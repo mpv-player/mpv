@@ -7,6 +7,9 @@
 */
 
 #import "vo_macosx.h"
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 
 //MPLAYER
 #include "config.h"
@@ -23,9 +26,15 @@
 #include "osdep/keycodes.h"
 
 //Cocoa
+NSProxy *mplayerosxProxy;
 MPlayerOpenGLView *mpGLView;
 NSAutoreleasePool *autoreleasepool;
 OSType pixelFormat;
+
+//shared memory
+int shm_id;
+struct shmid_ds shm_desc;
+BOOL shared_buffer = false;
 
 //Screen
 int screen_id;
@@ -87,7 +96,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	int i;
-
+	
 	//init screen
 	screen_array = [NSScreen screens];
 	if(screen_id < [screen_array count])
@@ -101,9 +110,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		screen_id = 0;
 	}
 	screen_frame = [screen_handle frame];
-	
-	monitor_aspect = (float)screen_frame.size.width/(float)screen_frame.size.height;
-	
+
 	//misc mplayer setup
 	image_width = width;
 	image_height = height;
@@ -113,29 +120,55 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		case IMGFMT_RGB32:
 			image_depth = 32;
 			break;
-        case IMGFMT_YUY2:
+		case IMGFMT_YUY2:
 			image_depth = 16;
 			break;
 	}
 	image_bytes = (image_depth + 7) / 8;
 	image_data = (unsigned char*)malloc(image_width*image_height*image_bytes);
-	
-	//set aspect
-	panscan_init();
-	aspect_save_orig(width,height);
-	aspect_save_prescale(d_width,d_height);
-	aspect_save_screenres(screen_frame.size.width, screen_frame.size.height);
-	aspect((int *)&d_width,(int *)&d_height,A_NOZOOM);
-	
-	movie_aspect = (float)d_width/(float)d_height;
-	old_movie_aspect = movie_aspect;
-	
-	vo_fs = flags & VOFLAG_FULLSCREEN;
 		
-	//config OpenGL View
-	[mpGLView config];
-	[mpGLView reshape];
-	
+	if(!shared_buffer)
+	{		
+		monitor_aspect = (float)screen_frame.size.width/(float)screen_frame.size.height;
+		
+		//set aspect
+		panscan_init();
+		aspect_save_orig(width,height);
+		aspect_save_prescale(d_width,d_height);
+		aspect_save_screenres(screen_frame.size.width, screen_frame.size.height);
+		aspect((int *)&d_width,(int *)&d_height,A_NOZOOM);
+		
+		movie_aspect = (float)d_width/(float)d_height;
+		old_movie_aspect = movie_aspect;
+		
+		vo_fs = flags & VOFLAG_FULLSCREEN;
+			
+		//config OpenGL View
+		[mpGLView config];
+		[mpGLView reshape];
+	}
+	else
+	{
+		movie_aspect = (float)d_width/(float)d_height;
+				
+		shm_id = shmget(9849, image_width*image_height*image_bytes, IPC_CREAT | 0666);
+		if (shm_id == -1)
+		{
+			perror("vo_mplayer shmget: ");
+			return 1;
+		}
+		
+		image_data = shmat(shm_id, NULL, 0);
+		if (!image_data)
+		{	
+			perror("vo_mplayer shmat: ");
+			return 1;
+		}
+		
+		//connnect to mplayerosx
+		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:@"mplayerosx" host:nil];
+		[mplayerosxProxy startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:movie_aspect];
+	}
 	return 0;
 }
 
@@ -151,7 +184,10 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-	[mpGLView render];
+	if(shared_buffer)
+		[mplayerosxProxy render];
+	else
+		[mpGLView render];
 }
 
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
@@ -174,7 +210,10 @@ static int draw_frame(uint8_t *src[])
 			memcpy_pic(image_data, src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
 			break;
 	}
-	[mpGLView setCurrentTexture];
+	
+	if(!shared_buffer)
+		[mpGLView setCurrentTexture];
+	
 	return 0;
 }
 
@@ -198,9 +237,20 @@ static int query_format(uint32_t format)
 
 static void uninit(void)
 {
+	if(shared_buffer)
+	{
+		[mplayerosxProxy stop];
+
+		if (shmdt(image_data) == -1)
+			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shmdt failed\n");
+	
+		if (shmctl(shm_id, IPC_RMID, &shm_desc) == -1)
+			mp_msg(MSGT_VO, MSGL_FATAL, "uninit: shmctl failed\n");
+	}
+
 	SetSystemUIMode( kUIModeNormal, 0);
 	ShowCursor();
-
+	
 	[autoreleasepool release];
 }
 
@@ -239,6 +289,11 @@ static int preinit(const char *arg)
 				screen_id = strtol(parse_pos, &parse_pos, 0);
 				screen_force = YES;
             }
+			if (strncmp (parse_pos, "shared_buffer", 13) == 0)
+			{
+				parse_pos = &parse_pos[13];
+				shared_buffer = YES;
+            }
             if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
             else if (parse_pos[0]) parse_err = 1;
         }
@@ -248,14 +303,17 @@ static int preinit(const char *arg)
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
 	NSApp = [NSApplication sharedApplication];
 	
-	if(!mpGLView)
+	if(!shared_buffer)
 	{
-		mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
-		[mpGLView autorelease];
-	}
+		if(!mpGLView)
+		{
+			mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
+			[mpGLView autorelease];
+		}
 	
-	[mpGLView display];
-	[mpGLView preinit];
+		[mpGLView display];
+		[mpGLView preinit];
+	}
 	
     return 0;
 }
