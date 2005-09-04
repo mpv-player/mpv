@@ -5443,7 +5443,7 @@ else
 fi
 echores "$_libmpeg2"
 
-echocheck "patched libmpcdec (musepack)"
+echocheck "libmpcdec (musepack, version >= 1.2.1 required)"
 if test "$_musepack" = auto ; then
   _musepack=no
   cat > $TMPC << EOF
