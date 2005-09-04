@@ -86,6 +86,13 @@ x86() {
   esac
 }
 
+x86_64() {
+  case "$host_arch" in
+    x86_64|amd64) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
 ppc() {
   case "$host_arch" in
     ppc) return 0;;
@@ -2142,6 +2149,7 @@ if test "$_vidix" = auto ; then
   _vidix=no
   # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
   x86 && _vidix=yes
+  x86_64 && _vidix=yes
   ppc && linux && _vidix=yes
   alpha && linux && _vidix=yes
   qnx && _vidix=no
