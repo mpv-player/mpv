@@ -1,4 +1,4 @@
-.\" synced with 1.1083
+.\" synced with 1.1084
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -612,14 +612,10 @@ Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .
 .TP
-.B \-idle\ \ 
-Rend MPlayer inactif et se met en attente de commandes 'loadfile', 'loadlist',
-ou 'quit' lorsqu'aucun fichier n'est donnée à jouer en ligne de commande, ou
-que MPlayer a finit de jouer tous les fichiers.
-Surtout utilise avec \-slave.
-.br
-.I NOTE:
-Si utilisé avec \-fixed-vo, la fenêtre restera ouverte en attente de
+.B \-idle (voir aussi \-slave)
+Fait que MPlayer se met en attente au lieu de quitter lorsqu'il n'y a pas
+de fichier à jouer.
+Sutout utile en "slave mode" où MPlayer peut être controllé par l'envoi de
 commandes.
 .
 .TP
