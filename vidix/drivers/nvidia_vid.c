@@ -67,6 +67,9 @@ unsigned int vixGetVersion(void){
 static struct {
   uint32_t lum; // luminance (brightness + contrast)
   uint32_t chrom; // chrominance (saturation + hue)
+  uint8_t red_off; // for NV03/NV04
+  uint8_t green_off;
+  uint8_t blue_off;
   vidix_video_eq_t vals;
 } eq;
 
@@ -637,11 +640,11 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		VID_WR32 (info->chip.PVIDEO, 0x200, (yscale << 16) | xscale);
 
 		/* NV_PVIDEO_RED_CSC_OFFSET */
-		VID_WR32 (info->chip.PVIDEO, 0x280, 0x69);
+		VID_WR32 (info->chip.PVIDEO, 0x280, eq.red_off);
 		/* NV_PVIDEO_GREEN_CSC_OFFSET */
-		VID_WR32 (info->chip.PVIDEO, 0x284, 0x3e);
+		VID_WR32 (info->chip.PVIDEO, 0x284, eq.green_off);
 		/* NV_PVIDEO_BLUE_CSC_OFFSET */
-		VID_WR32 (info->chip.PVIDEO, 0x288, 0x89);
+		VID_WR32 (info->chip.PVIDEO, 0x288, eq.blue_off);
 		/* NV_PVIDEO_CSC_ADJUST */
 		VID_WR32 (info->chip.PVIDEO, 0x28C, 0x00000); /* No colour correction! */
 
@@ -767,8 +770,12 @@ int vixInit(void){
   eq.lum = 0x00001000;
   eq.chrom = 0x00001000;
   memset(&eq.vals, 0, sizeof(vidix_video_eq_t));
-  eq.vals.cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST |
-                VEQ_CAP_SATURATION | VEQ_CAP_HUE;
+  eq.vals.cap = VEQ_CAP_BRIGHTNESS;
+  if (info->chip.arch > NV_ARCH_04)
+    eq.vals.cap |= VEQ_CAP_CONTRAST | VEQ_CAP_SATURATION | VEQ_CAP_HUE;
+  eq.red_off = 0x69;
+  eq.green_off = 0x3e;
+  eq.blue_off = 0x89;
   return 0;
 }
 
@@ -887,22 +894,23 @@ int vixPlaybackFrameSelect(unsigned int frame){
 int vixPlaybackSetEq(const vidix_video_eq_t *eq_parm) {
   double angle;
   int16_t chrom_cos, chrom_sin;
-  vidix_video_eq_t new_eq;
-  vixPlaybackGetEq(&new_eq);
   if (eq_parm->cap & VEQ_CAP_BRIGHTNESS)
-    new_eq.brightness = eq_parm->brightness;
+    eq.vals.brightness = eq_parm->brightness;
   if (eq_parm->cap & VEQ_CAP_CONTRAST)
-    new_eq.contrast = eq_parm->contrast;
+    eq.vals.contrast = eq_parm->contrast;
   if (eq_parm->cap & VEQ_CAP_SATURATION)
-    new_eq.saturation = eq_parm->saturation;
+    eq.vals.saturation = eq_parm->saturation;
   if (eq_parm->cap & VEQ_CAP_HUE)
-    new_eq.hue = eq_parm->hue;
-  eq.lum = (((new_eq.brightness * 512 + 500) / 1000) << 16) |
-           ((((new_eq.contrast + 1000) * 8191 + 1000) / 2000) & 0xffff);
-  angle = (double)new_eq.hue / 1000.0 * 3.1415927;
-  chrom_cos = ((new_eq.saturation + 1000) * 8191 * cos(angle) + 1000) / 2000;
-  chrom_sin = ((new_eq.saturation + 1000) * 8191 * sin(angle) + 1000) / 2000;
+    eq.vals.hue = eq_parm->hue;
+  eq.lum = (((eq.vals.brightness * 512 + 500) / 1000) << 16) |
+           ((((eq.vals.contrast + 1000) * 8191 + 1000) / 2000) & 0xffff);
+  angle = (double)eq.vals.hue / 1000.0 * 3.1415927;
+  chrom_cos = ((eq.vals.saturation + 1000) * 8191 * cos(angle) + 1000) / 2000;
+  chrom_sin = ((eq.vals.saturation + 1000) * 8191 * sin(angle) + 1000) / 2000;
   eq.chrom = chrom_sin << 16 | chrom_cos;
+  eq.red_off = 0x69 - eq.vals.brightness * 62 / 1000;
+  eq.green_off = 0x3e + eq.vals.brightness * 62 / 1000;
+  eq.blue_off = 0x89 - eq.vals.brightness * 62 / 1000;
   return 0;
 }
 
