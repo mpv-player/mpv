@@ -1,4 +1,4 @@
-.\" synced with 1.1063
+.\" synced with 1.1076
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -828,8 +828,9 @@ Riproduce un file Matroska in giapponese.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <nome> (solo \-audiofile)
+.B \-audio-demuxer <[+]nome> (solo \-audiofile)
 Forza il nome del demuxer audio, come indicato da \-audio-demuxer help.
+Usa un '+' prima del nome per forzarlo, il che eviterà alcuni controlli!
 Per retrocompatibilità accetta anche l'ID del demuxer come definito in
 libmpdemux/\:demuxer.h.
 \-audio-demuxer audio o \-audio-demuxer 17 forza il formato MP3.
@@ -1912,7 +1913,7 @@ La sintassi è
 .B \-ao <driver1[:sottoopzione1[=valore]:...],driver2,...[,]>
 Specifica una lista di priorità dei driver di uscita audio da usare.
 .PP
-Se la lista ha una ',' finale, MPlayer proverà ad usare anche i driver
+Se la lista termina con una ',', MPlayer proverà ad usare anche i driver
 non presenti nella lista stessa.
 Le sotto opzioni sono facoltative e possono generalmente essere omesse.
 .br
@@ -1977,7 +1978,7 @@ scegliere a SDL).
 .
 .TP
 .B arts\ \ \ 
-uscita audio attraverso il demone Arts
+uscita audio attraverso il demone aRts
 .
 .TP
 .B esd\ \ \ \ 
@@ -1996,6 +1997,9 @@ uscita audio attraverso JACK (Jack Audio Connection Kit)
 .RSs
 .IPs port=<nome>
 Si connette alla porta con il nome specificato (default: porta fisica).
+.IPs name=<nome client>
+Il nome del client che viene passato a JACK (default: MPlayer [<PID>]).
+Utile se vuoi che certe connessioni vengano stabilite automaticamente.
 .IPs (no)estimate
 Stima il ritardo audio, dovrebbe rendere la riproduzione video più dolce
 ed uniforme (default: abilitato).
@@ -2520,7 +2524,7 @@ La sintassi è:
 .B \-vo <driver1[:sottoopzione1[=valore]:...],driver2,...[,]>
 Specifica una lista di priorità dei driver di uscita video da usare.
 .PP
-Se la lista ha una ',' finale, MPlayer proverà ad usare anche i driver non
+Se la lista termina con una ',', MPlayer proverà ad usare anche i driver non
 presenti nella lista stessa.
 Le sotto opzioni sono facoltative e possono generalmente essere omesse.
 .br
@@ -2809,10 +2813,16 @@ Per favore utilizza \-dr se funziona con la tua implementazione OpenGL, dato
 che per alte risoluzioni porta a un
 .B grande
 aumento di velocità.
+Questa parte di codice implementa pochi controlli percio' se una
+caratteristica non funziona potrebbe non essere supportata dalla
+tua scheda o dalla tua implementazione OpenGL anche se non viene
+visualizzato nemmeno un messaggio di errore.
+Utilizza glxinfo oppure uno strumento simile per visualizzare le estensioni
+supportate dalla vostra implementazione OpenGL.
 .PD 0
 .RSs
 .IPs (no)manyfmts
-Abilita il supporto per più formati colore (RGB e BGR).
+Abilita il supporto per più formati colore (RGB e BGR) (default: abilitato).
 Necessita di OpenGL con versione >= 1.2.
 .IPs slice-height=<0\-...>
 Numero di linee copiate sulla texture in un blocco unico (default: 4).
@@ -2834,14 +2844,27 @@ Abilita o disabilita la scalatura dell'aspetto ed il supporto per il
 pan-and-scan (default: abilitato).
 Disabilitarlo può incrementare la velocità.
 .IPs rectangle=<0,1,2>
-Abilita l'utilizzo di texture rettangolari (risparmia RAM video, ma spesso
-più lento).
+Abilita l'utilizzo di texture rettangolari, fatto che risparmia RAM video 
+ma e' spesso più lento (default: 0).
 .RSss
 0: Usa textures alla potenza di 2 (power-of-two) (default).
 .br
 1: Usa rettangolo texture (texture_rectangle).
 .br
 2: Usa texture non alla potenza di 2 (texture_non_power_of_two).
+.IPs (no)glfinish
+Invoca glFinish() prima di invertire i buffer.
+Più lento ma in alcuni casi l'uscita è più corretta (default: disabilitato).
+.IPs  swapinterval=<n>
+Intervallo minimo nei fotogrammi visualizzati tra due scambi di buffer
+(default: 1).
+1 equivale ad abilitare VSYNC, 0 a disabilitarlo.
+Valori < 0 saranno ignorati e verrà usato il default del sistema.
+Questo limiterà la frequenza di aggiornamento a (frequenza rinfresco
+orizzontale / n).
+Richiede il supporto GLX_SGI_swap_control per funzionare.
+Con alcune (la maggior parte/tutte?) implementazioni funziona sono in modalità
+a schermo intero.
 .REss
 .RE
 .PD 1
@@ -3271,11 +3294,13 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "OPZIONI DI DECODIFICA/\:FILTRAGGIO"
 .
 .TP
-.B \-ac <[-]codec1,[-]codec2,...[,]>
+.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
 Specifica una lista di priorità dei codec audio da usare, in accordo con il
 loro nome in codecs.conf.
 Usa un '-' prima del nome del codec per ometterlo.
-Se la lista ha una ',' finale, MPlayer proverà ad usare anche i codec non
+Usa un '+' prima del nome per forzarlo, anche se questo probabilmente lo
+farà bloccare!
+Se la lista termina con una ',', MPlayer proverà ad usare anche i codec non
 presenti nella lista stessa.
 .br
 .I NOTA:
@@ -3689,7 +3714,9 @@ La descrizione del filtro video scale ha ulteriori informazioni.
 Specifica una lista di priorità dei codec video da usare, in accordo con il
 loro nome in codecs.conf.
 Utilizza un '-' prima del nome del codec per ometterlo.
-Se la lista ha una ',' finale, MPlayer proverà ad usare anche i codec non
+Usa un '+' prima del nome per forzarlo, anche se questo probabilmente lo
+farà bloccare!
+Se la lista termina con una ',', MPlayer proverà ad usare anche i codec non
 presenti nella lista stessa.
 .br
 .I NOTA:
@@ -6537,7 +6564,7 @@ MPEG Layer 3
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits per campione, compressione 4:1)
-.IPS sonic\ 
+.IPs sonic\ 
 Codec sperimentale con/senza perdita
 .RE
 .PD 1
@@ -8053,14 +8080,11 @@ scostamento di quantizzazione tra fotogrammi di tipo B e fotogrammi non di tipo 
 .
 .TP
 .B bf_threshold=<-255\-255>
-A volte i fotogrammi B non appaiono belli ed introducono artefatti quando la
-maggior parte del fotogramma è statica e piccole zone hanno ampi movimenti
-(in una scena statica dove un uomo sta parlando, la sua bocca probabilmente
-apparirà brutta se quello che circonda l'uomo e la sua bocca è completamente
-fermo e statico).
 Questa opzione ti permette o meno di favorire l'utilizzo di fotogrammi B.
 Maggiore il valore, maggiore la probabilità che vengano usati fotogrammi B.
 (default: 0)
+Non dimenticare che spesso i fotogrammi B hanno un quantizzatore più alto, e
+quindi un massiccio utilizzo può portare ad una peggior qualità.
 .
 .TP
 .B (no)closed_gop
@@ -8876,6 +8900,34 @@ Sono mantenuti solo per compararli con il codec di riferimento JM.
 Per tutto il resto, utilizza perfavore sia il PSNR 'Global' oppure il valore per
 ogni fotogramma, ottenuto con log=3.
 .
+.TP
+.B (no)visualize
+Abilita la visualizzazione x264 durante la codifica.
+Se l'x264 sul tuo sistema lo supporta, durante il processo di codifica verrà
+aperta una nuova finestra, nella quale x264 tenterà di presentare una indicazione
+di come viene codificato ogni fotogramma.
+Ogni tipo di blocco sul filmato visualizzato sarà colorato come segue:
+.PD 0
+.RSs
+.IPs rosso/rosa
+blocco intra
+.IPs blu\ 
+blocco inter
+.IPs verde
+blocco skip
+.IPs giallo
+blocco B
+.RE
+.PD 1
+.RS
+Questa funzione può essere considerata sperimentale e soggetta a modifiche.
+In particolare, dipende dal fatto che x264 sia stato compilato con la
+visualizzazione abilitata o meno.
+Nota che al momento di scrivere ciò, x264 va in pausa dopo la codifica e la
+visualizzazione di ogni fotogramma, in attesa che l'utente prema un tasto,
+prima di continuare con il fotogramma successivo.
+.RE
+.
 .
 .SS MPEG muxer (\-mpegopts)
 .
@@ -8960,7 +9012,7 @@ un framerate, eventualmente convertito con \-ofps, di 24000/1001 oppure 24 fps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .
 .
-.SS FFmpeg libavformat muxers (\-lavfopts) (vedi anche \-of lavf)
+.SS FFmpeg libavformat muxer (\-lavfopts) (vedi anche \-of lavf)
 .
 .TP
 .B format=<formato_contenitore>
@@ -8981,13 +9033,13 @@ Macromedia Flash
 .IPs flv\ \ 
 File Macromedia Flash Video
 .IPs rm\ \ \ 
-Real Audio e Video
+RealAudio e RealVideo
 .IPs au\ \ \ 
 Formato SUN AU
 .IPs nut\ \ 
 Formato contenitore aperto NUT (sperimentale)
 .IPs mov\ \ 
-Quicktime
+QuickTime
 .IPs mp4\ \ 
 Formato MPEG-4
 .IPs dv\ \ 
