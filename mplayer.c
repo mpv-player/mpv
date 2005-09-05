@@ -2210,6 +2210,10 @@ int frame_time_remaining=0; // flag
 int blit_frame=0;
 
 osd_text_buffer[0]=0;
+// make sure OSD old does not stay around,
+// e.g. with -fixed-vo and same-resolution files
+vo_osd_text = osd_text_buffer;
+vo_osd_changed(OSDTYPE_OSD);
 
 //================ SETUP AUDIO ==========================
 
