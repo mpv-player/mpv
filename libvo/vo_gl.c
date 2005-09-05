@@ -150,6 +150,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   glClear( GL_COLOR_BUFFER_BIT );
   if (SwapInterval && swap_interval >= 0)
     SwapInterval(swap_interval);
+  osdtexCnt = 0;
   gl_buffer = 0;
   gl_buffersize = 0;
   err_shown = 0;
