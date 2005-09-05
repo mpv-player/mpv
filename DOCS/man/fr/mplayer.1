@@ -1,4 +1,4 @@
-.\" synced with 1.1087
+.\" synced with 1.1088
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -8940,6 +8940,19 @@ Utilise un quanta différent pour la chroma et la luma.
 Les valeurs intéressantes se situent dans l'intervalle <-2\-2>
 (par défaut\ : 0).
 .
+.RS
+.I NOTES\ :
+Les fichiers encodés avec des CQMs ne sont pas décodés correctement avec
+les lecteurs basés sur FFmpeg.
+.br
+Les utilisateurs de CMD.EXE de Windows peuvent rencontrer des problèmes
+de parsing de la ligne de command s'ils utilisent toutes les CQM sous
+forme de listes.
+Ceci est dû à la limite de la longueur de la ligne de commande.
+Dans ce cas, il est recommandé d'utiliser de mettre les listes dans un
+fichier de CQM au format JM, et de le charger comme précisé plus haut.
+.RE
+.
 .TP
 .B cqm=<flat|jvt|<nom_fichier>>
 Utilise soit une matrice de quantification personnalisée (CQM) prédéfinie
@@ -8956,46 +8969,34 @@ Utilise la matrice personnalisée au format JM depuis un fichier.
 .RE
 .
 .TP
-.B cqm4iy=<liste>
+.B cqm4iy=<liste> (voir aussi cqm)
 Matrice luminance intra 4x4 personnalisée, donnée sous forme d'une liste
-de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+de 16 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
-.B cqm4ic=<liste>
+.B cqm4ic=<liste> (voir aussi cqm)
 Matrice chrominance intra 4x4 personnalisée, donnée sous forme d'une liste
-de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+de 16 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
-.B cqm4py=<liste>
+.B cqm4py=<liste> (voir aussi cqm)
 Matrice luminance inter 4x4 personnalisée, donnée sous forme d'une liste
-de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+de 16 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
-.B cqm4pc=<liste>
+.B cqm4pc=<liste> (voir aussi cqm)
 Matrice chrominance inter 4x4 personnalisée, donnée sous forme d'une liste
-de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+de 16 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
-.B cqm8iy=<liste>
+.B cqm8iy=<liste> (voir aussi cqm)
 Matrice luminance intra 8x8 personnalisée, donnée sous forme d'une liste
-de 64 valeurs dans l'intervalle 1-255, séparées par une virgule.
+de 64 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
-.B cqm8py=<liste>
+.B cqm8py=<liste> (voir aussi cqm)
 Matrice luminance inter 8x8 personnalisée, donnée sous forme d'une liste
-de 64 valeurs dans l'intervalle 1-255, séparées par une virgule.
-.RE
-.I NOTES\ :
-Les fichiers encodés avec des CQMs ne sont pas décodés correctement avec
-les lecteurs basés sur FFmpeg.
-.br
-Les utilisateurs de CMD.EXE de Windows peuvent rencontrer des problèmes
-de parsing de la ligne de command s'ils utilisent toutes les CQM sous
-forme de listes.
-Ceci est dû à la limite de la longueur de la ligne de commande.
-Dans ce cas, il est recommandé d'utiliser de mettre les listes dans un
-fichier de CQM au format JM, et de le charger comme précisé plus haut.
-.RE
+de 64 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
 .B level_idc=<10\-51>
