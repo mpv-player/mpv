@@ -509,13 +509,18 @@ when an audio family is specified.
 <title>Matrix-encoded Audio</title>
 
 <para>
-***TODO***
-This section has not be written yet as we would need some matrix-encoded
-samples to test with.
-I someone has such files, or would know how to handle them in detail,
-please contact us though the mailling list adding [matrix-encoded samples]
-to the subject of your mail.
-If no such file can be found, this section will just be dropped.
+<emphasis>***TODO***</emphasis>
+</para>
+<para>
+This section has yet to be written and cannot be completed until somebody
+provides sample files for us to test. If you have any matrix-encoded audio
+files, know where to find some, or have any information that could be helpful,
+please send a message to the
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
+mailing list. Put "[matrix-encoded audio]" in the subject line.
+</para>
+<para>
+If no files or further information are forthcoming this section will be dropped.
 </para>
 
 <para>
