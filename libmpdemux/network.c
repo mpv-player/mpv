@@ -417,7 +417,7 @@ http_send_request( URL_t *url, off_t pos ) {
 	http_set_field( http_hdr, "Connection: close");
 	http_add_basic_authentication( http_hdr, url->username, url->password );
 	if( http_build_request( http_hdr )==NULL ) {
-		return -1;
+		goto err_out;
 	}
 
 	if( proxy ) {
@@ -429,19 +429,22 @@ http_send_request( URL_t *url, off_t pos ) {
 		fd = connect2Server( server_url->hostname, server_url->port,1 );
 	}
 	if( fd<0 ) {
-		return -1; 
+		goto err_out;
 	}
 	mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request: [%s]\n", http_hdr->buffer );
 	
 	ret = send( fd, http_hdr->buffer, http_hdr->buffer_size, 0 );
 	if( ret!=(int)http_hdr->buffer_size ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while sending HTTP request: didn't sent all the request\n");
-		return -1;
+		goto err_out;
 	}
 	
 	http_free( http_hdr );
 
 	return fd;
+err_out:
+	http_free(http_hdr);
+	return -1;
 }
 
 HTTP_header_t *
