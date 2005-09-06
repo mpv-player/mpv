@@ -46,11 +46,9 @@ static uint32_t get_bits(da_priv_t* priv, stream_t* s, int bits) {
   return out & mask;
 }
 
-static int demux_mpc_open(demuxer_t* demuxer) {
+static int demux_mpc_check(demuxer_t* demuxer) {
   stream_t *s = demuxer->stream;
-  sh_audio_t* sh_audio;
   uint8_t hdr[HDR_SIZE];
-  da_priv_t* priv;
   int i;
 
   if (stream_read(s, hdr, HDR_SIZE) != HDR_SIZE)
@@ -64,6 +62,15 @@ static int demux_mpc_open(demuxer_t* demuxer) {
 
   if (hdr[0] != 'M' || hdr[1] != 'P' || hdr[2] != '+')
     return 0;
+  demuxer->priv = malloc(HDR_SIZE);
+  memcpy(demuxer->priv, hdr, HDR_SIZE);
+  return DEMUXER_TYPE_MPC;
+}
+
+static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
+  stream_t *s = demuxer->stream;
+  sh_audio_t* sh_audio;
+  da_priv_t* priv = demuxer->priv;
 
   sh_audio = new_sh_audio(demuxer,0);
 
@@ -72,7 +79,8 @@ static int demux_mpc_open(demuxer_t* demuxer) {
     char *header = &wf[sizeof(WAVEFORMATEX)];
     const int freqs[4] = {44100, 48000, 37800, 32000};
     sh_audio->format = mmioFOURCC('M', 'P', 'C', ' ');
-    memcpy(header, hdr, HDR_SIZE);
+    memcpy(header, priv, HDR_SIZE);
+    free(priv);
     sh_audio->wf = (WAVEFORMATEX *)wf;
     sh_audio->wf->wFormatTag = sh_audio->format;
     sh_audio->wf->nChannels = 2;
@@ -101,15 +109,14 @@ static int demux_mpc_open(demuxer_t* demuxer) {
   sh_audio->audio.dwScale = 32 * 36;
   sh_audio->audio.dwRate = sh_audio->samplerate;
 
-  return DEMUXER_TYPE_MPC;
+  return demuxer;
 }
 
-static int demux_mpc_fill_buffer(demux_stream_t *ds, demux_stream_t *dsds) {
+static int demux_mpc_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   int l;
   int bit_len;
   demux_packet_t* dp;
   sh_audio_t* sh_audio = ds->sh;
-  demuxer_t* demux = ds->demuxer;
   da_priv_t* priv = demux->priv;
   stream_t* s = demux->stream;
   sh_audio = ds->sh;
@@ -159,9 +166,9 @@ demuxer_desc_t demuxer_desc_mpc = {
   "supports v7 bitstream only",
   DEMUXER_TYPE_MPC,
   0, // unsafe autodetect
-  demux_mpc_open,
+  demux_mpc_check,
   demux_mpc_fill_buffer,
-  NULL,
+  demux_mpc_open,
   demux_close_mpc,
   demux_mpc_seek,
   demux_mpc_control
