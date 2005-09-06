@@ -62,6 +62,8 @@ static int demux_mpc_check(demuxer_t* demuxer) {
 
   if (hdr[0] != 'M' || hdr[1] != 'P' || hdr[2] != '+')
     return 0;
+  demuxer->movi_start = stream_tell(s) - HDR_SIZE;
+  demuxer->movi_end = s->end_pos;
   demuxer->priv = malloc(HDR_SIZE);
   memcpy(demuxer->priv, hdr, HDR_SIZE);
   return DEMUXER_TYPE_MPC;
@@ -78,16 +80,23 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
     char *wf = (char *)calloc(1, sizeof(WAVEFORMATEX) + HDR_SIZE);
     char *header = &wf[sizeof(WAVEFORMATEX)];
     const int freqs[4] = {44100, 48000, 37800, 32000};
+    int frames;
+    int seconds;
     sh_audio->format = mmioFOURCC('M', 'P', 'C', ' ');
     memcpy(header, priv, HDR_SIZE);
     free(priv);
+    frames = header[4] | header[5] << 8 | header[6] << 16 | header[7] << 24;
     sh_audio->wf = (WAVEFORMATEX *)wf;
     sh_audio->wf->wFormatTag = sh_audio->format;
     sh_audio->wf->nChannels = 2;
     sh_audio->wf->nSamplesPerSec = freqs[header[10] & 3];
     sh_audio->wf->nBlockAlign = 32 * 36;
     sh_audio->wf->wBitsPerSample = 16;
-    sh_audio->wf->nAvgBytesPerSec = 128 * 1024; // dummy to make mencoder not hang
+    seconds = 1152 * frames / sh_audio->wf->nSamplesPerSec;
+    if (demuxer->movi_end > demuxer->movi_start && seconds > 0)
+      sh_audio->wf->nAvgBytesPerSec = (demuxer->movi_end - demuxer->movi_start) / seconds;
+    else
+      sh_audio->wf->nAvgBytesPerSec = 32 * 1024; // dummy to make mencoder not hang
     sh_audio->wf->cbSize = HDR_SIZE;
     demuxer->movi_start = stream_tell(s);
     demuxer->movi_end = s->end_pos;
