@@ -597,8 +597,11 @@ int i;
 if (file_format) {
   if ((demuxer_desc = get_demuxer_desc_from_type(file_format))) {
     demuxer = new_demuxer(stream,demuxer_desc->type,audio_id,video_id,dvdsub_id,filename);
-    if (!force && demuxer_desc->check_file) {
-      if ((fformat = demuxer_desc->check_file(demuxer)) != 0) {
+    if (demuxer_desc->check_file) {
+      fformat = demuxer_desc->check_file(demuxer);
+      if (force)
+        fformat = demuxer_desc->type;
+      if (fformat != 0) {
         if (fformat == demuxer_desc->type) {
           // Move messages to demuxer detection code?
           mp_msg(MSGT_DEMUXER, MSGL_INFO, MSGTR_Detected_XXX_FileFormat, demuxer_desc->shortdesc);
