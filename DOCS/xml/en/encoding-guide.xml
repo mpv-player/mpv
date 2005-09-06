@@ -1440,7 +1440,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   Now that you have encoded your video, you will most likely want
   to mux it with one or more audio tracks into a movie container, such
   as AVI, MPEG, Matroska or NUT.
-  <application>MEncoder</application> is currently only able to output
+  <application>MEncoder</application> is currently only able to natively output
   audio and video into MPEG and AVI container formats.
   for example:
   <screen>mencoder -oac copy -ovc copy  -o <replaceable>output_movie.avi</replaceable> -audiofile <replaceable>input_audio.mp2</replaceable> <replaceable>input_video.avi</replaceable></screen>
@@ -1466,6 +1466,43 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <systemitem class="library">libavformat</systemitem> enabled (which
   means that a pre-packaged binary version will not work in most cases).
 </para>
+
+
+<sect3 id="menc-feat-dvd-mpeg4-muxing-filter-issues">
+<title>Improving muxing and A/V sync reliability</title>
+<para>
+  You may experience some serious A/V sync problems while trying to mux
+  your video and some audio tracks, where no matter how you adjust the
+  audio delay, you will never get proper sync.
+  That may happen when you use some video filters that will drop or
+  duplicate some frames, like the inverse telecine filters.
+  It is strongly encouraged to append the <option>harddup</option> video
+  filter at the end of the filter chain to avoid this kind of problem.
+</para>
+
+<para>
+  Without <option>harddup</option>, if <application>MEncoder</application>
+  wants to duplicate a frame, it relies on the muxer to put a mark on the
+  container so that the last frame will be displayed again to maintain
+  sync while writing no actual frame.
+  With <option>harddup</option>, <application>MEncoder</application>
+  will instead just push the last frame displayed again into the filter
+  chain.
+  This means that the encoder receives the <emphasis>exact</emphasis>
+  same frame twice, and compresses it.
+  This will result in a slightly bigger file, but will not cause problems
+  when demuxing or remuxing into other container formats.
+</para>
+
+<para>
+  You may also have no choice but to use <option>harddup</option> with
+  container formats that are not too tightly linked with
+  <application>MEncoder</application> such as the ones supported through
+  <systemitem class="library">libavformat</systemitem>, which may not
+  support frame duplication at the container level.
+</para>
+</sect3>
+
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-avi-limitations">
 <title>Limitations of the AVI container</title>
