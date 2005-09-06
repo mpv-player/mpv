@@ -16,7 +16,7 @@
 URL_t*
 url_new(const char* url) {
 	int pos1, pos2,v6addr = 0;
-	URL_t* Curl;
+	URL_t* Curl = NULL;
         char *escfilename=NULL;
         char *unescfilename=NULL;
 	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL, *ptr4=NULL;
@@ -28,22 +28,19 @@ url_new(const char* url) {
         unescfilename=malloc(strlen(url)+1);
         if (!unescfilename ) {
                 mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-                return NULL;
+                goto err_out;
         }
         escfilename=malloc(strlen(url)*3+1);
         if (!escfilename ) {
-                free(unescfilename);
                 mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-                return NULL;
+                goto err_out;
         }
 
 	// Create the URL container
 	Curl = (URL_t*)malloc(sizeof(URL_t));
 	if( Curl==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-                if (unescfilename) free(unescfilename);
-                if (escfilename) free(escfilename);
-		return NULL;
+		goto err_out;
 	}
 
 	// Initialisation of the URL container members
@@ -54,13 +51,13 @@ url_new(const char* url) {
                                                  // violating RFC 2396
         url_escape_string(escfilename,unescfilename);
         free(unescfilename);
+        unescfilename = NULL;
 
 	// Copy the url in the URL container
 	Curl->url = strdup(escfilename);
 	if( Curl->url==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-		url_free(Curl);
-		return NULL;
+		goto err_out;
 	}
         mp_msg(MSGT_OPEN,MSGL_V,"Filename for url is now %s\n",escfilename);
 
@@ -73,16 +70,14 @@ url_new(const char* url) {
 			jumpSize = 1;
 		} else {
 		        mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");
-		        url_free(Curl);
-			return NULL;
+			goto err_out;
 		}
 	}
 	pos1 = ptr1-escfilename;
 	Curl->protocol = (char*)malloc(pos1+1);
 	if( Curl->protocol==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-		url_free(Curl);
-		return NULL;
+		goto err_out;
 	}
 	strncpy(Curl->protocol, escfilename, pos1);
 	Curl->protocol[pos1] = '\0';
@@ -104,8 +99,7 @@ url_new(const char* url) {
 		Curl->username = (char*)malloc(len+1);
 		if( Curl->username==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-			url_free(Curl);
-			return NULL;
+			goto err_out;
 		}
 		strncpy(Curl->username, ptr1, len);
 		Curl->username[len] = '\0';
@@ -118,8 +112,7 @@ url_new(const char* url) {
 			Curl->password = (char*)malloc(len2+1);
 			if( Curl->password==NULL ) {
 				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-				url_free(Curl);
-				return NULL;
+				goto err_out;
 			}
 			strncpy( Curl->password, ptr3+1, len2);
 			Curl->password[len2]='\0';
@@ -171,8 +164,7 @@ url_new(const char* url) {
 	Curl->hostname = (char*)malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-		url_free(Curl);
-		return NULL;
+		goto err_out;
 	}
 	strncpy(Curl->hostname, ptr1, pos2-pos1);
 	Curl->hostname[pos2-pos1] = '\0';
@@ -187,8 +179,7 @@ url_new(const char* url) {
 			Curl->file = strdup(ptr2);
 			if( Curl->file==NULL ) {
 				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-				url_free(Curl);
-				return NULL;
+				goto err_out;
 			}
 		}
 	} 
@@ -197,14 +188,18 @@ url_new(const char* url) {
 		Curl->file = (char*)malloc(2);
 		if( Curl->file==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-			url_free(Curl);
-			return NULL;
+			goto err_out;
 		}
 		strcpy(Curl->file, "/");
 	}
 	
         free(escfilename);
 	return Curl;
+err_out:
+	if (escfilename) free(escfilename);
+	if (unescfilename) free(unescfilename);
+	if (Curl) url_free(Curl);
+	return NULL;
 }
 
 void
