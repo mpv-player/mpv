@@ -7,3 +7,4 @@ pci_names.c
 pci_names.h
 pci_dev_ids.c
 libdha.so*
+test
