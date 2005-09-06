@@ -343,6 +343,7 @@ check4proxies( URL_t *url ) {
 			if (network_ipv4_only_proxy && (gethostbyname(url->hostname)==NULL)) {
 				mp_msg(MSGT_NETWORK,MSGL_WARN,
 					"Could not find resolve remote hostname for AF_INET. Trying without proxy.\n");
+				url_free(proxy_url);
 				return url_out;
 			}
 #endif
@@ -352,11 +353,14 @@ check4proxies( URL_t *url ) {
 			new_url = malloc( len+1 );
 			if( new_url==NULL ) {
 				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+				url_free(proxy_url);
 				return url_out;
 			}
 			sprintf(new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url );
 			tmp_url = url_new( new_url );
 			if( tmp_url==NULL ) {
+				free( new_url );
+				url_free( proxy_url );
 				return url_out;
 			}
 			url_free( url_out );
