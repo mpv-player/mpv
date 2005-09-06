@@ -109,6 +109,7 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
   stream_read(s, (void *)&priv->dword, 4);
   priv->pos = 8;
   demuxer->priv = priv;
+  demuxer->seekable = 0;
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
