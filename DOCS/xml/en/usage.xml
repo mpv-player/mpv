@@ -20,7 +20,7 @@ filename/URL/whatever, for example:
 
 <para>
 You can group filenames/URLs together using <literal>{</literal> and
-<literal>}</literal>. It's useful with option <option>-loop</option>:
+<literal>}</literal>. It is useful with option <option>-loop</option>:
 
 <screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
 
@@ -177,8 +177,8 @@ The application name for <application>MPlayer</application> is - surprise -
 <filename>mplayer</filename>. You can use any <application>MPlayer</application>
 commands and even pass more than one command by separating them with
 <literal>\n</literal>.
-Don't forget to enable the repeat flag in <filename>.lircrc</filename> when
-it makes sense (seek, volume, etc). Here's an excerpt from a sample
+Do not forget to enable the repeat flag in <filename>.lircrc</filename> when
+it makes sense (seek, volume, etc). Here is an excerpt from a sample
 <filename>.lircrc</filename>:
 </para>
 
@@ -211,7 +211,7 @@ end<!--
 --></programlisting>
 
 <para>
-If you don't like the standard location for the lirc-config file
+If you do not like the standard location for the lirc-config file
 (<filename>~/.lircrc</filename>) use the <option>-lircconf
 <replaceable>filename</replaceable></option> switch to specify another
 file.
@@ -256,7 +256,7 @@ play from FTP:
 </para>
 
 <note><para>
-It's also recommended to enable <option>-cache</option> when playing
+It is also recommended to enable <option>-cache</option> when playing
 from the network:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
@@ -294,7 +294,7 @@ stream type from a remote host. The main purpose of this feature is to make
 it possible to directly use the CD or DVD drive of another computer on the
 network (provided you have the required bandwidth). On the downside some
 stream type (currently TV and MF) are not usable remotely because they are
-implemented at the demuxer level. It's sad for MF but TV stream would anyway
+implemented at the demuxer level. It is sad for MF but TV stream would anyway
 require an insane amount of bandwidth.
 </para>
 
@@ -314,7 +314,7 @@ to the right place on your system (usually
 <title>Using remote streams</title>
 <para>
 First you have to start the server on the computer you intend to remotely
-access. Currently the server is very basic and doesn't have any commands
+access. Currently the server is very basic and does not have any commands
 line arguments so just enter <filename>netstream</filename>. Now you can
 for example play the second track of a VCD on the server with :
 <screen>
@@ -330,7 +330,7 @@ needed but highly recommended.
 </para>
 
 <para>
-Be aware that currently the server is not secure at all. So don't complain
+Be aware that currently the server is not secure at all. So do not complain
 about the numerous exploits which are possible through this. Instead send
 some (good) patch to make it better or start writing your own server.
 </para>
@@ -402,10 +402,10 @@ that time. You can then go back and fine-tune the generated EDL file.
 
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
-<title>Advanced Audio</title>
+<title>Advanced audio</title>
 
 <sect2 id="advaudio-surround">
-<title>Surround/Multichannel Playback</title>
+<title>Surround/Multichannel playback</title>
 
 <sect3 id="advaudio-surround-DVD">
 <title>DVDs</title>
@@ -433,7 +433,7 @@ all four channels are available.
 
 
 <sect3 id="advaudio-surround-stereoinfour">
-<title>Playing Stereo Files to Four Speakers</title>
+<title>Playing stereo files to four speakers</title>
 
 <para>
 <application>MPlayer</application> does not duplicate any channels by default,
@@ -494,10 +494,10 @@ For both AC3 and DTS, use <option>-afm hwac3</option>
 </itemizedlist>
 
 <para>
-Note that there is a comma ("<keycap>,</keycap>") at the end of
+Note that there is a comma (",") at the end of
 <option>ac=hwac3,</option> and <option>ac=hwdts,</option>. This will make
-<application>MPlayer</application> fall back to the codecs it normally uses when
-playing a file that doesn't have AC3 or DTS audio. <option>afm=hwac3</option>
+<application>MPlayer</application> fall back on the codecs it normally uses when
+playing a file that does not have AC3 or DTS audio. <option>afm=hwac3</option>
 does not need a comma; <application>MPlayer</application> will fall back anyway
 when an audio family is specified.
 </para>
@@ -506,7 +506,7 @@ when an audio family is specified.
 
 
 <sect3 id="advaudio-surround-matrix">
-<title>Matrix-encoded Audio</title>
+<title>Matrix-encoded audio</title>
 
 <para>
 <emphasis>***TODO***</emphasis>
@@ -539,14 +539,13 @@ Good links:
 
 
 <sect3 id="advaudio-surround-hrtf">
-<title>Surround Emulation in Headphones</title>
+<title>Surround emulation in headphones</title>
 
 <para>
 <application>MPlayer</application> includes an HRTF (Head Related Transfer
-Function) filter based on an MIT project wherein measurements were taken from
-microphones mounted on a dummy human head. See the
-<ulink url="http://sound.media.mit.edu/KEMAR.html">project page</ulink> for more
-information.
+Function) filter based on an
+<ulink url="http://sound.media.mit.edu/KEMAR.html">MIT project</ulink>
+wherein measurements were taken from microphones mounted on a dummy human head.
 </para>
 
 <para>
@@ -555,7 +554,7 @@ Although it is not possible to exactly imitate a surround system,
 immersive audio in 2-channel headphones. Regular downmixing simply combines all
 the channels into two; besides combining the channels, <option>hrtf</option>
 generates subtle echoes, increases the stereo separation slightly, and alters
-the volume of some frequencies. Whether HRTF sounds better may be dependant on
+the volume of some frequencies. Whether HRTF sounds better may be dependent on
 the source audio and a matter of personal taste, but it is definitely worth
 trying out.
 </para>
@@ -584,7 +583,7 @@ you have a file with a different sampling rate that you want to play using
 <title>Troubleshooting</title>
 
 <para>
-If you don't hear any sound out of your surround channels, check your mixer
+If you do not hear any sound out of your surround channels, check your mixer
 settings with a mixer program such as <application>alsamixer</application>;
 audio outputs are often muted and set to zero volume by default.
 </para>
@@ -595,10 +594,10 @@ audio outputs are often muted and set to zero volume by default.
 
 
 <sect2 id="advaudio-channels">
-<title>Channel Manipulation</title>
+<title>Channel manipulation</title>
 
 <sect3 id="advaudio-channels-general">
-<title>General Information</title>
+<title>General information</title>
 
 <para>
 Unfortunately, there is no standard for how channels are ordered. The orders
@@ -606,18 +605,18 @@ listed below are those of AC3 and are fairly typical; try them and see if your
 source matches. Channels are numbered starting with 0.
 
 <orderedlist spacing="compact">
-<title>Mono</title>
+<title>mono</title>
 <listitem override="0"><simpara>center</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
-<title>Stereo</title>
+<title>stereo</title>
 <listitem override="0"><simpara>left</simpara></listitem>
 <listitem><simpara>right</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
-<title>Quadraphonic</title>
+<title>quadraphonic</title>
 <listitem override="0"><simpara>left front</simpara></listitem>
 <listitem><simpara>right front</simpara></listitem>
 <listitem><simpara>left rear</simpara></listitem>
@@ -625,7 +624,7 @@ source matches. Channels are numbered starting with 0.
 </orderedlist>
 
 <orderedlist spacing="compact">
-<title>Surround 4.0</title>
+<title>surround 4.0</title>
 <listitem override="0"><simpara>left front</simpara></listitem>
 <listitem><simpara>right front</simpara></listitem>
 <listitem><simpara>center rear</simpara></listitem>
@@ -633,7 +632,7 @@ source matches. Channels are numbered starting with 0.
 </orderedlist>
 
 <orderedlist spacing="compact">
-<title>Surround 5.0</title>
+<title>surround 5.0</title>
 <listitem override="0"><simpara>left front</simpara></listitem>
 <listitem><simpara>right front</simpara></listitem>
 <listitem><simpara>left rear</simpara></listitem>
@@ -642,7 +641,7 @@ source matches. Channels are numbered starting with 0.
 </orderedlist>
 
 <orderedlist spacing="compact">
-<title>Surround 5.1</title>
+<title>surround 5.1</title>
 <listitem override="0"><simpara>left front</simpara></listitem>
 <listitem><simpara>right front</simpara></listitem>
 <listitem><simpara>left rear</simpara></listitem>
@@ -672,15 +671,15 @@ card. See the following sections for more information on channel manipulation.
 
 
 <sect3 id="advaudio-channels-mono">
-<title>Playing Mono in Two Speakers</title>
+<title>Playing mono with two speakers</title>
 
 <para>
-Mono sounds a lot better when played through two speakers -- especially when
-using headphones. Audio files that truly have 1 channel are automatically played
-in two speakers; unfortunately, most files with mono sound are actually encoded
-as stereo with one channel silent. The easiest and most foolproof way to make
-both speakers output the same audio is with the <option>extrastereo</option>
-filter:
+Mono sounds a lot better when played through two speakers - especially when
+using headphones. Audio files that truly have one channel are automatically
+played through two speakers; unfortunately, most files with mono sound are
+actually encoded as stereo with one channel silent. The easiest and most
+foolproof way to make both speakers output the same audio is the
+<option>extrastereo</option> filter:
 
 <screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0</screen>
 
@@ -702,11 +701,12 @@ the right value. For example:
 
 
 <sect3 id="advaudio-channels-copying">
-<title>Channel Copying/Moving</title>
+<title>Channel copying/moving</title>
 
 <para>
-The <option>channels</option> filter can move any or all channels. Setting up all
-the suboptions to channels can be complicated and takes a little care.
+The <option>channels</option> filter can move any or all channels.
+Setting up all the suboptions for the <option>channels</option>
+filter can be complicated and takes a little care.
 
 <orderedlist spacing="compact">
 <listitem><para>
@@ -738,7 +738,7 @@ long as they are properly grouped into
 <bridgehead>Example: one channel in two speakers</bridgehead>
 
 <para>
-Here's an example of another way to play one channel in both speakers. Suppose
+Here is an example of another way to play one channel in both speakers. Suppose
 for this example that the left channel should be played and the right channel
 discarded. Following the steps above:
 <orderedlist>
@@ -753,7 +753,7 @@ suboption "2" as well.
 </para></listitem>
 <listitem><para>
 To move the left channel (channel 0) into the right channel (channel 1), the
-suboption pair is "0:1". To move the left channel into itself is "0:0".
+suboption pair is "0:1", "0:0" moves the left channel onto itself.
 </para></listitem>
 </orderedlist>
 Putting that all together gives:
@@ -765,7 +765,7 @@ Putting that all together gives:
 The advantage this example has over <option>extrastereo</option> is that the
 volume of each output channel is the same as the input channel. The disadvantage
 is that the suboptions must be changed to "2:2:1:0:1:1" when the desired audio
-is in the right channel. Also, it's more difficult to remember and type.
+is in the right channel. Also, it is more difficult to remember and type.
 </para>
 
 <bridgehead>Example: left channel in two speakers shortcut</bridgehead>
@@ -810,7 +810,7 @@ Combine all the suboptions to get:
 
 
 <sect3 id="advaudio-channels-mixing">
-<title>Channel Mixing</title>
+<title>Channel mixing</title>
 
 <para>
 The <option>pan</option> filter can mix channels in user-specified proportions.
@@ -825,7 +825,7 @@ will show when to use which.
 <listitem><para>
 Decide how many channels to feed into <option>pan</option> (further decoded
 channels are discarded). This is the first suboption, and it also controls how
-many channels are output.
+many channels to employ for output.
 </para></listitem>
 <listitem><para>
 The remaining suboptions specify how much of each channel gets mixed into each
@@ -839,7 +839,7 @@ percentage of the input channel that gets mixed into the output channel.
 original volume. Be careful when using values greater than 1. Not only can this
 give you very high volume, but if you exceed the sample range of your sound card
 you may hear painful pops and clicks. If you want you can follow
-<option>pan</option> with <option>,volume</option> to enable clipping, but it's
+<option>pan</option> with <option>,volume</option> to enable clipping, but it is
 best to keep the values of <option>pan</option> low enough that clipping is not
 necessary.
 </para></listitem>
@@ -894,7 +894,7 @@ only channel gets 100% of itself.
 <bridgehead>Example: downmixing 6-channel PCM</bridgehead>
 <para>
 <application>MPlayer</application>'s decoder for 6-channel PCM is not capable of
-downmixing. Here's a way to downmix PCM using <option>pan</option>:
+downmixing. Here is a way to downmix PCM using <option>pan</option>:
 <orderedlist>
 <listitem><para>
 The number of output channels is 2. Since <option>pan</option> will be handling
@@ -994,7 +994,7 @@ Combine all those options to get:
 
 
 <sect2 id="advaudio-volume">
-<title>Software Volume Adjustment</title>
+<title>Software Volume adjustment</title>
 
 <para>
 Some audio tracks are too quiet to be heard comfortably without amplification.
@@ -1017,7 +1017,7 @@ volume to be adjusted up to twice its original level.
 It is safe to specify a large value with
 <option>-softvol-max</option>; the higher volume will not be used until you
 use the volume adjustment keys. The only disadvantage of a large value is that,
-since <application>MPlayer</application> adjusts volume by percentage of the
+since <application>MPlayer</application> adjusts volume by a percentage of the
 maximum, you will not have as precise control when using the volume adjustment
 keys. Use a lower value with <option>-softvol-max</option> and/or specify
 <option>-volstep 1</option> if you need higher precision.
