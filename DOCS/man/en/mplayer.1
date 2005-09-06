@@ -1994,7 +1994,7 @@ plugin audio output driver
 Set the graphics card that will receive the image.
 Needs the \-vm option to work.
 You can get a list of available cards when you run this option with \-v.
-Works currently only with \-vo directx.
+Currently only works with the directx video output driver.
 .
 .TP
 .B \-bpp <depth>
@@ -2721,10 +2721,11 @@ slower (default: 0).
 Call glFinish() before swapping buffers.
 Slower but in some cases more correct output (default: disabled).
 .IPs  swapinterval=<n>
-Minimum interval in displayed frames between to buffer swaps (default: 1).
+Minimum interval between two buffer swaps, counted in
+displayed frames (default: 1).
 1 is equivalent to enabling VSYNC, 0 to disabling VSYNC.
-Values < 0 will leave it at the system default.
-This will limit the framerate to (horizontal refresh rate / n).
+Values below 0 will leave it at the system default.
+This limits the framerate to (horizontal refresh rate / n).
 Requires GLX_SGI_swap_control support to work.
 With some (most/all?) implementations this only works in fullscreen mode.
 .REss
