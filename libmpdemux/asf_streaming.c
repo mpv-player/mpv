@@ -849,7 +849,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
 	url = url_new(stream->url);
 	stream->streaming_ctrl->url = check4proxies(url);
-	//url_free(url);
+	url_free(url);
 	
 	mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_ASF, URL: %s\n", stream->url);
 	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
