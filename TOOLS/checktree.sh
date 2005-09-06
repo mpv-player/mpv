@@ -172,7 +172,7 @@ for i in "$@"; do
         disable_all_tests
         ;;
     -none)
-        disable_all
+        disable_all_tests
         ;;
     -*)
         echo "unknown option: $i" >&2
