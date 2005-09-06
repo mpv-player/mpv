@@ -530,7 +530,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     } else {
             // we can't adjust the window position correctly in textmode
             // setting y to 8 seems to work ok, though
-            if(!y)y = info->wy+8;
+            if(info->chip.arch < NV_ARCH_10 && y < 8) y = 8;
     }
     
 	    /* adjust negative output window variables */
