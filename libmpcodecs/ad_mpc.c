@@ -127,7 +127,9 @@ static int init(sh_audio_t *sh) {
     mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Not a valid musepack file.\n");
     return 0;
   }
-  sh->i_bps = info.average_bitrate / 8;
+// this value is nonsense, since it relies on the get_size function.
+// use the value from the demuxer instead.
+//  sh->i_bps = info.average_bitrate / 8;
   sh->channels = info.channels;
   sh->samplerate = info.sample_freq;
   sh->samplesize = 4;
