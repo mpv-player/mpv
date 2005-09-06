@@ -1010,14 +1010,17 @@ The following example is a good start:
 
 <screen>mplayer <replaceable>quiet-file</replaceable> -softvol -softvol-max 300</screen>
 
-The <option>-softvol-max</option> option specifies the maximum percentage of the
+The <option>-softvol-max</option> option specifies the maximum allowable output
+volume as a percentage of the
 original volume. For example, <option>-softvol-max 200</option> would allow the
-file to be played up to twice as loud. It is safe to specify a large value with
+volume to be adjusted up to twice its original level.
+It is safe to specify a large value with
 <option>-softvol-max</option>; the higher volume will not be used until you
 use the volume adjustment keys. The only disadvantage of a large value is that,
 since <application>MPlayer</application> adjusts volume by percentage of the
 maximum, you will not have as precise control when using the volume adjustment
-keys.
+keys. Use a lower value with <option>-softvol-max</option> and/or specify
+<option>-volstep 1</option> if you need higher precision.
 </para>
 
 <para>
@@ -1031,7 +1034,7 @@ This will play the file with a ten decibel gain. Be careful when using the
 <option>volume</option> filter - you could easily hurt your ears if you use
 too high a value. Start low and work your way up gradually until you get a feel
 for how much adjustment is required. Also, if you specify excessively high
-values <option>volume</option> may need to clip the signal to avoid sending your
+values, <option>volume</option> may need to clip the signal to avoid sending your
 sound card data that is outside the allowable range. You will hear distortion
 when this happens.
 </para>
