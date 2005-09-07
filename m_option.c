@@ -15,7 +15,7 @@
 
 // Don't free for 'production' atm
 #ifndef MP_DEBUG
-#define NO_FREE
+//#define NO_FREE
 #endif
 
 m_option_t* m_option_list_find(m_option_t* list,char* name) {
