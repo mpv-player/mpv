@@ -95,7 +95,7 @@ static void window_ontop(void)
 static void set_graphtype(uint32_t format, ggi_mode *mode)
 {
     switch (format) {
-        case IMGFMT_RGB4:
+    case IMGFMT_RGB4:
         mode->graphtype = GT_4BIT;
         break;
     case IMGFMT_BGR4:
@@ -164,18 +164,18 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     ggiCheckMode(ggi_conf.parentvis, &parentmode);
 
     if (ggiSetMode(ggi_conf.parentvis, &parentmode) < 0) {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set display mode\n");
-	return (-1);
+        mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set display mode\n");
+        return (-1);
     }
     if (ggiGetMode(ggi_conf.parentvis, &parentmode) < 0) {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get display mode\n");
-	return (-1);
+        mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get display mode\n");
+        return (-1);
     }
     if ((parentmode.graphtype == GT_INVALID)
        || (parentmode.graphtype == GT_AUTO))
     {
-	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] not supported depth/bpp\n");
-	return (-1);
+        mp_msg(MSGT_VO, MSGL_ERR, "[ggi] not supported depth/bpp\n");
+        return (-1);
     }
 
 #if 0
@@ -245,10 +245,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     ggiSetFlags(ggi_conf.vis, GGIFLAG_ASYNC);
 
     if (GT_SCHEME(mode.graphtype) == GT_PALETTE)
-	ggiSetColorfulPalette(ggi_conf.vis);
+        ggiSetColorfulPalette(ggi_conf.vis);
 
     if (ggiGetFlags(ggi_conf.vis) & GGIFLAG_ASYNC)
-	ggi_conf.async = 1;
+        ggi_conf.async = 1;
 
     mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d\n",
            ggi_conf.srcwidth, ggi_conf.srcheight, ggi_conf.srcdepth,
@@ -283,7 +283,7 @@ static uint32_t get_image(mp_image_t *mpi)
         (mpi->width != ggi_conf.srcwidth) ||
         (mpi->height != ggi_conf.srcheight))
     {
-	return (VO_FALSE);
+        return (VO_FALSE);
     }
 
     mpi->planes[1] = mpi->planes[2] = NULL;
@@ -448,7 +448,7 @@ static void uninit(void)
 static int control(uint32_t request, void *data, ...)
 {
     switch (request) {
-        case VOCTRL_QUERY_FORMAT:
+    case VOCTRL_QUERY_FORMAT:
         return query_format(*((uint32_t *) data));
     case VOCTRL_GET_IMAGE:
         return get_image(data);
@@ -483,7 +483,7 @@ static void check_events(void)
             switch (event.any.type) {
             case evKeyPress:
                 switch (event.key.sym) {
-                case GIIK_PAsterisk:	/* PStar */
+                case GIIK_PAsterisk:    /* PStar */
                 case GIIUC_Asterisk:
                     mplayer_put_key('*');
                     break;
@@ -563,8 +563,8 @@ static void check_events(void)
                 }   /* switch */
 
                 break;
-            }	/* switch */
+            }   /* switch */
         }   /* if */
-    }	/* if */
+    }   /* if */
     return;
 }
