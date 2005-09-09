@@ -1,4 +1,4 @@
-.\" synced with 1.1091
+.\" synced with 1.1093
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2888,10 +2888,11 @@ RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
 1: Utilise texture_rectangle.
 .br
 2: Utilise texture_non_puissance_de_deux.
+.REss
 .IPs (no)glfinish
 Appelle glFinish() avant d'échanger les tampons.
 Plus lent mais dans certain cas affichage "plus correct".
-.IPs  swapinterval=<n>
+.IPs swapinterval=<n>
 Intervalle minimum entre chaque échange de tampon, exprimé en nombre de
 trames affichées (par défaut\ : 1).
 1 est équivalent à activer VSYNC, 0 désactive VSYNC.
