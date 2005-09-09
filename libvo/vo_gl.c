@@ -67,7 +67,7 @@ static GLenum gl_target;
 static GLint gl_texfmt;
 static GLenum gl_format;
 static GLenum gl_type;
-static GLint gl_buffer;
+static GLuint gl_buffer;
 static int gl_buffersize;
 
 static int int_pause;
