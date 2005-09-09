@@ -305,7 +305,7 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
  * \param type OpenGL type
  * \return bytes per pixel
  *
- * Does not handle all possible variants, just those use by MPlayer
+ * Does not handle all possible variants, just those used by MPlayer
  */
 int glFmt2bpp(GLenum format, GLenum type) {
   switch (type) {
