@@ -126,6 +126,9 @@ static void texSize(int w, int h, int *texw, int *texh) {
   }
 }
 
+/**
+ * \brief remove all OSD textures and display-lists, thus clearing it.
+ */
 static void clearOSD() {
   int i;
   glDeleteTextures(osdtexCnt, osdtex);
