@@ -404,7 +404,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   priv = demux->priv;
   s = demux->stream;
 
-  if(s->eof || (demux->movi_end && stream_tell(s) >= demux->movi_end) )
+  if(s->eof)
     return 0;
 
   switch(priv->frmt) {
@@ -412,15 +412,18 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
     while(1) {
       uint8_t hdr[4];
       stream_read(s,hdr,4);
-      if (s->eof || (demux->movi_end && stream_tell(s) >= demux->movi_end))
+      if (s->eof)
         return 0;
       l = mp_decode_mp3_header(hdr);
       if(l < 0) {
+	if (demux->movi_end && stream_tell(s) >= demux->movi_end)
+	  return 0; // might be ID3 tag, i.e. EOF
 	stream_skip(s,-3);
       } else {
 	dp = new_demux_packet(l);
 	memcpy(dp->buffer,hdr,4);
-	stream_read(s,dp->buffer + 4,l-4);
+	if (stream_read(s,dp->buffer + 4,l-4) != l-4)
+	  return 0;
 	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + sh_audio->audio.dwScale/(float)sh_audio->samplerate;
 	break;
       }
