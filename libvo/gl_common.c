@@ -285,6 +285,7 @@ static void getFunctions() {
  */
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
                       int w, int h, char val) {
+  GLfloat border[4] = {val, val, val, val};
   GLenum clrfmt = (fmt == GL_ALPHA) ? GL_ALPHA : GL_LUMINANCE;
   char *init = (char *)malloc(w * h);
   memset(init, val, w * h);
@@ -296,6 +297,7 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
   glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
   free(init);
 }
 
