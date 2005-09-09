@@ -53,7 +53,7 @@ static GLuint osdatex[MAX_OSD_PARTS];
 //! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
 //! How many parts the OSD currently consists of
-static int osdtexCnt = 0;
+static int osdtexCnt;
 
 static int use_aspect;
 static int use_rectangle;
@@ -126,10 +126,34 @@ static void texSize(int w, int h, int *texw, int *texh) {
   }
 }
 
+static void clearOSD() {
+  int i;
+  glDeleteTextures(osdtexCnt, osdtex);
+#ifndef FAST_OSD
+  glDeleteTextures(osdtexCnt, osdatex);
+#endif
+  for (i = 0; i < osdtexCnt; i++)
+    glDeleteLists(osdDispList[i], 1);
+  osdtexCnt = 0;
+}
+
+/**
+ * \brief uninitialize OpenGL context, freeing textures, buffers etc.
+ */
+static void uninitGl() {
+  clearOSD();
+  if (DeleteBuffers && gl_buffer)
+    DeleteBuffers(1, &gl_buffer);
+  gl_buffer = 0; gl_buffersize = 0;
+  err_shown = 0;
+}
+
 /**
  * \brief Initialize a (new or reused) OpenGL context.
+ * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
+  osdtexCnt = 0; gl_buffer = 0; gl_buffersize = 0; err_shown = 0;
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
@@ -150,10 +174,6 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   glClear( GL_COLOR_BUFFER_BIT );
   if (SwapInterval && swap_interval >= 0)
     SwapInterval(swap_interval);
-  osdtexCnt = 0;
-  gl_buffer = 0;
-  gl_buffersize = 0;
-  err_shown = 0;
   return 1;
 }
 
@@ -280,6 +300,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #endif
 
 glconfig:
+  if (vo_config_count)
+    uninitGl();
   setGlWindow(&gl_vinfo, &gl_context, vo_window);
   initGl(vo_dwidth, vo_dheight);
 
@@ -364,17 +386,8 @@ static void draw_osd(void)
 {
   if (!use_osd) return;
   if (vo_osd_changed(0)) {
-    int i;
     int osd_h, osd_w;
-    glDeleteTextures(osdtexCnt, osdtex);
-#ifndef FAST_OSD
-    glDeleteTextures(osdtexCnt, osdatex);
-#endif
-    for (i = 0; i < osdtexCnt; i++) {
-      glDeleteLists(osdDispList[i], 1);
-    }
-    osdtexCnt = 0;
-
+    clearOSD();
     osd_w = (scaled_osd) ? image_width : vo_dwidth;
     osd_h = (scaled_osd) ? image_height : vo_dheight;
     vo_draw_text(osd_w, osd_h, create_osd_texture);
@@ -507,6 +520,7 @@ static void
 uninit(void)
 {
   if ( !vo_config_count ) return;
+  uninitGl();
   releaseGlContext(&gl_vinfo, &gl_context);
 #ifdef GL_WIN32
   vo_w32_uninit();
