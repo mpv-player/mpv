@@ -1,4 +1,4 @@
-		NUT Open Container Format DRAFT 20050111
+		NUT Open Container Format DRAFT 20050909
 		----------------------------------------
 
 
@@ -125,7 +125,7 @@ main header:
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_fields			v
-		if(tmp_fields>0) tmp_timestamp	s
+		if(tmp_fields>0) tmp_pts	s
 		if(tmp_fields>1) tmp_mul	v
 		if(tmp_fields>2) tmp_stream	v
 		if(tmp_fields>3) tmp_size	v
@@ -142,7 +142,7 @@ main header:
 			stream_id_plus1[i]= tmp_stream;
 			data_size_mul[i]= tmp_mul;
 			data_size_lsb[i]= tmp_size + j;
-			timestamp_delta[i]= tmp_timestamp;
+			pts_delta[i]= tmp_pts;
 			reserved_count[i]= tmp_res;
 		}
 	}
@@ -155,10 +155,9 @@ stream_header:
 	stream_id				v
 	stream_class				v
 	fourcc					vb
-	average_bitrate				v
 	time_base_nom				v
 	time_base_denom				v
-	msb_timestamp_shift			v
+	msb_pts_shift				v
 	decode_delay				v
 	fixed_fps				u(1)
 	reserved				u(6)
@@ -182,6 +181,11 @@ audio_stream_header:
 	reserved_bytes
 	checksum				u(32)
 
+other_stream_header:
+	stream_header
+	reserved_bytes
+	checksum				u(32)
+
 		Basic Packets:
  
 frame:
@@ -189,8 +193,8 @@ frame:
 	if(stream_id_plus1[frame_code]==0){
 		stream_id			v
 	}
-	if(timestamp_delta[frame_code]==0){
-		coded_timestamp			v
+	if(pts_delta[frame_code]==0){
+		coded_pts			v
 	}
 	if(flags[frame_code]&1){
 		data_size_msb			v
@@ -203,9 +207,10 @@ index:
 	index_startcode				f(64)
 	packet header
 	stream_id				v
+	max_pts					v
 	index_length				v
 	for(i=0; i<index_length; i++){
-		index_timestamp			v
+		index_pts			v
 		index_position			v
 	}
 	reserved_bytes
@@ -244,8 +249,10 @@ file:
 		for(i=0; i<stream_count; i++){
 			if(next_packet==video_stream_header)
 				video_stream_header
-			else
+			else if(next_packet==audio_stream_header)
 				audio_stream_header
+			else
+				other_stream_header
 		}
 		while(next_code != main_startcode){
 			if(next_code == info_startcode)
@@ -257,16 +264,19 @@ file:
 			}
 		}
 	}
-	index
-                
+	if (next_code == index_startcode){
+		while(!eof){
+			index
+		}
+		index_ptr			u(64)
+	}
 
 
 			Tag description:
 
 forward_ptr
-	size of the packet (exactly the distance from the first byte of the
-	startcode of the current packet to the first byte of the following
-	packet
+	size of the packet data (exactly the distance from the first byte
+	after the forward_ptr to the first byte of the next packet)
 
 file_id_string
 	"nut/multimedia container\0"
@@ -312,11 +322,8 @@ max_index_distance
 	SHOULD be set to <=32768 or at least <=65536 unless there is a very
 	good reason to set it higher
 
-stream_id[FIXME]
+stream_id
 	Stream identifier
-	Note: streams with a lower relative class MUST have a lower relative ID
-	so a stream with class 0 MUST always have an ID which is lower than any
-	stream with class > 0
 	stream_id MUST be < stream_count
 
 stream_class
@@ -334,45 +341,38 @@ fourcc
 	if needed
 
 time_base_nom / time_base_denom = time_base
-	the number of timer ticks per second, this MUST be equal to the fps
+	the length of a timer tick in seconds, this MUST be equal to the 1/fps
 	if fixed_fps is 1
-	time_base_denom MUST NOT be 0
+	time_base_nom and time_base_denom MUST NOT be 0
 	time_base_nom and time_base_denom MUST be relatively prime
-	time_base_nom MUST be < 2^31
+	time_base_denom MUST be < 2^31
 	examples:
         	fps	time_base_nom	time_base_denom
-		30	30		1
-		29.97	30000		1001
-		23.976	24000		1001
-		sample_rate	sample_rate_mul	time_base_nom	time_base_denom
-		44100		1		44100		1
-		44100		64		11025		16 
-		48000		1024		375		8  
-
-		Note: the advantage to using a large sample_rate_mul is that
-		the timestamps need fewer bits
+		30	1		30
+		29.97	1001		30000
+		23.976	1001		24000
 
 global_time_base_nom / global_time_base_denom = global_time_base
-	the number of timer ticks per second
-	global_time_base_denom MUST NOT be 0
+	the length of a timer tick in seconds
+	global_time_base_nom and global_time_base_denom MUST NOT be 0
 	global_time_base_nom and global_time_base_denom MUST be relatively prime
-	global_time_base_nom MUST be < 2^31
+	global_time_base_denom MUST be < 2^31
 
 global_timestamp
 	timestamp in global_time_base units
-	when a global_timestamp is encountered the last_timestamp of all
+	when a global_timestamp is encountered the last_pts of all
 	streams is set to the following:
 	
-	ln= global_time_base_denom*time_base_nom
+	ln= global_time_base_nom*time_base_denom
 	sn= global_timestamp
-	d1= global_time_base_nom
-	d2= time_base_denom
-	last_timestamp= (ln/d1*sn + ln%d1*sn/d1)/d2
+	d1= global_time_base_denom
+	d2= time_base_nom
+	last_pts= (ln/d1*sn + ln%d1*sn/d1)/d2
 	Note: this calculation MUST be done with unsigned 64 bit integers, and 
 	is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
 
-msb_timestamp_shift
-	amount of bits in lsb_timestamp
+msb_pts_shift
+	amount of bits in lsb_pts
 	MUST be <16
 
 decode_delay
@@ -415,37 +415,35 @@ data_size_mul[frame_code]
 data_size_lsb[frame_code]
 	must be <16384
 
-timestamp_delta[frame_code]
+pts_delta[frame_code]
 	must be <16384 and >-16384
 
 data_size       
 	data_size= data_size_lsb + data_size_msb*data_size_mul;
 
-coded_timestamp
-	if coded_timestamp < (1<<msb_timestamp_shift) then it is an lsb
-	timestamp, otherwise it is a full timestamp + (1<<msb_timestamp_shift)
-	lsb timestamps are converted to full timesamps by:
-	mask = (1<<msb_timestamp_shift)-1;
-	delta= last_timestamp - mask/2
-	timestamp= ((timestamp_lsb-delta)&mask) + delta
-	a full timestamp MUST be used if there is no reference timestamp
-	available after the last frame_startcode with the current stream_id
+coded_pts
+	if coded_pts < (1<<msb_pts_shift) then it is an lsb
+	pts, otherwise it is a full pts + (1<<msb_pts_shift)
+	lsb pts is converted to a full pts by:
+	mask = (1<<msb_pts_shift)-1;
+	delta= last_pts - mask/2
+	pts= ((pts_lsb-delta)&mask) + delta
         
-lsb_timestamp
-	least significant bits of the timestamp in time_base precision
+lsb_pts
+	least significant bits of the pts in time_base precision
         Example: IBBP display order
-		keyframe timestamp=0                     -> timestamp=0
-		frame                    lsb_timestamp=3 -> timestamp=3
-		frame                    lsb_timestamp=1 -> timestamp=1
-		frame                    lsb_timestamp=2 -> timestamp=2
+		keyframe pts=0                     -> pts=0
+		frame                    lsb_pts=3 -> pts=3
+		frame                    lsb_pts=1 -> pts=1
+		frame                    lsb_pts=2 -> pts=2
 		...
-		keyframe msb_timestamp=257               -> timestamp=257
-		frame                    lsb_timestamp=255->timestamp=255
-		frame                    lsb_timestamp=0 -> timestamp=256
-		frame                    lsb_timestamp=4 -> timestamp=260
-		frame                    lsb_timestamp=2 -> timestamp=258
-		frame                    lsb_timestamp=3 -> timestamp=259
-	all timestamps of keyframes of a single stream MUST be monotone
+		keyframe msb_pts=257               -> pts=257
+		frame                    lsb_pts=255->pts=255
+		frame                    lsb_pts=0 -> pts=256
+		frame                    lsb_pts=4 -> pts=260
+		frame                    lsb_pts=2 -> pts=258
+		frame                    lsb_pts=3 -> pts=259
+	all pts's of keyframes of a single stream MUST be monotone
 
 dts
 	dts is calculated by using a decode_delay+1 sized buffer for each 
@@ -455,7 +453,6 @@ dts
 	all frames with dts == timestamp must be monotone, that means a frame
 	which occurs later in the stream must have a larger or equal dts
 	than an earlier frame
-	FIXME rename timestamp* to pts* ?
 
 width/height
 	MUST be set to the coded width/height
@@ -477,9 +474,15 @@ samplerate_nom / samplerate_denom = samplerate
 
 checksum
 	adler32 checksum
+	checksum is calculated for the area pointed to by forward_ptr not
+	including the checksum itself (from first byte after the
+	forward_ptr until last byte before the checksum).
 
-index_timestamp
-	value of the timestamp of a keyframe relative to the last keyframe
+max_pts
+	The highest pts in the stream.
+
+index_pts
+	value of the pts of a keyframe relative to the last keyframe
 	stored in this index
 
 index_position
@@ -488,6 +491,11 @@ index_position
 	there MUST be no keyframe with the same stream_id as this index between
 	two consecutive index entries if they are more than max_index_distance
 	apart
+
+index_ptr
+	Length in bytes from the first byte of the first index startcode
+	to the first byte of the index_ptr. If there is no index, index_ptr
+	MUST NOT be written.
 
 id
 	the ID of the type/name pair, so it is more compact
@@ -572,15 +580,13 @@ headers MUST be placed at least at the start of the file and immediately before
 the index or at the file end if there is no index
 headers MUST be repeated at least twice (so they exist three times in a file)
 
-a demuxer MUST NOT demux a stream which contains more than one stream, or which
-is wrapped in a structure to facilitate more than one stream or otherwise 
-duplicate the role of a container. any such file is to be considered invalid
-
 info packets which describe the whole file or individual streams/tracks MUST be
 placed before any video/audio/... frames
 
 		Index
 Note: with realtime streaming, there is no end, so no index there either
+An index SHOULD be written for every stream. Indices MUST be placed at end
+of file. Indices MAY be repeated for a stream.
 
 		Info packets
 the info_packet can be repeated, and can also contain different names & values
@@ -599,6 +605,15 @@ MUST be ignored by the demuxer
 in the absence of a valid header at the beginning, players SHOULD search for
 backup headers starting at offset 2^x; for each x players SHOULD end their
 search at a particular offset when any startcode is found (including syncpoint)
+
+			Semantic requirements
+
+If more than one stream of a given stream class is present, each one MUST
+have info tags specifying disposition, and if applicable, language.
+
+A demuxer MUST NOT demux a stream which contains more than one stream, or which
+is wrapped in a structure to facilitate more than one stream or otherwise
+duplicate the role of a container. any such file is to be considered invalid.
 
 
 			Sample code (GPL, & untested)
@@ -691,3 +706,4 @@ Authors in alphabetical order: (FIXME! Tell us if we left you out)
     Gereoffy, Arpad (arpi@thot.banki.hu)
     Hess, Andreas (jaska@gmx.net)
     Niedermayer, Michael (michaelni@gmx.at)
+    Shimon, Oded (ods15@ods15.dyndns.org)
