@@ -1,4 +1,4 @@
-.\" synced with 1.1088
+.\" synced with 1.1091
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2139,7 +2139,7 @@ Définit la carte graphique qui recevra l'image
 Nécessite l'option \-vm.
 Vous pouvez obtenir une liste des cartes disponibles si cette option est
 combinée à l'option \-v.
-Ne fonctionne qu'avec \-vo directx pour le moment.
+Ne fonctionne pour le moment qu'avec le pilote de sortie vidéo directx.
 .
 .TP
 .B \-bpp <profondeur>
@@ -2707,9 +2707,9 @@ Pilote de sortie vidéo très rapide sur les cartes le gérant.
 .RSs
 .IPs <sous-périphérique>
 Choisi explicitement le sous-périphérique à utiliser.
-Les pilotes de sous-périphérique existant sont cyberblade_vid,
-mach64_vid, mga_crtc2_vid, mga_vid, nvidia_vid, pm3_vid, radeon_vid,
-rage128_vid, sis_vid et unichrome_vid.
+Les pilotes de sous-périphérique existant sont cyberblade_vid.so,
+mach64_vid.so, mga_crtc2_vid.so, mga_vid.so, nvidia_vid.so, pm3_vid.so,
+radeon_vid.so, rage128_vid.so, sis_vid.so et unichrome_vid.so.
 .RE
 .PD 1
 .
@@ -2892,11 +2892,11 @@ RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
 Appelle glFinish() avant d'échanger les tampons.
 Plus lent mais dans certain cas affichage "plus correct".
 .IPs  swapinterval=<n>
-Intervalle minimum en trames affichées entre chaque échange de tampon
-(par défaut\ : 1).
+Intervalle minimum entre chaque échange de tampon, exprimé en nombre de
+trames affichées (par défaut\ : 1).
 1 est équivalent à activer VSYNC, 0 désactive VSYNC.
-Une valeur < 0 utilisera la configuration système.
-Ceci va limiter le débit de trames (framerate) à (rafraîchissement
+Une valeur inférieure à 0 utilisera la configuration système.
+Ceci limite le débit de trames (framerate) à (rafraîchissement
 horizontal / n).
 Requiert le support de GLX_SGI_swap_control pour fonctionner.
 Avec certaines implémentation (la plupart/toutes?) ceci ne fonctionne
