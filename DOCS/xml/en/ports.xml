@@ -555,49 +555,55 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-Only Mac OS X 10.2 and up is supported by the "raw"
-<application>MPlayer</application> source. Feel free to make support for older
-Mac OS versions and send patches!
+<application>MPlayer</application> should compile out-of-the-box on
+Mac OS X 10.2 and up. The preferred compiler is the Apple version of
+GCC 3.x or later, Apple's GCC 2.95.x does not support C99 syntax well.
 </para>
 
-<para>
-Apple's modified GCC 3.x is preferred for compiling
-<application>MPlayer</application> especially when using
-<systemitem class="library">libavcodec</systemitem> as Apple's
-modified GCC 2.95.x doesn't support C99 syntax well.
-</para>
+<sect2 id="mplayerosx">
+<title>MPlayer OS X</title>
 
 <para>
-One can get an Aqua GUI for <application>MPlayer</application> together with
-compiled <application>MPlayer</application> binaries for Mac OS X from the
+You can get a native GUI for <application>MPlayer</application> together with
+precompiled <application>MPlayer</application> binaries for Mac OS X from the
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project, but be
-warned: that project as it is is not active anymore.
+warned: that project is not active anymore.
 </para>
+
 <para>
 Fortunately, <application>MPlayerOSX</application> has been taken over
-by <application>MPlayer</application>'s dev team, and is now one of the
-official projects supported by <application>MPlayer</application>.
+by a member of the <application>MPlayer</application> team.
+Preview releases are available from our
+<ulink url="http://mplayerhq.hu/dload.html">download page</ulink>
+and an official release should arrive soon.
 </para>
+
 <para>
-In order to build <application>MPlayerOSX</application>, you need
-the <systemitem>mplayerosx</systemitem> module, the
-<systemitem>main</systemitem> module and a copy of the
-<systemitem>main</systemitem> module named
+In order to build <application>MPlayerOSX</application> from source
+yourself, you need the <systemitem>mplayerosx</systemitem>, the
+<systemitem>main</systemitem> and a copy of the
+<systemitem>main</systemitem> CVS module named
 <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> is the GUI frontend,
 <systemitem>main</systemitem> is MPlayer and
 <systemitem>main_noaltivec</systemitem> is MPlayer built without AltiVec
 support.
 </para>
+
 <para>
-You can get the latest source from CVS:
+To check out CVS modules use:
+
 <screen>
 cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
 cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
 </screen>
+</para>
 
+<para>
 In order to build <application>MPlayerOSX</application> you will need to
 set up something like this:
+
 <screen>
 MPlayer_source_directory
    |
@@ -605,46 +611,57 @@ MPlayer_source_directory
    |
    |--->main_noaltivec (MPlayer CVS source configured with --disable-altivec)
    |
-   |--->mplayerosx     (MPlayerOSX CVS source)
+   |--->mplayerosx     (MPlayer OS X CVS source)
 </screen>
 
 You first need to build main and main_noaltivec.
+</para>
 
+<para>
 Next, set a global variable:
-<screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 
+<screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
+</para>
+
+<para>
 Then, configure:
 </para>
+
 <para>
-If you configure for a machine which CPU is greater than G3, do as follows:
+If you configure for a G4 or later CPU with AltiVec support, do as follows:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 </screen>
-
-If you configure for a G3-powered machine, do as follows:
+If you configure for a G3-powered machine without AltiVec, use:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 --disable-altivec
 </screen>
-You may need to edit config.mak and change the -mcpu and -mtune from
-74XX to G3.
+You may need to edit <filename>config.mak</filename> and change
+<systemitem>-mcpu</systemitem> and <systemitem>-mtune</systemitem>
+from <systemitem>74XX</systemitem> to <systemitem>G3</systemitem>.
 </para>
+
 <para>
 Continue with
 <screen>
 make
 </screen>
-then go to the mplayerosx directory and and type
+then go to the mplayerosx directory and type
 
 <screen>
 make dist
 </screen>
-This will create a compressed .dmg archive with the binary ready to use.
+This will create a compressed <systemitem>.dmg</systemitem> archive
+with the ready to use binary.
 </para>
+
 <para>
-You can also use the xcode 2.1 project; the old project for xcode 1.x is
-not working anymore.
+You can also use the <application>Xcode</application> 2.1 project;
+the old project for <application>Xcode</application> 1.x does
+not work anymore.
 </para>
+</sect2>
 </sect1>
 
 <sect1 id="amiga">
