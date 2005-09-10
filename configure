@@ -6370,17 +6370,13 @@ echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l" = auto ; then
  _tv_v4l=no
  if test "$_tv" = yes && linux ; then
-  for I in /dev/video /dev/video? ; do
-    if test -c $I ; then
-      cat > $TMPC <<EOF
+  cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
-      cc_check && _tv_v4l=yes
-      break
-    fi
-  done
+  cc_check && _tv_v4l=yes
+  break
  fi
 fi
 if test "$_tv_v4l" = yes ; then
@@ -6397,12 +6393,14 @@ echocheck "Video 4 Linux 2 TV interface"
 if test "$_tv_v4l2" = auto ; then
  _tv_v4l2=no
  if test "$_tv" = yes && linux ; then
-  for I in /dev/video /dev/video? ; do
-    if test -c $I ; then
-      _tv_v4l2=yes
-      break
-    fi
-  done
+  cat > $TMPC <<EOF
+#include <stdlib.h>
+#include <linux/types.h>
+#include <linux/videodev2.h>
+int main(void) { return 0; }
+EOF
+  cc_check && _tv_v4l2=yes
+  break
  fi
 fi
 if test "$_tv_v4l2" = yes ; then

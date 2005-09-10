@@ -40,7 +40,8 @@ known issues:
 #ifdef HAVE_SYS_SYSINFO_H
 #include <sys/sysinfo.h>
 #endif
-#include "videodev2.h"
+#include <linux/types.h>
+#include <linux/videodev2.h>
 #include "../mp_msg.h"
 #include "../libvo/img_format.h"
 #include "../libaf/af_format.h"
