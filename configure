@@ -5086,6 +5086,9 @@ else
     _def_freetype='#undef HAVE_FREETYPE'
 fi
 echores "$_freetype"
+if test "$_freetype" != yes ; then
+    _freetype=no
+fi
 
 if test "$_freetype" = no ; then
     _fontconfig=no
