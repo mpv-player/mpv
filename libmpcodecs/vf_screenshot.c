@@ -25,8 +25,9 @@
 
 struct vf_priv_s {
     int frameno;
-    int shot;
-    int dw, dh;
+    char fname[102];
+    int shot, store_slices;
+    int dw, dh, stride;
     uint8_t *buffer;
     struct SwsContext *ctx;
     mp_image_t *dmpi;
@@ -49,6 +50,7 @@ static int config(struct vf_instance_s* vf,
 
     vf->priv->dw = d_width;
     vf->priv->dh = d_height;
+    vf->priv->stride = (3*vf->priv->dw+15)&~15;
 
     if (vf->priv->buffer) free(vf->priv->buffer); // probably reconfigured
     vf->priv->dmpi = NULL;
@@ -92,7 +94,7 @@ static int write_png(char *fname, unsigned char *buffer, int width, int height, 
     png_set_bgr(png_ptr);
 
     row_pointers = (png_byte**)malloc(height*sizeof(png_byte*));
-    for ( k = 0; k <height; k++ ){
+    for (k = 0; k < height; k++) {
 	unsigned char* s=buffer + stride*k;
 	row_pointers[k] = s;
     }
@@ -113,22 +115,23 @@ static int fexists(char *fname)
     else return 0;
 }
 
-static void shot(struct vf_priv_s* priv)
+static void gen_fname(struct vf_priv_s* priv)
 {
-    char fname[102];
+    do {
+	snprintf (priv->fname, 100, "shot%04d.png", ++priv->frameno);
+    } while (fexists(priv->fname) && priv->frameno < 100000);
+    if (fexists(priv->fname)) return;
+
+    mp_msg(MSGT_VFILTER,MSGL_INFO,"*** screenshot '%s' ***\n",priv->fname);
+
+}
+
+static void scale_image(struct vf_priv_s* priv)
+{
     uint8_t *dst[3];
     int dst_stride[3];
 	
-    priv->shot=0;
-
-    do {
-	snprintf (fname, 100, "shot%04d.png", ++priv->frameno);
-    } while (fexists(fname) && priv->frameno < 100000);
-    if (fexists(fname)) return;
-
-    mp_msg(MSGT_VFILTER,MSGL_INFO,"*** screenshot '%s' ***\n",fname);
-
-    dst_stride[0] = (3*priv->dw+15)&~15;
+    dst_stride[0] = priv->stride;
     dst_stride[1] = dst_stride[2] = 0;
     if (!priv->buffer)
 	priv->buffer = (uint8_t*)memalign(16, dst_stride[0]*priv->dh);
@@ -136,16 +139,84 @@ static void shot(struct vf_priv_s* priv)
     dst[0] = priv->buffer;
     dst[1] = dst[2] = 0;
     sws_scale_ordered(priv->ctx, priv->dmpi->planes, priv->dmpi->stride, 0, priv->dmpi->height, dst, dst_stride);
+}
 
-    write_png(fname, priv->buffer, priv->dw, priv->dh, dst_stride[0]);
+static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
+    if(!vf->next->draw_slice) {
+	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
+	return;
+    }
+    if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) return; // shouldn't happen
+    mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	mpi->type, mpi->flags, mpi->width, mpi->height);
+    if (vf->priv->shot) {
+	vf->priv->store_slices = 1;
+	vf->priv->shot = 0;
+	if (!vf->priv->buffer)
+	    vf->priv->buffer = (uint8_t*)memalign(16, vf->priv->stride*vf->priv->dh);
+    }
+    
+}
+
+static void draw_slice(struct vf_instance_s* vf,
+        unsigned char** src, int* stride, int w,int h, int x, int y){
+    mp_image_t *dmpi=vf->dmpi;
+    if(!dmpi){
+	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_screenshot: draw_slice() called with dmpi=NULL (no get_image??)\n");
+	return;
+    }
+    if (vf->priv->store_slices) {
+	uint8_t *dst[3];
+	int dst_stride[3];
+	dst_stride[0] = vf->priv->stride;
+	dst_stride[1] = dst_stride[2] = 0;
+	dst[0] = vf->priv->buffer;
+	dst[1] = dst[2] = 0;
+	sws_scale_ordered(vf->priv->ctx, src, stride, y, h, dst, dst_stride);
+    }
+    vf_next_draw_slice(vf,src,stride,w,h,x,y);
+}
+
+static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+    vf->dmpi= vf_get_image(vf->next, mpi->imgfmt, 
+			   mpi->type, mpi->flags, mpi->width, mpi->height);
+
+    mpi->planes[0]=vf->dmpi->planes[0];
+    mpi->stride[0]=vf->dmpi->stride[0];
+    if(mpi->flags&MP_IMGFLAG_PLANAR){
+	mpi->planes[1]=vf->dmpi->planes[1];
+	mpi->planes[2]=vf->dmpi->planes[2];
+	mpi->stride[1]=vf->dmpi->stride[1];
+	mpi->stride[2]=vf->dmpi->stride[2];
+    }
+    mpi->width=vf->dmpi->width;
+
+    mpi->flags|=MP_IMGFLAG_DIRECT;
+    mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
+    
+    mpi->priv=(void*)vf->dmpi;
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
-    vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-				MP_IMGTYPE_EXPORT, 0,
-				mpi->w, mpi->h);
-
+    if (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK) {
+	if(vf->priv->store_slices) {
+	    vf->priv->store_slices = 0;
+	    gen_fname(vf->priv);
+	    write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
+	}
+	return vf_next_put_image(vf,vf->dmpi);
+    }
+    
+    if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
+	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+				    MP_IMGTYPE_EXPORT, 0,
+				    mpi->width, mpi->height);
+	vf_clone_mpi_attributes(vf->priv->dmpi, mpi);
+    } else {
+	vf->priv->dmpi=vf->dmpi;
+    }
+    
     vf->priv->dmpi->planes[0]=mpi->planes[0];
     vf->priv->dmpi->planes[1]=mpi->planes[1];
     vf->priv->dmpi->planes[2]=mpi->planes[2];
@@ -156,7 +227,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     vf->priv->dmpi->height=mpi->height;
 
     if(vf->priv->shot) {
-	shot(vf->priv);
+	vf->priv->shot=0;
+	gen_fname(vf->priv);
+	scale_image(vf->priv);
+	write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
     }
 
     return vf_next_put_image(vf, vf->priv->dmpi);
@@ -206,9 +280,13 @@ static int open(vf_instance_t *vf, char* args)
     vf->control=control;
     vf->put_image=put_image;
     vf->query_format=query_format;
+    vf->start_slice=start_slice;
+    vf->draw_slice=draw_slice;
+    vf->get_image=get_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->frameno=0;
     vf->priv->shot=0;
+    vf->priv->store_slices=0;
     vf->priv->buffer=0;
     vf->priv->ctx=0;
     return 1;
