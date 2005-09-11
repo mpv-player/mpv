@@ -6014,6 +6014,17 @@ L'option fd dit au filtre de toujours appliquer la décimation demandée
 (image médiocre).
 .RE
 .
+.TP
+.B screenshot
+Permet de réaliser des captures d'écran à chaque utilisation de la
+commande "screenshot" (correspond à la touche 's' par defaut).
+Chaque capture sera sauvegardé dans le répertoire de travail, et chaque un
+fichier aura un nom de type 'shotNNNN.png' en utilisant le premier nombre
+disponible - aucun fichier ne sera écrasé.
+Ce filtre ne provoque pas de surcoût lorsqu'il n'est pas utilisé, et accepte
+tous les espaces de couleur, donc ça ne pose pas de problème de le mettre par
+défaut dans votre fichier de configuration.
+.RE
 .
 .
 .SH "OPTIONS D'ENCODAGE GÉNÉRALES (MENCODER UNIQUEMENT)"
