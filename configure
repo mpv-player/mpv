@@ -3263,7 +3263,7 @@ echores "$_sys_sysinfo"
 
 
 echocheck "Mac OS X APIs"
-if test "$_macosx" = auto ; then
+if test "$_macosx" = auto && darwin ; then
     productName=`/usr/bin/sw_vers -productName`
     if test "$productName" = "Mac OS X" ; then
         _macosx=yes
