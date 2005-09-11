@@ -120,7 +120,10 @@ static void gen_fname(struct vf_priv_s* priv)
     do {
 	snprintf (priv->fname, 100, "shot%04d.png", ++priv->frameno);
     } while (fexists(priv->fname) && priv->frameno < 100000);
-    if (fexists(priv->fname)) return;
+    if (fexists(priv->fname)) {
+	priv->fname[0] = '\0';
+	return;
+    }
 
     mp_msg(MSGT_VFILTER,MSGL_INFO,"*** screenshot '%s' ***\n",priv->fname);
 
@@ -209,7 +212,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	if(vf->priv->store_slices) {
 	    vf->priv->store_slices = 0;
 	    gen_fname(vf->priv);
-	    write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
+	    if (vf->priv->fname[0])
+		write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
 	}
 	return vf_next_put_image(vf,vf->dmpi);
     }
@@ -235,8 +239,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     if(vf->priv->shot) {
 	vf->priv->shot=0;
 	gen_fname(vf->priv);
-	scale_image(vf->priv);
-	write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
+	if (vf->priv->fname[0]) {
+	    scale_image(vf->priv);
+	    write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
+	}
     }
 
     return vf_next_put_image(vf, vf->priv->dmpi);
