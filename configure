@@ -136,10 +136,11 @@ echocheck() {
 
 # Use this to echo the results of a check
 echores() {
-  echo "Result is: $@" >> "$TMPLOG"
+  echo "Result is: $@ $_comment" >> "$TMPLOG"
   echo "##########################################" >> "$TMPLOG"
   echo "" >> "$TMPLOG"
-  echo "$@"
+  echo "$@ $_comment"
+  _comment=""
 }
 #############################################################################
 
@@ -5081,7 +5082,7 @@ echocheck "freetype >= 2.0.9"
 # freetype depends on iconv
 if test "$_iconv" = no ; then
     _freetype=no
-    rez_comment="(iconv support needed)"
+    _comment="(iconv support needed)"
 fi
 
 if test "$_freetype" = auto ; then
@@ -5126,12 +5127,11 @@ if test "$_freetype" = yes ; then
 else
     _def_freetype='#undef HAVE_FREETYPE'
 fi
-echores "$_freetype $rez_comment"
-rez_comment=""
+echores "$_freetype"
 
 if test "$_freetype" = no ; then
     _fontconfig=no
-    rez_comment="(freetype support needed)"
+    _comment="(freetype support needed)"
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
@@ -5163,8 +5163,7 @@ if test "$_fontconfig" = yes ; then
 else
     _def_fontconfig='#undef HAVE_FONTCONFIG'
 fi
-echores "$_fontconfig $rez_comment"
-rez_comment=""
+echores "$_fontconfig"
 
 echocheck "fribidi with charsets"
 if test "$_fribidi" = yes ; then
