@@ -45,23 +45,12 @@ cc_check() {
   return "$TMP"
 }
 
-perl_check() {
-  echo >> "$TMPLOG"
-  cat "$TMPP" >> "$TMPLOG"
-  echo >> "$TMPLOG"
-  echo "perl $TMPP" >> "$TMPLOG"
-  perl "$TMPP" >> "$TMPLOG" 2>&1
-  TMP="$?"
-  echo >> "$TMPLOG"
-  return "$TMP"
-}
-
 # Display error message, flushes tempfile, exit
 die () {
   echo
   echo "Error: $@" >&2
   echo >&2
-  rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP" "TMPP"
+  rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
   echo "Check \"$TMPLOG\" if you do not understand why it failed."
   exit 1
 }
@@ -559,7 +548,6 @@ TMPC="$I/mplayer-conf-$RANDOM-$$.c"
 TMPCPP="$I/mplayer-conf-$RANDOM-$$.cpp"
 TMPO="$I/mplayer-conf-$RANDOM-$$.o"
 TMPS="$I/mplayer-conf-$RANDOM-$$.S"
-TMPP="$I/mplayer-conf-$RANDOM-$$.perl"
 
 # config files
 
@@ -3276,35 +3264,8 @@ echores "$_sys_sysinfo"
 
 echocheck "Mac OS X APIs"
 if test "$_macosx" = auto ; then
-
-cat > $TMPP <<EOF
-\$/ = \0;
-
-open( PLIST, "/System/Library/CoreServices/SystemVersion.plist") || do {
-	print "Failed to open SystemVersion.plist\n";
-	exit (1);
-};
-
-\$plistData = <PLIST>;
-\$plistData =~ /<dict>(.*?)<\/dict>/gis;
-@items = split(/<key>/, \$plistData);
-
-shift @items;
-foreach \$item (@items) {
-	\$item =~ /(.*?)<\/key>.*?<string>(.*?)<\/string>/gis;
-        \$versiondata{ \$1 } = \$2;
-}
-
-close(PLIST);
-
-if( \$versiondata{"ProductName"} eq  "Mac OS X") {
-	exit(0);
-}
-
-exit(1);
-EOF
-
-	if perl_check; then 
+    productName=`/usr/bin/sw_vers -productName`
+    if test "$productName" = "Mac OS X" ; then
         _macosx=yes
     else
 	_macosx=no
@@ -7998,4 +7959,4 @@ EOF
 fi
 
 # Last move:
-rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP" "$TMPP"
+rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
