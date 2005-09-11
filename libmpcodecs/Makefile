@@ -128,6 +128,7 @@ VFILTER_SRCS=vf.c \
              vf_yuvcsp.c \
              vf_yuy2.c \
              vf_yvu9.c \
+             vf_screenshot.c \
 
 ifeq ($(HAVE_FFPOSTPROCESS),yes)
 VFILTER_SRCS += vf_pp.c
