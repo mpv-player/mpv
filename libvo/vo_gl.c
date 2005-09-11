@@ -164,6 +164,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
   glEnable(gl_target);
+  glDrawBuffer(vo_doublebuffering?GL_BACK:GL_FRONT);
 
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
@@ -429,13 +430,14 @@ flip_page(void)
 //  glFlush();
   if (use_glFinish)
   glFinish();
+  if (vo_doublebuffering)
 #ifdef GL_WIN32
   SwapBuffers(vo_hdc);
 #else
   glXSwapBuffers( mDisplay,vo_window );
 #endif
  
-  if (vo_fs && use_aspect)
+  if (vo_fs && use_aspect && vo_doublebuffering)
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
