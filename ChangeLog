@@ -69,6 +69,7 @@ MPlayer (1.0)
     * remove_logo filter
     * lavcresample now used by default (-af-adv force=0 gives old behavior)
     * vf_expand and vf_dsize now support aspect and round parameters
+    * screenshot filter
 
     MEncoder:
     * audio encoding modularized
