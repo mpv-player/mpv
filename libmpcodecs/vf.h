@@ -74,6 +74,7 @@ typedef struct vf_seteq_s
 #define VFCTRL_DUPLICATE_FRAME 11 /* For encoding - encode zero-change frame */
 #define VFCTRL_SKIP_NEXT_FRAME 12 /* For encoding - drop the next frame that passes thru */
 #define VFCTRL_FLUSH_FRAMES    13 /* For encoding - flush delayed frames */
+#define VFCTRL_SCREENSHOT      14 /* Make a screenshot */
 
 #include "vfcap.h"
 
