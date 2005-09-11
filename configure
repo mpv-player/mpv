@@ -5080,7 +5080,8 @@ echocheck "freetype >= 2.0.9"
 
 # freetype depends on iconv
 if test "$_iconv" = no ; then
-    _freetype="no (iconv support needed)"
+    _freetype=no
+    rez_comment="(iconv support needed)"
 fi
 
 if test "$_freetype" = auto ; then
@@ -5125,13 +5126,12 @@ if test "$_freetype" = yes ; then
 else
     _def_freetype='#undef HAVE_FREETYPE'
 fi
-echores "$_freetype"
-if test "$_freetype" != yes ; then
-    _freetype=no
-fi
+echores "$_freetype $rez_comment"
+rez_comment=""
 
 if test "$_freetype" = no ; then
     _fontconfig=no
+    rez_comment="(freetype support needed)"
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
@@ -5163,7 +5163,8 @@ if test "$_fontconfig" = yes ; then
 else
     _def_fontconfig='#undef HAVE_FONTCONFIG'
 fi
-echores "$_fontconfig"
+echores "$_fontconfig $rez_comment"
+rez_comment=""
 
 echocheck "fribidi with charsets"
 if test "$_fribidi" = yes ; then
