@@ -181,6 +181,12 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->dmpi= vf_get_image(vf->next, mpi->imgfmt, 
 			   mpi->type, mpi->flags | MP_IMGFLAG_READABLE, mpi->width, mpi->height);
 
+    if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
+       !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
+	// use slices if DR isn't possible
+	return;
+    }
+
     mpi->planes[0]=vf->dmpi->planes[0];
     mpi->stride[0]=vf->dmpi->stride[0];
     if(mpi->flags&MP_IMGFLAG_PLANAR){
