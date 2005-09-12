@@ -125,11 +125,14 @@ echocheck() {
 
 # Use this to echo the results of a check
 echores() {
-  echo "Result is: $@ $_comment" >> "$TMPLOG"
+  if test "$_res_comment" ; then
+    _res_comment="($_res_comment)"
+  fi
+  echo "Result is: $@ $_res_comment" >> "$TMPLOG"
   echo "##########################################" >> "$TMPLOG"
   echo "" >> "$TMPLOG"
-  echo "$@ $_comment"
-  _comment=""
+  echo "$@ $_res_comment"
+  _res_comment=""
 }
 #############################################################################
 
@@ -2269,11 +2272,10 @@ if test "$_i18n" = yes ; then
 else
   _def_i18n='#undef USE_I18N'
 fi
-if test -z "$_i18n_libs" ; then
-  echores "$_i18n"
-else
-  echores "$_i18n (using $_i18n_libs)"
+if test "$_i18n_libs" ; then
+  _res_comment="using $_i18n_libs"
 fi
+echores "$_i18n"
 
 
 echocheck "langinfo"
@@ -3008,11 +3010,11 @@ EOF
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define USE_TERMCAP 1'
-  echores "yes (using $_ld_termcap)"
+  _res_comment="using $_ld_termcap"
 else
   _def_termcap='#undef USE_TERMCAP'
-  echores no
 fi
+echores "$_termcap"
 
 
 echocheck "termios"
@@ -3046,12 +3048,13 @@ if test "$_termios" = yes ; then
   elif test "$_def_termios_h_name" = 'termios.h' ; then
     _def_termios_h='#define HAVE_TERMIOS_H 1'
   fi
-  echores "yes (using $_def_termios_h_name)"
+  _res_comment="using $_def_termios_h_name"
 else
   _def_termios='#undef HAVE_TERMIOS'
   _def_termios_h_name=''
-  echores "no"
+  _termios=no
 fi
+echores "$_termios"
 
 
 echocheck "shm"
@@ -3481,19 +3484,18 @@ EOF
     _directfb_version=`"$TMPO"`
     _def_directfb_version="#define DIRECTFBVERSION $_directfb_version"
     if test "$_directfb_version" -ge 913; then
-	echores "yes ($_directfb_version)"
+	_res_comment="$_directfb_version"
     else
         _def_directfb_version='#undef DIRECTFBVERSION'
 	_directfb=no
-	echores "no (version >=0.9.13 required)"
+	_res_comment="version >=0.9.13 required"
     fi
   else
     _directfb=no
-    echores "no (failed to get version)"
+    _res_comment="failed to get version"
   fi
-else
-  echores "$_directfb"
 fi
+echores "$_directfb"
 
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
@@ -3560,15 +3562,16 @@ if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
   _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
-  echores "yes (using $I)"
+  _res_comment="using $I"
 else
   _x11=no
   _def_x11='#undef HAVE_X11'
   _inc_x11=''
   _ld_x11=''
   _novomodules="x11 $_novomodules"
-  echores "no (check if the dev(el) packages are installed)"
+  _res_comment="check if the dev(el) packages are installed"
 fi
+echores "$_x11"
 
 
 echocheck "DPMS"
@@ -3803,6 +3806,7 @@ if test "$_gl" = yes ; then
   if test "$_gl_win32" = yes ; then
     _def_gl_win32='#define GL_WIN32 1' 
     _vosrc="$_vosrc w32_common.c"
+    _res_comment="win32 version"
   fi
   _vomodules="opengl $_vomodules"
 else
@@ -4018,21 +4022,19 @@ int main(void) {return 0;}
 EOF
     if cc_check ; then
         _dvb=yes
-        echores "yes"
     else
       for I in "$_inc_dvb" "-I/usr/src/DVB/ost/include" ; do
         if cc_check "$I" ; then
           _dvb=yes
           _inc_dvb="$I"
-          echores "yes (using $_inc_dvb)"
+          _res_comment="using $_inc_dvb"
           break
         fi
       done
-      test "$_dvb" = no && echores "no (specify path to DVB/ost/include with --with-dvbincdir=DIR)"
+      test "$_dvb" = no && _res_comment="specify path to DVB/ost/include with --with-dvbincdir=DIR"
     fi
-else
-    echores "no"
 fi
+echores "$_dvb"
 if test "$_dvb" = yes ; then
   _def_dvb='#define HAVE_DVB 1'
   _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
@@ -4059,21 +4061,19 @@ int main(void) {return 0;}
 EOF
     if cc_check ; then
       _dvbhead=yes
-      echores "yes"
     else
       for I in "$_inc_dvb" "-I/usr/src/DVB/include" ; do
         if cc_check "$I" ; then
           _dvbhead=yes
           _inc_dvb="$I"
-          echores "yes (using $_inc_dvb)"
+          _res_comment="using $_inc_dvb"
           break
         fi
       done
-      test "$_dvbhead" = no && echores "no (specify path to DVB/include (HEAD Version) with --with-dvbincdir=DIR)"
+      test "$_dvbhead" = no && _res_comment="specify path to DVB/include (HEAD Version) with --with-dvbincdir=DIR"
     fi
-  else
-    echores "no"
   fi
+  echores "$_dvbhead"
   if test "$_dvbhead" = yes ; then
     _def_dvb='#define HAVE_DVB_HEAD 1'
     _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
@@ -4102,7 +4102,7 @@ if test "$_png" = auto ; then
   if irix ; then
     # Don't check for -lpng on irix since it has its own libpng
     # incompatible with the GNU libpng
-    echores "disabled on irix (not GNU libpng)"
+    _res_comment="disabled on irix (not GNU libpng)"
   else
 cat > $TMPC << EOF
 #include <png.h>
@@ -4116,17 +4116,13 @@ EOF
     if cc_check -lpng -lz $_ld_lm ; then
       if "$TMPO" >> "$TMPLOG" ; then
         _png=yes
-        echores yes
       else
-        echores "no (mismatch of library and header versions)"
+        _res_comment="mismatch of library and header versions"
       fi
-    else
-      echores no
     fi
   fi
-else
-  echores "$_png"
 fi
+echores "$_png"
 if test "$_png" = yes ; then
   _def_png='#define HAVE_PNG 1'
   _ld_png='-lpng -lz'
@@ -4316,12 +4312,11 @@ if test "$_vesa" = yes ; then
   _ld_vesa="-lvbe -llrmi"
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c gtf.c"
   _vomodules="vesa $_vomodules"
-  echores "yes"
 else
   _def_vesa='#undef HAVE_VESA'
-  echores "no"
   _novomodules="vesa $_novomodules"
 fi
+echores "$_vesa"
 
 #################
 # VIDEO + AUDIO #
@@ -4355,7 +4350,7 @@ EOF
           fi
           _sdl=yes
         else
-          _sdl=outdated
+          _res_comment=outdated
         fi
      fi
   fi
@@ -4376,13 +4371,13 @@ if test "$_sdl" = yes ; then
   _vomodules="sdl $_vomodules"
   _aosrc="$_aosrc ao_sdl.c"
   _aomodules="sdl $_aomodules"
-  echores "yes (using $_sdlconfig)"
+  _res_comment="using $_sdlconfig"
 else
   _def_sdl='#undef HAVE_SDL'
   _novomodules="sdl $_novomodules"
   _noaomodules="sdl $_noaomodules"
-  echores "no"
 fi
+echores "$_sdl"
 
 echocheck "Windows waveout"
 if test "$_win32waveout" = auto ; then
@@ -4469,14 +4464,14 @@ if test "$_dxr2" = yes; then
   _aosrc="$_aosrc ao_dxr2.c"
   _aomodules="dxr2 $_aomodules"
   _vomodules="dxr2 $_vomodules"
-  echores "yes (using $_inc_dxr2)"
+  _res_comment="using $_inc_dxr2"
 else
   _def_dxr2='#undef HAVE_DXR2'
   _noaomodules="dxr2 $_noaomodules"
   _novomodules="dxr2 $_novomodules"
   _inc_dxr2=""
-  echores "no"
 fi
+echores "$_dxr2"
 
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
@@ -4532,13 +4527,11 @@ if test "$_fame" = auto ; then
   if test -d libfame && test -f libfame/fame.h ; then
     # disable fame on cygwin as no sense to port - atmos	  
     cygwin || _fame=yes
-    echores $_fame
   else
-    echores "no (no fame dir)"
+    _res_comment="no fame dir"
   fi
-else
-  echores "$_fame"
 fi
+echores "$_fame"
 
 _def_fame='#undef USE_LIBFAME'
 if test "$_fame" = yes ; then
@@ -4753,42 +4746,46 @@ _def_alsa1x='#undef HAVE_ALSA1X'
 _def_sys_asoundlib_h='#undef HAVE_SYS_ASOUNDLIB_H'
 _def_alsa_asoundlib_h='#undef HAVE_ALSA_ASOUNDLIB_H'
 if test "$_alsaver" ; then
+  _alsa=yes
   if test "$_alsaver" = '0.5.x' ; then
     _aosrc="$_aosrc ao_alsa5.c"
     _aomodules="alsa5 $_aomodules"
     _def_alsa5='#define HAVE_ALSA5 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
-    echores "yes (using alsa 0.5.x and sys/asoundlib.h)"
+    _res_comment="using alsa 0.5.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-sys' ; then
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
-    echores "yes (using alsa 0.9.x and sys/asoundlib.h)"
+    _res_comment="using alsa 0.9.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-alsa' ; then
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
-    echores "yes (using alsa 0.9.x and alsa/asoundlib.h)"
+    _res_comment="using alsa 0.9.x and alsa/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-sys' ; then
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
-    echores "yes (using alsa 1.0.x and sys/asoundlib.h)"
+    _res_comment="using alsa 1.0.x and sys/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
-    echores "yes (using alsa 1.0.x and alsa/asoundlib.h)"
+    _res_comment="using alsa 1.0.x and alsa/asoundlib.h"
+  else
+    _alsa=no
+    _res_comment="unknown version"
   fi
   _ld_alsa="-lasound $_ld_dl $_ld_pthread"
 else
   _noaomodules="alsa $_noaomodules"
-  echores "no"
 fi
+echores "$_alsa"
 
 
 echocheck "Sun audio"
@@ -5043,7 +5040,7 @@ echocheck "freetype >= 2.0.9"
 # freetype depends on iconv
 if test "$_iconv" = no ; then
     _freetype=no
-    _comment="(iconv support needed)"
+    _res_comment="iconv support needed"
 fi
 
 if test "$_freetype" = auto ; then
@@ -5092,7 +5089,7 @@ echores "$_freetype"
 
 if test "$_freetype" = no ; then
     _fontconfig=no
-    _comment="(freetype support needed)"
+    _res_comment="freetype support needed"
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
@@ -5283,11 +5280,10 @@ else
   _toolame_lib=""
   _nocodecmodules="toolame $_nocodecmodules"
 fi
-if test -z "$_toolamedir" ; then
-  echores "$_toolame"
-else
-  echores "$_toolame (using $_toolamedir)"
+if test "$_toolamedir" ; then
+  _res_comment="using $_toolamedir"
 fi
+echores "$_toolame"
 
 echocheck "Twolame"
 if test "$_twolame" = auto ; then
@@ -5347,14 +5343,13 @@ else
   _nocodecmodules="libvorbis $_nocodecmodules"
 fi
 if test "$_vorbis" = yes -a "$_tremor_internal" = yes -a "$_tremor_low" = yes ; then
-  echores "$_vorbis (internal low accuracy Tremor)"
+  _res_comment="internal low accuracy Tremor"
 elif test "$_vorbis" = yes -a "$_tremor_internal" = yes ; then
-  echores "$_vorbis (internal Tremor)"
+  _res_comment="internal Tremor"
 elif test "$_vorbis" = yes -a "$_tremor" = yes ; then
-  echores "$_vorbis (Tremor)"
-else
-  echores "$_vorbis"
+  _res_comment="Tremor"
 fi
+echores "$_vorbis"
 
 echocheck "OggTheora support (only the CVS version!)"
 if test "$_theora" = auto ; then
@@ -5560,10 +5555,8 @@ int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = f
 EOF
     cc_check $_inc_faad $_ld_faad $_ld_lm && _faad_external=yes
   fi
-  echores "$_faad_external"
-else
-  echores "no"
 fi
+echores "$_faad_external"
 
 if test "$_faad_external" = yes; then
   _def_faad='#define HAVE_FAAD 1'
@@ -5628,13 +5621,13 @@ if test "$_win32" = auto ; then
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
-  echores "yes (using $_win32libdir)"
+  _res_comment="using $_win32libdir"
 else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
   _dshow=no
-  echores "no"
 fi
+echores "$_win32"
 
 if test "$_win32" != no ; then
   _def_win32_loader='#undef WIN32_LOADER'
@@ -5711,7 +5704,9 @@ fi
 echocheck "XAnim DLL"
 if test "$_xanim" = auto ; then
   _xanim=no
+  _res_comment="dynamic loader support needed"
   if test "$_dl" = yes ; then
+    _res_comment="no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html"
     if test -z "$_xanimlibdir" ; then
 	for I in "$_libdir/codecs" /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
           if test -d "$I" ; then
@@ -5721,38 +5716,29 @@ if test "$_xanim" = auto ; then
         done
     fi
     test "$_xanimlibdir" && _xanim=yes
-    if test "$_xanim" = yes ; then
-      echores "yes (using $_xanimlibdir)"
-    else
-      echores "no (no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html)"
-    fi
-  else
-    echores "no (dynamic loader support needed)"
   fi
-else
-  echores "$_xanim (using $_xanimlibdir)"
 fi
 if test "$_xanim" = yes ; then
   _def_xanim='#define USE_XANIM 1'
   _def_xanim_path="#define XACODEC_PATH \"$_xanimlibdir\""
   _codecmodules="xanim $_codecmodules"
+  _res_comment="using $_xanimlibdir"
 else
   _def_xanim='#undef USE_XANIM'
   _def_xanim_path='#undef XACODEC_PATH'
   _nocodecmodules="xanim $_nocodecmodules"
 fi
+echores "$_xanim"
 
 echocheck "RealPlayer DLL"
 if test "$_real" = auto ; then
   _real=no
+  _res_comment="dynamic loader support needed"
   if test "$_dl" = yes || test "$_win32" = yes ; then
 #  if test "$_dl" = yes  ; then
+    _res_comment="tested only on Linux/FreeBSD/NetBSD/Cygwin/MinGW/Darwin"
     if linux || freebsd || netbsd || win32 || darwin ; then
-      _real=yes
-    else
-      echores "no (tested only on Linux/FreeBSD/NetBSD/Cygwin/MinGW/Darwin)"
-    fi
-    if test "$_real" = yes ; then
+      _res_comment="no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html"
       if test -z "$_reallibdir" ; then
 	for I in "$_libdir/codecs" "$_libdir/real" /usr/lib/real \
 	  /usr/lib/RealPlayer{9,8,}/Codecs /usr/local/RealPlayer{9,8,}/Codecs \
@@ -5765,28 +5751,21 @@ if test "$_real" = auto ; then
           fi
         done
       fi
-      test "$_reallibdir" || _real=no
-      if test "$_real" = yes ; then
-        echores "yes (using $_reallibdir)"
-      else
-        echores "no (no suitable directory found - see DOCS/HTML/$_doc_lang/codecs.html)"
-      fi
+      test "$_reallibdir" && _real=yes
     fi
-  else
-    echores "no (dynamic loader support needed)"
   fi
-else
-  echores "$_real (using $_reallibdir)"
 fi
 if test "$_real" = yes ; then
   _def_real='#define USE_REALCODECS 1'
   _def_real_path="#define REALCODEC_PATH \"$_reallibdir\""
   _codecmodules="real $_codecmodules"
+  _res_comment="using $_reallibdir"
 else
   _def_real='#undef USE_REALCODECS'
   _def_real_path="#undef REALCODEC_PATH"
   _nocodecmodules="real $_nocodecmodules"
 fi
+echores "$_real"
 
 
 echocheck "LIVE.COM Streaming Media libraries"
@@ -5874,7 +5853,9 @@ echocheck "FFmpeg libavcodec (static)"
 if test "$_libavcodec" = auto ; then
   # Note: static linking is preferred to dynamic linking
   _libavcodec=no
+  _res_comment="see DOCS/HTML/$_doc_lang/codecs.html"
   if test -d libavcodec && test -f libavcodec/utils.c ; then
+    _res_comment="old ffmpeg version, use CVS !"
     if grep avcodec_find_encoder_by_name libavcodec/utils.c > /dev/null 2>&1 ; then
       # check if libavutil is a required
       cat > $TMPC << EOF
@@ -5890,21 +5871,15 @@ EOF
       else
         _libavutil_required="yes"
       fi
-      if test "$_libavutil_required" != "$_libavutil"; then
-        _libavcodec="no (libavutil availability does not fit libavcodec version)"
-      else
+      _res_comment="libavutil availability does not fit libavcodec version"
+      if test "$_libavutil_required" = "$_libavutil"; then
         _libavcodec="yes"
+        _res_comment=""
       fi
-      echores $_libavcodec
-    else
-      echores "no (old ffmpeg version, use CVS !)"
     fi
-  else
-    echores "no (see DOCS/HTML/$_doc_lang/codecs.html)"
   fi
-else
-  echores "$_libavcodec"
 fi
+echores "$_libavcodec"
 
 echocheck "FFmpeg libavformat (static)"
 if test "$_libavformat" = auto ; then
@@ -5912,13 +5887,9 @@ if test "$_libavformat" = auto ; then
   _libavformat=no
   if test -d libavformat && test -f libavformat/utils.c ; then
     _libavformat=yes
-    echores "yes"
-  else
-    echores "no"
   fi
-else
-  echores "$_libavformat"
 fi
+echores "$_libavformat"
 
 _def_haveffpostprocess='no'
 if test -d libavcodec && test -f libavcodec/libpostproc/postprocess.h ; then
@@ -5929,6 +5900,7 @@ if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
 if test "$_libavcodecso" = auto ; then
   _libavcodecso=no
+  _res_comment="libavcodec.so is broken/obsolete"
 # FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
 #define FF_POSTPROCESS 1 
@@ -5940,13 +5912,10 @@ int main(void) {
 EOF
   if cc_check -lavcodec $_ld_lm ; then
     _libavcodecso=yes
-    echores "yes (using libavcodec.so)"
-  else
-    echores "no (libavcodec.so is broken/obsolete)"
+    _res_comment="using libavcodec.so, but static libavcodec is recommended"
   fi
-else
-  echores "$_libavcodecso"
 fi
+echores "$_libavcodecso"
 fi
 
 _def_libavcodec='#undef USE_LIBAVCODEC'
@@ -5983,17 +5952,14 @@ if test "$_libavformat" = yes ; then
 fi
 
 echocheck "amr narrowband"
-_echomsg=""
 if test "$_amr_nb" = auto ; then
+  _amr_nb=no
   if test -f libavcodec/amr_float/sp_dec.c ; then
     if test "$_libavcodec" = yes ; then
       _amr_nb=yes
     else
-      _amr_nb=no
-      _echomsg "libavcodec (static) is required by amr_nb, sorry"
+      _res_comment="libavcodec (static) is required by amr_nb, sorry"
     fi
-  else
-    _amr_nb=no
   fi
 fi
 if test "$_amr_nb" = yes ; then
@@ -6004,22 +5970,18 @@ fi
 echores "$_amr_nb $_echomsg"
 
 echocheck "amr narrowband, fixed point"
-_echomsg=""
 if test "$_amr_nb_fixed" = auto ; then
+  _amr_nb_fixed=no
   if test -f libavcodec/amr/dtx_dec.c ; then
     if test "$_libavcodec" = yes ; then
       if test "$_amr_nb" = no ; then
         _amr_nb_fixed=yes
       else
-        _amr_nb_fixed=no
-        _echomsg="(disabled by amr_nb)"
+        _res_comment="disabled by amr_nb"
       fi
     else
-      _amr_nb_fixed=no
-      _echomsg "libavcodec (static) is required by amr_nb-fixed, sorry"
+      _res_comment="libavcodec (static) is required by amr_nb-fixed, sorry"
     fi
-  else
-    _amr_nb_fixed=no
   fi
 fi
 if test "$_amr_nb_fixed" = yes ; then
@@ -6029,7 +5991,7 @@ if test "$_amr_nb_fixed" = yes ; then
 else
   _def_amr_nb_fixed='#undef AMR_NB_FIXED'
 fi
-echores "$_amr_nb_fixed $_echomsg"
+echores "$_amr_nb_fixed"
 
 if test "$_amr_nb" = yes ; then
   _codecmodules="amr_nb $_codecmodules"
@@ -6038,17 +6000,14 @@ else
 fi
 
 echocheck "amr wideband"
-_echomsg=""
 if test "$_amr_wb" = auto ; then
+  _amr_wb=no
   if test -f libavcodec/amrwb_float/dec_dtx.c ; then
     if test "$_libavcodec" = yes ; then
       _amr_wb=yes
     else
-      _amr_wb=no
-      _echomsg="libavcodec (static) is required by amr_wb, sorry"
+      _res_comment="libavcodec (static) is required by amr_wb, sorry"
     fi
-  else
-    _amr_wb=no
   fi
 fi
 if test "$_amr_wb" = yes ; then
@@ -6058,7 +6017,7 @@ else
   _def_amr_wb='#undef AMR_WB'
   _nocodecmodules="amr_wb $_nocodecmodules"
 fi
-echores "$_amr_wb $_echomsg"
+echores "$_amr_wb"
 
 echocheck "libdv-0.9.5+"
 if test "$_libdv" = auto ; then
@@ -6094,17 +6053,16 @@ if test "$_zr" = yes ; then
     _def_zr='#define HAVE_ZR 1'
     _vosrc="$_vosrc vo_zr2.c vo_zr.c jpeg_enc.c"
     _vomodules="zr zr2 $_vomodules"
-    echores "$_zr"
   else
-    echores "libavcodec (static) is required by zr, sorry"
+    _res_comment="libavcodec (static) is required by zr, sorry"
     _novomodules="zr $_novomodules"
     _def_zr='#undef HAVE_ZR'
   fi
 else
   _def_zr='#undef HAVE_ZR'
   _novomodules="zr zr2 $_novomodules"
-  echores "$_zr"
 fi
+echores "$_zr"
 
 echocheck "bl"
 if test "$_bl" = yes ; then
