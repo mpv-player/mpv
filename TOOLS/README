@@ -254,6 +254,51 @@ Note:         Requires gnuplot. Comparison is based on file2. Comparison
               assumes that the frame numbers of both files fit.
 
 
+psnr-video.sh
+
+Author:       Matthias Wieser
+
+Description:  Calculates the PSNR between two existing video files.
+              The PSNR is calculated frame by frame.
+              Prints also the overall PSNR.
+              The script can be used to:
+               * compare different softwarescalers (should I use
+                 -sws 1 or -sws 2) ?
+               * compare different resolutions (is it better to scale
+                 down to 640x360 or to 560x320)
+               * compare different deinterlacers
+               * compare different video codecs
+               * compare video filters (is it better to use -vf hqdn3d
+                 or lavcopts:nr=400)
+               * [...]
+
+Usage:        psnr-video.sh <file1> <file2> [<frames>] [<options1>] [<options2>]
+
+              <file1> and <file2> are the video files for which the PSNR
+                should be calculated.
+              [<frames>] is the number of frames to process, starting
+                from frame 1.
+              [<options1>] are additional MPlayer options for <file1>
+              [<options2>] are additional MPlayer options for <file2>
+
+              A file called psnr.dat will be created with the following
+              content:
+
+              File;Y;Cb;Cr
+              00000001.ppm;34.23;39.54;40.06;35.426
+              00000002.ppm;33.03;38.71;39.26;34.271
+              00000003.ppm;33.45;38.91;39.28;34.655
+              00000004.ppm;32.72;38.69;38.85;33.972
+              [...]
+              00000247.ppm;35.55;40.84;42.15;36.785
+              PSNR:;35.9887
+
+Note:         This script relies on the the tool "pnmpsnr" for the
+              frame-by-frame PSNR calculation.
+              Be aware that psnr-video.sh needs a lot of temporal space
+              inside /temp/.
+
+
 asfinfo
 
 Author:       Arpi
