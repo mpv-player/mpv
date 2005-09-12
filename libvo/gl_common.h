@@ -65,7 +65,7 @@ int glFindFormat(uint32_t format, uint32_t *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
-                      int w, int h, char val);
+                      int w, int h, unsigned char val);
 void glUploadTex(GLenum target, GLenum format, GLenum type,
                  const char *data, int stride,
                  int x, int y, int w, int h, int slice);

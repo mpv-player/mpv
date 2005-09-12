@@ -284,8 +284,9 @@ static void getFunctions() {
  * \param val luminance value to fill texture with
  */
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
-                      int w, int h, char val) {
-  GLfloat border[4] = {val, val, val, val};
+                      int w, int h, unsigned char val) {
+  GLfloat fval = (GLfloat)val / 255.0;
+  GLfloat border[4] = {fval, fval, fval, fval};
   GLenum clrfmt = (fmt == GL_ALPHA) ? GL_ALPHA : GL_LUMINANCE;
   char *init = (char *)malloc(w * h);
   memset(init, val, w * h);
