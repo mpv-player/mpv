@@ -29,7 +29,8 @@ LIBAD_EXTERN(libmusepack)
 
 #include <mpcdec/mpcdec.h>
 
-#define MAX_FRAMESIZE MPC_DECODER_BUFFER_LENGTH
+// BUFFER_LENGTH is in MPC_SAMPLE_FORMAT units
+#define MAX_FRAMESIZE (4 * MPC_DECODER_BUFFER_LENGTH)
 
 typedef struct context_s {
   char *header;
@@ -155,8 +156,8 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
   mpc_uint32_t *packet = NULL;
   
   context_t *cd = (context_t *) sh->context;
-  if (maxlen < MPC_DECODER_BUFFER_LENGTH) {
-    mp_msg(MSGT_DECAUDIO, MSGL_ERR, "maxlen too small in decode_audio\n");
+  if (maxlen < MAX_FRAMESIZE) {
+    mp_msg(MSGT_DECAUDIO, MSGL_V, "maxlen too small in decode_audio\n");
     return -1;
   }
   len = ds_get_packet(sh->ds, (unsigned char **)&packet);
