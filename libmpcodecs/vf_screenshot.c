@@ -3,6 +3,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 #include <string.h>
 #include <inttypes.h>
 
@@ -30,7 +33,6 @@ struct vf_priv_s {
     int dw, dh, stride;
     uint8_t *buffer;
     struct SwsContext *ctx;
-    mp_image_t *dmpi;
 };
 
 //===========================================================================//
@@ -39,21 +41,15 @@ static int config(struct vf_instance_s* vf,
 		  int width, int height, int d_width, int d_height,
 		  unsigned int flags, unsigned int outfmt)
 {
-    int int_sws_flags=0;
-    SwsFilter *srcFilter, *dstFilter;
-    
-    sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
-
-    vf->priv->ctx=sws_getContext(width, height, outfmt,
-				 d_width, d_height, IMGFMT_BGR24,
-				 int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter, NULL);
+    vf->priv->ctx=sws_getContextFromCmdLine(width, height, outfmt,
+				 d_width, d_height, IMGFMT_BGR24);
 
     vf->priv->dw = d_width;
     vf->priv->dh = d_height;
     vf->priv->stride = (3*vf->priv->dw+15)&~15;
 
     if (vf->priv->buffer) free(vf->priv->buffer); // probably reconfigured
-    vf->priv->dmpi = NULL;
+    vf->priv->buffer = NULL;
 
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
@@ -129,7 +125,7 @@ static void gen_fname(struct vf_priv_s* priv)
 
 }
 
-static void scale_image(struct vf_priv_s* priv)
+static void scale_image(struct vf_priv_s* priv, mp_image_t *mpi)
 {
     uint8_t *dst[3];
     int dst_stride[3];
@@ -141,20 +137,14 @@ static void scale_image(struct vf_priv_s* priv)
 
     dst[0] = priv->buffer;
     dst[1] = dst[2] = 0;
-    sws_scale_ordered(priv->ctx, priv->dmpi->planes, priv->dmpi->stride, 0, priv->dmpi->height, dst, dst_stride);
+    sws_scale_ordered(priv->ctx, mpi->planes, mpi->stride, 0, mpi->height, dst, dst_stride);
 }
 
 static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
-    if(!vf->next->draw_slice) {
-	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
-	return;
-    }
-    if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) return; // shouldn't happen
-    mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	mpi->type, mpi->flags, mpi->width, mpi->height);
     if (vf->priv->shot) {
 	vf->priv->store_slices = 1;
-	vf->priv->shot = 0;
 	if (!vf->priv->buffer)
 	    vf->priv->buffer = (uint8_t*)memalign(16, vf->priv->stride*vf->priv->dh);
     }
@@ -163,11 +153,6 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
-    mp_image_t *dmpi=vf->dmpi;
-    if(!dmpi){
-	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_screenshot: draw_slice() called with dmpi=NULL (no get_image??)\n");
-	return;
-    }
     if (vf->priv->store_slices) {
 	uint8_t *dst[3];
 	int dst_stride[3];
@@ -181,14 +166,11 @@ static void draw_slice(struct vf_instance_s* vf,
 }
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+    // FIXME: should vf.c really call get_image when using slices??
+    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
+      return;
     vf->dmpi= vf_get_image(vf->next, mpi->imgfmt, 
-			   mpi->type, mpi->flags | MP_IMGFLAG_READABLE, mpi->width, mpi->height);
-
-    if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
-       !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
-	// use slices if DR isn't possible
-	return;
-    }
+			   mpi->type, mpi->flags/* | MP_IMGFLAG_READABLE*/, mpi->width, mpi->height);
 
     mpi->planes[0]=vf->dmpi->planes[0];
     mpi->stride[0]=vf->dmpi->stride[0];
@@ -201,51 +183,44 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->width=vf->dmpi->width;
 
     mpi->flags|=MP_IMGFLAG_DIRECT;
-    mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
     
     mpi->priv=(void*)vf->dmpi;
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
-    if (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK) {
-	if(vf->priv->store_slices) {
-	    vf->priv->store_slices = 0;
-	    gen_fname(vf->priv);
-	    if (vf->priv->fname[0])
-		write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
-	}
-	return vf_next_put_image(vf,vf->dmpi);
-    }
+    mp_image_t *dmpi = (mp_image_t *)mpi->priv;
     
+    if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
+      dmpi = vf->dmpi;
+    else
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	dmpi=vf_get_image(vf->next,mpi->imgfmt,
 				    MP_IMGTYPE_EXPORT, 0,
 				    mpi->width, mpi->height);
-	vf_clone_mpi_attributes(vf->priv->dmpi, mpi);
-    } else {
-	vf->priv->dmpi=vf->dmpi;
+	vf_clone_mpi_attributes(dmpi, mpi);
+	dmpi->planes[0]=mpi->planes[0];
+	dmpi->planes[1]=mpi->planes[1];
+	dmpi->planes[2]=mpi->planes[2];
+	dmpi->stride[0]=mpi->stride[0];
+	dmpi->stride[1]=mpi->stride[1];
+	dmpi->stride[2]=mpi->stride[2];
+	dmpi->width=mpi->width;
+	dmpi->height=mpi->height;
     }
-    
-    vf->priv->dmpi->planes[0]=mpi->planes[0];
-    vf->priv->dmpi->planes[1]=mpi->planes[1];
-    vf->priv->dmpi->planes[2]=mpi->planes[2];
-    vf->priv->dmpi->stride[0]=mpi->stride[0];
-    vf->priv->dmpi->stride[1]=mpi->stride[1];
-    vf->priv->dmpi->stride[2]=mpi->stride[2];
-    vf->priv->dmpi->width=mpi->width;
-    vf->priv->dmpi->height=mpi->height;
 
     if(vf->priv->shot) {
 	vf->priv->shot=0;
 	gen_fname(vf->priv);
 	if (vf->priv->fname[0]) {
-	    scale_image(vf->priv);
+	    if (!vf->priv->store_slices)
+	      scale_image(vf->priv, dmpi);
 	    write_png(vf->priv->fname, vf->priv->buffer, vf->priv->dw, vf->priv->dh, vf->priv->stride);
 	}
+	vf->priv->store_slices = 0;
     }
 
-    return vf_next_put_image(vf, vf->priv->dmpi);
+    return vf_next_put_image(vf, dmpi);
 }
 
 int control (vf_instance_t *vf, int request, void *data)
@@ -286,7 +261,8 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
     return 0;
 }
 
-static int open(vf_instance_t *vf, char* args)
+// open conflicts with stdio.h at least under MinGW
+static int screenshot_open(vf_instance_t *vf, char* args)
 {
     vf->config=config;
     vf->control=control;
@@ -317,7 +293,7 @@ vf_info_t vf_info_screenshot = {
     "screenshot",
     "A'rpi, Jindrich Makovicka",
     "",
-    open,
+    screenshot_open,
     NULL
 };
 
