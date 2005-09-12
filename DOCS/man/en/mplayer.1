@@ -7539,6 +7539,13 @@ two pass.
 Specify the pass in two pass mode.
 .
 .TP
+.B turbo (two pass only)
+Dramatically speeds up pass one using faster algorithms and disabling
+CPU-intensive options.
+This will probably reduce global PSNR a little bit and change individual
+frame type and PSNR little bit more.
+.
+.TP
 .B bitrate=<value> (CBR or two pass mode)
 Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000.
