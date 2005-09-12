@@ -99,6 +99,7 @@ MPlayer (1.0)
     * massive stream layer cleanup, all streams ported to the new API
     * full gcc 4 support for IA-32 and AMD-64 ports
     * TOOLS/vobshift.py: vobsub time-adjust tool
+    * TOOLS/psnr-video.sh: computes PSNR between two existing video files
     * fixed auto-insertion of lavc encoder (for DXR2/3 and DVB)
     * new option: -idle, to make MPlayer wait for input commands when
       done playing all files
