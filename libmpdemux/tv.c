@@ -738,22 +738,25 @@ int tv_step_channel_real(tvi_handle_t *tvh, int direction)
 int tv_step_channel(tvi_handle_t *tvh, int direction) {
 	if (tv_channel_list) {
 		if (direction == TV_CHANNEL_HIGHER) {
-			if (tv_channel_current->next) {
-				tv_channel_last = tv_channel_current;
+			tv_channel_last = tv_channel_current;
+			if (tv_channel_current->next)
 				tv_channel_current = tv_channel_current->next;
+			else
+				tv_channel_current = tv_channel_list;
 				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 				mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
 			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
-			}
 		}
 		if (direction == TV_CHANNEL_LOWER) {
-			if (tv_channel_current->prev) {
-				tv_channel_last = tv_channel_current;
+			tv_channel_last = tv_channel_current;
+			if (tv_channel_current->prev)
 				tv_channel_current = tv_channel_current->prev;
+			else
+				while (tv_channel_current->next)
+					tv_channel_current = tv_channel_current->next;
 				tv_set_freq(tvh, (unsigned long)(((float)tv_channel_current->freq/1000)*16));
 				mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s - %s (freq: %.3f)\n",
 			tv_channel_current->number, tv_channel_current->name, (float)tv_channel_current->freq/1000);
-			}
 		}
 	} else tv_step_channel_real(tvh, direction);
 	return(1);
