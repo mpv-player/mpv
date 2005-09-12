@@ -1,4 +1,4 @@
-.\" synced with 1.1093
+.\" synced with 1.1096
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -6933,7 +6933,7 @@ Encode avec une table Huffman optimisée d'après les statistiques de la passe 1.
 .PD 1
 .
 .TP
-.B turbo (2-pass uniquement)
+.B turbo (deux passes uniquement)
 Accélère énormément la première passe en utilisant des algorithmes plus
 rapides et en désactivant des options gourmandes en temps processeur.
 Cela va sans doute diminuer le PSNR global (d'environ 0.01dB) et changer
@@ -7930,6 +7930,13 @@ fixe et deux passes.
 .TP
 .B pass=<1|2>
 Définit la passe en mode deux passes.
+.
+.TP
+.B turbo (deux passes uniquement)
+Accélère énormément la première passe en utilisant des algorithmes plus
+rapides et en désactivant des options gourmandes en temps processeur.
+Cela va sans doute diminuer le PSNR global et changer un peu plus le type
+et le PSNR des trames générées.
 .
 .TP
 .B bitrate=<valeur> (CBR ou mode deux passes)
