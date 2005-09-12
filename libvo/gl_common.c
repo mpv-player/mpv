@@ -296,8 +296,10 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
   glTexParameterf(target, GL_TEXTURE_PRIORITY, 1.0);
   glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
   glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
-  glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP);
-  glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  // Border texels should not be used with CLAMP_TO_EDGE
+  // We set a sane default anyway.
   glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
   free(init);
 }
