@@ -612,16 +612,6 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%lu (%lu)  audio size=%lu\n",vsize,priv->numberofframes,asize);
     sh_video->i_bps=(float)vsize/(sh_video->frametime*priv->numberofframes);
   }
-
-  mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    (char *)&sh_video->bih->biCompression,
-    sh_video->bih->biWidth,
-    sh_video->bih->biHeight,
-    sh_video->bih->biBitCount,
-    sh_video->fps,
-    sh_video->i_bps*0.008f,
-    sh_video->i_bps/1024.0f );
-
   return demuxer;
   
 }
