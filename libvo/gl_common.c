@@ -94,9 +94,9 @@ const char *glValName(GLint value)
   return "Unknown format!";
 }
 
-#undef TEXTUREFORMAT_ALWAYS
 //! always return this format as internal texture format in glFindFormat
 #define TEXTUREFORMAT_ALWAYS GL_RGB8
+#undef TEXTUREFORMAT_ALWAYS
 
 /**
  * \brief find the OpenGL settings coresponding to format.
@@ -113,6 +113,7 @@ const char *glValName(GLint value)
 int glFindFormat(uint32_t fmt, uint32_t *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type)
 {
+  int supported = 1;
   int dummy1;
   GLenum dummy2;
   GLint dummy3;
@@ -133,6 +134,8 @@ int glFindFormat(uint32_t fmt, uint32_t *bpp, GLint *gl_texfmt,
       *gl_format = GL_RGBA;
       *gl_type = GL_UNSIGNED_BYTE;
       break;
+    case IMGFMT_YV12:
+      supported = 0; // no native YV12 support
     case IMGFMT_Y800:
     case IMGFMT_Y8:
       *gl_texfmt = 1;
@@ -187,12 +190,12 @@ int glFindFormat(uint32_t fmt, uint32_t *bpp, GLint *gl_texfmt,
       *gl_texfmt = 4;
       *gl_format = GL_RGBA;
       *gl_type = GL_UNSIGNED_BYTE;
-      return 0;
+      supported = 0;
   }
 #ifdef TEXTUREFORMAT_ALWAYS
   *gl_texfmt = TEXTUREFORMAT_ALWAYS;
 #endif
-  return 1;
+  return supported;
 }
 
 static void *setNull(const GLubyte *s) {

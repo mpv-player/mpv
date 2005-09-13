@@ -187,10 +187,9 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 static int 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-	int tmp;
 	image_height = height;
 	image_width = width;
-	glFindFormat(format, &tmp, &gl_texfmt, &gl_format, &gl_type);
+	glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
 	int_pause = 0;
 
