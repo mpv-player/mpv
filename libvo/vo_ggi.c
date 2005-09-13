@@ -6,13 +6,7 @@
   Uses libGGI - http://www.ggi-project.org/
 
   TODO:
-   * check on many devices
    * implement gamma handling (VAA isn't obsoleted?)
-
-  BUGS:
-   * palettized playback has bad colors, probably swapped palette?
-   * fbdev & DR produces two downscaled images
-   * fbdev & FLIP (& DR) produces no image
 
   Thanks to Andreas Beck for his patches.
 
@@ -56,8 +50,8 @@ LIBVO_EXTERN(ggi)
 static struct ggi_conf_s {
     char *driver;
 
-    ggi_visual_t parentvis;
     ggi_visual_t vis;
+    ggi_visual_t drawvis;
 
     /* source image format */
     int srcwidth;
@@ -72,12 +66,6 @@ static struct ggi_conf_s {
         int x2, y2;
     } flushregion;
 
-    /* destination */
-    int dstwidth;
-    int dstheight;
-
-    int async;
-
     int voflags;
 } ggi_conf;
 
@@ -86,7 +74,7 @@ static struct ggi_conf_s {
 static void window_ontop(void)
 {
     mp_msg(MSGT_VO, MSGL_V, "[ggi] debug: window_ontop() called\n");
-    ggiWmhZOrder(ggi_conf.parentvis, ZO_TOP);
+    ggiWmhZOrder(ggi_conf.vis, ZO_TOP);
     return;
 }
 #endif
@@ -133,14 +121,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 {
     ggi_mode mode = {
         1,                      /* frames */
-        {0, 0},                 /* top, left corner */
-        {width, height},        /* bottem, right corner */
-        {GGI_AUTO, GGI_AUTO},   /* size */
-        GT_AUTO,                /* graphtype */
-        {GGI_AUTO, GGI_AUTO}    /* dots per pixel */
-    };
-    ggi_mode parentmode = {
-        1,                      /* frames */
         {width, height},        /* visible */
         {GGI_AUTO, GGI_AUTO},   /* virt */
         {GGI_AUTO, GGI_AUTO},   /* size */
@@ -149,30 +129,26 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     };
 
 
-    set_graphtype(format, &parentmode);
+    set_graphtype(format, &mode);
 
 #if 0
     printf("[ggi] mode: ");
-    ggiPrintMode(&parentmode);
-    printf("\n");
-
-    printf("[ggi] submode: ");
     ggiPrintMode(&mode);
     printf("\n");
 #endif
 
-    ggiCheckMode(ggi_conf.parentvis, &parentmode);
+    ggiCheckMode(ggi_conf.vis, &mode);
 
-    if (ggiSetMode(ggi_conf.parentvis, &parentmode) < 0) {
+    if (ggiSetMode(ggi_conf.vis, &mode) < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set display mode\n");
         return (-1);
     }
-    if (ggiGetMode(ggi_conf.parentvis, &parentmode) < 0) {
+    if (ggiGetMode(ggi_conf.vis, &mode) < 0) {
         mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get display mode\n");
         return (-1);
     }
-    if ((parentmode.graphtype == GT_INVALID)
-       || (parentmode.graphtype == GT_AUTO))
+    if ((mode.graphtype == GT_INVALID)
+       || (mode.graphtype == GT_AUTO))
     {
         mp_msg(MSGT_VO, MSGL_ERR, "[ggi] not supported depth/bpp\n");
         return (-1);
@@ -180,55 +156,61 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
 #if 0
     printf("[ggi] mode: ");
-    ggiPrintMode(&parentmode);
-    printf("\n");
-#endif
-
-    /* calculate top, left corner */
-    mode.visible.x = (parentmode.virt.x - width) / 2;
-    mode.visible.y = (parentmode.virt.y - height) / 2;
-
-    /* calculate bottom, right corner */
-    mode.virt.x = width;
-    mode.virt.y = height;
-
-    ggiCheckMode(ggi_conf.vis, &mode);
-
-    if (ggiSetMode(ggi_conf.vis, &mode) < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set video mode\n");
-        return (-1);
-    }
-    if (ggiGetMode(ggi_conf.vis, &mode) < 0) {
-        mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get video mode\n");
-        return (-1);
-    }
-
-#ifdef HAVE_GGIWMH
-    ggiWmhSetTitle(ggi_conf.parentvis, title);
-    if (vo_ontop) window_ontop();
-#endif
-
-#if 0
-    printf("[ggi] submode: ");
     ggiPrintMode(&mode);
     printf("\n");
 #endif
 
-    vo_depthonscreen = GT_DEPTH(parentmode.graphtype);
-    vo_screenwidth = parentmode.visible.x;
-    vo_screenheight = parentmode.visible.y;
 
-    vo_dx = vo_dy = 0;
-    vo_dwidth = mode.virt.x;
-    vo_dheight = mode.virt.y;
-    vo_dbpp = GT_SIZE(parentmode.graphtype);
+#ifdef HAVE_GGIWMH
+    ggiWmhSetTitle(ggi_conf.vis, title);
+    if (vo_ontop) window_ontop();
+#endif
+
+    ggiSetFlags(ggi_conf.vis, GGIFLAG_ASYNC);
+
+    if (GT_SCHEME(mode.graphtype) == GT_PALETTE)
+        ggiSetColorfulPalette(ggi_conf.vis);
+
+    if (GT_SCHEME(mode.graphtype) != GT_TRUECOLOR) {
+        ggi_mode drawmode;
+
+        ggi_conf.drawvis = ggiOpen("display-memory", NULL);
+        if (ggi_conf.drawvis == NULL) {
+            mp_msg(MSGT_VO, MSGL_ERR,
+                   "[ggi] unable to get backbuffer for conversion\n");
+            return -1;
+        }
+        memcpy(&drawmode, &mode, sizeof(ggi_mode));
+        drawmode.graphtype = GT_32BIT;
+        drawmode.size.x = GGI_AUTO;
+        drawmode.size.y = GGI_AUTO;
+        ggiCheckMode(ggi_conf.drawvis, &drawmode);
+        if (ggiSetMode(ggi_conf.drawvis, &drawmode) < 0) {
+            mp_msg(MSGT_VO, MSGL_ERR,
+                   "[ggi] unable to set backbuffer mode\n");
+            return -1;
+        }
+        mode.graphtype = drawmode.graphtype;
+
+        ggiSetFlags(ggi_conf.drawvis, GGIFLAG_ASYNC);
+    }
+    vo_depthonscreen = GT_DEPTH(mode.graphtype);
+    vo_screenwidth = mode.virt.x;
+    vo_screenheight = mode.virt.y;
+
+    vo_dwidth = width;
+    vo_dheight = height;
+    vo_dbpp = GT_SIZE(mode.graphtype);
+
+
+    /* calculate top, left corner */
+    vo_dx = (vo_screenwidth - vo_dwidth) / 2;
+    vo_dy = (vo_screenheight - vo_dheight) / 2;
+
 
     ggi_conf.srcwidth = width;
     ggi_conf.srcheight = height;
     ggi_conf.srcformat = format;
-
-    ggi_conf.dstwidth = mode.virt.x;
-    ggi_conf.dstheight = mode.virt.y;
 
     ggi_conf.voflags = flags;
 
@@ -242,25 +224,16 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         return (-1);
     }
 
-    ggiSetFlags(ggi_conf.vis, GGIFLAG_ASYNC);
-
-    if (GT_SCHEME(mode.graphtype) == GT_PALETTE)
-        ggiSetColorfulPalette(ggi_conf.vis);
-
-    if (ggiGetFlags(ggi_conf.vis) & GGIFLAG_ASYNC)
-        ggi_conf.async = 1;
-
     mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d\n",
            ggi_conf.srcwidth, ggi_conf.srcheight, ggi_conf.srcdepth,
-           vo_dwidth, vo_dheight, vo_dbpp);
-    mp_msg(MSGT_VO, MSGL_INFO, "[ggi] async mode: %s\n",
-           ggi_conf.async ? "yes" : "no");
+           mode.virt.x, mode.virt.y, vo_dbpp);
 
     ggi_conf.srcbpp = (ggi_conf.srcdepth + 7) / 8;
 
-    ggi_conf.flushregion.x1 = ggi_conf.flushregion.y1 = 0;
-    ggi_conf.flushregion.x2 = ggi_conf.dstwidth;
-    ggi_conf.flushregion.y2 = ggi_conf.dstheight;
+    ggi_conf.flushregion.x1 = vo_dx;
+    ggi_conf.flushregion.y1 = vo_dy;
+    ggi_conf.flushregion.x2 = vo_dwidth;
+    ggi_conf.flushregion.y2 = vo_dheight;
 
     return (0);
 }
@@ -268,20 +241,20 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 static uint32_t get_image(mp_image_t *mpi)
 {
     /* GGI DirectRendering supports (yet) only BGR/RGB modes */
-    if (
-#if 1
-        (IMGFMT_IS_RGB(mpi->imgfmt) &&
-         (IMGFMT_RGB_DEPTH(mpi->imgfmt) != vo_dbpp)) ||
-        (IMGFMT_IS_BGR(mpi->imgfmt) &&
-         (IMGFMT_BGR_DEPTH(mpi->imgfmt) != vo_dbpp)) ||
-#else
-        (mpi->imgfmt != ggi_conf.srcformat) ||
-#endif
-        ((mpi->type != MP_IMGTYPE_STATIC) && (mpi->type != MP_IMGTYPE_TEMP)) ||
-        (mpi->flags & MP_IMGFLAG_PLANAR) ||
-        (mpi->flags & MP_IMGFLAG_YUV) ||
-        (mpi->width != ggi_conf.srcwidth) ||
-        (mpi->height != ggi_conf.srcheight))
+    if (!((IMGFMT_IS_BGR(mpi->imgfmt)) &&
+        (IMGFMT_BGR_DEPTH(mpi->imgfmt) == vo_dbpp)))
+    {
+        return (VO_FALSE);
+    }
+
+    if (!((IMGFMT_IS_RGB(mpi->imgfmt)) &&
+        (IMGFMT_RGB_DEPTH(mpi->imgfmt) == vo_dbpp)))
+    {
+        return (VO_FALSE);
+    }
+
+    if (!((mpi->width == ggi_conf.srcwidth) &&
+        (mpi->height == ggi_conf.srcheight)))
     {
         return (VO_FALSE);
     }
@@ -305,13 +278,13 @@ static uint32_t get_image(mp_image_t *mpi)
 
 static int draw_frame(uint8_t *src[])
 {
-    ggiPutBox(ggi_conf.vis, 0, 0,
-              ggi_conf.dstwidth, ggi_conf.dstheight,
-              src[0]);
+    ggiPutBox(ggi_conf.drawvis, vo_dx, vo_dy,
+              vo_dwidth, vo_dheight, src[0]);
 
-    ggi_conf.flushregion.x1 = ggi_conf.flushregion.y1 = 0;
-    ggi_conf.flushregion.x2 = ggi_conf.dstwidth;
-    ggi_conf.flushregion.y2 = ggi_conf.dstheight;
+    ggi_conf.flushregion.x1 = vo_dx;
+    ggi_conf.flushregion.y1 = vo_dy;
+    ggi_conf.flushregion.x2 = vo_dwidth;
+    ggi_conf.flushregion.y2 = vo_dheight;
 
     return (0);
 }
@@ -323,6 +296,21 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
+    if (ggi_conf.drawvis != ggi_conf.vis) {
+#if 0
+        ggiFlushRegion(ggi_conf.drawvis,
+                       ggi_conf.flushregion.x1, ggi_conf.flushregion.y1,
+                       ggi_conf.flushregion.x2 - ggi_conf.flushregion.x1,
+                       ggi_conf.flushregion.y2 - ggi_conf.flushregion.y1);
+#endif
+        ggiCrossBlit(ggi_conf.drawvis,
+                     ggi_conf.flushregion.x1, ggi_conf.flushregion.y1,
+                     ggi_conf.flushregion.x2 - ggi_conf.flushregion.x1,
+                     ggi_conf.flushregion.y2 - ggi_conf.flushregion.y1,
+                     ggi_conf.vis,
+                     ggi_conf.flushregion.x1, ggi_conf.flushregion.y1);
+
+    }
     ggiFlushRegion(ggi_conf.vis,
                    ggi_conf.flushregion.x1, ggi_conf.flushregion.y1,
                    ggi_conf.flushregion.x2 - ggi_conf.flushregion.x1,
@@ -335,16 +323,28 @@ static void flip_page(void)
 static int draw_slice(uint8_t *src[], int stride[],
                       int w, int h, int x, int y)
 {
-    ggiPutBox(ggi_conf.vis, x, y, w, h, src[0]);
+    ggiPutBox(ggi_conf.drawvis, vo_dx + x, vo_dy + y, w, h, src[0]);
 
-    if ((ggi_conf.flushregion.x1 == -1) || (x < ggi_conf.flushregion.x1))
-        ggi_conf.flushregion.x1 = x;
-    if ((ggi_conf.flushregion.y1 == -1) || (y < ggi_conf.flushregion.y1))
-        ggi_conf.flushregion.y1 = y;
-    if ((ggi_conf.flushregion.x2 == -1) || ((x + w) > ggi_conf.flushregion.x2))
-        ggi_conf.flushregion.x2 = x + w;
-    if ((ggi_conf.flushregion.y2 == -1) || ((y + h) > ggi_conf.flushregion.y2))
-        ggi_conf.flushregion.y2 = y + h;
+    if ((ggi_conf.flushregion.x1 == -1) ||
+        ((vo_dx + x) < ggi_conf.flushregion.x1))
+    {
+        ggi_conf.flushregion.x1 = vo_dx + x;
+    }
+    if ((ggi_conf.flushregion.y1 == -1) ||
+        ((vo_dy + y) < ggi_conf.flushregion.y1))
+    {
+        ggi_conf.flushregion.y1 = vo_dy + y;
+    }
+    if ((ggi_conf.flushregion.x2 == -1) ||
+        ((vo_dx + x + w) > ggi_conf.flushregion.x2))
+    {
+        ggi_conf.flushregion.x2 = vo_dx + x + w;
+    }
+    if ((ggi_conf.flushregion.y2 == -1) ||
+        ((vo_dy + y + h) > ggi_conf.flushregion.y2))
+    {
+        ggi_conf.flushregion.y2 = vo_dy + y + h;
+    }
 
     return (1);
 }
@@ -358,8 +358,16 @@ static int query_format(uint32_t format)
             | VFCAP_CSP_SUPPORTED_BY_HW
             | VFCAP_ACCEPT_STRIDE;
 
-    if ((!vo_depthonscreen || !vo_dbpp) && ggi_conf.parentvis) {
-        if (ggiGetMode(ggi_conf.parentvis, &mode) == 0) {
+    if ((!vo_depthonscreen || !vo_dbpp) && ggi_conf.vis) {
+        if (ggiGetMode(ggi_conf.vis, &mode) == 0) {
+            vo_depthonscreen = GT_DEPTH(mode.graphtype);
+            vo_dbpp = GT_SIZE(mode.graphtype);
+        }
+        if (GT_SCHEME(mode.graphtype) == GT_AUTO) {
+            ggiCheckMode(ggi_conf.vis, &mode);
+        }
+        if (GT_SCHEME(mode.graphtype) != GT_TRUECOLOR) {
+            mode.graphtype = GT_32BIT;
             vo_depthonscreen = GT_DEPTH(mode.graphtype);
             vo_dbpp = GT_SIZE(mode.graphtype);
         }
@@ -372,7 +380,7 @@ static int query_format(uint32_t format)
     if (IMGFMT_IS_BGR(format) || IMGFMT_IS_RGB(format)) {
         set_graphtype(format, &mode);
 
-        if (ggiCheckMode(ggi_conf.parentvis, &mode) < 0) {
+        if (ggiCheckMode(ggi_conf.drawvis, &mode) < 0) {
             return 0;
         } else {
             return vfcap;
@@ -394,10 +402,10 @@ static int preinit(const char *arg)
     }
 #endif
 
-    if ((char *) arg) {
+    if (arg) {
         int i = 0;
         ggi_conf.driver = strdup(arg);
-        while (ggi_conf.driver[i]) {
+        while (ggi_conf.driver[i] != '\0') {
             if (ggi_conf.driver[i] == '.')
                 ggi_conf.driver[i] = ',';
             i++;
@@ -406,21 +414,18 @@ static int preinit(const char *arg)
         ggi_conf.driver = NULL;
     }
 
-    ggi_conf.parentvis = ggiOpen(ggi_conf.driver);
-    if (ggi_conf.parentvis == NULL) {
+    ggi_conf.vis = ggiOpen(ggi_conf.driver);
+    if (ggi_conf.vis == NULL) {
         mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to open '%s' output\n",
                (ggi_conf.driver == NULL) ? "default" : ggi_conf.driver);
         ggiExit();
         return (-1);
     }
-    ggi_conf.vis = ggiOpen("display-sub", ggi_conf.parentvis);
-    if (ggi_conf.vis == NULL) {
-        mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] unable to open the video output\n");
-        ggiExit();
-        return (-1);
-    }
+    ggi_conf.drawvis = ggi_conf.vis;
+
+
 #ifdef HAVE_GGIWMH
-    ggiWmhAttach(ggi_conf.parentvis);
+    ggiWmhAttach(ggi_conf.vis);
 #endif
 
 
@@ -436,12 +441,14 @@ static void uninit(void)
         free(ggi_conf.driver);
 
 #ifdef HAVE_GGIWMH
-    ggiWmhDetach(ggi_conf.parentvis);
+    ggiWmhDetach(ggi_conf.vis);
     ggiWmhExit();
 #endif
 
+    if (ggi_conf.drawvis != NULL && ggi_conf.drawvis != ggi_conf.vis)
+        ggiClose(ggi_conf.drawvis);
+
     ggiClose(ggi_conf.vis);
-    ggiClose(ggi_conf.parentvis);
     ggiExit();
 }
 
@@ -472,8 +479,8 @@ static void check_events(void)
     ggi_event       event;
     ggi_event_mask  mask;
 
-    if ((mask = ggiEventPoll(ggi_conf.parentvis, emAll, &tv))) {
-        if (ggiEventRead(ggi_conf.parentvis, &event, emAll) != 0) {
+    if ((mask = ggiEventPoll(ggi_conf.vis, emAll, &tv))) {
+        if (ggiEventRead(ggi_conf.vis, &event, emAll) != 0) {
             mp_dbg(MSGT_VO, MSGL_DBG3,
                    "type: %4x, origin: %4x, "
                    "sym: %4x, label: %4x, button=%4x\n",
