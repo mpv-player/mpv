@@ -63,6 +63,40 @@
 
 #define MAX_ZONES   64
 
+// Profile flag definitions
+#define PROFILE_ADAPTQUANT 0x00000001
+#define PROFILE_BVOP       0x00000002
+#define PROFILE_MPEGQUANT  0x00000004
+#define PROFILE_INTERLACE  0x00000008
+#define PROFILE_QPEL       0x00000010
+#define PROFILE_GMC        0x00000020
+#define PROFILE_4MV        0x00000040
+#define PROFILE_DXN        0x00000080
+
+// Reduce code duplication in profiles[] array
+#define PROFILE_S   (PROFILE_4MV)
+#define PROFILE_AS  (PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_MPEGQUANT|PROFILE_INTERLACE|PROFILE_QPEL|PROFILE_GMC)
+
+typedef struct
+{
+	char *name;                  ///< profile name
+	int id;                      ///< mpeg-4 profile id; iso/iec 14496-2:2001 table G-1
+	int width;                   ///< profile width restriction
+	int height;                  ///< profile height restriction
+	int fps;                     ///< profile frame rate restriction
+	int max_objects;             ///< ??????
+	int total_vmv_buffer_sz;     ///< macroblock memory; when BVOPS=false, vmv = 2*vcv; when BVOPS=true,  vmv = 3*vcv
+	int max_vmv_buffer_sz;       ///< max macroblocks per vop
+	int vcv_decoder_rate;        ///< macroblocks decoded per second
+	int max_acpred_mbs;          ///< percentage
+	int max_vbv_size;            ///< max vbv size (bits) 16368 bits
+	int max_video_packet_length; ///< bits
+	int max_bitrate;             ///< bits per second
+	int vbv_peakrate;            ///< max bits over anyone second period; 0=don't care
+	int dxn_max_bframes;         ///< dxn: max consecutive bframes
+	unsigned int flags;          ///< flags for allowed options/dxn note the definitions for PROFILE_S and PROFILE_AS
+} profile_t;
+
 // Code taken from Libavcodec and ve_lavc.c to handle Aspect Ratio calculation
 
 typedef struct xvid_rational_s{
@@ -141,7 +175,56 @@ static XVIDRational xvid_d2q(double d, int max){
     return a;
 }
 
+// Code taken from XviD VfW source for profile support
 
+/* default vbv_occupancy is (64/170)*vbv_buffer_size */
+
+const profile_t profiles[] =
+{
+	/*   name               p@l    w    h    fps  obj Tvmv  vmv     vcv  ac%   vbv        pkt     bps    vbv_peak dbf  flags */
+	/* unrestricted profile (default) */
+	{ "unrestricted",  0x00,    0,   0,  0,  0,    0,    0,      0, 100,   0*16368,    -1,       0,        0, -1, 0xffffffff & ~PROFILE_DXN },
+
+	{ "sp0",           0x08,  176, 144, 15,  1,  198,   99,   1485, 100,  10*16368,  2048,   64000,        0, -1, PROFILE_S },
+	/* simple@l0: max f_code=1, intra_dc_vlc_threshold=0 */
+	/* if ac preidition is used, adaptive quantization must not be used */
+	/* <=qcif must be used */
+	{ "sp1",           0x01,  176, 144, 15,  4,  198,   99,   1485, 100,  10*16368,  2048,   64000,        0, -1, PROFILE_S|PROFILE_ADAPTQUANT },
+	{ "sp2",           0x02,  352, 288, 15,  4,  792,  396,   5940, 100,  40*16368,  4096,  128000,        0, -1, PROFILE_S|PROFILE_ADAPTQUANT },
+	{ "sp3",           0x03,  352, 288, 15,  4,  792,  396,  11880, 100,  40*16368,  8192,  384000,        0, -1, PROFILE_S|PROFILE_ADAPTQUANT },
+
+	{ "asp0",          0xf0,  176, 144, 30,  1,  297,   99,   2970, 100,  10*16368,  2048,  128000,        0, -1, PROFILE_AS },
+	{ "asp1",          0xf1,  176, 144, 30,  4,  297,   99,   2970, 100,  10*16368,  2048,  128000,        0, -1, PROFILE_AS },
+	{ "asp2",          0xf2,  352, 288, 15,  4, 1188,  396,   5940, 100,  40*16368,  4096,  384000,        0, -1, PROFILE_AS },
+	{ "asp3",          0xf3,  352, 288, 30,  4, 1188,  396,  11880, 100,  40*16368,  4096,  768000,        0, -1, PROFILE_AS },
+	/*  ISMA Profile 1, (ASP) @ L3b (CIF, 1.5 Mb/s) CIF(352x288), 30fps, 1.5Mbps max ??? */
+	{ "asp4",          0xf4,  352, 576, 30,  4, 2376,  792,  23760,  50,  80*16368,  8192, 3000000,        0, -1, PROFILE_AS },
+	{ "asp5",          0xf5,  720, 576, 30,  4, 4860, 1620,  48600,  25, 112*16368, 16384, 8000000,        0, -1, PROFILE_AS },
+
+	//	information provided by DivXNetworks, USA.
+	//  "DivX Certified Profile Compatibility v1.1", February 2005
+	{ "dxnhandheld",   0x00,  176, 144, 15,  1,  198,   99,   1485, 100,   32*8192,    -1,  537600,   800000,  0, PROFILE_ADAPTQUANT|PROFILE_DXN },
+	{ "dxnportntsc",   0x00,  352, 240, 30,  1,  990,  330,  36000, 100,  384*8192,    -1, 4854000,  8000000,  1, PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_DXN },
+	{ "dxnportpal",    0x00,  352, 288, 25,  1, 1188,  396,  36000, 100,  384*8192,    -1, 4854000,  8000000,  1, PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_DXN },
+	{ "dxnhtntsc",     0x00,  720, 480, 30,  1, 4050, 1350,  40500, 100,  384*8192,    -1, 4854000,  8000000,  1, PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_INTERLACE|PROFILE_DXN },
+	{ "dxnhtpal",      0x00,  720, 576, 25,  1, 4860, 1620,  40500, 100,  384*8192,    -1, 4854000,  8000000,  1, PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_INTERLACE|PROFILE_DXN },
+	{ "dxnhdtv",       0x00, 1280, 720, 30,  1,10800, 3600, 108000, 100,  768*8192,    -1, 9708400, 16000000,  2, PROFILE_4MV|PROFILE_ADAPTQUANT|PROFILE_BVOP|PROFILE_INTERLACE|PROFILE_DXN },
+
+	{ NULL,            0x00,    0,   0,  0,  0,    0,    0,      0,   0,         0,     0,       0,        0,  0, 0x00000000 },
+};
+
+/**
+ * \brief return the pointer to a chosen profile
+ * \param str the profile name
+ * \return pointer of the appropriate profiles array entry or NULL for a mistyped profile name
+ */
+static profile_t *profileFromName(char *str)
+{
+	profile_t *cur = profiles;
+	while (cur->name && strcasecmp(cur->name, str)) cur++;
+	if(!cur->name) return NULL;
+	return cur;
+}
 
 /*****************************************************************************
  * Configuration options
@@ -197,6 +280,9 @@ static int xvidenc_vbr_max_overflow_degradation = 5;
 static int xvidenc_vbr_kfreduction = 0;
 static int xvidenc_vbr_kfthreshold = 0;
 static int xvidenc_vbr_container_frame_overhead = 24; /* mencoder uses AVI container */
+
+// commandline profile option string - default to unrestricted
+static char *xvidenc_profile = "unrestricted";
 
 static char *xvidenc_par = NULL;
 static int xvidenc_par_width = 0;
@@ -291,6 +377,9 @@ m_option_t xvidencopts_conf[] =
 	/* Section Zones */
 	{"zones", &xvidenc_zones, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+	/* section profiles */
+	{"profile", &xvidenc_profile, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
 	/* End of the config array */
 	{NULL, 0, 0, 0, 0, 0, NULL}
 };
@@ -341,7 +430,7 @@ typedef struct _xvid_mplayer_module_t
 	FILE *fvstats;
 } xvid_mplayer_module_t;
 
-static void dispatch_settings(xvid_mplayer_module_t *mod);
+static int dispatch_settings(xvid_mplayer_module_t *mod);
 static int set_create_struct(xvid_mplayer_module_t *mod);
 static int set_frame_struct(xvid_mplayer_module_t *mod, mp_image_t *mpi);
 static void update_stats(xvid_mplayer_module_t *mod, xvid_enc_stats_t *stats);
@@ -389,7 +478,8 @@ config(struct vf_instance_s* vf,
 	mod->d_width = d_width;
 	mod->d_height = d_height;
 
-	dispatch_settings(mod);
+	if(dispatch_settings(mod) == BAD)
+		return(BAD);
 
 	/*--------------------------------------------------------------------
 	 * Set remaining information in the xvid_enc_create_t structure
@@ -630,13 +720,24 @@ vf_open(vf_instance_t *vf, char* args)
 
 static void *read_matrix(unsigned char *filename);
 
-static void dispatch_settings(xvid_mplayer_module_t *mod)
+static int dispatch_settings(xvid_mplayer_module_t *mod)
 {
 	xvid_enc_create_t *create     = &mod->create;
 	xvid_enc_frame_t  *frame      = &mod->frame;
 	xvid_plugin_single_t *onepass = &mod->onepass;
 	xvid_plugin_2pass2_t *pass2   = &mod->pass2;
 	XVIDRational ar;
+
+	//profile is unrestricted as default
+	profile_t *selected_profile =  profileFromName("unrestricted");
+	if(xvidenc_profile)
+		selected_profile = profileFromName(xvidenc_profile);
+	if(!selected_profile)
+	{
+		mp_msg(MSGT_MENCODER,MSGL_ERR,
+			"xvid:[ERROR] \"%s\" is an invalid profile name\n", xvidenc_profile);
+		return(BAD);
+	}
 
 	const int motion_presets[7] =
 		{
@@ -663,12 +764,6 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 
 	create->global = 0;
 
-	if(xvidenc_packed)
-		create->global |= XVID_GLOBAL_PACKED;
-
-	if(xvidenc_closed_gop)
-		create->global |= XVID_GLOBAL_CLOSED_GOP;
-
         if(xvidenc_psnr)
 	    xvidenc_stats = 1;
 
@@ -680,9 +775,36 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	create->num_plugins = 0;
 	create->plugins = NULL;
 	create->num_threads = 0;
+
+	if( (selected_profile->flags & PROFILE_BVOP) &&
+		/* dxn: prevent bframes usage if interlacing is selected */
+		!((selected_profile->flags & PROFILE_DXN) && xvidenc_interlaced) )
+	{
 	create->max_bframes = xvidenc_max_bframes;
 	create->bquant_ratio = xvidenc_bquant_ratio;
 	create->bquant_offset = xvidenc_bquant_offset;
+		if(xvidenc_packed)
+			create->global |= XVID_GLOBAL_PACKED;
+		if(xvidenc_closed_gop)
+			create->global |= XVID_GLOBAL_CLOSED_GOP;
+
+		/* dxn: restrict max bframes, require closed gop
+			and require packed b-frames */
+		if(selected_profile->flags & PROFILE_DXN)
+		{
+			if(create->max_bframes > selected_profile->dxn_max_bframes)
+				create->max_bframes = selected_profile->dxn_max_bframes;
+			create->global |= XVID_GLOBAL_CLOSED_GOP;
+			create->global |= XVID_GLOBAL_PACKED;
+		}
+	}
+	else
+		create->max_bframes = 0;
+
+	/* dxn: always write divx5 userdata */
+	if(selected_profile->flags & PROFILE_DXN)
+		create->global |= XVID_GLOBAL_DIVX5_USERDATA;
+	
 	create->max_key_interval = xvidenc_max_key_interval;
 	create->frame_drop_ratio = xvidenc_frame_drop_ratio;
 	create->min_quant[0] = xvidenc_min_quant[0];
@@ -717,6 +839,17 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	pass2->kfthreshold = xvidenc_vbr_kfthreshold;
 	pass2->container_frame_overhead = xvidenc_vbr_container_frame_overhead;
 
+	/* VBV */
+
+	pass2->vbv_size = selected_profile->max_vbv_size;
+	pass2->vbv_initial = (selected_profile->max_vbv_size*3)>>2; /* 75% */
+	pass2->vbv_maxrate = selected_profile->max_bitrate;
+	pass2->vbv_peakrate = selected_profile->vbv_peakrate*3;
+// XXX: xvidcore currently provides a "peak bits over 3 seconds" constraint.
+// according to the latest dxn literature, a 1 second constraint is now used
+
+	create->profile = selected_profile->id;
+
 	/* -------------------------------------------------------------------
 	 * The frame structure
 	 * ---------------------------------------------------------------- */
@@ -738,6 +871,12 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 		frame->motion |= XVID_ME_DETECT_STATIC_MOTION;
 	}
 
+	// MPEG quantisation is only supported in ASP and unrestricted profiles
+	if((selected_profile->flags & PROFILE_MPEGQUANT) &&
+		(xvidenc_quant_method != NULL) &&
+		!strcasecmp(xvidenc_quant_method, "mpeg"))
+	{
+		frame->vol_flags |= XVID_VOL_MPEGQUANT;
 	if(xvidenc_intra_matrix_file != NULL) {
 		frame->quant_intra_matrix = (unsigned char*)read_matrix(xvidenc_intra_matrix_file);
 		if(frame->quant_intra_matrix != NULL) {
@@ -754,19 +893,17 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 			xvidenc_quant_method = strdup("mpeg");
 		}
 	}
-	if(xvidenc_quant_method != NULL && !strcasecmp(xvidenc_quant_method, "mpeg")) {
-		frame->vol_flags |= XVID_VOL_MPEGQUANT;
 	}
-	if(xvidenc_quarterpel) {
+	if(xvidenc_quarterpel && (selected_profile->flags & PROFILE_QPEL)) {
 		frame->vol_flags |= XVID_VOL_QUARTERPEL;
 		frame->motion    |= XVID_ME_QUARTERPELREFINE16;
 		frame->motion    |= XVID_ME_QUARTERPELREFINE8;
 	}
-	if(xvidenc_gmc) {
+	if(xvidenc_gmc && (selected_profile->flags & PROFILE_GMC)) {
 		frame->vol_flags |= XVID_VOL_GMC;
 		frame->motion    |= XVID_ME_GME_REFINE;
 	}
-	if(xvidenc_interlaced) {
+	if(xvidenc_interlaced && (selected_profile->flags & PROFILE_INTERLACE)) {
 		frame->vol_flags |= XVID_VOL_INTERLACING;
 	}
 	if(xvidenc_trellis) {
@@ -778,7 +915,7 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	if(xvidenc_chroma_opt) {
 		frame->vop_flags |= XVID_VOP_CHROMAOPT;
 	}
-	if(xvidenc_motion > 4) {
+	if((xvidenc_motion > 4) && (selected_profile->flags & PROFILE_4MV)) {
 		frame->vop_flags |= XVID_VOP_INTER4V;
 	}
 	if(xvidenc_chromame) {
@@ -826,6 +963,8 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	/* PAR related initialization */
 	frame->par = XVID_PAR_11_VGA; /* Default */
 
+	if( !(selected_profile->flags & PROFILE_DXN) )
+	{
 	if(xvidenc_dar_aspect > 0) 
 	    ar = xvid_d2q(xvidenc_dar_aspect * mod->mux->bih->biHeight / mod->mux->bih->biWidth, 255);
 	else if(xvidenc_autoaspect)
@@ -877,7 +1016,11 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 	mp_msg(MSGT_MENCODER, MSGL_INFO, "xvid: par=%d/%d (%s), displayed=%dx%d, sampled=%dx%d\n", 
 			ar.num, ar.den, par_string(frame->par),
 			mod->d_width, mod->d_height, mod->mux->bih->biWidth, mod->mux->bih->biHeight);
-	return;
+	}
+	else
+		mp_msg(MSGT_MENCODER, MSGL_INFO,
+			"xvid: par=0/0 (vga11) forced by choosing a DXN profile\n");
+	return(FINE);
 }
 
 static int set_create_struct(xvid_mplayer_module_t *mod)
@@ -885,6 +1028,13 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 	int pass;
 	int doZones = 0;
 	xvid_enc_create_t *create    = &mod->create;
+
+	// profile is unrestricted as default
+	profile_t *selected_profile =  profileFromName("unrestricted");
+	if(xvidenc_profile)
+		selected_profile = profileFromName(xvidenc_profile);
+	if(!selected_profile)
+		return(BAD);
 
 	/* Most of the structure is initialized by dispatch settings, only a
 	 * few things are missing  */
@@ -894,9 +1044,32 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 	create->width  = mod->mux->bih->biWidth;
 	create->height = mod->mux->bih->biHeight;
 
+	/* Check resolution of video to be coded is within profile width/height
+	   restrictions */
+	if( ((selected_profile->width != 0) &&
+		(mod->mux->bih->biWidth > selected_profile->width)) ||
+		((selected_profile->height != 0) &&
+		(mod->mux->bih->biHeight > selected_profile->height)) )
+	{
+		mp_msg(MSGT_MENCODER,MSGL_ERR,
+			"xvid:[ERROR] resolution must be <= %dx%d for the chosen profile\n",
+			selected_profile->width, selected_profile->height);
+		return(BAD);
+	}
+
 	/* FPS */
 	create->fincr = mod->mux->h.dwScale;
 	create->fbase = mod->mux->h.dwRate;
+
+	// Check frame rate is within profile restrictions
+	if( ((float)mod->mux->h.dwRate/(float)mod->mux->h.dwScale > (float)selected_profile->fps) &&
+		(selected_profile->fps != 0))
+	{
+		mp_msg(MSGT_MENCODER,MSGL_ERR,
+			"xvid:[ERROR] frame rate must be <= %d for the chosen profile\n",
+			selected_profile->fps);
+		return(BAD);
+	}
 
 	/* Encodings zones */
 	memset(mod->zones, 0, sizeof(mod->zones));
@@ -1053,7 +1226,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		doZones = 1;
 	}
 
-	if (xvidenc_luminance_masking) {
+	if(xvidenc_luminance_masking && (selected_profile->flags & PROFILE_ADAPTQUANT)) {
 		create->plugins[create->num_plugins].func = xvid_plugin_lumimasking;
 		create->plugins[create->num_plugins].param = NULL;
 		create->num_plugins++;

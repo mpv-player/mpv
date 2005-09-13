@@ -688,6 +688,10 @@ Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
     * CRTC2 YUV support in mga_vid
     * DirectFB video output driver
 
+Swain, Robert <robert.swain@gmail.com>
+    * CQM support and turbo multipass mode in x264 interface
+    * Profile support in XviD interface
+
 Syrjälä, Ville <syrjala@sci.fi>
     * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)
 

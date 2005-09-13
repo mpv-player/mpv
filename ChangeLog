@@ -75,7 +75,7 @@ MPlayer (1.0)
     * audio encoding modularized
     * AAC (FAAC) audio encoding
     * border processing adaptive quantization in libavcodec
-    * encoding zones and luminance masking for XviD
+    * encoding zones, DivX profiles support and luminance masking for XviD
     * raw audio muxer
     * fixed various bugs in the EDL code
     * x264 "turbo mode" to speed up first pass of multi-pass encoding

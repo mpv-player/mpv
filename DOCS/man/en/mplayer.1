@@ -7983,6 +7983,57 @@ container generates (give only an average per frame).
 (default: 24 \- AVI average overhead).
 .
 .TP
+.B profile=<option>
+Restricts options and VBV (peak bitrate over a short period) according to
+the Simple, Advanced Simple and DivX profiles.
+The resulting videos should beplayable on standalones adhering to these
+profile specifications.
+.PD 0
+.RSs
+.IPs unrestricted
+no restrictions (default)
+.IPs sp0
+simple profile at level 0
+.IPs sp1
+simple profile at level 1
+.IPs sp2
+simple profile at level 2
+.IPs sp3
+simple profile at level 3
+.IPs asp0
+advanced simple profile at level 0
+.IPs asp1
+advanced simple profile at level 1
+.IPs asp2
+advanced simple profile at level 2
+.IPs asp3
+advanced simple profile at level 3
+.IPs asp4
+advanced simple profile at level 4
+.IPs asp5
+advanced simple profile at level 5
+.IPs dxnhandheld
+DXN handheld profile
+.IPs dxnportntsc
+DXN portable NTSC profile
+.IPs dxnportpal
+DXN portable PAL profile
+.IPs dxnhtntsc
+DXN home theater NTSC profile
+.IPs dxnhtpal
+DXN home theater PAL profile
+.IPs dxnhdtv
+DXN HDTV profile
+.RE
+.PD 1
+.RS
+.I NOTE:
+These profiles should be used in conjunction with an appropriate \-ffourcc.
+Generally DX50 is applicable, as some players do not recognise XviD but
+most recognise DivX.
+.RE
+.
+.TP
 .B par=<mode>
 Specifies the Pixel Aspect Ratio mode (not to be confused with DAR,
 the Display Aspect Ratio).
