@@ -557,7 +557,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>
 <application>MPlayer</application> should compile out-of-the-box on
 Mac OS X 10.2 and up. The preferred compiler is the Apple version of
-GCC 3.x or later, Apple's GCC 2.95.x does not support C99 syntax well.
+GCC 3.x or later. If you have Mac OS X 10.3.9 or later and QuickTime 7
+you can use the macosx video output driver.
 </para>
 
 <sect2 id="mplayerosx">
