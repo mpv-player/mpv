@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "subopt-helper.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "sub.h"
@@ -70,6 +71,7 @@ static int      isGL12 = GL_FALSE;
 
 static int      gl_bilinear=1;
 static int      gl_antialias=0;
+static int      use_glFinish;
 
 static void (*draw_alpha_fnc)
                  (int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
@@ -891,6 +893,7 @@ flip_page(void)
   drawTextureDisplay();
 
 //  glFlush();
+  if (use_glFinish)
   glFinish();
 #ifdef GL_WIN32
   SwapBuffers(vo_hdc);
@@ -951,13 +954,25 @@ uninit(void)
 #endif
 }
 
+static opt_t subopts[] = {
+  {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
+  {NULL}
+};
+
 static int preinit(const char *arg)
 {
-    if(arg) 
-    {
-	mp_msg(MSGT_VO, MSGL_FATAL, "[gl2] Unknown subdevice: %s\n",arg);
-	return -1;
-    }
+  // set defaults
+  use_glFinish = 1;
+  if (subopt_parse(arg, subopts) != 0) {
+    mp_msg(MSGT_VO, MSGL_FATAL,
+            "\n-vo gl2 command line help:\n"
+            "Example: mplayer -vo gl2:noglfinish\n"
+            "\nOptions:\n"
+            "  noglfinish\n"
+            "    Do not call glFinish() before swapping buffers\n"
+            "\n" );
+    return -1;
+  }
     if( !vo_init() ) return -1; // Can't open X11
     return 0;
 }
