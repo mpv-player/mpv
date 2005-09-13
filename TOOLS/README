@@ -260,15 +260,15 @@ Author:       Matthias Wieser
 
 Description:  Calculates the PSNR between two existing video files.
               The PSNR is calculated frame by frame.
-              Prints also the overall PSNR.
+              Also prints the overall PSNR.
               The script can be used to:
-               * compare different softwarescalers (should I use
-                 -sws 1 or -sws 2) ?
-               * compare different resolutions (is it better to scale
+               * Compare different softwarescalers (should I use
+                 -sws 1 or -sws 2 ?)
+               * Compare different resolutions (is it better to scale
                  down to 640x360 or to 560x320)
-               * compare different deinterlacers
-               * compare different video codecs
-               * compare video filters (is it better to use -vf hqdn3d
+               * Compare different deinterlacers
+               * Compare different video codecs
+               * Compare video filters (is it better to use -vf hqdn3d
                  or lavcopts:nr=400)
                * [...]
 
@@ -281,7 +281,7 @@ Usage:        psnr-video.sh <file1> <file2> [<frames>] [<options1>] [<options2>]
               [<options1>] are additional MPlayer options for <file1>
               [<options2>] are additional MPlayer options for <file2>
 
-              A file called psnr.dat will be created with the following
+              A file called ./psnr.dat will be created with the following
               content:
 
               File;Y;Cb;Cr
@@ -295,7 +295,7 @@ Usage:        psnr-video.sh <file1> <file2> [<frames>] [<options1>] [<options2>]
 
 Note:         This script relies on the the tool "pnmpsnr" for the
               frame-by-frame PSNR calculation.
-              Be aware that psnr-video.sh needs a lot of temporal space
+              Be aware that psnr-video.sh needs a lot of temporary space
               inside /temp/.
 
 
