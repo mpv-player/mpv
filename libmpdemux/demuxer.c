@@ -709,15 +709,17 @@ if (demuxer->desc->open)
   if (!(demuxer = demuxer->desc->open(demuxer)))
     return NULL;
 
-if ((sh_video=demuxer->video->sh) && sh_video->bih)
+if ((sh_video=demuxer->video->sh) && sh_video->bih){
+int biComp=le2me_32(sh_video->bih->biCompression);
   mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    (char *)&sh_video->bih->biCompression,
+    (char *)&biComp,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,
     sh_video->bih->biBitCount,
     sh_video->fps,
     sh_video->i_bps*0.008f,
     sh_video->i_bps/1024.0f );
+}
 return demuxer;
 }
 
