@@ -213,9 +213,10 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 		"paddb	%%mm6, %%mm2\n\t"
 		"punpcklbw %%mm2, %%mm2\n\t" // srca AABBCCDD
 		"punpcklbw %%mm2, %%mm2\n\t" // srca AAAABBBB
+		"psrlq  $8, %%mm2\n\t" // srca AAABBBB0
 		"movq	%%mm2, %%mm3\n\t"
-		"punpcklbw %%mm7, %%mm2\n\t" // srca 0A0A0A0A
-		"punpckhbw %%mm7, %%mm3\n\t" // srca 0B0B0B0B
+		"punpcklbw %%mm7, %%mm2\n\t" // srca 0A0A0A0B
+		"punpckhbw %%mm7, %%mm3\n\t" // srca 0B0B0B00
 		"pmullw	%%mm2, %%mm0\n\t"
 		"pmullw	%%mm3, %%mm1\n\t"
 		"psrlw	$8, %%mm0\n\t"
@@ -224,6 +225,7 @@ static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, 
 		"movd %2, %%mm2	\n\t" // src ABCD0000
 		"punpcklbw %%mm2, %%mm2\n\t" // src AABBCCDD
 		"punpcklbw %%mm2, %%mm2\n\t" // src AAAABBBB
+		"psrlq  $8, %%mm2\n\t" // src AAABBBB0
 		"paddb	%%mm2, %%mm0\n\t"
 		"pand	%4, %%mm5\n\t"
 		"pand	%3, %%mm0\n\t"
