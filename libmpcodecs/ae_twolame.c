@@ -88,7 +88,7 @@ static int encode_twolame(audio_encoder_t *encoder, uint8_t *dest, void *src, in
 	len /= (2*encoder->params.channels);
 	ret_size = twolame_encode_buffer_interleaved(ctx->twolame_ctx, src, len, dest, max_size);
 	r2 = mp_decode_mp3_header(dest);	
-	mp_msg(MSGT_MENCODER, MSGL_V, "\nSIZE: %d, max: %d, r2: %d\n", ret_size, max_size, r2);
+	mp_msg(MSGT_MENCODER, MSGL_DBG2, "\nSIZE: %d, max: %d, r2: %d\n", ret_size, max_size, r2);
 	if(r2 > 0)
 		ret_size = r2;
 	return ret_size;

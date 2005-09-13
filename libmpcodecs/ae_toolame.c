@@ -96,7 +96,7 @@ static int encode_toolame(audio_encoder_t *encoder, uint8_t *dest, void *src, in
 	
 	toolame_encode_buffer(ctx->toolame_ctx, ctx->left_pcm, ctx->right_pcm, nsamples, dest, max_size, &ret_size);
 	r2 = mp_decode_mp3_header(dest);	
-	mp_msg(MSGT_MENCODER, MSGL_V, "\nSIZE: %d, max: %d, r2: %d\n", ret_size, max_size, r2);
+	mp_msg(MSGT_MENCODER, MSGL_DBG2, "\nSIZE: %d, max: %d, r2: %d\n", ret_size, max_size, r2);
 	if(r2 > 0)
 		ret_size = r2;
 	return ret_size;
