@@ -3120,7 +3120,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_gamma_gamma = 100;
       else if (vo_gamma_gamma < -100)
         vo_gamma_gamma = -100;
-      set_video_colors(sh_video, "gamma", vo_gamma_gamma);
+      if (set_video_colors(sh_video, "gamma", vo_gamma_gamma)){
 #ifdef USE_OSD
        if(osd_level){
 	 osd_visible=sh_video->fps; // 1 sec
@@ -3129,6 +3129,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	 vo_osd_changed(OSDTYPE_PROGBAR);
        }
 #endif // USE_OSD
+     }
     } break;
     case MP_CMD_BRIGHTNESS :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
