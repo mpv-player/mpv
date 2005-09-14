@@ -1035,8 +1035,8 @@ This will play the file with a ten decibel gain. Be careful when using the
 too high a value. Start low and work your way up gradually until you get a feel
 for how much adjustment is required. Also, if you specify excessively high
 values, <option>volume</option> may need to clip the signal to avoid sending your
-sound card data that is outside the allowable range. You will hear distortion
-when this happens.
+sound card data that is outside the allowable range; this will result in
+distorted audio.
 </para>
 
 </sect2>
