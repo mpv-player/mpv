@@ -2714,7 +2714,7 @@ slower (default: 0).
 .RSss
 0: Use power-of-two textures (default).
 .br
-1: Use texture_rectangle.
+1: Use texture_rectangle, not compatible with hardware YUV conversion.
 .br
 2: Use texture_non_power_of_two.
 .REss
@@ -2729,6 +2729,36 @@ Values below 0 will leave it at the system default.
 This limits the framerate to (horizontal refresh rate / n).
 Requires GLX_SGI_swap_control support to work.
 With some (most/all?) implementations this only works in fullscreen mode.
+.IPs yuv=<n>
+Select the type of YUV to RGB conversion.
+.RSss
+0: Use software conversion (default).
+Compatible with all OpenGL version.
+Provides brightness, contrast and saturation control.
+.br
+1: Use register combiners.
+This uses an nVidia-specific extension (GL_NV_register_combiners).
+At least three texture units are needed.
+Provides saturation and hue control.
+.br
+2: Use a fragment program.
+Needs GL_ARB_fragment_program extension and at least three texture units.
+Provides brightness, contrast, saturation and hue control.
+.br
+3: Use a fragment program using the POW instruction.
+Needs GL_ARB_fragment_program extension and at least three texture units.
+Provides brightness, contrast, saturation, hue and gamma control.
+Gamma can also be set independently for red, green and blue.
+Method 4 is usually faster.
+.br
+4: Use a fragment program with additional lookup.
+Needs GL_ARB_fragment_program extension and at least four texture units.
+Provides brightness, contrast, saturation, hue and gamma control.
+Gamma can also be set independently for red, green and blue.
+.REss
+.IPs customprog=<filename>
+Load a custom fragment program from <filename>.
+See TOOLS/edgedect.fp for an example.
 .REss
 .RE
 .PD 1
@@ -2737,6 +2767,39 @@ With some (most/all?) implementations this only works in fullscreen mode.
 .B gl2\ \ \ \ 
 OpenGL video output driver, second generation.
 Supports OSD and videos larger than the maximum texture size.
+.PD 0
+.RSs
+.IPs (no)glfinish
+Call glFinish() before swapping buffers.
+Slower but in some cases more correct output (default: enabled).
+.IPs yuv=<n>
+Select the type of YUV to RGB conversion.
+.RSss
+0: Use software conversion (default).
+Compatible with all OpenGL version.
+Provides brightness, contrast and saturation control.
+.br
+1: Use register combiners.
+This uses an nVidia-specific extension (GL_NV_register_combiners).
+At least three texture units are needed.
+Provides saturation and hue control.
+.br
+2: Use a fragment program.
+Needs GL_ARB_fragment_program extension and at least three texture units.
+Provides brightness, contrast, saturation and hue control.
+.br
+3: Use a fragment program using the POW instruction.
+Needs GL_ARB_fragment_program extension and at least three texture units.
+Provides brightness, contrast, saturation, hue and gamma control.
+Gamma can also be set independently for red, green and blue.
+Method 4 is usually faster.
+.br
+4: Use a fragment program with additional lookup.
+Needs GL_ARB_fragment_program extension and at least four texture units.
+Provides brightness, contrast, saturation, hue and gamma control.
+Gamma can also be set independently for red, green and blue.
+.REss
+.REss
 .
 .TP
 .B null\ \ \ 

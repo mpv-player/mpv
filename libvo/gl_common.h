@@ -17,6 +17,72 @@
 #include "x11_common.h"
 #endif
 
+// conditionally define all extension defines used
+// vendor specific extensions should be marked as such
+// (e.g. _NV), _ARB is not used to ease readability.
+#ifndef GL_MAX_GENERAL_COMBINERS_NV
+#define GL_MAX_GENERAL_COMBINERS_NV 0x854D
+#endif
+#ifndef GL_NUM_GENERAL_COMBINERS_NV
+#define GL_NUM_GENERAL_COMBINERS_NV 0x854E
+#endif
+#ifndef GL_CONSTANT_COLOR0_NV
+#define GL_CONSTANT_COLOR0_NV 0x852A
+#endif
+#ifndef GL_CONSTANT_COLOR1_NV
+#define GL_CONSTANT_COLOR1_NV 0x852B
+#endif
+#ifndef GL_COMBINER0_NV
+#define GL_COMBINER0_NV 0x8550
+#endif
+#ifndef GL_COMBINER1_NV
+#define GL_COMBINER1_NV 0x8551
+#endif
+#ifndef GL_VARIABLE_A_NV
+#define GL_VARIABLE_A_NV 0x8523
+#endif
+#ifndef GL_VARIABLE_B_NV
+#define GL_VARIABLE_B_NV 0x8524
+#endif
+#ifndef GL_VARIABLE_C_NV
+#define GL_VARIABLE_C_NV 0x8525
+#endif
+#ifndef GL_VARIABLE_D_NV
+#define GL_VARIABLE_D_NV 0x8526
+#endif
+#ifndef GL_UNSIGNED_INVERT_NV
+#define GL_UNSIGNED_INVERT_NV 0x8537
+#endif
+#ifndef GL_HALF_BIAS_NORMAL_NV
+#define GL_HALF_BIAS_NORMAL_NV 0x853A
+#endif
+#ifndef GL_SIGNED_IDENTITY_NV
+#define GL_SIGNED_IDENTITY_NV 0x853C
+#endif
+#ifndef GL_SCALE_BY_FOUR_NV
+#define GL_SCALE_BY_FOUR_NV 0x853F
+#endif
+#ifndef GL_DISCARD_NV
+#define GL_DISCARD_NV 0x8530
+#endif
+#ifndef GL_SPARE0_NV
+#define GL_SPARE0_NV 0x852E
+#endif
+#ifndef GL_MAX_TEXTURE_UNITS
+#define GL_MAX_TEXTURE_UNITS 0x84E2
+#endif
+#ifndef GL_TEXTURE0
+#define GL_TEXTURE0 0x84C0
+#endif
+#ifndef GL_TEXTURE1
+#define GL_TEXTURE1 0x84C1
+#endif
+#ifndef GL_TEXTURE2
+#define GL_TEXTURE2 0x84C2
+#endif
+#ifndef GL_TEXTURE3
+#define GL_TEXTURE3 0x84C3
+#endif
 #ifndef GL_TEXTURE_RECTANGLE
 #define GL_TEXTURE_RECTANGLE 0x84F5
 #endif
@@ -56,6 +122,15 @@
 #ifndef GL_UNSIGNED_SHORT_1_5_5_5_REV
 #define GL_UNSIGNED_SHORT_1_5_5_5_REV 0x8366
 #endif
+#ifndef GL_FRAGMENT_PROGRAM
+#define GL_FRAGMENT_PROGRAM 0x8804
+#endif
+#ifndef GL_PROGRAM_FORMAT_ASCII
+#define GL_PROGRAM_FORMAT_ASCII 0x8875
+#endif
+#ifndef GL_PROGRAM_ERROR_POSITION
+#define GL_PROGRAM_ERROR_POSITION 0x864B
+#endif
 
 void glAdjustAlignment(int stride);
 
@@ -71,7 +146,23 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
                  int x, int y, int w, int h, int slice);
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
-               int sx, int sy, int rect_tex);
+               int sx, int sy, int rect_tex, int is_yv12);
+
+//! do not use YUV conversion, this should always stay 0
+#define YUV_CONVERSION_NONE 0
+//! use nVidia specific register combiners for YUV conversion
+#define YUV_CONVERSION_COMBINERS 1
+//! use a fragment program for YUV conversion
+#define YUV_CONVERSION_FRAGMENT 2
+//! use a fragment program for YUV conversion with gamma using POW
+#define YUV_CONVERSION_FRAGMENT_POW 3
+//! use a fragment program with additional table lookup for YUV conversion
+#define YUV_CONVERSION_FRAGMENT_LOOKUP 4
+void glSetupYUVConversion(int type, float brightness, float contrast,
+                          float hue, float saturation,
+                          float rgamma, float ggamma, float bgamma);
+void inline glEnableYUVConversion(GLenum target, int type);
+void inline glDisableYUVConversion(GLenum target, int type);
 
 //! could not set new window, will continue drawing into the old one.
 #define SET_WINDOW_FAILED -1
@@ -104,6 +195,8 @@ extern void (APIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
 extern void (APIENTRY *ActiveTexture)(GLenum);
 extern void (APIENTRY *BindTexture)(GLenum, GLuint);
 extern void (APIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
+extern void (APIENTRY *GenPrograms)(GLsizei, GLuint *);
+extern void (APIENTRY *DeletePrograms)(GLsizei, const GLuint *);
 extern void (APIENTRY *BindProgram)(GLenum, GLuint);
 extern void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 extern void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,

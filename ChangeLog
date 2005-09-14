@@ -20,6 +20,8 @@ MPlayer (1.0)
     * for -vo gl manyfmts is now default (since it is a lot faster), use
       -vo gl:nomanyfmts if it does not work for you
     * streaming textures for -vo gl, much faster if supported (use -dr)
+    * hardware YUV to RGB conversion for -vo gl and -vo gl2, see yuv suboption
+    * support for custom fragment programs for -vo gl (see TOOLS/*.fp)
     * use libvbe from vesautils as vesa video driver
 
     Decoders:
@@ -105,6 +107,7 @@ MPlayer (1.0)
       done playing all files
     * lots of new slave commands (check DOCS/tech/slave.txt)
     * lots of new information provided by the -identify option
+    * fixed ugly looking OSD with -vo gl2 and MMX
 
 
   pre7try2: August 26, 2005

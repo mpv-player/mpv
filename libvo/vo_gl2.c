@@ -63,6 +63,8 @@ static uint32_t texture_width;
 static uint32_t texture_height;
 static int texnumx, texnumy, raw_line_len;
 static struct TexSquare * texgrid = NULL;
+static GLuint   fragprog;
+static GLuint   lookupTex;
 static GLint    gl_internal_format;
 static int      rgb_sz, r_sz, g_sz, b_sz, a_sz;
 static GLenum   gl_bitmap_format;
@@ -71,6 +73,7 @@ static int      isGL12 = GL_FALSE;
 
 static int      gl_bilinear=1;
 static int      gl_antialias=0;
+static int      use_yuv;
 static int      use_glFinish;
 
 static void (*draw_alpha_fnc)
@@ -83,6 +86,7 @@ struct TexSquare
 {
   GLubyte *texture;
   GLuint texobj;
+  GLuint uvtexobjs[2];
   int isTexture;
   GLfloat fx, fy, fw, fh;
   int isDirty;
@@ -159,6 +163,7 @@ static int initTextures()
     s*=2;
   texture_height=s;
 
+  if (image_format != IMGFMT_YV12)
   gl_internal_format = getInternalFormat();
 
   /* Test the max texture size */
@@ -234,11 +239,20 @@ static int initTextures()
       tsq->isDirty=GL_FALSE;
       tsq->isTexture=GL_FALSE;
       tsq->texobj=0;
+      tsq->uvtexobjs[0] = tsq->uvtexobjs[1] = 0;
       tsq->dirtyXoff=0; tsq->dirtyYoff=0; tsq->dirtyWidth=-1; tsq->dirtyHeight=-1;
 
       glGenTextures (1, &(tsq->texobj));
 
       glBindTexture (GL_TEXTURE_2D, tsq->texobj);
+      if (image_format == IMGFMT_YV12) {
+        glGenTextures(2, tsq->uvtexobjs);
+        ActiveTexture(GL_TEXTURE1);
+        glBindTexture (GL_TEXTURE_2D, tsq->uvtexobjs[0]);
+        ActiveTexture(GL_TEXTURE2);
+        glBindTexture (GL_TEXTURE_2D, tsq->uvtexobjs[1]);
+        ActiveTexture(GL_TEXTURE0);
+      }
       err = glGetError ();
       if(err==GL_INVALID_ENUM)
       {
@@ -257,6 +271,15 @@ static int initTextures()
                        texture_width, texture_height, 0);
 
       glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+      if (image_format == IMGFMT_YV12) {
+        ActiveTexture(GL_TEXTURE1);
+        glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
+                         texture_width / 2, texture_height / 2, 0);
+        ActiveTexture(GL_TEXTURE2);
+        glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
+                         texture_width / 2, texture_height / 2, 0);
+        ActiveTexture(GL_TEXTURE0);
+      }
 
       tsq++;
     }	/* for all texnumx */
@@ -439,6 +462,8 @@ static void drawTextureDisplay ()
 
   glColor3f(1.0,1.0,1.0);
 
+  if (image_format == IMGFMT_YV12)
+    glEnableYUVConversion(GL_TEXTURE_2D, use_yuv);
   for (y = 0; y < texnumy; y++)
   {
     for (x = 0; x < texnumx; x++)
@@ -451,6 +476,13 @@ static void drawTextureDisplay ()
       }
 
       glBindTexture (GL_TEXTURE_2D, square->texobj);
+      if (image_format == IMGFMT_YV12) {
+        ActiveTexture(GL_TEXTURE1);
+        glBindTexture (GL_TEXTURE_2D, square->uvtexobjs[0]);
+        ActiveTexture(GL_TEXTURE2);
+        glBindTexture (GL_TEXTURE_2D, square->uvtexobjs[1]);
+        ActiveTexture(GL_TEXTURE0);
+      }
       err = glGetError ();
       if(err==GL_INVALID_ENUM)
       {
@@ -486,10 +518,12 @@ static void drawTextureDisplay ()
 
       glDrawTex(square->fx, square->fy, square->fw, square->fh,
                 0, 0, texture_width, texture_height,
-                texture_width, texture_height, 0);
+                texture_width, texture_height, 0, image_format == IMGFMT_YV12);
       square++;
     } /* for all texnumx */
   } /* for all texnumy */
+  if (image_format == IMGFMT_YV12)
+    glDisableYUVConversion(GL_TEXTURE_2D, use_yuv);
 
   /* YES - let's catch this error ... 
    */
@@ -706,6 +740,7 @@ static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
 
 static int initGl(uint32_t d_width, uint32_t d_height)
 {
+  fragprog = lookupTex = 0;
   if (initTextures() < 0)
     return -1;
 
@@ -714,6 +749,22 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
   glEnable (GL_TEXTURE_2D);
+  if (image_format == IMGFMT_YV12) {
+    switch (use_yuv) {
+      case YUV_CONVERSION_FRAGMENT_LOOKUP:
+        glGenTextures(1, &lookupTex);
+        ActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, lookupTex);
+        ActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+      case YUV_CONVERSION_FRAGMENT_POW:
+      case YUV_CONVERSION_FRAGMENT:
+        GenPrograms(1, &fragprog);
+        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
+        break;
+    }
+    glSetupYUVConversion(use_yuv, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0);
+  }
 
   gl_set_antialias(0);
   gl_set_bilinear(1);
@@ -793,7 +844,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	mp_msg(MSGT_VO, MSGL_INFO, "[gl2] You have OpenGL < 1.2 drivers, BAD (16bpp and BGR may be damaged!)\n");
   }
 
-  glFindFormat(format, &image_bpp, NULL, &gl_bitmap_format, &gl_bitmap_type);
+  glFindFormat(format, &image_bpp, &gl_internal_format, &gl_bitmap_format, &gl_bitmap_type);
 
   image_bytes=(image_bpp+7)/8;
 
@@ -908,12 +959,60 @@ flip_page(void)
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
+  int rem_h = h;
+  struct TexSquare *texline = &texgrid[y / texture_height * texnumx];
+  int subtex_y = y % texture_width;
+  while (rem_h > 0) {
+    int rem_w = w;
+    struct TexSquare *tsq = &texline[x / texture_width];
+    int subtex_x = x % texture_height;
+    int subtex_h = rem_h;
+    if (subtex_y + subtex_h > texture_height)
+      subtex_h = texture_height - subtex_y;
+    while (rem_w > 0) {
+      int subtex_w = rem_w;
+      if (subtex_x + subtex_w > texture_width)
+        subtex_w = texture_width - subtex_x;
+      ActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, tsq->texobj);
+      glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
+                  src[0], stride[0], subtex_x, subtex_y,
+                  subtex_w, subtex_h, 0);
+      ActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, tsq->uvtexobjs[0]);
+      glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
+                  src[1], stride[1], subtex_x, subtex_y,
+                  subtex_w / 2, subtex_h / 2, 0);
+      ActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, tsq->uvtexobjs[1]);
+      glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
+                  src[2], stride[2], subtex_x, subtex_y,
+                  subtex_w / 2, subtex_h / 2, 0);
+      subtex_x = 0;
+      src[0] += subtex_w;
+      src[1] += subtex_w / 2;
+      src[2] += subtex_w / 2;
+      tsq++;
+      rem_w -= subtex_w;
+    }
+    subtex_y = 0;
+    src[0] += subtex_h * stride[0] - w;
+    src[1] += subtex_h / 2 * stride[1] - w / 2;
+    src[2] += subtex_h / 2 * stride[2] - w / 2;
+    texline += texnumx;
+    rem_h -= subtex_h;
+  }
+  ActiveTexture(GL_TEXTURE0);
     return 0;
 }
 
 static int
 draw_frame(uint8_t *src[])
 {
+  if (image_format == IMGFMT_YV12) {
+    mp_msg(MSGT_VO, MSGL_ERR, "[gl2] error: draw_frame called for YV12!\n");
+    return 0;
+  }
   ImageData=(unsigned char *)src[0];
   resetTexturePointers(ImageData);
   setupTextureDirtyArea(0, 0, image_width, image_height);
@@ -924,6 +1023,11 @@ static int
 query_format(uint32_t format)
 {
     switch(format){
+    case IMGFMT_YV12:
+      if (use_yuv)
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD |
+               VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
+      break;
 #ifdef SYS_DARWIN
     case IMGFMT_RGB32:
 #else
@@ -955,6 +1059,7 @@ uninit(void)
 }
 
 static opt_t subopts[] = {
+  {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {NULL}
 };
@@ -962,6 +1067,7 @@ static opt_t subopts[] = {
 static int preinit(const char *arg)
 {
   // set defaults
+  use_yuv = 0;
   use_glFinish = 1;
   if (subopt_parse(arg, subopts) != 0) {
     mp_msg(MSGT_VO, MSGL_FATAL,
@@ -970,6 +1076,12 @@ static int preinit(const char *arg)
             "\nOptions:\n"
             "  noglfinish\n"
             "    Do not call glFinish() before swapping buffers\n"
+            "  yuv=<n>\n"
+            "    0: use software YUV to RGB conversion.\n"
+            "    1: use register combiners (nVidia only).\n"
+            "    2: use fragment program.\n"
+            "    3: use fragment program with gamma correction.\n"
+            "    4: use fragment program with gamma correction via lookup.\n"
             "\n" );
     return -1;
   }

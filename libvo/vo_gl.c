@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -56,10 +57,12 @@ static GLuint osdDispList[MAX_OSD_PARTS];
 static int osdtexCnt;
 
 static int use_aspect;
+static int use_yuv;
 static int use_rectangle;
 static int err_shown;
 static uint32_t image_width;
 static uint32_t image_height;
+static uint32_t image_format;
 static int many_fmts;
 static int use_glFinish;
 static int swap_interval;
@@ -69,8 +72,19 @@ static GLenum gl_format;
 static GLenum gl_type;
 static GLuint gl_buffer;
 static int gl_buffersize;
+static GLuint fragprog;
+static GLuint uvtexs[2];
+static GLuint lookupTex;
+static char *custom_prog;
 
 static int int_pause;
+static int eq_bri = 0;
+static int eq_cont = 0;
+static int eq_sat = 0;
+static int eq_hue = 0;
+static int eq_rgamma = 0;
+static int eq_ggamma = 0;
+static int eq_bgamma = 0;
 
 static uint32_t texture_width;
 static uint32_t texture_height;
@@ -126,6 +140,39 @@ static void texSize(int w, int h, int *texw, int *texh) {
   }
 }
 
+#define MAX_CUSTOM_PROG_SIZE (1024 * 1024)
+static void update_yuvconv() {
+  float bri = eq_bri / 100.0;
+  float cont = (eq_cont + 100) / 100.0;
+  float hue = eq_hue / 100.0 * 3.1415927;
+  float sat = (eq_sat + 100) / 100.0;
+  float rgamma = exp(log(8.0) * eq_rgamma / 100.0);
+  float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
+  float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
+  glSetupYUVConversion(use_yuv, bri, cont, hue, sat, rgamma, ggamma, bgamma);
+  if (custom_prog) {
+    FILE *f = fopen(custom_prog, "r");
+    if (!f)
+      mp_msg(MSGT_VO, MSGL_WARN,
+             "[gl] Could not read customprog %s\n", custom_prog);
+    else {
+      int i;
+      char *prog = calloc(1, MAX_CUSTOM_PROG_SIZE + 1);
+      fread(prog, 1, MAX_CUSTOM_PROG_SIZE, f);
+      fclose(f);
+      ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
+                   strlen(prog), prog);
+      glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
+      if (i != -1)
+        mp_msg(MSGT_VO, MSGL_ERR,
+          "[gl] Error in custom program at pos %i (%.20s)\n", i, &prog[i]);
+      free(prog);
+    }
+    ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 0,
+               1.0 / texture_width, 1.0 / texture_height, 0, 0);
+  }
+}
+
 /**
  * \brief remove all OSD textures and display-lists, thus clearing it.
  */
@@ -144,6 +191,15 @@ static void clearOSD() {
  * \brief uninitialize OpenGL context, freeing textures, buffers etc.
  */
 static void uninitGl() {
+  if (DeletePrograms && fragprog)
+    DeletePrograms(1, &fragprog);
+  fragprog = 0;
+  if (uvtexs[0] || uvtexs[1])
+    glDeleteTextures(2, uvtexs);
+  uvtexs[0] = uvtexs[1] = 0;
+  if (lookupTex)
+    glDeleteTextures(1, &lookupTex);
+  lookupTex = 0;
   clearOSD();
   if (DeleteBuffers && gl_buffer)
     DeleteBuffers(1, &gl_buffer);
@@ -157,6 +213,7 @@ static void uninitGl() {
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
   osdtexCnt = 0; gl_buffer = 0; gl_buffersize = 0; err_shown = 0;
+  fragprog = 0; uvtexs[0] = 0; uvtexs[1] = 0; lookupTex = 0;
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
@@ -169,6 +226,31 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
 
+  if (image_format == IMGFMT_YV12) {
+    glGenTextures(2, uvtexs);
+    ActiveTexture(GL_TEXTURE1);
+    BindTexture(gl_target, uvtexs[0]);
+    glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
+                     texture_width / 2, texture_height / 2, 128);
+    ActiveTexture(GL_TEXTURE2);
+    BindTexture(gl_target, uvtexs[1]);
+    glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
+                     texture_width / 2, texture_height / 2, 128);
+    switch (use_yuv) {
+      case YUV_CONVERSION_FRAGMENT_LOOKUP:
+        glGenTextures(1, &lookupTex);
+        ActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, lookupTex);
+      case YUV_CONVERSION_FRAGMENT_POW:
+      case YUV_CONVERSION_FRAGMENT:
+        GenPrograms(1, &fragprog);
+        BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
+        break;
+    }
+    ActiveTexture(GL_TEXTURE0);
+    BindTexture(gl_target, 0);
+    update_yuvconv();
+  }
   glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
                    texture_width, texture_height, 0);
 
@@ -189,6 +271,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 {
 	image_height = height;
 	image_width = width;
+	image_format = format;
 	glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
 	int_pause = 0;
@@ -374,12 +457,12 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // render alpha
   glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1);
+  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0);
 #endif
   // render OSD
   glBlendFunc (GL_ONE, GL_ONE);
   BindTexture(gl_target, osdtex[osdtexCnt]);
-  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1);
+  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0);
   glEndList();
 
   osdtexCnt++;
@@ -404,9 +487,14 @@ flip_page(void)
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
 
   glColor3f(1,1,1);
+  if (image_format == IMGFMT_YV12)
+    glEnableYUVConversion(gl_target, use_yuv);
   glDrawTex(0, 0, texture_width, texture_height,
             0, 0, texture_width, texture_height,
-            texture_width, texture_height, use_rectangle == 1);
+            texture_width, texture_height,
+            use_rectangle == 1, image_format == IMGFMT_YV12);
+  if (image_format == IMGFMT_YV12)
+    glDisableYUVConversion(gl_target, use_yuv);
 
   if (osdtexCnt > 0) {
     // set special rendering parameters
@@ -443,6 +531,17 @@ flip_page(void)
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
+  glUploadTex(gl_target, gl_format, gl_type, src[0], stride[0],
+              x, y, w, h, slice_height);
+  if (image_format == IMGFMT_YV12) {
+    ActiveTexture(GL_TEXTURE1);
+    glUploadTex(gl_target, gl_format, gl_type, src[1], stride[1],
+                x / 2, y / 2, w / 2, h / 2, slice_height);
+    ActiveTexture(GL_TEXTURE2);
+    glUploadTex(gl_target, gl_format, gl_type, src[2], stride[2],
+                x / 2, y / 2, w / 2, h / 2, slice_height);
+    ActiveTexture(GL_TEXTURE0);
+  }
 	return 0;
 }
 
@@ -476,6 +575,15 @@ static uint32_t get_image(mp_image_t *mpi) {
     err_shown = 1;
     return VO_FALSE;
   }
+  if (mpi->imgfmt == IMGFMT_YV12) {
+    // YV12
+    mpi->flags |= MP_IMGFLAG_COMMON_STRIDE | MP_IMGFLAG_COMMON_PLANE;
+    mpi->stride[0] = mpi->width;
+    mpi->planes[1] = mpi->planes[0] + mpi->stride[0] * mpi->height;
+    mpi->stride[1] = mpi->width >> 1;
+    mpi->planes[2] = mpi->planes[1] + mpi->stride[1] * (mpi->height >> 1);
+    mpi->stride[2] = mpi->width >> 1;
+  }
   mpi->flags |= MP_IMGFLAG_DIRECT;
   return VO_TRUE;
 }
@@ -493,6 +601,17 @@ static uint32_t draw_image(mp_image_t *mpi) {
   }
   glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[0],
               mpi->x, mpi->y, mpi->w, mpi->h, slice);
+  if (mpi->imgfmt == IMGFMT_YV12) {
+    data += mpi->planes[1] - mpi->planes[0];
+    ActiveTexture(GL_TEXTURE1);
+    glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[1],
+                mpi->x / 2, mpi->y / 2, mpi->w / 2, mpi->h / 2, slice);
+    data += mpi->planes[2] - mpi->planes[1];
+    ActiveTexture(GL_TEXTURE2);
+    glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[2],
+                mpi->x / 2, mpi->y / 2, mpi->w / 2, mpi->h / 2, slice);
+    ActiveTexture(GL_TEXTURE0);
+  }
   if (mpi->flags & MP_IMGFLAG_DIRECT)
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   return VO_TRUE;
@@ -513,6 +632,8 @@ query_format(uint32_t format)
       caps |= VFCAP_OSD;
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
         return caps;
+    if (use_yuv && format == IMGFMT_YV12)
+        return caps;
     if (many_fmts &&
          glFindFormat(format, NULL, NULL, NULL, NULL))
         return caps;
@@ -526,6 +647,8 @@ uninit(void)
   if ( !vo_config_count ) return;
   uninitGl();
   releaseGlContext(&gl_vinfo, &gl_context);
+  if (custom_prog) free(custom_prog);
+  custom_prog = NULL;
 #ifdef GL_WIN32
   vo_w32_uninit();
 #else
@@ -540,8 +663,10 @@ static opt_t subopts[] = {
   {"aspect",       OPT_ARG_BOOL, &use_aspect,   NULL},
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
+  {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
+  {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
   {NULL}
 };
 
@@ -552,10 +677,12 @@ static int preinit(const char *arg)
     use_osd = 1;
     scaled_osd = 0;
     use_aspect = 1;
+    use_yuv = 0;
     use_rectangle = 0;
     use_glFinish = 0;
     swap_interval = 1;
     slice_height = 4;
+    custom_prog = NULL;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
               "\n-vo gl command line help:\n"
@@ -579,6 +706,16 @@ static int preinit(const char *arg)
               "    Interval in displayed frames between to buffer swaps.\n"
               "    1 is equivalent to enable VSYNC, 0 to disable VSYNC.\n"
               "    Requires GLX_SGI_swap_control support to work.\n"
+              "  yuv=<n>\n"
+              "    0: use software YUV to RGB conversion.\n"
+              "    1: use register combiners (nVidia only).\n"
+              "    2: use fragment program.\n"
+              "    3: use fragment program with gamma correction.\n"
+              "    4: use fragment program with gamma correction via lookup.\n"
+              "  customprog=<filename>\n"
+              "    use a custom YUV conversion program\n"
+              "  customtex=<filename>\n"
+              "    use a custom YUV conversion lookup texture\n"
               "\n" );
       return -1;
     }
@@ -632,6 +769,81 @@ static int control(uint32_t request, void *data, ...)
     if (!use_aspect) return VO_NOTIMPL;
     resize (vo_dwidth, vo_dheight);
     return VO_TRUE;
+  case VOCTRL_GET_EQUALIZER:
+    if (image_format == IMGFMT_YV12) {
+      va_list va;
+      int *value;
+      va_start(va, data);
+      value = va_arg(va, int *);
+      va_end(va);
+      if (strcasecmp(data, "brightness") == 0) {
+        *value = eq_bri;
+        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
+      } else if (strcasecmp(data, "contrast") == 0) {
+        *value = eq_cont;
+        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
+      } else if (strcasecmp(data, "saturation") == 0) {
+        *value = eq_sat;
+      } else if (strcasecmp(data, "hue") == 0) {
+        *value = eq_hue;
+      } else if (strcasecmp(data, "gamma") ==  0) {
+        *value = eq_rgamma;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      } else if (strcasecmp(data, "red_gamma") ==  0) {
+        *value = eq_rgamma;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      } else if (strcasecmp(data, "green_gamma") ==  0) {
+        *value = eq_ggamma;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      } else if (strcasecmp(data, "blue_gamma") ==  0) {
+        *value = eq_bgamma;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      }
+      return VO_TRUE;
+    }
+    break;
+  case VOCTRL_SET_EQUALIZER:
+    if (image_format == IMGFMT_YV12) {
+      va_list va;
+      int value;
+      va_start(va, data);
+      value = va_arg(va, int);
+      va_end(va);
+      if (strcasecmp(data, "brightness") == 0) {
+        eq_bri = value;
+        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
+      } else if (strcasecmp(data, "contrast") == 0) {
+        eq_cont = value;
+        if (use_yuv == YUV_CONVERSION_COMBINERS) break; // not supported
+      } else if (strcasecmp(data, "saturation") == 0) {
+        eq_sat = value;
+      } else if (strcasecmp(data, "hue") == 0) {
+        eq_hue = value;
+      } else if (strcasecmp(data, "gamma") ==  0) {
+        eq_rgamma = eq_ggamma = eq_bgamma = value;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      } else if (strcasecmp(data, "red_gamma") ==  0) {
+        eq_rgamma = value;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      } else if (strcasecmp(data, "green_gamma") ==  0) {
+        eq_ggamma = value;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      } else if (strcasecmp(data, "blue_gamma") ==  0) {
+        eq_bgamma = value;
+        if (use_yuv == YUV_CONVERSION_COMBINERS ||
+            use_yuv == YUV_CONVERSION_FRAGMENT) break; // not supported
+      }
+      update_yuvconv();
+      return VO_TRUE;
+    }
+    break;
   }
   return VO_NOTIMPL;
 }

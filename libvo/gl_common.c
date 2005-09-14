@@ -1,5 +1,14 @@
+/**
+ * Common OpenGL routines.
+ * Copyleft (C) Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>, 2005
+ * Licensend under the GNU GPL v2.
+ * Special thanks go to the xine team and Matthias Hopf, whose video_out_opengl.c
+ * gave me lots of good ideas.
+ */
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
+#include <math.h>
 #include "gl_common.h"
 
 void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
@@ -18,6 +27,8 @@ void (APIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
 void (APIENTRY *ActiveTexture)(GLenum);
 void (APIENTRY *BindTexture)(GLenum, GLuint);
 void (APIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
+void (APIENTRY *GenPrograms)(GLsizei, GLuint *);
+void (APIENTRY *DeletePrograms)(GLsizei, const GLuint *);
 void (APIENTRY *BindProgram)(GLenum, GLuint);
 void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
@@ -249,6 +260,16 @@ static void getFunctions() {
   MultiTexCoord2f = getProcAddress("glMultiTexCoord2f");
   if (!MultiTexCoord2f)
     MultiTexCoord2f = getProcAddress("glMultiTexCoord2fARB");
+  GenPrograms = getProcAddress("glGenPrograms");
+  if (!GenPrograms)
+    GenPrograms = getProcAddress("glGenProgramsARB");
+  if (!GenPrograms)
+    GenPrograms = getProcAddress("glGenProgramsNV");
+  DeletePrograms = getProcAddress("glDeletePrograms");
+  if (!DeletePrograms)
+    DeletePrograms = getProcAddress("glDeleteProgramsARB");
+  if (!DeletePrograms)
+    DeletePrograms = getProcAddress("glDeleteProgramsNV");
   BindProgram = getProcAddress("glBindProgram");
   if (!BindProgram)
     BindProgram = getProcAddress("glBindProgramARB");
@@ -374,6 +395,301 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
 }
 
 /**
+ * \brief Setup register combiners for YUV to RGB conversion.
+ * \param uvcos used for saturation and hue adjustment
+ * \param uvsin used for saturation and hue adjustment
+ */
+static void glSetupYUVCombiners(float uvcos, float uvsin) {
+  GLfloat ucoef[4];
+  GLfloat vcoef[4];
+  GLint i;
+  glGetIntegerv(GL_MAX_GENERAL_COMBINERS_NV, &i);
+  if (i < 2)
+    mp_msg(MSGT_VO, MSGL_ERR,
+           "[gl] 2 general combiners needed for YUV combiner support (found %i)\n", i);
+  glGetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
+  if (i < 3)
+    mp_msg(MSGT_VO, MSGL_ERR,
+           "[gl] 3 texture units needed for YUV combiner support (found %i)\n", i);
+  if (!CombinerInput || !CombinerOutput ||
+      !CombinerParameterfv || !CombinerParameteri) {
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner functions missing!\n");
+    return;
+  }
+  ucoef[0] = 0 * uvcos + 1.403 * uvsin;
+  vcoef[0] = 0 * uvsin + 1.403 * uvcos;
+  ucoef[1] = -0.344 * uvcos + -0.714 * uvsin;
+  vcoef[1] = -0.344 * uvsin + -0.714 * uvcos;
+  ucoef[2] = 1.770 * uvcos + 0 * uvsin;
+  vcoef[2] = 1.770 * uvsin + 0 * uvcos;
+  ucoef[3] = 0;
+  vcoef[3] = 0;
+  // Coefficients (probably) must be in [0, 1] range, whereas they originally
+  // are in [-2, 2] range, so here comes the trick:
+  // First put them in the [-0.5, 0.5] range, then add 0.5.
+  // This can be undone with the HALF_BIAS and SCALE_BY_FOUR arguments
+  // for CombinerInput and CombinerOutput
+  for (i = 0; i < 4; i++) {
+    ucoef[i] = ucoef[i] * 0.25 + 0.5;
+    vcoef[i] = vcoef[i] * 0.25 + 0.5;
+  }
+  CombinerParameterfv(GL_CONSTANT_COLOR0_NV, ucoef);
+  CombinerParameterfv(GL_CONSTANT_COLOR1_NV, vcoef);
+
+  // UV first, like this green component cannot overflow
+  CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_A_NV,
+                GL_TEXTURE1, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
+  CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_B_NV,
+                GL_CONSTANT_COLOR0_NV, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
+  CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_C_NV,
+                GL_TEXTURE2, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
+  CombinerInput(GL_COMBINER0_NV, GL_RGB, GL_VARIABLE_D_NV,
+                GL_CONSTANT_COLOR1_NV, GL_HALF_BIAS_NORMAL_NV, GL_RGB);
+  CombinerOutput(GL_COMBINER0_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV,
+                 GL_SPARE0_NV, GL_SCALE_BY_FOUR_NV, GL_NONE, GL_FALSE,
+                 GL_FALSE, GL_FALSE);
+
+  // stage 2
+  CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_A_NV, GL_SPARE0_NV,
+                GL_SIGNED_IDENTITY_NV, GL_RGB);
+  CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_B_NV, GL_ZERO,
+                 GL_UNSIGNED_INVERT_NV, GL_RGB);
+  CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_C_NV,
+                GL_TEXTURE0, GL_SIGNED_IDENTITY_NV, GL_RGB);
+  CombinerInput(GL_COMBINER1_NV, GL_RGB, GL_VARIABLE_D_NV, GL_ZERO,
+                GL_UNSIGNED_INVERT_NV, GL_RGB);
+  CombinerOutput(GL_COMBINER1_NV, GL_RGB, GL_DISCARD_NV, GL_DISCARD_NV,
+                 GL_SPARE0_NV, GL_NONE, GL_NONE, GL_FALSE,
+                 GL_FALSE, GL_FALSE);
+
+  // leave final combiner stage in default mode
+  CombinerParameteri(GL_NUM_GENERAL_COMBINERS_NV, 2);
+}
+
+static const char *yuv_prog_template =
+  "!!ARBfp1.0\n"
+  "TEMP res, y, u, v;"
+  "TEX y, fragment.texcoord[0], texture[0], 2D;"
+  "MAD res, y, {%.4f, %.4f, %.4f}, {%.4f, %.4f, %.4f};"
+  "TEX u, fragment.texcoord[1], texture[1], 2D;"
+  "MAD res, u, {%.4f, %.4f, %.4f}, res;"
+  "TEX v, fragment.texcoord[2], texture[2], 2D;"
+  "MAD result.color, v, {%.4f, %.4f, %.4f}, res;"
+  "END";
+
+static const char *yuv_pow_prog_template =
+  "!!ARBfp1.0\n"
+  "TEMP res, y, u, v;"
+  "TEX y, fragment.texcoord[0], texture[0], 2D;"
+  "MAD res, y, {%.4f, %.4f, %.4f}, {%.4f, %.4f, %.4f};"
+  "TEX u, fragment.texcoord[1], texture[1], 2D;"
+  "MAD res, u, {%.4f, %.4f, %.4f}, res;"
+  "TEX v, fragment.texcoord[2], texture[2], 2D;"
+  "MAD_SAT res, v, {%.4f, %.4f, %.4f}, res;"
+  "POW result.color.r, res.r, %.4f.r;"
+  "POW result.color.g, res.g, %.4f.g;"
+  "POW result.color.b, res.b, %.4f.b;"
+  "END";
+
+static const char *yuv_lookup_prog_template =
+  "!!ARBfp1.0\n"
+  "TEMP res, y, u, v;"
+  "TEX y, fragment.texcoord[0], texture[0], 2D;"
+  "MAD res, y, {%.4f, %.4f, %.4f, 0}, {%.4f, %.4f, %.4f, 0};"
+  "TEX u, fragment.texcoord[1], texture[1], 2D;"
+  "MAD res, u, {%.4f, %.4f, %.4f, 0}, res;"
+  "TEX v, fragment.texcoord[2], texture[2], 2D;"
+  "MAD res, v, {%.4f, %.4f, %.4f, 0}, res;"
+  "ADD res.a, res.a, 0.125;"
+  "TEX result.color.r, res.raaa, texture[3], 2D;"
+  "ADD res.a, res.a, 0.25;"
+  "TEX result.color.g, res.gaaa, texture[3], 2D;"
+  "ADD res.a, res.a, 0.25;"
+  "TEX result.color.b, res.baaa, texture[3], 2D;"
+  "END";
+
+/**
+ * \brief setup a fragment program that will do YUV->RGB conversion
+ * \param brightness brightness adjustment offset
+ * \param contrast contrast adjustment factor
+ * \param uvcos used for saturation and hue adjustment
+ * \param uvsin used for saturation and hue adjustment
+ * \param lookup use fragment program that uses texture unit 4 to
+ *               do additional conversion via lookup.
+ */
+static void glSetupYUVFragprog(float brightness, float contrast,
+                        float uvcos, float uvsin, float rgamma,
+                        float ggamma, float bgamma, int type) {
+  char yuv_prog[1000];
+  const char *prog_template = yuv_prog_template;
+  int lookup = 0;
+  GLint i;
+  // this is the conversion matrix, with y, u, v factors
+  // for red, green, blue and the constant offsets
+  float ry, ru, rv, rc;
+  float gy, gu, gv, gc;
+  float by, bu, bv, bc;
+  switch (type) {
+    case YUV_CONVERSION_FRAGMENT_POW:
+      prog_template = yuv_pow_prog_template;
+      break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP:
+      prog_template = yuv_lookup_prog_template;
+      lookup = 1;
+      break;
+  }
+  glGetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
+  if (i < 3)
+    mp_msg(MSGT_VO, MSGL_ERR,
+           "[gl] 3 texture units needed for YUV fragment support (found %i)\n", i);
+  if (lookup && i < 4)
+    mp_msg(MSGT_VO, MSGL_ERR,
+           "[gl] 4 texture units needed for YUV fragment support with lookup (found %i)\n", i);
+  if (!ProgramString) {
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] ProgramString function missing!\n");
+    return;
+  }
+  ry = 1.164 * contrast;
+  gy = 1.164 * contrast;
+  by = 1.164 * contrast;
+  ru = 0 * uvcos + 1.596 * uvsin;
+  rv = 0 * uvsin + 1.596 * uvcos;
+  gu = -0.391 * uvcos + -0.813 * uvsin;
+  gv = -0.391 * uvsin + -0.813 * uvcos;
+  bu = 2.018 * uvcos + 0 * uvsin;
+  bv = 2.018 * uvsin + 0 * uvcos;
+  rc = (-16 * ry + (-128) * ru + (-128) * rv) / 255.0 + brightness;
+  gc = (-16 * gy + (-128) * gu + (-128) * gv) / 255.0 + brightness;
+  bc = (-16 * by + (-128) * bu + (-128) * bv) / 255.0 + brightness;
+  rgamma = 1.0 / rgamma;
+  ggamma = 1.0 / ggamma;
+  bgamma = 1.0 / bgamma;
+  snprintf(yuv_prog, 1000, prog_template, ry, gy, by, rc, gc, bc, ru, gu, bu,
+           rv, gv, bv, rgamma, bgamma, bgamma);
+  ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
+                strlen(yuv_prog), yuv_prog);
+  glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
+  if (i != -1)
+    mp_msg(MSGT_VO, MSGL_ERR,
+      "[gl] Error compiling fragment program, make sure your card supports\n"
+      "GL_ARB_fragment_program (use glxinfo to check).%.10s\n", &yuv_prog[i]);
+}
+
+/**
+ * \brief little helper function to create a lookup table for gamma
+ * \param map buffer to create map into
+ * \param size size of buffer
+ * \param gamma gamma value
+ */
+static void gen_gamma_map(unsigned char *map, int size, float gamma) {
+  int i;
+  gamma = 1.0 / gamma;
+  for (i = 0; i < size; i++) {
+    float tmp = (float)i / (size - 1.0);
+    tmp = pow(tmp, gamma);
+    if (tmp > 1.0) tmp = 1.0;
+    if (tmp < 0.0) tmp = 0.0;
+    map[i] = 255 * tmp;
+  }
+}
+
+//! resolution of texture for gamma lookup table
+#define LOOKUP_RES 512
+
+/**
+ * \brief setup YUV->RGB conversion
+ * \param brightness brightness adjustment offset
+ * \param contrast contrast adjustment factor
+ * \param hue hue adjustment angle
+ * \param saturation saturation adjustment factor
+ * \param rgamma gamma value for red channel
+ * \param ggamma gamma value for green channel
+ * \param bgamma gamma value for blue channel
+ * \param type YUV conversion type
+ */
+void glSetupYUVConversion(int type, float brightness, float contrast,
+                          float hue, float saturation,
+                          float rgamma, float ggamma, float bgamma) {
+  float uvcos = saturation * cos(hue);
+  float uvsin = saturation * sin(hue);
+  switch (type) {
+    case YUV_CONVERSION_COMBINERS:
+      glSetupYUVCombiners(uvcos, uvsin);
+      break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP:
+      {
+        unsigned char lookup_data[4 * LOOKUP_RES];
+        gen_gamma_map(lookup_data, LOOKUP_RES, rgamma);
+        gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, ggamma);
+        gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, bgamma);
+        ActiveTexture(GL_TEXTURE3);
+        glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LINEAR,
+                         LOOKUP_RES, 4, 0);
+        glUploadTex(GL_TEXTURE_2D, GL_LUMINANCE, GL_UNSIGNED_BYTE, lookup_data,
+                    LOOKUP_RES, 0, 0, LOOKUP_RES, 4, 0);
+        ActiveTexture(GL_TEXTURE0);
+      }
+    case YUV_CONVERSION_FRAGMENT:
+    case YUV_CONVERSION_FRAGMENT_POW:
+      glSetupYUVFragprog(brightness, contrast, uvcos, uvsin,
+                         rgamma, ggamma, bgamma, type);
+      break;
+  }
+}
+
+/**
+ * \brief enable the specified YUV conversion
+ * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
+ * \param type type of YUV conversion
+ */
+void inline glEnableYUVConversion(GLenum target, int type) {
+  if (type <= 0) return;
+  ActiveTexture(GL_TEXTURE1);
+  glEnable(target);
+  ActiveTexture(GL_TEXTURE2);
+  glEnable(target);
+  switch (type) {
+    case YUV_CONVERSION_COMBINERS:
+      glEnable(GL_REGISTER_COMBINERS_NV);
+      break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP:
+      ActiveTexture(GL_TEXTURE3);
+      glEnable(GL_TEXTURE_2D);
+    case YUV_CONVERSION_FRAGMENT_POW:
+    case YUV_CONVERSION_FRAGMENT:
+      glEnable(GL_FRAGMENT_PROGRAM);
+      break;
+  }
+  ActiveTexture(GL_TEXTURE0);
+}
+
+/**
+ * \brief disable the specified YUV conversion
+ * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
+ * \param type type of YUV conversion
+ */
+void inline glDisableYUVConversion(GLenum target, int type) {
+  if (type <= 0) return;
+  ActiveTexture(GL_TEXTURE1);
+  glDisable(target);
+  ActiveTexture(GL_TEXTURE2);
+  glDisable(target);
+  switch (type) {
+    case YUV_CONVERSION_COMBINERS:
+      glDisable(GL_REGISTER_COMBINERS_NV);
+      break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP:
+      ActiveTexture(GL_TEXTURE3);
+      glDisable(GL_TEXTURE_2D);
+    case YUV_CONVERSION_FRAGMENT_POW:
+    case YUV_CONVERSION_FRAGMENT:
+      glDisable(GL_FRAGMENT_PROGRAM);
+      break;
+  }
+  ActiveTexture(GL_TEXTURE0);
+}
+
+/**
  * \brief draw a texture part at given 2D coordinates
  * \param x screen top coordinate
  * \param y screen left coordinate
@@ -386,21 +702,40 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
  * \param sx width of texture in pixels
  * \param sy height of texture in pixels
  * \param rect_tex whether this texture uses texture_rectangle extension
+ * \param is_yv12 if set, also draw the textures from units 1 and 2
  */
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
-               int sx, int sy, int rect_tex) {
+               int sx, int sy, int rect_tex, int is_yv12) {
+  GLfloat tx2 = tx / 2, ty2 = ty / 2, tw2 = tw / 2, th2 = th / 2;
   if (!rect_tex) {
     tx /= sx; ty /= sy; tw /= sx; th /= sy;
+    tx2 = tx, ty2 = ty, tw2 = tw, th2 = th;
   }
   glBegin(GL_QUADS);
   glTexCoord2f(tx, ty);
+  if (is_yv12) {
+    MultiTexCoord2f(GL_TEXTURE1, tx2, ty2);
+    MultiTexCoord2f(GL_TEXTURE2, tx2, ty2);
+  }
   glVertex2f(x, y);
   glTexCoord2f(tx, ty + th);
+  if (is_yv12) {
+    MultiTexCoord2f(GL_TEXTURE1, tx2, ty2 + th2);
+    MultiTexCoord2f(GL_TEXTURE2, tx2, ty2 + th2);
+  }
   glVertex2f(x, y + h);
   glTexCoord2f(tx + tw, ty + th);
+  if (is_yv12) {
+    MultiTexCoord2f(GL_TEXTURE1, tx2 + tw2, ty2 + th2);
+    MultiTexCoord2f(GL_TEXTURE2, tx2 + tw2, ty2 + th2);
+  }
   glVertex2f(x + w, y + h);
   glTexCoord2f(tx + tw, ty);
+  if (is_yv12) {
+    MultiTexCoord2f(GL_TEXTURE1, tx2 + tw2, ty2);
+    MultiTexCoord2f(GL_TEXTURE2, tx2 + tw2, ty2);
+  }
   glVertex2f(x + w, y);
   glEnd();
 }
