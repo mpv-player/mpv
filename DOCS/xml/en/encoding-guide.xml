@@ -2855,6 +2855,279 @@ codec</title>
 
 </itemizedlist>
 </sect2>
+
+<sect2 id="menc-feat-xvid-encoding-profiles">
+<title>Encoding profiles</title>
+<para>
+  Xvid supports encoding profiles through the option <option>profile</option>,
+  which are used to impose restrictions on the properties of the XviD video
+  stream such that it will be playable on anything which supports the
+  chosen profile.
+  The restrictions relate to resolutions, bitrates and certain MPEG-4
+  features.
+  The following table shows what each profile supports.
+</para>
+<informaltable>
+<tgroup cols="16" align="center">
+<colspec colnum="1"  colname="col1"/>
+<colspec colnum="2"  colname="col2"/>
+<colspec colnum="3"  colname="col3"/>
+<colspec colnum="4"  colname="col4"/>
+<colspec colnum="5"  colname="col5"/>
+<colspec colnum="6"  colname="col6"/>
+<colspec colnum="7"  colname="col7"/>
+<colspec colnum="8"  colname="col8"/>
+<colspec colnum="9"  colname="col9"/>
+<colspec colnum="10" colname="col10"/>
+<colspec colnum="11" colname="col11"/>
+<colspec colnum="12" colname="col12"/>
+<colspec colnum="13" colname="col13"/>
+<colspec colnum="14" colname="col14"/>
+<colspec colnum="15" colname="col15"/>
+<colspec colnum="16" colname="col16"/>
+<colspec colnum="17" colname="col17"/>
+<spanspec spanname="spa2-5"   namest="col2" nameend="col5"/>
+<spanspec spanname="spa6-11"  namest="col6" nameend="col11"/>
+<spanspec spanname="spa12-17" namest="col12" nameend="col17"/>
+  <tbody>
+    <row>
+      <entry></entry>
+      <entry spanname="spa2-5">Simple</entry>
+      <entry spanname="spa6-11">Advanced Simple</entry>
+      <entry spanname="spa12-17">DivX</entry>
+    </row>
+    <row>
+      <entry>Profile name</entry>
+      <entry>0</entry>
+      <entry>1</entry>
+      <entry>2</entry>
+      <entry>3</entry>
+      <entry>0</entry>
+      <entry>1</entry>
+      <entry>2</entry>
+      <entry>3</entry>
+      <entry>4</entry>
+      <entry>5</entry>
+      <entry>Handheld</entry>
+      <entry>Portable NTSC</entry>
+      <entry>Portable PAL</entry>
+      <entry>Home Theater NTSC</entry>
+      <entry>Home Theater PAL</entry>
+      <entry>HDTV</entry>
+    </row>
+    <row>
+      <entry>Width [pixels]</entry>
+      <entry>176</entry>
+      <entry>176</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>176</entry>
+      <entry>176</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>720</entry>
+      <entry>176</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>720</entry>
+      <entry>720</entry>
+      <entry>1280</entry>
+    </row>
+    <row>
+      <entry>Height [pixels]</entry>
+      <entry>144</entry>
+      <entry>144</entry>
+      <entry>288</entry>
+      <entry>288</entry>
+      <entry>144</entry>
+      <entry>144</entry>
+      <entry>288</entry>
+      <entry>288</entry>
+      <entry>576</entry>
+      <entry>576</entry>
+      <entry>144</entry>
+      <entry>240</entry>
+      <entry>288</entry>
+      <entry>480</entry>
+      <entry>576</entry>
+      <entry>720</entry>
+    </row>
+    <row>
+      <entry>Frame rate [fps]</entry>
+      <entry>15</entry>
+      <entry>15</entry>
+      <entry>15</entry>
+      <entry>15</entry>
+      <entry>30</entry>
+      <entry>30</entry>
+      <entry>15</entry>
+      <entry>30</entry>
+      <entry>30</entry>
+      <entry>30</entry>
+      <entry>15</entry>
+      <entry>30</entry>
+      <entry>25</entry>
+      <entry>30</entry>
+      <entry>25</entry>
+      <entry>30</entry>
+    </row>
+    <row>
+      <entry>Max average bitrate [kbps]</entry>
+      <entry>64</entry>
+      <entry>64</entry>
+      <entry>128</entry>
+      <entry>384</entry>
+      <entry>128</entry>
+      <entry>128</entry>
+      <entry>384</entry>
+      <entry>768</entry>
+      <entry>3000</entry>
+      <entry>8000</entry>
+      <entry>537.6</entry>
+      <entry>4854</entry>
+      <entry>4854</entry>
+      <entry>4854</entry>
+      <entry>4854</entry>
+      <entry>9708.4</entry>
+    </row>
+    <row>
+      <entry>Peak average bitrate over 3 secs [kbps]</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>800</entry>
+      <entry>8000</entry>
+      <entry>8000</entry>
+      <entry>8000</entry>
+      <entry>8000</entry>
+      <entry>16000</entry>
+    </row>
+    <row>
+      <entry>Max. B-frames</entry>
+      <entry>0</entry>
+      <entry>0</entry>
+      <entry>0</entry>
+      <entry>0</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>0</entry>
+      <entry>1</entry>
+      <entry>1</entry>
+      <entry>1</entry>
+      <entry>1</entry>
+      <entry>2</entry>
+    </row>
+    <row>
+      <entry>MPEG quantization</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry>Adaptive quantization</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+    </row>
+    <row>
+      <entry>Interlaced encoding</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+    </row>
+    <row>
+      <entry>Quaterpixel</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry>Global motion compensation</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+  </tbody>
+</tgroup>
+</informaltable>
+</sect2>
 </sect1>
 
 <sect1 id="menc-feat-x264">
