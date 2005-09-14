@@ -1,4 +1,4 @@
-.\" synced with 1.1096
+.\" synced with 1.1100
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -3368,9 +3368,9 @@ Définit les options avancées de filtrage audio\ :
 .IPs force=<0\-7>
 Force l'insertion de filtres audios de l'une des façons suivantes:
 .RSss
-0: insertion totalement automatique des filtres (par défaut)
+0: Utilise l'insertion totalement automatique des filtres.
 .br
-1: Optimise pour fidélité.
+1: Optimise pour fidélité (par défaut).
 .br
 2: Optimise pour la vitesse.
 .I Attention\ :
@@ -6022,7 +6022,7 @@ Chaque capture sera sauvegardé dans le répertoire de travail, et chaque un
 fichier aura un nom de type 'shotNNNN.png' en utilisant le premier nombre
 disponible - aucun fichier ne sera écrasé.
 Ce filtre ne provoque pas de surcoût lorsqu'il n'est pas utilisé, et accepte
-tous les espaces de couleur, donc ça ne pose pas de problème de le mettre par
+tous les espaces de couleur, donc ça ne pose pas de problème de l'ajouter par
 défaut dans votre fichier de configuration.
 .RE
 .
@@ -8393,6 +8393,57 @@ XviD permet aux utilisateurs de donner le l'overhead par trame de
 leur conteneur (donner une moyenne par trame).
 0 a un sens particulier, il laisse XviD prendre la valeur par défaut.
 (par défaut\ : 24 \- l'overhead moyen d'AVI).
+.
+.TP
+.B profile=<option>
+Restreint les options et le VBV (bitrate maximal sur une courte période)
+d'après les profils Simple, Advanced Simple et ceux de DivX.
+La vidéo obtenue devrait être visionnable sur les platines de salon et les
+lecteurs exigeant ces profils.
+.PD 0
+.RSs
+.IPs unrestricted
+Pas de restriction (par default)
+.IPs sp0
+simple profile niveau 0
+.IPs sp1
+simple profile niveau 1
+.IPs sp2
+simple profile niveau 2
+.IPs sp3
+simple profile niveau 3
+.IPs asp0
+advanced simple profile niveau 0
+.IPs asp1
+advanced simple profile niveau 1
+.IPs asp2
+advanced simple profile niveau 2
+.IPs asp3
+advanced simple profile niveau 3
+.IPs asp4
+advanced simple profile niveau 4
+.IPs asp5
+advanced simple profile at level 5
+.IPs dxnhandheld
+Profil DivX pour appareils de poche
+.IPs dxnportntsc
+Profil DivX NTSC pour les appareils mobiles
+.IPs dxnportpal
+Profil DivX PAL pour les appareils mobiles
+.IPs dxnhtntsc
+Profil DivX NTSC pour le home cinéma
+.IPs dxnhtpal
+Profil DivX PAL pour le home cinéma
+.IPs dxnhdtv
+Profil DivX NTSC pour la TV HD
+.RE
+.PD 1
+.RS
+.I NOTE\ :
+Ces profils devraient être utilisés en conjonction du \-ffourcc approprié.
+En général, DX50 convient, étant donné que certains lecteurs ne reconnaissent
+pas XviD mais reconnaissent DivX.
+.RE
 .
 .TP
 .B par=<mode>
