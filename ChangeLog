@@ -14,7 +14,7 @@ MPlayer (1.0)
     * Italian man page synced
     * misc improvements all over the place
 
-    Driver:
+    Drivers:
     * JACK audio output rewritten without bio2jack
     * OpenGL video output modules support -geometry and -wid options
     * for -vo gl manyfmts is now default (since it is a lot faster), use
@@ -22,7 +22,8 @@ MPlayer (1.0)
     * streaming textures for -vo gl, much faster if supported (use -dr)
     * hardware YUV to RGB conversion for -vo gl and -vo gl2, see yuv suboption
     * support for custom fragment programs for -vo gl (see TOOLS/*.fp)
-    * use libvbe from vesautils as vesa video driver
+    * use libvbe from vesautils as VESA video driver
+    * several fixes for the GGI video output driver
 
     Decoders:
     * Indeo2 (RT21) support via lavc
@@ -48,7 +49,7 @@ MPlayer (1.0)
     * fix streaming of RealAudio files over HTTP
     * show SHOUT/Icecast metadata while playing
     * ultravox (unsv://) streaming support
-    * all stream code ported to new modular api
+    * stream code ported to new modular api, massive code cleanup
 
     FFmpeg/libavcodec:
     * Snow bug fixes and speedup
@@ -98,7 +99,6 @@ MPlayer (1.0)
     * enabled hinting for TrueType fonts
     * support for file:// syntax
     * -fb option removed, use the device suboption of -vo fbdev/fbdev2 instead
-    * massive stream layer cleanup, all streams ported to the new API
     * full gcc 4 support for IA-32 and AMD-64 ports
     * TOOLS/vobshift.py: vobsub time-adjust tool
     * TOOLS/psnr-video.sh: computes PSNR between two existing video files
