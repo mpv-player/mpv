@@ -73,6 +73,8 @@ MPlayer (1.0)
     * lavcresample now used by default (-af-adv force=0 gives old behavior)
     * vf_expand and vf_dsize now support aspect and round parameters
     * screenshot filter
+    * -af pan commandline fix, now outputs the right number of channels
+      and accepts values < 0 or > 1. Channel order had to be changed.
 
     MEncoder:
     * audio encoding modularized
