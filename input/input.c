@@ -281,8 +281,8 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '}', 0 }, "speed_mult 2.0" },
   { { KEY_BACKSPACE, 0 }, "speed_set 1.0" },
   { { 'q', 0 }, "quit" },
-  { { KEY_ESC, 0 }, "quit" },
 #ifndef HAVE_NEW_GUI
+  { { KEY_ESC, 0 }, "quit" },
   { { 'p', 0 }, "pause" },
 #endif
   { { ' ', 0 }, "pause" },
@@ -336,7 +336,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'l', 0 }, "gui_loadfile" },
   { { 't', 0 }, "gui_loadsubtitle" },
   { { KEY_ENTER, 0 }, "gui_play" },
-  { { 's', 0 }, "gui_stop" },
+  { { KEY_ESC, 0 }, "gui_stop" },
   { { 'p', 0 }, "gui_playlist" },
   { { 'r', 0 }, "gui_preferences" },
   { { 'c', 0 }, "gui_skinbrowser" },
