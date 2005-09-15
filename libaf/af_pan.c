@@ -64,10 +64,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     cp = &((char*)arg)[n];
     j = 0; k = 0;
     while((*cp == ':') && (k < AF_NCH)){
-      sscanf(cp, ":%f%n" , &s->level[k][j], &n);
-      s->level[k][j] = clamp(s->level[k][j],0.0,1.0);
+      sscanf(cp, ":%f%n" , &s->level[j][k], &n);
       af_msg(AF_MSG_VERBOSE,"[pan] Pan level from channel %i to" 
-	     " channel %i = %f\n",j,k,s->level[k][j]);
+	     " channel %i = %f\n",k,j,s->level[j][k]);
       cp =&cp[n];
       j++;
       if(j>=nch){
@@ -81,14 +80,18 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     int    i;
     int    ch = ((af_control_ext_t*)arg)->ch;
     float* level = ((af_control_ext_t*)arg)->arg;
+    if (ch >= AF_NCH)
+      return AF_FALSE;
     for(i=0;i<AF_NCH;i++)
-      s->level[ch][i] = clamp(level[i],0.0,1.0);
+      s->level[ch][i] = level[i];
     return AF_OK;
   }
   case AF_CONTROL_PAN_LEVEL | AF_CONTROL_GET:{
     int    i;
     int ch = ((af_control_ext_t*)arg)->ch;
     float* level = ((af_control_ext_t*)arg)->arg;
+    if (ch >= AF_NCH)
+      return AF_FALSE;
     for(i=0;i<AF_NCH;i++)
       level[i] = s->level[ch][i];
     return AF_OK;
