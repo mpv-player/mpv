@@ -104,8 +104,8 @@ char * proc_priority=NULL;
 #include <rtc.h>
 #define RTC_IRQP_SET RTCIO_IRQP_SET
 #define RTC_PIE_ON   RTCIO_PIE_ON
-#endif
-#endif
+#endif /* __linux__ */
+#endif /* HAVE_RTC */
 
 #ifdef USE_TV
 #include "libmpdemux/tv.h"
@@ -813,7 +813,7 @@ void update_set_of_subtitles()
         ++set_of_sub_size;
     }
 }
-#endif
+#endif /* USE_SUB */
 
 /*
  * In Mac OS X the SDL-lib is built upon Cocoa. The easiest way to
@@ -1012,7 +1012,7 @@ static void log_sub(){
     }
     fclose(f);
 }
-#endif
+#endif /* USE_SUB */
 
 int main(int argc,char* argv[]){
 
@@ -1097,8 +1097,8 @@ int gui_no_filename=0;
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
 #endif
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
-#endif
-#endif
+#endif /* RUNTIME_CPUDETECT */
+#endif /* defined(ARCH_X86) || defined(ARCH_X86_64) */
 
 #if defined(WIN32) && defined(USE_WIN32DLL)
 {  /*make our codec dirs available for LoadLibraryA()*/
@@ -1205,7 +1205,7 @@ int gui_no_filename=0;
       // Import initital playtree into gui
       import_initial_playtree_into_gui(playtree, mconfig, enqueue);
     }
-#endif
+#endif /* HAVE_NEW_GUI */
 
     if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
       list_video_out();
@@ -1354,7 +1354,7 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
 #ifdef HAVE_FONTCONFIG
   }
 #endif
-#endif
+#endif /* USE_OSD */
   vo_init_osd();
 
 #ifdef HAVE_RTC
@@ -1387,7 +1387,7 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
     if(use_gui) setuid( getuid() ); // strongly test, please check this.
 #endif
     if(rtc_fd<0)
-#endif
+#endif /* HAVE_RTC */
       mp_msg(MSGT_CPLAYER, MSGL_V, "Using %s timing\n",
 	     softsleep?"software":timer_name);
 
@@ -1540,7 +1540,7 @@ if(!noconsolecontrols && !slave_mode){
          }
        } 
     }
-#endif
+#endif /* HAVE_NEW_GUI */
 
 while (player_idle_mode && !filename) {
     play_tree_t * entry = NULL;
@@ -2019,7 +2019,7 @@ if(sh_video) {
       global_sub_size += set_of_sub_size;
   }
 }
-#endif
+#endif /* USE_SUB */
 
 if (global_sub_size) {
   // find the best sub to use
@@ -2580,7 +2580,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
 	}
     }
-#endif
+#endif /* SYS_DARWIN */
 }
 
 //if(!frame_time_remaining){	// should we display the frame now?
@@ -3342,7 +3342,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		}
 	  }
 	}
-#endif	
+#endif /* HAS_DVBIN_SUPPORT */
     break;
     case MP_CMD_TV_SET_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
@@ -3377,7 +3377,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  }
 	}
   }
-#endif	
+#endif /* HAS_DVBIN_SUPPORT	*/
     case MP_CMD_TV_LAST_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
 	tv_last_channel((tvi_handle_t*)(demuxer->priv));
@@ -3397,7 +3397,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if (file_format == DEMUXER_TYPE_TV)
 	tv_step_chanlist((tvi_handle_t*)(demuxer->priv));
     } break;
-#endif
+#endif /* USE_TV */
     case MP_CMD_SWITCH_VSYNC:  {
       vo_vsync = ( cmd->nargs > 0 )? cmd->args[0].v.i : !vo_vsync;
     } break;
@@ -3552,7 +3552,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
           set_of_subtitles[set_of_sub_size] = NULL;
         }
       }
-#endif
+#endif /* USE_SUB */
     } break;
     case MP_CMD_GET_SUB_VISIBILITY:
 	{
@@ -3812,7 +3812,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
                 d_dvdsub->id=dvdsub_id=stream_change->physical;
                 if (vo_spudec) spudec_reset(vo_spudec);
         }
-#endif
+#endif /* DVDNAVVERSION > 012 */
         break;
         }
       case DVDNAV_AUDIO_STREAM_CHANGE: {
@@ -3919,7 +3919,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
       break;
     }
-#endif
+#endif /* USE_DVDNAV */
     default : {
 #ifdef HAVE_NEW_GUI
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );
@@ -4015,7 +4015,7 @@ if(rel_seek_secs || abs_seek_pos){
 	  }
 	}
       }
-#endif
+#endif /* USE_OSD */
       if(sh_video) {
 	c_total=0;
 	max_pts_correction=0.1;
@@ -4086,7 +4086,7 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 	 }
 #endif
       }
-#endif
+#endif /* HAVE_NEW_GUI */
 
 
 //================= Update OSD ====================
@@ -4240,7 +4240,7 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
   }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
 //  vo_osd_text=osd_text_buffer;
-#endif
+#endif /* USE_OSD */
   
 #ifdef USE_SUB
   // find sub
