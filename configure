@@ -2835,7 +2835,7 @@ EOF
     _ld_iconv='-liconv'
   elif cc_check $_ld_lm -liconv $_ld_dl ; then
     _iconv=yes
-    _ld_iconv='-liconv $_ld_dl'
+    _ld_iconv="-liconv $_ld_dl"
   fi
 fi
 if test "$_iconv" = yes ; then
