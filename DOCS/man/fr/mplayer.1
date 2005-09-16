@@ -1,4 +1,4 @@
-.\" synced with 1.1100
+.\" synced with 1.1102
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2885,7 +2885,7 @@ RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
 .RSss
 0: Utilise des textures de taille d'une puissance de deux (par défaut).
 .br
-1: Utilise texture_rectangle.
+1: Utilise texture_rectangle, incompatible avec la conversion YUV matérielle.
 .br
 2: Utilise texture_non_puissance_de_deux.
 .REss
@@ -2902,6 +2902,44 @@ horizontal / n).
 Requiert le support de GLX_SGI_swap_control pour fonctionner.
 Avec certaines implémentation (la plupart/toutes?) ceci ne fonctionne
 qu'en mode plein écran
+.IPs yuv=<n>
+Choisi le type de conversion YUV vers RGB.
+.RSss
+0: Utilise la conversion logicielle (par défaut).
+Compatible avec toutes les version d'OpenGL.
+Offre le contrôle de la luminosité, du contraste et de la saturation.
+.br
+1: Utilise les "register combiners".
+Ceci utilise un extension nVidia (GL_NV_register_combiners).
+Au moins trois unitées de texture sont nécessaires.
+Offre le contrôle de la saturation et de la teinte.
+.br
+2: Utilise un "programme fragment" (fragment de programme).
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+de textures.
+Offre le contrôle de la luminosité, du contraste, de la saturation, et
+de la teinte.
+.br
+3: Utilise un "programme fragment" (fragment de programme) utilisant
+l'instruction POW.
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+de texture.
+Offre le contrôle de la luminosité, du contraste, de la saturation, de
+la teinte et du gamma.
+Le chaque composante rouge, verte et bleue du gamma peut être configurée.
+La méthode 4 est généralement plus rapide.
+.br
+4: Utilise un "programme fragment" (fragment de programme) avec une
+consultation de table.
+Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
+de texture.
+Offre le contrôle de la luminosité, du contraste, de la saturation, de
+la teinte et du gamma.
+Le chaque composante rouge, verte et bleue du gamma peut être configurée.
+.REss
+.IPs customprog=<nom_fichier>
+Charge un programme fragment personnalisé depuis <nom_fichier>.
+Voir l'exemple TOOLS/edgedect.fp.
 .REss
 .RE
 .PD 1
@@ -2911,6 +2949,47 @@ qu'en mode plein écran
 Pilote de sortie vidéo OpenGL, seconde génération.
 Gère l'OSD et les vidéo de taille supérieure à la taille maximum d'une
 texture.
+.PD 0
+.RSs
+.IPs (no)glfinish
+Appelle glFinish() avant d'échanger les tampons.
+Plus lent mais donne un meilleur résultat visuel (par défaut\ : activé)
+.IPs yuv=<n>
+Choisi le type de conversion YUV vers RGB.
+.RSss
+0: Utilise la conversion logicielle (par défaut).
+Compatible avec toutes les version d'OpenGL.
+Offre le contrôle de la luminosité, du contraste et de la saturation.
+.br
+1: Utilise les "register combiners".
+Ceci utilise un extension nVidia (GL_NV_register_combiners).
+Au moins trois unitées de texture sont nécessaires.
+Offre le contrôle de la saturation et de la teinte.
+.br
+2: Utilise un "programme fragment" (fragment de programme).
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+de textures.
+Offre le contrôle de la luminosité, du contraste, de la saturation, et
+de la teinte.
+.br
+3: Utilise un "programme fragment" (fragment de programme) utilisant
+l'instruction POW.
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+de texture.
+Offre le contrôle de la luminosité, du contraste, de la saturation, de
+la teinte et du gamma.
+Le chaque composante rouge, verte et bleue du gamma peut être configurée.
+La méthode 4 est généralement plus rapide.
+.br
+4: Utilise un "programme fragment" (fragment de programme) avec une
+consultation de table.
+Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
+de texture.
+Offre le contrôle de la luminosité, du contraste, de la saturation, de
+la teinte et du gamma.
+Le chaque composante rouge, verte et bleue du gamma peut être configurée.
+.REss
+.REss
 .
 .TP
 .B null\ \ \ 
@@ -4154,18 +4233,22 @@ Un exemple de mixage de six canaux vers deux à l'aide de ce filtre peut
 .PD 0
 .RSs
 .IPs <n>\ \ 
-nombre de canaux d'entrée (1\-6)
+nombre de canaux de sortie (1\-6)
 .IPs <lij>
-Combien du canal j est mixé dans le canal de sortie i (0\-1).
+Combien du canal i est mixé dans le canal de sortie j (0\-1).
+En principe, vous avez n nombres spécifiant ce que faire avec le premier
+canal d'entrée, et n nombres agissant sur le canal d'entrée, etc.
+Si vous ne donnez pas de nombre pour certains des canaux d'entrée, ils
+prennent la valeur 0.
 .RE
 .sp 1
 .RS
 .I EXEMPLE\ :
 .RE
 .RSs
-.IPs "mplayer \-af pan=1:0.5:0.5 -channels 1 media.avi"
+.IPs "mplayer \-af pan=1:0.5:0.5 media.avi"
 Mixe ensemble les canaux stéréo vers mono.
-.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+.IPs "mplayer \-af pan=3:1:0:0.5:0:1:0.5 media.avi"
 Donnerait 3 canaux, en laissant là où ils sont les canaux 0 et 1,
 et mixerait les canaux 0 et 1 vers le canal 2 (qui pourrait par
 exemple être envoyé sur un caisson de basse).
@@ -9389,7 +9472,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
-mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+mplayer \-rawaudio on:format=0xff \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .br
 Peut-être vous aurez à ajuster un peu la valeur de pan (par c-à-d la
 multiplier par une valeur) pour augementer le volume ou éviter l'écrêtage
