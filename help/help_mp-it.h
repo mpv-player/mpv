@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.178
+// Updated to help_mp-en.h v1.181
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -164,6 +164,7 @@ static char help_text[]=
 "agli script di avvio del sistema.\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC: errore di init in ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Uso la temporizzazione %s.\n"
+#define MSGTR_NoIdleAndGui "L'opzione -idle non può essere usata con GMPlayer.\n"
 #define MSGTR_MenuInitialized "Menu inizializzato: %s\n"
 #define MSGTR_MenuInitFailed "Inizializzazione Menu fallita.\n"
 #define MSGTR_Getch2InitializedTwice "WARNING: getch2_init chiamata 2 volte!\n"
@@ -847,7 +848,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FPS "FPS del filmato:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Mostra la finestra video anche quando non è attiva"
 #define MSGTR_PREFERENCES_ArtsBroken "Le nuove versioni di aRts sono incompatibili "\
-           "con GTK 1.x e gmplayer crasherà!"
+           "con GTK 1.x e GMPlayer crasherà!"
 
 #define MSGTR_ABOUT_UHU "Lo sviluppo della GUI è sponsorizzato da UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Team sviluppo MPlayer:\n"
@@ -949,18 +950,17 @@ static char help_text[]=
 // vo_yuv4mpeg.c
 #define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "La modalità interlacciata richiede l'altezza immagine divisibile per 4."
 #define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Impossibile allocare il buffer di linea per la modalità interlacciata." 
-// TODO: chrominance = ?
-#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "L'input non è RGB, non posso separare la chrominance per campi!"
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "L'input non è RGB, non posso separare la crominanza per campi!"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "La larghezza immagine dev'essere divisibile per 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Non c'è abbastanza memoria per allocare il framebuffer RGB."
 #define MSGTR_VO_YUV4MPEG_OutFileOpenError "Non posso allocare memoria o spazio per scrivere \"%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Errore di scrittura dell'immagine in uscita!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Subdispositivo sconosciuto: %s"
-// TODO: top-field/bottom-field first = ?
+// 'top-field first'/'bottom-field first' should be left as they are written,
+// since there's a reference to these in the man page
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Uso modalità di uscita interlacciata, top-field first."
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Uso modalità di uscita interlacciata, bottom-field first."
-// TODO: progressive frame = ?
-#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Uso la modalità frame progressivo (default)."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Uso la modalità fotogramma progressivo (default)."
 
 // Old vo drivers that have been replaced
 
@@ -1056,11 +1056,11 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: errore 'drain' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: errore 'flush' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: errore chiusura pcm: %s\n"
-#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: errore drain riproduzione: %s\n"
-#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: errore flush riproduzione: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: errore 'drain' riproduzione: %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: errore 'flush' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: errore preparazione canale: %s\n"
-#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: errore drain riproduzione: %s\n"
-#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: errore flush riproduzione: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: errore 'drain' riproduzione: %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: errore 'flush' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: errore preparazione canale: %s\n"
 #define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: ritardo alsa, reimposto il flusso.\n"
 #define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: errore preparazione riproduzione: %s\n"
