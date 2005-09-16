@@ -813,6 +813,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         data+= sizeof(dp_hdr_t);
     }
 
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "vd_ffmpeg data: %04x, %04x, %04x, %04x\n",
+           ((int *)data)[0], ((int *)data)[1], ((int *)data)[2], ((int *)data)[3]);
     ret = avcodec_decode_video(avctx, pic,
 	     &got_picture, data, len);
 
