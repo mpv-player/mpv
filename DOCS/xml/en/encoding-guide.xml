@@ -2859,7 +2859,7 @@ codec</title>
 <sect2 id="menc-feat-xvid-encoding-profiles">
 <title>Encoding profiles</title>
 <para>
-  Xvid supports encoding profiles through the option <option>profile</option>,
+  XviD supports encoding profiles through the <option>profile</option> option,
   which are used to impose restrictions on the properties of the XviD video
   stream such that it will be playable on anything which supports the
   chosen profile.
