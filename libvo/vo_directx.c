@@ -913,6 +913,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>killing screensaver\n" );
                 return 0;                      
 			}
+			break;
 		}
         case WM_KEYDOWN:
 		{
