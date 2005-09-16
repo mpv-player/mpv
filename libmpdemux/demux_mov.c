@@ -276,7 +276,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
 	    e_pts+=el->dur;
 	    // find end sample
 	    for(;sample<trak->samples_size;sample++){
-		if(pts<=trak->samples[sample].pts) break;
+		if(pts<trak->samples[sample].pts) break;
 	    }
 	    el->frames=sample-el->start_sample;
 	    frame+=el->frames;
