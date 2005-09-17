@@ -160,7 +160,7 @@ stream_header:
 	msb_pts_shift				v
 	decode_delay				v
 	fixed_fps				u(1)
-	reserved				u(6)
+	reserved				u(7)
 	codec_specific_data			vb
 
 video_stream_header:
