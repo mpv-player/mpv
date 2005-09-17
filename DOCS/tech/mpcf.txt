@@ -459,7 +459,7 @@ dts
 	stream, into which the current pts is inserted and the element with
 	the smallest value is removed, this is then the current dts
 	this buffer is initalized with decode_delay -1 elements
-	all frames except repeated frames must be monotone, that means a frame
+	all frames must be monotone, that means a frame
 	which occurs later in the stream must have a larger or equal dts
 	than an earlier frame
 
@@ -597,8 +597,6 @@ An index SHOULD be written for every stream. Indices MUST be placed at end
 of file. Indices MAY be repeated for a stream.
 
 		Info frames
-a info frame can be repeated, but must then be exactly identical
-Note, such repeated frames can be detected by their pts difference of 0
 Info frames can be used to describe the file or some part of it (chapters)
 
 		Unknown packets
