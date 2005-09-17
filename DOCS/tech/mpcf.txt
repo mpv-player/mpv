@@ -216,9 +216,7 @@ index:
 	reserved_bytes
 	checksum				u(32)
 
-info_packet: (optional)
-	info_startcode				f(64)
-	packet header
+info_frame: (optional)
 	for(;;){
 		id				v
 		if(id==0) break
@@ -235,10 +233,16 @@ info_packet: (optional)
 	}
 	reserved_bytes
         checksum				u(32)
-        
+
+info_packet: (optional)
+	info_startcode				f(64)
+	packet header
+	info_frame 
+
 sync_point:
 	frame_startcode				f(64)
-		global_timestamp		v
+	global_timestamp			v
+	back_ptr				v
 
 			Complete definition:
 
@@ -254,14 +258,13 @@ file:
 			else
 				other_stream_header
 		}
+		while(next_code == info_startcode){
+			info_packet
+		}
 		while(next_code != main_startcode){
-			if(next_code == info_startcode)
-				info_packet
-			else{
-				if(next_code == frame_startcode)
-					sync_point
-				frame
-			}
+			if(next_code == frame_startcode)
+				sync_point
+			frame
 		}
 	}
 	if (next_code == index_startcode){
@@ -277,6 +280,10 @@ file:
 forward_ptr
 	size of the packet data (exactly the distance from the first byte
 	after the forward_ptr to the first byte of the next packet)
+
+back_ptr
+	pointer to the latest syncpoint, for which there is at least one
+	keyframe prior to the global_timestamp in every stream
 
 file_id_string
 	"nut/multimedia container\0"
@@ -331,6 +338,8 @@ stream_class
 	1	audio
 	2	subtiles
 	3	metadata
+	4	userdata
+	in metadata streams each frame contains exactly one info frame
 	Note: the remaining values are reserved and MUST NOT be used
 	     a demuxer MUST ignore streams with reserved classes
 
@@ -450,7 +459,7 @@ dts
 	stream, into which the current pts is inserted and the element with
 	the smallest value is removed, this is then the current dts
 	this buffer is initalized with decode_delay -1 elements
-	all frames with dts == timestamp must be monotone, that means a frame
+	all frames except repeated frames must be monotone, that means a frame
 	which occurs later in the stream must have a larger or equal dts
 	than an earlier frame
 
@@ -580,22 +589,17 @@ headers MUST be placed at least at the start of the file and immediately before
 the index or at the file end if there is no index
 headers MUST be repeated at least twice (so they exist three times in a file)
 
-info packets which describe the whole file or individual streams/tracks MUST be
-placed before any video/audio/... frames
+there MUST be a sync point immedeatly before the first frame after any headers
 
 		Index
 Note: with realtime streaming, there is no end, so no index there either
 An index SHOULD be written for every stream. Indices MUST be placed at end
 of file. Indices MAY be repeated for a stream.
 
-		Info packets
-the info_packet can be repeated, and can also contain different names & values
-each time, but only if the time is different
-Info packets can be used to describe the file or some part of it (chapters)
-
-info packets SHOULD be placed at the start of the file at least for realtime
-streaming info packets will normally be transmitted when they apply for
-example, the current song title & artist of the currently shown music video
+		Info frames
+a info frame can be repeated, but must then be exactly identical
+Note, such repeated frames can be detected by their pts difference of 0
+Info frames can be used to describe the file or some part of it (chapters)
 
 		Unknown packets
 MUST be ignored by the demuxer
