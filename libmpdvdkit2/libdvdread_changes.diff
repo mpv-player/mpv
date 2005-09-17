@@ -160,7 +160,16 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  
  /**
   * Open a DVD image or block device file.
-@@ -282,7 +305,7 @@
+@@ -278,11 +301,16 @@
+    Darwin  /dev/rdisk0,  it needs to be the raw device
+    BSD/OS  /dev/sr0c (if not mounted) or /dev/rsr0c ('c' any letter will do) */
+ static char *bsd_block2char( const char *path )
++#if defined(__FreeBSD__)
++{
++    return (char *) strdup( path );
++}
++#else
+ {
      char *new_path;
  
      /* If it doesn't start with "/dev/" or does start with "/dev/r" exit */ 
@@ -169,7 +178,15 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
        return (char *) strdup( path );
  
      /* Replace "/dev/" with "/dev/r" */
-@@ -303,6 +326,16 @@
+@@ -292,6 +320,7 @@
+ 
+     return new_path;
+ }
++#endif /* __FreeBSD__ */
+ #endif
+ 
+ dvd_reader_t *DVDOpen( const char *path )
+@@ -303,6 +332,16 @@
      if( path == NULL )
        return 0;
  
@@ -186,7 +203,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
      ret = stat( path, &fileinfo );
      if( ret < 0 ) {
  	/* If we can't stat the file, give up */
-@@ -310,6 +343,7 @@
+@@ -310,6 +349,7 @@
  	perror("");
  	return 0;
      }
@@ -194,7 +211,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  
      /* Try to open libdvdcss or fall back to standard functions */
      have_css = dvdinput_setup();
-@@ -335,7 +369,7 @@
+@@ -335,7 +375,7 @@
  	char *path_copy;
  #if defined(SYS_BSD)
  	struct fstab* fe;
@@ -203,7 +220,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  	FILE *mntfile;
  #endif
  
-@@ -350,7 +384,9 @@
+@@ -350,7 +390,9 @@
  	    if( cdir >= 0 ) {
  		chdir( path_copy );
  		new_path = getcwd( NULL, PATH_MAX );
@@ -213,7 +230,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  		close( cdir );
  		if( new_path ) {
  		    free( path_copy );
-@@ -406,7 +442,7 @@
+@@ -406,7 +448,7 @@
  	    }
  	    fclose( mntfile );
  	}
@@ -222,7 +239,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
          mntfile = fopen( MOUNTED, "r" );
          if( mntfile ) {
              struct mntent *me;
-@@ -425,6 +461,9 @@
+@@ -425,6 +467,9 @@
              }
              fclose( mntfile );
  	}
@@ -232,7 +249,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  #endif
  	if( !dev_name ) {
  	  fprintf( stderr, "libdvdread: Couldn't find device name.\n" );
-@@ -615,8 +654,8 @@
+@@ -615,8 +660,8 @@
      }
      
      if( dvd->css_state == 1 /* Need key init */ ) {
@@ -243,7 +260,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
      }
      /*    
      if( dvdinput_title( dvd_file->dvd->dev, (int)start ) < 0 ) {
-@@ -915,7 +954,7 @@
+@@ -915,7 +960,7 @@
      return (ssize_t)ret;
  }
  

@@ -301,6 +301,11 @@ static char *sun_block2char( const char *path )
    Darwin  /dev/rdisk0,  it needs to be the raw device
    BSD/OS  /dev/sr0c (if not mounted) or /dev/rsr0c ('c' any letter will do) */
 static char *bsd_block2char( const char *path )
+#if defined(__FreeBSD__)
+{
+    return (char *) strdup( path );
+}
+#else
 {
     char *new_path;
 
@@ -315,6 +320,7 @@ static char *bsd_block2char( const char *path )
 
     return new_path;
 }
+#endif /* __FreeBSD__ */
 #endif
 
 dvd_reader_t *DVDOpen( const char *path )
