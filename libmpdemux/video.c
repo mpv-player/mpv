@@ -517,6 +517,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
             ((demuxer->file_format==DEMUXER_TYPE_MPEG_PS) && (sh_video->format==0x10000005))
   ){
       //
+        int in_picture = 0;
         while(videobuf_len<VIDEOBUFFER_SIZE-MAX_VIDEO_PACKET_SIZE){
           int i=sync_video_packet(d_video);
           int pos = videobuf_len+4;
@@ -532,7 +533,27 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
             if(!i) return -1;
             if(!read_video_packet(d_video)) return -1; // EOF
           }
-          if((i&~0x60) == 0x101 || (i&~0x60) == 0x102 || (i&~0x60) == 0x105) break;
+
+          // here starts the access unit end detection code
+          // see the mail on MPlayer-dev-eng for details:
+          // Date: Sat, 17 Sep 2005 11:24:06 +0200
+          // Subject: Re: [MPlayer-dev-eng] [RFC] h264 ES parser problems
+          // Message-ID: <20050917092406.GA7699@rz.uni-karlsruhe.de>
+          if((i&~0x60) == 0x101 || (i&~0x60) == 0x102 || (i&~0x60) == 0x105)
+            // found VCL NAL with slice header i.e. start of current primary coded
+            // picture, so start scanning for the end now
+            in_picture = 1;
+          if (in_picture) {
+            i = sync_video_packet(d_video) & ~0x60; // code of next packet
+            if(i == 0x106 || i == 0x109) break; // SEI or access unit delim.
+            if(i == 0x101 || i == 0x102 || i == 0x105) {
+              // assuming arbitrary slice ordering is not allowed, the
+              // first_mb_in_slice (golomb encoded) value should be 0 then
+              // for the first VCL NAL in a picture
+              if (demux_peekc(d_video) & 0x80)
+                break;
+            }
+          }
         }
 	*start=videobuffer; in_size=videobuf_len;
 	videobuf_len=0;
