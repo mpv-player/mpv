@@ -801,9 +801,11 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	else
 		create->max_bframes = 0;
 
+#if XVID_API >= XVID_MAKE_API(4,1)
 	/* dxn: always write divx5 userdata */
 	if(selected_profile->flags & PROFILE_DXN)
 		create->global |= XVID_GLOBAL_DIVX5_USERDATA;
+#endif
 	
 	create->max_key_interval = xvidenc_max_key_interval;
 	create->frame_drop_ratio = xvidenc_frame_drop_ratio;
@@ -841,10 +843,12 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 
 	/* VBV */
 
+#if XVID_API >= XVID_MAKE_API(4,1)
 	pass2->vbv_size = selected_profile->max_vbv_size;
 	pass2->vbv_initial = (selected_profile->max_vbv_size*3)>>2; /* 75% */
 	pass2->vbv_maxrate = selected_profile->max_bitrate;
 	pass2->vbv_peakrate = selected_profile->vbv_peakrate*3;
+#endif
 // XXX: xvidcore currently provides a "peak bits over 3 seconds" constraint.
 // according to the latest dxn literature, a 1 second constraint is now used
 
