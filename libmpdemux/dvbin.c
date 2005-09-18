@@ -129,15 +129,15 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 {
 	dvb_channels_list  *list;
 	FILE *f;
-	uint8_t line[CHANNEL_LINE_LEN];
+	char line[CHANNEL_LINE_LEN], *colon;
 
-	int fields, cnt, pcnt;
+	int fields, cnt, pcnt, k;
 	dvb_channel_t *ptr, *tmp, chn;
-	char *tmp_lcr, *tmp_hier, *inv, *bw, *cr, *mod, *transm, *gi, *vpid_str, *apid_str;
-	const char *cbl_conf = "%a[^:]:%d:%a[^:]:%d:%a[^:]:%a[^:]:%a[^:]:%a[^:]\n";
-	const char *sat_conf = "%a[^:]:%d:%c:%d:%d:%a[^:]:%a[^:]\n";
-	const char *ter_conf = "%a[^:]:%d:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]\n";
-	const char *atsc_conf = "%a[^:]:%d:%a[^:]:%a[^:]:%a[^:]\n";
+	char tmp_lcr[256], tmp_hier[256], inv[256], bw[256], cr[256], mod[256], transm[256], gi[256], vpid_str[256], apid_str[256];
+	const char *cbl_conf = "%d:%255[^:]:%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
+	const char *sat_conf = "%d:%c:%d:%d:%255[^:]:%255[^:]\n";
+	const char *ter_conf = "%d:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]:%255[^:]\n";
+	const char *atsc_conf = "%d:%255[^:]:%255[^:]:%255[^:]\n";
 	
 	mp_msg(MSGT_DEMUX, MSGL_V, "CONFIG_READ FILE: %s, type: %d\n", filename, type);
 	if((f=fopen(filename, "r"))==NULL)
@@ -164,23 +164,38 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 		if((line[0] == '#') || (strlen(line) == 0))
 			continue;
 
-
-		apid_str = vpid_str = NULL;
+		colon = index(line, ':');
+		if(colon)
+		{
+			k = colon - line;
+			if(!k)
+				continue;
+			ptr->name = (char*) malloc(k+1);
+			if(! ptr->name)
+				continue;
+			strncpy(ptr->name, line, k);
+			ptr->name[k] = 0;
+		}
+		else
+			continue;
+		k++;
+		apid_str[0] = vpid_str[0] = 0;
 		ptr->pids_cnt = 0;
+		ptr->freq = 0;
 		if(type == TUNER_TER)
 		{
-			fields = sscanf(line, ter_conf,
-				&ptr->name, &ptr->freq, &inv, &bw, &cr, &tmp_lcr, &mod,
-				&transm, &gi, &tmp_hier, &vpid_str, &apid_str);
+			fields = sscanf(&line[k], ter_conf,
+				&ptr->freq, inv, bw, cr, tmp_lcr, mod,
+				transm, gi, tmp_hier, vpid_str, apid_str);
 			mp_msg(MSGT_DEMUX, MSGL_V,
 				"TER, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d",
 				list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
 		}
 		else if(type == TUNER_CBL)
 		{
-			fields = sscanf(line, cbl_conf,
-				&ptr->name, &ptr->freq, &inv, &ptr->srate,
-				&cr, &mod, &vpid_str, &apid_str);
+			fields = sscanf(&line[k], cbl_conf,
+				&ptr->freq, inv, &ptr->srate,
+				cr, mod, vpid_str, apid_str);
 			mp_msg(MSGT_DEMUX, MSGL_V,
 				"CBL, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d, SRATE: %d",
 				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate);
@@ -188,8 +203,8 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 #ifdef DVB_ATSC
 		else if(type == TUNER_ATSC)
 		{
-			fields = sscanf(line, atsc_conf,
-				&ptr->name, &ptr->freq, &mod, &vpid_str, &apid_str);
+			fields = sscanf(&line[k], atsc_conf,
+				 &ptr->freq, mod, vpid_str, apid_str);
 			mp_msg(MSGT_DEMUX, MSGL_V,
 				"ATSC, NUM: %d, NUM_FIELDS: %d, NAME: %s, FREQ: %d\n",
 				list->NUM_CHANNELS, fields, ptr->name, ptr->freq);
@@ -197,8 +212,8 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 #endif
 		else //SATELLITE
 		{
-			fields = sscanf(line, sat_conf,
-				&ptr->name, &ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, &vpid_str, &apid_str);
+			fields = sscanf(&line[k], sat_conf,
+				&ptr->freq, &ptr->pol, &ptr->diseqc, &ptr->srate, vpid_str, apid_str);
 			ptr->pol = toupper(ptr->pol);
 			ptr->freq *=  1000UL;
 			ptr->srate *=  1000UL;
@@ -214,7 +229,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 				list->NUM_CHANNELS, fields, ptr->name, ptr->freq, ptr->srate, ptr->pol, ptr->diseqc);
 		}
 
-		if(vpid_str != NULL)
+		if(vpid_str[0])
 		{
 			pcnt = sscanf(vpid_str, "%d+%d+%d+%d+%d+%d+%d", &ptr->pids[0], &ptr->pids[1], &ptr->pids[2], &ptr->pids[3],
 				&ptr->pids[4], &ptr->pids[5], &ptr->pids[6]);
@@ -225,7 +240,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			}
 		}
 		
-		if(apid_str != NULL)
+		if(apid_str[0])
 		{
 			cnt = ptr->pids_cnt;
 			pcnt = sscanf(apid_str, "%d+%d+%d+%d+%d+%d+%d+%d", &ptr->pids[cnt], &ptr->pids[cnt+1], &ptr->pids[cnt+2],
@@ -237,7 +252,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			}
 		}
 
-		if((fields < 3) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
+		if((fields < 2) || (ptr->pids_cnt <= 0) || (ptr->freq == 0) || (strlen(ptr->name) == 0))
 			continue;
 
 
