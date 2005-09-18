@@ -186,17 +186,17 @@ mencoder \- movie encoder
 .B mplayer
 is a movie player for Linux (runs on many other platforms and CPU
 architectures, see the documentation).
-It plays most MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM,
+It plays most MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM,
 MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ files, supported by many
 native and binary codecs.
-You can watch VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 and even WMV movies,
+You can watch Video CD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 and even WMV movies,
 too.
 .PP
 MPlayer supports a wide range of video and audio output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, Mac OS X CoreVideo, but you can also use GGI, SDL (and all their drivers),
 VESA (on every VESA-compatible card, even without X11), some low-level 
-card-specific drivers (for Matrox, 3Dfx and ATI) and some hardware MPEG decoder
+card-specific drivers (for Matrox, 3dfx and ATI) and some hardware MPEG decoder
 boards, such as the Siemens DVB, DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
 fullscreen mode.
@@ -215,7 +215,7 @@ below).
 It encodes to MPEG-4 (DivX/XviD), one of the libavcodec codecs and
 PCM/\:MP3/\:VBRMP3 audio in 1, 2 or 3\ passes.
 Furthermore it has stream copying abilities, a powerful filter system (crop,
-expand, flip, postprocess, rotate, scale, noise, rgb/\:yuv conversion) and
+expand, flip, postprocess, rotate, scale, noise, RGB/\:YUV conversion) and
 more.
 .PP
 .B gmplayer
@@ -557,7 +557,7 @@ immediately.
 .
 .TP
 .B \-fixed-vo (BETA CODE!)
-Enforces a fixed video system for multiple files (one (un)initialisation for
+Enforces a fixed video system for multiple files (one (un)initialization for
 all files).
 Therefore only one window will be opened for all files.
 Currently the following drivers are fixed-vo compliant: gl, gl2, mga, svga, x11,
@@ -609,7 +609,7 @@ Specify input configuration file other than the default
 ~/\:.mplayer/\:input.conf.
 ~/\:.mplayer/\:<filename> is assumed if no full path is given.
 .IPs ar-delay
-Delay in msec before we start to autorepeat a key (0 to disable).
+Delay in milliseconds before we start to autorepeat a key (0 to disable).
 .IPs ar-rate
 Number of key presses to generate per second on autorepeat.
 .IPs keylist
@@ -636,7 +636,7 @@ If it is too small some events may be lost
 (leading to "stuck mouse buttons" and similar effects).
 If it is too big, MPlayer may seem to hang while it
 processes the buffered events.
-To get the same behaviour as before this option was introduced,
+To get the same behavior as before this option was introduced,
 set it to 2 for Linux or 1024 for Windows.
 .
 .TP
@@ -1107,7 +1107,7 @@ Falls back on IPv4 automatically.
 .TP
 .B \-rawaudio <option1:option2:...>
 This option lets you play raw audio files.
-It may also be used to play audio CDs which are not 44KHz 16-bit stereo.
+It may also be used to play audio CDs which are not 44kHz 16-bit stereo.
 For playing raw AC3 streams use \-rawaudio on:format=0x2000.
 .sp 1
 Available options are:
@@ -1214,7 +1214,7 @@ Sometimes needed to play corrupted MPEG-TS files.
 .B \-tsprobe <byte\ position>
 When playing an MPEG-TS stream, this option lets you specify how many
 bytes in the stream you want MPlayer to search for the desired
-audio and video pids.
+audio and video IDs.
 .
 .TP
 .B \-tsprog <1\-65534>
@@ -1584,7 +1584,7 @@ Big values mean more transparency.
 .TP
 .B \-sub-bg-color <0\-255>
 Specify the color value for subtitles and OSD backgrounds.
-Currently subtitles are grayscale so this value is equivalente to the
+Currently subtitles are grayscale so this value is equivalent to the
 intensity of the color.
 255 means white and 0 black.
 .
@@ -2338,7 +2338,7 @@ For optimal performance, this can be combined with '\-lavdopts gray'.
 .
 .TP
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr only)
-Select a part of the input image to display, multiple occurences
+Select a part of the input image to display, multiple occurrences
 of this option switch on cinerama mode.
 In cinerama mode the movie is distributed over more than one TV
 (or beamer) to create a larger image.
@@ -2493,7 +2493,7 @@ Queue frames for display to allow more parallel work of the video hardware.
 May add a small (not noticeable) constant A/\:V desync (default: noqueue).
 .IPs (no)sleep
 Use sleep function while waiting for rendering to finish
-(not recomended on Linux) (default: nosleep).
+(not recommended on Linux) (default: nosleep).
 .IPs ck=cur|use|set
 Same as \-vo xv:ck (see \-vo xv).
 .IPs ck-method=man|bg|auto
@@ -2525,7 +2525,7 @@ Use hardware accelerated scaler (default: hwaccel).
 .
 .TP
 .B vidix\ \ 
-VIDIX (VIDeo Interface for *niX) is an interface to the
+VIDIX (VIDeo Interface for *nIX) is an interface to the
 video acceleration features of different graphics cards.
 Very fast video output driver on cards that support it.
 .PD 0
@@ -2551,7 +2551,7 @@ same as vidix
 .TP
 .B cvidix\ 
 Generic and platform independent VIDIX frontend, can even run in a
-textconsole with nVidia cards.
+text console with nVidia cards.
 .PD 0
 .RSs
 .IPs <subdevice>
@@ -2826,7 +2826,7 @@ Play video using the DirectFB library.
 Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
 .IPs buffermode=single|double|triple
 Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it does
+Triple buffering is more efficient than double buffering as it does
 not block MPlayer while waiting for the vertical retrace.
 Single buffering should be avoided (default: single).
 .IPs fieldparity=top|bottom
@@ -2907,15 +2907,15 @@ the vertical retrace of your monitor.
 .
 .TP
 .B 3dfx (Linux only)
-3Dfx specific video output driver.
-This driver directly uses the 3Dfx hardware on top of X11.
+3dfx specific video output driver.
+This driver directly uses the 3dfx hardware on top of X11.
 Only 16 bpp are supported.
 FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux only)
 This driver employs the tdfx framebuffer driver to play movies with
-YUV acceleration on 3Dfx cards.
+YUV acceleration on 3dfx cards.
 FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .PD 0
 .RSs
@@ -2926,7 +2926,7 @@ Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
 .
 .TP
 .B tdfx_vid (Linux only)
-3Dfx specific video output driver.
+3dfx specific video output driver.
 This driver directly uses the tdfx_vid kernel module.
 FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .PD 0
@@ -3411,7 +3411,7 @@ Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the top.
 .IPs skiploopfilter=<skipvalue> (H.264 only)
-Skips the loop filter (aka deblocking) during H.264 decoding.
+Skips the loop filter (AKA deblocking) during H.264 decoding.
 Since the filtered frame is supposed to be used as reference
 for decoding dependant frames this has a worse effect on quality
 than not doing deblocking on e.g.\& MPEG-2 video.
@@ -3476,7 +3476,7 @@ Do not play/\:encode video.
 .
 .TP
 .B \-oldpp <quality> (OpenDivX only) (OBSOLETE)
-Use the opendivx postprocessing code instead of the internal one.
+Use the OpenDivX postprocessing code instead of the internal one.
 Superseded by \-pp, the internal postprocessing offers better
 quality and performance.
 The valid range of \-oldpp values varies by codec, it is mostly
@@ -3553,7 +3553,7 @@ bicubic (good quality) (default)
 .IPs 3
 experimental
 .IPs 4
-nearest neighbour (bad quality)
+nearest neighbor (bad quality)
 .IPs 5
 area
 .IPs 6
@@ -3591,7 +3591,7 @@ See \-vc help for a full list of available codecs.
 .PD 0
 .RSs
 .IPs "\-vc divx"
-Force Win32/\:VFW DivX codec, no fallback.
+Force Win32/\:VfW DivX codec, no fallback.
 .IPs "\-vc divx4,"
 Try divx4linux codec first, then fall back on others.
 .IPs "\-vc -divxds,-divx,"
@@ -3968,7 +3968,7 @@ How much of input channel i is mixed into output channel j (0\-1).
 So in principle you first have n numbers saying what to do with the
 first input channel, then n numbers that act on the second input channel
 etc.
-If you don't specify any numbers for some input channels, 0 is assumed.
+If you do not specify any numbers for some input channels, 0 is assumed.
 .RE
 .sp 1
 .RS
@@ -4177,7 +4177,7 @@ Entering 'help' here, will list all available filters within the specified
 library, which eliminates the use of 'listplugins' from the LADSPA SDK.
 .IPs <controls>
 Controls are zero or more floating point values that determine the
-behaviour of the loaded plugin (for example delay, threshold or gain).
+behavior of the loaded plugin (for example delay, threshold or gain).
 In verbose mode (add \-v to the MPlayer command line), all available controls
 and their valid ranges are printed.
 This eliminates the use of 'analyseplugin' from the LADSPA SDK.
@@ -4414,7 +4414,7 @@ with \-sws.
 .br
 0.00:0.60 default
 .br
-0.00:0.75 VirtualDubs "precise bicubic"
+0.00:0.75 VirtualDub's "precise bicubic"
 .br
 0.00:0.50 Catmull-Rom spline
 .br
@@ -4778,7 +4778,7 @@ Faster and of better quality than \-vf fame.
 .RSss
 1\-31: fixed qscale
 .br
-32\-:  fixed bitrate in kBits
+32\-:  fixed bitrate in kbits
 .REss
 .IPs <fps>
 force output fps (float value) (default: 0, autodetect based on height)
@@ -5161,7 +5161,7 @@ Analysis mode.
 .RSss
 0: Fixed pattern with initial frame number specified by <fr>.
 .br
-1: agressive search for telecine pattern (default)
+1: aggressive search for telecine pattern (default)
 .REss
 .IPs <fr>\ 
 Set initial frame number in sequence.
@@ -5265,7 +5265,7 @@ This is useful for YV12 sampled TV, which discards one of the chroma
 fields.
 .IPs mmx2=<n>
 On x86, if n=1, use MMX2 optimized functions, if n=2, use 3DNow!
-optimized functions, othewise, use plain C.
+optimized functions, otherwise, use plain C.
 If this option is not specified, MMX2 and 3DNow! are auto-detected, use
 this option to override auto-detection.
 .IPs fast=<n>
@@ -5793,7 +5793,7 @@ Encode only 56 seconds.
 .IPs "\-endpos 01:10:00"
 Encode only 1 hour 10 minutes.
 .IPs "\-endpos 100mb"
-Encode only 100 MBytes.
+Encode only 100 MB.
 .RE
 .PD 1
 .
@@ -6226,7 +6226,7 @@ When set to 0 CBR is used (default).
 .
 .TP
 .B maxvbr=<32\-384> (VBR only)
-maximum bitrate allowed per frame, in kpbs
+maximum bitrate allowed per frame, in kbps
 .
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
@@ -6582,21 +6582,21 @@ Nth pass (second and subsequent passes of N-pass encoding)
 .RS
 Here is how it works, and how to use it:
 .br
-The first pass (vpass=1) writes the stats file.
+The first pass (vpass=1) writes the statistics file.
 You might want to deactivate some CPU-hungry options, like "turbo"
 mode does.
 .br
-In two pass mode, the second pass (vpass=2) reads the stats file and
+In two pass mode, the second pass (vpass=2) reads the statistics file and
 bases ratecontrol decisions on it.
 .br
 In N-pass mode, the second pass (vpass=3, that is not a typo)
-does both: It first reads the stats, then overwrites them.
+does both: It first reads the statistics, then overwrites them.
 You might want to backup divx2pass.log before doing this if there is
 any possibility that you will have to cancel MEncoder.
 You can use all encoding options, except very CPU-hungry options like "qns".
 .br
 You can run this same pass over and over to refine the encode.
-Each subsequent pass will use the stats from the previous pass to improve.
+Each subsequent pass will use the statistics from the previous pass to improve.
 The final pass can include any CPU-hungry encoding options.
 .br
 If you want a 2 pass encode, use first vpass=1, and then vpass=2.
@@ -6657,7 +6657,7 @@ always on.
 Specify bitrate (pass\ 1/\:2) (default: 800).
 .br
 .I WARNING:
-1kBit = 1000 Bits
+1kbit = 1000 bits
 .PD 0
 .RSs
 .IPs 4\-16000
@@ -6669,9 +6669,9 @@ Specify bitrate (pass\ 1/\:2) (default: 800).
 .
 .TP
 .B vratetol=<value>
-approximated filesize tolerance in kBit.
+approximated file size tolerance in kbit.
 1000\-100000 is a sane range.
-(warning: 1kBit = 1000 Bits)
+(warning: 1kbit = 1000 bits)
 (default: 8000)
 .br
 .I NOTE:
@@ -6803,7 +6803,7 @@ average non-intra texture complexity in P-frames
 .IPs avgBPTex
 average non-intra texture complexity in B-frames
 .IPs mv\ \ \ 
-Bits used for motion vectors
+bits used for motion vectors
 .IPs fCode
 maximum length of motion vector in log2 scale
 .IPs iCount
@@ -7232,9 +7232,9 @@ large context model
 .PD 0
 .RSs
 .IPs 0
-predetermined huffman tables (builtin or two pass)
+predetermined Huffman tables (builtin or two pass)
 .IPs 1
-adaptive huffman tables
+adaptive Huffman tables
 .RE
 .PD 1
 .
@@ -7593,7 +7593,7 @@ frame type and PSNR a little bit more.
 Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000.
 If <value> is negative, XviD will use its absolute value as the target size
-(in kbytes) of the video and compute the associated bitrate automagically
+(in kBytes) of the video and compute the associated bitrate automagically
 (default: 687 kbits/\:s).
 .
 .TP
@@ -7803,13 +7803,13 @@ B-frames.
 The higher the value, the higher the probability of B-frames being used
 (default: 0).
 Do not forget that B-frames usually have a higher quantizer, and therefore
-aggresive production of B-frames may cause worse visual quality.
+aggressive production of B-frames may cause worse visual quality.
 .
 .TP
 .B (no)closed_gop
 This option tells XviD to close every GOP (Group Of Pictures bounded
 by two I-frames), which makes GOPs independent from each other.
-This just implies that the last frame of the GOP is eiter a P-frame or a
+This just implies that the last frame of the GOP is either a P-frame or a
 N-frame but not a B-frame.
 It is usually a good idea to turn this option on (default: on).
 .
@@ -8072,8 +8072,8 @@ DXN HDTV profile
 .RS
 .I NOTE:
 These profiles should be used in conjunction with an appropriate \-ffourcc.
-Generally DX50 is applicable, as some players do not recognise XviD but
-most recognise DivX.
+Generally DX50 is applicable, as some players do not recognize XviD but
+most recognize DivX.
 .RE
 .
 .TP
@@ -8198,15 +8198,15 @@ to a file.
 You might want to deactivate some CPU-hungry options, apart from the ones
 that are on by default.
 .br
-In two pass mode, the second pass (pass=2) reads the stats file and
+In two pass mode, the second pass (pass=2) reads the statistics file and
 bases ratecontrol decisions on it.
 .br
 In three pass mode, the second pass (pass=3, that is not a typo)
-does both: It first reads the stats, then overwrites them.
+does both: It first reads the statistics, then overwrites them.
 You can use all encoding options, except very CPU-hungry options.
 .br
 The third pass (pass=3) is the same as the second pass, except that it has
-the second pass' stats to work from.
+the second pass' statistics to work from.
 You can use all encoding options, including CPU-hungry ones.
 .br
 The first pass may use either average bitrate or constant quantizer.
@@ -8636,7 +8636,7 @@ values in the 1\-255 range.
 .
 .TP
 .B level_idc=<10\-51>
-Set the bitstream's Level as defined by Annex A of the H.264 standard
+Set the bitstream's level as defined by annex A of the H.264 standard
 (default: 40 - Level 4.0).
 This is used for telling the decoder what capabilities it needs to support.
 Use this parameter only if you know what it means,
@@ -8662,9 +8662,9 @@ Print errors only.
 .IPs " 1"
 warnings
 .IPs " 2"
-PSNR and other analysis stats when the encode finishes (default)
+PSNR and other analysis statistics when the encode finishes (default)
 .IPs " 3"
-PSNR, QP, frametype, size, and other stats for every frame
+PSNR, QP, frametype, size, and other statistics for every frame
 .RE
 .PD 1
 .
@@ -8964,7 +8964,7 @@ mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
-.B The same, but with bitrate set to 1800kBit and optimized macroblocks:
+.B The same, but with bitrate set to 1800kbit and optimized macroblocks:
 mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
@@ -8974,7 +8974,7 @@ mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
 .
 .TP
-.B Encode all *.jpg files in the current dir:
+.B Encode all *.jpg files in the current directory:
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
 .
 .TP
