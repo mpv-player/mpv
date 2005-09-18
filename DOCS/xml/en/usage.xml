@@ -853,28 +853,27 @@ Here is yet another example for playing the left channel in two speakers. Follow
 the steps above:
 <orderedlist>
 <listitem><para>
-The number of output channels is 2. Since this is the same as the number of
-channels in the input file, neither <option>-channels</option> nor
-<option>-af channels</option> needs to be specified.
-</para></listitem>
-<listitem><para>
-<option>pan</option> should receive and output two channels, so the first
+<option>pan</option> should output two channels, so the first
 suboption is "2".
 </para></listitem>
 <listitem><para>
-Since we have two output channels, there will be two sets of suboptions. Since
-there are also two input channels, there will be two suboptions per set. The
-left channel should consist of 100% of itself and 0% of the right channel. So,
-the first set of suboptions is "1:0". The right channel should be 100% of the
-left channel and 0% of itself. This is "1:0" as well.
+Since we have two input channels, there will be two sets of suboptions.
+Since there are also two output channels,
+there will be two suboptions per set.
+The left channel from the file should go with full volume to
+the new left and the right channels.
+Thus the first set of suboptions is "1:1".
+The right channel should be discarded, so the second would be "0:0".
+Any 0 values at the end can be left out, but for ease of
+understanding we will keep them.
 </para></listitem>
 </orderedlist>
 Putting those options together gives:
 
-<screen>mplayer <replaceable>filename</replaceable> -af pan=2:1:0:1:0</screen>
+<screen>mplayer <replaceable>filename</replaceable> -af pan=2:1:1:0:0</screen>
 
 If the right channel is desired instead of the left, the suboptions to
-<option>pan</option> will be "2:0:1:0:1".
+<option>pan</option> will be "2:0:0:1:1".
 </para>
 
 
@@ -897,17 +896,10 @@ only channel gets 100% of itself.
 downmixing. Here is a way to downmix PCM using <option>pan</option>:
 <orderedlist>
 <listitem><para>
-The number of output channels is 2. Since <option>pan</option> will be handling
-6 channels, it may be necessary to put <option>,channels=2</option> after pan to
-get rid of the extra channels. If your sound card is capable of 6-channel
-playback you can skip this, as the discarded channels will be empty by then anyway.
+The number of output channels is 2, so the first suboption is "2".
 </para></listitem>
 <listitem><para>
-<option>Pan</option> must receive all six channels to downmix, so the first
-suboption is "6".
-</para></listitem>
-<listitem><para>
-With six input channels there will be six suboptions per set. Fortunately,
+With six input channels there will be six sets of options. Fortunately,
 since we only care about the output of the first two channels, we only need to
 make two sets; the remaining four sets can be omitted. Beware that not all
 multichannel audio files have the same channel order! This example
@@ -921,13 +913,17 @@ demonstrates downmixing a file with the same channels as AC3 5.1:
 5 - subwoofer
 </programlisting>
 The first set of suboptions lists the percentages of the original volume, in
-order, at which each channel listed above should be mixed into the front left
-channel: "1:0:1:0:0.5:1". For the front right channel, this is "0:1:0:1:0.5:1".
+order, which each output channel should receive from the
+front left channel: "1:0".
+The front right channel should go into the right output: "0:1".
+The same for the rear channels: "1:0" and "0:1".
+The center channel goes into both output channels with half volume:
+"0.5:0.5", and the subwoofer goes into both with full volume: "1:1".
 </para></listitem>
 </orderedlist>
 Put all that together, for:
 
-<screen>mplayer <replaceable>6-channel.wav</replaceable> -af pan=6:1:0:1:0:0.5:1:0:1:0:1:0.5:1,channels=2</screen>
+<screen>mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
 
 The percentages listed above are only a rough example. Feel free to tweak them.
 </para>
@@ -948,43 +944,42 @@ Since <option>pan</option> needs to examine all six channels, specify
 <option>-channels 6</option> so liba52 decodes them all.
 </para></listitem>
 <listitem><para>
-<option>pan</option> needs all the channels, so the first suboption is 6 as
-well.
+<option>pan</option> outputs to only five channels, the first suboption is 5.
 </para></listitem>
 <listitem><para>
-Since the subwoofer channel is the last of six, we can specify five sets of
-suboptions and omit the set belonging to the subwoofer channel. Each of those
-five sets needs six suboptions so the list will get pretty long.
+Six input channels and five output channels means six sets of five suboptions.
   <itemizedlist spacing="compact">
   <listitem><simpara>
-  The left front channel should have itself and half the subwoofer channel:
-  "1:0:0:0:0:0.5"
+  The left front channel only replicates onto itself:
+  "1:0:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  The right front channel should have itself and half the subwoofer channel:
-  "0:1:0:0:0:0.5"
+  Same for the right front channel:
+  "0:1:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  The left rear channel stays the same:
-  "0:0:1:0:0:0"
+  Same for the left rear channel:
+  "0:0:1:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  The right rear channel stays the same:
-  "0:0:0:1:0:0"
+  And also the same for the right rear channel:
+  "0:0:0:1:0"
   </simpara></listitem>
   <listitem><simpara>
-  The center front channel stays the same:
-  "0:0:0:0:1:0"
+  Center front, too:
+  "0:0:0:0:1"
   </simpara></listitem>
   <listitem><simpara>
-  The subwoofer channel is left out and it will be silent.
+  And now we have to decide what to do with the subwoofer,
+  e.g. half into front right and front left:
+  "0.5:0.5:0:0:0"
   </simpara></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>
 Combine all those options to get:
 
-<screen>mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=6:1:0:0:0:0:0.5:0:1:0:0:0:0.5:0:0:1:0:0:0:0:0:0:1:0:0:0:0:0:0:1:0</screen>
+<screen>mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0</screen>
 
 </para>
 
