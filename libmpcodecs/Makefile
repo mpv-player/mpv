@@ -29,7 +29,11 @@ AUDIO_SRCS_OPT=ad_acm.c \
                ad_realaud.c \
                ad_twin.c \
 
-AUDIO_SRCS=dec_audio.c ad.c $(AUDIO_SRCS_LIB) $(AUDIO_SRCS_NAT) $(AUDIO_SRCS_OPT)
+AUDIO_SRCS=dec_audio.c \
+           ad.c \
+           $(AUDIO_SRCS_LIB) \
+           $(AUDIO_SRCS_NAT) \
+           $(AUDIO_SRCS_OPT) \
 
 VIDEO_SRCS_LIB=vd_libmpeg2.c \
                vd_lzo.c \
@@ -58,7 +62,11 @@ VIDEO_SRCS_OPT=vd_divx4.c \
                vd_xvid.c \
                vd_zrmjpeg.c \
 
-VIDEO_SRCS=dec_video.c vd.c $(VIDEO_SRCS_NAT) $(VIDEO_SRCS_LIB) $(VIDEO_SRCS_OPT)
+VIDEO_SRCS=dec_video.c \
+           vd.c \
+           $(VIDEO_SRCS_NAT) \
+           $(VIDEO_SRCS_LIB) \
+           $(VIDEO_SRCS_OPT) \
 
 VFILTER_SRCS=vf.c \
              pullup.c \
@@ -205,13 +213,27 @@ ifeq ($(FAAC),yes)
 ENCODER_SRCS += ae_faac.c
 endif
 
-SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS) img_format.c
+SRCS=$(AUDIO_SRCS) \
+     $(VIDEO_SRCS) \
+     $(VFILTER_SRCS) \
+     $(NATIVE_SRCS) \
+     img_format.c \
+
 OBJS=$(SRCS:.c=.o)
 
 SRCS2=$(ENCODER_SRCS)
 OBJS2=$(SRCS2:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -Inative -I.. -I../libmpdemux -I../loader $(LIBAV_INC) $(EXTRA_INC) $(X264_INC) $(XVID_INC) -D_GNU_SOURCE
+CFLAGS  = $(OPTFLAGS) \
+          -I. -I.. \
+          -Inative \
+          -I../libmpdemux \
+          -I../loader \
+          $(LIBAV_INC) \
+          $(EXTRA_INC) \
+          $(X264_INC) \
+          $(XVID_INC) \
+          -D_GNU_SOURCE \
 
 .SUFFIXES: .c .o
 
