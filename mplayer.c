@@ -569,6 +569,8 @@ static void exit_sighandler(int x){
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
       current_module?current_module:mp_gettext("unknown")
   );
+  if (identify)
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SIGNAL=%d\n", x);
   if(sig_count<=1)
   switch(x){
   case SIGINT:
@@ -2138,6 +2140,9 @@ if(!sh_video->inited){
 }
 
 inited_flags|=INITED_VCODEC;
+
+if (identify && sh_video->codec)
+    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
 
 if(auto_quality>0){
     // Auto quality option enabled

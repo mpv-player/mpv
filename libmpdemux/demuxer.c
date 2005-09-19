@@ -513,6 +513,8 @@ void demuxer_help(void)
 
   mp_msg(MSGT_DEMUXER, MSGL_INFO, "Available demuxers:\n");
   mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:  type  info:  (comment)\n");
+  if (identify)
+    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DEMUXERS\n");
   for (i = 0; demuxer_list[i]; i++) {
     if (demuxer_list[i]->type > DEMUXER_TYPE_MAX) // Don't display special demuxers
       continue;
