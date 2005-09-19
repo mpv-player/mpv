@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.71 -->
+<!-- synced with 1.72 -->
 <sect1 id="codecs">
 <title>Obsługiwane kodeki</title>
 
@@ -56,7 +56,7 @@ Najważniejsze ze wszystkich:
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> z użyciem
-  <systemitem class="library"> libavcodec</systemitem> i kodeki
+  <systemitem class="library">libavcodec</systemitem> i kodeki
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> używające bibliotek
   RealPlayer
   </simpara></listitem>
@@ -243,13 +243,15 @@ libavcodec wykonaj następujące czynności:
   <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
   </para></step>
 <step><para>
-  Przenieś katalog <filename>libavcodec</filename> ze źródeł FFmpega
+  Przenieś katalogi <filename>libavcodec</filename> i
+  <filename>libavutil</filename> ze źródeł FFmpega
   do katalogu głównego drzewa CVS <application>MPlayera</application>.
   Powinno to wyglądać w ten sposób:
   <filename class="directory">main/libavcodec</filename>
+  <filename class="directory">main/libavutil</filename>
   </para><para>
   Utworzenie dowiązań symbolicznych (symlinków)
   <emphasis role="bold">nie</emphasis> wystarcza. Konieczne jest
@@ -261,6 +263,7 @@ libavcodec wykonaj następujące czynności:
   dodaj następujące linie
   do pliku <filename>main/CVS/Entries</filename>:
   <screen>D/libavcodec////</screen>
+  <screen>D/libavutil////</screen>
   </para></step>
 <step><para>
   Przejdź do kompilowania. <filename>configure</filename> powinien wykryć
