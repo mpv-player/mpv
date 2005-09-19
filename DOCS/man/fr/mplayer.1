@@ -1,4 +1,4 @@
-.\" synced with 1.1102
+.\" synced with 1.1108
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -189,9 +189,9 @@ mencoder \- Encodeur vidéo
 est un lecteur vidéo pour Linux (il fonctionne sur beaucoup d'autres
 Unices et processeurs non\-x86, voir la documentation).
 Il joue la plupart des formats MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV,
-RM, QT/\:MOV/\:MP4, OGG/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM
+RM, QT/\:MOV/\:MP4, Ogg/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM
 et RoQ, gérés par plusieurs codecs natifs et par des codecs binaires.
-Vous pouvez regarder des VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 et
+Vous pouvez regarder des Video CD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 et
 même des films WMV.
 .PP
 Un autre gros atout de MPlayer est la grande variété de pilotes de
@@ -200,7 +200,7 @@ Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, Quartz, Mac OS X CoreVideo, mais vous pouvez aussi utiliser
 GGI, SDL (et de cette façon tous leurs drivers), VESA (sur n'importe 
 quelle carte compatible VESA, même sans X11), quelques drivers spécifiques à
-certaines cartes (pour Matrox, 3Dfx et ATI) et certaines cartes de
+certaines cartes (pour Matrox, 3dfx et ATI) et certaines cartes de
 décompression MPEG, telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
 La plupart d'entre eux gèrent le redimensionnement logiciel ou
 matériel, vous pouvez donc apprécier les films en plein-écran.
@@ -222,7 +222,7 @@ Il encode en MPEG-4 (DivX/XviD), un des codecs libavcodec, et en
 PCM/\:MP3/\:VBRMP3 audio en 1, 2 ou 3\ passes.
 Il permet également de copier des flux de données (stream), possède un
 puissant système de plugins (découpage, expansion, retournement, postprocess,
-rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
+rotation, redimensionnement, bruit, conversion RGB/\:YUV) et bien plus.
 .PP
 .B gmplayer
 est l'interface graphique de MPlayer.
@@ -319,6 +319,8 @@ Ajuste le décalage des sous-titres de +/\:- 0.1 secondes.
 Translate les sous-titres vers le haut/bas.
 .IPs i
 Créé une marque EDL.
+.IPs s\ \ \ \ 
+Réalise une capture d'écran (nécessite que le filtre "screenshot" soit chargé).
 .RE
 .PD 1
 .PP
@@ -363,13 +365,13 @@ Change l'alpha (transparence) de la fenêtre vidéo.
 .RSs
 .IPs "ENTRÉE"
 Démarre la lecture.
-.IPs s
+.IPs ESC\ \ 
 Stoppe la lecture.
-.IPs l
+.IPs l\ \ \ \ 
 Charge un fichier.
-.IPs c
+.IPs c\ \ \ \ 
 Navigateur de skins.
-.IPs p
+.IPs p\ \ \ \ 
 Bascule la liste de lecture (playlist).
 .RE
 .PD 1
@@ -641,7 +643,8 @@ lieu de ~/\:.mplayer/\:input.conf par défaut.
 Si vous ne donnez pas le chemin absolu, il sera cherché à
 ~/\:.mplayer/\:<nom_fichier>.
 .IPs ar-delay
-Temps en msec avant de démarrer la répétition automatique d'une touche
+Temps en milli-secondes avant de démarrer la répétition automatique
+d'une touche
 (0 pour désactiver).
 .IPs ar-rate
 Combien de frappes par seconde pendant la répétition automatique.
@@ -1178,7 +1181,7 @@ Se rabat automatiquement sur IPv4.
 .TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
-Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44KHz
+Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44kKHz
 16-bit stéréo.
 Pour lire un flux AC3 brut, utilisez \-rawaudio on:format=0x2000.
 .sp 1
@@ -1286,7 +1289,7 @@ Parfois requis pour lire des fichiers MPEG-TS corrompus.
 .TP
 .B \-tsprobe <position\ octet>
 Pour la lecture de flux MPEG-TS, cette option vous permet d'indiquer sur
-combien d'octets du flux MPlayer devra chercher les pids audio et vidéo
+combien d'octets du flux MPlayer devra chercher les IDs audio et vidéo
 désirés.
 .
 .TP
@@ -1301,7 +1304,7 @@ Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
 ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
 plus bas) comme URL de film.
-.\" FIXME: Le texte suivante ne dois pas etre ici...
+.\" FIXME: Le texte suivante ne doit pas etre ici...
 .I NOTE:
 .br
 MPlayer n'accepte pas les deux-points, vous devez donc taper l'ID périphérique
@@ -2720,7 +2723,7 @@ VIDIX tournant sous X11.
 .TP
 .B cvidix\ 
 Interface à VIDIX générique et indépendante de la plateforme et pouvant
-tourner dans une console avec une carte graphique nVidia.
+tourner dans une console texte avec une carte graphique nVidia.
 .PD 0
 .RSs
 .IPs <sous-périphérique>
@@ -2888,7 +2891,7 @@ RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
 1: Utilise texture_rectangle, incompatible avec la conversion YUV matérielle.
 .br
 2: Utilise texture_non_puissance_de_deux.
-.REss
+.RE
 .IPs (no)glfinish
 Appelle glFinish() avant d'échanger les tampons.
 Plus lent mais dans certain cas affichage "plus correct".
@@ -2906,7 +2909,7 @@ qu'en mode plein écran
 Choisi le type de conversion YUV vers RGB.
 .RSss
 0: Utilise la conversion logicielle (par défaut).
-Compatible avec toutes les version d'OpenGL.
+Compatible avec toutes les versions d'OpenGL.
 Offre le contrôle de la luminosité, du contraste et de la saturation.
 .br
 1: Utilise les "register combiners".
@@ -2936,7 +2939,7 @@ de texture.
 Offre le contrôle de la luminosité, du contraste, de la saturation, de
 la teinte et du gamma.
 Le chaque composante rouge, verte et bleue du gamma peut être configurée.
-.REss
+.RE
 .IPs customprog=<nom_fichier>
 Charge un programme fragment personnalisé depuis <nom_fichier>.
 Voir l'exemple TOOLS/edgedect.fp.
@@ -2952,43 +2955,9 @@ texture.
 .PD 0
 .RSs
 .IPs (no)glfinish
-Appelle glFinish() avant d'échanger les tampons.
-Plus lent mais donne un meilleur résultat visuel (par défaut\ : activé)
+Fonctionne comme pour le pilote de sortie vidéo gl (par défaut\ : activé)
 .IPs yuv=<n>
-Choisi le type de conversion YUV vers RGB.
-.RSss
-0: Utilise la conversion logicielle (par défaut).
-Compatible avec toutes les version d'OpenGL.
-Offre le contrôle de la luminosité, du contraste et de la saturation.
-.br
-1: Utilise les "register combiners".
-Ceci utilise un extension nVidia (GL_NV_register_combiners).
-Au moins trois unitées de texture sont nécessaires.
-Offre le contrôle de la saturation et de la teinte.
-.br
-2: Utilise un "programme fragment" (fragment de programme).
-Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
-de textures.
-Offre le contrôle de la luminosité, du contraste, de la saturation, et
-de la teinte.
-.br
-3: Utilise un "programme fragment" (fragment de programme) utilisant
-l'instruction POW.
-Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
-de texture.
-Offre le contrôle de la luminosité, du contraste, de la saturation, de
-la teinte et du gamma.
-Le chaque composante rouge, verte et bleue du gamma peut être configurée.
-La méthode 4 est généralement plus rapide.
-.br
-4: Utilise un "programme fragment" (fragment de programme) avec une
-consultation de table.
-Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
-de texture.
-Offre le contrôle de la luminosité, du contraste, de la saturation, de
-la teinte et du gamma.
-Le chaque composante rouge, verte et bleue du gamma peut être configurée.
-.REss
+Fonctionne comme pour le pilote de sortie vidéo gl
 .REss
 .
 .TP
@@ -3138,15 +3107,15 @@ avec la fréquence de rafraichissement verticale de votre moniteur.
 .
 .TP
 .B 3dfx (Linux uniquement)
-Pilote de sortie vidéo spécifique aux cartes 3Dfx.
-Ce pilote exploite directement les circuits matériels 3Dfx sous X11.
+Pilote de sortie vidéo spécifique aux cartes 3dfx.
+Ce pilote exploite directement les circuits matériels 3dfx sous X11.
 Ne gère que le 16 bits/pixel.
 FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux uniquement)
 Ce pilote utilise le pilote framebuffer tdfx pour jouer les films avec
-accélération YUV des 3Dfx.
+accélération YUV des 3dfx.
 FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
 .PD 0
 .RSs
@@ -3728,7 +3697,7 @@ Ne pas jouer/\:encoder la vidéo.
 .
 .TP
 .B \-oldpp <qualité> (OpenDivX uniquement) (OBSOLÈTE)
-Utilise le code de post-traitement d'opendivx au lieu de l'interne.
+Utilise le code de post-traitement d'OpenDivX au lieu de l'interne.
 À ne plus utiliser au profit de \-pp, car le postprocessing interne offre
 une meilleure qualité visuelle et de meilleures performances.
 L'intervalle valide des valeurs de \-oldpp varie suivant le codec, il est
@@ -3848,7 +3817,7 @@ Voir \-vc help pour une liste complète des codecs disponibles.
 .PD 0
 .RSs
 .IPs "\-vc divx"
-Force le codec DivX Win32/\:VFW, sans rabattement.
+Force le codec DivX Win32/\:VfW, sans rabattement.
 .IPs "\-vc divx4,"
 Essaie d'abord le codec divx4linux, puis se rabat sur les autres.
 .IPs "\-vc -divxds,-divx,"
@@ -5083,7 +5052,7 @@ Plus rapide et de meilleure qualité que \-vf fame.
 .RSss
 1\-31: qscale fixe
 .br
-32\-: débit binaire fixe en kBits
+32\-: débit binaire fixe en kbits
 .REss
 .IPs <fps>
 force le nombre de trames par seconde en sortie (nombre flottant)
@@ -6186,6 +6155,17 @@ Cela permet, avec '\-ovc copy', de changer le hauteur/\:largeur d'un fichier
 existant
 .
 .TP
+.B \-frameno-file <nom_fichier> (DEPRÉCIÉ)
+Nom du fichier pour la passe spéciale où juste l'audio est encodée.
+.br
+.I NOTE:
+Utiliser ce mode risque de déboucher sur une désynchronisation
+audio-vidéo.
+Ne l'utilisez pas!
+Cette option est gardée uniquement pour maintenir la compatibilité
+ascendante et risque d'être enlevée dans les versions futures.
+.
+.TP
 .B \-hr-edl-seek (EDL uniquement)
 Utilise une méthode précise, mais plus lente pour sauter des
 séquences de film.
@@ -6979,10 +6959,10 @@ Vous devriez désactiver des options gourmandes en temps processeur,
 comme le fait le mode "turbo".
 .br
 En mode deux passes, la seconde passe (vpass=2) se base sur le fichier de
-stats pour allouer le bon nombre de bits aux trames (ratecontrol).
+statistiques pour allouer le bon nombre de bits aux trames (ratecontrol).
 .br
 En mode N-passes, la seconde passe (vpass=3, non ce n'est pas une
-erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
+erreur) fait les deux\ : elle lit le fichier de statistiques, puis ré-écrit
 par dessus.
 (Peut-être que vous devriez sauver le fichier divx2pass.log avant si
 MEncoder peut être interrompu dans son cours).
@@ -7054,7 +7034,7 @@ l'activer tout le temps.
 Définit le débit binaire (bitrate) (passe 1/\:2) (par défaut 800).
 .br
 .I ATTENTION\ :
-1kBit = 1000 Bits
+1kbit = 1000 bits
 .PD 0
 .RSs
 .IPs 4\-16000
@@ -7068,7 +7048,7 @@ Définit le débit binaire (bitrate) (passe 1/\:2) (par défaut 800).
 .B vratetol=<valeur>
 tolérance approximative de taille du fichier en kbit.
 1000\-100000 est un intervalle raisonnable.
-attention: 1kBit = 1000 Bits
+attention: 1kibit = 1000 bits
 (par défaut\ : 8000)
 .br
 .I NOTE\ :
@@ -7211,7 +7191,7 @@ complexité de la texture non-intra dans les trames-P
 .IPs avgBPTex
 complexité de la texture non-intra dans les trames-B
 .IPs mv\ \ \ 
-Bits utilisés pour les vecteurs de mouvement
+bits utilisés pour les vecteurs de mouvement
 .IPs fCode
 longueur maximum des vecteurs de mouvement en échelle log base 2
 .IPs iCount
@@ -7652,9 +7632,9 @@ grand modèle contextuel
 .PD 0
 .RSs
 .IPs 0
-tables de huffman pré-calculées (intégrée ou deux passes)
+tables de Huffman pré-calculées (intégrée ou deux passes)
 .IPs 1
-tables de huffman adaptives
+tables de Huffman adaptives
 .RE
 .PD 1
 .
@@ -8023,7 +8003,7 @@ et le PSNR des trames générées.
 .
 .TP
 .B bitrate=<valeur> (CBR ou mode deux passes)
-Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde si <16000 ou
+Fixe le débit binaire (bitrate) à utiliser en koctets/\:seconde si <16000 ou
 en bits/\:seconde
 si >16000.
 Si <valeur> est un nombre négatif, XviD l'interprètera comme la taille
@@ -8656,16 +8636,16 @@ La première passe (pass=1) écrit le fichier de statistiques.
 Vous devriez désactiver des options gourmandes en temps processeur.
 .br
 En mode deux passes, la seconde passe (pass=2) se base sur le fichier de
-stats pour allouer le bon nombre de bits aux trames (ratecontrol).
+statistiques pour allouer le bon nombre de bits aux trames (ratecontrol).
 .br
 En mode trois passes, la seconde passe (pass=3, non ce n'est pas une
-erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
+erreur) fait les deux\ : elle lit le fichier de statistiques, puis ré-écrit
 par dessus.
 Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
 vraiment très gourmandes.
 .br
 La troisième passe (pass=3) fait la même chose que la seconde, à la
-différence près qu'elle dispose des stats de la deuxième passe pour mieux
+différence près qu'elle dispose des statistiques de la deuxième passe pour mieux
 travailler.
 Vous pouvez utiliser toutes les options d'encodage, même les plus
 gourmandes.
@@ -9153,7 +9133,7 @@ de 64 valeurs dans l'intervalle 1\-255, séparées par une virgule.
 .
 .TP
 .B level_idc=<10\-51>
-Définit le Niveau (Level) du flux comme définit dans l'Annexe A du standard
+Définit le Niveau (Level) du flux comme définit dans l'annexe A du standard
 H.264 (par défaut\ : 40 - Niveau 4.0).
 Ceci est utilisé pour indiquer au décodeur quelles options du codec il
 doit gérer.
@@ -9494,7 +9474,7 @@ mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titre2.avi \-oac copy
 \-ovc divx4
 .
 .TP
-.B Même chose, mais avec un bitrate de 1800kBit et des macro-blocs optimisés\ :
+.B Même chose, mais avec un bitrate de 1800kbit et des macro-blocs optimisés\ :
 mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
