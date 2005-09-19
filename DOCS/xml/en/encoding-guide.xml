@@ -2221,7 +2221,7 @@ You can encode to the following codecs (more or less up to date):
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Codec name</entry><entry>Description</entry></row>
+<row><entry>Video codec name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
 <row><entry>mjpeg</entry><entry>
@@ -2290,6 +2290,47 @@ You can encode to the following codecs (more or less up to date):
 
 The first column contains the codec names that should be passed after the
 <literal>vcodec</literal> config, like: <option>-lavcopts vcodec=msmpeg4</option>
+
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Audio codec name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mp2</entry>
+    <entry>MPEG Layer 2</entry>
+  </row>
+  <row>
+    <entry>ac3</entry>
+    <entry>AC3, aka Dolby Digital</entry>
+  </row>
+  <row>
+    <entry>adpcm_ima_wav</entry>
+    <entry>IMA Adaptive PCM (4bits per sample, 4:1 compression)</entry>
+  </row>
+  <row>
+    <entry>sonic</entry>
+    <entry>Experimental lossy/lossless codec</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+
+The first column contains the codec names that should be passed after the
+<literal>acodec</literal> config, like: <option>-lavcopts acodec=ac3</option>
+</para>
+
+<para>
+  Contrary to <systemitem class="library">libavcodec</systemitem>'s video
+  codecs, its audio codecs do not make a wise usage of the bits they are
+  been given as they lack some minimal psychoacoustic model (if at all)
+  which most other codec implementations feature.
+  However, note that all these audio codecs are very fast and work
+  out-of-the-box everywhere <application>MEncoder</application> has been
+  compiled with <systemitem class="library">libavcodec</systemitem> (which
+  is the case most of time), and do not depend on external libraries.
 </para>
 
 <informalexample>
