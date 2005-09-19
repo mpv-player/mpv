@@ -81,6 +81,7 @@ m_option_t cdda_opts[] = {
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+extern int cdd_identify(const char *dev);
 extern int cddb_resolve(const char *dev, char **xmcd_file);
 extern cd_info_t* cddb_parse_xmcd(char *xmcd_file);
 
@@ -112,7 +113,9 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 
 #ifdef MPLAYER_NETWORK
-  if(strncmp(st->url,"cddb",4) == 0) {
+  // cdd_identify returns -1 if it cannot read the TOC,
+  // in which case there is no point in calling cddb_resolve
+  if(cdd_identify(p->device) >= 0 && strncmp(st->url,"cddb",4) == 0) {
     i = cddb_resolve(p->device, &xmcd_file);
     if(i == 0) {
       cddb_info = cddb_parse_xmcd(xmcd_file);
@@ -274,7 +277,9 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
 		  cd_track = cd_info_get_track(p->cd_info, i+1);
 //printf("Track %d, sector=%d\n", i, p->sector-1);
 		  if( cd_track!=NULL ) {
-			  printf("\n%s\n", cd_track->name ); 
+			mp_msg(MSGT_SEEK, MSGL_INFO, "\n%s\n", cd_track->name); 
+			if (identify)
+				mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACK=%d\n", cd_track->track_nb);
 		  }
 		  break;
 	  }
@@ -315,7 +320,9 @@ static int seek(stream_t* s,off_t newpos) {
 //printf("Track %d, sector=%d\n", seeked_track, sec);
 		  cd_track = cd_info_get_track(p->cd_info, seeked_track+1);
 		  if( cd_track!=NULL ) {
-			  printf("\n%s\n", cd_track->name ); 
+			  mp_msg(MSGT_SEEK, MSGL_INFO, "\n%s\n", cd_track->name);
+			  if (identify)
+			    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACK=%d\n", cd_track->track_nb);
 		  }
 
 	}

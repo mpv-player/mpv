@@ -45,6 +45,7 @@
 stream_t* open_cdda(char *dev, char *track);
 
 static cd_toc_t cdtoc[100];
+static int cdtoc_last_track;
 
 #if defined(__linux__)
 int 
@@ -157,6 +158,39 @@ read_toc(const char *dev) {
 	return tochdr.ending_track;
 }
 #endif
+
+/** 
+\brief Reads TOC from CD in the given device and prints the number of tracks
+       and the length of each track in minute:second:frame format.
+\param *dev the device to analyse
+\return if the command line -identify is given, returns the last track of
+        the TOC or -1 if the TOC can't be read,
+        otherwise just returns 0 and let cddb_resolve the TOC
+*/
+int cdd_identify(const char *dev)
+{
+	cdtoc_last_track = 0;
+	if (identify)
+	{
+		int i, min, sec, frame;
+		cdtoc_last_track = read_toc(dev);
+		if (cdtoc_last_track < 0) {
+			mp_msg(MSGT_OPEN, MSGL_ERR, "Failed to open %s device.\n", dev);
+			return -1;
+		}
+		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACKS=%d\n", cdtoc_last_track);
+		for (i = 1; i <= cdtoc_last_track; i++)
+		{
+			frame = cdtoc[i].frame - cdtoc[i-1].frame;
+			sec = frame / 75;
+			frame -= sec * 75;
+			min = sec / 60;
+			sec -= min * 60;
+			mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACK_%d_MSF=%02d:%02d:%02d\n", i, min, sec, frame);
+		}
+	}
+	return cdtoc_last_track;
+}
 
 unsigned int 
 cddb_sum(int n) {
@@ -619,14 +653,16 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	char cddb_cache_dir[] = DEFAULT_CACHE_DIR;
 	char *home_dir = NULL;
 	cddb_data_t cddb_data;
-	int ret;
 
-	ret = read_toc(dev);
-	if( ret<0 ) {
+	if (cdtoc_last_track <= 0)
+	{
+	    cdtoc_last_track = read_toc(dev);
+	    if (cdtoc_last_track < 0) {
 		printf("Failed to open %s device.\n", dev);
 		return -1;
+	    }
 	}
-	cddb_data.tracks = ret;
+	cddb_data.tracks = cdtoc_last_track;
 	cddb_data.disc_id = cddb_discid(cddb_data.tracks);
 	cddb_data.anonymous = 1;	// Don't send user info by default
 
