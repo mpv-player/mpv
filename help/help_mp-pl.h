@@ -990,7 +990,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Plik: %s (%s)\nPCM: Czêstotliwo¶æ próbkowamia: %iHz Kana³y: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: najszybsze zrzucanie jest osi±gane poprzez -vc dummy -vo null\nPCM: Info: aby zapisaæ plik WAVE u¿yj -waveheader (domy¶lny).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: najszybsze zrzucanie jest osi±gane poprzez -vc dummy -vo null\nPCM: Info: aby zapisaæ plik WAVE u¿yj -ao pcm:waveheader (domy¶lny).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Nie powiod³o siê otwarcie %s do zapisu!\n"
 
 // ao_sdl.c

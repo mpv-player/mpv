@@ -942,7 +942,7 @@ static char help_text[]=
 // ao_pcm.c
 
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fil: %s (%s)\nPCM: Samplerate: %iHz Kanaler: %s Format %s\n" // FIXME Samplerate?
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: snabbaste dumplning är tillgänglig via -vc dummy -vo null\nPCM: Info: för att skriva WAVE-filer använd -waveheader (standard).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: snabbaste dumplning är tillgänglig via -vc dummy -vo null\nPCM: Info: för att skriva WAVE-filer använd -ao pcm:waveheader (standard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Misslyckades att öppna %s för skrivning!\n"
 
 // ao_sdl.c

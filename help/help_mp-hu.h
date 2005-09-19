@@ -999,7 +999,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fájl: %s (%s)\nPCM: Samplerate: %iHz Csatorna: %s Formátum: %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: a leggyorsabb dump-olás a -vc dummy -vo null kapcsolóval érhetõ el\nPCM: Info: WAVE fájlok írásához használd a -waveheader kapcsolót (alapértelmezett)!\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: a leggyorsabb dump-olás a -vc dummy -vo null kapcsolóval érhetõ el\nPCM: Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s megnyitása írásra nem sikerült!\n"
 
 // ao_sdl.c

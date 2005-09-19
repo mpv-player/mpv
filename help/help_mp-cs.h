@@ -993,7 +993,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Soubor: %s (%s)\nPCM: Vzorkování: %iHz Kanál(y): %s Formát %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info:  nejrychlej¹ího dumpingu dosáhnete s -vc dummy -vo null\nPCM: Info: pro zápis WAVE souborù pou¾ijte -waveheader (výchozí).\n" // ví nìkdo co je dumping?
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info:  nejrychlej¹ího dumpingu dosáhnete s -vc dummy -vo null\nPCM: Info: pro zápis WAVE souborù pou¾ijte -ao pcm:waveheader (výchozí).\n" // ví nìkdo co je dumping?
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Selhalo otevøení %s pro zápis!\n"
 
 // ao_sdl.c

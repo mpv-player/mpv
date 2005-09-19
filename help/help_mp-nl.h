@@ -897,7 +897,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Kanalen: %s Formaat %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: de snelste uitlezing wordt bereikt met -vc dummy -vo null\nPCM: Info: Om WAVE bestanden te schrijven gebruik -waveheader (standaard).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: de snelste uitlezing wordt bereikt met -vc dummy -vo null\nPCM: Info: Om WAVE bestanden te schrijven gebruik -ao pcm:waveheader (standaard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Kon %s niet openen om te schrijven!\n"
 
 // ao_sdl.c

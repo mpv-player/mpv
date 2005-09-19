@@ -974,7 +974,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Честота: %iHz Канали: %s Формат %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: най-бързо извличане се постига с -vc dummy -vo null\nPCM: Info: за да запишете WAVE файлове ползвайте -waveheader (подразбира се).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: най-бързо извличане се постига с -vc dummy -vo null\nPCM: Info: за да запишете WAVE файлове ползвайте -ao pcm:waveheader (подразбира се).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s не може да се отвори за запис!\n"
 
 // ao_sdl.c

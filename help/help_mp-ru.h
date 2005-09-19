@@ -951,7 +951,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Файл: %s (%s)\nPCM: Частота воспроизведения: %i Гц Каналы: %s Формат %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Информация: наиболее быстрый дампинг достигается с -vc dummy -vo null\nPCM: Информация: для записи WAVE файлов используйте -waveheader (по умолчанию).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Информация: наиболее быстрый дампинг достигается с -vc dummy -vo null\nPCM: Информация: для записи WAVE файлов используйте -ao pcm:waveheader (по умолчанию).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Не могу открыть %s для записи!\n"
 
 // ao_sdl.c
