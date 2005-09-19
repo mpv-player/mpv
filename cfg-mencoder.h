@@ -203,6 +203,8 @@ m_option_t mencoder_opts[]={
 
 	{"endpos", &end_at_string, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+	{"frameno-file", &frameno_filename, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
+
 #ifdef USE_EDL
         {"hr-edl-seek", &edl_seek_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"nohr-edl-seek", &edl_seek_type, CONF_TYPE_FLAG, 0, 1, 0, NULL},

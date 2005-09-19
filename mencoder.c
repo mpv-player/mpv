@@ -235,6 +235,8 @@ static int cfg_include(m_option_t *conf, char *filename){
 static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
 
+static char * frameno_filename=NULL;
+
 static void parse_end_at();
 static char * end_at_string=0;
 //static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
@@ -387,7 +389,6 @@ double v_timer_corr=0;
 
 m_entry_t* filelist = NULL;
 char* filename=NULL;
-char* frameno_filename="frameno.avi";
 
 int decoded_frameno=0;
 int next_frameno=-1;
@@ -452,14 +453,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   }
 }
 
-  // FIXME: get rid of -dvd and other tricky options
-  stream2=open_stream(frameno_filename,0,&i);
-  if(stream2){
-    demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
-    if(demuxer2) mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_UsingPass3ControllFile, frameno_filename);
-    else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
-  }
-
  mconfig = m_config_new();
  m_config_register_options(mconfig,mencoder_opts);
  parse_cfgfiles(mconfig);
@@ -467,6 +460,15 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
  if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
 
   mp_msg_set_level(verbose+MSGL_STATUS);
+
+if (frameno_filename) {
+  stream2=open_stream(frameno_filename,0,&i);
+  if(stream2){
+    demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
+    if(demuxer2) mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_UsingPass3ControllFile, frameno_filename);
+    else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
+  }
+}
 
 #ifdef WIN32
   if(proc_priority){

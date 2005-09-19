@@ -110,6 +110,8 @@ MPlayer (1.0)
     * lots of new slave commands (check DOCS/tech/slave.txt)
     * lots of new information provided by the -identify option
     * fixed ugly looking OSD with -vo gl2 and MMX
+    * search for (deprecated!) frameno.avi is now disabled by default (use
+      -frameno-file frameno.avi to enable)
 
 
   pre7try2: August 26, 2005
