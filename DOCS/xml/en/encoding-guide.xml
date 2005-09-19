@@ -2228,7 +2228,7 @@ You can encode to the following codecs (more or less up to date):
    Motion JPEG
   </entry></row>
 <row><entry>ljpeg</entry><entry>
-   Lossless JPEG
+   lossless JPEG
   </entry></row>
 <row><entry>h261</entry><entry>
   H.261
@@ -2240,13 +2240,13 @@ You can encode to the following codecs (more or less up to date):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG-4 (DivX 5, XVID compatible)
+  ISO standard MPEG-4 (DivX 5, XviD compatible)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
-  pre-standard MPEG-4 by MS, v2 (used in old asf files)
+  pre-standard MPEG-4 by MS, v2 (used in old ASF files)
   </entry></row>
 <row><entry>wmv1</entry><entry>
   Windows Media Video, version 1 (AKA WMV7)
@@ -2304,28 +2304,28 @@ The first column contains the codec names that should be passed after the
   </row>
   <row>
     <entry>ac3</entry>
-    <entry>AC3, aka Dolby Digital</entry>
+    <entry>AC3, AKA Dolby Digital</entry>
   </row>
   <row>
     <entry>adpcm_ima_wav</entry>
-    <entry>IMA Adaptive PCM (4bits per sample, 4:1 compression)</entry>
+    <entry>IMA adaptive PCM (4 bits per sample, 4:1 compression)</entry>
   </row>
   <row>
     <entry>sonic</entry>
-    <entry>Experimental lossy/lossless codec</entry>
+    <entry>experimental lossy/lossless codec</entry>
   </row>
 </tbody>
 </tgroup>
 </informaltable>
 
 The first column contains the codec names that should be passed after the
-<literal>acodec</literal> config, like: <option>-lavcopts acodec=ac3</option>
+<literal>acodec</literal> option, like: <option>-lavcopts acodec=ac3</option>
 </para>
 
 <para>
   Contrary to <systemitem class="library">libavcodec</systemitem>'s video
   codecs, its audio codecs do not make a wise usage of the bits they are
-  been given as they lack some minimal psychoacoustic model (if at all)
+  given as they lack some minimal psychoacoustic model (if at all)
   which most other codec implementations feature.
   However, note that all these audio codecs are very fast and work
   out-of-the-box everywhere <application>MEncoder</application> has been
