@@ -14,6 +14,143 @@ for a wealth of discussions about all aspects of and problems related to
 encoding with <application>MEncoder</application>.
 </para>
 
+<sect1 id="menc-feat-selecting-codec">
+<title>Selecting codecs and container formats</title>
+
+<para>
+  Audio and video codecs for encoding are selected with the
+  <option>-oac</option> and <option>-ovc</option> options, respectively.
+  The following choices are available, although some may not have been
+  enabled at compiletime:
+</para>
+<para>
+Audio Codecs:
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Audio codec name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mp3lame</entry>
+    <entry>Encode to VBR, ABR or CBR MP3 with LAME</entry>
+  </row>
+  <row>
+    <entry>lavc</entry>
+    <entry>Use one of libavcodec's audio encoders</entry>
+  </row>
+  <row>
+    <entry>faac</entry>
+    <entry>FAAC AAC audio encoder</entry>
+  </row>
+  <row>
+    <entry>toolame</entry>
+    <entry>MPEG Audio Layer 2 encoder</entry>
+  </row>
+  <row>
+    <entry>twolame</entry>
+    <entry>MPEG Audio Layer 2 encoder based on tooLAME</entry>
+  </row>
+  <row>
+    <entry>pcm</entry>
+    <entry>Uncompressed PCM audio</entry>
+  </row>
+  <row>
+    <entry>copy</entry>
+    <entry>Do not reencode, just copy compressed frames</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>
+Video codecs:
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Video codec name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>lavc</entry>
+    <entry>Use one of libavcodec's video encoders</entry>
+  </row>
+  <row>
+    <entry>xvid</entry>
+    <entry>XviD, MPEG-4 Advanced Simple Profile codec</entry>
+  </row>
+  <row>
+    <entry>x264</entry>
+    <entry>x264, MPEG-4 AVC, aka H.264 codec</entry>
+  </row>
+  <row>
+    <entry>nuv</entry>
+    <entry>nuppel video, used by some realtime applications</entry>
+  </row>
+  <row>
+    <entry>raw</entry>
+    <entry>Uncompressed video frames</entry>
+  </row>
+  <row>
+    <entry>copy</entry>
+    <entry>Do not reencode, just copy compressed frames</entry>
+  </row>
+  <row>
+    <entry>frameno</entry>
+    <entry>Used for 3-pass encoding (not recommended)</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect1>
+
+
+<sect1 id="menc-feat-selecting-input">
+<title>Selecting input file or device</title>
+
+<para>
+  <application>MEncoder</application> can encode from files or directly
+  from a DVD or VCD disc.
+  Simply include the filename on the command line to encode from a file,
+  or <option>dvd://</option><replaceable>titlenumber</replaceable> or
+  <option>vcd://</option><replaceable>tracknumber</replaceable> to encode
+  from a DVD title or VCD track.
+  If you have already copied a DVD to your hard drive (you can use a tool
+  such as <application>dvdbackup</application>, available on most systems),
+  and wish to encode from the copy, you should still use the
+  <option>dvd://</option> syntax, along with <option>-dvd-device</option>
+  followed by the path to the copied DVD root.
+
+  The <option>-dvd-device</option> and <option>-cdrom-device</option>
+  options can also be used to override the paths to the device nodes
+  for reading directly from disc, if the defaults of
+  <filename>/dev/dvd</filename> and <filename>/dev/cdrom</filename> do
+  not work on your system.
+</para>
+<para>
+  When encoding from DVD, it is often desirable to select a chapter or
+  range of chapters to encode.
+  You can use the <option>-chapter</option> option for this purpose.
+  For example, <option>-chapter</option> <replaceable>1-4</replaceable>
+  will only encode chapters 1 through 4 from the DVD.
+  This is especially useful if you will be making a 1400 MB encode
+  targetted for two CDs, since you can ensure the split occurs exactly
+  at a chapter boundary rather than in the middle of a scene.
+</para>
+<para>
+  If you have a supported TV capture card, you can also encode from the
+  TV-in device.
+  Use <option>tv://</option><replaceable>channelnumber</replaceable> as
+  the filename, and <option>-tv</option> to configure various capture
+  settings.
+  DVB input works similarly.
+</para>
+</sect1>
+
+
 <sect1 id="menc-feat-mpeg4">
 <title>Encoding two pass MPEG-4 (&quot;DivX&quot;)</title>
 
@@ -21,7 +158,9 @@ encoding with <application>MEncoder</application>.
 The name comes from the fact that this method encodes the file <emphasis>twice</emphasis>.
 The first encoding (dubbed pass) creates some temporary files
 (<filename>*.log</filename>) with a size of few megabytes, do not delete
-them yet (you can delete the AVI). In the second pass, the two pass output
+them yet (you can delete the AVI or rather just not create any video by
+redirecting it into <filename>/dev/null</filename>).
+In the second pass, the two pass output
 file is created, using the bitrate data from the temporary files. The
 resulting file will have much better image quality. If this is the first
 time you heard about this, you should consult some guides available on the
@@ -31,10 +170,10 @@ net.
 <example>
 <title>copy audio track</title>
 <para>
-Two pass encode of a DVD to an MPEG-4 (&quot;DivX&quot;) AVI while copying
-the audio track.
+Two pass encode of the second track a DVD to an MPEG-4 (&quot;DivX&quot;)
+AVI while copying the audio track.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>/dev/null</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>movie.avi</replaceable>
 </screen>
 </para>
@@ -45,6 +184,8 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <para>
 Two pass encode of a DVD to an MPEG-4 (&quot;DivX&quot;) AVI while encoding
 the audio track to MP3.
+Be careful using this method as it may lead to audio/video desync in
+some cases.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
