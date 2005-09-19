@@ -9,7 +9,7 @@
 **  File licensed under the GPL, see http://www.fsf.org/ for more info.
 **
 **  Some ideas are based on works from
-**    Alex Beregszaszi <alex@naxine.org>
+**    Alex Beregszaszi <alex@fsn.hu>
 **    Gerd Knorr <kraxel@bytesex.org>
 **
 **  CODE IS UNDER DEVELOPMENT, NO FEATURE REQUESTS PLEASE!
