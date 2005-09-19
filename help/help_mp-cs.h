@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.178
+// Synced to 1.182
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -154,6 +154,7 @@ static char help_text[]=
 #define MSGTR_IncreaseRTCMaxUserFreq "Zkuste pøidat \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" do startovacích\n skriptù va¹eho systému.\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "Chyba inicializace Linuxových RTC v ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Pou¾ívám %s èasování.\n"
+#define MSGTR_NoIdleAndGui "Volbu -idle nelze pou¾ít pro GMPlayer.\n"
 #define MSGTR_MenuInitialized "Menu inicializováno: %s\n"
 #define MSGTR_MenuInitFailed "Selhala inicializace menu.\n"
 #define MSGTR_Getch2InitializedTwice "VAROVÁNÍ: getch2_init volána dvakrát!\n"
@@ -836,7 +837,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FPS "Snímková rychlost (FPS):"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Zobrazovat video okno pøi neèinnosti"
 #define MSGTR_PREFERENCES_ArtsBroken "Novìj¹í verze aRts jsou nekompatibilní "\
-           "s GTK 1.x a zhavarují gmplayer!"
+           "s GTK 1.x a zhavarují GMPlayer!"
 
 #define MSGTR_ABOUT_UHU "Vývoj GUI je sponzorován firmou UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Hlavní vývojáøi programu MPlayer:\n"
