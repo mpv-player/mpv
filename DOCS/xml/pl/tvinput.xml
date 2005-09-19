@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Wejście TV</title>
 
@@ -141,7 +141,7 @@ sterownika.
 <para>
 Jeśli <application>MEncoder</application> nie może otworzyć urządzenia
 dźwiękowego, upewnij się, że jest ono rzeczywiście dostępne. Zdarzają się
-problemy z serwerami dźwięku typu aRts (KDE) lub esd (GNOME). Jeśli masz
+problemy z serwerami dźwięku typu aRts (KDE) lub ESD (GNOME). Jeśli masz
 kartę full-duplex (prawie wszystkie przyzwoite karty dostępne obecnie obsługują
 tę funkcję) i korzystasz z KDE, spróbuj zaznaczyć opcję "Działanie w pełni
 dupleksowe" ("full duplex") w konfiguracji serwera dźwięku.
