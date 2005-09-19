@@ -439,18 +439,28 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
 {
   char *hdr, *val;
   char **cmt = vc->user_comments;
-  int index;
+  int index, i;
   ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)d->priv;
+  struct table {
+    char *ogg;
+    char *mp;
+  } table[] = {
+    { "ENCODED_USING", "Software" },
+    { "ENCODER_URL", "Encoder URL" },
+    { "TITLE", "Name" },
+    { "ARTIST", "Artist" },
+    { "COMMENT", "Comments" },
+    { "DATE", "Creation Date" },
+    { "GENRE", "Genre" },
+    { "ALBUM", "Album" },
+    { "TRACKNUMBER", "Track" },
+    { NULL, NULL },
+  };
 
   while(*cmt)
   {
     hdr = NULL;
-    if (!strncasecmp(*cmt, "ENCODED_USING=", 14))
-    {
-      hdr = "Software";
-      val = *cmt + 14;
-    }
-    else if (!strncasecmp(*cmt, "LANGUAGE=", 9))
+    if (!strncasecmp(*cmt, "LANGUAGE=", 9))
     {
       val = *cmt + 9;
       if (identify)
@@ -479,18 +489,19 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
       else
 	hdr = "Language";
     }
-    else if (!strncasecmp(*cmt, "ENCODER_URL=", 12))
-    {
-      hdr = "Encoder URL";
-      val = *cmt + 12;
+    else {
+	for (i = 0; table[i].ogg; i++)
+	{
+	    if (!strncasecmp(*cmt, table[i].ogg, strlen(table[i].ogg)))
+	    {
+		hdr = table[i].mp;
+		val = *cmt + strlen(table[i].ogg) + 1;
+	    }
+	}
     }
-    else if (!strncasecmp(*cmt, "TITLE=", 6))
-    {
-      hdr = "Name";
-      val = *cmt + 6;
-    }
+    demux_info_add(d, hdr, val);
     if (hdr)
-      mp_msg(MSGT_DEMUX, MSGL_V, " %s: %s\n", hdr, val);
+      mp_dbg(MSGT_DEMUX, MSGL_DBG2, " %s: %s\n", hdr, val);
     cmt++;
   }
 }
