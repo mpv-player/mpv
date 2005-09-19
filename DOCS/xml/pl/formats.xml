@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.22 -->
 <sect1 id="formats">
 <title>Obsługiwane formaty</title>
 
@@ -365,6 +365,28 @@ jeszcze nie jest dekodowane przez <application>MPlayera</application>. Oprócz te
 strumienie z tej strony potrzebują dodatkowej warstwy depakietowania, która nie jest
 jeszcze zaimplementowana (plików tych i tak nie da się odtworzyć ze względu na 
 audio VLB).
+</para>
+</sect3>
+
+
+<sect3 id="matroska">
+<title>Pliki matroska</title>
+<para>
+Matroska jest otwartym formatem przechowywania.
+Więcej informacji na
+<ulink url="http://www.matroska.org/">oficjalnej stronie</ulink>.
+</para>
+</sect3>
+
+
+<sect3 id="nut">
+<title>PLiki NUT</title>
+<para>
+NUT jest formatem przechowywania opracowanym przez ludzi
+z <application>MPlayera</application> i <application>FFmpeg</application>. Oba
+projekty go obsługują.
+Więcej informacji na
+<ulink url="http://www.nut.hu/">oficjalnej stronie</ulink>.
 </para>
 </sect3>
 
