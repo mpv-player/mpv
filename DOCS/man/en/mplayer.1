@@ -5827,6 +5827,15 @@ Override the aspect stored in the AVI OpenDML vprp header.
 This can be used to change the aspect ratio with '\-ovc copy'.
 .
 .TP
+.B \-frameno-file <filename> (DEPRECATED)
+Name of the file for special audio-only first pass encoding mode
+.br
+.I NOTE:
+Using this mode will most likely give you A-V sync. Do not use it.
+It is kept for backwards compatibility only and will possibly
+be removed in a future version.
+.
+.TP
 .B \-hr-edl-seek (EDL only)
 Use a more precise, but much slower method for skipping areas.
 Areas marked for skipping are not seeked over, instead all
