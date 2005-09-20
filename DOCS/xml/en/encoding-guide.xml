@@ -2217,7 +2217,12 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
 provides simple encoding to a lot of interesting video and audio formats.
 You can encode to the following codecs (more or less up to date):
+</para>
 
+<sect2 id="menc-feat-enc-libavcodec-video-codecs">
+<title><systemitem class="library">libavcodec</systemitem>'s video codecs</title>
+
+<para>
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
@@ -2290,8 +2295,18 @@ You can encode to the following codecs (more or less up to date):
 
 The first column contains the codec names that should be passed after the
 <literal>vcodec</literal> config, like: <option>-lavcopts vcodec=msmpeg4</option>
+</para>
+<informalexample>
+<para>
+An example, with MJPEG compression:
+<screen>mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
+</para>
+</informalexample>
+</sect2>
 
-
+<sect2 id="menc-feat-enc-libavcodec-audio-codecs">
+<title><systemitem class="library">libavcodec</systemitem>'s audio codecs</title>
+<para>
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
@@ -2322,6 +2337,13 @@ The first column contains the codec names that should be passed after the
 <literal>acodec</literal> option, like: <option>-lavcopts acodec=ac3</option>
 </para>
 
+<informalexample>
+<para>
+An example, with AC3 compression:
+<screen>mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy</screen>
+</para>
+</informalexample>
+
 <para>
   Contrary to <systemitem class="library">libavcodec</systemitem>'s video
   codecs, its audio codecs do not make a wise usage of the bits they are
@@ -2332,13 +2354,8 @@ The first column contains the codec names that should be passed after the
   compiled with <systemitem class="library">libavcodec</systemitem> (which
   is the case most of time), and do not depend on external libraries.
 </para>
+</sect2>
 
-<informalexample>
-<para>
-An example, with MJPEG compression:
-<screen>mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
-</para>
-</informalexample>
 
 <sect2 id="menc-feat-dvd-mpeg4-lavc-encoding-options">
 <title>Encoding options of libavcodec</title>

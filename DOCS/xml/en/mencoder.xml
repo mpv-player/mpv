@@ -38,7 +38,8 @@ Audio Codecs:
   </row>
   <row>
     <entry>lavc</entry>
-    <entry>Use one of libavcodec's audio encoders</entry>
+    <entry>Use one of <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem>'s audio codecs</link>
+    </entry>
   </row>
   <row>
     <entry>faac</entry>
@@ -75,7 +76,8 @@ Video codecs:
 <tbody>
   <row>
     <entry>lavc</entry>
-    <entry>Use one of libavcodec's video encoders</entry>
+    <entry>Use one of <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem>'s video codecs</link>
+    </entry>
   </row>
   <row>
     <entry>xvid</entry>
