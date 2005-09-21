@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.66 -->
+<!-- synced with 1.70 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -568,24 +568,122 @@ wolna. Używaj SDL.
 "Surowe" źródła <application>MPlayera</application> obsługują
 tylko Mac OS X w wersjach 10.2 i wyższych. Możesz spróbować umożliwić
 obsługę starszych wersji Mac OS oraz przysłać nam łaty!
+<application>MPlayer</application> powinien skompilować się bez problemu
+na systemie Mac OS X 10.2 i wyższym. Zalecanym kompilatorem jest GCC 3.x w wersji
+Apple, jeżeli masz Mac OS X 10.3.9 lub późniejszy i QuickTime 7, możesz
+skorzystać z wyjścia video macosx.
+</para>
+
+<sect2 id="mplayerosx">
+<title>MPlayer OS X</title>
+ 
+<para>
+Możesz pobrać natywne GUI dla <application>MPlayera</application> razem
+z prekompilowanymi binariami <application>MPlayera</application> dla
+Mac OS X ze strony projektu
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>, ale uwaga:
+projekt nie jest już aktywny.
+</para>
+<para>
+Na szczęście, <application>MPlayerOSX</application> został przejęty
+przez członka załogi <application>MPlayera</application>.
+Wersje testowe są dostępne na stronie z
+<ulink url="http://mplayerhq.hu/dload.html">materiałami do
+pobrania</ulink>, a oficjalne wydanie powinno pojawić się już
+niedługo.
+</para>
+<para>
+Aby zbudować <application>MPlayerOSX</application> bezpośrednio
+ze źródeł, potrzebujesz modułu <systemitem>mplayerosx</systemitem>,
+<systemitem>main</systemitem> i kopii modułu CVS
+<systemitem>main</systemitem> o nazwie
+<systemitem>main_noaltivec</systemitem>.
+<systemitem>mplayerosx</systemitem> to graficzna nakładka,
+<systemitem>main</systemitem> to MPlayer, a
+<systemitem>main_noaltivec</systemitem> to MPlayer zbudowany bez obsługi
+AltiVec.
+
+</para>
+<para>
+Aby pobrać moduł z repozytorium CVS wykonaj polecenia:
+<screen>
+cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
+</screen>
+</para>
+<para>
+W celu zbudowania <application>MPlayerOSX</application> będziesz musiał
+utowrzyć podobną strukturę katalogów:
+<screen>
+katalog_źródłowy_MPlayera
+   |
+   |--->main           (źródła MPlayera z CVS)
+   |
+   |--->main_noaltivec (źródła MPlayera z CVS skonfigurowane z opcją --disable-altivec)
+   |
+   |--->mplayerosx     (źródła MPlayer OS X z CVS)
+</screen>
+
+
+Najpierw musisz zbudować main i main_noaltivec.
 </para>
 
 <para>
-Zmodyfikowane GCC 3.X Apple jest zalecane do kompilacji
-<application>MPlayera</application>, szczególnie z
-<systemitem class="library">libavcodec</systemitem>, ponieważ
-ich zmodyfikowane GCC 2.95.x nie obsługuje poprawnie składni C99.
+Następnie ustaw globalną zmienną:
+
+<screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
 <para>
-Możesz pobrać Aqua GUI dla <application>MPlayera</application> razem z
-jego skompilowanymi binariami dla Mac OS X ze strony projektu
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
+Potem skonfiguruj:
 </para>
+<para>
+Jeżeli konfigurujesz dla maszyny G4 lub lepszej z obsługą AltiVec,
+postępuj jak poniżej:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+</screen>
+
+Jeżeli konfigurujesz dla maszyny z procesorem G3 bez AltiVec,
+postępuj jak ponieżej:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+--disable-altivec
+</screen>
+Być może będziesz musiał wyedytować plik <filename>config.mak</filename>
+i zmienić wartości <systemitem>-mcpu</systemitem>
+<systemitem>-mtune</systemitem> z <systemitem>-74XX</systemitem> na
+<systemitem>-G3</systemitem>.
+</para>
+<para>
+Następnie wykonaj
+<screen>
+make
+</screen>
+przejdź do katalogu mplayerosx i wpisz
+
+<screen>
+make dist
+</screen>
+Zostanie utworzony skompresowany obraz <systemitem>.dmg</systemitem>
+zawierający gotowy do uruchomienia program.
+</para>
+<para>
+Możes również skorzystać z projektu <application>Xcode</application> 2.1;
+stary projekt dla <application>Xcode</application> 1.x już nie działa.
+ 
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="amiga">
 <title>Amiga/MorphOS (zabawki dla zapaleńców)</title>
+<para>
+Ludzie z <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
+tworzą aktualne paczki z <application>MPlayerem</application> i
+<application>MEncoderem</application>.
+</para>
+
 <para>
 Nicholas Det at Genesi stworzył potężny port <application>MPlayera
 </application> dla MorphOS. Niestety oparty jest on o serię 0.90.
