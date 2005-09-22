@@ -407,6 +407,23 @@ static void stream_dvd_close(stream_t *s) {
 #endif
 }
 
+/** 
+\brief Converts DVD time structure to milliseconds.
+\param *dev the DVD time structure to convert
+\return returns the time in milliseconds
+*/
+static int dvdtimetomsec(dvd_time_t *dt)
+{
+  static int framerates[4] = {0, 2500, 0, 2997};
+  int framerate = framerates[(dt->frame_u & 0xc0) >> 6];
+  int msec = (((dt->hour & 0xf0) >> 3) * 5 + (dt->hour & 0x0f)) * 3600000;
+  msec += (((dt->minute & 0xf0) >> 3) * 5 + (dt->minute & 0x0f)) * 60000;
+  msec += (((dt->second & 0xf0) >> 3) * 5 + (dt->second & 0x0f)) * 1000;
+  if(framerate > 0)
+    msec += (((dt->frame_u & 0x30) >> 3) * 5 + (dt->frame_u & 0x0f)) * 100000 / framerate;
+  return msec;
+}
+
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
@@ -474,6 +491,46 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       return STREAM_UNSUPORTED;
     }
     tt_srpt = vmg_file->tt_srpt;
+    if (identify)
+    {
+      unsigned char discid [16]; ///< disk ID, a 128 bit MD5 sum
+      int vts_no;   ///< video title set number
+      int title_no; ///< title number
+      int vts_ttn;  ///< title number within video title set
+      int pgc_no;   ///< program chain number
+      int msec;     ///< time length in milliseconds
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
+      for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
+      {
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_ptts);
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_angles);
+      }
+      for (vts_no = 1; vts_no <= vmg_file->vts_atrt->nr_of_vtss; vts_no++)
+      {
+        vts_file = ifoOpen(dvd, vts_no);
+        if (vts_file)
+        {
+          if (vts_file->vtsi_mat && vts_file->vts_pgcit)
+            for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
+              if (tt_srpt->title[title_no].title_set_nr == vts_no)
+              {
+                vts_ttn = tt_srpt->title[title_no].vts_ttn - 1;
+                pgc_no = vts_file->vts_ptt_srpt->title[vts_ttn].ptt[0].pgcn - 1;
+                msec = dvdtimetomsec(&vts_file->vts_pgcit->pgci_srp[pgc_no].pgc->playback_time);
+                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
+              }
+          ifoClose(vts_file);
+        }
+      }
+      if (DVDDiscID(dvd, discid) >= 0)
+      {
+        int i;
+        char buf[33];
+        for (i = 0; i < 16; i ++)
+          sprintf(buf+2*i, "%02X", discid[i]);
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_DISC_ID=%s\n", buf);
+      }
+    }
     /**
      * Make sure our title number is valid.
      */
