@@ -60,15 +60,20 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track){
 mp_vcd_priv_t* vcd_read_toc(int fd){
   struct ioc_toc_header tochdr;
   mp_vcd_priv_t* vcd;
-  int i;
+  int i, min = 0, sec = 0, frame = 0;
   if (ioctl(fd,CDIOREADTOCHEADER,&tochdr)==-1) {
     mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return NULL;
   }
-  for (i=tochdr.starting_track ; i<=tochdr.ending_track ; i++){
+  if (identify)
+  {
+    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", tochdr.starting_track);
+    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
+  }
+  for (i=tochdr.starting_track ; i<=tochdr.ending_track + 1; i++){
       struct ioc_read_toc_single_entry tocentry;
 
-      tocentry.track  = i;
+      tocentry.track  = i<=tochdr.ending_track ? i : CDROM_LEADOUT;
       tocentry.address_format = CD_MSF_FORMAT;
 
       if (ioctl(fd,CDIOREADTOCENTRY,&tocentry)==-1) {
@@ -76,6 +81,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
 	return NULL;
       }
         
+      if (i<=tochdr.ending_track)
       mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
           (int)tocentry.track,
           (int)tocentry.entry.addr_type,
@@ -85,6 +91,30 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
           (int)tocentry.entry.addr.msf.second,
           (int)tocentry.entry.addr.msf.frame
       );
+
+      if (identify)
+      {
+        if (i > tochdr.starting_track)
+        {
+          min = tocentry.entry.addr.msf.minute - min;
+          sec = tocentry.entry.addr.msf.second - sec;
+          frame = tocentry.entry.addr.msf.frame - frame;
+          if ( frame < 0 )
+          {
+            frame += 75;
+            sec --;
+          }
+          if ( sec < 0 )
+          {
+            sec += 60;
+            min --;
+          }
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
+        }
+        min = tocentry.entry.addr.msf.minute;
+        sec = tocentry.entry.addr.msf.second;
+        frame = tocentry.entry.addr.msf.frame;
+      }
     }
   vcd = malloc(sizeof(mp_vcd_priv_t));
   vcd->fd = fd;

@@ -110,7 +110,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 	CDMSF trackMSF;
 	
 	mp_vcd_priv_t* vcd;
-	int i;
+	int i, min = 0, sec = 0, frame = 0;
   
 	//read toc header
     memset(&tochdr, 0, sizeof(tochdr));
@@ -124,11 +124,16 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
     }
 	
 	//print all track info
-	for (i=hdr.firstTrackNumberInLastSessionLSB ; i<=hdr.lastTrackNumberInLastSessionLSB ; i++)
+	if (identify)
+	{
+		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", hdr.firstTrackNumberInLastSessionLSB);
+		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", hdr.lastTrackNumberInLastSessionLSB);
+	}
+	for (i=hdr.firstTrackNumberInLastSessionLSB ; i<=hdr.lastTrackNumberInLastSessionLSB + 1; i++)
 	{
 		memset( &tocentry, 0, sizeof(tocentry));
 		tocentry.addressType = kCDTrackInfoAddressTypeTrackNumber;
-		tocentry.address = i;
+		tocentry.address = i<=hdr.lastTrackNumberInLastSessionLSB ? i : CDROM_LEADOUT;
 		tocentry.bufferLength = sizeof(entry);
 		tocentry.buffer = &entry;
 
@@ -141,6 +146,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 		trackMSF = CDConvertLBAToMSF(entry.trackStartAddress);
         
 		//mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
+		if (i<=hdr.lastTrackNumberInLastSessionLSB)
 		mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d: format=%d  %02d:%02d:%02d\n",
           (int)tocentry.address,
           //(int)tocentry.entry.addr_type,
@@ -150,6 +156,30 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
           (int)trackMSF.second,
           (int)trackMSF.frame
 		);
+
+		if (identify)
+		{
+		  if (i > hdr.firstTrackNumberInLastSessionLSB)
+		  {
+		    min = trackMSF.minute - min;
+		    sec = trackMSF.second - sec;
+		    frame = trackMSF.frame - frame;
+		    if ( frame < 0 )
+		    {
+		      frame += 75;
+		      sec --;
+		    }
+		    if ( sec < 0 )
+		    {
+		      sec += 60;
+		      min --;
+		    }
+		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
+		  }
+		  min = trackMSF.minute;
+		  sec = trackMSF.second;
+		  frame = trackMSF.frame;
+		}
 	}
  
 	vcd = malloc(sizeof(mp_vcd_priv_t));
