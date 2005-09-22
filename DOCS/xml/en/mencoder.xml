@@ -81,11 +81,11 @@ Video codecs:
   </row>
   <row>
     <entry>xvid</entry>
-    <entry>XviD, MPEG-4 Advanced Simple Profile codec</entry>
+    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
   </row>
   <row>
     <entry>x264</entry>
-    <entry>x264, MPEG-4 AVC, aka H.264 codec</entry>
+    <entry>x264, MPEG-4 Advanced Video Coding (AVC), aka H.264 codec</entry>
   </row>
   <row>
     <entry>nuv</entry>
