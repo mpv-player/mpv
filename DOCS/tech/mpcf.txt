@@ -618,7 +618,7 @@ is wrapped in a structure to facilitate more than one stream or otherwise
 duplicate the role of a container. any such file is to be considered invalid.
 
 
-			Sample code (GPL, & untested)
+			Sample code (Public Domain, & untested)
 
 typedef BufferContext{
 	uint8_t *buf;
