@@ -213,12 +213,22 @@ To change <application>MEncoder</application>'s output file format,
 use the <option>-of mpeg</option> option.
 </para>
 
+<informalexample>
 <para>
 Example:
 <screen>
 mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
+Creating a MPEG-1 file suitable for exchange:
+<screen>
+mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
+<replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
+-lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3 \
+<replaceable>input.avi</replaceable>
+</screen>
 </para>
+</informalexample>
+
 </sect1>
 
 <sect1 id="menc-feat-rescale">
