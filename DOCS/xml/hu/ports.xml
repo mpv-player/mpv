@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.67 -->
+<!-- synced with 1.70 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -564,23 +564,113 @@ Használj SDL-t.
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-Csak a Mac OS X 10.2-es verzió és utódai támogatottak a hivatalos
-<application>MPlayer</application> forrásban. Régebbi verziók támogatásához
-javításokat szívesen fogadunk!
+Az <application>MPlayer</application>nek gond nélkül kell(ene) fordulnia egyből
+Mac OS X 10.2 és ez felett. A javasolt fordító a GCC 3.x vagy későbbi Apple féle
+változata. Ha Mac OS X 10.3.9 vagy régebbi verziód és QuickTime 7-esed van,
+használhatod a macosx videó kimeneti vezérlőt is.
+</para>
+
+<sect2 id="mplayerosx">
+<title>MPlayer OS X</title>
+
+<para>
+Van egy natív GUI az <application>MPlayer</application>hez egy előfordított
+<application>MPlayer</application> binárissal együtt Mac OS X alá a
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> projektből, de
+emlékezz rá: ez a projekt már nem aktív.
 </para>
 
 <para>
-Az Apple saját GCC 3.x-es fordítója ajánlott, legfőképp, ha 
-<systemitem class="library">libavcodec</systemitem>-et is használunk, mert
-azt az Apple módosított GCC 2.95.x verziója nem támogatja a C99-es
-szintaxist.
+Szerencsére az <application>MPlayerOSX</application> projektet az
+<application>MPlayer</application> csapat egyik tagja átvette.
+Előzetes kiadások elérhetőek a
+<ulink url="http://mplayerhq.hu/dload.html">letöltési oldalunkról</ulink>
+és hamarosan jön a hivatalos kiadás is.
 </para>
 
 <para>
-Mindezek mellett még egy Aqua GUI is elérhető az <application>MPlayer</application>hez,
-melyet egy előre lefordított lejátszó binárissal együtt tölthetünk le az
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> csapat oldaláról.
+Ha saját magad akarod lefordítani forrásból az <application>MPlayerOSX</application>et,
+szükséged lesz az <systemitem>mplayerosx</systemitem>-re, a
+<systemitem>main</systemitem>-re és a
+<systemitem>main</systemitem> CVS modul
+<systemitem>main_noaltivec</systemitem>-re átnevezett másolatára.
+<systemitem>mplayerosx</systemitem> a GUI frontend,
+<systemitem>main</systemitem> az MPlayer és a
+<systemitem>main_noaltivec</systemitem> az MPlayer AltiVec támogatás
+nélkül.
 </para>
+
+<para>
+A CVS modulok letöltéséhez használt az alábbi parancsokat:
+
+<screen>
+cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+</screen>
+</para>
+
+<para>
+Az <application>MPlayerOSX</application> elkészítéséhez valami ilyesmit kell
+csinálnod:
+
+<screen>
+MPlayer_forras_konyvtar
+   |
+   |--->main           (MPlayer CVS forrás)
+   |
+   |--->main_noaltivec (MPlayer CVS forrás --disable-altivec -kel konfigurálva)
+   |
+   |--->mplayerosx     (MPlayer OS X CVS forrás)
+</screen>
+
+Először a main és main_noaltivec-et kell lefordítanod.
+</para>
+
+<para>
+Ezután állíts be egy globális változót:
+
+<screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
+</para>
+
+<para>
+Majd konfigurálj:
+</para>
+
+<para>
+Ha a G4 vagy későbbi, AltiVec támogatással rendelkező CPU-ra konfigurálsz:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+</screen>
+Ha G3-as, AltiVec nélküli gépre:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+--disable-altivec
+</screen>
+Lehet, hogy szerkesztened kell a <filename>config.mak</filename> fájlt és
+át kell írnod az <systemitem>-mcpu</systemitem>-t és <systemitem>-mtune</systemitem>-t
+<systemitem>74XX</systemitem>-ről <systemitem>G3</systemitem>-ra.
+</para>
+
+<para>
+Folytasd a
+<screen>
+make
+</screen>
+paranccsal, majd menj a mplayerosx könyvtárba és írd be 
+
+<screen>
+make dist
+</screen>
+Ez egy tömörített <systemitem>.dmg</systemitem> archívot hoz létre
+egy használatra kész binárissal.
+</para>
+
+<para>
+Használhatod az <application>Xcode</application> 2.1 projektet is;
+a régi, <application>Xcode</application> 1.x projekt nem működik már.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="amiga">
