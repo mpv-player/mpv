@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.21 -->
+<!-- Synced with: 1.22 -->
 <sect1 id="formats">
 <title>Podporované formáty</title>
 
@@ -363,6 +363,25 @@ nepřehratelné, protože mají VLB audio).
 </sect3>
 
 
+<sect3 id="matroska">
+<title>Soubory Matroska</title>
+<para>
+Matroska je otevřený nosný (container) formát.
+Více se dozvíte na <ulink url="http://www.matroska.org/">oficiálním serveru</ulink>.
+</para>
+</sect3>
+
+
+<sect3 id="nut">
+<title>Soubory NUT</title>
+<para>
+NUT je nosný formát vyvíjený týmy <application>MPlayer</application> a
+<application>FFmpeg</application>. Oba projekty jej podporují.
+Více se dozvíte na <ulink url="http://www.nut.hu/">oficiálním serveru</ulink>.
+</para>
+</sect3>
+
+
 <sect3 id="gif">
 <title>GIF soubory</title>
 <para>
@@ -386,9 +405,9 @@ snímku v setinách sekundy.
 
 <para>
 Standardní GIF soubory obsahují 24-bitové RGB snímky s maximálně 8-bitovou
-indexovanou paletou. Snímky jsou obvykle LZW-komprimovány, ačkoli některé GIF
-enkodéry produkují nekomprimované snímky, aby se vyhnuly patentovým problémům
-s LZW kompresí.
+indexovanou paletou. Snímky jsou obvykle komprimovány algoritmem LZW, ačkoli
+některé GIF enkodéry produkují nekomprimované snímky, aby se vyhnuly
+patentovým problémům s LZW kompresí.
 </para>
 
 <para>
