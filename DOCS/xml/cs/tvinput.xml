@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.13 -->
+<!-- Synced with: 1.14 -->
 <sect1 id="tv-input" xreflabel="TV vstup">
 <title>TV vstup</title>
 
@@ -140,7 +140,7 @@ jak použít tento ovladač.
 <para>
 Pokud <application>MEncoder</application> nedokáže otevřít audio zařízení,
 ujistěte se, že je opravdu k dispozici. Můžete mít potíže se zvukovými
-servery jako arts (KDE) nebo esd (GNOME). Pokud máte plně duplexní zvukovou
+servery jako aRts (KDE) nebo ESD (GNOME). Pokud máte plně duplexní zvukovou
 kartu (téměř každá slušná karta to již podporuje) a používáte KDE, zkuste
 zaškrtnout volbu "full duplex" v menu nastavení zvukového serveru.
 </para>
