@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.21 -->
+<!-- Synced with: 1.24 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -2108,17 +2108,23 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
 zajišťuje jednoduché enkódování do mnoha zajímavých video a audio formátů.
 Můžete enkódovat do následujících kodeků (více méně aktuální):
 
+</para>
+
+<sect2 id="menc-feat-enc-libavcodec-video-codecs">
+<title>Video kodeky <systemitem class="library">libavcodec</systemitem></title>
+ 
+<para>
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Jméno kodeku</entry><entry>Popis</entry></row>
+<row><entry>Jméno video kodeku</entry><entry>Popis</entry></row>
 </thead>
 <tbody>
 <row><entry>mjpeg</entry><entry>
    Motion JPEG
   </entry></row>
 <row><entry>ljpeg</entry><entry>
-   Lossless (bezztrátový) JPEG
+   lossless (bezztrátový) JPEG
   </entry></row>
 <row><entry>h261</entry><entry>
   H.261
@@ -2130,13 +2136,13 @@ Můžete enkódovat do následujících kodeků (více méně aktuální):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  standardní ISO MPEG-4 (DivX 5, XVID kompatibilní)
+  standardní ISO MPEG-4 (DivX 5, XviD kompatibilní)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   prvotní MPEG-4 varianta od MS, v3 (DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
-  prvotní MPEG-4 od MS, v2 (použitý ve starých asf souborech)
+  prvotní MPEG-4 od MS, v2 (použitý ve starých ASF souborech)
   </entry></row>
 <row><entry>wmv1</entry><entry>
   Windows Media Video, verze 1 (WMV7)
@@ -2188,6 +2194,60 @@ Příklad, s MJPEG kompresí:
 <screen>mencoder dvd://2 -o titul2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
+</sect2>
+
+<sect2 id="menc-feat-enc-libavcodec-audio-codecs">
+<title>Audio kodeky <systemitem class="library">libavcodec</systemitem></title>
+<para>
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Jméno audio kodeku</entry><entry>Popis</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mp2</entry>
+    <entry>MPEG Layer 2</entry>
+  </row>
+  <row>
+    <entry>ac3</entry>
+    <entry>AC3, alias Dolby Digital</entry>
+  </row>
+  <row>
+    <entry>adpcm_ima_wav</entry>
+    <entry>IMA adaptivní PCM (4 bity na vzorek, komprese 4:1)</entry>
+  </row>
+  <row>
+    <entry>sonic</entry>
+    <entry>experimentální lossy/lossless kodek</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+
+Vprvním sloupci naleznate jména kodeků, které byste měli přiřadit parametru
+<literal>acodec</literal>, například: <option>-lavcopts acodec=ac3</option>
+</para>
+
+<informalexample>
+<para>
+Příklad s kompresí AC3:
+<screen>mencoder dvd://2 -o titul2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy</screen>
+</para>
+</informalexample>
+
+<para>
+  Narozdíl od videokodeků z <systemitem class="library">libavcodec</systemitem>
+  její audio kodeky neprovádějí inteligentní rozdělení přidělených bitů,
+  jelikož jim chybí nějaký minimální psychoakustický model (pokud vůbec),
+  který obsahuje většina implementací ostatních kodeků.
+  Vězte však, že všechny tyto kodeky zvuku jsou velmi rychlé a pracují
+  jak jsou všude, kde máte <application>MEncoder</application> se zakompilovanou
+  knihovnou <systemitem class="library">libavcodec</systemitem> (což je
+  naprostá většina případů) a nezávisejí na externích knihovnách.
+</para>
+</sect2>
+
 
 <sect2 id="menc-feat-dvd-mpeg4-lavc-encoding-options">
 <title>Enkódovací volby libavcodecu</title>
