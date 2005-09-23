@@ -1,5 +1,5 @@
 ////////// Routines (with C-linkage) that interface between "MPlayer"
-////////// and the "LIVE.COM Streaming Media" libraries:
+////////// and the "LIVE555 Streaming Media" libraries:
 
 extern "C" {
 // on MinGW, we must include windows.h before the things it conflicts
@@ -580,11 +580,11 @@ demux_packet_t* ReadBufferQueue::getPendingBuffer() {
 
 
 demuxer_desc_t demuxer_desc_rtp = {
-  "live.com RTP demuxer",
+  "LIVE555 RTP demuxer",
   "rtp",
   "",
   "Ross Finlayson",
-  "requires live.com library",
+  "requires LIVE555 Streaming Media library",
   DEMUXER_TYPE_RTP,
   0, // no autodetect
   NULL,

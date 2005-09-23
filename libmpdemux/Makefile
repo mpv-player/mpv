@@ -135,7 +135,7 @@ SRCS += realrtsp/asmrp.c \
         realrtsp/sdpplin.c \
         realrtsp/xbuffer.c \
 
-ifeq ($(STREAMING_LIVE_DOT_COM),yes)
+ifeq ($(STREAMING_LIVE555),yes)
 CPLUSPLUSSRCS = demux_rtp.cpp demux_rtp_codec.cpp
 CPLUSPLUSINCLUDE = $(LIVE_INCLUDES)
 endif

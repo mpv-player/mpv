@@ -1,5 +1,5 @@
 ////////// Codec-specific routines used to interface between "MPlayer"
-////////// and the "LIVE.COM Streaming Media" libraries:
+////////// and the "LIVE555 Streaming Media" libraries:
 
 #include "demux_rtp_internal.h"
 extern "C" {

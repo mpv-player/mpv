@@ -189,7 +189,7 @@ Optional features:
   --disable-network      disable network support (for: http/mms/rtp) [enable]
   --enable-winsock2      enable winsock2 usage [autodetect]
   --enable-smb           enable Samba (SMB) input support [autodetect]
-  --enable-live          enable LIVE.COM Streaming Media support [autodetect]
+  --enable-live          enable LIVE555 Streaming Media support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
@@ -366,7 +366,7 @@ multiple paths separated by ':'):
   --with-x264incdir=DIR    x264 header in DIR
   --with-dtslibdir=DIR     libdts library in DIR  (*)
   --with-dtsincdir=DIR     libdts header in DIR (*)
-  --with-livelibdir=DIR    LIVE.COM Streaming Media libraries in DIR
+  --with-livelibdir=DIR    LIVE555 Streaming Media libraries in DIR
   --with-toolamedir=DIR    path to Toolame library and include file
   --with-xmmsplugindir=DIR XMMS plugins in DIR
   --with-xmmslibdir=DIR    libxmms.so.1 in DIR
@@ -5768,14 +5768,14 @@ fi
 echores "$_real"
 
 
-echocheck "LIVE.COM Streaming Media libraries"
+echocheck "LIVE555 Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
   _TMPC=$TMPC
   TMPC=$TMPCPP
   cat >$TMPC <<EOF
 #include <liveMedia.hh>
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1090195200)
-#error Please upgrade to version 2004.07.19 or later of the "LIVE.COM Streaming Media" libraries - available from <www.live.com/liveMedia/>
+#error Please upgrade to version 2004.07.19 or later of the "LIVE555 Streaming Media" libraries - available from <www.live555.com/liveMedia/>
 #endif
 int main(void) {}
 EOF
@@ -5804,8 +5804,8 @@ EOF
 fi
 if test "$_live" = yes && test "$_network" = yes ; then
   echores "yes (using $_livelibdir)"
-  _def_live='#define STREAMING_LIVE_DOT_COM 1'
-  _live_libs_def="# LIVE.COM Streaming Media libraries:
+  _def_live='#define STREAMING_LIVE555 1'
+  _live_libs_def="# LIVE555 Streaming Media libraries:
 LIVE_LIB_DIR = $_livelibdir
 LIVE_LIBS =  \$(LIVE_LIB_DIR)/liveMedia/libliveMedia.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/groupsock/libgroupsock.a
@@ -5817,12 +5817,12 @@ LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/UsageEnvironment/include
 LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/BasicUsageEnvironment/include
 LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/groupsock/include"
   _ld_live='$(LIVE_LIBS)'
- _inputmodules="live.com $_inputmodules"
+ _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes ; then
   echores "yes (using distribution version)"
   _live="yes"
-  _def_live='#define STREAMING_LIVE_DOT_COM 1'
-  _live_libs_def="# LIVE.COM Streaming Media libraries:
+  _def_live='#define STREAMING_LIVE555 1'
+  _live_libs_def="# LIVE555 Streaming Media libraries:
 LIVE_LIB_DIR = $_livelibdir
 LIVE_LIBS =  -lliveMedia
 LIVE_LIBS += -lgroupsock
@@ -5834,11 +5834,11 @@ LIVE_INCLUDES += -I/usr/include/UsageEnvironment
 LIVE_INCLUDES += -I/usr/include/BasicUsageEnvironment                                                                     
 LIVE_INCLUDES += -I/usr/include/groupsock"
   _ld_live='$(LIVE_LIBS)'
- _inputmodules="live.com $_inputmodules"
+ _inputmodules="live555 $_inputmodules"
 else
   echores "no"
-  _def_live='#undef STREAMING_LIVE_DOT_COM'
-  _noinputmodules="live.com $_noinputmodules"
+  _def_live='#undef STREAMING_LIVE555'
+  _noinputmodules="live555 $_noinputmodules"
 fi
 
 echocheck "FFmpeg libavutil (static)"
@@ -6932,7 +6932,7 @@ PRG_MENCODER = $_prg_mencoder
 $_live_libs_def
 
 MPLAYER_NETWORK = $_network
-STREAMING_LIVE_DOT_COM = $_live
+STREAMING_LIVE555 = $_live
 MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
 DVBIN = $_dvbin
 VIDIX = $_vidix
@@ -7446,7 +7446,7 @@ $_def_real
 /* Default search path */
 $_def_real_path
 
-/* LIVE.COM Streaming Media library support */
+/* LIVE555 Streaming Media library support */
 $_def_live
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/

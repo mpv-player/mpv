@@ -12,7 +12,7 @@
 #include "demuxer.h"
 #include "help_mp.h"
 
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
 
 extern int network_bandwidth;
 
@@ -38,7 +38,7 @@ static int open_live_rtsp_sip(stream_t *stream,int mode, void* opts, int* file_f
   stream->streaming_ctrl->url = check4proxies(url);
   //url_free(url);
 
-  mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_LIVEDOTCOM, URL: %s\n", stream->url);
+  mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_LIVE555, URL: %s\n", stream->url);
 
   if(rtsp_streaming_start(stream) < 0) {
     mp_msg(MSGT_NETWORK,MSGL_ERR,"rtsp_streaming_start failed\n");
@@ -100,7 +100,7 @@ stream_info_t stream_info_rtsp_sip = {
   "standard RTSP and SIP",
   "RTSP and SIP",
   "Ross Finlayson",
-  "Uses LIVE.COM streaming library.",
+  "Uses LIVE555 Streaming Media library.",
   open_live_rtsp_sip,
   {"rtsp", "sip", NULL },
   NULL,
@@ -111,7 +111,7 @@ stream_info_t stream_info_sdp = {
   "SDP stream descriptor",
   "SDP",
   "Ross Finlayson",
-  "Uses live.com streaming library.",
+  "Uses LIVE555 Streaming Media library.",
   open_live_sdp,
   {"sdp", NULL },
   NULL,

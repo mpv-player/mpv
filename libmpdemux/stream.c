@@ -67,7 +67,7 @@ extern stream_info_t stream_info_dvdnav;
 #ifdef LIBSMBCLIENT
 extern stream_info_t stream_info_smb;
 #endif
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
 extern stream_info_t stream_info_sdp;
 extern stream_info_t stream_info_rtsp_sip;
 #endif;
@@ -90,7 +90,7 @@ stream_info_t* auto_open_streams[] = {
   &stream_info_asf,
   &stream_info_pnm,
   &stream_info_rtsp,
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
   &stream_info_sdp,
   &stream_info_rtsp_sip,
 #endif

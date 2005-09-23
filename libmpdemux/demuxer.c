@@ -114,7 +114,7 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_xmms,
 #endif
   &demuxer_desc_mpeg_ty,
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
   &demuxer_desc_rtp,
 #endif
 #ifdef USE_LIBAVFORMAT
