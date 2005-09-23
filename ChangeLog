@@ -112,7 +112,6 @@ MPlayer (1.0)
     * fixed ugly looking OSD with -vo gl2 and MMX
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)
-    * enhanced the output of the -identify option
 
 
   pre7try2: August 26, 2005
