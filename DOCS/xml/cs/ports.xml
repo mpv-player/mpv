@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.60 -->
+<!-- Synced with: 1.70 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -60,7 +60,7 @@ z jeho
 </para>
 
 <para>
-RPM balíčky pro Mandrake jsou dostupné z
+RPM balíčky pro Mandrake/Mandriva jsou dostupné z
 <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
 SuSE zařadilo do své distribuce zmrzačenou verzi
 <application>MPlayer</application>u. V posledních verzích ji odstranili. Funkční
@@ -418,11 +418,24 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>Yes, <application>MPlayer</application> runs on Windows under
   <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> and
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
-  It does not have a GUI yet, but the command line version is almost completely
-  functional. <ulink url="../../tech/patches.txt">Patches</ulink> are always welcome.
-  You should check out the
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
-  mailing list for help and latest information.</para>
+  It does not have an official GUI yet, but the command line version
+  is completely functional. You should check out the
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
+  mailing list for help and latest information.
+  Official Windows binaries can be found on the
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">download page</ulink>.
+  Installer packages and simple GUI frontends are available from external
+  sources, we have collected then in the Windows section of our
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">projects page</ulink>.
+</para>
+
+<para>If you wish to avoid using the command line, a simple trick is
+  to put a shortcut on your desktop that contains something like the
+  following in the execute section:
+  <screen><replaceable>c:\path\to\</replaceable>mplayer.exe %1</screen>
+  This will make <application>MPlayer</application> play any movie that is
+  dropped on the shortcut. Add <option>-fs</option> for fullscreen mode.
+</para>
 
 <para>Best results are achieved with the native DirectX video output driver
   (<option>-vo directx</option>) and the native Windows waveout audio driver
@@ -504,11 +517,6 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <option>-autosync 100</option>. If some of these options help you, you
   may want to put them in your config file.</para>
 
-<para>Sascha Sommer releases official Windows binaries from time to time,
-  Joey Parrish makes unofficial Windows packages complete with installer.
-  Look for these in the Windows section of
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">our projects page</ulink>.</para>
-
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
@@ -542,6 +550,10 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   Configure it with <option>--prefix=/mingw</option> and install
   it before compiling <application>MPlayer</application>.</para>
 
+<para>Complete instructions for building <application>MPlayer</application>
+  and necessary libraries can be found in the
+  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
+
 </sect2>
 
 
@@ -550,27 +562,124 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-Only Mac OS X 10.2 and up is supported by the "raw"
-<application>MPlayer</application> source. Feel free to make support for older
-Mac OS versions and send patches!
+<application>MPlayer</application> should compile out-of-the-box on
+Mac OS X 10.2 and up. The preferred compiler is the Apple version of
+GCC 3.x or later. If you have Mac OS X 10.3.9 or later and QuickTime 7
+you can use the macosx video output driver.
+</para>
+
+<sect2 id="mplayerosx">
+<title>MPlayer OS X</title>
+
+<para>
+You can get a native GUI for <application>MPlayer</application> together with
+precompiled <application>MPlayer</application> binaries for Mac OS X from the
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project, but be
+warned: that project is not active anymore.
 </para>
 
 <para>
-Apple's modified GCC 3.x is preferred for compiling
-<application>MPlayer</application> especially when using
-<systemitem class="library">libavcodec</systemitem> as Apple's
-modified GCC 2.95.x doesn't support C99 syntax well.
+Fortunately, <application>MPlayerOSX</application> has been taken over
+by a member of the <application>MPlayer</application> team.
+Preview releases are available from our
+<ulink url="http://mplayerhq.hu/dload.html">download page</ulink>
+and an official release should arrive soon.
 </para>
 
 <para>
-One can get an Aqua GUI for <application>MPlayer</application> together with
-compiled <application>MPlayer</application> binaries for Mac OS X from the
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project.
+In order to build <application>MPlayerOSX</application> from source
+yourself, you need the <systemitem>mplayerosx</systemitem>, the
+<systemitem>main</systemitem> and a copy of the
+<systemitem>main</systemitem> CVS module named
+<systemitem>main_noaltivec</systemitem>.
+<systemitem>mplayerosx</systemitem> is the GUI frontend,
+<systemitem>main</systemitem> is MPlayer and
+<systemitem>main_noaltivec</systemitem> is MPlayer built without AltiVec
+support.
 </para>
+
+<para>
+To check out CVS modules use:
+
+<screen>
+cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+</screen>
+</para>
+
+<para>
+In order to build <application>MPlayerOSX</application> you will need to
+set up something like this:
+
+<screen>
+MPlayer_source_directory
+   |
+   |--->main           (MPlayer CVS source)
+   |
+   |--->main_noaltivec (MPlayer CVS source configured with --disable-altivec)
+   |
+   |--->mplayerosx     (MPlayer OS X CVS source)
+</screen>
+
+You first need to build main and main_noaltivec.
+</para>
+
+<para>
+Next, set a global variable:
+
+<screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
+</para>
+
+<para>
+Then, configure:
+</para>
+
+<para>
+If you configure for a G4 or later CPU with AltiVec support, do as follows:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+</screen>
+If you configure for a G3-powered machine without AltiVec, use:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+--disable-altivec
+</screen>
+You may need to edit <filename>config.mak</filename> and change
+<systemitem>-mcpu</systemitem> and <systemitem>-mtune</systemitem>
+from <systemitem>74XX</systemitem> to <systemitem>G3</systemitem>.
+</para>
+
+<para>
+Continue with
+<screen>
+make
+</screen>
+then go to the mplayerosx directory and type
+
+<screen>
+make dist
+</screen>
+This will create a compressed <systemitem>.dmg</systemitem> archive
+with the ready to use binary.
+</para>
+
+<para>
+You can also use the <application>Xcode</application> 2.1 project;
+the old project for <application>Xcode</application> 1.x does
+not work anymore.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
+<para>
+The people over at <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
+make current <application>MPlayer</application> and
+<application>MEncoder</application> packages.
+</para>
+
 <para>
 Nicholas Det at Genesi has done a big and powerful port of <application>MPlayer
 </application> for MorphOS. Sadly it's based on the 0.90 series.
