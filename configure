@@ -6937,7 +6937,6 @@ MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
 DVBIN = $_dvbin
 VIDIX = $_vidix
 CONFIG_PP = yes
-CONFIG_RISKY = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
 I18NLIBS = $_i18n_libs
@@ -7405,9 +7404,6 @@ $_def_libavcodecso
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat
 $_def_libavformat_win32
-
-/* risky codecs */
-#define CONFIG_RISKY 1
 
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
