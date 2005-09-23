@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.87  -->
+<!-- Synced with: 1.93  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -25,7 +25,7 @@ Jak přeložím <application>MPlayer</application> do nového jazyka?
 <answer><para>
 Přečtěte si <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
 to vám objasní vše. Podrobnější pomoc můžete dostat v
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 mailing listu.
 </para></answer>
 </qandaentry>
@@ -91,7 +91,7 @@ nebo často upgradujte.
 
 <qandaentry>
 <question><para>
-Existují binární (RPM/deb) balíčky <application>MPlayer</application>u?
+Existují binární (RPM/Debian) balíčky <application>MPlayer</application>u?
 </para></question>
 <answer><para>
 Podrobnosti viz sekce <link linkend="debian">Debian</link> a <link linkend="rpm">RPM</link>.
@@ -124,7 +124,8 @@ Vaše gcc není správně nainstalováno, detaily naleznete v souboru
 
 <qandaentry>
 <question><para>
-Mám Matrox G200/G400/G450/G550, jak zkompiluji/použiji ovladač mga_vid?
+Mám Matrox G200/G400/G450/G550, jak zkompiluji/použiji ovladač
+<systemitem>mga_vid</systemitem>?
 </para></question>
 <answer><para>
 Přečtěte si sekci <link linkend="mga_vid">mga_vid</link>.
@@ -133,24 +134,18 @@ Přečtěte si sekci <link linkend="mga_vid">mga_vid</link>.
 
 <qandaentry>
 <question><para>
-Během 'make', si <application>MPlayer</application> stěžuje na X11 knihovny.
-Tomu nerozumím, vždyť MÁM nainstalovány X!?
+Během 'make', si <application>MPlayer</application> stěžuje na chybějící
+X11 knihovny. Tomu nerozumím, vždyť <emphasis>mám</emphasis> nainstalovány X11!?
 </para></question>
 <answer><para>
-... ale nemáte nainstalován vývojářský (dev/devel) balíček pro X.
+... ale nemáte nainstalován vývojářský (dev/devel) balíček pro X11.
 Nebo ne správně.
 V Red Hatu se nazývá <filename>XFree86-devel*</filename>,
 v Debianu Woody je to <filename>xlibs-dev</filename>,
 v Debianu Sarge je to <filename>libx11-dev</filename>. Také se přesvědčte,
 že symlinky <filename class="directory">/usr/X11</filename> a
 <filename class="directory">/usr/include/X11</filename> existují (to může být
-problém v Mandrake). Můžete si je vytvořit těmito příkazy:
-<screen>
-     # ln -sf /usr/X11R6 /usr/X11
-     # ln -sf /usr/X11R6/include/X11 /usr/include/X11
-</screen>
-Vaše distribuce se může lišit od
-<ulink url="http://www.pathname.com/fhs/">Standardní Hierarchie Souborového systému</ulink>.
+problém v systémech Mandrake).
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -218,82 +213,80 @@ Windows funguje <option>-vo directx:noaccel</option>.
 
 <qandaentry>
 <question><para>
-Volba <option>-xy</option> ani <option>-fs</option> nepracují v rozhraní x11
-(<option>-vo x11</option>) ...
-</para></question>
-<answer><para>
-Pracují, ale musíte explicitně nastavit softwarové škálování (velmi pomalé)
-pomocí volby <option>-zoom</option>. Raději použijte podporu XF86VidMode:
-Musíte zadat volbu <option>-vm</option> a volbu <option>-fs</option>,
-a to je vše.
-Ujistěte se, že máte správné nastavení grafických režimů v souboru
-<filename>XF86Config</filename>, a zkuste zprovoznit
-<link linkend="dga">DGA ovladač</link> a
-<link linkend="sdl">DGA ovladač z SDL</link>. Jsou mnohem rychlejší.
-Pokud pracuje DGA ovladač z SDL, bude ještě rychlejší.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Co znamenají čísla na stavovém řádku?
 </para></question>
 <answer><para>
 Příklad:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49%</screen>
-<itemizedlist>
-<listitem><para>A: audio pozice v sekundách</para></listitem>
-<listitem><para>V: video pozice v sekundách</para></listitem>
-<listitem><para>A-V: odchylka pozice audia a videa v sekundách (delay)</para></listitem>
-<listitem><para>ct: celková provedená korekce A-V synchronizace</para></listitem>
-<listitem><para>počet přehraných snímků (od posledního převíjení)</para></listitem>
-<listitem><para>počet dekódovaných snímků (od posledního převíjení)</para></listitem>
-<listitem><para>procentuální zatížení CPU video kodekem (při slices a DR to
-zahrnuje video_out)</para></listitem>
+<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<variablelist>
+<varlistentry><term><systemitem>A: 2.1</systemitem></term>
+<listitem><para>pozice zvukové stopy v sekundách</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>V: 2.2</systemitem></term>
+<listitem><para>pozice videa v sekundách</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
+<listitem><para>odchylka audio-video v sekundách (zpoždění (delay))</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
+<listitem><para>celková provedená korekce A-V synchronizace</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>57/57</systemitem></term>
+<listitem><para>snímků přehráno/dekódováno (počítáno od posledního převíjení)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>41%</systemitem></term>
+<listitem><para>zatížení CPU video kodekem v procentech
+  (při slice renderování a direct renderování zahrnuje i
+  video_out)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>0%</systemitem></term>
 <listitem><para>video_out zatížení CPU</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2.6%</systemitem></term>
 <listitem><para>procentuální zatížení CPU audio kodekem</para></listitem>
-<listitem><para>počet zahozených snímků pro udržení A-V synchronizace</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>0</systemitem></term>
+<listitem><para>počet zahozených snímků pro zachování A-V synchronizace</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>4</systemitem></term>
 <listitem><para>aktuální úroveň postprocesingu obrazu (při použití
 <option>-autoq</option>)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>49%</systemitem></term>
 <listitem><para>aktuální naplnění vyrovnávací paměti (běžně okolo 50%)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>1.00x</systemitem></term>
 <listitem><para>rychlost přehrávání v násobcích původní rychlosti</para></listitem>
-</itemizedlist>
-Většina z nich je určena pro ladění chyb a jednou budou odstraněny.
+</varlistentry>
+</variablelist>
+Většina z nich je určena pro ladění chyb. Použijte volbu <option>-quiet</option>,
+aby zmizely.
+U některých souborů můžete vidět, že zatížení CPU video_outem je nulové (0%).
+To proto, že je volán přímo video kodekem a nelze jej měřit odděleně.
+Pokud chcete znát rychlost video_out, porovnejte rozdíl při přehrávání souboru
+do <option>-vo null</option> a do obvyklého video výstupního zařízení.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Co mám udělat, aby se nezobrazovaly?
+Objevuje se chybová zpráva o chybějícím souboru <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Použijte volbu <option>-quiet</option> a přečtěte si manuálovou stránku.
+Stáhněte si a nainstalujte binární kodeky z naší
+<ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">kodekové stránky</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak to, že video_out nijak nezatěžuje (0%) CPU u některých souborů?
+Jak zařídit, aby si <application>MPlayer</application> pamatoval volby, které
+používám pro konkrétní soubor, např. <filename>film.avi</filename>?
 </para></question>
 <answer><para>
-Zátěž není nulová, ale zobrazení je voláno přímo kodekem, takže nemůže být měřena odděleně.
-Měli byste zkusit přehrát soubor s využitím <option>-vo null</option> a
-pak <option>-vo ...</option> a sledovat odchylky v rychlosti video_out.
-</para></answer>
-<answer><para>
-Používáte Direct Rendering tehdy, kdy kodek vykresluje přímo do video paměti.
-V tom případě zátěž dekódováním zahrnuje i zátěž vykreslováním.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Dostávám chybová hlášení, že nebyl nalezen soubor <filename>/usr/local/lib/codecs/</filename> ...
-</para></question>
-<answer><para>
-Stáhněte si binární kodeky z naší
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">stránky s kodeky</ulink>
-a nainstalujte je.
+Vytvořte soubor s názvem <filename>film.avi.conf</filename> s volbami jen pro
+tento soubor a umístěte jej do <filename class="directory">~/.mplayer</filename>
+nebo do adresáře s filmem.
 </para></answer>
 </qandaentry>
 
@@ -399,34 +392,6 @@ zkuste si porovnat
 
 <qandaentry>
 <question><para>
-Právě jsem nainstalil <application>MPlayer</application>. Když chci otevřít
-video soubor, nastane fatální chyba:
-<screen>
-inicializace zvoleného video_out (-vo) rozhraní.
-</screen>
-Jak to mám vyřešit?
-</para></question>
-<answer><para>
-Jen změňte své video výstupní rozhraní. Spusťte následující příkaz a
-dostanete seznam dostupných video výstupních rozhraní:
-<screen>
-mplayer -vo help
-</screen>
-Až si vyberete správné video rozhraní, přidejte jej do
-svého konfiguračního souboru. Přidejte
-<programlisting>
- vo = <replaceable>vybraný_vo</replaceable>
-</programlisting>
-do <filename>~/.mplayer/config</filename> a/nebo
-<programlisting>
-vo_driver = <replaceable>vybraný_vo</replaceable>
-</programlisting>
-do <filename>~/.mplayer/gui.conf</filename>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Nedaří se mi přimět titulky, aby se zobrazovaly, pomoc!!
 </para></question>
 <answer><para>
@@ -501,159 +466,51 @@ PRELINK_OPTS="-mR --no-exec-shield"
 
 <qandaentry>
 <question><para>
-... pracuje s <application>xine/vlc/...</application>, ale ne s
-<application>MPlayer</application>em.
-</para></question>
-<answer><para>
-<application>MPlayer</application> není <application>xine/vlc/...</application>.
-Ačkoli mají tyto přehrávače část kódu společnou, sada kodeků (DLL),
-synchronizace, demultiplexace atd jsou odlišné neměly by být srovnávány.
-Pokud máte soubor, který <application>MPlayer</application> nedokáže správně
-přehrát, ale jiný přehrávač ano, přečtěte si prosím
-<link linkend="bugreports">postup hlášení chyb</link> a nahrajte soubor na náš
-FTP server.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Zvuk se začne rozcházet s videem při přehrávání AVI souboru.
-</para></question>
-<answer><para>
-Zkuste volbu <option>-bps</option> nebo <option>-nobps</option>. Pokud se to
-nezlepší, přečtěte si <link linkend="bugreports">toto</link> a nahrajte
-soubor na FTP.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Můj počítač přehrává MS DivX AVI s rozlišením ~ 640x300 a stereo MP3 zvukem
-příliš pomalu. Když použiji volbu <option>-nosound</option>, vše je OK
-(jen bez zvuku).
-</para></question>
-<answer><para>
-Máte pomalý počítač nebo je špatný ovladač vaší zvukové karty. Prostudujte si
-dokumentaci a uvidíte zda dokážete zvýšit výkon.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-<application>MPlayer</application> zkolabuje s hláškou
+<application>MPlayer</application> zhavaruje s hláškou
 <screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
+nebo
+<screen>MPlayer přerušen signálem 4 v modulu: decode_video</screen>
 </para></question>
 <answer><para>
-Zkuste spustit <application>MPlayer</application> na počítači kde jste jej
-skompilovali. Nebo jej zkuste rekompilovat s detekcí CPU za běhu
+Nepoužívejte <application>MPlayer</application> na CPU odlišném než na jakém
+byl kompilován, nebo jej rekompilujte s detekcí CPU za běhu
 (<command>./configure --enable-runtime-cpudetection</command>).
-Nepoužívejte <application>MPlayer</application> na CPU odlišném než ten, na
-kterém jste jej kompilovali bez použití výše zmíněné vlastnosti.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Mám potíže s [váš okenní manažer] a celoobrazovkovými xv/xmga/sdl/x11 režimy ...
+Když zkouším grabovat z tuneru, funguje to, ale jsou divné barvy. V jiných
+programech je to OK.
 </para></question>
 <answer><para>
-Přečtěte si <link linkend="bugreports">postupy pro nahlášení chyb</link> a
-pošlete nám patřičné hlášení o chybách.
-Rovněž zkuste experimentovat s volbou <option>-fstype</option>.
+Pravděpodobně vaše karta hlásí některé barevné režimy jako podporované,
+i když je nepodporuje. Zkuste to s YUY2 místo výchozího
+YV12 (viz sekci <link linkend="tv-input">TV</link>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Pokud spustím <application>MPlayer</application> pod KDE, dostanu pouze černou
-obrazovku a nic se neděje. Po asi minutě se začne video přehrávat.
+Dostávám podivné procentní hodnoty (příliš velké) při přehrávání na notebooku.
 </para></question>
 <answer><para>
-Zvukový démon arts z KDE blokuje zvukové zařízení. Buď počkejte dokud video
-nezačne hrát, nebo vypněte démon arts v control center. Pokud chcete používat
-arts zvuk, nastavte zvukový výstup přes nativní arts audio rozhraní
-(<option>-ao arts</option>). Pokud selže, nebo není zakompilován, zkuste SDL
-(<option>-ao sdl</option>) a ujistěte se, že vaše SDL umí použít arts zvuk.
-Další možností je spustit <application>MPlayer</application> s artsdsp.
+To je práce power managementu / systému šetřícímu energií vašeho notebooku
+(BIOS, nikoli jádro). Zapojte konektor vnějšího napájení
+<emphasis role="bold">před</emphasis> zapnutím notebooku. Můžete také
+zkusit zda vám pomůže <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+(rozhraní k SpeedStep pro Linux).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Při přehrávání tohoto filmu se mi rozejde video se zvukem a/nebo
-<application>MPlayer</application> spadne se zprávou:
-<screen>DEMUXER: Příliš mnoho (945 ve 8390980 bajtech) video paketů ve
-vyrovnávací paměti!</screen>
+Synchronizace zvuku a videa se úplně rozpadne když spustím
+<application>MPlayer</application> jako root na notebooku.
+Když jej spustí jako uživatel, pracuje normálně.
 </para></question>
 <answer><para>
-Příčin může být několik.
-<itemizedlist>
-<listitem><para>
-Váš CPU <emphasis role="bold">a/nebo</emphasis> video karta
-<emphasis role="bold">a/nebo</emphasis> sběrnice je/jsou příliš pomalé.
-<application>MPlayer</application> zobrazí zprávu, pokud je to tento případ
-(a čítač zahozených snímků se rychle zvyšuje).
-</para></listitem>
-<listitem><para>
-Pokud se jedná o AVI, možná má špatné prokládání. Zkuste volbu
-<option>-ni</option>.
-</para></listitem>
-<listitem><para>
-Ovladač vaší zvukové karty je vadný, nebo používáte ALSA 0.5 s <option>-ao oss</option>.
-Viz <link linkend="audio">sekci zvuková karta</link>.
-</para></listitem>
-<listitem><para>
-AVI má špatnou hlavičku, zkuste volbu <option>-nobps</option> a/nebo
-<option>-mc 0</option>.
-</para></listitem>
-</itemizedlist>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Když se pokusím grabovat ze svého přijímače, funguje to, ale dostanu divné barvy.
-V ostatních aplikacích je vše v pořádku.
-</para></question>
-<answer><para>
-Pravděpodobně hlásí vaše karta některé barevné prostory jako podporované, ale
-ve skutečnosti je nepodporuje. Zkuste YUY2 místo výchozího YV12
-(viz sekce <link linkend="tv-input">TV</link>).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Mám problémy s A/V synchronizací. Některé AVI se přehrávají normálně, některé
-se však přehrávají s dvojnásobnou rychlostí!
-</para></question>
-<answer><para>
-Máte vadnou zvukovou kartu/její ovladač. Nejspíš je fixována na 44100Hz a
-zkoušíte přehrát soubor, který má zvuk 22050Hz. Zkuste audio filtr resample.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Dostávám podivné procentuální hodnoty (příliš vysoké) při přehrávání na
-notebooku.
-</para></question>
-<answer><para>
-Toto je problém power managementu / systému šetřícím energií vašeho notebooku
-(BIOS, nikoli jádro). Zapojte konektor externího napájení
-<emphasis role="bold">před</emphasis> zapnutím notebooku. Rovněž můžete zkusit,
-jestli vám pomůže <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
-(interface ke SpeedStep v Linuxu).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Audio/video se úplně rozejdou když pouštím <application>MPlayer</application>
-jako root na notebooku. Když jej spouštím jako uživatel, pracuje normálně.
-</para></question>
-<answer><para>
-To je opět efekt power managementu (viz výš). Připojte externí napájení
+Toto je opět práce power managementu (viz výš). Zapněte externí napájení
 <emphasis role="bold">před</emphasis> zapnutím notebooku, nebo použijte
 volbu <option>-nortc</option>.
 </para></answer>
@@ -661,19 +518,106 @@ volbu <option>-nortc</option>.
 
 <qandaentry>
 <question><para>
-Film začne být během přehrávání trhaný a dostanu následující zprávu:
-<screen>Detekován špatně prokládaný AVI soubor - přepínám do -ni režimu...</screen>
+Při přehrávání souboru se začne přehrávání zadrhávat a dostanu následující
+hlášení:
+<screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
+nebo
+<screen>Detekován špatně prokládaný AVI soubor &ndash; přepínám do režimu -ni...</screen>
 </para></question>
 <answer><para>
-Špatně prokládané soubory a <option>-cache</option> nejdou dobře dohromady.
+Špatně prokládané soubory a volba <option>-cache</option> nejdou moc dohromady.
 Zkuste <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
 
-
 <qandadiv id="faq-driver">
-<title>Potíže s video/audio rozhraním (vo/ao)</title>
+<title>Potíže video/audio ovaldače (vo/ao)</title>
+
+<qandaentry>
+<question><para>
+Když přejdu do celoobrazovkového režimu, dostanu pouze černé okraje kolem
+obrazu bez jeho zvětšení na celou obrazovku.
+</para></question>
+<answer><para>
+Vaše výstupní video rozhraní nepodporuje hardwarové škálování a protože
+softwarové škálování může být neskutečně pomalé, nezapíná jej
+<application>MPlayer</application> automaticky. Pravděpodobně používáte
+rozhraní <systemitem>x11</systemitem> místo <systemitem>xv</systemitem>.
+Zkuste přidat <option>-vo xv</option> do příkazového řádku, nebo si
+najděte v <link linkend="video">sekci video</link> alternativní video
+výstupní rozhraní. Volba <option>-zoom</option>
+explicitně zapne softwarové škálování.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Právě jsem nainstaloval <application>MPlayer</application>. Když chci však
+otevřít video soubor, nastane fatální chyba:
+<screen>
+Error opening/initializing the selected video_out (-vo) device.
+</screen>
+nebo
+<screen>
+Selhalo otevření/inicializace vybraného video_out (-vo) rozhraní.
+</screen>
+Jak mohu vyřašit své problémy?
+</para></question>
+<answer><para>
+Změňte své video výstupní zařízení. Spusťte následující příkaz, abyste
+dostali seznam dostupných video rozhraní:
+<screen>
+mplayer -vo help
+</screen>
+Jakmile jste si vybrali správné video výstupní rozhraní, přidejte jej
+do svého konfiguračního souboru. Přidejte
+<programlisting>
+ vo = <replaceable>vybraný_vo</replaceable>
+</programlisting>
+do <filename>~/.mplayer/config</filename> a/nebo
+<programlisting>
+vo_driver = <replaceable>vybraný_vo</replaceable>
+</programlisting>
+do <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám problémy s <replaceable>[váš okenní manažer]</replaceable>
+a celoobrazovkovými xv/xmga/sdl/x11 režimy ...
+</para></question>
+<answer><para>
+Přečtěte si <link linkend="bugreports">postup hlášení chyb</link> a pošlete nám
+správné hlášení chyby.
+Rovněž zkuste experimentovat s volbou <option>-fstype</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Zvuk se během přehrávání AVI souboru rozejde s videem.
+</para></question>
+<answer><para>
+Zkuste volbu <option>-bps</option> nebo <option>-nobps</option>. Pokud se to
+nezlepší, přečtěte si
+<link linkend="bugreports">postup hlášení chyb</link>
+a nahrejte soubor na FTP.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Můj počítač přehrává MS DivX AVI s rozlišeními ~ 640x300 a stereo MP3 zvukem
+příliš pomalu. Když použiji volbu <option>-nosound</option>, vše je v pořádku
+(jen bez zvuku).
+</para></question>
+<answer><para>
+Váš počítač je příliš pomalý, nebo máte vadný ovladač zvukové karty. Prostudujte
+si dokumentaci, abyste zjistili, zda nemůžete zvýšit výkon.
+</para></answer>
+</qandaentry>
 
 <qandaentry>
 <question><para>
@@ -699,13 +643,69 @@ Nemám zvuk při přehrávání videa a dostanu chybovou zprávu podobnou této:
 </screen>
 </para></question>
 <answer><para>
-Máte spuštěno KDE nebo GNOME s ARTS nebo ESD zvukovým démonem? Zkuste zakázat
+Máte spuštěno KDE nebo GNOME s aRts nebo ESD zvukovým démonem? Zkuste zakázat
 zvukový démon, nebo použijte volbu <option>-ao arts</option> nebo
-<option>-ao esd</option>, aby <application>MPlayer</application> použil ARTS
+<option>-ao esd</option>, aby <application>MPlayer</application> použil aRts
 nebo ESD.
 Možná provozujete ALSA bez OSS emulace, zkuste nahrát jaderné moduly pro ALSA
 OSS, nebo nařiďte použití výstupního rozhraní ALSA přidáním volby
 <option>-ao alsa</option> do příkazového řádku.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Pokus spustím <application>MPlayer</application> pod KDE, dostanu pouze černou
+obrazovku a nic se neděje. Asi po minutě se video spustí.
+</para></question>
+<answer><para>
+Zvukový démon KDE aRts blokuje zvukové zařízení. Buď čekejte až se video spustí,
+nebo zakažte démona aRts v ovládacím centru. Chcete-li použít aRts zvuk,
+nastavte výstup zvuku přes naše nativní aRts zvukové rozhraní
+(<option>-ao arts</option>). Pokud selže, nebo není zakompilováno, zjuste SDL
+(<option>-ao sdl</option>). Ujistěte se však, že vaše SDL umí pracovat s aRts
+zvukem. Další možností je spustit <application>MPlayer</application> s artsdsp.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mám problémy s A/V synchronizací. Některé mé AVI hrají dobře, ale některé
+s dvojnásobnou rychlostí!
+</para></question>
+<answer><para>
+Máte vadnou zvukovou kartu nebo její ovladač. Nejspíš je pevně nastavena na
+44100Hz a vy se pokoušíte přehrát soubor s 22050Hz zvukem. Zkuste zvukový filtr
+resample.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Když přehrávám tento soubor, rozjede se mi zvuk s obrazem a/nebo
+<application>MPlayer</application> havaruje s hláškou:
+<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
+nebo
+<screen>DEMUXER: Příliš mnoho (945 v 8390980 bytech) video paketů ve vyrovnávací paměti!</screen>
+</para></question>
+<answer><para>
+To může mít několik příčin.
+<itemizedlist>
+<listitem><para>
+Váš CPU <emphasis>a/nebo</emphasis> video karta <emphasis>a/nebo</emphasis>
+sběrnice je příliš pomalá. <application>MPlayer</application> v tom případě
+vypíše hlášku (a počet zahozených snímků rychle narůstá).
+</para></listitem>
+<listitem><para>
+Pokud je to AVI, možná je špatně prokládané. Zkuste to obejít
+volbou <option>-ni</option>.
+Nebo může mít špatnou hlavičku, v tom případě může pomoci
+<option>-nobps</option> a/nebo <option>-mc 0</option>.
+</para></listitem>
+<listitem><para>
+Ovladač vaší zvukové karty je vadný. Viz <link linkend="audio">sekce audio</link>.
+</para></listitem>
+</itemizedlist>
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -784,7 +784,7 @@ z harddisku?
 Použijte volbu <option>-dvd-device</option> pro nastavení adresáře, které
 obsahují soubory:
 <screen>
-mplayer dvd://1 -dvd-device /cesta/do/adresáře
+mplayer dvd://1 -dvd-device <replaceable>/cesta/do/adresáře</replaceable>
 </screen>
 </para></answer>
 </qandaentry>
@@ -814,19 +814,6 @@ Pokud není film pauzován, zapauzuje se pak (detaily viz man stránka).
 Krokování zpět pravděpodobně nebude v dohledné době implementováno.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-Jak přiměji <application>MPlayer</application> k zapamatování voleb, které
-používám pro tento konkrétní soubor, např. <filename>film.avi</filename>?
-</para></question>
-<answer><para>
-Vytvořte soubor jménem <filename>film.avi.conf</filename> s volbami
-specifickými pro tento film a umístěte jej do adresáře
-<filename class="directory">~/.mplayer</filename> nebo do stejného adresáře
-jako soubor.
-</para></answer>
-</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-encoding">
@@ -850,7 +837,7 @@ Jakmile jste vybrali svůj titul a ujistili se, že jej lze dobře přehrát
 <application>MPlayer</application>em, použijte volbu <option>-dumpstream</option>.
 Například:
 <screen>
-mplayer -dumpstream dvd://5 -dumpfile <replaceable>dvd_dump.vob</replaceable>
+mplayer dvd://5 -dumpstream -dumpfile <replaceable>dvd_dump.vob</replaceable>
 </screen>
 nahraje 5. titul z DVD do souboru
 <replaceable>dvd_dump.vob</replaceable>
@@ -877,63 +864,8 @@ Novější verze <application>MEncoder</application>u umí přímo generovat
 MPEG-2 soubory, které mohou být použity jako základ pro vytvoření VCD nebo SVCD
 a měly by být přehratelné jak jsou na všech platformách (například pro
 sdílení videa z digitálního kamkodéru se svými počítačově negramotnými přáteli).
-<screen>
-mencoder -of mpeg -oac toolame -toolameopts br=224 -srate 44100 \
--af-adv force=1 -ovc lavc -mpegopts format=xsvcd -vf harddup -ofps 25 \
--lavcopts vcodec=mpeg2video:mbd=2:keyint=25:vrc_buf_size=917:vrc_minrate=600:vbitrate=2500:vrc_maxrate=2500 \
-<replaceable>vstupní.avi</replaceable> -o <replaceable>xsvcd.mpg</replaceable>
-</screen>
-Takto převedete vstupní soubor <replaceable>vstupní.avi</replaceable> na
-výstupní soubor <replaceable>xsvcd.mpg</replaceable>, zkonvertujete
-zvuk pomocí <systemitem class="library">toolame</systemitem> při 224kbps
-a video pomocí <systemitem class="library">libavcodec</systemitem>
-při 2500kbps, s tím, že datový tok nikdy neklesne pod 600 a nikdy nepřekročí
-2500kbps, což odpovídá (S)VCD normě a zajišťuje hladké přehrávání.
-</para><para>
-Poznamenejme, že abychom mohli učinit GOP strukturu SVCD kompatibilní,
-měla by být volba <option>keyint</option> rovná 15 pro PAL a 18 pro NTSC,
-ačkoli často se přehrají dobře i soubory s mnohem delšími GOPy (25 by vám nemělo
-způsobit problémy).
-Rovněž vynechání <option>-ofps</option> by ve většině případů nemělo vadit
-(jelikož vaše video již pravděpodobně má správnou snímkovou rychlost).
-PAL vyžaduje <option>-ofps</option> 25 a NTSC vyžaduje
-<option>-ofps</option> 30000/1001.
-Navíc PAL SVCD podporují pouze rozlišení 480x576 a 352x288,
-zatímco NTSC podporují pouze 480x480 a 352x240.
-Pokud má zdrojové video jiné rozlišení, pak musíte přeškálovat
-pomocí video filtru <option>scale</option>, takže váš řetězec video filtrů
-bude vypadat například takto <option>-vf scale=480:480,harddup</option> pro
-NTSC SVCD, nebo <option>-vf scale=352:288,harddup</option> pro PAL SVCD.
-</para><para>
-Pokud požadujete zvuk, SVCD podporuje pouze zvuk MPEG-1 layer II,
-takže musíte použít jeden z těchto kodérů
-<systemitem class="library">toolame</systemitem>,
-<systemitem class="library">twolame</systemitem>, nebo jako poslední záchranu
-<systemitem class="library">libavcodec</systemitem> MPEG-1 layer II
-enkodér (jeho kvalita je daleko za předchozími dvěma knihovnami).
-Jak <systemitem class="library">toolame</systemitem> tak
-<systemitem class="library">twolame</systemitem> používají stejnou syntaxi,
-takže v závislosti na tom, co máte nainstalováno, bude uvedený příklad vyžadovat
-jen malou změnu. Pokud musíte použít
-<systemitem class="library">libavcodec</systemitem> MPEG-1 layer II
-enkodér, změňte
-<screen>
--oac toolame -toolameopts br=224
-</screen>
-pokud používáte toolame nebo
-<screen>
--oac twolame -twolameopts br=224
-</screen>
-pokud používáte twolame za:
-<screen>
--oac lavc -lavcopts acodec=mp2:abitrate=224
-</screen>
-</para><para>
-Výsledný soubor <replaceable>xsvcd.mpg</replaceable> je rozšířené
-SVCD (proto se nazývá xsvcd), hlavně proto, že neobsahuje
-scan offsety. Pokud z něj potřebujete generovat SVCD obraz disku, měli byste jej
-protáhnout přes
-<ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>.
+Více informací naleznete v sekci
+<link linkend="menc-feat-vcd-dvd">Použití MEncoderu pro vytvoření VCD/SVCD/DVD-kompatibilních souborů</link>.
 </para></answer>
 </qandaentry>
 
@@ -946,9 +878,10 @@ MPEGy mohou být spojeny do jediného souboru s trochou štěstí přímo.
 Pro AVI soubory můžete využít podporu pro více souborů
 v <application>MEncoder</application>u takto:
 <screen>
-mencoder -ovc copy -oac copy -o výstupní.avi -forceidx soubor1.avi soubor2.avi
+mencoder -ovc copy -oac copy -o <replaceable>výstupní.avi</replaceable> <replaceable>soubor1.avi</replaceable> <replaceable>soubor2.avi</replaceable>
 </screen>
-To však bude pracovat pouze tehdy, mají-li soubory stejné rozlišení a kodek.
+To však bude pracovat pouze tehdy, mají-li soubory stejné rozlišení a
+používají stejný kodek.
 Také můžete zkusit
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> a
 <application>avimerge</application> (součást sady nástrojů
@@ -961,14 +894,15 @@ Také můžete zkusit
 Jak mohu opravit AVI soubory s vadným indexem nebo prokládáním?
 </para></question>
 <answer><para>
-Prostě zkopírujte video a audio proudy do nového souboru a
-<application>MEncoder</application> vygeneruje index a rovněž opraví prokládání,
-takže volba <option>-ni</option> již nebude potřeba.
-To samozřejmě nemůže opravit případné chyby v samotných video a/nebo audio
-proudech.
+Abyste se zbavili nutnosti používat <option>-idx</option> pro zprovoznění
+převíjení v AVI souborech s vadným indexem nebo <option>-ni</option> pro
+přehrávání špatně prokládaných souborů, použijte příkaz
 <screen>
-mencoder -idx <replaceable>vstupní.avi</replaceable> -ovc copy -oac copy -o <replaceable>výstupní.avi</replaceable>
+mencoder <replaceable>vstupní.avi</replaceable> -idx -ovc copy -oac copy -o <replaceable>výstupní.avi</replaceable>
 </screen>
+který zkopíruje video a audio proudy do nového AVI souboru, přičenž vygeneruje
+správný index a správně uloží data (opraví proklad).
+Tento způsob samozřejmě nedokáže odstranit chyby ve video a/nebo audio proudech.
 </para></answer>
 </qandaentry>
 
@@ -991,7 +925,7 @@ mencoder <replaceable>vstupní.avi</replaceable> -ovc copy -oac copy -o <replacea
 Nemohu zakódovat DVD titulky do AVI!
 </para></question>
 <answer><para>
-Musíte správně nastavit volbu <option>-sid</option>!
+Musíte správně nastavit volbu <option>-sid</option>.
 </para></answer>
 </qandaentry>
 
@@ -1000,7 +934,7 @@ Musíte správně nastavit volbu <option>-sid</option>!
 Jak mohu enkódovat pouze některé kapitoly z DVD?
 </para></question>
 <answer><para>
-Použijte správně volbu <option>-chapter</option>, jako: <option>-chapter 5-7</option>
+Použijte správně volbu <option>-chapter</option>, jako: <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
@@ -1089,9 +1023,9 @@ můžete změnit použitím volby <option>-ffourcc</option> v
 <application>MEncoder</application>u.
 Rovněž můžete změnit FourCC existujících souborů stejným způsobem:
 <screen>
-  mencoder <replaceable>input.avi</replaceable> -o <replaceable>výstupní.avi</replaceable> -ffourcc XVID
+  mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>výstupní.avi</replaceable> -ffourcc XVID
 </screen>
-Poznamenejme, že takto nastavíte FourCC jako XVID, místo jako DIVX.
+Poznamenejme, že takto nastavíte FourCC na XVID spíše než DIVX.
 Toto doporučujeme, protože DIVX FourCC znamená DivX4, což je velmi jednoduchý
 MPEG-4 kodek, zatímco jak DX50, tak XVID jsou plnohodnotné MPEG-4 (ASP).
 Takže pokud nastavíte FourCC na DIVX, nekteré špatné softwarové nebo
