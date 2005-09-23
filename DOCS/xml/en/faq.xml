@@ -204,6 +204,12 @@ How can I make a screenshot?
 You have to use a video output driver that does not employ an overlay to be
 able to take a screenshot. Under X11, <option>-vo x11</option> will do, under
 Windows <option>-vo directx:noaccel</option> works.
+</para>
+<para>
+Alternatively you can run <application>MPlayer</application> with the
+<systemitem>screenshot</systemitem> video filter
+(<option>-vf screenshot</option>), and press the <keycap>s</keycap>
+key to grab a screenshot.
 </para></answer>
 </qandaentry>
 
