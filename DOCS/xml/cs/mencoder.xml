@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.87 -->
+<!-- Synced with: 1.92 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -14,6 +14,149 @@ chcete-li bohatost diskusí o všech aspektech a problémech vztažených
 k enkódování <application>MEncoder</application>em.
 </para>
 
+<sect1 id="menc-feat-selecting-codec">
+<title>Výběr kodeků a nosných formátů</title>
+
+<para>
+  Audio a video kodeky pro enkódování jsou vybírány příslušnými volbami
+  <option>-oac</option> a <option>-ovc</option> options.
+  Na výběr máte z následujících možností, ačkoli některé nemusely být
+  v době kompilace povoleny, nebudou tedy k dispozici:
+</para>
+<para>
+Audio (zvukové) kodeky:
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Jméno audio kodeku</entry><entry>Popis</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mp3lame</entry>
+    <entry>Enkóduje do VBR, ABR nebo CBR MP3 pomocí LAME</entry>
+  </row>
+  <row>
+    <entry>lavc</entry>
+    <entry>Použije se některý z
+    <link linkend="menc-feat-enc-libavcodec-audio-codecs">
+    <systemitem class="library">libavcodec</systemitem> audio kodeků</link>
+    </entry>
+  </row>
+  <row>
+    <entry>faac</entry>
+    <entry>FAAC AAC audio enkodér</entry>
+  </row>
+  <row>
+    <entry>toolame</entry>
+    <entry>Enkodér MPEG Audio Layer 2</entry>
+  </row>
+  <row>
+    <entry>twolame</entry>
+    <entry>Enkodér MPEG Audio Layer 2 založený na tooLAME</entry>
+  </row>
+  <row>
+    <entry>pcm</entry>
+    <entry>Nekomprimovaný PCM zvuk</entry>
+  </row>
+  <row>
+    <entry>copy</entry>
+    <entry>Nereenkóduje, pouze kopíruje komprimované vzorky</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>
+Video kodeky:
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Jméno video kodeku</entry><entry>Popis</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>lavc</entry>
+    <entry>Použije se některý z
+    <link linkend="menc-feat-enc-libavcodec-video-codecs">
+    <systemitem class="library">libavcodec</systemitem> video kodeků</link>
+    </entry>
+  </row>
+  <row>
+    <entry>xvid</entry>
+    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) kodek</entry>
+  </row>
+  <row>
+    <entry>x264</entry>
+    <entry>x264, MPEG-4 Advanced Video Coding (AVC), alias H.264 kodek</entry>
+  </row>
+  <row>
+    <entry>nuv</entry>
+    <entry>nuppel video, používaný některými realtime aplikacemi</entry>
+  </row>
+  <row>
+    <entry>raw</entry>
+    <entry>Nekomprimované videosnímky</entry>
+  </row>
+  <row>
+    <entry>copy</entry>
+    <entry>Nereenkóduje, pouze kopíruje komprimované snímky</entry>
+  </row>
+  <row>
+    <entry>frameno</entry>
+    <entry>Použité pro 3-průchodové enkódování (nedoporučujeme)</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect1>
+
+
+<sect1 id="menc-feat-selecting-input">
+<title>Výběr vstupního souboru nebo zařízení</title>
+
+<para>
+  <application>MEncoder</application> umí enkódovat ze souborů nebo přímo z
+  DVD či VCD disku.
+  Vložte na příkazovém řádku jméno souboru pro enkódování souboru,
+  nebo <option>dvd://</option><replaceable>číslo_titulu</replaceable> nebo
+  <option>vcd://</option><replaceable>číslo_stopy</replaceable> pro enkódování
+  DVD titulu či VCD stopy.
+  Máte-li již zkopírováno DVD na hard disk (k tomu můžete použít nástroj jako
+  <application>dvdbackup</application>, dostupný na mnoha systémech),
+  a chcete enkódovat z kopie, měli byste i zde použít syntaxi
+  <option>dvd://</option> ve spojení s volbou <option>-dvd-device</option>
+  následovanou cestou do kořenového adresáře skopírovaného DVD.
+
+  Volby <option>-dvd-device</option> a <option>-cdrom-device</option>
+  lze rovněž použít k přenastavení cest k souborům zařízení pro přímé
+  čtení disků, pokud výchozí 
+  <filename>/dev/dvd</filename> a <filename>/dev/cdrom</filename> na vašem
+  systému nepracují.
+</para>
+<para>
+  Enkódujete-li z DVD, je často vhodné vybrat kapitolu nebo rozsah
+  kapitol k enkódování.
+  Pro tento účel můžete použít volbu <option>-chapter</option>.
+  Například s volbou <option>-chapter</option> <replaceable>1-4</replaceable>
+  se budou z DVD enkódovat pouze kapitoly 1 až 4.
+  To se zvlášť hodí, pokud budete enkódovat film na velikost 1400 MB
+  určený pro dvě CD, jelikož budete mít jistotu, že zlom nastane přesně
+  na hranici kapitol místo uprostřed scény.
+</para>
+<para>
+  Pokud máte podporovanou TV zachytávací kartu, můžete rovněž enkódovat ze
+  zařízení TV vstupu.
+  Použijte <option>tv://</option><replaceable>číslo_kanálu</replaceable> jako
+  jméno souboru a volbu <option>-tv</option> pro konfiguraci různých nastavení
+  zachytávání.
+  Vstup z DVB pracuje obdobně.
+</para>
+</sect1>
+
+
 <sect1 id="menc-feat-mpeg4">
 <title>Dvouprůchodové enkódování MPEG-4 (&quot;DivX&quot;)</title>
 
@@ -21,29 +164,33 @@ k enkódování <application>MEncoder</application>em.
 Název vychází z faktu, že soubor je enkódován <emphasis>dvakrát</emphasis>.
 První enkódování (dubbed pass) vytvoří dočasné soubory
 (<filename>*.log</filename>) velikosti několika megabajtů, které zatím nemažte
-(můžete smazat AVI). Ve druhém průchodu je vytvořen dvouprůchodový výstupní
+(můžete smazat AVI, nebo raději žádné nevytvářejte a přesměrujte je do
+<filename>/dev/null</filename>).
+Ve druhém průchodu je vytvořen dvouprůchodový výstupní
 soubor s použitím řízení datového toku z dočasných souborů. Výsledný soubor
 bude mít lepší kvalitu obrazu. Pokud jste o tom teď slyšeli poprvé, měli byste
 si prostudovat některé návody dostupné na netu.
 </para>
 
 <example>
-<title>kopírování zvukové stopy</title>
+<title>Kopírování zvukové stopy</title>
 <para>
-Dvouprůchodové enkódování DVD do MPEG-4 (&quot;DivX&quot;) AVI zatímco se zvuk
-pouze zkopíruje.
+Dvouprůchodové enkódování druhé stopy z DVD do MPEG-4 (&quot;DivX&quot;)
+AVI zatímco se zvuk pouze zkopíruje.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>/dev/null</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
 </screen>
 </para>
 </example>
 
 <example>
-<title>enkódování zvukové stopy</title>
+<title>Enkódování zvukové stopy</title>
 <para>
 Dvouprůchodové enkódování DVD do MPEG-4 (&quot;DivX&quot;) AVI a současně
 enkódování zvukové stopy do MP3.
+Při této metodě buďte opatrní, jelikož v některých případech může vést k rozjetí
+zvuku s videem.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
@@ -68,12 +215,22 @@ Výstupní souborový formát <application>MEncoder</application>u změníte použitím
 volby <option>-of mpeg</option>.
 </para>
 
+<informalexample>
 <para>
-Example:
+Příklad:
 <screen>
 mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>další_volby</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>výstup.mpg</replaceable>
 </screen>
+Vytvoření MPEG-1 souboru vhodného pro výměnu:
+<screen>
+mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
+<replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
+-lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3 \
+<replaceable>vstupní.avi</replaceable>
+</screen>
 </para>
+</informalexample>
+
 </sect1>
 
 <sect1 id="menc-feat-rescale">
@@ -129,6 +286,24 @@ způsoby:
   <option>-audiofile <replaceable>soubor</replaceable></option>.
   </para></listitem>
 </itemizedlist>
+
+<para>
+  Použití <option>-oac copy</option> pro kopírování z jednoho nosného fomátu
+  do jiného může vyžadovat použití <option>-fafmttag</option> pro zachování
+  příznaku formátu zvuku původního souboru.
+  Například pokud konvertujete NSV soubor a AAC zvukem do nosného formátu AVI,
+  bude příznak formátu zvuku nesprávný a bude jej nutno změnit.
+  Seznam příznaků audio formátu naleznete v souboru
+  <filename>codecs.conf</filename>.
+</para>
+
+<para>
+Example:
+<screen>
+mencoder <replaceable>vstupní.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o <replaceable>výstupní.avi</replaceable>
+</screen>
+</para>
+
 </sect1>
 
 
