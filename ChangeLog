@@ -8,7 +8,7 @@ MPlayer (1.0)
       which is to be merged into the existing guide
     * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
-    * new advanced audio usage guide
+    * new advanced audio usage guide with surround sound instructions
     * Hungarian XML documentation translation finished
     * Czech documentation translation finished
     * Italian man page synced
@@ -73,7 +73,7 @@ MPlayer (1.0)
     * lavcresample now used by default (-af-adv force=0 gives old behavior)
     * vf_expand and vf_dsize now support aspect and round parameters
     * screenshot filter
-    * -af pan commandline fix, now outputs the right number of channels
+    * -af pan command line fix, now outputs the right number of channels
       and accepts values < 0 or > 1. Channel order had to be changed.
 
     MEncoder:
@@ -112,6 +112,7 @@ MPlayer (1.0)
     * fixed ugly looking OSD with -vo gl2 and MMX
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)
+    * enhanced the output of the -identify option
 
 
   pre7try2: August 26, 2005
