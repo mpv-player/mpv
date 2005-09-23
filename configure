@@ -7414,6 +7414,11 @@ $_def_libavformat_win32
 /* Use libavcodec's encoders */
 #define CONFIG_ENCODERS 1
 
+/* Use libavformat's demuxers */
+#define CONFIG_DEMUXERS 1
+/* Use libavformat's muxers */
+#define CONFIG_MUXERS 1
+
 #define CONFIG_MPEGAUDIO_HP 1
 
 #define CONFIG_GPL 1
