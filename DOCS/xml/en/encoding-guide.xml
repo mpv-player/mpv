@@ -2298,7 +2298,7 @@ The first column contains the codec names that should be passed after the
 </para>
 <informalexample>
 <para>
-An example, with MJPEG compression:
+An example with MJPEG compression:
 <screen>mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
@@ -2339,7 +2339,7 @@ The first column contains the codec names that should be passed after the
 
 <informalexample>
 <para>
-An example, with AC3 compression:
+An example with AC3 compression:
 <screen>mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy</screen>
 </para>
 </informalexample>

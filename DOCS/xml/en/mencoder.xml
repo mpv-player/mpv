@@ -85,7 +85,7 @@ Video codecs:
   </row>
   <row>
     <entry>x264</entry>
-    <entry>x264, MPEG-4 Advanced Video Coding (AVC), aka H.264 codec</entry>
+    <entry>x264, MPEG-4 Advanced Video Coding (AVC), AKA H.264 codec</entry>
   </row>
   <row>
     <entry>nuv</entry>
@@ -219,7 +219,8 @@ Example:
 <screen>
 mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
-Creating a MPEG-1 file suitable for exchange:
+Creating an MPEG-1 file suitable to be played on system with minimal
+multimedia support, like default Windows installs:
 <screen>
 mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
 <replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
