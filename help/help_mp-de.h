@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.175
+// In synch with rev 1.183
 
 // ========================= MPlayer help ===========================
 
@@ -97,7 +97,7 @@ static char help_text[]=
 "- Langsame CPU\n"\
 "  - Versuche nicht, DVDs/große DivX-Filme auf langsamen CPUs abzuspielen.\n"\
 "    Probiere Optionen von lavdopts, z.B.\n"\
-"        -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
+"    -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- Defekte Datei\n"\
 "  - Versuche verschiedene Kombinationen von: -nobps -ni -forceidx -mc 0.\n"\
 "- Für die Wiedergabe von langsamen Medien (NFS/SMB, DVD, VCD usw)\n"\
@@ -164,6 +164,7 @@ static char help_text[]=
 #define MSGTR_IncreaseRTCMaxUserFreq "Versuche, \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" zu deinen Systemstartskripten hinzuzufügen.\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC-Initialisierungsfehler in ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Benutze %s-Zeitgeber.\n"
+#define MSGTR_NoIdleAndGui "Die Option -idle kann mit GMPlayer nicht verwendet werden.\n"
 #define MSGTR_MenuInitialized "Menü initialisiert: %s\n"
 #define MSGTR_MenuInitFailed "Initialisierung des Menüs fehlgeschlagen.\n"
 #define MSGTR_Getch2InitializedTwice "WARNUNG: getch2_init doppelt aufgerufen!\n"
@@ -352,7 +353,7 @@ static char help_text[]=
 #define MSGTR_ConfigfileError "Konfigurationsdatei-Fehler"
 #define MSGTR_ErrorParsingCommandLine "Fehler beim Parsen der Kommandozeile."
 #define MSGTR_VideoStreamRequired "Videostream zwingend notwendig!\n"
-#define MSGTR_ForcingInputFPS "Eingabe-fps werden interpretiert als %5.2f anstelle von\n"
+#define MSGTR_ForcingInputFPS "Eingabe-fps werden interpretiert als %5.2f an Stelle von\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Ausgabedateiformat RAWVIDEO unterstützt kein Audio - Audio wird deaktiviert.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Dieser Demuxer unterstützt -nosound no nicht.\n"
 #define MSGTR_MemAllocFailed "Speicherreservierung fehlgeschlagen"
@@ -850,6 +851,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "DVD-Gerät:"
 #define MSGTR_PREFERENCES_FPS "FPS des Films:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Zeige Videofenster, wenn inaktiv"
+#define MSGTR_PREFERENCES_ArtsBroken "Neuere Versionen von aRts sind mit GTK 1.x nicht kompatibel\n"\
+           "und bringen GMPlayer zum Absturz!"
 
 #define MSGTR_ABOUT_UHU "GUI-Entwicklung wurde von UHU Linux gesponsert.\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayers Kernentwickler-Team:\n"
@@ -904,7 +907,8 @@ static char help_text[]=
 
  // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"
+#define MSGTR_VOincompCodec "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"\
+                "Versuche auch das Hinzufügen des Filters scale, z.B. -vf spp,scale an Stelle von -vf spp.\n"
 #define MSGTR_VO_GenericError "Dieser Fehler ist aufgetreten"
 #define MSGTR_VO_UnableToAccess "Zugriff nicht möglich."
 #define MSGTR_VO_ExistsButNoDirectory "existiert schon, ist aber kein Verzeichnis."
