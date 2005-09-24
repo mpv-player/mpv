@@ -1820,20 +1820,16 @@ Gibt die ID für die VOBsub-Untertitel an.
 Überschreibt die automatisch erkannte Puffergröße der Audiotreiber/\:-karte.
 .
 .TP
-.B \-delay <Sek>
-Audioverzögerung in Sekunden (positive oder negative Fließkommazahl).
-.
-.TP
 .B \-format <Format> (siehe auch format Audiofilter)
-Wählt das Sampleformat, das für die Ausgabe der Filterschicht zur Soundkarte
-verwendet wird.
+Wählt das Sampleformat, das für die Ausgabe der Audiofilterschicht zur
+Soundkarte verwendet wird.
 Die Werte, die <Format> annehmen kann, stehen unten in der Beschreibung
 des format Audiofilters.
 .
 .TP
 .B \-mixer <Gerät>
 Benutze einen anderen Mixer als den Standardmixer /dev/\:mixer.
-Bei ALSA gibt dies den Mixer-Namen an.
+Bei ALSA ist dies der Mixer-Name.
 .
 .TP
 .B \-mixer-channel <Mixer-Anschluß>[,Mixer-Index] <nur bei \-ao oss und \-ao
@@ -1853,9 +1849,18 @@ Die Namen von ALSA-Mixerkanälen gefolgt von einer Nummer müssen im Format
 <Name,Nummer> angegeben werden, z.B.\& muß ein Kanal, der im alsamixer 'PCM 1'
 heißt, umbenannt werden in
 .BR PCM,1 .
+.
 .TP
 .B \-softvol
 Erzwingt den Gebrauch des Softwaremixers anstelle des Mixers der Soundkarte.
+.
+.TP
+.B \-softvol-max <10.0\-10000.0>
+Setzt die maximale Verstärkung in Prozent (Standard: 110).
+Ein Wert von 200 erlaubt dir, die Lautstärke bis zum doppelten des aktuellen
+Lautstärkelevels einzustellen.
+Bei Werten unter 100 wird die anfängliche Lautstärke (die 100% ist) über dem
+Maximum sein, was z.B.\& das OSD nicht korrekt darstellen kann.
 .
 .TP
 .B \-volstep <0\-100>
