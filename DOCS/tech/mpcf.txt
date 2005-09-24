@@ -282,8 +282,11 @@ forward_ptr
 	after the forward_ptr to the first byte of the next packet)
 
 back_ptr
-	pointer to the latest syncpoint, for which there is at least one
-	keyframe prior to the global_timestamp in every stream
+	real_back_ptr = back_ptr * 8 + 7
+	real_back_ptr must point to a position such that a syncpoint startcode begins
+	within the next 8 bytes, and such that at least one keyframe for each stream
+	lies between the syncpoint to which real_back_ptr points, and the current
+	syncpoint.
 
 file_id_string
 	"nut/multimedia container\0"
