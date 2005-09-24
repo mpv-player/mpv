@@ -1243,7 +1243,8 @@ Springt zu 1 Stunde 10 Minuten.
 .
 .TP
 .B \-tskeepbroken
-Sorgt dafür, daß MPlayer solche TS-Pakete, die als unbrauchbar markiert wurden,
+Sorgt dafür, dass MPlayer solche TS-Pakete, die als unbrauchbar markiert
+wurden,
 nicht ignoriert.
 Diese Option wird manchmal gebraucht, um korrupte MPEG-TS-Dateien abzuspielen.
 .
@@ -1262,7 +1263,7 @@ Kann in Verbindung mit \-vid und \-aid benutzt werden.
 .B \-tv <Option1:Option2:...> (nur bei TV)
 Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
 Um mit MPlayer fernzusehen, benutze die Optionen 'tv://'
-oder 'tv://<Kanalnummer>' oder sogar 'tv://Kanalname' (siehe unten die
+oder 'tv://<Kanalnummer>' oder sogar 'tv://<Kanalname>' (siehe unten die
 Option 'channels' für die Kanalnamen) als Film-URL.
 .sp 1
 Verfügbare Optionen:
@@ -1274,11 +1275,11 @@ mögliche Werte: dummy, v4l, v4l2, bsdbt848
 .IPs device=<Wert>
 Gibt ein anderes Videogerät als /dev/\:video0 an.
 .IPs input=<Wert>
-Gibt einen anderen Eingang als den Standardeingang 0 (Television)
-an (such in der Ausgabe nach einer Liste)
+Gibt den Eingang an (Standard: 0 (TV), siehe Ausgaben in der Konsole für
+mögliche Eingänge).
 .IPs freq=<Wert>
 Gibt die Frequenz an, auf die der Tuner gesetzt wird (z.B.\& 511.250).
-Kann nicht zusammen mit 'channels' benutzt werden.
+Kann nicht zusammen mit dem Parameter channels benutzt werden.
 .IPs outfmt=<Wert>
 Gibt das Ausgabeformat des Tuners mit einer Voreinstellung des
 V4L-Treibers (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420) oder ein
@@ -1288,17 +1289,16 @@ Breite des Ausgabefensters
 .IPs height=<Wert>
 Höhe des Ausgabefensters
 .IPs fps=<Wert>
-Bildanzahl, mit der Video aufgenommen wird (Bilder pro Sekunde, frames per
+Framerate, mit der Video aufgenommen wird (Bilder pro Sekunde, frames per
 second).
 .IPs buffersize=<Wert>
-Maximalgröße des Capture-Puffers in Megabytes (standardmäßig: dynamische
-Größe)
+Maximalgröße des Capture-Puffers in Megabytes (Standard: dynamisch)
 .IPs norm=<Wert>
-Für bsdbt848 and v4l sind die Normen PAL, SECAM und NTSC verfügbar.
+Für bsdbt848 und v4l sind die Normen PAL, SECAM und NTSC verfügbar.
 Für v4l2, siehe Option normid und die Ausgabe von MPlayer für eine Liste der
 verfügbaren TV-Normen.
-.IPs "normid=<ID> (nur bei V4L2)"
-Setzt die TV-Norm auf die angegebene ID.
+.IPs "normid=<Wert> (nur bei V4L2)"
+Setzt die TV-Norm auf die angegebene numerische ID.
 Die TV-Norm hängt von der Videokarte ab.
 Siehe MPlayer-Output für eine Liste der verfügbaren TV-Normen.
 .IPs channel=<Wert>
@@ -1315,19 +1315,19 @@ Fernbedienung benutzbar sein (siehe LIRC).
 Kann nicht zusammen mit dem frequency\-Parameter benutzt werden.
 .br
 .I ANMERKUNG:
-Die Sendernummer wird dann die Position des Eintrags in
-der 'channels'-Liste sein, wobei der erste Eintrag die 1 bekommt.
+Die Sendernummer wird dann die Position des Eintrags in der 'channels'-Liste
+sein, mit 1 beginnend.
 .br
 .I BEISPIEL:
 tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
 Setzt Werte des Bild-Equaliziers der Karte.
-.IPs audiorate=<Werte>
-Setzt die Audiobitrate für's Capturen.
+.IPs audiorate=<Wert>
+Setzt die Audiobitrate für Capturing.
 .IPs forceaudio
 Capture auch dann Audio, wenn v4l keine Audioquellen zurückmeldet.
 .IPs alsa
-Benutze ALSA zum Capturen.
+Benutze ALSA für Capturing.
 .IPs amode=<0\-3>
 Wählt einen Audiomodus:
 .RSss
@@ -1342,31 +1342,31 @@ Wählt einen Audiomodus:
 .IPs forcechan=<1\-2>
 Normalerweise wird die Anzahl der aufgenommenen Audiokanäle automatisch
 durch Ermitteln des Audiomodus der TV-Karte festgelegt.
-Mit dieser Option kann Mono/\:Stereo unabhängig von dem von V4L
+Mit dieser Option kann Stereo/\:Mono unabhängig von dem von V4L
 zurückgegebenen Audiomodus erzwungen werden.
 Kann benutzt werden, wenn die TV-Karte den aktuellen Audiomodus nicht
-zurückgeben kann.
+angeben kann.
 .IPs adevice=<Wert>
 Setzt das Audiogerät.
 <Wert> sollte /dev/\:xxx bei OSS und eine Hardware-ID bei ALSA sein.
 Du musst in der Hardware-ID von ALSA jedes ':' durch ein '.' ersetzen.
 .IPs audioid=<Wert>
 Wählt einen Audioausgang der TV-Karte, wenn diese mehrere hat.
-.IPs "[volume|bass|treble|balance]=<0\-65535> v4l1"
-.IPs "[volume|bass|treble|balance]=<0\-100> v4l2"
+.IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
+.IPs "[volume|bass|treble|balance]=<0\-100> (v4l2)"
 Diese Optionen setzen Parameter des Mixers auf der Capture-Karte.
 Sie haben keinen Effekt, wenn deine Karte keinen Mixer hat.
 Bei V4L2 geht der gültige Bereich von 0 bis 100, und 50 steht für den vom
 Treiber angegebenen Default-Wert.
-.IPs immediatemode=<Boolean>
+.IPs immediatemode=<bool>
 Ein Wert von 0 bedeutet: Nimm Audio und Video zusammen in einem Puffer auf
-(Standardwert für MEncoder).
+(Standard für MEncoder).
 Ein Wert von 1 bedeutet: Nimm nur Video direkt von der Karte und Audio
-über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standardwert
+über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standard
 für MPlayer).
 .IPs mjpeg
 Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt).
-Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
+Bei dieser Option musst du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
 Dezimierungswert (siehe unten).
 .IPs decimation=<1|2|4>
