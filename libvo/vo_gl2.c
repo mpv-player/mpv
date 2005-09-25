@@ -274,10 +274,10 @@ static int initTextures()
       if (image_format == IMGFMT_YV12) {
         ActiveTexture(GL_TEXTURE1);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
-                         texture_width / 2, texture_height / 2, 0);
+                         texture_width / 2, texture_height / 2, 128);
         ActiveTexture(GL_TEXTURE2);
         glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
-                         texture_width / 2, texture_height / 2, 0);
+                         texture_width / 2, texture_height / 2, 128);
         ActiveTexture(GL_TEXTURE0);
       }
 
@@ -959,6 +959,8 @@ flip_page(void)
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
+  uint8_t *yptr = src[0], *uptr = src[1], *vptr = src[2];
+  int ystride = stride[0], ustride = stride[1], vstride = stride[2];
   int rem_h = h;
   struct TexSquare *texline = &texgrid[y / texture_height * texnumx];
   int subtex_y = y % texture_width;
@@ -976,29 +978,29 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
       ActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, tsq->texobj);
       glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
-                  src[0], stride[0], subtex_x, subtex_y,
+                  yptr, ystride, subtex_x, subtex_y,
                   subtex_w, subtex_h, 0);
       ActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, tsq->uvtexobjs[0]);
       glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
-                  src[1], stride[1], subtex_x, subtex_y,
+                  uptr, ustride, subtex_x / 2, subtex_y / 2,
                   subtex_w / 2, subtex_h / 2, 0);
       ActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, tsq->uvtexobjs[1]);
       glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
-                  src[2], stride[2], subtex_x, subtex_y,
+                  vptr, vstride, subtex_x / 2, subtex_y / 2,
                   subtex_w / 2, subtex_h / 2, 0);
       subtex_x = 0;
-      src[0] += subtex_w;
-      src[1] += subtex_w / 2;
-      src[2] += subtex_w / 2;
+      yptr += subtex_w;
+      uptr += subtex_w / 2;
+      vptr += subtex_w / 2;
       tsq++;
       rem_w -= subtex_w;
     }
     subtex_y = 0;
-    src[0] += subtex_h * stride[0] - w;
-    src[1] += subtex_h / 2 * stride[1] - w / 2;
-    src[2] += subtex_h / 2 * stride[2] - w / 2;
+    yptr += subtex_h * ystride - w;
+    uptr += subtex_h / 2 * ustride - w / 2;
+    vptr += subtex_h / 2 * vstride - w / 2;
     texline += texnumx;
     rem_h -= subtex_h;
   }
