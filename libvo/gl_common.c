@@ -213,12 +213,11 @@ static void *setNull(const GLubyte *s) {
   return NULL;
 }
 
-static void *(*getProcAddress)(const GLubyte *procName) = NULL;
-
 /**
  * \brief find the function pointers of some useful OpenGL extensions
+ * \param getProcAddress function to resolve function names, may be NULL
  */
-static void getFunctions() {
+static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
   if (!getProcAddress)
     getProcAddress = setNull;
   GenBuffers = getProcAddress("glGenBuffers");
@@ -794,8 +793,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
       wglDeleteContext(*context);
     *context = new_context;
     *vinfo = new_vinfo;
-    getProcAddress = w32gpa;
-    getFunctions();
+    getFunctions(w32gpa);
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;
@@ -906,19 +904,19 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
                   &vo_dwidth, &vo_dheight, &tmp, &tmp);
   }
   if (!keep_context) {
+    void *(*getProcAddress)(const GLubyte *);
     if (*context)
       glXDestroyContext(mDisplay, *context);
     *context = new_context;
     if (*vinfo)
       XFree(*vinfo);
     *vinfo = new_vinfo;
-    if (!getProcAddress)
       getProcAddress = getdladdr("glXGetProcAddress");
     if (!getProcAddress)
       getProcAddress = getdladdr("glXGetProcAddressARB");
     if (!getProcAddress)
       getProcAddress = getdladdr;
-    getFunctions();
+    getFunctions(getProcAddress);
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;
