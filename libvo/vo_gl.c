@@ -144,6 +144,7 @@ static void texSize(int w, int h, int *texw, int *texh) {
   }
 }
 
+//! maximum size of custom fragment program
 #define MAX_CUSTOM_PROG_SIZE (1024 * 1024)
 static void update_yuvconv() {
   float bri = eq_bri / 100.0;

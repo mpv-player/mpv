@@ -1,4 +1,7 @@
 /**
+ * \file gl_common.c
+ * \brief OpenGL helper functions used by vo_gl.c and vo_gl2.c
+ *
  * Common OpenGL routines.
  * Copyleft (C) Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>, 2005
  * Licensend under the GNU GPL v2.
@@ -12,6 +15,13 @@
 #include <math.h>
 #include "gl_common.h"
 
+/**
+ * \defgroup glextfunctions OpenGL extension functions
+ *
+ * the pointers to these functions are acquired when the OpenGL
+ * context is created
+ * \{
+ */
 void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
 void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
 void (APIENTRY *BindBuffer)(GLenum, GLuint);
@@ -35,10 +45,20 @@ void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                        GLfloat, GLfloat);
 int (APIENTRY *SwapInterval)(int);
+/** \} */ // end of glextfunctions group
+
+//! \defgroup glgeneral OpenGL general helper functions
+
+//! \defgroup glcontext OpenGL context management helper functions
+
+//! \defgroup gltexture OpenGL texture handling helper functions
+
+//! \defgroup glconversion OpenGL conversion helper functions
 
 /**
- * \brief adjusts the GL_UNPACK_ALGNMENT to fit the stride.
+ * \brief adjusts the GL_UNPACK_ALIGNMENT to fit the stride.
  * \param stride number of bytes per line for which alignment should fit.
+ * \ingroup glgeneral
  */
 void glAdjustAlignment(int stride) {
   GLint gl_alignment;
@@ -60,6 +80,7 @@ struct gl_name_map_struct {
 
 #undef MAP
 #define MAP(a) {a, #a}
+//! mapping table for the glValName function
 static const struct gl_name_map_struct gl_name_map[] = {
   // internal format
   MAP(GL_R3_G3_B2), MAP(GL_RGB4), MAP(GL_RGB5), MAP(GL_RGB8),
@@ -93,6 +114,7 @@ static const struct gl_name_map_struct gl_name_map[] = {
  * \brief return the name of an OpenGL constant
  * \param value the constant
  * \return name of the constant or "Unknown format!"
+ * \ingroup glgeneral
  */
 const char *glValName(GLint value)
 {
@@ -121,6 +143,7 @@ const char *glValName(GLint value)
  * \param gl_format [OUT] OpenGL format for this image format.
  * \param gl_type [OUT] OpenGL type for this image format.
  * \return 1 if format is supported by OpenGL, 0 if not.
+ * \ingroup gltexture
  */
 int glFindFormat(uint32_t fmt, uint32_t *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type)
@@ -306,6 +329,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
  * \param w texture width
  * \param h texture height
  * \param val luminance value to fill texture with
+ * \ingroup gltexture
  */
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
                       int w, int h, unsigned char val) {
@@ -355,6 +379,7 @@ static void ppm_skip(FILE *f) {
  * \param height [out] height of texture
  * \param maxval [out] maxval value from PPM file
  * \return 0 on error, 1 otherwise
+ * \ingroup gltexture
  */
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval) {
@@ -388,10 +413,11 @@ int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
 }
 
 /**
- * \brief return the number of bytes oer pixel for the given format
+ * \brief return the number of bytes per pixel for the given format
  * \param format OpenGL format
  * \param type OpenGL type
  * \return bytes per pixel
+ * \ingroup glgeneral
  *
  * Does not handle all possible variants, just those used by MPlayer
  */
@@ -419,7 +445,7 @@ int glFmt2bpp(GLenum format, GLenum type) {
     case GL_BGRA:
       return 4;
   }
-  return 0; // unkown
+  return 0; // unknown
 }
 
 /**
@@ -434,6 +460,7 @@ int glFmt2bpp(GLenum format, GLenum type) {
  * \param w width of the texture part to upload
  * \param h height of the texture part to upload
  * \param slice height of an upload slice, 0 for all at once
+ * \ingroup gltexture
  */
 void glUploadTex(GLenum target, GLenum format, GLenum type,
                  const char *data, int stride,
@@ -666,6 +693,7 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
 /**
  * \brief setup YUV->RGB conversion
  * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
+ * \param type YUV conversion type
  * \param brightness brightness adjustment offset
  * \param contrast contrast adjustment factor
  * \param hue hue adjustment angle
@@ -673,7 +701,7 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
  * \param rgamma gamma value for red channel
  * \param ggamma gamma value for green channel
  * \param bgamma gamma value for blue channel
- * \param type YUV conversion type
+ * \ingroup glconversion
  */
 void glSetupYUVConversion(GLenum target, int type,
                           float brightness, float contrast,
@@ -711,6 +739,7 @@ void glSetupYUVConversion(GLenum target, int type,
  * \brief enable the specified YUV conversion
  * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
  * \param type type of YUV conversion
+ * \ingroup glconversion
  */
 void inline glEnableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
@@ -735,6 +764,7 @@ void inline glEnableYUVConversion(GLenum target, int type) {
  * \brief disable the specified YUV conversion
  * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
  * \param type type of YUV conversion
+ * \ingroup glconversion
  */
 void inline glDisableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
@@ -769,6 +799,7 @@ void inline glDisableYUVConversion(GLenum target, int type) {
  * \param sy height of texture in pixels
  * \param rect_tex whether this texture uses texture_rectangle extension
  * \param is_yv12 if set, also draw the textures from units 1 and 2
+ * \ingroup gltexture
  */
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
@@ -807,6 +838,12 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 }
 
 #ifdef GL_WIN32
+/**
+ * \brief little helper since wglGetProcAddress definition does not fit our 
+ *        getProcAddress
+ * \param procName name of function to look up
+ * \return function pointer returned by wglGetProcAddress
+ */
 static void *w32gpa(const GLubyte *procName) {
   return wglGetProcAddress(procName);
 }
@@ -922,6 +959,7 @@ static XVisualInfo *getWindowVisualInfo(Window win) {
  * \return one of SET_WINDOW_FAILED, SET_WINDOW_OK or SET_WINDOW_REINIT.
  * In case of SET_WINDOW_REINIT the context could not be transfered
  * and the caller must initialize it correctly.
+ * \ingroup glcontext
  */
 int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
 {
@@ -991,6 +1029,7 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
 
 /**
  * \brief free the VisualInfo and GLXContext of an OpenGL context.
+ * \ingroup glcontext
  */
 void releaseGlContext(XVisualInfo **vinfo, GLXContext *context) {
   if (*vinfo)

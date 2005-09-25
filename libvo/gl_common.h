@@ -17,9 +17,14 @@
 #include "x11_common.h"
 #endif
 
-// conditionally define all extension defines used
-// vendor specific extensions should be marked as such
-// (e.g. _NV), _ARB is not used to ease readability.
+/**
+ * \defgroup glextdefines OpenGL extension defines
+ * 
+ * conditionally define all extension defines used.
+ * vendor specific extensions should be marked as such
+ * (e.g. _NV), _ARB is not used to ease readability.
+ * \{
+ */
 #ifndef GL_MAX_GENERAL_COMBINERS_NV
 #define GL_MAX_GENERAL_COMBINERS_NV 0x854D
 #endif
@@ -131,6 +136,7 @@
 #ifndef GL_PROGRAM_ERROR_POSITION
 #define GL_PROGRAM_ERROR_POSITION 0x864B
 #endif
+/** \} */ // end of glextdefines group
 
 void glAdjustAlignment(int stride);
 
@@ -150,6 +156,8 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                int sx, int sy, int rect_tex, int is_yv12);
 
+/** \addtogroup glconversion
+  * \{ */
 //! do not use YUV conversion, this should always stay 0
 #define YUV_CONVERSION_NONE 0
 //! use nVidia specific register combiners for YUV conversion
@@ -160,6 +168,7 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #define YUV_CONVERSION_FRAGMENT_POW 3
 //! use a fragment program with additional table lookup for YUV conversion
 #define YUV_CONVERSION_FRAGMENT_LOOKUP 4
+/** \} */
 void glSetupYUVConversion(GLenum target, int type,
                           float brightness, float contrast,
                           float hue, float saturation,
@@ -167,12 +176,15 @@ void glSetupYUVConversion(GLenum target, int type,
 void inline glEnableYUVConversion(GLenum target, int type);
 void inline glDisableYUVConversion(GLenum target, int type);
 
+/** \addtogroup glcontext
+  * \{ */
 //! could not set new window, will continue drawing into the old one.
 #define SET_WINDOW_FAILED -1
 //! new window is set, could even transfer the OpenGL context.
 #define SET_WINDOW_OK 0
 //! new window is set, but the OpenGL context needs to be reinitialized.
 #define SET_WINDOW_REINIT 1
+/** \} */
 
 #ifdef GL_WIN32
 int setGlWindow(int *vinfo, HGLRC *context, HWND win);
