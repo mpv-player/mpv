@@ -2699,7 +2699,7 @@ Number of lines copied to texture in one piece (default: 4).
 0 for whole image.
 .IPs (no)osd
 Enable or disable support for OSD rendering via OpenGL (default: enabled).
-Mostly for testing, you should use \-osdlevel 0 to disable OSD.
+This option is for testing purposes, instead use \-osdlevel 0 to disable OSD.
 .IPs (no)scaled-osd
 Changes the way the OSD behaves when the size of the
 window changes (default: disabled).
@@ -2716,10 +2716,12 @@ slower (default: 0).
 .RSss
 0: Use power-of-two textures (default).
 .br
-1: Use texture_rectangle, not compatible with hardware YUV conversion.
+1: Use the GL_ARB_texture_rectangle extension.
+This is not compatible with hardware YUV conversion.
 .br
-2: Use texture_non_power_of_two.
-.RE
+2: Use the GL_ARB_texture_non_power_of_two extension.
+In some cases only supported in software and thus very slow.
+.REss
 .IPs (no)glfinish
 Call glFinish() before swapping buffers.
 Slower but in some cases more correct output (default: disabled).
@@ -2774,7 +2776,28 @@ Supports OSD and videos larger than the maximum texture size.
 .IPs (no)glfinish
 same as gl (default: enabled)
 .IPs yuv=<n>
-same as gl
+Select the type of YUV to RGB conversion.
+If set to anything except 0 OSD will be disabled and brightness, contrast and
+gamma setting is only available via the global X server settings.
+.RSss
+0: Use software conversion (default).
+Compatible with all OpenGL version.
+Provides brightness, contrast and saturation control.
+.br
+1: Use register combiners.
+This uses an nVidia-specific extension (GL_NV_register_combiners).
+At least three texture units are needed.
+.br
+2: Use a fragment program.
+Needs GL_ARB_fragment_program extension and at least three texture units.
+.br
+3: Use a fragment program using the POW instruction.
+Needs GL_ARB_fragment_program extension and at least three texture units.
+Method 4 is usually faster.
+.br
+4: Use a fragment program with additional lookup.
+Needs GL_ARB_fragment_program extension and at least four texture units.
+.REss
 .REss
 .
 .TP
