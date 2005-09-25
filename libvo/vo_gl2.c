@@ -537,6 +537,9 @@ static void resize(int *x,int *y){
   {
 	  glClear(GL_COLOR_BUFFER_BIT);
 	  aspect(x, y, A_ZOOM);
+	  panscan_calc();
+	  *x += vo_panscan_x;
+	  *y += vo_panscan_y;
 	  glViewport( (vo_screenwidth-*x)/2, (vo_screenheight-*y)/2, *x, *y);
   } else { 
 	  //aspect(x, y, A_NOZOOM);
@@ -798,6 +801,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	int_pause = 0;
   
+	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -1116,6 +1120,11 @@ static int control(uint32_t request, void *data, ...)
     if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_REINIT)
       initGl(vo_dwidth, vo_dheight);
     resize(&vo_dwidth, &vo_dheight);
+    return VO_TRUE;
+  case VOCTRL_GET_PANSCAN:
+    return VO_TRUE;
+  case VOCTRL_SET_PANSCAN:
+    resize (&vo_dwidth, &vo_dheight);
     return VO_TRUE;
 #ifndef GL_WIN32
   case VOCTRL_SET_EQUALIZER:
