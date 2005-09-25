@@ -76,6 +76,8 @@ static GLuint fragprog;
 static GLuint uvtexs[2];
 static GLuint lookupTex;
 static char *custom_prog;
+static char *custom_tex;
+static int custom_tlin;
 
 static int int_pause;
 static int eq_bri = 0;
@@ -173,6 +175,26 @@ static void update_yuvconv() {
     }
     ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 0,
                1.0 / texture_width, 1.0 / texture_height, 0, 0);
+  }
+  if (custom_tex) {
+    FILE *f = fopen(custom_tex, "r");
+    if (!f)
+      mp_msg(MSGT_VO, MSGL_WARN,
+             "[gl] Could not read customtex %s\n", custom_tex);
+    else {
+      int width, height, maxval;
+      ActiveTexture(GL_TEXTURE3);
+      if (glCreatePPMTex(GL_TEXTURE_2D, 3,
+                     custom_tlin?GL_LINEAR:GL_NEAREST,
+                     f, &width, &height, &maxval))
+        ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 1,
+                   1.0 / width, 1.0 / height, 1.0 / maxval, 0);
+      else
+        mp_msg(MSGT_VO, MSGL_WARN,
+               "[gl] Error parsing customtex %s\n", custom_tex);
+      fclose(f);
+      ActiveTexture(GL_TEXTURE0);
+    }
   }
 }
 
@@ -652,6 +674,8 @@ uninit(void)
   releaseGlContext(&gl_vinfo, &gl_context);
   if (custom_prog) free(custom_prog);
   custom_prog = NULL;
+  if (custom_tex) free(custom_tex);
+  custom_tex = NULL;
 #ifdef GL_WIN32
   vo_w32_uninit();
 #else
@@ -670,6 +694,8 @@ static opt_t subopts[] = {
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
+  {"customtex",    OPT_ARG_MSTRZ,&custom_tex,   NULL},
+  {"customtlin",   OPT_ARG_BOOL, &custom_tlin,  NULL},
   {NULL}
 };
 
@@ -686,6 +712,8 @@ static int preinit(const char *arg)
     swap_interval = 1;
     slice_height = 4;
     custom_prog = NULL;
+    custom_tex = NULL;
+    custom_tlin = 1;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
               "\n-vo gl command line help:\n"
@@ -719,6 +747,8 @@ static int preinit(const char *arg)
               "    use a custom YUV conversion program\n"
               "  customtex=<filename>\n"
               "    use a custom YUV conversion lookup texture\n"
+              "  nocustomtlin\n"
+              "    use GL_NEAREST scaling for customtex texture\n"
               "\n" );
       return -1;
     }
