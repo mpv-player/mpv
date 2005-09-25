@@ -644,23 +644,21 @@ void glSetupYUVConversion(int type, float brightness, float contrast,
  */
 void inline glEnableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
-  ActiveTexture(GL_TEXTURE1);
-  glEnable(target);
-  ActiveTexture(GL_TEXTURE2);
-  glEnable(target);
   switch (type) {
     case YUV_CONVERSION_COMBINERS:
+      ActiveTexture(GL_TEXTURE1);
+      glEnable(target);
+      ActiveTexture(GL_TEXTURE2);
+      glEnable(target);
+      ActiveTexture(GL_TEXTURE0);
       glEnable(GL_REGISTER_COMBINERS_NV);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
-      ActiveTexture(GL_TEXTURE3);
-      glEnable(GL_TEXTURE_2D);
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
       glEnable(GL_FRAGMENT_PROGRAM);
       break;
   }
-  ActiveTexture(GL_TEXTURE0);
 }
 
 /**
@@ -670,23 +668,21 @@ void inline glEnableYUVConversion(GLenum target, int type) {
  */
 void inline glDisableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
-  ActiveTexture(GL_TEXTURE1);
-  glDisable(target);
-  ActiveTexture(GL_TEXTURE2);
-  glDisable(target);
   switch (type) {
     case YUV_CONVERSION_COMBINERS:
+      ActiveTexture(GL_TEXTURE1);
+      glDisable(target);
+      ActiveTexture(GL_TEXTURE2);
+      glDisable(target);
+      ActiveTexture(GL_TEXTURE0);
       glDisable(GL_REGISTER_COMBINERS_NV);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
-      ActiveTexture(GL_TEXTURE3);
-      glDisable(GL_TEXTURE_2D);
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
       glDisable(GL_FRAGMENT_PROGRAM);
       break;
   }
-  ActiveTexture(GL_TEXTURE0);
 }
 
 /**
