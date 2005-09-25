@@ -211,6 +211,11 @@ Döffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * made MMS over HTTP stream selection work and modified ASF header parsing
     * reimplemented ao_jack without bio2jack dependency
     * musepack demuxer and decoder, based on Reza's patch
+    * MPEG-2 in GXF demuxer
+    * vo_gl ported to windows
+    * gl_commmon.[ch] to decrease code duplication
+    * OpenGL support for OSD, panscan, YUV->RGB conversion, texture buffers,
+      custom fragment programs and more
 
 Dolbeau, Romain <romain@dolbeau.org>
     * random AltiVec (PowerPC multimedia extensions) stuff
