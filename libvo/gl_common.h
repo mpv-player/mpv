@@ -141,6 +141,8 @@ int glFindFormat(uint32_t format, uint32_t *bpp, GLint *gl_texfmt,
 int glFmt2bpp(GLenum format, GLenum type);
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
                       int w, int h, unsigned char val);
+int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
+                   FILE *f, int *width, int *height, int *maxval);
 void glUploadTex(GLenum target, GLenum format, GLenum type,
                  const char *data, int stride,
                  int x, int y, int w, int h, int slice);

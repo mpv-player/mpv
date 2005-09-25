@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <math.h>
 #include "gl_common.h"
 
@@ -325,6 +326,65 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
   // We set a sane default anyway.
   glTexParameterfv(target, GL_TEXTURE_BORDER_COLOR, border);
   free(init);
+}
+
+/**
+ * \brief skips whitespace and comments
+ * \param f file to read from
+ */
+static void ppm_skip(FILE *f) {
+  int c, comment = 0;
+  do {
+    c = fgetc(f);
+    if (c == '#')
+      comment = 1;
+    if (c == '\n')
+      comment = 0;
+  } while (c != EOF && (isspace(c) || comment));
+  if (c != EOF)
+    ungetc(c, f);
+}
+
+/**
+ * \brief creates a texture from a PPM file
+ * \param target texture taget, usually GL_TEXTURE_2D
+ * \param fmt internal texture format
+ * \param filter filter used for scaling, e.g. GL_LINEAR
+ * \param f file to read PPM from
+ * \param width [out] width of texture
+ * \param height [out] height of texture
+ * \param maxval [out] maxval value from PPM file
+ * \return 0 on error, 1 otherwise
+ */
+int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
+                   FILE *f, int *width, int *height, int *maxval) {
+  int w, h, m, val;
+  char *data;
+  ppm_skip(f);
+  if (fgetc(f) != 'P' || fgetc(f) != '6')
+    return 0;
+  ppm_skip(f);
+  if (fscanf(f, "%i", &w) != 1)
+    return 0;
+  ppm_skip(f);
+  if (fscanf(f, "%i", &h) != 1)
+    return 0;
+  ppm_skip(f);
+  if (fscanf(f, "%i", &m) != 1)
+    return 0;
+  val = fgetc(f);
+  if (!isspace(val))
+    return 0;
+  data = (char *)malloc(w * h * 3);
+  if (fread(data, w * 3, h, f) != h)
+    return 0;
+  glCreateClearTex(target, fmt, filter, w, h, 0);
+  glUploadTex(target, GL_RGB, GL_UNSIGNED_BYTE, data, w * 3, 0, 0, w, h, 0);
+  free(data);
+  if (width) *width = w;
+  if (height) *height = h;
+  if (maxval) *maxval = m;
+  return 1;
 }
 
 /**
