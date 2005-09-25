@@ -30,6 +30,13 @@
 #define TEXTUREFORMAT_ALWAYS GL_RGBA8
 #endif
 
+//! force texture height, useful for debugging
+#define TEXTURE_HEIGHT 128
+#undef TEXTURE_HEIGHT
+//! force texture width, useful for debugging
+#define TEXTURE_WIDTH 128
+#undef TEXTURE_WIDTH
+
 static vo_info_t info = 
 {
 	"X11 (OpenGL) - multiple textures version",
@@ -197,6 +204,12 @@ static int initTextures()
     }
   }
   while (format != gl_internal_format && texture_width > 1 && texture_height > 1);
+#ifdef TEXTURE_WIDTH
+  texture_width = TEXTURE_WIDTH;
+#endif
+#ifdef TEXTURE_HEIGHT
+  texture_height = TEXTURE_HEIGHT;
+#endif
 
   texnumx = image_width / texture_width;
   if ((image_width % texture_width) > 0)
