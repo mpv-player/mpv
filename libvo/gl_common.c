@@ -563,6 +563,11 @@ static void glSetupYUVFragprog(float brightness, float contrast,
   rc = (-16 * ry + (-128) * ru + (-128) * rv) / 255.0 + brightness;
   gc = (-16 * gy + (-128) * gu + (-128) * gv) / 255.0 + brightness;
   bc = (-16 * by + (-128) * bu + (-128) * bv) / 255.0 + brightness;
+  // these "center" contrast control so that e.g. a contrast of 0
+  // leads to a grey image, not a black one
+  rc += 0.5 - contrast / 2.0;
+  gc += 0.5 - contrast / 2.0;
+  bc += 0.5 - contrast / 2.0;
   rgamma = 1.0 / rgamma;
   ggamma = 1.0 / ggamma;
   bgamma = 1.0 / bgamma;
