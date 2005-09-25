@@ -158,7 +158,8 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #define YUV_CONVERSION_FRAGMENT_POW 3
 //! use a fragment program with additional table lookup for YUV conversion
 #define YUV_CONVERSION_FRAGMENT_LOOKUP 4
-void glSetupYUVConversion(int type, float brightness, float contrast,
+void glSetupYUVConversion(GLenum target, int type,
+                          float brightness, float contrast,
                           float hue, float saturation,
                           float rgamma, float ggamma, float bgamma);
 void inline glEnableYUVConversion(GLenum target, int type);

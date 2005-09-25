@@ -468,23 +468,25 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
 
 static const char *yuv_prog_template =
   "!!ARBfp1.0\n"
+  "OPTION ARB_precision_hint_fastest;"
   "TEMP res, y, u, v;"
-  "TEX y, fragment.texcoord[0], texture[0], 2D;"
+  "TEX y, fragment.texcoord[0], texture[0], %s;"
   "MAD res, y, {%.4f, %.4f, %.4f}, {%.4f, %.4f, %.4f};"
-  "TEX u, fragment.texcoord[1], texture[1], 2D;"
+  "TEX u, fragment.texcoord[1], texture[1], %s;"
   "MAD res, u, {%.4f, %.4f, %.4f}, res;"
-  "TEX v, fragment.texcoord[2], texture[2], 2D;"
+  "TEX v, fragment.texcoord[2], texture[2], %s;"
   "MAD result.color, v, {%.4f, %.4f, %.4f}, res;"
   "END";
 
 static const char *yuv_pow_prog_template =
   "!!ARBfp1.0\n"
+  "OPTION ARB_precision_hint_fastest;"
   "TEMP res, y, u, v;"
-  "TEX y, fragment.texcoord[0], texture[0], 2D;"
+  "TEX y, fragment.texcoord[0], texture[0], %s;"
   "MAD res, y, {%.4f, %.4f, %.4f}, {%.4f, %.4f, %.4f};"
-  "TEX u, fragment.texcoord[1], texture[1], 2D;"
+  "TEX u, fragment.texcoord[1], texture[1], %s;"
   "MAD res, u, {%.4f, %.4f, %.4f}, res;"
-  "TEX v, fragment.texcoord[2], texture[2], 2D;"
+  "TEX v, fragment.texcoord[2], texture[2], %s;"
   "MAD_SAT res, v, {%.4f, %.4f, %.4f}, res;"
   "POW result.color.r, res.r, %.4f.r;"
   "POW result.color.g, res.g, %.4f.g;"
@@ -493,14 +495,14 @@ static const char *yuv_pow_prog_template =
 
 static const char *yuv_lookup_prog_template =
   "!!ARBfp1.0\n"
+  "OPTION ARB_precision_hint_fastest;"
   "TEMP res, y, u, v;"
-  "TEX y, fragment.texcoord[0], texture[0], 2D;"
-  "MAD res, y, {%.4f, %.4f, %.4f, 0}, {%.4f, %.4f, %.4f, 0};"
-  "TEX u, fragment.texcoord[1], texture[1], 2D;"
+  "TEX y, fragment.texcoord[0], texture[0], %s;"
+  "MAD res, y, {%.4f, %.4f, %.4f, 0}, {%.4f, %.4f, %.4f, 0.125};"
+  "TEX u, fragment.texcoord[1], texture[1], %s;"
   "MAD res, u, {%.4f, %.4f, %.4f, 0}, res;"
-  "TEX v, fragment.texcoord[2], texture[2], 2D;"
+  "TEX v, fragment.texcoord[2], texture[2], %s;"
   "MAD res, v, {%.4f, %.4f, %.4f, 0}, res;"
-  "ADD res.a, res.a, 0.125;"
   "TEX result.color.r, res.raaa, texture[3], 2D;"
   "ADD res.a, res.a, 0.25;"
   "TEX result.color.g, res.gaaa, texture[3], 2D;"
@@ -519,9 +521,10 @@ static const char *yuv_lookup_prog_template =
  */
 static void glSetupYUVFragprog(float brightness, float contrast,
                         float uvcos, float uvsin, float rgamma,
-                        float ggamma, float bgamma, int type) {
+                        float ggamma, float bgamma, int type, int rect) {
   char yuv_prog[1000];
   const char *prog_template = yuv_prog_template;
+  char *tex_type = rect ? "RECT" : "2D";
   int lookup = 0;
   GLint i;
   // this is the conversion matrix, with y, u, v factors
@@ -564,8 +567,8 @@ static void glSetupYUVFragprog(float brightness, float contrast,
   rgamma = 1.0 / rgamma;
   ggamma = 1.0 / ggamma;
   bgamma = 1.0 / bgamma;
-  snprintf(yuv_prog, 1000, prog_template, ry, gy, by, rc, gc, bc, ru, gu, bu,
-           rv, gv, bv, rgamma, bgamma, bgamma);
+  snprintf(yuv_prog, 1000, prog_template, tex_type, ry, gy, by, rc, gc, bc,
+         tex_type, ru, gu, bu, tex_type, rv, gv, bv, rgamma, bgamma, bgamma);
   ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
                 strlen(yuv_prog), yuv_prog);
   glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
@@ -598,6 +601,7 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
 
 /**
  * \brief setup YUV->RGB conversion
+ * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
  * \param brightness brightness adjustment offset
  * \param contrast contrast adjustment factor
  * \param hue hue adjustment angle
@@ -607,7 +611,8 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
  * \param bgamma gamma value for blue channel
  * \param type YUV conversion type
  */
-void glSetupYUVConversion(int type, float brightness, float contrast,
+void glSetupYUVConversion(GLenum target, int type,
+                          float brightness, float contrast,
                           float hue, float saturation,
                           float rgamma, float ggamma, float bgamma) {
   float uvcos = saturation * cos(hue);
@@ -632,7 +637,8 @@ void glSetupYUVConversion(int type, float brightness, float contrast,
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_FRAGMENT_POW:
       glSetupYUVFragprog(brightness, contrast, uvcos, uvsin,
-                         rgamma, ggamma, bgamma, type);
+                         rgamma, ggamma, bgamma, type,
+                         target == GL_TEXTURE_RECTANGLE);
       break;
   }
 }

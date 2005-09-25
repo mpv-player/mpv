@@ -151,7 +151,8 @@ static void update_yuvconv() {
   float rgamma = exp(log(8.0) * eq_rgamma / 100.0);
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
-  glSetupYUVConversion(use_yuv, bri, cont, hue, sat, rgamma, ggamma, bgamma);
+  glSetupYUVConversion(gl_target, use_yuv, bri, cont, hue, sat,
+                       rgamma, ggamma, bgamma);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "r");
     if (!f)
