@@ -1,4 +1,4 @@
-.\" synced with 1.1114
+.\" synced with 1.1118
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -1181,16 +1181,16 @@ Se rabat automatiquement sur IPv4.
 .TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
+Vous devez aussi utiliser \-demuxer rawaudio.
 Il peut aussi être utilisé pour lire des CD audio qui ne sont pas 44kKHz
 16-bit stéréo.
-Pour lire un flux AC3 brut, utilisez \-rawaudio on:format=0x2000.
+Pour lire un flux AC3 brut, utilisez \-rawaudio format=0x2000
+\-demuxer rawaudio.
 .sp 1
 Les options disponibles sont:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
-utilise le démultiplexeur audio brut
 .IPs channels=<valeur>
 nombre de canaux
 .IPs rate=<valeur>
@@ -1205,13 +1205,12 @@ fourcc en hexa
 .TP
 .B \-rawvideo <option1:option2:...>
 Cette option vous permet de lire des fichiers vidéo bruts.
+Vous devez aussi utiliser \-demuxer rawvideo.
 .sp 1
 Les options disponibles sont:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
-utilise le démultiplexeur vidéo brut
 .IPs fps=<valeur>
 débit en trames par seconde (par défaut\ : 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
@@ -2438,7 +2437,7 @@ Active la fonctionnalité "pan-and-scan" (par ex.\& couper les côtés d'un
 film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
-gl, quartz, macosx et xvidix.
+gl, gl2, quartz, macosx et xvidix.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2869,8 +2868,8 @@ Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
 .IPs (no)osd
 Active ou désactive la gestion de l'incrustation OSD via OpenGL
 (par défaut\ : activé).
-Surtout pour des tests, vous devriez utiliser \-osdlevel 0 pour désactiver
-l'incrustation OSD.
+Cette option présente à des fins de des tests, vous devriez utiliser
+\-osdlevel 0 pour désactiver l'incrustation OSD.
 .IPs (no)scaled-osd
 Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
 (par défaut\ : désactivé).
@@ -2888,9 +2887,11 @@ RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
 .RSss
 0: Utilise des textures de taille d'une puissance de deux (par défaut).
 .br
-1: Utilise texture_rectangle, incompatible avec la conversion YUV matérielle.
+1: Utilise GL_ARB_texture_rectangle
 .br
-2: Utilise texture_non_puissance_de_deux.
+2: Utilise l'extension GL_ARB_texture_non_power_of_two.
+N'est dans certains cas que supporté de manière logicielle, donc lent.
+.REss
 .RE
 .IPs (no)glfinish
 Appelle glFinish() avant d'échanger les tampons.
@@ -2957,7 +2958,33 @@ texture.
 .IPs (no)glfinish
 Fonctionne comme pour le pilote de sortie vidéo gl (par défaut\ : activé)
 .IPs yuv=<n>
-Fonctionne comme pour le pilote de sortie vidéo gl
+Select the type of YUV to RGB conversion.
+Si défini à autre chose que 0, l'OSD sera désactivé et le paramétrage de
+la luminosité, du contraste et du gamma sera uniquement paramétrable à
+travers les paramètres globaux du serveur X.
+.RSss
+0: Utilise la conversion logicielle (par défaut).
+Compatible avec toutes les version d'OpenGL.
+Offre le contrôle de la luminosité, du contraste et de la saturation.
+.br
+1: Utilise les "register combiners".
+Ceci utilise une extension spécifique à nVidia (GL_NV_register_combiners).
+Au moins trois unitées de texture sont nécessaires.
+.br
+2: Utilise un "fragment program" (fragment de programme).
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+de textures.
+.br
+3: Utilise un "fragment program" (fragment de programme) utilisant
+l'instruction POW.
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+de texture.
+.br
+4: Utilise un "programme fragment" (fragment de programme) avec une
+consultation de table.
+Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
+de texture.
+.REss
 .REss
 .
 .TP
@@ -9436,8 +9463,8 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .
 .TP
 .B Convertit les sous-titres en au format MPsub sans afficher le film\ :
-mplayer /dev/\:zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
-\-benchmark \-sub source.sub \-dumpmpsub
+mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null
+\-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
 .
 .TP
 .B Entrée depuis V4L standard\ :
@@ -9454,7 +9481,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
-mplayer \-rawaudio on:format=0xff \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .br
 Peut-être vous aurez à ajuster un peu la valeur de pan (par c-à-d la
 multiplier par une valeur) pour augementer le volume ou éviter l'écrêtage
