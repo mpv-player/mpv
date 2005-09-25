@@ -2508,23 +2508,23 @@ An example with AC3 compression:
 </sect2>
 
 <sect2 id="menc-feat-mpeg4-lavc-example-settings">
-<title>Encoding settings examples</title>
+<title>Encoding setting examples</title>
 
 <para>
   The following settings are examples of different encoding
-  options combinations that affect the speed VS quality tradeoff
-  given the same target bitrate.
+  option combinations that affect the speed vs quality tradeoff
+  at the same target bitrate.
 </para>
 
 <para>
   All the encoding settings were tested on a 720x448 @30000/1001 fps
   video sample, the target bitrate was 900kbps, and the machine was an
   AMD-64 3400+ at 2400 Mhz in 64 bits mode.
-  Each encoding setting features the measured the encoding speed (in
-  frames per seconds) and the PSNR loss (in dB) compared to the "Very
+  Each encoding setting features the measured encoding speed (in
+  frames per second) and the PSNR loss (in dB) compared to the "very
   high quality" setting.
   Please understand that depending on your source, your machine type
-  and the development breakthrough, you may get very different results.
+  and development advancements, you may get very different results.
 </para>
 
 <para>
@@ -3244,23 +3244,23 @@ codec</title>
 </sect2>
 
 <sect2 id="menc-feat-xvid-example-settings">
-<title>Encoding settings examples</title>
+<title>Encoding setting examples</title>
 
 <para>
   The following settings are examples of different encoding
-  options combinations that affect the speed VS quality tradeoff
-  given the same target bitrate.
+  option combinations that affect the speed vs quality tradeoff
+  at the same target bitrate.
 </para>
 
 <para>
   All the encoding settings were tested on a 720x448 @30000/1001 fps
   video sample, the target bitrate was 900kbps, and the machine was an
   AMD-64 3400+ at 2400 Mhz in 64 bits mode.
-  Each encoding setting features the measured the encoding speed (in
-  frames per seconds) and the PSNR loss (in dB) compared to the "Very
+  Each encoding setting features the measured encoding speed (in
+  frames per second) and the PSNR loss (in dB) compared to the "very
   high quality" setting.
   Please understand that depending on your source, your machine type
-  and the development breakthrough, you may get very different results.
+  and development advancements, you may get very different results.
 </para>
 
 <para>
@@ -3766,23 +3766,23 @@ codec</title>
 </sect2>
 
 <sect2 id="menc-feat-x264-example-settings">
-<title>Encoding settings examples</title>
+<title>Encoding setting examples</title>
 
 <para>
   The following settings are examples of different encoding
-  options combinations that affect the speed VS quality tradeoff
-  given the same target bitrate.
+  option combinations that affect the speed vs quality tradeoff
+  at the same target bitrate.
 </para>
 
 <para>
   All the encoding settings were tested on a 720x448 @30000/1001 fps
   video sample, the target bitrate was 900kbps, and the machine was an
   AMD-64 3400+ at 2400 Mhz in 64 bits mode.
-  Each encoding setting features the measured the encoding speed (in
-  frames per seconds) and the PSNR loss (in dB) compared to the "Very
+  Each encoding setting features the measured encoding speed (in
+  frames per second) and the PSNR loss (in dB) compared to the "very
   high quality" setting.
   Please understand that depending on your source, your machine type
-  and the development breakthrough, you may get very different results.
+  and development advancements, you may get very different results.
 </para>
 
 <para>
