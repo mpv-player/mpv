@@ -23,7 +23,6 @@ static float fps = 25;
 static int imgsize=0;
 
 m_option_t demux_rawvideo_opts[] = {
-  { "on", &demuxer_type, CONF_TYPE_FLAG, 0,0, DEMUXER_TYPE_RAWVIDEO, NULL },
   // size:
   { "w", &width, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },
   { "h", &height, CONF_TYPE_INT,CONF_RANGE,1,8192, NULL },

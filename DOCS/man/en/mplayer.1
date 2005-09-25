@@ -1107,15 +1107,14 @@ Falls back on IPv4 automatically.
 .TP
 .B \-rawaudio <option1:option2:...>
 This option lets you play raw audio files.
+You have to use \-demuxer rawaudio as well.
 It may also be used to play audio CDs which are not 44kHz 16-bit stereo.
-For playing raw AC3 streams use \-rawaudio on:format=0x2000.
+For playing raw AC3 streams use \-rawaudio format=0x2000 \-demuxer rawaudio.
 .sp 1
 Available options are:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
-Use raw audio demuxer.
 .IPs channels=<value>
 number of channels
 .IPs rate=<value>
@@ -1132,13 +1131,12 @@ fourcc in hex
 .TP
 .B \-rawvideo <option1:option2:...>
 This option lets you play raw video files.
+You have to use \-demuxer rawvideo as well.
 .sp 1
 Available options are:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
-Use raw video demuxer.
 .IPs fps=<value>
 rate in frames per second (default: 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
@@ -8959,7 +8957,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .
 .TP
 .B Convert subtitles to MPsub format without watching the movie:
-mplayer /dev/\:zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
+mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop
 \-benchmark \-sub source.sub \-dumpmpsub
 .
 .TP
@@ -8977,7 +8975,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Play a 6-channel AAC file with only two speakers:
-mplayer \-rawaudio on:format=0xff \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .br
 You might want to play a bit with the pan values (e.g multiply with a value) to
 increase volume or avoid clipping.
