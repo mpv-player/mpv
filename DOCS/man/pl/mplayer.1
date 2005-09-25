@@ -1,4 +1,4 @@
-.\" synced with 1.1106
+.\" synced with 1.1114
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -406,8 +406,8 @@ Ma on nastêpuj±cy format:
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
 .PP
-Mo¿esz umie¶ciæ wszystkie opcje w zbiorze konfiguracyjnym, z którego
-MPlayer/MEncoder bêdzie czyta³ przy ka¿dym uruchomieniu.
+Mo¿esz umie¶ciæ wszystkie opcje w zbiorach konfiguracyjnych, z których
+MPlayer/MEncoder bêd± czyta³y przy ka¿dym uruchomieniu.
 G³ówny zbiór konfiguracyjny "mplayer.conf" jest w katalogu konfiguracyjnym
 (np.\& /etc/\:mplayer lub /usr/\:local/\:etc/\:mplayer), a specyficzny dla
 u¿ytkownika to "~/\:.mplayer/\:config".
@@ -5906,6 +5906,16 @@ Nadpisuje aspekt zawarty nag³ówku vprp AVI OpenDML.
 Opcja ta mo¿e byæ u¿yta do zmiany proporcji przy "\-ovc copy".
 .
 .TP
+.B \-frameno-file <nazwa pliku> (ODRADZANE)
+Okre¶la nazwê pliku audio z mapowaniem numerów klatek utworzonego w pierwszym
+(tylko audio) przebiegu specjalnego kodowania trzyprzebiegowego.
+.br
+.I INFORMACJA:
+Je¶li korzystasz z tego trybu prawdopodobnie uzyskasz desynchronizacjê A-V.
+Nie u¿ywaj tej opcji - jest ona trzymana tylko dla wstecznej kompatybilno¶ci
+i przypuszczalnie zostanie usuniêta w przysz³ych wydaniach.
+.
+.TP
 .B \-hr-edl-seek (tylko EDL)
 U¿ywa dok³adniejszej, ale o wiele wolniejszej metody przeskakiwania.
 OBszary przeznaczone do pominiêdzia nie s± przeskakiwane, zamiat tego
@@ -8139,25 +8149,25 @@ zgodnych ze specyfikacjami tych profili.
 .RSs
 .IPs unrestricted
 bez ograniczeñ (domy¶lne)
-.IPs sp0
+.IPs sp0\ \
 profil simple na poziomie 0
-.IPs sp1
+.IPs sp1\ \
 profil simple na poziomie 1
-.IPs sp2
+.IPs sp2\ \
 profil simple na poziomie 2
-.IPs sp3
+.IPs sp3\ \
 profil simple na poziomie 3
-.IPs asp0
+.IPs asp0\
 profil advanced simple na poziomie 0
-.IPs asp1
+.IPs asp1\
 profil advanced simple na poziomie 1
-.IPs asp2
+.IPs asp2\
 profil advanced simple na poziomie 2
-.IPs asp3
+.IPs asp3\
 profil advanced simple na poziomie 3
-.IPs asp4
+.IPs asp4\
 profil advanced simple na poziomie 4
-.IPs asp5
+.IPs asp5\
 profil advanced simple na poziomie 5
 .IPs dxnhandheld
 profil DXN handheld
