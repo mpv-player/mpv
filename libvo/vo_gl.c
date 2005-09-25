@@ -125,6 +125,8 @@ static void resize(int x,int y){
 #endif
   vo_osd_changed(OSDTYPE_OSD);
   }
+  if (vo_fs && use_aspect && !vo_doublebuffering)
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 static void texSize(int w, int h, int *texw, int *texh) {
@@ -434,7 +436,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 #ifndef FAST_OSD
   glGenTextures(1, &osdatex[osdtexCnt]);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
+  glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 255);
   {
   int i;
   char *tmp = (char *)malloc(stride * h);
@@ -489,8 +491,8 @@ flip_page(void)
   glColor3f(1,1,1);
   if (image_format == IMGFMT_YV12)
     glEnableYUVConversion(gl_target, use_yuv);
-  glDrawTex(0, 0, texture_width, texture_height,
-            0, 0, texture_width, texture_height,
+  glDrawTex(0, 0, image_width, image_height,
+            0, 0, image_width, image_height,
             texture_width, texture_height,
             use_rectangle == 1, image_format == IMGFMT_YV12);
   if (image_format == IMGFMT_YV12)
