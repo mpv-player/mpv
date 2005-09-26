@@ -489,7 +489,7 @@ For AC3 only, use <option>ac=hwac3,</option>
 For DTS only, use <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-For both AC3 and DTS, use <option>-afm hwac3</option>
+For both AC3 and DTS, use <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
