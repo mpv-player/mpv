@@ -499,8 +499,8 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
 	    }
 	}
     }
-    demux_info_add(d, hdr, val);
     if (hdr)
+      demux_info_add(d, hdr, val);
       mp_dbg(MSGT_DEMUX, MSGL_DBG2, " %s: %s\n", hdr, val);
     cmt++;
   }
