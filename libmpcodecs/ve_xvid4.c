@@ -57,7 +57,6 @@
 
 #include "m_option.h"
 
-#define XVID_FIRST_PASS_FILENAME "xvid-twopass.stats"
 #define FINE (!0)
 #define BAD (!FINE)
 
@@ -229,6 +228,8 @@ static profile_t *profileFromName(char *str)
 /*****************************************************************************
  * Configuration options
  ****************************************************************************/
+
+extern char* passtmpfile;
 
 static int xvidenc_bitrate = 0;
 static int xvidenc_pass = 0;
@@ -1190,7 +1191,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 
 		/* There is not much to initialize for this plugin */
 		pass1->version  = XVID_VERSION;
-		pass1->filename = XVID_FIRST_PASS_FILENAME;
+		pass1->filename = passtmpfile;
 
 		create->plugins[create->num_plugins].func  = xvid_plugin_2pass1;
 		create->plugins[create->num_plugins].param = pass1;
@@ -1206,7 +1207,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 
 		/* There is not much left to initialize after dispatch settings */
 		pass2->version  = XVID_VERSION;
-		pass2->filename =  XVID_FIRST_PASS_FILENAME;
+		pass2->filename =  passtmpfile;
 
 		/* Positive bitrate values are bitrates as usual but if the
 		 * value is negative it is considered as being a total size
