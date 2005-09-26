@@ -2389,7 +2389,6 @@ An example with AC3 compression:
 
 <listitem><para>
   <emphasis role="bold">vb_strategy=1</emphasis>: helps in high-motion scenes.
-  Requires vmax_b_frames >= 2.
   On some videos, vmax_b_frames may hurt quality, but vmax_b_frames=2 along
   with vb_strategy=1 helps.
 </para></listitem>
@@ -2474,7 +2473,7 @@ An example with AC3 compression:
   stored in the encoded file.
   The compression gain/loss depends on the movie, but it is usually not very
   effective on anime.
-  qpel always incurs a significant cost in CPU decode time (+20% in
+  qpel always incurs a significant cost in CPU decode time (+25% in
   practice).
 </para></listitem>
 
@@ -2875,8 +2874,8 @@ codec</title>
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
   Activates a better coefficient cost estimation method, which slightly
-  reduces filesize by around 0.15 to 0.19%, while having a negligible
-  impact on speed.
+  reduces filesize by around 0.15 to 0.19% (which corresponds to less
+  than 0.01dB PSNR increase), while having a negligible impact on speed.
   It is therefore recommended to always leave it on.
 </para></listitem>
 
