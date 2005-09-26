@@ -1,4 +1,4 @@
-.\" synced with 1.1076
+.\" synced with 1.1098
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -257,11 +257,11 @@ Controlla l'opzione \-input per vedere come personalizzarla.
 .PD 0
 .RSs
 .IPs "<\- e \->"
-Ricerca indietro/\:avanti 10 secondi
+Ricerca indietro/\:avanti 10 secondi.
 .IPs "su e giù"
-Ricerca indietro/\:avanti 1 minuto
+Ricerca indietro/\:avanti 1 minuto.
 .IPs "pagina su e pagina giù"
-Ricerca indietro/\:avanti 10 minuti
+Ricerca indietro/\:avanti 10 minuti.
 .IPs "[ e ]"
 Aumenta/diminuisce la velocità di riproduzione del 10%.
 .IPs "{ e }"
@@ -269,56 +269,56 @@ Dimezza/raddoppia la velocità di riproduzione.
 .IPs "Backspace"
 Ripristina la velocità di riproduzione iniziale.
 .IPs "< e >"
-Indietro/\:avanti nella playlist
+Indietro/\:avanti nella playlist.
 .IPs "HOME e FINE"
-Vai alla 'entry' successiva/\:precedente nella playlist
+Vai alla 'entry' successiva/\:precedente nella playlist.
 .IPs "INS e CANC"
-Va alla successiva/\:precedente sorgente alternativa (solo playlist ASX)
+Va alla successiva/\:precedente sorgente alternativa (solo playlist ASX).
 .IPs "p / SPAZIO"
-Pausa film (un'altra pressione continua)
+Pausa film (un'altra pressione la toglie).
 .IPs .\ \ \ \ 
 Passo avanti.
 Premendolo una volta il film passa in pausa, ogni pressione seguente riprodurrà
 solo un fotogramma per poi tornare in modalità di pausa (qualsiasi altro tasto 
 continua).
 .IPs "q / ESC"
-Smette di riprodurre ed esce
+Smette di riprodurre ed esce.
 .IPs "+ e -"
-Regola il ritardo audio di +/\:- 0.1 secondi
+Regola il ritardo audio di +/\:- 0.1 secondi.
 .IPs "/ e *"
-Aumenta/\:diminuisce il volume
+Aumenta/\:diminuisce il volume.
 .IPs "9 e 0"
-Aumenta/\:diminuisce il volume
+Aumenta/\:diminuisce il volume.
 .IPs m\ \ \ \ 
 Suono muto
 .IPs "# (solo MPEG e Matroska)" 
 Passa attraverso tutte le tracce audio disponibili.
 .IPs f\ \ \ \ 
-Attiva/disattiva schermo intero (vedi anche opzione -fs)
+Attiva/disattiva schermo intero (vedi anche opzione -fs).
 .IPs T\ \ \ \ 
-Attiva/disattiva stay-on-top (rimani in primo piano). (vedi anche opzione -ontop)
+Attiva/disattiva stay-on-top (rimani in primo piano) (vedi anche opzione -ontop).
 .IPs "w e e"
-Diminuisce/\:aumenta la gamma del pan-and-scan
+Diminuisce/\:aumenta la gamma del pan-and-scan.
 .IPs o\ \ \ \ 
-Cambia lo stato del OSD: nessuno / posizione / posizione + tempo / posizione + tempo +
-tempo totale
+Cambia lo stato del OSD: nessuno / posizione / posizione + tempo / posizione +
+tempo + tempo totale.
 .IPs d\ \ \ \ 
 Cambia lo stato dello scarto frame:  nessuno / salta visualizzazione / salta decodifica
-(vedi \-framedrop e \-hardframedrop)
+(vedi \-framedrop e \-hardframedrop).
 .IPs v\ \ \ \ 
-Cambia la visibilità dei sottotitoli
+Cambia la visibilità dei sottotitoli.
 .IPs "b / j"
-Passa attraverso le lingue possibili dei sottotitoli
+Passa attraverso le lingue possibili dei sottotitoli.
 .IP F\ \ \ \ 
-Cambia la visualizzazione dei sottotitoli forzati ("forced subtitles")
+Cambia la visualizzazione dei sottotitoli forzati ("forced subtitles").
 .IPs a\ \ \ \ 
-Cambia l'allineamento dei sottotitoli: alto/in mezzo/basso
+Cambia l'allineamento dei sottotitoli: alto/in mezzo/basso.
 .IPs "z e x"
-Regola il ritardo dei sottotitoli di +/\:- 0.1 secondi
+Regola il ritardo dei sottotitoli di +/\:- 0.1 secondi.
 .IPs "r e t"
-Regola la posizione dei sottotitoli su/giù
+Regola la posizione dei sottotitoli su/giù.
 .IPs i\ \ \ \ 
-Imposta un punto EDL
+Imposta un punto EDL.
 .RE
 .PD 1
 .PP
@@ -412,11 +412,14 @@ Ha il seguente formato:
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
 .PP
-Puoi mettere tutte le opzioni in un file di configurazione che verrà letto
-ogni volta che MPlayer viene lanciato.
+Puoi mettere tutte le opzioni in file di configurazione che verranno letti
+ogni volta che MPlayer o MEncoder vengono lanciati.
 Il file di configurazione globale 'mplayer.conf' è nella tua directory di
 configurazione (p.es.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer), quello
 specifico dell'utente è '~/\:.mplayer/\:config'.
+Il file di configurazione per MEncoder è 'mencoder.conf' nella tua directory di
+configurazione (p.es.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer), quello
+specifico dell'utente è '~/\:.mplayer/\:mencoder'.
 Le opzioni del file utente hanno precedenza sulle opzioni globali e le opzioni
 della linea di comando hanno precedenza su quelle specificate in entrambi i file.
 La sintassi del file di configurazione è 'option=<valore>', tutto quello che
@@ -608,6 +611,13 @@ Stampa anche informazioni dettagliate sui sottotitoli, le tracce audio ed i
 vari ID.
 Lo script di appoggio TOOLS/\:midentify toglie il resto delle stampe di MPlayer e
 (si spera) corregge per la shell (shellescapes) i nomi dei file.
+.
+.TP
+.B \-idle (vedi anche \-slave)
+Fa in modo che MPlayer attenda senza far nulla invece che chiudersi quando
+non c'è alcun file da riprodurre.
+Principalmente utile in modalità slave quando MPlayer può esser controllato
+attraverso comandi di input.
 .
 .TP
 .B \-input <comandi>
@@ -911,24 +921,17 @@ Può essere negativo.
 Specifica il nome del dispositivo CD-ROM (default: /dev/\:cdrom).
 .
 .TP
-.B \-channels <numero>
-Cambia il numero di canali da riprodurre (default: 2).
-Se il numero di canali di uscita è maggiore del numero dei canali di ingresso
-vengono inseriti dei canali vuoti tramite il filtro audio channels
-(tranne nel caso di miscelazione da mono a stereo dove il canale monofonico è ripetuto
-su entrambi i canali di uscita).
-La mappatura sarà quella di default per il filtro channels.
-Se il numero di canali di uscita è minore del numero dei canali di ingresso
-il risultato dipende dal decoder audio (\-afm).
-MPlayer chiede al decoder di decodificare l'audio in tanti canali quanti sono quelli
-specificati.
+.B \-channels <numero> (vedi anche \-af channels)
+Imposta il numero di canali da decodificare (default: 2).
+MPlayer chiede al decoder di decodificare l'audio in tanti canali quanti sono
+quelli impostati.
 A questo punto è compito del decoder adempiere alla richiesta.
-Se il decoder genera più canali di quelli richiesti i canali eccedenti
-sono troncati.
-Questo è generalmente importante solo quando si riproducono filmati con audio AC3
-(come i DVD).
-In questo caso liba52 effettua la decodifica per default e correttamente sottomiscela
-l'audio nel numero di canali richiesti.
+Questo è generalmente importante solo quando si riproducono filmati con audio
+AC3 (come i DVD).
+In questo caso liba52 effettua la decodifica per default e correttamente
+sottomiscela l'audio nel numero di canali richiesti.
+Per controllare direttamente il numero dei canali di uscita indipendentemente
+da quanti canali vengono decodificati, usa il filtro channel.
 .br
 .I NOTA:
 Questa opzione è onorata dai codec (solo AC3), filtri (surround) e driver di
@@ -972,8 +975,9 @@ Quando viene usato con MEncoder, non è detto che funzioni correttamente
 con \-ovc copy.
 .
 .TP
-.B \-demuxer <nome>
+.B \-demuxer <[+]nome>
 Forza il nome del demuxer audio, come indicato da \-demuxer help.
+Usa un '+' prima del nome per forzarlo, il che eviterà alcuni controlli!
 Per retrocompatibilità accetta anche l'ID del demuxer come definito in
 libmpdemux/\:demuxer.h.
 \-demuxer audio o \-demuxer 17 forza il formato MP3.
@@ -1658,8 +1662,9 @@ Attualmente i sottotitoli sono a scala di grigi e perciò questo valore
 255 indica bianco e 0 nero.
 .
 .TP
-.B \-sub-demuxer <nome> (solo \-subfile) (CODICE BETA)
+.B \-sub-demuxer <[+]nome> (solo \-subfile) (CODICE BETA)
 Forza il nome del demuxer, come indicato da \-sub-demuxer help.
+Usa un '+' prima del nome per forzarlo, il che eviterà alcuni controlli!
 Per retrocompatibilità accetta anche l'ID del demuxer come definito in
 subreader.h.
 .
@@ -2089,7 +2094,7 @@ Seleziona la scheda grafica che riceverà l'immagine.
 Serve anche l'opzione \-vm perché funzioni.
 Puoi avere una lista delle schede disponibili se utilizzi questa
 opzione insieme con \-v.
-Attualmente funziona solo con \-vo directx.
+Attualmente funziona solo con il driver di uscita video directx.
 .
 .TP
 .B \-bpp <profondità>
@@ -2659,9 +2664,9 @@ Driver di uscita video molto veloce su schede che lo supportano.
 .RSs
 .IPs <sottodispositivo>
 Seleziona in modo esplicito il sotto dispositivo VIDIX da usare.
-I driver disponibili sono cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid e
-unichrome_vid.
+I driver disponibili sono cyberblade_vid.so, mach64_vid.so,
+mga_crtc2_vid.so, mga_vid.so, nvidia_vid.so, pm3_vid.so,
+radeon_vid.so, rage128_vid.so, sis_vid.so e unichrome_vid.so.
 .RE
 .PD 1
 .
@@ -2845,22 +2850,24 @@ pan-and-scan (default: abilitato).
 Disabilitarlo può incrementare la velocità.
 .IPs rectangle=<0,1,2>
 Abilita l'utilizzo di texture rettangolari, fatto che risparmia RAM video 
-ma e' spesso più lento (default: 0).
+ma è spesso più lento (default: 0).
 .RSss
-0: Usa textures alla potenza di 2 (power-of-two) (default).
+0: Usa texture alla potenza di 2 (power-of-two) (default).
 .br
-1: Usa rettangolo texture (texture_rectangle).
+1: Usa texture rettangolari (texture_rectangle), non compatibile con conversione
+YUV hardware.
 .br
 2: Usa texture non alla potenza di 2 (texture_non_power_of_two).
+.RE
 .IPs (no)glfinish
 Invoca glFinish() prima di invertire i buffer.
 Più lento ma in alcuni casi l'uscita è più corretta (default: disabilitato).
-.IPs  swapinterval=<n>
-Intervallo minimo nei fotogrammi visualizzati tra due scambi di buffer
+.IPs swapinterval=<n>
+Intervallo minimo, in fotogrammi visualizzati, tra due scambi di buffer
 (default: 1).
 1 equivale ad abilitare VSYNC, 0 a disabilitarlo.
-Valori < 0 saranno ignorati e verrà usato il default del sistema.
-Questo limiterà la frequenza di aggiornamento a (frequenza rinfresco
+Valori minori di 0 saranno ignorati e verrà usato il default del sistema.
+Questo limita la frequenza di aggiornamento a (frequenza rinfresco
 orizzontale / n).
 Richiede il supporto GLX_SGI_swap_control per funzionare.
 Con alcune (la maggior parte/tutte?) implementazioni funziona sono in modalità
@@ -2950,6 +2957,12 @@ Abilita CRTC2 (la seconda uscita, head), visualizzando il video in modo
 indipendente dalla prima uscita.
 .PD 0
 .RSs
+.IPs (no)input
+Come per directfb (default: disabilitato)
+.IPs buffermode=single|double|triple
+Come per directfb (default: triple)
+.IPs fieldparity=top|bottom
+Come per directfb
 .IPs (no)bes
 Abilita l'utilizzo del BES (backend scaler) Matrox (default: disabilitato).
 Genera risultati molto buoni per quanto riguarda velocità e qualità di uscita
@@ -2961,20 +2974,6 @@ Utilizza il layer Matrox sub picture per visualizzare l'OSD di MPlayer (default:
 Attiva l'uscita TV sella seconda uscita (default: abilitata).
 La qualità di uscita è stupefacente in quanto è un'immagine completamente
 interlacciata con sincronismo corretto per ogni campo pari e dispari.
-.IPs (no)input
-Utilizza il codice della tastiera di DirectFB invece di quello standard di MPlayer (default: disabilitato).
-.IPs buffermode=single|double|triple
-Il doppio ed il triplo buffering danno i migliori risultati se vuoi evitare problemi di tearing.
-Il triplo buffering è più efficiente del doppio buffering perché non blocca MPlayer
-mentre aspetta il tracciamento verticale.
-La bufferizzazione singola dovrebbe essere evitata (default: triple).
-.IPs fieldparity=top|bottom
-Controlla l'ordine di uscita dei fotogrammi interlacciati (default: disabilitato).
-Valori validi sono top (prima il campo superiore) e bottom (prima il campo inferiore).
-Questa opzione non ha alcun effetto su materiale progressivo, generalmente la maggior
-parte dei film MPEG.
-Devi abilitare questa opzione se hai effetti di tearing oppure movimenti non uniformi
-guardando materiale interlacciato.
 .IPs tvnorm=pal|ntsc|auto
 Imposta la norma TV della scheda Matrox senza bisogno di modificare
 /etc/\:directfbrc (default: disabilitato).
@@ -3329,9 +3328,9 @@ Specifica le opzioni avanzate dei filtri audio:
 .IPs force=<0\-7>
 Forza l'inserimento del filtro audio a uno dei seguenti:
 .RSss
-0: Inserimento completamente automatico dei filtri (default).
+0: Inserimento completamente automatico dei filtri.
 .br
-1: Ottimizza per la precisione.
+1: Ottimizza per la precisione (default).
 .br
 2: Ottimizza per la velocità.
 .I Attenzione:
@@ -3710,7 +3709,7 @@ La descrizione del filtro video scale ha ulteriori informazioni.
 .RE
 .
 .TP
-.B \-vc <[-]codec1,[-]codec2,...[,]>
+.B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
 Specifica una lista di priorità dei codec video da usare, in accordo con il
 loro nome in codecs.conf.
 Utilizza un '-' prima del nome del codec per ometterlo.
@@ -5975,6 +5974,17 @@ L'opzione fd indica al filtro di eseguire sempre la decimazione
 richiesta (brutto).
 .RE
 .
+.TP
+.B screenshot
+Permette l'acquisizione di istantanee del filmato usando il comando di input
+screenshot (collagato di default al tasto 's').
+Verranno salvati dei file con nome 'shotNNNN.png' nella directory corrente,
+usando il primo numero disponibile - nessun file sarà sovrascritto.
+Il filtro se non viene usato non appesantisce il programma e accetta uno spazio
+colore arbitrario, quindi può esser impostato senza problemi nel file di
+configurazione.
+.RE
+.
 .
 .\" --------------------------------------------------------------------------
 .\" Opzioni generali di codifica
@@ -6884,12 +6894,16 @@ passo.
 .
 .TP
 .B turbo (solo modalità a 2 passaggi)
-Velocizza in modo drammatico il primo passaggio utilizzando algoritmi
+Velocizza in modo notevole il primo passaggio utilizzando algoritmi
 più veloci e disabilitando opzioni che necessitano di molto tempo
 di CPU.
 Questo probabilmente riduce leggermente il PSNR globale (circa 0.01 dB)
-e cambia qualche fotogramma, sia come tipo sia riducendone il suo PSNR (fino
+e cambia qualche fotogramma, sia come tipo sia riducendone il PSNR (fino
 ad un massimo di 0.03 dB).
+Modalità primo passo veloce.
+Durante il primo passaggio di una codifica a 2 o 3 passaggi, è possibile
+guadagnare velocità disabilitando alcune opzioni con un impatto basso o nullo
+sulla qualità di uscita dell'ultimo passaggio.
 .
 .TP
 .B aspect=<x/\:y>
@@ -7862,6 +7876,14 @@ e due passi.
 Specifica il passo nella modalità a due passaggi.
 .
 .TP
+.B turbo (solo modalità a due passi)
+Velocizza in modo drammatico il primo passaggio utilizzando algoritmi
+più veloci e disabilitando opzioni che necessitano di molto tempo
+di CPU.
+Questo probabilmente riduce leggermente il PSNR globale e cambia qualche
+fotogramma, sia come tipo sia riducendone il PSNR.
+.
+.TP
 .B bitrate=<valore> (CBR oppure modalità a due passi)
 Regola il bitrate da usare in kbits/\:secondo se <16000 oppure in bits/\:secondo
 se >16000.
@@ -7965,7 +7987,7 @@ Modalità a due passi: quantizzazione minima e massima per i fotogrammi I/\:P (de
 Da XviD-1.0.x questa opzione è sostituita dalle opzioni [min|max]_[i|p|b]quant.
 .
 .TP
-.B min_key_interval=<valore> (solo modalità a 2 passi)
+.B min_key_interval=<valore> (solo modalità a due passi)
 Intervallo minimo tra due keyframe (default: 0)
 .
 .TP
@@ -8851,6 +8873,62 @@ Richiede subq>=5.
 Utilizza un quantizzatore diverso per i piani di crominanza rispetto a quello
 per la luminanza.
 Valori utili sono nella gamma <-2\-2> (default: 0).
+.
+.TP
+.B cqm=<flat|jvt|<nomefile>>
+Usa una matrice di quantizzazione personalizzata predefinita o ne carica una
+da un file in formato JS.
+.PD 0
+.RSs
+.IPs flat\ 
+Usa la matrice predefinita flat 16 (default).
+.IPs jvt\ \ 
+Usa la matrice predefinita JVT.
+.IPs <nomefile>
+Usa la matrice dal file in formato JM indicato.
+.PD 1
+.RE
+.RS
+.I NOTA:
+File codificati usando matrici personalizzate CQM non sono attualmente
+decodificabili da programmi di visualizzazione basati su FFmpeg.
+.br
+Chi usa CMD.EXE di Windows potrebbe aver problemi nell'interpretazione della
+riga comando se tenta di usare tutte le liste CQM.
+Ciò è dovuto alla limitazione della lunghezza della riga comando.
+In questo caso si raccomanda di mettere le liste in un file CQM in formato JM
+e caricarle come indicato sopra.
+.RE
+.
+.TP
+.B cqm4iy=<lista> (vedi anche cqm)
+Matrice di luminanza intra 4x4 personalizzata, fornita come una lista di 16
+valori separati da virgola, compresi tra 1 e 255.
+.
+.TP
+.B cqm4ic=<lista> (vedi anche cqm)
+Matrice di crominanza intra 4x4 personalizzata, fornita come una lista di 16
+valori separati da virgola, compresi tra 1 e 255.
+.
+.TP
+.B cqm4py=<lista> (vedi anche cqm)
+Matrice di luminanza inter 4x4 personalizzata, fornita come una lista di 16
+valori separati da virgola, compresi tra 1 e 255.
+.
+.TP
+.B cqm4pc=<lista> (vedi anche cqm)
+Matrice di crominanza inter 4x4 personalizzata, fornita come una lista di 16
+valori separati da virgola, compresi tra 1 e 255.
+.
+.TP
+.B cqm8iy=<lista> (vedi anche cqm)
+Matrice di luminanza intra 8x8 personalizzata, fornita come una lista di 64
+valori separati da virgola, compresi tra 1 e 255.
+.
+.TP
+.B cqm8py=<lista> (vedi anche cqm)
+Matrice di luminanza inter 8x8 personalizzata, fornita come una lista di 64
+valori separati da virgola, compresi tra 1 e 255.
 .
 .TP
 .B level_idc=<10\-51>
