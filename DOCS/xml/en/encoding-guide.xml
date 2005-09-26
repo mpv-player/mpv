@@ -2541,19 +2541,19 @@ An example with AC3 compression:
 </row>
 <row>
   <entry>High quality</entry>
-  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo:psnr</option></entry>
+  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo</option></entry>
   <entry>15fps</entry>
   <entry>-0.5dB</entry>
 </row>
 <row>
   <entry>Fast</entry>
-  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:turbo:psnr</option></entry>
+  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:turbo</option></entry>
   <entry>42fps</entry>
   <entry>-0.74dB</entry>
 </row>
 <row>
   <entry>Realtime</entry>
-  <entry><option>vcodec=mpeg4:mbd=2:turbo:psnr</option></entry>
+  <entry><option>vcodec=mpeg4:mbd=2:turbo</option></entry>
   <entry>54fps</entry>
   <entry>-1.21dB</entry>
 </row>
@@ -3277,19 +3277,19 @@ codec</title>
 </row>
 <row>
   <entry>High quality</entry>
-  <entry><option>vhq=2:bvhq=1:psnr:chroma_opt:quant_type=mpeg:psnr</option></entry>
+  <entry><option>vhq=2:bvhq=1:chroma_opt:quant_type=mpeg</option></entry>
   <entry>18fps</entry>
   <entry>-0.1dB</entry>
 </row>
 <row>
   <entry>Fast</entry>
-  <entry><option>turbo:vhq=0:psnr</option></entry>
+  <entry><option>turbo:vhq=0</option></entry>
   <entry>28fps</entry>
   <entry>-0.69dB</entry>
 </row>
 <row>
   <entry>Realtime</entry>
-  <entry><option>turbo:nochroma_me:notrellis:max_bframes=0:vhq=0:psnr</option></entry>
+  <entry><option>turbo:nochroma_me:notrellis:max_bframes=0:vhq=0</option></entry>
   <entry>38fps</entry>
   <entry>-1.48dB</entry>
 </row>
@@ -3799,13 +3799,13 @@ codec</title>
 </row>
 <row>
   <entry>High quality</entry>
-  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b:psnr</option></entry>
+  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13fps</entry>
   <entry>-0.89dB</entry>
 </row>
 <row>
   <entry>Fast</entry>
-  <entry><option>subq=4:bframes=2:b_pyramid:weight_b:psnr</option></entry>
+  <entry><option>subq=4:bframes=2:b_pyramid:weight_b</option></entry>
   <entry>17fps</entry>
   <entry>-1.48dB</entry>
 </row>
