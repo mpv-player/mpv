@@ -37,6 +37,7 @@ extern int vo_fsmode;
 extern int vo_dbpp;
 extern int vo_directrendering;
 extern float vo_panscan;
+extern float vo_panscanrange;
 /* only used at startup (setting these values from configfile) */
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
@@ -239,6 +240,7 @@ m_option_t mplayer_opts[]={
 	{"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
+	{"panscanrange", &vo_panscanrange, CONF_TYPE_FLOAT, CONF_RANGE, -19.0, 99.0, NULL},
 
 	{"grabpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nograbpointer", &vo_grabpointer, CONF_TYPE_FLAG, 0, 1, 0, NULL},

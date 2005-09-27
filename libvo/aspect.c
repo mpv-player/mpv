@@ -14,6 +14,7 @@
 int vo_panscan_x = 0;
 int vo_panscan_y = 0;
 float vo_panscan_amount = 0;
+float vo_panscanrange = 1.0;
 
 #include "video_out.h"
 
@@ -123,8 +124,12 @@ void panscan_calc( void )
  int fwidth,fheight;
  int vo_panscan_area;
 
+ if (vo_panscanrange > 0) {
  aspect(&fwidth,&fheight,A_ZOOM);
  vo_panscan_area = (aspdat.scrh-fheight);
+   vo_panscan_area *= vo_panscanrange;
+ } else
+   vo_panscan_area = -vo_panscanrange * aspdat.scrh;
 
  vo_panscan_amount = vo_fs ? vo_panscan : 0;
  vo_panscan_x = vo_panscan_area * vo_panscan_amount * aspdat.asp;
