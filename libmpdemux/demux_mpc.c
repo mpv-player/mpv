@@ -23,6 +23,7 @@ typedef struct da_priv {
   float last_pts;
   uint32_t dword;
   int pos;
+  float length;
 } da_priv_t;
 
 extern void free_sh_audio(sh_audio_t* sh);
@@ -70,6 +71,7 @@ static int demux_mpc_check(demuxer_t* demuxer) {
 }
 
 static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
+  float seconds = 0;
   stream_t *s = demuxer->stream;
   sh_audio_t* sh_audio;
   da_priv_t* priv = demuxer->priv;
@@ -81,7 +83,6 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
     char *header = &wf[sizeof(WAVEFORMATEX)];
     const int freqs[4] = {44100, 48000, 37800, 32000};
     int frames;
-    int seconds;
     sh_audio->format = mmioFOURCC('M', 'P', 'C', ' ');
     memcpy(header, priv, HDR_SIZE);
     free(priv);
@@ -92,8 +93,8 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
     sh_audio->wf->nSamplesPerSec = freqs[header[10] & 3];
     sh_audio->wf->nBlockAlign = 32 * 36;
     sh_audio->wf->wBitsPerSample = 16;
-    seconds = 1152 * frames / sh_audio->wf->nSamplesPerSec;
-    if (demuxer->movi_end > demuxer->movi_start && seconds > 0)
+    seconds = 1152 * frames / (float)sh_audio->wf->nSamplesPerSec;
+    if (demuxer->movi_end > demuxer->movi_start && seconds > 1)
       sh_audio->wf->nAvgBytesPerSec = (demuxer->movi_end - demuxer->movi_start) / seconds;
     else
       sh_audio->wf->nAvgBytesPerSec = 32 * 1024; // dummy to make mencoder not hang
@@ -104,6 +105,7 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
 
   priv = (da_priv_t *)malloc(sizeof(da_priv_t));
   priv->last_pts = -1;
+  priv->length = seconds;
   priv->dword = 0;
   priv->pos = 0;
   stream_read(s, (void *)&priv->dword, 4);
@@ -164,6 +166,17 @@ static void demux_close_mpc(demuxer_t* demuxer) {
 }
 
 static int demux_mpc_control(demuxer_t *demuxer,int cmd, void *arg){
+  da_priv_t* priv = demuxer->priv;
+  switch (cmd) {
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+      if (priv->length < 1) return DEMUXER_CTRL_DONTKNOW;
+      *((double *)arg) = priv->length;
+      return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_PERCENT_POS:
+      if (priv->length < 1) return DEMUXER_CTRL_DONTKNOW;
+      *((int *)arg) = priv->last_pts * 100 / priv->length;
+      return DEMUXER_CTRL_OK;
+  }
   return DEMUXER_CTRL_NOTIMPL;
 }
 
