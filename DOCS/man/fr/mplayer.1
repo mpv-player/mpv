@@ -1,4 +1,4 @@
-.\" synced with 1.1118
+.\" synced with 1.1119
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2438,6 +2438,16 @@ film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
 Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga,
 gl, gl2, quartz, macosx et xvidix.
+.
+.TP
+.B \-panscanrange <-19.0\-99.0> (expérimental)
+Change l'intervalle de la fonction pan-and-scan (par défaut\ : 1).
+Les valeurs positives signifie multiples de l'intervalle par défaut.
+Les valeurs négatives signifie que vous pouvez zoomer jusqu'à un facteur
+de \-panscanrange+1.
+Par ex.\& \-panscanrange -3 vous permet de zoomer jusqu'à un facteur de 4.
+Cette fonction est expérimentale.
+N'envoyez pas de rapport de bug à moins que vous utilisiez \-vo gl.
 .
 .TP
 .B \-refreshrate <Hz>
