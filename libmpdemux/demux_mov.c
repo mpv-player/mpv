@@ -662,6 +662,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //      32  char[4]	atom type (fourc charater code -> esds)		
 //      36  char[]  	atom data (len=size-8)
 
+// TODO: fix parsing for files using version 2.
 		trak->samplebytes=sh->samplesize=char2short(trak->stdata,18)/8;
 		trak->nchannels=sh->channels=char2short(trak->stdata,16);
 		/*printf("MOV: timescale: %d samplerate: %d durmap: %d (%d) -> %d (%d)\n",
@@ -711,8 +712,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, &trak->stdata[52+char2int(trak->stdata,52)], sh->codecdata_len);
 		    } else {
+		      if (len > 8 && len + 44 < trak->stdata_len) {
 		    sh->codecdata_len = len-8;
 		    sh->codecdata = trak->stdata+44+8;
+		      }
 		    }
 		  }
 		}
