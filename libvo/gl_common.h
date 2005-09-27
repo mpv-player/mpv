@@ -25,6 +25,9 @@
  * (e.g. _NV), _ARB is not used to ease readability.
  * \{
  */
+#ifndef GL_REGISTER_COMBINERS_NV
+#define GL_REGISTER_COMBINERS_NV 0x8522
+#endif
 #ifndef GL_MAX_GENERAL_COMBINERS_NV
 #define GL_MAX_GENERAL_COMBINERS_NV 0x854D
 #endif
