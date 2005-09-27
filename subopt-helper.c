@@ -262,6 +262,15 @@ static char const * parse_str( char const * str, strarg_t * const valp )
     match = &str[len];
   }
   else
+  if (str[0] == '"') {
+    str = &str[1];
+    match = strchr(str, '"');
+    if (!match)
+      return NULL;
+    valp->len = match - str;
+    valp->str = str;
+    return &match[1];
+  }
   if ( !match )
     match = &str[strlen(str)];
 
