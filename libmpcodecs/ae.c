@@ -11,6 +11,8 @@
 #include "ae.h"
 #include "../config.h"
 
+#include "ae_pcm.h"
+
 #ifdef HAVE_TOOLAME
 #include "ae_toolame.h"
 #endif
