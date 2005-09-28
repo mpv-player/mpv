@@ -729,17 +729,6 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	xvid_plugin_2pass2_t *pass2   = &mod->pass2;
 	XVIDRational ar;
 
-	//profile is unrestricted as default
-	profile_t *selected_profile =  profileFromName("unrestricted");
-	if(xvidenc_profile)
-		selected_profile = profileFromName(xvidenc_profile);
-	if(!selected_profile)
-	{
-		mp_msg(MSGT_MENCODER,MSGL_ERR,
-			"xvid:[ERROR] \"%s\" is an invalid profile name\n", xvidenc_profile);
-		return(BAD);
-	}
-
 	const int motion_presets[7] =
 		{
 			0,
@@ -752,6 +741,16 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 			XVID_ME_HALFPELREFINE8  | XVID_ME_USESQUARES16
 		};
 
+	//profile is unrestricted as default
+	profile_t *selected_profile =  profileFromName("unrestricted");
+	if(xvidenc_profile)
+		selected_profile = profileFromName(xvidenc_profile);
+	if(!selected_profile)
+	{
+		mp_msg(MSGT_MENCODER,MSGL_ERR,
+			"xvid:[ERROR] \"%s\" is an invalid profile name\n", xvidenc_profile);
+		return(BAD);
+	}
 	
 	/* -------------------------------------------------------------------
 	 * Dispatch all settings having an impact on the "create" structure
