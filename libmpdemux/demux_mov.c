@@ -1850,6 +1850,7 @@ static int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
     int x;
     off_t pos;
     
+    if (ds->eof) return 0;
     trak = stream_track(priv, ds);
     if (!trak) return 0;
 
@@ -1946,6 +1947,7 @@ if(trak->samplesize){
     if(!(flags&1)) sample+=trak->chunks[trak->pos].sample; // relative
     trak->pos=0;
     while(trak->pos<trak->chunks_size && trak->chunks[trak->pos].sample<sample) ++trak->pos;
+    if (trak->pos == trak->chunks_size) return -1;
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
 } else {
     unsigned int ipts;
@@ -1956,12 +1958,14 @@ if(trak->samplesize){
     for(trak->pos=0;trak->pos<trak->samples_size;++trak->pos){
 	if(trak->samples[trak->pos].pts>=ipts) break; // found it!
     }
+    if (trak->pos == trak->samples_size) return -1;
     if(trak->keyframes_size){
 	// find nearest keyframe
 	int i;
 	for(i=0;i<trak->keyframes_size;i++){
 	    if(trak->keyframes[i]>=trak->pos) break;
 	}
+	if (i == trak->keyframes_size) return -1;
 	if(i>0 && (trak->keyframes[i]-trak->pos) > (trak->pos-trak->keyframes[i-1]))
 	  --i;
 	trak->pos=trak->keyframes[i];
@@ -1987,7 +1991,9 @@ static void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
     if (trak) {
 	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
 	//if(!(flags&1)) pts+=ds->pts;
-	pts=ds->pts=mov_seek_track(trak,pts,flags);
+	ds->pts=mov_seek_track(trak,pts,flags);
+	if (ds->pts < 0) ds->eof = 1;
+	else pts = ds->pts;
 	flags=1; // absolute seconds
     }
 
@@ -1997,6 +2003,7 @@ static void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
 	//if(flags&2) pts*=(float)trak->length/(float)trak->timescale;
 	//if(!(flags&1)) pts+=ds->pts;
 	ds->pts=mov_seek_track(trak,pts,flags);
+	if (ds->pts < 0) ds->eof = 1;
 	if (demuxer->video->id < 0)
 	  ((sh_audio_t*)ds->sh)->delay = ds->pts;
     }
