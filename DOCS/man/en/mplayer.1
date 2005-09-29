@@ -5516,8 +5516,10 @@ Available field dominances are:
 .PD 0
 .RSs
 .IPs -1
-auto (Only works if the decoder exports the appropriate information and
-no other filters are loaded before that discard that information.)
+auto (default)
+Only works if the decoder exports the appropriate information and
+no other filters are loaded before that discard that information,
+otherwise it falls back to 0 (top field first).
 .IPs 0
 top-first
 .IPs 1
