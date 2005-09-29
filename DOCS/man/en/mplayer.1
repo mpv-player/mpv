@@ -5493,7 +5493,7 @@ framerate unchanged.
 .PD 1
 .
 .TP
-.B tfields[=mode]
+.B tfields[=mode[:field_dominance]]
 Temporal field separation \- split fields into frames, doubling the
 output framerate.
 Like the telecine filter, tfields will only work properly with
@@ -5510,6 +5510,18 @@ Interpolate missing lines. (The algorithm used might not be so good.)
 Translate fields by 1/4 pixel with linear interpolation (no jump).
 .IPs 4
 Translate fields by 1/4 pixel with 4tap filter (higher quality). (default)
+.RE
+.PD 1
+Available field dominances are:
+.PD 0
+.RSs
+.IPs -1
+auto (Only works if the decoder exports the appropriate information and
+no other filters are loaded before that discard that information.)
+.IPs 0
+top-first
+.IPs 1
+bottom-first
 .RE
 .PD 1
 .
