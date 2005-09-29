@@ -8,14 +8,10 @@
 #include "config.h"
 
 #if	defined(FOR_MENCODER) || defined(CODECS2HTML)
-#undef	ENABLE_GUI_CODE
-#elif	defined(HAVE_NEW_GUI)
-#define	ENABLE_GUI_CODE	HAVE_NEW_GUI
-#else
-#undef	ENABLE_GUI_CODE
+#undef HAVE_NEW_GUI
 #endif
 
-#if ENABLE_GUI_CODE
+#ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 extern int use_gui;
 #endif
@@ -25,8 +21,6 @@ extern int use_gui;
 #define MSGSIZE_MAX 3072
 
 static int mp_msg_levels[MSGT_MAX]; // verbose level of this module
-
-#if 1
 
 void mp_msg_init(){
 #ifdef USE_I18N
@@ -57,21 +51,20 @@ int mp_msg_test(int mod, int lev)
     return lev <= mp_msg_levels[mod];
 }
 
-void mp_msg_c( int x, const char *format, ... ){
-#if 1
+void mp_msg(int mod, int lev, const char *format, ... ){
     va_list va;
     char tmp[MSGSIZE_MAX];
     
-    if((x&255)>mp_msg_levels[x>>8]) return; // do not display
+    if (lev > mp_msg_levels[mod]) return; // do not display
     va_start(va, format);
     vsnprintf(tmp, MSGSIZE_MAX, mp_gettext(format), va);
     va_end(va);
     tmp[MSGSIZE_MAX-2] = '\n';
     tmp[MSGSIZE_MAX-1] = 0;
 
-#if ENABLE_GUI_CODE
+#ifdef HAVE_NEW_GUI
     if(use_gui)
-        guiMessageBox(x&255, tmp);
+        guiMessageBox(lev, tmp);
 #endif
 
 #ifdef MSG_USE_COLORS
@@ -139,83 +132,21 @@ void mp_msg_c( int x, const char *format, ... ){
                                 "NETST",
                                 "MUXER"};
 
-	int c=v_colors[(x & 255)];
-        int c2=((x>>8)+1)%15+1;
+        int c=v_colors[lev];
+        int c2=(mod+1)%15+1;
         static int header=1;
-        FILE *stream= (x & 255) <= MSGL_WARN ? stderr : stdout;
+        FILE *stream= (lev) <= MSGL_WARN ? stderr : stdout;
         if(header){
-            fprintf(stream, "\033[%d;3%dm%9s\033[0;37m: ",c2>>3,c2&7, mod_text[x>>8]);
+            fprintf(stream, "\033[%d;3%dm%9s\033[0;37m: ",c2>>3,c2&7, mod_text[mod]);
         }
         fprintf(stream, "\033[%d;3%dm",c>>3,c&7);
         header=    tmp[strlen(tmp)-1] == '\n'
                  /*||tmp[strlen(tmp)-1] == '\r'*/;
     }
 #endif
-    if ((x & 255) <= MSGL_WARN){
+    if (lev <= MSGL_WARN){
 	fprintf(stderr, "%s", tmp);fflush(stderr);
     } else {
 	printf("%s", tmp);fflush(stdout);
     }
-
-#else
-    va_list va;
-    if((x&255)>mp_msg_levels[x>>8]) return; // do not display
-    va_start(va, format);
-#if ENABLE_GUI_CODE
-    if(use_gui){
-      char tmp[16*80];
-      vsnprintf( tmp,8*80,format,va ); tmp[8*80-1]=0;
-      switch( x&255 ) {
-       case MSGL_FATAL: 
-              fprintf( stderr,"%s",tmp );
-	      fflush(stderr);
-              gtkMessageBox( GTK_MB_FATAL|GTK_MB_SIMPLE,tmp );
-       	   break;
-       case MSGL_ERR:
-              fprintf( stderr,"%s",tmp );
-	      fflush(stderr);
-              gtkMessageBox( GTK_MB_ERROR|GTK_MB_SIMPLE,tmp );
-       	   break;
-       case MSGL_WARN:
-              fprintf( stderr, "%s",tmp );
-	      fflush(stdout);
-              gtkMessageBox( GTK_MB_WARNING|GTK_MB_SIMPLE,tmp );
-       	   break;
-       default:
-              fprintf(stderr, "%s",tmp );
-	      fflush(stdout);
-      }
-    } else
-#endif
-    if((x&255)<=MSGL_ERR){
-//    fprintf(stderr,"%%%%%% ");
-      vfprintf(stderr,format, va);
-      fflush(stderr);
-    } else {
-//	printf("%%%%%% ");
-      vfprintf(stderr,format, va);
-      fflush(stdout);
-    }
-    va_end(va);
-#endif
 }
-
-#else
-
-FILE *mp_msg_file[MSGT_MAX]; // print message to this file (can be stdout/err)
-static FILE* mp_msg_last_file=NULL;
-
-// how to handle errors->stderr messages->stdout  ?
-void mp_msg( int x, const char *format, ... ){
-    if((x&255)>mp_msg_levels[x>>8] || !mp_msg_file[x>>8]) return; // do not display
-    va_list va;
-    va_start(va, format);
-    vfprintf(mp_msg_file[x>>8],format, va);
-    if(mp_msg_last_file!=mp_msg_file[x>>8]){
-	fflush(mp_msg_file[x>>8]);
-	mp_msg_last_file=mp_msg_file[x>>8];
-    }
-    va_end(va);
-}
-
-#endif

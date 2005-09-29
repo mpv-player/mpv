@@ -114,25 +114,16 @@ int mp_msg_test(int mod, int lev);
 #endif
 
 #ifdef __GNUC__
-void mp_msg_c( int x, const char *format, ... ) __attribute__ ((format (printf, 2, 3)));
-#define mp_msg(mod,lev, args... ) mp_msg_c(((mod)<<8)|(lev), ## args )
-
-#ifdef MP_DEBUG
-#define mp_dbg(mod,lev, args... ) mp_msg_c(((mod)<<8)|(lev), ## args )
-#else
-// these messages are only usefull for developers, disable them
-#define mp_dbg(mod,lev, args... ) 
-#endif
+void mp_msg(int mod, int lev, const char *format, ... ) __attribute__ ((format (printf, 3, 4)));
 #else // not GNU C
-void mp_msg_c( int x, const char *format, ... );
-#define mp_msg(mod,lev, ... ) mp_msg_c(((mod)<<8)|(lev), __VA_ARGS__)
+void mp_msg(int mod, int lev, const char *format, ... );
+#endif
 
 #ifdef MP_DEBUG
-#define mp_dbg(mod,lev, ... ) mp_msg_c(((mod)<<8)|(lev), __VA_ARGS__)
+#define mp_dbg(mod,lev, ... ) mp_msg(mod, lev, __VA_ARGS__)
 #else
 // these messages are only usefull for developers, disable them
 #define mp_dbg(mod,lev, ... ) 
-#endif
 #endif
 
 #endif
