@@ -5518,8 +5518,8 @@ Available field dominances are:
 .IPs -1
 auto (default)
 Only works if the decoder exports the appropriate information and
-no other filters are loaded before that discard that information,
-otherwise it falls back to 0 (top field first).
+no other filters which discard that information come before tfields
+in the filter chain, otherwise it falls back to 0 (top field first).
 .IPs 0
 top-first
 .IPs 1
