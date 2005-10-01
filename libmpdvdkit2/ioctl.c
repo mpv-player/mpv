@@ -2,9 +2,6 @@
  * ioctl.c: DVD ioctl replacement function
  *****************************************************************************
  * Copyright (C) 1999-2001 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  * $Id$
  *
  * Authors: Markus Kuespert <ltlBeBoy@beosmail.com>
@@ -1912,44 +1909,60 @@ static void SolarisInitUSCSI( struct uscsi_cmd *p_sc, int i_type )
  * for execution
  *****************************************************************************
  * When available, this function uses the function smedia_uscsi_cmd()
- * from solaris' libsmedia library (solaris 9 or newer) to execute the
+ * from Solaris' libsmedia library (Solaris 9 or newer) to execute the
  * USCSI command.  smedia_uscsi_cmd() allows USCSI commands for
- * non-root users on removable media devices on solaris 9; sending the
+ * non-root users on removable media devices on Solaris 9; sending the
  * USCSI command directly to the device using the USCSICMD ioctl fails
- * with an EPERM error on solaris 9.
+ * with an EPERM error on Solaris 9.
  *
  * The code will fall back to the USCSICMD ioctl method, when
  * libsmedia.so is not available or does not export the
- * smedia_uscsi_cmd() function (on solaris releases upto and including
- * solaris 8). Fortunatelly, on these old releases non-root users are
+ * smedia_uscsi_cmd() function (on Solaris releases upto and including
+ * Solaris 8). Fortunatelly, on these old releases non-root users are
  * allowed to perform USCSICMD ioctls on removable media devices.
  *****************************************************************************/
-static int SolarisSendUSCSI( int i_fd, struct uscsi_cmd *p_sc ) {
-    void *sm_hdl;
-    static int initialized;
-    static void* (*sm_get_handle)(int32_t);
-    static int (*sm_release_handle)(void*);
-    static int (*sm_uscsi_cmd)(void*, struct uscsi_cmd *);
+static int SolarisSendUSCSI( int i_fd, struct uscsi_cmd *p_sc )
+{
+    void *p_handle;
 
-    if (!initialized)
+    /* We use static variables to keep track of the libsmedia symbols, which
+     * is harmless even in a multithreaded program because the library and
+     * its symbols will always be mapped at the same address. */
+    static int b_tried = 0;
+    static int b_have_sm = 0;
+    static void * (*p_get_handle) ( int32_t );
+    static int (*p_uscsi_cmd) ( void *, struct uscsi_cmd * );
+    static int (*p_release_handle) ( void * );
+
+    if( !b_tried )
     {
-	void *smedia_lib;
+        void *p_lib;
 
-	smedia_lib = dlopen("libsmedia.so", RTLD_NOW);
-	if (smedia_lib) {
-	    sm_get_handle = dlsym(smedia_lib, "smedia_get_handle");
-	    sm_release_handle = dlsym(smedia_lib, "smedia_release_handle");
-	    sm_uscsi_cmd = dlsym(smedia_lib, "smedia_uscsi_cmd");
-	}
-	initialized = 1;
+        p_lib = dlopen( "libsmedia.so", RTLD_NOW );
+        if( p_lib )
+        {
+            p_get_handle = dlsym( p_lib, "smedia_get_handle" );
+            p_uscsi_cmd = dlsym( p_lib, "smedia_uscsi_cmd" );
+            p_release_handle = dlsym( p_lib, "smedia_release_handle" );
+
+            if( p_get_handle && p_uscsi_cmd && p_release_handle )
+            {
+                b_have_sm = 1;
+            }
+            else
+            {
+                dlclose( p_lib );
+            }
+        }
+
+        b_tried = 1;
     }
 
-    if (sm_get_handle && sm_uscsi_cmd && sm_release_handle
-	&& (sm_hdl = sm_get_handle(i_fd)))
+    if( b_have_sm && (p_handle = p_get_handle(i_fd)) )
     {
-	int i_ret = sm_uscsi_cmd(sm_hdl, p_sc);
-	sm_release_handle(sm_hdl);
-	return i_ret;
+        int i_ret = p_uscsi_cmd( p_handle, p_sc );
+        p_release_handle( p_handle );
+        return i_ret;
     }
 
     return ioctl( i_fd, USCSICMD, p_sc );

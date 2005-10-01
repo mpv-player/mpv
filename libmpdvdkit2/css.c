@@ -1,19 +1,17 @@
 /*****************************************************************************
  * css.c: Functions for DVD authentication and descrambling
  *****************************************************************************
- * Copyright (C) 1999-2001 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * Copyright (C) 1999-2003 VideoLAN
  * $Id$
  *
- * Author: Stéphane Borel <stef@via.ecp.fr>
- *         Håkan Hjort <d95hjort@dtek.chalmers.se>
+ * Authors: Stéphane Borel <stef@via.ecp.fr>
+ *          Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * based on:
  *  - css-auth by Derek Fawcus <derek@spider.com>
  *  - DVD CSS ioctls example program by Andrew T. Veliath <andrewtv@usa.net>
  *  - The Divide and conquer attack by Frank A. Stevenson <frank@funcom.com>
+ *     (see http://www-2.cs.cmu.edu/~dst/DeCSS/FrankStevenson/index.html)
  *  - DeCSSPlus by Ethan Hawke
  *  - DecVOB
  *  see http://www.lemuria.org/DeCSS/ by Tom Vogt for more information.
@@ -43,9 +41,9 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#   include <unistd.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <limits.h>
+#   include <limits.h>
 
 #include "dvdcss.h"
 
@@ -59,6 +57,8 @@
 /*****************************************************************************
  * Local prototypes
  *****************************************************************************/
+static void PrintKey        ( dvdcss_t, char *, uint8_t const * );
+
 static int  GetBusKey       ( dvdcss_t );
 static int  GetASF          ( dvdcss_t );
 
@@ -66,7 +66,7 @@ static void CryptKey        ( int, int, uint8_t const *, uint8_t * );
 static void DecryptKey      ( uint8_t,
                               uint8_t const *, uint8_t const *, uint8_t * );
 
-static int  DecryptDiscKey  ( uint8_t const *, dvd_key_t );
+static int  DecryptDiscKey  ( dvdcss_t, uint8_t const *, dvd_key_t );
 static int  CrackDiscKey    ( dvdcss_t, uint8_t * );
 
 static void DecryptTitleKey ( dvd_key_t, dvd_key_t );
@@ -91,190 +91,30 @@ int _dvdcss_test( dvdcss_t dvdcss )
 #ifdef WIN32
     if( i_ret < 0 )
     {
-        /* Maybe we didn't have enough priviledges to read the copyright
+        /* Maybe we didn't have enough privileges to read the copyright
          * (see ioctl_ReadCopyright comments).
          * Apparently, on unencrypted DVDs _dvdcss_disckey() always fails, so
-         * we can check this as a work-around. */
+         * we can check this as a workaround. */
         i_ret = 0;
+        i_copyright = 1;
         if( _dvdcss_disckey( dvdcss ) < 0 )
+        {
             i_copyright = 0;
-        else
-            i_copyright = 1;
+        }
     }
 #endif
 
     if( i_ret < 0 )
     {
         /* Since it's the first ioctl we try to issue, we add a notice */
-        _dvdcss_error( dvdcss, "css error: ioctl_ReadCopyright failed, "
-                       "make sure there is a DVD in the drive, and that "
-                       "you have used the correct device node." );
+        print_error( dvdcss, "css error: ioctl_ReadCopyright failed, "
+                     "make sure there is a DVD in the drive, and that "
+                     "you have used the correct device node." );
 
         return i_ret;
     }
 
     return i_copyright;
-}
-
-/*****************************************************************************
- * GetBusKey : Go through the CSS Authentication process
- *****************************************************************************
- * It simulates the mutual authentication between logical unit and host,
- * and stops when a session key (called bus key) has been established.
- * Always do the full auth sequence. Some drives seem to lie and always
- * respond with ASF=1.  For instance the old DVD roms on Compaq Armada says
- * that ASF=1 from the start and then later fail with a 'read of scrambled
- * block without authentication' error.
- *****************************************************************************/
-static int GetBusKey( dvdcss_t dvdcss )
-{
-    uint8_t   p_buffer[10];
-    uint8_t   p_challenge[2*KEY_SIZE];
-    dvd_key_t p_key1;
-    dvd_key_t p_key2;
-    dvd_key_t p_key_check;
-    uint8_t   i_variant = 0;
-    char      psz_warning[80];
-    int       i_ret = -1;
-    int       i;
-
-    _dvdcss_debug( dvdcss, "requesting AGID" );
-    i_ret = ioctl_ReportAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-
-    /* We might have to reset hung authentication processes in the drive
-       by invalidating the corresponding AGID'.  As long as we haven't got
-       an AGID, invalidate one (in sequence) and try again. */
-    for( i = 0; i_ret == -1 && i < 4 ; ++i )
-    {
-        sprintf( psz_warning,
-                 "ioctl ReportAgid failed, invalidating AGID %d", i );
-        _dvdcss_debug( dvdcss, psz_warning );
-
-        /* This is really _not good_, should be handled by the OS.
-           Invalidating an AGID could make another process fail some
-           where in it's authentication process. */
-        dvdcss->css.i_agid = i;
-        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-
-        _dvdcss_debug( dvdcss, "requesting AGID" );
-        i_ret = ioctl_ReportAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-    }
-
-    /* Unable to authenticate without AGID */
-    if( i_ret == -1 )
-    {
-        _dvdcss_error( dvdcss, "ioctl ReportAgid failed, fatal" );
-        return -1;
-    }
-
-    /* Setup a challenge, any values should work */
-    for( i = 0 ; i < 10; ++i )
-    {
-        p_challenge[i] = i;
-    }
-
-    /* Get challenge from host */
-    for( i = 0 ; i < 10 ; ++i )
-    {
-        p_buffer[9-i] = p_challenge[i];
-    }
-
-    /* Send challenge to LU */
-    if( ioctl_SendChallenge( dvdcss->i_fd,
-                             &dvdcss->css.i_agid, p_buffer ) < 0 )
-    {
-        _dvdcss_error( dvdcss, "ioctl SendChallenge failed" );
-        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-        return -1;
-    }
-
-    /* Get key1 from LU */
-    if( ioctl_ReportKey1( dvdcss->i_fd, &dvdcss->css.i_agid, p_buffer ) < 0)
-    {
-        _dvdcss_error( dvdcss, "ioctl ReportKey1 failed" );
-        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-        return -1;
-    }
-
-    /* Send key1 to host */
-    for( i = 0 ; i < KEY_SIZE ; i++ )
-    {
-        p_key1[i] = p_buffer[4-i];
-    }
-
-    for( i = 0 ; i < 32 ; ++i )
-    {
-        CryptKey( 0, i, p_challenge, p_key_check );
-
-        if( memcmp( p_key_check, p_key1, KEY_SIZE ) == 0 )
-        {
-            snprintf( psz_warning, sizeof(psz_warning),
-                      "drive authenticated, using variant %d", i );
-            _dvdcss_debug( dvdcss, psz_warning );
-            i_variant = i;
-            break;
-        }
-    }
-
-    if( i == 32 )
-    {
-        _dvdcss_error( dvdcss, "drive would not authenticate" );
-        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-        return -1;
-    }
-
-    /* Get challenge from LU */
-    if( ioctl_ReportChallenge( dvdcss->i_fd,
-                               &dvdcss->css.i_agid, p_buffer ) < 0 )
-    {
-        _dvdcss_error( dvdcss, "ioctl ReportKeyChallenge failed" );
-        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-        return -1;
-    }
-
-    /* Send challenge to host */
-    for( i = 0 ; i < 10 ; ++i )
-    {
-        p_challenge[i] = p_buffer[9-i];
-    }
-
-    CryptKey( 1, i_variant, p_challenge, p_key2 );
-
-    /* Get key2 from host */
-    for( i = 0 ; i < KEY_SIZE ; ++i )
-    {
-        p_buffer[4-i] = p_key2[i];
-    }
-
-    /* Send key2 to LU */
-    if( ioctl_SendKey2( dvdcss->i_fd, &dvdcss->css.i_agid, p_buffer ) < 0 )
-    {
-        _dvdcss_error( dvdcss, "ioctl SendKey2 failed" );
-        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
-        return -1;
-    }
-
-    /* The drive has accepted us as authentic. */
-    _dvdcss_debug( dvdcss, "authentication established" );
-
-    memcpy( p_challenge, p_key1, KEY_SIZE );
-    memcpy( p_challenge + KEY_SIZE, p_key2, KEY_SIZE );
-
-    CryptKey( 2, i_variant, p_challenge, dvdcss->css.p_bus_key );
-
-    return 0;
-}
-
-/*****************************************************************************
- * PrintKey : debug function that dumps a key value
- *****************************************************************************/
-static void PrintKey( dvdcss_t dvdcss, char *prefix, uint8_t const *data )
-{
-    char psz_output[80];
-
-    sprintf( psz_output, "%s%02x:%02x:%02x:%02x:%02x", prefix,
-             data[0], data[1], data[2], data[3], data[4] );
-    _dvdcss_debug( dvdcss, psz_output );
 }
 
 /*****************************************************************************
@@ -322,13 +162,27 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
 
         if( i_fd >= 0 )
         {
-            if( read( i_fd, p_title_key, 5 ) == 5 )
+            unsigned char psz_key[KEY_SIZE * 3];
+            unsigned int k0, k1, k2, k3, k4;
+
+            psz_key[KEY_SIZE * 3 - 1] = '\0';
+
+            if( read( i_fd, psz_key, KEY_SIZE * 3 - 1 ) == KEY_SIZE * 3 - 1
+                 && sscanf( psz_key, "%x:%x:%x:%x:%x",
+                            &k0, &k1, &k2, &k3, &k4 ) == 5 )
             {
-                _dvdcss_debug( dvdcss, "key found in cache" );
+                p_title_key[0] = k0;
+                p_title_key[1] = k1;
+                p_title_key[2] = k2;
+                p_title_key[3] = k3;
+                p_title_key[4] = k4;
+                PrintKey( dvdcss, "title key found in cache ", p_title_key );
+
                 /* Don't try to save it again */
                 b_cache = 0;
                 i_ret = 1;
             }
+
             close( i_fd );
         }
     }
@@ -340,24 +194,30 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
 
         if( i_ret < 0 )
         {
-            _dvdcss_error( dvdcss, "fatal error in vts css key" );
+            print_error( dvdcss, "fatal error in vts css key" );
             return i_ret;
         }
 
         if( i_ret == 0 )
         {
-            _dvdcss_debug( dvdcss, "unencrypted title" );
+            print_debug( dvdcss, "unencrypted title" );
             /* We cache this anyway, so we don't need to check again. */
         }
     }
 
     /* Key is valid, we store it on disk. */
-    if( b_cache )
+    if( dvdcss->psz_cachefile[0] && b_cache )
     {
-        i_fd = open( dvdcss->psz_cachefile, O_RDWR|O_CREAT|O_EXCL, 0644 );
+        i_fd = open( dvdcss->psz_cachefile, O_RDWR|O_CREAT, 0644 );
         if( i_fd >= 0 )
         {
-            write( i_fd, p_title_key, 5 );
+            unsigned char psz_key[KEY_SIZE * 3 + 2];
+
+            sprintf( psz_key, "%02x:%02x:%02x:%02x:%02x\r\n",
+                              p_title_key[0], p_title_key[1], p_title_key[2],
+                              p_title_key[3], p_title_key[4] );
+
+            write( i_fd, psz_key, KEY_SIZE * 3 + 1 );
             close( i_fd );
         }
     }
@@ -420,7 +280,7 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
     /* Get encrypted disc key */
     if( ioctl_ReadDiscKey( dvdcss->i_fd, &dvdcss->css.i_agid, p_buffer ) < 0 )
     {
-        _dvdcss_error( dvdcss, "ioctl ReadDiscKey failed" );
+        print_error( dvdcss, "ioctl ReadDiscKey failed" );
         return -1;
     }
 
@@ -428,32 +288,33 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
     if( GetASF( dvdcss ) != 1 )
     {
         /* Region mismatch (or region not set) is the most likely source. */
-        _dvdcss_error( dvdcss,
-                       "ASF not 1 after reading disc key (region mismatch?)" );
+        print_error( dvdcss,
+                     "ASF not 1 after reading disc key (region mismatch?)" );
         ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
         return -1;
     }
 
-    /* Decrypt disc key using bus key */
+    /* Shuffle disc key using bus key */
     for( i = 0 ; i < DVD_DISCKEY_SIZE ; i++ )
     {
         p_buffer[ i ] ^= dvdcss->css.p_bus_key[ 4 - (i % KEY_SIZE) ];
     }
 
+    /* Decrypt disc key */
     switch( dvdcss->i_method )
     {
         case DVDCSS_METHOD_KEY:
 
             /* Decrypt disc key with player key. */
-            _dvdcss_debug( dvdcss, "decrypting disc key with player keys" );
-            if( ! DecryptDiscKey( p_buffer, p_disc_key ) )
+            PrintKey( dvdcss, "decrypting disc key ", p_buffer );
+            if( ! DecryptDiscKey( dvdcss, p_buffer, p_disc_key ) )
             {
                 PrintKey( dvdcss, "decrypted disc key is ", p_disc_key );
                 break;
             }
-            _dvdcss_debug( dvdcss, "failed to decrypt the disc key, "
-                                   "faulty drive/kernel? "
-                                   "cracking title keys instead" );
+            print_debug( dvdcss, "failed to decrypt the disc key, "
+                                 "faulty drive/kernel? "
+                                 "cracking title keys instead" );
 
             /* Fallback, but not to DISC as the disc key might be faulty */
             dvdcss->i_method = DVDCSS_METHOD_TITLE;
@@ -462,22 +323,21 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
         case DVDCSS_METHOD_DISC:
 
             /* Crack Disc key to be able to use it */
-            _dvdcss_debug( dvdcss, "cracking disc key from key hash ..."
-                                   " this will take some time" );
             memcpy( p_disc_key, p_buffer, KEY_SIZE );
+            PrintKey( dvdcss, "cracking disc key ", p_disc_key );
             if( ! CrackDiscKey( dvdcss, p_disc_key ) )
             {
                 PrintKey( dvdcss, "cracked disc key is ", p_disc_key );
                 break;
             }
-            _dvdcss_debug( dvdcss, "failed to crack the disc key" );
+            print_debug( dvdcss, "failed to crack the disc key" );
             memset( p_disc_key, 0, KEY_SIZE );
             dvdcss->i_method = DVDCSS_METHOD_TITLE;
             break;
 
         default:
 
-            _dvdcss_debug( dvdcss, "disc key needs not be decrypted" );
+            print_debug( dvdcss, "disc key needs not be decrypted" );
             memset( p_disc_key, 0, KEY_SIZE );
             break;
     }
@@ -504,7 +364,8 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
          * read the title key and decrypt it.
          */
 
-        _dvdcss_debug( dvdcss, "getting title key the classic way" );
+        print_debug( dvdcss, "getting title key at block %i the classic way",
+                             i_pos );
 
         /* We need to authenticate again every time to get a new session key */
         if( GetBusKey( dvdcss ) < 0 )
@@ -516,8 +377,8 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
         if( ioctl_ReadTitleKey( dvdcss->i_fd, &dvdcss->css.i_agid,
                                 i_pos, p_key ) < 0 )
         {
-            _dvdcss_debug( dvdcss,
-                           "ioctl ReadTitleKey failed (region mismatch?)" );
+            print_debug( dvdcss,
+                         "ioctl ReadTitleKey failed (region mismatch?)" );
             i_ret = -1;
         }
 
@@ -526,7 +387,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
         {
             case -1:
                 /* An error getting the ASF status, something must be wrong. */
-                _dvdcss_debug( dvdcss, "lost ASF requesting title key" );
+                print_debug( dvdcss, "lost ASF requesting title key" );
                 ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
                 i_ret = -1;
                 break;
@@ -534,7 +395,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
             case 0:
                 /* This might either be a title that has no key,
                  * or we encountered a region error. */
-                _dvdcss_debug( dvdcss, "lost ASF requesting title key" );
+                print_debug( dvdcss, "lost ASF requesting title key" );
                 break;
 
             case 1:
@@ -565,7 +426,9 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
             }
             else
             {
+                PrintKey( dvdcss, "initial disc key ", dvdcss->css.p_disc_key );
                 DecryptTitleKey( dvdcss->css.p_disc_key, p_key );
+                PrintKey( dvdcss, "decrypted title key ", p_key );
                 i_ret = 1;
             }
 
@@ -577,7 +440,7 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
         }
 
         /* The title key request failed */
-        _dvdcss_debug( dvdcss, "resetting drive and cracking title key" );
+        print_debug( dvdcss, "resetting drive and cracking title key" );
 
         /* Read an unscrambled sector and reset the drive */
         dvdcss->pf_seek( dvdcss, 0 );
@@ -612,39 +475,195 @@ int _dvdcss_unscramble( dvd_key_t p_key, uint8_t *p_sec )
     uint8_t        *p_end = p_sec + DVDCSS_BLOCK_SIZE;
 
     /* PES_scrambling_control */
-    if( p_sec[0x14] & 0x30)
+    if( !(p_sec[0x14] & 0x30) )
     {
-        i_t1 = (p_key[0] ^ p_sec[0x54]) | 0x100;
-        i_t2 = p_key[1] ^ p_sec[0x55];
-        i_t3 = (p_key[2] | (p_key[3] << 8) |
-               (p_key[4] << 16)) ^ (p_sec[0x56] |
-               (p_sec[0x57] << 8) | (p_sec[0x58] << 16));
-        i_t4 = i_t3 & 7;
-        i_t3 = i_t3 * 2 + 8 - i_t4;
-        p_sec += 0x80;
-        i_t5 = 0;
+        return 0;
+    }
 
-        while( p_sec != p_end )
-        {
-            i_t4 = p_css_tab2[i_t2] ^ p_css_tab3[i_t1];
-            i_t2 = i_t1>>1;
-            i_t1 = ( ( i_t1 & 1 ) << 8 ) ^ i_t4;
-            i_t4 = p_css_tab5[i_t4];
-            i_t6 = ((((((( i_t3 >> 3 ) ^ i_t3 ) >> 1 ) ^
-                                         i_t3 ) >> 8 ) ^ i_t3 ) >> 5 ) & 0xff;
-            i_t3 = (i_t3 << 8 ) | i_t6;
-            i_t6 = p_css_tab4[i_t6];
-            i_t5 += i_t6 + i_t4;
-            *p_sec = p_css_tab1[*p_sec] ^ ( i_t5 & 0xff );
-            p_sec++;
-            i_t5 >>= 8;
-        }
+    i_t1 = (p_key[0] ^ p_sec[0x54]) | 0x100;
+    i_t2 = p_key[1] ^ p_sec[0x55];
+    i_t3 = (p_key[2] | (p_key[3] << 8) |
+           (p_key[4] << 16)) ^ (p_sec[0x56] |
+           (p_sec[0x57] << 8) | (p_sec[0x58] << 16));
+    i_t4 = i_t3 & 7;
+    i_t3 = i_t3 * 2 + 8 - i_t4;
+    p_sec += 0x80;
+    i_t5 = 0;
+
+    while( p_sec != p_end )
+    {
+        i_t4 = p_css_tab2[i_t2] ^ p_css_tab3[i_t1];
+        i_t2 = i_t1>>1;
+        i_t1 = ( ( i_t1 & 1 ) << 8 ) ^ i_t4;
+        i_t4 = p_css_tab5[i_t4];
+        i_t6 = ((((((( i_t3 >> 3 ) ^ i_t3 ) >> 1 ) ^
+                                     i_t3 ) >> 8 ) ^ i_t3 ) >> 5 ) & 0xff;
+        i_t3 = (i_t3 << 8 ) | i_t6;
+        i_t6 = p_css_tab4[i_t6];
+        i_t5 += i_t6 + i_t4;
+        *p_sec = p_css_tab1[*p_sec] ^ ( i_t5 & 0xff );
+        p_sec++;
+        i_t5 >>= 8;
     }
 
     return 0;
 }
 
 /* Following functions are local */
+
+/*****************************************************************************
+ * GetBusKey : Go through the CSS Authentication process
+ *****************************************************************************
+ * It simulates the mutual authentication between logical unit and host,
+ * and stops when a session key (called bus key) has been established.
+ * Always do the full auth sequence. Some drives seem to lie and always
+ * respond with ASF=1.  For instance the old DVD roms on Compaq Armada says
+ * that ASF=1 from the start and then later fail with a 'read of scrambled
+ * block without authentication' error.
+ *****************************************************************************/
+static int GetBusKey( dvdcss_t dvdcss )
+{
+    uint8_t   p_buffer[10];
+    uint8_t   p_challenge[2*KEY_SIZE];
+    dvd_key_t p_key1;
+    dvd_key_t p_key2;
+    dvd_key_t p_key_check;
+    uint8_t   i_variant = 0;
+    int       i_ret = -1;
+    int       i;
+
+    print_debug( dvdcss, "requesting AGID" );
+    i_ret = ioctl_ReportAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+
+    /* We might have to reset hung authentication processes in the drive
+     * by invalidating the corresponding AGID'.  As long as we haven't got
+     * an AGID, invalidate one (in sequence) and try again. */
+    for( i = 0; i_ret == -1 && i < 4 ; ++i )
+    {
+        print_debug( dvdcss, "ioctl ReportAgid failed, "
+                             "invalidating AGID %d", i );
+
+        /* This is really _not good_, should be handled by the OS.
+         * Invalidating an AGID could make another process fail somewhere
+         * in its authentication process. */
+        dvdcss->css.i_agid = i;
+        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+
+        print_debug( dvdcss, "requesting AGID" );
+        i_ret = ioctl_ReportAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+    }
+
+    /* Unable to authenticate without AGID */
+    if( i_ret == -1 )
+    {
+        print_error( dvdcss, "ioctl ReportAgid failed, fatal" );
+        return -1;
+    }
+
+    /* Setup a challenge, any values should work */
+    for( i = 0 ; i < 10; ++i )
+    {
+        p_challenge[i] = i;
+    }
+
+    /* Get challenge from host */
+    for( i = 0 ; i < 10 ; ++i )
+    {
+        p_buffer[9-i] = p_challenge[i];
+    }
+
+    /* Send challenge to LU */
+    if( ioctl_SendChallenge( dvdcss->i_fd,
+                             &dvdcss->css.i_agid, p_buffer ) < 0 )
+    {
+        print_error( dvdcss, "ioctl SendChallenge failed" );
+        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+        return -1;
+    }
+
+    /* Get key1 from LU */
+    if( ioctl_ReportKey1( dvdcss->i_fd, &dvdcss->css.i_agid, p_buffer ) < 0)
+    {
+        print_error( dvdcss, "ioctl ReportKey1 failed" );
+        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+        return -1;
+    }
+
+    /* Send key1 to host */
+    for( i = 0 ; i < KEY_SIZE ; i++ )
+    {
+        p_key1[i] = p_buffer[4-i];
+    }
+
+    for( i = 0 ; i < 32 ; ++i )
+    {
+        CryptKey( 0, i, p_challenge, p_key_check );
+
+        if( memcmp( p_key_check, p_key1, KEY_SIZE ) == 0 )
+        {
+            print_debug( dvdcss, "drive authenticated, using variant %d", i );
+            i_variant = i;
+            break;
+        }
+    }
+
+    if( i == 32 )
+    {
+        print_error( dvdcss, "drive would not authenticate" );
+        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+        return -1;
+    }
+
+    /* Get challenge from LU */
+    if( ioctl_ReportChallenge( dvdcss->i_fd,
+                               &dvdcss->css.i_agid, p_buffer ) < 0 )
+    {
+        print_error( dvdcss, "ioctl ReportKeyChallenge failed" );
+        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+        return -1;
+    }
+
+    /* Send challenge to host */
+    for( i = 0 ; i < 10 ; ++i )
+    {
+        p_challenge[i] = p_buffer[9-i];
+    }
+
+    CryptKey( 1, i_variant, p_challenge, p_key2 );
+
+    /* Get key2 from host */
+    for( i = 0 ; i < KEY_SIZE ; ++i )
+    {
+        p_buffer[4-i] = p_key2[i];
+    }
+
+    /* Send key2 to LU */
+    if( ioctl_SendKey2( dvdcss->i_fd, &dvdcss->css.i_agid, p_buffer ) < 0 )
+    {
+        print_error( dvdcss, "ioctl SendKey2 failed" );
+        ioctl_InvalidateAgid( dvdcss->i_fd, &dvdcss->css.i_agid );
+        return -1;
+    }
+
+    /* The drive has accepted us as authentic. */
+    print_debug( dvdcss, "authentication established" );
+
+    memcpy( p_challenge, p_key1, KEY_SIZE );
+    memcpy( p_challenge + KEY_SIZE, p_key2, KEY_SIZE );
+
+    CryptKey( 2, i_variant, p_challenge, dvdcss->css.p_bus_key );
+
+    return 0;
+}
+
+/*****************************************************************************
+ * PrintKey : debug function that dumps a key value
+ *****************************************************************************/
+static void PrintKey( dvdcss_t dvdcss, char *prefix, uint8_t const *data )
+{
+    print_debug( dvdcss, "%s%02x:%02x:%02x:%02x:%02x", prefix,
+                 data[0], data[1], data[2], data[3], data[4] );
+}
 
 /*****************************************************************************
  * GetASF : Get Authentication success flag
@@ -661,17 +680,17 @@ static int GetASF( dvdcss_t dvdcss )
     if( ioctl_ReportASF( dvdcss->i_fd, NULL, &i_asf ) != 0 )
     {
         /* The ioctl process has failed */
-        _dvdcss_error( dvdcss, "GetASF fatal error" );
+        print_error( dvdcss, "GetASF fatal error" );
         return -1;
     }
 
     if( i_asf )
     {
-        _dvdcss_debug( dvdcss, "GetASF authenticated, ASF=1" );
+        print_debug( dvdcss, "GetASF authenticated, ASF=1" );
     }
     else
     {
-        _dvdcss_debug( dvdcss, "GetASF not authenticated, ASF=0" );
+        print_debug( dvdcss, "GetASF not authenticated, ASF=0" );
     }
 
     return i_asf;
@@ -945,57 +964,66 @@ static void DecryptKey( uint8_t invert, uint8_t const *p_key,
 }
 
 /*****************************************************************************
+ * player_keys: alternate DVD player keys
+ *****************************************************************************
+ * These player keys were generated using Frank A. Stevenson's PlayerKey
+ * cracker. A copy of his article can be found here:
+ * http://www-2.cs.cmu.edu/~dst/DeCSS/FrankStevenson/mail2.txt
+ *****************************************************************************/
+static const dvd_key_t player_keys[] =
+{
+    { 0x01, 0xaf, 0xe3, 0x12, 0x80 },
+    { 0x12, 0x11, 0xca, 0x04, 0x3b },
+    { 0x14, 0x0c, 0x9e, 0xd0, 0x09 },
+    { 0x14, 0x71, 0x35, 0xba, 0xe2 },
+    { 0x1a, 0xa4, 0x33, 0x21, 0xa6 },
+    { 0x26, 0xec, 0xc4, 0xa7, 0x4e },
+    { 0x2c, 0xb2, 0xc1, 0x09, 0xee },
+    { 0x2f, 0x25, 0x9e, 0x96, 0xdd },
+    { 0x33, 0x2f, 0x49, 0x6c, 0xe0 },
+    { 0x35, 0x5b, 0xc1, 0x31, 0x0f },
+    { 0x36, 0x67, 0xb2, 0xe3, 0x85 },
+    { 0x39, 0x3d, 0xf1, 0xf1, 0xbd },
+    { 0x3b, 0x31, 0x34, 0x0d, 0x91 },
+    { 0x45, 0xed, 0x28, 0xeb, 0xd3 },
+    { 0x48, 0xb7, 0x6c, 0xce, 0x69 },
+    { 0x4b, 0x65, 0x0d, 0xc1, 0xee },
+    { 0x4c, 0xbb, 0xf5, 0x5b, 0x23 },
+    { 0x51, 0x67, 0x67, 0xc5, 0xe0 },
+    { 0x53, 0x94, 0xe1, 0x75, 0xbf },
+    { 0x57, 0x2c, 0x8b, 0x31, 0xae },
+    { 0x63, 0xdb, 0x4c, 0x5b, 0x4a },
+    { 0x7b, 0x1e, 0x5e, 0x2b, 0x57 },
+    { 0x85, 0xf3, 0x85, 0xa0, 0xe0 },
+    { 0xab, 0x1e, 0xe7, 0x7b, 0x72 },
+    { 0xab, 0x36, 0xe3, 0xeb, 0x76 },
+    { 0xb1, 0xb8, 0xf9, 0x38, 0x03 },
+    { 0xb8, 0x5d, 0xd8, 0x53, 0xbd },
+    { 0xbf, 0x92, 0xc3, 0xb0, 0xe2 },
+    { 0xcf, 0x1a, 0xb2, 0xf8, 0x0a },
+    { 0xec, 0xa0, 0xcf, 0xb3, 0xff },
+    { 0xfc, 0x95, 0xa9, 0x87, 0x35 }
+};
+
+/*****************************************************************************
  * DecryptDiscKey
  *****************************************************************************
- * Decryption of the disc key with player keys if they are available.
- * Try to decrypt the disc key from every position with every player key.
+ * Decryption of the disc key with player keys: try to decrypt the disc key
+ * from every position with every player key.
  * p_struct_disckey: the 2048 byte DVD_STRUCT_DISCKEY data
  * p_disc_key: result, the 5 byte disc key
  *****************************************************************************/
-static int DecryptDiscKey( uint8_t const *p_struct_disckey,
+static int DecryptDiscKey( dvdcss_t dvdcss, uint8_t const *p_struct_disckey,
                            dvd_key_t p_disc_key )
 {
     uint8_t p_verify[KEY_SIZE];
     unsigned int i, n = 0;
 
-    static const dvd_key_t player_keys[] =
-    {
-        { 0x01, 0xaf, 0xe3, 0x12, 0x80 },
-        { 0x12, 0x11, 0xca, 0x04, 0x3b },
-        { 0x14, 0x0c, 0x9e, 0xd0, 0x09 },
-        { 0x14, 0x71, 0x35, 0xba, 0xe2 },
-        { 0x1a, 0xa4, 0x33, 0x21, 0xa6 },
-        { 0x26, 0xec, 0xc4, 0xa7, 0x4e },
-        { 0x2c, 0xb2, 0xc1, 0x09, 0xee },
-        { 0x2f, 0x25, 0x9e, 0x96, 0xdd },
-        { 0x33, 0x2f, 0x49, 0x6c, 0xe0 },
-        { 0x35, 0x5b, 0xc1, 0x31, 0x0f },
-        { 0x36, 0x67, 0xb2, 0xe3, 0x85 },
-        { 0x39, 0x3d, 0xf1, 0xf1, 0xbd },
-        { 0x3b, 0x31, 0x34, 0x0d, 0x91 },
-        { 0x45, 0xed, 0x28, 0xeb, 0xd3 },
-        { 0x48, 0xb7, 0x6c, 0xce, 0x69 },
-        { 0x4b, 0x65, 0x0d, 0xc1, 0xee },
-        { 0x4c, 0xbb, 0xf5, 0x5b, 0x23 },
-        { 0x51, 0x67, 0x67, 0xc5, 0xe0 },
-        { 0x53, 0x94, 0xe1, 0x75, 0xbf },
-        { 0x57, 0x2c, 0x8b, 0x31, 0xae },
-        { 0x63, 0xdb, 0x4c, 0x5b, 0x4a },
-        { 0x7b, 0x1e, 0x5e, 0x2b, 0x57 },
-        { 0x85, 0xf3, 0x85, 0xa0, 0xe0 },
-        { 0xab, 0x1e, 0xe7, 0x7b, 0x72 },
-        { 0xab, 0x36, 0xe3, 0xeb, 0x76 },
-        { 0xb1, 0xb8, 0xf9, 0x38, 0x03 },
-        { 0xb8, 0x5d, 0xd8, 0x53, 0xbd },
-        { 0xbf, 0x92, 0xc3, 0xb0, 0xe2 },
-        { 0xcf, 0x1a, 0xb2, 0xf8, 0x0a },
-        { 0xec, 0xa0, 0xcf, 0xb3, 0xff },
-        { 0xfc, 0x95, 0xa9, 0x87, 0x35 }
-    };
-
     /* Decrypt disc key with the above player keys */
-    while( n < sizeof(player_keys) / sizeof(dvd_key_t) )
+    for( n = 0; n < sizeof(player_keys) / sizeof(dvd_key_t); n++ )
     {
+        PrintKey( dvdcss, "trying player key ", player_keys[n] );
+
         for( i = 1; i < 409; i++ )
         {
             /* Check if player key n is the right key for position i. */
@@ -1013,7 +1041,6 @@ static int DecryptDiscKey( uint8_t const *p_struct_disckey,
                 return 0;
             }
         }
-        n++;
     }
 
     /* Have tried all combinations of positions and keys,
@@ -1076,12 +1103,9 @@ static int CrackDiscKey( dvdcss_t dvdcss, uint8_t *p_disc_key )
     unsigned int*  BigTable;    /* LFSR2 startstate indexed by
                                  * 1,2,5 output byte */
 
-    _dvdcss_debug( dvdcss, "cracking disc key" );
-
     /*
      * Prepare tables for hash reversal
      */
-
 
     /* initialize lookup tables for k[1] */
     K1table = malloc( 65536 * K1TABLEWIDTH );
@@ -1104,7 +1128,7 @@ static int CrackDiscKey( dvdcss_t dvdcss, uint8_t *p_disc_key )
 /*
             if( tmp4 == K1TABLEWIDTH )
             {
-                _dvdcss_debug( dvdcss, "Table disaster %d", tmp4 );
+                print_debug( dvdcss, "Table disaster %d", tmp4 );
             }
 */
             if( tmp4 < K1TABLEWIDTH )
@@ -1125,7 +1149,7 @@ static int CrackDiscKey( dvdcss_t dvdcss, uint8_t *p_disc_key )
 
     tmp3 = 0;
 
-    _dvdcss_debug( dvdcss, "initializing the big table" );
+    print_debug( dvdcss, "initializing the big table" );
 
     for( i = 0 ; i < 16777216 ; i++ )
     {
@@ -1376,7 +1400,7 @@ static int RecoverTitleKey( int i_start, uint8_t const *p_crypted,
 
 
 /******************************************************************************
- * Various pices for the title crack engine.
+ * Various pieces for the title crack engine.
  ******************************************************************************
  * The length of the PES packet is located at 0x12-0x13.
  * The the copyrigth protection bits are located at 0x14 (bits 0x20 and 0x10).
@@ -1408,7 +1432,7 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
     int b_read_error = 0;
     int i_ret;
 
-    _dvdcss_debug( dvdcss, "cracking title key" );
+    print_debug( dvdcss, "cracking title key at block %i", i_pos );
 
     i_tries = 0;
     i_success = 0;
@@ -1419,7 +1443,7 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
 
         if( i_ret != i_pos )
         {
-            _dvdcss_error( dvdcss, "seek failed" );
+            print_error( dvdcss, "seek failed" );
         }
 
         i_ret = dvdcss_read( dvdcss, p_buf, 1, DVDCSS_NOFLAGS );
@@ -1430,12 +1454,12 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
         {
             if( i_ret == 0 )
             {
-                _dvdcss_debug( dvdcss, "read returned 0 (end of device?)" );
+                print_debug( dvdcss, "read returned 0 (end of device?)" );
             }
             else if( !b_read_error )
             {
-                _dvdcss_debug( dvdcss, "read error, resorting to secret "
-                                       "arcanes to recover" );
+                print_debug( dvdcss, "read error at block %i, resorting to "
+                                     "secret arcanes to recover", i_pos );
 
                 /* Reset the drive before trying to continue */
                 _dvdcss_close( dvdcss );
@@ -1452,12 +1476,13 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
          * For now, allow all blocks that begin with a start code. */
         if( memcmp( p_buf, p_packstart, 3 ) )
         {
-            _dvdcss_debug( dvdcss, "non MPEG block found (end of title)" );
+            print_debug( dvdcss, "non MPEG block found at block %i "
+                                 "(end of title)", i_pos );
             break;
         }
 
         if( p_buf[0x0d] & 0x07 )
-            _dvdcss_debug( dvdcss, "stuffing in pack header" );
+            print_debug( dvdcss, "stuffing in pack header" );
 
         /* PES_scrambling_control does not exist in a system_header,
          * a padding_stream or a private_stream2 (and others?). */
@@ -1486,7 +1511,7 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
         /* Emit a progress indication now and then. */
         if( !( i_reads & 0xfff ) )
         {
-            _dvdcss_debug( dvdcss, "still cracking..." );
+            print_debug( dvdcss, "at block %i, still cracking...", i_pos );
         }
 
         /* Stop after 2000 blocks if we haven't seen any encrypted blocks. */
@@ -1496,27 +1521,23 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
 
     if( !b_stop_scanning )
     {
-        _dvdcss_debug( dvdcss, "end of title reached" );
+        print_debug( dvdcss, "end of title reached" );
     }
 
-    { /* Print some statistics. */
-        char psz_info[128];
-        snprintf( psz_info, sizeof(psz_info),
-                  "%d of %d attempts successful, %d of %d blocks scrambled",
-                  i_success, i_tries, i_encrypted, i_reads );
-        _dvdcss_debug( dvdcss, psz_info );
-    }
+    /* Print some statistics. */
+    print_debug( dvdcss, "successful attempts %d/%d, scrambled blocks %d/%d",
+                         i_success, i_tries, i_encrypted, i_reads );
 
     if( i_success > 0 /* b_stop_scanning */ )
     {
-        _dvdcss_debug( dvdcss, "vts key initialized" );
+        print_debug( dvdcss, "vts key initialized" );
         return 1;
     }
 
     if( i_encrypted == 0 && i_reads > 0 )
     {
         memset( p_titlekey, 0, KEY_SIZE );
-        _dvdcss_debug( dvdcss, "file was unscrambled" );
+        print_debug( dvdcss, "no scrambled sectors found" );
         return 0;
     }
 

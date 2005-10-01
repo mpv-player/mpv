@@ -10,9 +10,6 @@
 
 /*
  * Copyright (C) 1998-2002 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  * $Id$
  *
  * This program is free software; you can redistribute it and/or modify
@@ -70,8 +67,6 @@ extern char *        dvdcss_interface_2;
  */
 extern dvdcss_t dvdcss_open  ( char *psz_target );
 extern int      dvdcss_close ( dvdcss_t );
-extern int      dvdcss_title ( dvdcss_t,
-                               int i_block );
 extern int      dvdcss_seek  ( dvdcss_t,
                                int i_blocks,
                                int i_flags );

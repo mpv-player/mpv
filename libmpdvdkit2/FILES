@@ -23,7 +23,7 @@ nav_read.c
 nav_read.h
 nav_types.h
 
-libdvdcss 1.2.8:
+libdvdcss 1.2.9:
 ----------------
 bsdi_dvd.h
 bsdi_ioctl.c

@@ -2,9 +2,6 @@
  * error.c: error management functions
  *****************************************************************************
  * Copyright (C) 1998-2002 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  * $Id$
  *
  * Author: Samuel Hocevar <sam@zoy.org>
@@ -28,7 +25,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <limits.h>
+#   include <limits.h>
 
 #include "dvdcss.h"
 
@@ -39,7 +36,7 @@
 /*****************************************************************************
  * Error messages
  *****************************************************************************/
-void _dvdcss_error( dvdcss_t dvdcss, char *psz_string )
+void _print_error( dvdcss_t dvdcss, char *psz_string )
 {
     if( dvdcss->b_errors )
     {
@@ -52,11 +49,13 @@ void _dvdcss_error( dvdcss_t dvdcss, char *psz_string )
 /*****************************************************************************
  * Debug messages
  *****************************************************************************/
-void _dvdcss_debug( dvdcss_t dvdcss, char *psz_string )
+#if 0
+void _print_debug( dvdcss_t dvdcss, char *psz_string )
 {
     if( dvdcss->b_debug )
     {
         fprintf( stderr, "libdvdcss debug: %s\n", psz_string );
     }
 }
+#endif
 
