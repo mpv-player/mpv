@@ -432,6 +432,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   
 #if 1
   if(sh->a_in_buffer_len<=0){
+		if (sh->ds->eof) return 0;
       // fill the buffer!
 		if (sh->format == mmioFOURCC('1','4','_','4')) {
 			demux_read_data(sh->ds, sh->a_in_buffer, sh->wf->nBlockAlign);
