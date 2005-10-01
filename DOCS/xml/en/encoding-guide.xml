@@ -3868,10 +3868,8 @@ codec</title>
         <entry>9800 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
-        <entry>1536 kbps</entry>
-        <entry>30000/1001, 24000/1001<footnote id="fn-ntsc-framerate"><para>
-            24000/1001 FPS can be achieved with a 3:2 pullup.
-            </para></footnote></entry>
+        <entry>1536 kbps (max)</entry>
+        <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9 (only for 720x480)</entry>
     </row>
     <row>
@@ -3883,8 +3881,8 @@ codec</title>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
-        <entry>1536 kbps</entry>
-        <entry>30000/1001, 24000/1001<footnoteref linkend='fn-ntsc-framerate'/></entry>
+        <entry>1536 kbps (max)</entry>
+        <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9</entry>
     </row>
     <row>
@@ -3894,7 +3892,7 @@ codec</title>
         <entry>2600 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
-        <entry>384 kbps</entry>
+        <entry>384 kbps (max)</entry>
         <entry>30000/1001</entry>
         <entry>4:3</entry>
     </row>
@@ -3916,7 +3914,7 @@ codec</title>
         <entry>9800 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>MP2,AC3,PCM</entry>
-        <entry>1536 kbps</entry>
+        <entry>1536 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9 (only for 720x576)</entry>
     </row>
@@ -3927,7 +3925,7 @@ codec</title>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>MP2,AC3,PCM</entry>
-        <entry>1536 kbps</entry>
+        <entry>1536 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9</entry>
     </row>
@@ -3938,7 +3936,7 @@ codec</title>
         <entry>2600 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
-        <entry>384 kbps</entry>
+        <entry>384 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3</entry>
     </row>
@@ -3946,7 +3944,7 @@ codec</title>
         <entry>PAL VCD</entry>
         <entry>352x288</entry>
         <entry>MPEG-1</entry>
-        <entry>1150 kbps</entry>
+        <entry>1152 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>224 kbps</entry>
