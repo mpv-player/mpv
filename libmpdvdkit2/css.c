@@ -2,6 +2,9 @@
  * css.c: Functions for DVD authentication and descrambling
  *****************************************************************************
  * Copyright (C) 1999-2003 VideoLAN
+ *
+ * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  * $Id$
  *
  * Authors: Stéphane Borel <stef@via.ecp.fr>
