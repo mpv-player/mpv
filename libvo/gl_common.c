@@ -35,6 +35,15 @@ void (APIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
 void (APIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
                                 GLenum, GLenum, GLboolean, GLboolean,
                                 GLboolean);
+void (APIENTRY *BeginFragmentShader)(void);
+void (APIENTRY *EndFragmentShader)(void);
+void (APIENTRY *SampleMap)(GLuint, GLuint, GLenum);
+void (APIENTRY *ColorFragmentOp2)(GLenum, GLuint, GLuint, GLuint, GLuint,
+                                  GLuint, GLuint, GLuint, GLuint, GLuint);
+void (APIENTRY *ColorFragmentOp3)(GLenum, GLuint, GLuint, GLuint, GLuint,
+                                  GLuint, GLuint, GLuint, GLuint, GLuint,
+                                  GLuint, GLuint, GLuint);
+void (APIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
 void (APIENTRY *ActiveTexture)(GLenum);
 void (APIENTRY *BindTexture)(GLenum, GLuint);
 void (APIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
@@ -274,6 +283,12 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
   CombinerOutput = getProcAddress("glCombinerOutput");
   if (!CombinerOutput)
     CombinerOutput = getProcAddress("glCombinerOutputNV");
+  BeginFragmentShader = getProcAddress("glBeginFragmentShaderATI");
+  EndFragmentShader = getProcAddress("glEndFragmentShaderATI");
+  SampleMap = getProcAddress("glSampleMapATI");
+  ColorFragmentOp2 = getProcAddress("glColorFragmentOp2ATI");
+  ColorFragmentOp3 = getProcAddress("glColorFragmentOp3ATI");
+  SetFragmentShaderConstant = getProcAddress("glSetFragmentShaderConstantATI");
   ActiveTexture = getProcAddress("glActiveTexture");
   if (!ActiveTexture)
     ActiveTexture = getProcAddress("glActiveTextureARB");
@@ -480,6 +495,28 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
     glTexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
 }
 
+static void fillUVcoeff(GLfloat *ucoef, GLfloat *vcoef,
+                        float uvcos, float uvsin) {
+  int i;
+  ucoef[0] = 0 * uvcos + 1.403 * uvsin;
+  vcoef[0] = 0 * uvsin + 1.403 * uvcos;
+  ucoef[1] = -0.344 * uvcos + -0.714 * uvsin;
+  vcoef[1] = -0.344 * uvsin + -0.714 * uvcos;
+  ucoef[2] = 1.770 * uvcos + 0 * uvsin;
+  vcoef[2] = 1.770 * uvsin + 0 * uvcos;
+  ucoef[3] = 0;
+  vcoef[3] = 0;
+  // Coefficients (probably) must be in [0, 1] range, whereas they originally
+  // are in [-2, 2] range, so here comes the trick:
+  // First put them in the [-0.5, 0.5] range, then add 0.5.
+  // This can be undone with the HALF_BIAS and SCALE_BY_FOUR arguments
+  // for CombinerInput and CombinerOutput (or the respective ATI variants)
+  for (i = 0; i < 4; i++) {
+    ucoef[i] = ucoef[i] * 0.25 + 0.5;
+    vcoef[i] = vcoef[i] * 0.25 + 0.5;
+  }
+}
+
 /**
  * \brief Setup register combiners for YUV to RGB conversion.
  * \param uvcos used for saturation and hue adjustment
@@ -502,23 +539,7 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
     mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner functions missing!\n");
     return;
   }
-  ucoef[0] = 0 * uvcos + 1.403 * uvsin;
-  vcoef[0] = 0 * uvsin + 1.403 * uvcos;
-  ucoef[1] = -0.344 * uvcos + -0.714 * uvsin;
-  vcoef[1] = -0.344 * uvsin + -0.714 * uvcos;
-  ucoef[2] = 1.770 * uvcos + 0 * uvsin;
-  vcoef[2] = 1.770 * uvsin + 0 * uvcos;
-  ucoef[3] = 0;
-  vcoef[3] = 0;
-  // Coefficients (probably) must be in [0, 1] range, whereas they originally
-  // are in [-2, 2] range, so here comes the trick:
-  // First put them in the [-0.5, 0.5] range, then add 0.5.
-  // This can be undone with the HALF_BIAS and SCALE_BY_FOUR arguments
-  // for CombinerInput and CombinerOutput
-  for (i = 0; i < 4; i++) {
-    ucoef[i] = ucoef[i] * 0.25 + 0.5;
-    vcoef[i] = vcoef[i] * 0.25 + 0.5;
-  }
+  fillUVcoeff(ucoef, vcoef, uvcos, uvsin);
   CombinerParameterfv(GL_CONSTANT_COLOR0_NV, ucoef);
   CombinerParameterfv(GL_CONSTANT_COLOR1_NV, vcoef);
 
@@ -550,6 +571,53 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
 
   // leave final combiner stage in default mode
   CombinerParameteri(GL_NUM_GENERAL_COMBINERS_NV, 2);
+}
+
+/**
+ * \brief Setup ATI version of register combiners for YUV to RGB conversion.
+ * \param uvcos used for saturation and hue adjustment
+ * \param uvsin used for saturation and hue adjustment
+ *
+ * ATI called this fragment shader, but the name is confusing in the
+ * light of a very different OpenGL 2.0 extension with the same name
+ */
+static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
+  GLfloat ucoef[4];
+  GLfloat vcoef[4];
+  GLint i;
+  glGetIntegerv(GL_NUM_FRAGMENT_REGISTERS_ATI, &i);
+  if (i < 3)
+    mp_msg(MSGT_VO, MSGL_ERR,
+           "[gl] 3 registers needed for YUV combiner (ATI) support (found %i)\n", i);
+  glGetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
+  if (i < 3)
+    mp_msg(MSGT_VO, MSGL_ERR,
+           "[gl] 3 texture units needed for YUV combiner (ATI) support (found %i)\n", i);
+  if (!BeginFragmentShader || !EndFragmentShader ||
+      !SetFragmentShaderConstant || !SampleMap ||
+      !ColorFragmentOp2 || !ColorFragmentOp3) {
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner (ATI) functions missing!\n");
+    return;
+  }
+  fillUVcoeff(ucoef, vcoef, uvcos, uvsin);
+  BeginFragmentShader();
+  SetFragmentShaderConstant(GL_CON_0_ATI, ucoef);
+  SetFragmentShaderConstant(GL_CON_1_ATI, vcoef);
+  SampleMap(GL_REG_0_ATI, GL_TEXTURE0, GL_SWIZZLE_STR_ATI);
+  SampleMap(GL_REG_1_ATI, GL_TEXTURE1, GL_SWIZZLE_STR_ATI);
+  SampleMap(GL_REG_2_ATI, GL_TEXTURE2, GL_SWIZZLE_STR_ATI);
+  // UV first, like this green component cannot overflow
+  ColorFragmentOp2(GL_MUL_ATI, GL_REG_1_ATI, GL_NONE, GL_NONE,
+                   GL_REG_1_ATI, GL_NONE, GL_BIAS_BIT_ATI,
+                   GL_CON_0_ATI, GL_NONE, GL_BIAS_BIT_ATI);
+  ColorFragmentOp3(GL_MAD_ATI, GL_REG_2_ATI, GL_NONE, GL_4X_BIT_ATI,
+                   GL_REG_2_ATI, GL_NONE, GL_BIAS_BIT_ATI,
+                   GL_CON_1_ATI, GL_NONE, GL_BIAS_BIT_ATI,
+                   GL_REG_1_ATI, GL_NONE, GL_NONE);
+  ColorFragmentOp2(GL_ADD_ATI, GL_REG_0_ATI, GL_NONE, GL_NONE,
+                   GL_REG_0_ATI, GL_NONE, GL_NONE,
+                   GL_REG_2_ATI, GL_NONE, GL_NONE);
+  EndFragmentShader();
 }
 
 static const char *yuv_prog_template =
@@ -713,6 +781,9 @@ void glSetupYUVConversion(GLenum target, int type,
     case YUV_CONVERSION_COMBINERS:
       glSetupYUVCombiners(uvcos, uvsin);
       break;
+    case YUV_CONVERSION_COMBINERS_ATI:
+      glSetupYUVCombinersATI(uvcos, uvsin);
+      break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
       {
         unsigned char lookup_data[4 * LOOKUP_RES];
@@ -752,6 +823,14 @@ void inline glEnableYUVConversion(GLenum target, int type) {
       ActiveTexture(GL_TEXTURE0);
       glEnable(GL_REGISTER_COMBINERS_NV);
       break;
+    case YUV_CONVERSION_COMBINERS_ATI:
+      ActiveTexture(GL_TEXTURE1);
+      glEnable(target);
+      ActiveTexture(GL_TEXTURE2);
+      glEnable(target);
+      ActiveTexture(GL_TEXTURE0);
+      glEnable(GL_FRAGMENT_SHADER_ATI);
+      break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
@@ -776,6 +855,14 @@ void inline glDisableYUVConversion(GLenum target, int type) {
       glDisable(target);
       ActiveTexture(GL_TEXTURE0);
       glDisable(GL_REGISTER_COMBINERS_NV);
+      break;
+    case YUV_CONVERSION_COMBINERS_ATI:
+      ActiveTexture(GL_TEXTURE1);
+      glDisable(target);
+      ActiveTexture(GL_TEXTURE2);
+      glDisable(target);
+      ActiveTexture(GL_TEXTURE0);
+      glDisable(GL_FRAGMENT_SHADER_ATI);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:

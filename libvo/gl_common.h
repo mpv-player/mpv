@@ -76,6 +76,45 @@
 #ifndef GL_SPARE0_NV
 #define GL_SPARE0_NV 0x852E
 #endif
+#ifndef GL_FRAGMENT_SHADER_ATI
+#define GL_FRAGMENT_SHADER_ATI 0x8920
+#endif
+#ifndef GL_NUM_FRAGMENT_REGISTERS_ATI
+#define GL_NUM_FRAGMENT_REGISTERS_ATI 0x896E
+#endif
+#ifndef GL_REG_0_ATI
+#define GL_REG_0_ATI 0x8921
+#endif
+#ifndef GL_REG_1_ATI
+#define GL_REG_1_ATI 0x8922
+#endif
+#ifndef GL_REG_2_ATI
+#define GL_REG_2_ATI 0x8923
+#endif
+#ifndef GL_CON_0_ATI
+#define GL_CON_0_ATI 0x8941
+#endif
+#ifndef GL_CON_1_ATI
+#define GL_CON_1_ATI 0x8942
+#endif
+#ifndef GL_ADD_ATI
+#define GL_ADD_ATI 0x8963
+#endif
+#ifndef GL_MUL_ATI
+#define GL_MUL_ATI 0x8964
+#endif
+#ifndef GL_MAD_ATI
+#define GL_MAD_ATI 0x8968
+#endif
+#ifndef GL_SWIZZLE_STR_ATI
+#define GL_SWIZZLE_STR_ATI 0x8976
+#endif
+#ifndef GL_4X_BIT_ATI
+#define GL_4X_BIT_ATI 2
+#endif
+#ifndef GL_BIAS_BIT_ATI
+#define GL_BIAS_BIT_ATI 8
+#endif
 #ifndef GL_MAX_TEXTURE_UNITS
 #define GL_MAX_TEXTURE_UNITS 0x84E2
 #endif
@@ -171,6 +210,8 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #define YUV_CONVERSION_FRAGMENT_POW 3
 //! use a fragment program with additional table lookup for YUV conversion
 #define YUV_CONVERSION_FRAGMENT_LOOKUP 4
+//! use ATI specific register combiners ("fragment program")
+#define YUV_CONVERSION_COMBINERS_ATI 5
 /** \} */
 void glSetupYUVConversion(GLenum target, int type,
                           float brightness, float contrast,
@@ -210,6 +251,15 @@ extern void (APIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
 extern void (APIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
                                        GLenum, GLenum, GLboolean, GLboolean,
                                        GLboolean);
+extern void (APIENTRY *BeginFragmentShader)(void);
+extern void (APIENTRY *EndFragmentShader)(void);
+extern void (APIENTRY *SampleMap)(GLuint, GLuint, GLenum);
+extern void (APIENTRY *ColorFragmentOp2)(GLenum, GLuint, GLuint, GLuint, GLuint,
+                                         GLuint, GLuint, GLuint, GLuint, GLuint);
+extern void (APIENTRY *ColorFragmentOp3)(GLenum, GLuint, GLuint, GLuint, GLuint,
+                                         GLuint, GLuint, GLuint, GLuint, GLuint,
+                                         GLuint, GLuint, GLuint);
+extern void (APIENTRY *SetFragmentShaderConstant)(GLuint, const GLfloat *);
 extern void (APIENTRY *ActiveTexture)(GLenum);
 extern void (APIENTRY *BindTexture)(GLenum, GLuint);
 extern void (APIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
