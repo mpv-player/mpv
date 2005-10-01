@@ -124,68 +124,125 @@ typedef struct af_stream_s
 // Export functions
 */
 
-/* Initialize the stream "s". This function creates a new filter list
-   if necessary according to the values set in input and output. Input
-   and output should contain the format of the current movie and the
-   formate of the preferred output respectively. The function is
-   reentrant i.e. if called with an already initialized stream the
-   stream will be reinitialized. If the binary parameter
-   "force_output" is set, the output format will be converted to the
-   format given in "s", otherwise the output fromat in the last filter
-   will be copied "s". The return value is 0 if success and -1 if
-   failure */
+/**
+ * \defgroup af_chain Audio filter chain functions
+ * \{
+ * \param s filter chain
+ */
+
+/**
+ * \brief Initialize the stream "s".
+ * \return 0 on success, -1 on failure
+ *
+ * This function creates a new filter list if necessary, according
+ * to the values set in input and output. Input and output should contain
+ * the format of the current movie and the format of the preferred output
+ * respectively.
+ * Filters to convert to the preferred output format are inserted
+ * automatically, except when they are set to 0.
+ * The function is reentrant i.e. if called with an already initialized
+ * stream the stream will be reinitialized.
+ */
 int af_init(af_stream_t* s);
 
-// Uninit and remove all filters
+/**
+ * \brief Uninit and remove all filters from audio filter chain
+ */
 void af_uninit(af_stream_t* s);
 
-/* Add filter during execution. This function adds the filter "name"
-   to the stream s. The filter will be inserted somewhere nice in the
-   list of filters. The return value is a pointer to the new filter,
-   If the filter couldn't be added the return value is NULL. */
+/**
+ * \brief This function adds the filter "name" to the stream s.
+ * \param name name of filter to add
+ * \return pointer to the new filter, NULL if insert failed
+ *
+ * The filter will be inserted somewhere nice in the
+ * list of filters (i.e. at the beginning unless the
+ * first filter is the format filter (why??).
+ */
 af_instance_t* af_add(af_stream_t* s, char* name);
 
-// Uninit and remove the filter "af"
+/**
+ * \brief Uninit and remove the filter "af"
+ * \param af filter to remove
+ */
 void af_remove(af_stream_t* s, af_instance_t* af);
 
-/* Find filter in the dynamic filter list using it's name This
-   function is used for finding already initialized filters */
+/**
+ * \brief find filter in chain by name
+ * \param name name of the filter to find
+ * \return first filter with right name or NULL if not found
+ * 
+ * This function is used for finding already initialized filters
+ */
 af_instance_t* af_get(af_stream_t* s, char* name);
 
-// Filter data chunk through the filters in the list
+/**
+ * \brief filter data chunk through the filters in the list
+ * \param data data to play
+ * \return resulting data
+ * \ingroup af_chain
+ */
 af_data_t* af_play(af_stream_t* s, af_data_t* data);
 
-// send control to all filters, starting with the last until
-// one accepts the command with AF_OK.
-// Returns the accepting filter or NULL if none was found.
+/**
+ * \brief send control to all filters, starting with the last until
+ *        one accepts the command with AF_OK.
+ * \param cmd filter control command
+ * \param arg argument for filter command
+ * \return the accepting filter or NULL if none was found
+ */
 af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg);
 
-/* Calculate how long the output from the filters will be given the
-   input length "len". The calculated length is >= the actual
-   length */
+/**
+ * \brief Calculate how long the output from the filters will be for a given
+ *        input length.
+ * \param len input lenght for which to calculate output length
+ * \return calculated output length, will always be >= the resulting
+ *         length when actually calling af_play.
+ */
 int af_outputlen(af_stream_t* s, int len);
 
-/* Calculate how long the input to the filters should be to produce a
-   certain output length, i.e. the return value of this function is
-   the input length required to produce the output length "len". The
-   calculated length is <= the actual length */
+/**
+ * \brief Calculate how long the input to the filters should be to produce a
+ *        certain output length
+ * \param len wanted output length
+ * \return input length required to produce the output length "len". Possibly
+ *         smaller to avoid overflow of output buffer
+ */
 int af_inputlen(af_stream_t* s, int len);
 
-/* Calculate how long the input IN to the filters should be to produce
+/**
+ * \brief calculate required input length for desired output size
+ * \param len desired minimum output length
+ * \param max_outsize maximum output length
+ * \param max_insize maximum input length
+ * \return input length or -1 on error
+ *
+   Calculate how long the input IN to the filters should be to produce
    a certain output length OUT but with the following three constraints:
    1. IN <= max_insize, where max_insize is the maximum possible input
       block length
    2. OUT <= max_outsize, where max_outsize is the maximum possible
       output block length
    3. If possible OUT >= len. 
-   Return -1 in case of error */ 
+ */ 
 int af_calc_insize_constrained(af_stream_t* s, int len,
 			       int max_outsize,int max_insize);
 
-/* Calculate the total delay caused by the filters */
+/**
+ * \brief Calculate the total delay caused by the filters
+ * \return delay in seconds
+ */
 double af_calc_delay(af_stream_t* s);
 
+/** \} */ // end of af_chain group
+
 // Helper functions and macros used inside the audio filters
+
+/**
+ * \defgroup af_filter Audio filter helper functions
+ * \{
+ */
 
 /* Helper function called by the macro with the same name only to be
    called from inside filters */
@@ -196,31 +253,87 @@ int af_resize_local_buffer(af_instance_t* af, af_data_t* data);
    needed */
 int af_lencalc(frac_t mul, af_data_t* data);
 
-/* Helper function used to convert to gain value from dB. Returns
-   AF_OK if of and AF_ERROR if fail */
+/**
+ * \brief convert dB to gain value
+ * \param n number of values to convert
+ * \param in [in] values in dB, <= -200 will become 0 gain
+ * \param out [out] gain values
+ * \param k input values are divided by this
+ * \param mi minimum dB value, input will be clamped to this
+ * \param ma maximum dB value, input will be clamped to this
+ * \return AF_ERROR on error, AF_OK otherwise
+ */
 int af_from_dB(int n, float* in, float* out, float k, float mi, float ma);
-/* Helper function used to convert from gain value to dB. Returns
-   AF_OK if of and AF_ERROR if fail */
+
+/**
+ * \brief convert gain value to dB
+ * \param n number of values to convert
+ * \param in [in] gain values, 0 wil become -200 dB
+ * \param out [out] values in dB
+ * \param k output values will be multiplied by this
+ * \return AF_ERROR on error, AF_OK otherwise
+ */
 int af_to_dB(int n, float* in, float* out, float k);
-/* Helper function used to convert from ms to sample time*/
+
+/**
+ * \brief convert milliseconds to sample time
+ * \param n number of values to convert
+ * \param in [in] values in milliseconds
+ * \param out [out] sample time values
+ * \param rate sample rate
+ * \param mi minimum ms value, input will be clamped to this
+ * \param ma maximum ms value, input will be clamped to this
+ * \return AF_ERROR on error, AF_OK otherwise
+ */
 int af_from_ms(int n, float* in, int* out, int rate, float mi, float ma);
-/* Helper function used to convert from sample time to ms */
+
+/**
+ * \brief convert sample time to milliseconds
+ * \param n number of values to convert
+ * \param in [in] sample time values
+ * \param out [out] values in milliseconds
+ * \param rate sample rate
+ * \return AF_ERROR on error, AF_OK otherwise
+ */
 int af_to_ms(int n, int* in, float* out, int rate); 
-/* Helper function for testing the output format */
+
+/**
+ * \brief test if output format matches
+ * \param af audio filter
+ * \param out needed format, will be overwritten by available
+ *            format if they do not match
+ * \return AF_FALSE if formats do not match, AF_OK if they match
+ *
+ * compares the format, bps, rate and nch values of af->data with out
+ */
 int af_test_output(struct af_instance_s* af, af_data_t* out);
 
+/**
+ * \brief soft clipping function using sin()
+ * \param a input value
+ * \return clipped value
+ */
 float af_softclip(float a);
+
+/** \} */ // end of af_filter group, but more functions of this group below
 
 /** Print a list of all available audio filters */
 void af_help(void);
 
-/* Fill the missing parameters in the af_data_t structure.
-   Used for stuffing bps with a value based on format. */
+/**
+ * \brief fill the missing parameters in the af_data_t structure
+ * \param data structure to fill
+ * \ingroup af_filter
+ * 
+ * Currently only sets bps based on format
+ */
 void af_fix_parameters(af_data_t *data);
 
-/* Memory reallocation macro: if a local buffer is used (i.e. if the
+/** Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be
-   called to ensure the buffer is big enough. */
+   called to ensure the buffer is big enough.
+ * \ingroup af_filter
+ */
 #define RESIZE_LOCAL_BUFFER(a,d)\
 ((a->data->len < af_lencalc(a->mul,d))?af_resize_local_buffer(a,d):AF_OK)
 
@@ -257,19 +370,22 @@ typedef struct af_msg_cfg_s
 
 extern af_msg_cfg_t af_msg_cfg; // Message 
 
-#define AF_MSG_FATAL	-3 // Fatal error exit immediately
-#define AF_MSG_ERROR    -2 // Error return gracefully
-#define AF_MSG_WARN     -1 // Print warning but do not exit (can be suppressed)
-#define AF_MSG_INFO	 0 // Important information
-#define AF_MSG_VERBOSE	 1 // Print this if verbose is enabled 
-#define AF_MSG_DEBUG0	 2 // Print if very verbose
-#define AF_MSG_DEBUG1	 3 // Print if very very verbose 
+//! \addtogroup af_filter
+//! \{
+#define AF_MSG_FATAL	-3 ///< Fatal error exit immediately
+#define AF_MSG_ERROR    -2 ///< Error return gracefully
+#define AF_MSG_WARN     -1 ///< Print warning but do not exit (can be suppressed)
+#define AF_MSG_INFO	 0 ///< Important information
+#define AF_MSG_VERBOSE	 1 ///< Print this if verbose is enabled 
+#define AF_MSG_DEBUG0	 2 ///< Print if very verbose
+#define AF_MSG_DEBUG1	 3 ///< Print if very very verbose 
 
-/* Macro for printing error messages */
+//! Macro for printing error messages
 #ifndef af_msg
 #define af_msg(lev, args... ) \
 (((lev)<AF_MSG_WARN)?(fprintf(af_msg_cfg.err?af_msg_cfg.err:stderr, ## args )): \
 (((lev)<=af_msg_cfg.level)?(fprintf(af_msg_cfg.msg?af_msg_cfg.msg:stdout, ## args )):0))
 #endif
+//! \}
 
 #endif /* __aop_h__ */

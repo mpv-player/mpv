@@ -628,11 +628,7 @@ inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
   return AF_OK;
 }
 
-/**
- * \brief send control to all filters, starting with the last, until
- *        one responds with AF_OK
- * \return The instance that accepted the command or NULL if none did.
- */
+// documentation in af.h
 af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
   int res = AF_UNKNOWN;
   af_instance_t* filt = s->last;
@@ -647,6 +643,8 @@ af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
 
 /**
  * \brief calculate greatest common divisior of a and b.
+ * \ingroup af_filter
+ *
  *   Extended for negative and 0 values. If both are 0 the result is 1.
  *   The sign of the result will be so that it has the same sign as b.
  */
@@ -669,6 +667,8 @@ int af_gcd(register int a, register int b) {
 
 /**
  * \brief cancel down a fraction f
+ * \param f fraction to cancel down
+ * \ingroup af_filter
  */
 void af_frac_cancel(frac_t *f) {
   int gcd = af_gcd(f->n, f->d);
@@ -678,7 +678,11 @@ void af_frac_cancel(frac_t *f) {
 
 /**
  * \brief multiply out by in and store result in out.
- *        the resulting fraction wil be cancelled down
+ * \param out [inout] fraction to multiply by in
+ * \param in [in] fraction to multiply out by
+ * \ingroup af_filter
+ *
+ *        the resulting fraction will be cancelled down
  *        if in and out were.
  */
 void af_frac_mul(frac_t *out, const frac_t *in) {
