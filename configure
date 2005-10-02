@@ -7159,6 +7159,9 @@ $_def_crash_debug
 /* Toggles debugging informations */
 $_def_debug
 
+/* Toggles colorized output */
+//#define MSG_USE_COLORS 1
+
 /* Indicates that Ogle's libdvdread is available for DVD playback */
 $_def_dvdread
 
