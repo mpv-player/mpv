@@ -215,6 +215,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   
   if(p->no_skip)
     mode |= PARANOIA_MODE_NEVERSKIP;
+  paranoia_modeset(cdd, mode);
 
   if(p->search_overlap >= 0)
     paranoia_overlapset(cdd,p->search_overlap);
