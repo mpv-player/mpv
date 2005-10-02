@@ -968,6 +968,8 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	    PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
 	if (gCpuCaps.hasSSE)
 	    PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
+	if (gCpuCaps.hasSSE2)
+	    PF[PF_XMMI64_INSTRUCTIONS_AVAILABLE] = TRUE;
 	if (gCpuCaps.has3DNow)
 	    PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 
@@ -1141,8 +1143,10 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 		    PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
 		if (strstr(value,"tsc"))
 		    PF[PF_RDTSC_INSTRUCTION_AVAILABLE] = TRUE;
-		if (strstr(value,"xmm"))
+		if (strstr(value,"xmm") || strstr(value,"sse"))
 		    PF[PF_XMMI_INSTRUCTIONS_AVAILABLE] = TRUE;
+		if (strstr(value,"sse2"))
+		    PF[PF_XMMI64_INSTRUCTIONS_AVAILABLE] = TRUE;
 		if (strstr(value,"3dnow"))
 		    PF[PF_AMD3D_INSTRUCTIONS_AVAILABLE] = TRUE;
 	    }
@@ -3322,6 +3326,7 @@ static int WINAPI expIsRectEmpty(CONST RECT *lprc)
 }
 
 static int _adjust_fdiv=0; //what's this? - used to adjust division
+static int _winver = 0x510; // windows version
 
 
 
@@ -4528,6 +4533,12 @@ static void WINAPI expGlobalMemoryStatus(
         lpmem->dwAvailPageFile++;
 }
 
+static INT WINAPI expGetThreadPriority(HANDLE hthread)
+{
+    dbgprintf("GetThreadPriority(%p)\n",hthread);
+    return 0;
+}
+
 /**********************************************************************
  * SetThreadPriority [KERNEL32.@]  Sets priority for thread.
  *
@@ -4927,6 +4938,7 @@ struct exports exp_kernel32[]=
     FF(SetThreadAffinityMask,-1)
     FF(GetCurrentProcessId,-1)
     FF(GlobalMemoryStatus,-1)
+    FF(GetThreadPriority,-1)
     FF(SetThreadPriority,-1)
     FF(ExitProcess,-1)
     {"LoadLibraryExA", -1, (void*)&LoadLibraryExA},
@@ -4942,6 +4954,7 @@ struct exports exp_msvcrt[]={
     {"??3@YAXPAX@Z", -1, expdelete},
     {"??2@YAPAXI@Z", -1, expnew},
     {"_adjust_fdiv", -1, (void*)&_adjust_fdiv},
+    {"_winver",-1,(void*)&_winver},
     FF(strrchr, -1)
     FF(strchr, -1)
     FF(strlen, -1)
