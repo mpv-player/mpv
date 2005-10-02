@@ -64,7 +64,7 @@ MPlayer (1.0)
     * skiploopfilter decoder option for very fast H.264 decoding
     * D-Cinema audio demuxer and decoder support
 
-    Gui:
+    GUI:
     * ported to GTK2
 
     Filters:
@@ -112,6 +112,8 @@ MPlayer (1.0)
     * lots of new slave commands (check DOCS/tech/slave.txt)
     * lots of new information provided by the -identify option
     * fixed ugly looking OSD with -vo gl2 and MMX
+    * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
+    * libdvdcss updated to 1.2.9
 
 
   pre7try2: August 26, 2005
