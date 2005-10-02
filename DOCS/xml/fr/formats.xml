@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.22 -->
 <sect1 id="formats">
 <title>Formats supportés</title>
 
@@ -61,6 +61,14 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
   l'audio non-MPEG (AC3). Il contient de la vidéo encodé en MPEG2 et généralement
   de l'audio AC3, mais DTS, MP2 et LPCM non-compressé sont également autorisés.
   Lisez la section <link linkend="dvd">DVD</link>!
+  </simpara></listitem>
+<listitem><simpara>
+  TY: C'est un flux TiVo MPEG. Il contient les données MPEG PES pour les flux audio et
+  vidéo, ainsi que des informations en plus comme les closed captions (CC). Le
+  conteneur n'est pas un flux de programme MPEG, mais un format fermé créé par
+  TiVo. Pour plus d'information sur le format de flux TiVo, veuillez vous référer à
+  <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
+  la page TyStudio</ulink>.
   </simpara></listitem>
 </itemizedlist>
 
@@ -331,11 +339,6 @@ PVA est un format semblable à MPEG utilisé dans les logiciels des cartes TV DVB
 (par ex.: <application>MultiDec</application>, <application>WinTV</application>
 sous Windows.)
 </para>
-
-<para>
-Les spécifications PVA peuvent être téléchargées à l'adresse suivante:
-<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
-</para>
 </sect3>
 
 <sect3 id="nsv">
@@ -354,15 +357,37 @@ fichiers sont de toute façon illisibles car ils utilisent de l'audio VLB).
 </para>
 </sect3>
 
+<sect3 id="matroska">
+<title>Fichiers Matroska</title>
+<para>
+Matroska est un format ouvert de conteneur.
+En lire plus sur le <ulink url="http://www.matroska.org/">site officiel</ulink>.
+</para>
+</sect3>
+
+
+<sect3 id="nut">
+<title>fichiers NUT</title>
+<para>
+NUT est le format de conteneur developé par les membres de
+<application>MPlayer</application> et <application>FFmpeg</application>.
+Les deux projets le supportent.
+En lire plus sur le <ulink url="http://www.nut.hu/">site officiel</ulink>.
+</para>
+</sect3>
+
+
 <sect3 id="gif">
 <title>Fichiers GIF</title>
 <para>
 Le format <emphasis role="bold">GIF</emphasis>est un format courant pour les
 graphismes web. Il y a deux versions des specs GIF, GIF87a et GIF89a. La
-principale différence est que le GIF89a autorise l'animation. <application>MPlayer</application> supporte
-les deux formats en utilisant <systemitem class="library">libungif</systemitem>
-ou une autre librairie compatible libgif. Les GIFs non-animés seront affichées
-comme des vidéos à simple trame. (Utilisez les options <option>-loop</option>
+principale différence est que le GIF89a autorise l'animation.
+<application>MPlayer</application> supporte les deux formats en utilisant
+<systemitem class="library">libungif</systemitem> ou une autre librairie
+compatible libgif.
+Les GIFs non-animés seront affichées comme des vidéos à simple trame.
+(Utilisez les options <option>-loop</option>
 et <option>-fixed-vo</option> pour les afficher plus longtemps).
 </para>
 
@@ -385,7 +410,7 @@ problèmes de licence avec la compression LZW.
 <para>
 Si votre distribution ne contient pas <systemitem class="library">libungif</systemitem>,
 téléchargez-en une copie depuis la
-<ulink url="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">page de libungif
+<ulink url="http://sourceforge.net/projects/libungif">page de libungif
 </ulink>. Pour des informations techniques détaillées, regardez la
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">spécification GIF89a</ulink>.
 </para>
