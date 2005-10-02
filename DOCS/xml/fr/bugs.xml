@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 $ -->
+<!-- synced with 1.13 $ -->
 <appendix id="bugs">
 <title>Bogues connus</title>
 <sect1 id="bugs-special">
-<title>Bogues/Problèmes spécifiques au système ou au CPU</title>
+<title>Bogues/Problèmes spécifiques à certains systèmes ou à certains CPU</title>
 <itemizedlist>
 <listitem>
 <para>SIGILL (signal 4) sur P3 en utilisant les noyaux 2.2.x:</para>
@@ -24,7 +24,7 @@ lors de l'étape de configuration.</para>
 <para>&quot;Internal buffer inconsistency&quot; pendant l'exécution de <application>MEncoder</application>:</para>
 <para>Problème: problème connu quand lame &lt; 3.90 à été compilé avec gcc 2.96 ou 3.x</para>
 <para>Solution: utilisez lame &gt;=3.90.</para>
-<para>Contournement: compilez lame avec gcc 2.95.x et retirez les paquetages lame éventuellement
+<para>Contournement: compilez lame avec gcc 2.95.x et retirez tous les paquetages lame éventuellement
 installés, ils peuvent avoir été compilés avec gcc 2.96.</para>
 </listitem>
 <listitem>
@@ -41,7 +41,7 @@ installés, ils peuvent avoir été compilés avec gcc 2.96.</para>
 </sect1>
 
 <sect1 id="bugs-audio">
-<title>Problèmes de synchro A-V et d'audio</title>
+<title>Problèmes de synchro A-V et autres problèmes audio</title>
 
 <sect2 id="bugs-delay-all">
 <title>Décalage audio général ou son saccadé (existe avec tous ou de nombreux fichiers)</title>
@@ -49,7 +49,7 @@ installés, ils peuvent avoir été compilés avec gcc 2.96.</para>
 <listitem><para>Le plus courant: pilote audio bogué ! - Essayez d'utiliser d'autres pilotes, essayez
 l'émulation OSS ALSA 0.9 avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
 des fois ça aide. Si votre fichier est lu correctement avec <option>-nosound</option>,
-alors vous pouvez être certain qu'il s'agit d'un problème de carte son (ou de pilote).
+alors vous pouvez être certain qu'il s'agit d'un problème de carte son (pilote).
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
@@ -61,7 +61,7 @@ alors vous pouvez être certain qu'il s'agit d'un problème de carte son (ou de pi
 <itemizedlist>
 <listitem><para>
 Problèmes de taux d'échantillonnage - peut-être que votre carte ne supporte pas le taux
-d'échantillonnage utilisé dans vos fichiers - essayez le plugin resampling (<option>-af resample=...</option>)
+d'échantillonnage utilisé dans vos fichiers - essayez le filtre de réechantillonnage (<option>-af resample=...</option>)
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
@@ -105,7 +105,7 @@ Si rien de tout ça n'aide, uploadez le fichier SVP, nous le contrôlerons (et rép
 <para>Votre carte son ne supporte pas la lecture à 48kHz</para>
 <para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter le
 nombre de trames par seconde (fps) de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
-filtre resample</para>
+filtre de réechantillonnage (resample)</para>
 </listitem>
 <listitem>
 <para>Machine lente (si A-V n'est pas proche de 0, et que le dernier nombre de la ligne
@@ -151,7 +151,7 @@ Vous essayez de lire un fichier DivX 3.x avec le décodeur OpenDivX ou XviD
 <title>Problèmes de sortie vidéo</title>
 <para>
 Première note: les options <option>-fs -vm</option> et <option>-zoom</option> sont
-juste des recommandations, pas (encore) supportées par tous les pilotes. Donc ce n'est
+juste des recommandations, non supportées (encore) par tous les pilotes. Donc ce n'est
 pas un bogue si ça ne marche pas. Seuls quelques pilotes supportent le
 redimensionnement/zoom, ne l'espérez pas de x11 ou dga.
 </para>
