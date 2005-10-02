@@ -1,11 +1,39 @@
 #!/bin/sh
 # Helper script to ease comparing the PSNR between two video files
 # Copyleft 2005 by Matthias Wieser
+# Copyleft 2005 by Ivo
 # This file comes under GPL, see http://www.gnu.org/copyleft/gpl.html for more
 # information on its licensing.
 
+warning_frame_number () { 
+	echo "Files have differing numbers of frames!"
+	echo "$FILE1 has `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` frames,"
+	echo "$FILE2 has `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
+	echo "Processing the first `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
+} 
+
+
 TEMPDIR="/tmp/psnr_video"
-WORKDIR=`pwd`/
+WORKDIR=`pwd`
+
+exit=0
+if [[ `which pnmpsnr 2> /dev/null` = "" ]]
+then
+	echo
+	echo "To use this script you have to install the program \"pnmpsnr\" which is"
+	echo " included in the netpbm package."
+	echo
+	exit=1
+fi
+
+if [[ `which bc 2> /dev/null` = "" ]]
+then
+	echo
+	echo "To use this script you have to install the GNU command line calculator \"bc\"."
+	echo
+	exit=1
+fi
+
 if [ $# -le 1 ]; then
    echo
    echo "Usage: `basename $0` <file1> <file2> [<frames>] [<options1>] [<options2>]"
@@ -21,7 +49,11 @@ if [ $# -le 1 ]; then
    echo "        ./`basename $0` ./orig.avi ./test.avi 250 \"\" \"-vf pp=ac\""
    echo
 
-   exit 1
+   exit=1
+fi
+
+if [ "$exit" -eq 1 ]; then
+	exit 1
 fi
 
 FILE1=$1
@@ -44,6 +76,7 @@ if [ $# -ge 5 ]; then
 	echo "Mplayer options for ${FILE2}: $FILE2_Options"
 fi
 
+
 mkdir -p ${TEMPDIR}/FILE1
 mkdir -p ${TEMPDIR}/FILE2
 
@@ -57,12 +90,12 @@ rm -f *ppm
 rm -f *del
 
 if [ $LastFrame -ge 0 ]; then
-	mplayer $FILE1_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}$FILE1 >/dev/null
+	mplayer $FILE1_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}/$FILE1 >/dev/null
 else
-	mplayer $FILE1_Options -nosound -vo pnm ${WORKDIR}$FILE1 > /dev/null
+	mplayer $FILE1_Options -nosound -vo pnm ${WORKDIR}/$FILE1 > /dev/null
 fi
-###  File 2
 
+###  File 2
 echo
 echo "############## $FILE2 #################"
 
@@ -71,9 +104,9 @@ cd ${TEMPDIR}/FILE2
 rm *ppm 2> /dev/null
 
 if [ $LastFrame -ge 0 ]; then
-	mplayer $FILE2_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}$FILE2 >/dev/null
+	mplayer $FILE2_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}/$FILE2 >/dev/null
 else
-	mplayer $FILE2_Options -nosound -vo pnm ${WORKDIR}$FILE2 >/dev/null
+	mplayer $FILE2_Options -nosound -vo pnm ${WORKDIR}/$FILE2 >/dev/null
 fi
 
 
@@ -86,10 +119,7 @@ if [[ `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` = `ls -1 ${TEMPDIR}/FILE2/*ppm | wc 
 then
 	echo 
 else
-	echo "Files have differing numbers of frames!"
-	echo "$FILE1 has `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` frames,"
-	echo "$FILE2 has `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
-	echo "Processing the first `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
+	warning_frame_number
 	echo
 fi
 
@@ -104,47 +134,45 @@ for FILE in `ls -1 *.ppm`
         echo $FILE
                 echo -n "$FILE">>../psnr.dat
                 echo -n ";">>../psnr.dat
-        pnmpsnr ../FILE1/$FILE $FILE 2> del.del
-        grep "Y" del.del | dd bs=1c count=5 skip=29 of=del2.del 2>/dev/null
-                Y=`cat del2.del`
-               echo -n "$Y;">>../psnr.dat
-        grep "Cb" del.del | dd bs=1c count=5 skip=29 of=del2.del 2>/dev/null
-                CB=`cat del2.del`
-               echo -n "$CB;">>../psnr.dat
-        grep "Cr" del.del | dd bs=1c count=5 skip=29 of=del2.del 2>/dev/null
-                CR=`cat del2.del`
-               echo -n "$CR;">>../psnr.dat
-         ALL=`echo "(-10)*l((e(-$Y/10*l(10))+e(-$CB/10*l(10))/4+e(-$CR/10*l(10))/4)/1.5)/l(10)"|bc -l`
-         echo "$ALL">>../psnr.dat
+
+        YCBCR=`pnmpsnr ../FILE1/$FILE $FILE 2>&1 | tail -n 3 | cut -f 3 -d ':' | \
+            ( read Y X; read CB X; read CR X; echo "$Y;$CB;$CR;")`
+        Y=`echo $YCBCR | cut -f 1 -d ';'`
+        CB=`echo $YCBCR | cut -f 2 -d ';'`
+        CR=`echo $YCBCR | cut -f 3 -d ';'`
+        echo $YCBCR >>../psnr.dat
+
+        ALL=`echo "(-10)*l((e(-$Y/10*l(10))+e(-$CB/10*l(10))/4+e(-$CR/10*l(10))/4)/1.5)/l(10)"|bc -l`
+        echo "$ALL">>../psnr.dat
         ERROR=`echo "scale=30; (e(-1*$Y/10*l(10))+e(-1*$CB/10*l(10))/4+e(-1*$CR/10*l(10))/4)/1.5"|bc -l`
         ERRORSUM=`cat errorsum.del`
-        echo `echo "scale=30; $ERROR + $ERRORSUM" | bc -l` > errorsum.del
-    i=$(($i+1))
+        echo `echo "scale=30; $ERROR + $ERRORSUM"|bc -l` > errorsum.del
+
+        i=$(($i+1))
 	if [[ $i = $LastFrame ]]
 	then
 		break
 	fi
 done
+
 ERRORSUM=`cat errorsum.del`
 PSNR=`echo "-10*l($ERRORSUM/$i)/l(10)" | bc -l`
 echo "PSNR:;$PSNR">>../psnr.dat
+
 cd ..
-mv psnr.dat ${WORKDIR}
+mv psnr.dat ${WORKDIR}/
 
 if [[ `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` = `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` ]]
 then
         echo
 else
-        echo "Files have differing numbers of frames!"
-        echo "$FILE1 has `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` frames,"
-        echo "$FILE2 has `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
-        echo "Processed the first `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
+	warning_frame_number
         echo
 fi
 
 cd ..
 rm -r ${TEMPDIR}
 
-echo "Created ${WORKDIR}psnr.dat"
+echo "Created ${WORKDIR}/psnr.dat"
 echo
 
