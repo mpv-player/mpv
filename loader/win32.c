@@ -938,9 +938,7 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
     dbgprintf("GetSystemInfo(%p) =>\n", si);
 
     if (cache) {
-	memcpy(si,&cachedsi,sizeof(*si));
-	DumpSystemInfo(si);
-	return;
+	goto exit;
     }
     memset(PF,0,sizeof(PF));
     pf_set = 1;
@@ -1036,7 +1034,14 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	FILE *f = fopen ("/proc/cpuinfo", "r");
 
 	if (!f)
-	    return;
+	{
+#ifdef MPLAYER
+	  mp_msg(MSGT_WIN32, MSGL_WARN, "expGetSystemInfo: "
+	                     "/proc/cpuinfo not readable! "
+	                     "Expect bad performance and/or weird behaviour\n");
+#endif
+	  goto exit;
+	}
 	while (fgets(line,200,f)!=NULL) {
 	    char	*s,*value;
 
@@ -1162,6 +1167,7 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
     }
 #endif /* __linux__ */
     cache = 1;
+exit:
     memcpy(si,&cachedsi,sizeof(*si));
     DumpSystemInfo(si);
 }
