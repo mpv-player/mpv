@@ -2388,10 +2388,8 @@ EOF
 _kstat=no
 cc_check -lkstat && _kstat=yes
 if test "$_kstat" = yes ; then
-  _ld_arch="-lkstat $_ld_arch"
-fi
-if test "$_kstat" = yes ; then
   _def_kstat="#define HAVE_LIBKSTAT 1"
+  _ld_arch="-lkstat $_ld_arch"
 else
   _def_kstat="#undef HAVE_LIBKSTAT"
 fi
@@ -2462,11 +2460,9 @@ cat > $TMPC << EOF
 #include <netdb.h>
 int main(void) { (void) gethostbyname(0); return 0; }
 EOF
-cc_check -lsocket && _ld_sock="-lsocket"
-cc_check -lnsl && _ld_sock="-lnsl"
-cc_check -lsocket -lnsl && _ld_sock="-lsocket -lnsl"
-cc_check -lsocket -ldnet && _ld_sock="-lsocket -ldnet"
-cc_check -lsocket -lbind && _ld_sock="-lsocket -lbind"
+for _ld_tmp in "-lsocket" "-lnsl" "-lsocket -lnsl" "-lsocket -ldnet" "-lsocket -lbind" ; do
+  cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && break
+done
 if test $_winsock2 = auto && not cygwin ; then
   _winsock2=no
   cat > $TMPC << EOF
@@ -2700,12 +2696,9 @@ cat > $TMPC << EOF
 int main(void) { dlopen(0, 0); dlclose(0); dlsym(0, 0); return 0; }
 EOF
 _dl=no
-if cc_check ; then
-  _dl=yes
-elif cc_check -ldl ; then
-  _dl=yes
-  _ld_dl='-ldl'
-fi
+for _ld_tmp in "" "-ldl" ; do
+  cc_check $_ld_tmp && ld_dl="$_ld_tmp" && _dl=yes && break
+done
 if test "$_dl" = yes ; then
  _def_dl='#define HAVE_LIBDL 1'
 else
@@ -2744,39 +2737,21 @@ echores "$_dynamic_plugins"
 _def_threads='#undef HAVE_THREADS'
 
 echocheck "pthread"
-_ld_pthread=''
 if test "$_pthreads" != no ; then
 cat > $TMPC << EOF
 #include <pthread.h>
 void* func(void *arg) { return arg; }
 int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
-if hpux ; then
-  _ld_pthread=''
-elif ( cc_check -lpthreadGC2 && $TMPO ) ; then # mingw pthreads-win32
-  _ld_pthread='-lpthreadGC2'
-elif ( cc_check && $TMPO ) ; then              # QNX
-  _ld_pthread=' ' # _ld_pthread='' would disable pthreads, but the test worked
-elif ( cc_check -lpthread && $TMPO ) ; then
-  _ld_pthread='-lpthread'
-elif ( cc_check -pthread && $TMPO ) ; then
-  _ld_pthread='-pthread'
-else
-  if test "$_ld_static" ; then
+_pthreads=no
+if not hpux ; then
+  for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
     # for crosscompilation, we cannot execute the program, be happy if we can link statically
-    if ( cc_check -lpthread ) ; then
-      _ld_pthread='-lpthread'
-    elif ( cc_check -pthread ) ; then
-     _ld_pthread='-pthread'
-    else
-      _ld_pthread=''
-    fi
-  else
-    _ld_pthread='' 
-  fi
+    cc_check $_ld_tmp && ($TMPO || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
+  done
 fi
 fi
-if test "$_ld_pthread" != '' ; then
+if test "$_pthreads" = yes ; then
   echores "yes (using $_ld_pthread)"
   _pthreads='yes'
   _def_pthreads='#define HAVE_PTHREADS 1'
@@ -2828,15 +2803,9 @@ int main(void) {
 }
 EOF
   _iconv=no
-  if cc_check $_ld_lm ; then
-    _iconv=yes
-  elif cc_check $_ld_lm -liconv ; then
-    _iconv=yes
-    _ld_iconv='-liconv'
-  elif cc_check $_ld_lm -liconv $_ld_dl ; then
-    _iconv=yes
-    _ld_iconv="-liconv $_ld_dl"
-  fi
+  for _ld_tmp in "" "-liconv" "-liconv $_ld_dl" ; do
+    cc_check $_ld_lm $_ld_tmp && _ld_iconv="$_ld_tmp" && _iconv=yes && break
+  done
 fi
 if test "$_iconv" = yes ; then
   _def_iconv='#define USE_ICONV 1'
@@ -3005,8 +2974,9 @@ if test "$_termcap" = auto ; then
 int main(void) { return 0; }
 EOF
   _termcap=no
-  cc_check -ltermcap && _termcap=yes && _ld_termcap='-ltermcap'
-  cc_check -ltinfo && _termcap=yes && _ld_termcap='-ltinfo'
+  for _ld_tmp in "-ltermcap" "-ltinfo" ; do
+    cc_check $_ld_tmp && _ld_termcap="$_ld_tmp" && _termcap=yes && break
+  done
 fi
 if test "$_termcap" = yes ; then
   _def_termcap='#define USE_TERMCAP 1'
@@ -3356,25 +3326,9 @@ if test "$_smbsupport" = auto; then
 #include <libsmbclient.h>
 int main(void) { smbc_opendir("smb://"); return 0; }
 EOF
-    if cc_check -lsmbclient ; then 
-	_smbsupport=yes
-	_ld_smb="-lsmbclient"
-    else
-	if cc_check -lsmbclient $_ld_dl ; then
-	    _smbsupport=yes
-	    _ld_smb="-lsmbclient $_ld_dl"
-    	else
-	    if cc_check -lsmbclient $_ld_dl -lnsl ; then
-		_smbsupport=yes
-		_ld_smb="-lsmbclient $_ld_dl -lnsl"
-	    else
-	    if cc_check -lsmbclient $_ld_dl -lssl -lnsl ; then
-		_smbsupport=yes
-		_ld_smb="-lsmbclient $_ld_dl -lssl -lnsl"
-	    fi
-	    fi
-	fi
-    fi
+  for _ld_tmp in "-lsmbclient" "-lsmbclient $_ld_dl" "-lsmbclient $_ld_dl -lnsl" "-lsmbclient $_ld_dl -lssl -lnsl" ; do
+    cc_check $_ld_tmp && _ld_smb="$_ld_tmp" && _smbsupport=yes && break
+  done
 fi
 
 if test "$_smbsupport" = yes; then
@@ -3576,6 +3530,7 @@ echores "$_x11"
 
 echocheck "DPMS"
 _xdpms3=no
+_xdpms4=no
 if test "$_x11" = yes ; then
   cat > $TMPC <<EOF
 #include <X11/Xmd.h>
@@ -3588,9 +3543,6 @@ int main(void) {
 }
 EOF
   cc_check $_inc_x11 -lXdpms $_ld_x11 && _xdpms3=yes
-fi
-_xdpms4=no
-if test "$_x11" = yes ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
@@ -3919,13 +3871,9 @@ aa_autoinitkbd(c,0);
 return 0; }
 EOF
   _aa=no
-  if cc_check -laa ; then
-    _aa=yes
-    _ld_aa="-laa"
-  elif cc_check $_ld_x11 -laa ; then
-    _aa=yes
-    _ld_aa="$_ld_x11 -laa"
-  fi
+  for _ld_tmp in "-laa" "$_ld_x11 -laa" ; do
+    cc_check $_ld_tmp && _ld_aa=$_ld_tmp && _aa=yes && break
+  done
 fi
 if test "$_aa" = yes ; then
   _def_aa='#define HAVE_AA 1'
@@ -3976,7 +3924,7 @@ EOF
 fi
 if test "$_svga" = yes ; then
   _def_svga='#define HAVE_SVGALIB 1'
-  _ld_svga="-lvga $_ld_lm"
+  _ld_svga="-lvga"
   _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
@@ -4213,19 +4161,9 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check -lungif && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lungif"
-  elif cc_check -lungif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lungif $_ld_x11"
-  elif cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lgif"
-  elif cc_check -lgif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
-    _gif=yes
-    _ld_gif="-lgif $_ld_x11"
-  fi
+  for _ld_tmp in "-lungif" "-lungif $_ld_x11" "-lgif" "-lgif $_ld_x11" ; do
+    cc_check $_ld_tmp && "$TMPO" >> "$TMPLOG" && _ld_gif="$_ld_tmp" && _gif=yes && break
+  done
 fi
 
 # If no library was found, and the user wants support forced,
@@ -4426,7 +4364,7 @@ fi
 echores "$_directx"
 
 echocheck "NAS"
-if test "$_nas" = auto || test "$_nas" = yes ; then
+if test "$_nas" = auto ; then
   cat > $TMPC << EOF
 #include <audio/audiolib.h>
 int main(void) { return 0; }
@@ -4448,13 +4386,13 @@ echores "$_nas"
 echocheck "DXR2"
 if test "$_dxr2" = auto; then
   _dxr2=no
-  for _inc_dxr2 in "$_inc_dxr2" \
-		   "-I/usr/local/include/dxr2" \
-		   "-I/usr/include/dxr2"; do
     cat > $TMPC << EOF
 #include <dxr2ioctl.h>
 int main(void) { return 0; }
 EOF
+  for _inc_dxr2 in "$_inc_dxr2" \
+		   "-I/usr/local/include/dxr2" \
+		   "-I/usr/include/dxr2"; do
     cc_check $_inc_dxr2 && _dxr2=yes && break
   done
 fi
@@ -4685,24 +4623,26 @@ fi
 
 echocheck "JACK"
 if test "$_jack" = auto ; then
-  _jack=no
-  if ( pkg-config --modversion jack > /dev/null 2>&1 ) &&
-     jackd --version | grep version | awk '{ print $3 }' >> "$TMPLOG" 2>&1 ; then
+  _jack=yes
 
 cat > $TMPC << EOF
 #include <jack/jack.h>
 int main(void) { jack_client_new("test"); return 0; }
 EOF
-	cc_check `pkg-config --libs --cflags jack` && "$TMPO" >> "$TMPLOG" 2>&1 && _jack=yes
-fi
+  if cc_check -ljack ; then
+    _ld_jack="-ljack"
+  elif cc_check `pkg-config --libs --cflags jack` ; then
+    _ld_jack="`pkg-config --libs jack`"
+    _inc_jack="`pkg-config --cflags jack`"
+  else
+    _jack=no
+  fi
 fi
 
 if test "$_jack" = yes ; then
   _def_jack='#define USE_JACK 1'
   _aosrc="$_aosrc ao_jack.c"
   _aomodules="jack $_aomodules"
-  _ld_jack="`pkg-config --libs jack`"
-  _inc_jack=`pkg-config --cflags jack`
 else
   _noaomodules="jack $_noaomodules"
 fi
@@ -5013,15 +4953,9 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    if cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm ; then
-        _cdparanoia=yes
-    else
-	for I in /usr/include/cdda /usr/local/include/cdda ; do
-            if cc_check -I$I $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm ; then
-	        _cdparanoia=yes; _inc_cdparanoia="-I$I"; break
-            fi
-        done
-    fi
+    for _inc_tmp in "$_inc_cdparanoia" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
+       cc_check $_inc_tmp $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm && _inc_cdparanoia="$_inc_tmp" && _cdparanoia=yes && break
+    done
 fi
 if test "$_cdparanoia" = yes ; then
     _def_cdparanoia='#define HAVE_CDDA'
@@ -5093,7 +5027,6 @@ if test "$_freetype" = no ; then
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
-    if ( pkg-config --modversion fontconfig) > /dev/null 2>&1 ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <fontconfig/fontconfig.h>
@@ -5108,16 +5041,18 @@ int main()
     
 }
 EOF
-        _fontconfig=no
-        cc_check `pkg-config --cflags --libs fontconfig` && $TMPO >> "$TMPLOG" && _fontconfig=yes
-    else
-        _fontconfig=no
-    fi
+  _fontconfig=yes
+  if cc_check -lfontconfig ; then
+    _ld_fontconfig="-lfontconfig"
+  elif cc_check `pkg-config --cflags --libs fontconfig` ; then
+    _inc_fontconfig=`pkg-config --cflags fontconfig`
+    _ld_fontconfig=`pkg-config --libs fontconfig`
+  else
+    _fontconfig=no
+  fi
 fi
 if test "$_fontconfig" = yes ; then
     _def_fontconfig='#define HAVE_FONTCONFIG'
-    _inc_fontconfig=`pkg-config --cflags fontconfig`
-    _ld_fontconfig=`pkg-config --libs fontconfig`
 else
     _def_fontconfig='#undef HAVE_FONTCONFIG'
 fi
@@ -5432,7 +5367,7 @@ EOF
 fi
 if test "$_libdts" = yes ; then
   _def_libdts='#define CONFIG_DTS 1'
-  _ld_libdts="$_ld_libdts -ldts $_ld_lm"
+  _ld_libdts="$_ld_libdts -ldts"
   _codecmodules="libdts $_codecmodules"
 else
   _def_libdts='#undef CONFIG_DTS'
@@ -5492,22 +5427,17 @@ if test "$_faac" = auto ; then
 #include <faac.h>
 int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
-  if ( cc_check -c -O4 -lfaac $_ld_lm ); then
-    _faac=yes
-  elif ( cc_check -c -O4 -lfaac -lmp4v2 -lstdc++ $_ld_lm ); then
-    _faac=yes
-    _ld_faac="-lmp4v2 -lstdc++"
-  else
-    _faac=no
-  fi
+  _faac=no
+  for _ld_tmp in "-lfaac" "-lfaac -lmp4v2 -lstdc++" ; do
+    cc_check -c -O4 $_ld_tmp $_ld_lm && _ld_faac="$_ld_tmp" && faac=yes && break
+  done
 fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
-  _codecmodules="$_codecmodules faac"
-  _ld_faac="-lfaac $_ld_faac"
+  _codecmodules="faac $_codecmodules"
 else
   _def_faac="#undef HAVE_FAAC"
-  _nocodecmodules="$_nocodecmodules faac"
+  _nocodecmodules="faac $_nocodecmodules"
 fi
 echores "$_faac"
 
@@ -5780,26 +5710,16 @@ if test "$_live" = auto  && test "$_network" = yes ; then
 int main(void) {}
 EOF
 
-  _live_dist=no
-  if test -z "$_livelibdir" ; then
+  _live=no
+  for I in "$_livelibdir" "$_libdir/live" "/usr/lib/live" "/usr/local/live" "/usr/local/lib/live" ; do
+    cc_check -I$I/liveMedia/include -I$I/UsageEnvironment/include -I$I/groupsock/include && _livelibdir=$I && _live=yes && break
+  done
+  if test "$_live" != yes ; then
       if cc_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock; then
 	  _live_dist=yes
-      else
-	  for I in $_libdir/live /usr/lib/live /usr/local/live /usr/local/lib/live; do
-	      if test -d "$I" ; then
-		  _livelibdir="$I"
-		  break;
-	      fi;
-	  done
       fi
   fi
 
-  if test "$_live_dist" = no && test "$_livelibdir" && cc_check -I$_livelibdir/liveMedia/include \
-      -I$_livelibdir/UsageEnvironment/include -I$_livelibdir/groupsock/include; then
-      _live=yes
-  else
-      _live=no
-  fi
   TMPC=$_TMPC
 fi
 if test "$_live" = yes && test "$_network" = yes ; then
@@ -6080,8 +6000,8 @@ cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
-_ld_xvid="$_ld_xvid -lxvidcore $_ld_lm"
-if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid ; then
+_ld_xvid="$_ld_xvid -lxvidcore"
+if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid $_ld_lm ; then
   _xvid=yes
   _def_xvid3='#define HAVE_XVID3 1'
   _def_xvid4='#undef HAVE_XVID4'
@@ -6091,7 +6011,7 @@ cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
-  if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid ; then
+  if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid $_ld_lm ; then
     _xvid=yes
     _def_xvid3='#undef HAVE_XVID3'
     _def_xvid4='#define HAVE_XVID4 1'
@@ -6128,10 +6048,10 @@ cat > $TMPC << EOF
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
-_ld_x264="$_ld_x264 -lx264 $_ld_lm $_ld_pthread"
+_ld_x264="$_ld_x264 -lx264 $_ld_pthread"
 if test "$_x264" != no && \
-( cc_check $_inc_x264 $_ld_x264 || \
-( test "$_x11" = yes && cc_check $_inc_x264 $_inc_x11 $_ld_x264 $_ld_x11 )) ; \
+( cc_check $_inc_x264 $_ld_x264 $_ld_lm || \
+( test "$_x11" = yes && cc_check $_inc_x264 $_inc_x11 $_ld_x264 $_ld_x11 $_ld_lm )) ; \
 then
   _x264=yes
   _def_x264='#define HAVE_X264 1'
