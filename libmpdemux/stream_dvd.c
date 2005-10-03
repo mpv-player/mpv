@@ -16,6 +16,11 @@
 #include <sys/cdrio.h>
 #endif
 
+#define FIRST_AC3_AID 128
+#define FIRST_DTS_AID 136
+#define FIRST_MPG_AID 0
+#define FIRST_PCM_AID 160
+
 #include "stream.h"
 #include "../m_option.h"
 #include "../m_struct.h"
@@ -176,8 +181,8 @@ int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
     code=lang[1]|(lang[0]<<8);
     for(i=0;i<d->nr_of_subtitles;i++) {
       if(d->subtitles[i].language==code) {
-        mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", d->subtitles[i].id, lang[0],lang[1]);
-        return d->subtitles[i].id;
+        mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", i, lang[0],lang[1]);
+        return i;
       }
     }
     lang+=2; 
@@ -577,6 +582,8 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       return STREAM_UNSUPORTED;
     }
     --dvd_angle; // remap 1.. -> 0..
+
+    ttn = tt_srpt->title[dvd_title].vts_ttn - 1;
     /**
      * Load the VTS information for the title set our title is in.
      */
@@ -614,15 +621,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      * Check number of audio channels and types
      */
     {
-      int ac3aid = 128;
-      int mpegaid = 0;
-      int pcmaid = 160;
-
       d->nr_of_channels=0;
       if(vts_file->vts_pgcit) {
         int i;
         for(i=0;i<8;i++)
-          if(vts_file->vts_pgcit->pgci_srp[0].pgc->audio_control[i] & 0x8000) {
+          if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].present) {
             audio_attr_t * audio = &vts_file->vtsi_mat->vts_audio_attr[i];
             int language = 0;
             char tmp[] = "unknown";
@@ -635,24 +638,20 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
             }
 
             d->audio_streams[d->nr_of_channels].language=language;
-            d->audio_streams[d->nr_of_channels].id=0;
+            d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].s_audio;
             switch(audio->audio_format) {
               case 0: // ac3
-                d->audio_streams[d->nr_of_channels].id=ac3aid;
-                ac3aid++;
+                d->audio_streams[d->nr_of_channels].id+=FIRST_AC3_AID;
                 break;
               case 6: // dts
-                d->audio_streams[d->nr_of_channels].id=ac3aid+8;
-                ac3aid++;
+                d->audio_streams[d->nr_of_channels].id+=FIRST_DTS_AID;
                 break;
               case 2: // mpeg layer 1/2/3
               case 3: // mpeg2 ext
-                d->audio_streams[d->nr_of_channels].id=mpegaid;
-                mpegaid++;
+                d->audio_streams[d->nr_of_channels].id+=FIRST_MPG_AID;
                 break;
               case 4: // lpcm
-                d->audio_streams[d->nr_of_channels].id=pcmaid;
-                pcmaid++;
+                d->audio_streams[d->nr_of_channels].id+=FIRST_PCM_AID;
                 break;
            }
 
@@ -688,8 +687,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
       d->nr_of_subtitles=0;
       for(i=0;i<32;i++)
-      if(vts_file->vts_pgcit->pgci_srp[0].pgc->subp_control[i] & 0x80000000) {
+      if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].present) {
         subp_attr_t * subtitle = &vts_file->vtsi_mat->vts_subp_attr[i];
+        video_attr_t *video = &vts_file->vtsi_mat->vts_video_attr;
         int language = 0;
         char tmp[] = "unknown";
 
@@ -702,10 +702,14 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
         d->subtitles[ d->nr_of_subtitles ].language=language;
         d->subtitles[ d->nr_of_subtitles ].id=d->nr_of_subtitles;
+        if(video->display_aspect_ratio == 0) /* 4:3 */
+          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_4p3;
+        else if(video->display_aspect_ratio == 3) /* 16:9 */
+          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_lbox;
 
         mp_msg(MSGT_OPEN,MSGL_V,"[open] subtitle ( sid ): %d language: %s\n", d->nr_of_subtitles, tmp);
         if(identify) {
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->nr_of_subtitles);
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->subtitles[d->nr_of_subtitles].id);
           if(language && tmp[0])
             mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", d->nr_of_subtitles, tmp);
         }
@@ -718,16 +722,15 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      * Determine which program chain we want to watch.  This is based on the
      * chapter number.
      */
-    ttn = tt_srpt->title[ dvd_title ].vts_ttn; // local
-    pgc_id = vts_file->vts_ptt_srpt->title[ttn-1].ptt[dvd_chapter].pgcn; // local
-    pgn  = vts_file->vts_ptt_srpt->title[ttn-1].ptt[dvd_chapter].pgn;  // local
+    pgc_id = vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_chapter].pgcn; // local
+    pgn  = vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_chapter].pgn;  // local
     d->cur_pgc = vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
     d->cur_cell = d->cur_pgc->program_map[pgn-1] - 1; // start playback here
     d->packs_left=-1;      // for Navi stuff
     d->angle_seek=0;
     /* XXX dvd_last_chapter is in the range 1..nr_of_ptts */
     if(dvd_last_chapter > 0 && dvd_last_chapter < tt_srpt->title[dvd_title].nr_of_ptts) {
-      pgn=vts_file->vts_ptt_srpt->title[ttn-1].ptt[dvd_last_chapter].pgn;
+      pgn=vts_file->vts_ptt_srpt->title[ttn].ptt[dvd_last_chapter].pgn;
       d->last_cell=d->cur_pgc->program_map[pgn-1] - 1;
     } else
       d->last_cell=d->cur_pgc->nr_of_cells;
