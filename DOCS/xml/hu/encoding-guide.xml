@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.12 $ -->
+<!-- synced with 1.30 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1255,6 +1255,52 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
 </sect2>
 
 
+<sect2 id="menc-feat-dvd-mpeg4-av-sync">
+<title>Megjegyzések az Audió/Videó szinkronizáláshoz</title>
+<para>
+A <application>MEncoder</application> audió/videó szinkronizáló
+algoritmusai azzal a szándékkal lettek megtervezve, hogy képesek
+legyenek a sérült szinkronú filmek megjavítására.
+De néhány esetben a képkockáknál szükségtelen kihagyásokat és duplikálásokat
+valamint kis mértékben A/V deszinkronizációt okozhatnak, ha megfelelő
+bementük van (természetesen az A/V szinkron dolgok csak akkor érvényesek,
+ha feldolgozod vagy másolod az audió sávot a videó átkódolása közben,
+ami nagyon javasolt).
+
+Ezért lehet, hogy az alapértelmezett A/V szinkronizációra kell váltanod
+a <option>-mc 0</option> opcióval, vagy írd ezt bele a
+<systemitem>~/.mplayer/mencoder</systemitem> konfigurációs fájlodba,
+feltéve, hogy csak hibátlan anyaggal dolgozol (DVD, TV mentés, nagyon
+jó minőségű MPEG-4 rip, stb.) és nem hibás ASF/RM/MOV fájlokkal.
+</para>
+<para>
+Ha még további különös képkocka kihagyásokat és duplázásokat akarsz
+elkerülni, használhatod az <option>-mc 0</option> és <option>-noskip</option>
+kapcsolókat együtt is.
+Ez megakadályoz <emphasis>mindenféle</emphasis> A/V szinkronizációt és
+egy az egyben másolja a képkockákat, így nem használhatod olyan szűrőkkel,
+melyek megjósolhatatlanul hozzáadnak vagy elvesznek képkockákat, vagy ha
+a bemeneti fájlodnak változó framerátája van!
+Ezért a <option>-noskip</option> használata általában nem javasolt.
+</para>
+<para>
+A <application>MEncoder</application> által támogatott, úgy nevezett "három
+lépéses" audió kódolás a visszajelzések szerint A/V deszinkronizációt okoz.
+Ez különösen akkor történik, ha bizonyos szűrőkkel együtt használják,
+így jelenleg <emphasis>nem</emphasis> javasolt a három lépéses audió mód
+használata.
+Ez a képesség csak kompatibilítási okok miatt maradt meg és a haladó
+felhasználóknak, akik tudják, hogy mikor lehet használni és mikor nem.
+Ha ezelőtt még soha nem hallottál a három lépéses módról, felejtsd el azt
+is, hogy megemlítettük!
+</para>
+<para>
+Érkeztek jelentések A/V deszinkronizációról <application>MEncoder</application>rel
+stdin-ről történő kódolás esetén is.
+Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
+</para>
+</sect2>
+
 <sect2 id="menc-feat-dvd-mpeg4-audio">
 <title>Audió</title>
 
@@ -1283,6 +1329,41 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   A legtöbb ember vagy MP3-at vagy Vorbis-t választ az audió tömörítéséhez.
   Míg az utóbbi nagyon hely-takarékos codec, az MP3-nak jobb a hardveres
   lejátszók terén a támogatottsága, bár ez a trend változóban van.
+</para>
+
+<para>
+  <emphasis>Ne</emphasis> használd a <option>-nosound</option>-ot ha audióval
+  rendelkező fájlt kódolsz, akkor se, ha az audiót később, elkülönítve kódolod
+  és kevered.
+  Bár ideális esetben működik, a <option>-nosound</option> opció okozhat némi
+  problémát a parancssori kódolási beállításaidban.
+  Más szavakkal, a zene sáv megléte biztosítja a
+  <quote>Too many audio packets in the buffer</quote> (Túl sok audió csomag a
+  bufferban) és hasonló üzenetek elkerülését és a megfelelő szinkront.
+</para>
+
+<para>
+  Fel kell dolgoznod a <application>MEncoder</application>rel a hangot.
+  Például az <option>-oac copy</option>-val átmásolhatod az eredeti hangsávot
+  a kódolás közben vagy átkonvertálhatod "könnyű" 4 kHz-es mono WAV
+  PCM-be a <option>-oac pcm -channels 1 -srate 4000</option> kapcsolóval.
+  Különben bizonyos esetekben olyan videó fájlt fog létrehozni, amiben nem
+  lesz szinkronban az audió.
+  Akkor fordulhat elő ilyen eset, ha a videó kockák száma a forrás fájlban
+  nem egyezik meg az audió keretek teljes hosszával vagy folyamatossági
+  hiba/szakadás miatt hiányzó vagy extra audió keretek vannak a fájlban.
+  A helyes megoldás ezen típusú problémák kezelésére csend beillesztése vagy
+  az audió keretek vágása ezeken a pontokon.
+  Azonban a <application>MPlayer</application> ezt nem tudja megtenni, így
+  ha az AC3-at demuxálod és egy másik alkalmazással kódolod (vagy kimented
+  PCM-be az <application>MPlayer</application>rel), a szeletek hibásan maradnak
+  benne és csak képkocka eldobással/duplázással lehet javítani.
+  Amíg a <application>MEncoder</application> látja az audiót a videó kódolása
+  közben, meg tudja csinálni ezt az eldobást/duplázást (ami általában rendben
+  van, mert teljesen sötét/jelentetváltásos helyeken történik), de ha a
+  <application>MEncoder</application> nem látja az audiót, csak feldolgoz
+  minden képkockát úgy ahogy van és nem fog illeszkedni a végső audió folyamhoz
+  ha például összeilleszted az audió és a videó sávodat egy Matroska fájlba.
 </para>
 
 <para>
@@ -1321,9 +1402,9 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
 <para>
   Most, hogy elkódoltad a videódat, valószínűleg szeretnéd elkeverni egy
   vagy több audió sávval együtt egy film konténerbe, mint pl. az AVI,
-  Matroska vagy a NUT.
+  MPEG, Matroska vagy a NUT.
   A <application>MEncoder</application> jelenleg csak MPEG és AVI
-  konténer formátumokba tud audió és videó kimenetet készíteni.
+  konténer formátumokba tud natív audió és videó kimenetet készíteni.
   Például:
   <screen>mencoder -oac copy -ovc copy  -o <replaceable>kimenet_film.avi</replaceable> -audiofile <replaceable>bemenet_audio.mp2</replaceable> <replaceable>bemenet_video.avi</replaceable></screen>
   Ez a <replaceable>bemenet_video.avi</replaceable> videó fájlból
@@ -1349,6 +1430,43 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   bekapcsolásával fordítottad (ami azt jelenti, hogy az előre
   csomagolt binárisok a legtöbb esetben nem fognak működni).
 </para>
+
+
+<sect3 id="menc-feat-dvd-mpeg4-muxing-filter-issues">
+<title>A keverés és az A/V szinkron megbízhatóságának növelése</title>
+<para>
+  Néhány súlyos A/V szinkron problémát tapasztalhatsz, ha a videódat
+  valamilyen audió sávval akarod összekeverni, mégpedig azt, hogy akár
+  hogyan állítod az audió késleltetést, soha nem lesz megfelelő a szinkron.
+  Ez akkor történhet meg, ha olyan videó szűrőt használsz, ami eldob vagy
+  megdupláz képkockákat, mint pl. az inverz telecine szűrők.
+  Javasolt a <option>harddup</option> videű szűrő hozzáillesztése a szűrő
+  lánc végéhez ezen problémák elkerülése érdekében.
+</para>
+
+<para>
+  A <option>harddup</option> nélkül ha a <application>MEncoder</application>
+  meg akar duplázni egy képkockát, a keverőre bízza a jelölés konténerbe
+  helyezését, hogy az utolsó képkocka még egyszer megjelenjen a szinkron
+  megtartása végett, aktuális képkocka írása nélkül.
+  A <option>harddup</option>-pal a <application>MEncoder</application>
+  ehelyett egyszerűen csak újra átküldi a szűrő láncon az utolsó megjelenített
+  képkockát.
+  Ez azt jelenti, hogy a kódoló <emphasis>pontosan</emphasis> ugyan azt a
+  képkockát kapja meg kétszer és tömöríti be.
+  Ez kicsit nagyobb fájlt eredményez, de nem okoz problémát demuxálásnál vagy
+  másik konténer formátumba történő újrakeverésnél.
+</para>
+
+<para>
+  Nincs más választásod, mint a <option>harddup</option> használata az
+  olyan konténer formátumokkal, amelyek nincsenek szoros összefüggésben a
+  <application>MEncoder</application>rel. Ezek pl. azok, amelyeket a
+  <systemitem class="library">libavformat</systemitem>-on keresztül támogat,
+  ami nem támogatja a képkocka duplázást konténer szinten.
+</para>
+</sect3>
+
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-avi-limitations">
 <title>Az AVI konténer korlátai</title>
@@ -1745,7 +1863,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
 </para>
 
 <para>
-  <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -ovc lavc -ofps 24000/1001</screen>
 </para>
 
 <para>
@@ -1793,7 +1911,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   makroblokkokat nem-átlapoltként fogja elkódolni azokon a helyeken, ahol
   nincs mozgás. Ügyelj rá, hogy itt a <option>-ofps</option> NEM kell.
 
-  <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
+  <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
 <listitem><para>
   Használj deinterlacing szűrőt a kódolás előtt. Számos közül választhatsz,
@@ -1806,7 +1924,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   <link linkend="menc-feat-telecine-footnotes">[1]</link> és a méretezés
   előtt kell elvégezni.
 
-  <screen>mencoder dvd://1 -nosound -vf pp=lb -ovc lavc</screen>
+  <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
   Sajnos ez a kapcsoló hibás a <application>MEncoder</application>ben;
@@ -1829,7 +1947,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   mind a <option>-fps</option>-nek, mind a <option>-ofps</option>-nek az eredeti
   forrásod framerátájának kétszeresét <emphasis role="bold">kell megadnod</emphasis>.
 
-  <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
   Ha drasztikus downscaling-et tervezel, kiszedhetsz és elkódolhatsz egy mezőt is
@@ -1841,7 +1959,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   és megfelelő méretezés. Emlékezz, hogy be kell állítanod a méretarányt a
   felezett függőleges felbontásnak megfelelően.
 
-  <screen>mencoder dvd://1 -nosound -vf field=0 -ovc lavc</screen>
+  <screen>mencoder dvd://1 -oac copy -vf field=0 -ovc lavc</screen>
   </para></listitem>
 </orderedlist>
 </sect3>
@@ -1871,7 +1989,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   mind a telecine-s, mind a &quot;kevert progresszív és telecine-s&quot;
   videók elkódolásához.
 
-  <screen>mencoder dvd://1 -nosound -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
   </para>
 
 
@@ -1885,7 +2003,7 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   eredmény teljesen progresszív lesz. A <option>-ofps 24000/1001</option>
   kapcsolót meg kell adni.
 
-  <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
   </para>
   </listitem>
 
@@ -2057,18 +2175,23 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
 A <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
 számos érdekes videó és audió formátumba történő egyszerű kódolást biztosít.
 A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
+</para>
 
+<sect2 id="menc-feat-enc-libavcodec-video-codecs">
+<title>A <systemitem class="library">libavcodec</systemitem> videó codec-jei</title>
+
+<para>
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Codec neve</entry><entry>Leírás</entry></row>
+<row><entry>Videó codec neve</entry><entry>Leírás</entry></row>
 </thead>
 <tbody>
 <row><entry>mjpeg</entry><entry>
    Motion JPEG
   </entry></row>
 <row><entry>ljpeg</entry><entry>
-   Veszteségmentes JPEG
+   veszteségmentes JPEG
   </entry></row>
 <row><entry>h261</entry><entry>
   H.261
@@ -2080,13 +2203,13 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO szabvány MPEG-4 (DivX 5, XVID kompatibilis)
+  ISO szabvány MPEG-4 (DivX 5, XviD kompatibilis)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   Szabvány előtti MPEG-4 variáns az MS-től, v3 (AKA DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
-  Szabvány előtti MPEG-4 az MS-től, v2 (régi asf fájlokban használják)
+  Szabvány előtti MPEG-4 az MS-től, v2 (régi ASF fájlokban használják)
   </entry></row>
 <row><entry>wmv1</entry><entry>
   Windows Media Video, 1-es verzió (AKA WMV7)
@@ -2131,13 +2254,66 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
 Az első oszlop a codec neveket tartalmazza, amit a <literal>vcodec</literal>
 opció után kell megadni, például: <option>-lavcopts vcodec=msmpeg4</option>
 </para>
-
 <informalexample>
 <para>
-Egy példa MJPEG tömörítéssel:
+Egy példa, MJPEG tömörítéssel:
 <screen>mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
+</sect2>
+
+<sect2 id="menc-feat-enc-libavcodec-audio-codecs">
+<title>A <systemitem class="library">libavcodec</systemitem> audió codec-jei</title>
+<para>
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Audió codec neve</entry><entry>Leírás</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mp2</entry>
+    <entry>MPEG Layer 2</entry>
+  </row>
+  <row>
+    <entry>ac3</entry>
+    <entry>AC3, AKA Dolby Digital</entry>
+  </row>
+  <row>
+    <entry>adpcm_ima_wav</entry>
+    <entry>IMA adaptív PCM (4 bit mintánként, 4:1-es tömörítés)</entry>
+  </row>
+  <row>
+    <entry>sonic</entry>
+    <entry>kísérleti veszteséges/veszteségmentes codec</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+
+Az első oszlop a codec neveket tartalmazza, amit az <literal>acodec</literal>
+opció után kell megadni, például: <option>-lavcopts acodec=ac3</option>
+</para>
+
+<informalexample>
+<para>
+Egy példa, AC3 tömörítéssel:
+<screen>mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy</screen>
+</para>
+</informalexample>
+
+<para>
+  Ellentétben a <systemitem class="library">libavcodec</systemitem> videó
+  codec-jeivel, az audió codec-jei nem használnak el annyi bit-et, amennyit
+  szánsz nekik, mivel hiányzik belőlük némi minimális pszichoakusztikus modell
+  (ha van egyáltalán), ami a legtöbb egyéb codec implementációban benne van.
+  Azonban vedd figyelembe, hogy ezek az audió codec-ek nagyon gyorsak és
+  azonnal használhatóak bárhol, ahol a <application>MEncoder</application>t
+  a <systemitem class="library">libavcodec</systemitem>-kel együtt fordították le
+  (ami a legtöbb esetben így van), és nem függ külső függvénykönyvtáraktól.
+</para>
+</sect2>
+
 
 <sect2 id="menc-feat-dvd-mpeg4-lavc-encoding-options">
 <title>A libavcodec kódolási opciói</title>
@@ -2170,7 +2346,6 @@ Egy példa MJPEG tömörítéssel:
 
 <listitem><para>
   <emphasis role="bold">vb_strategy=1</emphasis>: segít a gyors mozgású jeleneteknél.
-  vmax_b_frames >= 2 szükséges.
   Néhány videónál a vmax_b_frames rontja a minőséget, de a vmax_b_frames=2 a
   vb_strategy=1-gyel együtt segít.
 </para></listitem>
@@ -2255,7 +2430,7 @@ Egy példa MJPEG tömörítéssel:
   ezért ez az opció plusz terhelést hoz, mivel több információ tárolódik az
   elkódolt fájlban. A tömörítési nyereség/veszteség a filmtől függ, de
   általában nem hatékony anime-oknál.
-  A qpel mindig jelentős dekódolási CPU idő igénnyel jár (+20% a gyakorlatban).
+  A qpel mindig jelentős dekódolási CPU idő igénnyel jár (+25% a gyakorlatban).
 </para></listitem>
 
 <listitem><para>
@@ -2287,6 +2462,62 @@ Egy példa MJPEG tömörítéssel:
 </itemizedlist>
 </sect2>
 
+<sect2 id="menc-feat-mpeg4-lavc-example-settings">
+<title>Kódolás beállítási példák</title>
+
+<para>
+  A következő beállítások példák különböző kódolási opciók kombinációjára,
+  amik a sebesség vs minőség kérdést döntően befolyásolják ugyanazon
+  cél bitráta mellett.
+</para>
+
+<para>
+  Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es példa videón
+  teszteltük, a cél bitráta 900kbps volt, a gép pedig egy
+  AMD-64 3400+ 2400 Mhz-en 64 bites módban.
+  Mindegyik kódolási beállítás tartalmazza a kódolási sebességet (képkocka per
+  másodpercben) és a PSNR veszteséget (dB-ben) a "nagyon jó minőséghez"
+  viszonyítva.
+  Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától és
+  a fejlesztésektől függően különböző eredményeket kaphatsz.
+</para>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row><entry>Leírás</entry><entry>Kódolási opciók</entry><entry>sebesség (fps-ben)</entry><entry>Relatív PSNR veszteség (dB-ben)</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>Nagyon jó minőség</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:vme=5:naq:qns=2</option></entry>
+  <entry>6fps</entry>
+  <entry>0dB</entry>
+</row>
+<row>
+  <entry>Jó minőség</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo</option></entry>
+  <entry>15fps</entry>
+  <entry>-0.5dB</entry>
+</row>
+<row>
+  <entry>Gyors</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:turbo</option></entry>
+  <entry>42fps</entry>
+  <entry>-0.74dB</entry>
+</row>
+<row>
+  <entry>Valós idejű</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:turbo</option></entry>
+  <entry>54fps</entry>
+  <entry>-1.21dB</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect2>
 
 <sect2 id="custommatrices"><title>Egyedi inter/intra matricák</title>
 
@@ -2590,8 +2821,8 @@ codec-kal</title>
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
   Bekapcsol egy jobb együttható kölcségbecslő módszert, ami kissé csökkenti
-  a fájlméretet, kb. 0,15-0,19% között, miközben jelentéktelen hatása
-  van a sebességre.
+  a fájlméretet, kb. 0,15-0,19% között (ami kevesebb, mint 0,01dB-es PSNR
+  növekedésnek felel meg), miközben jelentéktelen hatása van a sebességre.
   Ezért ajánlott mindig bekapcsolva hagyni.
 </para></listitem>
 
@@ -2682,6 +2913,337 @@ codec-kal</title>
 
 </itemizedlist>
 </sect2>
+
+<sect2 id="menc-feat-xvid-encoding-profiles">
+<title>Kódolási profilok</title>
+<para>
+  Az XviD támogatja a kódolási profilokat a <option>profile</option> opción
+  keresztül, amivel az XVid videó folyam tulajdonságaiban olyan megszorításokat
+  lehet előírni, amikkel az lejátszható marad az összes eszközön, ami támogatja
+  a választott profilt.
+  A megkötések a felbontásra, a bitrátára és bizonyos MPEG-4-es funkciókra
+  vonatkoznak.
+  A következő táblázat megmutatja, hogy melyik profil mit támogat.
+</para>
+<informaltable>
+<tgroup cols="16" align="center">
+<colspec colnum="1"  colname="col1"/>
+<colspec colnum="2"  colname="col2"/>
+<colspec colnum="3"  colname="col3"/>
+<colspec colnum="4"  colname="col4"/>
+<colspec colnum="5"  colname="col5"/>
+<colspec colnum="6"  colname="col6"/>
+<colspec colnum="7"  colname="col7"/>
+<colspec colnum="8"  colname="col8"/>
+<colspec colnum="9"  colname="col9"/>
+<colspec colnum="10" colname="col10"/>
+<colspec colnum="11" colname="col11"/>
+<colspec colnum="12" colname="col12"/>
+<colspec colnum="13" colname="col13"/>
+<colspec colnum="14" colname="col14"/>
+<colspec colnum="15" colname="col15"/>
+<colspec colnum="16" colname="col16"/>
+<colspec colnum="17" colname="col17"/>
+<spanspec spanname="spa2-5"   namest="col2" nameend="col5"/>
+<spanspec spanname="spa6-11"  namest="col6" nameend="col11"/>
+<spanspec spanname="spa12-17" namest="col12" nameend="col17"/>
+  <tbody>
+    <row>
+      <entry></entry>
+      <entry spanname="spa2-5">Szimpla</entry>
+      <entry spanname="spa6-11">Fejlett szimpla</entry>
+      <entry spanname="spa12-17">DivX</entry>
+    </row>
+    <row>
+      <entry>Profil neve</entry>
+      <entry>0</entry>
+      <entry>1</entry>
+      <entry>2</entry>
+      <entry>3</entry>
+      <entry>0</entry>
+      <entry>1</entry>
+      <entry>2</entry>
+      <entry>3</entry>
+      <entry>4</entry>
+      <entry>5</entry>
+      <entry>Handheld</entry>
+      <entry>Hordozható NTSC</entry>
+      <entry>Hordozható PAL</entry>
+      <entry>NTSC házimozi</entry>
+      <entry>PAL házimozi</entry>
+      <entry>HDTV</entry>
+    </row>
+    <row>
+      <entry>Szélesség [pixelben]</entry>
+      <entry>176</entry>
+      <entry>176</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>176</entry>
+      <entry>176</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>720</entry>
+      <entry>176</entry>
+      <entry>352</entry>
+      <entry>352</entry>
+      <entry>720</entry>
+      <entry>720</entry>
+      <entry>1280</entry>
+    </row>
+    <row>
+      <entry>Magasság [pixelben]</entry>
+      <entry>144</entry>
+      <entry>144</entry>
+      <entry>288</entry>
+      <entry>288</entry>
+      <entry>144</entry>
+      <entry>144</entry>
+      <entry>288</entry>
+      <entry>288</entry>
+      <entry>576</entry>
+      <entry>576</entry>
+      <entry>144</entry>
+      <entry>240</entry>
+      <entry>288</entry>
+      <entry>480</entry>
+      <entry>576</entry>
+      <entry>720</entry>
+    </row>
+    <row>
+      <entry>Frame ráta [fps]</entry>
+      <entry>15</entry>
+      <entry>15</entry>
+      <entry>15</entry>
+      <entry>15</entry>
+      <entry>30</entry>
+      <entry>30</entry>
+      <entry>15</entry>
+      <entry>30</entry>
+      <entry>30</entry>
+      <entry>30</entry>
+      <entry>15</entry>
+      <entry>30</entry>
+      <entry>25</entry>
+      <entry>30</entry>
+      <entry>25</entry>
+      <entry>30</entry>
+    </row>
+    <row>
+      <entry>Max átlagos bitráta [kbps]</entry>
+      <entry>64</entry>
+      <entry>64</entry>
+      <entry>128</entry>
+      <entry>384</entry>
+      <entry>128</entry>
+      <entry>128</entry>
+      <entry>384</entry>
+      <entry>768</entry>
+      <entry>3000</entry>
+      <entry>8000</entry>
+      <entry>537.6</entry>
+      <entry>4854</entry>
+      <entry>4854</entry>
+      <entry>4854</entry>
+      <entry>4854</entry>
+      <entry>9708.4</entry>
+    </row>
+    <row>
+      <entry>Átlagos csúcs bitráta 3 mp-n keresztül [kbps]</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>800</entry>
+      <entry>8000</entry>
+      <entry>8000</entry>
+      <entry>8000</entry>
+      <entry>8000</entry>
+      <entry>16000</entry>
+    </row>
+    <row>
+      <entry>Max. B-frame</entry>
+      <entry>0</entry>
+      <entry>0</entry>
+      <entry>0</entry>
+      <entry>0</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>0</entry>
+      <entry>1</entry>
+      <entry>1</entry>
+      <entry>1</entry>
+      <entry>1</entry>
+      <entry>2</entry>
+    </row>
+    <row>
+      <entry>MPEG kvantálás</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry>Adaptív kvantálás</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+    </row>
+    <row>
+      <entry>Átlapolt kódolás</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+    </row>
+    <row>
+      <entry>Quaterpixel</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry>Globális mozgás-kompenzáció</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry>X</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+  </tbody>
+</tgroup>
+</informaltable>
+</sect2>
+
+<sect2 id="menc-feat-xvid-example-settings">
+<title>Kódolás beállítási példák</title>
+
+<para>
+  A következő beállítások példák különböző kódolási opciók kombinációjára,
+  amik a sebesség vs minőség kérdést döntően befolyásolják ugyanazon
+  cél bitráta mellett.
+</para>
+
+<para>
+  Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es példa videón
+  teszteltük, a cél bitráta 900kbps volt, a gép pedig egy
+  AMD-64 3400+ 2400 Mhz-en 64 bites módban.
+  Mindegyik kódolási beállítás tartalmazza a kódolási sebességet (képkocka per
+  másodpercben) és a PSNR veszteséget (dB-ben) a "nagyon jó minőséghez"
+  viszonyítva.
+  Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától és
+  a fejlesztésektől függően különböző eredményeket kaphatsz.
+</para>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row><entry>Leírás</entry><entry>Kódolási opciók</entry><entry>sebesség (fps-ben)</entry><entry>Relatív PSNR veszteség (dB-ben)</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>Nagyon jó minőség</entry>
+  <entry><option>chroma_opt:vhq=4:bvhq=1:quant_type=mpeg</option></entry>
+  <entry>16fps</entry>
+  <entry>0dB</entry>
+</row>
+<row>
+  <entry>Jó minőség</entry>
+  <entry><option>vhq=2:bvhq=1:chroma_opt:quant_type=mpeg</option></entry>
+  <entry>18fps</entry>
+  <entry>-0.1dB</entry>
+</row>
+<row>
+  <entry>Gyors</entry>
+  <entry><option>turbo:vhq=0</option></entry>
+  <entry>28fps</entry>
+  <entry>-0.69dB</entry>
+</row>
+<row>
+  <entry>Valós idejű</entry>
+  <entry><option>turbo:nochroma_me:notrellis:max_bframes=0:vhq=0</option></entry>
+  <entry>38fps</entry>
+  <entry>-1.48dB</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect2>
+
 </sect1>
 
 <sect1 id="menc-feat-x264">
@@ -3140,46 +3702,54 @@ codec-kal</title>
 </sect2>
 
 <sect2 id="menc-feat-x264-example-settings">
-<title>Kódolási beállítási példák</title>
+<title>Kódolás beállítási példák</title>
 
 <para>
   A következő beállítások példák a különböző kódolási opciók
   kombinációjára, amik érintik a sebességet vagy a minőséget
   ugyan annál a cél bitrátánál.
-
-  Ha a tökéletes minőséget célzod a méretbeli korlátokon való töprengés
-  nélkül, egy alacsony konstansú kvantáló kódolás (mint pl.
-  <option>qp_constant=18</option>) B-képkockák nélkül
-  (<option>bframes=0</option>) valószínűleg nagyon jól fog kinézni, de
-  szükségtelenül sok bit-et fog felhasználni a részletek elkódolásához,
-  amit sokkal okosabban fel lehetne használni néhány fejlettebb beállítással.
 </para>
 
 <para>
   Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es minta
   videón teszteltük, a cél bitráta 900kbps volt, a gép pedig egy AMD-64 3400+
   2400 Mhz-en, 64 bit-es módban.
-  Minden kódolási beállítást a kódolás sebessége követ (képkocka per
-  másodpercben), a tömörítési hatékonyság romlása (a bitráta százalékában)
-  összehasonlítva a "nagyon jó minőség" beállításaival, és a PSNR veszteség
-  (dB-ben). Kérlek vedd figyelembe, hogy a forrásod, a géped típusa és a
-  rendszer környezetedtől függően nagyon különböző eredményeket kaphatsz.
+  Mindegyik kódolási beállítás tartalmazza a kódolási sebességet (képkocka per
+  másodpercben) és a PSNR veszteséget (dB-ben) a "nagyon jó minőséghez"
+  viszonyítva.
+  Kérlek vedd figyelembe, hogy a forrásanyagodtól, a géped típusától és
+  a fejlesztésektől függően különböző eredményeket kaphatsz.
 </para>
 
-<itemizedlist>
-<listitem><para><emphasis role="bold">Very high quality:</emphasis>
-<option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option>
-6fps, 0%, 0dB.
-</para></listitem>
-<listitem><para><emphasis role="bold">High quality:</emphasis>
-<option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b:psnr</option>
-13fps, -13%, -0.89dB.
-</para></listitem>
-<listitem><para><emphasis role="bold">Fast:</emphasis>
-<option>subq=4:bframes=2:b_pyramid:weight_b:psnr</option>
-17fps, -20%, -1.48dB.
-</para></listitem>
-</itemizedlist>
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row><entry>Leírás</entry><entry>Kódolási opciók</entry><entry>sebesség (fps-ben)</entry><entry>relatív PSNR veszteség (dB-ben)</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>Nagyon jó minőség</entry>
+  <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry>6fps</entry>
+  <entry>0dB</entry>
+</row>
+<row>
+  <entry>Jó minőség</entry>
+  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry>13fps</entry>
+  <entry>-0.89dB</entry>
+</row>
+<row>
+  <entry>Gyors</entry>
+  <entry><option>subq=4:bframes=2:b_pyramid:weight_b</option></entry>
+  <entry>17fps</entry>
+  <entry>-1.48dB</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
 </sect2>
 
 </sect1>
@@ -3236,11 +3806,8 @@ codec-kal</title>
         <entry>9800 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
-        <entry>1536 kbps</entry>
-        <entry>23.976, 29.97</entry>
-        <entry>30000/1001, 24000/1001<footnote id="fn-ntsc-framerate"><para>
-            24000/1001 FPS érhető el a 3:2-es pullup-pal.
-            </para></footnote></entry>
+        <entry>1536 kbps (max)</entry>
+        <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9 (csak 720x480-nál)</entry>
     </row>
     <row>
@@ -3252,8 +3819,8 @@ codec-kal</title>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
-        <entry>1536 kbps</entry>
-        <entry>30000/1001, 24000/1001<footnoteref linkend='fn-ntsc-framerate'/></entry>
+        <entry>1536 kbps (max)</entry>
+        <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9</entry>
     </row>
     <row>
@@ -3263,7 +3830,7 @@ codec-kal</title>
         <entry>2600 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
-        <entry>384 kbps</entry>
+        <entry>384 kbps (max)</entry>
         <entry>30000/1001</entry>
         <entry>4:3</entry>
     </row>
@@ -3285,7 +3852,7 @@ codec-kal</title>
         <entry>9800 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>MP2,AC3,PCM</entry>
-        <entry>1536 kbps</entry>
+        <entry>1536 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9 (csak 720x576-nál)</entry>
     </row>
@@ -3296,7 +3863,7 @@ codec-kal</title>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>MP2,AC3,PCM</entry>
-        <entry>1536 kbps</entry>
+        <entry>1536 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9</entry>
     </row>
@@ -3307,7 +3874,7 @@ codec-kal</title>
         <entry>2600 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
-        <entry>384 kbps</entry>
+        <entry>384 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3</entry>
     </row>
@@ -3315,7 +3882,7 @@ codec-kal</title>
         <entry>PAL VCD</entry>
         <entry>352x288</entry>
         <entry>MPEG-1</entry>
-        <entry>1150 kbps</entry>
+        <entry>1152 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>224 kbps</entry>
