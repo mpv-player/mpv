@@ -623,40 +623,55 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
 static const char *yuv_prog_template =
   "!!ARBfp1.0\n"
   "OPTION ARB_precision_hint_fastest;"
+  "PARAM ycoef = {%.4f, %.4f, %.4f};"
+  "PARAM ucoef = {%.4f, %.4f, %.4f};"
+  "PARAM vcoef = {%.4f, %.4f, %.4f};"
+  "PARAM offsets = {%.4f, %.4f, %.4f};"
+  "PARAM gamma = {%.4f, %.4f, %.4f};"
   "TEMP res, y, u, v;"
   "TEX y, fragment.texcoord[0], texture[0], %s;"
-  "MAD res, y, {%.4f, %.4f, %.4f}, {%.4f, %.4f, %.4f};"
+  "MAD res, y, ycoef, offsets;"
   "TEX u, fragment.texcoord[1], texture[1], %s;"
-  "MAD res, u, {%.4f, %.4f, %.4f}, res;"
+  "MAD res, u, ucoef, res;"
   "TEX v, fragment.texcoord[2], texture[2], %s;"
-  "MAD result.color, v, {%.4f, %.4f, %.4f}, res;"
+  "MAD result.color, v, vcoef, res;"
   "END";
 
 static const char *yuv_pow_prog_template =
   "!!ARBfp1.0\n"
   "OPTION ARB_precision_hint_fastest;"
+  "PARAM ycoef = {%.4f, %.4f, %.4f};"
+  "PARAM ucoef = {%.4f, %.4f, %.4f};"
+  "PARAM vcoef = {%.4f, %.4f, %.4f};"
+  "PARAM offsets = {%.4f, %.4f, %.4f};"
+  "PARAM gamma = {%.4f, %.4f, %.4f};"
   "TEMP res, y, u, v;"
   "TEX y, fragment.texcoord[0], texture[0], %s;"
-  "MAD res, y, {%.4f, %.4f, %.4f}, {%.4f, %.4f, %.4f};"
+  "MAD res, y, ycoef, offsets;"
   "TEX u, fragment.texcoord[1], texture[1], %s;"
-  "MAD res, u, {%.4f, %.4f, %.4f}, res;"
+  "MAD res, u, ucoef, res;"
   "TEX v, fragment.texcoord[2], texture[2], %s;"
-  "MAD_SAT res, v, {%.4f, %.4f, %.4f}, res;"
-  "POW result.color.r, res.r, %.4f.r;"
-  "POW result.color.g, res.g, %.4f.g;"
-  "POW result.color.b, res.b, %.4f.b;"
+  "MAD_SAT res, v, vcoef, res;"
+  "POW result.color.r, res.r, gamma.r;"
+  "POW result.color.g, res.g, gamma.g;"
+  "POW result.color.b, res.b, gamma.b;"
   "END";
 
 static const char *yuv_lookup_prog_template =
   "!!ARBfp1.0\n"
   "OPTION ARB_precision_hint_fastest;"
+  "PARAM ycoef = {%.4f, %.4f, %.4f, 0};"
+  "PARAM ucoef = {%.4f, %.4f, %.4f, 0};"
+  "PARAM vcoef = {%.4f, %.4f, %.4f, 0};"
+  "PARAM offsets = {%.4f, %.4f, %.4f, 0.125};"
+  "PARAM gamma = {%.4f, %.4f, %.4f};"
   "TEMP res, y, u, v;"
   "TEX y, fragment.texcoord[0], texture[0], %s;"
-  "MAD res, y, {%.4f, %.4f, %.4f, 0}, {%.4f, %.4f, %.4f, 0.125};"
+  "MAD res, y, ycoef, offsets;"
   "TEX u, fragment.texcoord[1], texture[1], %s;"
-  "MAD res, u, {%.4f, %.4f, %.4f, 0}, res;"
+  "MAD res, u, ucoef, res;"
   "TEX v, fragment.texcoord[2], texture[2], %s;"
-  "MAD res, v, {%.4f, %.4f, %.4f, 0}, res;"
+  "MAD res, v, vcoef, res;"
   "TEX result.color.r, res.raaa, texture[3], 2D;"
   "ADD res.a, res.a, 0.25;"
   "TEX result.color.g, res.gaaa, texture[3], 2D;"
@@ -726,8 +741,8 @@ static void glSetupYUVFragprog(float brightness, float contrast,
   rgamma = 1.0 / rgamma;
   ggamma = 1.0 / ggamma;
   bgamma = 1.0 / bgamma;
-  snprintf(yuv_prog, 1000, prog_template, tex_type, ry, gy, by, rc, gc, bc,
-         tex_type, ru, gu, bu, tex_type, rv, gv, bv, rgamma, bgamma, bgamma);
+  snprintf(yuv_prog, 1000, prog_template, ry, gy, by, ru, gu, bu, rv, gv, bv,
+           rc, gc, bc, rgamma, bgamma, bgamma, tex_type, tex_type, tex_type);
   ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
                 strlen(yuv_prog), yuv_prog);
   glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
