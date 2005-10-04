@@ -3034,15 +3034,11 @@ second generation.
 .PD 0
 .RSs
 .IPs dev=<device>
-Specifies the device to use.
-.IPs pal\ \ 
-Activate PAL video norm.
-.IPs secam
-Activate SECAM video norm.
-.IPs ntsc\ 
-Activate NTSC video norm.
-.IPs prebuf
-Activate prebuffering, not yet supported.
+Specifies the video device to use.
+.IPs norm=<PAL|NTSC|SECAM|auto>
+Specifies the video norm to use (default: auto).
+.IPs (no)prebuf
+(De)Activate prebuffering, not yet supported.
 .RE
 .PD 1
 .
