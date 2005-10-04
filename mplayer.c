@@ -846,6 +846,30 @@ static void saddf(char *buf, unsigned *pos, int len, const char *format, ...)
 }
 
 /**
+ * \brief append time in the hh:mm:ss.f format
+ * \param buf buffer to print into
+ * \param pos position of terminating 0 in buf
+ * \param len maximum number of characters in buf, not including terminating 0
+ * \param time time value to convert/append
+ */
+static void sadd_hhmmssf(char *buf, unsigned *pos, int len, float time) {
+  long tenths = 10 * time;
+  int f1 = tenths % 10;
+  int ss = (tenths /  10) % 60;
+  int mm = (tenths / 600) % 60;
+  int hh = tenths / 36000;
+  if (time <= 0) {
+    saddf(buf, pos, len, "unknown");
+    return;
+  }
+  if (hh > 0)
+    saddf(buf, pos, len, "%2d:", hh);
+  if (hh > 0 || mm > 0)
+    saddf(buf, pos, len, "%02d:", mm);
+  saddf(buf, pos, len, "%02d.%1d", ss, f1);
+}
+
+/**
  * \brief print the status line
  * \param a_pos audio position
  * \param a_v A-V desynchronization
@@ -872,20 +896,12 @@ static void print_status(float a_pos, float a_v, float corr)
   if (sh_audio) {
     saddf(line, &pos, width, "A:%6.1f ", a_pos);
     if (!sh_video) {
-      // convert time to HH:MM:SS.F format
-      long tenths = 10 * a_pos;
-      int f1 = tenths % 10;
-      int ss = (tenths /  10) % 60;
-      int mm = (tenths / 600) % 60;
-      int hh = (tenths / 36000) % 100;
+      float len = demuxer_get_time_length(demuxer);
       saddf(line, &pos, width, "(");
-      if (hh > 0)
-        saddf(line, &pos, width, "%2d:", hh);
-      if (hh > 0 || mm > 0)
-        saddf(line, &pos, width, "%02d:", mm);
-      saddf(line, &pos, width, "%02d.", ss);
-      saddf(line, &pos, width, "%1d", f1);
-      saddf(line, &pos, width, ") ");
+      sadd_hhmmssf(line, &pos, width, a_pos);
+      saddf(line, &pos, width, ") of %.1f (", len);
+      sadd_hhmmssf(line, &pos, width, len);
+      saddf(line, &pos, width, ")");
     }
   }
 
