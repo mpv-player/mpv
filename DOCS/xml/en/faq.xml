@@ -69,8 +69,8 @@ job, so why change? Besides, we dislike the auto* tools, just like
 </qandaentry>
 </qandadiv>
 
-<qandadiv id="faq-compilation">
-<title>Compilation</title>
+<qandadiv id="faq-compilation-installation">
+<title>Compilation and installation</title>
 <qandaentry>
 <question><para>
 Compilation fails with an error and <application>gcc</application> bails out
