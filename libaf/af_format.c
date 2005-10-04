@@ -35,10 +35,8 @@ long int lrintf(float);
 
 // Switch endianess
 static void endian(void* in, void* out, int len, int bps);
-// From singed to unsigned
-static void si2us(void* in, void* out, int len, int bps);
-// From unsinged to signed
-static void us2si(void* in, void* out, int len, int bps);
+// From singed to unsigned and the other way
+static void si2us(void* data, int len, int bps);
 // Change the number of bits per sample
 static void change_bps(void* in, void* out, int len, int inbps, int outbps);
 // From float to int signed
@@ -244,13 +242,13 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     if(AF_FORMAT_A_LAW == (l->format&AF_FORMAT_SPECIAL_MASK))
       to_ulaw(l->audio, l->audio, len, 1, AF_FORMAT_SI);
     if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-      si2us(l->audio,l->audio,len,l->bps);
+      si2us(l->audio,len,l->bps);
   } else if((c->format & AF_FORMAT_SPECIAL_MASK) == AF_FORMAT_A_LAW) {
     from_alaw(c->audio, l->audio, len, l->bps, l->format&AF_FORMAT_POINT_MASK);
     if(AF_FORMAT_A_LAW == (l->format&AF_FORMAT_SPECIAL_MASK))
       to_alaw(l->audio, l->audio, len, 1, AF_FORMAT_SI);
     if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-      si2us(l->audio,l->audio,len,l->bps);
+      si2us(l->audio,len,l->bps);
   } else if((c->format & AF_FORMAT_POINT_MASK) == AF_FORMAT_F) {
     switch(l->format&AF_FORMAT_SPECIAL_MASK){
     case(AF_FORMAT_MU_LAW):
@@ -262,7 +260,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     default:
       float2int(c->audio, l->audio, len, l->bps);
       if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-	si2us(l->audio,l->audio,len,l->bps);
+	si2us(l->audio,len,l->bps);
       break;
     }
   } else {
@@ -270,10 +268,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     
     // Change signed/unsigned
     if((c->format&AF_FORMAT_SIGN_MASK) != (l->format&AF_FORMAT_SIGN_MASK)){
-      if((c->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-	us2si(c->audio,c->audio,len,c->bps);
-      else
-	si2us(c->audio,c->audio,len,c->bps); 
+      si2us(c->audio,len,c->bps); 
     }
     // Convert to special formats
     switch(l->format&(AF_FORMAT_SPECIAL_MASK|AF_FORMAT_POINT_MASK)){
@@ -386,50 +381,17 @@ static void endian(void* in, void* out, int len, int bps)
   }
 }
 
-static void si2us(void* in, void* out, int len, int bps)
+static void si2us(void* data, int len, int bps)
 {
-  register int i;
-  switch(bps){
-  case(1):
-    for(i=0;i<len;i++)
-      ((uint8_t*)out)[i]=(uint8_t)(SCHAR_MAX+((int)((int8_t*)in)[i]));
-    break;
-  case(2):
-    for(i=0;i<len;i++)
-      ((uint16_t*)out)[i]=(uint16_t)(SHRT_MAX+((int)((int16_t*)in)[i]));
-    break;
-  case(3):
-    for(i=0;i<len;i++)
-      store24bit(out, i, (uint32_t)(INT_MAX+(int32_t)load24bit(in, i)));
-    break;
-  case(4):
-    for(i=0;i<len;i++)
-      ((uint32_t*)out)[i]=(uint32_t)(INT_MAX+((int32_t*)in)[i]);
-    break;
-  }
-}
-
-static void us2si(void* in, void* out, int len, int bps)
-{
-  register int i;
-  switch(bps){
-  case(1):
-    for(i=0;i<len;i++)
-      ((int8_t*)out)[i]=(int8_t)(SCHAR_MIN+((int)((uint8_t*)in)[i]));
-    break;
-  case(2):
-    for(i=0;i<len;i++)
-      ((int16_t*)out)[i]=(int16_t)(SHRT_MIN+((int)((uint16_t*)in)[i]));
-    break;
-  case(3):
-    for(i=0;i<len;i++)
-      store24bit(out, i, (int32_t)(INT_MIN+(uint32_t)load24bit(in, i)));
-    break;
-  case(4):
-    for(i=0;i<len;i++)
-      ((int32_t*)out)[i]=(int32_t)(INT_MIN+((uint32_t*)in)[i]);
-    break;
-  }	
+  register long i = -(len * bps);
+  register uint8_t *p = &((uint8_t *)data)[len * bps];
+#if AF_FORMAT_NE == AF_FORMAT_LE
+  p += bps - 1;
+#endif
+  if (len <= 0) return;
+  do {
+    p[i] ^= 0x80;
+  } while (i += bps);
 }
 
 static void change_bps(void* in, void* out, int len, int inbps, int outbps)
