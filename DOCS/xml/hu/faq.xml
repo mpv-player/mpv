@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.92 -->
+<!-- synced with 1.96 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -68,8 +68,8 @@ mint ahogy <ulink url="http://freshmeat.net/articles/view/889/">mások sem</ulink
 </qandaentry>
 </qandadiv>
 
-<qandadiv id="faq-compilation">
-<title>Fordítás</title>
+<qandadiv id="faq-compilation-installation">
+<title>Fordítás és telepítés</title>
 <qandaentry>
 <question><para>
 A fordítás leáll hibaüzenettel és a <application>gcc</application> valami
@@ -202,6 +202,12 @@ Hogyan készíthetek mentést a képernyőről?
 Olyan videó kimeneti vezérlőt kell használnod, ami nem átlapolva dolgozik,
 csak így tudod elmenteni a képet. X11 alatt a <option>-vo x11</option> megteszi,
 Windows alatt a <option>-vo directx:noaccel</option> működik.
+</para>
+<para>
+Alternatívaként futtathatod az <application>MPlayer</application>t a
+<systemitem>screenshot</systemitem> videó szűrővel
+(<option>-vf screenshot</option>) és az <keycap>s</keycap> gomb
+megnyomásával képernyőmentést készíthetsz.
 </para></answer>
 </qandaentry>
 
@@ -624,9 +630,9 @@ Nincs hang videó lejátszása közben, és egy ehhez hasonló üzenetet kapok:
 </screen>
 </para></question>
 <answer><para>
-KDE-t vagy GNOME-ot futtatsz ARTS vagy ESD hang démonnal? Próbáld meg kikapcsolni
+KDE-t vagy GNOME-ot futtatsz aRts vagy ESD hang démonnal? Próbáld meg kikapcsolni
 a hang démont vagy használd a <option>-ao arts</option> vagy <option>-ao esd</option>
-kapcsolót, hogy az <application>MPlayer</application> ARTS-ot vagy ESD-t használjon.
+kapcsolót, hogy az <application>MPlayer</application> aRts-ot vagy ESD-t használjon.
 Talán az ALSA-t OSS emuláció nélkül futtatod, próbáld meg betölteni az ALSA OSS
 kernel modulját vagy megadni a <option>-ao alsa</option> kapcsolót a parancssorban
 a közvetlen ALSA audió kimeneti vezérlő használatához.
@@ -640,12 +646,12 @@ képet kapok és semmi sem történik. Majd kb. egy perc után elindul a videó
 lejátszás.
 </para></question>
 <answer><para>
-A KDE arts zene démonja blokkolja a hang eszközt. Vagy megvárod, amíg a videó
+A KDE aRts zene démonja blokkolja a hang eszközt. Vagy megvárod, amíg a videó
 elindul vagy kikapcsolod az arts-démont a vezérlőpanelben. Ha arts-ot akarsz
-használni, add meg az audió kimenetnek a mi saját, natív arts audió vezérlőnket
+használni, add meg az audió kimenetnek a mi saját, natív aRts audió vezérlőnket
 (<option>-ao arts</option>). Ha nem működik vagy nincs beforgatva, próbáld meg
 az SDL-t (<option>-ao sdl</option>) és győződj meg róla, hogy az SDL tudja
-kezelni az arts-ot. Másik lehetőség, hogy az <application>MPlayer</application>t
+kezelni az aRts-ot. Másik lehetőség, hogy az <application>MPlayer</application>t
 artsdsp-vel indítod.
 </para></answer>
 </qandaentry>
@@ -1016,7 +1022,40 @@ közelebb áll a <systemitem class="library">libavcodec</systemitem>-hez
 funkcionalitásában és minden illedelmes lejátszó támogatja.
 </para></answer>
 </qandaentry>
- 	 
+
+<qandaentry>
+<question><para>
+Hogyan tudok elkódolni egy csak audiót tartalmazó fájlt?
+</para></question>
+<answer><para>
+Használd az <filename>aconvert</filename>-et a 
+<filename class="directory">TOOLS</filename>
+alkönyvtárból az MPlayer forrás fájában.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Hogyan tudom lejátszani az AVI-ba ágyazott feliratokat?
+</para></question>
+<answer><para>
+Használd az <filename>avisubdump.c</filename> fájlt a
+<filename class="directory">TOOLS</filename> alkönyvtárból vagy olvasd el
+<ulink url="http://xlife.zuavra.net/curse/0012/">ezt a dokumentumot az OpenDML AVI fájlokba ágyazott feliratok kicsomagolásáról/demultiplex-álásáról</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Az MPlayer nem...
+</para></question>
+<answer><para>
+Nézz bele a <filename class="directory">TOOLS</filename>
+alkönyvtárba, mindenféle scriptek és hack-ok gyűjteményét találod ott.
+A <filename>TOOLS/README</filename> tartalmazza a dokumentációt.
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 
