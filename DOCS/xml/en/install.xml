@@ -530,8 +530,8 @@ See the <link linkend="subosd">Subtitles and OSD</link> section for details.
 <title>What about the GUI?</title>
 
 <para>
-The GUI needs GTK 1.2.x (it isn't fully GTK, but the panels are). The skins
-are stored in PNG format, so GTK, <systemitem class="library">libpng</systemitem>
+The GUI needs GTK 1.2.x or GTK 2.0 (it isn't fully GTK, but the panels are).
+The skins are stored in PNG format, so GTK, <systemitem class="library">libpng</systemitem>
 (and their devel stuff, usually called <systemitem class="library">gtk-dev</systemitem>
 and <systemitem class="library">libpng-dev</systemitem>) has to be installed.
 You can build it by specifying <option>--enable-gui</option> during
