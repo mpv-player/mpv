@@ -120,9 +120,12 @@ void GetCpuCaps( CpuCaps *caps)
 		do_cpuid(0x00000001, regs2);
 
 		caps->cpuType=(regs2[0] >> 8)&0xf;
+
+// see AMD64 Architecture Programmer's Manual, Volume 3: General-purpose and
+// System Instructions, Table 3-2: Effective family computation, page 120.
 		if(caps->cpuType==0xf){
-		    // use extended family (P4, IA64)
-		    caps->cpuType=8+((regs2[0]>>20)&255);
+		    // use extended family (P4, IA64, K8)
+		    caps->cpuType=0xf+((regs2[0]>>20)&255);
 		}
 		caps->cpuStepping=regs2[0] & 0xf;
 
