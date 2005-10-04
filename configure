@@ -5286,10 +5286,11 @@ elif test "$_vorbis" = yes -a "$_tremor" = yes ; then
 fi
 echores "$_vorbis"
 
-echocheck "OggTheora support (only the CVS version!)"
+echocheck "OggTheora support"
 if test "$_theora" = auto ; then
   _theora=no
-  cat > $TMPC << EOF
+  if ( pkg-config --exists 'theora' ) >> "$TMPLOG" 2>&1 ; then
+    cat > $TMPC << EOF
 #include <theora/theora.h>
 #include <string.h>
 int main(void) 
@@ -5323,12 +5324,13 @@ int main(void)
   return 0;
 }
 EOF
-  cc_check -ltheora -logg $_ld_lm && _theora=yes
+    cc_check `pkg-config --libs --cflags theora` && _theora=yes
+  fi
 fi
 if test "$_theora" = yes ; then
   _def_theora='#define HAVE_OGGTHEORA 1'
   _codecmodules="libtheora $_codecmodules"
-  _ld_theora="-ltheora -logg"
+  _ld_theora=`pkg-config --libs --cflags theora`
 else
   _def_theora='#undef HAVE_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
