@@ -1025,6 +1025,39 @@ terms of functionality, and is supported by all decent players.
 </para></answer>
 </qandaentry>
 
+<qandaentry>
+<question><para>
+How can I encode an audio only file?
+</para></question>
+<answer><para>
+Use <filename>aconvert</filename> from the
+<filename class="directory">TOOLS</filename>
+subdirectory in the MPlayer source tree.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+How can I play subtitles embedded in AVI?
+</para></question>
+<answer><para>
+Use <filename>avisubdump.c</filename> from the
+<filename class="directory">TOOLS</filename> subdirectory or read
+<ulink url="http://xlife.zuavra.net/curse/0012/">this document about extracting/demultiplexing subtitles embedded in OpenDML AVI files</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+MPlayer won't...
+</para></question>
+<answer><para>
+Have a look at the <filename class="directory">TOOLS</filename>
+subdirectory for a collection of random scripts and hacks.
+<filename>TOOLS/README</filename> contains documentation.
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 
