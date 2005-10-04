@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.178 (2005. 07. 29.)
+// Sync'ed with help_mp-en.h 1.183 (2005. 10. 05.)
 
 // ========================= MPlayer help ===========================
 
@@ -160,6 +160,7 @@ static char help_text[]=
 #define MSGTR_IncreaseRTCMaxUserFreq "Próbáld ki ezt: \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" hozzáadni a rendszer indító script-jeidhez!\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC inicializálási hiba az ioctl-ben (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "%s idõzítés használata.\n"
+#define MSGTR_NoIdleAndGui "Az -idle opció nem használható a GMPlayerrel.\n"
 #define MSGTR_MenuInitialized "Menü inicializálva: %s\n"
 #define MSGTR_MenuInitFailed "Menü inicializálás nem sikerült.\n"
 #define MSGTR_Getch2InitializedTwice "FIGYELEM: getch2_init kétszer lett meghívva!\n"
@@ -844,7 +845,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FPS "Film FPS:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Lejátszó ablak megjelenítése ha inaktív"
 #define MSGTR_PREFERENCES_ArtsBroken "Az újabb aRts verziók inkompatibilisek "\
-           "a GTK 1.x-szel és összeomlasztják a gmplayert!"
+           "a GTK 1.x-szel és összeomlasztják a GMPlayert!"
 
 #define MSGTR_ABOUT_UHU "GUI fejlesztést az UHU Linux támogatta\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer csapat:\n"
