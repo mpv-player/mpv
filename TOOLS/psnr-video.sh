@@ -5,16 +5,18 @@
 # This file comes under GPL, see http://www.gnu.org/copyleft/gpl.html for more
 # information on its licensing.
 
-warning_frame_number () { 
+warning_frame_number () {
 	echo "Files have differing numbers of frames!"
 	echo "$FILE1 has `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` frames,"
 	echo "$FILE2 has `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
 	echo "Processing the first `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` frames."
-} 
+}
 
 
 TEMPDIR="/tmp/psnr_video"
 WORKDIR=`pwd`
+OUTFILE=psnr.dat
+ERRFILE=errorsum.del
 
 exit=0
 if [[ `which pnmpsnr 2> /dev/null` = "" ]]
@@ -73,7 +75,7 @@ fi
 
 if [ $# -ge 5 ]; then
 	FILE2_Options=$5
-	echo "Mplayer options for ${FILE2}: $FILE2_Options"
+	echo "MPlayer options for ${FILE2}: $FILE2_Options"
 fi
 
 
@@ -90,7 +92,7 @@ rm -f *ppm
 rm -f *del
 
 if [ $LastFrame -ge 0 ]; then
-	mplayer $FILE1_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}/$FILE1 >/dev/null
+	mplayer $FILE1_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}/$FILE1 > /dev/null
 else
 	mplayer $FILE1_Options -nosound -vo pnm ${WORKDIR}/$FILE1 > /dev/null
 fi
@@ -101,12 +103,12 @@ echo "############## $FILE2 #################"
 
 cd ${TEMPDIR}/FILE2
 
-rm *ppm 2> /dev/null
+rm -f *ppm
 
 if [ $LastFrame -ge 0 ]; then
-	mplayer $FILE2_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}/$FILE2 >/dev/null
+	mplayer $FILE2_Options -frames $LastFrame -nosound -vo pnm ${WORKDIR}/$FILE2 > /dev/null
 else
-	mplayer $FILE2_Options -nosound -vo pnm ${WORKDIR}/$FILE2 >/dev/null
+	mplayer $FILE2_Options -nosound -vo pnm ${WORKDIR}/$FILE2 > /dev/null
 fi
 
 
@@ -117,7 +119,7 @@ echo "############## PSNR Calculation #################"
 
 if [[ `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` = `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` ]]
 then
-	echo 
+	echo
 else
 	warning_frame_number
 	echo
@@ -125,28 +127,28 @@ fi
 
 
 cd ${TEMPDIR}/FILE2
-#rm ../psnr.dat
-echo "File;Y;Cb;Cr" >../psnr.dat
-echo "0" > errorsum.del
+#rm ../$OUTFILE
+echo "File;Y;Cb;Cr" > ../$OUTFILE
+echo "0" > $ERRFILE
 i=0
 for FILE in `ls -1 *.ppm`
         do
         echo $FILE
-                echo -n "$FILE">>../psnr.dat
-                echo -n ";">>../psnr.dat
+                echo -n "$FILE" >> ../$OUTFILE
+                echo -n ";"     >> ../$OUTFILE
 
         YCBCR=`pnmpsnr ../FILE1/$FILE $FILE 2>&1 | tail -n 3 | cut -f 3 -d ':' | \
             ( read Y X; read CB X; read CR X; echo "$Y;$CB;$CR;")`
-        Y=`echo $YCBCR | cut -f 1 -d ';'`
+         Y=`echo $YCBCR | cut -f 1 -d ';'`
         CB=`echo $YCBCR | cut -f 2 -d ';'`
         CR=`echo $YCBCR | cut -f 3 -d ';'`
-        echo $YCBCR >>../psnr.dat
+        echo $YCBCR >> ../$OUTFILE
 
-        ALL=`echo "(-10)*l((e(-$Y/10*l(10))+e(-$CB/10*l(10))/4+e(-$CR/10*l(10))/4)/1.5)/l(10)"|bc -l`
-        echo "$ALL">>../psnr.dat
-        ERROR=`echo "scale=30; (e(-1*$Y/10*l(10))+e(-1*$CB/10*l(10))/4+e(-1*$CR/10*l(10))/4)/1.5"|bc -l`
-        ERRORSUM=`cat errorsum.del`
-        echo `echo "scale=30; $ERROR + $ERRORSUM"|bc -l` > errorsum.del
+        ALL=`echo "(-10)*l((e(-$Y/10*l(10))+e(-$CB/10*l(10))/4+e(-$CR/10*l(10))/4)/1.5)/l(10)" | bc -l`
+        echo "$ALL" >> ../$OUTFILE
+        ERROR=`echo "scale=30; (e(-1*$Y/10*l(10))+e(-1*$CB/10*l(10))/4+e(-1*$CR/10*l(10))/4)/1.5" | bc -l`
+        ERRORSUM=`cat $ERRFILE`
+        echo `echo "scale=30; $ERROR + $ERRORSUM" | bc -l` > $ERRFILE
 
         i=$(($i+1))
 	if [[ $i = $LastFrame ]]
@@ -155,12 +157,12 @@ for FILE in `ls -1 *.ppm`
 	fi
 done
 
-ERRORSUM=`cat errorsum.del`
+ERRORSUM=`cat $ERRFILE`
 PSNR=`echo "-10*l($ERRORSUM/$i)/l(10)" | bc -l`
-echo "PSNR:;$PSNR">>../psnr.dat
+echo "PSNR:;$PSNR" >> ../$OUTFILE
 
 cd ..
-mv psnr.dat ${WORKDIR}/
+mv $OUTFILE ${WORKDIR}/
 
 if [[ `ls -1 ${TEMPDIR}/FILE1/*ppm | wc -l` = `ls -1 ${TEMPDIR}/FILE2/*ppm | wc -l` ]]
 then
@@ -173,6 +175,6 @@ fi
 cd ..
 rm -r ${TEMPDIR}
 
-echo "Created ${WORKDIR}/psnr.dat"
+echo "Created ${WORKDIR}/$OUTFILE"
 echo
 
