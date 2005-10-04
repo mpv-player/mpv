@@ -8,6 +8,10 @@ In this directory you can find some nice scripts and code that makes
 using MPlayer and MEncoder easier, for example scripts for DVD track
 encoding in three pass mode or creating SVCDs from a movie.
 
+FIXME: Document all the stuff in the subdirectories.
+
+
+
 MPlayer scripts in the TOOLS dir
 --------------------------------
 
@@ -43,6 +47,18 @@ Usage:        mplmult.sh <n> <options>
               n        number of MPlayer instances that display the video
               options  any options you would pass to MPlayer, more than
                        one file will usually not work
+
+
+subsearch.sh
+
+Author:       Alex Beregszaszi
+
+Description:  Collects subtitle files from the directory given as argument
+              ('.' if none is given) and its subdirectories and prints
+              them as a comma separated list to stdout.
+
+Usage:        subsearch.sh [directory]
+              mplayer -sub `subsearch.sh` movie
 
 
 x2mpsub.sh
@@ -99,6 +115,17 @@ Description:  A simple utility that creates an SVCD from a video in an AVI
 
 Usage:        divx2svcd <input_avi> [options]
               see 'divx2svcd -h' for more info
+
+
+menc2pass
+
+Author:       Felix Bünemann
+
+Description:  Helper script to ease MEncoder two pass encoding. Give it all
+              the encoding parameters you would pass to mencoder, but leave
+						  out the (v)pass=<n> suboption.
+
+Usage:        menc2pass <options>
 
 
 mencvcd
