@@ -4631,7 +4631,7 @@ int main(void) { jack_client_new("test"); return 0; }
 EOF
   if cc_check -ljack ; then
     _ld_jack="-ljack"
-  elif cc_check `pkg-config --libs --cflags jack` ; then
+  elif cc_check `pkg-config --libs --cflags --silence-errors jack` ; then
     _ld_jack="`pkg-config --libs jack`"
     _inc_jack="`pkg-config --cflags jack`"
   else
