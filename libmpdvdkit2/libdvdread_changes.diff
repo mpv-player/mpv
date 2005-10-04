@@ -300,8 +300,55 @@ diff -Naur dvdread.orig/dvd_udf.c dvdread/dvd_udf.c
  #include <sys/stat.h>
  #include <unistd.h>
 diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
+--- dvdread.orig/ifo_print.c	30 Jun 2005 22:48:26 -0000	1.4
++++ dvdread/ifo_print.c	3 Oct 2005 14:29:01 -0000	1.5
+@@ -761,14 +761,14 @@
+   ifoPrint_USER_OPS(&pgc->prohibited_ops);
+   
+     for(i = 0; i < 8; i++) {
+-      if(pgc->audio_control[i] & 0x8000) { /* The 'is present' bit */
++      if(pgc->audio_control[i].present) {
+ 	printf("Audio stream %i control: %04x\n", 
+ 	       i, pgc->audio_control[i]);
+       }
+     }
+   
+   for(i = 0; i < 32; i++) {
+-    if(pgc->subp_control[i] & 0x80000000) { /* The 'is present' bit */
++    if(pgc->subp_control[i].present) {
+       printf("Subpicture stream %2i control: %08x\n", 
+ 	     i, pgc->subp_control[i]);
+     }
+
 diff -Naur dvdread.orig/ifo_print.h dvdread/ifo_print.h
 diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
+--- dvdread.orig/ifo_read.c	30 Jun 2005 22:48:26 -0000	1.4
++++ dvdread/ifo_read.c	3 Oct 2005 14:29:01 -0000	1.5
+@@ -638,10 +638,6 @@
+   B2N_16(pgc->cell_playback_offset);
+   B2N_16(pgc->cell_position_offset);
+ 
+-  for(i = 0; i < 8; i++)
+-    B2N_16(pgc->audio_control[i]);
+-  for(i = 0; i < 32; i++)
+-    B2N_32(pgc->subp_control[i]);
+   for(i = 0; i < 16; i++)
+     B2N_32(pgc->palette[i]);
+   
+@@ -650,10 +646,10 @@
+ 
+   /* verify time (look at print_time) */
+   for(i = 0; i < 8; i++)
+-    if(!pgc->audio_control[i] & 0x8000) /* The 'is present' bit */
++    if(!pgc->audio_control[i].present)
+       CHECK_ZERO(pgc->audio_control[i]);
+   for(i = 0; i < 32; i++)
+-    if(!pgc->subp_control[i] & 0x80000000) /* The 'is present' bit */
++    if(!pgc->subp_control[i].present)
+       CHECK_ZERO(pgc->subp_control[i]);
+   
+   /* Check that time is 0:0:0:0 also if nr_of_programs == 0 */
+
 diff -Naur dvdread.orig/ifo_read.h dvdread/ifo_read.h
 --- dvdread.orig/ifo_read.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/ifo_read.h	2005-06-23 00:19:10.000000000 +0200
@@ -328,6 +375,73 @@ diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
  
  
  #undef ATTRIBUTE_PACKED
+@@ -398,6 +398,55 @@
+ } ATTRIBUTE_PACKED user_ops_t;
+ 
+ /**
++ * Subpicture stream mapping for a subtitle
++ */
++typedef struct {
++#ifdef WORDS_BIGENDIAN
++  unsigned int present   : 1;
++  unsigned int zero1     : 2;
++  unsigned int s_4p3     : 5; /* stream for 4:3 on any display */
++
++  unsigned int zero2     : 3;
++  unsigned int s_wide    : 5; /* stream for 16:9 on widescreen display */
++
++  unsigned int zero3     : 3;
++  unsigned int s_lbox    : 5; /* stream for 16:9 on letterboxed 4:3 display */
++
++  unsigned int zero4     : 3;
++  unsigned int s_panscan : 5; /* stream for 16:9 with pan&scan data on 4:3 display */
++#else
++  unsigned int s_4p3     : 5; /* stream for 4:3 on any display */
++  unsigned int zero1     : 2;
++  unsigned int present   : 1;
++
++  unsigned int s_wide    : 5; /* stream for 16:9 on widescreen display */
++  unsigned int zero2     : 3;
++
++  unsigned int s_lbox    : 5; /* stream for 16:9 on letterboxed 4:3 display */
++  unsigned int zero3     : 3;
++
++  unsigned int s_panscan : 5; /* stream for 16:9 with pan&scan data on 4:3 display */
++  unsigned int zero4     : 3;
++#endif
++} ATTRIBUTE_PACKED subp_mapping_t;
++
++/**
++ * Audio stream mapping for a soundtrack
++ */
++typedef struct {
++#ifdef WORDS_BIGENDIAN
++  unsigned int present : 1;
++  unsigned int zero1   : 4;
++  unsigned int s_audio : 3;
++#else
++  unsigned int s_audio : 3;
++  unsigned int zero1   : 4;
++  unsigned int present : 1;
++#endif
++  uint8_t zero2;
++} ATTRIBUTE_PACKED audio_mapping_t;
++
++/**
+  * Program Chain Information.
+  */
+ typedef struct {
+@@ -406,8 +455,8 @@
+   uint8_t  nr_of_cells;
+   dvd_time_t playback_time;
+   user_ops_t prohibited_ops;
+-  uint16_t audio_control[8]; /* New type? */
+-  uint32_t subp_control[32]; /* New type? */
++  audio_mapping_t audio_control[8];
++  subp_mapping_t subp_control[32];
+   uint16_t next_pgc_nr;
+   uint16_t prev_pgc_nr;
+   uint16_t goup_pgc_nr;
 diff -Naur dvdread.orig/nav_print.c dvdread/nav_print.c
 diff -Naur dvdread.orig/nav_print.h dvdread/nav_print.h
 --- dvdread.orig/nav_print.h	2005-06-23 00:18:54.000000000 +0200
