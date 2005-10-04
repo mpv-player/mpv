@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>TV bemenet</title>
 
@@ -135,7 +135,7 @@ használatával kapcsolatban.
 <para>
 Ha a <application>MEncoder</application> nem tudja megnyitni az audió eszközt,
 gyõzõdj meg róla, hogy tényleg elérhetõ-e. Gond lehet a hang szerverekkel, mint
-pl. arts (KDE) vagy esd (GNOME). ha full duplex hang kártyád van (majdnem
+pl. aRts (KDE) vagy ESD (GNOME). ha full duplex hang kártyád van (majdnem
 az összes hangkártya tudja már ezt manapság), és KDE-t használsz, próbáld
 meg bekapcsolni a "full duplex" opciót a hangkártya tulajdonságok menüben.
 </para>
