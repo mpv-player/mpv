@@ -22,19 +22,18 @@
     
 */
 
-#if !defined(_I386_TYPES_H) && !defined(_X86_64_TYPES_H)
-typedef unsigned char __u8;
-typedef unsigned short __u16;
-typedef unsigned long __u32;
-typedef unsigned long long __u64;
-typedef signed char __s8;
-typedef signed short __s16;
-typedef signed long __s32;
-#endif
+#define __u8 uint8_t
+#define __u16 uint16_t
+#define __u32 uint32_t
+#define __u64 uint64_t
+#define __s8 int8_t
+#define __s16 int16_t
+#define __s32 int32_t
+#define __s64 int64_t
 
 extern void RTjpeg_init_Q(__u8 Q);
-extern void RTjpeg_init_compress(long unsigned int *buf, int width, int height, __u8 Q);
-extern void RTjpeg_init_decompress(long unsigned int *buf, int width, int height);
+extern void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q);
+extern void RTjpeg_init_decompress(__u32 *buf, int width, int height);
 extern int RTjpeg_compressYUV420(__s8 *sp, unsigned char *bp);
 extern int RTjpeg_compressYUV422(__s8 *sp, unsigned char *bp);
 extern void RTjpeg_decompressYUV420(__s8 *sp, __u8 *bp);

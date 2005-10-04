@@ -3221,11 +3221,11 @@ int RTjpeg_mcompressYUV420(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
 
 #ifdef MMX
  emms();
- RTjpeg_lmask=(mmx_t)(((__u64)lmask<<48)|((__u64)lmask<<32)|((__u64)lmask<<16)|lmask);
- RTjpeg_cmask=(mmx_t)(((__u64)cmask<<48)|((__u64)cmask<<32)|((__u64)cmask<<16)|cmask);
+ RTjpeg_lmask.uq=((__u64)lmask<<48)|((__u64)lmask<<32)|((__u64)lmask<<16)|lmask;
+ RTjpeg_cmask.uq=((__u64)cmask<<48)|((__u64)cmask<<32)|((__u64)cmask<<16)|cmask;
 #else
- RTjpeg_lmask=lmask;
- RTjpeg_cmask=cmask;
+ RTjpeg_lmask.uq=lmask;
+ RTjpeg_cmask.uq=cmask;
 #endif
  
  sb=sp;
@@ -3312,11 +3312,11 @@ int RTjpeg_mcompressYUV422(__s8 *sp, unsigned char *bp, __u16 lmask, __u16 cmask
 
 #ifdef MMX
  emms();
- RTjpeg_lmask=(mmx_t)(((__u64)lmask<<48)|((__u64)lmask<<32)|((__u64)lmask<<16)|lmask);
- RTjpeg_cmask=(mmx_t)(((__u64)cmask<<48)|((__u64)cmask<<32)|((__u64)cmask<<16)|cmask);
+ RTjpeg_lmask.uq=((__u64)lmask<<48)|((__u64)lmask<<32)|((__u64)lmask<<16)|lmask;
+ RTjpeg_cmask.uq=((__u64)cmask<<48)|((__u64)cmask<<32)|((__u64)cmask<<16)|cmask;
 #else
- RTjpeg_lmask=lmask;
- RTjpeg_cmask=cmask;
+ RTjpeg_lmask.uq=lmask;
+ RTjpeg_cmask.uq=cmask;
 #endif
  
  bp = bp - RTjpeg_width*0;
@@ -3386,9 +3386,9 @@ int RTjpeg_mcompress8(__s8 *sp, unsigned char *bp, __u16 lmask)
 
 #ifdef MMX
  emms();
- RTjpeg_lmask=(mmx_t)(((__u64)lmask<<48)|((__u64)lmask<<32)|((__u64)lmask<<16)|lmask);
+ RTjpeg_lmask.uq=((__u64)lmask<<48)|((__u64)lmask<<32)|((__u64)lmask<<16)|lmask;
 #else
- RTjpeg_lmask=lmask;
+ RTjpeg_lmask.uq=lmask;
 #endif
 
  
