@@ -712,7 +712,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, &trak->stdata[52+char2int(trak->stdata,52)], sh->codecdata_len);
 		    } else {
-		      if (len > 8 && len + 44 < trak->stdata_len) {
+		      if (len > 8 && len + 44 <= trak->stdata_len) {
 		    sh->codecdata_len = len-8;
 		    sh->codecdata = trak->stdata+44+8;
 		      }
