@@ -36,13 +36,23 @@ double ff_eval(char *s, double *const_value, const char **const_name,
                void *opaque);
 #endif
 
+// Needed to bring in lrintf.
+#define HAVE_AV_CONFIG_H
+
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
 #include <ffmpeg/dsputil.h>
+#include <ffmpeg/common.h>
 #else
 #include "../libavcodec/avcodec.h"
 #include "../libavcodec/dsputil.h"
+#include "../libavutil/common.h"
 #endif
+
+/* FIXME: common.h defines printf away when HAVE_AV_CONFIG
+ * is defined, but mp_image.h needs printf.
+ */
+#undef printf
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -68,7 +78,7 @@ static int config(struct vf_instance_s* vf,
         int i;
 
 	vf->priv->qp_stride= (width+15)>>4;
-        vf->priv->qp= malloc(vf->priv->qp_stride*h*sizeof(int8_t));
+        vf->priv->qp= av_malloc(vf->priv->qp_stride*h*sizeof(int8_t));
         
         for(i=-129; i<128; i++){
             double const_values[]={
@@ -155,10 +165,10 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static void uninit(struct vf_instance_s* vf){
 	if(!vf->priv) return;
 
-	if(vf->priv->qp) free(vf->priv->qp);
+	if(vf->priv->qp) av_free(vf->priv->qp);
 	vf->priv->qp= NULL;
 	
-	free(vf->priv);
+	av_free(vf->priv);
 	vf->priv=NULL;
 }
 
@@ -168,7 +178,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->get_image=get_image;
     vf->uninit=uninit;
-    vf->priv=malloc(sizeof(struct vf_priv_s));
+    vf->priv=av_malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
     
 //    avcodec_init();
