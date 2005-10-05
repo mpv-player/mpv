@@ -2260,7 +2260,10 @@ You can encode to the following codecs (more or less up to date):
   Windows Media Video, version 2 (AKA WMV8)
   </entry></row>
 <row><entry>rv10</entry><entry>
-  an old RealVideo codec
+  RealVideo 1.0
+  </entry></row>
+<row><entry>rv20</entry><entry>
+  RealVideo 2.0
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
   MPEG-1 video
@@ -2279,6 +2282,9 @@ You can encode to the following codecs (more or less up to date):
   </entry></row>
 <row><entry>ffv1</entry><entry>
   FFmpeg's lossless video codec
+  </entry></row>
+<row><entry>svq1</entry><entry>
+  Sorenson video 1
   </entry></row>
 <row><entry>flv</entry><entry>
   Sorenson H.263 used in Flash Video
