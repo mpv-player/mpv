@@ -1,4 +1,4 @@
-.\" synced with 1.1121
+.\" synced with 1.1128
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -257,10 +257,12 @@ Pøevine zpìt/\:vpøed o 10 minut.
 Sní¾í/\:zvý¹í aktuální rychlost pøehrávání o 10%.
 .IPs "{ a }"
 Zpomalí na polovinu/\:zdvojí aktuální rychlost pøehrávání.
-.IPs "Backspace (mazátko)"
+.IPs "backspace (mazátko)"
 Vrátí rychlost pøehrávání na normál.
 .IPs "< a >"
 zpìt/\:vpøed v playlistu
+.IPs "ENTER"
+vpøed v playlistu, dokonce i pøes konec
 .IPs "HOME a END"
 dal¹í/\:pøedchozí podstrom v rodièovském playlistu
 .IPs "INS a DEL"
@@ -299,6 +301,8 @@ Pøepínaè zahazování snímkù:  nic / zru¹ zobrazení / zru¹ dekódování
 Pøepínaè viditelnosti titulkù.
 .IPs "b / j"
 Cykluje dostupné titulky.
+.IPs "y / g"
+Krok vpøed/zpìt v titulcích.
 .IP F\ \ \ \ 
 Pøepínaè zobrazení "vynucených titulkù".
 .IPs a\ \ \ \ 
@@ -348,6 +352,20 @@ Pøepínaè na celou obrazovku a zpìt (viz také volbu \-fs).
 Nastaví alfa-kanál okna.
 .RE
 .PD 1
+.PP
+(Následující klávesy jsou platné, pokud máte klávesnici
+s multimediálními tlaèítky.)
+.PP
+.PD 0
+.RSs
+.IPs "PAUSE"
+pauza
+.IPs "STOP\ "
+Ukonèení pøehrávání a exit.
+.IPs "PREVIOUS a NEXT"
+Pøevíjení zpìt/\:vpøed o 1 minutu.
+.RE
+.PD 1
 .
 .TP
 .B GUI ovládání z klávesnice
@@ -359,10 +377,14 @@ Start pøehrávání.
 Stop pøehrávání.
 .IPs l\ \ \ \ 
 Naètení souboru.
+.IPs t\ \ \ \ 
+Naètení titulkù.
 .IPs c\ \ \ \ 
-Voliè skinù.
+voliè skinù
 .IPs p\ \ \ \ 
-Pøepínaè playlistù.
+playlist
+.IPs r\ \ \ \ 
+pøedvolby
 .RE
 .PD 1
 .
@@ -376,6 +398,35 @@ Volba pøedchozího/\:dal¹ího kanálu.
 Zmìna normy.
 .IPs u\ \ \ \ 
 Zmìna seznamu kanálù.
+.RE
+.PD 1
+.
+.TP
+.B Ovládání my¹í
+.PD 0
+.RSs
+.IPs "tlaèítko 3 a tlaèítko 4"
+Pøevíjení zpìt/\:vpøed o 1 minutu.
+.IPs "tlaèítko 5 a tlaèítko 6"
+Sní¾ení/\:zvý¹ení hlasitosti.
+.RE
+.PD 1
+.
+.TP
+.B Ovládání joystickem
+.PD 0
+.RSs
+.IPs "doleva a doprava"
+Pøevíjení zpìt/\:vpøed o 10 sekund.
+.IPs "nahoru a dolù"
+Pøevíjení zpìt/\:vpøed o 1 minutu.
+.IPs "tlaèítko 1"
+pauza
+.IPs "tlaèítko 2"
+Cykluje stav OSD: nic / pøevíjení / pøevíjení + poèitadlo /
+pøevíjení + poèitadlo + celkový èas.
+.IPs "tlaèítko 3 a tlaèítko 4"
+Sní¾ení/\:zvý¹ení hlasitosti.
 .RE
 .PD 1
 .
@@ -3032,15 +3083,11 @@ Výstupní video rozhraní mnoha MJPEG zachytávacích/\:pøehrávacích karet, druhá ge
 .PD 0
 .RSs
 .IPs dev=<zaøízení>
-Nastaví jméno zaøízení k pou¾ití.
-.IPs PAL\ \ \ 
-Aktivuje video normu PAL.
-.IPs SECAM
-Aktivuje video normu SECAM.
-.IPs NTSC\ \ \ 
-Aktivuje video normu NTSC.
-.IPs prebuf
-Aktivuje prebuffering, zatím nepodporováno.
+Nastaví jméno video zaøízení k pou¾ití.
+.IPs norm=<PAL|NTSC|SECAM|auto>
+Vastavuje video normu k pou¾ití (výchozí: auto).
+.IPs (no)prebuf
+(De)Aktivuje prebuffering, zatím nepodporováno.
 .RE
 .PD 1
 .
@@ -5480,8 +5527,8 @@ Dostupná nastavení dominantního pùlsnímku jsou:
 .RSs
 .IPs -1
 auto (výchozí)
-Pracuje pouze pokud dekodér exportuje vhodné informace a nejsou
-pøed ním nahrány ¾ádné filtry, které tyto informace zahodí,
+Pracuje pouze pokud dekodér exportuje vhodné informace a pøed tfields nejsou
+¾ádné filtry odstraòující tyto informace,
 jinak se pou¾ije nastavení 0 (nejprve horní pùlsnímek).
 .IPs 0
 nejprve horní
