@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.182
+// Synced to 1.183
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
