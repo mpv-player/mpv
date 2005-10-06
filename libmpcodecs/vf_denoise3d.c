@@ -81,11 +81,11 @@ static void deNoise(unsigned char *Frame,        // mpi->planes[x]
     int sLineOffs = 0, pLineOffs = 0, dLineOffs = 0;
     unsigned char PixelAnt;
 
-    /* First pixel has no left nor top neightbour. Only previous frame */
+    /* First pixel has no left nor top neighbor. Only previous frame */
     LineAnt[0] = PixelAnt = Frame[0];
     FrameDest[0] = LowPass(FramePrev[0], LineAnt[0], Temporal);
 
-    /* Fist line has no top neightbour. Only left one for each pixel and
+    /* Fist line has no top neighbor. Only left one for each pixel and
      * last frame */
     for (X = 1; X < W; X++)
     {
