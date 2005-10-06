@@ -592,7 +592,7 @@ headers MUST be placed at least at the start of the file and immediately before
 the index or at the file end if there is no index
 headers MUST be repeated at least twice (so they exist three times in a file)
 
-there MUST be a sync point immedeatly before the first frame after any headers
+there MUST be a sync point immediately before the first frame after any headers
 
 		Index
 Note: with realtime streaming, there is no end, so no index there either
