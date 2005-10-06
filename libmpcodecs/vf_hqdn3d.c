@@ -111,7 +111,7 @@ static void deNoiseSpacial(
     PixelDst = LineAnt[0] = PixelAnt = Frame[0]<<16;
     FrameDest[0]= ((PixelDst+0x10007FFF)/65536);
 
-    /* Fist line has no top neighbor, only left. */
+    /* First line has no top neighbor, only left. */
     for (X = 1; X < W; X++){
         PixelDst = LineAnt[X] = LowPassMul(PixelAnt, Frame[X]<<16, Horizontal);
 	FrameDest[X]= ((PixelDst+0x10007FFF)/65536);
@@ -174,7 +174,7 @@ static void deNoise(unsigned char *Frame,        // mpi->planes[x]
     FrameAnt[0] = ((PixelDst+0x1000007F)/256);
     FrameDest[0]= ((PixelDst+0x10007FFF)/65536);
 
-    /* Fist line has no top neighbor. Only left one for each pixel and
+    /* First line has no top neighbor. Only left one for each pixel and
      * last frame */
     for (X = 1; X < W; X++){
         LineAnt[X] = PixelAnt = LowPassMul(PixelAnt, Frame[X]<<16, Horizontal);
