@@ -90,8 +90,8 @@ SYNOPSIS
     A description of MPlayer's playtree.
 DESCRIPTION
     A general description of MPlayer, MEncoder, GMPlayer and its features.
-KEYBOARD CONTROL
-    A description of MPlayer's input system and the default keyboard controls.
+INTERACTIVE CONTROL
+    A description of MPlayer's input system and the interactive controls.
 USAGE
     Some general notes about the options and a description of the config file
     format.

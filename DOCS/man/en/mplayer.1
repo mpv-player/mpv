@@ -229,17 +229,17 @@ of this man page.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Keyboard control
+.\" interactive control
 .\" --------------------------------------------------------------------------
 .
-.SH "KEYBOARD CONTROL"
+.SH "INTERACTIVE CONTROL"
 MPlayer has a fully configurable, command-driven control layer
 which allows you to control MPlayer using keyboard, mouse, joystick
 or remote control (with LIRC).
 See the \-input option for ways to customize it.
 .
 .TP
-.B general control
+.B keyboard control
 .PD 0
 .RSs
 .IPs "<\- and \->"
@@ -360,9 +360,10 @@ Stop playing and quit.
 Seek backward/\:forward 1 minute.
 .RE
 .PD 1
-.
-.TP
-.B GUI keyboard control
+.PP
+(The following keys are only valid if you compiled with GUI support
+and will take precedence over the keys defined aboved.)
+.PP
 .PD 0
 .RSs
 .IPs ENTER
@@ -381,9 +382,10 @@ playlist
 preferences
 .RE
 .PD 1
-.
-.TP
-.B TV input control
+.PP
+(The following keys are only valid if you compiled with TV input support
+and will take precedence over the keys defined aboved.)
+.PP
 .PD 0
 .RSs
 .IPs "h and k"
