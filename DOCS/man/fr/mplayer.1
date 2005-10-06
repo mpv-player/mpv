@@ -1,4 +1,4 @@
-.\" synced with 1.1119
+.\" synced with 1.1131
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -235,10 +235,10 @@ Des exemples d'usage pour vous familiariser rapidement sont disponibles
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Contrôle au clavier
+.\" Contrôle interactif
 .\" --------------------------------------------------------------------------
 .
-.SH "CONTRÔLE AU CLAVIER"
+.SH "CONTRÔLE INTERACTIF"
 MPlayer dispose d'une couche de contrôle pleinement configurable, qui
 vous permet de contrôler MPlayer avec le clavier, la souris, le joystick
 ou une télécommande (en utilisant LIRC).
@@ -251,9 +251,9 @@ Ces touches peuvent/\:ne peuvent pas fonctionner, suivant votre pilote de
 sortie vidéo.
 .
 .TP
-.B contrôle général
+.B contrôle au clavier
 .PD 0
-.RSs
+.Rs
 .IPs "<\- et \->"
 Recule/\:avance de 10 secondes.
 .IPs "haut et bas"
@@ -264,10 +264,12 @@ recule/\:avance de 10 minutes
 Diminue/accélère la vitesse courante de lecture de 10%.
 .IPs "{ and }"
 Réduit de moitié/double la vitesse courante de lecture.
-.IPs "Backspace"
+.IPs "backspace"
 Reset playback speed to normal.
 .IPs "< et >"
 Recule/\:avance dans la liste de lecture (playlist).
+.IPs "ENTER"
+avance dans la liste de lecture, même après la fin
 .IPs "HOME et END"
 Va à au prochain/\:précédent arbre de lecture (playtree) dans la liste des
 pères.
@@ -309,6 +311,9 @@ décodage (voir \-framedrop et \-hardframedrop)
 Bascule l'affichage des sous-titres.
 .IPs "b / j"\ \ \ 
 Alterne entre les différents sous-titres disponibles.
+.IPs "y et g"
+Choisi le sous-titre après/avant dans la liste des sous-titres.
++Step forwards/backwards in the subtitle list.
 .IP F\ \ \ \ 
 Bascule l'affichage des "sous-titres forcés".
 .IPs a\ \ \ \ 
@@ -324,12 +329,14 @@ Réalise une capture d'écran (nécessite que le filtre "screenshot" soit chargé).
 .RE
 .PD 1
 .PP
+.RS
 (Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
 accélérée matériellement (xv, (x)vidix, (x)mga, etc), l'égaliseur
 logiciel (\-vf eq ou \-vf eq2) ou le filtre de teinte (\-vf hue).
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "1 et 2"
 Ajuste le contraste.
 .IPs "3 et 4"
@@ -341,11 +348,13 @@ Ajuste la saturation.
 .RE
 .PD 1
 .PP
+.RS
 (Les touches suivantes ne sont valides que lorsque le pilote de sortie
 vidéo quartz ou macosx est utilisé.)
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "command + 0"
 Divise par deux la taille de la fenêtre vidéo.
 .IPs "command + 1"
@@ -358,28 +367,57 @@ Bascule en mode plein-écran (voir aussi \-fs).
 Change l'alpha (transparence) de la fenêtre vidéo.
 .RE
 .PD 1
-.
-.TP
-.B Contrôle clavier de la GUI
+.PP
+.RS
+(Les touches suivantes ne sont valides que si vous avez un clavier avec
+des touches multimédia.)
+.PP
 .PD 0
-.RSs
+.RS
+.IPs "PAUSE"
+pause
+.IPs "STOP\ "
+Stop la lecture et quitte.
+.IPs "AVANT et SUIVANT"
+Navigue en arrière/\:avant d'une minute.
+.RE
+.PD 1
+.
+.PP
+.RS
+(Les touches suivantes ne sont valides uniquement si MPlayer a été
+compilé avec le support de la GUI et ont une priorité supérieure à celles
+définies plus haut dans ce document.)
+.RE
+.PP
+.PD 0
+.RS
 .IPs "ENTRÉE"
 Démarre la lecture.
 .IPs ESC\ \ 
 Stoppe la lecture.
 .IPs l\ \ \ \ 
 Charge un fichier.
+.IPs t\ \ \ \ 
+Charge un sous-titre.
 .IPs c\ \ \ \ 
-Navigateur de skins.
+navigateur de skins
 .IPs p\ \ \ \ 
-Bascule la liste de lecture (playlist).
+bascule vers la liste de lecture (playlist).
+.IPs r\ \ \ \ 
+préférences
 .RE
 .PD 1
 .
-.TP
-.B Contrôle entrée TV
+.PP
+.RS
+(Les touches suivantes ne sont valides uniquement si MPlayer a été
+compilé avec le support de l'entrée TV et ont une priorité supérieure à
+celles définies plus haut dans ce document.)
+.RE
+.PP
 .PD 0
-.RSs
+.RS
 .IPs "h et k"
 Sélectionne le canal précédent/\:prochain.
 .IPs n
@@ -389,6 +427,35 @@ Change la liste des canaux.
 .RE
 .PD 1
 .
+.
+.TP
+.B contrôle à la souris
+.PD 0
+.RS
+.IPs "bouton 3 et bouton 4"
+Navigue en arrière/\:avant d'une minute.
+.IPs "boutonn 5 et bouton 6"
+Diminue/\:augmente le volume.
+.RE
+.PD 1
+.
+.TP
+.B contrôle au joystick
+.PD 0
+.RS
+.IPs "gauche et droite"
+Navigue en arrière/\:avant de 10 secondes.
+.IPs "haut et bas"
+Navigue en arrière/\:avant d'une minute.
+.IPs "bouton 1"
+pause
+.IPs "bouton 2"
+Bascule entre les états de l'OSD\ : rien / navigation / navigation + temps
+écoulé / navigation + temps écoulé + temps total.
+.IPs "bouton 3 et bouton 4"
+Diminue/\:augmente le volume.
+.RE
+.PD 1
 .
 .
 .\" --------------------------------------------------------------------------
@@ -2974,7 +3041,7 @@ la luminosité, du contraste et du gamma sera uniquement paramétrable à
 travers les paramètres globaux du serveur X.
 .RSss
 0: Utilise la conversion logicielle (par défaut).
-Compatible avec toutes les version d'OpenGL.
+Compatible avec toutes les versions d'OpenGL.
 Offre le contrôle de la luminosité, du contraste et de la saturation.
 .br
 1: Utilise les "register combiners".
@@ -3245,15 +3312,11 @@ MJPEG, seconde génération.
 .PD 0
 .RSs
 .IPs dev=<périph>
-Définit le périphérique à utiliser.
-.IPs pal\ \ \ 
-Active la norme vidéo PAL.
-.IPs secam
-Active la norme vidéo SECAM.
-.IPs ntsc\ \ \ 
-Active la norme vidéo NTSC.
-.IPs prebuf
-Active le pré-tamponnage (prebuffering), non géré pour le moment.
+Définit le vidéo périphérique à utiliser.
+.IPs norm=<PAL|NTSC|SECAM|auto>
+Défini la norme vidéo à utiliser (par défaut\ : auto)
+.IPs (no)prebuf
+(Dés)Active le pré-tamponnage (prebuffering), non géré pour le moment.
 .RE
 .PD 1
 .
@@ -5825,6 +5888,21 @@ Fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
 .IPs 4
 Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
 qualité) (par défaut).
+.RE
+.PD 1
+Les dominances de champs disponibles sont:
+.PD 0
+.RSs
+.IPs -1
+auto (par défaut)
+Ne fonctionne que si le décodeur exporte les informations nécessaires
+et que les filtres de la chaîne de filtres appliqués avant tfields
+ne supriment pas cette information, sinon on commence par défaut
+par le champs du haut.
+.IPs 0
+champs du haut d'abord
+.IPs 1
+champs du bas d'abord
 .RE
 .PD 1
 .
