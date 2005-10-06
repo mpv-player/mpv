@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.17 -->
 <appendix id="users-vs-dev">
 <title>Lamentations du développeur</title>
 
@@ -17,8 +17,9 @@ a inclus une version CVS lourdement patchée de GCC dans sa distribution et l'a n
 <emphasis role="bold">2.96</emphasis>. Red Hat a inclus cette version parce que GCC
 3.0 n'était pas terminé à ce moment là, et ils avaient besoin d'un compilateur
 fonctionnant sur toutes leurs plateformes supportées, incluant IA64 et s390. Le
-distributeur Linux <emphasis role="bold">Mandrake</emphasis> a également suivi
-l'exemple de Red Hat et a lancé la diffusion de GCC 2.96 avec sa série Linux-Mandrake 8.0.
+distributeur Linux <emphasis role="bold">Mandrake</emphasis> (maintenant Mandriva) 
+a également suivi l'exemple de Red Hat et a lancé la diffusion de GCC 2.96 avec 
+sa série Linux-Mandrake 8.0.
 </para>
 </formalpara>
 
@@ -28,9 +29,10 @@ l'exemple de Red Hat et a lancé la diffusion de GCC 2.96 avec sa série Linux-Man
 L'équipe GCC a nié tout lien avec GCC 2.96 et a publié une
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">réponse officielle</ulink>
 à GCC 2.96. De nombreux développeurs à travers le monde ont commencé à avoir des
-problèmes avec GCC 2.96, et ont donc recommandé d'autres compilateurs. Par Exemple
-<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink> et
-<ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>.
+problèmes avec GCC 2.96, et plusieurs projets, dont
+<ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>,
+ont donc recommandé d'autres compilateurs.
+
 D'autres liens intéressants sont
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash about kernel 2.4.17</ulink>
@@ -73,7 +75,7 @@ plaît, abstenez-vous.
 Si vous avez des problèmes avec GCC 2.96, vous pouvez obtenir les paquetages 2.96-85
 sur le <ulink url="ftp://updates.redhat.com">serveur ftp</ulink> de Red Hat, ou
 d'utiliser les paquetages 3.0.4 offerts avec la version 7.2 et supérieur. Vous pouvez
-également obtenir les <ulink url="ftp://people.redhat.com/jakub/gcc/3.2-11/">paquets gcc-3.2-11</ulink>
+également obtenir les <ulink url="ftp://people.redhat.com/jakub/gcc/errata/3.2.3-37/">paquetages gcc-3.2.3-37</ulink>
 (non officiels, mais fonctionnant bien) et vous pouvez les installer avec le GCC 2.96
 que vous avez déjà. Mplayer les détectera et utilisera 3.2 au lieu de 2.96. Si vous ne
 voulez pas ou ne pouvez pas utiliser les paquetages binaires, voici comment vous pouvez
