@@ -1,579 +1,591 @@
-		NUT Open Container Format DRAFT 20050909
-		----------------------------------------
+        NUT Open Container Format DRAFT 20050909
+        ----------------------------------------
 
 
-                
-			Intro:
 
-Features / goals: 
-	(supported by the format, not necessarily by a specific implementation)
+        Intro:
+
+Features / goals:
+    (supported by the format, not necessarily by a specific implementation)
 
 Simple
-	use the same encoding for nearly all fields
-	simple decoding, so slow CPUs (and embedded systems) can handle it
+    use the same encoding for nearly all fields
+    simple decoding, so slow CPUs (and embedded systems) can handle it
+
 Extendible
-	no limit for the possible values of all fields (using universal vlc)
-	allow adding of new headers in the future
-	allow adding more fields at the end of headers
+    no limit for the possible values of all fields (using universal vlc)
+    allow adding of new headers in the future
+    allow adding more fields at the end of headers
+
 Compact
-	~0.2% overhead, for normal bitrates
-	index is <10kb per hour (1 keyframe every 3sec)
-	a usual header for a file is about 100 bytes (audio + video headers together)
-	a packet header is about ~1-8 bytes
+    ~0.2% overhead, for normal bitrates
+    index is <10kb per hour (1 keyframe every 3sec)
+    a usual header for a file is about 100 bytes (audio + video headers together)
+    a packet header is about ~1-8 bytes
+
 Error resistant
-	seeking / playback without an index
-	headers & index can be repeated
-	damaged files can be played back with minimal data loss and fast
-	resync times
-
-        
-			Definitions:
-
-MUST	the specific part must be done to conform to this standard
-SHOULD	it is recommended to be done that way, but not strictly required
+    seeking / playback without an index
+    headers & index can be repeated
+    damaged files can be played back with minimal data loss and fast
+    resync times
 
 
+            Definitions:
 
-			Syntax:
+MUST    the specific part must be done to conform to this standard
+SHOULD  it is recommended to be done that way, but not strictly required
+
+
+
+            Syntax:
 
 Since NUT heavily uses variable length fields, the simplest way to describe it
 is using a pseudocode approach.
 
-			Conventions:
+            Conventions:
 
 The data types have a name, used in the bitstream syntax description, a short
 text description and a pseudocode (functional) definition, optional notes may
 follow:
 
-name	(text description)
-	functional definition
-	[Optional notes]
+name    (text description)
+    functional definition
+    [Optional notes]
 
-The bitstream syntax elements have a tagname and a functional definition, they 
-are presented in a bottom up approach, again optional notes may follow and 
+The bitstream syntax elements have a tagname and a functional definition, they
+are presented in a bottom up approach, again optional notes may follow and
 are reproduced in the tag description:
 
-name:	(optional note)
-	functional definition
-	[Optional notes]
+name:    (optional note)
+    functional definition
+    [Optional notes]
 
 The in-depth tag description follows the bitstream syntax.
 The functional definition has a C-like syntax.
 
 
-		Type definitions:
+        Type definitions:
 
 
-f(n)	(n fixed bits in big-endian order)
-u(n)	(unsigned number encoded in n bits in MSB-first order)
+f(n)    (n fixed bits in big-endian order)
+u(n)    (unsigned number encoded in n bits in MSB-first order)
 
-v	(variable length value, unsigned)
-	value=0
-	do{
-		more_data			u(1)
-		data				u(7)
-		value= 128*value + data
-	}while(more_data)
-        
-s	(variable length value, signed)
-	temp					v
-	temp++
-	if(temp&1) value= -(temp>>1)
-	else       value=  (temp>>1)
+v   (variable length value, unsigned)
+    value=0
+    do{
+        more_data                       u(1)
+        data                            u(7)
+        value= 128*value + data
+    }while(more_data)
 
-b 	(binary data or string, to be use in vb, see below)
-	for(i=0; i<length; i++){
-		data[i]				u(8)
-	}
-	[Note: strings MUST be encoded in UTF-8]
+s   (variable length value, signed)
+    temp                                v
+    temp++
+    if(temp&1) value= -(temp>>1)
+    else       value=  (temp>>1)
 
-vb	(variable length binary data or string)
-	length					v
-	value					b
+b   (binary data or string, to be use in vb, see below)
+    for(i=0; i<length; i++){
+        data[i]                         u(8)
+    }
+    [Note: strings MUST be encoded in UTF-8]
+
+vb  (variable length binary data or string)
+    length                              v
+    value                               b
 
 
-		Bitstream syntax:
+        Bitstream syntax:
 
-		Common elements:
+        Common elements:
 
 packet header:
-	forward ptr				v
+    forward ptr                         v
 
-align_byte: 
-	while(not byte aligned)
-		one				f(1)
+align_byte:
+    while(not byte aligned)
+        one                             f(1)
 
 reserved_bytes:
-	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
-		reserved			u(8)
-	[a demuxer MUST ignore any reserved bytes
-	a muxer MUST NOT write any reserved bytes, as this would make it
-	 impossible to add new fields at the end of packets in the future in
-	 a compatible way]
+    for(i=0; i<forward_ptr - length_of_non_reserved; i++)
+        reserved                        u(8)
+    [a demuxer MUST ignore any reserved bytes
+    a muxer MUST NOT write any reserved bytes, as this would make it
+    impossible to add new fields at the end of packets in the future
+    in a compatible way]
 
-		Headers:
+        Headers:
 
 main header:
-	main_startcode				f(64)
-	packet header
-	version					v
-	stream_count				v
-	max_distance				v
-	max_index_distance			v
-	global_time_base_nom			v
-	global_time_base_denom			v
-	for(i=0; i<256; ){
-		tmp_flag			v
-		tmp_fields			v
-		if(tmp_fields>0) tmp_pts	s
-		if(tmp_fields>1) tmp_mul	v
-		if(tmp_fields>2) tmp_stream	v
-		if(tmp_fields>3) tmp_size	v
-		else tmp_size=0
-		if(tmp_fields>4) tmp_res	v
-		else tmp_res=0
-		if(tmp_fields>5) count		v
-		else count= tmp_mul - tmp_size
-		for(j=6; j<tmp_fields; j++){
-			tmp_reserved[i]		v
-		}
-		for(j=0; j<count && i<256; j++, i++){
-			flags[i]= tmp_flag;
-			stream_id_plus1[i]= tmp_stream;
-			data_size_mul[i]= tmp_mul;
-			data_size_lsb[i]= tmp_size + j;
-			pts_delta[i]= tmp_pts;
-			reserved_count[i]= tmp_res;
-		}
-	}
-	reserved_bytes
-	checksum				u(32)
+    main_startcode                      f(64)
+    packet header
+    version                             v
+    stream_count                        v
+    max_distance                        v
+    max_index_distance                  v
+    global_time_base_nom                v
+    global_time_base_denom              v
+    for(i=0; i<256; ){
+        tmp_flag                        v
+        tmp_fields                      v
+        if(tmp_fields>0) tmp_pts        s
+        if(tmp_fields>1) tmp_mul        v
+        if(tmp_fields>2) tmp_stream     v
+        if(tmp_fields>3) tmp_size       v
+        else tmp_size=0
+        if(tmp_fields>4) tmp_res        v
+        else tmp_res=0
+        if(tmp_fields>5) count          v
+        else count= tmp_mul - tmp_size
+        for(j=6; j<tmp_fields; j++){
+            tmp_reserved[i]             v
+        }
+        for(j=0; j<count && i<256; j++, i++){
+            flags[i]= tmp_flag;
+            stream_id_plus1[i]= tmp_stream;
+            data_size_mul[i]= tmp_mul;
+            data_size_lsb[i]= tmp_size + j;
+            pts_delta[i]= tmp_pts;
+            reserved_count[i]= tmp_res;
+        }
+    }
+    reserved_bytes
+    checksum                            u(32)
 
 stream_header:
-	stream_startcode			f(64)
-	packet_header
-	stream_id				v
-	stream_class				v
-	fourcc					vb
-	time_base_nom				v
-	time_base_denom				v
-	msb_pts_shift				v
-	decode_delay				v
-	fixed_fps				u(1)
-	reserved				u(7)
-	codec_specific_data			vb
+    stream_startcode                    f(64)
+    packet_header
+    stream_id                           v
+    stream_class                        v
+    fourcc                              vb
+    time_base_nom                       v
+    time_base_denom                     v
+    msb_pts_shift                       v
+    decode_delay                        v
+    fixed_fps                           u(1)
+    reserved                            u(7)
+    codec_specific_data                 vb
 
 video_stream_header:
-	stream_header
-	width					v
-	height					v
-	sample_width				v
-	sample_height				v
-	colorspace_type				v
-	reserved_bytes
-	checksum				u(32)
+    stream_header
+    width                               v
+    height                              v
+    sample_width                        v
+    sample_height                       v
+    colorspace_type                     v
+    reserved_bytes
+    checksum                            u(32)
 
 audio_stream_header:
-	stream_header
-	samplerate_nom				v
-	samplerate_denom			v
-	channel_count				v
-	reserved_bytes
-	checksum				u(32)
+    stream_header
+    samplerate_nom                      v
+    samplerate_denom                    v
+    channel_count                       v
+    reserved_bytes
+    checksum                            u(32)
 
 other_stream_header:
-	stream_header
-	reserved_bytes
-	checksum				u(32)
+    stream_header
+    reserved_bytes
+    checksum                            u(32)
 
-		Basic Packets:
- 
+        Basic Packets:
+
 frame:
-	frame_code				f(8)
-	if(stream_id_plus1[frame_code]==0){
-		stream_id			v
-	}
-	if(pts_delta[frame_code]==0){
-		coded_pts			v
-	}
-	if(flags[frame_code]&1){
-		data_size_msb			v
-	}
-	for(i=0; i<reserved_count[frame_code]; i++)
-		reserved			v
-	data
-                
+    frame_code                          f(8)
+    if(stream_id_plus1[frame_code]==0){
+        stream_id                       v
+    }
+    if(pts_delta[frame_code]==0){
+        coded_pts                       v
+    }
+    if(flags[frame_code]&1){
+        data_size_msb                   v
+    }
+    for(i=0; i<reserved_count[frame_code]; i++)
+        reserved                        v
+    data
+
 index:
-	index_startcode				f(64)
-	packet header
-	stream_id				v
-	max_pts					v
-	index_length				v
-	for(i=0; i<index_length; i++){
-		index_pts			v
-		index_position			v
-	}
-	reserved_bytes
-	checksum				u(32)
+    index_startcode                     f(64)
+    packet header
+    stream_id                           v
+    max_pts                             v
+    index_length                        v
+    for(i=0; i<index_length; i++){
+        index_pts                       v
+        index_position                  v
+    }
+    reserved_bytes
+    checksum                            u(32)
 
 info_frame: (optional)
-	for(;;){
-		id				v
-		if(id==0) break
-		name= info_table[id][0]
-		type= info_table[id][1]
-		if(type==NULL)
-			type			vb
-		if(name==NULL)
-			name			vb
-		if(type=="v")
-			value			v
-		else
-			value			vb
-	}
-	reserved_bytes
-        checksum				u(32)
+    for(;;){
+        id                              v
+        if(id==0) break
+        name= info_table[id][0]
+        type= info_table[id][1]
+        if(type==NULL)
+            type                        vb
+        if(name==NULL)
+            name                        vb
+        if(type=="v")
+            value                       v
+        else
+            value                       vb
+    }
+    reserved_bytes
+        checksum                        u(32)
 
 info_packet: (optional)
-	info_startcode				f(64)
-	packet header
-	info_frame 
+    info_startcode                      f(64)
+    packet header
+    info_frame
 
 sync_point:
-	frame_startcode				f(64)
-	global_timestamp			v
-	back_ptr				v
+    frame_startcode                     f(64)
+    global_timestamp                    v
+    back_ptr                            v
 
-			Complete definition:
+            Complete definition:
 
 file:
-	file_id_string
-	while(!eof && next_code != index_startcode){
-		main_header
-		for(i=0; i<stream_count; i++){
-			if(next_packet==video_stream_header)
-				video_stream_header
-			else if(next_packet==audio_stream_header)
-				audio_stream_header
-			else
-				other_stream_header
-		}
-		while(next_code == info_startcode){
-			info_packet
-		}
-		while(next_code != main_startcode){
-			if(next_code == frame_startcode)
-				sync_point
-			frame
-		}
-	}
-	if (next_code == index_startcode){
-		while(!eof){
-			index
-		}
-		index_ptr			u(64)
-	}
+    file_id_string
+    while(!eof && next_code != index_startcode){
+        main_header
+        for(i=0; i<stream_count; i++){
+            if(next_packet==video_stream_header)
+                video_stream_header
+            else if(next_packet==audio_stream_header)
+                audio_stream_header
+            else
+                other_stream_header
+        }
+        while(next_code == info_startcode){
+            info_packet
+        }
+        while(next_code != main_startcode){
+            if(next_code == frame_startcode)
+                sync_point
+            frame
+        }
+    }
+    if (next_code == index_startcode){
+        while(!eof){
+            index
+        }
+        index_ptr                       u(64)
+    }
 
 
-			Tag description:
+            Tag description:
 
 forward_ptr
-	size of the packet data (exactly the distance from the first byte
-	after the forward_ptr to the first byte of the next packet)
+    size of the packet data (exactly the distance from the first byte
+    after the forward_ptr to the first byte of the next packet)
 
 back_ptr
-	real_back_ptr = back_ptr * 8 + 7
-	real_back_ptr must point to a position such that a syncpoint
-	startcode begins within the next 8 bytes, and such that at least
-	one keyframe for each stream lies between the syncpoint to which
-	real_back_ptr points, and the current syncpoint.
+    real_back_ptr = back_ptr * 8 + 7
+    real_back_ptr must point to a position such that a syncpoint
+    startcode begins within the next 8 bytes, and such that at least
+    one keyframe for each stream lies between the syncpoint to which
+    real_back_ptr points, and the current syncpoint.
 
 file_id_string
-	"nut/multimedia container\0"
+    "nut/multimedia container\0"
 
 *_startcode
         all startcodes start with 'N'
 
 main_startcode
-	0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
+    0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
 
 stream_starcode
-	0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
+    0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
 
 frame_startcode
-	0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
-	
-	frame_startcodes SHOULD be placed immediately before a keyframe if the
-	previous frame of the same stream was a non-keyframe, unless such
-	non-keyframe - keyframe transitions are very frequent
+    0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
+
+    frame_startcodes SHOULD be placed immediately before a keyframe if the
+    previous frame of the same stream was a non-keyframe, unless such
+    non-keyframe - keyframe transitions are very frequent
 
 index_startcode
-	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
+    0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
+
 info_startcode
-	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
+    0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
 
 version
-	NUT version. The current value is 2.
+    NUT version. The current value is 2.
 
 max_distance
-	max distance of frame_startcodes, the distance may only be larger if
-	there is only a single frame between the two frame_startcodes this can
-	be used by the demuxer to detect damaged frame headers if the damage
-	results in too long of a chain
-	
-	SHOULD be set to <=32768 or at least <=65536 unless there is a very
-	good reason to set it higher, otherwise reasonable error recovery will
-	be impossible
+    max distance of frame_startcodes, the distance may only be larger if
+    there is only a single frame between the two frame_startcodes this can
+    be used by the demuxer to detect damaged frame headers if the damage
+    results in too long of a chain
+
+    SHOULD be set to <=32768 or at least <=65536 unless there is a very
+    good reason to set it higher, otherwise reasonable error recovery will
+    be impossible
 
 max_index_distance
-	max distance of keyframes which are represented in the index, the
-	distance between consecutive entries A and B may only be larger if
-	there are no keyframes within this stream between A and B
-	SHOULD be set to <=32768 or at least <=65536 unless there is a very
-	good reason to set it higher
+    max distance of keyframes which are represented in the index, the
+    distance between consecutive entries A and B may only be larger if
+    there are no keyframes within this stream between A and B
+    SHOULD be set to <=32768 or at least <=65536 unless there is a very
+    good reason to set it higher
 
 stream_id
-	Stream identifier
-	stream_id MUST be < stream_count
+    Stream identifier
+    stream_id MUST be < stream_count
 
 stream_class
-	0	video
-	1	audio
-	2	subtiles
-	3	metadata
-	4	userdata
-	in metadata streams each frame contains exactly one info frame
-	Note: the remaining values are reserved and MUST NOT be used
-	     a demuxer MUST ignore streams with reserved classes
+    0    video
+    1    audio
+    2    subtiles
+    3    metadata
+    4    userdata
+    in metadata streams each frame contains exactly one info frame
+    Note: the remaining values are reserved and MUST NOT be used
+          a demuxer MUST ignore streams with reserved classes
 
 fourcc
-	identification for the codec
-	example: "H264"
-	MUST contain 2 or 4 bytes, note, this might be increased in the future
-	if needed
+    identification for the codec
+    example: "H264"
+    MUST contain 2 or 4 bytes, note, this might be increased in the future
+    if needed
 
 time_base_nom / time_base_denom = time_base
-	the length of a timer tick in seconds, this MUST be equal to the 1/fps
-	if fixed_fps is 1
-	time_base_nom and time_base_denom MUST NOT be 0
-	time_base_nom and time_base_denom MUST be relatively prime
-	time_base_denom MUST be < 2^31
-	examples:
-        	fps	time_base_nom	time_base_denom
-		30	1		30
-		29.97	1001		30000
-		23.976	1001		24000
+    the length of a timer tick in seconds, this MUST be equal to the 1/fps
+    if fixed_fps is 1
+    time_base_nom and time_base_denom MUST NOT be 0
+    time_base_nom and time_base_denom MUST be relatively prime
+    time_base_denom MUST be < 2^31
+    examples:
+        fps       time_base_nom    time_base_denom
+        30        1                30
+        29.97     1001             30000
+        23.976    1001             24000
 
 global_time_base_nom / global_time_base_denom = global_time_base
-	the length of a timer tick in seconds
-	global_time_base_nom and global_time_base_denom MUST NOT be 0
-	global_time_base_nom and global_time_base_denom MUST be relatively prime
-	global_time_base_denom MUST be < 2^31
+    the length of a timer tick in seconds
+    global_time_base_nom and global_time_base_denom MUST NOT be 0
+    global_time_base_nom and global_time_base_denom MUST be relatively prime
+    global_time_base_denom MUST be < 2^31
 
 global_timestamp
-	timestamp in global_time_base units
-	when a global_timestamp is encountered the last_pts of all
-	streams is set to the following:
-	
-	ln= global_time_base_nom*time_base_denom
-	sn= global_timestamp
-	d1= global_time_base_denom
-	d2= time_base_nom
-	last_pts= (ln/d1*sn + ln%d1*sn/d1)/d2
-	Note: this calculation MUST be done with unsigned 64 bit integers, and 
-	is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
+    timestamp in global_time_base units
+    when a global_timestamp is encountered the last_pts of all
+    streams is set to the following:
+
+    ln       = global_time_base_nom*time_base_denom
+    sn       = global_timestamp
+    d1       = global_time_base_denom
+    d2       = time_base_nom
+    last_pts = (ln/d1*sn + ln%d1*sn/d1)/d2
+    Note: this calculation MUST be done with unsigned 64 bit integers, and
+    is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
 
 msb_pts_shift
-	amount of bits in lsb_pts
-	MUST be <16
+    amount of bits in lsb_pts
+    MUST be <16
 
 decode_delay
-	maximum time between input and output for a codec, used to generate
-	dts from pts
-	is set to 0 for streams without B-frames, and set to 1 for streams with
-	B-frames, may be larger for future codecs
-        
+    maximum time between input and output for a codec, used to generate
+    dts from pts
+    is set to 0 for streams without B-frames, and set to 1 for streams with
+    B-frames, may be larger for future codecs
+
 fixed_fps
-	1 indicates that the fps is fixed
+    1 indicates that the fps is fixed
 
 codec_specific_data
-	private global data for a codec (could be huffman tables or ...)
+    private global data for a codec (could be huffman tables or ...)
 
 frame_code
-	the meaning of this byte is stored in the main header
-	the value 78 ('N') is forbidden to ensure that the byte is always
-	different from the first byte of any startcode
+    the meaning of this byte is stored in the main header
+    the value 78 ('N') is forbidden to ensure that the byte is always
+    different from the first byte of any startcode
 
 flags[frame_code]
-	first of the flags from MSB to LSB are called KD
-	if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
-	K is the keyframe_type 
-		0-> no keyframe, 
-		1-> keyframe, 
-	flags=4 can be used to mark illegal frame_code bytes
-	frame_code=78 must have flags=4
-	Note: frames MUST NOT depend(1) upon frames prior to the last 
-	  frame_startcode
-	Important: depend(1) means dependency on the container level (NUT) not
-	dependency on the codec level
+    first of the flags from MSB to LSB are called KD
+    if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
+    K is the keyframe_type
+        0 -> no keyframe,
+        1 -> keyframe,
+    flags=4 can be used to mark illegal frame_code bytes
+    frame_code=78 must have flags=4
+    Note: frames MUST NOT depend(1) upon frames prior to the last
+          frame_startcode
+    Important: depend(1) means dependency on the container level (NUT) not
+    dependency on the codec level
 
 stream_id_plus1[frame_code]
-	must be <250
-	if it is 0, then the stream_id is coded in the frame
+    must be <250
+    if it is 0, then the stream_id is coded in the frame
 
 data_size_mul[frame_code]
-	must be <16384
+    must be <16384
 
 data_size_lsb[frame_code]
-	must be <16384
+    must be <16384
 
 pts_delta[frame_code]
-	must be <16384 and >-16384
+    must be <16384 and >-16384
 
-data_size       
-	data_size= data_size_lsb + data_size_msb*data_size_mul;
+data_size
+    data_size= data_size_lsb + data_size_msb*data_size_mul;
 
 coded_pts
-	if coded_pts < (1<<msb_pts_shift) then it is an lsb
-	pts, otherwise it is a full pts + (1<<msb_pts_shift)
-	lsb pts is converted to a full pts by:
-	mask = (1<<msb_pts_shift)-1;
-	delta= last_pts - mask/2
-	pts= ((pts_lsb-delta)&mask) + delta
-        
+    if coded_pts < (1<<msb_pts_shift) then it is an lsb
+    pts, otherwise it is a full pts + (1<<msb_pts_shift)
+    lsb pts is converted to a full pts by:
+    mask  = (1<<msb_pts_shift)-1;
+    delta = last_pts - mask/2
+    pts   = ((pts_lsb-delta)&mask) + delta
+
 lsb_pts
-	least significant bits of the pts in time_base precision
+    least significant bits of the pts in time_base precision
         Example: IBBP display order
-		keyframe pts=0                     -> pts=0
-		frame                    lsb_pts=3 -> pts=3
-		frame                    lsb_pts=1 -> pts=1
-		frame                    lsb_pts=2 -> pts=2
-		...
-		keyframe msb_pts=257               -> pts=257
-		frame                    lsb_pts=255->pts=255
-		frame                    lsb_pts=0 -> pts=256
-		frame                    lsb_pts=4 -> pts=260
-		frame                    lsb_pts=2 -> pts=258
-		frame                    lsb_pts=3 -> pts=259
-	all pts's of keyframes of a single stream MUST be monotone
+        keyframe pts=0                       -> pts=0
+        frame                    lsb_pts=3   -> pts=3
+        frame                    lsb_pts=1   -> pts=1
+        frame                    lsb_pts=2   -> pts=2
+        ...
+        keyframe msb_pts=257                 -> pts=257
+        frame                    lsb_pts=255 -> pts=255
+        frame                    lsb_pts=0   -> pts=256
+        frame                    lsb_pts=4   -> pts=260
+        frame                    lsb_pts=2   -> pts=258
+        frame                    lsb_pts=3   -> pts=259
+    all pts's of keyframes of a single stream MUST be monotone
 
 dts
-	dts is calculated by using a decode_delay+1 sized buffer for each 
-	stream, into which the current pts is inserted and the element with
-	the smallest value is removed, this is then the current dts
-	this buffer is initalized with decode_delay -1 elements
-	all frames must be monotone, that means a frame
-	which occurs later in the stream must have a larger or equal dts
-	than an earlier frame
+    dts is calculated by using a decode_delay+1 sized buffer for each
+    stream, into which the current pts is inserted and the element with
+    the smallest value is removed, this is then the current dts
+    this buffer is initalized with decode_delay -1 elements
+    all frames must be monotone, that means a frame
+    which occurs later in the stream must have a larger or equal dts
+    than an earlier frame
 
 width/height
-	MUST be set to the coded width/height
+    MUST be set to the coded width/height
 
 sample_width/sample_height (aspect ratio)
-	sample_width is the horizontal distance between samples
-	sample_width and sample_height MUST be relatively prime if not zero
-	MUST be 0 if unknown
-        
+    sample_width is the horizontal distance between samples
+    sample_width and sample_height MUST be relatively prime if not zero
+    MUST be 0 if unknown
+
 colorspace_type
-	0	unknown
-	1	ITU Rec 624 / ITU Rec 601 Y range: 16..235 Cb/Cr range: 16..240
-	2	ITU Rec 709               Y range: 16..235 Cb/Cr range: 16..240
-	17	ITU Rec 624 / ITU Rec 601 Y range:  0..255 Cb/Cr range:  0..255
-	18	ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
+     0    unknown
+     1    ITU Rec 624 / ITU Rec 601 Y range: 16..235 Cb/Cr range: 16..240
+     2    ITU Rec 709               Y range: 16..235 Cb/Cr range: 16..240
+    17    ITU Rec 624 / ITU Rec 601 Y range:  0..255 Cb/Cr range:  0..255
+    18    ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
 
 samplerate_nom / samplerate_denom = samplerate
-	the number of samples per second
+    the number of samples per second
 
 checksum
-	adler32 checksum
-	checksum is calculated for the area pointed to by forward_ptr not
-	including the checksum itself (from first byte after the
-	forward_ptr until last byte before the checksum).
+    adler32 checksum
+    checksum is calculated for the area pointed to by forward_ptr not
+    including the checksum itself (from first byte after the
+    forward_ptr until last byte before the checksum).
 
 max_pts
-	The highest pts in the stream.
+    The highest pts in the stream.
 
 index_pts
-	value of the pts of a keyframe relative to the last keyframe
-	stored in this index
+    value of the pts of a keyframe relative to the last keyframe
+    stored in this index
 
 index_position
-	position in bytes of the first byte of a keyframe, relative to the
-	last keyframe stored in this index
-	there MUST be no keyframe with the same stream_id as this index between
-	two consecutive index entries if they are more than max_index_distance
-	apart
+    position in bytes of the first byte of a keyframe, relative to the
+    last keyframe stored in this index
+    there MUST be no keyframe with the same stream_id as this index between
+    two consecutive index entries if they are more than max_index_distance
+    apart
 
 index_ptr
-	Length in bytes from the first byte of the first index startcode
-	to the first byte of the index_ptr. If there is no index, index_ptr
-	MUST NOT be written.
+    Length in bytes from the first byte of the first index startcode
+    to the first byte of the index_ptr. If there is no index, index_ptr
+    MUST NOT be written.
 
 id
-	the ID of the type/name pair, so it is more compact
-	0 means end
-                
+    the ID of the type/name pair, so it is more compact
+    0 means end
+
 type
-	for example: "UTF8" -> string or "JPEG" -> JPEG image
-	Note: nonstandard fields should be prefixed by "X-"
-	Note: MUST be less than 6 byte long (might be increased to 64 later)
+    for example: "UTF8" -> string or "JPEG" -> JPEG image
+    Note: nonstandard fields should be prefixed by "X-"
+    Note: MUST be less than 6 byte long (might be increased to 64 later)
 
 info packet types
-	the name of the info entry, valid names are
-	"StreamId"	the stream(s) to which the info packet applies
-
-	"Author"
-	"Description"
-	"Copyright"
-	"Encoder"	the name & version of the software used for encoding
-	"Title"
-	"Cover"		an image of the (CD, DVD, VHS, ..) cover (preferably PNG or JPEG)
-	"Source"	"DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", 
-			"LD"
-			Optional: appended PAL, NTSC, SECAM, ... in parentheses
-	"CaptureDevice"	"BT878", "BT848", "webcam", ... (more exact names are fine too)
-	"CreationTime"	"2003-01-20 20:13:15Z", ... 
-			(ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
-			Note: do not forget the timezone
-	"Keywords"
-	"TotalTime"	total length of the stream in msecs
-	"Language"	ISO 639 and ISO 3166 for language/country code
-			something like "eng" (US english), can be 0 if unknown
-			and "multi" if several languages
-			see http://www.loc.gov/standards/iso639-2/englangn.html
-			and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html the language code
-	"Disposition"	"original", "dub" (translated), "comment", "lyrics", "karaoke"
-	Note: if someone needs some others, please tell us about them, so we can
-	      add them to the official standard (if they are sane)
-	Note: nonstandard fields should be prefixed by "X-"
-	Note: MUST be less than 64 bytes long
+    the name of the info entry, valid names are
+    "StreamId"
+        the stream(s) to which the info packet applies
+    "Author"
+    "Description"
+    "Copyright"
+    "Encoder"
+        the name & version of the software used for encoding
+    "Title"
+    "Cover"
+        image of the (CD, DVD, VHS, ..) cover (preferably PNG or JPEG)
+    "Source"
+        "DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", "LD"
+        Optional: appended PAL, NTSC, SECAM, ... in parentheses
+    "CaptureDevice"
+        "BT878", "BT848", "webcam", ... (more exact names are fine too)
+    "CreationTime"
+        "2003-01-20 20:13:15Z", ...
+        (ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
+        Note: do not forget the timezone
+    "Keywords"
+    "TotalTime"
+        total length of the stream in msecs
+    "Language"
+        ISO 639 and ISO 3166 for language/country code
+        something like "eng" (US english), can be 0 if unknown
+        and "multi" if several languages
+        see http://www.loc.gov/standards/iso639-2/englangn.html
+        and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html
+        the language code
+    "Disposition"
+        "original", "dub" (translated), "comment", "lyrics", "karaoke"
+        Note: if someone needs some others, please tell us about them, so we
+              can add them to the official standard (if they are sane)
+        Note: nonstandard fields should be prefixed by "X-"
+        Note: MUST be less than 64 bytes long
 
 value
-	value of this name/type pair
-	
+    value of this name/type pair
+
 stuffing
-        0x80 can be placed in front of any type v entry for stuffing purposes
+    0x80 can be placed in front of any type v entry for stuffing purposes
 
 info_table[][2]={
-	{NULL			,  NULL }, // end
-	{NULL			,  NULL },
-	{NULL			, "UTF8"},
-	{NULL			, "v"},
-	{NULL			, "s"},
-	{"StreamId"		, "v"},
-	{"Author"		, "UTF8"},
-	{"Titel"		, "UTF8"},
-	{"Language"		, "UTF8"},
-	{"Description"		, "UTF8"},
-	{"Copyright"		, "UTF8"},
-	{"Encoder"		, "UTF8"},
-	{"Keyword"		, "UTF8"},
-	{"Cover"		, "JPEG"},
-	{"Cover"		, "PNG"},
-	{"Disposition"		, "UTF8"},
+    {NULL            ,  NULL }, // end
+    {NULL            ,  NULL },
+    {NULL            , "UTF8"},
+    {NULL            , "v"},
+    {NULL            , "s"},
+    {"StreamId"      , "v"},
+    {"Author"        , "UTF8"},
+    {"Titel"         , "UTF8"},
+    {"Language"      , "UTF8"},
+    {"Description"   , "UTF8"},
+    {"Copyright"     , "UTF8"},
+    {"Encoder"       , "UTF8"},
+    {"Keyword"       , "UTF8"},
+    {"Cover"         , "JPEG"},
+    {"Cover"         , "PNG"},
+    {"Disposition"   , "UTF8"},
 };
 
-			Structure:
+            Structure:
 
 the headers MUST be in exactly the following order (to simplify demuxer design)
 main header
@@ -582,7 +594,7 @@ stream_header (id=1)
 ...
 stream_header (id=n)
 
-headers may be repeated, but if they are, then they MUST all be repeated 
+headers may be repeated, but if they are, then they MUST all be repeated
 together and repeated headers MUST be identical
 headers MAY only repeat at the closest possible positions after 2^x where x is
 an integer and the file end, so the headers may be repeated at 4102 if that is
@@ -594,24 +606,24 @@ headers MUST be repeated at least twice (so they exist three times in a file)
 
 there MUST be a sync point immediately before the first frame after any headers
 
-		Index
+        Index
 Note: with realtime streaming, there is no end, so no index there either
 An index SHOULD be written for every stream. Indices MUST be placed at end
 of file. Indices MAY be repeated for a stream.
 
-		Info frames
+        Info frames
 Info frames can be used to describe the file or some part of it (chapters)
 
-		Unknown packets
+        Unknown packets
 MUST be ignored by the demuxer
 
-			demuxer (non-normative)
+            demuxer (non-normative)
 
 in the absence of a valid header at the beginning, players SHOULD search for
 backup headers starting at offset 2^x; for each x players SHOULD end their
 search at a particular offset when any startcode is found (including syncpoint)
 
-			Semantic requirements
+            Semantic requirements
 
 If more than one stream of a given stream class is present, each one MUST
 have info tags specifying disposition, and if applicable, language.
@@ -621,85 +633,85 @@ is wrapped in a structure to facilitate more than one stream or otherwise
 duplicate the role of a container. any such file is to be considered invalid.
 
 
-			Sample code (Public Domain, & untested)
+            Sample code (Public Domain, & untested)
 
 typedef BufferContext{
-	uint8_t *buf;
-	uint8_t *buf_ptr;
+    uint8_t *buf;
+    uint8_t *buf_ptr;
 }BufferContext;
 
 static inline uint64_t get_bytes(BufferContext *bc, int count){
-	uint64_t val=0;
+    uint64_t val=0;
 
-	assert(count>0 && count<9);
-        
-	for(i=0; i<count; i++){
-		val <<=8;
-		val += *(bc->buf_ptr++);
-	}
-        
-	return val;
+    assert(count>0 && count<9);
+
+    for(i=0; i<count; i++){
+        val <<=8;
+        val += *(bc->buf_ptr++);
+    }
+
+    return val;
 }
 
 static inline void put_bytes(BufferContext *bc, int count, uint64_t val){
-	uint64_t val=0;
+    uint64_t val=0;
 
-	assert(count>0 && count<9);
+    assert(count>0 && count<9);
 
-	for(i=count-1; i>=0; i--){
-		*(bc->buf_ptr++)= val >> (8*i);
-	}
-        
-	return val;
+    for(i=count-1; i>=0; i--){
+        *(bc->buf_ptr++)= val >> (8*i);
+    }
+
+    return val;
 }
 
 static inline uint64_t get_v(BufferContext *bc){
-	uint64_t val= 0;
+    uint64_t val= 0;
 
-	for(; space_left(bc) > 0; ){
-		int tmp= *(bc->buf_ptr++);
-		if(tmp&0x80)
-			val= (val<<7) + tmp - 0x80;
-		else
-			return (val<<7) + tmp;
-	}
-        
-	return -1;
+    for(; space_left(bc) > 0; ){
+        int tmp= *(bc->buf_ptr++);
+        if(tmp&0x80)
+            val= (val<<7) + tmp - 0x80;
+        else
+            return (val<<7) + tmp;
+    }
+
+    return -1;
 }
 
 static inline int put_v(BufferContext *bc, uint64_t val){
-	int i;
-        
-	if(space_left(bc) < 9) return -1;
+    int i;
 
-	val &= 0x7FFFFFFFFFFFFFFFULL; // FIXME can only encode upto 63 bits currently
-	for(i=7; ; i+=7){
-		if(val>>i == 0) break;
-	}
+    if(space_left(bc) < 9) return -1;
 
-	for(i-=7; i>0; i-=7){
-		*(bc->buf_ptr++)= 0x80 | (val>>i);
-	}
-	*(bc->buf_ptr++)= val&0x7F;
-        
-	return 0;
+    val &= 0x7FFFFFFFFFFFFFFFULL; // FIXME can only encode upto 63 bits currently
+    for(i=7; ; i+=7){
+        if(val>>i == 0) break;
+    }
+
+    for(i-=7; i>0; i-=7){
+        *(bc->buf_ptr++)= 0x80 | (val>>i);
+    }
+    *(bc->buf_ptr++)= val&0x7F;
+
+    return 0;
 }
 
 static int64_t get_dts(int64_t pts, int64_t *pts_cache, int delay, int reset){
-	if(reset) memset(pts_cache, -1, delay*sizeof(int64_t));
+    if(reset) memset(pts_cache, -1, delay*sizeof(int64_t));
 
-	while(delay--){
-		int64_t t= pts_cache[delay];
-		if(t < pts){
-			pts_cache[delay]= pts;
-			pts= t;
-		}
-	}
+    while(delay--){
+        int64_t t= pts_cache[delay];
+        if(t < pts){
+            pts_cache[delay]= pts;
+            pts= t;
+        }
+    }
 
-	return pts;
+    return pts;
 }
 
-		        Authors
+                Authors
 
 Folks from the MPlayer developers mailing list (http://www.mplayerhq.hu/).
 Authors in alphabetical order: (FIXME! Tell us if we left you out)
