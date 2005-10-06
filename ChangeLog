@@ -114,6 +114,7 @@ MPlayer (1.0)
     * fixed ugly looking OSD with -vo gl2 and MMX
     * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
     * libdvdcss updated to 1.2.9
+    * configure check and compiler optimization options for VIA C3
 
 
   pre7try2: August 26, 2005
