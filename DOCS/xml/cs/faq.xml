@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.93  -->
+<!-- Synced with: 1.96  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -69,8 +69,8 @@ nástroje, stejně jako
 </qandaentry>
 </qandadiv>
 
-<qandadiv id="faq-compilation">
-<title>Kompilace</title>
+<qandadiv id="faq-compilation-installation">
+<title>Kompilace a instalace</title>
 <qandaentry>
 <question><para>
 Kompilace skončí s chybou a <application>gcc</application> vypíše nějakou
@@ -208,6 +208,12 @@ Jak si mohu udělat snímek obrazovky?
 Abyste si mohli udělat snímek, musíte použít video výstupní rozhraní, které
 nepoužívá překrývání. Jde to například pod X11 s <option>-vo x11</option>, pod
 Windows funguje <option>-vo directx:noaccel</option>.
+</para>
+<para>
+Alternativně můžete spustit <application>MPlayer</application> s video filtrem
+<systemitem>screenshot</systemitem>
+(<option>-vf screenshot</option>) a stisknout tlačítko <keycap>s</keycap>
+pro sejmutí obrazu.
 </para></answer>
 </qandaentry>
 
@@ -1034,6 +1040,39 @@ hardwarové přehrávače si mohou vylámat zuby na pokročilýchvlastnostech, které
 nikoli; naproti tomu je <systemitem class="library">XviD</systemitem>
 blíže <systemitem class="library">libavcodec</systemitem>u z hlediska funkčnosti
 a je podporován všemi dobrými přehrávači.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu enkódovat soubor jen se zvukem?
+</para></question>
+<answer><para>
+Použijte <filename>aconvert</filename> z podadresáře
+<filename class="directory">TOOLS</filename>
+ve zdrojových kódech MPlayeru.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu přehrát titulky zabudované v AVI?
+</para></question>
+<answer><para>
+Použijte <filename>avisubdump.c</filename> z podadresáře
+<filename class="directory">TOOLS</filename>, nebo si přečtěte
+<ulink url="http://xlife.zuavra.net/curse/0012/">tento dokument o extrakci/demultiplexování titulků zabudovaných v OpenDML AVI souborech</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+MPlayer neumí...
+</para></question>
+<answer><para>
+Proberte se podadresářem <filename class="directory">TOOLS</filename>,
+ve kterém naleznete řadu skriptů a udělátek. Dokumentaci k nim naleznete
+v souboru <filename>TOOLS/README</filename>.
 </para></answer>
 </qandaentry>
 
