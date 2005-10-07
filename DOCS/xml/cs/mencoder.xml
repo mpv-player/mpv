@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.92 -->
+<!-- Synced with: 1.94 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -221,7 +221,8 @@ Příklad:
 <screen>
 mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>další_volby</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>výstup.mpg</replaceable>
 </screen>
-Vytvoření MPEG-1 souboru vhodného pro výměnu:
+Vytvoření MPEG-1 souboru vhodného pro přehrávání na systémech s minimální
+podporou multimédií, jako je výchozí instalace Windows:
 <screen>
 mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
 <replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
