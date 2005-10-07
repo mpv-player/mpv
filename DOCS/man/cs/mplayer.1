@@ -1,4 +1,4 @@
-.\" synced with 1.1128
+.\" synced with 1.1131
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -233,10 +233,10 @@ Má stejné volby jako MPlayer.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Ovládání z klávesnice
+.\" Interaktivní ovládání
 .\" --------------------------------------------------------------------------
 .
-.SH "OVLÁDÁNÍ Z KLÁVESNICE"
+.SH "INTERAKTIVNÍ OVLÁDÁNÍ"
 MPlayer má plnì nastavitelnou, pøíkazovì orientovanou ovládací vrstvu,
 která jej umo¾òuje ovládat pomocí klávesnice, my¹i, joysticku
 nebo dálkového ovládaèe (s pomocí LIRC).
@@ -244,9 +244,9 @@ nebo dálkového ovládaèe (s pomocí LIRC).
 Mo¾nosti pøizpùsobení ovládání naleznete v nápovìdì k volbì \-input.
 .
 .TP
-.B základní ovládání
+.B Ovládání klávesnicí
 .PD 0
-.RSs
+.RS
 .IPs "<\- a \->"
 Pøevine zpìt/\:vpøed o 10 sekund.
 .IPs "nahoru a dolù"
@@ -318,12 +318,14 @@ Poøídí snímek obrazovky (vy¾aduje, aby byl nahrán filtr screenshot).
 .RE
 .PD 1
 .PP
+.RS
 Následující klávesy jsou èinné pouze pokud pou¾íváte hardwarovì akcelerovaný
 video výstup (xv, (x)vidix, (x)mga, atd), nebo softwarový ekvalizér
 (\-vf eq nebo \-vf eq2).
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "1 a 2"
 Nastavení kontrastu.
 .IPs "3 a 4"
@@ -335,11 +337,13 @@ Nastavení sytosti barev (saturation).
 .RE
 .PD 1
 .PP
+.RS
 (Následující klávesy jsou èinné pouze pokud pou¾íváte výstupní video rozhraní
 quartz nebo macosx.)
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "command + 0"
 Zmen¹í video okna na polovinu pùvodní velikosti.
 .IPs "command + 1"
@@ -353,11 +357,13 @@ Nastaví alfa-kanál okna.
 .RE
 .PD 1
 .PP
+.RS
 (Následující klávesy jsou platné, pokud máte klávesnici
 s multimediálními tlaèítky.)
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "PAUSE"
 pauza
 .IPs "STOP\ "
@@ -366,11 +372,14 @@ Ukonèení pøehrávání a exit.
 Pøevíjení zpìt/\:vpøed o 1 minutu.
 .RE
 .PD 1
-.
-.TP
-.B GUI ovládání z klávesnice
+.PP
+.RS
+(Následující klávasy jsou platné, pokud jste zakompilovali podporu GUI
+a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
+.RE
+.PP
 .PD 0
-.RSs
+.RS
 .IPs ENTER
 Start pøehrávání.
 .IPs ESC\ \ 
@@ -387,11 +396,14 @@ playlist
 pøedvolby
 .RE
 .PD 1
-.
-.TP
-.B Ovládání TV
+.PP
+.RS
+(Následující klávasy jsou platné, pokud jste zakompilovali podporu vstupu z TV
+a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
+.RE
+.PP
 .PD 0
-.RSs
+.RS
 .IPs "h a k"
 Volba pøedchozího/\:dal¹ího kanálu.
 .IPs n\ \ \ \ 
@@ -404,7 +416,7 @@ Zmìna seznamu kanálù.
 .TP
 .B Ovládání my¹í
 .PD 0
-.RSs
+.RS
 .IPs "tlaèítko 3 a tlaèítko 4"
 Pøevíjení zpìt/\:vpøed o 1 minutu.
 .IPs "tlaèítko 5 a tlaèítko 6"
@@ -415,7 +427,7 @@ Sní¾ení/\:zvý¹ení hlasitosti.
 .TP
 .B Ovládání joystickem
 .PD 0
-.RSs
+.RS
 .IPs "doleva a doprava"
 Pøevíjení zpìt/\:vpøed o 10 sekund.
 .IPs "nahoru a dolù"
