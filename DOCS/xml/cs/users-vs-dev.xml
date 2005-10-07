@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.16 -->
+<!-- Synced with: 1.17 -->
 <appendix id="users-vs-dev">
 <title>Nářky vývojářů</title>
 
@@ -18,8 +18,8 @@ patchovanou CVS verzi GCC do své distribuce a pojmenoval ji
 protože GCC 3.0 v té době nebylo dokončeno a potřebovali kompilátor, který by
 dobře fungoval na všech jimi podporovaných platformách, včetně
 IA64 a s390. Linuxový distributor <emphasis role="bold">Mandrake</emphasis>
-rovněž následoval příkladu Red Hatu a začal zařazovat GCC 2.96 do jejich
-řady Linux-Mandrake 8.0.
+(nyní Mandriva) rovněž následoval příkladu Red Hatu a začal zařazovat GCC 2.96
+do jejich řady Linux-Mandrake 8.0.
 </para>
 </formalpara>
 
