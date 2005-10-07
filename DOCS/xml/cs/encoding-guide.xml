@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.24 -->
+<!-- Synced with: 1.31 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -2151,7 +2151,10 @@ Můžete enkódovat do následujících kodeků (více méně aktuální):
   Windows Media Video, verze 2 (WMV8)
   </entry></row>
 <row><entry>rv10</entry><entry>
-  starý RealVideo kodek
+  RealVideo 1.0
+  </entry></row>
+<row><entry>rv20</entry><entry>
+  RealVideo 2.0
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
   MPEG-1 video
@@ -2170,6 +2173,9 @@ Můžete enkódovat do následujících kodeků (více méně aktuální):
   </entry></row>
 <row><entry>ffv1</entry><entry>
   bezztrátový video kodek z FFmpeg
+  </entry></row>
+<row><entry>svq1</entry><entry>
+  Sorenson video 1
   </entry></row>
 <row><entry>flv</entry><entry>
   Sorenson H.263 používaný ve Flash Video
@@ -2190,7 +2196,7 @@ První pole obsahuje názvy kodeků, které můžete přiřadit konfiguračnímu parametru
 
 <informalexample>
 <para>
-Příklad, s MJPEG kompresí:
+Příklad s MJPEG kompresí:
 <screen>mencoder dvd://2 -o titul2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
@@ -2366,7 +2372,7 @@ Příklad s kompresí AC3:
   souboru ukládá více informací.
   Kompresní zisk/ztráta závisí na filmu, ale obvykle to není příliš efektivní
   na anime.
-  qpel vždy způsobí zvýšení výpočetní náročnosti dekódování (v praxi +20% času
+  qpel vždy způsobí zvýšení výpočetní náročnosti dekódování (v praxi +25% času
   CPU).
 </para></listitem>
 
@@ -2399,6 +2405,62 @@ Příklad s kompresí AC3:
 
 </sect2>
 
+<sect2 id="menc-feat-mpeg4-lavc-example-settings">
+<title>Příklady nastavení enkódování</title>
+
+<para>
+  Následující nastavení jsou příklady nastavení různých kombinací voleb
+  enkodéru, které ovlivňují poměr rychlost versus kvalita při shodném
+  cílovém datovém toku.
+</para>
+
+<para>
+  Veškerá nastavení byla testována na video vzorku 720x448 @30000/1001
+  snímků za sekundu, cílový datový tok byl 900kbps a prováděly se na
+  AMD-64 3400+ při 2400 Mhz v režimu 64 bitů.
+  Každá kombinace nastavení má uvedenu změřenou rychlost enkódování
+  (ve snímcích za sekundu) a ztrátu PSNR (v dB) oproti nastavení
+  "velmi vysoká kvalita".
+  Rozumějte však že, v závislosti na vašem zdrojovém materiálu, typu
+  počítače a pokrokům ve vývoji, můžete dospět k velmi odlišným výsledkům.
+</para>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row><entry>Popis</entry><entry>Volby</entry><entry>Rychlost [fps]</entry><entry>Relativní ztráta PSNR [dB]</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>Velmi vysoká kvalita</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:vme=5:naq:qns=2</option></entry>
+  <entry>6</entry>
+  <entry>0</entry>
+</row>
+<row>
+  <entry>Vysoká kvalita</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo</option></entry>
+  <entry>15</entry>
+  <entry>-0.5</entry>
+</row>
+<row>
+  <entry>Rychlé enkódování</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:turbo</option></entry>
+  <entry>42</entry>
+  <entry>-0.74</entry>
+</row>
+<row>
+  <entry>Enkódování v reálném čase</entry>
+  <entry><option>vcodec=mpeg4:mbd=2:turbo</option></entry>
+  <entry>54</entry>
+  <entry>-1.21</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect2>
 
 <sect2 id="custommatrices"><title>Uživatelské inter/intra matice</title>
 
@@ -2702,8 +2764,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
   Aktivuje metodu odhadu s menšími náklady na koeficienty, což trochu
-  zmenší výstupní soubor (okolo  0,15 až 0,19%) při zanedbatelném vlivu na
-  rychlost.
+  zmenší výstupní soubor (okolo  0,15 až 0,19%, což odpovídá zvýšení PSNR
+  o méně než 0.01dB) při zanedbatelném vlivu na rychlost.
   Je proto doporučeno ponechat ji vždy zapnutou.
 </para></listitem>
 
@@ -3065,6 +3127,64 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </tgroup>
 </informaltable>
 </sect2>
+
+<sect2 id="menc-feat-xvid-example-settings">
+<title>Příklady nastavení enkódování</title>
+
+<para>
+  Následující nastavení jsou příklady nastavení různých kombinací voleb
+  enkodéru, které ovlivňují poměr rychlost versus kvalita při shodném
+  cílovém datovém toku.
+</para>
+
+<para>
+  Veškerá nastavení byla testována na video vzorku 720x448 @30000/1001
+  snímků za sekundu, cílový datový tok byl 900kbps a prováděly se na
+  AMD-64 3400+ při 2400 Mhz v režimu 64 bitů.
+  Každá kombinace nastavení má uvedenu změřenou rychlost enkódování
+  (ve snímcích za sekundu) a ztrátu PSNR (v dB) oproti nastavení
+  "velmi vysoká kvalita".
+  Rozumějte však že, v závislosti na vašem zdrojovém materiálu, typu
+  počítače a pokrokům ve vývoji, můžete dospět k velmi odlišným výsledkům.
+</para>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row><entry>Popis</entry><entry>Volby</entry><entry>Rychlost [fps]</entry><entry>Relativní ztráta PSNR [dB]</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>Velmi vysoká kvalita</entry>
+  <entry><option>chroma_opt:vhq=4:bvhq=1:quant_type=mpeg</option></entry>
+  <entry>16</entry>
+  <entry>0</entry>
+</row>
+<row>
+  <entry>Vysoká kvalita</entry>
+  <entry><option>vhq=2:bvhq=1:chroma_opt:quant_type=mpeg</option></entry>
+  <entry>18</entry>
+  <entry>-0.1</entry>
+</row>
+<row>
+  <entry>Rychlé enkódování</entry>
+  <entry><option>turbo:vhq=0</option></entry>
+  <entry>28</entry>
+  <entry>-0.69</entry>
+</row>
+<row>
+  <entry>Enkódování v reálném čase</entry>
+  <entry><option>turbo:nochroma_me:notrellis:max_bframes=0:vhq=0</option></entry>
+  <entry>38</entry>
+  <entry>-1.48</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+</sect2>
+
 </sect1>
 
 <sect1 id="menc-feat-x264">
@@ -3502,46 +3622,54 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect2>
 
 <sect2 id="menc-feat-x264-example-settings">
-<title>Příklady voleb enkódování</title>
+<title>Příklady nastavení enkódování</title>
 
 <para>
-  Následující nastavení jsou příkladem různých kombinací voleb enkódování
-  ovlivňující poměr rychlost/kvalita při stejném cílovém datovém toku.
-  
-  Pokud je vaším cílem perfektní kvalita bez velkého přemýšlení a
-  bez omezení velikosti, bude enkódování nízkým konstantním kvantizérem
-  (jako je <option>qp_constant=18</option>) bez B-snímků
-  (<option>bframes=0</option>) pravděpodobně vypadat velmi dobře, ale
-  spotřebuje mnoho bitů na enkódování detailů, které mohly být enkódovány
-  mnohem rozumněji pomocí pokročilých nastavení.
+  Následující nastavení jsou příklady nastavení různých kombinací voleb
+  enkodéru, které ovlivňují poměr rychlost versus kvalita při shodném
+  cílovém datovém toku.
 </para>
 
 <para>
-  Všechna nastavení enkódování byly testovány na videosnímku 720x448
-  @30000/1001 fps, cílový datový tok byl  900kbps. Testovacím strojem
-  byl AMD-64 3400+ na 2400 Mhz v režimu 64 bitů.
-  Každý příklad nastavení je následován rychlostí enkódování (ve snímcích
-  za sekundu), údajem o ztrátě efektivnosti enkódování (v procentech datového
-  toku) v porovnání s nastavením "velmi vysoké kvality" a ztrátou PSNR
-  (v dB).
-  Berte prosím v potaz, že v závislosti na zdrojovém videu, typu počítače
-  a pokroku ve vývoji můžete dostat velmi odlišné výsledky.
+  Veškerá nastavení byla testována na video vzorku 720x448 @30000/1001
+  snímků za sekundu, cílový datový tok byl 900kbps a prováděly se na
+  AMD-64 3400+ při 2400 Mhz v režimu 64 bitů.
+  Každá kombinace nastavení má uvedenu změřenou rychlost enkódování
+  (ve snímcích za sekundu) a ztrátu PSNR (v dB) oproti nastavení
+  "velmi vysoká kvalita".
+  Rozumějte však že, v závislosti na vašem zdrojovém materiálu, typu
+  počítače a pokrokům ve vývoji, můžete dospět k velmi odlišným výsledkům.
 </para>
 
-<itemizedlist>
-<listitem><para><emphasis role="bold">Velmi vysoká kvalita:</emphasis>
-<option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option>
-6fps, 0%, 0dB.
-</para></listitem>
-<listitem><para><emphasis role="bold">Vysoká kvalita:</emphasis>
-<option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b:psnr</option>
-13fps, -13%, -0.89dB.
-</para></listitem>
-<listitem><para><emphasis role="bold">Rychlá:</emphasis>
-<option>subq=4:bframes=2:b_pyramid:weight_b:psnr</option>
-17fps, -20%, -1.48dB.
-</para></listitem>
-</itemizedlist>
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row><entry>Popis</entry><entry>Volby</entry><entry>Rychlost [fps]</entry><entry>Relativní ztráta PSNR [dB]</entry></row>
+</thead>
+<tbody>
+<row>
+  <entry>Velmi vysoká kvalita</entry>
+  <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry>6</entry>
+  <entry>0</entry>
+</row>
+<row>
+  <entry>Vysoká kvalita</entry>
+  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry>13</entry>
+  <entry>-0.89</entry>
+</row>
+<row>
+  <entry>Rychlé enkódování</entry>
+  <entry><option>subq=4:bframes=2:b_pyramid:weight_b</option></entry>
+  <entry>17</entry>
+  <entry>-1.48</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
 </sect2>
 
 </sect1>
@@ -3595,11 +3723,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>9800 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
-        <entry>1536 kbps</entry>
-        <entry>30000/1001, 24000/1001<footnote id="fn-ntsc-framerate"><para>
-            Snímkové rychlosti (FPS) 24000/1001 můžete dosáhnout pomocí 3:2
-	    pullup.
-            </para></footnote></entry>
+        <entry>1536 kbps (max)</entry>
+        <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9 (pouze pro 720x480)</entry>
     </row>
     <row>
@@ -3611,8 +3736,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
-        <entry>1536 kbps</entry>
-        <entry>30000/1001, 24000/1001<footnoteref linkend='fn-ntsc-framerate'/></entry>
+        <entry>1536 kbps (max)</entry>
+        <entry>30000/1001, 24000/1001</entry>
         <entry>4:3, 16:9</entry>
     </row>
     <row>
@@ -3622,7 +3747,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>2600 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
-        <entry>384 kbps</entry>
+        <entry>384 kbps (max)</entry>
         <entry>30000/1001</entry>
         <entry>4:3</entry>
     </row>
@@ -3644,7 +3769,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>9800 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>MP2,AC3,PCM</entry>
-        <entry>1536 kbps</entry>
+        <entry>1536 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9 (pouze pro 720x576)</entry>
     </row>
@@ -3655,7 +3780,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
         <entry>MP2,AC3,PCM</entry>
-        <entry>1536 kbps</entry>
+        <entry>1536 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3, 16:9</entry>
     </row>
@@ -3666,7 +3791,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>2600 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
-        <entry>384 kbps</entry>
+        <entry>384 kbps (max)</entry>
         <entry>25</entry>
         <entry>4:3</entry>
     </row>
@@ -3674,7 +3799,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>PAL VCD</entry>
         <entry>352x288</entry>
         <entry>MPEG-1</entry>
-        <entry>1150 kbps</entry>
+        <entry>1152 kbps</entry>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>224 kbps</entry>
