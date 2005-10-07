@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced to: 1.58 -->
+<!-- Synced to: 1.59 -->
 <sect1 id="install">
 <title>Instalace</title>
 
@@ -568,8 +568,8 @@ což pracuje s těmito ovladači:
 <title>Chtěli byste GUI?</title>
 
 <para>
-  GUI potřebuje GTK 1.2.x (není plně GTK, ale panely jsou). Skiny jsou uloženy
-  v PNG formátu,
+  GUI potřebuje GTK 1.2.x nebo GTK 2.0 (není plně GTK, ale panely jsou).
+  Skiny jsou uloženy v PNG formátu,
   takže GTK, <systemitem class="library">libpng</systemitem>
   (a jejich příslušenství, obvykle nazývané <systemitem class="library">gtk-dev</systemitem>
   a <systemitem class="library">libpng-dev</systemitem>) musí být nainstalovány.
