@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.79 -->
+<!-- Synced with: 1.81 -->
 <sect1 id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -1319,7 +1319,7 @@ Nefunguje!
   ukončení <application>MPlayer</application>u budete mít nahrán
   <emphasis role="bold">ROM font</emphasis> místo národního.
   Můžete si opět nahrát národní font například pomocí utility
-  <command>setsysfont</command> z distribuce Mandrake.
+  <command>setsysfont</command> z distribuce Mandrake/Mandriva.
   (<emphasis role="bold">Tip</emphasis>: Stejná utilita je použita pro
   lokalizaci fbdev).
   </simpara></listitem>
@@ -1510,7 +1510,7 @@ Alternativně můžete použít speciální jaderný modul, například:
   stáhněte verzi vatvořenou Alexem speciálně pro použití s
   <application>MPlayer</application>em (ke kompilaci nepotřebuje zdrojový kód
   svgalib)
-  <ulink url="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">odtud</ulink>.
+  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">odtud</ulink>.
   </para></step>
 <step><para>
   Skompilujte modul v adresáři <filename class="directory">svgalib_helper</filename>
