@@ -81,6 +81,7 @@ static int dct8 = 0;
 static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
 static int weight_b = 0;
 static int chroma_me = 1;
+static int mixed_references = 0;
 static int chroma_qp_offset = 0;
 static float ip_factor = 1.4;
 static float pb_factor = 1.3;
@@ -150,6 +151,8 @@ m_option_t x264encopts_conf[] = {
     {"noweight_b", &weight_b, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"chroma_me", &chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nochroma_me", &chroma_me, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"mixed_refs", &mixed_references, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nomixed_refs", &mixed_references, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"chroma_qp_offset", &chroma_qp_offset, CONF_TYPE_INT, CONF_RANGE, -12, 12, NULL},
     {"ip_factor", &ip_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
     {"pb_factor", &pb_factor, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
@@ -281,6 +284,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.analyse.b_weighted_bipred = weight_b;
     mod->param.analyse.i_chroma_qp_offset = chroma_qp_offset;
     mod->param.analyse.b_chroma_me = chroma_me;
+    mod->param.analyse.b_mixed_references = mixed_references;
 
     mod->param.i_width = width;
     mod->param.i_height = height;

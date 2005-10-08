@@ -8687,6 +8687,13 @@ Takes into account chroma information during subpixel motion search
 Requires subq>=5.
 .
 .TP
+.B (no)mixed_refs
+Allows each 8x8 or 16x8 motion partition to independently select a
+reference frame.
+Without this option, a whole macroblock must use the same reference.
+Requires frameref>1.
+.
+.TP
 .B chroma_qp_offset=<-12\-12>
 Use a different quantizer for chroma as compared to luma.
 Useful values are in the range <-2\-2> (default: 0).
