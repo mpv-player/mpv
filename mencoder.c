@@ -1690,9 +1690,12 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
     while (!interrupted) {
         float a_pts = 0.;
 
-        frame_data->in_size = video_read_frame(sh_video, &frame_data->frame_time, &frame_data->start, force_fps);
-        if(frame_data->in_size<0) return 2;
-        sh_video->timer += frame_data->frame_time;
+        if (!frame_data->already_read) { // when called after fixdelay, a frame is already read
+            frame_data->in_size = video_read_frame(sh_video, &frame_data->frame_time, &frame_data->start, force_fps);
+            if(frame_data->in_size<0) return 2;
+            sh_video->timer += frame_data->frame_time;
+        }
+        frame_data->already_read = 0;
 
         a_pts = forward_audio(sh_video->pts - frame_data->frame_time + audio_delay, d_audio, mux_a);
 
