@@ -3,12 +3,14 @@ MPlayer (1.0)
   pre8:
 
     DOCS:
+    * interactive control fully documented
     * improved encoding guide
     * new technical encoding guide in DOCS/tech/encoding-guide.txt
       which is to be merged into the existing guide
     * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
     * new advanced audio usage guide with surround sound instructions
+    * French documentation synced
     * Hungarian XML documentation translation finished
     * Czech documentation translation finished
     * Italian man page synced
