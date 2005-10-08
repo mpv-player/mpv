@@ -2721,7 +2721,7 @@ int main(void) { dlopen(0, 0); dlclose(0); dlsym(0, 0); return 0; }
 EOF
 _dl=no
 for _ld_tmp in "" "-ldl" ; do
-  cc_check $_ld_tmp && ld_dl="$_ld_tmp" && _dl=yes && break
+  cc_check $_ld_tmp && _ld_dl="$_ld_tmp" && _dl=yes && break
 done
 if test "$_dl" = yes ; then
  _def_dl='#define HAVE_LIBDL 1'
