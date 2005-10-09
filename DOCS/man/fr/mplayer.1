@@ -1,4 +1,4 @@
-.\" synced with 1.1131
+.\" synced with 1.1132
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -9183,6 +9183,13 @@ types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
 Utilise l'information chroma en plus de la luma lors de la recherche
 de mouvement sub pixel (par défaut\: activé).
 Nécessite subq>=5.
+.
+.TP
+.B (no)mixed_refs
+Permet à chaque partition de mouvement 8x8 ou 16x8 de choisir indépendamment
+leur trame de référence.
+Sans cette option, tout le macro-bloc doit utiliser la même référence.
+Nécessite frameref>1.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
