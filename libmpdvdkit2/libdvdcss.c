@@ -103,10 +103,26 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_PARAM_H
+#   include <sys/param.h>
+#endif
+#ifdef HAVE_PWD_H
+#   include <pwd.h>
+#endif
 #include <fcntl.h>
 #include <errno.h>
+
+#ifdef HAVE_UNISTD_H
 #   include <unistd.h>
+#endif
+
+#ifdef HAVE_LIMITS_H
 #   include <limits.h>
+#endif
+
+#ifdef HAVE_DIRECT_H
+#   include <direct.h>
+#endif
 
 #include "dvdcss.h"
 

@@ -44,9 +44,17 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_PARAM_H
+#   include <sys/param.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #   include <unistd.h>
+#endif
 #include <fcntl.h>
+
+#ifdef HAVE_LIMITS_H
 #   include <limits.h>
+#endif
 
 #include "dvdcss.h"
 

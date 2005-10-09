@@ -34,12 +34,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef HAVE_ERRNO_H
 #   include <errno.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifdef HAVE_SYS_PARAM_H
+#   include <sys/param.h>
+#endif
 #include <fcntl.h>
+
+#ifdef HAVE_UNISTD_H
 #   include <unistd.h>
+#endif
+
+#ifdef HAVE_LIMITS_H
 #   include <limits.h>
+#endif
 
 #if defined( WIN32 ) && !defined( SYS_CYGWIN )
 #   include <io.h>                                                 /* read() */

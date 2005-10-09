@@ -1,48 +1,8 @@
---- common.h	2003-06-13 19:33:35.000000000 +0200
-+++ common.h	2005-03-01 07:41:41.000000000 +0100
-@@ -27,21 +27,10 @@
- /*****************************************************************************
-  * Basic types definitions
-  *****************************************************************************/
--#if defined( HAVE_STDINT_H )
--#   include <stdint.h>
--#elif defined( HAVE_INTTYPES_H )
--#   include <inttypes.h>
--#elif defined( SYS_CYGWIN )
--#   include <sys/types.h>
--    /* Cygwin only defines half of these... */
--    typedef u_int8_t            uint8_t;
--    typedef u_int32_t           uint32_t;
--#else
--    /* Fallback types (very x86-centric, sorry) */
--    typedef unsigned char       uint8_t;
--    typedef signed char         int8_t;
--    typedef unsigned int        uint32_t;
--    typedef signed int          int32_t;
-+#include <inttypes.h>
-+
-+#ifdef __CYGWIN__
-+#define SYS_CYGWIN
- #endif
- 
- #if defined( WIN32 )
 --- css.c	2005-07-11 14:24:09.000000000 +0200
-+++ css.c	2005-10-01 19:02:35.000000000 +0200
-@@ -41,19 +41,11 @@
- #include <string.h>
- #include <sys/types.h>
- #include <sys/stat.h>
--#ifdef HAVE_SYS_PARAM_H
--#   include <sys/param.h>
--#endif
--#ifdef HAVE_UNISTD_H
- #   include <unistd.h>
--#endif
- #include <fcntl.h>
--
--#ifdef HAVE_LIMITS_H
++++ css.c	2005-10-01 20:14:37.000000000 +0200
+@@ -53,7 +56,7 @@
  #   include <limits.h>
--#endif
+ #endif
  
 -#include "dvdcss/dvdcss.h"
 +#include "dvdcss.h"
@@ -51,30 +11,6 @@
  #include "css.h"
 --- device.c	2005-07-11 13:33:34.000000000 +0200
 +++ device.c	2005-10-01 19:08:07.000000000 +0200
-@@ -31,23 +31,12 @@
- #include <stdio.h>
- #include <stdlib.h>
- #include <string.h>
--#ifdef HAVE_ERRNO_H
- #   include <errno.h>
--#endif
- #include <sys/types.h>
- #include <sys/stat.h>
--#ifdef HAVE_SYS_PARAM_H
--#   include <sys/param.h>
--#endif
- #include <fcntl.h>
--
--#ifdef HAVE_UNISTD_H
- #   include <unistd.h>
--#endif
--
--#ifdef HAVE_LIMITS_H
- #   include <limits.h>
--#endif
- 
- #if defined( WIN32 ) && !defined( SYS_CYGWIN )
- #   include <io.h>                                                 /* read() */
 @@ -55,7 +44,7 @@
  #   include <sys/uio.h>                                      /* struct iovec */
  #endif
@@ -99,19 +35,10 @@
      /* Initialize readv temporary buffer */
      dvdcss->p_readv_buffer   = NULL;
 --- error.c	2004-02-24 16:46:49.000000000 +0100
-+++ error.c	2005-10-01 19:10:06.000000000 +0200
-@@ -25,16 +25,9 @@
- 
- #include <stdio.h>
- #include <stdlib.h>
--
--#ifdef HAVE_SYS_PARAM_H
--#   include <sys/param.h>
--#endif
--
--#ifdef HAVE_LIMITS_H
++++ error.c	2005-10-01 20:15:46.000000000 +0200
+@@ -34,7 +37,7 @@
  #   include <limits.h>
--#endif
+ #endif
  
 -#include "dvdcss/dvdcss.h"
 +#include "dvdcss.h"
@@ -132,31 +59,10 @@
   */
  
  /*
-@@ -103,28 +100,12 @@
- #include <string.h>
- #include <sys/types.h>
- #include <sys/stat.h>
--#ifdef HAVE_SYS_PARAM_H
--#   include <sys/param.h>
--#endif
--#ifdef HAVE_PWD_H
--#   include <pwd.h>
--#endif
- #include <fcntl.h>
- #include <errno.h>
--
--#ifdef HAVE_UNISTD_H
- #   include <unistd.h>
--#endif
--
--#ifdef HAVE_LIMITS_H
- #   include <limits.h>
--#endif
+@@ -124,7 +127,7 @@
+ #   include <direct.h>
+ #endif
  
--#ifdef HAVE_DIRECT_H
--#   include <direct.h>
--#endif
--
 -#include "dvdcss/dvdcss.h"
 +#include "dvdcss.h"
  
