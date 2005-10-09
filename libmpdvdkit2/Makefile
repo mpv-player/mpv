@@ -17,7 +17,7 @@ SRCS = css.c \
        nav_read.c \
        md5.c \
 
-#bsdi_ioctl.c 
+#bsdi_ioctl.c
 
 OBJS = $(SRCS:.c=.o)
 
@@ -26,9 +26,9 @@ LIB=libmpdvdkit
 .SUFFIXES: .c .o
 
 ifeq ($(OPTFLAGS),)
- OPTFLAGS = -mcpu=pentium -march=pentium -O4
+OPTFLAGS = -mcpu=pentium -march=pentium -O4
 else
- OPTFLAGS += -DHAVE_MPLAYER
+OPTFLAGS += -DHAVE_MPLAYER
 endif
 
 #	 \ -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
@@ -41,7 +41,7 @@ CFLAGS= -I. $(OPTFLAGS) $(EXTRA_INC)\
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
-all: $(LIB).a 
+all: $(LIB).a
 default: $(LIB).a
 
 $(LIB).a: $(OBJS)
@@ -66,6 +66,6 @@ depend: .depend
 #
 # include dependency files if they exist
 #
-ifneq ($(wildcard .depend),)                                                                       
-include .depend                                                                                    
-endif                                                                                              
+ifneq ($(wildcard .depend),)
+include .depend
+endif
