@@ -32,6 +32,7 @@
 /* prototypes for argument parsing */
 static char const * parse_int( char const * const str, int * const valp );
 static char const * parse_str( char const * const str, strarg_t * const valp );
+static char const * parse_float( char const * const str, float * const valp );
 
 /**
  * \brief Try to parse all options in str and fail if it was not possible.
@@ -162,6 +163,10 @@ int subopt_parse( char const * const str, opt_t * opts )
                   }
                   break;
                 }
+              case OPT_ARG_FLOAT:
+                last = parse_float( &str[parse_pos],
+                                  (float *)opts[idx].valp );
+                break;
               default:
                 assert( 0 && "Arg type of suboption doesn't exist!" );
                 last = NULL; // break parsing!
@@ -240,6 +245,20 @@ static char const * parse_int( char const * const str, int * const valp )
   assert( str && "parse_int(): str == NULL" );
 
   *valp = (int)strtol( str, &endp, 0 );
+
+  /* nothing was converted */
+  if ( str == endp ) { return NULL; }
+
+  return endp;
+}
+
+static char const * parse_float( char const * const str, float * const valp )
+{
+  char * endp;
+
+  assert( str && "parse_float(): str == NULL" );
+
+  *valp = strtof( str, &endp );
 
   /* nothing was converted */
   if ( str == endp ) { return NULL; }

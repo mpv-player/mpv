@@ -13,6 +13,7 @@
 #define OPT_ARG_INT  1
 #define OPT_ARG_STR  2
 #define OPT_ARG_MSTRZ 3 ///< A malloced, zero terminated string, use free()!
+#define OPT_ARG_FLOAT 4
 
 typedef int (*opt_test_f)(void *);
 
