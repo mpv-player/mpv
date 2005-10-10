@@ -259,6 +259,10 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             sh_video->bih= bih;
             sh_video->disp_w= codec->width;
             sh_video->disp_h= codec->height;
+            if (st->time_base.den) { /* if container has time_base, use that */
+                sh_video->video.dwRate= st->time_base.den;
+                sh_video->video.dwScale= st->time_base.num;
+            } else {
 #if LIBAVFORMAT_BUILD >= 4624
             sh_video->video.dwRate= codec->time_base.den;
             sh_video->video.dwScale= codec->time_base.num;
@@ -266,6 +270,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             sh_video->video.dwRate= codec->frame_rate;
             sh_video->video.dwScale= codec->frame_rate_base;
 #endif
+            }
             sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
             sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             sh_video->format = bih->biCompression;
