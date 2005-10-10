@@ -298,7 +298,7 @@ static int seek(stream_t *s,off_t newpos) {
     }
     // Send the ABOR command
     // Ignore the return code as sometimes it fail with "nothing to abort"
-    FtpSendCmd("ABOR\n\r",p,rsp_txt);
+    FtpSendCmd("ABOR\r\n",p,rsp_txt);
   }
 
   // Open a new connection
