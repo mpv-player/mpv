@@ -258,7 +258,7 @@ static char const * parse_float( char const * const str, float * const valp )
 
   assert( str && "parse_float(): str == NULL" );
 
-  *valp = strtof( str, &endp );
+  *valp = strtod( str, &endp );
 
   /* nothing was converted */
   if ( str == endp ) { return NULL; }
