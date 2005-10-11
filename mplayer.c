@@ -2630,7 +2630,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	   if(vo_config_count) video_out->flip_page();
 	   if (play_n_frames >= 0) {
 	     --play_n_frames;
-	     if (play_n_frames < 0) eof = PT_NEXT_ENTRY;
+	     if (play_n_frames <= 0) eof = PT_NEXT_ENTRY;
 	   }
 
 //        usec_sleep(50000); // test only!
