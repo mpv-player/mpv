@@ -217,9 +217,9 @@ static char help_text[]=
 #define MSGTR_ForcingOutputFourcc "Forzo il fourcc di output a %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Forzo la tag del formato audio a 0x%x\n"
 #define MSGTR_WritingAVIHeader "Scrittura intestazione AVI...\n"
-#define MSGTR_DuplicateFrames "\n%d frame(s) duplicato/i!!!    \n"
+#define MSGTR_DuplicateFrames "\n%d fotogramma/i duplicato/i!!!    \n"
 #define MSGTR_SkipFrame "\nScarto fotogramma!\n"
-#define MSGTR_ResolutionDoesntMatch "\nIl nuovo file video ha diversa risoluzione o spazio colori dal precedente.\n"
+#define MSGTR_ResolutionDoesntMatch "\nIl nuovo file video ha diversa risoluzione o spazio colore dal precedente.\n"
 #define MSGTR_FrameCopyFileMismatch "\nTutti i file video devono avere stessi fps, risoluz., e codec per -ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\nTutti i file devono avere lo stesso codec audio e formato per -oac copy.\n"
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed non è detto che funzioni correttamente con -oac copy!\n"\
@@ -573,9 +573,9 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDecoder "Apertura decoder audio: [%s] %s\n"
 #define MSGTR_UninitVideoStr "uninit video: %s  \n"
 #define MSGTR_UninitAudioStr "uninit audio: %s  \n"
-#define MSGTR_VDecoderInitFailed "Inizializazione VDecoder fallita :(\n"
-#define MSGTR_ADecoderInitFailed "Inizializazione ADecoder fallita :(\n"
-#define MSGTR_ADecoderPreinitFailed "Preinizializazione ADecoder fallita :(\n"
+#define MSGTR_VDecoderInitFailed "Inizializzazione VDecoder fallita :(\n"
+#define MSGTR_ADecoderInitFailed "Inizializzazione ADecoder fallita :(\n"
+#define MSGTR_ADecoderPreinitFailed "Preinizializzazione ADecoder fallita :(\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alloco %d byte per il buffer di input\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Alloco %d + %d = %d byte per il buffer di output\n"
 
@@ -588,13 +588,13 @@ static char help_text[]=
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "Impossibile trovare il filtro video '%s'\n"
 #define MSGTR_CouldNotOpenVideoFilter "Impossibile aprire il filtro video '%s'\n"
-#define MSGTR_OpeningVideoFilter "Apertura filtro filter: "
-#define MSGTR_CannotFindColorspace "Impossibile trovare un colorspace in comune, anche inserendo 'scale' :(\n"
+#define MSGTR_OpeningVideoFilter "Apertura filtro video: "
+#define MSGTR_CannotFindColorspace "Impossibile trovare uno spazio colore in comune, anche inserendo 'scale' :(\n"
 
 // vd.c
-#define MSGTR_CodecDidNotSet "VDec: Il codec non ha impostato sh->disp_w and sh->disp_h, tento di risolvere.!\n"
+#define MSGTR_CodecDidNotSet "VDec: Il codec non ha impostato sh->disp_w and sh->disp_h, tento di risolvere.\n"
 #define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (csp preferito: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Impossibile trovare un colorspace adatto - riprovo con -vf scale...\n"
+#define MSGTR_CouldNotFindColorspace "Impossibile trovare uno spazio colore adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
 
