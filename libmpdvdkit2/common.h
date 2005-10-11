@@ -3,6 +3,9 @@
  * Collection of useful common types and macros definitions
  *****************************************************************************
  * Copyright (C) 1998, 1999, 2000 VideoLAN
+ *
+ * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
+ * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  * $Id$
  *
  * Authors: Samuel Hocevar <sam@via.ecp.fr>
@@ -50,10 +53,9 @@
 #   define PATH_MAX MAX_PATH
 #endif
 
-#define lseek _lseeki64
-
 /* several type definitions */
 #   if defined( __MINGW32__ )
+#define lseek _lseeki64
 #       if !defined( _OFF_T_ )
 typedef long long _off_t;
 typedef _off_t off_t;
