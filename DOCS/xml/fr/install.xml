@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.49 -->
+<!-- synced with 1.59 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -101,7 +101,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - optionnel, depuis
-  <ulink url="http://www.directfb.org"/>
+  <ulink url="http://www.directfb.org"/>. At least 0.9.13 is required.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optionnel, pour le support CDDA
@@ -116,6 +116,10 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - optionnel, pour le support Samba.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">ALSA</emphasis> - optionnel, pour le support de sortie audio ALSA. 
+  Au moins 0.9.0rc4 est requis.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - optionnel, pour le support de la
@@ -138,7 +142,7 @@ recommandés.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>: Ce paquet de codecs est capable de
-  décoder les flux encodés en H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
+  décoder les flux vidéo encodés en H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   et les flux audio WMA (Windows Media Audio) v1/v2, sur
   plusieurs plateformes. Il est également considéré comme le plus rapide pour cette
   tâche. Voir la section <link linkend="ffmpeg">FFmpeg</link> pour de plus amples détails.
@@ -160,8 +164,8 @@ recommandés.
   <emphasis role="bold">codecs Win32</emphasis>: Si vous prévoyez d'utiliser
   <application>MPlayer</application> sur une architecture non x86, vous en aurez
   probablement besoin. Téléchargez les codecs Win32 depuis notre
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page de codecs</ulink>
-  et installez-les dans <filename class="directory">/usr/local/lib/codecs/</filename>
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">page de codecs</ulink>
+  et installez-les dans <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">AVANT</emphasis> de compiler <application>MPlayer</application>,
   sinon aucun support Win32 ne sera compilé!
   <note><para>Le projet avifile a un paquet de codecs similaire, mais qui diffère
@@ -176,13 +180,13 @@ recommandés.
    (exemple: DV, ATI VCR, MJPEG)
     </simpara></listitem>
   <listitem><simpara>
-    Requis si vous voulez lire des <emphasis role="bold">films WMV9/WMA9</emphasis>.
+    nécessaire si vous voulez lire des <emphasis role="bold">films WMV9/WMA9</emphasis>.
    </simpara></listitem>
   <listitem><simpara>
   Non requis pour les vieux ASF avec vidéo MP41 ou MP42 (bien que VoxWare audio soit
   fréquent pour ces fichiers - ceci est géré par les codecs Win32), ou WMV7.
   Requis également pour WMA (Windows Media Audio), <systemitem class="library">libavcodec</systemitem> possède un décodeur
-  opensource pour cela.
+  open source pour cela.
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -202,7 +206,7 @@ recommandés.
   Fonctionnalités:
   <itemizedlist>
   <listitem><simpara>
-    encodage 1 passe ou 2 passes avec <link linkend="mencoder"><application>MEncoder</application></link>
+    encodage en une passe ou deux passes avec <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     peut lire les films au vieux format <emphasis role="bold">DivX3</emphasis>
@@ -219,7 +223,7 @@ recommandés.
   Caractéristiques:
   <itemizedlist>
   <listitem><simpara>
-    encodage 1 passe ou 2 passes avec <link linkend="mencoder"><application>MEncoder</application></link>
+    encodage en une passe ou deux passes avec <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     les sources sont ouvertes, donc c'est multi-plateformes.
@@ -241,9 +245,8 @@ recommandés.
 <listitem><para>
   Pour le décodage d'<emphasis role="bold">Ogg Vorbis</emphasis>, vous aurez besoin
   d'installer <systemitem class="library">libvorbis</systemitem> correctement.
-  Utilisez les paquets deb/rpm si ils sont disponibles, ou compilez à partir des
-  <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">sources</ulink>
-  (c'est un tarball mis à jour chaque nuit à partir du CVS Vorbis).
+  Vous pouvez avoir les paquetages binaires et le code source depuis le
+  <ulink url="http://www.vorbis.com/download.psp">site Ogg Vorbis</ulink>.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> peut utiliser les bibliothèques de RealPlayer 8
@@ -412,7 +415,7 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
   <emphasis role="bold">Soundblaster Live!</emphasis>: avec cette carte vous pouvez utiliser 4 ou 6
     canaux AC3 (<emphasis role="bold">5.1</emphasis>) au lieu de 2. Voir la section
   <link linkend="swac3">Décodage AC3 logiciel</link>. Pour le transfert AC3 matériel vous 
-  <emphasis role="bold">devez</emphasis> utiliser ALSA 0.9 avec l'émulation OSS !
+  <emphasis role="bold">devez</emphasis> utiliser ALSA 0.9 avec l'émulation OSS!
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">C-Media avec sortie S/PDIF</emphasis>: Le transfert AC3 matériel est possible
@@ -514,10 +517,10 @@ section <link linkend="subosd">Sous-titres et OSD</link> pour les détails.
 <!-- ********** -->
 
 <sect1 id="gui">
-<title>À propos de l'interface graphique ?</title>
+<title>À propos de l'interface graphique?</title>
 
 <para>
-La GUI à besoin de GTK 1.2.x (elle n'est pas entièrement basée dessus, mais les 
+La GUI à besoin de GTK 1.2.x ou GTK 2.0 (elle n'est pas entièrement basée dessus, mais les 
 menus le sont). Les skins sont stockées au format PNG, donc GTK, 
 <systemitem class="library">libpng</systemitem> (ainsi que leurs paquets de dev,
 généralement nommés <systemitem class="library">gtk-dev</systemitem> et <systemitem class="library">libpng-dev</systemitem>)
@@ -628,7 +631,7 @@ exemple.txt</option> (éventuellement avec le chemin complet).
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
   <listitem><simpara>
     Décale les sous-titres de <option><replaceable>sec</replaceable></option> secondes.
-    Peut être négatif.
+    Peut être négatif. La valeur est ajouté au compteur d'avancement du film (movie's time position counter).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -648,13 +651,16 @@ exemple.txt</option> (éventuellement avec le chemin complet).
 <para>
 Si vous constatez un décalage progressif entre le film et les sous-titres en
 utilisant un fichier de sous-titres MicroDVD, il est probable que la vitesse
-du film et celle des sous-titres sont différentes. Veuillez noter que le format
+du film et celle des sous-titres soient différentes. Veuillez noter que le format
 de sous-titres MicroDVD utilise des numéros de trames absolus pour sa synchronisation,
-et de plus l'option <option>-subfps</option> ne peut pas être utilisée avec ce format. 
-<application>MPlayer</application> n'a pas la possibilité de deviner la vitesse du fichier de sous-titres, vous devrez
-donc convertir manuellement la vitesse. Il y a un petit script perl dans le répertoire 
-<filename class="directory">contrib</filename> du serveur FTP de <application>MPlayer</application> 
-qui fera la conversion pour vous.
+mais il ne contient pas d'information sur les fps et de ce fait l'option <option>-subfps</option> devrait être utilisée avec ce format. 
+Si vous voulez résoudre ce problème de manière permanente, 
+vous devez convertir manuellement le débit des trames du fichier de sous-titres.
+<application>MPlayer</application> peut faire cette conversion pour vous:
+
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps
+ <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> 
+ <replaceable>dummy.avi</replaceable></screen>
 </para>
 
 <para>
@@ -688,10 +694,10 @@ Naboo was under an attack.<!--
 
 <para>
 Comme vous pouvez le constater, l'objectif ici est de <emphasis role="bold">
-faciliter l'édition la synchronisation, la jointure et le découpage</emphasis>. 
+faciliter l'édition/synchronisation/jointure/découpage</emphasis>. 
 Si vous avez un sous-titre SSA mal synchronisé avec votre version de la vidéo, 
-faites simplement un <screen>mplayer dummy.avi -sub source.ssa -dumpmpsub</screen>
-Un fichier <filename>dump.mpsub</filename> sera crée dans le répertoire courant, 
+faites simplement un <screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>
+Un fichier <filename>dump.mpsub</filename> sera créé dans le répertoire courant, 
 contenant le texte du sous-titre au format <emphasis role="bold">MPsub</emphasis>. 
 Vous pourrez alors aisément ajouter/soustraire du temps entre les sous-titres.
 </para>
@@ -722,7 +728,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir:
 <listitem><para>
   Utiliser le plugin générateur de polices de <application>GIMP</application> dans <filename
   class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez avoir le
-  plugin HSI RAW également, voir <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+  plugin HSI RAW également, voir <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
  </para></listitem>
 <listitem><para>
   Utiliser une fonte TrueType (TTF), par l'intermédiaire de la librairie
@@ -749,7 +755,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir:
 <listitem><para>
   Télécharger des paquetages de polices prêtes à l'emploi depuis le site de <application>MPlayer</application>.
   Note: Les polices actuellement disponibles sont limitées a l'iso 8859-1/2, mais
-  il y en a quelques autres (coréen, russe, 8859-8, etc) dans la section contrib/font
+  il y en a quelques autres (incluant le Coréen, le Russe, l'ISO 8859-8, etc) dans la section contrib/font
   du FTP, créées par les utilisateurs.
 </para><para>
   <!-- FIXME: this para should be before the list -->
@@ -780,9 +786,9 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir:
     contributions d'utilisateurs
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
     </entry><entry>
-    polices coréennes et plugin RAW
+    polices Coréennes et plugin RAW
     </entry></row>
   </tbody>
   </tgroup>
@@ -838,7 +844,7 @@ dans le fichier config, ou en précisant l'option <option>-osdlevel</option> en l
 </para>
 
 <note><simpara>
-Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant !
+Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
 </simpara></note>
 
 <orderedlist>
