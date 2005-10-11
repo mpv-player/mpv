@@ -80,7 +80,7 @@ MPlayer code:
     * GUI: Zoltan Ponekker
     * GUI skins: Diego Biurrun
     * audio filters: None
-    * EDL code: Reynaldo H. Verdejo Pinochet
+    * EDL code: Reynaldo H. Verdejo Pinochet, Oded Shimon
 
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
