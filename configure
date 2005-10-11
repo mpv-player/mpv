@@ -2484,7 +2484,7 @@ cat > $TMPC << EOF
 #include <netdb.h>
 int main(void) { (void) gethostbyname(0); return 0; }
 EOF
-for _ld_tmp in "-lsocket" "-lnsl" "-lsocket -lnsl" "-lsocket -ldnet" "-lsocket -lbind" ; do
+for _ld_tmp in "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
   cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && break
 done
 if test $_winsock2 = auto && not cygwin ; then
