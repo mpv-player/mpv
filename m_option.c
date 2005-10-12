@@ -872,7 +872,6 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
   char *subopt;
   int nr = 0,i,r;
   m_option_t *subopts;
-  char *token;
   char *p;
   char** lst = NULL;
 
@@ -881,20 +880,54 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
 
   subparam = malloc(strlen(param)+1);
   subopt = malloc(strlen(param)+1);
-  p = strdup(param); // In case that param is a static string (cf man strtok)
+  p = param;
 
   subopts = opt->p;
 
-  token = strtok(p, (char *)&(":"));
-  while(token)
+  while(p[0])
     {
-      int sscanf_ret;
+      int sscanf_ret = 1;
+      int optlen = strcspn(p, ":=");
       /* clear out */
       subopt[0] = subparam[0] = 0;
+      strlcpy(subopt, p, optlen);
+      p = &p[optlen];
+      if (p[0] == '=') {
+        sscanf_ret = 2;
+        p = &p[1];
+        if (p[0] == '"') {
+          p = &p[1];
+          optlen = strcspn(p, "\"");
+          strlcpy(subparam, p, optlen);
+          p = &p[optlen];
+          if (p[0] != '"') {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Terminating '\"' missing for '%s'\n", subopt);
+            return M_OPT_INVALID;
+          }
+          p = &p[1];
+        } else if (p[0] == '%') {
+          p = &p[1];
+          optlen = (int)strtol(p, &p, 0);
+          if (!p || p[0] != '%' || (optlen > strlen(p) - 1)) {
+            mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Invalid length %i for '%s'\n", optlen, subopt);
+            return M_OPT_INVALID;
+          }
+          p = &p[1];
+          strlcpy(subparam, p, optlen);
+          p = &p[optlen];
+        } else {
+          optlen = strcspn(p, ":");
+          strlcpy(subparam, p, optlen);
+          p = &p[optlen];
+        }
+      }
+      if (p[0] == ':')
+        p = &p[1];
+      else if (p[0]) {
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Incorrect termination for '%s'\n", subopt);
+        return M_OPT_INVALID;
+      }
 			    
-      sscanf_ret = sscanf(token, "%[^=]=%[^:]", subopt, subparam);
-
-      mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', subopt='%s', subparam='%s' (ret: %d)\n", token, subopt, subparam, sscanf_ret);
       switch(sscanf_ret)
 	{
 	case 1:
@@ -918,16 +951,11 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
 	    nr++;
 	  }
 	  break;
-	default:
-	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Invalid subconfig argument! ('%s')\n", token);
-	  return M_OPT_INVALID;
 	}
-      token = strtok(NULL, (char *)&(":"));
     }
 
   free(subparam);
   free(subopt);
-  free(p);
   if(dst)
     VAL(dst) = lst;
 
