@@ -20,8 +20,11 @@ encoding with <application>MEncoder</application>.
 <para>
   Audio and video codecs for encoding are selected with the
   <option>-oac</option> and <option>-ovc</option> options, respectively.
-  The following choices are available, although some may not have been
-  enabled at compiletime:
+  Type for instance:
+  <screen>mencoder -ovc help</screen>
+  to list all video codecs supported by the version of
+  <application>MEncoder</application> on your machine.
+  The following choices are available:
 </para>
 <para>
 Audio Codecs:
@@ -107,6 +110,148 @@ Video codecs:
 </tgroup>
 </informaltable>
 </para>
+<para>
+  Output container formats are selected with the <option>-of</option>
+  option.
+  Type:
+  <screen>mencoder -of help</screen>
+  to list all containers supported by the version of
+  <application>MEncoder</application> on your machine.
+  The following choices are available:
+</para>
+<para>
+Container formats:
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Container format name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>lavf</entry>
+    <entry>One of the containers supported by
+    <systemitem class="library">libavformat</systemitem></entry>
+  </row>
+  <row>
+    <entry>avi</entry>
+    <entry>Audio-Video Interleave</entry>
+  </row>
+  <row>
+    <entry>mpeg</entry>
+    <entry>MPEG-1 and MPEG-2 PS</entry>
+  </row>
+  <row>
+    <entry>rawvideo</entry>
+    <entry>raw video stream (no muxing - one video stream only)</entry>
+  </row>
+  <row>
+    <entry>rawaudio</entry>
+    <entry>raw audio stream (no muxing - one audio stream only)</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+  The AVI container is the native container format for
+  <application>MEncoder</application>, which means that it's the one that
+  is best handled, and the one for which <application>MEncoder</application>
+  was designed.
+  As noted above, other container formats are usable, but you may
+  experience some problems when using them.
+</para>
+
+<para>
+<systemitem class="library">libavformat</systemitem> containers:
+</para>
+<para>
+  If you selected <systemitem class="library">libavformat</systemitem>
+  to do the muxing of the output file (by using the <option>-of lavf</option>,
+  the appropriate container format will be determined by the file extension
+  of the output file.
+  You may force a particular container format with
+  <systemitem class="library">libavformat</systemitem>'s
+  <option>format</option> option.
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry><systemitem class="library">libavformat</systemitem> container name</entry><entry>Description</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mpg</entry>
+    <entry>MPEG-1 and MPEG-2 PS</entry>
+  </row>
+  <row>
+    <entry>asf</entry>
+    <entry>Advanced Streaming Format</entry>
+  </row>
+  <row>
+    <entry>avi</entry>
+    <entry>Audio-Video Interleave</entry>
+  </row>
+  <row>
+    <entry>wav</entry>
+    <entry>Waveform Audio</entry>
+  </row>
+  <row>
+    <entry>swf</entry>
+    <entry>Macromedia Flash</entry>
+  </row>
+  <row>
+    <entry>flv</entry>
+    <entry>Macromedia Flash video</entry>
+  </row>
+  <row>
+    <entry>rm</entry>
+    <entry>RealAudio and RealVideo</entry>
+  </row>
+  <row>
+    <entry>au</entry>
+    <entry>SUN AU</entry>
+  </row>
+  <row>
+    <entry>nut</entry>
+    <entry>NUT open container (experimental and not yet spec-compliant)</entry>
+  </row>
+  <row>
+    <entry>mov</entry>
+    <entry>QuickTime</entry>
+  </row>
+  <row>
+    <entry>mp4</entry>
+    <entry>MPEG-4 format</entry>
+  </row>
+  <row>
+    <entry>dv</entry>
+    <entry>Sony Digital Video container</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+  As you can see, <systemitem class="library">libavformat</systemitem>
+  allows <application>MEncoder</application> to mux into a considerable
+  variety of containers.
+  Unfortunately, as <application>MEncoder</application> was not designed
+  from the beginning to support other container formats than AVI,
+  your should really be paranoid about the resulting file.
+  Please check to be sure that the audio/video synchronization is okay
+  and that the file can be played correctly by players other than
+  <application>MPlayer</application>.
+</para>
+
+<informalexample>
+<para>Example:</para>
+<para>
+  Creating a Macromedia Flash video suitable to be played in a web browser
+  with the Macromedia Flash plugin:
+<screen>
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>ouput.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
+-lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
+-srate 22050
+</screen>
+</para>
+</informalexample>
+
 </sect1>
 
 
