@@ -21,6 +21,7 @@
 
 typedef struct da_priv {
   float last_pts;
+  float pts_per_packet;
   uint32_t dword;
   int pos;
   float length;
@@ -105,12 +106,12 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
 
   priv = (da_priv_t *)malloc(sizeof(da_priv_t));
   priv->last_pts = -1;
+  priv->pts_per_packet = (32 * 36) / (float)sh_audio->wf->nSamplesPerSec;
   priv->length = seconds;
   priv->dword = 0;
   priv->pos = 32; // empty bit buffer
   get_bits(priv, s, 8); // discard first 8 bits
   demuxer->priv = priv;
-  demuxer->seekable = 0;
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
@@ -145,7 +146,7 @@ static int demux_mpc_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   if (priv->last_pts < 0)
     priv->last_pts = 0;
   else
-    priv->last_pts += (36 * 32) / (float)sh_audio->samplerate;
+    priv->last_pts += priv->pts_per_packet;
   ds->pts = priv->last_pts - (ds_tell_pts(demux->audio) -
               sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
   ds_add_packet(ds, dp);
@@ -153,7 +154,34 @@ static int demux_mpc_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
 }
 
 static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
-// TODO
+  sh_audio_t* sh_audio = demuxer->audio->sh;
+  da_priv_t* priv = demuxer->priv;
+  stream_t* s = demuxer->stream;
+  float target = rel_seek_secs;
+  if (flags & 2)
+    target *= priv->length;
+  if (!(flags & 1))
+    target += priv->last_pts;
+  if (target < priv->last_pts) {
+    stream_seek(s, demuxer->movi_start);
+    priv->pos = 32; // empty bit buffer
+    get_bits(priv, s, 8); // discard first 8 bits
+    priv->last_pts = 0;
+  }
+  while (target > priv->last_pts) {
+    int bit_len = get_bits(priv, s, 20);
+    if (bit_len > 32) {
+      stream_skip(s, bit_len / 32 * 4 - 4);
+      get_bits(priv, s, 32); // make sure dword is reloaded
+    }
+    get_bits(priv, s, bit_len % 32);
+    priv->last_pts += priv->pts_per_packet;
+    if (s->eof) break;
+  }
+  if (!sh_audio) return;
+  sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio) -
+                     sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+  resync_audio_stream(sh_audio);
 }
 
 static void demux_close_mpc(demuxer_t* demuxer) {
