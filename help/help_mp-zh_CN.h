@@ -218,6 +218,61 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "%s CD推荐的视频比特率为: %d\n"
 #define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs\n"
+#define MSGTR_OpenedStream "成功: 格式: %d数据: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "视频编解码器: 帧复制 (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "音频编解码器: 帧复制 (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_CBRPCMAudioSelected "选定CBR PCM音频\n"
+#define MSGTR_MP3AudioSelected "选定MP3音频\n"
+#define MSGTR_CannotAllocateBytes "无法分配%d字节\n"
+#define MSGTR_SettingAudioDelay "设置音频延迟为%5.3f\n"
+#define MSGTR_SettingAudioInputGain "设置音频输出增益(gain)为%f\n"
+#define MSGTR_LamePresetEquals "\npreset=%s\n\n"
+#define MSGTR_LimitingAudioPreload "限制音频预设值为0.4s\n"
+#define MSGTR_IncreasingAudioDensity "增加音频密度(density)为4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "强制音频预设值为0, 最大pts校验为0\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR音频: %ld字节/秒, %d字节/块\n"
+#define MSGTR_LameVersion "LAME版本 %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "错误: 在这个预设值上指定的比特率超出合法的范围\n"\
+"\n"\
+"当使用这种模式时你必须给定一个在\"8\"到\"320\"之间的数值\n"\
+"\n"\
+"更多信息，请试着: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "错误: 你没有给定一个合法的配置或预设值选项\n"\
+"\n"\
+"可用的配置(profile)包括:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - ABR模式是清楚的. 要使用这个选项,\n"\
+"                      简单地指定一个比特率就行了. 例如:\n"\
+"                      \"preset=185\"就可以激活这个\n"\
+"                      预设值并使用185作为平均比特率.\n"\
+"\n"\
+"    一些例子:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"更多信息，请试着: \"-lameopts preset=help\"\n"
+#define MSGTR_LameCantInit "无法设定LAME选项, 检查比特率/采样率,"\
+"一些非常低的比特率(<32)需要低采样率(如 -srate 8000)."\
+"如果都不行, 试试使用预设值."
+#define MSGTR_ConfigfileError "配置文件错误"
+#define MSGTR_ErrorParsingCommandLine "解析命令行错误"
+#define MSGTR_ForcingInputFPS "输入帧率将被%5.2f代替\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "输出文件格式RAWVIDEO不支持音频 - 取消音频\n"
+#define MSGTR_MemAllocFailed "内存分配失败"
+#define MSGTR_NoMatchingFilter "没找到匹配的filter/ao格式!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, C编译器挂了?\n"
+#define MSGTR_NoLavcAudioCodecName "音频LAVC, 没有编解码器名!\n"
+#define MSGTR_LavcAudioCodecNotFound "音频LAVC, 无法找到对应的编码器 %s\n"
+#define MSGTR_CouldntAllocateLavcContext "音频LAVC, 无法分配上下文!\n"
+#define MSGTR_CouldntOpenCodec "无法打开编解码器 %s, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "音频格式0x%x和'-oac copy'不兼容, 请试试用'-oac pcm'代替'-fafmttag'来解决这个问题.\n"
+
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
@@ -268,6 +323,52 @@ static char help_text[]=
 "                 (320 kbps bitrate)\n"\
 "                 <8-320>: 以所给比特率为平均比特率的ABR编码。\n\n"
 
+//codec-cfg.c:
+#define MSGTR_DuplicateFourcc "重复的FourCC"
+#define MSGTR_TooManyFourccs "太多的FourCCs/formats..."
+#define MSGTR_ParseError "解析错误"
+#define MSGTR_ParseErrorFIDNotNumber "解析错误(格式ID不是一个数字?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "解析错误(格式ID昵称(alias)不是一个数字?)"
+#define MSGTR_DuplicateFID "重复的格式ID"
+#define MSGTR_TooManyOut "太多输出..."
+#define MSGTR_InvalidCodecName "\n编解码器(%s)名不合法!\n"
+#define MSGTR_CodecLacksFourcc "\n编解码器(%s)没有FourCC/format!\n"
+#define MSGTR_CodecLacksDriver "\n编解码器(%s)没有驱动!\n"
+#define MSGTR_CodecNeedsDLL "\n编解码器(%s)需要一个'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\n编解码器(%s)需要一个'outfmt'!\n"
+#define MSGTR_CantAllocateComment "不能为注释分配内存."
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
+#define MSGTR_ReadingFile "读入 %s: "
+#define MSGTR_CantOpenFileError "无法打开 '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "无法为 'line' 获取内存: %s\n"
+#define MSGTR_CantReallocCodecsp "无法重新分配 '*codecsp': %s\n"
+#define MSGTR_CodecNameNotUnique "编解码器名 '%s' 不唯一."
+#define MSGTR_CantStrdupName "不能 strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "不能 strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "不能 strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "不能 strdup -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d 音频和 %d 视频编解码器\n"
+#define MSGTR_CodecDefinitionIncorrect "编解码器没有正确定义."
+#define MSGTR_OutdatedCodecsConf "这份codecs.conf太老，与当前的MPlayer不兼容!"
+
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "内存溢出"
+#define MSGTR_OverridingTooLowBitrate "指定的比特率对这人剪辑(clip)来说太低了.\n"\
+"对这个剪辑来说最小的比特率是 %.0f kbps. 以此替代\n"\
+"用户指定的值.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "不能建立PIPE!\n"
+
+// m_config.c
+#define MSGTR_InvalidCfgfileOption "选项%s不能在配置文件里使用.\n"
+#define MSGTR_InvalidCmdlineOption "选项%s不能在命令选里使用.\n"
+#define MSGTR_InvalidSuboption "错误: 选项'%s'没有子选项'%s'.\n"
+#define MSGTR_MissingSuboptionParameter "错误: 子选项'%s'(属于选项'%s')必须要有一个参数!\n"
+#define MSGTR_MissingOptionParameter "错误: 选项'%s'必须要有一个参数!\n"
+#define MSGTR_OptionListHeader "\n 名字                 类型            最小       最大     全局  命令行 配置文件\n\n"
+#define MSGTR_TotalOptions "\n总共: %d个选项\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "找不到CD-ROM设备 '%s'!\n"
 #define MSGTR_ErrTrackSelect "选择VCD track出错!"
@@ -291,6 +392,13 @@ static char help_text[]=
 #define MSGTR_DVDnoIFO "无法打开 DVD title: %d 的IFO文件.\n"
 #define MSGTR_DVDnoVOBs "无法打开title的VOB(VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD成功打开!\n"
+
+// muxer_*.c:
+#define MSGTR_TooManyStreams "太多的流!"
+#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer 只支持一个音频流!\n"
+#define MSGTR_IgnoringVideoStream "忽略视频流!\n"
+#define MSGTR_UnknownStreamType "警告! 未知的流类型: %d\n"
+#define MSGTR_WarningLenIsntDivisible "警告! 长度不能被采样率整除!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "警告! 音频流头部 %d 被重新定义.\n"
@@ -402,6 +510,8 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: 不能发送EWMH全屏事件!\n"
 
+#define MSGTR_InsertingAfVolume "[混音器] 没有硬件混音, 插入音量过滤器.\n"
+#define MSGTR_NoVolume "[混音器] 没有可用的音量控制.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -414,11 +524,14 @@ static char help_text[]=
 #define MSGTR_OtherSelect "选择..."
 #define MSGTR_AudioFileSelect "选择外部音频轨道..."
 #define MSGTR_FontSelect "选择字体..."
+// Note: If you change MSGTR_PlayList please see if it still fits MSGTR_MENU_PlayList
 #define MSGTR_PlayList "播放列表"
 #define MSGTR_Equalizer "均衡器"
 #define MSGTR_SkinBrowser "Skin浏览器"
 #define MSGTR_Network "网络流媒体..."
+// Note: If you change MSGTR_Preferences please see if it still fits MSGTR_MENU_Preferences
 #define MSGTR_Preferences "属性设置"
+#define MSGTR_AudioPreferences "音频驱动配置"
 #define MSGTR_NoMediaOpened "没有打开媒体"
 #define MSGTR_VCDTrack "VCD %d 轨道"
 #define MSGTR_NoChapter "没有chapter"
@@ -440,6 +553,7 @@ static char help_text[]=
 #define MSGTR_NEMFMR "抱歉, 没有足够的内存用于菜单渲染."
 #define MSGTR_IDFGCVD "抱歉, 无法找到gui兼容的视频输出驱动."
 #define MSGTR_NEEDLAVCFAME "抱歉, 你不能用你的DXR3/H+设备不经过重新编码而播放非mpeg的文件.\n请在DXR3/H+配置中开启lavc或者fame."
+#define MSGTR_UNKNOWNWINDOWTYPE "发现未知窗口类型 ..."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] skin配置文件的 %d: %s行出错"
