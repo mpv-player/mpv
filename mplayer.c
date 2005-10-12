@@ -3627,12 +3627,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
             vo_osd_changed(OSDTYPE_SUBTITLE); 
 
             // FIXME: is this the correct place for these?
-            if(stream_dump_type==3) list_sub_file(subdata);
-            if(stream_dump_type==4) dump_mpsub(subdata, sh_video->fps);
-            if(stream_dump_type==6) dump_srt(subdata, sh_video->fps);
-            if(stream_dump_type==7) dump_microdvd(subdata, sh_video->fps);
-            if(stream_dump_type==8) dump_jacosub(subdata, sh_video->fps);
-            if(stream_dump_type==9) dump_sami(subdata, sh_video->fps);
+	    switch (stream_dump_type) {
+		case 3: list_sub_file(subdata); break;
+		case 4: dump_mpsub(subdata, sh_video->fps); break;
+		case 6: dump_srt(subdata, sh_video->fps); break;
+		case 7: dump_microdvd(subdata, sh_video->fps); break;
+		case 8: dump_jacosub(subdata, sh_video->fps); break;
+		case 9: dump_sami(subdata, sh_video->fps); break;
+	    }
 #endif
         } else if (source == SUB_SOURCE_DEMUX) {
             dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
