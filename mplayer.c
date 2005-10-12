@@ -901,7 +901,7 @@ static void print_status(float a_pos, float a_v, float corr)
       sadd_hhmmssf(line, &pos, width, a_pos);
       saddf(line, &pos, width, ") of %.1f (", len);
       sadd_hhmmssf(line, &pos, width, len);
-      saddf(line, &pos, width, ")");
+      saddf(line, &pos, width, ") ");
     }
   }
 
