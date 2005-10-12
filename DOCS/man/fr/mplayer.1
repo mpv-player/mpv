@@ -1,4 +1,4 @@
-.\" synced with 1.1132
+.\" synced with 1.1136
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -258,7 +258,7 @@ sortie vidéo.
 Recule/\:avance de 10 secondes.
 .IPs "haut et bas"
 Recule/\:avance d'1 minute.
-.IPs "pgup et pgdown"
+.IPs "PG.PRÉC. et PG.SUIV."
 recule/\:avance de 10 minutes
 .IPs "[ et ]"
 Diminue/accélère la vitesse courante de lecture de 10%.
@@ -270,14 +270,13 @@ Reset playback speed to normal.
 Recule/\:avance dans la liste de lecture (playlist).
 .IPs "ENTER"
 avance dans la liste de lecture, même après la fin
-.IPs "HOME et END"
+.IPs "ORIG et FIN"
 Va à au prochain/\:précédent arbre de lecture (playtree) dans la liste des
 pères.
-.IPs "INS et DEL"
-Va à la prochaine/\:précédente source de rechange (liste de lecture ASX
-uniquement)
+.IPs "INSER et SUPPR (liste de lecture ASX uniquement)"
+Va à la prochaine/\:précédente source de rechange.
 .IPs "p / ESPACE"
-Met le film en pause (un autre appuis reprend la lecture).
+Met en pause (un autre appuis reprend la lecture).
 .IPs .\ \ \ \
 Avance d'une trame.
 Le premier appui mettra le film en pause, et chaque appui suivant jouera
@@ -324,8 +323,8 @@ Ajuste le décalage des sous-titres de +/\:- 0.1 secondes.
 Translate les sous-titres vers le haut/bas.
 .IPs i
 Créé une marque EDL.
-.IPs s\ \ \ \ 
-Réalise une capture d'écran (nécessite que le filtre "screenshot" soit chargé).
+.IPs "s (nécessite que le filtre "screenshot" soit chargé)"
+Réalise une capture d'écran.
 .RE
 .PD 1
 .PP
@@ -375,9 +374,9 @@ des touches multimédia.)
 .PD 0
 .RS
 .IPs "PAUSE"
-pause
+Pause.
 .IPs "STOP\ "
-Stop la lecture et quitte.
+Stope la lecture et quitte.
 .IPs "AVANT et SUIVANT"
 Navigue en arrière/\:avant d'une minute.
 .RE
@@ -401,11 +400,11 @@ Charge un fichier.
 .IPs t\ \ \ \ 
 Charge un sous-titre.
 .IPs c\ \ \ \ 
-navigateur de skins
+Ouvre le navigateur de skins.
 .IPs p\ \ \ \ 
-bascule vers la liste de lecture (playlist).
+Ouvre la liste de lecture (playlist).
 .IPs r\ \ \ \ 
-préférences
+Ouvre la fenêtre de préférences.
 .RE
 .PD 1
 .
@@ -3382,7 +3381,7 @@ le framerate ne soit pas inclus dans le nom du fichier.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:15.0:test.gif
+mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
 .RE
 .PD 1
 .
@@ -5890,7 +5889,9 @@ Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
 qualité) (par défaut).
 .RE
 .PD 1
-Les dominances de champs disponibles sont:
+.RS
+Les dominances de champs disponibles sont\ :
+.RE
 .PD 0
 .RSs
 .IPs -1
@@ -8575,7 +8576,7 @@ leur conteneur (donner une moyenne par trame).
 (par défaut\ : 24 \- l'overhead moyen d'AVI).
 .
 .TP
-.B profile=<option>
+.B profile=<nom_du_profil>
 Restreint les options et le VBV (bitrate maximal sur une courte période)
 d'après les profils Simple, Advanced Simple et ceux de DivX.
 La vidéo obtenue devrait être visionnable sur les platines de salon et les
