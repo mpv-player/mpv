@@ -107,9 +107,8 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
   priv->last_pts = -1;
   priv->length = seconds;
   priv->dword = 0;
-  priv->pos = 0;
-  stream_read(s, (void *)&priv->dword, 4);
-  priv->pos = 8;
+  priv->pos = 32; // empty bit buffer
+  get_bits(priv, s, 8); // discard first 8 bits
   demuxer->priv = priv;
   demuxer->seekable = 0;
   demuxer->audio->id = 0;
