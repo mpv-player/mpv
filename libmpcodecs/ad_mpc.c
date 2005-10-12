@@ -31,6 +31,10 @@ LIBAD_EXTERN(libmusepack)
 
 // BUFFER_LENGTH is in MPC_SAMPLE_FORMAT units
 #define MAX_FRAMESIZE (4 * MPC_DECODER_BUFFER_LENGTH)
+//! this many frames should decode good after seeking
+#define MIN_SEEK_GOOD 5
+//! how many frames to discard at most after seeking
+#define MAX_SEEK_DISCARD 50
 
 typedef struct context_s {
   char *header;
@@ -178,7 +182,37 @@ static int decode_audio(sh_audio_t *sh, unsigned char *buf,
   return status;
 }
 
+/**
+ * \brief check if the decoded values are in a sane range
+ * \param buf decoded buffer
+ * \param len length of buffer in bytes
+ * \return 1 if all values are in (-1.01, 1.01) range, 0 otherwise
+ */
+static int check_clip(void *buf, int len) {
+#if MPC_SAMPLE_FORMAT == float
+  float *p = buf;
+  if (len < 4) return 1;
+  len = -len / 4;
+  p = &p[-len];
+  do {
+    if (p[len] < -1 || p[len] > 1) return 0;
+  } while (++len);
+#endif
+  return 1;
+}
+
 static int control(sh_audio_t *sh, int cmd, void* arg, ...) {
+  if (cmd == ADCTRL_RESYNC_STREAM) {
+    unsigned char *buf = (unsigned char *)malloc(MAX_FRAMESIZE);
+    int i;
+    int nr_ok = 0;
+    for (i = 0; i < MAX_SEEK_DISCARD; i++) {
+      int len = decode_audio(sh, buf, 0, MAX_FRAMESIZE);
+      if (check_clip(buf, len)) nr_ok++; else nr_ok = 0;
+      if (nr_ok > MIN_SEEK_GOOD) break;
+    }
+    free(buf);
+  }
   return CONTROL_UNKNOWN;
 }
 
