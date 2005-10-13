@@ -69,7 +69,7 @@ static int mp_write(URLContext *h, unsigned char *buf, int size)
 static offset_t mp_seek(URLContext *h, offset_t pos, int whence)
 {
 	muxer_t *muxer = (muxer_t*)h->priv_data;
-	fprintf(stderr, "SEEK %llu\n", pos);
+	fprintf(stderr, "SEEK %"PRIu64"\n", (int64_t)pos);
 	return fseeko(muxer->file, pos, whence);
 }
 

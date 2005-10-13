@@ -140,11 +140,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->type = STREAMTYPE_FILE;
   }
 
-#ifdef _LARGEFILE_SOURCE
-  mp_msg(MSGT_OPEN,MSGL_V,"[file] File size is %lld bytes\n", (long long)len);
-#else
-  mp_msg(MSGT_OPEN,MSGL_V,"[file] File size is %u bytes\n", (unsigned int)len);
-#endif 
+  mp_msg(MSGT_OPEN,MSGL_V,"[file] File size is %"PRId64" bytes\n", (int64_t)len);
 
   stream->fd = f;
   stream->fill_buffer = fill_buffer;

@@ -240,13 +240,13 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          mp_msg
          ( 
             MSGT_DEMUX, MSGL_DBG3,
-           "tmf_filetoparts(): size %lld\n",
+           "tmf_filetoparts(): size %"PRId64"\n",
            tivo->tmfparts[ parts ].fileSize
          );
          mp_msg
          ( 
             MSGT_DEMUX, MSGL_DBG3,
-           "tmf_filetoparts(): startOffset %lld\n",
+           "tmf_filetoparts(): startOffset %"PRId64"\n",
            tivo->tmfparts[ parts ].startOffset
          );
          parts++;
@@ -283,7 +283,7 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       tivo->tmf_totalchunks += ( tivo->tmfparts[ index ].fileSize / CHUNKSIZE );
    }
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "tmf_filetoparts():total size %lld\n", tivo->tmf_totalsize );
+      "tmf_filetoparts():total size %"PRId64"\n", tivo->tmf_totalsize );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "tmf_filetoparts():total chunks %d\n", tivo->tmf_totalchunks );
 
@@ -317,7 +317,7 @@ void tmf_filetooffset( TiVoInfo *tivo, int chunk, off_t *offset )
    mp_msg
    ( 
       MSGT_DEMUX, MSGL_DBG3, 
-      "tmf_filetooffset() offset %llx\n", *offset
+      "tmf_filetooffset() offset %"PRIx64"\n", *offset
    );
 }
 
@@ -728,7 +728,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                      tivo->size = numberParts * TIVO_PART_LENGTH;
                      tivo->size += size;
                      mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-                        "ty:Header Calc Stream Size %lld\n", tivo->size );
+                        "ty:Header Calc Stream Size %"PRId64"\n", tivo->size );
                   }
                }
             }
@@ -754,13 +754,13 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    // Give a clue as to where we are in the stream
    // ======================================================================
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "ty:ty header size %llx\n", tivo->size );
+      "ty:ty header size %"PRIx64"\n", tivo->size );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "ty:ty which Chunk %llx\n", tivo->whichChunk );
+      "ty:ty which Chunk %"PRIx64"\n", tivo->whichChunk );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "ty:file end_pos   %llx\n", demux->stream->end_pos );
+      "ty:file end_pos   %"PRIx64"\n", demux->stream->end_pos );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "\nty:wanted current offset %llx\n", stream_tell( demux->stream ) );
+      "\nty:wanted current offset %"PRIx64"\n", stream_tell( demux->stream ) );
 
    if ( tivo->size > 0 )
    {
@@ -826,7 +826,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
       }
    }   
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "\nty:actual current offset %llx\n", ( stream_tell( demux->stream ) - 
+      "\nty:actual current offset %"PRIx64"\n", ( stream_tell( demux->stream ) - 
 		0x20000 ) );
 
 

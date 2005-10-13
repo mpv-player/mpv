@@ -636,7 +636,7 @@ demux_mkv_read_info (demuxer_t *demuxer)
             if (num == EBML_UINT_INVALID)
               return 1;
             mkv_d->tc_scale = num;
-            mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + timecode scale: %llu\n",
+            mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + timecode scale: %"PRIu64"\n",
                     mkv_d->tc_scale);
             break;
           }
@@ -1262,7 +1262,7 @@ demux_mkv_read_cues (demuxer_t *demuxer)
           mkv_d->indexes[mkv_d->num_indexes].timecode = time;
           mkv_d->indexes[mkv_d->num_indexes].filepos =mkv_d->segment_start+pos;
           mp_msg (MSGT_DEMUX, MSGL_DBG2, "[mkv] |+ found cue point "
-                  "for track %llu: timecode %llu, filepos: %llu\n", 
+                  "for track %"PRIu64": timecode %"PRIu64", filepos: %"PRIu64"\n", 
                   track, time, mkv_d->segment_start + pos);
           mkv_d->num_indexes++;
         }

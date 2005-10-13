@@ -307,11 +307,7 @@ static int seek(stream_t *s,off_t newpos) {
   if(!s->fd) return 0;
 
   if(newpos > 0) {
-#ifdef _LARGEFILE_SOURCE
-    snprintf(str,255,"REST %lld\r\n",newpos);
-#else
-    snprintf(str,255,"REST %u\r\n",newpos);
-#endif 
+    snprintf(str,255,"REST %"PRId64"\r\n", (int64_t)newpos);
 
     resp = FtpSendCmd(str,p,rsp_txt);
     if(resp != 3) {

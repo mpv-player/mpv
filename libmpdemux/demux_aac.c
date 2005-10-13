@@ -121,7 +121,7 @@ static int demux_aac_probe(demuxer_t *demuxer)
 	if(cnt < 8)
 		goto fail;
 	
-	mp_msg(MSGT_DEMUX, MSGL_V, "demux_aac_probe, INIT: %llu, PROBED: %llu, cnt: %d\n", init, probed, cnt);
+	mp_msg(MSGT_DEMUX, MSGL_V, "demux_aac_probe, INIT: %"PRIu64", PROBED: %"PRIu64", cnt: %d\n", init, probed, cnt);
 	return DEMUXER_TYPE_AAC;
 
 fail:

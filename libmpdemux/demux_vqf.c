@@ -143,7 +143,7 @@ static demuxer_t* demux_open_vqf(demuxer_t* demuxer) {
     {
     demuxer->movi_start=stream_tell(s);
     demuxer->movi_end=demuxer->movi_start+chunk_size-8;
-    mp_msg(MSGT_DEMUX, MSGL_V, "Found data at %llX size %llu\n",demuxer->movi_start,demuxer->movi_end);
+    mp_msg(MSGT_DEMUX, MSGL_V, "Found data at %"PRIX64" size %"PRIu64"\n",demuxer->movi_start,demuxer->movi_end);
     /* Done! play it */
     break;
     }

@@ -289,7 +289,7 @@ static int parse_position(m_option_t* opt,char *name, char *param, void* dst, in
   if (param == NULL)
     return M_OPT_MISSING_PARAM;
   if (sscanf(param, sizeof(off_t) == sizeof(int) ?
-	     "%d%c" : "%lld%c", &tmp_off, &dummy) != 1) {
+	     "%d%c" : "%"PRId64"%c", &tmp_off, &dummy) != 1) {
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "The %s option must be an integer: %s\n",opt->name,param);
     return M_OPT_INVALID;
   }
@@ -297,20 +297,16 @@ static int parse_position(m_option_t* opt,char *name, char *param, void* dst, in
   if (opt->flags & M_OPT_MIN)
     if (tmp_off < opt->min) {
       mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-	     (sizeof(off_t) == sizeof(int) ?
-	      "The %s option must be >= %d: %s\n" :
-	      "The %s option must be >= %lld: %s\n"),
-	     name, (off_t) opt->min, param);
+	      "The %s option must be >= %"PRId64": %s\n",
+	     name, (int64_t) opt->min, param);
       return M_OPT_OUT_OF_RANGE;
     }
 
   if (opt->flags & M_OPT_MAX)
     if (tmp_off > opt->max) {
       mp_msg(MSGT_CFGPARSER, MSGL_ERR,
-	     (sizeof(off_t) == sizeof(int) ?
-	      "The %s option must be <= %d: %s\n" :
-	      "The %s option must be <= %lld: %s\n"),
-	     name, (off_t) opt->max, param);
+	      "The %s option must be <= %"PRId64": %s\n",
+	     name, (int64_t) opt->max, param);
       return M_OPT_OUT_OF_RANGE;
     }
 
@@ -320,7 +316,7 @@ static int parse_position(m_option_t* opt,char *name, char *param, void* dst, in
 }
 
 static char* print_position(m_option_t* opt,  void* val) {
-  return dup_printf(sizeof(off_t) == sizeof(int) ?  "%d" : "%lld",VAL(val));
+  return dup_printf("%"PRId64,(int64_t)VAL(val));
 }
 
 m_option_type_t m_option_type_position = {

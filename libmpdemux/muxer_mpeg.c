@@ -863,7 +863,7 @@ static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, FILE *f, char *bl,
 	{
 		spriv = (muxer_headers_t *) s->priv;
 		
-		mp_msg(MSGT_MUXER, MSGL_DBG2, "\nwrite_mpeg_pack(MUX=%d, len=%u, rate=%u, id=%X, pts: %llu, dts: %llu, scr: %llu, PACK_size:%u\n", 
+		mp_msg(MSGT_MUXER, MSGL_DBG2, "\nwrite_mpeg_pack(MUX=%d, len=%u, rate=%u, id=%X, pts: %"PRIu64", dts: %"PRIu64", scr: %"PRIu64", PACK_size:%u\n", 
 		priv->mux, len, muxer->sysrate, s->ckid, spriv->pts, spriv->dts, priv->scr, priv->packet_size);
 		
 		//stflen is the count of stuffing bytes in the pes header itself, 
@@ -1154,7 +1154,7 @@ static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, 
 		next_pts = apriv->last_pts;
 	apriv->last_dts = apriv->pts;
 	apriv->pts = next_pts;
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nAUDIO: tot=%llu, sz=%u bytes, FRAMES: %llu * %u, REST: %u, DELTA_PTS: %u\n", 
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nAUDIO: tot=%"PRIu64", sz=%u bytes, FRAMES: %"PRIu64" * %u, REST: %u, DELTA_PTS: %u\n", 
 		apriv->size, sz, num_frames, (uint32_t) apriv->frame_size, (uint32_t) rest, (uint32_t) ((num_frames * apriv->delta_pts) >> 10));
 	
 	if(((priv->scr + (63000*1024)) < next_pts) && (priv->scr < apriv->pts) && (! force))
@@ -1239,11 +1239,11 @@ static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, 
 			mp_msg(MSGT_MUXER, MSGL_ERR, "\nWARNING: SCR: << APTS, DELTA=%.3lf secs, COMPENSATE=%d, BR: %d\n", 
 				(((double) tmp)/92160000.0), apriv->compensate, apriv->bitrate);
 		else if(apriv->pts < priv->scr)
-			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR: SCR: %llu, APTS: %llu, DELTA=-%.3lf secs, COMPENSATE=%d, BR: %d, lens: %d/%d, frames: %d\n", 
+			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR: SCR: %"PRIu64", APTS: %"PRIu64", DELTA=-%.3lf secs, COMPENSATE=%d, BR: %d, lens: %d/%d, frames: %d\n", 
 				priv->scr, apriv->pts, (double) ((priv->scr - apriv->pts)/92160000.0), apriv->compensate, apriv->bitrate, tlen, len, n);
 	}
 
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nWRITTEN AUDIO: %u bytes, TIMER: %.3lf, FRAMES: %llu * %u, DELTA_PTS: %.3lf\n", 
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nWRITTEN AUDIO: %u bytes, TIMER: %.3lf, FRAMES: %"PRIu64" * %u, DELTA_PTS: %.3lf\n", 
 		len, (double) (apriv->pts/92160000), num_frames, (uint32_t) apriv->frame_size, delta_pts);
 	
 	return len;
@@ -1263,7 +1263,7 @@ static void drop_delayed_audio(muxer_t *muxer, muxer_stream_t *as, int64_t size)
 	else
 		size1 = (div) * apriv->frame_size;
 
-	mp_msg(MSGT_MUXER, MSGL_V, "SIZE1: %llu, LEN: %llu\n", size1, (uint64_t)as->b_buffer_len);
+	mp_msg(MSGT_MUXER, MSGL_V, "SIZE1: %"PRIu64", LEN: %"PRIu64"\n", size1, (uint64_t)as->b_buffer_len);
 	size1 = min(size1, as->b_buffer_len);
 	memmove(as->b_buffer, &(as->b_buffer[size]), as->b_buffer_len - size1);
 	as->b_buffer_len -= size1;
@@ -1272,7 +1272,7 @@ static void drop_delayed_audio(muxer_t *muxer, muxer_stream_t *as, int64_t size)
 	rest_pts = (double) rest / (double) apriv->bitrate;
 	apriv->pts += (int64_t) (92160000.0 * rest_pts);
 	apriv->last_pts += (int64_t) (92160000.0 * rest_pts);
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "DROPPED: %lld bytes, REST= %lld, REST_PTS: %.3lf, AUDIO_PTS%.3lf\n", size1, rest, rest_pts, (double) (apriv->pts/92160000.0));
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "DROPPED: %"PRId64" bytes, REST= %"PRId64", REST_PTS: %.3lf, AUDIO_PTS%.3lf\n", size1, rest, rest_pts, (double) (apriv->pts/92160000.0));
 }
 
 
@@ -1283,20 +1283,20 @@ static void save_delayed_audio(muxer_t *muxer, muxer_stream_t *as, uint64_t dur)
 	uint64_t init_pts, last_pts;	//initial value
 	
 	init_pts = apriv->pts;
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "DUR: %llu, DIFF: %llu\n", dur, apriv->pts - init_pts);
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "DUR: %"PRIu64", DIFF: %"PRIu64"\n", dur, apriv->pts - init_pts);
 	while(dur > apriv->pts - init_pts)
 	{
 		priv->scr = (92160000 * apriv->size) / apriv->bitrate;
 		last_pts = apriv->pts;
 		dump_audio(muxer, as, as->b_buffer_len, 0);
-		mp_msg(MSGT_MUXER, MSGL_DBG2, "DUR: %llu, DIFF: %llu, SCR: %llu\n", dur, apriv->pts - init_pts, priv->scr);
+		mp_msg(MSGT_MUXER, MSGL_DBG2, "DUR: %"PRIu64", DIFF: %"PRIu64", SCR: %"PRIu64"\n", dur, apriv->pts - init_pts, priv->scr);
 	}
 	
 	//priv->init_delay_pts = last_pts;
 	priv->init_delay_pts = (90 * 1024 * abs(conf_init_adelay)) + apriv->init_pts - (90 * 1024 * abs(conf_init_vpts));
 	if(priv->init_delay_pts <= priv->scr)
 		priv->init_delay_pts = last_pts;
-	mp_msg(MSGT_MUXER, MSGL_INFO, "INIT_VPTS: %llu (%.3lf)\n", priv->init_delay_pts, (double) (priv->init_delay_pts/92160000.0));
+	mp_msg(MSGT_MUXER, MSGL_INFO, "INIT_VPTS: %"PRIu64" (%.3lf)\n", priv->init_delay_pts, (double) (priv->init_delay_pts/92160000.0));
 }
 
 
@@ -1310,7 +1310,7 @@ static inline void update_scr(muxer_priv_t *priv, uint32_t len, uint32_t totlen,
 	delta_scr = (uint64_t) (mult * perc);
 	priv->scr += delta_scr;
 	
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "UPDATE SCR TO %llu (%.3lf): mult is %.3lf,  perc: %.3lf, %u/%u, delta: %llu\n", 
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "UPDATE SCR TO %"PRIu64" (%.3lf): mult is %.3lf,  perc: %.3lf, %u/%u, delta: %"PRIu64"\n", 
 		priv->scr, (double) (priv->scr/92160000.0), mult, perc, len, totlen, delta_scr);
 }
 
@@ -2088,7 +2088,7 @@ static uint64_t fix_mp4_frame_duration(muxer_headers_t *vpriv)
 	mn = mx = vpriv->framebuf[0].pts;
 	for(i = 0; i < 3; i++) 
 	{
-		mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "PTS: %llu\n", vpriv->framebuf[i].pts);
+		mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "PTS: %"PRIu64"\n", vpriv->framebuf[i].pts);
 		if(vpriv->framebuf[i].pts < mn)
 			mn = vpriv->framebuf[i].pts;
 		if(vpriv->framebuf[i].pts > mx)
@@ -2100,7 +2100,7 @@ static uint64_t fix_mp4_frame_duration(muxer_headers_t *vpriv)
 		if((vpriv->framebuf[i].pts > mn) && (vpriv->framebuf[i].pts < mx))
 		md = vpriv->framebuf[i].pts;
 	}
-	mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "MIN: %llu, mid: %llu, max: %llu\n", mn, md, mx);
+	mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "MIN: %"PRIu64", mid: %"PRIu64", max: %"PRIu64"\n", mn, md, mx);
 	
 	if(mx - md > md - mn)
 		diff = md - mn;
@@ -2166,7 +2166,7 @@ static size_t parse_mpeg4_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_hea
 			delta_pts = (92160000 * (int64_t) delta) / vpriv->picture.timeinc_resolution;
 			
 			pt = vpriv->picture.picture_type + 1;
-			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTYPE: %c, RESOLUTION: %d, TEMP: %d, delta: %d, delta_pts: %lld = %.3lf, delta2: %.3lf\n", 
+			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTYPE: %c, RESOLUTION: %d, TEMP: %d, delta: %d, delta_pts: %"PRId64" = %.3lf, delta2: %.3lf\n", 
 				FTYPE(pt), vpriv->picture.timeinc_resolution, vpriv->picture.timeinc_unit, delta, delta_pts, (double) (delta_pts/92160000.0),
 				(double) delta / (double) vpriv->picture.timeinc_resolution);
 			
@@ -2199,7 +2199,7 @@ static size_t parse_mpeg4_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_hea
 			vpriv->last_pts += vpriv->frame_duration;
 			vpriv->last_dts = vpriv->framebuf[vpriv->framebuf_used-1].dts;
 			vpriv->delta_clock = ((double) vpriv->frame_duration)/92160000.0;
-			mp_msg(MSGT_MUXER, MSGL_INFO, "FRAME DURATION: %llu   %.3lf\n", 
+			mp_msg(MSGT_MUXER, MSGL_INFO, "FRAME DURATION: %"PRIu64"   %.3lf\n", 
 				vpriv->frame_duration, (double) (vpriv->frame_duration/92160000.0));
 		}
 	}
@@ -2508,12 +2508,12 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 		{
 			if(priv->drop)
 			{
-				mp_msg(MSGT_MUXER, MSGL_V, "\nDROPPING %llu AUDIO BYTES, DELAY: %.3lf, BR: %u\n", delay_len, priv->init_adelay, spriv->bitrate);
+				mp_msg(MSGT_MUXER, MSGL_V, "\nDROPPING %"PRIu64" AUDIO BYTES, DELAY: %.3lf, BR: %u\n", delay_len, priv->init_adelay, spriv->bitrate);
 				drop_delayed_audio(muxer, s, (int64_t) delay_len);
 			}
 			else
 			{
-				mp_msg(MSGT_MUXER, MSGL_V, "\nWRITING %llu EARLY AUDIO BYTES, DELAY: %.3lf, BR: %u\n", delay_len, priv->init_adelay, spriv->bitrate);
+				mp_msg(MSGT_MUXER, MSGL_V, "\nWRITING %"PRIu64" EARLY AUDIO BYTES, DELAY: %.3lf, BR: %u\n", delay_len, priv->init_adelay, spriv->bitrate);
 				save_delayed_audio(muxer, s, (uint64_t) (92160000 * (-priv->init_adelay)));
 			}
 			priv->init_adelay = 0.0;
@@ -2569,7 +2569,7 @@ static void mpegfile_write_index(muxer_t *muxer)
 	if(priv->is_genmpeg1 || priv->is_genmpeg2)
 		write_mpeg_pack(muxer, NULL, muxer->file, NULL, 0, 1);	//insert fake Nav Packet
 		
-	mp_msg(MSGT_MUXER, MSGL_INFO, "\nOverhead: %.3lf%% (%llu / %llu)\n", 100.0 * (double)priv->headers_size / (double)priv->data_size, priv->headers_size, priv->data_size);
+	mp_msg(MSGT_MUXER, MSGL_INFO, "\nOverhead: %.3lf%% (%"PRIu64" / %"PRIu64")\n", 100.0 * (double)priv->headers_size / (double)priv->data_size, priv->headers_size, priv->data_size);
 }
 
 static void mpegfile_write_header(muxer_t *muxer)

@@ -408,11 +408,7 @@ http_send_request( URL_t *url, off_t pos ) {
 
 	if(pos>0) { 
 	// Extend http_send_request with possibility to do partial content retrieval
-#ifdef __MINGW32__
-	    snprintf(str, 256, "Range: bytes=%I64d-", (int64_t)pos);
-#else
-	    snprintf(str, 256, "Range: bytes=%lld-", (long long)pos);
-#endif
+	    snprintf(str, 256, "Range: bytes=%"PRId64"-", (int64_t)pos);
 	    http_set_field(http_hdr, str);
 	}
 	    

@@ -157,7 +157,7 @@ void print_avistdindex_chunk(avistdindex_chunk *h){
     mp_msg (MSGT_HEADER, MSGL_V, "  FCC (%.4s) dwSize (%d) wLongsPerEntry(%d)\n", h->fcc, h->dwSize, h->wLongsPerEntry);
     mp_msg (MSGT_HEADER, MSGL_V, "  bIndexSubType (%d) bIndexType (%d)\n", h->bIndexSubType, h->bIndexType);
     mp_msg (MSGT_HEADER, MSGL_V, "  nEntriesInUse (%d) dwChunkId (%.4s)\n", h->nEntriesInUse, h->dwChunkId);
-    mp_msg (MSGT_HEADER, MSGL_V, "  qwBaseOffset (0x%llX) dwReserved3 (%d)\n", h->qwBaseOffset, h->dwReserved3);
+    mp_msg (MSGT_HEADER, MSGL_V, "  qwBaseOffset (0x%"PRIX64") dwReserved3 (%d)\n", h->qwBaseOffset, h->dwReserved3);
     mp_msg (MSGT_HEADER, MSGL_V, "===========================\n");
 }
 void print_avisuperindex_chunk(avisuperindex_chunk *h){

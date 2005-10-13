@@ -268,13 +268,8 @@ off_t newpos=0;
   }
 
 if(verbose>=3){
-#ifdef _LARGEFILE_SOURCE
-  printf("s->pos=%llX  newpos=%llX  new_bufpos=%llX  buflen=%X  \n",
-    (long long)s->pos,(long long)newpos,(long long)pos,s->buf_len);
-#else
-  printf("s->pos=%X  newpos=%X  new_bufpos=%X  buflen=%X  \n",
-    (unsigned int)s->pos,newpos,pos,s->buf_len);
-#endif
+  printf("s->pos=%"PRIX64"  newpos=%"PRIX64"  new_bufpos=%"PRIX64"  buflen=%X  \n",
+    (int64_t)s->pos,(int64_t)newpos,(int64_t)pos,s->buf_len);
 }
   pos-=newpos;
 
@@ -333,11 +328,7 @@ if(newpos==0 || newpos!=s->pos){
   
 //  if(pos==s->buf_len) printf("XXX Seek to last byte of file -> EOF\n");
   
-#ifdef _LARGEFILE_SOURCE
-  mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%llX !\n",(long long)(pos+newpos));
-#else
-  mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%X !\n",(pos+newpos));
-#endif
+  mp_msg(MSGT_STREAM,MSGL_V,"stream_seek: WARNING! Can't seek to 0x%"PRIX64" !\n",(int64_t)(pos+newpos));
   return 0;
 }
 

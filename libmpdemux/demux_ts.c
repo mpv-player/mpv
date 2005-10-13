@@ -322,7 +322,7 @@ static int ts_check_file(demuxer_t * demuxer)
 		}
 	}
 
-	mp_msg(MSGT_DEMUX, MSGL_V, "TRIED UP TO POSITION %llu, FOUND %x, packet_size= %d, SEEMS A TS? %d\n", (uint64_t) pos, c, size, is_ts);
+	mp_msg(MSGT_DEMUX, MSGL_V, "TRIED UP TO POSITION %"PRIu64", FOUND %x, packet_size= %d, SEEMS A TS? %d\n", (uint64_t) pos, c, size, is_ts);
 	stream_seek(demuxer->stream, pos);
 
 	if(! is_ts)
@@ -547,7 +547,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 	has_tables = 0;
 	memset(pes_priv1, 0, sizeof(pes_priv1));
 	init_pos = stream_tell(demuxer->stream);
-	mp_msg(MSGT_DEMUXER, MSGL_INFO, "PROBING UP TO %llu, PROG: %d\n", (uint64_t) param->probe, param->prog);
+	mp_msg(MSGT_DEMUXER, MSGL_INFO, "PROBING UP TO %"PRIu64", PROG: %d\n", (uint64_t) param->probe, param->prog);
 	while((pos <= init_pos + param->probe) && (! demuxer->stream->eof))
 	{
 		pos = stream_tell(demuxer->stream);
@@ -952,7 +952,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	}
 
 
-	mp_msg(MSGT_DEMUXER,MSGL_INFO, "Opened TS demuxer, audio: %x(pid %d), video: %x(pid %d)...POS=%llu\n", params.atype, demuxer->audio->id, params.vtype, demuxer->video->id, (uint64_t) start_pos);
+	mp_msg(MSGT_DEMUXER,MSGL_INFO, "Opened TS demuxer, audio: %x(pid %d), video: %x(pid %d)...POS=%"PRIu64"\n", params.atype, demuxer->audio->id, params.vtype, demuxer->video->id, (uint64_t) start_pos);
 
 
 	start_pos = (start_pos <= priv->ts.packet_size ? 0 : start_pos - priv->ts.packet_size);
@@ -1154,7 +1154,7 @@ static int mp4_parse_sl_packet(pmt_t *pmt, uint8_t *buf, uint16_t packet_len, in
 			}
 			
 			pes_es->pts = (float) v / (float) sl->ts_resolution;
-			mp_msg(MSGT_DEMUXER,MSGL_DBG2, "CTS: %d bits, value: %llu/%d = %.3f\n", sl->ts_len, v, sl->ts_resolution, pes_es->pts);
+			mp_msg(MSGT_DEMUXER,MSGL_DBG2, "CTS: %d bits, value: %"PRIu64"/%d = %.3f\n", sl->ts_len, v, sl->ts_resolution, pes_es->pts);
 		}
 		
 		
@@ -1755,7 +1755,7 @@ static uint16_t parse_mp4_slconfig_descriptor(pmt_t *pmt, uint8_t *buf, int len,
 	else	//no support for fixed durations atm
 		sl->timescale = sl->au_duration = sl->cts_duration = 0;
 	
-	mp_msg(MSGT_DEMUX, MSGL_V, "MP4SLCONFIG(len=0x%x), predef: %d, flags: %x, use_ts: %d, tslen: %d, timescale: %d, dts: %llu, cts: %llu\n", 
+	mp_msg(MSGT_DEMUX, MSGL_V, "MP4SLCONFIG(len=0x%x), predef: %d, flags: %x, use_ts: %d, tslen: %d, timescale: %d, dts: %"PRIu64", cts: %"PRIu64"\n", 
 		len, buf[0], sl->flags, sl->use_ts, sl->ts_len, sl->timescale, (uint64_t) sl->dts, (uint64_t) sl->cts);
 	
 	return len;
