@@ -950,73 +950,53 @@ signal(SIGPIPE,exit_sighandler); // broken pipe
 timer_start=GetTimerMS();
 } // if (!curfile) // if this was the first file.
 else {
-if (!mux_a != !sh_audio) {
-	mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioFileMismatch);
-	mencoder_exit(1,NULL);
-}
-if (sh_audio) {
-	int out_format = 0, out_minsize = 0, out_maxsize = 0;
-	int do_init_filters = 1;
-	if((aencoder != NULL) && (mux_a->codec != ACODEC_COPY))
-	{
-		out_format = aencoder->input_format;
-		out_minsize = aencoder->min_buffer_size;
-		out_maxsize = aencoder->max_buffer_size;
+	if (!mux_a != !sh_audio) {
+		mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioFileMismatch);
+		mencoder_exit(1,NULL);
 	}
-	switch(mux_a->codec){
-		case ACODEC_COPY:
-			do_init_filters = 0;
-			if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
-			mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-			       mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
-			       mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
-			if (sh_audio->wf) {
-				if ((mux_a->wf->wFormatTag != sh_audio->wf->wFormatTag) ||
-				    (mux_a->wf->nChannels != sh_audio->wf->nChannels) ||
-				    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec * playback_speed))
-				{
-					mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-					       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec * playback_speed,
-					       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
-					mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
-					mencoder_exit(1,NULL);
-				}
+	if (sh_audio && mux_a->codec == ACODEC_COPY) {
+		if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
+		mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
+		       mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
+		       mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
+		if (sh_audio->wf) {
+			if ((mux_a->wf->wFormatTag != sh_audio->wf->wFormatTag) ||
+			    (mux_a->wf->nChannels != sh_audio->wf->nChannels) ||
+			    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec * playback_speed))
+			{
+				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec * playback_speed,
+				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
+				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
+				mencoder_exit(1,NULL);
 			}
-			else {
-				if ((mux_a->wf->wFormatTag != sh_audio->format) ||
-				    (mux_a->wf->nChannels != sh_audio->channels) ||
-				    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate * playback_speed))
-				{
-					mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-					       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec * playback_speed,
-					       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
-					mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
-					mencoder_exit(1,NULL);
-				}
-				
+		} else {
+			if ((mux_a->wf->wFormatTag != sh_audio->format) ||
+			    (mux_a->wf->nChannels != sh_audio->channels) ||
+			    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate * playback_speed))
+			{
+				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec * playback_speed,
+				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
+				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
+				mencoder_exit(1,NULL);
 			}
-			break;
+		}
+	} else if (sh_audio) {
+		int out_srate = mux_a->wf->nSamplesPerSec;
+		int out_channels = mux_a->wf->nChannels;
+		int out_format = aencoder->input_format;
+		int out_minsize = aencoder->min_buffer_size;
+		int out_maxsize = aencoder->max_buffer_size;
+		if (!init_audio_filters(sh_audio, new_srate, sh_audio->channels,
+					sh_audio->sample_format, &out_srate, &out_channels,
+					&out_format, out_minsize, out_maxsize)) {
+			mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoMatchingFilter);
+			mencoder_exit(1, NULL);
+		}
+		mux_a->wf->nSamplesPerSec = out_srate;
+		mux_a->wf->nChannels = out_channels;
 	}
-	if (do_init_filters) {
-	  int out_srate = mux_a->wf->nSamplesPerSec;
-	  int out_channels = mux_a->wf->nChannels;
-	  if(!init_audio_filters(sh_audio,
-	    new_srate,
-	    sh_audio->channels,
-	    sh_audio->sample_format,
-	    &out_srate,
-	    &out_channels,
-	    &out_format,
-	    out_minsize,
-	    out_maxsize))
-	{
-		mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoMatchingFilter);
-		mencoder_exit(1, NULL);
-	}
-	  mux_a->wf->nSamplesPerSec = out_srate;
-	  mux_a->wf->nChannels = out_channels;
-	}
-}
 }
 
 parse_end_at();
