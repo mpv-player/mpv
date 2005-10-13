@@ -218,6 +218,7 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nNew video file has different resolution or colorspace than the previous one.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAll video files must have identical fps, resolution, and codec for -ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAll files must have identical audio codec and format for -oac copy.\n"
+#define MSGTR_NoAudioFileMismatch "\nCan not mix video-only files with audio and video files. Try -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed is not guaranteed to work correctly with -oac copy!\n"\
 "Your encode might be broken!\n"
 #define MSGTR_ErrorWritingFile "%s: Error writing file.\n"

@@ -948,7 +948,12 @@ signal(SIGPIPE,exit_sighandler); // broken pipe
 
 timer_start=GetTimerMS();
 } // if (!curfile) // if this was the first file.
-else if (sh_audio) {
+else {
+if (!mux_a != !sh_audio) {
+	mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_NoAudioFileMismatch);
+	mencoder_exit(1,NULL);
+}
+if (sh_audio) {
 	int out_format = 0, out_minsize = 0, out_maxsize = 0;
 	int do_init_filters = 1;
 	if((aencoder != NULL) && (mux_a->codec != ACODEC_COPY))
@@ -1010,6 +1015,7 @@ else if (sh_audio) {
 	  mux_a->wf->nSamplesPerSec = out_srate;
 	  mux_a->wf->nChannels = out_channels;
 	}
+}
 }
 
 parse_end_at();
