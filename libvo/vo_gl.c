@@ -759,10 +759,9 @@ static int preinit(const char *arg)
     else
       gl_target = GL_TEXTURE_2D;
     if (many_fmts)
-      mp_msg (MSGT_VO, MSGL_WARN, "[gl] using extended formats.\n"
-               "Make sure you have OpenGL >= 1.2 and used corresponding "
-               "headers for compiling!\n");
-    mp_msg (MSGT_VO, MSGL_INFO, "[gl] Using %d as slice height "
+      mp_msg (MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
+               "Use -vo gl:manyfmts if playback fails.\n");
+    mp_msg (MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
              "(0 means image height).\n", slice_height);
     if( !vo_init() ) return -1; // Can't open X11
 
