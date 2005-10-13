@@ -257,13 +257,83 @@ static char help_text[]=
 " or \"-lameopts      preset=extreme   \"\n"\
 "\n"\
 "更多信息，请试着: \"-lameopts preset=help\"\n"
+#define MSGTR_LamePresetsLongInfo "\n"\
+"预设开关被设计为提供最好的品质.\n"\
+"\n"\
+"它们的大多数的部分已经通过严格的 double blind listening 测试来调整和检验性能\n"\
+"以达到我们预期的目标.\n"\
+"\n"\
+"它们不断地被升级以便和最新的发展保持一致的步调,\n"\
+"所以应该能给你提供当然LAME所能提供的将近最好的品质.\n"\
+"\n"\
+"激活这样预设值:\n"\
+"\n"\
+"   VBR模式(通常情况下的最高品质):\n"\
+"\n"\
+"     \"preset=standard\" 此项预设值显然应该是大多数人在处理大多数的音乐的时候\n"\
+  "                                   所要用到的选项, 它的品质已经非常高的了.\n" \
+"\n"\
+"     \"preset=extreme\" 如果你有极好的听力和相当的设备, 这项预设值一般会比\n"\
+"                             \"standard\"模式的品质还要提高一点.\n"\
+"\n"\
+"   CBR 320kbps(预设开关选项里的最高质量):\n"\
+"\n"\
+"     \"preset=insane\"  对于大多数人和在大多数情况下, 这个选项都显得有些过度了.\n"\
+"                             但是如果你一定要有最高品质并且完全不关心文件大小,\n"\
+"                             那这正是适合你的.\n"\
+"\n"\
+"   ABR模式(high quality per given bitrate but not as high as VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  使用这个预设值总是会在一个给定的比特率有不错的品质.\n"\
+"                             当指定一个确定的比特率, 预设值将会决定这种情况下所能达\n"\
+"                             到的最好效果的设置. \n"\
+"                             虽然这种方法是可以的, 但它并没有VBR模式那么灵活, 同样\n"\
+"                             一般也不能达到VBR在高比特率下的同等品质. \n"\
+"\n"\
+"以下选项在一致的配置文件的情况下也可使用:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (ABR Mode) - ABR模式是清楚的. 要使用这个选项,\n"\
+"                      简单地指定一个比特率就行了. 例如:\n"\
+"                      \"preset=185\"就可以激活这个\n"\
+"                      预设值并使用185作为平均比特率.\n"\
+"\n"\
+"   \"fast\" - 给一个特定的配置文件启用新的快速VBR模式. 速度切换\n"\
+"            的坏处是经常性的比特率要比一般情况下的要高, 品质也会\n"\
+"            低一点点.\n"\
+"      警告: 在当前版本下, 快速预设值可能有点比一般模式偏高得太多了.\n"\
+"\n"\
+"   \"cbr\"  - 如果你在特定比特率使用ABR模式(见上), 比如80,\n"\
+"            96, 112, 128, 160, 192, 224, 256, 320, 你可\n"\
+"            以使用\"cbr\"选项来强制使用CBR模式编码以代替标准\n"\
+"            abr模式. ABR不提供更高的品质, 但是cbr可能会用到,\n"\
+"            某些情况下比如从internet传送一个mp3的流时就会相\n"\
+"            当重要了.\n"\
+"\n"\
+"    例如:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" or \"-lameopts  cbr:preset=192       \"\n"\
+" or \"-lameopts      preset=172       \"\n"\
+" or \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"ABR模式下的一些可用的别名(alias):\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps"
 #define MSGTR_LameCantInit "无法设定LAME选项, 检查比特率/采样率,"\
 "一些非常低的比特率(<32)需要低采样率(如 -srate 8000)."\
 "如果都不行, 试试使用预设值."
 #define MSGTR_ConfigfileError "配置文件错误"
 #define MSGTR_ErrorParsingCommandLine "解析命令行错误"
+#define MSGTR_VideoStreamRequired "视频流是必须的!\n"
 #define MSGTR_ForcingInputFPS "输入帧率将被%5.2f代替\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "输出文件格式RAWVIDEO不支持音频 - 取消音频\n"
+#define MSGTR_DemuxerDoesntSupportNosound "这个demuxer当前还不支持 -nosound.\n"
 #define MSGTR_MemAllocFailed "内存分配失败"
 #define MSGTR_NoMatchingFilter "没找到匹配的filter/ao格式!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, C编译器挂了?\n"
@@ -560,6 +630,8 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING1 "[skin] 警告, 在配置文件的 %d行:\n找到widget但在这之前没有找到\"section\" (%s)"
 #define MSGTR_SKIN_WARNING2 "[skin] 警告, 在配置文件的 %d行:\n找到widget但在这之前没有找到 \"subsection\" (%s) "
 #define MSGTR_SKIN_WARNING3 "[skin] 警告, 在配置文件的 %d行:\n这个widget不支持这个subsection(%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[skin] 文件( %s )没找到.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] 文件( %s )不可读.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "不支持少于16 bits色深的位图(%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "找不到文件(%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP读取错误(%s)\n"
@@ -575,7 +647,8 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_FontImageNotFound "找不到字体图像文件.\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "不存在的字体标签( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "未知参数( %s )\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "找不到Skin( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "找不到skin( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "选定的skin( %s )没找到, 试着使用'default'...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin配置文件( %s )读取错误.\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
@@ -596,6 +669,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "下一个"
 #define MSGTR_MENU_PrevStream "上一个"
 #define MSGTR_MENU_Size "大小"
+#define MSGTR_MENU_HalfSize   "一半大小"
 #define MSGTR_MENU_NormalSize "正常大小"
 #define MSGTR_MENU_DoubleSize "双倍大小"
 #define MSGTR_MENU_FullScreen "全屏"
@@ -610,7 +684,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Chapter %2d"
 #define MSGTR_MENU_AudioLanguages "音频语言"
 #define MSGTR_MENU_SubtitleLanguages "字幕语言"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Skin浏览器"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "退出..."
 #define MSGTR_MENU_Mute "静音"
 #define MSGTR_MENU_Original "原始的"
@@ -620,7 +696,9 @@ static char help_text[]=
 #define MSGTR_MENU_VideoTrack "视频轨道"
 
 // --- equalizer
+// Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio
 #define MSGTR_EQU_Audio "音频"
+// Note: If you change MSGTR_EQU_Video please see if it still fits MSGTR_PREFERENCES_Video
 #define MSGTR_EQU_Video "视频"
 #define MSGTR_EQU_Contrast "对比度: "
 #define MSGTR_EQU_Brightness "亮度: "
@@ -647,14 +725,20 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "目录树"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "字幕和OSD"
+#define MSGTR_PREFERENCES_Codecs "Codecs和demuxer"
+// Note: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "其他"
 
 #define MSGTR_PREFERENCES_None "None"
+#define MSGTR_PREFERENCES_DriverDefault "默认驱动"
 #define MSGTR_PREFERENCES_AvailableDrivers "可用驱动:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "不播放声音"
 #define MSGTR_PREFERENCES_NormalizeSound "声音标准化"
 #define MSGTR_PREFERENCES_EnEqualizer "开启均衡器"
+#define MSGTR_PREFERENCES_SoftwareMixer "开启软件混音器"
 #define MSGTR_PREFERENCES_ExtraStereo "开启立体声加强"
 #define MSGTR_PREFERENCES_Coefficient "参数:"
 #define MSGTR_PREFERENCES_AudioDelay "音频延迟"
@@ -677,7 +761,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "将所给字幕转换为基于时间的SubViewer(SRT) 格式"
 #define MSGTR_PREFERENCES_SUB_Overlap "开启字幕重叠"
 #define MSGTR_PREFERENCES_Font "字体:"
-#define MSGTR_PREFERENCES_Codecs "Codecs和demuxer"
 #define MSGTR_PREFERENCES_FontFactor "字体效果:"
 #define MSGTR_PREFERENCES_PostProcess "开启后期处理"
 #define MSGTR_PREFERENCES_AutoQuality "自动控制质量: "
@@ -691,6 +774,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "后期处理"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec和demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "缓存"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
+#define MSGTR_PREFERENCES_Audio_Device "设备:"
+#define MSGTR_PREFERENCES_Audio_Mixer "混音器:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "混音通道:"
 #define MSGTR_PREFERENCES_Message "请记住, 有些功能只有重新播放后才有效果."
 #define MSGTR_PREFERENCES_DXR3_VENC "视频编码器:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "使用LAVC(FFmpeg)"
@@ -738,6 +825,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "DVD设备:"
 #define MSGTR_PREFERENCES_FPS "电影的FPS:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "在非激活状态下显示视频窗口"
+#define MSGTR_PREFERENCES_ArtsBroken "新的aRts版本和GTK 1.x不兼容,"\
+           "会使GMPlayer崩溃!"
 
 #define MSGTR_ABOUT_UHU "GUI开发由UHU Linux赞助\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer核心小组:\n"
@@ -745,8 +834,106 @@ static char help_text[]=
 #define MSGTR_ABOUT_MainTesters "   主要测试者:\n"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "致命错误..."
-#define MSGTR_MSGBOX_LABEL_Error "错误..."
-#define MSGTR_MSGBOX_LABEL_Warning "警告..."
+#define MSGTR_MSGBOX_LABEL_FatalError "致命错误!"
+#define MSGTR_MSGBOX_LABEL_Error "错误!"
+#define MSGTR_MSGBOX_LABEL_Warning "警告!"
+
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] 内存不够, 容不下图片\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] 内存不够, 容不下图片\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] 读配置文件错误...\n"
+#define MSGTR_UnableToSaveOption "[cfg] 无法保存'%s'选项.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] 删除字幕.\n"
+#define MSGTR_LoadingSubtitles "[GUI] 导入字幕: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] 加入视频过滤器: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] 删除视频过滤器: %s\n"
+
+// mw.c
+
+#define MSGTR_NotAFile "这看起来不像是一个文件: %s !\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] 无法打开display.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] 远程display, 取消XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] 抱歉, 你的系统不支持X共享内存扩展.\n"
+#define MSGTR_WS_NoXshape "[ws] 抱歉, 你的系统不支持XShape扩展.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] 抱歉, 色彩深度太低了.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] 打开的窗口太多了.\n"
+#define MSGTR_WS_ShmError "[ws] 共享内存扩展错误\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] 抱歉, 内存不够画写缓冲(draw buffer).\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS不可用?\n"
+#define MSGTR_WS_DpmsNotEnabled "不能启用DPMS.\n"
+
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "这看起来不像是一个文件...\n"
+#define MSGTR_WS_DDNothing "D&D: 没有任何东西返回!\n"
 
 #endif
+
+// ======================= VO Video Output drivers ========================
+
+#define MSGTR_VOincompCodec "选定的视频输出设备和这个编解码器不兼容.\n"\
+                "试着加入缩放过滤器, 例如以 -vf spp,scale 来代替 -vf spp.\n"
+#define MSGTR_VO_GenericError "这个错误已经发生"
+#define MSGTR_VO_UnableToAccess "无法访问"
+#define MSGTR_VO_ExistsButNoDirectory "已经存在, 但不是一个目录."
+#define MSGTR_VO_DirExistsButNotWritable "输出目录已经存在, 但是不可写."
+#define MSGTR_VO_DirExistsAndIsWritable "输出目录已经存在并且可写."
+#define MSGTR_VO_CantCreateDirectory "无法创建输出目录."
+#define MSGTR_VO_CantCreateFile "无法创建输出文件."
+#define MSGTR_VO_DirectoryCreateSuccess "输出目录成功创建."
+#define MSGTR_VO_ParsingSuboptions "解析子选项."
+#define MSGTR_VO_SuboptionsParsedOK "子选项解析成功."
+#define MSGTR_VO_ValueOutOfRange "值超出范围"
+#define MSGTR_VO_NoValueSpecified "没有指定值."
+#define MSGTR_VO_UnknownSuboptions "未知子选项"
+
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\n这里是 aalib vo_aa 的子选项:\n"
+#define MSGTR_VO_AA_AdditionalOptions "vo_aa 提供的附加选项:\n" \
+"  help        显示此帮助信息\n" \
+"  osdcolor    设定osd颜色\n  subcolor    设定字幕颜色\n" \
+"        颜色参数有:\n           0 : 一般\n" \
+"           1 : 模糊\n           2 : 粗\n           3 : 粗字体\n" \
+"           4 : 反色\n           5 : 特殊\n\n\n"
+
+// vo_jpeg.c
+#define MSGTR_VO_JPEG_ProgressiveJPEG "启用Progressive JPEG."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "取消Progressive JPEG."
+#define MSGTR_VO_JPEG_BaselineJPEG "启用Baseline JPEG."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "取消Baseline JPEG."
+
+// vo_pnm.c
+#define MSGTR_VO_PNM_ASCIIMode "启用ASCII模式."
+#define MSGTR_VO_PNM_RawMode "启用Raw模式."
+#define MSGTR_VO_PNM_PPMType "将要写入PPM文件."
+#define MSGTR_VO_PNM_PGMType "将要写入PGM文件."
+#define MSGTR_VO_PNM_PGMYUVType "将要写入PGMYUV文件."
+
+// vo_yuv4mpeg.c
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "交错模式需要图像高度能被4整除."
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "无法为交错模式分配线缓冲."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "输入不是RGB, 不能按域分开色讯!"
+#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "图像宽度必须能被2整除."
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "内存不够, 不能分配RGB缓冲."
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "不能得到内存或文件句柄以写入\"%s\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileWriteError "写图像到输出错误!"
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "未知的子设备: %s"
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "使用交错输出模式(上层域在前)."
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "使用交错输出模式(下层域在前)."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "使用(默认)progressive帧模式."
+
+// Old vo drivers that have been replaced
+
+#define MSGTR_VO_PGM_HasBeenReplaced "Pgm视频输出驱动已经被 -vo pnm:pgmyuv 代替.\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "Md5视频输出驱动已经被 -vo md5sum 代替.\n"
