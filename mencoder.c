@@ -508,6 +508,7 @@ if (frameno_filename) {
 
   vo_init_osd();
 
+  m_config_push(mconfig);
 play_next_file:
   m_config_push(mconfig);
   m_entry_set_options(mconfig,&filelist[curfile]);
