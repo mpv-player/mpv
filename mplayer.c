@@ -2253,6 +2253,7 @@ if(sh_audio){
 	// output:
 	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
+      exit_player(MSGTR_Exit_error);
   }
 #endif  
   current_module="ao2_init";
