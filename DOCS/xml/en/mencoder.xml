@@ -229,7 +229,7 @@ Container formats:
 </tgroup>
 </informaltable>
   As you can see, <systemitem class="library">libavformat</systemitem>
-  allows <application>MEncoder</application> muxing into a considerable
+  allows <application>MEncoder</application> to mux into a considerable
   variety of containers.
   Unfortunately, as <application>MEncoder</application> was not designed
   from the beginning to support container formats other than AVI,
