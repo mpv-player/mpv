@@ -134,7 +134,7 @@ Container formats:
   </row>
   <row>
     <entry>avi</entry>
-    <entry>Audio-Video Interleave</entry>
+    <entry>Audio-Video Interleaved</entry>
   </row>
   <row>
     <entry>mpeg</entry>
@@ -156,7 +156,7 @@ Container formats:
   is best handled, and the one for which <application>MEncoder</application>
   was designed.
   As noted above, other container formats are usable, but you may
-  experience some problems when using them.
+  experience problems when using them.
 </para>
 
 <para>
@@ -187,7 +187,7 @@ Container formats:
   </row>
   <row>
     <entry>avi</entry>
-    <entry>Audio-Video Interleave</entry>
+    <entry>Audio-Video Interleaved</entry>
   </row>
   <row>
     <entry>wav</entry>
@@ -203,7 +203,7 @@ Container formats:
   </row>
   <row>
     <entry>rm</entry>
-    <entry>RealAudio and RealVideo</entry>
+    <entry>RealMedia</entry>
   </row>
   <row>
     <entry>au</entry>
@@ -229,12 +229,12 @@ Container formats:
 </tgroup>
 </informaltable>
   As you can see, <systemitem class="library">libavformat</systemitem>
-  allows <application>MEncoder</application> to mux into a considerable
+  allows <application>MEncoder</application> muxing into a considerable
   variety of containers.
   Unfortunately, as <application>MEncoder</application> was not designed
-  from the beginning to support other container formats than AVI,
+  from the beginning to support container formats other than AVI,
   your should really be paranoid about the resulting file.
-  Please check to be sure that the audio/video synchronization is okay
+  Please check to be sure that the audio/video synchronization is OK
   and that the file can be played correctly by players other than
   <application>MPlayer</application>.
 </para>
@@ -242,10 +242,10 @@ Container formats:
 <informalexample>
 <para>Example:</para>
 <para>
-  Creating a Macromedia Flash video suitable to be played in a web browser
+  Creating a Macromedia Flash video suitable for playback in a web browser
   with the Macromedia Flash plugin:
 <screen>
-mencoder <replaceable>input.avi</replaceable> -o <replaceable>ouput.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
+mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
 -lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
 -srate 22050
 </screen>
