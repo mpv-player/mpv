@@ -164,7 +164,7 @@ Container formats:
 </para>
 <para>
   If you selected <systemitem class="library">libavformat</systemitem>
-  to do the muxing of the output file (by using the <option>-of lavf</option>,
+  to do the muxing of the output file (by using the <option>-of lavf</option>),
   the appropriate container format will be determined by the file extension
   of the output file.
   You may force a particular container format with
