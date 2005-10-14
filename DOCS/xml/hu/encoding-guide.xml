@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.30 $ -->
+<!-- synced with 1.31 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2218,7 +2218,10 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   Windows Media Video, 2-es verzió (AKA WMV8)
   </entry></row>
 <row><entry>rv10</entry><entry>
-  egy régi RealVideo codec
+  RealVideo 1.0
+  </entry></row>
+<row><entry>rv20</entry><entry>
+  RealVideo 2.0
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
   MPEG-1 videó
@@ -2238,6 +2241,9 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
 <row><entry>ffv1</entry><entry>
   az FFmpeg veszteségmentes videó codec-je
   </entry></row>
+<row><entry>svq1</entry><entry>
+  Sorenson video 1
+  </entry></row>
 <row><entry>flv</entry><entry>
   Flash Videókban használt Sorenson H.263
   </entry></row>
@@ -2256,7 +2262,7 @@ opció után kell megadni, például: <option>-lavcopts vcodec=msmpeg4</option>
 </para>
 <informalexample>
 <para>
-Egy példa, MJPEG tömörítéssel:
+Egy példa MJPEG tömörítéssel:
 <screen>mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
@@ -2297,7 +2303,7 @@ opció után kell megadni, például: <option>-lavcopts acodec=ac3</option>
 
 <informalexample>
 <para>
-Egy példa, AC3 tömörítéssel:
+Egy példa AC3 tömörítéssel:
 <screen>mencoder dvd://2 -o title2.avi -oac lavc -lavcopts acodec=ac3 -ovc copy</screen>
 </para>
 </informalexample>
