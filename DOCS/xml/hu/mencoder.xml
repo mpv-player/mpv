@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.88 -->
+<!-- synced with 1.97 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -16,6 +16,287 @@ történő kódolást több szempontból vizsgálják és kiemelik a problémákat vele
 kapcsolatban.
 </para>
 
+<sect1 id="menc-feat-selecting-codec">
+<title>Codec és konténer formátum kiválasztása</title>
+
+<para>
+  A kódoláshoz az audió és videó codec-ek a <option>-oac</option> és
+  <option>-ovc</option> opciókkal adható meg.
+  Gépeld be ezt a példát:
+  <screen>mencoder -ovc help</screen>
+  a gépeden lévő <application>MEncoder</application> által támogatott
+  videó codec-ek kilistázásához.
+  A következő választások érhetőek el:
+</para>
+<para>
+Audió codec-ek:
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Audió codec neve</entry><entry>Leírás</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mp3lame</entry>
+    <entry>Kódol VBR, ABR vagy CBR MP3-at LAME-mel</entry>
+  </row>
+  <row>
+    <entry>lavc</entry>
+    <entry>A <link linkend="menc-feat-enc-libavcodec-audio-codecs"><systemitem class="library">libavcodec</systemitem> valamelyik audió codec-jét használja</link>
+    </entry>
+  </row>
+  <row>
+    <entry>faac</entry>
+    <entry>FAAC AAC audió kódoló</entry>
+  </row>
+  <row>
+    <entry>toolame</entry>
+    <entry>MPEG Audio Layer 2 kódoló</entry>
+  </row>
+  <row>
+    <entry>twolame</entry>
+    <entry>tooLAME alapú MPEG Audio Layer 2 kódoló</entry>
+  </row>
+  <row>
+    <entry>pcm</entry>
+    <entry>Tömörítetlen PCM audió</entry>
+  </row>
+  <row>
+    <entry>copy</entry>
+    <entry>Nem kódol újra, csak másolja a tömörített kockákat</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+
+<para>
+Videó codec-ek:
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Videó codec neve</entry><entry>Leírás</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>lavc</entry>
+    <entry>A <link linkend="menc-feat-enc-libavcodec-video-codecs"><systemitem class="library">libavcodec</systemitem> valamelyik videó codec-jét használja</link>
+    </entry>
+  </row>
+  <row>
+    <entry>xvid</entry>
+    <entry>XviD, MPEG-4 Advanced Simple Profile (ASP) codec</entry>
+  </row>
+  <row>
+    <entry>x264</entry>
+    <entry>x264, MPEG-4 Advanced Video Coding (AVC), AKA H.264 codec</entry>
+  </row>
+  <row>
+    <entry>nuv</entry>
+    <entry>nuppel video, néhány realtime alkalmazás használja</entry>
+  </row>
+  <row>
+    <entry>raw</entry>
+    <entry>Tömörítetlen videó képkockák</entry>
+  </row>
+  <row>
+    <entry>copy</entry>
+    <entry>Nem kódol újra, csak másolja a tömörített kockákat</entry>
+  </row>
+  <row>
+    <entry>frameno</entry>
+    <entry>A 3-lépéses kódolásban használatos (nem javasolt)</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+</para>
+<para>
+  A kimeneti konténer formátumokat a <option>-of</option> kapcsolóval
+  választhatod ki.
+  Írd be:
+  <screen>mencoder -of help</screen>
+  a gépeden lévő <application>MEncoder</application> által támogatott konténerek
+  kilistázásához.
+  A következő választások érhetőek el:
+</para>
+<para>
+Konténer formátumok:
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Konténer formátum neve</entry><entry>Leírás</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>lavf</entry>
+    <entry>A <systemitem class="library">libavformat</systemitem> által
+    támogatott valamelyik konténer</entry>
+  </row>
+  <row>
+    <entry>avi</entry>
+    <entry>Audio-Video Interleaved</entry>
+  </row>
+  <row>
+    <entry>mpeg</entry>
+    <entry>MPEG-1 és MPEG-2 PS</entry>
+  </row>
+  <row>
+    <entry>rawvideo</entry>
+    <entry>nyers videó folyam (nincs keverés - csak egy videó folyam)</entry>
+  </row>
+  <row>
+    <entry>rawaudio</entry>
+    <entry>nyers audió folyam (nincs keverés - csak egy audió folyam)</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+  Az AVI konténer a <application>MEncoder</application> natív konténer
+  formátuma, ami azt jelenti, hogy ezt kezeli a legjobban és hogy a
+  <application>MEncoder</application> ehhez lett tervezve.
+  Amint fentebb megemlítettük, más konténer formátumok is használhatóak, de
+  problémákba ütközhetsz a használatuk során.
+</para>
+
+<para>
+<systemitem class="library">libavformat</systemitem> konténerek:
+</para>
+<para>
+  Ha a <systemitem class="library">libavformat</systemitem>-ot választottad
+  a kimeneti fájl keveréséhez (a <option>-of lavf</option> használatával),
+  a megfelelő konténer formátum a kimeneti fájl kiterjesztése alapján kerül
+  megállapításra.
+  Egy meghatározott konténer formátumot a <option>format</option> kapcsolóval
+  tudsz megadni a <systemitem class="library">libavformat</systemitem>-nek.
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry><systemitem class="library">libavformat</systemitem> konténer neve</entry><entry>Leírás</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mpg</entry>
+    <entry>MPEG-1 és MPEG-2 PS</entry>
+  </row>
+  <row>
+    <entry>asf</entry>
+    <entry>Advanced Streaming Format</entry>
+  </row>
+  <row>
+    <entry>avi</entry>
+    <entry>Audio-Video Interleaved</entry>
+  </row>
+  <row>
+    <entry>wav</entry>
+    <entry>Waveform Audio</entry>
+  </row>
+  <row>
+    <entry>swf</entry>
+    <entry>Macromedia Flash</entry>
+  </row>
+  <row>
+    <entry>flv</entry>
+    <entry>Macromedia Flash video</entry>
+  </row>
+  <row>
+    <entry>rm</entry>
+    <entry>RealMedia</entry>
+  </row>
+  <row>
+    <entry>au</entry>
+    <entry>SUN AU</entry>
+  </row>
+  <row>
+    <entry>nut</entry>
+    <entry>NUT nyílt konténer (kísérleti és még nem a specifikációnak megfelelő)</entry>
+  </row>
+  <row>
+    <entry>mov</entry>
+    <entry>QuickTime</entry>
+  </row>
+  <row>
+    <entry>mp4</entry>
+    <entry>MPEG-4 formátum</entry>
+  </row>
+  <row>
+    <entry>dv</entry>
+    <entry>Sony Digital Video konténer</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+  Amint láthatod, a <systemitem class="library">libavformat</systemitem>
+  elég sok konténer formátumba engedélyezi a keverést a
+  <application>MEncoder</application>-nek.
+  Sajnos mivel a <application>MEncoder</application> nem úgy lett tervezve
+  a kezdetektől, hogy az AVI-tól különböző konténer formátumokat is támogassa,
+  izgulhatsz a kimeneti fájl miatt.
+  Kérjük ellenőrizd, hogy az audió/videó szinkron rendben van-e és hogy a
+  fájl lejátszható-e más lejátszókkal is az
+  <application>MPlayer</application>-en kívül.
+</para>
+
+<informalexample>
+<para>Példa:</para>
+<para>
+  Egy Macromedia Flash videó létrehozása, mely lejátszható web böngészőben
+  a Macromedia Flash plugin-nel:
+<screen>
+mencoder <replaceable>bemenet.avi</replaceable> -o <replaceable>kimenet.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
+-lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
+-srate 22050
+</screen>
+</para>
+</informalexample>
+
+</sect1>
+
+
+<sect1 id="menc-feat-selecting-input">
+<title>Bemeneti fájl vagy eszköz kiválasztása</title>
+
+<para>
+  A <application>MEncoder</application> tud kódolni fájlokból vagy akár
+  direkt DVD vagy VCD lemezekről is.
+  A fájlból való kódoláshoz egyszerűen csak add meg a fájl nevét a parancssorban,
+  vagy a <option>dvd://</option><replaceable>részszám</replaceable> vagy
+  <option>vcd://</option><replaceable>sávszám</replaceable> eszközt a
+  DVD részről vagy VCD sávról történő kódoláshoz.
+  Ha egy DVD-t már átmásoltál a merevlemezedre (használhatod pl. a
+  <application>dvdbackup</application> ezsközt, mely a legtöbb rendszeren megvan),
+  és a másolatot akarod elkódolni, akkor is használnod kell a
+  <option>dvd://</option> szintaxist, a <option>-dvd-device</option>-szal együtt,
+  amit a lemásolt DVD gyökérkönyvtárának elérési útja követ.
+
+  A <option>-dvd-device</option> és <option>-cdrom-device</option>
+  kapcsolókkal felülbírálhatóak a direkt lemezolvasásnál használt eszközök
+  elérési útjái is, ha az alapértelmezett
+  <filename>/dev/dvd</filename> és <filename>/dev/cdrom</filename> nem
+  működnek a rendszereden.
+</para>
+<para>
+  Ha DVD-ről kódolsz, gyakran kívánatos, hogy a kódolni kívánt fejezetet vagy
+  fejezetek tartományát is megadd.
+  Ehhez használhatod a <option>-chapter</option> kapcsolót.
+  Például a <option>-chapter</option> <replaceable>1-4</replaceable>
+  csak az 1-4 fejezeteket fogja elkódolni a DVD-ről.
+  Ez különösen hasznos, ha egy 1400 MB-os kódolást csinálsz két CD-re, mivel
+  meggyőződhetsz róla, hogy a vágás pontosan fejezet határnál lesz és nem
+  egy jelenet közepén.
+</para>
+<para>
+  Ha van támogatott TV felvevő kártyád, tudsz kódolni a TV-in eszközről is.
+  Használd a <option>tv://</option><replaceable>csatornaszám</replaceable> eszközt
+  fájlnévként és a <option>-tv</option> kapcoslót a mentési beállítások
+  megadásához.
+  A DVB hasonlóképpen működik.
+</para>
+</sect1>
+
+
 <sect1 id="menc-feat-mpeg4">
 <title>Két menetes MPEG-4 (&quot;DivX&quot;) kódolás</title>
 
@@ -23,19 +304,20 @@ kapcsolatban.
 A név abból a tényből ered, hogy ez a módszer a fájlt <emphasis>kétszer</emphasis>
 kódolja át. Az első kódolás (szinkronizációs lépés) létrehoz pár ideiglenes,
 néhány megabájtos fájlt (<filename>*.log</filename>), ezeket ne töröld le
-még (az AVI-t letörölheted). A második lépésben, a két menetes kimenet
-fájl lesz létrehozva, az ideiglenes fájlok bitrátájának felhasználásával. Az
-eredmény fájlnak sokkal jobb lesz a képminősége. Ha most hallasz erről először,
+még (az AVI-t letörölheted vagy egyszerűen létre sem hozod, a videó
+<filename>/dev/null</filename> -ba irányításával). A második lépésben, a két menetes
+kimenet fájl lesz létrehozva, az ideiglenes fájlok bitrátájának felhasználásával.
+Az eredmény fájlnak sokkal jobb lesz a képminősége. Ha most hallasz erről először,
 nézz meg pár a neten elérhető leírást.
 </para>
 
 <example>
 <title>audió sáv másolása</title>
 <para>
-Egy DVD két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az audió sáv
-másolásával.
+Egy DVD második sávjának két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az
+audió sáv másolásával.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>/dev/null</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>movie.avi</replaceable>
 </screen>
 </para>
@@ -44,8 +326,10 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <example>
 <title>audió sáv kódolása</title>
 <para>
-Egy DVD két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az audió sáv
-MP3-ba alakításával.
+Egy DVD második sávjának két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az
+audió sáv MP3-ba alakításával.
+Vigyázz ezzela  módszerrel, mivel bizonyos esetekben audió/videó
+deszinkronizációhoz vezethet.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
@@ -71,12 +355,24 @@ A <application>MEncoder</application> kimeneti fájl formátumának megváltoztatásá
 használd a <option>-of mpeg</option> kapcsolót.
 </para>
 
+<informalexample>
 <para>
 Példa:
 <screen>
 mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>egyéb_kapcsolók</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
+Egy MPEG-1-es fájl létrehozása, mely alkalmas minimális multimédia támogatással
+rendelkező rendszereken, például alapértelmezett Windows telepítéseken történő
+lejátszásra is:
+<screen>
+mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
+<replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
+-lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3 \
+<replaceable>bemenet.avi</replaceable>
+</screen>
 </para>
+</informalexample>
+
 </sect1>
 
 <sect1 id="menc-feat-rescale">
