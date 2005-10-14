@@ -70,7 +70,7 @@ extern stream_info_t stream_info_smb;
 #ifdef STREAMING_LIVE555
 extern stream_info_t stream_info_sdp;
 extern stream_info_t stream_info_rtsp_sip;
-#endif;
+#endif
 
 extern stream_info_t stream_info_cue;
 extern stream_info_t stream_info_null;
