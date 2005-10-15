@@ -455,9 +455,13 @@ It has the following format:
 .br
 %n%string_of_length_n
 .br
-.I EXAMPLE:
+.I EXAMPLES:
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
+.br
+Or in a script:
+.br
+mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
 You can put all of the options in configuration files which will be read
 every time MPlayer/MEncoder is run.
@@ -1989,6 +1993,14 @@ native Mac OS X audio output driver
 .TP
 .B sgi (SGI only)
 native SGI audio output driver
+.PD 0
+.RSs
+.IPs "<output device name>"
+Explicitly choose the output device/\:interface to use
+(default: system-wide default).
+For example, 'Analog\ Out' or 'Digital\ Out'.
+.RE
+.PD 1
 .
 .TP
 .B sun (Sun only)
