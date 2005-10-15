@@ -35,6 +35,8 @@ MPlayer (1.0)
     * support for musepack audio (WARNING: when muxing into e.g. AVI you will
       be able to seek, but you might get ear- and speaker-breaking noises)
     * On2 VP7 video decoder via binary DLL
+    * Duck/On2 TrueMotion2 (TM20) support via lavc
+    * support FLX and DTA extensions for flic files
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -65,6 +67,9 @@ MPlayer (1.0)
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
     * skiploopfilter decoder option for very fast H.264 decoding
     * D-Cinema audio demuxer and decoder support
+    * Indeo2 (RT21) decoder
+    * Duck/On2 TrueMotion2 (TM20) decoder
+    * FLX and DTA extensions for flic
 
     GUI:
     * ported to GTK2
