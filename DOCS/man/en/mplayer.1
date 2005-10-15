@@ -2781,7 +2781,7 @@ Number of lines copied to texture in one piece (default: 4).
 0 for whole image.
 .IPs (no)osd
 Enable or disable support for OSD rendering via OpenGL (default: enabled).
-This option is for testing purposes, instead use \-osdlevel 0 to disable OSD.
+This option is for testing, to disable the OSD use \-osdlevel 0 instead.
 .IPs (no)scaled-osd
 Changes the way the OSD behaves when the size of the
 window changes (default: disabled).
@@ -2840,10 +2840,19 @@ Method 4 is usually faster.
 Needs the GL_ARB_fragment_program extension and at least four texture units.
 Provides brightness, contrast, saturation, hue and gamma control.
 Gamma can also be set independently for red, green and blue.
+.br
+5: Use ATI-specific method (for older cards).
+This uses an ATI-specific extension (GL_ATI_fragment_shader - not
+GL_ARB_fragment_shader!).
+At least three texture units are needed.
+Provides saturation and hue control.
 .RE
 .IPs customprog=<filename>
 Load a custom fragment program from <filename>.
 See TOOLS/edgedect.fp for an example.
+.IPs customtex=<filename>
+Load a custom "gamma ramp" texture from <filename>.
+This can be used in combination with yuv=4 or with the customprog option.
 .REss
 .RE
 .PD 1
@@ -2860,25 +2869,7 @@ same as gl (default: enabled)
 Select the type of YUV to RGB conversion.
 If set to anything except 0 OSD will be disabled and brightness, contrast and
 gamma setting is only available via the global X server settings.
-.RSss
-0: Use software conversion (default).
-Compatible with all OpenGL versions.
-Provides brightness, contrast and saturation control.
-.br
-1: Use register combiners.
-This uses an nVidia-specific extension (GL_NV_register_combiners).
-At least three texture units are needed.
-.br
-2: Use a fragment program.
-Needs GL_ARB_fragment_program extension and at least three texture units.
-.br
-3: Use a fragment program using the POW instruction.
-Needs GL_ARB_fragment_program extension and at least three texture units.
-Method 4 is usually faster.
-.br
-4: Use a fragment program with additional lookup.
-Needs GL_ARB_fragment_program extension and at least four texture units.
-.REss
+Apart from this the values have the same meaning as for \-vo gl.
 .REss
 .
 .TP
