@@ -1,4 +1,4 @@
-.\" synced with 1.1136
+.\" synced with 1.1137
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -477,9 +477,13 @@ Il suit le format suivant\ :
 .br
 %n%chaîne_de_longueur_n
 .br
-.I EXEMPLE\ :
+.I EXEMPLES\ :
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
+.br
+Ou dans un script\ :
+.br
+mplayer -ao pcm:file=%`longueur expr "$NOM"`%"$NOM" test.avi
 .PP
 Vous pouvez placer toutes les options dans des fichiers de configuration
 qui seront lu à chaque exécution de MPlayer/MEncoder.
@@ -2138,6 +2142,14 @@ pilote de sortie audio natif de Mac OS X
 .TP
 .B sgi (SGI uniquement)
 pilote de sortie audio natif de SGI
+.PD 0
+.RSs
+.IPs "<nom du périphérique de sortie>"
+Choisi explicitement le périphérique/\:interface à utiliser
+(par défaut\ : celui configuré pour le système global).
+Par exemple, 'Analog\ Out' ou 'Digital\ Out'.
+.RE
+.PD 1
 .
 .TP
 .B sun (Sun uniquement)
