@@ -897,7 +897,7 @@ demuxer_desc_t demuxer_desc_mpeg_ps = {
   demux_mpg_ps_open,
   demux_close_mpg,
   demux_seek_mpg,
-  NULL
+  demux_mpg_control,
 };
 
 
@@ -914,7 +914,7 @@ demuxer_desc_t demuxer_desc_mpeg_pes = {
   demux_mpg_ps_open,
   demux_close_mpg,
   demux_seek_mpg,
-  NULL
+  demux_mpg_control,
 };
 
 
@@ -947,7 +947,7 @@ demuxer_desc_t demuxer_desc_mpeg_es = {
   demux_mpg_es_open,
   demux_close_mpg,
   demux_seek_mpg,
-  NULL
+  demux_mpg_control,
 };
 
 
@@ -964,7 +964,7 @@ demuxer_desc_t demuxer_desc_mpeg4_es = {
   demux_mpg_es_open,
   demux_close_mpg,
   demux_seek_mpg,
-  NULL
+  demux_mpg_control,
 };
 
 
@@ -981,5 +981,5 @@ demuxer_desc_t demuxer_desc_h264_es = {
   demux_mpg_es_open,
   demux_close_mpg,
   demux_seek_mpg,
-  NULL
+  demux_mpg_control,
 };
