@@ -1,4 +1,4 @@
-.\" synced with 1.1137
+.\" synced with 1.1138
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2956,7 +2956,7 @@ Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
 .IPs (no)osd
 Active ou désactive la gestion de l'incrustation OSD via OpenGL
 (par défaut\ : activé).
-Cette option présente à des fins de des tests, vous devriez utiliser
+Cette option présente à des fins de des tests, vous devriez plutôt utiliser
 \-osdlevel 0 pour désactiver l'incrustation OSD.
 .IPs (no)scaled-osd
 Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
@@ -3028,10 +3028,19 @@ de texture.
 Offre le contrôle de la luminosité, du contraste, de la saturation, de
 la teinte et du gamma.
 Le chaque composante rouge, verte et bleue du gamma peut être configurée.
+.br
+5: Utilise des méthodes spécifiques à ATI (pour les cartes plus anciennes).
+Ceci utilise un extension spécifique à ATI (GL_ATI_fragment_shader - pas
+GL_ARB_fragment_shader\ !).
+Au moins trois unitées de texture sont nécessaires.
+Permet le contrôle de la saturation et de la teinte.
 .RE
 .IPs customprog=<nom_fichier>
 Charge un programme fragment personnalisé depuis <nom_fichier>.
 Voir l'exemple TOOLS/edgedect.fp.
+.IPs customtex=<nom_fichier>
+Charge une texture "gamma ramp" personnalisée depuis <nom_fichier>.
+Peut être utilisé en même temps que yuv=4 ou avec l'option customprog.
 .REss
 .RE
 .PD 1
@@ -3050,29 +3059,8 @@ Select the type of YUV to RGB conversion.
 Si défini à autre chose que 0, l'OSD sera désactivé et le paramétrage de
 la luminosité, du contraste et du gamma sera uniquement paramétrable à
 travers les paramètres globaux du serveur X.
-.RSss
-0: Utilise la conversion logicielle (par défaut).
-Compatible avec toutes les versions d'OpenGL.
-Offre le contrôle de la luminosité, du contraste et de la saturation.
-.br
-1: Utilise les "register combiners".
-Ceci utilise une extension spécifique à nVidia (GL_NV_register_combiners).
-Au moins trois unitées de texture sont nécessaires.
-.br
-2: Utilise un "fragment program" (fragment de programme).
-Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
-de textures.
-.br
-3: Utilise un "fragment program" (fragment de programme) utilisant
-l'instruction POW.
-Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
-de texture.
-.br
-4: Utilise un "programme fragment" (fragment de programme) avec une
-consultation de table.
-Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
-de texture.
-.REss
+A part ces quelques détails, les valeurs de <n> ont le même sens que pour
+\-vo gl.
 .REss
 .
 .TP
