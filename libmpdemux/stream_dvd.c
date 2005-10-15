@@ -625,7 +625,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       if(vts_file->vts_pgcit) {
         int i;
         for(i=0;i<8;i++)
+#ifdef USE_MPDVDKIT
           if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].present) {
+#else
+          if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i] & 0x8000) {
+#endif
             audio_attr_t * audio = &vts_file->vtsi_mat->vts_audio_attr[i];
             int language = 0;
             char tmp[] = "unknown";
@@ -638,7 +642,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
             }
 
             d->audio_streams[d->nr_of_channels].language=language;
+#ifdef USE_MPDVDKIT
             d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i].s_audio;
+#else
+            d->audio_streams[d->nr_of_channels].id=vts_file->vts_pgcit->pgci_srp[ttn].pgc->audio_control[i] >> 8 & 7;
+#endif
             switch(audio->audio_format) {
               case 0: // ac3
                 d->audio_streams[d->nr_of_channels].id+=FIRST_AC3_AID;
@@ -687,7 +695,11 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 
       d->nr_of_subtitles=0;
       for(i=0;i<32;i++)
+#ifdef USE_MPDVDKIT
       if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].present) {
+#else
+      if(vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] & 0x80000000) {
+#endif
         subp_attr_t * subtitle = &vts_file->vtsi_mat->vts_subp_attr[i];
         video_attr_t *video = &vts_file->vtsi_mat->vts_video_attr;
         int language = 0;
@@ -703,9 +715,17 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         d->subtitles[ d->nr_of_subtitles ].language=language;
         d->subtitles[ d->nr_of_subtitles ].id=d->nr_of_subtitles;
         if(video->display_aspect_ratio == 0) /* 4:3 */
+#ifdef USE_MPDVDKIT
           d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_4p3;
+#else
+          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] >> 24 & 31;
+#endif
         else if(video->display_aspect_ratio == 3) /* 16:9 */
+#ifdef USE_MPDVDKIT
           d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i].s_lbox;
+#else
+          d->subtitles[d->nr_of_subtitles].id = vts_file->vts_pgcit->pgci_srp[ttn].pgc->subp_control[i] >> 8 & 31;
+#endif
 
         mp_msg(MSGT_OPEN,MSGL_V,"[open] subtitle ( sid ): %d language: %s\n", d->nr_of_subtitles, tmp);
         if(identify) {
