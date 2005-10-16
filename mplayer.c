@@ -1119,35 +1119,7 @@ int gui_no_filename=0;
 #endif /* defined(ARCH_X86) || defined(ARCH_X86_64) */
 
 #if defined(WIN32) && defined(USE_WIN32DLL)
-{  /*make our codec dirs available for LoadLibraryA()*/
-  char tmppath[MAX_PATH*2 + 1];
-  char win32path[MAX_PATH];
-  char realpath[MAX_PATH];
-#ifdef __CYGWIN__
-  cygwin_conv_to_full_win32_path(WIN32_PATH,win32path);
-  strcpy(tmppath,win32path);
-#ifdef USE_REALCODECS
-  cygwin_conv_to_full_win32_path(REALCODEC_PATH,realpath);
-  sprintf(tmppath,"%s;%s",win32path,realpath);
-#endif /*USE_REALCODECS*/
-#else
-  if(!strstr(WIN32_PATH,":")){
-    GetModuleFileNameA(NULL, win32path, MAX_PATH);
-    strcpy(win32path + strlen(win32path) - strlen("mplayer.exe"), WIN32_PATH);
-  }
-  else strcpy(win32path,WIN32_PATH);
-  strcpy(tmppath,win32path);
-#ifdef USE_REALCODECS
-  if(!strstr(REALCODEC_PATH,":")){
-    GetModuleFileNameA(NULL, realpath, MAX_PATH);
-    strcpy(realpath + strlen(realpath) - strlen("mplayer.exe"), REALCODEC_PATH);
-  }
-  else strcpy(realpath,REALCODEC_PATH);
-  sprintf(tmppath,"%s;%s",win32path,realpath);
-#endif /*USE_REALCODECS*/
-#endif /*__CYGWIN__*/
-  SetEnvironmentVariableA("PATH", tmppath);
-}
+  set_path_env();
 #endif /*WIN32 && USE_WIN32DLL*/
 
 #ifdef USE_TV

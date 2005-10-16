@@ -437,6 +437,10 @@ audio_encoder_t *aencoder = NULL;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
 #endif
 #endif
+
+#if defined(WIN32) && defined(USE_WIN32DLL)
+  set_path_env();
+#endif /*WIN32 && USE_WIN32DLL*/
   
   InitTimer();
 
