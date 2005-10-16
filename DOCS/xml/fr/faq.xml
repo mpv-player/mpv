@@ -841,9 +841,9 @@ générer des fichiers MPEG-2 qui peuvent être utilisé comme une base pour créer u
 sont plus à même d'être joué sans modification sur n'importe quelle plateformes (par exemple
 pour partager une vidéo depuis une caméra numérique pour des amis qui n'y connaisse rien en 
 informatique).
-Veuillez lire
+<!--Veuillez lire
 <link linkend="menc-feat-vcd-dvd">Utilisé MEncoder pour créer des fichiers compatible VCD/SVCD/DVD</link>
-pour plus de détails.
+pour plus de détails.!-->
 </para></answer>
 </qandaentry>
  	 
