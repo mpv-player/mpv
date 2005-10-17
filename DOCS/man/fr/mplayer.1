@@ -1,4 +1,4 @@
-.\" synced with 1.1138
+.\" synced with 1.1139
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2939,7 +2939,7 @@ Veuillez utiliser \-dr si cela fonctionne avec votre implémentation
 OpenGL, car pour de hautes résolutions, cela permet un affichage
 .B beaucoup
 plus rapide.
-Le code vérifie très peu de choses, donc si cette fonction ne marche
+Le code vérifie très peu de choses, donc si une fonction ne marche
 pas, c'est peut-être parceque votre carte ou votre implémentation de
 OpenGL ne la gère pas, même si aucun message d'erreur s'affiche.
 Utilisez glxinfo ou un outil similaire pour afficher les extensions
@@ -2956,7 +2956,7 @@ Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
 .IPs (no)osd
 Active ou désactive la gestion de l'incrustation OSD via OpenGL
 (par défaut\ : activé).
-Cette option présente à des fins de des tests, vous devriez plutôt utiliser
+Cette option présente à des fins de des tests\ ; vous devriez plutôt utiliser
 \-osdlevel 0 pour désactiver l'incrustation OSD.
 .IPs (no)scaled-osd
 Change le comportement de l'OSD quand la taille de la fenêtre vidéo change
@@ -2971,7 +2971,7 @@ le "pan-and-scan" (par défaut\ : activé).
 Sa désactivation peut économiser un peu de temps processeur.
 .IPs rectangle=<0,1,2>
 Défini l'utilisation des textures rectangulaires ce qui économise de la
-RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
+RAM vidéo, mais est souvent plus lent (par défaut\ : 0).
 .RSss
 0: Utilise des textures de taille d'une puissance de deux (par défaut).
 .br
@@ -3006,14 +3006,13 @@ Ceci utilise un extension nVidia (GL_NV_register_combiners).
 Au moins trois unitées de texture sont nécessaires.
 Offre le contrôle de la saturation et de la teinte.
 .br
-2: Utilise un "programme fragment" (fragment de programme).
+2: Utilise un "programme fragment".
 Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
 de textures.
 Offre le contrôle de la luminosité, du contraste, de la saturation, et
 de la teinte.
 .br
-3: Utilise un "programme fragment" (fragment de programme) utilisant
-l'instruction POW.
+3: Utilise un "programme fragment" utilisant l'instruction POW.
 Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
 de texture.
 Offre le contrôle de la luminosité, du contraste, de la saturation, de
@@ -3021,8 +3020,7 @@ la teinte et du gamma.
 Le chaque composante rouge, verte et bleue du gamma peut être configurée.
 La méthode 4 est généralement plus rapide.
 .br
-4: Utilise un "programme fragment" (fragment de programme) avec une
-consultation de table.
+4: Utilise un "programme fragment" avec une consultation de table.
 Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
 de texture.
 Offre le contrôle de la luminosité, du contraste, de la saturation, de
@@ -3055,7 +3053,7 @@ texture.
 .IPs (no)glfinish
 Fonctionne comme pour le pilote de sortie vidéo gl (par défaut\ : activé)
 .IPs yuv=<n>
-Select the type of YUV to RGB conversion.
+Choisi le type de conversion YUV vers RGB.
 Si défini à autre chose que 0, l'OSD sera désactivé et le paramétrage de
 la luminosité, du contraste et du gamma sera uniquement paramétrable à
 travers les paramètres globaux du serveur X.
