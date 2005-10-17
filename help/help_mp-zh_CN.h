@@ -210,6 +210,7 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\n新的视频文件和前一个的解析度或色彩空间不同.\n"
 #define MSGTR_FrameCopyFileMismatch "\n所有的视频文件必须要有同样的帧率, 解析度和编解码器才能使用-ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\n所有的音频文件必须要有同样的音频编解码器和格式才能使用-oac copy.\n"
+#define MSGTR_NoAudioFileMismatch "\n无法把只有视频的文件和音频视频文件混合. 试试 -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "警告: -speed不保证能和-oac copy一起正常工作!\n"\
 "你的编码可能失败!\n"
 #define MSGTR_ErrorWritingFile "%s: 写入文件错误.\n"
@@ -937,3 +938,130 @@ static char help_text[]=
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Pgm视频输出驱动已经被 -vo pnm:pgmyuv 代替.\n"
 #define MSGTR_VO_MD5_HasBeenReplaced "Md5视频输出驱动已经被 -vo md5sum 代替.\n"
+
+// ======================= AO Audio Output drivers ========================
+
+// libao2
+
+// audio_out.c
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9和alsa1x模块已经被删除,请用 -ao alsa 代替.\n"
+
+// ao_oss.c
+#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: 无法打开混音器设备 %s: %s\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: 声卡混音器没有'%s', 使用默认通道.\n"
+#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: 无法打开音频设备 %s: %s\n"
+#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: 无法建立文件描述块: %s\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] 无法设定音频设备 %s 到 %s 的输出, 试着使用 %s...\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: 设定音频设备到 %d 通道失败.\n"
+#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: 驱动不支持 SNDCTL_DSP_GETOSPACE :-(\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  你的音频驱动不支持 select()  ***\n 请用 #undef HAVE_AUDIO_SELECT in config.h 重编译MPlayer!\n\n"
+#define MSGTR_AO_OSS_CantReopen "[AO OSS]\n严重错误: *** 无法重新打开或重设音频设备 *** %s\n"
+
+// ao_arts.c
+#define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
+#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] 已连接到声音设备.\n"
+#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] 无法打开一个流.\n"
+#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] 流已经打开.\n"
+#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] 缓冲大小: %d\n"
+
+// ao_dxr2.c
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] 设定音量为 %d 失败 .\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: 不支持 %d Hz, 请试试 \"-aop list=resample\"\n"
+
+// ao_esd.c
+#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound 失败: %s\n"
+#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] 延迟: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] 打开 esd 播放流失败: %s\n"
+
+// ao_mpegpes.c
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB 音频设置混音器错误: %s\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] 不支持 %d Hz, 试着重采样...\n"
+
+// ao_null.c
+// This one desn't even  have any mp_msg nor printf's?? [CHECK]
+
+// ao_pcm.c
+#define MSGTR_AO_PCM_FileInfo "[AO PCM] 文件: %s (%s)\nPCM: 采样率: %iHz 通道: %s 格式 %s\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] 信息: 用 -vc null -vo null 可以达到最快速的转储\nPCM: 信息: 如果要写 WAVE 文件, 使用 -ao pcm:waveheader (默认).\n"
+#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] 打开 %s 写失败!\n"
+
+// ao_sdl.c
+#define MSGTR_AO_SDL_INFO "[AO SDL] 采样率: %iHz 通道: %s 格式 %s\n"
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] 使用 %s 音频驱动.\n"
+#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] 不支持的音频格式: 0x%x.\n"
+#define MSGTR_AO_SDL_CantInit "[AO SDL] SDL 音频启动失败: %s\n"
+#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] 无法打开音频: %s\n"
+
+// ao_sgi.c
+#define MSGTR_AO_SGI_INFO "[AO SGI] 控制.\n"
+#define MSGTR_AO_SGI_InitInfo "[AO SGI] 启动: 采样率: %iHz 通道: %s 格式 %s\n"
+#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] 播放: 非法设备.\n"
+#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] 启动: 设定参数失败: %s\n无法设定需要的采样率.\n"
+#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] 启动: AL_RATE 在给定的源上不可用.\n"
+#define MSGTR_AO_SGI_CantGetParms "[AO SGI] 启动: 获取参数失败: %s\n"
+#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] 启动: 当前的采样率为 %lf (需要的速率是 %lf)\n"
+#define MSGTR_AO_SGI_InitConfigError "[AO SGI] 启动: %s\n"
+#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] 启动: 无法打开音频通道: %s\n"
+#define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n"
+#define MSGTR_AO_SGI_Reset "[AO SGI] reset: ...\n"
+#define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pause: ...\n"
+#define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_resume: ...\n"
+
+// ao_sun.c
+#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO 失败.\n"
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: 写失败."
+#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] 无法打开音频设备 %s, %s  -> nosound.\n"
+#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: 你的声卡不支持 %d 通道, %s, %d Hz 采样率.\\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  你的音频驱动不支持 select()  ***\n用 #undef HAVE_AUDIO_SELECT in config.h 重新编译MPlayer!\n\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatal error: *** 无法重新打开或重设音频设备 (%s) ***\n"
+
+// ao_alsa5.c
+#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: 要求的格式: %d Hz, %d 通道, %s\n"
+#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: 没有发现声卡.\n"
+#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: 要求的格式 (%s) 非法 - 取消输出.\n"
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: 打开回放错误: %s\n"
+#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: pcm 信息错误: %s\n"
+#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: 发现 %d 声卡, 使用: %s\n"
+#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: pcm 通道信息错误: %s\n"
+#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: 设定参数错误: %s\n"
+#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: 设定通道错误: %s\n"
+#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: 通道准备错误: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: 回放 drain 错误: %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: 回放 flush 错误: %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: pcm 关闭错误: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: 回放 drain 错误: %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: 回放 flush 错误: %s\n"
+#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: 通道准备错误: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: 回放 drain 错误: %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: 回放 flush 错误: %s\n"
+#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: 通道准备错误: %s\n"
+#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: alsa 未运行, 重新启动流.\n"
+#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: 回放准备错误: %s\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: 重启后写错误: %s - 放弃.\n"
+#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: 输出错误: %s\n"
+
+// ao_plugin.c
+
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] 非法插件: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf 
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "可用的标签"
+#define MSGTR_AF_LADSPA_WarnNoInputs "警告! 这个 LADSPA 插件没有音频输入.\n 以后的音频信号将会丢失."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "现在还不支持多通道(>2)插件.\n 只能使用单声道或立体声道插件."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "这个 LADSPA 插件没有音频输出."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "LADSPA 插件的音频输入和音频输出的数目不相等."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "导入失败"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "在指定的库文件里找不到 ladspa_descriptor() 函数."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "在插件库里找不到标签."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "没有子选项标签"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "没有指定库文件"
+#define MSGTR_AF_LADSPA_ErrNoLabel "没有指定过滤器标签"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "命令行给定的控制项不够"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: 输入控制 #%d 在下限 %0.4f 之下.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: 输入控制 #%d 在上限 %0.4f 之上.\n"
+
