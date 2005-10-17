@@ -1467,6 +1467,13 @@ Creates a dumpsub.smi file in the current directory.
 Convert the given subtitle (specified with the \-sub option) to the time-based
 SubViewer (SRT) subtitle format.
 Creates a dumpsub.srt file in the current directory.
+.br
+.I NOTE:
+Some broken hardware players choke on SRT subtitle files with Unix
+line endings.
+If you are unlucky enough to have such a box, pass your subtitle
+files through unix2dos or a similar program to replace Unix line
+endings with DOS/Windows line endings.
 .
 .TP
 .B \-dumpsub (MPlayer only) (BETA CODE)
