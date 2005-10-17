@@ -6282,7 +6282,6 @@ if test "$_tv_v4l" = auto ; then
 int main(void) { return 0; }
 EOF
   cc_check && _tv_v4l=yes
-  break
  fi
 fi
 if test "$_tv_v4l" = yes ; then
@@ -6306,7 +6305,6 @@ if test "$_tv_v4l2" = auto ; then
 int main(void) { return 0; }
 EOF
   cc_check && _tv_v4l2=yes
-  break
  fi
 fi
 if test "$_tv_v4l2" = yes ; then
