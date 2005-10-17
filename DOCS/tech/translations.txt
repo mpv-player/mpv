@@ -55,6 +55,14 @@ the English messages, since English messages in translations may be outdated.
 Furthermore, running help_diff.sh on your translated file will immediately show
 missing messages, which eases further translation.
 
+If no messages are missing, please add a line similar to
+
+  /* Synced with help_mp-en.h 1.XXX */
+
+to the file header, replacing XXX with the revision of help_mp-en.h that your
+translation is in sync with. This way we can easily tell if the translation
+is up to date or not.
+
 Translations are for documentation what porting is for code. Many more eyes
 see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
 clumsy wording, spelling/grammar errors or if you notice that something is
