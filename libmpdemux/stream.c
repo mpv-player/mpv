@@ -195,7 +195,7 @@ stream_t* open_stream_full(char* filename,int mode, char** options, int* file_fo
 	s = open_stream_plugin(sinfo,filename,mode,options,file_format,&r);
 	if(s) return s;
 	if(r != STREAM_UNSUPORTED) {
-	  mp_msg(MSGT_OPEN,MSGL_ERR, "Failed to open %s\n",filename);
+	  mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_FailedToOpen,filename);
 	  return NULL;
 	}
 	break;

@@ -471,15 +471,23 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
 
 #define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
+#define MSGTR_NoDVDSupport "MPlayer was compiled without DVD support, exit\n"
 #define MSGTR_DVDwait "Reading disc structure, please wait...\n"
 #define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"
 #define MSGTR_DVDinvalidTitle "Invalid DVD title number: %d\n"
 #define MSGTR_DVDnumChapters "There are %d chapters in this DVD title.\n"
 #define MSGTR_DVDinvalidChapter "Invalid DVD chapter number: %d\n"
+#define MSGTR_DVDinvalidChapterRange "Invalid chapter range specification %s\n"
+#define MSGTR_DVDinvalidLastChapter "Invalid DVD last chapter number: %d\n"
 #define MSGTR_DVDnumAngles "There are %d angles in this DVD title.\n"
 #define MSGTR_DVDinvalidAngle "Invalid DVD angle number: %d\n"
 #define MSGTR_DVDnoIFO "Cannot open the IFO file for DVD title %d.\n"
+#define MSGTR_DVDnoVMG "Can't open VMG info!\n"
 #define MSGTR_DVDnoVOBs "Cannot open title VOBS (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "No matching DVD audio language found!\n"
+#define MSGTR_DVDaudioChannel "Selected DVD audio channel: %d language: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "No matching DVD subtitle language found!\n"
+#define MSGTR_DVDsubtitleChannel "Selected DVD subtitle channel: %d language: %c%c\n"
 #define MSGTR_DVDopenOk "DVD successfully opened.\n"
 
 // muxer_*.c:
@@ -539,6 +547,10 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC content detected, switching framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressive NTSC content detected, switching framerate.\n"
 
+#define MSGTR_CacheFill "\rCache fill: %5.2f%% (%d bytes)   "
+#define MSGTR_NoBindFound "No bind found for key '%s'"
+#define MSGTR_FailedToOpen "Failed to open %s\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Could not open codec.\n"
 #define MSGTR_CantCloseCodec "Could not close codec.\n"
@@ -564,7 +576,10 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n"
 #define MSGTR_OpeningVideoDecoder "Opening video decoder: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "Selected video codec: [%s] vfm: %s (%s)\n"
 #define MSGTR_OpeningAudioDecoder "Opening audio decoder: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "Selected audio codec: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n"
 #define MSGTR_UninitVideoStr "uninit video: %s\n"
 #define MSGTR_UninitAudioStr "uninit audio: %s\n"
 #define MSGTR_VDecoderInitFailed "VDecoder init failed :(\n"
@@ -599,6 +614,8 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Couldn't send EWMH fullscreen Event!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Could not find xscreensaver window.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: Selected video mode %dx%d for image size %dx%d.\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] No hardware mixing, inserting volume filter.\n"
 #define MSGTR_NoVolume "[Mixer] No volume control available.\n"

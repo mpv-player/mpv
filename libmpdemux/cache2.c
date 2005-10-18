@@ -27,6 +27,7 @@ static DWORD WINAPI ThreadProc(void* s);
 #endif
 
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 
@@ -290,7 +291,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %d [%d] %d  pre:%d  eof:%d  \n",
 	s->min_filepos,s->read_filepos,s->max_filepos,min,s->eof);
     while(s->read_filepos<s->min_filepos || s->max_filepos-s->read_filepos<min){
-	mp_msg(MSGT_CACHE,MSGL_STATUS,"\rCache fill: %5.2f%% (%d bytes)    ",
+	mp_msg(MSGT_CACHE,MSGL_STATUS,MSGTR_CacheFill,
 	    100.0*(float)(s->max_filepos-s->read_filepos)/(float)(s->buffer_size),
 	    s->max_filepos-s->read_filepos
 	);

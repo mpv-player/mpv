@@ -1612,8 +1612,7 @@ static void xscreensaver_disable(Display * dpy)
     xs_windowid = find_xscreensaver_window(dpy);
     if (!xs_windowid)
     {
-        mp_msg(MSGT_VO, MSGL_INFO,
-               "xscreensaver_disable: Could not find xscreensaver window.\n");
+        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_CouldNotFindXScreenSaver);
         return;
     }
     mp_msg(MSGT_VO, MSGL_INFO,
@@ -1842,8 +1841,7 @@ void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,
                     j = i;
                 }
 
-        mp_msg(MSGT_VO, MSGL_INFO,
-               "XF86VM: Selected video mode %dx%d for image size %dx%d.\n",
+        mp_msg(MSGT_VO, MSGL_INFO, MSGTR_SelectedVideoMode,
                *modeline_width, *modeline_height, X, Y);
         XF86VidModeLockModeSwitch(mDisplay, mScreen, 0);
         XF86VidModeSwitchToMode(mDisplay, mScreen, vidmodes[j]);

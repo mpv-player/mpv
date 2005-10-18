@@ -297,7 +297,7 @@ if(!sh_video->inited){
     return 0; // failed
 }
 
-mp_msg(MSGT_DECVIDEO,MSGL_INFO,"Selected video codec: [%s] vfm:%s (%s)\n",
+mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_SelectedVideoCodec,
     sh_video->codec->name,sh_video->codec->drv,sh_video->codec->info);
 return 1; // success
 }

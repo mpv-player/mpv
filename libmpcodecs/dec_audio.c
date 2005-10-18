@@ -241,7 +241,7 @@ if(!sh_audio->inited){
     return 0; // failed
 }
 
-mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Selected audio codec: [%s] afm:%s (%s)\n",
+mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_SelectedAudioCodec,
     sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
 return 1; // success
 }
@@ -306,7 +306,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
   // filter config:  
   memcpy(&afs->cfg,&af_cfg,sizeof(af_cfg_t));
   
-  mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Building audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n",
+  mp_msg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_BuildingAudioFilterChain,
       afs->input.rate,afs->input.nch,af_fmt2str_short(afs->input.format),
       afs->output.rate,afs->output.nch,af_fmt2str_short(afs->output.format));
   

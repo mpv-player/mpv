@@ -81,26 +81,26 @@ int dvd_parse_chapter_range(m_option_t *conf, const char *range) {
   if(*range && isdigit(*range)) {
     dvd_chapter = strtol(range, &s, 10);
     if(range == s) {
-      mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+      mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
       return M_OPT_INVALID;
     }
   }
   if(*s == 0)
     return 0;
   else if(*s != '-') {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+    mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
     return M_OPT_INVALID;
   }
   ++s;
   if(*s == 0)
       return 0;
   if(! isdigit(*s)) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+    mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
     return M_OPT_INVALID;
   }
   dvd_last_chapter = strtol(s, &t, 10);
   if (s == t || *t) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
+    mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_DVDinvalidChapterRange, range);
     return M_OPT_INVALID;
   }
   return 0;
@@ -144,7 +144,7 @@ int dvd_aid_from_lang(stream_t *stream, unsigned char* lang) {
       code=lang[1]|(lang[0]<<8);
       for(i=0;i<d->nr_of_channels;i++) {
         if(d->audio_streams[i].language==code) {
-          mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD audio channel: %d language: %c%c\n",
+          mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDaudioChannel,
           d->audio_streams[i].id, lang[0],lang[1]);
           return d->audio_streams[i].id;
         }
@@ -152,7 +152,7 @@ int dvd_aid_from_lang(stream_t *stream, unsigned char* lang) {
       }
       lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
     }
-    mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
+    mp_msg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingAudio);
   }
   return -1;
 }
@@ -181,14 +181,14 @@ int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
     code=lang[1]|(lang[0]<<8);
     for(i=0;i<d->nr_of_subtitles;i++) {
       if(d->subtitles[i].language==code) {
-        mp_msg(MSGT_OPEN,MSGL_INFO,"Selected DVD subtitle channel: %d language: %c%c\n", i, lang[0],lang[1]);
+        mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDsubtitleChannel, i, lang[0],lang[1]);
         return i;
       }
     }
     lang+=2; 
     while (lang[0]==',' || lang[0]==' ') ++lang;
   }
-  mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD subtitle language found!\n");
+  mp_msg(MSGT_OPEN,MSGL_WARN,MSGTR_DVDnoMatchingSubtitle);
   return -1;
 }
 
@@ -490,7 +490,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
      */
     vmg_file = ifoOpen(dvd, 0);
     if(!vmg_file) {
-      mp_msg(MSGT_OPEN,MSGL_ERR, "Can't open VMG info!\n");
+      mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDnoVMG);
       DVDClose( dvd );
       m_struct_free(&stream_opts,opts);
       return STREAM_UNSUPORTED;
@@ -561,7 +561,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     }
     if(dvd_last_chapter>0) {
       if(dvd_last_chapter<dvd_chapter || dvd_last_chapter>tt_srpt->title[dvd_title].nr_of_ptts) {
-        mp_msg(MSGT_OPEN,MSGL_ERR, "Invalid DVD last chapter number: %d\n", dvd_last_chapter);
+        mp_msg(MSGT_OPEN,MSGL_ERR, MSGTR_DVDinvalidLastChapter, dvd_last_chapter);
         ifoClose( vmg_file );
         DVDClose( dvd );
         m_struct_free(&stream_opts,opts);
@@ -776,7 +776,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_OK;
   }
 #endif
-  mp_msg(MSGT_DVD,MSGL_ERR,"MPlayer was compiled without dvd support, exit\n");
+  mp_msg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
   m_struct_free(&stream_opts,opts);
   return STREAM_UNSUPORTED;
 }

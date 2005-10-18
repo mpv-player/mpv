@@ -21,6 +21,7 @@
 #include "../osdep/keycodes.h"
 #include "../osdep/timer.h"
 #include "../mp_msg.h"
+#include "../help_mp.h"
 #include "../m_config.h"
 #include "../m_option.h"
 
@@ -833,7 +834,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
     cmd = mp_input_find_bind_for_key(def_cmd_binds,n,keys);
 
   if(cmd == NULL) {
-    mp_msg(MSGT_INPUT,MSGL_WARN,"No bind found for key %s",mp_input_get_key_name(keys[0]));
+    mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_NoBindFound,mp_input_get_key_name(keys[0]));
     if(n > 1) {
       int s;
       for(s=1; s < n; s++)
