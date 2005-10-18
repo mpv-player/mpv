@@ -3454,21 +3454,20 @@ if test "$_directfb" = auto ; then
   _directfb=no
   cat > $TMPC <<EOF
 #include <directfb.h>
-int main(void) { IDirectFB *foo; return 0; }
+int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
 EOF
   linux && test -c /dev/fb0 && cc_check $_inc_directfb -ldirectfb && _directfb=yes
 fi
 
 if test "$_directfb" = yes; then
-cat > $TMPC <<EOF
-#include <directfb.h>
-int main(void) { 
-  printf ("%i",(directfb_major_version*100+directfb_minor_version)*100+directfb_micro_version);
-  return 0; 
-}
+  cat > $TMPC << EOF
+#include <directfb_version.h>
+int
+dfb_ver = DIRECTFB_MAJOR_VERSION DIRECTFB_MINOR_VERSION DIRECTFB_MICRO_VERSION
+;
 EOF
-  if cc_check $_inc_directfb -ldirectfb && "$TMPO" >> "$TMPLOG" ; then
-    _directfb_version=`"$TMPO"`
+  if $_cc -E $TMPC $_inc_directfb > "$TMPO"; then
+    _directfb_version=`sed -n 's/^dfb_ver[^1-9]*\(.*\)/\1/p' "$TMPO" | tr -d '() '`
     _def_directfb_version="#define DIRECTFBVERSION $_directfb_version"
     if test "$_directfb_version" -ge 913; then
 	_res_comment="$_directfb_version"
