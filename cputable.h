@@ -1,6 +1,7 @@
 /* cputable.h - Maps CPUID to real CPU name.
  * Copyleft 2001 by Felix Buenemann <atmosfear at users dot sourceforge dot net>
  * This file comes under the GNU GPL, see www.fsf.org for more info!
+ * Family F codenames owe much thanks to Neil Phillips, author of x86test.
  */
 
 #define MAX_VENDORS 8 /* Number of CPU Vendors */
@@ -89,7 +90,7 @@ static const char *cpuname
 				/* A */ "Pentium III Xeon Cascades",
 				/* B */ "Celeron 2/Pentium III Tualatin",
 				/* C */ N_UNKNOWN, 
-				/* D */ N_UNKNOWN, 
+				/* D */ "Pentium M Dothan", 
 				/* E */ N_UNKNOWN, 
 				/* F */ N_UNKNOWNEXT 
 			},
@@ -119,11 +120,11 @@ static const char *cpuname
 			/* D */ F_UNKNOWN, 
 			/* E */ F_UNKNOWN, 
 			/* F extended family (P4/new IA-64)*/ {
-				/* 0 */ "Pentium 4 Willamette/Xeon Foster",
-				/* 1 */ "Pentium 4 Willamette/Xeon Foster",
-				/* 2 */ "Pentium 4/Celeron D Northwood/Xeon Prestonia/Gallatin",
-				/* 3 */ "Pentium 4/Celeron D Prescott/Xeon Nocona",
-				/* 4 */ "Pentium 4/Celeron D Prescott/Xeon Nocona",
+				/* 0 */ "Pentium 4 Willamette; Xeon Foster",
+				/* 1 */ "Pentium 4 Willamette; Xeon Foster",
+				/* 2 */ "Pentium 4/Celeron 4 Northwood; Pentium 4 EE/Xeon Prestonia,Gallatin",
+				/* 3 */ "Pentium 4/Celeron D Prescott; Xeon Nocona",
+				/* 4 */ "Pentium 4/Celeron D Prescott; Pentium D/XE Smithfield; Xeon Nocona,Irwindale",
 				/* 5 */ N_UNKNOWN, 
 				/* 6 */ N_UNKNOWN, 
 				/* 7 */ N_UNKNOWN, 
@@ -240,11 +241,11 @@ static const char *cpuname
 				/* 3 */ "Duron Spitfire",
 				/* 4 */ "Athlon Thunderbird",
 				/* 5 */ N_UNKNOWN, 
-				/* 6 */ "Athlon 4 /Athlon MP/XP Palomino",
-				/* 7 */ "Duron MG Morgan",
-				/* 8 */ "Athlon MP/XP Thoroughbred", 
+				/* 6 */ "Duron/Athlon 4/MP/XP Palomino",
+				/* 7 */ "Duron Morgan,Camaro",
+				/* 8 */ "Sempron/Athlon MP/XP Thoroughbred; Duron Applebred", 
 				/* 9 */ N_UNKNOWN,
-				/* A */ "Athlon MP/XP/XP-M Barton", 
+				/* A */ "Sempron/Athlon MP/XP/XP-M Barton,Thorton", 
 				/* B */ N_UNKNOWN, 
 				/* E */ N_UNKNOWN, 
 				/* C */ N_UNKNOWN, 
@@ -261,21 +262,21 @@ static const char *cpuname
 			/* E */ F_UNKNOWN, 
 			/* F K8 */ {
 				/* 0 */ N_UNKNOWN, 
-				/* 1 */ N_UNKNOWN, 
+				/* 1 */ "Opteron Egypt,Italy,Denmark", 
 				/* 2 */ N_UNKNOWN, 
-				/* 3 */ N_UNKNOWN, 
-				/* 4 */ "Athlon 64 Clawhammer", 
-				/* 5 */ "Opteron Sledgehammer", 
+				/* 3 */ "Athlon 64 X2 Manchester,Toledo", 
+				/* 4 */ "Athlon 64 Clawhammer; Athlon 64 X2 Toledo; Turion Newark,Lancaster", 
+				/* 5 */ "Athlon 64 FX/Opteron Sledgehammer,Athens,Troy,Venus", 
 				/* 6 */ N_UNKNOWN, 
-				/* 7 */ N_UNKNOWN, 
-				/* 8 */ N_UNKNOWN, 
+				/* 7 */ "Athlon 64/FX Sledgehammer,San Diego,Venice", 
+				/* 8 */ "Mobile Athlon 64 Newcastle; Mobile Sempron Dublin", 
 				/* 9 */ N_UNKNOWN,
 				/* A */ N_UNKNOWN, 
-				/* B */ N_UNKNOWN, 
+				/* B */ "Athlon 64 Newcastle; Athlon 64 X2 Manchester", 
 				/* E */ N_UNKNOWN, 
-				/* C */ N_UNKNOWN, 
+				/* C */ "Athlon 64 Newcastle,Odesssa,Oakville,Venice; Sempron Palermo,Paris,Dublin", 
 				/* D */ N_UNKNOWN, 
-				/* F */ N_UNKNOWN 
+				/* F */ "Athlon 64 Newcastle,Winchester,San Diego,Venice; Sempron Palermo" 
 			}
 				
 		},
