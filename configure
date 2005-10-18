@@ -317,6 +317,7 @@ Audio output:
 
 Miscellaneous options:
   --enable-runtime-cpudetection    Enable runtime CPU detection [disable]
+  --enable-cross-compile Enable cross-compilation [autodetect]
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --host-cc=COMPILER     use this C compiler to build apps needed for the build process [gcc]
   --as=ASSEMBLER         use this assembler to build MPlayer [as]
@@ -414,6 +415,7 @@ _cc=cc
 test "$CC" && _cc="$CC"
 _as=auto
 _runtime_cpudetection=no
+_cross_compile=auto
 for ac_option do
   case "$ac_option" in
   --target=*)
@@ -454,6 +456,12 @@ for ac_option do
     ;;
   --disable-runtime-cpudetection)
     _runtime_cpudetection=no
+    ;;
+  --enable-cross-compile)
+    _cross_compile=yes
+    ;;
+  --disable-cross-compile)
+    _cross_compile=no
     ;;
   --install-path=*)
     _install=`echo $ac_option | cut -d '=' -f 2 | sed 's/\/$//'`"/install"
@@ -714,6 +722,21 @@ echocheck "host cc"
 test "$_host_cc" || _host_cc=$_cc
 echores $_host_cc 
 
+echocheck "cross compilation"
+if test $_cross_compile = auto ; then
+  cat > $TMPC << EOF
+int main() { return 0; }
+EOF
+  _cross_compile=yes
+  cc_check && "$TMPO" && _cross_compile=no
+fi
+echores $_cross_compile
+
+if test $_cross_compile = yes; then
+  tmp_run() {
+    return 0
+  }
+fi
 
 # ---
 
@@ -1541,6 +1564,8 @@ for ac_option do
   --with-extralibdir=*) ;;
   --enable-runtime-cpudetection) ;;
   --disable-runtime-cpudetection) ;;
+  --enable-cross-compile) ;;
+  --disable-cross-compile) ;;
   --install-path=*) ;;
   --with-install=*) ;;
 
