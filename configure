@@ -6181,6 +6181,8 @@ if test "$_mencoder" != no ; then
 
   echocheck "libmp3lame (for mencoder)"
   _mp3lame=no
+  _def_mp3lame_preset='#undef HAVE_MP3LAME_PRESET'
+  _def_mp3lame_preset_medium='#undef HAVE_MP3LAME_PRESET_MEDIUM'
   cat > $TMPC <<EOF
 #include <lame/lame.h>
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
@@ -6188,12 +6190,20 @@ EOF
   # Note: libmp3lame usually depends on vorbis
   cc_check -lmp3lame $_ld_vorbis $_ld_lm && "$TMPO" >> "$TMPLOG" 2>&1 && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
-    _def_mp3lame="#define HAVE_MP3LAME `$TMPO`"
-    _def_cfg_mp3lame="#define CONFIG_MP3LAME `$TMPO`"
+    _def_mp3lame="#define HAVE_MP3LAME"
     _ld_mp3lame="-lmp3lame $_ld_vorbis"
+    cat > $TMPC << EOF
+#include <lame/lame.h>
+int main(void) { int p = STANDARD_FAST; return 0; }
+EOF
+    cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset="#define HAVE_MP3LAME_PRESET"
+    cat > $TMPC << EOF
+#include <lame/lame.h>
+int main(void) { int p = MEDIUM_FAST; return 0; }
+EOF
+    cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
   else
     _def_mp3lame='#undef HAVE_MP3LAME'
-    _def_cfg_mp3lame='#undef CONFIG_MP3LAME'
   fi
   echores "$_mp3lame"
 
@@ -7184,7 +7194,8 @@ $_def_encore
 /* Indicates if libmp3lame is available
    Note: for mencoder */
 $_def_mp3lame
-$_def_cfg_mp3lame
+$_def_mp3lame_preset
+$_def_mp3lame_preset_medium
 
 /* Define libmp1e for realtime mpeg encoding (for DXR3 and DVB cards) */
 $_def_mp1e
