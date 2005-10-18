@@ -1,4 +1,4 @@
-.\" synced with 1.1139
+.\" synced with 1.1140
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -1566,6 +1566,14 @@ Crée un fichier dumpsub.smi dans le répertoire courant.
 Convertit les sous-titres donnés (via l'option \-sub) au format basé sur le
 temps SubViewer (SRT).
 Créé un fichier dump.srt dans le répertoire courant.
+.br
+.I NOTE\ :
+Certaines mauvaises platines de salons peuvent avoir du mal avec les
+sous-titres SRT dont les fins de ligne sont Unix.
+Si vous avez la malchance de posséder un tel matériel, transformez votre
+sous-titre avec unix2dos our un programme similaire pour remplacer les fins
+de lignes avec des fins de ligne DOS/Windows.
+
 .
 .TP
 .B \-dumpsub (MPlayer uniquement) (CODE BÉTA)
