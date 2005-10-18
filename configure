@@ -30,19 +30,27 @@ export LC_ALL
 
 # Prefer these macros to full length text !
 # These macros only return an error code - NO display is done
-cc_check() {
+compile_check() {
   echo >> "$TMPLOG"
-  cat "$TMPC" >> "$TMPLOG"
+  cat "$1" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $TMPC -o $TMPO $@" >> "$TMPLOG"
+  echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra -o $TMPO $@" >> "$TMPLOG"
   rm -f "$TMPO"
-  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" >> "$TMPLOG" 2>&1
+  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra -o "$TMPO" "$@" >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo "ldd $TMPO" >> "$TMPLOG"
   $_ldd "$TMPO" >> "$TMPLOG" 2>&1
   echo >> "$TMPLOG"
   return "$TMP"
+}
+
+cc_check() {
+  compile_check $TMPC $@
+}
+
+cxx_check() {
+  compile_check $TMPCPP $@ -lstdc++
 }
 
 # Display error message, flushes tempfile, exit
@@ -5619,9 +5627,7 @@ class myclass {
 int myclass::myreturn(void) { ret = 0; return ret ; }
 int main(void) { myclass myobject; return myobject.myreturn(); }
 EOF
-  echo "------------------------------------------------"  >> "$TMPLOG"
-  cat "$TMPCPP" >> "$TMPLOG"
-  if ( $_cc "$TMPCPP" -o "$TMPO" && "$TMPO" ) >> "$TMPLOG" 2>&1 ; then
+  if cxx_check && "$TMPO" >> "$TMPLOG" 2>&1 ; then
     _dshow=yes
     echores "yes (C++ is ok)"
   else
@@ -5727,9 +5733,7 @@ echores "$_real"
 
 echocheck "LIVE555 Streaming Media libraries"
 if test "$_live" = auto  && test "$_network" = yes ; then
-  _TMPC=$TMPC
-  TMPC=$TMPCPP
-  cat >$TMPC <<EOF
+  cat > $TMPCPP << EOF
 #include <liveMedia.hh>
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1090195200)
 #error Please upgrade to version 2004.07.19 or later of the "LIVE555 Streaming Media" libraries - available from <www.live555.com/liveMedia/>
@@ -5739,15 +5743,13 @@ EOF
 
   _live=no
   for I in "$_livelibdir" "$_libdir/live" "/usr/lib/live" "/usr/local/live" "/usr/local/lib/live" ; do
-    cc_check -I$I/liveMedia/include -I$I/UsageEnvironment/include -I$I/groupsock/include && _livelibdir=$I && _live=yes && break
+    cxx_check -I$I/liveMedia/include -I$I/UsageEnvironment/include -I$I/groupsock/include && _livelibdir=$I && _live=yes && break
   done
   if test "$_live" != yes ; then
-      if cc_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock; then
+      if cxx_check -I/usr/include/liveMedia -I/usr/include/UsageEnvironment -I/usr/include/groupsock; then
 	  _live_dist=yes
       fi
   fi
-
-  TMPC=$_TMPC
 fi
 if test "$_live" = yes && test "$_network" = yes ; then
   echores "yes (using $_livelibdir)"
