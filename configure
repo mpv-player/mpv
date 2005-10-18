@@ -4687,31 +4687,46 @@ if test "$_alsa" != no ; then
   _alsa=no
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
-int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==5)); }
+#if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 5))
+#error "alsa version != 0.5.x"
+#endif
+int main(void) { return 0; }
 EOF
-  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.5.x'
+  cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.5.x'
 
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
-int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
+#if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 9))
+#error "alsa version != 0.9.x"
+#endif
+int main(void) { return 0; }
 EOF
-  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x-sys'
+  cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.9.x-sys'
   cat > $TMPC << EOF
 #include <alsa/asoundlib.h>
-int main(void) { return (!(SND_LIB_MAJOR==0 && SND_LIB_MINOR==9)); }
+#if !((SND_LIB_MAJOR == 0) && (SND_LIB_MINOR == 9))
+#error "alsa version != 0.9.x"
+#endif
+int main(void) { return 0; }
 EOF
-  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='0.9.x-alsa'
+  cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='0.9.x-alsa'
 
   cat > $TMPC << EOF
 #include <sys/asoundlib.h>
-int main(void) { return (!(SND_LIB_MAJOR==1 && SND_LIB_MINOR==0)); }
+#if !((SND_LIB_MAJOR == 1) && (SND_LIB_MINOR == 0))
+#error "alsa version != 1.0.x"
+#endif
+int main(void) { return 0; }
 EOF
-  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='1.0.x-sys'
+  cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='1.0.x-sys'
   cat > $TMPC << EOF
 #include <alsa/asoundlib.h>
-int main(void) { return (!(SND_LIB_MAJOR==1 && SND_LIB_MINOR==0)); }
+#if !((SND_LIB_MAJOR == 1) && (SND_LIB_MINOR == 0))
+#error "alsa version != 1.0.x"
+#endif
+int main(void) { return 0; }
 EOF
-  cc_check -lasound $_ld_dl $_ld_pthread && $TMPO && _alsaver='1.0.x-alsa'
+  cc_check -lasound $_ld_dl $_ld_pthread && _alsaver='1.0.x-alsa'
 fi
 _def_alsa5='#undef HAVE_ALSA5'
 _def_alsa9='#undef HAVE_ALSA9'
