@@ -53,6 +53,10 @@ cxx_check() {
   compile_check $TMPCPP $@ -lstdc++
 }
 
+tmp_run() {
+  "$TMPO" >> "$TMPLOG" 2>&1
+}
+
 # Display error message, flushes tempfile, exit
 die () {
   echo
@@ -1331,7 +1335,7 @@ int main(void){
 }
 EOF
 
-      if ( cc_check && $TMPO ) > /dev/null 2>&1 ; then
+      if cc_check && tmp_run ; then
         echores "yes"
 	_optimizing="$_optimizing $2"
         return 0
@@ -2780,7 +2784,7 @@ _pthreads=no
 if not hpux ; then
   for _ld_tmp in "-lpthreadGC2" "" "-lpthread" "-pthread" ; do
     # for crosscompilation, we cannot execute the program, be happy if we can link statically
-    cc_check $_ld_tmp && ($TMPO || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
+    cc_check $_ld_tmp && (tmp_run || test "$_ld_static") && _ld_pthread="$_ld_tmp" && _pthreads=yes && break
   done
 fi
 fi
@@ -4094,7 +4098,7 @@ int main(void) {
 }
 EOF
     if cc_check -lpng -lz $_ld_lm ; then
-      if "$TMPO" >> "$TMPLOG" ; then
+      if tmp_run ; then
         _png=yes
       else
         _res_comment="mismatch of library and header versions"
@@ -4129,7 +4133,7 @@ int main(void) {
 }
 EOF
     if cc_check -ljpeg $_ld_lm ; then
-      if "$TMPO" >> "$TMPLOG" ; then
+      if tmp_run ; then
         _jpg=yes
       fi
     fi
@@ -4194,7 +4198,7 @@ int main(void) {
 }
 EOF
   for _ld_tmp in "-lungif" "-lungif $_ld_x11" "-lgif" "-lgif $_ld_x11" ; do
-    cc_check $_ld_tmp && "$TMPO" >> "$TMPLOG" && _ld_gif="$_ld_tmp" && _gif=yes && break
+    cc_check $_ld_tmp && tmp_run && _ld_gif="$_ld_tmp" && _gif=yes && break
   done
 fi
 
@@ -4232,7 +4236,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && ( "$TMPO" ) >>"$TMPLOG" 2>&1 ; then
+  if cc_check "$_ld_gif" && tmp_run ; then
     _def_gif_4='#define HAVE_GIF_4 1'
     _gif="yes"
   fi
@@ -4258,7 +4262,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && "$TMPO" >>"$TMPLOG" 2>&1 ; then
+  if cc_check "$_ld_gif" && tmp_run ; then
     _def_gif_tvt_hack='#undef HAVE_GIF_TVT_HACK'
     echores "disabled"
   else
@@ -4572,7 +4576,7 @@ cat > $TMPC << EOF
 #include <artsc.h>
 int main(void) { return 0; }
 EOF
-cc_check `artsc-config --libs` `artsc-config --cflags` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _arts=yes
+cc_check `artsc-config --libs` `artsc-config --cflags` && tmp_run && _arts=yes
 
   fi
 fi
@@ -4598,7 +4602,7 @@ cat > $TMPC << EOF
 #include <esd.h>
 int main(void) { return 0; }
 EOF
-cc_check `esd-config --libs` `esd-config --cflags` && "$TMPO" >> "$TMPLOG" 2>&1 && _esd=yes
+cc_check `esd-config --libs` `esd-config --cflags` && tmp_run && _esd=yes
 
   fi
 fi
@@ -4635,7 +4639,7 @@ cat > $TMPC << EOF
 #include <polyp/polyplib-error.h>
 int main(void) { return 0; }
 EOF
-cc_check `pkg-config --libs --cflags polyplib polyplib-error polyplib-mainloop` && "$TMPO" >> "$TMPLOG" 2>&1 && _polyp=yes
+cc_check `pkg-config --libs --cflags polyplib polyplib-error polyplib-mainloop` && tmp_run && _polyp=yes
 
   fi
 fi
@@ -5054,7 +5058,7 @@ int main()
 }
 EOF
 	_freetype=no
-	cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && $TMPO >> "$TMPLOG" && _freetype=yes
+	cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && tmp_run && _freetype=yes
     else
 	_freetype=no
     fi
@@ -5123,7 +5127,7 @@ int main()
 }
 EOF
 	_fribidi=no
-	cc_check `$_fribidiconfig --cflags` `$_fribidiconfig --libs` && $TMPO >> "$TMPLOG" && _fribidi=yes
+	cc_check `$_fribidiconfig --cflags` `$_fribidiconfig --libs` && tmp_run && _fribidi=yes
     else
 	_fribidi=no
     fi
@@ -5641,7 +5645,7 @@ class myclass {
 int myclass::myreturn(void) { ret = 0; return ret ; }
 int main(void) { myclass myobject; return myobject.myreturn(); }
 EOF
-  if cxx_check && "$TMPO" >> "$TMPLOG" 2>&1 ; then
+  if cxx_check && tmp_run ; then
     _dshow=yes
     echores "yes (C++ is ok)"
   else
@@ -6188,7 +6192,7 @@ if test "$_mencoder" != no ; then
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
 EOF
   # Note: libmp3lame usually depends on vorbis
-  cc_check -lmp3lame $_ld_vorbis $_ld_lm && "$TMPO" >> "$TMPLOG" 2>&1 && _mp3lame=yes
+  cc_check -lmp3lame $_ld_vorbis $_ld_lm && tmp_run && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME"
     _ld_mp3lame="-lmp3lame $_ld_vorbis"
