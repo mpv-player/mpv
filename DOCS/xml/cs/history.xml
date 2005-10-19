@@ -12,7 +12,7 @@ Zaèalo to pøed rokem... Vyzkou¹el jsem mnoho pøehrávaèù pod Linuxem
 <application>xanim</application>, <application>avifile</application>,
 <application>xmmp</application>), ale v¹echny mìly nìjaký problém.
 Vìt¹inou se zvlá¹tními soubory nebo audio/video synchronizací. Mnoho z nich
-neumí pøehrát jak MPEG-1, MPEG-2 tak AVI (DivX) soubory. Mnoho z nich má
+neumí pøehrát MPEG-1, MPEG-2 a zároveò AVI (DivX) soubory. Mnoho z nich má
 i potí¾e se zobrazováním nebo s rychlostí. Proto jsem se rozhodl, ¾e si nìjaký
 napí¹u nebo upravím...
 </para></blockquote><para>A'rpi, 2001</para>
@@ -30,8 +30,8 @@ napí¹u nebo upravím...
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application>
 	v0.5-v0.87</emphasis>: 28. záøí&ndash;20. øíjen 2000
-  </para><para>MPEG kodek byl nahrazen DVDview od Dirka Farina, byla skvìlá,
-	ale byla pomalá a psaná v C++ (A'rpi nenávidí C++!!!)
+  </para><para>MPEG kodek byl nahrazen knihovnou DVDview od Dirka Farina,
+  	byla skvìlá, ale byla pomalá a psaná v C++ (A'rpi nenávidí C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application>
@@ -125,7 +125,7 @@ napí¹u nebo upravím...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis>
-	datu dosud neznámý
+	datum dosud neznámý
   </para></listitem>
 </itemizedlist>
 </para>
