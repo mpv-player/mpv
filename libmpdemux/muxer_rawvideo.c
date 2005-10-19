@@ -21,14 +21,6 @@
 static muxer_stream_t* rawvideofile_new_stream(muxer_t *muxer,int type){
     muxer_stream_t* s;
     if (!muxer) return NULL;
-    if (type == MUXER_TYPE_AUDIO) {
-	printf("Rawvideo muxer does not support audio !\n");
-	return NULL;
-    }
-    if(muxer->avih.dwStreams>=1){
-	printf("Too many streams! Rawvideo muxer supports only one video stream !\n");
-	return NULL;
-    }
     s=malloc(sizeof(muxer_stream_t));
     memset(s,0,sizeof(muxer_stream_t));
     if(!s) return NULL; // no mem!?
@@ -44,9 +36,6 @@ static muxer_stream_t* rawvideofile_new_stream(muxer_t *muxer,int type){
       s->h.fccType=streamtypeVIDEO;
       if(!muxer->def_v) muxer->def_v=s;
       break;
-    default:
-      printf("WarninG! unknown stream type: %d\n",type);
-      return NULL;
     }
     muxer->avih.dwStreams++;
     return s;
@@ -65,6 +54,7 @@ static void rawvideofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int f
     muxer_t *muxer=s->muxer;
 
     // write out the chunk:
+    if (s->type == MUXER_TYPE_VIDEO)
     write_rawvideo_chunk(muxer->file,len,s->buffer); /* unsigned char */
 
     // alter counters:
