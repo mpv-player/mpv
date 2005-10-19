@@ -1,5 +1,7 @@
-// Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.121
+// Translated by Emfox Zhou <EmfoxZhou@gmail.com>
+
+// (Translator before 2005-10-12)
+// Lu Ran <hephooey@fastmail.fm>
 
 // ========================= MPlayer help ===========================
 
@@ -30,15 +32,15 @@ static char help_text[]=
 "\n"
 "基本控制键: (完整的列表参见manpage, 同时也要检查一下 input.conf)\n"
 " <-  or  ->      向后/向前搜索10秒\n"
-" up or down      向后/向前搜索1分钟\n"
-" pgup or pgdown  向后/向前搜索10分钟\n"
+" down or up      向后/向前搜索1分钟\n"
+" pgdown or pgup  向后/向前搜索10分钟\n"
 " < or >          跳到播放列表中的前一首/后一首\n"
 " p or SPACE      暂停播放(按任意键继续)\n"
 " q or ESC        停止播放并退出程序\n"
 " + or -          调整音频延迟+/-0.1秒\n"
 " o               循环OSD模式:  none/seekbar/seekbar+timer\n"
 " * or /          增加或减少pcm音量\n"
-" z or x          调整字幕延迟+/-0.1秒\n"
+" x or z          调整字幕延迟+/-0.1秒\n"
 " r or t          上/下调整字幕位置, 参见-vf expand\n"
 "\n"
 " * * * 详细内容，进一步(高级)的选项和控制键参见MANPAGE！* * *\n"
@@ -453,15 +455,23 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer没有编译SMB读取的支持.\n"
 
 #define MSGTR_CantOpenDVD "无法打开DVD 设备: %s\n"
+#define MSGTR_NoDVDSupport "MPlayer 是被编译成不带DVD支持的，退出\n"
 #define MSGTR_DVDwait "读取光盘结构, 请等待...\n"
 #define MSGTR_DVDnumTitles "这张DVD有 %d 个titles.\n"
 #define MSGTR_DVDinvalidTitle "无效的DVD title号: %d\n"
 #define MSGTR_DVDnumChapters "这个 DVD title有 %d chapters.\n"
-#define MSGTR_DVDinvalidChapter "I无效的DVD chapter号: %d\n"
+#define MSGTR_DVDinvalidChapter "无效的DVD chapter号: %d\n"
+#define MSGTR_DVDinvalidChapterRange "无效的 chapter 范围 %s\n"
+#define MSGTR_DVDinvalidLastChapter "无效的 DVD 最后 chapter 数: %d\n"
 #define MSGTR_DVDnumAngles "这个 DVD title有 %d 个视角.\n"
 #define MSGTR_DVDinvalidAngle "无效的DVD视角号: %d\n"
-#define MSGTR_DVDnoIFO "无法打开 DVD title: %d 的IFO文件.\n"
+#define MSGTR_DVDnoIFO "无法打开 DVD title %d 的IFO文件.\n"
+#define MSGTR_DVDnoVMG "无法打开 VMG 信息!\n"
 #define MSGTR_DVDnoVOBs "无法打开title的VOB(VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "没有找到匹配的 DVD 音频语言!\n"
+#define MSGTR_DVDaudioChannel "选定 DVD 音频通道: %d 语言: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "没有找到匹配的 DVD 字幕语言!\n"
+#define MSGTR_DVDsubtitleChannel "选定 DVD 字幕通道: %d 语言: %c%c\n"
 #define MSGTR_DVDopenOk "DVD成功打开!\n"
 
 // muxer_*.c:
@@ -520,6 +530,10 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到30fps的NTSC内容, 改变帧速率.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到24fps渐进的NTSC内容, 改变帧速率.\n"
 
+#define MSGTR_CacheFill "\r缓冲填充: %5.2f%% (%d 字节)   "
+#define MSGTR_NoBindFound "没有找到键 '%s' 的键绑定"
+#define MSGTR_FailedToOpen "打开 %s 失败\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "无法打开解码器\n"
 #define MSGTR_CantCloseCodec "无法关闭解码器\n"
@@ -545,7 +559,10 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "要求的视频解码器族 [%s] (vfm=%s) 不可用.\n在编译时开启它.\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "要求的音频解码器族 [%s] (afm=%s) 不可用.\n在编译时开启它.\n"
 #define MSGTR_OpeningVideoDecoder "打开视频解码器: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "选定视频编解码器: [%s] vfm: %s (%s)\n"
 #define MSGTR_OpeningAudioDecoder "打开音频解码器: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "选定音频编解码器: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "为 %dHz/%dch/%s -> %dHz/%dch/%s 建造音频过滤链...\n"
 #define MSGTR_UninitVideoStr "关闭视频: %s  \n"
 #define MSGTR_UninitAudioStr "关闭音频: %s  \n"
 #define MSGTR_VDecoderInitFailed "VDecoder初始化失败 :(\n"
@@ -568,7 +585,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: 解码器无法设置sh->disp_w和sh->disp_h, 尝试绕过!\n"
-#define MSGTR_VoConfigRequest "VDec: vo配置要求 - %d x %d (选择 csp: %s)\n"
+#define MSGTR_VoConfigRequest "VDec: vo配置要求 - %d x %d (选择色彩空间: %s)\n"
 #define MSGTR_CouldNotFindColorspace "无法找到匹配的色彩空间 - 重新尝试 -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "电影宽高比为 %.2f:1 - 预放大到正确的电影宽高比.\n"
 #define MSGTR_MovieAspectUndefined "电影宽高比未定义 - 无法使用预放大.\n"
@@ -580,6 +597,8 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: 不能发送EWMH全屏事件!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: 找不到屏幕保护的窗口.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: 选定视频模式 %dx%d (图像大小 %dx%d).\n"
 
 #define MSGTR_InsertingAfVolume "[混音器] 没有硬件混音, 插入音量过滤器.\n"
 #define MSGTR_NoVolume "[混音器] 没有可用的音量控制.\n"
