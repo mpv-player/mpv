@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.94 -->
+<!-- Synced with: 1.98 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -20,8 +20,11 @@ k enkódování <application>MEncoder</application>em.
 <para>
   Audio a video kodeky pro enkódování jsou vybírány příslušnými volbami
   <option>-oac</option> a <option>-ovc</option> options.
-  Na výběr máte z následujících možností, ačkoli některé nemusely být
-  v době kompilace povoleny, nebudou tedy k dispozici:
+  Napište například:
+  <screen>mencoder -ovc help</screen>
+  pro seznam video kodeků podporovaných verzí programu
+  <application>MEncoder</application> na vašem počítači.
+  Dostupné jsou následující možnosti:
 </para>
 <para>
 Audio (zvukové) kodeky:
@@ -111,6 +114,147 @@ Video kodeky:
 </tgroup>
 </informaltable>
 </para>
+<para>
+  Výstupní nosný formát je vybírán volbou <option>-of</option>.
+  Zadejte:
+  <screen>mencoder -of help</screen>
+  pro seznam všech nosných formátů podporovaných verzí programu
+  <application>MEncoder</application> na vašem počítači.
+  Dostupné jsou následující možnosti:
+</para>
+<para>
+Nosné formáty:
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Název nosného formátu</entry><entry>Popis</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>lavf</entry>
+    <entry>Jeden z nosných formátů podporovaných
+    <systemitem class="library">libavformat</systemitem></entry>
+  </row>
+  <row>
+    <entry>avi</entry>
+    <entry>Audio-Video Interleaved (Prokládané audio s videem)</entry>
+  </row>
+  <row>
+    <entry>mpeg</entry>
+    <entry>MPEG-1 a MPEG-2 PS</entry>
+  </row>
+  <row>
+    <entry>rawvideo</entry>
+    <entry>surový (raw) video datový proud (žádný muxing &ndash; pouze jeden
+    video proud)</entry>
+  </row>
+  <row>
+    <entry>rawaudio</entry>
+    <entry>surový (raw) audio datový proud (žádný muxing &ndash; pouze jeden
+    audio proud)</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+  Nosný formát AVI je nativním nosným formátem
+  <application>MEncoder</application>u, což znamená, že je tím, který je nejlépe
+  zpracován a pro nějž byl <application>MEncoder</application>
+  navržen.
+  Jak bylo zmíněno, ostatní nosné formáty jsou použitelné, ale můžete
+  při jejich použití narazit na problémy.
+</para>
+
+<para>
+Nosné formáty <systemitem class="library">libavformat</systemitem>:
+</para>
+<para>
+  Pokud jste si zvolili <systemitem class="library">libavformat</systemitem>
+  pro provádění muxování výstupního souboru (pomocí <option>-of lavf</option>),
+  příslušný nosný formát bude určen z přípony výstupního souboru.
+  Můžete vynutit určitý nosný formát pomocí parametru <option>format</option>
+  knihovny <systemitem class="library">libavformat</systemitem>.
+
+<informaltable frame="all">
+<tgroup cols="2">
+<thead>
+<row><entry>Název <systemitem class="library">libavformat</systemitem> nosného formátu</entry><entry>Popis</entry></row>
+</thead>
+<tbody>
+  <row>
+    <entry>mpg</entry>
+    <entry>MPEG-1 a MPEG-2 PS</entry>
+  </row>
+  <row>
+    <entry>asf</entry>
+    <entry>Advanced Streaming Format</entry>
+  </row>
+  <row>
+    <entry>avi</entry>
+    <entry>Audio-Video Interleaved</entry>
+  </row>
+  <row>
+    <entry>wav</entry>
+    <entry>Waveform Audio</entry>
+  </row>
+  <row>
+    <entry>swf</entry>
+    <entry>Macromedia Flash</entry>
+  </row>
+  <row>
+    <entry>flv</entry>
+    <entry>Macromedia Flash video</entry>
+  </row>
+  <row>
+    <entry>rm</entry>
+    <entry>RealMedia</entry>
+  </row>
+  <row>
+    <entry>au</entry>
+    <entry>SUN AU</entry>
+  </row>
+  <row>
+    <entry>nut</entry>
+    <entry>otevřený nosný formát NUT (experimentální a dosud neslučitelný se specifikací)</entry>
+  </row>
+  <row>
+    <entry>mov</entry>
+    <entry>QuickTime</entry>
+  </row>
+  <row>
+    <entry>mp4</entry>
+    <entry>formát MPEG-4</entry>
+  </row>
+  <row>
+    <entry>dv</entry>
+    <entry>Sony Digital Video</entry>
+  </row>
+</tbody>
+</tgroup>
+</informaltable>
+  Jak vidíte, <systemitem class="library">libavformat</systemitem>
+  umožňuje <application>MEncoder</application>u muxovat do velkého množství
+  nosných formátů.
+  Naneštěstí, jelikož <application>MEncoder</application> nebyl od počátku
+  navržen pro podporu jiných nosných formátů než AVI, měli byste být
+  paranoidní ve vstahu k výstupnímu souboru.
+  Ověřte si prosím pro jistotu, že audio/video synchronizace je OK
+  a soubor lze správně přehrát i jinými přehrávači, než
+  <application>MPlayer</application>.
+</para>
+
+<informalexample>
+<para>Příklad:</para>
+<para>
+  Vytvoření Macromedia Flash videa vhodného pro přehrávání ve webovém prohlížeči
+  pomocí Macromedia Flash pluginu:
+<screen>
+mencoder <replaceable>vstupní.avi</replaceable> -o <replaceable>výstupní.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
+-lavcopts vcodec=flv:vbitrate=500:mbd=2:mv0:trell:v4mv:cbp:last_pred=3 \
+-srate 22050
+</screen>
+</para>
+</informalexample>
+
 </sect1>
 
 
