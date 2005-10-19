@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.181
+// Updated to help_mp-en.h v1.188
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -35,8 +35,8 @@ static char help_text[]=
 "\n"
 "Tasti principali: (vedi pagina man per lista, controlla anche input.conf)\n"
 " <-  o  ->        va indietro/avanti di 10 secondi\n"
-" su o giù         va indietro/avanti di  1 minuto\n"
-" pagsu o paggiù   va indietro/avanti di 10 minuti\n"
+" su o giù         va avanti/indietro di  1 minuto\n"
+" pagsu o paggiù   va avanti/indietro di 10 minuti\n"
 " < o >            va indietro/avanti nella playlist\n"
 " p o SPAZIO       pausa (premere un qualunque tasto per continuare)\n"
 " q o ESC          ferma la riproduzione ed esce dal programma\n"
@@ -158,7 +158,7 @@ static char help_text[]=
 #define MSGTR_RemovedSubtitleFile "SUB: rimosso file sottotitoli (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Errore durante l'apertura del file [%s] per la scrittura!\n"
 #define MSGTR_CommandLine "CommandLine:"
-#define MSGTR_RTCDeviceNotOpenable "Fallimento nell'aprire %s: %s (dovrebbe esser leggibile dall'utente.)\n"
+#define MSGTR_RTCDeviceNotOpenable "Apertura di %s fallita: %s (dovrebbe esser leggibile dall'utente.)\n"
 #define MSGTR_LinuxRTCInitErrorIrqpSet "Linux RTC: errore di init in ioctl (rtc_irqp_set %lu): %s\n"
 #define MSGTR_IncreaseRTCMaxUserFreq "Prova aggiungendo \"echo %lu > /proc/sys/dev/rtc/max-user-freq\"\n"\
 "agli script di avvio del sistema.\n"
@@ -222,6 +222,7 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nIl nuovo file video ha diversa risoluzione o spazio colore dal precedente.\n"
 #define MSGTR_FrameCopyFileMismatch "\nTutti i file video devono avere stessi fps, risoluz., e codec per -ovc copy.\n"
 #define MSGTR_AudioCopyFileMismatch "\nTutti i file devono avere lo stesso codec audio e formato per -oac copy.\n"
+#define MSGTR_NoAudioFileMismatch "\nImpossibile mescolare file solo audio con file video. Prova con -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed non è detto che funzioni correttamente con -oac copy!\n"\
 "L'encoding potrebbe essere danneggiato!\n"
 #define MSGTR_ErrorWritingFile "%s: errore nella scrittura del file.\n"
@@ -447,7 +448,7 @@ static char help_text[]=
 
 // divx4_vbr.c:
 #define MSGTR_OutOfMemory "Memoria esaurita"
-#define MSGTR_OverridingTooLowBitrate "Il bitrate specificato è troppo basso per questo clip.\n"\
+#define MSGTR_OverridingTooLowBitrate "Il bitrate specificato è troppo basso per questo filmato.\n"\
 "Il bitrate minimo possibile è %.0f kbps. Ignoro il valore dato dall'utente\n"
 
 // fifo.c
@@ -476,15 +477,23 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer non è stato compilato con supporto di lettura da SMB.\n"
 
 #define MSGTR_CantOpenDVD "Impossibile aprire il dispositivo DVD: %s\n"
+#define MSGTR_NoDVDSupport "MPlayer è stato compilato senza il supporto per DVD, esco\n" 
 #define MSGTR_DVDwait "Leggo la struttura del disco, per favore aspetta...\n"
-#define MSGTR_DVDnumTitles "Ci sono %d titoli su questo DVD.\n"
+#define MSGTR_DVDnumTitles "Ci sono %d titolo/i su questo DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numero del titolo del DVD non valido: %d\n"
-#define MSGTR_DVDnumChapters "Ci sono %d capitoli in questo titolo del DVD.\n"
+#define MSGTR_DVDnumChapters "Ci sono %d capitolo/i in questo titolo del DVD.\n"
 #define MSGTR_DVDinvalidChapter "Numero del capitolo del DVD non valido: %d\n"
-#define MSGTR_DVDnumAngles "Ci sono %d angolazioni in questo titolo del DVD.\n"
+#define MSGTR_DVDinvalidChapterRange "Intervallo dei capitoli indicato non valido: %s\n"
+#define MSGTR_DVDinvalidLastChapter "Numero del capitolo finale del DVD non valido: %d\n"
+#define MSGTR_DVDnumAngles "Ci sono %d angolazione/i in questo titolo del DVD.\n"
 #define MSGTR_DVDinvalidAngle "Numero delle angolazioni del DVD non valido: %d\n"
 #define MSGTR_DVDnoIFO "Impossibile aprire il file IFO per il titolo del DVD %d.\n"
+#define MSGTR_DVDnoVMG "Impossibile aprire le informazioni VMG!\n"
 #define MSGTR_DVDnoVOBs "Impossibile aprire il VOB del titolo (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "Non trovata la lingua dell'audio DVD corrispondente!\n"
+#define MSGTR_DVDaudioChannel "Scelto canale audio DVD: %d lingua: %c%c\n" 
+#define MSGTR_DVDnoMatchingSubtitle "Non trovata la lingua dei sottotitoli DVD corrispondente!\n"
+#define MSGTR_DVDsubtitleChannel "Scelto canale sottotitoli DVD: %d lingua: %c%c\n"
 #define MSGTR_DVDopenOk "DVD aperto con successo.\n"
 
 // muxer_*.c:
@@ -540,11 +549,15 @@ static char help_text[]=
 #define MSGTR_TVInputNotSeekable "Impossibile spostarsi in un programma TV!\n"\
 "(Probabilmente lo spostamento sarà usato per cambiare canale ;)\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Info demuxer %s già presente!\n"
-#define MSGTR_ClipInfo "Informazioni clip: \n"
+#define MSGTR_ClipInfo "Informazioni filmato: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Rilevato formato NTSC 30000/1001fps, cambio framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: Rilevato formato NTSC 24000/1001fps progressivo, cambio framerate.\n"
 
+#define MSGTR_CacheFill "\rRiempio cache: %5.2f%% (%d byte)   " 
+#define MSGTR_NoBindFound "Nessun controllo legato al tasto '%s'"
+#define MSGTR_FailedToOpen "Apertura di '%s' fallita\n"
+							       //
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "impossibile aprire il codec\n"
 #define MSGTR_CantCloseCodec "impossibile chiudere il codec\n"
@@ -570,7 +583,10 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Famiglia di codec video voluta [%s] (vfm=%s) indisponibile.\nAbilitala in compilazione.\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Famiglia di codec audio voluta [%s] (afm=%s) indisponibile.\nAbilitala in compilazione.\n"
 #define MSGTR_OpeningVideoDecoder "Apertura decoder video: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "Scelto codec video: [%s] vfm: %s (%s)\n"
 #define MSGTR_OpeningAudioDecoder "Apertura decoder audio: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "Scelto codec audio: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Costruisco catena filtri audio per %dHz/%dch/%s -> %dHz/%dch/%s...\n"
 #define MSGTR_UninitVideoStr "uninit video: %s  \n"
 #define MSGTR_UninitAudioStr "uninit audio: %s  \n"
 #define MSGTR_VDecoderInitFailed "Inizializzazione VDecoder fallita :(\n"
@@ -580,9 +596,9 @@ static char help_text[]=
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Alloco %d + %d = %d byte per il buffer di output\n"
 
 // LIRC:
-#define MSGTR_SettingUpLIRC "Configurazione del supporto per lirc...\n"
+#define MSGTR_SettingUpLIRC "Configurazione del supporto per LIRC...\n"
 #define MSGTR_LIRCdisabled "Non potrai usare il tuo telecomando\n"
-#define MSGTR_LIRCopenfailed "Apertura del supporto per lirc fallita!\n"
+#define MSGTR_LIRCopenfailed "Apertura del supporto per LIRC fallita!\n"
 #define MSGTR_LIRCcfgerr "Fallimento nella lettura del file di configurazione di LIRC %s!\n"
 
 // vf.c
@@ -593,7 +609,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Il codec non ha impostato sh->disp_w and sh->disp_h, tento di risolvere.\n"
-#define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (csp preferito: %s)\n"
+#define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (sp.colore preferito: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Impossibile trovare uno spazio colore adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
@@ -605,6 +621,8 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Impossibile inviare l'evento schermo pieno EWMH!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Non riesco a trovare la finestra di XScreenSaver.\n" 
+#define MSGTR_SelectedVideoMode "XF86VM: Scelta modalità video %dx%d per la dimensione immagine %dx%d.\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Nessun mixer hardware, filtro volume inserito automaticamente.\n"
 #define MSGTR_NoVolume "[Mixer] Nessuna regolazione di volume disponibile.\n"
@@ -980,7 +998,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Non posso aprire il dispositivo audio %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Non riesco a bloccare il dispositivo: %s\n"
 #define MSGTR_AO_OSS_CantSet "[AO OSS] Non posso impostare il device audio %s a %s output, provo %s...\n"
-#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Fallimento nell'impostazione audio a %d canali.\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Fallita impostazione audio a %d canali.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: il driver non supporta SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Il tuo driver audio NON supporta select()  ***\n Ricompila MPlayer con #undef HAVE_AUDIO_SELECT in config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nErrore fatale: *** NON POSSO RIAPRIRE / RESETTARE IL DEVICE AUDIO *** %s\n"
