@@ -355,6 +355,19 @@ system, you should remove it now.
 
 <qandaentry>
 <question><para>
+How can I get subtitles to appear on the black margins around a movie?
+</para></question>
+<answer><para>
+Use the <systemitem>expand</systemitem> video filter to increase the
+area onto which the movie is rendered vertically and place the movie
+at the top border, for example:
+<screen>
+mplayer -vf expand=0:-100:0:0 -slang de dvd://1
+</screen>
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
 How can I select audio/subtitle tracks from a DVD, OGM, Matroska or NUT file?
 </para></question>
 <answer><para>
