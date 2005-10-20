@@ -518,7 +518,9 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   
   switch(priv->frmt) {
   case WAV:
-    pos -= (pos % (sh_audio->channels * sh_audio->samplesize) );
+    pos -= (pos - demuxer->movi_start) %
+            (sh_audio->wf->nBlockAlign ? sh_audio->wf->nBlockAlign :
+             (sh_audio->channels * sh_audio->samplesize));
     // We need to decrease the pts by one step to make it the "last one"
     priv->last_pts -= sh_audio->wf->nAvgBytesPerSec/(float)sh_audio->i_bps;
     break;
