@@ -814,6 +814,6 @@ Special care must be taken when working with interlaced video:
 With these things in mind, here is our first example:
 
   mencoder capture.avi -mc 0 -oac lavc -ovc lavc -lavcopts \
-  vcodec=mpeg2video:vbitrate=6000:ilmv:ildct:acodec=mp2:abitrate=224
+  vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 
-Note the ilmv and ildct options.
+Note the ilme and ildct options.

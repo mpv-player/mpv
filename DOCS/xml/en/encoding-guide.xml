@@ -1280,10 +1280,10 @@ With these things in mind, here is our first example:
 </para>
 <screen>
   mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
-  vcodec=mpeg2video:vbitrate=6000:ilmv:ildct:acodec=mp2:abitrate=224
+  vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 </screen>
 <para>
-Note the <option>ilmv</option> and <option>ildct</option> options. 
+Note the <option>ilme</option> and <option>ildct</option> options. 
 </para>
 </sect2>
 
