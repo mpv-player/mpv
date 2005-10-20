@@ -375,8 +375,8 @@ You have to use <option>-aid</option> (audio ID) or <option>-alang</option>
 (audio language), <option>-sid</option>(subtitle ID) or <option>-slang</option>
 (subtitle language), for example:
 <screen>
-mplayer example.mkv -alang eng -slang eng
-mplayer example.mkv -aid 1 -sid 1
+mplayer -alang eng -slang eng <replaceable>example.mkv</replaceable>
+mplayer -aid 1 -sid 1 <replaceable>example.mkv</replaceable>
 </screen>
 To see which ones are available:
 <screen>
@@ -677,7 +677,8 @@ I have A/V sync problems. Some of my AVIs play fine, but some play with double s
 </para></question>
 <answer><para>
 You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
-try to play a file which has 22050Hz audio. Try the resample audio filter.
+try to play a file which has 22050Hz audio. Try the
+<systemitem>resample</systemitem> audio filter.
 </para></answer>
 </qandaentry>
 
