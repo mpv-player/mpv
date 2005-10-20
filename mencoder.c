@@ -512,6 +512,8 @@ if (frameno_filename) {
 
   vo_init_osd();
 
+  /* HACK, for some weird reason, push() has to be called twice,
+     otherwise options are not saved correctly */
   m_config_push(mconfig);
 play_next_file:
   m_config_push(mconfig);
