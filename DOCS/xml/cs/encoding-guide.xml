@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.31 -->
+<!-- Synced with: 1.32 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -1213,10 +1213,10 @@ S vědomím těchto souvislostí vám předkládáme první příklad:
 </para>
 <screen>
   mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
-  vcodec=mpeg2video:vbitrate=6000:ilmv:ildct:acodec=mp2:abitrate=224
+  vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 </screen>
 <para>
-Povšimněte si voleb <option>ilmv</option> a <option>ildct</option>.
+Povšimněte si voleb <option>ilme</option> a <option>ildct</option>.
 </para>
 </sect2>
 

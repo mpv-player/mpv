@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.31 $ -->
+<!-- synced with 1.32 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1247,10 +1247,10 @@ Mindezt észben tartva, itt az első példánk:
 </para>
 <screen>
   mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
-  vcodec=mpeg2video:vbitrate=6000:ilmv:ildct:acodec=mp2:abitrate=224
+  vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 </screen>
 <para>
-Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
+Figyelj az <option>ilme</option> és az <option>ildct</option> kapcsolókra.
 </para>
 </sect2>
 
