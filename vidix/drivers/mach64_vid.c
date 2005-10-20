@@ -128,14 +128,14 @@ static uint32_t SAVED_OVERLAY_GRAPHICS_KEY_CLR;
 #define GETREG(TYPE,PTR,OFFZ)		(*((volatile TYPE*)((PTR)+(OFFZ))))
 #define SETREG(TYPE,PTR,OFFZ,VAL)	(*((volatile TYPE*)((PTR)+(OFFZ))))=VAL
 
-#define INREG8(addr)		GETREG(uint8_t,(uint32_t)mach64_mmio_base,((addr)^0x100)<<2)
-#define OUTREG8(addr,val)	SETREG(uint8_t,(uint32_t)mach64_mmio_base,((addr)^0x100)<<2,val)
+#define INREG8(addr)		GETREG(uint8_t,(uint8_t *)mach64_mmio_base,((addr)^0x100)<<2)
+#define OUTREG8(addr,val)	SETREG(uint8_t,(uint8_t *)mach64_mmio_base,((addr)^0x100)<<2,val)
 
 static inline uint32_t INREG (uint32_t addr) {
-	uint32_t tmp = GETREG(uint32_t,(uint32_t)mach64_mmio_base,((addr)^0x100)<<2);
+	uint32_t tmp = GETREG(uint32_t,(uint8_t *)mach64_mmio_base,((addr)^0x100)<<2);
 	return le2me_32(tmp);
 }
-#define OUTREG(addr,val)	SETREG(uint32_t,(uint32_t)mach64_mmio_base,((addr)^0x100)<<2,le2me_32(val))
+#define OUTREG(addr,val)	SETREG(uint32_t,(uint8_t *)mach64_mmio_base,((addr)^0x100)<<2,le2me_32(val))
 
 #define OUTREGP(addr,val,mask)  					\
 	do {								\
