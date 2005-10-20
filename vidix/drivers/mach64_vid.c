@@ -465,7 +465,7 @@ int vixInit(void)
   }
   if(__verbose>0) printf("[mach64] version %s\n", VERSION);
   
-  if((mach64_mmio_base = map_phys_mem(pci_info.base2,0x4000))==(void *)-1) return ENOMEM;
+  if((mach64_mmio_base = map_phys_mem(pci_info.base2,0x1000))==(void *)-1) return ENOMEM;
   mach64_wait_for_idle();
   mach64_ram_size = INREG(MEM_CNTL) & CTL_MEM_SIZEB;
   if (mach64_ram_size < 8) mach64_ram_size = (mach64_ram_size + 1) * 512;
@@ -522,7 +522,7 @@ void vixDestroy(void)
   OUTREG(OVERLAY_GRAPHICS_KEY_CLR,SAVED_OVERLAY_GRAPHICS_KEY_CLR);
   
   unmap_phys_mem(mach64_mem_base,mach64_ram_size);
-  unmap_phys_mem(mach64_mmio_base,0x4000);
+  unmap_phys_mem(mach64_mmio_base,0x1000);
 }
 
 int vixGetCapability(vidix_capability_t *to)
