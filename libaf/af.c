@@ -503,6 +503,7 @@ af_data_t* af_play(af_stream_t* s, af_data_t* data)
   af_instance_t* af=s->first; 
   // Iterate through all filters 
   do{
+    if (data->len <= 0) break;
     data=af->play(af,data);
     af=af->next;
   }while(af);
