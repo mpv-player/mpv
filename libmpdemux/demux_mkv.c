@@ -1773,7 +1773,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
                !strncmp(track->codec_id, MKV_A_AAC_4LC,
                         strlen(MKV_A_AAC_4LC)) ||
                !strcmp(track->codec_id, MKV_A_AAC_4SSR) ||
-               !strcmp(track->codec_id, MKV_A_AAC_4LTP))
+               !strcmp(track->codec_id, MKV_A_AAC_4LTP) ||
+               !strcmp(track->codec_id, MKV_A_AAC))
         track->a_formattag = mmioFOURCC('M', 'P', '4', 'A');
       else if (!strcmp(track->codec_id, MKV_A_VORBIS))
         {
@@ -1873,6 +1874,16 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
 
       sh_a->wf->nAvgBytesPerSec = 16000;
       sh_a->wf->nBlockAlign = 1024;
+
+      if (!strcmp (track->codec_id, MKV_A_AAC) &&
+          (NULL != track->private_data))
+        {
+          sh_a->codecdata=(unsigned char *)malloc(track->private_size);
+          memcpy (sh_a->codecdata, track->private_data,
+                  track->private_size);
+          sh_a->codecdata_len = track->private_size;
+          return 0;
+        }
 
       /* Recreate the 'private data' */
       /* which faad2 uses in its initialization */
