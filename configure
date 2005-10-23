@@ -477,7 +477,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`uname -s 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS|MorphOS)
     ;;
   IRIX*)
     system_name=IRIX
@@ -490,9 +490,6 @@ if test -z "$_target" ; then
     ;;
   MINGW32*)
     system_name=MINGW32
-    ;;
-  MorphOS)
-    system_name=MorphOS
     ;;
   *)
     system_name="$system_name-UNKNOWN"
@@ -1136,22 +1133,22 @@ EOF
     _altivec=no
 
     echocheck "CPU type"
-    if linux && test -n "$_cpuinfo"; then
+    case $system_name in
+      Linux)
 	proc=`$_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | _head 1`
 	if test -n "`$_cpuinfo | grep altivec`"; then
 	    _altivec=yes
 	fi
-    fi
-    if darwin ; then
+        ;;
+      Darwin)
 	proc=`$_cpuinfo | grep "Processor type" | cut -f 3 -d ' ' | sed 's/ppc//'`
-	if [ `sysctl -n hw.vectorunit` -eq 1 ]; then
-	    _altivec=yes
-	elif [ "`sysctl -n hw.optional.altivec 2>/dev/null`" = 1 ]; then
+	if [ `sysctl -n hw.vectorunit` -eq 1 -o
+	    "`sysctl -n hw.optional.altivec 2>/dev/null`" -eq 1 ]; then
 	    _altivec=yes
 	fi
-    fi
-    # only gcc 3.4 works reliably with altivec code under netbsd 
-    if netbsd ; then
+        ;;
+      NetBSD)
+        # only gcc 3.4 works reliably with AltiVec code under NetBSD
 	case $cc_version in
 	    2*|3.0*|3.1*|3.2*|3.3*)
 		;;
@@ -1161,7 +1158,8 @@ EOF
 		fi
 		;;
 	esac
-    fi
+        ;;
+    esac
     if test "$_altivec" = yes; then
         echores "$proc altivec"
     else
