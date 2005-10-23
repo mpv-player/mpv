@@ -627,7 +627,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
     }
     /// vertical alignment
     h = dys - obj->y;
-    if (sub_alignment == 2)
+    if (sub_alignment == 0)
         obj->y = dys * sub_pos / 100 - h;
     else if (sub_alignment == 1)
         obj->y = dys * sub_pos / 100 - h / 2;
