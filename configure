@@ -870,7 +870,9 @@ case "$host_arch" in
 	fi
 	;;
     6) iproc=686
-	if test "$pmodel" -ge 7; then
+	if test "$pmodel" -eq 9 -o "$pmodel" -eq 13; then
+		proc=pentium-m
+	elif test "$pmodel" -ge 7; then
 		proc=pentium3
 	elif test "$pmodel" -ge 3; then
 		proc=pentium2
@@ -878,8 +880,15 @@ case "$host_arch" in
 		proc=i686
 	fi
 	;;
-    15) proc=pentium4 iproc=686 ;;
-    *) proc=pentium4 iproc=686 ;;
+    15) iproc=686
+	# A nocona in 32-bit mode has no more capabilities than a prescott.
+	if test "$pmodel" -ge 3; then
+		proc=prescott
+	else
+		proc=pentium4
+	fi
+	;;
+    *) proc=prescott iproc=686 ;;
     esac
     ;;
   CentaurHauls)
@@ -952,7 +961,7 @@ EOF
 	fi
       fi
     fi
-    if test "$proc" = "pentium4" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2"; then
+    if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i686
     fi
     if test "$proc" = "i686" || test "$proc" = "pentium-mmx" || test "$proc" = "winchip-c6" || test "$proc" = "winchip2"; then
@@ -968,7 +977,7 @@ EOF
       cc_check -march=$proc $cpuopt=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
-      echores "Your $_cc does not even support \"i386\" for '-march' and '$cpuopt'."
+        echores "CPU optimization disabled.\nYou have an old compiler and/or configure does not recognize your CPU."
       _mcpu=""
       _march=""
       _optimizing=""
@@ -1037,9 +1046,16 @@ EOF
     else
 	cpuopt=-mcpu
     fi
-    # k8 cpu-type only supported in gcc >= 3.4.0, but that will be
-    # caught and remedied in the optimization tests below.
-    proc=k8
+    case "$pvendor" in
+    AuthenticAMD)
+      proc=k8;;
+    GenuineIntel)
+      # 64-bit prescotts exist, but as far as GCC is concerned they have the
+      # same capabilities as a nocona.
+      proc=nocona;;
+    *)
+      proc=error;;
+    esac
 
     echocheck "GCC & CPU optimization abilities"
 cat > $TMPC << EOF
@@ -1047,6 +1063,7 @@ int main(void) { return 0; }
 EOF
     # This is a stripped-down version of the i386 fallback.
     if test "$_runtime_cpudetection" = no ; then
+      # --- AMD processors ---
       if test "$proc" = "k8" -o "$proc" = "opteron" -o "$proc" = "athlon64" -o "$proc" = "athlon-fx" ; then
         cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
       fi
@@ -1056,10 +1073,18 @@ EOF
       if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" ; then
         cc_check -march=$proc $cpuopt=$proc || proc=error
       fi
+      # --- Intel processors ---
+      if test "$proc" = "nocona" || test "$proc" = "prescott" ; then
+        cc_check -march=$proc $cpuopt=$proc || proc=pentium4
+      fi
+      if test "$proc" = "pentium4" || test "$proc" = "pentium4m" ; then
+        cc_check -march=$proc $cpuopt=$proc || proc=error
+      fi
+
       _march="-march=$proc"
       _mcpu="$cpuopt=$proc"
       if test "$proc" = "error" ; then
-        echores "Your $_cc does not even support \"athlon-xp\" for '-march' and '$cpuopt'."
+        echores "CPU optimization disabled.\nYou have an old compiler and/or configure does not recognize your CPU."
         _mcpu=""
         _march=""
       fi
