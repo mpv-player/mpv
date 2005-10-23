@@ -1326,7 +1326,7 @@ EOF
     echo "It seems nobody has ported MPlayer to your OS or CPU type yet."
     die "unsupported architecture $host_arch"
     ;;
-esac
+esac # case "$host_arch" in
 
 if test "$_runtime_cpudetection" = yes ; then
   if x86; then
