@@ -1300,6 +1300,8 @@ default:
       badframes++;
       if(skip_flag<=0){
 	// unwanted skipping of a frame, what to do?
+        v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+#if 0
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
 	    if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
@@ -1308,6 +1310,7 @@ default:
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
 	}
+#endif
       }
     }
 }
