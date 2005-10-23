@@ -1,4 +1,4 @@
-.\" synced with 1.1140
+.\" synced with 1.1143
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -1797,15 +1797,16 @@ Utilisé pour débogage.
 .
 .TP
 .B \-subalign <0\-2> (OSD uniquement)
-Définit l'alignement des sous-titres alignés avec \-subpos.
+Définit quel bord des sous-titres des sous-titres doit être aligné à la
+hauteur définie par \-subpos.
 .PD 0
 .RSs
 .IPs 0
-Aligner en haut (par défaut).
+Aligner en haut (comportement original).
 .IPs 1
 Aligner au milieu.
 .IPs 2
-Aligner en bas.
+Aligner en bas (par défaut).
 .RE
 .PD 1
 .
@@ -4693,9 +4694,9 @@ résolution (par défaut\ : 0).
 .I EXEMPLE\ :
 .PD 0
 .RSs
-.IP expand=800::::3/4
+.IP expand=800::::4/3
 Étend à 800x600, à moins que la source soit d'une résolution supérieure,
-et dans ce cas, l'étend pour correspondre à un aspect 3/4.
+et dans ce cas, l'étend pour correspondre à un aspect 4/3.
 .RE
 .PD 1
 .IPs <r>\ \ 
@@ -6879,7 +6880,7 @@ Sorenson H.263 used in Flash Video
 Sony Digital Video
 .IPs svq1\
 Apple Sorenson Video 1
-.IPs snow (voir aussi\ : vstrict)
+.IPs "snow (voir aussi\ : vstrict)"
 codec expérimental basé sur les wavelets de FFmpeg
 .RE
 .PD 1
