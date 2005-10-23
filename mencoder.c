@@ -1302,6 +1302,11 @@ default:
 	// unwanted skipping of a frame, what to do?
         v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
 #if 0
+        // Old code apparently made under the assumption that !blit_frame means
+        // decoding failed due to corruption or something.. but duplication and
+        // skipping of frames should be entirely disabled when skip_limit==0,
+        // and must be in order for many filters to work with -noskip.
+        // Eventually this entire block should probably be removed.
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
 	    if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
