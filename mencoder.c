@@ -582,6 +582,10 @@ sh_video=d_video->sh;
     mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_ForcingInputFPS, sh_video->fps);
   }
 
+  if(sh_audio && out_file_format==MUXER_TYPE_RAWVIDEO){
+      mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_RawvideoDoesNotSupportAudio);
+      sh_audio=NULL;
+  }
   if(sh_audio && out_audio_codec<0){
     if(audio_id==-2)
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_DemuxerDoesntSupportNosound);
@@ -1300,8 +1304,6 @@ default:
       badframes++;
       if(skip_flag<=0){
 	// unwanted skipping of a frame, what to do?
-        v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
-#if 0
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
 	    if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
@@ -1310,7 +1312,6 @@ default:
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
 	}
-#endif
       }
     }
 }
