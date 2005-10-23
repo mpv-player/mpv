@@ -540,7 +540,7 @@ if test -z "$_target" ; then
     esac
     ;;
   esac
-else
+else # if test -z "$_target"
   system_name=`echo $_target | cut -d '-' -f 2`
   case "`echo $system_name | tr A-Z a-z`" in
     linux) system_name=Linux ;;
@@ -984,7 +984,7 @@ EOF
       _mcpu="$cpuopt=$proc"
       _optimizing="$proc"
     fi
-  else
+  else # if test "$_runtime_cpudetection" = no
     # i686 is probably the most common CPU - optimize for it
     _mcpu="$cpuopt=i686"
     # at least i486 required, for bswap instruction
