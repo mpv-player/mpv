@@ -1,9 +1,11 @@
-        NUT Open Container Format DRAFT 20050909
-        ----------------------------------------
+========================================
+NUT Open Container Format DRAFT 20050909
+========================================
 
 
 
-        Intro:
+Intro:
+======
 
 Features / goals:
     (supported by the format, not necessarily by a specific implementation)
@@ -30,19 +32,25 @@ Error resistant
     resync times
 
 
-            Definitions:
+
+Definitions:
+============
 
 MUST    the specific part must be done to conform to this standard
 SHOULD  it is recommended to be done that way, but not strictly required
 
 
 
-            Syntax:
+Syntax:
+=======
 
 Since NUT heavily uses variable length fields, the simplest way to describe it
 is using a pseudocode approach.
 
-            Conventions:
+
+
+Conventions:
+============
 
 The data types have a name, used in the bitstream syntax description, a short
 text description and a pseudocode (functional) definition, optional notes may
@@ -64,8 +72,9 @@ The in-depth tag description follows the bitstream syntax.
 The functional definition has a C-like syntax.
 
 
-        Type definitions:
 
+Type definitions:
+=================
 
 f(n)    (n fixed bits in big-endian order)
 u(n)    (unsigned number encoded in n bits in MSB-first order)
@@ -95,9 +104,12 @@ vb  (variable length binary data or string)
     value                               b
 
 
-        Bitstream syntax:
 
-        Common elements:
+Bitstream syntax:
+=================
+
+Common elements:
+----------------
 
 packet header:
     forward ptr                         v
@@ -278,7 +290,8 @@ file:
     }
 
 
-            Tag description:
+Tag description:
+----------------
 
 forward_ptr
     size of the packet data (exactly the distance from the first byte
@@ -585,7 +598,9 @@ info_table[][2]={
     {"Disposition"   , "UTF8"},
 };
 
-            Structure:
+
+Structure:
+----------
 
 the headers MUST be in exactly the following order (to simplify demuxer design)
 main header
@@ -606,24 +621,38 @@ headers MUST be repeated at least twice (so they exist three times in a file)
 
 there MUST be a sync point immediately before the first frame after any headers
 
-        Index
+
+Index:
+------
+
 Note: with realtime streaming, there is no end, so no index there either
 An index SHOULD be written for every stream. Indices MUST be placed at end
 of file. Indices MAY be repeated for a stream.
 
-        Info frames
+
+Info frames:
+------------
+
 Info frames can be used to describe the file or some part of it (chapters)
 
-        Unknown packets
+
+Unknown packets:
+----------------
+
 MUST be ignored by the demuxer
 
-            demuxer (non-normative)
+
+demuxer (non-normative):
+------------------------
 
 in the absence of a valid header at the beginning, players SHOULD search for
 backup headers starting at offset 2^x; for each x players SHOULD end their
 search at a particular offset when any startcode is found (including syncpoint)
 
-            Semantic requirements
+
+
+Semantic requirements:
+======================
 
 If more than one stream of a given stream class is present, each one MUST
 have info tags specifying disposition, and if applicable, language.
@@ -633,7 +662,9 @@ is wrapped in a structure to facilitate more than one stream or otherwise
 duplicate the role of a container. any such file is to be considered invalid.
 
 
-            Sample code (Public Domain, & untested)
+
+Sample code (Public Domain, & untested):
+========================================
 
 typedef BufferContext{
     uint8_t *buf;
@@ -711,7 +742,10 @@ static int64_t get_dts(int64_t pts, int64_t *pts_cache, int delay, int reset){
     return pts;
 }
 
-                Authors
+
+
+Authors:
+========
 
 Folks from the MPlayer developers mailing list (http://www.mplayerhq.hu/).
 Authors in alphabetical order: (FIXME! Tell us if we left you out)
