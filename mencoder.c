@@ -582,10 +582,6 @@ sh_video=d_video->sh;
     mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_ForcingInputFPS, sh_video->fps);
   }
 
-  if(sh_audio && out_file_format==MUXER_TYPE_RAWVIDEO){
-      mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_RawvideoDoesNotSupportAudio);
-      sh_audio=NULL;
-  }
   if(sh_audio && out_audio_codec<0){
     if(audio_id==-2)
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_DemuxerDoesntSupportNosound);
