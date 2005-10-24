@@ -70,21 +70,6 @@ diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
   x = ((((x) & 0xff00) >> 8) | \
        (((x) & 0x00ff) << 8))
 diff -Naur dvdread.orig/.cvsignore dvdread/.cvsignore
-diff -Naur dvdread.orig/common.h dvdread/common.h
---- dvdread.orig/common.h	2005-10-11 10:55:45.000000000 +0200
-+++ dvdread/common.h	2005-10-11 14:07:42.000000000 +0200
-@@ -50,10 +50,9 @@
- #   define PATH_MAX MAX_PATH
- #endif
- 
--#define lseek _lseeki64
--
- /* several type definitions */
- #   if defined( __MINGW32__ )
-+#define lseek _lseeki64
- #       if !defined( _OFF_T_ )
- typedef long long _off_t;
- typedef _off_t off_t;
 diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
 --- dvdread.orig/dvd_input.c	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/dvd_input.c	2005-06-23 00:30:23.000000000 +0200

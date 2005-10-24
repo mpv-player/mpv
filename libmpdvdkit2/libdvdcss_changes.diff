@@ -1,3 +1,17 @@
+--- common.h	2005-10-11 10:55:45.000000000 +0200
++++ common.h	2005-10-11 14:07:42.000000000 +0200
+@@ -50,10 +53,9 @@
+ #   define PATH_MAX MAX_PATH
+ #endif
+ 
+-#define lseek _lseeki64
+-
+ /* several type definitions */
+ #   if defined( __MINGW32__ )
++#define lseek _lseeki64
+ #       if !defined( _OFF_T_ )
+ typedef long long _off_t;
+ typedef _off_t off_t;
 --- css.c	2005-07-11 14:24:09.000000000 +0200
 +++ css.c	2005-10-01 20:14:37.000000000 +0200
 @@ -53,7 +56,7 @@
