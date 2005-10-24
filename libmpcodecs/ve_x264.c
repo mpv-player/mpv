@@ -60,6 +60,7 @@ extern char* passtmpfile;
 
 static int bitrate = -1;
 static int qp_constant = 26;
+static int rf_constant = 0;
 static int frame_ref = 1;
 static int keyint_max = 250;
 static int keyint_min = 25;
@@ -118,6 +119,8 @@ static char *cqm8py = NULL;
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
     {"qp_constant", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 0, 51, NULL},
+    {"qp", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 0, 51, NULL},
+    {"crf", &rf_constant, CONF_TYPE_INT, CONF_RANGE, 1, 50, NULL},
     {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 16, NULL},
     {"keyint", &keyint_max, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"keyint_min", &keyint_min, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
@@ -231,6 +234,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.b_cabac = cabac;
 
     mod->param.rc.i_qp_constant = qp_constant;
+    mod->param.rc.i_rf_constant = rf_constant;
     if(qp_min > qp_constant)
         qp_min = qp_constant;
     if(qp_max < qp_constant)

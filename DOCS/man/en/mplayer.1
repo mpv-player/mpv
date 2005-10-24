@@ -8303,6 +8303,13 @@ The mapping is approximately H264QP = 12 + 6*log2(MPEGQP).
 For example, MPEG at QP=2 is equivalent to H.264 at QP=18.
 .
 .TP
+.B crf=<1\-50>
+Enables constant quality mode, and selects the quality.
+The scale is similar to QP.
+Like the bitrate-based modes, this allows each frame to use a
+different QP based on the frame's complexity.
+.
+.TP
 .B pass=<1\-3>
 Enable 2 or 3-pass mode.
 It is recommended to always encode in 2 or 3-pass mode as it leads to a
