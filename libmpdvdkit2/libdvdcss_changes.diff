@@ -61,18 +61,6 @@
  #include "css.h"
 --- libdvdcss.c	2004-08-13 15:40:18.000000000 +0200
 +++ libdvdcss.c	2005-10-01 19:11:27.000000000 +0200
-@@ -87,10 +87,7 @@
-  *     values. This will speed up descrambling of DVDs which are in the
-  *     cache. The DVDCSS_CACHE directory is created if it does not exist,
-  *     and a subdirectory is created named after the DVD's title or
-- *     manufacturing date. If DVDCSS_CACHE is not set or is empty, \e libdvdcss
-- *     will use the default value which is "${HOME}/.dvdcss/" under Unix and
-- *     "C:\Documents and Settings\$USER\Application Data\dvdcss\" under Win32.
-- *     The special value "off" disables caching.
-+ *     manufacturing date.
-  */
- 
- /*
 @@ -124,7 +127,7 @@
  #   include <direct.h>
  #endif
@@ -82,55 +70,3 @@
  
  #include "common.h"
  #include "css.h"
-@@ -132,6 +113,12 @@
- #include "ioctl.h"
- #include "device.h"
- 
-+#ifndef HAVE_MPLAYER
-+ #include "get_path.c"
-+#else
-+ extern char * get_path( char * filename );
-+#endif
-+
- /**
-  * \brief Symbol for version checks.
-  *
-@@ -233,6 +220,8 @@
-         }
-     }
- 
-+#if 0 /* MPlayer caches keys in its own configuration directory */
-+
-     /*
-      *  If DVDCSS_CACHE was not set, try to guess a default value
-      */
-@@ -309,6 +298,8 @@
- #endif
-     }
- 
-+#endif /* 0 */
-+
-     /*
-      *  Find cache dir from the DVDCSS_CACHE environment variable
-      */
-@@ -326,6 +317,7 @@
-             psz_cache = NULL;
-         }
-     }
-+    else psz_cache = get_path( "DVDKeys" );
- 
-     /*
-      *  Open device
-@@ -504,9 +496,10 @@
-             dvdcss->psz_cachefile[0] = '\0';
-             goto nocache;
-         }
-+        i += sprintf( dvdcss->psz_cachefile + i, "/");
- 
--        i += sprintf( dvdcss->psz_cachefile + i, "/%s-%s%s", psz_title,
--                      psz_serial, psz_key );
-+//        i += sprintf( dvdcss->psz_cachefile + i, "/%s", psz_data );
-+        i += sprintf( dvdcss->psz_cachefile + i, "/%s#%s", psz_title, psz_serial );
- #if !defined( WIN32 ) || defined( SYS_CYGWIN )
-         i_ret = mkdir( dvdcss->psz_cachefile, 0755 );
- #else

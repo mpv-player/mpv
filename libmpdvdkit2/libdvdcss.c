@@ -90,7 +90,10 @@
  *     values. This will speed up descrambling of DVDs which are in the
  *     cache. The DVDCSS_CACHE directory is created if it does not exist,
  *     and a subdirectory is created named after the DVD's title or
- *     manufacturing date.
+ *     manufacturing date. If DVDCSS_CACHE is not set or is empty, \e libdvdcss
+ *     will use the default value which is "${HOME}/.dvdcss/" under Unix and
+ *     "C:\Documents and Settings\$USER\Application Data\dvdcss\" under Win32.
+ *     The special value "off" disables caching.
  */
 
 /*
@@ -131,12 +134,6 @@
 #include "libdvdcss.h"
 #include "ioctl.h"
 #include "device.h"
-
-#ifndef HAVE_MPLAYER
- #include "get_path.c"
-#else
- extern char * get_path( char * filename );
-#endif
 
 /**
  * \brief Symbol for version checks.
@@ -239,8 +236,6 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
         }
     }
 
-#if 0 /* MPlayer caches keys in its own configuration directory */
-
     /*
      *  If DVDCSS_CACHE was not set, try to guess a default value
      */
@@ -317,8 +312,6 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 #endif
     }
 
-#endif /* 0 */
-
     /*
      *  Find cache dir from the DVDCSS_CACHE environment variable
      */
@@ -336,7 +329,6 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
             psz_cache = NULL;
         }
     }
-    else psz_cache = get_path( "DVDKeys" );
 
     /*
      *  Open device
@@ -515,10 +507,9 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
             dvdcss->psz_cachefile[0] = '\0';
             goto nocache;
         }
-        i += sprintf( dvdcss->psz_cachefile + i, "/");
 
-//        i += sprintf( dvdcss->psz_cachefile + i, "/%s", psz_data );
-        i += sprintf( dvdcss->psz_cachefile + i, "/%s#%s", psz_title, psz_serial );
+        i += sprintf( dvdcss->psz_cachefile + i, "/%s-%s%s", psz_title,
+                      psz_serial, psz_key );
 #if !defined( WIN32 ) || defined( SYS_CYGWIN )
         i_ret = mkdir( dvdcss->psz_cachefile, 0755 );
 #else
