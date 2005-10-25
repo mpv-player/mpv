@@ -82,7 +82,7 @@ int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 "        leal (%%ecx,%%ebp,4),%%eax\n\t"
 ".L74:\n\t"
 "        pushl %%eax\n\t"
-"        call "MANGLE(dct64)"\n\t"
+"        call "MANGLE(mp3lib_dct64)"\n\t"
 "        addl $12,%%esp\n\t"
 "        movl %4,%%edx\n\t"
 "        leal 0(,%%edx,4),%%edx\n\t"
