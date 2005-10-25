@@ -15,6 +15,9 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #ifndef JOY_AXIS_DELTA
 #define JOY_AXIS_DELTA 500
 #endif
@@ -35,11 +38,11 @@ int mp_input_joystick_init(char* dev) {
   int inited = 0;
   struct js_event ev;
   
-  printf("Opening joystick device %s\n",dev ? dev : JS_DEV);
+  mp_msg(MSGT_INPUT,MSGL_INFO,MSGTR_INPUT_JOYSTICK_Opening,dev ? dev : JS_DEV);
 
   fd = open( dev ? dev : JS_DEV , O_RDONLY | O_NONBLOCK );
   if(fd < 0) {
-    printf("Can't open joystick device %s : %s\n",dev ? dev : JS_DEV,strerror(errno));
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_CantOpen,dev ? dev : JS_DEV,strerror(errno));
     return -1;
   }
   
@@ -54,7 +57,7 @@ int mp_input_joystick_init(char* dev) {
 	  inited = 1;
 	  break;
 	}
-	printf("Error while reading joystick device : %s\n",strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));
 	close(fd);
 	return -1;
       }	
@@ -62,7 +65,7 @@ int mp_input_joystick_init(char* dev) {
     }
     if((unsigned int)l < sizeof(struct js_event)) {
       if(l > 0)
-	printf("Joystick : we loose %d bytes of data\n",l);
+	mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);	  
       break;
     }
     ev.type &= ~JS_EVENT_INIT;
@@ -87,9 +90,9 @@ int mp_input_joystick_read(int fd) {
       else if(errno == EAGAIN)
 	return MP_INPUT_NOTHING;
       if( r < 0)
-	printf("Joystick error while reading joystick device : %s\n",strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,strerror(errno));
       else
-	printf("Joystick error while reading joystick device : EOF\n");
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_JOYSTICK_ErrReading,"EOF"); 
       return MP_INPUT_DEAD;
     } 	
     l += r;
@@ -97,12 +100,12 @@ int mp_input_joystick_read(int fd) {
 
   if((unsigned int)l < sizeof(struct js_event)) {
     if(l > 0)
-      printf("Joystick : we loose %d bytes of data\n",l);
+      mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_LoosingBytes,l);
     return MP_INPUT_NOTHING;
   }
 
   if(ev.type & JS_EVENT_INIT) {
-    printf("Joystick : warning init event, we have lost sync with driver\n");
+    mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_WarnLostSync);	
     ev.type &= ~JS_EVENT_INIT;
     if(ev.type == JS_EVENT_BUTTON) {
       int s = (btns >> ev.number) & 1;
@@ -139,7 +142,7 @@ int mp_input_joystick_read(int fd) {
     } else
       return MP_INPUT_NOTHING;
   } else {
-    printf("Joystick warning unknown event type %d\n",ev.type);
+    mp_msg(MSGT_INPUT,MSGL_WARN,MSGTR_INPUT_JOYSTICK_WarnUnknownEvent,ev.type);	
     return MP_INPUT_ERROR;
   }
 
