@@ -237,6 +237,7 @@ static int demux_xscan_nuv(demuxer_t* demuxer, int width, int height) {
     if (stream_read(demuxer->stream, (char*)&rtjpeg_frameheader,
               sizeof(rtjpeg_frameheader)) < sizeof(rtjpeg_frameheader))
       goto out;
+    le2me_rtframeheader(&rtjpeg_frameheader);
 
     if (rtjpeg_frameheader.frametype != 'X')
       stream_skip(demuxer->stream, rtjpeg_frameheader.packetlength);
@@ -250,10 +251,10 @@ static int demux_xscan_nuv(demuxer_t* demuxer, int width, int height) {
            "NUV extended frame does not have expected length, ignoring\n");
     goto out;
   }
-  le2me_extendeddata(&ext);
 
   if (stream_read(demuxer->stream, (char*)&ext, sizeof(ext)) < sizeof(ext))
     goto out;
+  le2me_extendeddata(&ext);
 
   if (ext.version != 1) {
     mp_msg(MSGT_DEMUXER, MSGL_WARN,
