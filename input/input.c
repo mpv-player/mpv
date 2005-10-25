@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -17,13 +17,13 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
-#include "../osdep/getch2.h"
-#include "../osdep/keycodes.h"
-#include "../osdep/timer.h"
+#include "osdep/getch2.h"
+#include "osdep/keycodes.h"
+#include "osdep/timer.h"
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "../m_config.h"
-#include "../m_option.h"
+#include "m_config.h"
+#include "m_option.h"
 
 #include "joystick.h"
 

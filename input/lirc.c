@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef HAVE_LIRC
 
@@ -12,8 +12,8 @@
 #include <sys/time.h>
 #include <stdlib.h>
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "input.h"
 
 static struct lirc_config *lirc_config;
