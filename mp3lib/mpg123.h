@@ -120,7 +120,6 @@ extern int synth_1to1_pent( real *,int,short * );
 extern void make_decode_tables_MMX(long scaleval);
 extern int synth_1to1_MMX( real *,int,short * );
 extern int synth_1to1_MMX_s(real *, int, short *, short *, int *);
-extern void dct64(real *a,real *b,real *c);
 
 extern void dct36_3dnow(real *,real *,real *,real *,real *);
 extern void dct36_3dnowex(real *,real *,real *,real *,real *);
