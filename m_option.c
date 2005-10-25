@@ -886,7 +886,7 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
       int optlen = strcspn(p, ":=");
       /* clear out */
       subopt[0] = subparam[0] = 0;
-      strlcpy(subopt, p, optlen);
+      strlcpy(subopt, p, optlen + 1);
       p = &p[optlen];
       if (p[0] == '=') {
         sscanf_ret = 2;
@@ -894,7 +894,7 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
         if (p[0] == '"') {
           p = &p[1];
           optlen = strcspn(p, "\"");
-          strlcpy(subparam, p, optlen);
+          strlcpy(subparam, p, optlen + 1);
           p = &p[optlen];
           if (p[0] != '"') {
             mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Terminating '\"' missing for '%s'\n", subopt);
@@ -909,11 +909,11 @@ static int parse_subconf(m_option_t* opt,char *name, char *param, void* dst, int
             return M_OPT_INVALID;
           }
           p = &p[1];
-          strlcpy(subparam, p, optlen);
+          strlcpy(subparam, p, optlen + 1);
           p = &p[optlen];
         } else {
           optlen = strcspn(p, ":");
-          strlcpy(subparam, p, optlen);
+          strlcpy(subparam, p, optlen + 1);
           p = &p[optlen];
         }
       }
