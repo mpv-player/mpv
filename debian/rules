@@ -69,7 +69,7 @@ binary-arch: build
 	dh_strip
 	dh_compress
 	dh_fixperms
-#	dh_makeshlibs
+	dh_makeshlibs
 	dh_installdeb
 	dh_perl
 	dh_shlibdeps
