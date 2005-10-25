@@ -11,10 +11,14 @@ unsigned int strlcpy (char *dest, const char *src, unsigned int size)
 {
 	register unsigned int i;
 
+	if (size > 0) {
+	size--;
 	for (i=0; size > 0 && src[i] != '\0'; ++i, size--)
 		dest[i] = src[i];
 
 	dest[i] = '\0';
+	}
+	while (src[i++]);
 
 	return i;
 }
@@ -23,26 +27,10 @@ unsigned int strlcpy (char *dest, const char *src, unsigned int size)
 #ifndef HAVE_STRLCAT
 unsigned int strlcat (char *dest, const char *src, unsigned int size)
 {
-#if 0
-	register unsigned int i, j;
-
-	for(i=0; size > 0 && dest[i] != '\0'; size--, i++);
-	for(j=0; size > 0 && src[j] != '\0'; size--, i++, j++)
-		dest[i] = src[j];
-
-	dest[i] = '\0';
-	return i;
-#else
 	register char *d = dest;
-	register const char *s = src;
 
 	for (; size > 0 && *d != '\0'; size--, d++);
-	for (; size > 0 && *s != '\0'; size--, d++, s++)
-		*d = *s;
-
-	*d = '\0';
-	return (d - dest) + (s - src);
-#endif 
+	return (d - dest) + strlcpy(d, src, size);
 }
 #endif
 
