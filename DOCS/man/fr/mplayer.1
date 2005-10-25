@@ -1,4 +1,4 @@
-.\" synced with 1.1143
+.\" synced with 1.1145
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -1735,11 +1735,11 @@ Définit l'alignement des sous-titres SPU (DVD/\:VobSub).
 .IPs "-1"
 position originale.
 .IPs " 0"
-aligner en haut (par défaut)
+Aligner en haut (par défaut).
 .IPs " 1"
-aligner au milieu
+Aligner au milieu.
 .IPs " 2"
-aligner en bas
+Aligner en bas.
 .RE
 .PD 1
 .
@@ -8738,6 +8738,13 @@ Notez que la quantification dans H.264 fonctionne différemment de MPEG-1/2/4\ :
 l'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
 L'équivalence est approximativement H264QP = 12 + 6*log2(MPEGQP).
 Par exemple, MPEG à QP=2 est équivalent à H.264 à QP=18.
+.
+.TP
+.B crf=<1\-50>
+Active le mode qualité constante, et choisi la qualité.
+L'échelle est similaire à QP.
+Tout comme les modes basés sur le bitrate, celui-ci permet aux trames
+d'utiliser des QP différent en fonction de la complexité de la trame.
 .
 .TP
 .B pass=<1\-2>
