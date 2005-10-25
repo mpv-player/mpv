@@ -20,8 +20,8 @@
 #include "../osdep/getch2.h"
 #include "../osdep/keycodes.h"
 #include "../osdep/timer.h"
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "../m_config.h"
 #include "../m_option.h"
 
@@ -470,7 +470,7 @@ mp_input_get_key_name(int key);
 int
 mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t close_func) {
   if(num_cmd_fd == MP_MAX_CMD_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Too many command fds, unable to register fd %d.\n",fd);
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds,fd);
     return 0;
   }
 
@@ -526,7 +526,7 @@ mp_input_rm_key_fd(int fd) {
 int
 mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t close_func) {
   if(num_key_fd == MP_MAX_KEY_FD) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Too many key fds, unable to register fd %d.\n",fd);
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds,fd);
     return 0;
   }
 
@@ -597,7 +597,7 @@ mp_input_parse_cmd(char* str) {
       errno = 0;
       cmd->args[i].v.i = atoi(ptr);
       if(errno != 0) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d isn't an integer.\n",cmd_def->name,i+1);
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrArgMustBeInt,cmd_def->name,i+1);
 	ptr = NULL;
       }
       break;
@@ -605,7 +605,7 @@ mp_input_parse_cmd(char* str) {
       errno = 0;
       cmd->args[i].v.f = atof(ptr);
       if(errno != 0) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d isn't a float.\n",cmd_def->name,i+1);
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrArgMustBeFloat,cmd_def->name,i+1);
 	ptr = NULL;
       }
       break;
@@ -627,7 +627,7 @@ mp_input_parse_cmd(char* str) {
       }
       
       if(term != ' ' && (!e || e[0] == '\0')) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Command %s: argument %d is unterminated.\n",cmd_def->name,i+1);
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnterminatedArg,cmd_def->name,i+1);
 	ptr = NULL;
 	break;
       } else if(!e) e = ptr+strlen(ptr);
@@ -647,14 +647,14 @@ mp_input_parse_cmd(char* str) {
       ptr = NULL;
       break;
     default :
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Unknown argument %d\n",i);
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownArg,i);
     }
   }
   cmd->nargs = i;
 
   if(cmd_def->nargs > cmd->nargs) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Got command '%s' but\n",str);
-    mp_msg(MSGT_INPUT,MSGL_ERR,"command %s requires at least %d arguments, we found only %d so far.\n",cmd_def->name,cmd_def->nargs,cmd->nargs);
+/*    mp_msg(MSGT_INPUT,MSGL_ERR,"Got command '%s' but\n",str); */
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2FewArgs,cmd_def->name,cmd_def->nargs,cmd->nargs);
     mp_cmd_free(cmd);
     return NULL;
   }
@@ -707,7 +707,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
       switch(r) {
       case MP_INPUT_ERROR:
       case MP_INPUT_DEAD:
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d: %s\n",mp_fd->fd,strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingCmdFd,mp_fd->fd,strerror(errno));
       case MP_INPUT_NOTHING:
 	return r;
       case MP_INPUT_RETRY:
@@ -734,7 +734,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
     if(!end) {
       // If buffer is full we must drop all until the next \n
       if(mp_fd->size - mp_fd->pos <= 1) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Cmd buffer of fd %d is full: dropping content\n",mp_fd->fd);
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent,mp_fd->fd);
 	mp_fd->pos = 0;
 	mp_fd->flags |= MP_FD_DROP;
       }
@@ -845,7 +845,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   }
   ret =  mp_input_parse_cmd(cmd);
   if(!ret) {
-    mp_msg(MSGT_INPUT,MSGL_ERR,"Invalid command for bound key %s",mp_input_get_key_name(key_down[0]));
+    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrInvalidCommandForKey,mp_input_get_key_name(key_down[0]));
     if(  num_key_down > 1) {
       unsigned int s;
       for(s=1; s < num_key_down; s++)
@@ -906,7 +906,7 @@ if(n>0){
     if(select(max_fd+1,&fds,NULL,NULL,time_val) < 0) {
       if(errno == EINTR)
 	continue;
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Select error: %s\n",strerror(errno));
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrSelect,strerror(errno));
     }
     break;
   }
@@ -940,9 +940,9 @@ if(n>0){
       return code;
 
     if(code == MP_INPUT_ERROR)
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Error on key input fd %d\n",key_fds[i].fd);
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrOnKeyInFd,key_fds[i].fd);
     else if(code == MP_INPUT_DEAD) {
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Dead key input on fd %d\n",key_fds[i].fd);
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrDeadKeyOnFd,key_fds[i].fd);
       key_fds[i].flags |= MP_FD_DEAD;
     }
   }
@@ -969,7 +969,7 @@ mp_input_read_keys(int time,int paused) {
     // key pushed
     if(code & MP_KEY_DOWN) {
       if(num_key_down > MP_MAX_KEY_DOWN) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Too many key down events at the same time\n");
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
 	continue;
       }
       code &= ~MP_KEY_DOWN;
@@ -995,7 +995,7 @@ mp_input_read_keys(int time,int paused) {
     }
     if(j == num_key_down) { // key was not in the down keys : add it
       if(num_key_down > MP_MAX_KEY_DOWN) {
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Too many key down events at the same time\n");
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_Err2ManyKeyDowns);
 	continue;
       }
       key_down[num_key_down] = code;
@@ -1090,7 +1090,7 @@ mp_input_read_cmds(int time) {
       if(i < 0) {
 	if(errno == EINTR)
 	  continue;
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Select error: %s\n",strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrSelect,strerror(errno));
       }
       if(!got_cmd)
 	return NULL;
@@ -1116,7 +1116,7 @@ mp_input_read_cmds(int time) {
     r = mp_input_read_cmd(&cmd_fds[i],&cmd);
     if(r < 0) {
       if(r == MP_INPUT_ERROR)
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error on cmd fd %d\n",cmd_fds[i].fd);
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrOnCmdFd,cmd_fds[i].fd);
       else if(r == MP_INPUT_DEAD)
 	cmd_fds[i].flags |= MP_FD_DEAD;
       continue;
@@ -1373,7 +1373,7 @@ mp_input_parse_config(char *file) {
       if(r < 0) {
 	if(errno == EINTR)
 	  continue;
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading input config file %s: %s\n",file,strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingInputConfig,file,strerror(errno));
 	mp_input_free_binds(binds);
 	close(fd);
 	return 0;
@@ -1431,9 +1431,9 @@ mp_input_parse_config(char *file) {
       if(end[0] == '\0') { // Key name doesn't fit in the buffer
 	if(buffer == iter) {
 	  if(eof && (buffer-iter) == bs)
-	    mp_msg(MSGT_INPUT,MSGL_ERR,"Unfinished binding %s\n",iter);
+	    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnfinishedBinding,iter);
 	  else
-	    mp_msg(MSGT_INPUT,MSGL_ERR,"Buffer is too small for this key name: %s\n",iter);
+	    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName,iter);
 	  mp_input_free_binds(binds);
 	  return 0;
 	}
@@ -1446,7 +1446,7 @@ mp_input_parse_config(char *file) {
 	strncpy(name,iter,end-iter);
 	name[end-iter] = '\0';
 	if(! mp_input_get_input_from_name(name,keys)) {
-	  mp_msg(MSGT_INPUT,MSGL_ERR,"Unknown key '%s'\n",name);
+	  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownKey,name);
 	  mp_input_free_binds(binds);
 	  close(fd);
 	  return 0;
@@ -1461,7 +1461,7 @@ mp_input_parse_config(char *file) {
       // Found new line
       if(iter[0] == '\n' || iter[0] == '\r') {
 	int i;
-	mp_msg(MSGT_INPUT,MSGL_ERR,"No command found for key %s" ,mp_input_get_key_name(keys[0]));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrNoCmdForKey,mp_input_get_key_name(keys[0]));
 	for(i = 1; keys[i] != 0 ; i++)
 	  mp_msg(MSGT_INPUT,MSGL_ERR,"-%s",mp_input_get_key_name(keys[i]));
 	mp_msg(MSGT_INPUT,MSGL_ERR,"\n");
@@ -1476,7 +1476,7 @@ mp_input_parse_config(char *file) {
 	/* NOTHING */;
       if(end[0] == '\0' && ! (eof && ((end+1) - buffer) == bs)) {
 	if(iter == buffer) {
-	  mp_msg(MSGT_INPUT,MSGL_ERR,"Buffer is too small for command %s\n",buffer);
+	  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd,buffer);
 	  mp_input_free_binds(binds);
 	  close(fd);
 	  return 0;
@@ -1502,7 +1502,7 @@ mp_input_parse_config(char *file) {
       continue;
     }
   }
-  mp_msg(MSGT_INPUT,MSGL_ERR,"What are we doing here?\n");
+  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrWhyHere);
   close(fd);
   return 0;
 }
@@ -1540,7 +1540,7 @@ mp_input_init(void) {
   if(use_joystick) {
     int fd = mp_input_joystick_init(js_dev);
     if(fd < 0)
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Can't init input joystick\n");
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantInitJoystick);
     else
       mp_input_add_key_fd(fd,1,mp_input_joystick_read,(mp_close_func_t)close);
   }
@@ -1565,13 +1565,13 @@ mp_input_init(void) {
   if(in_file) {
     struct stat st;
     if(stat(in_file,&st))
-      mp_msg(MSGT_INPUT,MSGL_ERR,"Can't stat %s: %s\n",in_file,strerror(errno));
+      mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantStatFile,in_file,strerror(errno));
     else {
       in_file_fd = open(in_file,S_ISFIFO(st.st_mode) ? O_RDWR : O_RDONLY);
       if(in_file_fd >= 0)
 	mp_input_add_cmd_fd(in_file_fd,1,NULL,(mp_close_func_t)close);
       else
-	mp_msg(MSGT_INPUT,MSGL_ERR,"Can't open %s: %s\n",in_file,strerror(errno));
+	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrCantOpenFile,in_file,strerror(errno));
     }
   }
 
