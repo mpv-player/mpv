@@ -1101,3 +1101,41 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input control #%d is below lower boundary of %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input control #%d is above upper boundary of %0.4f.\n"
 
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "Opening joystick device %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Can't open joystick device %s : %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Error while reading joystick device : %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick : we loose %d bytes of data\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick : warning init event, we have lost sync with driver\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick warning unknown event type %d\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Too many command fds, unable to register fd %d.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Too many key fds, unable to register fd %d.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Command %s: argument %d isn't an integer.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Command %s: argument %d isn't a float.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Command %s: argument %d is unterminated.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Unknown argument %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "Command %s requires at least %d arguments, we found only %d so far.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Error while reading cmd fd %d: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Cmd buffer of fd %d is full: dropping content\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Invalid command for bound key %s"
+#define MSGTR_INPUT_INPUT_ErrSelect "Select error: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Error on key input fd %d\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Dead key input on fd %d\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Too many key down events at the same time\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Error on cmd fd %d\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Error while reading input config file %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Unknown key '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Unfinished binding %s\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "Buffer is too small for this key name: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "No command found for key %s"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Buffer is too small for command %s\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "What are we doing here?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Can't init input joystick\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "Can't stat %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "Can't open %s: %s\n"
