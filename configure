@@ -793,11 +793,8 @@ x86_exts_check()
   done
 }
 
-case "$host_arch" in
-  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  _def_arch="#define ARCH_X86 1"
-  _target_arch="TARGET_ARCH_X86 = yes"
-
+if x86 || x86_64 ; then
+  # gather more CPU information
   pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | _head 1`
   pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | _head 1`
   pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1`
@@ -811,6 +808,13 @@ case "$host_arch" in
 
   echocheck "CPU type"
   echores "$pname"
+fi
+
+case "$host_arch" in
+  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
+  _def_arch="#define ARCH_X86 1"
+  _target_arch="TARGET_ARCH_X86 = yes"
+
 
   case "$pvendor" in
   AuthenticAMD)
