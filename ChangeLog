@@ -112,7 +112,7 @@ MPlayer (1.0)
     * enabled hinting for TrueType fonts
     * support for file:// syntax
     * -fb option removed, use the device suboption of -vo fbdev/fbdev2 instead
-    * full gcc 4 support for IA-32 and AMD-64 ports
+    * full gcc 4 support
     * TOOLS/vobshift.py: vobsub time-adjust tool
     * TOOLS/psnr-video.sh: computes PSNR between two existing video files
     * fixed auto-insertion of lavc encoder (for DXR2/3 and DVB)
@@ -123,7 +123,9 @@ MPlayer (1.0)
     * fixed ugly looking OSD with -vo gl2 and MMX
     * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
     * libdvdcss updated to 1.2.9
-    * configure check and compiler optimization options for VIA C3
+    * ~/.dvdcss is used instead of ~/.mplayer/DVDKeys for cached CSS keys
+    * configure check and compiler optimizations for VIA C3 and Pentium-M
+    * configure check and compiler optimizations for AMD-64 extended
     * configure can now run with cross compiling, new configure option
       --enable-cross-compile
 
