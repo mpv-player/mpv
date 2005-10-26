@@ -3,8 +3,9 @@
 // Jesús Climent <jesus.climent at hispalinux.es>,
 // Sefanja Ruijsenaars <sefanja at gmx.net>,
 // Andoni Zubimendi <andoni at lpsat.net>
+// Reynaldo H. Verdejo Pinochet <reynaldo at opendot.cl>
 
-// Updated to help_mp-en.h v1.167
+// Updated to help_mp-en.h v1.192
 
 // ========================= MPlayer help ===========================
 
@@ -70,7 +71,7 @@ static char help_text[]=
 #define MSGTR_GetpathProblem "Problema en get_path(\"config\").\n"
 #define MSGTR_CreatingCfgFile "Creando archivo de configuración: %s.\n"
 #define MSGTR_InvalidAOdriver "Nombre del driver de salida de audio incorrecto: %s\nUsa '-ao help' para obtener la lista de drivers de salida de audio disponibles.\n"
-#define MSGTR_CopyCodecsConf "Copia o enlaza <árbol del código fuente de MPlayer>/etc/codecs.conf a ~/.mplayer/codecs.conf\n"
+#define MSGTR_CopyCodecsConf "Copia/Enlaza <árbol del código fuente de MPlayer>/etc/codecs.conf a ~/.mplayer/codecs.conf\n"
 #define MSGTR_BuiltinCodecsConf "Usando codecs.conf interno por defecto.\n" 
 #define MSGTR_CantLoadFont "No se puede cargar fuente: %s.\n"
 #define MSGTR_CantLoadSub "No se puede cargar la subtítulación: %s.\n"
@@ -115,7 +116,6 @@ static char help_text[]=
 #define MSGTR_Playing "Reproduciendo %s.\n"
 #define MSGTR_NoSound "Audio: sin sonido.\n"
 #define MSGTR_FPSforced "FPS forzado en %5.3f  (ftime: %5.3f).\n"
-
 #define MSGTR_CompiledWithRuntimeDetection "Compilado con detección en tiempo de ejecución de CPU - esto no es óptimo! Para obtener mejor rendimiento, recompila MPlayer con --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Compilado para CPU x86 con extensiones:"
 #define MSGTR_AvailableVideoOutputDrivers "Drivers de salida de vídeo disponibles:\n"
@@ -132,7 +132,7 @@ static char help_text[]=
 #define MSGTR_ForcedVideoCodec "Forzado el codec de vídeo: %s.\n"
 #define MSGTR_ForcedAudioCodec "Forzado el codec de audio: %s\n"
 #define MSGTR_Video_NoVideo "Vídeo: no hay vídeo!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: No se pudieron inicializar los filtros de vídeo (-vf) o de salida de vídeo (-vo)!\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: No se pudo inicializar los filtros de vídeo (-vf) o salida de vídeo (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUSA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nNo se puede cargar la lista de reproducción %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -169,16 +169,16 @@ static char help_text[]=
 #define MSGTR_MenuInitFailed "Fallo en inicialización del menú.\n"
 #define MSGTR_Getch2InitializedTwice "ADVERTENCIA: getch2_init llamada dos veces!\n"
 #define MSGTR_DumpstreamFdUnavailable "No puedo volcar ese flujo - no esta disponible 'fd'.\n"
-/// *****REVISAR #define MSGTR_FallingBackOnPlaylist "Falling back on trying to parse playlist %s...\n"
-#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "No puedo abrir filtro de video de libmenu video filter con el menú principal %s.\n"
-#define MSGTR_AudioFilterChainPreinitError "Error en pre-inicialización de cadena de filtro de audio filter!\n"
+#define MSGTR_FallingBackOnPlaylist "No se pudo procesar el playlist %s...\n"
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "No puedo abrir filtro de video libmenu con el menú principal %s.\n"
+#define MSGTR_AudioFilterChainPreinitError "Error en pre-inicialización de cadena de filtros de audio!\n"
 #define MSGTR_LinuxRTCReadError "Error de lectura de Linux RTC: %s\n"
 #define MSGTR_SoftsleepUnderflow "Advertencia! Desborde de softsleep!\n"
 #define MSGTR_DvdnavNullEvent "Evento DVDNAV NULO?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "Evento DVDNAV: Evento de destacado erroneo\n"
 #define MSGTR_DvdnavEvent "Evento DVDNAV: %s\n"
 #define MSGTR_DvdnavHighlightHide "Evento DVDNAV: Ocultar destacado\n"
-#define MSGTR_DvdnavStillFrame "######################################## Evento DVDNAV: Cuadro Quieto: %d seg(s)\n"
+#define MSGTR_DvdnavStillFrame "######################################## Evento DVDNAV: Frame fijo: %d seg(s)\n"
 #define MSGTR_DvdnavNavStop "Evento DVDNAV: Nav Stop\n"
 #define MSGTR_DvdnavNavNOP "Evento DVDNAV: Nav NOP\n"
 #define MSGTR_DvdnavNavSpuStreamChangeVerbose "Evento DVDNAV: Cambio de Nav SPU Stream Change: phys: %d/%d/%d logical: %d\n"
@@ -211,21 +211,18 @@ static char help_text[]=
 #define MSGTR_MissingFilename "\nFalta el nombre del archivo.\n\n"
 #define MSGTR_CannotOpenFile_Device "No se pudo abrir el archivo o el dispositivo.\n"
 #define MSGTR_CannotOpenDemuxer "No se pudo abrir el demuxer.\n"
-#define MSGTR_NoAudioEncoderSelected \
-"\nNo se ha selecciono codificador de audio (-oac).\n"\
-"  Escoge uno (mira -oac help) o usa -nosound.\n"
-#define MSGTR_NoVideoEncoderSelected \
-"\nNo se ha selecciono codificador de video (-ovc). \n"\
-"  Escoge uno (mira -ovc help)\n"
+#define MSGTR_NoAudioEncoderSelected "\nNo se ha seleccionado un codificador de audio (-oac). Escoja uno (mire -oac help) o use -nosound.\n"
+#define MSGTR_NoVideoEncoderSelected "\nNo se ha selecciono un codificador de video (-ovc). Escoge uno (mira -ovc help)\n"
 #define MSGTR_CannotOpenOutputFile "No se puede abrir el archivo de salida'%s'.\n"
 #define MSGTR_EncoderOpenFailed "No se pudo abrir el codificador.\n"
 #define MSGTR_ForcingOutputFourcc "Forzando salida fourcc a %x [%.4s].\n"
 #define MSGTR_WritingAVIHeader "Escribiendo cabecera AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d frame(s) duplicados.\n"
 #define MSGTR_SkipFrame "\nse salta frame...\n"
-#define MSGTR_ResolutionDoesntMatch "\nEl archivo nuevo de video tiene diferente resolución o un espacio de colores diferente al archivo anterior.\n"
-#define MSGTR_FrameCopyFileMismatch "\nTodos los archivos de video deben tener idéntico cps, resolución y codec para -ovc copy.\n"
-#define MSGTR_AudioCopyFileMismatch "\nTodos los archivos deben tener idéntico codec de audio y formato para -oac copy.\n"
+#define MSGTR_ResolutionDoesntMatch "\nEl nuevo archivo de video tiene diferente resolución o espacio de colores que el anterior.\n"
+#define MSGTR_FrameCopyFileMismatch "\nTodos los archivos de video deben tener fps, resolución y codec identicos para -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nTodos los archivos deben tener codec de audio y formato identicos para -oac copy.\n"
+#define MSGTR_NoAudioFileMismatch "\nNo se puede mezclar archivos de solo video y archivos con video y audio, Pruebe -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "ADVERTENCIA: No se garantiza que -speed funcione adecuadamente con -oac copy!\n"\
 "Su codificación puede salir mal!\n"
 #define MSGTR_ErrorWritingFile "%s: error escribiendo el archivo.\n"
@@ -235,8 +232,8 @@ static char help_text[]=
 #define MSGTR_VideoStreamResult "\nStream de vídeo: %8.3f kbit/s (%d B/s), tamaño: %d bytes, %5.3f segundos, %d frames\n"
 #define MSGTR_AudioStreamResult "\nStream de audio: %8.3f kbit/s (%d B/s), tamaño: %d bytes, %5.3f segundos\n"
 #define MSGTR_OpenedStream "exito: formato: %d  datos: 0x%X - 0x%x\n"
-#define MSGTR_VCodecFramecopy "codec de video: copia de cuadro (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "codec de audio: copia de cuadro (formato=%x canales=%d razón=%ld bits=%d B/s=%ld muestra-%ld)\n"
+#define MSGTR_VCodecFramecopy "codec de video: framecopy (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "codec de audio: framecopy (formato=%x canales=%d razón=%ld bits=%d B/s=%ld muestra-%ld)\n"
 #define MSGTR_CBRPCMAudioSelected "audio PCM CBR seleccionado\n"
 #define MSGTR_MP3AudioSelected "audio MP3 seleccionado\n"
 #define MSGTR_CannotAllocateBytes "No se pueden asignar %d bytes\n"
@@ -245,7 +242,7 @@ static char help_text[]=
 #define MSGTR_LamePresetEquals "\npreconfiguración=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Limitando la pre-carda de audio a 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Incrementando la densidad de audio a 4\n"
-#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forzando la precarga de audio a 0, puntos máximos de corrección ajustado a 0\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forzando la precarga de audio a 0, corrección pts a 0\n"
 #define MSGTR_CBRAudioByterate "\n\naudio CBR: %ld bytes/seg, %d bytes/bloque\n"
 #define MSGTR_LameVersion "versión de LAME %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Error: La tasa de bits especificada esta fuera de los rangos de valor para esta preconfiguración\n"\
@@ -366,6 +363,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "LAVC Audio, no se encuentra el codificador para el codec %s\n"
 #define MSGTR_CouldntAllocateLavcContext "LAVC Audio, ¡no se puede asignar contexto!\n"
 #define MSGTR_CouldntOpenCodec "No se puede abrir el codec %s, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "El formato de audio 0x%x no es compatible con '-oac copy', profavor pruebe '-oac pcm' o use '-fafmttag' para sobreescribirlo.\n"
 
 // cfg-mencoder.h
 
@@ -485,9 +483,21 @@ static char help_text[]=
 #define MSGTR_DVDinvalidChapter "Número de capítulo de DVD inválido: %d\n"
 #define MSGTR_DVDnumAngles "Hay %d ángulos en este título de DVD.\n"
 #define MSGTR_DVDinvalidAngle "Número de ángulo de DVD inválido: %d\n"
-#define MSGTR_DVDnoIFO "No se puede abrir archivo IFO para el título de DVD %d.\n"
-#define MSGTR_DVDnoVOBs "No se puede abrir VOBS del título (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD abierto.\n"
+#define MSGTR_DVDnoIFO "No se pudo abrir archivo IFO para el título de DVD %d.\n"
+#define MSGTR_DVDnoVMG "No se pudo abrir la información VMG!\n"
+#define MSGTR_DVDnoVOBs "No se pudo abrir VOBS del título (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "DVD, no se encontró un idioma coincidente!\n"
+#define MSGTR_DVDaudioChannel "DVD, canal de audio seleccionado: %d idioma: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "DVD, no se encontró un idioma de subtitulo coincidente!\n"
+#define MSGTR_DVDsubtitleChannel "DVD, canal de subtitulos seleccionado: %d idioma: %c%c\n"
+#define MSGTR_DVDopenOk "DVD abierto satisfactoriamente.\n"
+
+// muxer_*.c:
+#define MSGTR_TooManyStreams "Demaciados streams!"
+#define MSGTR_RawMuxerOnlyOneStream "El muxer rawaudio soporta solo un stream de audio!\n"
+#define MSGTR_IgnoringVideoStream "Ignorando stream de video!\n"
+#define MSGTR_UnknownStreamType "Advertencia! tipo de stream desconocido: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Advertencia! el largo no es divisible por el tamaño de muestreo!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Advertencia! Cabecera de stream de audio %d redefinida!\n"
@@ -535,6 +545,9 @@ static char help_text[]=
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: contenido NTSC de 30000/1001cps detectado, cambiando cuadros por segundo.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: contenido NTSC progresivo de 24000/1001cps detectado, cambiando cuadros por segundo.\n"
+#define MSGTR_CacheFill "\rLlenando cache: %5.2f%% (%d bytes)   "
+#define MSGTR_NoBindFound "No se econtró una asignación para la tecla '%s'"
+#define MSGTR_FailedToOpen "No se pudo abrir %s\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "No se pudo abrir codec.\n"
@@ -544,7 +557,6 @@ static char help_text[]=
 #define MSGTR_ACMiniterror "No se puede cargar/inicializar codecs de audio Win32/ACM (falta archivo DLL?)\n"
 #define MSGTR_MissingLAVCcodec "No se encuentra codec '%s' en libavcodec...\n"
 
-
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF mientras buscaba la cabecera de secuencia.\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: No se puede leer cabecera de secuencia.\n"
 #define MSGTR_CannotReadMpegSequHdrEx "FATAL: No se puede leer la extensión de la cabecera de secuencia.\n"
@@ -553,7 +565,7 @@ static char help_text[]=
 
 #define MSGTR_ShMemAllocFail "No se puede alocar memoria compartida.\n"
 #define MSGTR_CantAllocAudioBuf "No se puede alocar buffer de la salida de audio.\n"
-#define MSGTR_UnknownAudio "Formato de audio desconocido/perdido, no se reproducirá sonido.\n"
+#define MSGTR_UnknownAudio "Formato de audio desconocido/faltante, no se reproducirá sonido.\n"
 
 
 #define MSGTR_UsingExternalPP "[PP] Usando filtro de postprocesado externo, max q = %d.\n"
@@ -561,8 +573,11 @@ static char help_text[]=
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Atributo de vídeo '%s' no es soportado por -vo y -vd actuales. \n"
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Familia de codec de vídeo solicitada [%s] (vfm=%s) no está disponible (actívalo al compilar).\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Familia de codec de audio solicitada [%s] (afm=%s) no está disponible (actívalo al compilar).\n"
-#define MSGTR_OpeningVideoDecoder "Abriendo descodificador de vídeo: [%s] %s.\n"
-#define MSGTR_OpeningAudioDecoder "Abriendo descodificador de audio: [%s] %s.\n"
+#define MSGTR_OpeningVideoDecoder "Abriendo decodificador de vídeo: [%s] %s.\n"
+#define MSGTR_SelectedVideoCodec "Video codec seleccionado: [%s] vfm: %s (%s)\n"
+#define MSGTR_OpeningAudioDecoder "Abriendo decodificador de audio: [%s] %s.\n"
+#define MSGTR_SelectedAudioCodec "Audio codec seleccionado: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Construyendo cadena de filtros de audio para %dHz/%dch/%s -> %dHz/%dch/%s...\n"
 #define MSGTR_UninitVideoStr "uninit video: %s.\n"
 #define MSGTR_UninitAudioStr "uninit audio: %s.\n"
 #define MSGTR_VDecoderInitFailed "Inicialización del VDecoder ha fallado.\n"
@@ -571,13 +586,11 @@ static char help_text[]=
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alocando %d bytes para el búfer de entrada.\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes para el búfer de salida.\n"
 
-
 // LIRC:
 #define MSGTR_SettingUpLIRC "Configurando soporte para LIRC...\n"
 #define MSGTR_LIRCdisabled "No podrás usar el control remoto.\n"
 #define MSGTR_LIRCopenfailed "Fallo al abrir el soporte para LIRC.\n"
 #define MSGTR_LIRCcfgerr "Fallo al leer archivo de configuración de LIRC %s.\n"
-
 
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "No se pudo encontrar el filtro de vídeo '%s'.\n"
@@ -599,8 +612,9 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: ¡No se pudo enviar evento de pantalla completa EWMH!\n"
-
-#define MSGTR_InsertingAfVolume "[Mixer] No mezclador de volumen por hardware, insertando filtro de volumen.\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: no se pudo encontrar ventana XScreenSaver.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: Modo de video seleccionado %dx%d para tamaño de imagen %dx%d.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] No se ecnontró mezclador de volumen por hardware, insertando filtro de volumen.\n"
 #define MSGTR_NoVolume "[Mixer] Na hay control de volumen disponible.\n"
 
 // ====================== GUI messages/buttons ========================
@@ -650,6 +664,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING2 "[skin] advertencia en archivo de configuración en la línea %d:\n control (%s) encontrado pero no se encontro \"subsection\" antes"
 #define MSGTR_SKIN_WARNING3 "[skin] advertencia en archivo de configuración en la linea %d:\nesta subsección no esta soportada por control (%s)"
 #define MSGTR_SKIN_SkinFileNotFound "[skin] no se encontró archivo ( %s ).\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] file no leible ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Mapa de bits de 16 bits o menos no soportado (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Archivo no encontrado (%s).\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "Error al leer BMP (%s).\n"
@@ -702,7 +717,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Capítulo %2d"
 #define MSGTR_MENU_AudioLanguages "Idiomas de audio"
 #define MSGTR_MENU_SubtitleLanguages "Idiomas de subtítulos"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Navegador de skins"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Salir..."
 #define MSGTR_MENU_Mute "Mudo"
 #define MSGTR_MENU_Original "Original"
@@ -740,8 +757,8 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Árbol de directorios"
 
 // --- preferences
-// TODO: Why is this different from MSGTR_EQU_Video?
-#define MSGTR_PREFERENCES_Video "Vídeo"
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtítulos y OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs y demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
@@ -788,6 +805,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesado"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec y demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
 #define MSGTR_PREFERENCES_Audio_Device "Dispositivo:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mezclador:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Canal del Mezclador:"
@@ -839,6 +857,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "Dispositivo de DVD:"
 #define MSGTR_PREFERENCES_FPS "Cuadros por segundo de la Pelicula:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Mostrar Ventana de Video cuando este inactiva"
+#define MSGTR_PREFERENCES_ArtsBroken "Las versiones nuevas de aRts no son compatibles con GTK 1.x y botan GMPlayer!"
 
 #define MSGTR_ABOUT_UHU " Desarrollo de GUI patrocinado por UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Equipo principal de MPlayer:\n"
@@ -918,12 +937,11 @@ static char help_text[]=
 "           1 : oscuro\n           2 : bold\n           3 : boldfont\n" \
 "           4 : reverso\n           5 : especial\n\n\n"
 
-// vo_jpeg.c - desde aqui hasta abajo se ha sincronizado con help_mp-en (1.148)
+// vo_jpeg.c 
 #define MSGTR_VO_JPEG_ProgressiveJPEG "JPEG progresivo habilitado."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "JPEG progresivo deshabilitado."
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG habilitado."
 #define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG deshabilitado."
-
 
 // vo_pnm.c
 #define MSGTR_VO_PNM_ASCIIMode "modo ASCII habilitado."
@@ -988,9 +1006,6 @@ static char help_text[]=
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Fallo configurando mezclador de audio DVB:%s\n"
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz no soportado, trate de resamplear...\n"
  
-// ao_null.c
-// Este ni siquiera tiene un mp_msg o printf ?? [REVISAR]
-
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Archivo: %s (%s)\nPCM: Samplerate: %iHz Canales: %s Formato %s\n"
 #define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: El volcado más rápido se logra con -vc dummy -vo null\nPCM: Info: Para escribir archivos de onda (WAVE) use -ao pcm:waveheader (valor por omisión).\n"
@@ -1075,3 +1090,39 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "No se especificaron suficientes controles en la línea de comando"
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Control de entrada #%d esta abajo del límite inferior que es %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Control de entrada #%d esta por encima del límite superior que es %0.4f.\n"
+
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "Abriendo joystick %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Imposible abrir joystick %s : %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Error leyendo dispositivo joystick : %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick : perdimos %d bytes de datos\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick : Advertencia, init event, perdimos sync con el driver\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick : Advertencia, tipo de evento desconocido %d\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Demaciados fds de comandos, imposible registrar fd %d.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Demaciados fds de teclas, imposible registrar fd %d.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Comando %s: argumento %d no es un entero.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Comando %s: argumento %d no es punto flotante.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Commando %s: argumento %d no está terminado.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Argumento desconocido %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "Comando %s requiere a lo menos %d argumentos, solo encontramos %d hasta ahora.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Error leyendo fd de comandos %d: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Buffer de comandos de fd %d lleno: botando contenido\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Comando inválido asignado a la tecla %s"
+#define MSGTR_INPUT_INPUT_ErrSelect "Error en Select: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Error en fd %d de entrada de teclas\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Ingreso de tecla muerta en fd %d\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Demaciado eventos de keydown al mismo tiempo\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Error en fd de comandos %d\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Error leyendo archivo de configuración de input %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Tecla desconocida '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Asignación no terminada %s\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "el buffer es demaciado pequeño para este nombre de tecla: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "No se econtro un comando para la tecla %s"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Buffer demaciado pequeño para el comando %s\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "Que estamos haciendo aqui?\n"
