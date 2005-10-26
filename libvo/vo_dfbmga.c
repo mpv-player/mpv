@@ -83,6 +83,7 @@ static DFBRectangle c2rect;
 static DFBRectangle *subrect;
 
 static IDirectFBInputDevice  *keyboard;
+static IDirectFBInputDevice  *remote;
 static IDirectFBEventBuffer  *buffer;
 
 static int blit_done;
@@ -92,6 +93,7 @@ static int use_bes;
 static int use_crtc2;
 static int use_spic;
 static int use_input;
+static int use_remote;
 static int field_parity;
 static int flipping;
 static DFBDisplayLayerBufferMode buffermode;
@@ -269,6 +271,10 @@ preinit( const char *arg )
                     force_input = !opt_no;
                     vo_subdevice += 5;
                     opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "remote", 6)) {
+                    use_remote = !opt_no;
+                    vo_subdevice += 6;
+                    opt_no = 0;
                } else if (!strncmp(vo_subdevice, "buffermode=", 11)) {
                     if (opt_no) {
                          show_help = 1;
@@ -360,6 +366,7 @@ preinit( const char *arg )
                        "  crtc2  Use CRTC2\n"
                        "  spic   Use hardware sub-picture for OSD\n"
                        "  input  Use DirectFB for keyboard input\n"
+                       "  remote Use DirectFB for remote control input\n"
                        "\nOther options:\n"
                        "  buffermode=(single|double|triple)\n"
                        "    single   Use single buffering\n"
@@ -498,15 +505,8 @@ preinit( const char *arg )
           }
      }
 
-     if (use_input) {
-          if ((res = dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard )) != DFB_OK) {
-               mp_msg( MSGT_VO, MSGL_ERR,
-                       "vo_dfbmga: Can't get keyboard - %s\n",
-                       DirectFBErrorString( res ) );
-               uninit();
-               return -1;
-          }
-          if ((res = keyboard->CreateEventBuffer( keyboard, &buffer )) != DFB_OK) {
+     if (use_input || use_remote) {
+          if ((res = dfb->CreateEventBuffer( dfb, &buffer )) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: Can't create event buffer - %s\n",
                        DirectFBErrorString( res ) );
@@ -515,6 +515,39 @@ preinit( const char *arg )
           }
      }
 
+     if (use_input) {
+          if ((res = dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't get keyboard - %s\n",
+                       DirectFBErrorString( res ) );
+               uninit();
+               return -1;
+          }
+          if ((res = keyboard->AttachEventBuffer( keyboard, buffer )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't attach event buffer to keyboard - %s\n",
+                       DirectFBErrorString( res ) );
+               uninit();
+               return -1;
+          }
+     }
+     if (use_remote) {
+          if ((res = dfb->GetInputDevice( dfb, DIDID_REMOTE, &remote )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't get remote control - %s\n",
+                       DirectFBErrorString( res ) );
+               uninit();
+               return -1;
+          }
+          if ((res = remote->AttachEventBuffer( remote, buffer )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't attach event buffer to remote control - %s\n",
+                       DirectFBErrorString( res ) );
+               uninit();
+               return -1;
+          }
+     }
+     
      return 0;
 }
 
@@ -1155,6 +1188,8 @@ uninit( void )
 
      if (buffer)
           buffer->Release( buffer );
+     if (remote)
+          remote->Release( remote );
      if (keyboard)
           keyboard->Release( keyboard );
      if (crtc2)
@@ -1167,6 +1202,7 @@ uninit( void )
           dfb->Release( dfb );
 
      buffer = NULL;
+     remote = NULL;
      keyboard = NULL;
      crtc2 = NULL;
      bes = NULL;
@@ -1396,7 +1432,7 @@ check_events( void )
 {
      DFBInputEvent event;
 
-     if (!use_input)
+     if (!buffer)
           return;
 
      if (buffer->GetEvent( buffer, DFB_EVENT( &event )) == DFB_OK) {
@@ -1435,6 +1471,37 @@ check_events( void )
                case DIKS_END:
                     mplayer_put_key( KEY_END );
                     break;
+
+               case DIKS_POWER:
+                    mplayer_put_key( 'q' );
+                    break;
+               case DIKS_MENU:
+                    mplayer_put_key( 'o' );
+                    break;
+               case DIKS_PLAY:
+               case DIKS_STOP:
+               case DIKS_PAUSE:
+               case DIKS_PLAYPAUSE:
+                    mplayer_put_key( ' ' );
+                    break;
+               case DIKS_FORWARD:
+               case DIKS_NEXT:
+                    mplayer_put_key( KEY_PAGE_UP );
+                    break;
+               case DIKS_REWIND:
+               case DIKS_PREVIOUS:
+                    mplayer_put_key( KEY_PAGE_DOWN );
+                    break;
+               case DIKS_VOLUME_UP:
+                    mplayer_put_key( '0' );
+                    break;
+               case DIKS_VOLUME_DOWN:
+                    mplayer_put_key( '9' );
+                    break;
+               case DIKS_MUTE:
+                    mplayer_put_key( 'm' );
+                    break;
+
                default:
                     mplayer_put_key( event.key_symbol );
                }
