@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.186 (2005. 10. 14.)
+// Sync'ed with help_mp-en.h 1.192 (2005. 10. 26.)
 
 // ========================= MPlayer help ===========================
 
@@ -34,15 +34,15 @@ static char help_text[]=
 "\n"
 "Fontosabb billentyûk: (a teljes lista a man-ban és nézd meg az input.conf fájlt)\n"
 " <-  vagy  ->     10 másodperces hátra/elõre ugrás\n"
-" fel vagy le      1 percnyi hátra/elõre ugrás\n"
-" pgup v. pgdown   10 percnyi hátra/elõre ugrás\n"
+" le vagy fel      1 percnyi hátra/elõre ugrás\n"
+" pgdown v. pgup   10 percnyi hátra/elõre ugrás\n"
 " < vagy >         1 fájllal elõre/hátra lépés a lejátszási listában\n"
 " p vagy SPACE     pillanatállj (bármely billentyûre továbbmegy)\n"
 " q vagy ESC       lejátszás vége és kilépés\n"
-" + vagy -         audio késleltetése +/- 0.1 másodperccel\n"
+" + vagy -         audio késleltetése ± 0.1 másodperccel\n"
 " o                OSD-mód váltása:  nincs / keresõsáv / keresõsáv + idõ\n"
 " * vagy /         hangerõ fel/le\n"
-" z vagy x         felirat késleltetése +/- 0.1 másodperccel\n"
+" x vagy z         felirat késleltetése ± 0.1 másodperccel\n"
 " r vagy t         felirat pozíciójának megváltoztatása, lásd -vf expand-ot is\n"
 "\n"
 " * * * A MANPAGE TOVÁBBI RÉSZLETEKET, OPCIÓKAT, BILLENTYÛKET TARTALMAZ! * * *\n"
@@ -471,15 +471,23 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "Nincs befordítva az MPlayerbe az SMB támogatás\n"
 
 #define MSGTR_CantOpenDVD "Nem tudom megnyitni a DVD eszközt: %s\n"
+#define MSGTR_NoDVDSupport "Az MPlayer DVD támogatás nélkül lett lefordítva, kilépés\n"
 #define MSGTR_DVDwait "A lemez struktúrájának olvasása, kérlek várj...\n"
 #define MSGTR_DVDnumTitles "%d sáv van a DVD-n.\n"
 #define MSGTR_DVDinvalidTitle "Helytelen DVD sáv: %d\n"
 #define MSGTR_DVDnumChapters "Az adott DVD sávban %d fejezet van.\n"
 #define MSGTR_DVDinvalidChapter "Helytelen DVD fejezet: %d\n"
+#define MSGTR_DVDinvalidChapterRange "Helytelen fejezet tartomány specifikáció: %s\n"
+#define MSGTR_DVDinvalidLastChapter "Helytelen DVD utolsó fejezet szám: %d\n"
 #define MSGTR_DVDnumAngles "%d darab kameraállás van ezen a DVD sávon.\n"
 #define MSGTR_DVDinvalidAngle "Helytelen DVD kameraállás: %d\n"
 #define MSGTR_DVDnoIFO "Nem tudom a(z) %d. DVD sávhoz megnyitni az IFO fájlt.\n"
-#define MSGTR_DVDnoVOBs "Nem tudom megnyitni a sávot (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoVMG "A VMG infót nem lehet megnyitni!\n"
+#define MSGTR_DVDnoVOBs "Nem tudom megnyitni a VOBS sávokat (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDnoMatchingAudio "Nem található megfelelõ nyelvû DVD audió!\n"
+#define MSGTR_DVDaudioChannel "Kiválasztott DVD audió csatorna: %d nyelv: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "Nincs megfelelõ nyelvû DVD felirat fájl!\n"
+#define MSGTR_DVDsubtitleChannel "Kiválasztott DVD felirat csatorna: %d nyelv: %c%c\n"
 #define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
 
 // muxer_*.c:
@@ -539,6 +547,10 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC formátumot találtam, frameráta váltás.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progresszív NTSC formátumot találtam, frameráta váltás.\n"
 
+#define MSGTR_CacheFill "\rCache feltöltés: %5.2f%% (%d bájt)   "
+#define MSGTR_NoBindFound "Nincs semmi sem összerendelve a(z) '%s' gombbal"
+#define MSGTR_FailedToOpen "Nem lehet megnyitni: %s\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nem tudom megnyitni a kodeket.\n"
 #define MSGTR_CantCloseCodec "Nem tudom lezárni a kodeket.\n"
@@ -564,7 +576,10 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "A kért [%s] video codec család (vfm=%s) nem kiválasztható (fordításnál kapcsold be!)\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "A kért [%s] audio codec család (afm=%s) nem kiválasztható (fordításnál kapcsold be!)\n"
 #define MSGTR_OpeningVideoDecoder "Video dekóder meghívása: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "Kiválasztott videó codec: [%s] vfm: %s (%s)\n"
 #define MSGTR_OpeningAudioDecoder "Audio dekóder meghívása: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "Kiválasztott audió codec: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Audió szûrõ lánc felépítése %dHz/%dch/%s -> %dHz/%dch/%s formátumhoz...\n"
 #define MSGTR_UninitVideoStr "uninit video: %s\n"
 #define MSGTR_UninitAudioStr "uninit audio: %s\n"
 #define MSGTR_VDecoderInitFailed "VDecoder init nem sikerült :(\n"
@@ -587,7 +602,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: a codec nem állította be az sh->disp_w és az sh_disp_h izéket, megpróbálom workaroundolni!\n"
-#define MSGTR_VoConfigRequest "VDec: vo config kérés - %d x %d (preferált csp: %s)\n"
+#define MSGTR_VoConfigRequest "VDec: vo config kérés - %d x %d (preferált színtér: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Nem találok egyezõ colorspace-t - újra próbálom a -vf scale filterrel...\n"
 #define MSGTR_MovieAspectIsSet "A film aspect értéke %.2f:1 - aspect arány javítása.\n"
 #define MSGTR_MovieAspectUndefined "A film aspect értéke nem definiált - nincs arányjavítás.\n"
@@ -599,6 +614,8 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Nem lehet EWMH fullscreen eseményt küldeni!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Nem található az XScreenSaver ablak.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: %dx%d kiválasztott videó mód a(z) %dx%d képmérethez.\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Nincs hardveres keverés, hangerõ szûrõ használata.\n"
 #define MSGTR_NoVolume "[Mixer] Hangerõ állítás nem lehetséges.\n"
@@ -1001,7 +1018,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fájl: %s (%s)\nPCM: Samplerate: %iHz Csatorna: %s Formátum: %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: a leggyorsabb dump-olás a -vc null -vo null kapcsolóval érhetõ el\nPCM: Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Gyorsabb dump-olás a -vc null -vo null kapcsolóval érhetõ el\nPCM: Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s megnyitása írásra nem sikerült!\n"
 
 // ao_sdl.c
@@ -1084,3 +1101,41 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f alsó határ alatt van.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f felsõ határ felett van.\n"
 
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "Botkormány eszköz megnyitása: %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Nem sikerült a(z) %s botkormány eszközt megnyitni : %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Hiba a botkormány eszköz olvasása közben : %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Botkormány : elvesztettünk %d bájtnyi adatot\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Botkormány : figyelmeztetõ init esemény, elvesztettük a szinkront a vezérlõvel\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Botkormány ismeretlen figyelmeztetõ esemény típus: %d\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Túl sok parancs fd, nem sikerült a(z) %d fd regisztálása.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Túl sok gomb fd, nem sikerült a(z) %d fd regisztálása.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "%s parancs: %d argumentum nem egész.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "%s parancs: %d argumentum nem lebegõpontos.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "%s parancs: %d argumentum lezáratlan.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Ismeretlen argumentum: %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "A(z) %s parancsnak legalább %d argumentum kell, de csak %d-t találtunk eddig.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Hiba a(z) %d cmd fd olvasása közben: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "%d fd cmd buffer-e tele van: tartalom eldobása\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Hibás parancs a(z) %s gombnál"
+#define MSGTR_INPUT_INPUT_ErrSelect "Kiválasztási hiba: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Hiba a(z) %d gomb input fd-ben\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Halott gomb input a(z) %d fd-nél\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Túl sok gomblenyomási esemény egy idõben\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Hiba a(z) %d cmd fd-ben\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Hiba a(z) %s input konfigurációs fájl olvasása közben: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Ismeretlen gomb '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Nem befejezett hozzárendelés: %s\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "A buffer túl kicsi ehhez a gomb névhez: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "A(z) %s gombhoz nem található parancs"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "A buffer túl kicsi a(z) %s parancshoz\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "Mit keresünk mi itt?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "A bemeneti borkormány inicializálása nem sikerült\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "Nem stat-olható %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "Nem nyitható meg %s: %s\n"
