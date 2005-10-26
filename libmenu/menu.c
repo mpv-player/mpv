@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -7,16 +7,16 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "../libvo/osd.h"
-#include "../libvo/font_load.h"
-#include "../osdep/keycodes.h"
-#include "../asxparser.h"
-#include "../libmpdemux/stream.h"
+#include "libvo/osd.h"
+#include "libvo/font_load.h"
+#include "osdep/keycodes.h"
+#include "asxparser.h"
+#include "libmpdemux/stream.h"
 
 #include "img_format.h"
 #include "mp_image.h"
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "m_option.h"
+#include "m_struct.h"
 #include "menu.h"
 
 extern menu_info_t menu_info_cmdlist;

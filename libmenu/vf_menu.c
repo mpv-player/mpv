@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,17 +9,17 @@
 #include <malloc.h>
 #endif
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
-#include "../libmpcodecs/img_format.h"
-#include "../libmpcodecs/mp_image.h"
-#include "../libmpcodecs/vf.h"
+#include "libmpcodecs/img_format.h"
+#include "libmpcodecs/mp_image.h"
+#include "libmpcodecs/vf.h"
 
-#include "../libvo/fastmemcpy.h"
-#include "../libvo/video_out.h"
-#include "../libvo/font_load.h"
-#include "../input/input.h"
-#include "../m_struct.h"
+#include "libvo/fastmemcpy.h"
+#include "libvo/video_out.h"
+#include "libvo/font_load.h"
+#include "input/input.h"
+#include "m_struct.h"
 #include "menu.h"
 
 extern vo_functions_t* video_out;

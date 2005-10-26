@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -12,8 +12,8 @@
 #include "m_struct.h"
 #include "menu.h"
 
-#include "../libvo/font_load.h"
-#include "../osdep/keycodes.h"
+#include "libvo/font_load.h"
+#include "osdep/keycodes.h"
 
 #define IMPL 1
 #include "menu_list.h"

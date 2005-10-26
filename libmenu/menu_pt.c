@@ -4,19 +4,19 @@
 #include <string.h>
 //#include <libgen.h>
 
-#include "../config.h"
+#include "config.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 
-#include "../m_struct.h"
-#include "../m_option.h"
+#include "m_struct.h"
+#include "m_option.h"
 #include "menu.h"
 #include "menu_list.h"
 
 
-#include "../playtree.h"
-#include "../input/input.h"
+#include "playtree.h"
+#include "input/input.h"
 
 #define mp_basename(s) (strrchr((s),'/')==NULL?(char*)(s):(strrchr((s),'/')+1))
 

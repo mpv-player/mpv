@@ -9,20 +9,20 @@
 #include <ctype.h>
 
 
-#include "../config.h"
+#include "config.h"
 
-#include "../m_struct.h"
-#include "../m_option.h"
-#include "../m_config.h"
-#include "../asxparser.h"
+#include "m_struct.h"
+#include "m_option.h"
+#include "m_config.h"
+#include "asxparser.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 
 #include "menu.h"
 #include "menu_list.h"
-#include "../input/input.h"
-#include "../osdep/keycodes.h"
+#include "input/input.h"
+#include "osdep/keycodes.h"
 
 struct list_entry_s {
   struct list_entry p;

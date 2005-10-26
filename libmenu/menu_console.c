@@ -1,5 +1,5 @@
 
-#include "../config.h"
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,14 +16,14 @@
 #include "img_format.h"
 #include "mp_image.h"
 
-#include "../m_struct.h"
-#include "../m_option.h"
+#include "m_struct.h"
+#include "m_option.h"
 #include "menu.h"
 
-#include "../libvo/font_load.h"
-#include "../osdep/keycodes.h"
-#include "../input/input.h"
-#include "../osdep/timer.h"
+#include "libvo/font_load.h"
+#include "osdep/keycodes.h"
+#include "input/input.h"
+#include "osdep/timer.h"
 
 typedef struct history_st history_t;
 
