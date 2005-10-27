@@ -299,6 +299,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
 	if(mp_input_check_interrupt(PREFILL_SLEEP_TIME))
 	  return 0;
     }
+    mp_msg(MSGT_CACHE,MSGL_STATUS,"\n");
     return 1; // parent exits
   }
   
