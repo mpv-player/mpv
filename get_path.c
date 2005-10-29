@@ -36,7 +36,9 @@ char *get_path(char *filename){
 	char *bdl_url_path = NULL;
 #endif
 
-	if ((homedir = getenv("HOME")) == NULL)
+	if ((homedir = getenv("MPLAYER_HOME")) != NULL)
+		config_dir = "";
+	else if ((homedir = getenv("HOME")) == NULL)
 #if defined(__MINGW32__)||defined(__CYGWIN__) /*hack to get fonts etc. loaded outside of cygwin environment*/
 	{
         int i,imax=0;       
