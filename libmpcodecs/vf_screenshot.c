@@ -261,6 +261,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
     return 0;
 }
 
+static void uninit(vf_instance_t *vf);
 // open conflicts with stdio.h at least under MinGW
 static int screenshot_open(vf_instance_t *vf, char* args)
 {
@@ -271,6 +272,7 @@ static int screenshot_open(vf_instance_t *vf, char* args)
     vf->start_slice=start_slice;
     vf->draw_slice=draw_slice;
     vf->get_image=get_image;
+    vf->uninit=uninit;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->frameno=0;
     vf->priv->shot=0;
