@@ -45,7 +45,6 @@
 #include "stheader.h"
 #include "../sub_cc.h"
 
-extern void resync_audio_stream( sh_audio_t *sh_audio );
 extern void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;
 
@@ -1313,7 +1312,6 @@ static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, int flags )
 	if( sh_audio )
    {
 	  ds_fill_buffer( d_audio );
-	  resync_audio_stream( sh_audio );
 	}
 
 	while( 1 )

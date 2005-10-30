@@ -21,6 +21,7 @@
 #include "../libaf/af_format.h"
 #include "../libvo/fastmemcpy.h"
 
+extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 // Demuxer list
 extern demuxer_desc_t demuxer_desc_rawaudio;
@@ -855,6 +856,8 @@ if(!demuxer->seekable){
 
 if (demuxer->desc->seek)
     demuxer->desc->seek(demuxer,rel_seek_secs,flags);
+
+    if (sh_audio) resync_audio_stream(sh_audio);
 
 return 1;
 }

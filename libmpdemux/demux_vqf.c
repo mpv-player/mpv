@@ -9,8 +9,6 @@
 #include "stheader.h"
 #include "../libmpcodecs/vqf.h"
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
-
 static int demux_probe_vqf(demuxer_t* demuxer) 
 {
   char buf[KEYWORD_BYTES];
@@ -195,7 +193,6 @@ static void demux_seek_vqf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
   pos -= (pos % (sh_audio->channels * sh_audio->samplesize) );
   stream_seek(s,pos);
-  resync_audio_stream(sh_audio);
 #endif
 }
 

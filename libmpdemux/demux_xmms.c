@@ -199,8 +199,6 @@ static void cleanup_plugins(){
 
 // ============================ mplayer demuxer stuff ===============
 
-//extern void resync_audio_stream(sh_audio_t *sh_audio);
-
 static int demux_xmms_open(demuxer_t* demuxer) {
   InputPlugin* ip = NULL;
   sh_audio_t* sh_audio;

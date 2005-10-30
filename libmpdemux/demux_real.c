@@ -1748,8 +1748,6 @@ static void demux_close_real(demuxer_t *demuxer)
     return;
 }
 
-extern void resync_audio_stream(sh_audio_t * sh_audio);
-
 /* please upload RV10 samples WITH INDEX CHUNK */
 static int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
@@ -1840,8 +1838,6 @@ static int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
         stream_seek(demuxer->stream, next_offset);
 
     demux_real_fill_buffer(demuxer, NULL);
-    if (sh_audio)
-        resync_audio_stream(sh_audio);
     return 1;
 }
 

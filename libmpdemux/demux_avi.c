@@ -617,7 +617,6 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 }
 
 //extern float initial_pts_delay;
-extern void resync_audio_stream(sh_audio_t *sh_audio);
 
 void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
     avi_priv_t *priv=demuxer->priv;
@@ -806,7 +805,6 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
             demux_read_data(d_audio,NULL,skip_audio_bytes);
             //d_audio->pts=0; // PTS is outdated because of the raw data skipping
           }
-	  resync_audio_stream(sh_audio);
 
 //          sh_audio->timer=-skip_audio_secs;
 

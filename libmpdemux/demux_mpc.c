@@ -181,7 +181,6 @@ static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   if (!sh_audio) return;
   sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio) -
                      sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-  resync_audio_stream(sh_audio);
 }
 
 static void demux_close_mpc(demuxer_t* demuxer) {

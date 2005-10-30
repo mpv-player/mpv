@@ -14,8 +14,6 @@
 #include "bswap.h"
 #include "ms_hdr.h"
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
-
 typedef struct {
 	uint8_t *buf;
 	uint64_t size;	/// amount of time of data packets pushed to demuxer->audio (in bytes)
@@ -248,7 +246,6 @@ static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 		}
 	}
 	sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)priv->bitrate;
-	resync_audio_stream(sh_audio);
 }
 
 

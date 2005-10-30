@@ -223,7 +223,6 @@ typedef struct {
 #define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC))
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
-extern void resync_audio_stream( sh_audio_t *sh_audio );
 
 static uint8_t get_packet_size(const unsigned char *buf, int size)
 {
@@ -2991,7 +2990,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 }
 
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
 extern void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void reset_fifos(ts_priv_t* priv, int a, int v, int s)
@@ -3096,7 +3094,6 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 	if(sh_audio != NULL)
 	{
 		ds_fill_buffer(d_audio);
-		resync_audio_stream(sh_audio);
 	}
 
 	while(sh_video != NULL)

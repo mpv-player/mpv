@@ -44,7 +44,6 @@ typedef struct mp3_hdr {
 } mp3_hdr_t;
 
 extern void free_sh_audio(sh_audio_t* sh);
-extern void resync_audio_stream(sh_audio_t *sh_audio);
 extern void print_wave_header(WAVEFORMATEX *h);
 
 int hr_mp3_seek = 0;
@@ -496,7 +495,6 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     if(len > 0)
       high_res_mp3_seek(demuxer,len);
     sh_audio->delay = priv->last_pts -  (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-    resync_audio_stream(sh_audio);
     return;
   }
 
@@ -527,9 +525,6 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   }
 
   stream_seek(s,pos);
-
-  resync_audio_stream(sh_audio);
-
 }
 
 static void demux_close_audio(demuxer_t* demuxer) {

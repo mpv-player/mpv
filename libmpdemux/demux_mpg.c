@@ -669,7 +669,6 @@ do{
   return 1;
 }
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
 extern void skip_audio_frame(sh_audio_t *sh_audio);
 
 void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
@@ -733,7 +732,6 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	ds_fill_buffer(d_video);
 	if(sh_audio){
 	  ds_fill_buffer(d_audio);
-	  resync_audio_stream(sh_audio);
 	}
 
 	while(1){

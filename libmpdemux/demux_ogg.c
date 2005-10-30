@@ -1390,8 +1390,6 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 
 }
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
-
 static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
   ogg_sync_state* sync = &ogg_d->sync;
@@ -1558,8 +1556,6 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
         vo_osd_changed(OSDTYPE_SUBTITLE);
         clear_sub = -1;
 	demux_ogg_add_packet(ds,os,ds->id,&op);
-	if(sh_audio)
-	  resync_audio_stream(sh_audio); 
 	return;
       }
      }

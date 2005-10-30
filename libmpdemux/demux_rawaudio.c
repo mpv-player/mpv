@@ -30,8 +30,6 @@ m_option_t demux_rawaudio_opts[] = {
 };
 
 
-extern void resync_audio_stream(sh_audio_t *sh_audio);
-
 static demuxer_t* demux_rawaudio_open(demuxer_t* demuxer) {
   sh_audio_t* sh_audio;
   WAVEFORMATEX* w;
@@ -95,7 +93,6 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags
   pos -= (pos % (sh_audio->channels * sh_audio->samplesize) );
   stream_seek(s,pos);
   sh_audio->delay= (pos-ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len) / (float)(sh_audio->wf->nAvgBytesPerSec);
-  resync_audio_stream(sh_audio);
 //  printf("demux_rawaudio: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
 

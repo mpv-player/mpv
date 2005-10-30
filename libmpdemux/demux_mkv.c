@@ -3117,7 +3117,6 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
   free_cached_dps (demuxer);
   if (!(flags & 2))  /* time in secs */
     {
-      void resync_audio_stream(sh_audio_t *sh_audio);
       mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
       stream_t *s = demuxer->stream;
       int64_t target_timecode = 0, diff, min_diff=0xFFFFFFFL;
@@ -3228,15 +3227,11 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
         clear_subtitles(demuxer, 0, 1);
 
       demux_mkv_fill_buffer(demuxer, NULL);
-
-      if(demuxer->audio->sh != NULL)
-        resync_audio_stream((sh_audio_t *) demuxer->audio->sh); 
     }
   else if ((demuxer->movi_end <= 0) || !(flags & 1))
     mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] seek unsupported flags\n");
   else
     {
-      void resync_audio_stream(sh_audio_t *sh_audio);
       mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
       stream_t *s = demuxer->stream;
       uint64_t target_filepos;
@@ -3274,9 +3269,6 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
         clear_subtitles(demuxer, 0, 1);
 
       demux_mkv_fill_buffer(demuxer, NULL);
-
-      if(demuxer->audio->sh != NULL)
-        resync_audio_stream((sh_audio_t *) demuxer->audio->sh); 
     }
 }
 
