@@ -107,6 +107,19 @@ static void demux_close_demuxers(demuxer_t* demuxer) {
 }
   
 
+static int demux_demuxers_control(demuxer_t *demuxer,int cmd, void *arg){
+  dd_priv_t* priv = demuxer->priv;
+  switch (cmd) {
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+      *((double *)arg) = demuxer_get_time_length(priv->vd);
+      return DEMUXER_CTRL_OK;
+    case DEMUXER_CTRL_GET_PERCENT_POS:
+      *((int *)arg) = demuxer_get_percent_pos(priv->vd);
+      return DEMUXER_CTRL_OK;
+  }
+  return DEMUXER_CTRL_NOTIMPL;
+}
+
 demuxer_desc_t demuxer_desc_demuxers = {
   "Demuxers demuxer",
   "", // Not selectable
@@ -120,5 +133,5 @@ demuxer_desc_t demuxer_desc_demuxers = {
   NULL,
   demux_close_demuxers,
   demux_demuxers_seek,
-  NULL
+  demux_demuxers_control
 };
