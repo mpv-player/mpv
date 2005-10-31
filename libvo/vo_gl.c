@@ -760,7 +760,7 @@ static int preinit(const char *arg)
       gl_target = GL_TEXTURE_2D;
     if (many_fmts)
       mp_msg (MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
-               "Use -vo gl:manyfmts if playback fails.\n");
+               "Use -vo gl:nomanyfmts if playback fails.\n");
     mp_msg (MSGT_VO, MSGL_V, "[gl] Using %d as slice height "
              "(0 means image height).\n", slice_height);
     if( !vo_init() ) return -1; // Can't open X11
