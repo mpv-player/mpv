@@ -201,6 +201,13 @@ typedef struct {
 } pmt_t;
 
 typedef struct {
+	uint64_t size;
+	float duration;
+	float first_pts;
+	float last_pts;
+} TS_stream_info;
+
+typedef struct {
 	MpegTSContext ts;
 	int last_pid;
 	av_fifo_t fifo[3];	//0 for audio, 1 for video, 2 for subs
@@ -208,8 +215,10 @@ typedef struct {
 	pmt_t *pmt;
 	uint16_t pmt_cnt;
 	uint32_t prog;
+	uint32_t vbitrate;
 	int keep_broken;
 	char packet[TS_FEC_PACKET_SIZE];
+	TS_stream_info vstr, astr;
 } ts_priv_t;
 
 
@@ -849,7 +858,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	if(!packet_size)
 	    return NULL;
 
-	priv = malloc(sizeof(ts_priv_t));
+	priv = calloc(1, sizeof(ts_priv_t));
 	if(priv == NULL)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_FATAL, "DEMUX_OPEN_TS, couldn't allocate enough memory for ts->priv, exit\n");
@@ -2456,7 +2465,7 @@ static inline uint8_t *pid_lang_from_pmt(ts_priv_t *priv, int pid)
 }
 
 
-static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **dp, int *dp_offset)
+static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **dp, int *dp_offset, TS_stream_info *si)
 {
 	int ret = 0;
 
@@ -2466,6 +2475,30 @@ static int fill_packet(demuxer_t *demuxer, demux_stream_t *ds, demux_packet_t **
 			resize_demux_packet(*dp, ret);	//shrinked to the right size
 			ds_add_packet(ds, *dp);
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "ADDED %d  bytes to %s fifo, PTS=%.3f\n", ret, (ds == demuxer->audio ? "audio" : (ds == demuxer->video ? "video" : "sub")), (*dp)->pts);
+			if(si)
+			{
+				float diff = (*dp)->pts - si->last_pts;
+				float dur;
+
+				if(abs(diff) > 1) //1 second, there's a discontinuity
+				{
+					si->duration += si->last_pts - si->first_pts;
+					si->first_pts = si->last_pts = (*dp)->pts;
+				}
+				else
+				{
+					si->last_pts = (*dp)->pts;
+				}
+				si->size += ret;
+				dur = si->duration + (si->last_pts - si->first_pts);
+
+				if(dur > 0 && ds == demuxer->video)
+				{
+					ts_priv_t * priv = (ts_priv_t*) demuxer->priv;
+					if(dur > 1)	//otherwise it may be unreliable
+						priv->vbitrate = (uint32_t) ((float) si->size / dur);
+				}
+			}
 	}
 
 	*dp = NULL;
@@ -2513,6 +2546,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 	int junk = 0, rap_flag = 0;
 	pmt_t *pmt;
 	mp4_decoder_config_t *mp4_dec;
+	TS_stream_info *si;
 
 
 	while(! done)
@@ -2524,6 +2558,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		rap_flag = 0;
 		mp4_dec = NULL;
 		es->is_synced = 0;
+		si = NULL;
 
 		junk = priv->ts.packet_size - TS_PACKET_SIZE;
 		buf_size = priv->ts.packet_size - junk;
@@ -2707,6 +2742,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				dp = &priv->fifo[1].pack;
 				dp_offset = &priv->fifo[1].offset;
 				buffer_size = &priv->fifo[1].buffer_size;
+				si = &priv->vstr;
 			}
 			else if(is_audio && (demuxer->audio->id == tss->pid))
 			{
@@ -2715,6 +2751,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				dp = &priv->fifo[0].pack;
 				dp_offset = &priv->fifo[0].offset;
 				buffer_size = &priv->fifo[0].buffer_size;
+				si = &priv->astr;
 			}
 			else if(is_sub
 				|| (pid_type == SPU_DVD) || (pid_type == SPU_DVB))
@@ -2780,7 +2817,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			//IS IT TIME TO QUEUE DATA to the dp_packet?
 			if(is_start && (dp != NULL))
 			{
-				retv = fill_packet(demuxer, ds, dp, dp_offset);
+				retv = fill_packet(demuxer, ds, dp, dp_offset, si);
 			}
 
 
@@ -2893,7 +2930,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 				if(is_audio)
 				{
-					retv = fill_packet(demuxer, ds, dp, dp_offset);
+					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
 					return 1;
 				}
 				
@@ -2966,7 +3003,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				if(is_audio)
 				{
 					(*dp)->pts = tss->last_pts;
-					retv = fill_packet(demuxer, ds, dp, dp_offset);
+					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
 					return 1;
 				}
 
@@ -3056,7 +3093,13 @@ static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 
 	video_stats = (sh_video != NULL);
 	if(video_stats)
-		video_stats = sh_video->i_bps;
+	{
+		mp_msg(MSGT_DEMUX, MSGL_V, "IBPS: %d, vb: %d\r\n", sh_video->i_bps, priv->vbitrate);
+		if(priv->vbitrate)
+			video_stats = priv->vbitrate;
+		else
+			video_stats = sh_video->i_bps;
+	}
 
 	newpos = (flags & 1) ? demuxer->movi_start : demuxer->filepos;
 	if(flags & 2) // float seek 0..1
