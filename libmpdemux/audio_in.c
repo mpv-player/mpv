@@ -8,6 +8,7 @@
 
 #include "audio_in.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 #include <string.h>
 #include <errno.h>
 
@@ -186,16 +187,16 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	ret = snd_pcm_readi(ai->alsa.handle, buffer, ai->alsa.chunk_size);
 	if (ret != ai->alsa.chunk_size) {
 	    if (ret < 0) {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nerror reading audio: %s\n", snd_strerror(ret));
+		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, snd_strerror(ret));
 		if (ret == -EPIPE) {
 		    if (ai_alsa_xrun(ai) == 0) {
-			mp_msg(MSGT_TV, MSGL_ERR, "Recovered from cross-run, some frames may be left out!\n");
+			mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut);
 		    } else {
-			mp_msg(MSGT_TV, MSGL_ERR, "Fatal error, cannot recover!\n");
+			mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover);
 		    }
 		}
 	    } else {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nnot enough audio samples!\n");
+		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
 	    }
 	    return -1;
 	}
@@ -206,9 +207,9 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	ret = read(ai->oss.audio_fd, buffer, ai->blocksize);
 	if (ret != ai->blocksize) {
 	    if (ret < 0) {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nerror reading audio: %s\n", strerror(errno));
+		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio, strerror(errno));
 	    } else {
-		mp_msg(MSGT_TV, MSGL_ERR, "\nnot enough audio samples!\n");
+		mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples);
 	    }
 	    return -1;
 	}

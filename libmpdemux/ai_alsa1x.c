@@ -9,6 +9,7 @@
 #include <alsa/asoundlib.h>
 #include "audio_in.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 int ai_alsa_setup(audio_in_t *ai)
 {
@@ -24,27 +25,27 @@ int ai_alsa_setup(audio_in_t *ai)
 
     err = snd_pcm_hw_params_any(ai->alsa.handle, params);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Broken configuration for this PCM: no configurations available\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_PcmBrokenConfig);
 	return -1;
     }
 
     err = snd_pcm_hw_params_set_access(ai->alsa.handle, params,
 				       SND_PCM_ACCESS_RW_INTERLEAVED);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Access type not available\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_UnavailableAccessType);
 	return -1;
     }
 
     err = snd_pcm_hw_params_set_format(ai->alsa.handle, params, SND_PCM_FORMAT_S16_LE);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Sample format not available\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_UnavailableSampleFmt);
 	return -1;
     }
 
     err = snd_pcm_hw_params_set_channels(ai->alsa.handle, params, ai->req_channels);
     if (err < 0) {
 	snd_pcm_hw_params_get_channels(params, &ai->channels);
-	mp_msg(MSGT_TV, MSGL_ERR, "Channel count not available - reverting to default: %d\n",
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_UnavailableChanCount,
 	       ai->channels);
     } else {
 	ai->channels = ai->req_channels;
@@ -54,7 +55,7 @@ int ai_alsa_setup(audio_in_t *ai)
     rate = ai->req_samplerate;
     err = snd_pcm_hw_params_set_rate_near(ai->alsa.handle, params, &rate, &dir);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Cannot set samplerate\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate);
     }
     ai->samplerate = rate;
 
@@ -63,7 +64,7 @@ int ai_alsa_setup(audio_in_t *ai)
     err = snd_pcm_hw_params_set_buffer_time_near(ai->alsa.handle, params,
 						 &ai->alsa.buffer_time, &dir);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Cannot set buffer time\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime);
     }
 
     dir = 0;
@@ -71,12 +72,12 @@ int ai_alsa_setup(audio_in_t *ai)
     err = snd_pcm_hw_params_set_period_time_near(ai->alsa.handle, params,
 						 &ai->alsa.period_time, &dir);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Cannot set period time\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime);
     }
 
     err = snd_pcm_hw_params(ai->alsa.handle, params);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Unable to install hw params: %s\n", snd_strerror(err));
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_CannotInstallHWParams, snd_strerror(err));
 	snd_pcm_hw_params_dump(params, ai->alsa.log);
 	return -1;
     }
@@ -86,7 +87,7 @@ int ai_alsa_setup(audio_in_t *ai)
     snd_pcm_hw_params_get_buffer_size(params, &buffer_size);
     ai->alsa.chunk_size = period_size;
     if (period_size == buffer_size) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Can't use period equal to buffer size (%u == %lu)\n", ai->alsa.chunk_size, (long)buffer_size);
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_PeriodEqualsBufferSize, ai->alsa.chunk_size, (long)buffer_size);
 	return -1;
     }
 
@@ -103,7 +104,7 @@ int ai_alsa_setup(audio_in_t *ai)
 
     assert(err >= 0);
     if (snd_pcm_sw_params(ai->alsa.handle, swparams) < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "unable to install sw params:\n");
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_CannotInstallSWParams);
 	snd_pcm_sw_params_dump(swparams, ai->alsa.log);
 	return -1;
     }
@@ -127,7 +128,7 @@ int ai_alsa_init(audio_in_t *ai)
     
     err = snd_pcm_open(&ai->alsa.handle, ai->alsa.device, SND_PCM_STREAM_CAPTURE, 0);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Error opening audio: %s\n", snd_strerror(err));
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_ErrorOpeningAudio, snd_strerror(err));
 	return -1;
     }
     
@@ -161,7 +162,7 @@ int ai_alsa_xrun(audio_in_t *ai)
 	
     snd_pcm_status_alloca(&status);
     if ((res = snd_pcm_status(ai->alsa.handle, status))<0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "ALSA status error: %s", snd_strerror(res));
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_AlsaStatusError, snd_strerror(res));
 	return -1;
     }
     if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
@@ -169,19 +170,19 @@ int ai_alsa_xrun(audio_in_t *ai)
 	gettimeofday(&now, 0);
 	snd_pcm_status_get_trigger_tstamp(status, &tstamp);
 	timersub(&now, &tstamp, &diff);
-	mp_msg(MSGT_TV, MSGL_ERR, "ALSA xrun!!! (at least %.3f ms long)\n",
+	mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_AlsaXRUN,
 	       diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
 	if (mp_msg_test(MSGT_TV, MSGL_V)) {
-	    mp_msg(MSGT_TV, MSGL_ERR, "ALSA Status:\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_AlsaStatus);
 	    snd_pcm_status_dump(status, ai->alsa.log);
 	}
 	if ((res = snd_pcm_prepare(ai->alsa.handle))<0) {
-	    mp_msg(MSGT_TV, MSGL_ERR, "ALSA xrun: prepare error: %s", snd_strerror(res));
+	    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_AlsaXRUNPrepareError, snd_strerror(res));
 	    return -1;
 	}
 	return 0;		/* ok, data should be accepted again */
     }
-    mp_msg(MSGT_TV, MSGL_ERR, "ALSA read/write error");
+    mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA1X_AlsaReadWriteError);
     return -1;
 }
 

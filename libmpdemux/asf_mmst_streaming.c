@@ -16,6 +16,9 @@
 
 #include "config.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #ifndef HAVE_WINSOCK2
 #define closesocket close
 #else
@@ -112,7 +115,7 @@ static void send_command (int s, int command, uint32_t switches,
     memset(&cmd.buf[48 + length], 0, 8 - (length & 7));
 
   if (send (s, cmd.buf, len8*8+48, 0) != (len8*8+48)) {
-    mp_msg(MSGT_NETWORK,MSGL_ERR,"write error\n");
+    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_WriteError);
   }
 }
 
@@ -160,7 +163,7 @@ static void get_answer (int s)
 
     len = recv (s, data, BUF_SIZE, 0) ;
     if (!len) {
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"\nalert! eof\n");
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_EOFAlert);
       return;
     }
 
@@ -207,7 +210,7 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 
   while (1) {
     if (!get_data (s, pre_header, 8)) {
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"pre-header read failed\n");
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_PreHeaderReadFailed);
       return 0;
     }
     if (pre_header[4] == 0x02) {
@@ -219,12 +222,12 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 //      mp_msg(MSGT_NETWORK,MSGL_INFO,"asf header packet detected, len=%d\n", packet_len);
 
       if (packet_len < 0 || packet_len > HDR_BUF_SIZE - header_len) {
-        mp_msg(MSGT_NETWORK, MSGL_FATAL, "Invalid header size, giving up\n");
+        mp_msg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MPDEMUX_MMST_InvalidHeaderSize);
         return 0;
       }
 
       if (!get_data (s, &header[header_len], packet_len)) {
-	mp_msg(MSGT_NETWORK,MSGL_ERR,"header data read failed\n");
+	mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_HeaderDataReadFailed);
 	return 0;
       }
 
@@ -250,7 +253,7 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
       char data[BUF_SIZE];
 
       if (!get_data (s, (char*)&packet_len, 4)) {
-	mp_msg(MSGT_NETWORK,MSGL_ERR,"packet_len read failed\n");
+	mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_packet_lenReadFailed);
 	return 0;
       }
       
@@ -260,12 +263,12 @@ static int get_header (int s, uint8_t *header, streaming_ctrl_t *streaming_ctrl)
 
       if (packet_len < 0 || packet_len > BUF_SIZE) {
         mp_msg(MSGT_NETWORK, MSGL_FATAL,
-                "Invalid rtsp packet size, giving up\n");
+                MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize);
         return 0;
       }
       
       if (!get_data (s, data, packet_len)) {
-	mp_msg(MSGT_NETWORK,MSGL_ERR,"command data read failed\n");
+	mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_CmdDataReadFailed);
 	return 0;
       }
       
@@ -318,14 +321,14 @@ static int interp_header (uint8_t *header, int header_len)
     i += 8;
 
     if ( (guid_1 == 0x6cce6200aa00d9a6ULL) && (guid_2 == 0x11cf668e75b22630ULL) ) {
-      mp_msg(MSGT_NETWORK,MSGL_INFO,"header object\n");
+      mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_MMST_HeaderObject);
     } else if ((guid_1 == 0x6cce6200aa00d9a6ULL) && (guid_2 == 0x11cf668e75b22636ULL)) {
-      mp_msg(MSGT_NETWORK,MSGL_INFO,"data object\n");
+      mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_MMST_DataObject);
     } else if ((guid_1 == 0x6553200cc000e48eULL) && (guid_2 == 0x11cfa9478cabdca1ULL)) {
 
       packet_length = get_32(header, i+92-24);
 
-      mp_msg(MSGT_NETWORK,MSGL_INFO,"file object, packet length = %d (%d)\n",
+      mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_MMST_FileObjectPacketLen,
 	      packet_length, get_32(header, i+96-24));
 
 
@@ -333,13 +336,13 @@ static int interp_header (uint8_t *header, int header_len)
 
       int stream_id = header[i+48] | header[i+49] << 8;
 
-      mp_msg(MSGT_NETWORK,MSGL_INFO,"stream object, stream id: %d\n", stream_id);
+      mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_MMST_StreamObjectStreamID, stream_id);
 
       if (num_stream_ids < MAX_STREAMS) {
       stream_ids[num_stream_ids] = stream_id;
       num_stream_ids++;
       } else {
-        mp_msg(MSGT_NETWORK,MSGL_ERR,"too many id, stream skipped");
+        mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_2ManyStreamID);
       }
       
     } else {
@@ -355,7 +358,7 @@ static int interp_header (uint8_t *header, int header_len)
       }
       printf("\n");
 #else
-      mp_msg(MSGT_NETWORK,MSGL_WARN,"unknown object\n");
+      mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_MMST_UnknownObject);
 #endif
     }
 
@@ -375,7 +378,7 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
   char           data[BUF_SIZE];
 
   if (!get_data (s, pre_header, 8)) {
-    mp_msg(MSGT_NETWORK,MSGL_ERR,"pre-header read failed\n");
+    mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_PreHeaderReadFailed);
     return 0;
   }
 
@@ -392,13 +395,12 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
 //    mp_msg(MSGT_NETWORK,MSGL_INFO,"asf media packet detected, len=%d\n", packet_len);
 
     if (packet_len < 0 || packet_len > BUF_SIZE) {
-      mp_msg(MSGT_NETWORK, MSGL_FATAL,
-              "Invalid rtsp packet size, giving up\n");
+      mp_msg(MSGT_NETWORK, MSGL_FATAL, MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize);
       return 0;
     }
       
     if (!get_data (s, data, packet_len)) {
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"media data read failed\n");
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_MediaDataReadFailed);
       return 0;
     }
 
@@ -410,27 +412,26 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
     int command;
 
     if (!get_data (s, (char*)&packet_len, 4)) {
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"packet_len read failed\n");
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_packet_lenReadFailed);
       return 0;
     }
 
     packet_len = get_32 ((unsigned char*)&packet_len, 0) + 4;
 
     if (packet_len < 0 || packet_len > BUF_SIZE) {
-      mp_msg(MSGT_NETWORK, MSGL_FATAL,
-              "Invalid rtsp packet size, giving up\n");
+      mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize);
       return 0;
     }
 
     if (!get_data (s, data, packet_len)) {
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"command data read failed\n");
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_CmdDataReadFailed);
       return 0;
     }
 
     if ( (pre_header[7] != 0xb0) || (pre_header[6] != 0x0b)
 	 || (pre_header[5] != 0xfa) || (pre_header[4] != 0xce) ) {
 
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"missing signature\n");
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_MissingSignature);
       return -1;
     }
 
@@ -441,7 +442,7 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
     if (command == 0x1b) 
       send_command (s, 0x1b, 0, 0, 0, data);
     else if (command == 0x1e) {
-      mp_msg(MSGT_NETWORK,MSGL_INFO,"everything done. Thank you for downloading a media file containing proprietary and patented technology.\n");
+      mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke);
       return 0;
     }
     else if (command == 0x21 ) {
@@ -450,7 +451,7 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
 	return 0;
     }
     else if (command != 0x05) {
-      mp_msg(MSGT_NETWORK,MSGL_ERR,"unknown command %02x\n", command);
+      mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_UnknownCmd,command);
       return -1;
     }
   }
@@ -471,7 +472,7 @@ static int asf_mmst_streaming_read( int fd, char *buffer, int size, streaming_ct
           // buffer is empty - fill it!
 	  int ret = get_media_packet( fd, packet_length1, stream_ctrl);
 	  if( ret<0 ) {
-		  mp_msg(MSGT_NETWORK,MSGL_ERR,"get_media_packet error : %s\n",strerror(errno));
+		  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_MMST_GetMediaPacketErr,strerror(errno));
 		  return -1;
 	  } else if (ret==0) //EOF?
 		  return ret;
@@ -524,7 +525,7 @@ int asf_mmst_streaming_start(stream_t *stream)
    */
   unescpath=malloc(strlen(path)+1);
   if (!unescpath) {
-	mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+	mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_MMST_MallocFailed);
 	return -1; 
   }
   url_unescape_string(unescpath,path);
@@ -539,7 +540,7 @@ int asf_mmst_streaming_start(stream_t *stream)
 	  free(path);
 	  return s;
   }
-  mp_msg(MSGT_NETWORK,MSGL_INFO,"connected\n");
+  mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_MMST_Connected);
   
   seq_num=0;
 
@@ -653,7 +654,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   stream->streaming_ctrl->status = streaming_playing_e;
 
   packet_length1 = packet_length;
-  mp_msg(MSGT_NETWORK,MSGL_INFO,"mmst packet_length = %d\n",packet_length);
+  mp_msg(MSGT_NETWORK,MSGL_INFO,"mmst packet_length = %d\n");
 
 #ifdef USE_ICONV
   if (url_conv != (iconv_t)(-1))

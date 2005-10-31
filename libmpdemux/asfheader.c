@@ -9,6 +9,7 @@ extern int verbose; // defined in mplayer.c
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "stream.h"
 #include "demuxer.h"
@@ -165,22 +166,19 @@ int read_asf_header(demuxer_t *demuxer){
   uint64_t data_len;
 
   if (hdr_len > 1024 * 1024) {
-    mp_msg(MSGT_HEADER, MSGL_FATAL,
-            "FATAL: header size bigger than 1 MB (%d)!\n"
-            "Please contact MPlayer authors, and upload/send this file.\n",
-             hdr_len);
+    mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB,
+			hdr_len);
     return 0;
   }
   hdr = malloc(hdr_len);
   if (!hdr) {
-    mp_msg(MSGT_HEADER, MSGL_FATAL, "Could not allocate %d bytes for header\n",
+    mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed,
             hdr_len);
     return 0;
   }
   stream_read(demuxer->stream, hdr, hdr_len);
   if (stream_eof(demuxer->stream)) {
-    mp_msg(MSGT_HEADER, MSGL_FATAL,
-           "EOF while reading asf header, broken/incomplete file?\n");
+    mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader);
     goto err_out;
   }
 
@@ -239,8 +237,7 @@ int read_asf_header(demuxer_t *demuxer){
         memcpy(sh_video->bih,&buffer[4+4+1+2],len);
 	le2me_BITMAPINFOHEADER(sh_video->bih);
 	if (sh_video->bih->biCompression == mmioFOURCC('D', 'V', 'R', ' '))
-	  mp_msg(MSGT_DEMUXER, MSGL_WARN, "DVR will probably only work with "
-	          "libavformat, try -demuxer 35 if you have problems\n");
+	  mp_msg(MSGT_DEMUXER, MSGL_WARN, MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat);
         //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         //sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         if(verbose>=1) print_video_header(sh_video->bih);
@@ -369,7 +366,7 @@ int read_asf_header(demuxer_t *demuxer){
   start = stream_tell(demuxer->stream); // start of first data chunk
   stream_read(demuxer->stream, guid_buffer, 16);
   if (memcmp(guid_buffer, asf_data_chunk_guid, 16) != 0) {
-    mp_msg(MSGT_HEADER, MSGL_FATAL, "No data chunk following header!\n");
+    mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader);
     return 0;
   }
   // read length of chunk
@@ -414,7 +411,7 @@ if(!audio_streams) demuxer->audio->id=-2;  // nosound
 else if(best_audio > 0 && demuxer->audio->id == -1) demuxer->audio->id=best_audio;
 if(!video_streams){
     if(!audio_streams){
-	mp_msg(MSGT_HEADER,MSGL_ERR,"ASF: no audio or video headers found - broken file?\n");
+	mp_msg(MSGT_HEADER,MSGL_ERR,MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound);
 	return 0; 
     }
     demuxer->video->id=-2; // audio-only
@@ -431,7 +428,7 @@ if(verbose){
 return 1;
 
 len_err_out:
-  mp_msg(MSGT_HEADER, MSGL_FATAL, "Invalid length in ASF header!\n");
+  mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader);
 err_out:
   if (hdr) free(hdr);
   if (streams) free(streams);
