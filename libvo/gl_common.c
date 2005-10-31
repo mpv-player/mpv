@@ -154,7 +154,7 @@ const char *glValName(GLint value)
  * \return 1 if format is supported by OpenGL, 0 if not.
  * \ingroup gltexture
  */
-int glFindFormat(uint32_t fmt, uint32_t *bpp, GLint *gl_texfmt,
+int glFindFormat(uint32_t fmt, int *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type)
 {
   int supported = 1;
@@ -478,7 +478,7 @@ int glFmt2bpp(GLenum format, GLenum type) {
  * \ingroup gltexture
  */
 void glUploadTex(GLenum target, GLenum format, GLenum type,
-                 const char *data, int stride,
+                 const void *data, int stride,
                  int x, int y, int w, int h, int slice) {
   int y_max = y + h;
   if (w <= 0 || h <= 0) return;

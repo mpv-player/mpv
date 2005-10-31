@@ -184,7 +184,7 @@ void glAdjustAlignment(int stride);
 
 const char *glValName(GLint value);
 
-int glFindFormat(uint32_t format, uint32_t *bpp, GLint *gl_texfmt,
+int glFindFormat(uint32_t format, int *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
@@ -192,7 +192,7 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval);
 void glUploadTex(GLenum target, GLenum format, GLenum type,
-                 const char *data, int stride,
+                 const void *data, int stride,
                  int x, int y, int w, int h, int slice);
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,

@@ -88,8 +88,8 @@ static int eq_rgamma = 0;
 static int eq_ggamma = 0;
 static int eq_bgamma = 0;
 
-static uint32_t texture_width;
-static uint32_t texture_height;
+static int texture_width;
+static int texture_height;
 
 static unsigned int slice_height = 1;
 
@@ -615,7 +615,7 @@ static uint32_t get_image(mp_image_t *mpi) {
 }
 
 static uint32_t draw_image(mp_image_t *mpi) {
-  char *data = mpi->planes[0];
+  unsigned char *data = mpi->planes[0];
   int slice = slice_height;
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     return VO_TRUE;
