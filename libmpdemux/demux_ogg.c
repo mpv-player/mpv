@@ -554,8 +554,6 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
   if (ds == d->video && ((sh_audio_t*)ds->sh)->format == FOURCC_THEORA)
      context = ((sh_video_t *)ds->sh)->context;
   data = demux_ogg_read_packet(os,pack,context,&pts,&flags,samplesize);
-  if(d->video->id < 0)
-      ((sh_audio_t*)ds->sh)->delay = pts;
 
   /// Clear subtitles if necessary (for broken files)
   if ((clear_sub > 0) && (pts >= clear_sub)) {
@@ -1471,7 +1469,8 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
     }
   }
     if (pos < 0) pos = 0;
-    if (pos > (demuxer->movi_end - demuxer->movi_start)) return;
+    if (pos > (demuxer->movi_end - demuxer->movi_start))
+      pos = demuxer->movi_end - demuxer->movi_start;
   } // if(ogg_d->syncpoints)
 
   while(1) {
@@ -1500,8 +1499,8 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
       char* buf = ogg_sync_buffer(sync,BLOCK_SIZE);
       int len = stream_read(demuxer->stream,buf,BLOCK_SIZE);
        if(len == 0 && demuxer->stream->eof) {
-	mp_msg(MSGT_DEMUX,MSGL_ERR,"EOF while trying to seek !!!!\n");
-	break;
+	mp_msg(MSGT_DEMUX,MSGL_V,"EOF while trying to seek !!!!\n");
+	return;
       }
       ogg_sync_wrote(sync,len);
       continue;
@@ -1556,6 +1555,8 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
         vo_osd_changed(OSDTYPE_SUBTITLE);
         clear_sub = -1;
 	demux_ogg_add_packet(ds,os,ds->id,&op);
+        if (demuxer->video->id < 0)
+          sh_audio->delay = pts;
 	return;
       }
      }
