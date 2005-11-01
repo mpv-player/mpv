@@ -155,6 +155,8 @@ uninit(struct vf_instance_s *vf)
 		free(vf->priv->bitmap.v);
 		free(vf->priv->bitmap.a);
 		free(vf->priv->bitmap.oa);
+		if (vf->priv->stream_fd >= 0)
+		  close(vf->priv->stream_fd);
 		free(vf->priv);
 	}
 }
