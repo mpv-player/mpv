@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.96 -->
+<!--synced with 1.98 -->
 <chapter id="faq" xreflabel="FAQ">   
 <title>Foire Aux Questions</title>
 
@@ -347,6 +347,19 @@ de lecture. Si vous l'avez encor quelque part sur votre système, vous devriez le
 	 
 <qandaentry>
 <question><para>
+Comment puis-je faire apparaitre les sous-titres sur les bandes noires autour d'un film?
+</para></question>
+<answer><para>
+Utilisez le filtre vidéo <systemitem>expand</systemitem> pour augmenter
+ verticalement la zone sur laquelle le film est rendue et placer le film
+au niveau de la bande supérieure, par exemple:
+<screen>
+mplayer -vf expand=0:-100:0:0 -slang de dvd://1
+</screen>
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
 Comment sélectionner les pistes audio ou les sous-titres d'un DVD ou de fichiers
 OGM, Matroska ou NUT ?
 </para></question>
@@ -355,8 +368,8 @@ Vous devez utiliser <option>-aid</option> (audio ID) ou <option>-alang</option>
 (audio language), <option>-sid</option>(subtitle ID) ou <option>-slang</option>
 (subtitle language), par exemple:
 <screen>
-mplayer example.mkv -alang eng -slang eng
-mplayer example.mkv -aid 1 -sid 1
+mplayer -alang eng -slang eng <replaceable>exemple.mkv</replaceable>
+mplayer -aid 1 -sid 1 <replaceable>exemple.mkv</replaceable>
 </screen>
 Pour voir ceux qui sont disponibles:
 <screen>
@@ -655,7 +668,8 @@ d'autres sont lus à double vitesse !
 </para></question>
 <answer><para>
 Vous avez une carte son/pilote boguée. Elle est certainement fixée à 44100Hz, et
-vous essayez de lire un fichier qui a de l'audio à 22050Hz. Essayez le filtre audio resample.
+vous essayez de lire un fichier qui a de l'audio à 22050Hz.
+Essayez le filtre audio <systemitem>resample</systemitem>.
 </para></answer>
 </qandaentry>
  	 
