@@ -25,7 +25,7 @@ static int cursor = 1;
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
 	case WM_CLOSE:
-	    mp_input_queue_cmd(mp_input_parse_cmd("quit"));
+	    mplayer_put_key(KEY_CLOSE_WIN);
 	    break;
         case WM_SYSCOMMAND:
 	    switch (wParam) {

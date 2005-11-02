@@ -909,7 +909,7 @@ if (buffer) {
      if (event.type == DIET_KEYPRESS) { 
     		switch (event.key_symbol) {
                                 case DIKS_ESCAPE:
-					mplayer_put_key('q');
+					mplayer_put_key(KEY_ESC);
 				break;
 				case DIKS_PAGE_UP: mplayer_put_key(KEY_PAGE_UP);break;
 				case DIKS_PAGE_DOWN: mplayer_put_key(KEY_PAGE_DOWN);break;

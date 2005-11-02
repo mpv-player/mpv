@@ -65,7 +65,7 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 			PostQuitMessage(0);
 			return 0;
 	    case WM_CLOSE:
-			mp_input_queue_cmd(mp_input_parse_cmd("quit"));
+			mplayer_put_key(KEY_CLOSE_WIN);
 			break;
 		case WM_WINDOWPOSCHANGED:
            {

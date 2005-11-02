@@ -1439,7 +1439,7 @@ check_events( void )
           if (event.type == DIET_KEYPRESS) {
                switch (event.key_symbol) {
                case DIKS_ESCAPE:
-                    mplayer_put_key( 'q' );
+                    mplayer_put_key( KEY_ESC );
                     break;
                case DIKS_PAGE_UP:
                     mplayer_put_key( KEY_PAGE_UP );
@@ -1473,33 +1473,43 @@ check_events( void )
                     break;
 
                case DIKS_POWER:
-                    mplayer_put_key( 'q' );
+                    mplayer_put_key( KEY_POWER );
                     break;
                case DIKS_MENU:
-                    mplayer_put_key( 'o' );
+                    mplayer_put_key( KEY_MENU );
                     break;
                case DIKS_PLAY:
+                    mplayer_put_key( KEY_PLAY );
+                    break;
                case DIKS_STOP:
+                    mplayer_put_key( KEY_STOP );
+                    break;
                case DIKS_PAUSE:
+                    mplayer_put_key( KEY_PAUSE );
+                    break;
                case DIKS_PLAYPAUSE:
-                    mplayer_put_key( ' ' );
+                    mplayer_put_key( KEY_PLAYPAUSE );
                     break;
                case DIKS_FORWARD:
+                    mplayer_put_key( KEY_FORWARD );
+                    break;
                case DIKS_NEXT:
-                    mplayer_put_key( KEY_PAGE_UP );
+                    mplayer_put_key( KEY_NEXT );
                     break;
                case DIKS_REWIND:
+                    mplayer_put_key( KEY_REWIND );
+                    break;
                case DIKS_PREVIOUS:
-                    mplayer_put_key( KEY_PAGE_DOWN );
+                    mplayer_put_key( KEY_PREVIOUS );
                     break;
                case DIKS_VOLUME_UP:
-                    mplayer_put_key( '0' );
+                     mplayer_put_key( KEY_VOLUME_UP );
                     break;
                case DIKS_VOLUME_DOWN:
-                    mplayer_put_key( '9' );
+                    mplayer_put_key( KEY_VOLUME_DOWN );
                     break;
                case DIKS_MUTE:
-                    mplayer_put_key( 'm' );
+                    mplayer_put_key( KEY_MUTE );
                     break;
 
                default:

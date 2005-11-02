@@ -548,16 +548,16 @@ void vo_x11_putkey_ext(int keysym)
     switch (keysym)
     {
         case XF86XK_AudioPause:
-            mplayer_put_key(KEY_XF86_PAUSE);
+            mplayer_put_key(KEY_PAUSE);
             break;
         case XF86XK_AudioStop:
-            mplayer_put_key(KEY_XF86_STOP);
+            mplayer_put_key(KEY_STOP);
             break;
         case XF86XK_AudioPrev:
-            mplayer_put_key(KEY_XF86_PREV);
+            mplayer_put_key(KEY_PREV);
             break;
         case XF86XK_AudioNext:
-            mplayer_put_key(KEY_XF86_NEXT);
+            mplayer_put_key(KEY_NEXT);
             break;
         default:
             break;
@@ -586,6 +586,9 @@ void vo_x11_putkey(int key)
             break;
         case wsEscape:
             mplayer_put_key(KEY_ESC);
+            break;
+        case wsTab:
+            mplayer_put_key(KEY_TAB);
             break;
         case wsEnter:
             mplayer_put_key(KEY_ENTER);
@@ -646,14 +649,6 @@ void vo_x11_putkey(int key)
             break;
         case wsF12:
             mplayer_put_key(KEY_F + 12);
-            break;
-        case wsq:
-        case wsQ:
-            mplayer_put_key('q');
-            break;
-        case wsp:
-        case wsP:
-            mplayer_put_key('p');
             break;
         case wsMinus:
         case wsGrayMinus:
@@ -728,15 +723,6 @@ void vo_x11_putkey(int key)
         case wsGrayEnter:
             mplayer_put_key(KEY_KPENTER);
             break;
-        case wsm:
-        case wsM:
-            mplayer_put_key('m');
-            break;
-        case wso:
-        case wsO:
-            mplayer_put_key('o');
-            break;
-
         case wsGrave:
             mplayer_put_key('`');
             break;

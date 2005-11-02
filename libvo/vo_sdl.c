@@ -1320,7 +1320,7 @@ static void check_events (void)
                                 }
                                 
 				break;
-				case SDL_QUIT: mplayer_put_key('q');break;
+				case SDL_QUIT: mplayer_put_key(KEY_CLOSE_WIN);break;
 		}
 	}
 }

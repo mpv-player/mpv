@@ -378,7 +378,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 		switch ( theHICommand.commandID )
 		{
 			case kHICommandQuit:
-				mplayer_put_key(KEY_ESC);
+				mplayer_put_key(KEY_CLOSE_WIN);
 				break;
 				
 			case kHalfScreenCmd:
@@ -476,7 +476,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 		{
 			case kEventWindowClosed:
 				theWindow = NULL;
-				mplayer_put_key(KEY_ESC);
+				mplayer_put_key(KEY_CLOSE_WIN);
 				break;
 				
 			//resize window

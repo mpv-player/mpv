@@ -34,12 +34,21 @@
 #define KEY_DOWN (KEY_CRSR+2)
 #define KEY_UP (KEY_CRSR+3)
 
-/* XF86 Multimedia keyboard keys */
-#define KEY_XF86_BASE (0x100+384)
-#define KEY_XF86_PAUSE (KEY_XF86_BASE+1)
-#define KEY_XF86_STOP (KEY_XF86_BASE+2)
-#define KEY_XF86_PREV (KEY_XF86_BASE+3)
-#define KEY_XF86_NEXT (KEY_XF86_BASE+4)
+/* Multimedia keyboard/remote keys */
+#define KEY_MM_BASE (0x100+384)
+#define KEY_POWER (KEY_MM_BASE+0)
+#define KEY_MENU (KEY_MM_BASE+1)
+#define KEY_PLAY (KEY_MM_BASE+2)
+#define KEY_PAUSE (KEY_MM_BASE+3)
+#define KEY_PLAYPAUSE (KEY_MM_BASE+4)
+#define KEY_STOP (KEY_MM_BASE+5)
+#define KEY_FORWARD (KEY_MM_BASE+6)
+#define KEY_REWIND (KEY_MM_BASE+7)
+#define KEY_NEXT (KEY_MM_BASE+8)
+#define KEY_PREV (KEY_MM_BASE+9)
+#define KEY_VOLUME_UP (KEY_MM_BASE+10)
+#define KEY_VOLUME_DOWN (KEY_MM_BASE+11)
+#define KEY_MUTE (KEY_MM_BASE+12)
   
 /* Keypad keys */
 #define KEY_KEYPAD (KEY_BASE+32)
@@ -57,3 +66,7 @@
 #define KEY_KPINS (KEY_KEYPAD+11)
 #define KEY_KPDEL (KEY_KEYPAD+12)
 #define KEY_KPENTER (KEY_KEYPAD+13)
+
+/* Special keys */
+#define KEY_INTERN (0x1000)
+#define KEY_CLOSE_WIN (KEY_INTERN+0)

@@ -240,10 +240,27 @@ static mp_key_name_t key_names[] = {
   { JOY_BTN8, "JOY_BTN8" },
   { JOY_BTN9, "JOY_BTN9" },
 
-  { KEY_XF86_PAUSE, "XF86_PAUSE" },
-  { KEY_XF86_STOP, "XF86_STOP" },
-  { KEY_XF86_PREV, "XF86_PREV" },
-  { KEY_XF86_NEXT, "XF86_NEXT" },
+  { KEY_POWER, "POWER" },
+  { KEY_MENU, "MENU" },
+  { KEY_PLAY, "PLAY" },
+  { KEY_PAUSE, "PAUSE" },
+  { KEY_PLAYPAUSE, "PLAYPAUSE" },
+  { KEY_STOP, "STOP" },
+  { KEY_FORWARD, "FORWARD" },
+  { KEY_REWIND, "REWIND" },
+  { KEY_NEXT, "NEXT" },
+  { KEY_PREV, "PREV" },
+  { KEY_VOLUME_UP, "VOLUME_UP" },
+  { KEY_VOLUME_DOWN, "VOLUME_DOWN" },
+  { KEY_MUTE, "MUTE" },
+
+  // These are kept for backward compatibility
+  { KEY_PAUSE, "XF86_PAUSE" },
+  { KEY_STOP, "XF86_STOP" },
+  { KEY_PREV, "XF86_PREV" },
+  { KEY_NEXT, "XF86_NEXT" },
+
+  { KEY_CLOSE_WIN, "CLOSE_WIN" },
 
   { 0, NULL }
 };
@@ -282,9 +299,11 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '}', 0 }, "speed_mult 2.0" },
   { { KEY_BACKSPACE, 0 }, "speed_set 1.0" },
   { { 'q', 0 }, "quit" },
+  { { 'Q', 0 }, "quit" },
 #ifndef HAVE_NEW_GUI
   { { KEY_ESC, 0 }, "quit" },
   { { 'p', 0 }, "pause" },
+  { { 'P', 0 }, "pause" },
 #endif
   { { ' ', 0 }, "pause" },
   { { '.', 0 }, "frame_step" },
@@ -298,6 +317,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_INS, 0 }, "alt_src_step 1" },
   { { KEY_DEL, 0 }, "alt_src_step -1" },
   { { 'o', 0 }, "osd" },
+  { { 'O', 0 }, "osd" },
   { { 'z', 0 }, "sub_delay -0.1" },
   { { 'x', 0 }, "sub_delay +0.1" },
   { { 'g', 0 }, "sub_step -1" },
@@ -307,6 +327,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { '0', 0 }, "volume 1" },
   { { '*', 0 }, "volume 1" },
   { { 'm', 0 }, "mute" },
+  { { 'M', 0 }, "mute" },
   { { '1', 0 }, "contrast -1" },
   { { '2', 0 }, "contrast 1" },
   { { '3', 0 }, "brightness -1" },
@@ -358,10 +379,21 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'w', 0 }, "panscan -0.1" },
   { { 'e', 0 }, "panscan +0.1" },
 
-  { { KEY_XF86_PAUSE, 0 }, "pause" },
-  { { KEY_XF86_STOP, 0 }, "quit" },
-  { { KEY_XF86_PREV, 0 }, "seek -60" },
-  { { KEY_XF86_NEXT, 0 }, "seek +60" },
+  { { KEY_POWER, 0 }, "quit" },
+  { { KEY_MENU, 0 }, "osd" },
+  { { KEY_PLAY, 0 }, "pause" },
+  { { KEY_PAUSE, 0 }, "pause" },
+  { { KEY_PLAYPAUSE, 0 }, "pause" },
+  { { KEY_STOP, 0 }, "quit" },
+  { { KEY_FORWARD, 0 }, "seek 60" },
+  { { KEY_REWIND, 0 }, "seek -60" },
+  { { KEY_NEXT, 0 }, "pt_step 1" },
+  { { KEY_PREV, 0 }, "pt_step -1" },
+  { { KEY_VOLUME_UP, 0 }, "volume 1" },
+  { { KEY_VOLUME_DOWN, 0 }, "volume -1" },
+  { { KEY_MUTE, 0 }, "mute" },
+          
+  { { KEY_CLOSE_WIN, 0 }, "quit" },
 
   { { 0 }, NULL }
 };
