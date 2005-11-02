@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.192
+// In synch with rev 1.193
 
 // ========================= MPlayer help ===========================
 
@@ -1148,3 +1148,156 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "stat auf Datei '%s' fehlgeschlagen: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Konnte Datei '%s' nicht öffnen: %s\n"
 
+// ========================== LIBMPDEMUX ===================================
+
+// url.c
+
+#define MSGTR_MPDEMUX_URL_MallocFailed "Speicherallozierung fehlgeschlagen!\n"
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "Zeichenkette scheint bereits im URL-Format %c%c1%c2 'escaped' zu sein\n"
+
+// ai_alsa1x.c
+
+#define MSGTR_MPDEMUX_AIALSA1X_PcmBrokenConfig "Kaputte Konfiguration für diesen PCM-Kanal: Keine Konfiguration verfügbar\n"
+#define MSGTR_MPDEMUX_AIALSA1X_UnavailableAccessType "Zugriffstyp nicht verfügbar\n"
+#define MSGTR_MPDEMUX_AIALSA1X_UnavailableSampleFmt "Sampleformat nicht verfügbar\n"
+#define MSGTR_MPDEMUX_AIALSA1X_UnavailableChanCount "Kanalzahl nicht verfügbar - falle auf Standard zurück: %d\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Konnte Samplingrate nicht setzen\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Konnte Pufferzeit nicht setzen\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Konnte Periode nicht setzen\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotInstallHWParams "Konnte Hardwareparameter nicht einrichten: %s\n"
+#define MSGTR_MPDEMUX_AIALSA1X_PeriodEqualsBufferSize "Periode darf nicht gleich der Puffergröße sein (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotInstallSWParams "Konnte Softwareparameter nicht einrichten:\n"
+#define MSGTR_MPDEMUX_AIALSA1X_ErrorOpeningAudio "Konnte Ton nicht öffnen: %s\n"
+#define MSGTR_MPDEMUX_AIALSA1X_AlsaStatusError "ALSA-Statusfehler: %s"
+#define MSGTR_MPDEMUX_AIALSA1X_AlsaXRUN "ALSA xrun!!! (mindestens %.3f ms lang)\n"
+#define MSGTR_MPDEMUX_AIALSA1X_AlsaStatus "ALSA-Status:\n"
+#define MSGTR_MPDEMUX_AIALSA1X_AlsaXRUNPrepareError "ALSA xrun: Fehler bei Vorbereitung: %s"
+#define MSGTR_MPDEMUX_AIALSA1X_AlsaReadWriteError "ALSA Ein/Ausgabefehlerr"
+
+// ai_alsa.c
+
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Kaputte Konfiguration für diesen PCM-Kanal: Keine Konfiguration verfügbar\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Zugriffstyp nicht verfügbar\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Sampleformat nicht verfügbar\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Kanalzahl nicht verfügbar - falle auf Standard zurück: %d\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Konnte Hardwareparameter nicht einrichten:"
+#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Periode darf nicht gleich der Puffergröße sein (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Konnte Softwareparameter nicht einrichten:\n"
+#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Konnte Ton nicht öffnen: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA-Statusfehler: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (mindestens %.3f ms lang)\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "ALSA-Status:\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: Fehler bei Vorbereitung: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA Ein/Ausgabefehler"
+
+// ai_oss.c
+
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Konnte Kanalzahl nicht setzen: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Konnte Stereo nicht setzen: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "Konnte '%s' nicht öffnen: %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Format ist nicht unterstützt\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Konnte Tonformat nicht setzen."
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Konnte Samplerate nicht setzen: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Konnte Trigger nicht setzen: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Konnte Blockgröße nicht ermitteln!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "Blockgröße des Tons ist null, setze auf %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Blockgröße des Tons ist zu klein, setze auf %d!\n"
+
+// asfheader.c
+
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: Dateikopf größer als 1 MB (%d)!\nSetze dich mit den MPlayer-Autoren in Verbindung und sende oder lade diese Datei hoch.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "%d Byte konnten nicht für den Kopf reserviert werden\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "Dateiende beim lesen des Kopfes, kaputte/unvollständige Datei?\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR funktioniert vermutlich nur mit libavformat, versuche -demuxer 35, falls du Probleme hast\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Auf den Kopf folgt kein Datenblock!\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: Kein Ton/Bild-Kopf gefunden - kaputte Datei?\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Ungültige Längenangabe im ASF-Kopf!\n"
+
+// asf_mmst_streaming.c
+
+#define MSGTR_MPDEMUX_MMST_WriteError "Schreibfehler\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nAchtung! Dateiende\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "Konnte 'pre-header' nicht lesen\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Ungültige Kopfgröße, gebe auf\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Konnte Kopfdaten nicht lesen\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "Konnte 'packet_len' nicht lesen\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Ungültige RTSP-Paketgröße, gebe auf\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Fehler beim Lesen der Kommandodaten\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "Kopfobjekt\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "Datenobjekt\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "Dateiobjekt, Paketgröße = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Datenstromobjekt, Identifikationsnummer: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Zu viele Identifikationsnummern, Datenstrom übersprungen"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "Unbekannter Objekttyp\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Konnte Mediendaten nicht lesen\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "Fehlende Signatur\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, daß Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "Unbekanntes Kommando %02x\n"
+#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet lieferte Fehler zurück: %s\n"
+#define MSGTR_MPDEMUX_MMST_MallocFailed "Speicherreservierung fehlgeschlagen!\n"
+#define MSGTR_MPDEMUX_MMST_Connected "Verbunden\n"
+
+// asf_streaming.c
+
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunk-Größe ist zu klein: %d\n"
+#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm passt nicht!: %d %d\n"
+#define MSGTR_MPDEMUX_ASF_WarnDropHeader "Warnung: 'header' verloren ????\n"
+#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Fehler beim Parsen des Blockkopfes\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Habe keinen 'header' als ersten Block bekommen!!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Konnte %d Byte Puffer nicht reservieren\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Fehler beim Lesen des Datenstroms über das Netzwerk\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Fehler: Block ist zu klein\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Fehler: Unterblocknummer ist ungültig\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Bandbreite reicht nicht aus, kann Datei nicht abspielen!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Bandbreite reicht nicht aus, Tonspur deaktiviert\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Bandbreite reicht nicht aus, Videospur deaktiviert\n"
+#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Ungültige Längenangabe im ASF-Kopf!\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Fehler beim Lesen des Blockkopfes\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Fehler: Blockgröße > Paketgröße\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Fehler beim Lesen des Blocks\n"
+#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "Ungültige Proxy-URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Unbekannter ASF-Datenstromtyp\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Konnte HTTP-Antworte nicht parsen\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "Server liefert %d:%s\n"
+#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF-HTTP-Parser Warnung: Pragma '%s' von %d auf %d Byte abgeschnitten\n"
+#define MSGTR_MPDEMUX_ASF_MallocFailed "Speicherallozierung fehlgeschlagen\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Fehler beim Schreiben in Socket: %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Konnte Kopf nicht parsen\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "Kein Datenstrom gefunden\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Unbekannte ASF-'streaming'-Variante\n"
+#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Fehlgeschlagen, breche ab\n"
+
+// audio_in.c
+
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nFehler beim Lesen des Tons: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Es gab einen 'cross-run', einige 'Frames' könnten fehlen!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Fataler Fehler, Rettung nicht möglich!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNicht genug Tonsamples!\n"
+
+// aviheader.c
+
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** leere Liste?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Film von 0x%X - 0x%X gefunden\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "'bih' gefunden, %u Byte von %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Erstelle Keyframe-Tabelle für MS-mpg4v1-Video neu\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Erstelle Keyframe-Tabelle für DIVX3-Video neu\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Erstelle Keyframe-Tabelle für MPEG4-Video neu\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' gefunden, %d Byte von %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh gefunden (size=%d) (total_frames=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Lese INDEX-Block, %d Blöcke für %ld Frames (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "zusätzlicher RIFF-Kopf...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** Warnung: Dies ist kein erweiterter AVI-Kopf...\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Kaputter Block?  Blockgröße=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Erstelle ODML-Index (%d Superindexblöcke)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Kaputte (unfertige?) Datei erkannt.  Benutze den herkömmlichen Index\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "Konnte Index-Datei '%s' nicht lesen: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "'%s' ist keine gültige MPlayer-Index-Datei\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Konnte Speicher für Indexdaten von '%s' nicht reservieren\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Vorzeitiges Ende der Indexdatei '%s'\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Indexdatei '%s' geladen\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Erzeuge Index: %3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Erzeuge Indextabelle für %d Blöcke!\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Konnte Indexdatei '%s' nicht schreiben: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Indexdate '%s' gespeichert\n"
