@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.183
+// In synch with rev 1.192
 
 // ========================= MPlayer help ===========================
 
@@ -221,6 +221,7 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung oder anderen Farbraum als die vorige.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAlle Videodateien müssen für -ovc copy identische fps, Auflösung und Codec haben.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAlle Videodateien müssen für -oac copy identischen Audiocodec und Format haben.\n"
+#define MSGTR_NoAudioFileMismatch "\nNur-Video-Dateien können nicht mit Audio/Video-Dateien gemischt werden.  Versuche -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "WARNUNG: Korrektes Funktionieren von -speed kann zusammen mit -oac copy nicht garantiert werden!\n"\
 "Das Ergebnis der Encodierung könnte defekt sein!\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
@@ -477,15 +478,23 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer wurde ohne  SMB-Unterstützung  kompiliert.\n"
 
 #define MSGTR_CantOpenDVD "Kann DVD-Laufwerk nicht öffnen: %s\n"
+#define MSGTR_NoDVDSupport "MPlayer wurde ohne DVD-Unterstützung übersetzt.\n"
 #define MSGTR_DVDwait "Lese Disk-Struktur, bitte warten...\n"
 #define MSGTR_DVDnumTitles "Es sind %d Titel auf dieser DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ungültige DVD-Titelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Es sind %d Kapitel in diesem DVD-Titel.\n"
 #define MSGTR_DVDinvalidChapter "Ungültige DVD-Kapitelnummer: %d\n"
+#define MSGTR_DVDinvalidChapterRange "Ungültige Kapitelbereichsangabe: %s\n"
+#define MSGTR_DVDinvalidLastChapter "Ungültiger Wert für das letzte DVD-Kapitel: %d\n"
 #define MSGTR_DVDnumAngles "Es sind %d Kameraeinstellungen diesem DVD-Titel.\n"
 #define MSGTR_DVDinvalidAngle "Ungültige DVD-Kameraeinstellungsnummer %d.\n"
 #define MSGTR_DVDnoIFO "Kann die IFO-Datei für den DVD-Titel %d nicht öffnen.\n"
+#define MSGTR_DVDnoVMG "Kann VMG-Informationen nicht öffnen!\n"
 #define MSGTR_DVDnoVOBs "Kann VOB-Dateien des Titels  (VTS_%02d_1.VOB) nicht öffnen.\n"
+#define MSGTR_DVDnoMatchingAudio "Keine passende DVD-Tonspur gefunden!\n"
+#define MSGTR_DVDaudioChannel "Ausgewählte DVD-Audiospur: %d Sprache: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "Keine passende Untertitelspur gefunden!\n"
+#define MSGTR_DVDsubtitleChannel "Ausgewählte DVD-Untertitelspur: %d Sprache: %c%c\n"
 #define MSGTR_DVDopenOk "DVD erfolgreich geöffnet.\n"
 
 // muxer_*.c:
@@ -546,6 +555,10 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressiven NTSC-Inhalt erkannt, wechsele Framerate.\n"
 
+#define MSGTR_CacheFill "\rFülle Zwischenpuffer: %5.2f%% (%d Byte)   "
+#define MSGTR_NoBindFound "Taste '%s' ist nicht gebunden."
+#define MSGTR_FailedToOpen "Konnte '%s' nicht öffnen\n"
+
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Konnte Codec nicht öffnen.\n"
 #define MSGTR_CantCloseCodec "Konnte Codec nicht schließen.\n"
@@ -571,7 +584,10 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Erforderliche Videocodec Familie [%s] (vfm=%s) nicht verfügbar.\nAktiviere sie beim Kompilieren.\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Erforderliche Audiocodec-Familie [%s] (afm=%s) nicht verfügbar.\nAktiviere sie beim Kompilieren.\n"
 #define MSGTR_OpeningVideoDecoder "Öffne Videodecoder: [%s] %s\n"
+#define MSGTR_SelectedVideoCodec "Ausgewählter Videocodec: [%s] vfm: %s (%s)\n"
 #define MSGTR_OpeningAudioDecoder "Öffne Audiodecoder: [%s] %s\n"
+#define MSGTR_SelectedAudioCodec "Ausgewählter Audiocodec: [%s] afm: %s (%s)\n"
+#define MSGTR_BuildingAudioFilterChain "Baue Tonfilterkette von %dHz/%dch/%s nach %dHz/%dch/%s auf...\n"
 #define MSGTR_UninitVideoStr "Deinitialisiere Video: %s  \n"
 #define MSGTR_UninitAudioStr "Deinitialisiere Audio: %s  \n"
 #define MSGTR_VDecoderInitFailed "Initialisierung des Videodecoders fehlgeschlagen :(\n"
@@ -606,6 +622,9 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Konnte EWMH-Fullscreen-Event nicht senden!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Konnte das XScreeSaver-Fenster nicht finden.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: Ausgewählter Videomodus %dx%d für Bildgröße %dx%d.\n"
+
 #define MSGTR_InsertingAfVolume "[Mixer] Kein Hardware-Mixing, füge Lautstärkefilter ein.\n"
 #define MSGTR_NoVolume "[Mixer] Keine Lautstärkeregelung verfügbar.\n"
 
@@ -1089,4 +1108,43 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "Nicht genügend Bedienelemente in der Kommandozeile angegeben"
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input-Kontrolle #%d ist unterhalb der Grenze von %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input-Kontrolle #%d ist überhalb der Grenze von %0.4f.\n"
+
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "Öffne Joystick-Gerätedatei '%s'\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Konnte Joystick-Gerätedatei '%s' nicht öffnen: %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Fehler beim Lesen von Joystick-Gerätedatei: %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: %d Byte Daten verloren\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: Warnung: Initialisierungsereignis, Synchronisierung mit Treiber verloren\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick: Warnung: Unbekannter Ereignistyp %d\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Zu viele Kommandodateideskriptoren, konnte Deskriptor %d nicht registrieren.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Zu viele Tastendateidesktriptoren, konnte Deskriptor %d nicht registrieren.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Kommando %s: Argument %d ist keine Integerzahl.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Kommando %s: Argument %d ist keine Fließkommazahl.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Kommando %s: Argument %d ist nicht abgeschlossen.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Unbekanntes Argument %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "Kommando %s benötigt mindestens %d Argumente, es wurden aber nur %d gefunden.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Fehler beim Lesen von Kommandodateideskriptor %d: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Kommandopuffer von Dateideskriptor %d ist voll: Verwerfe Inhalt\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Ungültiges Kommando für gebundene Taste '%s'"
+#define MSGTR_INPUT_INPUT_ErrSelect "Select gab Fehler zurück: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Fehler beim Lesen von Tasteneingabedateideskriptor %d\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Fataler Fehler beim Lesen von Tasteneingabedateideskriptor %d\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Zu viele gleichzeitige Tastendruckereignisse\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Fehler beim Lesen von Kommandodateideskriptor %d\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Fehler beim Lesen von Eingabekonfigurationsdatei '%s': %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Unbekannte Taste '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Konnte Bindung '%s' nicht fertigstellen.\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "Der Puffer ist zu klein für diesen Tastennamen: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "Kein Kommando für Taste '%s' gefunden"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Der Puffer ist zu klein für Kommando '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "Interner Fehler: What are we doing here?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Konnte Joystick nicht initialisieren\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "stat auf Datei '%s' fehlgeschlagen: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "Konnte Datei '%s' nicht öffnen: %s\n"
 
