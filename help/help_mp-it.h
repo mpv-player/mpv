@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.188
+// Updated to help_mp-en.h v1.192
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -1026,7 +1026,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Canali: %s Formato %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: un dump più veloce si ottiene con -vc dummy -vo null\nPCM: Info: per scrivere files WAVE usa -ao pcm:waveheader (default).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: un dump più veloce si ottiene con -vc null -vo null\nPCM: Info: per scrivere files WAVE usa -ao pcm:waveheader (default).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Non posso aprire %s in scrittura!\n"
 
 // ao_sdl.c
@@ -1109,4 +1109,43 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "Non sono stati indicati abbastaza controlli sulla riga comando"
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Il controllo di input #%d è sotto il limite inferiore di %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Il controllo di input #%d è sopra al limite superiore di %0.4f.\n"
+
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "Apertura dispositivo joystick %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Non posso aprire il dispositivo joystick %s: %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Errore in lettura dispositivo joystick: %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: persi %d byte di dati\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: Avviso: evento in inizializzazione, persa sincronia col driver\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick: Avviso: tipo di evento %d sconosciuto\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Troppi descrittori comandi, non posso registrare il descrittore %d.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Troppi descrittori tasti, non posso registrare il descrittore %d.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Comando %s: l'argomento %d non è un'intero.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Comando %s: l'argomento %d non è un decimale.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Comando %s: l'argomento %d è indeterminato.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Argomento %d sconosciuto\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "Il comando %s richiede almeno %d argomenti, trovati solo %d finora.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Errore in lettura descrittore comandi %d: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Il buffer cmd del descrittore %d è pieno: ne scarto il contenuto\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Controllo non valido legato al tasto '%s'"
+#define MSGTR_INPUT_INPUT_ErrSelect "Errore selezione: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Errore nel descrittore input tasto %d\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Input da tasto morto nel descrittore %d\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Troppi eventi di tasto premuto contemporaneamente\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Errore nel descrittore comando %d\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Fallimento nella lettura del file di configurazione dell'input %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Il tasto '%s' è sconosciuto\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Legame %s non completato\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "Il buffer è troppo piccolo per questo nome tasto: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "Nessun comando trovato per il tasto %s"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Il buffer è troppo piccolo per il comando %s\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "Cosa ci stiamo facendo qui?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Impossibile inizializzare i controlli del joystick\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "Impossibile fare stat di %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "Impossibile aprire %s: %s\n"
 
