@@ -107,7 +107,7 @@ static char help_text[]=
 "Se nulla di ciò ti aiuta, allora leggi DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
-#define MSGTR_GuiNeedsX "LA GUI di MPlayer richiede X11!\n"
+#define MSGTR_GuiNeedsX "La GUI di MPlayer richiede X11!\n"
 #define MSGTR_Playing "Riproduco %s\n"
 #define MSGTR_NoSound "Audio: nessun suono!!!\n"
 #define MSGTR_FPSforced "FPS forzato a %5.3f  (ftime: %5.3f)\n"
@@ -237,8 +237,8 @@ static char help_text[]=
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio selezionato\n"
 #define MSGTR_MP3AudioSelected "MP3 audio selezionato\n"
 #define MSGTR_CannotAllocateBytes "Non posso allocare %d bytes\n"
-#define MSGTR_SettingAudioDelay "Setto l'AUDIO DELAY a %5.3f\n"
-#define MSGTR_SettingAudioInputGain "Setto l'audio input gain a %f\n"
+#define MSGTR_SettingAudioDelay "Imposto il ritardo audio a %5.3f\n"
+#define MSGTR_SettingAudioInputGain "Imposto il guadagno di ingresso audio a %f\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Limito il preload audio a 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Aumento la densità audio a 4\n"
@@ -366,7 +366,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, Non trovo l'encoder per il codec %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, non posso allocare il contesto!\n"
 #define MSGTR_CouldntOpenCodec "Non posso aprire il codec %s, br=%d\n"
-#define MSGTR_CantCopyAudioFormat "Il formato audio 0x%x è incompatible con '-oac copy', prova invece '-oac pcm' o usa '-fafmttag' per forzare.\n"
+#define MSGTR_CantCopyAudioFormat "Il formato audio 0x%x è incompatibile con '-oac copy', prova invece '-oac pcm' o usa '-fafmttag' per forzare.\n"
 
 // cfg-mencoder.h:
 
@@ -541,7 +541,7 @@ static char help_text[]=
 #define MSGTR_FoundVideoStream "==> Trovato flusso video: %d\n"
 #define MSGTR_DetectedTV "Ho trovato una TV! ;-)\n"
 #define MSGTR_ErrorOpeningOGGDemuxer "Impossibile aprire il demuxer ogg\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: sto cercandi il flusso audio (id:%d)\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: sto cercando il flusso audio (id:%d)\n"
 #define MSGTR_CannotOpenAudioStream "Impossibile aprire il flusso audio: %s\n"
 #define MSGTR_CannotOpenSubtitlesStream "Impossibile aprire il flusso dei sottotitoli: %s\n"
 #define MSGTR_OpeningAudioDemuxerFailed "Errore nell'apertura del demuxer audio: %s\n"
@@ -609,7 +609,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Il codec non ha impostato sh->disp_w and sh->disp_h, tento di risolvere.\n"
-#define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (sp.colore preferito: %s)\n"
+#define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (sp.col. preferito: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Impossibile trovare uno spazio colore adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
@@ -779,7 +779,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SoftwareMixer "Abilita Mixer Software"
 #define MSGTR_PREFERENCES_ExtraStereo "Abilita l'extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficiente:"
-#define MSGTR_PREFERENCES_AudioDelay "Ritatdo audio"
+#define MSGTR_PREFERENCES_AudioDelay "Ritardo audio"
 #define MSGTR_PREFERENCES_DoubleBuffer "Abilita il doppio buffering"
 #define MSGTR_PREFERENCES_DirectRender "Abilita il direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Abilita lo scarto dei frame"
@@ -1125,7 +1125,7 @@ static char help_text[]=
 
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Troppi descrittori comandi, non posso registrare il descrittore %d.\n"
 #define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Troppi descrittori tasti, non posso registrare il descrittore %d.\n"
-#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Comando %s: l'argomento %d non è un'intero.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Comando %s: l'argomento %d non è un intero.\n"
 #define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Comando %s: l'argomento %d non è un decimale.\n"
 #define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Comando %s: l'argomento %d è indeterminato.\n"
 #define MSGTR_INPUT_INPUT_ErrUnknownArg "Argomento %d sconosciuto\n"
@@ -1136,7 +1136,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrSelect "Errore selezione: %s\n"
 #define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Errore nel descrittore input tasto %d\n"
 #define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Input da tasto morto nel descrittore %d\n"
-#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Troppi eventi di tasto premuto contemporaneamente\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Troppi eventi di 'tasto premuto' contemporaneamente\n"
 #define MSGTR_INPUT_INPUT_ErrOnCmdFd "Errore nel descrittore comando %d\n"
 #define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Fallimento nella lettura del file di configurazione dell'input %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrUnknownKey "Il tasto '%s' è sconosciuto\n"
