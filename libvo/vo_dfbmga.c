@@ -1500,7 +1500,7 @@ check_events( void )
                     mplayer_put_key( KEY_REWIND );
                     break;
                case DIKS_PREVIOUS:
-                    mplayer_put_key( KEY_PREVIOUS );
+                    mplayer_put_key( KEY_PREV );
                     break;
                case DIKS_VOLUME_UP:
                      mplayer_put_key( KEY_VOLUME_UP );
