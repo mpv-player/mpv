@@ -63,7 +63,7 @@ static float get_delay();
 static int control(int cmd, int arg);
   This is for reading/setting plugin-specific and other special
   parameters and can be used for keyboard input for example. All
-  plugins bust respond to cmd=AOCONTROL_PLUGIN_SET_LEN which is part
+  plugins must respond to cmd=AOCONTROL_PLUGIN_SET_LEN which is part
   of the initialization of the plugin. When this command is received
   the parameter pl_delay.len will contain the maximum size of data the
   plugin can produce. This can be used for calculating and allocating
