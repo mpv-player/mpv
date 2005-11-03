@@ -1591,10 +1591,26 @@ while (player_idle_mode && !filename) {
         mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
     }else if(sub_auto && filename && (strlen(filename)>=5)){
       /* try to autodetect vobsub from movie filename ::atmos */
-      char *buf = malloc((strlen(filename)-3) * sizeof(char));
+      char *buf = malloc((strlen(filename)-3) * sizeof(char)),*psub;
       memset(buf,0,strlen(filename)-3); // make sure string is terminated
       strncpy(buf, filename, strlen(filename)-4); 
       vo_vobsub=vobsub_open(buf,spudec_ifo,0,&vo_spudec);
+      /* try from ~/.mplayer/sub */
+      if(!vo_vobsub && (psub = get_path( "sub/" ))) {
+          char *bname;
+          int l;
+          bname = strrchr(buf,'/');
+#ifdef WIN32
+          if(!bname) bname = strrchr(buf,'\\');
+#endif
+          if(bname) bname++;
+          else bname = buf;
+          l = strlen(psub) + strlen(bname) + 1;
+          psub = realloc(psub,l);
+          strcat(psub,bname);
+          vo_vobsub=vobsub_open(psub,spudec_ifo,0,&vo_spudec);
+          free(psub);          
+      }
       free(buf);
     }
     if(vo_vobsub){
