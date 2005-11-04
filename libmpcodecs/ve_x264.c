@@ -102,6 +102,7 @@ static char *zones = NULL;
 static int subq = 5;
 static int me_method = 2;
 static int me_range = 16;
+static int trellis = 1;
 static int threads = 1;
 static int level_idc = 40;
 static int psnr = 0;
@@ -182,6 +183,7 @@ m_option_t x264encopts_conf[] = {
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
     {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"me_range", &me_range, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
+    {"trellis", &trellis, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {"level_idc", &level_idc, CONF_TYPE_INT, CONF_RANGE, 10, 51, NULL},
     {"threads", &threads, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -289,6 +291,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.analyse.i_chroma_qp_offset = chroma_qp_offset;
     mod->param.analyse.b_chroma_me = chroma_me;
     mod->param.analyse.b_mixed_references = mixed_references;
+    mod->param.analyse.i_trellis = trellis;
 
     mod->param.i_width = width;
     mod->param.i_height = height;
@@ -347,6 +350,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
             mod->param.analyse.i_subpel_refine = max( min( 3, subq - 1 ), 1 );
             mod->param.analyse.inter &= ( ~X264_ANALYSE_PSUB8x8 );
             mod->param.analyse.inter &= ( ~X264_ANALYSE_BSUB16x16 );
+            mod->param.analyse.i_trellis = 0;
         }
         else if(turbo == 2)
         {
@@ -356,6 +360,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
             mod->param.analyse.inter = 0;
             mod->param.analyse.b_transform_8x8 = 0;
             mod->param.analyse.b_weighted_bipred = 0;
+            mod->param.analyse.i_trellis = 0;
         }
         mod->param.rc.b_stat_write = 1;
         mod->param.rc.b_stat_read = 0;

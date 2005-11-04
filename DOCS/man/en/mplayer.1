@@ -8714,6 +8714,20 @@ Without this option, a whole macroblock must use the same reference.
 Requires frameref>1.
 .
 .TP
+.B trellis=<0\-2>
+rate-distortion optimal quantization
+.PD 0
+.RSs
+.IPs 0
+disabled
+.IPs 1
+enabled only for the final encode (default)
+.IPs 2
+enabled during all mode decisions (slow, requires subq=6)
+.RE
+.PD 1
+.
+.TP
 .B chroma_qp_offset=<-12\-12>
 Use a different quantizer for chroma as compared to luma.
 Useful values are in the range <-2\-2> (default: 0).
