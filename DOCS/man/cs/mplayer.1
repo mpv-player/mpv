@@ -1,4 +1,4 @@
-.\" synced with 1.1131
+.\" synced with 1.1146
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -249,9 +249,9 @@ Mo¾nosti pøizpùsobení ovládání naleznete v nápovìdì k volbì \-input.
 .RS
 .IPs "<\- a \->"
 Pøevine zpìt/\:vpøed o 10 sekund.
-.IPs "nahoru a dolù"
+.IPs "dolù a nahoru"
 Pøevine zpìt/\:vpøed o 1 minutu.
-.IPs "pgup a pgdown"
+.IPs "pgdown a pgup"
 Pøevine zpìt/\:vpøed o 10 minut.
 .IPs "[ a ]"
 Sní¾í/\:zvý¹í aktuální rychlost pøehrávání o 10%.
@@ -260,13 +260,13 @@ Zpomalí na polovinu/\:zdvojí aktuální rychlost pøehrávání.
 .IPs "backspace (mazátko)"
 Vrátí rychlost pøehrávání na normál.
 .IPs "< a >"
-zpìt/\:vpøed v playlistu
+Pøejde zpìt/\:vpøed v playlistu.
 .IPs "ENTER"
-vpøed v playlistu, dokonce i pøes konec
+Pøejde vpøed v playlistu, dokonce i pøes konec.
 .IPs "HOME a END"
-dal¹í/\:pøedchozí podstrom v rodièovském playlistu
-.IPs "INS a DEL"
-dal¹í/\:pøedchozí alternativní zdroj (pouze ASX playlist)
+Pøejde na dal¹í/\:pøedchozí podstrom v rodièovském playlistu.
+.IPs "INS a DEL (pouze ASX playlist)"
+Pøejde na dal¹í/\:pøedchozí alternativní zdroj.
 .IPs "p / MEZERNÍK"
 Pauza pøehrávání (dal¹í stisk odpauzuje).
 .IPs .\ \ \ \ 
@@ -313,8 +313,8 @@ Nastavení zpo¾dìní titulkù po +/\:- 0.1 sekundy.
 Posun titulkù nahoru/\:dolù.
 .IPs i\ \ \ \ 
 Nastavení EDL znaèky.
-.IPs s\ \ \ \ 
-Poøídí snímek obrazovky (vy¾aduje, aby byl nahrán filtr screenshot).
+.IPs s (filtr screenshot musí být nahrán)
+Poøídí snímek obrazovky.
 .RE
 .PD 1
 .PP
@@ -365,7 +365,7 @@ s multimediálními tlaèítky.)
 .PD 0
 .RS
 .IPs "PAUSE"
-pauza
+Pauza.
 .IPs "STOP\ "
 Ukonèení pøehrávání a exit.
 .IPs "PREVIOUS a NEXT"
@@ -389,11 +389,11 @@ Naètení souboru.
 .IPs t\ \ \ \ 
 Naètení titulkù.
 .IPs c\ \ \ \ 
-voliè skinù
+Otevøe voliè skinù.
 .IPs p\ \ \ \ 
-playlist
+Otevøe playlist.
 .IPs r\ \ \ \ 
-pøedvolby
+Otevøe pøedvolby.
 .RE
 .PD 1
 .PP
@@ -462,9 +462,13 @@ Formát je následující:
 .br
 %n%øetìzec_délky_n
 .br
-.I PØÍKLAD:
+.I PØÍKLADY:
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
+.br
+Nebo ve skriptu:
+.br
+mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
 Mù¾ete umístit v¹echny své volby do konfiguraèních souborù, které budou naèteny
 pøi ka¾dém spu¹tìní MPlayeru/MEncoderu.
@@ -1466,6 +1470,13 @@ Vytvoøí soubor dumpsub.smi v aktuálním adresáøi.
 Pøevede zvolené titulky (urèené volbou \-sub) do èasovì orientovaného
 SubViewer (SRT) formátu.
 Vytvoøí soubor dumpsub.srt v aktuálním adresáøi.
+.br
+.I POZNÁMKA:
+Nìkteré ¹patné hardwarové pøehrávaèe se rdousí SRT titulky s Unixovými
+konci øádkù.
+Pokud máte smùlu a vlastníte takovou ma¹inu, protáhnìte si své
+titulkové soubory pøes unix2dos nebo podpbný program pro výmìnu Unixových
+koncù øádkù za DOS/Windows konce øádkù.
 .
 .TP
 .B \-dumpsub (pouze MPlayer) (BETA KÓD)
@@ -1619,13 +1630,13 @@ Urèí jak budou zarovnány SPU (DVD/\:VOBsub) titulky.
 .PD 0
 .RSs
 .IPs "-1"
-originální pozice
+Originální pozice.
 .IPs " 0"
-zarovnané na horní okraj (originální/\:výchozí chování)
+Zarovnat na horní okraj (originální/\:výchozí chování).
 .IPs " 1"
-zarovnané na støed
+Zarovnat na støed.
 .IPs " 2"
-zarovnané na spodní okraj
+Zarovnat na spodní okraj.
 .RE
 .PD 1
 .
@@ -1680,15 +1691,16 @@ Pou¾íváno pro ladící úèely.
 .
 .TP
 .B \-subalign <0\-2> (pouze OSD)
-Urèí jak budou zarovnány titulky pøi pou¾ití \-subpos.
+Urèí který okraj titulkù by mìl být zarovnán na vý¹ku zadanou
+pomocí \-subpos.
 .PD 0
 .RSs
 .IPs 0
-Zarovnané na horní okraj (originální/\:výchozí chování).
+Zarovnat horní okraj titulku (originální chování).
 .IPs 1
-Zarovnané na støed.
+Zarovnat støed titulku.
 .IPs 2
-Zarovnané na spodní okraj.
+Zarovnat spodní okraj titulku (výchozí).
 .RE
 .PD 1
 .
@@ -1989,7 +2001,15 @@ Nativní Mac OS X zvuk.
 .
 .TP
 .B sgi (pouze SGI)
-Nativní SGI zvuk.
+Nativní SGI zvukové rozhraní.
+.PD 0
+.RSs
+.IPs "<jméno výstupního zaøízení>"
+Explicitnì vybere výstupní zaøízení/\:rozhraní k pou¾ití
+(výchozí: výchozí nastavení systému).
+Napøíklad, 'Analog\ Out' nebo 'Digital\ Out'.
+.RE
+.PD 1
 .
 .TP
 .B sun (pouze Sun)
@@ -2340,10 +2360,10 @@ gl2, quartz, macosx a xvidix.
 .B \-panscanrange <-19.0\-99.0> (experimentální)
 Zmìní rozsah pùsobení funkce pan-and-scan (výchozí: 1).
 Kladné hodnoty jsou násobky výchozího rozsahu.
-Záporné hodnoty zase umo¾ní zoomovat a¾ na násobek -panscanrange+1.
+Záporné hodnoty zase umo¾ní zoomovat a¾ na násobek \-panscanrange+1.
 Napø. \-panscanrange -3 umo¾òuje zoom násobek a¾ do 4.
 Tato vlastnost je experimentální.
-Nehlaste chyby, pokud nepou¾íváte -vo gl.
+Nehlaste chyby, pokud nepou¾íváte \-vo gl.
 .br
 Hodnota, v daném rozsahu, udává jak moc má být obraz oøíznut.
 .
@@ -2767,7 +2787,7 @@ Poèet øádkù kopírovaných do textury najednou (výchozí: 4).
 0 pro celý obrázek.
 .IPs (no)osd
 Zapne nebo vypne podporu pro renderování OSD pomocí OpenGL (výchozí: zapnuto).
-Tato volba je pro testovací úèely, místo ní pou¾ijte pro vypnutí OSD
+Tato volba je pro testovací úèely, pro vypnutí OSD pou¾ijte radìji
 volbu \-osdlevel 0.
 .IPs (no)scaled-osd
 Zmìní chování OSD pøi zmìnách velikosti okna (výchozí: vypnuto).
@@ -2828,10 +2848,19 @@ Metoda 4 je obvykle rychlej¹í.
 Vy¾aduje roz¹íøení GL_ARB_fragment_program a aspoò ètyøi texturové jednotky.
 Poskytuje ovládání jasu, kontrastu, sytosti, barevného tónu a gama.
 Gama mù¾e být také nastavena nezávisle pro èervenou, zelenou a modrou slo¾ku.
+.br
+5: Pou¾ije ATI-specifickou metodu (pro star¹í karty).
+Pou¾ívá roz¹íøení specifické pro ATI (GL_ATI_fragment_shader - nikoli
+GL_ARB_fragment_shader!).
+Vy¾aduje aspoò tøi texturovací jednotky.
+Poskytuje ovládání sytosti a tónování.
 .RE
 .IPs customprog=<soubor>
 Nahraje u¾ivatelský fragment program ze <souboru>.
 Jako pøíklad viz TOOLS/edgedect.fp.
+.IPs customtex=<soubor>
+Nahraje u¾ivatelskou "gamma ramp" texturu ze <souboru>.
+To mù¾e být pou¾ito v kombinaci s yuv=4 nebo s volbou customprog.
 .REss
 .RE
 .PD 1
@@ -2848,25 +2877,7 @@ stejné jako gl (výchozí: zapnuto)
 Nastaví typ konverze YUV na RGB.
 Pokud ji nastavíte na jinou hodnotu ne¾ 0, vypne se OSD a nastavování jasu,
 kontrastu a gama bude dostupné pouze pøes globální nastavení X serveru.
-.RSss
-0: Pou¾ije se softwarová konverze (výchozí).
-Kompatibilní se v¹emi verzemi OpenGL.
-Poskytuje ovládání jasu, kontrastu a sytosti.
-.br
-1: Pou¾ijí se register combiners.
-Pou¾ije specifické nVidia roz¹íøení (GL_NV_register_combiners).
-Vy¾aduje aspoò tøi texturové jednotky.
-.br
-2: Pou¾ije se fragment program.
-Vy¾aduje roz¹íøení GL_ARB_fragment_program a aspoò tøi texturové jednotky.
-.br
-3: Pou¾ije se fragment program pou¾ívající POW instrukci.
-Vy¾aduje roz¹íøení GL_ARB_fragment_program a aspoò tøi texturové jednotky.
-Metoda 4 je obvykle rychlej¹í.
-.br
-4: Pou¾ije se fragment program s dal¹í kontrolou.
-Vy¾aduje roz¹íøení GL_ARB_fragment_program a aspoò ètyøi texturové jednotky.
-.REss
+Jinak mají hodnoty stejný význam jako pro \-vo gl.
 .REss
 .
 .TP
@@ -3164,7 +3175,7 @@ jména souboru.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:15.0:test.gif
+mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
 .RE
 .PD 1
 .
@@ -4411,9 +4422,9 @@ Expanduje tak aby odpovídal pomìru stran, místo rozli¹ení (výchozí: 0).
 .I PØÍKLAD:
 .PD 0
 .RSs
-.IP expand=800::::3/4
+.IP expand=800::::4/3
 Expanduje na 800x600, pokud nemá zdroj vy¹¹í rozli¹ení, v tom pøípadì
-expanduje tak, aby dosáhl pomìru stran 3/4.
+expanduje tak, aby dosáhl pomìru stran 4/3.
 .RE
 .PD 1
 .IPs <r>\ \ 
@@ -5534,7 +5545,9 @@ Pøekládá políèka o 1/4 pixelu s lineární interpolací (¾ádné poskakování).
 Pøekládá políèka o 1/4 pixelu s 4tap filtrem (vy¹¹í kvalita). (výchozí)
 .RE
 .PD 1
+.RS
 Dostupná nastavení dominantního pùlsnímku jsou:
+.RE
 .PD 0
 .RSs
 .IPs -1
@@ -6463,7 +6476,7 @@ nestandardní o 20% men¹í HuffYUV pou¾ívající YV12
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1 (viz také: vstrict)
+.IPs "ffv1 (viz také: vstrict)"
 bezztrátový video kodek z FFmpeg
 .IPs flv\ \ 
 Sorenson H.263 pou¾ívaný ve Flash Videu
@@ -6471,7 +6484,7 @@ Sorenson H.263 pou¾ívaný ve Flash Videu
 Sony Digital Video
 .IPs svq1\ 
 Apple Sorenson Video 1
-.IPs snow (viz také: vstrict)
+.IPs "snow (viz také: vstrict)"
 Experimentální kodek z FFmpeg zalo¾ený na vlnkové analýze (wavelet)
 .RE
 .PD 1
@@ -8082,7 +8095,7 @@ XviD umo¾òuje u¾ivateli nastavit velikost navý¹ení na snímek zabrané nosièem
 (výchozí: 24 \- prùmìrné navý¹ení pro AVI).
 .
 .TP
-.B profile=<volba>
+.B profile=<název_profilu>
 Omezí volby a VBV (vrcholový datový tok v krátkém èasovém úseku) podle
 Simple, Advanced Simple a DivX profilù.
 Výsledná videa by mìly být pøehratelné stolními pøehrávaèi, které vyhovují
@@ -8228,6 +8241,13 @@ Poznamenejme, ¾e kvantizace v H.264 pracuje odli¹nì od MPEG-1/2/4:
 Kvantizaèní parametr (QP) v H.264 se nachází na logaritmické ¹kále.
 Mapování odpovídá pøibli¾nì H.264QP = 12 + 6*log2(MPEGQP).
 Napøíklad MPEG s kvantizaèním parametrem QP = 2 odpovídá H.264 s QP=18.
+.
+.TP
+.B crf=<1\-50>
+Zapne re¾im konstantní kvality a nastaví kvalitu.
+©kála je podobná QP.
+Tak jako re¾imy zalo¾ené na datovém toku umo¾òuje ka¾dému snímku pou¾ít
+odli¹ný QP podle komplexnosti snímku.
 .
 .TP
 .B pass=<1\-3>
@@ -8621,6 +8641,13 @@ Vý¹e uvedený pojem "v¹echny kandidátské typy" neznamená v¹echny povolené typy:
 Bere v potaz barvu bìhem vyhledávání pohybu subpixelu
 (výchozí: zapnuto).
 Vy¾aduje subq>=5.
+.
+.TP
+.B (no)mixed_refs
+Umo¾òuje ka¾dému pohybovému oddílu 8x8 nebo 16x8 nezávisle zvolit
+referenèní snímek.
+Bez této volby musí pou¾ít celý makroblok stejnou referenci.
+Vy¾aduje frameref>1.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
