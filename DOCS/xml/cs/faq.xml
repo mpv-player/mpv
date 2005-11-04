@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.96  -->
+<!-- Synced with: 1.98  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -358,6 +358,19 @@ Pokud jej tedy stále ještě někde máte, ihned se jej zbavte.
 
 <qandaentry>
 <question><para>
+Jak dostanu titulky do černých okrajů kolem filmu?
+</para></question>
+<answer><para>
+Použijte video filtr <systemitem>expand</systemitem> pro rozšíření vertikálního
+rozměru oblasti do které je film renderován a umístěte film do její horní části,
+například:
+<screen>
+mplayer -vf expand=0:-100:0:0 -slang de dvd://1
+</screen>
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
 Jak mohu vybrat audio/titulkové stopy z DVD, OGM, Matroska nebo NUT souboru?
 </para></question>
 <answer><para>
@@ -365,8 +378,8 @@ Musíte použít <option>-aid</option> (ID zvuku) nebo <option>-alang</option>
 (jazyk zvuku), <option>-sid</option>(ID titulků) nebo <option>-slang</option>
 (jazyk titulků), například:
 <screen>
-mplayer example.mkv -alang eng -slang eng
-mplayer example.mkv -aid 1 -sid 1
+mplayer -alang eng -slang eng <replaceable>example.mkv</replaceable>
+mplayer -aid 1 -sid 1 <replaceable>example.mkv</replaceable>
 </screen>
 Chcete-li vědět jaké jsou k dispozici:
 <screen>
@@ -682,7 +695,7 @@ s dvojnásobnou rychlostí!
 <answer><para>
 Máte vadnou zvukovou kartu nebo její ovladač. Nejspíš je pevně nastavena na
 44100Hz a vy se pokoušíte přehrát soubor s 22050Hz zvukem. Zkuste zvukový filtr
-resample.
+<systemitem>resample</systemitem>.
 </para></answer>
 </qandaentry>
 
