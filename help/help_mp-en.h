@@ -1106,10 +1106,10 @@ static char help_text[]=
 // joystick.c
 
 #define MSGTR_INPUT_JOYSTICK_Opening "Opening joystick device %s\n"
-#define MSGTR_INPUT_JOYSTICK_CantOpen "Can't open joystick device %s : %s\n"
-#define MSGTR_INPUT_JOYSTICK_ErrReading "Error while reading joystick device : %s\n"
-#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick : we loose %d bytes of data\n"
-#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick : warning init event, we have lost sync with driver\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Can't open joystick device %s: %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Error while reading joystick device: %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: we loose %d bytes of data\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: warning init event, we have lost sync with driver\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick warning unknown event type %d\n"
 
 // input.c
