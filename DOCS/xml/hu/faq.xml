@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.96 -->
+<!-- synced with 1.98 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -353,6 +353,20 @@ Ha még valahol megtalálható a rendszereden, most azonnal töröld le!
 
 <qandaentry>
 <question><para>
+Hogyan jeleníthetem meg a feliratot a film körül lévő fekete sávon?
+</para></question>
+<answer><para>
+Használd az <systemitem>expand</systemitem> videó szűrőt a videó függőleges
+renderelési területének növeléséhez és igazítsd a filmet a felső határhoz,
+például:
+<screen>
+mplayer -vf expand=0:-100:0:0 -slang de dvd://1
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Hogyan tudok audió/felirat sávot választani a DVD, OGM, Matroska vagy NUT fájlban?
 </para></question>
 <answer><para>
@@ -360,8 +374,8 @@ A <option>-aid</option> (audio ID) vagy <option>-alang</option>
 (audió nyelv), <option>-sid</option>(felirat ID) vagy <option>-slang</option>
 (felirat nyelv) kapcsolókkal, például:
 <screen>
-mplayer example.mkv -alang eng -slang eng
-mplayer example.mkv -aid 1 -sid 1
+mplayer -alang eng -slang eng <replaceable>example.mkv</replaceable>
+mplayer -aid 1 -sid 1 <replaceable>example.mkv</replaceable>
 </screen>
 Ha kiváncsi vagy, hogy melyek elérhetőek:
 <screen>
@@ -658,12 +672,13 @@ artsdsp-vel indítod.
 
 <qandaentry>
 <question><para>
-A/V szinkronizálási problémáim vannak. Néhány AVI fájlom rendesen lejátszódik, de néhány
-dupla sebességgel megy!
+A/V szinkronizálási problémáim vannak. Néhány AVI fájlom rendesen lejátszódik,
+de néhány dupla sebességgel megy!
 </para></question>
 <answer><para>
-Hibás hang kártyád/vezérlőd van. Legvalószínűbb, hogy rögzítve van 44100Hz-en, és olyan
-fájlt akarsz lejátszani, amiben 22050Hz-es audió van. Próbáld ki a resample audió szűrőt.
+Hibás hang kártyád/vezérlőd van. Legvalószínűbb, hogy rögzítve van 44100Hz-en,
+és olyan fájlt akarsz lejátszani, amiben 22050Hz-es audió van. Próbáld ki a
+<systemitem>resample</systemitem> audió szűrőt.
 </para></answer>
 </qandaentry>
 
