@@ -2779,21 +2779,29 @@ handle_realaudio (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
  * or P frame arrives these timecodes can be changed to I at 0ms, P at 40ms,
  * B at 80ms and B at 120ms.
  *
+ * This works for simple H.264 B-frame pyramids, but not for arbitrary orders.
+ *
  * \param demuxer The Matroska demuxer struct for this instance.
  * \param track The track structure whose cache should be handled.
  */
 static void
 flush_cached_dps (demuxer_t *demuxer, mkv_track_t *track)
 {
-  float tmp_pts;
-  int i;
+  int i, ok;
 
   if (track->num_cached_dps == 0)
     return;
-  tmp_pts = track->cached_dps[0]->pts;
-  for (i = 1; i < track->num_cached_dps; i++)
-    track->cached_dps[i - 1]->pts = track->cached_dps[i]->pts;
-  track->cached_dps[track->num_cached_dps - 1]->pts = tmp_pts;
+
+  do {
+    ok = 1;
+    for (i = 1; i < track->num_cached_dps; i++)
+      if (track->cached_dps[i - 1]->pts > track->cached_dps[i]->pts) {
+        float tmp_pts = track->cached_dps[i - 1]->pts;
+        track->cached_dps[i - 1]->pts = track->cached_dps[i]->pts;
+        track->cached_dps[i]->pts = tmp_pts;
+        ok = 0;
+      }
+  } while (!ok);
 
   for (i = 0; i < track->num_cached_dps; i++)
     ds_add_packet (demuxer->video, track->cached_dps[i]);
