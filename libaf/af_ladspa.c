@@ -497,7 +497,7 @@ static int af_ladspa_load_plugin(af_ladspa_t *setup) {
  */
 
 static int af_ladspa_malloc_failed(char *myname) {
-    af_msg(AF_MSG_ERROR, "%s: %s\n", myname, MSGTR_MemAllocFailed);
+    af_msg(AF_MSG_ERROR, "%s: %s", myname, MSGTR_MemAllocFailed);
     return AF_ERROR;
 }
 
