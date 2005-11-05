@@ -5392,7 +5392,6 @@ echores "$_vorbis"
 echocheck "OggTheora support"
 if test "$_theora" = auto ; then
   _theora=no
-  if ( pkg-config --exists 'theora' ) >> "$TMPLOG" 2>&1 ; then
     cat > $TMPC << EOF
 #include <theora/theora.h>
 #include <string.h>
@@ -5427,16 +5426,22 @@ int main(void)
   return 0;
 }
 EOF
-    cc_check `pkg-config --libs --cflags theora` && _theora=yes
+  for _ld_theora in "`pkg-config --silence-errors --libs --cflags theora`" "-ltheora"; do
+    cc_check $_ld_theora && _theora=yes && break
+  done
+  if test "$_theora" = no && test "$_tremor_internal" = yes; then
+    for _ld_theora in "`pkg-config --silence-errors --libs --cflags theora`" "-ltheora"; do
+      cc_check -I. tremor/bitwise.c $_ld_theora && _theora=yes && break
+    done
   fi
 fi
 if test "$_theora" = yes ; then
   _def_theora='#define HAVE_OGGTHEORA 1'
   _codecmodules="libtheora $_codecmodules"
-  _ld_theora=`pkg-config --libs --cflags theora`
 else
   _def_theora='#undef HAVE_OGGTHEORA'
   _nocodecmodules="libtheora $_nocodecmodules"
+  _ld_theora=""
 fi
 echores "$_theora"
 
