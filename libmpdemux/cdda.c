@@ -28,7 +28,7 @@ static struct cdda_params {
   m_span_t span;
 } cdda_dflts = {
   -1,
-  1,
+  0,
   NULL,
   0,
   -1,
