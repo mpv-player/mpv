@@ -768,6 +768,8 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 					// handling like later
 					if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && (!strcmp(field_data, "video/nsv") || !strcmp(field_data, "misc/ultravox")))
 						*file_format = DEMUXER_TYPE_NSV;
+					else if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && (!strcmp(field_data, "audio/aacp")))
+						*file_format = DEMUXER_TYPE_AAC;
 					else
 						*file_format = DEMUXER_TYPE_AUDIO;
 					return 0;
