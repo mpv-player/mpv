@@ -525,7 +525,7 @@ int asf_mmst_streaming_start(stream_t *stream)
    */
   unescpath=malloc(strlen(path)+1);
   if (!unescpath) {
-	mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_MMST_MallocFailed);
+	mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 	return -1; 
   }
   url_unescape_string(unescpath,path);
