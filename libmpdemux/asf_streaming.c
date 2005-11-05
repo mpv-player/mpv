@@ -718,7 +718,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 
 	asf_http_ctrl = (asf_http_streaming_ctrl_t*)malloc(sizeof(asf_http_streaming_ctrl_t));
 	if( asf_http_ctrl==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_ASF_MallocFailed);
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return -1;
 	}
 	asf_http_ctrl->streaming_type = ASF_Unknown_e;
