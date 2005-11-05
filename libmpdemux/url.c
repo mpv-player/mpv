@@ -28,19 +28,19 @@ url_new(const char* url) {
         // Create temp filename space
         unescfilename=malloc(strlen(url)+1);
         if (!unescfilename ) {
-                mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+                mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
                 goto err_out;
         }
         escfilename=malloc(strlen(url)*3+1);
         if (!escfilename ) {
-                mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+                mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
                 goto err_out;
         }
 
 	// Create the URL container
 	Curl = (URL_t*)malloc(sizeof(URL_t));
 	if( Curl==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
 	}
 
@@ -57,7 +57,7 @@ url_new(const char* url) {
 	// Copy the url in the URL container
 	Curl->url = strdup(escfilename);
 	if( Curl->url==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
 	}
         mp_msg(MSGT_OPEN,MSGL_V,"Filename for url is now %s\n",escfilename);
@@ -77,7 +77,7 @@ url_new(const char* url) {
 	pos1 = ptr1-escfilename;
 	Curl->protocol = (char*)malloc(pos1+1);
 	if( Curl->protocol==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
 	}
 	strncpy(Curl->protocol, escfilename, pos1);
@@ -99,7 +99,7 @@ url_new(const char* url) {
 		int len = ptr2-ptr1;
 		Curl->username = (char*)malloc(len+1);
 		if( Curl->username==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			goto err_out;
 		}
 		strncpy(Curl->username, ptr1, len);
@@ -112,7 +112,7 @@ url_new(const char* url) {
 			Curl->username[ptr3-ptr1]='\0';
 			Curl->password = (char*)malloc(len2+1);
 			if( Curl->password==NULL ) {
-				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 				goto err_out;
 			}
 			strncpy( Curl->password, ptr3+1, len2);
@@ -164,7 +164,7 @@ url_new(const char* url) {
 	// copy the hostname in the URL container
 	Curl->hostname = (char*)malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
 	}
 	strncpy(Curl->hostname, ptr1, pos2-pos1);
@@ -179,7 +179,7 @@ url_new(const char* url) {
 			// copy the path/filename in the URL container
 			Curl->file = strdup(ptr2);
 			if( Curl->file==NULL ) {
-				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 				goto err_out;
 			}
 		}
@@ -188,7 +188,7 @@ url_new(const char* url) {
 	if( Curl->file==NULL ) {
 		Curl->file = (char*)malloc(2);
 		if( Curl->file==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_URL_MallocFailed);
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			goto err_out;
 		}
 		strcpy(Curl->file, "/");
