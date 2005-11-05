@@ -4147,24 +4147,23 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 #ifdef USE_DVDREAD
 	  if (vo_spudec && (demuxer->type != DEMUXER_TYPE_MATROSKA)) {
 	      if (dvdsub_id >= 0) {
-		  char lang[5] = MSGTR_OSDnone;
+		  char lang[3] = "\0\0\0";
 		  int code = 0;
 		  code = dvd_lang_from_sid(stream, dvdsub_id);
 		  if (code) {
 		      lang[0] = code >> 8;
 		      lang[1] = code;
-		      lang[2] = 0;
 		  }
-		  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
+		  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, code ? lang : MSGTR_OSDnone);
 	      }
 	  }
 #endif
 #ifdef HAVE_MATROSKA
     if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
-      char lang[10] = MSGTR_OSDunknown;
+      char lang[40] = MSGTR_OSDunknown;
       if (dvdsub_id >= 0) {
-        demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
-        lang[9] = 0;
+        demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 39);
+        lang[39] = 0;
 	snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
       }
     }
