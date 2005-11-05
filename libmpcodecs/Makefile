@@ -209,6 +209,10 @@ ifeq ($(MUSEPACK),yes)
 AUDIO_SRCS += ad_mpc.c
 endif
 
+ifeq ($(SPEEX),yes)
+AUDIO_SRCS += ad_speex.c
+endif
+
 ifeq ($(FAAC),yes)
 ENCODER_SRCS += ae_faac.c
 endif

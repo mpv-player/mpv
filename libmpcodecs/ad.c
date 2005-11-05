@@ -33,6 +33,7 @@ extern ad_functions_t mpcodecs_ad_acm;
 extern ad_functions_t mpcodecs_ad_msgsm;
 extern ad_functions_t mpcodecs_ad_faad;
 extern ad_functions_t mpcodecs_ad_libvorbis;
+extern ad_functions_t mpcodecs_ad_speex;
 extern ad_functions_t mpcodecs_ad_libmad;
 extern ad_functions_t mpcodecs_ad_realaud;
 extern ad_functions_t mpcodecs_ad_libdv;
@@ -77,6 +78,9 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #endif
 #ifdef HAVE_OGGVORBIS
   &mpcodecs_ad_libvorbis,
+#endif
+#ifdef HAVE_SPEEX
+  &mpcodecs_ad_speex,
 #endif
 #ifdef USE_LIBMAD
   &mpcodecs_ad_libmad,

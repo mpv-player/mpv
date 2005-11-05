@@ -16,6 +16,7 @@
 #include "stheader.h"
 
 #define FOURCC_VORBIS mmioFOURCC('v', 'r', 'b', 's')
+#define FOURCC_SPEEX  mmioFOURCC('s', 'p', 'x', ' ')
 #define FOURCC_THEORA mmioFOURCC('t', 'h', 'e', 'o')
 
 #ifdef TREMOR
@@ -116,6 +117,7 @@ typedef struct ogg_stream {
   ogg_stream_state stream;
   int hdr_packets;
   int vorbis;
+  int speex;
   int theora;
   int flac;
   int text;
@@ -352,6 +354,8 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
        os->lastsize = blocksize;
        os->lastpos = pack->granulepos;
     }
+  } else if (os->speex) {
+    data = pack->packet;
 # ifdef HAVE_OGGTHEORA
   } else if (os->theora) {
      /* we pass complete packets to theora, mustn't strip the header! */
@@ -536,6 +540,13 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
       demux_ogg_add_sub(os,pack);
     return 0;
   }
+  if (os->speex) {
+    // discard first two packets, they contain the header and comment
+    if (os->hdr_packets < 2) {
+      os->hdr_packets++;
+      return 0;
+    }
+  } else
   // If packet is an header we jump it except for vorbis and theora
   // (PACKET_TYPE_HEADER bit doesn't even exist for theora ?!)
   // We jump nothing for FLAC. Ain't this great? Packet contents have to be
@@ -916,6 +927,27 @@ int demux_ogg_open(demuxer_t* demuxer) {
       ogg_d->subs[ogg_d->num_sub].id = n_audio;
       n_audio++;
       mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Vorbis), -aid %d\n",ogg_d->num_sub,n_audio-1);
+    } else if (pack.bytes >= 80 && !strncmp(pack.packet,"Speex", 5)) {
+      sh_a = new_sh_audio(demuxer, ogg_d->num_sub);
+      sh_a->wf = (WAVEFORMATEX*)calloc(1, sizeof(WAVEFORMATEX) + pack.bytes);
+      sh_a->format = FOURCC_SPEEX;
+      sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint32(&pack.packet[36]);
+      sh_a->channels = sh_a->wf->nChannels = get_uint32(&pack.packet[48]);
+      sh_a->wf->wFormatTag = sh_a->format;
+      sh_a->wf->nAvgBytesPerSec = get_uint32(&pack.packet[52]);
+      sh_a->wf->nBlockAlign = 0;
+      sh_a->wf->wBitsPerSample = 16;
+      sh_a->samplesize = 2;
+      sh_a->wf->cbSize = pack.bytes;
+      memcpy(&sh_a->wf[1], pack.packet, pack.bytes);
+
+      ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate;
+      ogg_d->subs[ogg_d->num_sub].speex = 1;
+      if (identify)
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
+      ogg_d->subs[ogg_d->num_sub].id = n_audio;
+      n_audio++;
+      mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Speex), -aid %d\n",ogg_d->num_sub,n_audio-1);
 
       // check for Theora
 #   ifdef HAVE_OGGTHEORA
@@ -1549,7 +1581,7 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
           break;
         }
       }
-      if(!precision && (is_keyframe || os->vorbis) ) {
+      if(!precision && (is_keyframe || os->vorbis || os->speex) ) {
         ogg_sub.lines = 0;
         vo_sub = &ogg_sub;
         vo_osd_changed(OSDTYPE_SUBTITLE);

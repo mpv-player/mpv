@@ -243,6 +243,7 @@ Codecs:
   --enable-tremor-low    build with lower accuracy internal tremor [disabled]
   --enable-external-tremor build with external tremor [disabled]
   --disable-vorbis       disable OggVorbis support entirely [autodetect]
+  --disable-speex        disable Speex support [autodetect]
   --enable-theora        build with OggTheora support [autodetect]
   --disable-internal-matroska disable internal Matroska support [enabled]
   --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
@@ -1486,6 +1487,7 @@ _twolame=auto
 _tremor_internal=yes
 _tremor_low=no
 _vorbis=auto
+_speex=auto
 _theora=auto
 _mp3lib=yes
 _liba52=yes
@@ -1679,6 +1681,8 @@ for ac_option do
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
   --disable-vorbis)	_vorbis=no	;;
+  --enable-speex)	_speex=yes	;;
+  --disable-speex)	_speex=no	;;
   --enable-internal-tremor)	_tremor_internal=yes	;;
   --disable-internal-tremor)	_tremor_internal=no	;;
   --enable-tremor-low)	_tremor_low=yes	;;
@@ -5389,6 +5393,29 @@ elif test "$_vorbis" = yes -a "$_tremor" = yes ; then
 fi
 echores "$_vorbis"
 
+echocheck "libspeex (version >= 1.1 required)"
+if test "$_speex" = auto ; then
+  _speex=no
+  cat > $TMPC << EOF
+#include <speex/speex.h>
+int main(void) {
+  SpeexBits bits;
+  void *dec;
+  speex_decode_int(dec, &bits, dec);
+}
+EOF
+  cc_check -lspeex $_ld_lm && _speex=yes
+fi
+if test "$_speex" = yes ; then
+  _def_speex='#define HAVE_SPEEX 1'
+  _ld_speex='-lspeex'
+  _codecmodules="speex $_codecmodules"
+else
+  _def_speex='#undef HAVE_SPEEX'
+  _nocodecmodules="speex $_nocodecmodules"
+fi
+echores "$_speex"
+
 echocheck "OggTheora support"
 if test "$_theora" = auto ; then
   _theora=no
@@ -6982,6 +7009,7 @@ LIBMPEG2 = $_libmpeg2
 TREMOR = $_tremor_internal
 TREMOR_FLAGS = $_tremor_flags
 
+SPEEX = $_speex
 MUSEPACK = $_musepack
 
 UNRARLIB = $_unrarlib
@@ -7091,6 +7119,7 @@ FRIBIDI_LIB = $_ld_fribidi
 LIBLZO_LIB= $_ld_liblzo
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
+SPEEX_LIB = $_ld_speex
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
 INTERNAL_FAAD = $_faad_internal
@@ -7668,6 +7697,9 @@ $_def_vorbis
 
 /* enable Tremor as vorbis decoder */
 $_def_tremor
+
+/* enable Speex support */
+$_def_speex
 
 /* enable musepack support */
 $_def_musepack

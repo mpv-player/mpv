@@ -104,6 +104,7 @@ CODEC_LIBS = $(AV_LIB) \
              $(XMMS_LIB) \
              $(X264_LIB) \
              $(MUSEPACK_LIB) \
+             $(SPEEX_LIB) \
 
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
