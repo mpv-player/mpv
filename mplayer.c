@@ -4110,13 +4110,13 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
       vo_osd_text=osd_text_buffer;
 #ifdef USE_DVDNAV
       if (osd_show_dvd_nav_delay) {
-          snprintf(osd_text_tmp, 63, "DVDNAV: %s", dvd_nav_text);
+          snprintf(osd_text_tmp, 63, MSGTR_OSDDVDNAV, dvd_nav_text);
           osd_show_dvd_nav_delay--;
       } else
 #endif
 #ifdef USE_TV
       if (osd_show_tv_channel && tv_channel_list) {
-	  snprintf(osd_text_tmp, 63, "Channel: %s", tv_channel_current->name);
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDChannel, tv_channel_current->name);
 	  osd_show_tv_channel--;
       } else
 #endif
@@ -4125,29 +4125,29 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 	  osd_show_text--;
       } else
       if (osd_show_sub_visibility) {
-	  snprintf(osd_text_tmp, 63, "Subtitles: %sabled", sub_visibility?"en":"dis");
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitles, sub_visibility? MSGTR_OSDenabled : MSGTR_OSDdisabled);
 	  osd_show_sub_visibility--;
       } else
       if (osd_show_vobsub_changed) {
-	  snprintf(osd_text_tmp, 63, "Subtitles: off");
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesOff);
 	  if (vo_vobsub && vobsub_id >= 0) {
-	      const char *language = "none";
+	      const char *language = MSGTR_OSDnone;
 	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
-	      snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", vobsub_id, language ? language : "unknown");
+	      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, vobsub_id, language ? language : MSGTR_OSDunknown);
 	  }
 #ifdef HAVE_OGGVORBIS
 	  if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG) {
 	      if (dvdsub_id >= 0) {
 		char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
-		if (!lang) lang = "unknown";
-		snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
+		if (!lang) lang = MSGTR_OSDunknown;
+		snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
 	      }
 	  }
 #endif
 #ifdef USE_DVDREAD
 	  if (vo_spudec && (demuxer->type != DEMUXER_TYPE_MATROSKA)) {
 	      if (dvdsub_id >= 0) {
-		  char lang[5] = "none";
+		  char lang[5] = MSGTR_OSDnone;
 		  int code = 0;
 		  code = dvd_lang_from_sid(stream, dvdsub_id);
 		  if (code) {
@@ -4155,17 +4155,17 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 		      lang[1] = code;
 		      lang[2] = 0;
 		  }
-		  snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
+		  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
 	      }
 	  }
 #endif
 #ifdef HAVE_MATROSKA
     if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
-      char lang[10] = "unknown";
+      char lang[10] = MSGTR_OSDunknown;
       if (dvdsub_id >= 0) {
         demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
         lang[9] = 0;
-	snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
+	snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
       }
     }
 #endif
@@ -4178,7 +4178,7 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 	  if ((tmp2 = strrchr(tmp, '/'))) {
 	      tmp = tmp2+1;
 	  }
-	  snprintf(osd_text_tmp, 63, "Sub: (%d) %s%s", 
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDSub, 
                                   set_of_sub_pos + 1,
                                   strlen(tmp) < 20 ? "" : "...",
                                   strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
@@ -4186,35 +4186,35 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
       } else
 #endif
       if (osd_show_sub_delay) {
-	  snprintf(osd_text_tmp, 63, "Sub delay: %d ms", ROUND(sub_delay*1000));
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
 	  osd_show_sub_delay--;
       } else
       if (osd_show_sub_pos) {
-         snprintf(osd_text_tmp, 63, "Sub position: %d/100", sub_pos);
+         snprintf(osd_text_tmp, 63, MSGTR_OSDSubPosition, sub_pos);
          osd_show_sub_pos--;
       } else
       if (osd_show_sub_alignment) {
-         snprintf(osd_text_tmp, 63, "Sub alignment: %s",
-	    (sub_alignment == 2 ? "bottom" :
-	    (sub_alignment == 1 ? "center" : "top")));
+         snprintf(osd_text_tmp, 63, MSGTR_OSDSubAlignment,
+	    (sub_alignment == 2 ? MSGTR_OSDSubBottom :
+	    (sub_alignment == 1 ? MSGTR_OSDSubCenter : MSGTR_OSDSubTop)));
          osd_show_sub_alignment--;
       } else
       if (osd_show_av_delay) {
-	  snprintf(osd_text_tmp, 63, "A-V delay: %d ms", ROUND(audio_delay*1000));
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDAVDelay, ROUND(audio_delay*1000));
 	  osd_show_av_delay--;
       } else if (osd_show_speed) {
-	  snprintf(osd_text_tmp, 63, "Speed: x %6.2f", playback_speed);
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDSpeed, playback_speed);
 	  osd_show_speed--;
       } else if (osd_show_ontop) {
-	  snprintf(osd_text_tmp, 63, "Stay on top: %sabled", vo_ontop?"en":"dis");
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDStayOnTop, vo_ontop? MSGTR_OSDenabled : MSGTR_OSDdisabled);
 	  osd_show_ontop--;
       } else if (osd_show_rootwin) {
-	  snprintf(osd_text_tmp, 63, "Rootwin: %sabled", vo_rootwin?"en":"dis");
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDRootwin, vo_rootwin? MSGTR_OSDenabled : MSGTR_OSDdisabled);
 	  osd_show_rootwin--;
       } else if (osd_show_framedropping) {
-	  snprintf(osd_text_tmp, 63, "Framedropping: %s",
-	     (frame_dropping == 1 ? "on" :
-	     (frame_dropping == 2 ? "hard"  : "off")));
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDFramedrop,
+	     (frame_dropping == 1 ? MSGTR_OSDFramedropOn :
+	     (frame_dropping == 2 ? MSGTR_OSDFramedropHard : MSGTR_OSDFramedropOff)));
 	  osd_show_framedropping--;
       } else if(osd_level>=2) {
           int len = demuxer_get_time_length(demuxer);
@@ -4246,7 +4246,7 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
   }
   if (osd_level <= 1 && osd_show_status > 0 && sh_video) {
     vo_osd_text = osd_text_buffer;
-    snprintf(vo_osd_text, 63, "OSD: %sabled", osd_level ? "en" : "dis");
+    snprintf(vo_osd_text, 63, MSGTR_OSDosd, osd_level ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
     vo_osd_changed(OSDTYPE_OSD);
     osd_show_status--;
   }
