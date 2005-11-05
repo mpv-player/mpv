@@ -352,7 +352,7 @@ static char help_text[]=
 #define MSGTR_ForcingInputFPS "input fps will be interpreted as %5.2f instead\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Output file format RAWVIDEO does not support audio - disabling audio\n"
 #define MSGTR_DemuxerDoesntSupportNosound "This demuxer doesn't support -nosound yet.\n"
-#define MSGTR_MemAllocFailed "memory allocation failed"
+#define MSGTR_MemAllocFailed "Memory allocation failed\n"
 #define MSGTR_NoMatchingFilter "Couldn't find matching filter/ao format!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, maybe broken C compiler?\n"
 #define MSGTR_NoLavcAudioCodecName "Audio LAVC, Missing codec name!\n"
@@ -1144,29 +1144,15 @@ static char help_text[]=
 
 // url.c
 
-#define MSGTR_MPDEMUX_URL_MallocFailed "Memory allocation failed!\n" 
 #define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "string appears to be already escaped in url_escape %c%c1%c2\n"
 
 // ai_alsa1x.c
 
-#define MSGTR_MPDEMUX_AIALSA1X_PcmBrokenConfig "Broken configuration for this PCM: no configurations available\n"
-#define MSGTR_MPDEMUX_AIALSA1X_UnavailableAccessType "Access type not available\n"
-#define MSGTR_MPDEMUX_AIALSA1X_UnavailableSampleFmt "Sample format not available\n"
-#define MSGTR_MPDEMUX_AIALSA1X_UnavailableChanCount "Channel count not available - reverting to default: %d\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Cannot set samplerate\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Cannot set buffer time\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Cannot set period time\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotInstallHWParams "Unable to install hw params: %s\n"
-#define MSGTR_MPDEMUX_AIALSA1X_PeriodEqualsBufferSize "Can't use period equal to buffer size (%u == %lu)\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotInstallSWParams "unable to install sw params:\n"
-#define MSGTR_MPDEMUX_AIALSA1X_ErrorOpeningAudio "Error opening audio: %s\n"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaStatusError "ALSA status error: %s"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaXRUN "ALSA xrun!!! (at least %.3f ms long)\n"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaStatus "ALSA Status:\n"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaXRUNPrepareError "ALSA xrun: prepare error: %s"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaReadWriteError "ALSA read/write error"
-															   
-// ai_alsa.c
+
+// ai_alsa1x.c / ai_alsa.c
 
 #define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Broken configuration for this PCM: no configurations available\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Access type not available\n"
@@ -1226,7 +1212,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "everything done. Thank you for downloading a media file containing proprietary and patented technology.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "unknown command %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet error : %s\n"
-#define MSGTR_MPDEMUX_MMST_MallocFailed "Memory allocation failed!\n"
 #define MSGTR_MPDEMUX_MMST_Connected "connected\n"
 
 // asf_streaming.c
@@ -1242,7 +1227,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Error sub chunks number is invalid\n"
 #define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "bandwidth too small, file cannot be played!\n"
 #define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "bandwidth too small, deselected audio stream\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "bandwidth too small, " "deselected video stream\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "bandwidth too small, deselected video stream\n"
 #define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Invalid length in ASF header!\n"
 #define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Error while reading chunk header\n"
 #define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Error chunk_size > packet_size\n"
@@ -1253,7 +1238,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Failed to parse HTTP response\n"
 #define MSGTR_MPDEMUX_ASF_ServerReturn "Server return %d:%s\n"
 #define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP PARSE WARNING : Pragma %s cuted from %d bytes to %d\n"
-#define MSGTR_MPDEMUX_ASF_MallocFailed "Memory allocation failed\n"
 #define MSGTR_MPDEMUX_ASF_SocketWriteError "Socket write error : %s\n"
 #define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Failed to parse header\n"
 #define MSGTR_MPDEMUX_ASF_NoStreamFound "No stream found\n"
