@@ -200,6 +200,34 @@ static char help_text[]=
 "[%f]. Entries must be in chronological order, cannot overlap. Discarding.\n"
 #define MSGTR_EdlBadLineBadStop "Stop time has to be after start time.\n"
 
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "enabled"
+#define MSGTR_OSDdisabled "disabled"
+#define MSGTR_OSDnone "none"
+#define MSGTR_OSDunknown "unknown"
+#define MSGTR_OSDDVDNAV "DVDNAV: %s"
+#define MSGTR_OSDChannel "Channel: %s"
+#define MSGTR_OSDSubtitles "Subtitles: %s"
+#define MSGTR_OSDSubtitlesOff "Subtitles: off"
+#define MSGTR_OSDSubtitlesLanguage "Subtitles: (%d) %s"
+#define MSGTR_OSDSub "Sub: (%d) %s%s"
+#define MSGTR_OSDSubDelay "Sub delay: %d ms"
+#define MSGTR_OSDSubPosition "Sub position: %d/100"
+#define MSGTR_OSDSubAlignment "Sub alignment: %s"
+#define MSGTR_OSDAVDelay "A-V delay: %d ms"
+#define MSGTR_OSDSpeed "Speed: x %6.2f"
+#define MSGTR_OSDStayOnTop "Stay on top: %s"
+#define MSGTR_OSDRootwin "Rootwin: %s"
+#define MSGTR_OSDFramedrop "Framedropping: %s"
+#define MSGTR_OSDFramedropOn "on"
+#define MSGTR_OSDFramedropHard "hard"
+#define MSGTR_OSDFramedropOff "off"
+#define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDSubBottom "bottom"
+#define MSGTR_OSDSubCenter "center"
+#define MSGTR_OSDSubTop "top"
+
 // mencoder.c:
 
 #define MSGTR_UsingPass3ControllFile "Using pass3 control file: %s\n"
