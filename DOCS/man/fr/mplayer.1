@@ -1,4 +1,4 @@
-.\" synced with 1.1146
+.\" synced with 1.1148
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -971,13 +971,15 @@ Les options disponibles sont:
 .IPs speed=<valeur>
 Règle la vitesse de lecture du CD
 .IPs paranoia=<0\-2>
-Règle le niveau de paranoia
+Règle le niveau de paranoia.
+Toute valeur autre que 0 semble ne permettre la lecture de la
+première piste uniquement.
 .RSss
-0: désactive la détection
+0: désactive la détection (par défaut)
 .br
-1: détection des chevauchements uniquement (comportement par défaut)
+1: détection des chevauchements uniquement
 .br
-2: correction et vérification des données complètes
+2: correction et vérification complète des données
 .REss
 .IPs generic-dev=<valeur>
 utiliser le périphérique SCSI générique spécifié
@@ -9205,6 +9207,21 @@ Permet à chaque partition de mouvement 8x8 ou 16x8 de choisir indépendamment
 leur trame de référence.
 Sans cette option, tout le macro-bloc doit utiliser la même référence.
 Nécessite frameref>1.
+.TP
+.
+.B trellis=<0\-2>
+quatification optimale du point de vue du taux de distortion
+.PD 0
+.RSs
+.IPs 0
+désactivé
+.IPs 1
+activé uniquement lors de l'encodage final (par défaut)
+.IPs 2
+activé pour toutes les décisions de modes de macroblocs (lent, requiert
+subq=6)
+.RE
+.PD 1
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
