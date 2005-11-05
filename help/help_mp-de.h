@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.193
+// In synch with rev 1.196
 
 // ========================= MPlayer help ===========================
 
@@ -202,6 +202,34 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "Letzte Stop-Position war [%f]; nächster Start ist "\
 "[%f]. Einträge müssen in chronologischer Reihenfolge sein, ohne Überschneidung. Verwerfe.\n"
 #define MSGTR_EdlBadLineBadStop "Zeit des Stops muß nach der Startzeit sein.\n"
+
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "aktiviert"
+#define MSGTR_OSDdisabled "deaktiviert"
+#define MSGTR_OSDnone "nicht verfügbar"
+#define MSGTR_OSDunknown "unbekannt"
+#define MSGTR_OSDDVDNAV "DVDNAV: %s"
+#define MSGTR_OSDChannel "Kanal: %s"
+#define MSGTR_OSDSubtitles "Untertitel: %s"
+#define MSGTR_OSDSubtitlesOff "Untertitel: deaktiviert"
+#define MSGTR_OSDSubtitlesLanguage "Untertitelsprache: (%d) %s"
+#define MSGTR_OSDSub "Untertitel: (%d) %s%s"
+#define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
+#define MSGTR_OSDSubPosition "Untertitelposition: %d/100"
+#define MSGTR_OSDSubAlignment "Untertitelausrichtung: %s"
+#define MSGTR_OSDAVDelay "A/V-Verzögerung: %dms"
+#define MSGTR_OSDSpeed "Geschwindigkeit: %6.2f-fach"
+#define MSGTR_OSDStayOnTop "Immer im Vordergrund: %s"
+#define MSGTR_OSDRootwin "Anzeige auf dem Desktop: %s"
+#define MSGTR_OSDFramedrop "Framedropping: %s"
+#define MSGTR_OSDFramedropOn "an"
+#define MSGTR_OSDFramedropHard "hart"
+#define MSGTR_OSDFramedropOff "aus"
+#define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDSubBottom "unten"
+#define MSGTR_OSDSubCenter "mitte"
+#define MSGTR_OSDSubTop "oben"
 
 // mencoder.c:
 
@@ -1152,27 +1180,13 @@ static char help_text[]=
 
 // url.c
 
-#define MSGTR_MPDEMUX_URL_MallocFailed "Speicherallozierung fehlgeschlagen!\n"
 #define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "Zeichenkette scheint bereits im URL-Format %c%c1%c2 'escaped' zu sein\n"
 
 // ai_alsa1x.c
 
-#define MSGTR_MPDEMUX_AIALSA1X_PcmBrokenConfig "Kaputte Konfiguration für diesen PCM-Kanal: Keine Konfiguration verfügbar\n"
-#define MSGTR_MPDEMUX_AIALSA1X_UnavailableAccessType "Zugriffstyp nicht verfügbar\n"
-#define MSGTR_MPDEMUX_AIALSA1X_UnavailableSampleFmt "Sampleformat nicht verfügbar\n"
-#define MSGTR_MPDEMUX_AIALSA1X_UnavailableChanCount "Kanalzahl nicht verfügbar - falle auf Standard zurück: %d\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Konnte Samplingrate nicht setzen\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Konnte Pufferzeit nicht setzen\n"
 #define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Konnte Periode nicht setzen\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotInstallHWParams "Konnte Hardwareparameter nicht einrichten: %s\n"
-#define MSGTR_MPDEMUX_AIALSA1X_PeriodEqualsBufferSize "Periode darf nicht gleich der Puffergröße sein (%u == %lu)\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotInstallSWParams "Konnte Softwareparameter nicht einrichten:\n"
-#define MSGTR_MPDEMUX_AIALSA1X_ErrorOpeningAudio "Konnte Ton nicht öffnen: %s\n"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaStatusError "ALSA-Statusfehler: %s"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaXRUN "ALSA xrun!!! (mindestens %.3f ms lang)\n"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaStatus "ALSA-Status:\n"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaXRUNPrepareError "ALSA xrun: Fehler bei Vorbereitung: %s"
-#define MSGTR_MPDEMUX_AIALSA1X_AlsaReadWriteError "ALSA Ein/Ausgabefehlerr"
 
 // ai_alsa.c
 
@@ -1234,7 +1248,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, daß Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "Unbekanntes Kommando %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet lieferte Fehler zurück: %s\n"
-#define MSGTR_MPDEMUX_MMST_MallocFailed "Speicherreservierung fehlgeschlagen!\n"
 #define MSGTR_MPDEMUX_MMST_Connected "Verbunden\n"
 
 // asf_streaming.c
@@ -1261,7 +1274,6 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Konnte HTTP-Antworte nicht parsen\n"
 #define MSGTR_MPDEMUX_ASF_ServerReturn "Server liefert %d:%s\n"
 #define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF-HTTP-Parser Warnung: Pragma '%s' von %d auf %d Byte abgeschnitten\n"
-#define MSGTR_MPDEMUX_ASF_MallocFailed "Speicherallozierung fehlgeschlagen\n"
 #define MSGTR_MPDEMUX_ASF_SocketWriteError "Fehler beim Schreiben in Socket: %s\n"
 #define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Konnte Kopf nicht parsen\n"
 #define MSGTR_MPDEMUX_ASF_NoStreamFound "Kein Datenstrom gefunden\n"
