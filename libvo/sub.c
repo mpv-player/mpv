@@ -9,6 +9,7 @@
 #endif
 
 #include "mp_msg.h"
+#include "help_mp.h"
 #include "video_out.h"
 #include "font_load.h"
 #include "sub.h"
@@ -38,18 +39,18 @@ struct osd_text_p {
 //^
 
 char * __sub_osd_names[]={
-    "Seekbar",
-    "Play",
-    "Pause",
-    "Stop",
-    "Rewind",
-    "Forward",
-    "Clock",
-    "Contrast",
-    "Saturation",
-    "Volume",
-    "Brightness",
-    "Hue"
+    MSGTR_VO_SUB_Seekbar,
+    MSGTR_VO_SUB_Play,
+    MSGTR_VO_SUB_Pause,
+    MSGTR_VO_SUB_Stop,
+    MSGTR_VO_SUB_Rewind,
+    MSGTR_VO_SUB_Forward,
+    MSGTR_VO_SUB_Clock,
+    MSGTR_VO_SUB_Contrast,
+    MSGTR_VO_SUB_Saturation,
+    MSGTR_VO_SUB_Volume,
+    MSGTR_VO_SUB_Brightness,
+    MSGTR_VO_SUB_Hue
 };
 char * __sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", ""};
 
