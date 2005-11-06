@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.192 (2005. 10. 26.)
+// Sync'ed with help_mp-en.h 1.197 (2005. 11. 06.)
 
 // ========================= MPlayer help ===========================
 
@@ -199,6 +199,34 @@ static char help_text[]=
 "[%f]. A bejegyzéseknek idõrendben kell lenniük, nem átlapolhatóak. Kihagyva.\n"
 #define MSGTR_EdlBadLineBadStop "A megállítási idõnek a kezdési idõ után kell lennie.\n"
 
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "bekapcsolva"
+#define MSGTR_OSDdisabled "kikapcsolva"
+#define MSGTR_OSDnone "nincs"
+#define MSGTR_OSDunknown "ismeretlen"
+#define MSGTR_OSDDVDNAV "DVDNAV: %s"
+#define MSGTR_OSDChannel "Csatorna: %s"
+#define MSGTR_OSDSubtitles "Felirat: %s"
+#define MSGTR_OSDSubtitlesOff "Felirat: ki"
+#define MSGTR_OSDSubtitlesLanguage "Felirat: (%d) %s"
+#define MSGTR_OSDSub "Sub: (%d) %s%s"
+#define MSGTR_OSDSubDelay "Sub késés: %d ms"
+#define MSGTR_OSDSubPosition "Sub pozíció: %d/100"
+#define MSGTR_OSDSubAlignment "Sub igazítás: %s"
+#define MSGTR_OSDAVDelay "A-V késés: %d ms"
+#define MSGTR_OSDSpeed "Sebesség: x %6.2f"
+#define MSGTR_OSDStayOnTop "Mindig felül: %s"
+#define MSGTR_OSDRootwin "Rootwin: %s"
+#define MSGTR_OSDFramedrop "Képkocka dobás: %s"
+#define MSGTR_OSDFramedropOn "be"
+#define MSGTR_OSDFramedropHard "erõs"
+#define MSGTR_OSDFramedropOff "ki"
+#define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDSubBottom "alul"
+#define MSGTR_OSDSubCenter "középen"
+#define MSGTR_OSDSubTop "fent"
+
 // mencoder.c:
 
 #define MSGTR_UsingPass3ControllFile "Pass3 vezérlõ fájl használata: %s\n"
@@ -352,7 +380,7 @@ static char help_text[]=
 #define MSGTR_ForcingInputFPS "az input fps inkább %5.2f-ként lesz értelmezve\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "A RAWVIDEO kimeneti fájl formátum nem támogatja a hangot - audio letiltva\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Ez a demuxer még nem támogatja a -nosound kapcsolót.\n"
-#define MSGTR_MemAllocFailed "nem sikerült a memóriafoglálás"
+#define MSGTR_MemAllocFailed "Nem sikerült a memóriafoglalás\n"
 #define MSGTR_NoMatchingFilter "Nem találtam megfelelõ szûrõt/ao formátumot!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, talán hibás C fordító?\n"
 #define MSGTR_NoLavcAudioCodecName "Audio LAVC, hiányzó codec név!\n"
@@ -970,6 +998,20 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Interlaced kimeneti mód használata, bottom-field elõször."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "Progresszív (alapértelmezett) frame mód használata."
 
+// sub.c
+#define MSGTR_VO_SUB_Seekbar "Keresõsáv"
+#define MSGTR_VO_SUB_Play "Lejátszás"
+#define MSGTR_VO_SUB_Pause "Pillanat állj"
+#define MSGTR_VO_SUB_Stop "Állj"
+#define MSGTR_VO_SUB_Rewind "Vissza"
+#define MSGTR_VO_SUB_Forward "Elõre"
+#define MSGTR_VO_SUB_Clock "Óra"
+#define MSGTR_VO_SUB_Contrast "Kontraszt"
+#define MSGTR_VO_SUB_Saturation "Telítettség"
+#define MSGTR_VO_SUB_Volume "Hangerõ"
+#define MSGTR_VO_SUB_Brightness "Fényerõ"
+#define MSGTR_VO_SUB_Hue "Színárnyalat"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "A pgm video kimeneti vezérlõt lecserélte a -vo pnm:pgmyuv.\n"
@@ -1106,10 +1148,10 @@ static char help_text[]=
 // joystick.c
 
 #define MSGTR_INPUT_JOYSTICK_Opening "Botkormány eszköz megnyitása: %s\n"
-#define MSGTR_INPUT_JOYSTICK_CantOpen "Nem sikerült a(z) %s botkormány eszközt megnyitni : %s\n"
-#define MSGTR_INPUT_JOYSTICK_ErrReading "Hiba a botkormány eszköz olvasása közben : %s\n"
-#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Botkormány : elvesztettünk %d bájtnyi adatot\n"
-#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Botkormány : figyelmeztetõ init esemény, elvesztettük a szinkront a vezérlõvel\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Nem sikerült a(z) %s botkormány eszközt megnyitni: %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Hiba a botkormány eszköz olvasása közben: %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Botkormány: elvesztettünk %d bájtnyi adatot\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Botkormány: figyelmeztetõ init esemény, elvesztettük a szinkront a vezérlõvel\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Botkormány ismeretlen figyelmeztetõ esemény típus: %d\n"
 
 // input.c
@@ -1139,3 +1181,141 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "A bemeneti borkormány inicializálása nem sikerült\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Nem stat-olható %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Nem nyitható meg %s: %s\n"
+
+// ========================== LIBMPDEMUX ===================================
+
+// url.c
+
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "a karakterlánc már escape-ltnek tûnik az url_escape-ben %c%c1%c2\n"
+
+// ai_alsa1x.c
+
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Nem állítható be a mintavételi ráta\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Nem állítható be a buffer idõ\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Nem állítható be a periódus idõ\n"
+
+// ai_alsa1x.c / ai_alsa.c
+
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Hibás konfiguráció ehhez a PCM-hez: nincs elérhetõ konfiguráció\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Elérési típus nem használható\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Minta formátum nem elérhetõ\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Csatorna számláló nem elérhetõ - visszatérés az alapértelmezetthez: %d\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Sikertelen a hw paraméterek beállítása:"
+#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Nem használható a buffer mérettel egyezõ periódus (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Sikertelen az sw paraméterek beállítása:\n"
+#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Hiba az audió megnyitásakor: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA státusz hiba: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (legalább %.3f ms hosszan)\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "ALSA Státusz:\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: elõkészítési hiba: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA olvasás/írás hiba"
+
+// ai_oss.c
+
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Sikertelen a csatorna számláló beállítása: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Sikertelen a sztereó beállítása: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "'%s' nem nyitható meg: %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "nem támogatott formátum\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Az audió formátum nem állítható be."
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "A mintavételi ráta nem állítható be: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "A trigger nem állítható be: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Nem sikerült lekérdezni a blokkméretet!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "az audió blokk méret nulla, beállítva: %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "az audió blokk méret túl alacsony, beállítva: %d!\n"
+
+// asfheader.c
+
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "VÉGZETES HIBA: fejléc méret nagyobb, mint 1 MB (%d)!\nKeresd meg az MPlayer készítõit és töltsd fel/küldd el ezt a fájlt.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Nem sikerült %d bájt lefoglalása a fejléchez\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF az asf fejléc olvasása közben, hibás/nem teljes fájl?\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "A DVR valószínûleg csak libavformat-tal mûködik, próbáld ki a -demuxer 35 -öt probléma esetén\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Nincs adat rész a fejléc után!\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: nem található audió vagy videó fejléc - hibás fájl?\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Hibás hossz az ASF fejlécben!\n"
+
+// asf_mmst_streaming.c
+
+#define MSGTR_MPDEMUX_MMST_WriteError "írási hiba\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nriadó! eof\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "elõ-fejléc olvasás sikertelen\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Hibás fejléc méret, feladom\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "fejléc adat olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Hibás rtsp csomag méret, feladom\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "parancs adat olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "fejléc objektum\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "adat objektum\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "fájl objektum, csomag méret = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "folyam objektum, folyam id: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "túl sok id, a folyam figyelmen kívül hagyva"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "ismeretlen objektum\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "média adat olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "hiányzó aláírás\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Minden kész. Köszönjük, hogy szabadalmazott technológiát alkalmazó médiát töltöttél le.\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "ismeretlen parancs %02x\n"
+#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet hiba : %s\n"
+#define MSGTR_MPDEMUX_MMST_Connected "csatlakozva\n"
+
+// asf_streaming.c
+
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunck méret túl kicsi: %d\n"
+#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm hibás!: %d %d\n"
+#define MSGTR_MPDEMUX_ASF_WarnDropHeader "Figyelmeztetés : fejléc eldobva ????\n"
+#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Hiba a fejléc chunk értelmezésekor\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Ne a fejléc legyen az elsõ chunk !!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Hiba, nem lehet allokálni a(z) %d bájtos buffert\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Hiba a hálózati folyam olvasása közben\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Hiba, a chunk túl kicsi\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Hiba, az al-chunk-ok száma hibás\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Kicsi a sávszélesség, a fájl nem lejátszható!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "A sávszélesség túl kicsi, audió folyam kikapcsolva\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "A sávszélesség túl kicsi, videó folyam kikapcsolva\n"
+#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Hibás hossz az ASF fejlécben!\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Hiba a fejléc chunk olvasásakor\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Hiba: chunk_size > packet_size\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Hiba a chunk olvasása közben\n"
+#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "Hibás proxy URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Ismeretlen asf folyam típus\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Sikertelen a HTTP válasz értelmezése\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "Szerver válasz %d:%s\n"
+#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP ÉRTELMEZÉSI HIBA : %s pragma elvágva %d bájttól %d bájtig\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Socket írási hiba : %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Sikertelen a fájléc értelmezése\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "Nem található folyam\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Ismeretlen ASF folyam típus\n"
+#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "sikertelen, kilépés\n"
+
+// audio_in.c
+
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nhiba az audió olvasásakor: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Visszatérés a cross-run-ból, néhány képkocka kimaradhatott!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Végzetes hiba, nem lehet visszatérni!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nnincs elég audió minta!\n"
+
+// aviheader.c
+
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** üres lista?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Film megtalálva: 0x%X - 0x%X\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "'bih' megtalálva, %u bájt %d bájtból\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "A kulcs képkocka tábla újragenerálva az M$ mpg4v1 videóhoz\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Kulcs képkocka tábla újragenerálása a DIVX3 videóhoz\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Kulcs képkocka tábla újragenerálása az MPEG4 videóhoz\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' megtalálva, %d bájt %d bájtból\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh megtalálva (size=%d) (total_frames=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "INDEX blokk olvasása, %d chunks %ld képkockához (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "kiegészítõ RIFF fejléc...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** figyelmeztetés: ez nem kiterjesztett AVI fejléc..\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Hibás chunk?  chunksize=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: odml index felépítése (%d superindexchunks)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Hibás (nem teljes?) fájlt találtam. Tradícionális index használata\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "A(z) %s index fájl nem olvasható: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s nem érvényes MPlayer index fájl\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Nem lehet memóriát foglalni az index adatoknak %s-bõl\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Korai index fájlvég %s fájlban\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Betöltött index fájl: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Index generálása: %3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Index tábla legenerálva %d chunk-hoz!\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Nem sikerült a(z) %s index fájl írása: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Elmentett index fájl: %s\n"
