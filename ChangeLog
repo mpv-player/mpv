@@ -122,6 +122,7 @@ MPlayer (1.0)
     * lots of new slave commands (check DOCS/tech/slave.txt)
     * lots of new information provided by the -identify option
     * fixed ugly looking OSD with -vo gl2 and MMX
+    * added support for OSD localization
     * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
     * libdvdcss updated to 1.2.9
     * ~/.dvdcss is used instead of ~/.mplayer/DVDKeys for cached CSS keys
