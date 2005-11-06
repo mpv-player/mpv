@@ -850,7 +850,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
 	
-	mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_MPDEMUX_ASF_InfoStreamASFURL);
+	mp_msg(MSGT_OPEN, MSGL_INFO, MSGTR_MPDEMUX_ASF_InfoStreamASFURL, stream->url);
 	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
 		streaming_ctrl_free(stream->streaming_ctrl);
 		stream->streaming_ctrl = NULL;

@@ -654,7 +654,7 @@ int asf_mmst_streaming_start(stream_t *stream)
   stream->streaming_ctrl->status = streaming_playing_e;
 
   packet_length1 = packet_length;
-  mp_msg(MSGT_NETWORK,MSGL_INFO,"mmst packet_length = %d\n");
+  mp_msg(MSGT_NETWORK,MSGL_INFO,"mmst packet_length = %d\n", packet_length);
 
 #ifdef USE_ICONV
   if (url_conv != (iconv_t)(-1))
