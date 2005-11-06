@@ -26,6 +26,10 @@ ifeq ($(VIDIX),yes)
 SUBDIRS += libdha vidix
 DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 endif
+ifeq ($(HAVE_LIBCDIO),yes)
+CFLAGS += $(LIBCDIO_INC) 
+COMMON_LIBS += $(LIBCDIO_LIB)
+endif
 
 SRCS_COMMON = asxparser.c \
               codec-cfg.c \

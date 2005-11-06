@@ -226,6 +226,7 @@ Codecs:
   --enable-gif		 enable gif support [autodetect]
   --enable-png		 enable png input/output support [autodetect]
   --enable-jpeg		 enable jpeg input/output support [autodetect]
+  --enable-libcdio	 enable external libcdio support [autodetect]
   --enable-liblzo	 enable external liblzo support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable Win32/DirectShow support [autodetect]
@@ -1480,6 +1481,7 @@ _arts=auto
 _esd=auto
 _polyp=auto
 _jack=auto
+_libcdio=auto
 _liblzo=auto
 _mad=auto
 _toolame=auto
@@ -1677,6 +1679,8 @@ for ac_option do
   --disable-mad)	_mad=no		;;
   --disable-toolame)	_toolame=no	;;
   --disable-twolame)	_twolame=no	;;
+  --enable-libcdio)	_libcdio=yes	;;
+  --disable-libcio)	_libcdio=no	;;
   --enable-liblzo)	_liblzo=yes	;;
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
@@ -5076,6 +5080,49 @@ fi
 echores "$_cdparanoia"
 
 
+echocheck "libcdio"
+if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
+    if ( pkg-config --modversion libcdio) > /dev/null 2>&1 ; then
+        cat > $TMPC << EOF
+#include <stdio.h>
+#include <cdio/version.h>
+#include <cdio/cdda.h>
+#include <cdio/paranoia.h>
+int main()
+{
+    printf("%s\n", CDIO_VERSION);
+    return 0;
+    
+}
+EOF
+        _libcdio=no
+    for _inc_tmp in "$_inc_libcdio" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
+       cc_check `pkg-config --cflags --libs libcdio` $_inc_tmp $_ld_libcdio -lcdio_cdda -lcdio_paranoia $_ld_lm && _inc_libcdio="$_inc_tmp" && ( $TMPO >> "$TMPLOG" ) && _libcdio=yes && break
+    done
+    else
+        _libcdio=no
+    fi
+fi
+if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
+    _def_libcdio='#define HAVE_LIBCDIO'
+    _def_cdparanoia='#define HAVE_CDDA'
+    _def_havelibcdio='yes'
+    _inputmodules="cdda $_inputmodules"
+    _inc_libcdio=`pkg-config --cflags libcdio`
+    _ld_libcdio=`pkg-config --libs libcdio`
+    _ld_cdparanoia="$_ld_cdparanoia -lcdio_cdda -lcdio_paranoia -lcdio"
+else
+    if test "$_cdparanoia" = yes ; then
+       _libcdio="no (using cdparanoia)"
+    else
+       _libcdio=no
+    fi
+    _def_libcdio='#undef HAVE_LIBCDIO'
+    _def_havelibcdio='no'
+fi
+echores "$_libcdio"
+
+
 echocheck "freetype >= 2.0.9"
 
 # freetype depends on iconv
@@ -7116,6 +7163,8 @@ FONTCONFIG_INC = $_inc_fontconfig
 FONTCONFIG_LIB = $_ld_fontconfig
 FRIBIDI_INC = $_inc_fribidi
 FRIBIDI_LIB = $_ld_fribidi
+LIBCDIO_INC = $_inc_libcdio
+LIBCDIO_LIB = $_ld_libcdio
 LIBLZO_LIB= $_ld_liblzo
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
@@ -7222,6 +7271,9 @@ $_def_debug
 
 /* Toggles colorized output */
 //#define MSG_USE_COLORS 1
+
+/* Indicates that libcdio is available for VCD and CD-DA playback */
+$_def_libcdio
 
 /* Indicates that Ogle's libdvdread is available for DVD playback */
 $_def_dvdread

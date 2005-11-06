@@ -21,10 +21,18 @@
 #include <fcntl.h>
 #include <stdarg.h>
 #include <errno.h>
-#include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#ifdef WIN32
+#ifdef __MINGW32__
+#define mkdir(a,b) mkdir(a)
+#endif
+#include <windows.h>
+#include <winsock2.h>
+#else
+#include <netdb.h>
 #include <sys/ioctl.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -32,6 +40,8 @@
 	#include <linux/cdrom.h>
 #elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 	#include <sys/cdio.h>
+#elif defined(WIN32)
+        #include <ddk/ntddcdrm.h>
 #endif
 
 #include "cdd.h"
@@ -81,6 +91,41 @@ read_toc(const char *dev) {
 	cdtoc[tochdr.cdth_trk1].frame += cdtoc[tochdr.cdth_trk1].sec*75;
 	close(drive);
 	return tochdr.cdth_trk1;
+}
+
+#elif defined(WIN32)
+int
+read_toc(const char *dev) {
+        HANDLE drive;
+        DWORD r;
+        CDROM_TOC toc;
+        char device[10];
+        int i;
+
+        sprintf(device, "\\\\.\\%s", dev);
+        drive = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
+
+        if(!DeviceIoControl(drive, IOCTL_CDROM_READ_TOC, NULL, 0, &toc, sizeof(CDROM_TOC), &r, 0)) {
+                mp_msg(MSGT_OPEN, MSGL_ERR, "Failed to read TOC.\n");
+                return 0;
+        }
+
+        for (i = toc.FirstTrack; i <= toc.LastTrack; i++) {
+                toc.FirstTrack = i;
+		cdtoc[i-1].min = toc.TrackData[i - 1].Address[1];
+		cdtoc[i-1].sec = toc.TrackData[i - 1].Address[2];
+		cdtoc[i-1].frame = toc.TrackData[i - 1].Address[3];
+		cdtoc[i-1].frame += cdtoc[i-1].min*60*75;
+		cdtoc[i-1].frame += cdtoc[i-1].sec*75;
+        }
+        toc.FirstTrack = 0xAA;
+        cdtoc[toc.LastTrack].min = toc.TrackData[toc.LastTrack].Address[1];
+        cdtoc[toc.LastTrack].sec = toc.TrackData[toc.LastTrack].Address[2];
+        cdtoc[toc.LastTrack].frame = toc.TrackData[toc.LastTrack].Address[3];
+        cdtoc[toc.LastTrack].frame += cdtoc[toc.LastTrack].min*60*75;
+        cdtoc[toc.LastTrack].frame += cdtoc[toc.LastTrack].sec*75;
+        CloseHandle(drive);
+        return toc.LastTrack;
 }
 
 #elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__DragonFly__)
@@ -281,7 +326,11 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 	
 	sprintf( file_name, "%s%08lx", cddb_data->cache_dir, cddb_data->disc_id);
 	
-	file_fd = open(file_name, O_RDONLY);
+	file_fd = open(file_name, O_RDONLY
+#ifdef WIN32
+	| O_BINARY
+#endif
+	);
 	if( file_fd<0 ) {
 		printf("No cache found\n");
 		return -1;
@@ -328,7 +377,11 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 	if( ret<0 ) {
 		// Directory not present, create it.
 		ret = mkdir( cddb_data->cache_dir, 0755 );
+#ifdef __MINGW32__
+		if( ret<0 && errno != EEXIST ) {
+#else
 		if( ret<0 ) {
+#endif
 			perror("mkdir");
 			printf("Failed to create directory %s\n", cddb_data->cache_dir );
 			return -1;
@@ -674,6 +727,12 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	}
 	
 	home_dir = getenv("HOME");
+#ifdef __MINGW32__
+	if( home_dir==NULL ) home_dir = getenv("USERPROFILE");
+	if( home_dir==NULL ) home_dir = getenv("HOMEPATH");
+	// Last resort, store the cddb cache in the mplayer directory
+	if( home_dir==NULL ) home_dir = (char *)get_path("");
+#endif
 	if( home_dir==NULL ) {
 		cddb_data.cache_dir = NULL;
 	} else {

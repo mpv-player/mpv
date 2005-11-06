@@ -1,8 +1,14 @@
 #ifndef __CDD_H__
 #define __CDD_H__
 
+#include "config.h"
+#ifndef HAVE_LIBCDIO
 #include <cdda_interface.h>
 #include <cdda_paranoia.h>
+#else
+#include <cdio/cdda.h>
+#include <cdio/paranoia.h>
+#endif
 
 typedef struct {
 	char cddb_hello[1024];	
@@ -48,8 +54,13 @@ typedef struct {
 } cd_info_t;
 
 typedef struct {
+#ifndef HAVE_LIBCDIO
 	cdrom_drive* cd;
 	cdrom_paranoia* cdp;
+#else
+	cdrom_drive_t* cd;
+	cdrom_paranoia_t* cdp;
+#endif
 	int sector;
 	int start_sector;
 	int end_sector;

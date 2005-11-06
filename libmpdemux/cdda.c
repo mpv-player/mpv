@@ -87,13 +87,17 @@ extern cd_info_t* cddb_parse_xmcd(char *xmcd_file);
 
 static int seek(stream_t* s,off_t pos);
 static int fill_buffer(stream_t* s, char* buffer, int max_len);
-static void close(stream_t* s);
+static void close_cdda(stream_t* s);
 
 static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   struct cdda_params* p = (struct cdda_params*)opts;
   int mode = p->paranoia_mode;
   int offset = p->toc_offset;
+#ifndef HAVE_LIBCDIO
   cdrom_drive* cdd = NULL;
+#else
+  cdrom_drive_t* cdd = NULL;
+#endif
   cdda_priv* priv;
   cd_info_t *cd_info,*cddb_info = NULL;
   unsigned int audiolen=0;
@@ -125,9 +129,11 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 #endif
   
+#ifndef HAVE_LIBCDIO
   if(p->generic_dev)
     cdd = cdda_identify_scsi(p->generic_dev,p->device,0,NULL);
   else
+#endif
 #if defined(__NetBSD__)
     cdd = cdda_identify_scsi(p->device,p->device,0,NULL);
 #else
@@ -144,7 +150,9 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 
   if(p->sector_size) {
     cdd->nsectors = p->sector_size;
+#ifndef HAVE_LIBCDIO
     cdd->bigbuff = p->sector_size * CD_FRAMESIZE_RAW;
+#endif
   }
 
   if(cdda_open(cdd) != 0) {
@@ -218,10 +226,17 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   
   if(p->no_skip)
     mode |= PARANOIA_MODE_NEVERSKIP;
+#ifndef HAVE_LIBCDIO
   paranoia_modeset(cdd, mode);
 
   if(p->search_overlap >= 0)
     paranoia_overlapset(cdd,p->search_overlap);
+#else
+  paranoia_modeset(priv->cdp, mode);
+
+  if(p->search_overlap >= 0)
+    paranoia_overlapset(priv->cdp,p->search_overlap);
+#endif
 
   paranoia_seek(priv->cdp,priv->start_sector,SEEK_SET);
   priv->sector = priv->start_sector;
@@ -235,14 +250,21 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 #endif
 
   st->priv = priv;
+#ifndef HAVE_LIBCDIO
   st->start_pos = priv->start_sector*CD_FRAMESIZE_RAW;
   st->end_pos = priv->end_sector*CD_FRAMESIZE_RAW;
   st->type = STREAMTYPE_CDDA;
   st->sector_size = CD_FRAMESIZE_RAW;
+#else
+  st->start_pos = priv->start_sector*CDIO_CD_FRAMESIZE_RAW;
+  st->end_pos = priv->end_sector*CDIO_CD_FRAMESIZE_RAW;
+  st->type = STREAMTYPE_CDDA;
+  st->sector_size = CDIO_CD_FRAMESIZE_RAW;
+#endif
 
   st->fill_buffer = fill_buffer;
   st->seek = seek;
-  st->close = close;
+  st->close = close_cdda;
 
   *file_format = DEMUXER_TYPE_RAWAUDIO;
 
@@ -251,7 +273,11 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   return STREAM_OK;
 }
 
+#ifndef HAVE_LIBCDIO
 static void cdparanoia_callback(long inpos, int function) {
+#else
+static void cdparanoia_callback(long int inpos, paranoia_cb_mode_t function) {
+#endif
 }
 
 static int fill_buffer(stream_t* s, char* buffer, int max_len) {
@@ -263,13 +289,22 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   buf = paranoia_read(p->cdp,cdparanoia_callback);
 
 #ifdef WORDS_BIGENDIAN 
+#ifndef HAVE_LIBCDIO
   for(i=0;i<CD_FRAMESIZE_RAW/2;i++)
+#else
+  for(i=0;i<CDIO_CD_FRAMESIZE_RAW/2;i++)
+#endif
           buf[i]=le2me_16(buf[i]);
 #endif
 
   p->sector++;
+#ifndef HAVE_LIBCDIO
   s->pos = p->sector*CD_FRAMESIZE_RAW;
   memcpy(buffer,buf,CD_FRAMESIZE_RAW);
+#else
+  s->pos = p->sector*CDIO_CD_FRAMESIZE_RAW;
+  memcpy(buffer,buf,CDIO_CD_FRAMESIZE_RAW);
+#endif
 
   if((p->sector < p->start_sector) || (p->sector >= p->end_sector)) {
     s->eof = 1;
@@ -290,7 +325,11 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   }
 
   
+#ifndef HAVE_LIBCDIO
   return CD_FRAMESIZE_RAW;
+#else
+  return CDIO_CD_FRAMESIZE_RAW;
+#endif
 }
 
 static int seek(stream_t* s,off_t newpos) {
@@ -306,8 +345,13 @@ static int seek(stream_t* s,off_t newpos) {
     return 0;
   }
 
+#ifndef HAVE_LIBCDIO
   sec = s->pos/CD_FRAMESIZE_RAW;
 //printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CD_FRAMESIZE_RAW);
+#else
+  sec = s->pos/CDIO_CD_FRAMESIZE_RAW;
+//printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CDIO_CD_FRAMESIZE_RAW);
+#endif
 //printf("sector: %d  new: %d\n", p->sector, sec );
  
   for(i=0;i<p->cd->tracks;i++){
@@ -338,14 +382,18 @@ static int seek(stream_t* s,off_t newpos) {
 #endif
 
   p->sector = sec;
+#ifndef HAVE_LIBCDIO
 //  s->pos = sec*CD_FRAMESIZE_RAW;
+#else
+//  s->pos = sec*CDIO_CD_FRAMESIZE_RAW;
+#endif
 
 //printf("seek: %d, sec: %d\n", (int)s->pos, sec);
   paranoia_seek(p->cdp,sec,SEEK_SET);
   return 1;
 }
 
-static void close(stream_t* s) {
+static void close_cdda(stream_t* s) {
   cdda_priv* p = (cdda_priv*)s->priv;
   paranoia_free(p->cdp);
   cdda_close(p->cd);
