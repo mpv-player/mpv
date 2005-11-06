@@ -3763,7 +3763,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
                 mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavEvent,dvd_nav_text);
                 //osd_show_dvd_nav_delay = 60;
 
-                osd_show_dvd_nav_highlight=sh_video->fps/2;
+                osd_show_dvd_nav_highlight=1; /* this is just a flag */
                 osd_show_dvd_nav_sx=hevent->sx;
                 osd_show_dvd_nav_ex=hevent->ex;
                 osd_show_dvd_nav_sy=hevent->sy;
