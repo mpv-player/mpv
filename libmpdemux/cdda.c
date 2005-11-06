@@ -13,6 +13,11 @@
 
 #include "cdd.h"
 
+#ifndef CD_FRAMESIZE_RAW
+#define CD_FRAMESIZE_RAW CDIO_CD_FRAMESIZE_RAW
+#endif
+
+
 extern char *cdrom_device;
 
 static struct cdda_params {
@@ -250,17 +255,10 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 #endif
 
   st->priv = priv;
-#ifndef HAVE_LIBCDIO
   st->start_pos = priv->start_sector*CD_FRAMESIZE_RAW;
   st->end_pos = priv->end_sector*CD_FRAMESIZE_RAW;
   st->type = STREAMTYPE_CDDA;
   st->sector_size = CD_FRAMESIZE_RAW;
-#else
-  st->start_pos = priv->start_sector*CDIO_CD_FRAMESIZE_RAW;
-  st->end_pos = priv->end_sector*CDIO_CD_FRAMESIZE_RAW;
-  st->type = STREAMTYPE_CDDA;
-  st->sector_size = CDIO_CD_FRAMESIZE_RAW;
-#endif
 
   st->fill_buffer = fill_buffer;
   st->seek = seek;
@@ -289,22 +287,13 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   buf = paranoia_read(p->cdp,cdparanoia_callback);
 
 #ifdef WORDS_BIGENDIAN 
-#ifndef HAVE_LIBCDIO
   for(i=0;i<CD_FRAMESIZE_RAW/2;i++)
-#else
-  for(i=0;i<CDIO_CD_FRAMESIZE_RAW/2;i++)
-#endif
           buf[i]=le2me_16(buf[i]);
 #endif
 
   p->sector++;
-#ifndef HAVE_LIBCDIO
   s->pos = p->sector*CD_FRAMESIZE_RAW;
   memcpy(buffer,buf,CD_FRAMESIZE_RAW);
-#else
-  s->pos = p->sector*CDIO_CD_FRAMESIZE_RAW;
-  memcpy(buffer,buf,CDIO_CD_FRAMESIZE_RAW);
-#endif
 
   if((p->sector < p->start_sector) || (p->sector >= p->end_sector)) {
     s->eof = 1;
@@ -325,11 +314,7 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   }
 
   
-#ifndef HAVE_LIBCDIO
   return CD_FRAMESIZE_RAW;
-#else
-  return CDIO_CD_FRAMESIZE_RAW;
-#endif
 }
 
 static int seek(stream_t* s,off_t newpos) {
@@ -345,13 +330,8 @@ static int seek(stream_t* s,off_t newpos) {
     return 0;
   }
 
-#ifndef HAVE_LIBCDIO
   sec = s->pos/CD_FRAMESIZE_RAW;
 //printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CD_FRAMESIZE_RAW);
-#else
-  sec = s->pos/CDIO_CD_FRAMESIZE_RAW;
-//printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CDIO_CD_FRAMESIZE_RAW);
-#endif
 //printf("sector: %d  new: %d\n", p->sector, sec );
  
   for(i=0;i<p->cd->tracks;i++){
@@ -382,11 +362,7 @@ static int seek(stream_t* s,off_t newpos) {
 #endif
 
   p->sector = sec;
-#ifndef HAVE_LIBCDIO
 //  s->pos = sec*CD_FRAMESIZE_RAW;
-#else
-//  s->pos = sec*CDIO_CD_FRAMESIZE_RAW;
-#endif
 
 //printf("seek: %d, sec: %d\n", (int)s->pos, sec);
   paranoia_seek(p->cdp,sec,SEEK_SET);
