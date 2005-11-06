@@ -998,6 +998,20 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Using interlaced output mode, bottom-field first."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "Using (default) progressive frame mode."
 
+// sub.c
+#define MSGTR_VO_SUB_Seekbar "Seekbar"
+#define MSGTR_VO_SUB_Play "Play"
+#define MSGTR_VO_SUB_Pause "Pause"
+#define MSGTR_VO_SUB_Stop "Stop"
+#define MSGTR_VO_SUB_Rewind "Rewind"
+#define MSGTR_VO_SUB_Forward "Forward"
+#define MSGTR_VO_SUB_Clock "Clock"
+#define MSGTR_VO_SUB_Contrast "Contrast"
+#define MSGTR_VO_SUB_Saturation "Saturation"
+#define MSGTR_VO_SUB_Volume "Volume"
+#define MSGTR_VO_SUB_Brightness "Brightness"
+#define MSGTR_VO_SUB_Hue "Hue"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n"
