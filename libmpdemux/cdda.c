@@ -97,6 +97,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   cdda_priv* priv;
   cd_info_t *cd_info,*cddb_info = NULL;
   unsigned int audiolen=0;
+  int last_track;
   int i;
   char *xmcd_file = NULL;
 
@@ -185,14 +186,16 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   if(p->speed)
     cdda_speed_set(cdd,p->speed);
 
+  last_track = cdda_tracks(cdd);
+  if (p->span.start > last_track) p->span.start = last_track;
+  if (p->span.end < p->span.start) p->span.end = p->span.start;
+  if (p->span.end > last_track) p->span.end = last_track;
   if(p->span.start)
     priv->start_sector = cdda_track_firstsector(cdd,p->span.start);
   else
     priv->start_sector = cdda_disc_firstsector(cdd);
 
   if(p->span.end) {
-    int last = cdda_tracks(cdd);
-    if(p->span.end > last) p->span.end = last;
     priv->end_sector = cdda_track_lastsector(cdd,p->span.end);
   } else
     priv->end_sector = cdda_disc_lastsector(cdd);
