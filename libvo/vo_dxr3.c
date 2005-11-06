@@ -162,7 +162,6 @@ LIBVO_EXTERN (dxr3)
 static int v_width, v_height;
 static int s_width, s_height;
 static int osd_w, osd_h;
-static int fullscreen;
 static int img_format;
 
 /* Configuration values
@@ -293,13 +292,9 @@ static int control(uint32_t request, void *data, ...)
 	case VOCTRL_FULLSCREEN:
 		if (dxr3_overlay) {
 			vo_x11_fullscreen();
-			if (fullscreen) {
-				overlay_signalmode(overlay_data, EM8300_OVERLAY_SIGNAL_WITH_VGA);
-				fullscreen = 0;
-			} else {
-				overlay_signalmode(overlay_data, EM8300_OVERLAY_SIGNAL_ONLY);
-				fullscreen = 1;
-			}
+			overlay_signalmode(overlay_data,
+			  vo_fs ? EM8300_OVERLAY_SIGNAL_ONLY :
+			    EM8300_OVERLAY_SIGNAL_WITH_VGA);
 			return VO_TRUE;
 		}
 		return VO_FALSE;
