@@ -2859,7 +2859,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_SEEK : {
       float v;
       int abs;
-      osd_show_percentage = 25;
+      osd_show_percentage = sh_video->fps;
       v = cmd->args[0].v.f;
       abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
       if(abs==2) { /* Absolute seek to a specific timestamp in seconds */
@@ -2898,7 +2898,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_AUDIO_DELAY : {
       float v = cmd->args[0].v.f;
       audio_delay += v;
-      osd_show_av_delay = 9;
+      osd_show_av_delay = sh_video->fps/2;
       if(sh_audio) sh_audio->delay+= v;
     } break;
     case MP_CMD_SPEED_INCR : {
@@ -2994,7 +2994,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	sub_delay = v;
       else
 	sub_delay += v;
-      osd_show_sub_delay = 9; // show the subdelay in OSD
+      osd_show_sub_delay = sh_video->fps/2; // show the subdelay in OSD
     }
 #endif
     } break;
@@ -3003,7 +3003,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     if (sh_video) {
       int movement = cmd->args[0].v.i;
       step_sub(subdata, sh_video->pts, movement);
-      osd_show_sub_delay = 9; // show the subdelay in OSD
+      osd_show_sub_delay = sh_video->fps/2; // show the subdelay in OSD
     }
 #endif
     } break;
@@ -3023,7 +3023,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	/* Show OSD state when disabled, but not when an explicit
 	   argument is given to the osd command, i.e. in slave mode. */
 	if (v == -1 && osd_level <= 1)
-	  osd_show_status = 9;
+	  osd_show_status = sh_video->fps/2;
       }
 #endif
     } break;
@@ -3274,7 +3274,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if(v < 0){
 	frame_dropping = (frame_dropping+1)%3;
 #ifdef USE_OSD
-       osd_show_framedropping=10;
+       osd_show_framedropping=sh_video->fps/2;
        vo_osd_changed(OSDTYPE_SUBTITLE);
 #endif
       }
@@ -3424,7 +3424,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
      if(video_out && vo_config_count) {
        video_out->control(VOCTRL_ONTOP, 0);
 #ifdef USE_OSD
-       osd_show_ontop=10;
+       osd_show_ontop=sh_video->fps/2;
        vo_osd_changed(OSDTYPE_SUBTITLE);
 #endif
      }
@@ -3435,7 +3435,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
      if(video_out && vo_config_count) {
        video_out->control(VOCTRL_ROOTWIN, 0);
 #ifdef USE_OSD
-       osd_show_rootwin=10;
+       osd_show_rootwin=sh_video->fps/2;
        vo_osd_changed(OSDTYPE_SUBTITLE);
 #endif
      }
@@ -3473,7 +3473,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if(sub_pos >100) sub_pos=100;
 	if(sub_pos <0) sub_pos=0;
 	vo_osd_changed(OSDTYPE_SUBTITLE);
-        osd_show_sub_pos = 9;
+        osd_show_sub_pos = sh_video->fps/2;
       }
 #endif
     } break;
@@ -3485,7 +3485,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     	    sub_alignment = cmd->args[0].v.i;
     	else
             sub_alignment = (sub_alignment+1) % 3;
-	osd_show_sub_alignment = 9;
+	osd_show_sub_alignment = sh_video->fps/2;
 	vo_osd_changed(OSDTYPE_SUBTITLE);
       }
 #endif
@@ -3495,7 +3495,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #ifdef USE_SUB
       if (sh_video) {
 	sub_visibility=1-sub_visibility;
-	osd_show_sub_visibility = 9; // show state of subtitle visibility in OSD
+	osd_show_sub_visibility = sh_video->fps/2; // show state of subtitle visibility in OSD
 	vo_osd_changed(OSDTYPE_SUBTITLE);
       }
 #endif
@@ -3763,7 +3763,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
                 mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavEvent,dvd_nav_text);
                 //osd_show_dvd_nav_delay = 60;
 
-                osd_show_dvd_nav_highlight=1;
+                osd_show_dvd_nav_highlight=sh_video->fps/2;
                 osd_show_dvd_nav_sx=hevent->sx;
                 osd_show_dvd_nav_ex=hevent->ex;
                 osd_show_dvd_nav_sy=hevent->sy;
