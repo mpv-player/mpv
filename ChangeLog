@@ -130,6 +130,7 @@ MPlayer (1.0)
     * configure check and compiler optimizations for AMD-64 extended
     * configure can now run with cross compiling, new configure option
       --enable-cross-compile
+    * libcdio support for cd playback
 
 
   pre7try2: August 26, 2005
