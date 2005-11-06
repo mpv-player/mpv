@@ -1529,11 +1529,13 @@ static int check_crc32(uint32_t val, uint8_t *ptr, uint16_t len, uint8_t *vbase)
 }
 */
 
-static uint8_t collect_section(ts_section_t *section, int is_start, unsigned char *buff, int size)
+static int collect_section(ts_section_t *section, int is_start, unsigned char *buff, int size)
 {
-	uint8_t skip = 0, *ptr, tid;
+	uint8_t *ptr;
 	uint16_t tlen;
+	int skip, tid;
 	
+	mp_msg(MSGT_DEMUX, MSGL_V, "COLLECT_SECTION, start: %d, size: %d, collected: %d\n", is_start, size, section->buffer_len);
 	if(! is_start && !section->buffer_len)
 		return 0;
 	
@@ -1567,7 +1569,7 @@ static uint8_t collect_section(ts_section_t *section, int is_start, unsigned cha
 	ptr = &(section->buffer[skip + 1]);
 	tid = ptr[0];
 	tlen = ((ptr[1] & 0x0f) << 8) | ptr[2];
-	mp_msg(MSGT_DEMUX, MSGL_V, "SKIP: %d+1, TID: %d, TLEN: %d\n", skip, tid, tlen);
+	mp_msg(MSGT_DEMUX, MSGL_V, "SKIP: %d+1, TID: %d, TLEN: %d, COLLECTED: %d\n", skip, tid, tlen, section->buffer_len);
 	if(section->buffer_len < (skip+1+3+tlen))
 	{
 		mp_msg(MSGT_DEMUX, MSGL_DBG2, "DATA IS NOT ENOUGH, NEXT TIME\n");
@@ -1579,7 +1581,7 @@ static uint8_t collect_section(ts_section_t *section, int is_start, unsigned cha
 
 static int parse_pat(ts_priv_t * priv, int is_start, unsigned char *buff, int size)
 {
-	uint8_t skip;
+	int skip;
 	unsigned char *ptr;
 	unsigned char *base;
 	int entries, i;
@@ -2207,7 +2209,8 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 	unsigned char *base, *es_base;
 	pmt_t *pmt;
 	int32_t idx, es_count, section_bytes;
-	uint8_t skip, m=0;
+	uint8_t m=0;
+	int skip;
 	pmt_t *tmp;
 	struct pmt_es_t *tmp_es;
 	ts_section_t *section;
@@ -2228,6 +2231,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 		idx = priv->pmt_cnt;
 		memset(&(priv->pmt[idx]), 0, sizeof(pmt_t));
 		priv->pmt_cnt++;
+		priv->pmt[idx].progid = progid;
 	}
 
 	pmt = &(priv->pmt[idx]);
@@ -2238,8 +2242,6 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 		return 0;
 		
 	base = &(section->buffer[skip]);
-
-	pmt->progid = progid;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "FILL_PMT(prog=%d), PMT_len: %d, IS_START: %d, TS_PID: %d, SIZE=%d, M=%d, ES_CNT=%d, IDX=%d, PMT_PTR=%p\n",
 		progid, pmt->section.buffer_len, is_start, pid, size, m, pmt->es_cnt, idx, pmt);
