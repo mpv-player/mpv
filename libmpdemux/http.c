@@ -930,7 +930,7 @@ stream_info_t stream_info_http2 = {
   "http streaming",
   "null",
   "Bertrand, Albeu, Arpi? who?",
-  "plain http, aslo used as falback for many other protocols",
+  "plain http, also used as fallback for many other protocols",
   open_s2,
   {"http", "http_proxy", "pnm", "mms", "mmsu", "mmst", "rtsp", NULL},	//all the others as fallback
   NULL,
