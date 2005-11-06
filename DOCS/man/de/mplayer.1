@@ -110,7 +110,7 @@ mencoder \- Movie Encoder
 .in
 .B mplayer
 'in +\n[.k]u
-.I [cdda|cddb]://Titel[:Geschwindigkeit][/Gerät]
+.I [cdda|cddb]://Titel[-Endtitel][:Geschwindigkeit][/Gerät]
 [Optionen]
 .
 .br
@@ -124,7 +124,7 @@ mencoder \- Movie Encoder
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp] ://
+.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv] ://
 [Benutzer:Passwort@]\fIURL\fP[:Port] [Optionen]
 .br
 .in
@@ -292,7 +292,7 @@ Erhöht/\:verringert die Lautstärke.
 Erhöht/\:verringert die Lautstärke.
 .IPs m\ \ \ \ 
 Ändert Ton-Stummschaltung (ein/\:aus).
-.IPs "#" (nur bei MPEG und Matroska)
+.IPs "# (nur bei MPEG und Matroska)"
 Wechselt zwischen den verfügbaren Audiospuren.
 .IPs f\ \ \ \ 
 Ändert Vollbild-Wiedergabe (ein/\:aus).
@@ -519,7 +519,7 @@ Gib eine Konfigurationsdatei an, die nach der Standardkonfigurationsdateien
 eingelesen werden soll.
 .
 .TP
-.B \-quiet \ \ 
+.B \-quiet \ 
 Konsolenausgaben werden weniger ausführlich; insbesondere wird damit die
 Statuszeile (z.B.\& A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
 Besonders nützlich ist dies bei langsamen Terminals oder fehlerhaften, die
@@ -951,9 +951,9 @@ Setzt die CD-Umdrehungsgeschwindigkeit.
 .IPs paranoia=<0\-2>
 Setzt den Paranoia-Wert.
 .RSss
-0: deaktiviert Fehlererkennung
+0: deaktiviert Fehlererkennung (Standard)
 .br
-1: nur Überlappungstest (Standard)
+1: nur Überlappungstest
 .br
 2: komplette Datenkorrektur und -überprüfung
 .REss
@@ -2519,7 +2519,7 @@ Anzeigemodus zu setzen.
 Aktiviert VBI für vesa-, dfbmga- und svga-Videoausgabetreiber.
 .
 .TP
-.B \-wid <Fenster-ID> (siehe auch \-guiwid, \-geometry) (nur bei X11 und DirectX)
+.B \-wid <Fenster-ID> (siehe auch \-guiwid) (nur bei X11, OpenGL und DirectX)
 Weist MPlayer an, sich an ein bestehendes X11-Fenster zu heften, was
 beispielsweise nützlich ist, um MPlayer in einen Browser einzubetten (z.B.\&
 mit der plugger-Erweiterung).
@@ -3078,6 +3078,8 @@ interlaced-Filmmaterial
 zu Abreißeffekten oder unscharfen Bewegungen kommt.
 .IPs layer=N
 Wird den Layer mit der ID N für die Wiedergabe erzwingen (Standard: -1 - auto).
+.IPs dfbopts=<Liste>
+Gibt eine Parameterliste für DirectFB an.
 .RE
 .PD 1
 .
@@ -3461,7 +3463,7 @@ Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 .PD 1
 .
 .TP
-.B \-af-adv <force=(0\-3):list=(Filter)> (siehe auch \-af)
+.B \-af-adv <force=(0\-7):list=(Filter)> (siehe auch \-af)
 Gibt erweiterte Audiofilteroptionen an:
 .RSs
 .IPs force=<0\-7>
@@ -3679,14 +3681,14 @@ Auflösung.
 Falls <b> angegeben wurde, wird die Decodierung für niedrige Auflösungen nur
 dann benutzt, falls die Breite des Videos größer oder gleich dem Wert <b> ist.
 .RE
-.IPs "sb=<Nummer> (nur bei MPEG2)"
+.IPs "sb=<Nummer> (nur bei MPEG-2)"
 Überspringe unten die angegebene Anzahl von Makroblockreihen.
-.IPs "st=<Nummer> (nur bei MPEG2)"
+.IPs "st=<Nummer> (nur bei MPEG-2)"
 Überspringe oben die angegebene Anzahl von Makroblockreihen.
 .IPs skiploopfilter=<skipvalue> (nur H.264)
 Überspringt den Schleifenfilter (Deblocking) während der H.264-Dekodierung.
 Da das gefilterte Bild als Referenz für darauf aufbauende Bilder benutzt wird
-hat dies im Vergleich zum Weglassen des Deblocking-Filters bei MPEG2 einen
+hat dies im Vergleich zum Weglassen des Deblocking-Filters bei MPEG-2 einen
 stärkeren negativen Effekt auf die Qualität.
 Aber zumindest bei HDTV mit hoher Bitrate bietet dies einen hohen
 Geschwindigkeitsgewinn bei kaum sichtbarem Qualitätsverlust.
@@ -6593,23 +6595,29 @@ Für Menschen mit einem sehr guten Gehör und entsprechender HiFi-Ausstattung.
 Im CBR-Modus gibt dieser Parameter die Bitrate in kbps an, im VBR-Modus ist er
 die minimal erlaubte Bitrate pro Frame.
 VBR funktioniert nicht mit einem Wert unter 112.
+.
 .TP
 .B vbr=<-50\-50> (nur bei VBR)
 Bereich für Abweichungen; falls negativ verlagert der Encoder die
 durchschnittliche Bitrate zum unteren Limit, wenn positiv zum höheren.
 Auf 0 gesetzt wird CBR benutzt (Standard).
+.
 .TP
 .B maxvbr=<32\-384> (VBR only)
 maximal erlaubte Bitrate pro Frame, in kpbs
+.
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (Standard: mono bei 1-Kanal-Audio, sonst stereo)
+.
 .TP
 .B psy=<-1\-4>
 psychoakustisches Modell (Standard: 2)
+.
 .TP
 .B errprot=<0 | 1>
 Füge Fehlerkorrektur hinzu.
+.
 .TP
 .B debug=<0\-10>
 Debugging-Level
@@ -6622,9 +6630,11 @@ Debugging-Level
 .TP
 .B br=<Bitrate>
 mittlere Bitrate in kbps (schließt Option quality aus)
+.
 .TP
 .B quality=<1\-1000>
 Qualitätsmodus, je höher desto besser (schließt Option br aus)
+.
 .TP
 .B object=<0\-3>
 Komplexität des Objekttyps
@@ -6640,15 +6650,19 @@ SSR
 LTP (extrem langsam)
 .RE
 .PD 1
+.
 .TP
 .B mpeg=<2|4>
 MPEG-Version (Standard: 4)
+.
 .TP
 .B tns\ \ \ \ 
 Aktiviert temporäre Rauschanpassung.
+.
 .TP
 .B cutoff=<0\-Samplerate/2>
 Frequenz, ab der abgeschnitten wird (Standard: <Samplerate>/2)
+.
 .TP
 .B raw\ \ \ \ 
 Speichert den Bitstream als reine Arbeitsdaten mit Extrainformationen im
@@ -7690,13 +7704,13 @@ Setzt die Vergleichsfunktion für "sub pel"-Bewegungsabschätzung (siehe mbcmp
 für eine Liste der verfügbaren Vergleichsfunktionen) (Standard: 0).
 .
 .TP
-.B nssew=<0\-100>
+.B nssew=<0\-1000000>
 Diese Einstellung kontrolliert die NSSE-Gewichtung, wobei eine höhere
 Gewichtung stärkeres Rauschen erzeugt.
 NSSE 0 ist identisch mit SSE.
 Vielleicht findest du dies nützlich, wenn du die Beibehaltung von etwas
 Rauschen in deinem encodierten Video besser findest als es vor dem Encodieren
-herauszufiltern.
+herauszufiltern. (Standard: 8)
 .
 .TP
 .B predia=<-99\-6>
@@ -8157,7 +8171,7 @@ welche die Fehlerkorrekturmechanismen mancher Decoder verwirren kann.
 .TP
 .B max_bframes=<0\-4>
 Maximale Anzahl der B-Frames, die zwischen I- und P-Frames gesetzt wird
-(Standard: 0).
+(Standard: 2).
 .
 .TP
 .B bquant_ratio=<0\-1000>
@@ -8609,34 +8623,42 @@ Erschöpfende Suche, kontrolliert von me_range (sehr langsam).
 Radius der Erschöpfenden Bewegungssuche (Standard: 16).
 .
 .TP
-.B subq=<1\-5>
+.B subq=<1\-6>
 Passt die Qualität der subpel-Verfeinerung an.
-Dieser Parameter kontrolliert den Ausgleich von Qualität und Geschwindigkeit
+Dieser Parameter kontrolliert den Kompromiss zwischen Qualität und Geschwindigkeit
 beim Prozess der Bewegungsabschätzung.
 subq=5 kann bis zu 10% besser komprimieren als subq=1.
+.PD 0
 .RSs
-1: Startet Vollpixel-Präzisions-Bewegungsabschätzung für alle in Frage
-kommenden Makroblock-Typen und wählt dann den besten aus.
-Dann verfeinert er die Bewegung dieses Typs zu einer schnellen
-Viertelpixel-Präzision (am schnellsten).
-.br
-2: Wie 1, benutzt aber eine langsamere Viertelpixel-Verfeinerung.
-.br
-3: Startet Halbpixel-Präzisions-Bewegungsabschätzung für alle in Frage
-kommenden Makroblock-Typen und wählt dann den besten aus.
-Dann verfeinert er die Bewegung dieses Typs zu einer Viertelpixel-Präzision.
-.br
-4: Startet schnelle Viertelpixel-Präzisions-Bewegungsabschätzung für alle in
-Frage kommenden Makroblock-Typen, wählt den besten aus und beendet die
+.IPs 1
+Benutze Bewegungsabschätzung mit Ganzpixelpräzision für alle in Frage
+kommenden Makroblocktypen und wähle dann den besten aus.
+Verfeinert dann die Bewegung dieses Typs zu einer schnellen
+Viertelpixelpräzision (am schnellsten).
+.IPs 2
+Wie 1, benutzt aber eine langsamere Viertelpixel-Verfeinerung.
+.IPs 3
+Benutze Bewegungsabschätzung mit Halbpixelpräzision für alle in Frage
+kommenden Makroblocktypen und wähle dann den besten aus.
+Verfeinert dann die Bewegung dieses Typs zu einer Viertelpixelpräzision.
+.IPs 4
+Benutze Bewegungsabschätzung mit Viertelpixelpräzision für alle in
+Frage kommenden Makroblocktypen, wähle den besten aus und beende die
 Viertelpixel-Verfeinerung für diesen Typ.
-.br
-5: Startet Viertelpixel-Präzisions-Bewegungsabschätzung in der höchsten
-Qualitätsstufe für alle in Frage kommenden Makroblock-Typen, bevor er den
-besten Typ auswählt (am besten, Standard).
-.REss
-Oben beschriebene "alle in Frage kommenden Makroblock-Typen" bedeut nicht alle
+.IPs 5
+Benutze Bewegungsabschätzung mit Viertelpixelpräzisions in der höchsten
+Qualitätsstufe für alle in Frage kommenden Makroblocktypen, wähle dann den
+besten Typ (Standard).
+.IPs 6
+Benutze Optimierung der Makroblocktypen nach Ratenverzerrungstheorie für
+I- und P-Frames (am besten).
+.RE
+.PD 1
+.RS
+Oben beschriebene "alle in Frage kommenden Makroblocktypen" bedeutet nicht alle
 möglichen Typen:
 4x4, 4x8, 8x4 werden nur probiert, wenn 8x8 besser ist als 16x16.
+.RE
 .
 .TP
 .B keyint=<Wert>
@@ -8683,18 +8705,21 @@ wirklich setzen mußt.
 .TP
 .B log=<-1\-3>
 Passt an, wieviele Logging-Informationen ausgegeben werden.
+.PD 0
 .RSs
--1: keine
-.br
- 0: Gib nur Fehler aus.
-.br
- 1: Warnungen
-.br
- 2: PSNR und andere Statistiken der Analyse, wenn die Encodierung fertig ist
-(Standard)
-.br
- 3: PSNR, QP, Frametyp, Größe und andere Statistiken für jeden Frame
-.REss
+.IPs "-1"
+keine
+.IPs " 0"
+Gib nur Fehler aus.
+.IPs " 1"
+Warnungen
+.IPs " 2"
+PSNR und andere Statistiken der Analyse, wenn die Encodierung fertig ist
+(Standard).
+.IPs " 3"
+PSNR, QP, Frametyp, Größe und andere Statistiken für jeden Frame
+.RE
+.PD 1
 .
 .TP
 .B scenecut=<-1\-100>
@@ -9063,8 +9088,8 @@ lavc \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
 .TP
 .B Das gleiche, aber mit MJPEG-Kompression:
-mencoder dvd://2 \-o titel2.avi \-ovc lavc \-lavcopts
-vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
+mencoder dvd://2 \-o titel2.avi \-oac copy \-ovc lavc \-lavcopts
+vcodec=mjpeg:mbd=1:vbitrate=1800
 .
 .TP
 .B Encodiere alle .jpg-Dateien im aktuellen Verzeichnis:
