@@ -160,7 +160,7 @@ void GetCpuCaps( CpuCaps *caps)
 		mp_msg(MSGT_CPUDETECT,MSGL_V,"extended cache-info: %d\n",regs2[2]&0x7FFFFFFF);
 		caps->cl_size  = regs2[2] & 0xFF;
 	}
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"Detected cache-line size is %u bytes\n",caps->cl_size);
+	mp_msg(MSGT_CPUDETECT,MSGL_V,"Detected cache-line size is %u bytes\n",caps->cl_size);
 #if 0
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"cpudetect: MMX=%d MMX2=%d SSE=%d SSE2=%d 3DNow=%d 3DNowExt=%d\n",
 		gCpuCaps.hasMMX,
