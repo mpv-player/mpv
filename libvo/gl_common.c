@@ -959,6 +959,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
 
   // should only be needed when keeping context, but not doing glFinish
   // can cause flickering even when we do not keep it.
+  if (*context)
   glFinish();
   new_vinfo = GetPixelFormat(windc);
   if (*context && *vinfo && new_vinfo && *vinfo == new_vinfo) {
@@ -1071,6 +1072,7 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
 
   // should only be needed when keeping context, but not doing glFinish
   // can cause flickering even when we do not keep it.
+  if (*context)
   glFinish();
   new_vinfo = getWindowVisualInfo(win);
   if (*context && *vinfo && new_vinfo &&
