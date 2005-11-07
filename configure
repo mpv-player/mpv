@@ -1680,7 +1680,7 @@ for ac_option do
   --disable-toolame)	_toolame=no	;;
   --disable-twolame)	_twolame=no	;;
   --enable-libcdio)	_libcdio=yes	;;
-  --disable-libcio)	_libcdio=no	;;
+  --disable-libcdio)	_libcdio=no	;;
   --enable-liblzo)	_liblzo=yes	;;
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
