@@ -5043,6 +5043,21 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .RE
 .
 .TP
+.B uspp[=Qualität[:qp]]
+Sehr einfacher und langsamer Nachbearbeitungsfilter, der das Bild
+mit mehreren Verschiebungen rekomprimiert und daraus den Mittelwert
+bildet.
+Der Unterschied zu spp liegt darin, das tatsächlich mit lavc-mpeg4
+rekomprimiert wird, wohingegen spp eine vereinfachte nur-Intra 8x8 DCT
+ähnlich der bei MJPEG benutzten verwendet.
+.RSs
+.IPs <Qualität>
+0\-8 (Standard: 3)
+.IPs <qp>\ 
+Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
+.RE
+.
+.TP
 .B fspp[=Qualität[:qp[:Stärke]]]
 schnellere Variante des einfachen Nachbearbeitungsfilters.
 .RSs
