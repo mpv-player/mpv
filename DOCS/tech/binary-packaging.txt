@@ -38,7 +38,6 @@ the following features MUST be included in any official binary package:
   - JPEG/PNG/TGA
   - (X)MGA
   - OSS 
-  - SDL
   - tdfxfb
   - (c/x)vidix
   - X11/Xvideo
@@ -47,7 +46,7 @@ the following features MUST be included in any official binary package:
   - FAAD
   - libavcodec(internal)
   - native codecs (libmpeg2/liba52/mp3lib)
-  - Ogg Vorbis support
+  - Vorbis Tremor codec(internal)
   - RealPlayer codecs support
   - Win32/VfW/DShow/QT codecs support
   - XAnim codecs support
@@ -82,7 +81,7 @@ documentation. Translated versions SHOULD be included, even if your
 package management system does not provide specific support for
 internationalization.
 
-Libavcodec MUST always be in the latest development version and it SHOULD
+Libavcodec MUST always be in the latest development version and it MUST
 be linked statically into the mplayer binary, because MPlayer requires a
 recent libavcodec snapshot. While some distributions provide FFmpeg
 packages containing a shared libavcodec library, they are often based on the
@@ -104,7 +103,7 @@ for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 /usr/share/mplayer/font/        fonts
 /usr/share/mplayer/Skin/        GUI skins
 
-You MUST never include the codecs.conf file in your package. It is useful
+You MUSTN'T include the codecs.conf file in your package. It is useful
 only for development purposes and often causes obscure problems for users.
 
 
@@ -123,7 +122,7 @@ mplayer          contains MPlayer binary without GUI (mplayer),
 mplayer-codecs-* contain binary codecs available from MPlayer's site
 mplayer-font-*   contain various bitmap fonts for OSD (obsolete)
 mplayer-gui      contains MPlayer binary with GUI (gmplayer);
-                 requires default skin package
+                 contans default skin (Blue)
 mplayer-skin-*   contain various MPlayer GUI skins
 mplayer-vidix    contains VIDIX support library for MPlayer
 mplayer-vidix-*  contain VIDIX drivers for specific cards, one per package
