@@ -132,6 +132,7 @@ VFILTER_SRCS=vf.c \
              vf_tile.c \
              vf_tinterlace.c \
              vf_unsharp.c \
+             vf_uspp.c \
              vf_vo.c \
              vf_yuvcsp.c \
              vf_yuy2.c \
