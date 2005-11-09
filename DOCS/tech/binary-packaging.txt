@@ -37,7 +37,7 @@ the following features MUST be included in any official binary package:
   - fbdev
   - JPEG/PNG/TGA
   - (X)MGA
-  - OSS 
+  - OSS
   - tdfxfb
   - (c/x)vidix
   - X11/Xvideo
@@ -122,7 +122,7 @@ mplayer          contains MPlayer binary without GUI (mplayer),
 mplayer-codecs-* contain binary codecs available from MPlayer's site
 mplayer-font-*   contain various bitmap fonts for OSD (obsolete)
 mplayer-gui      contains MPlayer binary with GUI (gmplayer);
-                 contans default skin (Blue)
+                 contains default skin (Blue)
 mplayer-skin-*   contain various MPlayer GUI skins
 mplayer-vidix    contains VIDIX support library for MPlayer
 mplayer-vidix-*  contain VIDIX drivers for specific cards, one per package
