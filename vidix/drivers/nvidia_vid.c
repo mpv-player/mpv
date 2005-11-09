@@ -839,7 +839,7 @@ int vixConfigPlayback(vidix_playback_t *vinfo){
 	    case IMGFMT_YUY2:
 	    case IMGFMT_UYVY:
 
-		    vinfo->dest.pitch.y = 16;
+		    vinfo->dest.pitch.y = 64;
 		    vinfo->dest.pitch.u = 0;
 		    vinfo->dest.pitch.v = 0;
 
