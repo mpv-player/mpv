@@ -1,4 +1,4 @@
-.\" synced with 1.1149
+.\" synced with 1.1150
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -5099,6 +5099,22 @@ la video).
 .br
 1: faible seuillage (soft thresholding) (meilleure élimination des parasites,
 mais image plus floue)
+.RE
+.
+.TP
+.B uspp[=qualité[:qp]]
+Filtre de post-traitement ultra simple&lent qui compresse et décompresse
+l'image avec différents décalages (ou \- dans le cas du niveau de qualité 8
+\- tous) et fait la moyenne des résultats.
+La différence avec spp est que chaque étape d'encodage&décodage est fait
+avec lavc-mpeg4 tandis que spp utilise uniquement une DCT 8x8 intra,
+comme mjpeg
+.RSs
+.IPs <qualité>
+0\-8 (par défaut\ : 3)
+.IPs <qp>\ 
+Force le paramètre de quantification (par défaut\ : 0, utilise le QP de
+la vidéo).
 .RE
 .
 .TP
