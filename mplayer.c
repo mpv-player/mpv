@@ -4131,44 +4131,45 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
       } else
       if (osd_show_vobsub_changed) {
 	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesOff);
-	  if (vo_vobsub && vobsub_id >= 0) {
-	      const char *language = MSGTR_OSDnone;
-	      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
-	      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, vobsub_id, language ? language : MSGTR_OSDunknown);
-	  }
-#ifdef HAVE_OGGVORBIS
-	  if (d_dvdsub && demuxer->type == DEMUXER_TYPE_OGG) {
-	      if (dvdsub_id >= 0) {
-		char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
-		if (!lang) lang = MSGTR_OSDunknown;
-		snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
-	      }
-	  }
-#endif
-#ifdef USE_DVDREAD
-	  if (vo_spudec && (demuxer->type != DEMUXER_TYPE_MATROSKA)) {
-	      if (dvdsub_id >= 0) {
-		  char lang[3] = "\0\0\0";
-		  int code = 0;
-		  code = dvd_lang_from_sid(stream, dvdsub_id);
-		  if (code) {
-		      lang[0] = code >> 8;
-		      lang[1] = code;
-		  }
-		  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, code ? lang : MSGTR_OSDnone);
-	      }
-	  }
-#endif
+          switch (demuxer->type) {
 #ifdef HAVE_MATROSKA
-    if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
-      char lang[40] = MSGTR_OSDunknown;
-      if (dvdsub_id >= 0) {
-        demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 39);
-        lang[39] = 0;
-	snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
-      }
-    }
+              case DEMUXER_TYPE_MATROSKA:
+                  if (dvdsub_id >= 0) {
+                      char lang[40] = MSGTR_OSDunknown;
+                      demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 39);
+                      lang[39] = 0;
+                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
+                  }
+                  break;
 #endif
+#ifdef HAVE_OGGVORBIS
+              case DEMUXER_TYPE_OGG:
+                  if (d_dvdsub && dvdsub_id >= 0) {
+                      char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
+                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang ? lang : MSGTR_OSDunknown);
+                  }
+                  break;
+#endif
+              default:
+                  if (vo_vobsub && vobsub_id >= 0) {
+                      char *language = MSGTR_OSDnone;
+                      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
+                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, vobsub_id, language ? language : MSGTR_OSDunknown);
+                  }
+#ifdef USE_DVDREAD
+                  if (vo_spudec && dvdsub_id >= 0) {
+                      char lang[3] = "\0\0\0";
+                      int code = 0;
+                      code = dvd_lang_from_sid(stream, dvdsub_id);
+                      if (code) {
+                          lang[0] = code >> 8;
+                          lang[1] = code;
+                      }
+                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, code ? lang : MSGTR_OSDnone);
+                  }
+#endif
+                  break;
+          }
 	  osd_show_vobsub_changed--;
       } else
 #ifdef USE_SUB
