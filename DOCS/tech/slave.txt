@@ -261,6 +261,9 @@ tv_set_saturation <-100 - 100>
 use_master
     Switch volume control between master and PCM.
 
+vo_border
+    Toggle borderless display.
+
 vo_fullscreen
     Switch to fullscreen mode.
 
@@ -269,9 +272,6 @@ vo_ontop
 
 vo_rootwin
     Toggle playback on the root window.
-
-vo_border
-    Toggle borderless display.
 
 volume <value>
     Increase/decrease volume.
