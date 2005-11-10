@@ -223,7 +223,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Velocità: x %6.2f"
 #define MSGTR_OSDStayOnTop "Resta in primo piano: %so"
 #define MSGTR_OSDRootwin "Rootwin: %so"
-#define MSGTR_OSDFramedrop "Scarto fotogrammi: %so"
+#define MSGTR_OSDFramedrop "Scarto fotogrammi: %s"
 #define MSGTR_OSDFramedropOn "on"
 #define MSGTR_OSDFramedropHard "hard"
 #define MSGTR_OSDFramedropOff "off"
