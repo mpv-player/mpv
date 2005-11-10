@@ -22,6 +22,7 @@ Buffer allocation:
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
@@ -89,6 +90,7 @@ static int int_pause;
 static Window mRoot;
 static uint32_t drwX, drwY, drwBorderWidth, drwDepth;
 static uint32_t dwidth, dheight;
+static uint32_t max_width = 0, max_height = 0; // zero means: not set
 
 static void (*draw_alpha_fnc) (int x0, int y0, int w, int h,
                                unsigned char *src, unsigned char *srca,
@@ -174,6 +176,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     image_height = height;
     image_width = width;
     image_format = format;
+
+    if ((max_width != 0 && max_height != 0) &&
+        (image_width > max_width || image_height > max_height))
+    {
+        mp_msg( MSGT_VO, MSGL_ERR, "[xv] " MSGTR_VO_XV_ImagedimTooHigh,
+                image_width, image_height, max_width, max_height);
+        return -1;
+    }
 
     vo_mouse_autohide = 1;
 
@@ -918,6 +928,7 @@ static int preinit(const char *arg)
       return -1; // bail out, colorkey setup failed
     }
     vo_xv_enable_vsync();
+    vo_xv_get_max_img_dim( &max_width, &max_height );
 
     fo = XvListImageFormats(mDisplay, xv_port, (int *) &formats);
 

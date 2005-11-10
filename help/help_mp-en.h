@@ -1012,6 +1012,10 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Brightness "Brightness"
 #define MSGTR_VO_SUB_Hue "Hue"
 
+// vo_xv.c
+#define MSGTR_VO_XV_ImagedimTooHigh "Source image dimensions are " \
+                                    "too high: %ux%u (maximum is %ux%u)\n"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "The pgm video output driver has been replaced by -vo pnm:pgmyuv.\n"

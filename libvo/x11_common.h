@@ -77,6 +77,8 @@ extern int vo_xv_get_eq(uint32_t xv_port, char * name, int *value);
 
 extern int vo_xv_enable_vsync();
 
+extern void vo_xv_get_max_img_dim( uint32_t * width, uint32_t * height );
+
 /*** colorkey handling ***/
 typedef struct xv_ck_info_s
 {

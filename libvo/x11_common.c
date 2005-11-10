@@ -2277,6 +2277,45 @@ int vo_xv_enable_vsync()
 }
 
 /**
+ * \brief Get maximum supported source image dimensions.
+ *
+ *   This function does not set the variables pointed to by
+ * width and height if the information could not be retreived.
+ * So the caller is reponsible for initing them properly.
+ *
+ * \param width [out] The maximum width gets stored here.
+ * \param height [out] The maximum height gets stored here.
+ *
+ */
+void vo_xv_get_max_img_dim( uint32_t * width, uint32_t * height )
+{
+  XvEncodingInfo * encodings;
+  //unsigned long num_encodings, idx; to int or too long?!
+  unsigned int num_encodings, idx;
+
+  XvQueryEncodings( mDisplay, xv_port, &num_encodings, &encodings);
+
+  if ( encodings )
+  {
+      for ( idx = 0; idx < num_encodings; ++idx )
+      {
+          if ( strcmp( encodings[idx].name, "XV_IMAGE" ) == 0 )
+          {
+              *width  = encodings[idx].width;
+              *height = encodings[idx].height;
+              break;
+          }
+      }
+  }
+
+  mp_msg( MSGT_VO, MSGL_V,
+          "[xv common] Maximum source image dimensions: %ux%u\n",
+          *width, *height );
+
+  XvFreeEncodingInfo( encodings );
+}
+
+/**
  * \brief Print information about the colorkey method and source.
  *
  * \param ck_handling Integer value containing the information about
