@@ -533,7 +533,6 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 	    sh->aspect = ctx->last_aspect;
 	sh->disp_w = width;
 	sh->disp_h = height;
-	ctx->vo_inited=1;
 	switch(pix_fmt){
 	// YUVJ are YUV formats that use the full Y range and not just
 	// 16 - 235 (see colorspaces.txt).
@@ -562,6 +561,7 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 	}
     	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
     		return -1;
+	ctx->vo_inited = 1;
     }
     return 0;
 }
