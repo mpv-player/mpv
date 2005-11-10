@@ -836,6 +836,16 @@ int tv_last_channel(tvi_handle_t *tvh) {
 
 int tv_step_norm(tvi_handle_t *tvh)
 {
+  tvh->norm++;
+  if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM,
+                              &tvh->norm) != TVI_CONTROL_TRUE) {
+    tvh->norm = 0;
+    if (tvh->functions->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM,
+                                &tvh->norm) != TVI_CONTROL_TRUE) {
+      mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
+      return 0;
+    }
+  }
     return(1);
 }
 
