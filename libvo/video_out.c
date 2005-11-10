@@ -45,6 +45,7 @@ int vo_adapter_num=0;
 int vo_refresh_rate=0;
 int vo_keepaspect=1;
 int vo_rootwin=0;
+int vo_border=1;
 int WinID = -1;
 
 int vo_pts=0; // for hw decoding

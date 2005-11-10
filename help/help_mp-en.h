@@ -219,6 +219,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Speed: x %6.2f"
 #define MSGTR_OSDStayOnTop "Stay on top: %s"
 #define MSGTR_OSDRootwin "Rootwin: %s"
+#define MSGTR_OSDBorder "Border: %s"
 #define MSGTR_OSDFramedrop "Framedropping: %s"
 #define MSGTR_OSDFramedropOn "on"
 #define MSGTR_OSDFramedropHard "hard"

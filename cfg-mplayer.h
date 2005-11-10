@@ -45,6 +45,7 @@ extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
 extern char *vo_geometry;
 extern int vo_ontop;
+extern int vo_border;
 extern int vo_keepaspect;
 extern int vo_rootwin;
 
@@ -144,6 +145,8 @@ m_option_t mplayer_opts[]={
 	{"ontop", &vo_ontop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noontop", &vo_ontop, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"border", &vo_border, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noborder", &vo_border, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	{"aop", "-aop is deprecated, use -af instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},

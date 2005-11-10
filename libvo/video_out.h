@@ -57,6 +57,7 @@
 
 #define VOCTRL_ONTOP 25
 #define VOCTRL_ROOTWIN 26
+#define VOCTRL_BORDER 27
 
 // Vo can be used by xover
 #define VOCTRL_XOVERLAY_SUPPORT 22
@@ -202,6 +203,7 @@ extern int vo_refresh_rate;
 extern int vo_keepaspect;
 extern int vo_rootwin;
 extern int vo_ontop;
+extern int vo_border;
 
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;

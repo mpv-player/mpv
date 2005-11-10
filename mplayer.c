@@ -1062,6 +1062,7 @@ int osd_show_percentage = 0;
 int osd_show_tv_channel = 25;
 int osd_show_ontop = 0;
 int osd_show_rootwin = 0;
+int osd_show_border = 0;
 int osd_show_framedropping = 0;
 int osd_show_status = 0;
 
@@ -3442,6 +3443,17 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
      }
 
     } break;
+    case MP_CMD_VO_BORDER:
+    {
+     if(video_out && vo_config_count) {
+       video_out->control(VOCTRL_BORDER, 0);
+#ifdef USE_OSD
+       osd_show_border=10;
+       vo_osd_changed(OSDTYPE_SUBTITLE);
+#endif
+     }
+
+    } break;
     case MP_CMD_PANSCAN : {
       if ( !video_out ) break;
       if ( video_out->control( VOCTRL_GET_PANSCAN,NULL ) == VO_TRUE )
@@ -4212,6 +4224,9 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
       } else if (osd_show_rootwin) {
 	  snprintf(osd_text_tmp, 63, MSGTR_OSDRootwin, vo_rootwin? MSGTR_OSDenabled : MSGTR_OSDdisabled);
 	  osd_show_rootwin--;
+      } else if (osd_show_border) {
+	  snprintf(osd_text_tmp, 63, MSGTR_OSDBorder, vo_border? MSGTR_OSDenabled : MSGTR_OSDdisabled);
+	  osd_show_border--;
       } else if (osd_show_framedropping) {
 	  snprintf(osd_text_tmp, 63, MSGTR_OSDFramedrop,
 	     (frame_dropping == 1 ? MSGTR_OSDFramedropOn :

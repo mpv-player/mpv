@@ -63,6 +63,8 @@ Each vo driver _has_ to implement these:
 		Makes the player window stay-on-top. Only supported (currently)
 		by drivers which use X11, except SDL, as well as directx and
 		gl2 under Windows.
+	 VOCTRL_BORDER
+		Makes the player window borderless.  Only supported by directx.
 
     config():	
       Set up the video system. You get the dimensions and flags.

@@ -270,6 +270,9 @@ vo_ontop
 vo_rootwin
     Toggle playback on the root window.
 
+vo_border
+    Toggle borderless display.
+
 volume <value>
     Increase/decrease volume.
 

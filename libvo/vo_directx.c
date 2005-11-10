@@ -670,6 +670,7 @@ static uint32_t Directx_ManageDisplay()
     if(!vidmode && !vo_fs){
       if(WinID == -1) {
           RECT rdw=rd;
+          if (vo_border)
           AdjustWindowRect(&rdw,WNDSTYLE,FALSE);
 //          printf("window: %i %i %ix%i\n",rdw.left,rdw.top,rdw.right - rdw.left,rdw.bottom - rdw.top);      
 		  rdw.left += monitor_rect.left; /* move to global coordinate space */
@@ -1039,7 +1040,7 @@ static int preinit(const char *arg)
     if (WinID != -1) hWnd = WinID;
     else
     hWnd = CreateWindowEx(vidmode?WS_EX_TOPMOST:0,
-        WNDCLASSNAME_WINDOWED,"",(vidmode)?WS_POPUP:WNDSTYLE,
+        WNDCLASSNAME_WINDOWED,"",(vidmode || !vo_border)?WS_POPUP:WNDSTYLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 100, 100,NULL,NULL,hInstance,NULL);
     wc.hbrBackground = blackbrush;
     wc.lpszClassName = WNDCLASSNAME_FULLSCREEN;
@@ -1295,6 +1296,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
         rd.right = rd.left + d_image_width;
         rd.bottom = rd.top + d_image_height;
         if (WinID == -1) {
+        if (vo_border)
         AdjustWindowRect(&rd,WNDSTYLE,FALSE);  
         SetWindowPos(hWnd,NULL, vo_dx, vo_dy,rd.right-rd.left,rd.bottom-rd.top,SWP_SHOWWINDOW|SWP_NOOWNERZORDER); 
         }
@@ -1449,6 +1451,30 @@ static int control(uint32_t request, void *data, ...)
         return query_format(*((uint32_t*)data));
 	case VOCTRL_DRAW_IMAGE:
         return put_image(data);
+    case VOCTRL_BORDER:
+			if(WinID != -1) return VO_TRUE;
+	        if(vidmode)
+			{
+				mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>border has no meaning in exclusive mode\n");
+			}
+	        else
+			{
+				if(vo_border) {
+					vo_border = 0;
+					SetWindowLong(hWnd, GWL_STYLE, WS_POPUP);
+				} else {
+					vo_border = 1;
+					SetWindowLong(hWnd, GWL_STYLE, WNDSTYLE);
+				}
+				// needed AFAICT to force the window to
+				// redisplay with the new style.  --Joey
+				if (!vo_fs) {
+					ShowWindow(hWnd,SW_HIDE);
+					ShowWindow(hWnd,SW_SHOW);
+				}
+				Directx_ManageDisplay();
+			}
+		return VO_TRUE;
     case VOCTRL_ONTOP:
 			if(WinID != -1) return VO_TRUE;
 	        if(vidmode)
