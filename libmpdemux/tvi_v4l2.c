@@ -1360,6 +1360,7 @@ static void *video_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     long long skew, prev_skew, xskew, interval, prev_interval, delta;
     int i;
+    int err_count = 0;
     int framesize = priv->format.fmt.pix.height*priv->format.fmt.pix.width*
 	pixfmt2depth(priv->format.fmt.pix.pixelformat)/8;
     fd_set rdset;
@@ -1546,9 +1547,11 @@ static void *video_grabber(void *data)
     return NULL;
 }
 
+#define MAX_LOOP 50
 static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     double interval;
+    int loop_cnt = 0;
 
     if (priv->first) {
 	pthread_create(&priv->video_grabber_thread, NULL, video_grabber, priv);
@@ -1557,6 +1560,7 @@ static double grab_video_frame(priv_t *priv, char *buffer, int len)
 
     while (priv->video_cnt == 0) {
 	usleep(10000);
+	if (loop_cnt++ > MAX_LOOP) return 0;
     }
 
     pthread_mutex_lock(&priv->video_buffer_mutex);
