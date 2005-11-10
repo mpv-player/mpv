@@ -13,6 +13,9 @@
 
 #include "cdd.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #ifndef CD_FRAMESIZE_RAW
 #define CD_FRAMESIZE_RAW CDIO_CD_FRAMESIZE_RAW
 #endif
@@ -146,7 +149,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
 #endif
 
   if(!cdd) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,"Can't open cdda device\n");
+    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice);
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
@@ -161,14 +164,14 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   }
 
   if(cdda_open(cdd) != 0) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,"Can't open disc\n");
+    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenDisc);
     cdda_close(cdd);
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
   }
 
   cd_info = cd_info_new();
-  mp_msg(MSGT_OPEN,MSGL_INFO,"Found Audio CD with %d tracks\n",cdda_tracks(cdd));
+  mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks,cdda_tracks(cdd));
   for(i=0;i<cdd->tracks;i++) {
 	  char track_name[80];
 	  long sec=cdda_track_firstsector(cdd,i+1);

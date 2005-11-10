@@ -1323,3 +1323,53 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Generated index table for %d chunks!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Couldn't write index file %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Saved index file: %s\n"
+
+// cache2.c
+
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rThis stream is non-cacheable\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos differs!!! report this bug...\n"
+
+// cdda.c
+
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Can't open cdda device\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Can't open disc\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Found Audio CD with %d tracks\n"
+
+// cddb.c
+
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Failed to read TOC.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Failed to open %s device.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "Not a valid URL\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "failed to send the http request\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the http response\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Not Found\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Unknown Error code\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "No cache found\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Not all the xmcd file has been read\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Failed to create directory %s\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Not all the xmcd file has been written\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Invalid xmcd database file returned\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Unexpected fix me\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Unhandled code\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Unable to find end of line\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parse OK, found: %s\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album not found\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Server returns: Command syntax error\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "No sites information available\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Failed to get the protocol level\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "No CD in the drive\n"
+
+// cue_read.c
+
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unexpected cuefile line: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] bin filename tested: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] couldn't find the bin file - giving up\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] using bin file %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] unknown mode for binfile. should not happen. aborting\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] cannot open %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] error reading from  %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] error getting size of bin file\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "track %02d:  format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] unexpected end of bin file\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] couldn't read %d bytes of payload\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n"

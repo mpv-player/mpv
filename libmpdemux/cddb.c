@@ -36,6 +36,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #if defined(__linux__)
 	#include <linux/cdrom.h>
 #elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
@@ -106,7 +109,7 @@ read_toc(const char *dev) {
         drive = CreateFile(device, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, 0, 0);
 
         if(!DeviceIoControl(drive, IOCTL_CDROM_READ_TOC, NULL, 0, &toc, sizeof(CDROM_TOC), &r, 0)) {
-                mp_msg(MSGT_OPEN, MSGL_ERR, "Failed to read TOC.\n");
+                mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadTOC);
                 return 0;
         }
 
@@ -220,7 +223,7 @@ int cdd_identify(const char *dev)
 		int i, min, sec, frame;
 		cdtoc_last_track = read_toc(dev);
 		if (cdtoc_last_track < 0) {
-			mp_msg(MSGT_OPEN, MSGL_ERR, "Failed to open %s device.\n", dev);
+			mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToOpenDevice, dev);
 			return -1;
 		}
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACKS=%d\n", cdtoc_last_track);
@@ -279,19 +282,19 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 
 	url = url_new(request);
 	if( url==NULL ) {
-		printf("Not a valid URL\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NotAValidURL);
 		return -1;
 	}
 	
 	fd = http_send_request(url,0);
 	if( fd<0 ) {
-		printf("failed to send the http request\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest);
 		return -1;
 	}
 
 	http_hdr = http_read_response( fd );
 	if( http_hdr==NULL ) {
-		printf("Failed to read the http response\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse);
 		return -1;
 	}
 
@@ -303,10 +306,10 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 			ret = reply_parser(http_hdr, cddb_data);
 			break;
 		case 400:
-			printf("Not Found\n");
+			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND);
 			break;
 		default:
-			printf("Unknown Error code\n");
+			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown);
 	}
 
 	http_free( http_hdr );
@@ -332,7 +335,7 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 #endif
 	);
 	if( file_fd<0 ) {
-		printf("No cache found\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCacheFound);
 		return -1;
 	}
 
@@ -346,13 +349,13 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 	
 	cddb_data->xmcd_file = (char*)malloc(file_size);
 	if( cddb_data->xmcd_file==NULL ) {
-		printf("Memory allocation failed\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		close(file_fd);
 		return -1;
 	}
 	cddb_data->xmcd_file_size = read(file_fd, cddb_data->xmcd_file, file_size);
 	if( cddb_data->xmcd_file_size!=file_size ) {
-		printf("Not all the xmcd file has been read\n");
+		mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead);
 		close(file_fd);
 		return -1;
 	}
@@ -383,7 +386,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 		if( ret<0 ) {
 #endif
 			perror("mkdir");
-			printf("Failed to create directory %s\n", cddb_data->cache_dir );
+			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory, cddb_data->cache_dir);
 			return -1;
 		}
 	}
@@ -403,7 +406,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 		return -1;
 	}
 	if( (unsigned int)wrote!=cddb_data->xmcd_file_size ) {
-		printf("Not all the xmcd file has been written\n");
+		mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten);
 		close(file_fd);
 		return -1;
 	}
@@ -424,7 +427,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		printf("Parse error\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -432,13 +435,13 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		case 210:
 			ret = sscanf( http_hdr->body, "%d %s %08lx", &status, category, &disc_id);
 			if( ret!=3 ) {
-				printf("Parse error\n");
+				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			// Check if it's a xmcd database file
 			ptr = strstr(http_hdr->body, "# xmcd");
 			if( ptr==NULL ) {
-				printf("Invalid xmcd database file returned\n");
+				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned);
 				return -1;
 			}
 			// Ok found the beginning of the file
@@ -447,14 +450,14 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			if( ptr2==NULL ) {
 				ptr2 = strstr(ptr, "\n.\n");
 				if( ptr2==NULL ) {
-					printf("Unable to find '.'\n");
+					mp_msg(MSGT_DEMUX, MSGL_FIXME, "Unable to find '.'\n");
 					ptr2=ptr+strlen(ptr); //return -1;
 				}
 			}
 			// Ok found the end
 			// do a sanity check
 			if( http_hdr->body_size<(unsigned int)(ptr2-ptr) ) {
-				printf("Unexpected fix me\n");
+				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnexpectedFIXME);
 				return -1;
 			}
 			cddb_data->xmcd_file = ptr;
@@ -465,7 +468,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			http_hdr->body_size = 0;
 			return cddb_write_cache(cddb_data);
 		default:
-			printf("Unhandled code\n");
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
 	}
 	return 0;
 }
@@ -485,7 +488,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ptr = strstr(http_hdr->body, "\n");
 	if( ptr==NULL ) {
-		printf("Unable to find end of line\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_UnableToFindEOL);
 		return -1;
 	}
 	ptr++;
@@ -493,7 +496,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	// So let's take the first one.
 	ret = sscanf(ptr, "%s %08lx %s", cddb_data->category, &(cddb_data->disc_id), album_title);
 	if( ret!=3 ) {
-		printf("Parse error\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 	ptr = strstr(http_hdr->body, album_title);
@@ -509,7 +512,7 @@ cddb_parse_matches_list(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		strncpy(album_title, ptr, len);
 		album_title[len-2]='\0';
 	}
-	printf("Parse OK, found: %s\n", album_title);
+	mp_msg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
 	return 0;
 }
 
@@ -521,7 +524,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		printf("Parse error\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -530,7 +533,7 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			// Found exact match
 			ret = sscanf(http_hdr->body, "%d %s %08lx %s", &status, cddb_data->category, &(cddb_data->disc_id), album_title);
 			if( ret!=4 ) {
-				printf("Parse error\n");
+				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			ptr = strstr(http_hdr->body, album_title);
@@ -546,11 +549,11 @@ cddb_query_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 				strncpy(album_title, ptr, len);
 				album_title[len-2]='\0';
 			}
-			printf("Parse OK, found: %s\n", album_title);
+			mp_msg(MSGT_DEMUX, MSGL_STATUS, MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle, album_title);
 			return cddb_request_titles(cddb_data);
 		case 202:
 			// No match found
-			printf("Album not found\n");
+			mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MPDEMUX_CDDB_AlbumNotFound);
 			break;
 		case 210:
 			// Found exact matches, list follows
@@ -568,10 +571,10 @@ blues c711930d Santana / Supernatural
 			cddb_parse_matches_list(http_hdr, cddb_data);
 			return cddb_request_titles(cddb_data);
 		case 500:
-			printf("Server returns: Command syntax error\n");
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr);
 			break;
 		default:
-			printf("Unhandled code\n");
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
 	}
 	return -1;
 }
@@ -584,7 +587,7 @@ cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		printf("Parse error\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);	
 		return -1;
 	}
 
@@ -592,18 +595,18 @@ cddb_proto_level_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 		case 210:
 			ptr = strstr(http_hdr->body, "max proto:");
 			if( ptr==NULL ) {
-				printf("Parse error\n");
+				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			ret = sscanf(ptr, "max proto: %d", &max);
 			if( ret!=1 ) {
-				printf("Parse error\n");
+				mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 				return -1;
 			}
 			cddb_data->freedb_proto_level = max;
 			return 0;
 		default:
-			printf("Unhandled code\n");
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);	
 	}
 	return -1;
 }
@@ -619,7 +622,7 @@ cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
-		printf("Parse error\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_ParseError);
 		return -1;
 	}
 
@@ -629,10 +632,10 @@ cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 			ret = cddb_data->anonymous;	// For gcc complaining about unused parameter.
 			return 0;
 		case 401:
-			printf("No sites information available\n");
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable);
 			break;
 		default:
-			printf("Unhandled code\n");
+			mp_msg(MSGT_DEMUX, MSGL_FIXME, MSGTR_MPDEMUX_CDDB_UnhandledCode);
 	}
 	return -1;
 }
@@ -685,7 +688,7 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 
 	cddb_create_hello(cddb_data);
 	if( cddb_get_proto_level(cddb_data)<0 ) {
-		printf("Failed to get the protocol level\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel);
 		return -1;
 	}
 
@@ -711,7 +714,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	{
 	    cdtoc_last_track = read_toc(dev);
 	    if (cdtoc_last_track < 0) {
-		printf("Failed to open %s device.\n", dev);
+		mp_msg(MSGT_OPEN, MSGL_ERR, MSGTR_MPDEMUX_CDDB_FailedToOpenDevice, dev);
 		return -1;
 	    }
 	}
@@ -722,7 +725,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	// Check if there is a CD in the drive
 	// FIXME: That's not really a good way to check
 	if( cddb_data.disc_id==0 ) {
-		printf("No CD in the drive\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MPDEMUX_CDDB_NoCDInDrive);
 		return -1;
 	}
 	
@@ -738,7 +741,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	} else {
 		cddb_data.cache_dir = (char*)malloc(strlen(home_dir)+strlen(cddb_cache_dir)+1);
 		if( cddb_data.cache_dir==NULL ) {
-			printf("Memory allocation failed\n");
+			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 			return -1;
 		}
 		sprintf(cddb_data.cache_dir, "%s%s", home_dir, cddb_cache_dir );
