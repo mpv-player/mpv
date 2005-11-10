@@ -43,6 +43,7 @@
 
 #define WNDCLASSNAME_WINDOWED	"MPlayer - The Movie Player"
 #define WNDCLASSNAME_FULLSCREEN	"MPlayer - Fullscreen"
+#define WNDSTYLE WS_OVERLAPPEDWINDOW|WS_SIZEBOX
 
 static LPDIRECTDRAWCOLORCONTROL	g_cc = NULL;		//color control interface
 static LPDIRECTDRAW7        g_lpdd = NULL;          //DirectDraw Object
@@ -669,7 +670,7 @@ static uint32_t Directx_ManageDisplay()
     if(!vidmode && !vo_fs){
       if(WinID == -1) {
           RECT rdw=rd;
-          AdjustWindowRect(&rdw,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);
+          AdjustWindowRect(&rdw,WNDSTYLE,FALSE);
 //          printf("window: %i %i %ix%i\n",rdw.left,rdw.top,rdw.right - rdw.left,rdw.bottom - rdw.top);      
 		  rdw.left += monitor_rect.left; /* move to global coordinate space */
           rdw.top += monitor_rect.top;
@@ -1038,7 +1039,7 @@ static int preinit(const char *arg)
     if (WinID != -1) hWnd = WinID;
     else
     hWnd = CreateWindowEx(vidmode?WS_EX_TOPMOST:0,
-        WNDCLASSNAME_WINDOWED,"",(vidmode)?WS_POPUP:WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
+        WNDCLASSNAME_WINDOWED,"",(vidmode)?WS_POPUP:WNDSTYLE,
         CW_USEDEFAULT, CW_USEDEFAULT, 100, 100,NULL,NULL,hInstance,NULL);
     wc.hbrBackground = blackbrush;
     wc.lpszClassName = WNDCLASSNAME_FULLSCREEN;
@@ -1294,7 +1295,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
         rd.right = rd.left + d_image_width;
         rd.bottom = rd.top + d_image_height;
         if (WinID == -1) {
-        AdjustWindowRect(&rd,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);  
+        AdjustWindowRect(&rd,WNDSTYLE,FALSE);  
         SetWindowPos(hWnd,NULL, vo_dx, vo_dy,rd.right-rd.left,rd.bottom-rd.top,SWP_SHOWWINDOW|SWP_NOOWNERZORDER); 
         }
     }
