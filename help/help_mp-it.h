@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.192
+// Updated to help_mp-en.h v1.198
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -168,7 +168,7 @@ static char help_text[]=
 #define MSGTR_MenuInitialized "Menu inizializzato: %s\n"
 #define MSGTR_MenuInitFailed "Inizializzazione Menu fallita.\n"
 #define MSGTR_Getch2InitializedTwice "WARNING: getch2_init chiamata 2 volte!\n"
-#define MSGTR_DumpstreamFdUnavailable "Non posso fare il dump di questo stream - nessun 'fd' disponibile.\n"
+#define MSGTR_DumpstreamFdUnavailable "Non posso fare il dump di questo flusso - nessun descrittore file disponibile.\n"
 #define MSGTR_FallingBackOnPlaylist "Provo infine a interpretare playlist %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Non riesco ad aprire il filtro video libmenu col menu base %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Errore nel pre-init della sequenza di filtri audio!\n"
@@ -203,6 +203,34 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "L'ultimo stop era a [%f]; lo start successivo a [%f].\n"\
 "Le indicazioni devono essere in ordine, non posso sovrapporle. Ignoro.\n"
 #define MSGTR_EdlBadLineBadStop "Lo stop deve essere dopo il tempo di start.\n"
+
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "abilitat"
+#define MSGTR_OSDdisabled "disabilitat"
+#define MSGTR_OSDnone "nessuno"
+#define MSGTR_OSDunknown "sconosciuto"
+#define MSGTR_OSDDVDNAV "DVDNAV: %s"
+#define MSGTR_OSDChannel "Canale: %s"
+#define MSGTR_OSDSubtitles "Sottotitoli: %si"
+#define MSGTR_OSDSubtitlesOff "Sottotitoli: off"
+#define MSGTR_OSDSubtitlesLanguage "Sottotitoli: (%d) %s"
+#define MSGTR_OSDSub "Sottotitoli: (%d) %s%s"
+#define MSGTR_OSDSubDelay "Ritardo sottotitoli: %d ms"
+#define MSGTR_OSDSubPosition "Posizione sottotitoli: %d/100"
+#define MSGTR_OSDSubAlignment "Allineamento sottotitoli: %s"
+#define MSGTR_OSDAVDelay "Ritardo A-V: %d ms"
+#define MSGTR_OSDSpeed "Velocità: x %6.2f"
+#define MSGTR_OSDStayOnTop "Resta in primo piano: %so"
+#define MSGTR_OSDRootwin "Rootwin: %so"
+#define MSGTR_OSDFramedrop "Scarto fotogrammi: %so"
+#define MSGTR_OSDFramedropOn "on"
+#define MSGTR_OSDFramedropHard "hard"
+#define MSGTR_OSDFramedropOff "off"
+#define MSGTR_OSDosd "OSD: %so"
+#define MSGTR_OSDSubBottom "in basso"
+#define MSGTR_OSDSubCenter "al centro"
+#define MSGTR_OSDSubTop "in alto"
 
 // mencoder.c:
 
@@ -359,7 +387,7 @@ static char help_text[]=
 #define MSGTR_ForcingInputFPS "i fps saranno interpretati come %5.2f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Il formato output RAWVIDEO non supporta l'audio - lo disabilito\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Questo demuxer non supporta ancora -nosound.\n"
-#define MSGTR_MemAllocFailed "allocazione memoria non riuscita"
+#define MSGTR_MemAllocFailed "Allocazione memoria non riuscita\n"
 #define MSGTR_NoMatchingFilter "Non trovo il filtro/il formato ao corrispondente!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, compilatore C bacato?\n"
 #define MSGTR_NoLavcAudioCodecName "Audio LAVC, Manca il nome del codec!\n"
@@ -980,6 +1008,20 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Uso modalità di uscita interlacciata, bottom-field first."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "Uso la modalità fotogramma progressivo (default)."
 
+// sub.c
+#define MSGTR_VO_SUB_Seekbar "Barra ricerca"
+#define MSGTR_VO_SUB_Play "Riproduci"
+#define MSGTR_VO_SUB_Pause "Pausa"
+#define MSGTR_VO_SUB_Stop "Stop"
+#define MSGTR_VO_SUB_Rewind "Indietro"
+#define MSGTR_VO_SUB_Forward "Avanti"
+#define MSGTR_VO_SUB_Clock "Orologio"
+#define MSGTR_VO_SUB_Contrast "Contrasto"
+#define MSGTR_VO_SUB_Saturation "Saturazione"
+#define MSGTR_VO_SUB_Volume "Volume"
+#define MSGTR_VO_SUB_Brightness "Luminosità"
+#define MSGTR_VO_SUB_Hue "Tonalità"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Il driver di output video pgm è stato sostituito con -vo pnm:pgmyuv.\n"
@@ -1118,7 +1160,7 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_CantOpen "Non posso aprire il dispositivo joystick %s: %s\n"
 #define MSGTR_INPUT_JOYSTICK_ErrReading "Errore in lettura dispositivo joystick: %s\n"
 #define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: persi %d byte di dati\n"
-#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: Avviso: evento in inizializzazione, persa sincronia col driver\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: Evento di attenzione in inizializzazione, persa sincronia col driver\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick: Avviso: tipo di evento %d sconosciuto\n"
 
 // input.c
@@ -1148,4 +1190,142 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Impossibile inizializzare i controlli del joystick\n"
 #define MSGTR_INPUT_INPUT_ErrCantStatFile "Impossibile fare stat di %s: %s\n"
 #define MSGTR_INPUT_INPUT_ErrCantOpenFile "Impossibile aprire %s: %s\n"
+
+// ========================== LIBMPDEMUX ===================================
+
+// url.c
+
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "La stringa sembra essere già filtrata in url_escape %c%c1%c2\n"
+
+// ai_alsa1x.c
+
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Non posso impostare il samplerate\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Non posso impostare il tempo del buffer\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Non posso impostare il tempo del periodo\n"
+
+// ai_alsa1x.c / ai_alsa.c
+
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Configurazione PCM rovinata: nessuna configurazione disponibile\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Tipo di accesso non disponibile\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Formato sample non disponibile\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Calcolo canali non disponibile - reimposto al default: %d\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Impossibile impostare i parametri hardware: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Non posso usare il periodo uguale al buffer (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Impossibile impostare i parametri software: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Non posso aprire l'audio: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA Errore di stato: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (almeno di %.3f ms)\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "ALSA Stato:\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: errore preparazione: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA errore di lettura/scrittura"
+
+// ai_oss.c
+
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Impossibile impostare il numero di canali: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Impossibile impostare lo stereo: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "Non posso aprire '%s': %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "formato non supportato\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Impossibile impostare il formato audio."
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Impossibile impostare il samplerate: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Impossibile impostare il trigger: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Non posso ricavare la dimensione del blocco!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "la dimensione del blocco audio è, la imposto a %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "la dimensione del blocco audio è troppo bassa, la imposto a %d!\n"
+
+// asfheader.c
+
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATALE: la dimensione dell'intestazione è più grande di 1 MB (%d)!\nPerfavore contatta gli autori di MPlayer e invia/rendi disponibile questo file.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Non ho potuto allocare %d byte per l'intestazione\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF durante la lettura dell'intestazione asf, file danneggiato/incompleto?\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR funzionerà probabilmente solo con libavformat, prova -demuxer 35 se hai problemi\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Nessun dato trovato dopo l'intestazione!\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: nessuna intestazione audio o video trovata - file danneggiato?\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Lunghezza non valida nell'intestazione ASF!\n"
+
+// asf_mmst_streaming.c
+
+#define MSGTR_MPDEMUX_MMST_WriteError "errore di scrittura\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nattenzione! eof\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "lettura pre-intestazione fallita\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Dimensione intestazione non valida, mi arrendo\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "lettura dati intestazione fallita\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "lettura packet_len fallita\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Dimensione pacchetto rtsp invalida, mi arrendo\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "lettura dati comando fallita\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "oggetto intestazione\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "oggetto dati\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "oggetto file, lunghezza pacchetto (packet length) = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "oggetto flusso, id flusso: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "troppi id, flusso scartato"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "oggetto sconosciuto\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "lettura dati contenuto fallita\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "firma mancante\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "tutto fatto. Grazie per aver scaricato un file che contiene tecnologie proprietarie e brevettate.\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "comando sconosciuto %02x\n"
+#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "errore get_media_packet: %s\n"
+#define MSGTR_MPDEMUX_MMST_Connected "connesso\n"
+
+// asf_streaming.c
+
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, la dimensione stream_chunk è troppo piccola: %d\n"
+#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "disallineamento size_confirm!: %d %d\n"
+#define MSGTR_MPDEMUX_ASF_WarnDropHeader "Attenzione : scarto intestazione ????\n"
+#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Errore durante l'interpretazione di una parte di intestazione\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Non ho avuto un'intestazione come prima parte!!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Errore non posso allocare un buffer di %d byte\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Errore durante la lettura del flusso via rete\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Errore chunk troppo piccolo\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Errore il numero delle sotto-parti non è valido\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "banda troppo piccola, il file non può esser riprodotto!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "banda troppo piccola, deselezionato flusso audio\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "banda troppo piccola, deselezionato flusso video\n"
+#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Lunghezza non valida nell'intestazione ASF!\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Errore durante la lettura di una parte di intestazione\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Errore chunk_size > packet_size\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Errore durante la lettura di una parte (chunk)\n"
+#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Ridirezionatore\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "URL proxy non valida\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Tipo del flusso asf sconosciuto\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Fallita interpretazione della risposta HTTP\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "Il server risponde %d:%s\n"
+#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "AVVISO INTERPRETAZIONE ASF HTTP : Pragma %s tagliato da %d byte a %d\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Errore scrittura socket: %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Interpretazione intestazione fallita\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "Nessun flusso trovato\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Modo do fornire il flusso ASF sconociuto\n"
+#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "fallimento, esco\n"
+
+// audio_in.c
+
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nerrore leggendo l'audio: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Recupero da un cross-run, alcuni fotogrammi possono essere stati persi!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Errore fatale, non posso recuperare!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nnon ci sono abbastanza parti audio!\n"
+
+// aviheader.c
+
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** lista vuota?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Trovato filmato a 0x%X - 0x%X\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "trovato 'bih', %u byte di %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Ricostruisco tabella keyframe per video M$ mpg4v1\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Ricostruisco tabella keyframe per video DIVX3\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Ricostruisco tabella keyframe per video MPEG4\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "trovato 'wf', %d byte di %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh trovato (dimensione=%d) (fotogrammi totali=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Leggo blocco INDEX, %d parti per %ld fotogrammi (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "intestazione RIFF supplementare...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** attenzione: questa non è un'intestazione AVI estesa..\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Parte (chunk) danneggiata?  chunksize=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Costruisco indice odml (%d superindexchunks)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Rilevato file rovinato (incompleto?). Sarà usato un indice tradizionale\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "Impossibile leggere il file indice %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s non è un file indice di MPlayer valido\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Impossibile allocare la memoria per i dati dell'indice da %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Fine prematura del file indice %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Caricato file indice: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Genero indice: %3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Tabella indice generata per %d parti (chunks)!\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Non ho potuto scrivere il file indice %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Salvato file indice: %s\n"
 
