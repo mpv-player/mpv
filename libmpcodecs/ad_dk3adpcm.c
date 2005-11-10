@@ -145,7 +145,7 @@ static int dk3_adpcm_decode_block(unsigned short *output, unsigned char *input,
   sum_index = input[14];
   diff_index = input[15];
 
-  while (in_ptr < block_size)
+  while (in_ptr < block_size - !decode_top_nibble_next)
 //  while (in_ptr < 2048)
   {
     // process the first predictor of the sum channel
@@ -237,7 +237,11 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     sh_audio->ds->ss_mul) 
       return -1; /* EOF */
 
+  if (maxlen < 2 * 4 * sh_audio->wf->nBlockAlign * 2 / 3) {
+    mp_msg(MSGT_DECAUDIO, MSGL_V, "dk3adpcm: maxlen too small in decode_audio\n");
+    return -1;
+  }
   return 2 * dk3_adpcm_decode_block(
     (unsigned short*)buf, sh_audio->a_in_buffer,
-    sh_audio->wf->nBlockAlign);
+    sh_audio->ds->ss_mul);
 }
