@@ -1,4 +1,5 @@
 // Translated by Emfox Zhou <EmfoxZhou@gmail.com>
+// Synced with help_mp-en.h 1.198
 
 // (Translator before 2005-10-12)
 // Lu Ran <hephooey@fastmail.fm>
@@ -159,7 +160,7 @@ static char help_text[]=
 #define MSGTR_MenuInitialized "菜单已启动: %s\n"
 #define MSGTR_MenuInitFailed "菜单启动失败.\n"
 #define MSGTR_Getch2InitializedTwice "警告: getch2_init 被调用两次!\n"
-#define MSGTR_DumpstreamFdUnavailable "无法转储这个流 - 没有可用的'fd'.\n"
+#define MSGTR_DumpstreamFdUnavailable "无法转储这个流 - 没有可用的文件描述符.\n"
 #define MSGTR_FallingBackOnPlaylist "回退到试着解析播放列表 %s...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "不能用根菜单%s打开libmenu video filter.\n"
 #define MSGTR_AudioFilterChainPreinitError "音频过滤器链预启动错误!\n"
@@ -193,6 +194,34 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "上一次的停止位置是[%f]; 下一次开始是"\
 "[%f]. 每一项必须按时间顺序, 不能重叠. 丢弃.\n"
 #define MSGTR_EdlBadLineBadStop "停止时间必须是开始时间之后.\n"
+
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "启用"
+#define MSGTR_OSDdisabled "禁用"
+#define MSGTR_OSDnone "无"
+#define MSGTR_OSDunknown "未知"
+#define MSGTR_OSDDVDNAV "DVDNAV: %s"
+#define MSGTR_OSDChannel "通道: %s"
+#define MSGTR_OSDSubtitles "字幕: %s"
+#define MSGTR_OSDSubtitlesOff "字幕: 关闭"
+#define MSGTR_OSDSubtitlesLanguage "字幕: (%d) %s"
+#define MSGTR_OSDSub "字幕: (%d) %s%s"
+#define MSGTR_OSDSubDelay "字幕延迟: %d ms"
+#define MSGTR_OSDSubPosition "字幕位置: %d/100"
+#define MSGTR_OSDSubAlignment "字幕对齐: %s"
+#define MSGTR_OSDAVDelay "A-V 延迟: %d ms"
+#define MSGTR_OSDSpeed "速率: x %6.2f"
+#define MSGTR_OSDStayOnTop "置顶: %s"
+#define MSGTR_OSDRootwin "根窗口: %s"
+#define MSGTR_OSDFramedrop "跳帧: %s"
+#define MSGTR_OSDFramedropOn "开"
+#define MSGTR_OSDFramedropHard "强制"
+#define MSGTR_OSDFramedropOff "关"
+#define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDSubBottom "底部"
+#define MSGTR_OSDSubCenter "中间"
+#define MSGTR_OSDSubTop "顶部"
 
 // mencoder.c:
 
@@ -337,7 +366,7 @@ static char help_text[]=
 #define MSGTR_ForcingInputFPS "输入帧率将被%5.2f代替\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "输出文件格式RAWVIDEO不支持音频 - 取消音频\n"
 #define MSGTR_DemuxerDoesntSupportNosound "这个demuxer当前还不支持 -nosound.\n"
-#define MSGTR_MemAllocFailed "内存分配失败"
+#define MSGTR_MemAllocFailed "内存分配失败\n"
 #define MSGTR_NoMatchingFilter "没找到匹配的filter/ao格式!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, C编译器挂了?\n"
 #define MSGTR_NoLavcAudioCodecName "音频LAVC, 没有编解码器名!\n"
@@ -434,6 +463,7 @@ static char help_text[]=
 #define MSGTR_CannotMakePipe "不能建立PIPE!\n"
 
 // m_config.c
+#define MSGTR_SaveSlotTooOld "等级 %d 里的save slot 太旧: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "选项%s不能在配置文件里使用.\n"
 #define MSGTR_InvalidCmdlineOption "选项%s不能在命令选里使用.\n"
 #define MSGTR_InvalidSuboption "错误: 选项'%s'没有子选项'%s'.\n"
@@ -953,6 +983,20 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "使用交错输出模式(下层域在前)."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "使用(默认)progressive帧模式."
 
+// sub.c
+#define MSGTR_VO_SUB_Seekbar "进度条"
+#define MSGTR_VO_SUB_Play "播放"
+#define MSGTR_VO_SUB_Pause "暂停"
+#define MSGTR_VO_SUB_Stop "停止"
+#define MSGTR_VO_SUB_Rewind "后退"
+#define MSGTR_VO_SUB_Forward "前进"
+#define MSGTR_VO_SUB_Clock "计时"
+#define MSGTR_VO_SUB_Contrast "对比度"
+#define MSGTR_VO_SUB_Saturation "饱和度"
+#define MSGTR_VO_SUB_Volume "音量"
+#define MSGTR_VO_SUB_Brightness "亮度"
+#define MSGTR_VO_SUB_Hue "色相"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Pgm视频输出驱动已经被 -vo pnm:pgmyuv 代替.\n"
@@ -1001,7 +1045,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] 文件: %s (%s)\nPCM: 采样率: %iHz 通道: %s 格式 %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] 信息: 用 -vc null -vo null 可以达到最快速的转储\nPCM: 信息: 如果要写 WAVE 文件, 使用 -ao pcm:waveheader (默认).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] 信息: 用 -vc null -vo null 可以达到更快速的转储\nPCM: 信息: 如果要写 WAVE 文件, 使用 -ao pcm:waveheader (默认).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] 打开 %s 写失败!\n"
 
 // ao_sdl.c
@@ -1084,3 +1128,179 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: 输入控制 #%d 在下限 %0.4f 之下.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: 输入控制 #%d 在上限 %0.4f 之上.\n"
 
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "打开操纵杆设备 %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "无法打开操纵杆设备 %s: %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "读操纵杆设备时发生错误: %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "操纵杆: 丢失了 %d 字节的数据\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "操纵杆: 警告启动事件, 失去了和驱动的同步\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "操作杆警告未知事件类型%d\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "太多命令文件描述符了, 无法注册文件描述符 %d.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "太多键文件描述符了, 无法注册文件描述符 %d.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "命令 %s: 参数 %d 不是一个整数.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "命令 %s: 参数 %d 不是一个浮点数.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "命令 %s: 参数 %d 未结束.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "未知参数 %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "命令 %s 需要至少 %d 个参数, 然而只发现了 %d 个.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "当读取命令文件描述符 %d 时发生错误: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "文件描述符 %d 的命令缓存已满: 正在丢失内容\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "绑定键 %s 的命令非法"
+#define MSGTR_INPUT_INPUT_ErrSelect "选定错误: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "键输入文件描述符 %d 发生错误\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "文件描述符 %d 得到死的键输入\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "同时有太多键按下事件发生\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "命令文件描述符 %d 发生错误\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "当读取输入配置文件 %s 时发生错误: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "未知键 '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "未完成的绑定 %s\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "这个键名的缓存太小: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "没有找到键 %s 的命令"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "这个命令的缓存太小: %s\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "怎么会运行到这里了?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "无法启动输入法操纵杆\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "无法 stat %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "无法打开 %s: %s\n"
+
+// ========================== LIBMPDEMUX ===================================
+
+// url.c
+
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "字符串好像已经被解开在 url_escape %c%c1%c2\n"
+
+// ai_alsa1x.c
+
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "无法设置采样率\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "无法设置缓冲时间\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "无法设置间断时间\n"
+
+// ai_alsa1x.c / ai_alsa.c
+
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "此 PCM 的配置文件损坏: 配置不可用\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "访问类型不可用\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "采样文件不可用\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "通道数不可用 - 使用默认: %d\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "无法安装硬件参数:"
+#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "无法使用等于缓冲大小的间隔 (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "无法安装软件参数:\n"
+#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "打开音频错误: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA 状态错误: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (至少 %.3f ms)\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "ALSA 状态:\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: 准备错误: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "ALSA 读/写错误"
+
+// ai_oss.c
+
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "无法设置通道数: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "无法设置立体声: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "无法打开 '%s': %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "不支持的格式\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "无法设置音频格式."
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "无法设置采样率: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "无法设置触发器: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "无法得到块大小!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "音频块大小是零, 设成 %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "音频块大小不够, 设成 %d!\n"
+
+// asfheader.c
+
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: header 的大小大于 1 MB (%d)!\n请联系 MPlayer 的作者, 并且发送或上传这个文件.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "不能为 header 分配 %d 字节的空间\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "读 asf header 的时候结束, 坏掉或不完整的文件?\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR 可能只能和 libavformat 一起工作, 如果有问题请试试 -demuxer 35\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "没有数据块紧随 header 之后!\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: 没发现音频或视频 header - 损坏的文件?\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "ASF header 非常长度!\n"
+
+// asf_mmst_streaming.c
+
+#define MSGTR_MPDEMUX_MMST_WriteError "写错误\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\n警告：结束\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "header 预读取失败\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "非法 header 大小，正在放弃\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "header 数据读失败\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len 读失败\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "非法 rtsp 包大小，正在放弃\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "命令数据读失败\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "header 对象\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "data 对象\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "文件 object, 包长 = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "流对象, 流 id: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "id 太多, 跳过流"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "未知的对象\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "媒体对象读错误\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "丢失签名\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "一切都结束了. 感谢下载一个包含专利保护的媒体文件.\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "未知命令 %02x\n"
+#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet 错误 : %s\n"
+#define MSGTR_MPDEMUX_MMST_Connected "已连接\n"
+
+// asf_streaming.c
+
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "啊…… stream_chunck 大小太小了: %d\n"
+#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm 不匹配!: %d %d\n"
+#define MSGTR_MPDEMUX_ASF_WarnDropHeader "警告 : 掉了 header ????\n"
+#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "解析区块 header 的时候发生错误\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "不要把 header 当成第一个区块 !!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "不能分配 %d 字节的缓存\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "读网络流的时候发生错误\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "错误 区块太小\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "错误 子区块号非法\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "带宽太小, 文件不能播放!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "带宽太小, 取消选定音频流\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "带宽太水, 取消选定视频流\n"
+#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "非法 ASF header 的长度!\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "当读区块 header 的时候发生错误\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Error chunk_size > packet_size\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "读区块的时候发生错误\n"
+#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "非法的代理 URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "未知的 asf 流类型\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "解析 HTTP 回应失败\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "服务器返回 %d:%s\n"
+#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP 解析警告 : Pragma %s 被从 %d 字节切到 %d\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Socket 写错误: %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "解析 header 失败\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "没有找到流\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "未知 ASF 流类型\n"
+#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "失败, 正在退出\n"
+
+// audio_in.c
+
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\n读音频错误: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "从交叉运行中恢复, 可能丢失了某些帧!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "致命错误, 无法恢复!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\n音频采样不够!\n"
+
+// aviheader.c
+
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "**空列表?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "在 0x%X - 0x%X 找到电影\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "找到 'bih', %u 字节的 %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "为 M$ mpg4v1 视频重新生成关键帧表\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "为 DIVX3 视频重新生成关键帧表\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "为 MPEG4 视频重新生成关键帧表\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "找到 'wf', %d 字节的 %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: 发现 dmlh (size=%d) (total_frames=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "读 INDEX 块, %d 区块的 %ld 帧 (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "附加的 RIFF 头...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** 警告: 这不是扩展的 AVI 头..\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "损坏的区块?  chunksize=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: 建造 odml 索引 (%d superindexchunks)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: 检测到损坏的(不完整的?)文件. 将使用传统的索引\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "无法读索引文件 %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s 不是有效的 MPlayer 索引文件\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "无法为来自 %s 的索引数据分配内存\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "过早结束的索引文件 %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "导入索引文件: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "正在生成索引: %3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: 为 %d 区块生成索引表!\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "无法写索引文件 %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "已保存索引文件: %s\n"
