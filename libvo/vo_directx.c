@@ -914,6 +914,9 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				case SC_MONITORPOWER:
                 mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>killing screensaver\n" );
                 return 0;                      
+				case SC_MAXIMIZE:
+					if (!vo_fs) control(VOCTRL_FULLSCREEN, NULL);
+                return 0;                      
 			}
 			break;
 		}
