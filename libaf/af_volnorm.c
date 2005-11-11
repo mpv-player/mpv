@@ -38,9 +38,6 @@
 #define MUL_INIT 1.0
 #define MUL_MIN 0.1
 #define MUL_MAX 5.0
-// "Ideal" level
-#define MID_S16 (SHRT_MAX * 0.25)
-#define MID_FLOAT (INT_MAX * 0.25)
 
 // Silence level
 // FIXME: should be relative to the level of the samples
@@ -50,6 +47,8 @@
 // smooth must be in ]0.0, 1.0[
 #define SMOOTH_MUL 0.06
 #define SMOOTH_LASTAVG 0.06
+
+#define DEFAULT_TARGET 0.25
 
 // Data for specific instances of this filter
 typedef struct af_volume_s
@@ -64,6 +63,9 @@ typedef struct af_volume_s
 	float avg; // average level of the sample
 	int len; // sample size (weight)
     } mem[NSAMPLES];
+    // "Ideal" level
+    float mid_s16;
+    float mid_float;
 }af_volnorm_t;
 
 // Initialization and runtime control
@@ -88,11 +90,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     }
     return af_test_output(af,(af_data_t*)arg);
   case AF_CONTROL_COMMAND_LINE:{
-    int   i;
-    sscanf((char*)arg,"%d", &i);
+    int   i = 0;
+    float target = DEFAULT_TARGET;
+    sscanf((char*)arg,"%d:%f", &i, &target);
     if (i != 1 && i != 2)
 	return AF_ERROR;
     s->method = i-1;
+    s->mid_s16 = ((float)SHRT_MAX) * target;
+    s->mid_float = ((float)INT_MAX) * target;
     return AF_OK;
   }
   }
@@ -128,7 +133,7 @@ static void method1_int16(af_volnorm_t *s, af_data_t *c)
   
   if (curavg > SIL_S16)
   {
-    neededmul = MID_S16 / (curavg * s->mul);
+    neededmul = s->mid_s16 / (curavg * s->mul);
     s->mul = (1.0 - SMOOTH_MUL) * s->mul + SMOOTH_MUL * neededmul;
     
     // clamp the mul coefficient
@@ -169,7 +174,7 @@ static void method1_float(af_volnorm_t *s, af_data_t *c)
   
   if (curavg > SIL_FLOAT) // FIXME
   {
-    neededmul = MID_FLOAT / (curavg * s->mul);
+    neededmul = s->mid_float / (curavg * s->mul);
     s->mul = (1.0 - SMOOTH_MUL) * s->mul + SMOOTH_MUL * neededmul;
     
     // clamp the mul coefficient
@@ -215,7 +220,7 @@ static void method2_int16(af_volnorm_t *s, af_data_t *c)
     avg /= (float)totallen;
     if (avg >= SIL_S16)
     {
-	s->mul = MID_S16 / avg;
+	s->mul = s->mid_s16 / avg;
 	s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
     }
   }
@@ -265,7 +270,7 @@ static void method2_float(af_volnorm_t *s, af_data_t *c)
     avg /= (float)totallen;
     if (avg >= SIL_FLOAT)
     {
-	s->mul = MID_FLOAT / avg;
+	s->mul = s->mid_float / avg;
 	s->mul = clamp(s->mul, MUL_MIN, MUL_MAX);
     }
   }
@@ -319,8 +324,10 @@ static int open(af_instance_t* af){
     return AF_ERROR;
 
   ((af_volnorm_t*)af->setup)->mul = MUL_INIT;
-  ((af_volnorm_t*)af->setup)->lastavg = MID_S16;
+  ((af_volnorm_t*)af->setup)->lastavg = ((float)SHRT_MAX) * DEFAULT_TARGET;
   ((af_volnorm_t*)af->setup)->idx = 0;
+  ((af_volnorm_t*)af->setup)->mid_s16 = ((float)SHRT_MAX) * DEFAULT_TARGET;
+  ((af_volnorm_t*)af->setup)->mid_float = ((float)INT_MAX) * DEFAULT_TARGET;
   for (i = 0; i < NSAMPLES; i++)
   {
      ((af_volnorm_t*)af->setup)->mem[i].len = 0;

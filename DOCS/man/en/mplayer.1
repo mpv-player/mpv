@@ -4251,7 +4251,7 @@ unchanged, with -1.0 left and right channels will be swapped.
 .PD 1
 .
 .TP
-.B volnorm[=method]
+.B volnorm[=method:target]
 Maximizes the volume without distorting the sound.
 .PD 0
 .RSs
@@ -4264,6 +4264,9 @@ weighted mean over past samples (default).
 2: Use several samples to smooth the variations via the standard
 weighted mean over past samples.
 .REss
+.IPs <target>
+Sets the target amplitude as a fraction of the maximum for the
+sample type (default: 0.25).
 .RE
 .PD 1
 .
