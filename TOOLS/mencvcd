@@ -356,7 +356,7 @@ if [ $burnonly -eq 0 ]; then
    # encode streams
    if [ $mkstream -eq 1 ]; then
       # start mplayer
-      command="mplayer -noframedrop -vo yuv4mpeg -ao pcm -waveheader -v -osdlevel 0 $sub $params"
+      command="mplayer -noframedrop -vo yuv4mpeg -ao pcm:waveheader -v -osdlevel 0 $sub $params"
       echo "$command"
       $command &
       
