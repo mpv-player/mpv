@@ -976,6 +976,24 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				mplayer_put_key(MOUSE_BTN2);
 			break;
 		}
+		case WM_LBUTTONDBLCLK:
+		{
+			if(!vo_nomouse_input)
+				mplayer_put_key(MOUSE_BTN0_DBL);
+			break;
+		}
+		case WM_MBUTTONDBLCLK:
+		{
+			if(!vo_nomouse_input)
+				mplayer_put_key(MOUSE_BTN1_DBL);
+			break;
+		}
+		case WM_RBUTTONDBLCLK:
+		{
+			if(!vo_nomouse_input)
+				mplayer_put_key(MOUSE_BTN2_DBL);
+			break;
+		}
         case WM_MOUSEWHEEL:
 		{
 			if (vo_nomouse_input)
@@ -995,6 +1013,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 				mplayer_put_key(MOUSE_BTN5);
 			else
 				mplayer_put_key(MOUSE_BTN6);
+			break;
+		}
+        case WM_XBUTTONDBLCLK:
+		{
+			if (vo_nomouse_input)
+				break;
+			if (HIWORD(wParam) == 1)
+				mplayer_put_key(MOUSE_BTN5_DBL);
+			else
+				mplayer_put_key(MOUSE_BTN6_DBL);
 			break;
 		}
 		
@@ -1029,7 +1057,7 @@ static int preinit(const char *arg)
     windowcolor = vo_colorkey;
     colorbrush = CreateSolidBrush(windowcolor);
     blackbrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
-    wc.style         =  CS_HREDRAW | CS_VREDRAW;
+    wc.style         =  CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     wc.lpfnWndProc   =  WndProc;
     wc.cbClsExtra    =  0;
     wc.cbWndExtra    =  0;
