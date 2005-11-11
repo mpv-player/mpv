@@ -1945,8 +1945,9 @@ ALSA 0.5 audio output driver
 OSS audio output driver
 .PD 0
 .RSs
-.IPs dsp-device
-Sets the audio-output device (default: /dev/\:dsp).
+.IPs dsp-device[:mixer-device[:mixer-channel]]
+Sets the audio-output device (default: /dev/\:dsp), mixer device (default:
+/dev/\:mixer) and mixer channel (default: pcm).
 .RE
 .PD 1
 .
