@@ -1,4 +1,4 @@
-.\" synced with 1.1150
+.\" synced with 1.1153
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2095,8 +2095,10 @@ Pilote de sortie audio ALSA 0.5
 Pilote de sortie audio OSS.
 .PD 0
 .RSs
-.IPs dsp-device
-Définit le périphérique audio d'entrée (/dev/\:dsp par defaut).
+.IPs dsp-device[:périphérique_de_mixage[:canal_de_mixage]]
+Définit le périphérique audio d'entrée (par défaut\ : /dev/\:dsp),
+périphérique de mixage (par défaut\ : /dev/\:mixer) et canal de mixage
+(par défaut\ : pcm).
 .RE
 .PD 1
 .
@@ -2236,6 +2238,13 @@ Ne fonctionne pour le moment qu'avec le pilote de sortie vidéo directx.
 .B \-bpp <profondeur>
 Outrepasse la profondeur de couleur détectée automatiquement.
 Géré uniquement par les pilotes de sortie vidéo fbdev, dga, svga, vesa.
+.
+.TP
+.B \-border
+Joue la vidéo avec les bordures et décorations de fenêtre (par défaut).
+Spécifiez \-noborder pour désactiver les décorations de fenêtre
+standards.
+Supporté par le pilote de sortie vidéo directx.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -4495,7 +4504,7 @@ inversés.
 .PD 1
 .
 .TP
-.B volnorm[=méthode]
+.B volnorm[=méthode:cible]
 Maximalise le volume sans introduire de distortions sonores.
 .PD 0
 .RSs
@@ -4508,6 +4517,9 @@ prenant une moyenne pondérée des échantillons précédents
 .br
 2 : Utilise plusieurs échantillons pour lisser les variations en
 prenant une moyenne pondérée des échantillons précédents
+.IPs <cible>
+Spécifie l'amplitude cible en tant que fraction du maximum permis
+par le type d'échantillon (par défaut 0.25).
 .REss
 .RE
 .PD 1
