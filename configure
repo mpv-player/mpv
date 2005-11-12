@@ -914,6 +914,8 @@ case "$host_arch" in
         _mmx2=no
 	if test "$pmodel" -ge 9; then
 		proc=c3-2
+	elif test "$pmodel" -ge 7; then
+		proc=c3
 	else
 		proc=i686
 	fi
@@ -973,7 +975,7 @@ EOF
     if test "$proc" = "i686" || test "$proc" = "pentium-mmx" || test "$proc" = "winchip-c6" || test "$proc" = "winchip2"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i586
     fi
-    if test "$proc" = "i586" || test "$proc" = "c3" ; then
+    if test "$proc" = "i586" || test "$proc" = "c3" || test "$proc" = "c3-2"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i486
     fi
     if test "$proc" = "i486" ; then

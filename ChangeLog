@@ -126,7 +126,7 @@ MPlayer (1.0)
     * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
     * libdvdcss updated to 1.2.9
     * ~/.dvdcss is used instead of ~/.mplayer/DVDKeys for cached CSS keys
-    * configure check and compiler optimizations for VIA C3 and Pentium-M
+    * configure check and compiler optimizations for VIA C3, C3-2 and Pentium-M
     * configure check and compiler optimizations for AMD-64 extended
     * configure can now run with cross compiling, new configure option
       --enable-cross-compile
