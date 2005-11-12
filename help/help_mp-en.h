@@ -1191,7 +1191,7 @@ static char help_text[]=
 
 // url.c
 
-#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "string appears to be already escaped in url_escape %c%c1%c2\n"
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "String appears to be already escaped in url_escape %c%c1%c2\n"
 
 // ai_alsa1x.c
 
@@ -1207,7 +1207,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Channel count not available - reverting to default: %d\n"
 #define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Unable to install hw params:"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Can't use period equal to buffer size (%u == %lu)\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "unable to install sw params:\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Unable to install sw params:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Error opening audio: %s\n"
 #define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA status error: %s"
 #define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (at least %.3f ms long)\n"
@@ -1219,14 +1219,14 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Unable to set channel count: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Unable to set stereo: %d\n"
-#define MSGTR_MPDEMUX_AIOSS_Unable2Open "unable to open '%s': %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "not supported format\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "Unable to open '%s': %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Not supported format\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Unable to set audio format."
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Unable to set samplerate: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Unable to set trigger: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Unable to get block size!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "audio block size is zero, setting to %d!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "audio block size too low, setting to %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "Audio block size is zero, setting to %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Audio block size too low, setting to %d!\n"
 
 // asfheader.c
 
@@ -1240,26 +1240,26 @@ static char help_text[]=
 
 // asf_mmst_streaming.c
 
-#define MSGTR_MPDEMUX_MMST_WriteError "write error\n"
-#define MSGTR_MPDEMUX_MMST_EOFAlert "\nalert! eof\n"
+#define MSGTR_MPDEMUX_MMST_WriteError "Write error\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nAlert! EOF\n"
 #define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "pre-header read failed\n"
 #define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Invalid header size, giving up\n"
-#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "header data read failed\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Header data read failed\n"
 #define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len read failed\n"
 #define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Invalid rtsp packet size, giving up\n"
-#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "command data read failed\n"
-#define MSGTR_MPDEMUX_MMST_HeaderObject "header object\n"
-#define MSGTR_MPDEMUX_MMST_DataObject "data object\n"
-#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "file object, packet length = %d (%d)\n"
-#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "stream object, stream id: %d\n"
-#define MSGTR_MPDEMUX_MMST_2ManyStreamID "too many id, stream skipped"
-#define MSGTR_MPDEMUX_MMST_UnknownObject "unknown object\n"
-#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "media data read failed\n"
-#define MSGTR_MPDEMUX_MMST_MissingSignature "missing signature\n"
-#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "everything done. Thank you for downloading a media file containing proprietary and patented technology.\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Command data read failed\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "Header object\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "Data object\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "File object, packet length = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Stream object, stream id: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Too many id, stream skipped"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "Unknown object\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Media data read failed\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "Missing signature\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Everything done. Thank you for downloading a media file containing proprietary and patented technology.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "unknown command %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet error : %s\n"
-#define MSGTR_MPDEMUX_MMST_Connected "connected\n"
+#define MSGTR_MPDEMUX_MMST_Connected "Connected\n"
 
 // asf_streaming.c
 
@@ -1272,9 +1272,9 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Error while reading network stream\n"
 #define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Error chunk is too small\n"
 #define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Error sub chunks number is invalid\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "bandwidth too small, file cannot be played!\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "bandwidth too small, deselected audio stream\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "bandwidth too small, deselected video stream\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Bandwidth too small, file cannot be played!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Bandwidth too small, deselected audio stream\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Bandwidth too small, deselected video stream\n"
 #define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Invalid length in ASF header!\n"
 #define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Error while reading chunk header\n"
 #define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Error chunk_size > packet_size\n"
@@ -1290,27 +1290,27 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_NoStreamFound "No stream found\n"
 #define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Unknown ASF streaming type\n"
 #define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
-#define MSGTR_MPDEMUX_ASF_StreamingFailed "failed, exiting\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Failed, exiting\n"
 
 // audio_in.c
 
-#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nerror reading audio: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nError reading audio: %s\n"
 #define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Recovered from cross-run, some frames may be left out!\n"
 #define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Fatal error, cannot recover!\n"
-#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nnot enough audio samples!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNot enough audio samples!\n"
 
 // aviheader.c
 
 #define MSGTR_MPDEMUX_AVIHDR_EmptyList "** empty list?!\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Found movie at 0x%X - 0x%X\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "found 'bih', %u bytes of %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "Found 'bih', %u bytes of %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regenerating keyframe table for M$ mpg4v1 video\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Regenerating keyframe table for DIVX3 video\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regenerating keyframe table for MPEG4 video\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "found 'wf', %d bytes of %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Found 'wf', %d bytes of %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh found (size=%d) (total_frames=%d)\n"
 #define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Reading INDEX block, %d chunks for %ld frames (fpos=%p)\n"
-#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "additional RIFF header...\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Additional RIFF header...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** warning: this is no extended AVI header..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Broken chunk?  chunksize=%d  (id=%.4s)\n"
 #define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Building odml index (%d superindexchunks)\n"
@@ -1341,7 +1341,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Failed to read TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Failed to open %s device.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAValidURL "Not a valid URL\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "failed to send the http request\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Failed to send the http request\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the http response\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Not Found\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Unknown Error code\n"
