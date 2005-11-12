@@ -1,5 +1,5 @@
 // Translated by Emfox Zhou <EmfoxZhou@gmail.com>
-// Synced with help_mp-en.h 1.198
+// Synced with help_mp-en.h 1.201
 
 // (Translator before 2005-10-12)
 // Lu Ran <hephooey@fastmail.fm>
@@ -214,6 +214,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "速率: x %6.2f"
 #define MSGTR_OSDStayOnTop "置顶: %s"
 #define MSGTR_OSDRootwin "根窗口: %s"
+#define MSGTR_OSDBorder "边框: %s"
 #define MSGTR_OSDFramedrop "跳帧: %s"
 #define MSGTR_OSDFramedropOn "开"
 #define MSGTR_OSDFramedropHard "强制"
@@ -997,6 +998,10 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Brightness "亮度"
 #define MSGTR_VO_SUB_Hue "色相"
 
+// vo_xv.c
+#define MSGTR_VO_XV_ImagedimTooHigh "源图像尺寸" \
+                                    "太大: %ux%u (上限是 %ux%u)\n"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Pgm视频输出驱动已经被 -vo pnm:pgmyuv 代替.\n"
@@ -1304,3 +1309,53 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: 为 %d 区块生成索引表!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "无法写索引文件 %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "已保存索引文件: %s\n"
+
+// cache2.c
+
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\r这个流是不可缓冲的\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos 不同!!! 请报告这个 bug...\n"
+
+// cdda.c
+
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "无法打开 cdda 设备\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "无法打开盘\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "发现音频 CD，共 %d 音轨\n"
+
+// cddb.c
+
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "无法读 TOC.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "打开 %s 设备失败.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "不是合法的 URL\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "发送 http 请求失败\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "读 http 回复失败\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "没有发现\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "未知错误代码\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "没有发现缓存\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "没有读出所有的 xmcd 文件\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "创建目录 %s 失败\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "没有写入所有的 xmcd 文件\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "返回了非法的 xmcd 数据库文件\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "意外。请修复\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "未处理的代码\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "无法找到行结束\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "解析完成，找到: %s\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "没发现专辑\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "服务器返回: 命令语法错误\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "没有可用的站点信息\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "获得协议级别失败\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "没有 CD 在驱动器里\n"
+
+// cue_read.c
+
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] 意外的 cue 文件行: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] bin 文件名测试: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] 找不到 bin 文件 - 正在放弃\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] 使用 bin 文件 %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] 未知的 bin 文件模式. 不应该发生. 正在停止\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] 无法打开 %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] 从 %s 中读取错误\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] 得到 bin 文件大小时发生错误\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "音轨 %02d:  format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] 意外的 bin 文件结束\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] 无法读取 %d 字节的 payload\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, 可用音轨: %d -> %d\n"
