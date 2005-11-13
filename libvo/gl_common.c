@@ -251,6 +251,7 @@ static void *setNull(const GLubyte *s) {
  * \param getProcAddress function to resolve function names, may be NULL
  */
 static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
+  const char *extensions = glGetString(GL_EXTENSIONS);
   if (!getProcAddress)
     getProcAddress = setNull;
   GenBuffers = getProcAddress("glGenBuffers");
@@ -323,6 +324,9 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fARB");
   if (!ProgramEnvParameter4f)
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fNV");
+  if (!extensions || !strstr(extensions, "_swap_control"))
+    SwapInterval = NULL;
+  else {
   SwapInterval = getProcAddress("glXSwapInterval");
   if (!SwapInterval)
     SwapInterval = getProcAddress("glXSwapIntervalEXT");
@@ -334,6 +338,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
     SwapInterval = getProcAddress("wglSwapIntervalEXT");
   if (!SwapInterval)
     SwapInterval = getProcAddress("wglSwapIntervalSGI");
+  }
 }
 
 /**
