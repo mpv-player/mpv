@@ -234,11 +234,9 @@ cookies_set(HTTP_header_t * http_hdr, const char *domain, const char *url)
 	    for (i = 0; i < found_cookies; i++) {
 		if (strcmp(list->name, cookies[i]->name) == 0) {
 		    replacing = 0;
-		    if (strlen(list->domain) >
-			strlen(cookies[i]->domain) == 0) {
+		    if (strlen(list->domain) <= strlen(cookies[i]->domain)) {
 			cookies[i] = list;
-		    } else if (strlen(list->path) >
-			       strlen(cookies[i]->path) == 0) {
+		    } else if (strlen(list->path) <= strlen(cookies[i]->path)) {
 			cookies[i] = list;
 		    }
 		}
