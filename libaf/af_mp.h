@@ -2,9 +2,9 @@
 #ifndef __af_mp_h__
 #define __af_mp_h__
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 /* Set the initialization type from mplayers cpudetect */
 #ifdef AF_INIT_TYPE

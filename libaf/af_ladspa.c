@@ -76,7 +76,7 @@
 /* Local Includes */
 
 #include "af.h"
-#include "../help_mp.h"
+#include "help_mp.h"
 
 /* ------------------------------------------------------------------------- */
 

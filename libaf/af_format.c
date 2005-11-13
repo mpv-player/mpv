@@ -14,8 +14,8 @@
 #include <limits.h>
 
 #include "af.h"
-#include "../bswap.h"
-#include "../libvo/fastmemcpy.h"
+#include "bswap.h"
+#include "libvo/fastmemcpy.h"
 
 // Integer to float conversion through lrintf()
 #ifdef HAVE_LRINTF

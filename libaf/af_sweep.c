@@ -7,7 +7,7 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "../config.h"
+#include "config.h"
 #include "af.h"
 
 typedef struct af_sweep_s{

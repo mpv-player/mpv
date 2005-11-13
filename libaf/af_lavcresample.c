@@ -6,7 +6,7 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../config.h"
+#include "config.h"
 #include "af.h"
 
 #ifdef USE_LIBAVCODEC
