@@ -1,8 +1,8 @@
-#include "../config.h"
+#include "config.h"
 
 #ifndef	HAVE_SWAB
 /* system has no swab.  emulate via bswap */
-#include "../bswap.h"
+#include "bswap.h"
 #include <unistd.h>
 
 void swab(const void *from, void *to, ssize_t n) {

@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "config.h"
 
 #ifndef HAVE_GLOB
 #ifdef __MINGW32__

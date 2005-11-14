@@ -1,6 +1,6 @@
 /* GyS-TermIO v2.0 (for GySmail v3)          (C) 1999 A'rpi/ESP-team */
 
-#include "../config.h"
+#include "config.h"
 
 //#define USE_TERMCAP
 #if !defined(__OS2__) && !defined(__MORPHOS__)

@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "config.h"
 
 #ifndef	HAVE_VSSCANF
 /* system has no vsscanf.  try to provide one */

@@ -6,7 +6,7 @@
 
 #include <windows.h>
 #include "keycodes.h"
-#include "../input/input.h"
+#include "input/input.h"
 
 int mp_input_win32_slave_cmd_func(int fd,char* dest,int size){
   DWORD retval;

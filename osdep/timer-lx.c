@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <sys/time.h>
-#include "../config.h"
+#include "config.h"
 
 const char *timer_name =
 #ifdef HAVE_NANOSLEEP

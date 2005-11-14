@@ -4,7 +4,7 @@
  * implementation for systems that do not have it in libc
  */
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef	HAVE_SCANDIR
 

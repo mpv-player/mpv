@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef HAVE_GLOB
 #ifdef __MINGW32__

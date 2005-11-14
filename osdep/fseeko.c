@@ -3,7 +3,7 @@
  *	  64-bit versions of fseeko/ftello() for systems which do not have them
  */
 
-#include "../config.h"
+#include "config.h"
  
 #if !defined(HAVE_FSEEKO) || !defined(HAVE_FTELLO)
 #include <stdio.h>

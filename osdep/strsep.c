@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef HAVE_STRSEP
 char *strsep(char **stringp, const char *delim) {

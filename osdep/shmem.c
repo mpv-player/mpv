@@ -6,7 +6,7 @@
  *   Sun Apr  6 02:26:26 MET DST 1997
  */
 
-#include "../config.h"
+#include "config.h"
 
 #if defined(USE_STREAM_CACHE) && !defined(WIN32)
 
@@ -26,7 +26,7 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 #ifdef AIX
 #include <sys/select.h>

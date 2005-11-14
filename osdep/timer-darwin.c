@@ -22,8 +22,8 @@
 #include <sys/time.h>
 #include <mach/mach_time.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 #include "timer.h"
 
 /* global variables */

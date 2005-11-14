@@ -4,7 +4,7 @@
  * (C) 2003-2004 Nicholas J. Kain <njk@aerifal.cx>
  */
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef HAVE_STRLCPY
 unsigned int strlcpy (char *dest, const char *src, unsigned int size)
