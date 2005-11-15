@@ -12,7 +12,7 @@
 #include "mp3lib/mp3.h"
 #include "config.h"
 
-#include "../cpudetect.h"
+#include "cpudetect.h"
 extern CpuCaps gCpuCaps;
 
 static inline unsigned int GetTimer(){

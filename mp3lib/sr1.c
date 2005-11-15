@@ -25,9 +25,9 @@
 #include "huffman.h"
 #include "mp3.h"
 #include "bswap.h"
-#include "../cpudetect.h"
-//#include "../liba52/mm_accel.h"
-#include "../mp_msg.h"
+#include "cpudetect.h"
+//#include "liba52/mm_accel.h"
+#include "mp_msg.h"
 
 #include "fastmemcpy.h"
 
@@ -394,7 +394,7 @@ extern void dct64_MMX_3dnow(real *, real *, real *);
 extern void dct64_MMX_3dnowex(real *, real *, real *);
 void (*dct64_MMX_func)(real *, real *, real *);
 
-#include "../cpudetect.h"
+#include "cpudetect.h"
 
 // Init decoder tables.  Call first, once!
 #ifdef USE_FAKE_MONO

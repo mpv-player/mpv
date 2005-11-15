@@ -9,7 +9,7 @@
  * used source: musicout.h from mpegaudio package
  */
 
-#include "../config.h"
+#include "config.h"
 
 #ifndef M_PI
 #define M_PI		3.141592653589793238462

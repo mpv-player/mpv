@@ -3,8 +3,8 @@
  * See ChangeLog of mpg123-0.59s-pre.1 for detail
  * Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 */
-#include "../config.h"
-#include "../mangle.h"
+#include "config.h"
+#include "mangle.h"
 
 long __attribute__((aligned(8))) mp3lib_decwins [544];
 

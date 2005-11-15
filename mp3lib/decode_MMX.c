@@ -7,8 +7,8 @@
  * Local ChangeLog:
  * - Partial loops unrolling and removing MOVW insn from loops
 */
-#include "../config.h"
-#include "../mangle.h"
+#include "config.h"
+#include "mangle.h"
 #define real float /* ugly - but only way */
 
 static unsigned long long attribute_used __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;

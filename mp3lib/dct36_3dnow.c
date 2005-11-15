@@ -29,7 +29,7 @@
 
 #define real float /* ugly - but only way */
 
-#include "../mangle.h"
+#include "mangle.h"
 
 #ifdef __DCT36_OPTIMIZE_FOR_K7
 void dct36_3dnowex(real *inbuf, real *o1,

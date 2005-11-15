@@ -17,7 +17,7 @@
  */
 
 
-#include "../config.h"
+#include "config.h"
 
 #if 0
  /* old WRITE_SAMPLE */

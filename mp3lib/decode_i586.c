@@ -29,8 +29,8 @@
 *
 * $Id$
 */
-#include "../config.h"
-#include "../mangle.h"
+#include "config.h"
+#include "mangle.h"
 #define real float /* ugly - but only way */
 
 static long attribute_used buffs[1088]={0};
