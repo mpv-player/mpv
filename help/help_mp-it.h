@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.198
+// Updated to help_mp-en.h v1.202
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -223,6 +223,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Velocità: x %6.2f"
 #define MSGTR_OSDStayOnTop "Resta in primo piano: %so"
 #define MSGTR_OSDRootwin "Rootwin: %so"
+#define MSGTR_OSDBorder "Bordo: %s"
 #define MSGTR_OSDFramedrop "Scarto fotogrammi: %s"
 #define MSGTR_OSDFramedropOn "on"
 #define MSGTR_OSDFramedropHard "hard"
@@ -608,8 +609,8 @@ static char help_text[]=
 #define MSGTR_UsingExternalPP "[PP] Utilizzo un filtro di postprocessing esterno, max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] Utilizzo il postprocessing del codec, max q = %d\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "L'attributo video '%s' non è supportato dal vo & vd selezionati! \n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Famiglia di codec video voluta [%s] (vfm=%s) indisponibile.\nAbilitala in compilazione.\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Famiglia di codec audio voluta [%s] (afm=%s) indisponibile.\nAbilitala in compilazione.\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Famiglia di codec video voluta [%s] (vfm=%s) non disponibile.\nAbilitala in compilazione.\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Famiglia di codec audio voluta [%s] (afm=%s) non disponibile.\nAbilitala in compilazione.\n"
 #define MSGTR_OpeningVideoDecoder "Apertura decoder video: [%s] %s\n"
 #define MSGTR_SelectedVideoCodec "Scelto codec video: [%s] vfm: %s (%s)\n"
 #define MSGTR_OpeningAudioDecoder "Apertura decoder audio: [%s] %s\n"
@@ -637,7 +638,7 @@ static char help_text[]=
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Il codec non ha impostato sh->disp_w and sh->disp_h, tento di risolvere.\n"
-#define MSGTR_VoConfigRequest "VDec: configurazione richiesta dal vo - %d x %d (sp.col. preferito: %s)\n"
+#define MSGTR_VoConfigRequest "VDec: configurazione chiesta dal vo - %d x %d (sp.col. preferito: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Impossibile trovare uno spazio colore adatto - riprovo con -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect è %.2f:1 - riscalo per ottenere un rapporto corretto.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
@@ -1022,6 +1023,9 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Brightness "Luminosità"
 #define MSGTR_VO_SUB_Hue "Tonalità"
 
+// vo_xv.c
+#define MSGTR_VO_XV_ImagedimTooHigh "Dimensioni dell'immagine origine troppo grandi: %ux%u (il massimo è %ux%u)\n"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Il driver di output video pgm è stato sostituito con -vo pnm:pgmyuv.\n"
@@ -1224,13 +1228,13 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Impossibile impostare il numero di canali: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Impossibile impostare lo stereo: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2Open "Non posso aprire '%s': %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "formato non supportato\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Formato non supportato\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Impossibile impostare il formato audio."
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Impossibile impostare il samplerate: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Impossibile impostare il trigger: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Non posso ricavare la dimensione del blocco!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "la dimensione del blocco audio è, la imposto a %d!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "la dimensione del blocco audio è troppo bassa, la imposto a %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "La dimensione del blocco audio è, la imposto a %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "La dimensione del blocco audio è troppo bassa, la imposto a %d!\n"
 
 // asfheader.c
 
@@ -1328,4 +1332,54 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Tabella indice generata per %d parti (chunks)!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Non ho potuto scrivere il file indice %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Salvato file indice: %s\n"
+
+// cache2.c
+
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rNon posso riempire la cache per questo flusso\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos differiscono!!! Notifica questo errore...\n"
+
+// cdda.c
+
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Impossibile aprire il dispositivo CDDA\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Impossibile aprire il disco\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Trovato CD Audio con %d tracce\n"
+
+// cddb.c
+
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Imposibile leggere la TOC.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Apertura del dispositivo %s fallita.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "URL non valido\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Fallimento nell'invio della richiesta HTTP\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Fallimento nella lettura della risposta HTTP\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Non Trovato\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Codice di errore sconosciuto\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Cache non trovata\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Non tutti i file xmcd sono stati letti\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Creazione della directory %s fallita\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Non tutti i file xmcd sono stati scritti\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Ricevuto file database xmcd non valido\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "'FIXME' inatteso\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Codice non gestito\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Impossibile trovare il carattere di 'fine linea'\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Lettura OK, trovato: %s\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album non trovato\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Il server ha risposto: Errore sintassi comando ('Command syntax error')\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nessuna informazione sul sito disponibile\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Fallimento nell'ottenere il livello del protocollo\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Nessun CD nel lettore\n"
+
+// cue_read.c
+
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Linea del file cue inattesa: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] Verificato nome del file bin: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Impossibile trovare il file bin - mi arrendo\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Uso il file bin %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Modalità del file bin sconosciuta. Non dovrebbe capitare. Annullamento\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Impossibile aprire %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Errore in lettura da %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Errore nell'ottenere la dimensione del file bin\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Traccia %02d:  formato=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Fine del file bin inattesa\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Non ho potuto leggere %d byte di payload\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, nomefile=%s, traccia=%d, tracce disponibili: %d -> %d\n"
 
