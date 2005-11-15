@@ -122,7 +122,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Codec video disponibili:\n"
 #define MSGTR_AvailableAudioFm "Famiglie/driver di codec audio disponibili (compilati):\n"
 #define MSGTR_AvailableVideoFm "Famiglie/driver di codec video disponibili (compilati):\n"
-#define MSGTR_AvailableFsType "Modi disponibili a schermo pieno:\n"
+#define MSGTR_AvailableFsType "Modi disponibili a schermo intero:\n"
 #define MSGTR_UsingRTCTiming "Sto utilizzando la temporizzazione hardware RTC di Linux (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: impossibile leggere le proprietà\n"
 #define MSGTR_NoStreamFound "Nessun flusso trovato\n"
@@ -497,7 +497,7 @@ static char help_text[]=
 #define MSGTR_CdDevNotfound "Dispositivo CD-ROM '%s' non trovato!\n"
 #define MSGTR_ErrTrackSelect "Errore nella selezione della traccia del VCD!"
 #define MSGTR_ReadSTDIN "Leggo da stdin...\n"
-#define MSGTR_UnableOpenURL "Impossibile aprire la URL: %s\n"
+#define MSGTR_UnableOpenURL "Impossibile aprire l'URL: %s\n"
 #define MSGTR_ConnToServer "Connesso al server: %s\n"
 #define MSGTR_FileNotFound "File non trovato: '%s'\n"
 
@@ -729,7 +729,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayFile "Riproduci il file..."
 #define MSGTR_MENU_PlayVCD "Riproduci il VCD..."
 #define MSGTR_MENU_PlayDVD "Riproduci il DVD..."
-#define MSGTR_MENU_PlayURL "Riproduci la URL..."
+#define MSGTR_MENU_PlayURL "Riproduci l'URL..."
 #define MSGTR_MENU_LoadSubtitle "Carica i sottotitoli..."
 #define MSGTR_MENU_DropSubtitle "Elimina i sototitoli..."
 #define MSGTR_MENU_LoadExternAudioFile "Carica file audio esterni..."
@@ -1028,8 +1028,8 @@ static char help_text[]=
 
 // Old vo drivers that have been replaced
 
-#define MSGTR_VO_PGM_HasBeenReplaced "Il driver di output video pgm è stato sostituito con -vo pnm:pgmyuv.\n"
-#define MSGTR_VO_MD5_HasBeenReplaced "Il driver di output video md5 è stato sostituito con -vo md5sum.\n"
+#define MSGTR_VO_PGM_HasBeenReplaced "Il driver di uscita video pgm è stato sostituito con -vo pnm:pgmyuv.\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "Il driver di uscita video md5 è stato sostituito con -vo md5sum.\n"
 
 // ======================= AO Audio Output drivers ========================
 
@@ -1233,7 +1233,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Impossibile impostare il samplerate: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Impossibile impostare il trigger: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Non posso ricavare la dimensione del blocco!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "La dimensione del blocco audio è, la imposto a %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "La dimensione del blocco audio è zero, la imposto a %d!\n"
 #define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "La dimensione del blocco audio è troppo bassa, la imposto a %d!\n"
 
 // asfheader.c
@@ -1288,7 +1288,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Errore chunk_size > packet_size\n"
 #define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Errore durante la lettura di una parte (chunk)\n"
 #define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Ridirezionatore\n"
-#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "URL proxy non valida\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "URL proxy non valido\n"
 #define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Tipo del flusso asf sconosciuto\n"
 #define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Fallita interpretazione della risposta HTTP\n"
 #define MSGTR_MPDEMUX_ASF_ServerReturn "Il server risponde %d:%s\n"
@@ -1364,7 +1364,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Lettura OK, trovato: %s\n"
 #define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album non trovato\n"
 #define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Il server ha risposto: Errore sintassi comando ('Command syntax error')\n"
-#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nessuna informazione sul sito disponibile\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nessuna informazione disponibile sul sito\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Fallimento nell'ottenere il livello del protocollo\n"
 #define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Nessun CD nel lettore\n"
 
@@ -1379,7 +1379,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Errore in lettura da %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Errore nell'ottenere la dimensione del file bin\n"
 #define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Traccia %02d:  formato=%d  %02d:%02d:%02d\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Fine del file bin inattesa\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Fine inaspettata del file bin\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Non ho potuto leggere %d byte di payload\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, nomefile=%s, traccia=%d, tracce disponibili: %d -> %d\n"
 
