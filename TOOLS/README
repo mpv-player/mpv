@@ -186,6 +186,19 @@ Note:         The script is probably bash dependent and it's just a quick
 
 
 
+qepdvcd.sh
+
+Author:       Reynaldo H. Verdejo Pinochet
+
+Description:  anything supported to vcd/svcd pal/ntsc converter 
+
+Usage:        qepdvcd.sh file <options>
+              run with no args to see the list of options
+
+Note:         you will need vcdimager/cdrecord to master/burn the resulting
+              files
+			  
+			  
 Tech scripts in the TOOLS dir
 -----------------------------
 
