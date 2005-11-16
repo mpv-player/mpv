@@ -2028,8 +2028,9 @@ ALSA 0.5 Audioausgabetreiber.
 OSS Audioausgabetreiber.
 .PD 0
 .RSs
-.IPs dsp-device
-Setzt das Audioausgabegerät (Standard: /dev/\:dsp).
+.IPs DSP-Gerät[:Mixer-Gerät[:Mixer-Kanall]]
+Setzt das Audioausgabegerät (Standard: /dev/\:dsp), das Mixergerät
+(Standard: /dev/\:mixer) und den Mixerkanal (Standard: pcm).
 .RE
 .PD 1
 .
@@ -2169,6 +2170,13 @@ Funktioniert momentan nur mit \-vo directx.
 .B \-bpp <Farbtiefe>
 Überschreibt die automatisch erkannte Farbtiefe.
 Wird nur von fbdev-, dga2-, svga- und vesa-Ausgabetreibern unterstützt.
+.
+.TP
+.B \-border
+Spiele den Film mit Fensterrand und Dekoration.
+Da dies standardmäßig an ist, benutze \-noborder um die normale
+Fensterdekoration abzuschalten.
+Wird nur vom directx-Ausgabetreiber unterstützt.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -4454,7 +4462,7 @@ Klang unverändert, mit -1.0 werden linker und rechter Kanal vertauscht.
 .PD 1
 .
 .TP
-.B volnorm[=Methode]
+.B volnorm[=Methode:Ziel]
 Maximiert die Lautstärke, ohne den Klang zu verzerren.
 .PD 0
 .RSs
@@ -4467,6 +4475,9 @@ standardgewichteten Durchschnitts der vorigen Samples zu glätten (Standard).
 2: Benutze mehrere Samples, um die Abweichungen mit Hilfe eines
 standardgewichteten Durchschnitts der vorigen Samples zu glätten.
 .REss
+.IPs <Ziel>
+Setzt die Zielamplitude als Bruchteil des Maximalwertes der Samplingauflösung
+(Standard: 0.25).
 .RE
 .PD 1
 .
