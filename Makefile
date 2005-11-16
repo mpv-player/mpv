@@ -510,10 +510,11 @@ uninstall:
 	-rm -f $(prefix)/share/applications/mplayer.desktop
 	-rm -f $(LIBDIR)/libmpdvdkit.so
 	for l in $(MAN_LANG); do \
-	  if test "i$$l" != "en"; then \
-	    -rm -f $(MANDIR)/$$l/man1/mplayer.1 $(MANDIR)/$$l/man1/mencoder.1 \
-	    -rm -f $(MANDIR)/$$l/man1/gmplayer.1 \
-	  fi \
+	  if test "$$l" != "en"; then \
+	    rm -f $(MANDIR)/$$l/man1/mplayer.1    \
+	          $(MANDIR)/$$l/man1/mencoder.1   \
+	          $(MANDIR)/$$l/man1/gmplayer.1 ; \
+	  fi ; \
 	done
 ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
