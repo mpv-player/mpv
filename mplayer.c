@@ -229,7 +229,12 @@ int enqueue=0;
 int osd_level=1;
 int osd_level_saved=-1;
 int osd_visible=100;
+static int osd_function=OSD_PLAY;
+static int osd_show_percentage = 0;
+static int osd_duration = 1000;
 
+static int term_osd = 1;
+static char* term_osd_esc = "\x1b[A\r\x1b[K";
 // seek:
 static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
@@ -1032,6 +1037,227 @@ static void log_sub(){
 }
 #endif /* USE_SUB */
 
+#define OSD_MSG_TV_CHANNEL              0
+#define OSD_MSG_TEXT                    1
+#define OSD_MSG_SUB_DELAY               2
+#define OSD_MSG_SPEED                   3
+#define OSD_MSG_OSD_STATUS              4
+#define OSD_MSG_BAR                     5
+#define OSD_MSG_PAUSE                   6
+
+// These will later be implemented via properties and removed
+#define OSD_MSG_AV_DELAY               100
+#define OSD_MSG_FRAMEDROPPING          101
+#define OSD_MSG_ONTOP                  102
+#define OSD_MSG_ROOTWIN                103
+#define OSD_MSG_BORDER                 104
+#define OSD_MSG_SUB_POS                105
+#define OSD_MSG_SUB_ALIGN              106
+#define OSD_MSG_SUB_VISIBLE            107
+#define OSD_MSG_SUB_CHANGED            108
+
+typedef struct mp_osd_msg mp_osd_msg_t;
+struct mp_osd_msg {
+    mp_osd_msg_t* prev;
+    char msg[64];
+    int  id,level,started;
+    unsigned  time; // Display duration in ms
+};
+
+static mp_osd_msg_t* osd_msg_stack = NULL;
+
+/**
+ *  \brief Add a message on the OSD message stack
+ * 
+ *  If a message with the same id is already present in the stack
+ *  it is pulled on top of the stack, otherwise a new message is created.
+ *  
+ */
+
+static void set_osd_msg(int id, int level, int time, char* fmt, ...) {
+    mp_osd_msg_t *msg,*last=NULL;
+    va_list va;
+   
+    // look if the id is already in the stack
+    for(msg = osd_msg_stack ; msg && msg->id != id ;
+	last = msg, msg = msg->prev);
+    // not found: alloc it
+    if(!msg) {
+        msg = calloc(1,sizeof(mp_osd_msg_t));
+        msg->prev = osd_msg_stack;
+        osd_msg_stack = msg;
+    } else if(last) { // found, but it's not on top of the stack
+        last->prev = msg->prev;
+        msg->prev = osd_msg_stack;
+        osd_msg_stack = msg;
+    }
+    // write the msg
+    va_start(va,fmt);
+    vsnprintf(msg->msg, 63, fmt, va);
+    va_end(va);
+    // set id and time
+    msg->id = id;
+    msg->level = level;
+    msg->time = time;
+    
+}
+
+/**
+ *  \brief Get the current message fron the OSD stack
+ * 
+ *  This function decrement the message timer and destroy the old ones.
+ *  The message that should be displayed is returned (if any).
+ *  
+ */
+
+static mp_osd_msg_t* get_osd_msg(void) {
+    mp_osd_msg_t *msg,*prev,*last = NULL;
+    static unsigned last_update = 0;
+    unsigned now = GetTimerMS();
+    unsigned diff;
+    char hidden_dec_done = 0;
+    
+    if(!last_update) last_update = now;
+    diff = now >= last_update ? now - last_update : 0;
+    
+    last_update = now;
+    
+    // look for the first message in the stack with high enouth level
+    for(msg = osd_msg_stack ; msg ; last = msg, msg = prev) {
+        prev = msg->prev;
+        if(msg->level > osd_level && hidden_dec_done) continue;
+        // The message have an high enouth level or it is the first hidden one
+        // in both case we decrement the timer or kill it
+        if(!msg->started || msg->time > diff) {
+            if(msg->started) msg->time -= diff;
+            else msg->started = 1;
+            // display it
+            if(msg->level <= osd_level) return msg;
+            hidden_dec_done = 1;
+            continue;
+        }
+        // kill the message
+        free(msg);
+        if(last) {
+            last->prev = prev;
+            msg = last;
+        } else {
+            osd_msg_stack = prev;
+            msg = NULL;
+        }
+    }
+    // Nothing found
+    return NULL;
+}
+
+/**
+ * \brief Display the OSD bar.
+ *
+ * Display the osd bar or fallback on a simple message.
+ *
+ */
+
+void set_osd_bar(int type,char* name,double min,double max,double val) {
+    
+    if(osd_level < 1) return;
+    
+#ifdef USE_OSD
+    if(sh_video) {
+        osd_visible = sh_video->fps;
+        vo_osd_progbar_type = type;
+        vo_osd_progbar_value = 256*(val-min)/(max-min);
+        vo_osd_changed(OSDTYPE_PROGBAR);
+        return;
+    }
+#endif
+    
+    set_osd_msg(OSD_MSG_BAR,1,osd_duration,"%s: %d %%",
+                name,ROUND(100*(val-min)/(max-min)));
+}
+
+
+/**
+ * \brief Update the OSD message line.
+ *
+ * This function display the current message on the vo osd or on the term.
+ * If the stack is empty and the osd level is high enouth the timer
+ * is displayed (only on the vo osd).
+ * 
+ */
+
+static void update_osd_msg(void) {
+    mp_osd_msg_t *msg;
+    static char osd_text[64] = "";
+    static char osd_text_timer[64];
+    
+#ifdef USE_OSD    
+    // we need some mem for vo_osd_text
+    vo_osd_text = (unsigned char*)osd_text;
+#endif
+    
+    // Look if we have a msg
+    if((msg = get_osd_msg())) {
+        if(strcmp(osd_text,msg->msg)) {
+            strncpy((char*)osd_text, msg->msg, 63);
+#ifdef USE_OSD
+            if(sh_video) vo_osd_changed(OSDTYPE_OSD); else 
+#endif
+            if(term_osd) printf("%s%s\n",term_osd_esc,msg->msg);
+        }
+        return;
+    }
+        
+#ifdef USE_OSD
+    if(sh_video) {
+        // fallback on the timer
+        if(osd_level>=2) {
+            int len = demuxer_get_time_length(demuxer);
+            int percentage = -1;
+            char percentage_text[10];
+            static int last_pts = -303;
+            int pts = sh_video->pts;
+            if(pts==last_pts-1) ++pts; else last_pts=pts;
+            
+            if (osd_show_percentage)
+                percentage = demuxer_get_percent_pos(demuxer);
+            
+            if (percentage >= 0)
+                snprintf(percentage_text, 9, " (%d%%)", percentage);
+            else
+                percentage_text[0] = 0;
+            
+            if (osd_level == 3) 
+                snprintf(osd_text_timer, 63,
+                         "%c %02d:%02d:%02d / %02d:%02d:%02d%s",
+                         osd_function,pts/3600,(pts/60)%60,pts%60,
+                         len/3600,(len/60)%60,len%60,percentage_text);
+            else
+                snprintf(osd_text_timer, 63, "%c %02d:%02d:%02d%s",
+                         osd_function,pts/3600,(pts/60)%60,
+                         pts%60,percentage_text);
+        } else
+            osd_text_timer[0]=0;
+        
+        // always decrement the percentage timer
+        if(osd_show_percentage)
+            osd_show_percentage--;
+        
+        if(strcmp(osd_text,osd_text_timer)) {
+            strncpy(osd_text, osd_text_timer, 63);
+            vo_osd_changed(OSDTYPE_OSD);
+        }
+        return;
+    }
+#endif
+        
+    // Clear the term osd line
+    if(term_osd && osd_text[0]) {
+        osd_text[0] = 0;
+        printf("%s\n",term_osd_esc);
+    }
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -1047,24 +1273,9 @@ int delay_corrected=1;
 
 // movie info:
 
-int osd_function=OSD_PLAY;
-int osd_last_pts=-303;
-int osd_show_av_delay = 0;
-int osd_show_text = 0;
-int osd_show_speed = 0;
-int osd_show_sub_delay = 0;
-int osd_show_sub_pos = 0;
-int osd_show_sub_visibility = 0;
-int osd_show_sub_alignment = 0;
+// still needed for the subtitles mess
 int osd_show_vobsub_changed = 0;
 int osd_show_sub_changed = 0;
-int osd_show_percentage = 0;
-int osd_show_tv_channel = 25;
-int osd_show_ontop = 0;
-int osd_show_rootwin = 0;
-int osd_show_border = 0;
-int osd_show_framedropping = 0;
-int osd_show_status = 0;
 
 int rtc_fd=-1;
 
@@ -2173,17 +2384,8 @@ current_module="init_vo";
 main:
 current_module="main";
 
-// If there is no video OSD has to be disabled.
-// In case of playing a playtree we have to restore the
-// old OSD level after playing one or more audio-only files.
-if(!sh_video && osd_level >= 0) { // save OSD level only once
-    osd_level_saved = osd_level;
-    osd_level = 0;
-} else if (osd_level_saved > -1) { // if there is a saved OSD level, restore it
-    osd_level = osd_level_saved;
-    osd_level_saved = -1;
-}
-
+// Disable the term osd in verbose mode
+if(verbose) term_osd = 0;
 fflush(stdout);
 
 #ifdef HAVE_NEW_GUI
@@ -2761,7 +2963,21 @@ if(auto_quality>0){
   if(osd_function==OSD_PAUSE){
     mp_cmd_t* cmd;
       if(!quiet) {
-	mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
+        // small hack to display the pause message in the osd line
+        // The pause string is: "\n == PAUSE == \r" so we need to
+        // take the first and the last char out
+#ifdef USE_OSD
+	if(term_osd && !sh_video) {
+#else
+	if(term_osd) {
+#endif
+	  char msg[128] = MSGTR_Paused;
+	  int mlen = strlen(msg);
+	  msg[mlen-1] = '\0';
+	  set_osd_msg(OSD_MSG_PAUSE,1,0,"%s",msg+1);
+	  update_osd_msg();
+	} else
+	  mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
         if (identify)
           mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_PAUSED\n");
 	fflush(stdout);
@@ -2900,28 +3116,26 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_AUDIO_DELAY : {
       float v = cmd->args[0].v.f;
       audio_delay += v;
-      osd_show_av_delay = sh_video->fps/2;
+      set_osd_msg(OSD_MSG_AV_DELAY,1,osd_duration,MSGTR_OSDAVDelay,
+                  ROUND(audio_delay*1000));
       if(sh_audio) sh_audio->delay+= v;
     } break;
     case MP_CMD_SPEED_INCR : {
       float v = cmd->args[0].v.f;
       playback_speed += v;
-      if (sh_video)
-      osd_show_speed = sh_video->fps;
+      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
       build_afilter_chain(sh_audio, &ao_data);
     } break;
     case MP_CMD_SPEED_MULT : {
       float v = cmd->args[0].v.f;
       playback_speed *= v;
-      if (sh_video)
-      osd_show_speed = sh_video->fps;
+      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
       build_afilter_chain(sh_audio, &ao_data);
     } break;
     case MP_CMD_SPEED_SET : {
       float v = cmd->args[0].v.f;
       playback_speed = v;
-      if (sh_video)
-      osd_show_speed = sh_video->fps;
+      set_osd_msg(OSD_MSG_SPEED,1,osd_duration,MSGTR_OSDSpeed, playback_speed);
       build_afilter_chain(sh_audio, &ao_data);
     } break;
     case MP_CMD_FRAME_STEP :
@@ -2996,7 +3210,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	sub_delay = v;
       else
 	sub_delay += v;
-      osd_show_sub_delay = sh_video->fps/2; // show the subdelay in OSD
+      set_osd_msg(OSD_MSG_SUB_DELAY,1,osd_duration,
+                  MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
     }
 #endif
     } break;
@@ -3005,7 +3220,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     if (sh_video) {
       int movement = cmd->args[0].v.i;
       step_sub(subdata, sh_video->pts, movement);
-      osd_show_sub_delay = sh_video->fps/2; // show the subdelay in OSD
+      set_osd_msg(OSD_MSG_SUB_DELAY,1,osd_duration,
+                  MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
     }
 #endif
     } break;
@@ -3015,8 +3231,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
     } break;
     case MP_CMD_OSD :  {
-#ifdef USE_OSD
-      if(sh_video) {
 	int v = cmd->args[0].v.i;
 	if(v < 0)
 	  osd_level=(osd_level+1)%(MAX_OSD_LEVEL+1);
@@ -3025,17 +3239,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	/* Show OSD state when disabled, but not when an explicit
 	   argument is given to the osd command, i.e. in slave mode. */
 	if (v == -1 && osd_level <= 1)
-	  osd_show_status = sh_video->fps/2;
-      }
-#endif
+	  set_osd_msg(OSD_MSG_OSD_STATUS,0,osd_duration,
+                      MSGTR_OSDosd, osd_level ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
     } break;
     case MP_CMD_OSD_SHOW_TEXT :  {
-#ifdef USE_OSD
-      if(osd_level && sh_video){
-	osd_show_text=sh_video->fps; // 1 sec
-        strncpy(osd_show_text_buffer, cmd->args[0].v.s, 64);
-      }
-#endif
+      set_osd_msg(OSD_MSG_TEXT,1,osd_duration,"%64s",cmd->args[0].v.s);
     } break;
     case MP_CMD_VOLUME :  {
       int v = cmd->args[0].v.i;
@@ -3057,16 +3265,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	mixer_decvolume(&mixer);
 		}
 	  
-#ifdef USE_OSD
-      if(osd_level && sh_video){
+      if(1){
         float vol;
-	osd_visible=sh_video->fps; // 1 sec
-	vo_osd_progbar_type=OSD_VOLUME;
 	mixer_getbothvolume(&mixer, &vol);
-	vo_osd_progbar_value=(vol*256.0)/100.0;
-	vo_osd_changed(OSDTYPE_PROGBAR);
+	set_osd_bar(OSD_VOLUME,"Volume",0,100,vol);
       }
-#endif
     } break;
     case MP_CMD_MUTE:
 #ifdef USE_EDL
@@ -3132,16 +3335,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_gamma_gamma = 100;
       else if (vo_gamma_gamma < -100)
         vo_gamma_gamma = -100;
-      if (set_video_colors(sh_video, "gamma", vo_gamma_gamma)){
-#ifdef USE_OSD
-       if(osd_level){
-	 osd_visible=sh_video->fps; // 1 sec
-	 vo_osd_progbar_type=OSD_BRIGHTNESS;
-	 vo_osd_progbar_value=(vo_gamma_gamma<<7)/100 + 128;
-	 vo_osd_changed(OSDTYPE_PROGBAR);
-       }
-#endif // USE_OSD
-     }
+      if (set_video_colors(sh_video, "gamma", vo_gamma_gamma))
+        set_osd_bar(OSD_BRIGHTNESS,"Gamma",-100,100,vo_gamma_gamma);
     } break;
     case MP_CMD_BRIGHTNESS :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
@@ -3164,16 +3359,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_gamma_brightness = 100;
       else if (vo_gamma_brightness < -100)
         vo_gamma_brightness = -100;
-      if(set_video_colors(sh_video, "brightness", vo_gamma_brightness)){
-#ifdef USE_OSD
-       if(osd_level){
-	 osd_visible=sh_video->fps; // 1 sec
-	 vo_osd_progbar_type=OSD_BRIGHTNESS;
-	 vo_osd_progbar_value=(vo_gamma_brightness<<7)/100 + 128;
-	 vo_osd_changed(OSDTYPE_PROGBAR);
-       }
-#endif // USE_OSD
-      }
+      if(set_video_colors(sh_video, "brightness", vo_gamma_brightness))
+        set_osd_bar(OSD_BRIGHTNESS,"Brightness",-100,100,vo_gamma_brightness);
     } break;
     case MP_CMD_CONTRAST :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
@@ -3196,16 +3383,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_gamma_contrast = 100;
       else if (vo_gamma_contrast < -100)
         vo_gamma_contrast = -100;
-      if(set_video_colors(sh_video, "contrast", vo_gamma_contrast)){
-#ifdef USE_OSD
-       if(osd_level){
-	 osd_visible=sh_video->fps; // 1 sec
-	 vo_osd_progbar_type=OSD_CONTRAST;
-	 vo_osd_progbar_value=(vo_gamma_contrast<<7)/100 + 128;
-	 vo_osd_changed(OSDTYPE_PROGBAR);
-       }
-#endif // USE_OSD
-      }
+      if(set_video_colors(sh_video, "contrast", vo_gamma_contrast))
+        set_osd_bar(OSD_CONTRAST,"Contrast",-100,100,vo_gamma_contrast);
     } break;
     case MP_CMD_SATURATION :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
@@ -3228,16 +3407,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_gamma_saturation = 100;
       else if (vo_gamma_saturation < -100)
         vo_gamma_saturation = -100;
-      if(set_video_colors(sh_video, "saturation", vo_gamma_saturation)){
-#ifdef USE_OSD
-       if(osd_level){
-	 osd_visible=sh_video->fps; // 1 sec
-	 vo_osd_progbar_type=OSD_SATURATION;
-	 vo_osd_progbar_value=(vo_gamma_saturation<<7)/100 + 128;
-	 vo_osd_changed(OSDTYPE_PROGBAR);
-       }
-#endif // USE_OSD
-      }
+      if(set_video_colors(sh_video, "saturation", vo_gamma_saturation))
+        set_osd_bar(OSD_SATURATION,"Saturation",-100,100,vo_gamma_saturation);
     } break;
     case MP_CMD_HUE :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
@@ -3260,28 +3431,20 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_gamma_hue = 100;
       else if (vo_gamma_hue < -100)
         vo_gamma_hue = -100;
-      if(set_video_colors(sh_video, "hue", vo_gamma_hue)){
-#ifdef USE_OSD
-       if(osd_level){
-	 osd_visible=sh_video->fps; // 1 sec
-	 vo_osd_progbar_type=OSD_HUE;
-	 vo_osd_progbar_value=(vo_gamma_hue<<7)/100 + 128;
-	 vo_osd_changed(OSDTYPE_PROGBAR);
-       }
-#endif // USE_OSD
-      }
+      if(set_video_colors(sh_video, "hue", vo_gamma_hue))
+        set_osd_bar(OSD_HUE,"Hue",-100,100,vo_gamma_hue);
     } break;
     case MP_CMD_FRAMEDROPPING :  {
       int v = cmd->args[0].v.i;
-      if(v < 0){
+      if(v < 0)
 	frame_dropping = (frame_dropping+1)%3;
-#ifdef USE_OSD
-       osd_show_framedropping=sh_video->fps/2;
-       vo_osd_changed(OSDTYPE_SUBTITLE);
-#endif
-      }
       else
 	frame_dropping = v > 2 ? 2 : v;
+      set_osd_msg(OSD_MSG_FRAMEDROPPING,1,osd_duration,
+                  MSGTR_OSDFramedrop,(frame_dropping == 1 ? MSGTR_OSDFramedropOn :
+                                      (frame_dropping == 2 ? MSGTR_OSDFramedropHard : 
+                                       MSGTR_OSDFramedropOff)));
+      //vo_osd_changed(OSDTYPE_SUBTITLE);
     } break;
 #ifdef USE_TV
     case MP_CMD_TV_SET_FREQ :  {
@@ -3313,21 +3476,14 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	int v = cmd->args[0].v.i;
 	if(v > 0){
 	  tv_step_channel((tvi_handle_t*)(demuxer->priv), TV_CHANNEL_HIGHER);
-#ifdef USE_OSD
-	  if (tv_channel_list) {
-	    osd_show_tv_channel = sh_video->fps;
-	    vo_osd_changed(OSDTYPE_SUBTITLE);
-	  }
-#endif
 	} else {
 	  tv_step_channel((tvi_handle_t*)(demuxer->priv), TV_CHANNEL_LOWER);
-#ifdef USE_OSD
-	  if (tv_channel_list) {
-	    osd_show_tv_channel = sh_video->fps;
-	    vo_osd_changed(OSDTYPE_SUBTITLE);
-	  }
-#endif
 	}
+        if (tv_channel_list) {
+          set_osd_msg(OSD_MSG_TV_CHANNEL,1,osd_duration,
+                      MSGTR_OSDChannel, tv_channel_current->name);
+          //vo_osd_changed(OSDTYPE_SUBTITLE);
+        }
       }
     } 
 #ifdef HAS_DVBIN_SUPPORT
@@ -3359,12 +3515,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_TV_SET_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
 	tv_set_channel((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
-#ifdef USE_OSD
 	if (tv_channel_list) {
-		osd_show_tv_channel = sh_video->fps;
-		vo_osd_changed(OSDTYPE_SUBTITLE);
+		set_osd_msg(OSD_MSG_TV_CHANNEL,1,osd_duration,
+		            MSGTR_OSDChannel, tv_channel_current->name);
+		//vo_osd_changed(OSDTYPE_SUBTITLE);
 	}
-#endif
       }
     } break;
 #ifdef HAS_DVBIN_SUPPORT	
@@ -3393,12 +3548,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_TV_LAST_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
 	tv_last_channel((tvi_handle_t*)(demuxer->priv));
-#ifdef USE_OSD
 	if (tv_channel_list) {
-		osd_show_tv_channel = sh_video->fps;
-		vo_osd_changed(OSDTYPE_SUBTITLE);
+		set_osd_msg(OSD_MSG_TV_CHANNEL,1,osd_duration,
+                            MSGTR_OSDChannel, tv_channel_current->name);
+		//vo_osd_changed(OSDTYPE_SUBTITLE);
 	}
-#endif
       }
     } break;
     case MP_CMD_TV_STEP_NORM :  {
@@ -3425,10 +3579,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     {
      if(video_out && vo_config_count) {
        video_out->control(VOCTRL_ONTOP, 0);
-#ifdef USE_OSD
-       osd_show_ontop=sh_video->fps/2;
-       vo_osd_changed(OSDTYPE_SUBTITLE);
-#endif
+       set_osd_msg(OSD_MSG_ONTOP,1,osd_duration,
+                   MSGTR_OSDStayOnTop, vo_ontop? MSGTR_OSDenabled : MSGTR_OSDdisabled);
+       //vo_osd_changed(OSDTYPE_SUBTITLE);
      }
 
     } break;
@@ -3436,10 +3589,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     {
      if(video_out && vo_config_count) {
        video_out->control(VOCTRL_ROOTWIN, 0);
-#ifdef USE_OSD
-       osd_show_rootwin=sh_video->fps/2;
-       vo_osd_changed(OSDTYPE_SUBTITLE);
-#endif
+       set_osd_msg(OSD_MSG_ROOTWIN,1,osd_duration,
+                   MSGTR_OSDRootwin, vo_rootwin? MSGTR_OSDenabled : MSGTR_OSDdisabled);
+       //vo_osd_changed(OSDTYPE_SUBTITLE);
      }
 
     } break;
@@ -3447,10 +3599,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     {
      if(video_out && vo_config_count) {
        video_out->control(VOCTRL_BORDER, 0);
-#ifdef USE_OSD
-       osd_show_border=10;
-       vo_osd_changed(OSDTYPE_SUBTITLE);
-#endif
+       set_osd_msg(OSD_MSG_BORDER,1,osd_duration,
+                   MSGTR_OSDBorder, vo_border? MSGTR_OSDenabled : MSGTR_OSDdisabled);
+       //vo_osd_changed(OSDTYPE_SUBTITLE);
      }
 
     } break;
@@ -3465,14 +3616,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
           else res = vo_panscan+v;
         vo_panscan = res > 1 ? 1 : res < 0 ? 0 : res;
         video_out->control( VOCTRL_SET_PANSCAN,NULL );
-#ifdef USE_OSD
-        if(osd_level && sh_video){
-	  osd_visible=sh_video->fps; // 1 sec
-	  vo_osd_progbar_type=OSD_PANSCAN;
-	  vo_osd_progbar_value=vo_panscan*256;
-	  vo_osd_changed(OSDTYPE_PROGBAR);
-        }
-#endif
+        set_osd_bar(OSD_PANSCAN,"Panscan",0,1,vo_panscan);
        }
     } break;
     case MP_CMD_SUB_POS:
@@ -3485,8 +3629,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	sub_pos+=v;
 	if(sub_pos >100) sub_pos=100;
 	if(sub_pos <0) sub_pos=0;
+        set_osd_msg(OSD_MSG_SUB_POS,1,osd_duration,
+                    MSGTR_OSDSubPosition, sub_pos);
 	vo_osd_changed(OSDTYPE_SUBTITLE);
-        osd_show_sub_pos = sh_video->fps/2;
       }
 #endif
     } break;
@@ -3498,7 +3643,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     	    sub_alignment = cmd->args[0].v.i;
     	else
             sub_alignment = (sub_alignment+1) % 3;
-	osd_show_sub_alignment = sh_video->fps/2;
+        set_osd_msg(OSD_MSG_SUB_ALIGN,1,osd_duration,
+                    MSGTR_OSDSubAlignment,(sub_alignment == 2 ? MSGTR_OSDSubBottom :
+                                         (sub_alignment == 1 ? MSGTR_OSDSubCenter : MSGTR_OSDSubTop)));
 	vo_osd_changed(OSDTYPE_SUBTITLE);
       }
 #endif
@@ -3508,7 +3655,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #ifdef USE_SUB
       if (sh_video) {
 	sub_visibility=1-sub_visibility;
-	osd_show_sub_visibility = sh_video->fps/2; // show state of subtitle visibility in OSD
+	set_osd_msg(OSD_MSG_SUB_VISIBLE,1,osd_duration,
+	            MSGTR_OSDSubtitles, sub_visibility?MSGTR_OSDenabled:MSGTR_OSDdisabled);
 	vo_osd_changed(OSDTYPE_SUBTITLE);
       }
 #endif
@@ -4024,23 +4172,14 @@ if(rel_seek_secs || abs_seek_pos){
         current_module="seek_audio_reset";
         audio_out->reset(); // stop audio, throwing away buffered data
       }
-#ifdef USE_OSD
         // Set OSD:
-      if(osd_level && !loop_seek){
+      if(!loop_seek){
 #ifdef USE_EDL
-	if( !edl_decision ) {
-#else
-	  if( 1 ) { // Let the compiler optimize this out
+	if( !edl_decision )
 #endif
-	  if (sh_video) {
-	    osd_visible=sh_video->fps; // 1 sec
-	    vo_osd_progbar_type=0;
-	    vo_osd_progbar_value=demuxer_get_percent_pos(demuxer) * 256 / 100;
-	    vo_osd_changed(OSDTYPE_PROGBAR);
-	  }
-	}
+          set_osd_bar(0,"Position",0,100,demuxer_get_percent_pos(demuxer));
       }
-#endif /* USE_OSD */
+
       if(sh_video) {
 	c_total=0;
 	max_pts_correction=0.1;
@@ -4116,31 +4255,10 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 
 //================= Update OSD ====================
 #ifdef USE_OSD
-  if(osd_level>=1 && sh_video){
-      int pts=sh_video->pts;
+  if(sh_video){
       char osd_text_tmp[64];
-      if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
-      vo_osd_text=osd_text_buffer;
-#ifdef USE_DVDNAV
-      if (osd_show_dvd_nav_delay) {
-          snprintf(osd_text_tmp, 63, MSGTR_OSDDVDNAV, dvd_nav_text);
-          osd_show_dvd_nav_delay--;
-      } else
-#endif
-#ifdef USE_TV
-      if (osd_show_tv_channel && tv_channel_list) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDChannel, tv_channel_current->name);
-	  osd_show_tv_channel--;
-      } else
-#endif
-      if (osd_show_text) {
-	  snprintf(osd_text_tmp, 63, "%s", osd_show_text_buffer);
-	  osd_show_text--;
-      } else
-      if (osd_show_sub_visibility) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitles, sub_visibility? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-	  osd_show_sub_visibility--;
-      } else
+      // The subtitles stuff is particulary messy. Keep the mess for now it will be
+      // cleaned up when properties get implemented.
       if (osd_show_vobsub_changed) {
 	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesOff);
           switch (demuxer->type) {
@@ -4182,7 +4300,9 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 #endif
                   break;
           }
-	  osd_show_vobsub_changed--;
+          osd_show_vobsub_changed = 0;
+          set_osd_msg(OSD_MSG_SUB_CHANGED,1,osd_duration,
+                      "%s",osd_text_tmp);
       } else
 #ifdef USE_SUB
       if (osd_show_sub_changed) {
@@ -4191,85 +4311,20 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 	  if ((tmp2 = strrchr(tmp, '/'))) {
 	      tmp = tmp2+1;
 	  }
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDSub, 
-                                  set_of_sub_pos + 1,
-                                  strlen(tmp) < 20 ? "" : "...",
-                                  strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
-	  osd_show_sub_changed--;
-      } else
+          set_osd_msg(OSD_MSG_SUB_CHANGED,1,osd_duration,
+                      MSGTR_OSDSub, set_of_sub_pos + 1,
+                      strlen(tmp) < 20 ? "" : "...",
+                      strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
+	  osd_show_sub_changed = 0;
+      }
 #endif
-      if (osd_show_sub_delay) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
-	  osd_show_sub_delay--;
-      } else
-      if (osd_show_sub_pos) {
-         snprintf(osd_text_tmp, 63, MSGTR_OSDSubPosition, sub_pos);
-         osd_show_sub_pos--;
-      } else
-      if (osd_show_sub_alignment) {
-         snprintf(osd_text_tmp, 63, MSGTR_OSDSubAlignment,
-	    (sub_alignment == 2 ? MSGTR_OSDSubBottom :
-	    (sub_alignment == 1 ? MSGTR_OSDSubCenter : MSGTR_OSDSubTop)));
-         osd_show_sub_alignment--;
-      } else
-      if (osd_show_av_delay) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDAVDelay, ROUND(audio_delay*1000));
-	  osd_show_av_delay--;
-      } else if (osd_show_speed) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDSpeed, playback_speed);
-	  osd_show_speed--;
-      } else if (osd_show_ontop) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDStayOnTop, vo_ontop? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-	  osd_show_ontop--;
-      } else if (osd_show_rootwin) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDRootwin, vo_rootwin? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-	  osd_show_rootwin--;
-      } else if (osd_show_border) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDBorder, vo_border? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-	  osd_show_border--;
-      } else if (osd_show_framedropping) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDFramedrop,
-	     (frame_dropping == 1 ? MSGTR_OSDFramedropOn :
-	     (frame_dropping == 2 ? MSGTR_OSDFramedropHard : MSGTR_OSDFramedropOff)));
-	  osd_show_framedropping--;
-      } else if(osd_level>=2) {
-          int len = demuxer_get_time_length(demuxer);
-          int percentage = -1;
-          char percentage_text[10];
-          if (osd_show_percentage) {
-            percentage = demuxer_get_percent_pos(demuxer);
-            osd_show_percentage--;
-          }
-          if (percentage >= 0)
-            snprintf(percentage_text, 9, " (%d%%)", percentage);
-	  else
-	    percentage_text[0] = 0;
-          if (osd_level == 3) 
-            snprintf(osd_text_tmp, 63, "%c %02d:%02d:%02d / %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,len/3600,(len/60)%60,len%60,percentage_text);
-          else
-            snprintf(osd_text_tmp, 63, "%c %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,percentage_text);
-      } else osd_text_tmp[0]=0;
-      
-      if(strcmp(vo_osd_text, osd_text_tmp)) {
-	      strncpy(vo_osd_text, osd_text_tmp, 63);
-	      vo_osd_changed(OSDTYPE_OSD);
-      }
-  } else {
-      if(vo_osd_text) {
-         vo_osd_text=NULL;
-	  vo_osd_changed(OSDTYPE_OSD);
-      }
-  }
-  if (osd_level <= 1 && osd_show_status > 0 && sh_video) {
-    vo_osd_text = osd_text_buffer;
-    snprintf(vo_osd_text, 63, MSGTR_OSDosd, osd_level ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-    vo_osd_changed(OSDTYPE_OSD);
-    osd_show_status--;
   }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
 //  vo_osd_text=osd_text_buffer;
 #endif /* USE_OSD */
   
+  update_osd_msg();
+    
 #ifdef USE_SUB
   // find sub
   if(subdata &&  sh_video && sh_video->pts>0){

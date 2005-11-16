@@ -307,6 +307,7 @@ m_option_t mplayer_opts[]={
 	{"nocrash-debug", &crash_debug, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 #endif
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+	{"osd-duration", &osd_duration, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 #ifdef HAVE_MENU
 	{"menu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nomenu", &use_menu, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
@@ -375,6 +376,10 @@ m_option_t mplayer_opts[]={
 	{"rtc", &nortc, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 	{"rtc-device", &rtc_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
+
+	{"term-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noterm-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+    	{"term-osd-esc", &term_osd_esc, CONF_TYPE_STRING, 0, 0, 1, NULL},
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
 	{"idle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
