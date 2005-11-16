@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.196
+// In synch with rev 1.202
 
 // ========================= MPlayer help ===========================
 
@@ -222,6 +222,7 @@ static char help_text[]=
 #define MSGTR_OSDSpeed "Geschwindigkeit: %6.2f-fach"
 #define MSGTR_OSDStayOnTop "Immer im Vordergrund: %s"
 #define MSGTR_OSDRootwin "Anzeige auf dem Desktop: %s"
+#define MSGTR_OSDBorder "Rand: %s"
 #define MSGTR_OSDFramedrop "Framedropping: %s"
 #define MSGTR_OSDFramedropOn "an"
 #define MSGTR_OSDFramedropHard "hart"
@@ -1006,6 +1007,24 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Benutze Interlaced-Ausgabemodus, unteres Feld (bottom-field) zuerst."
 #define MSGTR_VO_YUV4MPEG_ProgressiveMode "Benutze (Standard-) Progressive-Frame-Modus."
 
+// sub.c
+
+#define MSGTR_VO_SUB_Seekbar "Suchlaufleiste"
+#define MSGTR_VO_SUB_Play "Play"
+#define MSGTR_VO_SUB_Pause "Pause"
+#define MSGTR_VO_SUB_Stop "Stop"
+#define MSGTR_VO_SUB_Rewind "Rücklauf"
+#define MSGTR_VO_SUB_Forward "Vorlauf"
+#define MSGTR_VO_SUB_Clock "Spielzeit"
+#define MSGTR_VO_SUB_Contrast "Kontrast"
+#define MSGTR_VO_SUB_Saturation "Sättigung"
+#define MSGTR_VO_SUB_Volume "Lautstärke"
+#define MSGTR_VO_SUB_Brightness "Helligkeit"
+#define MSGTR_VO_SUB_Hue "Farbwertkorrektur"
+
+// vo_xv.c
+#define MSGTR_VO_XV_ImagedimTooHigh "Dimensionen des Quellbildes sind zu groß: %ux%u (Maximalgröße ist %ux%u)\n"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "Der pgm-Videoausgabetreiber wurde ersetzt durch -vo pnm:pgmyuv.\n"
@@ -1313,3 +1332,53 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Erzeuge Indextabelle für %d Blöcke!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Konnte Indexdatei '%s' nicht schreiben: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Indexdate '%s' gespeichert\n"
+
+// cache2.c
+
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rDieser Datenstrom lässt sich nicht zwischenspeichern\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!!Unterschied in read_filepos!!! Bitte Melde diesen Fehler...\n"
+
+// cdda.c
+
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Kann CDDA-Gerät nicht öffnen.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Kann CD nicht öffnen.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Musik-CD mit %d Titeln gefunden.\n"
+
+// cddb.c
+
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Konnte Inhaltsverzeichnis der CD nicht lesen.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Konnte Gerät '%s' nicht öffnen.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "Ungültige URL.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Konnte die HTTP-Anfrage nicht senden.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Konnte die HTTP-Antwort nicht lesen.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Nicht gefunden.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Unbekannter Fehlercode.\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Kein Cache gefunden.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Konnte die XMCD-Datei nicht komplett lesen.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Konnte Verzeichnis '%s' nicht erstellen.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Konnte die XMCD-Datei nicht komplett schreiben.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "XMCD-Datenbankdatei ist ungültig.\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Unerwarteter Fehler.\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Unbehandelter Statuscode.\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Konnte Zeilenendemarkierung nicht finden.\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Album '%s' gefunden.\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album nicht gefunden.\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Fehlercode des Servers: Kommandosyntaxfehler.\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Liste der CDDB-Seiten nicht verfügbar.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Konnte aktuelle Protokollebene nicht ermitteln.\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Keine CD im Laufwerk.\n"
+
+// cue_read.c
+
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unerwartete Zeile in der Cue-Datei: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] Zugehörige Bin-Datei unter dem Namen '%s' nicht gefunden.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Konnte Bin-Datei nicht finden. Gebe auf.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Benutze Bin-Datei '%s'.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Unbekannter Typ der Bin-Datei. Dies sollte nicht auftreten, breche ab.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Kann Cue-Datei '%s' nicht öffnen.\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Fehler beim Lesen von '%s'.\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Konnte Größe der Bin-Datei nicht ermitteln.\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Titel %02d: Format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Unerwartetes Ende der Bin-Datei.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Konnte Block der Größe %dByte nicht lesen.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open: Dateiname='%s', Titel=%d, verfügbare Titel: %d -> %d\n"
