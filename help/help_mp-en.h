@@ -1014,8 +1014,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Hue "Hue"
 
 // vo_xv.c
-#define MSGTR_VO_XV_ImagedimTooHigh "Source image dimensions are " \
-                                    "too high: %ux%u (maximum is %ux%u)\n"
+#define MSGTR_VO_XV_ImagedimTooHigh "Source image dimensions are too high: %ux%u (maximum is %ux%u)\n"
 
 // Old vo drivers that have been replaced
 
@@ -1332,7 +1331,7 @@ static char help_text[]=
 
 // cdda.c
 
-#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Can't open cdda device\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Can't open CDDA device\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Can't open disc\n"
 #define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Found Audio CD with %d tracks\n"
 
@@ -1341,8 +1340,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Failed to read TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Failed to open %s device.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAValidURL "Not a valid URL\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Failed to send the http request\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the http response\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Failed to send the HTTP request\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the HTTP response\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Not Found\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Unknown Error code\n"
 #define MSGTR_MPDEMUX_CDDB_NoCacheFound "No cache found\n"
@@ -1350,7 +1349,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Failed to create directory %s\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Not all the xmcd file has been written\n"
 #define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Invalid xmcd database file returned\n"
-#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Unexpected fix me\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Unexpected FIXME\n"
 #define MSGTR_MPDEMUX_CDDB_UnhandledCode "Unhandled code\n"
 #define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Unable to find end of line\n"
 #define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parse OK, found: %s\n"
@@ -1364,13 +1363,14 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unexpected cuefile line: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] bin filename tested: %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] couldn't find the bin file - giving up\n"
-#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] using bin file %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] unknown mode for binfile. should not happen. aborting\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] cannot open %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] error reading from  %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] error getting size of bin file\n"
-#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "track %02d:  format=%d  %02d:%02d:%02d\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] unexpected end of bin file\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] couldn't read %d bytes of payload\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Couldn't find the bin file - giving up\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Using bin file %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Unknown mode for binfile. Should not happen. Aborting\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Cannot open %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Error reading from  %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Error getting size of bin file\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Track %02d:  format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Unexpected end of bin file\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Couldn't read %d bytes of payload\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n"
+
