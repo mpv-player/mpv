@@ -1553,6 +1553,10 @@ subtitles.
 Turns off automatic subtitle file loading.
 .
 .TP
+.B \-osd-duration <time>
+Set the duration of the OSD messages in ms (default: 1000).
+.
+.TP
 .B \-osdlevel <0\-3> (MPlayer only)
 Specifies which mode the OSD should start in.
 .PD 0
@@ -1816,6 +1820,17 @@ The value is the vertical position of the subtitle in % of the screen height.
 Specify the maximum width of subtitles on the screen.
 Useful for TV-out.
 The value is the width of the subtitle in % of the screen width.
+.
+.TP
+.B \-noterm-osd
+Disable the display of OSD messages on the console when no video output is
+available.
+.
+.TP
+.B \-term-osd-esc <escape sequence>
+Specify the escape sequence to use before writing an OSD messages on the
+console. The escape sequence should move the pointer to the beginning of the 
+line used for the OSD and clear it (default: ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
