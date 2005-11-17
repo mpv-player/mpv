@@ -1,4 +1,4 @@
-.\" synced with 1.1153
+.\" synced with 1.1155
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -1655,6 +1655,9 @@ des sous-titres VOBSUB.
 .B \-noautosub
 Désactive le chargement automatique du fichier de sous-titres.
 .
+.B \-osd-duration <durée>
+Défini la durée d'affichage en ms des messages OSD (par défaut\ : 1000).
+.
 .TP
 .B \-osdlevel <0\-3> (MPlayer uniquement)
 Définit dans quel mode OSD démarrer.
@@ -1933,6 +1936,18 @@ de l'écran.
 Définit la largeur maximum des sous-titres sur l'écran.
 Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
+.
+.TP
+.B \-noterm-osd
+Désactive l'affichage des messages OSD sur la console lorsqu'il n'y a
+pas de vidéo à afficher.
+.
+.TP
+.B \-term-osd-esc <séquence d'échappement>
+Défini la séquence d'échappement à utiliser avant d'écrire un message OSD
+sur la console.
+La séquence d'échappement doit déplacer le curseur au début de la ligne
+utilisée par l'OSD et l'effacer (par défaut\ : ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
@@ -9495,29 +9510,29 @@ sortie (par défaut\ : auto-détection d'après l'extension du fichier de
 sortie).
 .PD 0
 .RSs
-.IPs mpg\ \
+.IPs mpg\ \ 
 MPEG-1 systems and MPEG-2 PS
-.IPs asf\ \
+.IPs asf\ \ 
 Advanced Streaming Format
-.IPs avi\ \
+.IPs avi\ \ 
 fichier Audio Video Interleave
-.IPs wav\ \
+.IPs wav\ \ 
 Waveform Audio
-.IPs swf\ \
+.IPs swf\ \ 
 Macromedia Flash
-.IPs flv\ \
+.IPs flv\ \ 
 Macromedia Flash video files
-.IPs rm\ \ \
+.IPs rm\ \ \ 
 RealAudio et RealVideo
-.IPs au\ \ \
+.IPs au\ \ \ 
 SUN AU format
-.IPs nut\ \
+.IPs nut\ \ 
 NUT open container format (expérimental)
-.IPs mov\ \
+.IPs mov\ \ 
 QuickTime
-.IPs mp4\ \
+.IPs mp4\ \ 
 MPEG-4 format
-.IPs dv\ \
+.IPs dv\ \ \ 
 Sony Digital Video container
 .RE
 .PD 1
