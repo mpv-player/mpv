@@ -108,6 +108,7 @@ MPlayer (1.0)
     * support for playing DVDs copied to harddisk on Cygwin
     * DragonFly BSD support
     * liba52 asm optimizations ported to amd64
+    * -(no)border option to get a bordered/borderless window on Windows
 
     Others:
     * enabled hinting for TrueType fonts
