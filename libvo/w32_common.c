@@ -161,7 +161,10 @@ static void resetMode(void) {
 int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
     PIXELFORMATDESCRIPTOR pfd;
+    RECT r;
     int pf;
+    int style = (vo_border && !vo_fs) ?
+                (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP;
 
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
@@ -178,9 +181,16 @@ int createRenderingContext(void) {
 	}
     }
     updateScreenProperties();
+    ShowWindow(vo_window, SW_HIDE);
+    SetWindowLong(vo_window, GWL_STYLE, style);
     vo_dwidth = vo_fs ? vo_screenwidth : o_dwidth;
     vo_dheight = vo_fs ? vo_screenheight : o_dheight;
-    SetWindowPos(vo_window, layer, vo_fs ? 0 : vo_dx, vo_fs ? 0 : vo_dy, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+    r.left = vo_fs ? 0 : vo_dy;
+    r.right = r.left + vo_dwidth;
+    r.top = vo_fs ? 0 : vo_dx;
+    r.bottom = r.top + vo_dheight;
+    AdjustWindowRect(&r, style, 0);
+    SetWindowPos(vo_window, layer, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW);
 
     memset(&pfd, 0, sizeof pfd);
     pfd.nSize = sizeof pfd;
@@ -228,7 +238,9 @@ int vo_init(void) {
     if (WinID >= 0)
       vo_window = WinID;
     else {
-    vo_window = CreateWindowEx(0, classname, classname, WS_POPUP, CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
+    vo_window = CreateWindowEx(0, classname, classname,
+                  vo_border ? (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP,
+                  CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
     if (!vo_window) {
 	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create window!\n");
 	return 0;
@@ -245,6 +257,11 @@ int vo_init(void) {
 void vo_w32_fullscreen(void) {
     vo_fs = !vo_fs;
 
+    createRenderingContext();
+}
+
+void vo_w32_border() {
+    vo_border = !vo_border;
     createRenderingContext();
 }
 
