@@ -6934,6 +6934,7 @@ _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
 
 # TODO cleanup the VIDIX stuff here
+echocheck "VIDIX"
 _def_vidix='#define CONFIG_VIDIX 1'
 test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
 if test "$_vidix" = yes; then
@@ -6955,8 +6956,9 @@ if test "$_vidix" = yes && test "$_x11" = yes; then
 else
   _novomodules="xvidix $_novomodules"
 fi
-echo Checking for VIDIX ... "$_vidix"
+echores "$_vidix"
 
+echocheck "joystick"
 _def_joystick='#undef HAVE_JOYSTICK'
 if test "$_joystick" = yes ; then
   if linux ; then
@@ -6966,7 +6968,7 @@ if test "$_joystick" = yes ; then
     _joystick="no (unsupported under $system_name)"
   fi
 fi
-echo Checking for joystick ... "$_joystick"
+echores "$_joystick"
 
 echocheck "lirc"
 if test "$_lirc" = auto ; then
