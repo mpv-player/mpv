@@ -985,7 +985,7 @@ EOF
       cc_check -march=$proc $cpuopt=$proc  || proc=error
     fi
     if test "$proc" = "error" ; then
-        echores "CPU optimization disabled.\nYou have an old compiler and/or configure does not recognize your CPU."
+        echores "CPU optimization disabled. CPU not recognized or your compiler is too old."
       _mcpu=""
       _march=""
       _optimizing=""
@@ -1092,7 +1092,7 @@ EOF
       _march="-march=$proc"
       _mcpu="$cpuopt=$proc"
       if test "$proc" = "error" ; then
-        echores "CPU optimization disabled.\nYou have an old compiler and/or configure does not recognize your CPU."
+        echores "CPU optimization disabled. CPU not recognized or your compiler is too old."
         _mcpu=""
         _march=""
       fi
