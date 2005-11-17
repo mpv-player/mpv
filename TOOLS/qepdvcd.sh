@@ -2,9 +2,9 @@
 #
 # QEPDVCD
 #
-# Most of this stuff comes straight from mplayer documentation
-# options are limited only to an small usesfull subset, if you 
-# want more control, RTFM and DIY
+# Most of this stuff comes straight from MPlayer documentation.
+# Options are limited only to a small useful subset, if you 
+# want more control, RTFM and DIY.
 #
 # Version:          0.1
 #
@@ -55,10 +55,10 @@ echo "-q	Encoding quality 0|1|2 [2]"
 echo "-a	Audio bitrate in kbps [224]"
 echo "-v	Video bitrate in kbps [2000 For SVCD, 1150 For VCD]"
 echo "-n	Norm NTSC|PAL [NTSC]"
-echo "-d	Divide/splits movie at given times time1:time2:... [No split]"
+echo "-d	Divide/split movie at given times time1:time2:... [no split]"
 echo "-s	Shitty TV screen tolerance %, afects subtitle positioning [85]"
 echo "-u	Subtitle file name [No subtitle]"
-echo "-o	Output Basename [mencodedvcd]"
+echo "-o	Output basename [mencodedvcd]"
 echo ""
 echo "In case you want to use -a/-v please read:"
 echo "http://www.mplayerhq.hu/DOCS/HTML/en/menc-feat-vcd-dvd.html"
@@ -83,7 +83,7 @@ function test_sugested()
 for i in vcdimager cdrecord; do
 	if [ -z "`which $i`" ]; then
 		echo "[WARNING] $i not found in $PATH!"
-		echo "youre likely to need it after we finish"
+		echo "You'll likely need it after we finish."
 		exit 1
 	fi
 done
@@ -94,7 +94,7 @@ test_sugested
 
 if [ $# -lt 1 ]; then
 	echo ""
-	echo "[ERROR] Input filename parameter is mandatory"
+	echo "[ERROR] Input filename parameter is mandatory."
 	echo ""
 	usage
 	exit 1
@@ -155,7 +155,7 @@ while [ "$1"x != "x" ]; do
 done
 
 echo ""
-echo "[STATUS] Will re-encode using the following params:"
+echo "[STATUS] Will re-encode using the following parameters:"
 echo ""
 for i in $OPTIONS ; do
 	echo "$i ${!i}";
@@ -167,20 +167,20 @@ done
 
 if [ $TARGET = "svcd" ]; then
 	if [ $ABPS -gt 384 ]; then
-		echo "[ERROR] SVCD max abitrate is 384kbps"
+		echo "[ERROR] SVCD maximum abitrate is 384kbps."
 		exit 1
 	fi
 	if [ $VBPS -gt 2600 ]; then
-		echo "[ERROR] SVCD max vbitrate is 2600kbps"
+		echo "[ERROR] SVCD maximum vbitrate is 2600kbps."
 		exit 1
 	fi
 else [ $TARGET = "vcd" ]
 	if [ $ABPS -eq 224 ]; then
-		echo "[ERROR] VCD abitrate must be 224kbps"
+		echo "[ERROR] VCD abitrate must be 224kbps."
 		exit 1
 	fi
 	if [ $VBPS -gt 1150 ]; then
-		echo "[ERROR] VCD max vbitrate is 1150kbps"
+		echo "[ERROR] VCD maximum vbitrate is 1150kbps."
 		exit 1
 	fi
 fi
@@ -240,9 +240,9 @@ if [ $SPLIT == "0" ]; then
 else
 	if [ -e $EDLFILENAME ]; then
 		echo "[ERROR]"
-		echo "-d option needs to generate a temporary file called"
-		echo "$EDLFILENAME you already have one on this dir, please"
-		echo "remove/rename it and run $MYNAME again."
+		echo "The -d option needs to generate a temporary file called"
+		echo "$EDLFILENAME. You already have one in this directory,"
+		echo "please remove/rename it and run $MYNAME again."
 		echo ""
 		exit 1
 	else
@@ -281,11 +281,11 @@ for j in $(seq 0 $CICLES); do
 
 mencoder -ovc lavc -oac lavc -vf expand=:::::$RATIOX/$RATIOY:1,scale=$SCALEX:$SCALEY,harddup -srate 44100 -af lavcresample=44100 -lavcopts acodec=mp2:abitrate=$ABPS:vcodec=$VCODEC:vbitrate=$VBPS:keyint=$KEYINT:mbd=$ENCQ:vrc_buf_size=$VRCBUFSIZE:vrc_maxrate=$VRCMAXRATE:vrc_minrate=$VRCMINRATE:aspect=$RATIOX/$RATIOY -of mpeg -mpegopts format=$FORMAT$TELECINE -sub $SUBTITLESTRING -subpos $TOLERANCE -subwidth $TOLERANCE -ofps $OFPS $TIMESTRING -o $NEWNAME $INPUTFILENAME
 
-echo "Encoding of $NEWNAME Finished"
-echo "Run vcdimager -t svcd/vcd $NEWNAME and burn with cdrecord"
+echo "Encoding of $NEWNAME finished."
+echo "Run vcdimager -t svcd/vcd $NEWNAME and burn with cdrecord."
 
 done
 
 echo "$(($CICLES+1)) VCD/SVCD file(s) created!!!"
-echo "Happy to be of some help ;-) have fun"
+echo "Happy to be of some help ;-) have fun."
 exit 0

@@ -190,15 +190,15 @@ qepdvcd.sh
 
 Author:       Reynaldo H. Verdejo Pinochet
 
-Description:  anything supported to vcd/svcd pal/ntsc converter 
+Description:  anything supported to VCD/SVCD PAL/NTSC converter
 
 Usage:        qepdvcd.sh file <options>
-              run with no args to see the list of options
+              Run with no arguments to see the list of options.
 
-Note:         you will need vcdimager/cdrecord to master/burn the resulting
-              files
-			  
-			  
+Note:         You will need vcdimager/cdrecord to master/burn the resulting
+              files.
+
+
 Tech scripts in the TOOLS dir
 -----------------------------
 
