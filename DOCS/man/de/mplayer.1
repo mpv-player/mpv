@@ -1618,6 +1618,10 @@ VOBsub-Untertitel lädt.
 Deaktiviert das automatische Laden von Untertiteln.
 .
 .TP
+.B \-osd-duration <Zeit> (nur bei MPlayer)
+Setzt die Anzeigedauer der OSD-Meldungen in ms (Standard: 1000).
+.
+.TP
 .B \-osdlevel <0\-3> (nur bei MPlayer)
 Gibt den Modus an, in dem das OSD startet:
 .PD 0
@@ -1890,6 +1894,18 @@ Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
 Gibt die maximale Breite der Untertitel an.
 Nützlich für Ausgabe auf dem Fernseher.
 Der Wert ist die Breite in %  der Bildschirmbreite.
+.
+.TP
+.B \-noterm-osd
+Deaktiviert die Anzeige der OSD-Meldungen auf der Konsole bei nichtverfügbarer
+Videoausgabe.
+.
+.TP
+.B \-term-osd-esc
+Gibt die Escapesequenz an, mit der OSD-Meldungen auf der Konsole eingeleitet
+werden.
+Sie sollte den Cursor zum Anfang der Zeile bewegen und die Zeile
+löschen (Standard: ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
@@ -3750,6 +3766,8 @@ Spielt keinen Sound ab bzw.\& encodiert keinen Sound.
 .TP
 .B \-novideo
 Spielt kein Video ab bzw.\& encodiert kein Video.
+In vielen Fällen funktioniert dies nicht, benutze stattdessen \-vc null
+und \-vo null.
 .
 .TP
 .B \-oldpp <Qualität> (nur bei OpenDivX) (OBSOLET)
