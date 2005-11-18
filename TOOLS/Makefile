@@ -7,16 +7,18 @@ OBJS = alaw-gen \
 	avi-fix \
 	avisubdump \
 	bios2dump \
-	cpuinfo \
 	dump_mp4 \
 	mem2dump \
 	movinfo \
 	png2raw \
 	subrip \
-	fastmemcpybench \
 	vivodump \
 	302m_convert \
 	360m_convert \
+
+ifeq ($(TARGET_ARCH_X86),yes)
+OBJS += cpuinfo fastmemcpybench
+endif
 
 all: $(OBJS)
 
