@@ -1,5 +1,5 @@
 ========================================
-NUT Open Container Format DRAFT 20050909
+NUT Open Container Format DRAFT 20051118
 ========================================
 
 
@@ -654,8 +654,9 @@ search at a particular offset when any startcode is found (including syncpoint)
 Semantic requirements:
 ======================
 
-If more than one stream of a given stream class is present, each one MUST
+If more than one stream of a given stream class is present, each one SHOULD
 have info tags specifying disposition, and if applicable, language.
+It often highly improves usability and is therefore strongly encouraged.
 
 A demuxer MUST NOT demux a stream which contains more than one stream, or which
 is wrapped in a structure to facilitate more than one stream or otherwise
