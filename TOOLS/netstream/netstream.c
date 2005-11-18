@@ -396,7 +396,7 @@ int mp_input_check_interrupt(int time){
 }
 
 // for libmpdvdkit2:
-#include "../get_path.c"
+#include "get_path.c"
 
 int verbose=0;
 

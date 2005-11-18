@@ -2,7 +2,7 @@
 // simple tool to fix chunk sizes in a RIFF AVI file
 // it doesn't check/fix index, use mencoder -forceidx -oac copy -ovc copy to fix index!
 
-#include "../config.h"
+#include "config.h"
 #ifdef MP_DEBUG
 #define mp_debug(...) printf(__VA_ARGS__)
 #else

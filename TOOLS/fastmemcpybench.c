@@ -17,14 +17,14 @@
 #include <sys/time.h>
 #include <inttypes.h>
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 //#define ARR_SIZE 100000
 #define ARR_SIZE (1024*768*2)
 
 #ifdef HAVE_MGA
 
-#include "../drivers/mga_vid.h"
+#include "drivers/mga_vid.h"
 
 static int mga_next_frame=0;
 
