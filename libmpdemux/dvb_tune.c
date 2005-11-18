@@ -53,7 +53,7 @@
 #endif
 
 #include "dvbin.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 
 

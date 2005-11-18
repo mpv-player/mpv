@@ -9,8 +9,8 @@
 #include <assert.h>
 #include <math.h>
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
@@ -161,8 +161,8 @@ extern int demux_aid_vid_mismatch;
 //-------- subtitle support - should be moved to decoder layer, and queue
 //                          - subtitles up in demuxer buffer...
 
-#include "../subreader.h"
-#include "../libvo/sub.h"
+#include "subreader.h"
+#include "libvo/sub.h"
 #define OGG_SUB_MAX_LINE 128
 
 static subtitle ogg_sub;

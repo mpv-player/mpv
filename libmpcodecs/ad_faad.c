@@ -27,7 +27,7 @@ LIBAD_EXTERN(faad)
 #ifndef USE_INTERNAL_FAAD
 #include <faad.h>
 #else
-#include "../libfaad2/faad.h"
+#include "libfaad2/faad.h"
 #endif
 
 /* configure maximum supported channels, *

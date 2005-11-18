@@ -41,10 +41,10 @@
 #endif
 
 #include "mp_msg.h"
-#include "../libaf/af_format.h"
-#include "../libvo/img_format.h"
-#include "../libvo/fastmemcpy.h"
-#include "../libvo/videodev_mjpeg.h"
+#include "libaf/af_format.h"
+#include "libvo/img_format.h"
+#include "libvo/fastmemcpy.h"
+#include "libvo/videodev_mjpeg.h"
 
 #include "tv.h"
 

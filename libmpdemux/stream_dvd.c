@@ -22,8 +22,8 @@
 #define FIRST_PCM_AID 160
 
 #include "stream.h"
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "m_option.h"
+#include "m_struct.h"
 
 /// We keep these 2 for the gui atm, but they will be removed.
 int dvd_title=0;

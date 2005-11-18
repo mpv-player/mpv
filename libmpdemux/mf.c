@@ -14,7 +14,7 @@
 #ifdef HAVE_GLOB
 #include <glob.h>
 #else
-#include "../osdep/glob.h"
+#include "osdep/glob.h"
 #endif
 
 #include "mp_msg.h"

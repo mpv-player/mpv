@@ -4,16 +4,16 @@
 #include <limits.h>
 #include <math.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
-#include "../bswap.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
+#include "bswap.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 vf_info_t vf_info_divtc;
 

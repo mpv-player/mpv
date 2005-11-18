@@ -17,10 +17,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../osdep/timer.h"
+#include "osdep/timer.h"
 #ifndef WIN32
 #include <sys/wait.h>
-#include "../osdep/shmem.h"
+#include "osdep/shmem.h"
 #else
 #include <windows.h>
 static DWORD WINAPI ThreadProc(void* s);

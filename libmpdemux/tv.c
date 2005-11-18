@@ -29,9 +29,9 @@ int tv_param_on = 0;
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "../libaf/af_format.h"
-#include "../libvo/img_format.h"
-#include "../libvo/fastmemcpy.h"
+#include "libaf/af_format.h"
+#include "libvo/img_format.h"
+#include "libvo/fastmemcpy.h"
 
 #include "tv.h"
 

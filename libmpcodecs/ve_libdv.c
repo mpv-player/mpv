@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #ifdef HAVE_LIBDV095
 

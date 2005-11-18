@@ -7,14 +7,14 @@
 #include <unistd.h>
 #include <string.h>
 #include "mp_msg.h"
-#include "../osdep/timer.h"
-#include "../input/input.h"
+#include "osdep/timer.h"
+#include "input/input.h"
 #include "stream.h"
 #include "dvdnav_stream.h"
-#include "../libvo/video_out.h"
-#include "../spudec.h"
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "libvo/video_out.h"
+#include "spudec.h"
+#include "m_option.h"
+#include "m_struct.h"
 
 static struct stream_priv_s {
   int track;

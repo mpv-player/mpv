@@ -20,14 +20,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 struct vf_priv_s {
 	int mode;

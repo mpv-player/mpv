@@ -11,15 +11,15 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "../m_config.h"
+#include "m_config.h"
 
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 #include "mf.h"
 
-#include "../libaf/af_format.h"
-#include "../libvo/fastmemcpy.h"
+#include "libaf/af_format.h"
+#include "libvo/fastmemcpy.h"
 
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 

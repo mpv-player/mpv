@@ -156,7 +156,7 @@ typedef struct {
 /*************************************************/
 /*** Definitions about TwinVQ bitstream header ***/
 /*************************************************/
-//#include "../declib_src/tvq_hdr.h"
+//#include "declib_src/tvq_hdr.h"
 //#ifndef	BUFSIZ
 //#define	BUFSIZ		1024
 //#endif

@@ -48,7 +48,7 @@
 #endif
 
 #include "cdd.h"
-#include "../version.h"
+#include "version.h"
 #include "stream.h"
 #include "network.h"
 

@@ -4,8 +4,8 @@
 #include <sys/types.h>
 #include <inttypes.h>
 #include "config.h"
-#include "../version.h"
-#include "../mp_msg.h"
+#include "version.h"
+#include "mp_msg.h"
 
 #include "bswap.h"
 #include "aviheader.h"
@@ -15,7 +15,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "../m_option.h"
+#include "m_option.h"
 #include "avformat.h"
 
 extern unsigned int codec_get_wav_tag(int id);

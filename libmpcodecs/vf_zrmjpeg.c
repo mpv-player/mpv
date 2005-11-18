@@ -14,23 +14,23 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
 #ifdef USE_FASTMEMCPY
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 #endif
 
 /* We need this #define because we need ../libavcodec/common.h to #define 
  * be2me_32, otherwise the linker will complain that it doesn't exist */
 #define HAVE_AV_CONFIG_H
-#include "../libavcodec/avcodec.h"
-#include "../libavcodec/dsputil.h"
-#include "../libavcodec/mpegvideo.h"
+#include "libavcodec/avcodec.h"
+#include "libavcodec/dsputil.h"
+#include "libavcodec/mpegvideo.h"
 
 #undef malloc
 #undef free

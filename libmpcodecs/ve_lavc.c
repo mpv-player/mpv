@@ -8,12 +8,12 @@
 #define INFINITY HUGE_VAL
 #endif
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef USE_LIBAVCODEC
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "codec-cfg.h"
 #include "stream.h"

@@ -18,7 +18,7 @@ static ad_info_t info =
 
 LIBAD_EXTERN(mp3lib)
 
-#include "../mp3lib/mp3.h"
+#include "mp3lib/mp3.h"
 
 extern int fakemono;
 

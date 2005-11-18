@@ -3,16 +3,16 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
-#include "../postproc/rgb2rgb.h"
+#include "libvo/fastmemcpy.h"
+#include "postproc/rgb2rgb.h"
 
 struct vf_priv_s {
 	int field;

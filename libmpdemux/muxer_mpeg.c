@@ -5,8 +5,8 @@
 #include <sys/types.h>
 
 #include "config.h"
-#include "../version.h"
-#include "../mp_msg.h"
+#include "version.h"
+#include "mp_msg.h"
 
 #include "bswap.h"
 
@@ -17,7 +17,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "../m_option.h"
+#include "m_option.h"
 #include "mpeg_hdr.h"
 
 #define PACK_HEADER_START_CODE 0x01ba

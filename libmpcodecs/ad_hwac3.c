@@ -18,7 +18,7 @@
 
 #include "ad_internal.h"
 
-#include "../liba52/a52.h"
+#include "liba52/a52.h"
 
 
 static int isdts = -1;

@@ -4,18 +4,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 #ifdef OSD_SUPPORT
-#include "../libvo/sub.h"
-#include "../libvo/osd.h"
+#include "libvo/sub.h"
+#include "libvo/osd.h"
 #endif
 
 #include "m_option.h"

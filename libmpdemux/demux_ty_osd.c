@@ -22,9 +22,9 @@
 //#include "parse_es.h"
 //#include "stheader.h"
 //#include "mp3_hdr.h"
-//#include "../subreader.h"
-#include "../sub_cc.h"
-#include "../libvo/sub.h"
+//#include "subreader.h"
+#include "sub_cc.h"
+#include "libvo/sub.h"
 
 //#include "dvdauth.h"
 

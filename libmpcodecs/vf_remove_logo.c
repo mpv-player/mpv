@@ -90,9 +90,9 @@ __________________________________________________________________________
 #include <ctype.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../libvo/fastmemcpy.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "libvo/fastmemcpy.h"
 
 #include "img_format.h"
 #include "mp_image.h"

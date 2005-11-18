@@ -66,13 +66,13 @@
 #include "mp_image.h"
 #include "vf.h"
 #include "img_format.h"
-#include "../config.h"
+#include "config.h"
 
 #ifndef HAVE_NO_POSIX_SELECT
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 #define IS_RAWIMG	0x100
 #define IS_IMG		0x200

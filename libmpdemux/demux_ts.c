@@ -35,7 +35,7 @@
 #include "stheader.h"
 
 #include "bswap.h"
-#include "../unrarlib.h"
+#include "unrarlib.h"
 #include "ms_hdr.h"
 #include "mpeg_hdr.h"
 

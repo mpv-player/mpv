@@ -15,7 +15,7 @@
 #include "mp_msg.h"
 #include "bswap.h"
 
-#include "../../libvo/fastmemcpy.h"
+#include "../libvo/fastmemcpy.h"
 
 #include "libmpdemux/nuppelvideo.h" 
 #include "RTjpegN.h"

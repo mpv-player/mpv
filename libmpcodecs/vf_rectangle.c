@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mp_image.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 struct vf_priv_s {
     int x, y, w, h;

@@ -12,7 +12,7 @@
 #include "asf.h"
 #include "demuxer.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 /*
  * Load 16/32-bit values in little endian byte order

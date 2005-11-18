@@ -4,16 +4,16 @@
 #include <signal.h>
 #include <sys/time.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "cmmx.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 #define NUM_STORED 4
 

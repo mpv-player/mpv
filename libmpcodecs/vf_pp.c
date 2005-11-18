@@ -4,9 +4,9 @@
 #include <inttypes.h>
 #include <errno.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -20,10 +20,10 @@
 
 #define EMU_OLD
 
-#include "../libavcodec/libpostproc/postprocess.h"
+#include "libavcodec/libpostproc/postprocess.h"
 
 #ifdef EMU_OLD
-#include "../libavcodec/libpostproc/postprocess_internal.h"
+#include "libavcodec/libpostproc/postprocess_internal.h"
 #endif
 
 struct vf_priv_s {

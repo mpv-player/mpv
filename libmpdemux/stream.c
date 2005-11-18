@@ -23,13 +23,13 @@
 
 #include "mp_msg.h"
 #include "help_mp.h"
-#include "../osdep/shmem.h"
+#include "osdep/shmem.h"
 
 #include "stream.h"
 #include "demuxer.h"
 
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "m_option.h"
+#include "m_struct.h"
 
 
 extern int verbose; // defined in mplayer.c

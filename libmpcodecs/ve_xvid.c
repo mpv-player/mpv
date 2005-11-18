@@ -9,8 +9,8 @@
 #define INFINITY HUGE_VAL
 #endif
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #ifdef HAVE_XVID3
 

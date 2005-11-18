@@ -3,17 +3,17 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/video_out.h"
-#include "../libvo/fastmemcpy.h"
-#include "../postproc/rgb2rgb.h"
+#include "libvo/video_out.h"
+#include "libvo/fastmemcpy.h"
+#include "postproc/rgb2rgb.h"
 
 #include "m_option.h"
 #include "m_struct.h"

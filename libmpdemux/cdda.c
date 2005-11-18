@@ -3,9 +3,9 @@
 #ifdef HAVE_CDDA
 
 #include "stream.h"
-#include "../m_option.h"
-#include "../m_struct.h"
-#include "../bswap.h"
+#include "m_option.h"
+#include "m_struct.h"
+#include "bswap.h"
 
 #include <stdio.h>
 #include <stdlib.h>

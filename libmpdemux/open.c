@@ -15,7 +15,7 @@
 #include <sys/cdrio.h>
 #endif
 
-#include "../m_option.h"
+#include "m_option.h"
 #include "stream.h"
 #include "demuxer.h"
 #include "mf.h"

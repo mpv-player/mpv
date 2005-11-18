@@ -20,8 +20,8 @@
 #include "matroska.h"
 #include "bswap.h"
 
-#include "../subreader.h"
-#include "../libvo/sub.h"
+#include "subreader.h"
+#include "libvo/sub.h"
 
 #ifdef USE_QTX_CODECS
 #include "qtx/qtxsdk/components.h"
@@ -34,7 +34,7 @@
 #ifdef USE_LIBLZO
 #include <lzo1x.h>
 #else
-#include "../libmpcodecs/native/minilzo.h"
+#include "libmpcodecs/native/minilzo.h"
 #endif
 
 #if !defined(MIN)

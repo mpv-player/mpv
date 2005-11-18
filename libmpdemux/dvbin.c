@@ -44,8 +44,8 @@ Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stream.h"
 #include "demuxer.h"
 #include "help_mp.h"
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "m_option.h"
+#include "m_struct.h"
 
 #include "dvbin.h"
 

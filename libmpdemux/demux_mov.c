@@ -40,7 +40,7 @@
 #include <QuickTime/ImageCompression.h>
 #include <QuickTime/ImageCodec.h>
 #else
-#include "../loader/qtx/qtxsdk/components.h"
+#include "loader/qtx/qtxsdk/components.h"
 #endif
 
 #ifdef HAVE_ZLIB

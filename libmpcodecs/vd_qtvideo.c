@@ -23,7 +23,7 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(qtvideo)
 
-#include "../bswap.h"
+#include "bswap.h"
 
 #ifdef MACOSX
 #include <QuickTime/ImageCodec.h>

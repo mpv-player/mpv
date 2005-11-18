@@ -43,7 +43,7 @@
 #include "demuxer.h"
 #include "parse_es.h"
 #include "stheader.h"
-#include "../sub_cc.h"
+#include "sub_cc.h"
 
 extern void skip_audio_frame( sh_audio_t *sh_audio );
 extern int sub_justify;

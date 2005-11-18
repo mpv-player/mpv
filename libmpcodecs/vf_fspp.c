@@ -36,19 +36,19 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef USE_LIBAVCODEC
 
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
 #include <ffmpeg/dsputil.h>
 #else
-#include "../libavcodec/avcodec.h"
-#include "../libavcodec/dsputil.h"
+#include "libavcodec/avcodec.h"
+#include "libavcodec/dsputil.h"
 #endif
 
 #ifdef HAVE_MALLOC_H
@@ -58,7 +58,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 //===========================================================================//
 #define BLOCKSZ 12
@@ -690,7 +690,7 @@ vf_info_t vf_info_fspp = {
 //Specific spp's dct, idct and threshold functions
 //I'd prefer to have them in the separate file.
 
-#include "../mangle.h"
+#include "mangle.h"
 //#define MANGLE(a) #a
 
 //typedef int16_t DCTELEM; //! only int16_t

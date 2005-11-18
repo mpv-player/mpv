@@ -6,7 +6,7 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "../version.h"
+#include "version.h"
 
 //#include "stream.h"
 //#include "demuxer.h"

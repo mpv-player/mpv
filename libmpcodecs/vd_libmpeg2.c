@@ -27,7 +27,7 @@ LIBVD_EXTERN(libmpeg2)
 #include "libmpeg2/attributes.h"
 #include "libmpeg2/mpeg2_internal.h"
 
-#include "../cpudetect.h"
+#include "cpudetect.h"
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){

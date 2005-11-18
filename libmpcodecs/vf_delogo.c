@@ -24,9 +24,9 @@
 #include <inttypes.h>
 #include <math.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -35,7 +35,7 @@
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 #include "m_option.h"
 #include "m_struct.h"

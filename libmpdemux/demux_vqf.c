@@ -7,7 +7,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
-#include "../libmpcodecs/vqf.h"
+#include "libmpcodecs/vqf.h"
 
 static int demux_probe_vqf(demuxer_t* demuxer) 
 {

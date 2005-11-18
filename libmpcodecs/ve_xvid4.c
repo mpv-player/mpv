@@ -33,8 +33,8 @@
 #include <limits.h>
 #include <time.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #ifdef HAVE_XVID4
 

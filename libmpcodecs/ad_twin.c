@@ -7,9 +7,9 @@
 
 #include "ad_internal.h"
 #include "vqf.h"
-#include "../../loader/ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 #include "wine/windef.h"
-#include "../libaf/af_format.h"
+#include "libaf/af_format.h"
 
 #include "help_mp.h"
 

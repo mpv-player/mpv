@@ -3,14 +3,14 @@
 #include <string.h>
 #include <limits.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 enum mode { PROGRESSIVE, TOP_FIRST, BOTTOM_FIRST,
 	    TOP_FIRST_ANALYZE, BOTTOM_FIRST_ANALYZE,

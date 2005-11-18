@@ -42,9 +42,9 @@ known issues:
 #endif
 #include <linux/types.h>
 #include <linux/videodev2.h>
-#include "../mp_msg.h"
-#include "../libvo/img_format.h"
-#include "../libaf/af_format.h"
+#include "mp_msg.h"
+#include "libvo/img_format.h"
+#include "libaf/af_format.h"
 #include "tv.h"
 #include "audio_in.h"
 

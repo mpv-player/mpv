@@ -25,14 +25,14 @@
 
 #include "stream.h"
 #include "demuxer.h"
-#include "../m_config.h"
+#include "m_config.h"
 
 #include "network.h"
 #include "http.h"
 #include "cookies.h"
 #include "url.h"
 
-#include "../version.h"
+#include "version.h"
 
 extern int verbose;
 extern int stream_cache_size;

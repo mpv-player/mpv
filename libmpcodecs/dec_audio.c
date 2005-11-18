@@ -14,9 +14,9 @@
 
 #include "dec_audio.h"
 #include "ad.h"
-#include "../libaf/af_format.h"
+#include "libaf/af_format.h"
 
-#include "../libaf/af.h"
+#include "libaf/af.h"
 
 #ifdef DYNAMIC_PLUGINS
 #include <dlfcn.h>

@@ -3,8 +3,8 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 //#ifdef USE_LIBFAME
 
@@ -15,7 +15,7 @@
 #include "mp_image.h"
 #include "vf.h"
 
-//#include "../libvo/fastmemcpy.h"
+//#include "libvo/fastmemcpy.h"
 #include <fame.h>
 
 struct vf_priv_s {

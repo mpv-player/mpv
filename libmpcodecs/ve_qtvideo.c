@@ -8,16 +8,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../bswap.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "bswap.h"
 
 #ifdef WIN32_LOADER 
 #include "ldt_keeper.h" 
 #endif 
 
 #ifdef USE_QTX_CODECS
-#include "../loader/qtx/qtxsdk/components.h"
+#include "loader/qtx/qtxsdk/components.h"
 #include "wine/windef.h"
 
 #include "codec-cfg.h"

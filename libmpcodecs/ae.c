@@ -9,7 +9,7 @@
 #include "ms_hdr.h"
 #include "muxer.h"
 #include "ae.h"
-#include "../config.h"
+#include "config.h"
 
 #include "ae_pcm.h"
 

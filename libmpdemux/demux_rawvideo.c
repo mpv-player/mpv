@@ -6,13 +6,13 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../m_option.h"
+#include "m_option.h"
 
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
 
-#include "../libmpcodecs/img_format.h"
+#include "libmpcodecs/img_format.h"
 
 extern int demuxer_type;
 static int format = IMGFMT_I420;

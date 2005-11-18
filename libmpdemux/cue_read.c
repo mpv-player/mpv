@@ -17,8 +17,8 @@
 
 #include "cue_read.h"
 #include "help_mp.h"
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "m_option.h"
+#include "m_struct.h"
 
 #define byte    unsigned char
 #define SIZERAW 2352

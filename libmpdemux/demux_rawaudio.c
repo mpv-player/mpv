@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 
-#include "../m_option.h"
+#include "m_option.h"
 
 #include "stream.h"
 #include "demuxer.h"

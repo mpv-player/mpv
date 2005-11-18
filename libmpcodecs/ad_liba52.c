@@ -14,10 +14,10 @@
 
 #include "cpudetect.h"
 
-#include "../libaf/af_format.h"
+#include "libaf/af_format.h"
 
-#include "../liba52/a52.h"
-#include "../liba52/mm_accel.h"
+#include "liba52/a52.h"
+#include "liba52/mm_accel.h"
 
 static sample_t * a52_samples;
 static a52_state_t a52_state;

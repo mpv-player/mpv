@@ -22,12 +22,12 @@
 #include <math.h>
 #include <inttypes.h>
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef USE_LIBAVCODEC
 
-#include "../mp_msg.h"
-#include "../cpudetect.h"
+#include "mp_msg.h"
+#include "cpudetect.h"
 
 #if 1
 double ff_eval(char *s, double *const_value, const char **const_name,
@@ -44,9 +44,9 @@ double ff_eval(char *s, double *const_value, const char **const_name,
 #include <ffmpeg/dsputil.h>
 #include <ffmpeg/common.h>
 #else
-#include "../libavcodec/avcodec.h"
-#include "../libavcodec/dsputil.h"
-#include "../libavutil/common.h"
+#include "libavcodec/avcodec.h"
+#include "libavcodec/dsputil.h"
+#include "libavutil/common.h"
 #endif
 
 /* FIXME: common.h defines printf away when HAVE_AV_CONFIG
@@ -61,7 +61,7 @@ double ff_eval(char *s, double *const_value, const char **const_name,
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 
 struct vf_priv_s {

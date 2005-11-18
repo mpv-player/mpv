@@ -5,14 +5,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include "m_option.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 #include "muxer.h"
 #include "ae_lavc.h"
 #include "help_mp.h"
-#include "../config.h"
-#include "../libaf/af_format.h"
+#include "config.h"
+#include "libaf/af_format.h"
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
 #else

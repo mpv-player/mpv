@@ -4,9 +4,9 @@
 extern int tv_param_on;
 
 #ifdef USE_TV
-//#include "../libao2/afmt.h"
-//#include "../libvo/img_format.h"
-//#include "../libvo/fastmemcpy.h"
+//#include "libao2/afmt.h"
+//#include "libvo/img_format.h"
+//#include "libvo/fastmemcpy.h"
 //#include "mp_msg.h"
 
 extern char *tv_param_freq;

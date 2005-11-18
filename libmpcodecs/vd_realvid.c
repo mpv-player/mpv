@@ -151,7 +151,7 @@ static int load_syms_linux(char *path) {
 #ifdef USE_WIN32DLL
 
 #ifdef WIN32_LOADER
-#include "../loader/ldt_keeper.h"
+#include "loader/ldt_keeper.h"
 #endif
 void* WINAPI LoadLibraryA(char* name);
 void* WINAPI GetProcAddress(void* handle,char* func);

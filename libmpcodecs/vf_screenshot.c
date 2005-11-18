@@ -1,4 +1,4 @@
-#include "../config.h"
+#include "config.h"
 #ifdef HAVE_PNG
 
 #include <stdio.h>
@@ -15,16 +15,16 @@
 
 #include <png.h>
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "vf_scale.h"
 
-#include "../libvo/fastmemcpy.h"
-#include "../postproc/swscale.h"
-#include "../postproc/rgb2rgb.h"
+#include "libvo/fastmemcpy.h"
+#include "postproc/swscale.h"
+#include "postproc/rgb2rgb.h"
 
 struct vf_priv_s {
     int frameno;

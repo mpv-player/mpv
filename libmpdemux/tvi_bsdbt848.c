@@ -64,8 +64,8 @@
 #endif
 #endif
 
-#include "../libaf/af_format.h"
-#include "../libvo/img_format.h"
+#include "libaf/af_format.h"
+#include "libvo/img_format.h"
 #include "tv.h"
 
 /* information about this file */

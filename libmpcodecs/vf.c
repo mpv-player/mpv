@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -11,17 +11,17 @@
 #include <assert.h>
 #endif
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
-#include "../m_option.h"
-#include "../m_struct.h"
+#include "mp_msg.h"
+#include "help_mp.h"
+#include "m_option.h"
+#include "m_struct.h"
 
 
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 extern vf_info_t vf_info_vo;
 extern vf_info_t vf_info_rectangle;

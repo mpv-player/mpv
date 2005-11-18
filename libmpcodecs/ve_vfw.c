@@ -4,10 +4,10 @@
 #include <unistd.h>
 #include <inttypes.h>
 
-#include "../config.h"
+#include "config.h"
 #ifdef USE_WIN32DLL
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 #include "codec-cfg.h"
 //#include "stream.h"

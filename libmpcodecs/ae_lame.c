@@ -5,14 +5,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include "m_option.h"
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #include "aviheader.h"
 #include "ms_hdr.h"
 #include "muxer.h"
-#include "../help_mp.h"
+#include "help_mp.h"
 #include "ae_pcm.h"
-#include "../libaf/af_format.h"
-#include "../libmpdemux/mp3_hdr.h"
+#include "libaf/af_format.h"
+#include "libmpdemux/mp3_hdr.h"
 
 #undef CDECL
 #include <lame/lame.h>
