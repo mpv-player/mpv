@@ -1,6 +1,9 @@
-include ../../config.mak
 
-LDLIBS=-lm ../../osdep/timer-lx.o $(shell freetype-config --libs)
+MPROOT=../..
+
+include $(MPROOT)/config.mak
+
+LDLIBS=-lm $(MPROOT)/osdep/timer-lx.o $(shell freetype-config --libs)
 CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags)
 
 #CFLAGS+=-O0			# for RedHat's gcc-2.96-95
@@ -12,10 +15,11 @@ CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags)
 
 subfont:	subfont.o
 
-subfont.o:	subfont.c Makefile ../../bswap.h
+subfont.o:	subfont.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-subfont.S:	subfont.c Makefile ../../bswap.h
+subfont.S:	subfont.c
 	$(CC) $(CFLAGS) -S $< -o $@
 
 clean:
-	rm -f subfont subfont.o core
+	rm -f subfont subfont.o subfont.S core
