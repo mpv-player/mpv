@@ -4,7 +4,7 @@ MPROOT=../..
 include $(MPROOT)/config.mak
 
 LDLIBS=-lm $(MPROOT)/osdep/timer-lx.o $(shell freetype-config --libs)
-CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags)
+CFLAGS=$(OPTFLAGS) $(shell freetype-config --cflags) -I$(MPROOT)
 
 #CFLAGS+=-O0			# for RedHat's gcc-2.96-95
 #CFLAGS+=-DOLD_FREETYPE2	# for FreeType 2.0.1
