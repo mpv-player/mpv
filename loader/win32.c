@@ -189,7 +189,7 @@ static void longcount_stub(long long* z)
 }
 
 #ifdef MPLAYER
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #endif
 int LOADER_DEBUG=1; // active only if compiled with -DDETAILED_OUT
 //#define DETAILED_OUT
@@ -959,7 +959,7 @@ static void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 #ifdef MPLAYER
     /* mplayer's way to detect PF's */
     {
-#include "../cpudetect.h"
+#include "cpudetect.h"
 	extern CpuCaps gCpuCaps;
 
 	if (gCpuCaps.hasMMX)
