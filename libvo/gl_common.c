@@ -249,9 +249,13 @@ static void *setNull(const GLubyte *s) {
 /**
  * \brief find the function pointers of some useful OpenGL extensions
  * \param getProcAddress function to resolve function names, may be NULL
+ * \param ext2 an extra extension string
  */
-static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
+static void getFunctions(void *(*getProcAddress)(const GLubyte *),
+                         const char *ext2) {
   const char *extensions = glGetString(GL_EXTENSIONS);
+  if (!extensions) extensions = "";
+  if (!ext2) ext2 = "";
   if (!getProcAddress)
     getProcAddress = setNull;
   GenBuffers = getProcAddress("glGenBuffers");
@@ -324,7 +328,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *)) {
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fARB");
   if (!ProgramEnvParameter4f)
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fNV");
-  if (!extensions || !strstr(extensions, "_swap_control"))
+  if (!strstr(extensions, "_swap_control") && !strstr(ext2, "_swap_control"))
     SwapInterval = NULL;
   else {
   SwapInterval = getProcAddress("glXSwapInterval");
@@ -1003,7 +1007,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
       wglDeleteContext(*context);
     *context = new_context;
     *vinfo = new_vinfo;
-    getFunctions(w32gpa);
+    getFunctions(w32gpa, NULL);
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;
@@ -1117,6 +1121,7 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
   }
   if (!keep_context) {
     void *(*getProcAddress)(const GLubyte *);
+    const char *(*glXExtStr)(Display *, int);
     if (*context)
       glXDestroyContext(mDisplay, *context);
     *context = new_context;
@@ -1128,7 +1133,9 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
       getProcAddress = getdladdr("glXGetProcAddressARB");
     if (!getProcAddress)
       getProcAddress = getdladdr;
-    getFunctions(getProcAddress);
+    glXExtStr = getdladdr("glXQueryExtensionsString");
+    getFunctions(getProcAddress, !glXExtStr ? NULL :
+                 glXExtStr(mDisplay, DefaultScreen(mDisplay)));
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;
