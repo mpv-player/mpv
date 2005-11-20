@@ -225,6 +225,7 @@ int enqueue=0;
 #endif
 
 #define MAX_OSD_LEVEL 3
+#define MAX_TERM_OSD_LEVEL 1
 
 int osd_level=1;
 int osd_level_saved=-1;
@@ -1149,6 +1150,14 @@ static mp_osd_msg_t* get_osd_msg(void) {
     // Nothing found
     return NULL;
 }
+
+// Make a define to test if we are using the term osd without having
+// to #ifdef USE_OSD all the time.
+#ifdef USE_OSD
+#define use_term_osd (term_osd && !sh_video)
+#else
+#define use_term_osd (term_osd)
+#endif
 
 /**
  * \brief Display the OSD bar.
@@ -2966,11 +2975,7 @@ if(auto_quality>0){
         // small hack to display the pause message in the osd line
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
-#ifdef USE_OSD
-	if(term_osd && !sh_video) {
-#else
-	if(term_osd) {
-#endif
+	if(use_term_osd) {
 	  char msg[128] = MSGTR_Paused;
 	  int mlen = strlen(msg);
 	  msg[mlen-1] = '\0';
@@ -3232,10 +3237,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_OSD :  {
 	int v = cmd->args[0].v.i;
+	int max = use_term_osd ? MAX_TERM_OSD_LEVEL : MAX_OSD_LEVEL;
+	if(osd_level > max) osd_level = max;
 	if(v < 0)
-	  osd_level=(osd_level+1)%(MAX_OSD_LEVEL+1);
+	  osd_level=(osd_level+1)%(max+1);
 	else
-	  osd_level= v > MAX_OSD_LEVEL ? MAX_OSD_LEVEL : v;
+	  osd_level= v > max ? max : v;
 	/* Show OSD state when disabled, but not when an explicit
 	   argument is given to the osd command, i.e. in slave mode. */
 	if (v == -1 && osd_level <= 1)
