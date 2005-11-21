@@ -103,6 +103,7 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc muxer_stream, EXIT\n");
 		return NULL;
 	}
+	muxer->streams[muxer->avih.dwStreams] = stream;
 	stream->b_buffer = (unsigned char *)malloc(2048);
 	if(!stream->b_buffer)
 	{
@@ -230,8 +231,6 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags)
 	muxer_stream_priv_t *spriv = (muxer_stream_priv_t *) stream->priv;
 	AVPacket pkt;
 	
-	stream->size += len;
-	
 	if(len)
 	{
 	av_init_packet(&pkt);
@@ -259,12 +258,6 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags)
 	}
 	}
 	
-	if(stream->h.dwSampleSize) 	// CBR
-		stream->h.dwLength += len / stream->h.dwSampleSize;
-	else				// VBR
-		stream->h.dwLength++;
-	
-	stream->timer = (double) stream->h.dwLength * stream->h.dwScale / stream->h.dwRate;
 	return;
 }
 

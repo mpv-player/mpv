@@ -51,19 +51,6 @@ static void rawaudiofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int f
     // write out the chunk:
     if (s->type==MUXER_TYPE_AUDIO)
         fwrite(s->buffer,len,1,muxer->file);
-
-    // alter counters:
-    if(s->h.dwSampleSize){
-        // CBR
-        s->h.dwLength+=len/s->h.dwSampleSize;
-        if(len%s->h.dwSampleSize)
-            mp_msg(MSGT_MUXER,MSGL_WARN,MSGTR_WarningLenIsntDivisible);
-    } else {
-        // VBR
-        s->h.dwLength++;
-    }
-    s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
-    s->size+=len;
 }
 
 static void rawaudiofile_write_header(muxer_t *muxer){

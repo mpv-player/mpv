@@ -1991,7 +1991,6 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 
 		if(s->buffer[3])
 		{	// Sequence or GOP -- scan for Picture
-			s->gop_start = s->h.dwLength;
 			while (ptr < len-5 && 
 				(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1 || s->buffer[ptr+3] != 0)) 
 				ptr++;
@@ -2454,10 +2453,8 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     priv->vbytes += len;
     
     sz <<= 1;
-    s->h.dwLength++;
-    s->size += len;
-    s->timer = (double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
   } else { // MUXER_TYPE_AUDIO
+  	double fake_timer;
   	spriv->type = 0;
 	stream_format = s->wf->wFormatTag;
 	
@@ -2522,9 +2519,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 		}
 	}
 	
-	parse_audio(s, 0, &nf, &(s->timer));
-	s->h.dwLength += nf;
-	s->size += len;
+	parse_audio(s, 0, &nf, &fake_timer);
 	sz = max(len, 2 * priv->packet_size);
   }
   
@@ -2557,12 +2552,13 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 static void mpegfile_write_index(muxer_t *muxer)
 {
 	int i, nf;
+	double fake_timer;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 
 	for(i = 0; i < muxer->avih.dwStreams; i++)
 	{
 		if(muxer->streams[i]->type == MUXER_TYPE_AUDIO)
-			parse_audio(muxer->streams[i], 1, &nf, &(muxer->streams[i]->timer));
+			parse_audio(muxer->streams[i], 1, &nf, &fake_timer);
 	}
 	while(flush_buffers(muxer, 0) > 0);
 	flush_buffers(muxer, 1);

@@ -57,17 +57,6 @@ static void rawvideofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int f
     if (s->type == MUXER_TYPE_VIDEO)
     write_rawvideo_chunk(muxer->file,len,s->buffer); /* unsigned char */
 
-    // alter counters:
-    if(s->h.dwSampleSize){
-	// CBR
-	s->h.dwLength+=len/s->h.dwSampleSize;
-	if(len%s->h.dwSampleSize) printf("Warning! len isn't divisable by samplesize!\n");
-    } else {
-	// VBR
-	s->h.dwLength++;
-    }
-    s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
-    s->size+=len;
     // if((unsigned int)len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
 
 }

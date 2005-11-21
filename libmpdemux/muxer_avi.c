@@ -241,20 +241,9 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
     // write out the chunk:
     write_avi_chunk(muxer->file,s->ckid,len,s->buffer); /* unsigned char */
 
-    // alter counters:
     if (len > s->h.dwSuggestedBufferSize){
 	s->h.dwSuggestedBufferSize = len;
     }
-    if(s->h.dwSampleSize){
-	// CBR
-	s->h.dwLength+=len/s->h.dwSampleSize;
-	if(len%s->h.dwSampleSize) mp_msg(MSGT_MUXER, MSGL_WARN, "Warning! len isn't divisable by samplesize!\n");
-    } else {
-	// VBR
-	s->h.dwLength++;
-    }
-    s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
-    s->size+=len;
     if((unsigned int)len>s->h.dwSuggestedBufferSize) s->h.dwSuggestedBufferSize=len;
 
     muxer->file_end += 8 + paddedlen;

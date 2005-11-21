@@ -343,6 +343,7 @@ Hess, Andreas <jaska@gmx.net>
 Hickey, Corey <bugfood-ml@fatooh.org>
     * telecine/interlacing HOWTO for the MEncoder documentation
     * advanced audio usage guide for the MPlayer documentation
+    * muxer frame buffer for MEncoder
 
 Hidvégi, Zoltán (Zoli) <mplayer@hzoli.com>
     * filmdint video filter

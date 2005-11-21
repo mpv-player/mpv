@@ -48,3 +48,105 @@ muxer_t *muxer_new_muxer(int type,FILE *f){
     }
     return muxer;
 }
+
+/* buffer frames until we either:
+ * (a) have at least one frame from each stream
+ * (b) run out of memory */
+void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags) {
+    if (s->muxer->muxbuf_skip_buffer) {
+      s->muxer->cont_write_chunk(s, len, flags);
+    }
+    else {
+      int num = s->muxer->muxbuf_num++;
+      muxbuf_t *buf, *tmp;
+      
+      tmp = realloc(s->muxer->muxbuf, (num+1) * sizeof(muxbuf_t));
+      if(!tmp) {
+        mp_msg(MSGT_MUXER, MSGL_FATAL, "Muxer frame buffer cannot reallocate memory!\n");
+        return;
+      }
+      s->muxer->muxbuf = tmp;
+      buf = s->muxer->muxbuf + num;
+      
+      /* buffer this frame */
+      buf->stream = s;
+      buf->timer = s->timer;
+      buf->len = len;
+      buf->flags = flags;
+      buf->buffer = malloc(len * sizeof (unsigned char));
+      if (!buf->buffer) {
+        mp_msg(MSGT_MUXER, MSGL_FATAL, "Muxer frame buffer cannot allocate memory!\n");
+        return;
+      }
+      memcpy(buf->buffer, s->buffer, buf->len);
+      s->muxbuf_seen = 1;
+
+      /* see if we need to keep buffering */
+      s->muxer->muxbuf_skip_buffer = 1;
+      for (num = 0; s->muxer->streams[num]; ++num)
+        if (!s->muxer->streams[num]->muxbuf_seen)
+          s->muxer->muxbuf_skip_buffer = 0;
+      
+      /* see if we can flush buffer now */
+      if (s->muxer->muxbuf_skip_buffer) {
+        muxbuf_t *tmp_buf = malloc(sizeof(muxbuf_t));
+        if (!tmp_buf) {
+          mp_msg(MSGT_MUXER, MSGL_FATAL, "Muxer frame buffer cannot allocate memory!\n");
+          return;
+        }
+        mp_msg(MSGT_MUXER, MSGL_V, "Muxer frame buffer sending %d frame(s) to muxer.\n",
+                        s->muxer->muxbuf_num);
+        
+        /* fix parameters for all streams */
+        for (num = 0; s->muxer->streams[num]; ++num) {
+          muxer_stream_t *str = s->muxer->streams[num];
+          if(str->muxer->fix_stream_parameters)
+            muxer_stream_fix_parameters(str->muxer, str);
+        }
+        
+        /* write header */
+        mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingAVIHeader);
+        if (s->muxer->cont_write_header)
+          muxer_write_header(s->muxer);
+        
+        /* send all buffered frames to muxer */
+        for (num = 0; num < s->muxer->muxbuf_num; ++num) {
+          buf = s->muxer->muxbuf + num;
+          s = buf->stream;
+          
+          /* 1. save timer and buffer (might have changed by now) */
+          tmp_buf->timer = s->timer;
+          tmp_buf->buffer = s->buffer;
+          
+          /* 2. move stored timer and buffer into stream and mux it */
+          s->timer = buf->timer;
+          s->buffer = buf->buffer;
+          s->muxer->cont_write_chunk(s, buf->len, buf->flags);
+          
+          /* 3. restore saved timer and buffer */
+          s->timer = tmp_buf->timer;
+          s->buffer = tmp_buf->buffer;
+        }
+        free(tmp_buf);
+        
+        free(s->muxer->muxbuf);
+        s->muxer->muxbuf_num = 0;
+      }
+    }
+    
+    /* this code moved directly from muxer_avi.c */
+    // alter counters:
+    if(s->h.dwSampleSize){
+      // CBR
+      s->h.dwLength+=len/s->h.dwSampleSize;
+      if(len%s->h.dwSampleSize) mp_msg(MSGT_MUXER, MSGL_WARN, "Warning! len isn't divisable by samplesize!\n");
+    } else {
+      // VBR
+      s->h.dwLength++;
+    }
+    s->timer=(double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
+    s->size+=len;
+    
+    return;
+}
+

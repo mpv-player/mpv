@@ -28,6 +28,8 @@ typedef struct {
   unsigned int b_buffer_size;	//size of b_buffer
   unsigned int b_buffer_ptr;	//index to next data to write
   unsigned int b_buffer_len;	//len of next data to write
+  // muxer frame buffer:
+  unsigned int muxbuf_seen;
   // source stream:
   void* source; // sh_audio or sh_video
   int codec; // codec used for encoding. 0 means copy
@@ -37,7 +39,6 @@ typedef struct {
   WAVEFORMATEX *wf;
   BITMAPINFOHEADER *bih;   // in format
   // mpeg specific:
-  unsigned int gop_start; // frame number of this GOP start
   size_t ipb[3]; // sizes of I/P/B frames
   // muxer of that stream
   struct muxer_t *muxer;
@@ -66,6 +67,11 @@ typedef struct muxer_t{
   //int num_streams;
   muxer_stream_t* def_v;  // default video stream (for general headers)
   muxer_stream_t* streams[MUXER_MAX_STREAMS];
+  // muxer frame buffer:
+  struct muxbuf_t * muxbuf;
+  int muxbuf_num;
+  int muxbuf_skip_buffer;
+  // functions:
   void (*fix_stream_parameters)(muxer_stream_t *);
   void (*cont_write_chunk)(muxer_stream_t *,size_t,unsigned int);
   void (*cont_write_header)(struct muxer_t *);
@@ -75,10 +81,20 @@ typedef struct muxer_t{
   void *priv;
 } muxer_t;
 
+/* muxer frame buffer */
+typedef struct muxbuf_t {
+  muxer_stream_t *stream; /* pointer back to corresponding stream */
+  double timer; /* snapshot of stream timer */
+  unsigned char *buffer;
+  size_t len;
+  unsigned int flags;
+} muxbuf_t;
+
+
 muxer_t *muxer_new_muxer(int type,FILE *);
 #define muxer_new_stream(muxer,a) muxer->cont_new_stream(muxer,a)
 #define muxer_stream_fix_parameters(muxer, a) muxer->fix_stream_parameters(a)
-#define muxer_write_chunk(a,b,c) a->muxer->cont_write_chunk(a,b,c)
+void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags);
 #define muxer_write_header(muxer) muxer->cont_write_header(muxer)
 #define muxer_write_index(muxer) muxer->cont_write_index(muxer)
 

@@ -833,8 +833,6 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
-if(muxer->fix_stream_parameters)
-	  muxer_stream_fix_parameters(muxer,mux_v);
 //if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 
 // ============= AUDIO ===============
@@ -933,13 +931,8 @@ if(audio_delay_fix!=0.0){
     mux_a->h.dwStart=audio_delay_fix*mux_a->h.dwRate/mux_a->h.dwScale;
     mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_SettingAudioDelay,mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
 }
-if(muxer->fix_stream_parameters)
-	  muxer_stream_fix_parameters(muxer,mux_a);
 
 } // if(sh_audio)
-
-mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_WritingAVIHeader);
-if (muxer->cont_write_header) muxer_write_header(muxer);
 
 decoded_frameno=0;
 
