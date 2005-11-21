@@ -1,8 +1,10 @@
 mplayer (1.0cvs) unstable; urgency=low
 
-  * this is a placeholder message
+  * debian/rules: now compiled without --enable-runtime-cpudetection.
+    If you plan to install the target .deb on a wide variety of machines,
+    you may want to add that option to the configure command.
 
- -- Gabucino <gabucino@mplayerhq.hu>  Tue, 17 Feb 2004 01:56:40 +0100
+ -- Guillaume POIRIER <gpoirier@mplayerhq.hu>  Mon, 20 Nov 2005 22:56:40 +0100
 
 mplayer (0.90cvs) unstable; urgency=low
 
