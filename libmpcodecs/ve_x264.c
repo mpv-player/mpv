@@ -100,6 +100,7 @@ static float complexity_blur = 20;
 static char *rc_eq = "blurCplx^(1-qComp)";
 static char *zones = NULL;
 static int subq = 5;
+static int bframe_rdo = 0;
 static int me_method = 2;
 static int me_range = 16;
 static int trellis = 1;
@@ -181,6 +182,8 @@ m_option_t x264encopts_conf[] = {
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
     {"zones", &zones, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
+    {"brdo", &bframe_rdo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nobrdo", &bframe_rdo, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"me_range", &me_range, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
     {"trellis", &trellis, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
@@ -292,6 +295,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.analyse.b_chroma_me = chroma_me;
     mod->param.analyse.b_mixed_references = mixed_references;
     mod->param.analyse.i_trellis = trellis;
+    mod->param.analyse.b_bframe_rdo = bframe_rdo;
 
     mod->param.i_width = width;
     mod->param.i_height = height;

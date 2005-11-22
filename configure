@@ -6223,7 +6223,7 @@ echocheck "x264"
 cat > $TMPC << EOF
 #include <inttypes.h>
 #include <x264.h>
-#if X264_BUILD < 39
+#if X264_BUILD < 40
 #error We do not support old versions of x264. Get the latest from SVN.
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }

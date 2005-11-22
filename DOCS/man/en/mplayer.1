@@ -8757,6 +8757,11 @@ Without this option, a whole macroblock must use the same reference.
 Requires frameref>1.
 .
 .TP
+.B (no)brdo
+Enables rate-distortion optimization of macroblock types in B-frames.
+Requires subq=6.
+.
+.TP
 .B trellis=<0\-2>
 rate-distortion optimal quantization
 .PD 0
@@ -8791,9 +8796,6 @@ Use the provided JM format matrix file.
 .RE
 .RS
 .I NOTE:
-Files encoded using CQMs are not currently decodable by FFmpeg-based
-players.
-.br
 Windows CMD.EXE users may experience problems with parsing the command line
 if they attempt to use all the CQM lists.
 This is due to a command line length limitation.
@@ -8834,7 +8836,7 @@ values in the 1\-255 range.
 .TP
 .B level_idc=<10\-51>
 Set the bitstream's level as defined by annex A of the H.264 standard
-(default: 40 - Level 4.0).
+(default: 51 - Level 5.1).
 This is used for telling the decoder what capabilities it needs to support.
 Use this parameter only if you know what it means,
 and you have a need to set it.
