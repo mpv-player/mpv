@@ -1,4 +1,4 @@
-.\" synced with 1.1136
+.\" synced with 1.1158
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -108,7 +108,7 @@ mencoder \- codificatore di film
 .in
 .B mplayer
 'in +\n[.k]u
-.I [cdda|cddb]://traccia[:velocità][/device]
+.I [cdda|cddb]://traccia[-traccia_finale][:velocità][/device]
 [opzioni]
 .
 .br
@@ -317,7 +317,7 @@ Va avanti/\:indietro nella lista dei sottotitoli.
 Cambia la visualizzazione dei sottotitoli forzati ("forced subtitles").
 .IPs a\ \ \ \ 
 Cambia l'allineamento dei sottotitoli: alto/in mezzo/basso.
-.IPs "z e x"
+.IPs "x e z"
 Regola il ritardo dei sottotitoli di +/\:- 0.1 secondi.
 .IPs "r e t"
 Regola la posizione dei sottotitoli più su/più giù.
@@ -473,9 +473,13 @@ Ha il seguente formato:
 .br
 %n%stringa_di_lunghezza_n
 .br
-.I ESEMPIO:
+.I ESEMPI:
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
+.br
+Oppure in uno script:
+.br
+mplayer -ao pcm:file=%`expr length "$NOME"`%"$NOME" test.avi
 .PP
 Puoi mettere tutte le opzioni in file di configurazione che verranno letti
 ogni volta che MPlayer o MEncoder vengono lanciati.
@@ -956,9 +960,9 @@ Regola la velocità di rotazione del CD
 .IPs paranoia=<0\-2>
 Regola il livello di paranoia
 .RSss
-0: disabilita il controllo dati
+0: disabilita il controllo dati (default)
 .br
-1: solo controllo di sovrapposizione (overlap) (default)
+1: solo controllo di sovrapposizione (overlap)
 .br
 2: controllo e verifica completa dei dati
 .REss
@@ -1533,6 +1537,13 @@ Crea un file dumpsub.smi nella directory corrente.
 Converti i sottotitoli (specificati con l'opzione \-sub) nel formato
 dei sottotitoli basato sul tempo SubViever (SRT).
 Crea un file dumpsub.srt nella directory corrente.
+.br
+.I NOTA:
+Alcuni lettori da tavolo hanno sani problemi con file di sottotitoli con
+terminatori di linea Unix.
+Se sei così sfortunato da possederne uno, filtra i tuoi file dei sottotitoli
+con unix2dos o un programma simile, per sostituire i terminatori di linea Unix
+con terminatori di linea DOS/Windows.
 .
 .TP
 .B \-dumpsub (solo MPlayer) (CODICE BETA)
@@ -1610,6 +1621,10 @@ del fotogramma per i sottotitoli VOBsub.
 .TP
 .B \-noautosub
 Disabilita il caricamento automatico dei file dei sottotitoli.
+.
+.TP
+.B \-osd-duration <tempo>
+Imposta la durata dei messaggi OSD in millisecondi (default: 1000).
 .
 .TP
 .B \-osdlevel <0\-3> (solo MPlayer)
@@ -1755,15 +1770,16 @@ Usato a scopo di debug.
 .
 .TP
 .B \-subalign <0\-2> (solo OSD)
-Specifica come i sottotitoli devono essere allineati con \-subpos.
+Specifica quale bordo dei sottotitoli debba essere allineato all'altezza
+impostata da \-subpos.
 .PD 0
 .RSs
 .IPs 0
-Allinea in alto (comportamento originale/\:default).
+Allinea al bordo superiore del sottotitolo (comportamento originale).
 .IPs 1
 Allinea al centro.
 .IPs 2
-Allinea in basso.
+Allinea al bordo inferiore (default).
 .RE
 .PD 1
 .
@@ -1886,6 +1902,18 @@ Il valore è la posizione verticale dei sottotitoli in % sull'altezza dello scher
 Specifica la larghezza massima dei sottotitoli sullo schermo.
 Utile per l'uscita TV.
 Il valore è l'ampiezza dei sottotitoli in % sulla larghezza dello schermo.
+.
+.TP
+.B \-noterm-osd
+Disabilita la visualizzazione dei messaggi OSD sulla console, quando non è
+disponibile un'uscita video.
+.
+.TP
+.B \-term-osd-esc <sequenza di escape>
+Specifica la sequenza di escape da usare prima di scrivere un messaggio OSD
+sulla console.
+La sequenza di escape dovrebbe portare il puntatore all'inizio della linea
+usata per l'OSD e ripulirla (default: ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
@@ -2029,8 +2057,9 @@ driver di uscita audio ALSA 0.5
 Driver di uscita audio OSS
 .PD 0
 .RSs
-.IPs dsp-device
-Seleziona il dispositivo di uscita audio (default: /dev/\:dsp).
+.IPs dispositivo-dsp[:dispositivo-mixer[:canale-mixer]]
+Seleziona il dispositivo di uscita audio (default: /dev/\:dsp), il dispositivo
+del mixer (default: /dev/\:mixer) e il canale del mixer (default: pcm).
 .RE
 .PD 1
 .
@@ -2087,6 +2116,14 @@ driver di uscita audio nativo per Mac OS X
 .TP
 .B sgi (solo SGI)
 driver di uscita audio nativo per SGI
+.PD 0
+.RSs
+.IPs "<nome del dispositivo di uscita>"
+Seleziona esplicitamente il dipositivo di uscita/\:l'interfaccia da usare
+(default: system-wide default).
+Per esempio, 'Analog\ Out' o 'Digital\ Out'.
+.RE
+.PD 1
 .
 .TP
 .B sun (solo Sun)
@@ -2165,6 +2202,13 @@ Attualmente funziona solo con il driver di uscita video directx.
 .B \-bpp <profondità>
 Sovrascrive la selezione automatica della profondità colore.
 Supportato solo dai driver di uscita video fbdev, dga, svga e vesa.
+.
+.TP
+.B \-border
+Riproduce il filmato in una finestra con bordi e decorazioni.
+Dato che questo è il default, usa \-noborder per disabilitare le decorazioni
+standard della finestra.
+Supportato dal driver di uscita video directx.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -2974,10 +3018,19 @@ Il metodo 4 è solitamente più veloce.
 Richiede l'estensione GL_ARB_fragment_program e almeno quattro unità di texture.
 Fornisce controllo di luminosità, contrasto, saturazione, tonalità e gamma.
 La gamma può venire impostata indipendentemente per rosso, verde e blu.
+.br
+5: Usa una funzione specifica ATI (per schede più vecchie).
+Questa modalità usa un'estensione specifica ATI (GL_ATI_fragment_shader - non
+GL_ARB_fragment_shader!).
+Servono almeno tre unità di texture.
+Fornisce controllo di saturazione e tonalità.
 .RE
 .IPs customprog=<nomefile>
 Carica un programma personalizzato di frammentazione da <nomefile>.
 Vedi TOOLS/edgedect.fp come esempio.
+.IPs customtex=<nomefile>
+Carica una texture "gamma ramp" personalizzata da <nomefile>.
+Questo può essere usato insieme con yuv=4 oppure con l'opzione customprog.
 .REss
 .RE
 .PD 1
@@ -2992,25 +3045,10 @@ Supporta OSD e video più grandi della dimensione massima della texture.
 come per gl (default: abilitato)
 .IPs yuv=<n>
 Seleziona il tipo di conversione da YUV a RGB.
-.RSss
-0: Usa conversione software (default).
-Compatibile con tutte le versioni di OpenGL.
-.br
-1: Usa combinatori di registro.
-Questa modalità utilizza un'estensione particolare nVidia
-(GL_NV_register_combiners).
-Servono almeno tre unità di texture.
-.br
-2: Usa un programma di frammentazione.
-Richiede l'estensione GL_ARB_fragment_program e almeno tre unità di texture.
-.br
-3: Usa un programma di frammentazione attraverso l'istruzione POW.
-Richiede l'estensione GL_ARB_fragment_program e almeno tre unità di texture.
-Il metodo 4 è solitamente più veloce.
-.br
-4: Usa un programma di frammentazione con ricerca supplementare.
-Richiede l'estensione GL_ARB_fragment_program e almeno quattro unità di texture.
-.REss
+Se impostato ad un valore diverso da 0, l'OSD verrà disabilitato e le
+impostazioni di luminosità, contrasto e gamma saranno disponibili solo
+attraverso le impostazioni globali del server X.
+A parte ciò, i valori hanno gli stessi significati validi per \-vo gl.
 .REss
 .
 .TP
@@ -3729,6 +3767,7 @@ Utile per le prove di velocità (benchmark).
 .TP
 .B \-novideo
 Non riproduce/\:codifica il video.
+Im molti casi questo non funziona, usa al suo posto \-vc null \-vo null.
 .
 .TP
 .B \-oldpp <qualità> (solo OpenDivX) (OBSOLETO)
@@ -4434,7 +4473,7 @@ con -1.0 i canali destro e sinistro verranno scambiati.
 .PD 1
 .
 .TP
-.B volnorm[=metodo]
+.B volnorm[=metodo:risultato]
 Massimizza il volume senza distorcere il suono.
 .PD 0
 .RSs
@@ -4447,6 +4486,9 @@ il metodo standard della media ponderale sui campionamenti passati (default).
 2: Utilizza alcuni campionamenti per ammorbidire la variazione attraverso
 il metodo standard della media ponderale sui campionamenti passati.
 .REss
+.IPs <risultato>
+Imposta l'ampiezza del risultato come frazione del massimo per il tipo di
+campionamento (default: 0.25).
 .RE
 .PD 1
 .
@@ -4636,7 +4678,7 @@ espande ad un aspetto invece che ad una risoluzione (default: 0).
 .I ESEMPIO:
 .PD 0
 .RSs
-.IP expand=800::::3/4
+.IP expand=800::::4/3
 Espande a 800x600, a meno che l'origine sia ad una risoluzione più alta,
 nel qual caso espande per ottenere un rapporto di aspetto 4/3.
 .RE
@@ -5016,8 +5058,8 @@ verticale automaticamente a seconda del tempo di CPU disponibile.
 .
 .TP
 .B spp[=qualità[:qp[:modo]]]
-Filtro di post elaborazione semplice che comprime e decomprime l'immagine a
-parecchi (o \- nel caso del livello di qualità 6 \- tutti) 'shifts'
+Filtro di post elaborazione semplice che comprime e decomprime
+l'immagine a parecchi (o \- nel caso del livello di qualità 6 \- tutti) 'shifts'
 (spostamenti) e media i risultati.
 .RSs
 .IPs <qualità>
@@ -5028,6 +5070,20 @@ Forza il parametro di quantizzazione (default: 0, usa QP del video).
 0: controllo della soglia rigido (default)
 .br
 1: controllo della soglia meno rigido (miglior eliminazione degli artefatti circolari ma immagine più sfocata)
+.RE
+.
+.TP
+.B uspp[=qualità[:qp]]
+Filtro di post elaborazione Ultra Semplice&Lento che comprime e decomprime
+l'immagine a parecchi (o \- nel caso del livello di qualità 8 \- tutti) 'shifts'
+(spostamenti) e media i risultati.
+La differenza da spp è che codifica&decodifica effettivamente ogni caso con
+lavc-mpeg4, mentre spp usa un intra semplificato solo 8x8 DCT simile a mjpeg
+.RSs
+.IPs <qualità>
+0\-8 (default: 3)
+.IPs <qp>\ 
+Forza il parametro di quantizzazione (default: 0, usa QP del video).
 .RE
 .
 .TP
@@ -6802,7 +6858,7 @@ più piccoli del 20%
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1 (vedi anche: vstrict)
+.IPs "ffv1 (vedi anche: vstrict)"
 codec video di FFmpeg senza perdita
 .IPs flv\ \ 
 Sorenson H.263 usato nei Flash Video
@@ -6810,7 +6866,7 @@ Sorenson H.263 usato nei Flash Video
 Sony Digital Video
 .IPs svq1\ 
 Apple Sorenson Video 1
-.IPs snow (vedi anche: vstrict)
+.IPs "snow (vedi anche: vstrict)"
 codec video sperimentale di FFmpeg basato su wavelet
 .RE
 .PD 1
@@ -8654,6 +8710,13 @@ La mappatura è approssimativamente H264QP = 12 + 6*log2(MPEGQP).
 Per esempio MPEG a QP=2 è equivalente ad H.264 con QP=18.
 .
 .TP
+.B crf=<1\-50>
+Attiva la modalità a qualità constante, e imposta la qualità.
+La scala è simile a QP.
+Come la modalità basata sul bitrate, questa permette ad ogni fotogramma di
+usare un QP diverso basandosi sulla complessità del fotogramma stesso.
+.
+.TP
 .B pass=<1\-3>
 Attiva la modalità interna a due (o tre) passi.
 Si raccomanda di effettuare la codifica utilizzando sempre 2 o 3 passi
@@ -9087,6 +9150,26 @@ di riferimento.
 Richiede frameref>1.
 .
 .TP
+.B (no)brdo
+Abilita l'ottimizzazione della rate-distorsion per i tipi di macroblocco
+nei fotogrammi B.
+Richiede subq=6.
+.
+.TP
+.B trellis=<0\-2>
+quantizzazione ottimale della rate-distortion 
+.PD 0
+.RSs
+.IPs 0
+disabilitata
+.IPs 1
+abilitata solo per la codifica finale (default)
+.IPs 2
+abilitata durante ogni decisione di modalità (lento, richiede subq=6)
+.RE
+.PD 1
+.
+.TP
 .B chroma_qp_offset=<-12\-12>
 Utilizza un quantizzatore diverso per i piani di crominanza rispetto a quello
 per la luminanza.
@@ -9108,9 +9191,6 @@ Usa la matrice dal file in formato JM indicato.
 .RE
 .RS
 .I NOTA:
-File codificati usando matrici personalizzate CQM non sono attualmente
-decodificabili da programmi di visualizzazione basati su FFmpeg.
-.br
 Chi usa CMD.EXE di Windows potrebbe aver problemi nell'interpretazione della
 riga comando se tenta di usare tutte le liste CQM.
 Ciò è dovuto alla limitazione della lunghezza della riga comando.
@@ -9151,7 +9231,7 @@ valori separati da virgola, compresi tra 1 e 255.
 .TP
 .B level_idc=<10\-51>
 Seleziona il Livello del flusso di bit come definito nell'Allegato A dello
-standard H.264 (default: 40 - livello 4.0).
+standard H.264 (default: 51 - livello 5.1).
 Viene utilizzato per indicare al decodificatore quali capacità deve
 supportare.
 Utilizza questo parametro solo se sai cosa significa ed hai effettivamente
@@ -9338,7 +9418,7 @@ Formato contenitore aperto NUT (sperimentale)
 QuickTime
 .IPs mp4\ \ 
 Formato MPEG-4
-.IPs dv\ \ 
+.IPs dv\ \ \ 
 Formato contenitore Sony Digital Video
 .RE
 .PD 1
@@ -9379,7 +9459,7 @@ directory dei font (devono esserci un file font.desc e alcuni file con estension
 chiavi CSS salvate
 .
 .TP
-Supponendo che /percorso/\:del/\:filmato.avi sia riprodotto, MPlayer cerca i
+Supponendo che venga riprodotto /percorso/\:del/\:filmato.avi, MPlayer cerca i
 file sub (sottotitoli) in questo ordine:
 .RS
 /percorso/\:del/\:filmato.sub
