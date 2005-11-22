@@ -576,7 +576,8 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
   if (size>=4) {
     i=read_stream(s->s, buffer, 4);
     if (i<4) return i;
-    if ((buffer[0]=='S')&&(buffer[1]=='E')&&(buffer[2]=='T')&&(buffer[3]=='_'))
+    if (((buffer[0]=='S')&&(buffer[1]=='E')&&(buffer[2]=='T')&&(buffer[3]=='_')) ||
+        ((buffer[0]=='O')&&(buffer[1]=='P')&&(buffer[2]=='T')&&(buffer[3]=='I'))) // OPTIONS
     {
       char *rest=rtsp_get(s);
       if (!rest)
