@@ -1,4 +1,4 @@
-.\" synced with 1.1157
+.\" synced with 1.1159
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -5137,7 +5137,7 @@ l'image avec différents décalages (ou \- dans le cas du niveau de qualité 8
 \- tous) et fait la moyenne des résultats.
 La différence avec spp est que chaque étape d'encodage&décodage est fait
 avec lavc-mpeg4 tandis que spp utilise uniquement une DCT 8x8 intra,
-comme mjpeg
+comme mjpeg.
 .RSs
 .IPs <qualité>
 0\-8 (par défaut\ : 3)
@@ -9253,6 +9253,12 @@ leur trame de référence.
 Sans cette option, tout le macro-bloc doit utiliser la même référence.
 Nécessite frameref>1.
 .TP
+.
+.TP
+.B (no)brdo
+Active l'optimisation du types de macroblocs dans les trames-B d'après
+leur taux de distortion
+Nécessite subq=6.
 .
 .B trellis=<0\-2>
 quatification optimale du point de vue du taux de distortion
