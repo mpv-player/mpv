@@ -2812,6 +2812,15 @@ Needs OpenGL version >= 1.2.
 .IPs slice-height=<0\-...>
 Number of lines copied to texture in one piece (default: 4).
 0 for whole image.
+.br
+.I NOTE:
+If YUV colorspace is used (see yuv suboption), special rules apply:
+.RSss
+If the decoder uses slice rendering (see \-noslices), this setting
+has no effect, the size of the slices as provided by the decoder is used.
+.br
+If the decoder does not use slice rendering, the default is 16.
+.REss
 .IPs (no)osd
 Enable or disable support for OSD rendering via OpenGL (default: enabled).
 This option is for testing; to disable the OSD use \-osdlevel 0 instead.
