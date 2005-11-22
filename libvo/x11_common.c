@@ -1572,8 +1572,6 @@ void xscreensaver_heartbeat(void)
     unsigned int time = GetTimerMS();
     XEvent ev;
 
-    if (mDisplay)
-        xs_windowid = find_xscreensaver_window(mDisplay);
     if (mDisplay && xs_windowid &&
         ((time - time_last) > 30000 || (time - time_last) < 0))
     {
