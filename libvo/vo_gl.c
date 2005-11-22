@@ -711,7 +711,7 @@ static int preinit(const char *arg)
     use_rectangle = 0;
     use_glFinish = 0;
     swap_interval = 1;
-    slice_height = 4;
+    slice_height = -1;
     custom_prog = NULL;
     custom_tex = NULL;
     custom_tlin = 1;
@@ -758,6 +758,8 @@ static int preinit(const char *arg)
       gl_target = GL_TEXTURE_RECTANGLE;
     else
       gl_target = GL_TEXTURE_2D;
+    if (slice_height == -1)
+      slice_height = use_yuv ? 16 : 4;
     if (many_fmts)
       mp_msg (MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
                "Use -vo gl:nomanyfmts if playback fails.\n");
