@@ -708,6 +708,15 @@ Your sound driver is buggy. See the <link linkend="audio">audio section</link>.
 </itemizedlist>
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+How can I get rid of A/V desynchronization while seeking through RealMedia streams?
+</para></question>
+<answer><para>
+<option>-mc 10</option> can help.
+</para></answer>
+</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-dvd">
