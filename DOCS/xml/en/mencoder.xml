@@ -320,8 +320,8 @@ net.
 Two pass encode of the second track a DVD to an MPEG-4 (&quot;DivX&quot;)
 AVI while copying the audio track.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>/dev/null</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -334,8 +334,8 @@ the audio track to MP3.
 Be careful using this method as it may lead to audio/video desync in
 some cases.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -362,15 +362,13 @@ use the <option>-of mpeg</option> option.
 <para>
 Example:
 <screen>
-mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>output.mpg</replaceable>
+mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
 Creating an MPEG-1 file suitable to be played on systems with minimal
 multimedia support, such as default Windows installs:
 <screen>
-mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
-<replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
--lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3 \
-<replaceable>input.avi</replaceable>
+mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
+-lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 </para>
 </informalexample>
@@ -382,7 +380,7 @@ mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
 
 <para>
 Often the need to resize movie images' size emerges. Its reasons can be
-many: decreasing file size, network bandwidth,etc. Most people even do
+many: decreasing file size, network bandwidth, etc. Most people even do
 rescaling when converting DVDs or SVCDs to DivX AVI. If you wish to rescale,
 read the <link linkend="aspect">Preserving aspect ratio</link> section.
 </para>
@@ -510,7 +508,7 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <repl
 <para>
 Creating an uncompressed file from all the PNG files in the current directory:
 <screen>
-mencoder mf:// -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -607,7 +605,7 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 DVDs and SVCDs (i.e. MPEG-1/2) files contain an aspect ratio value, which
 describes how the player should scale the video stream, so humans will not
 have egg heads (ex.: 480x480 + 4:3 = 640x480). However when encoding to AVI
-(DivX) files, you have be aware that AVI headers do not store this value.
+(DivX) files, you have to be aware that AVI headers do not store this value.
 Rescaling the movie is disgusting and time consuming, there has to be a better
 way!
 </para>
