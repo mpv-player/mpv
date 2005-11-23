@@ -301,7 +301,7 @@ Step forward/backward in the subtitle list.
 Toggle displaying "forced subtitles".
 .IPs a\ \ \ \ 
 Toggle subtitle alignment: top/\:middle/\:bottom.
-.IPs "z and x"
+.IPs "x and z"
 Adjust subtitle delay by +/\:- 0.1 seconds.
 .IPs "r and t"
 Move subtitles up/\:down.
@@ -1961,9 +1961,12 @@ ALSA 0.5 audio output driver
 OSS audio output driver
 .PD 0
 .RSs
-.IPs dsp-device[:mixer-device[:mixer-channel]]
-Sets the audio-output device (default: /dev/\:dsp), mixer device (default:
-/dev/\:mixer) and mixer channel (default: pcm).
+.IPs <dsp-device>
+Sets the audio output device (default: /dev/\:dsp).
+.IPs <mixer-device>
+Sets the audio mixer device (default: /dev/\:mixer).
+.IPs <mixer-channel>
+Sets the audio mixer channel (default: pcm).
 .RE
 .PD 1
 .
@@ -2820,7 +2823,7 @@ If the decoder uses slice rendering (see \-noslices), this setting
 has no effect, the size of the slices as provided by the decoder is used.
 .br
 If the decoder does not use slice rendering, the default is 16.
-.REss
+.RE
 .IPs (no)osd
 Enable or disable support for OSD rendering via OpenGL (default: enabled).
 This option is for testing; to disable the OSD use \-osdlevel 0 instead.
@@ -2844,7 +2847,7 @@ slower (default: 0).
 .br
 2: Use the GL_ARB_texture_non_power_of_two extension.
 In some cases only supported in software and thus very slow.
-.REss
+.RE
 .IPs (no)glfinish
 Call glFinish() before swapping buffers.
 Slower but in some cases more correct output (default: disabled).
