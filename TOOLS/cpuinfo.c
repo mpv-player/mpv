@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 #include <sys/time.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef __MINGW32__
 #include <sys/timeb.h>
@@ -79,6 +81,7 @@ main(int argc, char **argv)
 	unsigned max_cpuid;
 	unsigned max_ext_cpuid;
 	unsigned int amd_flags;
+	unsigned int amd_flags2;
 	char *model_name = "Unknown CPU";
 	int i;
 	char processor_name[49];
@@ -103,6 +106,7 @@ main(int argc, char **argv)
 	if (max_ext_cpuid >= (1<<31) + 1) {
 	    regs_ext = cpuid((1<<31) + 1);
 	    amd_flags = regs_ext.edx;
+	    amd_flags2 = regs_ext.ecx;
 
 	    if (max_ext_cpuid >= (1<<31) + 4) {
 		for (i = 2; i <= 4; i++) {
@@ -117,6 +121,7 @@ main(int argc, char **argv)
 	    }
 	} else {
 	    amd_flags = 0;
+	    amd_flags2 = 0;
 	}
 
 	if (max_cpuid >= 1) {
@@ -151,7 +156,25 @@ main(int argc, char **argv)
 			{ 25, "sse",   "SSE Extensions" },
 			{ 26, "sse2",  "SSE2 Extensions" },
 			{ 27, "ss",    "Self Snoop" },
+			{ 28, "htt",   "Multi-threading" },
 			{ 29, "tm",    "Therm. Monitor" },
+			{ 30, "ia64",  "IA-64 Processor" },
+			{ 31, "pbe",   "Pend. Brk. EN." },
+			{ -1 }
+		};
+		static struct {
+			int bit;
+			char *desc;
+			char *description;
+		} cap2[] = {
+			{ 0, "sse3", "SSE3 Extensions" },
+			{ 3, "monitor", "MONITOR/MWAIT" },
+			{ 4, "ds-cpl", "CPL Qualified Debug Store" },
+			{ 5, "vmx", "Virtual Machine Extensions" },
+			{ 7, "est", "Enhanced Intel SpeedStep Technology" },
+			{ 8, "tm2", "Thermal Monitor 2" },
+			{ 10, "cnxt-id", "L1 Context ID" },
+			{ 13, "cmpxchg16b", "CMPXCHG16B Available" },
 			{ -1 }
 		};
 		static struct {
@@ -159,21 +182,36 @@ main(int argc, char **argv)
 			char *desc;;
 			char *description;
 		} cap_amd[] = {
-		    	{ 22, "mmxext","MMX Technology (AMD Extensions)" },
+			{ 11, "syscall", "SYSCALL and SYSRET" },
+			{ 19, "mp", "MP Capable" },
+			{ 20, "nx", "No-Execute Page Protection" },
+			{ 22, "mmxext","MMX Technology (AMD Extensions)" },
+			{ 25, "fxsr_opt", "Fast FXSAVE/FXRSTOR" },
+			{ 27, "rdtscp", "RDTSCP Instruction" },
 			{ 30, "3dnowext","3Dnow! Extensions" },
 			{ 31, "3dnow", "3Dnow!" },
-			{ 32, "k6_mtrr", "Memory Type Range Registers" },
 			{ -1 }
 		};
-		int i;
+		static struct {
+			int bit;
+			char *desc;
+			char *description;
+		} cap_amd2[] = {
+			{ 0, "lahf_lm", "LAHF/SAHF Supported in 64-bit Mode" },
+			{ 1, "cmp_legacy", "Chip Multi-Core" },
+			{ 2, "svm", "Secure Virtual Machine" },
+			{ 4, "cr8", "CR8 Available in Legacy Mode" },
+			{ -1 }
+		};
+		unsigned int family, model, stepping;
 
 		regs = cpuid(1);
 		printf("cpu family\t: %d\n"
 		       "model\t\t: %d\n"
 		       "stepping\t: %d\n" ,
-			(regs.eax >>  8) & 0xf,
-			(regs.eax >>  4) & 0xf,
-			 regs.eax        & 0xf);
+			family = (regs.eax >> 8) & 0xf,
+			model = (regs.eax >> 4) & 0xf,
+			stepping = regs.eax & 0xf);
 		
 		printf("flags\t\t:");
 		for (i = 0; cap[i].bit >= 0; i++) {
@@ -181,9 +219,27 @@ main(int argc, char **argv)
 				printf(" %s", cap[i].desc);
 			}
 		}
+		for (i = 0; cap2[i].bit >= 0; i++) {
+			if (regs.ecx & (1 << cap[i].bit)) {
+				printf(" %s", cap2[i].desc);
+			}
+		}
+		/* k6_mtrr is supported by some AMD K6-2/K6-III CPUs but
+		   it is not indicated by a CPUID feature bit, so we
+		   have to check the family, model and stepping instead. */
+		if (strstr(idstr, "AMD") &&
+		   	family == 5 && 
+			(model >= 9 || model == 8 && stepping >= 8))
+			printf(" %s", "k6_mtrr");
+
 		for (i = 0; cap_amd[i].bit >= 0; i++) {
 			if (amd_flags & (1 << cap_amd[i].bit)) {
 				printf(" %s", cap_amd[i].desc);
+			}
+		}
+		for (i = 0; cap_amd2[i].bit >= 0; i++) {
+			if (amd_flags2 & (1 << cap_amd2[i].bit)) {
+				printf(" %s", cap_amd2[i].desc);
 			}
 		}
 		printf("\n");
