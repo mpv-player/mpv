@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.98 -->
+<!--synced with 1.99 -->
 <chapter id="faq" xreflabel="FAQ">   
 <title>Foire Aux Questions</title>
 
@@ -699,6 +699,16 @@ Votre pilote son est boggué. Voir la <link linkend="audio">section audio</link>.
 </itemizedlist>
 </para></answer>
 </qandaentry> 
+
+<qandaentry>
+<question><para>
+Comment puis-je me débarasser de la désynchronisation A/V lors d'une
+recherche sur des flux de type RealMedia?
+</para></question>
+<answer><para>
+l'option <option>-mc 10</option> peut aider.
+</para></answer>
+</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-dvd">
