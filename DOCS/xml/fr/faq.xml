@@ -72,7 +72,7 @@ auto*, comme d'
 <qandaentry>
 <question><para>
 La compilation échoue avec une erreur et <application>gcc</application> parachute
-des messages crypté contenant la phrase
+des messages cryptés contenant la phrase
 <systemitem>internal compiler error</systemitem> ou
 <systemitem>unable to find a register to spill</systemitem>.
 </para></question>
@@ -102,7 +102,7 @@ pour plus de détails.
 Comment puis-je "build" un <application>MPlayer</application> 32 bit sur un Athlon 64 bit?
 </para></question>
 <answer><para>
-Essayer les options de configuration suivante:
+Essayer les options de configuration suivantes:
 <screen>
 ./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
 </screen>
@@ -131,7 +131,7 @@ Lisez la section <link linkend="mga_vid">mga_vid</link>.
 
 <qandaentry>
 <question><para>
-Pendant 'make', <application>MPlayer</application> se plaint à propose de librairies X11. Je ne comprends pas,
+Pendant 'make', <application>MPlayer</application> se plaint à propos de librairies X11. Je ne comprends pas,
 J'ai <emphasis>VRAIMENT</emphasis> installé X11 !?
 </para></question>
 <answer><para>
@@ -232,7 +232,7 @@ Exemple:
 </varlistentry>
 <varlistentry><term><systemitem>41%</systemitem></term>
 <listitem><para>utilisation CPU du codec vidéo en pourcents (pour les tranches et
-le rendu direct (Direct Rendering)ceci inclut video_out)</para></listitem>
+le rendu direct (Direct Rendering)ceci inclus video_out)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>0%</systemitem></term>	 
 <listitem><para>utilisation CPU de video_out</para></listitem>
@@ -300,8 +300,8 @@ et remplacez <systemitem>#undef FAST_OSD</systemitem> par
 
 <qandaentry>
 <question><para>
-Je ne peut pas accéder au menu de la GUI. J'appuie sur le bouton droit de la
-souris, mais je ne peut pas accéder aux éléments du menu !
+Je ne peux pas accéder au menu de la GUI. J'appuie sur le bouton droit de la
+souris, mais je ne peux pas accéder aux éléments du menu !
 </para></question>
 <answer><para>
 Utilisez-vous FVWM ? Essayez cela:
@@ -338,10 +338,10 @@ Avez-vous un fichier <filename>codecs.conf</filename> encore présent dans
 un fichier <filename>codecs.conf</filename> obsolète peut causer d'obscurs
 problèmes et ne doit être utilisé que par les dévelopeurs travaillant sur le suuport
 de codec. Cela remplace les paramètres interne de codec de <application>MPlayer</application>,
-ce qui créera un désastre si des modifications incompatible sont faite avec
-des versions plus récente du logiciel. A moins qu'il soit utilisé par des experts, c'est une recette
+ce qui créera un désastre si des modifications incompatibles sont faites avec
+des versions plus récentes du logiciel. A moins qu'il soit utilisé par des experts, c'est une recette
 pour un désastre de telle facon qu'il est aléatoire et très dur à localiser des plantages et des problèmes
-de lecture. Si vous l'avez encor quelque part sur votre système, vous devriez le supprimer immédiatement.
+de lecture. Si vous l'avez encore quelque part sur votre système, vous devriez le supprimer immédiatement.
 </para></answer>
 </qandaentry>
 	 
@@ -351,7 +351,7 @@ Comment puis-je faire apparaitre les sous-titres sur les bandes noires autour d'
 </para></question>
 <answer><para>
 Utilisez le filtre vidéo <systemitem>expand</systemitem> pour augmenter
- verticalement la zone sur laquelle le film est rendue et placer le film
+ verticalement la zone sur laquelle le film est rendu et placer le film
 au niveau de la bande supérieure, par exemple:
 <screen>
 mplayer -vf expand=0:-100:0:0 -slang de dvd://1
@@ -407,7 +407,7 @@ J'ai des problèmes pour afficher mes sous-titres, à l'aide!!
 Assurez-vous d'avoir installé les polices correctement. Suivez les étapes de la
 partie <link linkend="mpsub-install">OSD et sous-titres</link> de la section
 installation. Si vous utilisez des polices TrueType, vérifiez que la librairie
-<systemitem class="library">FreeType</systemitem> est installé.
+<systemitem class="library">FreeType</systemitem> est installée.
 Vous pouvez aussi essayer de vérifier vos sous-titres dans un éditeur de texte
 ou avec d'autres lecteurs. Ou encore les convertir dans un autre format.
 </para></answer>
@@ -484,11 +484,11 @@ recompilez avec &quot;runtime CPU detection&quot;
 <qandaentry>
 <question><para>
 Quand j'essaye de faire une capture depuis mon tuner, cela fonctionne, 
-mais les couleurs sont étrange. C'est BON avec d'autre applications.
+mais les couleurs sont étranges. C'est BON avec d'autres applications.
 </para></question>
 <answer><para>
-Votre carte probablement rapporte certain espace de couleurs comme étant 
-supporté alors qu'en fait elle ne les supporte pas. Essayez avec YUY2 
+Votre carte probablement rapporte certains espaces de couleurs comme étant 
+supportés alors qu'en fait elle ne les supporte pas. Essayez avec YUY2 
 à la place de YV12 par défaut (voir la section <link linkend="tv-input">TV</link>).
 </para></answer>
 </qandaentry>
@@ -525,7 +525,7 @@ Pendant qu'un film joue tout devient soudainement saccadé et j'obtiens le messag
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
 </para></question>
 <answer><para>
-Des fichiers avec un entrelacement très mauvais et <option>-cache</option> ne font pas très bon menage ensemble.
+Des fichiers avec un entrelacement très mauvais et <option>-cache</option> ne font pas très bon ménage ensemble.
 Essayez <option>-nocache</option>.
 </para></answer>
 </qandaentry>
@@ -535,7 +535,7 @@ Essayez <option>-nocache</option>.
 <title>Problèmes de pilote vidéo/audio (vo/ao)</title>
 <qandaentry>
 <question><para>
-Quand je passe en mode plein écran j'obtiens juste des bandes noirs autour de l'image
+Quand je passe en mode plein écran j'obtiens juste des bandes noires autour de l'image
 et pas de réel agrandissement en mode plein écran.
 </para></question>
 <answer><para>
@@ -552,7 +552,7 @@ explicitement permet l'agrandissement logiciel.
  	 
 <qandaentry>
 <question><para>
-Je viens juste d'installé <application>MPlayer</application>. Quand je veux
+Je viens juste d'installer <application>MPlayer</application>. Quand je veux
 ouvrir un fichier vidéo cela provoque une erreur fatale:
 <screen>
 Error opening/initializing the selected video_out (-vo) device.
@@ -581,7 +581,7 @@ dans <filename>~/.mplayer/gui.conf</filename>.
 <qandaentry>
 <question><para>
 J'ai des problèmes avec <replaceable>[votre gestionnaire de fenêtre]</replaceable>
-et les modes plein écrans xv/xmga/sdl/x11 ...
+et les modes plein écran xv/xmga/sdl/x11 ...
 </para></question>
 <answer><para>
 Lire <link linkend="bugreports">comment rapporter un bogue</link> et envoyer nous
@@ -648,7 +648,7 @@ directement utiliser le pilote ALSA de sortie audio.
 
 <qandaentry>
 <question><para>
-Quand je lance <application>MPlayer</application> sous KDE je n'obtient qu'un
+Quand je lance <application>MPlayer</application> sous KDE je n'obtiens qu'un
 écran noir et rien ne se passe. Après environ une minute la vidéo commence à défiler.
 </para></question>
 <answer><para>
@@ -694,7 +694,7 @@ Ou il a peut-être un mauvais entête, dans ce cas <option>-nobps</option>
 et/ou <option>-mc 0</option> peut aider.
 </para></listitem>
 <listitem><para>
-Votre pilote son est boggué. Voir la <link linkend="audio">section audio</link>.
+Votre pilote son est bogué. Voir la <link linkend="audio">section audio</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -861,8 +861,8 @@ Comment puis-je créer des (S)VCDs?
 </para></question>
 <answer><para>
 Des versions plus récentes de <application>MEncoder</application> peuvent directement
-générer des fichiers MPEG-2 qui peuvent être utilisé comme une base pour créer un (S)SVCD et
-sont plus à même d'être joué sans modification sur n'importe quelle plateformes (par exemple
+générer des fichiers MPEG-2 qui peuvent être utilisés comme une base pour créer un (S)SVCD et
+sont plus à même d'être joués sans modification sur n'importe quelle plateformes (par exemple
 pour partager une vidéo depuis une caméra numérique pour des amis qui n'y connaisse rien en 
 informatique).
 <!--Veuillez lire
@@ -876,7 +876,7 @@ pour plus de détails.!-->
 Comment puis-je joindre deux fichiers vidéos ?
 </para></question>
 <answer><para>
-Les fichiers MPEG peuvent être mis boût à boût en un seul fichier avec de la chance.
+Les fichiers MPEG peuvent être mis bout à bout en un seul fichier avec de la chance.
 Pour les fichiers AVI, vous pouvez utiliser le support de fichier multiple de 
 <application>MEncoder</application> comme cela:
 <screen>
@@ -904,7 +904,7 @@ mencoder <replaceable>input.avi</replaceable> -idx -ovc copy -oac copy -o <repla
 </screen>
 pour copier les flux vidéo et audio dans un nouveau fichier AVI ce qui
 régénére l'index et entrelace correctement les données.
-Bien sûr cela ne peut pas réparer les possibles bogues présent dans les flux vidéo et/ou audio.
+Bien sûr cela ne peut pas réparer les possibles bogues présents dans les flux vidéo et/ou audio.
 </para></answer>
 </qandaentry>
  	 
@@ -1006,8 +1006,8 @@ des versions plus tardives que 1.0pre7 de <application>MEncoder</application>?
  	 
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, la librairie d'encodage 
-native MPEG-4 noramlement incluse avec <application>MEncoder</application>,
-avais pour habitude de règler le FourCC à 'DIVX' quand il encode des vidéos MPEG-4
+native MPEG-4 normalement incluse avec <application>MEncoder</application>,
+avait pour habitude de règler le FourCC à 'DIVX' quand il encode des vidéos MPEG-4
 (le FourCC est un tag AVI pour identifier le logiciel utilisé pour encoder et 
 le logiciel destiné à être utilisé pour le décodage de la vidéo) 
 Cela amène les gens à penser que
@@ -1027,7 +1027,7 @@ Notez que cela règlera le FourCC à XVID plutôt que DIVX.
 Ceci est recommandé étant donné que DIVX FourCC signifie DivX4, ce qui est un codec MPEG-4 
 très basic, alorsque DX50 et XVID tout deux signifie MPEG-4 complèt (ASP).
 Donc, si vous changez le FourCC à DIVX, de mauvais logiciels ou lecteurs hardware
-peuvent caffouiller sur quelques fonctionalités avançés que
+peuvent cafouiller sur quelques fonctionalités avançées que
 <systemitem class="library">libavcodec</systemitem> supporte, mais que DivX
 ne supporte pas; d'autre part <systemitem class="library">XviD</systemitem> est plus proche 
 de <systemitem class="library">libavcodec</systemitem> en terme de

@@ -446,7 +446,7 @@ Les deux projets ont donc la même origine.
   Comme la plupart des logiciels open source, il est disponible en deux parfums:
   <ulink url="http://www.xvid.org/downloads.html">versions officiel</ulink>
   et la version CVS.
-  La version CVS est actuellement assez stable pour être utilisé, et bénéficie des
+  La version CVS est actuellement assez stable pour être utilisée, et bénéficie des
   corrections de bogues existant des versions "officielles".
   Voici qui doit être fait pour faire fonctionner la version CVS de
   <systemitem class="library">XviD</systemitem>
@@ -492,7 +492,7 @@ Les deux projets ont donc la même origine.
 <title>Sorenson</title>
 
 <para>
-Sorenson est un codec vidéo développé par Sorenson Media et licenciée à Apple qui 
+Sorenson est un codec vidéo développé par Sorenson Media et licencié à Apple qui 
 le distribue avec son <application>Lecteur QuickTime</application>. Nous sommes 
 actuellement capables de décoder toutes les versions des fichiers Sorenson avec les
 décodeurs suivants:
@@ -536,8 +536,8 @@ décodeurs suivants:
   Il n'est pas 100% achevé, mais actuellement il a au moins un début de
   support pour la plupart des fonctionalités du H.264 qui ont un impact sur la qualité.
   Il y a aussi des fonctionalités plus avancées des specifications du H.264
-  qui n'ont rien avoir avec la qualité video. La plupart ne sont pas encor
-  implementé dans le <systemitem class="library">x264</systemitem>.
+  qui n'ont rien avoir avec la qualité vidéo. La plupart ne sont pas encore
+  implémentées dans le <systemitem class="library">x264</systemitem>.
 </para>
 
 <itemizedlist>
@@ -569,17 +569,17 @@ décodeurs suivants:
 <para>
   H.264 est un des noms pour le nouveau codec video numérique développé conjointement
   par l'ITU et le MPEG.
-  Il peut être aussi correctement réferencé avec les noms vagues de
+  Il peut être aussi correctement référencé avec les noms vagues de
   "ISO/IEC 14496-10" ou "MPEG-4 Part 10".
-  De façon plus fréquente, il est rréferencé comme étant "MPEG-4 AVC" ou juste "AVC".
+  De façon plus fréquente, il est réferencé comme étant "MPEG-4 AVC" ou juste "AVC".
 </para>
 <para>
   Qu'importe la façon de l'appeler, H.264 peut valoir le coup d'être essayé
   parcequ'il peut typiquement être équivalent en qualité au MPEG-4 ASP avec
   5%-30% de débit en moins.
-  Concrètement, le résultats dépendra de la source d'encodage et de l'efficacité
+  Concrètement, le résultat dépendra de la source d'encodage et de l'efficacité
   de l'encodeur.
-  Les gains apportés par H.264 ne sont pas gratuit: Décoder un flux H.264
+  Les gains apportés par H.264 ne sont pas gratuits: Décoder un flux H.264
   augmente considérablement les besoins en CPU et mémoire.
   Par exemple, sur un Athlon 1733 MHz, une vidéo H.264 en résolution DVD à 1500kbps
   demande environ 35% de CPU à décoder.
@@ -611,13 +611,13 @@ décodeurs suivants:
   <systemitem class="library">libavcodec</systemitem>.
   <systemitem class="library">libavcodec</systemitem> a eu au moins
   un décodeur H.264 qui est un fonctionne un minimum depuis les alentours de Juillet 2004,
-  cependant des changements et améliorations majeurs ont été implémenté depuis cette date,
-  que ce soit en terme de fonctionalités supportées et en terme d'utilisation amélioré du CPU.
+  cependant des changements et améliorations majeurs ont été implémentés depuis cette date,
+  que ce soit en terme de fonctionalités supportées et en terme d'utilisation améliorée du CPU.
   Juste pour être certain, c'est toujours une bonne idée d'utiliser une version récente extraite du CVS.
 </para>
 <para>
-  Si vous voulez un façon rapide et facile de savoir si il y a eu des
-  changements récent du décodage H.264 de <systemitem class="library">libavcodec</systemitem>, 
+  Si vous voulez une façon rapide et facile de savoir si il y a eu des
+  changements récents du décodage H.264 de <systemitem class="library">libavcodec</systemitem>, 
   vous devriez garder un oeil sur
   <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">Interface Web du site CVS de FFmpeg</ulink>.
 </para>
@@ -628,7 +628,7 @@ décodeurs suivants:
 <systemitem class="library">x264</systemitem>?</title>
 <para>
   Si vous avez la sous-version du client installé, les dernières sources de x264
-  peut être récupéré avec cette commande:
+  peuvent être récupérées avec cette commande:
   <screen>
     svn co svn://svn.videolan.org/x264/trunk x264<!--
   --></screen>

@@ -37,7 +37,7 @@ Vous pouvez réduire la vitesse des lecteurs de CD-ROM IDE avec <command>hdparm</
 </para>
 
 <para>
-Si vous utilisé l'émulation SCSI, vous pourriez avoir à appliquer les paramètres au
+Si vous utilisez l'émulation SCSI, vous pourriez avoir à appliquer les paramètres au
 vrai périphérique IDE, et non au périphérique SCSI émulé.
 </para>
 
@@ -141,7 +141,7 @@ outils de ce genre.
 <formalpara>
 <title>Structure d'un DVD</title>
 <para>
-Les disques DVD utilisent tous des secteurs de 2048 octets par secondes avec ECC/CRC. Ils ont
+Les disques DVD utilisent tous des secteurs de 2048 octets par seconde avec ECC/CRC. Ils ont
 généralement un système de fichier UDF sur une seule piste, qui contient divers fichiers (des
 petits fichiers .IFO et .BUK et de gros (1Go) fichiers .VOB). Ce sont de véritables fichiers et ils
 peuvent être joués/copiés depuis le système de fichier monté d'un DVD non-crypté.
@@ -300,17 +300,17 @@ La première piste est en mode 2 forme 2 ce qui signifie qu'elle utilise une
 correction d'erreur L2. La piste contient un système de fichiers ISO-9660 avec 2048
 octets/secteur. Ce système de fichiers contient des informations VCD meta-donnée, aussi
 bien que les frames fixes souvent utilisées dans les menus. Les segments MPEG pour les menus peuvent
-aussi être stocké dans la première piste, mais les données MPEG doivent être cassé en séries de bouts de 150 secteurs.
+aussi être stockés dans la première piste, mais les données MPEG doivent être cassées en séries de bouts de 150 secteurs.
 Le système de fichiers ISO-9660 peut contenir d'autres fichiers ou programmes qui ne sont pas essentiels pour les
 opérations VCD.
 </para></listitem>
 
 <listitem><para>
 La seconde piste et les suivantes sont des pistes MPEG brutes (film) à 2324 octets/secteur, contenant
-un paquet de données MPEG PS par secteur. Celle-là sont formaté selon le mode 2 forme 1, donc elles stockent
-plus de donnée par secteur au dépend de la perte de quelque correction d'erreur. Il est aussi permis d'avoir
+un paquet de données MPEG PS par secteur. Celles-ci sont formatées selon le mode 2 forme 1, donc elles stockent
+plus de données par secteur au dépend de la perte de quelque correction d'erreur. Il est aussi permis d'avoir
 des pistes CD-DA dans un VCD aussi bien après la première piste.
-Sur certains systèmes opérant, il y a quelque astuces qui permettent de faire apparaître ces pistes non-ISO-9660
+Sur certains systèmes opérant, il y a quelques astuces qui permettent de faire apparaître ces pistes non-ISO-9660
 dans un système de fichiers. Sur d'autres systèmes opérant comme GNU/Linux cela n'est pas le cas (pas encore). Ici
 les données MPEG <emphasis role="bold">ne peuvent être montées</emphasis>. Comme la plupart des films sont à l'intérieur
 de ce genre de piste, vous devrez tout d'abord essayer <option>vcd://2</option>
