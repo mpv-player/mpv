@@ -41,10 +41,12 @@
 
 #if defined(__linux__)
 	#include <linux/cdrom.h>
-#elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 	#include <sys/cdio.h>
 #elif defined(WIN32)
         #include <ddk/ntddcdrm.h>
+#elif (__bsdi__)
+        #include <dvd.h>
 #endif
 
 #include "cdd.h"
@@ -60,7 +62,7 @@ stream_t* open_cdda(char *dev, char *track);
 static cd_toc_t cdtoc[100];
 static int cdtoc_last_track;
 
-#if defined(__linux__)
+#if defined(__linux__) || defined(__bsdi__)
 int 
 read_toc(const char *dev) {
 	int drive;
@@ -131,7 +133,7 @@ read_toc(const char *dev) {
         return toc.LastTrack;
 }
 
-#elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
 int 
 read_toc(const char *dev) {
 	int drive;
