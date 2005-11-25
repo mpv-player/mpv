@@ -239,7 +239,7 @@ Egger, Christoph <christoph_egger@gmx.de>
     * vo_ggi updates
 
 Elsinghorst, Paul Wilhelm <paul@uni-bonn.de>
-    * GUI: remote ESD support including software mixer 
+    * GUI: remote ESD support including software mixer
 
 Ernesti, Bernd <mplayer@lists.veego.de>
     * NetBSD support patches
@@ -877,6 +877,9 @@ GUI skins
 unknown author
     * iTunes, iTunes-mini
 
+Azrael <azrael@azrael-uk.f2s.com>
+    * brushedGnome
+
 Bekesi, Viktor (FRD)
     * standard, plastic, slim
 
@@ -976,6 +979,9 @@ Sudrien
 Szumiela, Marcin <marcin@szumiela.pl>
     * divxplayer
 
+Tisi, Massimo <massimotisi@yahoo.it>
+    * clearplayer
+
 Tyr, Jiri jun. <jirka@dts.cz>
     * DVDPlayer
 
@@ -984,6 +990,9 @@ Vasilev, Ognian <ogi28@mail.bg>
 
 Veres, Imre <six@freemail.hu>
     * Canary
+
+Vesko, Radic <rvesko@EUnet.yu>
+    * Linea
 
 Vigvary, Balasz (Toky)
     * avifile
@@ -997,5 +1006,5 @@ Whitmore, Gary Jr.
 Wilamowski, Franciszek (Xenomorph) <higgs@hoth.amu.edu.pl>
     * Abyss, Blue, Blue-small
 
-Zeising, Michael <michael@michaels-website.de> 
+Zeising, Michael <michael@michaels-website.de>
     * productive
