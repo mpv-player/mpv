@@ -58,7 +58,7 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
 <listitem><simpara>
   VOB: C'est le format de fichier MPEG des <emphasis role="bold">DVDs</emphasis>.
   C'est le même que MPG, plus la capacité de contenir des sous-titres et de
-  l'audio non-MPEG (AC3). Il contient de la vidéo encodé en MPEG2 et généralement
+  l'audio non-MPEG (AC3). Il contient de la vidéo encodée en MPEG2 et généralement
   de l'audio AC3, mais DTS, MP2 et LPCM non-compressé sont également autorisés.
   Lisez la section <link linkend="dvd">DVD</link>!
   </simpara></listitem>
@@ -66,7 +66,7 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
   TY: C'est un flux TiVo MPEG. Il contient les données MPEG PES pour les flux audio et
   vidéo, ainsi que des informations en plus comme les closed captions (CC). Le
   conteneur n'est pas un flux de programme MPEG, mais un format fermé créé par
-  TiVo. Pour plus d'information sur le format de flux TiVo, veuillez vous référer à
+  TiVo. Pour plus d'informations sur le format de flux TiVo, veuillez vous référer à
   <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
   la page TyStudio</ulink>.
   </simpara></listitem>
@@ -75,7 +75,7 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
 <para>
 Les séries de trames forment des groupes indépendants dans les fichiers MPEG.
 Cela signifie que vous pouvez couper/joindre un fichier MPEG avec des outils
-fichier standards (comme <command>dd</command>, <command>cut</command>), et il
+fichiers standards (comme <command>dd</command>, <command>cut</command>), et il
 restera parfaitement lisible.
 </para>
 
@@ -386,7 +386,7 @@ principale différence est que le GIF89a autorise l'animation.
 <application>MPlayer</application> supporte les deux formats en utilisant
 <systemitem class="library">libungif</systemitem> ou une autre librairie
 compatible libgif.
-Les GIFs non-animés seront affichées comme des vidéos à simple trame.
+Les GIFs non-animés seront affichés comme des vidéos à simple trame.
 (Utilisez les options <option>-loop</option>
 et <option>-fixed-vo</option> pour les afficher plus longtemps).
 </para>

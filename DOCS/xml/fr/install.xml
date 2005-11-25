@@ -156,7 +156,7 @@ recommandés.
     </simpara></listitem>
   <listitem><simpara>
     ce codec est le <emphasis role="bold">plus rapide disponible</emphasis> pour
-    les formats DivX/3/4/5 et autre MPEG-4. Recommendé!
+    les formats DivX/3/4/5 et autre MPEG-4. Recommandé!
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -577,7 +577,7 @@ dans votre fichier de configuration pour utiliser la skin dans le répertoire <fi
 <para>
 <application>MPlayer</application> peut convertir les formats précédemment listés
 (<emphasis role="bold">excepté les trois premiers</emphasis>)
-dans dans les formats de destination suivants, en utilisant ces options:
+dans dans les formats de destinations suivants, en utilisant ces options:
 <itemizedlist>
 <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
 <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
@@ -732,7 +732,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir:
  </para></listitem>
 <listitem><para>
   Utiliser une fonte TrueType (TTF), par l'intermédiaire de la librairie
-  <systemitem class="library">freetype</systemitem>. La Version 2.0.9 ou supérieur est obligatoire!
+  <systemitem class="library">freetype</systemitem>. La Version 2.0.9 ou supérieure est obligatoire!
   Ensuite vous avez deux méthodes:
   <itemizedlist>
     <listitem><para>
@@ -867,7 +867,7 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
   </simpara></listitem>
 <listitem><simpara>
   trouvez et éditez <filename>input.conf</filename> pour activer les touches
-  correspondant aux mouvements dans le menu (c'est décrit sur place).
+  correspondants aux mouvements dans le menu (c'est décrit sur place).
   </simpara></listitem>
 <listitem><para>
   lancez <application>MPlayer</application> avec par exemple:
@@ -918,13 +918,13 @@ Si vous n'avez pas un noyau si récent, vous pouvez aussi changer une ligne du fi
    la vitesse des processeurs interfèrent avec la RTC. L'audio et la vidéo peuvent alors
    se désynchroniser. Brancher l'alimentation sur secteur avant de démarrer le portable
    semble aider. Vous pouvez toujours désactiver le support RTC avec l'option 
-   <option>-nortc</option>. Dans certaines configurations matérielles (confirmé durant 
+   <option>-nortc</option>. Dans certaines configurations matérielles (confirmées durant 
    l'utilisation d'un lecteur DVD sans DMA sur une carte ALi1541), l'utilisation de la RTC 
    peut causer une image qui saute. Dans ce cas, il est recommandé d'utiliser 
    la troisième méthode.
   </para></listitem>
 <listitem><simpara>
-  <emphasis role="bold">La troisième méthode de synchro</emphasis> est activé par l'option 
+  <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option 
   <option>-softsleep</option>. Il à la précision de la RTC, mais n'utilise pas la RTC. 
   D'un autre côté, il nécessite plus de CPU.
   </simpara></listitem>
