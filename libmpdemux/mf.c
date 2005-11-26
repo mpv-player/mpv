@@ -40,9 +40,38 @@ mf_t* open_mf(char * filename){
 
  mf=calloc( 1,sizeof( mf_t ) );
 
+ if( filename[0] == '@' )
+  { 
+   FILE *lst_f=fopen(filename + 1,"r");
+   if ( lst_f ) 
+    {
+     fname=malloc( 255 );
+     while ( fgets( fname,255,lst_f ) ) 
+      {
+       /* remove spaces from end of fname */
+       char *t=fname + strlen( fname ) - 1;
+       while ( t > fname && isspace( *t ) ) *(t--)=0;
+       if ( stat( fname,&fs ) ) 
+        {
+         mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
+        }
+        else
+        {
+         mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
+         mf->names[mf->nr_of_files]=strdup( fname );
+         mf->nr_of_files++;
+        }
+      }
+      fclose( lst_f );
+	     
+      mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
+      goto exit_mf;
+    }
+    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] %s is not indirect filelist\n",filename+1 );
+  }
+
  if( strchr( filename,',') )
   { 
-   fname=malloc( 255 ); 
    mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] filelist: %s\n",filename );
  
    while ( ( fname=strsep( &filename,"," ) ) )
