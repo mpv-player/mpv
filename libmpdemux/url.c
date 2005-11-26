@@ -19,18 +19,11 @@ url_new(const char* url) {
 	int pos1, pos2,v6addr = 0;
 	URL_t* Curl = NULL;
         char *escfilename=NULL;
-        char *unescfilename=NULL;
 	char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL, *ptr4=NULL;
 	int jumpSize = 3;
 
 	if( url==NULL ) return NULL;
 	
-        // Create temp filename space
-        unescfilename=malloc(strlen(url)+1);
-        if (!unescfilename ) {
-                mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
-                goto err_out;
-        }
         escfilename=malloc(strlen(url)*3+1);
         if (!escfilename ) {
                 mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
@@ -47,12 +40,7 @@ url_new(const char* url) {
 	// Initialisation of the URL container members
 	memset( Curl, 0, sizeof(URL_t) );
 
-        //create unescaped/escaped versions of url
-        url_unescape_string(unescfilename,url);  // this is to prevent us from escaping an unescaped string
-                                                 // violating RFC 2396
-        url_escape_string(escfilename,unescfilename);
-        free(unescfilename);
-        unescfilename = NULL;
+	url_escape_string(escfilename,url);
 
 	// Copy the url in the URL container
 	Curl->url = strdup(escfilename);
@@ -198,7 +186,6 @@ url_new(const char* url) {
 	return Curl;
 err_out:
 	if (escfilename) free(escfilename);
-	if (unescfilename) free(unescfilename);
 	if (Curl) url_free(Curl);
 	return NULL;
 }
@@ -243,10 +230,8 @@ url_unescape_string(char *outbuf, const char *inbuf)
         *outbuf++='\0'; //add nullterm to string
 }
 
-/* Replace specific characters in the URL string by an escape sequence */
-/* works like strcpy(), but without return argument */
-void
-url_escape_string(char *outbuf, const char *inbuf) {
+static void
+url_escape_string_part(char *outbuf, const char *inbuf) {
 	unsigned char c,c1,c2;
         int i,len=strlen(inbuf);
 
@@ -261,12 +246,7 @@ url_escape_string(char *outbuf, const char *inbuf) {
 		if(	(c >= 'A' && c <= 'Z') ||
 			(c >= 'a' && c <= 'z') ||
 			(c >= '0' && c <= '9') ||
-			(c >= 0x7f) ||						/* fareast languages(Chinese, Korean, Japanese) */
-			c=='-' || c=='_' || c=='.' || c=='!' || c=='~' ||	/* mark characters */
-			c=='*' || c=='\'' || c=='(' || c==')' || 	 	/* do not touch escape character */
-			c==';' || c=='/' || c=='?' || c==':' || c=='@' || 	/* reserved characters */
-			c=='&' || c=='=' || c=='+' || c=='$' || c==',' || 	/* see RFC 2396 */
-			c=='\0' ) {                                             /* string term char */
+			(c >= 0x7f)) {
 			*outbuf++ = c;
                 } else if ( c=='%' && ((c1 >= '0' && c1 <= '9') || (c1 >= 'A' && c1 <= 'F')) &&
                            ((c2 >= '0' && c2 <= '9') || (c2 >= 'A' && c2 <= 'F'))) {
@@ -291,6 +271,67 @@ url_escape_string(char *outbuf, const char *inbuf) {
 		}
 	}
         *outbuf++='\0';
+}
+
+/* Replace specific characters in the URL string by an escape sequence */
+/* works like strcpy(), but without return argument */
+void
+url_escape_string(char *outbuf, const char *inbuf) {
+	unsigned char c;
+        int i = 0,j,len = strlen(inbuf);
+	char* tmp,*unesc = NULL, *in;
+	
+	// Look if we have an ip6 address, if so skip it there is
+	// no need to escape anything in there.
+	tmp = strstr(inbuf,"://[");
+	if(tmp) {
+		tmp = strchr(tmp+4,']');
+		if(tmp && (tmp[1] == '/' || tmp[1] == ':' ||
+			   tmp[1] == '\0')) {
+			i = tmp+1-inbuf;
+			strncpy(outbuf,inbuf,i);
+			outbuf += i;
+			tmp = NULL;
+		}
+	}
+	
+	while(i < len) {
+		// look for the next char that must be kept
+		for  (j=i;j<len;j++) {
+			c = inbuf[j];
+			if(c=='-' || c=='_' || c=='.' || c=='!' || c=='~' ||	/* mark characters */
+			   c=='*' || c=='\'' || c=='(' || c==')' || 	 	/* do not touch escape character */
+			   c==';' || c=='/' || c=='?' || c==':' || c=='@' || 	/* reserved characters */
+			   c=='&' || c=='=' || c=='+' || c=='$' || c==',') 	/* see RFC 2396 */
+				break;
+		}
+		// we are on a reserved char, write it out
+		if(j == i) {
+			*outbuf++ = c;
+			i++;
+			continue;
+		}
+		// we found one, take that part of the string
+		if(j < len) {
+			if(!tmp) tmp = malloc(len+1);
+			strncpy(tmp,inbuf+i,j-i);
+			tmp[j-i] = '\0';
+			in = tmp;
+		} else // take the rest of the string
+			in = (char*)inbuf+i;
+		
+		if(!unesc) unesc = malloc(len+1);
+		// unescape first to avoid escaping escape
+		url_unescape_string(unesc,in);
+		// then escape, including mark and other reserved chars
+		// that can come from escape sequences
+		url_escape_string_part(outbuf,unesc);
+		outbuf += strlen(outbuf);
+		i += strlen(in);
+	}
+	*outbuf = '\0';
+	if(tmp) free(tmp);
+	if(unesc) free(unesc);
 }
 
 #ifdef __URL_DEBUG
