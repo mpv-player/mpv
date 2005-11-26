@@ -909,15 +909,11 @@ case "$host_arch" in
 	fi
 	;;
     6) iproc=686
-        # VIA C3 has SSE, but doesn't have MMX2
-        # workaround for SSE => MMX2 implication above
-        _mmx2=no
 	if test "$pmodel" -ge 9; then
 		proc=c3-2
-	elif test "$pmodel" -ge 7; then
-		proc=c3
 	else
-		proc=i686
+		proc=c3
+		iproc=586
 	fi
 	;;
     *) proc=i686 iproc=i686 ;;
@@ -960,7 +956,7 @@ EOF
     if test "$proc" = "k6-3" || test "$proc" = "k6-2"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=k6
     fi
-    if test "$proc" = "k6"; then
+    if test "$proc" = "k6" || test "$proc" = "c3"; then
       if not cc_check -march=$proc $cpuopt=$proc; then
         if cc_check -march=i586 $cpuopt=i686; then
           proc=i586-i686
@@ -975,7 +971,7 @@ EOF
     if test "$proc" = "i686" || test "$proc" = "pentium-mmx" || test "$proc" = "winchip-c6" || test "$proc" = "winchip2"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i586
     fi
-    if test "$proc" = "i586" || test "$proc" = "c3" || test "$proc" = "c3-2"; then
+    if test "$proc" = "i586"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i486
     fi
     if test "$proc" = "i486" ; then
