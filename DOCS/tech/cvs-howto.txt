@@ -186,7 +186,8 @@ II. POLICY / RULES:
    the CVS log message. Since the mplayer-cvslog mailing list is publicly
    archived you should add some spam protection to the email address. Send an
    answer to mplayer-dev-eng (or wherever you got the patch from) saying that
-   you applied the patch.
+   you applied the patch. If the patch contains a documentation part, commit
+   this as well, do not leave it to the documentation maintainers.
 
 9. Do NOT commit to code actively maintained by others without permission. Send
    a patch to mplayer-dev-eng instead.
