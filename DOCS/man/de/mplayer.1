@@ -309,7 +309,7 @@ Wechselt durch die verfügbaren Untertitel.
 Ändert die Anzeige der "erzwungenen Untertitel".
 .IPs a\ \ \ \ 
 Ändert die Positionierung der Untertitel: oben/\:mitte/\:unten.
-.IPs "z und x"
+.IPs "x und z"
 Passt die Untertitel-Anzeige um +/\:- 0.1 Sekunde an.
 .IPs "r und t"
 Bewegt die Untertitel nach oben/\:unten.
@@ -2931,6 +2931,15 @@ Benötigt eine OpenGL-Version >= 1.2.
 .IPs slice-height=<0\-...>
 Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
 0 für ganzes Bild.
+.br
+.I HINWEIS:
+Falls der YUV-Farbraum benutzt wird (siehe yuv-Unteroption), gilt folgendes:
+.RSss
+Wenn der Dekoder in Streifen rendert (siehe \-noslices), dann hat diese
+Einstellung keinen Effekt, die Streifengröße des Dekoders wird benutzt.
+.br
+Wenn der Dekoder nicht in Streifen rendert, dann ist die Standardeinstellung 16.
+.RE
 .IPs (no)osd
 (De)aktiviere die Unterstützung für das Rendern des OSD via OpenGL (Standard:
 aktiviert).
@@ -2957,7 +2966,7 @@ Grafikspeicher, aber ist oft langsamer (Standard: 0).
 .br
 2: Benutze die GL_ARB_texture_non_power_of_two Erweiterung.
 Dies wird manchmal durch Software emuliert und ist dann sehr langsam.
-.REss
+.RE
 .IPs (no)glfinish
 Rufe glFinish() vor dem Wechsel der Puffer auf.
 Langsamer, aber sorgt manchmal für korrektere Ausgabe (Standard: aus).
@@ -8734,7 +8743,7 @@ Brauchbare Werte liegen im Bereich <-2\-2> (Standard: 0).
 .TP
 .B level_idc=<10\-51>
 Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert
-Standard: 40 (Level 4.0).
+Standard: 51 (Level 5.1).
 Dies wird benutzt, um dem Decoder mitzuteilen, welche Fähigkeiten dieser
 unterstützen muß.
 Benutze diesen Parameter nur, wenn du weißt, was er bedeutet, und du ihn
