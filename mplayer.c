@@ -1104,6 +1104,29 @@ static void set_osd_msg(int id, int level, int time, char* fmt, ...) {
 }
 
 /**
+ *  \brief Remove a message from the OSD stack
+ * 
+ *  This function can be used to get rid of a message right away.
+ * 
+ */
+
+static void rm_osd_msg(int id) {
+    mp_osd_msg_t *msg,*last=NULL;
+    
+    // Search for the msg
+    for(msg = osd_msg_stack ; msg && msg->id != id ;
+	last = msg, msg = msg->prev);
+    if(!msg) return;
+
+    // Detach it from the stack and free it
+    if(last)
+        last->prev = msg->prev;
+    else
+        osd_msg_stack = msg->prev;
+    free(msg);
+}
+
+/**
  *  \brief Get the current message fron the OSD stack
  * 
  *  This function decrement the message timer and destroy the old ones.
@@ -3248,6 +3271,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if (v == -1 && osd_level <= 1)
 	  set_osd_msg(OSD_MSG_OSD_STATUS,0,osd_duration,
                       MSGTR_OSDosd, osd_level ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
+	else
+	  rm_osd_msg(OSD_MSG_OSD_STATUS);
     } break;
     case MP_CMD_OSD_SHOW_TEXT :  {
       set_osd_msg(OSD_MSG_TEXT,1,osd_duration,"%64s",cmd->args[0].v.s);
