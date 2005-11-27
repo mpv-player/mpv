@@ -6,7 +6,8 @@
 set -e
 
 site=http://download.divx.com/divx/
-filename=divx4linux501-20020418.tgz
+packagename=divx4linux501-20020418
+filename=$packagename.tgz
 
 if [ `whoami` != root ]; then
     echo "You must be a root to start this script. Login As root first!"
@@ -20,11 +21,11 @@ case "$1" in
         cd /var/tmp/mplayer$$
         wget $site/$filename
         tar xzf $filename
-        cd divx4linux-20020418/
+        cd $packagename/
         sh install.sh
         cd ..
         rm -rf $filename
-        rm -rf divx4linux-20020418/
+        rm -rf $packagename/
         echo "Installed Succesfully!"
         rmdir /var/tmp/mplayer$$	
 	;;
