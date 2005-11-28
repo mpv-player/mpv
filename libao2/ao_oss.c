@@ -319,7 +319,7 @@ ac3_retry:
   }
 #if 0
   if(oss_format!=format2oss(format))
-	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-aop list=format'\n",audio_out_format_name(format));
+	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-af format'\n",audio_out_format_name(format));
 #endif
 
   ao_data.format = oss2format(oss_format);
