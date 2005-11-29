@@ -6,6 +6,7 @@
 #include "config.h"
 #include "version.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "bswap.h"
 #include "aviheader.h"
@@ -266,9 +267,9 @@ static void write_header(muxer_t *muxer)
 {
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	
+	mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
 	av_write_header(priv->oc);
 	muxer->cont_write_header = NULL;
-	mp_msg(MSGT_MUXER, MSGL_INFO, "WRITTEN HEADER\n");
 }
 
 
@@ -277,8 +278,8 @@ static void write_trailer(muxer_t *muxer)
 	int i;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	
+	mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
 	av_write_trailer(priv->oc);
-	mp_msg(MSGT_MUXER, MSGL_INFO, "WRITTEN TRAILER\n");
 	for(i = 0; i < priv->oc->nb_streams; i++) 
 	{
 		av_freep(&(priv->oc->streams[i]));

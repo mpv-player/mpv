@@ -18,6 +18,7 @@
 #include "aviheader.h"
 #include "ms_hdr.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 extern char *info_name;
 extern char *info_artist;
@@ -277,6 +278,7 @@ static void avifile_write_header(muxer_t *muxer){
   struct avi_stream_info *vsi = muxer->def_v->priv;
   int isodml = vsi->riffofspos > 0;
 
+  mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
   if (aspect == 0) {
     mp_msg(MSGT_MUXER, MSGL_INFO, "ODML: Aspect information not (yet?) available or unspecified, not writing vprp header.\n");
   } else {
@@ -642,6 +644,7 @@ static void avifile_write_standard_index(muxer_t *muxer){
 static void avifile_write_index(muxer_t *muxer){
   struct avi_stream_info *vsi = muxer->def_v->priv;
 
+  mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
   if (vsi->riffofspos > 0){
     avifile_odml_write_index(muxer);
   } else {

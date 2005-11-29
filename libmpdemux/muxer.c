@@ -62,7 +62,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags) {
       
       tmp = realloc(s->muxer->muxbuf, (num+1) * sizeof(muxbuf_t));
       if(!tmp) {
-        mp_msg(MSGT_MUXER, MSGL_FATAL, "Muxer frame buffer cannot reallocate memory!\n");
+        mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufReallocErr);
         return;
       }
       s->muxer->muxbuf = tmp;
@@ -75,7 +75,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags) {
       buf->flags = flags;
       buf->buffer = malloc(len * sizeof (unsigned char));
       if (!buf->buffer) {
-        mp_msg(MSGT_MUXER, MSGL_FATAL, "Muxer frame buffer cannot allocate memory!\n");
+        mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufMallocErr);
         return;
       }
       memcpy(buf->buffer, s->buffer, buf->len);
@@ -91,11 +91,10 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags) {
       if (s->muxer->muxbuf_skip_buffer) {
         muxbuf_t *tmp_buf = malloc(sizeof(muxbuf_t));
         if (!tmp_buf) {
-          mp_msg(MSGT_MUXER, MSGL_FATAL, "Muxer frame buffer cannot allocate memory!\n");
+          mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufMallocErr);
           return;
         }
-        mp_msg(MSGT_MUXER, MSGL_V, "Muxer frame buffer sending %d frame(s) to muxer.\n",
-                        s->muxer->muxbuf_num);
+        mp_msg(MSGT_MUXER, MSGL_V, MSGTR_MuxbufSending, s->muxer->muxbuf_num);
         
         /* fix parameters for all streams */
         for (num = 0; s->muxer->streams[num]; ++num) {
@@ -105,7 +104,6 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags) {
         }
         
         /* write header */
-        mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingAVIHeader);
         if (s->muxer->cont_write_header)
           muxer_write_header(s->muxer);
         
@@ -139,7 +137,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags) {
     if(s->h.dwSampleSize){
       // CBR
       s->h.dwLength+=len/s->h.dwSampleSize;
-      if(len%s->h.dwSampleSize) mp_msg(MSGT_MUXER, MSGL_WARN, "Warning! len isn't divisable by samplesize!\n");
+      if(len%s->h.dwSampleSize) mp_msg(MSGT_MUXER, MSGL_WARN, MSGTR_WarningLenIsntDivisible);
     } else {
       // VBR
       s->h.dwLength++;

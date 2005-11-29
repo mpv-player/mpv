@@ -241,7 +241,6 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "Failed to open the encoder.\n"
 #define MSGTR_ForcingOutputFourcc "Forcing output fourcc to %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Forcing output audio format tag to 0x%x\n"
-#define MSGTR_WritingAVIHeader "Writing AVI header...\n"
 #define MSGTR_DuplicateFrames "\n%d duplicate frame(s)!\n"
 #define MSGTR_SkipFrame "\nSkipping frame!\n"
 #define MSGTR_ResolutionDoesntMatch "\nNew video file has different resolution or colorspace than the previous one.\n"
@@ -251,8 +250,6 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed is not guaranteed to work correctly with -oac copy!\n"\
 "Your encode might be broken!\n"
 #define MSGTR_ErrorWritingFile "%s: Error writing file.\n"
-#define MSGTR_WritingAVIIndex "\nWriting AVI index...\n"
-#define MSGTR_FixupAVIHeader "Fixing AVI header...\n"
 #define MSGTR_RecommendedVideoBitrate "Recommended video bitrate for %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/s  (%d B/s)  size: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d B/s)  size: %d bytes  %5.3f secs\n"
@@ -519,12 +516,17 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleChannel "Selected DVD subtitle channel: %d language: %c%c\n"
 #define MSGTR_DVDopenOk "DVD successfully opened.\n"
 
-// muxer_*.c:
+// muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Too many streams!"
 #define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer supports only one audio stream!\n"
 #define MSGTR_IgnoringVideoStream "Ignoring video stream!\n"
 #define MSGTR_UnknownStreamType "Warning! unknown stream type: %d\n"
 #define MSGTR_WarningLenIsntDivisible "Warning! len isn't divisible by samplesize!\n"
+#define MSGTR_MuxbufMallocErr "Muxer frame buffer cannot allocate memory!\n"
+#define MSGTR_MuxbufReallocErr "Muxer frame buffer cannot reallocate memory!\n"
+#define MSGTR_MuxbufSending "Muxer frame buffer sending %d frame(s) to muxer.\n"
+#define MSGTR_WritingHeader "Writing header...\n"
+#define MSGTR_WritingTrailer "Writing index...\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"

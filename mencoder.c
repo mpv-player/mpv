@@ -1508,10 +1508,8 @@ if(aencoder)
     if(aencoder->fixup)
         aencoder->fixup(aencoder);
 
-mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_WritingAVIIndex);
 if (muxer->cont_write_index) muxer_write_index(muxer);
 muxer_f_size=ftello(muxer_f);
-mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
 if (muxer->cont_write_header) muxer_write_header(muxer); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {

@@ -7,6 +7,7 @@
 #include "config.h"
 #include "version.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "bswap.h"
 
@@ -2555,6 +2556,8 @@ static void mpegfile_write_index(muxer_t *muxer)
 	double fake_timer;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 
+	mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingTrailer);
+
 	for(i = 0; i < muxer->avih.dwStreams; i++)
 	{
 		if(muxer->streams[i]->type == MUXER_TYPE_AUDIO)
@@ -2571,6 +2574,8 @@ static void mpegfile_write_index(muxer_t *muxer)
 static void mpegfile_write_header(muxer_t *muxer)
 {
 	muxer_priv_t *priv = (muxer_priv_t*) muxer->priv;
+	
+	mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_WritingHeader);
 	
 	priv->headers_cnt++;
 	
