@@ -123,11 +123,12 @@ CODEC SPECIFIC ENCODING OPTIONS (MENCODER ONLY)
     Codec specific option descriptions (lavc,divx4,xvid,lame) (MEncoder only).
 FILES
     A list and description of all installed/used files/directories.
-EXAMPLES
+EXAMPLES OF MPLAYER USAGE
+    Basic examples. Again: no long descriptions/processes.
+EXAMPLES OF MENCODER USAGE
     Basic examples. Again: no long descriptions/processes.
 BUGS
 AUTHORS
-STANDARD DISCLAIMER
 
 
 
