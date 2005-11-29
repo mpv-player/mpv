@@ -98,7 +98,7 @@ static int init(int rate,int channels,int format,int flags){
 #ifdef DXR2_AUDIO_FREQ_24
 	// This is not yet in the dxr2 driver CVS
 	// you can get the patch at
-	// http://www.ranmachan.dyndns.org/~ranma/patches/dxr2.pcm1723.20020513
+	// http://www.tdiedrich.de/~ranma/patches/dxr2.pcm1723.20020513
 	case 24000:
 		freq_id=DXR2_AUDIO_FREQ_24;
 		break;
