@@ -1914,19 +1914,19 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	if(! vpriv->vframes)	//initial value of tff
 		vpriv->trf = (pce_ptr[3] >> 6) & 0x2;
 
+	while(n < 0) n+=4;
+	vpriv->trf = (vpriv->trf + n) % 4;
+	
 	//sets curent tff/rff bits
 	tff = (vpriv->trf & 0x2) ? 0x80 : 0;
 	rff = (vpriv->trf & 0x1) ? 0x2 : 0;
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTFF: %d, RFF: %d\n", tff >> 7, rff >> 1);
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
 	pce_ptr[3] = (pce_ptr[3] & 0xfd) | tff | rff;
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	
 	if(! vpriv->vframes)
 		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
 		framerates[fps+3], tff >> 7, rff >> 1);
-	
-	while(n < 0) n+=4;
-	vpriv->trf = (vpriv->trf + n) % 4;
 	
 	return 1;
 }
@@ -1937,7 +1937,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 	uint8_t *fps_ptr = NULL;	//pointer to the fps byte in the sequence header
 	uint8_t *se_ptr = NULL;		//pointer to sequence extension
 	uint8_t *pce_ptr = NULL;	//pointer to picture coding extension
-	int frames_diff, d1;		//how any frames we advanced respect to the last one
+	int frames_diff, d1, gop_reset = 0;	//how any frames we advanced respect to the last one
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg12_video, len=%u\n", (uint32_t) len);
 	if(s->buffer[0] != 0 || s->buffer[1] != 0 || s->buffer[2] != 1 || len<6) 
@@ -1989,12 +1989,24 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		}
 		
 		
-
 		if(s->buffer[3])
 		{	// Sequence or GOP -- scan for Picture
-			while (ptr < len-5 && 
+			/*while (ptr < len-5 && 
 				(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1 || s->buffer[ptr+3] != 0)) 
+				ptr++;*/
+
+			do_loop: while (ptr < len-5 && 
+				(s->buffer[ptr] != 0 || s->buffer[ptr+1] != 0 || s->buffer[ptr+2] != 1))
 				ptr++;
+
+			if(s->buffer[ptr+3] == 0xb8)
+				gop_reset = 1;
+
+			if(s->buffer[ptr+3])	//not frame
+			{
+				ptr++;
+				goto do_loop;
+			}
 		}
 
 		if (ptr >= len-5) 
@@ -2010,14 +2022,21 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			if(!spriv->vframes)
 				spriv->last_tr = spriv->max_tr = temp_ref;
 			d1 = temp_ref - spriv->last_tr;
+			if(gop_reset)
+			{
+				frames_diff = spriv->max_tr + temp_ref - spriv->last_tr;
+			}
+			else
+			{
 			if(d1 < -6)	//there's a wraparound
 				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
 			else if(d1 > 6)	//there's a wraparound
 				frames_diff = spriv->max_tr + 1 + spriv->last_tr - temp_ref;
 			else
 				frames_diff = d1;
-			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nLAST: %d, TR: %d, DIFF: %d, MAX: %d, d1: %d\n", 
-			spriv->last_tr, temp_ref, frames_diff, spriv->max_tr, d1);
+			}
+			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nLAST: %d, TR: %d, GOP: %d, DIFF: %d, MAX: %d, d1: %d\n", 
+			spriv->last_tr, temp_ref, gop_reset, frames_diff, spriv->max_tr, d1);
 			if(!temp_ref)
 				spriv->max_tr = 0;
 			else if(temp_ref > spriv->max_tr)
@@ -2648,11 +2667,11 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   //calloc() already zero-ed all flags, so we assign only the ones we need
   
   if(conf_mux != NULL) {
-    if(! strcasecmp(conf_mux, "mpeg2"))
+    if(! strcasecmp(conf_mux, "mpeg1"))
     {
-    	priv->mux = MUX_MPEG2;
+    	priv->mux = MUX_MPEG1;
 	priv->packet_size = 2048;
-	priv->is_genmpeg2 = 1;
+	priv->is_genmpeg1 = 1;
 	priv->muxrate = 1800 * 125;	//Constrained parameters
     }
     else if(! strcasecmp(conf_mux, "dvd"))
@@ -2682,8 +2701,10 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
     }
     else
     {
-	priv->mux = MUX_MPEG1;
-	priv->is_genmpeg1 = 1;
+    	if(strcasecmp(conf_mux, "mpeg2"))
+		mp_msg(MSGT_MUXER, MSGL_ERR, "Unknown format %s, default to mpeg2\n", conf_mux);
+	priv->mux = MUX_MPEG2;
+	priv->is_genmpeg2 = 1;
 	priv->packet_size = 2048;
 	priv->muxrate = 1800 * 125;	//Constrained parameters
     }
