@@ -1043,8 +1043,8 @@
 <sect3 id="menc-feat-dvd-mpeg4-resolution-bitrate-compute">
 <title>Computing the resolution</title>
 <para>
-  The following steps will guide you to compute the resolution of your
-  encode without taking too much distortion by taking into account several
+  The following steps will guide you in computing the resolution of your
+  encode without distorting the video too much, by taking into account several
   information about the souce video.
   First, you should compute the encoded aspect ratio:
   <systemitem>ARc = (Wc x (ARa / PRdvd )) / Hc</systemitem>
@@ -1082,18 +1082,18 @@
 </para>
 
 <para>
-  The CQ depends both on the bitrate, the video codec efficiency and the
+  The CQ depends on the bitrate, the video codec efficiency and the
   movie resolution.
   In order to raise the CQ, typically you would downscale the movie given that the
   bitrate is computed in function of the target size and the length of the
   movie, which are constant.
   With MPEG-4 ASP codecs such as <systemitem class="library">XviD</systemitem>
   and <systemitem class="library">libavcodec</systemitem>, a CQ below 0.18
-  usually ends up in a pretty blocky picture, because there
-  are not enough bits to code the information of each macroblock (MPEG4, like
+  usually results in a pretty blocky picture, because there
+  are not enough bits to code the information of each macroblock. (MPEG4, like
   many other codecs, groups pixels by blocks of several pixels to compress the
   image; if there are not enough bits, the edges of those blocks are
-  visible).
+  visible.)
   It is therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
   and 0.26-0.28 for 2 CDs with standard encoding options.
   More advanced encoding options such as those listed here for
@@ -1101,7 +1101,7 @@
   and
 <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
   should make it possible to get the same quality with CQ ranging from
-  0.18 to 0.20 for 1 CD rip, and 0.24-0.26 for 2 CDs
+  0.18 to 0.20 for a 1 CD rip, and 0.24-0.26 for 2 CDs
   With MPEG-4 ASP codecs such as <systemitem class="library">x264</systemitem>,
   you can use a CQ ranging from 0.14 to 0.16 with standard encoding options,
   and should be able to go as low as 0.10 to 0.12 with
@@ -1114,8 +1114,8 @@
   to a movie such as The Matrix, which contains many high-motion scenes.
   On the other hand, it is worthless to raise CQ higher than 0.30 as you would
   be wasting bits without any noticeable quality gain.
-  Also note that as said earlier on this quide, low resolution comparatively
-  need a bigger QP to look good.
+  Also note that as mentioned earlier in this guide, low resolution videos
+  need a bigger CQ (compared to for ex. DVD-resolution) to look good.
 </para>
 </sect3>
 
