@@ -4778,6 +4778,14 @@ static double exp_CIsin(void)
     return sin(x);
 }
 
+/* Needed by rp8 sipr decoder */
+static LPSTR WINAPI expCharNextA(LPCSTR ptr)
+{
+    if (!*ptr) return (LPSTR)ptr;
+//    dbgprintf("CharNextA(0x%08x), %s\n", ptr, ptr);
+    return (LPSTR)(ptr + 1);
+}
+
 struct exports
 {
     char name[64];
@@ -5074,6 +5082,7 @@ struct exports exp_user32[]={
     FF(MessageBeep, -1)
     FF(DialogBoxParamA, -1)
     FF(RegisterClipboardFormatA, -1)
+    FF(CharNextA, -1)
 };
 struct exports exp_advapi32[]={
     FF(RegCloseKey, -1)
