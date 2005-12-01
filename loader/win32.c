@@ -5183,6 +5183,8 @@ struct exports exp_pncrt[]={
     FF(_CIpow,-1)
     FF(calloc,-1)
     FF(memmove, -1)
+    FF(ldexp, -1)
+    FF(frexp, -1)
 };
 #endif
 
