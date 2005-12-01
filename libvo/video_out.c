@@ -157,11 +157,11 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_SYNCFB
         &video_out_syncfb,
 #endif
-#ifdef HAVE_3DFX
-        &video_out_3dfx,
-#endif
 #ifdef HAVE_TDFXFB
         &video_out_tdfxfb,
+#endif
+#ifdef HAVE_3DFX
+        &video_out_3dfx,
 #endif
 #ifdef HAVE_XVMC
         &video_out_xvmc,
