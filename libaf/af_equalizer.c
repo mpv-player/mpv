@@ -190,7 +190,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	wq[0] = w;
       }
       // Calculate output 
-      *out=yt/(4.0*10.0);
+      *out=yt;
       out+=nch;
     }
   }
