@@ -837,22 +837,15 @@ case "$host_arch" in
 	fi
 	;;
     6) iproc=686
-	if test "$pmodel" -ge 7; then
-		proc=athlon-4
-	elif test "$pmodel" -ge 6; then
-		# only Athlon XP supports ssem MP, Duron etc not
-		# but most of them are CPUID 666, so check if sse detected
-		# btw. there is also athlon-mp opt, but we need extended
-		# CPUID to detect if CPU is SMP capable -> athlon-mp ::atmos
-		if test "$_sse" = yes && test "$pstepping" -ge 2; then
-			proc=athlon-xp
-		else
-			proc=athlon-4
-		fi
-	elif test "$pmodel" -ge 4; then
-		proc=athlon-tbird
+	# It's a bit difficult to determine the correct type of Family 6
+	# AMD CPUs just from their signature. Instead, we check directly
+	# whether it supports SSE.
+	if test "$_sse" = yes; then
+		# gcc treats athlon-xp, athlon-4 and athlon-mp similarly.
+		proc=athlon-xp
 	else
-		proc=athlon # TODO: should the Duron Spitfire be considered a Thunderbird instead?
+		# Again, gcc treats athlon and athlon-tbird similarly.
+		proc=athlon
 	fi
 	;;
     15) iproc=686
@@ -861,7 +854,7 @@ case "$host_arch" in
     	proc=k8
     	;;
 
-    *) proc=athlon-xp iproc=686 ;;
+    *) proc=k8 iproc=686 ;;
     esac
     ;;
   GenuineIntel)
