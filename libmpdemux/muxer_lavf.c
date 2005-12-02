@@ -38,9 +38,11 @@ typedef struct {
 } muxer_stream_priv_t;
 
 static char *conf_format = NULL;
+static int conf_allow_lavf = 0;
 
 m_option_t lavfopts_conf[] = {
 	{"format", &(conf_format), CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"i_certify_that_my_video_stream_does_not_use_b_frames", &conf_allow_lavf, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -296,6 +298,24 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 	muxer_priv_t *priv;
 	AVOutputFormat *fmt = NULL;
 	char mp_filename[256] = "menc://stream.dummy";
+
+	mp_msg(MSGT_MUXER, MSGL_WARN, "** MUXER_LAVF *****************************************************************\n");
+	if (!conf_allow_lavf) {
+		mp_msg(MSGT_MUXER, MSGL_FATAL,
+"If you wish to use libavformat muxing, you must ensure that your video stream\n"
+"does not contain B frames (out of order decoding) and specify:\n"
+"    -lavfopts i_certify_that_my_video_stream_does_not_use_b_frames\n"
+"on the command line.\n");
+	} else {
+		mp_msg(MSGT_MUXER, MSGL_WARN,
+"You have certified that your video stream does not contain B frames.\n");
+	}
+	mp_msg(MSGT_MUXER, MSGL_WARN,
+"REMEMBER: MEncoder's libavformat muxing is presently broken and will generate\n"
+"INCORRECT files in the presence of B frames. Moreover, due to bugs MPlayer\n"
+"will play these INCORRECT files as if nothing were wrong!\n"
+"*******************************************************************************\n");
+	if (!conf_allow_lavf) return 0;
 	
 	priv = (muxer_priv_t *) calloc(1, sizeof(muxer_priv_t));
 	if(priv == NULL)
