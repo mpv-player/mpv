@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.98  -->
+<!-- Synced with: 1.99  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -725,6 +725,15 @@ Nebo může mít špatnou hlavičku, v tom případě může pomoci
 Ovladač vaší zvukové karty je vadný. Viz <link linkend="audio">sekce audio</link>.
 </para></listitem>
 </itemizedlist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak se zbavím A/V desynchronizace při převíjení v RealMedia proudech?
+</para></question>
+<answer><para>
+<option>-mc 10</option> může pomoci.
 </para></answer>
 </qandaentry>
 </qandadiv>
