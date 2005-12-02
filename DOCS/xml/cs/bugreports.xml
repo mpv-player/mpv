@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.11 -->
+<!-- Synced with: 1.12 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
 <para>
@@ -23,6 +23,76 @@ dozvěděli jak zahrnout váš kód do <application>MPlayer</application>u.
 Lidé z konference
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 vám pomohou, pokud budete mít otázky.
+</para>
+</sect1>
+<sect1 id="bugreports_regression_test">
+<title>Jak provádět regresní testování pomocí CVS</title>
+<para>
+Občas nastane problém typu 'předtím to fungovalo, teď už ne...'.
+Zde přinášíme postup krok za krokem, jak vyhledat, kdy problém
+nastal. Toto <emphasis role="bold">není</emphasis> určeno příležitostným
+uživatelům.
+</para>
+<para>
+Nejprve si musíte opatřit zdrojové kódy MPlayeru z CVS.
+Instrukce lze nalést na konci
+<ulink url="http://www.mplayerhq.hu/homepage/dload.html">této stránky</ulink>.
+</para>
+<para>
+Tak dostanete v adresáři main/ obraz CVS stromu na straně klienta.
+Nyní aktualizujte tento obraz k datu, které chcete:
+<screen>
+cd main/
+cvs update -PAd -D "2004-08-23"
+</screen>
+Formát data je YYYY-MM-DD HH:MM:SS.
+Požití tohoto datového formátu zajišťuje, že budete schopni extrahovat
+patche podle data, kdy byly zapsány (commit) stejně, jak jsou v
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archivu</ulink>.
+</para>
+<para>
+A teď proveďte sestavení jako při normální aktualizaci:
+<screen>
+./configure
+make
+</screen>
+</para>
+<para>
+Pokud to čte nějaký neprogramátor, nejrychlejší metodou, jak se dostat
+k bodu, kde problém nastal, je použití binárního vyhledávání &ndash; to je
+vyhledávání data poruchy opakovaným dělením vyhledávacího intervalu napůl.
+Například pokud problém nastal v 2003, začneme v polovině roku a ptáme se,
+"Už je tu problém?".
+Pokud ano, vraťte se na prvního dubna; pokud ne, běžte na prvního října
+a tak dále.
+</para>
+<para>
+Pokud máte spoustu místa na disku (plná kompilace obvykle zabírá 100 MB
+a kolem 300&ndash;350 MB, pokud jsou zapnuty debugovací symboly), zkopírujte
+nejstarší známou funkční verzi před jejím updatem; to vám ušetří čas,
+pokud se budete vracet.
+(Obvykla je nutné spustit 'make distclean' před rekompilací starší verze,
+takže pokud si neuděláte záložní kopii originálního zdrojového stromu,
+budete v něm muset rekompilovat vše, až se vrátíte do současnosti.)
+</para>
+<para>
+Pokud jste našli den, kdy k problému došlo, pokračujte v hledání pomocí
+archivu mplayer-cvslog (řazeného podle data) a preciznějším cvs update
+s uvedením hodiny, minuty a sekundy:
+<screen>
+cvs update -PAd -D "2004-08-23 15:17:25"
+</screen>
+To vám umožní lehce najít patch, který problém způsobil.
+</para>
+<para>
+Pokud jste našli patch, který je příčinou problému, máte téměř vyhráno;
+ohlaste to do
+<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilly</ulink> nebo
+se přihlaste do
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+a pošlete to tam.
+Je šance, že autor navrhne opravu.
+Rovněž si můžete patch rozpitvat, dokud z něj nevytlučete, kde je chyba :-).
 </para>
 </sect1>
 <sect1 id="bugreports_report">
