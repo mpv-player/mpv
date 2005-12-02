@@ -111,6 +111,7 @@ static char *lavc_param_skip_loop_filter_str = NULL;
 static char *lavc_param_skip_idct_str = NULL;
 static char *lavc_param_skip_frame_str = NULL;
 #endif
+static int lavc_param_threads=1;
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -132,6 +133,7 @@ m_option_t lavc_decode_opts_conf[]={
 	{"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
+        {"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -407,6 +409,10 @@ static int init(sh_video_t *sh){
     if(sh->bih)
 	avctx->bits_per_sample= sh->bih->biBitCount;
 
+#if LIBAVCODEC_BUILD >= 4716
+    if(lavc_param_threads > 1)
+        avcodec_thread_init(avctx, lavc_param_threads);
+#endif
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
