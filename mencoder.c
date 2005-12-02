@@ -691,6 +691,10 @@ if(!muxer_f) {
 }
 
 muxer=muxer_new_muxer(out_file_format,muxer_f);
+if(!muxer) {
+  mp_msg(MSGT_MENCODER, MSGL_FATAL, "Cannot initialize muxer.");
+  mencoder_exit(1,NULL);
+}
 
 // ============= VIDEO ===============
 
