@@ -285,6 +285,8 @@ static int init(sh_video_t *sh){
     avctx->error_concealment= lavc_param_error_concealment;
 #if LIBAVCODEC_BUILD >= 4642
     avctx->debug= lavc_param_debug;
+    if (lavc_param_debug)
+        av_log_set_level(AV_LOG_DEBUG);
 #endif    
 #if LIBAVCODEC_BUILD >= 4698
     avctx->debug_mv= lavc_param_vismv;
