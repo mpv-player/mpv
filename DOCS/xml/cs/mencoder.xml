@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.98 -->
+<!-- Synced with: 1.100 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -322,8 +322,8 @@ si prostudovat některé návody dostupné na netu.
 Dvouprůchodové enkódování druhé stopy z DVD do MPEG-4 (&quot;DivX&quot;)
 AVI zatímco se zvuk pouze zkopíruje.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>/dev/null</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -336,8 +336,8 @@ enkódování zvukové stopy do MP3.
 Při této metodě buďte opatrní, jelikož v některých případech může vést k rozjetí
 zvuku s videem.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -363,15 +363,13 @@ volby <option>-of mpeg</option>.
 <para>
 Příklad:
 <screen>
-mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>další_volby</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>výstup.mpg</replaceable>
+mencoder <replaceable>vstup.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>další_volby</replaceable> -o <replaceable>výstup.mpg</replaceable>
 </screen>
 Vytvoření MPEG-1 souboru vhodného pro přehrávání na systémech s minimální
 podporou multimédií, jako je výchozí instalace Windows:
 <screen>
-mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
-<replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
--lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3 \
-<replaceable>vstupní.avi</replaceable>
+mencoder <replaceable>vstup.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>výstup.mpg</replaceable> -oac lavc -ovc lavc \
+-lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 </para>
 </informalexample>
@@ -499,6 +497,18 @@ mencoder mf://<replaceable>snímek001.jpg,snímek002.jpg</replaceable> -mf w=800:h
 
 <informalexample>
 <para>
+Vytvoření MPEG-4 souboru ze seznamu vyjmenovaných JPEG souborů
+(seznam.txt v aktuálním adresáři obsahuje seznam souborů k použití
+jako zdroj, každý soubor na samostatném řádku):
+<screen>
+mencoder mf://<replaceable>@seznam.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
+</screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
 Vytvoření Motion JPEG (MJPEG) souboru ze všech JPEG souborů v aktuálním
 adresáři:
 <screen>
@@ -511,7 +521,7 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <repl
 <para>
 Vytvoření nekomprimovaného souboru ze všech PNG souborů v aktuálním adresáři:
 <screen>
-mencoder mf:// -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
