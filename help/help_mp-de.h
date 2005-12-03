@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.202
+// In synch with rev 1.205
 
 // ========================= MPlayer help ===========================
 
@@ -244,7 +244,6 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen.\n"
 #define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Erzwinge Audioformatkennzeichnung 0x%x in der Ausgabe.\n"
-#define MSGTR_WritingAVIHeader "Schreibe AVI-Header...\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
 #define MSGTR_SkipFrame "\nFrame übersprungen!\n"
 #define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung oder anderen Farbraum als die vorige.\n"
@@ -254,8 +253,6 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "WARNUNG: Korrektes Funktionieren von -speed kann zusammen mit -oac copy nicht garantiert werden!\n"\
 "Das Ergebnis der Encodierung könnte defekt sein!\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
-#define MSGTR_WritingAVIIndex "\nSchreibe AVI-Index...\n"
-#define MSGTR_FixupAVIHeader "Korrigiere AVI-Header...\n"
 #define MSGTR_RecommendedVideoBitrate "Empfohlene Videobitrate für %s CD(s): %d\n"
 #define MSGTR_VideoStreamResult "\nVideostream: %8.3f kbit/s  (%d B/s)  Größe: %d Bytes  %5.3f Sek.  %d Frames\n"
 #define MSGTR_AudioStreamResult "\nAudiostream: %8.3f kbit/s  (%d B/s)  Größe: %d Bytes  %5.3f Sek.\n"
@@ -526,12 +523,18 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleChannel "Ausgewählte DVD-Untertitelspur: %d Sprache: %c%c\n"
 #define MSGTR_DVDopenOk "DVD erfolgreich geöffnet.\n"
 
-// muxer_*.c:
+// muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Zu viele Streams!"
 #define MSGTR_RawMuxerOnlyOneStream "Der rawaudio-Muxer unterstützt nur einen Audiostream!\n"
 #define MSGTR_IgnoringVideoStream "Ignoriere Videostream!\n"
 #define MSGTR_UnknownStreamType "Warnung! Unbekannter Streamtyp: %d\n"
 #define MSGTR_WarningLenIsntDivisible "Warnung! 'len' ist nicht durch 'samplesize' teilbar!\n"
+
+#define MSGTR_MuxbufMallocErr "Speicher für Muxer-Framepuffer konnte nicht alloziert werden!\n"
+#define MSGTR_MuxbufReallocErr "Speicher für Muxer-Framepuffer konnte nicht vergrößert werden!\n"
+#define MSGTR_MuxbufSending "Muxer-Framepuffer: Sende %d Frame(s) zum Muxer.\n"
+#define MSGTR_WritingHeader "Schreibe Dateikopf...\n"
+#define MSGTR_WritingTrailer "Schreibe Dateiindex...\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Warnung! Audiostream-Header %d neu definiert!\n"
@@ -1057,23 +1060,23 @@ static char help_text[]=
 
 // ao_dxr2.c
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Die Lautstärke auf %d zu setzen ist fehlgeschlagen.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz nicht unterstützt, versuche \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz nicht unterstützt, versuche Resampling.\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound fehlgeschlagen: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] Latenz: [Server: %0.2fs, Netz: %0.2fs] (Anpassung %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Öffnen des esd-Wiedergabestreams fehlgeschlagen: %s\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Öffnen des ESD-Wiedergabestreams fehlgeschlagen: %s\n"
 
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Setzen des DVB-Audiomixers fehlgeschlagen: %s\n"
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz nicht unterstützt, versuche Resampling...\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz nicht unterstützt, versuche Resampling.\n"
 
 // ao_null.c
 // Der hier hat weder mp_msg noch printf's?? [CHECK]
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Datei: %s (%s)\nPCM: Samplerate: %iHz Kanäle: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am Schnellsten mit -vc dummy -vo null erreicht.\nPCM: Info: Um WAVE-Dateien zu schreiben, benutze -ao pcm:waveheader (Standard).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am Schnellsten mit -vc dummy -vo null erreicht.\n[AO PCM] Info: Um WAVE-Dateien zu schreiben, benutze -ao pcm:waveheader (Standard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Öffnen von %s zum Schreiben fehlgeschlagen!\n"
 
 // ao_sdl.c
@@ -1335,7 +1338,7 @@ static char help_text[]=
 
 // cache2.c
 
-#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rDieser Datenstrom lässt sich nicht zwischenspeichern\n"
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rDieser Datenstrom lässt sich nicht zwischenspeichern.\n"
 #define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!!Unterschied in read_filepos!!! Bitte Melde diesen Fehler...\n"
 
 // cdda.c
