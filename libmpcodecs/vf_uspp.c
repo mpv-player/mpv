@@ -154,24 +154,25 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
         int w= width >>is_chroma;
         int h= height>>is_chroma;
         int stride= p->temp_stride[i];
+        int block= BLOCK>>is_chroma;
 
         if (!src[i] || !dst[i]) 
             continue; // HACK avoid crash for Y8 colourspace
         for(y=0; y<h; y++){
-            int index= BLOCK + BLOCK*stride + y*stride;
+            int index= block + block*stride + y*stride;
             memcpy(p->src[i] + index, src[i] + y*src_stride[i], w);
-            for(x=0; x<BLOCK; x++){ 
+            for(x=0; x<block; x++){ 
                 p->src[i][index     - x - 1]= p->src[i][index +     x    ];
                 p->src[i][index + w + x    ]= p->src[i][index + w - x - 1];
             }
         }
-        for(y=0; y<BLOCK; y++){
-            memcpy(p->src[i] + (  BLOCK-1-y)*stride, p->src[i] + (  y+BLOCK  )*stride, stride);
-            memcpy(p->src[i] + (h+BLOCK  +y)*stride, p->src[i] + (h-y+BLOCK-1)*stride, stride);
+        for(y=0; y<block; y++){
+            memcpy(p->src[i] + (  block-1-y)*stride, p->src[i] + (  y+block  )*stride, stride);
+            memcpy(p->src[i] + (h+block  +y)*stride, p->src[i] + (h-y+block-1)*stride, stride);
         }
 
         p->frame->linesize[i]= stride;
-        memset(p->temp[i], 0, (h+2*BLOCK)*stride*sizeof(int16_t));
+        memset(p->temp[i], 0, (h+2*block)*stride*sizeof(int16_t));
     }
 
     if(p->qp)
@@ -198,7 +199,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                 p->temp[0][ x + y*p->temp_stride[0] ] += p->frame_dec->data[0][ x + y*p->frame_dec->linesize[0] + offset ];
             }
         }
-        offset= (BLOCK-x1/2) + (BLOCK-y1/2)*p->frame_dec->linesize[1];
+        offset= (BLOCK/2-x1/2) + (BLOCK/2-y1/2)*p->frame_dec->linesize[1];
         for(y=0; y<height/2; y++){
             for(x=0; x<width/2; x++){
                 p->temp[1][ x + y*p->temp_stride[1] ] += p->frame_dec->data[1][ x + y*p->frame_dec->linesize[1] + offset ];
@@ -217,31 +218,35 @@ static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
         int i;
-        AVCodec *dec= avcodec_find_decoder(CODEC_ID_MPEG4);
-        AVCodec *enc= avcodec_find_encoder(CODEC_ID_MPEG4);
+        AVCodec *dec= avcodec_find_decoder(CODEC_ID_SNOW);
+        AVCodec *enc= avcodec_find_encoder(CODEC_ID_SNOW);
 
         for(i=0; i<3; i++){
             int is_chroma= !!i;
-            int w= ((width >>is_chroma) + 4*BLOCK-1) & (~(2*BLOCK-1));
-            int h= ((height>>is_chroma) + 4*BLOCK-1) & (~(2*BLOCK-1));
+            int w= ((width  + 4*BLOCK-1) & (~(2*BLOCK-1)))>>is_chroma;
+            int h= ((height + 4*BLOCK-1) & (~(2*BLOCK-1)))>>is_chroma;
 
             vf->priv->temp_stride[i]= w;
             vf->priv->temp[i]= malloc(vf->priv->temp_stride[i]*h*sizeof(int16_t));
             vf->priv->src [i]= malloc(vf->priv->temp_stride[i]*h*sizeof(uint8_t));
         }
         for(i=0; i< (1<<vf->priv->log2_count); i++){
-            AVCodecContext *avctx_enc;
+            AVCodecContext *avctx_enc, *avctx_dec;
 
             avctx_enc=
             vf->priv->avctx_enc[i]= avcodec_alloc_context();
+            avctx_dec=
             vf->priv->avctx_dec[i]= avcodec_alloc_context();
+            avctx_dec->width =
             avctx_enc->width = width + BLOCK;
+            avctx_dec->height =
             avctx_enc->height = height + BLOCK;
             avctx_enc->time_base= (AVRational){1,25};  // meaningless
             avctx_enc->gop_size = 300;
             avctx_enc->max_b_frames= 0;
             avctx_enc->pix_fmt = PIX_FMT_YUV420P;
             avctx_enc->flags = CODEC_FLAG_QSCALE | CODEC_FLAG_LOW_DELAY;
+            avctx_enc->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
             avcodec_open(avctx_enc, enc);
             avcodec_open(vf->priv->avctx_dec[i], dec);
 
