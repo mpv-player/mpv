@@ -379,7 +379,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src, int dst_stri
 	int x, y, i;
 	const int count= 1<<p->log2_count;
 	const int stride= is_luma ? p->temp_stride : ((width+16+15)&(~15));
-	uint64_t block_align[32];
+	uint64_t __attribute__((aligned(16))) block_align[32];
 	DCTELEM *block = (DCTELEM *)block_align;
 	DCTELEM *block2= (DCTELEM *)(block_align+16);
 
