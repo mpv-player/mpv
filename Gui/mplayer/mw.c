@@ -443,7 +443,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           itemtype=0;
           break;
 
-   case wsPRMouseButton:
+   case wsRRMouseButton:
         gtkShow( evShowPopUpMenu,NULL );
         break;
 

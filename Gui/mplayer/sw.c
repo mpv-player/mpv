@@ -47,7 +47,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
 
  switch( Button )
   {
-   case wsPRMouseButton:
+   case wsRRMouseButton:
           gtkShow( evShowPopUpMenu,NULL );
           break;
    case wsPMMouseButton:

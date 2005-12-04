@@ -217,15 +217,7 @@ void gtkShow( int type,char * param )
 	  gtk_widget_destroy( PopUpMenu );
 	 }
         PopUpMenu=create_PopUpMenu();
-#ifdef HAVE_GTK2_GUI
-        // Ugly hack, but we don't want to loose events
-        while(!GTK_WIDGET_VISIBLE(PopUpMenu)) {
-           gtk_menu_popup(GTK_MENU(PopUpMenu), NULL, NULL, NULL, NULL, 0, gtk_get_current_event_time());
-           gtk_main_iteration();
-        }
-#else
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
-#endif //HAVE_GTK2_GUI
         break;
    case evHidePopUpMenu:
         if ( PopUpMenu ) 
