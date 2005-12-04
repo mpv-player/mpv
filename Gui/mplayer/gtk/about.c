@@ -74,10 +74,13 @@ GtkWidget * create_About( void )
 
 #ifdef HAVE_GTK2_GUI
   AboutText = gtk_text_view_new();
+  gtk_text_view_set_editable(GTK_TEXT_VIEW(AboutText), FALSE);
+  gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(AboutText), FALSE);
   AboutTextBuffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (AboutText));
   gtk_text_buffer_get_iter_at_offset (AboutTextBuffer, &iter, 0);  
 #else  
   AboutText=gtk_text_new( NULL,NULL );
+  gtk_text_set_editable(GTK_TEXT(AboutText), FALSE);
 #endif
   gtk_widget_set_name( AboutText,"AboutText" );
   gtk_widget_show( AboutText );
