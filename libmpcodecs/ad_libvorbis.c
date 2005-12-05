@@ -60,7 +60,8 @@ static int preinit(sh_audio_t *sh)
 
 static int init(sh_audio_t *sh)
 {
-  unsigned int offset, i, length, hsizes[3], *headers[3];
+  unsigned int offset, i, length, hsizes[3];
+  void *headers[3];
   unsigned char* extradata;
   ogg_packet op;
   vorbis_comment vc;
