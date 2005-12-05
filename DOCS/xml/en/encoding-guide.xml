@@ -1045,7 +1045,7 @@
 <para>
   The following steps will guide you in computing the resolution of your
   encode without distorting the video too much, by taking into account several
-  information about the souce video.
+  types of information about the source video.
   First, you should compute the encoded aspect ratio:
   <systemitem>ARc = (Wc x (ARa / PRdvd )) / Hc</systemitem>
 <itemizedlist>
@@ -1095,13 +1095,13 @@
   image; if there are not enough bits, the edges of those blocks are
   visible.)
   It is therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
-  and 0.26-0.28 for 2 CDs with standard encoding options.
+  and 0.26-0.28 for 2 CDs rip with standard encoding options.
   More advanced encoding options such as those listed here for
   <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>
   and
 <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
   should make it possible to get the same quality with CQ ranging from
-  0.18 to 0.20 for a 1 CD rip, and 0.24-0.26 for 2 CDs
+  0.18 to 0.20 for a 1 CD rip, and 0.24-0.26 for 2 CDs rip.
   With MPEG-4 ASP codecs such as <systemitem class="library">x264</systemitem>,
   you can use a CQ ranging from 0.14 to 0.16 with standard encoding options,
   and should be able to go as low as 0.10 to 0.12 with
@@ -1115,7 +1115,7 @@
   On the other hand, it is worthless to raise CQ higher than 0.30 as you would
   be wasting bits without any noticeable quality gain.
   Also note that as mentioned earlier in this guide, low resolution videos
-  need a bigger CQ (compared to for ex. DVD-resolution) to look good.
+  need a bigger CQ (compared to for instance DVD-resolution) to look good.
 </para>
 </sect3>
 
@@ -2559,7 +2559,7 @@ An example with AC3 compression:
 <tbody>
 <row>
   <entry>Very high quality</entry>
-  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:vme=5:naq:qns=2</option></entry>
+  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:qns=2</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
