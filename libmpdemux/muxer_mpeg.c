@@ -20,6 +20,8 @@
 #include "stheader.h"
 #include "m_option.h"
 #include "mpeg_hdr.h"
+#include "mp3_hdr.h"
+#include "liba52/a52.h"
 
 #define PACK_HEADER_START_CODE 0x01ba
 #define SYSTEM_HEADER_START_CODE 0x01bb
