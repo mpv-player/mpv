@@ -114,6 +114,7 @@ char * proc_priority=NULL;
 #ifdef HAS_DVBIN_SUPPORT
 #include "libmpdemux/dvbin.h"
 static int last_dvb_step = 1;
+extern void cache_uninit(stream_t *s);
 #endif
 
 //**************************************************************************//
@@ -186,6 +187,7 @@ static int max_framesize=0;
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/vf.h"
+#include "libmpcodecs/vd.h"
 
 extern void vf_list_plugins();
 
