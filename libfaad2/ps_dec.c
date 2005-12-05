@@ -1935,8 +1935,8 @@ ps_info *ps_init(uint8_t sr_index)
 /* main Parametric Stereo decoding function */
 uint8_t ps_decode(ps_info *ps, qmf_t X_left[38][64], qmf_t X_right[38][64])
 {
-    qmf_t X_hybrid_left[32][32] = {{0}};
-    qmf_t X_hybrid_right[32][32] = {{0}};
+    qmf_t X_hybrid_left[32][32] = {{{0}}};
+    qmf_t X_hybrid_right[32][32] = {{{0}}};
 
     /* delta decoding of the bitstream data */
     ps_data_decode(ps);

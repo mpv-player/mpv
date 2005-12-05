@@ -527,8 +527,8 @@ uint8_t sbrDecodeSingleFramePS(sbr_info *sbr, real_t *left_channel, real_t *righ
     uint8_t l, k;
     uint8_t dont_process = 0;
     uint8_t ret = 0;
-    ALIGN qmf_t X_left[38][64] = {{0}};
-    ALIGN qmf_t X_right[38][64] = {{0}}; /* must set this to 0 */
+    ALIGN qmf_t X_left[38][64] = {{{0}}};
+    ALIGN qmf_t X_right[38][64] = {{{0}}}; /* must set this to 0 */
 
     if (sbr == NULL)
         return 20;
