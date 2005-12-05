@@ -26,6 +26,9 @@ extern int  lavc_param_abitrate;
 extern int  lavc_param_atag;
 extern int  avcodec_inited;
 static int compressed_frame_size = 0;
+#ifdef USE_LIBAVFORMAT
+extern unsigned int codec_get_wav_tag(int id);
+#endif
 
 static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
