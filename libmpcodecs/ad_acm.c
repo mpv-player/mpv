@@ -11,6 +11,7 @@
 #include "wineacm.h"
 
 #include "ad_internal.h"
+#include "osdep/timer.h"
 
 static ad_info_t info = 
 {

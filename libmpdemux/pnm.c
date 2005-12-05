@@ -47,6 +47,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "help_mp.h"
+#include "osdep/timer.h"
 
 #include "pnm.h"
 //#include "libreal/rmff.h"

@@ -52,6 +52,7 @@
 #include "../stream.h"
 #include "../demuxer.h"
 #include "rtsp_session.h"
+#include "osdep/timer.h"
 
 /*
 #define LOG
