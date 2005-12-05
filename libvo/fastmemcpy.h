@@ -20,7 +20,7 @@ extern void * mem2agpcpy(void * to, const void * from, size_t len);
 #define mem2agpcpy(a,b,c) memcpy(a,b,c)
 #endif
 
-static inline void * mem2agpcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
+static inline void * mem2agpcpy_pic(void * dst, const void * src, int bytesPerLine, int height, int dstStride, int srcStride)
 {
 	int i;
 	void *retval=dst;
@@ -48,7 +48,7 @@ static inline void * mem2agpcpy_pic(void * dst, void * src, int bytesPerLine, in
 	return retval;
 }
 
-static inline void * memcpy_pic(void * dst, void * src, int bytesPerLine, int height, int dstStride, int srcStride)
+static inline void * memcpy_pic(void * dst, const void * src, int bytesPerLine, int height, int dstStride, int srcStride)
 {
 	int i;
 	void *retval=dst;
