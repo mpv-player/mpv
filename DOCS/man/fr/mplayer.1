@@ -3743,6 +3743,8 @@ utilisées, que l'espace de couleur est YUV 4:2:0 et le saut de quelques
 vérifications pour détecter les flux endommagés.
 .IPs gray\ 
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
+.IPs threads=<0\-8>
+décodage multithreadé
 .IPs "idct=<0\-99> (voir \-lavcopts)"
 Pour obtenir la meilleure qualité d'encodage utilisez le même algorithme IDCT
 pour le décodage et l'encodage.
