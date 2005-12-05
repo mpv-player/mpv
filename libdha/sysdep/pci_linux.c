@@ -5,7 +5,8 @@
 */
 #include <errno.h>
 #ifdef __i386__
-// is this needed? #include <sys/perm.h>
+//#include <sys/perm.h> doesn't exist on libc5 systems
+int iopl();
 #else
 #if !defined(__sparc__) && !defined(__powerpc__) && !defined(__x86_64__)
 #include <sys/io.h>
