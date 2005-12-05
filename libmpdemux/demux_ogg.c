@@ -29,6 +29,7 @@
 
 #ifdef HAVE_OGGTHEORA
 #include <theora/theora.h>
+extern int _ilog (unsigned int); /* defined in many places in theora/lib/ */
 #endif
 
 #define BLOCK_SIZE 4096
