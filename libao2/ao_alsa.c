@@ -112,7 +112,7 @@ static int control(int cmd, void *arg)
 	 char *test_mix_index;
 
 	 mix_name = strdup(mixer_channel);
-	 if (test_mix_index = strchr(mix_name, ',')){
+	 if ((test_mix_index = strchr(mix_name, ','))){
 		*test_mix_index = 0;
 		test_mix_index++;
 		mix_index = strtol(test_mix_index, &test_mix_index, 0);
