@@ -3557,8 +3557,6 @@ of the default quantization matrix, assuming YUV 4:2:0 and skipping a few
 checks to detect damaged bitstreams.
 .IPs gray\ 
 grayscale only decoding (a bit faster than with color)
-.IPs threads=<0\-8>
-multithreaded decoding
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same IDCT algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
@@ -3617,6 +3615,8 @@ This degrades quality a lot of in almost all cases
 Skips decoding of frames completely.
 Big speedup, but jerky motion and sometimes bad artifacts
 (see skiploopfilter for available skip values).
+.IPs threads=<1\-8>
+number of threads to use for decoding (default: 1)
 .IPs vismv=<value>
 Visualize motion vectors.
 .RSss
