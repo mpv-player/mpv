@@ -1,5 +1,5 @@
 
-#define MSG_USE_COLORS
+//#define MSG_USE_COLORS
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -137,7 +137,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
         }
         fprintf(stream, "\033[%d;3%dm",c>>3,c&7);
         header=    tmp[strlen(tmp)-1] == '\n'
-                 ||tmp[strlen(tmp)-1] == '\r';
+                 /*||tmp[strlen(tmp)-1] == '\r'*/;
     }
 #endif
     if (lev <= MSGL_WARN){
