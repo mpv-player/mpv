@@ -905,24 +905,15 @@ static int gl_handlekey(int key)
 	return 1;
 }
 
-#ifdef GL_WIN32
-
-static void check_events(void) {
-    int e=vo_w32_check_events();
-    if(e&VO_EVENT_RESIZE) resize(&vo_dwidth, &vo_dheight);
-    if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
-}
-
-#else
-
 static void check_events(void)
 {
+	 int e;
+#ifndef GL_WIN32
 	 XEvent         Event;
 	 char           buf[100];
 	 KeySym         keySym;
 	 int            key;
 	 static XComposeStatus stat;
-	 int e;
          
 	 while ( XPending( mDisplay ) )
 	 {
@@ -941,12 +932,11 @@ static void check_events(void)
 	               break;
 	      }
          }
-	 e=vo_x11_check_events(mDisplay);
+#endif
+	 e=vo_check_events();
          if(e&VO_EVENT_RESIZE) resize(&vo_dwidth, &vo_dheight);
          if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
-
-#endif
 
 static void draw_osd(void)
 {
@@ -963,11 +953,7 @@ flip_page(void)
 //  glFlush();
   if (use_glFinish)
   glFinish();
-#ifdef GL_WIN32
-  SwapBuffers(vo_hdc);
-#else
-  glXSwapBuffers( mDisplay,vo_window );
-#endif
+  swapGlBuffers();
 
   if (vo_fs) // Avoid flickering borders in fullscreen mode
     glClear (GL_COLOR_BUFFER_BIT);
@@ -1070,11 +1056,7 @@ uninit(void)
     free(texgrid);
     texgrid = NULL;
   }
-#ifdef GL_WIN32
-  vo_w32_uninit();
-#else
-  vo_x11_uninit();
-#endif
+  vo_uninit();
 }
 
 static opt_t subopts[] = {
@@ -1119,18 +1101,10 @@ static int control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
         return VO_TRUE;
   case VOCTRL_ONTOP:
-#ifdef GL_WIN32
-    vo_w32_ontop();
-#else
-    vo_x11_ontop();
-#endif 
+    vo_ontop();
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
-#ifdef GL_WIN32
-    vo_w32_fullscreen();
-#else
-    vo_x11_fullscreen();
-#endif 
+    vo_fullscreen();
     if (setGlWindow(&gl_vinfo, &gl_context, vo_window) == SET_WINDOW_REINIT)
       initGl(vo_dwidth, vo_dheight);
     resize(&vo_dwidth, &vo_dheight);

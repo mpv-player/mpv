@@ -312,11 +312,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	vo_dy = (vo_screenheight - d_height) / 2;
 	geometry(&vo_dx, &vo_dy, &d_width, &d_height,
 	          vo_screenwidth, vo_screenheight);
-#ifdef X11_FULLSCREEN
-//        if( flags&VOFLAG_FULLSCREEN ){ // (-fs)
-//          aspect(&d_width,&d_height,A_ZOOM);
-//        }
-#endif
 #ifdef HAVE_NEW_GUI
   if (use_gui) {
     // GUI creates and manages window for us
@@ -379,7 +374,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       vo_x11_classhint( mDisplay,vo_window,"gl" );
       vo_hidecursor(mDisplay,vo_window);
 
-//      if ( flags&VOFLAG_FULLSCREEN ) vo_x11_decoration( mDisplay,vo_window,0 );
 	  XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 	  /* Tell other applications about this window */
 	  XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
@@ -422,11 +416,7 @@ glconfig:
 
 static void check_events(void)
 {
-#ifdef GL_WIN32
-    int e=vo_w32_check_events();
-#else
-    int e=vo_x11_check_events(mDisplay);
-#endif
+    int e=vo_check_events();
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
     if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
@@ -544,11 +534,7 @@ flip_page(void)
   if (use_glFinish)
   glFinish();
   if (vo_doublebuffering)
-#ifdef GL_WIN32
-  SwapBuffers(vo_hdc);
-#else
-  glXSwapBuffers( mDisplay,vo_window );
-#endif
+    swapGlBuffers();
  
   if (vo_fs && use_aspect && vo_doublebuffering)
     glClear(GL_COLOR_BUFFER_BIT);
@@ -677,11 +663,7 @@ uninit(void)
   custom_prog = NULL;
   if (custom_tex) free(custom_tex);
   custom_tex = NULL;
-#ifdef GL_WIN32
-  vo_w32_uninit();
-#else
-  vo_x11_uninit();
-#endif
+  vo_uninit();
 }
 
 static opt_t subopts[] = {
@@ -784,19 +766,11 @@ static int control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
-#ifdef GL_WIN32
-    vo_w32_ontop();
-#else
-    vo_x11_ontop();
-#endif
+    vo_ontop();
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
-#ifdef GL_WIN32
-    vo_w32_fullscreen();
+    vo_fullscreen();
     resize(vo_dwidth, vo_dheight);
-#else
-    vo_x11_fullscreen();
-#endif
     return VO_TRUE;
 #ifdef GL_WIN32
   case VOCTRL_BORDER:

@@ -949,6 +949,7 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 }
 
 #ifdef GL_WIN32
+#include "w32_common.h"
 /**
  * \brief little helper since wglGetProcAddress definition does not fit our 
  *        getProcAddress
@@ -1023,10 +1024,15 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
   }
   *context = 0;
 }
+
+void swapGlBuffers() {
+  SwapBuffers(vo_hdc);
+}
 #else
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
 #endif
+#include "x11_common.h"
 /**
  * \brief find address of a linked function
  * \param s name of function to find
@@ -1158,6 +1164,10 @@ void releaseGlContext(XVisualInfo **vinfo, GLXContext *context) {
     glXDestroyContext(mDisplay, *context);
   }
   *context = 0;
+}
+
+void swapGlBuffers() {
+  glXSwapBuffers(mDisplay, vo_window);
 }
 #endif
 
