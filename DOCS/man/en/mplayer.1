@@ -1259,11 +1259,11 @@ frame size in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (LIVE.COM only)
+.B \-rtsp-stream-over-tcp (LIVE555 only)
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).
 This option may be useful if you have a broken internet connection that does
-not pass incoming UDP packets (see http://www.live.com/\:mplayer/).
+not pass incoming UDP packets (see http://www.live555.com/\:mplayer/).
 .
 .TP
 .B \-saveidx <filename>
@@ -2840,7 +2840,7 @@ Please use \-dr if it works with your OpenGL implementation,
 since for higher resolutions this provides a
 .B big
 speedup.
-The code is doing very little checks, so if a feature does not work, this
+The code performs very few checks, so if a feature does not work, this
 might be because it is not supported by your card/OpenGL implementation
 even if you do not get any error message.
 Use glxinfo or a similar tool to display the supported OpenGL extensions.
