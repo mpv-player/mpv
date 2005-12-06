@@ -21,9 +21,18 @@ uint32_t o_dheight;
 static HINSTANCE hInstance;
 HWND vo_window = 0;
 static int cursor = 1;
+static int event_flags;
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
+	case WM_ACTIVATE:
+	    event_flags |= VO_EVENT_EXPOSE;
+	    break;
+	case WM_SIZE:
+	    event_flags |= VO_EVENT_RESIZE;
+	    vo_dwidth = lParam & 0xffff;
+	    vo_dheight = lParam >> 16;
+	    break;
 	case WM_CLOSE:
 	    mplayer_put_key(KEY_CLOSE_WIN);
 	    break;
@@ -90,18 +99,13 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 int vo_w32_check_events(void) {
     MSG msg;
-    int r = 0;
+    event_flags = 0;
     while (PeekMessage(&msg, 0, 0, 0, PM_REMOVE)) {
 	TranslateMessage(&msg);
 	DispatchMessage(&msg);
-	switch (msg.message) {
-	    case WM_ACTIVATE:
-		r |= VO_EVENT_EXPOSE;
-		break;
-	}
     }
     
-    return r;
+    return event_flags;
 }
 
 static void updateScreenProperties() {
