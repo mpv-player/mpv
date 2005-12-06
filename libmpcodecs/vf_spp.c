@@ -102,6 +102,7 @@ struct vf_priv_s {
 	int16_t *temp;
 	AVCodecContext *avctx;
 	DSPContext dsp;
+        char *non_b_qp;
 };
 
 #define SHIFT 22
@@ -481,11 +482,20 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
         }
 
         vf->priv->mpeg2= mpi->qscale_type;
+        if(mpi->pict_type != 3 && mpi->qscale && !vf->priv->qp){
+            if(!vf->priv->non_b_qp)
+                vf->priv->non_b_qp= malloc(mpi->qstride * mpi->h);
+            memcpy(vf->priv->non_b_qp, mpi->qscale, mpi->qstride * mpi->h);
+        }
 	if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	    if(mpi->qscale || vf->priv->qp){
-		filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, mpi->qscale, mpi->qstride, 1);
-		filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
-		filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
+            char *qp_tab= vf->priv->non_b_qp;
+            if((vf->priv->mode&4) || !qp_tab)
+                qp_tab= mpi->qscale;
+
+	    if(qp_tab || vf->priv->qp){
+		filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, qp_tab, mpi->qstride, 1);
+		filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, qp_tab, mpi->qstride, 0);
+		filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, qp_tab, mpi->qstride, 0);
 	    }else{
 		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h, dmpi->stride[0], mpi->stride[0]);
 		memcpy_pic(dmpi->planes[1], mpi->planes[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, dmpi->stride[1], mpi->stride[1]);
@@ -512,6 +522,8 @@ static void uninit(struct vf_instance_s* vf){
 	vf->priv->src= NULL;
         if(vf->priv->avctx) free(vf->priv->avctx);
         vf->priv->avctx= NULL;
+        if(vf->priv->non_b_qp) free(vf->priv->non_b_qp);
+        vf->priv->non_b_qp= NULL;
 	
 	free(vf->priv);
 	vf->priv=NULL;
@@ -590,7 +602,7 @@ static int open(vf_instance_t *vf, char* args){
     if(vf->priv->qp < 0)
         vf->priv->qp = 0;
 
-    switch(vf->priv->mode){
+    switch(vf->priv->mode&3){
         default:
 	case 0: requantize= hardthresh_c; break;
 	case 1: requantize= softthresh_c; break;
@@ -599,7 +611,7 @@ static int open(vf_instance_t *vf, char* args){
 #ifdef HAVE_MMX
     if(gCpuCaps.hasMMX){
 	store_slice= store_slice_mmx;
-	switch(vf->priv->mode){
+	switch(vf->priv->mode&3){
 	    case 0: requantize= hardthresh_mmx; break;
 	    case 1: requantize= softthresh_mmx; break;
 	}
