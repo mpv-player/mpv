@@ -1101,7 +1101,7 @@
   and
 <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
   should make it possible to get the same quality with CQ ranging from
-  0.18 to 0.20 for a 1 CD rip, and 0.24-0.26 for 2 CDs rip.
+  0.18 to 0.20 for a 1 CD rip, and 0.24 to 0.26 for a 2 CD rip.
   With MPEG-4 ASP codecs such as <systemitem class="library">x264</systemitem>,
   you can use a CQ ranging from 0.14 to 0.16 with standard encoding options,
   and should be able to go as low as 0.10 to 0.12 with
@@ -1115,7 +1115,7 @@
   On the other hand, it is worthless to raise CQ higher than 0.30 as you would
   be wasting bits without any noticeable quality gain.
   Also note that as mentioned earlier in this guide, low resolution videos
-  need a bigger CQ (compared to for instance DVD-resolution) to look good.
+  need a bigger CQ (compared to, for instance, DVD resolution) to look good.
 </para>
 </sect3>
 
