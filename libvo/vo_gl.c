@@ -530,11 +530,12 @@ flip_page(void)
     BindTexture(gl_target, 0);
   }
 
-//  glFlush();
   if (use_glFinish)
   glFinish();
   if (vo_doublebuffering)
     swapGlBuffers();
+  else if (!use_glFinish)
+    glFlush();
  
   if (vo_fs && use_aspect && vo_doublebuffering)
     glClear(GL_COLOR_BUFFER_BIT);
