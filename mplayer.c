@@ -1526,26 +1526,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     if(opt_exit)
       exit_player(NULL);
 
-#ifdef USE_EDL
-if (edl_check_mode() == EDL_ERROR && edl_filename)
-{
-    mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantUseBothModes);
-    exit_player(NULL);
-} else if (edl_filename)
-{
-    if (edl_records) free_edl(edl_records);
-    next_edl_record = edl_records = edl_parse_file();
-} else if (edl_output_filename)
-{
-    if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
-    {
-        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantOpenForWrite,
-               edl_output_filename);
-        exit_player(NULL);
-    }
-}
-#endif
-
     if (player_idle_mode && use_gui) {
         mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoIdleAndGui);
         exit_player_with_rc(NULL, 1);
@@ -1827,6 +1807,21 @@ while (player_idle_mode && !filename) {
 //---------------------------------------------------------------------------
 
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
+
+#ifdef USE_EDL
+if (edl_filename) {
+    if (edl_records) free_edl(edl_records);
+    next_edl_record = edl_records = edl_parse_file();
+}
+if (edl_output_filename) {
+    if (edl_fd) fclose(edl_fd);
+    if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
+    {
+        mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlCantOpenForWrite,
+               edl_output_filename);
+    }
+}
+#endif
 
 //==================== Open VOB-Sub ============================
 

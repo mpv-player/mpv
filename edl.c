@@ -11,24 +11,6 @@ char *edl_output_filename; // file to put EDL entries in (-edlout)
 #ifdef USE_EDL
 
 /**
- *  We can't do -edl and -edlout at the same time
- *  so we check that here.
- *
- *  \return EDL_ERROR on error and 1 otherwise.
- *  \brief Makes sure EDL has been called correctly.
- */
-
-int edl_check_mode(void)
-{
-    if (edl_filename && edl_output_filename)
-    {
-        return (EDL_ERROR);
-    }
-
-    return (1);
-}
-
-/**
  *  Allocates a new EDL record and makes sure allocation was successful.
  *
  *  \return New allocated EDL record.

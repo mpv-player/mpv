@@ -187,7 +187,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV Event: Nav Seek Done\n"
 #define MSGTR_MenuCall "Menu call\n"
 
-#define MSGTR_EdlCantUseBothModes "Can't use -edl and -edlout at the same time.\n"
 #define MSGTR_EdlOutOfMem "Can't allocate enough memory to hold EDL data.\n"
 #define MSGTR_EdlRecordsNo "Read %d EDL actions.\n"
 #define MSGTR_EdlQueueEmpty "There are no EDL actions to take care of.\n"
