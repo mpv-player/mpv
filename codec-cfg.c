@@ -887,7 +887,7 @@ int use_gui = 0;
 #endif
 
 int mp_msg_levels[MSGT_MAX];
-int mp_msg_level_all = MSGL_STATUS;
+int mp_msg_level_all = MSGL_ERR;
 int verbose = 0;
 
 void wrapline(FILE *f2,char *s){
