@@ -5,6 +5,7 @@
 	{"noquiet", &quiet, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 0, 100, NULL},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOSAVE, 0, 0, NULL},
+	{"msglevel", msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL},
 #ifdef WIN32
 	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -224,6 +225,10 @@
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 	{"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#ifdef WIN32_LOADER
+	{"codecs-dir", &def_path, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#endif
+
 // ------------------------- subtitles options --------------------
 
 #ifdef USE_SUB
@@ -308,6 +313,10 @@ extern int divx_quality;
 
 /* defined in codec-cfg.c */
 extern char * codecs_file;
+
+#ifdef WIN32_LOADER
+extern char * def_path;
+#endif
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
@@ -474,6 +483,93 @@ m_option_t audio_filter_conf[]={
 	{"list", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
         {"force", &af_cfg.force, CONF_TYPE_INT, CONF_RANGE, 0, 7, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
+m_option_t msgl_config[]={
+	{ "all", &mp_msg_level_all, CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL},
+
+	{ "global", &mp_msg_levels[MSGT_GLOBAL], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "cplayer", &mp_msg_levels[MSGT_CPLAYER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "gplayer", &mp_msg_levels[MSGT_GPLAYER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "vo", &mp_msg_levels[MSGT_VO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "ao", &mp_msg_levels[MSGT_AO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "demuxer", &mp_msg_levels[MSGT_DEMUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "ds", &mp_msg_levels[MSGT_DS], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "demux", &mp_msg_levels[MSGT_DEMUX], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "header", &mp_msg_levels[MSGT_HEADER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "avsync", &mp_msg_levels[MSGT_AVSYNC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "autoq", &mp_msg_levels[MSGT_AUTOQ], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "cfgparser", &mp_msg_levels[MSGT_CFGPARSER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "decaudio", &mp_msg_levels[MSGT_DECAUDIO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "decvideo", &mp_msg_levels[MSGT_DECVIDEO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "seek", &mp_msg_levels[MSGT_SEEK], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "win32", &mp_msg_levels[MSGT_WIN32], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "open", &mp_msg_levels[MSGT_OPEN], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "dvd", &mp_msg_levels[MSGT_DVD], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "parsees", &mp_msg_levels[MSGT_PARSEES], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "lirc", &mp_msg_levels[MSGT_LIRC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "stream", &mp_msg_levels[MSGT_STREAM], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "cache", &mp_msg_levels[MSGT_CACHE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "mencoder", &mp_msg_levels[MSGT_MENCODER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "xacodec", &mp_msg_levels[MSGT_XACODEC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "tv", &mp_msg_levels[MSGT_TV], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "osdep", &mp_msg_levels[MSGT_OSDEP], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "spudec", &mp_msg_levels[MSGT_SPUDEC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "playtree", &mp_msg_levels[MSGT_PLAYTREE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "input", &mp_msg_levels[MSGT_INPUT], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "vfilter", &mp_msg_levels[MSGT_VFILTER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "osd", &mp_msg_levels[MSGT_OSD], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "network", &mp_msg_levels[MSGT_NETWORK], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "cpudetect", &mp_msg_levels[MSGT_CPUDETECT], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "codeccfg", &mp_msg_levels[MSGT_CODECCFG], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "sws", &mp_msg_levels[MSGT_SWS], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "vobsub", &mp_msg_levels[MSGT_VOBSUB], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "subreader", &mp_msg_levels[MSGT_SUBREADER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "afilter", &mp_msg_levels[MSGT_AFILTER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "netst", &mp_msg_levels[MSGT_NETST], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "muxer", &mp_msg_levels[MSGT_MUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+        {"help", "\nAvailable msg mdoules:\n"
+        "   global     - common player errors/information\n"
+        "   cplayer    - console player (mplayer.c)\n"
+        "   gplayer    - gui player\n"
+        "   vo         - libvo\n"
+        "   ao         - libao\n"
+        "   demuxer    - demuxer.c (general stuff)\n"
+        "   ds         - demux stream (add/read packet etc)\n"
+        "   demux      - fileformat-specific stuff (demux_*.c)\n"
+        "   header     - fileformat-specific header (*header.c)\n"
+        "   avsync     - mplayer.c timer stuff\n"
+        "   autoq      - mplayer.c auto-quality stuff\n"
+        "   cfgparser  - cfgparser.c\n"
+        "   decaudio   - av decoder\n"
+        "   decvideo\n"
+        "   seek       - seeking code\n"
+        "   win32      - win32 dll stuff\n"
+        "   open       - open.c (stream opening)\n"
+        "   dvd        - open.c (DVD init/read/seek)\n"
+        "   parsees    - parse_es.c (mpeg stream parser)\n"
+        "   lirc       - lirc_mp.c and input lirc driver\n"
+        "   stream     - stream.c\n"
+        "   cache      - cache2.c\n"
+        "   mencoder\n"
+        "   xacodec    - XAnim codecs\n"
+        "   tv         - TV input subsystem\n"
+        "   osdep      - OS Dependant parts (linux/ for now)\n"
+        "   spudec     - spudec.c\n"
+        "   playtree   - Playtree handeling (playtree.c, playtreeparser.c)\n"
+        "   input\n"
+        "   vfilter\n"
+        "   osd\n"
+        "   network\n"
+        "   cpudetect\n"
+        "   codeccfg\n"
+        "   sws\n"
+        "   vobsub\n"
+        "   subreader\n"
+        "   afilter    - Audio filter messages\n"
+        "   netst      - Netstream\n"
+        "   muxer      - muxer layer\n"
+        "\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 };
 
 #ifdef WIN32

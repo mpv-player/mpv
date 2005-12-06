@@ -95,7 +95,6 @@ extern int identify;
 #define MSGT_MAX 64
 
 void mp_msg_init();
-void mp_msg_set_level(int verbose);
 int mp_msg_test(int mod, int lev);
 
 #include "config.h"

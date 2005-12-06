@@ -1,5 +1,5 @@
 
-//#define MSG_USE_COLORS
+#define MSG_USE_COLORS
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,9 +20,12 @@ extern int use_gui;
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 3072
 
-static int mp_msg_levels[MSGT_MAX]; // verbose level of this module
+extern int mp_msg_levels[MSGT_MAX]; // verbose level of this module
+extern int mp_msg_level_all;
+extern int verbose;
 
 void mp_msg_init(){
+    int i;
 #ifdef USE_I18N
 #ifdef MP_DEBUG
     fprintf(stdout, "Using GNU internationalization\n");
@@ -36,26 +39,19 @@ void mp_msg_init(){
     fprintf(stdout, "Current dirname: %s\n\n", bindtextdomain(textdomain(NULL),NULL));
 #endif
 #endif
-    mp_msg_set_level(MSGL_STATUS);
-}
-
-void mp_msg_set_level(int verbose){
-    int i;
-    for(i=0;i<MSGT_MAX;i++){
-	mp_msg_levels[i]=verbose;
-    }
+    for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
 }
 
 int mp_msg_test(int mod, int lev)
 {
-    return lev <= mp_msg_levels[mod];
+    return lev <= (mp_msg_levels[mod] == -2 ? mp_msg_level_all + verbose : mp_msg_levels[mod]);
 }
 
 void mp_msg(int mod, int lev, const char *format, ... ){
     va_list va;
     char tmp[MSGSIZE_MAX];
     
-    if (lev > mp_msg_levels[mod]) return; // do not display
+    if (!mp_msg_test(mod, lev)) return; // do not display
     va_start(va, format);
     vsnprintf(tmp, MSGSIZE_MAX, mp_gettext(format), va);
     va_end(va);
@@ -141,7 +137,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
         }
         fprintf(stream, "\033[%d;3%dm",c>>3,c&7);
         header=    tmp[strlen(tmp)-1] == '\n'
-                 /*||tmp[strlen(tmp)-1] == '\r'*/;
+                 ||tmp[strlen(tmp)-1] == '\r';
     }
 #endif
     if (lev <= MSGL_WARN){

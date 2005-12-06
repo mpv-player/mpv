@@ -343,6 +343,9 @@ int global_sub_pos = -1; // this encompasses all subtitle sources
 int global_sub_indices[SUB_SOURCES];
 int global_sub_quiet_osd_hack = 0;
 
+int mp_msg_levels[MSGT_MAX]; // inited to -2
+int mp_msg_level_all = MSGL_STATUS;
+
 static stream_t* stream=NULL;
 static demuxer_t *demuxer=NULL;
 static sh_audio_t *sh_audio=NULL;
@@ -1328,7 +1331,6 @@ int gui_no_filename=0;
   InitTimer();
   
   mp_msg_init();
-  mp_msg_set_level(MSGL_STATUS);
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2005 MPlayer Team\n");
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
@@ -1563,8 +1565,6 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
       for(i=1;i<argc;i++)mp_msg(MSGT_CPLAYER, MSGL_INFO," '%s'",argv[i]);
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
     }
-
-    mp_msg_set_level(verbose+MSGL_STATUS);
 
 //------ load global data first ------
 

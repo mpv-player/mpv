@@ -140,6 +140,9 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 int benchmark=0;
 
+int mp_msg_levels[MSGT_MAX]; // inited to -2
+int mp_msg_level_all = MSGL_STATUS;
+
 #ifdef WIN32
 char * proc_priority=NULL;
 #endif
@@ -402,7 +405,6 @@ audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
 
   mp_msg_init();
-  mp_msg_set_level(MSGL_STATUS);
   mp_msg(MSGT_CPLAYER,MSGL_INFO, "MEncoder " VERSION " (C) 2000-2005 MPlayer Team\n");
 
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
@@ -462,8 +464,6 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
  parse_cfgfiles(mconfig);
  filelist = m_config_parse_me_command_line(mconfig, argc, argv);
  if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
-
-  mp_msg_set_level(verbose+MSGL_STATUS);
 
 if (frameno_filename) {
   stream2=open_stream(frameno_filename,0,&i);
