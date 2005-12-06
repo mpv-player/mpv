@@ -225,10 +225,6 @@
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 	{"codecs-file", &codecs_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#ifdef WIN32_LOADER
-	{"codecs-dir", &def_path, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
-
 // ------------------------- subtitles options --------------------
 
 #ifdef USE_SUB
@@ -313,10 +309,6 @@ extern int divx_quality;
 
 /* defined in codec-cfg.c */
 extern char * codecs_file;
-
-#ifdef WIN32_LOADER
-extern char * def_path;
-#endif
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;
