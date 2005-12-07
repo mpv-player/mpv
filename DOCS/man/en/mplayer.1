@@ -511,10 +511,11 @@ instead of the builtin codecs.conf.
 Specify configuration file to be parsed after the default ones.
 .
 .TP
-.B \-msglevel <all=<level>:module=<level>:...>
+.B \-msglevel <all=<level>:<module>=<level>:...>
 Control verbosity directly for each module.
-The 'all' module changes the verbosity of all other modules not specified.
-See '-msglevel help' for a list of all modules
+The 'all' module changes the verbosity of all the modules not
+explicitly specified on the command line.
+See '-msglevel help' for a list of all modules.
 .br
 .I NOTE:
 Messages printed before the command line is loaded cannot be controlled.
@@ -522,28 +523,28 @@ Messages printed before the command line is loaded cannot be controlled.
 Available levels:
 .PD 0
 .RSs
-.IPs -1
-Complete silence.
-.IPs 0
-Fatal messages only.
-.IPs 1
-Error messages.
-.IPs 2
-Warning messages.
-.IPs 3
-Short hints.
-.IPs 4
-Information messages.
-.IPs 5
-Status messages (those hidden by -quiet).
-.IPs 6
-Verbose messages.
-.IPs 7
-Debug level 2.
-.IPs 8
-Debug level 3.
-.IPs 9
-Debug level 4.
+.IPs "-1"
+complete silence
+.IPs " 0"
+fatal messages only
+.IPs " 1"
+error messages
+.IPs " 2"
+warning messages
+.IPs " 3"
+short hints
+.IPs " 4"
+informational messages
+.IPs " 5"
+status messages (those hidden by \-quiet)
+.IPs " 6"
+verbose messages
+.IPs " 7"
+debug level 2
+.IPs " 8"
+debug level 3
+.IPs " 9"
+debug level 4
 .RE
 .PD 1
 .
