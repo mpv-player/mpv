@@ -1,4 +1,4 @@
-.\" synced with 1.1146
+.\" synced with 1.1163
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -107,7 +107,7 @@ mencoder \- filmový enkodér
 .in
 .B mplayer
 'in +\n[.k]u
-.I [cdda|cddb]://stopa[:rychlost][/zaøízení]
+.I [cdda|cddb]://stopa[-poslední_stopa][:rychlost][/zaøízení]
 [volby]
 .
 .br
@@ -307,7 +307,7 @@ Krok vpøed/zpìt v titulcích.
 Pøepínaè zobrazení "vynucených titulkù".
 .IPs a\ \ \ \ 
 Pøepínaè zarovnání titulkù: vrch/\:støed/\:spodek.
-.IPs "z a x"
+.IPs "x a z"
 Nastavení zpo¾dìní titulkù po +/\:- 0.1 sekundy.
 .IPs "r a t"
 Posun titulkù nahoru/\:dolù.
@@ -515,6 +515,43 @@ codecs.conf.
 .TP
 .B \-include <konfiguraèní\ soubor>
 Zadaný <konfiguraèní\ soubor> bude zpracován po ostatních konfiguraèních souborech.
+.
+.TP
+.B \-msglevel <all=<úroveò>:module=<úroveò>:...>
+Ovládá upovídanost ka¾dého modulu pøímo.
+Modul 'all' zmìní upovídanost v¹ech ostatních neuvedených modulù.
+Seznam v¹ech dostupných modulù získáte pomocí '-msglevel help'.
+.br
+.I POZNÁMKA:
+Zprávy vypsané pøed naètením pøíkazového øádku nelze kontrolovat.
+.br
+Dostupné úrovnì:
+.PD 0
+.RSs
+.IPs -1
+Úplné ticho.
+.IPs 0
+Pouze kritické zprávy.
+.IPs 1
+Chybové zprávy.
+.IPs 2
+Varování.
+.IPs 3
+Krátké tipy.
+.IPs 4
+Informaèní sdìlení.
+.IPs 5
+Stavové informace (ty, které skrývá -quiet).
+.IPs 6
+Obsáhlá sdìlení.
+.IPs 7
+Debug úroveò 2.
+.IPs 8
+Debug úroveò 3.
+.IPs 9
+Debug úroveò 4.
+.RE
+.PD 1
 .
 .TP
 .B \-quiet\ 
@@ -918,10 +955,11 @@ Dostupné volby jsou:
 Nastaví rychlost otáèení CD.
 .IPs paranoia=<0\-2>
 Nastaví úroveò pro paranoiu.
+Zdá se, ¾e jiné hodnoty ne¾ 0 znemo¾ní pøehrát v¹e kromì první stopy.
 .RSss
-0: zákaz testování
+0: zákaz testování (výchozí)
 .br
-1: pouze kolizní test (výchozí)
+1: pouze kolizní test
 .br
 2: plné ovìøování a korekce dat
 .REss
@@ -1556,6 +1594,10 @@ titulky.
 Vypne automatické naèítání souborù s titulky.
 .
 .TP
+.B \-osd-duration <èas>
+Nastaví trvání OSD zpráv v ms (výchozí: 1000).
+.
+.TP
 .B \-osdlevel <0\-3> (pouze MPlayer)
 Nastavuje re¾im zobrazení ve kterém bude startovat OSD.
 .PD 0
@@ -1822,6 +1864,18 @@ Pou¾itelné pro TV-out.
 Hodnota vyjadøuje ¹íøku titulkù v % ¹íøky obrazu.
 .
 .TP
+.B \-noterm-osd
+Zaká¾e zobrazování OSD zpráv na konzoli, pokud není dostupný ¾ádný video
+výstup.
+.
+.TP
+.B \-term-osd-esc <escape sequence>
+Nastaví únikovou sekvenci, která se pou¾ije pøed zapsáním OSD zprávy na
+konzoli.
+Úniková sekvence by mìla pøesunout kursor na zaèátek øádku pou¾itého pro
+OSD a vyèistit jej (výchozí: ^[[A\\r^[[K).
+.
+.TP
 .B \-unicode
 Øekne MPlayeru aby zpracoval titulkový soubor jako unicode.
 .
@@ -1947,8 +2001,12 @@ Zvukové rozhraní ALSA 0.5.
 Rozhraní OSS.
 .PD 0
 .RSs
-.IPs dsp-device
+.IPs <dsp-device>
 Nastaví výstupní zvukové zaøízení (výchozí: /dev/\:dsp).
+.IPs <mixer-device>
+Nastaví zvukové mixá¾ní zaøízení (výchozí: /dev/\:mixer).
+.IPs <mixer-channel>
+Nastaví kanál mixá¾ního zaøízení (výchozí: pcm).
 .RE
 .PD 1
 .TP
@@ -2084,6 +2142,13 @@ V souèasnosti pracuje pouze s video rozhraním directx.
 .B \-bpp <hloubka>
 Pøepí¹e detekovanou barevnou hloubku.
 Funkci podporují pouze tato výstupní rozhraní: fbdev, dga, svga, vesa.
+.
+.TP
+.B \-border
+Pøehrává film v orámovaném oknì s dekoracemi.
+Jeliko¾ je to zapnuté jako výchozí, pou¾ijte q-noborder pro vypnutí
+standardních dekorací okna.
+Podporováno výstupním video rozhraním directx.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -2785,6 +2850,15 @@ Vy¾aduje OpenGL ve verzi >= 1.2.
 .IPs slice-height=<0\-...>
 Poèet øádkù kopírovaných do textury najednou (výchozí: 4).
 0 pro celý obrázek.
+.br
+.I POZNÁMKA:
+Pokud pou¾ijete barevný prostor YUV (viz parametr yuv), platí zvlá¹tní pravidla:
+.RSss
+Pokud dekodér pou¾ívá renderování po kouskách (viz \-noslices), nemá toto
+nastavení ¾ádný efekt a zachová se velikost pou¾itá dekodérem.
+.br
+Pokud dekodér nepou¾ívá renderování po kouskách, je výchozí 16.
+.RE
 .IPs (no)osd
 Zapne nebo vypne podporu pro renderování OSD pomocí OpenGL (výchozí: zapnuto).
 Tato volba je pro testovací úèely, pro vypnutí OSD pou¾ijte radìji
@@ -2810,6 +2884,7 @@ Nastaví pou¾ití pravoúhlých textur, co¾ ¹etøí video RAM, ale èasto je pomalej¹í
 2: Pou¾ije roz¹íøení GL_ABR_texture_non_power_of_two.
 V nìkterých pøípadech je podporováno pouze softwarovì a proto velmi pomalé.
 .REss
+.RE
 .IPs (no)glfinish
 Zavolá glFinish() pøed prohozením vyrovnávacích pamìtí.
 Pomalej¹í, ale v nìkterých pøípadech dává korektnìj¹í výstup (výchozí: vypnuto).
@@ -3482,6 +3557,8 @@ kvantizaèní matice, pøedpokládaný YUV 4:2:0 a pøeskoèení nìkolika testù
 detekujících po¹kozené bitové proudy.
 .IPs gray\ 
 dekódování pouze èernobíle (o nìco rychlej¹í ne¾ barevnì)
+.IPs threads=<0\-8>
+vícevláknové dekódování
 .IPs "idct=<0\-99> (viz \-lavcopts)"
 (viz lavcopts)
 Nejlep¹í kvality dekódování dosáhnete pou¾itím stejného IDCT algoritmu jak pro
@@ -3573,6 +3650,7 @@ Pou¾itelné pro výkonové testy.
 .TP
 .B \-novideo
 Nepøehrávat/\:enkódovat video.
+V mnoha pøípadech to nebude fungovat, místo toho pou¾ijte \-vc null \-vo null.
 .
 .TP
 .B \-oldpp <kvalita> (pouze OpenDivX) (ZASTARALÉ)
@@ -4235,7 +4313,7 @@ pøi -1.0 budou levý a pravý kanál prohozeny.
 .PD 1
 .
 .TP
-.B volnorm[=metoda]
+.B volnorm[=metoda:cíl]
 Maximalizuje hlasitost bez zkreslení zvuku.
 .PD 0
 .RSs
@@ -4248,6 +4326,9 @@ prùmìru z pøedchozích vzorkù (výchozí).
 2: Pou¾ívá nìkolik vzorkù pro vyhlazení zmìn pomocí standardního vá¾eného
 prùmìru z pøedchozích vzorkù (výchozí).
 .REss
+.IPs <cíl>
+Nastaví cílovou amplitudu jako podíl maxima daného typu vzorku
+(výchozí: 0.25).
 .RE
 .PD 1
 .
@@ -4804,6 +4885,20 @@ Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 0: ostrý práh (výchozí)
 .br
 1: jemný práh (lep¹í dering, ale rozmazanìj¹í)
+.RE
+.
+.TP
+.B uspp[=kvalita[:qp]]
+Ultra jednoduchý&pomalý postprocesní filtr, který koprimuje a dekomprimuje
+obraz s posunem nìkolika (nebo \- v pøípadì kvality úrovnì 8 \- v¹emi) smìry
+a zprùmìruje výsledky.
+Rozdíl proti spp je, ¾e pro komprimaci a dekompimaci pou¾ívá lavc-mpeg4,
+zatímco spp pou¾ívá zjednodu¹enou pouze intra 8x8 DCT podobnou mjpeg.
+.RSs
+.IPs <kvalita>
+0\-8 (výchozí: 3)
+.IPs <qp>\ 
+Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 .RE
 .
 .TP
@@ -8087,8 +8182,8 @@ velikost snímku v porovnání s ideální alokaèní køivkou
 Nastavuje prùmìrné navý¹ení v bajtech na jeden snímek.
 Vìt¹inou u¾ivatelé nastavují cílový datový tok videa bez zohlednìní velikosti
 pøidané nosièem (container).
-Toto malé a (vìt¹inou) stálé navý¹ení mù¾e zpùsobit pøekroèení po¾adované velikosti
-souboru.
+Toto malé a (vìt¹inou) stálé navý¹ení mù¾e zpùsobit pøekroèení po¾adované
+velikosti souboru.
 XviD umo¾òuje u¾ivateli nastavit velikost navý¹ení na snímek zabrané nosièem
 (zadává se prùmìr na snímek).
 0 má speciální význam, nechá XviD pou¾ít vlastní výchozí hodnotu
@@ -8199,7 +8294,8 @@ Pomìr stran mù¾e být zadán zlomkem, nebo desetinným èíslem.
 .TP
 .B (no)autoaspect
 Stejné jako volba aspect, ale pomìr stran je vypoèítán automaticky,
-s pøihlédnutím ke v¹em úpravám (crop/\:expand/\:scale/\:atd.) provedeným ve filtrech.
+s pøihlédnutím ke v¹em úpravám (crop/\:expand/\:scale/\:atd.)
+provedeným ve filtrech.
 .
 .TP
 .B psnr\ \ \ 
@@ -8421,7 +8517,8 @@ filtrem by bylo vidìt více ne¾ pùvodní ètvereèkování.
 Pou¾ije CABAC (Kontextovì-Adaptivní Binární Aritmetické Kódování)
 (výchozí: zapnuto).
 Zpomalí enkódování, ale mìlo by u¹etøit 10-15% datového toku.
-Tuto volbu byste nemìli vypínat, pokud nevy¾adujete maximální rychlost dekódování.
+Tuto volbu byste nemìli vypínat, pokud nevy¾adujete maximální rychlost
+dekódování.
 .
 .TP
 .B qp_min=<1\-51> (pouze ABR nebo dvouprùchodový re¾im)
@@ -8475,12 +8572,14 @@ Rozostøení komplexnosti pracovního (temporal) snímku pøed kompresí køivky
 Ni¾¹í hodnoty umo¾òují hodnotì kvantizeru rychlé zmìny,
 vy¹¹í hodnoty vynucují pomalej¹í zmìny.
 Díky cplx_blur bude mít ka¾dý I-snímek kvalitu odpovídající následným
-P-snímkùm. Rovnì¾ pøi støídání snímkù s vysokou a nízkou komplexností (napø.\& animace
-s nízkou snímkovou rychlostí) nebude plýtvat bity na fluktuaci kvantizeru.
+P-snímkùm. Rovnì¾ pøi støídání snímkù s vysokou a nízkou komplexností
+(napø.\& animace s nízkou snímkovou rychlostí) nebude plýtvat bity
+na fluktuaci kvantizeru.
 .
 .TP
 .B qblur=<0\-99> (pouze dvouprùchodový re¾im)
-Rozostøení pracovního (temporal) kvantizaèního parametru po kompresi køivky (výchozí: 0.5).
+Rozostøení pracovního (temporal) kvantizaèního parametru po kompresi køivky
+(výchozí: 0.5).
 Ni¾¹í hodnoty umo¾òují ostøej¹í skoky hodnoty kvantizeru,
 vy¹¹í hodnoty vynucují pozvolnìj¹í zmìny.
 .
@@ -8650,6 +8749,25 @@ Bez této volby musí pou¾ít celý makroblok stejnou referenci.
 Vy¾aduje frameref>1.
 .
 .TP
+.B (no)brdo
+Zapne optimalizaci oøezání datového toku makroblokových typù v B-snímcích.
+Vy¾aduje subq=6.
+.
+.TP
+.B trellis=<0\-2>
+optimální kvantizace z hlediska omezení datového toku
+.PD 0
+.RSs
+.IPs 0
+vypnuto
+.IPs 1
+zapnuto pouze pro koneèný výsledek (encode) (výchozí)
+.IPs 2
+zapnuto pøi v¹ech rozhodováních o re¾imech (pomalé, vy¾aduje subq=6)
+.RE
+.PD 1
+.
+.TP
 .B chroma_qp_offset=<-12\-12>
 Pou¾ije odli¹ný kvantizer pro barvu vzta¾ený k jasu.
 Pou¾itelné hodnoty jsou v rozsahu <-2\-2> (výchozí: 0).
@@ -8670,9 +8788,6 @@ Pou¾ije se zadaný soubor formátu JM s maticí.
 .RE
 .RS
 .I POZNÁMKA:
-Soubory enkódované s pou¾itím CQM nelze v souèasnosti dekódovat pøehrávaèi
-zalo¾enými na FFmpeg.
-.br
 U¾ivatelé pou¾ívající Windows CMD.EXE mohou mít problém se zpracováním
 pøíkazového øádku, pokud se pokusí pou¾ít v¹echny CQM seznamy.
 To je zpùsobeno omezením délky pøíkazového øádku.
@@ -8713,7 +8828,7 @@ hodnot v rozsahu 1\-255.
 .TP
 .B level_idc=<10\-51>
 Nastavuje Level bitového proudu tak jak je definován v annex A
-standardu H.264 (výchozí: 40 - Level 4.0).
+standardu H.264 (výchozí: 51 - Level 5.1).
 To je pou¾ito pro sdìlení dekodéru jaké vlastnosti musí podporovat.
 Tento parametr pou¾ijte pouze pokud víte co znamená a musíte jej nastavit.
 .
@@ -8894,7 +9009,7 @@ NUT Open container format (experimentální)
 QuickTime
 .IPs mp4\ \ 
 Formát MPEG-4
-.IPs dv\ \ 
+.IPs dv\ \ \ 
 Sony Digital Video kontejner
 .RE
 .PD 1
