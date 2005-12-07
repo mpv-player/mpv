@@ -396,9 +396,9 @@ char* filename=NULL;
 int decoded_frameno=0;
 int next_frameno=-1;
 int curfile=0;
-int new_srate;
+int new_srate=0;
 
-unsigned int timer_start;
+unsigned int timer_start=0;
 ao_data_t ao_data = {0,0,0,0,OUTBURST,-1,0};
 
 audio_encoding_params_t aparams;
@@ -924,8 +924,8 @@ case ACODEC_COPY:
     mux_a->h.dwRate *= playback_speed;
     mux_a->wf->nSamplesPerSec *= playback_speed;
     mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
-	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
+	mux_a->wf->wFormatTag, mux_a->wf->nChannels, (long)mux_a->wf->nSamplesPerSec,
+	mux_a->wf->wBitsPerSample, (long)mux_a->wf->nAvgBytesPerSec, (long)mux_a->h.dwSampleSize);
     break;
 }
 
@@ -956,16 +956,16 @@ else {
 	if (sh_audio && mux_a->codec == ACODEC_COPY) {
 		if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
 		mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-		       mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
-		       mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
+		       mux_a->wf->wFormatTag, mux_a->wf->nChannels, (long)mux_a->wf->nSamplesPerSec,
+		       mux_a->wf->wBitsPerSample, (long)mux_a->wf->nAvgBytesPerSec, (long)mux_a->h.dwSampleSize);
 		if (sh_audio->wf) {
 			if ((mux_a->wf->wFormatTag != sh_audio->wf->wFormatTag) ||
 			    (mux_a->wf->nChannels != sh_audio->wf->nChannels) ||
 			    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec * playback_speed))
 			{
 				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec * playback_speed,
-				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (long)(sh_audio->wf->nSamplesPerSec * playback_speed),
+				       sh_audio->wf->wBitsPerSample, (long)sh_audio->wf->nAvgBytesPerSec, 0L);
 				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
 				mencoder_exit(1,NULL);
 			}
@@ -975,8 +975,8 @@ else {
 			    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate * playback_speed))
 			{
 				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec * playback_speed,
-				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (long)(sh_audio->wf->nSamplesPerSec * playback_speed),
+				       sh_audio->wf->wBitsPerSample, (long)sh_audio->wf->nAvgBytesPerSec, 0L);
 				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
 				mencoder_exit(1,NULL);
 			}
@@ -1705,7 +1705,7 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
 
 #ifdef USE_EDL
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,
-               "EDL SKIP: Start: %.2f  End: %.2lf   Current: V: %.2f  A: %.2f     \r",
+               "EDL SKIP: Start: %.2f  End: %.2f   Current: V: %.2f  A: %.2f     \r",
                next_edl_record->start_sec, next_edl_record->stop_sec,
                sh_video->pts, a_pts);
 #endif
@@ -1717,8 +1717,6 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
 static void fixdelay(demux_stream_t *d_video, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy) {
     // TODO: Find a way to encode silence instead of deleting video
     sh_video_t * sh_video = d_video->sh;
-    vf_instance_t * vfilter = sh_video ? sh_video->vfilter : NULL;
-    int done = 0;
     float a_pts;
 
     // demux_seek has a weirdness that sh_video->pts is meaningless,
