@@ -1,4 +1,4 @@
-.\" synced with 1.1163
+.\" Synced with 1.1163
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -339,7 +339,7 @@ Nastavení sytosti barev (saturation).
 .PP
 .RS
 (Následující klávesy jsou èinné pouze pokud pou¾íváte výstupní video rozhraní
-quartz nebo macosx.)
+Quartz nebo macosx.)
 .RE
 .PP
 .PD 0
@@ -367,14 +367,14 @@ s multimediálními tlaèítky.)
 .IPs "PAUSE"
 Pauza.
 .IPs "STOP\ "
-Ukonèení pøehrávání a exit.
+Ukonèení pøehrávání a skonèí.
 .IPs "PREVIOUS a NEXT"
 Pøevíjení zpìt/\:vpøed o 1 minutu.
 .RE
 .PD 1
 .PP
 .RS
-(Následující klávasy jsou platné, pokud jste zakompilovali podporu GUI
+(Následující klávesy jsou platné, pokud jste zakompilovali podporu GUI
 a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
 .RE
 .PP
@@ -398,7 +398,7 @@ Otevøe pøedvolby.
 .PD 1
 .PP
 .RS
-(Následující klávasy jsou platné, pokud jste zakompilovali podporu vstupu z TV
+(Následující klávesy jsou platné, pokud jste zakompilovali podporu vstupu z TV
 a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
 .RE
 .PP
@@ -1513,7 +1513,7 @@ Vytvoøí soubor dumpsub.srt v aktuálním adresáøi.
 Nìkteré ¹patné hardwarové pøehrávaèe se rdousí SRT titulky s Unixovými
 konci øádkù.
 Pokud máte smùlu a vlastníte takovou ma¹inu, protáhnìte si své
-titulkové soubory pøes unix2dos nebo podpbný program pro výmìnu Unixových
+titulkové soubory pøes unix2dos nebo podobný program pro výmìnu Unixových
 koncù øádkù za DOS/Windows konce øádkù.
 .
 .TP
@@ -3183,7 +3183,7 @@ Výstupní video rozhraní mnoha MJPEG zachytávacích/\:pøehrávacích karet, druhá ge
 .IPs dev=<zaøízení>
 Nastaví jméno video zaøízení k pou¾ití.
 .IPs norm=<PAL|NTSC|SECAM|auto>
-Vastavuje video normu k pou¾ití (výchozí: auto).
+Nastavuje video normu k pou¾ití (výchozí: auto).
 .IPs (no)prebuf
 (De)Aktivuje prebuffering, zatím nepodporováno.
 .RE
@@ -3790,7 +3790,7 @@ Viz \-vfm help pro úplný seznam dostupných rodin kodekù.
 .PD 0
 .RSs
 .IPs "\-vfm ffmpeg,dshow,vfw"
-Zkou¹í libavcodec, potom Directshow, potom VFW kodeky a v pøípadì ¾e ¾ádný
+Zkou¹í libavcodec, potom DirectShow, potom VFW kodeky a v pøípadì ¾e ¾ádný
 kodek není vhodný, zkusí i ostatní.
 .IPs "\-vfm xanim"
 Nejdøív zkusí XAnim kodeky.
@@ -3973,7 +3973,7 @@ zvuku.
 .IPs "Pøíznak  Význam"
 .IPs "m        maticové dekódování zadního kanálu"
 .IPs "s        dvoukanálové maticové dekódování"
-.IPs "0        nepou¾ívá se maticové dokódování (výchozí)"
+.IPs "0        nepou¾ívá se maticové dekódování (výchozí)"
 .RE
 .PD 1
 .
@@ -4889,10 +4889,10 @@ Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 .
 .TP
 .B uspp[=kvalita[:qp]]
-Ultra jednoduchý&pomalý postprocesní filtr, který koprimuje a dekomprimuje
+Ultra jednoduchý&pomalý postprocesní filtr, který komprimuje a dekomprimuje
 obraz s posunem nìkolika (nebo \- v pøípadì kvality úrovnì 8 \- v¹emi) smìry
 a zprùmìruje výsledky.
-Rozdíl proti spp je, ¾e pro komprimaci a dekompimaci pou¾ívá lavc-mpeg4,
+Rozdíl proti spp je, ¾e pro komprimaci a dekomprimaci pou¾ívá lavc-mpeg4,
 zatímco spp pou¾ívá zjednodu¹enou pouze intra 8x8 DCT podobnou mjpeg.
 .RSs
 .IPs <kvalita>
@@ -7305,7 +7305,7 @@ Naq se pokusí upravit kvantizery makroblokù tak, aby mìly správný prùmìr.
 .
 .TP
 .B ildct\ \ 
-Pou¾ije prokládanou DCT (Diskrétní Kosínova Transformace)
+Pou¾ije prokládanou DCT (Diskrétní Kosinova Transformace)
 .
 .TP
 .B ilme\ \ \ 
@@ -8357,7 +8357,7 @@ první prùchod
 .IPs 2
 druhý prùchod (dvouprùchodového re¾imu)
 .IPs 3
-Ntý prùchod (druhý a tøetí prùchod tøíprùchodového re¾imu)
+N-tý prùchod (druhý a tøetí prùchod tøíprùchodového re¾imu)
 .RE
 .RS
 Popis funkce a pou¾ití:
