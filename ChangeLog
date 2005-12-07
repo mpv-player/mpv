@@ -3,6 +3,7 @@ MPlayer (1.0)
   pre8:
 
     DOCS:
+    * environment variables documentation started
     * interactive control fully documented
     * improved encoding guide
     * new technical encoding guide in DOCS/tech/encoding-guide.txt
@@ -123,7 +124,7 @@ MPlayer (1.0)
     * lots of new slave commands (check DOCS/tech/slave.txt)
     * lots of new information provided by the -identify option
     * fixed ugly looking OSD with -vo gl2 and MMX
-    * added support for OSD localization
+    * support for OSD localization
     * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
     * libdvdcss updated to 1.2.9
     * ~/.dvdcss is used instead of ~/.mplayer/DVDKeys for cached CSS keys
@@ -131,7 +132,7 @@ MPlayer (1.0)
     * configure check and compiler optimizations for AMD-64 extended
     * configure can now run with cross compiling, new configure option
       --enable-cross-compile
-    * libcdio support for cd playback
+    * libcdio support for CD playback
 
 
   pre7try2: August 26, 2005
