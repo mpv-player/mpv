@@ -1586,8 +1586,10 @@ void xscreensaver_heartbeat(void)
         ev.xclient.data.l[0] = (long) deactivate;
 
         mp_msg(MSGT_VO, MSGL_DBG2, "Pinging xscreensaver.\n");
+        old_handler = XSetErrorHandler(badwindow_handler);
         XSendEvent(mDisplay, xs_windowid, False, 0L, &ev);
         XSync(mDisplay, False);
+        XSetErrorHandler(old_handler);        
     }
 }
 
