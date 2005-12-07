@@ -25,7 +25,7 @@ static int event_flags;
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     switch (message) {
-	case WM_ACTIVATE:
+	case WM_PAINT:
 	    event_flags |= VO_EVENT_EXPOSE;
 	    break;
 	case WM_SIZE:
