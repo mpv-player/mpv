@@ -99,7 +99,8 @@ struct vf_priv_s { //align 16 !
     int prev_q;
     uint8_t *src;
     int16_t *temp;
-    //int mode;
+    int bframes;
+    char *non_b_qp;
 };
 
 
@@ -535,11 +536,23 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     }
 
     vf->priv->mpeg2= mpi->qscale_type;
+    if(mpi->pict_type != 3 && mpi->qscale && !vf->priv->qp){
+	if(!vf->priv->non_b_qp)
+	    vf->priv->non_b_qp= malloc(mpi->qstride * mpi->h);
+	memcpy(vf->priv->non_b_qp, mpi->qscale, mpi->qstride * mpi->h);
+    }
     if(vf->priv->log2_count || !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	if(mpi->qscale || vf->priv->qp){
-	    filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, mpi->qscale, mpi->qstride, 1);
-	    filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
-	    filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, mpi->qscale, mpi->qstride, 0);
+	char *qp_tab= vf->priv->non_b_qp;
+	if(vf->priv->bframes || !qp_tab)
+	    qp_tab= mpi->qscale;
+
+	if(qp_tab || vf->priv->qp){
+	    filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0],
+		   mpi->w, mpi->h, qp_tab, mpi->qstride, 1);
+	    filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1],
+		   mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, qp_tab, mpi->qstride, 0);
+	    filter(vf->priv, dmpi->planes[2], mpi->planes[2], dmpi->stride[2], mpi->stride[2],
+		   mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, qp_tab, mpi->qstride, 0);
 	}else{
 	    memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h, dmpi->stride[0], mpi->stride[0]);
 	    memcpy_pic(dmpi->planes[1], mpi->planes[1], mpi->w>>mpi->chroma_x_shift, mpi->h>>mpi->chroma_y_shift, dmpi->stride[1], mpi->stride[1]);
@@ -566,6 +579,8 @@ static void uninit(struct vf_instance_s* vf)
     vf->priv->src= NULL;
     //if(vf->priv->avctx) free(vf->priv->avctx);
     //vf->priv->avctx= NULL;
+    if(vf->priv->non_b_qp) free(vf->priv->non_b_qp);
+    vf->priv->non_b_qp= NULL;
         
     av_free(vf->priv);
     vf->priv=NULL;
@@ -642,8 +657,9 @@ static int open(vf_instance_t *vf, char* args)
     //dsputil_init(&vf->priv->dsp, vf->priv->avctx);
     
     vf->priv->log2_count= 4;
+    vf->priv->bframes = 0;
     
-    if (args) sscanf(args, "%d:%d:%d", &log2c, &vf->priv->qp, &i);
+    if (args) sscanf(args, "%d:%d:%d:%d", &log2c, &vf->priv->qp, &i, &vf->priv->bframes);
 
     if( log2c >=4 && log2c <=5 )
         vf->priv->log2_count = log2c;
