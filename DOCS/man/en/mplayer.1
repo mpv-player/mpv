@@ -9082,6 +9082,237 @@ Sony Digital Video container
 .
 .
 .\" --------------------------------------------------------------------------
+.\" environment variables
+.\" --------------------------------------------------------------------------
+.
+.SH ENVIRONMENT VARIABLES
+.
+There are a number of environment variables that can be used to
+control the behavior of MPlayer and MEncoder.
+.
+.TP
+.B MPLAYER_HOME
+Directory where MPlayer looks for user settings.
+.
+.SS libaf:
+.
+.TP
+.B LADSPA_PATH
+If LADSPA_PATH is set, it searches for the specified file.
+If it is not set, you must supply a fully specified pathname.
+FIXME: This is also mentioned in the ladspa section.
+.
+.SS libmpdvdkit2:
+.
+.TP
+.B DVDCSS_CACHE
+Specify a directory in which to store title key values.
+This will speed up descrambling of DVDs which are in the cache.
+The DVDCSS_CACHE directory is created if it does not exist,
+and a subdirectory is created named after the DVD's title
+or manufacturing date.
+If DVDCSS_CACHE is not set or is empty, libdvdcss will use
+the default value which is "${HOME}/.dvdcss/" under Unix and
+"C:\Documents and Settings\$USER\Application Data\dvdcss\" under Win32.
+The special value "off" disables caching.
+.
+.TP
+.B DVDCSS_METHOD
+Sets the authentication and decryption method that
+libdvdcss will use to read scrambled discs.
+Can be one of title, key or disc.
+.PD 0
+.RSs
+.IPs key\ \ 
+is the default method.
+libdvdcss will use a set of calculated player keys to try and get the disc key.
+This can fail if the drive does not recognize any of the player keys.
+.IPs disc\ 
+is a fallback method when key has failed.
+Instead of using player keys, libdvdcss will crack the disc key using
+a brute force algorithm.
+This process is CPU intensive and requires 64 MB of memory to store
+temporary data.
+.IPs title
+is the fallback when all other methods have failed.
+It does not rely on a key exchange with the DVD drive, but rather uses
+a crypto attack to guess the title key.
+On rare cases this may fail because there is not enough encrypted data
+on the disc to perform a statistical attack, but in the other hand it
+is the only way to decrypt a DVD stored on a hard disc, or a DVD with
+the wrong region on an RPC2 drive.
+.RE
+.PD 1
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+Specify the raw device to use.
+Exact usage will depend on your operating system, the Linux
+utility to set up raw devices is raw(8) for instance.
+Please note that on most operating systems, using a raw device
+requires highly aligned buffers: Linux requires a 2048 bytes
+alignment (which is the size of a DVD sector).
+.
+.TP
+.B DVDCSS_VERBOSE
+Sets the libdvdcss verbosity level.
+.PD 0
+.RSs
+.IPs 0
+Outputs no messages at all.
+.IPs 1
+Outputs error messages to stderr.
+.IPs 2
+Outputs error messages and debug messages to stderr.
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+DVDREAD_NOKEYS is MPlayer specific, but currently unused.
+In the file libmpdvdkit2/dvd_reader.c DVDREAD_NOKEYS is used
+in the funcion initAllCSSKeys, but the only place where this
+function is called is commented.
+.
+.TP
+.B HOME
+FIXME: Document this.
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+FIXME: Document this.
+.
+.TP
+.B AUDIODEV
+FIXME: Document this.
+.
+.TP
+.B AUDIOSERVER
+Specifies the Network Audio System server to which the
+nas audio output driver should connect and the transport
+that should be used.
+If unset DISPLAY is used instead.
+The transport can be one of tcp and unix.
+Syntax is tcp/somehost:someport, somehost:instancenumber
+or [unix]:instancenumber.
+.sp 1
+.RS
+.I EXAMPLES:
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=somehost:0
+Connect to NAS server on somehost using default port and transport.
+.IPs AUDIOSERVER=tcp/somehost:8000
+Connect to NAS server on somehost listening on TCP port 8000.
+.IPs AUDIOSERVER=(unix)?:0
+Connect to NAS server instance 0 on localhost using unix domain sockets.
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+FIXME: Document this.
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+FIXME: Document this.
+.
+.SS osdep:
+.
+.TP
+.B TERM
+FIXME: Document this.
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+FIXME: Document this.
+.
+.TP
+.B FRAMEBUFFER
+FIXME: Document this.
+.
+.TP
+.B HOME
+FIXME: Document this.
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+FIXME: Document this.
+.
+.TP
+.B HOMEPATH
+FIXME: Document this.
+.
+.TP
+.B http_proxy
+FIXME: Document this.
+.
+.TP
+.B LOGNAME
+FIXME: Document this.
+.
+.TP
+.B USERPROFILE
+FIXME: Document this.
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+FIXME: Document this.
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+FIXME: Document this.
+.
+.TP
+.B DISPLAY
+FIXME: Document this.
+.
+.TP
+.B HOME
+FIXME: Document this.
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+FIXME: Document this.
+.
+.TP
+.B BKTR_DEV
+FIXME: Document this.
+.
+.TP
+.B BKTR_FORMAT
+FIXME: Document this.
+.
+.TP
+.B BKTR_FREQUENCY
+FIXME: Document this.
+.
+.TP
+.B http_proxy
+FIXME: Document this.
+.
+.TP
+.B no_proxy
+FIXME: Document this.
+.
+.
+.
+.\" --------------------------------------------------------------------------
 .\" Files
 .\" --------------------------------------------------------------------------
 .
