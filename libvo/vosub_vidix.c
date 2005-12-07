@@ -404,6 +404,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		   unsigned dst_height,unsigned format,unsigned dest_bpp,
 		   unsigned vid_w,unsigned vid_h)
 {
+  void *tmp, *tmpa;
   size_t i;
   int err;
   uint32_t sstride,apitch;
@@ -495,14 +496,22 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 
 	vidix_mem = vidix_play.dga_addr;
 
-	/* select first frame */
-	next_frame = 0;
-//        vdlPlaybackFrameSelect(vidix_handler,next_frame);
-
+	tmp = calloc(image_width, image_height);
+	tmpa = malloc(image_width * image_height);
+	memset(tmpa, 1, image_width * image_height);
 	/* clear every frame with correct address and frame_size */
-	for (i = 0; i < vidix_play.num_frames; i++)
+	/* HACK: use draw_alpha to clear Y component */
+	for (i = 0; i < vidix_play.num_frames; i++) {
+	    next_frame = i;
 	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
 		vidix_play.frame_size);
+	    draw_alpha(0, 0, image_width, image_height, tmp, tmpa, image_width);
+	}
+	free(tmp);
+	free(tmpa);
+	/* show one of the "clear" frames */
+	vidix_flip_page();
+
 	switch(format)
 	{
 	    case IMGFMT_YV12:
