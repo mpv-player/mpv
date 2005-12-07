@@ -82,7 +82,7 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 		return NULL;
 	}
 	encoder->bind(encoder, stream);
-	encoder->decode_buffer = (int*)malloc(encoder->decode_buffer_size);
+	encoder->decode_buffer = malloc(encoder->decode_buffer_size);
 	if(! encoder->decode_buffer)
 	{
 		free(encoder);

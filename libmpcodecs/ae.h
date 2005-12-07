@@ -29,7 +29,7 @@ typedef struct audio_encoder_s {
 	int audio_preload;	//in ms
 	int input_format;
 	int min_buffer_size, max_buffer_size;	//for init_audio_filters
-	int *decode_buffer;
+	unsigned char *decode_buffer;
 	int decode_buffer_size;
 	int decode_buffer_len;
 	void *priv;

@@ -1142,7 +1142,7 @@ if(sh_audio){
 
 			len = dec_audio(sh_audio, aencoder->decode_buffer, len);
 			mux_a->buffer_len += aencoder->encode(aencoder, mux_a->buffer + mux_a->buffer_len, 
-				(void*)aencoder->decode_buffer, len, mux_a->buffer_size-mux_a->buffer_len);
+				aencoder->decode_buffer, len, mux_a->buffer_size-mux_a->buffer_len);
 			if(mux_a->buffer_len < mux_a->wf->nBlockAlign)
 				len = 0;
 			else 
@@ -1167,7 +1167,7 @@ if(sh_audio){
 					len = 0;
 					break;
 				}
-				len = aencoder->encode(aencoder, mux_a->buffer + mux_a->buffer_len, (void*)aencoder->decode_buffer, len, mux_a->buffer_size-mux_a->buffer_len);
+				len = aencoder->encode(aencoder, mux_a->buffer + mux_a->buffer_len, aencoder->decode_buffer, len, mux_a->buffer_size-mux_a->buffer_len);
 				mux_a->buffer_len += len;
 			}
 	    }
