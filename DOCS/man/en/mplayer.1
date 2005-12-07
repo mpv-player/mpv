@@ -4922,7 +4922,7 @@ Force quantization parameter (default: 0, use QP from video).
 .RE
 .
 .TP
-.B fspp[=quality[:qp[:strength]]]
+.B fspp[=quality[:qp[:strength[:bframes]]]]
 faster version of the simple postprocessing filter
 .RSs
 .IPs <quality>
@@ -4933,6 +4933,10 @@ Force quantization parameter (default: 0, use QP from video).
 Filter strength, lower values mean more details but also more artifacts,
 while higher values make the image smoother but also blurrier (default:
 0 \- PSNR optimal).
+.IPs <bframes>
+0: do not use QP from B-frames (default)
+.br
+1: use QP from B-frames too (may cause flicker)
 .RE
 .
 .TP
