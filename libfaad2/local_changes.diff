@@ -130,9 +130,9 @@
 -** Commercial non-GPL licensing of this software is possible.
 -** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 -**
--** $Id: local_changes.diff,v 1.3 2005/08/17 22:50:29 diego Exp $
+-** $Id: local_changes.diff,v 1.4 2005/12/07 23:07:40 rathann Exp $
 +** Initially modified for use with MPlayer by Rich Felker on 2005/03/29
-+** $Id: local_changes.diff,v 1.3 2005/08/17 22:50:29 diego Exp $
++** $Id: local_changes.diff,v 1.4 2005/12/07 23:07:40 rathann Exp $
 +** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  **/
  
@@ -211,3 +211,16 @@
  
      /* delta decoding of the bitstream data */
      ps_data_decode(ps);
+--- libfaad/sbr_dec.c	2005-12-07 22:52:03.000000000 +0100
++++ libfaad2/sbr_dec.c	2005-12-07 22:52:31.000000000 +0100
+@@ -604,8 +527,8 @@
+     uint8_t l, k;
+     uint8_t dont_process = 0;
+     uint8_t ret = 0;
+-    ALIGN qmf_t X_left[38][64] = {{0}};
+-    ALIGN qmf_t X_right[38][64] = {{0}}; /* must set this to 0 */
++    ALIGN qmf_t X_left[38][64] = {{{0}}};
++    ALIGN qmf_t X_right[38][64] = {{{0}}}; /* must set this to 0 */
+ 
+     if (sbr == NULL)
+         return 20;
