@@ -22,6 +22,7 @@ _crlf=yes
 _trailws=no
 _rcsid=no
 _oll=no
+_showcont=no
 
 _color=yes
 _head=yes
@@ -103,6 +104,9 @@ for i in "$@"; do
         echo
         printoption "all       " "enable all tests" "no"
         echo
+        printoption "showcont  " "show offending content of file(s)" \
+                                                                    "$_showcont"
+        echo
         printoption "color     " "colored output" "$_color"
         printoption "head      " "print heading for each test" "$_head"
         printoption "cvs       " "use CVS/ to determine which files to check" \
@@ -174,6 +178,12 @@ for i in "$@"; do
     -none)
         disable_all_tests
         ;;
+    -showcont)
+        _showcont=yes
+        ;;
+    -noshowcont)
+        _showcont=no
+        ;;
     -*)
         echo "unknown option: $i" >&2
         exit 0
@@ -222,15 +232,24 @@ fi
 
 if [ "$_crlf" == "yes" ]; then
     printhead "checking for MSDOS line endings ..."
+    if [ "$_showcont" == "yes" ]; then
+        grep -n -I "
+" $filelist
+    else
     grep -l -I "
 " $filelist
+    fi
 fi
 
 # -----------------------------------------------------------------------------
 
 if [ "$_trailws" == "yes" ]; then
     printhead "checking for trailing whitespace ..."
+    if [ "$_showcont" == "yes" ]; then
+        grep -n -I "[[:space:]]\+$" $filelist
+    else
     grep -l -I "[[:space:]]\+$" $filelist
+    fi
 fi
 
 # -----------------------------------------------------------------------------
@@ -244,7 +263,11 @@ fi
 
 if [ "$_oll" == "yes" ]; then
     printhead "checking for overly long lines (over 79 characters) ..."
+    if [ "$_showcont" == "yes" ]; then
+        grep -n -I "^[[:print:]]\{80,\}$" $filelist
+    else
     grep -l -I "^[[:print:]]\{80,\}$" $filelist
+    fi
 fi
 
 # -----------------------------------------------------------------------------
