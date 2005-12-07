@@ -130,9 +130,9 @@
 -** Commercial non-GPL licensing of this software is possible.
 -** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 -**
--** $Id: output.c,v 1.8 2005/03/29 18:14:24 rfelker Exp $
+-** $Id: local_changes.diff,v 1.3 2005/08/17 22:50:29 diego Exp $
 +** Initially modified for use with MPlayer by Rich Felker on 2005/03/29
-+** $Id: output.c,v 1.11 2005/04/05 05:43:41 rfelker Exp $
++** $Id: local_changes.diff,v 1.3 2005/08/17 22:50:29 diego Exp $
 +** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  **/
  
@@ -198,3 +198,16 @@
 +}
 +
  #endif
+--- libfaad/ps_dec.c	2005-02-01 14:15:58.000000000 +0100
++++ libfaad2/ps_dec.c	2005-12-07 22:52:31.000000000 +0100
+@@ -1960,8 +1935,8 @@
+ /* main Parametric Stereo decoding function */
+ uint8_t ps_decode(ps_info *ps, qmf_t X_left[38][64], qmf_t X_right[38][64])
+ {
+-    qmf_t X_hybrid_left[32][32] = {{0}};
+-    qmf_t X_hybrid_right[32][32] = {{0}};
++    qmf_t X_hybrid_left[32][32] = {{{0}}};
++    qmf_t X_hybrid_right[32][32] = {{{0}}};
+ 
+     /* delta decoding of the bitstream data */
+     ps_data_decode(ps);
