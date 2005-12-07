@@ -86,7 +86,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 int slave_mode=0;
 int player_idle_mode=0;
-int verbose=0;
+extern int verbose;
 int identify=0;
 int quiet=0;
 
@@ -343,8 +343,8 @@ int global_sub_pos = -1; // this encompasses all subtitle sources
 int global_sub_indices[SUB_SOURCES];
 int global_sub_quiet_osd_hack = 0;
 
-int mp_msg_levels[MSGT_MAX]; // inited to -2
-int mp_msg_level_all = MSGL_STATUS;
+extern int mp_msg_levels[MSGT_MAX];
+extern int mp_msg_level_all;
 
 static stream_t* stream=NULL;
 static demuxer_t *demuxer=NULL;

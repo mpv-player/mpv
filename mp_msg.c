@@ -20,9 +20,9 @@ extern int use_gui;
 /* maximum message length of mp_msg */
 #define MSGSIZE_MAX 3072
 
-extern int mp_msg_levels[MSGT_MAX]; // verbose level of this module
-extern int mp_msg_level_all;
-extern int verbose;
+int mp_msg_levels[MSGT_MAX]; // verbose level of this module. inited to 2
+int mp_msg_level_all = MSGL_STATUS;
+int verbose = 0;
 
 void mp_msg_init(){
     int i;

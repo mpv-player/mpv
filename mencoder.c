@@ -129,7 +129,7 @@ int out_file_format=MUXER_TYPE_AVI;	// default to AVI
 //void skip_audio_frame(sh_audio_t *sh_audio){}
 //void resync_audio_stream(sh_audio_t *sh_audio){}
 
-int verbose=0; // must be global!
+extern int verbose; // must be global!
 int identify=0;
 int quiet=0;
 double video_time_usage=0;
@@ -140,8 +140,8 @@ double cur_video_time_usage=0;
 double cur_vout_time_usage=0;
 int benchmark=0;
 
-int mp_msg_levels[MSGT_MAX]; // inited to -2
-int mp_msg_level_all = MSGL_STATUS;
+extern int mp_msg_levels[MSGT_MAX];
+extern int mp_msg_level_all;
 
 #ifdef WIN32
 char * proc_priority=NULL;

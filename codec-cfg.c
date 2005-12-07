@@ -886,10 +886,6 @@ void gtkMessageBox( int type,char * str ) { return; }
 int use_gui = 0;
 #endif
 
-int mp_msg_levels[MSGT_MAX];
-int mp_msg_level_all = MSGL_ERR;
-int verbose = 0;
-
 void wrapline(FILE *f2,char *s){
     int c;
     if(!s){
@@ -1001,8 +997,6 @@ int main(int argc, char* argv[])
         int win32=-1;
         int dshow=-1;
         int win32ex=-1;
-
-	mp_msg_init();
 
 	/*
 	 * Take path to codecs.conf from command line, or fall back on
@@ -1152,16 +1146,10 @@ int main(int argc, char* argv[])
 #endif
 
 #ifdef TESTING
-int mp_msg_levels[MSGT_MAX];
-int mp_msg_level_all = MSGL_STATUS;
-int verbose = 0;
-
 int main(void)
 {
 	codecs_t *c;
         int i,j, nr_codecs, state;
-
-	mp_msg_init();
 
 	if (!(parse_codec_cfg("etc/codecs.conf")))
 		return 0;
