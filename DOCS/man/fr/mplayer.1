@@ -5207,7 +5207,7 @@ la vidéo).
 .RE
 .
 .TP
-.B fspp[=qualité[:qp[:force]]]
+.B fspp[=qualité[:qp[:force[:bframes]]]]
 version plus rapide du filtre de post-traitement simple
 .RSs
 .IPs <qualité>
@@ -5220,6 +5220,12 @@ Force du filtrage, de faibles valeurs signifie plus de détails, mais
 aussi plus d'artefacts, tandis que de valeurs plus grandes signifie
 rend l'image plus lisse mais plus floue
 (par défaut\ : 0 \- optimal vis-à-vis du PSNR).
+.IPs <bframes>
+.br
+4: comme 0, mais utilise aussi les QP des trames-B QP (peut provoquer un scintillement)
+.br
+5: comme 1, mais utilise aussi les QP des trames-B QP (peut provoquer un scintillement)
+.RE
 .RE
 .
 .TP
