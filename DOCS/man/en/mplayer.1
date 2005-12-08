@@ -9199,8 +9199,9 @@ nas audio output driver should connect and the transport
 that should be used.
 If unset DISPLAY is used instead.
 The transport can be one of tcp and unix.
-Syntax is tcp/somehost:someport, somehost:instancenumber
-or [unix]:instancenumber.
+Syntax is tcp/<somehost>:<someport>, <somehost>:<instancenumber>
+or [unix]:<instancenumber>.
+The NAS base port is 8000 and <instancenumber> is added to that.
 .sp 1
 .RS
 .I EXAMPLES:
