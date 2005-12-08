@@ -1,4 +1,4 @@
-.\" synced with 1.1161
+.\" synced with 1.1167
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -535,6 +535,46 @@ paramètre au lieu du fichier codecs.conf inclus dans MPlayer
 .TP
 .B \-include <fichier\ de\ configuration>
 Spécifie le fichier de configuration à analyser après ceux par défaut.
+.
+.TP
+.B \-msglevel <all=<niveau>:<module>=<niveau>:...>
+Contrôle directement le niveau de verbosité de chaque module.
+Le module 'all' change le niveau de verbosité de tous les modules
+à part ceux explicitement donnés sur la ligne de commande.
+Tapez '-msglevel help' pour avoir la liste de tous les modules.
+.br
+.I NOTE\ :
+Les messages affichés avant que la ligne de commande soit chargée ne
+peut pas être contrôlé
+.br
+Niveaux disponibles\ :
+.PD 0
+.RSs
+.IPs "-1"
+complètement silencieux
+.IPs " 0"
+messages fatals
+.IPs " 1"
+messages d'erreurs
+error messages
+.IPs " 2"
+messages d'avertissement
+.IPs " 3"
+quelques conseils
+.IPs " 4"
+messages informatifs
+.IPs " 5"
+messages de status (ceux cachés par \-quiet)
+.IPs " 6"
+messages verbeux
+.IPs " 7"
+niveau de debug 2
+.IPs " 8"
+niveau de debug 3
+.IPs " 9"
+niveau de debug 4
+.RE
+.PD 1
 .
 .TP
 .B \-quiet\ 
@@ -1301,7 +1341,7 @@ taille de trame en octets
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (LIVE.com uniquement)
+.B \-rtsp-stream-over-tcp (LIVE555 uniquement)
 Utilisé avec 'rtsp://', URLs pour indiquer que les paquets RTP et RTCP
 entrants seront streamés sur TCP (en utilisant la même connexion TCP que
 RTSP).
@@ -3743,8 +3783,6 @@ utilisées, que l'espace de couleur est YUV 4:2:0 et le saut de quelques
 vérifications pour détecter les flux endommagés.
 .IPs gray\ 
 décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
-.IPs threads=<0\-8>
-décodage multithreadé
 .IPs "idct=<0\-99> (voir \-lavcopts)"
 Pour obtenir la meilleure qualité d'encodage utilisez le même algorithme IDCT
 pour le décodage et l'encodage.
@@ -3810,6 +3848,9 @@ Saute complètement le décodgae des trames.
 Grosse accélération, mais mouvement saccadés et parfois artefacts
 visuels
 (voir skiploopfilter pour les valeurs de "skipvalue" disponibles).
+.IPs threads=<1\-8>
+nombre de threads à utiliser pour le décodage (pa défaut\ : 1)
+décodage multithreadé
 .IPs vismv=<valeur>
 Visualise les vecteurs de mouvement.
 .RSss
@@ -5143,6 +5184,10 @@ la video).
 .br
 1: faible seuillage (soft thresholding) (meilleure élimination des parasites,
 mais image plus floue)
+.br
+4: comme 0, mais utilise aussi les QP des trames-B QP (peut provoquer un scintillement)
+.br
+5: comme 1, mais utilise aussi les QP des trames-B QP (peut provoquer un scintillement)
 .RE
 .
 .TP
