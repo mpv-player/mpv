@@ -18,17 +18,17 @@
 #include "widgets.h"
 
 #include "./mplayer.h"
-#include "../app.h"
-#include "../wm/ws.h"
+#include "app.h"
+#include "wm/ws.h"
 
 
 #include "gtk/menu.h"
 #include "play.h"
 #include "gtk/fs.h"
 
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../mp_msg.h"
+#include "../config.h"
+#include "../help_mp.h"
+#include "../mp_msg.h"
 
 GtkWidget     * PopUpMenu = NULL;
 

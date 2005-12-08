@@ -7,12 +7,12 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../../config.h"
-#include "../../osdep/shmem.h"
+#include "../config.h"
+#include "../osdep/shmem.h"
 #include "play.h"
 #include "mplayer.h"
-#include "../interface.h"
-#include "../wm/ws.h"
+#include "interface.h"
+#include "wm/ws.h"
 
 #define GTK_MB_SIMPLE 0
 #define GTK_MB_MODAL 1

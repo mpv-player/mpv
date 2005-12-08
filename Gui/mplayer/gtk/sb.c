@@ -9,12 +9,12 @@
 #include "sb.h"
 #include "common.h"
 
-#include "../../app.h"
-#include "../../../config.h"
-#include "../../../help_mp.h"
+#include "../app.h"
+#include "../../config.h"
+#include "../../help_mp.h"
 
 #include "../widgets.h"
-#include "../app.h"
+#include "app.h"
 
 GtkWidget * SkinList = NULL;
 char      * sbSelectedSkin=NULL;

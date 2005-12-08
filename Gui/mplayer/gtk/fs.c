@@ -12,11 +12,11 @@
 #include "mplayer/pixmaps/dir.xpm"
 #include "mplayer/pixmaps/file.xpm"
 
-#include "../../app.h"
-#include "../../interface.h"
-#include "../../../config.h"
-#include "../../../help_mp.h"
-#include "../../../libmpdemux/stream.h"
+#include "../app.h"
+#include "../interface.h"
+#include "../../config.h"
+#include "../../help_mp.h"
+#include "../../libmpdemux/stream.h"
 
 #include "../widgets.h"
 #include "fs.h"

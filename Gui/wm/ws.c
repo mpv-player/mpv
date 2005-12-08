@@ -18,18 +18,18 @@
 
 #include <inttypes.h>
 
-#include "../../config.h"
-#include "../../libvo/x11_common.h"
-#include "../../libvo/video_out.h"
+#include "../config.h"
+#include "../libvo/x11_common.h"
+#include "../libvo/video_out.h"
 #include "ws.h"
 #include "wsxdnd.h"
-#include "../../cpudetect.h"
-#include "../../postproc/swscale.h"
-#include "../../postproc/rgb2rgb.h"
-#include "../../libmpcodecs/vf_scale.h"
-#include "../../mp_msg.h"
-#include "../../help_mp.h"
-#include "../../mplayer.h"
+#include "../cpudetect.h"
+#include "../postproc/swscale.h"
+#include "../postproc/rgb2rgb.h"
+#include "../libmpcodecs/vf_scale.h"
+#include "../mp_msg.h"
+#include "../help_mp.h"
+#include "../mplayer.h"
 
 #include <X11/extensions/XShm.h>
 #ifdef HAVE_XSHAPE

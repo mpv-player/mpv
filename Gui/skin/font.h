@@ -2,8 +2,8 @@
 #ifndef _FONT_H
 #define _FONT_H
 
-#include "../bitmap.h"
-#include "../app.h"
+#include "bitmap.h"
+#include "app.h"
 
 #define fntAlignLeft   0
 #define fntAlignCenter 1

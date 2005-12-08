@@ -2,7 +2,7 @@
 #ifndef __MY_SKIN
 #define __MY_SKIN
 
-#include "../app.h"
+#include "app.h"
 
 extern listItems     * skinAppMPlayer;
 

@@ -11,10 +11,10 @@
 
 #include "url.h"
 #include "common.h"
-#include "../../interface.h"
-#include "../../app.h"
+#include "../interface.h"
+#include "../app.h"
 #include "../widgets.h"
-#include "../../help_mp.h"
+#include "../help_mp.h"
 
 GtkWidget * URL = NULL;
 

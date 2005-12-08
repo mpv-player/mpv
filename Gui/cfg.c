@@ -3,15 +3,15 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../help_mp.h"
-#include "../mixer.h"
-#include "../mplayer.h"
-#include "../m_config.h"
-#include "../m_option.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
+#include "mixer.h"
+#include "mplayer.h"
+#include "m_config.h"
+#include "m_option.h"
 
-#include "../../libvo/video_out.h"
+#include "libvo/video_out.h"
 
 #include "cfg.h"
 #include "app.h"

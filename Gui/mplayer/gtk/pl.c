@@ -10,11 +10,11 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../../../config.h"
-#include "../../../help_mp.h"
-#include "../../libmpdemux/stream.h"
+#include "../../config.h"
+#include "../../help_mp.h"
+#include "../libmpdemux/stream.h"
 
-#include "../../interface.h"
+#include "../interface.h"
 #include "../widgets.h"
 #include "pl.h"
 #include "common.h"

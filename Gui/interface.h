@@ -2,14 +2,14 @@
 #ifndef _INTERFACE_H
 #define _INTERFACE_H
 
-#include "../config.h"
+#include "config.h"
 #include "mplayer/play.h"
-#include "../mplayer.h"
-#include "../libvo/font_load.h"
+#include "mplayer.h"
+#include "libvo/font_load.h"
 #include "cfg.h"
 
 #ifdef USE_DVDREAD
- #include "../libmpdemux/stream.h"
+ #include "libmpdemux/stream.h"
 #endif
 
 typedef struct

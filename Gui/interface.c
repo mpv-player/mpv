@@ -15,20 +15,20 @@
 #include "mplayer/mplayer.h"
 #include "mplayer/play.h"
 
-#include "../mplayer.h"
+#include "mplayer.h"
 #include "app.h"
 #include "cfg.h"
-#include "../help_mp.h"
-#include "../subreader.h"
-#include "../libvo/x11_common.h"
-#include "../libvo/video_out.h"
-#include "../libvo/font_load.h"
-#include "../libvo/sub.h"
-#include "../input/input.h"
-#include "../libao2/audio_out.h"
-#include "../mixer.h"
-#include "../libaf/af.h"
-#include "../libaf/equalizer.h"
+#include "help_mp.h"
+#include "subreader.h"
+#include "libvo/x11_common.h"
+#include "libvo/video_out.h"
+#include "libvo/font_load.h"
+#include "libvo/sub.h"
+#include "input/input.h"
+#include "libao2/audio_out.h"
+#include "mixer.h"
+#include "libaf/af.h"
+#include "libaf/equalizer.h"
 
 extern af_cfg_t af_cfg;
 
@@ -36,13 +36,13 @@ extern af_cfg_t af_cfg;
 #include <iconv.h>
 #endif
 
-#include "../libmpdemux/stream.h"
-#include "../libmpdemux/demuxer.h"
-#include "../libmpdemux/stheader.h"
-#include "../libmpcodecs/dec_video.h"
+#include "libmpdemux/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+#include "libmpcodecs/dec_video.h"
 
-#include "../m_config.h"
-#include "../m_option.h"
+#include "m_config.h"
+#include "m_option.h"
 
 extern mixer_t mixer; // mixer from mplayer.c
 
@@ -1195,7 +1195,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 
 #define mp_basename(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
 
-#include "../playtree.h"
+#include "playtree.h"
 
 //This function adds/inserts one file into the gui playlist
 

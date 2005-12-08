@@ -7,15 +7,15 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "../../../config.h"
-#include "../../../help_mp.h"
-#include "../../../mixer.h"
-#include "../../../libao2/audio_out.h"
-#include "../../../libvo/video_out.h"
+#include "../../config.h"
+#include "../../help_mp.h"
+#include "../../mixer.h"
+#include "../../libao2/audio_out.h"
+#include "../../libvo/video_out.h"
 
-#include "../../app.h"
-#include "../../cfg.h"
-#include "../../interface.h"
+#include "../app.h"
+#include "../cfg.h"
+#include "../interface.h"
 #include "../widgets.h"
 #include "opts.h"
 #include "fs.h"
@@ -25,8 +25,8 @@ typedef struct sh_video_t sh_video_t;
 typedef struct sh_audio_t sh_audio_t;
 
 // for mpcodecs_[av]d_drivers:
-#include "../../../libmpcodecs/vd.h"
-#include "../../../libmpcodecs/ad.h"
+#include "../../libmpcodecs/vd.h"
+#include "../../libmpcodecs/ad.h"
 
        GtkWidget * Preferences = NULL;
 static GtkWidget * AConfig;

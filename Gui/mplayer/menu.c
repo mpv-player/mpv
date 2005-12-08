@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <inttypes.h>
 
-#include "../app.h"
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../mp_msg.h"
+#include "app.h"
+#include "../config.h"
+#include "../help_mp.h"
+#include "../mp_msg.h"
 
 #include "widgets.h"
 

@@ -4,8 +4,8 @@
 
 #include <png.h>
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "bitmap.h"
 
 int pngRead( unsigned char * fname,txSample * bf )

@@ -7,28 +7,28 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "../wm/ws.h"
-#include "../wm/wsxdnd.h"
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../mplayer.h"
-#include "../../libvo/x11_common.h"
-#include "../../libvo/video_out.h"
-#include "../../input/input.h"
+#include "wm/ws.h"
+#include "wm/wsxdnd.h"
+#include "../config.h"
+#include "../help_mp.h"
+#include "../mplayer.h"
+#include "../libvo/x11_common.h"
+#include "../libvo/video_out.h"
+#include "../input/input.h"
 
-#include "../app.h"
+#include "app.h"
 
-#include "../wm/wskeys.h"
-#include "../interface.h"
+#include "wm/wskeys.h"
+#include "interface.h"
 
 #include "widgets.h"
 #include "./mplayer.h"
 #include "play.h"
 
-#include "../skin/skin.h"
-#include "../skin/font.h"
+#include "skin/skin.h"
+#include "skin/font.h"
 
-#include "../libmpdemux/stream.h"
+#include "libmpdemux/stream.h"
 
 extern float rel_seek_secs;
 extern int abs_seek_pos;

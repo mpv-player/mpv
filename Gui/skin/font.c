@@ -5,11 +5,11 @@
 #include <string.h>
 #include <inttypes.h>
 
-#include "../app.h"
+#include "app.h"
 #include "skin.h"
 #include "font.h"
 #include "cut.h"
-#include "../../mp_msg.h"
+#include "../mp_msg.h"
 
 int items;
 

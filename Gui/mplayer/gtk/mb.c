@@ -1,7 +1,7 @@
 
-#include "../../app.h"
-#include "../../../config.h"
-#include "../../../help_mp.h"
+#include "../app.h"
+#include "../../config.h"
+#include "../../help_mp.h"
 
 #include "../pixmaps/error.xpm"
 #include "../pixmaps/warning.xpm"

@@ -7,24 +7,24 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "../app.h"
-#include "../skin/font.h"
-#include "../skin/skin.h"
-#include "../wm/ws.h"
+#include "app.h"
+#include "skin/font.h"
+#include "skin/skin.h"
+#include "wm/ws.h"
 
-#include "../../config.h"
-#include "../../help_mp.h"
-#include "../../libvo/x11_common.h"
-#include "../../libvo/fastmemcpy.h"
+#include "../config.h"
+#include "../help_mp.h"
+#include "../libvo/x11_common.h"
+#include "../libvo/fastmemcpy.h"
 
-#include "../../libmpdemux/stream.h"
-#include "../../mixer.h"
-#include "../../libvo/sub.h"
-#include "../../mplayer.h"
+#include "../libmpdemux/stream.h"
+#include "../mixer.h"
+#include "../libvo/sub.h"
+#include "../mplayer.h"
 
-#include "../../libmpdemux/demuxer.h"
-#include "../../libmpdemux/stheader.h"
-#include "../../codec-cfg.h"
+#include "../libmpdemux/demuxer.h"
+#include "../libmpdemux/stheader.h"
+#include "../codec-cfg.h"
 
 
 #include "play.h"
