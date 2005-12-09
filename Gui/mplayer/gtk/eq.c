@@ -11,7 +11,6 @@
 
 #include "../app.h"
 #include "../cfg.h"
-#include "../help_mp.h"
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../mplayer.h"
