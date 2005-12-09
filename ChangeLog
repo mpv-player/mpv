@@ -40,6 +40,7 @@ MPlayer (1.0)
     * Duck/On2 TrueMotion2 (TM20) support via lavc
     * support FLX and DTA extensions for flic files
     * QDM2 audio decoding via lavc
+    * cook audio decoding via lavc
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
