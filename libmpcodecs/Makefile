@@ -15,7 +15,6 @@ AUDIO_SRCS_NAT=ad_alaw.c \
                ad_msadpcm.c \
                ad_msgsm.c \
                ad_pcm.c \
-               ad_ra1428.c \
 
 AUDIO_SRCS_OPT=ad_acm.c \
                ad_dmo.c \
@@ -157,9 +156,7 @@ ENCODER_SRCS=ae.c \
              ve_xvid4.c \
              ve_xvid.c \
 
-NATIVE_SRCS=native/decode144.c \
-            native/decode288.c \
-            native/minilzo.c \
+NATIVE_SRCS=native/minilzo.c \
             native/nuppelvideo.c \
             native/RTjpegN.c \
             native/xa_gsm.c \
