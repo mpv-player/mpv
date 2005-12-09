@@ -36,6 +36,7 @@ typedef struct {
 	unsigned short frame_size;
 	unsigned short sub_packet_size;
 	char genr[4];
+	char * audio_buf;
 } ra_priv_t;
 
 
@@ -68,6 +69,7 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 	sh_audio_t *sh = ds->sh;
 	WAVEFORMATEX *wf = sh->wf;
 	demux_packet_t *dp;
+	int x, y;
 
   if (demuxer->stream->eof)
     return 0;
@@ -75,6 +77,21 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 	len = wf->nBlockAlign;
 	demuxer->filepos = stream_tell(demuxer->stream);
 
+    if (sh->format == FOURCC_288) {
+        for (y = 0; y < ra_priv->sub_packet_h; y++)
+            for (x = 0; x < ra_priv->sub_packet_h / 2; x++)
+                stream_read(demuxer->stream, ra_priv->audio_buf + x * 2 *ra_priv->frame_size +
+                            y * ra_priv->coded_framesize, ra_priv->coded_framesize);
+        // Release all the audio packets
+        for (x = 0; x < ra_priv->sub_packet_h * ra_priv->frame_size / len; x++) {
+            dp = new_demux_packet(len);
+            memcpy(dp->buffer, ra_priv->audio_buf + x * len, len);
+            dp->pts = x ? 0 : demuxer->filepos / ra_priv->data_size;
+            dp->pos = demuxer->filepos; // all equal
+            dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
+            ds_add_packet(ds, dp);
+        }
+    } else {
 	dp = new_demux_packet(len);
 	stream_read(demuxer->stream, dp->buffer, len);
 
@@ -82,6 +99,7 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 	dp->pos = demuxer->filepos;
 	dp->flags = 0;
 	ds_add_packet(ds, dp);
+    }
 
 	return 1;
 }
@@ -234,23 +252,12 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 	switch (sh->format) {
 		case FOURCC_144:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: 14_4\n");
-			    sh->wf->cbSize = 10/*+codecdata_length*/;
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    ((short*)(sh->wf+1))[0]=0;
-			    ((short*)(sh->wf+1))[1]=240;
-			    ((short*)(sh->wf+1))[2]=0;
-			    ((short*)(sh->wf+1))[3]=0x14;
-			    ((short*)(sh->wf+1))[4]=0;
+            sh->wf->nBlockAlign = 0x14;
 			break;
 		case FOURCC_288:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: 28_8\n");
-			    sh->wf->cbSize = 10/*+codecdata_length*/;
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    ((short*)(sh->wf+1))[0]=0;
-			    ((short*)(sh->wf+1))[1]=ra_priv->sub_packet_h;
-			    ((short*)(sh->wf+1))[2]=ra_priv->codec_flavor;
-			    ((short*)(sh->wf+1))[3]=ra_priv->coded_framesize;
-			    ((short*)(sh->wf+1))[4]=0;
+            sh->wf->nBlockAlign = ra_priv->coded_framesize;
+            ra_priv->audio_buf = malloc(ra_priv->sub_packet_h * ra_priv->frame_size);
 			break;
 		case FOURCC_DNET:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
@@ -276,9 +283,11 @@ static void demux_close_ra(demuxer_t *demuxer)
 {
 	ra_priv_t* ra_priv = demuxer->priv;
  
-	if (ra_priv)
+    if (ra_priv) {
+	    if (ra_priv->audio_buf)
+	        free (ra_priv->audio_buf);
 		free(ra_priv);
-
+    }
 	return;
 }
 

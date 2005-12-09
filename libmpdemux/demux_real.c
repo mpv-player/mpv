@@ -38,6 +38,13 @@ Video codecs: (supported by RealPlayer8 for Linux)
 
 #define MAX_STREAMS 32
 
+static unsigned char sipr_swaps[38][2]={
+    {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
+    {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
+    {25,94},{26,54},{28,75},{29,50},{32,70},{33,92},{35,74},{38,85},{40,56},
+    {42,87},{43,65},{45,59},{48,79},{49,93},{51,89},{55,95},{61,76},{67,83},
+    {77,80} };
+
 typedef struct {
     int		timestamp;
     int		offset;
@@ -92,6 +99,18 @@ typedef struct {
     int a_bitrate; ///< Audio bitrate
     int v_bitrate; ///< Video bitrate
     int stream_switch; ///< Flag used to switch audio/video demuxing
+
+   /**
+    * Used to reorder audio data
+    */
+    int sub_packet_size[MAX_STREAMS]; ///< sub packet size, per stream
+    int sub_packet_h[MAX_STREAMS]; ///< number of coded frames per block
+    int coded_framesize[MAX_STREAMS]; ///< coded frame size, per stream
+    int audiopk_size[MAX_STREAMS]; ///< audio packet size
+    unsigned char *audio_buf; ///< place to store reordered audio data
+    int audio_timestamp; ///< timestamp for all audio packets in a block
+    int sub_packet_cnt; ///< number of subpacket already received
+    int audio_filepos; ///< file position of first audio packet in block
 } real_priv_t;
 
 /* originally from FFmpeg */
@@ -531,6 +550,8 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
     int version;
     int reserved;
     demux_packet_t *dp;
+    int x, sps, cfs, sph, spc, w;
+    int audioreorder_getnextpk = 0;
 
   while(1){
 
@@ -622,6 +643,11 @@ got_audio:
 	ds=demuxer->audio;
 	mp_dbg(MSGT_DEMUX,MSGL_DBG2, "packet is audio (id: %d)\n", stream_id);
 
+        if (flags & 2) {
+    	    priv->sub_packet_cnt = 0;
+    	    audioreorder_getnextpk = 0;
+        }
+
 	// parse audio chunk:
 	{
 #ifdef CRACK_MATRIX
@@ -649,8 +675,79 @@ got_audio:
 		free(sub_packet_lengths);
 		return 1;
 	    }
+        if ((((sh_audio_t*)ds->sh)->format == mmioFOURCC('2', '8', '_', '8')) ||
+            (((sh_audio_t*)ds->sh)->format == mmioFOURCC('c', 'o', 'o', 'k')) ||
+            (((sh_audio_t*)ds->sh)->format == mmioFOURCC('a', 't', 'r', 'c')) ||
+            (((sh_audio_t*)ds->sh)->format == mmioFOURCC('s', 'i', 'p', 'r'))) {
+            sps = priv->sub_packet_size[stream_id];
+            sph = priv->sub_packet_h[stream_id];
+            cfs = priv->coded_framesize[stream_id];
+            w = priv->audiopk_size[stream_id];
+            spc = priv->sub_packet_cnt;
+            switch (((sh_audio_t*)ds->sh)->format) {
+                case mmioFOURCC('2', '8', '_', '8'):
+                    for (x = 0; x < sph / 2; x++)
+                        stream_read(demuxer->stream, priv->audio_buf + x * 2 * w + spc * cfs, cfs);
+                    break;
+                case mmioFOURCC('c', 'o', 'o', 'k'):
+                case mmioFOURCC('a', 't', 'r', 'c'):
+                    for (x = 0; x < w / sps; x++)
+                        stream_read(demuxer->stream, priv->audio_buf + sps * (sph * x + ((sph + 1) / 2) * (spc & 1) +
+                                    (spc >> 1)), sps);
+                    break;
+                case mmioFOURCC('s', 'i', 'p', 'r'):
+                    stream_read(demuxer->stream, priv->audio_buf + spc * w, w);
+                    if (spc == sph - 1) {
+                        int n;
+                        int bs = sph * w * 2 / 96;  // nibbles per subpacket
+                        // Perform reordering
+                        for(n=0; n < 38; n++) {
+                            int j;
+                            int i = bs * sipr_swaps[n][0];
+                            int o = bs * sipr_swaps[n][1];
+                            // swap nibbles of block 'i' with 'o'      TODO: optimize
+                            for(j = 0;j < bs; j++) {
+                                int x = (i & 1) ? (priv->audio_buf[i >> 1] >> 4) : (priv->audio_buf[i >> 1] & 0x0F);
+                                int y = (o & 1) ? (priv->audio_buf[o >> 1] >> 4) : (priv->audio_buf[o >> 1] & 0x0F);
+                                if(o & 1)
+                                    priv->audio_buf[o >> 1] = (priv->audio_buf[o >> 1] & 0x0F) | (x << 4);
+                                else
+                                    priv->audio_buf[o >> 1] = (priv->audio_buf[o >> 1] & 0xF0) | x;
+                                if(i & 1)
+                                    priv->audio_buf[i >> 1] = (priv->audio_buf[i >> 1] & 0x0F) | (y << 4);
+                                else
+                                    priv->audio_buf[i >> 1] = (priv->audio_buf[i >> 1] & 0xF0) | y;
+                                ++i; ++o;
+                            }
+                        }
+                    }
+                    break;
+            }
+            priv->audio_need_keyframe = 0;
+            priv->audio_timestamp = timestamp / 1000.0f;
+            priv->a_pts = timestamp; // All packets in a block have the same timestamp
+            if (priv->sub_packet_cnt == 0)
+                priv->audio_filepos = demuxer->filepos;
+            if (++(priv->sub_packet_cnt) < sph)
+                audioreorder_getnextpk = 1;
+            else {
+                int apk_usize = ((WAVEFORMATEX*)((sh_audio_t*)ds->sh)->wf)->nBlockAlign;
+                audioreorder_getnextpk = 0;
+                priv->sub_packet_cnt = 0;
+                // Release all the audio packets
+                for (x = 0; x < sph*w/apk_usize; x++) {
+                    dp = new_demux_packet(apk_usize);
+                    memcpy(dp->buffer, priv->audio_buf + x * apk_usize, apk_usize);
+                    dp->pts = x ? 0 : priv->audio_timestamp;
+                    dp->pos = priv->audio_filepos; // all equal
+                    dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
+                    ds_add_packet(ds, dp);
+                }
+            }
+        } else { // Not a codec that require reordering
             dp = new_demux_packet(len);
-	    stream_read(demuxer->stream, dp->buffer, len);
+            stream_read(demuxer->stream, dp->buffer, len);
+
 #ifdef CRACK_MATRIX
 	    mp_msg(MSGT_DEMUX, MSGL_V,"*** audio block len=%d\n",len);
 	    { // HACK - used for reverse engineering the descrambling matrix
@@ -691,6 +788,8 @@ got_audio:
 	    dp->pos = demuxer->filepos;
 	    dp->flags = (flags & 0x2) ? 0x10 : 0;
 	    ds_add_packet(ds, dp);
+
+        } // codec_id check, codec default case
 	}
 // we will not use audio index if we use -idx and have a video
 	if(!demuxer->video->sh && index_mode == 2 && (unsigned)demuxer->audio->id < MAX_STREAMS)
@@ -706,6 +805,10 @@ got_audio:
 			priv->stream_switch = 1;
 		}
 	
+    // If we're reordering audio packets and we need more data get it
+    if (audioreorder_getnextpk)
+        continue;
+
 	return 1;
     }
     
@@ -933,6 +1036,7 @@ if(stream_id<256){
 	demuxer->audio->id=stream_id;
 	sh->ds=demuxer->audio;
 	demuxer->audio->sh=sh;
+	priv->audio_buf = malloc(priv->sub_packet_h[demuxer->audio->id] * priv->audiopk_size[demuxer->audio->id]);
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM audio ID = %d\n",stream_id);
 	goto got_audio;
     }
@@ -1260,29 +1364,10 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    sh->wf->nChannels = sh->channels;
 		    sh->wf->wBitsPerSample = sh->samplesize*8;
 		    sh->wf->nSamplesPerSec = sh->samplerate;
-		    sh->wf->nAvgBytesPerSec = bitrate;
+		    sh->wf->nAvgBytesPerSec = bitrate/8;
 		    sh->wf->nBlockAlign = frame_size;
 		    sh->wf->cbSize = 0;
 		    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
-
-#if 0
-		    switch (sh->format){
-			case MKTAG('d', 'n', 'e', 't'):
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET (AC3 with low-bitrate extension)\n");
-			    break;
-			case MKTAG('s', 'i', 'p', 'r'):
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SiproLab's ACELP.net\n");
-			    break;
-			case MKTAG('c', 'o', 'o', 'k'):
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
-			    break;
-			case MKTAG('a', 't', 'r', 'c'):
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
-			    break;
-			default:
-			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%s)\n", buf);
-		    }
-#endif
 
 		    switch (sh->format)
 		    {
@@ -1291,74 +1376,40 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 //			    sh->format = 0x2000;
 			    break;
 			case MKTAG('1', '4', '_', '4'):
-                            sh->wf->cbSize = 10;
-                            sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-                            ((short*)(sh->wf+1))[0]=0;
-                            ((short*)(sh->wf+1))[1]=240;
-                            ((short*)(sh->wf+1))[2]=0;
-                            ((short*)(sh->wf+1))[3]=0x14;
-                            ((short*)(sh->wf+1))[4]=0;
+                sh->wf->nBlockAlign = 0x14;
                             break;
 
 			case MKTAG('2', '8', '_', '8'):
-			    sh->wf->cbSize = 10;
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    ((short*)(sh->wf+1))[0]=sub_packet_size;
-			    ((short*)(sh->wf+1))[1]=sub_packet_h;
-			    ((short*)(sh->wf+1))[2]=flavor;
-			    ((short*)(sh->wf+1))[3]=coded_frame_size;
-			    ((short*)(sh->wf+1))[4]=0;
+			    sh->wf->nBlockAlign = coded_frame_size;
+			    priv->sub_packet_size[stream_id] = sub_packet_size;
+			    priv->sub_packet_h[stream_id] = sub_packet_h;
+			    priv->coded_framesize[stream_id] = coded_frame_size;
+			    priv->audiopk_size[stream_id] = frame_size;
 			    break;
 
 			case MKTAG('s', 'i', 'p', 'r'):
-#if 0
-			    sh->format = 0x130;
-			    /* for buggy directshow loader */
-			    sh->wf->cbSize = 4;
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    sh->wf->wBitsPerSample = 0;
-			    sh->wf->nAvgBytesPerSec = 1055;
-			    sh->wf->nBlockAlign = 19;
-//			    sh->wf->nBlockAlign = frame_size / 288;
-			    buf[0] = 30;
-			    buf[1] = 1;
-			    buf[2] = 1;
-			    buf[3] = 0;
-			    memcpy((sh->wf+18), (char *)&buf[0], 4);
-//			    sh->wf[sizeof(WAVEFORMATEX)+1] = 30;
-//			    sh->wf[sizeof(WAVEFORMATEX)+2] = 1;
-//			    sh->wf[sizeof(WAVEFORMATEX)+3] = 1;
-//			    sh->wf[sizeof(WAVEFORMATEX)+4] = 0;
-			    break;
-#endif
 			case MKTAG('a', 't', 'r', 'c'):
-#if 0
-			    sh->format = 0x270;
-			    /* 14 bytes extra header needed ! */
-			    sh->wf->cbSize = 14;
-			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    sh->wf->nAvgBytesPerSec = 16537; // 8268
-			    sh->wf->nBlockAlign = 384; // 192
-			    sh->wf->wBitsPerSample = 0; /* from AVI created by VirtualDub */
-			    break;
-#endif
 			case MKTAG('c', 'o', 'o', 'k'):
 			    // realaudio codec plugins - common:
-//			    sh->wf->cbSize = 4+2+24;
 			    stream_skip(demuxer->stream,3);  // Skip 3 unknown bytes 
 			    if (version==5)
 			      stream_skip(demuxer->stream,1);  // Skip 1 additional unknown byte 
 			    codecdata_length=stream_read_dword(demuxer->stream);
-			    sh->wf->cbSize = 10+codecdata_length;
+			    sh->wf->cbSize = codecdata_length;
 			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
-			    ((short*)(sh->wf+1))[0]=sub_packet_size;
-			    ((short*)(sh->wf+1))[1]=sub_packet_h;
-			    ((short*)(sh->wf+1))[2]=flavor;
-			    ((short*)(sh->wf+1))[3]=coded_frame_size;
-			    ((short*)(sh->wf+1))[4]=codecdata_length;
-//			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+6, 24); // extras
-			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+10, codecdata_length); // extras
+			    stream_read(demuxer->stream, ((char*)(sh->wf+1)), codecdata_length); // extras
+                if ((sh->format == MKTAG('a', 't', 'r', 'c')) ||
+                    (sh->format == MKTAG('c', 'o', 'o', 'k')))
+    			    sh->wf->nBlockAlign = sub_packet_size;
+    			else
+    			    sh->wf->nBlockAlign = coded_frame_size;
+
+			    priv->sub_packet_size[stream_id] = sub_packet_size;
+			    priv->sub_packet_h[stream_id] = sub_packet_h;
+			    priv->coded_framesize[stream_id] = coded_frame_size;
+			    priv->audiopk_size[stream_id] = frame_size;
 			    break;
+
 			case MKTAG('r', 'a', 'a', 'c'):
 			case MKTAG('r', 'a', 'c', 'p'):
 			    /* This is just AAC. The two or five bytes of */
@@ -1397,6 +1448,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			demuxer->audio->id=stream_id;
 			sh->ds=demuxer->audio;
 			demuxer->audio->sh=sh;
+        	priv->audio_buf = malloc(priv->sub_packet_h[demuxer->audio->id] * priv->audiopk_size[demuxer->audio->id]);
 		    }
 		    
 		    ++a_streams;
