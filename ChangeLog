@@ -75,6 +75,7 @@ MPlayer (1.0)
     * Duck/On2 TrueMotion2 (TM20) decoder
     * FLX and DTA extensions for flic
     * QDM2 audio decoder
+    * cook audio decoder
 
     GUI:
     * ported to GTK2
