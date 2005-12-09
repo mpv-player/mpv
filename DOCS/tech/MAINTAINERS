@@ -30,7 +30,7 @@ English documentation:
     * MPlayer docs: Diego Biurrun
     * MEncoder docs: Guillaume Poirier
     * man page: Diego Biurrun
-    * Help Messages: Reynaldo H. Verdejo Pinochet 
+    * console messages: Reynaldo H. Verdejo Pinochet
     * input layer, LIRC, slave mode docs: Alban Bedel
     * tech/* docs: Alex Beregszaszi
     * tech/* documentation docs: Diego Biurrun
@@ -48,40 +48,39 @@ man pages:
 Documentation translations:
     * Chinese (simplified): Lu Ran (outdated)
     * Czech: Jiri Heryan
-    * French: Nicolas Le Gaillart (outdated)
+    * French: Nicolas Le Gaillart, Guillaume Poirier
     * German: outdated
-    * Hungarian: Gabor Mizda (incomplete)
+    * Hungarian: Gabor Mizdad
     * Italian: outdated
     * Polish: Waclaw Schiller
     * Russian: Dmitry Baryshkov (incomplete)
     * Spanish: Juan Martin, Reynaldo H. Verdejo Pinochet (outdated)
 
-Platforms/ports: (see also DOCS/tech/porting-status.txt)
-    * Debian packaging: Dariusz Pietrzak
-    * RedHat/RPM packaging: Dominik Mierzejewski
-    * FreeBSD support: Vladimir Kushnir, Nexus
-    * BSD/OS support: Steven Schultz
-    * NetBSD support: Bernd Ernesti
-    * OpenBSD support: Björn Sandell
-    * Solaris 8 support: Jürgen Keil, Pierre Lombard
-    * MIPS support: Oliver Schoenbrunner
-    * Win32/Cygwin/MinGW support: Sascha Sommer, Joey Parrish, Diego Biurrun
+Platforms/ports:
+    * Debian packaging: None
+    * Red Hat/RPM packaging: Dominik Mierzejewski
+    * FreeBSD: Vladimir Kushnir, Nexus
+    * BSD/OS: Steven Schultz
+    * NetBSD: Bernd Ernesti
+    * OpenBSD: Björn Sandell
+    * Solaris: None
+    * MIPS: Oliver Schoenbrunner
+    * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish, Diego Biurrun
     * Mac OS X: Nicolas Plourde
 
 MPlayer code:
+    * build system: Diego Biurrun
     * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
     * libmpdemux, libmpcodecs: Alex Beregszaszi
     * TV input/capture: Jindrich Makovicka
-    * DVD support (dvdread/dvdcss): None
     * network streaming: Bertrand Baudet
-    * DVD/VOB subtitles: Kim Minh Kaplan
+    * DVD/VOB subtitles: None
     * config files & commandline parser: Alban Bedel, Alex Beregszaszi
     * playtree, input layer: Alban Bedel
     * postproc, colorspace converters: Michael Niedermayer
     * DVB support: Nico Sabbi
-    * GUI: Zoltan Ponekker
+    * GUI: None
     * GUI skins: Diego Biurrun
-    * audio filters: None
     * EDL code: Reynaldo H. Verdejo Pinochet, Oded Shimon
 
 Imported libs/projects:
@@ -100,7 +99,7 @@ demuxers:
     * demux_gif.c - Joey Parrish
     * demux_lavf.c - Michael Niedermayer
     * demux_mkv.c - Moritz Bunkus
-    * demux_nsv.c - Reza Jelveh, Roberto Togni
+    * demux_nsv.c - Roberto Togni
     * demux_ogg.c - Moritz Bunkus
     * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
@@ -114,6 +113,10 @@ codec support:
 video filters:
     * general: Richard Felker, Michael Niedermayer
     * vf_filmdint.c - Zoltan Hidvegi
+
+audio filters:
+    * general: Alex Beregszaszi
+    * af_ladspa.c - Ivo van Poorten
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
@@ -171,6 +174,7 @@ libao2 drivers:
     * ao_alsa5.c - None
     * ao_alsa.c - Zsolt Barat
     * ao_arts.c - None
+    * ao_dsound.c - None
     * ao_dxr2.c - None
     * ao_esd.c - None
     * ao_jack.c - Reimar Döffinger
@@ -184,6 +188,3 @@ libao2 drivers:
     * ao_sgi.c - None
     * ao_sun.c - None
     * ao_win32.c - Sascha Sommer
-
-audio filters:
-    * af_ladspa.c - Ivo van Poorten
