@@ -64,7 +64,6 @@ Platforms/ports:
     * NetBSD: Bernd Ernesti
     * OpenBSD: Björn Sandell
     * Solaris: None
-    * MIPS: Oliver Schoenbrunner
     * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish, Diego Biurrun
     * Mac OS X: Nicolas Plourde
 
@@ -73,7 +72,7 @@ MPlayer code:
     * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
     * libmpdemux, libmpcodecs: Alex Beregszaszi
     * TV input/capture: Jindrich Makovicka
-    * network streaming: Bertrand Baudet
+    * network streaming: None
     * DVD/VOB subtitles: None
     * config files & commandline parser: Alban Bedel, Alex Beregszaszi
     * playtree, input layer: Alban Bedel
