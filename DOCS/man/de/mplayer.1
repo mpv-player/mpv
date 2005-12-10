@@ -513,6 +513,44 @@ Gib eine Konfigurationsdatei an, die nach der Standardkonfigurationsdateien
 eingelesen werden soll.
 .
 .TP
+.B \-msglevel <all=<level>:<modul>=<level>:...>
+Steuert die Ausführlichkeit der Ausgabe für jedes einzelne Modul.
+Das 'all'-Modul steuert alle nicht zusätzlich angegebenen Module.
+Siehe '-msglevel help' für eine Liste der verfügbaren Module.
+.br
+.I HINWEIS:
+Meldungen, die vor der Auswertung der Kommandozeile ausgegeben werden,
+können nicht gesteuert werden.
+.br
+Verfügbare Level:
+.PD 0
+.RSs
+.IPs -1
+Absolute Stille
+.IPs 0
+Nur fatale Fehlermeldungen
+.IPs 1
+Fehlermeldungen
+.IPs 2
+Warnungen
+.IPs 3
+Kurze Hinweise
+.IPs 4
+Informationen
+.IPs 5
+Statusmeldungen (die von \-quiet unterdrückten)
+.IPs 6
+Ausführliche Meldungen
+.IPs 7
+Debuglevel 2
+.IPs 8
+Debuglevel 3
+.IPs 9
+Debuglevel 4
+.RE
+.PD 1
+.
+.TP
 .B \-quiet \ 
 Konsolenausgaben werden weniger ausführlich; insbesondere wird damit die
 Statuszeile (z.B.\& A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
@@ -1281,12 +1319,12 @@ Bildgröße in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (nur bei LIVE.COM)
+.B \-rtsp-stream-over-tcp (nur bei LIVE555)
 Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
 daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP
 übertragen werden (mit der gleichen TCP-Verbindung wie RTSP).
 Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
-UDP-Pakete nicht durchlässt (siehe http://www.live.com/\:mplayer/).
+UDP-Pakete nicht durchlässt (siehe http://www.live555.com/\:mplayer/).
 .
 .TP
 .B \-saveidx <Dateiname>
@@ -3745,6 +3783,9 @@ für mögliche Werte).
 Überspringt die Dekodierung von Bildern komplett.
 Hohe Geschwindigkeitsgewinn, aber ruckelige Bewegungen und manchmal
 schlimme Artefakte (siehe skiploopfilter für mögliche Werte).
+.IPs threads=<1\-8>
+Anzahl der für die Decodierung zu benutzenden Threads (Standard: 1).
+Nur sinnvoll, wenn mehrere logische Prozessoren vorhanden sind (Hyperthreading oder SMP).
 .IPs vismv=<Wert>
 Visualisiere Motion-Vectors.
 .RSss
@@ -5072,6 +5113,10 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 0: harter Schwellenwert (Standard)
 .br
 1: weicher Schwellenwert (besseres Deringing, aber unschärfer)
+.br
+4: wie 0, benutzt aber auch QP von B-Frames (kann Flackern verursachen).
+.br
+5: wie 1, benutzt aber auch QP von B-Frames (kann Flackern verursachen).
 .RE
 .
 .TP
@@ -5090,7 +5135,7 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .RE
 .
 .TP
-.B fspp[=Qualität[:qp[:Stärke]]]
+.B fspp[=Qualität[:qp[:Stärke[:bframes]]]]
 schnellere Variante des einfachen Nachbearbeitungsfilters.
 .RSs
 .IPs <Qualität>
@@ -5101,6 +5146,10 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 Stärke des Filters, niedrigere Werte behalten mehr Details, aber auch mehr
 Artefakte, während höhere Werte das Bild glatter und unschärfer machen
 (Standard: 0 \- PSNR optimal).
+.IPs <bframes>
+0: QP von B-Frames nicht benutzen (Standard).
+.br
+1: Benutze auch QP von B-Frames (Kann Flackern verursachen).
 .RE
 .
 .TP
@@ -9033,6 +9082,289 @@ sucht MPlayer nach Untertiteldateien in folgender Reihenfolge:
 ~/.mplayer/\:default.sub
 .RE
 .PD 1
+.
+.
+.\" --------------------------------------------------------------------------
+.\" Umgebungsvariablen
+.\" --------------------------------------------------------------------------
+.
+.SH UMGEBUNGSVARIABLEN
+.
+Es gibt einige Umgebungsvariablen, die das Verhalten von MPlayer und
+MEncoder steuern können.
+.
+.TP
+.B MPLAYER_HOME
+Verzeichnis, in dem MPlayer nach dem Benutzereinstellungen sucht.
+.
+.SS libaf:
+.
+.TP
+.B LADSPA_PATH
+Falls LADSPA_PATH gesetzt ist, wird dort der angegebenen Datei gesucht.
+Ansonsten muss ein vollständiger Pfadname angegeben werden.
+FIXME: Dies wird auch in der ladspa-Sektion erwähnt.
+.
+.SS libmpdvdkit2:
+.
+.TP
+.B DVDCSS_CACHE
+Gibt das Verzeichnis an, in dem die Titelschlüssel gespeichert werden sollen.
+Dies beschleunigt die entschlüsselung von DVDs, die im Cache sind.
+Falls das Verzeichnis noch nicht existiert, wird es erzeugt und ein
+nach dem Titel oder Herstellungsdatum der DVD benanntes Unterverzeichnis
+angelegt.
+Wenn DVDCSS_CACHE nicht gesetzt oder leer ist, wird die Standardeinstellung
+benutzt, die unter Unix "${HOME}/.dvdcss/" und unter Win32
+"C:\Dokumente und Einstellungen\$USER\Anwendungsdaten\dvdcss\" ist.
+Der spezielle Wert "off" deaktiviert den Cache.
+.
+.TP
+.B DVDCSS_METHOD
+Stellt die Authentifizierungs- und Entschlüsselungsmethode ein,
+die libdvdcss zum Lesen verschlüsselter DVDs benutzt.
+Mögliche Werte sind title, key oder disc.
+.PD 0
+.RSs
+.IPs key\ \ 
+Standardeinstellung, libdvdcss benutzt einen Satz vorberechneter
+Player-Schlüssel um zu Versuchen den Disc-Schlüssel zu bekommen.
+Dies kann fehlschlagen, wenn das Laufwerk keinen der Player-Schlüssel
+erkennt.
+.IPs disc\ 
+Ausweichmethode, wenn key fehlgeschlagen ist.
+Anstelle die Player-Schlüssel zu benutzen, knackt libdvdcss den
+Disc-Schlüssel mit einem Brute-Force-Algorithmus.
+Dieser Prozess ist CPU-Intensiv und benötigt 64MB Speicher für
+temporäre Daten.
+.IPs title
+Wird benutzt, wenn die anderen Methoden fehlgeschlagen sind.
+Es findet kein Schlüsselaustausch mit dem Laufwerk statt, an dessen
+Stelle wird ein Kryptografischer Angriff benutzt um den Titel-Schlüssel
+zu erraten.
+In seltenen Fällen kann dies fehlschlagen, wenn nicht genug verschlüsselte
+Daten auf der DVD sind um einen statistischen Angriff durchzuführen,
+andererseits ist dies die einzige Möglichkeit um eine verschlüsselt
+auf der Festplatte abgelegte oder mit nicht zur Laufwerksregion passende
+DVD abzuspielen.
+.RE
+.PD 1
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+Gibt die zu benutzende Rohdaten-Gerätedatei an.
+Die genaue Syntax hängt vom verwendeten Betriebssystem ab,
+z.B. wird uner Linux das raw(8)-Tool benutzt um diese
+Gerätedatei aufzusetzen.
+Beachte bitte, dass bei den meisten Betriebssystemen die Benutzung
+von Rohdaten-Gerätedateien streng ausgerichtet Puffer benötigt:
+Linux verlangt eine Ausrichtung auf 2048 Byte (die Größe eines DVD-Sektors).
+.
+.TP
+.B DVDCSS_VERBOSE
+Steuert die Ausführlichkeit der Meldungen von libdvdcss.
+.PD 0
+.RSs
+.IPs 0
+Keine Ausgaben.
+.IPs 1
+Gibt Fehlermeldungen auf stderr aus.
+.IPs 2
+Gibt Fehler- und Debugmeldungen auf stderr aus.
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+DVDREAD_NOKEYS ist MPlayer-spezifisch, aber zurzeit unbenutzt.
+.
+.TP
+.B HOME
+FIXME: Muss noch dokumentiert werden.
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B AUDIODEV
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B AUDIOSERVER
+Gibt den Network Audio System Server und Transporttyp an, zu dem der
+nas-Audioausgabetreiber verbinden soll.
+Falls AUDIOSERVER nicht gesetzt ist, wird DISPLAY benutzt.
+Mögliche Werte für den Transporttyp sind tcp und unix.
+Die Syntax ist tcp/<rechner>:<port>, <rechner>:<instanznummer>
+oder [unix]:<instanznummer>.
+Der NAS-Basisport ist 8000 und <instanznummer> wird dazugezählt.
+.sp 1
+.RS
+.I BEISPIELE:
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=rechner:0
+Verbinde mit NAS-Server auf rechner mit Standardport und -Transporttyp.
+.IPs AUDIOSERVER=tcp/rechner:8000
+Verbinde mit auf port 8000 lauschendem NAS-Server auf rechner.
+.IPs AUDIOSERVER=(unix)?:0
+Verbinde mit NAS-Serverinstanz 0 auf localhost unter Benutzung von
+unix domain sockets.
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+FIXME: Muss noch dokumentiert werden.
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+FIXME: Muss noch dokumentiert werden.
+.
+.SS osdep:
+.
+.TP
+.B TERM
+FIXME: Muss noch dokumentiert werden.
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B FRAMEBUFFER
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B HOME
+FIXME: Muss noch dokumentiert werden.
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B HOMEPATH
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B http_proxy
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B LOGNAME
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B USERPROFILE
+FIXME: Muss noch dokumentiert werden.
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+FIXME: Muss noch dokumentiert werden.
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B DISPLAY
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B HOME
+FIXME: Muss noch dokumentiert werden.
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B BKTR_DEV
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B BKTR_FORMAT
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B BKTR_FREQUENCY
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B http_proxy
+FIXME: Muss noch dokumentiert werden.
+.
+.TP
+.B no_proxy
+FIXME: Muss noch dokumentiert werden.
+.
+.
+.
+.\" --------------------------------------------------------------------------
+.\" Files
+.\" --------------------------------------------------------------------------
+.
+.SH FILES
+.
+.TP
+/usr/\:local/\:etc/\:mplayer/\:mplayer.conf
+Systemweite Einstellungen
+.
+.TP
+~/.mplayer/\:config
+Benutzerspezifische Einstellungen
+.
+.TP
+~/.mplayer/\:input.conf
+Eingabebindungen (Siehe '\-input keylist' für eine vollständige Liste)
+.
+.TP
+~/.mplayer/\:gui.conf
+GUI-Konfigurationsdatei
+.
+.TP
+~/.mplayer/\:gui.pl
+GUI-Playliste
+.
+.TP
+~/.mplayer/\:font/
+Font-Verzeichnis (Es müssen eine font.desc-Datei und Dateien
+mit .RAW-Erweiterung existieren)
+.
+.TP
+~/.mplayer/\:DVDkeys/
+Cacheverzeichnis für CSS-Schlüssel
+.
+.TP
+Angenommen, das /path/\:to/\:movie.avi abgespielt werden soll, sucht
+MPlayer in folgender Reichenfolge nach Untertiteldateien:
+.RS
+/path/\:to/\:movie.sub
+.br
+~/.mplayer/\:sub/\:movie.sub
+.br
+~/.mplayer/\:default.sub
+.RE
+.PD 1
+.
+.
 .
 .
 .\" --------------------------------------------------------------------------
