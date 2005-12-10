@@ -897,7 +897,7 @@ static char help_text[]=
 
 #define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_Contributors "Code and documentation contributors\n"
-#define	MSGTR_ABOUT_Codecs_libs_contributions "Codecs and third party libraries\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Codecs and third party libraries\n"
 #define MSGTR_ABOUT_Translations "Translations\n"
 #define MSGTR_ABOUT_Skins "Skins\n"
 
