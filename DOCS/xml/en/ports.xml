@@ -505,10 +505,24 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   console is rather slow. Redirecting output or using the
   <option>-quiet</option> option has been reported to improve performance on
   some systems. Direct rendering (<option>-dr</option>) may also help.
-  You can prevent OSD flicker through double buffering with the
-  <option>-double</option> option. If playback is jerky, try
+  If playback is jerky, try
   <option>-autosync 100</option>. If some of these options help you, you
   may want to put them in your config file.</para>
+
+<note>
+
+<para>On Windows the runtime CPU-detection disables SSE support
+  because of recurring and hard to trace SSE-related crashes. If you
+  wish to have SSE support, you will have to compile without runtime
+  CPU-detection.
+</para>
+
+<para>If you have a Pentium 4 and are experiencing a crash using the
+  realplayer codecs you may need to disable hyperthreading support.
+</para>
+
+</note>
+
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
