@@ -1,4 +1,4 @@
-.\" synced with 1.1167
+.\" synced with 1.1170
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -9610,6 +9610,247 @@ MPEG-4 format
 Sony Digital Video container
 .RE
 .PD 1
+.
+.
+.
+.\" --------------------------------------------------------------------------
+.\" variables' environment
+.\" --------------------------------------------------------------------------
+.
+.SH VARIABLES D'ENVIRONMENT
+.
+Il existe un grand nombre de variables d'environnement qui peuvent être
+utilisées pour contrôler le comportement de MPlayer et MEncoder.
+.
+.TP
+.B MPLAYER_HOME
+Le répertoire où MPlayer lit la configuration de l'utilisateur.
+.
+.SS libaf:
+.
+.TP
+.B LADSPA_PATH
+Si LADSPA_PATH est définie, le fichier correspondant est recherché.
+Si elle n'est pas définie, vous devez donner le chemin absolu.
+FIXME: Ceci est une redite de la section LADSPA.
+.
+.SS libmpdvdkit2:
+.
+.TP
+.B DVDCSS_CACHE
+Un répertoire spécifique dans lequel stocker les valeurs de la clée
+CSS.
+Ceci accélèrera le cassage de la protection du DVD si sa clée est
+en cache.
+Le répertoire DVDCSS_CACHE sera créé s'il n'existe pas, et un répertoire
+nommé en fonction du titre ou de la date de fabrication du DVD sera créé
+en son sein.
+Si DVDCSS_CACHE n'est pas défini our vide, libdvdcss utilisera la valeur
+par défaut, qui est "${HOME}/.dvdcss/" sous Unix et
+"C:\Documents and Settings\$USER\Application Data\dvdcss\" sous Win32.
+La valeur spéciale "off" désactive la mise en cache.
+.
+.TP
+.B DVDCSS_METHOD
+Défini la méthode d'authentication et de decryptage que libdvdcss
+utilisera pour lire les disques cryptés.
+Elles peuvent être 'title', 'key' ou 'disc'.
+.PD 0
+.RSs
+.IPs key\ \ 
+est la méthode par défaut.
+libdvdcss utilisera un set de clées de lecture pré-calculées pour
+obtenir celle du disque.
+Ceci peut échouer si le lecteur ne reconnaît aucune des clées de lecture.
+.IPs disc\ 
+est la méthode vers laquelle libdvdcss se rabat lorsque 'key' a échoué.
+Au lieu d'utiliser les clées de lecture, libdvdcss va casser la clée du
+disque en utilisant un algorithme de force brute.
+Ceci est assez coûteux en temps CPU, et nécessite 64 Mo de mémoire pour
+stocker les données temporaires.
+.IPs title
+est la méthode vers laquelle libdvdcss se rabat lorsque toute les autres
+méthodes ont échoué.
+Ceci ne se base pas sur un échange de clée avec le lecteur DVD, mais
+utilise à la place une attache crypto pour deviner la clée du titre.
+En de rares cas, ceci va échoué s'il n'y a pas assez de données cryptées
+sur le disque pour effectuer l'attaque statistique, mais d'un autre
+côté c'est la seule façon de décrypter les DVDs enregistrés sur disque
+dur, ou un disque dont la région ne correspond pas à la région RPC2 du
+lecteur DVD.
+.RE
+.PD 1
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+Défini le périphérique brut à utiliser.
+L'usage exact dépend de votre système d'exploitation, l'utilitaire
+raw(8) étant celui disponible sous Linux.
+Specify the raw device to use.
+Notez qu'avec la plupart des systèmes d'exploitation, utiliser un
+périphérique brut requiert des buffers très alignés: Linux exige
+un alignement sur 2048 octets (qui est la taille d'un secteur DVD).
+.
+.TP
+.B DVDCSS_VERBOSE
+Défini le niveau de verbosité de libdvdcss.
+.PD 0
+.RSs
+.IPs 0
+N'affiche aucun messages.
+.IPs 1
+Envoie tous les messages d'erreurs sur stderr.
+.IPs 2
+Envoie tous les messages d'erreurs et de débug sur stderr.
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+DVDREAD_NOKEYS est une variable spécifique à MPlayer, mais non
+utilisée pour le moment.
+Dans le fichier libmpdvdkit2/dvd_reader.c, DVDREAD_NOKEYS est
+utilisé par la fonction initAllCSSKeys, mais l'unique appel à
+cette fonction est en commentaire.
+.
+.TP
+.B HOME
+FIXME: Documente ceci.
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+FIXME: Documente ceci.
+.
+.TP
+.B AUDIODEV
+FIXME: Documente ceci.
+.
+.TP
+.B AUDIOSERVER
+Défini le serveur Network Audio System auquel le pilote de sortie
+audio nas doit se connecter et transporter les données.
+Si non défini, DISPLAY est utilisé à la place.
+Le type de transport peut être tcp et unix.
+La syntax est tcp/<hôte>:<port>, <hôte>:<numéro d'instance>
+ou [unix]:<numéro d'instance>.
+Le port de base de NAS est 8000 et <numéro d'instance> y est
+ajouté.
+.sp 1
+.RS
+.I EXEMPLES\ :
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=somehost:0
+Se connect au serveur NAS somehost en utilisant le port et le transport
+par défaut.
+.IPs AUDIOSERVER=tcp/somehost:8000
+Se connect au serveur NAS somehost écoutant sur le port TCP 8000.
+.IPs AUDIOSERVER=(unix)?:0
+Se connect au serveur NAS d'instance 0 sur localhost en utilisant des sockets Unix.
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+FIXME: Documente ceci.
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+FIXME: Documente ceci.
+.
+.SS osdep:
+.
+.TP
+.B TERM
+FIXME: Documente ceci.
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+FIXME: Documente ceci.
+.
+.TP
+.B FRAMEBUFFER
+FIXME: Documente ceci.
+.
+.TP
+.B HOME
+FIXME: Documente ceci.
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+FIXME: Documente ceci.
+.
+.TP
+.B HOMEPATH
+FIXME: Documente ceci.
+.
+.TP
+.B http_proxy
+FIXME: Documente ceci.
+.
+.TP
+.B LOGNAME
+FIXME: Documente ceci.
+.
+.TP
+.B USERPROFILE
+FIXME: Documente ceci.
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+FIXME: Documente ceci.
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+FIXME: Documente ceci.
+.
+.TP
+.B DISPLAY
+FIXME: Documente ceci.
+.
+.TP
+.B HOME
+FIXME: Documente ceci.
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+FIXME: Documente ceci.
+.
+.TP
+.B BKTR_DEV
+FIXME: Documente ceci.
+.
+.TP
+.B BKTR_FORMAT
+FIXME: Documente ceci.
+.
+.TP
+.B BKTR_FREQUENCY
+FIXME: Documente ceci.
+.
+.TP
+.B http_proxy
+FIXME: Documente ceci.
+.
+.TP
+.B no_proxy
+FIXME: Documente ceci.
+.
 .
 .
 .\" --------------------------------------------------------------------------
