@@ -101,6 +101,8 @@ static Window mywindow;
 static int bpp;
 static XWindowAttributes attribs;
 
+static int fd=-1;
+
 
 static void 
 restore(void) 
@@ -307,10 +309,11 @@ update_target(void)
 static int 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format) 
 {
-	int fd;
 	char *name = ":0.0";
 	pioData data;
 	uint32_t retval;
+
+//TODO use x11_common for X and window handling
 
 	if(getenv("DISPLAY"))
 		name = getenv("DISPLAY");
@@ -328,9 +331,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	//alarm(120);
 
 	// Open driver device
-	if ( (fd = open("/dev/3dfx",O_RDWR) ) == -1) 
+	if ( fd == -1 ) 
 	{
-		printf("Couldn't open /dev/3dfx\n");
+		printf("Device not opened /dev/3dfx\n");
 		return -1;
 	}
 
@@ -350,7 +353,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	if ((retval = ioctl(fd,_IOC(_IOC_READ,'3',3,0),&data)) < 0) 
 	{
 		printf("Error: %d\n",retval);
-		//return -1;
+		return -1;
 	}
 
 	// Ask 3dfx driver for base memory address 1
@@ -361,7 +364,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	if ((retval = ioctl(fd,_IOC(_IOC_READ,'3',3,0),&data)) < 0) 
 	{
 		printf("Error: %d\n",retval);
-		//return -1;
+		return -1;
 	}
 
 	// Map all 3dfx memory areas
@@ -405,8 +408,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	*/
 	//XF86DGADirectVideo(display,0,XF86DGADirectGraphics); //| XF86DGADirectMouse | XF86DGADirectKeyb);
 #endif
-
-	/* fd is deliberately not closed - if it were, mmaps might be released??? */
 
 	atexit(restore);
 
@@ -469,6 +470,8 @@ query_format(uint32_t format)
 static void
 uninit(void)
 {
+    if( fd != -1 )
+        close(fd);
 }
 
 
@@ -478,6 +481,12 @@ static void check_events(void)
 
 static int preinit(const char *arg)
 {
+    if ( (fd = open("/dev/3dfx",O_RDWR) ) == -1) 
+    {
+        printf("Couldn't open /dev/3dfx\n");
+        return -1;
+    }
+                                                        
     if(arg) 
     {
 	printf("vo_3dfx: Unknown subdevice: %s\n",arg);
