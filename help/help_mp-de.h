@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.205
+// In synch with rev 1.210
 
 // ========================= MPlayer help ===========================
 
@@ -190,7 +190,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV-Ereignis: Nav Suche beendet.\n"
 #define MSGTR_MenuCall "Menü-Aufruf\n"
 
-#define MSGTR_EdlCantUseBothModes "Kann -edl und -edlout nicht zur selben Zeit benutzen.\n"
 #define MSGTR_EdlOutOfMem "Kann nicht genug Speicher für EDL-Daten reservieren.\n"
 #define MSGTR_EdlRecordsNo "%d EDL-Aktionen gelesen.\n"
 #define MSGTR_EdlQueueEmpty "Es gibt keine auszuführenden EDL-Aktionen.\n"
@@ -906,9 +905,10 @@ static char help_text[]=
            "und bringen GMPlayer zum Absturz!"
 
 #define MSGTR_ABOUT_UHU "GUI-Entwicklung wurde von UHU Linux gesponsert.\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayers Kernentwickler-Team:\n"
-#define MSGTR_ABOUT_AdditionalCoders " Weitere Programmierer:\n"
-#define MSGTR_ABOUT_MainTesters "     Haupttester:\n"
+#define MSGTR_ABOUT_Contributors "Mitwirkende am Programm und der Dokumentation\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Codecs und externe Bibliotheken\n"
+#define MSGTR_ABOUT_Translations "Übersetzungen\n"
+#define MSGTR_ABOUT_Skins "Skins\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler!"
@@ -1385,3 +1385,26 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Unerwartetes Ende der Bin-Datei.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Konnte Block der Größe %dByte nicht lesen.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open: Dateiname='%s', Titel=%d, verfügbare Titel: %d -> %d\n"
+
+// network.c
+
+#define MSGTR_MPDEMUX_NW_UnknownAF "Unbekannte Adressfamilie %d\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Löse %s auf für %s...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "Konnte Namen für %s nicht auflösen: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Verbinde mit Server %s[%s]:%d ...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "Konnte nicht mit %s zu Server verbinden.\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "Select fehlgeschlagen.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Zeitüberschreitung der Verbindung.\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt fehlgeschlagen: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "Verbindung fehlgeschlagen: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Ungültige Proxyeinstellung... Versuche es ohne Proxy.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Konnte Hostnamen nicht für AF_INET auflösen. Versuche es ohne Proxy.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Fehler beim Senden der HTTP-Anforderung: Anfrage wurde unvollständig gesendet.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "Lesen der HTTP-Antwort fehlgeschlagen.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response: 0 Bytes gelesen, d.h. EOF\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "Authentifizierung fehlgeschlagen. Benutze bitte die Optionen -user und -passwd um deinen Benutzernamen/Passwort für eine Liste von URLs anzugeben, oder eine URL der Form: http://benutzer:passwort@hostname/datei\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Authentifizierung erforderlich für Bereich '%s'.\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "Authentifizierung erforderlich.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Kein Passwort angegeben, versuche leeres Passwort.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Server lieferte Fehler %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Setze Cache-Größe auf %d KByte.\n"
