@@ -2,21 +2,6 @@
 <!-- $Revision$ -->
 <appendix id="skin">
 <title><application>MPlayer</application> skin format</title>
-<para>
-The purpose of this document is to describe the
-<application>MPlayer</application> skin format. The information contained here
-might be wrong, for
-<orderedlist>
-<listitem><para>It is not me who wrote the GUI.</para></listitem>
-<listitem><para>The GUI is not finished.</para></listitem>
-<listitem><para>I might be wrong.</para></listitem>
-</orderedlist>
-So do not be surprised if something does not work as described here.
-</para>
-
-<para>Thanks to <emphasis>Zoltán Ponekker</emphasis> for his help.</para>
-
-<para><emphasis>András Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
 
 <sect1 id="skin-overview">
 <title>Overview</title>
