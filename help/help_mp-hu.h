@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.197 (2005. 11. 06.)
+// Sync'ed with help_mp-en.h 1.201 (2005. 12. 11.)
 
 // ========================= MPlayer help ===========================
 
@@ -164,7 +164,7 @@ static char help_text[]=
 #define MSGTR_MenuInitialized "Menü inicializálva: %s\n"
 #define MSGTR_MenuInitFailed "Menü inicializálás nem sikerült.\n"
 #define MSGTR_Getch2InitializedTwice "FIGYELEM: getch2_init kétszer lett meghívva!\n"
-#define MSGTR_DumpstreamFdUnavailable "Ezt a folyamot nem lehet dump-olni - 'fd' nem elérhetõ.\n"
+#define MSGTR_DumpstreamFdUnavailable "Ezt a folyamot nem lehet dump-olni - a fájlleíró nem elérhetõ.\n"
 #define MSGTR_FallingBackOnPlaylist "Visszalépés a(z) %s lejátszási lista értelmezése közben...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "A libmenu video szûrõt nem sikerült a(z) %s fõmenüvel megnyitni.\n"
 #define MSGTR_AudioFilterChainPreinitError "Hiba az audio szûrõ lánc elõ-inicializálásában!\n"
@@ -217,7 +217,8 @@ static char help_text[]=
 #define MSGTR_OSDAVDelay "A-V késés: %d ms"
 #define MSGTR_OSDSpeed "Sebesség: x %6.2f"
 #define MSGTR_OSDStayOnTop "Mindig felül: %s"
-#define MSGTR_OSDRootwin "Rootwin: %s"
+#define MSGTR_OSDRootwin "Fõablak: %s"
+#define MSGTR_OSDBorder "Határ: %s"
 #define MSGTR_OSDFramedrop "Képkocka dobás: %s"
 #define MSGTR_OSDFramedropOn "be"
 #define MSGTR_OSDFramedropHard "erõs"
@@ -1012,6 +1013,10 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Brightness "Fényerõ"
 #define MSGTR_VO_SUB_Hue "Színárnyalat"
 
+// vo_xv.c
+#define MSGTR_VO_XV_ImagedimTooHigh "A forrás kép méretei " \
+                                    "túl nagyok: %ux%u (a maximum %ux%u)\n"
+
 // Old vo drivers that have been replaced
 
 #define MSGTR_VO_PGM_HasBeenReplaced "A pgm video kimeneti vezérlõt lecserélte a -vo pnm:pgmyuv.\n"
@@ -1156,21 +1161,21 @@ static char help_text[]=
 
 // input.c
 
-#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Túl sok parancs fd, nem sikerült a(z) %d fd regisztálása.\n"
-#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Túl sok gomb fd, nem sikerült a(z) %d fd regisztálása.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Túl sok parancs fájl leíró, nem sikerült a(z) %d fájl leíró regisztálása.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Túl sok gomb fájl leíró, nem sikerült a(z) %d fájl leíró regisztálása.\n"
 #define MSGTR_INPUT_INPUT_ErrArgMustBeInt "%s parancs: %d argumentum nem egész.\n"
 #define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "%s parancs: %d argumentum nem lebegõpontos.\n"
 #define MSGTR_INPUT_INPUT_ErrUnterminatedArg "%s parancs: %d argumentum lezáratlan.\n"
 #define MSGTR_INPUT_INPUT_ErrUnknownArg "Ismeretlen argumentum: %d\n"
 #define MSGTR_INPUT_INPUT_Err2FewArgs "A(z) %s parancsnak legalább %d argumentum kell, de csak %d-t találtunk eddig.\n"
-#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Hiba a(z) %d cmd fd olvasása közben: %s\n"
-#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "%d fd cmd buffer-e tele van: tartalom eldobása\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Hiba a(z) %d parancs fájl leíró olvasása közben: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "%d parancs fájl leíró buffere tele van: tartalom eldobása\n"
 #define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Hibás parancs a(z) %s gombnál"
 #define MSGTR_INPUT_INPUT_ErrSelect "Kiválasztási hiba: %s\n"
-#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Hiba a(z) %d gomb input fd-ben\n"
-#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Halott gomb input a(z) %d fd-nél\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Hiba a(z) %d gomb input fájl leírójában\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Halott gomb input a(z) %d fájl leírónál\n"
 #define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Túl sok gomblenyomási esemény egy idõben\n"
-#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Hiba a(z) %d cmd fd-ben\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Hiba a(z) %d parancs fájlleíróban\n"
 #define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Hiba a(z) %s input konfigurációs fájl olvasása közben: %s\n"
 #define MSGTR_INPUT_INPUT_ErrUnknownKey "Ismeretlen gomb '%s'\n"
 #define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Nem befejezett hozzárendelés: %s\n"
@@ -1319,3 +1324,53 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Index tábla legenerálva %d chunk-hoz!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Nem sikerült a(z) %s index fájl írása: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Elmentett index fájl: %s\n"
+
+// cache2.c
+
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rEz a folyam nem cache-elhetõ.\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos különbözik!!! jelentsd ezt a hibát...\n"
+
+// cdda.c
+
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Nem nyitható meg a CDDA eszköz.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Nem nyitható meg a lemez.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Audió CD-t találtam %d sávval.\n"
+
+// cddb.c
+
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Hiba a TOC olvasása közben.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Hiba a(z) %s eszköz megnyitásakor.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "Hibás URL\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "HTTP kérés elküldése nem sikerült.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "HTTP válasz olvasása nem sikerült.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Nem található.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Ismeretlen hibakód\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Nem találtam cache-t.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Nem minden xmcd fájl lett elolvasva.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Sikertelen a(z) %s könyvtár létrehozása.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Nem minden xmcd fájl lett kiírva.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Hibás xmcd adatbázis fájl érkezett vissza.\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Nem várt FIXME\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Kezeletlen kód\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Nem található a sor vége\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Értelmezés OK, találtam: %s\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album nem található\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Szerver válasza: Parancs szintaxis hibás\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nincs elérhetõ oldal információ\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Sikertelen a protokol szint lekérdezése\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Nincs CD a meghajtóban\n"
+
+// cue_read.c
+
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Nem várt cuefájl sor: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] tesztelt bin fájlnév: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Nem található a bin fájl - feladom\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] %s bin fájl használata\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] ismeretlen mód a binfájlhoz. Nem kellene megtörténnie. Megszakítás.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] %s nem nyitható meg\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Hiba %s fájlból történõ olvasáskor\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Hiba a bin fájl méretének lekérdezésekor\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "sáv %02d:  formátum=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] nem várt bin fájl vége\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Nem olvasható %d bájtnyi payload\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, fájlnév=%s, sáv=%d, elérhetõ sávok: %d -> %d\n"
