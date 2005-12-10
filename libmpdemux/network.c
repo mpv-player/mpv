@@ -16,6 +16,9 @@
 
 #include "config.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #ifndef HAVE_WINSOCK2
 #define closesocket close
 #else
@@ -93,7 +96,7 @@ streaming_ctrl_new( ) {
 	streaming_ctrl_t *streaming_ctrl;
 	streaming_ctrl = (streaming_ctrl_t*)malloc(sizeof(streaming_ctrl_t));
 	if( streaming_ctrl==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Failed to allocate memory\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return NULL;
 	}
 	memset( streaming_ctrl, 0, sizeof(streaming_ctrl_t) );
@@ -165,7 +168,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		case AF_INET6: our_s_addr = (void *) &server_address.six.sin6_addr; break;
 #endif
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR, "Unknown address family %d:\n", af);
+			mp_msg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
 			return -2;
 	}
 	
@@ -182,7 +185,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	if ( inet_addr(host)==INADDR_NONE )
 #endif
 	{
-		if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,"Resolving %s for %s...\n", host, af2String(af));
+		if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,MSGTR_MPDEMUX_NW_ResolvingHostForAF, host, af2String(af));
 		
 #ifdef HAVE_GETHOSTBYNAME2
 		hp=(struct hostent*)gethostbyname2( host, af );
@@ -190,7 +193,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		hp=(struct hostent*)gethostbyname( host );
 #endif
 		if( hp==NULL ) {
-			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,"Couldn't resolve name for %s: %s\n", af2String(af), host);
+			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantResolv, af2String(af), host);
 			return -2;
 		}
 		
@@ -217,7 +220,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 			break;
 #endif
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR, "Unknown address family %d:\n", af);
+			mp_msg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
 			return -2;
 	}
 
@@ -226,7 +229,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #else
 	inet_ntop(af, our_s_addr, buf, 255);
 #endif
-	if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,"Connecting to server %s[%s]:%d ...\n", host, buf , port );
+	if(verb) mp_msg(MSGT_NETWORK,MSGL_STATUS,MSGTR_MPDEMUX_NW_ConnectingToServer, host, buf , port );
 
 	// Turn the socket as non blocking so we can timeout on the connection
 #ifndef HAVE_WINSOCK2
@@ -241,7 +244,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #else
 		if( (WSAGetLastError() != WSAEINPROGRESS) && (WSAGetLastError() != WSAEWOULDBLOCK) ) {
 #endif
-			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server with %s\n", af2String(af));
+			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantConnect2Server, af2String(af));
 			closesocket(socket_server_fd);
 			return -1;
 		}
@@ -252,11 +255,11 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	FD_SET( socket_server_fd, &set );
 	// When the connection will be made, we will have a writable fd
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
-	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,"select failed\n");
+	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_SelectFailed);
 	      else if(ret > 0) break;
 	      else if(count > 30 || mp_input_check_interrupt(500)) {
 		if(count > 30)
-		  mp_msg(MSGT_NETWORK,MSGL_ERR,"Connection timeout\n");
+		  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnTimeout);
 		else
 		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
 		return -3;
@@ -279,11 +282,11 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	err_len = sizeof(int);
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
 	if(ret < 0) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"getsockopt failed : %s\n",strerror(errno));
+		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_GetSockOptFailed,strerror(errno));
 		return -2;
 	}
 	if(err > 0) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Connect error : %s\n",strerror(err));
+		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnectError,strerror(err));
 		return -1;
 	}
 	
@@ -335,14 +338,15 @@ check4proxies( URL_t *url ) {
 			URL_t *proxy_url = url_new( proxy );
 
 			if( proxy_url==NULL ) {
-				mp_msg(MSGT_NETWORK,MSGL_WARN,"Invalid proxy setting...Trying without proxy.\n");
+				mp_msg(MSGT_NETWORK,MSGL_WARN,
+					MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout);
 				return url_out;
 			}
 			
 #ifdef HAVE_AF_INET6
 			if (network_ipv4_only_proxy && (gethostbyname(url->hostname)==NULL)) {
 				mp_msg(MSGT_NETWORK,MSGL_WARN,
-					"Could not find resolve remote hostname for AF_INET. Trying without proxy.\n");
+					MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy);
 				url_free(proxy_url);
 				return url_out;
 			}
@@ -352,7 +356,7 @@ check4proxies( URL_t *url ) {
 			len = strlen( proxy_url->hostname ) + strlen( url->url ) + 20;	// 20 = http_proxy:// + port
 			new_url = malloc( len+1 );
 			if( new_url==NULL ) {
-				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 				url_free(proxy_url);
 				return url_out;
 			}
@@ -435,7 +439,7 @@ http_send_request( URL_t *url, off_t pos ) {
 	
 	ret = send( fd, http_hdr->buffer, http_hdr->buffer_size, 0 );
 	if( ret!=(int)http_hdr->buffer_size ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Error while sending HTTP request: didn't sent all the request\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest);
 		goto err_out;
 	}
 	
@@ -461,12 +465,12 @@ http_read_response( int fd ) {
 	do {
 		i = recv( fd, response, BUFFER_SIZE, 0 ); 
 		if( i<0 ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Read failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ReadFailed);
 			http_free( http_hdr );
 			return NULL;
 		}
 		if( i==0 ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"http_read_response read 0 -ie- EOF\n");
+			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_Read0CouldBeEOF);
 			http_free( http_hdr );
 			return NULL;
 		}
@@ -481,9 +485,7 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 	char *aut;
 
 	if( *auth_retry==1 ) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Authentication failed\n");
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -passwd to provide your username/password for a list of URLs,\n");
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_AuthFailed);
 		return -1;
 	}
 	if( *auth_retry>0 ) {
@@ -502,30 +504,28 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 		char *aut_space;
 		aut_space = strstr(aut, "realm=");
 		if( aut_space!=NULL ) aut_space += 6;
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authentication required for %s\n", aut_space);
+		mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_AuthRequiredFor, aut_space);
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authentication required\n");
+		mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_AuthRequired);
 	}
 	if( network_username ) {
 		url->username = strdup(network_username);
 		if( url->username==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			return -1;
 		}
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to read the username\n");
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -passwd to provide your username/password for a list of URLs,\n");
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
+		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_AuthFailed);
 		return -1;
 	}
 	if( network_password ) {
 		url->password = strdup(network_password);
 		if( url->password==NULL ) {
-			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			return -1;
 		}
 	} else {
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"No password provided, trying blank password\n");
+		mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank);
 	}
 	(*auth_retry)++;
 	return 0;
@@ -558,7 +558,7 @@ http_seek( stream_t *stream, off_t pos ) {
 			}
 			break;
 		default:
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Server return %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+			mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ErrServerReturned, http_hdr->status_code, http_hdr->reason_phrase );
 			close( fd );
 			fd = -1;
 	}
@@ -580,7 +580,7 @@ streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size) {
 //printf("streaming_bufferize\n");
 	streaming_ctrl->buffer = (char*)malloc(size);
 	if( streaming_ctrl->buffer==NULL ) {
-		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return -1;
 	}
 	memcpy( streaming_ctrl->buffer, buffer, size );
@@ -640,7 +640,7 @@ void fixup_network_stream_cache(stream_t *stream) {
       stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
       if( stream_cache_size<64 ) stream_cache_size = 64;	// 16KBytes min buffer
     }
-    mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", stream_cache_size);
+    mp_msg(MSGT_NETWORK,MSGL_INFO,MSGTR_MPDEMUX_NW_CacheSizeSetTo, stream_cache_size);
   }
 }
 
