@@ -331,7 +331,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	if ( (fd = open("/dev/3dfx",O_RDWR) ) == -1) 
 	{
 		printf("Couldn't open /dev/3dfx\n");
-		exit(1);
+		return -1;
 	}
 
 	// Store sizes for later
