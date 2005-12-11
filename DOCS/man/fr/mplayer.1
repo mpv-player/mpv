@@ -1,4 +1,4 @@
-.\" synced with 1.1176
+.\" synced with 1.1177
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1335,8 +1335,10 @@ taille de trame en octets
 .RE
 .PD 0
 .RSs
-.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif:w=176:h=144"
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
 Joue le fameux morceau de vidéo "foreman".
+.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+Joue un morceau de vidéo YUV.
 .RE
 .PD 1
 .
