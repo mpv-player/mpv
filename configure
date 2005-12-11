@@ -210,7 +210,7 @@ Optional features:
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
   --enable-menu          Enable OSD menu support (NOT DVD MENU) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
-  --enable-fribidi       Enable using the FriBiDi libs [disabled]
+  --enable-fribidi       Enable using the FriBiDi libs [autodetect]
   --disable-enca         Disable using ENCA charset oracle library [autodetect]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
   --enable-macosx-finder-support  Enable Mac OS X Finder invocation parameter parsing [disabled]
@@ -1562,7 +1562,7 @@ _macosx_finder_support=no
 _macosx_bundle=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
-_fribidi=no
+_fribidi=auto
 _fribidiconfig='fribidi-config'
 _enca=auto
 _inet6=auto
@@ -5204,7 +5204,7 @@ fi
 echores "$_fontconfig"
 
 echocheck "fribidi with charsets"
-if test "$_fribidi" = yes ; then
+if test "$_fribidi" = auto ; then
     if ( $_fribidiconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
