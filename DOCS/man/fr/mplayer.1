@@ -1,4 +1,4 @@
-.\" synced with 1.1174
+.\" synced with 1.1175
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -598,24 +598,15 @@ L'utilisation de la priorité realtime (temps-réel) peut figer le système.
 .RE
 .
 .TP
-.B \-v, \-verbose
-Active le mode verbeux (plus de \-v signifie plus de verbosité).
+.B \-v\ \ \ \ \ 
+Agmente le niveau de verbosité d'un niveau par chaque \-v
+donné en ligne de commande.
 .
-.PD 0
-.RSs
-.IPs <nothing>
-uniquement quelques sorties informelles (par défaut)
-.IPs \-v\ \ \ 
-quelques infos basiques de débogage, entête AVI, valeurs des fonctions
-(débogage de l'initialisation)
-.IPs \-v\ \-v
-Affiche les index AVI, entrées de tronquage, plus d'infos de débogage
-(débogage du lecteur).
-.IPs \-v\ \-v\ \-v
-Affiche tout ce qui est relatif aux parseurs d'entrée (pour le débogage des
-parsers).
-.RE
-.PD 1
+.TP
+.B \-verbose <0\-4)
+Défini le niveau de verbosité directement.
+Voir \-msglevel pour connaître la signification de chaque niveau,
+sachant que \-verbose 0 correspond au niveau level 5.
 .
 .
 .
