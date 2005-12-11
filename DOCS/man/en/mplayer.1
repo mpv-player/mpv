@@ -570,20 +570,15 @@ Using realtime priority can cause system lockup.
 .RE
 .
 .TP
-.B \-v, \-verbose
-Increment verbose level (more \-v means more verbosity).
-.PD 0
-.RSs
-.IPs <nothing>
-only some informational output (default)
-.IPs \-v\ \ \ 
-some basic debug info, AVI header, function values (init debug)
-.IPs \-v\ \-v
-Print AVI indexes, chunk inputs, more debug info (player debug).
-.IPs \-v\ \-v\ \-v
-Prints everything related to input parsers (parser debug).
-.RE
-.PD 1
+.B \-v\ \ \ \ \ 
+Increment verbosity level, one level for each \-v
+found on the command line.
+.
+.TP
+.B \-verbose <0\-4)
+Directly set verbosity level.
+See \-msglevel for the meaning of each level, taking into
+account that \-verbose 0 corresponds to level 5.
 .
 .
 .
