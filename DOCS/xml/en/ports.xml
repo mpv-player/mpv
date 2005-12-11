@@ -511,14 +511,14 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <note>
 
-<para>On Windows the runtime CPU-detection disables SSE support
-  because of recurring and hard to trace SSE-related crashes. If you
-  wish to have SSE support, you will have to compile without runtime
-  CPU-detection.
+<para>On Windows the runtime CPU detection disables SSE support
+  because of recurring and hard-to-trace SSE-related crashes. If you
+  wish to have SSE support under Windows, you will have to compile without
+  runtime CPU-detection.
 </para>
 
 <para>If you have a Pentium 4 and are experiencing a crash using the
-  realplayer codecs you may need to disable hyperthreading support.
+  RealPlayer codecs, you may need to disable hyperthreading support.
 </para>
 
 </note>
