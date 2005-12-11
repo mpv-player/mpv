@@ -29,8 +29,11 @@ alt_src_step <value> (ASX playlist only)
 audio_delay <value>
     Adjust the audio delay by <value> seconds.
 
-[brightness|contrast|gamma|hue|saturation] <-100 - 100> [<abs>]
+[brightness|contrast|gamma|hue|saturation] <value> [<abs>]
     Set/adjust video parameters.
+    If abs is not given or zero, modifies parameter by <value>.
+    If abs is non-zero, parameter is set to <value>
+    <value> is in the range [-100, 100]
 
 change_rectangle <val1> <val2>
     Change the position of the rectangle filter rectangle.
