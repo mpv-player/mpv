@@ -1,4 +1,4 @@
-.\" synced with 1.1175
+.\" synced with 1.1176
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -598,6 +598,12 @@ L'utilisation de la priorité realtime (temps-réel) peut figer le système.
 .RE
 .
 .TP
+.B \-really-quiet (voir aussi \-quiet)
+Affiche encore moins de messages d'état que \-quiet.
+.B \-rtc-device <périph>
+Utilise ce périphérique spécial RTC pour améliorer la synchro.
+.
+.TP
 .B \-v\ \ \ \ \ 
 Agmente le niveau de verbosité d'un niveau par chaque \-v
 donné en ligne de commande.
@@ -852,12 +858,6 @@ suite s'appliqueront uniquement aux éléments de la liste de lecture.
 .br
 FIXME: Cette description est quelque peu alambiquée, et devrait être mieux
 documentée.
-.
-.TP
-.B \-really-quiet (voir aussi \-quiet)
-Affiche encore moins de messages d'état que \-quiet.
-.B \-rtc-device <périph>
-Utilise ce périphérique spécial RTC pour améliorer la synchro.
 .
 .TP
 .B \-shuffle
