@@ -121,8 +121,8 @@
  #ifdef HAVE_SINF
  #  define sin sinf
  #error
---- main/libfaad2/output.c	2005/02/19 01:21:19	1.7
-+++ main/libfaad2/output.c	2005/03/29 18:14:24	1.8
+--- libfaad2/output.c	2005/02/19 01:21:19	1.7
++++ libfaad2/output.c	2005/03/29 18:14:24	1.8
 @@ -19,10 +19,9 @@
  ** Any non-GPL usage of this software or parts of this software is strictly
  ** forbidden.
@@ -130,9 +130,9 @@
 -** Commercial non-GPL licensing of this software is possible.
 -** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 -**
--** $Id: local_changes.diff,v 1.4 2005/12/07 23:07:40 rathann Exp $
+-** $Id: output.c,v 1.42 2004/09/04 14:56:28 menno Exp $
 +** Initially modified for use with MPlayer by Rich Felker on 2005/03/29
-+** $Id: local_changes.diff,v 1.4 2005/12/07 23:07:40 rathann Exp $
++** $Id: output.c,v 1.11 2005/04/05 05:43:41 rfelker Exp $
 +** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
  **/
  
