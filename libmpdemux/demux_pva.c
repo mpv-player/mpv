@@ -466,7 +466,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 	return 1;
 }
 
-static int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
+static void demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
 {
 	int total_bitrate=0;
 	off_t dest_offset;
@@ -490,7 +490,7 @@ static int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
 	if(!pva_sync(demuxer))
 	{
 		mp_msg(MSGT_DEMUX,MSGL_V,"demux_pva: Couldn't seek!\n");
-		return 0;
+		return;
 	}
 	
 	/*
@@ -501,8 +501,6 @@ static int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
 	
 	priv->last_video_pts=-1;
 	priv->last_audio_pts=-1;
-	
-	return 1;
 }
 
 

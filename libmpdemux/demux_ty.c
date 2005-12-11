@@ -1360,7 +1360,7 @@ int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
 }
 
 
-static int demux_close_ty( demuxer_t *demux )
+static void demux_close_ty( demuxer_t *demux )
 {
    TiVoInfo         *tivo = 0;
 
@@ -1371,7 +1371,6 @@ static int demux_close_ty( demuxer_t *demux )
       demux->a_streams[ MAX_A_STREAMS - 1 ] = 0;
 	   sub_justify = 0;
    }
-   return( 0 );
 }
 
 

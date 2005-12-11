@@ -1801,7 +1801,7 @@ static void demux_close_real(demuxer_t *demuxer)
 }
 
 /* please upload RV10 samples WITH INDEX CHUNK */
-static int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *d_audio = demuxer->audio;
@@ -1823,7 +1823,7 @@ static int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 //    printf("streams: %d\n", streams);
 
     if (!streams)
-	return 0;
+	return;
 
     if (flags & 1)
 	/* seek absolute */
@@ -1890,7 +1890,6 @@ static int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
         stream_seek(demuxer->stream, next_offset);
 
     demux_real_fill_buffer(demuxer, NULL);
-    return 1;
 }
 
 static int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)

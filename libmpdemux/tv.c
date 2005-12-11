@@ -603,10 +603,10 @@ no_audio:
     return demuxer;
 }
 
-static int demux_close_tv(demuxer_t *demuxer)
+static void demux_close_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
-    return(tvh->functions->uninit(tvh->priv));
+    tvh->functions->uninit(tvh->priv);
 }
 
 /* ================== STREAM_TV ===================== */
