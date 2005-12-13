@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.202
+// Updated to help_mp-en.h v1.210
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -129,7 +129,7 @@ static char help_text[]=
 #define MSGTR_ErrorInitializingVODevice "Errore aprendo/inizializzando il dispositivo uscita video (-vo) selezionato!\n"
 #define MSGTR_ForcedVideoCodec "Codec video forzato: %s\n"
 #define MSGTR_ForcedAudioCodec "Codec audio forzato: %s\n"
-#define MSGTR_Video_NoVideo "Video: no video!!!\n"
+#define MSGTR_Video_NoVideo "Video: nessun video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATALE: Impossibile inizializzare i filtri video (-vf) o l'output video (-vo)!\n"
 #define MSGTR_Paused "\n  =====  PAUSA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nImpossibile caricare la playlist %s\n"
@@ -191,7 +191,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV Evento: Nev Ricerca eseguita\n"
 #define MSGTR_MenuCall "Chiamata a Menu\n"
 
-#define MSGTR_EdlCantUseBothModes "Non puoi usare -edl e -edlout contemporanemente.\n"
 #define MSGTR_EdlOutOfMem "Non posso allocare abbastanza memoria per i dati EDL.\n"
 #define MSGTR_EdlRecordsNo "Lette azioni EDL %d.\n"
 #define MSGTR_EdlQueueEmpty "Non ci sono azioni EDL di cui curarsi.\n"
@@ -245,7 +244,6 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "Errore nell'apertura dell'encoder.\n"
 #define MSGTR_ForcingOutputFourcc "Forzo il fourcc di output a %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Forzo la tag del formato audio a 0x%x\n"
-#define MSGTR_WritingAVIHeader "Scrittura intestazione AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d fotogramma/i duplicato/i!!!    \n"
 #define MSGTR_SkipFrame "\nScarto fotogramma!\n"
 #define MSGTR_ResolutionDoesntMatch "\nIl nuovo file video ha diversa risoluzione o spazio colore dal precedente.\n"
@@ -255,8 +253,6 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "WARNING: -speed non è detto che funzioni correttamente con -oac copy!\n"\
 "L'encoding potrebbe essere danneggiato!\n"
 #define MSGTR_ErrorWritingFile "%s: errore nella scrittura del file.\n"
-#define MSGTR_WritingAVIIndex "\nScrittura indice AVI...\n"
-#define MSGTR_FixupAVIHeader "Completamento intestazione AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Il bitrate video consigliato per %s CD è: %d\n"
 #define MSGTR_VideoStreamResult "\nFlusso video: %8.3f kbit/s  (%d B/s)  dim.: %d bytes  %5.3f sec   %d frames\n"
 #define MSGTR_AudioStreamResult "\nFlusso audio: %8.3f kbit/s  (%d B/s)  dim.: %d bytes  %5.3f secondi\n"
@@ -525,12 +521,18 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleChannel "Scelto canale sottotitoli DVD: %d lingua: %c%c\n"
 #define MSGTR_DVDopenOk "DVD aperto con successo.\n"
 
-// muxer_*.c:
+// muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Troppi flussi!"
 #define MSGTR_RawMuxerOnlyOneStream "Il muxer rawaudio supporta solo un flusso audio!\n"
 #define MSGTR_IgnoringVideoStream "Ignoro il flusso video!\n"
 #define MSGTR_UnknownStreamType "Attenzione! Tipo flusso sconosciuto: %d\n"
-#define MSGTR_WarningLenIsntDivisible "Attenzione! len non è divisibile da samplesize!\n"
+#define MSGTR_WarningLenIsntDivisible "Attenzione! len non è divisibile per samplesize!\n"
+// TODO: muxer frame buffer ???
+#define MSGTR_MuxbufMallocErr "Il buffer fotogrammi del muxer non può allocare la memoria!\n"
+#define MSGTR_MuxbufReallocErr "Il buffer fotogrammi del muxer non può riallocare la memoria!\n"
+#define MSGTR_MuxbufSending "Il buffer fotogrammi del muxer sta inviando %d fotogramma/i al muxer.\n"
+#define MSGTR_WritingHeader "Scrittura intestazione in corso...\n"
+#define MSGTR_WritingTrailer "Scrittura indice in corso...\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Avvertimento! Intestazione del flusso audio %d ridefinito!\n"
@@ -898,9 +900,10 @@ static char help_text[]=
            "con GTK 1.x e GMPlayer crasherà!"
 
 #define MSGTR_ABOUT_UHU "Lo sviluppo della GUI è sponsorizzato da UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   Team sviluppo MPlayer:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Altri programmatori:\n"
-#define MSGTR_ABOUT_MainTesters "   Tester principali:\n"
+#define MSGTR_ABOUT_Contributors "Contributori codice e documentazione\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Codec e librerie di terze parti\n"
+#define MSGTR_ABOUT_Translations "Traduzioni\n"
+#define MSGTR_ABOUT_Skins "Skin\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Errore fatale!"
@@ -1058,21 +1061,20 @@ static char help_text[]=
 
 // ao_dxr2.c
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Impostazione del volume a %d fallita.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz non supportati, prova \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz non supportati, prova a ricampionare (resample)."\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound fallito: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latenza: [server: %0.2fs, net: %0.2fs] (scarto %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] fallimento nell'aprire il flusso di riproduzione esd: %s\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] fallimento nell'aprire il flusso di riproduzione ESD: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Impostazione mixer DVB fallita: %s\n" 
-// TODO: resample = ?
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz non supportati, prova con resample...\n"
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] Impostazione mixer DVB fallita: %s.\n" 
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz non supportati, prova a ricampionare (resample).\n"
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Canali: %s Formato %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: un dump più veloce si ottiene con -vc null -vo null\nPCM: Info: per scrivere files WAVE usa -ao pcm:waveheader (default).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Un dump più veloce si ottiene con -vc null -vo null\n[AO PCM] Info: Per scrivere file WAVE usa -ao pcm:waveheader (default).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Non posso aprire %s in scrittura!\n"
 
 // ao_sdl.c
@@ -1116,7 +1118,6 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: errore impostazione parametri: %s\n"
 #define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: errore nell'impostazione canale: %s\n"
 #define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: preparazione del canale: %s\n"
-// TODO: drain, flush = ?
 #define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: errore 'drain' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: errore 'flush' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: errore chiusura pcm: %s\n"
@@ -1335,29 +1336,29 @@ static char help_text[]=
 
 // cache2.c
 
-#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rNon posso riempire la cache per questo flusso\n"
-#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos differiscono!!! Notifica questo errore...\n"
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rNon posso riempire la cache per questo flusso.\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos è differente!!! Riporta questo errore...\n"
 
 // cdda.c
 
-#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Impossibile aprire il dispositivo CDDA\n"
-#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Impossibile aprire il disco\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Trovato CD Audio con %d tracce\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Impossibile aprire il dispositivo CDDA.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Impossibile aprire il disco.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Trovato CD audio con %d tracce.\n"
 
 // cddb.c
 
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Imposibile leggere la TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Apertura del dispositivo %s fallita.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAValidURL "URL non valido\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Fallimento nell'invio della richiesta HTTP\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Fallimento nella lettura della risposta HTTP\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Non Trovato\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Fallimento nell'invio della richiesta HTTP.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Fallimento nella lettura della risposta HTTP.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Non Trovato.\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Codice di errore sconosciuto\n"
-#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Cache non trovata\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Non tutti i file xmcd sono stati letti\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Creazione della directory %s fallita\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Non tutti i file xmcd sono stati scritti\n"
-#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Ricevuto file database xmcd non valido\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Cache non trovata.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Non tutti i file xmcd sono stati letti.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Creazione della directory %s fallita.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Non tutti i file xmcd sono stati scritti.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Ricevuto file database xmcd non valido.\n"
 #define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "'FIXME' inatteso\n"
 #define MSGTR_MPDEMUX_CDDB_UnhandledCode "Codice non gestito\n"
 #define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Impossibile trovare il carattere di 'fine linea'\n"
@@ -1374,12 +1375,35 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] Verificato nome del file bin: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Impossibile trovare il file bin - mi arrendo\n"
 #define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Uso il file bin %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Modalità del file bin sconosciuta. Non dovrebbe capitare. Annullamento\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Modalità del file bin sconosciuta. Non dovrebbe capitare. Annullamento.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Impossibile aprire %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Errore in lettura da %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Errore nell'ottenere la dimensione del file bin\n"
-#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Traccia %02d:  formato=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "traccia %02d:  formato=%d  %02d:%02d:%02d\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Fine inaspettata del file bin\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Non ho potuto leggere %d byte di payload\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, nomefile=%s, traccia=%d, tracce disponibili: %d -> %d\n"
+
+// network.c
+
+#define MSGTR_MPDEMUX_NW_UnknownAF "Famiglia d'indirizzi %d sconosciuta\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Risolvo %s per %s...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "Impossibile risolvere il nome per %s: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Connessione al server %s[%s]: %d ...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "Connessione al server fallita con %s\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "Selezione fallita.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Timeout connessione.\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "Fallimento di getsockopt: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "Errore di connessione: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Impostazioni proxy non valide... Provo senza proxy.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Non ho potuto risolvere il nome host remoto per AF_INET. Provo senza proxy.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Errore nell'invio della richiesta HTTP: non è stata inviata tutta la richiesta.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "Lettura fallita.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response ha letto uno 0 -p.es.- EOF\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "Autenticazione fallita. Per favore usa le opzioni -user e -passwd per fornire\nun nome utente/password per una lista di URL, o indica un URL come questo:\nhttp://utente:password@nomehost/file\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Autenticazione richiesta per %s\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "Autenticazione richiesta.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nessuna password fornita, provo senza.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Risposta del server %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Dimensione cache impostata a %d KByte\n"
 
