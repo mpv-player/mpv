@@ -43,6 +43,10 @@ ifeq ($(TARGET_OS),CYGWIN)
 CFLAGS+=-DSYS_CYGWIN
 endif
 
+ifeq ($(TARGET_OS),Darwin)
+CFLAGS+=-D__DARWIN__
+endif
+
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<
 
