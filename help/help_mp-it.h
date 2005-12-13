@@ -1061,7 +1061,7 @@ static char help_text[]=
 
 // ao_dxr2.c
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Impostazione del volume a %d fallita.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz non supportati, prova a ricampionare (resample)."\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz non supportati, prova a ricampionare (resample).\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound fallito: %s\n"
