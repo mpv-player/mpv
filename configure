@@ -1493,6 +1493,7 @@ _faad_external=auto
 _faac=auto
 _ladspa=auto
 _xmms=no
+_have_dvd=no
 # dvdnav disabled, it does not work
 #_dvdnav=no
 _dvdread=auto
@@ -4948,6 +4949,7 @@ else
   _noinputmodules="mpdvdkit $_noinputmodules"
 fi
 if test "$_dvdkit" = yes || test "$_dvdkit2" = yes; then
+  _have_dvd=yes
   echores "yes"
 else
   echores "no"
@@ -4977,6 +4979,7 @@ case "$_dvdread" in
 	_def_dvdread='#define USE_DVDREAD 1'
 	_ld_dvdread='-ldvdread'
 	_inputmodules="dvdread $_inputmodules"
+	_have_dvd=yes
 	echores "yes"
 	;;
   no)
@@ -4990,6 +4993,7 @@ case "$_dvdread" in
 	_ld_dvdread='-Llibmpdvdkit -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 1"
+	_have_dvd=yes
 	echores "disabled by libmpdvdkit"
 	;;
   libmpdvdkit2)
@@ -4998,9 +5002,16 @@ case "$_dvdread" in
 	_ld_dvdread='-Llibmpdvdkit2 -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 2"
+	_have_dvd=yes
 	echores "disabled by libmpdvdkit2"
 	;;
 esac
+
+if test "$_have_dvd" = yes ; then
+  _def_have_dvd='#define HAVE_DVD 1'
+else
+  _def_have_dvd='#undef HAVE_DVD'
+fi
 
 # dvdnav disabled, it does not work
 # echocheck "DVD support (libdvdnav)"
@@ -7116,6 +7127,8 @@ SGIAUDIO_LIB = $_ld_sgiaudio
 TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
 LIRCC_LIB = $_ld_lircc
+HAVE_DVD = $_have_dvd
+DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
 DVDKIT = $_dvdkit
 DVDKIT2 = $_dvdkit2
@@ -7290,6 +7303,7 @@ $_def_dvd_darwin
 $_def_sol_scsi_h
 $_def_hpux_scsi_h
 $_def_stddef
+$_def_have_dvd
 
 /* Common data directory (for fonts, etc) */
 #define MPLAYER_DATADIR "$_datadir"

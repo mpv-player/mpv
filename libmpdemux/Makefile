@@ -31,7 +31,6 @@ SRCS += cdda.c \
 
 # Stream readers/writers
 SRCS += stream.c \
-        stream_dvd.c \
         stream_file.c \
         stream_ftp.c \
         stream_livedotcom.c \
@@ -89,6 +88,9 @@ SRCS += demuxer.c \
         demux_vqf.c \
         demux_y4m.c \
 
+ifeq ($(HAVE_DVD),yes)
+SRCS += stream_dvd.c
+endif 
 ifeq ($(XMMS_PLUGINS),yes)
 SRCS += demux_xmms.c
 endif 

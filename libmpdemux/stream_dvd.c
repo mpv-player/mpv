@@ -26,12 +26,13 @@
 #include "m_struct.h"
 
 /// We keep these 2 for the gui atm, but they will be removed.
-int dvd_title=0;
-int dvd_chapter=1;
-int dvd_last_chapter=0;
+extern int dvd_title;
+extern int dvd_chapter;
+extern int dvd_last_chapter;
+extern char* dvd_device;
 int dvd_angle=1;
-char* dvd_device=NULL;
 
+#ifdef HAVE_DVD
 #ifdef USE_DVDREAD
 #define	DVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
 /*
@@ -792,3 +793,4 @@ stream_info_t stream_info_dvd = {
   &stream_opts,
   1 // Urls are an option string
 };
+#endif

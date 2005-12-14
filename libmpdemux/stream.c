@@ -75,7 +75,9 @@ extern stream_info_t stream_info_rtsp_sip;
 extern stream_info_t stream_info_cue;
 extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
+#ifdef HAVE_DVD
 extern stream_info_t stream_info_dvd;
+#endif
 
 stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_VCD
@@ -110,7 +112,9 @@ stream_info_t* auto_open_streams[] = {
   &stream_info_smb,
 #endif
   &stream_info_cue,
+#ifdef HAVE_DVD
   &stream_info_dvd,
+#endif
 #ifdef USE_DVDNAV
   &stream_info_dvdnav;
 #endif
