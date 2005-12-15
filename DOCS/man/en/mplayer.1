@@ -490,6 +490,8 @@ flip=yes
 mf=type=png:fps=25
 # Eerie negative images are cool.
 vf=eq2=1.0:-0.8
+# I want MEncoder to ouput to this filename by default.
+o=encoded.avi
 .fi
 .PP
 You can also write file-specific configuration files.
@@ -6119,7 +6121,10 @@ Do not skip frames.
 .
 .TP
 .B \-o <filename>
-Outputs to the given filename, instead of the default 'test.avi'.
+Outputs to the given filename.
+.br
+If you want a default output filename, you can put this option in the
+MEncoder config file.
 .
 .TP
 .B \-oac <codec name>

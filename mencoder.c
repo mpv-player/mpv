@@ -170,7 +170,7 @@ char *vobsub_out=NULL;
 unsigned int vobsub_out_index=0;
 char *vobsub_out_id=NULL;
 
-char* out_filename="test.avi";
+char* out_filename=NULL;
 
 char *force_fourcc=NULL;
 int force_audiofmttag=-1;
@@ -464,6 +464,33 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
  parse_cfgfiles(mconfig);
  filelist = m_config_parse_me_command_line(mconfig, argc, argv);
  if(!filelist) mencoder_exit(1, MSGTR_ErrorParsingCommandLine);
+
+{
+	char *extension;
+	
+	if (!out_filename) mencoder_exit(1,MSGTR_MissingOutputFilename);
+	extension=strrchr(out_filename,'.');
+	if (extension != NULL && strlen(extension) > 3 && strlen(extension) < 6)
+	{
+		extension++;
+		
+		switch (out_file_format)
+		{
+			case MUXER_TYPE_AVI:
+			if (strcasecmp(extension,"avi"))
+				mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_MencoderWrongFormatAVI);
+			break;
+
+			case MUXER_TYPE_MPEG:
+			if (strcasecmp(extension,"mpg") &&
+				strcasecmp(extension,"mpeg") &&
+				strcasecmp(extension,"vob")) 
+				mp_msg(MSGT_MENCODER, MSGL_WARN, MSGTR_MencoderWrongFormatMPG);
+			break;
+		}
+	}
+}				
+
 
 if (frameno_filename) {
   stream2=open_stream(frameno_filename,0,&i);
