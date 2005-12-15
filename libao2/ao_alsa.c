@@ -197,6 +197,17 @@ static int control(int cmd, void *arg)
 	}
 	mp_msg(MSGT_AO,MSGL_DBG2,"right=%li, pmin=%li, pmax=%li, mult=%f\n", 
 	       set_vol, pmin, pmax, f_multi);
+
+	if (snd_mixer_selem_has_playback_switch(elem)) {
+	  int lmute = (vol->left == 0.0);
+	  int rmute = (vol->right == 0.0);
+	  if (snd_mixer_selem_has_playback_switch_joined(elem)) {
+	    lmute = rmute = lmute && rmute;
+	  } else {
+	    snd_mixer_selem_set_playback_switch(elem, SND_MIXER_SCHN_FRONT_RIGHT, !rmute);
+	  }
+	  snd_mixer_selem_set_playback_switch(elem, SND_MIXER_SCHN_FRONT_LEFT, !lmute);
+	}
       }
       else {
 	snd_mixer_selem_get_playback_volume(elem, 0, &get_vol);
