@@ -594,14 +594,13 @@ GtkWidget * create_PopUpMenu( void )
     N=AddMenuCheckItem( window1, (const char*)normal_xpm, Menu,MSGTR_MENU_NormalSize"      ",b1,evNormalSize );
     D=AddMenuCheckItem( window1, (const char*)double_xpm, Menu,MSGTR_MENU_DoubleSize,b2,evDoubleSize );
     F=AddMenuCheckItem( window1, (const char*)fs_xpm, Menu,MSGTR_MENU_FullScreen,appMPlayer.subWindow.isFullScreen,evFullScreen );
-   }
-
   if ( !gtkShowVideoWindow && !guiIntfStruct.Playing )
    {
     gtk_widget_set_sensitive( H,FALSE );
     gtk_widget_set_sensitive( N,FALSE );
     gtk_widget_set_sensitive( D,FALSE );
     gtk_widget_set_sensitive( F,FALSE );
+   }
    }
 
   AddSeparator( Menu );
