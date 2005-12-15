@@ -1392,7 +1392,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Error while sending HTTP request: didn't sent all the request.\n"
 #define MSGTR_MPDEMUX_NW_ReadFailed "Read failed.\n"
 #define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response read 0 (i.e. EOF)\n"
-#define MSGTR_MPDEMUX_NW_AuthFailed "Authentication failed. Please use the option -user and -passwd to provide your\n"\
+#define MSGTR_MPDEMUX_NW_AuthFailed "Authentication failed. Please use -user and -passwd options to provide your\n"\
 "username/password for a list of URLs, or form an URL like:\n"\
 "http://username:password@hostname/file\n"
 #define MSGTR_MPDEMUX_NW_AuthRequiredFor "Authentication required for %s\n"
