@@ -569,6 +569,7 @@ int vf_config_wrapper(struct vf_instance_s* vf,
 		    int width, int height, int d_width, int d_height,
 		    unsigned int flags, unsigned int outfmt)
 {
+    int r;
     if ((vf->default_caps&VFCAP_CONSTANT) && vf->fmt.have_configured) {
         if ((vf->fmt.orig_width != width)
 	    || (vf->fmt.orig_height != height)
@@ -582,7 +583,9 @@ int vf_config_wrapper(struct vf_instance_s* vf,
     vf->fmt.orig_height = height;
     vf->fmt.orig_width = width;
     vf->fmt.orig_fmt = outfmt;
-    return vf->config(vf, width, height, d_width, d_height, flags, outfmt);
+    r = vf->config(vf, width, height, d_width, d_height, flags, outfmt);
+    if (!r) vf->fmt.have_configured = 0;
+    return r;
 }
 
 int vf_next_config(struct vf_instance_s* vf,
