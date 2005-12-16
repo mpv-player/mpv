@@ -182,7 +182,7 @@ static int fcc_mp2vl(int fcc)
     case IMGFMT_IF09:	return V4L2_PIX_FMT_YUV410;
     case IMGFMT_I420:	return V4L2_PIX_FMT_YUV420;
     case IMGFMT_YUY2:	return V4L2_PIX_FMT_YUYV;
-    case IMGFMT_YV12:	return V4L2_PIX_FMT_YUV420;
+    case IMGFMT_YV12:	return V4L2_PIX_FMT_YVU420;
     case IMGFMT_UYVY:   return V4L2_PIX_FMT_UYVY;
     }
     return fcc;
@@ -204,6 +204,7 @@ static int fcc_vl2mp(int fcc)
     case V4L2_PIX_FMT_GREY:		return IMGFMT_Y800;
     case V4L2_PIX_FMT_YUV410:	return IMGFMT_IF09;
     case V4L2_PIX_FMT_YUV420:	return IMGFMT_I420;
+    case V4L2_PIX_FMT_YVU420:	return IMGFMT_YV12;
     case V4L2_PIX_FMT_YUYV:		return IMGFMT_YUY2;
     case V4L2_PIX_FMT_UYVY:     return IMGFMT_UYVY;
     }
@@ -570,11 +571,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_GET_FORMAT:
 	if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
-	if (priv->mp_format == IMGFMT_YV12 && priv->format.fmt.pix.pixelformat == V4L2_PIX_FMT_YUV420) {
-	    *(int *)arg = IMGFMT_YV12;
-	} else {
-	    *(int *)arg = fcc_vl2mp(priv->format.fmt.pix.pixelformat);
-	}
+	*(int *)arg = fcc_vl2mp(priv->format.fmt.pix.pixelformat);
 	mp_msg(MSGT_TV, MSGL_V, "%s: get format: %s\n", info.short_name,
 	       pixfmt2name(priv->format.fmt.pix.pixelformat));
 	return TVI_CONTROL_TRUE;
@@ -1332,7 +1329,6 @@ static double grabimmediate_video_frame(priv_t *priv, char *buffer, int len)
 #endif /* HAVE_TV_BSDBT848 */
 
 // copies a video frame
-// for YV12 swaps the 2nd and 3rd plane
 static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *source)
 {
     int w = priv->format.fmt.pix.width;
@@ -1340,17 +1336,7 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
     int d = pixfmt2depth(priv->format.fmt.pix.pixelformat);
     int bytesperline = w*d/8;
 
-    // YV12 uses VIDEO_PALETTE_YUV420P, but the planes are swapped
-    switch (priv->mp_format) {
-    case IMGFMT_YV12:
-	memcpy(dest, source, w * h);
-	memcpy(dest+w * h*5/4, source+w * h, w * h/4);
-	memcpy(dest+w * h, source+w * h*5/4, w * h/4);
-	break;
-    default:
-	memcpy(dest, source, bytesperline * h);
-    }
-    
+    memcpy(dest, source, bytesperline * h);
 }
 
 // maximum skew change, in frames
