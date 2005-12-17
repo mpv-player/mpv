@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.13 -->
 <appendix id="skin">
 <title>Format de skins <application>MPlayer</application></title>
-<para>
-L'objectif de ce document est de décrire le format de skins de <application>MPlayer</application>. Les
-informations présentées ici peuvent s'avérer fausses, du fait que
-<orderedlist>
-<listitem><para>Ce n'est pas moi qui ait écrit la GUI.</para></listitem>
-<listitem><para>Cette GUI n'est pas terminée.</para></listitem>
-<listitem><para>Je peux me tromper.</para></listitem>
-</orderedlist>
-Ne soyez donc pas surpris si quelque chose ne correspond pas à cette description.
-</para>
-
-<para>Merci à <emphasis>Zoltán Ponekker</emphasis> pour son aide.</para>
-
-<para><emphasis>András Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
 
 <sect1 id="skin-overview">
 <title>Aperçu</title>
