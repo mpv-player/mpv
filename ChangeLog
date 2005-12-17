@@ -135,6 +135,8 @@ MPlayer (1.0)
     * configure can now run with cross compiling, new configure option
       --enable-cross-compile
     * libcdio support for CD playback
+    * new option -msglevel, control verbosity of modules of MPlayer directly
+    * -verbose option removed, use -v or "-msglevel all" instead.
 
 
   pre7try2: August 26, 2005
