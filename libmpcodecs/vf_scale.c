@@ -144,12 +144,12 @@ static int config(struct vf_instance_s* vf,
 	}
     }
 
-    if (vf->priv->w < 0 && (-vf->priv->w & 8)) {
-      vf->priv->w = -(-vf->priv->w & ~8);
+    if (vf->priv->w <= -8) {
+      vf->priv->w += 8;
       round_w = 1;
     }
-    if (vf->priv->h < 0 && (-vf->priv->h & 8)) {
-      vf->priv->h = -(-vf->priv->h & ~8);
+    if (vf->priv->h <= -8) {
+      vf->priv->h += 8;
       round_h = 1;
     }
 
