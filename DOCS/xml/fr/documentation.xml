@@ -92,7 +92,7 @@ Même les fichiers AVI sans index sont lisibles, et vous pouvez reconstruire
 ses indexs soit temporairement avec l'option <option>-idx</option>,
 soit de manière définitive avec <application>MEncoder</application>, autorisant
 ainsi l'avance/retour rapide !
-Comme vous pouvez le constater, le stabilité et la qualité sont les choses
+Comme vous pouvez le constater, la stabilité et la qualité sont les choses
 les plus importantes, mais la vitesse est également formidable.
 Il y a également un puissant système de filtres pour faire de la manipulation
 vidéo et audio.

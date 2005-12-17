@@ -84,7 +84,7 @@ Si vous voulez le compiler vous-même, vous devriez regarder les répertoires
 et
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 du répertoire raçine de la distribution OpenZaurus.
-Ils ont toujours les derniers Makefile et patches utilisés pour contruire
+Ils ont toujours les derniers Makefile et patchs utilisés pour contruire
 un <application>MPlayer</application> CVS avec
 <systemitem class="library">libavcodec</systemitem>.
 Si vous avez besoin d'une GUI, vous pouvez utiliser xmms-embedded.
@@ -363,7 +363,7 @@ Exemple:
 </screen>
  	 
 <para>
-Ci-dessous sont exposé les solutions pour certains problèmes communs:
+Ci-dessous sont exposées les solutions pour certains problèmes communs:
 </para>
  	 
 <itemizedlist>
@@ -417,7 +417,7 @@ Vous aurez besoin d'étendre <systemitem>maxssiz</systemitem>
 et de recompiler le noyau (et redémarrer).
 Vous pouvez utiliser SAM pour ce faire.
 (Pendant ce temps, aller voir le paramètre <systemitem>maxdsiz</systemitem>
-pour le montant maximum de donnée qu'un programme peut utiliser.
+pour le montant maximum de données qu'un programme peut utiliser.
 Cela dépend de vos applications, si la valeur par défaut de 64MO est
 suffisante ou non.)
 </para>
@@ -452,9 +452,9 @@ X qui est TRÈS lente. Utilisez SDL.
   complètement opérationnelle. Vous devriez jeter un oeil à la liste de diffusion
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">Mplayer-cygwin</ulink>
   pour obtenir de l'aide et les dernières informations.
-  Les binaires officiels de Windows peuvent être récupéré sur la 
+  Les binaires officiels de Windows peuvent être récupérés sur la 
   <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">page de téléchargement</ulink>.
-  Les paquetages d'installation et de simple frontends GUI sont disponible à partir de sources
+  Les paquetages d'installation et de simple frontends GUI sont disponibles à partir de sources
   externe, nous avons collecté ensuite dans la section Windows de notre 
   <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">page de projets</ulink>.
 </para>
@@ -538,7 +538,7 @@ Il y a des paquetages de codec spécial pour Windows disponible sur notre
 <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">page de codecs</ulink>
 pour permettre de jouer les formats qui ne sont pas encore nativement
 supportés.
-Placez les codecs quelque part dans votre path ou passez
+Placez les codecs quelque part dans votre patch ou passez
 <option>--with-codecsdir=<replaceable>c:/chemin/de/vos/codecs</replaceable></option>
 (éventuellement
 <option>--with-codecsdir=<replaceable>/chemin/de/vos/codecs</replaceable></option>
@@ -611,8 +611,8 @@ peuvent être trouvés sur le
   Configurez-le avec <option>--prefix=/mingw</option> et installez-le
   avant de compiler <application>MPlayer</application>.</para>
   
-<para>De complète instructions pour compiler <application>MPlayer</application>
-et les librairies nécessaire sont disponible sur
+<para>De complètes instructions pour compiler <application>MPlayer</application>
+et les librairies nécessaires sont disponibles sur
 <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer 
 MinGW HOWTO</ulink>.</para>
  	   
@@ -643,9 +643,9 @@ ce projet n'est plus du tout actif.
 <para>
 Heureusement, <application>MPlayerOSX</application> a été repris en main
 par un membre de l'équipe de <application>MPlayer</application>.
-Des versions preview sont disponible sur notre
+Des versions preview sont disponibles sur notre
 <ulink url="http://mplayerhq.hu/dload.html">page de téléchargement</ulink>
-et une version officiel ne devrait pas tarder.
+et une version officielle ne devrait pas tarder.
 </para>
 
 <para>
@@ -686,7 +686,7 @@ Premièrement vous avez besoin de compiler main et main_noaltivec.
 </para>
  	 
 <para> 
-Ensuite, réglez une varaible globale:
+Ensuite, réglez une variable globale:
 
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
@@ -723,7 +723,7 @@ ensuite placez vous dans le répertoire mplayerosx et tapez
 <screen>
 make dist
 </screen>
-Cela créera une archive compressé <systemitem>.dmg</systemitem> avec le binaire
+Cela créera une archive compressée <systemitem>.dmg</systemitem> avec le binaire
 prêt à l'emploi.
 </para>
 
@@ -739,7 +739,7 @@ du tout en fonction.
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
 Les gens de chez <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
-font des paquetages actualisé pour <application>MPlayer</application> et
+font des paquetages actualisés pour <application>MPlayer</application> et
 <application>MEncoder</application>.
 </para>
  	 

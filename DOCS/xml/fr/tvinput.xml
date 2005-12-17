@@ -49,7 +49,7 @@ Les espaces dans le nom du canal doivent être remplacés par le caractère
 
 <listitem>
 <para>
-Choisissez des dimensions d'image sensées. Les dimensions de l'image de
+Choisissez des dimensions d'images sensées. Les dimensions de l'image de
 destination devraient être divisible par 16.
 </para>
 </listitem>
@@ -160,7 +160,7 @@ Il peut y avoir des ennuis avec certains serveurs de son comme aRts (KDE)
 ou ESD (GNOME).
 Si vous avez une carte son full duplex (presque toutes les cartes décentes
 le supportent aujourd'hui), et que vous utilisez KDE, essayez d'activer
-l'otpion "full duplex" dans le menu des préférences du serveur de son.
+l'option "full duplex" dans le menu des préférences du serveur de son.
 </para>
 </listitem>
 </itemizedlist>

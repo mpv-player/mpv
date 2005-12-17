@@ -445,7 +445,7 @@ horizontalement.
 Un <literal>hpotmeter</literal> sans bouton. (je suppose qu'il est censé tourner
 en rond, mais il réagit uniquement aux tractions horizontales.) Pour une
 description de ses paramètres lisez <link linkend="skin-hpotmeter">hpotmeter</link>.
-Ses <literal>phases</literal> peuvent être fixés à <literal>NULL</literal>, mais ce n'est
+Ses <literal>phases</literal> peuvent être fixées à <literal>NULL</literal>, mais ce n'est
 pas vraiment utile, puisque vous ne pouvez pas voir son niveau.
     </para></listitem>
 </varlistentry>

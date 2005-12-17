@@ -372,7 +372,7 @@ précédents formats EDL).
 <para>
 Incluez l'option <option>-edl &lt;nomfichier&gt;</option> quand vous lancez
 <application>MPlayer</application>, avec le nom du fichier EDL que vous voulez
-appliquer à la video.
+appliquer à la vidéo.
 </para>
 </sect2>
 
@@ -394,7 +394,7 @@ Exemple:
 Cela va sauter de la seconde 5.3 à la seconde 7.1 de la vidéo, puis va couper
 le son à 15 secondes, le remettre à 16.7 secondes et sauter de la seconde 420
 à la seconde 422 de la vidéo. Ces actions seront appliquées quand le temps de
-lecture atteint le temps indiqué dans le fichier.
+lecture aura atteint le temps indiqué dans le fichier.
 </para>
 
 <para>
@@ -419,16 +419,16 @@ et affiner le fichier EDL généré.
 <para>
 La plupart des DVDs et beaucoup d'autres fichiers incluent le son surround.
 <application>MPlayer</application> supporte la lecture surround mais ne les
-activent pas par défaut parceque les équipement stéréos sont de loin plus communs.
+activent pas par défaut parce que les équipement stéréos sont de loin plus communs.
 Pour jouer un fichier qui ont plus de deux canaux audio utilisez
 <option>-channels</option>.
 Par exemple, pour jouer un DVD avec l'audio 5.1:
 
 <screen>mplayer dvd://1 -channels 6</screen>
 
-Notez que en dépit du nom "5.1" il y a couramment six canaux discrêt.
+Notez que en dépit du nom "5.1" il y a couramment six canaux discret.
 Si vous avez l'équipement pour le son surround il est de précaution de mettre
-l'option <option>channels</option> dans votre fichhier de configuration de 
+l'option <option>channels</option> dans votre fichier de configuration de 
 <application>MPlayer</application> <filename>~/.mplayer/config</filename>.
 Par exemple, pour faire une lecture quadriphonique par défaut, ajoutez cette
 ligne:
@@ -436,7 +436,7 @@ ligne:
 <programlisting>channels=4</programlisting>
 
 <application>MPlayer</application> sortira alors l'audio en quatre canaux quand
-les quatres canaux sont tous disponible.
+les quatres canaux sont tous disponibles.
 </para>
 </sect3>
 
@@ -463,7 +463,7 @@ explication.
 
 <para>
 Les DVDs ont habituellement l'audio surround encodé en format AC3 (Dolby Digital) ou DTS
-(Digital Theater System). Certains équipements audio moderne sont capable de
+(Digital Theater System). Certains équipements audio moderne sont capables de
 décoder ces formats de façon interne. <application>MPlayer</application> peut être
 configuré pour relayer les données audio sans le décodé. Cela ne marchera que si
 vous avez you have une connectique S/PDIF (Sony/Philips Digital Interface) sur
@@ -524,15 +524,15 @@ d'audio est spécifiée.
 <emphasis>***TODO***</emphasis>
 </para>
 <para>
-Cette section doit encor être écrite et ne peut être complété tant que personne ne nous 
+Cette section doit encore être écrite et ne peut être complétée tant que personne ne nous 
 a fourni des fichiers d'exemple à tester. Si vous avez quelconques fichiers audio à
-encodage matriciel en votre possession, savez où en trouver, ou avez quelconques informations 
-qui pourrai être util, veuillez envoyer un message à le liste de diffusion
+encodage matriciel en votre possession,que savez où en trouver, ou avez quelconques informations 
+qui pourraient être utiles, veuillez envoyer un message à la liste de diffusion
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>. 
 Mettez "[matrix-encoded audio]" en sujet du mail.
 </para>
 <para>
-Si aucun fichiers ou de plus ample informations ne sont reçu cette section sera enlevé.
+Si aucuns fichiers ou de plus amples informations ne sont reçues cette section sera enlevée.
 </para>
 
 <para>
@@ -554,7 +554,7 @@ Liens Bon:
 <title>Emulation Surround dans les écouteurs</title>
 
 <para>
-<application>MPlayer</application> inclus un filtre HRTF (Head Related Transfer
+<application>MPlayer</application> inclu un filtre HRTF (Head Related Transfer
 Function) basé sur un
 <ulink url="http://sound.media.mit.edu/KEMAR.html">projet MIT</ulink>
 où des mesures ont été prises depuis des microphones montés sur une tête humaine factice.
@@ -563,10 +563,10 @@ où des mesures ont été prises depuis des microphones montés sur une tête humaine
 <para>
 Bien que il ne soit pas possible de reproduire exactement un système surround,
 le filtre HRTF de <application>MPlayer</application> fourni une immersion audio 
-plus spatialle avec les systèmes d'écoute stéréo.
+plus spatiale avec les systèmes d'écoute stéréo.
 La plupart des techniques de mixage consistent à simplement fusionner tous les
 canaux en deux; En plus de cette fusion, <option>hrtf</option> génére de
-subtils échoe, augmente un peu la séparation stéréo, et altère le volume de
+subtils échos, augmente un peu la séparation stéréo, et altère le volume de
 certaines fréquences.
 Si HRTF sonne mieux gardez à l'esprit que tout ceci est dépendant de la
 source audio et est une question de goût personnel, mais cela vaut vraiment le
@@ -616,10 +616,10 @@ et le volume réglé à zéro par défaut.
 <title>Information Générale</title>
 
 <para>
-Malheureusement, il n'y a pas de standard sur comment les canaux sont ordonnés.
-Les ordres listé ci-dessous sont ceux de l'AC3 et sont assez typiques;
+Malheureusement, il n'y a pas de standard qui montrent comment les canaux sont ordonnés.
+Les ordres listés ci-dessous sont ceux de l'AC3 et sont assez typiques;
 essayez-les et voyez si votre source correspond.
-Les canaux sont numérottés à partir de par 0.
+Les canaux sont numérotés à partir de par 0.
 
 <orderedlist spacing="compact">
 <title>mono</title>
@@ -670,19 +670,19 @@ Les canaux sont numérottés à partir de par 0.
 </para>
 
 <para>
-L'option <option>-channels</option> est utilisé pour demander le nombre
+L'option <option>-channels</option> est utilisée pour demander le nombre
 de canaux depuis le décodeur audio.
-Certains codecs audio utilisent le nombre de canaux spécifié pour décider
+Certains codecs audio utilisent le nombre de canaux spécifiés pour décider
 si le mixage (downmixing) de la source est nécessaire.
 Notez que cela n'affecte pas toujours le nombre de canaux de sortie.
 Par exemple, utiliser <option>-channels 4</option> pour jouer un fichier
 stéréo MP3 résultera quand même en une sortie en 2-canaux à partir du moment
-où le codec MP3 ne produira pas de canaux suplémentaire.
+où le codec MP3 ne produira pas de canaux suplémentaires.
 </para>
 
 <para>
 Le filtre audio <option>channels</option> peut être utilisé pour créer ou enléver
-des canaux et est util pour controler le nombre de canaux envoyé à la carte son.
+des canaux et, est utile pour contrôler le nombre de canaux envoyés à la carte son.
 Voir les sections suivantes pour plus d'informations sur la manipulation de canaux.
 </para>
 
@@ -695,9 +695,9 @@ Voir les sections suivantes pour plus d'informations sur la manipulation de cana
 <para>
 Mono sonne beaucoup mieux quand il est joué au travers de deux enceintes -
 particulièrement quand des écouteurs sont utilisés.
-Les fichiers Audio qui ont vraiment un canal sont automatiquement joué
+Les fichiers Audio qui ont vraiment un canal sont automatiquement joués
 au travers de deux enceintes; malheureusement, la plupart des filtres avec
-le son mono sont couramment encodé comme stéréo avec un canal silencieux.
+le son mono sont couramment encodés comme stéréo avec un canal silencieux.
 La façon la plus facile et la plus fidèle de faire sortir des enceintes le
 même audio est le filtre <option>extrastereo</option>:
 
@@ -709,7 +709,7 @@ même audio est le filtre <option>extrastereo</option>:
 Ceci fait la moyenne des deux canaux, ayant pour résultat que les deux canaux ont
 leur volume réduit de moitié par rapport à l'original. Les sections suivantes ont 
 des exemples sur les autres manières de faire ceci sans une diminution du volume, 
-mais ils sont plus compliqué et requière différente options dépendemment du canal 
+mais ils sont plus compliqués et requièrent différentes options dépendemment du canal 
 à garder. Si vous voulez réellement maintenir le volume,
 il est peut être plus facile de tester avec le filtre <option>volume</option> et
 trouver la bonne valeur. Par exemple:
@@ -726,7 +726,7 @@ trouver la bonne valeur. Par exemple:
 
 <para>
 Le filtre <option>channels</option> peut déplacer n'importe lequel ou tous les canaux.
-Paramètré toutes les sous-options pour le filtre <option>channels</option>
+Parametré toutes les sous-options pour le filtre <option>channels</option>
 peut être compliqué et prend peu d'attention.
 
 <orderedlist spacing="compact">
@@ -737,7 +737,7 @@ Ceci est la première sous-option.
 <listitem><para>
 Comptez combien de canaux vous devrez déplacer.
 Ceci est la seconde sous-option.
-Chaque canal peut être déplacé en plusieurs différent canaux en même temps,
+Chaque canal peut être déplacé en plusieurs différents canaux en même temps,
 mais gardez en tête que quand un canal est déplacé (même si vers une seule
 destination) le canal source sera vidé à moins qu'un autre canal ne soit
 déplacé dans ce même canal.
@@ -788,9 +788,9 @@ En mettant tout ça ensemble cela donne:
 
 <para>
 L'avantage de cette exemple par rapport à <option>extrastereo</option> est que le
-volume de chaque canal de sortie est le même que le canal d'entrée. Le désadvantage
-étant que les sous-options doivent être changé à "2:2:1:0:1:1" quand l'audio désirée
-est dans le canal de droite. Il est aussi plus difficile de s'en souvenir et de le tapper.
+volume de chaque canal de sortie est le même que le canal d'entrée. Le désavantage
+étant que les sous-options doivent être changées à "2:2:1:0:1:1" quand l'audio désirée
+est dans le canal de droite. Il est aussi plus difficile de s'en souvenir et de le taper.
 </para>
 
 <bridgehead>Exemple: canal gauche vers deux enceintes raccourci</bridgehead>
@@ -816,7 +816,7 @@ faire rejouer sur les enceintes arrière d'un paramètrage quadraphonique.
 Il devrait y avoir quatre canaux de sortie. La première sous-option est "4".
 </para></listitem>
 <listitem><para>
-Chacune des deux canaux avant a besoin d'être déplacé vers le canal arrière
+Chacun des deux canaux avant a besoin d'être déplacé vers le canal arrière
 correspondant et aussi vers lui-même.
 Cela fait quatre déplacements, donc la seconde sous-option est "4".
 </para></listitem>
@@ -839,9 +839,9 @@ Combinez toutes les sous-options pour obtenir:
 <title>Mixage de canal</title>
 
 <para>
-Le filtre <option>pan</option> peut mixer les canaux selon des proportions spécifié 
+Le filtre <option>pan</option> peut mixer les canaux selon des proportions spécifiées 
 par l'utilisateur. Ceci tient compte de tout que le filtre de <option>channels</option> 
-peut faire et plus. Malheureusement, les sous-options sont beaucoup plus complexe.
+peut faire et plus. Malheureusement, les sous-options sont beaucoup plus complexes.
 <orderedlist>
 <listitem><para>
 Décidez avec combien de canaux vous voulez travailler. Vous aurez peut-être besoin 
@@ -850,15 +850,15 @@ Des exemples plus loin montreront quand et laquelle il faut utiliser.
 </para></listitem>
 <listitem><para>
 Décidez combien de canaux à introduire dans <option>pan</option> (les canaux suplémentaires
-décodés sont rejetés). Ceci est la première sous-option, et elle controle aussi combien de 
+décodés sont rejetés). Ceci est la première sous-option, et elle contrôle aussi combien de 
 canaux à employer pour la sortie.
 </para></listitem>
 <listitem><para>
-Les sous-options restantes spécifient quelle quantité de chaque canal sont mixé l'un 
-dans l'autre. Ceci est la partie compliqué. Pour décomposer la tâches, découpez les
-sous-options en plusieurs ensemble, un ensemlbe pour chaque canal de sortie. Chaque sous-option
+Les sous-options restantes spécifient quelle quantité de chaque canal sont mixés l'un 
+dans l'autre. Ceci est la partie compliquée. Pour décomposer la tâche, découpez les
+sous-options en plusieurs ensembles, un ensemlbe pour chaque canal de sortie. Chaque sous-option
 d'un ensemble correspond à un canal d'entrée. Le nombre que vous spécifiez sera le pourcentage
-de canal d'entrée qui sont mixé dans le canal de sortie.
+de canal d'entrée qui sont mixés dans le canal de sortie.
 </para>
 <para>
 <option>pan</option> accepte des valeurs de 0 à 512, rendement de 0% à 51200% du volume 
@@ -866,7 +866,7 @@ original. Faites attention quand en utilisant des valeurs plus grande que 1. Non
 cela peut vous donner un volume tres haut, mais si vous dépassez la marge d'échantillon de 
 votre carte son vous pourriez entendre des pops et clics désagréables. Si vous le voulez vous 
 pouvez faire suivre <option>pan</option> avec <option>,volume</option> pour activer la coupure, 
-mais c'est mieux de garder les valeurs de <option>pan</option> suffisament basses pour que la 
+mais c'est mieux de garder les valeurs de <option>pan</option> suffisamment basses pour que la 
 coupure ne soit pas nécessaire.
 </para></listitem>
 </orderedlist>
@@ -952,13 +952,13 @@ Mettez tout ça ensemble, pour:
 
 <screen>mplayer <replaceable>6-canaux.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
 
-Les pourcentages listé ci-dessus sont seulement un exemple approximatif. Vous êtes libre de les ajuster.
+Les pourcentages listés ci-dessus sont seulement un exemple approximatif. Vous êtes libres de les ajuster.
 </para>
 
 <bridgehead>Exemple: Jouer de l'audio 5.1 sur de grosses enceintes sans un caisson de basse (subwoofer)</bridgehead>
 
 <para>
-Si vous avez une paire d'enceintes frontale énorme vous ne voudriez pas
+Si vous avez une paire d'enceintes frontales énormes, vous ne voudriez pas
 gaspiller de l'argent sur l'achat d'un caisson de basse (subwoofer) pour
 un système son 5.1 complet.
 Si vous utilisez <option>-channels 5</option> pour demander que liba52
@@ -976,7 +976,7 @@ Puisque <option>pan</option> a besoin d'examiner chacun des six canaux, spécifie
 <option>pan</option> sort vers seulement cinq canaux, la première sous-option est 5.
 </para></listitem>
 <listitem><para>
-Six canaux d'entrée et cinq de sortie signifient six ensembles de cinq sous-options.
+Six canaux d'entrées et cinq de sortie signifient six ensembles de cinq sous-options.
   <itemizedlist spacing="compact">
   <listitem><simpara>
   Le canal avant gauche ne se réplique que vers lui-même:
@@ -1040,16 +1040,16 @@ Par exemple, <option>-softvol-max 200</option> devra permettre
 l'ajustement du volume jusqu'à deux fois son niveau d'origine.
 Il est sûr d'indiquer une valeur importante avec <option>-softvol-max</option>; 
 un volume plus important ne sera utilisé qu'à partir du moment où
-les touches d'ajustement du volume sont utilisé. Le seul désavantage 
+les touches d'ajustement du volume sont utilisées. Le seul désavantage 
 d'une valeur large est que, puisque <application>MPlayer</application> ajuste 
-le volume par un pourcentage du maximum, vous n'aurez pas un control aussi précis 
+le volume par un pourcentage du maximum, vous n'aurez pas un contrôle aussi précis 
 en utilisant les touches d'ajustement du volume. Utilisez une valeur plus basse avec 
 <option>-softvol-max</option> et/ou indiquez <option>-volstep 1</option> si vous désirez 
 une précision plus importante.
 </para>
 
 <para>
-L'option <option>-softvol</option> fonmctionne en controlant le filtre audio
+L'option <option>-softvol</option> fonmctionne en contrôlant le filtre audio
 <option>volume</option>. Si vous voulez jouer un fichier à un certain volume
 depuis le début vous pouvez spécifier <option>volume</option> manuellement:
 
@@ -1060,7 +1060,7 @@ l'utilisation du filtre <option>volume</option> - vous pourriez facilement
 abimer votre appareil auditif si vous utilisez un valeur trop grande. 
 Commencez bas et travaillez de façon graduelle vers le haut jusqu'à être à même 
 d'apprécier de combien il est nécessaire d'ajuster le volume. Aussi, si vous 
-indiquez des valeurs excéssivement haute, <option>volume</option> pourrai avoir 
+indiquez des valeurs excessivement haute, <option>volume</option> pourra avoir 
 besoin de couper le signal pour éviter d'envoyer vos données de carte son qui 
 sont en dehors de la bande permise; cela résultera en une distorsion de l'audio.
 </para>

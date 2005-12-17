@@ -154,7 +154,7 @@ screen #0
 (...etc...)<!--
 --></screen>
   Cela doit supporter les formats de pixels YUY2 packed et YV12 planar pour
-  pouvoir être utilisé avec <application>MPlayer</application>.
+  pouvoir être utilisés avec <application>MPlayer</application>.
   </para></listitem>
 <listitem><para>
   Finalement, vérifiez si <application>MPlayer</application> a été compilé
@@ -531,7 +531,7 @@ ceci dépendant de l'implémentation du DGA pour votre matériel.
 <para>
 Généralement, l'accès au framebuffer DGA peut s'avérer aussi rapide que le driver X11,
 apportant en plus l'avantage de bénéficier d'une image plein écran. Les pourcentages
-affichées par <application>MPlayer</application> doivent être interprétées avec
+affichés par <application>MPlayer</application> doivent être interprétés avec
 précaution, comme par exemple avec le pilote X11 où ils n'incluent pas le temps utilisé
 par le serveur X pour l'affichage. Pour des résultats exacts, branchez un terminal sur
 le port série de votre machine et lancez un <command>top</command> pour savoir ce qui
