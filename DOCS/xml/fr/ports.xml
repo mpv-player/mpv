@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.70 -->
+<!-- synced with 1.72 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -565,11 +565,25 @@ Essayez de les rendre accessibles en écriture si vous avez des problèmes.
 <para>La console <application>Cygwin</application>/<application>MinGW</application>
   est plutôt lente. Il semble que rediriger la sortie
   ou utiliser l'option <option>-quiet</option> améliore les performances. Le
-  rendu direct (<option>-dr</option>) peut également aider. Vous pouvez éviter le
-  tremblement de L'OSD en utilisant le double buffering avec l'option
-  <option>-double</option>. Si la lecture est sale, essayez
+  rendu direct (<option>-dr</option>) peut également aider. 
+  Si la lecture est erratique, essayez
   <option>-autosync 100</option>. Si certaines de ces options vous sont utiles,
   vous pouvez les placer dans votre fichier de config.</para>
+
+<note>
+
+<para>Sous Windows la détection CPU en cours d'execution (runtime CPU detection) 
+désactive le support SSE en raison de plantages récurrent et dur à tracer liés au SSE. 
+Si vous souhaitez avoir le support SSE sous Windows, vous devrez compiler sans 
+runtime CPU detection.
+</para>
+
+<para>Si vous avez un Pentium 4 et que vous expériencez un plantage lors de l'utilisation
+des codecs RealPlayer vous pourriez vouloir désactiver le support hyperthreading.
+</para>
+
+</note>
+
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
