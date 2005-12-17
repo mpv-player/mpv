@@ -277,7 +277,6 @@ static short edl_seek_type; ///< When non-zero, frames are discarded instead of 
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy);
 #endif
 
-#include "cfg-mplayer-def.h"
 #include "cfg-mencoder.h"
 
 #ifdef USE_DVDREAD
