@@ -490,6 +490,8 @@ flip=yes
 mf=type=png:fps=25
 # Unheimliche Negativbilder sind cool.
 vf=eq2=1.0:-0.8
+# Ich möchte, dass MEncoder standardmäßig in diese Datei schreibt.
+o=ausgabe.avi
 .fi
 .PP
 Du kannst auch dateispezifische Konfigurationsdateien schreiben.
@@ -572,21 +574,13 @@ Echtzeitpriorität zu benutzen kann das System einfrieren.
 .RE
 .
 .TP
-.B \-v, \-verbose
-macht Ausgaben ausführlicher (mehrere \-v erzeugen höhere Ausführlichkeit).
-.PD 0
-.RSs
-.IPs <nichts>
-nur einige Informationsausgaben (Standard)
-.IPs \-v\ \ \ 
-einige Debug-Informationen, avi-Header, Funktionswerte (init-Debug)
-.IPs \-v\ \-v
-gibt AVI-Indizes, Dateiblock-Inputs und weitere Debug-Informationen aus
-(Player-Debug)
-.IPs \-v\ \-v\ \-v
-gibt alles aus, was mit dem Input-Parser zu tun hat (Parser-Debug)
-.RE
-.PD 1
+.B \-really-quiet (siehe auch \-quiet)
+Zeigt noch weniger Statusmeldungen an als mit \-quiet.
+.
+.TP
+.B \-v\ \ \ \ \ 
+Erhöht die Ausführlichkeit der Ausgaben um eine Stufe für jedes \-v auf der
+Kommandozeile.
 .
 .
 .
@@ -832,10 +826,6 @@ Diese Option wird als ein Eintrag gesehen, so daß alle Optionen danach nur auf
 die Elemente dieser Playlist angewendet werden.
 .br
 FIXME: Dies muss noch genauer angegeben und ordentlich dokumentiert werden.
-.
-.TP
-.B \-really-quiet (siehe auch \-quiet)
-Zeigt noch weniger Statusmeldungen an als mit \-quiet.
 .
 .TP
 .B \-rtc-device <Gerät>
@@ -1315,6 +1305,17 @@ wählt den Farbraum
 Farbraum (FourCC) als Hexadezimalwert
 .IPs size=<Wert>
 Bildgröße in Bytes
+.REss
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+Spielt das berühmte "foreman" Beispielvideo.
+.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+Spielt ein rohes YUV-Sample.
 .RE
 .PD 1
 .
@@ -6354,7 +6355,10 @@ Verwerfe keine Bilder.
 .
 .TP
 .B \-o <Dateiname>
-Schreibt in die angegebene Datei anstatt in 'test.avi'.
+Schreibt in die angegebene Datei.
+.br
+Falls ein Dateiname standardmäßig benutzt werden soll, kann diese Option in die
+MEncoder-Konfigurationsdatei geschrieben werden.
 .
 .TP
 .B \-oac <Codecname>
@@ -9116,7 +9120,7 @@ nach dem Titel oder Herstellungsdatum der DVD benanntes Unterverzeichnis
 angelegt.
 Wenn DVDCSS_CACHE nicht gesetzt oder leer ist, wird die Standardeinstellung
 benutzt, die unter Unix "${HOME}/.dvdcss/" und unter Win32
-"C:\Dokumente und Einstellungen\$USER\Anwendungsdaten\dvdcss\" ist.
+"C:\\Dokumente und Einstellungen\\$USER\\Anwendungsdaten\\dvdcss\\" ist.
 Der spezielle Wert "off" deaktiviert den Cache.
 .
 .TP
