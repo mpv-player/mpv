@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.12 -->
 <appendix id="bugreports">
 <title>Comment rapporter les bogues</title>
 
@@ -24,6 +24,80 @@ pour trouver comment faire inclure votre code dans <application>MPlayer</applica
 Les gens de la liste de diffusion
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 vous assisterons si vous avez des questions.
+</para>
+</sect1>
+<sect1 id="bugreports_regression_test">
+<title>Comment faire des tests de regression en utilisant CVS</title>
+<para>
+Un problème qui peut survenir quelque fois est 'cela marchait avant, et
+plus maintenant...'.
+Voici une procédure étape-par-étape pour tenter d'indiquer quand exactement
+le problème s'est produit. Ceci n'est <emphasis role="bold">pas</emphasis> pour les utilisateurs 
+occasionnels.
+</para>
+<para>
+Premièrement, vous aurez besoin de récuperer l'arbre des sources de MPlayer depuis le CVS.
+Les instructions peuvent être trouvé au bas de
+<ulink url="http://www.mplayerhq.hu/homepage/dload.html">cette page</ulink>.
+</para>
+<para>
+Vous aurez donc dans le repertoire main/ une image de l'arbre CVS, du coté 
+client.
+Maintenant mettez à jour cette image à la date voulue:
+<screen>
+cd main/
+cvs update -PAd -D "2004-08-23"
+</screen>
+Le format de date est AAAA-MM-JJ HH:MM:SS.
+Utiliser ce format de date vous assure que vous pourrez extraire les patches
+selon la date à laquelle elles ont été ajoutés au CVS, comme dans l'
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">archive MPlayer-cvslog</ulink>.
+</para>
+<para>
+Maintenant procéder comme pour une mise-à-jour normale:
+<screen>
+./configure
+make
+</screen>
+</para>
+<para>
+Pour un non-informaticien qui lit ceci, la méthode la plus rapide d'arriver au point
+où le problème se produit est d'utiliser une recherche dichotomique &mdash; qui est,
+chercher la date où est survenu le problème en divisant à plusieurs reprises l'intervalle 
+de recherche par moitié.
+Par exemple, si le problème se produit en 2003, commencez en milieu d'année, puis demandez-vous
+"Le problème est-il déjà présent à ce moment?".
+Si oui, revenez au premier Avril; si non, allez au premier Octobre,
+et ainsi de suite.
+</para>
+<para>
+Si vous avez beaucoup d'espace libre sur le disque dur (une compilation complète des sources prend actuellement
+100 MO, et environ 300-350 MO si les symboles de déboguage sont activés), copiez la
+plus vieille version fonctionnelle connue avant de la mettre à jour; cela sauvera du temps si
+vous devez y revenir.
+(Il est habituellement nécessaire de lancer 'make distclean' avant de recompiller une
+version plus récente, donc si vous ne faites pas une copie de sauvegarde de votre arbre 
+source original, vous devrez tout recompiler dedans quand vous reviendrez
+à la version présente.)
+</para>
+<para>
+Quand vous avez trouvé le jour où le problème survient, continuez la recherche
+en utilisant l'archive mplayer-cvslog (triée par date) et une faites mise-à-jour depuis le
+CVS précisant heure, minute et seconde:
+<screen>
+cvs update -PAd -D "2004-08-23 15:17:25"
+</screen>
+Cela vous permettra de trouver facilement le patch exact à l'origine du problème.
+</para>
+<para>
+Si vous trouvez le patch qui est la cause du problème, vous avez quasiement gagné;
+signalez le à
+<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink> ou
+souscrivez à
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+et postez-le là.
+Il y a une chance pour que l'auteur s'empresse de suggérer un correctif.
+Vous pouvez également décortiquer le patch jusqu'à ce que le bug vous saute aux yeux :-).
 </para>
 </sect1>
 <sect1 id="bugreports_report">
