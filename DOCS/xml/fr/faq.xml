@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.99 -->
+<!--synced with 1.100 -->
 <chapter id="faq" xreflabel="FAQ">   
 <title>Foire Aux Questions</title>
 
@@ -707,6 +707,15 @@ recherche sur des flux de type RealMedia?
 </para></question>
 <answer><para>
 l'option <option>-mc 10</option> peut aider.
+</para></answer>
+</qandaentry>
+<qandaentry>
+<question><para>
+Comment puis-je me débarasser des désynchronisation A/V durant la recherche
+sur des flux RealMedia?
+</para></question>
+<answer><para>
+<option>-mc 0.1</option> peut aider.
 </para></answer>
 </qandaentry>
 </qandadiv>
