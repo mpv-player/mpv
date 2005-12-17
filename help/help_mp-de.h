@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.210
+// In synch with rev 1.216
 
 // ========================= MPlayer help ===========================
 
@@ -241,6 +241,9 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nKein Videoencoder (-ovc) ausgewählt. \nWähle einen aus (siehe -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Kann Ausgabedatei '%s' nicht öffnen.\n"
 #define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen.\n"
+#define MSGTR_MencoderWrongFormatAVI "\nWARNING: Format der Ausgabedatei ist _AVI_, siehe '-of help'.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nWARNUNG: Format der Ausgabedatei ist _MPEG_, siehe '-of help'.\n"
+#define MSGTR_MissingOutputFilename "Keine Ausgabedatei angegeben, schaue dir bitte die Option '-o' an."
 #define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Erzwinge Audioformatkennzeichnung 0x%x in der Ausgabe.\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
@@ -959,7 +962,7 @@ static char help_text[]=
  // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"\
-                "Versuche auch das Hinzufügen des Filters scale, z.B. -vf spp,scale an Stelle von -vf spp.\n"
+                "Versuche den scale-Filter hinzuzufügen, z.B. -vf spp,scale an Stelle von -vf spp.\n"
 #define MSGTR_VO_GenericError "Dieser Fehler ist aufgetreten"
 #define MSGTR_VO_UnableToAccess "Zugriff nicht möglich."
 #define MSGTR_VO_ExistsButNoDirectory "existiert schon, ist aber kein Verzeichnis."
