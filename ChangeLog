@@ -102,6 +102,9 @@ MPlayer (1.0)
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)
     * -o is now manditory. You can add 'o=test.avi' in ~/.mplayer/mencoder
+      to get old behaviour back.
+    * In multiple file encoding, all files must now have audio or none. Use
+      -nosound to force.
 
     Ports:
     * improved timer function on Mac OS X
@@ -138,6 +141,8 @@ MPlayer (1.0)
     * libcdio support for CD playback
     * new option -msglevel, control verbosity of modules of MPlayer directly
     * -verbose option removed, use -v or "-msglevel all" instead.
+    * -edl is now per-file in MPlayer.
+    
 
 
   pre7try2: August 26, 2005
