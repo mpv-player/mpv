@@ -101,6 +101,7 @@ MPlayer (1.0)
     * -delay allows real audio delay instead of just a delay in the header
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)
+    * -o is now manditory. You can add 'o=test.avi' in ~/.mplayer/mencoder
 
     Ports:
     * improved timer function on Mac OS X
