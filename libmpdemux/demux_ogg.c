@@ -616,7 +616,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
     if (((sh_video_t*)demuxer->video->sh)->format == FOURCC_THEORA)
       context = ((sh_video_t*)demuxer->video->sh)->context;
   }
-  else {
+  else if(demuxer->audio->id >= 0) {
     sid = demuxer->audio->id;
     /* demux_ogg_read_packet needs decoder context for Vorbis streams */
     if(((sh_audio_t*)demuxer->audio->sh)->format == FOURCC_VORBIS) {
@@ -624,6 +624,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
       samplesize = ((sh_audio_t*)demuxer->audio->sh)->samplesize;
     }
   }
+  else return;
   os = &ogg_d->subs[sid];
   oss = &os->stream;
 
