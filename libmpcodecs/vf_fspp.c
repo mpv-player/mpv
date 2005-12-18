@@ -95,7 +95,7 @@ struct vf_priv_s { //align 16 !
     int log2_count;
     int temp_stride;
     int qp;
-    int mpeg2;
+    int qscale_type;
     int prev_q;
     uint8_t *src;
     int16_t *temp;
@@ -458,7 +458,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
 		    t=x+x0-2; //correct t=x+x0-2-(y&1), but its the same 
 		    if (t<0) t=0;//t always < width-2
 		    t=qp_store[qy+(t>>qps)];
-		    if(p->mpeg2) t>>=1; //copy p->mpeg2,prev_q to locals?
+		    if(p->qscale_type == FF_QSCALE_TYPE_MPEG2) t>>=1; //copy p->mpeg2,prev_q to locals?
 		    if (t!=p->prev_q) p->prev_q=t, mul_thrmat_s(p, t);
 		    column_fidct_s((int16_t*)(&p->threshold_mtx[0]), block+x*8, block3+x*8, 8); //yes, this is a HOTSPOT
 		}
@@ -535,7 +535,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	dmpi=vf->dmpi;
     }
 
-    vf->priv->mpeg2= mpi->qscale_type;
+    vf->priv->qscale_type= mpi->qscale_type;
     if(mpi->pict_type != 3 && mpi->qscale && !vf->priv->qp){
 	if(!vf->priv->non_b_qp)
 	    vf->priv->non_b_qp= malloc(mpi->qstride * mpi->h);
@@ -546,7 +546,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	if(vf->priv->bframes || !qp_tab)
 	    qp_tab= mpi->qscale;
 
-	if(qp_tab || vf->priv->qp){
+	if((qp_tab || vf->priv->qp)
+	   && (mpi->qscale_type == FF_QSCALE_TYPE_MPEG1 || mpi->qscale_type == FF_QSCALE_TYPE_MPEG2)){
 	    filter(vf->priv, dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0],
 		   mpi->w, mpi->h, qp_tab, mpi->qstride, 1);
 	    filter(vf->priv, dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1],
