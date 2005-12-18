@@ -90,6 +90,7 @@ static int eq_bgamma = 0;
 
 static int texture_width;
 static int texture_height;
+static int mpi_flipped;
 
 static unsigned int slice_height = 1;
 
@@ -473,12 +474,12 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // render alpha
   glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0);
+  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0, 0);
 #endif
   // render OSD
   glBlendFunc (GL_ONE, GL_ONE);
   BindTexture(gl_target, osdtex[osdtexCnt]);
-  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0);
+  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0, 0);
   glEndList();
 
   osdtexCnt++;
@@ -508,7 +509,7 @@ flip_page(void)
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
-            use_rectangle == 1, image_format == IMGFMT_YV12);
+            use_rectangle == 1, image_format == IMGFMT_YV12, mpi_flipped);
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(gl_target, use_yuv);
 
@@ -544,6 +545,7 @@ flip_page(void)
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
 static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
+  mpi_flipped = (stride[0] < 0);
   glUploadTex(gl_target, gl_format, gl_type, src[0], stride[0],
               x, y, w, h, slice_height);
   if (image_format == IMGFMT_YV12) {
@@ -612,6 +614,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     slice = 0; // always "upload" full texture
   }
+  mpi_flipped = (mpi->stride[0] < 0);
   glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[0],
               mpi->x, mpi->y, mpi->w, mpi->h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {

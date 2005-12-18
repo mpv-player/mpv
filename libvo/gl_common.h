@@ -196,7 +196,7 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
                  int x, int y, int w, int h, int slice);
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
-               int sx, int sy, int rect_tex, int is_yv12);
+               int sx, int sy, int rect_tex, int is_yv12, int flip);
 
 /** \addtogroup glconversion
   * \{ */

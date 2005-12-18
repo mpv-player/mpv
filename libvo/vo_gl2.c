@@ -531,7 +531,8 @@ static void drawTextureDisplay ()
 
       glDrawTex(square->fx, square->fy, square->fw, square->fh,
                 0, 0, texture_width, texture_height,
-                texture_width, texture_height, 0, image_format == IMGFMT_YV12);
+                texture_width, texture_height,
+                0, image_format == IMGFMT_YV12, 0);
       square++;
     } /* for all texnumx */
   } /* for all texnumy */

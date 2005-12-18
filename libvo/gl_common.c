@@ -493,6 +493,10 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
   if (w <= 0 || h <= 0) return;
   if (slice <= 0)
     slice = h;
+  if (stride < 0) {
+    data += h * stride;
+    stride = -stride;
+  }
   // this is not always correct, but should work for MPlayer
   glAdjustAlignment(stride);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
@@ -910,15 +914,20 @@ void inline glDisableYUVConversion(GLenum target, int type) {
  * \param sy height of texture in pixels
  * \param rect_tex whether this texture uses texture_rectangle extension
  * \param is_yv12 if set, also draw the textures from units 1 and 2
+ * \param flip flip the texture upside down
  * \ingroup gltexture
  */
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
-               int sx, int sy, int rect_tex, int is_yv12) {
+               int sx, int sy, int rect_tex, int is_yv12, int flip) {
   GLfloat tx2 = tx / 2, ty2 = ty / 2, tw2 = tw / 2, th2 = th / 2;
   if (!rect_tex) {
     tx /= sx; ty /= sy; tw /= sx; th /= sy;
     tx2 = tx, ty2 = ty, tw2 = tw, th2 = th;
+  }
+  if (flip) {
+    y += h;
+    h = -h;
   }
   glBegin(GL_QUADS);
   glTexCoord2f(tx, ty);
