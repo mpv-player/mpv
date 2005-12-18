@@ -112,6 +112,7 @@ static char *lavc_param_skip_idct_str = NULL;
 static char *lavc_param_skip_frame_str = NULL;
 #endif
 static int lavc_param_threads=1;
+static int lavc_param_bitexact=0;
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -134,6 +135,7 @@ m_option_t lavc_decode_opts_conf[]={
 	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
         {"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
+        {"bitexact", &lavc_param_bitexact, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_BITEXACT, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -270,6 +272,7 @@ static int init(sh_video_t *sh){
 #ifdef CODEC_FLAG_NOT_TRUNCATED
     avctx->flags|= CODEC_FLAG_NOT_TRUNCATED;
 #endif
+    avctx->flags|= lavc_param_bitexact;
     
     avctx->width = sh->disp_w;
     avctx->height= sh->disp_h;
