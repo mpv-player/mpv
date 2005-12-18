@@ -81,8 +81,14 @@ static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   case IMGFMT_UYVY: imgsize=width*height*2;break;
   case IMGFMT_Y8: imgsize=width*height;break;
   default:
+      if (IMGFMT_IS_RGB(format))
+        imgsize = width * height * ((IMGFMT_RGB_DEPTH(format) + 7) >> 3);
+      else if (IMGFMT_IS_BGR(format))
+        imgsize = width * height * ((IMGFMT_BGR_DEPTH(format) + 7) >> 3);
+      else {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"rawvideo: img size not specified and unknown format!\n");
       return 0;
+      }
   }
 
   sh_video = new_sh_video(demuxer,0);
