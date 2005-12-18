@@ -448,6 +448,10 @@ Kovriga, Gregory <gkovriga@techunix.technion.ac.il>
 Kühling, David <dvdkhlng@gmx.de>
     * libtheora support, Ogg/Theora demuxing changes
 
+Küçük, Onur <onur@delipenguen.net>
+    * GTK2 port of the GUI
+    * Fix compilation in locales like TR, AZ etc.
+
 Kuivinen, Fredrik (ksorim) <freku045@student.liu.se>
     * OSD/subtitles outside a movie for SDL
     * video filter layer draft, first implementation
