@@ -324,7 +324,7 @@ static int init(sh_video_t *sh){
     {
 	avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	avctx->extradata = av_malloc(avctx->extradata_size);
+	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	memcpy(avctx->extradata, sh->bih+sizeof(BITMAPINFOHEADER),
 	    avctx->extradata_size);
 
@@ -346,7 +346,7 @@ static int init(sh_video_t *sh){
        || sh->format == mmioFOURCC('R', 'V', '4', '0')
        ){
         avctx->extradata_size= 8;
-        avctx->extradata = av_malloc(avctx->extradata_size);
+        avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
         if(sh->bih->biSize!=sizeof(*sh->bih)+8){
             /* only 1 packet per frame & sub_id from fourcc */
 	    ((uint32_t*)avctx->extradata)[0] = 0;
@@ -384,7 +384,7 @@ static int init(sh_video_t *sh){
          ))
     {
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	avctx->extradata = av_malloc(avctx->extradata_size);
+	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
     }
     /* Pass palette to codec */
@@ -405,7 +405,7 @@ static int init(sh_video_t *sh){
     if (sh->ImageDesc &&
 	 sh->format == mmioFOURCC('S','V','Q','3')){
 	avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
-	avctx->extradata = av_malloc(avctx->extradata_size);
+	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
     }
     

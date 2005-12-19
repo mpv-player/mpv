@@ -62,6 +62,11 @@ static void asf_descrambling(unsigned char **src,int len){
   *src = dst;
 }
 
+#ifdef USE_LIBAVCODEC
+#include "avcodec.h"
+#else
+#define FF_INPUT_BUFFER_PADDING_SIZE 8
+#endif
 
 static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs,int keyframe){
   demux_stream_t *ds=NULL;
@@ -106,8 +111,9 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         // append data to it!
         demux_packet_t* dp=ds->asf_packet;
         if(dp->len!=offs && offs!=-1) mp_msg(MSGT_DEMUX,MSGL_V,"warning! fragment.len=%d BUT next fragment offset=%d  \n",dp->len,offs);
-        dp->buffer=realloc(dp->buffer,dp->len+len);
+        dp->buffer=realloc(dp->buffer,dp->len+len+FF_INPUT_BUFFER_PADDING_SIZE);
         memcpy(dp->buffer+dp->len,data,len);
+        memset(dp->buffer+dp->len+len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
         mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
         dp->len+=len;
         // we are ready now.
