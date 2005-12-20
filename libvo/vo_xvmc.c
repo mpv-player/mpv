@@ -450,7 +450,10 @@ static uint32_t vm_height;
    }
 
    rez = XvMCCreateContext(mDisplay, xv_port,mode_id,width,height,XVMC_DIRECT,&ctx);
-   if( rez != Success ) return -1;
+   if( rez != Success ){
+      printf("vo_xvmc: XvMCCreateContext failed with error %d\n",rez);
+      return -1;
+   }
    if( ctx.flags & XVMC_DIRECT ){
       printf("vo_xvmc: Allocated Direct Context\n");
    }else{
