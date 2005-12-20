@@ -31,7 +31,7 @@ static int config(struct vf_instance_s* vf,
 		if (vf->priv->h == -2) vf->priv->h = vf->priv->w * (double)d_height / d_width;
 		if (vf->priv->h == -3) vf->priv->h = vf->priv->w * (double)height / width;
 		if (vf->priv->method > -1) {
-			double aspect = (vf->priv->method & 2) ? ((double)d_height / d_width) : ((double)height / width);
+			double aspect = (vf->priv->method & 2) ? ((double)height / width) : ((double)d_height / d_width);
 			if ((vf->priv->h > vf->priv->w * aspect) ^ (vf->priv->method & 1)) {
 				vf->priv->h = vf->priv->w * aspect;
 			} else {
