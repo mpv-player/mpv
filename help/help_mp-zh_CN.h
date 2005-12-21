@@ -1,5 +1,5 @@
 // Translated by Emfox Zhou <EmfoxZhou@gmail.com>
-// Synced with help_mp-en.h 1.201
+// Synced with help_mp-en.h 1.216
 
 // (Translator before 2005-10-12)
 // Lu Ran <hephooey@fastmail.fm>
@@ -182,7 +182,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV事件: Nav搜寻完成\n"
 #define MSGTR_MenuCall "菜单调用\n"
 
-#define MSGTR_EdlCantUseBothModes "不能同时使用-edl和-edlout.\n"
 #define MSGTR_EdlOutOfMem "不能分配足够的内存来保持EDL数据.\n"
 #define MSGTR_EdlRecordsNo "读入%d EDL动作.\n"
 #define MSGTR_EdlQueueEmpty "没有EDL动作要处理.\n"
@@ -234,9 +233,11 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\n没有选择视频解码器(-ovc)! 选择一个(参考-ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "无法打开输出文件 '%s'\n"
 #define MSGTR_EncoderOpenFailed "无法打开编码器\n"
+#define MSGTR_MencoderWrongFormatAVI "\n警告: 输出文件格式是 _AVI_. 请查看 -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\n警告: 输出文件格式是 _MPEG_. 请查看 -of help.\n"
+#define MSGTR_MissingOutputFilename "没有指定输出文件, 请查看 -o 选项"
 #define MSGTR_ForcingOutputFourcc "指定输出的fourcc为 %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "强制输出音频格式标签(tag) 0x%x\n"
-#define MSGTR_WritingAVIHeader "正在写AVI文件头...\n"
 #define MSGTR_DuplicateFrames "\n已复制 %d 帧!\n"
 #define MSGTR_SkipFrame "\n跳过这一帧!\n"
 #define MSGTR_ResolutionDoesntMatch "\n新的视频文件和前一个的解析度或色彩空间不同.\n"
@@ -246,8 +247,6 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "警告: -speed不保证能和-oac copy一起正常工作!\n"\
 "你的编码可能失败!\n"
 #define MSGTR_ErrorWritingFile "%s: 写入文件错误.\n"
-#define MSGTR_WritingAVIIndex "\n正在写AVI索引...\n"
-#define MSGTR_FixupAVIHeader "修复AVI文件头...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD推荐的视频比特率为: %d\n"
 #define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs\n"
@@ -505,12 +504,17 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleChannel "选定 DVD 字幕通道: %d 语言: %c%c\n"
 #define MSGTR_DVDopenOk "DVD成功打开!\n"
 
-// muxer_*.c:
+// muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "太多的流!"
 #define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer 只支持一个音频流!\n"
 #define MSGTR_IgnoringVideoStream "忽略视频流!\n"
 #define MSGTR_UnknownStreamType "警告! 未知的流类型: %d\n"
 #define MSGTR_WarningLenIsntDivisible "警告! 长度不能被采样率整除!\n"
+#define MSGTR_MuxbufMallocErr "Muxer 帧缓冲无法分配内存!\n"
+#define MSGTR_MuxbufReallocErr "Muxer 帧缓冲无法重新分配内存!\n"
+#define MSGTR_MuxbufSending "Muxer 帧缓冲正在发送 %d 帧到 muxer.\n"
+#define MSGTR_WritingHeader "正在写帧头...\n"
+#define MSGTR_WritingTrailer "正在写索引...\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "警告! 音频流头部 %d 被重新定义.\n"
@@ -880,9 +884,10 @@ static char help_text[]=
            "会使GMPlayer崩溃!"
 
 #define MSGTR_ABOUT_UHU "GUI开发由UHU Linux赞助\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayer核心小组:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   其他开发者:\n"
-#define MSGTR_ABOUT_MainTesters "   主要测试者:\n"
+#define MSGTR_ABOUT_Contributors "代码和文档贡献者\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "编解码器和第三方库\n"
+#define MSGTR_ABOUT_Translations "翻译\n"
+#define MSGTR_ABOUT_Skins "皮肤\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误!"
@@ -999,8 +1004,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Hue "色相"
 
 // vo_xv.c
-#define MSGTR_VO_XV_ImagedimTooHigh "源图像尺寸" \
-                                    "太大: %ux%u (上限是 %ux%u)\n"
+#define MSGTR_VO_XV_ImagedimTooHigh "源图像尺寸太大: %ux%u (上限是 %ux%u)\n"
 
 // Old vo drivers that have been replaced
 
@@ -1033,24 +1037,24 @@ static char help_text[]=
 #define MSGTR_AO_ARTS_BufferSize "[AO ARTS] 缓冲大小: %d\n"
 
 // ao_dxr2.c
-#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] 设定音量为 %d 失败 .\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: 不支持 %d Hz, 请试试 \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] 设定音量为 %d 失败.\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] 不支持 %d Hz, 试试重采样.\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound 失败: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] 延迟: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] 打开 esd 播放流失败: %s\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] 打开 ESD 播放流失败: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB 音频设置混音器错误: %s\n"
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] 不支持 %d Hz, 试着重采样...\n"
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB 音频设置混音器错误: %s.\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] 不支持 %d Hz, 试试重采样.\n"
 
 // ao_null.c
 // This one desn't even  have any mp_msg nor printf's?? [CHECK]
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] 文件: %s (%s)\nPCM: 采样率: %iHz 通道: %s 格式 %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] 信息: 用 -vc null -vo null 可以达到更快速的转储\nPCM: 信息: 如果要写 WAVE 文件, 使用 -ao pcm:waveheader (默认).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] 信息: 用 -vc null -vo null 可以达到更快速的转储\n[AO PCM] 信息: 如果要写 WAVE 文件, 使用 -ao pcm:waveheader (默认).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] 打开 %s 写失败!\n"
 
 // ao_sdl.c
@@ -1077,7 +1081,7 @@ static char help_text[]=
 
 // ao_sun.c
 #define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO 失败.\n"
-#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: 写失败."
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: 写失败.\n"
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] 无法打开音频设备 %s, %s  -> nosound.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: 你的声卡不支持 %d 通道, %s, %d Hz 采样率.\\n"
 #define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  你的音频驱动不支持 select()  ***\n用 #undef HAVE_AUDIO_SELECT in config.h 重新编译MPlayer!\n\n"
@@ -1226,18 +1230,18 @@ static char help_text[]=
 // asf_mmst_streaming.c
 
 #define MSGTR_MPDEMUX_MMST_WriteError "写错误\n"
-#define MSGTR_MPDEMUX_MMST_EOFAlert "\n警告：结束\n"
-#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "header 预读取失败\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\n警告: 文件结束\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "Header 预读取失败\n"
 #define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "非法 header 大小，正在放弃\n"
-#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "header 数据读失败\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Header 数据读失败\n"
 #define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len 读失败\n"
 #define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "非法 rtsp 包大小，正在放弃\n"
 #define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "命令数据读失败\n"
-#define MSGTR_MPDEMUX_MMST_HeaderObject "header 对象\n"
-#define MSGTR_MPDEMUX_MMST_DataObject "data 对象\n"
-#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "文件 object, 包长 = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "Header 对象\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "Data 对象\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "文件对象, 包长 = %d (%d)\n"
 #define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "流对象, 流 id: %d\n"
-#define MSGTR_MPDEMUX_MMST_2ManyStreamID "id 太多, 跳过流"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Id 太多, 跳过流"
 #define MSGTR_MPDEMUX_MMST_UnknownObject "未知的对象\n"
 #define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "媒体对象读错误\n"
 #define MSGTR_MPDEMUX_MMST_MissingSignature "丢失签名\n"
@@ -1312,29 +1316,29 @@ static char help_text[]=
 
 // cache2.c
 
-#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\r这个流是不可缓冲的\n"
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\r这个流是不可缓冲的.\n"
 #define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos 不同!!! 请报告这个 bug...\n"
 
 // cdda.c
 
-#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "无法打开 cdda 设备\n"
-#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "无法打开盘\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "发现音频 CD，共 %d 音轨\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "无法打开 cdda 设备.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "无法打开盘.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "发现音频 CD，共 %d 音轨.\n"
 
 // cddb.c
 
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "无法读 TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "打开 %s 设备失败.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAValidURL "不是合法的 URL\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "发送 http 请求失败\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "读 http 回复失败\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "没有发现\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "发送 http 请求失败.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "读 http 回复失败.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "没有发现.\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "未知错误代码\n"
-#define MSGTR_MPDEMUX_CDDB_NoCacheFound "没有发现缓存\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "没有读出所有的 xmcd 文件\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "创建目录 %s 失败\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "没有写入所有的 xmcd 文件\n"
-#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "返回了非法的 xmcd 数据库文件\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "没有发现缓存.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "没有读出所有的 xmcd 文件.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "创建目录 %s 失败.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "没有写入所有的 xmcd 文件.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "返回了非法的 xmcd 数据库文件.\n"
 #define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "意外。请修复\n"
 #define MSGTR_MPDEMUX_CDDB_UnhandledCode "未处理的代码\n"
 #define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "无法找到行结束\n"
@@ -1359,3 +1363,28 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] 意外的 bin 文件结束\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] 无法读取 %d 字节的 payload\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, 可用音轨: %d -> %d\n"
+
+// network.c
+
+#define MSGTR_MPDEMUX_NW_UnknownAF "未知地址族 %d\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "正在解析 %s (为 %s)...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "无法为 %s 解析名字: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "正在连接到服务器 %s[%s]: %d...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "连接服务器失败: %s\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "选择失败.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "连接超时.\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt 失败: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "连接错误: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "无效的代理设置... 试着不用代理.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "无法为 AF_INET 解析过程主机名. 试着不用代理.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "发送 HTTP 请求时发生错误: 没有发出所有请求.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "读失败.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response 读进 0 (比如已经结束)\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "认证失败. 请使用 -user 和 -passwd 选项来指定你的\n"\
+"用户名/密码, 以便提供给一组 URLs, 或者使用这样的 URL 格式:\n"\
+"http://username:password@hostname/file\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "%s 需要认证\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "需要认证.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "没有给定密码, 试着使用空密码.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "服务器返回 %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "缓存大小设为 %d K字节\n"
