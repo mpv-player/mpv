@@ -587,7 +587,7 @@ info_table[][2]={
     {NULL            , "s"},
     {"StreamId"      , "v"},
     {"Author"        , "UTF8"},
-    {"Titel"         , "UTF8"},
+    {"Title"         , "UTF8"},
     {"Language"      , "UTF8"},
     {"Description"   , "UTF8"},
     {"Copyright"     , "UTF8"},
