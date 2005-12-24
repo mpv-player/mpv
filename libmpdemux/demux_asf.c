@@ -478,7 +478,7 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
 
 demuxer_desc_t demuxer_desc_asf = {
   "ASF demuxer",
-  "asv",
+  "asf",
   "ASF",
   "A'rpi",
   "ASF, WMV, WMA",
