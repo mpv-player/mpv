@@ -6771,14 +6771,15 @@ Does absolutely nothing at the moment.
 .TP
 .B keyint=<0\-300>
 maximum interval between keyframes in frames (default: 250 or one
-keyframe every ten seconds in a 25fps movie).
-Keyframes are needed for seeking as seeking is only possible to a keyframe, but
+keyframe every ten seconds in a 25fps movie. This is recommended default for MPEG-4).
+Most codecs require regular keyframes in order to limit the accumulation of mismatch error. 
+Keyframes are also needed for seeking as seeking is only possible to a keyframe, but
 keyframes need more space than other frames, so larger numbers here mean
 slightly smaller files but less precise seeking.
 0 is equivalent to 1, which makes every frame a keyframe.
 Values >300 are not recommended as the quality might be bad depending upon
 decoder, encoder and luck.
-For a strict MPEG-1/2/4 compliance this would have to be <=132.
+It is a common for MPEG-1/2 to use values <=30.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
