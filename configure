@@ -3063,7 +3063,7 @@ if test "$_termcap" = auto ; then
 int main(void) { tgetent(); return 0; }
 EOF
   _termcap=no
-  for _ld_tmp in "-ltermcap" "-ltinfo" "-lncurses"; do
+  for _ld_tmp in "-lncurses" "-ltinfo" "-ltermcap"; do
     cc_check $_ld_tmp && _ld_termcap="$_ld_tmp" && _termcap=yes && break
   done
 fi
