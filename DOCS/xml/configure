@@ -9,6 +9,7 @@ _xmllintwrapper="xmllint.sh"
 echo "Searching for XML catalogs..."
 for _try_catalog in \
   /etc/sgml/catalog \
+  /usr/share/xml/docbook/*/catalog.xml \
   /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog \
   /usr/share/apps/ksgmltools2/customization/en/catalog \
   /usr/share/sgml/catalog \
@@ -117,6 +118,7 @@ EOF
 
 echo "Searching for DTD..."
 for _try_dtd in \
+  /usr/share/xml/docbook/*/docbookx.dtd \
   /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd \
   /usr/share/docbook-xml42/docbookx.dtd \
   /usr/share/sgml/docbook/xml-dtd-4.1.2*/docbookx.dtd \
