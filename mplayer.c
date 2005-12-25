@@ -2448,6 +2448,7 @@ unsigned int lastframeout_ts=0;
 float next_frame_time=0;
 int frame_time_remaining=0; // flag
 int blit_frame=0;
+int was_paused=0;
 
 osd_text_buffer[0]=0;
 // make sure OSD old does not stay around,
@@ -3047,6 +3048,7 @@ if(auto_quality>0){
         guiGetEvent( guiCEvent,(char *)guiSetPlay );
        }
 #endif
+      was_paused = 1;
   }
 
 // handle -sstep
@@ -4129,11 +4131,20 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       mp_msg(MSGT_CPLAYER, MSGL_V, "Received unknown cmd %s\n",cmd->name);
     }
     }
-    if (cmd->pausing)
-      osd_function = OSD_PAUSE;
+    switch (cmd->pausing) {
+      case 1: // "pausing"
+        osd_function = OSD_PAUSE;
+        break;
+      case 3: // "pausing_toggle"
+        was_paused = !was_paused;
+        // fall through
+      case 2: // "pausing_keep"
+        if (was_paused) osd_function = OSD_PAUSE;
+    }
     mp_cmd_free(cmd);
   }
 }
+  was_paused = 0;
 
   if (seek_to_sec) {
     int a,b; float d;

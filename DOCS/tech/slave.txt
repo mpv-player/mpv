@@ -15,9 +15,12 @@ Most slave mode commands are equivalent to command line options, though not
 necessarily under the same name. Detailed descriptions can be found in the
 man page.
 
-All commands can be prefixed with "pausing ", causing MPlayer to pause as soon
-as possible after processing the command. Please note that this can be before
-the command is fully executed.
+All commands can be prefixed with one of "pausing ", "pausing_keep ", or
+"pausing_toggle ". "pausing " tells MPlayer to pause as soon as possible
+after processing the command. "pausing_keep " tells MPlayer to do so only if
+it was already in paused mode. "pausing_toggle " tells MPlayer to do so
+only if it was not already in paused mode. Please note that "as soon as
+possible" can be before the command is fully executed.
 
 
 Available commands ('mplayer -input cmdlist' will print a list):

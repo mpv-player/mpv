@@ -600,6 +600,12 @@ mp_input_parse_cmd(char* str) {
   if (strncmp(str, "pausing ", 8) == 0) {
     pausing = 1;
     str = &str[8];
+  } else if (strncmp(str, "pausing_keep ", 13) == 0) {
+    pausing = 2;
+    str = &str[13];
+  } else if (strncmp(str, "pausing_toggle ", 15) == 0) {
+    pausing = 3;
+    str = &str[15];
   }
 
   for(ptr = str ; ptr[0] != '\0'  && ptr[0] != '\t' && ptr[0] != ' ' ; ptr++)
