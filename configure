@@ -3060,10 +3060,10 @@ echores "$_sol_scsi_h"
 echocheck "termcap"
 if test "$_termcap" = auto ; then
   cat > $TMPC <<EOF
-int main(void) { return 0; }
+int main(void) { tgetent(); return 0; }
 EOF
   _termcap=no
-  for _ld_tmp in "-ltermcap" "-ltinfo" ; do
+  for _ld_tmp in "-ltermcap" "-ltinfo" "-lncurses"; do
     cc_check $_ld_tmp && _ld_termcap="$_ld_tmp" && _termcap=yes && break
   done
 fi
