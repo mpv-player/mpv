@@ -1,4 +1,4 @@
-.\" synced with 1.1182
+.\" synced with 1.1184
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -979,7 +979,7 @@ La lecture commencera quand le cache sera rempli jusqu'à <pourcentage>
 du total.
 .
 .TP
-.B \-cache-seek-min <pourcentage> (pas encore implémenté)
+.B \-cache-seek-min <pourcentage>
 Si un déplacement (seek) est demandé à une position située à <pourcentage>
 de la taille du cache depuis la position courante, MPlayer va attendre
 que le cache se remplisse jusqu'à cette position au lieu de réaliser un
@@ -7141,16 +7141,19 @@ Ne fait absolument rien pour l'instant.
 .B keyint=<0\-300>
 intervalle (en trames) entre les trames-clé (keyframe)
 (par défaut\ : 250 ou une trame-clé toutes les dix secondes dans un
-film à 25fps)
-Les trames-clé sont indispensables pour les déplacements puisque celui-ci n'est
-possible que d'une trame-clé vers une autre, mais celles-ci prennent plus
-de place que les autres trames.
+film à 25fps.
+C'est la valeur par défaut recommandée pour MPEG-4.)
+La plupart des codecs requièrent des trames-clées espacées régulièrement
+de façon à ne pas accumuler des erreurs d'encodage.
+Les trames-clé sont de plus indispensables pour les déplacements puisqu'il
+ne peut se faire que de trame-clée à trame-clée, mais celles-ci prennent plus
+de place que les autres types de trames.
 Un espacement plus important des trames-clé signifie donc des fichiers
 légèrement plus petits, mais un déplacement moins précis.
 0 est équivalent à 1, ce qui rend chaque trame une trame-clé.
 Les valeurs >300 ne sont pas recommandées car la qualité peut être
 mauvaise suivant le décodeur, l'encodeur et votre horoscope ;-).
-Pour une conformité stricte MPEG-1/\:2/\:4 cela devrait être <=132.
+Il est courant pour MPEG-1/\:2 de prendre un espacement de <=30.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
