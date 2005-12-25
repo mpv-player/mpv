@@ -431,10 +431,9 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 </para>
 
 <para>Best results are achieved with the native DirectX video output driver
-  (<option>-vo directx</option>) and the native Windows waveout audio driver
-  (<option>-ao win32</option>). Alternatives are OpenGL and SDL, but OpenGL
+  (<option>-vo directx</option>). Alternatives are OpenGL and SDL, but OpenGL
   performance varies greatly between systems and SDL is known to
-  distort sound and video or crash on some systems. If the image is
+  distort video or crash on some systems. If the image is
   distorted, try turning off hardware acceleration with
   <option>-vo directx:noaccel</option>. Download
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 header files</ulink>
