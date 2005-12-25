@@ -5,6 +5,9 @@
 extern int screen_width;
 extern int screen_height;
 
+/* Termcap code to erase to end of line */
+extern char * erase_to_end_of_line;
+
 /* Get screen-size using IOCTL call. */
 extern void get_screen_size();
 
