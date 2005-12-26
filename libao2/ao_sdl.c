@@ -122,22 +122,6 @@ static int read_buffer(unsigned char* data,int len){
 
 // end ring buffer stuff
 
-#if defined(__MINGW32__) || defined(HPUX) || defined(sgi) || (defined(sun) && defined(__svr4__))
-/* setenv is missing on win32, solaris, IRIX and HPUX */
-static void setenv(const char *name, const char *val, int _xx)
-{
-  int len  = strlen(name) + strlen(val) + 2;
-  char *env = malloc(len);
-
-  if (env != NULL) {
-    strcpy(env, name);
-    strcat(env, "=");
-    strcat(env, val);
-    putenv(env);
-  }
-}
-#endif
-
 
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){

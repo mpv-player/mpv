@@ -138,22 +138,6 @@ LIBVO_EXTERN(sdl)
 #include <SDL.h>
 //#include <SDL/SDL_syswm.h>
 
-#if defined(__MINGW32__) || defined(HPUX) || defined(sgi) || (defined(sun) && defined(__svr4__))
-/* setenv is missing on win32, solaris, IRIX and HPUX */
-static void setenv(const char *name, const char *val, int _xx)
-{
-    int len  = strlen(name) + strlen(val) + 2;
-    char *env = malloc(len);
-
-    if (env != NULL) {
-	strcpy(env, name);
-	strcat(env, "=");
-	strcat(env, val);
-	putenv(env);
-    }
-}
-#endif
-
 
 #ifdef SDL_ENABLE_LOCKS
 #define	SDL_OVR_LOCK(x)        if (SDL_LockYUVOverlay (priv->overlay)) { \

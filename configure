@@ -3304,6 +3304,21 @@ fi
 echores "$_glob"
 
 
+echocheck "setenv()"
+cat > $TMPC << EOF
+#include <stdlib.h>
+int main (void){ setenv("","",0); return 0; }
+EOF
+_setenv=no
+cc_check && _setenv=yes
+if test "$_setenv" = yes ; then
+  _def_setenv='#define HAVE_SETENV 1'
+else
+  _def_setenv='#undef HAVE_SETENV'
+fi
+echores "$_setenv"
+
+
 echocheck "sys/sysinfo.h"
 cat > $TMPC << EOF
 #include <sys/sysinfo.h>
@@ -7479,6 +7494,12 @@ $_def_gettimeofday
 
 /* Define this if your system has glob */
 $_def_glob
+
+/* Define this if your system has setenv */
+$_def_setenv
+#ifndef HAVE_SETENV
+int setenv(const char *name, const char *val, int overwrite);
+#endif
 
 /* Define this if your system has pthreads */
 $_def_pthreads
