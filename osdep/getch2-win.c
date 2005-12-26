@@ -22,6 +22,7 @@ int mp_input_win32_slave_cmd_func(int fd,char* dest,int size){
 
 int screen_width=80;
 int screen_height=24;
+char * erase_to_end_of_line = "\033[J";
 
 void get_screen_size(){
 }
