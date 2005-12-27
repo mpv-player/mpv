@@ -963,7 +963,7 @@ static void print_status(float a_pos, float a_v, float corr)
 
   // end
   line[pos] = 0;
-  mp_msg(MSGT_AVSYNC, MSGL_STATUS, "%s%s\r", line, erase_to_end_of_line);
+  mp_msg(MSGT_AVSYNC, MSGL_STATUS, "%s%s\r", erase_to_end_of_line, line);
   free(line);
 }
 
