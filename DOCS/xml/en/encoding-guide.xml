@@ -1350,6 +1350,111 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 </para>
 </sect2>
 
+<sect2 id="menc-feat-dvd-mpeg4-codec">
+<title>Choosing the video codec</title>
+
+<para>
+  Choosing the video codec to use depends on several factors, some of
+  which widely depend on personal taste and technical constraints.
+</para>
+<itemizedlist>
+  <listitem><para>
+  <emphasis role="bold">Compression efficiency</emphasis>:
+  It's quite easy to understand that newer-generation codecs are made
+  to yield better picture quality than previous generations.
+  Therefore, you cannot be wrong
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
+  <para>Be careful, however: decoding DVD-resolution MPEG-4 AVC videos
+  requires a fast machine (i.e. a Pentium 4 over 1.5Ghz or a Pentium M
+  over 1Ghz).
+  </para></footnote>
+  by choosing MPEG-4 AVC codecs like
+  <systemitem class="library">x264</systemitem> instead of MPEG-4 ASP codecs
+  such as <systemitem class="library">libavcodec</systemitem> MPEG-4 or
+  <systemitem class="library">XviD</systemitem>.
+  (To get a better grasp of what the fundamental differences between
+  MPEG-4 ASP and MPEG-4 AVC are, you would be well advised to read the entry
+  "<ulink url="http://guru.multimedia.cx/?p=10">15 reasons why MPEG4 sucks</ulink>"
+  from Michael Niedermayer's blog.)
+  Likewise, you should get better quality using MPEG-4 ASP instead
+  of MPEG-2 codecs.
+  </para>
+  <para>
+  However, newer codecs which are in heavy development can suffer from
+  bugs which have not yet been noticed and which can ruin an encode.
+  This is simply the tradeoff for using bleeding-edge technology.
+  </para>
+  <para>
+  What's more, beginning to use a new codec requires that you spend some
+  time becoming familiar with its available options, so that you know what
+  to adjust to achieve a desired picture quality.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Hardware compatibility</emphasis>:
+  It usually takes a long time for standalone video players to begin to
+  include support for the latest video codecs.
+  As a result, most only support MPEG-2 and MPEG-4 ASP
+  (beware: usually, not all MPEG-4 ASP features are supported).
+  Please refer to the technical specs of your player (if they are available),
+  or Google around for more information.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Best quality per encoding time</emphasis>:
+  Codecs that have been around for some time (such as
+  <systemitem class="library">libavcodec</systemitem> MPEG-4 and
+  <systemitem class="library">XviD</systemitem>) are usually heavily
+  optimized with all kinds of smart algorithms and SIMD assembly code.
+  That's why they tend to yield the best quality per fps.
+  However, they may have some very advanced options that, if enabled,
+  will make the encode really slow for marginal gains.
+  </para>
+  <para>
+  If you are after blazing speed you should stick around the default
+  settings of the video codec (which doesn't mean you should not experiment
+  with some of the options which are mentioned in other sections
+  of this guide).
+  </para>
+  <para>
+  You may also consider choosing a codec which can do multi-threaded
+  processing.
+  <systemitem class="library">libavcodec</systemitem> MPEG-4 does
+  allow that, resulting in small speed gains at the price of lower
+  picture quality.
+  <systemitem class="library">XviD</systemitem> has some experimental
+  patches available to boost encoding speed, by about 40-60% in typical
+  cases, with low picture degradation.
+  <systemitem class="library">x264</systemitem> also allows multi-threaded
+  encoding, which currently speeds-up encoding by 15-30% while lowering
+  PSNR by about 0.05dB.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Personal taste</emphasis>:
+  This is where it gets almost irrational: For the same reason that some
+  hung on to DivX&nbsp;3 for years when newer codecs were already doing wonders,
+  some folks will prefer <systemitem class="library">XviD</systemitem>
+  or <systemitem class="library">libavcodec</systemitem> MPEG-4 over
+  <systemitem class="library">x264</systemitem>.
+  </para>
+  <para>
+  Make your own judgment, and don't always listen to what some people will
+  tell you to do or think: The best codec is the one you master the best,
+  and the one that looks best to your eyes on your display
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
+  <para>The same encode may not look the same on someone else's monitor or
+  when played back by a different decoder, so future-proof your encodes by
+  playing them back on different setups.</para></footnote>!
+  </para></listitem>
+</itemizedlist>
+<para>
+  Please refer to the section
+  <link linkend="menc-feat-selecting-codec">selecting codecs and container formats</link>
+  to get a list of supported codecs.
+</para>
+</sect2>
+
 <sect2 id="menc-feat-dvd-mpeg4-audio">
 <title>Audio</title>
 
