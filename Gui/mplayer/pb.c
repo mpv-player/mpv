@@ -154,9 +154,13 @@ void mplPBMouseHandle( int Button,int X,int Y,int RX,int RY )
 	switch( itemtype )
 	 {
 	  case itPotmeter:
-	  case itVPotmeter:
 	  case itHPotmeter:
 	       btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
+	       mplEventHandling( item->msg,item->value );
+	       value=item->value;
+	       break;
+	  case itVPotmeter:
+	       btnModify( item->msg, ( 1. - (float)( Y - item->y ) / item->height) * 100.0f );
 	       mplEventHandling( item->msg,item->value );
 	       value=item->value;
 	       break;
@@ -187,6 +191,9 @@ rollerhandled:
 	       break;
 	  case itPotmeter:
 	       item->value=(float)( X - item->x ) / item->width * 100.0f;
+	       goto potihandled;
+	  case itVPotmeter:
+	       item->value=(1. - (float)( Y - item->y ) / item->height) * 100.0f;
 	       goto potihandled;
 	  case itHPotmeter:
 	       item->value=(float)( X - item->x ) / item->width * 100.0f;
