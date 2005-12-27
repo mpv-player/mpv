@@ -52,6 +52,7 @@ MPlayer (1.0)
     * MPEG in GXF container support with extension-based detection
     * faster MPEG and much faster GFX demuxing
     * more user-friendly demuxer forcing
+    * bugfix for lavc wma2 decoder, now all files should be playable
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
