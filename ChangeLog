@@ -142,6 +142,8 @@ MPlayer (1.0)
     * new option -msglevel, control verbosity of modules of MPlayer directly
     * -verbose option removed, use -v or "-msglevel all" instead.
     * -edl is now per-file in MPlayer.
+    * new input command prefixes, "pausing_keep" and "pausing_toggle" which alter
+      pausing state immediately after command.
     
 
 
