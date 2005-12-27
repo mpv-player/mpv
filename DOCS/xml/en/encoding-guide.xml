@@ -1360,15 +1360,15 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 <itemizedlist>
   <listitem><para>
   <emphasis role="bold">Compression efficiency</emphasis>:
-  It's quite easy to understand that newer-generation codecs are made
+  It is quite easy to understand that newer-generation codecs are made
   to yield better picture quality than previous generations.
-  Therefore, you cannot be wrong
+  Therefore, you cannot go wrong
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
-  <para>Be careful, however: decoding DVD-resolution MPEG-4 AVC videos
+  <para>Be careful, however: Decoding DVD-resolution MPEG-4 AVC videos
   requires a fast machine (i.e. a Pentium 4 over 1.5Ghz or a Pentium M
   over 1Ghz).
   </para></footnote>
-  by choosing MPEG-4 AVC codecs like
+  when choosing MPEG-4 AVC codecs like
   <systemitem class="library">x264</systemitem> instead of MPEG-4 ASP codecs
   such as <systemitem class="library">libavcodec</systemitem> MPEG-4 or
   <systemitem class="library">XviD</systemitem>.
@@ -1385,8 +1385,8 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   This is simply the tradeoff for using bleeding-edge technology.
   </para>
   <para>
-  What's more, beginning to use a new codec requires that you spend some
-  time becoming familiar with its available options, so that you know what
+  What is more, beginning to use a new codec requires that you spend some
+  time becoming familiar with its options, so that you know what
   to adjust to achieve a desired picture quality.
   </para></listitem>
 
@@ -1395,9 +1395,9 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   It usually takes a long time for standalone video players to begin to
   include support for the latest video codecs.
   As a result, most only support MPEG-2 and MPEG-4 ASP
-  (beware: usually, not all MPEG-4 ASP features are supported).
+  (Beware: Usually, not all MPEG-4 ASP features are supported).
   Please refer to the technical specs of your player (if they are available),
-  or Google around for more information.
+  or google around for more information.
   </para></listitem>
 
   <listitem><para>
@@ -1406,13 +1406,14 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <systemitem class="library">libavcodec</systemitem> MPEG-4 and
   <systemitem class="library">XviD</systemitem>) are usually heavily
   optimized with all kinds of smart algorithms and SIMD assembly code.
-  That's why they tend to yield the best quality per fps.
+  That is why they tend to yield the best quality quality per
+  encoding time ratio.
   However, they may have some very advanced options that, if enabled,
   will make the encode really slow for marginal gains.
   </para>
   <para>
   If you are after blazing speed you should stick around the default
-  settings of the video codec (which doesn't mean you should not experiment
+  settings of the video codec (which does not mean you should not experiment
   with some of the options which are mentioned in other sections
   of this guide).
   </para>
@@ -1439,7 +1440,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <systemitem class="library">x264</systemitem>.
   </para>
   <para>
-  Make your own judgment, and don't always listen to what some people will
+  Make your own judgment, and do not always listen to what some people will
   tell you to do or think: The best codec is the one you master the best,
   and the one that looks best to your eyes on your display
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
