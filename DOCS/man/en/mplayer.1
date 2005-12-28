@@ -6811,6 +6811,20 @@ Speed should increase by a factor of 4 every time brd_scale is increased
 by 1.
 .
 .TP
+.B bidir_refine=<0\-4>
+Refine the two motion vectors used in bidirectional macroblocks,
+rather than re-using vectors from the forward and backward searches.
+This option has no effect without B-frames.
+.PD 0
+.RSs
+.IPs 0
+Disabled (default).
+.IPs 1\-4
+Use a wider search (larger values are slower).
+.RE
+.PD 1
+.
+.TP
 .B vpass=<1\-3>
 Activates internal two (or more) pass mode, only specify if you wish to
 use two (or more) pass encoding.

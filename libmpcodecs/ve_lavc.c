@@ -157,6 +157,7 @@ static int lavc_param_dc_precision = 8;
 static int lavc_param_threads= 1;
 static int lavc_param_turbo = 0;
 static int lavc_param_brd_scale = 0;
+static int lavc_param_bidir_refine = 0;
 
 
 char *lavc_param_acodec = "mp2";
@@ -312,6 +313,7 @@ m_option_t lavcopts_conf[]={
 	{"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
 	{"turbo", &lavc_param_turbo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"brd_scale", &lavc_param_brd_scale, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
+	{"bidir_refine", &lavc_param_bidir_refine, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -625,6 +627,7 @@ static int config(struct vf_instance_s* vf,
 #endif
     lavc_venc_context->prediction_method= lavc_param_prediction_method;
     lavc_venc_context->brd_scale = lavc_param_brd_scale;
+    lavc_venc_context->bidir_refine = lavc_param_bidir_refine;
     switch(lavc_param_format)
     {
 	case IMGFMT_YV12:
