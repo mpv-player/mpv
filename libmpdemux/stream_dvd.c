@@ -34,17 +34,19 @@ int dvd_angle=1;
 
 #ifdef HAVE_DVD
 #ifdef USE_DVDREAD
-#define	DVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
+#define	LIBDVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
 /*
  * Try to autodetect the libdvd-0.9.0 library
  * (0.9.0 removed the <dvdread/dvd_udf.h> header, and moved the two defines
  * DVD_VIDEO_LB_LEN and MAX_UDF_FILE_NAME_LEN from it to
  * <dvdread/dvd_reader.h>)
  */
+#ifndef DVDREAD_VERSION
 #if defined(DVD_VIDEO_LB_LEN) && defined(MAX_UDF_FILE_NAME_LEN)
-#define	LIBDVDREAD_VERSION	DVDREAD_VERSION(0,9,0)
+#define	DVDREAD_VERSION	LIBDVDREAD_VERSION(0,9,0)
 #else
-#define	LIBDVDREAD_VERSION	DVDREAD_VERSION(0,8,0)
+#define	DVDREAD_VERSION	LIBDVDREAD_VERSION(0,8,0)
+#endif
 #endif
 
 char * dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
@@ -263,7 +265,7 @@ read_next:
   if(data[38]==0 && data[39]==0 && data[40]==1 && data[41]==0xBF &&
     data[1024]==0 && data[1025]==0 && data[1026]==1 && data[1027]==0xBF) {
        // found a Navi packet!!!
-#if LIBDVDREAD_VERSION >= DVDREAD_VERSION(0,9,0)
+#if DVDREAD_VERSION >= LIBDVDREAD_VERSION(0,9,0)
     navRead_DSI(&d->dsi_pack, &(data[ DSI_START_BYTE ]));
 #else
     navRead_DSI(&d->dsi_pack, &(data[ DSI_START_BYTE ]), sizeof(dsi_t));
