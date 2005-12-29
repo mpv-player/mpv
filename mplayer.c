@@ -962,8 +962,14 @@ static void print_status(float a_pos, float a_v, float corr)
     saddf(line, &pos, width, "%4.2fx ", playback_speed);
 
   // end
-  line[pos] = 0;
-  mp_msg(MSGT_AVSYNC, MSGL_STATUS, "%s%s\r", erase_to_end_of_line, line);
+  if (erase_to_end_of_line) {
+    line[pos] = 0;
+    mp_msg(MSGT_AVSYNC, MSGL_STATUS, "%s%s\r", line, erase_to_end_of_line);
+  } else {
+    memset(&line[pos], ' ', width - pos);
+    line[width] = 0;
+    mp_msg(MSGT_AVSYNC, MSGL_STATUS, "%s\r", line);
+  }
   free(line);
 }
 

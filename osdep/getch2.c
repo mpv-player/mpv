@@ -40,7 +40,7 @@ static char getch2_buf[BUF_LEN];
 
 int screen_width=80;
 int screen_height=24;
-char * erase_to_end_of_line = "\033[J";
+char * erase_to_end_of_line = NULL;
 
 typedef struct {
   int len;
@@ -79,7 +79,6 @@ char *p=tgetstr(id,&term_p);
 static int success=0;
 
 int load_termcap(char *termtype){
-  char * p;
   if(!termtype) termtype=getenv("TERM");
   if(!termtype) termtype="unknown";
   success=tgetent(term_buffer, termtype);
@@ -90,7 +89,7 @@ int load_termcap(char *termtype){
   screen_height=tgetnum("li");
   if(screen_width<1 || screen_width>255) screen_width=80;
   if(screen_height<1 || screen_height>255) screen_height=24;
-  if ((p = tgetstr("cd",&term_p))) erase_to_end_of_line=p;
+  erase_to_end_of_line= tgetstr("cd",&term_p);
 
   termcap_add("kP",KEY_PGUP);
   termcap_add("kN",KEY_PGDWN);
