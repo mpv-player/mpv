@@ -4914,9 +4914,9 @@ Force quantization parameter (default: 0, use QP from video).
 Ultra simple & slow postprocessing filter that compresses and
 decompresses the image at several (or \- in the case of quality
 level 8 \- all) shifts and averages the results.
-The difference to spp is that it actually encodes & decodes
-each case with libavcodec-MPEG-4 while spp uses a simplified
-intra only 8x8 DCT similar to MJPEG.
+The way this differs from the behavior of spp is that uspp actually
+encodes & decodes each case with libavcodec MPEG-4, whereas spp uses
+a simplified intra only 8x8 DCT similar to MJPEG.
 .RSs
 .IPs <quality>
 0\-8 (default: 3)
