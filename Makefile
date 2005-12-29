@@ -395,6 +395,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(ARCH_LIB) \
                $(I18NLIBS) \
                $(MATH_LIB) \
+               $(LIBC_LIB) \
 
 $(PRG):	$(MPLAYER_DEP)
     ifeq ($(TARGET_WIN32),yes)
@@ -424,6 +425,7 @@ LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(ARCH_LIB) \
                 $(I18NLIBS) \
                 $(MATH_LIB) \
+                $(LIBC_LIB) \
 
 $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)

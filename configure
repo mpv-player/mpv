@@ -75,6 +75,7 @@ linux()   { issystem "Linux"   ; return "$?" ; }
 sunos()   { issystem "SunOS"   ; return "$?" ; }
 hpux()    { issystem "HP-UX"   ; return "$?" ; }
 irix()    { issystem "IRIX"    ; return "$?" ; }
+aix()     { issystem "AIX"     ; return "$?" ; }
 cygwin()  { issystem "CYGWIN"  ; return "$?" ; }
 freebsd() { issystem "FreeBSD" ; return "$?" ; }
 netbsd()  { issystem "NetBSD"  ; return "$?" ; }
@@ -479,7 +480,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`uname -s 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS|MorphOS)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS|MorphOS|AIX)
     ;;
   IRIX*)
     system_name=IRIX
@@ -595,6 +596,12 @@ fi
 _ldd=ldd
 if darwin; then
   _ldd="otool -L"
+fi
+
+if aix ; then
+  _ld_libC="-lC"
+else
+  _ld_libC=""
 fi
 
 # Check how to call 'head' and 'tail'. Newer versions spit out warnings
@@ -760,6 +767,9 @@ elif test -r /compat/linux/proc/cpuinfo && not x86 ; then
 elif darwin ; then
   # use hostinfo on Darwin
   _cpuinfo="hostinfo"
+elif aix; then
+  # use 'lsattr' on AIX
+  _cpuinfo="lsattr -E -l proc0"
 elif x86; then
   # all other OSes try to extract CPU information from a small helper
   # program TOOLS/cpuinfo instead
@@ -1181,6 +1191,9 @@ EOF
 		;;
 	esac
         ;;
+      AIX)
+	proc=`$_cpuinfo | grep 'type' | cut -f 7 -d ' ' | sed 's/PowerPC_//'`
+	;;
     esac
     if test "$_altivec" = yes; then
         echores "$proc altivec"
@@ -1198,6 +1211,9 @@ EOF
 	    604|604e|604r|604ev) _march='-mcpu=604' _mcpu='-mtune=604' ;;
 	    740|740/750|745/755) _march='-mcpu=740' _mcpu='-mtune=740' ;;
 	    750|750CX) _march='-mcpu=750' _mcpu='-mtune=750' ;;
+	    POWER)  _march='-mcpu=power'  _mcpu='-mtune=power'  ;;
+	    POWER2) _march='-mcpu=power2' _mcpu='-mtune=power2' ;;
+	    POWER3) _march='-mcpu=power3' _mcpu='-mtune=power3' ;;
     	    *) ;;
         esac
 	# gcc 3.1(.1) and up supports 7400 and 7450
@@ -1215,6 +1231,14 @@ EOF
                       _def_dcbzl='#undef NO_DCBZL' ;;
     		*) ;;
     	    esac
+	fi
+	# gcc 3.3 and up supports POWER4
+	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3" || test "$_cc_major" -ge "4"; then
+	    case "$proc" in
+		POWER4) _march='-mcpu=power4' _mcpu='-mtune=power4'
+			_def_dcbzl='#undef NO_DCBZL' ;;
+		*) ;;
+	    esac
 	fi
     fi
 
@@ -7095,6 +7119,7 @@ STATIC_LIB = $_ld_static
 ENCA_LIB = $_ld_enca
 HAVE_PTHREADS = $_pthreads
 MATH_LIB = $_ld_lm
+LIBC_LIB = $_ld_libC
 
 X11_INC = $_inc_x11
 X11DIR = $_ld_x11
