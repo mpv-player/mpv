@@ -1,4 +1,4 @@
-.\" synced with 1.1192
+.\" synced with 1.1194
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -9361,6 +9361,13 @@ Nécessite frameref>1.
 Active l'optimisation du types de macroblocs dans les trames-B d'après
 leur taux de distortion
 Nécessite subq=6.
+.
+.TP
+.B (no)bime
+Affine les deux vecteurs de mouvement utilisés par les macro-blocs
+bi-directionnels, au lieu de ré-utiliser les vecteurs des recherches
+avant et arrière.
+Cette option n'a pas d'effet sans trames-B.
 .
 .B trellis=<0\-2>
 quatification optimale du point de vue du taux de distortion
