@@ -1,4 +1,4 @@
-.\" synced with 1.1184
+.\" synced with 1.1192
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -5188,12 +5188,12 @@ mais image plus floue)
 .
 .TP
 .B uspp[=qualité[:qp]]
-Filtre de post-traitement ultra simple&lent qui compresse et décompresse
+Filtre de post-traitement ultra simple & lent qui compresse et décompresse
 l'image avec différents décalages (ou \- dans le cas du niveau de qualité 8
 \- tous) et fait la moyenne des résultats.
-La différence avec spp est que chaque étape d'encodage&décodage est fait
-avec lavc-mpeg4 tandis que spp utilise uniquement une DCT 8x8 intra,
-comme mjpeg.
+La différence avec spp est que chaque étape d'encodage & décodage est faite
+avec libavcodec-MPEG-4, tandis que spp utilise uniquement une DCT 8x8 intra,
+comme MJPEG.
 .RSs
 .IPs <qualité>
 0\-8 (par défaut\ : 3)
@@ -7083,6 +7083,8 @@ EPZS\ : diamant de taille 1, dont la taille peut être ajustée avec les
 options *dia (par défaut)
 .IPs 5
 X1 (expérimental, est un alias de EPZS pour le moment)
+.IPs 8
+iter ("iterative overlapped block", utilisé uniquement par Snow)
 .RE
 .PD 1
 .sp 1
@@ -7145,8 +7147,8 @@ film à 25fps.
 C'est la valeur par défaut recommandée pour MPEG-4.)
 La plupart des codecs requièrent des trames-clées espacées régulièrement
 de façon à ne pas accumuler des erreurs d'encodage.
-Les trames-clé sont de plus indispensables pour les déplacements puisqu'il
-ne peut se faire que de trame-clée à trame-clée, mais celles-ci prennent plus
+Les trames-clé sont de plus indispensables pour les déplacements, puisqu'il
+ne peut se faire que de trame-clée à trame-clée - mais celles-ci prennent plus
 de place que les autres types de trames.
 Un espacement plus important des trames-clé signifie donc des fichiers
 légèrement plus petits, mais un déplacement moins précis.
@@ -7166,14 +7168,42 @@ Vous pouvez définir la sensibilité de la détection avec cette option.
 (par défaut\ : 0).
 .
 .TP
-.B vb_strategy=<0\-1> (première passe uniquement)
+.B vb_strategy=<0\-2> (première passe uniquement)
 stratégie à choisir entre les trames-I/\:P/\:Bi\ :
 .PD 0
 .RSs
 .IPs 0
 Toujours utiliser le nombre maximum de trames-B (par défaut).
 .IPs 1
-Éviter les trames-B dans les scènes avec beaucoup de mouvement.
+Éviter les trames-B dans les scènes avec beaucoup de mouvements.
+.IPs 2
+Placeles trames-B plus ou moins optimalement pour obtenir la meilleure
+qualité (plus lent).
+Vous pouvez réduire l'impact de cette option sur la vitesse d'encodage en
+agissant sur l'option brd_scale.
+.RE
+.PD 1
+.
+.TP
+.B brd_scale=<0\-10>
+Réduit la résolution des trames pour la décision dynamique des trames-B
+(par defaut\ : 0).
+La vitesse devrait augmenter d'un facteur 4 à chaque fois que brd_scale
+est augmenté de 1.
+.
+.TP
+.B bidir_refine=<0\-4>
+Affine les deux vecteurs de mouvement utilisés par les macro-blocs
+bi-directionnels, au lieu de ré-utiliser les vecteurs des recherches
+avant et arrière.
+Cette option n'a pas d'effet sans trames-B.
+.PD 0
+.RSs
+.IPs 0
+Désactivé (par défaut).
+.IPs 1\-4
+Utilise une plus large recherche (plus la recherche est large, plus
+elle est lente).
 .RE
 .PD 1
 .
@@ -7913,6 +7943,10 @@ somme des différences verticales absolues
 somme des différences verticales absolues au carré
 .IPs "10 (NSSE)"
 somme des différences au carré préservant le bruit
+.IPs "11 (W53)"
+ondelette 5/3, utilisé par Snow
++.IPs "12 (W97)"
+ondelette 9/7, utilisé par Snow
 .IPs +256\ 
 Utilise également le chroma, ne fonctionne pour le moment pas (correctement)
 avec les trames-B actuellement
