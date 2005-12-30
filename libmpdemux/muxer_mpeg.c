@@ -130,8 +130,8 @@ typedef struct {
 	off_t headers_size, data_size;
 	uint64_t scr, vbytes, abytes, init_delay_pts;
 	uint32_t muxrate;
-	uint8_t *buff, *tmp, *abuf, *residual;
-	uint32_t residual_cnt, headers_cnt;
+	uint8_t *buff, *tmp, *abuf;
+	uint32_t headers_cnt;
 	double init_adelay;
 	int drop;
 	
@@ -1094,6 +1094,7 @@ static int reorder_frame(muxer_headers_t *spriv, uint8_t *ptr, size_t len, uint8
 		(uint32_t) idx, FTYPE(pt), temp_ref, ptr, (uint32_t) len, (uint32_t) spriv->framebuf[idx].alloc_size, spriv->framebuf[idx].buffer);
 		
 	memcpy(spriv->framebuf[idx].buffer, ptr, len);
+	spriv->framebuf[idx].pos = 0;
 	spriv->framebuf[idx].size = len;
 	spriv->framebuf[idx].temp_ref = temp_ref;
 	spriv->framebuf[idx].type = pt;
@@ -1599,22 +1600,6 @@ init:
 		vbytes = 0;
 		vpriv = (muxer_headers_t*) vs->priv;
 		
-		if(priv->residual_cnt)
-		{
-			mpeg_frame_t *f = &(vpriv->framebuf[0]);
-			size_t sz = f->size + priv->residual_cnt;
-			
-			if(f->alloc_size < sz)
-			{
-				f->buffer = (uint8_t *) realloc(f->buffer, sz);
-				f->alloc_size = sz;
-			}
-			memmove(&(f->buffer[priv->residual_cnt]), f->buffer, f->size);
-			memcpy(f->buffer, priv->residual, priv->residual_cnt);
-			f->size += priv->residual_cnt;
-			priv->residual_cnt = 0;
-		}
-		
 		duration = 0;
 		iduration = 0;
 		for(i = 0; i < n; i++)
@@ -1737,6 +1722,8 @@ init:
 					
 						if(vbytes == 0)	//current frame is saved, pass to the next
 						{
+							if(i+1 >= n)	//the current one is the last frame in GOP
+								break;
 							i++;
 							vbytes = vpriv->framebuf[i].size;
 							offset = 0;
@@ -1750,8 +1737,14 @@ init:
 				
 				if((pl_size < priv->packet_size - calc_pack_hlen(priv, vpriv)) && !finalize && (i >= n - 1))
 				{
-					memcpy(priv->residual, buf, pl_size);
-					priv->residual_cnt = pl_size;
+					if(vpriv->framebuf[n].alloc_size < pl_size + vpriv->framebuf[n].size)
+					{
+						vpriv->framebuf[n].buffer = realloc(vpriv->framebuf[n].buffer, pl_size + vpriv->framebuf[n].size);
+						vpriv->framebuf[n].alloc_size = pl_size + vpriv->framebuf[n].size;
+					}
+					memmove(&(vpriv->framebuf[n].buffer[pl_size]), vpriv->framebuf[n].buffer, vpriv->framebuf[n].size);
+					memcpy(vpriv->framebuf[n].buffer, buf, pl_size);
+					vpriv->framebuf[n].size += pl_size;
 					pl_size = update = vbytes = 0;	
 				}
 				if(pl_size)
@@ -2816,8 +2809,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   priv->buff = (uint8_t *) malloc(priv->packet_size);
   priv->tmp = (uint8_t *) malloc(priv->packet_size);
   priv->abuf = (uint8_t *) malloc(priv->packet_size);
-  priv->residual = (uint8_t *) malloc(priv->packet_size);
-  if((priv->buff == NULL) || (priv->tmp == NULL) || (priv->abuf == NULL) || (priv->residual == NULL))
+  if((priv->buff == NULL) || (priv->tmp == NULL) || (priv->abuf == NULL))
   {
 	mp_msg(MSGT_MUXER, MSGL_ERR, "\nCouldn't allocate %d bytes, exit\n", priv->packet_size);
 	return 0;
