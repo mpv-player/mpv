@@ -568,14 +568,12 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-<application>MPlayer</application> should compile out-of-the-box on
-Mac OS X 10.2 and up. The preferred compiler is the Apple version of
+<application>MPlayer</application> does not work on Mac OS versions before
+10, but should compile out-of-the-box on Mac OS X 10.2 and up.
+The preferred compiler is the Apple version of
 GCC 3.x or later. If you have Mac OS X 10.3.9 or later and QuickTime 7
 you can use the macosx video output driver.
 </para>
-
-<sect2 id="mplayerosx">
-<title>MPlayer OS X</title>
 
 <para>
 You can get a native GUI for <application>MPlayer</application> together with
@@ -675,7 +673,6 @@ You can also use the <application>Xcode</application> 2.1 project;
 the old project for <application>Xcode</application> 1.x does
 not work anymore.
 </para>
-</sect2>
 </sect1>
 
 <sect1 id="amiga">
