@@ -101,6 +101,7 @@ static char *rc_eq = "blurCplx^(1-qComp)";
 static char *zones = NULL;
 static int subq = 5;
 static int bframe_rdo = 0;
+static int bidir_me = 0;
 static int me_method = 2;
 static int me_range = 16;
 static int trellis = 1;
@@ -154,6 +155,8 @@ m_option_t x264encopts_conf[] = {
     {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {"weight_b", &weight_b, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noweight_b", &weight_b, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"bime", &bidir_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nobime", &bidir_me, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"chroma_me", &chroma_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nochroma_me", &chroma_me, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"mixed_refs", &mixed_references, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -292,6 +295,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.analyse.i_direct_mv_pred = direct_pred;
     mod->param.analyse.b_weighted_bipred = weight_b;
     mod->param.analyse.i_chroma_qp_offset = chroma_qp_offset;
+    mod->param.analyse.b_bidir_me = bidir_me;
     mod->param.analyse.b_chroma_me = chroma_me;
     mod->param.analyse.b_mixed_references = mixed_references;
     mod->param.analyse.i_trellis = trellis;

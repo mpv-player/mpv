@@ -8859,6 +8859,12 @@ Enables rate-distortion optimization of macroblock types in B-frames.
 Requires subq=6.
 .
 .TP
+.B (no)bime
+Refine the two motion vectors used in bidirectional macroblocks,
+rather than re-using vectors from the forward and backward searches.
+This option has no effect without B-frames.
+.
+.TP
 .B trellis=<0\-2>
 rate-distortion optimal quantization
 .PD 0
