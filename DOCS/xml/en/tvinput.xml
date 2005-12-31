@@ -54,9 +54,15 @@ be divisible by 16.
 
 <listitem>
 <para>
-If you capture the video with the vertical resolution higher than half of
-the full resolution (i.e. 288 for PAL or 240 for NTSC), make sure you turned
-deinterlacing on. Otherwise you'll get a movie which is distorted during
+If you capture the video with the vertical resolution higher than half
+of the full resolution (i.e. 288 for PAL or 240 for NTSC), then the
+'frames' you get will really be interleaved pairs of fields.
+Depending on what you want to do with the video you may leave it in
+this form, destructively deinterlace, or break the pairs apart into
+individual fields.
+</para>
+<para>
+Otherwise you'll get a movie which is distorted during
 fast-motion scenes and the bitrate controller will be probably even unable
 to retain the specified bitrate as the interlacing artifacts produce high
 amount of detail and thus consume lot of bandwidth. You can enable
