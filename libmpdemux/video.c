@@ -274,7 +274,7 @@ switch(video_codec){
    break;
  }
  case VIDEO_MPEG12: {
-//mpeg_header_parser:
+mpeg_header_parser:
    // Find sequence_header first:
    videobuf_len=0; videobuf_code_len=0;
    telecine=0; telecine_cnt=-2.5;
@@ -307,7 +307,8 @@ switch(video_codec){
    }
    if(mp_header_process_sequence_header (&picture, &videobuffer[4])) {
      mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_BadMpegSequHdr); 
-     return 0;
+     goto mpeg_header_parser;
+     //return 0;
    }
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
 //    videobuf_len=0;
