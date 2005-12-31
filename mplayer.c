@@ -2599,7 +2599,7 @@ while(sh_audio){
   current_module="decode_audio";   // Enter AUDIO decoder module
   t=GetTimer();
   while(sh_audio->a_out_buffer_len<playsize &&
-        (!d_audio->eof || sh_audio->a_in_buffer_len > 0)){
+        (!d_audio->eof || sh_audio->a_in_buffer_len > 0 || sh_audio->a_buffer_len > 0)){
     int ret=decode_audio(sh_audio,&sh_audio->a_out_buffer[sh_audio->a_out_buffer_len],
         playsize-sh_audio->a_out_buffer_len,sh_audio->a_out_buffer_size-sh_audio->a_out_buffer_len);
     if(ret<=0) { // EOF?
