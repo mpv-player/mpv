@@ -539,25 +539,23 @@ decoders:
 <title>Encoder features</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Multi-references</para></listitem>
-  <listitem><para>Intra: all macroblock types (16x16 and 4x4 with
+  <listitem><para>Intra: all macroblock types (16x16, 8x8, and 4x4 with
     all predictions)</para></listitem>
   <listitem><para>Inter P: all partitions (from 16x16 down to
     4x4)</para></listitem>
   <listitem><para>Inter B: partitions from 16x16 down to 8x8
     (including SKIP/DIRECT)</para></listitem>
   <listitem><para>Ratecontrol: constant quantizer, constant bitrate,
-    or multipass ABR</para></listitem>
+    single or multipass ABR, optional VBV</para></listitem>
   <listitem><para>Scene cut detection</para></listitem>
   <listitem><para>Adaptive B-frame placement</para></listitem>
   <listitem><para>B-frames as references / arbitrary frame
     order</para></listitem>
+  <listitem><para>8x8 and 4x4 adaptive spatial transform</para></listitem>
+  <listitem><para>Lossless mode</para></listitem>
+  <listitem><para>Custom quantization matrices</para></listitem>
+  <listitem><para>Parallel encoding of multiple slices</para></listitem>
 </itemizedlist>
-
-<itemizedlist>
-<title>Encoder limitations</title>
-  <listitem><para>No real RD</para></listitem>
-</itemizedlist>
-
 
 </sect4>
 
