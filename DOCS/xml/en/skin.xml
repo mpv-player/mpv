@@ -1103,4 +1103,54 @@ Open the skin browser window.
 
 </sect1>
 
+<sect1 id="skin-quality">
+<title>Creating quality skins</title>
+
+<para>
+So you have read up on creating skins for the
+<application>MPlayer</application> GUI, done your best with the
+<application>Gimp</application> and wish to submit your skin to us?
+Read on for some guidelines to avoid common mistakes and produce
+a high quality skin.
+</para>
+
+<para>
+We want skins that we add to our repository to conform to certain
+quality standards. There are also a number of things that you can do
+to make our lives easier.
+</para>
+
+<para>
+As an example you can look at the <systemitem>Blue</systemitem> skin,
+it satisfies all the criteria listed below since version 1.5.
+</para>
+
+<itemizedlist>
+  <listitem><para>Each skin should come with a
+  <filename>README</filename> file that contains information about
+  you, the author, copyright and license notices and anything else
+  you wish to add. If you wish to have a changelog, this file is a
+  good place.</para></listitem>
+
+  <listitem><para>There should be a file <filename>VERSION</filename>
+  with nothing more than the version number of the skin on a single
+  line (e.g. 1.0).</para></listitem>
+
+  <listitem><para>Horizontal and vertical controls (sliders like volume
+  or position) should have the center of the knob properly centered on
+  the middle of the slider. It should be possible to move the knob to
+  both ends of the slider, but not past it.</para></listitem>
+
+  <listitem><para>Skin elements should have the right sizes declared
+  in the skin file. If this is not the case you can click outside of
+  e.g. a button and still trigger it or click inside its area and not
+  trigger it.</para></listitem>
+
+  <listitem><para>The <filename>skin</filename> file should be
+  prettyprinted and not contain tabs. Prettyprinted means that the
+  numbers should line up neatly in columns.</para></listitem>
+</itemizedlist>
+
+</sect1>
+
 </appendix>
