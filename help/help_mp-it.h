@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.213
+// Updated to help_mp-en.h v1.216
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -242,6 +242,9 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nNessun encoder video (-ovc) scelto! Selezionane uno (vedi -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Impossibile aprire il file di output '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Errore nell'apertura dell'encoder.\n"
+#define MSGTR_MencoderWrongFormatAVI "\nATTENZIONE: IL FORMATO DEL FILE DI OUTPUT È _AVI_. vedi -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nATTENZIONE: IL FORMATO DEL FILE DI OUTPUT È _MPEG_. vedi -of help.\n"
+#define MSGTR_MissingOutputFilename "Nessun file di output specificato, per favore verifica l'opzione -o"
 #define MSGTR_ForcingOutputFourcc "Forzo il fourcc di output a %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Forzo la tag del formato audio a 0x%x\n"
 #define MSGTR_DuplicateFrames "\n%d fotogramma/i duplicato/i!!!    \n"
@@ -954,7 +957,7 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Il dispositivo di uscita video_out scelto è incompatibile con questo codec.\n"\
-                "Prova anche aggiungendo il filtro scale, per esempio -vf spp,scale invece di -vf spp.\n"
+                "Prova aggiungendo il filtro scale, per esempio -vf spp,scale invece di -vf spp.\n"
 #define MSGTR_VO_GenericError "E' accaduto questo errore"
 #define MSGTR_VO_UnableToAccess "Impossibile accedere a"
 #define MSGTR_VO_ExistsButNoDirectory "già esiste, ma non è una directory."
