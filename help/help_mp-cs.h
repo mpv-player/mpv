@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.202
+// Synced to 1.216
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -180,7 +180,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV událost: Nav Pøevíjení Dokonèeno\n"
 #define MSGTR_MenuCall "Volání menu\n"
 
-#define MSGTR_EdlCantUseBothModes "Nelze pou¾ít -edl a -edlout zároveò.\n"
 #define MSGTR_EdlOutOfMem "Nelze alokovat dostatek pamìti pro vlo¾ení EDL dat.\n"
 #define MSGTR_EdlRecordsNo "Naèítám %d EDL akcí.\n"
 #define MSGTR_EdlQueueEmpty "Ve¹keré EDL akce ji¾ byly provedeny.\n"
@@ -232,9 +231,11 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nNebyl vybrán video enkodér (-ovc). Nìjaký vyberte (viz  -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Nelze otevøít výstupní soubor '%s'\n"
 #define MSGTR_EncoderOpenFailed "Selhalo spu¹tìní enkodéru\n"
+#define MSGTR_MencoderWrongFormatAVI "\nVAROVÁNÍ: FORMÁT VÝSTUPNÍHO SOUBORU JE _AVI_. viz -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nVAROVÁNÍ: FORMÁT VÝSTUPNÍHO SOUBORU JE _MPEG_. viz -of help.\n"
+#define MSGTR_MissingOutputFilename "Nebyl nastaven výstupní soubor, prostudujte si volbu -o"
 #define MSGTR_ForcingOutputFourcc "Vynucuji výstupní fourcc na %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Vynucuji znaèku výstupního zvukového formátu 0x%x\n"
-#define MSGTR_WritingAVIHeader "Zapisuji AVI hlavièku...\n"
 #define MSGTR_DuplicateFrames "\n%d opakujících se snímkù!\n"
 #define MSGTR_SkipFrame "\nPøeskakuji snímek!\n"
 #define MSGTR_ResolutionDoesntMatch "\nNový video soubor má jiné rozli¹ení nebo barevný prostor ne¾ jeho pøedchùdce.\n"
@@ -244,8 +245,6 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "VAROVÁNÍ: volba -speed nemá zaruèenou správnou funkènost spolu s -oac copy!\n"\
 "Výsledný film mù¾e být vadný!\n"
 #define MSGTR_ErrorWritingFile "%s: chyba pøi zápisu souboru.\n"
-#define MSGTR_WritingAVIIndex "\nZapisuji AVI index...\n"
-#define MSGTR_FixupAVIHeader "Opravuji AVI hlavièku...\n"
 #define MSGTR_RecommendedVideoBitrate "Doporuèený datový tok videa pro CD %s: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo proud: %8.3f kbit/s  (%d B/s)  velikost: %d bajtù  %5.3f sekund  %d snímkù\n"
 #define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d B/s)  velikost: %d bajtù  %5.3f sekund\n"
@@ -511,13 +510,18 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleChannel "Vybrán DVD titulkový kanál: %d jazyk: %c%c\n"
 #define MSGTR_DVDopenOk "DVD úspì¹nì otevøeno.\n"
 
-// muxer_*.c:
+// muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Pøíli¹ mnoho datových proudù!"
 #define MSGTR_RawMuxerOnlyOneStream "Muxer surového zvuku podporuje pouze jeden zvukový proud!\n"
 #define MSGTR_IgnoringVideoStream "Ignoruji video proud!\n"
 #define MSGTR_UnknownStreamType "Varování! Neznámý typ datového proudu: %d\n"
 #define MSGTR_WarningLenIsntDivisible "Varování! Délka není násobkem velikosti vzorku!\n"
-
+#define MSGTR_MuxbufMallocErr "Nelze alokovat pamì» pro snímkovou vyrovnávací pamì» muxeru!\n"
+#define MSGTR_MuxbufReallocErr "Nelze realokovat pamì» pro snímkovou vyrovnávací pamì» muxeru!\n"
+#define MSGTR_MuxbufSending "Snímková vyrovnávací pamì» muxeru posílá %d snímkù do muxeru.\n"
+#define MSGTR_WritingHeader "Zapisuji hlavièku...\n"
+#define MSGTR_WritingTrailer "Zapisuji index...\n"
+ 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "VAROVÁNÍ: Hlavièka audio proudu %d pøedefinována!\n"
 #define MSGTR_VideoStreamRedefined "VAROVÁNÍ: Hlavièka video proudu %d pøedefinována!\n"
@@ -887,9 +891,10 @@ static char help_text[]=
            "s GTK 1.x a zhavarují GMPlayer!"
 
 #define MSGTR_ABOUT_UHU "Vývoj GUI je sponzorován firmou UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   Hlavní vývojáøi programu MPlayer:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Dal¹í vývojáøi:\n"
-#define MSGTR_ABOUT_MainTesters "   Hlavní testeøi:\n"
+#define MSGTR_ABOUT_Contributors "Pøispìvatelé kódu a dokumentace\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Kodeky a knihovny tøetích stran\n"
+#define MSGTR_ABOUT_Translations "Pøeklady\n"
+#define MSGTR_ABOUT_Skins "Skiny\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba!"
@@ -941,7 +946,7 @@ static char help_text[]=
 
 #define MSGTR_VOincompCodec "Vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"
 #define MSGTR_VOincompCodec "Vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"\
-                "Zkuste rovnì¾ pøidat filtr scale, èili -vf spp,scale namísto -vf spp.\n"
+                "Zkuste pøidat filtr scale, èili -vf spp,scale namísto -vf spp.\n"
 #define MSGTR_VO_GenericError "Tato chyba nastala"
 #define MSGTR_VO_UnableToAccess "Nemám pøístup k"
 #define MSGTR_VO_ExistsButNoDirectory "ji¾ existuje, ale není to adresáø."
@@ -1007,8 +1012,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Hue "Barevný tón"
 
 // vo_xv.c
-#define MSGTR_VO_XV_ImagedimTooHigh "Rozmìry zdrojového obrazu jsou " \
-                                    "pøíli¹ velké: %ux%u (maximum je %ux%u)\n"
+#define MSGTR_VO_XV_ImagedimTooHigh "Rozmìry zdrojového obrazu jsou pøíli¹ velké: %ux%u (maximum je %ux%u)\n"
 
 // Old vo drivers that have been replaced
 
@@ -1042,23 +1046,23 @@ static char help_text[]=
 
 // ao_dxr2.c
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Nastavení hlasitosti na %d selhalo.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz není podporováno, zkuste \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz není podporováno, zkuste pøevzorkovat.\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound selhalo: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latence: [server: %0.2fs, sí»: %0.2fs] (upravuji %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] selhalo otevøení datového proudu esd pro pøehrávání: %s\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] selhalo otevøení datového proudu ESD pro pøehrávání: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] selhalo nastavení DVB zvukového mixeru: %s\n" 
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz není podporováno, zkuste pøevzorkovat...\n"
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] selhalo nastavení DVB zvukového mixeru: %s.\n" 
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz není podporováno, zkuste pøevzorkovat.\n"
 
 // ao_null.c
 // This one desn't even  have any mp_msg nor printf's?? [CHECK]
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Soubor: %s (%s)\nPCM: Vzorkování: %iHz Kanál(y): %s Formát %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info:  Nejrychlej¹í extrakce dosáhnete s -vc null -vo null\nPCM: Info: pro zápis WAVE souborù pou¾ijte -ao pcm:waveheader (výchozí).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info:  Nejrychlej¹í extrakce dosáhnete s -vc null -vo null\n[AO PCM] Info: Pro zápis WAVE souborù pou¾ijte -ao pcm:waveheader (výchozí).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Selhalo otevøení %s pro zápis!\n"
 
 // ao_sdl.c
@@ -1085,7 +1089,7 @@ static char help_text[]=
 
 // ao_sun.c
 #define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: selhalo SETINFO.\n"
-#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: zápis selhal."
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: zápis selhal.\n"
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Nelze otevøít zvukové zaøízení %s, %s  -> nebude zvuk.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: Va¹e karta nepodporuje %d kanálové, %s, %d Hz vzorkování.\n"
 #define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Ovladaè Va¹í zvukové karty NEPODPORUJE select()  ***\n Pøekompilujte MPlayer s #undef HAVE_AUDIO_SELECT v config.h !\n\n"
@@ -1320,30 +1324,30 @@ static char help_text[]=
 
 // cache2.c
 
-#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rTento proud nelze ukládat do vyrovnávací pamìti\n"
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rTento proud nelze ukládat do vyrovnávací pamìti.\n"
 #define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos se li¹í!!! ohlaste tuto chybu...\n"
 
 // cdda.c
 
-#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Nelze otevøít cdda zaøízení\n"
-#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Nelze otevøít disk\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Nalezeno Audio CD s %d stopami\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Nelze otevøít CDDA zaøízení.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Nelze otevøít disk.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Nalezeno audio CD s %d stopami\n"
 
 // cddb.c
 
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Selhalo ètení TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Selhalo otevøení zaøízení %s.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAValidURL "Neplatná URL\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Selhalo odeslání http po¾adavku\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Selhalo ètení http odpovìdi\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Není k dispozici\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Selhalo odeslání HTTP po¾adavku.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Selhalo ètení HTTP odpovìdi.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Není k dispozici.\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Neznámý Error kód\n"
-#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Vyrovnávací pamì» nenalezena\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Nebyl pøeèten celý xmcd soubor\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Selhalo vytvoøení adresáøe %s\n"
-#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Nebyl zapsán celý xmcd soubor\n"
-#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Vrácen chybný soubor xmcd databáze\n"
-#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Neoèekávané urob si sám\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Vyrovnávací pamì» nenalezena.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Nebyl pøeèten celý xmcd soubor.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Selhalo vytvoøení adresáøe %s.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Nebyl zapsán celý xmcd soubor.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Vrácen chybný soubor xmcd databáze.\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Neoèekávané UROB-SI-SÁM\n"
 #define MSGTR_MPDEMUX_CDDB_UnhandledCode "Neo¹etøený kód\n"
 #define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Nelze nalést konec øádku\n"
 #define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parsování OK, nalezeno: %s\n"
@@ -1357,13 +1361,38 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Neoèekávaný øádek v cue souboru: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] otestován bin soubor: %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] nelze nalézt bin soubor - vzdávám to\n"
-#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] pou¾ívám bin soubor %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] neznámý re¾im pro bin soubor. To by se nemìlo stát. Konèím\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] nelze otevøít %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] chyba ètení z  %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] chyba získání velikosti bin souboru\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Nelze nalézt bin soubor - vzdávám to\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Pou¾ívám bin soubor %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] neznámý re¾im pro bin soubor. To by se nemìlo stát. Konèím.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Nelze otevøít %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Chyba ètení z  %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Chyba získání velikosti bin souboru\n"
 #define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "stopa %02d:  format=%d  %02d:%02d:%02d\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] neoèekávaný konec bin souboru\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] nelze pøeèíst %d bajtù 'payloadu'\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Nelze pøeèíst %d bajtù 'payloadu'\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, soubor=%s, stopa=%d, dostupné stopy: %d -> %d\n"
+
+// network.c
+
+#define MSGTR_MPDEMUX_NW_UnknownAF "Neznámá rodina adres %d\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Resolvuji %s pro %s...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "Nelze resolvovat jméno pro %s: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Pøipojuji se k serveru %s[%s]: %d...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "Selhalo pøipojení k serveru pomocí %s\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "Select selhal.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Spojení vypr¹elo.\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt selhal: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "Chyba spojení: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "©patné nastavení proxy... Zkou¹ím bez proxy.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Nelze resolvovat jméno vzdáleného systému pro AF_INET. Zkou¹ím bez proxy.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Chyba pøi odesílání HTTP po¾adavku: nebyl odeslán celý po¾adavek.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "Chyba pøi ètení.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response pøeèetlo 0 (to je EOF)\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "Autentifikace selhala. Pou¾ijte volby -user a -passwd pro zadání svého\n"\
+"u¾ivatelského_jména/hesla pro seznam URL, nebo URL v následující formì:\n"\
+"http://u¾ivatelské_jméno:heslo@jméno_serveru/soubor\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Pro %s je vy¾adována autentifikace\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "Vy¾adována autentifikace.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nezadáno heslo, zkou¹ím prázdné heslo.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Server vrátil %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Vyrovnávací pamì» nastavena na %d KBajtù\n"
