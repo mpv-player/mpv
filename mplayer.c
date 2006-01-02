@@ -3794,8 +3794,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_sub_last = vo_sub = NULL;
 #endif
         vobsub_id = -1;
+	if(dvdsub_lang) {
         dvdsub_id = -1;
         if (d_dvdsub) d_dvdsub->id = -1;
+	}
 
         // be careful!
         // if sub_changed is till on but subdata's been reset, bad things happen.

@@ -36,6 +36,7 @@ typedef struct mpg_demuxer {
   int a_stream_ids[MAX_A_STREAMS];
 } mpg_demuxer_t;
 
+extern char* dvdsub_lang;
 static int mpeg_pts_error=0;
 
 static int parse_psm(demuxer_t *demux, int len) {
@@ -293,6 +294,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
             demux->s_streams[aid]=1;
         }
 
+        if(demux->sub->id > -1)
+          demux->sub->id &= 0x1F;
+        if(!dvdsub_lang && demux->sub->id == -1)
+          demux->sub->id = aid;
         if(demux->sub->id==aid){
             ds=demux->sub;
         }
