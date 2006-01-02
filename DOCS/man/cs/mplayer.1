@@ -1,4 +1,4 @@
-.\" Synced with 1.1163
+.\" Synced with 1.1182
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -39,7 +39,7 @@
 .TH MPlayer 1 "2005-05-15" "The MPlayer Project" "The Movie Player"
 .
 .SH NÁZEV
-mplayer  \- multimediální pøehrávaè
+mplayer  \- pøehrávaè filmù
 .br
 mencoder \- filmový enkodér
 .
@@ -187,7 +187,7 @@ mencoder \- filmový enkodér
 .
 .SH POPIS
 .B mplayer
-je multimediální pøehrávaè pro Linux (bì¾í na mnoha platformách a CPU
+je filmový pøehrávaè pro Linux (bì¾í na mnoha platformách a CPU
 architekturách, viz dokumentace).
 Pøehraje vìt¹inu MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM,
 MKV, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM a RoQ souborù s podporou mnoha
@@ -368,7 +368,7 @@ s multimediálními tlaèítky.)
 Pauza.
 .IPs "STOP\ "
 Ukonèení pøehrávání a skonèí.
-.IPs "PREVIOUS a NEXT"
+.IPs "PØEDCHOZÍ a DAL©Í"
 Pøevíjení zpìt/\:vpøed o 1 minutu.
 .RE
 .PD 1
@@ -496,6 +496,8 @@ flip=yes
 mf=type=png:fps=25
 # Stra¹idelné negativy jsou bo¾í.
 vf=eq2=1.0:-0.8
+# Chci aby MEncoder pou¾il tento soubor jako výchozí výstup.
+o=encoded.avi
 .fi
 .PP
 Rovnì¾ mù¾ete napsat konfiguraèní soubory k jednotlivým filmùm.
@@ -517,9 +519,10 @@ codecs.conf.
 Zadaný <konfiguraèní\ soubor> bude zpracován po ostatních konfiguraèních souborech.
 .
 .TP
-.B \-msglevel <all=<úroveò>:module=<úroveò>:...>
+.B \-msglevel <all=<úroveò>:<module>=<úroveò>:...>
 Ovládá upovídanost ka¾dého modulu pøímo.
-Modul 'all' zmìní upovídanost v¹ech ostatních neuvedených modulù.
+Modul 'all' zmìní upovídanost v¹ech modulù neuvedených explicitnì
+na pøíkazovém øádku.
 Seznam v¹ech dostupných modulù získáte pomocí '-msglevel help'.
 .br
 .I POZNÁMKA:
@@ -529,27 +532,27 @@ Dostupné úrovnì:
 .PD 0
 .RSs
 .IPs -1
-Úplné ticho.
+úplné ticho
 .IPs 0
-Pouze kritické zprávy.
+pouze kritické zprávy
 .IPs 1
-Chybové zprávy.
+chybové zprávy
 .IPs 2
-Varování.
+varování
 .IPs 3
-Krátké tipy.
+krátké tipy
 .IPs 4
-Informaèní sdìlení.
+informaèní sdìlení
 .IPs 5
-Stavové informace (ty, které skrývá -quiet).
+stavové informace (ty, které skrývá -quiet)
 .IPs 6
-Obsáhlá sdìlení.
+obsáhlá sdìlení
 .IPs 7
-Debug úroveò 2.
+debug úroveò 2
 .IPs 8
-Debug úroveò 3.
+debug úroveò 3
 .IPs 9
-Debug úroveò 4.
+debug úroveò 4
 .RE
 .PD 1
 .
@@ -575,20 +578,13 @@ Pou¾ití priority realtime mù¾e zpùsobit zamrznutí systému.
 .RE
 .
 .TP
-.B \-v, \-verbose
-Zvy¹uje upovídanost (èím více \-v tím více informací).
-.PD 0
-.RSs
-.IPs <nic>
-jen bì¾né informace (výchozí)
-.IPs \-v\ \ \ 
-základní debugovací info, AVI hlavièka, hodnoty funkcí (init debug)
-.IPs \-v\ \-v
-vypisuje AVI indexy, vstupní chunky, více debugovacích informací (player debug)
-.IPs \-v\ \-v\ \-v
-vypisuje v¹e co souvisí se vstupními parsery (parser debug)
-.RE
-.PD 1
+.B \-really-quiet (viz také \-quiet)
+Zobrazovat je¹tì ménì výstupních a stavových informací ne¾ s \-quiet.
+.
+.TP
+.B \-v\ \ \ \ \ 
+Zvy¹uje úroveò upovídanosti o jednu úroveò na ka¾dé \-v
+nalezené na pøíkazové øádce.
 .
 .
 .
@@ -813,10 +809,6 @@ Playlist je zpracován jako vstup. Volby nalezené za touto volbou
 budou tedy uplatnìny pouze pro soubory v playlistu.
 .br
 DODÌLAT: Volba musí být dùkladnì objasnìna a dokumentována.
-.
-.TP
-.B \-really-quiet (viz také \-quiet)
-Vypisuje je¹tì ménì výstupních a stavových informací ne¾ s \-quiet.
 .
 .TP
 .B \-rtc-device <zaøízení>
@@ -1260,15 +1252,26 @@ nastaví barevnou hloubku
 barevná hloubka (fourcc) v hexadecimálním tvaru
 .IPs size=<hodnota>
 velikost snímku v bajtech
+.REss
+.sp 1
+.RS
+.I PØÍKLAD:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+Pøehraje vìhlasné "foreman" vzorkové video.
+.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+Pøehraje surový YUV sampl.
 .RE
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (pouze LIVE.COM)
+.B \-rtsp-stream-over-tcp (pouze LIVE555)
 Pou¾ívá se v kombinaci s 'rtsp://' URL pro urèení ¾e pakety odpovìdi
 protokolu RTP a RTCP budou tunelovány pøes TCP (pro TCP i RTSP se pou¾ije stejné spojení).
 Tato volba je u¾iteèná, jestli¾e va¹e internetové pøipojení nepropou¹tí pøíchozí
-UDP pakety (viz http://www.live.com/\:mplayer/).
+UDP pakety (viz http://www.live555.com/\:mplayer/).
 .
 .TP
 .B \-saveidx <soubor>
@@ -3557,8 +3560,6 @@ kvantizaèní matice, pøedpokládaný YUV 4:2:0 a pøeskoèení nìkolika testù
 detekujících po¹kozené bitové proudy.
 .IPs gray\ 
 dekódování pouze èernobíle (o nìco rychlej¹í ne¾ barevnì)
-.IPs threads=<0\-8>
-vícevláknové dekódování
 .IPs "idct=<0\-99> (viz \-lavcopts)"
 (viz lavcopts)
 Nejlep¹í kvality dekódování dosáhnete pou¾itím stejného IDCT algoritmu jak pro
@@ -3619,6 +3620,8 @@ Témìø ve v¹ech pøípadech velmi sní¾í kvalitu
 Pøeskoèí zcela dekódování snímkù.
 Znamená velké zrychlení, ale trhaný pohyb a obèas tì¾ké artefakty
 (viz skiploopfilter pro dostupné skip hodnoty).
+.IPs threads=<0\-8>
+poèet vláken pou¾itých pro dekódování (výchozí: 1)
 .IPs vismv=<hodnota>
 Vizualizuje pohybové vektory.
 .RSss
@@ -4024,8 +4027,8 @@ Zesílí nízké a vysoké frekvence zvuku, zatímco témìø odstraní pásmo
 okolo 1kHz.
 .RE
 .PD 1
- .
- .TP
+.
+.TP
 .B channels=poèet_kanálù[:poèet:od1:do1:od2:do2:od3:do3:...]
 Mù¾e být pou¾it pro pøidání, odstranìní, pøesmìrování a kopírování zvukových
 kanálù. Pokud je zadán pouze <poèet_kanálù>, pou¾ije se výchozí smìrování,
@@ -4885,6 +4888,10 @@ Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 0: ostrý práh (výchozí)
 .br
 1: jemný práh (lep¹í dering, ale rozmazanìj¹í)
+.br
+4: jako 0, ale pou¾ijí se také B-snímky' QP (mù¾e zpùsobit cukání)
+.br
+5: jako 1, ale pou¾ijí se také B-snímky' QP (mù¾e zpùsobit cukání)
 .RE
 .
 .TP
@@ -4902,7 +4909,7 @@ Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 .RE
 .
 .TP
-.B fspp[=kvalita[:qp[:síla]]]
+.B fspp[=kvalita[:qp[:síla[:bsnímky]]]]
 rychlej¹í verze jednoduchého postprocesního filtru
 .RSs
 .IPs <kvalita>
@@ -4913,6 +4920,10 @@ Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 Síla filtru, ni¾¹í hodnoty zachovají více detailù, ale také více artefaktù,
 zatímco vy¹¹í hodnoty uèiní obraz hlad¹ím, ale i rozmazanìj¹ím (výchozí:
 0 \- PSNR optimální).
+.IPs <bsnímky>
+0: nepou¾ívat QP z B-snímkù (výchozí)
+.br
+1: pou¾ívat také QP z B-snímkù (mù¾e zpùsobit cukání)
 .RE
 .
 .TP
@@ -5315,12 +5326,12 @@ Následující argumenty (syntax viz vý¹) mù¾ete pou¾ít k ovlivnìní chování detc:
 .IPs <dr>\ 
 Nastaví re¾im zahazování snímkù.
 .RSss
-0: Nezahazovat snímky abychom mìli pevnou rychlost snímkování (výchozí).
+0: Nezahazovat snímky abychom mìli pevnou snímkovou rychlostí (výchozí).
 .br
 1: V¾dy zahodit snímek pokud za posledních 5 snímkù nebyl ¾ádný zahozen
 nebo slouèen z pùlsnímkù.
 .br
-2: V¾dy zachovat vstupnì-výstupní pomìr rychlosti snímkování 5:4.
+2: V¾dy zachovat vstupnì-výstupní pomìr snímkové rychlosti 5:4.
 .br
 .I POZNÁMKA:
 V MEncoderu pou¾ívejte módy 1 nebo 2.
@@ -5352,7 +5363,7 @@ telecine, ale na druhou stranu je více ovlivòován ¹umem, napø. pøi zachytávání
 z televize.
 Volitelný parametr (ivtc=1) odpovídá volbì dr=1 z detc filtru, a mù¾e být
 pou¾itý v MEncoderu ale ne v MPlayeru.
-Stejnì jako u detc, musíte zadat správnou výstupní rychlost snímkování (\-ofps
+Stejnì jako u detc, musíte zadat správnou výstupní snímkovou rychlost (\-ofps
 24000/1001) pou¾íváte-li MEncoder.
 Dal¹í vývoj ivtc byl zastaven, jeliko¾ se filtry pullup a filmdint
 zdají být mnohem preciznìj¹í.
@@ -5481,7 +5492,7 @@ nebo v nìm byl odstranìn proklad metodou, která ponechá jeden pùlsnímek a
 druhý odvodí, pak je výsledkem roztøepané video s ka¾dým ètvrtým snímkem
 duplicitním.
 Tento filtr má za úkol nalézt tyto duplikáty a obnovit pùvodní snímkovou
-rychlost snímkování filmu.
+rychlost filmu.
 Pou¾íváte-li tento filtr, musíte nastavit \-ofps na 4/\:5 snímkové rychlosti
 vstupního souboru a pozdìji ve výètu filtrù umístit filtr softskip, abyste mìli
 jistotu, ¾e filtrem divtc projdou v¹echny snímky.
@@ -9013,6 +9024,238 @@ Formát MPEG-4
 Sony Digital Video kontejner
 .RE
 .PD 1
+.
+.
+.
+.\" --------------------------------------------------------------------------
+.\" promìnné prostøedí
+.\" --------------------------------------------------------------------------
+.
+.SH PROMÌNNÉ PROSTØEDÍ
+.
+K ovládání chování MPlayeru a MEncoderu lze pou¾ít øadu
+promìnných prostøedí.
+.
+.TP
+.B MPLAYER_HOME
+Adresáø kde bude hledat MPlayer u¾ivatelská nastavení.
+.
+.SS libaf:
+.
+.TP
+.B LADSPA_PATH
+Pokud je nastavena LADSPA_PATH, vyhledává uvedený soubor.
+Pokud ne, musíte zadat celé jméno i s cestou.
+DODÌLAT: Toto rovnì¾ zmiòujeme v sekci ladspa.
+.
+.SS libmpdvdkit2:
+.
+.TP
+.B DVDCSS_CACHE
+Nastavuje adresáø, do kterého se ukládají CSS klíèe DVD titulù.
+To zrychluje otevírání DVD které jsou v cache.
+Adresáø DVDCSS_CACHE je vytvoøen, pokud ji¾ neexistuje a
+podadresáø je vytvoøen podle názvu DVD nebo data výroby.
+Pokud není DVDCSS_CACHE nastavena, nebo je prázdná, libdvdcss pou¾ije
+výchozí hodnotu, kterou je "${HOME}/.dvdcss/" pod Unixem a
+"C:\\Documents and Settings\\$USER\\Application Data\\dvdcss\\" pod Win32.
+Speciální hodnota "off" vypne ukládání klíèù.
+.
+.TP
+.B DVDCSS_METHOD
+Nastaví metodu autentifikace a de¹ifrování, kterou pou¾ije
+libdvdcss pro ètení ¹ifrovaných diskù.
+Mù¾e být titul, klíè nebo disk.
+Mù¾e nabýt hodnoty title, key nebo disc.
+.PD 0
+.RSs
+.IPs key\ \ 
+je výchozí metoda.
+libdvdcss pou¾ije sadu vypoèítaných klíèù pøehrávaèe pro dosa¾ení
+klíèe disku.
+To mù¾e selhat, pokud mechanika nerozpozná ¾ádný z klíèù pøehrávaèe.
+.IPs disc\ 
+je záchytná metoda, pokud klíè sel¾e.
+Místo pou¾ití klíèù pøehrávaèe, libdvdcss získá klíè disku
+hrubou silou.
+Tento proces je nároèný na CPU a vy¾aduje 64 MB pamìti pro ulo¾ení
+doèasných dat.
+.IPs title
+je záchytnou metodou, pokud v¹echny ostatní metody sel¾ou.
+Nezávisí na výmìnì klíèù s DVD mechanikou, ale spí¹e pou¾ije
+kryptografický útok pro uhodnutí klíèe.
+V ojedinìlých pøípadech mù¾e selhat, jeliko¾ na disku není dostatek
+¹ifrovaných dat pro provedení statistického útoku, ale na druhou stranu
+je to jediný zpùsob, jak de¹ifrovat DVD ulo¾ené na hard disku, nebo DVD
+se ¹patným regionem na RPC2 mechanice.
+.RE
+.PD 1
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+Nastaví raw zaøízení k pou¾ití.
+Pøesné pou¾ití závisí na operaèním systému. Linuxová utilita pro
+nastavení raw zaøízení je napøíklad raw(8).
+Pamatujte, ¾e na vìt¹inì operaèních systémù vy¾aduje pou¾ití
+raw zaøízení vysoce zarovnané buffery: Linux vy¾aduje zarovnání
+na 2048 bajtù (co¾ je velikost DVD sektoru).
+.
+.TP
+.B DVDCSS_VERBOSE
+Nastaví upovídanost libdvdcss.
+.PD 0
+.RSs
+.IPs 0
+Neprodukuje ¾ádné zprávy.
+.IPs 1
+Vypisuje chybové zprávy na stderr.
+.IPs 2
+Vypisuje chybové a debugovací zprávy na stderr.
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+DVDREAD_NOKEYS je specifická pro MPlayer, ale v souèasnosti nevyu¾itá.
+V souboru libmpdvdkit2/dvd_reader.c je DVDREAD_NOKEYS pou¾ita ve funkci
+initAllCSSKeys, ale jediné místo, kde je funkce volána je zakomentováno.
+.
+.TP
+.B HOME
+DODÌLAT: Zdokumentovat.
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B AUDIODEV
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B AUDIOSERVER
+Nastaví server Network Audio Systému, na který by se mìlo pøipojit
+výstupní audio rozhraní nas a pøenos, který by mìl být
+pou¾itý.
+Pokud není nastavena, pou¾ije se místo ní DISPLAY.
+Pøenos mù¾e být tcp nebo unix.
+Syntaxe je tcp/<poèítaè>:<port>, <poèítaè>:<èíslo_instance>
+nebo [unix]:<èíslo_instance>.
+Základní port NAS je 8000 a <èíslo_instance> je k nìmu pøièteno.
+.sp 1
+.RS
+.I PØÍKLADY:
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=poèítaè:0
+Pøipojí se k NAS serveru na <poèítaèi> pomocí výchozího portu a pøenosu.
+.IPs AUDIOSERVER=tcp/poèítaè:8000
+Pøipojí se k NAS serveru na <poèítaèi> naslouchajícímu na TCP portu 8000.
+.IPs AUDIOSERVER=(unix)?:0
+Pøipojí se k NAS serveru instance 0 na localhost pomocí unix domain soketù.
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+DODÌLAT: Zdokumentovat.
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+DODÌLAT: Zdokumentovat.
+.
+.SS osdep:
+.
+.TP
+.B TERM
+DODÌLAT: Zdokumentovat.
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B FRAMEBUFFER
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B HOME
+DODÌLAT: Zdokumentovat.
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B HOMEPATH
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B http_proxy
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B LOGNAME
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B USERPROFILE
+DODÌLAT: Zdokumentovat.
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+DODÌLAT: Zdokumentovat.
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B DISPLAY
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B HOME
+DODÌLAT: Zdokumentovat.
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B BKTR_DEV
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B BKTR_FORMAT
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B BKTR_FREQUENCY
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B http_proxy
+DODÌLAT: Zdokumentovat.
+.
+.TP
+.B no_proxy
+DODÌLAT: Zdokumentovat.
 .
 .
 .
