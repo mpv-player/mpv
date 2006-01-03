@@ -79,7 +79,7 @@ depend: pci_names.c
 
 install:
 	mkdir -p $(LIBDIR)
-	install -m 755 -s -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
+	install -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
 	rm -f $(LIBDIR)/libdha.so
 	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)
 ifeq ($(TARGET_OS),OpenBSD)

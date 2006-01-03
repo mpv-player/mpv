@@ -162,7 +162,7 @@ depend:
 
 install:
 	mkdir -p $(LIBDIR)/mplayer/vidix
-	-install -m 755 -s -p *.so $(LIBDIR)/mplayer/vidix
+	-install -m 755 $(INSTALLSTRIP) -p *.so $(LIBDIR)/mplayer/vidix
 uninstall:
 	rm -f $(LIBDIR)/mplayer/vidix/*.so
 	rmdir -p --ignore-fail-on-non-empty $(LIBDIR)/mplayer/vidix
