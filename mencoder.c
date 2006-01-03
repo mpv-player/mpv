@@ -105,7 +105,7 @@ float stream_cache_seek_min_percent=50.0;
 
 int audio_id=-1;
 int video_id=-1;
-int dvdsub_id=-1;
+int dvdsub_id=-2;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -562,7 +562,7 @@ play_next_file:
 #ifdef USE_DVDREAD
 if(stream->type==STREAMTYPE_DVD){
   if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
-  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
 }
 #endif
 
