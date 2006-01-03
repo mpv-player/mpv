@@ -757,7 +757,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	      if((videobuffer[pos+4] & 0x3F) == 0) break;	//I-frame
 	    }
           } else if(sh_video->format == 0x10000005){	//h264
-            if((i & ~0x60) == 0x101 || (i & ~0x60) == 0x102 || (i & ~0x60) == 0x105) break;
+            if((i & ~0x60) == 0x105) break;
           } else { 	//default mpeg1/2
 	    if(i==0x1B3 || i==0x1B8) break; // found it!
 	  }
