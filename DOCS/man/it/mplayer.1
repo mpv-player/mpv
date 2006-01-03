@@ -1,4 +1,4 @@
-.\" synced with 1.1158
+.\" synced with 1.1167
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -530,6 +530,44 @@ al posto di quello integrato nel programma.
 .TP
 .B \-include <configuration\ file>
 Specifica un file di configurazione da interpretare dopo quelli di default.
+.
+.TP
+.B \-msglevel <all=<livello>:<modulo>=<livello>:...>
+Controlla direttamente la verbosità per ogni modulo.
+Il modulo 'all' cambia la verbosità di tutti i moduli non esplicitamente
+specificati sulla riga comando.
+Vedi '\-msglevel help' per una lista di tutti i moduli.
+.br
+.I NOTA:
+I messaggi emessi prima che venga letta la riga comando non vengono controllati.
+.br
+Livelli disponibili:
+.PD 0
+.RSs
+.IPs "-1"
+silenzio completo
+.IPs " 0"
+solo messaggi fatali
+.IPs " 1"
+messaggi d'errore
+.IPs " 2"
+messaggi di attenzione
+.IPs " 3"
+suggerimenti brevi
+.IPs " 4"
+messaggi informativi
+.IPs " 5"
+messaggi di stato (quelli nascosti da \-quiet)
+.IPs " 6"
+messaggi verbosi
+.IPs " 7"
+livello di debug 2
+.IPs " 8"
+livello di debug 3
+.IPs " 9"
+livello di debug 4
+.RE
+.PD 1
 .
 .TP
 .B \-quiet\ 
@@ -1277,15 +1315,26 @@ seleziona lo spazio colore
 spazio colore (fourcc) in esadecimale
 .IPs size=<valore>
 dimensione di un fotogramma in Bytes
+.REss
+.sp 1
+.RS
+.I ESEMPI:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+Riproduce il famoso video di esempio "foreman".
+.IPs "mplayer esempio-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+Riproduce un esempio YUV grezzo.
 .RE
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (solo LIVE.COM)
+.B \-rtsp-stream-over-tcp (solo LIVE555)
 Utilizzato con URL del tipo 'rtsp://' per specificare che i pacchetti RTP o RTCP
 devono essere fatti passare su TCP (utilizzando la stessa connessione di RTSP).
 Questa opzione può essere utile se hai una connessione internet che non gestisce
-in maniera corretta i pacchetti UDP (vedi http://www.live.com/\:mplayer/).
+in maniera corretta i pacchetti UDP (vedi http://www.live555.com/\:mplayer/).
 .
 .TP
 .B \-saveidx <nomefile>
@@ -2057,9 +2106,12 @@ driver di uscita audio ALSA 0.5
 Driver di uscita audio OSS
 .PD 0
 .RSs
-.IPs dispositivo-dsp[:dispositivo-mixer[:canale-mixer]]
-Seleziona il dispositivo di uscita audio (default: /dev/\:dsp), il dispositivo
-del mixer (default: /dev/\:mixer) e il canale del mixer (default: pcm).
+.IPs <dispositivo-dsp>
+Seleziona il dispositivo di uscita audio (default: /dev/\:dsp).
+.IPs <dispositivo-mixer>
+Seleziona il dispositivo del mixer (default: /dev/\:mixer).
+.IPs <canale-mixer>
+Seleziona il canale del mixer (default: pcm).
 .RE
 .PD 1
 .
@@ -2950,6 +3002,16 @@ Necessita di OpenGL con versione >= 1.2.
 .IPs slice-height=<0\-...>
 Numero di linee copiate sulla texture in un blocco unico (default: 4).
 0 per l'immagine intera.
+.br
+.I NOTA:
+Se è usato lo spazio colore YUV (vedi sottopzione yuv), vigono speciali regole:
+.RSss
+Se il decodificatore usa lo "slice rendering" (vedi \-noslices), questa
+impostazione non ha effetto, e viene usata la dimensione slice fornita dal
+decodificatore.
+.br
+Se il decodificatore non usa "slice rendering", il default è 16.
+.RE
 .IPs (no)osd
 Abilita o disabilita il supporto per il rendering dell'OSD via OpenGL
 (default: abilitato).
@@ -3736,6 +3798,8 @@ Questo diminuisce molto la qualità in quasi tutti i casi
 Salta completamente la decodifica dei fotogrammi.
 Accelera molto, ma porta movimenti scattosi e ogni tanto brutti artefatti
 (vedi skiploopfilter per i valori_salto disponibili).
+.IPs threads=<1\-8>
+numero di thread da usare per la decodifica (default: 1)
 .IPs vismv=<valore>
 Visualizza i vettori di movimento.
 .RSss
@@ -5070,6 +5134,10 @@ Forza il parametro di quantizzazione (default: 0, usa QP del video).
 0: controllo della soglia rigido (default)
 .br
 1: controllo della soglia meno rigido (miglior eliminazione degli artefatti circolari ma immagine più sfocata)
+.br
+4: come 0, ma usa anche il QP dei fotogrammi-B (può causare tremolio (flicker))
+.br
+5: come 1, ma usa anche il QP dei fotogrammi-B (può causare tremolio (flicker))
 .RE
 .
 .TP
@@ -5087,7 +5155,7 @@ Forza il parametro di quantizzazione (default: 0, usa QP del video).
 .RE
 .
 .TP
-.B fspp[=qualità[:qp[:forza]]]
+.B fspp[=qualità[:qp[:forza[:fotogrammiB]]]]
 versione più veloce del filtro di post elaborazione semplice.
 .RSs
 .IPs <qualità>
@@ -5098,6 +5166,10 @@ Forza il parametro di quantizzazione (default: 0, usa QP del video).
 Forza del filtro, valori bassi indicano maggior dettaglio ma anche maggiori
 artefatti, mentre valori più alti rendono l'immagine più morbida ma anche
 più sfocata (default: 0 \- ottimale per PSNR).
+.IPs <fotogrammiB>
+0: non usa il QP dei fotogrammi-B (default)
+.br
+1: usa anche il QP dei fotogrammi-B (può causare tremolio (flicker))
 .RE
 .
 .TP
