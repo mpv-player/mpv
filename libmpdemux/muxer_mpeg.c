@@ -314,6 +314,7 @@ static mpeg_frame_t *init_frames(uint16_t num, size_t size)
 		if(tmp[i].buffer == NULL)
 			return NULL;
 		tmp[i].size = 0;
+		tmp[i].pos = 0;
 		tmp[i].alloc_size = size;
 		tmp[i].pts = 0;
 	}
@@ -322,6 +323,7 @@ static mpeg_frame_t *init_frames(uint16_t num, size_t size)
 }
 
 static uint32_t calc_pack_hlen(muxer_priv_t *priv, muxer_headers_t *h);
+static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int len, uint8_t pt, uint32_t temp_ref);
 
 static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   muxer_priv_t *priv = (muxer_priv_t*) muxer->priv;
@@ -1017,94 +1019,6 @@ static void patch_panscan(muxer_priv_t *priv, unsigned char *buf)
 #define min(a, b) ((a) <= (b) ? (a) : (b))
 
 
-static int reorder_frame(muxer_headers_t *spriv, uint8_t *ptr, size_t len, uint8_t pt, uint32_t temp_ref, uint64_t idur)
-{
-	uint16_t idx = 0, move=0;
-	
-	/*	HOW TO REORDER FRAMES IN DECODING ORDER:
-		current frame is n
-		IF pt(n)==I or P and
-			n>0 && temp_ref(n) > temp_ref(n-1) && pt(n-1 .. n-m)==B
-				then insert frame n before frame n-m 
-				and shift forward the others
-	*/
-
-	idx = spriv->framebuf_used;
-	if(spriv->reorder)
-	{
-		//stores the frame in decoding order
-		if((idx > 0) && ((pt == I_FRAME) || (pt == P_FRAME)))
-		{
-			if((spriv->framebuf[idx - 1].type == B_FRAME) && (spriv->framebuf[idx - 1].temp_ref == temp_ref-1))
-			{
-				while((spriv->framebuf[idx - 1].type == B_FRAME) && (spriv->framebuf[idx - 1].temp_ref < temp_ref) && (idx > 0))
-					idx--;
-				move = spriv->framebuf_used - idx;	//from idx there are 'move' frames to move forward
-			}
-		}
-	}
-	
-	//now idx is the position where we should store the frame 
-	if(idx+move >= spriv->framebuf_cnt)
-	{	//realloc
-		spriv->framebuf = (mpeg_frame_t*) realloc(spriv->framebuf, (spriv->framebuf_cnt+1)*sizeof(mpeg_frame_t));
-		if(spriv->framebuf == NULL)
-		{
-			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(idx), abort\n");
-			return 0;
-		}
-		
-		spriv->framebuf[spriv->framebuf_cnt].size = 0;
-		spriv->framebuf[spriv->framebuf_cnt].alloc_size = 0;
-		
-		spriv->framebuf[spriv->framebuf_cnt].buffer = (uint8_t*) malloc(len);
-		if(spriv->framebuf[spriv->framebuf_cnt].buffer == NULL)
-		{
-			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
-			return 0;
-		}
-		spriv->framebuf[spriv->framebuf_cnt].alloc_size = len;		
-		spriv->framebuf_cnt++;
-	}
-	
-
-	
-	while(move > 0)
-	{
-		mpeg_frame_t f;
-		
-		f = spriv->framebuf[move + idx];
-		spriv->framebuf[move + idx] = spriv->framebuf[move + idx - 1];
-		spriv->framebuf[move + idx - 1] = f;
-		move--;
-	}
-	
-	if(spriv->framebuf[idx].alloc_size < len)
-	{
-		spriv->framebuf[idx].buffer = realloc(spriv->framebuf[idx].buffer, len);
-		if(spriv->framebuf[idx].buffer == NULL)
-		{
-			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
-			return 0;
-		}
-		spriv->framebuf[idx].alloc_size = len;
-	}
-	
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nIDX: %u, type: %c, temp_ref: %u, ptr: %p, len: %u, alloc: %u, buffer: %p\n", 
-		(uint32_t) idx, FTYPE(pt), temp_ref, ptr, (uint32_t) len, (uint32_t) spriv->framebuf[idx].alloc_size, spriv->framebuf[idx].buffer);
-		
-	memcpy(spriv->framebuf[idx].buffer, ptr, len);
-	spriv->framebuf[idx].pos = 0;
-	spriv->framebuf[idx].size = len;
-	spriv->framebuf[idx].temp_ref = temp_ref;
-	spriv->framebuf[idx].type = pt;
-	spriv->framebuf[idx].idur = idur;
-	spriv->framebuf_used++;
-	
-	return 1;
-}
-
-
 static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, int force)
 {
 	uint32_t len = 0, tlen, sz;
@@ -1201,6 +1115,7 @@ static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, 
 	{
 		for(j = n; j < apriv->framebuf_used; j++)
 		{
+			apriv->framebuf[j - n].size = apriv->framebuf[j - n].pos = 0;
 			frm2 = apriv->framebuf[j - n];
 			apriv->framebuf[j - n] = apriv->framebuf[j];
 			apriv->framebuf[j] = frm2;
@@ -1812,6 +1727,8 @@ init:
 			vpriv->last_pts += idur;
 		}
 
+		for(i=0; i<n; i++)
+			vpriv->framebuf[i].pos = vpriv->framebuf[i].size = 0;
 		for(i = n; i < vpriv->framebuf_used; i++)
 		{
 			temp_frame = vpriv->framebuf[i - n];
@@ -1819,7 +1736,6 @@ init:
 			vpriv->framebuf[i] = temp_frame;
 		}
 		vpriv->framebuf_used -= n;
-
 
 		if((as != NULL) && priv->has_audio)
 		{
@@ -1953,6 +1869,9 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
 			
 			spriv->delta_clock = (double) 1/fps;
+			//the 2 lines below are needed to handle non-standard frame rates (such as 18)
+			if(! spriv->delta_pts)
+				spriv->delta_pts = spriv->nom_delta_pts = (uint64_t) ((double)92160000.0 * spriv->delta_clock );
 			mp_msg(MSGT_MUXER, MSGL_DBG2, "\nFPS: %.3f, FRAMETIME: %.3lf\n", fps, (double)1/fps);
 			if(priv->patch_seq)
 				patch_seq(priv, s->buffer);
@@ -2086,7 +2005,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		}
 
 		spriv->vframes++;
-		reorder_frame(spriv, s->buffer, len, pt, temp_ref, spriv->delta_pts);
+		add_frame(spriv, spriv->delta_pts, s->buffer, len, pt, temp_ref);
 	}
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg12_video, return %u\n", (uint32_t) len);
@@ -2195,7 +2114,7 @@ static size_t parse_mpeg4_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_hea
 	vpriv->last_dts += vpriv->frame_duration;
 	vpriv->last_pts += delta_pts;
 	
-	reorder_frame(vpriv, s->buffer, len, pt, 0, delta_pts);
+	add_frame(vpriv, delta_pts, s->buffer, len, pt, 0);
 	vpriv->framebuf[vpriv->framebuf_used-1].pts = vpriv->last_pts;
 	vpriv->framebuf[vpriv->framebuf_used-1].dts = vpriv->last_dts;
 	vpriv->framebuf[vpriv->framebuf_used-1].idur = vpriv->frame_duration;
@@ -2251,8 +2170,7 @@ static int fill_last_frame(muxer_headers_t *spriv,  uint8_t *ptr, int len)
 	return len;
 }
 
-
-static int add_audio_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int len)
+static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int len, uint8_t pt, uint32_t temp_ref)
 {
 	int idx, i;
 
@@ -2263,7 +2181,7 @@ static int add_audio_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, 
 		if(spriv->framebuf == NULL)
 		{
 			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(idx), abort\n");
-			return 0;
+			return -1;
 		}
 		
 		spriv->framebuf[spriv->framebuf_cnt].size = 0;
@@ -2274,7 +2192,7 @@ static int add_audio_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, 
 		if(spriv->framebuf[spriv->framebuf_cnt].buffer == NULL)
 		{
 			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
-			return 0;
+			return -1;
 		}
 		spriv->framebuf[spriv->framebuf_cnt].alloc_size = len;		
 		spriv->framebuf_cnt++;
@@ -2286,7 +2204,7 @@ static int add_audio_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, 
 		if(spriv->framebuf[idx].buffer == NULL)
 		{
 			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
-			return 0;
+			return -1;
 		}
 		spriv->framebuf[idx].alloc_size = spriv->framebuf[idx].size + len;
 	}
@@ -2294,17 +2212,13 @@ static int add_audio_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, 
 	memcpy(&(spriv->framebuf[idx].buffer[spriv->framebuf[idx].size]), ptr, len);
 	spriv->framebuf[idx].size += len;
 	spriv->framebuf[idx].pos = 0;
+	spriv->framebuf[idx].temp_ref = temp_ref;
+	spriv->framebuf[idx].type = pt;
 
 	spriv->framebuf[idx].idur = idur;
-	spriv->framebuf[idx].pts = spriv->last_pts;
 	spriv->framebuf_used++;
 
-	for(i = idx; i < spriv->framebuf_cnt; i++)
-		spriv->framebuf[i].pts = spriv->last_pts;
-
-	spriv->last_pts += idur;
-
-	return 1;
+	return idx;
 }
 
 
@@ -2312,7 +2226,7 @@ extern int aac_parse_frame(uint8_t *buf, int *srate, int *num);
 
 static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 {
-	int i, len, chans, srate, spf, layer, dummy, tot, num, frames;
+	int i, j, len, chans, srate, spf, layer, dummy, tot, num, frames, frm_idx;
 	uint64_t idur;
 	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
 
@@ -2333,7 +2247,13 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
 
 						idur = (92160000ULL * spf) / srate;
-						add_audio_frame(spriv, idur, &(s->b_buffer[i]), len);
+						frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, 0);
+						if(frm_idx < 0)
+							continue;
+						for(j = frm_idx; j < spriv->framebuf_cnt; j++)
+							spriv->framebuf[j].pts = spriv->last_pts;
+						spriv->last_pts += idur;
+
 						i += len;
 						tot = i;
 						continue;
@@ -2357,7 +2277,13 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
 
 						idur = (92160000ULL * 1536) / srate;
-						add_audio_frame(spriv, idur, &(s->b_buffer[i]), len);
+						frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, 0);
+						if(frm_idx < 0)
+							continue;
+						for(j = frm_idx; j < spriv->framebuf_cnt; j++)
+							spriv->framebuf[j].pts = spriv->last_pts;
+						spriv->last_pts += idur;
+
 						i += len;
 						tot = i;
 						continue;
@@ -2382,7 +2308,13 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
 
 						idur = (92160000ULL * 1024 * num) / srate;
-						add_audio_frame(spriv, idur, &(s->b_buffer[i]), len);
+						frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, 0);
+						if(frm_idx < 0)
+							continue;
+						for(j = frm_idx; j < spriv->framebuf_cnt; j++)
+							spriv->framebuf[j].pts = spriv->last_pts;
+						spriv->last_pts += idur;
+
 						i += len;
 						tot = i;
 						continue;
@@ -2404,7 +2336,15 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 	}
 
 	if(finalize)
-		add_audio_frame(spriv, 0, s->b_buffer, s->b_buffer_len);
+	{
+		frm_idx = add_frame(spriv, 0, s->b_buffer, s->b_buffer_len, 0, 0);
+		if(frm_idx >= 0)
+		{
+			for(j = frm_idx; j < spriv->framebuf_cnt; j++)
+				spriv->framebuf[j].pts = spriv->last_pts;
+		}
+	}
+
 	*nf = frames;
 	*timer = (double) (spriv->last_pts - spriv->init_pts)/92160000.0;
 
