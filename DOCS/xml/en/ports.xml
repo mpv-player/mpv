@@ -87,8 +87,8 @@ If you need a GUI frontend, you can use xmms-embedded.
 <sect1 id="bsd">
 <title>*BSD</title>
 <para>
-<application>MPlayer</application> runs on FreeBSD, OpenBSD, NetBSD,
-BSD/OS and Darwin. There are ports/pkgsrc/fink/etc versions of <application>MPlayer</application>
+<application>MPlayer</application> runs on all known BSD flavors.
+There are ports/pkgsrc/fink/etc versions of <application>MPlayer</application>
 available that are probably easier to use than our raw sources.
 </para>
 
@@ -141,8 +141,18 @@ See the <link linkend="macos">Mac OS</link> section.
 </sect2>
 </sect1>
 
-<sect1 id="solaris">
-<title>Sun Solaris</title>
+<sect1 id="unix">
+<title>Commercial Unix</title>
+
+<para>
+<application>MPlayer</application> has been ported to a number of commercial
+Unix variants. Since the development environments on these systems tend to be
+different from those found on free Unixes, you may have to make some manual
+adjustments to make the build work.
+</para>
+
+<sect2 id="solaris">
+<title>Solaris</title>
 <para>
 <application>MPlayer</application> should work on Solaris 2.6 or newer.
 Use the SUN audio driver with the <option>-ao sun</option> option for sound.
@@ -239,10 +249,10 @@ accessed modulo 4GB
 The hsfs problem can be fixed by installing patch 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
-</sect1>
+</sect2>
 
-<sect1 id="irix">
-<title>Silicon Graphics Irix</title>
+<sect2 id="irix">
+<title>IRIX</title>
 <para>
 You can either try to install the GNU install program, and (if you did
 not put it in your global path) then point to the location with:
@@ -268,10 +278,10 @@ And then do (from within the <application>MPlayer</application> source dir):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 and then go on with building and installing.
 </para>
-</sect1>
+</sect2>
 
 
-<sect1 id="hp-ux">
+<sect2 id="hp-ux">
 <title>HP-UX</title>
 <para>
 Joe Page hosts a detailed HP-UX <application>MPlayer</application>
@@ -388,21 +398,7 @@ default of 64MB is enough or not.)
 </listitem>
 </itemizedlist>
 
-</sect1>
-
-
-<sect1 id="qnx">
-<title>QNX</title>
-<para>
-Works. You'll need to download SDL for QNX, and install it. Then run
-<application>MPlayer</application> with <option>-vo sdl:photon</option>
-and <option>-ao sdl:nto</option> options, and it should be fast.
-</para>
-
-<para>
-The <option>-vo x11</option> output will be even slower than on Linux,
-since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
-</para>
+</sect2>
 </sect1>
 
 <sect1 id="windows">
@@ -575,6 +571,8 @@ GCC 3.x or later. If you have Mac OS X 10.3.9 or later and QuickTime 7
 you can use the macosx video output driver.
 </para>
 
+<sect2 id="osx_gui">
+<title>MPlayer OS X GUI</title>
 <para>
 You can get a native GUI for <application>MPlayer</application> together with
 precompiled <application>MPlayer</application> binaries for Mac OS X from the
@@ -675,7 +673,31 @@ not work anymore.
 </para>
 </sect1>
 
-<sect1 id="amiga">
+<sect1 id="exotic_platforms">
+<title>Exotic Platforms</title>
+
+<para>
+<application>MPlayer</application> runs on a number of exotic platforms,
+but most of the platform-specific changes from those systems have not been
+merged back into the main source tree.
+For build instructions you should refer to the system-specific documentation.
+</para>
+
+<sect2 id="qnx">
+<title>QNX</title>
+<para>
+You'll need to download and install SDL for QNX. Then run
+<application>MPlayer</application> with <option>-vo sdl:photon</option>
+and <option>-ao sdl:nto</option> options, it should be fast.
+</para>
+
+<para>
+The <option>-vo x11</option> output will be even slower than on Linux,
+since QNX has only X <emphasis>emulation</emphasis> which is very slow.
+</para>
+</sect2>
+
+<sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
 The people over at <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
@@ -705,6 +727,7 @@ Get if from <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
 </para></listitem>
 </itemizedlist>
 </para>
+</sect2>
 </sect1>
 
 </chapter>
