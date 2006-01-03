@@ -41,6 +41,7 @@ MPlayer (1.0)
     * support FLX and DTA extensions for flic files
     * QDM2 audio decoding via lavc
     * cook audio decoding via lavc
+    * TrueSpeech audio decoding via lavc
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -52,7 +53,7 @@ MPlayer (1.0)
     * MPEG in GXF container support with extension-based detection
     * faster MPEG and much faster GFX demuxing
     * more user-friendly demuxer forcing
-    * bugfix for lavc wma2 decoder, now all files should be playable
+    * bug fix for lavc WMA v2 decoder, now all files should be playable
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
@@ -720,7 +721,7 @@ MPlayer (1.0)
     * interlaced scaling support in vf_scale
     * vf_kerndeint: adaptive deinterlacer
     * vf_rgbtest: rgb test pattern generator for developers
-    * vf_qp: qp change filter
+    * vf_qp: QP change filter
     * vf_noformat: the same as vf_format but with reversed meaning
     * AltiVec-optimized SWScaler
     * vf_phase: phase shift fields
@@ -1148,7 +1149,7 @@ MPlayer (1.0)
     * ASV1 (ASUS Video v1) and ASV2 (ASUS Video v2) en/decoding
     * Improved SVQ1 decoding (using FFmpeg VLC functions)
     * truncated unary binarization, unary k-th order exp golomb binarization :)
-    * FFV1: lossless YUV codec, compresses a lot better than huffyuv, but slower
+    * FFV1: lossless YUV codec, compresses a lot better than HuffYUV, but slower
     * lossless MJPEG en/decoding, pegasus "pseudo yuv" (=RCT) decoding
     * ATI VCR1 and VCR2 decoding
     * full featured SH4 optimizations
