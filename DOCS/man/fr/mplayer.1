@@ -1,4 +1,4 @@
-.\" synced with 1.1194
+.\" synced with 1.1197
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -3682,6 +3682,9 @@ Définit les paramètres de décodage de libavcodec.
 Les options disponibles sont:
 .RE
 .RSs
+.IPs bitexact
+N'utilise pour toutes les étapes du décodage que des algorithmes
+précises au bit près (pour le test de codecs).
 .IPs bug=<valeur>
 Contourne manuellement les bogues des encodeurs.
 .RSss
@@ -9555,15 +9558,6 @@ Sera mis à jour si nécessaire dans le cas où 'format=mpeg1' ou 'mpeg2'.
 .TP
 .B tsaf\ \ \ 
 Place des markes d'horodatage (timestamps) dans chaque trame, si possible.
-.
-.TP
-.B (no)reorder
-Active le code de ré-ordonnancement de trames, qui stocke les trames
-dans l'ordre de décodage (au lieu de l'ordre d'affichage)
-(par défaut\ : désactivé).
-Ne l'utiliser que si vous pensez que si les trames du flux vidéo source
-était stocké dans le mauvais ordre.
-Ne fonctionne qu'avec les vidéos MPEG-1/2.
 .
 .TP
 .B init_vpts=<100\-700>
