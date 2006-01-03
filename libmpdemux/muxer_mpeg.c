@@ -81,7 +81,6 @@ static int conf_ts_allframes = 0;
 static int conf_init_adelay = 0;
 static int conf_drop = 0;
 static int conf_skip_padding = 0;
-static int conf_reorder = 0;
 static int conf_telecine = 0;
 
 enum FRAME_TYPE {
@@ -158,7 +157,7 @@ typedef struct {
 	uint16_t max_pl_size;
 	int32_t last_tr;
 	int max_tr;
-	uint8_t id, reorder, is_mpeg12, telecine;
+	uint8_t id, is_mpeg12, telecine;
 	uint64_t vframes;
 	uint8_t trf;
 	mp_mpeg_header_t picture;
@@ -182,8 +181,6 @@ m_option_t mpegopts_conf[] = {
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"skip_padding", &conf_skip_padding, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"reorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noreorder", &conf_reorder, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -408,7 +405,6 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
       spriv->min_pes_hlen = 18;
     else if(priv->is_xsvcd)
       spriv->min_pes_hlen = 22;
-    spriv->reorder = conf_reorder;
     spriv->telecine = conf_telecine;
     mp_msg (MSGT_MUXER, MSGL_DBG2, "Added video stream %d, ckid=%X\n", muxer->num_videos, s->ckid);
   } else { // MUXER_TYPE_AUDIO
@@ -2389,7 +2385,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     else if(is_mpeg4(stream_format)) 
     {
       spriv->is_mpeg12 = 0;
-      spriv->reorder = 0;
       spriv->telecine = 0;
       if(spriv->size == 0)
         priv->use_psm = 1;
