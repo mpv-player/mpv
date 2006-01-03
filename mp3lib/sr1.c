@@ -45,7 +45,7 @@ int MP3_fpos=0;      // current file position
 int MP3_framesize=0; // current framesize
 int MP3_bitrate=0;   // current bitrate
 int MP3_samplerate=0;  // current samplerate
-static int MP3_resync;
+int MP3_resync=0;
 int MP3_channels=0;
 int MP3_bps=2;
 
@@ -407,7 +407,6 @@ void MP3_Init(){
 
     _has_mmx = 0;
     dct36_func = dct36;
-    MP3_resync = 1;
 
     make_decode_tables(outscale);
 
