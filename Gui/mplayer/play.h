@@ -2,7 +2,7 @@
 #ifndef __GUI_PLAY_H
 #define __GUI_PLAY_H
 
-#include "../config.h"
+#include "../../config.h"
 
 #include "./mplayer.h"
 

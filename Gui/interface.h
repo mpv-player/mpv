@@ -2,7 +2,7 @@
 #ifndef _INTERFACE_H
 #define _INTERFACE_H
 
-#include "config.h"
+#include "../config.h"
 #include "mplayer/play.h"
 #include "mplayer.h"
 #include "libvo/font_load.h"
