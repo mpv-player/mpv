@@ -114,7 +114,7 @@ typedef struct {
     int coded_framesize[MAX_STREAMS]; ///< coded frame size, per stream
     int audiopk_size[MAX_STREAMS]; ///< audio packet size
     unsigned char *audio_buf; ///< place to store reordered audio data
-    float audio_timestamp; ///< timestamp for all audio packets in a block
+    float *audio_timestamp; ///< timestamp for each audio packet
     int sub_packet_cnt; ///< number of subpacket already received
     int audio_filepos; ///< file position of first audio packet in block
 } real_priv_t;
@@ -730,8 +730,8 @@ got_audio:
                     break;
             }
             priv->audio_need_keyframe = 0;
-            priv->audio_timestamp = timestamp / 1000.0f;
-            priv->a_pts = timestamp; // All packets in a block have the same timestamp
+            priv->audio_timestamp[priv->sub_packet_cnt] = (priv->a_pts==timestamp) ? 0 : (timestamp/1000.0f);
+            priv->a_pts = timestamp;
             if (priv->sub_packet_cnt == 0)
                 priv->audio_filepos = demuxer->filepos;
             if (++(priv->sub_packet_cnt) < sph)
@@ -744,7 +744,8 @@ got_audio:
                 for (x = 0; x < sph*w/apk_usize; x++) {
                     dp = new_demux_packet(apk_usize);
                     memcpy(dp->buffer, priv->audio_buf + x * apk_usize, apk_usize);
-                    dp->pts = x ? 0 : priv->audio_timestamp;
+                    /* Put timestamp only on packets that correspond to original audio packets in file */
+                    dp->pts = (x * apk_usize % w) ? 0 : priv->audio_timestamp[x * apk_usize / w];
                     dp->pos = priv->audio_filepos; // all equal
                     dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
                     ds_add_packet(ds, dp);
@@ -1044,6 +1045,7 @@ if(stream_id<256){
 	sh->ds=demuxer->audio;
 	demuxer->audio->sh=sh;
 	priv->audio_buf = malloc(priv->sub_packet_h[demuxer->audio->id] * priv->audiopk_size[demuxer->audio->id]);
+	priv->audio_timestamp = malloc(priv->sub_packet_h[demuxer->audio->id] * sizeof(float));
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM audio ID = %d\n",stream_id);
 	goto got_audio;
     }
@@ -1456,6 +1458,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			sh->ds=demuxer->audio;
 			demuxer->audio->sh=sh;
         	priv->audio_buf = malloc(priv->sub_packet_h[demuxer->audio->id] * priv->audiopk_size[demuxer->audio->id]);
+        	priv->audio_timestamp = malloc(priv->sub_packet_h[demuxer->audio->id] * sizeof(float));
 		    }
 		    
 		    ++a_streams;
