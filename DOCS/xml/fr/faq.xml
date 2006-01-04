@@ -232,7 +232,7 @@ Exemple:
 </varlistentry>
 <varlistentry><term><systemitem>41%</systemitem></term>
 <listitem><para>utilisation CPU du codec vidéo en pourcents (pour les tranches et
-le rendu direct (Direct Rendering)ceci inclus video_out)</para></listitem>
+le rendu direct (Direct Rendering) ceci inclus video_out)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>0%</systemitem></term>	 
 <listitem><para>utilisation CPU de video_out</para></listitem>

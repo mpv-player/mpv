@@ -1337,7 +1337,7 @@ int gui_no_filename=0;
   
   mp_msg_init();
 
-  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2005 MPlayer Team\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2006 MPlayer Team\n");
   /* Test for cpu capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
 #if defined(ARCH_X86) || defined(ARCH_X86_64)
