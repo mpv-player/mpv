@@ -1,4 +1,4 @@
-.\" synced with 1.1167
+.\" synced with 1.1198
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -461,8 +461,9 @@ Diminuisce/\:aumenta il volume.
 .SH "USO"
 Ogni opzione 'flag' ha una controparte 'noflag', p.es.\& l'opposto dell'opzione \-fs è \-nofs.
 .PP
-Se una opzione è marcata come (solo XXX) allora funzionerà solo in combinazione
-con l'opzione XXX oppure se XXX è stato compilato nell'eseguibile che stai usando.
+Se una opzione è marcata come '(solo XXX)' allora funzionerà solo in
+combinazione con l'opzione XXX oppure se XXX è stato compilato nell'eseguibile
+che stai usando.
 .PP
 .I NOTA:
 L'interprete delle sotto-opzioni (usato ad esempio per le sotto-opzioni di -ao pcm)
@@ -506,8 +507,10 @@ flip=yes
 # Decodifica/\:Codifica file multipli di tipo png,
 # da lanciare con mf://filemask
 mf=type=png:fps=25
-# Le immagini in negativo sono forti.
+# Le immagini vacue in negativo sono forti.
 vf=eq2=1.0:-0.8
+# Voglio che MEncoder scriva questo file di output per default.
+o=encoded.avi
 .fi
 .PP
 Puoi anche scrivere configurazioni specifiche per i singoli file.
@@ -571,15 +574,15 @@ livello di debug 4
 .
 .TP
 .B \-quiet\ 
-Rende l'uscita su console meno prolissa, in particolare disattiva la scrittura
-della linea di stato (cioè A:   0.7 V:   0.6 A-V:  0.068 ...)
-Particolarmente utile su terminali lenti oppure che non funzionano correttamente e
-non gestiscono in modo giusto il ritorno carrello (cioè \\r).
+Rende l'emissione su console meno prolissa, in particolare disattiva la
+scrittura della linea di stato (cioè A:   0.7 V:   0.6 A-V:  0.068 ...)
+Particolarmente utile su terminali lenti oppure che non funzionano correttamente
+e non gestiscono in modo giusto il ritorno carrello (cioè \\r).
 .TP
-.B \-priority <prio> (solo Windows)
+.B \-priority <priorità> (solo Windows)
 Seleziona la priorità del processo MPlayer in accordo con le priorità
 predefinite disponibili sotto Windows.
-Possibili valori di <prio>:
+Possibili valori di <priorità>:
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
 .RE
@@ -590,30 +593,20 @@ Utilizzare la priorità realtime può causare blocchi del sistema.
 .RE
 .
 .TP
-.B \-v, \-verbose
-Incrementa il livello di verbosità (più \-v implicano una maggiore verbosità).
-.PD 0
-.RSs
-.IPs "<non indicato>"
-Solo qualche informazione (default)
-.IPs \-v\ \ \ 
-Qualche informazione di base per il debug, intestazione file AVI, valori di funzione (init debug).
-.IPs \-v\ \-v
-Stampa gli indici dei file AVI, i blocchi di ingresso, più informazioni di debug (player debug).
-.IPs \-v\ \-v\ \-v
-Stampa tutto quello relativo all'interpretazione dell'input (parser debug).
-.RE
-.PD 1
+.B \-really-quiet (vedi anche \-quiet)
+Emette ancora meno messaggi di output e di stato che con \-quiet.
+.
+.TP
+.B \-v\ \ \ \ \ 
+Aumenta il livello di verbosità, di un livello per ogni \-v trovata sulla
+riga comando.
 .
 .
-.\" --------------------------------------------------------------------------
-.\" Opzioni di riproduzione
-.\" --------------------------------------------------------------------------
 .
 .SH "OPZIONI DI RIPRODUZIONE (SOLO MPLAYER)"
 .
 .TP
-.B \-autoq <quality> (da usare con \-vf [s]pp)
+.B \-autoq <qualità> (da usare con \-vf [s]pp)
 Cambia dinamicamente il livello di post elaborazione a seconda del tempo di
 CPU libero.
 Il numero che specifichi sarà il massimo livello usato.
@@ -847,12 +840,8 @@ playlist.
 FIXME: Questo deve essere chiarito e documentato completamente.
 .
 .TP
-.B \-really-quiet (vedi anche \-quiet)
-Visualizza ancora meno informazioni e messaggi di stato rispetto a \-quiet.
-.
-.TP
-.B \-rtc-device <device>
-Utilizza il device specificato per le temporizzazioni con RTC.
+.B \-rtc-device <dispositivo>
+Utilizza il dispositivo specificato per le temporizzazioni con RTC.
 .
 .TP
 .B \-shuffle
@@ -981,7 +970,7 @@ La riproduzione comincerà appena la cache verrà riempirà almeno a <percentuale>
 del totale.
 .
 .TP
-.B \-cache-seek-min <percentuale> (non ancora implementato)
+.B \-cache-seek-min <percentuale>
 Quando verrà effettuata una ricerca verso una posizione entro la <percentuale>
 della dimensione della cache dalla posizione attuale, MPlayer attenderà il
 riempimento della cache stessa fino a quella posizione, invece di effettuare la
@@ -3642,6 +3631,9 @@ Specifica i parametri di decodifica di libavcodec.
 Le opzioni disponibili sono:
 .RE
 .RSs
+.IPs bitexact
+Usa solo algoritmi bit-exact (bit esatto) in tutti i passaggi di decodifica
+(per provare i codec).
 .IPs bug=<valore>
 Lavora manualmente alla risoluzione degli errori del codificatore.
 .RSss
@@ -5142,11 +5134,12 @@ Forza il parametro di quantizzazione (default: 0, usa QP del video).
 .
 .TP
 .B uspp[=qualità[:qp]]
-Filtro di post elaborazione Ultra Semplice&Lento che comprime e decomprime
+Filtro di post elaborazione ultrasemplice & lento che comprime e decomprime
 l'immagine a parecchi (o \- nel caso del livello di qualità 8 \- tutti) 'shifts'
 (spostamenti) e media i risultati.
-La differenza da spp è che codifica&decodifica effettivamente ogni caso con
-lavc-mpeg4, mentre spp usa un intra semplificato solo 8x8 DCT simile a mjpeg
+La differenza da spp è che uspp codifica & decodifica effettivamente ogni caso
+con libavcodec MPEG-4, mentre spp usa un intra semplificato solo 8x8 DCT simile
+a MJPEG.
 .RSs
 .IPs <qualità>
 0\-8 (default: 3)
@@ -5156,7 +5149,7 @@ Forza il parametro di quantizzazione (default: 0, usa QP del video).
 .
 .TP
 .B fspp[=qualità[:qp[:forza[:fotogrammiB]]]]
-versione più veloce del filtro di post elaborazione semplice.
+versione più veloce del filtro di post elaborazione semplice
 .RSs
 .IPs <qualità>
 4\-5 (equivalente a spp; default: 4)
@@ -7031,6 +7024,8 @@ EPZS: diamante di dimensione=1, la dimensione può essere specificata
 con le opzioni *dia (default)
 .IPs 5
 X1 (sperimentale, attualmente mappato su EPZS)
+.IPs 8
+iter (blocco sovrapposto iterativo, usato solo in snow)
 .RE
 .PD 1
 .sp 1
@@ -7087,18 +7082,21 @@ Non fa assolutamente nulla, al momento.
 .
 .TP
 .B keyint=<0\-300>
-intervallo massimo fra fotogrammi chiave in fotogrammi (default: 250, cioè
-un keyframe ogni dieci secondi in un filmato a 25 fps).
+intervallo massimo fra fotogrammi chiave (keyframe) in fotogrammi
+(default: 250, cioè un keyframe ogni dieci secondi in un filmato a 25 fps.
+Questo è il default raccomandato per MPEG-4).
+.\" FIXME: mismatch tradotto con disallineamento, è giusto davvero?
+La maggior parte dei codec richiede keyframe regolari, in modo da limitare
+l'accumulo di errori di disallineamento.
 I keyframe sono necessari per il posizionamento perché il posizionamento
-è possibile solo su un keyframe.
-Lo svantaggio è che i keyframe hanno bisogno di più spazio
-rispetto agli altri tipi di fotogrammi perciò un numero alto comporta
+è possibile solo su un keyframe - ma i keyframe hanno bisogno di più spazio
+rispetto agli altri tipi di fotogrammi, perciò un numero alto comporta
 file di dimensione leggermente minore ma un posizionamento meno preciso.
 0 è equivalente a 1, che rende tutti i fotogrammi dei fotogrammi chiave.
 Valori maggiori di 300 non sono raccomandati perché la qualità può
 essere non buona e dipende dal programma di codifica, dal programma di
 decodifica e dalla fortuna (o sfortuna).
-Per avere un formato MPEG-1/2/4 conforme deve essere <= 132.
+È solito usare valori <=30 per MPEG-1/2.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
@@ -7111,7 +7109,7 @@ questa opzione.
 scena (default: 0).
 .
 .TP
-.B vb_strategy=<0\-1> (solo primo passo)
+.B vb_strategy=<0\-2> (solo primo passo)
 strategia per la scelta tra fotogrammi I/\:P/\:B:
 .PD 0
 .RSs
@@ -7119,6 +7117,32 @@ strategia per la scelta tra fotogrammi I/\:P/\:B:
 Usa sempre il numero massimo di fotogrammi di tipo B (default).
 .IPs 1
 Evita fotogrammi B in scene ad alto movimento.
+.IPs 2
+Posiziona più o meno ottimamente i fotogrammi B per ottenere massima qualità
+(più lento).
+Vorresti probabilmente ridurre l'impatto sulla velocità configurando l'opzione
+brd_scale.
+.RE
+.PD 1
+.
+.TP
+.B brd_scale=<0\-10>
+Rimpicciolisce i fotogrammi per una decisione dinamica dei fotogrammi B
+(default: 0).
+La velocità dovrebbe aumentare di un fattore 4 per ogni valore di incremento di
+brd_scale.
+.
+.TP
+.B bidir_refine=<0\-4>
+Rifinisce i due vettori di movimento usati per i macroblocchi bidirezionali,
+piuttosto che riutilizzare vettori da ricerche in avanti e indietro.
+Questa opzione non ha effetto senza fotogrammi B.
+.PD 0
+.RSs
+.IPs 0
+disabilitato (default)
+.IPs 1\-4
+Usa una ricerca più ampia (valori più alti sono più lenti).
 .RE
 .PD 1
 .
@@ -7847,6 +7871,10 @@ somma delle differenze verticali assolute
 somma del quadrato delle differenze verticali assolute
 .IPs "10 (NSSE)"
 Somma delle differenze al quadrato senza considerare il disturbo
+.IPs "11 (W53)"
+wavelet 5/3, usato solo in snow
+.IPs "12 (W97)"
+wavelet 9/7, usato solo in snow
 .IPs +256\ 
 utilizza anche la crominanza, attualmente non funziona (correttamente)
 con i fotogrammi B.
@@ -9228,6 +9256,12 @@ nei fotogrammi B.
 Richiede subq=6.
 .
 .TP
+.B (no)bime
+Rifinisce i due vettori di movimento usati per i macroblocchi bidirezionali,
+piuttosto che riutilizzare vettori da ricerche in avanti e indietro.
+Questa opzione non ha effetto senza fotogrammi B.
+.
+.TP
 .B trellis=<0\-2>
 quantizzazione ottimale della rate-distortion 
 .PD 0
@@ -9405,14 +9439,6 @@ Viene aggiornata se necessario nel caso di 'format=mpeg1' oppure 'mpeg2'.
 Imposta i marcatori di tempo (timestamps) su tutti i fotogrammi, se possibile.
 .
 .TP
-.B (no)reorder
-Abilita il codice di riordino dei fotogrammi che memorizza i fotogrammi in
-ordine di decodifica (invece che di visualizzazione) (default: disabilitato).
-Utilizzalo solo se credi che i fotogrammi nel flusso/file originale siano
-memorizzati in modo non corretto.
-Funziona solo con video MPEG-1/2.
-.
-.TP
 .B init_vpts=<100\-700>
 valore iniziale del pts (presentation time stamp) video, in millisecondi (default: 200)
 .
@@ -9494,6 +9520,237 @@ Formato MPEG-4
 Formato contenitore Sony Digital Video
 .RE
 .PD 1
+.
+.
+.\" --------------------------------------------------------------------------
+.\" environment variables
+.\" --------------------------------------------------------------------------
+.
+.SH VARIABILI D'AMBIENTE
+.
+Ci sono alcuni variabili d'ambiente che possono essere usate per controllare il
+comportamento di MPlayer e MEncoder.
+.
+.TP
+.B MPLAYER_HOME
+Cartella in cui MPlayer cerca le impostazioni utente.
+.
+.SS libaf:
+.
+.TP
+.B LADSPA_PATH
+Se LADSPA_PATH è impostato, cerca il file specificato.
+Se non lo è, va indicato un nome file completo di percorso.
+FIXME: Ciò è menzionato anche nella sezione ladspa.
+.
+.SS libmpdvdkit2:
+.
+.TP
+.B DVDCSS_CACHE
+Specifica una directory in cui memorizzare i valori delle chiavi dei titoli.
+Questo velocizzerà la decodifica dei DVD già presenti nella cache.
+La directory DVDCSS_CACHE viene creata se non esiste già, e viene creata una
+sottodirectory col nome del titolo del DVD o della data di produzione.
+Se DVDCSS_CACHE non è specificata o è vuota, libdvdcss userà il valore di
+default, che è "${HOME}/.dvdcss/" per i sistemi Unix e
+"C:\\Documents and Settings\\$USER\\Application Data\\dvdcss\\" per Win32.
+Il valore speciale "off" disabilita la cache.
+.
+.TP
+.B DVDCSS_METHOD
+Imposta il metodo di autenticazione e decrittazione che libdvdcss userà per
+leggere dischi criptati.
+Può essere 'title', 'key' o 'disc'.
+.PD 0
+.RSs
+.IPs key\ \ 
+È il metodo di default.
+libdvdcss userà un set di chiavi di decodifica calcolate per provare ad
+ottenere la chiave del disco.
+Questo può fallire se il lettore non riconosce nessuna delle chiavi del disco.
+.IPs disc\ 
+È un metodo di ripiego quando 'key' è fallito.
+Invece di usare chiavi di lettura, libdvdcss romperà la criptazione del disco
+usando un algoritmo di 'brute force'.
+Questo processo utilizza molto la CPU e richiede 64MB di memoria per
+immmagazzinare i dati temporanei.
+.IPs title
+È il ripiego quando tutti gli altri metodi sono falliti.
+Non si basa su uno scambio di chiavi col lettore DVD, ma usa invece un
+attacco crittografico per indovinare la chiave del titolo.
+Questo in rari casi può fallire perché non ci sono abbastanza dati criptati sul
+disco per fare un attacco statistico, ma d'altro canto è l'unico modo di
+decodificare un DVD memorizzato su disco rigido, o un DVD con la regione
+sbagliata o su un lettore RPC2.
+.RE
+.PD 1
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+Specifica il dispositivo grezzo da usare.
+L'indicazione esatta dipenderà dal sistema operativo, l'utilità Linux per
+impostare i dispositivi grezzi è raw(8), per esempio.
+Nota per favore che in molti sistemi operativi, l'utilizzo di un dispositivo
+grezzo richiede buffer altamente allineati: Linux richiede un allineamento di
+2048 Byte (che è la dimensione di un settore DVD).
+.
+.TP
+.B DVDCSS_VERBOSE
+Imposta il livello di verbosità di libdvdcss.
+.PD 0
+.RSs
+.IPs 0
+Non emette nessun messaggio.
+.IPs 1
+Emette messaggi di errore su stderr.
+.IPs 2
+Emette messaggi di errore e di debug su stderr.
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+DVDREAD_NOKEYS is MPlayer specific, but currently unused.
+In the file libmpdvdkit2/dvd_reader.c DVDREAD_NOKEYS is used
+in the funcion initAllCSSKeys, but the only place where this
+function is called is commented.
+.
+.TP
+.B HOME
+FIXME: Da documentare.
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+FIXME: Da documentare.
+.
+.TP
+.B AUDIODEV
+FIXME: Da documentare.
+.
+.TP
+.B AUDIOSERVER
+Specifica il server Network Audio System a cui dovrebbe connettersi il driver di
+uscita audio nas, e il tipo di trasporto che dovrebbe essere usato.
+Se non impostato viene usata la variabile DISPLAY.
+Il tipo di trasporto può essere 'tcp' o 'unix'.
+La sintassi è tcp/<host>:<porta>, <host>:<istanza>
+o [unix]:<instanza>.
+La porta NAS di base è 8000 e <istanza> viene aggiunta a questa.
+.sp 1
+.RS
+.I ESEMPI:
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=host:0
+Connessione al server NAS su host usando la porta e il trasporto di default.
+.IPs AUDIOSERVER=tcp/host:8000
+Connessione al server NAS su host in ascolto sulla porta TCP 8000.
+.IPs AUDIOSERVER=(unix)?:0
+Connessione all'istanza 0 del server NAS su localhost usando socket unix.
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+FIXME: Da documentare.
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+FIXME: Da documentare.
+.
+.SS osdep:
+.
+.TP
+.B TERM
+FIXME: Da documentare.
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+FIXME: Da documentare.
+.
+.TP
+.B FRAMEBUFFER
+FIXME: Da documentare.
+.
+.TP
+.B HOME
+FIXME: Da documentare.
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+FIXME: Da documentare.
+.
+.TP
+.B HOMEPATH
+FIXME: Da documentare.
+.
+.TP
+.B http_proxy
+FIXME: Da documentare.
+.
+.TP
+.B LOGNAME
+FIXME: Da documentare.
+.
+.TP
+.B USERPROFILE
+FIXME: Da documentare.
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+FIXME: Da documentare.
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+FIXME: Da documentare.
+.
+.TP
+.B DISPLAY
+FIXME: Da documentare.
+.
+.TP
+.B HOME
+FIXME: Da documentare.
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+FIXME: Da documentare.
+.
+.TP
+.B BKTR_DEV
+FIXME: Da documentare.
+.
+.TP
+.B BKTR_FORMAT
+FIXME: Da documentare.
+.
+.TP
+.B BKTR_FREQUENCY
+FIXME: Da documentare.
+.
+.TP
+.B http_proxy
+FIXME: Da documentare.
+.
+.TP
+.B no_proxy
+FIXME: Da documentare.
+.
 .
 .
 .\" --------------------------------------------------------------------------
