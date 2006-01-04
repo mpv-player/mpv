@@ -114,7 +114,7 @@ typedef struct {
     int coded_framesize[MAX_STREAMS]; ///< coded frame size, per stream
     int audiopk_size[MAX_STREAMS]; ///< audio packet size
     unsigned char *audio_buf; ///< place to store reordered audio data
-    int audio_timestamp; ///< timestamp for all audio packets in a block
+    float audio_timestamp; ///< timestamp for all audio packets in a block
     int sub_packet_cnt; ///< number of subpacket already received
     int audio_filepos; ///< file position of first audio packet in block
 } real_priv_t;
