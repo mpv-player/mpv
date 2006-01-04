@@ -93,8 +93,9 @@ DESCRIPTION
 INTERACTIVE CONTROL
     A description of MPlayer's input system and the interactive controls.
 USAGE
-    Some general notes about the options and a description of the config file
-    format.
+    Some general notes about usage.
+CONFIGURATION FILES
+    A description of the configuration file format.
 GENERAL OPTIONS
     General options that are common to both MPlayer and MEncoder.
 PLAYER OPTIONS (MPLAYER ONLY)
