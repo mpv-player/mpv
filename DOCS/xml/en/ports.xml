@@ -671,6 +671,7 @@ You can also use the <application>Xcode</application> 2.1 project;
 the old project for <application>Xcode</application> 1.x does
 not work anymore.
 </para>
+</sect2>
 </sect1>
 
 <sect1 id="exotic_platforms">
