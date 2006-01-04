@@ -437,7 +437,7 @@ Decrease/\:increase volume.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Options
+.\" Usage
 .\" --------------------------------------------------------------------------
 .
 .SH "USAGE"
@@ -463,6 +463,12 @@ Or in a script:
 .br
 mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
+.
+.\" --------------------------------------------------------------------------
+.\" Configuration files
+.\" --------------------------------------------------------------------------
+.
+.SH "CONFIGURATION FILES"
 You can put all of the options in configuration files which will be read
 every time MPlayer/MEncoder is run.
 The system-wide configuration file 'mplayer.conf' is in your configuration
@@ -479,7 +485,8 @@ Options that work without values can be enabled by setting them to 'yes'
 or '1' or 'true' and disabled by setting them to 'no' or '0' or 'false'.
 Even suboptions can be specified in this way.
 .PP
-.I EXAMPLE:
+.I EXAMPLE MPLAYER CONFIGURATION FILE:
+.sp 1
 .nf
 # Use Matrox driver by default.
 vo=xmga
@@ -490,8 +497,31 @@ flip=yes
 mf=type=png:fps=25
 # Eerie negative images are cool.
 vf=eq2=1.0:-0.8
-# I want MEncoder to output to this filename by default.
+.fi
+.PP
+.I "EXAMPLE MENCODER CONFIGURATION FILE:"
+.sp 1
+.nf
+# Make MEncoder output to a default filename.
 o=encoded.avi
+# The next 4 lines allow mencoder tv:// to start capturing immediately.
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# more complex default encoding option set
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
 .fi
 .PP
 You can also write file-specific configuration files.
@@ -499,7 +529,9 @@ If you wish to have a configuration file for a file called 'movie.avi', create a
 named 'movie.avi.conf' with the file-specific options in it and put it in
 ~/.mplayer/ or in the same directory as the file.
 .
-.
+.\" --------------------------------------------------------------------------
+.\" Options
+.\" --------------------------------------------------------------------------
 .
 .SH "GENERAL OPTIONS"
 .
