@@ -1804,6 +1804,10 @@ static void demux_close_real(demuxer_t *demuxer)
     	for(i=0; i<MAX_STREAMS; i++)
 	    if(priv->index_table[i])
 	        free(priv->index_table[i]);
+    if (priv->audio_buf)
+        free(priv->audio_buf);
+    if (priv->audio_timestamp)
+        free(priv->audio_timestamp);
 	free(priv);
     }
 
