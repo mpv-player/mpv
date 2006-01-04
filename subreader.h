@@ -29,7 +29,7 @@ extern int sub_format;
 
 #define MAX_SUBTITLE_FILES 128
 
-#define SUB_MAX_TEXT 10
+#define SUB_MAX_TEXT 12
 #define SUB_ALIGNMENT_BOTTOMLEFT       1
 #define SUB_ALIGNMENT_BOTTOMCENTER     2
 #define SUB_ALIGNMENT_BOTTOMRIGHT      3

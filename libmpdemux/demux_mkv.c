@@ -2546,16 +2546,19 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
           ptr1++;
       
           /* Newline */
-          if (*ptr1 == '\\' && ptr1+1-block < size && (*(ptr1+1)|0x20) == 'n')
+          while (*ptr1 == '\\' && ptr1+1-block < size && (*(ptr1+1)|0x20) == 'n')
             {
               mkv_d->clear_subs_at[mkv_d->subs.lines++]
                 = timecode + block_duration;
               *ptr2 = '\0';
               if (mkv_d->subs.lines >= SUB_MAX_TEXT)
                 {
-                  mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many "
-                          "sublines to render, skipping\n");
-                  return;
+                  mp_msg (MSGT_DEMUX, MSGL_WARN, "\n[mkv] Warning: too many "
+                          "sublines to render, skipping after first %i\n",
+                          SUB_MAX_TEXT);
+                  mkv_d->subs.lines--;
+                  ptr1=block+size;
+                  break;
                 }
               ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
               ptr1 += 2;
@@ -2568,7 +2571,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     }
   else
     {
-      while (ptr1 - block != size)
+      while (ptr1 - block < size)
         {
           if (*ptr1 == '\n' || *ptr1 == '\r')
             {
@@ -2579,9 +2582,12 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                     = timecode + block_duration;
                   if (mkv_d->subs.lines >= SUB_MAX_TEXT)
                     {
-                      mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many "
-                              "sublines to render, skipping\n");
-                      return;
+                      mp_msg (MSGT_DEMUX, MSGL_WARN, "\n[mkv] Warning: too many "
+                              "sublines to render, skipping after first %i\n",
+                              SUB_MAX_TEXT);
+                      mkv_d->subs.lines--;
+                      ptr1=block+size;
+                      break;
                     }
                   ptr2 = mkv_d->subs.text[mkv_d->subs.lines];
                   state = 1;
