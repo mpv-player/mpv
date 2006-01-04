@@ -111,7 +111,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  #include <dirent.h>
   
 -#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__)
-+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__) || defined(__DragonFly__)
++#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__) || defined(__DARWIN__) || defined(__DragonFly__)
  #define SYS_BSD 1
  #endif
  
@@ -321,6 +321,19 @@ diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
      }
 
 diff -Naur dvdread.orig/ifo_print.h dvdread/ifo_print.h
+--- dvdread/ifo_print.h 2002-08-15 22:13:21.000000000 +0200
++++ /home/diego/src/mplayer/vanilla/libmpdvdkit2/ifo_print.h    2005-12-29 13:13:21.000000000 +0100
+@@ -20,8 +24,8 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
+-#include <dvdread/ifo_types.h>
+-#include <dvdread/dvd_reader.h>
++#include "ifo_types.h"
++#include "dvd_reader.h"
+ 
+ #ifdef __cplusplus
+ extern "C" {
 diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
 --- dvdread.orig/ifo_read.c	30 Jun 2005 22:48:26 -0000	1.4
 +++ dvdread/ifo_read.c	3 Oct 2005 14:29:01 -0000	1.5
