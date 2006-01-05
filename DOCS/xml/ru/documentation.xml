@@ -181,10 +181,15 @@ Public License Version 2.
 </chapter>
 
 
-&features.xml;
 &usage.xml;
-&faq.xml;
 &cd-dvd.xml;
+&faq.xml;
+
+&features.xml;
+
+&video.xml;
+&audio.xml;
+
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
