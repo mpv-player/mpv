@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
-<sect1 id="install">
+<chapter id="install">
 <title>Installation</title>
 
 <para>
@@ -22,8 +22,7 @@ contain. It will take some time, but it IS worth it.
 You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 </para>
 
-
-<sect2 id="softreq">
+<sect1 id="softreq">
 <title>Software requirements</title>
 
 <itemizedlist>
@@ -132,10 +131,10 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <filename>./configure</filename> where that file is.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="installation_codecs">
 <title>Codecs</title>
 
 <itemizedlist>
@@ -258,10 +257,10 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   section for installation instructions and more information.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="video-cards">
+<sect1 id="video-cards">
 <title>Video cards</title>
 
 <para>
@@ -271,7 +270,7 @@ the other cards don't.
 </para>
 
 
-<sect3 id="yuv-cards">
+<sect2 id="yuv-cards">
 <title>YUV cards</title>
 
 <para>
@@ -348,10 +347,10 @@ zooming), thus fullscreen is nice and very fast.
   </para></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Non-YUV cards">
+<sect2 id="non-yuv-cards" xreflabel="Non-YUV cards">
 <title>Non-YUV cards</title>
 
 <para>
@@ -377,10 +376,10 @@ it works with the following drivers:
   </simpara></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
 <title>Cirrus-Logic cards</title>
 <itemizedlist>
 <listitem><para>
@@ -410,11 +409,11 @@ it works with the following drivers:
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
-</sect3>
 </sect2>
+</sect1>
 
 
-<sect2 id="sound-cards">
+<sect1 id="sound-cards">
 <title>Sound cards</title>
 
 <itemizedlist>
@@ -435,10 +434,10 @@ it works with the following drivers:
   to read the <link linkend="audio">sound card</link> section!</emphasis>
   </simpara></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="features">
 <title>Features</title>
 
 <itemizedlist>
@@ -521,7 +520,6 @@ font file and telling <application>MPlayer</application> to use it.
 See the <link linkend="subosd">Subtitles and OSD</link> section for details.
 </para>
 
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -957,3 +955,5 @@ It's a clear way for everyone to become root.
 </para></note>
 </para>
 </sect1>
+
+</chapter>

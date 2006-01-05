@@ -172,14 +172,20 @@ can be distributed under the terms of the GNU General Public License Version 2.
 </para>
 
 &history.xml;
-&install.xml;
 </chapter>
 
+&install.xml;
 
-&features.xml;
 &usage.xml;
-&faq.xml;
 &cd-dvd.xml;
+&faq.xml;
+
+&formats.xml;
+&codecs.xml;
+&video.xml;
+&audio.xml;
+&tvinput.xml;
+
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;

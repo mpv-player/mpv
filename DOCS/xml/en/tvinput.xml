@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
+<chapter id="tv">
+<title>TV</title>
+
 <sect1 id="tv-input" xreflabel="TV input">
 <title>TV input</title>
 
@@ -211,3 +214,5 @@ pixel averaging only in the horizontal direction due to a hardware limitation.
 </informalexample>
 </sect2>
 </sect1>
+
+</chapter>
