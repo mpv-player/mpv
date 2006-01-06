@@ -60,6 +60,7 @@ MPlayer (1.0)
     * show SHOUT/Icecast metadata while playing
     * ultravox (unsv://) streaming support
     * stream code ported to new modular api, massive code cleanup
+    * bandwidth selection for Real RTSP streams (for faster stream dumps)
 
     FFmpeg/libavcodec:
     * Snow bug fixes and speedup
