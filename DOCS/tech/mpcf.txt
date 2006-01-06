@@ -1,5 +1,5 @@
 ========================================
-NUT Open Container Format DRAFT 20051118
+NUT Open Container Format DRAFT 20060105
 ========================================
 
 
@@ -23,7 +23,7 @@ Compact
     ~0.2% overhead, for normal bitrates
     index is <10kb per hour (1 keyframe every 3sec)
     a usual header for a file is about 100 bytes (audio + video headers together)
-    a packet header is about ~1-8 bytes
+    a packet header is about ~1-5 bytes
 
 Error resistant
     seeking / playback without an index
@@ -243,6 +243,8 @@ info_frame: (optional)
             name                        vb
         if(type=="v")
             value                       v
+        else if(type=="s")
+            value                       s
         else
             value                       vb
     }
@@ -254,8 +256,8 @@ info_packet: (optional)
     packet header
     info_frame
 
-sync_point:
-    frame_startcode                     f(64)
+syncpoint:
+    syncpoint_startcode                 f(64)
     global_timestamp                    v
     back_ptr                            v
 
@@ -277,8 +279,8 @@ file:
             info_packet
         }
         while(next_code != main_startcode){
-            if(next_code == frame_startcode)
-                sync_point
+            if(next_code == syncpoint_startcode)
+                syncpoint
             frame
         }
     }
@@ -316,10 +318,10 @@ main_startcode
 stream_starcode
     0x11405BF2F9DBULL + (((uint64_t)('N'<<8) + 'S')<<48)
 
-frame_startcode
+syncpoint_startcode
     0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
 
-    frame_startcodes SHOULD be placed immediately before a keyframe if the
+    syncpoint_startcodes SHOULD be placed immediately before a keyframe if the
     previous frame of the same stream was a non-keyframe, unless such
     non-keyframe - keyframe transitions are very frequent
 
@@ -333,8 +335,8 @@ version
     NUT version. The current value is 2.
 
 max_distance
-    max distance of frame_startcodes, the distance may only be larger if
-    there is only a single frame between the two frame_startcodes this can
+    max distance of syncpoints, the distance may only be larger if
+    there is no more than a single frame between the two syncpoints. This can
     be used by the demuxer to detect damaged frame headers if the damage
     results in too long of a chain
 
