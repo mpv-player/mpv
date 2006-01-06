@@ -114,10 +114,6 @@ Common elements:
 packet header:
     forward ptr                         v
 
-align_byte:
-    while(not byte aligned)
-        one                             f(1)
-
 reserved_bytes:
     for(i=0; i<forward_ptr - length_of_non_reserved; i++)
         reserved                        u(8)
