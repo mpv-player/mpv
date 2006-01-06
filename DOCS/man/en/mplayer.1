@@ -9438,111 +9438,154 @@ in this order:
 .
 .SH EXAMPLES OF MPLAYER USAGE
 .
-.TP
+.PP
 .B Quickstart DVD playing:
+.nf
 mplayer dvd://1
+.fi
 .
-.TP
+.PP
 .B Play in Japanese with English subtitles:
+.nf
 mplayer dvd://1 \-alang ja \-slang en
+.fi
 .
-.TP
+.PP
 .B Play only chapters 5, 6, 7:
+.nf
 mplayer dvd://1 \-chapter 5-7
+.fi
 .
-.TP
+.PP
 .B Play only titles 5, 6, 7:
+.nf
 mplayer dvd://5-7
+.fi
 .
-.TP
+.PP
 .B Play a multiangle DVD:
+.nf
 mplayer dvd://1 \-dvdangle 2
+.fi
 .
-.TP
+.PP
 .B Play from a different DVD device:
+.nf
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.fi
 .
-.TP
+.PP
 .B Play DVD video from a directory with VOB files:
+.nf
 mplayer dvd://1 \-dvd-device /path/\:to/\:directory/
+.fi
 .
-.TP
+.PP
 .B Copy a DVD title to hard disk, saving to file "title1.vob":
+.nf
 mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
+.fi
 .
-.TP
+.PP
 .B Stream from HTTP:
+.nf
 mplayer http://mplayer.hq/\:example.avi
+.fi
 .
-.TP
+.PP
 .B Stream using RTSP:
+.nf
 mplayer rtsp://server.example.com/\:streamName
+.fi
 .
-.TP
+.PP
 .B Convert subtitles to MPsub format:
+.nf
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
+.fi
 .
-.TP
+.PP
 .B Convert subtitles to MPsub format without watching the movie:
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop
-\-benchmark \-sub source.sub \-dumpmpsub
+.nf
+mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+.fi
 .
-.TP
+.PP
 .B input from standard V4L:
-mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
-\-vo xv
+.nf
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
+.fi
 .
-.TP
+.PP
 .B Playback on Zoran cards (old style, deprecated):
+.nf
 mplayer \-vo zr \-vf scale=352:288 file.avi
+.fi
 .
-.TP
+.PP
 .B Playback on Zoran cards (new style):
+.nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
+.fi
 .
-.TP
+.PP
 .B Play a 6-channel AAC file with only two speakers:
+.nf
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+.fi
 .br
 You might want to play a bit with the pan values (e.g multiply with a value) to
 increase volume or avoid clipping.
 .
 .SH EXAMPLES OF MENCODER USAGE
 .
-.TP
+.PP
 .B Encode DVD title #2, only selected chapters:
+.nf
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Encode DVD title #2, resizing to 640x480:
+.nf
 mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Encode DVD title #2, resizing to 512xHHH (keep aspect ratio):
-mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
-\-ovc lavc \-lavcopts vcodec=mpeg4
+.nf
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B The same, but with bitrate set to 1800kbit and optimized macroblocks:
-mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
-\-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.nf
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.fi
 .
-.TP
+.PP
 .B The same, but with MJPEG compression:
-mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
-\-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
+.nf
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
+.fi
 .
-.TP
+.PP
 .B Encode all *.jpg files in the current directory:
+.nf
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Encode from a tuner (specify a format with \-vf format):
+.nf
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
+.fi
 .
-.TP
+.PP
 .B Encode from a pipe:
+.nf
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
+.fi
 .
 .
 .\" --------------------------------------------------------------------------
