@@ -481,9 +481,9 @@ dts
     stream, into which the current pts is inserted and the element with
     the smallest value is removed, this is then the current dts
     this buffer is initalized with decode_delay -1 elements
-    all frames must be monotone, that means a frame
-    which occurs later in the stream must have a larger or equal dts
-    than an earlier frame
+
+    Pts of all frames in all streams MUST be bigger or equal to dts of all
+    previous frames in all streams, compared in common timebase.
 
 width/height
     MUST be set to the coded width/height
