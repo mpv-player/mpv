@@ -706,12 +706,17 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   char *mrl=rtsp_get_mrl(rtsp_session);
   unsigned int size;
   int status;
+  uint32_t maxbandwidth = bandwidth;
   
   /* get challenge */
   challenge1=strdup(rtsp_search_answers(rtsp_session,"RealChallenge1"));
 #ifdef LOG
   printf("real: Challenge1: %s\n", challenge1);
 #endif
+
+  /* set a reasonable default to get the best stream, unless bandwidth given */
+  if (!bandwidth)
+      bandwidth = 10485800;
   
   /* request stream description */
   rtsp_schedule_field(rtsp_session, "Accept: application/sdp");
@@ -810,6 +815,13 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   /* set stream parameter (bandwidth) with our subscribe string */
   rtsp_schedule_field(rtsp_session, subscribe);
   rtsp_request_setparameter(rtsp_session,NULL);
+
+  /* set delivery bandwidth */
+  if (maxbandwidth) {
+      sprintf(buf, "SetDeliveryBandwidth: Bandwidth=%u;BackOff=0", maxbandwidth);
+      rtsp_schedule_field(rtsp_session, buf);
+      rtsp_request_setparameter(rtsp_session,NULL);
+  }
 
   {
     int s_ss = 0, s_ms = 0, e_ss = 0, e_ms = 0;
