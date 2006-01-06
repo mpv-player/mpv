@@ -135,8 +135,6 @@ main header:
     stream_count                        v
     max_distance                        v
     max_index_distance                  v
-    global_time_base_nom                v
-    global_time_base_denom              v
     for(i=0; i<256; ){
         tmp_flag                        v
         tmp_fields                      v
@@ -258,7 +256,9 @@ info_packet: (optional)
 
 syncpoint:
     syncpoint_startcode                 f(64)
-    global_timestamp                    v
+    coded_pts                           v
+    stream = coded_pts % stream_count
+    global_key_pts = coded_pts/stream_count
     back_ptr                            v
 
             Complete definition:
@@ -305,6 +305,10 @@ back_ptr
     startcode begins within the next 8 bytes, and such that at least
     one keyframe for each stream lies between the syncpoint to which
     real_back_ptr points, and the current syncpoint.
+
+global_key_pts
+    After a syncpoint, last_pts of each stream is to be set to:
+    last_pts[i] = convert_ts(global_key_pts, timebase[stream], timebase[i])
 
 file_id_string
     "nut/multimedia container\0"
@@ -383,22 +387,15 @@ time_base_nom / time_base_denom = time_base
         29.97     1001             30000
         23.976    1001             24000
 
-global_time_base_nom / global_time_base_denom = global_time_base
-    the length of a timer tick in seconds
-    global_time_base_nom and global_time_base_denom MUST NOT be 0
-    global_time_base_nom and global_time_base_denom MUST be relatively prime
-    global_time_base_denom MUST be < 2^31
+convert_ts
+    To switch from 2 different timebases, the following calculation is
+    defined:
 
-global_timestamp
-    timestamp in global_time_base units
-    when a global_timestamp is encountered the last_pts of all
-    streams is set to the following:
-
-    ln       = global_time_base_nom*time_base_denom
-    sn       = global_timestamp
-    d1       = global_time_base_denom
-    d2       = time_base_nom
-    last_pts = (ln/d1*sn + ln%d1*sn/d1)/d2
+    ln        = from_time_base_nom*to_time_base_denom
+    sn        = from_timestamp
+    d1        = from_time_base_denom
+    d2        = to_time_base_nom
+    timestamp = (ln/d1*sn + ln%d1*sn/d1)/d2
     Note: this calculation MUST be done with unsigned 64 bit integers, and
     is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
 
