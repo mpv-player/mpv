@@ -29,7 +29,7 @@ my $dcarea = <<"EOF";
 EOF
 
   $dcarea .= "vo=" . scalar(get("mplayer/voutput"));
-  $dcarea .= "\n";
+  $dcarea .= ",\n";
 
 $mcfg->setconfarea($dcarea);
 
