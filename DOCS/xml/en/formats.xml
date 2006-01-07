@@ -12,15 +12,15 @@ popular belief such a file <emphasis>can</emphasis> contain MPEG-1 video.
 
 <para>
 You see, a <emphasis role="bold">codec</emphasis> is not the same as a
-<emphasis role="bold">file format</emphasis>.
+<emphasis role="bold">container format</emphasis>.
 Examples of video <emphasis role="bold">codecs</emphasis> are: MPEG-1, MPEG-2,
 MPEG-4 (DivX), Indeo5, 3ivx.
-Examples of file <emphasis role="bold">formats</emphasis> are: MPG, AVI, ASF.
+Examples of container <emphasis role="bold">formats</emphasis> are: MPG, AVI, ASF.
 </para>
 
 <para>
 In theory, you can put an OpenDivX video and MP3 audio
-into an <emphasis role="bold">MPG format file</emphasis>. However, most
+into an <emphasis role="bold">MPG container</emphasis>. However, most
 players will not play it, since they expect MPEG-1 video and MP2 audio (unlike
 <emphasis role="bold">AVI</emphasis>, <emphasis role="bold">MPG</emphasis>
 does not have the necessary fields to describe its video and audio streams).
@@ -434,12 +434,6 @@ man page may help you in these cases.
 </para>
 </sect2>
 
-<sect2 id="wav">
-<title>WAV files</title>
-<para>
-</para>
-</sect2>
-
 <sect2 id="ogg-vorbis">
 <title>OGG/OGM files (Vorbis)</title>
 <para>
@@ -447,17 +441,6 @@ Requires properly installed
 <systemitem class="library">libogg</systemitem> and
 <systemitem class="library">libvorbis</systemitem>.
 </para>
-</sect2>
-
-<sect2 id="wma-asf">
-<title>WMA/ASF files</title>
-<para>
-</para>
-</sect2>
-
-<sect2 id="mp4">
-<title>MP4 files</title>
-<para></para>
 </sect2>
 
 <sect2 id="cdda">
