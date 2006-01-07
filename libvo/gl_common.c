@@ -246,6 +246,41 @@ static void *setNull(const GLubyte *s) {
   return NULL;
 }
 
+typedef struct {
+  void **funcptr;
+  char *extstr;
+  char *funcnames[7];
+} extfunc_desc_t;
+
+static const extfunc_desc_t extfuncs[] = {
+  {(void **)&GenBuffers, NULL, {"glGenBuffers", "glGenBuffersARB", NULL}},
+  {(void **)&DeleteBuffers, NULL, {"glDeleteBuffers", "glDeleteBuffersARB", NULL}},
+  {(void **)&BindBuffer, NULL, {"glBindBuffer", "glBindBufferARB", NULL}},
+  {(void **)&MapBuffer, NULL, {"glMapBuffer", "glMapBufferARB", NULL}},
+  {(void **)&UnmapBuffer, NULL, {"glUnmapBuffer", "glUnmapBufferARB", NULL}},
+  {(void **)&BufferData, NULL, {"glBufferData", "glBufferDataARB", NULL}},
+  {(void **)&CombinerParameterfv, NULL, {"glCombinerParameterfv", "glCombinerParameterfvNV", NULL}},
+  {(void **)&CombinerParameteri, NULL, {"glCombinerParameteri", "glCombinerParameteriNV", NULL}},
+  {(void **)&CombinerInput, NULL, {"glCombinerInput", "glCombinerInputNV", NULL}},
+  {(void **)&CombinerOutput, NULL, {"glCombinerOutput", "glCombinerOutputNV", NULL}},
+  {(void **)&BeginFragmentShader, NULL, {"glBeginFragmentShaderATI", NULL}},
+  {(void **)&EndFragmentShader, NULL, {"glEndFragmentShaderATI", NULL}},
+  {(void **)&SampleMap, NULL, {"glSampleMapATI", NULL}},
+  {(void **)&ColorFragmentOp2, NULL, {"glColorFragmentOp2ATI", NULL}},
+  {(void **)&ColorFragmentOp3, NULL, {"glColorFragmentOp3ATI", NULL}},
+  {(void **)&SetFragmentShaderConstant, NULL, {"glSetFragmentShaderConstantATI", NULL}},
+  {(void **)&ActiveTexture, NULL, {"glActiveTexture", "glActiveTextureARB", NULL}},
+  {(void **)&BindTexture, NULL, {"glBindTexture", "glBindTextureARB", NULL}},
+  {(void **)&MultiTexCoord2f, NULL, {"glMultiTexCoord2f", "glMultiTexCoord2fARB", NULL}},
+  {(void **)&GenPrograms, NULL, {"glGenPrograms", "glGenProgramsARB", "glGenProgramsNV", NULL}},
+  {(void **)&DeletePrograms, NULL, {"glDeletePrograms", "glDeleteProgramsARB", "glDeleteProgramsNV", NULL}},
+  {(void **)&BindProgram, NULL, {"glBindProgram", "glBindProgramARB", "glBindProgramNV", NULL}},
+  {(void **)&ProgramString, NULL, {"glProgramString", "glProgramStringARB", "glProgramStringNV", NULL}},
+  {(void **)&ProgramEnvParameter4f, NULL, {"glProgramEnvParameter4f", "glProgramEnvParameter4fARB", "glProgramEnvParameter4fNV", NULL}},
+  {(void **)&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalEXT", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
+  {NULL}
+};
+
 /**
  * \brief find the function pointers of some useful OpenGL extensions
  * \param getProcAddress function to resolve function names, may be NULL
@@ -253,96 +288,27 @@ static void *setNull(const GLubyte *s) {
  */
 static void getFunctions(void *(*getProcAddress)(const GLubyte *),
                          const char *ext2) {
+  const extfunc_desc_t *dsc;
   const char *extensions = glGetString(GL_EXTENSIONS);
+  char *allexts;
   if (!extensions) extensions = "";
   if (!ext2) ext2 = "";
+  allexts = (char *)malloc(strlen(extensions) + strlen(ext2) + 2);
+  strcpy(allexts, extensions);
+  strcat(allexts, " ");
+  strcat(allexts, ext2);
   if (!getProcAddress)
     getProcAddress = setNull;
-  GenBuffers = getProcAddress("glGenBuffers");
-  if (!GenBuffers)
-    GenBuffers = getProcAddress("glGenBuffersARB");
-  DeleteBuffers = getProcAddress("glDeleteBuffers");
-  if (!DeleteBuffers)
-    DeleteBuffers = getProcAddress("glDeleteBuffersARB");
-  BindBuffer = getProcAddress("glBindBuffer");
-  if (!BindBuffer)
-    BindBuffer = getProcAddress("glBindBufferARB");
-  MapBuffer = getProcAddress("glMapBuffer");
-  if (!MapBuffer)
-    MapBuffer = getProcAddress("glMapBufferARB");
-  UnmapBuffer = getProcAddress("glUnmapBuffer");
-  if (!UnmapBuffer)
-    UnmapBuffer = getProcAddress("glUnmapBufferARB");
-  BufferData = getProcAddress("glBufferData");
-  if (!BufferData)
-    BufferData = getProcAddress("glBufferDataARB");
-  CombinerParameterfv = getProcAddress("glCombinerParameterfv");
-  if (!CombinerParameterfv)
-    CombinerParameterfv = getProcAddress("glCombinerParameterfvNV");
-  CombinerParameteri = getProcAddress("glCombinerParameteri");
-  if (!CombinerParameteri)
-    CombinerParameteri = getProcAddress("glCombinerParameteriNV");
-  CombinerInput = getProcAddress("glCombinerInput");
-  if (!CombinerInput)
-    CombinerInput = getProcAddress("glCombinerInputNV");
-  CombinerOutput = getProcAddress("glCombinerOutput");
-  if (!CombinerOutput)
-    CombinerOutput = getProcAddress("glCombinerOutputNV");
-  BeginFragmentShader = getProcAddress("glBeginFragmentShaderATI");
-  EndFragmentShader = getProcAddress("glEndFragmentShaderATI");
-  SampleMap = getProcAddress("glSampleMapATI");
-  ColorFragmentOp2 = getProcAddress("glColorFragmentOp2ATI");
-  ColorFragmentOp3 = getProcAddress("glColorFragmentOp3ATI");
-  SetFragmentShaderConstant = getProcAddress("glSetFragmentShaderConstantATI");
-  ActiveTexture = getProcAddress("glActiveTexture");
-  if (!ActiveTexture)
-    ActiveTexture = getProcAddress("glActiveTextureARB");
-  BindTexture = getProcAddress("glBindTexture");
-  if (!BindTexture)
-    BindTexture = getProcAddress("glBindTextureARB");
-  MultiTexCoord2f = getProcAddress("glMultiTexCoord2f");
-  if (!MultiTexCoord2f)
-    MultiTexCoord2f = getProcAddress("glMultiTexCoord2fARB");
-  GenPrograms = getProcAddress("glGenPrograms");
-  if (!GenPrograms)
-    GenPrograms = getProcAddress("glGenProgramsARB");
-  if (!GenPrograms)
-    GenPrograms = getProcAddress("glGenProgramsNV");
-  DeletePrograms = getProcAddress("glDeletePrograms");
-  if (!DeletePrograms)
-    DeletePrograms = getProcAddress("glDeleteProgramsARB");
-  if (!DeletePrograms)
-    DeletePrograms = getProcAddress("glDeleteProgramsNV");
-  BindProgram = getProcAddress("glBindProgram");
-  if (!BindProgram)
-    BindProgram = getProcAddress("glBindProgramARB");
-  if (!BindProgram)
-    BindProgram = getProcAddress("glBindProgramNV");
-  ProgramString = getProcAddress("glProgramString");
-  if (!ProgramString)
-    ProgramString = getProcAddress("glProgramStringARB");
-  if (!ProgramString)
-    ProgramString = getProcAddress("glProgramStringNV");
-  ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4f");
-  if (!ProgramEnvParameter4f)
-    ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fARB");
-  if (!ProgramEnvParameter4f)
-    ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fNV");
-  if (!strstr(extensions, "_swap_control") && !strstr(ext2, "_swap_control"))
-    SwapInterval = NULL;
-  else {
-  SwapInterval = getProcAddress("glXSwapInterval");
-  if (!SwapInterval)
-    SwapInterval = getProcAddress("glXSwapIntervalEXT");
-  if (!SwapInterval)
-    SwapInterval = getProcAddress("glXSwapIntervalSGI");
-  if (!SwapInterval)
-    SwapInterval = getProcAddress("wglSwapInterval");
-  if (!SwapInterval)
-    SwapInterval = getProcAddress("wglSwapIntervalEXT");
-  if (!SwapInterval)
-    SwapInterval = getProcAddress("wglSwapIntervalSGI");
+  for (dsc = extfuncs; dsc->funcptr; dsc++) {
+    void *ptr = NULL;
+    int i;
+    if (!dsc->extstr || strstr(allexts, dsc->extstr)) {
+      for (i = 0; !ptr && dsc->funcnames[i]; i++)
+        ptr = getProcAddress((const GLubyte *)dsc->funcnames[i]);
+    }
+    *(dsc->funcptr) = ptr;
   }
+  free(allexts);
 }
 
 /**
