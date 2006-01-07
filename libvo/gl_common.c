@@ -289,7 +289,7 @@ static const extfunc_desc_t extfuncs[] = {
 static void getFunctions(void *(*getProcAddress)(const GLubyte *),
                          const char *ext2) {
   const extfunc_desc_t *dsc;
-  const char *extensions = glGetString(GL_EXTENSIONS);
+  const char *extensions = (const char *)glGetString(GL_EXTENSIONS);
   char *allexts;
   if (!extensions) extensions = "";
   if (!ext2) ext2 = "";
@@ -1015,7 +1015,7 @@ void swapGlBuffers() {
  *
  * Copied from xine
  */
-static void *getdladdr(const GLubyte *s) {
+static void *getdladdr(const char *s) {
 #ifdef HAVE_LIBDL
 #if defined(__sun) || defined(__sgi)
   static void *handle = dlopen(NULL, RTLD_LAZY);
@@ -1097,8 +1097,9 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
   {
     Window root;
     int tmp;
+    unsigned utmp;
     XGetGeometry(mDisplay, vo_window, &root, &tmp, &tmp,
-                  &vo_dwidth, &vo_dheight, &tmp, &tmp);
+        (unsigned *)&vo_dwidth, (unsigned *)&vo_dheight, &utmp, &utmp);
   }
   if (!keep_context) {
     void *(*getProcAddress)(const GLubyte *);
@@ -1113,7 +1114,7 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
     if (!getProcAddress)
       getProcAddress = getdladdr("glXGetProcAddressARB");
     if (!getProcAddress)
-      getProcAddress = getdladdr;
+      getProcAddress = (void *)getdladdr;
     glXExtStr = getdladdr("glXQueryExtensionsString");
     getFunctions(getProcAddress, !glXExtStr ? NULL :
                  glXExtStr(mDisplay, DefaultScreen(mDisplay)));
