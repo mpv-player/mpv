@@ -96,7 +96,7 @@ switch(video_codec){
     sh_video->disp_w=sh_video->bih->biWidth;
     sh_video->disp_h=abs(sh_video->bih->biHeight);
 
-#if 1
+#if 0
     /* hack to support decoding of mpeg1 chunks in AVI's with libmpeg2 -- 2002 alex */
     if ((sh_video->format == 0x10000001) ||
 	(sh_video->format == 0x10000002) ||
