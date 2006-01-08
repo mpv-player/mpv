@@ -905,6 +905,7 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RADEON_R300_AF,
  DEVICE_ATI_RADEON_RV350_AP,
  DEVICE_ATI_RADEON_RV350_AR,
+ DEVICE_ATI_RADEON_RV350_BK,
  DEVICE_ATI_RADEON_R350_AH,
  DEVICE_ATI_RADEON_R350_AI,
  DEVICE_ATI_RADEON_R350_NH,
@@ -1094,6 +1095,7 @@ int vixProbe( int verbose,int force )
             case DEVICE_ATI_RV370_5B60_RADEON:
             case DEVICE_ATI_RADEON_RV350_AP:
             case DEVICE_ATI_RADEON_RV350_AR:
+            case DEVICE_ATI_RADEON_RV350_BK:
             case DEVICE_ATI_RADEON_R350_NH:
             case DEVICE_ATI_RADEON_R350_AH:
             case DEVICE_ATI_RADEON_R350_AI:
