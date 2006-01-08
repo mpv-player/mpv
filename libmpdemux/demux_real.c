@@ -32,8 +32,10 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #include "stheader.h"
 #include "bswap.h"
 
-#ifdef USE_LIBAVCODEC
-#include "avcodec.h"
+#ifdef USE_LIBAVCODEC_SO
+#include <ffmpeg/avcodec.h>
+#elif defined(USE_LIBAVCODEC)
+#include "libavcodec/avcodec.h"
 #else
 #define FF_INPUT_BUFFER_PADDING_SIZE 8
 #endif
