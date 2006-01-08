@@ -1,6 +1,6 @@
 ?package(mplayer):\
   needs="X11"\
   section="Apps/Viewers"\
-  title=MPlayer\
-  command=/usr/bin/gmplayer\
-  icon=/usr/share/pixmaps/mplayer-desktop.xpm
+  title="MPlayer"\
+  command="/usr/bin/gmplayer"\
+  icon="/usr/share/pixmaps/mplayer-desktop.xpm"
