@@ -1,99 +1,52 @@
-#!/usr/bin/perl -w
+#!/bin/sh
 
-# Script to configure mplayer 
-# based on etherconf by John Goerzen <jgoerzen@progenylinux.com>
+CONFIGFILE=/etc/mplayer/mplayer.conf
 
-use Debconf::Client::ConfModule qw(:all);
+set -e
+
+# Source debconf library.
+. /usr/share/debconf/confmodule
+
+if test -r $CONFIGFILE && ! grep -q '### mplayer DEBCONF AREA' $CONFIGFILE
+then
+    db_input medium 'mplayer/replace-existing-files'  || true
+    db_go || true
+    if [ "$RET" != "true" ]; then
+        exit 0
+    fi
+    db_get  'mplayer/replace-existing-files' || true
+fi
+
+########################################## find fonts
+#default font (if available)
+BESTFONT=/usr/share/fonts/truetype/Arial.ttf
+[ -r $BESTFONT ] || BESTFONT=/usr/share/fonts/truetype/freefont/FreeSans.ttf
+
+t=$(tempfile -p fonts )
+find /usr/share/fonts/ /?/?in*/?ont* -type f -iname '*.ttf' -maxdepth 3 2> /dev/null  > $t  || true
+
+if test -s $t
+then
+    fonts=$( awk '{print a $0;a=", "}' $t || true )
+    db_subst "mplayer/ttfont" ttfontchoices $fonts  || true
+ ## suppose the question is skipped: give a default
+    a=$BESTFONT
+    [ -r $BESTFONT ] || a=$(head -1 $t)
+    db_subst "mplayer/ttfont" ttfontdefault $a  || true
+
+    db_input medium  mplayer/ttfont  || true
+    if [ "$?" = 30 ] ; then
+        db_set  mplayer/ttfont $a  || true
+    fi
+else
+    db_input medium "mplayer/no-ttfont" || true
+fi
+
+rm $t
+
+db_go || true
+
+############################################################
 
 
-my $version = version(2.0);
-title('MPlayer Configuration');
-my $PRIORITY = 'high';
-#TODO: 'medium'
-my $next = 'mainmenu';
-my $isediting = 0;
-
-my @nextargs = ();
-
-checkupgrade();			# Find out if we have to upgrade.
-mainloop(letsgo());
-
-sub checkupgrade {
-  open(MCFG, "</etc/mplayer/mplayer.conf") || return 1;
-  my $line = <MCFG>;
-  return 1 if ($line =~ /mplayer DEBCONF AREA/);
-  exit(0) if (input($PRIORITY, 'mplayer/replace-existing-files') eq "question skipped");
-  go();
-  if (get('mplayer/replace-existing-files') eq 'false') {
-    input($PRIORITY, 'mplayer/replace-existing-files-bail');
-    go();
-    exit();
-  }
-  close MCFG;
-}
-
-sub mainloop {
-  $next = shift @_;
-  do {
-    my @retval = &$next(@nextargs);
-    #  if ($retval[0] eq 'BACK') {
-    #    $retval[0] = $backups{$next};
-    #  }
-    ($next, @nextargs) = @retval;
-  } while ($next ne 'Exit');
-}
-
-sub letsgo {
-#useless!
-  return "configure";
-}
-
-sub configure {
-  subst("mplayer/voutput", "vochoices", "xv, xmga, mga, x11, gl, sdl, xvidix");
-  # db_subst mplayer/output vo xc,xmga,mga,x11,gl,sdl
-  exit(0) if (input($PRIORITY, "mplayer/voutput") eq "question skipped");
-  go();
-  exit 0 unless (get("mplayer/voutput") eq 'true');
-  #return 'audioout';
-  return 'mainmenu';
-}
-
-sub mainmenu {
-  go();				# To catch spare things from before
-  my @choices = (
-    'Video Output: ' . scalar(get("mplayer/voutput")));
-    #,
-  $choices = join(', ', @choices);
-  $isediting = 1;
-  
-  subst('mplayer/mainmenu', 'choices', $choices);
-  input($PRIORITY, 'mplayer/mainmenu');
-  go();
-  
-  my $selection = get('mplayer/mainmenu');
-  if ($selection =~ /^Exit/) {
-    return 'Exit';
-  }
-
-  # Set to redisplay.
-  fset('mplayer/mainmenu', 'isdefault', 'true');
-
-  $_ = $selection;
-
-  return 'configure' if /^Video/;
-#  return 'aoutput' if /^Aoutput/;
-  return 'Exit';
-}
-      
-sub editreturn {
-  my @args = @_;
-  return 'mainmenu' if $isediting;
-  return @args;
-}
-
-sub editfix {
-  my $template = shift @_;
-  if ($isediting) {
-    fset($template, 'isdefault', 'true');
-  }
-}
+exit 0
