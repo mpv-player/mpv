@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include "rtsp.h"
 #include "rtsp_session.h"
