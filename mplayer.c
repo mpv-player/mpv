@@ -2633,7 +2633,7 @@ if(!sh_video) {
     float a_pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
     print_status(a_pos, 0, 0);
   }
-  if(d_audio->eof && sh_audio->a_in_buffer_len <= 0) eof = PT_NEXT_ENTRY;
+  if(d_audio->eof && sh_audio->a_in_buffer_len <= 0 && sh_audio->a_buffer_len <= 0) eof = PT_NEXT_ENTRY;
 
 } else {
 
