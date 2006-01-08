@@ -837,13 +837,13 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
-    	    if (!priv->numberofframes) return DEMUXER_CTRL_DONTKNOW;
+    	    if (!priv->numberofframes || !sh_video) return DEMUXER_CTRL_DONTKNOW;
 	    *((double *)arg)=(double)priv->numberofframes/sh_video->fps;
 	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
 	    return DEMUXER_CTRL_OK;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
-    	    if (!priv->numberofframes) {
+    	    if (!priv->numberofframes || !sh_video) {
               return DEMUXER_CTRL_DONTKNOW;
 	    }
 	    *((int *)arg)=(int)(priv->video_pack_no*100/priv->numberofframes);
