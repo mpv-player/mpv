@@ -1,4 +1,4 @@
-.\" synced with 1.119
+.\" synced with 1.1205
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -485,6 +485,11 @@ Ou dans un script\ :
 .br
 mplayer -ao pcm:file=%`longueur expr "$NOM"`%"$NOM" test.avi
 .PP
+.
+.\" --------------------------------------------------------------------------
+.\" Fichiers de configuration
+.\" --------------------------------------------------------------------------
+.
 Vous pouvez placer toutes les options dans des fichiers de configuration
 qui seront lu à chaque exécution de MPlayer/MEncoder.
 Le fichier de configuration général 'mplayer.conf' se trouve dans le répertoire
@@ -505,7 +510,8 @@ initialisant à 'yes' ou '1' ou désactivées en les initialisant à 'no'
 ou '0'.
 Ceci est même applicable aux sous-options.
 .PP
-.I EXEMPLE\ :
+.I EXEMPLE DE FICHIER DE CONFIGURATION MPLAYER\ :
+.sp 1
 .nf
 # Utilise les pilotes Matrox par défaut.
 vo=xmga
@@ -518,12 +524,40 @@ mf=type=png:fps=25
 vf=eq2=1.0:-0.8
 .fi
 .PP
+.I "EXEMPLE DE FICHIER DE CONFIGURATION MENCODER :"
+.sp 1
+.nf
+# Fait MEncoder écrire dans un certain fichier par défaut.
+o=encoded.avi
+# Les 4 lignes suivantes permettant à mencoder tv:// de capturer immédiatement.
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# des options d'encodage plus complexes.
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
+.fi
+.PP
 Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
 Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
 fichier et placez-le dans ~/.mplayer/ ou dans le même répertoire que le
 fichier.
 .
+.\" --------------------------------------------------------------------------
+.\" Options
+.\" --------------------------------------------------------------------------
 .
 .SH "OPTIONS GÉNÉRALES"
 .
@@ -966,6 +1000,9 @@ Spécifie la bande passante maximum pour le streaming par le réseau (pour les
 serveurs capables d'envoyer du contenu à différents débits).
 Utile si vous voulez voir en direct avec une connexion lente des médias
 streamés.
+Avec les flux Real RTSP streaming, c'est aussi utilisé pour définir la bande
+passante d'émission maximale, permettant un remplissage du cache et une
+sauvegarde plus rapide.
 .
 .TP
 .B \-cache <Koctets>
@@ -9744,11 +9781,8 @@ Envoie tous les messages d'erreurs et de débug sur stderr.
 .
 .TP
 .B DVDREAD_NOKEYS
-DVDREAD_NOKEYS est une variable spécifique à MPlayer, mais non
-utilisée pour le moment.
-Dans le fichier libmpdvdkit2/dvd_reader.c, DVDREAD_NOKEYS est
-utilisé par la fonction initAllCSSKeys, mais l'unique appel à
-cette fonction est en commentaire.
+Saute la récupération de toute clée au démarrage.
+Désactivé pour le moment.
 .
 .TP
 .B HOME
@@ -9944,64 +9978,64 @@ cherche les les fichiers sub dans cet ordre\ :
 .
 .SH EXEMPLES D'UTILISATIONS DE MPLAYER
 .
-.TP
+.PP
 .B Lecture rapide de DVD\ :
 mplayer dvd://1
 .
-.TP
+.PP
 .B Lecture en japonais avec sous-titres anglais\ :
 mplayer dvd://1 \-alang ja \-slang en
 .
-.TP
+.PP
 .B Ne lire que les chapitres 5, 6, 7\ :
 mplayer dvd://1 \-chapter 5-7
 .
-.TP
+.PP
 .B Lecture d'un DVD multi-angle\ :
 mplayer dvd://1 \-dvdangle 2
 .
-.TP
+.PP
 .B Lecture depuis un autre périphérique DVD\ :
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
 .
-.TP
+.PP
 .B Joue un DVD vidéo depuis un répertoire contenant des fichiers VOB\ :
 mplayer dvd://1 \-dvd-device /chemin/\:vers/\:répertoire/
 .
-.TP
+.PP
 .B Copie le titre 1 du DVD sur le disque dur, sous le nom "title1.vob":
 mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .
 .B Streaming depuis HTTP\ :
 mplayer http://mplayer.hq/\:exemple.avi
 .
-.TP
+.PP
 .B Streaming en utilisant RTSP\ :
 mplayer rtsp://serveur.exemple.com/\:NomFlux
 .
-.TP
+.PP
 .B Convertit les sous-titres au format MPsub\ :
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .
-.TP
+.PP
 .B Convertit les sous-titres en au format MPsub sans afficher le film\ :
 mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null
 \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
 .
-.TP
+.PP
 .B Entrée depuis V4L standard\ :
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .
-.TP
+.PP
 .B Lecture sur cartes zoran (ancienne méthode, depréciée)\ :
 mplayer \-vo zr \-vf scale=352:288 file.avi
 .
-.TP
+.PP
 .B Lecture sur carte zoran (nouvelle méthode)\ :
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
-.TP
+.PP
 .B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .br
@@ -10010,43 +10044,43 @@ multiplier par une valeur) pour augementer le volume ou éviter l'écrêtage
 .
 .SH EXEMPLES D'UTILISATIONS DE MENCODER
 .
-.TP
+.PP
 .B Encode le titre #2 d'un DVD, uniquement les chapitres sélectionnés\ :
 mencoder dvd://2 \-chapter 10-15 \-o titre2.avi \-oac copy \-ovc divx4
 .
-.TP
+.PP
 .B Encode le titre #2 d'un DVD, redimensionnement en 640x480\ :
 mencoder dvd://2 \-vf scale=640:480 \-o titre2.avi \-oac copy \-ovc divx4
 .
-.TP
+.PP
 .B Encodage du titre #2 d'un DVD, redimensionnement en 512xHHH (gardant \
 le rapport hauteur/\:largeur)\ :
 mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titre2.avi \-oac copy
 \-ovc divx4
 .
-.TP
+.PP
 .B Même chose, mais avec un bitrate de 1800kbit et des macro-blocs optimisés\ :
 mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
 .
-.TP
+.PP
 .B Même chose, mais une compression MJPEG\ :
 mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
 \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
 .
-.TP
+.PP
 .B Encode tous les fichiers *.jpg du répertoire courant
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc divx4
 .
-.TP
+.PP
 .B Encode depuis un tuner TV
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
 .
-.TP
+.PP
 .B Encode depuis un pipe
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
 .
-.TP
+.PP
 .B Encode de multiples fichiers *.vob
 cat *.vob | mencoder <options> \-
 .
@@ -10067,7 +10101,7 @@ explique comment créer des rapports de bogues utiles.
 .
 .
 .SH AUTEURS
-MPlayer était écrit à l'origine par Arpad Gereöffy.
+MPlayer était écrit à l'origine par Arpad Gereoffy.
 Voir le fichier AUTHORS pour la liste de certains des nombreux autres
 contributeurs.
 .TP
