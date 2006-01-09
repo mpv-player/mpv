@@ -64,7 +64,6 @@ SRCS += demuxer.c \
         demux_film.c \
         demux_fli.c \
         demux_gif.c \
-        demux_lavf.c \
         demux_lmlm4.c \
         demux_mf.c \
         demux_mov.c \
@@ -117,7 +116,12 @@ LIBAV_INC += -I../libavcodec
 endif
 ifeq ($(CONFIG_LIBAVFORMAT),yes)
 LIBAV_INC += -I../libavformat
-SRCS += muxer_lavf.c
+SRCS += demux_lavf.c \
+	muxer_lavf.c
+endif
+ifeq ($(CONFIG_LIBAVFORMAT_SO),yes)
+SRCS += demux_lavf.c \
+	muxer_lavf.c
 endif
 
 ifeq ($(MPLAYER_NETWORK),yes)

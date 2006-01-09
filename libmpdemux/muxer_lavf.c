@@ -17,7 +17,11 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "m_option.h"
+#ifdef USE_LIBAVFORMAT_SO
+#include <ffmpeg/avformat.h>
+#else
 #include "avformat.h"
+#endif
 
 extern unsigned int codec_get_wav_tag(int id);
 extern enum CodecID codec_get_bmp_id(unsigned int tag);

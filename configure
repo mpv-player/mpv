@@ -1460,6 +1460,7 @@ _amr_wb=auto
 _libavcodecs=`grep 'register_avcodec(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
 _libavcodecso=auto 
 _libavformat=auto
+_libavformat_so=auto
 _fame=auto
 _mp1e=no
 _mencoder=yes
@@ -6060,6 +6061,19 @@ fi
 echores "$_libavcodecso"
 fi
 
+if test "$_libavformat" != yes ; then
+echocheck "FFmpeg libavformat (dynamic)"
+if test "$_libavformat_so" = auto ; then
+  _libavformat_so=no
+  cat > $TMPC <<EOF
+  #include <ffmpeg/avformat.h>
+  int main(void) { av_alloc_format_context(); return 0; }
+EOF
+  cc_check $_ld_lm -lavformat && _libavformat_so=yes
+fi
+echores "$_libavformat_so"
+fi
+
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodecso='#undef USE_LIBAVCODEC_SO'
 _def_ffpostprocess='#undef FF_POSTPROCESS'
@@ -6083,6 +6097,7 @@ else
 fi
 
 _def_libavformat='#undef USE_LIBAVFORMAT'
+_def_libavformat_so='#undef USE_LIBAVFORMAT_SO'
 _def_libavformat_win32='#undef CONFIG_WIN32'
 if test "$_libavformat" = yes ; then
   _def_libavformat='#define USE_LIBAVFORMAT 1'
@@ -6090,6 +6105,14 @@ if test "$_libavformat" = yes ; then
   _dep_libavformat='libavformat/libavformat.a'
   if win32 ; then
     _def_libavformat_win32='#define CONFIG_WIN32 1'
+  fi
+else
+  if test "$_libavformat_so" = yes ; then
+    _def_libavformat_so='#define USE_LIBAVFORMAT_SO 1'
+    _ld_libavformat='-lavformat'
+    if win32 ; then
+      _def_libavformat_win32='#define CONFIG_WIN32 1'
+    fi
   fi
 fi
 
@@ -7184,6 +7207,7 @@ CONFIG_LIBAVUTIL = $_libavutil
 CONFIG_LIBAVCODEC = $_libavcodec
 CONFIG_LIBAVCODECSO = $_libavcodecso
 CONFIG_LIBAVFORMAT = $_libavformat
+CONFIG_LIBAVFORMAT_SO = $_libavformat_so
 ZORAN = $_zr
 FAME = $_fame
 FAME_LIB = $_ld_fame
@@ -7576,6 +7600,7 @@ $_def_libavcodecso
 
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat
+$_def_libavformat_so
 $_def_libavformat_win32
 
 /* Use libavcodec's decoders */

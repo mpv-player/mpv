@@ -62,7 +62,9 @@ extern demuxer_desc_t demuxer_desc_audio;
 extern demuxer_desc_t demuxer_desc_xmms;
 extern demuxer_desc_t demuxer_desc_mpeg_ty;
 extern demuxer_desc_t demuxer_desc_rtp;
+#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 extern demuxer_desc_t demuxer_desc_lavf;
+#endif
 extern demuxer_desc_t demuxer_desc_aac;
 
 demuxer_desc_t* demuxer_list[] = {
@@ -119,7 +121,7 @@ demuxer_desc_t* demuxer_list[] = {
 #ifdef STREAMING_LIVE555
   &demuxer_desc_rtp,
 #endif
-#ifdef USE_LIBAVFORMAT
+#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
   &demuxer_desc_lavf,
 #endif
   &demuxer_desc_aac,

@@ -28,10 +28,12 @@
 #include "demuxer.h"
 #include "stheader.h"
 
-#ifdef USE_LIBAVFORMAT
-
+#ifdef USE_LIBAVFORMAT_SO
+#include <ffmpeg/avformat.h>
+#else
 #include "avformat.h"
 #include "avi.h"
+#endif
 
 #define PROBE_BUF_SIZE 2048
 
@@ -451,4 +453,3 @@ demuxer_desc_t demuxer_desc_lavf = {
   demux_lavf_control
 };
 
-#endif // USE_LIBAVFORMAT
