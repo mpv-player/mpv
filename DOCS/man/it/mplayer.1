@@ -602,6 +602,9 @@ Aumenta il livello di verbosità, di un livello per ogni \-v trovata sulla
 riga comando.
 .
 .
+.\" --------------------------------------------------------------------------
+.\" Opzioni di riproduzione
+.\" --------------------------------------------------------------------------
 .
 .SH "OPZIONI DI RIPRODUZIONE (SOLO MPLAYER)"
 .
@@ -985,7 +988,9 @@ Le opzioni disponibili sono:
 .IPs speed=<valore>
 Regola la velocità di rotazione del CD
 .IPs paranoia=<0\-2>
-Regola il livello di paranoia
+Regola il livello di paranoia.
+Valori diversi da 0 sembrano rovinare la riproduzione di tutto tranne la
+prima traccia.
 .RSss
 0: disabilita il controllo dati (default)
 .br
@@ -1577,10 +1582,10 @@ dei sottotitoli basato sul tempo SubViever (SRT).
 Crea un file dumpsub.srt nella directory corrente.
 .br
 .I NOTA:
-Alcuni lettori da tavolo hanno sani problemi con file di sottotitoli con
+Alcuni lettori da tavolo hanno seri problemi con file di sottotitoli con
 terminatori di linea Unix.
 Se sei così sfortunato da possederne uno, filtra i tuoi file dei sottotitoli
-con unix2dos o un programma simile, per sostituire i terminatori di linea Unix
+con unix2dos (o un programma simile) per sostituire i terminatori di linea Unix
 con terminatori di linea DOS/Windows.
 .
 .TP
@@ -1815,9 +1820,9 @@ impostata da \-subpos.
 .IPs 0
 Allinea al bordo superiore del sottotitolo (comportamento originale).
 .IPs 1
-Allinea al centro.
+Allinea al centro del sottotitolo.
 .IPs 2
-Allinea al bordo inferiore (default).
+Allinea al bordo inferiore del sottotitolo (default).
 .RE
 .PD 1
 .
@@ -2098,9 +2103,9 @@ Driver di uscita audio OSS
 .IPs <dispositivo-dsp>
 Seleziona il dispositivo di uscita audio (default: /dev/\:dsp).
 .IPs <dispositivo-mixer>
-Seleziona il dispositivo del mixer (default: /dev/\:mixer).
+Seleziona il dispositivo del mixer audio (default: /dev/\:mixer).
 .IPs <canale-mixer>
-Seleziona il canale del mixer (default: pcm).
+Seleziona il canale del mixer audio (default: pcm).
 .RE
 .PD 1
 .
@@ -2161,7 +2166,7 @@ driver di uscita audio nativo per SGI
 .RSs
 .IPs "<nome del dispositivo di uscita>"
 Seleziona esplicitamente il dipositivo di uscita/\:l'interfaccia da usare
-(default: system-wide default).
+(default: default globale del sistema).
 Per esempio, 'Analog\ Out' o 'Digital\ Out'.
 .RE
 .PD 1
@@ -3632,7 +3637,7 @@ Le opzioni disponibili sono:
 .RE
 .RSs
 .IPs bitexact
-Usa solo algoritmi bit-exact (bit esatto) in tutti i passaggi di decodifica
+Usa solo algoritmi bit-exact (esatti al bit) in tutti i passaggi di decodifica
 (per provare i codec).
 .IPs bug=<valore>
 Lavora manualmente alla risoluzione degli errori del codificatore.
@@ -3823,7 +3828,7 @@ Utile per le prove di velocità (benchmark).
 .TP
 .B \-novideo
 Non riproduce/\:codifica il video.
-Im molti casi questo non funziona, usa al suo posto \-vc null \-vo null.
+Im molti casi questo non funziona, usa \-vc null \-vo null al suo posto
 .
 .TP
 .B \-oldpp <qualità> (solo OpenDivX) (OBSOLETO)
@@ -4537,7 +4542,7 @@ Massimizza il volume senza distorcere il suono.
 Imposta il metodo da usare.
 .RSss
 1: Utilizza un singolo campionamento per ammorbidire la variazione attraverso
-il metodo standard della media ponderale sui campionamenti passati (default).
+il metodo standard della media pesata sui campionamenti passati (default).
 .br
 2: Utilizza alcuni campionamenti per ammorbidire la variazione attraverso
 il metodo standard della media ponderale sui campionamenti passati.
@@ -5138,7 +5143,7 @@ Filtro di post elaborazione ultrasemplice & lento che comprime e decomprime
 l'immagine a parecchi (o \- nel caso del livello di qualità 8 \- tutti) 'shifts'
 (spostamenti) e media i risultati.
 La differenza da spp è che uspp codifica & decodifica effettivamente ogni caso
-con libavcodec MPEG-4, mentre spp usa un intra semplificato solo 8x8 DCT simile
+con libavcodec MPEG-4, mentre spp usa una una DCT 8x8 solo intra semplificata simile
 a MJPEG.
 .RSs
 .IPs <qualità>
@@ -6405,7 +6410,10 @@ Non saltare dei fotogrammi.
 .
 .TP
 .B \-o <nomefile>
-Scrive sul file specificato, invece che sul default 'test.avi'.
+Scrive sul file specificato.
+.br
+Se vuoi un valore di default per il nome del file di uscita puoi mettere
+questa opzione nel file di configurazione di MEncoder.
 .
 .TP
 .B \-oac <nome codec>
@@ -7085,18 +7093,19 @@ Non fa assolutamente nulla, al momento.
 intervallo massimo fra fotogrammi chiave (keyframe) in fotogrammi
 (default: 250, cioè un keyframe ogni dieci secondi in un filmato a 25 fps.
 Questo è il default raccomandato per MPEG-4).
-.\" FIXME: mismatch tradotto con disallineamento, è giusto davvero?
 La maggior parte dei codec richiede keyframe regolari, in modo da limitare
-l'accumulo di errori di disallineamento.
-I keyframe sono necessari per il posizionamento perché il posizionamento
-è possibile solo su un keyframe - ma i keyframe hanno bisogno di più spazio
+l'accumulo di errori dovuti alle diverse implementazioni/precisioni di DCT
+ed iDCT.
+I keyframe sono necessari anche per il posizionamento visto che il
+posizionamento è possibile solo su un keyframe. 
+Bisogna pero' tener presente che i keyframe hanno bisogno di più spazio
 rispetto agli altri tipi di fotogrammi, perciò un numero alto comporta
 file di dimensione leggermente minore ma un posizionamento meno preciso.
-0 è equivalente a 1, che rende tutti i fotogrammi dei fotogrammi chiave.
+Il valore 0 è equivalente a 1, che rende tutti i fotogrammi dei fotogrammi chiave.
 Valori maggiori di 300 non sono raccomandati perché la qualità può
 essere non buona e dipende dal programma di codifica, dal programma di
 decodifica e dalla fortuna (o sfortuna).
-È solito usare valori <=30 per MPEG-1/2.
+È comune (a volte obbligatorio!) usare valori <=30 per MPEG-1/2.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
@@ -9523,7 +9532,7 @@ Formato contenitore Sony Digital Video
 .
 .
 .\" --------------------------------------------------------------------------
-.\" environment variables
+.\" Variabili di ambiente
 .\" --------------------------------------------------------------------------
 .
 .SH VARIABILI D'AMBIENTE
@@ -9533,7 +9542,7 @@ comportamento di MPlayer e MEncoder.
 .
 .TP
 .B MPLAYER_HOME
-Cartella in cui MPlayer cerca le impostazioni utente.
+Directory in cui MPlayer cerca le impostazioni utente.
 .
 .SS libaf:
 .
@@ -9570,8 +9579,8 @@ ottenere la chiave del disco.
 Questo può fallire se il lettore non riconosce nessuna delle chiavi del disco.
 .IPs disc\ 
 È un metodo di ripiego quando 'key' è fallito.
-Invece di usare chiavi di lettura, libdvdcss romperà la criptazione del disco
-usando un algoritmo di 'brute force'.
+Invece di usare chiavi di lettura, libdvdcss violerà la criptazione del disco
+usando un algoritmo a forza bruta.
 Questo processo utilizza molto la CPU e richiede 64MB di memoria per
 immmagazzinare i dati temporanei.
 .IPs title
@@ -9580,8 +9589,8 @@ Non si basa su uno scambio di chiavi col lettore DVD, ma usa invece un
 attacco crittografico per indovinare la chiave del titolo.
 Questo in rari casi può fallire perché non ci sono abbastanza dati criptati sul
 disco per fare un attacco statistico, ma d'altro canto è l'unico modo di
-decodificare un DVD memorizzato su disco rigido, o un DVD con la regione
-sbagliata o su un lettore RPC2.
+decodificare un DVD memorizzato su disco rigido oppure un DVD con la regione
+sbagliata su un lettore RPC2.
 .RE
 .PD 1
 .
@@ -9944,8 +9953,11 @@ MPlayer è (C) 2000\-2006 The MPlayer Team
 Questa pagina di manuale (versione inglese) è stata scritta principalmente da
 Gabucino, Jonas Jermann e Diego Biurrun.
 E' mantenuta da Diego Biurrun.
-La traduzione in italiano è stata fatta ed è mantenuta da Daniele Forghieri.
-.
+La traduzione iniziale in italiano è stata fatta da Daniele Forghieri, ed e'
+attualemte mantenuta da Daniele Forghieri con il grande aiuto di PaulTT.
+Per sapere chi devi offendere per qualche traduzione errata controlla i log
+del CVS ;).
+
 .PP
 Per favore spedisci qualsiasi messaggio riguardante questa documentazione
 alla mailing list MPlayer-DOCS per quello che riguarda l'originale inglese ed
