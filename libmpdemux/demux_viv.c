@@ -625,7 +625,7 @@ static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
 		/* disable seeking */
 		demuxer->seekable = 0;
 
-		printf("VIVO Video stream %d size: display: %dx%d, codec: %ux%u\n",
+		mp_msg(MSGT_DEMUX,MSGL_STATUS,"VIVO Video stream %d size: display: %dx%d, codec: %ux%u\n",
 		    demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
 		    sh->bih->biHeight);
 }

@@ -346,7 +346,7 @@ static int config(struct vf_instance_s* vf,
     mux_v->bih->biHeight=height;
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
 
-    printf("videocodec: libavcodec (%dx%d fourcc=%x [%.4s])\n",
+    mp_msg(MSGT_MENCODER, MSGL_INFO,"videocodec: libavcodec (%dx%d fourcc=%x [%.4s])\n",
 	mux_v->bih->biWidth, mux_v->bih->biHeight, mux_v->bih->biCompression,
 	    (char *)&mux_v->bih->biCompression);
 
