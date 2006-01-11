@@ -3,7 +3,7 @@ Section: misc
 Priority: optional
 Maintainer: Dariush Pietrzak <eyck@ghost.anime.pl>
 Standards-Version: 3.2.1
-Build-Depends: libgtk1.2-dev | libgtk2.0-dev, libpng12-dev, zlib1g-dev, x-dev, libx11-dev, libxext-dev, libxinerama-dev, libxv-dev, libxvmc-dev, libxxf86dga-dev, libxxf86vm-dev, debhelper (>= 2)
+Build-Depends: libgtk1.2-dev | libgtk2.0-dev, libpng12-dev, zlib1g-dev, x-dev, libx11-dev, libxext-dev, libxinerama-dev, libxv-dev, libxvmc-dev, debhelper (>= 2)
 
 Package: mplayer
 Architecture: any
