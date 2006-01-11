@@ -436,7 +436,7 @@ Verringert/\:erhöht die Lautstärke.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Optionen
+.\" Zum Umgang mit MPlayer
 .\" --------------------------------------------------------------------------
 .
 .SH "ZUM UMGANG MIT MPLAYER"
@@ -463,6 +463,12 @@ Oder in einem Skript:
 .br
 mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
+.
+.\" --------------------------------------------------------------------------
+.\" Konfigurationsdateien
+.\" --------------------------------------------------------------------------
+.
+.SH "KONFIGURATIONSDATEIEN"
 Du kannst jede Option in einer Konfigurationsdatei speichern, die bei jedem
 Start von MPlayer gelesen wird.
 Die systemweite Konfigurationsdatei 'mplayer.conf' liegt in deinem
@@ -479,7 +485,8 @@ du ihnen den Wert 'yes' oder '1' oder 'true' zuweist, deaktiviert werden sie
 mit \'no' oder '0'.
 Selbst Suboptionen können in dieser Art angegeben werden.
 .PP
-.I BEISPIEL:
+.I BEISPIEL FÜR DIE MPLAYER-KONFIGURATIONSDATEI:
+.sp 1
 .nf
 # Benutze in der Voreinstellung den Matrox-Treiber
 vo=xmga
@@ -490,17 +497,44 @@ flip=yes
 mf=type=png:fps=25
 # Unheimliche Negativbilder sind cool.
 vf=eq2=1.0:-0.8
-# Ich möchte, dass MEncoder standardmäßig in diese Datei schreibt.
-o=ausgabe.avi
+.fi
+.PP
+.I "EXAMPLE FÜR DIE MENCODER-KONFIGURATIONSDATEI:"
+.sp 1
+.nf
+# Sorge dafür, dass MEncoder in eine Standarddatei
+schreibt.
+o=encodiert.avi
+# Die nächsten vier Zeilen bewirken, dass mencoder tv:// sofort mit der
+Aufnahme beginnt.
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# eine Menge komplexerer Encodierungsoptionen
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
 .fi
 .PP
 Du kannst auch dateispezifische Konfigurationsdateien schreiben.
 Wenn du für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben
 möchtest, dann nenne diese Datei 'movie.avi.conf', stecke dort alle nur für
-diesen Film relevanten Optionen rein und speichere die Datei in ~/\:.mplayer
-oder im gleichen Verzeichnis wie 'movie.avi'.
+diesen Film relevanten Optionen rein und speichere die Datei in ~/\:.mplayer/
+oder im Verzeichnis der Datei.
 .
-.
+.\" --------------------------------------------------------------------------
+.\" Optionen
+.\" --------------------------------------------------------------------------
 .
 .SH "ALLGEMEINE OPTIONEN"
 .
@@ -518,7 +552,7 @@ eingelesen werden soll.
 .B \-msglevel <all=<level>:<modul>=<level>:...>
 Steuert die Ausführlichkeit der Ausgabe für jedes einzelne Modul.
 Das 'all'-Modul steuert alle nicht zusätzlich angegebenen Module.
-Siehe '-msglevel help' für eine Liste der verfügbaren Module.
+Siehe '\-msglevel help' für eine Liste der verfügbaren Module.
 .br
 .I HINWEIS:
 Meldungen, die vor der Auswertung der Kommandozeile ausgegeben werden,
@@ -3623,6 +3657,9 @@ Gibt Parameter für das Decodieren mit libavcodec an.
 Verfügbare Optionen sind folgende:
 .RE
 .RSs
+.IPs bitexact
+Benutze in allen Decodierungsschritten nur bitgenaue Algorithmen (zum Testen
+von Codecs).
 .IPs bug=<Wert>
 Umgehe Fehler (Bugs) des Encoders manuell.
 .RSss
@@ -9017,15 +9054,6 @@ Wird aktualisiert, wenn nötig, im Falle 'format=mpeg1' oder 'mpeg2'.
 Setzt Zeitstempel (timestamps) bei allen Frames, wenn möglich.
 .
 .TP
-.B (no)reorder
-Aktiviert Code für Neuanordnung von Frames.
-Frames werden in Decodierungs- (und nicht Anzeige-) reihenfolge gespeichert
-(Standard: deaktiviert).
-Benutze dies nur, wenn du glaubst, dass Videoframes im originalen Stream nicht
-korrekt gespeichert wurden.
-Funktioniert nur mit MPEG-1/2-Video.
-.
-.TP
 .B init_vpts=<100\-700>
 initiales Video pts in Millisekunden (Standard: 200)
 .
@@ -9216,7 +9244,8 @@ Gibt Fehler- und Debugmeldungen auf stderr aus.
 .
 .TP
 .B DVDREAD_NOKEYS
-DVDREAD_NOKEYS ist MPlayer-spezifisch, aber zurzeit unbenutzt.
+Überspringt das Ermitteln aller Schlüssel beim Start.
+Momentan unbenutzt.
 .
 .TP
 .B HOME
