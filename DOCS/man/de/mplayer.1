@@ -5123,12 +5123,13 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .
 .TP
 .B uspp[=Qualität[:qp]]
-Sehr einfacher und langsamer Nachbearbeitungsfilter, der das Bild
-mit mehreren Verschiebungen rekomprimiert und daraus den Mittelwert
+Ultra-einfacher und -langsamer Nachbearbeitungsfilter, der das Bild
+mit mehreren (bzw.\& \- im Falle von Qualitätslevel 8 \- alle) Verschiebungen
+rekomprimiert und daraus den Mittelwert
 bildet.
-Der Unterschied zu spp liegt darin, dass tatsächlich mit lavc-mpeg4
-rekomprimiert wird, wohingegen spp eine vereinfachte nur-Intra 8x8 DCT
-ähnlich der bei MJPEG benutzten verwendet.
+Dies unterscheidet sich im Verhalten zu spp insofern, dass uspp tatsächlich
+jeden Fall encodiert und decodiert, wohingegen spp eine vereinfachte nur-Intra
+8x8 DCT ähnlich der bei MJPEG benutzten verwendet.
 .RSs
 .IPs <Qualität>
 0\-8 (Standard: 3)
@@ -6953,6 +6954,8 @@ EPZS: Größe=1 diamond, Größe kann mit den *dia-Optionen angepasst werden
 (Standard).
 .IPs 5
 X1 (experimentell, verweist momentan nur auf EPZS)
+.IPs 8
+iter (iterativ überlappter Block, wird nur bei snow benutzt)
 .RE
 .PD 1
 .sp 1
@@ -7054,6 +7057,21 @@ Herumprobieren mit der Option brd_scale zu verringern.
 Skaliert Frames für dynamische B-Frame-Entscheidungen herunter (Standard: 0).
 Die Geschwindigkeit sollte sich jedesmal dann, wenn brd_scale um 1 erhöht
 wurde, um den Faktor 4 erhöhen.
+.
+.TP
+.B bidir_refine=<0\-4>
+Verfeinert die beiden Motion-Vectors, die in bidirektionalen Makroblöcken
+benutzt werden, anstatt die Vektoren der Vorwärts- und Rückwärtssuche zu
+benutzen.
+Diese Option hat ohne B-Frames keine Wirkung.
+.PD 0
+.RSs
+.IPs 0
+Deaktiviert (Standard).
+.IPs 1\-4
+Benutze eine weitergehende Suche (größere Werte sind langsamer).
+.RE
+.PD 1
 .
 .TP
 .B vpass=<1\-3>
@@ -7791,6 +7809,10 @@ Summe der absoluten vertikalen Differenzen
 Summe der quadrierten vertikalen Differenzen
 .IPs "10 (NSSE)"
 Rauschen beibehaltende Summe der quadrierten Differenzen
+.IPs "11 (W53)"
+5/3-Wavelet, wird nur bei snow verwendet
+.IPs "12 (W97)"
+9/7-Wavelet, wird nur bei snow verwendet
 .IPs +256\ 
 Benutze auch die Farbinformation, funktioniert momentan nicht (korrekt) mit
 B-Frames.
