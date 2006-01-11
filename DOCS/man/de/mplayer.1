@@ -956,10 +956,11 @@ Die Wiedergabe startet, wenn der Cache bis zu <Prozent> der Gesamtgröße gefüllt
 ist.
 .TP
 .
-.B \-cache-seek-min <Prozent> (noch nicht implementiert)
+.B \-cache-seek-min <Prozent>
 Falls ein Sprung zu einer Position nicht weiter als <Prozent> der Cachegröße
 von der aktuellen Position gemacht wird, wartet MPlayer bis der Cache
-zu dieser Stelle gefüllt ist, anstelle einen Sprung im Datenstrom zu machen.
+zu dieser Stelle gefüllt ist, anstatt einen Sprung im Datenstrom zu machen
+(Standard: 50).
 .
 .TP
 .B \-cdda <Option1:Option2> (nur bei CDDA)
@@ -7009,15 +7010,19 @@ Bewirkt zur Zeit gar nichts.
 .TP
 .B keyint=<0\-300>
 Maximale Anzahl von Bildern zwischen zwei Keyframes (Standard: 250, was einem
-Keyframe alle zehn Sekunden bei einem 25fps-Film entspricht).
-Keyframes werden für das Spulen in Filmen gebraucht, da nur ein Sprung zu
-Keyframes möglich ist; Keyframes jedoch benötigen mehr Platz als andere Frames,
+Keyframe alle zehn Sekunden bei einem 25fps-Film entspricht.
+Dies ist der empfohlene Standardwert für MPEG-4).
+Die meisten Codecs benötigen regelmäßig Keyframes, um die Anhäufung von
+Versatzfehlern zu begrenzen.
+Keyframes werden auch für das Spulen in Filmen gebraucht, da nur ein Sprung zu
+Keyframes möglich ist.
+Keyframes jedoch benötigen mehr Platz als andere Frames,
 daher bedeutet ein höherer Wert hier geringfügig kleinere Dateien und damit
 weniger genaues Spulen.
 0 ist gleichbedeutend mit 1, was jeden Frame zu einem Keyframe macht.
 Werte > 300 werden nicht empfohlen, da die Qualität abhängig von Decoder,
 Encoder und Glück schlecht sein kann.
-Für eine strikte Einhaltung von MPEG-1/2/4 müsste dieser Wert <=132 sein.
+Für MPEG-1/2 sind Werte <=30 üblich.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
@@ -7028,18 +7033,27 @@ Mit dieser Option kannst du die Sensitivität dieser Erkennung bestimmen.
 1000000000 bedeutet, dass gar keine Szenenwechsel erkannt werden (Standard: 0).
 .
 .TP
-.B vb_strategy=<0\-1>
-Strategie, mit der zwischen I-/\:P-/\:B\-Frames gewählt wird (beim ersten
-Durchlauf):
-.
+.B vb_strategy=<0\-2> (nur bei Durchlauf 1)
+Strategie, mit der zwischen I-/\:P-/\:B\-Frames gewählt wird:
 .PD 0
 .RSs
 .IPs 0
 Benutzt immer die maximale Anzahl B-Frames (Standard).
 .IPs 1
 Vermeide B-Frames in schnell bewegten Szenen.
+.IPs 2
+Platziert B-Frames mehr oder weniger optimal, um maximale Qualität zu
+erbringen (langsamer).
+Du kannst versuchen, den Einfluß auf die Geschwindigkeit durch
+Herumprobieren mit der Option brd_scale zu verringern.
 .RE
 .PD 1
+.
+.TP
+.B brd_scale=<0\-10>
+Skaliert Frames für dynamische B-Frame-Entscheidungen herunter (Standard: 0).
+Die Geschwindigkeit sollte sich jedesmal dann, wenn brd_scale um 1 erhöht
+wurde, um den Faktor 4 erhöhen.
 .
 .TP
 .B vpass=<1\-3>
