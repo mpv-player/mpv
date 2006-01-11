@@ -257,26 +257,6 @@ static void uninit(void)
 static int preinit(const char *arg)
 {
 	int parse_err = 0;
-	
-	#if !defined (MACOSX_FINDER_SUPPORT) || !defined (HAVE_SDL)
-	//this chunk of code is heavily based off SDL_macosx.m from SDL 
-	//it uses an Apple private function to request foreground operation
-	void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
-	ProcessSerialNumber myProc, frProc;
-	Boolean sameProc;
-	
-	if (GetFrontProcess(&frProc) == noErr)
-	{
-		if (GetCurrentProcess(&myProc) == noErr)
-		{
-			if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
-			{
-				CPSEnableForegroundOperation(&myProc);
-			}
-			SetFrontProcess(&myProc);
-		}
-	}
-	#endif
 
     if(arg) 
     {
@@ -305,6 +285,26 @@ static int preinit(const char *arg)
 	
 	if(!shared_buffer)
 	{
+		#if !defined (MACOSX_FINDER_SUPPORT) || !defined (HAVE_SDL)
+		//this chunk of code is heavily based off SDL_macosx.m from SDL 
+		//it uses an Apple private function to request foreground operation
+		void CPSEnableForegroundOperation(ProcessSerialNumber* psn);
+		ProcessSerialNumber myProc, frProc;
+		Boolean sameProc;
+
+		if (GetFrontProcess(&frProc) == noErr)
+		{
+			if (GetCurrentProcess(&myProc) == noErr)
+			{
+				if (SameProcess(&frProc, &myProc, &sameProc) == noErr && !sameProc)
+				{
+					CPSEnableForegroundOperation(&myProc);
+				}
+				SetFrontProcess(&myProc);
+			}
+		}
+		#endif
+
 		if(!mpGLView)
 		{
 			mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
