@@ -499,7 +499,7 @@ mf=type=png:fps=25
 vf=eq2=1.0:-0.8
 .fi
 .PP
-.I "EXAMPLE FÜR DIE MENCODER-KONFIGURATIONSDATEI:"
+.I "BEISPIEL FÜR DIE MENCODER-KONFIGURATIONSDATEI:"
 .sp 1
 .nf
 # Sorge dafür, dass MEncoder in eine Standarddatei
@@ -977,6 +977,9 @@ Gibt die maximal zu benutzende Bandbreite für Netzwerkstreaming an (bei
 Servern, die Streams in verschiedenen Bitraten senden können).
 Nützlich, wenn du Live-Streams über eine langsame Verbindung ansehen
 möchtest.
+Im Falle von Real-RTSP-Streaming wird dies auch verwendet, um die maximale
+Zuführungsbandbreite festzulegen, was schnelleres Auffüllen des Caches und
+Stream-Dumping ermöglicht.
 .
 .TP
 .B \-cache <kbytes>
