@@ -361,7 +361,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
             return 1; // success
     }
     
-    mp_msg(MSGT_DEMUX,MSGL_V,"%08X:  UNKNOWN TYPE  %02X %02X %02X %02X %02X...\n",demux->filepos,asf_packet[0],asf_packet[1],asf_packet[2],asf_packet[3],asf_packet[4]);
+    mp_msg(MSGT_DEMUX,MSGL_V,"%08"PRIX64":  UNKNOWN TYPE  %02X %02X %02X %02X %02X...\n",(int64_t)demux->filepos,asf_packet[0],asf_packet[1],asf_packet[2],asf_packet[3],asf_packet[4]);
     return 0;
 }
 

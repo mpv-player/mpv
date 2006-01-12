@@ -326,7 +326,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 	{
 		if(stream_read_word(d->stream) != (('A'<<8)|'V'))
 		{
-			mp_msg(MSGT_DEMUX,MSGL_V,"demux_pva: pva_get_payload() missed a SyncWord at %ld!! Trying to sync...\n",stream_tell(d->stream));
+			mp_msg(MSGT_DEMUX,MSGL_V,"demux_pva: pva_get_payload() missed a SyncWord at %"PRId64"!! Trying to sync...\n",(int64_t)stream_tell(d->stream));
 			if(!pva_sync(d))
 			{
 				if (!d->stream->eof)
@@ -350,7 +350,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 	flags=stream_read_char(d->stream);
 	payload->is_packet_start=flags & 0x10;
 	pack_size=le2me_16(stream_read_word(d->stream));
-	mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_pva::pva_get_payload(): pack_size=%u field read at offset %lu\n",pack_size,stream_tell(d->stream)-2);
+	mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_pva::pva_get_payload(): pack_size=%u field read at offset %"PRIu64"\n",pack_size,(int64_t)stream_tell(d->stream)-2);
 	pva_payload_start=stream_tell(d->stream);
 	next_offset=pva_payload_start+pack_size;
 

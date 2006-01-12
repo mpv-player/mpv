@@ -657,7 +657,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		
 		acq_color = ((key_color.red / 256) << 16) | ((key_color.green / 256) << 8) | key_color.blue;
 		if (key_color.pixel != KEY_COLOR) {
-			printf("VO: [dxr3] Unable to allocate exact keycolor, using closest match (%0x).\n", key_color.pixel);	
+			printf("VO: [dxr3] Unable to allocate exact keycolor, using closest match (0x%lx).\n", key_color.pixel);	
 		}
 		
 		/* Set keycolor and activate overlay */

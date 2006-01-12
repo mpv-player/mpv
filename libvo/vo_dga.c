@@ -811,7 +811,7 @@ static int config(uint32_t width, uint32_t height,
     // do some more checkings here ...
 
     mp_msg(MSGT_VO, MSGL_V,
-           "vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %08x, bpp: %d\n",
+           "vo_dga: bytes/line: %d, screen res: %dx%d, depth: %d, base: %p, bpp: %d\n",
            vo_dga_width, vo_dga_vp_width, vo_dga_vp_height,
            HW_MODE.vdm_bytespp, vo_dga_base, HW_MODE.vdm_bitspp);
 
@@ -900,7 +900,7 @@ static int preinit(const char *arg)
             for (i = 0; i < vo_modecount; i++)
             {
                 mp_msg(MSGT_VO, MSGL_V,
-                       "vo_dga: (%03d) depth=%d, bpp=%d, r=%08x, g=%08x, b=%08x, %d x %d\n",
+                       "vo_dga: (%03d) depth=%d, bpp=%d, r=%08lx, g=%08lx, b=%08lx, %d x %d\n",
                        i, vo_modelines[i].depth,
                        vo_modelines[i].bitsPerPixel,
                        vo_modelines[i].redMask, vo_modelines[i].greenMask,

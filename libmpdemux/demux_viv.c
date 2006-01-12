@@ -113,8 +113,8 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	header_len -= strlen(token)+2;
 	if (sscanf(token, "%[^:]:%[^\n]", opt, param) != 2)
 	{
-	    mp_msg(MSGT_DEMUX, MSGL_V, "viv_text_header_parser: bad line: '%s' at ~%p\n",
-		token, stream_tell(demux->stream));
+	    mp_msg(MSGT_DEMUX, MSGL_V, "viv_text_header_parser: bad line: '%s' at ~%#"PRIx64"\n",
+		token, (int64_t)stream_tell(demux->stream));
 	    break;
 	}
 	mp_dbg(MSGT_DEMUX, MSGL_DBG3, "token: '%s' (%d bytes/%d bytes left)\n",
@@ -364,8 +364,8 @@ static int demux_vivo_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
       audio_pos+=len;
       break;
   default:
-      mp_msg(MSGT_DEMUX,MSGL_WARN,"VIVO - unknown ID found: %02X at pos %lu contact author!\n",
-        c, stream_tell(demux->stream));
+      mp_msg(MSGT_DEMUX,MSGL_WARN,"VIVO - unknown ID found: %02X at pos %"PRIu64" contact author!\n",
+        c, (int64_t)stream_tell(demux->stream));
       return 0;
   }
 

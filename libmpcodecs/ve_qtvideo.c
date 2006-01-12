@@ -146,13 +146,13 @@ static int config(struct vf_instance_s* vf,
     cdesc.componentFlagsMask=0;
 
 
-    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Count = %d\n",CountComponents(&cdesc));
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Count = %ld\n",CountComponents(&cdesc));
     compressor=FindNextComponent(NULL,&cdesc);
     if(!compressor){
 	mp_msg(MSGT_MENCODER,MSGL_ERR,"Cannot find requested component\n");
 	return(0);
     }
-    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Found it! ID = 0x%X\n",compressor);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Found it! ID = %p\n",compressor);
 
 //	cres= FindCodec (fourcc,anyCodec,&compressor,&decompressor );
 //	printf("FindCodec returned:%i compressor: 0x%X decompressor: 0x%X\n",cres&0xFFFF,compressor,decompressor);
@@ -218,7 +218,7 @@ if(!codec_inited){
        bswap_32(format),
        compressor,
        &framesizemax );
-    mp_msg(MSGT_MENCODER,MSGL_DBG2,"GetMaxCompressionSize returned:%i : MaxSize:%i\n",cres&0xFFFF,framesizemax);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"GetMaxCompressionSize returned:%i : MaxSize:%li\n",cres&0xFFFF,framesizemax);
     frame_comp=malloc(framesizemax);
 
     desc = (ImageDescriptionHandle)NewHandleClear(MAX_IDSIZE); //memory where the desc will be stored

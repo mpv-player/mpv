@@ -221,7 +221,7 @@ do{
 
     pos = (off_t)priv->idx_offset+AVI_IDX_OFFSET(idx);
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start) && (demux->stream->flags & STREAM_SEEK)){
-      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%X  \n",pos);
+      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!   idx=0x%"PRIX64"  \n",(int64_t)pos);
       continue;
     }
 #if 0
@@ -245,7 +245,7 @@ do{
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
-      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
+      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%d  \n",len,idx->dwChunkLength);
       if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
       len=choose_chunk_len(idx->dwChunkLength,len);
     }
@@ -335,7 +335,7 @@ do{
 
     pos = priv->idx_offset+AVI_IDX_OFFSET(idx);
     if((pos<demux->movi_start || pos>=demux->movi_end) && (demux->movi_end>demux->movi_start)){
-      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!  current=0x%X  idx=0x%X  \n",demux->filepos,pos);
+      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkOffset out of range!  current=0x%"PRIX64"  idx=0x%"PRIX64"  \n",(int64_t)demux->filepos,(int64_t)pos);
       continue;
     }
 #if 0
@@ -358,7 +358,7 @@ do{
     }
     len=stream_read_dword_le(demux->stream);
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
-      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
+      mp_msg(MSGT_DEMUX,MSGL_V,"ChunkSize mismatch! raw=%d idx=%d  \n",len,idx->dwChunkLength);
       if(len>0x200000 && idx->dwChunkLength>0x200000) continue; // both values bad :(
       len=choose_chunk_len(idx->dwChunkLength,len);
     }
@@ -582,7 +582,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 	asamples+=(len+priv->audio_block_size-1)/priv->audio_block_size;
       }
     }
-    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%lu (%lu) audio size=%lu (%lu)\n",vsize,vsamples,asize,asamples);
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%u (%u) audio size=%u (%u)\n",vsize,vsamples,asize,asamples);
     priv->numberofframes=vsamples;
     sh_video->i_bps=((float)vsize/(float)vsamples)*(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
     if(sh_audio) sh_audio->i_bps=((float)asize/(float)asamples)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
@@ -609,7 +609,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       }
     }
     vsize=demuxer->movi_end-demuxer->movi_start-asize-8*priv->numberofframes;
-    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%lu (%lu)  audio size=%lu\n",vsize,priv->numberofframes,asize);
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%d (%u)  audio size=%d\n",vsize,priv->numberofframes,asize);
     sh_video->i_bps=(float)vsize/(sh_video->frametime*priv->numberofframes);
   }
   return demuxer;

@@ -205,7 +205,7 @@ static int x11_errorhandler(Display * display, XErrorEvent * event)
     mp_msg(MSGT_VO, MSGL_ERR, "X11 error: %s\n", msg);
 
     mp_msg(MSGT_VO, MSGL_V,
-           "Type: %x, display: %x, resourceid: %x, serial: %x\n",
+           "Type: %x, display: %p, resourceid: %lx, serial: %lx\n",
            event->type, event->display, event->resourceid, event->serial);
     mp_msg(MSGT_VO, MSGL_V,
            "Error code: %x, request code: %x, minor code: %x\n",
@@ -1299,7 +1299,7 @@ void vo_x11_setlayer(Display * mDisplay, Window vo_window, int layer)
         xev.data.l[0] = layer ? fs_layer : orig_layer;  // if not fullscreen, stay on default layer
         xev.data.l[1] = CurrentTime;
         mp_msg(MSGT_VO, MSGL_V,
-               "[x11] Layered style stay on top (layer %d).\n",
+               "[x11] Layered style stay on top (layer %ld).\n",
                xev.data.l[0]);
         XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask,
                    (XEvent *) & xev);
@@ -1604,7 +1604,7 @@ static void xscreensaver_disable(Display * dpy)
         return;
     }
     mp_msg(MSGT_VO, MSGL_INFO,
-           "xscreensaver_disable: xscreensaver wid=%d.\n", xs_windowid);
+           "xscreensaver_disable: xscreensaver wid=%ld.\n", xs_windowid);
 
     deactivate = XInternAtom(dpy, "DEACTIVATE", False);
     screensaver = XInternAtom(dpy, "SCREENSAVER", False);
@@ -1903,7 +1903,7 @@ int vo_find_depth_from_visuals(Display * dpy, int screen,
         for (i = 0; i < nvisuals; i++)
         {
             mp_msg(MSGT_VO, MSGL_V,
-                   "vo: X11 truecolor visual %#x, depth %d, R:%lX G:%lX B:%lX\n",
+                   "vo: X11 truecolor visual %#lx, depth %d, R:%lX G:%lX B:%lX\n",
                    visuals[i].visualid, visuals[i].depth,
                    visuals[i].red_mask, visuals[i].green_mask,
                    visuals[i].blue_mask);
@@ -2347,27 +2347,27 @@ void vo_xv_print_ck_info()
   switch ( xv_ck_info.source )
   {
     case CK_SRC_CUR:      
-      mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06x).\n",
+      mp_msg( MSGT_VO, MSGL_V, "Using colorkey from Xv (0x%06lx).\n",
               xv_colorkey );
       break;
     case CK_SRC_USE:
       if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
       {
         mp_msg( MSGT_VO, MSGL_V,
-                "Ignoring colorkey from MPlayer (0x%06x).\n",
+                "Ignoring colorkey from MPlayer (0x%06lx).\n",
                 xv_colorkey );
       }
       else
       {
         mp_msg( MSGT_VO, MSGL_V,
-                "Using colorkey from MPlayer (0x%06x)."
+                "Using colorkey from MPlayer (0x%06lx)."
                 " Use -colorkey to change.\n",
                 xv_colorkey );
       }
       break;
     case CK_SRC_SET:
       mp_msg( MSGT_VO, MSGL_V,
-              "Setting and using colorkey from MPlayer (0x%06x)."
+              "Setting and using colorkey from MPlayer (0x%06lx)."
               " Use -colorkey to change.\n",
               xv_colorkey );
       break;

@@ -238,7 +238,7 @@ while(1){
 	  s->aIndex[i].qwOffset |= ((uint64_t)stream_read_dword_le(demuxer->stream) & 0xffffffff)<<32;
 	  s->aIndex[i].dwSize = stream_read_dword_le(demuxer->stream);
 	  s->aIndex[i].dwDuration = stream_read_dword_le(demuxer->stream);
-	  mp_msg (MSGT_HEADER, MSGL_V, "ODML (%.4s): [%d] 0x%016llx 0x%04lx %ld\n", 
+	  mp_msg (MSGT_HEADER, MSGL_V, "ODML (%.4s): [%d] 0x%016"PRIx64" 0x%04x %u\n", 
 		  (s->dwChunkId), i,
 		  (uint64_t)s->aIndex[i].qwOffset, s->aIndex[i].dwSize, s->aIndex[i].dwDuration);
       }
@@ -353,7 +353,7 @@ while(1){
       uint32_t last_off = 0;
       priv->idx_size=size2>>4;
       mp_msg(MSGT_HEADER,MSGL_V,MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames,
-        priv->idx_size,avih.dwTotalFrames, stream_tell(demuxer->stream));
+        priv->idx_size,avih.dwTotalFrames, (int64_t)stream_tell(demuxer->stream));
       priv->idx=malloc(priv->idx_size<<4);
 //      printf("\nindex to %p !!!!! (priv=%p)\n",priv->idx,priv);
       stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
@@ -410,9 +410,9 @@ while(1){
       demux_info_add(demuxer, hdr, buf);
     }
   }
-  mp_msg(MSGT_HEADER,MSGL_DBG2,"list_end=0x%X  pos=0x%X  chunksize=0x%X  next=0x%X\n",
-      (int)list_end, (int)stream_tell(demuxer->stream),
-      chunksize, (int)chunksize+stream_tell(demuxer->stream));
+  mp_msg(MSGT_HEADER,MSGL_DBG2,"list_end=0x%"PRIX64"  pos=0x%"PRIX64"  chunksize=0x%"PRIX64"  next=0x%"PRIX64"\n",
+      (int64_t)list_end, (int64_t)stream_tell(demuxer->stream),
+      (int64_t)chunksize, (int64_t)chunksize+(int64_t)stream_tell(demuxer->stream));
   if(list_end>0 &&
      chunksize+stream_tell(demuxer->stream) == list_end) list_end=0;
   if(list_end>0 && chunksize+stream_tell(demuxer->stream)>list_end){

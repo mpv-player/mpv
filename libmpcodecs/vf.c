@@ -405,7 +405,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":((mpi->flags&MP_IMGFLAG_SWAPPED)?"BGR":"RGB"),
 		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
 	          mpi->bpp*mpi->width*mpi->height/8);
-	    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"(imgfmt: %x, planes: %x,%x,%x strides: %d,%d,%d, chroma: %dx%d, shift: h:%d,v:%d)\n",
+	    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"(imgfmt: %x, planes: %p,%p,%p strides: %d,%d,%d, chroma: %dx%d, shift: h:%d,v:%d)\n",
 		mpi->imgfmt, mpi->planes[0], mpi->planes[1], mpi->planes[2],
 		mpi->stride[0], mpi->stride[1], mpi->stride[2],
 		mpi->chroma_width, mpi->chroma_height, mpi->chroma_x_shift, mpi->chroma_y_shift);

@@ -616,7 +616,7 @@ do{
   if(demux->synced==1){
     if(head==0x1BB || head==0x1BD || (head>=0x1C0 && head<=0x1EF)){
       demux->synced=2;
-      mp_msg(MSGT_DEMUX,MSGL_V,"system stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
+      mp_msg(MSGT_DEMUX,MSGL_V,"system stream synced at 0x%"PRIX64" (%"PRId64")!\n",(int64_t)demux->filepos,(int64_t)demux->filepos);
       num_elementary_packets100=0; // requires for re-sync!
       num_elementary_packets101=0; // requires for re-sync!
     } else demux->synced=0;

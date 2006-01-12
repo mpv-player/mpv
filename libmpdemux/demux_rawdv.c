@@ -135,7 +135,7 @@ static demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
    rawdv_frames_t *frames = (rawdv_frames_t *)malloc(sizeof(rawdv_frames_t));
    dv_decoder_t *dv_decoder=NULL;
 
-   mp_msg(MSGT_DEMUXER,MSGL_V,"demux_open_rawdv() end_pos %d\n",demuxer->stream->end_pos);
+   mp_msg(MSGT_DEMUXER,MSGL_V,"demux_open_rawdv() end_pos %"PRId64"\n",(int64_t)demuxer->stream->end_pos);
 
    // go back to the beginning
    stream_reset(demuxer->stream);

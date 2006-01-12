@@ -1305,7 +1305,7 @@ vixConfigPlayback (vidix_playback_t * vinfo)
 
 		  vinfo->frame_size = info->pitch * info->src_h;
 
-			printf("$#### destination pitch = %lu\n", info->pitch&0xffff);
+			printf("$#### destination pitch = %u\n", info->pitch&0xffff);
 
 
 
@@ -1469,7 +1469,7 @@ void debugout(unsigned int addr, unsigned int val){
 	    break;
 
     }
-    fprintf(stderr,":\t\t 0x%08X = %lu\n",val,val);
+    fprintf(stderr,":\t\t 0x%08X = %u\n",val,val);
 }
 
 

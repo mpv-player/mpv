@@ -188,7 +188,7 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       }
       if ( ok == 0 )
       { 
-         mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %d\n", offset );
+         mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %"PRId64"\n", (int64_t)offset );
          done = 1;
          error = 1;
          break;
@@ -282,9 +282,9 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
       tivo->tmf_totalchunks += ( tivo->tmfparts[ index ].fileSize / CHUNKSIZE );
    }
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "tmf_filetoparts():total size %"PRId64"\n", tivo->tmf_totalsize );
+      "tmf_filetoparts():total size %"PRId64"\n", (int64_t)tivo->tmf_totalsize );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "tmf_filetoparts():total chunks %d\n", tivo->tmf_totalchunks );
+      "tmf_filetoparts():total chunks %"PRId64"\n", (int64_t)tivo->tmf_totalchunks );
 
    return( 1 );
 }
@@ -697,8 +697,8 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
                   numberParts = demux->stream->end_pos / TIVO_PART_LENGTH;
                   offset = numberParts * TIVO_PART_LENGTH;
 
-                  mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:ty/ty+Number Parts %d\n",
-                    numberParts );
+                  mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:ty/ty+Number Parts %"PRId64"\n",
+                    (int64_t)numberParts );
 
                   if ( ( offset + CHUNKSIZE ) < demux->stream->end_pos )
                   {
@@ -753,13 +753,13 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    // Give a clue as to where we are in the stream
    // ======================================================================
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "ty:ty header size %"PRIx64"\n", tivo->size );
+      "ty:ty header size %"PRIx64"\n", (int64_t)tivo->size );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "ty:ty which Chunk %"PRIx64"\n", tivo->whichChunk );
+      "ty:ty which Chunk %d\n", tivo->whichChunk );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "ty:file end_pos   %"PRIx64"\n", demux->stream->end_pos );
+      "ty:file end_pos   %"PRIx64"\n", (int64_t)demux->stream->end_pos );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
-      "\nty:wanted current offset %"PRIx64"\n", stream_tell( demux->stream ) );
+      "\nty:wanted current offset %"PRIx64"\n", (int64_t)stream_tell( demux->stream ) );
 
    if ( tivo->size > 0 )
    {

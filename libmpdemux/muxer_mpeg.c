@@ -1779,7 +1779,7 @@ static uint64_t parse_fps(float fps)
 		case 60060:
 			return 1536000;
 		default:
-			mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR! unknown fps code: %d", fps);
+			mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR! unknown fps code: %d", (int)(fps*1001+0.5));
 			return 0;
 	}
 }

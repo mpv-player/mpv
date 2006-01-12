@@ -249,7 +249,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
   header_size -= 16;
 
   mp_msg(MSGT_DEMUX, MSGL_HINT, "FILM version %.4s\n",
-    &film_data->film_version);
+    (char *)&film_data->film_version);
 
   // skip to where the next chunk should be
   stream_skip(demuxer->stream, 4);

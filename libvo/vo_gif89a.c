@@ -165,7 +165,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	char LB2[] = { 1, 0, 0 };
 #endif
 
-	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: Config entered [%ldx%ld]\n", s_width,s_height);
+	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: Config entered [%dx%d]\n", s_width,s_height);
 	mp_msg(MSGT_VO, MSGL_DBG2, "GIF89a: With requested format: %s\n", vo_format_name(format));
 	
 	// save these for later.

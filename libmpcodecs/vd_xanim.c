@@ -258,27 +258,27 @@ static int xacodec_load(sh_video_t *sh, char *filename)
 	return(0);
     }
     
-    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Exported functions by codec: [functable: 0x%08x entries: %d]\n",
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Exported functions by codec: [functable: %p entries: %d]\n",
 	mod_hdr->funcs, mod_hdr->num_funcs);
     for (i = 0; i < (int)mod_hdr->num_funcs; i++)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " %d: %d %d [iq:0x%08x d:0x%08x]\n",
+	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " %d: %d %d [iq:%p d:%p]\n",
 		i, func[i].what, func[i].id, func[i].iq_func, func[i].dec_func);
 	if (func[i].what & XAVID_AVI_QUERY)
 	{
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " 0x%08x: avi init/query func (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " %p: avi init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
 	    priv->iq_func = (void *)func[i].iq_func;
 	}
 	if (func[i].what & XAVID_QT_QUERY)
 	{
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " 0x%08x: qt init/query func (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " %p: qt init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
 	    priv->iq_func = (void *)func[i].iq_func;
 	}
 	if (func[i].what & XAVID_DEC_FUNC)
 	{
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " 0x%08x: decoder func (init/query: 0x%08x) (id: %d)\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, " %p: decoder func (init/query: %p) (id: %d)\n",
 		func[i].dec_func, func[i].iq_func, func[i].id);
 	    priv->dec_func = (void *)func[i].dec_func;
 	}
@@ -306,7 +306,7 @@ static int xacodec_query(sh_video_t *sh, XA_CODEC_HDR *codec_hdr)
     {
 	case CODEC_SUPPORTED:
 	    priv->dec_func = (void *)codec_hdr->decoder;
-	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Codec is supported: found decoder for %s at 0x%08x\n",
+	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Codec is supported: found decoder for %s at %p\n",
 		codec_hdr->description, codec_hdr->decoder);
 	    return(1);
 	case CODEC_UNSUPPORTED:
@@ -720,8 +720,8 @@ static int init(sh_video_t *sh)
     priv->decinfo->xs = priv->decinfo->ys = 0;
     priv->decinfo->special = 0;
     priv->decinfo->extra = codec_hdr.extra;
-    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "decinfo->extra, filled by codec: 0x%08x [%s]\n",
-	&priv->decinfo->extra, priv->decinfo->extra);
+    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "decinfo->extra, filled by codec: %p [%s]\n",
+	&priv->decinfo->extra, (char *)priv->decinfo->extra);
 
     return(1);
 }

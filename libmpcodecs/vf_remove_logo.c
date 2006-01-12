@@ -132,8 +132,8 @@ __________________________________________________________________________
  */
 typedef struct
 {
-  unsigned short int width;
-  unsigned short int height;
+  unsigned int width;
+  unsigned int height;
 
   unsigned char * pixel;
 

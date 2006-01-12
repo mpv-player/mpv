@@ -257,7 +257,7 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d B/s)  size: %d bytes  %5.3f secs\n"
 #define MSGTR_OpenedStream "success: format: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio selected\n"
 #define MSGTR_MP3AudioSelected "MP3 audio selected\n"
 #define MSGTR_CannotAllocateBytes "Couldn't allocate %d bytes\n"
@@ -267,7 +267,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Limiting audio preload to 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Increasing audio density to 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forcing audio preload to 0, max pts correction to 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld bytes/sec, %d bytes/block\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %d bytes/sec, %d bytes/block\n"
 #define MSGTR_LameVersion "LAME version %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Error: The bitrate specified is out of the valid range for this preset\n"\
 "\n"\
@@ -580,7 +580,7 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC content detected, switching framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressive NTSC content detected, switching framerate.\n"
 
-#define MSGTR_CacheFill "\rCache fill: %5.2f%% (%d bytes)   "
+#define MSGTR_CacheFill "\rCache fill: %5.2f%% (%"PRId64" bytes)   "
 #define MSGTR_NoBindFound "No bind found for key '%s'"
 #define MSGTR_FailedToOpen "Failed to open %s\n"
 
@@ -1209,7 +1209,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Access type not available\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Sample format not available\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Channel count not available - reverting to default: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Unable to install hw params:"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Unable to install hw params: %s"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Can't use period equal to buffer size (%u == %lu)\n"
 #define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Unable to install sw params:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Error opening audio: %s\n"
@@ -1313,7 +1313,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regenerating keyframe table for MPEG4 video\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Found 'wf', %d bytes of %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh found (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Reading INDEX block, %d chunks for %ld frames (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Reading INDEX block, %d chunks for %d frames (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Additional RIFF header...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** warning: this is no extended AVI header..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Broken chunk?  chunksize=%d  (id=%.4s)\n"
@@ -1338,7 +1338,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Can't open CDDA device.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Can't open disc.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Found audio CD with %d tracks.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Found audio CD with %ld tracks.\n"
 
 // cddb.c
 

@@ -128,7 +128,7 @@ static int init(sh_audio_t *sh)
     op.packet = headers[i];
     op.b_o_s  = (i == 0);
     if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: header n. %d broken! len=%d\n", i, op.bytes);
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: header n. %d broken! len=%ld\n", i, op.bytes);
       ERROR();
     }
     if(i == 2) {

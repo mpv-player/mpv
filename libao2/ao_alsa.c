@@ -610,11 +610,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams, 
 							  &chunk_size, &dir)) < 0)
 	  {
-	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periodsize(%d): %s\n",
+	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periodsize(%ld): %s\n",
 			    chunk_size, snd_strerror(err));
 	  }
 	else {
-	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: chunksize set to %i\n", chunk_size);
+	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: chunksize set to %li\n", chunk_size);
 	}
 	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams,
 						      &alsa_fragcount, &dir)) < 0) {

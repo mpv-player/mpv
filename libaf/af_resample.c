@@ -182,7 +182,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if((s->setup & RSMP_MASK) == RSMP_LIN){
       s->pt=0LL;
       s->step=((uint64_t)n->rate<<STEPACCURACY)/(uint64_t)af->data->rate+1LL;
-      af_msg(AF_MSG_DEBUG0,"[resample] Linear interpolation step: 0x%016X.\n",
+      af_msg(AF_MSG_DEBUG0,"[resample] Linear interpolation step: 0x%016"PRIX64".\n",
 	     s->step);
       af->mul.n = af->data->rate;
       af->mul.d = n->rate;

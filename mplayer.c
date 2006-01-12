@@ -1033,13 +1033,13 @@ static void log_sub(){
     if (!f) return;
     fprintf(f, "----------------------------------------------------------\n");
     if (subdata->sub_uses_time) {
-	fprintf(f, "N: %s S: %02d:%02d:%02d.%02d E: %02d:%02d:%02d.%02d\n", filename, 
+	fprintf(f, "N: %s S: %02ld:%02ld:%02ld.%02ld E: %02ld:%02ld:%02ld.%02ld\n", filename, 
 		vo_sub_last->start/360000, (vo_sub_last->start/6000)%60,
 		(vo_sub_last->start/100)%60, vo_sub_last->start%100,
 		vo_sub_last->end/360000, (vo_sub_last->end/6000)%60,
 		(vo_sub_last->end/100)%60, vo_sub_last->end%100);
     } else {
-	fprintf(f, "N: %s S: %d E: %d\n", filename, vo_sub_last->start, vo_sub_last->end);
+	fprintf(f, "N: %s S: %ld E: %ld\n", filename, vo_sub_last->start, vo_sub_last->end);
     }
     for (i = 0; i < vo_sub_last->lines; i++) {
 	fprintf(f, "%s\n", vo_sub_last->text[i]);
@@ -2316,7 +2316,7 @@ if(identify) {
   if (sh_video) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_video->format >= 0x20202020)
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", &sh_video->format);
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", (char *)&sh_video->format);
     else
 	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=0x%08X\n", sh_video->format);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", sh_video->i_bps*8);
@@ -2330,7 +2330,7 @@ if(identify) {
       mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_audio->format >= 0x20202020)
-      mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", &sh_audio->format);
+      mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", (char *)&sh_audio->format);
     else
       mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_FORMAT=%d\n", sh_audio->format);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", sh_audio->i_bps*8);
@@ -3765,7 +3765,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	{
 #ifdef USE_SUB
 	if (sh_video) {
-		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_SUB_VISIBILITY=%ld\n", sub_visibility);
+		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_SUB_VISIBILITY=%d\n", sub_visibility);
 	}
 #endif
 	} break;
@@ -3893,11 +3893,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
 	case MP_CMD_GET_VO_FULLSCREEN : {
 	if(video_out && vo_config_count)
-		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_VO_FULLSCREEN=%ld\n", vo_fs);
+		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_VO_FULLSCREEN=%d\n", vo_fs);
 	} break;
     
     case MP_CMD_GET_PERCENT_POS : {
-	mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
+	mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_PERCENT_POSITION=%d\n", demuxer_get_percent_pos(demuxer));
     } break;
     case MP_CMD_GET_TIME_POS : {
       float pos = 0;

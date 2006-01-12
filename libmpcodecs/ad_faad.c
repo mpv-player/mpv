@@ -151,7 +151,7 @@ static int init(sh_audio_t *sh)
     return 0;
   } else {
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Decoder init done (%dBytes)!\n", sh->a_in_buffer_len); // XXX: remove or move to debug!
-    mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Negotiated samplerate: %dHz  channels: %d\n", faac_samplerate, faac_channels);
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Negotiated samplerate: %ldHz  channels: %d\n", faac_samplerate, faac_channels);
     sh->channels = faac_channels;
     if (audio_output_channels <= 2) sh->channels = faac_channels > 1 ? 2 : 1;
     sh->samplerate = faac_samplerate;
@@ -266,7 +266,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Decoded zero samples!\n");
     } else {
       /* XXX: samples already multiplied by channels! */
-      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%d Bytes)!\n",
+      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%ld Bytes)!\n",
       sh->samplesize*faac_finfo.samples);
       memcpy(buf+len,faac_sample_buffer, sh->samplesize*faac_finfo.samples);
       last_dec_len = sh->samplesize*faac_finfo.samples;

@@ -437,7 +437,7 @@ static int init(priv_t *priv)
     priv->audio_skew_buffer = NULL;
 
     priv->video_fd = open(priv->video_device, O_RDWR);
-    mp_msg(MSGT_TV, MSGL_DBG2, "Video fd: %d, %x\n", priv->video_fd,
+    mp_msg(MSGT_TV, MSGL_DBG2, "Video fd: %d, %p\n", priv->video_fd,
 	priv->video_device);
     if (priv->video_fd == -1)
     {

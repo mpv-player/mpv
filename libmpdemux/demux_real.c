@@ -1790,7 +1790,7 @@ header_end:
     if(demuxer->video->sh){
 	sh_video_t *sh=demuxer->video->sh;
 	mp_msg(MSGT_DEMUX,MSGL_V,"VIDEO:  %.4s [%08X,%08X]  %dx%d  (aspect %4.2f)  %4.2f fps\n",
-	    &sh->format,((unsigned int*)(sh->bih+1))[1],((unsigned int*)(sh->bih+1))[0],
+	    (char *)&sh->format,((unsigned int*)(sh->bih+1))[1],((unsigned int*)(sh->bih+1))[0],
 	    sh->disp_w,sh->disp_h,sh->aspect,sh->fps);
     }
 

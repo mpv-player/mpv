@@ -120,7 +120,7 @@ int cache_fill(cache_vars_t* s){
   
   if(read<s->min_filepos || read>s->max_filepos){
       // seek...
-      mp_msg(MSGT_CACHE,MSGL_DBG2,"Out of boundaries... seeking to 0x%X  \n",read);
+      mp_msg(MSGT_CACHE,MSGL_DBG2,"Out of boundaries... seeking to 0x%"PRIX64"  \n",(int64_t)read);
       // streaming: drop cache contents only if seeking backward or too much fwd:
       if(s->stream->type!=STREAMTYPE_STREAM ||
           read<s->min_filepos || read>=s->max_filepos+s->seek_limit)
@@ -129,7 +129,7 @@ int cache_fill(cache_vars_t* s){
         s->min_filepos=s->max_filepos=read; // drop cache content :(
         if(s->stream->eof) stream_reset(s->stream);
         stream_seek(s->stream,read);
-        mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%X  \n",(int)stream_tell(s->stream));
+        mp_msg(MSGT_CACHE,MSGL_DBG2,"Seek done. new pos: 0x%"PRIX64"  \n",(int64_t)stream_tell(s->stream));
       }
   }
   
@@ -288,12 +288,12 @@ int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
     stream->cache_pid = CreateThread(NULL,0,ThreadProc,s,0,&threadId);
 #endif
     // wait until cache is filled at least prefill_init %
-    mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %d [%d] %d  pre:%d  eof:%d  \n",
-	s->min_filepos,s->read_filepos,s->max_filepos,min,s->eof);
+    mp_msg(MSGT_CACHE,MSGL_V,"CACHE_PRE_INIT: %"PRId64" [%"PRId64"] %"PRId64"  pre:%d  eof:%d  \n",
+	(int64_t)s->min_filepos,(int64_t)s->read_filepos,(int64_t)s->max_filepos,min,(int64_t)s->eof);
     while(s->read_filepos<s->min_filepos || s->max_filepos-s->read_filepos<min){
 	mp_msg(MSGT_CACHE,MSGL_STATUS,MSGTR_CacheFill,
 	    100.0*(float)(s->max_filepos-s->read_filepos)/(float)(s->buffer_size),
-	    s->max_filepos-s->read_filepos
+	    (int64_t)s->max_filepos-s->read_filepos
 	);
 	if(s->eof) break; // file is smaller than prefill size
 	if(mp_input_check_interrupt(PREFILL_SLEEP_TIME))
@@ -347,7 +347,7 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
   s=stream->cache_data;
 //  s->seek_lock=1;
   
-  mp_msg(MSGT_CACHE,MSGL_DBG2,"CACHE2_SEEK: 0x%X <= 0x%X (0x%X) <= 0x%X  \n",s->min_filepos,(int)pos,s->read_filepos,s->max_filepos);
+  mp_msg(MSGT_CACHE,MSGL_DBG2,"CACHE2_SEEK: 0x%"PRIX64" <= 0x%"PRIX64" (0x%"PRIX64") <= 0x%"PRIX64"  \n",s->min_filepos,pos,s->read_filepos,s->max_filepos);
 
   newpos=pos/s->sector_size; newpos*=s->sector_size; // align
   stream->pos=s->read_filepos=newpos;

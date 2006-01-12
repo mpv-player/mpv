@@ -216,7 +216,7 @@ static int demux_lmlm4_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 
 hdr:
     demux->filepos = stream_tell(demux->stream);
-    mp_msg(MSGT_DEMUX, MSGL_DBG2, "fpos = %d\n", demux->filepos);
+    mp_msg(MSGT_DEMUX, MSGL_DBG2, "fpos = %"PRId64"\n", (int64_t)demux->filepos);
     
     ret=getFrame(demux, &frameInfo);
     if(ret<=0) return ret; // EOF/error

@@ -950,8 +950,8 @@ case ACODEC_COPY:
     mux_a->h.dwRate *= playback_speed;
     mux_a->wf->nSamplesPerSec *= playback_speed;
     mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-	mux_a->wf->wFormatTag, mux_a->wf->nChannels, (long)mux_a->wf->nSamplesPerSec,
-	mux_a->wf->wBitsPerSample, (long)mux_a->wf->nAvgBytesPerSec, (long)mux_a->h.dwSampleSize);
+	mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
+	mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
     break;
 }
 
@@ -982,16 +982,16 @@ else {
 	if (sh_audio && mux_a->codec == ACODEC_COPY) {
 		if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
 		mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-		       mux_a->wf->wFormatTag, mux_a->wf->nChannels, (long)mux_a->wf->nSamplesPerSec,
-		       mux_a->wf->wBitsPerSample, (long)mux_a->wf->nAvgBytesPerSec, (long)mux_a->h.dwSampleSize);
+		       mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
+		       mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
 		if (sh_audio->wf) {
 			if ((mux_a->wf->wFormatTag != sh_audio->wf->wFormatTag) ||
 			    (mux_a->wf->nChannels != sh_audio->wf->nChannels) ||
 			    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec * playback_speed))
 			{
 				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (long)(sh_audio->wf->nSamplesPerSec * playback_speed),
-				       sh_audio->wf->wBitsPerSample, (long)sh_audio->wf->nAvgBytesPerSec, 0L);
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (int)(sh_audio->wf->nSamplesPerSec * playback_speed),
+				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
 				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
 				mencoder_exit(1,NULL);
 			}
@@ -1001,8 +1001,8 @@ else {
 			    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate * playback_speed))
 			{
 				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
-				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (long)(sh_audio->wf->nSamplesPerSec * playback_speed),
-				       sh_audio->wf->wBitsPerSample, (long)sh_audio->wf->nAvgBytesPerSec, 0L);
+				       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, (int)(sh_audio->wf->nSamplesPerSec * playback_speed),
+				       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
 				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
 				mencoder_exit(1,NULL);
 			}

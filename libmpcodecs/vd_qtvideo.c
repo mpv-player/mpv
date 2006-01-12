@@ -152,7 +152,7 @@ static int init(sh_video_t *sh){
 
     result=InitializeQTML(6+16);
 //    result=InitializeQTML(0);
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %i\n",result);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %li\n",result);
 //    result=EnterMovies();
 //    printf("EnterMovies->%d\n",result);
 #endif /* !MACOSX */
@@ -193,20 +193,20 @@ static int init(sh_video_t *sh){
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
 
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Count = %d\n",CountComponents(&desc));
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Count = %ld\n",CountComponents(&desc));
     prev=FindNextComponent(NULL,&desc);
     if(!prev){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Cannot find requested component\n");
 	return(0);
     }
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Found it! ID = 0x%X\n",prev);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"Found it! ID = %p\n",prev);
 
     ci=OpenComponent(prev);
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ci=%p\n",ci);
 
     memset(&icap,0,sizeof(icap));
     cres=ImageCodecInitialize(ci,&icap);
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecInitialize->%p  size=%d (%d)\n",cres,icap.recordSize,icap.decompressRecordSize);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecInitialize->%#x  size=%d (%d)\n",cres,icap.recordSize,icap.decompressRecordSize);
     
     memset(&cinfo,0,sizeof(cinfo));
     cres=ImageCodecGetCodecInfo(ci,&cinfo);
@@ -281,7 +281,7 @@ static int init(sh_video_t *sh){
 	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Unknown requested csp\n");
 	    return(0);    
     }
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), &qt_imgfmt);
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), (char *)&qt_imgfmt);
     sh->context = (void *)qt_imgfmt;
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,imgfmt)) return 0;
     }
@@ -327,7 +327,7 @@ if(!codec_inited){
         0, 
         mpi->planes[0],
         mpi->stride[0]);
-    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"NewGWorldFromPtr returned:%d\n",65536-(result&0xffff));
+    mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"NewGWorldFromPtr returned:%ld\n",65536-(result&0xffff));
 //    if (65536-(result&0xFFFF) != 10000)
 //	return NULL;
 
@@ -368,7 +368,7 @@ if(!codec_inited){
     if(decpar.wantedDestinationPixelTypes)
     { OSType *p=*(decpar.wantedDestinationPixelTypes);
       if(p) while(*p){
-          mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"supported csp: 0x%08X %.4s\n",*p,p);
+          mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"supported csp: 0x%08X %.4s\n",*p,(char *)p);
 	  ++p;
       }
     }
@@ -390,7 +390,7 @@ if(!codec_inited){
     if(decpar.frameNumber==124){
 	decpar.frameNumber=1;
 	cres=ImageCodecPreDecompress(ci,&decpar);
-	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecPreDecompress cres=0x%X\n",cres);
+	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"ImageCodecPreDecompress cres=0x%lX\n",cres);
     }
 #endif
 

@@ -717,7 +717,7 @@ if (demuxer->desc->open)
 
 if ((sh_video=demuxer->video->sh) && sh_video->bih){
 int biComp=le2me_32(sh_video->bih->biCompression);
-  mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+  mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %dx%d  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     (char *)&biComp,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,

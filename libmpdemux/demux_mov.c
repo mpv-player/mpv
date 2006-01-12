@@ -388,7 +388,7 @@ static int mov_check_file(demuxer_t* demuxer){
      	      break;
 	    default:
 	      tmp = be2me_32(tmp);  
-	      mp_msg(MSGT_DEMUX,MSGL_WARN,"ISO: Unknown File Type Major Brand: %.4s\n",&tmp);
+	      mp_msg(MSGT_DEMUX,MSGL_WARN,"ISO: Unknown File Type Major Brand: %.4s\n",(char *)&tmp);
 	  }
 	  mp_msg(MSGT_DEMUX,MSGL_V,"ISO: File Type Minor Version: %d\n",
 	      stream_read_dword(demuxer->stream));
@@ -396,7 +396,7 @@ static int mov_check_file(demuxer_t* demuxer){
 	  // List all compatible brands
 	  for(i = 0; i < ((len-16)/4); i++) {
 	    tmp = be2me_32(stream_read_dword(demuxer->stream));
-	    mp_msg(MSGT_DEMUX,MSGL_V,"ISO: File Type Compatible Brand #%d: %.4s\n",i,&tmp);
+	    mp_msg(MSGT_DEMUX,MSGL_V,"ISO: File Type Compatible Brand #%d: %.4s\n",i,(char *)&tmp);
 	    skipped += 4;
 	  }
 #endif	  
@@ -406,8 +406,8 @@ static int mov_check_file(demuxer_t* demuxer){
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie header found!\n");
 	  priv->moov_start=(off_t)stream_tell(demuxer->stream);
 	  priv->moov_end=(off_t)priv->moov_start+len-skipped;
-	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie header: start: %x end: %x\n",
-	    priv->moov_start, priv->moov_end);
+	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie header: start: %"PRIx64" end: %"PRIx64"\n",
+	    (int64_t)priv->moov_start, (int64_t)priv->moov_end);
 	  skipped+=8;
 	  i = stream_read_dword(demuxer->stream)-8;
 	  if(stream_read_dword(demuxer->stream)==MOV_FOURCC('r','m','r','a')){
@@ -470,8 +470,8 @@ static int mov_check_file(demuxer_t* demuxer){
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie DATA found!\n");
 	  priv->mdat_start=stream_tell(demuxer->stream);
 	  priv->mdat_end=priv->mdat_start+len-skipped;
-	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie data: start: %x end: %x\n",
-	    priv->mdat_start, priv->mdat_end);
+	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: Movie data: start: %"PRIx64" end: %"PRIx64"\n",
+	    (int64_t)priv->mdat_start, (int64_t)priv->mdat_end);
 	  flags|=2;
 	  if(flags==3){
 	    // if we're over the headers, then we can stop parsing here!
@@ -482,7 +482,7 @@ static int mov_check_file(demuxer_t* demuxer){
 	case MOV_FOURCC('f','r','e','e'):
 	case MOV_FOURCC('s','k','i','p'):
 	case MOV_FOURCC('j','u','n','k'):
-	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: free space (len: %d)\n", len);
+	  mp_msg(MSGT_DEMUX,MSGL_DBG2,"MOV: free space (len: %"PRId64")\n", (int64_t)len);
 	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
 	  break;
 	case MOV_FOURCC('p','n','o','t'):
@@ -492,7 +492,7 @@ static int mov_check_file(demuxer_t* demuxer){
 	default:
 	  if(no==0){ free(priv); return 0;} // first chunk is bad!
 	  id = be2me_32(id);
-	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
+	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",(char *)&id,(int)len);
 	}
 skip_chunk:
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
@@ -560,7 +560,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	len-=8;
 	id=stream_read_dword(demuxer->stream);
 	//
-	mp_msg(MSGT_DEMUX,MSGL_DBG2,"lschunks %.4s  %d\n",&id,(int)len);
+	mp_msg(MSGT_DEMUX,MSGL_DBG2,"lschunks %.4s  %d\n",(char *)&id,(int)len);
 	//
 	if(trak){
 	  if (lschunks_intrak(demuxer, level, id, pos, len, trak) < 0)
@@ -806,7 +806,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    atom_len);
 		    }
 		}  
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",&trak->fourcc);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",(char *)&trak->fourcc);
 #if 0
 		{ FILE* f=fopen("stdata.dat","wb");
 		  fwrite(trak->stdata,trak->stdata_len,1,f);
@@ -1150,7 +1150,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Display size: %d x %d\n",
 		    trak->tkdata[77]|(trak->tkdata[76]<<8),
 		    trak->tkdata[81]|(trak->tkdata[80]<<8));
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata[42]&31,trak->stdata+43);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",(char *)&trak->fourcc,trak->stdata[42]&31,trak->stdata+43);
 		
 //		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
 //		    // (auto)selected video track:
@@ -1231,7 +1231,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	case MOV_FOURCC('d','c','o','m'): {
 //	    int temp=stream_read_dword(demuxer->stream);
 	    unsigned int algo=be2me_32(stream_read_dword(demuxer->stream));
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",&algo);
+	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",(char *)&algo);
 	    break;
 	}
 	case MOV_FOURCC('c','m','v','d'): {
@@ -1275,7 +1275,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	      }
 #endif
 	      if(moov_sz != zstrm.total_out)
-	        mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! moov size differs cmov: %d  zlib: %d\n",moov_sz,zstrm.total_out);
+	        mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! moov size differs cmov: %d  zlib: %ld\n",moov_sz,zstrm.total_out);
 	      zret = inflateEnd(&zstrm);
 	      
 	      backup=demuxer->stream;
@@ -1303,7 +1303,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		udta_len = stream_read_dword(demuxer->stream);
 		udta_id = stream_read_dword(demuxer->stream);
 		udta_size -= 8;
-		mp_msg(MSGT_DEMUX, MSGL_DBG2, "udta_id: %.4s (len: %d)\n", &udta_id, udta_len);
+		mp_msg(MSGT_DEMUX, MSGL_DBG2, "udta_id: %.4s (len: %"PRId64")\n", (char *)&udta_id, (int64_t)udta_len);
 		switch (udta_id)
 		{
 		    case MOV_FOURCC(0xa9,'c','p','y'):
@@ -1406,7 +1406,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	} /* eof udta */
 	default:
 	  id = be2me_32(id);
-	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
+	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",(char *)&id,(int)len);
 	} /* endof switch */
 	} /* endof else */
 
@@ -1482,7 +1482,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       str[len] = 0;
       mp_msg(MSGT_DEMUX, MSGL_V,
              "MOV: %*sHandler header: %.4s/%.4s (%.4s) %s\n", level, "",
-             &type, &subtype, &manufact, str);
+             (char *)&type, (char *)&subtype, (char *)&manufact, str);
       free(str);
       switch(bswap_32(type)) {
         case MOV_FOURCC('m','h','l','r'):
@@ -1494,7 +1494,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
         default:
           mp_msg(MSGT_DEMUX, MSGL_V,
                  "MOV: unknown handler class: 0x%X (%.4s)\n",
-                 bswap_32(type), &type);
+                 bswap_32(type), (char *)&type);
       }
       break;
     }
@@ -1536,8 +1536,8 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
         if (len < 8)
           break; // error
         mp_msg(MSGT_DEMUX, MSGL_V,
-               "MOV: %*s desc #%d: %.4s  (%d bytes)\n", level, "",
-               i, &fourcc, len - 16);
+               "MOV: %*s desc #%d: %.4s  (%"PRId64" bytes)\n", level, "",
+               i, (char *)&fourcc, (int64_t)len - 16);
         if (fourcc != trak->fourcc && i)
           mp_msg(MSGT_DEMUX, MSGL_WARN, MSGTR_MOVvariableFourCC);
 //      if(!i)
@@ -1582,7 +1582,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       int flags = (temp << 16) | (temp << 8) | temp;
       int i;
       mp_msg(MSGT_DEMUX, MSGL_V,
-             "MOV: %*sSample->Chunk mapping table!  (%d blocks) (ver:%d,flags:%ld)\n", level, "",
+             "MOV: %*sSample->Chunk mapping table!  (%d blocks) (ver:%d,flags:%d)\n", level, "",
              len, ver, flags);
       // read data:
       trak->chunkmap_size = len;
@@ -1602,7 +1602,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       int entries = stream_read_dword(demuxer->stream);
       int i;
       mp_msg(MSGT_DEMUX, MSGL_V,
-             "MOV: %*sSample size table! (entries=%d ss=%d) (ver:%d,flags:%ld)\n", level, "",
+             "MOV: %*sSample size table! (entries=%d ss=%d) (ver:%d,flags:%d)\n", level, "",
              entries, ss, ver, flags);
       trak->samplesize = ss;
       if (!ss) {
@@ -1662,7 +1662,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       int flags = (temp << 16) | (temp<<8) | temp;
       int i;
       mp_msg(MSGT_DEMUX, MSGL_V,
-             "MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%ld)\n", level, "",
+             "MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
       trak->keyframes_size = entries;
       trak->keyframes = malloc(sizeof(unsigned int) * entries);
@@ -1697,7 +1697,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       int flags = (temp << 16) | (temp << 8) | temp;
       int i;
       mp_msg(MSGT_DEMUX, MSGL_V,
-             "MOV: %*sEdit list table (%d entries) (ver:%d,flags:%ld)\n", level, "",
+             "MOV: %*sEdit list table (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
 #if 1
       trak->editlist_size = entries;
@@ -1722,7 +1722,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
     }
     default:
       id = be2me_32(id);
-      mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
+      mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",(char *)&id,(int)len);
       break;
   }//switch(id)
   return 0;
@@ -1740,8 +1740,8 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
     stream_reset(demuxer->stream);
     if(!stream_seek(demuxer->stream,priv->moov_start))
     {
-	mp_msg(MSGT_DEMUX,MSGL_ERR,"MOV: Cannot seek to the beginning of the Movie header (0x%x)\n",
-	    priv->moov_start);
+	mp_msg(MSGT_DEMUX,MSGL_ERR,"MOV: Cannot seek to the beginning of the Movie header (0x%"PRIx64")\n",
+	    (int64_t)priv->moov_start);
 	return 0;
     }
     lschunks(demuxer, 0, priv->moov_end, NULL);
@@ -1832,7 +1832,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	                zret = inflateInit(&zstrm);
 			zret = inflate(&zstrm, Z_NO_FLUSH);
 			if(newlen != zstrm.total_out)
-	    		    mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! unzipped frame size differs hdr: %d  zlib: %d\n",newlen,zstrm.total_out);
+	    		    mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! unzipped frame size differs hdr: %d  zlib: %ld\n",newlen,zstrm.total_out);
 			
 			write(fd, buf2, newlen);
 		    } else {

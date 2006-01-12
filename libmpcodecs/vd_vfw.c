@@ -275,14 +275,14 @@ static void uninit(sh_video_t *sh){
 #endif
     if (ret)
     {
-	mp_msg(MSGT_WIN32, MSGL_WARN, "ICDecompressEnd failed: %d\n", ret);
+	mp_msg(MSGT_WIN32, MSGL_WARN, "ICDecompressEnd failed: %ld\n", ret);
 	return;
     }
 
     ret = ICClose(priv->handle);
     if (ret)
     {
-	mp_msg(MSGT_WIN32, MSGL_WARN, "ICClose failed: %d\n", ret);
+	mp_msg(MSGT_WIN32, MSGL_WARN, "ICClose failed: %ld\n", ret);
 	return;
     }
     
@@ -323,7 +323,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	   sh->bih, data, priv->o_bih, (flags&3) ? 0 : mpi->planes[0]);
 
     if ((int)ret){
-      mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%d\n",ret);
+      mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%ld\n",ret);
       return NULL;
     }
     

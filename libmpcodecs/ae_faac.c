@@ -122,7 +122,7 @@ int mpae_init_faac(audio_encoder_t *encoder)
 		mp_msg(MSGT_MENCODER, MSGL_FATAL, "AE_FAAC, couldn't init, exit\n");
 		return 0;
 	}
-	mp_msg(MSGT_MENCODER, MSGL_V, "AE_FAAC, sample_input: %u, max_bytes_output: %u\n", samples_input, max_bytes_output);
+	mp_msg(MSGT_MENCODER, MSGL_V, "AE_FAAC, sample_input: %lu, max_bytes_output: %lu\n", samples_input, max_bytes_output);
 	config = faacEncGetCurrentConfiguration(faac);
 	if(!config)
 	{
