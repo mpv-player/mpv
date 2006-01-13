@@ -6,8 +6,7 @@ include config.mak
 
 INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC) $(EXTRA_INC) 
 
-OPTIMIZE =  $(OPTFLAGS) \
-            -fexpensive-optimizations -fschedule-insns2 -Wall
+OPTIMIZE =  $(OPTFLAGS)
 
 CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG) 
 
