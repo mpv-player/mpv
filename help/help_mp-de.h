@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.216
+// In synch with rev 1.217
 
 // ========================= MPlayer help ===========================
 
@@ -260,7 +260,7 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\nAudiostream: %8.3f kbit/s  (%d B/s)  Größe: %d Bytes  %5.3f Sek.\n"
 #define MSGTR_OpenedStream "Erfolg: Format: %d  Daten: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "Videocodec: Framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "Audiocodec: Framecopy (Format=%x chans=%d Rate=%ld Bits=%d B/s=%ld Sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "Audiocodec: Framecopy (Format=%x chans=%d Rate=%d Bits=%d B/s=%d Sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM Audio ausgewählt.\n"
 #define MSGTR_MP3AudioSelected "MP3 Audio ausgewählt.\n"
 #define MSGTR_CannotAllocateBytes "Konnte %d Bytes nicht reservieren.\n"
@@ -270,7 +270,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Limitiere Audio-Preload auf 0.4s.\n"
 #define MSGTR_IncreasingAudioDensity "Erhöhe Audiodichte auf 4.\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Erzwinge Audio-Preload von 0, maximale pts-Korrektur von 0.\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR Audio: %ld Bytes/Sek, %d Bytes/Block.\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR Audio: %d Bytes/Sek, %d Bytes/Block\n"
 #define MSGTR_LameVersion "LAME-Version %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Fehler: Die angegebene Bitrate ist außerhalb des gültigen Bereichs\nfür dieses Preset.\n"\
 "\n"\
@@ -589,7 +589,7 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressiver NTSC-Inhalt erkannt, wechsele Framerate.\n"
 
-#define MSGTR_CacheFill "\rFülle Zwischenpuffer: %5.2f%% (%d Byte)   "
+#define MSGTR_CacheFill "\rFülle Zwischenpuffer: %5.2f%% (%"PRId64" Bytes)   "
 #define MSGTR_NoBindFound "Taste '%s' ist nicht gebunden."
 #define MSGTR_FailedToOpen "Konnte '%s' nicht öffnen.\n"
 
@@ -1219,7 +1219,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Zugriffstyp nicht verfügbar.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Sampleformat nicht verfügbar.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Kanalzahl nicht verfügbar - falle auf Standard zurück: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Konnte Hardwareparameter nicht einrichten:"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Konnte Hardwareparameter nicht einrichten: %s"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Periode darf nicht gleich der Puffergröße sein (%u == %lu).\n"
 #define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Konnte Softwareparameter nicht einrichten:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Konnte Ton nicht öffnen: %s\n"
@@ -1323,7 +1323,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Erstelle Keyframe-Tabelle für MPEG4-Video neu...\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' gefunden, %d Byte von %d.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh gefunden (size=%d) (total_frames=%d).\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Lese INDEX-Block, %d Blöcke für %ld Frames (fpos=%p).\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Lese INDEX-Block, %d Blöcke für %d Frames (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "zusätzlicher RIFF-Kopf...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** Warnung: Dies ist kein erweiterter AVI-Kopf...\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Kaputter Block?  Blockgröße=%d  (id=%.4s)\n"
@@ -1348,7 +1348,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Kann CDDA-Gerät nicht öffnen.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Kann CD nicht öffnen.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Musik-CD mit %d Titeln gefunden.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Musik-CD mit %ld Titeln gefunden.\n"
 
 // cddb.c
 
