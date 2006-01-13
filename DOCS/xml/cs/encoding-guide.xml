@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.34 -->
+<!-- Synced with: 1.38 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -986,8 +986,8 @@
 <title>Výpočet rozlišení</title>
 <para>
   Následující kroky vás provedou výpočty rozlišení výsledného filmu tak,
-  abyste příliš nesnížili kvalitu videa s přihlédnutím několika informacím
-  o zdrojovém videu.
+  abyste příliš nesnížili kvalitu videa s přihlédnutím k několika typům
+  informací o zdrojovém videu.
   Nejdřív byste si měli spočítat enkódovaný poměr stran:
   <systemitem>PSo = (Šo x (PSa / PRdvd )) / Vo</systemitem>
 <itemizedlist>
@@ -1033,13 +1033,13 @@
   jiných kodeků seskupuje pixely do bloků při komprimaci obrázku; pokud není
   dostatek bitů, jsou viditelné hranice těchto bloků.)
   Proto je rozumné volit CQ v rozmezí 0.20 až 0.22 pro rip na 1 CD a
-  0.26 až 0.28 pro 2 CD při standardních enkódovacích volbách.
+  0.26 až 0.28 pro rip na 2 CD při standardních enkódovacích volbách.
   Pokročilejší volby podobné těm zmiňovaným zde pro
   <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>
   a
   <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
   by měly umožnit dosažení stejné kvality při CQ v rozsahu od
-  0.18 do 0.20 prorip na 1 CD a 0.24 až 0.26 pro 2 CD.
+  0.18 do 0.20 pro rip na 1 CD a 0.24 až 0.26 pro rip na 2 CD.
   S MPEG-4 ASP kodeky jako je <systemitem class="library">x264</systemitem>,
   můžete použít CQ v rozmezí 0.14 až 0.16 při standardních enkódovacích volbách
   a měli byste být schopni jít až na nízký od 0.10 do 0.12 s pokročilými
@@ -1281,17 +1281,119 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
 </para>
 </sect2>
 
+<sect2 id="menc-feat-dvd-mpeg4-codec">
+<title>Výběr video kodeku</title>
+
+<para>
+  Výběr vhodného video kodeku k použití závisí na několika faktorech.
+  Některé z nich jsou čistě věcí osobního vkusu, některé závisí na technických
+  omezeních.
+</para>
+<itemizedlist>
+  <listitem><para>
+  <emphasis role="bold">Účinost komprimace</emphasis>:
+  Jednoduše můžeme říct, že novější generace kodeků jsou vytvořeny
+  tak, aby dosahovaly vyšší kvality obrazu než ty předchozí.
+  Proto neuděláte chybu,
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
+  <para>Buďte však opartní: Dekódování MPEG-4 AVC videa v DVD
+  rozlišení vyžaduje rychlý stroj (např.Pentium 4 nad 1.5Ghz, nebo
+  Pentium M nad 1Ghz).
+  </para></footnote>
+  když zvolíte MPEG-4 AVC kodeky, jako
+  <systemitem class="library">x264</systemitem> místo MPEG-4 ASP kodeků
+  jako jsou <systemitem class="library">libavcodec</systemitem> MPEG-4, nebo
+  <systemitem class="library">XviD</systemitem>.
+  (Pro lepší představu o fundamentálních rozdílech mezi
+  MPEG-4 ASP a MPEG-4 AVC si můžete přečíst článek
+  "<ulink url="http://guru.multimedia.cx/?p=10">15 důvodů proč mě štve MPEG4</ulink>"
+  z blogu Michaela Niedermayera.)
+  Podobně dosáhnete lepší kvality použitím MPEG-4 ASP místo
+  MPEG-2 kodeků.
+  </para>
+  <para>
+  Novější kodeky, které jsou v rozsáhlém vývoji, mohou obsahovat chyby,
+  kterých si dosud nikdo nevšiml a které mohou zničit výsledek.
+  To je daň za použití nejnovější technologie.
+  </para>
+  <para>
+  Navíc, v začátku používání nového kodeku se budete muset strávit nějaký
+  čas seznámením se s jeho volbami, abyste se dověděli co kde nastavit pro
+  dosažení požadované kvality obrazu.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Hardwarová kompatibilita</emphasis>:
+  Obvykle trvá dlouhou dobu, než začnou stolní video přehrávače podporovat
+  nejnovější videokodeky. Výsledkem toho je, že většina z nich podporuje
+  pouze kodeky MPEG-2 a MPEG-4 ASP
+  (Pozor: obvykle nejsou podporovány všechny vlastnosti (features) MPEG-4 ASP).
+  Nahlédněte prosím do technických specifikací vašeho přehrávače (pokud jsou),
+  nebo si vygooglete více informací.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Nejlepší kvalita na enkódovací čas</emphasis>:
+  Kodeky, které již jsou zde nějakou dobu (jako
+  <systemitem class="library">libavcodec</systemitem> MPEG-4 a
+  <systemitem class="library">XviD</systemitem>), jsou obvykle vysoce
+  optimalizovány všemi druhy chytrých algoritmů a SIMD assembly kódem.
+  Proto mají snahu dosahovat nejlepší poměr kvality na enkódovací čas.
+  Mohou však mít některé velmi pokročilé volby, které, pokud jsou zapnuty,
+  velmi spomalí enkódování při mizivém zisku.
+  </para>
+  <para>
+  Pokud vám jde o rychlost, měli byste se držet výchozího nastavení
+  video kodeku (což neznamená, že byste neměli experimentovat s některými
+  volbami zmíněnými v ostatních částech této příručky).
+  </para>
+  <para>
+  Rovněž můžete zvážit použití kodeku, který umí vícevláknové zpracování.
+  <systemitem class="library">libavcodec</systemitem> MPEG-4 to umožňuje.
+  Získáte tím malý nárůst rychlosti za cenu nižší kvality obrazu.
+  <systemitem class="library">XviD</systemitem> má k dispozici některé
+  experimentální záplaty pro zrychlení rychlosti enkódování, obvykle
+  o 40&ndash;60%, s nízkým zhoršením obrazu.
+  <systemitem class="library">x264</systemitem> rovněž umožňuje vícevláknové
+  enkódování, které v současnosti zrychluje enkódování asi o 15&ndash;30%
+  ale sníží PSNR o 0.05dB.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Osobní vkus</emphasis>:
+  Zde jsme v rovině téměř iracionální: Ze stejného důvodu, pro který někteří
+  setrvávali léta u DivX&nbsp;3 i když novější kodeky již dělaly zázraky,
+  preferují někteří lidé <systemitem class="library">XviD</systemitem>
+  nebo <systemitem class="library">libavcodec</systemitem> MPEG-4 před
+  <systemitem class="library">x264</systemitem>.
+  </para>
+  <para>
+  Posuďte to sami a ne vždy poslouchejte to, co vám někteří lidé budou
+  říkat, že máte dělat nebo myslet: Nejlepší kodek je ten, který nejlépe
+  ovládáte a který se pro vás vypadá nejlépe na vaší obrazovce
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
+  <para>Stejný film nemusí vypadat stejně na monitoru někoho jiného, nebo
+  když je přehráván jiným dekodérem, takže si prověřujte své výtvory
+  přehráváním na různých sestavách.</para></footnote>!
+  </para></listitem>
+</itemizedlist>
+<para>
+  Seznam podporovaných kodeků najdete v sekci
+  <link linkend="menc-feat-selecting-codec">výběr kodeků a nosných formátů</link>.
+</para>
+</sect2>
+
 <sect2 id="menc-feat-dvd-mpeg4-audio">
 <title>Zvuk</title>
 
 <para>
   Zvuk je mnohem jednodušší problém k řešení: pokud prahnete po kvalitě, prostě
-  jej nechte tak jak je.
+  jej nechte jak je.
   Dokonce i AC3 5.1 datové proudy mají nanejvýš 448Kbitů/s a stojí za každý bit.
   Možná jste v pokušení převést zvuk do Ogg Vorbis při vysoké kvalitě, ale jen
   proto, že dnes nemáte A/V receiver pro hardwarové dekódování AC3 neznamená,
-  že jej nebudete mít zítra. Připravte své DVD ripy zachováním AC3 datových
-  proudů.
+  že jej nebudete mít zítra. Připravte své DVD ripy na budoucnost zachováním
+  AC3 datových proudů.
   Datový proud AC3 můžete zachovat buď jeho zkopírováním přímo do video proudu
   <link linkend="menc-feat-mpeg4">během enkódování</link>.
   Také můžete extrahovat AC3 proud, abyste jej pak namixovali do nosičů jako je
@@ -2451,7 +2553,7 @@ Příklad s kompresí AC3:
 <tbody>
 <row>
   <entry>Velmi vysoká kvalita</entry>
-  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:vme=5:naq:qns=2</option></entry>
+  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:qns=2</option></entry>
   <entry>6</entry>
   <entry>0</entry>
 </row>
