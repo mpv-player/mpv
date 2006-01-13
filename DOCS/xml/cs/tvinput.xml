@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.14 -->
+<!-- Synced with: 1.16 -->
+<chapter id="tv">
+<title>TV</title>
 <sect1 id="tv-input" xreflabel="TV vstup">
 <title>TV vstup</title>
 
@@ -56,8 +58,13 @@ bezezbytku dělitelné 16.
 <listitem>
 <para>
 Pokud zachytáváte video se svislým rozlišením vyšším než polovina plného
-rozlišení (čili 288 pro PAL nebo 240 pro NTSC), ujistěte se, že máte
-zapnuto odstraňování prokladu obrazu. Jinak bude získaný snímek roztřepený
+rozlišení (čili 288 pro PAL nebo 240 pro NTSC), pak 'snímky', které dostanete,
+budou ve skutečnosti prokládané páry půlsnímků.
+V závislosti na tom, co chcete s videem dělat, je můžete nechat jak jsou,
+destruktivně odstranit proklad, nebo rozdělit páry do individuálních políček.
+</para>
+<para>
+Jinak bude získaný snímek roztřepený
 během rychlých scén a regulátor datového toku nebude pravděpodobně schopen
 ani udržet nastavený datový tok, vzhledem k tomu, že prokladové artefakty
 produkují velké množství detailů, což spotřebovává velké přenosové pásmo.
@@ -206,3 +213,5 @@ umí průměrování pixelů pouze ve svislém směru díky hardwarovým omezením.
 </informalexample>
 </sect2>
 </sect1>
+
+</chapter>
