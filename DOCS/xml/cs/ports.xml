@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.70 -->
+<!-- Synced with: 1.76 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -91,8 +91,8 @@ Pokud potřebujete GUI rozhraní, můžete použít xmms-embedded.
 <sect1 id="bsd">
 <title>*BSD</title>
 <para>
-<application>MPlayer</application> běží na FreeBSD, OpenBSD, NetBSD,
-BSD/OS a Darwinu. Existují portované/pkgsrc/fink/atd verze
+<application>MPlayer</application> běží na všech známých BSD verzích.
+Existují portované/pkgsrc/fink/atd verze
 <application>MPlayer</application>u, které lze pravděpodobně snadněji použít,
 než naše surové zdrojové kódy.
 </para>
@@ -147,8 +147,18 @@ Viz sekce <link linkend="macos">Mac OS</link>.
 </sect2>
 </sect1>
 
-<sect1 id="solaris">
-<title>Sun Solaris</title>
+<sect1 id="unix">
+<title>Komerční Unix</title>
+
+<para>
+<application>MPlayer</application> byl portován na mnoho komerčních variant
+Unixu. Jelikož vývojová prostředí na těchto systémech bývají odlišná od těch
+na svobodných Unixech, budete muset provést ruční úpravy, aby se kompilace
+povedla.
+</para>
+
+<sect2 id="solaris">
+<title>Solaris</title>
 <para>
 <application>MPlayer</application> by měl běžet na Solarisu 2.6 nebo novějším.
 Použijte SUN audio rozhraní pomocí volby <option>-ao sun</option> pro přehrávání
@@ -246,10 +256,10 @@ modulo 4GB
 Problém hsfs může být odstraněn nainstalováním patche 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
-</sect1>
+</sect2>
 
-<sect1 id="irix">
-<title>Silicon Graphics Irix</title>
+<sect2 id="irix">
+<title>IRIX</title>
 <para>
 You can either try to install the GNU install program, and (if you did
 not put it in your global path) then point to the location with:
@@ -275,10 +285,10 @@ And then do (from within the <application>MPlayer</application> source dir):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 and then go on with building and installing.
 </para>
-</sect1>
+</sect2>
 
 
-<sect1 id="hp-ux">
+<sect2 id="hp-ux">
 <title>HP-UX</title>
 <para>
 Joe Page hosts a detailed HP-UX <application>MPlayer</application>
@@ -395,21 +405,7 @@ default of 64MB is enough or not.)
 </listitem>
 </itemizedlist>
 
-</sect1>
-
-
-<sect1 id="qnx">
-<title>QNX</title>
-<para>
-Works. You'll need to download SDL for QNX, and install it. Then run
-<application>MPlayer</application> with <option>-vo sdl:photon</option>
-and <option>-ao sdl:nto</option> options, and it should be fast.
-</para>
-
-<para>
-The <option>-vo x11</option> output will be even slower than on Linux,
-since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
-</para>
+</sect2>
 </sect1>
 
 <sect1 id="windows">
@@ -438,10 +434,9 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 </para>
 
 <para>Best results are achieved with the native DirectX video output driver
-  (<option>-vo directx</option>) and the native Windows waveout audio driver
-  (<option>-ao win32</option>). Alternatives are OpenGL and SDL, but OpenGL
+  (<option>-vo directx</option>). Alternatives are OpenGL and SDL, but OpenGL
   performance varies greatly between systems and SDL is known to
-  distort sound and video or crash on some systems. If the image is
+  distort video or crash on some systems. If the image is
   distorted, try turning off hardware acceleration with
   <option>-vo directx:noaccel</option>. Download
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 header files</ulink>
@@ -512,10 +507,24 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   console is rather slow. Redirecting output or using the
   <option>-quiet</option> option has been reported to improve performance on
   some systems. Direct rendering (<option>-dr</option>) may also help.
-  You can prevent OSD flicker through double buffering with the
-  <option>-double</option> option. If playback is jerky, try
+  If playback is jerky, try
   <option>-autosync 100</option>. If some of these options help you, you
   may want to put them in your config file.</para>
+
+<note>
+
+<para>On Windows the runtime CPU detection disables SSE support
+  because of recurring and hard-to-trace SSE-related crashes. If you
+  wish to have SSE support under Windows, you will have to compile without
+  runtime CPU-detection.
+</para>
+
+<para>If you have a Pentium 4 and are experiencing a crash using the
+  RealPlayer codecs, you may need to disable hyperthreading support.
+</para>
+
+</note>
+
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
@@ -562,14 +571,15 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-<application>MPlayer</application> should compile out-of-the-box on
-Mac OS X 10.2 and up. The preferred compiler is the Apple version of
+<application>MPlayer</application> does not work on Mac OS versions before
+10, but should compile out-of-the-box on Mac OS X 10.2 and up.
+The preferred compiler is the Apple version of
 GCC 3.x or later. If you have Mac OS X 10.3.9 or later and QuickTime 7
 you can use the macosx video output driver.
 </para>
 
-<sect2 id="mplayerosx">
-<title>MPlayer OS X</title>
+<sect2 id="osx_gui">
+<title>MPlayer OS X GUI</title>
 
 <para>
 You can get a native GUI for <application>MPlayer</application> together with
@@ -672,7 +682,31 @@ not work anymore.
 </sect2>
 </sect1>
 
-<sect1 id="amiga">
+<sect1 id="exotic_platforms">
+<title>Exotic Platforms</title>
+
+<para>
+<application>MPlayer</application> runs on a number of exotic platforms,
+but most of the platform-specific changes from those systems have not been
+merged back into the main source tree.
+For build instructions you should refer to the system-specific documentation.
+</para>
+
+<sect2 id="qnx">
+<title>QNX</title>
+<para>
+You'll need to download and install SDL for QNX. Then run
+<application>MPlayer</application> with <option>-vo sdl:photon</option>
+and <option>-ao sdl:nto</option> options, it should be fast.
+</para>
+
+<para>
+The <option>-vo x11</option> output will be even slower than on Linux,
+since QNX has only X <emphasis>emulation</emphasis> which is very slow.
+</para>
+</sect2>
+
+<sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
 The people over at <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
@@ -702,6 +736,7 @@ Get if from <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
 </para></listitem>
 </itemizedlist>
 </para>
+</sect2>
 </sect1>
 
 </chapter>
