@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced to: 1.59 -->
-<sect1 id="install">
+<!-- Synced to: 1.60 -->
+<chapter id="install">
 <title>Instalace</title>
 
 <para>
@@ -21,8 +21,7 @@ za to.
 Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.x.
 </para>
 
-
-<sect2 id="softreq">
+<sect1 id="softreq">
 <title>Softwarové požadavky</title>
 
 <itemizedlist>
@@ -136,10 +135,10 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   kde ten soubor najde.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="installation_codecs">
 <title>Kodeky</title>
 
 <itemizedlist>
@@ -272,10 +271,10 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   pro návod na instalaci a více informací.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="video-cards">
+<sect1 id="video-cards">
 <title>Video karty</title>
 
 <para>
@@ -285,7 +284,7 @@ druhé ji nemají.
 </para>
 
 
-<sect3 id="yuv-cards">
+<sect2 id="yuv-cards">
 <title>YUV karty</title>
 
 <para>
@@ -375,10 +374,10 @@ která se jim vejde do paměti, při <emphasis role="bold">nízkém zatížení CPU</emp
   </para></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Ne-YUV karty">
+<sect2 id="non-yuv-cards" xreflabel="Ne-YUV karty">
 <title>Ne-YUV karty</title>
 
 <para>
@@ -406,10 +405,10 @@ což pracuje s těmito ovladači:
   </simpara></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Karty Cirrus-Logic">
+<sect2 id="cirrus-logic-cards" xreflabel="Karty Cirrus-Logic">
 <title>Karty Cirrus-Logic</title>
 <itemizedlist>
 <listitem><para>
@@ -441,11 +440,11 @@ což pracuje s těmito ovladači:
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
-</sect3>
 </sect2>
+</sect1>
 
 
-<sect2 id="sound-cards">
+<sect1 id="sound-cards">
 <title>Zvukové karty</title>
 
 <itemizedlist>
@@ -470,10 +469,10 @@ což pracuje s těmito ovladači:
   <link linkend="audio">zvukové karty</link>!</emphasis>
   </simpara></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="features">
 <title>Vlastnosti</title>
 
 <itemizedlist>
@@ -559,7 +558,6 @@ což pracuje s těmito ovladači:
   Detaily viz sekce <link linkend="subosd">Titulky a OSD</link>.
 </para>
 
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -1008,3 +1006,5 @@ To je nejlepší cesta jak umožnit každému být rootem.
 </para></note>
 </para>
 </sect1>
+
+</chapter>
