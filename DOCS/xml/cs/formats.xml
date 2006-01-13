@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.22 -->
-<sect1 id="formats">
-<title>Podporované formáty</title>
+<!-- Synced with: 1.24 -->
+<chapter id="containers">
+<title>Nosné formáty (Containers)</title>
 
 <para>
 Považujeme za důležité vyjasnit všeobecný omyl. Když lidé vidí soubor s příponou
 <filename>.AVI</filename>, automaticky se domnívají, že to není MPEG soubor.
-To však není pravda. Alespoň ne úplně. Narozdíl od všeobecného mínění tyto
+To však není pravda. Aspoň ne úplně. Narozdíl od všeobecného mínění tyto
 soubory <emphasis>mohou</emphasis> obsahovat MPEG-1 video.
 </para>
 
 <para>
 Jak vidíte, <emphasis role="bold">kodek</emphasis> není to samé jako
-<emphasis role="bold">formát souboru</emphasis>.
+<emphasis role="bold">nosný formát</emphasis>.
 Příklady video <emphasis role="bold">kodeků</emphasis> jsou: MPEG-1, MPEG-2,
 MPEG-4 (DivX), Indeo5, 3ivx.
-Příklady souborových <emphasis role="bold">formátů</emphasis> jsou: MPG, AVI,
+Příklady nosných <emphasis role="bold">formátů</emphasis> jsou: MPG, AVI,
 ASF.
 </para>
 
 <para>
 Teoreticky můžete vložit OpenDivX video a MP3 audio
-do <emphasis role="bold">souboru formátu MPG</emphasis>. Většina přehrávačů jej
+do <emphasis role="bold">nosného formátu MPG</emphasis>. Většina přehrávačů jej
 však nepřehraje, jelikož zde očekávají MPEG-1 video a MP2 audio (narozdíl od
 <emphasis role="bold">AVI</emphasis>, <emphasis role="bold">MPG</emphasis>
 nemá potřebná pole k popisu svých video a audio datových proudů).
@@ -32,10 +32,10 @@ soubory vytvořit.
 </para>
 
 
-<sect2 id="video-formats">
+<sect1 id="video-formats">
 <title>Video formáty</title>
 
-<sect3 id="mpg-vob-dat">
+<sect2 id="mpg-vob-dat">
 <title>MPEG soubory</title>
 
 <para>
@@ -86,10 +86,10 @@ stran na 4:3, takže jsou přehrávány na 640x480.
 AVI soubory toto pole neobsahují, takže musí být přeškálovány během enkódování,
 nebo přehrávány s volbou <option>-aspect</option>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="avi">
+<sect2 id="avi">
 <title>AVI soubory</title>
 
 <para>
@@ -170,10 +170,10 @@ většina AVI enkodérů/multiplexerů vytváří vadné soubory, když je použito VBR
 audio. Existují pouze dvě známé výjimky: <application>NanDub</application> a
 <link linkend="mencoder"><application>MEncoder</application></link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="asf-wmv">
+<sect2 id="asf-wmv">
 <title>ASF/WMV soubory</title>
 <para>
 ASF (Active Streaming Format) pochází z dílny Microsoftu. Tam vytvořili dvě
@@ -186,10 +186,10 @@ liší a nejsou vůbec kompatibilní (je to jen další právnická hra).
 neviděl v2.0 soubory :). Poznamenejme že ASF soubory se v těchto dnech vyskytují
 s příponou <filename>.WMA</filename> nebo <filename>.WMV</filename>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="mov">
+<sect2 id="mov">
 <title>QuickTime/MOV soubory</title>
 
 <para>
@@ -210,10 +210,10 @@ video a QDesign Music audio. Viz naši sekci o kodeku
 <link linkend="sorenson">Sorenson</link>.
 </para>
 </note>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo">
+<sect2 id="vivo">
 <title>VIVO soubory</title>
 
 <para>
@@ -237,10 +237,10 @@ Instalační instrukce naleznete v sekcích
 <link linkend="vivo-video">VIVO video kodek</link> a
 <link linkend="vivo-audio">VIVO audio kodek</link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="fli">
+<sect2 id="fli">
 <title>FLI soubory</title>
 <para>
 <emphasis role="bold">FLI</emphasis> je velmi starý souborový formát používaný
@@ -250,10 +250,10 @@ schopen v nich převíjet (použitelné při přeskakování s volbou
 <option>-loop</option>). FLI soubory neobsahují klíčové snímky, takže bude obraz
 ještě chvíli po převíjení roztříštěný.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realmedia">
+<sect2 id="realmedia">
 <title>RealMedia (RM) soubory</title>
 
 <para>
@@ -263,10 +263,10 @@ Zde je seznam podporovaných <link
 linkend="realvideo">RealVideo</link> a <link
 linkend="realaudio">RealAudio</link> kodeků.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="nuppelvideo">
+<sect2 id="nuppelvideo">
 <title>NuppelVideo soubory</title>
 <para>
 <ulink url="http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/">NuppelVideo</ulink>
@@ -279,10 +279,10 @@ YV12 RTJpeg+lzo komprimované a YV12+lzo komprimované snímky.
 do MPEG-4 (DivX)/atd.!) všechny.
 Seeking works.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="yuv4mpeg">
+<sect2 id="yuv4mpeg">
 <title>yuv4mpeg soubory</title>
 <para>
 <ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
@@ -292,27 +292,27 @@ Můžete zachytávat, vytvářet, filtrovat nebo enkódovat video v tomto formátu
 pomocí těchto nástrojů. Formát souboru je ve skutečnosti sekvence
 nekomprimovaných YUV 4:2:0 obrázků.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="film">
+<sect2 id="film">
 <title>FILM soubory</title>
 <para>
 Tento formát používaly staré CD-ROM hry pro Sega Saturn.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="roq">
+<sect2 id="roq">
 <title>RoQ soubory</title>
 <para>
 RoQ soubory jsou multimediální soubory používané v některých hrách od ID, jako
 Quake III a Return to Castle Wolfenstein.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ogg">
+<sect2 id="ogg">
 <title>OGG/OGM soubory</title>
 <para>
 Toto je nový souborový formát od
@@ -322,10 +322,10 @@ Může obsahovat jakýkoli video nebo audio kodek, CBR nebo VBR. Budete potřebovat
 <systemitem class="library">libvorbis</systemitem> nainstalovány před kompilací
 <application>MPlayer</application>u, aby byl schopen je přehrávat.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="sdp">
+<sect2 id="sdp">
 <title>SDP soubory</title>
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> je
@@ -333,20 +333,20 @@ IETF standardní formát pro popis video a/nebo audio RTP datových proudů.
 (Vyžaduje
 &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;.)
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="pva">
+<sect2 id="pva">
 <title>PVA soubory</title>
 <para>
 PVA je formát podobný MPEG, používaný softwarem pro DVB TV desky (např.:
 <application>MultiDec</application>, <application>WinTV</application>
 pod Windows).
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="nsv">
+<sect2 id="nsv">
 <title>NSV soubory</title>
 <para>
 NSV (NullSoft Video) je souborový formát používaný přehrávačem
@@ -360,29 +360,29 @@ které zatím nelze dekódovat. Mimo to proudy z tohoto serveru vyžadují další
 depaketovací vrstvu, která ještě musí být implementována (stejně jsou ty soubory
 nepřehratelné, protože mají VLB audio).
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="matroska">
+<sect2 id="matroska">
 <title>Soubory Matroska</title>
 <para>
 Matroska je otevřený nosný (container) formát.
 Více se dozvíte na <ulink url="http://www.matroska.org/">oficiálním serveru</ulink>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="nut">
+<sect2 id="nut">
 <title>Soubory NUT</title>
 <para>
 NUT je nosný formát vyvíjený týmy <application>MPlayer</application> a
 <application>FFmpeg</application>. Oba projekty jej podporují.
 Více se dozvíte na <ulink url="http://www.nut.hu/">oficiálním serveru</ulink>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="gif">
+<sect2 id="gif">
 <title>GIF soubory</title>
 <para>
 Formát <emphasis role="bold">GIF</emphasis> je obecný formát pro webovou
@@ -417,12 +417,12 @@ stáhněte si ji z
 </ulink>. Podrobné technické informace naleznete v
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a specifikaci</ulink>.
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="audio-formats">
+<sect1 id="audio-formats">
 <title>Audio formáty</title>
 
 <para>
@@ -433,7 +433,7 @@ Toto není doporučené použití <application>MPlayer</application>u, raději
 použijte <ulink url="http://www.xmms.org">XMMS</ulink>.
 </para>
 
-<sect3 id="mp3">
+<sect2 id="mp3">
 <title>MP3 soubory</title>
 <para>
 Můžete mít problémy s přehráním určitých MP3 souborů, které
@@ -442,35 +442,18 @@ nesprávně nebo vůbec. Toto nelze opravit bez vyřazení podpory pro některé
 poškozené MPEG soubory, proto to tak v dohledné době zůstane. Příznak
 <option>-demuxer</option> popsaný v man stránce vám pomůže v těchto případech.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="wav">
-<title>WAV soubory</title>
-<para>
-</para>
-</sect3>
-
-<sect3 id="ogg-vorbis">
+<sect2 id="ogg-vorbis">
 <title>OGG/OGM soubory (Vorbis)</title>
 <para>
 Vyžaduje správně nainstalované
 <systemitem class="library">libogg</systemitem> a
 <systemitem class="library">libvorbis</systemitem>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="wma-asf">
-<title>WMA/ASF soubory</title>
-<para>
-</para>
-</sect3>
-
-<sect3 id="mp4">
-<title>MP4 soubory</title>
-<para></para>
-</sect3>
-
-<sect3 id="cdda">
+<sect2 id="cdda">
 <title>CD audio</title>
 <para>
 <application>MPlayer</application> umí použít <application>cdparanoia</application>
@@ -482,9 +465,9 @@ pro přehrávání CDDA (Audio CD). Zaměření této části nezahrnuje výčet vlastností
 Viz volbu <option>-cdda</option> v man stránce, která může být použita pro
 propašování voleb do <application>cdparanoia</application>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="xmms">
+<sect2 id="xmms">
 <title>XMMS</title>
 <para>
 <application>MPlayer</application> může použít vstupní pluginy pro
@@ -503,7 +486,7 @@ Pokud to nebude fungovat, budete muset nastavit cestu k
 volbami <option>--with-xmmsplugindir</option> a
 <option>--with-xmmslibdir</option>.
 </para>
-</sect3>
 </sect2>
 </sect1>
 
+</chapter>
