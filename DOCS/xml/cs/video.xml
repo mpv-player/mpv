@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.81 -->
-<sect1 id="video">
+<!-- Synced with: 1.82 -->
+<chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
-<sect2 id="mtrr">
+<sect1 id="mtrr">
 <title>Nastavení MTRR</title>
 
 <para>
@@ -83,11 +83,11 @@ Ne všechny procesory mají MTRR. Například starší CPU K6-2 (okolo 266MHz,
 stepping 0) nemají MTRR, ale stepping 12 je mají
 (pro ověření spusťte <command>cat /proc/cpuinfo</command>).
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="output-trad">
+<sect1 id="output-trad">
 <title>Video výstupy pro tradiční video karty</title>
-<sect3 id="xv">
+<sect2 id="xv">
 <title>Xv</title>
 
 <para>
@@ -161,7 +161,7 @@ screen #0
 </orderedlist>
 </para>
 
-<sect4 id="tdfx">
+<sect3 id="tdfx">
 <title>Karty 3dfx</title>
 
 <para>
@@ -179,10 +179,10 @@ Pokud zažívate podivné situace při používání <option>-vo xv</option>, zkuste SDL
 <option>-vo tdfxfb</option> rozhraní! Viz sekce
 <link linkend="tdfxfb">tdfxfb</link>.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="s3">
+<sect3 id="s3">
 <title>Karty S3</title>
 
 <para>
@@ -198,10 +198,10 @@ ovladačem (pomalé). Pokud podezříváte kartu, opatřete si novější ovladač, nebo
 slušně požádejte v konferenci MPlayer-users o ovladač s MMX/3DNow!.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="nvidia">
+<sect3 id="nvidia">
 <title>Karty nVidia</title>
 
 <para>
@@ -224,10 +224,10 @@ Ačkoli <application>MPlayer</application> obsahuje
 ve stavu beta verze a má jisté nedostatky. Více informací naleznete v sekci
 <link linkend="vidix-nvidia">nVidia VIDIX</link>.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="ati">
+<sect3 id="ati">
 <title>Karty ATI</title>
 
 <para>
@@ -247,10 +247,10 @@ vyšší. Není zde podpora pro TV out. Samozřejmě s
 <emphasis role="bold">TV výstupu</emphasis> a nepotřebujete žádné X knihovny.
 Přečtěte si sekci <link linkend="vidix">VIDIX</link>.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="neomagic">
+<sect3 id="neomagic">
 <title>Karty NeoMagic</title>
 
 <para>
@@ -280,10 +280,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="trident">
+<sect3 id="trident">
 <title>Karty Trident</title>
 <para>
 Chcete-li používat Xv s kartou Trident, což nepracuje s 4.1.0,
@@ -296,22 +296,22 @@ Alternativně, <application>MPlayer</application> obsahuje
 <link linkend="vidix">VIDIX</link> ovladač pro kartu Cyberblade/i1.
 </para>
 
-</sect4>
+</sect3>
 
 
-<sect4 id="kyro">
+<sect3 id="kyro">
 <title>Karty Kyro/PowerVR</title>
 <para>
 Pokud chcete používat Xv s kartou založenou na čipu Kyro (například Hercules
 Prophet 4000XT), měli byste si stáhnout ovladače z
 <ulink url="http://www.powervr.com/">PowerVR serveru</ulink>.
 </para>
-</sect4>
 </sect3>
+</sect2>
 
 <!-- ********** -->
 
-<sect3 id="dga">
+<sect2 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -596,12 +596,12 @@ ovladači pro XFree.
   </simpara></listitem>
 </itemizedlist>
 
-</sect3>
-<!--</sect2>-->
+</sect2>
+<!--</sect1>-->
 
 <!-- ********** -->
 
-<sect3 id="sdl">
+<sect2 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -689,10 +689,10 @@ okraji.
   NEPOUŽÍVEJTE SDL s GUI! Nefunguje to jak by mělo.
   </simpara></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
 
-<sect3 id="svgalib">
+<sect2 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -765,10 +765,10 @@ vzorkovací kmitočet zvuku, protože zvuk pří 44kHz byl vadný:
 Zapnout OSD a titulky můžete pouze v kombinaci s <option>expand</option>
 filtrem, viz man stránka pro přesné parametry.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="fbdev">
+<sect2 id="fbdev">
 <title>Výstup na Framebuffer (FBdev)</title>
 
 <para>
@@ -862,10 +862,10 @@ framebufferu a nechtějte to po nás, jelikož to není omezení
 <application>MPlayer</application>u.
 </para>
 </note>
-</sect3>
+</sect2>
 
 
-<sect3 id="mga_vid">
+<sect2 id="mga_vid">
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
@@ -939,10 +939,10 @@ například pomocí
 a může do něj být zapsána změna jasu:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Podpora 3Dfx YUV</title>
 <para>
 Tento ovladač používá ovladač framebufferu tdfx z jádra pro přehrávání
@@ -950,10 +950,10 @@ filmů s YUV akcelerací. Budete potřebovat jádro s podporou tdfxfb a
 rekompilovat s
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="opengl">
+<sect2 id="opengl">
 <title>Rozhraní OpenGL</title>
 
 <para>
@@ -985,10 +985,10 @@ prostředí (aspoň na nVidii):
 <command>export $__GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="aalib">
+<sect2 id="aalib">
 <title>AAlib - zobrazování v textovém režimu</title>
 
 <para>
@@ -1113,10 +1113,10 @@ potřebovat práva k zápisu do
 Aalib to nedetekuje, ale vo_aa zkouší najít nejlepší režim.
 Pro více ladících možností viz <ulink url="http://aa-project.sf.net/tune"/>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="caca">
+<sect2 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Barevná ASCII Art knihovna</title>
 
 <para>
@@ -1206,10 +1206,10 @@ Použijte volbu <option>-framedrop</option>, pokud váš počítač není dost rychlý
 pro renderování všech snímků.
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="vesa">
+<sect2 id="vesa">
 <title>VESA - výstup do VESA BIOSu</title>
 
 <para>
@@ -1342,10 +1342,10 @@ Nefunguje!
   inicializuje pouze jednou během POST procedury.
   </simpara></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
 
-<sect3 id="x11">
+<sect2 id="x11">
 <title>X11</title>
 
 <para>
@@ -1388,10 +1388,10 @@ Pokud nemůžete najír rozlišení, která jste vložili, pročtěte si výstup XFree86.
 Některé ovladače nezvládnou nízké bodové kmitočty potřebné pro režimy s nízkým
 rozlišením videa.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix">
+<sect2 id="vidix">
 <title>VIDIX</title>
 
 <formalpara>
@@ -1537,7 +1537,7 @@ Alternativně můžete použít speciální jaderný modul, například:
   </para></step>
 </procedure>
 
-<sect4 id="vidix-ati">
+<sect3 id="vidix-ati">
 <title>Karty ATI</title>
 <para>
 V současnosti je většina ATI karet podporována nativně od Mach64 až po
@@ -1549,9 +1549,9 @@ Existují dvě skompilované binárky: <filename>radeon_vid</filename> pro Radeony a
 <filename>rage128_vid</filename> pro karty Rage 128. Můžete některou vynutit,
  nebo nechat VIDIX rozhraní autodetekovat všechny dostupné ovladače.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-mga">
+<sect3 id="vidix-mga">
 <title>Karty Matrox</title>
 <para>
 Matrox G200, G400, G450 a G550 jsou hlášeny jako funkční.
@@ -1561,9 +1561,9 @@ Matrox G200, G400, G450 a G550 jsou hlášeny jako funkční.
 Ovladač podporuje video ekvalizéry a měl by být téměř tak rychlý jako
 <link linkend="mga_vid">Matrox framebuffer</link>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-trident">
+<sect3 id="vidix-trident">
 <title>Karty Trident</title>
 <para>
 Existuje ovladač pro čipset Trident Cyberblade/i1, který lze nalézt na
@@ -1574,17 +1574,17 @@ motherboardech VIA Epia.
 Ovladač byl napsán a je udržován
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastairem M. Robinsonem</ulink>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-3dlabs">
+<sect3 id="vidix-3dlabs">
 <title>Karty 3DLabs</title>
 <para>
 Ačkoli existuje ovladač pro čipy 3DLabs GLINT R3 a Permedia3, nikdo je
 netestoval, takže hlášení vítáme.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-nvidia">
+<sect3 id="vidix-nvidia">
 <title>Karty nVidia</title>
 <para>
 Existuje relativně nová ovladač pro nVidie o kterém je známo, že pracuje
@@ -1628,9 +1628,9 @@ funkční.
 <para>
 Hlášení očekávána!
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-sis">
+<sect3 id="vidix-sis">
 <title>Karty SiS</title>
 <para>
 Toto je velmi experimentální kód, stejně jako nvidia_vid.
@@ -1644,10 +1644,10 @@ verzích "Shuttle XPC" barebones boxes out there)
 <para>
 Hlášení očekávána!
 </para>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="directfb">
+<sect2 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
 &quot;DirectFB je grafická knihovna navržená se zřetelem na vestavěné systémy.
@@ -1671,9 +1671,9 @@ DirectFB na příkazovém řádku pomocí volby <option>-dfbopts</option>. Volbu
 vrstvy lze provést metodou podzařízení, např.: <option>-vo directfb:2</option>
 (výchozí je vrstva -1: autodetekce)
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="dfbmga">
+<sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
 Přečtěte si prosím <link linkend="directfb">hlavní DirectFB</link> sekci pro
@@ -1702,13 +1702,13 @@ patch z výše uvedeného URL). Portace CRTC2 kódu do
 <link linkend="mga_vid">mga_vid</link> bylo plánováno léta,
 <ulink url="../../tech/patches.txt">patche</ulink> vítáme.
 </para></note>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="mpeg_decoders">
+<sect1 id="mpeg_decoders">
 <title>MPEG dekodéry</title>
 
-<sect3 id="dvb">
+<sect2 id="dvb">
 <title>DVB výstup a vstup</title>
 <para>
 <application>MPlayer</application> podporuje karty s čipsetem Siemens DVB od
@@ -1948,9 +1948,9 @@ podpory OSD v DVB kartách, stejně jako plynulejší přehrávání filmů s jinou
 snímkovou rychlostí, než 25 fps a transkódování MPEG-2 na MPEG-4 v reálném čase
 (částečná dekomprese).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="dxr2">
+<sect2 id="dxr2">
 <title>DXR2</title>
 <para><application>MPlayer</application> podporuje hardwarově akcelerované
 přehrávání pomocí karty Creative DXR2.</para>
@@ -1987,9 +1987,9 @@ vhodně upravíte klíčování, můžete dosáhnout použitelných výsledků.
 </para>
 
 <para>Prostudujte si prosím man stránku pro dostupné volby.</para>
-</sect3>
+</sect2>
 
-<sect3 id="dxr3">
+<sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
 <application>MPlayer</application> podporuje hardwarově akcelerované
@@ -2114,14 +2114,14 @@ použita pro nastavení výstupu do DXR3 místo zvukové karty.
 </para></listitem>
 </varlistentry>
 </variablelist>
-</sect3>
-
 </sect2>
 
-<sect2 id="other">
+</sect1>
+
+<sect1 id="other">
 <title>Ostatní vizualizační hardware</title>
 
-<sect3 id="zr">
+<sect2 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2212,9 +2212,9 @@ zařízení během přehrávání, zhavaru je vám počítač. Můžete však
 počkat až <application>MPlayer</application> skončí a
 <emphasis role="bold">PAK</emphasis> zastavit XawTV.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="blinkenlights">
+<sect2 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
 Toto rozhraní je schopno přehrávání pomocí Blinkenlights UDP protokolu. Pokud
@@ -2227,13 +2227,13 @@ nabídnout. Stačí shlédnout některá z
 <ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights dokumentačních videí</ulink>.
 Na Arcade video můžete vidět výstupní rozhraní Blinkenlights v akci v 00:07:50.
 </para>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="tvout">
+<sect1 id="tvout">
 <title>pODPORA TV výstupu</title>
 
-<sect3 id="tvout-mga-g400">
+<sect2 id="tvout-mga-g400">
 <title>Karty Matrox G400</title>
 
 <para>
@@ -2372,9 +2372,9 @@ Kompozitní video signál je na pinu jedna. Zem je na pátém,
 (informaci poskytl Balázs Kerekes)
 </para>
 </formalpara>
-</sect3>
+</sect2>
 
-<sect3 id="tv-out_matrox_g450">
+<sect2 id="tv-out_matrox_g450">
 <title>Karty Matrox G450/G550</title>
 <para>
 Podpora TV výstupu pro tyto karty byla přidána teprve nedávno a dosud není
@@ -2398,10 +2398,10 @@ což se pro tuto chvíli doporučuje pro G400, viz předchozí sekce.
 Potřebnou záplatu jádra a podrobné HOWTO lze stáhnout z
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tvout-ati">
+<sect2 id="tvout-ati">
 <title>Karty ATI</title>
 
 <formalpara>
@@ -2444,17 +2444,17 @@ Jediné co musíte, je <emphasis role="bold">mít TV konektor zapojený
 před zapnutím PC</emphasis> jelikož video BIOS se inicializuje pouze
 jednou během POST procedury.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tvout-voodoo">
+<sect2 id="tvout-voodoo">
 <title>Voodoo 3</title>
 <para>
 Shlédněte <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">tuto URL</ulink>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="tvout-nvidia">
+<sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
 Nejprve si MUSÍTE stáhnout closed-source ovladače z <ulink url="http://nvidia.com"/>.
@@ -2491,9 +2491,9 @@ EndSection
 <para>
 Samozřejmě je nejdůležitější část TwinView.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="tvout-neomagic">
+<sect2 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
 Čip NeoMagic lze nalézt v různých laptopech. Některé z nich jsou vybaveny
@@ -2542,6 +2542,7 @@ jednoduchým analogovým TV enkodérem, některé jej mají mnohem pokročilejší.
 </listitem>
 </itemizedlist>
 </para>
-</sect3>
 </sect2>
 </sect1>
+
+</chapter>
