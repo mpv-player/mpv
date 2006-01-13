@@ -2073,7 +2073,7 @@ Kommandozeile aufgeführte Treiber benutzt.
 Suboptionen sind optional und können meistens weggelassen werden.
 .br
 .I ANMERKUNG:
-Eine Liste der eincompilierten Audiotreiber erhälst du mit \-ao help.
+Eine Liste der eincompilierten Audiotreiber erhältst du mit \-ao help.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -2152,13 +2152,14 @@ Audioausgabe über JACK (Jack Audio Connection Kit).
 .PD 0
 .RSs
 .IPs port=<Name>
-Mit dem angegebenden Port verbinden (Standard: physikalische Ports).
-.IPs name=<Klientenname>
-Klientenname, der an JACK weitergegeben wird (Standard: MPlayer [<PID>]).
+Verbindet zu den Ports mit dem angegebenen Namen (Standard: physikalische
+Ports).
+.IPs name=<Client-Name>
+Client-Name, der an JACK weitergegeben wird (Standard: MPlayer [<PID>]).
 Nützlich, falls du bestimmte Verbindungen automatisch eingerichtet haben
 möchtet.
 .IPs (no)estimate
-Schätze die Tonverzögerung, das soll die Wiedergabe flüssiger machen
+Schätze die Audioverzögerung, sollte die Wiedergabe flüssiger machen
 (Standard: eingeschaltet).
 .RE
 .PD 1
@@ -2712,7 +2713,7 @@ Kommandozeile aufgeführte Treiber benutzt.
 Suboptionen sind optional und können meistens weggelassen werden.
 .br
 .I ANMERKUNG:
-Eine Liste der eincompilierten Videotreiber erhälst du mit \-vo help.
+Eine Liste der eincompilierten Videotreiber erhältst du mit \-vo help.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3015,7 +3016,8 @@ Falls der YUV-Farbraum benutzt wird (siehe yuv-Unteroption), gilt folgendes:
 Wenn der Dekoder in Streifen rendert (siehe \-noslices), dann hat diese
 Einstellung keinen Effekt, die Streifengröße des Dekoders wird benutzt.
 .br
-Wenn der Dekoder nicht in Streifen rendert, dann ist die Standardeinstellung 16.
+Wenn der Dekoder nicht in Streifen rendert, dann ist die Standardeinstellung
+16.
 .RE
 .IPs (no)osd
 (De)aktiviere die Unterstützung für das Rendern des OSD via OpenGL (Standard:
@@ -3549,7 +3551,7 @@ Wenn die Liste mit ',' endet, wird MPlayer auch auf Codecs zurückgreifen, die
 nicht in der Liste stehen.
 .br
 .I ANMERKUNG:
-Mit \-ac help erhälst du eine vollständige Liste aller verfügbaren Codecs.
+Mit \-ac help erhältst du eine vollständige Liste aller verfügbaren Codecs.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3610,7 +3612,7 @@ Familien benutzt werden kann, so werden die Standardcodecs verwendet.
 
 .I ANMERKUNG:
 .br
-Mit \-afm help erhälst du eine Liste aller verfügbaren Treiber.
+Mit \-afm help erhältst du eine Liste aller verfügbaren Treiber.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -6269,11 +6271,11 @@ Konfigurationsdatei mit aufzunehmen.
 .
 .TP
 .B \-audio-delay <0.0\-...>
-Setzt den Header für die Audioverzögerung im Dateikopf.
+Setzt das Feld für die Audioverzögerung im Dateikopf.
 Standardwert ist 0.0, negative Werte funktionieren nicht.
-Diese Option verzögert den Ton nicht während des Encodierens, sondern der
-Player wird beim Abspielen den Ton verzögern, sodass du dann nicht mehr
-\-delay angeben musst.
+Diese Option verzögert den Ton nicht während des Encodierens, stattdessen wird
+der Player beim Abspielen den Ton verzögern, so dass du dann nicht mehr die
+Option \-delay angeben musst.
 .
 .TP
 .B \-audio-density <1\-50>
@@ -6281,12 +6283,12 @@ Anzahl der Audioblöcke pro Sekunde (Standard ist 2, was in 0.5s langen
 Audioblöcken resultiert).
 .br
 .I ANMERKUNG:
-Nur bei CBR (konstanter Bitrate), VBR (variable Bitrate) ignoriert diese
-Einstellung, da jedes Paket in einen eigenen Block kommt.
+Nur bei CBR (konstanter Bitrate), VBR (variable Bitrate) dagegen ignoriert
+diese Einstellung, da jedes Paket in einen eigenen Block kommt.
 .
 .TP
 .B \-audio-preload <0.0\-2.0>
-Setzt Audiopuffer-Zeitintervall (Standard: 0.5s).
+Setzt das Audiopuffer-Zeitintervall (Standard: 0.5s).
 .
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|Größe[b|kb|mb]> (siehe auch \-ss und \-sb)
@@ -6316,7 +6318,7 @@ Hiermit kann die Audioformat-Kennzeichnung der Ausgabedatei überschrieben werden
 .PD 0
 .RSs
 .IPs "\-fafmttag 0x55"
-Setzt die Kennzeichnung der Ausgabedatei auf 0x55 (mp3).
+Legt fest, dass die Ausgabedatei die Kennzeichnung 0x55 (mp3) enthält.
 .RE
 .PD 1
 .
@@ -6328,7 +6330,7 @@ Hiermit kann das FourCC-Feld der Ausgabedatei überschrieben werden.
 .PD 0
 .RSs
 .IPs "-ffourcc div3"
-Setzt das FourCC-Feld der Ausgabedatei auf 'div3'.
+Legt fest, dass die Ausgabedatei als FourCC-Feld 'div3' enthält.
 .RE
 .PD 1
 .
@@ -6336,6 +6338,19 @@ Setzt das FourCC-Feld der Ausgabedatei auf 'div3'.
 .B \-force-avi-aspect <0.2\-3.0>
 Überschreibe den Aspekt, der im AVI-OpenDML-vprp-Header gespeichert ist.
 Dies kann benutzt werden, um den Aspekt mit '\-ovc copy' zu ändern.
+.
+.TP
+.B \-frameno-file <Dateiname> (VERALTET)
+Gibt die Audiodatei an, in der die Zuweisungen der Framenummern stehen, die im
+ersten (nur Audio-) Durchlauf in einem speziellen Modus mit drei Durchläufen
+erstellt wurden.
+.br
+.I ANMERKUNG:
+Die Benutzung dieses Modus wird höchstwahrscheinlich die
+Audio-/\:Video-Synchronisation zerstören.
+Benutze diesen Modus nicht.
+Er wird nur aus Gründen der Rückwärtskompatibilität behalten und in einer
+zukünftigen Version vermutlich entfernt.
 .
 .TP
 .B \-hr-edl-seek (nur bei EDL)
@@ -6350,27 +6365,27 @@ Dies erlaubt das Starten in Bereichen zwischen Keyframes.
 Es ist nicht garantiert, dass dies mit der Option '\-ovc copy' funktioniert.
 .
 .TP
-.B \-info <Option1:Option2:...> (nur für AVIs)
-Gibt die Werte für den Info-Header der resultierenden AVI-Datei an.
+.B \-info <Option1:Option2:...> (nur bei AVIs)
+Gibt die Werte für den Info-Dateikopf der resultierenden AVI-Datei an.
 .sp 1
 Die verfügbaren Optionen sind:
 .RSs
 .IPs help\ 
 Zeigt diese Beschreibung.
 .IPs name=<Wert>
-Titel oder Thema des Films
+Titel des Films
 .IPs artist=<Wert>
-Künstler oder Autor des Originalfilms
+Künstler oder Autor des Films
 .IPs genre=<Wert>
-Kategorie oder Genre des Films
+Kategorie des Films
 .IPs subject=<Wert>
-Inhalt der Datei
+Inhalte der Datei
 .IPs copyright=<Wert>
-Copyright-Informationen für diese Datei
+Copyright-Informationen
 .IPs srcform=<Wert>
 Urpsrungsform des digitalisierten Materials
 .IPs comment=<Wert>
-allgemeine Kommentare über die Datei oder den thematischen Inhalt
+allgemeine Kommentare über den Film
 .RE
 .
 .TP
@@ -6382,24 +6397,24 @@ dargestellt werden, falls Untertitel fest in den Film eincodiert werden.
 .TP
 .B \-noencodedups
 Versuche nicht, doppelte Frames doppelt zu encodieren; gib immer
-zero-byte-Frames aus, um Duplikate anzudeuten.
+Zero-byte-Frames aus, um Duplikate anzudeuten.
 Zero-byte-Frames werden sowieso geschrieben, solange kein Filter oder
 Encoder geladen wird, der in der Lage ist, doppelte Frames zu encodieren.
 Zur Zeit ist der einzige solche Filter harddup.
 .
 .TP
 .B \-noodml (nur bei \-of AVI)
-Schreibe keinen OpenDML-Index für AVI-Dateien größer als 1GB.
+Schreibe keinen OpenDML-Index für AVI-Dateien >1GB.
 .
 .TP
 .B \-noskip
-Verwerfe keine Bilder.
+Verwirf keine Bilder.
 .
 .TP
 .B \-o <Dateiname>
 Schreibt in die angegebene Datei.
 .br
-Falls ein Dateiname standardmäßig benutzt werden soll, kann diese Option in die
+Falls ein Standarddateiname benutzt werden soll, kann diese Option in die
 MEncoder-Konfigurationsdatei geschrieben werden.
 .
 .TP
@@ -6413,11 +6428,11 @@ Encodiere Audio mit dem angegebenen Audiocodec (kein Standardwert vorhanden).
 .PD 0
 .RSs
 .IPs "-oac copy"
-kein Encodieren, sondern nur eine Kopie des Streams
+kein Encodieren, nur eine Kopie des Streams
 .IPs "-oac pcm"
-Encodiere in unkomprimiertes PCM.
+Encodiere zu unkomprimiertem PCM.
 .IPs "-oac mp3lame"
-Encodiere nach MP3 (mit LAME).
+Encodiere zu MP3 (benutzt LAME).
 .IPs "\-oac lavc"
 Encodiere mit dem libavcodec Codec.
 .RE
@@ -6425,7 +6440,7 @@ Encodiere mit dem libavcodec Codec.
 .
 .TP
 .B \-of <Format> (BETA\-CODE!)
-Gib in dem angegebenen Format aus.
+Gib in das angegebenen Containerformat aus (Standard: AVI).
 .br
 .I ANMERKUNG:
 Mit \-of help bekommst du eine Liste vorhandener Containerformate.
@@ -6434,13 +6449,15 @@ Mit \-of help bekommst du eine Liste vorhandener Containerformate.
 .PD 0
 .RSs
 .IPs "\-of avi"
-Gib ein AVI aus (Standard).
+Encodiere zu AVI.
 .IPs "\-of mpeg"
-Gib ein MPEG aus.
+Encodiere zu MPEG (siehe auch \-mpegopts).
+.IPs "\-of lavf"
+Encodiere mit den Muxern von libavcodec (siehe auch \-lavfopts).
 .IPs "\-of rawvideo"
-reiner (raw) Videostream (kein Muxing, nur ein Videostream)
+reiner (raw) Videostream (kein Muxing \- nur ein Videostream)
 .IPs "\-of rawaudio"
-reiner (raw) Audiostream (kein Muxing, nur ein Audiostream)
+reiner (raw) Audiostream (kein Muxing \- nur ein Audiostream)
 .RE
 .PD 1
 .
@@ -6449,16 +6466,15 @@ reiner (raw) Audiostream (kein Muxing, nur ein Audiostream)
 Setzt die Anzahl der Bilder pro Sekunde (fps) für die Ausgabedatei, die
 unterschiedlich zu der der Quelldatei sein kann.
 Diese Option muss gesetzt werden, wenn eine Quelldatei mit
-variabler Framerate (ASF, einige MOV) oder ein progressiver Film (30000/1001
-fps telecined MPEG) encodiert wird.
+variabler Framerate (ASF, einige MOV) oder ein progressiver (30000/1001
+fps telecined MPEG) Film encodiert wird.
 .
 .TP
 .B \-ovc <Codecname>
-Encodiere Video mit dem angegebenen Codec.
+Encodiere Video mit dem angegebenen Codec (kein Standardwert gesetzt).
 .br
 .I ANMERKUNG:
-Mit \-ovc help erhälst du eine Liste verfügbarer Codecs (kein Standardwert
-vorhanden).
+Mit \-ovc help erhältst du eine Liste verfügbarer Codecs.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -6477,29 +6493,29 @@ Encodiere mit einem libavcodec Codec.
 .
 .TP
 .B \-passlogfile <Dateiname>
-Wenn mit zwei Durchgängen encodiert wird, dann schreibt MEncoder die
-Informationen des ersten Durchgangs in die angegebene Datei und nicht
-nach divx2pass.log.
+Schreibe die Informationen des ersten Durchlaufs anstelle der Standarddatei
+divx2pass.log in die angegebene Datei.
 .
 .TP
 .B \-skiplimit <Wert>
-Maximale Anzahl ausgelassener Bilder nach einem nicht ausgelassenen
+Gibt die maximale Anzahl ausgelassener Bilder nach einem encodierten Frame an
 (mit \-noskiplimit gibt es ein solches Limit nicht).
 .
 .TP
 .B \-vobsubout <Basisname>
 Gibt den Basisnamen für die Ausgabe der .idx- und .sub-Dateien an.
 Damit wird das Rendern der Untertitel im encodierten Film deaktiviert, und
-die Untertitel werden statt dessen in eine VOBsub-Datei umgeleitet.
+die Untertitel werden statt dessen in eine VOBsub-Untertiteldatei umgeleitet.
 .
 .TP
 .B \-vobsuboutid <Sprach-ID>
-Gibt den zweibuchstabigen Sprachcode der Untertitel an.
+Gibt den zweibuchstabigen Sprachcode für die Untertitel an.
 Dieser Wert überschreibt, was von der DVD oder der .ifo-Datei gelesen wurde.
 .
 .TP
 .B \-vobsuboutindex <Index>
-Gibt den Index der ausgegebenen VOBsub-Untertitel an (Standardwert: 0).
+Gibt den Index der VOBsub-Untertitel in den Ausgabedateien an (Standardwert:
+0).
 .
 .
 .
