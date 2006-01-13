@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.72 -->
-<sect1 id="codecs">
-<title>Podporované kodeky</title>
+<!-- Synced with 1.74 -->
+<chapter id="codecs">
+<title>Kodeky</title>
 
-<sect2 id="video-codecs">
+<sect1 id="video-codecs">
 <title>Video kodeky</title>
 
 <para>
@@ -80,7 +80,7 @@ a pomozte nám přidat pro něj podporu.
 </para>
 
 
-<sect3 id="divx4-5">
+<sect2 id="divx4-5">
 <title>DivX4/DivX5</title>
 
 <para>
@@ -194,10 +194,10 @@ správně.
 
 </note>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
+<sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
 <para>
@@ -283,10 +283,10 @@ Musíte následovat výše uvedený postup, abyste získali zdrojové hódy knihovny.
 S pomocí FFmpeg a mé Matrox G400, mohu sledovat DivX dokonce i v tom nejvyšším
 rozlišení bez zahazování snímků na své K6-2 500.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="xanim">
+<sect2 id="xanim">
 <title>XAnim kodeky</title>
 
 <note>
@@ -347,10 +347,10 @@ měli použít volbu <option>-vfm xanim</option>, aby je
 Mezi testované kodeky patří: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID,
 3ivX, H.263.</emphasis>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo-video">
+<sect2 id="vivo-video">
 <title>VIVO video</title>
 <para>
 <application>MPlayer</application> umí přehrávat Vivo (1.0 a 2.0) videa.
@@ -360,10 +360,10 @@ přehrávejte pomocí Win32 DLL, pomocí volby <option>-vc vivo</option>.
 Pokud nezadáte volby na příkazovém řádku, <application>MPlayer</application>
 zvolí nejlepší kodek automaticky.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="mpeg12">
+<sect2 id="mpeg12">
 <title>MPEG-1/2 video</title>
 <para>
 MPEG-1 a MPEG-2 jsou dekódovány multiplatformní nativní knihovnou <systemitem
@@ -374,10 +374,10 @@ odchytáváním <systemitem>Signal 11</systemitem>
 kodeku tak, aby pokračoval tam, kde skončil.
 Tato opravná technika nemá měřitelný vliv na rychlost.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="avicodecs">
+<sect2 id="avicodecs">
 <title>MS Video1, Cinepak CVID a jiné starší kodeky</title>
 <para>
 <application>MPlayer</application> umí přehrát většinu starších kodeků
@@ -386,10 +386,10 @@ V minulosti byly dekódovány binárními Win32 kodeky, nyní však máme pro většinu
 z nich <emphasis role="bold">nativní kodeky</emphasis> zahrnuté v kolekci
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realvideo">
+<sect2 id="realvideo">
 <title>RealVideo</title>
 
 <para>
@@ -423,10 +423,10 @@ Pokud je chcete mít na jiném místě, zadejte skriptu
 na platformách x86, Alpha a PowerPC (Linux/Alpha a Linux/PowerPC byly
 testovány) a v Mac OS X</emphasis>.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="xvid">
+<sect2 id="xvid">
 <title>XviD</title>
 
 <para>
@@ -487,10 +487,10 @@ se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
   <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
   </para></step>
 </procedure>
-</sect3>
+</sect2>
 
 
-<sect3 id="sorenson">
+<sect2 id="sorenson">
 <title>Sorenson</title>
 
 <para>
@@ -527,12 +527,12 @@ platformy.</para></note>
 <step><para>zkomilujte <application>MPlayer</application></para></step>
 </procedure>
 
-</sect3>
+</sect2>
 
-<sect3 id="codec-x264">
+<sect2 id="codec-x264">
 <title>x264</title>
 
-<sect4 id="codec-x264-whatis">
+<sect3 id="codec-x264-whatis">
 <title>Co je x264?</title>
 <para>
   <systemitem class="library">x264</systemitem> je knihovna pro tvorbu
@@ -548,29 +548,27 @@ platformy.</para></note>
 <title>Vlastnosti enkodéru</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Multi-reference</para></listitem>
-  <listitem><para>Intra: všechny typy makrobloků (16x16 a 4x4 se všemi
+  <listitem><para>Intra: všechny typy makrobloků (16x16, 8x8 a 4x4 se všemi
     predikcemi)</para></listitem>
   <listitem><para>Inter P: všechna rozdělení (partitiony) (od 16x16 níže až do
     4x4)</para></listitem>
   <listitem><para>Inter B: rozdělení od 16x16 níže až do 8x8
     (včetně SKIP/DIRECT)</para></listitem>
   <listitem><para>Řízení datového toku: konstantní kvantizér, konstantní datový
-    tok nebo víceprůchodový ABR</para></listitem>
+    tok nebo jedno či víceprůchodový ABR</para></listitem>
   <listitem><para>Detekce změny scény</para></listitem>
   <listitem><para>Adaptivní umísťování B-snímků</para></listitem>
   <listitem><para>B-snímky jako referenční / libovolné řazení snímků
     </para></listitem>
+  <listitem><para>8x8 a 4x4 adaptivní prostorová transformace</para></listitem>
+  <listitem><para>Bezstrátový režim</para></listitem>
+  <listitem><para>Uživatelské kvantizační matice</para></listitem>
+  <listitem><para>Paralelní enkódování několika políček</para></listitem>
 </itemizedlist>
 
-<itemizedlist>
-<title>Omezení enkodéru</title>
-  <listitem><para>Nemá skutečný RD</para></listitem>
-</itemizedlist>
+</sect3>
 
-
-</sect4>
-
-<sect4 id="codec-h264-whatis">
+<sect3 id="codec-h264-whatis">
 <title>Co je H.264?</title>
 <para>
   H.264 je jeden z názvů nového kodeku digitálního videa vyvíjeného společně skupinami
@@ -605,9 +603,9 @@ platformy.</para></note>
   o stručný přehled, přečtěte si
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-playback">
+<sect3 id="codec-x264-playback">
 <title>Jak mohu přehrávat H.264 videa <application>MPlayer</application>em?</title>
 <para>
   <application>MPlayer</application> používá H.264 dekodér z
@@ -623,9 +621,9 @@ platformy.</para></note>
   <systemitem class="library">libavcodec</systemitem>u, sledujte
   <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">webové rozhraní FFmpeg CVS repozitáře</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-encode">
+<sect3 id="codec-x264-encode">
 <title>Jak mohu enkódovat video pomocí <application>MEncoder</application> a <systemitem class="library">x264</systemitem>?</title>
 <para>
   Pokud máte nainstalován klient subversion, můžete si poslední x264
@@ -662,13 +660,13 @@ platformy.</para></note>
   Skript configure automaticky detekuje, že jste splnili požadavky pro
   <systemitem class="library">x264</systemitem>.
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="audio-codecs">
+<sect1 id="audio-codecs">
 <title>Audio kodeky</title>
 
 <itemizedlist>
@@ -717,7 +715,7 @@ platformy.</para></note>
 </itemizedlist>
 
 
-<sect3 id="swac3">
+<sect2 id="swac3">
 <title>Softwarové dekódování AC3</title>
 
 <para>
@@ -754,10 +752,10 @@ SNDCTL_DSP_CHANNELS ioctl.  Příkladem použitelného ovladače je emu10k1
 (používaný kartami Soundblaster Live!) ze Srpna 2001 nebo novější (ALSA z CVS
 bude rovněž fungovat).
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="hwac3">
+<sect2 id="hwac3">
 <title>Hardwarové dekódování AC3</title>
 <para>
 Potřebujete zvukovou kartu schopnou AC3, s digitálním výstupem(S/PDIF).
@@ -767,10 +765,10 @@ Je to experimentální, ale víme že pracuje s C-Media kartami a
 Soundblaster Live! + ALSA (ale ne OSS) ovladači a dekodérovými kartami
 DXR3/Hollywood+ MPEG.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="libmad">
+<sect2 id="libmad">
 <title>podpora libmad</title>
 
 <para>
@@ -785,10 +783,10 @@ FPU (jako je <link linkend="arm">ARM</link>) než mp3lib.
 Pokud pro ni chcete podporu, předejte před kompilací skriptu configure volbu
 <option>--enable-mad</option>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo-audio">
+<sect2 id="vivo-audio">
 <title>VIVO audio</title>
 <para>
 The audio kodek používaný ve VIVO souborech závisí na tom, jestli je to soubor
@@ -796,10 +794,10 @@ VIVO/1.0 nebo VIVO/2.0. Soubory VIVO/1.0 mají
 <emphasis role="bold">g.723</emphasis> audio, zatímco soubory VIVO/2.0
 mají <emphasis role="bold">Vivo Siren</emphasis> audio. Obojí je podporováno.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realaudio">
+<sect2 id="realaudio">
 <title>RealAudio</title>
 
 <para>
@@ -822,9 +820,9 @@ RealAudio:
 Návod k instalaci knihoven RealPlayeru naleznete v sekci
 <link linkend="realvideo">RealVideo</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qdesign">
+<sect2 id="qdesign">
 <title>Kodeky QDesign</title>
 <para>
 Audio proudy QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) lze nalézt
@@ -832,9 +830,9 @@ v MOV/QT souborech. Obě verze tohoto kodeku mohou být dekódovány pomocí
 QuickTime knihoven. Návod k instalaci naleznete v sekci
 <link linkend="sorenson">Sorenson video kodek</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qualcomm">
+<sect2 id="qualcomm">
 <title>Kodeky Qualcomm</title>
 <para>
 Audio proudy Qualcomm (fourcc:<emphasis>Qclp</emphasis>) lze nalézt
@@ -842,9 +840,9 @@ v MOV/QT souborech. Mohou být dekódovány pomocí QuickTime knihoven.
 Návod k instalaci naleznete v sekci
 <link linkend="sorenson">Sorenson video kodek</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="aac">
+<sect2 id="aac">
 <title>Kodek AAC</title>
 <para>
 AAC (Advanced Audio Coding) je audio kodek, který lze občas nalézt v MOV a
@@ -876,18 +874,18 @@ Marillata</ulink>, Mandrake/Mandriva RPM z
 <ulink url="http://plf.zarb.org">P.L.F</ulink> a RedHat RPM
 ze stránek <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
-</sect3>
-
 </sect2>
+
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="codec-importing">
+<sect1 id="codec-importing">
 <title>HOWTO: Import Win32 kodeků</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
 
-<sect3 id="vfw-codecs">
+<sect2 id="vfw-codecs">
 <title>Kodeky VFW</title>
 
 <para>
@@ -929,10 +927,10 @@ ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
 zde hledáte &quot;VIDC.HFYU&quot;. Jak to udělat se dozvíte níže v sekci
 DirectShow Stará metoda.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="dshow-codecs">
+<sect2 id="dshow-codecs">
 <title>Kodeky DirectShow</title>
 
 <para>
@@ -1046,6 +1044,7 @@ Pokud chcete přidat kodek sami, přečtěte si
 <ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink>.
 </para>
 
-</sect3>
 </sect2>
 </sect1>
+
+</chapter>
