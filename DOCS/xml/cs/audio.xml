@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.31 -->
-<sect1 id="audio">
+<!-- Synced with: 1.32 -->
+<chapter id="audio">
 <title>Výstupní zvuková zařízení</title>
-<sect2 id="sync">
+<sect1 id="sync">
 <title>Audio/Video synchronizace</title>
 
 <para>
@@ -34,9 +34,9 @@ Pokud se stalo, že máte špatný zvukový ovladač, zkuste volbu
 <option>-autosync</option>, ta by měla vyřešit vaše problémy. Podrobné informace
 viz man stránka.
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="troubleshooting">
+<sect1 id="troubleshooting">
 <title>Odstraňování problémů</title>
 
 <para>Několik poznámek:</para>
@@ -54,7 +54,6 @@ DEMUXER: Příliš mnoho (945 ve 8390980 bajtech) video paketů v bufferu!<!--
   Pokud vám zvuk klape při přehrávání z CD-ROM, zapněte odmaskování IRQ tak,
 	jak je to popsáno v sekci <link linkend="drives">CD-ROM</link>.
 </para>
-</sect2>
-
 </sect1>
 
+</chapter>
