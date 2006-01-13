@@ -266,7 +266,7 @@ extern char *sub_demuxer_name; // override sub demuxer
 // streaming:
 int audio_id=-1;
 int video_id=-1;
-int dvdsub_id=-1;
+int dvdsub_id=-2;
 int vobsub_id=-1;
 char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
@@ -1945,6 +1945,7 @@ if(stream_dump_type==5){
 if(stream->type==STREAMTYPE_DVD){
   current_module="dvd lang->id";
   if(audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
+  if(dvdsub_lang && dvdsub_id==-2) dvdsub_id=-1;
   if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
   // setup global sub numbering
   global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
