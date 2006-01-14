@@ -1748,16 +1748,14 @@ header_end:
 
     switch (index_mode){
 	case -1: // untouched
-	    if (priv->index_chunk_offset && (priv->index_chunk_offset < demuxer->movi_end))
+	    if (priv->index_chunk_offset && parse_index_chunk(demuxer))
 	    {
-		parse_index_chunk(demuxer);
 		demuxer->seekable = 1;
 	    }
 	    break;
 	case 1: // use (generate index)
-	    if (priv->index_chunk_offset && (priv->index_chunk_offset < demuxer->movi_end))
+	    if (priv->index_chunk_offset && parse_index_chunk(demuxer))
 	    {
-		parse_index_chunk(demuxer);
 		demuxer->seekable = 1;
 	    } else {
 		generate_index(demuxer);
