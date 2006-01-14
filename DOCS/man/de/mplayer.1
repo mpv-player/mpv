@@ -7342,7 +7342,7 @@ Frames.
 .TP
 .B vqblur=<0.0\-99.0> (zweiter Durchlauf)
 Gaußsche Unschärfe des Quantisierungsparameters (Standard: 0.5); größere Werte
-bilden den Durchschnitt über mehr Frames (langsamerer Wechsel).
+bilden den Durchschnitt über längere Zeit (langsamerer Wechsel).
 .
 .TP
 .B vqcomp=<Wert>
@@ -7356,7 +7356,7 @@ Bei vqcomp=0.0 reserviert die Bitratenkontrolle für jeden Frame dieselbe
 Anzahl Bits, also striktes CBR.
 .I ANMERKUNG:
 Dies sind extreme Einstellungen und sollten nie benutzt werden.
-Die wahrgenommene Qualität ist optimal zwischen diesen beiden Extremen.
+Die wahrgenommene Qualität ist optimal irgendwo zwischen diesen beiden Extremen.
 .
 .TP
 .B vrc_eq=<Gleichung>
@@ -7368,9 +7368,9 @@ konstante Bitrate
 .IPs tex\ \ 
 konstante Qualität
 .IPs 1+(tex/\:avgTex-1)*qComp
-ungefähr die Gleichung der alten Bitratenkontrolle
+ungefähr die Gleichung des Codes der alten Bitratenkontrolle
 .IPs tex^qComp
-wobei qcomp = 0.5 oder ein ähnlicher Wert (Standard)
+wobei qcomp = 0.5 oder einem ähnlichen Wert (Standard)
 .RE
 .PP
 .RS
@@ -7396,14 +7396,14 @@ durchschnittliche Intra-Texturkomplexität bei Intraframes
 durchschnittliche Intra-Texturkomplexität bei P-Frames
 .IPs avgPPTex
 durchschnittliche Nicht-Intra-Texturkomplexität bei P-Frames
-.IPs avgBPTexaverage
+.IPs avgBPTex
 durchschnittliche Nicht-Intra-Texturkomplexität bei B-Frames
 .IPs mv\ \ \ 
 für Motion-Vectors verwendete Bits
 .IPs fCode
 maximale Länge der Motion-Vectors in log2-Skalierung
 .IPs iCount
-Anzahl der Intra-Macroblöcke / Anzahl der Macroblöcke
+Anzahl der Intra-Macroblöcke /\: Anzahl der Macroblöcke
 .IPs var\ \ 
 räumliche Komplexität
 .IPs mcVar
@@ -7411,7 +7411,7 @@ zeitliche Komplexität
 .IPs qComp
 auf der Kommandozeile angegebener Wert für qcomp
 .IPs "isI, isP, isB"
-Ist 1 bei einem Bildtyp von I/\:P/\:B, sonst 0.
+Ist 1 bei einem Bildtyp I/\:P/\:B, sonst 0.
 .IPs Pi,E\ 
 Schau in dein Lieblingsmathebuch.
 .RE
@@ -7421,7 +7421,7 @@ Funktionen:
 .RE
 .RSs
 .IPs max(a,b),min(a,b)
-Maximum / Minimum
+Maximum /\: Minimum
 .IPs gt(a,b)
 (greater than) ist 1 falls a>b, sonst 0
 .IPs lt(a,b)
@@ -7448,7 +7448,7 @@ Qualitätskorrektur in %
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
-anfängliche Komplexität (Durchlauf 1)
+anfängliche Komplexität (Durchlauf\ 1)
 .
 .TP
 .B vrc_init_occupancy=<0.0\-1.0>
@@ -7456,7 +7456,7 @@ initiale Pufferbelegung als Bruchteil von vrc_buf_size (Standard: 0.9)
 .
 .TP
 .B vqsquish=<0|1>
-Gibt an, wie die Quantisierungsparameter zwischen qmin und qmax gehalten werden
+Gibt an, wie die Quantisierungsparameter zwischen qmin und qmax beibehalten werden
 (Durchlauf 1/\:2):
 .PD 0
 .RSs
@@ -7469,9 +7469,9 @@ Benutzt eine schöne ableitbare Funktion (Standard).
 .
 .TP
 .B vlelim=<-1000\-1000>
-Schwelle für die Eliminierung von einzelnen Koeffizienten beim
+Setzt die Schwelle für die Eliminierung von einzelnen Koeffizienten beim
 Helligkeitsanteil.
-Bei negativen Werten werden auch die DC-Koeffizienten betrachtet (sollte
+Bei negativen Werten wird auch der DC-Koeffizient betrachtet (sollte
 mindestens -4 or niedriger sein, wenn mit quant=1 encodiert wird):
 .PD 0
 .RSs
@@ -7484,9 +7484,9 @@ JVT-Empfehlung
 .
 .TP
 .B vcelim=<-1000\-1000>
-Schwelle für die Eliminierung von einzelnen Koeffizienten beim
+Setzt die Schwelle für die Eliminierung von einzelnen Koeffizienten beim
 Farbanteil.
-Bei negativen Werten werden auch die DC-Koeffizienten betrachtet (sollte
+Bei negativen Werten wird auch der DC-Koeffizient betrachtet (sollte
 mindestens -4 or niedriger sein, wenn mit quant=1 encodiert wird):
 .PD 0
 .RSs
@@ -7499,6 +7499,7 @@ JVT-Empfehlung
 .
 .TP
 .B vstrict=<-2|-1|0|1>
+strikte Einhaltung des Standards
 .PD 0
 .RSs
 .IPs 0
@@ -7524,7 +7525,7 @@ Jedes Videopaket wird in drei separate Partitionen aufgeteilt:
 .PD 0
 .RSs
 .IPs "1. MVs"
-Bewegungen
+Bewegung
 .IPs "2. DC-Koeffizienten"
 niedrig aufgelöstes Bild
 .IPs "3. AC-Koeffizienten"
@@ -7534,7 +7535,7 @@ Details
 .RS
 MV und DC sind am wichtigsten, sie zu verlieren bedeutet ein viel schlechteres
 Bild als der Verlust von AC und der ersten oder zweiten Partition.
-MV und DC sind viel kleiner als die dritte (AC) Partition, was bedeutet, dass
+MV und DC sind viel kleiner als die dritte Partition (AC), was bedeutet, dass
 auftretende Fehler die AC-Partition viel häufiger treffen wird als die MV- und
 DC-Partitionen.
 Daher sieht das Bild mit Partitionierung viel besser aus, denn ohne eine
@@ -7563,11 +7564,11 @@ Encodierung zu Graustufenbildern (schneller)
 .
 .TP
 .B vfdct=<0\-10>
-DCT-Algorithmus (diskrete Cosinustransformation)
+DCT-Algorithmus
 .PD 0
 .RSs
 .IPs 0
-automatische Wahl (Standard)
+Wählt automatisch einen guten (Standard).
 .IPs 1
 schneller Integer-Algorithmus
 .IPs 2
@@ -7585,14 +7586,14 @@ Fließkomma-AAN
 .
 .TP
 .B idct=<0\-99>
-IDCT-Algorithmus (inverse diskrete Cosinustransformation)
+IDCT-Algorithmus
 .br
 .I ANMERKUNG:
-All diese IDCT-Algorithmen bestehen die IEEE1180-Tests.
+Nach unserem Wissensstand bestehen all diese IDCT-Algorithmen die IEEE1180-Tests.
 .PD 0
 .RSs
 .IPs 0
-automatische Wahl (Standard)
+Wählt automatisch einen guten (Standard).
 .IPs 1
 JPEG-Referenzalgorithmus (Integer)
 .IPs 2
@@ -7622,10 +7623,10 @@ Teilen eines Bildes weniger Details zu erkennen.
 Helligkeitsmaskierung komprimiert sehr helle Stellen stärker als
 durchschnittlich helle, so dass ein paar Bits eingespart werden, die dann auf
 andere Frames verwendet werden können, was die subjektive Qualität im Ganzen
-erhöht und den PSNR-Wert möglicherweise reduziert.
+erhöht, den PSNR-Wert dabei jedoch möglicherweise reduziert.
 .br
 .I WARNUNG:
-Sei vorsichtig! Zu große Werte können katastrophale Ergebnisse liefern.
+Sei vorsichtig, zu große Werte können katastrophale Ergebnisse liefern.
 .br
 .I WARNUNG:
 Große Werte mögen auf einigen Monitoren gut aussehen, können auf anderen aber
@@ -7647,7 +7648,7 @@ Teilen eines Bildes weniger Details zu erkennen.
 Dunkelheitsmaskierung komprimiert sehr dunkle Stellen stärker als
 durchschnittlich dunkle, so dass ein paar Bits eingespart werden, die dann auf
 andere Frames verwendet werden können, was die subjektive Qualität im Ganzen
-erhöht und den PSNR-Wert möglicherweise reduziert.
+erhöht, den PSNR-Wert dabei jedoch möglicherweise reduziert.
 .br
 .I WARNUNG:
 Sei vorsichtig!
@@ -7655,7 +7656,7 @@ Zu große Werte können katastrophale Ergebnisse liefern.
 .br
 .I WARNUNG:
 Große Werte mögen auf einigen Monitoren gut aussehen, können auf anderen
-Monitoren/dem Fernseher/\:TFTs aber auch schrecklich aussehen.
+Monitoren /\: dem Fernseher /\: TFTs aber auch schrecklich aussehen.
 .PD 0
 .RSs
 .IPs 0.0\ \ 
@@ -7706,7 +7707,8 @@ sinnvoller Bereich
 .I ANMERKUNG:
 Diese Einstellung hat nicht denselben Effekt wie die Benutzung einer
 benutzerdefinierten Matrix, die hohe Frequenzen stärker komprimieren würde, da
-scplx_mask die Qualität nur bei Änderung des DC-Koeffizienten verringert.
+scplx_mask die Qualität der P-Blöcke verringert, selbst wenn sich nur die
+DC-Koeffizienten ändern.
 Das Ergebnis mit scplx_mask wird vermutlich nicht so gut aussehen.
 .RE
 .
@@ -7728,10 +7730,10 @@ sind, da sie visuell oft weniger bedeutsam sind.
 .TP
 .B naq\ \ \ \ 
 Normalisierte adaptive Quantisierung (experimentell).
-Wenn adaptive Quantisierung benutzt wird (*_mast), dann wird der
+Wenn adaptive Quantisierung benutzt wird (*_mask), dann wird der
 durchschnittliche Quantisierungsparameter pro Macroblock eventuell
 nicht mehr dem geforderten Quantisierungsparameter auf Framelevel entsprechen.
-NAQ versucht dann, den pro Macroblock verwendeten Quantisierungsparameter
+Naq versucht dann, den pro Macroblock verwendeten Quantisierungsparameter
 anzupassen, um den geforderten Durchschnitt beizubehalten.
 .
 .TP
@@ -7846,7 +7848,8 @@ adaptive Huffman-Tabellen
 .
 .TP
 .B qpel\ \ \ 
-Benutze "quarter pel"-Bewegungsabschätzung (schließt ilme gegenseitig aus).
+Benutze auf ein viertel Pixel ("quarter pel") genaue Bewegungsabschätzung
+(schließt ilme gegenseitig aus).
 .br
 .I ANMERKUNG:
 Dies scheint nur für Encodierung mit hohen Bitraten sinnvoll zu sein.
@@ -7870,7 +7873,7 @@ Summe der quadratischen Quantisierungsfehler (zu vermeiden, niedrige Qualität)
 .IPs "5 (BIT)"
 Anzahl der für den Block benötigten Bits
 .IPs "6 (RD)"
-rate distortion (Ratenverzerrung) optimal, langsam
+Ratenverzerrung (rate distortion) optimal, langsam
 .IPs "7 (ZERO)"
 0
 .IPs "8 (VSAD)"
@@ -7880,9 +7883,9 @@ Summe der quadrierten vertikalen Differenzen
 .IPs "10 (NSSE)"
 Rauschen beibehaltende Summe der quadrierten Differenzen
 .IPs "11 (W53)"
-5/3-Wavelet, wird nur bei snow verwendet
+5/\:3-Wavelet, wird nur bei snow verwendet
 .IPs "12 (W97)"
-9/7-Wavelet, wird nur bei snow verwendet
+9/\:7-Wavelet, wird nur bei snow verwendet
 .IPs +256\ 
 Benutze auch die Farbinformation, funktioniert momentan nicht (korrekt) mit
 B-Frames.
@@ -7923,10 +7926,10 @@ herauszufiltern. (Standard: 8)
 Rautentyp und -größe für "pre pass"-Bewegungsabschätzung
 .
 .TP
-.B dia=<\-99\-6>
+.B dia=<-99\-6>
 Rautentyp und -größe für die Bewegungsabschätzung.
 Bewegungsabschätzung ist ein iterativer Prozess.
-Eine kleine Raute zu benutzen begrenzt die Suche nicht auf das Auffinden von
+Eine kleine Raute zu benutzen begrenzt die Suche nicht auf das Auffinden von nur
 kleinen Motion-Vectors.
 Es ist nur irgendwie wahrscheinlicher, dass die Suche anhält, bevor der beste
 Motion-Vector gefunden wurde \- vor allem, wenn Rauschen involviert ist.
@@ -7934,22 +7937,22 @@ Größere Rauten erlauben eine ausgedehntere Suche nach dem besten
 Motion-Vector, welche daher langsamer ist, dafür aber zu einem besseren
 Ergebnis führt.
 .br
-Große normale Rauten sind qualitativ besser als "shape adaptive" (Gestalt
-anpassende) Rauten.
+Große normale Rauten sind qualitativ besser als an das Muster anpassende
+("shape adaptive") Rauten.
 .br
-Shape adaptive Rauten sind ein guter Kompromiss zwischen Geschwindigkeit
-und Qualität.
+An das Muster anpassende Rauten sind ein guter Kompromiss zwischen
+Geschwindigkeit und Qualität.
 .br
 .I ANMERKUNG:
-Die Größen von normalen und "shape adaptive"-Rauten haben unterschiedliche
-Bedeutung.
+Die Größen von normalen und an das Muster anpassende Rauten haben
+nicht dieselbe Bedeutung.
 .RSs
 .IPs -3
-shape adaptive (schnell) Raute der Größe 3
+an das Muster anpassende (schnell) Raute der Größe 3
 .IPs -2
-shape adaptive (schnell) Raute der Größe 2
+an das Muster anpassende (schnell) Raute der Größe 2
 .IPs -1
-etwas speziell: Kann langsamer und/oder besser sein als dia=-2.
+etwas speziell: Kann langsamer und/\:oder besser sein als dia=-2.
 .IPs  1
 Normale Raute der Größe 1 (Standard), entspricht einer Raute des Typs EPZS.
 .nf
@@ -7977,7 +7980,7 @@ Hiermit wird die optimale Encodierung für jeden 8x8-Block gefunden.
 Die Trellis-Quantisierung ist bei gegenseitiger Abschätzung von PSNR-Wert gegen
 die Bitrate optimal (unter der Annahme, dass durch die IDCT keine
 Rundungsfehler ins Spiel kommen \- was natürlich nicht der Fall ist).
-Sie findet einfach einen Block für das Minimum von Fehler und lambda * bits.
+Sie findet einfach einen Block für das Minimum von Fehler und lambda*Bits.
 .PD 0
 .RSs
 .IPs lambda
@@ -7992,7 +7995,7 @@ Summe der quadrierten Quantisierungsfehler
 .TP
 .B cbp\ \ \ \ 
 Ratenverzerrtes optimal codiertes Blockmuster (coded block pattern).
-Wird dasjenige codierte Blockmuster auswählen, das Verzerrung + lambda*rate
+Wird dasjenige codierte Blockmuster auswählen, das Verzerrung + lambda*Rate
 minimiert.
 Dies kann nur zusammen mit der Trellis-Quantisierung benutzt werden.
 .
@@ -8004,7 +8007,7 @@ Dies hat keinen Effekt, falls mbd=0.
 .
 .TP
 .B qprd (nur mit mbd=2)
-Ratenverzerrter optimaler Quantisierungsparameter bei gegebenem lambda für
+ratenverzerrter optimaler Quantisierungsparameter bei gegebenem lambda für
 jeden Macroblock
 .
 .TP
@@ -8067,13 +8070,12 @@ alternativer "inter vlc" für H.263+
 .TP
 .B umv\ \ \ \ 
 unbegrenzte Motion-Vectors (unlimited MVs) (nur bei H.263+)
-.br
 Erlaubt die Encodierung von beliebig langen Motion-Vectors.
 .
 .TP
 .B ibias=<-256\-256>
 Intra-Quantisierungsverzerrung (256 entspricht 1.0,
-MPEG-Quantisierungsstandard: 96, H.263-Quantisierungsstandard: 0)
+MPEG-Quantisierungsstandard: 96, H.263-artiger Quantisierungsstandard: 0)
 .br
 .I ANMERKUNG:
 Die H.263-MMX-Quantisierung kann positive Verzerrungen nicht verarbeiten
@@ -8083,7 +8085,7 @@ nicht verarbeiten (setze vfdct=1 oder 2).
 .TP
 .B pbias=<-256\-256>
 Inter-Quantisierungsverzerrung (256 entspricht 1.0,
-MPEG-Quantisierungsstandard: 0, H.263-Quantisierungsstandard: -64)
+MPEG-Quantisierungsstandard: 0, H.263-artiger Quantisierungsstandard: -64)
 .br
 .I ANMERKUNG:
 Die H.263-MMX-Quantisierung kann positive Verzerrungen nicht verarbeiten
@@ -8091,21 +8093,27 @@ Die H.263-MMX-Quantisierung kann positive Verzerrungen nicht verarbeiten
 nicht verarbeiten (setze vfdct=1 oder 2).
 .br
 .I TIP:
-Eine eher positive Verzerrung (-32 bis -16 anstelle -64) scheint den
+Eine eher positive Verzerrung (-32 \- -16 anstatt -64) scheint den
 PSNR-Wert zu verbessern.
 .
 .TP
 .B nr=<0\-100000>
 Rauschunterdrückung (noise reduction), 0 bedeutet deaktiviert.
+0\-600 ist ein sinnvoller Bereich für typischen Inhalt, für etwas
+verrauschteren Inhalt kannst du den Wert etwas erhöhen (Standard: 0).
+Durch den geringen Einfluss auf die Geschwindigkeit möchtest du diese Option
+der Rauschunterdrückung mit Filtern wie denoise3d oder hqdn3d vielleicht
+vorziehen.
 .
 .TP
 .B qns=<0\-3>
-"Quantizer noise shaping", Rauschanpassung des Quantisierungsparameters.
+Rauschanpassung des Quantisierungsparameters, "Quantizer noise shaping".
 Anstatt die Quantisierung so zu wählen, dass dem Quellvideo im Sinne von PSNR
 am besten entsprochen wird, wählt die Rauschanpassung die Quantisierung so,
 dass Rauschen (normalerweise Ringbildungen) durch ähnlichfrequenten Inhalt im
 Bild maskiert wird.
-Größere Werte sind langsamer, können aber zu besserer Qualität führen.
+Größere Werte sind langsamer, müssen aber nicht unbedingt zu besserer Qualität
+führen.
 Dies kann und sollte zusammen mit der Trellis-Quantisierung benutzt werden, in
 welchem Falle diese (optimal für konstante Gewichtung) als Einstiegspunkt für
 die iterative Suche benutzt wird.
@@ -8123,12 +8131,12 @@ Versuche alle.
 .PD 1
 .
 .TP
-.B inter_matrix=<kommaseparierte Matrix>
+.B inter_matrix=<durch Kommas getrennte Matrix>
 Benutze eine eigene Intermatrix.
 Braucht eine kommaseparierte Zeichenkette von 64 Integerwerten.
 .
 .TP
-.B intra_matrix=<kommaseparierte Matrix>
+.B intra_matrix=<durch Kommas getrennte Matrix>
 Benutze eine eigene Intramatrix.
 Braucht eine kommaseparierte Zeichenkette von 64 Integerwerten.
 .
@@ -8148,7 +8156,7 @@ Wenn du vcodec=mpeg2video angibst, kann dieser Wert 8, 9, 10 oder 11 sein.
 .TP
 .B cgop (siehe auch sc_threshold)
 Schließt alle GOPs.
-Funktioniert momentan nur wenn die Szenenwechselerkennung deaktiviert ist
+Funktioniert momentan nur, wenn die Szenenwechselerkennung deaktiviert ist
 (sc_threshold=1000000000).
 .
 .
@@ -8159,7 +8167,7 @@ Normalerweise werden Frames zuerst mit RTJPEG encodiert und dann mit LZO
 komprimiert; es ist jedoch möglich, entweder einen oder beide Durchgänge zu
 deaktivieren.
 Als Ergebnis kannst du also tatsächlich raw i420, LZO-komprimiertes i420,
-RTJPEG, oder normales LZO-komprimiertes RTJPEG ausgeben.
+RTJPEG oder normales LZO-komprimiertes RTJPEG ausgeben.
 .br
 .I ANMERKUNG:
 Die nuvrec-Dokumentation enthält einige Anweisungen und Beispiele zu
