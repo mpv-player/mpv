@@ -7155,12 +7155,14 @@ X11DIR = $_ld_x11
 
 HAVE_XVMC_ACCEL = $_xvmc
 
-# for libavcodec:
+# for FFmpeg
 SRC_PATH=..
 LIBPREF=lib
 LIBSUF=.a
+LIB=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 SLIBPREF=lib
 SLIBSUF=.so
+SLIBNAME=\$(SLIBPREF)\$(NAME)\$(SLIBSUF)
 
 # video output
 X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_sock
