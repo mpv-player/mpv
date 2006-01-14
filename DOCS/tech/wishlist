@@ -103,6 +103,7 @@ Enhancements:
  * Stream quality selection, possibly based on available bandwidth.
    Currently only available for MMS-over-HTTP (libmpdemux/asf_streaming.c).
 
+ * MOD playback (via libmodplug?) - bug #434
 
 Difficult stuff:
 
