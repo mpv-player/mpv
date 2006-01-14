@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.216
+// Updated to help_mp-en.h v1.217
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -261,7 +261,7 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\nFlusso audio: %8.3f kbit/s  (%d B/s)  dim.: %d bytes  %5.3f secondi\n"
 #define MSGTR_OpenedStream "successo: formato: %d  dati: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio selezionato\n"
 #define MSGTR_MP3AudioSelected "MP3 audio selezionato\n"
 #define MSGTR_CannotAllocateBytes "Non posso allocare %d bytes\n"
@@ -271,7 +271,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Limito il preload audio a 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Aumento la densità audio a 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forzo il preload audio a 0, max pts correction a 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld bytes/sec, %d bytes/blocco\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %d byte/sec, %d byte/blocco\n"
 #define MSGTR_LameVersion "LAME versione %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset ""\
 "Errore: il bitrate specificato è fuori gamma per questo Preset\n"\
@@ -588,7 +588,7 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Rilevato formato NTSC 30000/1001fps, cambio framerate.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: Rilevato formato NTSC 24000/1001fps progressivo, cambio framerate.\n"
 
-#define MSGTR_CacheFill "\rRiempio cache: %5.2f%% (%d byte)   " 
+#define MSGTR_CacheFill "\rRiempio cache: %5.2f%% (%"PRId64" byte)   " 
 #define MSGTR_NoBindFound "Nessun controllo legato al tasto '%s'"
 #define MSGTR_FailedToOpen "Apertura di '%s' fallita\n"
 							       //
@@ -1321,7 +1321,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Ricostruisco tabella keyframe per video MPEG4\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "trovato 'wf', %d byte di %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh trovato (dimensione=%d) (fotogrammi totali=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Leggo blocco INDEX, %d parti per %ld fotogrammi (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Leggo blocco INDEX, %d parti per %d fotogrammi (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "intestazione RIFF supplementare...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** attenzione: questa non è un'intestazione AVI estesa..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Parte (chunk) danneggiata?  chunksize=%d  (id=%.4s)\n"
@@ -1346,7 +1346,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Impossibile aprire il dispositivo CDDA.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Impossibile aprire il disco.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Trovato CD audio con %d tracce.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Trovato CD audio con %ld tracce.\n"
 
 // cddb.c
 
