@@ -2,6 +2,7 @@
     Real parser & demuxer
     
     (C) Alex Beregszaszi
+    (C) 2005, 2006 Roberto Togni
     
     Based on FFmpeg's libav/rm.c.
 
@@ -1444,6 +1445,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 
 		    sh->wf->wFormatTag = sh->format;
 		    
+		    mp_msg(MSGT_DEMUX,MSGL_V,"audio fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 		    if (verbose > 0)
 		    print_wave_header(sh->wf);
 
@@ -1792,6 +1794,12 @@ header_end:
 	mp_msg(MSGT_DEMUX,MSGL_V,"VIDEO:  %.4s [%08X,%08X]  %dx%d  (aspect %4.2f)  %4.2f fps\n",
 	    (char *)&sh->format,((unsigned int*)(sh->bih+1))[1],((unsigned int*)(sh->bih+1))[0],
 	    sh->disp_w,sh->disp_h,sh->aspect,sh->fps);
+    }
+
+    if(demuxer->audio->sh){
+	sh_audio_t *sh=demuxer->audio->sh;
+	mp_msg(MSGT_DEMUX,MSGL_V,"AUDIO:  %.4s [%08X]\n",
+	    &sh->format,&sh->format);
     }
 
     return demuxer;
