@@ -1460,7 +1460,7 @@ _amr_nb=auto
 _amr_nb_fixed=auto
 _amr_wb=auto
 _libavcodecs=`grep 'register_avcodec(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
-_libavcodecso=auto 
+_libavcodec_so=auto
 _libavformat=auto
 _libavformat_so=auto
 _fame=auto
@@ -6047,8 +6047,8 @@ fi
 
 if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
-if test "$_libavcodecso" = auto ; then
-  _libavcodecso=no
+if test "$_libavcodec_so" = auto ; then
+  _libavcodec_so=no
   _res_comment="libavcodec.so is broken/obsolete"
 # FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
@@ -6060,11 +6060,11 @@ int main(void) {
 }
 EOF
   if cc_check -lavcodec $_ld_lm ; then
-    _libavcodecso=yes
+    _libavcodec_so=yes
     _res_comment="using libavcodec.so, but static libavcodec is recommended"
   fi
 fi
-echores "$_libavcodecso"
+echores "$_libavcodec_so"
 fi
 
 if test "$_libavformat" != yes ; then
@@ -6081,7 +6081,7 @@ echores "$_libavformat_so"
 fi
 
 _def_libavcodec='#undef USE_LIBAVCODEC'
-_def_libavcodecso='#undef USE_LIBAVCODEC_SO'
+_def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
 _def_ffpostprocess='#undef FF_POSTPROCESS'
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
@@ -6093,9 +6093,9 @@ if test "$_libavcodec" = yes ; then
     _ld_libavutil='libavutil/libavutil.a'
     _dep_libavutil='libavutil/libavutil.a'
   fi
-elif test "$_libavcodecso" = yes ; then
+elif test "$_libavcodec_so" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
-  _def_libavcodecso='#define USE_LIBAVCODEC_SO 1'
+  _def_libavcodec_so='#define USE_LIBAVCODEC_SO 1'
   _ld_libavcodec='-lavcodec'
   _codecmodules="libavcodec.so $_codecmodules"
 else
@@ -7211,7 +7211,7 @@ AV_DEP = $_dep_libavutil $_dep_libavcodec $_dep_libavformat
 AV_LIB = $_ld_libavformat $_ld_libavcodec $_ld_libavutil 
 CONFIG_LIBAVUTIL = $_libavutil
 CONFIG_LIBAVCODEC = $_libavcodec
-CONFIG_LIBAVCODECSO = $_libavcodecso
+CONFIG_LIBAVCODEC_SO = $_libavcodec_so
 CONFIG_LIBAVFORMAT = $_libavformat
 CONFIG_LIBAVFORMAT_SO = $_libavformat_so
 ZORAN = $_zr
@@ -7602,7 +7602,7 @@ $_def_win32_loader
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
-$_def_libavcodecso
+$_def_libavcodec_so
 
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat

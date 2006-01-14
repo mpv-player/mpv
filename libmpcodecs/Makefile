@@ -199,7 +199,7 @@ LIBAV_INC += -I../libavcodec
 ENCODER_SRCS += ae_lavc.c
 endif
 
-ifeq ($(CONFIG_LIBAVCODECSO),yes)
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 ENCODER_SRCS += ae_lavc.c
 endif
 
