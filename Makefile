@@ -336,7 +336,7 @@ tremor/libvorbisidec.a:
 libdha/libdha.so:
 	$(MAKE) -C libdha
 
-vidix/libvidix.a:
+vidix/libvidix.a: libdha/libdha.so
 	$(MAKE) -C vidix
 
 Gui/libgui.a:
