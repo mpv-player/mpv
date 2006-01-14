@@ -1799,7 +1799,7 @@ header_end:
     if(demuxer->audio->sh){
 	sh_audio_t *sh=demuxer->audio->sh;
 	mp_msg(MSGT_DEMUX,MSGL_V,"AUDIO:  %.4s [%08X]\n",
-	    &sh->format,&sh->format);
+	    (char *)&sh->format,sh->format);
     }
 
     return demuxer;
