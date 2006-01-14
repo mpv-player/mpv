@@ -240,6 +240,8 @@ Codecs:
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
+  --disable-libavcodec_so  disable shared libavcodec [autodetect]
+  --disable-libavformat_so disable shared libavformat [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --disable-internal-tremor do not build internal OggVorbis support [enabled]
   --enable-tremor-low    build with lower accuracy internal tremor [disabled]
@@ -1797,6 +1799,8 @@ for ac_option do
   --disable-opendivx)	_opendivx=no	;;
   --enable-libavcodec)	_libavcodec=yes	;;
   --disable-libavcodec)	_libavcodec=no	;;
+  --enable-libavcodec_so)	_libavcodec_so=yes	;;
+  --disable-libavcodec_so)	_libavcodec_so=no	;;
   --enable-amr_nb)	_amr_nb=yes	;;
   --disable-amr_nb)	_amr_nb=no	;;
   --enable-amr_nb-fixed)	_amr_nb_fixed=yes ;;
@@ -1807,6 +1811,8 @@ for ac_option do
   --disable-codec=*)	_libavcodecs=`echo $_libavcodecs | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-libavformat)	_libavformat=yes;;
   --disable-libavformat)	_libavformat=no	;;
+  --enable-libavformat_so)	_libavformat_so=yes	;;
+  --disable-libavformat_so)	_libavformat_so=no	;;
   --enable-libfame)	_fame=yes	;;
   --disable-libfame)	_fame=no	;;
   --enable-lirc)	_lirc=yes	;;
