@@ -1332,12 +1332,14 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    mp_msg(MSGT_DEMUX,MSGL_V,"header size: %d\n", hdr_size);
 		    flavor = stream_read_word(demuxer->stream);/* codec flavor id */
 		    coded_frame_size = stream_read_dword(demuxer->stream);/* needed by codec */
+		    mp_msg(MSGT_DEMUX,MSGL_V,"coded_frame_size: %d\n", coded_frame_size);
 		    //stream_skip(demuxer->stream, 4); /* coded frame size */
 		    stream_skip(demuxer->stream, 4); // big number
 		    stream_skip(demuxer->stream, 4); // bigger number
 		    stream_skip(demuxer->stream, 4); // 2 || -''-
 //		    stream_skip(demuxer->stream, 2); // 0x10
 		    sub_packet_h = stream_read_word(demuxer->stream);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"sub_packet_h: %d\n", sub_packet_h);
 //		    stream_skip(demuxer->stream, 2); /* coded frame size */
 		    frame_size = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"frame_size: %d\n", frame_size);
