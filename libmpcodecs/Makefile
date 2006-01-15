@@ -7,6 +7,7 @@ LIBNAME2 = libmpencoders.a
 AUDIO_SRCS_LIB=ad_hwac3.c \
                ad_liba52.c \
                ad_mp3lib.c \
+               ad_hwmpa.c \
 
 AUDIO_SRCS_NAT=ad_alaw.c \
                ad_dk3adpcm.c \

@@ -20,6 +20,7 @@ extern ad_functions_t mpcodecs_ad_mp3lib;
 extern ad_functions_t mpcodecs_ad_ffmpeg;
 extern ad_functions_t mpcodecs_ad_liba52;
 extern ad_functions_t mpcodecs_ad_hwac3;
+extern ad_functions_t mpcodecs_ad_hwmpa;
 extern ad_functions_t mpcodecs_ad_pcm;
 extern ad_functions_t mpcodecs_ad_dvdpcm;
 extern ad_functions_t mpcodecs_ad_alaw;
@@ -51,6 +52,7 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_liba52,
   &mpcodecs_ad_hwac3,
 #endif
+  &mpcodecs_ad_hwmpa,
 #ifdef USE_LIBAVCODEC
   &mpcodecs_ad_ffmpeg,
 #endif
