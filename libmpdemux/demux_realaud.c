@@ -22,6 +22,18 @@
 #define FOURCC_288 mmioFOURCC('2','8','_','8')
 #define FOURCC_DNET mmioFOURCC('d','n','e','t')
 #define FOURCC_LPCJ mmioFOURCC('l','p','c','J')
+#define FOURCC_SIPR mmioFOURCC('s','i','p','r')
+
+
+static unsigned char sipr_swaps[38][2]={
+    {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
+    {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
+    {25,94},{26,54},{28,75},{29,50},{32,70},{33,92},{35,74},{38,85},{40,56},
+    {42,87},{43,65},{45,59},{48,79},{49,93},{51,89},{55,95},{61,76},{67,83},
+    {77,80} };
+
+// Map flavour to bytes per second
+static int sipr_fl2bps[4] = {813, 1062, 625, 2000}; // 6.5, 8.5, 5, 16 kbit per second
 
 
 typedef struct {
@@ -36,7 +48,7 @@ typedef struct {
 	unsigned short frame_size;
 	unsigned short sub_packet_size;
 	char genr[4];
-	char * audio_buf;
+	unsigned char *audio_buf;
 } ra_priv_t;
 
 
@@ -77,11 +89,37 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 	len = wf->nBlockAlign;
 	demuxer->filepos = stream_tell(demuxer->stream);
 
-    if (sh->format == FOURCC_288) {
+    if ((sh->format == FOURCC_288) || (sh->format == FOURCC_SIPR)) {
+      if (sh->format == FOURCC_SIPR) {
+        int n;
+        int bs = ra_priv->sub_packet_h * ra_priv->frame_size * 2 / 96;  // nibbles per subpacket
+        stream_read(demuxer->stream, ra_priv->audio_buf, ra_priv->sub_packet_h * ra_priv->frame_size);
+        // Perform reordering
+        for(n = 0; n < 38; n++) {
+            int j;
+            int i = bs * sipr_swaps[n][0];
+            int o = bs * sipr_swaps[n][1];
+            // swap nibbles of block 'i' with 'o'      TODO: optimize
+            for(j = 0; j < bs; j++) {
+                int x = (i & 1) ? (ra_priv->audio_buf[i >> 1] >> 4) : (ra_priv->audio_buf[i >> 1] & 0x0F);
+                int y = (o & 1) ? (ra_priv->audio_buf[o >> 1] >> 4) : (ra_priv->audio_buf[o >> 1] & 0x0F);
+                if(o & 1)
+                    ra_priv->audio_buf[o >> 1] = (ra_priv->audio_buf[o >> 1] & 0x0F) | (x << 4);
+                else
+                    ra_priv->audio_buf[o >> 1] = (ra_priv->audio_buf[o >> 1] & 0xF0) | x;
+                if(i & 1)
+                    ra_priv->audio_buf[i >> 1] = (ra_priv->audio_buf[i >> 1] & 0x0F) | (y << 4);
+                else
+                    ra_priv->audio_buf[i >> 1] = (ra_priv->audio_buf[i >> 1] & 0xF0) | y;
+                ++i; ++o;
+            }
+        }
+      } else {
         for (y = 0; y < ra_priv->sub_packet_h; y++)
             for (x = 0; x < ra_priv->sub_packet_h / 2; x++)
                 stream_read(demuxer->stream, ra_priv->audio_buf + x * 2 *ra_priv->frame_size +
                             y * ra_priv->coded_framesize, ra_priv->coded_framesize);
+      }
         // Release all the audio packets
         for (x = 0; x < ra_priv->sub_packet_h * ra_priv->frame_size / len; x++) {
             dp = new_demux_packet(len);
@@ -147,10 +185,13 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 		ra_priv->version2 = stream_read_word(demuxer->stream);
 		ra_priv->hdr_size = stream_read_dword(demuxer->stream);
 		ra_priv->codec_flavor = stream_read_word(demuxer->stream);
+		mp_msg(MSGT_DEMUX,MSGL_V,"[RealAudio] Flavor: %d\n", ra_priv->codec_flavor);
 		ra_priv->coded_framesize = stream_read_dword(demuxer->stream);
+		mp_msg(MSGT_DEMUX,MSGL_V,"[RealAudio] Coded frame size: %d\n", ra_priv->coded_framesize);
 		stream_skip(demuxer->stream, 4); // data size?
 		stream_skip(demuxer->stream, 8);
 		ra_priv->sub_packet_h = stream_read_word(demuxer->stream);
+		mp_msg(MSGT_DEMUX,MSGL_V,"[RealAudio] Sub packet h: %d\n", ra_priv->sub_packet_h);
 		ra_priv->frame_size = stream_read_word(demuxer->stream);
 		mp_msg(MSGT_DEMUX,MSGL_V,"[RealAudio] Frame size: %d\n", ra_priv->frame_size);
 		ra_priv->sub_packet_size = stream_read_word(demuxer->stream);
@@ -261,6 +302,12 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 			break;
 		case FOURCC_DNET:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
+			break;
+		case FOURCC_SIPR:
+			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SIPR\n");
+			sh->wf->nBlockAlign = ra_priv->coded_framesize;
+			sh->wf->nAvgBytesPerSec = sipr_fl2bps[ra_priv->codec_flavor];
+			ra_priv->audio_buf = malloc(ra_priv->sub_packet_h * ra_priv->frame_size);
 			break;
 		default:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%d)\n", sh->format);
