@@ -1,8 +1,7 @@
-
-LIB	= libgui.a
-
 include ../config.mak
 include config.mak
+
+LIBNAME = libgui.a
 
 INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC) $(EXTRA_INC) 
 
@@ -23,15 +22,15 @@ OBJS = $(SRCS:.c=.o)
 
 ### TARGETS ###
 
-$(LIB):	.depend	$(OBJS)
-	rm -f $(LIB)
-	$(AR) rc $(LIB) $(OBJS) $(MPLAYEROBJS)
-	$(RANLIB) $(LIB)
+$(LIBNAME): .depend $(OBJS)
+	rm -f $(LIBNAME)
+	$(AR) rc $(LIBNAME) $(OBJS) $(MPLAYEROBJS)
+	$(RANLIB) $(LIBNAME)
 
-all:	$(LIB)
+all:	$(LIBNAME)
 
 clean:
-	rm -rf $(OBJS) *.o *~ *.bak main $(LIB) .depend
+	rm -rf $(OBJS) *.o *~ *.bak main $(LIBNAME) .depend
 
 #dep:	depend
 #
