@@ -1,4 +1,4 @@
-.\" synced with 1.1205
+.\" synced with 1.1206
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -9422,6 +9422,23 @@ activé pour toutes les décisions de modes de macroblocs (lent, requiert
 subq=6)
 .RE
 .PD 1
+.
+.TP
+.B (no)fast_pskip
+Effectue tôt une détection de skip des trames-P (par défaut\ : activé).
+Ceci accélère généralement 'gratuitement' l'encodage, mais dans certains
+cas, ceci produit des artefacts dans les régions sans détails, comme le
+ciel.
+.
+.TP
+.B nr=<0\-100000>
+Réduction du  bruit, 0 signifie désactivé.
+Les valeurs typiques se situent dans l'intervalle 100\-1000 pour la plupart
+des vidéos, mais vous pouvez essayer des valeurs un peu plus grandes pour
+des vidéos particulièrement bruitées (par défaut\ : 0).
+Étant donné son faible impact sur la vitesse d'encodage, vous pouvez
+essayer cette option à la place des filtres de débruitage vidéo tels que
+denoise3d ou hqdn3d.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
