@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.217
+// In synch with rev 1.218
 
 // ========================= MPlayer help ===========================
 
@@ -113,7 +113,7 @@ static char help_text[]=
 #define MSGTR_Playing "Spiele %s.\n"
 #define MSGTR_NoSound "Audio: kein Ton!\n"
 #define MSGTR_FPSforced "FPS von %5.3f erzwungen (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "MPlayer mit CPU-Erkennung zur Laufzeit kompiliert - WARNUNG, das ist nicht optimal!\nKompiliere MPlayer mit --disable-runtime-cpudetection für beste Performance.\n"
+#define MSGTR_CompiledWithRuntimeDetection "MPlayer mit CPU-Erkennung zur Laufzeit kompiliert.\n"
 #define MSGTR_CompiledWithCPUExtensions "Kompiliert für x86 CPU mit folgenden Erweiterungen:"
 #define MSGTR_AvailableVideoOutputDrivers "Verfügbare Videoausgabetreiber:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Verfügbare Audioausgabetreiber:\n"
