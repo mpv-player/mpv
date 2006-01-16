@@ -4214,6 +4214,23 @@ codec</title>
 
 </sect3>
 
+<sect3 id="menc-feat-vcd-dvd-a-v-sync">
+<title>Maintaining A/V sync</title>
+<para>
+  In order to maintain audio/video synchronization throughout the encode,
+  <application>MEncoder</application> has to drop or duplicate frames.
+  This works rather well when muxing into an AVI file, but is almost
+  guaranteed to fail to maintain A/V sync with other muxers such as MPEG.
+  This is why it is necessary to append the
+  <option>harddup</option> video filter at the end of the filter chain
+  to avoid this kind of problem.
+  You can find more technical information about <option>harddup</option>
+  in the section
+  <link linkend="menc-feat-dvd-mpeg4-muxing-filter-issues">Improving muxing and A/V sync reliability</link>
+  or in the manual page.
+</para>
+</sect3>
+
 <sect3 id="menc-feat-vcd-dvd-output-srate">
 <title>Sample Rate Conversion</title>
 <para>
