@@ -105,6 +105,8 @@ static int bidir_me = 0;
 static int me_method = 2;
 static int me_range = 16;
 static int trellis = 1;
+static int fast_pskip = 1;
+static int noise_reduction = 0;
 static int threads = 1;
 static int level_idc = 51;
 static int psnr = 0;
@@ -190,6 +192,9 @@ m_option_t x264encopts_conf[] = {
     {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"me_range", &me_range, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
     {"trellis", &trellis, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+    {"fast_pskip", &fast_pskip, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nofast_pskip", &fast_pskip, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+    {"nr", &noise_reduction, CONF_TYPE_INT, CONF_RANGE, 0, 100000, NULL},
     {"level_idc", &level_idc, CONF_TYPE_INT, CONF_RANGE, 10, 51, NULL},
     {"threads", &threads, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -299,6 +304,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.analyse.b_chroma_me = chroma_me;
     mod->param.analyse.b_mixed_references = mixed_references;
     mod->param.analyse.i_trellis = trellis;
+    mod->param.analyse.b_fast_pskip = fast_pskip;
+    mod->param.analyse.i_noise_reduction = noise_reduction;
     mod->param.analyse.b_bframe_rdo = bframe_rdo;
 
     mod->param.i_width = width;

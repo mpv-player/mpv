@@ -8916,6 +8916,20 @@ enabled during all mode decisions (slow, requires subq=6)
 .PD 1
 .
 .TP
+.B (no)fast_pskip
+Performs early skip detection in P-frames (default: enabled).
+This usually improves speed at no cost, but it can sometimes produce
+artifacts in areas with no details, like sky.
+.
+.TP
+.B nr=<0\-100000>
+Noise reduction, 0 means disabled.
+100\-1000 is a useful range for typical content, but you may want to turn it
+up a bit more for very noisy content (default: 0).
+Given its small impact on speed, you might want to prefer to use this over
+filtering noise away with video filters like denoise3d or hqdn3d.
+.
+.TP
 .B chroma_qp_offset=<-12\-12>
 Use a different quantizer for chroma as compared to luma.
 Useful values are in the range <-2\-2> (default: 0).
