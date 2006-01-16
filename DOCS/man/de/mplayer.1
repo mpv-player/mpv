@@ -2179,7 +2179,7 @@ Nativer SGI-Audioausgabetreiber.
 .RSs
 .IPs "<Name des Ausgabegeräts>"
 Setzt explizit den Namen des zu nutzenden Ausgabegerätes/\:Interfaces
-(Standard: Systemweite Voreinstellung).
+(Standard: systemweite Voreinstellung).
 Beispiele: 'Analog\ Out' oder 'Digital\ Out'.
 .RE
 .PD 1
@@ -2990,7 +2990,7 @@ OpenGL-Videoausgabetreiber.
 Einfache Version, die Videogröße muß kleiner
 sein als die maximale Texturgröße deiner OpenGL-Implementierung.
 Es ist beabsichtigt, auch mit den einfachsten OpenGL-Implementierungen zu
-funktionieren, benutzt aber auch neueren Erweiterungen, die mehr Farbräume
+funktionieren, benutzt aber auch neuere Erweiterungen, die mehr Farbräume
 und direct rendering ermöglichen.
 Bitte benutze \-dr, falls es mit deiner OpenGL-Implementierung funktioniert,
 da dies für höhere Auflösungen eine
@@ -3043,7 +3043,7 @@ Grafikspeicher, aber ist oft langsamer (Standard: 0).
 .br
 1: Benutze die GL_ARB_texture_rectangle Erweiterung.
 .br
-2: Benutze die GL_ARB_texture_non_power_of_two Erweiterung.
+2: Benutze die GL_ARB_texture_non_power_of_two-Erweiterung.
 Dies wird manchmal durch Software emuliert und ist dann sehr langsam.
 .RE
 .IPs (no)glfinish
@@ -3064,7 +3064,7 @@ Funktioniert mit allen OpenGL-Versionen.
 Ermöglicht Helligkeits-, Kontrast- und Sättigungseinstellung.
 .br
 1: Benutze register combiner.
-Dies benutzt eine nVidia-Spezifische Erweiterung (GL_NV_register_combiners).
+Dies benutzt eine nVidia-spezifische Erweiterung (GL_NV_register_combiners).
 Es werden mindestens drei Textureinheiten benötigt.
 Ermöglicht Sättigungseinstellung und Farbwertkorrektur.
 .br
@@ -3089,8 +3089,8 @@ Ermöglicht Helligkeits-, Kontrast-, Sättigungseinstellung,
 Farbwert- und Gammakorrektur.
 Gamma kann für Rot, Grün und Blau unterschiedlich gesetzt werden.
 .br
-5: Benutze ATI-Spezifische Methode (für ältere Karten)
-Benutzt eine ATI-Spezifische Erweiterung (GL_ATI_fragment_shader - not
+5: Benutze ATI-spezifische Methode (für ältere Karten)
+Benutzt eine ATI-spezifische Erweiterung (GL_ATI_fragment_shader \- nicht
 GL_ARB_fragment_shader!).
 Mindestens drei Textureinheiten werden benötigt.
 Ermöglicht Sättigungseinstellung und Farbwertkorrektur.
@@ -3114,9 +3114,9 @@ Unterstützt OSD und Videos, die größer als die maximale Texturgröße sind.
 .IPs (no)glfinish
 Siehe \-vo gl (Standard: aktiviert)
 .IPs yuv=<n>
-Wählt den Typ der YUV nach RGB Umwandlung aus.
+Wählt den Typ der Umwandlung von YUV nach RGB aus.
 Bei anderen Werten als 0 wird das OSD deaktiviert und Helligkeits-, Kontrast-
-und Gammaeinstellung ist nur über die Globale X-Server-Einstellung möglich.
+und Gammaeinstellung ist nur über die globale X-Server-Einstellung möglich.
 Davon abgesehen ist die Bedeutung dieselbe wie bei \-vo gl.
 .REss
 .
@@ -3795,7 +3795,7 @@ dann benutzt, falls die Breite des Videos größer oder gleich dem Wert <b> ist.
 .IPs "st=<Nummer> (nur bei MPEG-2)"
 Überspringe oben die angegebene Anzahl von Makroblockreihen.
 .IPs skiploopfilter=<skipvalue> (nur H.264)
-Überspringt den Schleifenfilter (Deblocking) während der H.264-Dekodierung.
+Überspringt den Schleifenfilter (Deblocking) während der H.264-Decodierung.
 Da das gefilterte Bild als Referenz für darauf aufbauende Bilder benutzt wird
 hat dies im Vergleich zum Weglassen des Deblocking-Filters bei MPEG-2 einen
 stärkeren negativen Effekt auf die Qualität.
@@ -3810,16 +3810,16 @@ none: Niemals überspringen.
 default: Unnötige Verarbeitungsschritte überspringen (z.B.\& 0 Byte große
 Pakete in AVI).
 .br
-nonref: Überspringe unreferenzierte Bilder (d.h. nicht für die dekodierung
+nonref: Überspringe unreferenzierte Bilder (d.h. nicht für die Decodierung
 anderer Bilder benötigt, der Fehler kann nicht akkumulieren).
 .br
-bidir: B-Bilder überspringen.
+bidir: B-Frames überspringen.
 .br
 nonkey: Alle Bilder ausser Keyframes überspringen.
 .br
 all: Alle Bilder überspringen.
 .REss
-.IPs skipidct=<skipvalue> (nur MPEG1/2)
+.IPs skipidct=<skipvalue> (nur MPEG-1/\:-2)
 Überspringt den IDCT-Schritt.
 Verringert die Qualität in fast allen Fällen stark (siehe skiploopfilter
 für mögliche Werte).
@@ -4762,7 +4762,7 @@ Anzeige von OSD/\:Untertiteln
 1: aktiviert
 .REss
 .IPs <a>\ \ 
-Expandiert auf das Seitenverhältnis anstelle der Auflösung (Standard: 0).
+Expandiert auf das Seitenverhältnis anstatt auf die Auflösung (Standard: 0).
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -4787,8 +4787,8 @@ Spiegelt das Bild an der Y-Achse.
 .TP
 .B rotate[=<0\-7>]
 Dreht das Bild um +/\:- 90 Grad (und stellt es optional auf den Kopf).
-Bei 4\-7 wird das Bild nur dann gedreht, wenn es vorher hochkant war
-(es also höher als breit ist).
+Bei Werten zwischen 4\-7 wird das Bild nur dann gedreht, wenn es vorher
+hochkant war  (es also höher als breit ist).
 .RSs
 .IPs 0
 Drehen um 90 Grad im Uhrzeigersinn und Umdrehen (Standard).
@@ -5232,7 +5232,7 @@ Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .TP
 .B lavc[=Qualität:fps]
 Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
-für die Benutzung mit DVB/\:DXR3/\:DXR2-Hardwaredekodern.
+für die Benutzung mit DVB/\:DXR3/\:DXR2-Hardwaredecodern.
 Schneller und von besserer Qualität als mit \-vf fame.
 .RSs
 .IPs <Qualität>
@@ -6212,8 +6212,8 @@ Finden der richtigen Parameter für x,y,w und h zu erleichtern.
 .
 .TP
 .B remove-logo=/pfad/zur/logo_bitmap_datei.pgm
-Unterdrückt das Senderlogo unter Benutzung des angegebenen PGM oder PPM-Bildes
-um herauszufinden aus welche Bildpunkte das Logo umfassen.
+Unterdrückt das Senderlogo unter Benutzung des angegebenen PGM- oder PPM-Bildes
+um herauszufinden, welche Bildpunkte das Logo umfassen.
 Die Breite und Höhe des Bildes muss denen des zu bearbeitenden Videos
 entsprechen.
 Benutzt das Bild und einen runden Weichzeichnungsalgorithmus um das Logo zu
@@ -6258,7 +6258,7 @@ Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
 Erlaubt das Erstellen von Schnappschüssen des Videos mit Hilfe
 des 'screenshot'-Kommandos (Standardmässig an die Taste 's' gebunden).
 Es werden Dateien mit dem Namen 'shotNNNN.png' im aktuellen Verzeichnis
-abgelegt, NNNN entspricht hierbei der ersten verfügbaren Nummer - keine Datei
+abgelegt, NNNN entspricht hierbei der ersten verfügbaren Nummer \- keine Datei
 wird überschrieben.
 Der Filter führt zu keiner Mehrbelastung, solange er nicht benutzt wird und
 aktzeptiert beliebige Farbräume, es ist also ungefährlich ihn in die
@@ -9173,9 +9173,9 @@ initiale Bufferbelegung als Bruchteil von vbv_bufsize (Standard: 0.9)
 .
 Der MPEG Muxer kann 5 verschiedene Streamtypen generieren, wovon jeder
 sinnvolle Standardparameter hat, die der Benutzer überschreiben kann.
-Beim Generieren von MPEG-Dateien ist es generell sinnvoll, den Frame-skip Code
-von MEncoder zu benutzen (siehe \-noskip, \-mc sowie die Videofilter harddup
-und softskip).
+Beim Generieren von MPEG-Dateien ist es generell sinnvoll, MEncoders Code zum
+Überspringen von Frames zu benutzen (siehe \-noskip, \-mc sowie die Videofilter
+harddup und softskip).
 .br
 .
 .TP
@@ -9189,9 +9189,9 @@ tust (Standard: 2048).
 .
 .TP
 .B muxrate=<int>
-Nominale Mux-Rate in kbit/s, die in den Paket-Headern benutzt wird (Standard:
+Nominale Mux-Rate in kBit/s, die in den Paket-Headern benutzt wird (Standard:
 1800 kb/s).
-Wird aktualisiert, wenn nötig, im Falle 'format=mpeg1' oder 'mpeg2'.
+Wird nach Bedarf aktualisiert, im Falle 'format=mpeg1' oder 'mpeg2'.
 .
 .TP
 .B tsaf\ \ \ 
@@ -9209,11 +9209,11 @@ initiales Audio pts in Millisekunden (Standard: 200)
 .TP
 .B vdelay=<1\-32760>
 Initiale Zeit, um die das Video verzögert wird, in Millisekunden (Standard:
-0), benutze dies, um Video in bezug zu Audio zu verzögern.
+0), benutze dies, um Video bezüglich Audio zu verzögern.
 .
 .TP
 .B drop\ \ \ 
-Bei Benutzung mit init_adelay verwirft der Muxer den Teil der Audiospur, die
+Bei Benutzung mit init_adelay verwirft der Muxer den Teil der Audiospur, der
 angepasst wurde.
 .
 .
@@ -9238,7 +9238,8 @@ Setzt die Videobitrate in kbit/s für MPEG-1/2-Video.
 .
 .
 .TP
-.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
+.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 |
+60 >
 Setzt die Framerate bei MPEG-1/2-Video.
 Diese Option wird ignoriert, wenn sie zusammen mit der Option telecine benutzt
 wird.
@@ -9246,10 +9247,47 @@ wird.
 .TP
 .B telecine
 Aktiviert Soft-telecine-Modus: Der Muxer wird tricksen, so dass der
-Videostream wie mit 29.97 oder 30 fps encodiert aussieht; das funktioniert nur
+Videostream wie mit 30000/\:1001 oder 30 fps encodiert aussieht; das
+funktioniert nur
 mit MPEG-2-Video, wenn die Framerate der Ausgabe, eventuell konvertiert
-mit \-ofps, entweder 23.976 oder 24 fps beträgt.
+mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
 Jede andere Framerate ist mit dieser Option nicht kompatibel.
+.
+.
+.SS FFmpeg-libavformat-Muxer (\-lavfopts) (siehe auch \-of lavf)
+.
+.TP
+.B format=<container_format>
+Überschreibt das Containerformat, in welches geschrieben wird (Standard:
+automatische Erkennung anhand der Dateiendung).
+.PD 0
+.RSs
+.IPs mpg\ \ 
+MPEG-1-Systeme und MPEG-2 PS
+.IPs asf\ \ 
+Advanced Streaming Format
+.IPs avi\ \ 
+Audio Video Interleave Datei
+.IPs wav\ \ 
+Waveform Audio
+.IPs swf\ \ 
+Macromedia Flash
+.IPs flv\ \ 
+Macromedia Flash Videodateien
+.IPs rm\ \ \ 
+RealAudio und RealVideo
+.IPs au\ \ \ 
+SUN AU-Format
+.IPs nut\ \ 
+NUT offenes Containerformat (experimentell)
+.IPs mov\ \ 
+QuickTime
+.IPs mp4\ \ 
+MPEG-4-Format
+.IPs dv\ \ \ 
+Sony Digital Video Container
+.RE
+.PD 1
 .
 .
 .\" --------------------------------------------------------------------------
