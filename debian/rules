@@ -19,7 +19,7 @@ configure-stamp:
 	# If you plan to install the target .deb on a wide variety of machines,
 	# you may want to add the "--enable-runtime-cpudetection" option to
 	# the line below, but beware: the resulting binary will run slower
-	./configure --prefix=/usr --confdir=/etc/mplayer --enable-gui $(DEB_BUILD_OPTIONS)
+	./configure --prefix=/usr --confdir=/etc/mplayer $(DEB_BUILD_OPTIONS)
 
 	touch configure-stamp
 
