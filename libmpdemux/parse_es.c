@@ -15,43 +15,37 @@
 //static unsigned char videobuffer[MAX_VIDEO_PACKET_SIZE];
 unsigned char* videobuffer=NULL;
 int videobuf_len=0;
-unsigned char videobuf_code[4];
+int next_nal = -1;
+///! legacy variable, 4 if stream is synced, 0 if not
 int videobuf_code_len=0;
 
+#define MAX_SYNCLEN (10 * 1024 * 1024)
 // sync video stream, and returns next packet code
 int sync_video_packet(demux_stream_t *ds){
+  if (!videobuf_code_len) {
   int skipped=0;
-  // we need enough bytes in the buffer:
-  while(videobuf_code_len<4){
-#if 0
-    int c;
-    c=demux_getc(ds);if(c<0){ return 0;} // EOF
-    videobuf_code[videobuf_code_len++]=c;
-#else
-    videobuf_code[videobuf_code_len++]=demux_getc(ds);
-#endif
+    if (!demux_pattern_3(ds, NULL, MAX_SYNCLEN, &skipped, 0x100)) {
+      mp_msg(MSGT_DEMUXER, MSGL_ERR, "parse_es: could not sync video stream!\n", skipped);
+      goto eof_out;
+    }
+    next_nal = demux_getc(ds);
+    if (next_nal < 0)
+      goto eof_out;
+    videobuf_code_len = 4;
+  if(skipped) mp_dbg(MSGT_PARSEES,MSGL_DBG2,"videobuf: %d bytes skipped  (next: 0x1%02X)\n",skipped,next_nal);
   }
-  // sync packet:
-  while(1){
-    int c;
-    if(videobuf_code[0]==0 &&
-       videobuf_code[1]==0 &&
-       videobuf_code[2]==1) break; // synced
-    // shift buffer, drop first byte
-    ++skipped;
-    videobuf_code[0]=videobuf_code[1];
-    videobuf_code[1]=videobuf_code[2];
-    videobuf_code[2]=videobuf_code[3];
-    c=demux_getc(ds);if(c<0){ return 0;} // EOF
-    videobuf_code[3]=c;
-  }
-  if(skipped) mp_dbg(MSGT_PARSEES,MSGL_DBG2,"videobuf: %d bytes skipped  (next: 0x1%02X)\n",skipped,videobuf_code[3]);
-  return 0x100|videobuf_code[3];
+  return 0x100|next_nal;
+
+eof_out:
+  next_nal = -1;
+  videobuf_code_len = 0;
+  return 0;
 }
 
 // return: packet length
 int read_video_packet(demux_stream_t *ds){
 int packet_start;
+  int res, read;
   
   if (VIDEOBUFFER_SIZE - videobuf_len < 5)
     return 0;
@@ -60,46 +54,35 @@ int packet_start;
 
   // COPY STARTCODE:
   packet_start=videobuf_len;
-  videobuffer[videobuf_len+0]=videobuf_code[0];
-  videobuffer[videobuf_len+1]=videobuf_code[1];
-  videobuffer[videobuf_len+2]=videobuf_code[2];
-  videobuffer[videobuf_len+3]=videobuf_code[3];
+  videobuffer[videobuf_len+0]=0;
+  videobuffer[videobuf_len+1]=0;
+  videobuffer[videobuf_len+2]=1;
+  videobuffer[videobuf_len+3]=next_nal;
   videobuf_len+=4;
   
   // READ PACKET:
-  {
-    register uint32_t head = 0xffffffff;
-    register unsigned char *buf = &videobuffer[VIDEOBUFFER_SIZE];
-    register int pos = videobuf_len - VIDEOBUFFER_SIZE;
-    do {
-      int c=demux_getc(ds);
-      if(c<0) break; // EOF
-      buf[pos]=c;
-      head<<=8;
-      if(head==0x100) break; // synced
-      head|=c;
-    } while (++pos);
-    if (pos) pos++; // increment missed because of break
-    videobuf_len = &buf[pos] - videobuffer;
-  }
-  
-  if(ds->eof){
-    videobuf_code_len=0; // EOF, no next code
-    return videobuf_len-packet_start;
-  }
-  
-  videobuf_len-=4;
+  res = demux_pattern_3(ds, &videobuffer[videobuf_len],
+          VIDEOBUFFER_SIZE - videobuf_len, &read, 0x100);
+  videobuf_len += read;
+  if (!res)
+    goto eof_out;
+ 
+  videobuf_len-=3;
 
   mp_dbg(MSGT_PARSEES,MSGL_DBG2,"videobuf: packet 0x1%02X  len=%d  (total=%d)\n",videobuffer[packet_start+3],videobuf_len-packet_start,videobuf_len);
 
   // Save next packet code:
-  videobuf_code[0]=videobuffer[videobuf_len];
-  videobuf_code[1]=videobuffer[videobuf_len+1];
-  videobuf_code[2]=videobuffer[videobuf_len+2];
-  videobuf_code[3]=videobuffer[videobuf_len+3];
+  next_nal = demux_getc(ds);
+  if (next_nal < 0)
+    goto eof_out;
   videobuf_code_len=4;
 
   return videobuf_len-packet_start;
+
+eof_out:
+  next_nal = -1;
+  videobuf_code_len = 0;
+  return videobuf_len - packet_start;
 }
 
 // return: next packet code
