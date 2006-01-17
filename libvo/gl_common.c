@@ -1018,7 +1018,9 @@ void swapGlBuffers() {
 static void *getdladdr(const char *s) {
 #ifdef HAVE_LIBDL
 #if defined(__sun) || defined(__sgi)
-  static void *handle = dlopen(NULL, RTLD_LAZY);
+  static void *handle = NULL;
+  if (!handle)
+    handle = dlopen(NULL, RTLD_LAZY);
   return dlsym(handle, s);
 #else
   return dlsym(0, s);
