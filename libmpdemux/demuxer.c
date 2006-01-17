@@ -426,6 +426,41 @@ while(len>0){
 return bytes;
 }
 
+/**
+ * \brief read data until the given 3-byte pattern is encountered, up to maxlen
+ * \param mem memory to read data into, may be NULL to discard data
+ * \param maxlen maximum number of bytes to read
+ * \param read number of bytes actually read
+ * \param pattern pattern to search for (lowest 8 bits are ignored)
+ * \return whether pattern was found
+ */
+int demux_pattern_3(demux_stream_t *ds, unsigned char *mem, int maxlen,
+                    int *read, uint32_t pattern) {
+  register uint32_t head = 0xffffff00;
+  register uint32_t pat = pattern & 0xffffff00;
+  int total_len = 0;
+  do {
+    register unsigned char *ds_buf = &ds->buffer[ds->buffer_size];
+    int len = ds->buffer_size - ds->buffer_pos;
+    register long pos = -len;
+    if (unlikely(pos >= 0)) { // buffer is empty
+      ds_fill_buffer(ds);
+      continue;
+    }
+    do {
+      head |= ds_buf[pos];
+      head <<= 8;
+    } while (++pos && head != pat);
+    len += pos;
+    if (total_len + len > maxlen)
+      len = maxlen - total_len;
+    len = demux_read_data(ds, mem ? &mem[total_len] : NULL, len);
+    total_len += len;
+  } while ((head != pat || total_len < 3) && total_len < maxlen && !ds->eof);
+  if (read)
+    *read = total_len;
+  return total_len >= 3 && head == pat;
+}
 
 void ds_free_packs(demux_stream_t *ds){
   demux_packet_t *dp=ds->first;
