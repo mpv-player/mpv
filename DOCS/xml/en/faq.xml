@@ -757,6 +757,16 @@ Use the <ulink url="http://linvdr.org/projects/regionset/">regionset tool</ulink
 
 <qandaentry>
 <question><para>
+I can't play a DVD, MPlayer hangs or outputs "Encrypted VOB file!" errors.
+</para></question>
+<answer><para>
+CSS decryption code does not work with some DVD drives unless you set
+the region code appropriately. See the answer to the previous question.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Do I need to be (setuid) root to be able to play a DVD?
 </para></question>
 <answer><para>
