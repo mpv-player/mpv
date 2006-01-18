@@ -1619,9 +1619,10 @@ zeitbasierende SubViewer-Untertitelformat (SRT).
 Erstellt eine Datei dumpsub.srt im aktuellen Verzeichnis.
 .br
 .I HINWEIS:
-Einige Hardwareplayer können nicht mit SRT-Untertiteln im Unix-Textformat
+Einige Hardwareplayer können nicht mit SRT-Untertiteln mit Unix-Zeilenenden
 umgehen.
-In diesem Fall solltest du unix2dos oder ein ähnliches Programm benutzen,
+Wenn du Pech hast und solch ein Gerät besitzt, solltest du unix2dos oder ein
+ähnliches Programm benutzen,
 um die Unix-Zeilenenden durch DOS/Windows-Zeilenenden zu ersetzen.
 .
 .TP
@@ -1636,7 +1637,7 @@ Mögliche Werte:
 .PD 0
 .RSs
 .IPs 0
-komplett weiße Schrift
+komplett weiße Schriften
 .IPs 0.75
 sehr dünner schwarzer Umriss (Standard)
 .IPs 1
@@ -1652,7 +1653,7 @@ Schaltet horizontales Spiegeln der Untertitel mittels FriBiDi ein.
 .
 .TP
 .B \-noflip-hebrew-commas
-Ändere die Annahmen von FriBiDi über die Positionierung von Kommata in
+Ändere die Annahmen von FriBiDi über die Platzierung von Kommata in
 Untertiteln.
 Benutze dies, falls Kommata in Untertiteln am Anfang eines Satzes anstatt am
 Ende angezeigt werden.
@@ -1683,7 +1684,7 @@ Ermöglicht die Benutzung von Schriften, die von fontconfig verwaltet werden.
 .
 .TP
 .B \-forcedsubsonly
-Stelle nur erzwungene DVD-Untertitel in der z.B.\& mit \-slang gewähten
+Stelle nur erzwungene DVD-Untertitel in der z.B.\& mit \-slang gewählten
 Sprache dar.
 .
 .TP
@@ -1725,14 +1726,16 @@ Gesamtzeit
 .B \-overlapsub
 Erlaubt die Anzeige des nächsten Untertitels, während der aktuelle noch
 sichtbar ist.
-Standardverhalten ist, diese Unterstützung nur bei bestimmten Formaten zu
-aktivieren.
+(Standardverhalten ist, diese Unterstützung nur bei bestimmten Formaten zu
+aktivieren).
 .
 .TP
 .B \-sid <ID> (siehe auch \-slang, \-vobsubid)
 Zeigt den Untertitelstream an, der durch <ID> (0\-31) angegeben wird.
-Eine Liste der verfügbaren Untertitel-IDs erhältst du bei Verwendung
-der Option \-v.
+Mplayer gibt eine Liste der verfügbaren Untertitel-IDs aus, wenn er im
+ausführlichen (\-v) Modus gestartet wird.
+Wenn du einen der Untertitel einer DVD nicht auswählen kannst, versuche auch
+die Option \-vobsubid.
 .
 .TP
 .B \-slang <Sprachcode[,Sprachcode,...]> (siehe auch \-sid)
@@ -1741,8 +1744,8 @@ Verschiedene Containerformate verwenden unterschiedliche Sprachcodes.
 DVDs benutzen ISO 639-1-Sprachcodes mit zwei Buchstaben, Matroska verwendet
 ISO 639-2-Sprachcodes mit drei Buchstaben, während OGM einen formfreien
 Bezeichner gebraucht.
-Die verfügbaren Untertitelsprachen erhältst du bei der Verwendung
-der Option \-v.
+Mplayer gibt eine Liste der verfügbaren Untertitel-IDs aus, wenn er im
+ausführlichen (\-v) Modus gestartet wird.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -1760,7 +1763,8 @@ Spielt eine Matroskadatei mit japanischen Untertiteln ab.
 Antialiasing-/\:Skalierungsmodus für DVD/\:VOBsub.
 Ein Wert von 16 kann zu <Modus> hinzuaddiert werden, um die Skalierung auch
 dann zu erzwingen, wenn das Orignalbild und das skalierte Bild bereits die
-gleiche Größe haben, um z.B.\& auch dann die Untertitel mit einem Gaußschen
+gleiche Größe haben.
+Dies kann benutzt werden, um z.B.\& die Untertitel mit einem Gaußschen
 Unschärfefilter zu glätten.
 Die verfügbaren Modi lauten:
 .PD 0
@@ -1786,11 +1790,11 @@ Gibt an, wie SPU-Untertitel (DVD/\:VOBsub) positioniert werden sollen.
 .IPs "-1"
 Originalposition
 .IPs " 0"
-oben positionieren (Standardverhalten)
+Positioniere oben (Originalverhalten, Standard).
 .IPs " 1"
-mittig positionieren
+Positioniere mittig.
 .IPs " 2"
-unten positionieren
+Positioniere unten.
 .RE
 .PD 1
 .
@@ -1806,7 +1810,7 @@ Nur ein Untertitel kann zu einer Zeit angezeigt werden.
 .
 .TP
 .B \-sub-bg-alpha <0\-255>
-Gibt an, wie transparent der Alphakanal bei Untertiteln und dem OSD ist.
+Gibt den Wert des Alphakanals bei Untertiteln und für OSD-Hintergründe an.
 Große Werte bedeuten mehr Transparenz.
 Der Wert 0 steht für vollständige Transparenz.
 .
@@ -1822,13 +1826,13 @@ Der Wert 255 steht für weiß und 0 für schwarz.
 Erzwinge Untertitel-Demuxertyp für \-subfile.
 Benutze '+' vor dem Namen um den Typ zu erzwingen, dies wird ein paar
 Überprüfungen überspringen!
-Gib den Namen des Demuxers an wie durch \-sub-demuxer help angezeigt.
+Gib den Demuxernamen an wie durch \-sub-demuxer help angezeigt.
 Für Rückwärtskompatibilität wird auch die in libmpdemux/\:demuxer.h definierte
 Demuxer-ID akzeptiert.
 .
 .TP
 .B \-sub-fuzziness <Modus>
-Passe die Unschärfe der Suche nach Untertiteln an:
+Passe die Unschärfe für die Suche nach Untertiteln an:
 .PD 0
 .RSs
 .IPs 0
@@ -1847,15 +1851,16 @@ Wird für Debugging-Zwecke verwendet.
 .
 .TP
 .B \-subalign <0\-2> (nur bei OSD)
-Gibt an, wie die Untertitel mit \-subpos positioniert werden sollen.
+Gibt an, welche Kante der Untertitel an der von \-subpos angegebenen Höhe
+positioniert werden sollen.
 .PD 0
 .RSs
 .IPs 0
-Positioniere oben (Standardverhalten).
+Positioniere obere Untertitelkante  (Originalverhalten).
 .IPs 1
-Positioniere mittig.
+Positioniere mittlere Untertitelkante.
 .IPs 2
-Positioniere unten.
+Positioniere untere Untertitelkante (Standard).
 .RE
 .PD 1
 .
@@ -1864,8 +1869,8 @@ Positioniere unten.
 Zeigt DVD-Closed-Caption-Untertitel (CC) an.
 Diese sind
 .B keine
-VOB-Untertitel.
-Hierbei handelt es sich um spezielle ASCII-Untertitel für Hörgeschädigte, die
+VOB-Untertitel
+sondern spezielle ASCII-Untertitel für Hörgeschädigte, die
 in VOB-Userdatenstreams auf den meisten Region-1-DVDs zu finden sind.
 CC-Untertitel wurden bisher auf keinen DVDs für andere Regionen entdeckt.
 .
@@ -1976,7 +1981,7 @@ Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
 .B \-subwidth <10\-100> (nur bei OSD)
 Gibt die maximale Breite der Untertitel an.
 Nützlich für Ausgabe auf dem Fernseher.
-Der Wert ist die Breite in %  der Bildschirmbreite.
+Der Wert ist die Breite des Untertitels in %  der Bildschirmbreite.
 .
 .TP
 .B \-noterm-osd
@@ -1987,8 +1992,8 @@ Videoausgabe.
 .B \-term-osd-esc
 Gibt die Escapesequenz an, mit der OSD-Meldungen auf der Konsole eingeleitet
 werden.
-Sie sollte den Cursor zum Anfang der Zeile bewegen und die Zeile
-löschen (Standard: ^[[A\\r^[[K).
+Die Escapesequenz sollte den Cursor zum Anfang der für OSD benutzten Zeile
+bewegen und die Zeile löschen (Standard: ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
@@ -2067,16 +2072,16 @@ Gesamtweite (Standard: 3).
 .
 .
 .SH "AUDIOAUSGABETREIBER (NUR BEI MPLAYER)"
-.
 Audioausgabetreiber sind Schnittstellen zu verschiedenen Ausgabeeinrichtungen.
 Die Syntax ist folgende:
+.
 .TP
 .B \-ao <Treiber1[:Suboption[=Wert]:...],Treiber2,...[,]>
 Gibt eine Prioritätenliste der zu benutzenden Audiotreiber an.
 .PP
 Wenn die Liste mit ',' endet, so werden notfalls auch nicht in der
 Kommandozeile aufgeführte Treiber benutzt.
-Suboptionen sind optional und können meistens weggelassen werden.
+Suboptionen sind optional und können größtenteils weggelassen werden.
 .br
 .I ANMERKUNG:
 Eine Liste der eincompilierten Audiotreiber erhältst du mit \-ao help.
@@ -2107,7 +2112,7 @@ Setzt den noblock-Modus.
 .IPs device=<Gerät>
 Setzt den Gerätenamen.
 Ersetze jedes ',' mit '.' und jeden ':' mit '=' im ALSA-Gerätenamen.
-Setze diese Option nicht, wenn du hwac3-Ausgabe über S/PDIF wünschst, es sei
+Setze diese Option nicht, wenn du hwac3-Ausgabe über S/\:PDIF wünschst, es sei
 denn, du weißt wirklich, wie sie gesetzt werden muß.
 .RE
 .PD 1
@@ -2121,9 +2126,12 @@ ALSA 0.5 Audioausgabetreiber.
 OSS Audioausgabetreiber.
 .PD 0
 .RSs
-.IPs DSP-Gerät[:Mixer-Gerät[:Mixer-Kanall]]
-Setzt das Audioausgabegerät (Standard: /dev/\:dsp), das Mixergerät
-(Standard: /dev/\:mixer) und den Mixerkanal (Standard: pcm).
+.IPs <dsp-device>
+Setzt das Audioausgabegerät (Standard: /dev/\:dsp).
+.IPs <mixer-device>
+Setzt das Audiomixergerät (Standard: /dev/\:mixer).
+.IPs <mixer-channel>
+Setzt den Audiomixerkanal (Standard: pcm).
 .RE
 .PD 1
 .
@@ -2140,7 +2148,7 @@ Wähle den SDL-Audioausgabetreiber explizit (Standard: lasse SDL wählen).
 .
 .TP
 .B arts\ \ \ 
-Audioausgabe über den Arts-Daemon.
+Audioausgabe über den aRts-Daemon.
 .
 .TP
 .B esd\ \ \ \ 
@@ -2154,7 +2162,7 @@ Wähle den zu benutzenden ESD-Server explizit (Standard: localhost).
 .
 .TP
 .B jack\ \ \ \ 
-Audioausgabe über JACK (Jack Audio Connection Kit).
+Audioausgabe über JACK (Jack Audio Connection Kit)
 .PD 0
 .RSs
 .IPs port=<Name>
@@ -2172,7 +2180,7 @@ Schätze die Audioverzögerung, sollte die Wiedergabe flüssiger machen
 .
 .TP
 .B nas\ \ \ \ 
-Audioausgabe über NAS.
+Audioausgabe über NAS
 .
 .TP
 .B macosx (nur bei Mac OS X)
@@ -2184,7 +2192,7 @@ Nativer SGI-Audioausgabetreiber.
 .PD 0
 .RSs
 .IPs "<Name des Ausgabegeräts>"
-Setzt explizit den Namen des zu nutzenden Ausgabegerätes/\:Interfaces
+Wähle das zu nutzende Ausgabegerät/\:Interface explizit
 (Standard: systemweite Voreinstellung).
 Beispiele: 'Analog\ Out' oder 'Digital\ Out'.
 .RE
@@ -2206,7 +2214,7 @@ Nativer Windows-Waveout-Audioausgabetreiber.
 .
 .TP
 .B dsound (nur bei Windows)
-DirectX-Audioausgabetreiber DirectSound.
+DirectX-Audioausgabetreiber DirectSound
 .PD 0
 .RSs
 .IPs device=<Gerätenummer>
@@ -2218,7 +2226,7 @@ Geräte angezeigt.
 .
 .TP
 .B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
-Creative DXR2-spezifischer Ausgabetreiber.
+DXR2-spezifischer Ausgabetreiber von Creative.
 .
 .TP
 .B mpegpes (nur bei DVB)
@@ -2231,7 +2239,7 @@ Benutze \-nosound für Benchmarking-Zwecke.
 .
 .TP
 .B pcm\ \ \ \ 
-Filewriter-Audioausgabe im raw-PCM/\:Wave-Format.
+Filewriter-Audioausgabe im raw-PCM/Wave-Format.
 .PD 0
 .RSs
 .IPs (no)waveheader
@@ -2258,24 +2266,24 @@ Bestimmt die Grafikkarte, die das Bild erhalten wird.
 Benötigt die \-vm-Option, um zu funktionieren.
 Du bekommst eine Liste aller verfügbaren Karten, wenn du diese Option mit \-v
 aufrufst.
-Funktioniert momentan nur mit \-vo directx.
+Funktioniert momentan nur mit dem directx-Videoausgabetreiber.
 .
 .TP
 .B \-bpp <Farbtiefe>
 Überschreibt die automatisch erkannte Farbtiefe.
-Wird nur von fbdev-, dga2-, svga- und vesa-Ausgabetreibern unterstützt.
+Wird nur von fbdev-, dga2-, svga- und vesa-Videoausgabetreibern unterstützt.
 .
 .TP
 .B \-border
 Spiele den Film mit Fensterrand und Dekoration.
 Da dies standardmäßig an ist, benutze \-noborder um die normale
 Fensterdekoration abzuschalten.
-Wird nur vom directx-Ausgabetreiber unterstützt.
+Wird nur vom directx-Videoausgabetreiber unterstützt.
 .
 .TP
 .B \-brightness <-100\-100>
 Passt die Helligkeit der Videoausgabe an (Standard: 0).
-Wird nicht von allen Videoausgabetreibern unterstützt
+Wird nicht von allen Videoausgabetreibern unterstützt.
 .
 .TP
 .B \-contrast <-100\-100>
@@ -2284,7 +2292,7 @@ Wird nicht von allen Videoausgabetreibern unterstützt.
 .
 .TP
 .B \-display <Name> (nur bei X11)
-Gibt den Rechnernamen und die Anzeigenummer des X-Servers an, auf dem
+Gibt den Rechnernamen und die Display-Nummer des X-Servers an, auf dem
 die Anzeige erscheinen soll.
 .sp 1
 .I BEISPIEL:
@@ -2297,13 +2305,13 @@ die Anzeige erscheinen soll.
 .TP
 .B \-dr \ \ \ 
 Schaltet direktes Rendern an (wird nicht von allen Codecs und
-Videoausgabetreibern unterstützt).
+Videoausgabetreibern unterstützt)
 .br
 .I WARNUNG:
-Kann zu Störungen beim OSD oder bei den Untertiteln führen!
+Kann zu Störungen beim OSD und bei Untertiteln führen!
 .
 .TP
-.B \-dxr2 <option1:option2:...>
+.B \-dxr2 <Option1:Option2:...>
 Mit dieser Option wird der dxr2-Videoausgabetreiber gesteuert.
 .RSs
 .IPs ar-mode=<Wert>
@@ -2316,7 +2324,7 @@ Setzt den iec958-Ausgabemodus auf 'decoded' (Standard).
 .IPs macrovision=<Wert>
 Macrovision-Modus (0 = aus (Standard), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
-.IPs mute\
+.IPs mute\ 
 Stummschalten der Soundausgabe
 .IPs unmute
 Ausschalten der Stummschaltung der Soundausgabe
@@ -2329,23 +2337,23 @@ Pfad zum Microcode
 .RE
 .RSs
 .IPs 75ire
-Schaltet den 7.5 IRE-Ausgabemodus an.
+Schaltet den 7.5 IRE-Ausgabemodus an
 .IPs no75ire
-Schaltet den 7.5 IRE-Ausgabemodus ab (Standard).
+Schaltet den 7.5 IRE-Ausgabemodus ab (Standard)
 .IPs bw\ \ \ 
 TV-Ausgabe in Schwarz/\:Weiß
 .IPs color
 TV-Ausgabe in Farbe (Standard)
 .IPs interlaced
-TV-Ausgabe ist interlaced (Standard).
+TV-Ausgabe ist interlaced (Standard)
 .IPs nointerlaced
-Schaltet die interlaced-TV-Ausgabe ab.
+Deaktiviert die interlaced-TV-Ausgabe
 .IPs norm=<Wert>
 TV-Norm (ntsc (Standard), pal, pal60, palm, paln, palnc)
 .IPs square-pixel
-Setzt TV-Pixelmodus auf 'square'.
+Setzt TV-Pixelmodus auf square
 .IPs ccir601-pixel
-Setzt TV-Pixelmodus auf 'ccir601'.
+Setzt TV-Pixelmodus auf ccir601
 .RE
 .RS
 .sp 1
@@ -2357,16 +2365,16 @@ Setzt den Wert für das Abschneiden des Bildrandes links (Standard: 50).
 .IPs cr-right=<0\-500>
 Setzt den Wert für das Abschneiden des Bildrandes rechts (Standard: 300).
 .IPs cr-top=<0\-500>
-Setzt den Wert für das Abschneiden des Bildrandes oben (Standard: 0)
+Setzt den Wert für das Abschneiden des Bildrandes oben (Standard: 0).
 .IPs cr-bottom=<0\-500>
-Setzt den Wert für das Abschneiden des Bildrandes unten (Standard: 0)
+Setzt den Wert für das Abschneiden des Bildrandes unten (Standard: 0).
 .IPs ck-[r|g|b]=<0\-255>
 Setzt die Verstärkung des r(oten), g(rünen) oder b(lauen) Wertes des
 Overlay-Farbschlüssels.
 .IPs ck-[r|g|b]min=<0\-255>
-Setzt den Minimalwert für den entsprechenden Farbschlüssel.
+Minimalwert für den entsprechenden Farbschlüssel
 .IPs ck-[r|g|b]max=<0\-255>
-Setzt den Maximalwert für den entsprechenden Farbschlüssel.
+Maximalwert für den entsprechenden Farbschlüssel
 .IPs ignore-cache
 Ignoriere die zwischengespeicherten Overlay-Einstellungen.
 .IPs update-cache
@@ -2375,15 +2383,15 @@ Aktualisiere die zwischengespeicherten Overlay-Einstellungen.
 Aktiviert Overlay-Onscreen-Anzeige.
 .IPs nool-osd
 Deaktiviert Overlay-Onscreen-Anzeige (Standard).
-.IPs ol[h|w|x|y]-cor=<Wert>
-Passt die Größe (Höhe, Breite) und Position des Overlays an, falls es nicht
-ganz den Fensterproportionen entspricht (Standard: 0).
+.IPs ol[h|b|x|y]-cor=<Wert>
+Passt die Overlay-Größe (h,b) und Position (x,y) an, falls es nicht
+ganz dem Fenster entspricht (Standard: 0).
 .IPs overlay
-Aktiviert das Overlay (Standard).
+Aktiviere das Overlay (Standard).
 .IPs nooverlay
-Aktiviert die TV-Ausgabe.
+Aktiviere die TV-Ausgabe.
 .IPs overlay-ratio=<1\-2500>
-Stellt das Overlay ein (Standard: 1000).
+Verfeinert das Overlay (Standard: 1000).
 .RE
 .
 .TP
@@ -2392,25 +2400,26 @@ Wechselt in den angegebenen Videomodus, der als <Modusname> in
 /etc/\:fb.modes steht.
 .br
 .I ANMERKUNG:
-Der VESA-Framebuffer unterstützt den Auflösungswechsel nicht.
+Der VESA-Framebuffer unterstützt den Moduswechsel nicht.
 .
 .TP
 .B \-fbmodeconfig <Dateiname> (nur bei \-vo fbdev)
-Benutze diese Konfigurationsdatei an Stelle der Standarddatei /etc/\:fb.modes.
+Überschreibt die Einstellung für die Konfigurationsdatei des Framebuffers
+(Standard: /etc/\:fb.modes).
 .
 .TP
 .B \-fs (siehe auch \-zoom)
 Vollbildwiedergabe (zentriert den Film und erstellt schwarze Balken rund um
 das Bild).
-Nicht jeder Videoausgabetreiber unterstützt dies.
+Wird nicht von allen Videoausgabetreibern unterstützt.
 .
 .TP
-.B \-fsmode-dontuse <0\-31> (VERALTET) (benutze \-fs)
+.B \-fsmode-dontuse <0\-31> (VERALTET) (benutze die Option \-fs)
 Benutze diese Option, wenn du mit dem Vollbildmodus Probleme hast.
 .
 .TP
 .B \-fstype <Typ1,Typ2,...> (nur bei X11)
-Gib eine Prioritätenliste von Vollbild-Layereinstellungsmodi an, die benutzt
+Gib eine Prioritätenliste von Vollbildmodi an, die benutzt
 werden sollen.
 Du kannst die Modi durch Voransetzen von '\-' negieren.
 Falls du das Problem hast, dass das Vollbild von anderen Fenstern überdeckt
@@ -2450,18 +2459,18 @@ Benutze die _NETWM_STATE_STAYS_ON_TOP-Anweisung, falls verfügbar.
 Standardreihenfolge; wird benutzt, wenn falsche oder nichtunterstützte Modi
 angegeben werden.
 .IPs \-fullscreen
-Korrigiert den Vollbildwechsel für Benutzer von OpenBox 1.x.
+Korrigiert den Vollbildwechsel bei OpenBox 1.x.
 .RE
 .PD 1
 .
 .TP
-.B \-geometry x[%][:y[%]] oder [WxH][+x+y]
+.B \-geometry x[%][:y[%]] oder [BxH][+x+y]
 Gibt an, wo die Videoausgabe initial erscheint.
 x und y sind Angaben in Pixeln und geben den Abstand von der linken oberen
 Ecke des Bildschirms zur linken oberen Ecke des darzustellenden
 Bildes an.
 Wenn ein Prozentzeichen nach einem Argument verwendet wird, dann wird statt
-dessen die prozentuale Bildschirmbreite/\:-höhe verwendet.
+dessen die prozentuale Bildschirmbreite/\:-höhe in diese Richtung verwendet.
 Auch das bei der X-Standardoption \-geometry verwendete Format wird
 unterstützt.
 Falls ein externes Fenster mit der Option \-wid angegeben wird, so sind die
@@ -2469,7 +2478,7 @@ Koordinaten x und y relativ zur linken oberen Ecke des Fensters und nicht zu
 der des Bildschirms.
 .br
 .I ANMERKUNG:
-Diese Option wird nur von x11-, xmga-, xv-, xvmc-, xvidix-,
+Diese Option wird nur von x11-, xmga-, xv-, xvmc-, xvidix-, gl, gl2,
 directx- und tdfxfb-Videoausgabetreibern unterstützt.
 .sp 1
 .I BEISPIEL:
@@ -2479,7 +2488,7 @@ directx- und tdfxfb-Videoausgabetreibern unterstützt.
 Platziert das Fenster bei x=50, y=40.
 .IPs 50%:50%
 Platziert das Fenster in der Mitte des Bildschirms.
-.IPs 100%\
+.IPs 100%\ 
 Platziert das Fenster in der Mitte des rechten Randes des Bildschirmes.
 .IPs 100%:100%
 Platziert das Fenster in der unteren rechten Ecke des Bildschirmes.
@@ -2487,15 +2496,15 @@ Platziert das Fenster in der unteren rechten Ecke des Bildschirmes.
 .PD 1
 .
 .TP
-.B \-guiwid <Fenster ID> (siehe auch \-wid) (nur mit GUI)
+.B \-guiwid <Fenster-ID> (siehe auch \-wid) (nur bei GUI)
 Weist die GUI an, auch ein X11-Fenster zu benutzen und sich selbst an die
 Unterseite des Videos zu heften, was nützlich ist beim Einbetten einer Mini-GUI
 in einen Browser (z.B.\& mit dem MPlayer-Plugin).
 .
 .TP
-.B \-hue <\-100\-100>
+.B \-hue <-100\-100>
 Passt die Farbe des Videosignals an (Standard: 0).
-Du kannst mit dieser Option negative Farben erhalten.
+Du kannst mit dieser Option Negativfarben erhalten.
 Wird nicht von allen Videoausgabetreibern unterstützt.
 .
 .TP
@@ -2504,16 +2513,15 @@ Gib den Bereich für dotclock oder pixelclock des Monitors an.
 .
 .TP
 .B \-monitor-hfreq <Bereich[,Bereich,...> (nur bei \-vo fbdev und vesa)
-Gibt den Bereich für die horizontale Frequenz des Monitors an.
+Gibt den Bereich für den horizontalen Frequenzbereich des Monitors an.
 .
 .TP
 .B \-monitor-vfreq <Bereich[,Bereich,...> (nur bei \-vo fbdev und vesa)
-Gibt den Bereich für die vertikale Frequenz des Monitors an.
+Gibt den Bereich für den vertikalen Frequenzbereich des Monitors an.
 .
 .TP
 .B \-monitoraspect <Verhältnis> (siehe auch \-aspect)
 Gibt das Höhen-/\:Breitenverhältnis deines Monitors oder Fernsehers an.
-Siehe auch \-aspect, das das Verhältnis des Films angibt.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -2531,20 +2539,17 @@ Double-Buffering vermeidet Flimmern dadurch, dass zwei Bilder im Speicher
 gehalten werden, von denen das eine angezeigt wird, während das andere noch
 decodiert wird.
 Es kann das OSD negativ beeinflussen, entfernt aber oft Flimmern des OSD.
-Es braucht doppelt so viel Speicher wie Einfachpufferung und wird somit
-nicht mit Grafikkarten funktionieren, die nur über sehr wenig Speicher
-verfügen.
 .
 .TP
 .B \-nograbpointer
-Übernimmt den Mauszeiger nach einem Wechsel des Videomodus (mit \-vm)
+Übernimm den Mauszeiger nach einem Wechsel des Videomodus (mit \-vm)
 nicht.
-Nützlich bei Multihead-Einstellungen.
+Nützlich bei Multihead-Einrichtungen.
 .
 .TP
 .B \-nokeepaspect
-Erhalte beim Ändern der Fenstergröße unter X11 nicht das
-Höhen-/\:Breitenverhältnis.
+Behalte beim Ändern der Fenstergröße das
+Höhen-/\:Breitenverhältnis nicht bei.
 Funktioniert nur mit den x11-, xv-, xmga-, xvidix- und
 directx-Videoausgabetreibern.
 Außerdem muß dein Windowmanager unter X11 Anweisungen zum
@@ -2552,37 +2557,36 @@ Fenster-Seitenverhältnis verstehen.
 .
 .TP
 .B \-ontop\ 
-Sorgt dafür, daß das Abspielfenster nicht von anderen Fenstern verdeckt wird.
+Sorgt dafür, daß das Abspielfenster oberhalb von anderen Fenstern bleibt.
 Wird unterstützt von Videoausgabetreibern, die X11 benutzen, außer SDL,
 außerdem directx, macosx, quartz, ggi und gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
-Aktiviert Pan & Scan.
+Aktiviert Panscan.
 Dabei werden z.B.\& bei einem 16:9-Film und einem 4:3-Monitor die Seiten
 abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
 Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
-Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, quartz-, macosx- und
+Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, gl2, quartz-, macosx- und
 xvidix-Videoausgabetreibern.
 .
 .TP
-.B \-panscanrange <-19.0\-99.0> (Experimentell)
-Ändert den Bereich der Pan & Scan Funktion (Standard: 1).
+.B \-panscanrange <-19.0\-99.0> (experimentell)
+Ändert den Bereich der Panscan-Funktion (Standard: 1).
 Positive Werte bedeuten ein Vielfaches des Standardbereichs.
-Negative Zahlen bedeuten eine mögliche Vergrößerung bis zum Faktor
-\-panscanrange+1.
-Z.B. erlaubt \-panscanrange -3 eine bis zu 4-fache Vergrößerung.
+Negative Zahlen bedeuten einen Zoom bis zum Faktor \-panscanrange+1.
+Z.B.\& erlaubt \-panscanrange -3 eine bis zu 4-fache Vergrößerung.
 Diese Funktionalität ist experimentell.
-Melde Fehler nur, wenn du \-vo gl benutzt.
+Melde keine Fehler, wenn du nicht \-vo gl benutzt.
 .
 .TP
 .B \-refreshrate <Hz>
-Setzt die Bildwiederholfrequenz des Monitors in Hz.
-Momentan nur unterstützt durch \-vo directx kombiniert mit der \-vm-Option.
+Setze die Bildwiederholfrequenz des Monitors in Hz.
+Momentan nur unterstützt von \-vo directx kombiniert mit der Option \-vm.
 .
 .TP
 .B \-rootwin
-Spielt den Film im Root-Fenster (dem Desktophintergrund) ab.
+Spielt den Film im Hauptfenster (dem Desktophintergrund) ab.
 Desktophintergrundbilder können den Film allerdings verdecken.
 Funktioniert nur mit den x11-, xv-, xmga-, xvidix-, quartz-, macosx- und
 directx-Videoausgabetreibern.
@@ -2590,7 +2594,7 @@ directx-Videoausgabetreibern.
 .TP
 .B \-saturation <\-100\-100>
 Passt die Sättigung des Videosignals an (Standard: 0).
-Mit dieser Option kannst du ein Graustufenbild bekommen.
+Es ist möglich, dass du mit dieser Option ein Graustufenbild bekommst.
 Wird nicht von allen Videoausgabetreibern unterstützt.
 .
 .TP
@@ -2613,7 +2617,7 @@ beim Beenden wieder.
 Versucht, in einen anderen Videomodus zu wechseln.
 Unterstützt von dga-, x11, xv-, sdl- und directx-Videoausgabetreibern.
 In Verbindung mit dem directx-Videoausgabetreiber können die Optionen
-\-screenw, \-screenh, \-bpp und \-refreshrate benutzt werden, um einen neuen
+\-screenw, \-screenh, \-bpp und \-refreshrate benutzt werden, um den neuen
 Anzeigemodus zu setzen.
 .
 .TP
@@ -2622,7 +2626,7 @@ Aktiviert VBI für vesa-, dfbmga- und svga-Videoausgabetreiber.
 .
 .TP
 .B \-wid <Fenster-ID> (siehe auch \-guiwid) (nur bei X11, OpenGL und DirectX)
-Weist MPlayer an, sich an ein bestehendes X11-Fenster zu heften, was
+Weist MPlayer an, sich an ein bestehendes X11-Fenster zu binden, was
 beispielsweise nützlich ist, um MPlayer in einen Browser einzubetten (z.B.\&
 mit der plugger-Erweiterung).
 .
@@ -2661,7 +2665,7 @@ er findet.
 Erzwungene Dezimierung: Dezimierung, wie mit \-zrhdec und \-zrvdec angegeben.
 Wird nur angewandt, wenn der Hardwareskalierer das Bild wieder auf seine
 ursprüngliche Größe ausdehnen kann.
-Mit dieser Option wird die Dezimierung erzwungen.
+Benutze diese Option, um Dezimierung zu erzwingen.
 .
 .TP
 .B \-zrhdec <1|2|4> (nur bei \-vo zr)
@@ -2676,13 +2680,13 @@ Zeigt eine Liste aller \-zr*-Optionen, ihre Standardwerte und ein Beispiel
 für den Cinerama-Modus an.
 .
 .TP
-.B \-zrnorm <norm> (nur bei \-vo zr)
-Gibt die Fernsehnorm PAL oder NTSC an (Standardwert: keine Änderung).
+.B \-zrnorm <Norm> (nur bei \-vo zr)
+Gib die Fernsehnorm PAL oder NTSC an (Standardwert: keine Änderung).
 .
 .TP
 .B \-zrquality <1\-20> (nur bei \-vo zr)
 Eine Nummer von 1 (beste) bis 20 (schlechteste), die die
-JPEG-Codierungsqualität angibt.
+JPEG-Encodierungsqualität angibt.
 .
 .TP
 .B \-zrvdec <1|2|4> (nur bei \-vo zr)
@@ -2693,15 +2697,15 @@ auf seine Urpsrungsgröße auszudehnen.
 .
 .TP
 .B \-zrxdoff <x Anzeige-Offset> (nur bei \-vo zr)
-Wenn das Bild kleiner als der Fernsehbildschirm ist, so wird mit dieser
+Wenn das Bild kleiner als der Fernsehbildschirm ist, gibt diese
 Option die Bildposition relativ zur oberen linken Ecke des Fernsehers
-kontrolliert (Standard: zentriert).
+an (Standard: zentriert).
 .
 .TP
 .B \-zrydoff <y Anzeige-Offset> (nur bei \-vo zr)
-Wenn das Bild kleiner als der Fernsehbildschirm ist, so wird mit dieser
+Wenn das Bild kleiner als der Fernsehbildschirm ist, gibt diese
 Option die Bildposition relativ zur oberen linken Ecke des Fernsehers
-kontrolliert (Standard: zentriert).
+an (Standard: zentriert).
 .
 .
 .
