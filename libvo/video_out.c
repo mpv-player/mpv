@@ -163,9 +163,6 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_3DFX
         &video_out_3dfx,
 #endif
-#ifdef HAVE_XVMC
-        &video_out_xvmc,
-#endif
 #ifdef HAVE_XV
         &video_out_xv,
 #endif
@@ -233,6 +230,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
         &video_out_null,
 	// should not be auto-selected
+#ifdef HAVE_XVMC
+        &video_out_xvmc,
+#endif
 	&video_out_mpegpes,
 	&video_out_yuv4mpeg,
 #ifdef HAVE_PNG
