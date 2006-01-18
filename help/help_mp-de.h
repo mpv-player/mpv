@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.218
+// In synch with rev 1.219
 
 // ========================= MPlayer help ===========================
 
@@ -568,7 +568,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Suche in reinen AVI-Streams nicht durchführbar (Index erforderlich, probiere die '-idx'-Option.).\n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen.\n"
 
-#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/HTML/en/dvd.html.\n"
+#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/HTML/en/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: komprimierte Header benötigen ZLIB-Unterstützung.\n"
 #define MSGTR_MOVvariableFourCC "MOV: Warnung: Variable FOURCC erkannt!?\n"
