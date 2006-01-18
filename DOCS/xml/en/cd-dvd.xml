@@ -136,7 +136,7 @@ library incompatibilities and slower speed.
 
 <note><para>
 In case of DVD decoding problems, try disabling supermount, or any other such
-facilities.
+facilities. Some RPC-2 drives may also require setting the region code.
 </para></note>
 
 <formalpara>
