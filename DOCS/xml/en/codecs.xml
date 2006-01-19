@@ -780,6 +780,19 @@ option.
 </para>
 </sect2>
 
+<sect2 id="hwmpa">
+<title>Hardware MPEG audio codec</title>
+
+<para>
+This codec (selected by -ac hwmpa) passes through MPEG audio packets 
+to hardware decoders, such as the ones found in full-featured DVB cards 
+and DXR2 adapters.
+Don't use it in combination with any other audio output device
+(such as OSS and ALSA) that isn't able to decode it (you will hear
+only white noise).
+</para>
+</sect2>
+
 
 <sect2 id="vivo-audio">
 <title>VIVO audio</title>

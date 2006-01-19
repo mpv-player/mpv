@@ -504,6 +504,23 @@ when an audio family is specified.
 
 </sect3>
 
+<sect3 id="hwmpa-surround-passthrough">
+<title>MPEG audio Passthrough</title>
+
+<para>
+Digital TV transmissions (such as DVB and ATSC) and some DVDs usually have 
+MPEG audio streams (in particular MP2).
+Some MPEG hardware decoders such as full-featured DVB cards and DXR2 
+adapters can natively decode this format. 
+<application>MPlayer</application> can be configured to relay the audio data 
+without decoding it.
+</para>
+
+<para>
+To use this codec:
+<screen> mplayer -ac hwmpa </screen>
+</para>
+</sect3>
 
 <sect3 id="advaudio-surround-matrix">
 <title>Matrix-encoded audio</title>
