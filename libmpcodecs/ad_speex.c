@@ -74,7 +74,7 @@ static void uninit(sh_audio_t *sh) {
     speex_bits_destroy(&ctx->bits);
     speex_decoder_destroy(ctx->dec_context);
     if (ctx->hdr)
-      speex_free(ctx->hdr);
+      free(ctx->hdr);
     free(ctx);
   }
   ctx = NULL;
