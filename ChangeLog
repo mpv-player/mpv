@@ -43,6 +43,7 @@ MPlayer (1.0)
     * QDM2 audio decoding via lavc
     * cook audio decoding via lavc
     * TrueSpeech audio decoding via lavc
+    * hwmpa pass-through MPEG audio codec
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
