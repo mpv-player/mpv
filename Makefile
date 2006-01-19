@@ -354,9 +354,6 @@ input/libinput.a:
 libmenu/libmenu.a:
 	$(MAKE) -C libmenu
 
-libavcodec/libpostproc/libpostproc.so:
-	$(MAKE) -C libavcodec/libpostproc
-
 MPLAYER_DEP = $(OBJS_MPLAYER) $(COMMON_DEPS)
 
 ifeq ($(LIBMENU),yes)
