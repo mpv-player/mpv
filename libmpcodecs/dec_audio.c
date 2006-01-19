@@ -306,7 +306,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
   // filter config:  
   memcpy(&afs->cfg,&af_cfg,sizeof(af_cfg_t));
   
-  mp_msg(MSGT_DECAUDIO, MSGL_INFO, MSGTR_BuildingAudioFilterChain,
+  mp_msg(MSGT_DECAUDIO, MSGL_V, MSGTR_BuildingAudioFilterChain,
       afs->input.rate,afs->input.nch,af_fmt2str_short(afs->input.format),
       afs->output.rate,afs->output.nch,af_fmt2str_short(afs->output.format));
   
