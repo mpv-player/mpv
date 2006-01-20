@@ -320,26 +320,6 @@ file:
 Tag description:
 ----------------
 
-forward_ptr
-    size of the packet data (exactly the distance from the first byte
-    after the forward_ptr to the first byte of the next packet)
-
-back_ptr_div8
-    back_ptr = back_ptr_div8 * 8 + 7
-    back_ptr must point to a position within 8 bytes of a syncpoint
-    startcode. This syncpoint MUST be the closest syncpoint such that at
-    least one keyframe with a pts lower or equal to the original syncpoint's
-    global_key_pts for all streams lies between it and the current syncpoint.
-
-    A stream where EOR is set is to be ignored for back_ptr.
-
-global_key_pts
-    After a syncpoint, last_pts of each stream is to be set to:
-    last_pts[i] = convert_ts(global_key_pts, timebase[stream], timebase[i])
-
-    global_key_pts MUST be bigger or equal to dts of all past frames across
-    all streams, and smaller or equal to pts of all future frames.
-
 file_id_string
     "nut/multimedia container\0"
 
@@ -355,10 +335,6 @@ stream_starcode
 syncpoint_startcode
     0xE4ADEECA4569ULL + (((uint64_t)('N'<<8) + 'K')<<48)
 
-    syncpoint_startcodes SHOULD be placed immediately before a keyframe if the
-    previous frame of the same stream was a non-keyframe, unless such
-    non-keyframe - keyframe transitions are very frequent
-
 index_startcode
     0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
 
@@ -368,11 +344,19 @@ info_startcode
 version
     NUT version. The current value is 2.
 
+forward_ptr
+    size of the packet data (exactly the distance from the first byte
+    after the forward_ptr to the first byte of the next packet)
+
 max_distance
     max distance of syncpoints, the distance may only be larger if
     there is no more than a single frame between the two syncpoints. This can
     be used by the demuxer to detect damaged frame headers if the damage
     results in too long of a chain
+
+    syncpoints SHOULD be placed immediately before a keyframe if the
+    previous frame of the same stream was a non-keyframe, unless such
+    non-keyframe - keyframe transitions are very frequent
 
     SHOULD be set to <=32768 or at least <=65536 unless there is a very
     good reason to set it higher, otherwise reasonable error recovery will
@@ -539,6 +523,22 @@ checksum
     checksum is calculated for the area pointed to by forward_ptr not
     including the checksum itself (from first byte after the
     forward_ptr until last byte before the checksum).
+
+back_ptr_div8
+    back_ptr = back_ptr_div8 * 8 + 7
+    back_ptr must point to a position within 8 bytes of a syncpoint
+    startcode. This syncpoint MUST be the closest syncpoint such that at
+    least one keyframe with a pts lower or equal to the original syncpoint's
+    global_key_pts for all streams lies between it and the current syncpoint.
+
+    A stream where EOR is set is to be ignored for back_ptr.
+
+global_key_pts
+    After a syncpoint, last_pts of each stream is to be set to:
+    last_pts[i] = convert_ts(global_key_pts, timebase[stream], timebase[i])
+
+    global_key_pts MUST be bigger or equal to dts of all past frames across
+    all streams, and smaller or equal to pts of all future frames.
 
 max_pts
     s = max_pts % stream_count
