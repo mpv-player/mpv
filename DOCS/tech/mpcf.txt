@@ -1,5 +1,5 @@
 ========================================
-NUT Open Container Format DRAFT 20060105
+NUT Open Container Format DRAFT 20060120
 ========================================
 
 
@@ -131,23 +131,29 @@ main header:
     stream_count                        v
     max_distance                        v
     max_index_distance                  v
+    tmp_pts=0
+    tmp_mul=1
+    tmp_stream=0
     for(i=0; i<256; ){
         tmp_flag                        v
         tmp_fields                      v
-        if(tmp_fields>0) tmp_pts        s
-        if(tmp_fields>1) tmp_mul        v
-        if(tmp_fields>2) tmp_stream     v
-        if(tmp_fields>3) tmp_size       v
+        if(tmp_fields>0) tmp_sflag      v
+        else tmp_sflag=0
+        if(tmp_fields>1) tmp_pts        s
+        if(tmp_fields>2) tmp_mul        v
+        if(tmp_fields>3) tmp_stream     v
+        if(tmp_fields>4) tmp_size       v
         else tmp_size=0
-        if(tmp_fields>4) tmp_res        v
+        if(tmp_fields>5) tmp_res        v
         else tmp_res=0
-        if(tmp_fields>5) count          v
+        if(tmp_fields>6) count          v
         else count= tmp_mul - tmp_size
-        for(j=6; j<tmp_fields; j++){
+        for(j=7; j<tmp_fields; j++){
             tmp_reserved[i]             v
         }
         for(j=0; j<count && i<256; j++, i++){
             flags[i]= tmp_flag;
+            stream_flags[i]= tmp_sflag;
             stream_id_plus1[i]= tmp_stream;
             data_size_mul[i]= tmp_mul;
             data_size_lsb[i]= tmp_size + j;
@@ -207,6 +213,9 @@ frame:
     }
     if(flags[frame_code]&1){
         data_size_msb                   v
+    }
+    if(flags[frame_code]&2){
+        coded_stream_flags              v
     }
     for(i=0; i<reserved_count[frame_code]; i++)
         reserved                        v
@@ -301,6 +310,8 @@ back_ptr
     startcode begins within the next 8 bytes, and such that at least
     one keyframe for each stream lies between the syncpoint to which
     real_back_ptr points, and the current syncpoint.
+
+    A stream where EOR is set is to be ignored for back_ptr.
 
 global_key_pts
     After a syncpoint, last_pts of each stream is to be set to:
@@ -417,17 +428,27 @@ frame_code
     different from the first byte of any startcode
 
 flags[frame_code]
-    first of the flags from MSB to LSB are called KD
-    if D is 1 then data_size_msb is coded, otherwise data_size_msb is 0
-    K is the keyframe_type
-        0 -> no keyframe,
-        1 -> keyframe,
-    flags=4 can be used to mark illegal frame_code bytes
-    frame_code=78 must have flags=4
-    Note: frames MUST NOT depend(1) upon frames prior to the last
-          frame_startcode
-    Important: depend(1) means dependency on the container level (NUT) not
-    dependency on the codec level
+    Bit  Name             Description
+      1  data_size_msb    if set, data_size_msb is at frame header,
+                          otherwise data_size_msb is 0
+      2  more_flags       if set, stream control flags are at frame header.
+      4  invalid          if set, frame_code is invalid.
+
+    frame_code=78 ('N') MUST have flags=64
+
+stream_flags
+    stream_flags is "stream_flags[frame_code] ^ coded_stream_flags"
+
+    Bit  Name               Description
+      1  is_key             if set, frame is keyframe
+      2  end_of_relevance   if set, stream has no relevance on
+                            presentation. (EOR)
+
+    EOR frames MUST be zero-length and must be set keyframe.
+    All streams SHOULD end with EOR, where the pts of the EOR indicates the
+    end presentation time of the final frame.
+    An EOR set stream is unset by the first content frames.
+    When an EOR is unset, dts_cache of the stream is reset to -1.
 
 stream_id_plus1[frame_code]
     must be <250
@@ -476,7 +497,8 @@ dts
     this buffer is initalized with decode_delay -1 elements
 
     Pts of all frames in all streams MUST be bigger or equal to dts of all
-    previous frames in all streams, compared in common timebase.
+    previous frames in all streams, compared in common timebase. (EOR
+    frames are NOT exempt from this rule)
 
 width/height
     MUST be set to the coded width/height
