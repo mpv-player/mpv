@@ -2712,15 +2712,15 @@ an (Standard: zentriert).
 .SH "VIDEOAUSGABETREIBER (NUR BEI MPLAYER)"
 Videoausgabetreiber sind Schnittstellen zu verschiedenen
 Videoausgabe-Einrichtungen.
-.
 Die Syntax ist folgende:
+.
 .TP
 .B \-vo <Treiber1[:Suboption1[=Wert]:...],Treiber2,...[,]>
 Gibt eine Prioritätenliste der zu verwendenden Videoausgabetreiber an.
 .PP
 Wenn die Liste mit ',' endet, so werden notfalls auch nicht in der
 Kommandozeile aufgeführte Treiber benutzt.
-Suboptionen sind optional und können meistens weggelassen werden.
+Suboptionen sind optional und können hauptsächlich weggelassen werden.
 .br
 .I ANMERKUNG:
 Eine Liste der eincompilierten Videotreiber erhältst du mit \-vo help.
@@ -2729,9 +2729,9 @@ Eine Liste der eincompilierten Videotreiber erhältst du mit \-vo help.
 .PD 0
 .RSs
 .IPs "\-vo xmga,xv,"
-Probiert zuerst den Matrox-X11-Treiber, dann den Xv-Treiber, dann andere.
+Versuche zuerst den Matrox-X11-Treiber, dann den Xv-Treiber, dann andere.
 .IPs "\-vo directx:noaccel"
-Benutzt den directx-Treiber mit abgeschalteten Beschleunigungs-Features.
+Benutzt den DirectX-Treiber mit abgeschalteten Beschleunigungs-Features.
 .RE
 .PD 1
 .sp 1
@@ -2749,7 +2749,7 @@ Zeilen, die am Anfang mit [xv common] gekennzeichnet sind.
 .PD 0
 .RSs
 .IPs port=<Nummer>
-Wähle einen bestimmten Port für XVideo.
+Wähle einen bestimmten XVideo-Port.
 .IPs ck=<cur|use|set>
 Wählt die Quelle, von der der Farbschlüssel genommen wird (Standard: cur).
 .RSss
@@ -2787,7 +2787,7 @@ Momentan nur von tdfx_vid unterstützt.
 .PD 0
 .RSs
 .IPs <vo_Treiber>
-Wähle den Treiber, der als Quelle für das Overlay oberhalb von X11 benutzt
+Wähle den Treiber, der als Quelle für das auf X11 aufsetzende Overlay benutzt
 werden soll.
 .RE
 .PD 1
@@ -2853,9 +2853,10 @@ Sehr schneller Videoausgabetreiber bei Karten, die dies unterstützen.
 .RSs
 .IPs <Subdevice>
 Wähle explizit einen VIDIX-Subdevice-Treiber, der benutzt werden soll.
-Verfügbare Subdevice-Treiber sind cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid und
-unichrome_vid.
+Verfügbare Subdevice-Treiber sind cyberblade_vid.so, mach64_vid.so,
+mga_crtc2_vid.so,
+mga_vid.so, nvidia_vid.so, pm3_vid.so, radeon_vid.so, rage128_vid.so,
+sis_vid.so und unichrome_vid.so.
 .RE
 .PD 1
 .
@@ -2917,7 +2918,7 @@ Gib die Auflösung im Vollbildmodus an (nützlich auf langsamen Systemen).
 .
 .TP
 .B macosx (Mac OS X 10.4 oder 10.3.9 mit QuickTime 7)
-Mac OS X CoreVideo Videoausgabetreiber
+Mac OS X CoreVideo-Videoausgabetreiber
 .PD 0
 .RSs
 .IPs device_id=<Nummer>
@@ -2965,7 +2966,7 @@ Aktiviere die TV-Ausgabe von NeoMagic und setze die Norm auf NTSC.
 .IPs vidix
 Benutze den VIDIX-Treiber.
 .IPs lvo:\ \ \ 
-Aktiviere das Linux-Video-Overlay über dem VESA-Modus.
+Aktiviere das auf dem VESA-Modus aufsetzende Linux-Video-Overlay.
 .RE
 .PD 1
 .
@@ -2987,7 +2988,7 @@ Dies verhindert direktes Rendern, OSD und Hardwarebeschleunigung.
 Erzwingt Frame-Wechsel bei vertikalem Retrace.
 Nur benutzbar mit \-double.
 Dies hat denselben Effekt wie die Option \-vsync.
-.IPs sq\ \ \
+.IPs sq\ \ \ 
 Versucht, einen Videomodus mit quadratischen Pixeln zu wählen.
 .IPs vidix
 Benutze svga mit VIDIX.
@@ -2996,8 +2997,8 @@ Benutze svga mit VIDIX.
 .
 .TP
 .B gl\ \ \ \ \ 
-OpenGL-Videoausgabetreiber.
-Einfache Version, die Videogröße muß kleiner
+OpenGL-Videoausgabetreiber, einfache Version.
+Die Videogröße muß kleiner
 sein als die maximale Texturgröße deiner OpenGL-Implementierung.
 Es ist beabsichtigt, auch mit den einfachsten OpenGL-Implementierungen zu
 funktionieren, benutzt aber auch neuere Erweiterungen, die mehr Farbräume
@@ -3008,7 +3009,8 @@ da dies für höhere Auflösungen eine
 Geschwindigkeitssteigerung bedeutet.
 Dieser Code macht nur sehr wenige Fehlerüberprüfungen, falls also ein Feature
 nicht funktioniert liegt das vieleicht an fehlender Unterstützung durch deine
-Grafiktreiber, auch wenn du keine Fehlermeldung bekommst.
+Grafiktreiber/OpenGL-Implementierung, auch wenn du keine Fehlermeldung
+bekommst.
 Benutze glxinfo oder ein ähnliches Tool um dir die unterstützten
 OpenGL-Erweiterungen anzeigen zu lassen.
 .PD 0
@@ -3020,7 +3022,7 @@ Benötigt eine OpenGL-Version >= 1.2.
 Anzahl der Linien, die an einem Stück zur Textur kopiert werden (Standard: 4).
 0 für ganzes Bild.
 .br
-.I HINWEIS:
+.I ANMERKUNG:
 Falls der YUV-Farbraum benutzt wird (siehe yuv-Unteroption), gilt folgendes:
 .RSss
 Wenn der Dekoder in Streifen rendert (siehe \-noslices), dann hat diese
@@ -3044,17 +3046,17 @@ Vollbildmodus die Ränder.
 .IPs (no)aspect
 (De)aktiviert die Skalierung des Aspekts und die Unterstützung für Panscan
 (Standard: aktiviert).
-Deaktivierung könnte die Geschwindigkeit erhöhen.
+Deaktivierung kann die Geschwindigkeit möglicherweise erhöhen.
 .IPs rectangle=<0,1,2>
-Wähle einen bestimmten Typ für rechtwinklige Texturen aus.  Dies spart
-Grafikspeicher, aber ist oft langsamer (Standard: 0).
+Wähle einen bestimmten Typ für rechtwinklige Texturen aus.
+Dies spart Grafikspeicher, ist aber oft langsamer (Standard: 0).
 .RSss
-0: Benutze Texturen mit einer Größe, die ein Vielfaches von 2 ist (Standard).
+0: Benutze Texturen mit einer Größe, die eine Potenz von 2 ist (Standard).
 .br
-1: Benutze die GL_ARB_texture_rectangle Erweiterung.
+1: Benutze die GL_ARB_texture_rectangle-Erweiterung.
 .br
 2: Benutze die GL_ARB_texture_non_power_of_two-Erweiterung.
-Dies wird manchmal durch Software emuliert und ist dann sehr langsam.
+Dies wird manchmal nur durch Software emuliert und ist dann sehr langsam.
 .RE
 .IPs (no)glfinish
 Rufe glFinish() vor dem Wechsel der Puffer auf.
@@ -3064,19 +3066,21 @@ Minimales Intervall zwischen zwei Pufferwechseln, in angezeigten Bildern
 (Standard: 1).
 1 entspricht dem Einschalten von VSYNC, 0 dem Ausschalten von VSYNC.
 Werte unter 0 belassen es bei der systemweiten Voreinstellung.
-Bei manchen (den meisten/allen?) Implementationen funktioniert dies nur im
+Dies limitiert die Framerate auf (horizontale Refresh-Rate / n).
+Benötigt GLX_SGI_swap_control-Unterstützung, um zu funktionieren.
+Bei manchen (den meisten/allen?) Implementierungen funktioniert dies nur im
 Vollbildmodus.
 .IPs yuv=<n>
-Wählt den Typ der YUV nach RGB Wandlung aus.
+Wählt den Typ der Umwandlung von YUV nach RGB aus.
 .RSss
 0: Benutze Softwareumwandlung (Standard).
 Funktioniert mit allen OpenGL-Versionen.
 Ermöglicht Helligkeits-, Kontrast- und Sättigungseinstellung.
 .br
-1: Benutze register combiner.
+1: Benutze register combiners.
 Dies benutzt eine nVidia-spezifische Erweiterung (GL_NV_register_combiners).
 Es werden mindestens drei Textureinheiten benötigt.
-Ermöglicht Sättigungseinstellung und Farbwertkorrektur.
+Ermöglicht Sättigungs- und Farbwerteinstellung.
 .br
 2: Benutze ein Fragmentprogramm.
 Benötigt die GL_ARB_fragment_program-Erweiterung und mindestens drei
@@ -3084,30 +3088,30 @@ Textureinheiten.
 Ermöglicht Helligkeits-, Kontrast-, Sättigungseinstellung und
 Farbwertkorrektur.
 .br
-3: Benutze ein Fragmentprogramm mit POW-Instruktion.
+3: Benutze ein Fragmentprogramm, das die POW-Instruktion benutzt.
 Benötigt die GL_ARB_fragment_program-Erweiterung und mindestens drei
 Textureinheiten.
-Ermöglicht Helligkeits-, Kontrast-, Sättigungseinstellung,
-Farbwert- und Gammakorrektur.
+Ermöglicht Helligkeits-, Kontrast-, Sättigungs-,
+Farbwert- und Gammaeinstellung.
 Gamma kann für Rot, Grün und Blau unterschiedlich gesetzt werden.
 Methode 4 ist meist schneller.
 .br
 4: Benutze ein Fragmentprogramm mit Tabelle.
 Benötigt die GL_ARB_fragment_program-Erweiterung und mindestens vier
 Textureinheiten.
-Ermöglicht Helligkeits-, Kontrast-, Sättigungseinstellung,
-Farbwert- und Gammakorrektur.
+Ermöglicht Helligkeits-, Kontrast-, Sättigungs-,
+Farbwert- und Gammaeinstellung.
 Gamma kann für Rot, Grün und Blau unterschiedlich gesetzt werden.
 .br
 5: Benutze ATI-spezifische Methode (für ältere Karten)
 Benutzt eine ATI-spezifische Erweiterung (GL_ATI_fragment_shader \- nicht
 GL_ARB_fragment_shader!).
 Mindestens drei Textureinheiten werden benötigt.
-Ermöglicht Sättigungseinstellung und Farbwertkorrektur.
+Ermöglicht Sättigungs- und Farbwerteinstellung.
 .RE
 .IPs customprog=<Dateiname>
 Lädt ein eigenes Fragmentprogramm aus <Dateiname>.
-Siehe TOOLS/edgedetect.fp als Beispiel.
+Siehe TOOLS/\:edgedetect.fp als Beispiel.
 .IPs customtex=<Dateiname>
 Lädt eine eigene "gamma ramp"-Textur aus <Dateiname>.
 Kann zusammen mit yuv=4 oder mit der customprog-Option benutzt werden.
@@ -3122,7 +3126,7 @@ Unterstützt OSD und Videos, die größer als die maximale Texturgröße sind.
 .PD 0
 .RSs
 .IPs (no)glfinish
-Siehe \-vo gl (Standard: aktiviert)
+das gleiche wie bei gl (Standard: aktiviert)
 .IPs yuv=<n>
 Wählt den Typ der Umwandlung von YUV nach RGB aus.
 Bei anderen Werten als 0 wird das OSD deaktiviert und Helligkeits-, Kontrast-
@@ -3161,7 +3165,7 @@ Du musst ein Subdevice angeben.
 .
 .TP
 .B ggi\ \ \ \ 
-Videoausgabetreiber für das GGI-Grafiksystem.
+Videoausgabetreiber des GGI-Grafiksystems.
 .PD 0
 .RSs
 .IPs <Treiber>
@@ -3179,7 +3183,7 @@ Videowiedergabe über die DirectFB-Bibliothek.
 Benutze DirectFB anstelle des MPlayer-Tastaturcodes (Standard: aktiviert).
 .IPs buffermode=single|double|triple
 Doppeltes (double) und dreifaches (triple) Buffering liefern die besten
-Resultate, wenn du Abreiß-Probleme vermeiden möchstest.
+Resultate, wenn du Abreißprobleme vermeiden möchstest.
 Triplebuffering ist effizienter als Doublebuffering, da es MPlayer
 während des Wartens auf das vertikale Retrace nicht blockiert.
 Einfaches Buffern sollte vermieden werden (Standard: single).
@@ -3190,10 +3194,10 @@ Gültige Werte sind top = obere Felder zuerst, bottom = untere Felder zuerst.
 Diese Option hat keinerlei Effekt auf progressives Filmmaterial, wie es die
 meisten MPEG-Filme sind.
 Du mußt diese Option aktivieren, wenn es beim Schauen von
-interlaced-Filmmaterial
-zu Abreißeffekten oder unscharfen Bewegungen kommt.
+interlaced-Filmmaterial zu Abreißeffekten oder unscharfen Bewegungen kommt.
 .IPs layer=N
-Wird den Layer mit der ID N für die Wiedergabe erzwingen (Standard: -1 - auto).
+Wird den Layer mit der ID N für die Wiedergabe erzwingen (Standard: -1 \-
+auto).
 .IPs dfbopts=<Liste>
 Gibt eine Parameterliste für DirectFB an.
 .RE
@@ -3202,11 +3206,18 @@ Gibt eine Parameterliste für DirectFB an.
 .TP
 .B dfbmga\ 
 Matrox G400/\:G450/\:G550-spezifische Videoausgabetreiber, die die
-DirectFB-Bibliothek benutzen.
-Ermöglicht CRTC2 (zweiter Bildschirm), stellt Videos unabhängig vom ersten
+DirectFB-Bibliothek benutzen, um von speziellen Hardware-Feeatures Gebrauch zu
+machen.
+Ermöglicht CRTC2 (zweiten Bildschirm) und stellt Videos unabhängig vom ersten
 Bildschirm dar.
 .PD 0
 .RSs
+.IPs (no)input
+das gleiche wie bei directfb (Standard: deaktiviert)
+.IPs buffermode=single|double|triple
+das gleiche wie bei  (Standard: triple)
+.IPs fieldparity=top|bottom
+das gleiche wie bei  directfb
 .IPs (no)bes
 Ermöglicht die Nutzung von Matrox BES (Backend-Skalierer) (Standard:
 deaktiviert).
@@ -3218,25 +3229,8 @@ Nutzt den Matrox-Sub-Picture-Layer für die Anzeige des OSD (Standard:
 aktiviert).
 .IPs (no)crtc2
 Schaltet TV-Out des zweiten Monitors an (Standard: aktiviert).
-An der Wiedergabequalität ist erstaunlich, dass ein komplettes Interlaced-Bild
-mit exakter Synchronisation auf jedem un-/\:graden Feld dargestellt wird.
-.IPs (no)input
-Benutze DirectFB anstelle des MPlayer-Tastaturcodes (Standard: aktiviert).
-.IPs buffermode=single|double|triple
-Doppeltes (double) und dreifaches (triple) Buffering liefern die besten
-Resultate, wenn du Abreiß-Probleme vermeiden möchstest.
-Triplebuffering ist effizienter als Doublebuffering, da es MPlayer
-während des Wartens auf das vertikale Retrace nicht blockiert.
-Einfaches Buffern sollte vermieden werden (Standard: single).
-.IPs fieldparity=top|bottom
-Kontrolliert die Ausgabereihenfolge für interlaced-Bilder (Standard:
-deaktiviert).
-Gültige Werte sind top = obere Felder zuerst, bottom = untere Felder zuerst.
-Diese Option hat keinerlei Effekt auf progressives Filmmaterial, wie es die
-meisten MPEG-Filme sind.
-Du mußt diese Option aktivieren, wenn es beim Schauen von
-interlaced-Filmmaterial
-zu Abreißeffekten oder unscharfen Bewegungen kommt.
+An der Wiedergabequalität ist erstaunlich, da ein komplettes Interlaced-Bild
+mit exakter Synchronisation auf jedem (un)geraden Feld dargestellt wird.
 .IPs tvnorm=pal|ntsc|auto
 Setzt die TV-Norm der Matrox-Karte, ohne /etc/\:directfbrc ändern zu
 müssen (Standard: deaktiviert).
@@ -3248,7 +3242,7 @@ die Norm wird bestimmt, indem die Framerate des Films betrachtet wird.
 .
 .TP
 .B mga (nur bei Linux)
-Matrox-spezifischer Videoausgabetreiber, der den YUV-Backend-Scaler von
+Matrox-spezifischer Videoausgabetreiber, der den YUV-Backend-Skalierer von
 Gxxx-Karten durch ein Kernelmodul benutzt.
 Wenn du eine Matroxkarte hast, ist dies die schnellste Option.
 .PD 0
@@ -3283,8 +3277,9 @@ Nur 16 bpp werden unterstützt.
 FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
 .
 .TP
-.B tdfxfb (Linux only)
-Dieser Treiber setzt den tdfx-Framebuffer-Treiber ein, um Filme mit
+.B tdfxfb (nur bei Linux)
+Dieser Treiber setzt den tdfx-Framebuffer-Treiber ein, um auf 3dfx-Karten Filme
+mit
 YUV-Beschleunigung abzuspielen.
 FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
 .PD 0
@@ -3295,7 +3290,7 @@ Wähle das zu benutzende fbdev-Gerät explizit (Standard: /dev/\:fb0).
 .PD 1
 .
 .TP
-.B tdfx_vid (Linux only)
+.B tdfx_vid (nur bei Linux)
 3Dfx-spezifischer Videoausgabetreiber.
 Dieser Treiber benutzt das tdfx_vid-Kernelmodul direkt.
 FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
@@ -3308,7 +3303,7 @@ Wähle das zu benutzende Gerät explizit (Standard:/dev/\:tdfx_vid).
 .
 .TP
 .B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
-Creative DXR2-spezifischer Videoausgabetreiber.
+DXR2-spezifischer Videoausgabetreiber von Creative.
 .PD 0
 .RSs
 .IPs <vo_Treiber>
@@ -3320,7 +3315,7 @@ Der für das Overlay zu benutzende unterliegende Videoausgabetreiber (x11, xv)
 .B dxr3 (nur bei DXR3)
 Sigma Designs em8300 MPEG-Decoder-Chip- (Creative DXR3, Sigma Designs
 Hollywood Plus) spezifischer Videoausgabetreiber.
-Siehe auch lavc-Videofilter.
+Siehe auch den lavc-Videofilter.
 .PD 0
 .RSs
 .IPs overlay
@@ -3356,7 +3351,8 @@ schreibt, falls keine DVB-Karte installiert ist.
 .PD 0
 .RSs
 .IPs card=<1\-4>
-Gibt die Gerätenummer an, wenn mehr als eine DVB-Karte vorhanden ist (nur bei
+Gibt die Gerätenummer an, wenn mehr als eine DVB-Ausgabekarte vorhanden ist
+(nur bei
 V3 API, wie bei den Treibern der 1.x.y-Serie).
 .IPs <Dateiname>
 Erlaubt die genaue Angabe des Ausgabedateinamens (Standard: ./grab.mpg).
@@ -3376,7 +3372,7 @@ zweite Generation.
 .IPs dev=<Gerät>
 Gibt das zu benutzende Gerät an.
 .IPs norm=<PAL|NTSC|SECAM|auto>
-gibt die zu benutzende Videonorm an (Standard: auto).
+Gibt die zu benutzende Videonorm an (Standard: auto).
 .IPs (no)prebuf
 (De)aktiviert Prebuffering, wird noch nicht unterstützt.
 .RE
@@ -3424,9 +3420,7 @@ interlaced).
 .
 .TP
 .B gif89a\ 
-Gibt jeden Frame in eine GIF-Datei im aktuellen Verzeichnis aus.
-Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
-Name.
+Gibt jeden Frame in eine animierte GIF-Datei im aktuellen Verzeichnis aus.
 Es unterstützt nur das RGB-Format (24 bpp), und die Ausgabe wird zu 256 Farben
 konvertiert.
 .PD 0
@@ -3447,14 +3441,14 @@ Teil des Dateinamens.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:15.0:test.gif
+mplayer video.nut \-vo gif89a:15.0:filename=test.gif
 .RE
 .PD 1
 .
 .TP
 .B jpeg\ \ \ 
 Gibt jeden Frame in eine JPEG-Datei im aktuellen Verzeichnis aus.
-Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
+Jede Datei bekommt die Framenummer mit vorangestellt ergänzenden Nullen als
 Name.
 .PD 0
 .RSs
@@ -3462,12 +3456,12 @@ Name.
 Gibt Standard-JPEG oder progressives JPEG an (Standard: noprogressive).
 .IPs [no]baseline
 Benutze eine/\:keine Baseline (Standard: baseline).
-.IPs optimize=<Wert>
-Optimierungswert <0\-100> (Standard: 100)
-.IPs smooth=<Wert>
-Glättungsfaktor <0\-100> (Standard: 0)
-.IPs quality=<Wert>
-Qualitätsfaktor <0\-100> (Standard: 75)
+.IPs optimize=<0\-100>
+Optimierungswert (Standard: 100)
+.IPs smooth=<0\-100>
+Glättungsfaktor (Standard: 0)
+.IPs quality=<0\-100>
+Qualitätsfaktor (Standard: 75)
 .IPs outdir=<Verzeichnisname>
 Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden
 (Standard: ./).
@@ -3487,7 +3481,7 @@ Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
 Unterstützt PPM-, PGM- und PGMYUV-Dateien sowohl im raw- als auch im
 ASCII-Modus.
-Siehe auch pnm(5), ppm(5) and pgm(5).
+Siehe auch pnm(5), ppm(5) und pgm(5).
 .PD 0
 .RSs
 .IPs ppm\ \ 
@@ -3496,8 +3490,8 @@ Schreibe PPM-Dateien (Standard).
 Schreibe PGM-Dateien.
 .IPs pgmyuv
 Schreibe PGMYUV-Dateien.
-PGMYUV ist wie PGM, enthält jedoch zusätzlich eine U- und V-Ebene unten im
-Bild.
+PGMYUV ist wie PGM, enthält jedoch zusätzlich eine U- und V-Ebene, die am Bild
+unten angehängt werden.
 .IPs raw\ \ 
 Schreibe PNM-Dateien im raw-Modus (Standard).
 .IPs ascii
@@ -3534,7 +3528,7 @@ Gibt jeden Frame in eine TGA-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
 Der Zweck dieses Videoausgabetreibers ist das Schreiben von verlustfreien
-Bildern, die mit jeder externen Bibliothek verwendet werden können.
+Bildern, die ohne jegliche externe Bibliothek verwendet werden können.
 Unterstützt werden BGR[A]-Farbformate mit 15, 24 und 32 bpp.
 Ein bestimmtes Format kann erzwungen werden durch Benutzung des
 format-Videofilters.
