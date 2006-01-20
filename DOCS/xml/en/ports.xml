@@ -399,6 +399,55 @@ default of 64MB is enough or not.)
 </itemizedlist>
 
 </sect2>
+
+<sect2 id="aix">
+<title>AIX</title>
+<para>
+<application>MPlayer</application> builds successfully on AIX 5.1,
+5.2, and 5.3, using GCC 3.3 or greater. Building
+<application>MPlayer</application> on AIX 4.3.3 and below is
+untested. It is highly recommended that you build
+<application>MPlayer</application> using GCC 3.4 or greater,
+or if you are building on POWER5, GCC 4.0 is required.
+</para>
+
+<para>
+Ensure that you are using GNU make
+(<filename>/opt/freeware/bin/gmake</filename>) to build
+<application>MPlayer</application>, as you will encounter problems if
+you use <filename>/usr/ccs/bin/make</filename>.
+</para>
+
+<para>
+CPU detection is still a work in progress.
+The following architectures have been tested:
+</para>
+
+<itemizedlist>
+<listitem><para>604e</para></listitem>
+<listitem><para>POWER4</para></listitem>
+</itemizedlist>
+
+<para>
+The following architectures are untested, but should still work:
+</para>
+<itemizedlist>
+<listitem><para>POWER</para></listitem>
+<listitem><para>POWER2</para></listitem>
+<listitem><para>POWER3</para></listitem>
+<listitem><para>POWER5</para></listitem>
+</itemizedlist>
+
+<para>
+Sound via the Ultimedia Services is not supported, as Ultimedia was
+dropped in AIX 5.1; therefore, the only option is to use the AIX Open
+Sound System (OSS) drivers from 4Front Technologies at <ulink
+url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>.
+4Front Technologies freely provides the OSS drivers for personal and
+non-commercial usage.
+</para>
+
+</sect2>
 </sect1>
 
 <sect1 id="windows">
