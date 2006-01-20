@@ -1237,8 +1237,14 @@ EOF
 	# gcc 3.3 and up supports POWER4
 	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3" || test "$_cc_major" -ge "4"; then
 	    case "$proc" in
-		POWER4) _march='-mcpu=power4' _mcpu='-mtune=power4'
-			_def_dcbzl='#undef NO_DCBZL' ;;
+		POWER4) _march='-mcpu=power4' _mcpu='-mtune=power4' ;;
+		*) ;;
+	    esac
+	fi
+	# gcc 4.0 and up supports POWER5
+	if test "$_cc_major" -ge "4"; then
+	    case "$proc" in
+		POWER5) _march='-mcpu=power5' _mcpu='-mtune=power5' ;;
 		*) ;;
 	    esac
 	fi
