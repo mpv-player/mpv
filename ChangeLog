@@ -84,6 +84,7 @@ MPlayer (1.0)
 
     GUI:
     * ported to GTK2
+    * long standing up side down vpotmeter bug fixed
 
     Filters:
     * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6")
@@ -149,6 +150,10 @@ MPlayer (1.0)
     * -edl is now per-file in MPlayer.
     * new input command prefixes, "pausing_keep" and "pausing_toggle" which alter
       pausing state immediately after command.
+    * enviorment variable MPLAYER_VERBOSE controls verbosity before command line
+      is parsed
+    * enviorment variable MPLAYER_HOME controls location searched for
+      configuration files
     
 
 
