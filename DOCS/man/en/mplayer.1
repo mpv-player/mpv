@@ -552,7 +552,8 @@ explicitly specified on the command line.
 See '\-msglevel help' for a list of all modules.
 .br
 .I NOTE:
-Messages printed before the command line is loaded cannot be controlled.
+Messages printed before the command line is parsed can be controlled only
+by $MPLAYER_VERBOSE, which applies to all modules.
 .br
 Available levels:
 .PD 0
@@ -9183,6 +9184,13 @@ control the behavior of MPlayer and MEncoder.
 .TP
 .B MPLAYER_HOME
 Directory where MPlayer looks for user settings.
+.
+.TP
+.B MPLAYER_VERBOSE
+Set the initial verbosity level across all message modules.
+The default is 0.  Negative values result in fewer messages
+while positive values result in more.
+See also \-v and \-msglevel above.
 .
 .SS libaf:
 .

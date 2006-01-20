@@ -26,6 +26,9 @@ int verbose = 0;
 
 void mp_msg_init(){
     int i;
+    char *env = getenv("MPLAYER_VERBOSE");
+    if (env)
+        verbose = atoi(env);
 #ifdef USE_I18N
 #ifdef MP_DEBUG
     fprintf(stdout, "Using GNU internationalization\n");
