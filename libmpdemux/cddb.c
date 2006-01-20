@@ -28,7 +28,9 @@
 #define mkdir(a,b) mkdir(a)
 #endif
 #include <windows.h>
+#ifdef HAVE_WINSOCK2
 #include <winsock2.h>
+#endif
 #else
 #include <netdb.h>
 #include <sys/ioctl.h>
