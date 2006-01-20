@@ -63,9 +63,10 @@ Platforms/ports:
     * BSD/OS: Steven Schultz
     * NetBSD: Bernd Ernesti
     * OpenBSD: Björn Sandell
-    * Solaris: None
+    * Solaris: Derek Lewis
     * Win32/Cygwin/MinGW: Sascha Sommer, Joey Parrish, Diego Biurrun
     * Mac OS X: Nicolas Plourde
+    * AIX: Derek Lewis
 
 MPlayer code:
     * build system: Diego Biurrun
