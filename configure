@@ -6097,6 +6097,7 @@ if test "$_libavcodec" = yes ; then
 elif test "$_libavcodec_so" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_libavcodec_so='#define USE_LIBAVCODEC_SO 1'
+  _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _ld_libavcodec='-lavcodec'
   _codecmodules="libavcodec.so $_codecmodules"
 else
