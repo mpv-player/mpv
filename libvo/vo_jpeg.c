@@ -67,12 +67,15 @@ LIBVO_EXTERN (jpeg)
 
 static int image_width;
 static int image_height;
+static int image_d_width;
+static int image_d_height;
 
 int jpeg_baseline = 1;
 int jpeg_progressive_mode = 0;
 int jpeg_optimize = 100;
 int jpeg_smooth = 0;
 int jpeg_quality = 75;
+int jpeg_dpi = 72; /** Screen resolution = 72 dpi */
 char *jpeg_outdir = NULL;
 char *jpeg_subdirs = NULL;
 int jpeg_maxfiles = 1000;
@@ -158,6 +161,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     image_height = height;
     image_width = width;
+    /* Save for JFIF-Header PAR */
+    image_d_width = d_width;
+    image_d_height = d_height;
     
     return 0;
 }
@@ -190,8 +196,19 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
     cinfo.image_height = image_height;
     cinfo.input_components = 3;
     cinfo.in_color_space = JCS_RGB;
-    
+
     jpeg_set_defaults(&cinfo);
+    /* Important: Header info must be set AFTER jpeg_set_defaults() */
+    cinfo.write_JFIF_header = TRUE;
+    cinfo.JFIF_major_version = 1;
+    cinfo.JFIF_minor_version = 2;
+    cinfo.density_unit = 1; /* 0=unknown, 1=dpi, 2=dpcm */
+    /* Image DPI is determined by Y_density, so we leave that at
+       jpeg_dpi if possible and crunch X_density instead (PAR > 1) */
+    cinfo.X_density = jpeg_dpi*image_width/image_d_width;
+    cinfo.Y_density = jpeg_dpi*image_height/image_d_height;
+    cinfo.write_Adobe_marker = TRUE;
+
     jpeg_set_quality(&cinfo,jpeg_quality, jpeg_baseline);
     cinfo.optimize_coding = jpeg_optimize;
     cinfo.smoothing_factor = jpeg_smooth;
@@ -324,6 +341,7 @@ static int preinit(const char *arg)
                                             (opt_test_f)int_zero_hundred, 0},
         {"quality",     OPT_ARG_INT,    &jpeg_quality,
                                             (opt_test_f)int_zero_hundred, 0},
+        {"dpi",         OPT_ARG_INT,    &jpeg_dpi,              NULL, 0},
         {"outdir",      OPT_ARG_MSTRZ,  &jpeg_outdir,           NULL, 0},
         {"subdirs",     OPT_ARG_MSTRZ,  &jpeg_subdirs,          NULL, 0},
         {"maxfiles",    OPT_ARG_INT,    &jpeg_maxfiles, (opt_test_f)int_pos, 0},
@@ -361,6 +379,8 @@ static int preinit(const char *arg)
                                                                 jpeg_smooth);
     mp_msg(MSGT_VO, MSGL_V, "%s: quality --> %d\n", info.short_name,
                                                                 jpeg_quality);
+    mp_msg(MSGT_VO, MSGL_V, "%s: dpi --> %d\n", info.short_name,
+                                                                jpeg_dpi);
     mp_msg(MSGT_VO, MSGL_V, "%s: outdir --> %s\n", info.short_name,
                                                                 jpeg_outdir);
     if (jpeg_subdirs) {
