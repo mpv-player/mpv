@@ -21,7 +21,7 @@ Extendible
 
 Compact
     ~0.2% overhead, for normal bitrates
-    index is <10kb per hour (1 keyframe every 3sec)
+    index is <100kb per hour
     a usual header for a file is about 100 bytes (audio + video headers together)
     a packet header is about ~1-5 bytes
 
@@ -130,7 +130,6 @@ main header:
     version                             v
     stream_count                        v
     max_distance                        v
-    max_index_distance                  v
     tmp_pts=0
     tmp_mul=1
     tmp_stream=0
@@ -224,12 +223,35 @@ frame:
 index:
     index_startcode                     f(64)
     packet header
-    stream_id                           v
     max_pts                             v
-    index_length                        v
-    for(i=0; i<index_length; i++){
-        index_pts                       v
-        index_position                  v
+    syncpoints                          v
+    for(i=0; i<syncpoints; i++){
+        syncpoint_pos_div8              v
+    }
+    for(i=0; i<stream_count; i++){
+        for(j=0; j<syncpoint_count; ){
+            x                           v
+            type= x & 1
+            x>>=1
+            if(type){
+                flag= x & 1
+                x>>=1
+                while(x--)
+                    has_keyframe[j++][i]=flag
+                has_keyframe[j++][i]=!flag;
+            }else{
+                while(x != 1){
+                    has_keyframe[j++][i]=x&1;
+                    x>>=1;
+                }
+            }
+        }
+        for(j=0; j<syncpoint_count; j++){
+            if (!has_keyframe[j++][i]) continue
+            A                           v
+            last_pts += A
+            keyframe_pts[j][i] = last_pts
+        }
     }
     reserved_bytes
     checksum                            u(32)
@@ -264,7 +286,7 @@ syncpoint:
     coded_pts                           v
     stream = coded_pts % stream_count
     global_key_pts = coded_pts/stream_count
-    back_ptr                            v
+    back_ptr_div8                       v
 
             Complete definition:
 
@@ -290,9 +312,7 @@ file:
         }
     }
     if (next_code == index_startcode){
-        while(!eof){
-            index
-        }
+        index
         index_ptr                       u(64)
     }
 
@@ -304,18 +324,21 @@ forward_ptr
     size of the packet data (exactly the distance from the first byte
     after the forward_ptr to the first byte of the next packet)
 
-back_ptr
-    real_back_ptr = back_ptr * 8 + 7
-    real_back_ptr must point to a position such that a syncpoint
-    startcode begins within the next 8 bytes, and such that at least
-    one keyframe for each stream lies between the syncpoint to which
-    real_back_ptr points, and the current syncpoint.
+back_ptr_div8
+    back_ptr = back_ptr_div8 * 8 + 7
+    back_ptr must point to a position within 8 bytes of a syncpoint
+    startcode. This syncpoint MUST be the closest syncpoint such that at
+    least one keyframe with a pts lower or equal to the original syncpoint's
+    global_key_pts for all streams lies between it and the current syncpoint.
 
     A stream where EOR is set is to be ignored for back_ptr.
 
 global_key_pts
     After a syncpoint, last_pts of each stream is to be set to:
     last_pts[i] = convert_ts(global_key_pts, timebase[stream], timebase[i])
+
+    global_key_pts MUST be bigger or equal to dts of all past frames across
+    all streams, and smaller or equal to pts of all future frames.
 
 file_id_string
     "nut/multimedia container\0"
@@ -354,13 +377,6 @@ max_distance
     SHOULD be set to <=32768 or at least <=65536 unless there is a very
     good reason to set it higher, otherwise reasonable error recovery will
     be impossible
-
-max_index_distance
-    max distance of keyframes which are represented in the index, the
-    distance between consecutive entries A and B may only be larger if
-    there are no keyframes within this stream between A and B
-    SHOULD be set to <=32768 or at least <=65536 unless there is a very
-    good reason to set it higher
 
 stream_id
     Stream identifier
@@ -525,23 +541,27 @@ checksum
     forward_ptr until last byte before the checksum).
 
 max_pts
-    The highest pts in the stream.
+    s = max_pts % stream_count
+    pts = max_pts / stream_count
+    The highest pts in the entire file in the timebase of stream 's' .
 
-index_pts
-    value of the pts of a keyframe relative to the last keyframe
-    stored in this index
+syncpoint_pos_div8
+    offset from begginning of file to up to 7 bytes before the syncpoint
+    referred to in this index entry. Relative to position of last
+    syncpoint.
 
-index_position
-    position in bytes of the first byte of a keyframe, relative to the
-    last keyframe stored in this index
-    there MUST be no keyframe with the same stream_id as this index between
-    two consecutive index entries if they are more than max_index_distance
-    apart
+has_keyframe
+    indicates whether this stream has a keyframe between this syncpoint and
+    the last syncpoint.
+
+keyframe_pts
+    The pts of the first keyframe for this stream in the region between the
+    2 syncpoints, in the stream's timebase.
 
 index_ptr
-    Length in bytes from the first byte of the first index startcode
-    to the first byte of the index_ptr. If there is no index, index_ptr
-    MUST NOT be written.
+    Length in bytes from the first byte of the index startcode to the first
+    byte of the index_ptr. If there is no index, index_ptr MUST NOT be
+    written.
 
 id
     the ID of the type/name pair, so it is more compact
