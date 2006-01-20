@@ -499,6 +499,10 @@ Leroy, Colin <colin@colino.net>
     * libdha on PowerPC Linux
     * mach64 VIDIX driver endianness fixes
 
+Lewis, Derek (delewis) <dlewis@solnetworks.net>
+    * AIX port
+    * Solaris-related configure fixes
+
 Liljeblad, Oskar <oskar@osk.mine.nu>
     * various OSD related patches
 
