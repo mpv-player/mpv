@@ -3547,7 +3547,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .TP
 .B \-ac <[-|+]Codec1,[-|+]Codec2,...[,]>
-Gibt eine Prioritätsliste der zu verwendenden Audiocodecs an.
+Gib eine Prioritätsliste der zu verwendenden Audiocodecs an.
 Die Codecnamen entsprechen den in codecs.conf definierten Einträgen.
 Ein '-' vor dem Codecnamen deaktiviert diesen Codec.
 Ein '+' vor dem Codecnamen erzwingt diesen, dies führt vermutlich zu Abstürzen!
@@ -3568,7 +3568,7 @@ Probiert zuerst libmad und dann andere Codecs.
 Zuerst wird versucht, AC3 unverändert durchzureichen, dann die
 Software-AC3-Decodierung, danach andere Codecs.
 .IPs "\-ac -ffmp3,"
-Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
+Überspringe den MP3-Decoder von FFmpeg.
 .RE
 .PD 1
 .
@@ -3579,7 +3579,7 @@ Gibt erweiterte Audiofilteroptionen an:
 .IPs force=<0\-7>
 Erzwingt das Einfügen von Audiofiltern nach folgenden Regeln:
 .RSss
-0: Komplett automatisches Einfügen (Standard)
+0: Benutze komplett automatisches Einfügen (Standard)
 .br
 1: Optimiere auf Genauigkeit.
 .br
@@ -3601,22 +3601,23 @@ aber Verarbeitung von Fließkommawerten, falls möglich.
 6: Benutze automatisches Einfügen von Filtern gemäß Option 2 oben, benutze
 aber Verarbeitung von Fließkommawerten, falls möglich.
 .br
-7: Benutze automatisches Einfügen von Filtern gemäß Option 3 oben, benutze
+7: Benutze kein automatisches Einfügen von Filtern gemäß Option 3 oben, benutze
 aber Verarbeitung von Fließkommawerten, falls möglich.
 .REss
 .IPs list=<Filter>
-Das gleiche wie \-af (siehe \-af).
+Das gleiche wie \-af.
 .RE
 .
 .TP
 .B \-afm <Treiber1,Treiber2,...>
 Gibt eine Prioritätsliste der zu verwendenden Audiocodecfamilien an,
-so wie sie in codecs.conf definiert wurden. Wenn keine der angegebenen
+so wie sie in codecs.conf definiert wurden.
+Wenn keine der angegebenen
 Familien benutzt werden kann, so werden die Standardcodecs verwendet.
-
+.br
 .I ANMERKUNG:
 .br
-Mit \-afm help erhältst du eine Liste aller verfügbaren Treiber.
+Mit \-afm help erhältst du eine Liste aller verfügbaren Codecfamilien.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3653,7 +3654,7 @@ Stellt das Bild auf den Kopf (horizontales Spiegeln).
 .
 .TP
 .B \-lavdopts <Option1:Option2:...> (DEBUG-CODE)
-Gibt Parameter für das Decodieren mit libavcodec an.
+Gibt Parameter für die Decodierung mit libavcodec an.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3667,8 +3668,8 @@ Verfügbare Optionen sind folgende:
 .RE
 .RSs
 .IPs bitexact
-Benutze in allen Decodierungsschritten nur bitgenaue Algorithmen (zum Testen
-von Codecs).
+Benutze in allen Decodierungsschritten nur bitgenaue Algorithmen (zum
+Testen von Codecs).
 .IPs bug=<Wert>
 Umgehe Fehler (Bugs) des Encoders manuell.
 .RSss
@@ -3679,28 +3680,28 @@ Umgehe Fehler (Bugs) des Encoders manuell.
 2 (msmpeg4v3): manche ältere, von lavc generierte msmpeg4v3-Dateien (keine
 automatische Erkennung)
 .br
-4 (mpeg4): XviD-Interlacing-Fehler (automatisch erkannt bei fourcc==XVIX)
+4 (mpeg4): XviD-Interlacing-Bug (automatisch erkannt bei fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (automatisch erkannt bei fourcc==UMP4)
 .br
-16 (mpeg4): Padding-Fehler (automatisch erkannt)
+16 (mpeg4): Padding-Bug (automatisch erkannt)
 .br
-32 (mpeg4): Fehler durch ungültigen vlc (automatisch erkannt durch fourcc)
+32 (mpeg4): ungültiger vlc-Bug (automatisch erkannt durch fourcc)
 .br
-64 (mpeg4): qpel-Fehler bei XviD und DivX (automatisch erkannt durch
-fourcc/\:version)
+64 (mpeg4): qpel-Bug bei XviD und DivX (automatisch erkannt durch
+fourcc/\:Version)
 .br
-128 (mpeg4): alter qpel-Standardfehler (automatisch erkannt durch
-fourcc/\:version)
+128 (mpeg4): alter qpel-Standard-Bug (automatisch erkannt durch
+fourcc/\:Version)
 .br
-256 (mpeg4): noch ein anderer qpel-Fehler (automatisch erkannt durch
-fourcc/\:version)
+256 (mpeg4): noch ein anderer qpel-Bug (automatisch erkannt durch
+fourcc/\:Version)
 .br
-512 (mpeg4): Fehler bei direkter qpel-Blockgröße (automatisch erkannt durch
-fourcc/\:version)
+512 (mpeg4): Bug bei direkter qpel-Blockgröße (automatisch erkannt durch
+fourcc/\:Version)
 .br
-1024 (mpeg4): Randfüllungsfehler (edge padding, automatisch erkannt durch
-fourcc/\:version)
+1024 (mpeg4): Randfüllungs-Bug (edge padding, automatisch erkannt durch
+fourcc/\:Version)
 .REss
 .IPs debug=<Wert>
 Zeige Debugging-Informationen an.
@@ -3755,7 +3756,7 @@ Setze Strategie zur Fehlerbehandlung.
 .br
 1: vorsichtig (Sollte mit den meisten fehlerhaften Encodern funktionieren.)
 .br
-2: normal (Standard) (Funktioniert mit den meisten konformen Encodern.)
+2: normal (Standard) (Funktioniert mit konformen Encodern.)
 .br
 3: aggressiv (mehr Überprüfungen, die aber selbst bei konformen Daten
 Fehler liefern können)
@@ -3765,17 +3766,18 @@ Fehler liefern können)
 .IPs fast\ 
 Aktiviere Optimierungen, die nicht den Spezifikationen entsprechen und
 möglicherweise Probleme verursachen können, wie beispielsweise einfachere
-Dequantisierung, angenommene Benutzung der Standardquantisierungsmatrix, YUV
-angenommen 4:2:0 und das Überspringen von ein paar Überprüfungen, die sonst
+Dequantisierung bei angenommener Benutzung der Standardquantisierungsmatrix und
+angenommen, dass YUV als 4:2:0 vorliegt, und das Überspringen von ein paar
+Überprüfungen, die sonst
 vorgenommen werden, um fehlerhafte Bitstreams zu erkennen.
-.IPs gray
+.IPs gray\ 
 Decodierung nur mit Graustufen (was ein bischen schneller als mit Farbe ist)
 .IPs "idct=<0\-99> (siehe \-lavcopts)"
 Um die beste Decodierqualität zu erreichen, benutze denselben IDCT-Algorithmus
-für Encodierung und Decodierung.
+für Decodierung und Encodierung.
 Dies kann allerdings auf Kosten der Genauigkeit gehen.
 .IPs lowres=<Nummer>[,<b>]
-Decodierung von niedrigeren Auflösungen.
+Decodierung bei niedrigeren Auflösungen.
 Dies wird nicht von allen Codecs unterstützt und wird oft in hässlichen
 Artefakten resultieren.
 Dies ist kein Bug sondern ein Nebeneffekt der Decodierung bei nicht voller
@@ -3784,14 +3786,14 @@ Auflösung.
 .br
 0: deaktiviert
 .br
-1: 1/2 Auflösung
+1: 1/\:2 Auflösung
 .br
-2: 1/4 Auflösung
+2: 1/\:4 Auflösung
 .br
-3: 1/8 Auflösung
+3: 1/\:8 Auflösung
 .REss
 .RS
-Falls <b> angegeben wurde, wird die Decodierung für niedrige Auflösungen nur
+Falls <b> angegeben wurde, wird die Decodierung bei niedriger Auflösungen nur
 dann benutzt, falls die Breite des Videos größer oder gleich dem Wert <b> ist.
 .RE
 .IPs "sb=<Nummer> (nur bei MPEG-2)"
@@ -3800,13 +3802,14 @@ dann benutzt, falls die Breite des Videos größer oder gleich dem Wert <b> ist.
 Überspringe oben die angegebene Anzahl von Makroblockreihen.
 .IPs skiploopfilter=<skipvalue> (nur H.264)
 Überspringt den Schleifenfilter (Deblocking) während der H.264-Decodierung.
-Da das gefilterte Bild als Referenz für darauf aufbauende Bilder benutzt wird
-hat dies im Vergleich zum Weglassen des Deblocking-Filters bei MPEG-2 einen
+Da das gefilterte Bild als Referenz für darauf aufbauende Bilder benutzt wird,
+hat dies im Vergleich zum Weglassen des Deblocking-Filters bei z.B.\& MPEG-2
+einen
 stärkeren negativen Effekt auf die Qualität.
 Aber zumindest bei HDTV mit hoher Bitrate bietet dies einen hohen
 Geschwindigkeitsgewinn bei kaum sichtbarem Qualitätsverlust.
 .sp 1
-<skipvalue> Kann einer der folgenden Werte sein:
+<skipvalue> kann einen der folgenden Werte annehmen:
 .RSss
 .br
 none: Niemals überspringen.
@@ -3814,12 +3817,12 @@ none: Niemals überspringen.
 default: Unnötige Verarbeitungsschritte überspringen (z.B.\& 0 Byte große
 Pakete in AVI).
 .br
-nonref: Überspringe unreferenzierte Bilder (d.h. nicht für die Decodierung
+nonref: Überspringe unreferenzierte Bilder (z.B.\& nicht für die Decodierung
 anderer Bilder benötigt, der Fehler kann nicht akkumulieren).
 .br
 bidir: B-Frames überspringen.
 .br
-nonkey: Alle Bilder ausser Keyframes überspringen.
+nonkey: Alle Bilder außer Keyframes überspringen.
 .br
 all: Alle Bilder überspringen.
 .REss
@@ -3829,11 +3832,10 @@ Verringert die Qualität in fast allen Fällen stark (siehe skiploopfilter
 für mögliche Werte).
 .IPs skipframe=<skipvalue>
 Überspringt die Dekodierung von Bildern komplett.
-Hohe Geschwindigkeitsgewinn, aber ruckelige Bewegungen und manchmal
+Hoher Geschwindigkeitsgewinn, aber ruckelige Bewegungen und manchmal
 schlimme Artefakte (siehe skiploopfilter für mögliche Werte).
 .IPs threads=<1\-8>
 Anzahl der für die Decodierung zu benutzenden Threads (Standard: 1).
-Nur sinnvoll, wenn mehrere logische Prozessoren vorhanden sind (Hyperthreading oder SMP).
 .IPs vismv=<Wert>
 Visualisiere Motion-Vectors.
 .RSss
@@ -3854,24 +3856,26 @@ Gebe Statistiken aus und speichere sie in ./vstats_*.log.
 .B \-noslices
 Deaktiviert die Anzeige des Videos in 16-Pixel-hohen Streifen und stellt den
 kompletten Frame statt dessen in einem einzigen Durchgang dar.
-Dies kann die Darstellung schneller oder langsamer machen, abhängig von der
-Hardware/\:dem Cache.
-Dies hat nur einen Effekt bei den Codecfamilien libmpeg2 und libavcodec.
+Dies kann die Darstellung schneller oder langsamer machen, abhängig von
+Hardware/\:Cache.
+Dies hat nur einen Effekt bei den Codecs libmpeg2 und libavcodec.
 .
 .TP
 .B \-nosound
 Spielt keinen Sound ab bzw.\& encodiert keinen Sound.
+Nützlich für Benchmarking-Zwecke.
+.
 .TP
 .B \-novideo
 Spielt kein Video ab bzw.\& encodiert kein Video.
-In vielen Fällen funktioniert dies nicht, benutze stattdessen \-vc null
-und \-vo null.
+In vielen Fällen funktioniert dies nicht, benutze stattdessen \-vc null \-vo
+null.
 .
 .TP
-.B \-oldpp <Qualität> (nur bei OpenDivX) (OBSOLET)
+.B \-oldpp <Qualität> (nur bei OpenDivX) (VERALTET)
 Benutze den Postprocessing-Code von opendivx anstelle des internen.
-Das interne Postprocessing liefert bessere Qualität und Performance, ersetzt
-durch \-pp.
+Ersetzt durch \-pp liefert das interne Postprocessing bessere Qualität und
+Performance.
 Der gültige Wertebereich für \-oldpp variiert je nach Codec, ist meistens
 aber 0\-6, wobei 0=deaktiviert und 6=langsamster/\:bester Modus bedeutet.
 .
@@ -3886,8 +3890,8 @@ Der gültige Wertebereich für \-pp variiert je nach Codec, ist meistens aber
 .
 .TP
 .B \-pphelp (siehe auch \-vf pp)
-Zeigt eine Zusammenfassung der vorhandenen Postprocessing-Filter und
-Nutzungshinweise an.
+Zeigt eine Zusammenfassung der vorhandenen Postprocessing-Filter und deren
+Benutzung.
 .
 .TP
 .B \-ssf <Modus>
@@ -3910,9 +3914,9 @@ Schärfefilter (beim Helligkeitsanteil)
 .IPs cs=<0\-100>
 Schärfefilter (beim Farbanteil)
 .IPs chs=<h>
-Horizontale Verschiebung des Farbanteils
+horizontale Verschiebung des Farbanteils
 .IPs cvs=<v>
-Vertikale Verschiebung des Farbanteils
+vertikale Verschiebung des Farbanteils
 .RE
 .PD 1
 .
@@ -3974,8 +3978,8 @@ Die Beschreibung des Videofilters scale enthält weitere Informationen.
 .
 .TP
 .B \-vc <[-|+]Codec1,[-|+]Codec2,...[,]>
-Gibt eine Prioritätsliste der zu verwendenden Videocodecs an, so wie sie
-in codecs.conf definiert werden.
+Gibt eine Prioritätsliste der zu verwendenden Videocodecs an, entsprechend dem
+Codecnamen in codecs.conf.
 Ein '-' vor dem Codecnamen deaktiviert diesen Codec.
 Ein '+' vor dem Codecnamen erzwingt diesen, das führt vermutlich zu einem Absturz!
 Wenn die Liste mit ',' endet, dann greift MPlayer auch auf auch nicht
@@ -3993,17 +3997,17 @@ Erzwingt den Win32/\:VFW DivX-Codec; andere werden nicht ausprobiert.
 Probiet zuerst den divx4linux-Codec, danach andere, wenn dieser nicht
 funktioniert.
 .IPs "\-vc -divxds,-divx,"
-Probiert alle Codecs außer den Win32-DivX-Codecs.
+Überspringt die Win32-DivX-Codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
-Probiert zuerst libavcodecs MPEG-1/\:2-Codec, gefolgt von libmpeg2, und
-dann erst andere.
+Probiert zuerst dem MPEG-1/\:2-Codec von libavcodec, gefolgt von libmpeg2, dann
+andere.
 .RE
 .PD 1
 .
 .TP
 .B \-vfm <Treiber1,Treiber2,...>
-Gibt eine Prioritätsliste der zu verwendenden Videocodecfamilien an, so wie sie
-in codecs.conf definiert werden.
+Gibt eine Prioritätsliste der zu verwendenden Videocodecfamilien an,
+entsprechend den Namen in codecs.conf.
 Wenn keine davon funktioniert, werden die Standardfamilien ausprobiert.
 .br
 .I ANMERKUNG:
@@ -4016,14 +4020,14 @@ Videocodecfamilien ausgegeben.
 .IPs "\-vfm ffmpeg,dshow,vfw"
 Probiert zuerst libavcodec, dann DirectShow, dann die VfW-Codecs und
 schließlich
-andere, falls keine der Familien funktioniert hat.
+andere, falls diese nicht funktioniert haben.
 .IPs "\-vfm xanim"
 Probiert zuerst die XAnim-Codecs.
 .RE
 .PD 1
 .
 .TP
-.B \-x <x> (nur bei MPlayer)
+.B \-x <x> (siehe auch \-zoom) (nur bei MPlayer)
 Skaliert das Bild auf eine Breite von <x> (falls
 Software-/\:Hardwareskalierung verfügbar ist).
 Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
@@ -4067,19 +4071,19 @@ Deaktiviert direktes Rendern mit Methode 2.
 .PD 1
 .
 .TP
-.B \-xy <Wert>
+.B \-xy <Wert> (siehe auch \-zoom)
 .PD 0
 .RSs
 .IPs Wert<=8
 Skaliert das Bild um den Faktor <Wert>.
 .IPs Wert>8
-Setzt die Bildbreite auf <Wert> und berechnet die Höhe so, dass das
+Setze die Bildbreite auf <Wert> und berechne die Höhe so, dass das
 ursprüngliche Höhen-/\:Breitenverhältnis beibehalten wird.
 .RE
 .PD 1
 .
 .TP
-.B \-y <y> (nur bei MPlayer)
+.B \-y <y> (siehe auch \-zoom) (nur bei MPlayer)
 Skaliert das Bild auf eine Höhe von <y> (falls Software-/\:Hardwareskalierung
 verfügbar ist).
 Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
@@ -4087,11 +4091,9 @@ Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
 .TP
 .B \-zoom\ \ 
 Lässt Softwareskalierung zu, wo sie verfügbar ist.
-Kann benutzt werden, um Skalierung mit \-vf scale zu erzwingen.
-.br
-.I ANMERKUNG:
-\-vf scale ignoriert die Optionen \-x / \-y / \-xy / \-fs / \-aspect, wenn
-\-zoom nicht angegeben wird.
+Dies erlaubt Skalierung mit Videoausgabetreibern (wie x11, fbdev), die
+Hardwareskalierung nicht unterstützen und bei denen MPlayer skalieren aus
+Performancegründen standardmäßig deaktiviert.
 .
 .
 .
