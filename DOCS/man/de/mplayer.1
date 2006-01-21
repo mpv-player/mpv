@@ -4105,20 +4105,19 @@ Der Syntax ist folgender:
 .TP
 .B \-af <Filter1[=Parameter1:Parameter2:...],Filter2,...>
 Aktiviert eine Kette von Audiofiltern.
-Siehe auch die Sektion Audiofilter der (englischen) Dokumentation.
 .PP
 .I ANMERKUNG:
-Für eine vollständige Liste der verfügbaren Audiofilter, siehe \-af help.
+Für eine vollständige Liste der verfügbaren Audiofilter siehe \-af help.
 .PP
 Die verfügbaren Filter lauten:
 .
 .TP
 .B resample[=srate[:salopp][:Typ]]
-Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
+Ändert die Samplerate des Audiostreams.
 Kann benutzt werden, wenn du eine Soundkarte mit fester Frequenz hast oder
 eine, die maximal 44.1kHz unterstützt.
 Dieser Filter wird automatisch eingefügt, wenn nötig.
-Unterstützt nur 16-bit-Integer und -Float im Native-Endian-Format.
+Unterstützt nur 16-Bit-Integer und -Float im Native-Endian-Format als Input.
 .br
 .I ANMERKUNG:
 In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
@@ -4163,7 +4162,7 @@ exakte Skalierung der Ausgabefrequenz und lineare Interpolation verwenden.
 .TP
 .B lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
 Ändert die Samplerate des Audiostreams zu einem Integerwert in Hz.
-Unterstützt nur das 16-bit Native-Endian-Format.
+Unterstützt nur das 16-Bit Native-Endian-Format.
 .br
 .I ANMERKUNG:
 In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
@@ -4172,9 +4171,9 @@ In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
 .IPs <srate>
 die Samplerate der Ausgabe
 .IPs <Länge>
-Länge: Länge des Filters hinsichtlich der niedrigeren Samplerate (Standard: 16)
+Länge des Filters hinsichtlich der niedrigeren Samplerate (Standard: 16)
 .IPs <linear>
-Falls 1 werden die Filter zwischen Polyphase-Einträgen linear interpoliert.
+Falls 1 werden die Filter zwischen mehrphasigen Einträgen linear interpoliert.
 .IPs <Zähler>
 log2 der Anzahl der Polyphase-Einträge
 (..., 10->1024, 11->2048, 12->4096, ...)
@@ -4187,7 +4186,7 @@ gesetzt.
 .
 .TP
 .B sweep[=Geschwindigkeit]
-Erzeugt eine Sinus-Schwingung.
+Erzeugt eine Sinusschwingung.
 .PD 0
 .RSs
 .IPs <0.0\-1.0>
@@ -4212,8 +4211,8 @@ Klangs.
 .
 .TP
 .B equalizer=[g1:g2:g3:...:g10]
-Graphischer Equalizier, der im 10-Octaven-Frequenzbereich arbeitet; benutzt
-10-IIR-Bandfilter.
+Graphischer Equalizier, der im 10-Octaven-Frequenzbereich arbeitet;
+implementiert durch einen 10-IIR-Bandfilter.
 Das bedeutet, dass er unabhängig davon funktioniert, welcher Art der
 wiedergegebene Audiotyp ist.
 Die mittleren Frequenzen für die 10 Frequenzbereiche sind:
@@ -4373,7 +4372,7 @@ hoch ist.
 .B pan=n[:l01:l02:...l0n:l10:l12:...l1n:lm0:lm1:...lmn]
 Mischt Kanäle beliebig.
 Im Prinzip eine Kombination der Filter volume und channels, der benutzt werden
-kann, viele Kanäle auf nur wenige herunterzumischen, z.B.\& stereo nach mono
+kann, viele Kanäle auf nur wenige herunterzumischen, z.B.\& Stereo nach Mono
 oder das Verändern der "Breite" vom mittleren Lautsprecher in einem
 Surroundsound-System.
 Dieser Filter ist schwierig zu benutzen und wird etwas Herumprobieren
@@ -4390,7 +4389,7 @@ Anzahl der Ausgabekanäle (1\-6).
 .IPs <lij>
 Gibt an, wieviel vom Eingabekanal i in den Ausgabekanal j gemischt wird (0\-1).
 Prinzipiell geben die ersten n Zahlen an, was mit dem ersten Eingabekanal
-gemacht wird, dann n Zahlen die den zweiten Eingabekanal betreffen usw.
+gemacht wird, dann n Zahlen, die den zweiten Eingabekanal betreffen, usw.
 Falls für einige Eingabekanäle nichts angegeben ist, wird 0 angenommen.
 .RE
 .sp 1
@@ -4463,12 +4462,14 @@ nötig sein sollte.
 .
 .TP
 .B surround[=Verzögerung]
-Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
-Zweikanaldateien.
+Decoder für Matrix-encodierten Surroundsound, wie z.B.\& Dolby Surround.
+Viele Dateien mit zwei Audiokanälen enthalten tatsächlich matrixencodierten
+Surroundsound.
+Benötigt eine Soundkarte, die mindestens 4 Kanäle unterstützt.
 .PD 0
 .RSs
 .IPs <Verzögerung>
-Verzögerung in ms für den hinteren Lautsprecher (0 bis 1000) (Standard: 20)
+Verzögerung in ms für die hinteren Lautsprecher (0 bis 1000) (Standard: 20)
 Diese Verzögerung sollte wie folgt gesetzt werden: Wenn d1 der Abstand ist,
 von dem aus die vorderen Lautsprecher gehört werden, und d2 der Abstand ist,
 von dem aus die hinteren Lautsprecher gehört werden, dann sollte die
@@ -4504,7 +4505,8 @@ Die Verzögerung in ms, die jedem Kanal auferlegt wird (Fließkommazahl zwischen
 Um die benötigte Verzögerung für die verschiedenen Kanäle zu berechnen, gehe
 wie folgt vor:
 .IP 1. 3
-Messe die Entfernung der Lautsprecher in Metern in Relation zu der Position,
+Messe die Entfernung zu den Lautsprechern in Metern in Relation zu der
+Position,
 an der gehört wird, was dir die Entfernungen s1 bis s5 liefert (bei einem
 5.1-System).
 Für den Subwoofer macht Anpassung keinen Sinn (du wirst den Unterschied eh
@@ -4532,7 +4534,7 @@ Kanäle und den Subwoofer um 0ms und Center um 7ms.
 .B export[=mmapped_Datei[:nsamples]]
 Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
 (mmap()).
-Memory-mapped-Bereiche enhalten einen Header:
+Memory-mapped-Bereiche enthalten einen Header:
 .sp 1
 .nf
 int nch                     /*Anzahl der Kanäle*/
@@ -4569,7 +4571,7 @@ Wiedergabe eine Art "Live"-Effekt hinzuzufügt.
 .RSs
 .IPs <mul>
 Setzt den Differenz-Koeffizient (Standard: 2.5).
-0.0 bedeutet Klang in mono (Durchschnitt beider Kanäle), bei 1.0 bleibt der
+0.0 bedeutet Klang in Mono (Durchschnitt beider Kanäle), bei 1.0 bleibt der
 Klang unverändert, mit -1.0 werden linker und rechter Kanal vertauscht.
 .RE
 .PD 1
@@ -4607,7 +4609,7 @@ Ist es nicht gesetzt, muss der volle Pfadname angegeben werden.
 .IPs <Label>
 Gibt den Filter innerhalb der Bibliothek an.
 Manche Bibliotheken beinhalten nur einen Filter, andere aber enthalten mehrere.
-Angabe von 'help' zeigt alle verfügbaren Filter innerhalb der angegebenen
+Angabe von 'help' hier zeigt alle verfügbaren Filter innerhalb der angegebenen
 Bibliothek, was die Benutzung von 'listplugins' des LADSPA SDK überflüssig
 macht.
 .IPs <Kontrollen>
@@ -4630,7 +4632,7 @@ Dieser Filter ist nicht getestet und möglicherweise unbrauchbar.
 .
 .TP
 .B gate\ \ \ 
-Ein das Rauschen beschränkender Filter, ähnlich dem Filter comp.
+Ein das Rauschen beschränkender Filter, ähnlich dem Audiofilter comp.
 Dieser Filter ist nicht getestet und möglicherweise unbrauchbar.
 .
 .
@@ -4643,7 +4645,7 @@ Die Syntax ist folgender:
 Aktiviert eine Videofilterkette zusammen mit ihren Optionen.
 .
 .TP
-.B \-vop <...,Filter2[=Parameter1:Parameter2:...],Filter1> (OBSOLET)
+.B \-vop <...,Filter2[=Parameter1:Parameter2:...],Filter1> (VERALTET)
 Aktiviert eine Kette von Videofiltern zusammen mit ihren Optionen, die in
 .B umgekehrter
 Reihenfolge angewendet wird.
@@ -4651,8 +4653,8 @@ Wurde ersetzt durch \-vf.
 .PP
 Viele Parameter sind optional und werden teilweise mit Standardwerten belegt,
 wenn sie weggelassen werden.
-Mit '-1' werden die Standardwerte beibehalten.
-Die Parameter w:h bedeuten Breite (width) und Höhe (height); x:y bedeutet
+Mit '-1' werden die Standardwerte explizit beibehalten.
+Die Parameter w:h bedeuten Breite (width) x Höhe (height); x:y bedeutet
 die x:y-Position relativ zur linken oberen Ecke des größeren Bildes.
 .br
 .I ANMERKUNG:
@@ -4769,13 +4771,14 @@ Anzeige von OSD/\:Untertiteln
 1: aktiviert
 .REss
 .IPs <a>\ \ 
-Expandiert auf das Seitenverhältnis anstatt auf die Auflösung (Standard: 0).
+Expandiert angepasst an das Seitenverhältnis anstatt an die Auflösung
+(Standard: 0).
 .sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IP expand=800::::4/3
-Erweitert auf 800x600, es sei denn die Quelle hat einen höhere Auflösung, dann
+Erweitert auf 800x600, es sei denn, die Quelle hat einen höhere Auflösung, dann
 wird auf das Seitenverhältnis 4/3 erweitert.
 .RE
 .PD 1
@@ -4798,13 +4801,13 @@ Bei Werten zwischen 4\-7 wird das Bild nur dann gedreht, wenn es vorher
 hochkant war  (es also höher als breit ist).
 .RSs
 .IPs 0
-Drehen um 90 Grad im Uhrzeigersinn und Umdrehen (Standard).
+Drehe um 90 Grad im Uhrzeigersinn und stelle es auf den Kopf (Standard).
 .IPs 1
-Drehen um 90 Grad im Uhrzeigersinn.
+Drehe um 90 Grad im Uhrzeigersinn.
 .IPs 2
-Drehen um 90 Grad gegen den Uhrzeigersinn.
+Drehe um 90 Grad gegen den Uhrzeigersinn.
 .IPs 3
-Drehen um 90 Grad gegen den Uhrzeigersinn und Umdrehen.
+Drehe um 90 Grad gegen den Uhrzeigersinn und stelle es auf den Kopf.
 .RE
 .
 .TP
@@ -4843,19 +4846,19 @@ Schalte Interlaced-Skalierung an/\:aus.
 .IPs <chr_drop>
 Chroma-Skipping, Auslassen von Chrominanz-Berechnungen
 .RSss
-0: Benutze alle verfügbaren Eingabelinien für Chrominanz-Berechnungen.
+0: Benutze alle verfügbaren Eingabezeilen für Chrominanz-Berechnungen.
 .br
-1: Benutze nur jede zweite Eingabelinie für Chrominanz-Berechnungen.
+1: Benutze nur jede zweite Eingabezeile für Chrominanz-Berechnungen.
 .br
-2: Benutze nur jede vierte Eingabelinie für Chrominanz-Berechnungen.
+2: Benutze nur jede vierte Eingabezeile für Chrominanz-Berechnungen.
 .br
-3: Benutze nur jede achte Eingabelinie für Chrominanz-Berechnungen.
+3: Benutze nur jede achte Eingabezeile für Chrominanz-Berechnungen.
 .REss
 .IPs "<param>:[:<param2>] (siehe auch \-sws)"
 Setzt einige Skalierungsparameter abhängig vom Skalierer, der mit \-sws
 gewählt wurde.
 .RSss
-\-sws 2 (bicubic):  B (weichzeichnend) und C (verstärkend)
+\-sws 2 (bicubisch):  B (weichzeichnend) und C (verstärkend)
 .br
 0.00:0.60 Standard
 .br
@@ -4889,7 +4892,7 @@ spal:    768x576 (PAL mit quadratischen Pixeln)
 .RE
 .
 .TP
-.B dsize={Aspekt|b:h:Methode:r}
+.B dsize=[Aspekt|b:h:Aspektmethode:r]
 Ändert die beabsichtigte Displaygröße/\:den Aspekt an einer frei wählbaren
 Position der Filterkette.
 Der Aspekt kann als Bruch (4/\:3) oder Fließkommazahl (1.33) angegeben werden.
@@ -4907,7 +4910,7 @@ Kann auch die folgenden Spezialwerte haben:
 .RSss
  0:    ursprüngliche Anzeigebreite und -höhe.
 .br
--1:    ursprüngliche Videobreite und -höhe (Standard).
+-1:    ursprüngliche Videobreite\:/-höhe (Standard).
 .br
 -2:    Berechne b/\:h anhand der anderen Abmessung und des ursprünglichen
 Anzeigeaspekts.
@@ -4922,7 +4925,7 @@ Videoaspekts.
 Gibt eine Anzeigeauflösung von 800x600 für ein Video mit Aspekt 4/3, oder
 800x450 für ein 16/9-Video an.
 .RE
-.IPs <Methode>
+.IPs <Aspektmethode>
 Verändert Breite und Höhe anhand des ursprünglichen Aspekts.
 .RSss
 -1: Ignoriere ursprünglichen Aspekt (Standard).
@@ -4940,7 +4943,8 @@ Verändert Breite und Höhe anhand des ursprünglichen Aspekts.
 .PD 0
 .RSs
 .IP dsize=800:600:0
-Gibt eine Anzeigeauflösung von maximal 800x600 oder kleiner an.
+Gibt eine Anzeigeauflösung von maximal 800x600 oder kleiner an, um den Aspekt
+beizubehalten.
 .RE
 .PD 1
 .IPs <r>\ \ 
@@ -4949,7 +4953,7 @@ Rundet Breite und Höhe auf ein Vielfaches von <r> auf (Standard: 1).
 .
 .TP
 .B yuy2\ \ \ 
-Erzwingt YV12/\:I420/\:422P zu YUY2-Konvertierung in Software.
+Erzwingt Konvertierung von YV12/\:I420/\:422P nach YUY2 in Software.
 Nützlich bei Videokarten/\:Treibern mit langsamer YV12- aber
 schneller YUY2-Unterstützung.
 .
@@ -4980,7 +4984,7 @@ einer Farbpalette.
 .
 .TP
 .B format[=fourcc]
-Beschränkt den Farbraum des nächsten Filters ohne wirkliche Konvertierung.
+Beschränkt den Farbraum des nächsten Filters ohne jegliche Konvertierung.
 Benutze ihn zusammen mit dem scale-Filter, um tatsächlich eine Konvertierung
 durchzuführen.
 .br
@@ -4995,7 +4999,7 @@ Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yuy2)
 .
 .TP
 .B noformat[=fourcc]
-Beschränkt den Farbraum des nächsten Filters ohne wirkliche Konvertierung.
+Beschränkt den Farbraum des nächsten Filters ohne jegliche Konvertierung.
 Anders als der format-Filter erlaubt dieser jeden Farbraum
 .B außer
 dem von dir angegebenen.
@@ -5010,19 +5014,19 @@ Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yv12)
 .PD 1
 .
 .TP
-.B pp[=Filter1[:Option1[:Option2...]]/[-]Filter2...] (siehe auch \-pphelp)
-Diese Option aktiviert die Benutzung von MPlayers internen
-Postprocessing-Filtern.
-Unterfilter müssen durch ein '/'\-Zeichen voneinander getrennt werden und
+.B pp[=Filter1[:Option1[:Option2...]]/\:[-]Filter2...] (siehe auch \-pphelp)
+Aktiviert die Benutzung der angegebenen Kette von Postprocessing-Subfiltern.
+Subfilter müssen durch ein '/'\-Zeichen voneinander getrennt werden und
 können durch ein vorangestelltes '\-' deaktiviert werden.
 Jeder Unterfilter und manche Optionen haben einen kurzen und einen langen
-Namen, die abwechselnd benutzt werden können, z.B.\& dr/dering gleichzeitig.
-Alle Unterfilter teilen gemeinsame Optionen, um ihren Geltungsbereich zu
+Namen, die unabhängig voneinander benutzt werden können, so ist z.B.\&
+dr/dering das gleiche.
+Alle Subfilter teilen gemeinsame Optionen, um ihren Geltungsbereich zu
 bestimmen:
 .PD 0
 .RSs
 .IPs a/autoq
-Schalte den Unterfilter automatisch aus, falls die CPU zu langsam ist.
+Schalte den Subfilter automatisch aus, falls die CPU zu langsam ist.
 .IPs c/chrom
 Führe außerdem Chrominanz-Filterung durch (Standard).
 .IPs y/nochrom
@@ -5035,9 +5039,9 @@ Führe nur Chrominanz-Filterung durch (keine Luminanz).
 .RS
 .br
 .I ANMERKUNG:
-\-pphelp zeigt eine Liste der verfügbaren Unterfilter.
+\-pphelp zeigt eine Liste der verfügbaren Subfilter.
 .sp 1
-Verfügbare Unterfilter sind folgende:
+Verfügbare Subfilter sind folgende:
 .RE
 .RSs
 .IPs hb/hdeblock[:Differenz[:Flachheit]]
@@ -5121,8 +5125,8 @@ Vertikal angewendeter FIR-Tiefpass-Deinterlace-Filter, der Deinterlacing eines
 gegebenen Blocks durch Filterung aller Zeilen mit einem (-1 2 6 2 -1)-Filter
 durchführt.
 .IPs fq/forceQuant[:Quantisierungsparameter]
-Überschreibt die Quantisierungstabelle der Eingabe mit einem konstanten
-Quantisierungsparameter, den du angibst.
+Überschreibt die Tabelle der Quantisierungsparameter der Eingabe mit einem
+konstanten Quantisierungsparameter, den du angibst.
 .RSss
 <Quantisierungsparameter>: zu benutzender Quantisierungsparameter
 .REss
@@ -5147,7 +5151,7 @@ Standardfilter ohne Helligkeits\-/\:Kontrastkorrektur
 .IPs "\-vf pp=default/tmpnoise:1:2:3"
 Aktiviert Standardfilter und temporäre Rauschunterdrücker.
 .IPs "\-vf pp=hb:y/vb:a"
-Horizontales Deblocking nur luminanz-bezogen, schaltet vertikales Deblocking
+Horizontales Deblocking nur luminanzbezogen, schaltet vertikales Deblocking
 je nach verfügbarer CPU-Auslastung hinzu.
 .RE
 .PD 1
