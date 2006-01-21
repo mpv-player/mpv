@@ -567,7 +567,8 @@ Siehe '\-msglevel help' für eine Liste der verfügbaren Module.
 .br
 .I ANMERKUNG:
 Meldungen, die vor der Auswertung der Kommandozeile ausgegeben werden,
-können nicht gesteuert werden.
+können nur von $MPLAYER_VERBOSE gesteuert werden, welches sich auf alle Module
+bezieht.
 .br
 Verfügbare Levels:
 .PD 0
@@ -9346,12 +9347,21 @@ sucht MPlayer nach Untertiteldateien in folgender Reihenfolge:
 .
 .SH UMGEBUNGSVARIABLEN
 .
-Es gibt einige Umgebungsvariablen, die das Verhalten von MPlayer und
-MEncoder steuern können.
+Es gibt einige Umgebungsvariablen, die benutzt werden können, um das Verhalten
+von MPlayer und MEncoder zu steuern.
 .
 .TP
 .B MPLAYER_HOME
 Verzeichnis, in dem MPlayer nach dem Benutzereinstellungen sucht.
+.
+.TP
+.B MPLAYER_VERBOSE
+Setze das initiale Ausführlichkeitslevel quer durch alle
+Benachrichtigungsmodule.
+Standardwert ist 0.
+Negative Werte führen zu weniger Mitteilungen, während positive Werte zu mehr
+führen.
+Siehe auch \-v und \-msglevel oben.
 .
 .SS libaf:
 .
