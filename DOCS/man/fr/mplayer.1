@@ -1,4 +1,4 @@
-.\" synced with 1.1206
+.\" synced with 1.1208
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -579,7 +579,8 @@ Tapez '-msglevel help' pour avoir la liste de tous les modules.
 .br
 .I NOTE\ :
 Les messages affichés avant que la ligne de commande soit chargée ne
-peut pas être contrôlé
+peuvent être contrôlés que par $MPLAYER_VERBOSE, qui s'applique à tous
+les modules.
 .br
 Niveaux disponibles\ :
 .PD 0
@@ -9716,6 +9717,13 @@ utilisées pour contrôler le comportement de MPlayer et MEncoder.
 .TP
 .B MPLAYER_HOME
 Le répertoire où MPlayer lit la configuration de l'utilisateur.
+.
+.TP
+.B MPLAYER_VERBOSE (voir aussi \-v et \-msglevel)
+Défini le niveau initial de verbosité de tous les messages des
+modules (par défaut\ : 0).
+Les valeurs négatives résultent en moins de messages alors que
+les valeurs positives résultent en plus.
 .
 .SS libaf:
 .
