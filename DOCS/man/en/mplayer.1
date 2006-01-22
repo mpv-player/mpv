@@ -6831,6 +6831,16 @@ You can specify the sensitivity of the detection with this option.
 1000000000 means no scene changes are detected (default: 0).
 .
 .TP
+.B sc_factor=<any positive integer>
+Causes frames with higher quantizers to be more likely to trigger a
+scene change detection and make libavcodec use an I-frame (default: 1).
+1\-16 is a sane range.
+Values between 2 and 6 may yield increasing PSNR (up to approximately
+0.04 dB) and better placement of I-frames in high-motion scenes.
+Higher values than 6 may give very slightly better PSNR (approximately
+0.01 dB more than sc_factor=6), but noticably worse visual quality.
+.
+.TP
 .B vb_strategy=<0\-2> (pass one only)
 strategy to choose between I/\:P/\:B-frames:
 .PD 0
