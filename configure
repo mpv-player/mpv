@@ -7279,6 +7279,7 @@ AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_GPL=yes
+CONFIG_MUXERS=yes
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
