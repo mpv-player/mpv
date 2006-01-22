@@ -123,6 +123,7 @@ for _try_dtd in \
   /usr/share/docbook-xml42/docbookx.dtd \
   /usr/share/sgml/docbook/xml-dtd-4.1.2*/docbookx.dtd \
   /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd \
+  /usr/share/sgml/docbook/xml-dtd-4.4/docbookx.dtd \
   /usr/share/xml/docbook/schema/dtd/4.2/docbookx.dtd \
   /usr/share/sgml/docbook/dtd/4.2/docbookx.dtd
 do
