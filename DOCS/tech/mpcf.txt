@@ -229,28 +229,29 @@ index:
         syncpoint_pos_div8              v
     }
     for(i=0; i<stream_count; i++){
-        for(j=0; j<syncpoint_count; ){
+        for(j=0; j<syncpoints; ){
             x                           v
             type= x & 1
             x>>=1
+            n=j
             if(type){
                 flag= x & 1
                 x>>=1
                 while(x--)
-                    has_keyframe[j++][i]=flag
-                has_keyframe[j++][i]=!flag;
+                    has_keyframe[n++][i]=flag
+                has_keyframe[n++][i]=!flag;
             }else{
                 while(x != 1){
-                    has_keyframe[j++][i]=x&1;
+                    has_keyframe[n++][i]=x&1;
                     x>>=1;
                 }
             }
-        }
-        for(j=0; j<syncpoint_count; j++){
-            if (!has_keyframe[j++][i]) continue
-            A                           v
-            last_pts += A
-            keyframe_pts[j][i] = last_pts
+            for(; j<n && j<syncpoints; j++){
+                if (!has_keyframe[j][i]) continue
+                A                           v
+                last_pts += A
+                keyframe_pts[j][i] = last_pts
+            }
         }
     }
     reserved_bytes
