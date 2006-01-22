@@ -30,7 +30,7 @@ extern vf_info_t vf_info_bmovl;
 #endif
 extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
-#ifdef FF_POSTPROCESS
+#if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
 extern vf_info_t vf_info_pp;
 #endif
 extern vf_info_t vf_info_scale;
@@ -109,7 +109,7 @@ static vf_info_t* filter_list[]={
 #endif
     &vf_info_crop,
     &vf_info_expand,
-#ifdef FF_POSTPROCESS
+#if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
     &vf_info_pp,
 #endif
     &vf_info_scale,

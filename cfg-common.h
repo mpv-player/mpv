@@ -192,7 +192,7 @@
         {"oldpp", "MPlayer was compiled without the OpenDivX library.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 	{"npp", "-npp has been removed, use -vf pp and read the fine manual.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#ifdef FF_POSTPROCESS
+#if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
 

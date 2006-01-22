@@ -240,8 +240,10 @@ Codecs:
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
+  --disable-libpostproc  disable libpostproc [autodetect]
   --disable-libavcodec_so  disable shared libavcodec [autodetect]
   --disable-libavformat_so disable shared libavformat [autodetect]
+  --disable-libpostproc_so disable shared libpostproc [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --disable-internal-tremor do not build internal OggVorbis support [enabled]
   --enable-tremor-low    build with lower accuracy internal tremor [disabled]
@@ -1468,6 +1470,8 @@ _libavcodecs=`grep 'register_avcodec(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*
 _libavcodec_so=auto
 _libavformat=auto
 _libavformat_so=auto
+_libpostproc=auto
+_libpostproc_so=auto
 _fame=auto
 _mp1e=no
 _mencoder=yes
@@ -1818,6 +1822,10 @@ for ac_option do
   --disable-libavformat)	_libavformat=no	;;
   --enable-libavformat_so)	_libavformat_so=yes	;;
   --disable-libavformat_so)	_libavformat_so=no	;;
+  --enable-libpostproc)		_libpostproc=yes	;;
+  --disable-libpostproc)	_libpostproc=no		;;
+  --enable-libpostproc_so)	_libpostproc_so=yes	;;
+  --disable-libpostproc_so)	_libpostproc_so=no	;;
   --enable-libfame)	_fame=yes	;;
   --disable-libfame)	_fame=no	;;
   --enable-lirc)	_lirc=yes	;;
@@ -6047,10 +6055,15 @@ if test "$_libavformat" = auto ; then
 fi
 echores "$_libavformat"
 
-_def_haveffpostprocess='no'
+echocheck "FFmpeg libpostproc (static)"
+if test "$_libpostproc" = auto ; then
+_libpostproc=no
 if test -d libavcodec && test -f libavcodec/libpostproc/postprocess.h ; then
-   _def_haveffpostprocess='yes'
+   _libpostproc='yes'
 fi
+fi
+echores "$_libpostproc"
+
 
 if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
@@ -6059,7 +6072,6 @@ if test "$_libavcodec_so" = auto ; then
   _res_comment="libavcodec.so is broken/obsolete"
 # FIXME : check for avcodec_find_encoder_by_name() for mencoder
   cat > $TMPC << EOF
-#define FF_POSTPROCESS 1 
 #include <ffmpeg/avcodec.h>
 int main(void) { 
     avcodec_find_encoder_by_name("");
@@ -6087,14 +6099,32 @@ fi
 echores "$_libavformat_so"
 fi
 
+if test "$_libpostproc" != yes ; then
+echocheck "FFmpeg libpostproc (dynamic)"
+if test "$_libpostproc_so" = auto ; then
+  _libpostproc_so=no
+  cat > $TMPC << EOF
+  #define USE_LIBPOSTPROC 1
+  #include <inttypes.h>
+  #include <postproc/postprocess.h>
+  int main(void) {
+      pp_get_mode_by_name_and_quality("de", 0);
+      return 0;}
+EOF
+  if cc_check -lpostproc $_ld_lm ; then
+    _libpostproc_so=yes
+    _res_comment="using libpostproc.so, but static libpostproc is recommended"
+  fi
+fi
+echores "$_libpostproc_so"
+fi
+
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
-_def_ffpostprocess='#undef FF_POSTPROCESS'
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _ld_libavcodec='libavcodec/libavcodec.a'
   _dep_libavcodec='libavcodec/libavcodec.a'
-  _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _codecmodules="libavcodec $_codecmodules"
   if test "$_libavutil" = yes; then
     _ld_libavutil='libavutil/libavutil.a'
@@ -6103,7 +6133,6 @@ if test "$_libavcodec" = yes ; then
 elif test "$_libavcodec_so" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_libavcodec_so='#define USE_LIBAVCODEC_SO 1'
-  _def_ffpostprocess='#define FF_POSTPROCESS 1'
   _ld_libavcodec='-lavcodec'
   _codecmodules="libavcodec.so $_codecmodules"
 else
@@ -6127,6 +6156,17 @@ else
     if win32 ; then
       _def_libavformat_win32='#define CONFIG_WIN32 1'
     fi
+  fi
+fi
+
+_def_libpostproc='#undef USE_LIBPOSTPROC'
+_def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
+if test "$_libpostproc" = yes ; then
+  _def_libpostproc='#define USE_LIBPOSTPROC 1'
+else
+  if test "$_libpostproc_so" = yes ; then
+    _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
+    _ld_libpostproc='-lpostproc'
   fi
 fi
 
@@ -7143,7 +7183,6 @@ SPEEX = $_speex
 MUSEPACK = $_musepack
 
 UNRARLIB = $_unrarlib
-HAVE_FFPOSTPROCESS = $_def_haveffpostprocess
 PNG = $_mkf_png
 JPEG = $_mkf_jpg
 GIF = $_mkf_gif
@@ -7215,12 +7254,14 @@ W32_LIB = $_ld_win32
 DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavutil $_dep_libavcodec $_dep_libavformat
-AV_LIB = $_ld_libavformat $_ld_libavcodec $_ld_libavutil 
+AV_LIB = $_ld_libavutil  $_ld_libavcodec  $_ld_libavformat  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
 CONFIG_LIBAVCODEC = $_libavcodec
 CONFIG_LIBAVCODEC_SO = $_libavcodec_so
 CONFIG_LIBAVFORMAT = $_libavformat
 CONFIG_LIBAVFORMAT_SO = $_libavformat_so
+CONFIG_LIBPOSTPROC = $_libpostproc
+CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 FAME = $_fame
 FAME_LIB = $_ld_fame
@@ -7587,7 +7628,8 @@ $_def_dvdnav_version
 #define MPEG12_POSTPROC 1
 
 /* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
-$_def_ffpostprocess
+$_def_libpostproc
+$_def_libpostproc_so
 
 /* Define to include support for OpenDivx postprocessing */
 $_def_odivx_postprocess

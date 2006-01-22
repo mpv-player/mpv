@@ -139,7 +139,10 @@ VFILTER_SRCS=vf.c \
              vf_yvu9.c \
              vf_screenshot.c \
 
-ifeq ($(HAVE_FFPOSTPROCESS),yes)
+ifeq ($(CONFIG_LIBPOSTPROC),yes)
+VFILTER_SRCS += vf_pp.c
+endif
+ifeq ($(CONFIG_LIBPOSTPROC_SO),yes)
 VFILTER_SRCS += vf_pp.c
 endif
 

@@ -74,7 +74,7 @@ typedef struct {
     int b_count;
 } vd_ffmpeg_ctx;
 
-//#ifdef FF_POSTPROCESS
+//#ifdef USE_LIBPOSTPROC
 //unsigned int lavc_pp=0;
 //#endif
 
