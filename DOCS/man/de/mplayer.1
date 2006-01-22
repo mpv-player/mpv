@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1209 (except x264encopts, TODO!)
+.\" In sync with rev 1.1210 (except x264encopts, TODO!)
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -7151,6 +7151,18 @@ wird.
 Mit dieser Option kannst du die Sensitivität dieser Erkennung bestimmen.
 -1000000000 bedeutet, dass mit jedem Frame ein Szenenwechsel erkannt wird;
 1000000000 bedeutet, dass gar keine Szenenwechsel erkannt werden (Standard: 0).
+.
+.TP
+.B sc_factor=<jede mögliche Ganzzahl>
+Bewirkt, dass Frames mit höheren Quantisierungsparametern eher eine Erkennung
+eines Szenenwechsels bewirken und libavcodec veranlassen, einen Intra-Frame zu
+benutzen (Standard: 1).
+1\-16 ist ein sinnvoller Bereich.
+Werte zwischen 2 und 6 können bewirken, den PSNR-Wert zu erhöhen (um bis zu
+ungefähr 0.04 dB) und Intra-Frames in Szenen mit viel Bewegung besser zu
+platzieren.
+Höhere Werte als 6 könnten den PSNR-Wert leicht erhöhen (um ungefähr 0.01 dB
+mehr als sc_factor=6) aber zu bemerkbar schlechterer Qualität führen.
 .
 .TP
 .B vb_strategy=<0\-2> (nur bei Durchlauf 1)
