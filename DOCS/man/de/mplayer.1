@@ -5158,7 +5158,9 @@ je nach verfügbarer CPU-Auslastung hinzu.
 .
 .TP
 .B spp[=Qualität[:qp[:Modus]]]
-einfacher Nachbearbeitungsfilter, der DCT-Artefakte (Ringing) entfernt.
+Einfacher Nachbearbeitungsfilter, der das Bild 
+mit mehreren (bzw.\& \- im Falle von Qualitätslevel 6 \- allen) Verschiebungen
+komprimiert und dekomprimiert und daraus den Mittelwert bildet.
 .RSs
 .IPs <Qualität>
 0\-6 (Standard: 3)
@@ -5169,9 +5171,9 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .br
 1: weicher Schwellenwert (besseres Deringing, aber unschärfer)
 .br
-4: wie 0, benutzt aber auch QP von B-Frames (kann Flackern verursachen).
+4: wie 0, benutze aber auch den QP von B-Frames (kann Flackern verursachen).
 .br
-5: wie 1, benutzt aber auch QP von B-Frames (kann Flackern verursachen).
+5: wie 1, benutze aber auch QP von B-Frames (kann Flackern verursachen).
 .RE
 .
 .TP
@@ -5195,7 +5197,7 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 schnellere Variante des einfachen Nachbearbeitungsfilters.
 .RSs
 .IPs <Qualität>
-4\-5 (Standard: 4)
+4\-5 (äquivalent zu spp; Standard: 4)
 .IPs <qp>\ 
 Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .IPs <Stärke> (-15\-32)
@@ -5203,7 +5205,7 @@ Stärke des Filters, niedrigere Werte behalten mehr Details, aber auch mehr
 Artefakte, während höhere Werte das Bild glatter und unschärfer machen
 (Standard: 0 \- PSNR optimal).
 .IPs <bframes>
-0: QP von B-Frames nicht benutzen (Standard).
+0: Benutze QP von B-Frames nicht (Standard).
 .br
 1: Benutze auch QP von B-Frames (Kann Flackern verursachen).
 .RE
@@ -5220,7 +5222,7 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .br
 1: weiche Schwellwerte (besseres Deringing, aber unschärfer)
 .br
-2: mittlere Schwellwerte (standard, gute Ergebnisse)
+2: mittlere Schwellwerte (Standard, gute Ergebnisse)
 .RE
 .
 .TP
@@ -5243,7 +5245,7 @@ Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .TP
 .B lavc[=Qualität:fps]
 Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
-für die Benutzung mit DVB/\:DXR3/\:DXR2-Hardwaredecodern.
+für die Benutzung mit DVB/\:DXR3.
 Schneller und von besserer Qualität als mit \-vf fame.
 .RSs
 .IPs <Qualität>
@@ -5259,18 +5261,17 @@ Erkennung basierend auf Höhe)
 .
 .TP
 .B fame\ \ \ 
-Schnelle Softwarekonvertierung mit libfame für die Benutzung mit
-DVB/\:DXR3/\:DXR2-Hardwaredekodern.
+Schnelle Softwarekonvertierung mit libfame für die Benutzung mit DVB/\:DXR3.
 .
 .TP
-.B dvbscale[=Verhältnis]
+.B dvbscale[=Aspekt]
 Wählt die optimale Skalierung für DVB-Karten, skaliert hardwareseitig
 die X-Achse und berecht die Y-Achse softwareseitig, um den Aspekt
 beizubehalten.
 Nützlich nur in Verbindung mit expand und scale.
 .RSs
-.IPs <Verhältnis>
-Kontrolliere das Seitenverhältnis, berechnet durch DVB_HÖHE*VERHÄLTNIS
+.IPs <Aspekt>
+Kontrolliere das Seitenverhältnis, berechnet durch DVB_HÖHE*ASPEKT
 (Standard:
 576*4/\:3=768), setze auf 576*(16/\:9)=1024 für einen 16:9-Fernseher.
 .RE
@@ -5310,15 +5311,16 @@ Mische Rauschen mit einem (halbwegs) gleichmäßigen Muster
 .TP
 .B "denoise3d[=Helligkeit:Farbwert:Zeit]"
 Dieser Filter versucht, Bildrauschen zu unterdrücken und so bewegungslose
-Bilder wirklich statisch zu machen (was das Bild besser komprimierbar macht).
+Bilder wirklich statisch zu machen (was das Bild besser komprimierbar machen
+sollte).
 .PD 0
 .RSs
 .IPs <Helligkeit>
-räumliche Helligkeitsstärke (Standard = 4)
+räumliche Helligkeitsstärke (Standard: 4)
 .IPs <Farbwert>
-räumliche Farbstärke (Standard = 3)
+räumliche Farbstärke (Standard: 3)
 .IPs <Zeit>
-zeitliche Stärke (Standard = 6)
+zeitliche Stärke (Standard: 6)
 .RE
 .PD 1
 .
@@ -5328,7 +5330,7 @@ Hochpräzise und -qualitative Version des Denoise3d-Filters.
 Parameter und Gebrauch sind dieselben.
 .
 .TP
-.B eq[=Helligkeit:Kontrast] (OBSOLET)
+.B eq[=Helligkeit:Kontrast] (VERALTET)
 Softwareequalizer mit interaktiver Kontrolle wie beim Hardwareequalizer, für
 Karten/\:Treiber, die die Kontrolle über Helligkeit und Kontrast via Hardware
 nicht unterstützen.
@@ -5347,8 +5349,8 @@ initialer Kontrast
 .TP
 .B eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg:weight]
 Alternativer Softwareequalizer, der Lookup-Tabellen benutzt (sehr langsam).
-Er erlaubt neben simpler Anpassung der Helligkeit, des Kontrastes und der
-Sättigung auch eine Gammakorrektur.
+Er erlaubt neben simpler Anpassung der Helligkeit und des Kontrastes
+auch eine Gammakorrektur.
 Beachte, dass er den gleichen MMX-optimierten Code benutzt wie \-vf eq, wenn
 alle Gammawerte 1.0 betragen!
 Die Parameter werden als Fließkommazahlen angegeben.
@@ -5366,12 +5368,12 @@ initiale Sättigung (Standard: 1.0)
 .IPs <0.1\-10>
 Gammawert der roten Komponente (Standard: 1.0)
 .IPs <0.1\-10>
-Gammawert der grünen Komponente  (Standard: 1.0)
+Gammawert der grünen Komponente (Standard: 1.0)
 .IPs <0.1\-10>
-Gammawert der blauen Komponente  (Standard: 1.0)
+Gammawert der blauen Komponente (Standard: 1.0)
 .IPs <0\-1>
 Der Parameter weight kann verwendet werden, um die Wirkung hoher Gammawerte auf
-helle Bildbereiche zu reduzieren, sie also davon abzuhalten
+helle Bildbereiche zu reduzieren, sie also z.B.\& davon abzuhalten
 zu übersteuern und ganz weiss zu werden.
 Bei 0.0 hat die Gammakorrektur gar keinen Effekt mehr, bei 1.0 hat sie die
 volle Stärke.
@@ -5404,9 +5406,10 @@ Helligkeitsanteil arbeitet und sehr wenig CPU-Leistung erfordert.
 .PD 0
 .RSs
 .IPs <f>\ \ 
-In der Voreinstellung bildet halfpack  beim Downsampling den Durchschnitt
-mehrer Zeilen.
-Jeder von 0 oder 1 verschiedene Wert liefert das Standardverhalten.
+In der Voreinstellung bildet halfpack beim Downsampling den Durchschnitt
+von Zeilenpaaren.
+Jeder von 0 oder 1 verschiedene Wert liefert das
+Standard(downsampling)verhalten.
 .RSss
 0: Benutze beim Downsampling nur die geraden Zeilen.
 .br
@@ -5479,7 +5482,7 @@ mehr als der Anteil <frac> angibt (wobei 1 das ganze Bild bedeutet) vom
 Schwellenwert <lo> unterscheidet.
 Werte für <hi> und <lo> beziehen sich auf 8x8-Pixelblöcke und repräsentieren
 aktuelle Unterschiede der Pixelwerte.
-Ein Schwellenwert von 64 entspricht einer Einheit im Unterschied für jeden
+Ein Schwellenwert von 64 entspricht also einer Einheit im Unterschied für jeden
 Pixel oder derselben unterschiedlichen Ausbreitung über einen Block.
 .RE
 .PD 1
@@ -5510,7 +5513,7 @@ wählbarer Schwellenwert überschritten wird.
 .PD 0
 .RSs
 .IPs <0\-255>
-Schwellenwert (Standard 10)
+Schwellenwert (Standard: 10)
 .IPs <map>
 .RSss
 0: Ignoriere Pixel, die den Schwellenwert überschreiten (Standard).
@@ -5525,9 +5528,9 @@ Schwellenwert (Standard 10)
 .REss
 .IPs <sharp>
 .RSss
-0: Deaktiviert zusätzliches Schärfen (Standard).
+0: Deaktiviere zusätzliches Schärfen (Standard).
 .br
-1: Fügt zusätzlich Schärfe hinzu.
+1: Füge zusätzliche Schärfe hinzu.
 .REss
 .IPs <twoway>
 .RSss
@@ -5540,7 +5543,7 @@ Schwellenwert (Standard 10)
 .
 .TP
 .B "unsharp=l|cBxH:Menge[:l|cWxH:Menge]"
-Unschärfefilter / Gaußscher Weichzeichner
+Unschärfemaske / Gaußscher Weichzeichner
 .RS
 .IPs l\ \ \ \ 
 Wendet den Effekt auf den Helligkeitsanteil an.
@@ -5571,9 +5574,9 @@ Das Ziel dieses Filters ist es, die Bearbeitung von interlaced Bildern zu
 ermöglichen, ohne sie vorher zu deinterlacen.
 Du kannst eine interlaced DVD filtern und am Fernseher ausgeben, ohne
 das Interlacing zu entfernen.
-Die meisten Filter deinterlacen permanent (smoothing, averaging, etc).
-Dieser Filter hingegen teilt das Bild in zwei Felder auf (sogenannte
-Halbbilder),
+Während Deinterlacing (mit dem Postprocessing-Filter) Interlacing permanent
+entfernt (smoothing, averaging, etc.\&), teilt
+dieser Filter das Bild in zwei Felder auf (sogenannte Halbbilder),
 so dass diese unabhängig voneinander gefiltert und wieder interleavt werden
 können.
 .PD 0
@@ -5631,8 +5634,8 @@ detc-Filters:
 .IPs <dr>\ 
 Setzt den Framedropping-Modus.
 .RSss
-0: Kein Frame wird ausgelassen, um die Framerate der Ausgabe beizubehalten
-(Standard).
+0: Kein Frame wird ausgelassen, um eine feste Framerate der Ausgabe
+zu erhalten (Standard).
 .br
 1: Ein Frame wird immer dann verworfen, wenn es keine Auslassungen oder
 Telecine-Zusammenführungen innerhalb der letzten 5 Frames gab.
@@ -5679,7 +5682,7 @@ filmident genauer zu sein scheinen.
 .TP
 .B pullup[=jl:jr:jo:ju:sb:mp]\
 Pulldown-Umkehrungs- (inverse telecine) Filter der dritten Generation, der
-mixed hard-telecine und Progressive-Material mit 24000/1001 und 30000/1001 fps
+mixed Hard-telecine- und Progressive-Material mit 24000/1001 und 30000/1001 fps
 handhaben kann.
 Der Pullup-Filter ist wesentlich robuster als detc oder ivtc, da er
 für Entscheidungen zukünftigen Kontext zurate zieht.
@@ -5688,7 +5691,7 @@ folgenden Muster sucht, sondern stattdessen nach vorne schaut, um Gegenstücke
 zu finden und progressive Frames zusammenzusetzen.
 Der Filter befindet sich noch in der Entwicklung, scheint aber akkurat zu
 arbeiten.
-Die Optionen jl, jr, jo, und ju bestimmen die zu ignorierende Menge "Müll"
+Die Optionen jl, jr, jo und ju bestimmen die zu ignorierende Menge "Müll"
 links, rechts, oben und unten am Bildrand, respektive.
 Links/\:rechts sind in Einheiten von 8 Pixeln anzugeben, oben/\:unten in
 Einheiten von 2 Zeilen.
@@ -5735,7 +5738,7 @@ werden.
 Abhängig von der MPEG-Quelle kannst du diesen Hinweis ignorieren, solange du
 keine Warnungen "Bottom-first field" bekommst.
 Werden keine Optionen angegeben, bewerkstelligt dieser Filter normales inverse
-telecine und sollte zusammen mit mencoder \-fps 30000/1001 \-ofps 30000/1001
+telecine und sollte zusammen mit mencoder \-fps 30000/1001 \-ofps 24000/1001
 benutzt werden.
 Wird dieser Filter mit mplayer benutzt wird, kommt es zu unregelmäßigen
 Frameraten, aber dies ist im Allgemeinen besser als pp=lb oder gar kein
@@ -5774,17 +5777,17 @@ Ohne MMX2 und 3DNow! und falls n=0 oder 1, werden dieselben Berechnungen
 durchgeführt wie mit n=2 oder 3.
 Ist n=2 oder 3, so wird die Anzahl der Helligkeitslevels, die benutzt werden,
 um Frameunterbrechungen zu finden, von 256 auf 128 reduziert, was einen
-schnelleren Filter zur Folge hat, ohne dabei an Genauigkeit zu verlieren.
+schnelleren Filter zur Folge hat, ohne dabei viel an Genauigkeit zu verlieren.
 Ist n=4 oder 5, so wird eine schnellere, aber weniger genauere Metrik benutzt,
 um Frameunterbrechungen zu finden, welche dazu neigt, hohe vertikale Details
 als interlaced-Inhalte fehlzuinterpretieren.
 .IPs verbose=<n>
 Falls n von null verschieden ist, gibt dies die detaillierteren Metriken für
 jeden Frame aus.
-Nützlich für Debugging.
+Nützlich für Debugging-Zwecke.
 .IPs dint_thres=<n>
 Schwellenwert für Deinterlacing.
-Wird während des Deinterlacing von nichtgetroffenen Frames benutzt.
+Wird während des Deinterlacing von nicht zugeordneten Frames benutzt.
 Größere Werte bedeuten weniger Deinterlacing; benutze n=256, um Deinterlacing
 komplett abzuschalten.
 Standardwert ist n=8.
@@ -5801,41 +5804,52 @@ Summe des "Absolute Difference"-Schwellenwerts, Standardwert ist 64.
 .
 .TP
 .B softpulldown
-Dieser Filter arbeitet nur mit MEncoder korrekt und richtet sich nur nach den
+Dieser Filter arbeitet nur mit MEncoder korrekt und richtet sich nach den
 MPEG-2-Flags, die für soft 3:2-Pulldown (soft telecine) benutzt werden.
 Wenn du einen der Filter ivtc oder detc für Filme benutzen möchtest, die zum
-Teil 'soft telecined' sind, kann er durch das Einfügen dieses Filters
+Teil 'soft telecined' sind, sollte er durch das Einfügen dieses Filters
 zuverlässiger gemacht werden.
 .
 .TP
 .B divtc[=Optionen]
-Inverse telecine für Videos im deinterlaced-Format.
+Inverse telecine für deinterlaced Videos.
 Falls 3:2-pulldown telecined Videomaterial eins der Felder verloren hat oder
 deinterlaced ist durch ein Verfahren, das ein Feld beibehält und das andere
 interpoliert, ist das Ergebnis ein ruckelndes Video, das jeden vierten Frame
 doppelt enthält.
-Dieser Filter beabsichtigt, diese Duplikate zu finden und die ursprüngliche
-Framerate des Films wiederherzustellen.
-Bei Benutzung dieses Filters mußt du einen Wert für \-ofps angeben, der 4/\:5
-der Framerate der Eingabedatei entspricht (23.976 bei einer Eingabe von
-29.97fps).
+Dieser Filter beabsichtigt, diese Duplikate zu finden, zu entfernen und die
+ursprüngliche Framerate des Films wiederherzustellen.
+Bei Benutzung dieses Filters musst du einen Wert für \-ofps angeben, der 4/\:5
+der Framerate der Eingabedatei entspricht.
+Außerdem musst du den Filter softskip an eine spätere Stelle der Filterkette
+stellen um sicherzustellen, dass dictc alle Frames sieht.
+Es sind zwei verschiedene Modi verfügbar:
+Der Modus mit einem Durchlauf ist die Standardeinstellung und sehr einfach zu
+benutzen, hat aber den Nachteil, dass alle Änderungen in der telecine-Phase
+(verlorengegangene Frames oder schlechte Bearbeitungungen) kurzzeitiges
+Ruckeln verursachen, bis der Filter wieder synchronisieren kann.
+Der Modus mit zwei Durchläufen vermeidet dies durch Analyse des ganzen Videos
+im Voraus, so dass er Phasenänderungen vorher kennt und die Resynchronisierung
+an der exakten Stelle durchführen kann.
+Diese Durchläufe entsprechen
+.B nicht
+dem ersten und zweiten Durchlauf des Encodierungsvorgangs.
+Du musst einen extra-Durchlauf mit Durchlauf 1 von divtc vor der eigentlichen
+Encodierung durchführen, die das resultierende Video verwirft.
+Benutze \-nosound \-ovc raw \-o /dev/null, um Verschwendung von CPU-Zeit für
+diesen Durchlauf zu vermeiden.
+Du kannst außerdem sowas wie crop=2:2:0:0 hinter divtc hinzufügen, um die
+Dinge noch etwas weiter zu beschleunigen.
+Benutze dann divtc-Durchlauf 2 für die eigentliche Encodierung.
+Wenn du mehrere Encoder-Durchläufe machste, benutze divtc-Durchlauf 2 für all
+diese.
 Die Optionen sind:
 .RSs
 .IPs pass=1|2
-Benutze das two-pass (zwei Durchläufe) Verfahren.
-Dies liefert die besten Resultate.
-Durchlauf 1 analysiert das Video und schreibt das Ergebnis in ein Logfile.
-Durchlauf 2 liest dann dieses Logfile und benutzt die Informationen für die
-eigentliche Arbeit.
-Beachte, dass diese Durchläufe
-.B nicht
-den Durchläufen 1 und 2 des Encodierungsvorgangs entsprechen.
-Um divtc two-pass mit der two-pass-Videoencodierung zu benutzen, sind drei
-Schritte nötig: zuerst divtc Durchlauf 1 und Encoder Durchlauf 1, dann divtc
-Durchlauf 2 und Encoder Durchlauf 1, schließlich dann divtc
-Durchlauf 2 und Encoder Durchlauf 2.
+Benutze Modus mit zwei Durchläufen.
 .IPs file=<Dateiname>
-Setzt den Dateinamen für das Logfile bei two-pass (Standard: "framediff.log").
+Setzt den Dateinamen für das Logfile beim Modus mit zwei Durchläufen (Standard:
+"framediff.log").
 .IPs threshold=<Wert>
 Setzt die minimale Stärke, die das telecine-Muster haben muss, damit der Filter
 es als solches wahrnimmt (Standard: 0.5).
@@ -5847,21 +5861,26 @@ berücksichtigt werden (Standard: 30).
 Ein längeres Zeitfenster erhöht die Zuverlässigkeit der Mustersuche, ein
 kürzeres Zeitfenster jedoch verbessert die Reaktionszeit für Änderungen in der
 telecine-Phase.
-Dies betrifft nur den one-pass-Modus.
-Der two-pass-Modus benutzt zur Zeit ein festes Zeitfenster, das nach vorne und
+Dies betrifft nur den Modus mit einem einzigen Durchlauf.
+Der Modus mit zwei Durchläufen benutzt zur Zeit ein festes Zeitfenster, das
+nach vorne und
 hinten gerichtet ist.
 .IPs phase=0|1|2|3|4
-Setzt die anfängliche telecine-Phase für den one-pass-Modus (Standard: 0).
-Der two-pass-Modus kann in die Zukunft sehen, so dass er von Anfang an die
-richtige Phase wählen kann, der one-pass-Modus kann jedoch nur raten.
+Setzt die anfängliche telecine-Phase für den Modus mit einem Durchlauf
+(Standard: 0).
+Der Modus mit zwei Durchläufen kann in die Zukunft sehen, so dass er von Anfang
+an die richtige Phase wählen kann, der Modus mit einem Durchlauf kann nur
+raten.
 Er erkennt die richtige Phase, wenn er sie findet, aber diese Option kann
 genutzt werden, um ein mögliches Haken am Anfang zu korrigieren.
-Der erste Durchlauf des two-pass-Modus benutzt dies auch; wenn du also die
+Der erste Durchlauf des Modus mit zwei Durchläufen benutzt dies auch; wenn du
+also die
 Ausgabe des ersten Durchlaufs speicherst, bekommst du als Ergebnis eine
 konstante Phase.
 .IPs deghost=<Wert>
-Setzt den Schwellenwert für "Deghosting" (Entfernung von stark unscharfen
-Bildern) (0\-255 im one-pass-Modus, -255\-255 im two-pass-Modus, Standard: 0).
+Setzt den Schwellenwert für die Entfernung von stark unscharfen
+Bildern (Deghosting) (0\-255 für Modus mit einem, -255\-255 für Modus mit zwei
+Durchläufen, Standard: 0).
 Ist der Wert ungleich null, wird Deghosting benutzt.
 Dies ist für Videomaterial gedacht, das deinterlaced wurde in der Art, dass
 die Felder übereinandergelegt wurden anstatt eins von beiden wegzulassen.
@@ -5869,7 +5888,8 @@ Deghosting erhöht Kompressionsartefakte in übereinandergelegten Frames, daher
 wird der Parameterwert als Schwellenwert benutzt, um diejenigen Pixel vom
 Deghosting auszuschließen, die sich vom vorigen in weniger als dem angegebenen
 Wert unterscheiden.
-Wird der two-pass-Modus verwendet, so kann ein negativer Wert benutzt werden,
+Wird der Modus mit zwei Durchläufen verwendet, so kann ein negativer Wert
+benutzt werden,
 damit der Filter zu Beginn des zweiten Durchlaufs das ganze Video analysiert
 um zu entscheiden, ob Deghosting verwendet werden muss oder nicht.
 Der Filter wählt dann entweder null oder den absoluten Wert des Parameters.
@@ -5879,8 +5899,8 @@ Unterschied.
 .
 .TP
 .B phase=[t|b|p|a|u|T|B|A|U][:v]
-Verzögert interlaced Video um ein Feld, so dass sich die Reihenfolge der
-Felder ändert.
+Verzögert interlaced Video um die Zeit eines Feldes, so dass sich die
+Reihenfolge der Felder ändert.
 Die Absicht ist, Videos im PAL-Format zu korrigieren, die bei der Umsetzung
 von Film zu Video mit umgekehrter Feldreihenfolge aufgenommen wurden.
 Die Optionen sind:
@@ -5894,7 +5914,7 @@ Der Filter verzögert das obere (top) Feld.
 .IPs p
 Nimm auf und transferiere mit derselben Feldreihenfolge.
 Dieser Modus existiert nur als Referenz zur Dokumentation anderer Optionen;
-falls du es trotzdem auswählst, wird der Filter treuevoll nichts tun ;-)
+falls du es trotzdem auswählst, wird der Filter guten Gewissens nichts tun ;-)
 .IPs a
 Nimm die Feldreihenfolge, die durch die Flags der Felder automatisch bestimmt
 werden und transferiere die andere.
@@ -5915,12 +5935,12 @@ Der Filter wählt einen der Modi b und p nach Analyse der Bilder.
 .IPs A
 Nimm die durch Feld-Flags bestimmte Feldreihenfolge, transferiere
 unbekannte oder variable.
-Der Filter wählt einen der Modi t und p nach Analyse der Bilder.
+Der Filter wählt einen der Modi t und p nach Analyse der Felder und Bilder.
 Ist keine Feldinformation verfügbar, arbeitet der Filter wie Angabe von U.
 Dies ist der Standardmodus.
 .IPs U
 Nimm auf und transferiere unbekannte oder variable Feldreihenfolge.
-Der Filter wählt einen der Modi t, b und p nur anhand der Bildanalyse.
+Der Filter wählt einen der Modi t, b oder p nur anhand der Bildanalyse.
 .IPs v
 Ausführliche Vorgehensweise.
 Gibt den ausgewählten Modus für jeden Frame sowie die gemittelte quadrierte
@@ -5931,8 +5951,8 @@ Differenz der Felder für die Auswahlen von t, b und p aus.
 .B telecine[=Start]
 Wende 3:2 'telecine'-Prozess an, um die Framerate um 20% zu erhöhen.
 Dies funktioniert mit MPlayer vermutlich nicht korrekt, kann jedoch in
-Verbindung mit 'mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine' benutzt
-werden.
+Verbindung mit 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'
+benutzt werden.
 Beide fps-Optionen müssen angegeben werden!
 (A/\:V-Synchronisation wird verlorengehen, wenn sie falsch sind.)
 Der optionale Parameter Start bestimmt, wo im telecine-Muster zu beginnen ist
@@ -5986,6 +6006,22 @@ Wandle Felder mit linearer Interpolation zu 1/4 Pixel um (kein Sprung).
 Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität) (Standard).
 .RE
 .PD 1
+.RS
+Verfügbare Feld-Dominanzen sind folgende:
+.RE
+.PD 0
+.RSs
+.IPs -1
+automatisch (Standard)
+Funktioniert nur, wenn der Decoder angemessene Informationen ausgibt und keine
+anderen Filter in der Filterkette vor tfields kommen, die diese Informationen
+verwefen; sonst fällt der Filter zurück auf 0 (obere Felder zuerst).
+.IPs 0
+obere Felder zuerst
+.IPs 1
+untere Felder zuerst
+.RE
+.PD 1
 .
 .TP
 .B "boxblur=Radius:Stärke[:Radius:Stärke]"
@@ -6001,7 +6037,7 @@ Anzahl der Anwendungen des Filters
 .
 .TP
 .B sab=Radius:pf:colorDiff[:Radius:pf:colorDiff]
-shape adaptive blur: umrissabhängige Glättung/Unschärfe
+umrissabhängige Glättung/Unschärfe (shape adaptive blur)
 .PD 0
 .RSs
 .IPs <Radius>
@@ -6009,7 +6045,7 @@ Stärke des Glättungsfilters (~0.1\-4.0) (je größer desto langsamer)
 .IPs <pf>\ 
 Stärke der Vorfilterung (~0.1\-2.0)
 .IPs <colorDiff>
-maximale Differenz zwischen zwei Pixeln, damit diese betrachtet werden
+maximale Differenz zwischen Pixeln, damit diese betrachtet werden
 (~0.1-100.0)
 .RE
 .PD 1
@@ -6038,7 +6074,7 @@ gefilmt wurden.
 .IPs <x0>,<y0>,...
 Koordinaten der Ecken links oben, rechts oben, links unten, rechts unten
 .IPs <t>\ \ 
-lineares (0) oder kubisches (1) Resampling
+lineare (0) oder kubische (1) Neuberechnung
 .RE
 .PD 1
 .
@@ -6068,9 +6104,8 @@ Anzahl der Zeilen, die von der Mitte des Bildes ausgewählt werden sollen
 .TP
 .B bmovl=versteckt:opak:fifo
 Der Bitmap-Overlay-Filter liest Bitmaps von einem FIFO und zeigt sie oberhalb
-des Filmfensters an.
-Er erlaubt dabei Transformationen der Bilder.
-Ein kleines Beispielprogramm findest du in TOOLS/\:bmovl-test.c.
+des Filmfensters an, was ein paar Transformationen der Bilder erlaubt.
+Ein kleines Testprogramm findest du in TOOLS/\:bmovl-test.c.
 .PD 0
 .RSs
 .IPs <versteckt>
@@ -6103,9 +6138,9 @@ Löscht den Bereich.
 .IPs OPAQUE
 Deaktiviert die Alpha-Transparenz.
 Schicke "ALPHA 0 0 0 0 0" an den FIFO, um sie wieder zu aktivieren.
-.IPs HIDE
+.IPs HIDE\ 
 Versteckt die Bitmap.
-.IPs SHOW
+.IPs SHOW\ 
 Zeigt die Bitmap an.
 .RE
 .PD 1
@@ -6136,7 +6171,7 @@ Lösche den Framebuffer vor dem "Blitting".
 .RSss
 0: Das Blitting eines Bildes wird nur über dem vorigen (darunterliegenden)
 angewendet, daher brauchst du nicht jedesmal, wenn ein kleiner Teil des
-Bildschirms aktualisiert wird, 1,8MB an RGBA32-Daten an den FIFO schicken.
+Bildschirms aktualisiert wird, 1,8MB RGBA32-Daten an den FIFO schicken.
 .br
 1: löschen
 .REss
@@ -6145,14 +6180,14 @@ Bildschirms aktualisiert wird, 1,8MB an RGBA32-Daten an den FIFO schicken.
 .
 .TP
 .B framestep=I|[i]step
-Rendert nur jeden n-ten Frame oder jeden Intraframe (Keyframe).
+Rendert nur jeden n-ten Frame oder jeden Intra-Frame (Keyframe).
 .sp 1
 Rufst du den Filter mit groß geschriebenem I als Parameter auf, so werden
 .B nur
 Keyframes gerendert.
 Für DVDs bedeutet dies im Allgemeinen, dass nur einer von 15/\:12
 (IBBPBBPBBPBBPBB) Frames dargestellt wird, bei AVIs wirkt diese Option bei
-jedem Szenenwechsel oder jedem keyint-Wert (siehe '\-lavcopts keyint=Wert',
+jedem Szenenwechsel oder jedem keyint-Wert (siehe \-lavcopts keyint=Wert,
 falls du MEncoder zum Encodieren des Videos benutzt).
 .sp 1
 Wird ein Keyframe gefunden, so wird ein 'I!' gefolgt von einem Zeilenumbruch
@@ -6175,7 +6210,7 @@ ein 'I!' für jeden Keyframe ausgegeben.
 Kachelt eine Reihe von Bildern zu einem größeren Bild.
 Lässt du einen Parameter weg oder benutzt einen Wert kleiner als 0, so wird
 der Standardwert benutzt.
-Du kannst aufhören, wenn du zufrieden bist (... \-vf tile=10:5 ...).
+Du kannst auch aufhören, wenn du zufrieden bist (... \-vf tile=10:5 ...).
 Es ist vermutlich eine gute Idee, den Filter scale vor das Kacheln zu
 setzen :-)
 .sp 1
@@ -6196,7 +6231,7 @@ ein 8 * 7 Kacheln großes Bild erstellen.
 .IPs <Start>
 Dicke des äußeren Rahmens in Pixeln (Standard: 2)
 .IPs <delta>
-Dicke des inneren Rahmens in Pixeln (Standard: 2)
+Dicke des inneren Rahmens in Pixeln (Standard: 4)
 .RE
 .PD 1
 .
@@ -6204,7 +6239,7 @@ Dicke des inneren Rahmens in Pixeln (Standard: 2)
 .B delogo[=x:y:b:h:t]
 Unterdrückt das Logo eines Fernsehsenders durch einfache Interpolation der
 umgebenden Pixel.
-Setze einfach ein Rechteck, das das Logo bedeckt, und sieh wie es
+Setze einfach ein Rechteck, das das Logo bedeckt, und sieh zu, wie es
 verschwindet (und manchmal etwas unschöneres entsteht \- deine Erfahrungen
 können variieren).
 .PD 0
@@ -6225,9 +6260,9 @@ Finden der richtigen Parameter für x,y,w und h zu erleichtern.
 .B remove-logo=/pfad/zur/logo_bitmap_datei.pgm
 Unterdrückt das Senderlogo unter Benutzung des angegebenen PGM- oder PPM-Bildes
 um herauszufinden, welche Bildpunkte das Logo umfassen.
-Die Breite und Höhe des Bildes muss denen des zu bearbeitenden Videos
+Die Breite und Höhe des Bildes muß denen des zu bearbeitenden Videos
 entsprechen.
-Benutzt das Bild und einen runden Weichzeichnungsalgorithmus um das Logo zu
+Benutzt das Bild und einen runden Weichzeichnungsalgorithmus, um das Logo zu
 entfernen.
 .RSs
 .IPs /pfad/zur/logo_bitmap_datei.pgm
@@ -6257,7 +6292,7 @@ Vertikale Dezimierung 1, 2 oder 4.
 .IPs quality=1\-20
 Setze Kompressionsqualität für JPEG [BESTE] 1 \- 20 [SEHR SCHLECHT].
 .IPs fd|nofd
-Der Standard ist, dass die Dezimierung nur dann ausgeführt wird, wenn die
+Der Standard ist, dass die Dezimierung nur dann durchgeführt wird, wenn die
 Zoran Hardware die erzeugten MJPEG-Bilder auf die originale Größe
 hochskalieren kann.
 Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
