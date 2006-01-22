@@ -326,7 +326,7 @@ besoin d'installer <systemitem class="library">libogg</systemitem> et
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> est un
 format IETF standard pour décrire les flux RTP video et/ou audio.
-(Les librairies &quot;<ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;
+(Les librairies &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;
 sont requises.)
 </para>
 </sect3>
