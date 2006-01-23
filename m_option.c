@@ -822,7 +822,7 @@ m_option_type_t m_option_type_func = {
 /////////////////// Print
 
 static int parse_print(m_option_t* opt,char *name, char *param, void* dst, int src) {
-  if(opt->type->flags&M_OPT_TYPE_INDIRECT)
+  if(opt->type == CONF_TYPE_PRINT_INDIRECT) 
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", *(char **) opt->p);
   else
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) opt->p);
@@ -849,7 +849,7 @@ m_option_type_t m_option_type_print_indirect = {
   "Print",
   "",
   0,
-  M_OPT_TYPE_INDIRECT,
+  0,
   parse_print,
   NULL,
   NULL,
