@@ -93,6 +93,10 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	}
 	if(!entry || (mp_opt->flags & M_OPT_GLOBAL)){
 	  tmp = m_config_set_option(config, opt, argv[i + 1]);
+	  if (tmp <= M_OPT_EXIT) {
+	    opt_exit = 1;
+	    tmp = M_OPT_EXIT - tmp;
+	  }
 	  if(tmp < 0){
 //	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
 	    goto err_out;
