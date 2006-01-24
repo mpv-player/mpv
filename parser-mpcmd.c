@@ -136,11 +136,8 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = option: %s\n", opt);
 	// We handle here some specific option
-	if(strcasecmp(opt,"list-options") == 0) {
-	  m_config_print_option_list(config);
-	  exit(1);
-	  // Loop option when it apply to a group
-	} else if(strcasecmp(opt,"loop") == 0 &&
+	// Loop option when it apply to a group
+	if(strcasecmp(opt,"loop") == 0 &&
 		  (! last_entry || last_entry->child) ) {
 	  int l;
 	  char* end;

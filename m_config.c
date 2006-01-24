@@ -27,6 +27,9 @@ show_profile(m_option_t *opt, char* name, char *param);
 static void
 m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix);
 
+static int
+list_options(m_option_t *opt, char* name, char *param);
+
 m_config_t*
 m_config_new(void) {
   m_config_t* config;
@@ -35,6 +38,7 @@ m_config_new(void) {
   static m_option_t ref_opts[] = {
     { "profile", NULL, &profile_opt_type, CONF_NOSAVE, 0, 0, NULL },
     { "show-profile", show_profile, CONF_TYPE_PRINT_FUNC, CONF_NOCFG, 0, 0, NULL },
+    { "list-options", list_options, CONF_TYPE_PRINT_FUNC, CONF_NOCFG, 0, 0, NULL },
     { NULL, NULL, NULL, 0, 0, 0, NULL }
   };
   int i;
@@ -575,4 +579,11 @@ show_profile(m_option_t *opt, char* name, char *param) {
   config->profile_depth--;
   if(!config->profile_depth) mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
   return M_OPT_EXIT-1;
+}
+
+static int
+list_options(m_option_t *opt, char* name, char *param) {
+  m_config_t* config = opt->priv;
+  m_config_print_option_list(config);
+  return M_OPT_EXIT;
 }
