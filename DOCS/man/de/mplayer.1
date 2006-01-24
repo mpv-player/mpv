@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1210 (except x264encopts, TODO!)
+.\" In sync with rev 1.1210 (except for two x264encopts, TODO!)
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -8878,355 +8878,628 @@ Performance-Einbußen auftreten (Standard: 1).
 .
 .TP
 .B bitrate=<Wert>
-Setzt die durchschnittlich zu benutzende Bitrate in kbits/\:Sekunde (Standard:
-deaktiviert).
-Da eine lokale Bitrate variieren kann, kann dieser Durchschnitt für sehr kurze
-Videos ungenau sein (siehe ratetol).
-Konstante Bitrate kann erreicht werden, indem diese Option mit vbv_maxrate
-kombiniert wird, was jedoch die Qualität signifikant verringert.
+Setzt die durchschnittliche Bitrate auf kbits/\:Sekunde (Standard: aus).
+Da die lokale Bitrate variieren kann, ist es möglich, dass dieser
+Durchschnittswert für sehr kurze Videos ungenau berechnet wird (siehe ratetol).
+Konstante Bitraten können erreicht werden, indem man diese Option mit
+vbv_maxrate kombiniert, allerdings vermindert das die Qualität signifikant.
 .
 .TP
-.B qp_constant=<1\-51>
-Dies wählt die zu benutzende Quantisierung für P-Frames.
-Intra- und B-Frames haben von diesem Wert einen Offset von ip_factor und
-pb_factor respektive.
+.B qp_constant=<0\-51>
+Diese Option wählt den Quantizer für P-Frames.
+Intra- und B-Frames werden mit diesem Wert jeweils durch ip_factor und
+pb_factor verrechnet.
 20\-40 ist ein brauchbarer Bereich (Standard: 26).
-Niedrigerere Werte resultieren in besserer Wiedergabetreue aber höheren
-Bitraten.
-Beachte, dass Quantisierung in H.264 unterschiedlich zu MPEG-1/2/4
-funktioniert:
-Quantisierungsparameter (QP) von H.264 werden logarithmisch skaliert.
-Das Mapping beträgt ungefähr H264QP = 12 + 6*log2(MPEGQP).
-Zum Beispiel ist MPEG bei QP=2 äquivalent zu H.264 bei QP=18.
+Niedrigere Werte bewirken geringere Verlusten bei höheren Bitraten.
+0 ist verlustfrei.
+Beachte, dass die Quantisierung bei H.264 anders funktioniert als bei
+MPEG-1/2/4:
+Die Quantisierungsparameter (QP) von H.264 liegen auf einer logarithmischen
+Skala.
+Das Mapping ist ungefähr H264QP = 12 + 6*log2(MPEGQP).
+Beispielsweise ist MPEG bei QP=2 vergleichbar mit H.264 bei QP=18.
+.
+.TP
+.B crf=<1\-50>
+Aktiviert den "constant quality mode" und legt die die Qualität fest.
+Die Skala ist ähnlich der des QP.
+Ähnlich wie die Bitraten-basierten Modi ermöglicht
+dies, für jeden Frame einen anderen QP festzulegen, je nach dessen Komplexität.
 .
 .TP
 .B pass=<1\-3>
-Aktiviert 2- oder 3-pass-Modus.
-Es wird empfohlen, immer im 2- oder 3-pass-Modus zu encodieren, da es zu einer
-besseren Zuteilung der Bits führt und die Qualität im Ganzen verbessert.
+2- oder 3-pass-Modus (d.h. mit 2 oder 3 Durchläufen) aktivieren.
+Es wird empfohlen, immer im 2- oder 3-pass-Modus zu enkodieren, da dies zu
+einer besseren Bit-Verteilung und allgemein besseren Qualität führt.
 .PD 0
 .RSs
 .IPs 1
-erster Durchlauf
+Erster Durchlauf
 .IPs 2
-zweiter Durchlauf (bei Encodierung im two-pass-Modus)
+Zweiter Durchlauf (bei Encodierung mit zwei Durchläufen)
 .IPs 3
-Nter Durchlauf (zweiter und dritter Durchlauf der three-pass-Encodierung)
+n-ter Durchlauf (zweiter und dritter Durchlauf des 3-Durchläufe-Modus)
 .RE
 .RS
-Hier also wie es funktioniert und anzuwenden ist:
+Und so funktioniert es bzw.\& so wird es angewandt:
 .br
-Der erste Durchlauf (pass=1) sammelt Statistiken über das Video und schreibt
-sie in eine Datei.
-Du möchtest vielleicht manche CPU-intensive Optionen deaktivieren, abgesehen
-von denen, die als Standardeinstellung aktiviert sind.
+Der erste Durchlauf (pass=1) erstellt Statistiken über das Video und
+schreibt diese in eine Datei.
+Es bietet sich an, einige CPU-intensive Optionen zu deaktivieren; abgesehen von
+denen, die als Voreinstellung aktiviert sind.
 .br
-Im Modus mit zwei Durchläufen liest der zweite Durchlauf (pass=2) die
-Statistiken und steuert dementsprechend Entscheidungen der Bitratenkontrolle.
+Im 2-pass-Modus liest der zweite Durchlauf (pass=2) diese Datei wieder ein und
+berechnet auf dieser Grundlage die Bitratenkontrolle.
 .br
-Im Modus mit drei Durchläufen tut der zweite Durchlauf (pass=3, kein
-Rechtschreibfehler) beides: Er liest zuerst die Statistiken und überschreibt
-sie dann.
-Du kannst alle Optionen für die Encodierung verwenden, außer den sehr
-CPU-intensiven.
+Im 3-pass-Modus tut der zweite Durchlauf (pass=3, dies ist kein Tippfehler)
+beides: Zuerst liest er die Statistiken ein, dann überschreibt er sie.
+Du kannst alle Optionen verwenden, außer vielleicht den sehr CPU-intensiven.
 .br
-Der dritte Durchlauf (pass=3) ist dasselbe wie der zweite, außer, dass er die
-Statistiken des zweiten Durchlaufs zur Grundlage hat.
-Du kannst alle Optionen für die Encodierung verwenden, auch die sehr
-CPU-intensiven.
+Der dritte Durchlauf (pass=3) macht das gleiche wie der zweite Durchlauf,
+außer dass er die Statisitiken des zweiten Durchlaufs verwendet.
+Du kannst alle Optionen verwenden, einschließlich der sehr CPU-intensiven.
 .br
-Der erste Durchlauf kann entweder durchschnittlich Bitrate oder konstanten
-Quantisierungsparameter verwenden.
-ABR wird empfohlen, da er nicht darauf angewiesen ist, einen
-Quantisierungsparameter zu ermitteln.
-Aufeinanderfolgende Durchläufe sind ABR und müssen eine Bitrate angeben.
+Der erste Durchlauf kann entweder eine durchschnittliche Bitrate (ABR) oder
+einen konstanten Quantizer verwenden.
+ABR wird empfohlen, da dafür nicht das Ermitteln eines Quantizers nötig ist.
+Nachfolgende Durchläufe sind ABR; es muss eine Bitrate angegeben werden.
 .br
-.I ANMERKUNG:
-Die Unterstützung für die Encodierung in drei Durchläufen für x264 ist neu in
-MEncoder, wir freuen uns daher über jegliches Feedback, das du geben kannst
-hinsichtlich guten Kombinationen von x264-Optionen, die sowohl schnell sind als
-auch gute Qualität liefern.
+.I
+Anmerkung:
+Die Unterstützung für x264 mit drei Durchläufen ist eine recht neue Funktion
+von MEncoder.
+Daher würden wir uns freuen, wenn Du uns gute Kombinationen von x264-Optionen
+(d.h. schnelle Encodierung in guter Qualität) mitteilen würdest.
 .REss
 .
 .TP
-.B qcomp=<0\-1> (ABR oder two-pass)
-Kompression des Quantisierungsparameters (Standard: 0.6).
-Ein niedrigerer Wert macht die Bitrate konstanter, während ein höherer Wert
-die Quantisierungsparameter konstanter macht.
-.
-.TP
-.B direct_pred=<0\-2>
-Bestimmt den Typ der Bewegungsabschätzung, die in B-Frames für direkte
-Macroblöcke benutzt wird.
+.B turbo=<0\-2>
+Schneller erster Durchlauf.
+Während des ersten Durchlaufs des Encodierens mit mehreren Durchläufen kann
+die Geschwindigkeit durch Deaktivieren einiger Optionen gesteigert werden \-
+ohne bzw. ohne merkliche Minderung der Qualität des letzten Durchlaufs.
 .PD 0
 .RSs
 .IPs 0
-Keiner: direkte Macroblöcke werden nicht benutzt.
+deaktiviert (Standard)
 .IPs 1
-Regional: Motion-Vectors werden von benachbarten Blöcken extrapoliert.
+Reduziere subq und frameref und deaktiviere einige "inter macroblock partitions
+analysis"-Modi.
 .IPs 2
-Zeitlich: Motion-Vectors werden vom folgenden P-Frame extrapoliert (Standard).
+Reduziere subq und frameref auf 1, verwende eine "diamond ME"-Suche und
+deaktiviere alle "partitions analysis"-Modi.
+.RE
+.RS
+
+Stufe 1 kann die Geschwindigkeit des ersten Durchlaufs bis auf das Doppelte
+erhöhen, ohne das globale PSNR im Vergleich zu einem vollen ersten Durchlauf zu
+verändern.
+.br
+Stufe 2 kann die Geschwindigkeit des ersten Durchlaufs bis auf das Vierfache
+erhöhen \- bei einer Veränderung des PSNR von ca. +/- 0.05dB im Vergleich zu
+einem vollen ersten Durchlauf.
+.REss
+.
+.TP
+.B keyint=<Wert>
+Setzt das maximale Intervall zwischen IDR-Frames (Standard: 250).
+Höhere Werte sichern Bits und erhöhen dadurch die Qualität auf Kosten der
+Suchpräzision.
+Anders als MPEG-1/2/4 ist H.264 nicht von DCT-Versatz bei hohen keyint-Werten
+betroffen.
+.
+.TP
+.B keyint_min=<1\-keyint/2>
+Setzt das minimale Intervall zwischen IDR-Frames (Standard: 25).
+Wenn innerhalb dieses Intervalls Szenenwechsel stattfinden, werden sie dennoch
+als Intra-Frames encodiert, sie starten aber nicht mit einem neuen GOP.
+In H.264 begrenzen Intra-frames nicht unbedingt einen geschlossen GOP, da ein
+P-Frame durch mehrere als nur den vorangehenden Frame vorausberechnet werden
+kann (siehe auch frameref).
+Daher sind Intra-Frames nicht notwendigerweise spulbar.
+IDR-Frames verhindern, dass nachfolgende P-Frames sich auf einen Frame vor dem
+IDR-Frame beziehen.
+.
+.TP
+.B scenecut=<-1\-100>
+Legt fest, wie aggressiv zusätzliche Intra-Frames eingefügt werden (Standard:
+40).
+Mit geringen Werten für scenecut muß der Codec oft einen Intra-Frame einfügen,
+wenn er den Wert für keyint übersteigen würde.
+Gute Werte für scenecut finden evtl.\& eine bessere Position für Intra-Frames.
+Hohe Werte setzen mehr Intra-Frames als nötig ein und verschwenden damit Bits.
+-1 schaltet die scenecut-Erkennung ab, dadurch werden Intra-Frames nur einmal
+pro jedem anderen keyint-Frame eingesetzt, sogar wenn ein Szenenwechsel früher
+stattfindet.
+Diese ist nicht empfehlenswert und verschwendet Bitraten, denn als scenecuts
+enkodierte P-Frames sind genau so groß wie I-Frames, ohne dabei aber den
+"keyint counter" zurückzusetzen.
+.
+.TP
+.B frameref=<1\-16>
+Die Anzahl der vorhergehenden Frames, die zum Vorausberechnen in B- und
+P-Frames
+verwendet werden (Standard: 1).
+Das ist besonders effektiv bei animierten Filmen; bei Realfilm-Material nehmen
+die Verbesserungen bei mehr als etwa 6 Referenz-Frames ziemlich schnell ab.
+Dies hat keinen Einfluss auf die Dekodiergeschwindigkeit, erhöht aber den zum
+Encodieren benötigten Speicherbedarf.
+Einige Dekodierer können maximal 15 Referenz-Frames behandeln.
+.
+.TP
+.B bframes=<0\-16>
+maximale Anzahl aufeinanderfolgender B-Frames zwischen Intra- and P-Frames
+(Standard: 0)
+.
+.TP
+.B (no)b_adapt
+Legt automatisch fest, wann und wieviele B-Frames verwendet werden, bis maximal
+zum o.a. Wert (Standard: an).
+Falls diese Option deaktiviert ist, wird die maximale Anzahl für B-Frames
+verwendet.
+.
+.TP
+.B b_bias=<-100\-100>
+Erlaubt Einflussnahme auf die Funktion von b_adapt.
+Ein höherer Wert für b_bias erzeugt mehr B-Frames (Standard: 0).
+.
+.TP
+.B (no)b_pyramid
+Ermöglicht die Verwendung von B-Frames als Referenz für die Vorhersage anderer
+Frames.
+Nehmen wir als Beispiel 3 aufeinanderfolgende Frames: I0 B1 B2 B3 P4.
+Ohne diese Option verhalten sich B-Frames genau wie MPEG-[124].
+Sie werden also in der Reihenfolge I0 P4 B1 B2 B3 kodiert, und alle B-Frames 
+werden auf Grundlage von I0 und P4 berechnet.
+Mit dieser Option werden sie als I0 P4 B2 B1 B3 encodiert.
+B2 ist das gleiche wie oben, jedoch wird B1 aus I0 and B2 berechnet, während B3
+auf B2 und B4 basiert.
+Das Ergebnis ist eine etwas bessere Komprimierung bei fast keinem
+Geschwindigkeitsverlust.
+Allerdings ist dies eine experimentelle Option: die Feinabstimmung fehlt noch,
+und daher bringt sie möglicherweise keinen Vorteil.
+Benötigt bframes >= 2.
+Nachteil: Erhöht die Decodierungsverzögerung auf 2 Frames.
+.
+.TP
+.B (no)deblock
+Deblocking-Filter verwenden (Standard: an).
+Da diese Option sehr wenig Zeit im Vergleich zum Qualitätsgewinn benötigt,
+sollte sie nicht deaktiviert werden.
+.
+.TP
+.B deblockalpha=<-6\-6>
+AlphaC0-Parameter des Deblocking-Filters (Standard: 0).
+Dieser regelt Schwellenwerte für den H.264-Inloop-Deblocking-Filter.
+Zunächst legt dieser Parameter den Höchstwert für die Änderung fest, den der
+Filter auf jeden einzelnen Pixel anwenden darf.
+Weiterhin beeinflusst dieser Parameter den Schwellenwert für den Unterschied,
+der über die Kante hinaus gefiltert wird.
+Positive Werte reduzieren blockförmige Strukturen, verwischen aber auch
+Details.
+.br
+Die Standardeinstellung des Filters erreicht fast immer optimale Qualität,
+daher ist es am besten, keine oder nur geringe Änderungen vorzunehmen.
+Falls allerdings dein Quellmaterial schon Blöcke oder Rauschen aufweist und Du
+diese entfernen möchtest, kannst Du den Wert etwas erhöhen.
+.
+.TP
+.B deblockbeta=<-6\-6>
+Beta-Parameter des Deblocking-Filters (Standard: 0).
+Beeinflusst den Schwellwert für Details.
+Sehr detailreiche Blöcke werden nicht gefiltert, da das Glätten durch den
+Filter stärker auffallen würde als die ursprünglichen Blöcke.
+.
+.TP
+.B (no)cabac
+Verwende CABAC (Context-Adaptive Binary Arithmetic Coding) (Standard: an).
+Verlangsamt geringfügig die Encodierung und Decodierung, spart aber für
+gewöhnlich 10-15% Bitrate.
+Solange Du keinen großen Wert auf Geschwindigkeit bei der Decodierung legst,
+solltest Du diese Option nicht deaktivieren.
+.
+.TP
+.B qp_min=<1\-51> (ABR oder Modus mit zwei Durchläufen)
+Minimaler Quantisierungsparameter, 10\-30 ist ein brauchbarer Bereich
+(Standard: 10).
+.
+.TP
+.B qp_max=<1\-51> (ABR oder Modus mit zwei Durchläufen)
+Maximaler Quantisierungsparameter (Standard: 51)
+.
+.TP
+.B qp_step=<1\-50> (ABR oder Modus mit zwei Durchläufen)
+Maximaler Wert um den der Quantisierungsparameter zwischen Frames
+erhöht/gesenkt werden kann (Standard: 2).
+.
+.TP
+.B ratetol=<0.1\-100.0> (ABR oder Modus mit zwei Durchläufen)
+Erlaubte Streuung der durchschnittlichen Bitrate (keine besonderen Einheiten)
+.
+.TP
+.B vbv_maxrate=<Wert> (ABR oder Modus mit zwei Durchläufen)
+Maximale lokale Bitrate in kBits/\:Sekunde (Standard: deaktiviert)
+.
+.TP
+.B vbv_bufsize=<Wert> (ABR oder Modus mit zwei Durchläufen)
+Mittelungsperiode für vbv_maxrate, in kBits
+(Standard: keine, muss angegeben werden wenn vbv_maxrate aktiviert ist)
+.
+.TP
+.B vbv_init=<0.0\-1.0> (ABR oder Modus mit zwei Durchläufen)
+Anfängliche Pufferauslastung als Bruchteil von vbv_bufsize (Standard: 0.9)
+.
+.TP
+.B ip_factor=<Wert>
+Quantizer-Faktor zwischen Intra- und P-Frames (Standard: 1.4)
+.
+.TP
+.B pb_factor=<Wert>
+Quantizer-Faktor zwischen P- und B-Frames (Standard: 1.3)
+.
+.TP
+.B qcomp=<0\-1> (ABR oder Modus mit zwei Durchläufen)
+Komprimierung des Quantisierungsparameters (Standard: 0.6).
+Ein niedrigerer Wert führt zu einer konstanteren Bitrate, während ein höherer
+Wert zu einem konstanteren Quantisierungsparameter führt.
+.
+.TP
+.B cplx_blur=<0\-999> (nur im Modus mit zwei Durchläufen)
+Zeitliche Unschärfe der geschätzten Frame-Komplexität vor der
+Kurvenkomprimierung (Standard: 20).
+Niedrigere Werte ermöglichen einen volatileren Quantisierungsparameterwert,
+höhere Werte forcieren sanftere Schwankungen.
+cplx_blur stellt sicher, dass jeder Intra-Frame eine mit den nachfolgenden
+P-Frames
+vergleichbare Qualität hat.
+Außerdem stellt diese Option sicher, dass abwechselnd hoch- und weniger
+komplexe Frames (z.B. Animation mit wenigen fps)
+keine Bits auf schwankende Quantizer verschwenden.
+.
+.TP
+.B qblur=<0\-99> (nur im Modus mit zwei Durchläufen)
+Zeitliche Unschärfe des Quantisierungsparameters nach der
+Kurvenkomprimierung (Standard: 0.5).
+Niedrigere Werte ermöglichen einen volatileren Quantisierungsparameterwert,
+höhere Werte forcieren sanftere Schwankungen.
+.
+.TP
+.B zones=<zone0>[/\:<zone1>[/\:...]]
+Vom Benutzer festgelegte Qualität für besondere Abschnitte (Ende, Abspann, 
+...)
+(ABR oder Modus mit zwei Durchläufen).
+Jede Zone ist <Start-Frame>,<End-Frame>,<Option>, wobei Option die folgenden
+Werte annehmen kann:
+.PD 0
+.RSs
+.IPs "q=<0\-51>"
+Quantisierungsparameter
+.IPs "b=<0.01\-100.0>"
+Bitraten-Multiplikator
 .RE
 .PD 1
-Regional und zeitlich sind ungefähr gleich schnell und haben einen ähnlichen
-PSNR-Wert, zeitlich sieht jedoch oft besser aus.
-direct_pred=0 ist langsamer und liefert schlechtere Qualität.
+.RS
+.I Anmerkung:
+Die Quantisierungsparameter-Option wird nicht streng forciert.
+Sie betrifft nur die Planungsphase von ratecontrol und unterliegt der
+Überlauf-Kompensation sowie qp_min/qp_max.
+.RE
+.
+.TP
+.B direct_pred=<0\-2>
+Legt den Typ der Bewegungsvorhersage fest, der für direkte Markoblöcke in
+B-Frames verwendet wird.
+.PD 0
+.RSs
+.IPs 0
+Keiner: Direkte Makroblöcke werden nicht genutzt.
+.IPs 1
+Räumlich: Bewegungsvektoren werden über benachbarte Blöcke extrapoliert.
+.IPs 2
+Zeitlich: Bewegungsvektoren werden über den nachfolgenden P-Frame extrapoliert.
+(Standard)
+.RE
+.PD 1
+.RS
+Zeitlich und räumlich haben in etwa die gleiche Geschwindigkeit und PSNR,
+allerdings sieht zeitlich oft besser aus.
+direct_pred=0 ist sowohl langsamer als auch von schlechterer Qualität.
+.RE
 .
 .TP
 .B (no)weight_b
-Benutze gewichtete Vorhersage für B-Frames.
-Ohne diese Option liefern bidirektional gerichtete Makroblöcke jedem
-Referenzframe das gleiche Gewicht.
-Mit dieser Option wird die Gewichtung durch Bestimmung der zeitlichen Position
-eines B-Frames zu seinen Referenzen bestimmt.
+Gewichtete Berechnung in B-Frames verwenden.
+Ohne diese Option messen bidirektional berechnete Makroblöcke jedem
+Referenz-Frame gleiches Gewicht bei.
+Mit dieser Option werden die Gewichtungen anhand der zeitlichen Position des
+B-Frames im Verhältnis zu den Referenzen bestimmt.
 Benötigt bframes > 1.
 .
 .TP
-.B me=<1\-3>
-Wählt Vollpixel-Bewegungsabschätzungsalgorithmus (me = motion estimation).
+.B (no)i4x4
+Zusätzlichen Makroblock-Typ i4x4 verwenden (Standard: aktiviert).
+Ohne diese Option nutzen P- und B-Frames nur i16x16 und die unten angegebenen
+Inter-Typen.
+.
+.TP
+.B (no)i8x8
+Zusätzlichen Makroblock-Typ i8x8 verwenden (Standard: aktiviert).
+Use additional macroblock type i8x8 (Standard: aktiviert).
+Diese Option ist wirkungslos, solange 8x8dct nicht aktiviert ist.
+.
+.TP
+.B (no)b8x8mv
+Zusätzliche Makroblock-Typen b16x8, b8x16, b8x8 verwenden (Standard:
+aktiviert).
+Ohne diese Option verwenden B-Frames nur die Typen i16x16, i8x8, i4x4, b16x16,
+skip, direct.
+Siehe auch 4x4mv für Details.
+.
+.TP
+.B (no)8x8mv
+Zusätzliche Makroblock-Typen p16x8, p8x16, p8x8 verwenden (Standard:
+aktiviert).
+Ohne diese Option verwenden P-Frames nur die Typen i16x16, i8x8, i4x4, p16x16,
+skip.
+Diese Option ist nur zum Experimentieren gedacht. Es wird nicht empfohlen,
+8x8mv
+bei richtiger Encodierung zu deaktivieren.
+.
+.TP
+.B (no)4x4mv
+Zusätzlichen Makroblock-Typen p8x4, p4x8, p4x4 verwenden (Standard:
+deaktiviert).
+Ohne diese Option verwenden P-Frames nur die Typen i16x16, i8x8, i4x4, p16x16,
+p16x8, p8x16, p8x8, skip.
+Benötigt 8x8mv.
+.br
+Die Kunst besteht darin, Typen und Größen zu finden, die einen
+bestimmten Bereich des Bildes am besten beschreiben.
+So wird ein weiter Kameraschwenk bei 16x16 Blöcken besser dargestellt,
+während kleine, bewegliche Objekte besser mit kleinen Blöcken dargestellt
+werden.
+.br
+4x4mv ist nur mit subq >= 3 empfehlenswert.
+.
+.TP
+.B (no)8x8dct
+Adaptive räumliche Transformationsgröße: Erlaubt Makroblöcken die Wahl
+zwischen 4x4 und 8x8 DCT.
+Erlaubt außerdem den Makroblock-Typ i8x8.
+Ohne diese Option wird nur 4x4 DCT verwendet.
+.
+.TP
+.B me=<1\-4>
+Wählt den Vollpixel-Bewegungsschätzungs-Algorithmus.
 .PD 0
 .RSs
 .IPs 1
-Diamantsuche, Radius 1 (schnell).
+Diamant-Suche, Radius 1 (schnell)
 .IPs 2
-Hexagonsuche, Radius 2 (Standard).
+Hexagon-Suche, Radius 2 (Standard)
 .IPs 3
-Erschöpfende Suche, kontrolliert von me_range (sehr langsam).
+Ungerade Multi-Hexagon-Suche
+.IPs 4
+Gründliche Suche (sehr langsam)
 .RE
 .PD 1
 .
 .TP
 .B me_range=<4\-64>
-Radius der Erschöpfenden Bewegungssuche (Standard: 16).
+Radius der gründlichen bzw. Multi-Hexagon-Bewegungssuche (Standard: 16)
 .
 .TP
 .B subq=<1\-6>
-Passt die Qualität der subpel-Verfeinerung an.
-Dieser Parameter kontrolliert den Kompromiss zwischen Qualität und Geschwindigkeit
-beim Prozess der Bewegungsabschätzung.
-subq=5 kann bis zu 10% besser komprimieren als subq=1.
+Anpassen der Verfeinerungsqualität von subpel.
+Dieser Parameter kontrolliert das Gleichgewicht von Qualität und
+Geschwindigkeit beim Prozess der Bewegungsschätzung.
+subq=5 kann bis zu 10% besser als subq=1 komprimieren.
 .PD 0
 .RSs
 .IPs 1
-Benutze Bewegungsabschätzung mit Ganzpixelpräzision für alle in Frage
-kommenden Makroblocktypen und wähle dann den besten aus.
-Verfeinert dann die Bewegung dieses Typs zu einer schnellen
-Viertelpixelpräzision (am schnellsten).
+Wendet Vollpixel-Präzisionsbewegungsschätzung auf alle in Frage kommenden
+Makroblock-Typen an, wählt dann den besten Typen und verfeinert schließlich die
+Bewegung dieses Typen auf schnelle Viertelpixel-Präzision (am schnellsten).
 .IPs 2
-Wie 1, benutzt aber eine langsamere Viertelpixel-Verfeinerung.
+Wie 1, verwendet jedoch langsamere Viertelpixel-Verfeinerung. 
 .IPs 3
-Benutze Bewegungsabschätzung mit Halbpixelpräzision für alle in Frage
-kommenden Makroblocktypen und wähle dann den besten aus.
-Verfeinert dann die Bewegung dieses Typs zu einer Viertelpixelpräzision.
+Wendet Halbpixel-Präzisionsbewegungsschätzung auf alle in Frage kommenden
+Makroblock-Typen an, wählt dann den besten Typen und verfeinert schließlich die
+Bewegung dieses Typen auf schnelle Viertelpixel-Präzision.
 .IPs 4
-Benutze Bewegungsabschätzung mit Viertelpixelpräzision für alle in
-Frage kommenden Makroblocktypen, wähle den besten aus und beende die
-Viertelpixel-Verfeinerung für diesen Typ.
+Wendet schnelle Viertelpixel-Präzisionsbewegungsschätzung auf alle in Frage
+kommenden Makroblock-Typen an, wählt dann den besten Typen und schließt dann
+die Viertelpixel-Verfeinerung für diesen Typen ab.
 .IPs 5
-Benutze Bewegungsabschätzung mit Viertelpixelpräzisions in der höchsten
-Qualitätsstufe für alle in Frage kommenden Makroblocktypen, wähle dann den
-besten Typ (Standard).
+Wendet die bestmögliche Viertelpixel-Präzisionsbewegungsschätzung auf alle in
+Frage kommenden Makroblock-Typen an, und wählt dann den besten Typen
+(Standard).
 .IPs 6
-Benutze Optimierung der Makroblocktypen nach Ratenverzerrungstheorie für
-I- und P-Frames (am besten).
+Aktiviert Rate-Distortion-Optimierung von Makroblock-Typen in Intra- und
+P-Frames an (am besten).
 .RE
 .PD 1
 .RS
-Oben beschriebene "alle in Frage kommenden Makroblocktypen" bedeutet nicht alle
-möglichen Typen:
-4x4, 4x8, 8x4 werden nur probiert, wenn 8x8 besser ist als 16x16.
+"alle in Frage kommenden" meint im obigen Zusammenhang nicht alle aktivierten
+Typen; 4x4, 4x8, 8x4 werden nur probiert, wenn 8x8 besser als 16x16 ist.
 .RE
 .
 .TP
-.B keyint=<Wert>
-Setzt das maximale Intervall zwischen IDR-Frames (Standard: 250).
-Größere Werte sparen Bits und erhöhen so die Qualität, dies geht aber auf
-Kosten der Genauigkeit beim Spulen.
-Im Gegensatz zu MPEG-1/2/4, leidet H.264 bei großen Werten für keyint nicht
-am DCT-Drift.
-.
-.TP
-.B keyint_min=<1\-keyint/\:2>
-Setzt das minimale Intervall zwischen IDR-Frames (Standard: 25).
-Sollten Szenenwechsel innerhalb dieses Intervalls vorkommen, so werden sie als
-Intraframes encodiert und nicht als Beginn einer neuen GOP.
-Bei H.264 sind Intraframes nicht notwendigerweise an eine geschlossene GOP
-gebunden.
-Denn es ist für einen P-Frame möglich, von mehr als einem vorigen Frame aus
-vorhergesagt zu werden (siehe auch frameref).
-Daher läßt sich durch Intraframes nicht notwendigerweise spulen.
-IDR-Frames schränken aufeinanderfolgende P-Frames insofern ein, dass sie auf
-keinen Frame, der vor der IDR-Frame liegt, verweisen.
-.
-.TP
 .B (no)chroma_me
-Benutzt Chrominanzinformationen bei der Subpixel-Bewegungsabschätzung
+Berücksichtigt Chrominanz-Informationen während der Subpixel-Bewegungssuche.
 (Standard: aktiviert).
-Benötigt subq=5.
+Benötigt subq>=5.
+.
+.TP
+.B (no)mixed_refs
+Ermöglicht für jede 8x8- oder 16x8-Bewegungspartition die unabhängige Wahl
+eines Referenz-Frames.
+Ohne diese Option muß ein gesamter Makroblock dieselbe Referenz benutzen.
+Benötigt frameref>1.
+.
+.TP
+.B (no)brdo
+Aktiviert die Rate-Distortion-Optimierung von Makroblock-Typen in B-Frames.
+Benötigt subq=6.
+.
+.TP
+.B (no)bime
+Verfeinert die zwei Bewegungsvektoren in bidirektionalen Makroblöcken anstatt
+Vektoren aus Vorwärts- und Rückwärtssuchen wiederzuverwenden.
+Diese Option hat ohne B-Frames keinerlei Wirkung.
+.
+.TP
+.B trellis=<0\-2>
+Optimale Quantisierung der Rate-Distortion
+.PD 0
+.RSs
+.IPs 0
+deaktiviert
+.IPs 1
+nur bei abschließender Encodierung aktiviert (Standard)
+.IPs 2
+während allen Modus-Selektionen aktiviert (langsam, benötigt subq=6)
+.RE
+.PD 1
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
-Benutzt einen anderen Quantisierungsparameter für Chrominanz im Vergleich zur
-Helligkeit.
+Einen anderen Quantisierungsparameter für die Chrominanz im Vergleich zur
+Helligkeit verwenden.
 Brauchbare Werte liegen im Bereich <-2\-2> (Standard: 0).
 .
 .TP
+.B cqm=<flat|jvt|<Dateiname>>
+Verwendet entweder eine vom Benutzer vorgegebene Quantisierungsmatrix oder lädt
+eine Matrixdatei im JM-Format.
+.PD 0
+.RSs
+.IPs flat\ 
+Verwendet die vorgegebene Flache-16-Matrix (Standard).
+.IPs jvt\ \ 
+Verwendet die JVT-Matrix.
+.IPs <Dateiname>
+Verwende die vorgegebene Matrixdatei im JM-Format.
+.PD 1
+.RE
+.RS
+.I ANMERKUNG:
+Beim Verwenden der CMD.EXE von Windows können Probleme beim Parsen der
+Kommandozeile
+auftreten, wenn alle CQM-Listen verwendet werden sollen.
+Das liegt an der Beschränkung der Kommandozeilenlänge.
+In diesem Fall ist empfehlenswert, die Listeninhalte in eine CQM-Datei im
+JM-Format zu packen und wie oben angegeben zu laden.
+.RE
+.
+.TP
+.B cqm4iy=<list> (siehe auch cqm)
+Eigene 4x4 Intra-Luminanz-Matrix, angegeben als Liste von 16 kommagetrennten
+Werten im Bereich von 1\-255.
+.
+.TP
+.B cqm4ic=<list> (siehe auch cqm)
+Eigene 4x4 Intra-Chrominanz-Matrix, angegeben als Liste von 16 kommagetrennten
+Werten im Bereich von 1\-255.
+.
+.TP
+.B cqm4py=<list> (siehe auch cqm)
+Eigene 4x4 Inter-Luminanz-Matrix, angegeben als Liste von 16 kommagetrennten
+Werten im Bereich von 1\-255.
+.
+.TP
+.B cqm4pc=<list> (siehe auch cqm)
+Eigene 4x4 Inter-Chrominanz-Matrix, angegeben als Liste von 16 kommagetrennten
+Werten im Bereich von 1\-255.
+.
+.TP
+.B cqm8iy=<list> (siehe auch cqm)
+Eigene 8x8 Intra-Luminanz-Matrix, angegeben als Liste von 64 kommagetrennten
+Werten im Bereich von 1\-255.
+.
+.TP
+.B cqm8py=<list> (siehe auch cqm)
+Eigene 8x8 Inter-Luminanz-Matrix, angegeben als Liste von 64 kommagetrennten
+Werten im Bereich von 1\-255.
+.
+.TP
 .B level_idc=<10\-51>
-Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert
-Standard: 51 (Level 5.1).
-Dies wird benutzt, um dem Decoder mitzuteilen, welche Fähigkeiten dieser
-unterstützen muß.
-Benutze diesen Parameter nur, wenn du weißt, was er bedeutet, und du ihn
-wirklich setzen mußt.
+Legt die Ebene des Bitstroms fest, wie im Anhang A des H.264-Standards
+beschrieben.
+(Standard: 51 - Ebene 5.1).
+Wird benötigt, um dem Dekoder mitzuteilen, welche Funktionen er unterstützen
+muss.
+Verwende diesen Parameter nur, wenn Du weißt, was Du tust und wenn Du ihn
+setzen musst.
+.
+.TP
+.B threads=<1\-4>
+Jeden Frame in Scheiben spalten und diese parallel encodieren (Standard: 1).
+Ermöglich weiterhin Multithread-Decodierung, falls vom Decoder unterstützt
+(lavc tut dies nicht).
+Das geht leicht zu Lasten der Komprimierung.
+Um diese Funktion nutzen zu können, muss libx264 mit Unterstützung für pthread
+kompiliert worden sein; falls das nicht der Fall ist, wird diese Option eine
+Warnung ausgeben und sodann Scheiben, jedoch nicht Multithreading aktivieren.
 .
 .TP
 .B log=<-1\-3>
-Passt an, wieviele Logging-Informationen ausgegeben werden.
+Einstellen, wieviel an Loginformationen auf dem Bildschirm ausgegeben wird.
 .PD 0
 .RSs
 .IPs "-1"
 keine
 .IPs " 0"
-Gib nur Fehler aus.
+Nur Fehler ausgeben.
 .IPs " 1"
 Warnungen
 .IPs " 2"
-PSNR und andere Statistiken der Analyse, wenn die Encodierung fertig ist
-(Standard).
+PSNR und andere Analyse-Statistiken nach der Encodierung ausgeben (Standard)
 .IPs " 3"
-PSNR, QP, Frametyp, Größe und andere Statistiken für jeden Frame
+PSNR, QP, Frame-Type, Größe und andere Statistiken für jeden Frame
 .RE
 .PD 1
 .
 .TP
-.B scenecut=<-1\-100>
-Steuert, wie energisch Intraframes extra eingefügt werden (Standard: 40).
-Bei geringen Werten für scenecut erzwingt der Codec häufig einen Intraframe,
-wenn dies den Wert für keyint überschreiten würde.
-Gute Werte für scenecut können eine bessere Positionierung für Intraframes
-finden.
-Hohe Werte verwenden mehr Intraframes als nötig, was Bits verschwendet.
--1 deaktiviert die Erkennung von Szenenwechseln, so dass Intraframes nur alle
-keyint Frames eingefügt werden, selbst wenn ein Szenenwechsel schon früher
-stattfindet.
-Dies wird nicht empfohlen und verschwendet Bits, da Szenenwechsel, die als
-P-Frames codiert werden, genauso groß sind wie Intraframes, den Zähler für
-keyint aber nicht zurücksetzen.
-.
-.TP
-.B frameref=<1\-16>
-Anzahl der vorigen Frames, die für die Vorhersage in B- und P-Frames verwendet
-werden (Standard: 1).
-Dies is effektiv in Animes, bei Material mit Live-Action aber nehmen die
-Verbesserungen bei mehr als ca.\& 6 Referenzframes schnell ab.
-Dies hat keinen Effekt auf die Geschwindigkeit der Decodierung, es erhöht nur
-den dafür nötigen Speicherbedarf.
-Manche Decoder sind nicht in der Lage, mehr als 15 Referenzframes zu
-verarbeiten.
-.
-.TP
-.B bframes=<0\-16>
-maximale Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames
-(Standard: 0)
-.
-.TP
-.B (no)b_adapt
-Entscheidet automatisch, wann und wie viele B-Frames benutzt werden, bis zum
-oben definierten Maximum (Standard: aktiviert).
-Wenn diese Option deaktiviert ist, wird die maximale Anzahl B-Frames benutzt.
-.
-.TP
-.B b_bias=<-100\-100>
-Steuert die von b_adapt getroffene Entscheidung.
-Ein höherer b_bias-Wert bewirkt mehr B-Frames (Standard: 0).
-.
-.TP
-.B (no)b_pyramid
-Erlaubt B-Frames, als Referenz für die Vorhersage von anderen Frames zu dienen.
-Betrachte zum Beispiel drei aufeinanderfolgende B-Frames: I0 B1 B2 B3 P4.
-Ohne diese Option würden B-Frames dem selben Muster folgen wie MPEG-[124].
-Also werden sie in der Reihenfolge I0 P4 B1 B2 B3 codiert, und alle B-Frames
-werden von I0 und P4 vorhergesagt.
-Mit dieser Option werden sie als I0 P4 B2 B1 B3 kodiert.
-B2 ist der gleiche wie oben, aber B1 wird von I0 und B2 vorhergesagt, und B3
-wird von B2 und P4 vorhergesagt.
-Dies bewirkt normalerweise eine leicht verbesserte Kompression, bei fast keinen
-Kosten für die Geschwindigkeit.
-Dies ist trotzdem eine experimentelle Option: Sie ist nicht völlig abgestimmt
-und wird nicht immer helfen.
-Benötigt bframes >= 2.
-Nachteil: Verzögert eine Decodierungsverzögerung um 2 Frames.
-.
-.TP
-.B (no)deblock
-Benutze einen Deblocking-Filter (Standard: aktiviert).
-Da es sehr wenig Zeit kostet verglichen mit dem Gewinn von Qualität, wird nicht
-empfohlen, ihn zu deaktivieren.
-.
-.TP
-.B deblockalpha=<-6\-6>
-AlphaC0-Parameter des Deblocking-Filters (Standard: 0).
-Dieser passt Schwellenwerte für den In-loop-Deblocking-Filter von H.264 an.
-Zuerst passt dieser Parameter den maximalen Wert an, um den dieser Filter
-einen Pixel verändern darf.
-Als zweites beeinflusst dieser Parameter den Schwellenwert für die Differenz
-jenseits der Kante, die gefiltert wird.
-Ein positiver Wert reduziert Blockartefakte stärker, wird jedoch Details
-verschmieren.
+.B (no)psnr
+Gib PSNR-Statistiken aus.
 .br
-Das Standardverhalten des Filters erreicht fast immer optimale Qualität, daher
-ist es am besten, die Werte nicht zu ändern oder nur geringe Änderungen
-vorzunehmen.
-Wenn dein Quellmaterial aber doch schon Blöcke oder Rauschen enthält, die du
-entfernen möchtest, kann es eine gute Idee sein, ihn etwas zu erhöhen.
+.I ANMERKUNG:
+Die PSNR-Felder'Y', 'U', 'V' und 'Avg' in der Zusammenfassung  sind nicht
+mathematisch exakt, sondern einfach die durchschnittliche PSNR pro Frame.
+Sie werden nur zum Vergleich mit dem JM-Referenz-Codec beibehalten.
+Für alle anderen Zwecke benutze bitte den PSNR 'Global' oder aber die
+PSNRs pro Frame, die von log=3 ausgegeben werden.
 .
 .TP
-.B deblockbeta=<-6\-6>
-Beta-Parameter des Deblocking-Filters (Standard: 0).
-Beeinflusst den Schwellenwert für Details.
-Sehr detaillierte Blöcke werden nicht gefiltert, da das Weichzeichnen des
-Filters stärker auffallen würde als Blocking-Effekte des Originals.
+.B (no)visualize
+x264-Visualisierung während der Encodierung aktivieren.
+Falls das x264 auf deinem System das unterstützt, wird während des
+Encodierprozesses ein neues Fenster geöffnet, in dem x264 versuchen wird, eine
+Übersicht darüber zu geben, wie jeder Block enkodiert wird.
+Jeder Block-Typ in der Visualisierung wird wiefolgt eingefärbt:
+.PD 0
+.RSs
+.IPs rot/pink
+Intra-Block
+.IPs blau\ 
+Inter-Block
+.IPs grün
+Skip-Block
+.IPs gelb
+B-Block
+.RE
+.PD 1
+.RS
+Diese Funktion sollte als experimentell betrachtet werden; sie kann in
+zukünftigen Versionen ihr Verhalten ändern.
+Insbesondere beruht sie darauf, dass x264 mit Unterstützung für
+Visualisierungen kompiliert wurde.
+Momentan ist es so, dass x264 nach jeder Encodierung und Visualisieren eines
+Frames anhält, auf einen Tastendruck des Benutzers wartet und dann erst den
+nächsten Frame enkodiert.
+.RE
 .
-.TP
-.B (no)cabac
-Benutze CABAC (Context-Adaptive Binary Arithmetic Coding) (Standard:
-aktiviert)
-Verlangsamt Encodierung und Decodierung leicht, sollte aber 10-15%
-Bitrate sparen.
-Wenn du nicht gerade nach Decodiergeschwindigkeit suchst, solltest du dies
-nicht deaktivieren.
-.
-.TP
-.B qp_min=<1\-51> (ABR oder two-pass)
-minimaler Quantisierungsparameter, 10\-30 scheint ein brauchbarer Bereich zu
-sein Standard: 10).
-.
-.TP
-.B qp_max=<1\-51> (ABR oder two-pass)
-maximaler Quantisierungsparameter (Standard: 51)
-.
-.TP
-.B qp_step=<1\-50> (ABR oder two-pass)
-maximaler Wert, um den der Quantisierungsparameter zwischen
-Frames erhöht/erniedrigt werden darf (Standard: 2)
-.
-.TP
-.B ratetol=<0.1\-100.0> (ABR oder two-pass)
-erlaubte Abweichung der durchschnittlichen Bitrate (keine bestimmten
-Einheiten) (Standard: 1.0)
-.
-.TP
-.B vbv_maxrate=<Wert> (ABR oder two-pass)
-maximale lokale Bitrate in kbits/\:Sekunde (Standard: deaktiviert)
-.
-.TP
-.B vbv_bufsize=<Wert> (ABR oder two-pass)
-Intervall für vbv_maxrate, über die gemittelt wird in kbits (Standard: keiner,
-muss angegeben werden, wenn vbv_maxrate aktiviert wird)
-.
-.TP
-.B vbv_init=<0.0\-1.0> (ABR oder two-pass)
-initiale Bufferbelegung als Bruchteil von vbv_bufsize (Standard: 0.9)
 .
 .
 .SS MPEG Muxer (\-mpegopts)
