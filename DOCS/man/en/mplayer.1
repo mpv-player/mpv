@@ -535,10 +535,12 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 .
 .SH "PROFILES"
 To ease working with different configurations profiles can be defined in the
-configuration files. A profile start with its name between square brackets,
-eg. '[my-profile]'. All following options will be part of the profile.
+configuration files.
+A profile starts with its name between square brackets, e.g.\& '[my-profile]'.
+All following options will be part of the profile.
 A description (shown by \-profile help) can be defined with the profile-desc
-option. To end the profile start another one or use the profile name 'default'
+option.
+To end the profile, start another one or use the profile name 'default'
 to continue with normal options.
 .fi
 .PP
@@ -585,7 +587,7 @@ See '\-msglevel help' for a list of all modules.
 .br
 .I NOTE:
 Messages printed before the command line is parsed can be controlled only
-by $MPLAYER_VERBOSE, which applies to all modules.
+by the MPLAYER_VERBOSE environment variable, which applies to all modules.
 .br
 Available levels:
 .PD 0
@@ -9232,7 +9234,7 @@ control the behavior of MPlayer and MEncoder.
 Directory where MPlayer looks for user settings.
 .
 .TP
-.B MPLAYER_VERBOSE (also see: \-v and \-msglevel)
+.B MPLAYER_VERBOSE (also see \-v and \-msglevel)
 Set the initial verbosity level across all message modules
 (default: 0).
 Negative values result in fewer messages while positive
