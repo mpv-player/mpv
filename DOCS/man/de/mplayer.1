@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1210
+.\" In sync with rev 1.1212
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -544,6 +544,36 @@ diesen Film relevanten Optionen und speichere die Datei in ~/\:.mplayer/
 oder im Verzeichnis der Datei.
 .
 .\" --------------------------------------------------------------------------
+.\" Profile
+.\" --------------------------------------------------------------------------
+.
+.SH "PROFILE"
+Um die Arbeit mit verschiedenen Konfigurationsprofilen zu erleichtern, können
+in den Konfigurationsdateien mehrere Profile definiert werden.
+Ein Profil beginnt mit dessen Name in eckigen Klammern, z.B.\& '[mein-Profil]'.
+Alle nachfolgenden Optionen werden Teil des Profils sein.
+Eine Beschreibung (gezeigt durch \-profile help) kann mit der Option
+profile-desc definiert werden.
+Um das Profil abzuschließen, beginne ein neues oder benutze den Profilnamen
+'default', um mit normalen Optionen fortzufahren.
+.fi
+.PP
+.I "BEISPIEL-PROFIL FÜR MENCODER:"
+.sp 1
+.nf
+
+[mpeg4]
+profile-desc="MPEG4-Encodierung"
+ovc=lacv=yes
+lavcopts=vcodec=mpeg4:vbitrate=1200
+
+[mpeg4-hq]
+profile-desc="HQ MPEG4-Encodierung"
+profile=mpeg4
+lavcopts=mbd=2:trell=yes:v4mv=yes
+.fi
+.
+.\" --------------------------------------------------------------------------
 .\" Optionen
 .\" --------------------------------------------------------------------------
 .
@@ -559,6 +589,10 @@ der eingebauten codecs.conf.
 .B \-include <Konfigurationsdatei>
 Gib eine Konfigurationsdatei an, die nach den Standardkonfigurationsdateien
 eingelesen werden soll.
+.
+.TP
+.B \-list-options
+Gibt alle verfügbaren Optionen aus.
 .
 .TP
 .B \-msglevel <all=<Level>:<Modul>=<Level>:...>
@@ -622,8 +656,17 @@ Echtzeitpriorität (realtime) zu benutzen kann das System einfrieren.
 .RE
 .
 .TP
+.B \-profile <Profil1,Profil2,...>
+Benutze eins (oder mehrere) der angegebenen Profile, \-profile help gibt eine
+Liste der definierten Profile aus.
+.
+.TP
 .B \-really-quiet (siehe auch \-quiet)
-Zeigt noch weniger Ausgaben und Statusmeldungen an als mit \-quiet.
+Zeige noch weniger Ausgaben und Statusmeldungen an als mit \-quiet.
+.
+.TP
+.B \-show-profile <Profil>
+Zeige eine Beschreibung und den Inhalt eines Profils an.
 .
 .TP
 .B \-v\ \ \ \ \ 
@@ -809,10 +852,6 @@ Wert auf 2 für Linux oder 1024 für Windows.
 .TP
 .B \-lircconf <Dateiname> (nur bei LIRC)
 Gibt eine Konfigurationsdatei für LIRC an (Standard: ~/\:.lircrc).
-.
-.TP
-.B \-list-options
-Gibt alle verfügbaren Optionen aus.
 .
 .TP
 .B \-loop <Anzahl>
