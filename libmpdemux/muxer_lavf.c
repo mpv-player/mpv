@@ -204,7 +204,9 @@ static void fix_parameters(muxer_stream_t *stream)
 	else if(stream->type == MUXER_TYPE_VIDEO)
 	{
 		ctx->codec_id = codec_get_bmp_id(stream->bih->biCompression);
+#if 0 //breaks mov/mp4
                 ctx->codec_tag= stream->bih->biCompression;
+#endif
 		mp_msg(MSGT_MUXER, MSGL_INFO, "VIDEO CODEC ID: %d\n", ctx->codec_id);
 		ctx->width = stream->bih->biWidth;
 		ctx->height = stream->bih->biHeight;
