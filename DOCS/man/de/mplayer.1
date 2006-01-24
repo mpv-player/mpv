@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1210 (except for two x264encopts, TODO!)
+.\" In sync with rev 1.1210
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -9361,6 +9361,22 @@ nur bei abschließender Encodierung aktiviert (Standard)
 während allen Modus-Selektionen aktiviert (langsam, benötigt subq=6)
 .RE
 .PD 1
+.
+.TP
+.B (no)fast_pskip
+Führt in P-Frames eine frühe Sprungerkennung durch (Standard: aktiviert).
+Dies verbessert die Geschwindigkeit normalerweise ohne zusätzliche Kosten,
+kann manchmal jedoch zu Artefakten führen in Bereichen ohne Details, wie ein
+Himmel.
+.
+.TP
+.B nr=<0\-100000>
+Rauschunterdrückung, 0 bedeutet deaktiviert.
+100\-1000 ist ein sinnvoller Bereich für typischen Inhalt, du möchtest den
+Wert aber vielleicht erhöhen bei etwas verrauschteren Inhalten (Standard: 0).
+Da der Einfluß auf die Geschwindigkeit gering ist, möchtest du diese Methode
+der Rauschunterdrückung mit Filtern wie denoise3d oder hqdn3d möglicherweise
+vorziehen.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
