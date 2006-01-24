@@ -37,6 +37,7 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 	int ret = 1;
 	int errors = 0;
 	int prev_mode = config->mode;
+	m_profile_t* profile = NULL;
 
 #ifdef MP_DEBUG
 	assert(config != NULL);
@@ -105,6 +106,16 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 			continue;
 		}
 		opt[opt_pos] = '\0';
+		
+		/* Profile declaration */
+		if(opt_pos > 2 && opt[0] == '[' && opt[opt_pos-1] == ']') {
+			opt[opt_pos-1] = '\0';
+			if(strcmp(opt+1,"default"))
+				profile = m_config_add_profile(config,opt+1);
+			else
+				profile = NULL;
+			continue;
+		}
 
 #ifdef MP_DEBUG
 		PRINT_LINENUM;
@@ -184,7 +195,14 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 			ret = -1;
 		}
 
-		tmp = m_config_set_option(config, opt, param);
+		if(profile) {
+			if(!strcmp(opt,"profile-desc"))
+				m_profile_set_desc(profile,param), tmp = 1;
+			else
+				tmp = m_config_set_profile_option(config,profile,
+								  opt,param);
+		} else
+			tmp = m_config_set_option(config, opt, param);
 		if (tmp < 0) {
 			PRINT_LINENUM;
 			if(tmp == M_OPT_UNKNOWN) {

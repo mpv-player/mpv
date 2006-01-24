@@ -530,6 +530,34 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 ~/.mplayer/ or in the same directory as the file.
 .
 .\" --------------------------------------------------------------------------
+.\" Profiles
+.\" --------------------------------------------------------------------------
+.
+.SH "PROFILES"
+To ease working with different configurations profiles can be defined in the
+configuration files. A profile start with its name between square brackets,
+eg. '[my-profile]'. All following options will be part of the profile.
+A description (shown by \-profile help) can be defined with the profile-desc
+option. To end the profile start another one or use the profile name 'default'
+to continue with normal options.
+.fi
+.PP
+.I "EXAMPLE MENCODER PROFILE:"
+.sp 1
+.nf
+
+[mpeg4]
+profile-desc="MPEG4 encoding"
+ovc=lacv=yes
+lavcopts=vcodec=mpeg4:vbitrate=1200
+
+[mpeg4-hq]
+profile-desc="HQ MPEG4 encoding"
+profile=mpeg4
+lavcopts=mbd=2:trell=yes:v4mv=yes
+.fi
+.
+.\" --------------------------------------------------------------------------
 .\" Options
 .\" --------------------------------------------------------------------------
 .
@@ -605,8 +633,16 @@ Using realtime priority can cause system lockup.
 .RE
 .
 .TP
+.B \-profile <profile1,profile2,...>
+Use the given profile(s), \-profile help display a list of the defined profiles.
+.
+.TP
 .B \-really-quiet (also see \-quiet)
 Display even less output and status messages than with \-quiet.
+.
+.TP
+.B \-show-profile <profile>
+Show the description and content of a profile.
 .
 .TP
 .B \-v\ \ \ \ \ 
