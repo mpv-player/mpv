@@ -160,7 +160,7 @@ static int lavc_param_turbo = 0;
 static int lavc_param_brd_scale = 0;
 static int lavc_param_bidir_refine = 0;
 static int lavc_param_sc_factor = 1;
-
+static int lavc_param_video_global_header= 0;
 
 char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
@@ -317,6 +317,7 @@ m_option_t lavcopts_conf[]={
 	{"brd_scale", &lavc_param_brd_scale, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"bidir_refine", &lavc_param_bidir_refine, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
 	{"sc_factor", &lavc_param_sc_factor, CONF_TYPE_INT, CONF_RANGE, 1, INT_MAX, NULL},
+	{"vglobal", &lavc_param_video_global_header, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -632,6 +633,14 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->brd_scale = lavc_param_brd_scale;
     lavc_venc_context->bidir_refine = lavc_param_bidir_refine;
     lavc_venc_context->scenechange_factor = lavc_param_sc_factor;
+    if((lavc_param_video_global_header&1)
+       /*|| (video_global_header==0 && (oc->oformat->flags & AVFMT_GLOBALHEADER))*/){
+        lavc_venc_context->flags |= CODEC_FLAG_GLOBAL_HEADER;
+    }
+    if(lavc_param_video_global_header&2){
+        lavc_venc_context->flags2 |= CODEC_FLAG2_LOCAL_HEADER;
+    }
+
     switch(lavc_param_format)
     {
 	case IMGFMT_YV12:
@@ -750,6 +759,7 @@ static int config(struct vf_instance_s* vf,
     if(lavc_venc_context->bits_per_sample)
         mux_v->bih->biBitCount= lavc_venc_context->bits_per_sample;
     if(lavc_venc_context->extradata_size){
+        mux_v->bih= realloc(mux_v->bih, sizeof(BITMAPINFOHEADER) + lavc_venc_context->extradata_size);
         memcpy(mux_v->bih + 1, lavc_venc_context->extradata, lavc_venc_context->extradata_size);
         mux_v->bih->biSize= sizeof(BITMAPINFOHEADER) + lavc_venc_context->extradata_size;
     }
