@@ -485,6 +485,11 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Error: option '%s' must have a parameter!\n"
 #define MSGTR_OptionListHeader "\n Name                 Type            Min        Max      Global  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nTotal: %d options\n"
+#define MSGTR_TooDeepProfileInclusion "WARNING: Too deep profile inclusion.\n"
+#define MSGTR_NoProfileDefined "No profiles have been defined.\n"
+#define MSGTR_AvailableProfiles "Available profiles:\n"
+#define MSGTR_UnknownProfile "Unknown profile '%s'.\n"
+#define MSGTR_Profile "Profile %s: %s\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found.\n"

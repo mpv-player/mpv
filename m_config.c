@@ -409,7 +409,7 @@ m_config_print_option_list(m_config_t *config) {
 
   if(!config->opts) return;
 
-  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_OptionListHeader);
+  mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_OptionListHeader);
   for(co = config->opts ; co ; co = co->next) {
     m_option_t* opt = co->opt;
     if(opt->type->flags & M_OPT_TYPE_HAS_CHILD) continue;
@@ -421,7 +421,7 @@ m_config_print_option_list(m_config_t *config) {
       sprintf(max,"%-8.0f",opt->max);
     else
       strcpy(max,"No");
-    mp_msg(MSGT_FIXME, MSGL_FIXME, " %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s   %-3.3s\n",
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s   %-3.3s\n",
 	   co->name,
 	   co->opt->type->name,
 	   min,
@@ -431,7 +431,7 @@ m_config_print_option_list(m_config_t *config) {
 	   opt->flags & CONF_NOCFG ? "No" : "Yes");
     count++;
   }
-  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_TotalOptions,count);
+  mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_TotalOptions,count);
 }
 
 m_profile_t*
@@ -476,7 +476,7 @@ static void
 m_config_set_profile(m_config_t* config, m_profile_t* p) {
   int i;
   if(config->profile_depth > MAX_PROFILE_DEPTH) {
-    mp_msg(MSGT_CFGPARSER, MSGL_WARN, "WARNING: Too deep profile inclusion\n");
+    mp_msg(MSGT_CFGPARSER, MSGL_WARN, MSGTR_TooDeepProfileInclusion);
     return;
   }
   config->profile_depth++;
@@ -493,14 +493,14 @@ parse_profile(m_option_t* opt,char *name, char *param, void* dst, int src) {
   if(param && !strcmp(param,"help")) {
     m_profile_t* p;
     if(!config->profiles) {
-      mp_msg(MSGT_FIXME, MSGL_FIXME, "No profile have been defined.\n");
+      mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_NoProfileDefined);
       return M_OPT_EXIT-1;
     }
-    mp_msg(MSGT_FIXME, MSGL_FIXME, "Available profiles:\n");
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_AvailableProfiles);
     for(p = config->profiles ; p ; p = p->next)
-      mp_msg(MSGT_FIXME, MSGL_FIXME, "\t%s\t%s\n",p->name,
+      mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\t%s\t%s\n",p->name,
 	     p->desc ? p->desc : "");
-    mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
     return M_OPT_EXIT-1;
   }
     
@@ -509,7 +509,7 @@ parse_profile(m_option_t* opt,char *name, char *param, void* dst, int src) {
   if(!list || !list[0]) return M_OPT_INVALID;
   for(i = 0 ; list[i] ; i++)
     if(!m_config_get_profile(config,list[i])) {
-      mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Unknown profile '%s'.\n",
+      mp_msg(MSGT_CFGPARSER, MSGL_WARN, MSGTR_UnknownProfile,
              list[i]);
       r = M_OPT_INVALID;
     }
@@ -543,11 +543,11 @@ show_profile(m_option_t *opt, char* name, char *param) {
   int i,j;
   if(!param) return M_OPT_MISSING_PARAM;
   if(!(p = m_config_get_profile(config,param))) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown profile '%s'\n",param);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, MSGTR_UnknownProfile, param);
     return M_OPT_EXIT-1;
   }
   if(!config->profile_depth)
-    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Profile %s: %s\n",param,
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_Profile, param,
 	   p->desc ? p->desc : "");
   config->profile_depth++;
   for(i = 0 ; i < p->num_opts ; i++) {
