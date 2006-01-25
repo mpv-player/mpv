@@ -190,7 +190,9 @@ static void fix_parameters(muxer_stream_t *stream)
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
 		ctx->codec_id = codec_get_wav_id(stream->wf->wFormatTag); 
+#if 0 //breaks aac in mov at least
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
+#endif
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AUDIO CODEC ID: %x, TAG: %x\n", ctx->codec_id, (uint32_t) ctx->codec_tag);
 		ctx->sample_rate = stream->wf->nSamplesPerSec;
 //                mp_msg(MSGT_MUXER, MSGL_INFO, "stream->h.dwSampleSize: %d\n", stream->h.dwSampleSize);
@@ -217,9 +219,8 @@ static void fix_parameters(muxer_stream_t *stream)
 	else if(stream->type == MUXER_TYPE_VIDEO)
 	{
 		ctx->codec_id = codec_get_bmp_id(stream->bih->biCompression);
-#if 0 //breaks mov/mp4
-                ctx->codec_tag= stream->bih->biCompression;
-#endif
+                if(ctx->codec_id <= 0)
+                    ctx->codec_tag= stream->bih->biCompression;
 		mp_msg(MSGT_MUXER, MSGL_INFO, "VIDEO CODEC ID: %d\n", ctx->codec_id);
 		ctx->width = stream->bih->biWidth;
 		ctx->height = stream->bih->biHeight;
