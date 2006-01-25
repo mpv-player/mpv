@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <inttypes.h>
+#include <limits.h>
 #include "config.h"
 #include "version.h"
 #include "mp_msg.h"
