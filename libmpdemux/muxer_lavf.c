@@ -202,7 +202,7 @@ static void fix_parameters(muxer_stream_t *stream)
                 mp_msg(MSGT_MUXER, MSGL_V, "MUXER_LAVF(audio stream) frame_size: %d, scale: %u, sps: %u, rate: %u, ctx->block_align = stream->wf->nBlockAlign; %d=%d stream->wf->nAvgBytesPerSec:%d\n", 
 			ctx->frame_size, stream->h.dwScale, ctx->sample_rate, stream->h.dwRate,
 			ctx->block_align, stream->wf->nBlockAlign, stream->wf->nAvgBytesPerSec);
-		ctx->block_align = stream->wf->nBlockAlign;
+		ctx->block_align = stream->h.dwSampleSize;
 		if(stream->wf+1 && stream->wf->cbSize)
 		{
 			ctx->extradata = av_malloc(stream->wf->cbSize);
