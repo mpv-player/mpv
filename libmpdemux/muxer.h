@@ -43,6 +43,9 @@ typedef struct {
   // muxer of that stream
   struct muxer_t *muxer;
   void *priv; // private stream specific data stored by the muxer
+
+  int vbv_size;
+  int max_rate;
 } muxer_stream_t;
 
 typedef struct {

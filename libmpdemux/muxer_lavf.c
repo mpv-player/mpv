@@ -43,10 +43,19 @@ typedef struct {
 
 static char *conf_format = NULL;
 static int conf_allow_lavf = 0;
+static int mux_rate= 0;
+static int mux_packet_size= 0;
+static float mux_preload= 0.5;
+static float mux_max_delay= 0.7;
 
 m_option_t lavfopts_conf[] = {
 	{"format", &(conf_format), CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"i_certify_that_my_video_stream_does_not_use_b_frames", &conf_allow_lavf, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"muxrate", &mux_rate, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
+	{"packetsize", &mux_packet_size, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
+	{"preload", &mux_preload, CONF_TYPE_FLOAT, CONF_RANGE, 0, INT_MAX, NULL},
+	{"delay", &mux_max_delay, CONF_TYPE_FLOAT, CONF_RANGE, 0, INT_MAX, NULL},
+
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -173,12 +182,16 @@ static void fix_parameters(muxer_stream_t *stream)
 	ctx = &(spriv->avstream->codec);
 #endif
 	
+        if(stream->wf && stream->wf->nAvgBytesPerSec)
+            ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
+        ctx->rc_buffer_size= stream->vbv_size;
+        ctx->rc_max_rate= stream->max_rate;
+
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
 		ctx->codec_id = codec_get_wav_id(stream->wf->wFormatTag); 
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AUDIO CODEC ID: %x, TAG: %x\n", ctx->codec_id, (uint32_t) ctx->codec_tag);
-		ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
 		ctx->sample_rate = stream->wf->nSamplesPerSec;
 //                mp_msg(MSGT_MUXER, MSGL_INFO, "stream->h.dwSampleSize: %d\n", stream->h.dwSampleSize);
 		ctx->channels = stream->wf->nChannels;
@@ -353,7 +366,11 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
 		mp_msg(MSGT_MUXER, MSGL_FATAL, "Invalid output format parameters\n");
 		goto fail;
 	}
-	
+	priv->oc->packet_size= mux_packet_size;
+        priv->oc->mux_rate= mux_rate;
+        priv->oc->preload= (int)(mux_preload*AV_TIME_BASE);
+        priv->oc->max_delay= (int)(mux_max_delay*AV_TIME_BASE);
+
 	register_protocol(&mp_protocol);
 
 	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))

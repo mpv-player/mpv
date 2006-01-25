@@ -362,6 +362,9 @@ static int config(struct vf_instance_s* vf,
 	lavc_venc_context->bit_rate = lavc_param_vbitrate*1000;
     else
 	lavc_venc_context->bit_rate = 800000; /* default */
+
+    //mux_v->wf->nAvgBytesPerSec= lavc_venc_context->bit_rate/8;
+
     lavc_venc_context->bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
 #if LIBAVCODEC_BUILD >= 4754
     lavc_venc_context->time_base= (AVRational){mux_v->h.dwScale, mux_v->h.dwRate};
@@ -402,9 +405,14 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->rc_qmod_amp= lavc_param_rc_qmod_amp;
     lavc_venc_context->rc_qmod_freq= lavc_param_rc_qmod_freq;
     lavc_venc_context->rc_eq= lavc_param_rc_eq;
+
+    mux_v->max_rate=
     lavc_venc_context->rc_max_rate= lavc_param_rc_max_rate*1000;
     lavc_venc_context->rc_min_rate= lavc_param_rc_min_rate*1000;
+
+    mux_v->vbv_size=
     lavc_venc_context->rc_buffer_size= lavc_param_rc_buffer_size*1000;
+
     lavc_venc_context->rc_initial_buffer_occupancy=
             lavc_venc_context->rc_buffer_size *
             lavc_param_rc_initial_buffer_occupancy;
