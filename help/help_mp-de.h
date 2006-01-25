@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.219
+// In synch with rev 1.220
 
 // ========================= MPlayer help ===========================
 
@@ -491,7 +491,12 @@ static char help_text[]=
 #define MSGTR_MissingSuboptionParameter "Fehler: Unteroption '%s' von '%s' benötigt einen Parameter!\n"
 #define MSGTR_MissingOptionParameter "Fehler: Option '%s' benötigt einen Parameter!\n"
 #define MSGTR_OptionListHeader "\n Name                 Typ             Min        Max      Global  CL    Cfg\n\n"
-#define MSGTR_TotalOptions "\nInsgesamt: %d Optionen.\n"
+#define MSGTR_TotalOptions "\nInsgesamt: %d Optionen\n"
+#define MSGTR_TooDeepProfileInclusion "WARNUNG: Zu tiefe Profileinfügung.\n"
+#define MSGTR_NoProfileDefined "Es wurden keine Profile definiert.\n"
+#define MSGTR_AvailableProfiles "Verfügbare Profile:\n"
+#define MSGTR_UnknownProfile "Unbekanntes Profil '%s'.\n"
+#define MSGTR_Profile "Profil %s: %s\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-Laufwerk '%s' nicht gefunden.\n"
