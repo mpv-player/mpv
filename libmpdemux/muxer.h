@@ -76,7 +76,7 @@ typedef struct muxer_t{
   int muxbuf_skip_buffer;
   // functions:
   void (*fix_stream_parameters)(muxer_stream_t *);
-  void (*cont_write_chunk)(muxer_stream_t *,size_t,unsigned int);
+  void (*cont_write_chunk)(muxer_stream_t *,size_t,unsigned int, double dts, double pts);
   void (*cont_write_header)(struct muxer_t *);
   void (*cont_write_index)(struct muxer_t *);
   muxer_stream_t* (*cont_new_stream)(struct muxer_t *,int);
@@ -87,17 +87,19 @@ typedef struct muxer_t{
 /* muxer frame buffer */
 typedef struct muxbuf_t {
   muxer_stream_t *stream; /* pointer back to corresponding stream */
-  double timer; /* snapshot of stream timer */
+  double dts; /* decode timestamp / time at which this packet should be feeded into the decoder */
+  double pts; /* presentation timestamp / time at which the data in this packet will be presented to the user */
   unsigned char *buffer;
   size_t len;
   unsigned int flags;
 } muxbuf_t;
 
+#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
 
 muxer_t *muxer_new_muxer(int type,FILE *);
 #define muxer_new_stream(muxer,a) muxer->cont_new_stream(muxer,a)
 #define muxer_stream_fix_parameters(muxer, a) muxer->fix_stream_parameters(a)
-void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags);
+void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double dts, double pts);
 #define muxer_write_header(muxer) muxer->cont_write_header(muxer)
 #define muxer_write_index(muxer) muxer->cont_write_index(muxer)
 

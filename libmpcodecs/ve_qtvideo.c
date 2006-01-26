@@ -260,7 +260,7 @@ if(!codec_inited){
     printf("Size %i->%i   \n",stride*height,compressedsize);
     printf("Ratio: %i:1\n",(stride*height)/compressedsize);
 #endif
-    muxer_write_chunk(mux_v, compressedsize , similarity?0:0x10);
+    muxer_write_chunk(mux_v, compressedsize , similarity?0:0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 
     if(((*desc)->idSize)>MAX_IDSIZE){
 	mp_msg(MSGT_MENCODER,MSGL_ERR,"FATAL! idSize=%d too big, increase MAX_IDSIZE in ve_qtvideo.c!\n",((*desc)->idSize));

@@ -859,7 +859,7 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic){
     if(out_size == 0)
         return 0;
            
-    muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0);
+    muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
         
 #if LIBAVCODEC_BUILD >= 4643
     /* store psnr / pict size / type / qscale */

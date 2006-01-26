@@ -2349,7 +2349,7 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 
 
 
-static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
+static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags, double dts_arg, double pts_arg){
   size_t ptr=0, sz = 0;
   uint64_t pts, tmp;
   muxer_t *muxer = s->muxer;

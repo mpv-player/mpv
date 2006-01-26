@@ -511,7 +511,7 @@ static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
         int keyframe = (pic_out.i_type == X264_TYPE_IDR) ||
                        (pic_out.i_type == X264_TYPE_I
                         && frame_ref == 1 && !bframe);
-        muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0);
+        muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     }
 
     return i_size;

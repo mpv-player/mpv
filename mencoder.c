@@ -1219,7 +1219,7 @@ if(sh_audio){
 	    }
 	}
 	if(len<=0) break; // EOF?
-	muxer_write_chunk(mux_a,len,0x10);
+	muxer_write_chunk(mux_a,len,0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	if(!mux_a->h.dwSampleSize && mux_a->timer>0)
 	    mux_a->wf->nAvgBytesPerSec=0.5f+(double)mux_a->size/mux_a->timer; // avg bps (VBR)
 	if(mux_a->buffer_len>=len){
@@ -1304,11 +1304,11 @@ ptimer_start = GetTimerMS();
 switch(mux_v->codec){
 case VCODEC_COPY:
     mux_v->buffer=frame_data.start;
-    if(skip_flag<=0) muxer_write_chunk(mux_v,frame_data.in_size,(sh_video->ds->flags&1)?0x10:0);
+    if(skip_flag<=0) muxer_write_chunk(mux_v,frame_data.in_size,(sh_video->ds->flags&1)?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     break;
 case VCODEC_FRAMENO:
     mux_v->buffer=(unsigned char *)&decoded_frameno; // tricky
-    if(skip_flag<=0) muxer_write_chunk(mux_v,sizeof(int),0x10);
+    if(skip_flag<=0) muxer_write_chunk(mux_v,sizeof(int),0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     break;
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
@@ -1333,7 +1333,7 @@ default:
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
 	    if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
-	      muxer_write_chunk(mux_v,0,0);
+	      muxer_write_chunk(mux_v,0,0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	} else {
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
@@ -1352,7 +1352,7 @@ if(skip_flag<0){
     while(skip_flag<0){
 	duplicatedframes++;
 	if (!encode_duplicates || !sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_DUPLICATE_FRAME, 0) != CONTROL_TRUE)
-	    muxer_write_chunk(mux_v,0,0);
+	    muxer_write_chunk(mux_v,0,0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	++skip_flag;
     }
 } else

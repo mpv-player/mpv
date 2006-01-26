@@ -523,7 +523,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 #endif
     
     // write output
-    muxer_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra==1 ? 0x10 : 0);
+    muxer_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra==1 ? 0x10 : 0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 
     // update the VBR engine
     vbrUpdate(&fp->vbr_state, enc_stats.quant, fp->enc_frame.intra,

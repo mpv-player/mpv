@@ -118,7 +118,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
   
     le2me_rtframeheader(ench);
     mux_v->buffer=vf->priv->buffer;
-    muxer_write_chunk(mux_v,FRAMEHEADERSIZE + 128*sizeof(long int), 0x10);
+    muxer_write_chunk(mux_v,FRAMEHEADERSIZE + 128*sizeof(long int), 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     vf->priv->tbl_wrote = 1;
     memset(ench,0,FRAMEHEADERSIZE); // Reset the header
   }
@@ -175,7 +175,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
   ench->packetlength = len;
   le2me_rtframeheader(ench);
   mux_v->buffer=(void*)ench;
-  muxer_write_chunk(mux_v, len + FRAMEHEADERSIZE, 0x10);
+  muxer_write_chunk(mux_v, len + FRAMEHEADERSIZE, 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
   return 1;
 }
 

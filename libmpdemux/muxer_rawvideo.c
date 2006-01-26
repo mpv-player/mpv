@@ -50,7 +50,7 @@ static void write_rawvideo_chunk(FILE *f,int len,void* data){
     }
 }
 
-static void rawvideofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
+static void rawvideofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags, double dts, double pts){
     muxer_t *muxer=s->muxer;
 
     // write out the chunk:

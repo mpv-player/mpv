@@ -248,7 +248,7 @@ static void fix_parameters(muxer_stream_t *stream)
 	}
 }
 
-static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags)
+static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags, double dts, double pts)
 {
 	muxer_t *muxer = (muxer_t*) stream->muxer;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;

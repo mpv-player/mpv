@@ -252,7 +252,7 @@ while((c=fgetc(f))>=0){
 	// end of frame:
 	printf("Frame size: %d\n",mux->buffer_len);
 	h263_decode_picture_header(mux->buffer);
-	muxer_write_chunk(mux,mux->buffer_len,0x10);
+	muxer_write_chunk(mux,mux->buffer_len,0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 	mux->buffer_len=0;
 	
 	if((v_id&0xF0)==0x10) fprintf(stderr,"hmm. last video packet %02X\n",v_id);

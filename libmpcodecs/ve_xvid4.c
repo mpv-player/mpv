@@ -629,7 +629,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	/* xvidcore outputed bitstream -- mux it */
 	muxer_write_chunk(mod->mux,
 			  size,
-			  (mod->frame.out_flags & XVID_KEYFRAME)?0x10:0);
+			  (mod->frame.out_flags & XVID_KEYFRAME)?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 
 	return(FINE);
 }
@@ -1378,7 +1378,7 @@ flush_internal_buffers(xvid_mplayer_module_t *mod)
 
 			/* xvidcore outputed bitstream -- mux it */
 			muxer_write_chunk(mod->mux, size,
-					(mod->frame.out_flags & XVID_KEYFRAME)?0x10:0);
+					(mod->frame.out_flags & XVID_KEYFRAME)?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 		}
 	} while (size>0);
 }

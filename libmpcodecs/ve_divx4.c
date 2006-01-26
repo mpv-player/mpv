@@ -396,9 +396,9 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     vf->priv->enc_frame.produce_empty_frame = 0;
     encore(vf->priv->enc_handle, ENC_OPT_ENCODE, &vf->priv->enc_frame, &enc_result);
     if(enc_result.cType == 'I')
-        muxer_write_chunk(mux_v,vf->priv->enc_frame.length,0x10);
+        muxer_write_chunk(mux_v,vf->priv->enc_frame.length,0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     else
-        muxer_write_chunk(mux_v,vf->priv->enc_frame.length,0);
+        muxer_write_chunk(mux_v,vf->priv->enc_frame.length,0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 #else
     vf->priv->enc_frame.mvs=NULL;
 #ifdef HAVE_XVID_VBR
@@ -444,7 +444,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 					       enc_result.quantizer);
 	}
     }
-    muxer_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
+    muxer_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
 #endif
     return 1;
 }

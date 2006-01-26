@@ -243,7 +243,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     int ret;
 //    flip_upside_down(vo_image_ptr,vo_image_ptr,3*vo_w,vo_h); // dirty hack
     ret=vfw_encode_frame(mux_v->bih, mux_v->buffer, vfw_bih, mpi->planes[0], &flags, 10000);
-    muxer_write_chunk(mux_v,mux_v->bih->biSizeImage,flags);
+    muxer_write_chunk(mux_v,mux_v->bih->biSizeImage,flags, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     return 1;
 }
 

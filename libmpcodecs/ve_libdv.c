@@ -77,7 +77,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	(mpi->flags&MP_IMGFLAG_YUV) ? e_dv_color_yuv : e_dv_color_rgb,
 	mux_v->buffer);
 
-    muxer_write_chunk(mux_v, 480 * (vf->priv->enc->isPAL ? 300 : 250) , 0x10);
+    muxer_write_chunk(mux_v, 480 * (vf->priv->enc->isPAL ? 300 : 250) , 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     return 1;
 }
 

@@ -45,7 +45,7 @@ static muxer_stream_t* rawaudiofile_new_stream(muxer_t *muxer,int type){
     return s;
 }
 
-static void rawaudiofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
+static void rawaudiofile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags, double dts, double pts){
     muxer_t *muxer=s->muxer;
 
     // write out the chunk:

@@ -191,7 +191,7 @@ static void avifile_odml_new_riff(muxer_t *muxer)
 
 static void avifile_write_header(muxer_t *muxer);
 
-static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
+static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags, double dts, double pts){
     off_t rifflen;
     muxer_t *muxer=s->muxer;
     struct avi_stream_info *si = s->priv;
