@@ -11,12 +11,14 @@ MPlayer (1.0)
     * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
     * new advanced audio usage guide with surround sound instructions
-    * French documentation synced
     * Hungarian XML documentation translation finished
     * Czech documentation translation finished
+    * French documentation synced
+    * German man page synced
     * Italian man page synced
     * Chinese console messages synced
     * misc improvements all over the place
+    * AIX port documentation added
 
     Drivers:
     * JACK audio output rewritten without bio2jack
@@ -43,6 +45,7 @@ MPlayer (1.0)
     * QDM2 audio decoding via lavc
     * cook audio decoding via lavc
     * TrueSpeech audio decoding via lavc
+    * CamStudio video decoder via lavc
     * hwmpa pass-through MPEG audio codec
 
     Demuxers:
@@ -67,7 +70,7 @@ MPlayer (1.0)
     FFmpeg/libavcodec:
     * Snow bug fixes and speedup
     * MPEG-1/2 decoder speedup
-    * Indeo2 video decoder
+    * Indeo2 (RT21) video decoder
     * Fraps video decoder (v0 & v1)
     * Vorbis audio decoder
     * RV20 fixes
@@ -76,11 +79,14 @@ MPlayer (1.0)
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
     * skiploopfilter decoder option for very fast H.264 decoding
     * D-Cinema audio demuxer and decoder support
-    * Indeo2 (RT21) decoder
     * Duck/On2 TrueMotion2 (TM20) decoder
     * FLX and DTA extensions for flic
     * QDM2 audio decoder
     * cook audio decoder
+    * TrueSpeech audio decoder
+    * WMA2 audio decoder fixed, now all files should play correctly
+    * JPEG-LS decoder (unfinished)
+    * CamStudio video decoder
 
     GUI:
     * ported to GTK2
@@ -122,6 +128,7 @@ MPlayer (1.0)
     * DragonFly BSD support
     * liba52 asm optimizations ported to amd64
     * -(no)border option to get a bordered/borderless window on Windows
+    * MPlayer ported to AIX
 
     Others:
     * enabled hinting for TrueType fonts
@@ -148,13 +155,12 @@ MPlayer (1.0)
     * new option -msglevel, control verbosity of modules of MPlayer directly
     * -verbose option removed, use -v or "-msglevel all" instead.
     * -edl is now per-file in MPlayer.
-    * new input command prefixes, "pausing_keep" and "pausing_toggle" which alter
-      pausing state immediately after command.
-    * enviorment variable MPLAYER_VERBOSE controls verbosity before command line
-      is parsed
-    * enviorment variable MPLAYER_HOME controls location searched for
-      configuration files
-    
+    * new input command prefixes, "pausing_keep" and "pausing_toggle" which
+      alter pausing state immediately after command.
+    * environment variable MPLAYER_VERBOSE controls verbosity before command
+      line is parsed
+    * environment variable MPLAYER_HOME controls location where
+      configuration files are searched for
 
 
   pre7try2: August 26, 2005
