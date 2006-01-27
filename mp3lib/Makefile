@@ -58,8 +58,8 @@ test2:	libMP3.a test2.c
 clean:
 	rm -f *~ *.o *.a test1 test2
 
-distclean:
-	rm -f *~ *.o *.a Makefile.bak .depend
+distclean: clean
+	rm -f .depend
 
 dep:    depend
 

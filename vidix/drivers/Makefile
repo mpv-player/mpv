@@ -152,8 +152,8 @@ $(SAVAGE_VID):     $(SAVAGE_OBJS)
 clean:
 	rm -f *.o *.so *~
 
-distclean:
-	rm -f Makefile.bak *.o *.so test *~ .depend
+distclean: clean
+	rm -f .depend test
 
 dep:    depend
 

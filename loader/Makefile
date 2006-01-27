@@ -27,7 +27,7 @@ CFLAGS=-I. -I.. $(OPTFLAGS) -U_FILE_OFFSET_BITS $(EXTRA_INC) $(WARN_FLAGS) -fno-
 all: libloader.a
 
 clean:
-	-rm -f *.o libloader.a
+	rm -f *.o *.a *~
 
 distclean: clean
 

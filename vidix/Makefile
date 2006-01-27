@@ -27,8 +27,8 @@ clean:
 	rm -f *.o *.a *~
 	$(DO_MAKE)
 
-distclean:
-	rm -f test *.o *.a *~ .depend
+distclean: clean
+	rm -f .depend test
 	$(DO_MAKE)
 
 dep:    depend

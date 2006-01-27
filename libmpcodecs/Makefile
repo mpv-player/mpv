@@ -262,8 +262,8 @@ clean:
 	rm -f *.o *.a *~
 	rm -f native/*.o native/*.a native/*~
 
-distclean:
-	rm -f Makefile.bak $(OBJS) $(OBJS2) $(LIBNAME) $(LIBNAME2) *~ .depend
+distclean: clean
+	rm -f .depend
 
 dep:    depend
 

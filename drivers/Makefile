@@ -49,10 +49,8 @@ endif
 dep:
 
 clean: 
-	rm -f *.o *~
-ifneq (,$(findstring 2.6, $(VERSION)))
+	rm -f *.o *.a *~
 	rm -f *.ko .mga* mga_vid.mod.c
-endif
 
 distclean: clean
 	rm -f mga_vid_test tdfx_vid_tst

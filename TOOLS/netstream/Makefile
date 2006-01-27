@@ -52,8 +52,8 @@ netstream: $(MPROOT)/libmpdemux/libmpdemux.a netstream.o
 clean:
 	rm -f *.o *.a *~
 
-distclean:
-	rm -f test Makefile.bak *.o *.a *~ .depend
+distclean: clean
+	rm -f .depend test
 
 dep:    depend
 

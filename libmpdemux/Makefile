@@ -180,8 +180,8 @@ test:	$(LIBNAME) test.c
 clean:
 	rm -f *.o *.a *~ realrtsp/*.o realrtsp/*.a realrtsp/*~
 
-distclean:
-	rm -f test Makefile.bak *.o *.a *~ realrtsp/*.o realrtsp/*.a realrtsp/*~ .depend
+distclean: clean
+	rm -f .depend test
 
 dep:    depend
 

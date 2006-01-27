@@ -65,8 +65,8 @@ all:	$(LIBNAME)
 clean:
 	rm -f *.o *.a *~
 
-distclean:
-	rm -f test *.o *.a *~ .depend
+distclean: clean
+	rm -f .depend test
 
 dep:    depend
 

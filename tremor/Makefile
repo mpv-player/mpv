@@ -26,8 +26,8 @@ all:	$(LIBNAME)
 clean:
 	rm -f *.o *.a *~
 
-distclean:
-	rm -f Makefile.bak *.o *.a *~ .depend
+distclean: clean
+	rm -f .depend
 
 dep:    depend
 

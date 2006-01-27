@@ -30,7 +30,9 @@ rage128_vid.o: radeon_vid.c radeon.h radeon_vid.h
 dep:
 
 clean: 
-	rm -f *.o *~
+	rm -f *.o *.a *~
+
+distclean: clean
 
 install:
 	mkdir -p $(MOD_PATH)

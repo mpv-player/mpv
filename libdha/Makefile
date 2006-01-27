@@ -66,10 +66,10 @@ test:
 	$(CC) test.c -o test $(SHORTNAME)
 
 clean:
-	rm -f *.o *.so *.so.* *~
+	rm -f *.o *.a *~ *.so *.so.*
 
-distclean:
-	rm -f Makefile.bak *.o *.so *.so.* test *~ .depend
+distclean: clean
+	rm -f .depend test
 	rm -f pci_dev_ids.c pci_ids.h pci_names.c pci_names.h pci_vendors.h pci.db
 
 dep:    depend

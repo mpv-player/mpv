@@ -521,11 +521,11 @@ endif
 	@echo "Uninstall completed"
 
 clean:
-	-rm -f *.o *~ $(OBJS) codecs.conf.h
+	-rm -f *.o *.a *~ codecs.conf.h
 
-distclean: doxygen_clean
-	-rm -f *~ $(PRG) $(PRG_MENCODER) $(PRG_CFG) $(OBJS)
-	-rm -f *.o *.a .depend configure.log codecs.conf.h help_mp.h
+distclean: clean doxygen_clean
+	-rm -f *~ $(PRG) $(PRG_MENCODER) $(PRG_CFG)
+	-rm -f .depend configure.log codecs.conf.h help_mp.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
 strip:

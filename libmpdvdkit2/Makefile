@@ -61,9 +61,10 @@ $(LIB).so: $(OBJS)
 	$(CC) -o $(LIB).so -shared -rdynamic $(OBJS)
 
 clean:
-	rm -f $(OBJS) $(LIB).a $(LIB).so .depend
+	rm -f *.o *.a *~ *.so
 
 distclean: clean
+	rm -f .depend
 
 dep:    depend
 
