@@ -2266,7 +2266,13 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 			{
 				if(s->b_buffer[i] == 0x0B && s->b_buffer[i+1] == 0x77)
 				{
+					srate = 0;
+				#ifdef USE_LIBA52
 					len = a52_syncinfo(&(s->b_buffer[i]), &dummy, &srate, &dummy);
+				#else
+					len = mp_a52_framesize(&(s->b_buffer[i]), &srate);
+				#endif
+					if(len) fprintf(stderr, "\r\nLEN: %d, srate: %d\r\n", len, srate);
 					if((len > 0) && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
 					{
 						frames++;
