@@ -30,7 +30,7 @@ $(LIBNAME): .depend $(OBJS)
 all:	$(LIBNAME)
 
 clean:
-	rm -rf $(OBJS) *.o *~ *.bak main $(LIBNAME) .depend
+	rm -f *.o *.a *~
 
 #dep:	depend
 #
@@ -39,6 +39,7 @@ clean:
 #
 
 distclean: clean
+	rm -f .depend
 
 dep:    depend
 
