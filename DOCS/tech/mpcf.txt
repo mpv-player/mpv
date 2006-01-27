@@ -275,7 +275,7 @@ info_frame: (optional)
             value                       vb
     }
     reserved_bytes
-        checksum                        u(32)
+    checksum                            u(32)
 
 info_packet: (optional)
     info_startcode                      f(64)
