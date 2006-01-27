@@ -464,7 +464,7 @@ typedef struct {
 
 //stripped down version of a52_syncinfo() from liba52
 //copyright belongs to Michel Lespinasse <walken@zoy.org> and Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
-static int a52_framesize(uint8_t * buf)
+int mp_a52_framesize(uint8_t * buf, int *srate)
 {
 	int rate[] = {	32,  40,  48,  56,  64,  80,  96, 112,
 			128, 160, 192, 224, 256, 320, 384, 448,
@@ -490,10 +490,13 @@ static int a52_framesize(uint8_t * buf)
 	switch(buf[4] & 0xc0) 
 	{
 		case 0:	/* 48 KHz */
+			*srate = 48000 >> half;
 			return 4 * bitrate;
 		case 0x40:	/* 44.1 KHz */
+			*srate = 44100 >> half;
 			return 2 * (320 * bitrate / 147 + (frmsizecod & 1));
 		case 0x80: /* 32 KHz */
+			*srate = 32000 >> half;
 			return 6 * bitrate;
 	}
 	
@@ -503,7 +506,7 @@ static int a52_framesize(uint8_t * buf)
 //second stage: returns the count of A52 syncwords found
 static int a52_check(char *buf, int len)
 {
-	int cnt, frame_length, ok;
+	int cnt, frame_length, ok, srate;
 	
 	cnt = ok = 0;
 	if(len < 8)
@@ -513,7 +516,7 @@ static int a52_check(char *buf, int len)
 	{
 		if(buf[cnt] == 0x0B && buf[cnt+1] == 0x77)
 		{
-			frame_length = a52_framesize(&buf[cnt]);
+			frame_length = mp_a52_framesize(&buf[cnt], &srate);
 			if(frame_length>=7 && frame_length<=3840)
 			{
 				cnt += frame_length;
