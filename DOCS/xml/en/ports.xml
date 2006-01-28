@@ -737,7 +737,7 @@ For build instructions you should refer to the system-specific documentation.
 <title>QNX</title>
 <para>
 You'll need to download and install SDL for QNX. Then run
-<application>MPlayer</application> with <option>-vo sdl:photon</option>
+<application>MPlayer</application> with <option>-vo sdl driver=photon</option>
 and <option>-ao sdl:nto</option> options, it should be fast.
 </para>
 
