@@ -30,7 +30,11 @@ $(LIBNAME): .depend $(OBJS)
 all:	$(LIBNAME)
 
 clean:
-	rm -f *.o *.a *~
+	rm -f *.o *.a *~ \
+              mplayer/*.o mplayer/*~ \
+              mplayer/gtk/*.o mplayer/gtk/*~ \
+              skin/*.o skin/*~ \
+              wm/*.o wm/*~
 
 #dep:	depend
 #
