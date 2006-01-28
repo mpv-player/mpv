@@ -407,7 +407,7 @@ accessed by other people because they can gain root privileges through SUID root
 
 <para>
 Now use <option>-vo dga</option> option, and there you go! (hope so:) You
-should also try if the <option>-vo sdl driver=dga</option> option works for you!
+should also try if the <option>-vo sdl:driver=dga</option> option works for you!
 It's much faster!
 </para>
 
@@ -455,7 +455,7 @@ EndSection
 <title>DGA &amp; MPLAYER</title>
 <para>
 DGA is used in two places with <application>MPlayer</application>: The SDL
-driver can be made to make use of it (<option>-vo sdl driver=dga</option>) and
+driver can be made to make use of it (<option>-vo sdl:driver=dga</option>) and
 within the DGA driver (<option>-vo dga</option>). The above said is true
 for both; in the following sections I'll explain how the DGA driver for
 <application>MPlayer</application> works.
@@ -629,7 +629,7 @@ present) black bar.
 <variablelist>
 <title>There are several command line switches for SDL:</title>
 <varlistentry>
-  <term><option>-vo sdl driver=<replaceable>name</replaceable></option></term>
+  <term><option>-vo sdl:driver=<replaceable>name</replaceable></option></term>
   <listitem><simpara>
     specifies SDL video driver to use (i.e. <literal>aalib</literal>,
     <literal>dga</literal>, <literal>x11</literal>)
@@ -676,7 +676,7 @@ present) black bar.
 <itemizedlist>
 <title>Known bugs:</title>
 <listitem><simpara>
-  Keys pressed under sdl driver=aalib console driver repeat forever. (use
+  Keys pressed under sdl:driver=aalib console driver repeat forever. (use
   <option>-vo aa</option>!) It's bug in SDL, I can't change it (tested with
   SDL 1.2.1).
   </simpara></listitem>
