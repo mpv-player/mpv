@@ -6897,8 +6897,13 @@ option brd_scale.
 .TP
 .B brd_scale=<0\-10>
 Downscales frames for dynamic B-frame decision (default: 0).
-Speed should increase by a factor of 4 every time brd_scale is increased
-by 1.
+Each time brd_scale is increased by one, the frame dimensions are
+divided by two, which improves speed by a factor of four.
+Both dimensions of the fully downscaled frame must be even numbers, so
+brd_scale=1 requires the original dimensions to be multiples of four,
+brd_scale=2 requires multiples of eight, etc.
+In other words, the dimensions of the original frame must both be
+divisible by 2^(brd_scale+1) with no remainder.
 .
 .TP
 .B bidir_refine=<0\-4>
