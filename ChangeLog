@@ -206,6 +206,7 @@ MPlayer (1.0)
     * memleak fixes all over the code
     * TOOLS/aconvert: allows mencoder to encode from an audio only file
     * TOOLS/3*m_convert: D-Cinema Audio and Video conversion program
+    * TOOLS/encode2mpeglight: new tool to encode to mpeg formats using only mencoder
     * allow multiple -help clauses on the command line
     * console "OSD" for audio-only files
     * show total time when playing audio-only files
