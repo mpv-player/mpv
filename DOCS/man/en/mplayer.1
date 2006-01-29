@@ -571,7 +571,7 @@ Override the standard search path and use the specified file
 instead of the builtin codecs.conf.
 .
 .TP
-.B \-include <configuration\ file>
+.B \-include <configuration file>
 Specify configuration file to be parsed after the default ones.
 .
 .TP
@@ -670,17 +670,17 @@ You have to use \-vf [s]pp without parameters in order for this to work.
 .TP
 .B \-autosync <factor>
 Gradually adjusts the A/\:V sync based on audio delay measurements.
-Specifying \-autosync\ 0, the default, will cause frame timing to be based
+Specifying \-autosync 0, the default, will cause frame timing to be based
 entirely on audio delay measurements.
-Specifying \-autosync\ 1 will do the same, but will subtly change the A/\:V
+Specifying \-autosync 1 will do the same, but will subtly change the A/V
 correction algorithm.
 An uneven video framerate in a movie which plays fine with \-nosound can
 often be helped by setting this to an integer value greater than 1.
 The higher the value, the closer the timing will be to \-nosound.
-Try \-autosync\ 30 to smooth out problems with sound drivers which do
+Try \-autosync 30 to smooth out problems with sound drivers which do
 not implement a perfect audio delay measurement.
 With this value, if large A/\:V sync offsets occur, they will only take about
-1 or 2\ seconds to settle out.
+1 or 2 seconds to settle out.
 This delay in reaction time to sudden A/\:V offsets should be the only
 side-effect of turning this option on, for all sound drivers.
 .
@@ -943,7 +943,7 @@ When playing an MPEG-TS stream, MPlayer/\:MEncoder will use the first program
 (if present) with the chosen audio stream.
 .
 .TP
-.B \-alang <language\ code[,language\ code,...]> (also see \-aid)
+.B \-alang <language code[,language code,...]> (also see \-aid)
 Specify a priority list of audio languages to use.
 Different container formats employ different language codes.
 DVDs use ISO 639-1 two letter language codes, Matroska and NUT use ISO 639-2
@@ -1031,7 +1031,7 @@ Set atomic read size.
 Force minimum overlap search during verification to <value> sectors.
 .IPs toc-bias
 Assume that the beginning offset of track 1 as reported in the TOC will be
-addressed as LBA\ 0.
+addressed as LBA 0.
 Some Toshiba drives need this for getting track boundaries correct.
 .IPs toc-offset=<value>
 Add <value> sectors to the values reported when addressing tracks.
@@ -1041,7 +1041,7 @@ May be negative.
 .RE
 .
 .TP
-.B \-cdrom-device <path\ to\ device>
+.B \-cdrom-device <path to device>
 Specify the CD-ROM device (default: /dev/\:cdrom).
 .
 .TP
@@ -1074,7 +1074,7 @@ full 5.1
 .PD 1
 .
 .TP
-.B \-chapter <chapter\ ID>[\-<end\ chapter\ ID>] (DVD only)
+.B \-chapter <chapter ID>[\-<endchapter ID>] (DVD only)
 Specify which chapter to start playing at.
 Optionally specify which chapter to end playing at (default: 1).
 .
@@ -1146,7 +1146,7 @@ or ~/.mplayer/\:channels.conf as a last resort.
 .PD 1
 .
 .TP
-.B \-dvd-device <path\ to\ device> (DVD only)
+.B \-dvd-device <path to device> (DVD only)
 Specify the DVD device (default: /dev/\:dvd).
 You can also specify a directory that contains files previously copied directly
 from a DVD (with e.g.\& vobcopy).
@@ -1154,7 +1154,7 @@ Note that using \-dumpstream is usually a better way to
 copy DVD titles in the first place (see the examples).
 .
 .TP
-.B \-dvdangle <angle\ ID> (DVD only)
+.B \-dvdangle <angle ID> (DVD only)
 Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
 .
@@ -1350,7 +1350,7 @@ Currently this only works with AVI files.
 This option is obsolete now that MPlayer has OpenDML support.
 .
 .TP
-.B \-sb <byte\ position> (also see \-ss)
+.B \-sb <byte position> (also see \-ss)
 Seek to byte position.
 Useful for playback from CD-ROM images or VOB files with junk at the beginning.
 .
@@ -1379,7 +1379,7 @@ Seek to given time position.
 .IPs "\-ss 56"
 Seeks to 56 seconds.
 .IPs "\-ss 01:10:00"
-Seeks to 1\ hour 10\ min.
+Seeks to 1 hour 10 min.
 .RE
 .PD 1
 .
@@ -1389,7 +1389,7 @@ Tells MPlayer not to discard TS packets reported as broken in the stream.
 Sometimes needed to play corrupted MPEG-TS files.
 .
 .TP
-.B \-tsprobe <byte\ position>
+.B \-tsprobe <byte position>
 When playing an MPEG-TS stream, this option lets you specify how many
 bytes in the stream you want MPlayer to search for the desired
 audio and video IDs.
@@ -1622,7 +1622,7 @@ Use this if commas in subtitles are shown at the start of a sentence
 instead of at the end.
 .
 .TP
-.B \-font <path\ to\ font.desc\ file> (OSD only)
+.B \-font <path to font.desc file> (OSD only)
 Search for the OSD/\:SUB fonts in an alternative directory (default for normal
 fonts: ~/\:.mplayer/\:font/\:font.desc, default for FreeType fonts:
 ~/.mplayer/\:subfont.ttf).
@@ -1652,12 +1652,12 @@ Display only forced subtitles for the DVD subtitle stream selected by e.g.\&
 \-slang.
 .
 .TP
-.B \-fribidi-charset <charset\ name> (FriBiDi only)
+.B \-fribidi-charset <charset name> (FriBiDi only)
 Specifies the character set that will be passed to FriBiDi when
 decoding non-UTF-8 subtitles (default: ISO8859-8).
 .
 .TP
-.B \-ifo <VOBsub\ ifo\ file>
+.B \-ifo <VOBsub IFO file>
 Indicate the file that will be used to load palette and frame size for VOBsub
 subtitles.
 .
@@ -1698,7 +1698,7 @@ MPlayer prints the available subtitle IDs when run in verbose (\-v) mode.
 If you cannot select one of the subtitles on a DVD, also try \-vobsubid.
 .
 .TP
-.B \-slang <language\ code[,language\ code,...]> (also see \-sid)
+.B \-slang <language code[,language code,...]> (also see \-sid)
 Specify a priority list of subtitle languages to use.
 Different container formats employ different language codes.
 DVDs use ISO 639-1 two letter language codes, Matroska uses ISO 639-2
@@ -1955,7 +1955,7 @@ Tells MPlayer to handle the subtitle file as unicode.
 Tells MPlayer to handle the subtitle file as UTF-8.
 .
 .TP
-.B \-vobsub <VOBsub\ file\ without\ extension>
+.B \-vobsub <VOBsub file without extension>
 Specify a VOBsub file to use for subtitles.
 Has to be the full pathname without extension, i.e.\& without
 the '.idx', '.ifo' or '.sub'.
@@ -2140,7 +2140,7 @@ native SGI audio output driver
 .IPs "<output device name>"
 Explicitly choose the output device/\:interface to use
 (default: system-wide default).
-For example, 'Analog\ Out' or 'Digital\ Out'.
+For example, 'Analog Out' or 'Digital Out'.
 .RE
 .PD 1
 .
@@ -2432,7 +2432,7 @@ Places the window at the bottom right corner of the screen.
 .PD 1
 .
 .TP
-.B \-guiwid <window\ ID> (also see \-wid) (GUI only)
+.B \-guiwid <window ID> (also see \-wid) (GUI only)
 This tells the GUI to also use an X11 window and stick itself to the bottom
 of the video, which is useful to embed a mini-GUI in a browser (with the
 MPlayer plugin for instance).
@@ -2553,7 +2553,7 @@ the new display mode.
 Enables VBI for the vesa, dfbmga and svga video output drivers.
 .
 .TP
-.B \-wid <window\ ID> (also see \-guiwid) (X11, OpenGL and DirectX only)
+.B \-wid <window ID> (also see \-guiwid) (X11, OpenGL and DirectX only)
 This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .
@@ -3790,7 +3790,7 @@ right channel
 .PD 1
 .
 .TP
-.B \-sws <software\ scaler\ type> (also see \-vf scale and \-zoom)
+.B \-sws <software scaler type> (also see \-vf scale and \-zoom)
 Specify the software scaler algorithm to be used with the \-zoom option.
 This affects video output drivers which lack hardware acceleration, e.g.\& x11.
 .sp 1
@@ -6712,7 +6712,7 @@ FFmpeg's experimental wavelet-based codec
 .
 .TP
 .B vqmin=<1\-31>
-minimum quantizer (pass\ 1/\:2)
+minimum quantizer (pass 1/\:2)
 .RSs
 .IPs 1
 Not recommended (much larger file, little quality difference and weird side
@@ -6759,7 +6759,7 @@ obsolete, use vqmax
 .TP
 .B vqdiff=<1\-31>
 maximum quantizer difference between consecutive I- or P-frames
-(pass\ 1/\:2) (default: 3)
+(pass 1/\:2) (default: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -7002,7 +7002,7 @@ always on.
 .
 .TP
 .B vbitrate=<value>
-Specify bitrate (pass\ 1/\:2) (default: 800).
+Specify bitrate (pass 1/\:2) (default: 800).
 .br
 .I WARNING:
 1kbit = 1000 bits
@@ -7028,17 +7028,17 @@ be problems if vrc_(min|max)rate is used.
 .
 .TP
 .B vrc_maxrate=<value>
-maximum bitrate in kbit/\:sec (pass\ 1/\:2)
+maximum bitrate in kbit/\:sec (pass 1/\:2)
 (default: 0, unlimited)
 .
 .TP
 .B vrc_minrate=<value>
-minimum bitrate in kbit/\:sec (pass\ 1/\:2)
+minimum bitrate in kbit/\:sec (pass 1/\:2)
 (default: 0, unlimited)
 .
 .TP
 .B vrc_buf_size=<value>
-buffer size in kbit (pass\ 1/\:2).
+buffer size in kbit (pass 1/\:2).
 For MPEG-1/2 this also sets the vbv buffer size, use 327 for VCD,
 917 for SVCD and 1835 for DVD.
 .
@@ -7052,19 +7052,19 @@ Dummy, reserved for future use.
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-quantizer factor between B- and non-B-frames (pass\ 1/\:2) (default: 1.25)
+quantizer factor between B- and non-B-frames (pass 1/\:2) (default: 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-quantizer factor between I- and non-I-frames (pass\ 1/\:2) (default: 0.8)
+quantizer factor between I- and non-I-frames (pass 1/\:2) (default: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-quantizer offset between B- and non-B-frames (pass\ 1/\:2) (default: 1.25)
+quantizer offset between B- and non-B-frames (pass 1/\:2) (default: 1.25)
 .
 .TP
 .B vi_qoffset=<-31.0\-31.0>
-(pass\ 1/\:2) (default: 0.0)
+(pass 1/\:2) (default: 0.0)
 .br
 if v{b|i}_qfactor > 0
 .br
@@ -7100,7 +7100,7 @@ the quantizer more over time (slower change).
 .
 .TP
 .B vqcomp=<0.0\-1.0>
-Quantizer compression, vrc_eq depends upon this (pass\ 1/\:2) (default: 0.5).
+Quantizer compression, vrc_eq depends upon this (pass 1/\:2) (default: 0.5).
 For instance, assuming the default rate control equation is used,
 if vqcomp=1.0, the ratecontrol allocates to each frame the number of bits
 needed to encode them all at the same QP.
@@ -7112,7 +7112,7 @@ Perceptual quality will be optimal somewhere in between these two extremes.
 .
 .TP
 .B vrc_eq=<equation>
-main ratecontrol equation (pass\ 1/\:2)
+main ratecontrol equation (pass 1/\:2)
 .RE
 .RSs
 .IPs 1\ \ \ \ 
@@ -7185,7 +7185,7 @@ is 1 if a==b, 0 otherwise
 .
 .TP
 .B vrc_override=<options>
-User specified quality for specific parts (ending, credits, ...) (pass\ 1/\:2).
+User specified quality for specific parts (ending, credits, ...) (pass 1/\:2).
 The options are <start-frame>, <end-frame>, <quality>[/\:<start-frame>,
 <end-frame>, <quality>[/\:...]]:
 .PD 0
@@ -7199,7 +7199,7 @@ quality correction in %
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
-initial complexity (pass\ 1)
+initial complexity (pass 1)
 .
 .TP
 .B vrc_init_occupancy=<0.0\-1.0>
@@ -7207,7 +7207,7 @@ initial buffer occupancy, as a fraction of vrc_buf_size (default: 0.9)
 .
 .TP
 .B vqsquish=<0|1>
-Specify how to keep the quantizer between qmin and qmax (pass\ 1/\:2).
+Specify how to keep the quantizer between qmin and qmax (pass 1/\:2).
 .PD 0
 .RSs
 .IPs 0
