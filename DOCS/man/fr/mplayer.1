@@ -1,4 +1,4 @@
-.\" synced with 1.1208
+.\" synced with 1.1216
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -556,6 +556,36 @@ fichier et placez-le dans ~/.mplayer/ ou dans le même répertoire que le
 fichier.
 .
 .\" --------------------------------------------------------------------------
+.\" Profils
+.\" --------------------------------------------------------------------------
+.
+.SH "PROFILS"
+Pour faciliter l'utilisation de différentes configuration, vous pouvez définir
+des profiles dans les fichiers de configurations.
+Un profil commence par un nom entre crochets, par ex.\& '[mon-profil]'.
+Toutes les options qui suivront feront partie de ce profil.
+Une description (affichée par \-profile help) peut être définie avec l'option
+profile-desc.
+Pour finir le profil, commencez-un nouveau, ou utilisez le nom de profil
+'default' pour continuer avec les options normales.
+.fi
+.PP
+.I "EXEMPLE DE PROFIL MENCODER\ :"
+.sp 1
+.nf
+
+[mpeg4]
+profile-desc="MPEG4 encoding"
+ovc=lacv=yes
+lavcopts=vcodec=mpeg4:vbitrate=1200
+
+[mpeg4-hq]
+profile-desc="HQ MPEG4 encoding"
+profile=mpeg4
+lavcopts=mbd=2:trell=yes:v4mv=yes
+.fi
+.
+.\" --------------------------------------------------------------------------
 .\" Options
 .\" --------------------------------------------------------------------------
 .
@@ -567,8 +597,12 @@ Change le chemin de recherche standard et utilise le fichier donné en
 paramètre au lieu du fichier codecs.conf inclus dans MPlayer
 .
 .TP
-.B \-include <fichier\ de\ configuration>
+.B \-include <fichier de configuration>
 Spécifie le fichier de configuration à analyser après ceux par défaut.
+.
+.TP
+.B \-list-options
+Affiche toutes les options disponibles.
 .
 .TP
 .B \-msglevel <all=<niveau>:<module>=<niveau>:...>
@@ -579,8 +613,8 @@ Tapez '-msglevel help' pour avoir la liste de tous les modules.
 .br
 .I NOTE\ :
 Les messages affichés avant que la ligne de commande soit chargée ne
-peuvent être contrôlés que par $MPLAYER_VERBOSE, qui s'applique à tous
-les modules.
+peuvent être contrôlés que par la variable d'environnement $MPLAYER_VERBOSE,
+qui s'applique à tous les modules.
 .br
 Niveaux disponibles\ :
 .PD 0
@@ -633,10 +667,15 @@ L'utilisation de la priorité realtime (temps-réel) peut figer le système.
 .RE
 .
 .TP
+.B \-profile <profile1,profile2,...>
+Utilise le profil donné, \-profile help affichant la liste des profils définis.
+.
+.TP
 .B \-really-quiet (voir aussi \-quiet)
 Affiche encore moins de messages d'état que \-quiet.
-.B \-rtc-device <périph>
-Utilise ce périphérique spécial RTC pour améliorer la synchro.
+.
+.B \-show-profile <profile>
+Affiche la description et le contenu du profil donnée..
 .
 .TP
 .B \-v\ \ \ \ \ 
@@ -659,15 +698,15 @@ Vous devez indiquer \-vf [s]pp sans paramètres pour l'utiliser.
 .B \-autosync <facteur>
 Ajuste graduellement la synchro A/\:V en fonction de la mesure du décalage
 audio.
-En spécifiant \-autosync\ 0, valeur par défaut, la synchronisation des trames
+En spécifiant \-autosync 0, valeur par défaut, la synchronisation des trames
 sera entièrement basée sur la mesure du décalage audio.
-En spécifiant \-autosync\ 1 la même chose sera faite, mais en changeant
+En spécifiant \-autosync 1 la même chose sera faite, mais en changeant
 légèrement l'algorithme de correction A/\:V utilisé.
 On peut souvent améliorer la lecture d'une vidéo possédant un débit binaire
 vidéo irrégulier, mais qui peut-être lue avec \-nosound, en initialisant
 cette option à une valeur entière supérieure à 1.
 Plus cette valeur sera élevée, plus le débit sera proche de \-nosound.
-Essayez \-autosync\ 30 pour faire disparaître les problèmes avec les drivers
+Essayez \-autosync 30 pour faire disparaître les problèmes avec les drivers
 audio qui ne possèdent pas une mesure de décalage audio parfaite.
 Avec cette valeur, si de larges écarts de synchro A/\:V se produisent, il ne
 mettront qu'une seconde ou deux pour disparaître.
@@ -820,10 +859,6 @@ Indique un fichier de configuration pour LIRC (Linux Infrared Remote
 Control, voir http://www.lirc.org) (par défaut\ : ~/\:.lircrc).
 .
 .TP
-.B \-list-options
-Affiche toutes les options disponibles.
-.
-.TP
 .B \-loop <nombre>
 Répète la lecture <nombre> fois.
 0 signifie illimité.
@@ -887,6 +922,10 @@ suite s'appliqueront uniquement aux éléments de la liste de lecture.
 .br
 FIXME: Cette description est quelque peu alambiquée, et devrait être mieux
 documentée.
+.
+.TP
+.B \-rtc-device <périph>
+Utilise ce périphérique spécial RTC pour améliorer la synchro.
 .
 .TP
 .B \-shuffle
@@ -955,7 +994,7 @@ Pour jouer des flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 (si présent) avec le flux audio choisi.
 .
 .TP
-.B \-alang <code-de-langue[,code-de-langue,...]> (voir aussi \-aid)
+.B \-alang <code de langue[,code de langue,...]> (voir aussi \-aid)
 Définit une liste de langues de pistes audio à jouer en priorité.
 Chaque format de conteneur utilise des codes de pays différents.
 Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska et NUT
@@ -1053,7 +1092,7 @@ force la recherche minimum de chevauchements pendant vérification à <valeur>
 secteurs.
 .IPs toc-bias
 Considère que l'offset de début de la piste 1 comme reportée dans la TOC sera
-adressée en tant que LBA\ 0.
+adressée en tant que LBA 0.
 Certains lecteurs Toshiba ont besoin de cela pour garder des transitions de
 pistes correctes.
 .IPs toc-offset=<valeur>
@@ -1097,7 +1136,7 @@ Surround
 .PD 1
 .
 .TP
-.B \-chapter <id\ chapitre>[\-<id\ fin\ chapitre>]
+.B \-chapter <id chapitre>[\-<id fin chapitre>]
 Indique à quel chapitre commencer la lecture.
 Vous pouvez également indiquer à quel chapitre arrêter la lecture
 (par défaut\ : 1).
@@ -1184,7 +1223,7 @@ Notez que l'utilisation de \-dumpstream est souvent une meilleure solution
 pour copier des titres de DVD (voir les exemples).
 .
 .TP
-.B \-dvdangle <ID\ angle> (DVD uniquement)
+.B \-dvdangle <ID angle> (DVD uniquement)
 Certains DVD contiennent des scènes qui peuvent être vues sous différents
 angles.
 Vous pouvez ainsi dire à MPlayer quels angles utiliser (par défaut\ : 1).
@@ -1391,7 +1430,7 @@ Pour l'instant cela ne fonctionne qu'avec les fichiers AVI.
 Cette option est obsolète maintenant que MPlayer gère OpenDML.
 .
 .TP
-.B \-sb <position\ octet> (voir aussi \-ss)
+.B \-sb <position octet> (voir aussi \-ss)
 Se place à la position donnée en octets.
 Utile pour la lecture d'images CDROM ou fichiers VOB avec des informations
 erronées au début.
@@ -1421,7 +1460,7 @@ Se place à la position temporelle indiquée.
 .IPs "\-ss 56"
 se place à 56 secondes
 .IPs "\-ss 01:10:00"
-se place à 1\ heure 10\ min
+se place à 1 heure 10 min
 .RE
 .PD 1
 .
@@ -1432,7 +1471,7 @@ flux.
 Parfois requis pour lire des fichiers MPEG-TS corrompus.
 .
 .TP
-.B \-tsprobe <position\ octet>
+.B \-tsprobe <position octet>
 Pour la lecture de flux MPEG-TS, cette option vous permet d'indiquer sur
 combien d'octets du flux MPlayer devra chercher les IDs audio et vidéo
 désirés.
@@ -1686,7 +1725,7 @@ les sous-titres.
 phrases au lieu de la fin.
 .
 .TP
-.B \-font <chemin\ vers\ le\ fichier\ font.desc> (OSD uniquement)
+.B \-font <chemin vers le fichier font.desc> (OSD uniquement)
 Recherche les polices OSD/\:SUB dans un répertoire particulier
 (par défaut pour les polices normales: ~/\:.mplayer/\:font/\:font.desc,
 pour les polices FreeType: ~/.mplayer/\:subfont.ttf).
@@ -1716,7 +1755,7 @@ N'affiche que les sous-titres forcés des sous-titres DVD sélectionnés,
 par ex.\& avec \-slang.
 .
 .TP
-.B \-fribidi-charset <nom\ charset>
+.B \-fribidi-charset <nom charset>
 Définit le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
 (par défaut\ : ISO8859-8).
 .
@@ -1764,7 +1803,7 @@ Si vous n'arrivez pas à sélectionner une des pistes de sous-titres d'un
 DVD, essayez avec \-vobsubid.
 .
 .TP
-.B \-slang <code\ de\ pays[,code\ de\ langue,...]> (voir aussi l'option \-sid)
+.B \-slang <code de pays[,code de langue,...]> (voir aussi l'option \-sid)
 Définit une liste de langues de sous-titres à afficher en priorité.
 Chaque format de conteneur utilise des codes de pays différents.
 Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska
@@ -2032,7 +2071,7 @@ Indique à MPlayer de traiter le fichier de sous-titre au format unicode.
 Indique à MPlayer de traiter le fichier de sous-titre au un format UTF-8.
 .
 .TP
-.B \-vobsub <fichier\ VOBsub\ sans\ extension>
+.B \-vobsub <fichier VOBsub sans extension>
 Définit le fichier VOBsub qui sera utilisé pour les sous-titres.
 Indiquez le chemin complet sans extensions, c'est-à-dire
 sans '.idx', '.ifo' ou '.sub'.
@@ -2251,7 +2290,7 @@ pilote de sortie audio natif de SGI
 .IPs "<nom du périphérique de sortie>"
 Choisi explicitement le périphérique/\:interface à utiliser
 (par défaut\ : celui configuré pour le système global).
-Par exemple, 'Analog\ Out' ou 'Digital\ Out'.
+Par exemple, 'Analog Out' ou 'Digital Out'.
 .RE
 .PD 1
 .
@@ -2550,7 +2589,7 @@ Place la fenêtre en bas à gauche de l'écran
 .PD 1
 .
 .TP
-.B \-guiwid <ID\ fenêtre> (voir aussi \-wid) (GUI uniquement)
+.B \-guiwid <ID fenêtre> (voir aussi \-wid) (GUI uniquement)
 Indique à la GUI (Graphical User Interface\ : interface homme-machine
 graphique) d'utiliser également une fenêtre X11 et de se fixer au bas de
 la vidéo, ce qui est utile pour embarquer une mini-GUI dans un navigateur (avec
@@ -3988,7 +4027,7 @@ canal droit
 .PD 1
 .
 .TP
-.B \-sws <type\ de\ zoom\ logiciel> (voir aussi \-vf scale et \-zoom)
+.B \-sws <type de zoom logiciel> (voir aussi \-vf scale et \-zoom)
 Définit l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
 Agit sur les pilotes de sortie vidéo qui ne disposent pas de ce type
 d'accélération logicielle, ex.\& x11.
@@ -7040,7 +7079,7 @@ codec expérimental basé sur les wavelets de FFmpeg
 .
 .TP
 .B vqmin=<1\-31>
-quantum minimum (passe\ 1/\:2)
+quantum minimum (passe 1/\:2)
 .RSs
 .IPs 1
 Non recommandé (fichier bien plus gros, faible différence de qualité et
@@ -7091,7 +7130,7 @@ obsolète, utilisez vqmax
 .TP
 .B vqdiff=<1\-31>
 différence maximale de quantum entre chaque trame-I ou -P
-consécutive (passe\ 1/\:2) (par défaut\ : 3)
+consécutive (passe 1/\:2) (par défaut\ : 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -7207,6 +7246,19 @@ Vous pouvez définir la sensibilité de la détection avec cette option.
 -1000000000 signifie qu'il y aura un changement détecté à chaque trame,
 1000000000 signifie qu'aucun changement de scène ne sera détecté
 (par défaut\ : 0).
+.
+.TP
+.B sc_factor=<une valeur positive>
+Conduit les trames avec des quanta plus grands à augmenter la
+probabilité de déclencher la détection de changement de scène, et de
+faire que libavcodec utilise une trame-I (par défaut\ : 1).
+Les valeurs intéressantes sont comprises dans l'intervalle 1\-16.
+Des valeurs entre 2 et 6 peuvent augmenter le PSNR (jusqu'à environ
+0.04 dB) et un meilleur placement des trames-I dans les scènes avec
+beaucoup de mouvements.
+Des valeurs plus grandes que 6 peuvent faire légèrement augmenter le
+PSNR (approximativement 0.01 dB de plus qu'avec sc_factor=6), mais
+dégrade sensiblement la qualité visuelle.
 .
 .TP
 .B vb_strategy=<0\-2> (première passe uniquement)
@@ -7342,7 +7394,7 @@ l'activer tout le temps.
 .
 .TP
 .B vbitrate=<valeur>
-Définit le débit binaire (bitrate) (passe 1/\:2) (par défaut 800).
+Définit le débit binaire (bitrate) (passe 1/\:2) (par défaut\ : 800).
 .br
 .I ATTENTION\ :
 1kbit = 1000 bits
@@ -7368,17 +7420,17 @@ se produire des problèmes si vrc_(min|max)rate est utilisé.
 .
 .TP
 .B vrc_maxrate=<valeur>
-bitrate maximum en kbit/\:sec (passe\ 1/\:2)
+bitrate maximum en kbit/\:sec (passe 1/\:2)
 (par défaut\ : 0, illimité)
 .
 .TP
 .B vrc_minrate=<valeur>
-bitrate minimum en kbit/\:sec (passe\ 1/\:2)
+bitrate minimum en kbit/\:sec (passe 1/\:2)
 (par défaut\ : 0, illimité)
 .
 .TP
 .B vrc_buf_size=<valeur>
-taille du tampon en kbit (passe\ 1/\:2).
+taille du tampon en kbit (passe 1/\:2).
 Pour MPEG-1/\:2 cela fixe également la taille du tampon vbv, utilisez 327 pour
 un VCD, 917 pour un SVCD et 1835 pour un DVD.
 .I NOTE:
@@ -7395,22 +7447,22 @@ Inutilisé, réservé pour utilisation future.
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-facteur de quantum entre les trames-B et non-B (passe\ 1/\:2)
+facteur de quantum entre les trames-B et non-B (passe 1/\:2)
 (par défaut\ : 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-facteur de quantum entre les trames-I et non-I (passe\ 1/\:2)
+facteur de quantum entre les trames-I et non-I (passe 1/\:2)
 (par défaut\ : 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
-offset des quantum entre les trames-B et non-B (passe\ 1/\:2)
+offset des quantum entre les trames-B et non-B (passe 1/\:2)
 (par défaut\ : 1.25)
 .
 .TP
 .B vi_qoffset=<-31.0\-31.0>
-(passe\ 1/\:2) (par défaut\ : 0.0)
+(passe 1/\:2) (par défaut\ : 0.0)
 .br
 si v{b|i}_qfactor > 0
 .br
@@ -7449,7 +7501,7 @@ plus les quantum seront semblables d'une trame à l'autre
 .
 .TP
 .B vqcomp=<0.0\-1.0>
-Compression quantum, vrc_eq dépend de cette option (passe\ 1/\:2)
+Compression quantum, vrc_eq dépend de cette option (passe 1/\:2)
 (par défaut\ : 0.5).
 Par exemple, en prenant l'équation de contrôle de flux (rate control) par
 défaut, si vqcomp=1.0, le contrôle de flux alloue à chaque trame le nombre
@@ -7463,7 +7515,7 @@ La qualité subjective étant optimale pour des valeurs entre ces deux extrêmes.
 .
 .TP
 .B vrc_eq=<équation>
-équation principale de contrôle de débit (passe\ 1/\:2)
+équation principale de contrôle de débit (passe 1/\:2)
 .RE
 .RSs
 .IPs 1\ \ \ \ 
@@ -7538,7 +7590,7 @@ est égal à 1 si a==b, 0 sinon
 .TP
 .B vrc_override=<options>
 Qualité définie par l'utilisateur pour les parties spécifiques (fin,
-remerciements, ...) (passe\ 1/\:2).
+remerciements, ...) (passe 1/\:2).
 Les options sont <trame de début>, <trame de fin>, <qualité>[/\:<trame de
 début>, <trame de fin>, <qualité>[/...]]:
 .PD 0
@@ -7552,7 +7604,7 @@ correction de qualité en %
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
-complexité initiale (passe\ 1)
+complexité initiale (passe 1)
 .
 .TP
 .B vrc_init_occupancy=<0.0\-1.0>
@@ -7563,7 +7615,7 @@ pré-charger dans le vbv-buffer, avant de commencer à les décoder.
 .
 .TP
 .B vqsquish=<0|1>
-Définit comment garder le quantum entre qmin et qmax (passe\ 1/\:2).
+Définit comment garder le quantum entre qmin et qmax (passe 1/\:2).
 .PD 0
 .RSs
 .IPs 0
@@ -9957,11 +10009,19 @@ FIXME: Documente ceci.
 .
 .TP
 /usr/\:local\:etc/\:mplayer/\:mplayer.conf
-paramètres globaux
+paramètres globaux de MPlayer
+.
+.TP
+/usr/\:local\:etc/\:mplayer/\:mplayer.conf
+paramètres globaux de MEncoder
 .
 .TP
 ~/.mplayer/\:config
-paramètres utilisateur
+paramètres utilisateur de MPlayer
+.
+.TP
+~/.mplayer/\:mencoder
+paramètres utilisateur de MEncoder
 .
 .TP
 ~/.mplayer/\:input.conf
