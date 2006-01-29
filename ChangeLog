@@ -2,6 +2,9 @@ MPlayer (1.0)
 
   pre8:
 
+    Security:
+    * support for compilation with non-executable stack
+
     DOCS:
     * environment variables documentation started
     * interactive control fully documented
@@ -19,6 +22,8 @@ MPlayer (1.0)
     * Chinese console messages synced
     * misc improvements all over the place
     * AIX port documentation added
+    * all XviD options documented
+    * CONFIGURATION FILES section added to the man page
 
     Drivers:
     * JACK audio output rewritten without bio2jack
@@ -30,6 +35,9 @@ MPlayer (1.0)
     * support for custom fragment programs for -vo gl (see TOOLS/*.fp)
     * use libvbe from vesautils as VESA video driver
     * several fixes for the GGI video output driver
+    * fallback to next vo if vo_3dfx failed to init
+    * improved XvMC library detection (disabled by default)
+    * DPI (Print-Resolution) and Pixel-Aspect support in vo_jpeg
 
     Decoders:
     * Indeo2 (RT21) support via lavc
@@ -47,6 +55,9 @@ MPlayer (1.0)
     * TrueSpeech audio decoding via lavc
     * CamStudio video decoder via lavc
     * hwmpa pass-through MPEG audio codec
+    * tremor updated to libogg 1.1.2
+    * PNG decoding via libavcodec
+    * removed native RealAudio codecs (ported to lavc)
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -56,9 +67,20 @@ MPlayer (1.0)
     * support for some more MythTV NUV files
     * modularization of demuxer code
     * MPEG in GXF container support with extension-based detection
-    * faster MPEG and much faster GFX demuxing
+    * faster MPEG and much faster GXF demuxing
     * more user-friendly demuxer forcing
     * bug fix for lavc WMA v2 decoder, now all files should be playable
+    * MPEG Layer 1 and 2 demuxing fixed
+    * pass Vorbis extradata from Matroska container properly
+    * DVR format support
+    * H.264 ES high profile support
+    * TV channel cycling
+    * DVD subtitle and audio stream mappings fixed
+    * fixed RealAudio demuxing
+    * partial support for QuickTime sound atom version 2
+    * improved handling of text subs in Matroska files
+    * DVD subtitles disabled by default
+    * support sipr codec in old RealAudio files
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
@@ -77,7 +99,8 @@ MPlayer (1.0)
     * VP3 decoder fixes and speedup
     * countless bug fixes all over the place
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
-    * skiploopfilter decoder option for very fast H.264 decoding
+    * skiploopfilter/skipidct/skipframe decoder options for very fast H.264
+      decoding
     * D-Cinema audio demuxer and decoder support
     * Duck/On2 TrueMotion2 (TM20) decoder
     * FLX and DTA extensions for flic
@@ -87,10 +110,15 @@ MPlayer (1.0)
     * WMA2 audio decoder fixed, now all files should play correctly
     * JPEG-LS decoder (unfinished)
     * CamStudio video decoder
+    * Theora decoder
+    * WMV3 decoder (unfinished)
+    * multithreaded decoding
+    * bitexact decoding
 
     GUI:
     * ported to GTK2
     * long standing up side down vpotmeter bug fixed
+    * don't hang on unreadable skin files
 
     Filters:
     * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6")
@@ -100,6 +128,9 @@ MPlayer (1.0)
     * screenshot filter
     * -af pan command line fix, now outputs the right number of channels
       and accepts values < 0 or > 1. Channel order had to be changed.
+    * negative stride support in swscale
+    * -srate fixed
+    * hqdn3d: 2.5x faster temporal-only, 1.6x faster spatial-only
 
     MEncoder:
     * audio encoding modularized
@@ -117,6 +148,10 @@ MPlayer (1.0)
       to get old behaviour back.
     * In multiple file encoding, all files must now have audio or none. Use
       -nosound to force.
+    * support for VBR MP2 encoding in toolame
+    * twolame support
+    * libavformat muxers support
+    * VBR audio in MPEG support
 
     Ports:
     * improved timer function on Mac OS X
@@ -127,8 +162,19 @@ MPlayer (1.0)
     * support for playing DVDs copied to harddisk on Cygwin
     * DragonFly BSD support
     * liba52 asm optimizations ported to amd64
+    * configure check and compiler optimizations for VIA C3, C3-2 and Pentium-M
+    * configure check and compiler optimizations for AMD-64 extended
+    * configure can now run with cross compiling, new configure option
+      --enable-cross-compile
     * -(no)border option to get a bordered/borderless window on Windows
     * MPlayer ported to AIX
+    * AltiVec support fixes
+    * POWER5 support
+    * OpenGL output ported to Windows
+    * FreeBSD default DVD device added
+    * MIPS64 support
+    * Darwin portability fixes
+    * improved Debian packaging
 
     Others:
     * enabled hinting for TrueType fonts
@@ -147,10 +193,6 @@ MPlayer (1.0)
     * -rawaudio/-rawvideo requires -demuxer rawaudio/-demuxer rawvideo
     * libdvdcss updated to 1.2.9
     * ~/.dvdcss is used instead of ~/.mplayer/DVDKeys for cached CSS keys
-    * configure check and compiler optimizations for VIA C3, C3-2 and Pentium-M
-    * configure check and compiler optimizations for AMD-64 extended
-    * configure can now run with cross compiling, new configure option
-      --enable-cross-compile
     * libcdio support for CD playback
     * new option -msglevel, control verbosity of modules of MPlayer directly
     * -verbose option removed, use -v or "-msglevel all" instead.
@@ -161,6 +203,17 @@ MPlayer (1.0)
       line is parsed
     * environment variable MPLAYER_HOME controls location where
       configuration files are searched for
+    * memleak fixes all over the code
+    * TOOLS/aconvert: allows mencoder to encode from an audio only file
+    * TOOLS/3*m_convert: D-Cinema Audio and Video conversion program
+    * allow multiple -help clauses on the command line
+    * console "OSD" for audio-only files
+    * show total time when playing audio-only files
+    * support for .wpl playlists
+    * support for ncurses as termcap library provider
+    * parallel make fixed
+    * (improved) support for shared libav* libraries
+    * playback/encoding profiles support
 
 
   pre7try2: August 26, 2005
