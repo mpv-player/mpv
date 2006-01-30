@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.201 (2005. 12. 11.)
+// Sync'ed with help_mp-en.h 1.216 (2006. 01. 30.)
 
 // ========================= MPlayer help ===========================
 
@@ -186,7 +186,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV esemény: Nav keresés kész\n"
 #define MSGTR_MenuCall "Menü hívás\n"
 
-#define MSGTR_EdlCantUseBothModes "Nem használhatod az -edl és -edlout kapcsolókat egyszerre!\n"
 #define MSGTR_EdlOutOfMem "Nem lehet elegendõ memóriát foglalni az EDL adatoknak.\n"
 #define MSGTR_EdlRecordsNo "%d EDL akciók olvasása.\n"
 #define MSGTR_EdlQueueEmpty "Nincs olyan EDL akció, amivel foglalkozni kellene.\n"
@@ -238,9 +237,11 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nNem választottál ki video enkódert (-ovc)! Válassz egyet (lásd -ovc help)!\n"
 #define MSGTR_CannotOpenOutputFile "Nem tudom a kimeneti fájlt (%s) megnyitni.\n"
 #define MSGTR_EncoderOpenFailed "Enkóder hívása sikertelen.\n"
+#define MSGTR_MencoderWrongFormatAVI "\nFIGYELEM: A KIMENETI FÁJL FORMÁTUM _AVI_. Lásd -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nFIGYELEM: A KIMENETI FÁJL FORMÁTUM _MPEG_. Lásd -of help.\n"
+#define MSGTR_MissingOutputFilename "Nincs kimeneti fájl megadva, lásd a -o kapcsolót"
 #define MSGTR_ForcingOutputFourcc "Kimeneti fourcc kényszerítése: %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Audió formátum tag kényszerítése: 0x%x\n"
-#define MSGTR_WritingAVIHeader "AVI fejléc írása...\n"
 #define MSGTR_DuplicateFrames "\n%d darab képkocka duplázása!!!\n"
 #define MSGTR_SkipFrame "\nképkocka átugrása!!!\n"
 #define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása vagy színtere különbözik az elõzõétõl.\n"
@@ -250,8 +251,6 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól mûködik az -oac copy-val!\n"\
 "A kódolásod hibás lehet!\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
-#define MSGTR_WritingAVIIndex "\nAVI index írása...\n"
-#define MSGTR_FixupAVIHeader "AVI fejléc javítása...\n"
 #define MSGTR_RecommendedVideoBitrate "Ajánlott video bitráta %s CD-hez: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/mp  (%d B/s)  méret: %d byte  %5.3f mp  %d képkocka\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/mp  (%d B/s)  méret: %d byte  %5.3f mp\n"
@@ -519,12 +518,17 @@ static char help_text[]=
 #define MSGTR_DVDsubtitleChannel "Kiválasztott DVD felirat csatorna: %d nyelv: %c%c\n"
 #define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
 
-// muxer_*.c:
+// muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Túl sok stream!"
 #define MSGTR_RawMuxerOnlyOneStream "A rawaudio muxer csak egy audió folyamot támogat!\n"
 #define MSGTR_IgnoringVideoStream "Videó folyam figyelmen kívül hagyva!\n"
 #define MSGTR_UnknownStreamType "Figyelem! Ismeretlen folyam típus: %d\n"
 #define MSGTR_WarningLenIsntDivisible "Figyelem! A len nem osztható a samplesize-zal!\n"
+#define MSGTR_MuxbufMallocErr "Muxer keret buffernek nem sikerült memóriát foglalni!\n"
+#define MSGTR_MuxbufReallocErr "Muxer keret buffernek nem sikerült memóriát újrafoglalni!\n"
+#define MSGTR_MuxbufSending "Muxer keret bufferbõl %d keret átküldve a muxer-nek.\n"
+#define MSGTR_WritingHeader "Fejléc írása...\n"
+#define MSGTR_WritingTrailer "Index írása...\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Vigyázat! Többszörösen definiált Audio-folyam: %d (Hibás fájl?)\n"
@@ -895,9 +899,10 @@ static char help_text[]=
            "a GTK 1.x-szel és összeomlasztják a GMPlayert!"
 
 #define MSGTR_ABOUT_UHU "GUI fejlesztést az UHU Linux támogatta\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayer csapat:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   További kóderek:\n"
-#define MSGTR_ABOUT_MainTesters "   Teszterek:\n"
+#define MSGTR_ABOUT_Contributors "Kód és dokumentáció közremûködõi\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Codec-ek és third party könyvtárak\n"
+#define MSGTR_ABOUT_Translations "Fordítások\n"
+#define MSGTR_ABOUT_Skins "Skin-ek\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Végzetes hiba!"
@@ -1014,8 +1019,7 @@ static char help_text[]=
 #define MSGTR_VO_SUB_Hue "Színárnyalat"
 
 // vo_xv.c
-#define MSGTR_VO_XV_ImagedimTooHigh "A forrás kép méretei " \
-                                    "túl nagyok: %ux%u (a maximum %ux%u)\n"
+#define MSGTR_VO_XV_ImagedimTooHigh "A forrás kép méretei túl nagyok: %ux%u (maximum %ux%u)\n"
 
 // Old vo drivers that have been replaced
 
@@ -1049,23 +1053,23 @@ static char help_text[]=
 
 // ao_dxr2.c
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Hangerõ beállítása %d-re sikertelen.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz nem támogatott, próbáld meg ezt: \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz nem támogatott, próbáld a resample-t\n"
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound sikertelen: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latency: [szerver: %0.2fs, net: %0.2fs] (igazítás %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] nem sikerült megnyitni az esd playback folyamot: %s\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] nem sikerült megnyitni az ESD playback folyamot: %s\n"
 
 // ao_mpegpes.c
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio keverõ beállítása sikertelen: %s\n" 
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz nem támogatott, megpróbálom újrakódolni...\n"
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio keverõ beállítása sikertelen: %s.\n" 
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz nem támogatott, új mintavételt próbálok.\n"
 
 // ao_null.c
 // This one desn't even  have any mp_msg nor printf's?? [CHECK]
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fájl: %s (%s)\nPCM: Samplerate: %iHz Csatorna: %s Formátum: %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Gyorsabb dump-olás a -vc null -vo null kapcsolóval érhetõ el\nPCM: Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Gyorsabb dump-olás a -vc null -vo null kapcsolóval érhetõ el\n[AO PCM] Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s megnyitása írásra nem sikerült!\n"
 
 // ao_sdl.c
@@ -1092,7 +1096,7 @@ static char help_text[]=
 
 // ao_sun.c
 #define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO sikertelen.\n"
-#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: írás sikertelen."
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: írás sikertelen.\n"
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] %s audio eszköz nem elérhetõ, %s  -> nincs hang.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: a kártyád nem támogat %d csatornát, %s, %d Hz samplerate-t.\n"
 #define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  A hangkártyád NEM támogatja a select()-et ***\nFordítsd újra az MPlayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban !\n\n"
@@ -1191,7 +1195,7 @@ static char help_text[]=
 
 // url.c
 
-#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "a karakterlánc már escape-ltnek tûnik az url_escape-ben %c%c1%c2\n"
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "A karakterlánc már escape-ltnek tûnik az url_escape-ben %c%c1%c2\n"
 
 // ai_alsa1x.c
 
@@ -1220,13 +1224,13 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Sikertelen a csatorna számláló beállítása: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Sikertelen a sztereó beállítása: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2Open "'%s' nem nyitható meg: %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "nem támogatott formátum\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Nem támogatott formátum\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Az audió formátum nem állítható be."
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "A mintavételi ráta nem állítható be: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "A trigger nem állítható be: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Nem sikerült lekérdezni a blokkméretet!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "az audió blokk méret nulla, beállítva: %d!\n"
-#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "az audió blokk méret túl alacsony, beállítva: %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "Az audió blokk méret nulla, beállítva: %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Az audió blokk méret túl kicsi, beállítva: %d!\n"
 
 // asfheader.c
 
@@ -1240,26 +1244,26 @@ static char help_text[]=
 
 // asf_mmst_streaming.c
 
-#define MSGTR_MPDEMUX_MMST_WriteError "írási hiba\n"
-#define MSGTR_MPDEMUX_MMST_EOFAlert "\nriadó! eof\n"
+#define MSGTR_MPDEMUX_MMST_WriteError "Írási hiba\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nRiadó! eof\n"
 #define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "elõ-fejléc olvasás sikertelen\n"
 #define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Hibás fejléc méret, feladom\n"
-#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "fejléc adat olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Fejléc adat olvasási hiba\n"
 #define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len olvasási hiba\n"
 #define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Hibás rtsp csomag méret, feladom\n"
-#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "parancs adat olvasási hiba\n"
-#define MSGTR_MPDEMUX_MMST_HeaderObject "fejléc objektum\n"
-#define MSGTR_MPDEMUX_MMST_DataObject "adat objektum\n"
-#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "fájl objektum, csomag méret = %d (%d)\n"
-#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "folyam objektum, folyam id: %d\n"
-#define MSGTR_MPDEMUX_MMST_2ManyStreamID "túl sok id, a folyam figyelmen kívül hagyva"
-#define MSGTR_MPDEMUX_MMST_UnknownObject "ismeretlen objektum\n"
-#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "média adat olvasási hiba\n"
-#define MSGTR_MPDEMUX_MMST_MissingSignature "hiányzó aláírás\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Parancs adat olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "Fejléc objektum\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "Adat objektum\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "Fájl objektum, csomag méret = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Folyam objektum, folyam id: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Túl sok id, a folyam figyelmen kívül hagyva"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "Ismeretlen objektum\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Média adat olvasási hiba\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "Hiányzó aláírás\n"
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Minden kész. Köszönjük, hogy szabadalmazott technológiát alkalmazó médiát töltöttél le.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "ismeretlen parancs %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet hiba : %s\n"
-#define MSGTR_MPDEMUX_MMST_Connected "csatlakozva\n"
+#define MSGTR_MPDEMUX_MMST_Connected "Csatlakozva\n"
 
 // asf_streaming.c
 
@@ -1290,14 +1294,14 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_NoStreamFound "Nem található folyam\n"
 #define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Ismeretlen ASF folyam típus\n"
 #define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
-#define MSGTR_MPDEMUX_ASF_StreamingFailed "sikertelen, kilépés\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Sikertelen, kilépés\n"
 
 // audio_in.c
 
-#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nhiba az audió olvasásakor: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nHiba az audió olvasásakor: %s\n"
 #define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Visszatérés a cross-run-ból, néhány képkocka kimaradhatott!\n"
 #define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Végzetes hiba, nem lehet visszatérni!\n"
-#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nnincs elég audió minta!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNincs elég audió minta!\n"
 
 // aviheader.c
 
@@ -1310,7 +1314,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' megtalálva, %d bájt %d bájtból\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh megtalálva (size=%d) (total_frames=%d)\n"
 #define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "INDEX blokk olvasása, %d chunks %ld képkockához (fpos=%p)\n"
-#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "kiegészítõ RIFF fejléc...\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Kiegészítõ RIFF fejléc...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** figyelmeztetés: ez nem kiterjesztett AVI fejléc..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Hibás chunk?  chunksize=%d  (id=%.4s)\n"
 #define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: odml index felépítése (%d superindexchunks)\n"
@@ -1366,11 +1370,36 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] tesztelt bin fájlnév: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Nem található a bin fájl - feladom\n"
 #define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] %s bin fájl használata\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] ismeretlen mód a binfájlhoz. Nem kellene megtörténnie. Megszakítás.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Ismeretlen mód a binfájlhoz. Nem szabadna megtörténnie. Megszakítás.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] %s nem nyitható meg\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Hiba %s fájlból történõ olvasáskor\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Hiba a bin fájl méretének lekérdezésekor\n"
 #define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "sáv %02d:  formátum=%d  %02d:%02d:%02d\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] nem várt bin fájl vége\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] nem várt vége a bin fájlnak\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Nem olvasható %d bájtnyi payload\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, fájlnév=%s, sáv=%d, elérhetõ sávok: %d -> %d\n"
+
+// network.c
+
+#define MSGTR_MPDEMUX_NW_UnknownAF "Ismeretlen címosztály: %d\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "%s feloldása erre: %s...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "Nem oldható fel név %s -hez: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Csatlakozás a(z) %s[%s] szerverhez: %d...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "Sikertelen csatlakozás a szerverhez %s -sel\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "Kiválasztás sikertelen.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Idõtúllépés a csatlakozáskor.\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt sikertelen: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "Csatlakozási hiba: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Hibás proxy beállítás... Megpróbálom proxy nélkül.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Nem oldható fel a távoli hosztnév az AF_INET-hez. Megpróbálom proxy nélkül.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Hiba a HTTP kérés küldésekor: nem küldte el az összes kérést.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "Olvasás sikertelen.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response 0-át olvasott, (pl. EOF)\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "Azonosítás sikertelen. Kérlek használd a -user és -passwd kapcsolókat az\n"\
+"azonosító/jelszó megadásához URL listáknál, vagy írd az alábbi formában az URL-t:\n"\
+"http://usernev:jelszo@hostnev/fajl\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Azonosítás szükséges ehhez: %s\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "Azonosítás szükséges.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nincs jelszó megadva, üres jelszót próbálok.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Szerver válasz %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache méret beállítva %d KByte-ra\n"
