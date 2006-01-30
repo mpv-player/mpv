@@ -1,4 +1,4 @@
-.\" Synced with 1.1182
+.\" Synced with 1.1214
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -36,7 +36,7 @@
 .\" Název
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-05-15" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2006-01-04" "The MPlayer Project" "The Movie Player"
 .
 .SH NÁZEV
 mplayer  \- pøehrávaè filmù
@@ -444,10 +444,10 @@ Sní¾ení/\:zvý¹ení hlasitosti.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Volby
+.\" Pou¾ití
 .\" --------------------------------------------------------------------------
 .
-.SH "VOLBY OBECNÌ"
+.SH "POU®ITÍ OBECNÌ"
 Ka¾dá 'flag' volba má svùj 'noflag' protìj¹ek, èili\& protìj¹kem volby \-fs je
 \-nofs.
 .PP
@@ -470,6 +470,12 @@ Nebo ve skriptu:
 .br
 mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
+.
+.\" --------------------------------------------------------------------------
+.\" Konfiguraèní soubory
+.\" --------------------------------------------------------------------------
+.
+.SH "KONFIGURAÈNÍ SOUBORY"
 Mù¾ete umístit v¹echny své volby do konfiguraèních souborù, které budou naèteny
 pøi ka¾dém spu¹tìní MPlayeru/MEncoderu.
 Systémový konfiguraèní soubor 'mplayer.conf' je v konfiguraèním adresáøi
@@ -485,7 +491,8 @@ Volby které nemají hodnoty jsou povoleny nastavením na 'yes' nebo '1' nebo
  'true' a zakázány nastavením na 'no' nebo '0' nebo 'false'.
 I podvolby mohou být takto nastavovány.
 .PP
-.I PØÍKLAD:
+.I PØÍKLAD KONFIGURAÈNÍHO SOUBORU MPLAYERU:
+.sp 1
 .nf
 # Jako výchozí pou¾ijeme video výstup Matrox.
 vo=xmga
@@ -496,8 +503,31 @@ flip=yes
 mf=type=png:fps=25
 # Stra¹idelné negativy jsou bo¾í.
 vf=eq2=1.0:-0.8
-# Chci aby MEncoder pou¾il tento soubor jako výchozí výstup.
+.fi
+.PP
+.I "PØÍKLAD KONFIGURAÈNÍHO SOUBORU MENCODERU:"
+.sp 1
+.nf
+# Nastaví výchozí soubor pro výstup z MEncoderu.
 o=encoded.avi
+# Následující 4 øádky umo¾ní pøíkazu mencoder tv:// zaèít okam¾itì zachytávat.
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# komplexnìj¹í výchozí nastavení enkódování
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
 .fi
 .PP
 Rovnì¾ mù¾ete napsat konfiguraèní soubory k jednotlivým filmùm.
@@ -505,7 +535,39 @@ Pokud chcete mít konfiguraèní soubor pro film s názvem 'film.avi', vytvoøte
 soubor s názvem 'film.avi.conf' s volbami pro tento film a umístìte jej do
 ~/.mplayer/ nebo do adresáøe s filmem.
 .
+.\" --------------------------------------------------------------------------
+.\" Profily
+.\" --------------------------------------------------------------------------
 .
+.SH "PROFILY"
+Pro usnadnìní práce s odli¹nými konfiguracemi si mù¾ete definovat profily v
+konfiguraèních souborech.
+Profil zaènete uvedením jeho jména v hranatých závorkách, napø.\& '[muj-profil]'.
+V¹echny konfiguraèní volby budou souèástí profilu.
+Popis (zobrazený pomocí \-profile help) si mù¾ete definovat pomocí volby
+profile-desc.
+Profil ukonèíte zapoèetím nového, nebo pou¾itím profilu 'default' pro
+pokraèování bì¾ného nastavení.
+.fi
+.PP
+.I "PØÍKLAD PROFILU MENCODERU:"
+.sp 1
+.nf
+
+[mpeg4]
+profile-desc="Enkódování do MPEG4"
+ovc=lacv=yes
+lavcopts=vcodec=mpeg4:vbitrate=1200
+
+[mpeg4-hq]
+profile-desc="Enkódování do MPEG4 s vysokou kvalitou"
+profile=mpeg4
+lavcopts=mbd=2:trell=yes:v4mv=yes
+.fi
+.
+.\" --------------------------------------------------------------------------
+.\" Volby
+.\" --------------------------------------------------------------------------
 .
 .SH "ZÁKLADNÍ VOLBY"
 .
@@ -519,14 +581,19 @@ codecs.conf.
 Zadaný <konfiguraèní\ soubor> bude zpracován po ostatních konfiguraèních souborech.
 .
 .TP
+.B \-list-options
+Vypí¹e v¹echny dostupné volby.
+.
+.TP
 .B \-msglevel <all=<úroveò>:<module>=<úroveò>:...>
 Ovládá upovídanost ka¾dého modulu pøímo.
 Modul 'all' zmìní upovídanost v¹ech modulù neuvedených explicitnì
 na pøíkazovém øádku.
-Seznam v¹ech dostupných modulù získáte pomocí '-msglevel help'.
+Seznam v¹ech dostupných modulù získáte pomocí '\-msglevel help'.
 .br
 .I POZNÁMKA:
-Zprávy vypsané pøed naètením pøíkazového øádku nelze kontrolovat.
+Zprávy vypsané pøed naètením pøíkazového øádku lze kontrolovat pouze promìnnou
+prostøedí MPLAYER_VERBOSE, která platí pro v¹echny moduly.
 .br
 Dostupné úrovnì:
 .PD 0
@@ -580,6 +647,14 @@ Pou¾ití priority realtime mù¾e zpùsobit zamrznutí systému.
 .TP
 .B \-really-quiet (viz také \-quiet)
 Zobrazovat je¹tì ménì výstupních a stavových informací ne¾ s \-quiet.
+.
+.TP
+.B \-profile <profil1,profil2,...>
+Pou¾ije zadaný(é) profil(y). Seznam zadaných profilù vypí¹e \-profile help.
+.
+.TP
+.B \-show-profile <profil>
+Vypí¹e popis a obsah profilu.
 .
 .TP
 .B \-v\ \ \ \ \ 
@@ -745,10 +820,6 @@ nastavte ji na 2 v Linuxu nebo 1024 ve Windows.
 .TP
 .B \-lircconf <soubor> (Pouze LIRC)
 Urèuje konfiguraèní soubor pro LIRC (výchozí: ~/\:.lircrc).
-.
-.TP
-.B \-list-options
-Vypí¹e v¹echny dostupné volby.
 .
 .TP
 .B \-loop <èíslo>
@@ -918,6 +989,9 @@ mno¾ství pamìti.
 Nastaví maximální ¹íøku pásma pro pøehrávání ze sítì (pro servery které
 umí poslat obsah v rùzných datových tocích (bitrate)).
 Pou¾itelné kdy¾ chcete sledovat ¾ivé vysílání a máte pomalé pøipojení.
+Pøi Real RTST streamování je volba rovnì¾ pou¾ita pro nastavení maximální
+vysílací ¹íøku pásma, co¾ umo¾òuje rychlej¹í plnìní vyrovnávací pamìti a
+ukládání datového proudu (streamdump).
 .
 .TP
 .B \-cache <kBajtù>
@@ -931,7 +1005,7 @@ Pøehrávání zaène jakmile byla vyrovnávací pamì» naplnìna z více <procent> ne¾
 je zde nastavený práh.
 .
 .TP
-.B \-cache-seek-min <procento> (zatím neimplementováno)
+.B \-cache-seek-min <procento>
 Pokud se má pøevinout na pozici mimo <procento> velikosti vyrovnávací pamìti
 z aktuální pozice, MPlayer pozastaví pøehrávání do doby,
 ne¾ se vyrovnávací pamì» doplní alespoò na tuto pozici, místo aby provedl
@@ -3467,6 +3541,9 @@ Nastavuje parametry dekódování pro libavcodec.
 Dostupné volby jsou:
 .RE
 .RSs
+.IPs bitexact
+Ve v¹ech krocích dekódování se pou¾ijí pouze bit-exact algoritmy (pro testování
+kodekù).
 .IPs bug=<hodnota>
 Manuální korekce chyb enkodéru.
 .RSss
@@ -4896,11 +4973,12 @@ Vynutí kvantizaèní parametr (výchozí: 0, pou¾ije QP z videa).
 .
 .TP
 .B uspp[=kvalita[:qp]]
-Ultra jednoduchý&pomalý postprocesní filtr, který komprimuje a dekomprimuje
-obraz s posunem nìkolika (nebo \- v pøípadì kvality úrovnì 8 \- v¹emi) smìry
-a zprùmìruje výsledky.
-Rozdíl proti spp je, ¾e pro komprimaci a dekomprimaci pou¾ívá lavc-mpeg4,
-zatímco spp pou¾ívá zjednodu¹enou pouze intra 8x8 DCT podobnou mjpeg.
+Ultra jednoduchý & pomalý postprocesní filtr, který komprimuje a
+dekomprimuje obraz s posunem nìkolika (nebo \- v pøípadì kvality úrovnì
+8 \- v¹emi) smìry a zprùmìruje výsledky.
+Volba se li¹í od spp v tom, ¾e pro komprimaci a dekomprimaci pou¾ívá MPEG-4 z
+libavcodec, zatímco spp pou¾ívá zjednodu¹enou pouze intra 8x8 DCT podobnou
+MJPEG.
 .RSs
 .IPs <kvalita>
 0\-8 (výchozí: 3)
@@ -6680,6 +6758,8 @@ EPZS: diamant velikost=1, velikost mù¾e být nastavena pomocí *dia voleb
 (výchozí)
 .IPs 5
 X1 (experimentální, momentálnì je aliasem pro EPZS)
+.IPs 8
+iter (iterative overlapped block, pou¾itý pouze ve snow)
 .RE
 .PD 1
 .sp 1
@@ -6732,14 +6812,16 @@ Momentálnì nedìlá vùbec nic.
 .TP
 .B keyint=<0\-300>
 maximální interval mezi klíèovými snímky ve snímcích (výchozí: 250 neboli jeden
-klíèový (I) snímek na ka¾dých 10 sekund pøi rychlosti 25 snímkù za sekundu).
-Klíèové snímky jsou nutné pro pøevíjení, proto¾e pøevinout lze korektnì pouze
-neklíèový snímek, ale klíèové snímky potøebují více prostoru ne¾ ostatní
+klíèový (I) snímek na ka¾dých 10 sekund pøi rychlosti 25 snímkù za sekundu.
+To je doporuèená výchozí hodnota pro MPEG-4).
+Vìt¹ina kodekù vy¾aduje pravidelné klíèové snímky, aby se omezila akumulace
+chyb. Klíèové snímky jsou rovnì¾ pou¾ity pro pøevíjení, jeliko¾ pøevíjet lze
+pouze na klíèové snímky, ale klíèové snímky potøebují více prostoru ne¾ ostatní
 snímky, tak¾e velké èíslo povede k o nìco men¹ímu souboru, ale nepøesnìj¹ímu
 pøevíjení. 0 je ekvivalentní 1, tedy ¾e v¹echny snímky budou klíèové.
 Hodnoty >300 nejsou doporuèovány, proto¾e kvalita mù¾e být ¹patná v závislosti
 na dekodéru, enkodéru a ¹tìstí.
-Pro striktní sluèitelnost MPEG-1/2/4 musí být interval <=132.
+V MPEG-1/2 je bì¾né pou¾ívat hodnoty <=30.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
@@ -6750,13 +6832,46 @@ Tato volba nastavuje citlivost detekce.
 1000000000 znamená ¾e nebudou detekovány ¾ádné zmìny scény (výchozí: 0).
 .
 .TP
-.B vb_strategy=<0\-1> (pouze první prùchod)
+.B sc_factor=<jakékoli kladné celé èíslo>
+Zpùsobí, ¾e snímky s vy¹¹ími kvantizery budou èastìji spou¹tìt detekci zmìny
+scény a ukládat libavcodecu pou¾ití I-snímku (výchozí: 1).
+Bezpeèný je rozsah 1\-16.
+Hodnoty mezi 2 a 6 mohou vést k lep¹ímu PSNR (v prùmìru do 0.04 dB) a lep¹í
+umístìní I-snímkù ve vysokorychlostních scénách.
+Vy¹¹í hodnoty ne¾ 6 mohou dát nepatrnì lep¹í PSNR (prùmìrnì o 0.01 dB víc, ne¾
+sc_factor=6), ale znatelnì hor¹í vizuální kvalitu.
+.
+.TP
+.B vb_strategy=<0\-2> (pouze první prùchod)
 strategie výbìru mezi I/\:P/\:B-snímky:
 .RSs
 .IPs 0
 V¾dy pou¾ívat maximální poèet B-snímkù (výchozí).
 .IPs 1
 Vyhnout se B-snímkùm ve vysoce pohyblivých scénách.
+.IPs 2
+Umís»uje B-snímky více ménì optimálnì pro dosa¾ení maximální kvality
+(pomalej¹í). Spomalení zpùsobené touto volbou mù¾ete sní¾it doladìním volby
+brd_scale.
+.RE
+.PD 1
+.
+.TP
+.B brd_scale=<0\-10>
+Sní¾í rozli¹ení snímkù pro dynamické hodnocení vhodnosti B-snímku (výchozí: 0).
+Rychlost by se mìla zvý¹it ètyønásobnì na ka¾dé zvý¹ení brd_scale o 1.
+.
+.TP
+.B bidir_refine=<0\-4>
+Radìji zpøesní oba vektory pohybu pou¾ité v dvousmìrných makroblocích, ne¾ by
+znovu pou¾il vektory ze zpìtného a dopøedného vyhledávání.
+Bez B-snímkù nemá tato volba ¾ádný efekt.
+.PD 0
+.RSs
+.IPs 0
+Vypnuto (výchozí).
+.IPs 1\-4
+Pou¾ije ¹ir¹í vyhledávání (vy¹¹í hodnoty jsou pomalej¹í).
 .RE
 .PD 1
 .
@@ -7458,6 +7573,10 @@ souèet absolutních svislých odchylek
 souèet ètvereèních svislých odchylek
 .IPs "10 (NSSE)"
 ¹umuvzdorný souèet ètvereèních odchylek
+.IPs "11 (W53)"
+vlnka 5/3, pou¾ita pouze ve snow
+.IPs "12 (W97)"
+9/7 wavelet, pou¾ita pouze ve snow
 .IPs +256\ 
 Pou¾ije té¾ barvu, v souèasnosti nepracuje (správnì) s B-snímky.
 .RE
@@ -8765,6 +8884,12 @@ Zapne optimalizaci oøezání datového toku makroblokových typù v B-snímcích.
 Vy¾aduje subq=6.
 .
 .TP
+.B (no)bime
+Radìji zpøesní oba vektory pohybu v dvousmìrných makroblocích, ne¾ aby pou¾il
+vektory ze zpìtného a dopøedného vyhledávání.
+Tato volba nemá ¾ádný vliv bez B-snímkù.
+.
+.TP
 .B trellis=<0\-2>
 optimální kvantizace z hlediska omezení datového toku
 .PD 0
@@ -8777,6 +8902,20 @@ zapnuto pouze pro koneèný výsledek (encode) (výchozí)
 zapnuto pøi v¹ech rozhodováních o re¾imech (pomalé, vy¾aduje subq=6)
 .RE
 .PD 1
+.
+.TP
+.B (no)fast_pskip
+Provádí detekci early skip v P-snímcích (výchozí: zapnuto).
+To obvykle zadarmo zlep¹í rychlost, ale mù¾e obèas zpùsobovat artefakty v
+plochách bez detailù, jako je obloha.
+.
+.TP
+.B nr=<0\-100000>
+Omezení ¹umu, 0 znamená vypnuto.
+Pro typický obsah je vhodný rozsah 100\-1000, ale mù¾ete ji o nìco
+zvý¹it pro velmi za¹umìný obsah (výchozí: 0).
+Vzhledem k malému vlivu na rychlost jím mù¾ete nahradit filtrování ¹umu pomocí
+videofiltrù jako denoise3d nebo hqdn3d.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
@@ -8936,14 +9075,6 @@ Bude zmìnìna podle potøeby v pøípadì ¾e 'format=mpeg1' nebo 'mpeg2'.
 Nastaví èasovou znaèku v ka¾dém snímku, pokud je to mo¾né.
 .
 .TP
-.B (no)reorder
-Aktivuje kód pro pøeøazování snímkù, který ukládá snímky v dekódovacím
-(spí¹e ne¾ zobrazovacím) sledu (výchozí: vypnuto).
-Pou¾ijte ji jen v pøípadì, kdy si myslíte, ¾e jsou snímky ve videu øazeny
-nesprávnì.
-Pracuje pouze s MPEG-1/2 videem.
-.
-.TP
 .B init_vpts=<100\-700>
 poèáteèní pts videa, v milisekundách (výchozí: 200)
 .
@@ -9040,6 +9171,11 @@ promìnných prostøedí.
 .B MPLAYER_HOME
 Adresáø kde bude hledat MPlayer u¾ivatelská nastavení.
 .
+.TP
+.B MPLAYER_VERBOSE (viz také \-v a \-msglevel)
+Nastaví poèáteèní úroveò upovídanosti pro v¹echny moduly (výchozí: 0).
+Záporné hodnoty sní¾í poèet zpráv, kladné jejich poèet zvý¹í.
+.
 .SS libaf:
 .
 .TP
@@ -9116,9 +9252,8 @@ Vypisuje chybové a debugovací zprávy na stderr.
 .
 .TP
 .B DVDREAD_NOKEYS
-DVDREAD_NOKEYS je specifická pro MPlayer, ale v souèasnosti nevyu¾itá.
-V souboru libmpdvdkit2/dvd_reader.c je DVDREAD_NOKEYS pou¾ita ve funkci
-initAllCSSKeys, ale jediné místo, kde je funkce volána je zakomentováno.
+Pøeskoèí obnovení v¹ech klíèù pøi startu.
+V souèasnosti vypnuto.
 .
 .TP
 .B HOME
@@ -9312,111 +9447,154 @@ s titulky vyhledávat v tomto poøadí:
 .
 .SH PØÍKLADY POU®ITÍ MPLAYERU
 .
-.TP
+.PP
 .B Rychlý start pøehrávání DVD:
+.nf
 mplayer dvd://1
+.fi
 .
-.TP
+.PP
 .B Pøehrávat v japon¹tinì s anglickými titulky:
+.nf
 mplayer dvd://1 \-alang ja \-slang en
+.fi
 .
-.TP
+.PP
 .B Pøehrát pouze kapitoly 5, 6, 7:
+.nf
 mplayer dvd://1 \-chapter 5-7
+.fi
 .
-.TP
+.PP
 .B Pøehrát pouze tituly 5, 6, 7:
+.nf
 mplayer dvd://5-7
+.fi
 .
-.TP
+.PP
 .B Pøehrávání DVD s více úhly pohledu:
+.nf
 mplayer dvd://1 \-dvdangle 2
+.fi
 .
-.TP
+.PP
 .B Pøehrávání z odli¹ného DVD zaøízení:
+.nf
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.fi
 .
-.TP
+.PP
 .B Pøehrávání DVD videa z adresáøe s VOB soubory:
+.nf
 mplayer dvd://1 \-dvd-device /cesta/\:do/\:adresáøe/
+.fi
 .
-.TP
+.PP
 .B Zkopírování filmu z DVD disku na hard disk, ulo¾ení do souboru "titul1.vob":
+.nf
 mplayer dvd://1 \-dumpstream \-dumpfile titul1.vob
+.fi
 .
-.TP
+.PP
 .B Pøehrávat proud z HTTP:
+.nf
 mplayer http://mplayer.hq/\:example.avi
+.fi
 .
-.TP
+.PP
 .B Pøehrávat proud pøes RTSP:
+.nf
 mplayer rtsp://server.example.com/\:streamName
+.fi
 .
-.TP
+.PP
 .B Pøevést titulky do MPsub formátu:
+.nf
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
+.fi
 .
-.TP
+.PP
 .B Pøevést titulky do MPsub bez koukání na video:
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null
-\-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+.nf
+mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub zdroj.sub \-dumpmpsub
+.fi
 .
-.TP
+.PP
 .B Vstup ze standardního V4L:
-mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
-\-vo xv
+.nf
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
+.fi
 .
-.TP
+.PP
 .B Pøehrávání na Zoran kartì (staré provedení, opu¹tìno):
+.nf
 mplayer \-vo zr \-vf scale=352:288 file.avi
+.fi
 .
-.TP
+.PP
 .B Pøehrávání na Zoran kartì (nové provedení):
+.nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
+.fi
 .
-.TP
+.PP
 .B Pøehrávání ¹estikanálového AAC souboru, máte-li jen dva reproduktory:
+.nf
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+.fi
 .br
 Musíte si pohrát s hodnotami "pan" (tedy násobte hodnotou) pro
 zvý¹ení hlasitosti nebo potlaèení omezení.
 .
 .SH PØÍKLADY POU®ITÍ MENCODERU
 .
-.TP
+.PP
 .B Enkódovat DVD titul #2, pouze vybrané kapitoly:
+.nf
 mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Enkódovat DVD titul #2, zmìna velikosti na 640x480:
+.nf
 mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Enkódovat DVD titul #2, zmìna velikosti na 512xHHH (dodr¾í pomìr stran):
-mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
-\-ovc lavc \-lavcopts vcodec=mpeg4
+.nf
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B To samé, jen datový tok je nastaven na 1800kbitù a optimalizované makrobloky:
-mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc
-\-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.nf
+mencoder dvd://2 \-o title2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.fi
 .
-.TP
+.PP
 .B To samé, jen s MJPEG kompresí:
-mencoder dvd://2 \-o title2.avi \-ovc lavc
-\-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
+.nf
+mencoder dvd://2 \-o title2.avi \-ovc lavc \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800 \-oac copy
+.fi
 .
-.TP
+.PP
 .B Enkódování v¹ech *.jpg souborù v aktuálním adresáøi:
+.nf
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Enkódování z tuneru (nastavte formát pomocí \-vf format):
+.nf
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
+.fi
 .
-.TP
+.PP
 .B Enkódování z roury:
+.nf
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
+.fi
 .
 .
 .\" --------------------------------------------------------------------------
