@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.216 (2006. 01. 30.)
+// Sync'ed with help_mp-en.h 1.221 (2006. 01. 30.)
 
 // ========================= MPlayer help ===========================
 
@@ -111,7 +111,7 @@ static char help_text[]=
 #define MSGTR_Playing "%s lejátszása\n"
 #define MSGTR_NoSound "Audio: nincs hang!!!\n"
 #define MSGTR_FPSforced "FPS kényszerítve %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Futásidejû CPU detektálás használata - FIGYELEM - ez nem optimális!\nA legjobb teljesítmény eléréséhez fordítsd újra az MPlayer-t a --disable-runtime-cpudetection\n opcióval!\n"
+#define MSGTR_CompiledWithRuntimeDetection "Futásidejû CPU detektálás használata.\n"
 #define MSGTR_CompiledWithCPUExtensions "x86-os CPU - a következõ kiterjesztésekkel:"
 #define MSGTR_AvailableVideoOutputDrivers "Rendelkezésre álló video meghajtók:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Rendelkezésre álló audio meghajtók:\n"
@@ -256,7 +256,7 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/mp  (%d B/s)  méret: %d byte  %5.3f mp\n"
 #define MSGTR_OpenedStream "kész: formátum: %d  adat: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (formátum=%x csati=%d ráta=%ld bit=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (formátum=%x csati=%d ráta=%d bit=%d B/s=%d sample-%ld)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio kiválasztva\n"
 #define MSGTR_MP3AudioSelected "MP3 audio kiválasztva\n"
 #define MSGTR_CannotAllocateBytes "%d byte nem foglalható le\n"
@@ -266,7 +266,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Audio elõretöltés korlátozva 0.4 mp-re\n"
 #define MSGTR_IncreasingAudioDensity "Audio tömörítés növelése 4-re\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Audio elõretöltés 0-ra állítva, max pts javítás 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld byte/mp, %d byte/blokk\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %d byte/mp, %d byte/blokk\n"
 #define MSGTR_LameVersion "LAME %s (%s) verzió\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Hiba: A megadott bitráta az ezen beállításhoz tartozó határokon kívül van\n"\
 "\n"\
@@ -485,6 +485,11 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Hiba: a(z) '%s' kapcsolóhoz kell egy paraméter!\n"
 #define MSGTR_OptionListHeader "\n Név                  Típus           Min        Max      Globál  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nÖsszesen: %d kapcsoló\n"
+#define MSGTR_TooDeepProfileInclusion "FIGYELMEZTETÉS: Túl mély profil beágyazás.\n"
+#define MSGTR_NoProfileDefined "Nincs profil megadva.\n"
+#define MSGTR_AvailableProfiles "Elérhetõ profilok:\n"
+#define MSGTR_UnknownProfile "Ismeretlen profil: '%s'.\n"
+#define MSGTR_Profile "Profil %s: %s\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "A CD-ROM meghajtó (%s) nem található!\n"
@@ -559,7 +564,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nem tudok nyers .AVI-kban tekerni! (index kell, próbáld az -idx kapcsolóval!)\n"
 #define MSGTR_CantSeekFile "Nem tudok ebben a fájlban tekerni!\n"
 
-#define MSGTR_EncryptedVOB "Titkosítótt VOB fájl! Olvasd el a DOCS/HTML/hu/dvd.html fájlt!\n"
+#define MSGTR_EncryptedVOB "Titkosítótt VOB fájl! Olvasd el a DOCS/HTML/hu/cd-dvd.html fájlt!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: A tömörített fejlécek támogatásához ZLIB kell!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Vigyázat: változó FOURCC detektálva!?\n"
@@ -580,7 +585,7 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC formátumot találtam, frameráta váltás.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progresszív NTSC formátumot találtam, frameráta váltás.\n"
 
-#define MSGTR_CacheFill "\rCache feltöltés: %5.2f%% (%d bájt)   "
+#define MSGTR_CacheFill "\rCache feltöltés: %5.2f%% (%"PRId64" bytes)   "
 #define MSGTR_NoBindFound "Nincs semmi sem összerendelve a(z) '%s' gombbal"
 #define MSGTR_FailedToOpen "Nem lehet megnyitni: %s\n"
 
@@ -1313,7 +1318,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Kulcs képkocka tábla újragenerálása az MPEG4 videóhoz\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' megtalálva, %d bájt %d bájtból\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh megtalálva (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "INDEX blokk olvasása, %d chunks %ld képkockához (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "INDEX blokk olvasása, %d chunk %d képkockához (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Kiegészítõ RIFF fejléc...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** figyelmeztetés: ez nem kiterjesztett AVI fejléc..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Hibás chunk?  chunksize=%d  (id=%.4s)\n"
@@ -1338,7 +1343,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Nem nyitható meg a CDDA eszköz.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Nem nyitható meg a lemez.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Audió CD-t találtam %d sávval.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Audió CD-t találtam %ld sávval.\n"
 
 // cddb.c
 
