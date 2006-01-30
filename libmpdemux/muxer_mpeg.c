@@ -2272,7 +2272,6 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 				#else
 					len = mp_a52_framesize(&(s->b_buffer[i]), &srate);
 				#endif
-					if(len) fprintf(stderr, "\r\nLEN: %d, srate: %d\r\n", len, srate);
 					if((len > 0) && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
 					{
 						frames++;
