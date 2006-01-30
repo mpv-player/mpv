@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1212
+.\" In sync with rev 1.1219
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -191,7 +191,7 @@ Er spielt die meisten Dateien in den Formaten
 MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, MKV
 VIVO, FLI, NuppelVideo, yuv4mpeg, FILM und RoQ ab, unterstützt von vielen
 eingebauten und binären Codecs.
-Es können VideoCDs, SuperVCDs, DVDs, 3ivx-, DivX\ 3/\:4/\:5- und sogar
+Es können VideoCDs, SuperVCDs, DVDs, 3ivx-, DivX 3/4/5- und sogar
 WMV-Filme angeschaut werden.
 .PP
 MPlayer unterstützt eine große Auswahl an Video- und Audioausgabetreibern.
@@ -281,7 +281,7 @@ auf).
 .IPs "q / ESC"
 Stoppt die Wiedergabe und beendet MPlayer.
 .IPs "+ und -"
-Passt die Audioverzögerung um +/\:- 0.1 Sekunde an.
+Passt die Audioverzögerung um +/- 0.1 Sekunde an.
 .IPs "/ und *"
 Verringert/\:erhöht die Lautstärke.
 .IPs "9 und 0"
@@ -310,11 +310,11 @@ Wechselt durch die verfügbaren Untertitel.
 .IP F\ \ \ \ 
 Ändert die Anzeige der "erzwungenen Untertitel".
 .IPs a\ \ \ \ 
-Ändert die Positionierung der Untertitel: oben/\:mitte/\:unten.
+Ändert die Positionierung der Untertitel: oben / mitte / unten.
 .IPs "x und z"
-Passt die Untertitel-Anzeige um +/\:- 0.1 Sekunde an.
+Passt die Untertitel-Anzeige um +/- 0.1 Sekunde an.
 .IPs "r und t"
-Bewegt die Untertitel nach oben/\:unten.
+Bewegt die Untertitel nach oben/unten.
 .IPs i\ \ \ \ 
 Setze EDL-Markierung.
 .RE
@@ -366,9 +366,9 @@ Setze Alphawert des Abspielfensters.
 .PP
 .PD 0
 .RSs
-.IPs "PAUSE"
+.IPs PAUSE
 Pause.
-.IPs "STOP\ "
+.IPs STOP\ 
 Wiedergabe anhalten und beenden.
 .IPs "ZURÜCK und VORWÄRTS"
 Im Minutenschritt zurück-/\:vorwärtsspulen.
@@ -503,7 +503,7 @@ Auch Suboptionen können in dieser Art angegeben werden.
 vo=xmga
 # Ich stehe darauf, beim Zusehen einen Handstand zu machen.
 flip=yes
-# Decodiere/\:encodiere mehrere Dateien im PNG-Format,
+# Decodiere/encodiere mehrere Dateien im PNG-Format,
 # beginne mit mf://Dateimaske.
 mf=type=png:fps=25
 # Unheimliche Negativbilder sind cool.
@@ -688,7 +688,7 @@ werden.
 .
 .TP
 .B \-autosync <Faktor>
-Ändert die Schrittweise der A/\:V-Synchronisation basierend auf den
+Ändert die Schrittweise der A/V-Synchronisation basierend auf den
 Messungen der Audioverzögerung.
 Mit \-autosync\ 0, dem Standardwert, wird das Bildtiming nur auf der
 gemessenen Audioverzögerung basieren.
@@ -799,7 +799,7 @@ durch Eingabekommandos gesteuert werden kann.
 .B \-input <Kommandos>
 Diese Option kann benutzt werden, um bestimmte Teile von MPlayers
 Eingabesystem zu konfigurieren.
-Pfadangaben sind relativ zu ~/\:.mplayer/.
+Pfadangaben sind relativ zu ~/.mplayer/.
 .br
 .I ANMERKUNG:
 Automatische Wiederholung (autorepeat) wird momentan nur von Joysticks
@@ -851,7 +851,7 @@ Wert auf 2 für Linux oder 1024 für Windows.
 .
 .TP
 .B \-lircconf <Dateiname> (nur bei LIRC)
-Gibt eine Konfigurationsdatei für LIRC an (Standard: ~/\:.lircrc).
+Gibt eine Konfigurationsdatei für LIRC an (Standard: ~/.lircrc).
 .
 .TP
 .B \-loop <Anzahl>
@@ -967,7 +967,7 @@ sein.
 .
 .
 .
-.SH "DEMUXER-/\:STREAM-OPTIONEN"
+.SH "DEMUXER-/STREAM-OPTIONEN"
 .
 .TP
 .B \-a52drc <Level>
@@ -1083,7 +1083,7 @@ Erzwingt eine minimal zu durchsuchende Überlappung bei der Datenüberprüfung
 von <Wert> Sektoren.
 .IPs toc-bias
 Nimm an, dass der Startoffset von Spur 1, wie er in der TOC steht, als
-LBA\ 0 adressiert wird.
+LBA 0 adressiert wird.
 Einige Toshiba-Laufwerke benötigen diese Option, um die Spurgrenzen richtig
 zu erkennen.
 .IPs toc-offset=<Wert>
@@ -1095,7 +1095,7 @@ Akzeptiere (niemals) nicht perfekte Datenrekonstruktion.
 .RE
 .
 .TP
-.B \-cdrom-device <Pfad\ zum\ Gerät>
+.B \-cdrom-device <Pfad zum Gerät>
 Gibt das CD-ROM-Gerät an (Standard: /dev/\:cdrom).
 .
 .TP
@@ -1130,7 +1130,7 @@ volles 5.1
 .PD 1
 .
 .TP
-.B \-chapter <Kapitel-ID>[\-<ID\ des\ letzten\ Kapitels>] (nur bei DVD)
+.B \-chapter <Kapitel-ID>[\-<ID des letzten Kapitels>] (nur bei DVD)
 Gibt das Kapitel an, ab dem abgespielt werden soll.
 Optional kann angegeben werden, nach welchem Kapitel mit dem Abspielen
 aufgehört werden soll (Standard: 1).
@@ -1231,7 +1231,7 @@ Feature benutzen kannst.
 .TP
 .B \-forceidx
 Erzwingt Indexneugenerierung.
-Nützlich für Dateien mit defektem Index (A/\:V-Desynchronisation etc.\&).
+Nützlich für Dateien mit defektem Index (A/V-Desynchronisation etc.\&).
 Das ermöglicht das Spulen in Dateien, in denen dies vorher nicht möglich war.
 Mit MEncoder kann der Index permanent repariert werden (siehe Dokumentation).
 .br
@@ -1250,10 +1250,10 @@ Nur die ersten <Anzahl> Bilder werden wiedergegeben/\:encodiert, danach wird
 MPlayer beendet.
 .
 .TP
-.B \-hr-mp3-seek (nur bei .MP3)
+.B \-hr-mp3-seek (nur bei MP3)
 Hi-res mp3-Spulen.
 Standardmäßig ist diese Option an, wenn ein externes MP3 abgespielt wird,
-da MPlayer an die exakte Position spulen muss, um die A/\:V-Syncronisation
+da MPlayer an die exakte Position spulen muss, um die A/V-Syncronisation
 beizubehalten.
 Kann langsam sein, vor allem dann, wenn zurückgespult wird, da dann erst
 zum Anfang gespult wird, um die genaue Stelle zu finden.
@@ -1287,8 +1287,8 @@ benutzt, aber dies wird sicherlich zu ungewünschten Resultaten führen.
 Diese Option ist veraltet, da MPlayer nun Unterstützung für OpenDML hat.
 .
 .TP
-.B \-mc <Sekunden/\:Frame>
-maximale A/\:V-Synchronisationsanpassung pro Frame (in Sekunden)
+.B \-mc <Sekunden/Frame>
+maximale A/V-Synchronisationsanpassung pro Frame (in Sekunden)
 .
 .TP
 .B \-mf <Option1:Option2:...>
@@ -1421,8 +1421,8 @@ Funktioniert momentan nur mit AVI-Dateien.
 Diese Option ist veraltet, da MPlayer nun OpenDML unterstützt.
 .
 .TP
-.B \-sb <Byte-Position> (siehe auch \-ss)
-Springt an die Byte-Position.
+.B \-sb <Byteposition> (siehe auch \-ss)
+Springt an die Byteposition.
 Nützlich beim Abspielen von CD-ROM-Abbildern / .VOB-Dateien mit Müll
 am Anfang.
 .
@@ -1464,7 +1464,7 @@ wurden, nicht ignoriert.
 Diese Option wird manchmal gebraucht, um korrupte MPEG-TS-Dateien abzuspielen.
 .
 .TP
-.B \-tsprobe <Byte-Position>
+.B \-tsprobe <Byteposition>
 Beim Abspielen eines MPEG-TS-Streams kannst du mit dieser Option auswählen,
 wie viele Bytes MPlayer nach den gewünschten Audio- und Video-IDs durchsuchen
 soll.
@@ -1700,7 +1700,7 @@ Untertiteln.
 Benutze dies, falls Kommata in Untertiteln am Anfang eines Satzes anstatt am
 Ende angezeigt werden.
 .TP
-.B \-font <Pfad\ zur\ font.desc-Datei> (nur bei OSD)
+.B \-font <Pfad zur font.desc-Datei> (nur bei OSD)
 Sucht nach den OSD-/\:Untertitelschriften in einem anderen Verzeichnis
 (Standard für normale Schriften: ~/\:.mplayer/\:font/\:font.desc,
 Standard für FreeType-Schriften: ~/.mplayer/\:subfont.ttf).
@@ -1735,7 +1735,7 @@ Gibt den Zeichensatz an, der an FriBiDi übergeben wird, wenn Untertitel
 decodiert werden, die nicht im UTF8-Format sind (Standard: ISO8859-8).
 .
 .TP
-.B \-ifo <VOBsub\ IFO-Datei>
+.B \-ifo <VOBsub IFO-Datei>
 Gibt die Datei an, aus der MPlayer die Palette und die Framegröße für
 VOBsub-Untertitel lädt.
 .
@@ -2046,7 +2046,7 @@ Weist MPlayer an, die Untertiteldatei als Unicode zu behandeln.
 Weist MPlayer an, die Untertiteldatei als UTF-8 zu behandeln.
 .
 .TP
-.B \-vobsub <VOBsub-Datei\ ohne\ Erweiterung>
+.B \-vobsub <VOBsub-Datei ohne Erweiterung>
 Gibt eine VOBsub-Datei an, die für die Untertitel verwendet werden soll.
 Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 \'.ifo' oder '.sub'.
@@ -2143,7 +2143,7 @@ Verfügbare Audioausgabetreiber sind folgende:
 .
 .TP
 .B alsa\ \ \ 
-ALSA 0.9/\:1.x Audioausgabetreiber.
+ALSA 0.9/1.x Audioausgabetreiber.
 .PD 0
 .RSs
 .IPs mmap\ \ \ 
@@ -2236,7 +2236,7 @@ Nativer SGI-Audioausgabetreiber.
 .IPs "<Name des Ausgabegeräts>"
 Wähle das zu nutzende Ausgabegerät/\:Interface explizit
 (Standard: systemweite Voreinstellung).
-Beispiele: 'Analog\ Out' oder 'Digital\ Out'.
+Beispiele: 'Analog Out' oder 'Digital Out'.
 .RE
 .PD 1
 .
@@ -2383,7 +2383,7 @@ Schaltet den 7.5 IRE-Ausgabemodus an
 .IPs no75ire
 Schaltet den 7.5 IRE-Ausgabemodus ab (Standard)
 .IPs bw\ \ \ 
-TV-Ausgabe in Schwarz/\:Weiß
+TV-Ausgabe in schwarz/weiß
 .IPs color
 TV-Ausgabe in Farbe (Standard)
 .IPs interlaced
@@ -2680,7 +2680,7 @@ das Video angezeigt werden soll.
 .
 .TP
 .B \-zrbw (nur bei \-vo zr)
-Anzeige in schwarz/\:weiß.
+Anzeige in schwarz/weiß.
 Für optimale Performance kann dies mit der Option '\-lavdopts gray'
 kombiniert werden.
 .
@@ -2851,7 +2851,7 @@ Voreinstellung ist, die Bildwiedergabe nicht zu deaktivieren (nobenchmark).
 .IPs (no)queue
 Frames werden in einer Queue angeordnet, um der Videohardware weitergehendes
 paralleles Arbeiten zu ermöglichen.
-Dies kann eine geringe konstante (nicht bemerkbare) A/\:V-Desynchronisation mit
+Dies kann eine geringe konstante (nicht bemerkbare) A/V-Desynchronisation mit
 sich bringen (Standard: noqueue).
 .IPs (no)sleep
 Benutze die Sleep-Funktion, während auf Beendigung des Renderns gewartet
@@ -3585,7 +3585,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .
 .
-.SH "OPTIONEN FÜR DIE DECODIERUNG/\:DAS FILTERN"
+.SH "OPTIONEN FÜR DIE DECODIERUNG/DAS FILTERN"
 .
 .TP
 .B \-ac <[-|+]Codec1,[-|+]Codec2,...[,]>
@@ -3899,7 +3899,7 @@ Gebe Statistiken aus und speichere sie in ./vstats_*.log.
 Deaktiviert die Anzeige des Videos in 16-Pixel-hohen Streifen und stellt den
 kompletten Frame statt dessen in einem einzigen Durchgang dar.
 Dies kann die Darstellung schneller oder langsamer machen, abhängig von
-Hardware/\:Cache.
+Hardware/Cache.
 Dies hat nur einen Effekt bei den Codecs libmpeg2 und libavcodec.
 .
 .TP
@@ -3977,7 +3977,7 @@ Rechter Kanal
 .PD 1
 .
 .TP
-.B \-sws <Typ\ des\ Softwareskalierers> (siehe auch \-vf scale und \-zoom)
+.B \-sws <Typ des Softwareskalierers> (siehe auch \-vf scale und \-zoom)
 Mit dieser Option wird die Qualität (und damit auch die Geschwindigkeit)
 des Softwareskalierers gewählt, der bei \-zoom zum Einsatz kommt.
 Dieser wird beispielsweise bei x11 oder anderen Videotreibern benutzt,
@@ -4788,7 +4788,7 @@ Position der linken oberen Ecke (Standard: -1, ganz oben, ganz links)
 .B expand[=b:h:x:y:o:a:r]
 Vergrößert das Bild ohne Skalierung auf die angegebene Größe und
 platziert das unskalierte Originalbild an die Koordinaten x/\:y.
-Kann benutzt werden, um die Platzierung des OSD/\:der Untertitel auf
+Kann benutzt werden, um die Platzierung des OSD/der Untertitel auf
 schwarzen Balken zu erreichen.
 .RSs
 .IPs <b>,<h>
@@ -4868,11 +4868,11 @@ Skalierung nicht unterstützen, werden die Werte d_width/\:d_height benutzt.
 .br
 -1:   originale Breite/\:Höhe
 .br
--2:   Berechne Breite/\:Höhe anhand der jeweils anderen Größe und dem
-vorskalierten Breiten-/\:Höhenverhältnis.
+-2:   Berechne Breite/Höhe anhand der jeweils anderen Größe und dem
+vorskalierten Breiten-/Höhenverhältnis.
 .br
--3:   Berechne Breite/\:Höhe anhand der jeweils anderen Größe und dem
-originalen Breiten-/\:Höhenverhältnis.
+-3:   Berechne Breite/Höhe anhand der jeweils anderen Größe und dem
+originalen Breiten-/Höhenverhältnis.
 .br
 -(n+8): wie -n oben, rundet aber die Abmessung auf das nächste Vielfache von
 16.
@@ -4936,7 +4936,7 @@ spal:    768x576 (PAL mit quadratischen Pixeln)
 .B dsize=[Aspekt|b:h:Aspektmethode:r]
 Ändert die beabsichtigte Displaygröße/\:den Aspekt an einer frei wählbaren
 Position der Filterkette.
-Der Aspekt kann als Bruch (4/\:3) oder Fließkommazahl (1.33) angegeben werden.
+Der Aspekt kann als Bruch (4/3) oder Fließkommazahl (1.33) angegeben werden.
 Alternativ können exakte Wiedergabebreite und -höhe wie gewünscht angegeben
 werden.
 Beachte, dass dieser Filter selbst
@@ -4951,12 +4951,12 @@ Kann auch die folgenden Spezialwerte haben:
 .RSss
  0:    ursprüngliche Anzeigebreite und -höhe.
 .br
--1:    ursprüngliche Videobreite\:/-höhe (Standard).
+-1:    ursprüngliche Videobreite/-höhe (Standard).
 .br
--2:    Berechne b/\:h anhand der anderen Abmessung und des ursprünglichen
+-2:    Berechne Breite/Höhe anhand der anderen Abmessung und des ursprünglichen
 Anzeigeaspekts.
 .br
--3:    Berechne b/\:h anhand der anderen Abmessung und des ursprünglichen
+-3:    Berechne Breite/Höhe anhand der anderen Abmessung und des ursprünglichen
 Videoaspekts.
 .REss
 .sp 1
@@ -5010,7 +5010,7 @@ wirkliche Konvertierung vorzunehmen.
 .
 .TP
 .B rgb2bgr[=swap]
-Farbraumkonvertierung RGB 24/\:32 <\-> BGR 24/\:32
+Farbraumkonvertierung RGB 24/32 <\-> BGR 24/32
 .PD 0
 .RSs
 .IPs swap\ 
@@ -5020,7 +5020,7 @@ Führe auch eine R <-> B-Vertauschung durch.
 .
 .TP
 .B palette
-Farbraumkonvertierung RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp unter Verwendung
+Farbraumkonvertierung RGB/BGR 8 \-> 15/16/24/32bpp unter Verwendung
 einer Farbpalette.
 .
 .TP
@@ -5055,7 +5055,7 @@ Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yv12)
 .PD 1
 .
 .TP
-.B pp[=Filter1[:Option1[:Option2...]]/\:[-]Filter2...] (siehe auch \-pphelp)
+.B pp[=Filter1[:Option1[:Option2...]]/[-]Filter2...] (siehe auch \-pphelp)
 Aktiviert die Benutzung der angegebenen Kette von Postprocessing-Subfiltern.
 Subfilter müssen durch ein '/'\-Zeichen voneinander getrennt werden und
 können durch ein vorangestelltes '\-' deaktiviert werden.
@@ -5314,7 +5314,7 @@ Nützlich nur in Verbindung mit expand und scale.
 .IPs <Aspekt>
 Kontrolliere das Seitenverhältnis, berechnet durch DVB_HÖHE*ASPEKT
 (Standard:
-576*4/\:3=768), setze auf 576*(16/\:9)=1024 für einen 16:9-Fernseher.
+576*4/3=768), setze auf 576*(16/9)=1024 für einen 16:9-Fernseher.
 .RE
 .sp 1
 .RS
@@ -5860,7 +5860,7 @@ interpoliert, ist das Ergebnis ein ruckelndes Video, das jeden vierten Frame
 doppelt enthält.
 Dieser Filter beabsichtigt, diese Duplikate zu finden, zu entfernen und die
 ursprüngliche Framerate des Films wiederherzustellen.
-Bei Benutzung dieses Filters musst du einen Wert für \-ofps angeben, der 4/\:5
+Bei Benutzung dieses Filters musst du einen Wert für \-ofps angeben, der 4/5
 der Framerate der Eingabedatei entspricht.
 Außerdem musst du den Filter softskip an eine spätere Stelle der Filterkette
 stellen um sicherzustellen, dass dictc alle Frames sieht.
@@ -5995,7 +5995,7 @@ Dies funktioniert mit MPlayer vermutlich nicht korrekt, kann jedoch in
 Verbindung mit 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'
 benutzt werden.
 Beide fps-Optionen müssen angegeben werden!
-(A/\:V-Synchronisation wird verlorengehen, wenn sie falsch sind.)
+(A/V-Synchronisation wird verlorengehen, wenn sie falsch sind.)
 Der optionale Parameter Start bestimmt, wo im telecine-Muster zu beginnen ist
 (0\-3).
 .
@@ -6226,7 +6226,7 @@ Rendert nur jeden n-ten Frame oder jeden Intra-Frame (Keyframe).
 Rufst du den Filter mit groß geschriebenem I als Parameter auf, so werden
 .B nur
 Keyframes gerendert.
-Für DVDs bedeutet dies im Allgemeinen, dass nur einer von 15/\:12
+Für DVDs bedeutet dies im Allgemeinen, dass nur einer von 15/12
 (IBBPBBPBBPBBPBB) Frames dargestellt wird, bei AVIs wirkt diese Option bei
 jedem Szenenwechsel oder jedem keyint-Wert (siehe \-lavcopts keyint=Wert,
 falls du MEncoder zum Encodieren des Videos benutzt).
@@ -6323,8 +6323,8 @@ Benutze diese Option, um die Werte für maxwidth und maxheight bei einer
 bekannten Kombination für Karte/Modus automatisch zu setzen.
 Gültige Optionen sind zum Beispiel dc10-PAL und buz-NTSC (Standard: dc10+PAL).
 .IPs color|bw
-Setze Encodierung auf Farbe oder Schwarz/Weiß.
-Schwarz/Weiß-Encodierung ist schneller.
+Setze Encodierung auf Farbe oder schwarz/weiß.
+Schwarz/weiß-Encodierung ist schneller.
 Encodierung in Farbe ist Standard.
 .IPs hdec={1,2,4}
 Horizontale Dezimierung 1, 2 oder 4.
@@ -7023,7 +7023,7 @@ codec
 .
 .TP
 .B vqmin=<1\-31>
-minimaler Quantisierungsparameter (Durchlauf\ 1/\:2)
+minimaler Quantisierungsparameter (Durchlauf 1/2)
 .RSs
 .IPs 1
 Nicht empfohlen (viel größere Datei, geringer Qualitätsunterschied und
@@ -7062,7 +7062,7 @@ Der Wert 1 wird nicht empfohlen (siehe vqmin für Details).
 .
 .TP
 .B vqmax=<1\-31>
-Maximaler Quantisierungsparameter (Durchlauf 1/\:2), Werte im Bereich 10\-31
+Maximaler Quantisierungsparameter (Durchlauf 1/2), Werte im Bereich 10\-31
 sollten vernünftig sein (Standard: 31).
 .
 .TP
@@ -7076,7 +7076,7 @@ veraltet, benutze vqmax
 .TP
 .B vqdiff=<1\-31>
 maximaler Unterschied der Quantisierungsparameter zwischen
-aufeinanderfolgenden Intra- und P-Frames (Durchlauf 1/\:2) (Standard: 3)
+aufeinanderfolgenden Intra- und P-Frames (Durchlauf 1/2) (Standard: 3)
 .
 .TP
 .B vmax_b_frames=<0\-4>
@@ -7205,7 +7205,7 @@ mehr als sc_factor=6) aber zu bemerkbar schlechterer Qualität führen.
 .
 .TP
 .B vb_strategy=<0\-2> (nur bei Durchlauf 1)
-Strategie, mit der zwischen I-/\:P-/\:B\-Frames gewählt wird:
+Strategie, mit der zwischen Intra-/P-/B-Frames gewählt wird:
 .PD 0
 .RSs
 .IPs 0
@@ -7315,7 +7315,7 @@ Dies wird den PSNR-Wert im Ganzen wahrscheinlich ein wenig (etwa
 0.03db) verringern.
 .
 .TP
-.B aspect=<x/\:y>
+.B aspect=<x/y>
 Speichere den Filmaspekt intern, wie bei MPEG-Dateien.
 Dies ist eine viel elegantere Lösung als den Film neu zu skalieren, da die
 Qualität nicht verringert wird.
@@ -7329,7 +7329,7 @@ werden.
 .RE
 .RSs
 .PD 0
-.IPs "aspect=16/\:9 oder aspect=1.78"
+.IPs "aspect=16/9 oder aspect=1.78"
 .PD 1
 .RE
 .
@@ -7344,7 +7344,7 @@ immer aktivert lassen.
 .
 .TP
 .B vbitrate=<Wert>
-Gibt die Bitrate an (Durchlauf 1/\:2) (Standard: 800).
+Gibt die Bitrate an (Durchlauf 1/2) (Standard: 800).
 .br
 .I WARNUNG:
 1kBit = 1000 Bits
@@ -7370,18 +7370,18 @@ Verbindung mit vrc_(min|max)rate zu Problemen kommen.
 .
 .TP
 .B vrc_maxrate=<Wert>
-maximale Bitrate in kBit/\:Sek (Durchlauf 1/\:2)
+maximale Bitrate in kBit/\:Sek (Durchlauf 1/2)
 (Standard: 0, unbegrenzt)
 .
 .TP
 .B vrc_minrate=<Wert>
-minimale Bitrate in kBit/\:Sek (Durchlauf 1/\:2)
+minimale Bitrate in kBit/\:Sek (Durchlauf 1/2)
 (Standard: 0, unbegrenzt)
 .
 .TP
 .B vrc_buf_size=<Wert>
-Puffergröße in kBit (Durchlauf 1/\:2).
-Für MPEG-1/\:2 setzt dies außerdem die vbv-Puffergröße; benutze 327
+Puffergröße in kBit (Durchlauf 1/2).
+Für MPEG-1/2 setzt dies außerdem die vbv-Puffergröße; benutze 327
 für VCDs, 917 für SVCDs und 1835 für DVDs.
 .
 .TP
@@ -7394,28 +7394,28 @@ Platzhalter, reserviert für zukünftige Benutzung.
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
-Quantisierungsparameter zwischen B- und Nicht-B-Frames (Durchlauf 1/\:2)
+Quantisierungsparameter zwischen B- und Nicht-B-Frames (Durchlauf 1/2)
 (Standard: 1.25)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-Quantisierungsparameter zwischen Intra- und Nicht-Intraframes (Durchlauf 1/\:2)
+Quantisierungsparameter zwischen Intra- und Nicht-Intraframes (Durchlauf 1/2)
 (Standard: 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
 Offset des Quantisierungsparameters zwischen B- und Nicht-B-Frames (Durchlauf
-1/\:2)
+1/2)
 (Standard: 1.25)
 .
 .TP
 .B vi_qoffset=<-31.0\-31.0>
 Offset des Quantisierungsparameters zwischen Intra- und Nicht-Intraframes
-(Durchlauf 1/\:2) (Standard: 0.0)
+(Durchlauf 1/2) (Standard: 0.0)
 .br
 falls v{b|i}_qfactor > 0
 .br
-Intra-/\:B-Frame-Quantisierungsparameter = P-Frame-Quantisierungsparameter *
+Intra-/B-Frame-Quantisierungsparameter = P-Frame-Quantisierungsparameter *
 v{b|i}_qfactor + v{b|i}_qoffset
 .br
 sonst
@@ -7451,7 +7451,7 @@ bilden den Durchschnitt über längere Zeit (langsamerer Wechsel).
 .TP
 .B vqcomp=<Wert>
 Kompression des Quantisierungsparameters, vrc_eq hängt davon ab (Durchlauf
-1/\:2) (Standard: 0.5).
+1/2) (Standard: 0.5).
 Sei beispielsweise angenommen, dass die Standard-Bitratenkontrollgleichung
 benutzt wird, so wird die Bitratenkontrolle bei vqcomp=1.0 für jeden Frame so
 viele Bits reservieren, dass sie alle mit dem selben Quantisierungsparameter
@@ -7464,7 +7464,7 @@ Die wahrgenommene Qualität ist optimal irgendwo zwischen diesen beiden Extremen.
 .
 .TP
 .B vrc_eq=<Gleichung>
-Hauptsächlich verwendete Gleichung für die Bitratenkontrolle (Durchlauf 1/\:2):
+Hauptsächlich verwendete Gleichung für die Bitratenkontrolle (Durchlauf 1/2):
 .RE
 .RSs
 .IPs 1\ \ \ \ 
@@ -7515,7 +7515,7 @@ zeitliche Komplexität
 .IPs qComp
 auf der Kommandozeile angegebener Wert für qcomp
 .IPs "isI, isP, isB"
-Ist 1 bei einem Bildtyp I/\:P/\:B, sonst 0.
+Ist 1 bei einem Bildtyp I/P/B, sonst 0.
 .IPs Pi,E\ 
 Schau in dein Lieblingsmathebuch.
 .RE
@@ -7538,9 +7538,9 @@ Maximum /\: Minimum
 .TP
 .B vrc_override=<Optionen>
 Vom Benutzer angegebene Qualität für bestimmte Abschnitte
-(Ende, Abspann, ...) (Durchlauf 1/\:2).
+(Ende, Abspann, ...) (Durchlauf 1/2).
 Die Optionen haben folgenden Aufbau: <Startframe>, <Endframe>,
-<Qualität>[/\:<Startframe>, <Endframe>, <Qualität>[/\:...]]:
+<Qualität>[/<Startframe>, <Endframe>, <Qualität>[/...]]:
 .PD 0
 .RSs
 .IPs "Qualität (2\-31)"
@@ -7552,7 +7552,7 @@ Qualitätskorrektur in %
 .
 .TP
 .B vrc_init_cplx=<0\-1000>
-anfängliche Komplexität (Durchlauf\ 1)
+anfängliche Komplexität (Durchlauf 1)
 .
 .TP
 .B vrc_init_occupancy=<0.0\-1.0>
@@ -7561,7 +7561,7 @@ initiale Pufferbelegung als Bruchteil von vrc_buf_size (Standard: 0.9)
 .TP
 .B vqsquish=<0|1>
 Gibt an, wie die Quantisierungsparameter zwischen qmin und qmax beibehalten werden
-(Durchlauf 1/\:2):
+(Durchlauf 1/2):
 .PD 0
 .RSs
 .IPs 0
@@ -8328,7 +8328,7 @@ Setzt die zu benutzende Bitrate in kBits/\Sekunde, wenn der Wert < 16000 ist,
 oder in Bits/\:Sekunde, wenn der Wert > 16000 ist.
 Ist <Wert> negativ, so benutzt XviD dessen absoluten Wert als Zielgröße des
 Videos (in kBytes) und berechnet die zugehörige Bitrate automagisch.
-(Standard: 687 kBits/\:s)
+(Standard: 687 kBits/s)
 .
 .TP
 .B fixed_quant=<1\-31>
@@ -8336,7 +8336,7 @@ Aktiviert den Modus mit festen Quantisierungsparametern und legt den zu
 benutzenden Quantisierungsparameter fest.
 .
 .TP
-.B zones=<Zone0>[/\:<Zone1>[/\:...]] (nur bei CBR oder im Modus mit zwei
+.B zones=<Zone0>[/<Zone1>[/...]] (nur bei CBR oder im Modus mit zwei
 Durchläufen)
 Vom Benutzer angegebene Qualität für bestimmte Abschnitte (Ende, Abspann, ...).
 Jede Zone hat die Form <Start-Frame>,<Modus>,<Wert>, wobei <Modus> einer der
@@ -8418,12 +8418,12 @@ um eine konstante Bitrate zu erreichen.
 Größe des Bitratenkontrollpuffers
 .
 .TP
-.B quant_range=<1\-31>\-<1\-31>[/\:<1\-31>\-<1\-31>]
+.B quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
 CBR-Modus: minimaler und maximaler Quantisierungsparameter für alle Frames
 (Standard: 2\-31)
 .br
 Modus mit zwei Durchläufen: minimaler und maximaler Quantisierungsparameter für
-Intra-/\:P-Frames (Standard: 2\-31/\:2\-31)
+Intra-/P-Frames (Standard: 2\-31/\:2\-31)
 .br
 .I WARNUNG:
 Seit Version 1.0.x von XviD ist diese Option ersetzt durch die
@@ -8494,7 +8494,7 @@ Seit XviD 1.0.x ist diese Option durch die Option closed_gop ersetzt.
 .TP
 .B (no)greyscale
 Sorge dafür, dass XviD die Chrominanzebenen verwirft, so dass das encodierte
-Video schwarz/\:weiß wird.
+Video schwarz/weiß wird.
 Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
 der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
 .
@@ -8642,7 +8642,7 @@ Er wird die Qualität auf Kosten der Zeit für die Encodierung verbessern.
 Naturgemäß verringert er den PSNR-Wert, da die mathematische Abweichung zum
 Originalbild größer wird, aber der subjektive Eindruck wird besser sein.
 Da er Farbinformationen benutzt, solltest du ihn bei Encodierung im
-Schwarz/\:Weiß-Modus abschalten.
+Schwarz/weiß-Modus abschalten.
 .
 .TP
 .B (no)hq_ac
@@ -8882,7 +8882,7 @@ Gibt die Breite des Pixel-Größenverhältnisses an.
 Gibt die Höhe des Pixel-Größenverhältnisses an.
 .
 .TP
-.B aspect=<x/\:y | f (Fließkommazahl)>
+.B aspect=<x/y | f (Fließkommazahl)>
 Speichere den Filmaspekt intern, wie bei MPEG-Dateien.
 Dies ist eine viel elegantere Lösung als den Film neu zu skalieren, da die
 Qualität nicht verringert wird.
@@ -9208,7 +9208,7 @@ Niedrigere Werte ermöglichen einen volatileren Quantisierungsparameterwert,
 höhere Werte forcieren sanftere Schwankungen.
 .
 .TP
-.B zones=<zone0>[/\:<zone1>[/\:...]]
+.B zones=<Zone0>[/<Zone1>[/...]]
 Vom Benutzer festgelegte Qualität für besondere Abschnitte (Ende, Abspann, 
 ...)
 (ABR oder Modus mit zwei Durchläufen).
@@ -10084,13 +10084,13 @@ mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
 .PP
 .B Streaming per HTTP:
 .nf
-mplayer http://mplayer.hq/\:example.avi
+mplayer http://mplayer.hq/example.avi
 .fi
 .
 .PP
 .B Streaming mit RTSP:
 .nf
-mplayer rtsp://server.example.com/\:streamName
+mplayer rtsp://server.example.com/streamName
 .fi
 .
 .TP
