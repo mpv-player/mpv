@@ -5,25 +5,29 @@ If wishes were fishes, we'd all cast nets ...
 
 Documentation:
 
- * a nice and complete MEncoder tutorial
+ * continue MEncoder tutorial
 
- * continue docs review
+ * review manual page again
 
- * check docs for completeness
+ * split manual page
+
+ * update and rewrite the XML documentation
+
+ * check documentation for completeness
 
  * write documentation HOWTO/rules document
+
+ * write -lavdopts documentation
 
 
 
 Small improvements:
 
- * vo mga should completely blank the screen like fbdev and tdfxfb
+ * vo_mga should completely blank the screen like fbdev and tdfxfb
    (maybe there should be an option - some people seem to like it the
    way it is, but then fbdev should also behave like this..)
 
  * Debian package creates mplayer.conf.1 .2 ...
-
- * make -geometry work with all vo drivers
 
  * Make the output windows remember their positions when resizing to
    double size.
@@ -31,11 +35,7 @@ Small improvements:
  * Ability to resize to full size/double size/triple (or half) size
    upon key presses.
 
- * wildcard support for MEncoder - mencoder *.avi blah
-
- * real mute support, not just setting volume 0
-
- * option to force a codec even if not configured as decoder in codecs.conf
+ * real mute support, not just setting volume to 0
 
 
 
@@ -74,8 +74,6 @@ Enhancements:
 
  * implement xawtv config file parser (for channels, etc)
 
- * finish icc support
-
  * G400 2nd head through mga_vid ;)
 
  * do more things automagically
@@ -105,13 +103,15 @@ Enhancements:
 
  * MOD playback (via libmodplug?) - bug #434
 
+ * allow multiple -dump* options at the same time - bug #70
+
+
+
 Difficult stuff:
 
- * RE all closed source codecs (QDMC, WMV9, RV30, RV40, cook, ...)
+ * RE all closed source codecs (QDMC, WMV9, RV30, RV40, sipr, ...)
 
  * support for Bink/Smacker codecs
-
- * frame by frame seeking/playback
 
  * allow frame insertion & removal in video filters (with timestamps)
 
@@ -119,13 +119,13 @@ Difficult stuff:
 
  * write something like mptv to replace xawtv
 
- * write/adapt a C implementation of live.com RTSP
+ * write/adapt a C implementation of live555 RTSP
 
- * unify live.com and Real RTSP
+ * unify live555 and Real RTSP
 
  * real mmsu:// support
 
- * encode to OGM, MP4, ASF, nut
+ * MEncoder output support for OGM, MKV, NUT
 
  * xinerama video filter that splits movie to 2 screens (like zr)
 
@@ -134,6 +134,8 @@ Difficult stuff:
  * write mpdump application to handle all -dump* options
 
  * modular MEncoder with audio encoding API
+
+ * multiple audio stream output in Mencoder
 
  * support for pausing/resuming of encoding in MEncoder
 
@@ -145,3 +147,7 @@ Difficult stuff:
 
  * smooth stream switching / multiple file caching to avoid the small skip
    between files when playing multiple files
+
+ * reverse playback
+
+ * more directshow filter/muxer support
