@@ -1,4 +1,4 @@
-.\" synced with 1.1198
+.\" synced with 1.1202
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -36,7 +36,7 @@
 .\" Titolo
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-05-15" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2006-01-04" "The MPlayer Project" "The Movie Player"
 .
 .SH NOME
 mplayer  \- visualizzatore di film
@@ -482,6 +482,12 @@ Oppure in uno script:
 .br
 mplayer -ao pcm:file=%`expr length "$NOME"`%"$NOME" test.avi
 .PP
+.
+.\" --------------------------------------------------------------------------
+.\" File di configurazione
+.\" --------------------------------------------------------------------------
+.
+.SH "FILE DI CONFIGURAZIONE"
 Puoi mettere tutte le opzioni in file di configurazione che verranno letti
 ogni volta che MPlayer o MEncoder vengono lanciati.
 Il file di configurazione globale 'mplayer.conf' è nella tua directory di
@@ -498,7 +504,7 @@ Le opzioni che si attivano senza valori possono essere abilitate impostandole
 a 'yes', '1' oppure 'true' e disabilitate impostandole a 'no', '0' oppure 'false'.
 Anche le sotto-opzioni possono essere specificate in questo modo.
 .PP
-.I ESEMPIO:
+.I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MPLAYER:
 .nf
 # Usa il driver Matrox per default.
 vo=xmga
@@ -509,8 +515,31 @@ flip=yes
 mf=type=png:fps=25
 # Le immagini vacue in negativo sono forti.
 vf=eq2=1.0:-0.8
+.fi
+.PP
+.I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MENCODER:
+.sp 1
+.nf
 # Voglio che MEncoder scriva questo file di output per default.
 o=encoded.avi
+# Le 4 righe seguenti fanno sì che mencoder tv:// inizi subito a registrare.
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# un gruppo più complesso di opzioni di default per la codifica
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
 .fi
 .PP
 Puoi anche scrivere configurazioni specifiche per i singoli file.
@@ -9619,10 +9648,8 @@ Emette messaggi di errore e di debug su stderr.
 .
 .TP
 .B DVDREAD_NOKEYS
-DVDREAD_NOKEYS is MPlayer specific, but currently unused.
-In the file libmpdvdkit2/dvd_reader.c DVDREAD_NOKEYS is used
-in the funcion initAllCSSKeys, but the only place where this
-function is called is commented.
+Evita il recupero delle chiavi alla partenza.
+Attualmente disabilitata.
 .
 .TP
 .B HOME
@@ -9815,113 +9842,155 @@ file sub (sottotitoli) in questo ordine:
 .
 .SH ESEMPI DELL'UTILIZZO DI MPLAYER
 .
-.TP
+.PP
 .B Riproduzione veloce di DVD:
+.nf
 mplayer dvd://1
+.fi
 .
-.TP
+.PP
 .B Riproduci in giapponese con i sottotitoli in inglese:
+.nf
 mplayer dvd://1 \-alang ja \-slang en
+.fi
 .
-.TP
+.PP
 .B Riproduci solo i capitoli 5, 6, 7:
+.nf
 mplayer dvd://1 \-chapter 5-7
+.fi
 .
-.TP
+.PP
 .B Riproduce solo i titoli 5, 6, 7:
+.nf
 mplayer dvd://5-7
+.fi
 .
-.TP
+.PP
 .B Riproduci un DVD multi angolo:
+.nf
 mplayer dvd://1 \-dvdangle 2
+.fi
 .
-.TP
+.PP
 .B Riproduci utilizzando un diverso dispositivo DVD:
+.nf
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
+.fi
 .
-.TP
+.PP
 .B Riproduci un DVD da una directory con i file VOB:
+.nf
 mplayer dvd://1 \-dvd-device /percorso/\:della/\:directory/
+.fi
 .
-.TP
+.PP
 .B Copia un titolo DVD sul disco fisso, salvando sul file "titolo1.vob":
+.nf
 mplayer dvd://1 \-dumpstream \-dumpfile titolo1.vob
+.fi
 .
-.TP
+.PP
 .B Stream da HTTP:
+.nf
 mplayer http://mplayer.hq/\:example.avi
+.fi
 .
-.TP
+.PP
 .B Stream utilizzando RTSP:
+.nf
 mplayer rtsp://server.di.esempio.com/\:nomeFlusso
+.fi
 .
-.TP
+.PP
 .B Converte i sottotitoli in formato MPsub:
+.nf
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
+.fi
 .
-.TP
-.B Converte i sottotitoli in MPsub senza guardare il film:
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null
-\-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+.PP
+.B Converte i sottotitoli in MPsub senza guardare il filmato:
+.nf
+mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+.fi
 .
-.TP
+.PP
 .B Ingresso da V4L standard:
-mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
-\-vo xv
+.nf
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
+.fi
 .
-.TP
+.PP
 .B Riproduzione su una scheda Zoran (vecchio stile, deprecato):
+.nf
 mplayer \-vo zr \-vf scale=352:288 file.avi
+.fi
 .
-.TP
+.PP
 .B Riproduzione su una scheda Zoran (nuovo stile):
+.nf
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
+.fi
 .
-.TP
+.PP
 .B Riproduce un file AAC con 6 canali utilizzando solo due altoparlanti:
+.nf
 mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+.fi
 .br
 Puoi voler giocare un poco con il valore di pan (p.e. moltiplica con un valore) per
 incrementare il volume o per evitare il clipping.
 .
 .SH ESEMPI DELL'UTILIZZO DI MENCODER
 .
-.TP
+.PP
 .B Codifica il titolo DVD #2, solo i capitoli selezionati:
+.nf
 mencoder dvd://2 \-chapter 10-15 \-o titolo2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
-.B Codifica il titolo DVD #2, riscalando a 640x480:
+.PP
+.B Codifica il titolo DVD #2, ridimensionando a 640x480:
+.nf
 mencoder dvd://2 \-vf scale=640:480 \-o titolo2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
-.B Codifica il titolo DVD #2, riscalando a 512xHHH (mantiene il rapporto di \
-aspetto):
-mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titolo2.avi \-oac copy
-\-ovc lavc \-lavcopts vcodec=mpeg4
+.PP
+.B Codifica il titolo DVD #2, ridimensionando a 512xHHH (mantiene il rapporto
+di aspetto):
+.nf
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o titolo2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
-.B Stessa cosa, con un bitrate di 1800 kbit e l'ottimizzazione \
-dei macroblocchi:
-mencoder dvd://2 \-o titolo2.avi \-oac copy \-ovc lavc
-\-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.PP
+.B Stessa cosa, con un bitrate di 1800 kbit e l'ottimizzazione dei macroblocchi:
+.nf
+mencoder dvd://2 \-o titolo2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mpeg4:mbd=1:vbitrate=1800
+.fi
 .
-.TP
+.PP
 .B Stessa cosa, con la compressione MJPEG:
-mencoder dvd://2 \-o titolo2.avi \-oac copy \-ovc lavc
-\-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
+.nf
+mencoder dvd://2 \-o titolo2.avi \-oac copy \-ovc lavc \-lavcopts vcodec=mjpeg:mbd=1:vbitrate=1800
+.fi
 .
-.TP
+.PP
 .B Codifica tutti i file *.jpg nella directory corrente:
+.nf
 mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc lavc \-lavcopts vcodec=mpeg4
+.fi
 .
-.TP
+.PP
 .B Codifica dal sintonizzatore (specifica un formato con \-vf format):
+.nf
 mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc raw
+.fi
 .
-.TP
+.PP
 .B Codifica da una pipe:
+.nf
 rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \-ofps 24 \-
+.fi
 .
 .
 .\" --------------------------------------------------------------------------
