@@ -603,7 +603,7 @@ Siehe '\-msglevel help' für eine Liste der verfügbaren Module.
 .br
 .I ANMERKUNG:
 Meldungen, die vor der Auswertung der Kommandozeile ausgegeben werden,
-können nur von $MPLAYER_VERBOSE gesteuert werden, welches sich auf alle Module
+können nur von MPLAYER_VERBOSE gesteuert werden, welches sich auf alle Module
 bezieht.
 .br
 Verfügbare Levels:
@@ -7223,8 +7223,13 @@ Herumprobieren mit der Option brd_scale zu verringern.
 .TP
 .B brd_scale=<0\-10>
 Skaliert Frames für dynamische B-Frame-Entscheidungen herunter (Standard: 0).
-Die Geschwindigkeit sollte sich jedesmal dann, wenn brd_scale um 1 erhöht
-wurde, um den Faktor 4 erhöhen.
+Jedesmal, wenn brd_scale um eins erhöht wird, werden die Bildabmessungen durch
+zwei geteilt, was die Geschwindigkeit um den Faktor vier verbessert.
+Beide Abmessungen des komplett herunterskalierten Bildes müssen gerade Zahlen
+sein, daher benötigt brd_scale=1 originale Abmessungen, die ein Vielfaches von
+vier sind, für brd_scale=2 ein Vielfaches von acht usw.
+Mit anderen Worten müssen beide Abmessungen des Originalbildes ohne Rest
+teilbar sein durch 2^(brd_scale+1).
 .
 .TP
 .B bidir_refine=<0\-4>
@@ -9971,11 +9976,19 @@ FIXME: Muss noch dokumentiert werden.
 .
 .TP
 /usr/\:local/\:etc/\:mplayer/\:mplayer.conf
-Systemweite Einstellungen
+Systemweite Einstellungen für MPlayer
+.
+.TP
+/usr/\:local/\:etc/\:mplayer/\:mencoder.conf
+Systemweite Einstellungen für MEncoder
 .
 .TP
 ~/.mplayer/\:config
-Benutzerspezifische Einstellungen
+Benutzerspezifische Einstellungen für MPlayer
+.
+.TP
+~/.mplayer/\:mencoder
+Benutzerspezifische Einstellungen für MEncoder
 .
 .TP
 ~/.mplayer/\:input.conf
