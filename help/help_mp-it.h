@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.217
+// Updated to help_mp-en.h v1.221
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -111,10 +111,7 @@ static char help_text[]=
 #define MSGTR_Playing "Riproduco %s\n"
 #define MSGTR_NoSound "Audio: nessun suono!!!\n"
 #define MSGTR_FPSforced "FPS forzato a %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection ""\
-"Compilato con riconoscimento CPU in esecuzione - ATTENZIONE - non è l'optimus!\n"\
-"Per avere le migliori prestazioni, ricompila MPlayer con\n"\
-" --disable-runtime-cpudetection.\n"
+#define MSGTR_CompiledWithRuntimeDetection "Compilato con riconoscimento CPU in esecuzione.\n"
 #define MSGTR_CompiledWithCPUExtensions "Compilato per CPU x86 con estensioni:"
 #define MSGTR_AvailableVideoOutputDrivers "Driver di output video disponibili:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Driver di output audio disponibili:\n"
@@ -491,6 +488,11 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Errore: l'opzione '%s' deve avere un parametro!\n"
 #define MSGTR_OptionListHeader "\n Nome                 Tipo            Min        Max      Global  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nTotale: %d opzioni\n"
+#define MSGTR_TooDeepProfileInclusion "ATTENZIONE: Livello di inclusione troppo profondo nel profilo.\n"
+#define MSGTR_NoProfileDefined "Non è stato definito alcun profilo.\n"
+#define MSGTR_AvailableProfiles "Profili disponibili:\n"
+#define MSGTR_UnknownProfile "Profilo '%s' sconosciuto.\n"
+#define MSGTR_Profile "Profilo %s: %s\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo CD-ROM '%s' non trovato!\n"
@@ -566,7 +568,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi. (richiesto un indice, prova con l'opzione -idx.)\n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
-#define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/HTML/en/dvd.html.\n"
+#define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/HTML/en/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Il supporto delle intestazioni compresse richiede ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Avvertimento! Rilevato FOURCC variabile!?\n"
@@ -1321,7 +1323,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Ricostruisco tabella keyframe per video MPEG4\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "trovato 'wf', %d byte di %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh trovato (dimensione=%d) (fotogrammi totali=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Leggo blocco INDEX, %d parti per %d fotogrammi (fpos=%"PRId64")\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Leggo blocco INDEX, %d parti per %d fotogrammi (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "intestazione RIFF supplementare...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** attenzione: questa non è un'intestazione AVI estesa..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Parte (chunk) danneggiata?  chunksize=%d  (id=%.4s)\n"
