@@ -14,7 +14,6 @@ SRCS=af.c \
      af_format.c \
      af_gate.c \
      af_hrtf.c \
-     af_lavcresample.c \
      af_pan.c \
      af_resample.c \
      af_sub.c \
@@ -34,6 +33,10 @@ LIBAV_INC += -I../libavutil
 endif
 ifeq ($(CONFIG_LIBAVCODEC),yes)
 LIBAV_INC += -I../libavcodec
+SRCS+=af_lavcresample.c
+endif
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
+SRCS+=af_lavcresample.c
 endif
 
 OBJS=$(SRCS:.c=.o)
