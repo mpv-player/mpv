@@ -4,6 +4,11 @@ include ../config.mak
 LIBNAME = libmpcodecs.a
 LIBNAME2 = libmpencoders.a
 
+LIBS =$(LIBNAME)
+ifeq ($(MENCODER),yes)
+LIBS+=$(LIBNAME2)
+endif
+
 AUDIO_SRCS_LIB=ad_hwac3.c \
                ad_liba52.c \
                ad_mp3lib.c \
@@ -276,7 +281,7 @@ CFLAGS  = $(OPTFLAGS) \
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-all:    $(LIBNAME) $(LIBNAME2)
+all:    $(LIBS)
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
