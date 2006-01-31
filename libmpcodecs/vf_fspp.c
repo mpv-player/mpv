@@ -38,8 +38,6 @@
 
 #include "config.h"
 
-#ifdef USE_LIBAVCODEC
-
 #include "mp_msg.h"
 #include "cpudetect.h"
 
@@ -2129,5 +2127,3 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 }
 
 #endif // HAVE_MMX
-
-#endif //USE_LIBAVCODEC

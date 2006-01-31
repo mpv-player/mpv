@@ -24,8 +24,6 @@
 
 #include "config.h"
 
-#ifdef USE_LIBAVCODEC
-
 #include "mp_msg.h"
 #include "cpudetect.h"
 
@@ -196,5 +194,3 @@ vf_info_t vf_info_qp = {
     open,
     NULL
 };
-
-#endif //USE_LIBAVCODEC

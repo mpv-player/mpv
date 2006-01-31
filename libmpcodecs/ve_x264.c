@@ -33,8 +33,6 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#ifdef HAVE_X264
-
 #include "m_option.h"
 #include "codec-cfg.h"
 #include "stream.h"
@@ -553,4 +551,3 @@ vf_info_t ve_info_x264 = {
     "(C) 2004 LINUX4MEDIA GmbH; (C) 2004 Ark Linux",
     vf_open
 };
-#endif

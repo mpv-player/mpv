@@ -7,8 +7,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifdef USE_LIBAVCODEC
-
 #include "bswap.h"
 
 #include "vd_internal.h"
@@ -1121,5 +1119,3 @@ uint8_t *source[3]= {src->data[0], src->data[1], src->data[2]};
 }
 
 #endif // HAVE_XVMC
-
-#endif

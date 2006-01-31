@@ -21,13 +21,19 @@ AUDIO_SRCS_OPT=ad_acm.c \
                ad_dmo.c \
                ad_dshow.c \
                ad_faad.c \
-               ad_ffmpeg.c \
                ad_libdv.c \
                ad_libmad.c \
                ad_libvorbis.c \
                ad_qtaudio.c \
                ad_realaud.c \
                ad_twin.c \
+
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+AUDIO_SRCS_OPT+=ad_ffmpeg.c
+endif
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
+AUDIO_SRCS_OPT+=ad_ffmpeg.c
+endif
 
 AUDIO_SRCS=dec_audio.c \
            ad.c \
@@ -49,7 +55,6 @@ VIDEO_SRCS_NAT=vd_hmblck.c \
 VIDEO_SRCS_OPT=vd_divx4.c \
                vd_dmo.c \
                vd_dshow.c \
-               vd_ffmpeg.c\
                vd_libdv.c \
                vd_odivx.c \
                vd_qtvideo.c \
@@ -61,6 +66,13 @@ VIDEO_SRCS_OPT=vd_divx4.c \
                vd_xvid4.c \
                vd_xvid.c \
                vd_zrmjpeg.c \
+
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+VIDEO_SRCS_OPT+=vd_ffmpeg.c
+endif
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
+VIDEO_SRCS_OPT+=vd_ffmpeg.c
+endif
 
 VIDEO_SRCS=dec_video.c \
            vd.c \
@@ -94,7 +106,6 @@ VFILTER_SRCS=vf.c \
              vf_flip.c \
              vf_format.c \
              vf_framestep.c \
-             vf_fspp.c \
              vf_halfpack.c \
              vf_harddup.c \
              vf_hqdn3d.c \
@@ -103,8 +114,6 @@ VFILTER_SRCS=vf.c \
              vf_ilpack.c \
              vf_ivtc.c \
              vf_kerndeint.c \
-             vf_lavc.c \
-             vf_lavcdeint.c \
              vf_mirror.c \
              vf_noformat.c \
              vf_noise.c \
@@ -113,7 +122,6 @@ VFILTER_SRCS=vf.c \
              vf_phase.c \
              vf_pp7.c \
              vf_pullup.c \
-             vf_qp.c \
              vf_rectangle.c \
              vf_remove_logo.c \
              vf_rgb2bgr.c \
@@ -124,7 +132,6 @@ VFILTER_SRCS=vf.c \
              vf_smartblur.c \
              vf_softpulldown.c \
              vf_softskip.c \
-             vf_spp.c \
              vf_swapuv.c \
              vf_telecine.c \
              vf_test.c \
@@ -132,12 +139,18 @@ VFILTER_SRCS=vf.c \
              vf_tile.c \
              vf_tinterlace.c \
              vf_unsharp.c \
-             vf_uspp.c \
              vf_vo.c \
              vf_yuvcsp.c \
              vf_yuy2.c \
              vf_yvu9.c \
              vf_screenshot.c \
+
+VFILTER_LAVC_SRCS += vf_uspp.c \
+                     vf_fspp.c \
+                     vf_lavc.c \
+                     vf_lavcdeint.c \
+                     vf_qp.c \
+                     vf_spp.c \
 
 ifeq ($(CONFIG_LIBPOSTPROC),yes)
 VFILTER_SRCS += vf_pp.c
@@ -146,19 +159,35 @@ ifeq ($(CONFIG_LIBPOSTPROC_SO),yes)
 VFILTER_SRCS += vf_pp.c
 endif
 
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
+endif
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
+VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
+endif
+
 ENCODER_SRCS=ae.c \
              ae_pcm.c \
              ve.c \
              ve_divx4.c \
-             ve_lavc.c \
              ve_libdv.c \
              ve_nuv.c \
              ve_qtvideo.c \
              ve_raw.c \
              ve_vfw.c \
-             ve_x264.c \
              ve_xvid4.c \
              ve_xvid.c \
+
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+ENCODER_SRCS+=ve_lavc.c
+endif
+ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
+ENCODER_SRCS+=ve_lavc.c
+endif
+
+ifeq ($(X264),yes)
+ENCODER_SRCS+=ve_x264.c
+endif
 
 NATIVE_SRCS=native/minilzo.c \
             native/nuppelvideo.c \
@@ -202,7 +231,6 @@ ifeq ($(CONFIG_LIBAVCODEC),yes)
 LIBAV_INC += -I../libavcodec
 ENCODER_SRCS += ae_lavc.c
 endif
-
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 ENCODER_SRCS += ae_lavc.c
 endif

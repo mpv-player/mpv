@@ -7,8 +7,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifdef USE_LIBAVCODEC
-
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
@@ -230,4 +228,3 @@ vf_info_t vf_info_lavc = {
 };
 
 //===========================================================================//
-#endif

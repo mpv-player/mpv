@@ -11,8 +11,6 @@
 
 #include "config.h"
 
-#ifdef USE_LIBAVCODEC
-
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -1089,4 +1087,3 @@ vf_info_t ve_info_lavc = {
 };
 
 //===========================================================================//
-#endif

@@ -24,8 +24,6 @@
 
 #include "config.h"
 
-#ifdef USE_LIBAVCODEC
-
 #include "mp_msg.h"
 #include "cpudetect.h"
 
@@ -408,5 +406,3 @@ vf_info_t vf_info_uspp = {
     open,
     NULL
 };
-
-#endif //USE_LIBAVCODEC
