@@ -227,7 +227,7 @@ typedef FILE rar_stream_t;
 /**********************************************************************/
 
 static ssize_t
-getline(char **lineptr, size_t *n, rar_stream_t *stream)
+vobsub_getline(char **lineptr, size_t *n, rar_stream_t *stream)
 {
     size_t res = 0;
     int c;
@@ -949,7 +949,7 @@ vobsub_parse_one_line(vobsub_t *vob, rar_stream_t *fd)
 	size_t line_reserve = 0;
 	char *line = NULL;
     do {
-	line_size = getline(&line, &line_reserve, fd);
+	line_size = vobsub_getline(&line, &line_reserve, fd);
 	if (line_size < 0) {
 	    break;
 	}
