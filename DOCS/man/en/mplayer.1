@@ -8576,12 +8576,6 @@ You can use all encoding options, including CPU-hungry ones.
 The first pass may use either average bitrate or constant quantizer.
 ABR is recommended, since it does not require guessing a quantizer.
 Subsequent passes are ABR, and must specify bitrate.
-.br
-.I
-NOTE:
-x264 three pass support being quite recent in MEncoder, we welcome any
-feedback you could give us on good combinations of x264 options that are
-both fast and provide good quality.
 .REss
 .
 .TP
@@ -8884,9 +8878,9 @@ diamond search, radius 1 (fast)
 .IPs 2
 hexagon search, radius 2 (default)
 .IPs 3
-uneven multi-hexagon search
+uneven multi-hexagon search (slow)
 .IPs 4
-exhaustive search (very slow)
+exhaustive search (very slow, and no better than 3)
 .RE
 .PD 1
 .
@@ -8908,11 +8902,11 @@ macroblock types.
 Then selects the best type.
 Then refines the motion of that type to fast quarterpixel precision (fastest).
 .IPs 2
-As 1, but uses a slower quarterpixel refinement.
-.IPs 3
 Runs halfpixel precision motion estimation on all candidate macroblock types.
 Then selects the best type.
-Then refines the motion of that type to quarterpixel precision.
+Then refines the motion of that type to fast quarterpixel precision.
+.IPs 3
+As 2, but uses a slower quarterpixel refinement.
 .IPs 4
 Runs fast quarterpixel precision motion estimation on all candidate
 macroblock types.
@@ -9055,7 +9049,7 @@ Split each frame into slices and encode them in parallel (default: 1).
 Also allows multithreaded decoding if the decoder supports it (lavc does not).
 This has a slight penalty to compression.
 Requires that libx264 was compiled with pthread support; if not, this
-option will produce a warning and enable slices but not multithreading.
+option will produce a warning and enables slices but not multithreading.
 .
 .TP
 .B log=<-1\-3>
