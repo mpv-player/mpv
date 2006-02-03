@@ -1,4 +1,4 @@
-.\" synced with 1.1219
+.\" synced with 1.1221
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1049,6 +1049,10 @@ sauvegarde plus rapide.
 Cette option indique combien de mémoire (en Ko) utiliser pour mettre un
 fichier ou une URL en cache.
 Particulièrement utile sur des médias lents.
+.
+.TP
+.B \-nocache
+Désactive la mise en cache.
 .
 .TP
 .B \-cache-min <pourcentage>
@@ -8994,7 +8998,7 @@ Tout comme les modes basés sur le bitrate, celui-ci permet aux trames
 d'utiliser des QP différent en fonction de la complexité de la trame.
 .
 .TP
-.B pass=<1\-2>
+.B pass=<1\-3>
 Active le mode 2 ou 3-passes.
 Il est recommandé de toujours encoder en mode 2 ou 3 passes puisque cela
 permet une distribution plus adéquate des bits et améliore la qualité
@@ -9035,13 +9039,6 @@ Le mode ABR est recommandé puisqu'il ne nécessite pas que vous deviniez
 le quanta à utiliser.
 Les passes suivantes sont ABR (débit binaire moyen), et vous devez définir
 un débit binaire.
-.br
-.I
-NOTE\ :
-x264 gérant le mode 3 passes depuis peu de temps, nous
-encourageons les utilisateurs à partager avec nous leurs expériences et
-leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
-produisant des images de qualité.
 .REss
 .
 .TP
@@ -9387,9 +9384,9 @@ recherche diamant, de rayon 1 (rapide)
 .IPs 2
 recherche hexagonale, de rayon 2 (par défaut)
 .IPs 3
-recherche multi-hexagonale irrégulière
+recherche multi-hexagonale irrégulière (lent)
 .IPs 4
-Recherche exhaustive (très lent).
+recherche exhaustive (très lent, et pas meilleur que 3).
 .RE
 .PD 1
 .
@@ -9414,13 +9411,13 @@ Sélectionne ensuite le meilleur type.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
 ce type (le plus rapide).
 .IPs 2
-Comme 1, mais affine au quart de pixel (un peu plus lent).
-.IPs 3
 Effectue une recherche de mouvement d'une précision demi pixel sur tous les
 types de macro-blocs candidats.
 Sélectionne ensuite le meilleur type.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
 ce type.
+.IPs 3
+Comme 2, mais utilise un affinage plus lent qu'un quart de pixel.
 .IPs 4
 Effectue une rapide recherche de mouvement d'une précision d'un quart de
 pixel (quarterpixel) sur tous les types de macro-blocs candidats.
@@ -9580,7 +9577,7 @@ Autorise de plus le décodage "multi-threadé" si le décodeur le gère
 Cela dégrade un peu la compressibilité.
 Cela nécessite que libx264 a été compilé avec le support pthread\ ;
 Si ce n'est pas le cas, cette option affichera un avertissement et
-activera le découpage en trache, sans le multithreading.
+activera le découpage en tranches, sans le multithreading.
 .
 .TP
 .B log=<-1\-3>
