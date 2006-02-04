@@ -299,7 +299,7 @@ syncpoint:
 
 file:
     file_id_string
-    while(!eof && next_code != index_startcode){
+    while(!eof){
         main_header
         for(i=0; i<stream_count; i++){
             if(next_packet==video_stream_header)
@@ -312,14 +312,16 @@ file:
         while(next_code == info_startcode){
             info_packet
         }
-        while(next_code != main_startcode){
+        if(next_code == index_startcode){
+            index
+        }
+        if (!eof) while(next_code != main_startcode){
             if(next_code == syncpoint_startcode)
                 syncpoint
             frame
         }
     }
-    if (next_code == index_startcode){
-        index
+    if (has_index){
         index_ptr                       u(64)
     }
 
@@ -590,7 +592,8 @@ eor_pts
 index_ptr
     Length in bytes from the first byte of the index startcode to the first
     byte of the index_ptr. If there is no index, index_ptr MUST NOT be
-    written.
+    written. If there are several indexes, index_ptr MUST point to the last
+    index.
 
 id
     the ID of the type/name pair, so it is more compact
@@ -692,8 +695,9 @@ Index:
 ------
 
 Note: with realtime streaming, there is no end, so no index there either
-An index SHOULD be written for every stream. Indices MUST be placed at end
-of file. Indices MAY be repeated for a stream.
+Index MAY only be repeated after main headers.
+If an index is written anywhere in the file, it MUST be written at end of
+file as well.
 
 
 Info frames:
