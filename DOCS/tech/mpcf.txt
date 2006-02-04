@@ -1,5 +1,5 @@
 ========================================
-NUT Open Container Format DRAFT 20060120
+NUT Open Container Format DRAFT 20060203
 ========================================
 
 
@@ -249,8 +249,14 @@ index:
             for(; j<n && j<syncpoints; j++){
                 if (!has_keyframe[j][i]) continue
                 A                           v
-                last_pts += A
-                keyframe_pts[j][i] = last_pts
+                if(!A){
+                    A                       v
+                    B                       v
+                    eor_pts[j][i] = last_pts + A + B
+                }else
+                    B=0
+                keyframe_pts[j][i] = last_pts + A
+                last_pts += A + B
             }
         }
     }
@@ -557,7 +563,11 @@ has_keyframe
 
 keyframe_pts
     The pts of the first keyframe for this stream in the region between the
-    2 syncpoints, in the stream's timebase.
+    2 syncpoints, in the stream's timebase. (EOR frames are also keyframes)
+
+eor_pts
+    Coded only if EOR is set at the position of the syncpoint. The pts of
+    that EOR. EOR is unset by the first keyframe after it.
 
 index_ptr
     Length in bytes from the first byte of the index startcode to the first
