@@ -413,6 +413,24 @@ convert_ts
     Note: this calculation MUST be done with unsigned 64 bit integers, and
     is equivalent to (ln*sn)/(d1*d2) but this would require a 96bit integer
 
+compare_ts
+    Compares timestamps from 2 different timebases,
+    if a is before b then compare_ts(a, b) = -1
+    if a is after  b then compare_ts(a, b) =  1
+    else                  compare_ts(a, b) =  0
+
+    Care must be taken that this is done exactly with no rounding errors,
+    simply casting to float or double and doing the obvious
+    a*timebase > b*timebase is not compliant or correct, neither is the
+    same with integers, and
+    a*a_timebase.num*b_timebase.den > b*b_timebase.num*a_timebase.den
+    will overflow. One possible implementation which shouldn't overflow
+    within the range of legal timestamps and timebases is:
+
+    if (convert_ts(a, a_timebase, b_timebase) < b) return -1;
+    if (convert_ts(b, b_timebase, a_timebase) < a) return  1;
+    return 0;
+
 msb_pts_shift
     amount of bits in lsb_pts
     MUST be <16
