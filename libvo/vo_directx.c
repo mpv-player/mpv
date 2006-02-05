@@ -416,6 +416,7 @@ static uint32_t Directx_InitDirectDraw()
 	LPDIRECTDRAWENUMERATEEX OurDirectDrawEnumerateEx;
 	HINSTANCE user32dll=LoadLibrary("user32.dll");
 	
+	adapter_count = 0;
 	if(user32dll){
 		myGetMonitorInfo=GetProcAddress(user32dll,"GetMonitorInfoA");
 		if(!myGetMonitorInfo && vo_adapter_num){
