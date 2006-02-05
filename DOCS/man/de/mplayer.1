@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1219
+.\" In sync with rev 1.1222
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1043,6 +1043,10 @@ Stream-Dumping ermöglicht.
 Diese Option gibt an, wieviel Speicher (in kBytes) MPlayer zum
 Precachen einer Datei oder URL benutzt.
 Besonders bei langsamen Medien sinnvoll.
+.
+.TP
+.B \-nocache
+Deaktiviert Zwischenspeicherung.
 .
 .TP
 .B \-cache-min <Prozent>
@@ -3951,9 +3955,9 @@ Gibt die Parameter für den Softwareskalierer an.
 gaußscher Unschärfefilter (beim Helligkeitsanteil)
 .IPs cgb=<0\-100>
 gaußscher Unschärfefilter (beim Farbanteil)
-.IPs ls=<0\-100>
+.IPs ls=<-100\-100>
 Schärfefilter (beim Helligkeitsanteil)
-.IPs cs=<0\-100>
+.IPs cs=<-100\-100>
 Schärfefilter (beim Farbanteil)
 .IPs chs=<h>
 horizontale Verschiebung des Farbanteils
@@ -8987,13 +8991,6 @@ Der erste Durchlauf kann entweder eine durchschnittliche Bitrate (ABR) oder
 einen konstanten Quantizer verwenden.
 ABR wird empfohlen, da dafür nicht das Ermitteln eines Quantizers nötig ist.
 Nachfolgende Durchläufe sind ABR; es muss eine Bitrate angegeben werden.
-.br
-.I
-Anmerkung:
-Die Unterstützung für x264 mit drei Durchläufen ist eine recht neue Funktion
-von MEncoder.
-Daher würden wir uns freuen, wenn Du uns gute Kombinationen von x264-Optionen
-(d.h. schnelle Encodierung in guter Qualität) mitteilen würdest.
 .REss
 .
 .TP
@@ -9322,9 +9319,9 @@ Diamant-Suche, Radius 1 (schnell)
 .IPs 2
 Hexagon-Suche, Radius 2 (Standard)
 .IPs 3
-Ungerade Multi-Hexagon-Suche
+Ungerade Multi-Hexagon-Suche (langsam)
 .IPs 4
-Gründliche Suche (sehr langsam)
+Gründliche Suche (sehr langsam und nicht besser als 3)
 .RE
 .PD 1
 .
@@ -9345,11 +9342,11 @@ Wendet Vollpixel-Präzisionsbewegungsschätzung auf alle in Frage kommenden
 Makroblock-Typen an, wählt dann den besten Typen und verfeinert schließlich die
 Bewegung dieses Typen auf schnelle Viertelpixel-Präzision (am schnellsten).
 .IPs 2
-Wie 1, verwendet jedoch langsamere Viertelpixel-Verfeinerung. 
-.IPs 3
 Wendet Halbpixel-Präzisionsbewegungsschätzung auf alle in Frage kommenden
 Makroblock-Typen an, wählt dann den besten Typen und verfeinert schließlich die
 Bewegung dieses Typen auf schnelle Viertelpixel-Präzision.
+.IPs 3
+Wie 2, verwendet jedoch langsamere Viertelpixel-Verfeinerung.
 .IPs 4
 Wendet schnelle Viertelpixel-Präzisionsbewegungsschätzung auf alle in Frage
 kommenden Makroblock-Typen an, wählt dann den besten Typen und schließt dann
@@ -9500,7 +9497,7 @@ Ermöglich weiterhin Multithread-Decodierung, falls vom Decoder unterstützt
 Das geht leicht zu Lasten der Komprimierung.
 Um diese Funktion nutzen zu können, muss libx264 mit Unterstützung für pthread
 kompiliert worden sein; falls das nicht der Fall ist, wird diese Option eine
-Warnung ausgeben und sodann Scheiben, jedoch nicht Multithreading aktivieren.
+Warnung ausgeben und aktiviert Scheiben, jedoch nicht Multithreading.
 .
 .TP
 .B log=<-1\-3>
