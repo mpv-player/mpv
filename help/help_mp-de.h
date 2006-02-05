@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.220
+// In synch with rev 1.221
 
 // ========================= MPlayer help ===========================
 
@@ -1328,7 +1328,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Erstelle Keyframe-Tabelle für MPEG4-Video neu...\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' gefunden, %d Byte von %d.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh gefunden (size=%d) (total_frames=%d).\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Lese INDEX-Block, %d Blöcke für %d Frames (fpos=%"PRId64")\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Lese INDEX-Block, %d Blöcke für %d Frames (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "zusätzlicher RIFF-Kopf...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** Warnung: Dies ist kein erweiterter AVI-Kopf...\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Kaputter Block?  Blockgröße=%d  (id=%.4s)\n"
