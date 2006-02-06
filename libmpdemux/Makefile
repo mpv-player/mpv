@@ -101,7 +101,7 @@ SRCS += demux_mkv.c ebml.c
 endif
 
 # Muxers
-SRCS += muxer.c \
+MUXERS = muxer.c \
         muxer_avi.c \
         muxer_mpeg.c \
         muxer_rawaudio.c \
@@ -116,12 +116,12 @@ LIBAV_INC += -I../libavcodec
 endif
 ifeq ($(CONFIG_LIBAVFORMAT),yes)
 LIBAV_INC += -I../libavformat
-SRCS += demux_lavf.c \
-	muxer_lavf.c
+SRCS   += demux_lavf.c
+MUXERS += muxer_lavf.c
 endif
 ifeq ($(CONFIG_LIBAVFORMAT_SO),yes)
-SRCS += demux_lavf.c \
-	muxer_lavf.c
+SRCS   += demux_lavf.c
+MUXERS += muxer_lavf.c
 endif
 
 ifeq ($(MPLAYER_NETWORK),yes)
@@ -150,6 +150,10 @@ endif
 ifeq ($(DVBIN),yes)
 SRCS += dvbin.c
 SRCS += dvb_tune.c
+endif
+
+ifeq ($(MENCODER),yes)
+SRCS += $(MUXERS)
 endif
 
 OBJS	= $(SRCS:.c=.o)
