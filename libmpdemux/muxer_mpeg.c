@@ -1024,7 +1024,7 @@ static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, 
 	double delta_pts;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_headers_t *apriv = (muxer_headers_t*) as->priv;
-	uint32_t num, den, j, k, l, n;
+	uint32_t j, k, l, n;
 	mpeg_frame_t *frm , frm2;
 
 	tlen = 0;
@@ -1417,7 +1417,7 @@ static void check_pts(muxer_priv_t *priv, muxer_headers_t *vpriv, int i)
 static uint32_t calc_audio_chunk_size(muxer_stream_t *as, double duration, int finalize)
 {
 	muxer_headers_t *apriv;
-	uint32_t x, div, rest, abytes, available;
+	uint32_t div, rest, abytes, available;
 	double adur;
 	uint64_t iaduration;
 	int i;
