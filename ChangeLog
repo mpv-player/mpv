@@ -58,6 +58,7 @@ MPlayer (1.0)
     * tremor updated to libogg 1.1.2
     * PNG decoding via libavcodec
     * removed native RealAudio codecs (ported to lavc)
+    * Zip Motion-Block Video (ZMB) decoder via binary DLL
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
