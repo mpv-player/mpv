@@ -1934,7 +1934,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 			d1 = temp_ref - spriv->last_tr;
 			if(gop_reset)
 			{
-				frames_diff = spriv->max_tr + temp_ref - spriv->last_tr;
+				frames_diff = spriv->max_tr + 1 + temp_ref - spriv->last_tr;
 			}
 			else
 			{
