@@ -475,7 +475,7 @@ stream_flags
     All streams SHOULD end with EOR, where the pts of the EOR indicates the
     end presentation time of the final frame.
     An EOR set stream is unset by the first content frames.
-    When an EOR is unset, dts_cache of the stream is reset to -1.
+    EOR can only be unset in streams with zero decode_delay .
 
 stream_id_plus1[frame_code]
     must be <250
