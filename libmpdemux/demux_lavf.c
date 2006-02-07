@@ -389,9 +389,9 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     return 1;
 }
 
-static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags){
+static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags){
     lavf_priv_t *priv = demuxer->priv;
-    mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %d)\n", demuxer, rel_seek_secs, flags);
+    mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %f, %d)\n", demuxer, rel_seek_secs, audio_delay, flags);
     
 #if LIBAVFORMAT_BUILD < 4619
     av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE);

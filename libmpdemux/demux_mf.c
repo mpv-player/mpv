@@ -15,7 +15,7 @@
 #include "stheader.h"
 #include "mf.h"
 
-static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   mf_t * mf = (mf_t *)demuxer->priv;
   sh_video_t   * sh_video = demuxer->video->sh;
   int newpos = (flags & 1)?0:mf->curr_frame;

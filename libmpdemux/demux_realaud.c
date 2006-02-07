@@ -341,7 +341,7 @@ static void demux_close_ra(demuxer_t *demuxer)
 
 #if 0
 /* please upload RV10 samples WITH INDEX CHUNK */
-int demux_seek_ra(demuxer_t *demuxer, float rel_seek_secs, int flags)
+int demux_seek_ra(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *d_audio = demuxer->audio;

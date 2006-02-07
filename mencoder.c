@@ -1036,12 +1036,12 @@ if (seek_to_sec) {
     else 
         sscanf(seek_to_sec, "%f", &d);
 
-    demux_seek(demuxer, d, 1);
+    demux_seek(demuxer, d, audio_delay, 1);
 //  there is 2 way to handle the -ss option in 3-pass mode:
 // > 1. do the first pass for the whole file, and use -ss for 2nd/3rd pases only
 // > 2. do all the 3 passes with the same -ss value
 //  this line enables behaviour 1. (and kills 2. at the same time):
-//    if(demuxer2) demux_seek(demuxer2, d, 1);
+//    if(demuxer2) demux_seek(demuxer2, d, audio_delay, 1);
 }
 
 if (out_file_format == MUXER_TYPE_MPEG)
@@ -1769,7 +1769,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
     if (sh_video->pts >= next_edl_record->stop_sec) return 1; // nothing to do...
 
     if (!edl_seek_type) {
-        if(demux_seek(demuxer, next_edl_record->stop_sec - sh_video->pts, 0)){
+        if(demux_seek(demuxer, next_edl_record->stop_sec - sh_video->pts, audio_delay, 0)){
             sh_video->pts = demuxer->video->pts;
             //if (vo_vobsub) vobsub_seek(vo_vobsub,sh_video->pts);
             resync_video_stream(sh_video);

@@ -46,7 +46,7 @@ typedef struct _film_data_t
   unsigned int film_version;
 } film_data_t;
 
-static void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
   film_data_t *film_data = (film_data_t *)demuxer->priv;
   int new_current_chunk=(flags&1)?0:film_data->current_chunk;
