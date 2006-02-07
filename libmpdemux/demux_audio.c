@@ -428,7 +428,10 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
       }
     } break;
   case WAV : {
+    unsigned align = sh_audio->wf->nBlockAlign;
     l = sh_audio->wf->nAvgBytesPerSec;
+    if (align)
+      l = (l + align - 1) / align * align;
     dp = new_demux_packet(l);
     l = stream_read(s,dp->buffer,l);
     priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
