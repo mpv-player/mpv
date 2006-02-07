@@ -505,6 +505,7 @@ a 'yes', '1' oppure 'true' e disabilitate impostandole a 'no', '0' oppure 'false
 Anche le sotto-opzioni possono essere specificate in questo modo.
 .PP
 .I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MPLAYER:
+.sp 1
 .nf
 # Usa il driver Matrox per default.
 vo=xmga
@@ -606,7 +607,7 @@ specificati sulla riga comando.
 Vedi '\-msglevel help' per una lista di tutti i moduli.
 .br
 .I NOTA:
-I messaggi emessi prima che venga letta la riga comando possono essere
+I messaggi emessi prima che venga interpretata la riga di comando possono essere
 controllati solo dalla variabile d'ambiente MPLAYER_VERBOSE, che influenza tutti
 i moduli.
 .br
@@ -7194,12 +7195,12 @@ scena (default: 0).
 .TP
 .B sc_factor=<un intero positivo qualsiasi>
 Fa in modo che fotogrammi con quantizzatori più alti possano più facilmente
-far scattare un cambio di scena e far sì che libavcodec usi un fotogramma I
-(default: 1).
+far intervenire un cambio di scena in modo che libavcodec utilizzi un
+fotogramma I (default: 1).
 1\-16 è una buona gamma.
-Valori compresi tra 2 e 6 possono portare PSNR in aumento (fino a circa 0.04 dB)
+Valori compresi tra 2 e 6 possono portare ad un miglioramento del PSNR (fino a circa 0.04 dB)
 ed un miglior posizionamento dei fotogrammi I in scene ad alto movimento.
-Valori più alti di 6 possono portare un PSNR leggermente migliore (circa 0.01 dB
+Valori più alti di 6 possono portare ad un PSNR leggermente migliore (circa 0.01 dB
 in più rispetto a sc_factor=6), ma una qualità visiva notevolmente peggiore.
 .
 .TP
