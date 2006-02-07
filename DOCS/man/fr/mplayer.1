@@ -1,4 +1,4 @@
-.\" synced with 1.1221
+.\" synced with 1.1223
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -762,7 +762,7 @@ Ajoute les fichiers donnés en ligne de commande à la liste de lecture au
 lieu de les jouer immédiatement.
 .
 .TP
-.B \-fixed-vo (CODE BETA!)
+.B \-fixed-vo
 Force l'initialistation d'une seule fenêtre vidéo pour la lecture d'une
 série de de fichiers.
 Actuellement les pilotes suivants fonctionnent avec fixed-vo: gl, gl2, mga,
@@ -4004,9 +4004,9 @@ Définit les paramètres de redimensionnement logiciel (scaler).
 filtre flou gaussien (luma)
 .IPs cgb=<0\-100>
 filtre flou gaussien (chroma)
-.IPs ls=<0\-100>
+.IPs ls=<100\-100>
 filtre netteté (sharpen) (luma)
-.IPs cs=<0\-100>
+.IPs cs=<100\-100>
 filtre netteté (sharpen) (chroma)
 .IPs chs=<h>
 décalage chroma horizontal
