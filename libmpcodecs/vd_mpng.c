@@ -89,6 +89,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  pngPointer=8;
  pngLength=len;
  png_set_read_fn( png,data,pngReadFN );
+ png_set_strip_16( png );
  png_set_sig_bytes( png,8 );
  png_read_info( png,info );
  png_get_IHDR( png,info,&png_width,&png_height,&depth,&color,NULL,NULL,NULL );
