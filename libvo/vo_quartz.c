@@ -888,21 +888,6 @@ static void check_events(void)
 		SendEventToEventTarget (theEvent, theTarget);
 		ReleaseEvent(theEvent);
 	}
-
-	//update activity every 30 seconds to prevent
-	//screensaver from starting up.
-	DateTimeRec d;
-	unsigned long curTime;
-	static unsigned long lastTime = 0;
-	
-	GetTime(&d);
-	DateToSeconds( &d, &curTime);
-	
-	if( ( (curTime - lastTime) >= 30) || (lastTime == 0))
-	{
-		UpdateSystemActivity(UsrActivity);
-		lastTime = curTime;
-	}
 }
 
 static void draw_osd(void)
@@ -995,6 +980,21 @@ static void flip_page(void)
 			mouseHide = TRUE;
 			lastTime = curTime;
 		}
+	}
+
+	//update activity every 30 seconds to prevent
+	//screensaver from starting up.
+	DateTimeRec d;
+	unsigned long curTime;
+	static unsigned long lastTime = 0;
+	
+	GetTime(&d);
+	DateToSeconds( &d, &curTime);
+	
+	if( ( (curTime - lastTime) >= 30) || (lastTime == 0))
+	{
+		UpdateSystemActivity(UsrActivity);
+		lastTime = curTime;
 	}
 }
 

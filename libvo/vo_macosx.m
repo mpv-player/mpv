@@ -722,6 +722,21 @@ static int control(uint32_t request, void *data, ...)
 			lastTime = curTime;
 		}
 	}
+	
+	//update activity every 60 seconds to prevent
+	//screensaver from starting up.
+	DateTimeRec d;
+	unsigned long curTime;
+	static unsigned long lastTime = 0;
+	
+	GetTime(&d);
+	DateToSeconds( &d, &curTime);
+	
+	if( ( (curTime - lastTime) >= 60) || (lastTime == 0))
+	{
+		UpdateSystemActivity(UsrActivity);
+		lastTime = curTime;
+	}
 }
 
 /*
@@ -849,21 +864,6 @@ static int control(uint32_t request, void *data, ...)
 {
 	event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate dateWithTimeIntervalSinceNow:0.0001] inMode:NSEventTrackingRunLoopMode dequeue:YES];
 	[NSApp sendEvent:event];
-	
-	//update activity every 60 seconds to prevent
-	//screensaver from starting up.
-	DateTimeRec d;
-	unsigned long curTime;
-	static unsigned long lastTime = 0;
-	
-	GetTime(&d);
-	DateToSeconds( &d, &curTime);
-	
-	if( ( (curTime - lastTime) >= 60) || (lastTime == 0))
-	{
-		UpdateSystemActivity(UsrActivity);
-		lastTime = curTime;
-	}
 }
 
 /*
