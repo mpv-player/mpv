@@ -590,8 +590,8 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
         rest=rtsp_get(s);
         if (!rest)
           return -1;
-        if (!strncmp(rest,"Cseq:",5))
-          sscanf(rest,"Cseq: %u",&seq);
+        if (!strncmp(rest,"CSeq:",5))
+          sscanf(rest,"CSeq: %u",&seq);
       } while (strlen(rest)!=0);
       free(rest);
       if (seq<0) {
