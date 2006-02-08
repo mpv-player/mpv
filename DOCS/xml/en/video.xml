@@ -2501,22 +2501,27 @@ Of course the important thing is the TwinView part.
 The NeoMagic chip is found in a variety of laptops, some of them are equipped
 with a simple analog TV encoder, some have a more advanced one.
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Analog encoder chip</emphasis>:
-  Tested on a Toshiba Tecra 8000. Its TV output chip is miserable crap. Avoid
-  if possible.
-  </simpara> <simpara>
-  You must use <option>-vo vesa</option>. The tested chip was capable of
-  1.333333 aspect ratio only, so be sure to use the <option>-x</option>,
-  <option>-y</option> options and/or the
-  <option>-vf scale,crop,expand</option> filters if the box doesn't let
-  you enable TV output. Maximum resolution was 720*576 at 16bpp.
-  </simpara>
-  <simpara>
-  Known issues: VESA-only, 1.33333 limitation, image isn't always centered,
-  movie becomes 4bpp in every 10 minutes, and stays that way. Frequent hard
-  freezes, LCD display problems.
-  </simpara></listitem>
+  It has been reported that reliable TV out can be obtained by using
+  <option>-vo fbdev</option> or <option>-vo fbdev2</option>.
+  You need to have vesafb compiled in your kernel and pass
+  the following parameters on the kernel command line:
+  <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
+  You should start <application>X</application>, then switch to console mode
+  with e.g. <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>.
+  If you fail to start <application>X</application> before running
+  <application>MPlayer</application> from the console, the video
+  becomes slow and choppy (explanations are welcome).
+  Login to your console, then initiate the following command:
+
+  <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
+
+  Now you should see the movie running in console mode filling up about
+  half your laptop's LCD screen.
+  To switch to TV hit <keycap>Fn</keycap>+<keycap>F5</keycap> three times.
+  Tested on a Tecra 8000, 2.6.15 kernel with vesafb, ALSA v1.0.10.
+  </para></listitem>
 <listitem><simpara>
   <emphasis role="bold">Chrontel 70xx encoder chip</emphasis>:
   Found in IBM Thinkpad 390E and possibly other Thinkpads or notebooks.
