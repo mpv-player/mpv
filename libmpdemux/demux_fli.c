@@ -22,7 +22,7 @@ typedef struct _fli_frames_t {
   unsigned int *frame_size;
 } fli_frames_t;
 
-static void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+static void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags){
   fli_frames_t *frames = (fli_frames_t *)demuxer->priv;
   sh_video_t *sh_video = demuxer->video->sh;
   int newpos=(flags&1)?0:frames->current_frame;

@@ -63,7 +63,7 @@ static int nearestBitrate(int bitrate) {
 /**
  * Seek to a position relative to the current position, indicated in time.
  */
-static void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags )
+static void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 {
 #define MAX_TIME 1000000
 	nuv_priv_t* priv = demuxer->priv;

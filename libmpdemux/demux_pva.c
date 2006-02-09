@@ -466,7 +466,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 	return 1;
 }
 
-static void demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,float audio_delay,int flags)
+static void demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
 {
 	int total_bitrate=0;
 	off_t dest_offset;

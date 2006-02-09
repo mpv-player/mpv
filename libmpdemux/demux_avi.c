@@ -618,7 +618,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 
 //extern float initial_pts_delay;
 
-void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
     avi_priv_t *priv=demuxer->priv;
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
@@ -706,8 +706,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int
 	    curr_audio_pos/=align;
 	    curr_audio_pos*=align;
 #else
-	    /* immediate seeking to audio position, including when streams are delayed */
-	    curr_audio_pos=(priv->avi_video_pts + audio_delay)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+	    curr_audio_pos=(priv->avi_video_pts)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+	    curr_audio_pos-=sh_audio->audio.dwStart;
 	    curr_audio_pos*=sh_audio->audio.dwSampleSize;
 #endif
 
@@ -733,8 +733,7 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int
 	      
 	} else {
 	    // VBR audio
-	    /* immediate seeking to audio position, including when streams are delayed */
-	    int chunks=(priv->avi_video_pts + audio_delay)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
+	    int chunks=(priv->avi_video_pts)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
 	    audio_chunk_pos=0;
 	    
         // find audio chunk pos:

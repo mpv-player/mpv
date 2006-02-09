@@ -179,7 +179,7 @@ static int demux_vqf_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   return 1;
 }
 
-static void demux_seek_vqf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+static void demux_seek_vqf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 #if 0
   stream_t* s = demuxer->stream;
   sh_audio_t* sh_audio = demuxer->audio->sh;

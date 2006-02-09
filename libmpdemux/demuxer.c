@@ -859,7 +859,7 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
 }
 
 
-int demux_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;

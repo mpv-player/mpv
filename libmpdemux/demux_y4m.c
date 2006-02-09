@@ -231,7 +231,7 @@ static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
     return demuxer;
 }
 
-static void demux_seek_y4m(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags) {
+static void demux_seek_y4m(demuxer_t *demuxer, float rel_seek_secs, int flags) {
     sh_video_t* sh = demuxer->video->sh;
     y4m_priv_t* priv = demuxer->priv;
     int rel_seek_frames = sh->fps*rel_seek_secs;

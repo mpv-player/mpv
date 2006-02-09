@@ -1825,7 +1825,7 @@ static void demux_close_real(demuxer_t *demuxer)
 }
 
 /* please upload RV10 samples WITH INDEX CHUNK */
-static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
+static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *d_audio = demuxer->audio;

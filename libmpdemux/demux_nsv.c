@@ -34,7 +34,7 @@ typedef struct {
 /**
  * Seeking still to be implemented
  */
-static void demux_seek_nsv ( demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags )
+static void demux_seek_nsv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 {
 // seeking is not yet implemented
 }

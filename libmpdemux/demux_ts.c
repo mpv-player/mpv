@@ -3071,7 +3071,7 @@ extern int videobuf_code_len;
 extern int sync_video_packet(demux_stream_t *);
 extern int skip_video_packet(demux_stream_t *);
 
-static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
+static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
 	demux_stream_t *d_audio=demuxer->audio;
 	demux_stream_t *d_video=demuxer->video;
