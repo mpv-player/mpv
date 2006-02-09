@@ -45,7 +45,7 @@ static void check_os_katmai_support( void );
 
 #if 1
 // return TRUE if cpuid supported
-static int has_cpuid()
+static int has_cpuid(void)
 {
 	long a, c;
 

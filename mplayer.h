@@ -59,6 +59,6 @@ extern int dvdsub_id;
 extern int vobsub_id;
 
 extern void exit_player(char* how);
-extern void update_set_of_subtitles();
+extern void update_set_of_subtitles(void);
 
 #endif

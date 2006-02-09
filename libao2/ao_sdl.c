@@ -67,7 +67,7 @@ static unsigned char volume=SDL_MIX_MAXVOLUME;
 // may only be called by mplayer's thread
 // return value may change between immediately following two calls,
 // and the real number of free bytes might be larger!
-static int buf_free() {
+static int buf_free(void) {
   int free = read_pos - write_pos - CHUNK_SIZE;
   if (free < 0) free += BUFFSIZE;
   return free;
@@ -76,7 +76,7 @@ static int buf_free() {
 // may only be called by SDL's playback thread
 // return value may change between immediately following two calls,
 // and the real number of buffered bytes might be larger!
-static int buf_used() {
+static int buf_used(void) {
   int used = write_pos - read_pos;
   if (used < 0) used += BUFFSIZE;
   return used;
@@ -283,7 +283,7 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
 
 	//printf("SDL: reset called!\n");	
 
@@ -295,7 +295,7 @@ static void reset(){
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
 
 	//printf("SDL: audio_pause called!\n");	
@@ -304,7 +304,7 @@ static void audio_pause()
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
 	//printf("SDL: audio_resume called!\n");	
 	SDL_PauseAudio(0);
@@ -312,7 +312,7 @@ static void audio_resume()
 
 
 // return: how many bytes can be played without blocking
-static int get_space(){
+static int get_space(void){
     return buf_free();
 }
 
@@ -338,7 +338,7 @@ static int play(void* data,int len,int flags){
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(){
+static float get_delay(void){
     int buffered = BUFFSIZE - CHUNK_SIZE - buf_free(); // could be less
     return (float)(buffered + ao_data.buffersize)/(float)ao_data.bps;
 }

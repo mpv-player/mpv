@@ -112,24 +112,24 @@ static int play(void* data,int len,int flags)
 	return arts_write(stream, data, len);
 }
 
-static void audio_pause()
+static void audio_pause(void)
 {
 }
 
-static void audio_resume()
+static void audio_resume(void)
 {
 }
 
-static void reset()
+static void reset(void)
 {
 }
 
-static int get_space()
+static int get_space(void)
 {
 	return arts_stream_get(stream, ARTS_P_BUFFER_SPACE);
 }
 
-static float get_delay()
+static float get_delay(void)
 {
 	return ((float) (ao_data.buffersize - arts_stream_get(stream,
 		ARTS_P_BUFFER_SPACE))) / ((float) ao_data.bps);

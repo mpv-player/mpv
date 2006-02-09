@@ -67,7 +67,7 @@ static void clear_buffer(subtitle *buf)
 }
 
 
-void subcc_init()
+void subcc_init(void)
 {
 	int i;
 	//printf("subcc_init(): initing...\n");
@@ -107,7 +107,7 @@ static void append_char(char c)
 }
 
 
-static void swap_buffers()
+static void swap_buffers(void)
 {
 	subtitle *foo;
 	foo=fb;
@@ -185,7 +185,7 @@ static void cc_decode_EIA608(unsigned short int data)
   lastcode=data;  
 }
 
-static void subcc_decode()
+static void subcc_decode(void)
 {
   /* The first number may denote a channel number. I don't have the
    * EIA-708 standard, so it is hard to say.

@@ -54,7 +54,7 @@ void free_edl(edl_record_ptr next_edl_record)
  *  \brief Fills EDL operations queue.
  */
 
-edl_record_ptr edl_parse_file()
+edl_record_ptr edl_parse_file(void)
 {
     FILE *fd;
     char line[100];

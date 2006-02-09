@@ -304,7 +304,7 @@ static int mach64_get_vert_stretch(void)
     return ret;
 }
 
-static void mach64_vid_make_default()
+static void mach64_vid_make_default(void)
 {
   mach64_fifo_wait(5);
   OUTREG(SCALER_COLOUR_CNTL,0x00101000);

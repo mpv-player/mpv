@@ -113,11 +113,11 @@ extern float spu_gaussvar;
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 extern void vo_remove_text(int dxs,int dys,void (*remove)(int x0,int y0, int w,int h));
 
-void vo_init_osd();
+void vo_init_osd(void);
 int vo_update_osd(int dxs,int dys);
 int vo_osd_changed(int new_value);
 int vo_osd_check_range_update(int,int,int,int);
-void free_osd_list();
+void free_osd_list(void);
 
 extern int vo_osd_changed_flag;
 

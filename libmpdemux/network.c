@@ -93,7 +93,7 @@ mime_struct_t mime_type_table[] = {
 
 
 streaming_ctrl_t *
-streaming_ctrl_new( ) {
+streaming_ctrl_new(void) {
 	streaming_ctrl_t *streaming_ctrl;
 	streaming_ctrl = (streaming_ctrl_t*)malloc(sizeof(streaming_ctrl_t));
 	if( streaming_ctrl==NULL ) {

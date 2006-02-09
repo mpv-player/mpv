@@ -731,7 +731,7 @@ void *vo_vobsub=NULL;
 
 static int draw_alpha_init_flag=0;
 
-extern void vo_draw_alpha_init();
+extern void vo_draw_alpha_init(void);
 
        mp_osd_obj_t* vo_osd_list=NULL;
 
@@ -747,7 +747,7 @@ mp_osd_obj_t* new_osd_obj(int type){
     return osd;
 }
 
-void free_osd_list(){
+void free_osd_list(void){
     mp_osd_obj_t* obj=vo_osd_list;
     while(obj){
 	mp_osd_obj_t* next=obj->next;
@@ -857,7 +857,7 @@ int vo_update_osd(int dxs,int dys){
     return chg;
 }
 
-void vo_init_osd(){
+void vo_init_osd(void){
     if(!draw_alpha_init_flag){
 	draw_alpha_init_flag=1;
 	vo_draw_alpha_init();

@@ -126,7 +126,7 @@ ao_functions_t* audio_out_drivers[] =
 	NULL
 };
 
-void list_audio_out(){
+void list_audio_out(void){
       int i=0;
       mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
       if (identify)

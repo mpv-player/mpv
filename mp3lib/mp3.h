@@ -9,11 +9,11 @@ extern void MP3_Init();
 extern int MP3_Open(char *filename,int buffsize);
 extern void MP3_SeekFrame(int num,int dir);
 extern void MP3_SeekForward(int num);
-extern int MP3_PrintTAG();
+extern int MP3_PrintTAG(void);
 extern int MP3_DecodeFrame(unsigned char *hova,short single);
-extern int MP3_FillBuffers();
-extern void MP3_PrintHeader();
-extern void MP3_Close();
+extern int MP3_FillBuffers(void);
+extern void MP3_PrintHeader(void);
+extern void MP3_Close(void);
 /* public variables: */
 extern int MP3_eof;        // set if EOF reached
 extern int MP3_pause;      // lock playing
@@ -29,7 +29,7 @@ extern int MP3_bps;
 
 /* player level: */
 extern int  MP3_OpenDevice(char *devname);  /* devname can be NULL for default) */
-extern void MP3_Play();
-extern void MP3_Stop();
-extern void MP3_CloseDevice();
+extern void MP3_Play(void);
+extern void MP3_Stop(void);
+extern void MP3_CloseDevice(void);
 

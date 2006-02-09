@@ -316,17 +316,17 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 	return 0;
 }
 
-int VbrControl_get_intra() 
+int VbrControl_get_intra(void) 
 {
 	return m_vFrames[m_iCount].is_key_frame;
 }
 
-short VbrControl_get_drop() 
+short VbrControl_get_drop(void) 
 {
 	return m_bDrop;
 }
 
-int VbrControl_get_quant() 
+int VbrControl_get_quant(void) 
 {
 	return m_iQuant;
 }
@@ -340,7 +340,7 @@ void VbrControl_set_quant(float quant)
 	if(m_iQuant>max_quantizer) m_iQuant=max_quantizer;
 }
 
-void VbrControl_update_1pass_vbr()
+void VbrControl_update_1pass_vbr(void)
 {
 	VbrControl_set_quant(m_fQuant);
 	m_iCount++;
@@ -395,7 +395,7 @@ void VbrControl_update_2pass_vbr_encoding(int motion_bits, int texture_bits, int
 		fprintf(m_pFile, ", new quant %d\n", m_iQuant);
 }
 
-void VbrControl_close()
+void VbrControl_close(void)
 {
 	if(m_pFile)
 	{

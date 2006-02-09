@@ -258,7 +258,7 @@ static unsigned short fast_osd_15bpp_table[256];
 static unsigned short fast_osd_16bpp_table[256];
 #endif
 
-void vo_draw_alpha_init(){
+void vo_draw_alpha_init(void){
 #ifdef FAST_OSD_TABLE
     int i;
     for(i=0;i<256;i++){

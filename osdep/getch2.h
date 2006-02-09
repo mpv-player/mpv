@@ -9,14 +9,14 @@ extern int screen_height;
 extern char * erase_to_end_of_line;
 
 /* Get screen-size using IOCTL call. */
-extern void get_screen_size();
+extern void get_screen_size(void);
 
 /* Load key definitions from the TERMCAP database. 'termtype' can be NULL */
 extern int load_termcap(char *termtype);
 
 /* Enable and disable STDIN line-buffering */
-extern void getch2_enable();
-extern void getch2_disable();
+extern void getch2_enable(void);
+extern void getch2_disable(void);
 
 /* Read a character or a special key code (see keycodes.h) */
 extern int getch2(int halfdelay_time);

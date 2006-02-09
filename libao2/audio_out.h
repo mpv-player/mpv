@@ -21,12 +21,12 @@ typedef struct ao_functions_s
         int (*control)(int cmd,void *arg);
         int (*init)(int rate,int channels,int format,int flags);
         void (*uninit)(int immed);
-        void (*reset)();
-        int (*get_space)();
+        void (*reset)(void);
+        int (*get_space)(void);
         int (*play)(void* data,int len,int flags);
-        float (*get_delay)();
-        void (*pause)();
-        void (*resume)();
+        float (*get_delay)(void);
+        void (*pause)(void);
+        void (*resume)(void);
 } ao_functions_t;
 
 /* global data used by mplayer and plugins */
@@ -44,7 +44,7 @@ typedef struct ao_data_s
 extern char *ao_subdevice;
 extern ao_data_t ao_data;
 
-void list_audio_out();
+void list_audio_out(void);
 ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags);
 
 // NULL terminated array of all drivers

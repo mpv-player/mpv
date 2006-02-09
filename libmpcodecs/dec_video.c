@@ -149,7 +149,7 @@ void uninit_video(sh_video_t *sh_video){
     sh_video->inited=0;
 }
 
-void vfm_help(){
+void vfm_help(void){
     int i;
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_AvailableVideoFm);
     if (identify)

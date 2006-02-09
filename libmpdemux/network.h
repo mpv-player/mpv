@@ -50,7 +50,7 @@ typedef struct streaming_control {
 } streaming_ctrl_t;
 
 //int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url );
-streaming_ctrl_t *streaming_ctrl_new();
+streaming_ctrl_t *streaming_ctrl_new(void);
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
 int nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl );

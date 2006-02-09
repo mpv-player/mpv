@@ -191,7 +191,7 @@ osdpercent(int duration, int deko, int min, int max, int val, char * desc, char 
 }
 
 void
-printosdtext()
+printosdtext(void)
 {
   if(osd_text_length > 0 && !vo_osd_text) {
     memset(c->textbuffer,' ',osd_text_length);
@@ -221,7 +221,7 @@ printosdtext()
 }
 
 void
-printosdprogbar(){
+printosdprogbar(void){
     /* print mplayer osd-progbar */
     if (vo_osd_progbar_type!=-1){
 	osdpercent(1,1,0,255,vo_osd_progbar_value, __sub_osd_names[vo_osd_progbar_type], "");	

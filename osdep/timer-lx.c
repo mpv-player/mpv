@@ -29,7 +29,7 @@ int usec_sleep(int usec_delay)
 }
 
 // Returns current time in microseconds
-unsigned int GetTimer(){
+unsigned int GetTimer(void){
   struct timeval tv;
   struct timezone tz;
 //  float s;
@@ -39,7 +39,7 @@ unsigned int GetTimer(){
 }  
 
 // Returns current time in milliseconds
-unsigned int GetTimerMS(){
+unsigned int GetTimerMS(void){
   struct timeval tv;
   struct timezone tz;
 //  float s;
@@ -51,7 +51,7 @@ unsigned int GetTimerMS(){
 static unsigned int RelativeTime=0;
 
 // Returns time spent between now and last call in seconds
-float GetRelativeTime(){
+float GetRelativeTime(void){
 unsigned int t,r;
   t=GetTimer();
 //  t*=16;printf("time=%ud\n",t);
@@ -61,7 +61,7 @@ unsigned int t,r;
 }
 
 // Initialize timer, must be called at least once at start
-void InitTimer(){
+void InitTimer(void){
   GetRelativeTime();
 }
 

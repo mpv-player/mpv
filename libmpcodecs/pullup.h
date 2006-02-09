@@ -75,7 +75,7 @@ struct pullup_frame *pullup_get_frame(struct pullup_context *c);
 void pullup_pack_frame(struct pullup_context *c, struct pullup_frame *fr);
 void pullup_release_frame(struct pullup_frame *fr);
 
-struct pullup_context *pullup_alloc_context();
+struct pullup_context *pullup_alloc_context(void);
 void pullup_preinit_context(struct pullup_context *c);
 void pullup_init_context(struct pullup_context *c);
 void pullup_free_context(struct pullup_context *c);

@@ -48,7 +48,7 @@ extern int vo_x11_check_events(Display *mydisplay);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 extern void vo_x11_fullscreen( void );
 extern void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer );
-extern void vo_x11_uninit();
+extern void vo_x11_uninit(void);
 extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
 extern uint32_t vo_x11_set_equalizer(char *name, int value);
 extern uint32_t vo_x11_get_equalizer(char *name, int *value);
@@ -59,7 +59,7 @@ extern Window vo_x11_create_smooth_window( Display *mDisplay, Window mRoot,
 extern void vo_x11_clearwindow_part(Display *mDisplay, Window vo_window,
 	int img_width, int img_height, int use_fs);
 extern void vo_x11_clearwindow( Display *mDisplay, Window vo_window );
-extern void vo_x11_ontop();
+extern void vo_x11_ontop(void);
 extern void vo_x11_ewmh_fullscreen( int action );
 
 #endif

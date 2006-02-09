@@ -24,6 +24,6 @@ extern char *edl_filename; // file to extract EDL entries from (-edl)
 extern char *edl_output_filename; // file to put EDL entries in (-edlout)
 
 void free_edl(edl_record_ptr next_edl_record); // free's entire EDL list.
-edl_record_ptr edl_parse_file(); // fills EDL stack
+edl_record_ptr edl_parse_file(void); // fills EDL stack
 
 #endif

@@ -3,11 +3,11 @@
 
 extern const char *timer_name;
 
-void InitTimer();
-unsigned int GetTimer();
-unsigned int GetTimerMS();
+void InitTimer(void);
+unsigned int GetTimer(void);
+unsigned int GetTimerMS(void);
 //int uGetTimer();
-float GetRelativeTime();
+float GetRelativeTime(void);
 
 int usec_sleep(int usec_delay);
 

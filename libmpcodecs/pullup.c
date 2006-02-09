@@ -733,7 +733,7 @@ void pullup_release_frame(struct pullup_frame *fr)
 
 
 
-struct pullup_context *pullup_alloc_context()
+struct pullup_context *pullup_alloc_context(void)
 {
 	struct pullup_context *c;
 

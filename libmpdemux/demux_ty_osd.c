@@ -63,7 +63,7 @@ static subtitle *ty_pOSD2;
 static int             tyOSDInited = 0;
 static int             tyOSDUpdate = 0;
 
-static void ty_DrawOSD()
+static void ty_DrawOSD(void)
 {
 	// printf( "Calling ty_DrawOSD()\n" );
 	tyOSDUpdate = 1;
@@ -161,7 +161,7 @@ static void ty_drawchar( char c )
    *( TY_CC_ptr++ ) = ( c == 14 ) ? '/' : c; // swap a '/' for musical note
 }
 
-static void ty_draw()
+static void ty_draw(void)
 {
    if ( TY_CC_ptr != TY_CC_buf && TY_OSD_flags & TY_TEXT_MODE ) 
    {
@@ -513,7 +513,7 @@ static void ty_AddXDSToDisplay( char *format, ... )
 }
 
 
-static void ty_DisplayXDSInfo()
+static void ty_DisplayXDSInfo(void)
 {
    int index;
    int size;

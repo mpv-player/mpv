@@ -137,19 +137,19 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
 
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
     // for now, just call reset();
     reset();
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
 }
 
@@ -158,7 +158,7 @@ void send_lpcm_packet(unsigned char* data,int len,int id,int timestamp,int freq_
 extern int vo_pts;
 
 // return: how many bytes can be played without blocking
-static int get_space(){
+static int get_space(void){
     float x=(float)(vo_pts-ao_data.pts)/90000.0;
     int y;
 //    printf("vo_pts: %5.3f  ao_pts: %5.3f\n",vo_pts/90000.0,ao_data.pts/90000.0);
@@ -189,7 +189,7 @@ static int play(void* data,int len,int flags){
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(){
+static float get_delay(void){
 
     return 0.0;
 }

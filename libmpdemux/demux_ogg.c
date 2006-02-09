@@ -221,7 +221,7 @@ uint64_t get_uint64 (const void *buf)
   return (ret);
 }
 
-void demux_ogg_init_sub () {
+void demux_ogg_init_sub (void) {
   int lcv;
   if(!ogg_sub.text[0]) // not yet allocated
   for (lcv = 0; lcv < SUB_MAX_TEXT; lcv++) {

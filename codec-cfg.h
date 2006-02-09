@@ -68,6 +68,6 @@ codecs_t* find_codec(unsigned int fourcc, unsigned int *fourccmap,
 void select_codec(char* codecname,int audioflag);
 void list_codecs(int audioflag);
 void codecs_reset_selection(int audioflag);
-void codecs_uninit_free();
+void codecs_uninit_free(void);
 
 #endif

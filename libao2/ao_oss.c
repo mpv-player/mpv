@@ -423,7 +423,7 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
   int oss_format;
     uninit(1);
     audio_fd=open(dsp, O_WRONLY);
@@ -450,20 +450,20 @@ static void reset(){
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
     uninit(1);
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
     reset();
 }
 
 
 // return: how many bytes can be played without blocking
-static int get_space(){
+static int get_space(void){
   int playsize=ao_data.outburst;
 
 #ifdef SNDCTL_DSP_GETOSPACE
@@ -503,7 +503,7 @@ static int play(void* data,int len,int flags){
 static int audio_delay_method=2;
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(){
+static float get_delay(void){
   /* Calculate how many bytes/second is sent out */
   if(audio_delay_method==2){
 #ifdef SNDCTL_DSP_GETODELAY

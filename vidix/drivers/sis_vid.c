@@ -167,17 +167,17 @@ static unsigned short sis_card_ids[] = {
 
 /** function declarations **/
 
-extern void sis_init_video_bridge();
+extern void sis_init_video_bridge(void);
 
 
 static void set_overlay(SISOverlayPtr pOverlay, int index);
-static void close_overlay();
+static void close_overlay(void);
 static void calc_scale_factor(SISOverlayPtr pOverlay,
 			      int index, int iscrt2);
 static void set_line_buf_size(SISOverlayPtr pOverlay);
 static void merge_line_buf(int enable);
 static void set_format(SISOverlayPtr pOverlay);
-static void set_colorkey();
+static void set_colorkey(void);
 
 static void set_brightness(uint8_t brightness);
 static void set_contrast(uint8_t contrast);
@@ -219,13 +219,13 @@ static void setsrregmask(uint8_t reg, uint8_t data, uint8_t mask)
 }
 
 /* vblank checking*/
-static uint8_t vblank_active_CRT1()
+static uint8_t vblank_active_CRT1(void)
 {
     /* this may be too simplistic? */
     return (inSISREG(SISINPSTAT) & 0x08);
 }
 
-static uint8_t vblank_active_CRT2()
+static uint8_t vblank_active_CRT2(void)
 {
     uint8_t ret;
     if (sis_vga_engine == SIS_315_VGA) {
@@ -445,7 +445,7 @@ int vixQueryFourcc(vidix_fourcc_t * to)
     return ENOSYS;
 }
 
-static int bridge_in_slave_mode()
+static int bridge_in_slave_mode(void)
 {
     unsigned char usScratchP1_00;
 
@@ -465,7 +465,7 @@ static int bridge_in_slave_mode()
 
 /* This does not handle X dual head mode, since 1) vidix doesn't support it
    and 2) it doesn't make sense for other gfx drivers */
-static void set_dispmode()
+static void set_dispmode(void)
 {
     sis_bridge_is_slave = 0;
 
@@ -489,7 +489,7 @@ static void set_dispmode()
     }
 }
 
-static void set_disptype_regs()
+static void set_disptype_regs(void)
 {
     switch (sis_displaymode) {
     case DISPMODE_SINGLE1:	/* TW: CRT1 only */
@@ -527,7 +527,7 @@ static void set_disptype_regs()
     }
 }
 
-static void init_overlay()
+static void init_overlay(void)
 {
     /* Initialize first overlay (CRT1) */
 
@@ -1154,7 +1154,7 @@ static void set_overlay(SISOverlayPtr pOverlay, int index)
 
 
 /* TW: Overlay MUST NOT be switched off while beam is over it */
-static void close_overlay()
+static void close_overlay(void)
 {
     uint32_t watchdog;
 
@@ -1493,7 +1493,7 @@ static void set_format(SISOverlayPtr pOverlay)
     setvideoregmask(Index_VI_Control_Misc0, fmt, 0x7c);
 }
 
-static void set_colorkey()
+static void set_colorkey(void)
 {
     uint8_t r, g, b;
 

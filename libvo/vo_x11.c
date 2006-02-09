@@ -148,7 +148,7 @@ extern int sws_flags;
 
 static XVisualInfo vinfo;
 
-static void getMyXImage()
+static void getMyXImage(void)
 {
 #ifdef HAVE_SHM
     if (mLocalDisplay && XShmQueryExtension(mDisplay))
@@ -238,7 +238,7 @@ static void getMyXImage()
 #endif
 }
 
-static void freeMyXImage()
+static void freeMyXImage(void)
 {
 #ifdef HAVE_SHM
     if (Shmem_Flag)

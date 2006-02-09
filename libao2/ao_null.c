@@ -20,7 +20,7 @@ LIBAO_EXTERN(null)
 struct	timeval last_tv;
 int	buffer;
 
-static void drain(){
+static void drain(void){
  
     struct timeval now_tv;
     int temp, temp2;
@@ -70,24 +70,24 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
     buffer=0;
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
     // for now, just call reset();
     reset();
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
 }
 
 // return: how many bytes can be played without blocking
-static int get_space(){
+static int get_space(void){
 
     drain();
     return ao_data.buffersize - buffer;
@@ -106,7 +106,7 @@ static int play(void* data,int len,int flags){
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(){
+static float get_delay(void){
 
     drain();
     return (float) buffer / (float) ao_data.bps;

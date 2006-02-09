@@ -40,7 +40,7 @@ static void Gsm_RPE_Decoding();
 static XA_GSM_STATE gsm_state;
 
 
-void GSM_Init()
+void GSM_Init(void)
 {
   memset((char *)(&gsm_state), 0, sizeof(XA_GSM_STATE));
   gsm_state.nrp = 40;

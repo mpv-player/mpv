@@ -279,7 +279,7 @@ static int nop_streaming_start( stream_t *stream ) {
 }
 
 HTTP_header_t *
-http_new_header() {
+http_new_header(void) {
 	HTTP_header_t *http_hdr;
 
 	http_hdr = (HTTP_header_t*)malloc(sizeof(HTTP_header_t));

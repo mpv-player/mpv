@@ -523,7 +523,7 @@ int MP3_DecodeFrame(unsigned char *hova,short single){
 }
 
 // Prints last frame header in ascii.
-void MP3_PrintHeader(){
+void MP3_PrintHeader(void){
         static char *modes[4] = { "Stereo", "Joint-Stereo", "Dual-Channel", "Single-Channel" };
         static char *layers[4] = { "???" , "I", "II", "III" };
 

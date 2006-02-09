@@ -1,6 +1,6 @@
 
 // dec_audio.c:
-extern void afm_help();
+extern void afm_help(void);
 //extern int init_best_audio_codec(sh_audio_t *sh_audio,char* audio_codec,char* audio_fm);
 extern int init_audio_codec(sh_audio_t *sh_audio);
 extern int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status);

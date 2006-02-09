@@ -256,7 +256,7 @@ vo_functions_t* video_out_drivers[] =
         NULL
 };
 
-void list_video_out(){
+void list_video_out(void){
       int i=0;
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
       if (identify)

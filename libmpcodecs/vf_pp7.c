@@ -212,7 +212,7 @@ static const int thres[16]={
 
 static int thres2[99][16];
 
-static void init_thres2(){
+static void init_thres2(void){
     int qp, i;
     int bias= 0; //FIXME
 

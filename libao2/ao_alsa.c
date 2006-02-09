@@ -237,7 +237,7 @@ static void parse_device (char *dest, const char *src, int len)
     tmp[0] = ':';
 }
 
-static void print_help ()
+static void print_help (void)
 {
   mp_msg (MSGT_AO, MSGL_FATAL,
            "\n-ao alsa commandline help:\n"
@@ -725,7 +725,7 @@ static void uninit(int immed)
   }
 }
 
-static void audio_pause()
+static void audio_pause(void)
 {
     int err;
 
@@ -745,7 +745,7 @@ static void audio_pause()
     }
 }
 
-static void audio_resume()
+static void audio_resume(void)
 {
     int err;
 
@@ -766,7 +766,7 @@ static void audio_resume()
 }
 
 /* stop playing and empty buffers (for seeking/pause) */
-static void reset()
+static void reset(void)
 {
     int err;
 
@@ -1030,7 +1030,7 @@ static int play_mmap(void* data, int len)
 }
 
 /* how many byes are free in the buffer */
-static int get_space()
+static int get_space(void)
 {
     snd_pcm_status_t *status;
     int ret;
@@ -1100,7 +1100,7 @@ static int get_space()
 }
 
 /* delay in seconds between first and last sample in buffer */
-static float get_delay()
+static float get_delay(void)
 {
 
   if (alsa_handler) {

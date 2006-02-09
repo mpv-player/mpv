@@ -159,7 +159,7 @@ static struct cookie_list_type *load_cookies_from(const char *filename,
 }
 
 /* Attempt to load cookies.txt from various locations. Returns a pointer to the linked list contain the cookies. */
-static struct cookie_list_type *load_cookies()
+static struct cookie_list_type *load_cookies(void)
 {
     DIR *dir;
     struct dirent *ent;

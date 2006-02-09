@@ -492,7 +492,7 @@ int sws_chr_hshift= 0;
 float sws_chr_sharpen= 0.0;
 float sws_lum_sharpen= 0.0;
 
-int get_sws_cpuflags(){
+int get_sws_cpuflags(void){
     return 
           (gCpuCaps.hasMMX   ? SWS_CPU_CAPS_MMX   : 0)
 	| (gCpuCaps.hasMMX2  ? SWS_CPU_CAPS_MMX2  : 0)

@@ -159,24 +159,24 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
 
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
     // for now, just call reset();
     reset();
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
 }
 
 // return: how many bytes can be played without blocking
-static int get_space(){
+static int get_space(void){
 
     if(vo_pts)
       return ao_data.pts < vo_pts ? ao_data.outburst : 0;
@@ -210,7 +210,7 @@ static int play(void* data,int len,int flags){
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(){
+static float get_delay(void){
 
     return 0.0;
 }

@@ -95,7 +95,7 @@ typedef struct {
 
 } asmrp_t;
 
-static asmrp_t *asmrp_new () {
+static asmrp_t *asmrp_new (void) {
 
   asmrp_t *p;
 

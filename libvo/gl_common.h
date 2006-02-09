@@ -245,7 +245,7 @@ void releaseGlContext(int *vinfo, HGLRC *context);
 int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win);
 void releaseGlContext(XVisualInfo **vinfo, GLXContext *context);
 #endif
-void swapGlBuffers();
+void swapGlBuffers(void);
 
 extern void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
 extern void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);

@@ -767,7 +767,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 }
 
 #define MAX_CARDS 4
-dvb_config_t *dvb_get_config()
+dvb_config_t *dvb_get_config(void)
 {
 	int i, fd, type, size;
 	char filename[30], *conf_file, *name;

@@ -940,7 +940,7 @@ void vo_setwindow(Window w, GC g)
 }
 #endif
 
-void vo_x11_uninit()
+void vo_x11_uninit(void)
 {
     saver_on(mDisplay);
     if (vo_window != None)

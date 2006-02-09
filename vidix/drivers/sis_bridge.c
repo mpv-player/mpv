@@ -60,7 +60,7 @@ static int sis_do_sense(int tempbl, int tempbh, int tempcl, int tempch)
 
 
 /* sense connected devices on 30x bridge */
-static void sis_sense_30x()
+static void sis_sense_30x(void)
 {
     unsigned char backupP4_0d, backupP2_00, biosflag;
     unsigned char testsvhs_tempbl, testsvhs_tempbh;
@@ -356,7 +356,7 @@ static void sis_sense_30x()
 }
 
 
-static void sis_detect_crt1()
+static void sis_detect_crt1(void)
 {
     unsigned char CR32;
     unsigned char CRT1Detected = 0;
@@ -394,7 +394,7 @@ static void sis_detect_crt1()
 }
 
 
-static void sis_detect_lcd()
+static void sis_detect_lcd(void)
 {
     unsigned char CR32, CR36, CR37;
 
@@ -413,7 +413,7 @@ static void sis_detect_lcd()
 }
 
 
-static void sis_detect_tv()
+static void sis_detect_tv(void)
 {
     unsigned char SR16, SR38, CR32, CR38 = 0, CR79;
     int temp = 0;
@@ -517,7 +517,7 @@ static void sis_detect_tv()
 }
 
 
-static void sis_detect_crt2()
+static void sis_detect_crt2(void)
 {
     unsigned char CR32;
 
@@ -563,7 +563,7 @@ static void sis_detect_crt2()
 
 
 /* Preinit: detect video bridge and sense connected devs */
-static void sis_detect_video_bridge()
+static void sis_detect_video_bridge(void)
 {
     int temp, temp1, temp2;
 
@@ -708,7 +708,7 @@ static void sis_detect_video_bridge()
 
 
 /* detect video bridge type and sense connected devices */
-void sis_init_video_bridge()
+void sis_init_video_bridge(void)
 {
 
     sis_detect_video_bridge();

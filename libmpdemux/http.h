@@ -33,7 +33,7 @@ typedef struct {
 	unsigned int is_parsed;
 } HTTP_header_t;
 
-HTTP_header_t*	http_new_header();
+HTTP_header_t*	http_new_header(void);
 void		http_free( HTTP_header_t *http_hdr );
 int		http_response_append( HTTP_header_t *http_hdr, char *data, int length );
 int		http_response_parse( HTTP_header_t *http_hdr );

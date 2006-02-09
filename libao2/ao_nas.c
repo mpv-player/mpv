@@ -506,7 +506,7 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
 	AuStatus as;
 
 	mp_msg(MSGT_AO, MSGL_DBG3, "ao_nas: reset()\n");
@@ -523,7 +523,7 @@ static void reset(){
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
 	AuStatus as;
 	mp_msg(MSGT_AO, MSGL_DBG3, "ao_nas: audio_pause()\n");
@@ -532,7 +532,7 @@ static void audio_pause()
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
 	AuStatus as;
 
@@ -546,7 +546,7 @@ static void audio_resume()
 
 
 // return: how many bytes can be played without blocking
-static int get_space()
+static int get_space(void)
 {
 	int result;
 	
@@ -597,7 +597,7 @@ static int play(void* data,int len,int flags)
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay()
+static float get_delay(void)
 {
 	float result;
 	

@@ -100,7 +100,7 @@ struct TexSquare
   int dirtyXoff, dirtyYoff, dirtyWidth, dirtyHeight;
 };
 
-static GLint getInternalFormat()
+static GLint getInternalFormat(void)
 {
 #ifdef GL_WIN32
   PIXELFORMATDESCRIPTOR pfd;
@@ -150,7 +150,7 @@ static GLint getInternalFormat()
   return GL_RGB;
 }
 
-static int initTextures()
+static int initTextures(void)
 {
   struct TexSquare *tsq=0;
   GLfloat texpercx, texpercy;
@@ -467,7 +467,7 @@ static void gl_set_antialias (int val)
 }
 
 
-static void drawTextureDisplay ()
+static void drawTextureDisplay (void)
 {
   struct TexSquare *square = texgrid;
   int x, y/*, xoff=0, yoff=0, wd, ht*/;

@@ -24,7 +24,7 @@ int mp_msg_levels[MSGT_MAX]; // verbose level of this module. inited to 2
 int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
 
-void mp_msg_init(){
+void mp_msg_init(void){
     int i;
     char *env = getenv("MPLAYER_VERBOSE");
     if (env)

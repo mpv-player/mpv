@@ -109,6 +109,6 @@ typedef struct {
 
 extern int dvb_step_channel(dvb_priv_t *, int);
 extern int dvb_set_channel(dvb_priv_t *, int, int);
-extern dvb_config_t *dvb_get_config();
+extern dvb_config_t *dvb_get_config(void);
 
 #endif

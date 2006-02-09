@@ -268,7 +268,7 @@ static inline int cue_msf_2_sector(int minute, int second, int frame) {
  return frame + (second + minute * 60 ) * 75;
 }
 
-static inline int cue_get_msf() {
+static inline int cue_get_msf(void) {
   return cue_msf_2_sector (cue_current_pos.minute,
                            cue_current_pos.second,
                            cue_current_pos.frame);
@@ -433,7 +433,7 @@ static int cue_read_cue (char *in_cue_filename)
 
 
 
-static int cue_read_toc_entry() {
+static int cue_read_toc_entry(void) {
 
   int track = cue_current_pos.track - 1;
 
@@ -480,7 +480,7 @@ static int cue_vcd_get_track_end (int track){
   return VCD_SECTOR_DATA * cue_get_msf();
 }
 
-static void cue_vcd_read_toc(){
+static void cue_vcd_read_toc(void){
   int i;
   for (i = 0; i < nTracks; ++i) {
 

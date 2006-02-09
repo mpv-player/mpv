@@ -29,7 +29,7 @@ int fakemono=0;
 int audio_output_channels = 2;
 af_cfg_t af_cfg = {1, NULL}; // Configuration for audio filters
 
-void afm_help(){
+void afm_help(void){
     int i;
     mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_AvailableAudioFm);
     if (identify)
@@ -434,6 +434,6 @@ void skip_audio_frame(sh_audio_t *sh_audio)
   ds_fill_buffer(sh_audio->ds);  // skip block
 }
 
-void adjust_volume()
+void adjust_volume(void)
 {
 }

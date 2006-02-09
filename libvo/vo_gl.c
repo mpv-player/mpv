@@ -147,7 +147,7 @@ static void texSize(int w, int h, int *texw, int *texh) {
 
 //! maximum size of custom fragment program
 #define MAX_CUSTOM_PROG_SIZE (1024 * 1024)
-static void update_yuvconv() {
+static void update_yuvconv(void) {
   float bri = eq_bri / 100.0;
   float cont = (eq_cont + 100) / 100.0;
   float hue = eq_hue / 100.0 * 3.1415927;
@@ -203,7 +203,7 @@ static void update_yuvconv() {
 /**
  * \brief remove all OSD textures and display-lists, thus clearing it.
  */
-static void clearOSD() {
+static void clearOSD(void) {
   int i;
   glDeleteTextures(osdtexCnt, osdtex);
 #ifndef FAST_OSD
@@ -217,7 +217,7 @@ static void clearOSD() {
 /**
  * \brief uninitialize OpenGL context, freeing textures, buffers etc.
  */
-static void uninitGl() {
+static void uninitGl(void) {
   if (DeletePrograms && fragprog)
     DeletePrograms(1, &fragprog);
   fragprog = 0;

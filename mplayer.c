@@ -189,7 +189,7 @@ static int max_framesize=0;
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"
 
-extern void vf_list_plugins();
+extern void vf_list_plugins(void);
 
 //**************************************************************************//
 //**************************************************************************//
@@ -764,7 +764,7 @@ int playtree_add_playlist(play_tree_t* entry)
 
 static int play_tree_step = 1;
 
-int sub_source()
+int sub_source(void)
 {
     int source = -1;
     int top = -1;
@@ -807,7 +807,7 @@ void add_subtitles(char *filename, float fps, int silent)
 }
 
 // FIXME: if/when the GUI calls this, global sub numbering gets (potentially) broken.
-void update_set_of_subtitles()
+void update_set_of_subtitles(void)
     // subdata was changed, set_of_sub... have to be updated.
 {
     int i;
@@ -1022,7 +1022,7 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
  * which need to be fixed while watching the movie.
  */
 
-static void log_sub(){
+static void log_sub(void){
     char *fname;
     FILE *f;
     int i;

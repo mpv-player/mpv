@@ -64,7 +64,7 @@ static int config(struct vf_instance_s* vf,
 
 static double c[64];
 
-static void initIdct()
+static void initIdct(void)
 {
 	int i;
 

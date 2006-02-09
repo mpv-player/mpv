@@ -94,7 +94,7 @@ static void SROUTW(int reg,int val)
 	SROUTB(reg+1,(val>>8)&255);
 }
 
-void DumpRegisters()
+void DumpRegisters(void)
 {
         int reg,val;
 #ifdef DEBUG_LOGFILE

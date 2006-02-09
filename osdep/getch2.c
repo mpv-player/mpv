@@ -118,7 +118,7 @@ int load_termcap(char *termtype){
 
 #endif
 
-void get_screen_size(){
+void get_screen_size(void){
 #ifdef USE_IOCTL
   struct winsize ws;
   if (ioctl(0, TIOCGWINSZ, &ws) < 0 || !ws.ws_row || !ws.ws_col) return;
@@ -217,7 +217,7 @@ found:
 
 static int getch2_status=0;
 
-void getch2_enable(){
+void getch2_enable(void){
 #ifdef HAVE_TERMIOS
 struct termios tio_new;
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__) || defined(__GLIBC__) || defined(_AIX)
@@ -242,7 +242,7 @@ struct termios tio_new;
     getch2_status=1;
 }
 
-void getch2_disable(){
+void getch2_disable(void){
     if(!getch2_status) return; // already disabled / never enabled
 #ifdef HAVE_TERMIOS
 #if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__) || defined(__GLIBC__) || defined(_AIX)

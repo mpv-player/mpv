@@ -2,7 +2,7 @@
 // dec_video.c:
 extern int video_read_properties(sh_video_t *sh_video);
 
-extern void vfm_help();
+extern void vfm_help(void);
 
 extern int init_best_video_codec(sh_video_t *sh_video,char** video_codec_list,char** video_fm_list);
 

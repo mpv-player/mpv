@@ -831,7 +831,7 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
     return i;
 }
 
-static font_desc_t* init_font_desc()
+static font_desc_t* init_font_desc(void)
 {
     font_desc_t *desc;
     int i;
@@ -1089,7 +1089,7 @@ gen_osd:
     return desc;
 }
 
-int init_freetype()
+int init_freetype(void)
 {
     int err;
     
@@ -1104,7 +1104,7 @@ int init_freetype()
     return 0;
 }
 
-int done_freetype()
+int done_freetype(void)
 {
     int err;
 

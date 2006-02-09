@@ -346,7 +346,7 @@ static int play(void* data, int len, int flags)
 /*
  * stop playing, keep buffers (for pause)
  */
-static void audio_pause()
+static void audio_pause(void)
 {
     /*
      * not possible with esd.  the esd daemom will continue playing
@@ -358,7 +358,7 @@ static void audio_pause()
 /*
  * resume playing, after audio_pause()
  */
-static void audio_resume()
+static void audio_resume(void)
 {
     /*
      * not possible with esd.
@@ -375,7 +375,7 @@ static void audio_resume()
 /*
  * stop playing and empty buffers (for seeking/pause)
  */
-static void reset()
+static void reset(void)
 {
 #ifdef	__svr4__
     /* throw away data buffered in the esd connection */
@@ -388,7 +388,7 @@ static void reset()
 /*
  * return: how many bytes can be played without blocking
  */
-static int get_space()
+static int get_space(void)
 {
     struct timeval tmout;
     fd_set wfds;
@@ -432,7 +432,7 @@ static int get_space()
 /*
  * return: delay in seconds between first and last sample in buffer
  */
-static float get_delay()
+static float get_delay(void)
 {
     struct timeval now;
     double buffered_samples_time;

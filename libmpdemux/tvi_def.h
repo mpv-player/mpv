@@ -28,7 +28,7 @@ static tvi_functions_t functions =
     get_audio_framesize
 };
 
-static tvi_handle_t *new_handle()
+static tvi_handle_t *new_handle(void)
 {
     tvi_handle_t *h = (tvi_handle_t *)malloc(sizeof(tvi_handle_t));
 

@@ -59,7 +59,7 @@ void bitstream_set_ptr (uint8_t * buf)
 }
 
 static inline void
-bitstream_fill_current()
+bitstream_fill_current(void)
 {
     uint32_t tmp;
 

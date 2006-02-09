@@ -1144,7 +1144,7 @@ void releaseGlContext(XVisualInfo **vinfo, GLXContext *context) {
   *context = 0;
 }
 
-void swapGlBuffers() {
+void swapGlBuffers(void) {
   glXSwapBuffers(mDisplay, vo_window);
 }
 #endif

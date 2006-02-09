@@ -82,7 +82,7 @@
 /* CR69[0] = 1 : Mem-mapped regs */
 #define USE_MM_FOR_PRI_STREAM_OLD   0x01
 
-void SavageStreamsOn();
+void SavageStreamsOn(void);
 
 /*
  * There are two different streams engines used in the Savage line.
@@ -323,7 +323,7 @@ static struct savage_cards savage_card_ids[] = {
 	{ PCI_CHIP_PROSAVAGE_DDRK	, 			S3_PROSAVAGE },
 };
 
-void SavageSetColorOld()
+void SavageSetColorOld(void)
 {
 
 
@@ -360,7 +360,7 @@ void SavageSetColorOld()
   }
 }
 
-void SavageSetColorKeyOld()
+void SavageSetColorKeyOld(void)
 {
     int red, green, blue;
 
@@ -421,8 +421,8 @@ void SavageSetColorKeyOld()
 
 
 static void
-SavageDisplayVideoOld(
-){
+SavageDisplayVideoOld(void)
+{
     int vgaCRIndex, vgaCRReg, vgaIOBase;
     unsigned int ssControl;
     int cr92;
@@ -528,7 +528,7 @@ SavageDisplayVideoOld(
 
 }
 
-void SavageInitStreamsOld()
+void SavageInitStreamsOld(void)
 {
     /*unsigned long jDelta;*/
     unsigned long format = 0;
@@ -582,7 +582,7 @@ void SavageInitStreamsOld()
 }
 
 void 
-SavageStreamsOn()
+SavageStreamsOn(void)
 {
      unsigned char jStreamsControl;
      unsigned short vgaCRIndex = 0x3d0 + 4;
@@ -726,7 +726,7 @@ static void savage_getscreenproperties(struct savage_info *info){
 }
 
 
-void SavageStreamsOff()
+void SavageStreamsOff(void)
 {
     unsigned char jStreamsControl;
     unsigned short vgaCRIndex = 0x3d0 + 4;

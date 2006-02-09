@@ -240,7 +240,7 @@ static off_t seek_to_byte=0;
 
 static char * frameno_filename=NULL;
 
-static void parse_end_at();
+static void parse_end_at(void);
 static char * end_at_string=0;
 //static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
 
@@ -1571,7 +1571,7 @@ if(stream) free_stream(stream); // kill cache thread
 return interrupted;
 }
 
-static void parse_end_at()
+static void parse_end_at(void)
 {
 
     end_at_type = END_AT_NONE;

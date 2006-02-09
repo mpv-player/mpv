@@ -45,7 +45,7 @@ static uint32_t center=0;
 static vidix_grkey_t gr_key;
 
 
-static uint32_t setup_vidix(){
+static uint32_t setup_vidix(void){
   int x=vo_dx,y=vo_dy;
   aspect(&vo_dwidth,&vo_dheight,vo_fs ? A_ZOOM : A_NOZOOM);  
   if(vo_fs || center){

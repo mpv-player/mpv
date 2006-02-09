@@ -747,7 +747,7 @@ static void codecs_free(codecs_t* codecs,int count) {
 			free(codecs);
 }
 
-void codecs_uninit_free() {
+void codecs_uninit_free(void) {
 	if (video_codecs)
 	codecs_free(video_codecs,nr_vcodecs);
 	video_codecs=NULL;
