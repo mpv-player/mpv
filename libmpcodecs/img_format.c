@@ -1,3 +1,4 @@
+#include "config.h"
 #include "img_format.h"
 
 char *vo_format_name(int format)
