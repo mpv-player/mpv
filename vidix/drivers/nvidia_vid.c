@@ -144,6 +144,7 @@ static struct nvidia_cards nvidia_card_ids[] = {
   {DEVICE_NVIDIA_NV31_GEFORCE_FX2,NV_ARCH_30}, 
   {DEVICE_NVIDIA_NV34_GEFORCE_FX,NV_ARCH_30}, 
   {DEVICE_NVIDIA_NV34_GEFORCE_FX2,NV_ARCH_30}, 
+  {DEVICE_NVIDIA_NV34_GEFORCE_FX3,NV_ARCH_30},
   {DEVICE_NVIDIA_NV34M_GEFORCE_FX,NV_ARCH_30}, 
   {DEVICE_NVIDIA_NV34GL_QUADRO_FX,NV_ARCH_30}, 
   {DEVICE_NVIDIA_NV35_GEFORCE_FX,NV_ARCH_30}, 
@@ -328,7 +329,7 @@ static unsigned long rivatv_fbsize_nv04 (struct rivatv_chip *chip){
 }
 
 static unsigned long rivatv_fbsize_nv10 (struct rivatv_chip *chip){
-	return ((VID_RD32 (chip->PFB, 0x20C) >> 20) & 0x000000FF) * 1024 * 1024;
+	return VID_RD32 (chip->PFB, 0x20C) & 0xFFF00000;
 }
 
 //lock funcs
@@ -479,15 +480,13 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
 }
 
 static void nv_getscreenproperties(struct rivatv_info *info){
-  uint32_t bpp=0;
+  uint32_t bpp=0,x;
   info->chip.lock(&info->chip, 0);
   /*get screen depth*/
   VID_WR08(info->chip.PCIO, 0x03D4,0x28);
   bpp = VID_RD08(info->chip.PCIO,0x03D5)&0x3;
-  if(bpp==3)bpp=4;
   if((bpp == 2) && (VID_RD32(info->chip.PVIDEO,0x600) & 0x00001000) == 0x0)info->depth=15;
-  else info->depth = bpp*8;
-  info->bps=bpp;
+  else info->depth = 0x04 << bpp;
   /*get screen width*/
   VID_WR08(info->chip.PCIO, 0x03D4, 0x1);
   info->screen_x = (1 + VID_RD08(info->chip.PCIO, 0x3D5)) * 8;
@@ -501,6 +500,17 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   /* and the 10th in CRTC_OVERFLOW*/
   info->screen_y |=(VID_RD08(info->chip.PCIO,0x03D5) &0x40)<<3;
   ++info->screen_y;
+
+  /* NV_PCRTC_OFFSET */
+  VID_WR08 (info->chip.PCIO, 0x3D4, 0x13);
+  x = VID_RD08 (info->chip.PCIO, 0x3D5);
+  /* NV_PCRTC_REPAINT0_OFFSET_10_8 */
+  VID_WR08 (info->chip.PCIO, 0x3D4, 0x19);
+  x |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0xE0) << 3;
+  /* NV_PCRTC_EXTRA_OFFSET_11 */
+  VID_WR08 (info->chip.PCIO, 0x3D4, 0x25);
+  x |= (VID_RD08 (info->chip.PCIO, 0x3D5) & 0x20) << 6; x <<= 3;
+  info->bps = x * bpp;
 }
 
 
@@ -746,6 +756,8 @@ int vixInit(void){
 	{
 		info->video_base = map_phys_mem(pci_info.base1, info->chip.fbsize);
 		info->picture_offset = info->chip.fbsize - NV04_BES_SIZE;
+		if(info->chip.fbsize > 16*1024*1024)
+			info->picture_offset -= NV04_BES_SIZE;
 //		info->picture_base = (unsigned long)map_phys_mem(pci_info.base1+info->picture_offset,NV04_BES_SIZE);
 		info->picture_base = info->video_base + info->picture_offset;
 		break;
