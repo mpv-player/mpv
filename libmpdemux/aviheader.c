@@ -432,7 +432,7 @@ if (priv->suidx_size > 0 && priv->idx_size == 0) {
     priv->isodml = 1;
 }
 
-if (priv->isodml && (index_mode==-1 || index_mode==0)) {
+if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
     int i, j, k;
     int safety=1000;
 
