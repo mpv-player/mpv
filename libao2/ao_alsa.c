@@ -1037,35 +1037,20 @@ static int get_space(void)
 /* delay in seconds between first and last sample in buffer */
 static float get_delay(void)
 {
-
   if (alsa_handler) {
-
-    snd_pcm_status_t *status;
-    float ret;
+    snd_pcm_sframes_t delay;
     
-    snd_pcm_status_alloca(&status);
+    if (snd_pcm_delay(alsa_handler, &delay) < 0)
+      return 0;
     
-    if ((ret = snd_pcm_status(alsa_handler, status)) < 0)
-    {
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-delay: cannot get pcm status: %s\n", snd_strerror(ret));
+    if (delay < 0) {
+      /* underrun - move the application pointer forward to catch up */
+#if SND_LIB_VERSION >= 0x000901 /* snd_pcm_forward() exists since 0.9.0rc8 */
+      snd_pcm_forward(alsa_handler, -delay);
+#endif
+      delay = 0;
     }
-    
-    switch(snd_pcm_status_get_state(status))
-    {
-	case SND_PCM_STATE_OPEN:
-	case SND_PCM_STATE_PREPARED:
-	case SND_PCM_STATE_RUNNING:
-	    ret = (float)snd_pcm_status_get_delay(status)/(float)ao_data.samplerate;
-	    break;
-	default:
-	    ret = 0;
-    }
-    
-
-    if (ret < 0)
-      ret = 0;
-    return(ret);
-    
+    return (float)delay / (float)ao_data.samplerate;
   } else {
     return(0);
   }
