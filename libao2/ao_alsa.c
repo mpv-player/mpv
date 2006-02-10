@@ -545,37 +545,9 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return(0);
         }
 
-    ao_data.bps = ao_data.channels * ao_data.samplerate;
-
-    //setting bw according to the input-format. resolution seems to be always s16_le or
-    //u16_le so 32bit is probably obsolet. 
-    switch(alsa_format)
-      {
-      case SND_PCM_FORMAT_S8:
-      case SND_PCM_FORMAT_U8:
-	ao_data.bps *= 1;
-	break;
-      case SND_PCM_FORMAT_S16_LE:
-      case SND_PCM_FORMAT_U16_LE:
-      case SND_PCM_FORMAT_S16_BE:
-      case SND_PCM_FORMAT_U16_BE:
-	ao_data.bps *= 2;
-	break;
-      case SND_PCM_FORMAT_S32_LE:
-      case SND_PCM_FORMAT_S32_BE:
-      case SND_PCM_FORMAT_FLOAT_LE:
-	ao_data.bps *= 4;
-	break;
-      case -1:
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: invalid format (%s) requested - output disabled\n",af_fmt2str_short(format));
-	return(0);
-	break;
-      default:
-	ao_data.bps *= 2;
-	mp_msg(MSGT_AO,MSGL_WARN,"alsa-init: couldn't convert to right format. setting bps to: %d", ao_data.bps);
-      }
-
-    bytes_per_sample = ao_data.bps / ao_data.samplerate;
+      bytes_per_sample = snd_pcm_format_physical_width(alsa_format) / 8;
+      bytes_per_sample *= ao_data.channels;
+      ao_data.bps = ao_data.samplerate * bytes_per_sample;
 
 #ifdef BUFFERTIME
       {
