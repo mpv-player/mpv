@@ -55,21 +55,18 @@ static snd_pcm_format_t alsa_format;
 static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 
-/* possible 4096, original 8192 
- * was only needed for calculating chunksize? */
-static int alsa_fragsize = 4096;
 /* 16 sets buffersize to 16 * chunksize is as default 1024
  * which seems to be good avarge for most situations 
  * so buffersize is 16384 frames by default */
 static int alsa_fragcount = 16;
-static snd_pcm_uframes_t chunk_size = 1024;//is alsa_fragsize / 4
+static snd_pcm_uframes_t chunk_size = 1024;
 
 static size_t bits_per_sample, bytes_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
-int ao_mmap = 0;
-int ao_noblock = 0;
-int first = 1;
+static int ao_mmap = 0;
+static int ao_noblock = 0;
+static int first = 1;
 
 static int open_mode;
 static int set_block_mode;
@@ -264,9 +261,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 {
     int err;
     int cards = -1;
-    snd_pcm_info_t *alsa_info;
     char *str_block_mode;
-    int dir = 0;
     int block;
     strarg_t device;
     snd_pcm_uframes_t bufsize;
@@ -551,7 +546,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	}
 
       if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, 
-						 &ao_data.samplerate, &dir)) < 0) 
+						 &ao_data.samplerate, NULL)) < 0) 
         {
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set samplerate-2: %s\n",
 		 snd_strerror(err));
@@ -568,7 +563,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	int alsa_period_time;
 	alsa_period_time = alsa_buffer_time/4;
 	if ((err = snd_pcm_hw_params_set_buffer_time_near(alsa_handler, alsa_hwparams, 
-							  &alsa_buffer_time, &dir)) < 0)
+							  &alsa_buffer_time, NULL)) < 0)
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set buffer time near: %s\n",
 		   snd_strerror(err));
@@ -577,7 +572,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    alsa_buffer_time = err;
 
 	if ((err = snd_pcm_hw_params_set_period_time_near(alsa_handler, alsa_hwparams, 
-							  &alsa_period_time, &dir)) < 0)
+							  &alsa_period_time, NULL)) < 0)
 	  /* original: alsa_buffer_time/ao_data.bps */
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set period time: %s\n",
@@ -591,9 +586,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 #ifdef SET_CHUNKSIZE
       {
 	//set chunksize
-	dir=0;
 	if ((err = snd_pcm_hw_params_set_period_size_near(alsa_handler, alsa_hwparams, 
-							  &chunk_size, &dir)) < 0)
+							  &chunk_size, NULL)) < 0)
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periodsize(%ld): %s\n",
 			    chunk_size, snd_strerror(err));
@@ -602,7 +596,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: chunksize set to %li\n", chunk_size);
 	}
 	if ((err = snd_pcm_hw_params_set_periods_near(alsa_handler, alsa_hwparams,
-						      &alsa_fragcount, &dir)) < 0) {
+						      &alsa_fragcount, NULL)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periods: %s\n", 
 		 snd_strerror(err));
 	}
