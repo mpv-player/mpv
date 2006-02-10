@@ -1828,7 +1828,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	tff = (vpriv->trf & 0x2) ? 0x80 : 0;
 	rff = (vpriv->trf & 0x1) ? 0x2 : 0;
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
-	pce_ptr[3] = (pce_ptr[3] & 0xfd) | tff | rff;
+	pce_ptr[3] = (pce_ptr[3] & 0x7d) | tff | rff;
 	pce_ptr[4] |= 0x80;	//sets progressive frame
 	
 	if(! vpriv->vframes)
