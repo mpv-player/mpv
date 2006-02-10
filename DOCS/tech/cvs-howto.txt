@@ -155,9 +155,9 @@ II. POLICY / RULES:
 3. Do not commit unrelated changes together, split them into self-contained
    pieces.
 
-4. Do not change behavior of the program (renaming options etc) without
-   first discussing it on the mplayer-dev-eng mailing list. Do not remove
-   functionality from the code. Just improve!
+4. Do not change behavior of the program (renaming options etc) or
+   remove functionality from the code without first discussing it
+   on the mplayer-dev-eng mailing list.
 
 5. Do not commit changes to the build system (Makefiles, configure script)
    which change behaviour, defaults etc, without asking first. The same
