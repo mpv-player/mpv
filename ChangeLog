@@ -38,6 +38,7 @@ MPlayer (1.0)
     * fallback to next vo if vo_3dfx failed to init
     * improved XvMC library detection (disabled by default)
     * DPI (Print-Resolution) and Pixel-Aspect support in vo_jpeg
+    * ALSA audio output: several small fixes and improvements
 
     Decoders:
     * Indeo2 (RT21) support via lavc
