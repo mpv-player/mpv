@@ -64,8 +64,6 @@ static int alsa_fragsize = 4096;
 static int alsa_fragcount = 16;
 static snd_pcm_uframes_t chunk_size = 1024;//is alsa_fragsize / 4
 
-#define MIN_CHUNK_SIZE 1024
-
 static size_t bits_per_sample, bytes_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
@@ -1021,9 +1019,6 @@ static int get_space(void)
 {
     snd_pcm_status_t *status;
     int ret;
-    char *str_status;
-
-    //snd_pcm_sframes_t avail_frames = 0;
     
     snd_pcm_status_alloca(&status);
     
@@ -1033,56 +1028,9 @@ static int get_space(void)
 	return(0);
     }
     
-    switch(snd_pcm_status_get_state(status))
-    {
-    case SND_PCM_STATE_OPEN:
-      str_status = "open";
-      ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
-      break;
-    case SND_PCM_STATE_PREPARED:
-	str_status = "prepared";
-	first = 1;
-	ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
-	if (ret == 0) //ugly workaround for hang in mmap-mode
-	  ret = 10;
-	break;
-    case SND_PCM_STATE_RUNNING:
-      ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
-      //avail_frames = snd_pcm_avail_update(alsa_handler) * bytes_per_sample;
-      if (str_status != "open" && str_status != "prepared")
-	str_status = "running";
-      break;
-    case SND_PCM_STATE_PAUSED:
-      mp_msg(MSGT_AO,MSGL_V,"alsa-space: paused");
-      str_status = "paused";
-      ret = 0;
-      break;
-    case SND_PCM_STATE_XRUN:
-      xrun("space");
-      str_status = "xrun";
-      first = 1;
-      ret = 0;
-      break;
-    default:
-      str_status = "undefined";
-      ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
-      if (ret <= 0) {
-	xrun("space");
-      }
-    }
-
-    if (snd_pcm_status_get_state(status) != SND_PCM_STATE_RUNNING)
-      mp_msg(MSGT_AO,MSGL_V,"alsa-space: free space = %i, %s --\n", ret, str_status);
-    
-    if (ret < 0) {
-      mp_msg(MSGT_AO,MSGL_ERR,"negative value!!\n");
-      ret = 0;
-    }
- 
-    // workaround for too small value returned
-    if (ret < MIN_CHUNK_SIZE)
-      ret = 0;
-
+    ret = snd_pcm_status_get_avail(status) * bytes_per_sample;
+    if (ret > MAX_OUTBURST)
+	    ret = MAX_OUTBURST;
     return(ret);
 }
 
