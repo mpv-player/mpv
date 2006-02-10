@@ -662,11 +662,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    mp_msg(MSGT_AO,MSGL_V,"alsa-init: bits per sample (bps)=%i, bits per frame (bpf)=%i, chunk_bytes=%i\n",bits_per_sample,bits_per_frame,chunk_bytes);}
 	//end swparams
 
-      if ((err = snd_pcm_prepare(alsa_handler)) < 0)
-	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: pcm prepare error: %s\n", snd_strerror(err));
-	}
-
       mp_msg(MSGT_AO,MSGL_INFO,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
 	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
@@ -686,14 +681,6 @@ static void uninit(int immed)
 
     if (!immed)
       snd_pcm_drain(alsa_handler);
-
-    if (!ao_noblock) {
-      if ((err = snd_pcm_drop(alsa_handler)) < 0)
-	{
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-uninit: pcm drop error: %s\n", snd_strerror(err));
-	  return;
-	}
-    }
 
     if ((err = snd_pcm_close(alsa_handler)) < 0)
       {
