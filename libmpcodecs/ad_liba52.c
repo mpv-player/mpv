@@ -288,6 +288,10 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     sample_t level=a52_level, bias=384;
     int flags=a52_flags|A52_ADJUST_LEVEL;
     int i,len=-1;
+	if (maxlen / sh_audio->samplesize / 256 / sh_audio->channels < 6) {
+	    mp_msg(MSGT_DECAUDIO, MSGL_V, "maxlen too small in decode_audio\n");
+	    return len;
+	}
 	if (sh_audio->sample_format == AF_FORMAT_FLOAT_NE)
 	    bias = 0;
 	if(!sh_audio->a_in_buffer_len) 
