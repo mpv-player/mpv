@@ -172,6 +172,7 @@ stream_header:
     time_base_nom                       v
     time_base_denom                     v
     msb_pts_shift                       v
+    max_pts_distance                    v
     decode_delay                        v
     fixed_fps                           u(1)
     reserved                            u(7)
@@ -371,6 +372,12 @@ max_distance
     good reason to set it higher, otherwise reasonable error recovery will
     be impossible
 
+max_pts_distance
+    max absoloute difference of pts of new frame from last_pts in the
+    timebase of the stream, without a syncpoint immediately before the
+    frame. Note that last_pts is not necessarily the pts of the last frame
+    on the same stream, as it is altered by syncpoint timestamps.
+
 stream_id
     Stream identifier
     stream_id MUST be < stream_count
@@ -546,7 +553,7 @@ samplerate_nom / samplerate_denom = samplerate
     the number of samples per second
 
 checksum
-    adler32 checksum
+    crc32 checksum
     checksum is calculated for the area pointed to by forward_ptr not
     including the checksum itself (from first byte after the
     forward_ptr until last byte before the checksum).
