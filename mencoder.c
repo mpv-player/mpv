@@ -721,6 +721,7 @@ if(!muxer) {
   mp_msg(MSGT_MENCODER, MSGL_FATAL, "Cannot initialize muxer.");
   mencoder_exit(1,NULL);
 }
+if(out_file_format == MUXER_TYPE_MPEG) audio_preload = 0;
 
 // ============= VIDEO ===============
 
