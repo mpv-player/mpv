@@ -6178,6 +6178,8 @@ _def_libpostproc='#undef USE_LIBPOSTPROC'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
 if test "$_libpostproc" = yes ; then
   _def_libpostproc='#define USE_LIBPOSTPROC 1'
+  _ld_libpostproc='libavcodec/libpostproc/libpostproc.a'
+  _dep_libpostproc='libavcodec/libpostproc/libpostproc.a'
 else
   if test "$_libpostproc_so" = yes ; then
     _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
@@ -7268,7 +7270,7 @@ W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
 DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
-AV_DEP = $_dep_libavcodec $_dep_libavformat $_dep_libavutil
+AV_DEP = $_dep_libavcodec $_dep_libavformat $_dep_libavutil $_dep_libpostproc
 AV_LIB = $_ld_libavcodec  $_ld_libavformat  $_ld_libavutil  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
 CONFIG_LIBAVCODEC = $_libavcodec
