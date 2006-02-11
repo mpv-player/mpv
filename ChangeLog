@@ -131,6 +131,7 @@ MPlayer (1.0)
     * -af pan command line fix, now outputs the right number of channels
       and accepts values < 0 or > 1. Channel order had to be changed.
     * negative stride support in swscale
+    * big-endian and AltiVec fixes and performance improvements for swscaler
     * -srate fixed
     * hqdn3d: 2.5x faster temporal-only, 1.6x faster spatial-only
 
