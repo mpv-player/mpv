@@ -1927,6 +1927,8 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		} 
 		else 
 		{
+			if(!spriv->nom_delta_pts)	//workaround: lavf doesn't sync to sequence headers before passing demux_packets
+				spriv->delta_pts = spriv->nom_delta_pts = parse_fps(fps);
 			pt = (s->buffer[ptr+5] & 0x1c) >> 3;
 			temp_ref = (s->buffer[ptr+4]<<2)+(s->buffer[ptr+5]>>6);
 			if(!spriv->vframes)
