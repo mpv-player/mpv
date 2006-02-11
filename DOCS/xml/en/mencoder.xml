@@ -321,7 +321,7 @@ Two pass encode of the second track a DVD to an MPEG-4 (&quot;DivX&quot;)
 AVI while copying the audio track.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -335,7 +335,7 @@ Be careful using this method as it may lead to audio/video desync in
 some cases.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>output.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -395,7 +395,7 @@ If it is not specified, <application>MEncoder</application> will use 2: bicubic.
 <para>
 Usage:
 <screen>
-mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vf scale=640:480 -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -442,7 +442,7 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
 <para>
 Example:
 <screen>
-mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 
@@ -480,7 +480,7 @@ The explanation of the <option>-mf</option> option is in the man page.
 <para>
 Creating an MPEG-4 file from all the JPEG files in the current directory:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -489,7 +489,7 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=m
 <para>
 Creating an MPEG-4 file from some JPEG files in the current directory:
 <screen>
-mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -596,7 +596,7 @@ before starting.
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
@@ -646,7 +646,7 @@ See the man page for the usage of the <systemitem>cropdetect</systemitem> and
 
 <para>
 Usage
-<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>output.avi</replaceable></screen>
+<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>output.avi</replaceable></screen>
 </para>
 </sect1>
 
