@@ -1394,7 +1394,10 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <emphasis role="bold">Hardware compatibility</emphasis>:
   It usually takes a long time for standalone video players to begin to
   include support for the latest video codecs.
-  As a result, most only support MPEG-2 and MPEG-4 ASP
+  As a result, most only support MPEG-1 (like VCD, XVCD and KVCD), MPEG-2
+  (like DVD, SVCD and KVCD) and MPEG-4 ASP (like DivX,
+  <systemitem class="library">libavcodec</systemitem>'s LMP4 and
+  <systemitem class="library">XviD</systemitem>)
   (Beware: Usually, not all MPEG-4 ASP features are supported).
   Please refer to the technical specs of your player (if they are available),
   or google around for more information.
