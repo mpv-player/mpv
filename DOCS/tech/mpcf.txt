@@ -265,6 +265,7 @@ index:
         }
     }
     reserved_bytes
+    index_ptr                           u(64)
     checksum                            u(32)
 
 info_frame: (optional)
@@ -324,9 +325,6 @@ file:
                 syncpoint
             frame
         }
-    }
-    if (has_index){
-        index_ptr                       u(64)
     }
 
 
@@ -605,10 +603,11 @@ eor_pts
     that EOR. EOR is unset by the first keyframe after it.
 
 index_ptr
-    Length in bytes from the first byte of the index startcode to the first
-    byte of the index_ptr. If there is no index, index_ptr MUST NOT be
-    written. If there are several indexes, index_ptr MUST point to the last
-    index.
+    Length in bytes of the entire index, from the first byte of the
+    startcode until the last byte of the checksum.
+    Note: A demuxer can use this to find the index when it is written at
+    EOF, as index_ptr will always be 12 bytes before the end of file if
+    there is an index at all.
 
 id
     the ID of the type/name pair, so it is more compact
