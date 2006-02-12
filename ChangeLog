@@ -155,6 +155,8 @@ MPlayer (1.0)
     * twolame support
     * libavformat muxers support
     * VBR audio in MPEG support
+    * muxer_mpeg: added an experimental film2pal teleciner and fixed previous bugs that could 
+      lead to desync and to wrong TFF/RFF flags being set
 
     Ports:
     * improved timer function on Mac OS X
