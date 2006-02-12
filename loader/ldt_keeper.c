@@ -244,6 +244,9 @@ ldt_fs_t* Setup_LDT_Keeper(void)
             perror("install_fs");
 	    printf("Couldn't install fs segment, expect segfault\n");
             printf("Did you reconfigure the kernel with \"options USER_LDT\"?\n");
+#ifdef __OpenBSD__
+	    printf("On newer OpenBSD systems did you set machdep.userldt to 1?\n");
+#endif
         }
     }
 #endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ || __DragonFly__ */
