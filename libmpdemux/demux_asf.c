@@ -446,7 +446,8 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
     sh_video_t *sh_video=NULL;
 
     //---- ASF header:
-    read_asf_header(demuxer);
+    if (!read_asf_header(demuxer))
+        return NULL;
     stream_reset(demuxer->stream);
     stream_seek(demuxer->stream,demuxer->movi_start);
 //    demuxer->idx_pos=0;
