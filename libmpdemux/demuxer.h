@@ -190,17 +190,18 @@ inline static demux_packet_t* new_demux_packet(int len){
   dp->flags=0;
   dp->refcount=1;
   dp->master=NULL;
-  dp->buffer=len?(unsigned char*)malloc(len+8):NULL;
-  if(len) memset(dp->buffer+len,0,8);
+  if (len > 0 && (dp->buffer = malloc(len + 8)))
+    memset(dp->buffer + len, 0, 8);
+  else
+    dp->len = 0;
   return dp;
 }
 
 inline static void resize_demux_packet(demux_packet_t* dp, int len)
 {
-  if(len)
+  if(len > 0)
   {
      dp->buffer=(unsigned char *)realloc(dp->buffer,len+8);
-     memset(dp->buffer+len,0,8);
   }
   else
   {
@@ -208,6 +209,10 @@ inline static void resize_demux_packet(demux_packet_t* dp, int len)
      dp->buffer=NULL;
   }
   dp->len=len;
+  if (dp->buffer)
+     memset(dp->buffer + len, 0, 8);
+  else
+     dp->len = 0;
 }
 
 inline static demux_packet_t* clone_demux_packet(demux_packet_t* pack){
