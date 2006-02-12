@@ -190,7 +190,7 @@ inline static demux_packet_t* new_demux_packet(int len){
   dp->flags=0;
   dp->refcount=1;
   dp->master=NULL;
-  if (len > 0 && (dp->buffer = malloc(len + 8)))
+  if (len > 0 && (dp->buffer = (unsigned char *)malloc(len + 8)))
     memset(dp->buffer + len, 0, 8);
   else
     dp->len = 0;
