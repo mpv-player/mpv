@@ -151,6 +151,11 @@ main header:
             tmp_reserved[i]             v
         }
         for(j=0; j<count && i<256; j++, i++){
+            if (i == 'N') {
+                flags[i]= 4;
+                j--;
+                continue;
+            }
             flags[i]= tmp_flag;
             stream_flags[i]= tmp_sflag;
             stream_id_plus1[i]= tmp_stream;
@@ -468,8 +473,6 @@ flags[frame_code]
                           otherwise data_size_msb is 0
       2  more_flags       if set, stream control flags are at frame header.
       4  invalid          if set, frame_code is invalid.
-
-    frame_code=78 ('N') MUST have flags=64
 
 stream_flags
     stream_flags is "stream_flags[frame_code] ^ coded_stream_flags"
