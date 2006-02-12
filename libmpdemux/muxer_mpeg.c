@@ -1861,7 +1861,9 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 			{
 				if(rest1)
 				{
-					vpriv->delay_rff = 4;	//delay of 3 frames the setting, so we don't have 2 consecutive rff
+					//delay the setting by 6 frames, so we don't have 2 consecutive rff
+					//and the transition will be smoother (halfway in the 12-frames sequence)
+					vpriv->delay_rff = 7;
 					mp_msg(MSGT_MUXER, MSGL_V, "\r\nDELAYED: %d\r\n", rest2);
 				}
 				else
