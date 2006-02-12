@@ -535,7 +535,7 @@ if test -z "$_target" ; then
       sparc) host_arch=sparc ;;
       sparc64) host_arch=sparc64 ;;
       parisc*|hppa*|9000*) host_arch=hppa ;;
-      arm*) host_arch=arm ;;
+      arm*|zaurus|cats) host_arch=arm ;;
       s390) host_arch=s390 ;;
       s390x) host_arch=s390x ;;
       mips*) host_arch=mips ;;
