@@ -145,6 +145,7 @@ typedef struct {
 
 typedef struct {
 	int has_pts, has_dts, pes_is_aligned, type, is_late, min_pes_hlen, psm_fixed;
+	int real_framerate, delay_rff;
 	uint64_t pts, last_pts, last_dts, dts, init_pts, init_dts, size, frame_duration, delta_pts, nom_delta_pts, frame_size, last_saved_pts;
 	uint32_t buffer_size;
 	uint8_t pes_priv_headers[4], has_pes_priv_headers;	//for A52 and LPCM
@@ -163,6 +164,8 @@ typedef struct {
 	mp_mpeg_header_t picture;
 } muxer_headers_t;
 
+#define PULLDOWN32 1
+#define TELECINE_FILM2PAL 2
 
 m_option_t mpegopts_conf[] = {
 	{"format", &(conf_mux), CONF_TYPE_STRING, 0, 0 ,0, NULL},
@@ -181,7 +184,8 @@ m_option_t mpegopts_conf[] = {
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"skip_padding", &conf_skip_padding, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, PULLDOWN32, NULL},
+	{"film2pal", &conf_telecine, CONF_TYPE_FLAG, 0, 0, TELECINE_FILM2PAL, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -1788,7 +1792,9 @@ static uint64_t parse_fps(float fps)
 static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_ptr, uint8_t *pce_ptr, int n)
 {
 	uint8_t fps, tff, rff; 
+	int period; 
 	
+	period = (vpriv->telecine == TELECINE_FILM2PAL) ? 12 : 4;
 	if(fps_ptr != NULL)
 	{
 		fps = *fps_ptr & 0x0f;
@@ -1798,8 +1804,16 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 			vpriv->telecine = 0;
 			return 0;
 		}
+		if(vpriv->telecine == TELECINE_FILM2PAL)
+		{
+			*fps_ptr = (*fps_ptr & 0xf0) | FRAMERATE_25;
+			vpriv->nom_delta_pts = parse_fps(25.0);
+		}
+		else
+		{
 		*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
 		vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 30000.0/1001.0 : 30.0);
+		}
 	}
 	
 	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
@@ -1821,19 +1835,66 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	if(! vpriv->vframes)	//initial value of tff
 		vpriv->trf = (pce_ptr[3] >> 6) & 0x2;
 
-	while(n < 0) n+=4;
-	vpriv->trf = (vpriv->trf + n) % 4;
+	while(n < 0) n+=period;
+	vpriv->trf = (vpriv->trf + n) % period;
 	
 	//sets curent tff/rff bits
+	if(vpriv->telecine == TELECINE_FILM2PAL)
+	{
+		//repeat 1 field every 12 frames
+		int rest1 = (vpriv->trf % period) == 11;
+		int rest2 = vpriv->vframes % 999;
+		
+		rff = 0;
+		if(rest1)
+			rff = 2;
+
+		if(vpriv->real_framerate == FRAMERATE_23976)
+		{
+			//we have to inverse the 1/1000 framedrop, repeating two fields in a sequence of 999 frames
+			//486 and 978 are ideal because they are halfway in the sequence 
+			//additionally x % 12 == 6 (halfway between two frames with rff set)
+			//and enough in advance to check if rest1 is valid too, 
+			//so we can delay the setting of rff to current_frame+3 with no risk to leave the 
+			//current sequence unpatched
+			if(rest2 == 486 || rest2 == 978)
+			{
+				if(rest1)
+				{
+					vpriv->delay_rff = 4;	//delay of 3 frames the setting, so we don't have 2 consecutive rff
+					mp_msg(MSGT_MUXER, MSGL_V, "\r\nDELAYED: %d\r\n", rest2);
+				}
+				else
+					rff = 2;
+			}
+	
+			if(!rest1 && vpriv->delay_rff)
+			{
+				vpriv->delay_rff--;
+				if(vpriv->delay_rff == 1)
+				{
+					rff = 2;
+					vpriv->delay_rff = 0;
+					mp_msg(MSGT_MUXER, MSGL_V, "\r\nRECOVERED: %d\r\n", rest2);
+				}
+			}
+		}
+		
+		pce_ptr[3] = (pce_ptr[3] & 0xfd) | rff;
+	}
+	else
+	{
 	tff = (vpriv->trf & 0x2) ? 0x80 : 0;
 	rff = (vpriv->trf & 0x1) ? 0x2 : 0;
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
 	pce_ptr[3] = (pce_ptr[3] & 0x7d) | tff | rff;
+	}
 	pce_ptr[4] |= 0x80;	//sets progressive frame
+	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nTRF: %d, TFF: %d, RFF: %d, n: %d\n", vpriv->trf, tff >> 7, rff >> 1, n);
+	
 	
 	if(! vpriv->vframes)
 		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
-		framerates[fps+3], tff >> 7, rff >> 1);
+		framerates[(vpriv->telecine == TELECINE_FILM2PAL) ? FRAMERATE_25 : fps+3], tff >> 7, rff >> 1);
 	
 	return 1;
 }
@@ -1861,6 +1922,7 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 		if(s->buffer[3] == 0xb3) //sequence
 		{
 			fps_ptr = &(s->buffer[7]);
+			spriv->real_framerate = *fps_ptr & 0x0f;
 			mp_header_process_sequence_header(&(spriv->picture), &(s->buffer[4]));
 			spriv->delta_pts = spriv->nom_delta_pts = parse_fps(spriv->picture.fps);
 			
