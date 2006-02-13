@@ -63,7 +63,6 @@ static snd_pcm_uframes_t chunk_size = 1024;
 static size_t bits_per_sample, bytes_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
-static int ao_mmap = 0;
 static int ao_noblock = 0;
 
 static int open_mode;
@@ -261,7 +260,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     strarg_t device;
     snd_pcm_uframes_t bufsize;
     opt_t subopts[] = {
-      {"mmap", OPT_ARG_BOOL, &ao_mmap, NULL},
       {"block", OPT_ARG_BOOL, &block, NULL},
       {"device", OPT_ARG_STR, &device, (opt_test_f)str_maxlen},
       {NULL}
@@ -345,7 +343,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     
     //subdevice parsing
     // set defaults
-    ao_mmap = 0;
     block = 1;
     /* switch for spdif
      * sets opening sequence for SPDIF
@@ -404,8 +401,6 @@ static int init(int rate_hz, int channels, int format, int flags)
         print_help();
         return 0;
     }
-    if (ao_mmap)
-      mp_msg(MSGT_AO,MSGL_WARN,"alsa-init: mmap option is obsolete and has no effect");
     ao_noblock = !block;
     parse_device(alsa_device, device.str, device.len);
 
