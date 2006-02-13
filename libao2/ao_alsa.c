@@ -739,10 +739,7 @@ static void reset(void)
 
 static int play(void* data, int len, int flags)
 {
-
-  //bytes_per_sample is always 4 for 2 chn S16_LE
   int num_frames = len / bytes_per_sample;
-  char *output_samples = (char *)data;
   snd_pcm_sframes_t res = 0;
 
   //mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: frames=%i, len=%i\n",num_frames,len);
@@ -752,39 +749,33 @@ static int play(void* data, int len, int flags)
     return 0;
   }
 
-  while (num_frames > 0) {
+  if (num_frames == 0)
+    return 0;
 
-    res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
+  do {
+    res = snd_pcm_writei(alsa_handler, data, num_frames);
 
-      if (res == -ESTRPIPE) {	/* suspend */
+      if (res == -EINTR) {
+	/* nothing to do */
+	res = 0;
+      }
+      else if (res == -ESTRPIPE) {	/* suspend */
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-play: pcm in suspend mode. trying to resume\n");
 	while ((res = snd_pcm_resume(alsa_handler)) == -EAGAIN)
 	  sleep(1);
       }
-      else if (res < 0) {
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-play: unknown status, trying to reset soundcard\n");
+      if (res < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: write error: %s\n", snd_strerror(res));
+	mp_msg(MSGT_AO,MSGL_INFO,"alsa-play: trying to reset soundcard\n");
 	if ((res = snd_pcm_prepare(alsa_handler)) < 0) {
-	   mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: snd prepare error");
+	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: pcm prepare error: %s\n", snd_strerror(res));
 	  return(0);
 	  break;
 	}
       }
+  } while (res == 0);
 
-      if (res > 0) {
-
-	/* output_samples += ao_data.channels * res; */
-	output_samples += res * bytes_per_sample;
-
-	num_frames -= res;
-      }
-
-  } //end while
-
-  if (res < 0) {
-    mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: write error %s", snd_strerror(res));
-    return 0;
-  }
-  return len - len % bytes_per_sample;
+  return res < 0 ? res : res * bytes_per_sample;
 }
 
 /* how many byes are free in the buffer */
