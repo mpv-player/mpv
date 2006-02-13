@@ -188,7 +188,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
         p->frame->data[2]= p->src[2] + x1/2 + y1/2 * p->frame->linesize[2];
 
         out_size = avcodec_encode_video(p->avctx_enc[i], p->outbuf, p->outbuf_size, p->frame);
-        avcodec_decode_video(p->avctx_dec[i], p->frame_dec, &got_picture, p->outbuf, out_size);
+        p->frame_dec = p->avctx_enc[i]->coded_frame;
 
         offset= (BLOCK-x1) + (BLOCK-y1)*p->frame_dec->linesize[0];
         //FIXME optimize
