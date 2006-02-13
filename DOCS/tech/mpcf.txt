@@ -238,6 +238,7 @@ index:
         syncpoint_pos_div8              v
     }
     for(i=0; i<stream_count; i++){
+        last_pts= -1
         for(j=0; j<syncpoints; ){
             x                           v
             type= x & 1
