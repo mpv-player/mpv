@@ -256,6 +256,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     int block;
     strarg_t device;
     snd_pcm_uframes_t bufsize;
+    snd_pcm_uframes_t boundary;
     opt_t subopts[] = {
       {"block", OPT_ARG_BOOL, &block, NULL},
       {"device", OPT_ARG_STR, &device, (opt_test_f)str_maxlen},
@@ -280,7 +281,6 @@ static int init(int rate_hz, int channels, int format, int flags)
     ao_data.samplerate = rate_hz;
     ao_data.format = format;
     ao_data.channels = channels;
-    ao_data.outburst = OUTBURST;
 
     switch (format)
       {
@@ -594,6 +594,49 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: got buffersize=%i\n", ao_data.buffersize);
       }
 
+      if ((err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get period size: %s\n", snd_strerror(err));
+      } else {
+	mp_msg(MSGT_AO,MSGL_V,"alsa-init: got period size %li\n", chunk_size);
+      }
+      ao_data.outburst = chunk_size * bytes_per_sample;
+
+      /* setting software parameters */
+      if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get sw-parameters: %s\n",
+	       snd_strerror(err));
+	return 0;
+      }
+      if ((err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get boundary: %s\n",
+	       snd_strerror(err));
+	return 0;
+      }
+      /* start playing when one period has been written */
+      if ((err = snd_pcm_sw_params_set_start_threshold(alsa_handler, alsa_swparams, chunk_size)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set start threshold: %s\n",
+	       snd_strerror(err));
+	return 0;
+      }
+      /* disable underrun reporting */
+      if ((err = snd_pcm_sw_params_set_stop_threshold(alsa_handler, alsa_swparams, boundary)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set stop threshold: %s\n",
+	       snd_strerror(err));
+	return 0;
+      }
+      /* play silence when there is an underrun */
+      if ((err = snd_pcm_sw_params_set_silence_size(alsa_handler, alsa_swparams, boundary)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set silence size: %s\n",
+	       snd_strerror(err));
+	return 0;
+      }
+      if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set sw-parameters: %s\n",
+	       snd_strerror(err));
+	return 0;
+      }
+      /* end setting sw-params */
+
       mp_msg(MSGT_AO,MSGL_INFO,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
 	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
@@ -687,49 +730,6 @@ static void reset(void)
     return;
 }
 
-#ifndef timersub
-#define timersub(a, b, result) \
-do { \
-	(result)->tv_sec = (a)->tv_sec - (b)->tv_sec; \
-  (result)->tv_usec = (a)->tv_usec - (b)->tv_usec; \
-  if ((result)->tv_usec < 0) { \
-		--(result)->tv_sec; \
-		(result)->tv_usec += 1000000; \
-	} \
-} while (0)
-#endif
-
-/* I/O error handler */
-static int xrun(u_char *str_mode)
-{
-  int err;
-  snd_pcm_status_t *status;
-
-  snd_pcm_status_alloca(&status);
-  
-  if ((err = snd_pcm_status(alsa_handler, status))<0) {
-    mp_msg(MSGT_AO,MSGL_ERR,"status error: %s", snd_strerror(err));
-    return(0);
-  }
-
-  if (snd_pcm_status_get_state(status) == SND_PCM_STATE_XRUN) {
-    struct timeval now, diff, tstamp;
-    gettimeofday(&now, 0);
-    snd_pcm_status_get_trigger_tstamp(status, &tstamp);
-    timersub(&now, &tstamp, &diff);
-    mp_msg(MSGT_AO,MSGL_INFO,"alsa-%s: xrun of at least %.3f msecs. resetting stream\n",
-	   str_mode,
-	   diff.tv_sec * 1000 + diff.tv_usec / 1000.0);
-  }
-
-  if ((err = snd_pcm_prepare(alsa_handler))<0) {
-    mp_msg(MSGT_AO,MSGL_ERR,"xrun: prepare error: %s", snd_strerror(err));
-    return(0);
-  }
-
-  return(1); /* ok, data should be accepted again */
-}
-
 /*
     plays 'len' bytes of 'data'
     returns: number of bytes played
@@ -756,13 +756,7 @@ static int play(void* data, int len, int flags)
 
     res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
 
-      if (res == -EPIPE) {  /* underrun */
-	if (xrun("play") <= 0) {
-	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: xrun reset error");
-	  return(0);
-	}
-      }
-      else if (res == -ESTRPIPE) {	/* suspend */
+      if (res == -ESTRPIPE) {	/* suspend */
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-play: pcm in suspend mode. trying to resume\n");
 	while ((res = snd_pcm_resume(alsa_handler)) == -EAGAIN)
 	  sleep(1);
