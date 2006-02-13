@@ -1,4 +1,4 @@
-.\" synced with 1.1226
+.\" synced with 1.1227
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -2191,8 +2191,8 @@ Pour obtenir la liste complète des pilotes disponibles, voir \-ao help.
 .RSs
 .IPs "\-ao alsa,oss,"
 Essaie d'utiliser ALSA, puis OSS ainsi que les autres en cas d'échec.
-.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
-Initialise le nom de périphérique, en accès non bloquant et mappé en mémoire,
+.IPs "\-ao alsa:noblock:device=hw=0.3"
+Initialise le nom de périphérique et en accès non bloquant,
 de la première carte, quatrième périphérique (ouf\ ! ;-).
 .RE
 .PD 1
@@ -2205,9 +2205,6 @@ Les pilotes de sorties audio sont\ :
 Pilote de sortie audio ALSA 0.9/1.x
 .PD 0
 .RSs
-.IPs mmap\ \ \ 
-Active le mode expérimental mappé en mémoire (ne marche pas avec plus de
-deux canaux)
 .IPs noblock
 Active le mode non-bloquant.
 .IPs device=<device>
