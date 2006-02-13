@@ -776,16 +776,6 @@ static int xrun(u_char *str_mode)
   return(1); /* ok, data should be accepted again */
 }
 
-static int play_normal(void* data, int len);
-
-static int play(void* data, int len, int flags)
-{
-  int result;
-  result = play_normal(data, len);
-
-  return result;
-}
-
 /*
     plays 'len' bytes of 'data'
     returns: number of bytes played
@@ -793,7 +783,7 @@ static int play(void* data, int len, int flags)
     thanxs for marius <marius@rospot.com> for giving us the light ;)
 */
 
-static int play_normal(void* data, int len)
+static int play(void* data, int len, int flags)
 {
 
   //bytes_per_sample is always 4 for 2 chn S16_LE
