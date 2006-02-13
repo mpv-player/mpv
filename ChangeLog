@@ -39,6 +39,7 @@ MPlayer (1.0)
     * improved XvMC library detection (disabled by default)
     * DPI (Print-Resolution) and Pixel-Aspect support in vo_jpeg
     * ALSA audio output: several small fixes and improvements
+    * removed experimental mmap suboption from the ALSA driver
 
     Decoders:
     * Indeo2 (RT21) support via lavc

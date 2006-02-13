@@ -2045,8 +2045,8 @@ See \-ao help for a list of compiled-in audio output drivers.
 .RSs
 .IPs "\-ao alsa,oss,"
 Try the ALSA driver, then the OSS driver, then others.
-.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
-Sets noblock-mode, mmap-mode and the device-name as first card, fourth device.
+.IPs "\-ao alsa:noblock:device=hw=0.3"
+Sets noblock-mode and the device-name as first card, fourth device.
 .RE
 .PD 1
 .sp 1
@@ -2057,8 +2057,6 @@ Available audio output drivers are:
 ALSA 0.9/1.x audio output driver
 .PD 0
 .RSs
-.IPs mmap\ \ \ 
-Sets experimental mmap-mode (does not work for more than 2 channels).
 .IPs noblock
 Sets noblock-mode.
 .IPs device=<device>

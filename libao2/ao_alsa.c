@@ -17,7 +17,6 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <sys/poll.h>
 
 #include "config.h"
 #include "subopt-helper.h"
@@ -66,7 +65,6 @@ static size_t chunk_bytes;
 
 static int ao_mmap = 0;
 static int ao_noblock = 0;
-static int first = 1;
 
 static int open_mode;
 static int set_block_mode;
@@ -76,7 +74,6 @@ static int alsa_can_pause = 0;
 
 #undef BUFFERTIME
 #define SET_CHUNKSIZE
-#undef USE_POLL
 
 /* to set/get/query special features/parameters */
 static int control(int cmd, void *arg)
@@ -236,11 +233,9 @@ static void print_help (void)
 {
   mp_msg (MSGT_AO, MSGL_FATAL,
            "\n-ao alsa commandline help:\n"
-           "Example: mplayer -ao alsa:mmap:device=hw=0.3\n"
-           "  sets mmap-mode and first card fourth device\n"
+           "Example: mplayer -ao alsa:device=hw=0.3\n"
+           "  sets first card fourth hardware device\n"
            "\nOptions:\n"
-           "  mmap\n"
-           "    Set memory-mapped mode, experimental\n"
            "  noblock\n"
            "    Sets non-blocking mode\n"
            "  device=<device-name>\n"
@@ -409,6 +404,8 @@ static int init(int rate_hz, int channels, int format, int flags)
         print_help();
         return 0;
     }
+    if (ao_mmap)
+      mp_msg(MSGT_AO,MSGL_WARN,"alsa-init: mmap option is obsolete and has no effect");
     ao_noblock = !block;
     parse_device(alsa_device, device.str, device.len);
 
@@ -456,10 +453,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  break;
 	default:
 	  alsa_fragcount = 16;
-	  if (ao_mmap)
-	    chunk_size = 512;
-	  else
-	    chunk_size = 1024;
+	  chunk_size = 1024;
 	  break;
 	}
     }
@@ -500,18 +494,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return(0);
 	}
     
-      if (ao_mmap) {
-	snd_pcm_access_mask_t *mask = alloca(snd_pcm_access_mask_sizeof());
-	snd_pcm_access_mask_none(mask);
-	snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_INTERLEAVED);
-	snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_NONINTERLEAVED);
-	snd_pcm_access_mask_set(mask, SND_PCM_ACCESS_MMAP_COMPLEX);
-	err = snd_pcm_hw_params_set_access_mask(alsa_handler, alsa_hwparams, mask);
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: mmap set\n");
-      } else {
-	err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,
-					   SND_PCM_ACCESS_RW_INTERLEAVED);
-      }
+      err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,
+					 SND_PCM_ACCESS_RW_INTERLEAVED);
       if (err < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set access type: %s\n", 
 	       snd_strerror(err));
@@ -749,22 +733,6 @@ static void reset(void)
     return;
 }
 
-#ifdef USE_POLL
-static int wait_for_poll(snd_pcm_t *handle, struct pollfd *ufds, unsigned int count)
-{
-  unsigned short revents;
-
-  while (1) {
-    poll(ufds, count, -1);
-    snd_pcm_poll_descriptors_revents(handle, ufds, count, &revents);
-    if (revents & POLLERR)
-      return -EIO;
-    if (revents & POLLOUT)
-      return 0;
-  }
-} 
-#endif
-
 #ifndef timersub
 #define timersub(a, b, result) \
 do { \
@@ -809,15 +777,11 @@ static int xrun(u_char *str_mode)
 }
 
 static int play_normal(void* data, int len);
-static int play_mmap(void* data, int len);
 
 static int play(void* data, int len, int flags)
 {
   int result;
-  if (ao_mmap)
-    result = play_mmap(data, len);
-  else
-    result = play_normal(data, len);
+  result = play_normal(data, len);
 
   return result;
 }
@@ -886,113 +850,6 @@ static int play_normal(void* data, int len)
     return 0;
   }
   return len - len % bytes_per_sample;
-}
-
-/* mmap-mode mainly based on descriptions by Joshua Haberman <joshua@haberman.com>
- * 'An overview of the ALSA API' http://people.debian.org/~joshua/x66.html
- * and some help by Paul Davis <pbd@op.net> */
-
-static int play_mmap(void* data, int len)
-{
-  snd_pcm_sframes_t commitres, frames_available;
-  snd_pcm_uframes_t frames_transmit, size, offset;
-  const snd_pcm_channel_area_t *area;
-  void *outbuffer;
-  int result;
-
-#ifdef USE_POLL //seems not really be needed
-  struct pollfd *ufds;
-  int count;
-
-  count = snd_pcm_poll_descriptors_count (alsa_handler);
-  ufds = malloc(sizeof(struct pollfd) * count);
-  snd_pcm_poll_descriptors(alsa_handler, ufds, count);
-
-  //first wait_for_poll
-    if (err = (wait_for_poll(alsa_handler, ufds, count) < 0)) {
-      if (snd_pcm_state(alsa_handler) == SND_PCM_STATE_XRUN || 
-	  snd_pcm_state(alsa_handler) == SND_PCM_STATE_SUSPENDED) {
-        xrun("play");
-      }
-    }
-#endif
-
-  outbuffer = alloca(ao_data.buffersize);
-
-  //don't trust get_space() ;)
-  frames_available = snd_pcm_avail_update(alsa_handler) * bytes_per_sample;
-  if (frames_available < 0)
-    xrun("play");
-
-  if (frames_available < 4) {
-    if (first) {
-      first = 0;
-      snd_pcm_start(alsa_handler);
-    }
-    else { //FIXME should break and return 0?
-      snd_pcm_wait(alsa_handler, -1);
-      first = 1;
-    }
-  }
-
-  /* len is simply the available bufferspace got by get_space() 
-   * but real avail_buffer in frames is ab/bytes_per_sample */
-  size = len / bytes_per_sample;
-
-  //mp_msg(MSGT_AO,MSGL_V,"len: %i size %i, f_avail %i, bps %i ...\n", len, size, frames_available, bytes_per_sample);
-
-  frames_transmit = size;
-
-  /* prepare areas and set sw-pointers
-   * frames_transmit returns the real available buffer-size
-   * sometimes != frames_available cause of ringbuffer 'emulation' */
-  snd_pcm_mmap_begin(alsa_handler, &area, &offset, &frames_transmit);
-
-  /* this is specific to interleaved streams (or non-interleaved
-   * streams with only one channel) */
-  outbuffer = ((char *) area->addr + (area->first + area->step * offset) / 8); //8
-
-  //write data
-  memcpy(outbuffer, data, (frames_transmit * bytes_per_sample));
-
-  commitres = snd_pcm_mmap_commit(alsa_handler, offset, frames_transmit);
-
-  if (commitres < 0 || commitres != frames_transmit) {
-    if (snd_pcm_state(alsa_handler) == SND_PCM_STATE_XRUN || 
-	snd_pcm_state(alsa_handler) == SND_PCM_STATE_SUSPENDED) {
-      xrun("play");
-    }
-  }
-
-  //mp_msg(MSGT_AO,MSGL_V,"mmap ft: %i, cres: %i\n", frames_transmit, commitres);
-
-  /* 	err = snd_pcm_area_copy(&area, offset, &data, offset, len, alsa_format); */
-  /* 	if (err < 0) { */
-  /* 	  mp_msg(MSGT_AO,MSGL_ERR,"area-copy-error\n"); */
-  /* 	  return 0; */
-  /* 	} */
-
-
-  //calculate written frames!
-  result = commitres * bytes_per_sample;
-
-
-  /* if (verbose) { */
-  /* if (len == result) */
-  /* mp_msg(MSGT_AO,MSGL_V,"result: %i, frames written: %i ...\n", result, frames_transmit); */
-  /* else */
-  /* mp_msg(MSGT_AO,MSGL_V,"result: %i, frames written: %i, result != len ...\n", result, frames_transmit); */
-  /* } */
-
-  //mplayer doesn't like -result
-  if (result < 0)
-    result = 0;
-
-#ifdef USE_POLL
-  free(ufds);
-#endif
-
-  return result;
 }
 
 /* how many byes are free in the buffer */
