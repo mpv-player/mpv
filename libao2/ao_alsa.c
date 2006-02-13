@@ -60,13 +60,11 @@ static snd_pcm_sw_params_t *alsa_swparams;
 static int alsa_fragcount = 16;
 static snd_pcm_uframes_t chunk_size = 1024;
 
-static size_t bits_per_sample, bytes_per_sample, bits_per_frame;
-static size_t chunk_bytes;
+static size_t bytes_per_sample;
 
 static int ao_noblock = 0;
 
 static int open_mode;
-static int set_block_mode;
 static int alsa_can_pause = 0;
 
 #define ALSA_DEVICE_SIZE 256
@@ -236,7 +234,7 @@ static void print_help (void)
            "  sets first card fourth hardware device\n"
            "\nOptions:\n"
            "  noblock\n"
-           "    Sets non-blocking mode\n"
+           "    Opens device in non-blocking mode\n"
            "  device=<device-name>\n"
            "    Sets device (change , to . and : to =)\n");
 }
@@ -255,7 +253,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 {
     int err;
     int cards = -1;
-    char *str_block_mode;
     int block;
     strarg_t device;
     snd_pcm_uframes_t bufsize;
@@ -409,13 +406,9 @@ static int init(int rate_hz, int channels, int format, int flags)
     //setting modes for block or nonblock-mode
     if (ao_noblock) {
       open_mode = SND_PCM_NONBLOCK;
-      set_block_mode = 1;
-      str_block_mode = "nonblock-mode";
     }
     else {
       open_mode = 0;
-      set_block_mode = 0;
-      str_block_mode = "block-mode";
     }
 
     //sets buff/chunksize if its set manually
@@ -462,9 +455,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
 	      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: playback open error: %s\n", snd_strerror(err));
 	      return(0);
-	    } else {
-	      set_block_mode = 0;
-	      str_block_mode = "block-mode";
 	    }
 	  } else {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: playback open error: %s\n", snd_strerror(err));
@@ -472,10 +462,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  }
 	}
 
-      if ((err = snd_pcm_nonblock(alsa_handler, set_block_mode)) < 0) {
+      if ((err = snd_pcm_nonblock(alsa_handler, 0)) < 0) {
          mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: error set block-mode %s\n", snd_strerror(err));
       } else {
-	mp_msg(MSGT_AO,MSGL_V,"alsa-init: pcm opend in %s\n", str_block_mode);
+	mp_msg(MSGT_AO,MSGL_V,"alsa-init: pcm opend in blocking mode\n");
       }
 
       snd_pcm_hw_params_alloca(&alsa_hwparams);
@@ -603,37 +593,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	ao_data.buffersize = bufsize * bytes_per_sample;
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: got buffersize=%i\n", ao_data.buffersize);
       }
-
-      // setting sw-params (only avail-min) if noblocking mode was choosed
-      if (ao_noblock)
-	{
-
-	  if ((err = snd_pcm_sw_params_current(alsa_handler, alsa_swparams)) < 0)
-	    {
-	      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get parameters: %s\n",
-		     snd_strerror(err));
-
-	    }
-
-	  //set min available frames to consider pcm ready (4)
-	  //increased for nonblock-mode should be set dynamically later
-	  if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, 4)) < 0)
-	    {
-	      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set avail_min %s\n",
-		     snd_strerror(err));
-	    }
-
-	  if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0)
-	    {
-	      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to install sw-params\n");
-	    }
-
-	  bits_per_sample = snd_pcm_format_physical_width(alsa_format);
-	  bits_per_frame = bits_per_sample * ao_data.channels;
-	  chunk_bytes = chunk_size * bits_per_frame / 8;
-
-	    mp_msg(MSGT_AO,MSGL_V,"alsa-init: bits per sample (bps)=%i, bits per frame (bpf)=%i, chunk_bytes=%i\n",bits_per_sample,bits_per_frame,chunk_bytes);}
-	//end swparams
 
       mp_msg(MSGT_AO,MSGL_INFO,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
 	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
@@ -797,10 +756,7 @@ static int play(void* data, int len, int flags)
 
     res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
 
-      if (res == -EAGAIN) {
-	snd_pcm_wait(alsa_handler, 1000);
-      }
-      else if (res == -EPIPE) {  /* underrun */
+      if (res == -EPIPE) {  /* underrun */
 	if (xrun("play") <= 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-play: xrun reset error");
 	  return(0);
