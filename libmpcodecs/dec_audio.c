@@ -68,7 +68,7 @@ int init_audio_codec(sh_audio_t *sh_audio)
       sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
       mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_AllocatingBytesForInputBuffer,
           sh_audio->a_in_buffer_size);
-      sh_audio->a_in_buffer=malloc(sh_audio->a_in_buffer_size);
+      sh_audio->a_in_buffer=memalign(16,sh_audio->a_in_buffer_size);
       memset(sh_audio->a_in_buffer,0,sh_audio->a_in_buffer_size);
       sh_audio->a_in_buffer_len=0;
   }
@@ -79,7 +79,7 @@ int init_audio_codec(sh_audio_t *sh_audio)
   mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_AllocatingBytesForOutputBuffer,
       sh_audio->audio_out_minsize,MAX_OUTBURST,sh_audio->a_buffer_size);
 
-  sh_audio->a_buffer=malloc(sh_audio->a_buffer_size);
+  sh_audio->a_buffer=memalign(16,sh_audio->a_buffer_size);
   if(!sh_audio->a_buffer){
       mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CantAllocAudioBuf);
       return 0;
@@ -327,7 +327,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
   if(out_maxsize<8192) out_maxsize=MAX_OUTBURST; // not sure this is ok
 
   sh_audio->a_out_buffer_size=out_maxsize;
-  sh_audio->a_out_buffer=malloc(sh_audio->a_out_buffer_size);
+  sh_audio->a_out_buffer=memalign(16,sh_audio->a_out_buffer_size);
   memset(sh_audio->a_out_buffer,0,sh_audio->a_out_buffer_size);
   sh_audio->a_out_buffer_len=0;
   }
