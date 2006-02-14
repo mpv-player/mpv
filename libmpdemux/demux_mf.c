@@ -68,8 +68,12 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   
   if(!demuxer->stream->url) return NULL;
 
+
+  mf=open_mf(demuxer->stream->url + 5);
+  if(!mf) return NULL;
+
   if(!mf_type){
-    char* p=strrchr(demuxer->stream->url,'.');
+    char* p=strrchr(mf->names[0],'.');
     if(!p){
       mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! (try -mf type=xxx)\n" );
       free( mf ); return NULL;
@@ -78,8 +82,6 @@ static demuxer_t* demux_open_mf(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX, MSGL_INFO, "[demux_mf] file type was not set! trying 'type=%s'...\n", mf_type);
   }
 
-  mf=open_mf(demuxer->stream->url + 5);
-  if(!mf) return NULL;
   mf->curr_frame=0;
 
   demuxer->movi_start = 0;
