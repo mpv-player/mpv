@@ -687,10 +687,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_TUN_SET_FREQ:
 #if 0
-	if (priv->input.audioset) {
-	    set_mute(priv, 1);
-	    usleep(100000); // wait to supress noise during switching
-	}
+	set_mute(priv, 1);
+	usleep(100000); // wait to supress noise during switching
 #endif
 	frequency.tuner = 0;
 	frequency.type  = V4L2_TUNER_ANALOG_TV;
@@ -701,10 +699,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return TVI_CONTROL_FALSE;
 	}
 #if 0
-	if (priv->input.audioset) {
-	    usleep(100000); // wait to supress noise during switching
-	    set_mute(priv, 0);
-	}
+	usleep(100000); // wait to supress noise during switching
+	set_mute(priv, 0);
 #endif
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_TUN_GET_TUNER:
@@ -901,9 +897,7 @@ static int uninit(priv_t *priv)
 	pthread_mutex_destroy(&priv->audio_mutex);
     }
 
-    if (priv->input.audioset) {
-	set_mute(priv, 1);
-    }
+    set_mute(priv, 1);
 
     /* free memory and close device */
     free(priv->map);		priv->map = NULL;
@@ -1312,9 +1306,7 @@ static int start(priv_t *priv)
     priv->audio_skew = 0;
     priv->first = 1;
 
-    if (priv->input.audioset) {
-	set_mute(priv, 0);
-    }
+    set_mute(priv, 0);
     
     return 1;
 }
