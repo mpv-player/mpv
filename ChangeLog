@@ -27,6 +27,7 @@ MPlayer (1.0)
 
     Drivers:
     * JACK audio output rewritten without bio2jack
+    * OpenAL audio output - unfinished, can only do mono output
     * OpenGL video output modules support -geometry and -wid options
     * for -vo gl manyfmts is now default (since it is a lot faster), use
       -vo gl:nomanyfmts if it does not work for you

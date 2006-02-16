@@ -17,6 +17,7 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. \
           $(ESD_INC) \
           $(EXTRA_INC) \
           $(JACK_INC) \
+          $(OPENAL_INC) \
           $(POLYP_INC) \
           $(SDL_INC) \
           $(X11_INC) \

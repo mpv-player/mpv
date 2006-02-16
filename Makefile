@@ -83,6 +83,7 @@ VO_LIBS = $(AA_LIB) \
 AO_LIBS = $(ARTS_LIB) \
           $(ESD_LIB) \
           $(JACK_LIB) \
+          $(OPENAL_LIB) \
           $(NAS_LIB) \
           $(SGIAUDIO_LIB) \
           $(POLYP_LIB) \

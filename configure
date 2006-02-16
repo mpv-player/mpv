@@ -316,6 +316,7 @@ Audio output:
   --disable-esd          disable esd sound support [autodetect]
   --disable-polyp        disable Polypaudio sound support [autodetect]
   --disable-jack         disable JACK sound support [autodetect]
+  --disable-openal       disable OpenAL sound support [autodetect]
   --disable-nas          disable NAS sound support [autodetect]
   --disable-sgiaudio     disable SGI sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
@@ -1508,6 +1509,7 @@ _arts=auto
 _esd=auto
 _polyp=auto
 _jack=auto
+_openal=auto
 _libcdio=auto
 _liblzo=auto
 _mad=auto
@@ -1703,6 +1705,8 @@ for ac_option do
   --disable-polyp)	_polyp=no		;;
   --enable-jack)	_jack=yes	;;
   --disable-jack)	_jack=no	;;
+  --enable-openal)	_openal=yes	;;
+  --disable-openal)	_openal=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
   --disable-toolame)	_toolame=no	;;
@@ -4797,6 +4801,30 @@ else
 fi
 echores "$_jack"
 
+echocheck "OpenAL"
+if test "$_openal" = auto ; then
+  _openal=no
+cat > $TMPC << EOF
+#include <AL/al.h>
+int main(void) {
+  alSourceQueueBuffers(0, 0, 0);
+//  alGetSourcei(0, AL_SAMPLE_OFFSET, 0);
+  return 0;
+}
+EOF
+  if cc_check -lopenal ; then
+    _ld_openal="-lopenal"
+    _openal=yes
+  fi
+fi
+if test "$_openal" = yes ; then
+  _def_openal='#define USE_OPENAL 1'
+  _aosrc="$_aosrc ao_openal.c"
+  _aomodules="openal $_aomodules"
+else
+  _noaomodules="openal $_noaomodules"
+fi
+echores "$_openal"
 
 echocheck "ALSA audio"
 if test "$_alsa" != no ; then
@@ -7253,6 +7281,8 @@ POLYP_LIB = $_ld_polyp
 POLYP_INC = $_inc_polyp
 JACK_LIB = $_ld_jack
 JACK_INC = $_inc_jack
+OPENAL_LIB = $_ld_openal
+OPENAL_INC = $_inc_openal
 SGIAUDIO_LIB = $_ld_sgiaudio
 
 # input/demuxer/codecs
@@ -7742,6 +7772,7 @@ $_def_esd
 $_def_esd_latency
 $_def_polyp
 $_def_jack
+$_def_openal
 $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
 $_def_sunaudio
