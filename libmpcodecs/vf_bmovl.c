@@ -63,10 +63,10 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <fcntl.h>
+#include "config.h"
 #include "mp_image.h"
 #include "vf.h"
 #include "img_format.h"
-#include "config.h"
 
 #ifndef HAVE_NO_POSIX_SELECT
 
