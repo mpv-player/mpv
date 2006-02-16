@@ -31,7 +31,9 @@ extern ao_functions_t audio_out_polyp;
 #ifdef USE_JACK
 extern ao_functions_t audio_out_jack;
 #endif
+#ifdef USE_OPENAL
 extern ao_functions_t audio_out_openal;
+#endif
 extern ao_functions_t audio_out_null;
 #ifdef HAVE_ALSA5
  extern ao_functions_t audio_out_alsa5;
@@ -121,7 +123,9 @@ ao_functions_t* audio_out_drivers[] =
 #ifdef HAVE_SDL
         &audio_out_sdl,
 #endif
+#ifdef USE_OPENAL
         &audio_out_openal,
+#endif
         &audio_out_null,
 // should not be auto-selected:
 	&audio_out_pcm,
