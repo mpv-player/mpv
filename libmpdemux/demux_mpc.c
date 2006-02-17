@@ -153,7 +153,7 @@ static int demux_mpc_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   return 1;
 }
 
-static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   sh_audio_t* sh_audio = demuxer->audio->sh;
   da_priv_t* priv = demuxer->priv;
   stream_t* s = demuxer->stream;

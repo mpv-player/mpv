@@ -36,7 +36,7 @@ typedef struct
    dv_decoder_t *decoder;
 } rawdv_frames_t;
 
-static void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,int flags)
+static void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags)
 {
    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
    sh_video_t *sh_video = demuxer->video->sh;

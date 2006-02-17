@@ -4185,7 +4185,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
 if(rel_seek_secs || abs_seek_pos){
   current_module="seek";
-  if(demux_seek(demuxer,rel_seek_secs,abs_seek_pos)){
+  if(demux_seek(demuxer,rel_seek_secs,audio_delay,abs_seek_pos)){
       // success:
       /* FIXME there should be real seeking for vobsub */
       if(sh_video) sh_video->pts=d_video->pts;

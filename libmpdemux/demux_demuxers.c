@@ -57,7 +57,7 @@ static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
   return 0;
 }
 
-static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
+static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags) {
   dd_priv_t* priv;
   float pos;
   priv=demuxer->priv;
@@ -66,13 +66,13 @@ static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags
   priv->sd->stream->eof = 0;
 
   // Seek video
-  demux_seek(priv->vd,rel_seek_secs,flags);
+  demux_seek(priv->vd,rel_seek_secs,audio_delay,flags);
   // Get the new pos
   pos = demuxer->video->pts;
 
   if(priv->ad != priv->vd) {
     sh_audio_t* sh = (sh_audio_t*)demuxer->audio->sh;
-    demux_seek(priv->ad,pos,1);
+    demux_seek(priv->ad,pos,audio_delay,1);
     // In case the demuxer don't set pts
     if(!demuxer->audio->pts)
       demuxer->audio->pts = pos-((ds_tell_pts(demuxer->audio)-sh->a_in_buffer_len)/(float)sh->i_bps);
@@ -80,7 +80,7 @@ static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags
   }
 
   if(priv->sd != priv->vd)
-      demux_seek(priv->sd,pos,1);
+      demux_seek(priv->sd,pos,audio_delay,1);
 
 }
 

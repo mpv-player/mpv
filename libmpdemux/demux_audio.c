@@ -476,7 +476,7 @@ static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
   }
 }
 
-static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   sh_audio_t* sh_audio;
   stream_t* s;
   int base,pos;

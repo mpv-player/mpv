@@ -118,7 +118,7 @@ static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   return 1;
 }
 
-static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   stream_t* s = demuxer->stream;
   sh_video_t* sh_video = demuxer->video->sh;
   off_t pos;

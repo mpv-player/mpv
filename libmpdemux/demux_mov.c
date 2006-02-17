@@ -2007,7 +2007,7 @@ if(trak->samplesize){
 return pts;
 }
 
-static void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
+static void demux_seek_mov(demuxer_t *demuxer,float pts,float audio_delay,int flags){
     mov_priv_t* priv=demuxer->priv;
     demux_stream_t* ds;
     mov_track_t* trak;

@@ -79,7 +79,7 @@ static int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   return 1;
 }
 
-static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
   stream_t* s = demuxer->stream;
   sh_audio_t* sh_audio = demuxer->audio->sh;
   off_t base,pos;

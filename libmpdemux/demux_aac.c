@@ -207,7 +207,7 @@ static int demux_aac_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
 
 //This is an almost verbatim copy of high_res_mp3_seek(), from demux_audio.c
-static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
 	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
 	demux_stream_t *d_audio=demuxer->audio;

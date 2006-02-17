@@ -1237,7 +1237,7 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
    return( 1 );
 }
 
-static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, int flags )
+static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags )
 {
    demux_stream_t *d_audio = demuxer->audio;
    demux_stream_t *d_video = demuxer->video;

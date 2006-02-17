@@ -1422,7 +1422,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 
 }
 
-static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
+static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
   ogg_sync_state* sync = &ogg_d->sync;
   ogg_page* page= &ogg_d->page;
