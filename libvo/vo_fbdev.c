@@ -549,7 +549,8 @@ static uint8_t *center;	/* thx .so :) */
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
-static struct fb_cmap fb_oldcmap;
+static unsigned short fb_ored[256], fb_ogreen[256], fb_oblue[256];
+static struct fb_cmap fb_oldcmap = { 0, 256, fb_ored, fb_ogreen, fb_oblue };
 static int fb_cmap_changed = 0;
 static int fb_pixel_size;	// 32:  4  24:  3  16:  2  15:  2
 static int fb_bpp;		// 32: 32  24: 24  16: 16  15: 15
