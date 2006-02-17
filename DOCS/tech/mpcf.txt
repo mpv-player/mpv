@@ -111,9 +111,6 @@ Bitstream syntax:
 Common elements:
 ----------------
 
-packet header:
-    forward ptr                         v
-
 reserved_bytes:
     for(i=0; i<forward_ptr - length_of_non_reserved; i++)
         reserved                        u(8)
@@ -126,7 +123,7 @@ reserved_bytes:
 
 main header:
     main_startcode                      f(64)
-    packet header
+    forward_ptr                         v
     version                             v
     stream_count                        v
     max_distance                        v
@@ -170,7 +167,7 @@ main header:
 
 stream_header:
     stream_startcode                    f(64)
-    packet_header
+    forward_ptr                         v
     stream_id                           v
     stream_class                        v
     fourcc                              vb
@@ -231,7 +228,7 @@ frame:
 
 index:
     index_startcode                     f(64)
-    packet header
+    forward_ptr                         v
     max_pts                             v
     syncpoints                          v
     for(i=0; i<syncpoints; i++){
@@ -296,7 +293,7 @@ info_frame: (optional)
 
 info_packet: (optional)
     info_startcode                      f(64)
-    packet header
+    forward_ptr                         v
     info_frame
 
 syncpoint:
@@ -456,6 +453,7 @@ decode_delay
     dts from pts
     is set to 0 for streams without B-frames, and set to 1 for streams with
     B-frames, may be larger for future codecs
+    decode_delay MUST NOT be set higher than necessary for a codec.
 
 fixed_fps
     1 indicates that the fps is fixed
@@ -562,6 +560,7 @@ checksum
     checksum is calculated for the area pointed to by forward_ptr not
     including the checksum itself (from first byte after the
     forward_ptr until last byte before the checksum).
+    In the case of info frames, covers area from begginning of frame.
 
 syncpoint_checksum
     crc32 checksum
@@ -727,12 +726,6 @@ Info frames:
 ------------
 
 Info frames can be used to describe the file or some part of it (chapters)
-
-
-Unknown packets:
-----------------
-
-MUST be ignored by the demuxer
 
 
 demuxer (non-normative):
