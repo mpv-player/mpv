@@ -7,6 +7,8 @@
  * Copyleft 2006 by Reimar Döffinger (Reimar.Doeffinger@stud.uni-karlsruhe.de)
  */
 
+#include <stdlib.h>
+#include <stdio.h>
 #include <inttypes.h>
 #include <AL/alc.h>
 #include <AL/al.h>
