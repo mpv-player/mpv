@@ -12,6 +12,7 @@ typedef struct {
   unsigned int format;
   int inited;
   float delay;	   // relative (to sh_video->timer) time in audio stream
+  float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // output format:
   int sample_format;
   int samplerate;
@@ -54,6 +55,7 @@ typedef struct {
   unsigned int format;
   int inited;
   float timer;		  // absolute time in video stream, since last start/seek
+  float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // frame counters:
   float num_frames;       // number of frames played
   int num_frames_decoded; // number of frames decoded

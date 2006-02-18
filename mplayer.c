@@ -2522,8 +2522,14 @@ if(sh_audio){
 
 current_module="av_init";
 
-if(sh_video) sh_video->timer=0;
-if(sh_audio) sh_audio->delay=-audio_delay;
+if(sh_video){
+  sh_video->timer=0;
+    audio_delay += sh_video->stream_delay;
+}
+if(sh_audio){
+    audio_delay -= sh_audio->stream_delay;
+  sh_audio->delay=-audio_delay;
+}
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
