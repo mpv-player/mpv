@@ -1225,7 +1225,7 @@ EOF
 	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "1" || test "$_cc_major" -ge "4"; then
 	    case "$proc" in
 		7400*|7410*) _march='-mcpu=7400' _mcpu='-mtune=7400' ;;
-		7450*|7455*) _march='-mcpu=7450' _mcpu='-mtune=7450' ;;
+		7447*|7450*|7455*) _march='-mcpu=7450' _mcpu='-mtune=7450' ;;
     		*) ;;
     	    esac
 	fi
