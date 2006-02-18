@@ -27,6 +27,7 @@ static struct vf_priv_s {
     struct SwsContext *ctx2; //for interlaced slices only
     unsigned char* palette;
     int interlaced;
+    int noup;
     int query_format_cache[64];
 } vf_priv_dflt = {
   -1,-1,
@@ -142,6 +143,13 @@ static int config(struct vf_instance_s* vf,
 	    vf->priv->w=d_width;
 	    vf->priv->h=d_height;
 	}
+    }
+
+    if(vf->priv->noup){
+        if(vf->priv->w > width)
+            vf->priv->w= width;
+        if(vf->priv->h > height)
+            vf->priv->h= height;
     }
 
     if (vf->priv->w <= -8) {
@@ -603,6 +611,7 @@ static m_option_t vf_opts_fields[] = {
   // Note that here the 2 field is NULL (ie 0)
   // As we want this option to act on the option struct itself
   {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, &size_preset},
+  {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
