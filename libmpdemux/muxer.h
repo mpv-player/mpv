@@ -59,6 +59,7 @@ typedef struct muxer_t{
   off_t movi_start;
   off_t movi_end;
   off_t file_end; // for MPEG it's system timestamp in 1/90000 s
+  float audio_delay_fix;
   // index:
   AVIINDEXENTRY *idx;
   int idx_pos;

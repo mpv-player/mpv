@@ -723,6 +723,8 @@ if(!muxer) {
 }
 if(out_file_format == MUXER_TYPE_MPEG) audio_preload = 0;
 
+muxer->audio_delay_fix = audio_delay_fix;
+
 // ============= VIDEO ===============
 
 mux_v=muxer_new_stream(muxer,MUXER_TYPE_VIDEO);
@@ -864,6 +866,8 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
+    muxer->audio_delay_fix -= sh_video->stream_delay;
+
 //if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 
 // ============= AUDIO ===============
@@ -942,7 +946,6 @@ case ACODEC_COPY:
 	mux_a->h.dwSampleSize=sh_audio->audio.dwSampleSize;
 	mux_a->h.dwScale=sh_audio->audio.dwScale;
 	mux_a->h.dwRate=sh_audio->audio.dwRate;
-//	mux_a->h.dwStart=sh_audio->audio.dwStart;
     } else {
 	mux_a->h.dwSampleSize=mux_a->wf->nBlockAlign;
 	mux_a->h.dwScale=mux_a->h.dwSampleSize;
@@ -958,10 +961,7 @@ case ACODEC_COPY:
 
 if (verbose>1) print_wave_header(mux_a->wf);
 
-if(audio_delay_fix!=0.0){
-    mux_a->h.dwStart=audio_delay_fix*mux_a->h.dwRate/mux_a->h.dwScale;
-    mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_SettingAudioDelay,mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
-}
+    muxer->audio_delay_fix += sh_audio->stream_delay;
 
 } // if(sh_audio)
 

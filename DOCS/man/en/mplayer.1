@@ -1098,7 +1098,7 @@ audio delay in seconds (positive or negative float value)
 .br
 .I NOTE:
 When used with MEncoder, this is not guaranteed to work correctly
-with \-ovc copy.
+with \-ovc copy; use \-audio-delay instead.
 .
 .TP
 .B \-demuxer <[+]name>
@@ -6058,11 +6058,18 @@ colorspace, so it is safe to add it to the configuration file.
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
 .
 .TP
-.B \-audio-delay <0.0\-...>
-Sets the audio delay field in the header.
-Default is 0.0, negative values do not work.
-This does not delay the audio while encoding, but the player will see the
-default audio delay, sparing you the use of the \-delay option.
+.B \-audio-delay <any floating-point number> 
+Delays either audio or video by setting a delay field in the header
+(default: 0.0).
+This does not delay either stream while encoding, but the player will
+see the delay field and compensate accordingly.
+Positive values delay the audio, and negative values delay the video.
+Note that this is the exact opposite of the \-delay option. 
+For example, if a video plays correctly with \-delay 0.2, you can 
+fix the video with MEncoder by using \-audio-delay -0.2.
+.sp 1
+Currently, this option only works with the default muxer (\-of avi).
+If you are using a different muxer, then you must use \-delay instead.
 .
 .TP
 .B \-audio-density <1\-50>
