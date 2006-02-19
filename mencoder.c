@@ -1274,29 +1274,30 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 // check frame duplicate/drop:
 
 //printf("\r### %5.3f ###\n",v_timer_corr);
+float mux_frametime = (float)mux_v->h.dwScale/mux_v->h.dwRate;
 
-if(v_timer_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate &&
-    (skip_limit<0 || skip_flag<skip_limit) ){
-    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+if (v_timer_corr >= mux_frametime && (skip_limit<0 || skip_flag < skip_limit)) {
+    v_timer_corr-=mux_frametime;
     ++skip_flag; // skip
-} else
-while(v_timer_corr<=-(float)mux_v->h.dwScale/mux_v->h.dwRate &&
-    (skip_limit<0 || (-skip_flag)<skip_limit) ){
-    v_timer_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+}
+while (v_timer_corr <= -mux_frametime && (skip_limit<0 || -skip_flag < skip_limit)) {
+    v_timer_corr+=mux_frametime;
     --skip_flag; // dup
 }
 
-while( (v_pts_corr<=-(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag>0)
- || (v_pts_corr<=-2*(float)mux_v->h.dwScale/mux_v->h.dwRate) ){
-    v_pts_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+// either v_pts_corr is big, more than 2 times framerate, then we follow its advice,
+// or, it cancels out v_timer_corr, in which case be happy and do nothing.
+
+while ((v_pts_corr <= -mux_frametime && skip_flag > 0) || (v_pts_corr <= -2*mux_frametime)) {
+    v_pts_corr+=mux_frametime;
     --skip_flag; // dup
 }
-if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
- || (v_pts_corr>=2*(float)mux_v->h.dwScale/mux_v->h.dwRate) )
-  if(skip_flag<=0){ // we can't skip more than 1 frame now
-    v_pts_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+if ((v_pts_corr >= mux_frametime && skip_flag < 0) || (v_pts_corr >= 2*mux_frametime)) {
+  if (skip_flag<=0) { // we can't skip more than 1 frame now
+    v_pts_corr-=mux_frametime;
     ++skip_flag; // skip
   }
+}
 
 } // demuxer2
 
