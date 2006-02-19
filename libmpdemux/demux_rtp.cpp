@@ -90,6 +90,7 @@ static char* openURL_sip(SIPClient* client, char const* url) {
 }
 
 int rtspStreamOverTCP = 0; 
+int rtsp_port = 0; 
 
 extern "C" int audio_id, video_id, dvdsub_id;
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
@@ -174,10 +175,13 @@ extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
 	continue;
       }
 
+      if (rtsp_port)
+          subsession->setClientPortNum (rtsp_port);
+      
       if (!subsession->initiate()) {
 	fprintf(stderr, "Failed to initiate \"%s/%s\" RTP subsession: %s\n", subsession->mediumName(), subsession->codecName(), env->getResultMsg());
       } else {
-	fprintf(stderr, "Initiated \"%s/%s\" RTP subsession\n", subsession->mediumName(), subsession->codecName());
+	fprintf(stderr, "Initiated \"%s/%s\" RTP subsession on port %d\n", subsession->mediumName(), subsession->codecName(), subsession->clientPortNum());
 
 	// Set the OS's socket receive buffer sufficiently large to avoid
 	// incoming packets getting dropped between successive reads from this

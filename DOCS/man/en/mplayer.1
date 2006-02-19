@@ -1346,6 +1346,12 @@ This option may be useful if you have a broken internet connection that does
 not pass incoming UDP packets (see http://www.live555.com/\:mplayer/).
 .
 .TP
+.B \-rtsp-port (LIVE555 only)
+Used with 'rtsp://' URLs to forces the client's port number.
+This option may be useful if you're behind a router and want to forward the
+RTSP stream from the server to a specific client.
+.
+.TP
 .B \-saveidx <filename>
 Force index rebuilding and dump the index to <filename>.
 Currently this only works with AVI files.
