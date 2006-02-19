@@ -1,4 +1,4 @@
-.\" synced with 1.1227
+.\" synced with 1.1229
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1161,7 +1161,7 @@ Retard audio en secondes (nombre flottant positif ou négatif).
 .br
 .I NOTE\ :
 Lorsque utilisé avec MEncoder et \-ovc copy, le résultat peut ne pas
-être correct.
+être correct: utilisez \-audio-delay à la place.
 .
 .TP
 .B \-demuxer <[+]nom>
@@ -6400,15 +6400,23 @@ défaut dans votre fichier de configuration.
 .
 .
 .SH "OPTIONS D'ENCODAGE GÉNÉRALES (MENCODER UNIQUEMENT)"
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
-.B \-audio-delay <0.0\-...>
-Définit le champ retard audio dans l'entête.
-La valeur par défaut est 0.0, les valeurs négatives ne fonctionnent pas.
-Cela ne retarde pas l'audio pendant l'encodage, mais le lecteur verra le
-décalage audio par défaut, vous évitant l'utilisation de l'option \-delay.
-.
+.B \-audio-delay <un nombre à virgule>
+Retarde le son ou la vidéo en définissant le champ délai dans l'entête
+(par défaut\ : 0.0).
+Cela ne retarde aucun des flux pendant l'encodage, mais le lecteur
+verra le champ délai et compensera le délai d'après lui.
+Les valeurs positives retardent l'audio, et les valeurs positives
+retardent la vidéo.
+Notez que c'est l'exact opposé de l'option \-delay.
+Par exemple, si une vidéo est jouée correctement avec \-delay 0.2, alors
+vous pouvez corriger la vidéo avec MEncoder avec \-audio-delay -0.2.
+.sp 1
+Pour le moment, cette option ne fonctionne qu'avec le multiplexeur
+par défaut (\-of avi).
+Si vous utilisez un multiplexeur différent, alors vous devez utiliser
+\-delay à la place.
 .TP
 .B \-audio-density <1\-50>
 Nombre de morceaux audio par seconde (par défaut\ : 2 pour des morceaux
