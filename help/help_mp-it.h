@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.221
+// Updated to help_mp-en.h v1.222
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -43,7 +43,7 @@ static char help_text[]=
 " + o -            regola il ritardo audio di +/- 0.1 secondi\n"
 " o                modalità OSD: niente / barra ricerca / barra ricerca + tempo\n"
 " * o /            incrementa o decrementa il volume PCM\n"
-" z o x            regola il ritardo dei sottotitoli di +/- 0.1 secondi\n"
+" x o z            regola il ritardo dei sottotitoli di +/- 0.1 secondi\n"
 " r o t            posizione alto/basso dei sottotitoli, vedi anche -vf expand\n"
 "\n"
 " * * * VEDI PAGINA MAN PER DETTAGLI, ULTERIORI OPZIONI AVANZATE E TASTI! * * *\n"
@@ -263,6 +263,7 @@ static char help_text[]=
 #define MSGTR_MP3AudioSelected "MP3 audio selezionato\n"
 #define MSGTR_CannotAllocateBytes "Non posso allocare %d bytes\n"
 #define MSGTR_SettingAudioDelay "Imposto il ritardo audio a %5.3f\n"
+#define MSGTR_SettingVideoDelay "Imposto il ritardo video a %5.3f\n"
 #define MSGTR_SettingAudioInputGain "Imposto il guadagno di ingresso audio a %f\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Limito il preload audio a 0.4s\n"
