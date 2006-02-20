@@ -1,4 +1,4 @@
-.\" synced with 1.1229
+.\" synced with 1.1231
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1162,6 +1162,17 @@ Retard audio en secondes (nombre flottant positif ou négatif).
 .I NOTE\ :
 Lorsque utilisé avec MEncoder et \-ovc copy, le résultat peut ne pas
 être correct: utilisez \-audio-delay à la place.
+.
+.TP
+.B \-ignore-start
+Ignore le temps de démarrage pour les flux dans les fichiers AVIs.
+Ceci permet d'ignorer le retardement du flux dans les fichiers
+encodés avec l'option \-audio-delay.
+Pendant l'encodage, cette option évite à MEncoder de transférer au
+nouveau fichier le moment original de démarrage du flux\ ;
+l'option \-audio-delay n'est pas affectée.
+Notez que MEncoder ajuste parfois automatique les moment de démarrage
+du flux pour compenser les délais de décodage anticipés, donc n'utilisez pas cette option avant de l'avoir testée avant.
 .
 .TP
 .B \-demuxer <[+]nom>
