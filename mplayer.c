@@ -294,6 +294,7 @@ static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
        float audio_delay=0;
+static int ignore_start=0;
 
 static int softsleep=0;
 
@@ -2524,9 +2525,11 @@ current_module="av_init";
 
 if(sh_video){
   sh_video->timer=0;
+  if (! ignore_start)
     audio_delay += sh_video->stream_delay;
 }
 if(sh_audio){
+  if (! ignore_start)
     audio_delay -= sh_audio->stream_delay;
   sh_audio->delay=-audio_delay;
 }

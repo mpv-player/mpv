@@ -156,6 +156,7 @@ static float c_total=0;
 static float audio_preload=0.5;
 static float audio_delay_fix=0.0;
 static float audio_delay=0.0;
+static int ignore_start=0;
 static int audio_density=2;
 
 float force_fps=0;
@@ -866,6 +867,7 @@ if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 	mux_v->bih->biCompression, (char *)&mux_v->bih->biCompression);
 }
 
+if (! ignore_start)
     muxer->audio_delay_fix -= sh_video->stream_delay;
 
 //if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
@@ -961,6 +963,7 @@ case ACODEC_COPY:
 
 if (verbose>1) print_wave_header(mux_a->wf);
 
+if (! ignore_start)
     muxer->audio_delay_fix += sh_audio->stream_delay;
 
 } // if(sh_audio)

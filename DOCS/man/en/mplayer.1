@@ -1101,6 +1101,18 @@ When used with MEncoder, this is not guaranteed to work correctly
 with \-ovc copy; use \-audio-delay instead.
 .
 .TP
+.B \-ignore-start
+Ignore the specified starting time for streams in AVI files.
+In MPlayer, this nullifies stream delays in files encoded with
+the \-audio-delay option.
+During encoding, this option prevents MEncoder from transferring
+original stream start times to the new file; the \-audio-delay option is
+not affected.
+Note that MEncoder sometimes adjusts stream starting times
+automatically to compensate for anticipated decoding delays, so don't
+use this option for encoding without testing it first.
+.
+.TP
 .B \-demuxer <[+]name>
 Force demuxer type.
 Use a '+' before the name to force it, this will skip some checks!

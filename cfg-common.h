@@ -150,6 +150,10 @@
 	// set a-v distance
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
 
+	// ignore header-specified delay (dwStart)
+	{"ignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noignore-start", &ignore_start, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+
 #ifdef USE_LIBA52
         {"a52drc", &a52_drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
 #endif
