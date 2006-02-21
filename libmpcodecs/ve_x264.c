@@ -435,6 +435,11 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         return 0;
     }
     
+    if (mod->param.i_bframe > 1 && mod->param.b_bframe_pyramid)
+        mod->mux->decoder_delay = 2;
+    else
+        mod->mux->decoder_delay = mod->param.i_bframe ? 1 : 0;
+    
     return 1;
 }
 
@@ -511,6 +516,8 @@ static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
                         && frame_ref == 1 && !bframe);
         muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     }
+    else
+        ++mod->mux->encoder_delay;
 
     return i_size;
 }

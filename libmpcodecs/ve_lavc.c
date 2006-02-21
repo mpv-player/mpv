@@ -770,6 +770,8 @@ static int config(struct vf_instance_s* vf,
         mux_v->bih->biSize= sizeof(BITMAPINFOHEADER) + lavc_venc_context->extradata_size;
     }
     
+    mux_v->decoder_delay = lavc_venc_context->max_b_frames ? 1 : 0;
+    
     return 1;
 }
 
@@ -854,8 +856,10 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic){
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
 
-    if(out_size == 0)
+    if(out_size == 0) {
+        ++mux_v->encoder_delay;
         return 0;
+    }
            
     muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
         

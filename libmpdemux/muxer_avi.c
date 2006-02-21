@@ -665,10 +665,19 @@ static void avifile_write_index(muxer_t *muxer){
   }
 }
 
+static void avifile_fix_parameters(muxer_stream_t *s){
+  /* adjust audio_delay_fix according to individual stream delay */
+  if (s->type == MUXER_TYPE_AUDIO)
+    s->muxer->audio_delay_fix -= (float)s->decoder_delay * s->h.dwScale/s->h.dwRate;
+  if (s->type == MUXER_TYPE_VIDEO)
+    s->muxer->audio_delay_fix += (float)s->decoder_delay * s->h.dwScale/s->h.dwRate;
+}
+
 int muxer_init_muxer_avi(muxer_t *muxer){
   muxer->cont_new_stream = &avifile_new_stream;
   muxer->cont_write_chunk = &avifile_write_chunk;
   muxer->cont_write_header = &avifile_write_header;
   muxer->cont_write_index = &avifile_write_index;
+  muxer->fix_stream_parameters = &avifile_fix_parameters;
   return 1;
 }

@@ -504,6 +504,8 @@ config(struct vf_instance_s* vf,
 	/* Store the encoder instance into the private data */
 	mod->instance = mod->create.handle;
 
+	mod->mux->decoder_delay = mod->create.max_bframes ? 1 : 0;
+
 	return(FINE);
 }
 
@@ -620,7 +622,10 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	}
 
 	/* If size is == 0, we're done with that frame */
-	if(size == 0) return(FINE);
+	if(size == 0) {
+		++mod->mux->encoder_delay;
+		return(FINE);
+	}
 
 	/* xvidcore returns stats about encoded frame in an asynchronous way
 	 * accumulate these stats */

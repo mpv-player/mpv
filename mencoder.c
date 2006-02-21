@@ -1394,6 +1394,9 @@ if(sh_audio && !demuxer2){
     AV_delay-=audio_delay;
     AV_delay /= playback_speed;
     AV_delay-=mux_a->timer-(mux_v->timer-(v_timer_corr+v_pts_corr));
+    // adjust for encoder delays
+    AV_delay -= (float) mux_a->encoder_delay * mux_a->h.dwScale/mux_a->h.dwRate;
+    AV_delay += (float) mux_v->encoder_delay * mux_v->h.dwScale/mux_v->h.dwRate;
 	// compensate input video timer by av:
         x=AV_delay*0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
