@@ -38,6 +38,8 @@ typedef struct {
   // stream specific:
   WAVEFORMATEX *wf;
   BITMAPINFOHEADER *bih;   // in format
+  int encoder_delay; // in number of frames
+  int decoder_delay; // in number of frames
   // mpeg specific:
   size_t ipb[3]; // sizes of I/P/B frames
   // muxer of that stream
