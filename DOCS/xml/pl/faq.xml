@@ -392,7 +392,7 @@ i kieruj się zawartymi tam instrukcjami.
 Mam problemy z odtwarzaniem plików przy użyciu kodeka ... Czy mogę ich używać?
 </para></question>
 <answer><para>
-Sprawdź <ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">status kodeków</ulink>,
+Sprawdź <ulink url="../../codecs-status.html">status kodeków</ulink>,
 jeżeli nie zawiera on Twojego kodeka przeczytaj 
 <link linkend="codecs">dokumentację kodeków</link>,
 a w szczególności <link linkend="codec-importing">HOWTO importowania kodeków</link> i skontaktuj się z nami.

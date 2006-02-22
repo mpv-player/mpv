@@ -371,7 +371,7 @@ y siga las instrucciones.
 Tengo problemas reproduciendo archivos con el codec .... ¿Puedo usarlo?
 </para></question>
 <answer><para>
-Compruebe el <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">estado del codec</ulink>,
+Compruebe el <ulink url="../../codecs-status.html">estado del codec</ulink>,
 si no contiene su codec, lea la <link linkend="codecs">documentación de codecs</link>,
 especialmente el <link linkend="win32-codecs">COMO importar codecs</link> y contacte con
 nosotros.
