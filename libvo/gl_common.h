@@ -17,6 +17,15 @@
 #include "x11_common.h"
 #endif
 
+// workaround for some gl.h headers
+#ifndef APIENTRY
+#ifdef GLAPIENTRY
+#define APIENTRY GLAPIENTRY
+#else
+#define APIENTRY
+#endif
+#endif
+
 /**
  * \defgroup glextdefines OpenGL extension defines
  * 
