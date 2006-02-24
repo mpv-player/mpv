@@ -262,21 +262,32 @@ index:
     checksum                            u(32)
 
 info_frame: (optional)
-    for(;;){
-        id                              v
-        if(id==0) break
-        name= info_table[id][0]
-        type= info_table[id][1]
-        if(type==NULL)
-            type                        vb
-        if(name==NULL)
-            name                        vb
-        if(type=="v")
-            value                       v
-        else if(type=="s")
-            value                       s
-        else
+    stream_id_plus1                     v
+    chapter_id                          v
+    if (chapter_id) {
+        chapter_start                   v
+        chapter_len                     v
+    }
+    count                               v
+    for(i=0; i<count; i++){
+        name                            vb
+        value                           s
+        if (value==-1){
+            type= "UTF-8"
             value                       vb
+        }else if (value==-2){
+            type                        vb
+            value                       vb
+        }else if (value==-3){
+            type= "signed integer"
+            value                       s
+        }else if (value<-3){
+            type= "rational"
+            value.den= -value-2
+            value.num                   s
+        }else{
+            type= "unsigned integer"
+        }
     }
     reserved_bytes
     checksum                            u(32)
@@ -609,9 +620,23 @@ index_ptr
 Info tags:
 ----------
 
-id
-    the ID of the type/name pair, so it is more compact
-    0 means end
+stream_id_plus1
+    Stream this info packet applies to. If zero, packet applies to whole
+    file.
+
+chapter_id
+    Id of chapter this packet applies to. If zero, packet applies to whole
+    file. Positive chapter_id's are real chapters and MUST NOT overlap.
+    Negative chapter_id indicate a sub region of file and not a real
+    chapter. chapter_id MUST be unique to the region it represents.
+
+chapter_start
+    s= chapter_start % stream_count
+    timestamp= chapter_start / stream_count
+    timestamp of start of chapter in timebase of stream 's'.
+
+chapter_len
+    Length of chapter in same timebase of chapter_start.
 
 type
     for example: "UTF8" -> string or "JPEG" -> JPEG image
@@ -620,15 +645,13 @@ type
 
 info packet types
     the name of the info entry, valid names are
-    "StreamId"
-        the stream(s) to which the info packet applies
     "Author"
     "Description"
     "Copyright"
     "Encoder"
         the name & version of the software used for encoding
     "Title"
-    "Cover"
+    "Cover" (allowed types are "PNG" and "JPEG")
         image of the (CD, DVD, VHS, ..) cover (preferably PNG or JPEG)
     "Source"
         "DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", "LD"
@@ -640,8 +663,6 @@ info packet types
         (ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
         Note: do not forget the timezone
     "Keywords"
-    "TotalTime"
-        total length of the stream in msecs
     "Language"
         ISO 639 and ISO 3166 for language/country code
         something like "eng" (US english), can be 0 if unknown
@@ -664,24 +685,6 @@ value
 stuffing
     0x80 can be placed in front of any type v entry for stuffing purposes
 
-info_table[][2]={
-    {NULL            ,  NULL }, // end
-    {NULL            ,  NULL },
-    {NULL            , "UTF8"},
-    {NULL            , "v"},
-    {NULL            , "s"},
-    {"StreamId"      , "v"},
-    {"Author"        , "UTF8"},
-    {"Title"         , "UTF8"},
-    {"Language"      , "UTF8"},
-    {"Description"   , "UTF8"},
-    {"Copyright"     , "UTF8"},
-    {"Encoder"       , "UTF8"},
-    {"Keyword"       , "UTF8"},
-    {"Cover"         , "JPEG"},
-    {"Cover"         , "PNG"},
-    {"Disposition"   , "UTF8"},
-};
 
 
 Structure:
@@ -721,10 +724,19 @@ If an index is written anywhere in the file, it MUST be written at end of
 file as well.
 
 
-Info frames:
-------------
+Info:
+-----
+
+All info packets with the same chapter_id and stream_id are repeated info
+packets and MUST be binary identical.
+
+All info packets MUST appear after main headers at begginning of file, and
+SHOULD be repeated after all main headers unless they are very large.
 
 Info frames can be used to describe the file or some part of it (chapters)
+
+Info SHOULD be stored in global packets instead of info streams/frames if
+possible, and the amount of data is not large.
 
 
 demuxer (non-normative):
