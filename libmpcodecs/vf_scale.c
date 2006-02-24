@@ -146,10 +146,10 @@ static int config(struct vf_instance_s* vf,
     }
 
     if(vf->priv->noup){
-        if(vf->priv->w > width)
+        if((vf->priv->w > width) + (vf->priv->h > height) >= vf->priv->noup){
             vf->priv->w= width;
-        if(vf->priv->h > height)
             vf->priv->h= height;
+        }
     }
 
     if (vf->priv->w <= -8) {
