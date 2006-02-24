@@ -1524,6 +1524,7 @@ if (!interrupted && filelist[++curfile].name != 0) {
 		sh_video->vfilter = NULL;
 	}
 
+	if(sh_audio){ uninit_audio(sh_audio);sh_audio=NULL; }
 	if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
 	if(demuxer) free_demuxer(demuxer);
 	if(stream) free_stream(stream); // kill cache thread
@@ -1572,6 +1573,7 @@ if(sh_audio)
 mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_AudioStreamResult,
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
+if(sh_audio){ uninit_audio(sh_audio);sh_audio=NULL; }
 if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
 if(demuxer) free_demuxer(demuxer);
 if(stream) free_stream(stream); // kill cache thread
