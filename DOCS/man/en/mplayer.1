@@ -4644,7 +4644,7 @@ Rotate by 90 degrees counterclockwise and flip.
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws).
 .RSs
@@ -4717,6 +4717,15 @@ pal:     720x576 (standard PAL)
 sntsc:   640x480 (square pixel NTSC)
 .br
 spal:    768x576 (square pixel PAL)
+.REss
+.IPs <noup>
+Disallow upscaling past the original dimensions.
+.RSss
+0: Allow upscaling (default).
+.br
+1: Disallow upscaling if one dimension exceeds its original value.
+.br
+2: Disallow upscaling if both dimensions exceed their original values.
 .REss
 .RE
 .
