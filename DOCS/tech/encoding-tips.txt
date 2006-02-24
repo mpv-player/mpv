@@ -1,7 +1,7 @@
 
 Some important URLs:
 ~~~~~~~~~~~~~~~~~~~~
-http://www.mplayerhq.hu/~michael/codec-features.html           <- lavc vs. divx5 vs. xvid
+http://mplayerhq.hu/~michael/codec-features.html               <- lavc vs. divx5 vs. xvid
 http://www.ee.oulu.fi/~tuukkat/mplayer/tests/rguyom.ath.cx/    <- lavc benchmarks, options
 http://ffdshow.sourceforge.net/tikiwiki/tiki-view_articles.php <- lavc for win32 :)
 http://www.bunkus.org/dvdripping4linux/index.html              <- a nice tutorial
