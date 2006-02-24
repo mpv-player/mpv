@@ -596,16 +596,16 @@ int dvb_step_channel(dvb_priv_t *priv, int dir)
 	if(dir == DVB_CHANNEL_HIGHER)
 	{
 		if(list->current == list->NUM_CHANNELS-1)
-			return 0;
-
-		new_current = list->current + 1;
+			new_current=0;
+		else
+			new_current = list->current + 1;
 	}
 	else
 	{
 		if(list->current == 0)
-			return 0;
-
-		new_current = list->current - 1;
+			new_current=list->NUM_CHANNELS-1;
+		else
+			new_current = list->current - 1;
 	}
 
 	return dvb_set_channel(priv, priv->card, new_current);
