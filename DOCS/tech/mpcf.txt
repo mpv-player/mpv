@@ -176,8 +176,8 @@ stream_header:
     msb_pts_shift                       v
     max_pts_distance                    v
     decode_delay                        v
-    fixed_fps                           u(1)
     reserved                            u(7)
+    fixed_fps                           u(1)
     codec_specific_data                 vb
     if(stream_class == video){
         width                           v
