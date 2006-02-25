@@ -554,6 +554,9 @@ colorspace_type
 samplerate_nom / samplerate_denom = samplerate
     the number of samples per second
 
+crc32 checksum
+    Generator polynomial is 0x04C11DB7. Starting value is zero.
+
 checksum
     crc32 checksum
     checksum is calculated for the area pointed to by forward_ptr not
