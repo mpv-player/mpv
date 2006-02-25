@@ -279,14 +279,14 @@ info_frame: (optional)
             type                        vb
             value                       vb
         }else if (value==-3){
-            type= "signed integer"
+            type= "s"
             value                       s
         }else if (value<-3){
-            type= "rational"
+            type= "r"
             value.den= -value-3
             value.num                   s
         }else{
-            type= "unsigned integer"
+            type= "v"
         }
     }
     reserved_bytes
@@ -643,6 +643,9 @@ chapter_len
 
 type
     for example: "UTF8" -> string or "JPEG" -> JPEG image
+    "v" -> unsigned integer
+    "s" -> signed integer
+    "r" -> rational
     Note: nonstandard fields should be prefixed by "X-"
     Note: MUST be less than 6 byte long (might be increased to 64 later)
 
