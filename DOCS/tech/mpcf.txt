@@ -569,7 +569,7 @@ Syncpoint tags:
 
 syncpoint_checksum
     crc32 checksum
-    checksum covers from first byte after syncpoint startcode until last 
+    checksum covers from first byte after syncpoint startcode until last
     byte before the syncpoint_checksum.
 
 back_ptr_div8
@@ -681,7 +681,7 @@ info packet types
         Note: if someone needs some others, please tell us about them, so we
               can add them to the official standard (if they are sane)
         Note: nonstandard fields should be prefixed by "X-"
-        Note: names of fields SHOULD be in English if a word with the same 
+        Note: names of fields SHOULD be in English if a word with the same
               meaning exists in English
         Note: MUST be less than 64 bytes long
 
