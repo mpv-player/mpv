@@ -283,7 +283,7 @@ info_frame: (optional)
             value                       s
         }else if (value<-3){
             type= "rational"
-            value.den= -value-2
+            value.den= -value-3
             value.num                   s
         }else{
             type= "unsigned integer"
