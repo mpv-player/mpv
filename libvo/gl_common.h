@@ -21,6 +21,8 @@
 #ifndef APIENTRY
 #ifdef GLAPIENTRY
 #define APIENTRY GLAPIENTRY
+#elif defined(GL_WIN32)
+#define APIENTRY __stdcall
 #else
 #define APIENTRY
 #endif
