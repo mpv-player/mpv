@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.98 -->
+<!-- synced with 1.101 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -710,6 +710,16 @@ A hang vezérlőd hibás. Lásd az <link linkend="audio">audió részt</link>.
 </qandaentry>
 </qandadiv>
 
+<qandaentry>
+<question><para>
+Hogyan szabadulhatok meg az A/V deszinkronizációtól a RealMedia folyamokban történő léptetésnél?
+</para></question>
+<answer><para>
+A <option>-mc 0.1</option> segíthet.
+</para></answer>
+</qandaentry>
+</qandadiv>
+
 <qandadiv id="faq-dvd">
 <title>DVD lejátszás</title>
 <qandaentry>
@@ -742,6 +752,16 @@ Hogy tudom beállítani a DVD meghajtóm régió kódját? Nincs Windows-om!
 </para></question>
 <answer><para>
 Használd a <ulink url="http://linvdr.org/projects/regionset/">regionset eszközt</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nem tudok lejátszani DVD-t, az MPlayer lefagy vagy "Titkosított VOB fájl!" / "Encrypted VOB file!" hibát ír.
+</para></question>
+<answer><para>
+A CSS dekódolás nem működik néhány DVD meghajtóval, amíg nem állítod be
+a régiókódot megfelelően. Lásd a választ az előző kérdésre.
 </para></answer>
 </qandaentry>
 
