@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.98 -->
+<!-- synced with 1.101 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -317,8 +317,8 @@ nézz meg pár a neten elérhető leírást.
 Egy DVD második sávjának két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az
 audió sáv másolásával.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>/dev/null</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -331,8 +331,8 @@ audió sáv MP3-ba alakításával.
 Vigyázz ezzela  módszerrel, mivel bizonyos esetekben audió/videó
 deszinkronizációhoz vezethet.
 <screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>movie.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -359,16 +359,14 @@ használd a <option>-of mpeg</option> kapcsolót.
 <para>
 Példa:
 <screen>
-mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>egyéb_kapcsolók</replaceable> <replaceable>media.avi</replaceable> -o <replaceable>output.mpg</replaceable>
+mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>egyéb_kapcsolók</replaceable> -o <replaceable>kimenet.mpg</replaceable>
 </screen>
 Egy MPEG-1-es fájl létrehozása, mely alkalmas minimális multimédia támogatással
 rendelkező rendszereken, például alapértelmezett Windows telepítéseken történő
 lejátszásra is:
 <screen>
-mencoder -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o \
-<replaceable>x.mpg</replaceable> -oac lavc -ovc lavc \
--lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3 \
-<replaceable>bemenet.avi</replaceable>
+mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>kimenet.mpg</replaceable> -oac lavc -ovc lavc \
+-lavcopts acodec=mp2:abitrate=224:vcodec=mpeg1video:vbitrate=1152:keyint=15:mbd=2:aspect=4/3
 </screen>
 </para>
 </informalexample>
@@ -396,7 +394,7 @@ Ha ez nincs megadva, akkor a <application>MEncoder</application> a 2: bicubic-et
 <para>
 Használat:
 <screen>
-mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vf scale=640:480 -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>bemenet.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -442,7 +440,7 @@ tudja őket. Ez a rész a <emphasis role="bold">másolásról</emphasis> szól.
 <para>
 Példa:
 <screen>
-mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>bemenet.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 
@@ -481,7 +479,7 @@ A <option>-mf</option> kapcsoló magyarázata a man oldalon található.
 Egy MPEG-4-es fájl létrehozása az aktuális könyvtárból található összes
 JPEG fájlból:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -490,7 +488,18 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=m
 <para>
 Egy MPEG-4 fájl létrehozása néhány JPEG fájlból az aktuális könyvtárban:
 <screen>
-mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
+</screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Egy MPEG-4 fájl létrehozása JPEG fájlok explicit listájából (az aktuális könyvtárban lévő
+lista.txt tartalmazza a forrásként felhasználandó fájlokat, soronként egyet):
+<screen>
+mencoder mf://<replaceable>@lista.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \ 
+-ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -499,7 +508,7 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=6
 <para>
 Egy Motion JPEG (MJPEG) fájl készítése az aktuális könyvtár összes JPEG fájlából:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -508,7 +517,7 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc copy -oac copy -o <repl
 <para>
 Egy tömörítetlen fájl létrehozása az aktuális könyvtár összes PNG fájlából:
 <screen>
-mencoder mf:// -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>output.avi</replaceable>
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceable>kimenet.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -521,7 +530,7 @@ A szélességnek 4 egész többszörösének kell lennie, ez a RAW RGB AVI formátum meg
 <para>
 Egy Motion PNG (MPNG) fájl létrehozása az aktuális könyvtár PNG fájlaiból:
 <screen>
-mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>output.avi</replaceable> <!--
+mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>kimenet.avi</replaceable> <!--
 --></screen>
 </para>
 </informalexample>
@@ -530,7 +539,7 @@ mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <repl
 <para>
 Egy Motion TGA (MTGA) fájl létrehozása az aktuális könyvtár összes TGA fájlából:
 <screen>
-mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <replaceable>output.avi</replaceable><!--
+mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <replaceable>kimenet.avi</replaceable><!--
 --></screen>
 </para>
 </informalexample>
@@ -582,7 +591,7 @@ ezeket le kell törölnöd, mielőtt nekiállnál.
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
@@ -632,7 +641,7 @@ Lásd a man oldalt a <systemitem>cropdetect</systemitem> és a
 
 <para>
 Használat
-<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>output.avi</replaceable></screen>
+<screen>mencoder <replaceable>sample-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>kimenet.avi</replaceable></screen>
 </para>
 </sect1>
 
