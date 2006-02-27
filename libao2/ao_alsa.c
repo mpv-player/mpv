@@ -270,7 +270,11 @@ static int init(int rate_hz, int channels, int format, int flags)
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: requested format: %d Hz, %d channels, %x\n", rate_hz,
 	channels, format);
     alsa_handler = NULL;
+#if SND_LIB_VERSION >= 0x010005
+    mp_msg(MSGT_AO,MSGL_V,"alsa-init: using ALSA %s\n", snd_asoundlib_version());
+#else
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
+#endif
     
     if ((err = snd_card_next(&cards)) < 0 || cards < 0)
     {
