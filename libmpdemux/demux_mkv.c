@@ -2078,7 +2078,7 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
   return 0;
 }
 
-static void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags);
+static void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags);
 
 /** \brief Given a matroska track number and type, find the id that mplayer would ask for.
  *  \param d The demuxer for which the subtitle id should be returned.
@@ -2351,7 +2351,7 @@ demux_mkv_open (demuxer_t *demuxer)
               mkv_d->has_first_tc = 1;
             }
           demux_mkv_seek (demuxer,
-                          mkv_d->chapters[dvd_chapter-1].start/1000.0, 1);
+                          mkv_d->chapters[dvd_chapter-1].start/1000.0, 0.0, 1);
         }
     }
 
@@ -3126,7 +3126,7 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
 }
 
 static void
-demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
+demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags)
 {
   free_cached_dps (demuxer);
   if (!(flags & 2))  /* time in secs */
