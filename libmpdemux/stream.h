@@ -309,6 +309,7 @@ typedef struct {
   vts_ptt_srpt_t *vts_ptt_srpt;
   pgc_t *cur_pgc;
 //
+  int cur_title;
   int cur_cell;
   int last_cell;
   int cur_pack;
