@@ -432,6 +432,63 @@ static int dvdtimetomsec(dvd_time_t *dt)
   return msec;
 }
 
+static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int vts_no, int title_no)
+{
+    int vts_ttn;  ///< title number within video title set
+    int pgc_no;   ///< program chain number
+    int msec;     ///< time length in milliseconds
+
+    if(!vts_file || !tt_srpt)
+        return 0;
+
+    if(vts_file->vtsi_mat && vts_file->vts_pgcit)
+    {
+        if(tt_srpt->title[title_no].title_set_nr == vts_no)
+        {
+            vts_ttn = tt_srpt->title[title_no].vts_ttn - 1;
+            pgc_no = vts_file->vts_ptt_srpt->title[vts_ttn].ptt[0].pgcn - 1;
+            msec = dvdtimetomsec(&vts_file->vts_pgcit->pgci_srp[pgc_no].pgc->playback_time);
+        }
+    }
+    return msec;
+}
+
+
+static int mp_describe_titleset(dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_no)
+{
+    ifo_handle_t *vts_file;
+    int title_no, msec=0;
+
+    vts_file = ifoOpen(dvd, vts_no);
+    if(!vts_file)
+        return 0;
+
+    if(!vts_file->vtsi_mat || !vts_file->vts_pgcit)
+        return 0;
+
+    for(title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
+    {
+        msec = mp_get_titleset_length(vts_file, tt_srpt, vts_no, title_no);
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
+    }
+    ifoClose(vts_file);
+}
+
+static int control(stream_t *stream,int cmd,void* arg) 
+{
+    switch(cmd) 
+    {
+        case STREAM_CTRL_GET_TIME_LENGTH:
+        {
+            dvd_priv_t *d = stream->priv;
+            *((unsigned int *)arg) = mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title, d->cur_title-1);
+            return 1;
+        }
+    }
+    return STREAM_UNSUPORTED;
+}
+
+
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
@@ -513,9 +570,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       unsigned char discid [16]; ///< disk ID, a 128 bit MD5 sum
       int vts_no;   ///< video title set number
       int title_no; ///< title number
-      int vts_ttn;  ///< title number within video title set
-      int pgc_no;   ///< program chain number
-      int msec;     ///< time length in milliseconds
       mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
       for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
       {
@@ -523,22 +577,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_angles);
       }
       for (vts_no = 1; vts_no <= vmg_file->vts_atrt->nr_of_vtss; vts_no++)
-      {
-        vts_file = ifoOpen(dvd, vts_no);
-        if (vts_file)
-        {
-          if (vts_file->vtsi_mat && vts_file->vts_pgcit)
-            for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
-              if (tt_srpt->title[title_no].title_set_nr == vts_no)
-              {
-                vts_ttn = tt_srpt->title[title_no].vts_ttn - 1;
-                pgc_no = vts_file->vts_ptt_srpt->title[vts_ttn].ptt[0].pgcn - 1;
-                msec = dvdtimetomsec(&vts_file->vts_pgcit->pgci_srp[pgc_no].pgc->playback_time);
-                mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
-              }
-          ifoClose(vts_file);
-        }
-      }
+        mp_describe_titleset(dvd, tt_srpt, vts_no);
       if (DVDDiscID(dvd, discid) >= 0)
       {
         int i;
@@ -628,6 +667,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     d->vmg_file=vmg_file;
     d->tt_srpt=tt_srpt;
     d->vts_file=vts_file;
+    d->cur_title = dvd_title+1;
 
     /**
      * Check number of audio channels and types
@@ -780,6 +820,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->flags = STREAM_READ | STREAM_SEEK;
     stream->fill_buffer = fill_buffer;
     stream->seek = seek;
+    stream->control = control;
     stream->close = stream_dvd_close;
     stream->start_pos = (off_t)d->cur_pack*2048;
     stream->end_pos = (off_t)(d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048;
