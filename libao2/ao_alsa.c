@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <math.h>
 #include <string.h>
 
@@ -71,6 +72,25 @@ static int alsa_can_pause = 0;
 
 #undef BUFFERTIME
 #define SET_CHUNKSIZE
+
+static void alsa_error_handler(const char *file, int line, const char *function,
+			       int err, const char *format, ...)
+{
+  char tmp[0xc00];
+  va_list va;
+
+  va_start(va, format);
+  vsnprintf(tmp, sizeof tmp, format, va);
+  va_end(va);
+  tmp[sizeof tmp - 1] = '\0';
+
+  if (err)
+    mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s: %s\n",
+	   file, line, function, tmp, snd_strerror(err));
+  else
+    mp_msg(MSGT_AO, MSGL_ERR, "alsa-lib: %s:%i:(%s) %s\n",
+	   file, line, function, tmp);
+}
 
 /* to set/get/query special features/parameters */
 static int control(int cmd, void *arg)
@@ -275,6 +295,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 #else
     mp_msg(MSGT_AO,MSGL_V,"alsa-init: compiled for ALSA-%s\n", SND_LIB_VERSION_STR);
 #endif
+
+    snd_lib_error_set_handler(alsa_error_handler);
     
     if ((err = snd_card_next(&cards)) < 0 || cards < 0)
     {
