@@ -787,9 +787,17 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
     demux_stream_t *d_video=demuxer->video;
     sh_video_t *sh_video=d_video->sh;
     mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
+    int msec = 0;
 
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
+            msec = stream_control(demuxer->stream, STREAM_CTRL_GET_TIME_LENGTH, arg);
+            if(msec != STREAM_UNSUPORTED) {
+              msec = *((unsigned int*)arg);
+              *((double *)arg)=(double)msec/1000.0f;
+              mp_msg(MSGT_DEMUXER,MSGL_DBG2,"\r\nDEMUX_MPG_CTRL, stream len: %d (%.3lf)\r\n", msec, *((double*)arg));
+              return DEMUXER_CTRL_GUESS;
+            }
             if (mpg_d && mpg_d->has_valid_timestamps) {
               *((double *)arg)=(double)mpg_d->final_pts;
               return DEMUXER_CTRL_GUESS;
