@@ -48,6 +48,7 @@
 #define MAX_STREAM_PROTOCOLS 10
 
 #define STREAM_CTRL_RESET 0
+#define STREAM_CTRL_GET_TIME_LENGTH 1
 
 #ifdef MPLAYER_NETWORK
 #include "network.h"

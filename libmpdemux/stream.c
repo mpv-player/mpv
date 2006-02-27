@@ -347,6 +347,11 @@ void stream_reset(stream_t *s){
   //stream_seek(s,0);
 }
 
+void stream_control(stream_t *s, int cmd, void *arg){
+  if(!s->control) return STREAM_UNSUPORTED;
+  return s->control(s, cmd, arg);
+}
+
 stream_t* new_memory_stream(unsigned char* data,int len){
   stream_t *s=malloc(sizeof(stream_t)+len);
   memset(s,0,sizeof(stream_t));
