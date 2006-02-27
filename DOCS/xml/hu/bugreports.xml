@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.12 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 <para>
@@ -20,6 +20,79 @@ Vagy talán már meg is tetted? Kérlek olvasd el <ulink url="../../tech/patches.tx
 hogy megtudd, hogyan kerülhet be a kódod az <application>MPlayer</application>be.
 Az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 levelezési listán lévő emberkék segítenek neked, ha kérdésed van.
+</para>
+</sect1>
+<sect1 id="bugreports_regression_test">
+<title>Hogyan tesztelj a CVS segítségével</title>
+<para>
+Egy néha előforduló probléma, hogy "régen még működött, de most már nem...".
+Következzék hát egy lépésenkénti leírás, mely segít a probléma
+megtalálásában. Ez <emphasis role="bold">nem</emphasis> az átlagos
+felhasználóknak szól.
+</para>
+<para>
+Először is, be kell szerezned az MPlayer forrás fáját a CVS-ből.
+Az utasításokat megtalálod
+<ulink url="http://www.mplayerhq.hu/homepage/dload.html">ennek az oldalnak</ulink>
+az alján.
+</para>
+<para>
+Ezután lesz a main/ könyvtárban a CVS fáról egy pillanatképed, a kliens oldalon.
+Ezután frissítsd ezt a kívánt dátumúra:
+<screen>
+cd main/
+cvs update -PAd -D "2004-08-23"
+</screen>
+A dátum formátum YYYY-MM-DD HH:MM:SS.
+Ezen dátum formátum használata biztosítja, hogy benne legyen minden olyan
+javítás, ami az adott dátumig commit-olva lett és bekerült az
+<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archívumába</ulink>.
+</para>
+<para>
+Majd folytasd, mint egy normális frissítést:
+<screen>
+./configure
+make
+</screen>
+</para>
+<para>
+Ha olyan olvassa ezt, aki nem programozó, annak gyorsabb megkeresni a
+probléma forrását bináris keresés használatával &mdash; ekkor
+a hiba helyét a keresési intervallum ismételt felezéseivel határozza
+meg.
+Például a probléma előfordult 2003 közepén, akkor kérdezd meg, hogy
+"Már ott volt a hiba?".
+Ha igen, akkor menj vissza április elsejére; ha nem, menj október elsejére,
+és így tovább.
+</para>
+<para>
+Ha nagyon sok hely van a merevlemezeden (egy teljes fordítás jelenleg 100 MB
+és 300-350 MB körül van a hibakereső szimbólumokkal), másold át a
+legrégebbi tudvalevőleg működő verziót, mielőtt frissítenél; ezzel időt
+spórolsz, ha vissza kell lépned.
+(Általában le kell futtatni a 'make distclean'-t egy régi verzió újrafordítása
+előtt, így ha nem készítesz mentést az eredeti forrás fádról, újra kell fordítanod
+mindent, ha visszajössz a jelenbe.)
+</para>
+<para>
+Ha megvan a nap, amikor a probléma megjelent, folytasd a keresést az
+mplayer-cvslog archívum segítségével (dátum szerint rendezve) és egy sokkal
+precízebb CVS update-tel, melybe órát, percet és másodpercet is írsz:
+<screen>
+cvs update -PAd -D "2004-08-23 15:17:25"
+</screen>
+Így könnyen megtalálod azt a javítást, ami okozta.
+</para>
+<para>
+Ha megvan a javítás, ami a problémát okozta, majdnem győztél is;
+jelentsd az
+<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>-n vagy
+iratkozz fel az
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+listára és küldd el oda.
+Valószínűleg a szerző jelentkezni fog javítási ötlettel.
+Addig azonban a javításra is gyanakodva tekint, amíg nem tiszta, hogy hol
+is van a hiba :-).
 </para>
 </sect1>
 <sect1 id="bugreports_report">
