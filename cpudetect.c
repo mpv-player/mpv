@@ -33,6 +33,10 @@ CpuCaps gCpuCaps;
 #include <windows.h>
 #endif
 
+#ifdef __AMIGAOS4__
+#include <proto/exec.h>
+#endif
+
 //#define X86_FXSR_MAGIC
 /* Thanks to the FreeBSD project for some of this cpuid code, and 
  * help understanding how to use it.  Thanks to the Mesa 
@@ -468,6 +472,7 @@ static void check_os_katmai_support( void )
 #ifdef SYS_DARWIN
 #include <sys/sysctl.h>
 #else
+#ifndef __AMIGAOS4__
 #include <signal.h>
 #include <setjmp.h>
 
@@ -484,6 +489,7 @@ static void sigill_handler (int sig)
     canjump = 0;
     siglongjmp (jmpbuf, 1);
 }
+#endif //__AMIGAOS4__
 #endif
 
 void GetCpuCaps( CpuCaps *caps)
@@ -517,6 +523,13 @@ void GetCpuCaps( CpuCaps *caps)
                                 caps->hasAltiVec = 1;
         }
 #else /* SYS_DARWIN */
+#ifdef __AMIGAOS4__
+        ULONG result = 0;
+
+        GetCPUInfoTags(GCIT_VectorUnit, &result, TAG_DONE);
+        if (result == VECTORTYPE_ALTIVEC)
+        	caps->hasAltiVec = 1;
+#else
 /* no Darwin, do it the brute-force way */
 /* this is borrowed from the libmpeg2 library */
         {
@@ -535,6 +548,7 @@ void GetCpuCaps( CpuCaps *caps)
             caps->hasAltiVec = 1;
           }
         }
+#endif //__AMIGAOS4__
 #endif /* SYS_DARWIN */
         mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
