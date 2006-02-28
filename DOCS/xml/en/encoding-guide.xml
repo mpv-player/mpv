@@ -377,9 +377,11 @@
   With a two pass encode, the first pass will rip the movie as though it
   were CBR, but it will keep a log of properties for each frame. This
   data is then used during the second pass in order to make intelligent
-  decisions about which quantizers to use. During fast action or low
+  decisions about which quantizers to use. During fast action or high
   detail scenes, higher quantizers will likely be used, and during
-  slow moving or high detail scenes, lower quantizers will be used.
+  slow moving or low detail scenes, lower quantizers will be used.
+  Normally, the amount of motion is much more important than the
+  amount of detail.
 </para>
 
 <para>
