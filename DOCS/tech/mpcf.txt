@@ -264,10 +264,8 @@ index:
 info_frame: (optional)
     stream_id_plus1                     v
     chapter_id                          v
-    if (chapter_id) {
-        chapter_start                   v
-        chapter_len                     v
-    }
+    chapter_start                       v
+    chapter_len                         v
     count                               v
     for(i=0; i<count; i++){
         name                            vb
