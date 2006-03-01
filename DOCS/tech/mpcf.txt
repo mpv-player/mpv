@@ -553,7 +553,7 @@ samplerate_nom / samplerate_denom = samplerate
     the number of samples per second, MUST not be 0
 
 crc32 checksum
-    Generator polynomial is 0x04C11DB7. Starting value is zero.
+    Generator polynomial is 0x104C11DB7. Starting value is zero.
 
 checksum
     crc32 checksum
