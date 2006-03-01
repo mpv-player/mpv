@@ -347,7 +347,7 @@ void stream_reset(stream_t *s){
   //stream_seek(s,0);
 }
 
-void stream_control(stream_t *s, int cmd, void *arg){
+int stream_control(stream_t *s, int cmd, void *arg){
   if(!s->control) return STREAM_UNSUPORTED;
   return s->control(s, cmd, arg);
 }
