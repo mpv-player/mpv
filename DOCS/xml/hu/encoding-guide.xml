@@ -1917,7 +1917,7 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   Használj deinterlacing szûrõt a kódolás elõtt. Számos közül választhatsz,
   mindegyiknek megvan a maga elõnye és hátránya. Lásd az <option>mplayer -pphelp</option>
   kimenetét, hogy megtudd, mit használhatsz (grep-pelj a &quot;deint&quot;-re),
-  és keress az <ulink url="http://www.mplayerhq.hu/design6/info.html#mailing_lists">
+  és keress az <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
   MPlayer levelezési listáin</ulink> a sok beszélgetés között, ami a különbözõ
   szûrõkrõl szól. A frameráta itt sem változik, így nem kell
   <option>-ofps</option>. A deinterlacing-et a vágás után

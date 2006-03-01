@@ -2083,7 +2083,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> to see
   what is available (grep for &quot;deint&quot;), and search the
-  <ulink url="http://www.mplayerhq.hu/design6/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
   MPlayer mailing lists</ulink> to find many discussions about the
   various filters. Again, the framerate is not changing, so no
   <option>-ofps</option>. Also, deinterlacing should be done after
