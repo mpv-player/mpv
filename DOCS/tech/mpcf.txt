@@ -535,7 +535,7 @@ dts
     frames are NOT exempt from this rule)
 
 width/height
-    MUST be set to the coded width/height
+    MUST be set to the coded width/height, MUST not be 0
 
 sample_width/sample_height (aspect ratio)
     sample_width is the horizontal distance between samples
@@ -550,7 +550,7 @@ colorspace_type
     18    ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
 
 samplerate_nom / samplerate_denom = samplerate
-    the number of samples per second
+    the number of samples per second, MUST not be 0
 
 crc32 checksum
     Generator polynomial is 0x04C11DB7. Starting value is zero.
