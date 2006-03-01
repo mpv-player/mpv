@@ -169,7 +169,7 @@ Budete potøebovat pomìrnì zánovní systém. Na Linuxu doporuèujeme jádro øady 2.4.
   <application>MPlayer</application> na x86 architektuøe, mo¾ná je budete
   potøebovat.
   Stáhnìte si balíèek s kodeky z na¹í
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">kodekové stránky</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">kodekové stránky</ulink>
   a rozbalte je do <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">PØED</emphasis> kompilací <application>MPlayer</application>u,
   jinak nebude zakompilována podpora pro Win32!
@@ -584,7 +584,7 @@ co¾ pracuje s tìmito ovladaèi:
 <para>
   Proto¾e <application>MPlayer</application> nemá pøibalen ¾ádný skin, budete si
   muset nìjaký stáhnout abyste mohli pou¾ívat GUI. Viz na¹i <ulink
-  url="http://www.mplayerhq.hu/homepage/dload.html">download stránku</ulink>.
+  url="http://www.mplayerhq.hu/dload.html">download stránku</ulink>.
   Skiny by mìly být rozbaleny do obvyklého systémového adresáøe
   (<filename class="directory">$PREFIX/share/mplayer/Skin</filename>),
   nebo do <filename class="directory">$HOME/.mplayer/Skin</filename>.

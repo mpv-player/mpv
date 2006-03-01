@@ -35,7 +35,7 @@ problemów wystêpuj±cych w oficjalnych wydaniach jest zg³aszana w ci±gu kilku dni
 albo nawet godzin. Dlatego te¿ prosimy u¿ywaæ <emphasis role="bold">tylko wersji
 z CVSu</emphasis> do zg³aszania b³êdów. Dotyczy to g³ównie pakietów binarnych
 <application>MPlayera</application>. Instrukcje dotycz±ce CVSu znajduj± siê na
-dole <ulink url="http://www.mplayerhq.hu/homepage/dload.html">tej strony</ulink>
+dole <ulink url="http://www.mplayerhq.hu/dload.html">tej strony</ulink>
 lub w pliku README. Je¿eli problem dalej wystêpuje prosimy sprawdziæ listê
 <link linkend="bugs">znanych b³êdów</link> i resztê dokumentacji. Je¿eli problem
 nie jest znany lub rozwi±zany przez nasz± dokumentacjê prosimy zg³osiæ b³±d.

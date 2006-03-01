@@ -33,7 +33,7 @@ occurred. This is <emphasis role="bold">not</emphasis> for casual users.
 <para>
 First, you'd need to fetch MPlayer's source tree from CVS.
 Instructions can be found at the bottom of
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">this page</ulink>.
+<ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink>.
 </para>
 <para>
 You will have now in the main/ directory an image of the CVS tree, on the
@@ -105,7 +105,7 @@ most problems in official releases are reported within days or even hours, so
 please use <emphasis role="bold">only CVS</emphasis> to report bugs. This
 includes binary packages of <application>MPlayer</application>. CVS
 instructions can be found at the bottom of
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">this page</ulink> or in
+<ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink> or in
 the README. If this did not help please refer to the list of
 <link linkend="bugs">known bugs</link> and the rest of the documentation. If your
 problem is not known or not solvable by our instructions, then please report the bug.

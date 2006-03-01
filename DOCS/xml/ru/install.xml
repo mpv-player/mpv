@@ -538,7 +538,7 @@ make install</screen>
 <para>
 Поскольку <application>MPlayer</application> не содержит ни одной шкуры, Вы должны скачать их, если Вы
 хотите использовать GUI. См. 
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">download page[страницу
+<ulink url="http://www.mplayerhq.hu/dload.html">download page[страницу
 закачек]</ulink>. Они должны быть извлечены в системный каталог
 (<filename class="directory">$PREFIX/share/mplayer/Skin</filename>), или в 
 <filename class="directory">$HOME/.mplayer/Skin</filename>. По умолчанию, MPlayer ищет каталог <filename class="directory">default</filename>

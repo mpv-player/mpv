@@ -36,7 +36,7 @@ Jak mohu podpoøit vývoj <application>MPlayer</application>u?
 </para></question>
 <answer><para>
 Rádi pøijmeme va¹e hardwarové a softwarové
-<ulink url="http://www.mplayerhq.hu/homepage/donations.html">pøíspìvky</ulink>.
+<ulink url="http://www.mplayerhq.hu/donations.html">pøíspìvky</ulink>.
 Ty nám pomáhají neustále vylep¹ovat <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
@@ -280,7 +280,7 @@ Objevuje se chybová zpráva o chybìjícím souboru <filename>/usr/local/lib/codecs/
 </para></question>
 <answer><para>
 Stáhnìte si a nainstalujte binární kodeky z na¹í
-<ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">kodekové stránky</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/codecs.html">kodekové stránky</ulink>.
 </para></answer>
 </qandaentry>
 

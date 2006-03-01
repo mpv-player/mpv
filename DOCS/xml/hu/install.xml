@@ -157,7 +157,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <emphasis role="bold">Win32 codecek</emphasis>: Ha x86-os gépen akarod használni
   az <application>MPlayer</application>t, valószínûleg szükséged lesz rájuk.
   Töltsd le egy codec csomagot a
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">codec oldalunkról</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codec oldalunkról</ulink>
   és tedd be a codec-eket a <filename class="directory">/usr/local/lib/codecs</filename> könyvtárba
   az <application>MPlayer</application> fordítása <emphasis role="bold">ELÕTT</emphasis>,
   különben nem lesz befordított Win32 támogatásod!
@@ -537,7 +537,7 @@ parancssorban.
 <para>
 Mivel az <application>MPlayer</application> nem rendelkezik beépített skin-nel,
 le kell töltened õket, ha a GUI-t használni akarod. Lásd a <ulink
-url="http://www.mplayerhq.hu/homepage/dload.html">letöltési oldalt</ulink>.
+url="http://www.mplayerhq.hu/dload.html">letöltési oldalt</ulink>.
 Ajánlott egy rendszerszinten elérhetõ könyvtárba tenni õket (<filename
 class="directory">$PREFIX/share/mplayer/Skin</filename>), vagy a <filename
 class="directory">$HOME/.mplayer/Skin</filename>-be.

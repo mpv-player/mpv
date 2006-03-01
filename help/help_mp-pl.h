@@ -588,7 +588,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Proporcje filmu (obrazu) nie s± zdefiniowane - nie skalujê.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Musisz zainstalowaæ/zaktualizowaæ pakiet binarnych kodeków.\nId¼ do http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Musisz zainstalowaæ/zaktualizowaæ pakiet binarnych kodeków.\nId¼ do http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFORMACJA: Inicjalizacja kodeka video Win32/DShow przebieg³a pomy¶lnie.\n"
 #define MSGTR_DMOInitOK "INFORMACJA: Inicjalizacja kodeka video Win32/DMO przebieg³a pomy¶lnie.\n"
 

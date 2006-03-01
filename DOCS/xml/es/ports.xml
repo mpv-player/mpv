@@ -339,7 +339,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <para>Sascha Sommer libera binarios oficiales para Windows de vez en
   cuando, Joey Parrish hace paquetes completos para Windows no oficiales
   con instalador. Búsquelos en la sección de Windows de
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">nuestra
+  <ulink url="http://www.mplayerhq.hu/projects.html#windows">nuestra
   página de proyectos</ulink>.</para>
 
 <sect2 id="cygwin">

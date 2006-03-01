@@ -36,7 +36,7 @@ How can I support <application>MPlayer</application> development?
 </para></question>
 <answer><para>
 We are more than happy to accept your hardware and software
-<ulink url="http://www.mplayerhq.hu/homepage/donations.html">donations</ulink>.
+<ulink url="http://www.mplayerhq.hu/donations.html">donations</ulink>.
 They help us in continuously improving <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
@@ -277,7 +277,7 @@ There are error messages about file not found <filename>/usr/local/lib/codecs/</
 </para></question>
 <answer><para>
 Download and install the binary codecs from our
-<ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codecs page</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>.
 </para></answer>
 </qandaentry>
 

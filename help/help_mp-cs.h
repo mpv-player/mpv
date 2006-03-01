@@ -639,7 +639,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Pomìr stran obrazu filmu není definován - nemìním velikost.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Potøebujete aktualizovat nebo nainstalovat binární kodeky.\nJdìte na http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Potøebujete aktualizovat nebo nainstalovat binární kodeky.\nJdìte na http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Inicializace Win32/DShow videokodeku OK.\n"
 #define MSGTR_DMOInitOK "INFO: Inicializace Win32/DMO videokodeku OK.\n"
 

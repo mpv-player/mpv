@@ -33,7 +33,7 @@
 в течение дней, и даже часов, после релиза, поэтому, пожалуйста, для сообщений
 об ошибках используйте <emphasis role="bold">только CVS</emphasis>. Это
 включает и бинарные пакеты <application>MPlayer</application>'а. Вы найдёте инструкции по CVS внизу
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">этой страницы</ulink>
+<ulink url="http://www.mplayerhq.hu/dload.html">этой страницы</ulink>
 или в README. Если это не помогло, пожалуйста, обратитесь к списку
 <link linkend="bugs">известных ошибок</link> и остальной документации. Если
 Ваша проблема не известна или не решается с помощью наших инструкций,

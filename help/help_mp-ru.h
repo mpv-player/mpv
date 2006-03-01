@@ -566,7 +566,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Movie-Aspect не определён - премасштабирование не применяется.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Вам нужно обновить/установить пакет бинарных кодеков.\nЗайдите на http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Вам нужно обновить/установить пакет бинарных кодеков.\nЗайдите на http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "ИНФОРМАЦИЯ: Win32/DShow видео кодек успешно инициализирован.\n"
 #define MSGTR_DMOInitOK "ИНФОРМАЦИЯ: Win32/DMO видео кодек успешно инициализирован.\n"
 

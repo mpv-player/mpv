@@ -164,7 +164,7 @@ recommandés.
   <emphasis role="bold">codecs Win32</emphasis>: Si vous prévoyez d'utiliser
   <application>MPlayer</application> sur une architecture non x86, vous en aurez
   probablement besoin. Téléchargez les codecs Win32 depuis notre
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">page de codecs</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">page de codecs</ulink>
   et installez-les dans <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">AVANT</emphasis> de compiler <application>MPlayer</application>,
   sinon aucun support Win32 ne sera compilé!
@@ -538,7 +538,7 @@ ceci pour des raisons techniques.
 <para>
 <application>MPlayer</application> n'ayant pas de skin par défaut, vous
 devrez la télécharger si vous voulez utiliser la GUI. Voir la <ulink
-url="http://www.mplayerhq.hu/homepage/dload.html">page des téléchargements</ulink>.
+url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
 Elles pourront se placer dans le répertoire commun (<filename class="directory">
 $PREFIX/share/mplayer/Skin</filename>), ou dans <filename class="directory">$HOME/.mplayer/Skin</filename>.
 Par défaut, <application>MPlayer</application> consulte ces répertoires à la recherche

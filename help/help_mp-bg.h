@@ -574,7 +574,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Не са дефинирани пропорции - без предварително мащабиране.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Трябва да обновите/инсталирате пакета с двоичните кодеци.\nОтидете на http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Трябва да обновите/инсталирате пакета с двоичните кодеци.\nОтидете на http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Видеокодек Win32/DShow е инициализиран успешно.\n"
 #define MSGTR_DMOInitOK "INFO: Видеокодек Win32/DMO е инициализиран успешно.\n"
 

@@ -39,7 +39,7 @@
 <para>
   If this seems to be too much for you, you should probably use one of the
   many fine frontends that are listed in the
-  <ulink url="http://mplayerhq.hu/homepage/design7/projects.html#mencoder_frontends">MEncoder section</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#mencoder_frontends">MEncoder section</ulink>
   of our related projects page.
   That way, you should be able to achieve high quality rips without too much
   thinking, because most of those tools are designed to take clever decisions
@@ -2083,7 +2083,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> to see
   what is available (grep for &quot;deint&quot;), and search the
-  <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design6/info.html#mailing_lists">
   MPlayer mailing lists</ulink> to find many discussions about the
   various filters. Again, the framerate is not changing, so no
   <option>-ofps</option>. Also, deinterlacing should be done after

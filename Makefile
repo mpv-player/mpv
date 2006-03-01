@@ -478,12 +478,12 @@ endif
 	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
 	@if test ! -d $(DATADIR)/font ; then mkdir -p $(DATADIR)/font ; fi
 	@if test ! -f $(DATADIR)/font/font.desc ; then \
-	echo "*** Download font at http://www.mplayerhq.hu/homepage/dload.html" ; \
+	echo "*** Download font at http://www.mplayerhq.hu/dload.html" ; \
 	echo "*** for OSD/Subtitles support and extract to $(DATADIR)/font/" ; \
 	fi
 ifeq ($(GUI),yes)
 	@if test ! -d $(DATADIR)/Skin ; then mkdir -p $(DATADIR)/Skin ; fi
-	@echo "*** Download skin(s) at http://www.mplayerhq.hu/homepage/dload.html"
+	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/Skin/"
 	@if test ! -d $(prefix)/share/pixmaps ; then mkdir -p $(prefix)/share/pixmaps ; fi
 	$(INSTALL) -m 644 Gui/mplayer/pixmaps/mplayer-desktop.xpm $(prefix)/share/pixmaps/mplayer-desktop.xpm

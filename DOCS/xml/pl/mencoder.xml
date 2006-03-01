@@ -1184,7 +1184,7 @@ cropowaniem, chyba ¿e naprawdê wiesz co robisz <link linkend="menc-feat-telecine
   U¿ycie filtru likwiduj±cego przeplot przed kodowaniem. Jest kilka takich 
   filtrów, ka¿dy ma swoje wady i zalety. Skonsultuj <option>mplayer -pphelp</option>
   aby zobaczyæ co jest dostêpne (grepuj "deint") i przeszukaj
-  <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design6/info.html#mailing_lists">
   listy dyskusyjne MPlayera</ulink> aby znale¼æ wiele dyskusji na temat ró¿nych filtrów.
   Ilo¶æ ramek na sekundê znów siê nie zmienia, wiêc nie u¿ywamy <option>-ofps</option>.
   Likwidowanie przeplotu powinno zostaæ zrobione po kadrowaniu 

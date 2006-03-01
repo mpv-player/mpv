@@ -424,10 +424,10 @@ wolna. U¿ywaj SDL.
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>,
   aby uzyskaæ pomoc albo otrzymaæ najnowsze informacje.
   Oficjalne paczki z binariami dla Windowsa znajdziesz na
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">stronie pobierania</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">stronie pobierania</ulink>.
   Pakiety zawieraj±ce instalatory i proste nak³adki GUI dostêpne s± z zewnêtrznych
   ¼róde³, informacje o nich zebrali¶my w sekcji po¶wiêconej Windowsowi na
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">stronie projektów</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">stronie projektów</ulink>.
 </para>
 
 <para>Je¿eli chcesz unikn±æ korzystania z wiersza poleceñ, prostym sposobem
@@ -489,7 +489,7 @@ wolna. U¿ywaj SDL.
   zapobiegnie jej u¿ywaniu. Mo¿esz to na sta³e dodaæ do Twojego pliku konfiguracyjnego.</para>
 
 <para>Dostêpne s± specjalne zbiory z kodekami przeznaczone dla systemu Windows, znajdziesz je na
-  <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">stronie kodeków</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">stronie kodeków</ulink>.
   Pozwol± Ci one na odtwarzanie formatów, które nie s± jeszcze bezpo¶rednio obs³ugiwane w
   <application>MPlayerze</application>. Umie¶æ je, gdzie¶ w swojej ¶cie¿ce (w katalogu podanym w
   zmiennej PATH - przyp. t³umacza) lub przeka¿ opcjê

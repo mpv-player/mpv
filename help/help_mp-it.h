@@ -652,7 +652,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Movie-Aspect non definito - nessuna scalatura.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Devi installare o aggiornare i codec binari.\nVai a http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Devi installare o aggiornare i codec binari.\nVai a http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Win32/DShow inizializzato correttamente.\n"
 #define MSGTR_DMOInitOK "INFO: Win32/DMO inizializzato correttamente.\n"
 

@@ -420,10 +420,10 @@ Használj SDL-t.
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   levelezési listát is segítéségért és a legfrissebb információkért.
   A hivatalos Windows-os binárisok megtalálhatóak a
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">letöltési oldalon</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalon</ulink>.
   A külsõ forrásból származó telepítõ csomagokat és egyszerû GUI frontend-eket
   összegyûjtöttük a 
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">kapcsolódó projektek oldal</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">kapcsolódó projektek oldal</ulink>
   Windows-os részében.
 </para>
 
@@ -482,7 +482,7 @@ Használj SDL-t.
   hogy véglegesen kimaradjon a használatból.</para>
 
 <para>Vannak speciálisan Windowsra készített codec csomagok a
-  <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codec oldalunkon</ulink>,
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codec oldalunkon</ulink>,
   melyek segítségével azokat a formátumokat is lejátszhatod, amikhez még
   nincs natív támogatás.
   Tedd be a codec-eket valahova az elérési útvonaladba vagy add meg a

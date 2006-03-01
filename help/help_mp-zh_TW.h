@@ -344,7 +344,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "電影比例未有說明 — 並無使用 prescaling。\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "你需要升級/安裝二進制codecs包。\n請訪問http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "你需要升級/安裝二進制codecs包。\n請訪問http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Win32/DShow影像codec初始OK。\n"
 #define MSGTR_DMOInitOK "INFO: Win32/DMO影像codec初始。\n"
 

@@ -343,7 +343,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Η αναλογία της ταινίας δεν είναι ορισμένη - δεν εφαρμόζεται προκλιμάκωση.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Θα πρέπει να αναβαθμήσετε ή να εγκαταστήσετε το πακέτο με τα codecs.\nΔείτε τη διεύθυνση http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Θα πρέπει να αναβαθμήσετε ή να εγκαταστήσετε το πακέτο με τα codecs.\nΔείτε τη διεύθυνση http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "Πληροφορία: το βίντεο codec Win32/DShow αρχικοποιήθηκε επιτυχώς.\n"
 #define MSGTR_DMOInitOK "Πληροφορία: το βίντεο codec Win32/DMO αρχικοποιήθηκε επιτυχώς.\n"
 

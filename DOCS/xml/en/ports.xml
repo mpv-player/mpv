@@ -461,10 +461,10 @@ non-commercial usage.
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   mailing list for help and latest information.
   Official Windows binaries can be found on the
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">download page</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>.
   Installer packages and simple GUI frontends are available from external
   sources, we have collected then in the Windows section of our
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">projects page</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">projects page</ulink>.
 </para>
 
 <para>If you wish to avoid using the command line, a simple trick is
@@ -523,7 +523,7 @@ non-commercial usage.
   keep it from being used.</para>
 
 <para>There are special codec packages for Windows available on our
-  <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codecs page</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
   to allow playing formats for which there is no native support yet.
   Put the codecs somewhere in your path or pass
   <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>

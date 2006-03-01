@@ -557,7 +557,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Movie-Aspect is niet gedefinieerd - geen voorscalering toegepast.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "De binary codecs moeten worden geinstalleerd of bijgewerkt.\nZie http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "De binary codecs moeten worden geinstalleerd of bijgewerkt.\nZie http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Win32/DShow video codec initialisatie OK.\n"
 #define MSGTR_DMOInitOK "INFO: Win32/DMO video codec initialisatie OK.\n"
 

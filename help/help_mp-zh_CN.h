@@ -626,7 +626,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "电影宽高比未定义 - 无法使用预放大.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "你需要升级/安装二进制编解码器包.\n请访问http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "你需要升级/安装二进制编解码器包.\n请访问http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Win32/DShow视频解码器初始化OK.\n"
 #define MSGTR_DMOInitOK "INFO: Win32/DMO视频解码器初始化OK.\n"
 

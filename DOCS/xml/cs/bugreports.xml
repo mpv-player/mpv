@@ -36,7 +36,7 @@ u¾ivatelùm.
 <para>
 Nejprve si musíte opatøit zdrojové kódy MPlayeru z CVS.
 Instrukce lze nalést na konci
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">této stránky</ulink>.
+<ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>.
 </para>
 <para>
 Tak dostanete v adresáøi main/ obraz CVS stromu na stranì klienta.
@@ -104,7 +104,7 @@ odstranìna. Vývoj je velmi rychlý, vìt¹ina chyb v oficiálních balíècích je
 nahlá¹ena bìhem nìkolika dnù, nebo dokonce hodin, tak¾e prosím pou¾ívejte
 <emphasis role="bold">pouze CVS</emphasis> pro hlá¹ení chyb. To zahrnuje binární
 balíèky <application>MPlayer</application>u. CVS instrukce naleznete na konci
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">této stránky</ulink>,
+<ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>,
 nebo v souboru README. Pokud to nepomù¾e, prostudujte si prosím seznam
 <link linkend="bugs">známých chyb</link> a zbytek dokumentace. Pokud je vá¹
 problém neznámý nebo jej nelze øe¹it pomocí na¹ich instrukcí pak jej nahlaste

@@ -606,7 +606,7 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Aspecto de película no es definido - no se ha aplicado prescalado.\n"
 
 // vd_dshow.c, vd_dmo.c
-#define MSGTR_DownloadCodecPackage "Necesita actualizar/instalar el paquete binario con codecs.\n Dirijase a http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Necesita actualizar/instalar el paquete binario con codecs.\n Dirijase a http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: Inicialización correcta de codec de vídeo Win32/DShow.\n"
 #define MSGTR_DMOInitOK "INFO: Inicialización correcta de codec de vídeo Win32/DMO.\n"
 

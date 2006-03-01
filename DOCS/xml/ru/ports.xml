@@ -369,7 +369,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <para>Иногда Саша Зоммер [Sascha Sommer] выпускает оффициальные бинарии
   под Windows, Джой Пэрриш[Joey Parrish] собирает
   неофициальные Windows пакеты с установочником. Ищщите ссылки в секции
-  Windows <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">
+  Windows <ulink url="http://www.mplayerhq.hu/projects.html#windows">
   нашей страницы проектов</ulink>.</para>
 
 <sect2 id="cygwin">

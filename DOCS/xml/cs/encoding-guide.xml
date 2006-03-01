@@ -36,7 +36,7 @@
 <para>
   Pokud je toho na vás moc, asi byste mìli pou¾ít nìkterý z pìkných frontendù,
   které jsou zmínìny v
-  <ulink url="http://mplayerhq.hu/homepage/design7/projects.html#mencoder_frontends">sekci MEncoder</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#mencoder_frontends">sekci MEncoder</ulink>
   na na¹í stránce odvozených projektù.
   Takto budete schopni dosahovat vysoce kvalitních ripù bez velkého pøemý¹lení,
   proto¾e vìt¹ina tìchto nástrojù je navr¾ena tak, aby dìlala vhodná rozhodnutí
@@ -1981,7 +1981,7 @@ Nedìlejte to! V¾dy pou¾ijte jako zdroj soubor nebo CD/DVD/atd zaøízení.
   mù¾ete si vybrat. Ka¾dý z nich má svá pro i proti. Prohlédnìte si výstup
   <option>mplayer -pphelp</option> abyste zjistili, které jsou k dispozici
   (grep pro &quot;deint&quot;) a vyhledejte
-  <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design6/info.html#mailing_lists">
   e-mailové konference MPlayeru</ulink>, kde naleznete mnoho diskusí o rùzných
   filtrech. Snímková rychlost se ani zde nemìní, tak¾e ¾ádné
   <option>-ofps</option>. Odstranìní proklady by rovnì¾ mìlo být provedeno po

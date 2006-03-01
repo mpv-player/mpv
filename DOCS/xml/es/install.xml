@@ -540,7 +540,7 @@ de comandos, debido a razones técnicas.
 <para>
 Como <application>MPlayer</application> no tiene una piel incluida, debe
 bajarlas si desea usar la GUI. Vea la <ulink
-url="http://www.mplayerhq.hu/homepage/dload.html">página de descargas</ulink>.
+url="http://www.mplayerhq.hu/dload.html">página de descargas</ulink>.
 Deberían ser extraídas al directorio global de pieles normal (<filename
 class="directory">$PREFIX/share/mplayer/Skin</filename>), o al directorio
 personal  <filename class="directory">$HOME/.mplayer/Skin</filename>.

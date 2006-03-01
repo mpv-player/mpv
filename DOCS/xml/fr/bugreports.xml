@@ -38,7 +38,7 @@ occasionnels.
 <para>
 Premièrement, vous aurez besoin de récuperer l'arbre des sources de MPlayer depuis le CVS.
 Les instructions peuvent être trouvé au bas de
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">cette page</ulink>.
+<ulink url="http://www.mplayerhq.hu/dload.html">cette page</ulink>.
 </para>
 <para>
 Vous aurez donc dans le repertoire main/ une image de l'arbre CVS, du coté 
@@ -110,7 +110,7 @@ rapportés dans les jours voir les heures qui suivent, donc n'utilisez
 <emphasis role="bold">que le CVS</emphasis> pour rapporter les bogues. Ceci
 est également valable pour les paquets binaires de <application>MPlayer</application>.
 Les instructions CVS peuvent être trouvées en bas de 
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">cette page</ulink>
+<ulink url="http://www.mplayerhq.hu/dload.html">cette page</ulink>
 ou dans le README. Si tout cela ne vous aide pas, veuillez vous référer à
 <link linkend="bugs">la liste des bogues connus</link> et au reste de la
 documentation.

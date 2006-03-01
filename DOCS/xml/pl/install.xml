@@ -166,7 +166,7 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   <emphasis role="bold">Kodeki Win32</emphasis>: Je¶li zamierzasz u¿ywaæ
   <application>MPlayera</application> na architekturze x86, bêdziesz ich prawdopodobnie
   potrzebowa³. ¦ci±gnij pakiet z naszej
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">strony kodeków</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">strony kodeków</ulink>
   i umie¶æ je w katalogu <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">PRZED</emphasis> kompilacj± <application>MPlayera</application>,
   w przeciwnym wypadku obs³uga Win32 nie bêdzie wkompilowana!
@@ -559,7 +559,7 @@ z przyczyn technicznych.
 <para>
 Jako ¿e <application>MPlayer</application> nie zawiera ¿adnej skórki, musisz
 je ¶ci±gn±æ, je¿eli chcesz u¿ywaæ GUI. Sprawd¼ <ulink
-url="http://www.mplayerhq.hu/homepage/dload.html">stronê z zasobami do pobrania</ulink>.
+url="http://www.mplayerhq.hu/dload.html">stronê z zasobami do pobrania</ulink>.
 Skórki powinny byæ rozpakowane do katalogu dostêpnego dla wszystkich (<filename
 class="directory">$PREFIX/share/mplayer/Skin</filename>) lub do <filename
 class="directory">$HOME/.mplayer/Skin</filename>.

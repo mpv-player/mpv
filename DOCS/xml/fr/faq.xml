@@ -35,7 +35,7 @@ Comment puis-je supporter le développement de <application>MPlayer</application>
 </para></question>
 <answer><para>
 Nous sommes plus que contents d'accepter vos
-<ulink url="http://www.mplayerhq.hu/homepage/donations.html">dons</ulink>
+<ulink url="http://www.mplayerhq.hu/donations.html">dons</ulink>
 matériels et logiciels. Ils nous aident à améliorer continuellement <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
@@ -270,7 +270,7 @@ Il y a des messages d'erreur à propos d'un fichier non-trouvé <filename>/usr/loc
 </para></question>
 <answer><para>
 Téléchargez et installez les codecs binaires depuis notre
-<ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">page des codecs</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/codecs.html">page des codecs</ulink>.
 </para></answer>
 </qandaentry>
 

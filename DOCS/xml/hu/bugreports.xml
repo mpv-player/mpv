@@ -33,7 +33,7 @@ felhasználóknak szól.
 <para>
 Elõször is, be kell szerezned az MPlayer forrás fáját a CVS-bõl.
 Az utasításokat megtalálod
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">ennek az oldalnak</ulink>
+<ulink url="http://www.mplayerhq.hu/dload.html">ennek az oldalnak</ulink>
 az alján.
 </para>
 <para>
@@ -105,7 +105,7 @@ meglévõ problémát napokon vagy akár órákon belül jelentik, így
 <emphasis role="bold">csak a CVS-bõl</emphasis> küldj hibajelentést. Ebbe
 beleértendõek az <application>MPlayer</application> bináris csomagjai is. A
 CVS utasításokat megtalálod
-<ulink url="http://www.mplayerhq.hu/homepage/dload.html">ennek az oldalnak</ulink>
+<ulink url="http://www.mplayerhq.hu/dload.html">ennek az oldalnak</ulink>
 az alján vagy a README fájlban. Ha ez sem segít, olvasd el az
 <link linkend="bugs">ismert hibák</link> listáját és a dokumentáció többi részét.
 Ha problémád még nem ismert vagy nem oldódott meg a leírásunk által, akkor kérjük

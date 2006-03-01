@@ -453,10 +453,10 @@ X qui est TRÈS lente. Utilisez SDL.
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">Mplayer-cygwin</ulink>
   pour obtenir de l'aide et les dernières informations.
   Les binaires officiels de Windows peuvent être récupérés sur la 
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">page de téléchargement</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">page de téléchargement</ulink>.
   Les paquetages d'installation et de simple frontends GUI sont disponibles à partir de sources
   externe, nous avons collecté ensuite dans la section Windows de notre 
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">page de projets</ulink>.
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">page de projets</ulink>.
 </para>
  	 
 <para>
@@ -521,7 +521,7 @@ Ajoutez <option>-fs</option> pour le mode plein écran.
   
   <para>
    There are special codec packages for Windows available on our
-   <ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codecs page</ulink>
+   <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
    to allow playing formats for which there is no native support yet.
    Put the codecs somewhere in your path or pass
    <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
@@ -535,7 +535,7 @@ Ajoutez <option>-fs</option> pour le mode plein écran.
 
 <para>
 Il y a des paquetages de codec spécial pour Windows disponible sur notre
-<ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">page de codecs</ulink>
+<ulink url="http://www.mplayerhq.hu/design7/codecs.html">page de codecs</ulink>
 pour permettre de jouer les formats qui ne sont pas encore nativement
 supportés.
 Placez les codecs quelque part dans votre patch ou passez

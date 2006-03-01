@@ -1238,7 +1238,7 @@ Notes:
   de choix parmi les filtres disponibles, chacun ayant ses avantages et ses
   inconvénients. Consultez <option>mplayer -pphelp</option> pour voir ce qui
   est disponible (recherche sur "deint"), et cherchez sur les
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
   listes de diffusion de MPlayer</ulink> pour trouver des discussions à propos
   des divers filtres. De nouveau, le débit ne change pas, donc il n'y a pas de 
   <option>-ofps</option>. De même, le désentrelacement devrait être appliqué
