@@ -265,8 +265,6 @@ extern int dvd_last_chapter;
 extern int dvd_angle;
 //#endif
 
-extern int dvbin_param_on;
-
 extern char * audio_stream;
 
 #ifdef USE_DVDNAV
