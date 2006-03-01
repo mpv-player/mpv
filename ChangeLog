@@ -146,6 +146,7 @@ MPlayer (1.0)
     * fixed various bugs in the EDL code
     * x264 "turbo mode" to speed up first pass of multi-pass encoding
     * x264 custom quantization matrices
+    * XviD multi-threaded encoding support
     * -delay allows real audio delay instead of just a delay in the header
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)

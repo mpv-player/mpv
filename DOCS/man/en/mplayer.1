@@ -8539,8 +8539,7 @@ Returned values are in dB (decibel), the higher the better.
 .
 .PP
 .sp 1
-The following option is only available in development versions
-of XviD 1.1.x.
+The following option is only available in XviD 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
@@ -8549,6 +8548,16 @@ the encoding chosen using a rate distortion optimized operator,
 which is what is done for P-frames by the vhq option.
 This produces nicer-looking B-frames while incurring almost no
 performance penalty (default: 1).
+.
+.PP
+.sp 1
+The following option is only available in the CVS version of XviD.
+.
+.TP
+.B threads=<0\-n>
+Create n threads to run the motion estimation (default: 0).
+The maximum number of threads that can be used is the picture height
+divided by 16.
 .
 .
 .SS x264enc (\-x264encopts)

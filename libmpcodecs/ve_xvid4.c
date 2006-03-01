@@ -258,6 +258,7 @@ static int xvidenc_debug = 0;
 static int xvidenc_psnr = 0;
 
 static int xvidenc_max_bframes = 2;
+static int xvidenc_num_threads = 0;
 static int xvidenc_bquant_ratio = 150;
 static int xvidenc_bquant_offset = 100;
 static int xvidenc_bframe_threshold = 0;
@@ -310,6 +311,7 @@ m_option_t xvidencopts_conf[] =
 	{"vhq", &xvidenc_vhq, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
 	{"bvhq", &xvidenc_bvhq, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
 	{"max_bframes", &xvidenc_max_bframes, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
+	{"threads", &xvidenc_num_threads, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"bquant_ratio", &xvidenc_bquant_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 200, NULL},
 	{"bquant_offset", &xvidenc_bquant_offset, CONF_TYPE_INT, CONF_RANGE, 0, 200, NULL},
 	{"bf_threshold", &xvidenc_bframe_threshold, CONF_TYPE_INT, CONF_RANGE, -255, 255, NULL},
@@ -779,7 +781,7 @@ static int dispatch_settings(xvid_mplayer_module_t *mod)
 	create->zones = NULL;
 	create->num_plugins = 0;
 	create->plugins = NULL;
-	create->num_threads = 0;
+	create->num_threads = xvidenc_num_threads;
 
 	if( (selected_profile->flags & PROFILE_BVOP) &&
 		/* dxn: prevent bframes usage if interlacing is selected */
