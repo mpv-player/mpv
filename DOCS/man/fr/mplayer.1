@@ -1,4 +1,4 @@
-.\" synced with 1.1231
+.\" synced with 1.1235
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1429,19 +1429,19 @@ Joue un morceau de vidéo YUV.
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (LIVE555 uniquement)
-Utilisé avec 'rtsp://', URLs pour indiquer que les paquets RTP et RTCP
-entrants seront streamés sur TCP (en utilisant la même connexion TCP que
-RTSP).
-Cette option peut être utile si vous avez une mauvaise connexion Internet
-qui bloque les paquets UDP entrants (voir http://www.live.com/\:mplayer/).
-.
-.TP
 .B \-rtsp-port (LIVE555 uniquement)
 Utilisé avec 'rtsp://', URLs pour forcer l'utilisation d'un port particulier
 au niveau du client.
 Cette option peut être utile si vous êtes derrière un routeur et souhaitez
 redistribuer le flux RTSP du serveur vers un client spécifique.
+.
+.TP
+.B \-rtsp-stream-over-tcp (LIVE555 uniquement)
+Utilisé avec 'rtsp://', URLs pour indiquer que les paquets RTP et RTCP
+entrants seront streamés sur TCP (en utilisant la même connexion TCP que
+RTSP).
+Cette option peut être utile si vous avez une mauvaise connexion Internet
+qui bloque les paquets UDP entrants (voir http://www.live555.com/\:mplayer/).
 .
 .TP
 .B \-saveidx <nomfichier>
@@ -4911,7 +4911,7 @@ Retourne de 90 degrés dans le sens anti-horaire et retourne.
 .RE
 .
 .TP
-.B scale[=w:h[:entrelacé[:chr_drop[:param[:param2[:presize]]]]]]
+.B scale[=w:h[:entrelacé[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
@@ -4989,6 +4989,16 @@ pal:     720x576 (PAL standard)
 sntsc:   640x480 (NTSC à pixels carrés)
 .br
 spal:    768x576 (PAL à pixels carrés)
+.REss
+.IPs <noup>
+Interdit le redimensionnement plus grand que les dimensions originales.
+.RSss
+0: Permet le redimensionnement plus grand (par défaut).
+.br
+1: Interdit le redimensionnement plus grand si une dimension devient plus
+grande que celle d'origine.
+.br
+2: Interdit le redimensionnement plus grand si les deux dimensions deviennent plus grandes que celles d'origine.
 .REss
 .RE
 .
@@ -8342,6 +8352,10 @@ Ferme tous les GOPs (groupes de trames).
 Ne fonctionne pour le moment que si la détection de changement de scène
 est désactivée (sc_threshold=1000000000).
 .
+.TP
+.B vglobal
+FIXME: Documente ceci.
+.
 .
 .SS nuv (\-nuvopts)
 .
@@ -8977,8 +8991,7 @@ vidéo générée est fidèle à l'originale.
 .
 .PP
 .sp 1
-L'option suivant n'est disponible que dans les versions de développement
-de XviD 1.1.x.
+L'option suivante n'est disponible que dans les versions 1.1.x de XviD.
 .
 .TP
 .B bvhq=<0|1>
@@ -8987,6 +9000,16 @@ de mouvement pour les trames-B d'après leur taux de distortion,
 ce qui correspond à ce que fait l'option vhq avec les trames-P.
 Cela produit des trames-B plus jolies sans pour autant avoir un impact
 significatif sur le temps de calcul (par défaut\: 1).
+.
+.PP
+.sp 1
+L'option suivante n'est disponible que dans la version CVS de XviD.
+.
+.TP
+.B threads=<0\-n>
+Crée n threads pour effectuer la recherche de mouvements (par défaut\ : 0).
+Le nombre maximum de threads qui peuvent être utilisés est la hauteur de
+l'image divisé par 16.
 .
 .
 .SS x264enc (\-x264encopts)
@@ -9673,6 +9696,10 @@ de désactiver le code de saut de trames de MEncoder (voir \-noskip, \-mc,
 tout comme les filtres vidéo harddup et softskip).
 .
 .TP
+.B delay\ \
+FIXME: Documente ceci.
+.
+.TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
 le format de flux (par défaut\ : mpeg2)
 .
@@ -9789,6 +9816,21 @@ MPEG-4 format
 Sony Digital Video container
 .RE
 .PD 1
+.TP
+.B i_certify_that_my_video_stream_does_not_use_b_frames
+FIXME: Documente ceci.
+.
+.TP
+.B muxrate
+FIXME: Documente ceci.
+.
+.TP
+.B packetsize
+FIXME: Documente ceci.
+.
+.TP
+.B preload
+FIXME: Documente ceci.
 .
 .
 .
