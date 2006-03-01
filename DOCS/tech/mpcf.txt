@@ -122,8 +122,6 @@ reserved_bytes:
         Headers:
 
 main header:
-    main_startcode                      f(64)
-    forward_ptr                         v
     version                             v
     stream_count                        v
     max_distance                        v
@@ -162,12 +160,8 @@ main header:
             reserved_count[i]= tmp_res;
         }
     }
-    reserved_bytes
-    checksum                            u(32)
 
 stream_header:
-    stream_startcode                    f(64)
-    forward_ptr                         v
     stream_id                           v
     stream_class                        v
     fourcc                              vb
@@ -190,8 +184,6 @@ stream_header:
         samplerate_denom                v
         channel_count                   v
     }
-    reserved_bytes
-    checksum                            u(32)
 
         Basic Packets:
 
@@ -211,22 +203,21 @@ frame:
     }
     for(i=0; i<reserved_count[frame_code]; i++)
         reserved                        v
-    if (after_syncpoint){
-        syncpoint_checksum              u(32)
+    if(stream_flags&4){
+        checksum                        u(32)
     }
     data
 
 index:
-    index_startcode                     f(64)
-    forward_ptr                         v
     max_pts                             v
+    syncpoint_start                     v
     syncpoints                          v
-    for(i=0; i<syncpoints; i++){
+    for(i=syncpoint_start; i<syncpoints; i++){
         syncpoint_pos_div8              v
     }
     for(i=0; i<stream_count; i++){
         last_pts= -1
-        for(j=0; j<syncpoints; ){
+        for(j=syncpoint_start; j<syncpoints; ){
             x                           v
             type= x & 1
             x>>=1
@@ -257,11 +248,8 @@ index:
             }
         }
     }
-    reserved_bytes
-    index_ptr                           u(64)
-    checksum                            u(32)
 
-info_frame: (optional)
+info_packet:
     stream_id_plus1                     v
     chapter_id                          v
     chapter_start                       v
@@ -287,16 +275,12 @@ info_frame: (optional)
             type= "v"
         }
     }
-    reserved_bytes
-    checksum                            u(32)
 
-info_packet: (optional)
-    info_startcode                      f(64)
-    forward_ptr                         v
-    info_frame
+info_frame:
+    info_packet
+    packet_footer
 
 syncpoint:
-    syncpoint_startcode                 f(64)
     coded_pts                           v
     stream = coded_pts % stream_count
     global_key_pts = coded_pts/stream_count
@@ -306,23 +290,73 @@ syncpoint:
 
 file:
     file_id_string
-    while(!eof){
-        main_header
+    while(bytes_left > 8){
+        if(next_byte == 'N'){
+            startcode                           f(64)
+            forward_ptr                         v
+            switch(startcode){
+                case      main_startcode:  main_header; break;
+                case    stream_startcode:stream_header; break;
+                case      info_startcode:  info_packet; break;
+                case     index_startcode:        index; break;
+                case syncpoint_startcode:    syncpoint; break;
+            }
+            reserved_bytes
+            checksum                    u(32)
+        }else
+            frame
+    }
+    index_ptr                           u(64)
+
+the structure of a undamaged file should look like the following, but
+demuxers should be flexible and be able to deal with damaged headers so the
+above is a better loop in practice (not to mention its simpler)
+note, demuxers MUST be able to deal with new and unknown headers
+
+packet_header
+        startcode                               f(64)
+        forward_ptr                             v
+
+packet_footer
+        reserved_bytes
+        checksum                                u(32)
+
+reserved_headers
+    while(next_byte == 'N' && next_code !=      main_startcode
+                           && next_code !=    stream_startcode
+                           && next_code !=      info_startcode
+                           && next_code !=     index_startcode
+                           && next_code != syncpoint_startcode){
+        packet_header
+        packet_footer
+    }
+
+file:
+    file_id_string
+    while(bytes_left > 8){
+        packet_header, main_header, packet_footer
+        reserved_headers
         for(i=0; i<stream_count; i++){
-            stream_header
+            packet_header, stream_header, packet_footer
+            reserved_headers
         }
         while(next_code == info_startcode){
-            info_packet
+            packet_header, info_packet, packet_footer
+            reserved_headers
         }
-        if(next_code == index_startcode){
-            index
+        while(next_code == index_startcode){
+            packet_header, index_packet, packet_footer
+            reserved_headers
         }
-        if (!eof) while(next_code != main_startcode){
-            if(next_code == syncpoint_startcode)
-                syncpoint
+        if (bytes_left > 8) while(next_code != main_startcode){
+            if(next_code == syncpoint_startcode){
+                packet_header, syncpoint, packet_footer
+            }
             frame
+            reserved_headers
         }
     }
+    index_ptr                           u(64)
 
 
 Tag description:
@@ -372,8 +406,8 @@ max_distance
 
 max_pts_distance
     max absoloute difference of pts of new frame from last_pts in the
-    timebase of the stream, without a syncpoint immediately before the
-    frame. Note that last_pts is not necessarily the pts of the last frame
+    timebase of the stream, without a checksum after the frameheader
+    Note that last_pts is not necessarily the pts of the last frame
     on the same stream, as it is altered by syncpoint timestamps.
 
 stream_id
@@ -474,12 +508,15 @@ stream_flags
       1  is_key             if set, frame is keyframe
       2  end_of_relevance   if set, stream has no relevance on
                             presentation. (EOR)
+      4  has_checksum       if set then the frame header contains a checksum
 
     EOR frames MUST be zero-length and must be set keyframe.
     All streams SHOULD end with EOR, where the pts of the EOR indicates the
     end presentation time of the final frame.
     An EOR set stream is unset by the first content frames.
     EOR can only be unset in streams with zero decode_delay .
+    has_checksum must be set if the frame is larger then 2*max_distance or its
+    pts differs by more then max_pts_distance from the last frame
 
 stream_id_plus1[frame_code]
     must be <250
@@ -560,15 +597,11 @@ checksum
     checksum is calculated for the area pointed to by forward_ptr not
     including the checksum itself (from first byte after the
     forward_ptr until last byte before the checksum).
-    In the case of info frames, covers area from begginning of frame.
+    for frame headers the checksum contains the framecode byte and all
+    following bytes upto the checksum itself
 
 Syncpoint tags:
 ---------------
-
-syncpoint_checksum
-    crc32 checksum
-    checksum covers from first byte after syncpoint startcode until last
-    byte before the syncpoint_checksum.
 
 back_ptr_div8
     back_ptr = back_ptr_div8 * 8 + 7
@@ -612,11 +645,8 @@ eor_pts
     that EOR. EOR is unset by the first keyframe after it.
 
 index_ptr
-    Length in bytes of the entire index, from the first byte of the
-    startcode until the last byte of the checksum.
-    Note: A demuxer can use this to find the index when it is written at
-    EOF, as index_ptr will always be 12 bytes before the end of file if
-    there is an index at all.
+    absolute location in the file of the first byte of the startcode of the 
+    first index packet, or 0 if there is no index
 
 Info tags:
 ----------
@@ -630,6 +660,8 @@ chapter_id
     file. Positive chapter_id's are real chapters and MUST NOT overlap.
     Negative chapter_id indicate a sub region of file and not a real
     chapter. chapter_id MUST be unique to the region it represents.
+    chapter_id n MUST not be used unless there are at least n chapters in the
+    file
 
 chapter_start
     s= chapter_start % stream_count
@@ -724,8 +756,6 @@ Index:
 
 Note: with realtime streaming, there is no end, so no index there either
 Index MAY only be repeated after main headers.
-If an index is written anywhere in the file, it MUST be written at end of
-file as well.
 
 
 Info:
@@ -742,6 +772,11 @@ Info frames can be used to describe the file or some part of it (chapters)
 Info SHOULD be stored in global packets instead of info streams/frames if
 possible, and the amount of data is not large.
 
+If 2 info frames have the same chapter_id and stream_id then the earlier
+MUST be ignored (the last info frame is the most correct, this allows
+updating or correcting info)
+
+Info frames MUST be keyframes
 
 demuxer (non-normative):
 ------------------------
