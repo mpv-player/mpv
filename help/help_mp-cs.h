@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.216
+// Synced to 1.222
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -107,7 +107,7 @@ static char help_text[]=
 #define MSGTR_Playing "Pøehrávám %s\n"
 #define MSGTR_NoSound "Audio: ¾ádný zvuk\n"
 #define MSGTR_FPSforced "FPS vynuceno na hodnotu %5.3f  (vyn. èas: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU za bìhu - VAROVÁNÍ - toto není optimální!\nAbyste získali co nejvìt¹í výkon, pøelo¾te znovu mplayer ze zdrojového kódu\ns volbou --disable-runtime-cpudetection\n"
+#define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU za bìhu."
 #define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro CPU x86 s roz¹íøeními:"
 #define MSGTR_AvailableVideoOutputDrivers "Dostupná video rozhraní:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Dostupná audio rozhraní:\n"
@@ -250,17 +250,18 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d B/s)  velikost: %d bajtù  %5.3f sekund\n"
 #define MSGTR_OpenedStream "úspìch: formát: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videokodek: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiokodek: framecopy (formát=%x kanálù=%d frekvence=%ld bitù=%d B/s=%ld vzorek-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiokodek: framecopy (formát=%x kanálù=%d frekvence=%d bitù=%d B/s=%d vzorek-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "vybrán CBR PCM zvuk\n"
 #define MSGTR_MP3AudioSelected "vybrán MP3 zvuk\n"
 #define MSGTR_CannotAllocateBytes "Nelze alokovat %d bajtù\n"
-#define MSGTR_SettingAudioDelay "Nastavuji ZPO®DÌNÍ ZVUKU na %5.3f\n"
+#define MSGTR_SettingAudioDelay "Nastavuji zpo¾dìní zvuku na %5.3f\n"
+#define MSGTR_SettingVideoDelay "Nastavuji zpo¾dìní videa na %5.3fs\n"
 #define MSGTR_SettingAudioInputGain "Nastavuji pøedzesílení zvukového vstupu na %f\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Omezuji pøednaèítání zvuku na 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Zvy¹uji hustotu audia na 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Vynucuji pøednaèítání zvuku na 0, max korekci pts  na 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR zvuk: %ld bajtù/s, %d bajtù/blok\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR zvuk: %d bajtù/s, %d bajtù/blok\n"
 #define MSGTR_LameVersion "LAME ve verzi %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Chyba: Specifikovaný datový tok je mimo rozsah pro tento preset re¾im.\n"\
 "\n"\
@@ -477,6 +478,11 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Chyba: volba '%s' musí mít parametr!\n"
 #define MSGTR_OptionListHeader "\n Název                Typ             Min        Max      Globál  CL    Konfig\n\n"
 #define MSGTR_TotalOptions "\nCelkem: %d voleb\n"
+#define MSGTR_TooDeepProfileInclusion "VAROVÁNÍ: Pøíli¹ hluboké vnoøování profilù.\n"
+#define MSGTR_NoProfileDefined "®ádný profil nebyl definován.\n"
+#define MSGTR_AvailableProfiles "Dostupné profily:\n"
+#define MSGTR_UnknownProfile "Neznámý profil '%s'.\n"
+#define MSGTR_Profile "Profil %s: %s\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM zaøízení '%s' nebylo nalezeno.\n"
@@ -551,7 +557,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nelze se posouvat v surových (raw) AVI proudech! (Potøebuji index, zkuste pou¾ít volbu -idx.)\n"
 #define MSGTR_CantSeekFile "Nemohu se posouvat v tomto souboru.\n"
 
-#define MSGTR_EncryptedVOB "©ifrovaný soubor VOB! Pøeètìte si DOCS/HTML/en/dvd.html.\n"
+#define MSGTR_EncryptedVOB "©ifrovaný soubor VOB! Pøeètìte si DOCS/HTML/cs/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky vy¾adují ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: VAROVÁNÍ: Promìnná FOURCC detekována!?\n"
@@ -572,7 +578,7 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: detekováno 30000/1001 fps NTSC, pøepínám frekvenci snímkù.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: detekováno 24000/1001 fps progresivní NTSC, pøepínám frekvenci snímkù.\n"
 
-#define MSGTR_CacheFill "\rNaplnìní cache: %5.2f%% (%d bajtù)   "
+#define MSGTR_CacheFill "\rNaplnìní cache: %5.2f%% (%"PRId64" bajtù)   "
 #define MSGTR_NoBindFound "Tlaèítko '%s' nemá pøiøazenu ¾ádnou funkci."
 #define MSGTR_FailedToOpen "Selhalo otevøení %s\n"
 
@@ -1202,7 +1208,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Typ pøístupu není k dispozici\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Formát vzorku není k dispozici\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Poèet kanálù není k dispozici - vracím výchozí: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Nelze nainstalovat hw parametry:"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Nelze nainstalovat hw parametry: %s"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Nelze pou¾ít opakování odpovídající velikosti vyrovnávací pamìti (%u == %lu)\n"
 #define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Nelze nainstalovat sw parametry:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Chyba pøi otevírání zvuku: %s\n"
@@ -1306,7 +1312,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regeneruji tabulku klíèových snímkù pro MPEG4 video\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Nalezen 'wf', %d bajtù z %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: nalezena dmlh (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "Ètu INDEX blok, %d chunkù pro %ld snímkù (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Ètu INDEX blok, %d chunkù pro %d snímkù (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Dodateèná RIFF hlavièka...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** varování: toto není roz¹íøená AVI hlavièka..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Vadný chunk?  chunksize=%d  (id=%.4s)\n"
@@ -1331,7 +1337,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Nelze otevøít CDDA zaøízení.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Nelze otevøít disk.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Nalezeno audio CD s %d stopami\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "Nalezeno audio CD s %ld stopami\n"
 
 // cddb.c
 
