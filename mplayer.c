@@ -3590,6 +3590,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  }
 	}
   }
+  break;
 #endif /* HAS_DVBIN_SUPPORT	*/
     case MP_CMD_TV_LAST_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
