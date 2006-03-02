@@ -622,6 +622,12 @@ global_key_pts
 Index tags:
 -----------
 
+syncpoint_start
+syncpoints
+    a index packet stores various flags and syncpoint locations for
+    all syncpoints and streams betweem syncpoint_start and 
+    syncpoint_start + syncpoints
+
 max_pts
     s = max_pts % stream_count
     pts = max_pts / stream_count
