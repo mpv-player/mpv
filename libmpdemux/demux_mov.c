@@ -1891,9 +1891,9 @@ if(trak->samplesize){
     {
 	mp_msg(MSGT_DEMUX, MSGL_DBG2, "WARNING! Samplesize(%d) != 1\n",
 	    trak->samplesize);
-	x=trak->chunks[trak->pos].size*trak->samplesize;
+//	x=trak->chunks[trak->pos].size*trak->samplesize;
     }
-    else
+//    else
 	x=trak->chunks[trak->pos].size;
 //    printf("X = %d\n", x);
     /* the following stuff is audio related */
