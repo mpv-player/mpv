@@ -121,7 +121,7 @@ static int load_syms_linux(char *path)
 {
     void *handle;
 
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "opening shared obj '%s'\n", path);
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "opening shared obj '%s'\n", path);
     handle = dlopen(path, RTLD_LAZY);
     if (!handle)
     {
@@ -168,7 +168,7 @@ static int load_syms_windows(char *path)
 {
     void *handle;
     
-    mp_msg(MSGT_DECVIDEO, MSGL_INFO, "opening win32 dll '%s'\n", path);
+    mp_msg(MSGT_DECVIDEO, MSGL_V, "opening win32 dll '%s'\n", path);
 #ifdef WIN32_LOADER
     Setup_LDT_Keeper();
 #endif

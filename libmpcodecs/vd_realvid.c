@@ -103,7 +103,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int load_syms_linux(char *path) {
 		void *handle;
 
-		mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening shared obj '%s'\n", path);
+		mp_msg(MSGT_DECVIDEO,MSGL_V, "opening shared obj '%s'\n", path);
 		handle = dlopen (path, RTLD_LAZY);
 		if (!handle) {
 			mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error: %s\n",dlerror());
@@ -160,7 +160,7 @@ int WINAPI FreeLibrary(void *handle);
 static int load_syms_windows(char *path) {
     void *handle;
 
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "opening win32 dll '%s'\n", path);
+    mp_msg(MSGT_DECVIDEO,MSGL_V, "opening win32 dll '%s'\n", path);
 #ifdef WIN32_LOADER
     Setup_LDT_Keeper();
 #endif
