@@ -398,9 +398,8 @@ max_distance
     previous frame of the same stream was a non-keyframe, unless such
     non-keyframe - keyframe transitions are very frequent
 
-    SHOULD be set to <=32768 or at least <=65536 unless there is a very
-    good reason to set it higher, otherwise reasonable error recovery will
-    be impossible
+    SHOULD be set to <=32768
+    if the stored value is >65536 then max_distance MUST be set to 65536
 
 max_pts_distance
     max absoloute difference of pts of new frame from last_pts in the
