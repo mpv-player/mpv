@@ -131,8 +131,6 @@ main header:
     for(i=0; i<256; ){
         tmp_flag                        v
         tmp_fields                      v
-        if(tmp_fields>0) tmp_sflag      v
-        else tmp_sflag=0
         if(tmp_fields>1) tmp_pts        s
         if(tmp_fields>2) tmp_mul        v
         if(tmp_fields>3) tmp_stream     v
@@ -147,12 +145,11 @@ main header:
         }
         for(j=0; j<count && i<256; j++, i++){
             if (i == 'N') {
-                flags[i]= 4;
+                flags[i]= FLAG_INVALID;
                 j--;
                 continue;
             }
             flags[i]= tmp_flag;
-            stream_flags[i]= tmp_sflag;
             stream_id_plus1[i]= tmp_stream;
             data_size_mul[i]= tmp_mul;
             data_size_lsb[i]= tmp_size + j;
@@ -195,15 +192,17 @@ frame:
     if(pts_delta[frame_code]==0){
         coded_pts                       v
     }
-    if(flags[frame_code]&1){
-        data_size_msb                   v
+    frame_flags= flags[frame_code]
+    if(frame_flags&FLAG_CODED){
+        coded_flags                     v
+        frame_flags ^= coded_flags
     }
-    if(flags[frame_code]&2){
-        coded_stream_flags              v
+    if(frame_flags&FLAG_SIZE_MSB){
+        data_size_msb                   v
     }
     for(i=0; i<reserved_count[frame_code]; i++)
         reserved                        v
-    if(stream_flags&4){
+    if(frame_flagsFLAG_CHECKSUM){
         checksum                        u(32)
     }
     data
@@ -494,21 +493,16 @@ frame_code
     the value 78 ('N') is forbidden to ensure that the byte is always
     different from the first byte of any startcode
 
-flags[frame_code]
+flags[frame_code], frame_flags
     Bit  Name             Description
-      1  data_size_msb    if set, data_size_msb is at frame header,
+      1  FLAG_SIZE_MSB    if set, data_size_msb is at frame header,
                           otherwise data_size_msb is 0
-      2  more_flags       if set, stream control flags are at frame header.
-      4  invalid          if set, frame_code is invalid.
-
-stream_flags
-    stream_flags is "stream_flags[frame_code] ^ coded_stream_flags"
-
-    Bit  Name               Description
-      1  is_key             if set, frame is keyframe
-      2  end_of_relevance   if set, stream has no relevance on
-                            presentation. (EOR)
-      4  has_checksum       if set then the frame header contains a checksum
+      2  FLAG_CHECKSUM    if set then the frame header contains a checksum
+      4  FLAG_KEY         if set, frame is keyframe
+      8  FLAG_EOR         if set, stream has no relevance on
+                          presentation. (EOR)
+    256  FLAG_CODED       if set, coded_flags are stored in the frame header.
+    512  FLAG_INVALID     if set, frame_code is invalid.
 
     EOR frames MUST be zero-length and must be set keyframe.
     All streams SHOULD end with EOR, where the pts of the EOR indicates the
