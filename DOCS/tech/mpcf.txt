@@ -131,16 +131,16 @@ main header:
     for(i=0; i<256; ){
         tmp_flag                        v
         tmp_fields                      v
-        if(tmp_fields>1) tmp_pts        s
-        if(tmp_fields>2) tmp_mul        v
-        if(tmp_fields>3) tmp_stream     v
-        if(tmp_fields>4) tmp_size       v
+        if(tmp_fields>0) tmp_pts        s
+        if(tmp_fields>1) tmp_mul        v
+        if(tmp_fields>2) tmp_stream     v
+        if(tmp_fields>3) tmp_size       v
         else tmp_size=0
-        if(tmp_fields>5) tmp_res        v
+        if(tmp_fields>4) tmp_res        v
         else tmp_res=0
-        if(tmp_fields>6) count          v
+        if(tmp_fields>5) count          v
         else count= tmp_mul - tmp_size
-        for(j=7; j<tmp_fields; j++){
+        for(j=6; j<tmp_fields; j++){
             tmp_reserved[i]             v
         }
         for(j=0; j<count && i<256; j++, i++){
