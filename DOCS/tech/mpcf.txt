@@ -209,14 +209,13 @@ frame:
 
 index:
     max_pts                             v
-    syncpoint_start                     v
     syncpoints                          v
-    for(i=syncpoint_start; i<syncpoints; i++){
+    for(i=0; i<syncpoints; i++){
         syncpoint_pos_div8              v
     }
     for(i=0; i<stream_count; i++){
         last_pts= -1
-        for(j=syncpoint_start; j<syncpoints; ){
+        for(j=0; j<syncpoints; ){
             x                           v
             type= x & 1
             x>>=1
@@ -615,12 +614,6 @@ global_key_pts
 
 Index tags:
 -----------
-
-syncpoint_start
-syncpoints
-    a index packet stores various flags and syncpoint locations for
-    all syncpoints and streams betweem syncpoint_start and 
-    syncpoint_start + syncpoints
 
 max_pts
     s = max_pts % stream_count
