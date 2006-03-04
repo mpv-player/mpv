@@ -202,7 +202,7 @@ frame:
     }
     for(i=0; i<reserved_count[frame_code]; i++)
         reserved                        v
-    if(frame_flagsFLAG_CHECKSUM){
+    if(frame_flags&FLAG_CHECKSUM){
         checksum                        u(32)
     }
     data
