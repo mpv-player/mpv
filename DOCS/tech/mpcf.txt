@@ -166,6 +166,7 @@ stream_header:
     time_base_denom                     v
     msb_pts_shift                       v
     max_pts_distance                    v
+    max_size                            v
     decode_delay                        v
     reserved                            u(7)
     fixed_fps                           u(1)
@@ -246,6 +247,8 @@ index:
             }
         }
     }
+last 8 reserved_bytes of index:
+    index_ptr                           u(64)
 
 info_packet:
     stream_id_plus1                     v
@@ -288,7 +291,7 @@ syncpoint:
 
 file:
     file_id_string
-    while(bytes_left > 8){
+    while(!eof){
         if(next_byte == 'N'){
             startcode                           f(64)
             forward_ptr                         v
@@ -304,7 +307,6 @@ file:
         }else
             frame
     }
-    index_ptr                           u(64)
 
 the structure of a undamaged file should look like the following, but
 demuxers should be flexible and be able to deal with damaged headers so the
@@ -331,7 +333,7 @@ reserved_headers
 
 file:
     file_id_string
-    while(bytes_left > 8){
+    while(!eof){
         packet_header, main_header, packet_footer
         reserved_headers
         for(i=0; i<stream_count; i++){
@@ -342,11 +344,10 @@ file:
             packet_header, info_packet, packet_footer
             reserved_headers
         }
-        while(next_code == index_startcode){
+        if(next_code == index_startcode){
             packet_header, index_packet, packet_footer
-            reserved_headers
         }
-        if (bytes_left > 8) while(next_code != main_startcode){
+        if (!eof) while(next_code != main_startcode){
             if(next_code == syncpoint_startcode){
                 packet_header, syncpoint, packet_footer
             }
@@ -354,7 +355,6 @@ file:
             reserved_headers
         }
     }
-    index_ptr                           u(64)
 
 
 Tag description:
@@ -406,6 +406,11 @@ max_pts_distance
     timebase of the stream, without a checksum after the frameheader
     Note that last_pts is not necessarily the pts of the last frame
     on the same stream, as it is altered by syncpoint timestamps.
+
+max_size
+    max frame size without a checksum after the frameheader.
+    MUST be <=4*max_distance. If stored value is bigger than max_size MUST
+    be set to 4*max_distance .
 
 stream_id
     Stream identifier
@@ -507,7 +512,7 @@ flags[frame_code], frame_flags
     end presentation time of the final frame.
     An EOR set stream is unset by the first content frames.
     EOR can only be unset in streams with zero decode_delay .
-    has_checksum must be set if the frame is larger then 2*max_distance or its
+    FLAG_CHECKSUM must be set if the frame is larger than max_size or its
     pts differs by more then max_pts_distance from the last frame
 
 stream_id_plus1[frame_code]
@@ -637,8 +642,12 @@ eor_pts
     that EOR. EOR is unset by the first keyframe after it.
 
 index_ptr
-    absolute location in the file of the first byte of the startcode of the 
-    first index packet, or 0 if there is no index
+    Length in bytes of the entire index, from the first byte of the
+    startcode until the last byte of the checksum.
+    Note: A demuxer can use this to find the index when it is written at
+    EOF, as index_ptr will always be 12 bytes before the end of file if
+    there is an index at all.
+
 
 Info tags:
 ----------
@@ -748,6 +757,8 @@ Index:
 
 Note: with realtime streaming, there is no end, so no index there either
 Index MAY only be repeated after main headers.
+If an index is written anywhere in the file, it MUST be written at end of
+file as well.
 
 
 Info:
