@@ -280,8 +280,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		}
 	}
 
-	center = frame_buffer + (out_width - in_width) * fb_pixel_size /
-		2 + ( (out_height - in_height) / 2 ) * fb_line_len;
+	center = frame_buffer +
+	         ( (out_width - in_width) / 2 ) * fb_pixel_size +
+		 ( (out_height - in_height) / 2 ) * fb_line_len;
 
 #ifndef USE_CONVERT2FB
 	if (!(next_frame = (uint8_t *) realloc(next_frame, in_width * in_height * fb_pixel_size))) {

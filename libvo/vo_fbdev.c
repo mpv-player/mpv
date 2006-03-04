@@ -1005,8 +1005,9 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		return 1;
 	    }
 
-	    center = frame_buffer + (out_width - in_width) * fb_pixel_size /
-		    2 + ( (out_height - in_height) / 2 ) * fb_line_len +
+	    center = frame_buffer +
+		    ( (out_width - in_width) / 2 ) * fb_pixel_size +
+		    ( (out_height - in_height) / 2 ) * fb_line_len +
 		    x_offset * fb_pixel_size + y_offset * fb_line_len;
 
 	    mp_msg(MSGT_VO, MSGL_DBG2, "frame_buffer @ %p\n", frame_buffer);
