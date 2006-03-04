@@ -723,7 +723,7 @@ static int control(uint32_t request, void *data, ...)
 		}
 	}
 	
-	//update activity every 60 seconds to prevent
+	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
 	DateTimeRec d;
 	unsigned long curTime;
@@ -732,7 +732,7 @@ static int control(uint32_t request, void *data, ...)
 	GetTime(&d);
 	DateToSeconds( &d, &curTime);
 	
-	if( ( (curTime - lastTime) >= 60) || (lastTime == 0))
+	if( ( (curTime - lastTime) >= 30) || (lastTime == 0))
 	{
 		UpdateSystemActivity(UsrActivity);
 		lastTime = curTime;
