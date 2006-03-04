@@ -963,7 +963,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	}
 
 
-	mp_msg(MSGT_DEMUXER,MSGL_INFO, "Opened TS demuxer, audio: %x(pid %d), video: %x(pid %d)...POS=%"PRIu64"\n", params.atype, demuxer->audio->id, params.vtype, demuxer->video->id, (uint64_t) start_pos);
+	mp_msg(MSGT_DEMUXER,MSGL_INFO, "Opened TS demuxer, audio: %x(pid %d), video: %x(pid %d)...POS=%"PRIu64", PROBE=%"PRIu64"\n", params.atype, demuxer->audio->id, params.vtype, demuxer->video->id, (uint64_t) start_pos, ts_probe);
 
 
 	start_pos = (start_pos <= priv->ts.packet_size ? 0 : start_pos - priv->ts.packet_size);
@@ -1315,7 +1315,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 			return 1;
 		}
-		else if ((p[0] & 0xF0) == 0x80)
+		else if ((p[0] & 0xF8) == 0x80)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "A52 WITH HEADER\n");
 			es->start   = p+4;
@@ -2867,6 +2867,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			{
 				if(es->type == UNKNOWN)
 					return 0;
+				
+				tss->payload_size = es->payload_size;
 				if(len == 0)
 				{
 					if(tss->type != UNKNOWN)
