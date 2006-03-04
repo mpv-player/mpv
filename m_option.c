@@ -1584,6 +1584,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
       mp_msg(MSGT_VFILTER,MSGL_INFO,"  %-15s: %s\n",
 	     M_ST_MB(char*,ol->list[n],ol->name_off),
 	     M_ST_MB(char*,ol->list[n],ol->info_off));
+    mp_msg(MSGT_VFILTER,MSGL_INFO,"\n");
     return M_OPT_EXIT - 1;
   }
   ptr = str = strdup(param);

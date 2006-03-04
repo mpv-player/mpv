@@ -240,7 +240,7 @@ void fstype_help(void)
            "use _NETWM_STATE_STAYS_ON_TOP hint if available");
     mp_msg(MSGT_VO, MSGL_INFO,
            "You can also negate the settings with simply putting '-' in the beginning");
-    mp_msg(MSGT_VO, MSGL_INFO, "\n\n");
+    mp_msg(MSGT_VO, MSGL_INFO, "\n");
 }
 
 static void fstype_dump(int fstype)

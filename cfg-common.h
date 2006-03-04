@@ -524,7 +524,7 @@ m_option_t msgl_config[]={
 	{ "afilter", &mp_msg_levels[MSGT_AFILTER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "netst", &mp_msg_levels[MSGT_NETST], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "muxer", &mp_msg_levels[MSGT_MUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
-        {"help", "\nAvailable msg mdoules:\n"
+        {"help", "Available msg modules:\n"
         "   global     - common player errors/information\n"
         "   cplayer    - console player (mplayer.c)\n"
         "   gplayer    - gui player\n"
