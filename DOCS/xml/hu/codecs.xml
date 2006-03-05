@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.72 -->
-<sect1 id="codecs">
-<title>Támogatott codec-ek</title>
+<!-- synced with 1.74 -->
+<chapter id="codecs">
+<title>Codec-ek</title>
 
-<sect2 id="video-codecs">
+<sect1 id="video-codecs">
 <title>Videó codec-ek</title>
 
 <para>
@@ -76,7 +76,7 @@ olvasd el a <link linkend="codec-importing">codec importálás HOGYAN</link>-t
 </para>
 
 
-<sect3 id="divx4-5">
+<sect2 id="divx4-5">
 <title>DivX4/DivX5</title>
 
 <para>
@@ -190,10 +190,10 @@ nem telepítetted vagy nem állítottad be megfelelően.
 
 </note>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
+<sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
 <para>
@@ -275,10 +275,10 @@ Kövesd a fenti lépéseket a függvénykönyvtár forrásának beszerzéséhez.
 Az FFmpeg-gel és a Matrox G400-as kártyámmal még a legnagyobb felbontású DivX
 filmeket is képkockák eldobása nélkül tudom nézni a K6-2 500 gépemen.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="xanim">
+<sect2 id="xanim">
 <title>XAnim codec-ek</title>
 
 <note>
@@ -338,10 +338,10 @@ a <option>-vfm xanim</option> kapcsolóval írhatod elő az <application>MPlayer</a
 Letesztelt codec-ek: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
 H.263.</emphasis>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo-video">
+<sect2 id="vivo-video">
 <title>VIVO videó</title>
 <para>
 Az <application>MPlayer</application> le tudja játszani a Vivo (1.0 és 2.0) videókat. Az
@@ -351,10 +351,10 @@ a Win32 DLL-t a <option>-vc vivo</option> kapcsoló segítségével. Ha nem adsz meg
 kapcsolót a parancsorban, az <application>MPlayer</application> automatikusan
 kiválasztja a legjobb codec-et.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="mpeg12">
+<sect2 id="mpeg12">
 <title>MPEG-1/2 videó</title>
 <para>
 Az MPEG-1 és MPEG-2 a <systemitem class="library">libmpeg2</systemitem> többplatformos,
@@ -365,10 +365,10 @@ videó fájlokat is a <systemitem>Signal 11</systemitem> elkapásával
 újrainicializálásával, pontosan onnan folytatva, ahol a hiba keletkezett. Ennek
 a javító technikának nincs mérhető sebességvesztesége.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="avicodecs">
+<sect2 id="avicodecs">
 <title>MS Video1, Cinepak CVID, és egyéb régi codec-ek</title>
 <para>
 Az <application>MPlayer</application> a legtöbb régi codec-kel készült AVI és MOV
@@ -377,10 +377,10 @@ már <emphasis role="bold">natív codec-jeink</emphasis> vannak a legtöbbhöz a
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>-nek
 hála.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realvideo">
+<sect2 id="realvideo">
 <title>RealVideo</title>
 
 <para>
@@ -413,10 +413,10 @@ A <application>RealPlayer</application> könyvtárak jelenleg
 <emphasis role="bold">csak Linux, FreeBSD, NetBSD és Cygwin alatt működnek
 x86-on, Alpha-n és PowerPC-n (a Linux/Alpha és Linux/PowerPC tesztelve lett) és Mac OS X-szel</emphasis>.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="xvid">
+<sect2 id="xvid">
 <title>XviD</title>
 
 <para>
@@ -479,10 +479,10 @@ projektnek azonosak a gyökereik.
   kapcsolókkal.
   </para></step>
 </procedure>
-</sect3>
+</sect2>
 
 
-<sect3 id="sorenson">
+<sect2 id="sorenson">
 <title>Sorenson</title>
 
 <para>
@@ -517,12 +517,13 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
 <step><para>fordítsd le az <application>MPlayer</application>t</para></step>
 </procedure>
 
-</sect3>
-<sect3 id="codec-x264">
+</sect2>
+
+<sect2 id="codec-x264">
 <title>x264</title>
 
-<sect4 id="codec-x264-whatis">
-<title>What is x264?</title>
+<sect3 id="codec-x264-whatis">
+<title>Mi az az x264?</title>
 <para>
   Az <systemitem class="library">x264</systemitem> egy függvénykönyvtár
   a H.264 videó folyamok létrehozásához.
@@ -537,29 +538,27 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
 <title>Kódoló tulajdonságai</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Többszörös hivatkozás</para></listitem>
-  <listitem><para>Intra: az összes makroblokk típus (16x16 és 4x4 az
-    összes jóslással)</para></listitem>
+  <listitem><para>Intra: az összes makroblokk típus (16x16, 8x8 és 4x4
+    az összes előrejelzéssel)</para></listitem>
   <listitem><para>Inter P: az összes elosztás (16x16-tól le
     4x4-ig)</para></listitem>
   <listitem><para>Inter B: elosztás 16x16-tól le 8x8-ig
     (beleértve a SKIP/DIRECT-et)</para></listitem>
   <listitem><para>Rátavezérlés: konstans kvantáló, konstans bitráta,
-    vagy többlépéses ABR</para></listitem>
+    egy vagy többlépéses ABR, opcionális VBV</para></listitem>
   <listitem><para>Jelenet vágás detektálása</para></listitem>
   <listitem><para>Adaptív B-kocka elhelyezés</para></listitem>
   <listitem><para>B-kocka mint referencia / önkényes képkocka
     sorrend</para></listitem>
+  <listitem><para>8x8 és 4x4 adaptív térbeli transzformáció</para></listitem>
+  <listitem><para>Veszteségmentes mód</para></listitem>
+  <listitem><para>Egyedi kvantálási matricák</para></listitem>
+  <listitem><para>Több szelet párhuzamos kódolása</para></listitem>
 </itemizedlist>
 
-<itemizedlist>
-<title>Kódolási korlátok</title>
-  <listitem><para>Nincs igazi RD</para></listitem>
-</itemizedlist>
+</sect3>
 
-
-</sect4>
-
-<sect4 id="codec-h264-whatis">
+<sect3 id="codec-h264-whatis">
 <title>Mi az a H.264?</title>
 <para>
   A H.264 az ITU és az MPEG által közösen fejlesztett új digitális
@@ -597,9 +596,9 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>
   című írást.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-playback">
+<sect3 id="codec-x264-playback">
 <title>Hogyan tudok lejátszani H.264 videókat az <application>MPlayer</application>rel?</title>
 <para>
   Az <application>MPlayer</application> a
@@ -619,9 +618,9 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   H.264 dekódolójában, tartsd figyelemmel az
   <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS fájának web-es felületét</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-encode">
+<sect3 id="codec-x264-encode">
 <title>Hogyan tudok a <application>MEncoder</application>rel és az <systemitem class="library">x264</systemitem>-gyel videót kódolni?</title>
 <para>
   Ha van feltelepítve subversion kliensed, a legújabb x264
@@ -657,13 +656,13 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   A configure script automatikusan detektálja, hogy elget teszel az
   <systemitem class="library">x264</systemitem> követelményeinek.
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="audio-codecs">
+<sect1 id="audio-codecs">
 <title>Audió codec-ek</title>
 
 <itemizedlist>
@@ -711,7 +710,7 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
 </itemizedlist>
 
 
-<sect3 id="swac3">
+<sect2 id="swac3">
 <title>Szoftveres AC3 dekódolás</title>
 
 <para>
@@ -747,10 +746,10 @@ csatornát az SNDCTL_DSP_CHANNELS ioctl-en keresztül. Például az emu10k1
 2001. augusztus vagy későbbi verziói megfelelő vezérlők (a Soundblaster Live!
 kártyák használják, de az ALSA CVS is valószínűleg működik).
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="hwac3">
+<sect2 id="hwac3">
 <title>Hardveres AC3 dekódolás</title>
 <para>
 AC3-at támogató hangkártyára lesz szükséges, digitális kimenettel (S/PDIF). A
@@ -760,10 +759,10 @@ használd a <option>-ac hwac3</option> kapcsolót. Még kisérleti kód, de működik
 C-Media kártyákon és Soundblaster Live! + ALSA (de OSS-en nem) vezérlővel,
 valamint DXR3/Hollywood+ MPEG dekódoló kártyákon.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="libmad">
+<sect2 id="libmad">
 <title>libmad támogatás</title>
 
 <para>
@@ -778,10 +777,10 @@ jobb a teljesítménye FPU nélküli rendszereken
 A támogatás bekapcsolásához add meg a <option>--enable-mad</option> configure
 kapcsolót.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo-audio">
+<sect2 id="vivo-audio">
 <title>VIVO audió</title>
 <para>
 A VIVO fájlokban használt audió codec attól függ, hogy VIVO/1.0 vagy
@@ -789,10 +788,10 @@ VIVO/2.0 fájlról van-e szó. A VIVO/1.0 fájlok <emphasis role="bold">g.723</empha
 tartalmaznak, a VIVO/2.0 fájlok pedig <emphasis role="bold">Vivo Siren</emphasis> audiót.
 Mindkettő támogatott.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realaudio">
+<sect2 id="realaudio">
 <title>RealAudio</title>
 
 <para>
@@ -814,9 +813,9 @@ Az <application>MPlayer</application> majdnem minden RealAudio verziót támogat:
 A RealPlayer könyvtárak telepítési útmutatóját a
 <link linkend="realvideo">RealVideo</link> részben találod.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qdesign">
+<sect2 id="qdesign">
 <title>QDesign codec-ek</title>
 <para>
 QDesign audió folyamok (fourcc:<emphasis>QDMC, QDM2</emphasis>) MOV/QT fájlokban
@@ -824,9 +823,9 @@ találhatóak. Ezen codec mindkét verziója dekódolható a QuickTime
 könyvtárakkal. A telepítési útmutatóhoz olvasd el a
 <link linkend="sorenson">Sorenson videó codec</link> részt.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qualcomm">
+<sect2 id="qualcomm">
 <title>Qualcomm codec-ek</title>
 <para>
 Qualcomm audio streams (fourcc:<emphasis>Qclp</emphasis>) MOV/QT fájlokban
@@ -834,9 +833,9 @@ találhatóak. Dekódolhatóak a QuickTime könyvtárakkal.
 A telepítési útmutatóhoz olvasd el a
 <link linkend="sorenson">Sorenson videó codec</link> részt.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="aac">
+<sect2 id="aac">
 <title>AAC codec</title>
 <para>
 Az AAC (Advanced Audio Coding) egy audió codec, amit néha MOV és MP4 fájlokban
@@ -865,18 +864,18 @@ Debian csomagokból <ulink url="http://hpisi.nerim.net">Christian Marillat webold
 vagy Mandrake/Mandriva RPM-ből a <ulink url="http://plf.zarb.org">P.L.F</ulink>-ről, RedHat RPM-ből
 pedig a <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>-tól.
 </para>
-</sect3>
-
 </sect2>
+
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="codec-importing">
+<sect1 id="codec-importing">
 <title>Win32 codec importálási HOGYAN</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
 
-<sect3 id="vfw-codecs">
+<sect2 id="vfw-codecs">
 <title>VFW codec-ek</title>
 
 <para>
@@ -915,10 +914,10 @@ ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecneve]/
 az információkat, pl. keress rá a &quot;VIDC.HFYU&quot;-ra. Hogy ezt hogy tudod
 megcsinálni, nézd meg a régi DirectShow módszert lejebb.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="dshow-codecs">
+<sect2 id="dshow-codecs">
 <title>DirectShow codec-ek</title>
 
 <para>
@@ -1029,6 +1028,7 @@ Ha saját magad szeretnél beépíteni egy codec-et, olvasd el a
 fájlt.
 </para>
 
-</sect3>
 </sect2>
 </sect1>
+
+</chapter>
