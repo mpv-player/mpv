@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.14 -->
 <appendix id="skin">
 <title><application>MPlayer</application> skin formátum</title>
-<para>
-Ezen dokumentum célja az
-<application>MPlayer</application> skin formátumának leírása. Az itt
-szereplő információk hibásak lehetnek, mert
-<orderedlist>
-<listitem><para>Nem én írtam a GUI-t.</para></listitem>
-<listitem><para>A GUI még nincs kész.</para></listitem>
-<listitem><para>Én is tévedhetek.</para></listitem>
-</orderedlist>
-Tehát ne lepődj meg nagyon, ha valami nem úgy működik, ahogy itt le
-van írva.
-</para>
-
-<para>Köszönet <emphasis>Ponekker Zoltánnak</emphasis> a segítségéért.</para>
-
-<para><emphasis>Mohári András &lt;mayday@freemail.hu&gt;</emphasis></para>
 
 <sect1 id="skin-overview">
 <title>Áttekintés</title>
@@ -1119,6 +1103,57 @@ Megnyitja a skin böngésző ablakot.
     </para></listitem>
 </varlistentry>
 </variablelist>
+
+</sect1>
+
+<sect1 id="skin-quality">
+<title>Minőségi skin-ek készítése</title>
+
+<para>
+Tehát végigolvastad az <application>MPlayer</application> GUI-jához
+történő skin készítés leírását, megtettél minden tőled telhetőt a
+<application>Gimp</application>pel és el szeretnéd küldeni nekünk a
+skin-ed?
+Olvass még egy kicsit tovább, hogy elkerüld a gyakori hibákat és
+minőségi skin-t tudj készíteni.
+</para>
+
+<para>
+Szeretnénk, ha a skin-ek, amit beveszünk a listánkba, megfelelnének
+bizonyos minőségi elvárásoknak. Ezen kívül van még pár dolog, amivel
+a mi életünket könnyítheted meg.
+</para>
+
+<para>
+Példaként nézd meg a a <systemitem>Blue</systemitem> skin-t,
+az teljesíti az összes lent felsorolt kritériumot az 1.5-ös verzió óta.
+</para>
+
+<itemizedlist>
+  <listitem><para>Minden skin-nek tartalmaznia kell egy
+  <filename>README</filename> fájlt, ami tartalmazza az információkat
+  rólad, a szerzőről, a szerzői jogi és licensz figyelmeztetéseket és
+  bármi mást, amit még bele akarsz írni. Ha szeretnél changelog-ot,
+  ez a fájl jó hely neki.</para></listitem>
+
+  <listitem><para>Kell lennie egy <filename>VERSION</filename>
+  fájlnak, melyben semmi más nincs, csak a skin verziószáma egyetlen
+  egy sorban (pl. 1.0).</para></listitem>
+
+  <listitem><para>A vízszintes és függőleges irányítókon (csúszkák a
+  hangerőnek és a pozíciónak) a gombjuk középpontjának pontosan középen
+  kell lennie, a csúszka felénél. A gombot mindkét irányban ki kell
+  tudni húzni a csúszka végéig, de azon túl nem.</para></listitem>
+
+  <listitem><para>A skin elemeit megfelelő méretűnek kell deklarálni
+  a skin fájlban. Ha nem így van, akkor kattintani tudsz pl. a gombon
+  kívül és mégis megnyomod vagy egy területen belül kattintasz és nem
+  lesz hatása.</para></listitem>
+
+  <listitem><para>A <filename>skin</filename> fájlnak jól formázottnak
+  kell lennie és nem tartalmazhat tab-okat. A jól formázottság azt
+  jelenti, hogy a számoknak szépen oszlopokban kell lenniük.</para></listitem>
+</itemizedlist>
 
 </sect1>
 
