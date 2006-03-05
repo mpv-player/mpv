@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.59 -->
-<sect1 id="install">
+<!-- synced with 1.62 -->
+<chapter id="install">
 <title>Telepítés</title>
 
 <para>
@@ -23,7 +23,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
 </para>
 
 
-<sect2 id="softreq">
+<sect1 id="softreq">
 <title>Szoftver követelmények</title>
 
 <itemizedlist>
@@ -93,7 +93,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <emphasis role="bold">libvorbis</emphasis> - választható, szükséges az OGG Vorbis audiók lejátszásához.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - választható, szükséges az RTSP/RTP folyamok lejátszásához.
   </para></listitem>
 <listitem><para>
@@ -127,10 +127,10 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <filename>./configure</filename> scriptnek, hol van a fájl.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="installation_codecs">
 <title>Codecek</title>
 
 <itemizedlist>
@@ -251,10 +251,10 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   részt a telepítési útmutatóért és egyébb információkért.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="video-cards">
+<sect1 id="video-cards">
 <title>Videó kártyák</title>
 
 <para>
@@ -264,7 +264,7 @@ a másik nem.
 </para>
 
 
-<sect3 id="yuv-cards">
+<sect2 id="yuv-cards">
 <title>YUV kártyák</title>
 
 <para>
@@ -342,10 +342,10 @@ ami belefér a memóriájukba, <emphasis role="bold">kevés CPU használattal</emphas
   </para></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Nem YUV-os kártyák">
+<sect2 id="non-yuv-cards" xreflabel="Nem YUV-os kártyák">
 <title>Nem YUV-os kártyák</title>
 
 <para>
@@ -370,10 +370,10 @@ vezérlőkkel működik:
   </simpara></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic kártyák">
 <title>Cirrus-Logic kártyák</title>
 <itemizedlist>
 <listitem><para>
@@ -402,11 +402,11 @@ vezérlőkkel működik:
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
-</sect3>
 </sect2>
+</sect1>
 
 
-<sect2 id="sound-cards">
+<sect1 id="sound-cards">
 <title>Hangkártyák</title>
 
 <itemizedlist>
@@ -427,10 +427,10 @@ vezérlőkkel működik:
   a <link linkend="audio">hangkártyákról</link> szóló részt!</emphasis>
   </simpara></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="features">
 <title>Jellemzők</title>
 
 <itemizedlist>
@@ -511,7 +511,6 @@ majd megmondod az <application>MPlayer</application>nek, hogy használja azt.
 Lásd a <link linkend="subosd">Feliratok és az OSD</link> részt bővebben.
 </para>
 
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -950,3 +949,5 @@ Azzal bárki simán root lehet.
 </para></note>
 </para>
 </sect1>
+
+</chapter>
