@@ -1411,8 +1411,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <systemitem class="library">libavcodec</systemitem> MPEG-4 and
   <systemitem class="library">XviD</systemitem>) are usually heavily
   optimized with all kinds of smart algorithms and SIMD assembly code.
-  That is why they tend to yield the best quality quality per
-  encoding time ratio.
+  That is why they tend to yield the best quality per encoding time ratio.
   However, they may have some very advanced options that, if enabled,
   will make the encode really slow for marginal gains.
   </para>
