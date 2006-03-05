@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.26 -->
+<!-- synced with 1.28 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -172,14 +172,20 @@ a GNU General Public License v2 értelmében terjeszthető.
 </para>
 
 &history.xml;
-&install.xml;
 </chapter>
 
+&install.xml;
 
-&features.xml;
 &usage.xml;
-&faq.xml;
 &cd-dvd.xml;
+&faq.xml;
+
+&formats.xml;
+&codecs.xml;
+&video.xml;
+&audio.xml;
+&tvinput.xml;
+
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
