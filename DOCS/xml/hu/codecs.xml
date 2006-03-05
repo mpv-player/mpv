@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.74 -->
+<!-- synced with 1.75 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -776,6 +776,18 @@ jobb a teljesítménye FPU nélküli rendszereken
 <para>
 A támogatás bekapcsolásához add meg a <option>--enable-mad</option> configure
 kapcsolót.
+</para>
+</sect2>
+
+<sect2 id="hwmpa">
+<title>Hardveres MPEG audió codec</title>
+
+<para>
+Ez a codec (a -ac hwmpa kapcsolóval választhatod ki) az MPEG audió csomagokat
+átadja a hardveres dekódolóknak, mint amilyenek például a jól felszerelt DVB
+kártyákon és DXR2 adaptereken vannak.
+Ne használd másik audió kimeneti eszközzel együtt (mint az OSS vagy ALSA),
+ami nem képes dekódolni (csak zajt fogsz hallanis).
 </para>
 </sect2>
 
