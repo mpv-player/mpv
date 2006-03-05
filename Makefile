@@ -303,16 +303,16 @@ loader/dmo/libDMO_Filter.a:
 	$(MAKE) -C loader/dmo
 
 libavutil/libavutil.a:
-	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a SRC_PATH=..
 
 libavcodec/libavcodec.a:
-	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a SRC_PATH=..
 
 libavcodec/libpostproc/libpostproc.a:
-	$(MAKE) -C libavcodec/libpostproc LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavcodec/libpostproc LIBPREF=lib LIBSUF=.a SRC_PATH=../..
 
 libavformat/libavformat.a:
-	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a
+	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a SRC_PATH=..
 
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
