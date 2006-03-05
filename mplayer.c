@@ -3783,12 +3783,15 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_SUB_SELECT:
     if (global_sub_size) {
         int source = -1;
+        int reset=0;
         int v = cmd->args[0].v.i;
 
         if (v < -1)
             global_sub_pos++;
         else
             global_sub_pos = v;
+	if(global_sub_pos == global_sub_size)
+	    reset = 1;
         if (global_sub_pos >= global_sub_size)
             global_sub_pos = -1;
         if (global_sub_pos >= 0)
@@ -3805,7 +3808,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         vo_sub_last = vo_sub = NULL;
 #endif
         vobsub_id = -1;
-	if(dvdsub_lang) {
+	if(dvdsub_lang || reset) {
         dvdsub_id = -1;
         if (d_dvdsub) d_dvdsub->id = -1;
 	}
@@ -3872,6 +3875,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
             }
             if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
         } else { // off
+#ifdef USE_DVDREAD
+            if (vo_spudec && stream->type == STREAMTYPE_DVD && dvdsub_id < 0) {
+	        dvdsub_id = -2;
+                d_dvdsub->id = dvdsub_id;
+                spudec_reset(vo_spudec);
+            }
+#endif	    
             if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
 #ifdef USE_SUB
             vo_osd_changed(OSDTYPE_SUBTITLE); 
