@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -136,7 +136,7 @@ könyvtár inkompatibilítást és sebességcsökkenést okozhat.
 
 <note><para>
 Ha DVD dekódolási problémáid vannak, próbáld meg letiltani a supermount-ot vagy
-bármilyen más hasonló dolgot.
+bármilyen más hasonló dolgot. Néhány RPC-2 vezérlő régió kód beállítását is megköveteli.
 </para></note>
 
 <formalpara>
