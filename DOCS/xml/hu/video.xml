@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.81 -->
-<sect1 id="video">
+<!-- synced with 1.85 -->
+<chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
-<sect2 id="mtrr">
+<sect1 id="mtrr">
 <title>Az MTRR beállítása</title>
 
 <para>
@@ -86,11 +86,11 @@ Nem minden CPU-ban van MTRR. Például a régebbi K6-2 (266MHz körül,
 stepping 0) CPU-kban nincs MTRR, de a stepping 12-ben van
 (futtasd le a <command>cat /proc/cpuinfo</command> parancsot az ellenőrzéshez).
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="output-trad">
+<sect1 id="output-trad">
 <title>Videó kimenet tradícionális videó kártyákhoz</title>
-<sect3 id="xv">
+<sect2 id="xv">
 <title>Xv</title>
 
 <para>
@@ -164,7 +164,7 @@ screen #0
 </orderedlist>
 </para>
 
-<sect4 id="tdfx">
+<sect3 id="tdfx">
 <title>3dfx kártyák</title>
 
 <para>
@@ -182,10 +182,10 @@ próbáld ki az SDL-t (ebben is van XVideo) és nézd meg, hogy ez segít-e. Lásd az
 <option>-vo tdfxfb</option> vezérlőt! Lásd a <link linkend="tdfxfb">tdfxfb</link>
 részt.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="s3">
+<sect3 id="s3">
 <title>S3 kártyák</title>
 
 <para>
@@ -201,10 +201,10 @@ konvertál a vezérlő (lassú). Ha a kártyára gyanakodsz, szerezz be egy újabb vezé
 vagy udvariasan kérj az MPlayer-users levelezési listán egy MMX/3DNow! támogatású vezérlőt.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="nvidia">
+<sect3 id="nvidia">
 <title>nVidia kártyák</title>
 
 <para>
@@ -227,10 +227,10 @@ rendelkezik <link linkend="vidix">VIDIX</link> vezérlővel. Jelenleg még
 béta állapotú, és van pár bökkenője. További információkért lásd az
 <link linkend="vidix-nvidia">nVidia VIDIX</link> részt.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="ati">
+<sect3 id="ati">
 <title>ATI kártyák</title>
 
 <para>
@@ -250,10 +250,10 @@ simán is <emphasis role="bold">gyorsított</emphasis> megjelenítést kapsz,
 függvénykönyvtárra sem X-re nincs szükség.
 Olvasd el a <link linkend="vidix">VIDIX</link> részt.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="neomagic">
+<sect3 id="neomagic">
 <title>NeoMagic kártyák</title>
 
 <para>
@@ -282,10 +282,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="trident">
+<sect3 id="trident">
 <title>Trident kártyák</title>
 <para>
 Ha az Xv-t Trident kártyával akarod használni, feltéve hogy nem megy 4.1.0-val,
@@ -298,22 +298,22 @@ Alternatívaként az <application>MPlayer</application> is tartalmaz egy
 <link linkend="vidix">VIDIX</link> vezérlőt a Cyberblade/i1 kártyához.
 </para>
 
-</sect4>
+</sect3>
 
 
-<sect4 id="kyro">
+<sect3 id="kyro">
 <title>Kyro/PowerVR kártyák</title>
 <para>
 Ha az Xv-t Kyro alapú kártyával akarod használni (például Hercules
 Prophet 4000XT-vel), akkor le kell töltened a vezérlőt a
 <ulink url="http://www.powervr.com/">PowerVR oldaláról</ulink>
 </para>
-</sect4>
 </sect3>
+</sect2>
 
 <!-- ********** -->
 
-<sect3 id="dga">
+<sect2 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -411,7 +411,7 @@ a SUID root-os <application>MPlayer</application>rel.
 
 <para>
 Használd a <option>-vo dga</option> kapcsolót, és már megy is! (reméljük:)
-Kipróbálhatod a <option>-vo sdl:dga</option> kapcsolót is, hogy működik-e!
+Kipróbálhatod a <option>-vo sdl:driver=dga</option> kapcsolót is, hogy működik-e!
 Sokkal gyorsabb!
 </para>
 
@@ -459,7 +459,7 @@ EndSection
 <title>DGA &amp; MPLAYER</title>
 <para>
 A DGA két helyen használható az <application>MPlayer</application>ben: Az SDL
-vezérlőnek előírhatod a használatát (<option>-vo sdl:dga</option>) és
+vezérlőnek előírhatod a használatát (<option>-vo sdl:driver=dga</option>) és
 a DGA vezérlőben (<option>-vo dga</option>). A fent említettek vonatkoznak mind
 a kettőre; a következő részben leírom, hogyan működik az <application>MPlayer</application>
 DGA vezérlője.
@@ -595,12 +595,12 @@ tartozó chipset vezérlőkkel.
   </simpara></listitem>
 </itemizedlist>
 
-</sect3>
-<!--</sect2>-->
+</sect2>
+<!--</sect1>-->
 
 <!-- ********** -->
 
-<sect3 id="sdl">
+<sect2 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -635,7 +635,7 @@ Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
 <variablelist>
 <title>Számos parancssori kapcsoló van az SDL-hez:</title>
 <varlistentry>
-  <term><option>-vo sdl:<replaceable>name</replaceable></option></term>
+  <term><option>-vo sdl:driver=<replaceable>név</replaceable></option></term>
   <listitem><simpara>
     előírja a használni kívánt SDL videó vezérlőt (pl. <literal>aalib</literal>,
     <literal>dga</literal>, <literal>x11</literal>)
@@ -682,18 +682,18 @@ Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
 <itemizedlist>
 <title>Ismert hibák:</title>
 <listitem><simpara>
-  Az sdl:aalib konzol vezérlő alatt leütött billentyűk a végtelenségig ismétlődnek.
-  (használd a <option>-vo aa</option>-t!) Ez egy SDL hiba, nem tudunk segíteni rajta
-  (tesztelve SDL 1.2.1-el).
+  Az sdl:driver=aalib konzol vezérlő alatt leütött billentyűk a végtelenségig
+  ismétlődnek. (Használd a <option>-vo aa</option>-t!) Ez egy SDL hiba, nem
+  tudunk segíteni rajta (tesztelve SDL 1.2.1-el).
   </simpara></listitem>
 <listitem><simpara>
   NE HASZNÁLD AZ SDL-T GUI-VAL! Nem úgy működik, ahogy kellene neki.
   </simpara></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
 
-<sect3 id="svgalib">
+<sect2 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -766,10 +766,10 @@ ráta csökkentése is, mert a hang szétesett 44kHz-en:
 Csak az <option>expand</option> szűrő segítségével tudod bekapcsolni a
 feliratokat és az OSD-t, lásd a man oldalt a megfelelő paraméterekért.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="fbdev">
+<sect2 id="fbdev">
 <title>Framebuffer kimenet (FBdev)</title>
 
 <para>
@@ -863,10 +863,10 @@ framebufferrel és ne is kérd, hogy működjön, mivel ez nem az
 <application>MPlayer</application> korlátja.
 </para>
 </note>
-</sect3>
+</sect2>
 
 
-<sect3 id="mga_vid">
+<sect2 id="mga_vid">
 <title>Matrox framebuffer (mga_vid)</title>
 
 <para>
@@ -941,10 +941,10 @@ például a
 segítségével és beállíthatod a fényerősséget:
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>3Dfx YUV támogatás</title>
 <para>
 Ez a vezérlő a kernel tdfx framebuffer vezérlőjét használja a filmek
@@ -953,10 +953,10 @@ támogatással, és egy újrafordítás a
 <screen>./configure --enable-tdfxfb</screen>
 paranccsal.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="opengl">
+<sect2 id="opengl">
 <title>OpenGL kimenet</title>
 
 <para>
@@ -990,10 +990,10 @@ környezeti változót (legalábbis az nVidia-n):
 <command>export $__GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="aalib">
+<sect2 id="aalib">
 <title>AAlib - szöveges módú megjelenítés</title>
 
 <para>
@@ -1119,10 +1119,10 @@ megtalálni a legjobb módot.
 Lásd a <ulink url="http://aa-project.sf.net/tune"/> oldalt a további
 tuningolási dolgokhoz.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="caca">
+<sect2 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Színes ASCII Art függvénykönyvtár</title>
 
 <para>
@@ -1212,10 +1212,10 @@ Használd a <option>-framedrop</option> kapcsolót ha a számítógéped nem elég
 gyors az összes képkocka rendeléséhez.
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="vesa">
+<sect2 id="vesa">
 <title>VESA - kimenet a VESA BIOS-hoz</title>
 
 <para>
@@ -1348,10 +1348,10 @@ Nem fog menni!
   a POST eljárás során inicializálja magát.
   </simpara></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
 
-<sect3 id="x11">
+<sect2 id="x11">
 <title>X11</title>
 
 <para>
@@ -1398,10 +1398,10 @@ Ha nem találod a beszúrt módokat, nézd át az XFree86 kimenetét. Néhány
 vezérlő nem tud alacsony pixelclock-ot használni, ami szükséges az alacsony
 felbontású videó módokhoz.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix">
+<sect2 id="vidix">
 <title>VIDIX</title>
 
 <formalpara>
@@ -1546,7 +1546,7 @@ Alternatívaként használhatsz egy speciális kernel modult, így:
   </para></step>
 </procedure>
 
-<sect4 id="vidix-ati">
+<sect3 id="vidix-ati">
 <title>ATI kártyák</title>
 <para>
 Jelenleg a legtöbb ATI kártya natívan támogatott, a Mach64-től a
@@ -1558,9 +1558,9 @@ Két lefordított bináris van: <filename>radeon_vid</filename> a Radeonhoz és
 <filename>rage128_vid</filename> a Rage 128 kártyákhoz. Előírhatsz egyet vagy
 hagyhatod a VIDIX rendszernek automatikusan kipróbálni az összes elérhető vezérlőt.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-mga">
+<sect3 id="vidix-mga">
 <title>Matrox kártyák</title>
 <para>
 A Matrox G200, G400, G450 és G550 működik a jelentések szerint.
@@ -1570,9 +1570,9 @@ A Matrox G200, G400, G450 és G550 működik a jelentések szerint.
 A vezérlő támogatja a videó equalizereket és majdnem olyan gyors, mint a
 <link linkend="mga_vid">Matrox framebuffer</link>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-trident">
+<sect3 id="vidix-trident">
 <title>Trident kártyák</title>
 <para>
 Van egy vezérlő a Trident Cyberblade/i1 chipset-hez, ami
@@ -1584,17 +1584,17 @@ A vezérlőt
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>
 írta és tartja karban.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-3dlabs">
+<sect3 id="vidix-3dlabs">
 <title>3DLabs kártyák</title>
 <para>
 Habár van vezérlő a 3DLabs GLINT R3 és Permedia3 chip-ekhez, senki sem
 tesztelte le, így örömmel fogadjuk a jelentéseket.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-nvidia">
+<sect3 id="vidix-nvidia">
 <title>nVidia kártya</title>
 <para>
 Van egy eléggé új nVidia vezérlő, tudvalevőleg működik a Riva
@@ -1636,9 +1636,9 @@ Van egy eléggé új nVidia vezérlő, tudvalevőleg működik a Riva
 <para>
 Várjuk a visszajelzéseket!
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-sis">
+<sect3 id="vidix-sis">
 <title>SiS kártyák</title>
 <para>
 Ez nagyon kísérleti kód, csakúgy mint az nvidia_vid.
@@ -1652,10 +1652,10 @@ a "Shuttle XPC" dobozokban).
 <para>
 Várjuk a visszajelzéseket!
 </para>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="directfb">
+<sect2 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
 &quot;A DirectFB egy grafikus függvénykönyvtár, amit a beágyazott rendszereket szem előtt
@@ -1678,9 +1678,9 @@ DirectFB opciókat a parancssorban a <option>-dfbopts</option> kapcsoló használat
 A réteg választás egy aleszköz módszerével történhet, pl.: <option>-vo directfb:2</option>
 (-1-es réteg az alapértelmezett: automatikus keresés)
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="dfbmga">
+<sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
 Kérjük olvasd el a <link linkend="directfb">fő DirectFB</link> részt az általános
@@ -1708,13 +1708,13 @@ javítás a fenti URL-ről). A CRTC2 kód portolását az
 <link linkend="mga_vid">mga_vid</link>-be évekig terveztük, a
 <ulink url="../../tech/patches.txt">javításokat</ulink> szívesen fogadjuk.
 </para></note>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="mpeg_decoders">
+<sect1 id="mpeg_decoders">
 <title>MPEG dekóderek</title>
 
-<sect3 id="dvb">
+<sect2 id="dvb">
 <title>DVB kimenet és bemenet</title>
 <para>
 Az <application>MPlayer</application> támogatja a Siemens DVB chipset-tel szerelt
@@ -1952,9 +1952,9 @@ OSD menü és a feliratok megjelenítéséhez, valamint a nem-25fps-es filmek sokkal
 folyékonyabb lejátszását és a valós idejű átkódolást MPEG-2 és MPEG-4
 között (részleges kitömörítés).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="dxr2">
+<sect2 id="dxr2">
 <title>DXR2</title>
 <para>Az <application>MPlayer</application> támogatja a hardveresen gyorsított
 lejátszást a Creative DXR2 kártyával.</para>
@@ -1992,9 +1992,9 @@ a színkulcsot, elfogadható eredményt kapsz.
 </para>
 
 <para>Kérjük nézd meg a man oldalt a használható kapcsolókhoz.</para>
-</sect3>
+</sect2>
 
-<sect3 id="dxr3">
+<sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
 Az <application>MPlayer</application> támogatja a hardveresen gyorsított lejátszást
@@ -2123,14 +2123,14 @@ hangkártya helyett.
 </para></listitem>
 </varlistentry>
 </variablelist>
-</sect3>
-
 </sect2>
 
-<sect2 id="other">
+</sect1>
+
+<sect1 id="other">
 <title>Egyéb vizualizációs hardverek</title>
 
-<sect3 id="zr">
+<sect2 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2223,9 +2223,9 @@ eszközön a lejátszás alatt, ez összeomlasztja a számítógépedet. Legjobb
 elindítani az <application>MPlayer</application>t, várni, míg az <application>MPlayer</application>
 végez, és <emphasis role="bold">EZUTÁN</emphasis> megállítani a XawTV-t.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="blinkenlights">
+<sect2 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
 Ez a vezérlő képes a lejátszásra a Blinkenlights UDP protokol felhasználásával.
@@ -2238,13 +2238,13 @@ videót</ulink>.
 Az Arcade videóban láthatod a Blinkenlights kimeneti vezérlőt akcióban a
 00:07:50-en.
 </para>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="tvout">
+<sect1 id="tvout">
 <title>TV-kimenet támogatás</title>
 
-<sect3 id="tvout-mga-g400">
+<sect2 id="tvout-mga-g400">
 <title>Matrox G400 kártyák</title>
 
 <para>
@@ -2383,9 +2383,9 @@ földelés az ötödik, hatodik, hetedik és tizenötödik (5, 6, 7, 15)
 pin. (az infót Kerekes Balázs adta)
 </para>
 </formalpara>
-</sect3>
+</sect2>
 
-<sect3 id="tv-out_matrox_g450">
+<sect2 id="tv-out_matrox_g450">
 <title>Matrox G450/G550 kártyák</title>
 <para>
 A TV kimenet támogatása ezeken a kártyákon csak nemrég jelent meg, és még
@@ -2409,10 +2409,10 @@ javasolt a G400-on, lásd a fenti részt.
 A szükséges kernel javítás és a bővebb HOWTO letölthető:
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tvout-ati">
+<sect2 id="tvout-ati">
 <title>ATI kártyák</title>
 
 <formalpara>
@@ -2455,17 +2455,17 @@ Az egyeten dolog, amit tenned kell - <emphasis role="bold">Be kell dugnod a
 TV csatlakozóját, mielőtt bekapcsolnád a PC-t</emphasis> mivel a videó BIOS
 csak egyszer, a POST folyamat során inicializálja magát.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tvout-voodoo">
+<sect2 id="tvout-voodoo">
 <title>Voodoo 3</title>
 <para>
 Nézd meg <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ezt az URL-t</ulink>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="tvout-nvidia">
+<sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
 Először le KELL töltened a zárt-forrású vezérlőt az <ulink url="http://nvidia.com"/>-ról.
@@ -2502,30 +2502,35 @@ EndSection
 <para>
 Természetesen a legfontosabb a TwinView rész.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="tvout-neomagic">
+<sect2 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
 A NeoMagic chip számos laptop-ban megtalálható, pár közülük egy egyszerű
 analóg TV kódolóval van felszerelve, mások sokkal fejlettebbel rendelkeznek.
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Analóg kódoló chip</emphasis>:
-  Tesztelve Toshiba Tecra 8000-en. A TV kimeneti chip-je egy kalap szar.
-  Kerüld el ha teheted.
-  </simpara> <simpara>
-  A <option>-vo vesa</option>-t kell használnod. A tesztelt chip csak
-  1.333333-as méret arányra volt képes, így győződj meg róla, hogy a <option>-x</option>,
-  <option>-y</option> kapcsolók és/vagy a
-  <option>-vf scale,crop,expand</option> szűrők használatáról, ha a doboz nem
-  engedélyezi a TV kimenetet. A maximum felbontás 720*576 volt 16bpp-n.
-  </simpara>
-  <simpara>
-  Ismert dolgok: Csak VESA, 1.33333-as korlátozás, a kép nem mindig középre
-  igazított, a film minden 10 percben 4bpp-s lesz és úgy is marad. Gyakori súlyos
-  fagyások, LCD kijelző problémák.
-  </simpara></listitem>
+  A visszajelzések szerint megbízható TV kimenet a <option>-vo fbdev</option>
+  vagy <option>-vo fbdev2</option> kapcsolókkal érhető el.
+  Kernelbe forgatott vesafb szükséges és a következő paramétereket
+  kell megadni a kernel parancssorában:
+  <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
+  Ajánlott elindítani az <application>X</application>-et, majd átváltani
+  konzol módba pl. a <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>-gyel.
+  Ha nem sikerül elindítani az <application>X</application>-et az
+  <application>MPlayer</application> konzolból történő elindítása előtt,
+  a videó lassú és zavaros lesz (a magyarázatokat szívesen fogadjuk).
+  Jelentkezz be a konzolodra majd add ki a következő parancsot:
+
+  <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
+
+  Ezután a filmet konzol módban, kb. a laptop LCD képernyőjének felét
+  kitöltve kell látnod.
+  A TV-re váltáshoz nyomd meg az <keycap>Fn</keycap>+<keycap>F5</keycap>-öt
+  háromszor. Tesztelve Tecra 8000-en, 2.6.15 kernel vesafb-vel, ALSA v1.0.10-en.
+  </para></listitem>
 <listitem><simpara>
   <emphasis role="bold">Chrontel 70xx kódoló chip</emphasis>:
   Az IBM Thinkpad 390E és talán más Thinkpad-okban és notebook-okban található.
@@ -2552,6 +2557,7 @@ analóg TV kódolóval van felszerelve, mások sokkal fejlettebbel rendelkeznek.
 </listitem>
 </itemizedlist>
 </para>
-</sect3>
 </sect2>
 </sect1>
+
+</chapter>
