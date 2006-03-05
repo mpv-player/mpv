@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.16 -->
+<chapter id="tv">
+<title>TV</title>
+
 <sect1 id="tv-input" xreflabel="TV input">
 <title>TV bemenet</title>
 
@@ -53,13 +56,19 @@ Válassz valamilyen értelmes képméretet. A kp méreteinek oszthatónak kell lennie 
 <listitem>
 <para>
 Ha videót mentesz el úgy, hogy a függõleges felbontás nagyobb, mint a teljes
-felbontás fele (pl. 288 a PAL-nál és 240 az NTSC-nél), gyõzõdj meg róla, hogy
-bekapcsoltad a deinterlacing-et. Különben a filmed torzul a gyors mozgású
-jelenetek alatt és a bitráta vezérlõ is valószínûleg képtelen lesz
-az elõírt bitráta megtartására, ahogy az interlacing változások nagy mennyiségû
-adatot eredményeznek és így nagy sávszélességet vesznek el. A deinterlacing-et
-bekapcsolhatod a <option>-vf pp=DEINT_TYPE</option> kapcsolóval. Általában
-a <option>pp=lb</option> jó, de ez az egyéni beállításokon is múlik. A többi
+felbontás fele (pl. 288 a PAL-nál és 240 az NTSC-nél), akkor a kapott 'képkockák'
+tényleg átlapolt mezõpárok lesznek.
+Attól függõen, hogy mit akarsz csinálni a videóval, hagyhatod ebben a formában,
+veszteséges deinterlacing-et hajthatsz végre vagy szétszedheted a párokat
+egyedi mezõkre.
+</para>
+<para>
+Különben a filmed torzul a gyors mozgású jelenetek alatt és a bitráta vezérlõ
+is valószínûleg képtelen lesz az elõírt bitráta megtartására, ahogy az
+interlacing változások nagy mennyiségû adatot eredményeznek és így nagy
+sávszélességet vesznek el. A deinterlacing-et bekapcsolhatod a
+<option>-vf pp=DEINT_TYPE</option> kapcsolóval. Általában a
+<option>pp=lb</option> jó, de ez az egyéni beállításokon is múlik. A többi
 deinterlacing algoritmust lásd a manuálban és próbálgasd ki õket.
 </para>
 </listitem>
@@ -202,3 +211,5 @@ pixel átlagolást csak vízszintesen tudják hardveres korlátok miatt.
 </informalexample>
 </sect2>
 </sect1>
+
+</chapter>
