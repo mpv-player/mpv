@@ -48,12 +48,6 @@ OPTIONS RECOGNIZED BY SNOW
    9/7 is probably better for for lossy coding, and 5/3 for lossless.
    NOTE: 9/7 wavelet doesn't work with lossless mode.
 
- * last_pred=<0-3>
-   Tries a few extra predicted motion vectors before doing EPZS search,
-   default: 0.
-   This option has negligible effect on both speed and quality of snow,
-   so just leave it off.
-
  * qpel
    Refines motion estimation, default: off.
    This setting always helps compressibility, but costs some CPU time
@@ -65,10 +59,18 @@ OPTIONS RECOGNIZED BY SNOW
    It improves quality, but also increases bitrate. (You could get
    more quality per bitrate by reducing quantizer instead.)
 
+ * vme=<4|8>
+   The default EPZS (4) is the same as in other formats.
+   Snow also supports iterative motion estimation (8), which jointly
+   optimizes adjacent blocks to make the most of OBMC. This significantly
+   improves compression, but is very slow.
+   Iterative ME currently does not perform scenecut detection, so should
+   be used only in the second pass of a two pass encode.
 
 v4mv and the wavelet cmp functions are theoretically good, but in practice
-won't work well until we get OBMC-aware motion estimation.
+aren't really working yet.
 
 In short:
 The best options in almost all cases are
-vcodec=snow:vstrict=-2:vqscale=$N:pred=0:cmp=1:subcmp=1:mbcmp=1:qpel
+vcodec=snow:vstrict=-2:vpass=1:vqscale=$N:pred=0:cmp=1:subcmp=1:mbcmp=1:qpel
+vcodec=snow:vstrict=-2:vpass=2:vbitrate=$B:pred=0:cmp=1:subcmp=1:mbcmp=1:qpel:vme=8
