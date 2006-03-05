@@ -77,7 +77,7 @@ static int b8x8mv = 1;
 static int i8x8 = 1;
 static int i4x4 = 1;
 static int dct8 = 0;
-static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
+static int direct_pred = X264_DIRECT_PRED_SPATIAL;
 static int weight_b = 0;
 static int chroma_me = 1;
 static int mixed_references = 0;
@@ -152,7 +152,7 @@ m_option_t x264encopts_conf[] = {
     {"noi8x8", &i8x8, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"8x8dct", &dct8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"no8x8dct", &dct8, CONF_TYPE_FLAG, 0, 0, 0, NULL},
-    {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+    {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
     {"weight_b", &weight_b, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noweight_b", &weight_b, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"bime", &bidir_me, CONF_TYPE_FLAG, 0, 0, 1, NULL},

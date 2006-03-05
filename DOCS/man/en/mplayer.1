@@ -8841,7 +8841,7 @@ to overflow compensation and qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-2>
+.B direct_pred=<0\-3>
 Determines the type of motion prediction used for direct macroblocks
 in B-frames.
 .PD 0
@@ -8850,14 +8850,17 @@ in B-frames.
 None: direct macroblocks are not used.
 .IPs 1
 Spatial: motion vectors are extrapolated from neighboring blocks.
+(default)
 .IPs 2
 Temporal: motion vectors are interpolated from the following P-frame.
-(default)
+.IPs 3
+Auto: the codec selects between spatial and temporal for each frame.
 .RE
 .PD 1
 .RS
 Spatial and temporal are approximately the same speed and PSNR,
-but temporal often looks better.
+the choice between them depends on the video content.
+Auto is slightly better, but slower.
 direct_pred=0 is both slower and lower quality.
 .RE
 .
