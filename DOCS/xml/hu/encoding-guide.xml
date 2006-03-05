@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.36 $ -->
+<!-- synced with 1.44 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -359,9 +359,10 @@
   Két lépéses kódolásban az első lépés úgy rip-eli a filmet, mintha CBR lenne,
   de megtartja a tulajdonságok listáját minden egyes képkockánál. Ezeket az
   adatokat használja fel aztán a második lépésben a használni kívánt kvantálót
-  meghatározó intelligens döntésekben. Gyors akciónál vagy kis részletességű
-  jeleneteknél magasabb kvantálót használ, lassú mozgásnál vagy nagy
-  részletességű jeleneteknél alacsonyabbat.
+  meghatározó intelligens döntésekben. Gyors akciónál vagy nagyon részletes
+  jeleneteknél magasabb kvantálót használ, lassú mozgásnál vagy kevésbé
+  részletes jeleneteknél alacsonyabbat.
+  Általában a mozgás mennyisége sokkal fontosabb, mint a részletesség.
 </para>
 
 <para>
@@ -1322,8 +1323,8 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
 <title>A videó codec kiválasztása</title>
 
 <para>
-  A használandó videó codec több dologtól függ, melyeket a a személyes
-  igényektől és a technikai korlátok határoznak meg.
+  A használandó videó codec több dologtól függ, melyeket a személyes
+  igények és a technikai korlátok határoznak meg.
 </para>
 <itemizedlist>
   <listitem><para>
@@ -2799,13 +2800,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Most már készen vagyunk a két lépéses kódoláshoz. Első lépés:
 
-  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
   A második lépés ugyan ez, csak megadjuk a <option>vpass=2</option>-t:
 
-  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
 -o Harry_Potter_2.avi</screen>
 </para>
@@ -4148,6 +4149,21 @@ codec-kal</title>
   PAL szélességet.
 </para>
 
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-a-v-sync">
+<title>A/V szinkron megtartása</title>
+<para>
+  Az audió/videó szinkronizáció kódolás közbeni megtartásához a
+  <application>MEncoder</application>nek el kell dobni vagy meg kell
+  duplázni képkockákat. Ez jobban működik ha AVI fájlba keversz, de
+  majdnem biztosan sikertelen az A/V szinkron megtartása más muxer-ekkel,
+  mint pl. az MPEG. Ezért van, hogy a <option>harddup</option> videó szűrőt
+  hozzá kell csatolni a szűrőlánc végéhez ezen problémák elkerüléséhez.
+  A <option>harddup</option>-ról további információkat a
+  <link linkend="menc-feat-dvd-mpeg4-muxing-filter-issues">muxálás és az A/V szinkron megbízhatósága</link>
+  című fejezetben találsz vagy a man oldalon.
+</para>
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-output-srate">
