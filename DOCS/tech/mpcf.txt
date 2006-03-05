@@ -166,7 +166,7 @@ stream_header:
     time_base_denom                     v
     msb_pts_shift                       v
     max_pts_distance                    v
-    max_size                            v
+    max_frame_size                      v
     decode_delay                        v
     reserved                            u(7)
     fixed_fps                           u(1)
@@ -407,10 +407,10 @@ max_pts_distance
     Note that last_pts is not necessarily the pts of the last frame
     on the same stream, as it is altered by syncpoint timestamps.
 
-max_size
+max_frame_size
     max frame size without a checksum after the frameheader.
-    MUST be <=4*max_distance. If stored value is bigger than max_size MUST
-    be set to 4*max_distance .
+    MUST be <=4*max_distance. If stored value is bigger then
+    max_frame_size MUST be set to 4*max_distance .
 
 stream_id
     Stream identifier
@@ -512,8 +512,8 @@ flags[frame_code], frame_flags
     end presentation time of the final frame.
     An EOR set stream is unset by the first content frames.
     EOR can only be unset in streams with zero decode_delay .
-    FLAG_CHECKSUM must be set if the frame is larger than max_size or its
-    pts differs by more then max_pts_distance from the last frame
+    FLAG_CHECKSUM MUST be set if the frame is larger than max_frame_size or
+    its pts differs by more then max_pts_distance from the last frame
 
 stream_id_plus1[frame_code]
     must be <250
@@ -569,7 +569,7 @@ dts
     frames are NOT exempt from this rule)
 
 width/height
-    MUST be set to the coded width/height, MUST not be 0
+    MUST be set to the coded width/height, MUST NOT be 0
 
 sample_width/sample_height (aspect ratio)
     sample_width is the horizontal distance between samples
@@ -584,7 +584,7 @@ colorspace_type
     18    ITU Rec 709               Y range:  0..255 Cb/Cr range:  0..255
 
 samplerate_nom / samplerate_denom = samplerate
-    the number of samples per second, MUST not be 0
+    the number of samples per second, MUST NOT be 0
 
 crc32 checksum
     Generator polynomial is 0x104C11DB7. Starting value is zero.
