@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.32 $ -->
+<!-- synced with 1.36 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1014,6 +1014,9 @@
 <sect3 id="menc-feat-dvd-mpeg4-resolution-bitrate-compute">
 <title>Felbontás kiszámítása</title>
 <para>
+  A következő képések segítenek a kódolásod felbontásának kiszámításában,
+  a videód túlzott mértékben történő torzítása nélkül, a forrás videó
+  számos tulajdonságának figyelembe vételével.
   Először, ki kell számítanod az elkódolt képarányt:
   <systemitem>ARc = (Wc x (ARa / PRdvd )) / Hc</systemitem>
 <itemizedlist>
@@ -1050,15 +1053,26 @@
 </para>
 
 <para>
-  A CQ függ mind a bitrátától mind a film felbontásától.
+  A CQ függ a bitrátától, a videó codec hatékonyságától és a film felbontásától.
   Ha növelni akarod a CQ-t, általában leméretezést kell végezned a filmen,
   mivel a bitráta a cél méret és a film hosszából számítódik, ami konstans.
-  Egy 0,18 alatti CQ általában nagyon kockás képet eredményez, mert nincs
-  elég bit minden egyes macroblokk információinak eltárolásához (az MPEG4,
+  Az MPEG-4 ASP codec-ekkel, mint pl. az <systemitem class="library">XviD</systemitem>
+  és a <systemitem class="library">libavcodec</systemitem>, egy 0,18 alatti
+  CQ általában nagyon kockás képet eredményez, mert nincs
+  elég bit minden egyes makroblokk információinak eltárolásához. (Az MPEG4,
   mint sok más codec, csoportokba gyűjti a pixeleket a kép tömörítéséhez;
-  ha nincs elég bit, láthatóvá válik ezen blokkok széle).
+  ha nincs elég bit, láthatóvá válik ezen blokkok széle.)
   Ezért ésszerű a CQ-t a 0,20-0,22-es tartományból választani 1 CD-s rip
-  esetén, és 0,26-0,28-ból a 2 CD-snél.
+  esetén, és 0,26-0,28-ból a 2 CD-snél a szabványos kódolási opciókkal.
+  A <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>-hez
+  és az <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>-hez
+  itt felsoroltaknál fejlettebb kódolási opciók segítségével lehetséges
+  ugyan ilyen minőség elérése 0,18-0,20-as CQ mellett egy 1 CD-s rip
+  esetén és 0,24-0,26-ossal 2 CD-s rip-nél.
+  Az MPEG-4 ASP codec-eknél, mint pl. az <systemitem class="library">x264</systemitem>,
+  használhatsz 0,14-0,16-os CQ tartományt a szabványos kódolási opciókkal
+  és lemehetsz akár 0,10-0,12-ig is az
+  <link linkend="menc-feat-x264-example-settings"><systemitem class="library">x264</systemitem> fejlett kódolási beállításaival</link>.
 </para>
 
 <para>
@@ -1067,6 +1081,9 @@
   filmekkel, mint például a Mátrix, ami sok gyors-mozgású részt tartalmaz.
   Másrészt nem éri meg növelni a CQ-t 0,30-nál magasabbra, mert csak
   pazarolni fogod a biteket észrevehető minőségi nyereség nélkül.
+  Vedd figyelembe, amint azt már korábban is említettük, hogy az alacsony
+  felbontású videókhoz nagyobb CQ kell (összehasonlítva pl. a DVD
+  felbontással), hogy jól nézzen ki.
 </para>
 </sect3>
 
@@ -1298,6 +1315,112 @@ is, hogy megemlítettük!
 Érkeztek jelentések A/V deszinkronizációról <application>MEncoder</application>rel
 stdin-ről történő kódolás esetén is.
 Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
+</para>
+</sect2>
+
+<sect2 id="menc-feat-dvd-mpeg4-codec">
+<title>A videó codec kiválasztása</title>
+
+<para>
+  A használandó videó codec több dologtól függ, melyeket a a személyes
+  igényektől és a technikai korlátok határoznak meg.
+</para>
+<itemizedlist>
+  <listitem><para>
+  <emphasis role="bold">Tömörítési hatékonyság</emphasis>:
+  Érthető módon az újabb generációs codec-ek jobb képminőséget
+  biztosítanak, mint a régebbiek. Ezért nem tudsz rosszat választani,
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
+  <para>Azonban légy óvatos: A DVD felbontású MPEG-4 AVC videó
+  dekódolása gyors gépet igényel (pl. egy 1,5 GHz feletti Pentium 4
+  vagy egy 1 GHz feletti Pentium M).
+  </para></footnote>
+  akár MPEG-4 AVC codec-et választasz, mint például az
+  <systemitem class="library">x264</systemitem>, akár egy MPEG-4 ASP
+  codec-et, mint pl. a <systemitem class="library">libavcodec</systemitem>
+  MPEG-4 vagy az <systemitem class="library">XviD</systemitem>.
+  (Hogy jobban lásd az alapvető különbséget az MPEG-4 ASP és az MPEG-4 AVC
+  között, javasoljuk, hogy olvasd el a
+  "<ulink url="http://guru.multimedia.cx/?p=10">15 ok amiért utáljuk az MPEG4-et</ulink>"
+  című bejegyzést Michael Niedermayer blog-jában.)
+  Az MPEG-4 ASP-vel jobb minőséget érhetsz el, mint az MPEG-2 codec-ekkel.
+  </para>
+  <para>
+  Bár az új codec-ek, melyek még erőteljes fejlesztés alatt állnak,
+  tartalmazhatnak hibákat, amiket még nem fedeztek fel és amik
+  tönkretehetnek egy kódolást. Ez a hátránya az új dolgok használatának.
+  </para>
+  <para>
+  Mint ahogy az is, hogy amikor új codec-et kezdesz használni, időt kell
+  szánnod az opcióinak a megismerésére, hogy tudd, miket kell
+  beállítanod a kívánt képminőség eléréséhez.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Hardveres kompatibilítás</emphasis>:
+  Általában sok idő kell, míg az asztali lejátszók elkezdenek támogatni
+  egy új codec-et.
+  Ennek eredménye, hogy a legtöbb csak MPEG-1 (mint a VCD, XVCD és KVCD),
+  MPEG-2 (mint a DVD, SVCD és KVCD) és MPEG-4 ASP (mint a DivX, a
+  <systemitem class="library">libavcodec</systemitem> LMP4-e és az
+  <systemitem class="library">XviD</systemitem>) lejátszására képes
+  (Vigyázz: Legtöbbször nem ismerik az MPEG-4 ASP összes képességét).
+  Nézd meg a lejátszód technikai specifikációját (ha van) vagy google-ozz
+  körbe további információért.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Legjobb minőség kontra kódolási idő</emphasis>:
+  A már jó ideje létező codec-ek (mint pl. a
+  <systemitem class="library">libavcodec</systemitem> MPEG-4-e és az
+  <systemitem class="library">XviD</systemitem>) általában nagyon jól
+  optimalizáltak mindenféle okos algoritmussal és SIMD assembly kóddal.
+  Ezért a legjobb minőség per kódolási idő arány felé tartanak.
+  Azonban van néhány nagyon fejlett opció, amit ha engedélyezel, nagyon
+  nagy mértékben lelassítják a kódolást csekély javulást produkálva.
+  </para>
+  <para>
+  Ha a fantasztikus sebességet keresed, a codec alapértelmezett beállításai
+  körül nézelődj (ami nem azt jelenti, hogy ne kísérletezgethetnél néhány
+  olyan opcióval, amiket ezen leírás egyéb fejezetei említenek).
+  </para>
+  <para>
+  Megfontolandó olyan codec-et választani, ami több-szálas módban
+  dolgozza fel a forrást.
+  A <systemitem class="library">libavcodec</systemitem> MPEG-4 tudja
+  ezt, egy kis előnyt jelent sebességben még kisebb képminőségromlás
+  mellett.
+  Az <systemitem class="library">XviD</systemitem>-hez csak kísérleti
+  jelleggel vannak javítások a kódolási sebesség átlagos esetben kb.
+  40-60%-os növelésére, csekély képromlás mellett.
+  Az <systemitem class="library">x264</systemitem> is tudja a több-szálas
+  kódolást, ami jelenleg 15-30%-kal gyorsítja fel a kódolást míg a PSNR-t
+  kb. 0.05dB-vel csökkenti.
+  </para></listitem>
+
+  <listitem><para>
+  <emphasis role="bold">Egyéni igények</emphasis>:
+  Itt válik a dolog a legirrálisabbá: ugyan azért, amiért sokan leragadtak
+  a DivX&nbsp;3-nál évekig, miközben az új codec-ek már csodákat műveltek,
+  néhányan az <systemitem class="library">XviD</systemitem>-et vagy a
+  <systemitem class="library">libavcodec</systemitem> MPEG-4-ét részesítik
+  előnyben az <systemitem class="library">x264</systemitem>-hez képest.
+  </para>
+  <para>
+  A döntést neked kell meghoznod és ne hallgass mindig arra, amit mások
+  mondanak vagy azt tartsd észben: amelyik codec-hez a legjobban értesz,
+  amelyik a legjobban néz ki szerinted a monitorodon, az lesz a legjobb
+  neked.
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
+  <para>Ugyan az a kódolás nem biztos, hogy ugyan úgy néz ki valaki másnak
+  a monitorán vagy ha más dekódolóval játszák le, ezért ellenőrizd a
+  kódolásaidat különböző beállítások mellett történő lejátszással!</para></footnote>!
+  </para></listitem>
+</itemizedlist>
+<para>
+  Kérjük, nézd meg a
+  <link linkend="menc-feat-selecting-codec">codec-ek és konténer formátumok kiválasztásáról</link>
+  szóló fejezetet a támogatott codec-ek listájához.
 </para>
 </sect2>
 
@@ -2497,7 +2620,7 @@ Egy példa AC3 tömörítéssel:
 <tbody>
 <row>
   <entry>Nagyon jó minőség</entry>
-  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:vme=5:naq:qns=2</option></entry>
+  <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:qns=2</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
