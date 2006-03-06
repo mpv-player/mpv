@@ -1429,7 +1429,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   allow that, but speed gains are limited, and there is a slight
   negative effect on picture quality.
   <systemitem class="library">XviD</systemitem>'s multi-threaded encoding,
-  activated by the <options>threads</option> option, can be used to
+  activated by the <option>threads</option> option, can be used to
   boost encoding speed &mdash; by about 40-60% in typical cases &mdash;
   with little if any picture degradation.
   <systemitem class="library">x264</systemitem> also allows multi-threaded
