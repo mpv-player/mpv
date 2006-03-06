@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.45 $ -->
+<!-- synced with 1.47 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1323,14 +1323,17 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
 <title>A videó codec kiválasztása</title>
 
 <para>
-  A használandó videó codec több dologtól függ, melyeket a személyes
-  igények és a technikai korlátok határoznak meg.
+  A használandó videó codec kiválasztása több dologtól függ, mint például a
+  méret, minőség, stream-elhetőség, használhatóság és elterjedtség, melyeket
+  a személyes igények és a technikai korlátok határoznak meg.
 </para>
 <itemizedlist>
   <listitem><para>
   <emphasis role="bold">Tömörítési hatékonyság</emphasis>:
-  Érthető módon az újabb generációs codec-ek jobb képminőséget
-  biztosítanak, mint a régebbiek. Ezért nem tudsz rosszat választani,
+  Érthető módon a legtöbb új generációs codec a minőség és a tömörítés
+  javítására íródott.
+  Ezért ezen leírás szerzői és még sok más szerint sem tudsz rosszat
+  választani,
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Azonban légy óvatos: A DVD felbontású MPEG-4 AVC videó
   dekódolása gyors gépet igényel (pl. egy 1,5 GHz feletti Pentium 4
@@ -1340,11 +1343,11 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   <systemitem class="library">x264</systemitem>, akár egy MPEG-4 ASP
   codec-et, mint pl. a <systemitem class="library">libavcodec</systemitem>
   MPEG-4 vagy az <systemitem class="library">XviD</systemitem>.
-  (Hogy jobban lásd az alapvető különbséget az MPEG-4 ASP és az MPEG-4 AVC
-  között, javasoljuk, hogy olvasd el a
-  "<ulink url="http://guru.multimedia.cx/?p=10">15 ok amiért utáljuk az MPEG4-et</ulink>"
-  című bejegyzést Michael Niedermayer blog-jában.)
-  Az MPEG-4 ASP-vel jobb minőséget érhetsz el, mint az MPEG-2 codec-ekkel.
+  (A haladóbb codec fejlesztőket talán érdekelheti Michael Niedermayer
+  véleménye, a
+  "<ulink url="http://guru.multimedia.cx/?p=10">miért utáljuk az MPEG4-et</ulink>".)
+  Valószínűleg az MPEG-4 ASP-vel jobb minőséget érhetsz el, mint az
+  MPEG-2 codec-ekkel.
   </para>
   <para>
   Bár az új codec-ek, melyek még erőteljes fejlesztés alatt állnak,
@@ -1382,21 +1385,25 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   </para>
   <para>
   Ha a fantasztikus sebességet keresed, a codec alapértelmezett beállításai
-  körül nézelődj (ami nem azt jelenti, hogy ne kísérletezgethetnél néhány
-  olyan opcióval, amiket ezen leírás egyéb fejezetei említenek).
+  körül nézelődj (azonban így is ajánlott kipróbálni egyéb opciókat,
+  amiket ezen leírás más fejezetei említenek).
   </para>
   <para>
   Megfontolandó olyan codec-et választani, ami több-szálas módban
-  dolgozza fel a forrást.
+  dolgozza fel a forrást, azonban ez csak a több processzoros géppel
+  rendelkezőknek jelent előnyt.
   A <systemitem class="library">libavcodec</systemitem> MPEG-4 tudja
-  ezt, egy kis előnyt jelent sebességben még kisebb képminőségromlás
-  mellett.
-  Az <systemitem class="library">XviD</systemitem>-hez csak kísérleti
+  ezt, de a sebességnövekedés eléggé korlátolt és egy kis negatív hatása
+  van a képminőségre.
+  Az <systemitem class="library">XviD</systemitem> több-szálas kódolása,
+  melyet a <option>threads</option> opció kapcsol be, használható a
+  kódolási sebesség &mdash; átlagban kb. 40-60%-os &mdash; növelésére,
+  nagyon csekély vagy semmilyen képromlással.
   jelleggel vannak javítások a kódolási sebesség átlagos esetben kb.
   40-60%-os növelésére, csekély képromlás mellett.
   Az <systemitem class="library">x264</systemitem> is tudja a több-szálas
-  kódolást, ami jelenleg 15-30%-kal gyorsítja fel a kódolást míg a PSNR-t
-  kb. 0.05dB-vel csökkenti.
+  kódolást, ami jelenleg 15-30%-kal (a kódolási beállításoktól függően)
+  gyorsítja fel a kódolást míg a PSNR-t kb. 0.05dB-vel csökkenti.
   </para></listitem>
 
   <listitem><para>
@@ -1408,10 +1415,12 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
   előnyben az <systemitem class="library">x264</systemitem>-hez képest.
   </para>
   <para>
-  A döntést neked kell meghoznod és ne hallgass mindig arra, amit mások
-  mondanak vagy azt tartsd észben: amelyik codec-hez a legjobban értesz,
-  amelyik a legjobban néz ki szerinted a monitorodon, az lesz a legjobb
-  neked.
+  A döntést magadnak kell meghoznod; ne hallgass azokra, akik egy codec-re
+  esküsznek.
+  Vegyél pár példa klippet nyers forrásokból és hasonlítsd össze a különböző
+  kódolási opciókat és codec-eket, hogy megtudd, melyik a legjobb neked.
+  A legjobb codec mindig az, amelyikhez a legjobban értesz, amelyik
+  a legjobban néz ki szerinted a monitorodon.
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
   <para>Ugyan az a kódolás nem biztos, hogy ugyan úgy néz ki valaki másnak
   a monitorán vagy ha más dekódolóval játszák le, ezért ellenőrizd a
