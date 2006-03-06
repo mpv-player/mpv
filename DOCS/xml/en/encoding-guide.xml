@@ -1356,15 +1356,17 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 <title>Choosing the video codec</title>
 
 <para>
-  Choosing the video codec to use depends on several factors, some of
+  Which video codec is best to choose depends on several factors,
+  like size, quality, streamability, usability and popularity, some of
   which widely depend on personal taste and technical constraints.
 </para>
 <itemizedlist>
   <listitem><para>
   <emphasis role="bold">Compression efficiency</emphasis>:
-  It is quite easy to understand that newer-generation codecs are made
-  to yield better picture quality than previous generations.
-  Therefore, you cannot go wrong
+  It is quite easy to understand that most newer-generation codecs are
+  made to increase quality and compression.
+  Therefore, the authors of this guide and many other people suggest that
+  you cannot go wrong
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Be careful, however: Decoding DVD-resolution MPEG-4 AVC videos
   requires a fast machine (i.e. a Pentium 4 over 1.5Ghz or a Pentium M
@@ -1374,12 +1376,11 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <systemitem class="library">x264</systemitem> instead of MPEG-4 ASP codecs
   such as <systemitem class="library">libavcodec</systemitem> MPEG-4 or
   <systemitem class="library">XviD</systemitem>.
-  (To get a better grasp of what the fundamental differences between
-  MPEG-4 ASP and MPEG-4 AVC are, you would be well advised to read the entry
-  "<ulink url="http://guru.multimedia.cx/?p=10">15 reasons why MPEG4 sucks</ulink>"
-  from Michael Niedermayer's blog.)
-  Likewise, you should get better quality using MPEG-4 ASP instead
-  of MPEG-2 codecs.
+  (Advanced codec developers may be interested in reading Michael
+  Niedermayer's opinion on
+  "<ulink url="http://guru.multimedia.cx/?p=10">why MPEG4-ASP sucks</ulink>".)
+  Likewise, you should get better quality using MPEG-4 ASP than you
+  would with MPEG-2 codecs.
   </para>
   <para>
   However, newer codecs which are in heavy development can suffer from
@@ -1417,22 +1418,23 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   </para>
   <para>
   If you are after blazing speed you should stick around the default
-  settings of the video codec (which does not mean you should not experiment
-  with some of the options which are mentioned in other sections
-  of this guide).
+  settings of the video codec (although you should still try the other
+  options which are mentioned in other sections of this guide).
   </para>
   <para>
   You may also consider choosing a codec which can do multi-threaded
-  processing.
+  processing, though this is only useful for users of machines with
+  several CPUs.
   <systemitem class="library">libavcodec</systemitem> MPEG-4 does
-  allow that, resulting in small speed gains at the price of lower
-  picture quality.
-  <systemitem class="library">XviD</systemitem> has some experimental
-  patches available to boost encoding speed, by about 40-60% in typical
-  cases, with low picture degradation.
+  allow that, but speed gains are limited, and there is a slight
+  negative effect on picture quality.
+  <systemitem class="library">XviD</systemitem>'s multi-threaded encoding,
+  activated by the <options>threads</option> option, can be used to
+  boost encoding speed &mdash; by about 40-60% in typical cases &mdash;
+  with little if any picture degradation.
   <systemitem class="library">x264</systemitem> also allows multi-threaded
-  encoding, which currently speeds-up encoding by 15-30% while lowering
-  PSNR by about 0.05dB.
+  encoding, which currently speeds up encoding by 15-30% (depending on
+  the encoding settings) while lowering PSNR by about 0.05dB.
   </para></listitem>
 
   <listitem><para>
@@ -1444,9 +1446,12 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <systemitem class="library">x264</systemitem>.
   </para>
   <para>
-  Make your own judgment, and do not always listen to what some people will
-  tell you to do or think: The best codec is the one you master the best,
-  and the one that looks best to your eyes on your display
+  You should make your own judgement; do not take advice from people who
+  swear by one codec.
+  Take a few sample clips from raw sources and compare different
+  encoding options and codecs to find one that suits you best.
+  The best codec is the one you master, and the one that looks
+  best to your eyes on your display
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
   <para>The same encode may not look the same on someone else's monitor or
   when played back by a different decoder, so future-proof your encodes by
