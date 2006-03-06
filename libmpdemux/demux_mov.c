@@ -163,7 +163,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
     }
 #endif
 
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV track #%d: %d chunks, %d samples\n",trak->id,trak->chunks_size,trak->samples_size);
+    mp_msg(MSGT_DEMUX, MSGL_V, "MOV track #%d: %d chunks, %d samples\n",trak->id,trak->chunks_size,trak->samples_size);
     mp_msg(MSGT_DEMUX, MSGL_V, "pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
 
     // process chunkmap:
@@ -581,7 +581,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVtooManyTrk);
 		return;
 	    }
-	    if(!priv->track_db) mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
+	    if(!priv->track_db) mp_msg(MSGT_DEMUX, MSGL_V, "--------------\n");
 	    trak=malloc(sizeof(mov_track_t));
 	    memset(trak,0,sizeof(mov_track_t));
 	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Track #%d:\n",priv->track_db);
@@ -708,7 +708,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  }  
 		}  
 		}
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d  rate: %d\n",
+		mp_msg(MSGT_DEMUX, MSGL_V, "Audio bits: %d  chans: %d  rate: %d\n",
 		    sh->samplesize*8,sh->channels,sh->samplerate);
 
 		if(trak->stdata_len >= 44 && trak->stdata[9]>=1){
@@ -721,14 +721,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    int len=char2int(trak->stdata,44);
 		    int fcc=char2int(trak->stdata,48);
 		    // we have extra audio headers!!!
-		    printf("Audio extra header: len=%d  fcc=0x%X\n",len,fcc);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"Audio extra header: len=%d  fcc=0x%X\n",len,fcc);
 		    if((len >= 4) && 
 		       (char2int(trak->stdata,52) >= 12) &&
 		       (char2int(trak->stdata,52+4) == MOV_FOURCC('f','r','m','a')) &&
 		       (char2int(trak->stdata,52+8) == MOV_FOURCC('a','l','a','c')) &&
 		       (len >= 36 + char2int(trak->stdata,52))) {
 			    sh->codecdata_len = char2int(trak->stdata,52+char2int(trak->stdata,52));
-			    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found alac atom (%d)!\n", sh->codecdata_len);
+			    mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found alac atom (%d)!\n", sh->codecdata_len);
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, &trak->stdata[52+char2int(trak->stdata,52)], sh->codecdata_len);
 		    } else {
@@ -755,7 +755,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    int atom_len = char2int(trak->stdata,28+adjust);
 		    switch(char2int(trak->stdata,32+adjust)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'): {
-			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
+			mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
 			if(atom_len > 8) {
 			  esds_t esds; 				  
 			  if(!mp4_parse_esds(&trak->stdata[36+adjust], atom_len-8, &esds)) {
@@ -784,7 +784,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			}
 		      } break;
 		      case MOV_FOURCC('a','l','a','c'): {
-			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found alac atom (%d)!\n", atom_len);
+			mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found alac atom (%d)!\n", atom_len);
 			if(atom_len > 8) {
 			    // copy all the atom (not only payload) for lavc alac decoder
 			    sh->codecdata_len = atom_len;
@@ -793,20 +793,20 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			}
 		      } break;
                       case MOV_FOURCC('d','a','m','r'):
-                        mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found AMR audio atom %c%c%c%c (%d)!\n", trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust], atom_len);
+                        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found AMR audio atom %c%c%c%c (%d)!\n", trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust], atom_len);
                         if (atom_len>14) {
-                          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Vendor: %c%c%c%c Version: %d\n",trak->stdata[36+adjust],trak->stdata[37+adjust],trak->stdata[38+adjust], trak->stdata[39+adjust],trak->stdata[40+adjust]);
-                          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Modes set: %02x%02x\n",trak->stdata[41+adjust],trak->stdata[42+adjust]);
-                          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Mode change period: %d Frames per sample: %d\n",trak->stdata[43+adjust],trak->stdata[44+adjust]);
+                          mp_msg(MSGT_DEMUX, MSGL_V, "mov: vendor: %c%c%c%c Version: %d\n",trak->stdata[36+adjust],trak->stdata[37+adjust],trak->stdata[38+adjust], trak->stdata[39+adjust],trak->stdata[40+adjust]);
+                          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Modes set: %02x%02x\n",trak->stdata[41+adjust],trak->stdata[42+adjust]);
+                          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Mode change period: %d Frames per sample: %d\n",trak->stdata[43+adjust],trak->stdata[44+adjust]);
                         }
                         break;
 		      default:
-			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
+			mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
 			    trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust],
 			    atom_len);
 		    }
 		}  
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",(char *)&trak->fourcc);
+		mp_msg(MSGT_DEMUX, MSGL_V, "Fourcc: %.4s\n",(char *)&trak->fourcc);
 #if 0
 		{ FILE* f=fopen("stdata.dat","wb");
 		  fwrite(trak->stdata,trak->stdata_len,1,f);
@@ -917,28 +917,28 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    case MOV_FOURCC('g','a','m','a'):
 		      // intfp with gamma value at which movie was captured
 		      // can be used to gamma correct movie display
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported Gamma-Correction movie atom (%d)!\n",
+		      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found unsupported Gamma-Correction movie atom (%d)!\n",
 			  atom_len);
 		      break;
 		    case MOV_FOURCC('f','i','e','l'):
 		      // 2 char-values (8bit int) that specify field handling
 		      // see the Apple's QuickTime Fileformat PDF for more info
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported Field-Handling movie atom (%d)!\n",
+		      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found unsupported Field-Handling movie atom (%d)!\n",
 			  atom_len);
 		      break;
 		    case MOV_FOURCC('m','j','q','t'):
 		      // Motion-JPEG default quantization table
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported MJPEG-Quantization movie atom (%d)!\n",
+		      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found unsupported MJPEG-Quantization movie atom (%d)!\n",
 			  atom_len);
 		      break;
 		    case MOV_FOURCC('m','j','h','t'):
 		      // Motion-JPEG default huffman table
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unsupported MJPEG-Huffman movie atom (%d)!\n",
+		      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found unsupported MJPEG-Huffman movie atom (%d)!\n",
 			  atom_len);
 		      break;
 		    case MOV_FOURCC('e','s','d','s'):
 		      // MPEG4 Elementary Stream Descriptor header
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 movie Elementary Stream Descriptor atom (%d)!\n", atom_len);
+		      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found MPEG4 movie Elementary Stream Descriptor atom (%d)!\n", atom_len);
 		      // add code here to save esds header of length atom_len-8
 		      // beginning at stdata[86] to some variable to pass it
 		      // on to the decoder ::atmos
@@ -963,7 +963,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      break;
 		    case MOV_FOURCC('a','v','c','C'):
 		      // AVC decoder configuration record
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: AVC decoder configuration record atom (%d)!\n", atom_len);
+		      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: AVC decoder configuration record atom (%d)!\n", atom_len);
 		      if(atom_len > 8) {
 		        int i, poffs, cnt;
 		        // Parse some parts of avcC, just for fun :)
@@ -995,14 +995,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      }	      
 		      break;
                     case MOV_FOURCC('d','2','6','3'):
-                      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found H.263 decoder atom %c%c%c%c (%d)!\n", trak->stdata[pos+4],trak->stdata[pos+5],trak->stdata[pos+6],trak->stdata[pos+7],atom_len);
+                      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found H.263 decoder atom %c%c%c%c (%d)!\n", trak->stdata[pos+4],trak->stdata[pos+5],trak->stdata[pos+6],trak->stdata[pos+7],atom_len);
               	      if (atom_len>10)
-                        mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Vendor: %c%c%c%c H.263 level: %d H.263 profile: %d \n", trak->stdata[pos+8],trak->stdata[pos+9],trak->stdata[pos+10],trak->stdata[pos+11],trak->stdata[pos+12],trak->stdata[pos+13]);
+                        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Vendor: %c%c%c%c H.263 level: %d H.263 profile: %d \n", trak->stdata[pos+8],trak->stdata[pos+9],trak->stdata[pos+10],trak->stdata[pos+11],trak->stdata[pos+12],trak->stdata[pos+13]);
                       break;
 		    case 0:
 		      break;
 		    default:
-	      	      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
+	      	      mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
 	      		  trak->stdata[pos+4],trak->stdata[pos+5],trak->stdata[pos+6],trak->stdata[pos+7],
 	      		  atom_len);
 		   }
@@ -1053,7 +1053,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  end = BE_16(&trak->stdata[hdr_ptr]);
 		  hdr_ptr += 2;
 		  palette_map = (unsigned char *)sh->bih + 40;
-		  mp_msg(MSGT_DEMUX, MSGL_INFO, "Allocated %d entries for palette\n",
+		  mp_msg(MSGT_DEMUX, MSGL_V, "Allocated %d entries for palette\n",
 		    palette_count);
 		  mp_msg(MSGT_DEMUX, MSGL_DBG2, "QT palette: start: %x, end: %x, count flag: %d, flags: %x\n",
 		    start, end, count_flag, flag);
@@ -1065,7 +1065,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  {
 		    if (gray)
 		    {
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT grayscale palette\n");
+		      mp_msg(MSGT_DEMUX, MSGL_V, "Using default QT grayscale palette\n");
 		      if (palette_count == 16)
 		        memcpy(palette_map, qt_default_grayscale_palette_16, 16 * 4);
 		      else if (palette_count == 256) {
@@ -1074,7 +1074,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		          int i;
 		          // Hack for grayscale CVID, negative palette
 		          // If you have samples where this is not required contact me (rxt)
-		          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: greyscale cvid with default palette,"
+		          mp_msg(MSGT_DEMUX, MSGL_V, "MOV: greyscale cvid with default palette,"
 		            " enabling negative palette hack.\n");
 		          for (i = 0; i < 256 * 4; i++)
 		            palette_map[i] = palette_map[i] ^ 0xff;
@@ -1083,7 +1083,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    }
 		    else
 		    {
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "Using default QT colour palette\n");
+		      mp_msg(MSGT_DEMUX, MSGL_V, "Using default QT colour palette\n");
 		      if (palette_count == 4)
 		        memcpy(palette_map, qt_default_palette_4, 4 * 4);
 		      else if (palette_count == 16)
@@ -1095,7 +1095,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  // load palette from file
 		  else
 		  {
-		    mp_msg(MSGT_DEMUX, MSGL_INFO, "Loading palette from file\n");
+		    mp_msg(MSGT_DEMUX, MSGL_V, "Loading palette from file\n");
 		    for (i = start; i <= end; i++)
 		    {
 		      entry = BE_16(&trak->stdata[hdr_ptr]);
@@ -1145,12 +1145,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->bih->biCompression=trak->fourcc;
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight;
 
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Image size: %d x %d (%d bpp)\n",sh->disp_w,sh->disp_h,sh->bih->biBitCount);
+		mp_msg(MSGT_DEMUX, MSGL_V, "Image size: %d x %d (%d bpp)\n",sh->disp_w,sh->disp_h,sh->bih->biBitCount);
 		if(trak->tkdata_len>81)
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Display size: %d x %d\n",
+		mp_msg(MSGT_DEMUX, MSGL_V, "Display size: %d x %d\n",
 		    trak->tkdata[77]|(trak->tkdata[76]<<8),
 		    trak->tkdata[81]|(trak->tkdata[80]<<8));
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",(char *)&trak->fourcc,trak->stdata[42]&31,trak->stdata+43);
+		mp_msg(MSGT_DEMUX, MSGL_V, "Fourcc: %.4s  Codec: '%.*s'\n",(char *)&trak->fourcc,trak->stdata[42]&31,trak->stdata+43);
 		
 //		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
 //		    // (auto)selected video track:
@@ -1160,7 +1160,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		break;
 	    }
 	    case MOV_TRAK_GENERIC:
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Generic track - not completely understood! (id: %d)\n",
+		mp_msg(MSGT_DEMUX, MSGL_V, "Generic track - not completely understood! (id: %d)\n",
 		    trak->id);
 		/* XXX: Also this contains the FLASH data */
 
@@ -1208,10 +1208,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 #endif
 		break;
 	    default:
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Unknown track type found (type: %d)\n", trak->type);
+		mp_msg(MSGT_DEMUX, MSGL_V, "Unknown track type found (type: %d)\n", trak->type);
 		break;
 	    }
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
+	    mp_msg(MSGT_DEMUX, MSGL_V, "--------------\n");
 	    priv->track_db++;
 	    trak=NULL;
 	    break;
@@ -1231,7 +1231,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	case MOV_FOURCC('d','c','o','m'): {
 //	    int temp=stream_read_dword(demuxer->stream);
 	    unsigned int algo=be2me_32(stream_read_dword(demuxer->stream));
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header uses %.4s algo!\n",(char *)&algo);
+	    mp_msg(MSGT_DEMUX, MSGL_V, "Compressed header uses %.4s algo!\n",(char *)&algo);
 	    break;
 	}
 	case MOV_FOURCC('c','m','v','d'): {
@@ -1244,7 +1244,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    z_stream zstrm;
 	    stream_t* backup;
 
-	    mp_msg(MSGT_DEMUX, MSGL_INFO, "Compressed header size: %d / %d\n",cmov_sz,moov_sz);
+	    mp_msg(MSGT_DEMUX, MSGL_V, "Compressed header size: %d / %d\n",cmov_sz,moov_sz);
 
 	    stream_read(demuxer->stream,cmov_buf,cmov_sz);
 
@@ -1760,7 +1760,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	    if(len>best_v_len){	best_v_len=len; best_v_id=t_no; }
 	}
     }
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: longest streams: A: #%d (%d samples)  V: #%d (%d samples)\n",
+    mp_msg(MSGT_DEMUX, MSGL_V, "MOV: longest streams: A: #%d (%d samples)  V: #%d (%d samples)\n",
 	best_a_id,best_a_len,best_v_id,best_v_len);
     if(demuxer->audio->id==-1 && best_a_id>=0) demuxer->audio->id=best_a_id;
     if(demuxer->video->id==-1 && best_v_id>=0) demuxer->video->id=best_v_id;
@@ -1838,7 +1838,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 		    } else {
 #else
 			len-=4;
-			printf("******* ZLIB COMPRESSED SAMPLE!!!!! (%d->%d bytes) *******\n",len,newlen);
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "******* ZLIB COMPRESSED SAMPLE!!!!! (%d->%d bytes) *******\n",len,newlen);
 		    }
 		    {
 #endif
