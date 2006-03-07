@@ -1,4 +1,4 @@
-.\" synced with 1.1235
+.\" synced with 1.1237
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -9332,7 +9332,7 @@ de débordement et à qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-2>
+.B direct_pred=<0\-3>
 Détermine le type de prédicteur de mouvement utilisé pour les macro-blocs
 directs dans les trames-B.
 .PD 0
@@ -9340,16 +9340,19 @@ directs dans les trames-B.
 .IPs 0
 Aucun\ : les macro-blocs directs ne sont pas utilisés.
 .IPs 1
-Spatial\ : les vecteur de mouvements sont extrapolés d'après les blocs
-adjacents.
+Spatial\ : Les vecteur de mouvements sont extrapolés d'après les blocs
+adjacents (par défaut).
 .IPs 2
-Temporel\ : les vecteur de mouvements sont interpolés d'après la trame-P
-suivante (par défaut).
+Temporel\ : Les vecteur de mouvements sont interpolés d'après la trame-P
+suivante.
+.IPs 3
+Auto: Le codec choisit entre Spatial et Temporel à chaque trame.
 .RE
 .PD 1
 Les prédicteurs spatiaux et temporels sont approximativement de la même
-vitesse, produisent un PSNR similaire, mais les temporels sont souvent
-plus jolis.
+vitesse, produisent un PSNR similaire, et le choix entre les deux dépend
+du type de vidéo.
+Auto est légèrement mieux, mais est plus lent.
 direct_pred=0 est lent et de qualité médiocre.
 .
 .TP
