@@ -1079,7 +1079,7 @@ int main(int argc, char* argv[])
             if(d>='0' && d<='9'){
                 // begin section
                 section=d-'0';
-                printf("BEGIN %d\n",section);
+                //printf("BEGIN %d\n",section);
                 if(section>=5){
                     // audio
 		    cl = audio_codecs;
