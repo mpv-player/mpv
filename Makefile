@@ -435,6 +435,9 @@ codecs.conf.h: $(PRG_CFG) etc/codecs.conf
 
 codec-cfg.o: codecs.conf.h
 
+codecs2html:
+	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
+
 # Every mplayer dependency depends on version.h, to force building version.h
 # first (in serial mode) before any other of the dependencies for a parallel make
 # run.  This is necessary, because the make rule for version.h removes objects
