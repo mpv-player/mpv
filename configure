@@ -6958,6 +6958,20 @@ else
 fi
 # --------------- GUI specific tests end -------------------
 
+if test "$_charset" = "noconv" ; then
+  _charset=""
+elif test -z "$_charset" ; then
+  if test "$_gtk1" = yes ; then
+    _charset=`cat ${_mp_help}.charset`
+  else
+    _charset=utf8
+  fi
+fi
+if test "$_charset" ; then
+  _def_charset="#define MSG_CHARSET \"$_charset\""
+else
+  _def_charset="#undef MSG_CHARSET"
+fi
 
 
 #############################################################################
@@ -7403,6 +7417,9 @@ cat > config.h << EOF
 
 /* use GNU internationalization */
 $_def_i18n
+
+/* name of messages charset */
+$_def_charset
 
 /* Runtime CPU detection */
 $_def_runtime_cpudetection

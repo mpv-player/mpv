@@ -7,6 +7,14 @@
 
 #include "config.h"
 
+#ifdef USE_LANGINFO
+#include <locale.h>
+#include <langinfo.h>
+#endif
+#ifdef USE_ICONV
+#include <iconv.h>
+#endif
+
 #if	defined(FOR_MENCODER) || defined(CODECS2HTML)
 #undef HAVE_NEW_GUI
 #endif
@@ -23,6 +31,11 @@ extern int use_gui;
 int mp_msg_levels[MSGT_MAX]; // verbose level of this module. inited to -2
 int mp_msg_level_all = MSGL_STATUS;
 int verbose = 0;
+#ifdef USE_ICONV
+char *mp_msg_charset = NULL;
+static char *old_charset = NULL;
+static iconv_t msgiconv;
+#endif
 
 void mp_msg_init(void){
     int i;
@@ -43,6 +56,16 @@ void mp_msg_init(void){
 #endif
 #endif
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
+#ifdef USE_ICONV
+    mp_msg_charset = getenv("MPLAYER_CHARSET");
+#ifdef USE_LANGINFO
+    if (!mp_msg_charset) {
+      setlocale(LC_CTYPE, "");
+      mp_msg_charset = nl_langinfo(CODESET);
+      setlocale(LC_CTYPE, "C");
+    }
+#endif
+#endif
 }
 
 int mp_msg_test(int mod, int lev)
@@ -64,6 +87,32 @@ void mp_msg(int mod, int lev, const char *format, ... ){
 #ifdef HAVE_NEW_GUI
     if(use_gui)
         guiMessageBox(lev, tmp);
+#endif
+
+#if defined(USE_ICONV) && defined(MSG_CHARSET)
+    if (mp_msg_charset && strcasecmp(mp_msg_charset, "noconv")) {
+      char tmp2[MSGSIZE_MAX];
+      size_t inlen = strlen(tmp), outlen = MSGSIZE_MAX;
+      char *in = tmp, *out = tmp2;
+      if (!old_charset || strcmp(old_charset, mp_msg_charset)) {
+        if (old_charset) {
+          free(old_charset);
+          iconv_close(msgiconv);
+        }
+        msgiconv = iconv_open(mp_msg_charset, MSG_CHARSET);
+        old_charset = strdup(mp_msg_charset);
+      }
+      memset(tmp2, 0, MSGSIZE_MAX);
+      while (iconv(msgiconv, &in, &inlen, &out, &outlen) == -1) {
+        if (!inlen || !outlen)
+          break;
+        *out++ = *in++;
+        outlen--; inlen--;
+      }
+      strncpy(tmp, tmp2, MSGSIZE_MAX);
+      tmp[MSGSIZE_MAX-1] = 0;
+      tmp[MSGSIZE_MAX-2] = '\n';
+    }
 #endif
 
 #ifdef MSG_USE_COLORS

@@ -6,6 +6,9 @@
 	{"really-quiet", &verbose, CONF_TYPE_FLAG, CONF_GLOBAL, 0, -10, NULL},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, CONF_GLOBAL|CONF_NOSAVE, 0, 0, NULL},
 	{"msglevel", msgl_config, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+#ifdef USE_ICONV
+	{"msgcharset", &mp_msg_charset, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
+#endif
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL},
 #ifdef WIN32
 	{"priority", &proc_priority, CONF_TYPE_STRING, 0, 0, 0, NULL},
@@ -302,6 +305,7 @@
 
 extern int quiet;
 extern int verbose;
+extern char *mp_msg_charset;
 
 // codec/filter opts: (defined at libmpcodecs/vd.c)
 extern float screen_size_xy;

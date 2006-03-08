@@ -61,7 +61,6 @@ Pixmap	    guiIconMask;
 void gtkInit( void )
 {
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] init GTK ...\n" );
- gtk_set_locale();
  gtk_init( 0,NULL );
 // gdk_set_use_xshm( TRUE );
 
