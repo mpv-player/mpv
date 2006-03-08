@@ -158,7 +158,7 @@ int ty_extensionis( char *name, char *ext )
 int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
 {
    char    header[ 512 ];
-   char    name[ 80 ];
+   char    name[ 100 ];
    char    sizestr[ 80 ];
    int     size;
    int     count;
@@ -201,8 +201,8 @@ int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
          error = 1;
          break;
       }
-      strncpy( name, &header[ 0 ], 100 );
-      strncpy( sizestr, &header[ 124 ], 12 );
+      strlcpy( name, &header[ 0 ], 100 );
+      strlcpy( sizestr, &header[ 124 ], 12 );
       size = ty_octaltodecimal( sizestr );
 
       blocks = size / 512;
