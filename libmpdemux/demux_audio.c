@@ -312,7 +312,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	unsigned char buf[16384]; // vlc uses 16384*4 (4 dts frames)
 	unsigned int i;
 	stream_read(s, buf, sizeof(buf));
-	for (i = 0; i < sizeof(buf); i += 2) {
+	for (i = 0; i < sizeof(buf) - 5; i += 2) {
 	    // DTS, 14 bit, LE
 	    if((buf[i] == 0xff) && (buf[i+1] == 0x1f) && (buf[i+2] == 0x00) &&
 	       (buf[i+3] == 0xe8) && ((buf[i+4] & 0xfe) == 0xf0) && (buf[i+5] == 0x07)) {
