@@ -9,7 +9,7 @@
 #ifndef HAVE_STRLCPY
 unsigned int strlcpy (char *dest, const char *src, unsigned int size)
 {
-	register unsigned int i;
+	register unsigned int i = 0;
 
 	if (size > 0) {
 	size--;
