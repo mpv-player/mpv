@@ -125,7 +125,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     float* gain = ((af_control_ext_t*)arg)->arg;
     int    ch   = ((af_control_ext_t*)arg)->ch;
     int    k;
-    if(ch > AF_NCH || ch < 0)
+    if(ch >= AF_NCH || ch < 0)
       return AF_ERROR;
 
     for(k = 0 ; k<KM ; k++)
@@ -137,7 +137,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     float* gain = ((af_control_ext_t*)arg)->arg;
     int    ch   = ((af_control_ext_t*)arg)->ch;
     int    k;
-    if(ch > AF_NCH || ch < 0)
+    if(ch >= AF_NCH || ch < 0)
       return AF_ERROR;
 
     for(k = 0 ; k<KM ; k++)
