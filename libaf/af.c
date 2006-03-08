@@ -104,7 +104,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
   af_instance_t* new=malloc(sizeof(af_instance_t));
   if(!new){
     af_msg(AF_MSG_ERROR,"[libaf] Could not allocate memory\n");
-    return NULL;
+    goto err_out;
   }  
   memset(new,0,sizeof(af_instance_t));
 
@@ -113,7 +113,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
 
   // Find filter from name
   if(NULL == (new->info=af_find(name)))
-    return NULL;
+    goto err_out;
 
   /* Make sure that the filter is not already in the list if it is
      non-reentrant */
@@ -121,8 +121,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
     if(af_get(s,name)){
       af_msg(AF_MSG_ERROR,"[libaf] There can only be one instance of" 
 	     " the filter '%s' in each stream\n",name);  
-      free(new);
-      return NULL;
+      goto err_out;
     }
   }
   
@@ -139,6 +138,7 @@ af_instance_t* af_create(af_stream_t* s, char* name)
       return new; 
   }
   
+err_out:
   free(new);
   af_msg(AF_MSG_ERROR,"[libaf] Couldn't create or open audio filter '%s'\n",
 	 name);  
