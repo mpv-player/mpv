@@ -659,7 +659,7 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 
 int 
 base64_encode(const void *enc, int encLen, char *out, int outMax) {
-	static const char	b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+	static const char	b64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 	unsigned char		*encBuf;
 	int			outLen;
@@ -670,6 +670,7 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 	outLen = 0;
 	bits = 0;
 	shift = 0;
+	outMax &= ~3;
 
 	while( outLen<outMax ) {
 		if( encLen>0 ) {
@@ -685,9 +686,12 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 			bits <<= 6 - shift;
 			shift = 6;
 		} else {
-			// Terminate with Mime style '='
-			*out = '=';
-			outLen++;
+			// As per RFC 2045, section 6.8,
+			// pad output as necessary: 0 to 2 '=' chars.
+			while( outLen & 3 ){
+				*out++ = '=';
+				outLen++;
+			}
 
 			return outLen;
 		}
