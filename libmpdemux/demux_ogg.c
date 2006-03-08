@@ -330,13 +330,12 @@ static  int demux_ogg_get_page_stream(ogg_demuxer_t* ogg_d,ogg_stream_state** os
 }
 
 static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,void *context,float* pts,int* flags, int samplesize) {
-  unsigned char* data;
+  unsigned char* data = pack->packet;
 
   *pts = 0;
   *flags = 0;
 
   if(os->vorbis) {
-    data = pack->packet;
     if(*pack->packet & PACKET_TYPE_HEADER)
       os->hdr_packets++;
     else if (context )
@@ -356,11 +355,10 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
        os->lastpos = pack->granulepos;
     }
   } else if (os->speex) {
-    data = pack->packet;
+    // whole packet (default)
 # ifdef HAVE_OGGTHEORA
   } else if (os->theora) {
      /* we pass complete packets to theora, mustn't strip the header! */
-     data = pack->packet;
      os->lastsize = 1;
      
      /* header packets beginn on 1-bit: thus check (*data&0x80).  We don't
@@ -389,7 +387,6 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
 # ifdef HAVE_FLAC
   } else if (os->flac) {
      /* we pass complete packets to flac, mustn't strip the header! */
-     data = pack->packet;
 #endif /* HAVE_FLAC */
   } else {
     if(*pack->packet & PACKET_TYPE_HEADER)
