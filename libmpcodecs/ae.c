@@ -74,6 +74,9 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 			ris = mpae_init_twolame(encoder);
 			break;
 #endif
+		default:
+			ris = 0;
+			break;
 	}
 	
 	if(! ris)
