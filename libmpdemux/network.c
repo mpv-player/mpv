@@ -431,6 +431,7 @@ http_send_request( URL_t *url, off_t pos ) {
 		if( url->port==0 ) url->port = 8080;			// Default port for the proxy server
 		fd = connect2Server( url->hostname, url->port,1 );
 		url_free( server_url );
+		server_url = NULL;
 	} else {
 		if( server_url->port==0 ) server_url->port = 80;	// Default port for the web server
 		fd = connect2Server( server_url->hostname, server_url->port,1 );
@@ -451,6 +452,8 @@ http_send_request( URL_t *url, off_t pos ) {
 	return fd;
 err_out:
 	http_free(http_hdr);
+	if (proxy && server_url)
+		url_free(server_url);
 	return -1;
 }
 
