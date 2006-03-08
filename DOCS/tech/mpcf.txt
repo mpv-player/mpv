@@ -289,8 +289,7 @@ file:
     file_id_string
     while(!eof){
         if(next_byte == 'N'){
-            startcode                           f(64)
-            forward_ptr                         v
+            packet_header
             switch(startcode){
                 case      main_startcode:  main_header; break;
                 case    stream_startcode:stream_header; break;
@@ -298,8 +297,7 @@ file:
                 case     index_startcode:        index; break;
                 case syncpoint_startcode:    syncpoint; break;
             }
-            reserved_bytes
-            checksum                    u(32)
+            packet_footer
         }else
             frame
     }
