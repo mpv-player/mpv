@@ -559,7 +559,10 @@ static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   pack = new_demux_packet(STREAM_BUFFER_SIZE);
   len = stream_read(demux->stream, pack->buffer, STREAM_BUFFER_SIZE);
   if (len <= 0)
+  {
+    free_demux_packet(pack);
     return 0;
+  }
   {
     register uint32_t state = (uint32_t)demux->priv;
     register int pos = -len;
