@@ -120,6 +120,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 
 	/* decompress the frame */
 	r = lzo1x_decompress (data, len, tmp, &w, priv->wrkmem);
+	free(tmp);
 
 	if (r != LZO_E_OK) {
 	    /* this should NEVER happen */
@@ -142,7 +143,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 
 	if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,priv->codec)) return NULL;
 	init_done++;
-	free(tmp);
     }
 
     mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0,
