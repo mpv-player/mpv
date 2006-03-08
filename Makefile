@@ -432,7 +432,7 @@ codecs.conf.h: $(PRG_CFG) etc/codecs.conf
 
 codec-cfg.o: codecs.conf.h
 
-codecs2html:
+codecs2html: mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
 
 # Every mplayer dependency depends on version.h, to force building version.h
