@@ -161,6 +161,9 @@ endif
 
 PARTS = libmpdemux \
         libmpcodecs \
+        libavutil \
+        libavcodec \
+        libavformat \
         libao2 \
         osdep \
         postproc \
@@ -300,16 +303,16 @@ loader/dmo/libDMO_Filter.a:
 	$(MAKE) -C loader/dmo
 
 libavutil/libavutil.a:
-	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a SRC_PATH=..
+	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a
 
 libavcodec/libavcodec.a:
-	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a SRC_PATH=..
+	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
 
 libavcodec/libpostproc/libpostproc.a:
-	$(MAKE) -C libavcodec/libpostproc LIBPREF=lib LIBSUF=.a SRC_PATH=../..
+	$(MAKE) -C libavcodec/libpostproc LIBPREF=lib LIBSUF=.a
 
 libavformat/libavformat.a:
-	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a SRC_PATH=..
+	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a
 
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
@@ -529,10 +532,6 @@ distclean: clean doxygen_clean
 	-rm -f *~ $(PRG) $(PRG_MENCODER) $(PRG_CFG)
 	-rm -f .depend configure.log codecs.conf.h help_mp.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
-	$(MAKE) -C libavutil distclean SRC_PATH=.. 
-	$(MAKE) -C libavcodec distclean SRC_PATH=.. 
-	$(MAKE) -C libavcodec/libpostproc distclean SRC_PATH=../..
-	$(MAKE) -C libavformat distclean SRC_PATH=..
 
 strip:
 	strip -s $(ALL_PRG)
@@ -543,9 +542,6 @@ depend: help_mp.h
 	./version.sh `$(CC) -dumpversion`
 	$(CC) -MM $(CFLAGS) -DCODECS2HTML mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
-	$(MAKE) -C libavutil dep SRC_PATH=..
-	$(MAKE) -C libavcodec dep SRC_PATH=..
-	$(MAKE) -C libavformat dep SRC_PATH=..
 
 # ./configure must be run if it changed in CVS
 config.h: configure
