@@ -6964,7 +6964,7 @@ elif test -z "$_charset" ; then
   if test "$_gtk1" = yes ; then
     _charset=`cat ${_mp_help}.charset`
   else
-    _charset=utf8
+    _charset="UTF-8"
   fi
 fi
 if test "$_charset" ; then
