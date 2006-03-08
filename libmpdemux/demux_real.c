@@ -162,7 +162,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     if (verbose<=1)
 	return;
     
-    if (stream_id > MAX_STREAMS)
+    if (stream_id >= MAX_STREAMS)
 	return;
 
     index = priv->index_table[stream_id];
