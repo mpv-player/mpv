@@ -121,6 +121,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(TERMCAP_LIB) \
               $(CDPARANOIA_LIB) \
               $(MPLAYER_NETWORK_LIB) \
+              $(LIBCDIO_LIB) \
               $(WIN32_LIB) \
               $(GIF_LIB) \
               $(MACOSX_FRAMEWORKS) \
@@ -128,7 +129,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(FRIBIDI_LIB) \
               $(FONTCONFIG_LIB) \
               $(ENCA_LIB) \
-              $(LIBCDIO_LIB) \
 
 CFLAGS = $(OPTFLAGS) -I. \
          $(CACA_INC) \
