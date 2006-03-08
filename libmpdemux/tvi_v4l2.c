@@ -545,12 +545,11 @@ static int control(priv_t *priv, int cmd, void *arg)
     struct v4l2_frequency frequency;
 
     switch(cmd) {
-    case TVI_CONTROL_IS_AUDIO:
-	if (tv_param_force_audio) return TVI_CONTROL_TRUE;
-	return priv->input.audioset ? TVI_CONTROL_TRUE: TVI_CONTROL_FALSE;
     case TVI_CONTROL_IS_VIDEO:
 	return priv->capability.capabilities & V4L2_CAP_VIDEO_CAPTURE?
 	    TVI_CONTROL_TRUE: TVI_CONTROL_FALSE;
+    case TVI_CONTROL_IS_AUDIO:
+	if (tv_param_force_audio) return TVI_CONTROL_TRUE;
     case TVI_CONTROL_IS_TUNER:
 	return priv->capability.capabilities & V4L2_CAP_TUNER?
 	    TVI_CONTROL_TRUE: TVI_CONTROL_FALSE;
