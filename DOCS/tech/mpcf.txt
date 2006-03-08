@@ -277,10 +277,6 @@ info_packet:
         }
     }
 
-info_frame:
-    info_packet
-    packet_footer
-
 syncpoint:
     coded_pts                           v
     stream = coded_pts % stream_count
@@ -420,9 +416,7 @@ stream_class
     0    video
     1    audio
     2    subtiles
-    3    metadata
     4    userdata
-    in metadata streams each frame contains exactly one info frame
     Note: the remaining values are reserved and MUST NOT be used
           a demuxer MUST ignore streams with reserved classes
 
@@ -764,22 +758,14 @@ file as well.
 Info:
 -----
 
-All info packets with the same chapter_id and stream_id are repeated info
-packets and MUST be binary identical.
+If a info packet is stored anywhere then a muxer MUST also store an identical
+info packet after every main-stream-header set
 
-All info packets MUST appear after main headers at begginning of file, and
-SHOULD be repeated after all main headers unless they are very large.
+If a demuxer has seen several info packets with the same chapter_id and
+stream_id then it MUST ignore all but the one with the highest position in
+the file
 
-Info frames can be used to describe the file or some part of it (chapters)
-
-Info SHOULD be stored in global packets instead of info streams/frames if
-possible, and the amount of data is not large.
-
-If 2 info frames have the same chapter_id and stream_id then the earlier
-MUST be ignored (the last info frame is the most correct, this allows
-updating or correcting info)
-
-Info frames MUST be keyframes
+demxuxers SHOULD not search the whole file for info packets
 
 demuxer (non-normative):
 ------------------------
