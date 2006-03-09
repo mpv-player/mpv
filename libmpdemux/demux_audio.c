@@ -422,7 +422,10 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
 	dp = new_demux_packet(l);
 	memcpy(dp->buffer,hdr,4);
 	if (stream_read(s,dp->buffer + 4,l-4) != l-4)
+	{
+	  free_demux_packet(dp);
 	  return 0;
+	}
 	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + sh_audio->audio.dwScale/(float)sh_audio->samplerate;
 	break;
       }
