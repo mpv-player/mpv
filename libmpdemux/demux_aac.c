@@ -56,7 +56,10 @@ static int demux_aac_init(demuxer_t *demuxer)
 	
 	priv->buf = (uint8_t*) malloc(8);
 	if(!priv->buf)
+	{
+		free(priv);
 		return 0;
+	}
 
 	demuxer->priv = priv;
 	return 1;
