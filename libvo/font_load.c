@@ -17,15 +17,15 @@ raw_file* load_raw(char *name,int verbose){
     raw_file* raw=malloc(sizeof(raw_file));
     unsigned char head[32];
     FILE *f=fopen(name,"rb");
-    if(!f) return NULL;                        // can't open
-    if(fread(head,32,1,f)<1) return NULL;        // too small
-    if(memcmp(head,"mhwanh",6)) return NULL;        // not raw file
+    if(!f) goto err_out;                        // can't open
+    if(fread(head,32,1,f)<1) goto err_out;        // too small
+    if(memcmp(head,"mhwanh",6)) goto err_out;        // not raw file
     raw->w=head[8]*256+head[9];
     raw->h=head[10]*256+head[11];
     raw->c=head[12]*256+head[13];
     if(raw->w == 0) // 2 bytes were not enough for the width... read 4 bytes from the end of the header
     	raw->w = ((head[28]*0x100 + head[29])*0x100 + head[30])*0x100 + head[31];
-    if(raw->c>256) return NULL;                 // too many colors!?
+    if(raw->c>256) goto err_out;                 // too many colors!?
     mp_msg(MSGT_OSD, MSGL_DBG2, "RAW: %s  %d x %d, %d colors\n",name,raw->w,raw->h,raw->c);
     if(raw->c){
         raw->pal=malloc(raw->c*3);
@@ -39,6 +39,12 @@ raw_file* load_raw(char *name,int verbose){
     fread(raw->bmp,raw->h*raw->w*bpp,1,f);
     fclose(f);
     return raw;
+
+err_out:
+    if (f)
+      fclose(f);
+    free(raw);
+    return NULL;
 }
 
 extern int sub_unicode;
