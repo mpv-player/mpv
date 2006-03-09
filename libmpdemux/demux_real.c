@@ -1207,7 +1207,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		int codec_pos;
 		int tmp;
 		int len;
-		char *descr, *mimet;
+		char *descr, *mimet = NULL;
 
 		stream_id = stream_read_word(demuxer->stream);
 		mp_msg(MSGT_DEMUX,MSGL_V,"Found new stream (id: %d)\n", stream_id);
