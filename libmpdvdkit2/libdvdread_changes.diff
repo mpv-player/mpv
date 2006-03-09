@@ -91,6 +91,15 @@ diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
    if(dev == NULL) {
      fprintf(stderr, "libdvdread: Could not allocate memory.\n");
      return NULL;
+@@ -158,7 +158,7 @@
+   dvd_input_t dev;
+   
+   /* Allocate the library structure */
+-  dev = (dvd_input_t) malloc(sizeof(dvd_input_t));
++  dev = (dvd_input_t) malloc(sizeof(struct dvd_input_s));
+   if(dev == NULL) {
+     fprintf(stderr, "libdvdread: Could not allocate memory.\n");
+     return NULL;
 @@ -320,8 +320,10 @@
      fprintf(stderr, "DVDCSS_METHOD %s\n", psz_method);
      fprintf(stderr, "DVDCSS_VERBOSE %s\n", psz_verbose);

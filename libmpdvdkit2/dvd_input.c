@@ -158,7 +158,7 @@ static dvd_input_t file_open(const char *target)
   dvd_input_t dev;
   
   /* Allocate the library structure */
-  dev = (dvd_input_t) malloc(sizeof(dvd_input_t));
+  dev = (dvd_input_t) malloc(sizeof(struct dvd_input_s));
   if(dev == NULL) {
     fprintf(stderr, "libdvdread: Could not allocate memory.\n");
     return NULL;
