@@ -281,7 +281,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     old_vo_dheight = -1;
 
     if (!title)
-        title = strdup("MPlayer X11 (XImage/Shm) render");
+        title = "MPlayer X11 (XImage/Shm) render";
 
     in_format = format;
     srcW = width;
