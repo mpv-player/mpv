@@ -215,7 +215,7 @@ index:
     max_pts                             t
     syncpoints                          v
     for(i=0; i<syncpoints; i++){
-        syncpoint_pos_div8              v
+        syncpoint_pos_div16             v
     }
     for(i=0; i<stream_count; i++){
         last_pts= -1
@@ -285,6 +285,7 @@ info_packet:
 
 syncpoint:
     global_key_pts                      t
+    back_ptr_div16                      v
 
             Complete definition:
 
@@ -600,9 +601,9 @@ header_checksum
 Syncpoint tags:
 ---------------
 
-back_ptr_div8
-    back_ptr = back_ptr_div8 * 8 + 7
-    back_ptr must point to a position within 8 bytes of a syncpoint
+back_ptr_div16
+    back_ptr = back_ptr_div16 * 16 + 15
+    back_ptr must point to a position within 16 bytes of a syncpoint
     startcode. This syncpoint MUST be the closest syncpoint such that at
     least one keyframe with a pts lower or equal to the original syncpoint's
     global_key_pts for all streams lies between it and the current syncpoint.
@@ -622,8 +623,8 @@ Index tags:
 max_pts
     The highest pts in the entire file
 
-syncpoint_pos_div8
-    offset from begginning of file to up to 7 bytes before the syncpoint
+syncpoint_pos_div16
+    offset from begginning of file to up to 15 bytes before the syncpoint
     referred to in this index entry. Relative to position of last
     syncpoint.
 
