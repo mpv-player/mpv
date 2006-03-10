@@ -170,7 +170,6 @@ stream_header:
     time_base_denom                     v
     msb_pts_shift                       v
     max_pts_distance                    v
-    max_frame_size                      v
     decode_delay                        v
     reserved                            u(7)
     fixed_fps                           u(1)
@@ -401,16 +400,14 @@ max_distance
     SHOULD be set to <=32768
     if the stored value is >65536 then max_distance MUST be set to 65536
 
+    this is also the max frame size without a checksum after the frameheader.
+
+
 max_pts_distance
     max absoloute difference of pts of new frame from last_pts in the
     timebase of the stream, without a checksum after the frameheader
     Note that last_pts is not necessarily the pts of the last frame
     on the same stream, as it is altered by syncpoint timestamps.
-
-max_frame_size
-    max frame size without a checksum after the frameheader.
-    MUST be <=4*max_distance. If stored value is bigger then
-    max_frame_size MUST be set to 4*max_distance .
 
 stream_id
     Stream identifier
@@ -512,7 +509,7 @@ flags[frame_code], frame_flags
     end presentation time of the final frame.
     An EOR set stream is unset by the first content frames.
     EOR can only be unset in streams with zero decode_delay .
-    FLAG_CHECKSUM MUST be set if the frame is larger than max_frame_size or
+    FLAG_CHECKSUM MUST be set if the frame is larger than max_distance or
     its pts differs by more then max_pts_distance from the last frame
 
 stream_id_plus1[frame_code]
