@@ -570,7 +570,7 @@ width/height
 sample_width/sample_height (aspect ratio)
     sample_width is the horizontal distance between samples
     sample_width and sample_height MUST be relatively prime if not zero
-    MUST be 0 if unknown
+    both MUST be 0 if unknown otherwise both MUST be non zero
 
 colorspace_type
      0    unknown
