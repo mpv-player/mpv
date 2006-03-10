@@ -489,6 +489,8 @@ frame_code
     the meaning of this byte is stored in the main header
     the value 78 ('N') is forbidden to ensure that the byte is always
     different from the first byte of any startcode
+    a muxer SHOULD mark 0x00 and 0xFF as invalid to improve error
+    detection
 
 flags[frame_code], frame_flags
     Bit  Name             Description
