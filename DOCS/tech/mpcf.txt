@@ -103,6 +103,10 @@ vb  (variable length binary data or string)
     length                              v
     value                               b
 
+t (v coded universal timestamp)
+    tmp                                 v
+    stream_id= tmp % stream_count
+    value= (tmp / stream_count) * stream[ stream_id ].timebase
 
 
 Bitstream syntax:
@@ -209,7 +213,7 @@ frame:
     data
 
 index:
-    max_pts                             v
+    max_pts                             t
     syncpoints                          v
     for(i=0; i<syncpoints; i++){
         syncpoint_pos_div8              v
@@ -253,7 +257,7 @@ last 8 reserved_bytes of index:
 info_packet:
     stream_id_plus1                     v
     chapter_id                          v
-    chapter_start                       v
+    chapter_start                       t
     chapter_len                         v
     count                               v
     for(i=0; i<count; i++){
@@ -268,9 +272,12 @@ info_packet:
         }else if (value==-3){
             type= "s"
             value                       s
-        }else if (value<-3){
+        }else if (value==-4){
+            type= "t"
+            value                       t
+        }else if (value<-4){
             type= "r"
-            value.den= -value-3
+            value.den= -value-4
             value.num                   s
         }else{
             type= "v"
@@ -278,10 +285,7 @@ info_packet:
     }
 
 syncpoint:
-    coded_pts                           v
-    stream = coded_pts % stream_count
-    global_key_pts = coded_pts/stream_count
-    back_ptr_div8                       v
+    global_key_pts                      t
 
             Complete definition:
 
@@ -619,9 +623,7 @@ Index tags:
 -----------
 
 max_pts
-    s = max_pts % stream_count
-    pts = max_pts / stream_count
-    The highest pts in the entire file in the timebase of stream 's' .
+    The highest pts in the entire file
 
 syncpoint_pos_div8
     offset from begginning of file to up to 7 bytes before the syncpoint
@@ -664,9 +666,7 @@ chapter_id
     file
 
 chapter_start
-    s= chapter_start % stream_count
-    timestamp= chapter_start / stream_count
-    timestamp of start of chapter in timebase of stream 's'.
+    timestamp of start of chapter
 
 chapter_len
     Length of chapter in same timebase of chapter_start.
