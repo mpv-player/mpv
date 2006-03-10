@@ -5189,7 +5189,9 @@ int main()
 EOF
         _libcdio=no
     for _inc_tmp in "$_inc_libcdio" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
-       cc_check `pkg-config --cflags --libs libcdio` $_inc_tmp $_ld_libcdio -lcdio_cdda -lcdio_paranoia $_ld_lm && _inc_libcdio="$_inc_tmp" && ( $TMPO >> "$TMPLOG" ) && _libcdio=yes && break
+        cc_check `pkg-config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_libcdio $_ld_lm \
+            && _inc_libcdio="$_inc_tmp" && ( $TMPO >> "$TMPLOG" ) \
+            && _libcdio=yes && break
     done
     else
         _libcdio=no
@@ -5201,8 +5203,7 @@ if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _def_havelibcdio='yes'
     _inputmodules="cdda $_inputmodules"
     _inc_libcdio=`pkg-config --cflags libcdio`
-    _ld_libcdio=`pkg-config --libs libcdio`
-    _ld_cdparanoia="$_ld_cdparanoia -lcdio_cdda -lcdio_paranoia -lcdio"
+    _ld_libcdio=`pkg-config --libs libcdio_paranoia`
 else
     if test "$_cdparanoia" = yes ; then
        _libcdio="no (using cdparanoia)"
