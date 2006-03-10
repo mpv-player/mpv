@@ -792,6 +792,8 @@ It often highly improves usability and is therefore strongly encouraged.
 A demuxer MUST NOT demux a stream which contains more than one stream, or which
 is wrapped in a structure to facilitate more than one stream or otherwise
 duplicate the role of a container. any such file is to be considered invalid.
+for example vorbis in ogg in nut is invalid, as is 
+mpegvideo+mpegaudio in mpeg-ps/ts in nut or dvvideo + dvaudio in dv in nut
 
 
 
