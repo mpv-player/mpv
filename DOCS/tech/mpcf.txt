@@ -409,6 +409,7 @@ max_pts_distance
     timebase of the stream, without a checksum after the frameheader
     Note that last_pts is not necessarily the pts of the last frame
     on the same stream, as it is altered by syncpoint timestamps.
+    SHOULD NOT be higher than 1/timebase
 
 stream_id
     Stream identifier
