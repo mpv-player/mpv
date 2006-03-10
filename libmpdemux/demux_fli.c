@@ -93,6 +93,8 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "Bad/unknown magic number (%04x)\n",
 	magic_number);
+    free(header);
+    free(frames);
     return(NULL);    
   }
 
