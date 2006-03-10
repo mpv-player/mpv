@@ -720,7 +720,8 @@ value
 
 stuffing
     0x80 can be placed in front of any type v entry for stuffing purposes
-
+    except the forward_ptr and all fields in the frame header where a
+    maximum of 8 stuffing bytes per field are allowed
 
 
 Structure:
