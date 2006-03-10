@@ -644,7 +644,7 @@ asx_parse_repeat(ASX_Parser_t* parser,char* buffer,char** _attribs) {
 
 play_tree_t*
 asx_parser_build_tree(char* buffer,int deep) {
-  char *element,*asx_body,**asx_attribs,*body, **attribs;
+  char *element,*asx_body,**asx_attribs,*body = NULL, **attribs;
   int r;
   play_tree_t *asx,*entry,*list = NULL;
   ASX_Parser_t* parser = asx_parser_new();
@@ -666,7 +666,6 @@ asx_parser_build_tree(char* buffer,int deep) {
   if(strcasecmp(element,"ASX") != 0) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"first element isn't ASX, it's %s\n",element);
     asx_free_attribs(asx_attribs);
-    if(body) free(body);
     asx_parser_free(parser);
     return NULL;
   }
