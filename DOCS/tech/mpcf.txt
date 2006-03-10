@@ -310,6 +310,8 @@ note, demuxers MUST be able to deal with new and unknown headers
 packet_header
         startcode                               f(64)
         forward_ptr                             v
+        if(forward_ptr > 4096)
+            header_checksum                     u(32)
 
 packet_footer
         reserved_bytes
@@ -588,6 +590,9 @@ checksum
     forward_ptr until last byte before the checksum).
     for frame headers the checksum contains the framecode byte and all
     following bytes upto the checksum itself
+
+header_checksum
+    checksum over the startcode and forward pointer
 
 Syncpoint tags:
 ---------------
