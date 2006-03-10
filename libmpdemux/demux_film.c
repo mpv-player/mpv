@@ -237,6 +237,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
   if (chunk_type != CHUNK_FILM)
   {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "Not a FILM file\n");
+    free(film_data);
     return(NULL);    
   }
 
