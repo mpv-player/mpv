@@ -416,7 +416,7 @@ stream_class
     0    video
     1    audio
     2    subtiles
-    4    userdata
+    3    userdata
     Note: the remaining values are reserved and MUST NOT be used
           a demuxer MUST ignore streams with reserved classes
 
