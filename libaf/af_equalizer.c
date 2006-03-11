@@ -58,6 +58,7 @@ typedef struct af_equalizer_s
   float   g[AF_NCH][KM];      	// Gain factor for each channel and band
   int     K; 		   	// Number of used eq bands
   int     channels;        	// Number of channels
+  float   gain_factor;     // applied at output to avoid clipping
 } af_equalizer_t;
 
 // 2nd order Band-pass Filter design
@@ -79,9 +80,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
   switch(cmd){
   case AF_CONTROL_REINIT:{
-    int k =0;
+    int k =0, i =0;
     float F[KM] = CF;
     
+    s->gain_factor=0.0;
+
     // Sanity check
     if(!arg) return AF_ERROR;
     
@@ -105,7 +108,25 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 
     // Calculate how much this plugin adds to the overall time delay
     af->delay += 2000.0/((float)af->data->rate);
+    
+    // Calculate gain factor to prevent clipping at output
+    for(k=0;k<AF_NCH;k++)
+    {
+        for(i=0;i<KM;i++)
+        {
+            if(s->gain_factor < s->g[k][i]) s->gain_factor=s->g[k][i];
+        }
+    }
 
+    s->gain_factor=log10(s->gain_factor + 1.0) * 20.0;
+	 
+    if(s->gain_factor > 0.0)
+    {
+        s->gain_factor=0.1+(s->gain_factor/12.0);
+    }else{
+        s->gain_factor=1;
+    }
+	
     return af_test_output(af,arg);
   }
   case AF_CONTROL_COMMAND_LINE:{
@@ -190,7 +211,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	wq[0] = w;
       }
       // Calculate output 
-      *out=yt;
+      *out=yt*s->gain_factor;
       out+=nch;
     }
   }
