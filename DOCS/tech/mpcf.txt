@@ -399,7 +399,7 @@ max_distance
     non-keyframe - keyframe transitions are very frequent
 
     SHOULD be set to <=32768
-    if the stored value is >65536 then max_distance MUST be set to 65536
+    if the stored value is >131072 then max_distance MUST be set to 131072
 
     this is also the max frame size without a checksum after the frameheader.
 
