@@ -65,6 +65,14 @@ static int init(sh_audio_t *sh_audio)
        sh_audio->sample_format=AF_FORMAT_FLOAT_BE;
        sh_audio->samplesize=4;
        break;
+    case 0x34326e69: // 'in24', bigendian int24
+       sh_audio->sample_format=AF_FORMAT_S24_BE;
+       sh_audio->samplesize=3;
+       break;
+    case 0x32336e69: // 'in32', bigendian int32
+       sh_audio->sample_format=AF_FORMAT_S32_BE;
+       sh_audio->samplesize=4;
+       break;
     default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AF_FORMAT_U8;
   }
   if (!sh_audio->samplesize) // this would cause MPlayer to hang later

@@ -62,6 +62,7 @@ MPlayer (1.0)
     * PNG decoding via libavcodec
     * removed native RealAudio codecs (ported to lavc)
     * Zip Motion-Block Video (ZMB) decoder via binary DLL
+    * support for QuickTime in24 and in32 PCM audio
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
