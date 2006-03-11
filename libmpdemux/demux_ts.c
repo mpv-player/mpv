@@ -1934,6 +1934,7 @@ static void parse_mp4_object_descriptor(pmt_t *pmt, uint8_t *buf, int len, void 
 {
 	int i, j = 0, id;
 	
+	i=0;
 	id = (buf[0] << 2) | ((buf[1] & 0xc0) >> 6);
 	mp_msg(MSGT_DEMUX, MSGL_V, "PARSE_MP4_OBJECT_DESCRIPTOR: len=%d, OD_ID=%d\n", len, id);
 	if(buf[1] & 0x20)
