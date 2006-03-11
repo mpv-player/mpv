@@ -438,6 +438,7 @@ static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, in
     int pgc_no;   ///< program chain number
     int msec;     ///< time length in milliseconds
 
+    msec=0;
     if(!vts_file || !tt_srpt)
         return 0;
 
