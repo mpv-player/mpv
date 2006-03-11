@@ -2122,7 +2122,7 @@ static uint64_t fix_mp4_frame_duration(muxer_headers_t *vpriv)
 static size_t parse_mpeg4_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_headers_t *vpriv, float fps, size_t len)
 {
 	size_t ptr = 0;
-	int64_t delta_pts;
+	int64_t delta_pts=0;
 	uint8_t pt;
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg4_video, len=%u\n", (uint32_t) len);
