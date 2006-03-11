@@ -386,7 +386,7 @@ version
 
 forward_ptr
     size of the packet data (exactly the distance from the first byte
-    after the forward_ptr to the first byte of the next packet)
+    after the packet_header to the first byte of the next packet)
 
 max_distance
     max distance of syncpoints, the distance may only be larger if
@@ -592,7 +592,7 @@ checksum
     crc32 checksum
     checksum is calculated for the area pointed to by forward_ptr not
     including the checksum itself (from first byte after the
-    forward_ptr until last byte before the checksum).
+    packet_header until last byte before the checksum).
     for frame headers the checksum contains the framecode byte and all
     following bytes upto the checksum itself
 
