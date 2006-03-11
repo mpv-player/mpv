@@ -1040,7 +1040,7 @@ got_video:
 	return 1;
     }
 
-if(stream_id<256){
+if(stream_id<MAX_STREAMS){
 
     if(demuxer->audio->id==-1 && demuxer->a_streams[stream_id]){
 	sh_audio_t *sh = demuxer->a_streams[stream_id];
