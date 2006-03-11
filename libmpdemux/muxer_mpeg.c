@@ -1794,6 +1794,9 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	uint8_t fps, tff, rff; 
 	int period; 
 	
+	if(! pce_ptr)
+		return 0;
+	
 	period = (vpriv->telecine == TELECINE_FILM2PAL) ? 12 : 4;
 	if(fps_ptr != NULL)
 	{
@@ -1829,8 +1832,6 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	if(se_ptr)
 		se_ptr[1] &= 0xf7;
 	
-	if(! pce_ptr)
-		return 0;
 			
 	if(! vpriv->vframes)	//initial value of tff
 		vpriv->trf = (pce_ptr[3] >> 6) & 0x2;
