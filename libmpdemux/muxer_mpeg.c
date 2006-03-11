@@ -327,11 +327,12 @@ static uint32_t calc_pack_hlen(muxer_priv_t *priv, muxer_headers_t *h);
 static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int len, uint8_t pt, uint32_t temp_ref);
 
 static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
-  muxer_priv_t *priv = (muxer_priv_t*) muxer->priv;
+  muxer_priv_t *priv;
   muxer_stream_t *s;
   muxer_headers_t *spriv;
 
   if (!muxer) return NULL;
+  priv = (muxer_priv_t*) muxer->priv;
   if(muxer->avih.dwStreams>=MUXER_MAX_STREAMS){
     mp_msg(MSGT_MUXER, MSGL_ERR, "Too many streams! increase MUXER_MAX_STREAMS !\n");
     return NULL;
