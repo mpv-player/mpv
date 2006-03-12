@@ -191,6 +191,8 @@ static void fix_parameters(muxer_stream_t *stream)
 
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
+		if(!stream->wf)
+			return;
 		ctx->codec_id = codec_get_wav_id(stream->wf->wFormatTag); 
 #if 0 //breaks aac in mov at least
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
@@ -220,6 +222,8 @@ static void fix_parameters(muxer_stream_t *stream)
 	}
 	else if(stream->type == MUXER_TYPE_VIDEO)
 	{
+		if(!stream->bih)
+			return;
 		ctx->codec_id = codec_get_bmp_id(stream->bih->biCompression);
                 if(ctx->codec_id <= 0)
                     ctx->codec_tag= stream->bih->biCompression;
