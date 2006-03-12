@@ -680,15 +680,13 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 				pragma += 9;
 				end = strstr( pragma, "," );
 				if( end==NULL ) {
-				  size_t s = strlen(pragma);
-				  if(s > sizeof(features)) {
-				    mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma,pragma,s,sizeof(features));
-				    len = sizeof(features);
-				  } else {				   
-				    len = s;
-				  }
+				  len = strlen(pragma);
 				} else { 
-				  len = MIN((unsigned int)(end-pragma),sizeof(features));
+				  len = (unsigned int)(end-pragma);
+				}
+				if(len > sizeof(features) - 1) {
+				  mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma,pragma,s,sizeof(features));
+				  len = sizeof(features) - 1;
 				}
 				strncpy( features, pragma, len );
 				features[len]='\0';
