@@ -98,6 +98,8 @@ b   (binary data or string, to be use in vb, see below)
         data[i]                         u(8)
     }
     [Note: strings MUST be encoded in UTF-8]
+    [Note: the character NUL (U+0000) is not legal within
+    or at the end of a string.]
 
 vb  (variable length binary data or string)
     length                              v
