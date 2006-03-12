@@ -516,20 +516,20 @@ flags[frame_code], frame_flags
     its pts differs by more then max_pts_distance from the last frame
 
 stream_id_plus1[frame_code]
-    must be <250
+    MUST be <256
     if it is 0, then the stream_id is coded in the frame
 
 data_size_mul[frame_code]
-    must be <16384
+    MUST be <65536
 
 data_size_lsb[frame_code]
-    must be <16384
+    MUST be <65536
 
 pts_delta[frame_code]
-    must be <16384 and >-16384
+    MUST be <32768 and >-32768
 
 reserved_count[frame_code]
-    must be <256
+    MUST be <256
 
 data_size
     data_size= data_size_lsb + data_size_msb*data_size_mul;
