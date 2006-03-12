@@ -149,6 +149,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	list = malloc(sizeof(dvb_channels_list));
 	if(list == NULL)
 	{
+		fclose(f);
 		mp_msg(MSGT_DEMUX, MSGL_V, "DVB_GET_CHANNELS: couldn't malloc enough memory\n");
 		return NULL;
 	}
