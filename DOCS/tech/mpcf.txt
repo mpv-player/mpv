@@ -1,5 +1,5 @@
 ========================================
-NUT Open Container Format DRAFT 20060207
+NUT Open Container Format DRAFT 20060312
 ========================================
 
 
@@ -106,7 +106,7 @@ vb  (variable length binary data or string)
 t (v coded universal timestamp)
     tmp                                 v
     stream_id= tmp % stream_count
-    value= (tmp / stream_count) * stream[ stream_id ].timebase
+    value= (tmp / stream_count) * timebase[stream_id]
 
 
 Bitstream syntax:
