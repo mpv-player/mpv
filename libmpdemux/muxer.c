@@ -19,51 +19,39 @@
 #include "stheader.h"
 
 muxer_t *muxer_new_muxer(int type,FILE *f){
-    muxer_t* muxer=malloc(sizeof(muxer_t));
-    memset(muxer,0,sizeof(muxer_t));
+    muxer_t* muxer=calloc(1,sizeof(muxer_t));
     if(!muxer)
         return NULL;
     muxer->file = f;
     switch (type) {
       case MUXER_TYPE_MPEG:
 	if(! muxer_init_muxer_mpeg(muxer))
-        {
-          free(muxer);
-          return NULL;
-        }
+	  goto fail;
 	break;
       case MUXER_TYPE_RAWVIDEO:
         if(! muxer_init_muxer_rawvideo(muxer))
-        {
-	  free(muxer);
-	  return NULL;
-        }
+	  goto fail;
 	break;
       case MUXER_TYPE_RAWAUDIO:
         if(! muxer_init_muxer_rawaudio(muxer))
-        {
-          free(muxer);
-          return NULL;
-        }
+	  goto fail;
         break;
 #if defined(USE_LIBAVFORMAT) || defined(USE_LIBAVFORMAT_SO)
       case MUXER_TYPE_LAVF:
         if(! muxer_init_muxer_lavf(muxer))
-        {
-          free(muxer);
-          return NULL;
-        }
+	  goto fail;
         break;
 #endif
       case MUXER_TYPE_AVI:
       default:
 	if(! muxer_init_muxer_avi(muxer))
-        {
-          free(muxer);
-          return NULL;
-        }
+	  goto fail;
     }
     return muxer;
+
+fail:
+    free(muxer);
+    return NULL;
 }
 
 /* buffer frames until we either:
