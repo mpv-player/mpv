@@ -183,9 +183,6 @@ static void fix_parameters(muxer_stream_t *stream)
 #else
 	ctx = &(spriv->avstream->codec);
 #endif
-	
-        if(stream->wf && stream->wf->nAvgBytesPerSec)
-            ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
         ctx->rc_buffer_size= stream->vbv_size;
         ctx->rc_max_rate= stream->max_rate;
 
@@ -198,6 +195,8 @@ static void fix_parameters(muxer_stream_t *stream)
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
 #endif
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AUDIO CODEC ID: %x, TAG: %x\n", ctx->codec_id, (uint32_t) ctx->codec_tag);
+		if(stream->wf->nAvgBytesPerSec)
+			ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
 		ctx->sample_rate = stream->wf->nSamplesPerSec;
 //                mp_msg(MSGT_MUXER, MSGL_INFO, "stream->h.dwSampleSize: %d\n", stream->h.dwSampleSize);
 		ctx->channels = stream->wf->nChannels;
