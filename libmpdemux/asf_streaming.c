@@ -685,7 +685,7 @@ static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTT
 				  len = (unsigned int)(end-pragma);
 				}
 				if(len > sizeof(features) - 1) {
-				  mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma,pragma,s,sizeof(features));
+				  mp_msg(MSGT_NETWORK,MSGL_WARN,MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma,pragma,len,sizeof(features) - 1);
 				  len = sizeof(features) - 1;
 				}
 				strncpy( features, pragma, len );
