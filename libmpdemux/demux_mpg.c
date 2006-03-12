@@ -818,7 +818,7 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
             if (mpg_d && mpg_d->num_a_streams > 1 && demuxer->audio && demuxer->audio->sh) {
               demux_stream_t *d_audio = demuxer->audio;
               sh_audio_t *sh_audio = d_audio->sh;
-              sh_audio_t *sh_a;
+              sh_audio_t *sh_a = sh_audio;
               int i;
               if (*((int*)arg) < 0)
               {
