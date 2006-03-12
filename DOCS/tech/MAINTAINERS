@@ -105,6 +105,9 @@ demuxers:
     * demux_rtp* - Ross Finlayson
     * demux_mpg and demux_ts - Nico Sabbi
 
+muxers:
+    * muxer_lavf.c - Michael Niedermayer
+
 codec support:
     * FFmpeg: Michael Niedermayer
     * XviD: Ivan Kalvachev
