@@ -500,10 +500,10 @@ flags[frame_code], frame_flags
     Bit  Name             Description
        1  FLAG_KEY         if set, frame is keyframe
        2  FLAG_EOR         if set, stream has no relevance on
+                           presentation. (EOR)
       32  FLAG_SIZE_MSB    if set, data_size_msb is at frame header,
                            otherwise data_size_msb is 0
       64  FLAG_CHECKSUM    if set then the frame header contains a checksum
-                           presentation. (EOR)
     4096  FLAG_CODED       if set, coded_flags are stored in the frame header.
     8192  FLAG_INVALID     if set, frame_code is invalid.
 
