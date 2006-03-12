@@ -426,9 +426,9 @@ static void copy_image(mp_image_t *dmpi, mp_image_t *mpi, int field)
 static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
 {
 	struct vf_priv_s *p = vf->priv;
-	int dropflag;
+	int dropflag=0;
 
-	switch (p->drop && !p->dropnext) {
+	if (!p->dropnext) switch (p->drop) {
 	case 0:
 		dropflag = 0;
 		break;
