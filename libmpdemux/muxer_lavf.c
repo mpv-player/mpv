@@ -103,17 +103,17 @@ static URLProtocol mp_protocol = {
 
 static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 {
-	if(!muxer) return NULL;
-	muxer_priv_t *priv = (muxer_priv_t*) muxer->priv;
+	muxer_priv_t *priv;
 	muxer_stream_t *stream;
 	muxer_stream_priv_t *spriv;
 	AVCodecContext *ctx;
 
-	if(type != MUXER_TYPE_VIDEO && type != MUXER_TYPE_AUDIO) 
+	if(!muxer || (type != MUXER_TYPE_VIDEO && type != MUXER_TYPE_AUDIO))
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "UNKNOW TYPE %d\n", type);
+		mp_msg(MSGT_MUXER, MSGL_ERR, "NULL MUXER PASSED OR UNKNOW TYPE %d\n", type);
 		return NULL;
 	}
+	priv = (muxer_priv_t*) muxer->priv;
 	
 	stream = (muxer_stream_t*) calloc(1, sizeof(muxer_stream_t));
 	if(!stream)
