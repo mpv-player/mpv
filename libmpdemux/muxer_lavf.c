@@ -113,16 +113,16 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 		mp_msg(MSGT_MUXER, MSGL_ERR, "NULL MUXER PASSED OR UNKNOW TYPE %d\n", type);
 		return NULL;
 	}
-	priv = (muxer_priv_t*) muxer->priv;
+	priv = muxer->priv;
 	
-	stream = (muxer_stream_t*) calloc(1, sizeof(muxer_stream_t));
+	stream = calloc(1, sizeof(muxer_stream_t));
 	if(!stream)
 	{
 		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc muxer_stream, EXIT\n");
 		return NULL;
 	}
 	muxer->streams[muxer->avih.dwStreams] = stream;
-	stream->b_buffer = (unsigned char *)malloc(2048);
+	stream->b_buffer = malloc(2048);
 	if(!stream->b_buffer)
 	{
 		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc b_buffer, EXIT\n");
@@ -133,7 +133,7 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 	stream->b_buffer_ptr = 0;
 	stream->b_buffer_len = 0;
 	
-	spriv = (muxer_stream_priv_t*) calloc(1, sizeof(muxer_stream_priv_t));
+	spriv = calloc(1, sizeof(muxer_stream_priv_t));
 	if(!spriv) 
 	{
 		free(stream);
