@@ -752,6 +752,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
 	      continue;
 	    }
           }
+	  if(!sh_video) break;
           i=sync_video_packet(d_video);
           if(sh_video->format == 0x10000004) {	//mpeg4
             if(i==0x1B6) {			//vop (frame) startcode
