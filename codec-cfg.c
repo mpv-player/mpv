@@ -26,6 +26,13 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#ifdef CODECS2HTML
+#ifdef __GNUC__
+#define mp_msg(t, l, m, args...) fprintf(stderr, m, ##args)
+#else
+#define mp_msg(t, l, m, ...) fprintf(stderr, m, __VA_ARGS__)
+#endif
+#endif
 
 #include "help_mp.h"
 
