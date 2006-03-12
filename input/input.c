@@ -1404,7 +1404,6 @@ mp_input_parse_config(char *file) {
   char *iter,*end;
   char buffer[BS_MAX];
   int n_binds = 0, keys[MP_MAX_KEY_DOWN+1] = { 0 };
-  mp_cmd_bind_t* binds = NULL;
 
   fd = open(file,O_RDONLY);
 
@@ -1423,7 +1422,6 @@ mp_input_parse_config(char *file) {
 	if(errno == EINTR)
 	  continue;
 	mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrReadingInputConfig,file,strerror(errno));
-	mp_input_free_binds(binds);
 	close(fd);
 	return 0;
       } else if(r == 0) {
@@ -1436,8 +1434,6 @@ mp_input_parse_config(char *file) {
     // Empty buffer : return
     if(bs <= 1) {
       mp_msg(MSGT_INPUT,MSGL_V,"Input config file %s parsed: %d binds\n",file,n_binds);
-      if(binds)
-	cmd_binds = binds;
       close(fd);
       return 1;
     }
@@ -1483,7 +1479,6 @@ mp_input_parse_config(char *file) {
 	    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnfinishedBinding,iter);
 	  else
 	    mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName,iter);
-	  mp_input_free_binds(binds);
 	  return 0;
 	}
 	memmove(buffer,iter,end-iter);
@@ -1496,7 +1491,6 @@ mp_input_parse_config(char *file) {
 	name[end-iter] = '\0';
 	if(! mp_input_get_input_from_name(name,keys)) {
 	  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrUnknownKey,name);
-	  mp_input_free_binds(binds);
 	  close(fd);
 	  return 0;
 	}
@@ -1526,7 +1520,6 @@ mp_input_parse_config(char *file) {
       if(end[0] == '\0' && ! (eof && ((end+1) - buffer) == bs)) {
 	if(iter == buffer) {
 	  mp_msg(MSGT_INPUT,MSGL_ERR,MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd,buffer);
-	  mp_input_free_binds(binds);
 	  close(fd);
 	  return 0;
 	}
