@@ -163,6 +163,7 @@ static int lavc_param_video_global_header= 0;
 char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
 int lavc_param_abitrate = 224;
+int lavc_param_audio_global_header= 0;
 
 #include "m_option.h"
 
@@ -316,6 +317,7 @@ m_option_t lavcopts_conf[]={
 	{"bidir_refine", &lavc_param_bidir_refine, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
 	{"sc_factor", &lavc_param_sc_factor, CONF_TYPE_INT, CONF_RANGE, 1, INT_MAX, NULL},
 	{"vglobal", &lavc_param_video_global_header, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
+	{"aglobal", &lavc_param_audio_global_header, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif

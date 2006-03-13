@@ -24,6 +24,7 @@ static AVCodecContext *lavc_actx;
 extern char *lavc_param_acodec;
 extern int  lavc_param_abitrate;
 extern int  lavc_param_atag;
+extern int  lavc_param_audio_global_header;
 extern int  avcodec_inited;
 static int compressed_frame_size = 0;
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
@@ -206,6 +207,13 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 		int framesize = (blkalign - 4 * lavc_actx->channels) * 8 / (4 * lavc_actx->channels) + 1;
 		lavc_actx->bit_rate = lavc_actx->sample_rate*8*blkalign/framesize;
 	}
+        if((lavc_param_audio_global_header&1)
+        /*|| (video_global_header==0 && (oc->oformat->flags & AVFMT_GLOBALHEADER))*/){
+                lavc_actx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+        }
+        if(lavc_param_audio_global_header&2){
+                lavc_actx->flags2 |= CODEC_FLAG2_LOCAL_HEADER;
+        }
 
 	if(avcodec_open(lavc_actx, lavc_acodec) < 0)
 	{
