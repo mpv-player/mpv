@@ -16,3 +16,4 @@ libavutil
 mplayer.exe.spec.c
 codecs.conf.h
 codec-cfg
+codecs2html
