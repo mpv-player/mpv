@@ -724,13 +724,29 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Audio extra header: len=%d  fcc=0x%X\n",len,fcc);
 		    if((len >= 4) && 
 		       (char2int(trak->stdata,52) >= 12) &&
-		       (char2int(trak->stdata,52+4) == MOV_FOURCC('f','r','m','a')) &&
-		       (char2int(trak->stdata,52+8) == MOV_FOURCC('a','l','a','c')) &&
-		       (len >= 36 + char2int(trak->stdata,52))) {
+		       (char2int(trak->stdata,52+4) == MOV_FOURCC('f','r','m','a'))) {
+			switch(char2int(trak->stdata,52+8)) {
+			 case MOV_FOURCC('a','l','a','c'):
+			  if (len >= 36 + char2int(trak->stdata,52)) {
 			    sh->codecdata_len = char2int(trak->stdata,52+char2int(trak->stdata,52));
 			    mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found alac atom (%d)!\n", sh->codecdata_len);
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, &trak->stdata[52+char2int(trak->stdata,52)], sh->codecdata_len);
+			  }
+			  break;
+			 case MOV_FOURCC('i','n','2','4'):
+			 case MOV_FOURCC('i','n','3','2'):
+			 case MOV_FOURCC('f','l','3','2'):
+			 case MOV_FOURCC('f','l','6','4'):
+			  if ((len >= 22) &&
+			      (char2int(trak->stdata,52+16)==MOV_FOURCC('e','n','d','a')) &&
+			      (char2short(trak->stdata,52+20))) {
+				sh->format=le2me_32(char2int(trak->stdata,52+8));
+				mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found little endian PCM data, reversed fourcc:%04x\n", sh->format);
+			  }
+		          break;
+		         default: break;
+		        }
 		    } else {
 		      if (len > 8 && len + 44 <= trak->stdata_len) {
 		    sh->codecdata_len = len-8;

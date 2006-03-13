@@ -65,12 +65,32 @@ static int init(sh_audio_t *sh_audio)
        sh_audio->sample_format=AF_FORMAT_FLOAT_BE;
        sh_audio->samplesize=4;
        break;
+    case 0x666c3332: // '23lf', little endian float32, MPlayer internal fourCC
+       sh_audio->sample_format=AF_FORMAT_FLOAT_LE;
+       sh_audio->samplesize=4;
+       break;
+/*    case 0x34366c66: // 'fl64', bigendian float64
+       sh_audio->sample_format=AF_FORMAT_FLOAT_BE;
+       sh_audio->samplesize=8;
+       break;
+    case 0x666c3634: // '46lf', little endian float64, MPlayer internal fourCC
+       sh_audio->sample_format=AF_FORMAT_FLOAT_LE;
+       sh_audio->samplesize=8;
+       break;*/
     case 0x34326e69: // 'in24', bigendian int24
        sh_audio->sample_format=AF_FORMAT_S24_BE;
        sh_audio->samplesize=3;
        break;
+    case 0x696e3234: // '42ni', little endian int24, MPlayer internal fourCC
+       sh_audio->sample_format=AF_FORMAT_S24_LE;
+       sh_audio->samplesize=3;
+       break;
     case 0x32336e69: // 'in32', bigendian int32
        sh_audio->sample_format=AF_FORMAT_S32_BE;
+       sh_audio->samplesize=4;
+       break;
+    case 0x696e3332: // '23ni', little endian int32, MPlayer internal fourCC
+       sh_audio->sample_format=AF_FORMAT_S32_LE;
        sh_audio->samplesize=4;
        break;
     default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AF_FORMAT_U8;
