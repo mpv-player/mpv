@@ -533,6 +533,18 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  return(0);
 	}
 
+      /* workaround for buggy rate plugin (should be fixed in ALSA 1.0.11)
+         prefer our own resampler */
+#if SND_LIB_VERSION >= 0x010009
+      if ((err = snd_pcm_hw_params_set_rate_resample(alsa_handler, alsa_hwparams,
+						     0)) < 0)
+	{
+	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to disable resampling: %s\n",
+		 snd_strerror(err));
+	  return(0);
+	}
+#endif
+
       if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, 
 						 &ao_data.samplerate, NULL)) < 0) 
         {
