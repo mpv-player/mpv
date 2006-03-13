@@ -103,17 +103,16 @@ static URLProtocol mp_protocol = {
 
 static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 {
-	muxer_priv_t *priv;
+	muxer_priv_t *priv = muxer->priv;
 	muxer_stream_t *stream;
 	muxer_stream_priv_t *spriv;
 	AVCodecContext *ctx;
 
 	if(!muxer || (type != MUXER_TYPE_VIDEO && type != MUXER_TYPE_AUDIO))
 	{
-		mp_msg(MSGT_MUXER, MSGL_ERR, "NULL MUXER PASSED OR UNKNOW TYPE %d\n", type);
+		mp_msg(MSGT_MUXER, MSGL_ERR, "UNKNOW TYPE %d\n", type);
 		return NULL;
 	}
-	priv = muxer->priv;
 	
 	stream = calloc(1, sizeof(muxer_stream_t));
 	if(!stream)
@@ -183,20 +182,19 @@ static void fix_parameters(muxer_stream_t *stream)
 #else
 	ctx = &(spriv->avstream->codec);
 #endif
+	
+        if(stream->wf && stream->wf->nAvgBytesPerSec)
+            ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
         ctx->rc_buffer_size= stream->vbv_size;
         ctx->rc_max_rate= stream->max_rate;
 
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
-		if(!stream->wf)
-			return;
 		ctx->codec_id = codec_get_wav_id(stream->wf->wFormatTag); 
 #if 0 //breaks aac in mov at least
 		ctx->codec_tag = codec_get_wav_tag(ctx->codec_id);
 #endif
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AUDIO CODEC ID: %x, TAG: %x\n", ctx->codec_id, (uint32_t) ctx->codec_tag);
-		if(stream->wf->nAvgBytesPerSec)
-			ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
 		ctx->sample_rate = stream->wf->nSamplesPerSec;
 //                mp_msg(MSGT_MUXER, MSGL_INFO, "stream->h.dwSampleSize: %d\n", stream->h.dwSampleSize);
 		ctx->channels = stream->wf->nChannels;
@@ -221,8 +219,6 @@ static void fix_parameters(muxer_stream_t *stream)
 	}
 	else if(stream->type == MUXER_TYPE_VIDEO)
 	{
-		if(!stream->bih)
-			return;
 		ctx->codec_id = codec_get_bmp_id(stream->bih->biCompression);
                 if(ctx->codec_id <= 0)
                     ctx->codec_tag= stream->bih->biCompression;
