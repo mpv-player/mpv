@@ -2890,19 +2890,18 @@ if not hpux ; then
 fi
 fi
 if test "$_pthreads" = yes ; then
-  echores "yes (using $_ld_pthread)"
-  _pthreads='yes'
+  _res_comment="(using $_ld_pthread)"
   _def_pthreads='#define HAVE_PTHREADS 1'
   _def_threads='#define HAVE_THREADS 1'
 else
-  echores "no (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
-  _pthreads=''
+  _res_comment="(v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
   _def_pthreads='#undef HAVE_PTHREADS'
   _nas=no ; _tv_v4l=no ; _macosx=no
   if not mingw32 ; then
     _win32=no
   fi
 fi
+echores "$_pthreads"
 
 
 echocheck "iconv"
@@ -4340,7 +4339,7 @@ if test "$_gif" = yes ; then
   _codecmodules="gif $_codecmodules"
   _vomodules="gif89a $_vomodules"
   _mkf_gif="yes"
-  _gif="yes (old version, some encoding functions disabled)"
+  _res_comment="(old version, some encoding functions disabled)"
   _def_gif_4='#undef HAVE_GIF_4'
 
   cat > $TMPC << EOF
@@ -4356,7 +4355,7 @@ int main(void) {
 EOF
   if cc_check "$_ld_gif" && tmp_run ; then
     _def_gif_4='#define HAVE_GIF_4 1'
-    _gif="yes"
+    _res_comment=""
   fi
 else
   _def_gif='#undef HAVE_GIF'
@@ -5735,7 +5734,8 @@ EOF
   if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer -D_GNU_SOURCE $_inc_faad ); then
     _faad_internal=yes
   else
-    _faad_internal="no (broken gcc)"
+    _faad_internal=no
+    _res_comment="(broken gcc)"
   fi
 fi
 if test "$_faad_internal" = yes ; then
