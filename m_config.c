@@ -470,6 +470,7 @@ m_config_set_profile_option(m_config_t* config, m_profile_t* p,
   p->opts[p->num_opts*2+1] = val ? strdup(val) : NULL;
   p->num_opts++;
   p->opts[p->num_opts*2] = p->opts[p->num_opts*2+1] = NULL;
+  return 1;
 }
 
 static void
