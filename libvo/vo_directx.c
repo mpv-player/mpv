@@ -79,6 +79,7 @@ static GUID *selected_guid_ptr = NULL;
 static RECT monitor_rect;	                        //monitor coordinates 
 static float window_aspect;
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
+static RECT last_rect = {0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE, 0xDEADC0DE};
 
 extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
@@ -435,6 +436,8 @@ static uint32_t Directx_InitDirectDraw()
 		return 1;
     }
 	
+    last_rect.left = 0xDEADC0DE;   // reset window position cache
+
 	if(vo_adapter_num){ //display other than default
         OurDirectDrawEnumerateEx = (LPDIRECTDRAWENUMERATEEX) GetProcAddress(hddraw_dll,"DirectDrawEnumerateExA");
         if (!OurDirectDrawEnumerateEx){
@@ -532,6 +535,17 @@ static uint32_t Directx_ManageDisplay()
     DWORD           dwUpdateFlags=0;
     int width,height;
    
+    if(!vidmode && !vo_fs && WinID!=-1) {
+      RECT current_rect = {0, 0, 0, 0};
+      GetWindowRect(hWnd, &current_rect);
+      if ((current_rect.left   == last_rect.left)
+      &&  (current_rect.top    == last_rect.top)
+      &&  (current_rect.right  == last_rect.right)
+      &&  (current_rect.bottom == last_rect.bottom))
+        return 0;
+      last_rect = current_rect;
+    }
+
     if(vo_fs || vidmode){
       aspect(&width,&height,A_ZOOM);
       rd.left=(vo_screenwidth-width)/2;
@@ -1480,6 +1494,7 @@ static int control(uint32_t request, void *data, ...)
 	case VOCTRL_GET_IMAGE:
       	return get_image(data);
     case VOCTRL_QUERY_FORMAT:
+        last_rect.left = 0xDEADC0DE;   // reset window position cache
         return query_format(*((uint32_t*)data));
 	case VOCTRL_DRAW_IMAGE:
         return put_image(data);
@@ -1577,6 +1592,9 @@ static int control(uint32_t request, void *data, ...)
 		va_end(ap);
 		return color_ctrl_get(data, value);
 	}
+    case VOCTRL_RESET:
+        last_rect.left = 0xDEADC0DE;   // reset window position cache
+        // fall-through intended
     };
     return VO_NOTIMPL;
 }
