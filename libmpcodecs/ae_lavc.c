@@ -102,8 +102,7 @@ static int encode_lavc(audio_encoder_t *encoder, uint8_t *dest, void *src, int s
 {
 	int n;
 	n = avcodec_encode_audio(lavc_actx, dest, size, src);
-	if(n > compressed_frame_size)
-		compressed_frame_size = n;	//it's valid because lavc encodes in cbr mode
+        compressed_frame_size = n;
 	return n;
 }
 
@@ -116,7 +115,9 @@ static int close_lavc(audio_encoder_t *encoder)
 
 static int get_frame_size(audio_encoder_t *encoder)
 {
-	return compressed_frame_size;
+        int sz = compressed_frame_size;
+        compressed_frame_size = 0;
+        return sz;
 }
 
 static uint32_t lavc_find_atag(char *codec)
