@@ -5712,6 +5712,7 @@ EOF
 fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
+  _def_lavc_faac="#define CONFIG_FAAC 1"
   _codecmodules="faac $_codecmodules"
 else
   _def_faac="#undef HAVE_FAAC"
@@ -7380,6 +7381,7 @@ AMR_NB=$_amr_nb
 AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+CONFIG_FAAC=$_faac
 CONFIG_GPL=yes
 CONFIG_MUXERS=yes
 
@@ -7744,6 +7746,7 @@ $_def_amr_wb
 
 /* Use specific codecs from libavcodec */
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+$_def_lavc_faac
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
