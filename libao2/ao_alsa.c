@@ -272,7 +272,6 @@ static int str_maxlen(strarg_t *str) {
 static int init(int rate_hz, int channels, int format, int flags)
 {
     int err;
-    int cards = -1;
     int block;
     strarg_t device;
     snd_pcm_uframes_t bufsize;
@@ -298,12 +297,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     snd_lib_error_set_handler(alsa_error_handler);
     
-    if ((err = snd_card_next(&cards)) < 0 || cards < 0)
-    {
-      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: no soundcards found: %s\n", snd_strerror(err));
-      return(0);
-    }
-
     ao_data.samplerate = rate_hz;
     ao_data.format = format;
     ao_data.channels = channels;
@@ -427,7 +420,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     ao_noblock = !block;
     parse_device(alsa_device, device.str, device.len);
 
-	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: %d soundcard%s found, using: %s\n", cards+1,(cards >= 0) ? "" : "s", alsa_device);
+    mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: using device %s\n", alsa_device);
 
     //setting modes for block or nonblock-mode
     if (ao_noblock) {
