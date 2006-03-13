@@ -125,6 +125,26 @@ reserved_bytes:
     impossible to add new fields at the end of packets in the future
     in a compatible way]
 
+packet_header
+    startcode                           f(64)
+    forward_ptr                         v
+    if(forward_ptr > 4096)
+        header_checksum                 u(32)
+
+packet_footer
+    reserved_bytes
+    checksum                            u(32)
+
+reserved_headers
+    while(next_byte == 'N' && next_code !=      main_startcode
+                           && next_code !=    stream_startcode
+                           && next_code !=      info_startcode
+                           && next_code !=     index_startcode
+                           && next_code != syncpoint_startcode){
+        packet_header
+        packet_footer
+    }
+
         Headers:
 
 main header:
@@ -312,26 +332,6 @@ the structure of a undamaged file should look like the following, but
 demuxers should be flexible and be able to deal with damaged headers so the
 above is a better loop in practice (not to mention its simpler)
 note, demuxers MUST be able to deal with new and unknown headers
-
-packet_header
-        startcode                               f(64)
-        forward_ptr                             v
-        if(forward_ptr > 4096)
-            header_checksum                     u(32)
-
-packet_footer
-        reserved_bytes
-        checksum                                u(32)
-
-reserved_headers
-    while(next_byte == 'N' && next_code !=      main_startcode
-                           && next_code !=    stream_startcode
-                           && next_code !=      info_startcode
-                           && next_code !=     index_startcode
-                           && next_code != syncpoint_startcode){
-        packet_header
-        packet_footer
-    }
 
 file:
     file_id_string
