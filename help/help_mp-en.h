@@ -1158,6 +1158,10 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input control #%d is below lower boundary of %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input control #%d is above upper boundary of %0.4f.\n"
 
+// af_format.c
+
+#define MSGTR_AF_FORMAT_UnknownSpecial "Unknown special\n"
+
 // ========================== INPUT =========================================
 
 // joystick.c

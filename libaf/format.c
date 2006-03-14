@@ -16,6 +16,7 @@
 #include <limits.h>
 
 #include "af.h"
+#include "help_mp.h"
 
 // Convert from string to format
 int af_str2fmt(char* str)
@@ -113,7 +114,7 @@ char* af_fmt2str(int format, char* str, int size)
     case(AF_FORMAT_IMA_ADPCM): 
       i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
     default:
-      printf("Unknown special\n");
+      af_msg(AF_MSG_ERROR,MSGTR_AF_FORMAT_UnknownSpecial); 
     }
   }
   else{
