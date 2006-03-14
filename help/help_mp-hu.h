@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.221 (2006. 01. 30.)
+// Sync'ed with help_mp-en.h 1.224 (2006. 03. 14.)
 
 // ========================= MPlayer help ===========================
 
@@ -260,7 +260,8 @@ static char help_text[]=
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio kiválasztva\n"
 #define MSGTR_MP3AudioSelected "MP3 audio kiválasztva\n"
 #define MSGTR_CannotAllocateBytes "%d byte nem foglalható le\n"
-#define MSGTR_SettingAudioDelay "Audió késleltetés beállítása: %5.3f\n"
+#define MSGTR_SettingAudioDelay "Audió késleltetés beállítása: %5.3fs\n"
+#define MSGTR_SettingVideoDelay "Videó késleltetés beállítása: %5.3fs\n"
 #define MSGTR_SettingAudioInputGain "Audio input erõsítése %f\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Audio elõretöltés korlátozva 0.4 mp-re\n"
@@ -1156,6 +1157,10 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "Nincs elég vezérlõ megadva a parancssorban"
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f alsó határ alatt van.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f felsõ határ felett van.\n"
+
+// af_format.c
+
+#define MSGTR_AF_FORMAT_UnknownSpecial "Ismeretlen specialítás\n"
 
 // ========================== INPUT =========================================
 
