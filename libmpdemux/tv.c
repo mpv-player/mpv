@@ -53,7 +53,7 @@ char *tv_param_driver = "dummy";
 int tv_param_width = -1;
 int tv_param_height = -1;
 int tv_param_input = 0; /* used in v4l and bttv */
-int tv_param_outfmt = IMGFMT_YV12;
+int tv_param_outfmt = -1;
 float tv_param_fps = -1.0;
 char **tv_param_channels = NULL;
 int tv_param_audio_id = 0;
@@ -165,6 +165,16 @@ static int open_tv(tvi_handle_t *tvh)
 {
     int i;
     tvi_functions_t *funcs = tvh->functions;
+    int tv_fmt_list[] = {
+      IMGFMT_YV12,
+      IMGFMT_I420,
+      IMGFMT_UYVY,
+      IMGFMT_YUY2,
+      IMGFMT_RGB32,
+      IMGFMT_RGB24,
+      IMGFMT_RGB16,
+      IMGFMT_RGB15
+    };
 
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
     {
@@ -172,6 +182,16 @@ static int open_tv(tvi_handle_t *tvh)
 	return 0;
     }
 
+    if (tv_param_outfmt == -1)
+      for (i = 0; i < sizeof (tv_fmt_list) / sizeof (*tv_fmt_list); i++)
+        {
+          tv_param_outfmt = tv_fmt_list[i];
+          if (funcs->control (tvh->priv, TVI_CONTROL_VID_SET_FORMAT,
+                              &tv_param_outfmt) == TVI_CONTROL_TRUE)
+            break;
+        }
+    else
+    {
     switch(tv_param_outfmt)
     {
 	case IMGFMT_YV12:
@@ -194,6 +214,7 @@ static int open_tv(tvi_handle_t *tvh)
 	    mp_msg(MSGT_TV, MSGL_ERR, "==================================================================\n");
     }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &tv_param_outfmt);
+    }
 
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
