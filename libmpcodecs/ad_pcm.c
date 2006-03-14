@@ -53,13 +53,6 @@ static int init(sh_audio_t *sh_audio)
        // intended fall-through
     case 0x74776F73: // 'swot'
        if(sh_audio->samplesize==1) sh_audio->sample_format=AF_FORMAT_S8;
-// Uncomment this if twos audio is broken for you
-// (typically with movies made on sgi machines)
-// This is just a workaround, the real bug is elsewhere
-#if 0
-       sh_audio->ds->ss_div= sh_audio->samplesize;
-       sh_audio->ds->ss_mul= sh_audio->samplesize * sh_audio->channels;
-#endif
        break;
     case 0x32336c66: // 'fl32', bigendian float32
        sh_audio->sample_format=AF_FORMAT_FLOAT_BE;
