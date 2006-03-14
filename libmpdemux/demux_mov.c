@@ -741,7 +741,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			  if ((len >= 22) &&
 			      (char2int(trak->stdata,52+16)==MOV_FOURCC('e','n','d','a')) &&
 			      (char2short(trak->stdata,52+20))) {
-				sh->format=le2me_32(char2int(trak->stdata,52+8));
+				sh->format=char2int(trak->stdata,52+8);
 				mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found little endian PCM data, reversed fourcc:%04x\n", sh->format);
 			  }
 		          break;
