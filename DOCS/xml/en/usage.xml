@@ -276,10 +276,6 @@ from the network:
   <replaceable>stream.asf</replaceable>.
   This works with all protocols supported by
   <application>MPlayer</application>, like MMS, RSTP, and so forth.
-  If you only wish to save audio or video, use <option>-dumpaudio</option>
-  or <option>-dumpvideo</option> respectively, but be aware that
-  <application>MPlayer</application> will ignore all but the last
-  <option>-dump*</option> option given on the command line.
 </para>
 </sect2>
 
