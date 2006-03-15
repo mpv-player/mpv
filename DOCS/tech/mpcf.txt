@@ -134,6 +134,7 @@ packet_header
 packet_footer
     reserved_bytes
     checksum                            u(32)
+    [Note: in index packet, reserved_bytes comes before index_ptr]
 
 reserved_headers
     while(next_byte == 'N' && next_code !=      main_startcode
@@ -276,7 +277,7 @@ index:
             }
         }
     }
-last 8 reserved_bytes of index:
+    reserved_bytes
     index_ptr                           u(64)
 
 info_packet:
