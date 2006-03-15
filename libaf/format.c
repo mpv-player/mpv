@@ -114,7 +114,7 @@ char* af_fmt2str(int format, char* str, int size)
     case(AF_FORMAT_IMA_ADPCM): 
       i+=snprintf(&str[i],size-i,"IMA-ADPCM "); break;
     default:
-      af_msg(AF_MSG_ERROR,MSGTR_AF_FORMAT_UnknownSpecial); 
+      i+=snprintf(&str[i],size-i,MSGTR_AF_FORMAT_UnknownFormat); 
     }
   }
   else{
