@@ -205,6 +205,8 @@ static void update_yuvconv(void) {
  */
 static void clearOSD(void) {
   int i;
+  if (!osdtexCnt)
+    return;
   glDeleteTextures(osdtexCnt, osdtex);
 #ifndef FAST_OSD
   glDeleteTextures(osdtexCnt, osdatex);
