@@ -1519,6 +1519,7 @@ static int control(uint32_t request, void *data, ...)
 					ShowWindow(hWnd,SW_HIDE);
 					ShowWindow(hWnd,SW_SHOW);
 				}
+				last_rect.left = 0xDEADC0DE;   // reset window position cache
 				Directx_ManageDisplay();
 			}
 		return VO_TRUE;
@@ -1532,6 +1533,7 @@ static int control(uint32_t request, void *data, ...)
 			{
 				if(vo_ontop) vo_ontop = 0;
 				else vo_ontop = 1;
+				last_rect.left = 0xDEADC0DE;   // reset window position cache
 				Directx_ManageDisplay();
 			}
 		return VO_TRUE;
@@ -1545,6 +1547,7 @@ static int control(uint32_t request, void *data, ...)
 			{
 				if(vo_rootwin) vo_rootwin = 0;
 				else vo_rootwin = 1;
+				last_rect.left = 0xDEADC0DE;   // reset window position cache
 				Directx_ManageDisplay();
 			}
 		return VO_TRUE;
@@ -1569,6 +1572,7 @@ static int control(uint32_t request, void *data, ...)
 					ShowWindow(hWndFS,SW_HIDE);
 					ShowWindow(hWnd,SW_SHOW);
 				}  
+	      			last_rect.left = 0xDEADC0DE;   // reset window position cache
 				Directx_ManageDisplay();
                 break;				
 			}
