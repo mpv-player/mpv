@@ -1211,7 +1211,8 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
     }
     r = m_option_parse(opt,str,p,NULL,M_CONFIG_FILE);
     if(r < 0) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Error while parsing %s parameter %s (%s)\n",opt_name,obj_name,str,p);
+      if(r > M_OPT_EXIT)
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Error while parsing %s parameter %s (%s)\n",opt_name,obj_name,str,p);
       eq[0] = '=';
       return r;
     }
@@ -1229,7 +1230,8 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
     opt = &desc->fields[(*nold)];
     r = m_option_parse(opt,opt->name,str,NULL,M_CONFIG_FILE);
     if(r < 0) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Error while parsing %s parameter %s (%s)\n",opt_name,obj_name,opt->name,str);
+      if(r > M_OPT_EXIT)
+        mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Error while parsing %s parameter %s (%s)\n",opt_name,obj_name,opt->name,str);
       return r;
     }
     if(dst) {
@@ -1424,6 +1426,10 @@ static int parse_obj_settings(char* opt,char* str,m_obj_list_t* list,
 
   if(param) {
     if(!desc && _ret) {
+      if(!strcmp(param,"help")) {
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Option %s: %s have no option description.\n",opt,str);
+        return M_OPT_EXIT - 1;
+      }
       plist = calloc(4,sizeof(char*));
       plist[0] = strdup("_oldargs_");
       plist[1] = strdup(param);
