@@ -107,8 +107,8 @@ vb  (variable length binary data or string)
 
 t (v coded universal timestamp)
     tmp                                 v
-    stream_id= tmp % stream_count
-    value= (tmp / stream_count) * timebase[stream_id]
+    id= tmp % time_base_count
+    value= (tmp / time_base_count) * time_base[id]
 
 
 Bitstream syntax:
@@ -151,6 +151,11 @@ main header:
     version                             v
     stream_count                        v
     max_distance                        v
+    time_base_count                     v
+    for(i=0; i<time_base_count; i++)
+        time_base_nom                   v
+        time_base_denom                 v
+        time_base[i]= time_base_nom/time_base_denom
     tmp_pts=0
     tmp_mul=1
     tmp_stream=0
@@ -188,8 +193,7 @@ stream_header:
     stream_id                           v
     stream_class                        v
     fourcc                              vb
-    time_base_nom                       v
-    time_base_denom                     v
+    time_base_id                        v
     msb_pts_shift                       v
     max_pts_distance                    v
     decode_delay                        v
@@ -444,6 +448,9 @@ time_base_nom / time_base_denom = time_base
         29.97     1001             30000
         23.976    1001             24000
 
+time_base_id
+    id to time_base table
+
 convert_ts
     To switch from 2 different timebases, the following calculation is
     defined:
@@ -616,7 +623,7 @@ back_ptr_div16
 
 global_key_pts
     After a syncpoint, last_pts of each stream is to be set to:
-    last_pts[i] = convert_ts(global_key_pts, timebase[stream], timebase[i])
+    last_pts[i] = convert_ts(global_key_pts, time_base[id], time_base[i])
 
     global_key_pts MUST be bigger or equal to dts of all past frames across
     all streams, and smaller or equal to pts of all future frames.
