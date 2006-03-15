@@ -436,6 +436,11 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // initialize to 8 to avoid special-casing on alignment
   int sx = 8, sy = 8;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
+
+  if (w <= 0 || h <= 0 || stride < w) {
+    mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
+    return;
+  }
   texSize(w, h, &sx, &sy);
 
   if (osdtexCnt >= MAX_OSD_PARTS) {
@@ -459,7 +464,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   char *tmp = (char *)malloc(stride * h);
   // convert alpha from weird MPlayer scale.
   // in-place is not possible since it is reused for future OSDs
-  for (i = h * stride - 1; i; i--)
+  for (i = h * stride - 1; i > 0; i--)
     tmp[i] = srca[i] - 1;
   glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, tmp, stride,
               0, 0, w, h, 0);
