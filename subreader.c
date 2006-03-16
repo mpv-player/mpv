@@ -18,6 +18,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "subreader.h"
+#include "libmpdemux/stream.h"
 
 #ifdef HAVE_ENCA
 #include <enca.h>
@@ -94,7 +95,7 @@ static char *stristr(const char *haystack, const char *needle) {
     return NULL;
 }
 
-subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
+subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
     static char line[LINE_LEN+1];
     static char *s = NULL, *slacktime_s;
     char text[LINE_LEN+1], *p=NULL, *q;
@@ -106,7 +107,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 
     /* read the first line */
     if (!s)
-	    if (!(s = fgets(line, LINE_LEN, fd))) return 0;
+	    if (!(s = stream_read_line(st, line, LINE_LEN))) return 0;
 
     do {
 	switch (state) {
@@ -213,7 +214,7 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	}
 
 	/* read next line */
-	if (state != 99 && !(s = fgets (line, LINE_LEN, fd))) {
+	if (state != 99 && !(s = stream_read_line (st, line, LINE_LEN))) {
 	    if (current->start > 0) {
 		break; // if it is the last subtitle
 	    } else {
@@ -257,14 +258,14 @@ char *sub_readtext(char *source, char **dest) {
     else return NULL;  // last text field
 }
 
-subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char line2[LINE_LEN+1];
     char *p, *next;
     int i;
 
     do {
-	if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
     } while ((sscanf (line,
 		      "{%ld}{}%[^\r\n]",
 		      &(current->start), line2) < 2) &&
@@ -285,14 +286,14 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_mpl2(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char line2[LINE_LEN+1];
     char *p, *next;
     int i;
 
     do {
-	if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
     } while ((sscanf (line,
 		      "[%ld][%ld]%[^\r\n]",
 		      &(current->start), &(current->end), line2) < 3));
@@ -311,19 +312,19 @@ subtitle *sub_read_line_mpl2(FILE *fd,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
+subtitle *sub_read_line_subrip(stream_t* st, subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL, *q=NULL;
     int len;
     
     while (1) {
-	if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4) < 8) continue;
 	current->start = a1*360000+a2*6000+a3*100+a4;
 	current->end   = b1*360000+b2*6000+b3*100+b4;
 
-	if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 
 	p=q=line;
 	for (current->lines=1; current->lines < SUB_MAX_TEXT; current->lines++) {
@@ -341,20 +342,20 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL;
     int i,len;
     
     while (!current->text[0]) {
-	if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	if ((len=sscanf (line, "%d:%d:%d%[,.:]%d --> %d:%d:%d%[,.:]%d",&a1,&a2,&a3,(char *)&i,&a4,&b1,&b2,&b3,(char *)&i,&b4)) < 10)
 	    continue;
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;
 	for (i=0; i<SUB_MAX_TEXT;) {
-	    if (!fgets (line, LINE_LEN, fd)) break;
+	    if (!stream_read_line (st, line, LINE_LEN)) break;
 	    len=0;
 	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++);
 	    if (len) {
@@ -390,21 +391,21 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_subviewer2(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_subviewer2(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4;
     char *p=NULL;
     int i,len;
    
     while (!current->text[0]) {
-        if (!fgets (line, LINE_LEN, fd)) return NULL;
+        if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	if (line[0]!='{')
 	    continue;
         if ((len=sscanf (line, "{T %d:%d:%d:%d",&a1,&a2,&a3,&a4)) < 4)
             continue;
         current->start = a1*360000+a2*6000+a3*100+a4/10;
         for (i=0; i<SUB_MAX_TEXT;) {
-            if (!fgets (line, LINE_LEN, fd)) break;
+            if (!stream_read_line (st, line, LINE_LEN)) break;
             if (line[0]=='}') break;
             len=0;
             for (p=line; *p!='\n' && *p!='\r' && *p; ++p,++len);
@@ -423,14 +424,14 @@ subtitle *sub_read_line_subviewer2(FILE *fd,subtitle *current) {
 }
 
 
-subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
 	char line[LINE_LEN+1];
 	int a1,a2,a3;
 	char *p=NULL, *next,separator;
 	int i,len,plen;
 
 	while (!current->text[0]) {
-		if (!fgets (line, LINE_LEN, fd)) return NULL;
+		if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 		if ((len=sscanf (line, "%d:%d:%d%c%n",&a1,&a2,&a3,&separator,&plen)) < 4)
 			continue;
 		
@@ -469,7 +470,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	return current;
 }
 
-subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_rt(stream_t *st,subtitle *current) {
 	//TODO: This format uses quite rich (sub/super)set of xhtml 
 	// I couldn't check it since DTD is not included.
 	// WARNING: full XML parses can be required for proper parsing 
@@ -479,7 +480,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     int i,len,plen;
     
     while (!current->text[0]) {
-	if (!fgets (line, LINE_LEN, fd)) return NULL;
+	if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	//TODO: it seems that format of time is not easily determined, it may be 1:12, 1:12.0 or 0:1:12.0
 	//to describe the same moment in time. Maybe there are even more formats in use.
 	//if ((len=sscanf (line, "<Time Begin=\"%d:%d:%d.%d\" End=\"%d:%d:%d.%d\"",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
@@ -519,7 +520,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
 /*
  * Sub Station Alpha v4 (and v2?) scripts have 9 commas before subtitle
  * other Sub Station Alpha scripts have only 8 commas before subtitle
@@ -543,7 +544,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	char *tmp;
 
 	do {
-		if (!fgets (line, LINE_LEN, fd)) return NULL;
+		if (!stream_read_line (st, line, LINE_LEN)) return NULL;
 	} while (sscanf (line, "Dialogue: Marked=%d,%d:%d:%d.%d,%d:%d:%d.%d,"
 			"%[^\n\r]", &nothing,
 			&hour1, &min1, &sec1, &hunsec1, 
@@ -620,11 +621,11 @@ void sub_pp_ssa(subtitle *sub) {
  *
  * by set, based on code by szabi (dunnowhat sub format ;-)
  */
-subtitle *sub_read_line_pjs(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_pjs(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char text[LINE_LEN+1], *s, *d;
 
-    if (!fgets (line, LINE_LEN, fd))
+    if (!stream_read_line (st, line, LINE_LEN))
 	return NULL;
     /* skip spaces */
     for (s=line; *s && isspace(*s); s++);
@@ -658,7 +659,7 @@ subtitle *sub_read_line_pjs(FILE *fd,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
+subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current) {
 	char line[LINE_LEN+1];
 	float a,b;
 	int num=0;
@@ -666,7 +667,7 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 
 	do
 	{
-		if (!fgets(line, LINE_LEN, fd)) return NULL;
+		if (!stream_read_line(st, line, LINE_LEN)) return NULL;
 	} while (sscanf (line, "%f %f", &a, &b) !=2);
 
 	mpsub_position += a*mpsub_multiplier; 
@@ -675,7 +676,7 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 	current->end=(int) mpsub_position;
 
 	while (num < SUB_MAX_TEXT) {
-		if (!fgets (line, LINE_LEN, fd)) {
+		if (!stream_read_line (st, line, LINE_LEN)) {
 			if (num == 0) return NULL;
 			else return current;
 		}
@@ -703,14 +704,14 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 subtitle *previous_aqt_sub = NULL;
 #endif
 
-subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char *next;
     int i;
 
     while (1) {
     // try to locate next subtitle
-        if (!fgets (line, LINE_LEN, fd))
+        if (!stream_read_line (st, line, LINE_LEN))
 		return NULL;
         if (!(sscanf (line, "-->> %ld", &(current->start)) <1))
 		break;
@@ -725,14 +726,14 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     previous_aqt_sub = current;
 #endif
 
-    if (!fgets (line, LINE_LEN, fd))
+    if (!stream_read_line (st, line, LINE_LEN))
 	return NULL;
 
     sub_readtext((char *) &line,&current->text[0]);
     current->lines = 1;
     current->end = current->start; // will be corrected by next subtitle
 
-    if (!fgets (line, LINE_LEN, fd))
+    if (!stream_read_line (st, line, LINE_LEN))
 	return current;
 
     next = line,i=1;
@@ -760,7 +761,7 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
 subtitle *previous_subrip09_sub = NULL;
 #endif
 
-subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
+subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3;
     char * next=NULL;
@@ -768,7 +769,7 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
    
     while (1) {
     // try to locate next subtitle
-        if (!fgets (line, LINE_LEN, fd))
+        if (!stream_read_line (st, line, LINE_LEN))
 		return NULL;
         if (!((len=sscanf (line, "[%d:%d:%d]",&a1,&a2,&a3)) < 3))
 		break;
@@ -785,7 +786,7 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
     previous_subrip09_sub = current;
 #endif
 
-    if (!fgets (line, LINE_LEN, fd))
+    if (!stream_read_line (st, line, LINE_LEN))
 	return NULL;
 
     next = line,i=0;
@@ -812,7 +813,7 @@ subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
+subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current)
 {
     char line1[LINE_LEN], line2[LINE_LEN], directive[LINE_LEN], *p, *q;
     unsigned a1, a2, a3, a4, b1, b2, b3, b4, comment = 0;
@@ -824,7 +825,7 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
     memset(line2, 0, LINE_LEN);
     memset(directive, 0, LINE_LEN);
     while (!current->text[0]) {
-	if (!fgets(line1, LINE_LEN, fd)) {
+	if (!stream_read_line(st, line1, LINE_LEN)) {
 	    return NULL;
 	}
 	if (sscanf
@@ -982,7 +983,7 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
 		    (*(p + 1) == '~') || (*(p + 1) == '{')) {
 		    ++p;
 		} else if (eol(*(p + 1))) {
-		    if (!fgets(directive, LINE_LEN, fd))
+		    if (!stream_read_line(st, directive, LINE_LEN))
 			return NULL;
 		    trail_space(directive);
 		    strncat(line2, directive,
@@ -1003,14 +1004,14 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
     return current;
 }
 
-int sub_autodetect (FILE *fd, int *uses_time) {
+int sub_autodetect (stream_t* st, int *uses_time) {
     char line[LINE_LEN+1];
     int i,j=0;
     char p;
     
     while (j < 100) {
 	j++;
-	if (!fgets (line, LINE_LEN, fd))
+	if (!stream_read_line (st, line, LINE_LEN))
 	    return SUB_INVALID;
 
 	if (sscanf (line, "{%d}{%d}", &i, &i)==2)
@@ -1074,7 +1075,7 @@ extern float sub_fps;
 #ifdef USE_ICONV
 static iconv_t icdsc = (iconv_t)(-1);
 
-void	subcp_open (FILE *enca_fd)
+void	subcp_open (stream_t *st)
 {
 	char *tocp = "UTF-8";
 
@@ -1086,7 +1087,7 @@ void	subcp_open (FILE *enca_fd)
 		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
 		  if (enca_fd) {
-		    cp_tmp = guess_cp(enca_fd, enca_lang, enca_fallback);
+		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
 		    free_cp_tmp = 1;
 		  } else {
 		    cp_tmp = enca_fallback;
@@ -1295,14 +1296,14 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block,
 }
 
 struct subreader {
-    subtitle * (*read)(FILE *fd,subtitle *dest);
+    subtitle * (*read)(stream_t *st,subtitle *dest);
     void       (*post)(subtitle *dest);
     const char *name;
 };
 
 #ifdef HAVE_ENCA
 #define MAX_GUESS_BUFFER_SIZE (256*1024)
-void* guess_cp(FILE *fd, char *preferred_language, char *fallback)
+void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
 {
     const char **languages;
     size_t langcnt, buflen;
@@ -1313,7 +1314,7 @@ void* guess_cp(FILE *fd, char *preferred_language, char *fallback)
     int i;
 
     buffer = (unsigned char*)malloc(MAX_GUESS_BUFFER_SIZE*sizeof(char));
-    buflen = fread(buffer, 1, MAX_GUESS_BUFFER_SIZE, fd);
+    buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
 
     languages = enca_get_languages(&langcnt);
     mp_msg(MSGT_SUBREADER, MSGL_V, "ENCA supported languages: ");
@@ -1338,7 +1339,7 @@ void* guess_cp(FILE *fd, char *preferred_language, char *fallback)
     
     free(languages);
     free(buffer);
-    rewind(fd);
+    stream_seek(st,0);
 
     if (!detected_sub_cp) {
 	detected_sub_cp = strdup(fallback);
@@ -1350,7 +1351,7 @@ void* guess_cp(FILE *fd, char *preferred_language, char *fallback)
 #endif
 
 sub_data* sub_read_file (char *filename, float fps) {
-    FILE *fd;
+    stream_t* fd;
     int n_max, n_first, i, j, sub_first, sub_orig;
     subtitle *first, *second, *sub, *return_sub;
     sub_data *subt_data;
@@ -1375,7 +1376,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     struct subreader *srp;
     
     if(filename==NULL) return NULL; //qnx segfault
-    fd=fopen (filename, "r"); if (!fd) return NULL;
+    fd=open_stream (filename, NULL, &i); if (!fd) return NULL;
     
     sub_format=sub_autodetect (fd, &uses_time);
     mpsub_multiplier = (uses_time ? 100.0 : 1.0);
@@ -1383,7 +1384,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     srp=sr+sub_format;
     mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", srp->name);
     
-    rewind (fd);
+    stream_seek(fd,0);
 
 #ifdef USE_ICONV
     sub_utf8_prev=sub_utf8;
@@ -1488,7 +1489,7 @@ sub_data* sub_read_file (char *filename, float fps) {
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
     
-    fclose(fd);
+    free_stream(fd);
 
 #ifdef USE_ICONV
     subcp_close();
