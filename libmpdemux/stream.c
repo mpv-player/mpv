@@ -324,11 +324,13 @@ if(newpos==0 || newpos!=s->pos){
 //   putchar('%');fflush(stdout);
 }
 
-  stream_fill_buffer(s);
-  if(pos>=0 && pos<=s->buf_len){
+while(stream_fill_buffer(s) > 0 && pos >= 0) {
+  if(pos<=s->buf_len){
     s->buf_pos=pos; // byte position in sector
     return 1;
   }
+  pos -= s->buf_len;
+}
   
 //  if(pos==s->buf_len) printf("XXX Seek to last byte of file -> EOF\n");
   
