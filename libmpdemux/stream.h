@@ -217,7 +217,7 @@ inline static unsigned char* stream_read_line(stream_t *s,unsigned char* mem, in
     if(len <= 0 &&
        (!cache_stream_fill_buffer(s) || 
         (len = s->buf_len-s->buf_pos) <= 0)) break;
-    end = memchr((void*)(s->buffer+s->buf_pos),'\n',len);
+    end = (unsigned char*) memchr((void*)(s->buffer+s->buf_pos),'\n',len);
     if(end) len = end - (s->buffer+s->buf_pos) + 1;
     if(len > 0 && max > 1) {
       int l = len > max-1 ? max-1 : len;
