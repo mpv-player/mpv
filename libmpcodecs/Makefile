@@ -150,12 +150,13 @@ VFILTER_SRCS=vf.c \
              vf_yvu9.c \
              vf_screenshot.c \
 
-VFILTER_LAVC_SRCS += vf_uspp.c \
-                     vf_fspp.c \
-                     vf_lavc.c \
+VFILTER_LAVC_SRCS += vf_lavc.c \
                      vf_lavcdeint.c \
-                     vf_qp.c \
-                     vf_spp.c \
+
+VFILTER_LAVC_DSPUTIL_SRCS += vf_uspp.c \
+                             vf_fspp.c \
+                             vf_qp.c \
+                             vf_spp.c \
 
 ifeq ($(CONFIG_LIBPOSTPROC),yes)
 VFILTER_SRCS += vf_pp.c
@@ -166,6 +167,7 @@ endif
 
 ifeq ($(CONFIG_LIBAVCODEC),yes)
 VFILTER_SRCS += $(VFILTER_LAVC_SRCS)
+VFILTER_SRCS += $(VFILTER_LAVC_DSPUTIL_SRCS)
 endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 VFILTER_SRCS += $(VFILTER_LAVC_SRCS)

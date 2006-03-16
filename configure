@@ -6165,8 +6165,10 @@ fi
 
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
+_def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
+  _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
   _ld_libavcodec='libavcodec/libavcodec.a'
   _dep_libavcodec='libavcodec/libavcodec.a'
   _codecmodules="libavcodec $_codecmodules"
@@ -7719,6 +7721,7 @@ $_def_win32_loader
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
 $_def_libavcodec_so
+$_def_lavc_dsputil
 
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat

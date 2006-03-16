@@ -172,17 +172,17 @@ static vf_info_t* filter_list[]={
     &vf_info_delogo,
     &vf_info_remove_logo,
     &vf_info_hue,
-#ifdef USE_LIBAVCODEC
+#ifdef USE_LIBAVCODEC_DSPUTIL
     &vf_info_spp,
     &vf_info_uspp,
     &vf_info_fspp,
-    &vf_info_pp7,
+    &vf_info_qp,
 #endif
     &vf_info_yuvcsp,
     &vf_info_kerndeint,
     &vf_info_rgbtest,
 #ifdef USE_LIBAVCODEC
-    &vf_info_qp,
+    &vf_info_pp7,
 #endif
     &vf_info_phase,
     &vf_info_divtc,
