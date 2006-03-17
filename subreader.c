@@ -1339,6 +1339,7 @@ void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
     
     free(languages);
     free(buffer);
+    stream_reset(st);
     stream_seek(st,0);
 
     if (!detected_sub_cp) {
@@ -1384,6 +1385,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     srp=sr+sub_format;
     mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", srp->name);
     
+    stream_reset(fd);
     stream_seek(fd,0);
 
 #ifdef USE_ICONV
