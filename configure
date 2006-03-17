@@ -6348,6 +6348,7 @@ cat > $TMPC << EOF
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
 _ld_xvid="$_ld_xvid -lxvidcore"
+_xvid4=no
 if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid $_ld_lm ; then
   _xvid=yes
   _def_xvid3='#define HAVE_XVID3 1'
@@ -6360,8 +6361,10 @@ int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
   if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid $_ld_lm ; then
     _xvid=yes
+    _xvid4=yes
     _def_xvid3='#undef HAVE_XVID3'
     _def_xvid4='#define HAVE_XVID4 1'
+    _def_lavc_xvid='#define CONFIG_XVID 1'
     _codecmodules="xvid $_codecmodules"
   else
     _xvid=no
@@ -7384,6 +7387,7 @@ AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_FAAC=$_faac
+CONFIG_XVID=$_xvid4
 CONFIG_GPL=yes
 CONFIG_MUXERS=yes
 
@@ -7750,6 +7754,7 @@ $_def_amr_wb
 /* Use specific codecs from libavcodec */
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
 $_def_lavc_faac
+$_def_lavc_xvid
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib

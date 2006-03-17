@@ -7088,7 +7088,18 @@ currently useless
 .
 .TP
 .B vrc_strategy
-Dummy, reserved for future use.
+Ratecontrol method.
+Note that some of the ratecontrol-affecting options will have no effect
+if vrc_strategy is not set to 0.
+.PD 0
+.RSs
+.IPs 0
+Use internal lavc ratecontrol (default).
+.IPs 1
+Use XviD ratecontrol (experimental; requires MEncoder to be compiled
+with XviD support).
+.RE
+.PD 1
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
