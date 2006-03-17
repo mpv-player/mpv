@@ -448,6 +448,8 @@ time_base_nom / time_base_denom = time_base
         30        1                30
         29.97     1001             30000
         23.976    1001             24000
+    There MUST NOT be 2 identical timebases in a file.
+    There SHOULD NOT be more timebases than streams.
 
 time_base_id
     id to time_base table
