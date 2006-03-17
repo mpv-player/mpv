@@ -1086,11 +1086,12 @@ void	subcp_open (stream_t *st)
 		int free_cp_tmp = 0;
 		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 		     || sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
-		  if (st) {
+		  if (st && st->flags & STREAM_SEEK ) {
 		    cp_tmp = guess_cp(st, enca_lang, enca_fallback);
 		    free_cp_tmp = 1;
 		  } else {
 		    cp_tmp = enca_fallback;
+		    mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca faild, stream must be seakable.\n"); 
 		  }
 		}
 #endif
