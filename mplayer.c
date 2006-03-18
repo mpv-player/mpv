@@ -1056,6 +1056,7 @@ static void log_sub(void){
 #define OSD_MSG_OSD_STATUS              4
 #define OSD_MSG_BAR                     5
 #define OSD_MSG_PAUSE                   6
+#define OSD_MSG_MUTE                    7
 
 // These will later be implemented via properties and removed
 #define OSD_MSG_AV_DELAY               100
@@ -3323,6 +3324,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if ((edl_muted | user_muted) != mixer.muted)
 #endif
       mixer_mute(&mixer);
+      set_osd_msg(OSD_MSG_MUTE,1,osd_duration, MSGTR_OSDMute,
+                  mixer.muted ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
       break;
     case MP_CMD_LOADFILE : {
       play_tree_t* e = play_tree_new();

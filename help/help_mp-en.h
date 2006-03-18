@@ -227,6 +227,7 @@ static char help_text[]=
 #define MSGTR_OSDSubBottom "bottom"
 #define MSGTR_OSDSubCenter "center"
 #define MSGTR_OSDSubTop "top"
+#define MSGTR_OSDMute "Mute: %s"
 
 // mencoder.c:
 
