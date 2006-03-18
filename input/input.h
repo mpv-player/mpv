@@ -230,7 +230,7 @@ mp_cmd_clone(mp_cmd_t* cmd);
 
 // When you create a new driver you should add it in these 2 functions.
 void
-mp_input_init(void);
+mp_input_init(int use_gui);
 
 void
 mp_input_uninit(void);

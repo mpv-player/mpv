@@ -311,19 +311,15 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_BACKSPACE, 0 }, "speed_set 1.0" },
   { { 'q', 0 }, "quit" },
   { { 'Q', 0 }, "quit" },
-#ifndef HAVE_NEW_GUI
   { { KEY_ESC, 0 }, "quit" },
   { { 'p', 0 }, "pause" },
   { { 'P', 0 }, "pause" },
-#endif
   { { ' ', 0 }, "pause" },
   { { '.', 0 }, "frame_step" },
   { { KEY_HOME, 0 }, "pt_up_step 1" },
   { { KEY_END, 0 }, "pt_up_step -1" },
   { { '>', 0 }, "pt_step 1" },
-#ifndef HAVE_NEW_GUI
   { { KEY_ENTER, 0 }, "pt_step 1 1" },
-#endif
   { { '<', 0 }, "pt_step -1" },
   { { KEY_INS, 0 }, "alt_src_step 1" },
   { { KEY_DEL, 0 }, "alt_src_step -1" },
@@ -365,15 +361,6 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'n', 0 }, "tv_step_norm" },
   { { 'u', 0 }, "tv_step_chanlist" },
 #endif
-#ifdef HAVE_NEW_GUI
-  { { 'l', 0 }, "gui_loadfile" },
-  { { 't', 0 }, "gui_loadsubtitle" },
-  { { KEY_ENTER, 0 }, "gui_play" },
-  { { KEY_ESC, 0 }, "gui_stop" },
-  { { 'p', 0 }, "gui_playlist" },
-  { { 'r', 0 }, "gui_preferences" },
-  { { 'c', 0 }, "gui_skinbrowser" },
-#endif
 #ifdef HAVE_JOYSTICK
   { { JOY_AXIS0_PLUS, 0 }, "seek 10" },
   { { JOY_AXIS0_MINUS, 0 }, "seek -10" },
@@ -408,6 +395,22 @@ static mp_cmd_bind_t def_cmd_binds[] = {
 
   { { 0 }, NULL }
 };
+
+
+#ifdef HAVE_NEW_GUI
+static mp_cmd_bind_t gui_def_cmd_binds[] = {
+
+  { { 'l', 0 }, "gui_loadfile" },
+  { { 't', 0 }, "gui_loadsubtitle" },
+  { { KEY_ENTER, 0 }, "gui_play" },
+  { { KEY_ESC, 0 }, "gui_stop" },
+  { { 'p', 0 }, "gui_playlist" },
+  { { 'r', 0 }, "gui_preferences" },
+  { { 'c', 0 }, "gui_skinbrowser" },
+
+  { { 0 }, NULL }
+};
+#endif
 
 #ifndef MP_MAX_KEY_FD
 #define MP_MAX_KEY_FD 10
@@ -1378,6 +1381,12 @@ mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
   memcpy(bind->input,keys,(MP_MAX_KEY_DOWN+1)*sizeof(int));
 }
 
+void
+mp_input_add_binds(mp_cmd_bind_t* list) {
+  int i;
+  for(i = 0 ; list[i].cmd ; i++)
+    mp_input_bind_keys(list[i].input,list[i].cmd);
+}
 
 static void
 mp_input_free_binds(mp_cmd_bind_t* binds) {
@@ -1552,9 +1561,14 @@ mp_input_parse_config(char *file) {
 extern char *get_path(char *filename);
 
 void
-mp_input_init(void) {
+mp_input_init(int use_gui) {
   char* file;
 
+#ifdef HAVE_NEW_GUI  
+  if(use_gui)
+    mp_input_add_binds(gui_def_cmd_binds);
+#endif
+  
   file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
     return;

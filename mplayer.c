@@ -1621,7 +1621,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
 // Init input system
 current_module = "init_input";
-mp_input_init();
+mp_input_init(use_gui);
 #if 0
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
