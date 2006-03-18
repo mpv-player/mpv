@@ -447,7 +447,7 @@ codecs2html: mp_msg.o
 $(MPLAYER_DEP): version.h help_mp.h
 $(MENCODER_DEP): version.h help_mp.h
 
-$(PRG_CFG): version.h codec-cfg.c codec-cfg.h
+$(PRG_CFG): version.h codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) $(HOST_CFLAGS) -I. codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML $(EXTRA_LIB) $(EXTRA_INC)
 
 install: $(ALL_PRG)
