@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.221
+// In synch with rev 1.226
 
 // ========================= MPlayer help ===========================
 
@@ -230,6 +230,7 @@ static char help_text[]=
 #define MSGTR_OSDSubBottom "unten"
 #define MSGTR_OSDSubCenter "mitte"
 #define MSGTR_OSDSubTop "oben"
+#define MSGTR_OSDMute "Stumm: %s"
 
 // mencoder.c:
 
@@ -264,7 +265,8 @@ static char help_text[]=
 #define MSGTR_CBRPCMAudioSelected "CBR PCM Audio ausgewählt.\n"
 #define MSGTR_MP3AudioSelected "MP3 Audio ausgewählt.\n"
 #define MSGTR_CannotAllocateBytes "Konnte %d Bytes nicht reservieren.\n"
-#define MSGTR_SettingAudioDelay "Setze AUDIOVERZÖGERUNG auf %5.3f.\n"
+#define MSGTR_SettingAudioDelay "Setze Audioverzögerung auf %5.3f.\n"
+#define MSGTR_SettingVideoDelay "Setze Videoverzögerung auf %5.3f.\n"
 #define MSGTR_SettingAudioInputGain "Setze Audioeingangsverstärkung auf %f.\n"
 #define MSGTR_LamePresetEquals "\nPreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Limitiere Audio-Preload auf 0.4s.\n"
@@ -1167,6 +1169,10 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input-Kontrolle #%d ist unterhalb der Grenze von %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input-Kontrolle #%d ist überhalb der Grenze von %0.4f.\n"
 
+// format.c
+
+#define MSGTR_AF_FORMAT_UnknownFormat "unbekanntes-Format "
+
 // ========================== INPUT =========================================
 
 // joystick.c
@@ -1326,7 +1332,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Erstelle Keyframe-Tabelle für MS-mpg4v1-Video neu...\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Erstelle Keyframe-Tabelle für DIVX3-Video neu...\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Erstelle Keyframe-Tabelle für MPEG4-Video neu...\n"
-#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' gefunden, %d Byte von %d.\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' gefunden, %d Bytes von %d.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh gefunden (size=%d) (total_frames=%d).\n"
 #define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Lese INDEX-Block, %d Blöcke für %d Frames (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "zusätzlicher RIFF-Kopf...\n"
