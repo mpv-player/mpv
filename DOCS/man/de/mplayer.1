@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1222
+.\" In sync with rev 1.1230
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -756,7 +756,7 @@ Hänge die auf der Kommandozeile angegebenen Dateien an die Playlist an,
 anstatt sie sofort abzuspielen.
 .
 .TP
-.B \-fixed-vo (BETA CODE!)
+.B \-fixed-vo
 Erzwingt dasselbe Videosystem für mehrere Dateien (einmalige Initialisierung
 für alle Dateien).
 Dementsprechend wird für alle Dateien nur ein Fenster geöffnet.
@@ -1155,7 +1155,7 @@ Audioverzögerung in Sekunden (postive oder negative Fließkommazahl).
 .br
 .I HINWEIS:
 Falls diese Option mit MEncoder benutzt wird, funktioniert sie im Zusammenhang
-mit \-ovc copy nicht notwendigerweise.
+mit \-ovc copy nicht notwendigerweise; benutze stattdessen \-audio-delay.
 .
 .TP
 .B \-demuxer <[+]Name>
@@ -1415,6 +1415,12 @@ daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP
 übertragen werden (mit der gleichen TCP-Verbindung wie RTSP).
 Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
 UDP-Pakete nicht durchlässt (siehe http://www.live555.com/\:mplayer/).
+.
+.TP
+.B \-rtsp-port (nur bei LIVE555)
+Wird bei 'rtsp://'-URLs benutzt, um die Portnummer des Clients zu erzwingen.
+Diese Option kann nützlich sein, wenn du hinter einem Router bist und den
+RTSP-Stream vom Server an einen bestimmten Client weiterleiten möchtest.
 .
 .TP
 .B \-saveidx <Dateiname>
@@ -2137,8 +2143,8 @@ Eine Liste der eincompilierten Audiotreiber erhältst du mit \-ao help.
 .RSs
 .IPs "\-ao alsa,oss,"
 Probiere den ALSA-Treiber, dann den OSS-Treiber, dann andere.
-.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
-Setzt den noblock-Modus, mmap-Modus und den Gerätenamen auf erste Karte,
+.IPs "\-ao alsa:noblock:device=hw=0.3"
+Setzt den noblock-Modus und den Gerätenamen auf erste Karte,
 viertes Gerät.
 .RE
 .PD 1
@@ -2150,9 +2156,6 @@ Verfügbare Audioausgabetreiber sind folgende:
 ALSA 0.9/1.x Audioausgabetreiber.
 .PD 0
 .RSs
-.IPs mmap\ \ \ 
-Setzt den experimentellen mmap-Modus (funktioniert nicht für mehr als zwei
-Kanäle).
 .IPs noblock
 Setzt den noblock-Modus.
 .IPs device=<Gerät>
@@ -5725,7 +5728,7 @@ Die Entwicklung an itvc findet nicht weiter statt, da die Filter pullup und
 filmident genauer zu sein scheinen.
 .
 .TP
-.B pullup[=jl:jr:jo:ju:sb:mp]\
+.B pullup[=jl:jr:jo:ju:sb:mp]
 Pulldown-Umkehrungs- (inverse telecine) Filter der dritten Generation, der
 mixed Hard-telecine- und Progressive-Material mit 24000/1001 und 30000/1001 fps
 handhaben kann.
@@ -6361,12 +6364,17 @@ Konfigurationsdatei mit aufzunehmen.
 .SH "ALLGEMEINE ENCODING-OPTIONEN (NUR BEI MENCODER)"
 .
 .TP
-.B \-audio-delay <0.0\-...>
-Setzt das Feld für die Audioverzögerung im Dateikopf.
-Standardwert ist 0.0, negative Werte funktionieren nicht.
-Diese Option verzögert den Ton nicht während des Encodierens, stattdessen wird
-der Player beim Abspielen den Ton verzögern, so dass du dann nicht mehr die
-Option \-delay angeben musst.
+.B \-audio-delay <beliebige Fließkommazahl>
+Verzögert entweder Audio oder Video durch Setzen eines Verzögerungsfeldes im
+Dateikopf (Standard: 0.0).
+Dies wird bei der Encodierung keinen der beiden Streams verzögern, der Player
+jedoch wird das Verzögerungsfeld beachten und kompensieren.
+Positive Werte verzögern den Ton und negative Werte verzögern das Video.
+Beachte, dass diese Option das genaue Gegenstück zur Option \-delay ist.
+Zum Beispiel, wenn ein Video korrekt abgespielt wird mit \-delay 0.2, kannst
+Du das Video mit MEncoder reparieren, indem du \-audio-delay -0.2 verwendest.
+Momentan funktioniert diese Option nur mit dem Standardmuxer (\-of avi).
+Wenn du einen anderen Muxer benutzt, mußt du stattdessen \-delay verwenden.
 .
 .TP
 .B \-audio-density <1\-50>
@@ -9636,12 +9644,21 @@ wird.
 .
 .TP
 .B telecine
-Aktiviert Soft-telecine-Modus: Der Muxer wird tricksen, so dass der
-Videostream wie mit 30000/\:1001 oder 30 fps encodiert aussieht; das
-funktioniert nur
-mit MPEG-2-Video, wenn die Framerate der Ausgabe, eventuell konvertiert
+Aktiviert 3:2-Pulldown-Soft-telecine-Modus: Der Muxer wird dafür
+sorgen, dass der
+Videostream wie mit 30000/\:1001 oder 30 fps encodiert aussieht.
+Das funktioniert nur
+mit MPEG-2-Video, wenn die Framerate der Ausgabe, konvertiert
 mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
-Jede andere Framerate ist mit dieser Option nicht kompatibel.
+Jede andere Framerate ist mit dieser Option inkompatibel.
+.
+.TP
+.B film2pal
+Aktiviert FILM zu PAL und NTSC zu PAL Soft-telecine-Modus: Der Muxer wird dafür
+sorgen, dass der Videostream wie mit 25 fps encodiert aussieht.
+Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
+konvertiert mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
+Jede andere Framerate ist mit dieser Option inkompatibel.
 .
 .
 .SS FFmpeg-libavformat-Muxer (\-lavfopts) (siehe auch \-of lavf)
