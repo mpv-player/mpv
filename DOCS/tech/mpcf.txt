@@ -182,7 +182,7 @@ main header:
                 continue;
             }
             flags[i]= tmp_flag;
-            stream_id_plus1[i]= tmp_stream;
+            stream_id[i]= tmp_stream;
             data_size_mul[i]= tmp_mul;
             data_size_lsb[i]= tmp_size + j;
             pts_delta[i]= tmp_pts;
@@ -217,20 +217,22 @@ stream_header:
 
 frame:
     frame_code                          f(8)
-    if(stream_id_plus1[frame_code]==0){
-        stream_id                       v
-    }
-    if(pts_delta[frame_code]==0){
-        coded_pts                       v
-    }
     frame_flags= flags[frame_code]
     if(frame_flags&FLAG_CODED){
         coded_flags                     v
         frame_flags ^= coded_flags
     }
+    if(frame_flags&FLAG_STREAM_ID){
+        stream_id                       v
+    }
+    if(frame_flags&FLAG_CODED_PTS){
+        coded_pts                       v
+    }
     if(frame_flags&FLAG_SIZE_MSB){
         data_size_msb                   v
     }
+    if(frame_flags&FLAG_RESERVED)
+        reserved_count[frame_code]      v
     for(i=0; i<reserved_count[frame_code]; i++)
         reserved                        v
     if(frame_flags&FLAG_CHECKSUM){
@@ -513,9 +515,12 @@ flags[frame_code], frame_flags
        1  FLAG_KEY         if set, frame is keyframe
        2  FLAG_EOR         if set, stream has no relevance on
                            presentation. (EOR)
+       8  FLAG_CODED_PTS   if set, coded_pts is in the frame header
+      16  FLAG_STREAM_ID   if set, stream_id is coded in the frame header
       32  FLAG_SIZE_MSB    if set, data_size_msb is at frame header,
                            otherwise data_size_msb is 0
       64  FLAG_CHECKSUM    if set then the frame header contains a checksum
+     128  FLAG_RESERVED    if set, reserved_count is coded in the frame header
     4096  FLAG_CODED       if set, coded_flags are stored in the frame header.
     8192  FLAG_INVALID     if set, frame_code is invalid.
 
@@ -527,9 +532,8 @@ flags[frame_code], frame_flags
     FLAG_CHECKSUM MUST be set if the frame is larger than 2*max_distance or
     its pts differs by more then max_pts_distance from the last frame
 
-stream_id_plus1[frame_code]
+stream_id[frame_code]
     MUST be <250
-    if it is 0, then the stream_id is coded in the frame
 
 data_size_mul[frame_code]
     MUST be <16384
