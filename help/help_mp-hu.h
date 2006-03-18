@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.224 (2006. 03. 14.)
+// Sync'ed with help_mp-en.h 1.225 (2006. 03. 18.)
 
 // ========================= MPlayer help ===========================
 
@@ -1158,9 +1158,9 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f alsó határ alatt van.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: A(z) #%d bemeneti vezérlõ a(z) %0.4f felsõ határ felett van.\n"
 
-// af_format.c
+// format.c
 
-#define MSGTR_AF_FORMAT_UnknownSpecial "Ismeretlen specialítás\n"
+#define MSGTR_AF_FORMAT_UnknownFormat "ismeretlen formátum "
 
 // ========================== INPUT =========================================
 
