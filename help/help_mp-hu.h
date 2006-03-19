@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.225 (2006. 03. 18.)
+// Sync'ed with help_mp-en.h 1.226 (2006. 03. 19.)
 
 // ========================= MPlayer help ===========================
 
@@ -226,6 +226,7 @@ static char help_text[]=
 #define MSGTR_OSDSubBottom "alul"
 #define MSGTR_OSDSubCenter "középen"
 #define MSGTR_OSDSubTop "fent"
+#define MSGTR_OSDMute "Némít: %s"
 
 // mencoder.c:
 
