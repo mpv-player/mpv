@@ -722,7 +722,10 @@ if(!muxer) {
   mp_msg(MSGT_MENCODER, MSGL_FATAL, "Cannot initialize muxer.");
   mencoder_exit(1,NULL);
 }
+#if 0
+//disabled: it horrybly distorts filtered sound
 if(out_file_format == MUXER_TYPE_MPEG) audio_preload = 0;
+#endif
 
 muxer->audio_delay_fix = audio_delay_fix;
 
