@@ -717,6 +717,7 @@ char *rtsp_search_answers(rtsp_t *s, const char *tag) {
   while (*answer) {
     if (!strncasecmp(*answer,tag,strlen(tag))) {
       ptr=strchr(*answer,':');
+      if (!ptr) return NULL;
       ptr++;
       while(*ptr==' ') ptr++;
       return ptr;
