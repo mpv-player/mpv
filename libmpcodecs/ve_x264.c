@@ -184,7 +184,7 @@ m_option_t x264encopts_conf[] = {
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
     {"zones", &zones, CONF_TYPE_STRING, 0, 0, 0, NULL},
-    {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
+    {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 7, NULL},
     {"brdo", &bframe_rdo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nobrdo", &bframe_rdo, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},

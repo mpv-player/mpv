@@ -8951,7 +8951,7 @@ exhaustive search (very slow, and no better than 3)
 radius of exhaustive or multi-hexagon motion search (default: 16)
 .
 .TP
-.B subq=<1\-6>
+.B subq=<1\-7>
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
@@ -8979,7 +8979,9 @@ Runs best quality quarterpixel precision motion estimation on all
 candidate macroblock types, before selecting the best type (default).
 .IPs 6
 Enables rate-distortion optimization of macroblock types in
-I- and P-frames. (best)
+I- and P-frames.
+.IPs 6
+Enables rate-distortion optimization of motion vectors and intra modes. (best)
 .RE
 .PD 1
 .RS
@@ -9003,7 +9005,7 @@ Requires frameref>1.
 .TP
 .B (no)brdo
 Enables rate-distortion optimization of macroblock types in B-frames.
-Requires subq=6.
+Requires subq>=6.
 .
 .TP
 .B (no)bime
@@ -9021,7 +9023,7 @@ disabled
 .IPs 1
 enabled only for the final encode (default)
 .IPs 2
-enabled during all mode decisions (slow, requires subq=6)
+enabled during all mode decisions (slow, requires subq>=6)
 .RE
 .PD 1
 .
