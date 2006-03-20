@@ -130,6 +130,150 @@ static mp3_hdr_t *add_mp3_hdr(mp3_hdr_t **list, off_t st_pos,
   return NULL;
 }
 
+#define FLAC_SIGNATURE_SIZE 4
+#define FLAC_STREAMINFO_SIZE 34
+#define FLAC_SEEKPOINT_SIZE 18
+
+enum {
+  FLAC_STREAMINFO = 0,
+  FLAC_PADDING,
+  FLAC_APPLICATION,
+  FLAC_SEEKTABLE,
+  FLAC_VORBIS_COMMENT,
+  FLAC_CUESHEET
+} flac_preamble_t;
+
+static void
+get_flac_metadata (demuxer_t* demuxer)
+{
+  uint8_t preamble[4];
+  unsigned int blk_len;
+  stream_t *s = NULL;
+
+  if (!demuxer)
+    return;
+
+  s = demuxer->stream;
+  if (!s)
+    return;
+  
+  /* file is qualified; skip over the signature bytes in the stream */
+  stream_seek (s, 4);
+
+  /* loop through the metadata blocks; use a do-while construct since there
+   * will always be 1 metadata block */
+  do {
+    int r;
+    
+    r = stream_read (s, (char *) preamble, FLAC_SIGNATURE_SIZE);
+    if (r != FLAC_SIGNATURE_SIZE)
+      return;
+
+    blk_len = (preamble[1] << 16) | (preamble[2] << 8) | (preamble[3] << 0);
+
+    switch (preamble[0] & 0x7F)
+    {
+    case FLAC_STREAMINFO:
+    {
+      if (blk_len != FLAC_STREAMINFO_SIZE)
+        return;
+
+      stream_skip (s, FLAC_STREAMINFO_SIZE);
+      break;
+    }
+
+    case FLAC_PADDING:
+      stream_skip (s, blk_len);
+      break;
+
+    case FLAC_APPLICATION:
+      stream_skip (s, blk_len);
+      break;
+
+    case FLAC_SEEKTABLE:
+    {
+      int seekpoint_count, i;
+
+      seekpoint_count = blk_len / FLAC_SEEKPOINT_SIZE;
+      for (i = 0; i < seekpoint_count; i++)
+        if (stream_skip (s, FLAC_SEEKPOINT_SIZE) != 1)
+          return;
+      break;
+    }
+
+    case FLAC_VORBIS_COMMENT:
+    {
+      /* For a description of the format please have a look at */
+      /* http://www.xiph.org/vorbis/doc/v-comment.html */
+
+      uint32_t length, comment_list_len;
+      char comments[blk_len];
+      void *ptr = comments;
+      char *comment;
+      int cn;
+      char c;
+
+      if (stream_read (s, comments, blk_len) == blk_len)
+      {
+        uint8_t *p = ptr;
+        length = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+        ptr += 4 + length;
+
+        p = ptr;
+        comment_list_len = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+        ptr += 4;
+
+        cn = 0;
+        for (; cn < comment_list_len; cn++)
+        {
+          p = ptr;
+          length = p[0] + (p[1] << 8) + (p[2] << 16) + (p[3] << 24);
+          ptr += 4;
+
+          comment = (char *) ptr;
+          c = comment[length];
+          comment[length] = 0;
+
+          if (!strncasecmp ("TITLE=", comment, 6) && (length - 6 > 0))
+            demux_info_add (demuxer, "Title", comment + 6);
+          else if (!strncasecmp ("ARTIST=", comment, 7) && (length - 7 > 0))
+            demux_info_add (demuxer, "Artist", comment + 7);
+          else if (!strncasecmp ("ALBUM=", comment, 6) && (length - 6 > 0))
+            demux_info_add (demuxer, "Album", comment + 6);
+          else if (!strncasecmp ("DATE=", comment, 5) && (length - 5 > 0))
+            demux_info_add (demuxer, "Year", comment + 5);
+          else if (!strncasecmp ("GENRE=", comment, 6) && (length - 6 > 0))
+            demux_info_add (demuxer, "Genre", comment + 6);
+          else if (!strncasecmp ("Comment=", comment, 8) && (length - 8 > 0))
+            demux_info_add (demuxer, "Comment", comment + 8);
+          else if (!strncasecmp ("TRACKNUMBER=", comment, 12)
+                   && (length - 12 > 0))
+          {
+            char buf[31];
+            buf[30] = '\0';
+            sprintf (buf, "%d", atoi (comment + 12));
+            demux_info_add(demuxer, "Track", buf);
+          }
+          comment[length] = c;
+
+          ptr += length;
+        }
+      }
+      break;
+    }
+
+    case FLAC_CUESHEET:
+      stream_skip (s, blk_len);
+      break;
+
+    default: 
+      /* 6-127 are presently reserved */
+      stream_skip (s, blk_len);
+      break;
+    }
+  } while ((preamble[0] & 0x80) == 0);
+}
+
 static int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
   sh_audio_t* sh_audio;
@@ -352,6 +496,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	    sh_audio->format = mmioFOURCC('f', 'L', 'a', 'C');
 	    demuxer->movi_start = stream_tell(s);
 	    demuxer->movi_end = s->end_pos;
+	    get_flac_metadata (demuxer);
 	    break;
   }
 
