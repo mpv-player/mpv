@@ -162,6 +162,10 @@ static int parse_fbmode_cfg(char *cfgfile)
 	int in_mode_def = 0;
 	int tmp, i;
 
+	/* If called more than once, reuse parsed data */
+	if (nr_modes)
+		return nr_modes;
+
 	mp_msg(MSGT_VO, MSGL_V, "Reading %s: ", cfgfile);
 
 	if ((fp = fopen(cfgfile, "r")) == NULL) {
