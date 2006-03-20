@@ -4748,7 +4748,7 @@ fi
 echocheck "Polyp"
 if test "$_polyp" = auto ; then
   _polyp=no
-  if ( pkg-config --exists 'polyplib >= 0.6 polyplib-error >= 0.6 polyplib-mainloop >= 0.6' ) >> "$TMPLOG" 2>&1 ; then
+  if pkg-config --exists 'polyplib >= 0.6 polyplib-error >= 0.6 polyplib-mainloop >= 0.6' ; then
 
 cat > $TMPC << EOF
 #include <polyp/polyplib.h>
@@ -5173,7 +5173,7 @@ echores "$_cdparanoia"
 
 echocheck "libcdio"
 if test "$_libcdio" = auto && test "$_cdparanoia" = no ; then
-    if ( pkg-config --modversion libcdio) > /dev/null 2>&1 ; then
+    if pkg-config --exists libcdio ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <cdio/version.h>
@@ -5288,7 +5288,7 @@ EOF
   _fontconfig=yes
   if cc_check -lfontconfig ; then
     _ld_fontconfig="-lfontconfig"
-  elif cc_check `pkg-config --cflags --libs fontconfig` ; then
+  elif cc_check `pkg-config --silence-errors --cflags --libs fontconfig` ; then
     _inc_fontconfig=`pkg-config --cflags fontconfig`
     _ld_fontconfig=`pkg-config --libs fontconfig`
   else
@@ -6107,7 +6107,7 @@ int main(void) {
     return 0; 
 }
 EOF
-  if (pkg-config --exists libavcodec >> "$TMPLOG" 2>&1) ; then
+  if pkg-config --exists libavcodec ; then
     _inc_libavcodec=`pkg-config --cflags libavcodec`
     _ld_libavcodec=`pkg-config --libs libavcodec`
     cc_check $_inc_libavcodec $_ld_libavcodec && _libavcodec_so=yes
@@ -6129,7 +6129,7 @@ if test "$_libavformat_so" = auto ; then
   #include <ffmpeg/avformat.h>
   int main(void) { av_alloc_format_context(); return 0; }
 EOF
-  if (pkg-config --exists libavformat >> "$TMPLOG" 2>&1 ) ; then
+  if pkg-config --exists libavformat ; then
     _inc_libavformat=`pkg-config --cflags libavformat`
     _ld_libavformat=`pkg-config --libs libavformat`
     cc_check $_inc_libavformat $_ld_libavformat && _libavformat_so=yes
