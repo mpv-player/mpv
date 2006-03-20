@@ -1,4 +1,4 @@
-.\" synced with 1.1238
+.\" synced with 1.1241
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -7484,7 +7484,19 @@ actuellement inutile
 .
 .TP
 .B vrc_strategy
-Inutilisé, réservé pour utilisation future.
+Méthode de ratecontrol (contrôle du débit).
+Notez que certaines des options agissant sur le ratecontrol n'auront
+d'effet que si vrc_strategy est à 0.
+Ratecontrol method.
+.PD 0
+.RSs
+.IPs 0
+Utilise le ratecontrol interne de lavc (par défaut).
+.IPs 1
+Utlise le ratecontrol d'XviD (expérimental; nécessite que MEncoder
+soit compilé par le support d'XviD).
+.RE
+.PD 1
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
@@ -9696,6 +9708,13 @@ paramètres, raisonnables par défaut, que l'utilisateur peut redéfinir.
 En général, lorsque vous générez un fichier MPEG, il est recommandé
 de désactiver le code de saut de trames de MEncoder (voir \-noskip, \-mc,
 tout comme les filtres vidéo harddup et softskip).
+.PP
+.I EXEMPLE:
+.PD 0
+.RSs
+.IPs format=mpeg2:tsaf:vbitrate=8000
+.RE
+.PD 1
 .
 .TP
 .B delay\ \
