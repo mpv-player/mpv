@@ -1058,7 +1058,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 {
 	unsigned char *dst;
 
-	dst = center + (fb_line_len * y0 + x0) * fb_pixel_size;
+	dst = center + fb_line_len * y0 + fb_pixel_size * x0;
 
 	(*draw_alpha_p)(w, h, src, srca, stride, dst, fb_line_len);
 }
@@ -1071,7 +1071,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 	uint8_t *d;
 	uint8_t *s;
 
-	d = center + (fb_line_len * y + x) * fb_pixel_size;
+	d = center + fb_line_len * y + fb_pixel_size * x;
 
 	s = src[0];
 	while (h) {
