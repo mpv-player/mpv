@@ -35,7 +35,7 @@ struct vf_priv_s {
 	mp_image_t *dmpi;
 };
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	int ret = 0;
 	mp_image_t *dmpi;
@@ -74,16 +74,16 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 					   mpi->chroma_width, mpi->chroma_height,
 					   dmpi->stride[2]*2, mpi->stride[2]);
 			}
-			ret = vf_next_put_image(vf, dmpi);
+			ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 		}
 		break;
 	case 1:
 		if (vf->priv->frame & 1)
-			ret = vf_next_put_image(vf, mpi);
+			ret = vf_next_put_image(vf, mpi, MP_NOPTS_VALUE);
 		break;
 	case 2:
 		if ((vf->priv->frame & 1) == 0)
-			ret = vf_next_put_image(vf, mpi);
+			ret = vf_next_put_image(vf, mpi, MP_NOPTS_VALUE);
 		break;
 	case 3:
 		dmpi = vf_get_image(vf->next, mpi->imgfmt,
@@ -114,7 +114,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 					   dmpi->stride[2]*2, mpi->stride[2]);
 			}
 		}
-		ret = vf_next_put_image(vf, dmpi);
+		ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 		break;
 	}
 

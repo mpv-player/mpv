@@ -172,7 +172,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static int codec_inited = 0;
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
     OSErr cres;
     long framesizemax;

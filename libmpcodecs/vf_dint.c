@@ -62,7 +62,7 @@ static int config (struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int put_image (struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
     char rrow0[MAXROWSIZE];
     char rrow1[MAXROWSIZE];
@@ -171,7 +171,7 @@ static int put_image (struct vf_instance_s* vf, mp_image_t *mpi)
     }
     vf->priv->was_dint = 0;
 //    mp_msg (MSGT_VFILTER, MSGL_INFO, "DI:%d/%d ", vf->priv->rdfr, vf->priv->dfr);
-    return vf_next_put_image (vf, mpi);
+    return vf_next_put_image (vf, mpi, pts);
 }
 
 static int open (vf_instance_t *vf, char* args){

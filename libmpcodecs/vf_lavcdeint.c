@@ -103,7 +103,7 @@ config (struct vf_instance_s* vf,
 }
 
 static int 
-put_image (struct vf_instance_s* vf, mp_image_t *mpi)
+put_image (struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
   struct vf_priv_s *priv = vf->priv;
   mp_image_t* dmpi;
@@ -135,7 +135,7 @@ put_image (struct vf_instance_s* vf, mp_image_t *mpi)
       return 0;
     }
   
-  return vf_next_put_image(vf, dmpi);
+  return vf_next_put_image(vf, dmpi, pts);
 }
 
 

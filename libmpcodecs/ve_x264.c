@@ -221,7 +221,7 @@ static int parse_cqm(const char *str, uint8_t *cqm, int length,
     return 0;
 }
 
-static int put_image(struct vf_instance_s *vf, mp_image_t *mpi);
+static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts);
 static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in);
 
 static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
@@ -474,7 +474,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
     return 0;
 }
 
-static int put_image(struct vf_instance_s *vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts)
 {
     h264_module_t *mod=(h264_module_t*)vf->priv;
     int i;

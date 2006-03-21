@@ -55,7 +55,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     int bpp=mpi->bpp/8;
     int w,h,x,y,shrink_by;
@@ -135,7 +135,7 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
 
 }
 
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, pts);
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt) {

@@ -318,7 +318,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,2*width,2*height,2*d_width,2*d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     // hope we'll get DR buffer:
@@ -330,7 +330,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		  dmpi->planes[0], dmpi->stride[0],
 		  mpi->w, mpi->h, mpi->bpp/8);
     
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, pts);
 }
 
 //===========================================================================//

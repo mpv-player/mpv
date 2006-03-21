@@ -322,7 +322,7 @@ static void draw_slice(struct vf_instance_s* vf,
     scale(vf->priv->ctx, vf->priv->ctx2, src, stride, y, h, dmpi->planes, dmpi->stride, vf->priv->interlaced);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi=mpi->priv;
 
 //    printf("vf_scale::put_image(): processing whole frame! dmpi=%p flag=%d\n",
@@ -346,7 +346,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
     if(vf->priv->palette) dmpi->planes[1]=vf->priv->palette; // export palette!
     
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, pts);
 }
 
 static int control(struct vf_instance_s* vf, int request, void* data){

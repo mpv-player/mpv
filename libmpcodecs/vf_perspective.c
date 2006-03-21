@@ -257,7 +257,7 @@ static inline void resampleLinear(uint8_t *dst, uint8_t *src, int w, int h, int 
 	}
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
 
@@ -283,7 +283,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 				vf->priv, mpi->chroma_x_shift, mpi->chroma_y_shift);
 	}
 
-	return vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi, pts);
 }
 
 //===========================================================================//

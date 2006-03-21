@@ -449,10 +449,10 @@ static int do_put_image(struct vf_instance_s* vf, mp_image_t *dmpi)
 	}
 
 	p->outframes++;
-	return vf_next_put_image(vf, dmpi);
+	return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	int ret=0;
 	struct vf_priv_s *p = vf->priv;

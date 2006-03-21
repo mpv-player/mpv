@@ -329,7 +329,7 @@ static void draw_slice(struct vf_instance_s* vf,
     vf->priv->first_slice = 0;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	vf->dmpi=mpi->priv;
 	if(!vf->dmpi) { printf("Why do we get NULL \n"); return 0; }
@@ -340,7 +340,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	// we've used DR, so we're ready...
 	if(!(mpi->flags&MP_IMGFLAG_PLANAR))
 	    vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
-	return vf_next_put_image(vf,vf->dmpi);
+	return vf_next_put_image(vf,vf->dmpi, pts);
     }
 
     // hope we'll get DR buffer:
@@ -372,7 +372,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 #ifdef OSD_SUPPORT
     if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
-    return vf_next_put_image(vf,vf->dmpi);
+    return vf_next_put_image(vf,vf->dmpi, pts);
 }
 
 //===========================================================================//

@@ -15,7 +15,7 @@ struct vf_priv_s {
 	int skipflag;
 };
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 	
@@ -34,7 +34,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		dmpi->stride[2] = mpi->stride[2];
 	}
 	
-	return vf_next_put_image(vf, dmpi);
+	return vf_next_put_image(vf, dmpi, pts);
 }
 
 static int control(struct vf_instance_s* vf, int request, void* data)

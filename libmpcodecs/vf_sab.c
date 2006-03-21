@@ -236,7 +236,7 @@ if((x/32)&1){
 	}
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
 
@@ -250,7 +250,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	blur(dmpi->planes[1], mpi->planes[1], cw    , ch   , dmpi->stride[1], mpi->stride[1], &vf->priv->chroma);
 	blur(dmpi->planes[2], mpi->planes[2], cw    , ch   , dmpi->stride[2], mpi->stride[2], &vf->priv->chroma);
     
-	return vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi, pts);
 }
 
 //===========================================================================//

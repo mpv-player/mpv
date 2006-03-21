@@ -235,7 +235,7 @@ static int match(struct vf_priv_s *p, int *diffs,
    return m;
    }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
    {
    mp_image_t *dmpi, *tmpi=0;
    int n, m, f, newphase;
@@ -350,12 +350,12 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	    imgop((void *)memcpy_pic, tmpi, mpi, 0);
 	    imgop(deghost_plane, tmpi, dmpi, p->deghost);
 	    imgop((void *)memcpy_pic, dmpi, mpi, 0);
-	    return vf_next_put_image(vf, tmpi);
+	    return vf_next_put_image(vf, tmpi, MP_NOPTS_VALUE);
 	    }
       }
 
    imgop((void *)memcpy_pic, dmpi, mpi, 0);
-   return vf_next_put_image(vf, dmpi);
+   return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
    }
 
 static int analyze(struct vf_priv_s *p)

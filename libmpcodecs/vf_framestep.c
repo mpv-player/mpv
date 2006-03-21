@@ -75,7 +75,7 @@ struct vf_priv_s {
 };
 
 /* Filter handler */
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
     mp_image_t        *dmpi;
     struct vf_priv_s  *priv;
@@ -125,7 +125,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
         dmpi->height    = mpi->height;
 
         /* Chain to next filter / output ... */
-        return vf_next_put_image(vf, dmpi);
+        return vf_next_put_image(vf, dmpi, pts);
     }
 
     /* Skip the frame */

@@ -68,7 +68,7 @@ static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcst
 
 //===========================================================================//
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
 
     // hope we'll get DR buffer:
@@ -93,7 +93,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	dmpi->planes[1]=mpi->planes[1]; // passthrough rgb8 palette
     }
     
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, pts);
 }
 
 //===========================================================================//

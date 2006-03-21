@@ -663,7 +663,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 		(priv->fields == 2) ? IMGFMT_ZRMJPEGIT : IMGFMT_ZRMJPEGNI); 
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	struct vf_priv_s *priv = vf->priv;
 	int size = 0;
 	int i;
@@ -679,7 +679,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 			MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
 	dmpi->planes[0] = (uint8_t*)priv->buf;
 	dmpi->planes[1] = (uint8_t*)size;
-	return vf_next_put_image(vf,dmpi); 
+	return vf_next_put_image(vf,dmpi, pts); 
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){

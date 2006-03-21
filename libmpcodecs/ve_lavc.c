@@ -338,7 +338,7 @@ struct vf_priv_s {
 #define FF_QP2LAMBDA 1
 #endif
 
-static int encode_frame(struct vf_instance_s* vf, AVFrame *pic);
+static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts);
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
@@ -782,7 +782,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
     switch(request){
         case VFCTRL_FLUSH_FRAMES:
             if(vf->priv->codec->capabilities & CODEC_CAP_DELAY)
-                while(encode_frame(vf, NULL) > 0);
+                while(encode_frame(vf, NULL, MP_NOPTS_VALUE) > 0);
             return CONTROL_TRUE;
         default:
             return CONTROL_UNKNOWN;
@@ -826,7 +826,7 @@ static double psnr(double d){
     return -10.0*log(d)/log(10);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     AVFrame *pic= vf->priv->pic;
 
     pic->data[0]=mpi->planes[0];
@@ -848,13 +848,17 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     }
 #endif
 
-    return (encode_frame(vf, pic) >= 0);
+    return (encode_frame(vf, pic, pts) >= 0);
 }
 
-static int encode_frame(struct vf_instance_s* vf, AVFrame *pic){
+static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
     int out_size;
 
+    if(pic){
+        pic->opaque= malloc(sizeof(pts));
+        memcpy(pic->opaque, &pts, sizeof(pts));
+    }
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
 
@@ -863,7 +867,10 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic){
         return 0;
     }
            
-    muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
+    muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0, 
+                      pts, 
+                      *(double*)lavc_venc_context->coded_frame->opaque);
+    free(lavc_venc_context->coded_frame->opaque);
         
 #if LIBAVCODEC_BUILD >= 4643
     /* store psnr / pict size / type / qscale */

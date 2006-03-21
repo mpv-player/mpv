@@ -93,7 +93,7 @@ static int config(struct vf_instance_s* vf,
 }
 
 /* Filter handler */
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
     mp_image_t        *dmpi;
     struct vf_priv_s  *priv;
@@ -170,7 +170,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
         /* Display the composition */
         dmpi->width  = xw;
         dmpi->height = yh;
-        return vf_next_put_image(vf, dmpi);
+        return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
     }
     else {
         /* Skip the frame */

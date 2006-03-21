@@ -311,7 +311,7 @@ static void qpel_4tap_C(unsigned char *d, unsigned char *s, int w, int h, int ds
 static void (*qpel_li)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 static void (*qpel_4tap)(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up);
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	int i;
 	int ret=0;
@@ -356,7 +356,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				dmpi->stride[1] = 2*mpi->stride[1];
 				dmpi->stride[2] = 2*mpi->stride[2];
 			}
-			ret |= vf_next_put_image(vf, dmpi);
+			ret |= vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
 		break;
@@ -383,7 +383,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				deint(dmpi->planes[2], dmpi->stride[2], mpi->planes[2], mpi->stride[2],
 					mpi->chroma_width, mpi->chroma_height, (i^!tff));
 			}
-			ret |= vf_next_put_image(vf, dmpi);
+			ret |= vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
 		break;
@@ -406,7 +406,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 					mpi->chroma_width, mpi->chroma_height/2,
 					dmpi->stride[2], mpi->stride[2]*2, (i^!tff));
 			}
-			ret |= vf_next_put_image(vf, dmpi);
+			ret |= vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			if (!i) vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
 		}
 		break;

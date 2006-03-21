@@ -132,7 +132,7 @@ static void vBlur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int s
 	}
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
 
@@ -156,7 +156,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	vBlur(dmpi->planes[2], dmpi->planes[2], cw,ch, 
 		dmpi->stride[2], dmpi->stride[2], vf->priv->chromaParam.radius, vf->priv->chromaParam.power);
     
-	return vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi, pts);
 }
 
 //===========================================================================//

@@ -30,7 +30,7 @@ static inline void *my_memcpy_pic(void * dst, void * src, int bytesPerLine, int 
 	return retval;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 	int ret;
@@ -58,7 +58,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		ret = vf_next_put_image(vf, dmpi);
+		ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 	case 1:
 	case 2:
 		memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h,
@@ -71,7 +71,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height,
 				dmpi->stride[2], mpi->stride[2]);
 		}
-		return vf_next_put_image(vf, dmpi) || ret;
+		return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE) || ret;
 	case 3:
 		my_memcpy_pic(dmpi->planes[0]+dmpi->stride[0],
 			mpi->planes[0]+mpi->stride[0], mpi->w, mpi->h/2,
@@ -86,7 +86,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 				mpi->chroma_width, mpi->chroma_height/2,
 				dmpi->stride[2]*2, mpi->stride[2]*2);
 		}
-		ret = vf_next_put_image(vf, dmpi);
+		ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 		my_memcpy_pic(dmpi->planes[0], mpi->planes[0], mpi->w, mpi->h/2,
 			dmpi->stride[0]*2, mpi->stride[0]*2);
 		if (mpi->flags & MP_IMGFLAG_PLANAR) {

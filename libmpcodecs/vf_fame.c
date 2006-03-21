@@ -45,7 +45,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_MPEGPES);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     fame_yuv_t yuv;
     mp_image_t *dmpi;
     int out_size;
@@ -75,7 +75,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     dmpi->planes[0]=(void*) &vf->priv->pes;
     
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, MP_NOPTS_VALUE);
 }
 
 //===========================================================================//

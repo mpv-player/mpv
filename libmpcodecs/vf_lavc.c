@@ -115,7 +115,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_MPEGPES);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t* dmpi;
     int out_size;
     AVFrame *pic= vf->priv->pic;
@@ -143,7 +143,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     dmpi->planes[0]=(unsigned char*)&vf->priv->pes;
     
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, MP_NOPTS_VALUE);
 }
 
 //===========================================================================//
@@ -203,7 +203,7 @@ static int open(vf_instance_t *vf, char* args){
     }
 #if LIBAVCODEC_BUILD >= 4754
     lavc_venc_context.time_base.num = 1000*1001;
-    lavc_venc_context.time_base.den = (p_fps<1.0) ? 0 : (p_fps * lavc_venc_context.time_base.num);
+    lavc_venc_context.time_base.den = (p_fps<1.0) ? 1000*1001*25 : (p_fps * lavc_venc_context.time_base.num);
 #else
 #if LIBAVCODEC_BUILD >= 4662
     lavc_venc_context.frame_rate_base = 1000*1001;

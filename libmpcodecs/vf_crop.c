@@ -67,10 +67,10 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,vf->priv->crop_w,vf->priv->crop_h,d_width,d_height,flags,outfmt);
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     mp_image_t *dmpi;
     if (mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)
-	return vf_next_put_image(vf,vf->dmpi);
+	return vf_next_put_image(vf,vf->dmpi, pts);
     dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, 0,
 	vf->priv->crop_w, vf->priv->crop_h);
@@ -91,7 +91,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     }
     dmpi->stride[0]=mpi->stride[0];
     dmpi->width=mpi->width;
-    return vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi, pts);
 }
 
 static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){

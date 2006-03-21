@@ -115,9 +115,9 @@ static int query_format(struct vf_instance_s *vf, unsigned int fmt) {
     return 0;
 }
 
-static int put_image(struct vf_instance_s *vf, mp_image_t *mpi) {
+static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts) {
     mux_v->buffer = mpi->planes[0];
-    muxer_write_chunk(mux_v, mpi->width*mpi->height*mux_v->bih->biBitCount/8, 0x10, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
+    muxer_write_chunk(mux_v, mpi->width*mpi->height*mux_v->bih->biBitCount/8, 0x10, pts, pts);
     return 1;
 }
 

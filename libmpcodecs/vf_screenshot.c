@@ -187,7 +187,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->priv=(void*)vf->dmpi;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
     mp_image_t *dmpi = (mp_image_t *)mpi->priv;
     
@@ -220,7 +220,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	vf->priv->store_slices = 0;
     }
 
-    return vf_next_put_image(vf, dmpi);
+    return vf_next_put_image(vf, dmpi, pts);
 }
 
 int control (vf_instance_t *vf, int request, void *data)

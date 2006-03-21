@@ -30,7 +30,7 @@ static inline int clamp_c(int x){
     return (x > 240) ? 240 : (x < 16) ? 16 : x;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     int i,j;
     uint8_t *y_in, *cb_in, *cr_in;
     uint8_t *y_out, *cb_out, *cr_out;
@@ -58,7 +58,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	    cr_out[i*vf->dmpi->stride[2]+j] = clamp_c(cr_in[i*mpi->stride[2]+j]);
 	}
     
-    return vf_next_put_image(vf,vf->dmpi);
+    return vf_next_put_image(vf,vf->dmpi, pts);
 }
 
 //===========================================================================//

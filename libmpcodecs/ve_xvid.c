@@ -434,7 +434,7 @@ query_format(struct vf_instance_s* vf, unsigned int fmt)
 }
 
 static int
-put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
     XVID_ENC_STATS enc_stats;
     struct vf_priv_s *fp = vf->priv;

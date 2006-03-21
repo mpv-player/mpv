@@ -336,7 +336,7 @@ if(!mpi || drop_frame) return 0; // error / skipped frame
 
 //vo_draw_image(video_out,mpi);
 vf=sh_video->vfilter;
-ret = vf->put_image(vf,mpi); // apply video filters and call the leaf vo/ve
+ret = vf->put_image(vf,mpi, MP_NOPTS_VALUE); // apply video filters and call the leaf vo/ve
 if(ret>0) vf->control(vf,VFCTRL_DRAW_OSD,NULL);
 
     t2=GetTimer()-t2;

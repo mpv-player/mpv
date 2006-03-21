@@ -387,7 +387,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     ENC_RESULT enc_result;
     vf->priv->enc_frame.image=mpi->planes[0];
     vf->priv->enc_frame.bitstream=mux_v->buffer;

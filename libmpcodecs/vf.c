@@ -630,8 +630,8 @@ int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
     return flags;
 }
 
-int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
-    return vf->next->put_image(vf->next,mpi);
+int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi, double pts){
+    return vf->next->put_image(vf->next,mpi, pts);
 }
 
 void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stride,int w, int h, int x, int y){

@@ -100,7 +100,7 @@ static void get_image(struct vf_instance_s* vf,
 }
 
 static int put_image(struct vf_instance_s* vf,
-        mp_image_t *mpi){
+        mp_image_t *mpi, double pts){
   if(!vo_config_count) return 0; // vo not configured?
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
   if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.

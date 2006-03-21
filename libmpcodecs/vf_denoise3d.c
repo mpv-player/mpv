@@ -114,7 +114,7 @@ static void deNoise(unsigned char *Frame,        // mpi->planes[x]
 
 
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	int cw= mpi->w >> mpi->chroma_x_shift;
 	int ch= mpi->h >> mpi->chroma_y_shift;
         int W = mpi->w, H = mpi->h;
@@ -147,7 +147,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
                 vf->priv->Coefs[3] + 256);
 
 	vf->priv->pmpi=dmpi; // save reference image
-	return vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi, pts);
 }
 
 //===========================================================================//

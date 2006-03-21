@@ -118,7 +118,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
 }
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	struct pullup_context *c = vf->priv->ctx;
 	struct pullup_buffer *b;
@@ -263,7 +263,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			dmpi->qstride = mpi->qstride;
 			dmpi->qscale_type = mpi->qscale_type;
 		}
-		return vf_next_put_image(vf, dmpi);
+		return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 	}
 	dmpi = vf_get_image(vf->next, mpi->imgfmt,
 		MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
@@ -282,7 +282,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		dmpi->qstride = mpi->qstride;
 		dmpi->qscale_type = mpi->qscale_type;
 	}
-	ret = vf_next_put_image(vf, dmpi);
+	ret = vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 	pullup_release_frame(f);
 	return ret;
 }

@@ -58,7 +58,7 @@ static void (*process)(uint8_t *udst, uint8_t *vdst, uint8_t *usrc, uint8_t *vsr
 
 /* FIXME: add packed yuv version of process */
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
 
@@ -89,7 +89,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			vf->priv->hue, vf->priv->saturation);
 	}
 
-	return vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi, pts);
 }
 
 static int control(struct vf_instance_s* vf, int request, void* data)

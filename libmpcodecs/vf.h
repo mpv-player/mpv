@@ -37,7 +37,7 @@ typedef struct vf_instance_s {
     void (*get_image)(struct vf_instance_s* vf,
         mp_image_t *mpi);
     int (*put_image)(struct vf_instance_s* vf,
-        mp_image_t *mpi);
+        mp_image_t *mpi, double pts);
     void (*start_slice)(struct vf_instance_s* vf,
         mp_image_t *mpi);
     void (*draw_slice)(struct vf_instance_s* vf,
@@ -78,6 +78,10 @@ typedef struct vf_seteq_s
 
 #include "vfcap.h"
 
+//FIXME this should be in a common header, but i dunno which
+#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
+
+
 // functions:
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h);
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h);
@@ -96,7 +100,7 @@ int vf_next_config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt);
 int vf_next_control(struct vf_instance_s* vf, int request, void* data);
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt);
-int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi);
+int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi, double pts);
 void vf_next_draw_slice (struct vf_instance_s* vf, unsigned char** src, int* stride, int w,int h, int x, int y);
 
 vf_instance_t* append_filters(vf_instance_t* last);

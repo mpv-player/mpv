@@ -199,7 +199,7 @@ _read_cmd(int fd, char *cmd, char *args) {
 			
 
 static int
-put_image(struct vf_instance_s* vf, mp_image_t* mpi){
+put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 	int buf_x=0, buf_y=0, buf_pos=0;
 	int have, got, want;
 	int xpos=0, ypos=0, pos=0;
@@ -246,10 +246,10 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			else if( strncmp(cmd,"OPAQUE",6)==0 ) vf->priv->opaque=TRUE;
 			else if( strncmp(cmd,"SHOW",  4)==0 ) vf->priv->hidden=FALSE;
 			else if( strncmp(cmd,"HIDE",  4)==0 ) vf->priv->hidden=TRUE;
-			else if( strncmp(cmd,"FLUSH" ,5)==0 ) return vf_next_put_image(vf, dmpi);
+			else if( strncmp(cmd,"FLUSH" ,5)==0 ) return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			else {
 			    mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Unknown command: '%s'. Ignoring.\n", cmd);
-			    return vf_next_put_image(vf, dmpi);
+			    return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			}
 
 			if(command == CMD_ALPHA) {
@@ -268,7 +268,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			    buffer = malloc(imgw*imgh*pxsz);
 			    if(!buffer) {
 			    	mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Couldn't allocate temporary buffer! Skipping...\n\n");
-					return vf_next_put_image(vf, dmpi);
+					return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			    }
   				/* pipes/sockets might need multiple calls to read(): */
 			    want = (imgw*imgh*pxsz);
@@ -329,7 +329,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 					if( (imgx <= vf->priv->x2) && ( (imgx+imgw) >= vf->priv->x2) )
 						vf->priv->x2 = imgx;
 				}
-				return vf_next_put_image(vf, dmpi);
+				return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 			}
 
 			for( buf_y=0 ; (buf_y < imgh) && (buf_y < (vf->priv->h-imgy)) ; buf_y++ ) {
@@ -387,7 +387,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 		}
     }
 
-	if(vf->priv->hidden) return vf_next_put_image(vf, dmpi);
+	if(vf->priv->hidden) return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 
 	if(vf->priv->opaque) {	// Just copy buffer memory to screen
 		for( ypos=vf->priv->y1 ; ypos < vf->priv->y2 ; ypos++ ) {
@@ -439,7 +439,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 			} // for xpos
 		} // for ypos
 	} // if !opaque
-    return vf_next_put_image(vf, dmpi);
+    return vf_next_put_image(vf, dmpi, MP_NOPTS_VALUE);
 } // put_image
 
 static int
