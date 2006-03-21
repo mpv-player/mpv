@@ -4,6 +4,7 @@
 #include <math.h>
 #include <limits.h>
 #include <time.h>
+#include <assert.h>
 
 #if !defined(INFINITY) && defined(HUGE_VAL)
 #define INFINITY HUGE_VAL
@@ -857,8 +858,15 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     double dts;
 
     if(pic){
+#if 0
         pic->opaque= malloc(sizeof(pts));
         memcpy(pic->opaque, &pts, sizeof(pts));
+#else
+        if(pts != MP_NOPTS_VALUE)
+            pic->pts= floor(pts / av_q2d(lavc_venc_context->time_base) + 0.5);
+        else
+            pic->pts= MP_NOPTS_VALUE;
+#endif
     }
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
@@ -867,11 +875,18 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
         dts= pts - lavc_venc_context->delay * av_q2d(lavc_venc_context->time_base);
     else
         dts= MP_NOPTS_VALUE;
-
+#if 0
     pts= lavc_venc_context->coded_frame->opaque ?
            *(double*)lavc_venc_context->coded_frame->opaque
          : MP_NOPTS_VALUE;
-
+#else
+    if(lavc_venc_context->coded_frame->pts != MP_NOPTS_VALUE)
+        pts= lavc_venc_context->coded_frame->pts * av_q2d(lavc_venc_context->time_base);
+    else
+        pts= MP_NOPTS_VALUE;
+    assert(MP_NOPTS_VALUE == AV_NOPTS_VALUE);
+#endif
+//fprintf(stderr, "ve_lavc %f/%f\n", dts, pts);
     if(out_size == 0) {
         ++mux_v->encoder_delay;
         return 0;
