@@ -854,6 +854,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
     int out_size;
+    double dts;
 
     if(pic){
         pic->opaque= malloc(sizeof(pts));
@@ -862,15 +863,24 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
 
+    if(pts != MP_NOPTS_VALUE) 
+        dts= pts - lavc_venc_context->delay * av_q2d(lavc_venc_context->time_base);
+    else
+        dts= MP_NOPTS_VALUE;
+
+    pts= lavc_venc_context->coded_frame->opaque ?
+           *(double*)lavc_venc_context->coded_frame->opaque
+         : MP_NOPTS_VALUE;
+
     if(out_size == 0) {
         ++mux_v->encoder_delay;
         return 0;
     }
            
     muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0, 
-                      pts, 
-                      *(double*)lavc_venc_context->coded_frame->opaque);
+                      dts, pts);
     free(lavc_venc_context->coded_frame->opaque);
+    lavc_venc_context->coded_frame->opaque= NULL;
         
 #if LIBAVCODEC_BUILD >= 4643
     /* store psnr / pict size / type / qscale */
