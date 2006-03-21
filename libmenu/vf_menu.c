@@ -37,7 +37,7 @@ struct vf_priv_s {
   menu_t* current;
 };
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi);
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts);
 
 static mp_image_t* alloc_mpi(int w, int h, uint32_t fmt) {
   mp_image_t* mpi = new_mp_image(w,h);
@@ -76,7 +76,7 @@ static mp_image_t* alloc_mpi(int w, int h, uint32_t fmt) {
 
 void vf_menu_pause_update(struct vf_instance_s* vf) {
   if(pause_mpi) {
-    put_image(vf,pause_mpi);
+    put_image(vf,pause_mpi, MP_NOPTS_VALUE);
     // Don't draw the osd atm
     //vf->control(vf,VFCTRL_DRAW_OSD,NULL);
     video_out->flip_page();
@@ -169,7 +169,7 @@ inline static void copy_mpi(mp_image_t *dmpi, mp_image_t *mpi) {
 
 
 
-static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
   mp_image_t *dmpi = NULL;
 
   if(vf->priv->current->show 
@@ -231,7 +231,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi->planes[2] = mpi->planes[2];
     dmpi->priv      = mpi->priv;
   }
-  return vf_next_put_image(vf,dmpi);
+  return vf_next_put_image(vf,dmpi, pts);
 }
 
 static void uninit(vf_instance_t *vf) {
