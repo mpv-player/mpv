@@ -2693,7 +2693,7 @@ if(!sh_video) {
 	// decode:
 	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
-	blit_frame=decode_video(sh_video,start,in_size,drop_frame);
+	blit_frame=decode_video(sh_video,start,in_size,drop_frame, MP_NOPTS_VALUE);
 	break;
     }
     vdecode_time=video_time_usage-vdecode_time;

@@ -304,7 +304,7 @@ return 1; // success
 
 extern int vo_directrendering;
 
-int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
+int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame, double pts){
 vf_instance_t* vf;
 mp_image_t *mpi=NULL;
 unsigned int t=GetTimer();
@@ -336,7 +336,7 @@ if(!mpi || drop_frame) return 0; // error / skipped frame
 
 //vo_draw_image(video_out,mpi);
 vf=sh_video->vfilter;
-ret = vf->put_image(vf,mpi, MP_NOPTS_VALUE); // apply video filters and call the leaf vo/ve
+ret = vf->put_image(vf,mpi, pts); // apply video filters and call the leaf vo/ve
 if(ret>0) vf->control(vf,VFCTRL_DRAW_OSD,NULL);
 
     t2=GetTimer()-t2;

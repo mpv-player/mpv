@@ -1321,7 +1321,7 @@ case VCODEC_FRAMENO:
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     blit_frame=decode_video(sh_video,frame_data.start,frame_data.in_size,
-      skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE));
+      skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), mux_v->timer);
     
     if (sh_video->vf_inited < 0) mencoder_exit(1, NULL);
     
@@ -1739,7 +1739,7 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
 
         if (vfilter) {
             int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
-            decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip);
+            decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip, MP_NOPTS_VALUE);
         }
 
 #ifdef USE_EDL
