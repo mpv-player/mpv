@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1237
+.\" In sync with rev 1.1243
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -2324,7 +2324,6 @@ Plugin-Audioausgabetreiber.
 .TP
 .B \-adapter <Wert>
 Bestimmt die Grafikkarte, die das Bild erhalten wird.
-Benötigt die \-vm-Option, um zu funktionieren.
 Du bekommst eine Liste aller verfügbaren Karten, wenn du diese Option mit \-v
 aufrufst.
 Funktioniert momentan nur mit dem directx-Videoausgabetreiber.
@@ -7425,7 +7424,18 @@ momentan nutzlos
 .
 .TP
 .B vrc_strategy
-Platzhalter, reserviert für zukünftige Benutzung.
+Methode zur Bitratenkontrolle.
+Beachte, dass manche der die Bitratenkontrolle betreffenden Optionen nicht
+wirksam sind, wenn vrc_strategy nicht auf 0 gesetzt ist.
+.PD 0
+.RSs
+.IPs 0
+Benutze die interne lavc-Bitratenkontrolle (Standard).
+.IPs 1
+Benutze die XviD-Bitratenkontrolle (experimentell; MEncoder muß mit
+XviD-Unterstützung kompiliert worden sein).
+.RE
+.PD 1
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
@@ -9377,7 +9387,7 @@ Gründliche Suche (sehr langsam und nicht besser als 3)
 Radius der gründlichen bzw. Multi-Hexagon-Bewegungssuche (Standard: 16)
 .
 .TP
-.B subq=<1\-6>
+.B subq=<1\-7>
 Anpassen der Verfeinerungsqualität von subpel.
 Dieser Parameter kontrolliert das Gleichgewicht von Qualität und
 Geschwindigkeit beim Prozess der Bewegungsschätzung.
@@ -9404,7 +9414,10 @@ Frage kommenden Makroblock-Typen an, und wählt dann den besten Typen
 (Standard).
 .IPs 6
 Aktiviert Rate-Distortion-Optimierung von Makroblock-Typen in Intra- und
-P-Frames an (am besten).
+P-Frames an.
+.IPs 7
+Aktiviert Rate-Distortion-Optimierung von Bewegungsvektoren und Intra-Modi (am
+besten).
 .RE
 .PD 1
 .RS
@@ -9428,7 +9441,7 @@ Benötigt frameref>1.
 .TP
 .B (no)brdo
 Aktiviert die Rate-Distortion-Optimierung von Makroblock-Typen in B-Frames.
-Benötigt subq=6.
+Benötigt subq>=6.
 .
 .TP
 .B (no)bime
@@ -9446,7 +9459,7 @@ deaktiviert
 .IPs 1
 nur bei abschließender Encodierung aktiviert (Standard)
 .IPs 2
-während allen Modus-Selektionen aktiviert (langsam, benötigt subq=6)
+während allen Modus-Entscheidungen aktiviert (langsam, benötigt subq>=6)
 .RE
 .PD 1
 .
@@ -9613,7 +9626,13 @@ sinnvolle Standardparameter hat, die der Benutzer überschreiben kann.
 Beim Generieren von MPEG-Dateien ist es generell sinnvoll, MEncoders Code zum
 Überspringen von Frames zu benutzen (siehe \-noskip, \-mc sowie die Videofilter
 harddup und softskip).
-.br
+.PP
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs format=mpeg2:tsaf:vbitrate=8000
+.RE
+.PD 1
 .
 .TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
