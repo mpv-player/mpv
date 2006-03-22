@@ -42,6 +42,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 #include "m_option.h"
 #include "m_config.h"
+#include "m_property.h"
 
 #include "cfg-mplayer-def.h"
 
@@ -238,6 +239,7 @@ static int osd_duration = 1000;
 
 static int term_osd = 1;
 static char* term_osd_esc = "\x1b[A\r\x1b[K";
+static char* playing_msg = NULL;
 // seek:
 static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
@@ -1056,7 +1058,9 @@ static void log_sub(void){
 #define OSD_MSG_OSD_STATUS              4
 #define OSD_MSG_BAR                     5
 #define OSD_MSG_PAUSE                   6
-#define OSD_MSG_MUTE                    7
+// Base id for the messages generated from the commmand to property bridge
+#define OSD_MSG_PROPERTY                0x100
+
 
 // These will later be implemented via properties and removed
 #define OSD_MSG_AV_DELAY               100
@@ -1301,6 +1305,288 @@ static void update_osd_msg(void) {
     }
 }
 
+
+// General properties
+
+static int mp_property_osdlevel(m_option_t* prop,int action,void* arg) {
+    return m_property_choice(prop,action,arg,&osd_level);
+}
+
+static int mp_property_playback_speed(m_option_t* prop,int action,void* arg) {
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(float*)arg);
+        playback_speed = *(float*)arg;
+        build_afilter_chain(sh_audio, &ao_data);
+        return 1;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        playback_speed += (arg ? *(float*)arg : 0.1) *
+            (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
+        M_PROPERTY_CLAMP(prop,playback_speed);
+        build_afilter_chain(sh_audio, &ao_data);
+        return 1;
+    }
+    return m_property_float_range(prop,action,arg,&playback_speed);
+}
+
+static int mp_property_path(m_option_t* prop,int action,void* arg) {
+    return m_property_string_ro(prop,action,arg,filename);
+}
+
+static int mp_property_filename(m_option_t* prop,int action,void* arg) {
+    char* f;
+    if(!filename) return M_PROPERTY_UNAVAILABLE;
+    if(((f = strrchr(filename,'/')) || (f = strrchr(filename,'\\'))) && f[1])
+        f++;
+    else
+        f = filename;
+    return m_property_string_ro(prop,action,arg,f);
+}
+
+
+static int mp_property_demuxer(m_option_t* prop,int action,void* arg) {
+    if(!demuxer) return M_PROPERTY_UNAVAILABLE;
+    return m_property_string_ro(prop,action,arg,(char*)demuxer->desc->name);
+}
+
+static int mp_property_length(m_option_t* prop,int action,void* arg) {
+    double len;
+    
+    if(!demuxer ||
+       !(int)(len = demuxer_get_time_length(demuxer)))
+        return M_PROPERTY_UNAVAILABLE;
+    
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        else {
+            int h, m, s = len;
+            h = s/3600;
+            s -= h*3600;
+            m = s/60;
+            s -= m*60;
+            *(char**)arg = malloc(20);
+            if(h > 0) sprintf(*(char**)arg,"%d:%02d:%02d",h,m,s);
+            else if(m > 0) sprintf(*(char**)arg,"%d:%02d",m,s);
+            else sprintf(*(char**)arg,"%d",s);
+            return 1;
+        }
+        break;
+    }
+    return m_property_double_ro(prop,action,arg,len);
+}
+
+// Audio properties
+
+static int mp_property_volume(m_option_t* prop,int action,void* arg) {
+
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+    
+    switch(action) {
+    case M_PROPERTY_GET:
+        if(!arg) return 0;
+        mixer_getbothvolume(&mixer,arg);
+        return 1;
+    case M_PROPERTY_PRINT:{
+        float vol;
+        if(!arg) return 0;
+        mixer_getbothvolume(&mixer,&vol);
+        return m_property_float_range(prop,action,arg,&vol);
+    }        
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+    case M_PROPERTY_SET:
+        break;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+
+#ifdef USE_EDL
+    if (edl_muted) return M_PROPERTY_DISABLED;
+    user_muted = 0;
+#endif
+
+    switch(action) {
+   case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(float*)arg);
+        mixer_setvolume(&mixer,*(float*)arg,*(float*)arg);
+        return 1;
+    case M_PROPERTY_STEP_UP:
+        if(arg && *(float*)arg <= 0)
+            mixer_decvolume(&mixer);
+        else
+            mixer_incvolume(&mixer);
+        return 1;
+    case M_PROPERTY_STEP_DOWN:
+        if(arg && *(float*)arg <= 0)
+            mixer_incvolume(&mixer);
+        else
+            mixer_decvolume(&mixer);
+        return 1;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+
+static int mp_property_mute(m_option_t* prop,int action,void* arg) {
+    
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+    
+    switch(action) {
+    case M_PROPERTY_SET:
+#ifdef USE_EDL
+        if(edl_muted) return M_PROPERTY_DISABLED;
+#endif
+        if(!arg) return 0;
+        if((!!*(int*)arg) != mixer.muted)
+            mixer_mute(&mixer);
+        return 1;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+#ifdef USE_EDL
+        if(edl_muted) return M_PROPERTY_DISABLED;
+#endif
+        mixer_mute(&mixer);
+        return 1;
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+#ifdef USE_EDL
+        if(edl_muted) {
+            *(char**)arg = strdup(MSGTR_EnabledEdl);
+            return 1;
+        }
+#endif
+    default:
+        return m_property_flag(prop,action,arg,&mixer.muted);
+
+    }
+}
+
+
+static m_option_t mp_properties[] = {
+    // General
+    { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
+      M_OPT_RANGE, 0, 3, NULL },
+    { "speed", mp_property_playback_speed, CONF_TYPE_FLOAT,
+      M_OPT_RANGE, 0.01, 100.0, NULL },
+    { "filename", mp_property_filename, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+    { "path", mp_property_path, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+    { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
+      0, 0, 0, NULL },
+    { "length", mp_property_length, CONF_TYPE_DOUBLE,
+      0, 0, 0, NULL },
+
+    // Audio
+    { "volume", mp_property_volume, CONF_TYPE_FLOAT,
+      M_OPT_RANGE, 0, 100, NULL },
+    { "mute", mp_property_mute, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { NULL, NULL, NULL, 0, 0, 0, NULL }
+};
+
+m_option_t*  mp_property_find(char* name) {
+    return m_option_list_find(mp_properties,name);
+}
+
+int mp_property_do(char* name,int action, void* val) {
+    m_option_t* p = mp_property_find(name);
+    if(!p) return M_PROPERTY_UNAVAILABLE;
+    return m_property_do(p,action,val);
+}
+
+
+/*
+ * \brief Commands to property bridge.
+ * 
+ * It is used to handle most commands that just set a property
+ * and optionaly display something on the OSD.
+ * Two kinds of commands are handled: adjust or toggle.
+ *
+ * Adjust commands take 1 or 2 paramter: <value> <abs>
+ * If <abs> is none zero the property is set to the given value
+ * otherwise it is adjusted.
+ *
+ * Toggle commands take 0 or 1 parameter. With no parameter
+ * or a value less than the property minimum it just step the
+ * property to it's next value. Otherwise it set it to the given
+ * value.
+ *
+ */
+
+static struct  {
+    char* name;         // property name
+    int cmd;            // cmd id
+    int toggle;         // set/adjust or toggle command
+    int osd_progbar;    // progbar type
+    int osd_id;         // osd msg id if it must be shared
+    char* osd_msg;      // osd msg template
+} set_prop_cmd[] = {
+    // audio
+    { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
+    { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
+
+    { NULL, 0, 0, 0, -1, NULL }
+};
+
+static int set_property_command(mp_cmd_t* cmd) {
+    int i,r;
+    m_option_t* prop;
+    
+    // look for the command
+    for(i = 0 ; set_prop_cmd[i].name ; i++)
+        if(set_prop_cmd[i].cmd == cmd->id) break;
+    if(!set_prop_cmd[i].name) return 0;
+     
+    // get the property
+    prop = mp_property_find(set_prop_cmd[i].name);
+    if(!prop) return 0;
+    
+    // toggle command
+    if(set_prop_cmd[i].toggle) {
+        // set to value
+        if(cmd->nargs > 0 && cmd->args[0].v.i >= prop->min)
+            r = m_property_do(prop,M_PROPERTY_SET,&cmd->args[0].v.i);
+        else
+            r = m_property_do(prop,M_PROPERTY_STEP_UP,NULL);
+    } else if(cmd->args[1].v.i) //set
+            r = m_property_do(prop,M_PROPERTY_SET,&cmd->args[0].v);
+    else // adjust
+        r = m_property_do(prop,M_PROPERTY_STEP_UP,&cmd->args[0].v);
+ 
+    if(r <= 0) return 1;
+    
+    if(set_prop_cmd[i].osd_progbar) {
+        if(prop->type == CONF_TYPE_INT) {
+            if(m_property_do(prop,M_PROPERTY_GET,&r) > 0)
+                set_osd_bar(set_prop_cmd[i].osd_progbar,
+                            set_prop_cmd[i].osd_msg,
+                            prop->min,prop->max,r);
+        } else if(prop->type == CONF_TYPE_FLOAT) {
+            float f;
+            if(m_property_do(prop,M_PROPERTY_GET,&f) > 0)
+                set_osd_bar(set_prop_cmd[i].osd_progbar,set_prop_cmd[i].osd_msg,
+                            prop->min,prop->max,f);
+        } else
+            mp_msg(MSGT_CPLAYER,MSGL_ERR, "Property use an unsupported type.\n");
+        return 1;
+    }
+    
+    if(set_prop_cmd[i].osd_msg) {
+        char* val = m_property_print(prop);
+        if(val) {
+            set_osd_msg(set_prop_cmd[i].osd_id >= 0 ? set_prop_cmd[i].osd_id :
+                        OSD_MSG_PROPERTY+i,1,osd_duration,
+                        set_prop_cmd[i].osd_msg,val);
+            free(val);
+        }
+    }
+    return 1;
+}
 
 int main(int argc,char* argv[]){
 
@@ -2421,6 +2707,13 @@ current_module="init_vo";
 main:
 current_module="main";
 
+    if(playing_msg) {
+        char* msg = m_properties_expand_string(mp_properties,playing_msg);
+        mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",msg);
+        free(msg);
+    }
+        
+
 // Disable the term osd in verbose mode
 if(verbose) term_osd = 0;
 fflush(stdout);
@@ -3115,6 +3408,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
   mp_cmd_t* cmd;
   int brk_cmd = 0;
   while( !brk_cmd && (cmd = mp_input_get_cmd(0,0,0)) != NULL) {
+   if(!set_property_command(cmd))
     switch(cmd->id) {
     case MP_CMD_SEEK : {
       float v;
@@ -3140,6 +3434,35 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	osd_function= (v > 0) ? OSD_FFW : OSD_REW;
       }
       brk_cmd = 1;
+    } break;
+    case MP_CMD_SET_PROPERTY: {
+        m_option_t* prop = mp_property_find(cmd->args[0].v.s);
+        if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
+        else if(m_property_parse(prop,cmd->args[1].v.s) <= 0)
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Failed to set property '%s' to '%s'.\n",
+                   cmd->args[0].v.s,cmd->args[1].v.s);
+        
+    } break;
+    case MP_CMD_GET_PROPERTY: {
+        m_option_t* prop;
+        void* val;
+        prop = mp_property_find(cmd->args[0].v.s);
+        if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
+        // use m_option_print directly to get easily parsable values
+        val = calloc(1,prop->type->size);
+        if(m_property_do(prop,M_PROPERTY_GET,val) <= 0) {
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Failed to get value of property '%s'.\n",
+                   cmd->args[0].v.s);
+            break;
+        }
+        tmp = m_option_print(prop,val);
+        if(!tmp || tmp == (char*)-1) {
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Failed to print value of property '%s'.\n",
+                   cmd->args[0].v.s);
+            break;
+        }
+        mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_%s=%s\n",cmd->args[0].v.s,tmp);
+        free(tmp);
     } break;
 #ifdef USE_EDL
     case MP_CMD_EDL_MARK:
@@ -3292,41 +3615,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_OSD_SHOW_TEXT :  {
       set_osd_msg(OSD_MSG_TEXT,1,osd_duration,"%64s",cmd->args[0].v.s);
     } break;
-    case MP_CMD_VOLUME :  {
-      int v = cmd->args[0].v.i;
-
-		// start change for absolute volume value
-		int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
-		
-#ifdef USE_EDL
-      if (edl_muted) break;
-      user_muted = 0;
-#endif
-		if( abs )
-		{
-			mixer_setvolume(&mixer, (float)v, (float)v );
-		} else {
-      if(v > 0)
-	mixer_incvolume(&mixer);
-      else
-	mixer_decvolume(&mixer);
-		}
-	  
-      if(1){
-        float vol;
-	mixer_getbothvolume(&mixer, &vol);
-	set_osd_bar(OSD_VOLUME,"Volume",0,100,vol);
-      }
-    } break;
-    case MP_CMD_MUTE:
-#ifdef USE_EDL
-      user_muted = !user_muted;
-      if ((edl_muted | user_muted) != mixer.muted)
-#endif
-      mixer_mute(&mixer);
-      set_osd_msg(OSD_MSG_MUTE,1,osd_duration, MSGTR_OSDMute,
-                  mixer.muted ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-      break;
     case MP_CMD_LOADFILE : {
       play_tree_t* e = play_tree_new();
       play_tree_add_file(e,cmd->args[0].v.s);

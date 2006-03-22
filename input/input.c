@@ -66,9 +66,9 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_STEP, "sub_step",1,  { { MP_CMD_ARG_INT,{0} }, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_OSD, "osd",0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_OSD_SHOW_TEXT, "osd_show_text", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
-  { MP_CMD_VOLUME, "volume", 1, { { MP_CMD_ARG_INT,{0} }, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_VOLUME, "volume", 1, { { MP_CMD_ARG_FLOAT,{0} }, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_MIXER_USEMASTER, "use_master", 0, { {-1,{0}} } },
-  { MP_CMD_MUTE, "mute", 0, { {-1,{0}} } },
+  { MP_CMD_MUTE, "mute", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_CONTRAST, "contrast",1,  { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_GAMMA, "gamma", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} }  },
   { MP_CMD_BRIGHTNESS, "brightness",1,  { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} }  },
@@ -144,6 +144,8 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_GET_VO_FULLSCREEN, "get_vo_fullscreen", 0, { {-1,{0}} } },
   { MP_CMD_GET_SUB_VISIBILITY, "get_sub_visibility", 0, { {-1,{0}} } },
   { MP_CMD_KEYDOWN_EVENTS, "key_down_event", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
+  { MP_CMD_SET_PROPERTY, "set_property", 2, { {MP_CMD_ARG_STRING, {0}},  {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
+  { MP_CMD_GET_PROPERTY, "get_property", 1, { {MP_CMD_ARG_STRING, {0}},  {-1,{0}} } },
   
   { 0, NULL, 0, {} }
 };

@@ -56,6 +56,7 @@ SRCS_MENCODER = mencoder.c \
                 xvid_vbr.c \
 
 SRCS_MPLAYER = mplayer.c \
+               m_property.c \
                mp_msg.c \
                $(SRCS_COMMON) \
                mixer.c \

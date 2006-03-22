@@ -227,7 +227,17 @@ static char help_text[]=
 #define MSGTR_OSDSubBottom "bottom"
 #define MSGTR_OSDSubCenter "center"
 #define MSGTR_OSDSubTop "top"
-#define MSGTR_OSDMute "Mute: %s"
+
+// property values
+#define MSGTR_Enabled "enabled"
+#define MSGTR_EnabledEdl "enabled (edl)"
+#define MSGTR_Disabled "disabled"
+
+// osd bar names
+#define MSGTR_Volume "Volume"
+
+// property state
+#define MSGTR_MuteStatus "Mute: %s"
 
 // mencoder.c:
 

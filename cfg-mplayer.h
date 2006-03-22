@@ -383,6 +383,7 @@ m_option_t mplayer_opts[]={
 	{"term-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noterm-osd", &term_osd, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     	{"term-osd-esc", &term_osd_esc, CONF_TYPE_STRING, 0, 0, 1, NULL},
+	{"playing-msg", &playing_msg, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
 	{"idle", &player_idle_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
