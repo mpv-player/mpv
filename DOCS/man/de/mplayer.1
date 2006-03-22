@@ -4871,7 +4871,7 @@ Drehe um 90 Grad gegen den Uhrzeigersinn und stelle es auf den Kopf.
 .RE
 .
 .TP
-.B scale[=b:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
+.B scale[=b:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
 Skaliert das Bild mit dem Softwareskalierer (langsam) und führt eine
 Farbraumkonvertierung zwischen YUV und RGB durch (siehe auch \-sws).
 .RSs
@@ -4948,6 +4948,17 @@ pal:     720x576 (Standard-PAL)
 sntsc:   640x480 (NTSC mit quadratischen Pixeln)
 .br
 spal:    768x576 (PAL mit quadratischen Pixeln)
+.REss
+.IPs <noup>
+Verbietet Hochskalierung über die ursprünglichen Abmessungen hinaus.
+.RSss
+0: Erlaubt Hochskalierung (Standard).
+.br
+1: Verbietet Hochskalierung, falls eine Abmessung ihren ursprünglichen Wert
+überschreitet.
+.br
+2: Verbietet Hochskalierung, falls beide Abmessungen ihre ursprünglichen Werte
+überschreiten.
 .REss
 .RE
 .
@@ -8286,6 +8297,10 @@ Wenn du vcodec=mpeg2video angibst, kann dieser Wert 8, 9, 10 oder 11 sein.
 Schließt alle GOPs.
 Funktioniert momentan nur, wenn die Szenenwechselerkennung deaktiviert ist
 (sc_threshold=1000000000).
+.TP
+.B vglobal
+FIXME: Dokumentiere diese Option.
+.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9676,6 +9691,10 @@ Jede andere Framerate ist mit dieser Option inkompatibel.
 .SS FFmpeg-libavformat-Muxer (\-lavfopts) (siehe auch \-of lavf)
 .
 .TP
+.B delay\ \ 
+FIXME: Dokumentiere diese Option.
+.
+.TP
 .B format=<container_format>
 Überschreibt das Containerformat, in welches geschrieben wird (Standard:
 automatische Erkennung anhand der Dateiendung).
@@ -9707,6 +9726,22 @@ MPEG-4-Format
 Sony Digital Video Container
 .RE
 .PD 1
+.TP
+.B i_certify_that_my_video_stream_does_not_use_b_frames
+FIXME: Dokumentiere diese Option.
+.
+.TP
+.B muxrate
+FIXME: Dokumentiere diese Option.
+.
+.TP
+.B packetsize
+FIXME: Dokumentiere diese Option.
+.
+.TP
+.B preload
+FIXME: Dokumentiere diese Option.
+.
 .
 .
 .\" --------------------------------------------------------------------------
