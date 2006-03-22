@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1230
+.\" In sync with rev 1.1237
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -8945,8 +8945,7 @@ Die gelieferten Werte haben die Einheit dB (Dezibel), je höher desto besser.
 .
 .PP
 .sp 1
-Die folgende Option ist nur in den Entwicklerversionen von XviD 1.1.x
-verfügbar.
+Die folgende Option ist nur bei XviD 1.1.x verfügbar.
 .
 .TP
 .B bvhq=<0|1>
@@ -8955,6 +8954,15 @@ B-Frames, einen Raten-störungsoptimierten Operator verwenden, was für
 P-Frames mit der Option vhq getan wird.
 Dies liefert besser aussehende B-Frames, während fast keine
 Performance-Einbußen auftreten (Standard: 1).
+.
+.PP
+.sp 1
+Die folgende Option ist nur in der CVS-Version von XviD verfügbar.
+.
+.TP
+.B threads=<0\-n>
+Erzeugt n Threads für die Bewegungsabschätzung (Standard: 0).
+Die maximale Anzahl zu benutzender Threads die Bildhöhe geteilt durch 16.
 .
 .
 .SS x264enc (\-x264encopts)
@@ -9262,7 +9270,7 @@ Sie betrifft nur die Planungsphase von ratecontrol und unterliegt der
 .RE
 .
 .TP
-.B direct_pred=<0\-2>
+.B direct_pred=<0\-3>
 Legt den Typ der Bewegungsvorhersage fest, der für direkte Markoblöcke in
 B-Frames verwendet wird.
 .PD 0
@@ -9271,14 +9279,18 @@ B-Frames verwendet wird.
 Keiner: Direkte Makroblöcke werden nicht genutzt.
 .IPs 1
 Räumlich: Bewegungsvektoren werden über benachbarte Blöcke extrapoliert.
+(Standard)
 .IPs 2
 Zeitlich: Bewegungsvektoren werden über den nachfolgenden P-Frame extrapoliert.
-(Standard)
+.IPs 3
+Auto: Der Codec wählt für jeden Frame zwischen räumlicher und zeitlicher
+Vorhersage.
 .RE
 .PD 1
 .RS
 Zeitlich und räumlich haben in etwa die gleiche Geschwindigkeit und PSNR,
-allerdings sieht zeitlich oft besser aus.
+die Wahl zwischen beiden hängt vom Videoinhalt ab.
+Auto ist etwas besser, jedoch langsamer.
 direct_pred=0 ist sowohl langsamer als auch von schlechterer Qualität.
 .RE
 .
