@@ -80,6 +80,9 @@ frame_drop [<value>]
 get_percent_pos
     Print out the current position in the file, as integer percentage [0-100).
 
+get_property <property>
+    Print out the current value of a property.
+
 get_sub_visibility
     Print out subtitle visibility (1 == on, 0 == off).
 
@@ -125,8 +128,9 @@ menu <command>
 set_menu <menu_name>
     Display the menu named <menu_name>.
 
-mute
-    Mute/unmute sound output.
+mute [<value>]
+    Toggle sound output mutting or set it to <value> when <value> >= 0
+    (1 == on, 0 == off).
 
 osd [<level>]
     Toggle OSD mode or set it to level when <level> >= 0.
@@ -164,6 +168,9 @@ seek <value> [<type>]
         0 is a relative seek of +/- <value> seconds (default).
         1 is a seek to <value> % in the movie.
         2 is a seek to an absolute position of <value> seconds.
+
+set_property <property> <value>
+    Set a property.
 
 speed_incr <value>
     Add <value> to the current playback speed.
@@ -279,8 +286,8 @@ vo_ontop
 vo_rootwin
     Toggle playback on the root window.
 
-volume <value>
-    Increase/decrease volume.
+volume <value> [<abs>]
+    Increase/decrease volume or set it to <value> if <abs> is nonzero.
 
 
 The following commands are really only useful for OSD menu console mode:
