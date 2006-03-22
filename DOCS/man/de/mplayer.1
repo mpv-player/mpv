@@ -1158,6 +1158,18 @@ Falls diese Option mit MEncoder benutzt wird, funktioniert sie im Zusammenhang
 mit \-ovc copy nicht notwendigerweise; benutze stattdessen \-audio-delay.
 .
 .TP
+.B \-ignore-start
+Ignoriere die angegebene Startzeit für Streams in AVI-Dateien.
+In MPlayer setzt dies Streamverzögerungen, die mit der Option \-audio-delay
+encodiert wurden, auf null.
+Bei Encodierungen verhindert diese Option, dass MEncoder die originalen
+Startzeiten der Streams in die neue Datei überträgt; die Option \-audio-delay
+ist davon nicht betroffen.
+Beachte, dass MEncoder manchmal die Startzeiten von Streams automatisch
+anpasst, um angenommene Decodierungsverzögerungen zu kompensieren.
+Benutze diese Option für Encodierungen daher nicht, ohne vorher zu testen.
+.
+.TP
 .B \-demuxer <[+]Name>
 Erzwingt den Demuxertyp.
 Setze ein '+' vor den Namen um den Demuxer zu erzwingen, dann werden
@@ -1409,18 +1421,18 @@ Spielt ein raw-YUV-Beispielvideo.
 .PD 1
 .
 .TP
+.B \-rtsp-port (nur bei LIVE555)
+Wird bei 'rtsp://'-URLs benutzt, um die Portnummer des Clients zu erzwingen.
+Diese Option kann nützlich sein, wenn du hinter einem Router bist und den
+RTSP-Stream vom Server an einen bestimmten Client weiterleiten möchtest.
+.
+.TP
 .B \-rtsp-stream-over-tcp (nur bei LIVE555)
 Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
 daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP
 übertragen werden (mit der gleichen TCP-Verbindung wie RTSP).
 Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
 UDP-Pakete nicht durchlässt (siehe http://www.live555.com/\:mplayer/).
-.
-.TP
-.B \-rtsp-port (nur bei LIVE555)
-Wird bei 'rtsp://'-URLs benutzt, um die Portnummer des Clients zu erzwingen.
-Diese Option kann nützlich sein, wenn du hinter einem Router bist und den
-RTSP-Stream vom Server an einen bestimmten Client weiterleiten möchtest.
 .
 .TP
 .B \-saveidx <Dateiname>
