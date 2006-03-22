@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1243
+.\" In sync with rev 1.1246
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -854,6 +854,10 @@ Wert auf 2 für Linux oder 1024 für Windows.
 Gibt eine Konfigurationsdatei für LIRC an (Standard: ~/.lircrc).
 .
 .TP
+.B \-list-properties
+Gibt eine Liste der verfügbaren Eigenschaften aus.
+.
+.TP
 .B \-loop <Anzahl>
 Wiederholt die Wiedergabe <Anzahl> mal.
 0 bedeutet ständige Wiederholung.
@@ -904,6 +908,17 @@ anzuzeigen).
 Deaktiviert die Benutzung der Linux-Echtzeituhr (real-time clock (RTC) \-
 /dev/\:rtc)
 als Zeitgeber.
+.
+.TP
+.B \-playing-msg <Zeichenkette>
+Gibt vor Beginn der Wiedergabe eine Zeichenkette aus.
+Folgende Erweiterungen werden unterstützt:
+.RSs
+.IPs ${NAME}
+Erweitere um den Wert der Eigenschaft NAME.
+.IPs $(NAME:TEXT)
+Erweitere TEXT nur, wenn die Eigenschaft NAME verfügbar ist.
+.RE
 .
 .TP
 .B \-playlist <Dateiname>
@@ -7433,7 +7448,7 @@ wirksam sind, wenn vrc_strategy nicht auf 0 gesetzt ist.
 Benutze die interne lavc-Bitratenkontrolle (Standard).
 .IPs 1
 Benutze die XviD-Bitratenkontrolle (experimentell; MEncoder muß mit
-XviD-Unterstützung kompiliert worden sein).
+Unterstützung für XviD 1.1 oder höher kompiliert worden sein).
 .RE
 .PD 1
 .
