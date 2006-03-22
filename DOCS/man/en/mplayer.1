@@ -818,6 +818,10 @@ set it to 2 for Linux or 1024 for Windows.
 Specifies a configuration file for LIRC (default: ~/.lircrc).
 .
 .TP
+.B \-list-properties
+Print a list of the available properties.
+.
+.TP
 .B \-loop <number>
 Loops movie playback <number> times.
 0 means forever.
@@ -865,6 +869,17 @@ on this option).
 .B \-nortc (RTC only)
 Turns off usage of the Linux RTC (realtime clock \- /dev/\:rtc) as timing
 mechanism.
+.
+.TP
+.B \-playing-msg <string>
+Print out a string before starting playback. The following expansions are
+supported:
+.RSs
+.IPs ${NAME}
+Expand to the value of the property NAME.
+.IPs $(NAME:TEXT)
+Expand TEXT only if the property NAME is available.
+.RE
 .
 .TP
 .B \-playlist <filename>
