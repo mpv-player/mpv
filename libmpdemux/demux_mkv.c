@@ -2724,12 +2724,26 @@ handle_realvideo (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
   dp_hdr_t *hdr;
   uint8_t chunks;
   int isize;
+#ifdef WORDS_BIGENDIAN
+  uint8_t *p;
+  int i;
+#endif
 
   chunks = *buffer++;
   isize = --size - (chunks+1)*8;
   dp = new_demux_packet (sizeof (*hdr) + size);
   memcpy (dp->buffer + sizeof(*hdr), buffer + (chunks+1)*8, isize);
+#ifdef WORDS_BIGENDIAN
+  p = (uint8_t *)(dp->buffer + sizeof(*hdr) + isize);
+  for (i = 0; i<(chunks+1)*8; i+=4) {
+    p[i] = *((uint8_t *)buffer+i+3);
+    p[i+1] = *((uint8_t *)buffer+i+2);
+    p[i+2] = *((uint8_t *)buffer+i+1);
+    p[i+3] = *((uint8_t *)buffer+i);
+  }
+#else
   memcpy (dp->buffer + sizeof(*hdr) + isize, buffer, (chunks+1)*8);
+#endif
 
   hdr = (dp_hdr_t *) dp->buffer;
   hdr->len = isize;
