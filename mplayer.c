@@ -1065,7 +1065,6 @@ static void log_sub(void){
 
 
 // These will later be implemented via properties and removed
-#define OSD_MSG_AV_DELAY               100
 #define OSD_MSG_FRAMEDROPPING          101
 #define OSD_MSG_ONTOP                  102
 #define OSD_MSG_ROOTWIN                103
@@ -1467,6 +1466,56 @@ static int mp_property_mute(m_option_t* prop,int action,void* arg) {
     }
 }
 
+static int mp_property_audio_delay(m_option_t* prop,int action,void* arg) {
+    if(!(sh_audio && sh_video)) return M_PROPERTY_UNAVAILABLE;
+    switch(action) {
+    case M_PROPERTY_SET:
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        if(!arg) return 0;
+        else {
+            float delay = audio_delay;
+            m_property_delay(prop,action,arg,&audio_delay);
+            if(sh_audio) sh_audio->delay += audio_delay-delay;
+        }
+        return 1;
+    default:
+        return m_property_delay(prop,action,arg,&audio_delay);
+    }
+}
+
+static int mp_property_audio_format(m_option_t* prop,int action,void* arg) {
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_audio->format);
+}
+
+static int mp_property_audio_bitrate(m_option_t* prop,int action,void* arg) {
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_audio->i_bps);
+}
+
+static int mp_property_samplerate(m_option_t* prop,int action,void* arg) {
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_audio->samplerate);
+}
+
+static int mp_property_channels(m_option_t* prop,int action,void* arg) {
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        switch(sh_audio->channels) {
+        case 1: *(char**)arg = strdup("mono"); break;
+        case 2: *(char**)arg = strdup("stereo"); break;
+        default:
+            *(char**)arg = malloc(32);
+            sprintf(*(char**)arg,"%d channels",sh_audio->channels);
+        }
+        return 1;
+    }
+    return m_property_int_ro(prop,action,arg,sh_audio->channels);
+}
+
 
 static m_option_t mp_properties[] = {
     // General
@@ -1488,6 +1537,17 @@ static m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 100, NULL },
     { "mute", mp_property_mute, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
+    { "audio_delay", mp_property_audio_delay, CONF_TYPE_FLOAT,
+      M_OPT_RANGE, -100, 100, NULL },
+    { "audio_format", mp_property_audio_format, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "audio_bitrate", mp_property_audio_bitrate, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "samplerate", mp_property_samplerate, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "channels", mp_property_channels, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+
     { NULL, NULL, NULL, 0, 0, 0, NULL }
 };
 
@@ -1531,6 +1591,7 @@ static struct  {
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
+    { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, MSGTR_AVDelayStatus },
 
     { NULL, 0, 0, 0, -1, NULL }
 };
@@ -3484,13 +3545,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       else
 	movie_aspect = cmd->args[0].v.f;
       mpcodecs_config_vo (sh_video, sh_video->disp_w, sh_video->disp_h, 0);
-    } break;
-    case MP_CMD_AUDIO_DELAY : {
-      float v = cmd->args[0].v.f;
-      audio_delay += v;
-      set_osd_msg(OSD_MSG_AV_DELAY,1,osd_duration,MSGTR_OSDAVDelay,
-                  ROUND(audio_delay*1000));
-      if(sh_audio) sh_audio->delay+= v;
     } break;
     case MP_CMD_SPEED_INCR : {
       float v = cmd->args[0].v.f;

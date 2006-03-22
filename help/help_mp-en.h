@@ -214,7 +214,6 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Sub delay: %d ms"
 #define MSGTR_OSDSubPosition "Sub position: %d/100"
 #define MSGTR_OSDSubAlignment "Sub alignment: %s"
-#define MSGTR_OSDAVDelay "A-V delay: %d ms"
 #define MSGTR_OSDSpeed "Speed: x %6.2f"
 #define MSGTR_OSDStayOnTop "Stay on top: %s"
 #define MSGTR_OSDRootwin "Rootwin: %s"
@@ -238,6 +237,7 @@ static char help_text[]=
 
 // property state
 #define MSGTR_MuteStatus "Mute: %s"
+#define MSGTR_AVDelayStatus "A-V delay: %s"
 
 // mencoder.c:
 
