@@ -283,7 +283,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 #ifndef PVA_NEW_PREBYTES_CODE
 	demux_packet_t * dp; 	//hack to deliver the preBytes (see PVA doc)
 #endif
-	pva_priv_t * priv=(pva_priv_t *) d->priv;
+	pva_priv_t * priv;
 
 	
 	if(d==NULL)
@@ -292,6 +292,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 		return 0;
 	}
 
+	priv = (pva_priv_t *)d->priv;
 	d->filepos=stream_tell(d->stream);
 	
 	
