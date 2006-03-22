@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.228
+// In synch with rev 1.229
 
 // ========================= MPlayer help ===========================
 
@@ -217,7 +217,6 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
 #define MSGTR_OSDSubPosition "Untertitelposition: %d/100"
 #define MSGTR_OSDSubAlignment "Untertitelausrichtung: %s"
-#define MSGTR_OSDAVDelay "A/V-Verzögerung: %dms"
 #define MSGTR_OSDSpeed "Geschwindigkeit: %6.2f-fach"
 #define MSGTR_OSDStayOnTop "Immer im Vordergrund: %s"
 #define MSGTR_OSDRootwin "Anzeige auf dem Desktop: %s"
@@ -241,6 +240,7 @@ static char help_text[]=
 
 // property state
 #define MSGTR_MuteStatus "Stumm: %s"
+#define MSGTR_AVDelayStatus "A/V-Verzögerung: %s"
 
 // mencoder.c:
 
