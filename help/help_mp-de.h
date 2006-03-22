@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.226
+// In synch with rev 1.228
 
 // ========================= MPlayer help ===========================
 
@@ -230,7 +230,17 @@ static char help_text[]=
 #define MSGTR_OSDSubBottom "unten"
 #define MSGTR_OSDSubCenter "mitte"
 #define MSGTR_OSDSubTop "oben"
-#define MSGTR_OSDMute "Stumm: %s"
+
+// property values
+#define MSGTR_Enabled "aktiviert"
+#define MSGTR_EnabledEdl "aktiviert (edl)"
+#define MSGTR_Disabled "deaktiviert"
+
+// osd bar names
+#define MSGTR_Volume "Lautstärke"
+
+// property state
+#define MSGTR_MuteStatus "Stumm: %s"
 
 // mencoder.c:
 
@@ -499,6 +509,10 @@ static char help_text[]=
 #define MSGTR_AvailableProfiles "Verfügbare Profile:\n"
 #define MSGTR_UnknownProfile "Unbekanntes Profil '%s'.\n"
 #define MSGTR_Profile "Profil %s: %s\n"
+
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Name                 Typ             Min        Max\n\n"
+#define MSGTR_TotalProperties "\nInsgesamt: %d Eigenschaften\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-Laufwerk '%s' nicht gefunden.\n"
