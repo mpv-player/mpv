@@ -9,6 +9,7 @@
 
 #include "m_option.h"
 #include "m_property.h"
+#include "mp_msg.h"
 #include "help_mp.h"
 
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
@@ -140,6 +141,34 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str) {
     
     ret[pos] = 0;
     return ret;
+}
+
+void m_properties_print_help_list(m_option_t* list) {
+    char min[50],max[50];
+    int i,count = 0;
+    
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_PropertyListHeader);
+    for(i = 0 ; list[i].name ; i++) {
+        m_option_t* opt = &list[i];
+        if(opt->flags & M_OPT_MIN)
+            sprintf(min,"%-8.0f",opt->min);
+        else
+            strcpy(min,"No");
+        if(opt->flags & M_OPT_MAX)
+            sprintf(max,"%-8.0f",opt->max);
+        else
+            strcpy(max,"No");
+        mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %-20.20s %-15.15s %-10.10s %-10.10s\n",
+               opt->name,
+               opt->type->name,
+               min,
+               max,
+               opt->flags & CONF_GLOBAL ? "Yes" : "No",
+               opt->flags & CONF_NOCMD ? "No" : "Yes",
+               opt->flags & CONF_NOCFG ? "No" : "Yes");
+        count++;
+    }
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_TotalProperties, count);
 }
 
 // Some generic property implementations

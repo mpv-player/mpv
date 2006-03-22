@@ -227,6 +227,8 @@ int use_gui=0;
 int enqueue=0;
 #endif
 
+static int list_properties = 0;
+
 #define MAX_OSD_LEVEL 3
 #define MAX_TERM_OSD_LEVEL 1
 
@@ -1813,6 +1815,10 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
        (sub_demuxer_name && strcmp(sub_demuxer_name,"help")==0)){
       demuxer_help();
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
+      opt_exit = 1;
+    }
+    if(list_properties) {
+      m_properties_print_help_list(mp_properties);
       opt_exit = 1;
     }
 

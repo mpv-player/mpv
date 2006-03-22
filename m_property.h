@@ -33,6 +33,8 @@ char* m_property_print(m_option_t* prop);
 
 int m_property_parse(m_option_t* prop, char* txt);
 
+void m_properties_print_help_list(m_option_t* list);
+
 char* m_properties_expand_string(m_option_t* prop_list,char* str);
 
 #define M_PROPERTY_CLAMP(prop,val) do {                                 \

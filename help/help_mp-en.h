@@ -503,6 +503,10 @@ static char help_text[]=
 #define MSGTR_UnknownProfile "Unknown profile '%s'.\n"
 #define MSGTR_Profile "Profile %s: %s\n"
 
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Name                 Type            Min        Max\n\n"
+#define MSGTR_TotalProperties "\nTotal: %d properties\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found.\n"
 #define MSGTR_ErrTrackSelect "Error selecting VCD track."
