@@ -1065,10 +1065,6 @@ static void log_sub(void){
 
 
 // These will later be implemented via properties and removed
-#define OSD_MSG_FRAMEDROPPING          101
-#define OSD_MSG_ONTOP                  102
-#define OSD_MSG_ROOTWIN                103
-#define OSD_MSG_BORDER                 104
 #define OSD_MSG_SUB_POS                105
 #define OSD_MSG_SUB_ALIGN              106
 #define OSD_MSG_SUB_VISIBLE            107
@@ -1516,6 +1512,167 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
     return m_property_int_ro(prop,action,arg,sh_audio->channels);
 }
 
+// Video properties
+
+static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
+
+    if(!video_out) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(int*)arg);
+        if(vo_fs == !!*(int*)arg) return 1;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+#ifdef HAVE_NEW_GUI
+        if(use_gui) guiGetEvent(guiIEvent,(char*)MP_CMD_GUI_FULLSCREEN);
+        else
+#endif
+        if(vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
+        return 1;
+    default:
+        return m_property_flag(prop,action,arg,&vo_fs);
+    }
+}
+
+static int mp_property_panscan(m_option_t* prop,int action,void* arg) {
+
+    if(!video_out || video_out->control(VOCTRL_GET_PANSCAN,NULL ) != VO_TRUE)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(float*)arg);
+        vo_panscan = *(float*)arg;
+        video_out->control(VOCTRL_SET_PANSCAN,NULL);
+        return 1;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        vo_panscan += (arg ? *(float*)arg : 0.1) *
+            (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
+        if(vo_panscan > 1) vo_panscan = 1;
+        else if(vo_panscan < 0) vo_panscan = 0;
+        video_out->control(VOCTRL_SET_PANSCAN,NULL);
+        return 1;
+    default:
+        return m_property_float_range(prop,action,arg,&vo_panscan);
+    }
+}
+
+
+static int mp_property_vo_flag(m_option_t* prop,int action,void* arg,
+                               int vo_ctrl,int* vo_var) {
+
+    if(!video_out) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(int*)arg);
+        if(*vo_var == !!*(int*)arg) return 1;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        if(vo_config_count) video_out->control(vo_ctrl, 0);
+        return 1;
+    default:
+        return m_property_flag(prop,action,arg,vo_var);
+    }
+}
+
+static int mp_property_ontop(m_option_t* prop,int action,void* arg) {
+    return mp_property_vo_flag(prop,action,arg,VOCTRL_ONTOP,&vo_ontop);
+}
+
+static int mp_property_rootwin(m_option_t* prop,int action,void* arg) {
+    return mp_property_vo_flag(prop,action,arg,VOCTRL_ROOTWIN,&vo_rootwin);
+}
+
+static int mp_property_border(m_option_t* prop,int action,void* arg) {
+    return mp_property_vo_flag(prop,action,arg,VOCTRL_BORDER,&vo_border);
+}
+
+static int mp_property_framedropping(m_option_t* prop,int action,void* arg) {
+
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        *(char**)arg = strdup(frame_dropping == 1 ? MSGTR_Enabled :
+                              (frame_dropping == 2 ? MSGTR_HardFrameDrop  : MSGTR_Disabled));
+        return 1;
+    default:
+        return m_property_choice(prop,action,arg,&frame_dropping);
+    }
+}
+
+static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
+    int* gamma = prop->priv;
+
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+
+    if(gamma[0] == 1000) {
+        gamma[0] = 0;
+        get_video_colors (sh_video, prop->name, gamma);
+    }
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(int*)arg);
+        *gamma = *(int*)arg;
+        set_video_colors(sh_video, prop->name, *gamma);
+        return 1;
+    case M_PROPERTY_GET:
+        if(!arg) return 0;
+        return get_video_colors (sh_video, prop->name, arg);
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        *gamma += (arg ? *(int*)arg : 1) *
+            (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
+        M_PROPERTY_CLAMP(prop,*gamma);
+        return set_video_colors(sh_video, prop->name, *gamma);
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_vsync(m_option_t* prop,int action,void* arg) {
+    return m_property_flag(prop,action,arg,&vo_vsync);
+}
+
+static int mp_property_video_format(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_video->format);
+}
+
+static int mp_property_video_bitrate(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_video->i_bps);
+}
+
+
+static int mp_property_width(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_video->disp_w);
+}
+
+static int mp_property_height(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_int_ro(prop,action,arg,sh_video->disp_h);
+}
+
+static int mp_property_fps(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_float_ro(prop,action,arg,sh_video->fps);
+}
+
+static int mp_property_aspect(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_float_ro(prop,action,arg,sh_video->aspect);
+}
+
 
 static m_option_t mp_properties[] = {
     // General
@@ -1546,6 +1703,44 @@ static m_option_t mp_properties[] = {
     { "samplerate", mp_property_samplerate, CONF_TYPE_INT,
       0, 0, 0, NULL },
     { "channels", mp_property_channels, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+
+    // Video
+    { "fullscreen", mp_property_fullscreen, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "ontop", mp_property_ontop, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "rootwin", mp_property_rootwin, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "border", mp_property_border, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "framedropping", mp_property_framedropping, CONF_TYPE_INT,
+      M_OPT_RANGE, 0, 2, NULL },
+    { "gamma", mp_property_gamma, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, &vo_gamma_gamma },
+    { "brightness", mp_property_gamma, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, &vo_gamma_brightness },
+    { "contrast", mp_property_gamma, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, &vo_gamma_contrast },
+    { "saturation", mp_property_gamma, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, &vo_gamma_saturation },
+    { "hue", mp_property_gamma, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, &vo_gamma_hue },
+    { "panscan", mp_property_panscan, CONF_TYPE_FLOAT,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "vsync", mp_property_vsync, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "video_format", mp_property_video_format, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "video_bitrate", mp_property_video_bitrate, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "width", mp_property_width, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "height", mp_property_height, CONF_TYPE_INT,
+      0, 0, 0, NULL },
+    { "fps", mp_property_fps, CONF_TYPE_FLOAT,
+      0, 0, 0, NULL },
+    { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
 
     { NULL, NULL, NULL, 0, 0, 0, NULL }
@@ -1592,6 +1787,19 @@ static struct  {
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
     { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, MSGTR_AVDelayStatus },
+    // video
+    { "fullscreen", MP_CMD_VO_FULLSCREEN, 1, 0, -1, NULL },
+    { "panscan", MP_CMD_PANSCAN, 0, OSD_PANSCAN, -1, MSGTR_Panscan },
+    { "ontop", MP_CMD_VO_ONTOP, 1, 0, -1, MSGTR_OnTopStatus },
+    { "rootwin", MP_CMD_VO_ROOTWIN, 1, 0, -1, MSGTR_RootwinStatus },
+    { "border", MP_CMD_VO_BORDER, 1, 0, -1, MSGTR_BorderStatus },
+    { "framedropping", MP_CMD_FRAMEDROPPING, 1, 0, -1, MSGTR_FramedroppingStatus },
+    { "gamma", MP_CMD_GAMMA, 0, OSD_BRIGHTNESS, -1, MSGTR_Gamma },
+    { "brightness", MP_CMD_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
+    { "contrast", MP_CMD_CONTRAST, 0, OSD_CONTRAST, -1, MSGTR_Contrast },
+    { "saturation", MP_CMD_SATURATION, 0, OSD_SATURATION, -1, MSGTR_Saturation },
+    { "hue", MP_CMD_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
+    { "vsync", MP_CMD_SWITCH_VSYNC, 1, 0, -1, MSGTR_VSyncStatus },
 
     { NULL, 0, 0, 0, -1, NULL }
 };
@@ -3711,138 +3919,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
       brk_cmd = 1;
     } break;
-    case MP_CMD_GAMMA :  {
-      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-
-      if (!sh_video)
-	break;
-
-      if (vo_gamma_gamma == 1000)
-      {
-	vo_gamma_gamma = 0;
-	get_video_colors (sh_video, "gamma", &vo_gamma_gamma);
-      }
-
-      if (abs)
-        vo_gamma_gamma = v;
-      else
-        vo_gamma_gamma += v;
-
-      if (vo_gamma_gamma > 100)
-        vo_gamma_gamma = 100;
-      else if (vo_gamma_gamma < -100)
-        vo_gamma_gamma = -100;
-      if (set_video_colors(sh_video, "gamma", vo_gamma_gamma))
-        set_osd_bar(OSD_BRIGHTNESS,"Gamma",-100,100,vo_gamma_gamma);
-    } break;
-    case MP_CMD_BRIGHTNESS :  {
-      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-      
-      if (!sh_video)
-	break;
-      
-      if (vo_gamma_brightness == 1000)
-      {
-	vo_gamma_brightness = 0;
-	get_video_colors(sh_video, "brightness", &vo_gamma_brightness);
-      }
-
-      if (abs)
-        vo_gamma_brightness = v;
-      else
-        vo_gamma_brightness += v;
-
-      if (vo_gamma_brightness > 100)
-        vo_gamma_brightness = 100;
-      else if (vo_gamma_brightness < -100)
-        vo_gamma_brightness = -100;
-      if(set_video_colors(sh_video, "brightness", vo_gamma_brightness))
-        set_osd_bar(OSD_BRIGHTNESS,"Brightness",-100,100,vo_gamma_brightness);
-    } break;
-    case MP_CMD_CONTRAST :  {
-      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-
-      if (!sh_video)
-	break;
-      
-      if (vo_gamma_contrast == 1000)
-      {
-	vo_gamma_contrast = 0;
-	get_video_colors(sh_video, "contrast", &vo_gamma_contrast);
-      }
-     
-      if (abs)
-        vo_gamma_contrast = v;
-      else
-        vo_gamma_contrast += v;
-
-      if (vo_gamma_contrast > 100)
-        vo_gamma_contrast = 100;
-      else if (vo_gamma_contrast < -100)
-        vo_gamma_contrast = -100;
-      if(set_video_colors(sh_video, "contrast", vo_gamma_contrast))
-        set_osd_bar(OSD_CONTRAST,"Contrast",-100,100,vo_gamma_contrast);
-    } break;
-    case MP_CMD_SATURATION :  {
-      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-
-      if (!sh_video)
-	break;
-      
-      if (vo_gamma_saturation == 1000)
-      {
-	vo_gamma_saturation = 0;
-	get_video_colors(sh_video, "saturation", &vo_gamma_saturation);
-      }
-
-      if (abs)
-        vo_gamma_saturation = v;
-      else
-        vo_gamma_saturation += v;
-
-      if (vo_gamma_saturation > 100)
-        vo_gamma_saturation = 100;
-      else if (vo_gamma_saturation < -100)
-        vo_gamma_saturation = -100;
-      if(set_video_colors(sh_video, "saturation", vo_gamma_saturation))
-        set_osd_bar(OSD_SATURATION,"Saturation",-100,100,vo_gamma_saturation);
-    } break;
-    case MP_CMD_HUE :  {
-      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
-
-      if (!sh_video)
-	break;
-      
-      if (vo_gamma_hue == 1000)
-      {
-	vo_gamma_hue = 0;
-	get_video_colors(sh_video, "hue", &vo_gamma_hue);
-      }
-     
-      if (abs)
-        vo_gamma_hue = v;
-      else
-        vo_gamma_hue += v;
-
-      if (vo_gamma_hue > 100)
-        vo_gamma_hue = 100;
-      else if (vo_gamma_hue < -100)
-        vo_gamma_hue = -100;
-      if(set_video_colors(sh_video, "hue", vo_gamma_hue))
-        set_osd_bar(OSD_HUE,"Hue",-100,100,vo_gamma_hue);
-    } break;
-    case MP_CMD_FRAMEDROPPING :  {
-      int v = cmd->args[0].v.i;
-      if(v < 0)
-	frame_dropping = (frame_dropping+1)%3;
-      else
-	frame_dropping = v > 2 ? 2 : v;
-      set_osd_msg(OSD_MSG_FRAMEDROPPING,1,osd_duration,
-                  MSGTR_OSDFramedrop,(frame_dropping == 1 ? MSGTR_OSDFramedropOn :
-                                      (frame_dropping == 2 ? MSGTR_OSDFramedropHard : 
-                                       MSGTR_OSDFramedropOff)));
-      //vo_osd_changed(OSDTYPE_SUBTITLE);
-    } break;
 #ifdef USE_TV
     case MP_CMD_TV_SET_FREQ :  {
       if (file_format == DEMUXER_TYPE_TV)
@@ -3962,61 +4038,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	tv_step_chanlist((tvi_handle_t*)(demuxer->priv));
     } break;
 #endif /* USE_TV */
-    case MP_CMD_SWITCH_VSYNC:  {
-      vo_vsync = ( cmd->nargs > 0 )? cmd->args[0].v.i : !vo_vsync;
-    } break;
-    case MP_CMD_VO_FULLSCREEN:
-    {
-#ifdef HAVE_NEW_GUI
-     if ( use_gui ) guiGetEvent( guiIEvent,(char *)MP_CMD_GUI_FULLSCREEN );
-      else
-#endif
-	if(video_out && vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
-    } break;
-    case MP_CMD_VO_ONTOP:
-    {
-     if(video_out && vo_config_count) {
-       video_out->control(VOCTRL_ONTOP, 0);
-       set_osd_msg(OSD_MSG_ONTOP,1,osd_duration,
-                   MSGTR_OSDStayOnTop, vo_ontop? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-       //vo_osd_changed(OSDTYPE_SUBTITLE);
-     }
-
-    } break;
-    case MP_CMD_VO_ROOTWIN:
-    {
-     if(video_out && vo_config_count) {
-       video_out->control(VOCTRL_ROOTWIN, 0);
-       set_osd_msg(OSD_MSG_ROOTWIN,1,osd_duration,
-                   MSGTR_OSDRootwin, vo_rootwin? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-       //vo_osd_changed(OSDTYPE_SUBTITLE);
-     }
-
-    } break;
-    case MP_CMD_VO_BORDER:
-    {
-     if(video_out && vo_config_count) {
-       video_out->control(VOCTRL_BORDER, 0);
-       set_osd_msg(OSD_MSG_BORDER,1,osd_duration,
-                   MSGTR_OSDBorder, vo_border? MSGTR_OSDenabled : MSGTR_OSDdisabled);
-       //vo_osd_changed(OSDTYPE_SUBTITLE);
-     }
-
-    } break;
-    case MP_CMD_PANSCAN : {
-      if ( !video_out ) break;
-      if ( video_out->control( VOCTRL_GET_PANSCAN,NULL ) == VO_TRUE )
-       {
-        int abs= cmd->args[1].v.i;
-        float v = cmd->args[0].v.f;
-        float res;
-        if(abs) res = v;
-          else res = vo_panscan+v;
-        vo_panscan = res > 1 ? 1 : res < 0 ? 0 : res;
-        video_out->control( VOCTRL_SET_PANSCAN,NULL );
-        set_osd_bar(OSD_PANSCAN,"Panscan",0,1,vo_panscan);
-       }
-    } break;
     case MP_CMD_SUB_POS:
     {
 #ifdef USE_SUB

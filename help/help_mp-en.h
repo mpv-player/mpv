@@ -215,13 +215,6 @@ static char help_text[]=
 #define MSGTR_OSDSubPosition "Sub position: %d/100"
 #define MSGTR_OSDSubAlignment "Sub alignment: %s"
 #define MSGTR_OSDSpeed "Speed: x %6.2f"
-#define MSGTR_OSDStayOnTop "Stay on top: %s"
-#define MSGTR_OSDRootwin "Rootwin: %s"
-#define MSGTR_OSDBorder "Border: %s"
-#define MSGTR_OSDFramedrop "Framedropping: %s"
-#define MSGTR_OSDFramedropOn "on"
-#define MSGTR_OSDFramedropHard "hard"
-#define MSGTR_OSDFramedropOff "off"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDSubBottom "bottom"
 #define MSGTR_OSDSubCenter "center"
@@ -231,13 +224,25 @@ static char help_text[]=
 #define MSGTR_Enabled "enabled"
 #define MSGTR_EnabledEdl "enabled (edl)"
 #define MSGTR_Disabled "disabled"
+#define MSGTR_HardFrameDrop "hard"
 
 // osd bar names
 #define MSGTR_Volume "Volume"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "Brightness"
+#define MSGTR_Contrast "Contrast"
+#define MSGTR_Saturation "Saturation"
+#define MSGTR_Hue "Hue"
 
 // property state
 #define MSGTR_MuteStatus "Mute: %s"
 #define MSGTR_AVDelayStatus "A-V delay: %s"
+#define MSGTR_OnTopStatus "Stay on top: %s"
+#define MSGTR_RootwinStatus "Rootwin: %s"
+#define MSGTR_BorderStatus "Border: %s"
+#define MSGTR_FramedroppingStatus "Framedropping: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
 
 // mencoder.c:
 
