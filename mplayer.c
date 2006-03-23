@@ -1091,6 +1091,7 @@ static mp_osd_msg_t* osd_msg_stack = NULL;
 static void set_osd_msg(int id, int level, int time, char* fmt, ...) {
     mp_osd_msg_t *msg,*last=NULL;
     va_list va;
+    int r;
    
     // look if the id is already in the stack
     for(msg = osd_msg_stack ; msg && msg->id != id ;
@@ -1107,8 +1108,9 @@ static void set_osd_msg(int id, int level, int time, char* fmt, ...) {
     }
     // write the msg
     va_start(va,fmt);
-    vsnprintf(msg->msg, 63, fmt, va);
+    r = vsnprintf(msg->msg, 64, fmt, va);
     va_end(va);
+    if(r >= 64) msg->msg[63] = 0;
     // set id and time
     msg->id = id;
     msg->level = level;
@@ -3881,7 +3883,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  rm_osd_msg(OSD_MSG_OSD_STATUS);
     } break;
     case MP_CMD_OSD_SHOW_TEXT :  {
-      set_osd_msg(OSD_MSG_TEXT,1,osd_duration,"%64s",cmd->args[0].v.s);
+      set_osd_msg(OSD_MSG_TEXT,1,osd_duration,"%-.63s",cmd->args[0].v.s);
     } break;
     case MP_CMD_LOADFILE : {
       play_tree_t* e = play_tree_new();
