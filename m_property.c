@@ -162,10 +162,7 @@ void m_properties_print_help_list(m_option_t* list) {
                opt->name,
                opt->type->name,
                min,
-               max,
-               opt->flags & CONF_GLOBAL ? "Yes" : "No",
-               opt->flags & CONF_NOCMD ? "No" : "Yes",
-               opt->flags & CONF_NOCFG ? "No" : "Yes");
+               max);
         count++;
     }
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, MSGTR_TotalProperties, count);
