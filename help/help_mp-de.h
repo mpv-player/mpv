@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.230
+// In synch with rev 1.231
 
 // ========================= MPlayer help ===========================
 
@@ -210,24 +210,19 @@ static char help_text[]=
 #define MSGTR_OSDunknown "unbekannt"
 #define MSGTR_OSDDVDNAV "DVDNAV: %s"
 #define MSGTR_OSDChannel "Kanal: %s"
-#define MSGTR_OSDSubtitles "Untertitel: %s"
-#define MSGTR_OSDSubtitlesOff "Untertitel: deaktiviert"
-#define MSGTR_OSDSubtitlesLanguage "Untertitelsprache: (%d) %s"
-#define MSGTR_OSDSub "Untertitel: (%d) %s%s"
 #define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
-#define MSGTR_OSDSubPosition "Untertitelposition: %d/100"
-#define MSGTR_OSDSubAlignment "Untertitelausrichtung: %s"
 #define MSGTR_OSDSpeed "Geschwindigkeit: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
-#define MSGTR_OSDSubBottom "unten"
-#define MSGTR_OSDSubCenter "mitte"
-#define MSGTR_OSDSubTop "oben"
 
 // property values
 #define MSGTR_Enabled "aktiviert"
 #define MSGTR_EnabledEdl "aktiviert (edl)"
 #define MSGTR_Disabled "deaktiviert"
 #define MSGTR_HardFrameDrop "hart"
+#define MSGTR_Unknown "unbekannt"
+#define MSGTR_Bottom "unten"
+#define MSGTR_Center "mittig"
+#define MSGTR_Top "oben"
 
 // osd bar names
 #define MSGTR_Volume "Lautstärke"
@@ -246,6 +241,12 @@ static char help_text[]=
 #define MSGTR_BorderStatus "Rahmen: %s"
 #define MSGTR_FramedroppingStatus "Framedropping: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "Untertitel: %s"
+#define MSGTR_SubPosStatus "Untertitelposition: %s/100"
+#define MSGTR_SubAlignStatus "Untertitelausrichtung: %s"
+#define MSGTR_SubDelayStatus "Untertitelverzögerung: %s"
+#define MSGTR_SubVisibleStatus "Untertitel: %s"
+#define MSGTR_SubForcedOnlyStatus "Erzwungene Untertitel: %s"
 
 // mencoder.c:
 
