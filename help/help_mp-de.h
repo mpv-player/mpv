@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.229
+// In synch with rev 1.230
 
 // ========================= MPlayer help ===========================
 
@@ -217,14 +217,7 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
 #define MSGTR_OSDSubPosition "Untertitelposition: %d/100"
 #define MSGTR_OSDSubAlignment "Untertitelausrichtung: %s"
-#define MSGTR_OSDSpeed "Geschwindigkeit: %6.2f-fach"
-#define MSGTR_OSDStayOnTop "Immer im Vordergrund: %s"
-#define MSGTR_OSDRootwin "Anzeige auf dem Desktop: %s"
-#define MSGTR_OSDBorder "Rand: %s"
-#define MSGTR_OSDFramedrop "Framedropping: %s"
-#define MSGTR_OSDFramedropOn "an"
-#define MSGTR_OSDFramedropHard "hart"
-#define MSGTR_OSDFramedropOff "aus"
+#define MSGTR_OSDSpeed "Geschwindigkeit: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
 #define MSGTR_OSDSubBottom "unten"
 #define MSGTR_OSDSubCenter "mitte"
@@ -234,13 +227,25 @@ static char help_text[]=
 #define MSGTR_Enabled "aktiviert"
 #define MSGTR_EnabledEdl "aktiviert (edl)"
 #define MSGTR_Disabled "deaktiviert"
+#define MSGTR_HardFrameDrop "hart"
 
 // osd bar names
 #define MSGTR_Volume "Lautstärke"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "Helligkeit"
+#define MSGTR_Contrast "Kontrast"
+#define MSGTR_Saturation "Sättigung"
+#define MSGTR_Hue "Farbton"
 
 // property state
 #define MSGTR_MuteStatus "Stumm: %s"
 #define MSGTR_AVDelayStatus "A/V-Verzögerung: %s"
+#define MSGTR_OnTopStatus "Immer im Vordergrund: %s"
+#define MSGTR_RootwinStatus "Anzeige auf dem Desktop: %s"
+#define MSGTR_BorderStatus "Rahmen: %s"
+#define MSGTR_FramedroppingStatus "Framedropping: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
 
 // mencoder.c:
 
