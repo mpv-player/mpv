@@ -203,28 +203,20 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "enabled"
 #define MSGTR_OSDdisabled "disabled"
-#define MSGTR_OSDnone "none"
-#define MSGTR_OSDunknown "unknown"
-#define MSGTR_OSDDVDNAV "DVDNAV: %s"
 #define MSGTR_OSDChannel "Channel: %s"
-#define MSGTR_OSDSubtitles "Subtitles: %s"
-#define MSGTR_OSDSubtitlesOff "Subtitles: off"
-#define MSGTR_OSDSubtitlesLanguage "Subtitles: (%d) %s"
-#define MSGTR_OSDSub "Sub: (%d) %s%s"
 #define MSGTR_OSDSubDelay "Sub delay: %d ms"
-#define MSGTR_OSDSubPosition "Sub position: %d/100"
-#define MSGTR_OSDSubAlignment "Sub alignment: %s"
 #define MSGTR_OSDSpeed "Speed: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
-#define MSGTR_OSDSubBottom "bottom"
-#define MSGTR_OSDSubCenter "center"
-#define MSGTR_OSDSubTop "top"
 
 // property values
 #define MSGTR_Enabled "enabled"
 #define MSGTR_EnabledEdl "enabled (edl)"
 #define MSGTR_Disabled "disabled"
 #define MSGTR_HardFrameDrop "hard"
+#define MSGTR_Unknown "unknown"
+#define MSGTR_Bottom "bottom"
+#define MSGTR_Center "center"
+#define MSGTR_Top "top"
 
 // osd bar names
 #define MSGTR_Volume "Volume"
@@ -243,6 +235,12 @@ static char help_text[]=
 #define MSGTR_BorderStatus "Border: %s"
 #define MSGTR_FramedroppingStatus "Framedropping: %s"
 #define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "Subtitles: %s"
+#define MSGTR_SubPosStatus "Sub position: %s/100"
+#define MSGTR_SubAlignStatus "Sub alignment: %s"
+#define MSGTR_SubDelayStatus "Sub delay: %s"
+#define MSGTR_SubVisibleStatus "Subtitles: %s"
+#define MSGTR_SubForcedOnlyStatus "Forced sub only: %s"
 
 // mencoder.c:
 

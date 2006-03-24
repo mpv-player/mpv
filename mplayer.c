@@ -355,6 +355,9 @@ static stream_t* stream=NULL;
 static demuxer_t *demuxer=NULL;
 static sh_audio_t *sh_audio=NULL;
 static sh_video_t *sh_video=NULL;
+static demux_stream_t *d_audio=NULL;
+static demux_stream_t *d_video=NULL;
+static demux_stream_t *d_dvdsub=NULL;
 
 char* current_module=NULL; // for debugging
 
@@ -1064,12 +1067,6 @@ static void log_sub(void){
 #define OSD_MSG_PROPERTY                0x100
 
 
-// These will later be implemented via properties and removed
-#define OSD_MSG_SUB_POS                105
-#define OSD_MSG_SUB_ALIGN              106
-#define OSD_MSG_SUB_VISIBLE            107
-#define OSD_MSG_SUB_CHANGED            108
-
 typedef struct mp_osd_msg mp_osd_msg_t;
 struct mp_osd_msg {
     mp_osd_msg_t* prev;
@@ -1675,6 +1672,267 @@ static int mp_property_aspect(m_option_t* prop,int action,void* arg) {
     return m_property_float_ro(prop,action,arg,sh_video->aspect);
 }
 
+// Subtitles properties
+
+static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
+#ifdef USE_SUB
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+    default:
+        return m_property_int_range(prop,action,arg,&sub_pos);
+    }
+#else
+    return M_PROPERTY_UNAVAILABLE;
+#endif
+}
+
+static int mp_property_sub(m_option_t* prop,int action,void* arg) {
+    int source = -1, reset_spu = 0;
+
+    if(global_sub_size <= 0) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_GET:
+        if(!arg) return 0;
+        *(int*)arg = global_sub_pos;
+        return 1;
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        *(char**)arg = malloc(64);
+        (*(char**)arg)[63] = 0;
+#ifdef USE_SUB
+        if(subdata) {
+            char *tmp,*tmp2;
+            tmp = subdata->filename;
+            if ((tmp2 = strrchr(tmp, '/')))
+                tmp = tmp2+1;
+
+            snprintf(*(char**)arg, 63, "(%d) %s%s",
+                     set_of_sub_pos + 1,
+                     strlen(tmp) < 20 ? "" : "...",
+                     strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
+            return 1;
+        }
+#endif
+#ifdef HAVE_MATROSKA
+        if (demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
+            char lang[40] = MSGTR_Unknown;
+            demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
+            lang[39] = 0;
+            snprintf(*(char**)arg, 63, "(%d) %s", dvdsub_id, lang);
+            return 1;
+        }
+#endif
+#ifdef HAVE_OGGVORBIS
+        if (demuxer->type == DEMUXER_TYPE_OGG && d_dvdsub && dvdsub_id >= 0) {
+            char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
+            if (!lang) lang = MSGTR_Unknown;
+            snprintf(*(char**)arg, 63, "(%d) %s",
+                     dvdsub_id, lang);
+            return 1;
+        }
+#endif
+        if (vo_vobsub && vobsub_id >= 0) {
+            const char *language = MSGTR_Unknown;
+            language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
+            snprintf(*(char**)arg, 63, "(%d) %s",
+                     vobsub_id, language ? language : MSGTR_Unknown);
+            return 1;
+        }
+#ifdef USE_DVDREAD
+        if (vo_spudec && dvdsub_id >= 0) {
+            char lang[3] = "\0\0\0";
+            int code = 0;
+            code = dvd_lang_from_sid(stream, dvdsub_id);
+            if (code) {
+                lang[0] = code >> 8;
+                lang[1] = code;
+                lang[2] = 0;
+            }
+            snprintf(*(char**)arg, 63, "(%d) %s",
+                     dvdsub_id, lang);
+            return 1;
+        }
+#endif
+        snprintf(*(char**)arg, 63, MSGTR_Disabled);
+        return 1;
+
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        if(*(int*)arg < -1) *(int*)arg = -1;
+        else if(*(int*)arg >= global_sub_size) *(int*)arg = global_sub_size-1;
+        global_sub_pos = *(int*)arg;
+        break;
+    case M_PROPERTY_STEP_UP:
+        global_sub_pos += 2;
+        global_sub_pos = (global_sub_pos % (global_sub_size+1)) - 1;
+        break;
+    case M_PROPERTY_STEP_DOWN:
+        global_sub_pos += global_sub_size+1;
+        global_sub_pos = (global_sub_pos % (global_sub_size+1)) - 1;
+        break;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+
+    if (global_sub_pos >= 0)
+        source = sub_source();
+
+    mp_msg(MSGT_CPLAYER, MSGL_DBG3,
+           "subtitles: %d subs, (v@%d s@%d d@%d), @%d, source @%d\n",
+           global_sub_size, global_sub_indices[SUB_SOURCE_VOBSUB],
+           global_sub_indices[SUB_SOURCE_SUBS],
+           global_sub_indices[SUB_SOURCE_DEMUX],
+           global_sub_pos, source);
+
+#ifdef USE_SUB
+    set_of_sub_pos = -1;
+    subdata = NULL;
+    vo_sub_last = vo_sub = NULL;
+#endif
+    vobsub_id = -1;
+    dvdsub_id = -1;
+    if (d_dvdsub) {
+        if(d_dvdsub->id > -2) reset_spu = 1;
+        d_dvdsub->id = -2;
+    }
+
+    if (source == SUB_SOURCE_VOBSUB) {
+        vobsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_VOBSUB];
+#ifdef USE_SUB
+    } else if (source == SUB_SOURCE_SUBS) {
+        set_of_sub_pos = global_sub_pos - global_sub_indices[SUB_SOURCE_SUBS];
+        subdata = set_of_subtitles[set_of_sub_pos];
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+#endif
+    } else if (source == SUB_SOURCE_DEMUX) {
+        dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
+        if (d_dvdsub) {
+#ifdef USE_DVDREAD
+            if (vo_spudec && stream->type == STREAMTYPE_DVD) {
+                d_dvdsub->id = dvdsub_id;
+                spudec_reset(vo_spudec);
+            }
+#endif
+#ifdef HAVE_OGGVORBIS
+            if (demuxer->type == DEMUXER_TYPE_OGG)
+                d_dvdsub->id = demux_ogg_sub_id(demuxer, dvdsub_id);
+#endif
+#ifdef HAVE_MATROSKA
+            if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
+                d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
+                if (d_dvdsub->id >= 0 &&
+                    ((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v') {
+                    mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
+                    if (vo_spudec != NULL)
+                        spudec_free(vo_spudec);
+                    vo_spudec =
+                        spudec_new_scaled_vobsub(mkv_sh_sub->has_palette ?
+                                                 mkv_sh_sub->palette :
+                                                 NULL, mkv_sh_sub->colors,
+                                                 mkv_sh_sub->custom_colors,
+                                                 mkv_sh_sub->width,
+                                                 mkv_sh_sub->height);
+                    if (!forced_subs_only)
+                        forced_subs_only = mkv_sh_sub->forced_subs_only;
+                    if (vo_spudec) {
+                        spudec_set_forced_subs_only(vo_spudec,
+                                                    forced_subs_only);
+                        inited_flags |= INITED_SPUDEC;
+                    }
+                }
+            }
+#endif
+        }
+    } else { // off
+#ifdef USE_SUB
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+#endif
+        if(vo_spudec) vo_osd_changed(OSDTYPE_SPU);
+    }
+#ifdef USE_DVDREAD
+    if (vo_spudec && stream->type == STREAMTYPE_DVD && dvdsub_id < 0 && reset_spu) {
+        dvdsub_id = -2;
+        d_dvdsub->id = dvdsub_id;
+        spudec_reset(vo_spudec);
+    }
+#endif
+
+    return 1;
+}
+
+static int mp_property_sub_delay(m_option_t* prop,int action,void* arg) {
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    return m_property_delay(prop,action,arg,&sub_delay);
+}
+
+static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
+#ifdef USE_SUB
+    char* name[] = { MSGTR_Top, MSGTR_Center, MSGTR_Bottom };
+
+    if(!sh_video || global_sub_pos < 0 || sub_source() != SUB_SOURCE_SUBS)
+        return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,sub_alignment);
+        *(char**)arg = strdup(name[sub_alignment]);
+        return 1;
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+    default:
+        return m_property_choice(prop,action,arg,&sub_alignment);
+    }
+#else
+    return M_PROPERTY_UNAVAILABLE;
+#endif
+}
+
+static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
+#ifdef USE_SUB
+    if(!sh_video) return M_PROPERTY_UNAVAILABLE;
+    
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        vo_osd_changed(OSDTYPE_SUBTITLE);
+        if(vo_spudec) vo_osd_changed(OSDTYPE_SPU);
+    default:
+        return m_property_flag(prop,action,arg,&sub_visibility);
+    }
+#else
+    return M_PROPERTY_UNAVAILABLE;
+#endif
+}
+
+static int mp_property_sub_forced_only(m_option_t* prop,int action,void* arg) {
+    if(!vo_spudec) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        m_property_flag(prop,action,arg,&forced_subs_only);
+        spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
+        return 1;
+    default:
+        return m_property_flag(prop,action,arg,&forced_subs_only);
+    }
+
+}
 
 static m_option_t mp_properties[] = {
     // General
@@ -1745,6 +2003,20 @@ static m_option_t mp_properties[] = {
     { "aspect", mp_property_aspect, CONF_TYPE_FLOAT,
       0, 0, 0, NULL },
 
+    // Subs
+    { "sub", mp_property_sub, CONF_TYPE_INT,
+      M_OPT_MIN, -1, 0, NULL },
+    { "sub_delay", mp_property_sub_delay, CONF_TYPE_FLOAT,
+      0, 0, 0, NULL },
+    { "sub_pos", mp_property_sub_pos, CONF_TYPE_INT,
+      M_OPT_RANGE, 0, 100, NULL },
+    { "sub_alignment", mp_property_sub_alignment, CONF_TYPE_INT,
+      M_OPT_RANGE, 0, 2, NULL },
+    { "sub_visibility", mp_property_sub_visibility, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+    { "sub_forced_only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
+      M_OPT_RANGE, 0, 1, NULL },
+
     { NULL, NULL, NULL, 0, 0, 0, NULL }
 };
 
@@ -1802,6 +2074,13 @@ static struct  {
     { "saturation", MP_CMD_SATURATION, 0, OSD_SATURATION, -1, MSGTR_Saturation },
     { "hue", MP_CMD_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
     { "vsync", MP_CMD_SWITCH_VSYNC, 1, 0, -1, MSGTR_VSyncStatus },
+    // subs
+    { "sub", MP_CMD_SUB_SELECT, 1, 0, -1, MSGTR_SubSelectStatus },
+    { "sub_pos", MP_CMD_SUB_POS, 0, 0, -1, MSGTR_SubPosStatus },
+    { "sub_alignment", MP_CMD_SUB_ALIGNMENT, 1, 0, -1, MSGTR_SubAlignStatus },
+    { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, MSGTR_SubDelayStatus },
+    { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, MSGTR_SubVisibleStatus },
+    { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, MSGTR_SubForcedOnlyStatus },
 
     { NULL, 0, 0, 0, -1, NULL }
 };
@@ -1866,19 +2145,11 @@ int main(int argc,char* argv[]){
 
 char * mem_ptr;
 
-static demux_stream_t *d_audio=NULL;
-static demux_stream_t *d_video=NULL;
-static demux_stream_t *d_dvdsub=NULL;
-
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
 int delay_corrected=1;
 
 // movie info:
-
-// still needed for the subtitles mess
-int osd_show_vobsub_changed = 0;
-int osd_show_sub_changed = 0;
 
 int rtc_fd=-1;
 
@@ -2861,7 +3132,16 @@ if (global_sub_size) {
   }
   // rather than duplicate code, use the SUB_SELECT handler to init the right one.
   global_sub_pos--;
-  mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
+  mp_property_do("sub",M_PROPERTY_STEP_UP,NULL);
+  if(subdata)
+    switch (stream_dump_type) {
+        case 3: list_sub_file(subdata); break;
+        case 4: dump_mpsub(subdata, sh_video->fps); break;
+        case 6: dump_srt(subdata, sh_video->fps); break;
+        case 7: dump_microdvd(subdata, sh_video->fps); break;
+        case 8: dump_jacosub(subdata, sh_video->fps); break;
+        case 9: dump_sami(subdata, sh_video->fps); break;
+    }
 }
 
 //================== Init AUDIO (codec) ==========================
@@ -3013,7 +3293,6 @@ float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
 int grab_frames=0;
 char osd_text_buffer[64];
-char osd_show_text_buffer[64];
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
 int too_slow_frame_cnt=0;
@@ -3837,20 +4116,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
       brk_cmd = 1;
     } break;
-    case MP_CMD_SUB_DELAY : {
-#ifdef USE_SUB
-    if (sh_video) {
-      int abs= cmd->args[1].v.i;
-      float v = cmd->args[0].v.f;
-      if(abs)
-	sub_delay = v;
-      else
-	sub_delay += v;
-      set_osd_msg(OSD_MSG_SUB_DELAY,1,osd_duration,
-                  MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
-    }
-#endif
-    } break;
     case MP_CMD_SUB_STEP : {
 #ifdef USE_SUB
     if (sh_video) {
@@ -4040,48 +4305,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	tv_step_chanlist((tvi_handle_t*)(demuxer->priv));
     } break;
 #endif /* USE_TV */
-    case MP_CMD_SUB_POS:
-    {
-#ifdef USE_SUB
-      if (sh_video) {
-        int v;
-	v = cmd->args[0].v.i;
-    
-	sub_pos+=v;
-	if(sub_pos >100) sub_pos=100;
-	if(sub_pos <0) sub_pos=0;
-        set_osd_msg(OSD_MSG_SUB_POS,1,osd_duration,
-                    MSGTR_OSDSubPosition, sub_pos);
-	vo_osd_changed(OSDTYPE_SUBTITLE);
-      }
-#endif
-    } break;
-    case MP_CMD_SUB_ALIGNMENT:
-    {
-#ifdef USE_SUB
-      if (sh_video) {
-    	if (cmd->nargs >= 1)
-    	    sub_alignment = cmd->args[0].v.i;
-    	else
-            sub_alignment = (sub_alignment+1) % 3;
-        set_osd_msg(OSD_MSG_SUB_ALIGN,1,osd_duration,
-                    MSGTR_OSDSubAlignment,(sub_alignment == 2 ? MSGTR_OSDSubBottom :
-                                         (sub_alignment == 1 ? MSGTR_OSDSubCenter : MSGTR_OSDSubTop)));
-	vo_osd_changed(OSDTYPE_SUBTITLE);
-      }
-#endif
-    } break;
-    case MP_CMD_SUB_VISIBILITY:
-    {
-#ifdef USE_SUB
-      if (sh_video) {
-	sub_visibility=1-sub_visibility;
-	set_osd_msg(OSD_MSG_SUB_VISIBLE,1,osd_duration,
-	            MSGTR_OSDSubtitles, sub_visibility?MSGTR_OSDenabled:MSGTR_OSDdisabled);
-	vo_osd_changed(OSDTYPE_SUBTITLE);
-      }
-#endif
-    } break;
     case MP_CMD_SUB_LOAD:
     {
 #ifdef USE_SUB
@@ -4154,123 +4377,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	}
 #endif
 	} break;
-    case MP_CMD_SUB_SELECT:
-    if (global_sub_size) {
-        int source = -1;
-        int reset=0;
-        int v = cmd->args[0].v.i;
-
-        if (v < -1)
-            global_sub_pos++;
-        else
-            global_sub_pos = v;
-	if(global_sub_pos == global_sub_size)
-	    reset = 1;
-        if (global_sub_pos >= global_sub_size)
-            global_sub_pos = -1;
-        if (global_sub_pos >= 0)
-            source = sub_source();
-
-	mp_msg(MSGT_CPLAYER, MSGL_DBG3, "subtitles: %d subs, (v@%d s@%d d@%d), @%d, source @%d\n",
-		global_sub_size, global_sub_indices[SUB_SOURCE_VOBSUB],
-		global_sub_indices[SUB_SOURCE_SUBS], global_sub_indices[SUB_SOURCE_DEMUX],
-		global_sub_pos, source);
-
-#ifdef USE_SUB
-        set_of_sub_pos = -1;
-        subdata = NULL;
-        vo_sub_last = vo_sub = NULL;
-#endif
-        vobsub_id = -1;
-	if(dvdsub_lang || reset) {
-        dvdsub_id = -1;
-        if (d_dvdsub) d_dvdsub->id = -1;
-	}
-
-        // be careful!
-        // if sub_changed is till on but subdata's been reset, bad things happen.
-        osd_show_vobsub_changed = 0;
-        osd_show_sub_changed = 0;
-
-        if (source == SUB_SOURCE_VOBSUB) {
-            vobsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_VOBSUB];
-            if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
-#ifdef USE_SUB
-        } else if (source == SUB_SOURCE_SUBS) {
-            set_of_sub_pos = global_sub_pos - global_sub_indices[SUB_SOURCE_SUBS];
-            subdata = set_of_subtitles[set_of_sub_pos];
-            if (!global_sub_quiet_osd_hack) osd_show_sub_changed = sh_video->fps;
-            vo_osd_changed(OSDTYPE_SUBTITLE); 
-
-            // FIXME: is this the correct place for these?
-	    switch (stream_dump_type) {
-		case 3: list_sub_file(subdata); break;
-		case 4: dump_mpsub(subdata, sh_video->fps); break;
-		case 6: dump_srt(subdata, sh_video->fps); break;
-		case 7: dump_microdvd(subdata, sh_video->fps); break;
-		case 8: dump_jacosub(subdata, sh_video->fps); break;
-		case 9: dump_sami(subdata, sh_video->fps); break;
-	    }
-#endif
-        } else if (source == SUB_SOURCE_DEMUX) {
-            dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
-            if (d_dvdsub) {
-#ifdef USE_DVDREAD
-                if (vo_spudec && stream->type == STREAMTYPE_DVD) {
-                    d_dvdsub->id = dvdsub_id;
-                    spudec_reset(vo_spudec);
-                }
-#endif
-#ifdef HAVE_OGGVORBIS
-                if (demuxer->type == DEMUXER_TYPE_OGG)
-                    d_dvdsub->id = demux_ogg_sub_id(demuxer, dvdsub_id);
-#endif
-#ifdef HAVE_MATROSKA
-                if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
-                    d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
-      if (d_dvdsub->id >= 0 && ((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v') {
-        mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
-        if (vo_spudec != NULL)
-          spudec_free(vo_spudec);
-        vo_spudec =
-          spudec_new_scaled_vobsub(mkv_sh_sub->has_palette ? mkv_sh_sub->palette : NULL, mkv_sh_sub->colors,
-                                   mkv_sh_sub->custom_colors,
-                                   mkv_sh_sub->width,
-                                   mkv_sh_sub->height);
-        if (!forced_subs_only)
-          forced_subs_only = mkv_sh_sub->forced_subs_only;
-        if (vo_spudec) {
-          spudec_set_forced_subs_only(vo_spudec, forced_subs_only);
-          inited_flags |= INITED_SPUDEC;
-        }
-      }
-    }
-#endif
-            }
-            if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
-        } else { // off
-#ifdef USE_DVDREAD
-            if (vo_spudec && stream->type == STREAMTYPE_DVD && dvdsub_id < 0) {
-	        dvdsub_id = -2;
-                d_dvdsub->id = dvdsub_id;
-                spudec_reset(vo_spudec);
-            }
-#endif	    
-            if (!global_sub_quiet_osd_hack) osd_show_vobsub_changed = sh_video->fps;
-#ifdef USE_SUB
-            vo_osd_changed(OSDTYPE_SUBTITLE); 
-#endif
-	}
-        // it's annoying and dumb to show osd saying "off" at every subless file...
-        global_sub_quiet_osd_hack = 0;
-    }
-        break;
-    case MP_CMD_SUB_FORCED_ONLY:
-      if (vo_spudec) {
-	forced_subs_only = forced_subs_only ? 0 : ~0; // toggle state
-	spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
-      }    
-      break;
     case MP_CMD_SCREENSHOT :
       if(vo_config_count){
 	mp_msg(MSGT_CPLAYER,MSGL_INFO,"sending VFCTRL_SCREENSHOT!\n");
@@ -4696,74 +4802,6 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 
 
 //================= Update OSD ====================
-#ifdef USE_OSD
-  if(sh_video){
-      char osd_text_tmp[64];
-      // The subtitles stuff is particulary messy. Keep the mess for now it will be
-      // cleaned up when properties get implemented.
-      if (osd_show_vobsub_changed) {
-	  snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesOff);
-          switch (demuxer->type) {
-#ifdef HAVE_MATROSKA
-              case DEMUXER_TYPE_MATROSKA:
-                  if (dvdsub_id >= 0) {
-                      char lang[40] = MSGTR_OSDunknown;
-                      demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 39);
-                      lang[39] = 0;
-                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang);
-                  }
-                  break;
-#endif
-#ifdef HAVE_OGGVORBIS
-              case DEMUXER_TYPE_OGG:
-                  if (d_dvdsub && dvdsub_id >= 0) {
-                      char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
-                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, lang ? lang : MSGTR_OSDunknown);
-                  }
-                  break;
-#endif
-              default:
-                  if (vo_vobsub && vobsub_id >= 0) {
-                      char *language = MSGTR_OSDnone;
-                      language = vobsub_get_id(vo_vobsub, (unsigned int) vobsub_id);
-                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, vobsub_id, language ? language : MSGTR_OSDunknown);
-                  }
-#ifdef USE_DVDREAD
-                  if (vo_spudec && dvdsub_id >= 0) {
-                      char lang[3] = "\0\0\0";
-                      int code = 0;
-                      code = dvd_lang_from_sid(stream, dvdsub_id);
-                      if (code) {
-                          lang[0] = code >> 8;
-                          lang[1] = code;
-                      }
-                      snprintf(osd_text_tmp, 63, MSGTR_OSDSubtitlesLanguage, dvdsub_id, code ? lang : MSGTR_OSDnone);
-                  }
-#endif
-                  break;
-          }
-          osd_show_vobsub_changed = 0;
-          set_osd_msg(OSD_MSG_SUB_CHANGED,1,osd_duration,
-                      "%s",osd_text_tmp);
-      } else
-#ifdef USE_SUB
-      if (osd_show_sub_changed) {
-	  char *tmp2;
-          tmp = subdata->filename;
-	  if ((tmp2 = strrchr(tmp, '/'))) {
-	      tmp = tmp2+1;
-	  }
-          set_osd_msg(OSD_MSG_SUB_CHANGED,1,osd_duration,
-                      MSGTR_OSDSub, set_of_sub_pos + 1,
-                      strlen(tmp) < 20 ? "" : "...",
-                      strlen(tmp) < 20 ? tmp : tmp+strlen(tmp)-19);
-	  osd_show_sub_changed = 0;
-      }
-#endif
-  }
-//  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
-//  vo_osd_text=osd_text_buffer;
-#endif /* USE_OSD */
   
   update_osd_msg();
     
