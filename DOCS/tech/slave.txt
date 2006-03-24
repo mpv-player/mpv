@@ -29,8 +29,10 @@ Available commands ('mplayer -input cmdlist' will print a list):
 alt_src_step <value> (ASX playlist only)
     When more than one source is available it selects the next/previous one.
 
-audio_delay <value>
-    Adjust the audio delay by <value> seconds.
+audio_delay <value> [<abs>]
+    Set/adjust the audio delay.
+    If <abs> is not given or is zero, adjust the delay by <value> seconds.
+    If <abs> is nonzero, set the delay to <value> seconds.
 
 [brightness|contrast|gamma|hue|saturation] <value> [<abs>]
     Set/adjust video parameters.
@@ -181,8 +183,8 @@ speed_mult <value>
 speed_set <value>
     Set the speed to <value>.
 
-sub_alignment <value>
-    Set subtitle alignment.
+sub_alignment [<value>]
+    Toggle/set subtitle alignment.
 
 sub_delay <value> [<abs>]
     Adjust the subtitle delay by +/- <value> seconds or set it to <value>
@@ -197,8 +199,8 @@ sub_log
     is to allow convenient marking of bogus subtitles which need to be
     fixed while watching the movie.
 
-sub_pos <value>
-    Adjust subtitle position.
+sub_pos <value> [<abs>]
+    Adjust/set subtitle position.
 
 sub_remove [<value>]
     If the <value> argument is present and non-negative, removes the subtitle
@@ -219,11 +221,11 @@ sub_step <value>
     Step forward in the subtitle list by <value> steps or backwards if <value>
     is negative.
 
-sub_visibility
-    Toggle subtitle visibility.
+sub_visibility [<value>]
+    Toggle/set subtitle visibility.
 
-forced_subs_only
-    Display forced subtitles only.
+forced_subs_only [<value>]
+    Toggle/set forced subtitles only.
 
 switch_audio [<value>] (MPEG and Matroska only)
     Switch to the audio track with the id <value>. Cycle through the
@@ -274,17 +276,17 @@ tv_set_saturation <-100 - 100>
 use_master
     Switch volume control between master and PCM.
 
-vo_border
-    Toggle borderless display.
+vo_border [<value>]
+    Toggle/set borderless display.
 
-vo_fullscreen
-    Switch to fullscreen mode.
+vo_fullscreen [<value>]
+    Toggle/set fullscreen mode.
 
-vo_ontop
-    Toggle stay-on-top.
+vo_ontop [<value>]
+    Toggle/set stay-on-top.
 
-vo_rootwin
-    Toggle playback on the root window.
+vo_rootwin [<value>]
+    Toggle/set playback on the root window.
 
 volume <value> [<abs>]
     Increase/decrease volume or set it to <value> if <abs> is nonzero.
