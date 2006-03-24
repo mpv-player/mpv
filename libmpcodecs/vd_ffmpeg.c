@@ -1001,7 +1001,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     }
     assert(avctx->draw_horiz_band == mc_render_slice);
     assert(avctx->release_buffer == mc_release_buffer);
-    if(verbose > 4)
+    if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
         printf("vd_ffmpeg::mc_get_buffer\n");
 
     if(init_vo(sh,avctx->pix_fmt) < 0){
@@ -1068,7 +1068,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     pic->type= FF_BUFFER_TYPE_USER;
 
     render=(xvmc_render_state_t*)mpi->priv;//same as data[2]
-    if(verbose > 4)
+    if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
         printf("vd_ffmpeg::mc_get_buffer (render=%p)\n",render);
     assert(render != 0);
     assert(render->magic == MP_XVMC_RENDER_MAGIC);
@@ -1095,7 +1095,7 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 //printf("R%X %X\n", pic->linesize[0], pic->data[0]);
 //mark the surface as not requared for prediction
     render=(xvmc_render_state_t*)pic->data[2];//same as mpi->priv
-    if(verbose > 4)
+    if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
         printf("vd_ffmpeg::mc_release_buffer (render=%p)\n",render);
     assert(render!=NULL);
     assert(render->magic==MP_XVMC_RENDER_MAGIC);

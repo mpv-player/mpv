@@ -46,8 +46,6 @@
 #define UNUSED(x) ((void)(x))
 
 
-extern int vo_verbose;
-
 static int benchmark;
 static int use_sleep;
 static int first_frame;//draw colorkey on first frame
@@ -270,21 +268,26 @@ XvMCSurfaceInfo * mc_surf_list;
 
    rez = XvQueryAdaptors(mDisplay,DefaultRootWindow(mDisplay),&num_adaptors,&ai);
    if( rez != Success ) return -1;
-   if( verbose > 2 ) printf("vo_xvmc: Querying %d adaptors\n",num_adaptors);
+   if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
+      printf("vo_xvmc: Querying %d adaptors\n",num_adaptors); }
    for(i=0; i<num_adaptors; i++)
    {
-      if( verbose > 2) printf("vo_xvmc: Quering adaptor #%d\n",i);
+      if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
+         printf("vo_xvmc: Quering adaptor #%d\n",i); }
       if( ai[i].type == 0 ) continue;// we need at least dummy type!
 //probing ports
       for(p=ai[i].base_id; p<ai[i].base_id+ai[i].num_ports; p++)
       {
-         if( verbose > 2) printf("vo_xvmc: probing port #%ld\n",p);
+         if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
+            printf("vo_xvmc: probing port #%ld\n",p); }
 	 mc_surf_list = XvMCListSurfaceTypes(mDisplay,p,&mc_surf_num);
 	 if( mc_surf_list == NULL || mc_surf_num == 0){
-	    if( verbose > 2) printf("vo_xvmc: No XvMC supported. \n");
+	    if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
+               printf("vo_xvmc: No XvMC supported. \n"); }
 	    continue;
 	 }
-	 if( verbose > 2) printf("vo_xvmc: XvMC list have %d surfaces\n",mc_surf_num);
+	 if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
+            printf("vo_xvmc: XvMC list have %d surfaces\n",mc_surf_num); }
 //we have XvMC list!
          for(s=0; s<mc_surf_num; s++)
          {
@@ -301,7 +304,8 @@ XvMCSurfaceInfo * mc_surf_list;
             if(!query){
                rez = XvGrabPort(mDisplay,p,CurrentTime);
 	       if(rez != Success){
-	          if (verbose > 2) printf("vo_xvmc: Fail to grab port %ld\n",p);
+	          if ( mp_msg_test(MSGT_VO,MSGL_DBG3) ) {
+                     printf("vo_xvmc: Fail to grab port %ld\n",p); }
 	          continue;
 	       }
 	       printf("vo_xvmc: Port %ld grabed\n",p);
@@ -320,7 +324,7 @@ XvMCSurfaceInfo * mc_surf_list;
 surface_found:
 
    memcpy(surf_info,&mc_surf_list[s],sizeof(XvMCSurfaceInfo));
-   if( verbose > 2 || !query) 
+   if( mp_msg_test(MSGT_VO,MSGL_DBG3) || !query)
       printf("vo_xvmc: Found matching surface with id=%X on %ld port at %d adapter\n",
              mc_surf_list[s].surface_type_id,p,i);
    return mc_surf_list[s].surface_type_id;
@@ -336,7 +340,7 @@ xvmc_render_state_t * rndr;
    rndr = (xvmc_render_state_t*)mpi->priv;//there is copy in plane[2]
    assert( rndr != NULL );
    assert( rndr->magic == MP_XVMC_RENDER_MAGIC );
-   if( verbose > 3 ) 
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
        printf("vo_xvmc: draw_image(show rndr=%p)\n",rndr);
 // the surface have passed vf system without been skiped, it will be displayed
    rndr->state |= MP_XVMC_STATE_DISPLAY_PENDING;
@@ -500,7 +504,7 @@ static uint32_t vm_height;
       surface_render[i].chroma_format = surface_info.chroma_format;
       surface_render[i].unsigned_intra = (surface_info.flags & XVMC_INTRA_UNSIGNED) == XVMC_INTRA_UNSIGNED;
       surface_render[i].p_surface = &surface_array[i];
-      if( verbose > 3 )
+      if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
           printf("vo_xvmc: surface[%d] = %p .rndr=%p\n",i,&surface_array[i], &surface_render[i]);
    }
    number_of_surfaces = i;
@@ -532,7 +536,7 @@ static uint32_t vm_height;
                       surface_info.surface_type_id, &num_subpic);
 
       if(num_subpic != 0 && xvfmv != NULL){
-         if(verbose > 3){//Print All subpicture types for debug
+         if( mp_msg_test(MSGT_VO,MSGL_DBG4) ){//Print all subpicture types for debug
             for(s=0;s<num_subpic;s++)
                print_xvimage_format_values(&xvfmv[s]);
          }
@@ -813,7 +817,7 @@ unsigned short osd_height, osd_width;
 int rez;
 
    if(subpicture_alloc){
-      if(verbose>3)
+      if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
          printf("vo_xvmc: destroying subpicture\n");
       XvMCDestroySubpicture(mDisplay,&subpicture);
       deallocate_xvimage();
@@ -836,7 +840,7 @@ int rez;
    if(osd_width == 0 || osd_height == 0) 
       return;//if called before window size is known
 
-   if(verbose > 3)
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: creating subpicture (%d,%d) format %X\n",
               osd_width,osd_height,subpicture_info.id);
 
@@ -847,7 +851,7 @@ int rez;
       printf("vo_xvmc: Create Subpicture failed, OSD disabled\n");
       return;
    }
-   if(verbose > 3){
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) ){
    int i;
       printf("vo_xvmc: Created Subpicture:\n");
       printf("         xvimage_id=0x%X\n",subpicture.xvimage_id);
@@ -865,7 +869,7 @@ int rez;
    
    //call init for the surface type
    init_osd_fnc();//init palete,clear color etc ...
-   if(verbose > 3)
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: clearing subpicture\n");
    clear_osd_fnc(0, 0, subpicture.width, subpicture.height);
 
@@ -877,7 +881,7 @@ static void draw_osd_IA44(int x0,int y0, int w,int h, unsigned char* src, unsign
 int ox,oy;
 int rez;
 
-   if(verbose > 3)
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc:composite AI44 subpicture (%d,%d - %d,%d)\n",x0,y0,w,h);
 
    for(ox=0; ox<w; ox++){
@@ -896,7 +900,7 @@ int rez;
 static void draw_osd_AI44(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 int ox,oy;
 int rez;
-   if( verbose > 3)
+   if(  mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc:composite AI44 subpicture (%d,%d - %d,%d)\n",x0,y0,w,h);
 
    for(ox=0; ox<w; ox++){
@@ -918,7 +922,7 @@ int osd_has_changed;
 int have_osd_to_draw;
 int rez;
 
-   if(verbose > 3)
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: draw_osd ,OSD_mode=%d, surface_to_show=%p\n",
              subpicture_mode,p_render_surface_to_show);
 
@@ -973,7 +977,7 @@ int rez;
          p_render_surface_to_show = osd_rndr;
          p_render_surface_to_show->state = MP_XVMC_STATE_DISPLAY_PENDING;
 
-         if(verbose > 3)
+         if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
             printf("vo_xvmc:draw_osd: surface_to_show changed to %p\n",osd_rndr);
       }//endof if(BLEND)
       if(subpicture_mode == BACKEND_SUBPICTURE){
@@ -1042,7 +1046,7 @@ static void flip_page(void){
 int i,cfs;
 
 
-   if( verbose > 3 ) 
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: flip_page  show(rndr=%p)\n\n",p_render_surface_to_show);
 
    if(p_render_surface_to_show == NULL) return;
@@ -1060,7 +1064,7 @@ int i,cfs;
          return; 
       }
       p_render_surface_to_show=show_queue[0];
-      if(verbose > 4)
+      if( mp_msg_test(MSGT_VO,MSGL_DBG5) )
          printf("vo_xvmc: flip_queue free_element=%d\n",free_element);
       free_element--;
       for(i=0; i<free_element; i++){
@@ -1128,7 +1132,7 @@ int i;
 
       subpicture_alloc = 0;
 
-      if(verbose > 3)
+      if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
          printf("vo_xvmc: subpicture destroyed\n");
    }
 
@@ -1154,19 +1158,22 @@ int i;
       XvMCDestroyContext(mDisplay,&ctx);
       number_of_surfaces = 0;
 
-      if(verbose > 3) printf("vo_xvmc: Context sucessfuly freed\n");
+      if( mp_msg_test(MSGT_VO,MSGL_DBG4) ) {
+         printf("vo_xvmc: Context sucessfuly freed\n"); }
    }
 
 
    if( xv_port !=0 ){
       XvUngrabPort(mDisplay,xv_port,CurrentTime);
       xv_port = 0;
-      if(verbose > 3) printf("vo_xvmc: xv_port sucessfuly ungrabed\n");
+      if( mp_msg_test(MSGT_VO,MSGL_DBG4) ) {
+         printf("vo_xvmc: xv_port sucessfuly ungrabed\n"); }
    }
 }
 
 static void uninit(void){
-   if( verbose > 3 ) printf("vo_xvmc: uninit called\n");
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) ) {
+      printf("vo_xvmc: uninit called\n"); }
    xvmc_free();
  //from vo_xv
 #ifdef HAVE_XF86VM
@@ -1180,7 +1187,7 @@ uint32_t flags;
 XvMCSurfaceInfo qsurface_info;
 int mode_id;
 
-   if(verbose > 3)
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: query_format=%X\n",format);
 
    if(!IMGFMT_IS_XVMC(format)) return 0;// no caps supported
@@ -1204,7 +1211,7 @@ static int draw_slice(uint8_t *image[], int stride[],
 xvmc_render_state_t * rndr;
 int rez;
 
-   if(verbose > 3)
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: draw_slice y=%d\n",y);
 
    rndr = (xvmc_render_state_t*)image[2];//this is copy of priv-ate
@@ -1246,7 +1253,7 @@ int rez;
    }
 #endif
    assert(rez==Success);
-   if(verbose > 3 ) printf("vo_xvmc: flush surface\n");
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) ) printf("vo_xvmc: flush surface\n");
    rez = XvMCFlushSurface(mDisplay, rndr->p_surface);
    assert(rez==Success);
 
@@ -1266,7 +1273,7 @@ xvmc_render_state_t * osd_rndr;
 int stat;
       //If this is source surface, check does the OSD rendering is compleate
       if(src_rndr->state & MP_XVMC_STATE_OSD_SOURCE){
-         if(verbose > 3)
+         if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
             printf("vo_xvmc: OSD surface=%p quering\n",src_rndr);
          osd_rndr = src_rndr->p_osd_target_surface_render;
          XvMCGetSurfaceStatus(mDisplay, osd_rndr->p_surface, &stat);
@@ -1354,7 +1361,7 @@ assert(rndr->next_free_data_block_num == 0);
    rndr->filled_mv_blocks_num = 0;
    rndr->next_free_data_block_num = 0;
 
-   if( verbose > 3 ) 
+   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
       printf("vo_xvmc: get_image: rndr=%p (surface=%p) \n",
              rndr,rndr->p_surface);
 return VO_TRUE;   

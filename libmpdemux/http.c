@@ -735,7 +735,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 		}
 
 		stream->fd=fd;
-		if( verbose>0 ) {
+		if( mp_msg_test(MSGT_NETWORK,MSGL_V) ) {
 			http_debug_hdr( http_hdr );
 		}
 		

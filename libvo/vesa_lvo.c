@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 #include "vesa_lvo.h"
 #include "img_format.h"
@@ -40,7 +41,6 @@ static uint8_t *lvo_mem = NULL;
 static uint8_t next_frame;
 static mga_vid_config_t mga_vid_config;
 static unsigned image_bpp,image_height,image_width,src_format;
-extern int verbose;
 uint32_t vlvo_control(uint32_t request, void *data, ...);
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
@@ -54,7 +54,8 @@ int vlvo_preinit(const char *drvname)
   printf("vesa_lvo: This branch is no longer supported.\n"
 	 "vesa_lvo: Please use -vo vesa:vidix instead\n");
   return -1;
-  if(verbose > 1) printf("vesa_lvo: vlvo_preinit(%s) was called\n",drvname);
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: vlvo_preinit(%s) was called\n",drvname); }
 	lvo_handler = open(drvname,O_RDWR);
 	if(lvo_handler == -1)
 	{
@@ -78,7 +79,8 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
   printf("vesa_lvo: This branch is no longer supported.\n"
 	 "vesa_lvo: Please use -vo vesa:vidix instead\n");
   return -1;
-  if(verbose > 1) printf("vesa_lvo: vlvo_init() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: vlvo_init() was called\n"); }
 	image_width = src_width;
 	image_height = src_height;
 	mga_vid_config.version=MGA_VID_VERSION;
@@ -146,7 +148,8 @@ int      vlvo_init(unsigned src_width,unsigned src_height,
 
 void vlvo_term( void )
 {
-  if(verbose > 1) printf("vesa_lvo: vlvo_term() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: vlvo_term() was called\n"); }
 	ioctl( lvo_handler,MGA_VID_OFF,0 );
 	munmap(frames[0],mga_vid_config.frame_size*mga_vid_config.num_frames);
 	if(lvo_handler != -1) close(lvo_handler);
@@ -194,7 +197,8 @@ uint32_t vlvo_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,i
 
 uint32_t vlvo_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
- if(verbose > 1) printf("vesa_lvo: vlvo_draw_slice() was called\n");
+ if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+   printf("vesa_lvo: vlvo_draw_slice() was called\n"); }
     if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
 	vlvo_draw_slice_420(image,stride,w,h,x,y);
     else
@@ -213,13 +217,15 @@ uint32_t vlvo_draw_frame(uint8_t *image[])
 {
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
   memcpy(lvo_mem,image[0],mga_vid_config.frame_size);
-  if(verbose > 1) printf("vesa_lvo: vlvo_draw_frame() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: vlvo_draw_frame() was called\n"); }
   return 0;
 }
 
 void     vlvo_flip_page(void)
 {
-  if(verbose > 1) printf("vesa_lvo: vlvo_flip_page() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: vlvo_flip_page() was called\n"); }
   if(vo_doublebuffering)
   {
 	ioctl(lvo_handler,MGA_VID_FSEL,&next_frame);
@@ -277,7 +283,8 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 
 void     vlvo_draw_osd(void)
 {
-  if(verbose > 1) printf("vesa_lvo: vlvo_draw_osd() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: vlvo_draw_osd() was called\n"); }
   /* TODO: hw support */
 #if 0
 /* disable this stuff until new fbvid.h interface will be implemented
@@ -289,7 +296,8 @@ void     vlvo_draw_osd(void)
 
 uint32_t vlvo_query_info(uint32_t format)
 {
-  if(verbose > 1) printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format));
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format)); }
   return VFCAP_CSP_SUPPORTED;
 }
 

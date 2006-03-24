@@ -237,7 +237,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 sh_audio->format = 0x7;
                 break;
             }
-            if(verbose>=1) print_wave_header(sh_audio->wf);
+            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf);
             if(demuxer->audio->id != i && demuxer->audio->id != -1)
                 st->discard= AVDISCARD_ALL;
             else{
@@ -286,7 +286,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             sh_video->ds= demuxer->video;
             if(codec->extradata_size)
                 memcpy(sh_video->bih + 1, codec->extradata, codec->extradata_size);
-            if(verbose>=1) print_video_header(sh_video->bih);
+            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih);
 /*    short 	biPlanes;
     int  	biXPelsPerMeter;
     int  	biYPelsPerMeter;

@@ -2110,7 +2110,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
     }
 
     // Many users forget to include command line in bugreports...
-    if(verbose>0){
+    if( mp_msg_test(MSGT_CPLAYER,MSGL_V) ){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_CommandLine);
       for(i=1;i<argc;i++)mp_msg(MSGT_CPLAYER, MSGL_INFO," '%s'",argv[i]);
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
@@ -3358,7 +3358,7 @@ if(!sh_video) {
 	  
       }
 
-//      if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,sh_audio->timer,sh_video->timer);
+//      if(mp_msg_test(MSGT_CPLAYER,MSGL_DBG2)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,sh_audio->timer,sh_video->timer);
 
       aq_sleep_time+=time_frame;
 
@@ -4592,7 +4592,7 @@ if(rel_seek_secs || abs_seek_pos){
       if(sh_audio){
 	if(d_audio->packs == 0)
 	  ds_fill_buffer(d_audio);
-	if(verbose>0){
+	if( mp_msg_test(MSGT_AVSYNC,MSGL_V) ){
 	    float a_pts=d_audio->pts;
             a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
 	    mp_msg(MSGT_AVSYNC,MSGL_V,"SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);

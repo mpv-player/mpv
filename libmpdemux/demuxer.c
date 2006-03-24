@@ -340,7 +340,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 int ds_fill_buffer(demux_stream_t *ds){
   demuxer_t *demux=ds->demuxer;
   if(ds->current) free_demux_packet(ds->current);
-  if(verbose>2){
+  if( mp_msg_test(MSGT_DEMUXER,MSGL_DBG3) ){
     if(ds==demux->audio) mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_audio) called\n");else
     if(ds==demux->video) mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_video) called\n");else
     if(ds==demux->sub)   mp_dbg(MSGT_DEMUXER,MSGL_DBG3,"ds_fill_buffer(d_sub) called\n");else

@@ -74,7 +74,7 @@ static int preinit(sh_audio_t *sh_audio)
 //    priv->o_wf->wBitsPerSample = inf_fmt->wBitsPerSample;
     priv->o_wf->cbSize = 0;
     
-    if (verbose>0)
+    if ( mp_msg_test(MSGT_DECAUDIO,MSGL_V) )
     {
 	mp_msg(MSGT_DECAUDIO, MSGL_V, "Input format:\n");
 	print_wave_header(in_fmt);
@@ -98,7 +98,7 @@ static int preinit(sh_audio_t *sh_audio)
     mp_msg(MSGT_WIN32, MSGL_V, "Audio codec opened OK! ;-)\n");
     
     acmStreamSize(priv->handle, in_fmt->nBlockAlign, &srcsize, ACM_STREAMSIZEF_SOURCE);
-    //if (verbose) printf("Audio ACM output buffer min. size: %ld (reported by codec)\n", srcsize);
+    //if ( mp_msg_test(MSGT_DECAUDIO,MSGL_V) ) printf("Audio ACM output buffer min. size: %ld (reported by codec)\n", srcsize);
     srcsize *= 2;
     //if (srcsize < MAX_OUTBURST) srcsize = MAX_OUTBURST;
     if (!srcsize)

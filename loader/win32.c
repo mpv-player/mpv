@@ -214,7 +214,7 @@ static inline void dbgprintf(char* fmt, ...)
     }
 #endif
 #ifdef MPLAYER
-    if (verbose > 2)
+    if ( mp_msg_test(MSGT_WIN32,MSGL_DBG3) )
     {
 	va_list va;
 	

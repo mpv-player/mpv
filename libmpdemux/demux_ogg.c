@@ -993,7 +993,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 		   (int)inf.version_minor, 
 		   (int)inf.version_subminor, 
 		   n_video - 1);
-	    if(verbose>0) print_video_header(sh_v->bih);
+	    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_v->bih);
 	}
 #   endif /* HAVE_OGGTHEORA */
 #   ifdef HAVE_FLAC
@@ -1036,7 +1036,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: video (FOURCC %c%c%c%c), -vid %d\n",
 	       ogg_d->num_sub,pack.packet[68],pack.packet[69],pack.packet[70],pack.packet[71],n_video-1);
-	if(verbose>0) print_video_header(sh_v->bih);
+	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_v->bih);
 	// Old audio header
       } else if(get_uint32(pack.packet+96) == 0x05589F81) {
 	unsigned int extra_size;
@@ -1060,7 +1060,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (format 0x%04x), -aid %d\n",ogg_d->num_sub,sh_a->format,n_audio-1);
-	if(verbose>0) print_wave_header(sh_a->wf);
+	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_a->wf);
       } else
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"Ogg stream %d contains an old header but the header type is unknown\n",ogg_d->num_sub);
 
@@ -1092,7 +1092,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: video (FOURCC %c%c%c%c), -vid %d\n",
 	       ogg_d->num_sub,st->subtype[0],st->subtype[1],st->subtype[2],st->subtype[3],n_video-1);
-	if(verbose>0) print_video_header(sh_v->bih);
+	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_v->bih);
 	/// New audio header
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
 	char buffer[5];
@@ -1131,7 +1131,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (format 0x%04x), -aid %d\n",ogg_d->num_sub,sh_a->format,n_audio-1);
-	if(verbose>0) print_wave_header(sh_a->wf);
+	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_a->wf);
 
 	/// Check for text (subtitles) header
       } else if (strncmp(st->streamtype, "text", 4) == 0) {

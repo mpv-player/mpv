@@ -31,7 +31,6 @@
 	((guid)[3] << 24 | (guid)[2] << 16 | (guid)[1] << 8 | (guid)[0])
 #endif
 
-extern int verbose;
 extern int network_bandwidth;
 
 int asf_mmst_streaming_start( stream_t *stream );
@@ -759,7 +758,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 			}
 			http_response_append( http_hdr, buffer, i );
 		} while( !http_is_header_entire( http_hdr ) );
-		if( verbose>0 ) {
+		if( mp_msg_test(MSGT_NETWORK,MSGL_V) ) {
 			http_hdr->buffer[http_hdr->buffer_size]='\0';
 			mp_msg(MSGT_NETWORK,MSGL_DBG2,"Response [%s]\n", http_hdr->buffer );
 		}

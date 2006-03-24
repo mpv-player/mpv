@@ -5,8 +5,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-extern int verbose; // defined in mplayer.c
-
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -212,7 +210,7 @@ int read_asf_header(demuxer_t *demuxer){
         sh_audio->wf=calloc((streamh->type_size<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):streamh->type_size,1);
         memcpy(sh_audio->wf,buffer,streamh->type_size);
 	le2me_WAVEFORMATEX(sh_audio->wf);
-        if(verbose>=1) print_wave_header(sh_audio->wf);
+        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf);
 	if(ASF_LOAD_GUID_PREFIX(streamh->concealment)==ASF_GUID_PREFIX_audio_conceal_interleave){
           buffer = &hdr[pos];
           pos += streamh->stream_size;
@@ -240,7 +238,7 @@ int read_asf_header(demuxer_t *demuxer){
 	  mp_msg(MSGT_DEMUXER, MSGL_WARN, MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat);
         //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         //sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-        if(verbose>=1) print_video_header(sh_video->bih);
+        if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih);
         //asf_video_id=streamh.stream_no & 0x7F;
 	//if(demuxer->video->id==-1) demuxer->video->id=streamh.stream_no & 0x7F;
         break;
@@ -283,7 +281,7 @@ int read_asf_header(demuxer_t *demuxer){
           string = &hdr[pos];
           pos += contenth->title_size;
           if (pos > hdr_len) goto len_err_out;
-          if(verbose>0)
+          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
             print_asf_string(" Title: ", string, contenth->title_size);
 	  else
 	    pack_asf_string(string, contenth->title_size);
@@ -294,7 +292,7 @@ int read_asf_header(demuxer_t *demuxer){
           string = &hdr[pos];
           pos += contenth->author_size;
           if (pos > hdr_len) goto len_err_out;
-          if(verbose>0)
+          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
             print_asf_string(" Author: ", string, contenth->author_size);
 	  else
 	    pack_asf_string(string, contenth->author_size);
@@ -305,7 +303,7 @@ int read_asf_header(demuxer_t *demuxer){
           string = &hdr[pos];
           pos += contenth->copyright_size;
           if (pos > hdr_len) goto len_err_out;
-          if(verbose>0)
+          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
             print_asf_string(" Copyright: ", string, contenth->copyright_size);
 	  else
 	    pack_asf_string(string, contenth->copyright_size);
@@ -316,7 +314,7 @@ int read_asf_header(demuxer_t *demuxer){
           string = &hdr[pos];
           pos += contenth->comment_size;
           if (pos > hdr_len) goto len_err_out;
-          if(verbose>0)
+          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
             print_asf_string(" Comment: ", string, contenth->comment_size);
 	  else
 	    pack_asf_string(string, contenth->comment_size);
@@ -327,7 +325,7 @@ int read_asf_header(demuxer_t *demuxer){
           string = &hdr[pos];
           pos += contenth->rating_size;
           if (pos > hdr_len) goto len_err_out;
-          if(verbose>0)
+          if( mp_msg_test(MSGT_HEADER,MSGL_V) )
             print_asf_string(" Rating: ", string, contenth->rating_size);
         }
 	mp_msg(MSGT_HEADER,MSGL_V,"\n");
@@ -418,7 +416,7 @@ if(!video_streams){
 } else if (best_video > 0 && demuxer->video->id == -1) demuxer->video->id = best_video;
 
 #if 0
-if(verbose){
+if( mp_msg_test(MSGT_HEADER,MSGL_V) ){
     printf("ASF duration: %d\n",(int)fileh.duration);
     printf("ASF start pts: %d\n",(int)fileh.start_timestamp);
     printf("ASF end pts: %d\n",(int)fileh.end_timestamp);

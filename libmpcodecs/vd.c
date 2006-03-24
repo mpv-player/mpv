@@ -174,7 +174,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     // check if libvo and codec has common outfmt (no conversion):
 csp_again:
 
-    if(verbose>0){
+    if( mp_msg_test(MSGT_DECVIDEO,MSGL_V) ){
 	vf_instance_t* f=vf;
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"Trying filter chain:");
 	for(f = vf ; f ; f = f->next)

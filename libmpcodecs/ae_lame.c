@@ -70,7 +70,6 @@ m_option_t lameopts_conf[]={
 
 
 static int pass;
-extern int verbose;
 
 static int bind_lame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
@@ -192,7 +191,7 @@ int mpae_init_lame(audio_encoder_t *encoder)
         mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_LameCantInit); 
         return 0;
     }
-    if(verbose>0) {
+    if( mp_msg_test(MSGT_MENCODER,MSGL_V) ) {
         lame_print_config(lame);
         lame_print_internals(lame);
     }

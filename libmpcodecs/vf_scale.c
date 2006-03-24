@@ -522,7 +522,7 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 		firstTime=0;
 		*flags= SWS_PRINT_INFO;
 	}
-	else if(verbose>1) *flags= SWS_PRINT_INFO;
+	else if( mp_msg_test(MSGT_VFILTER,MSGL_DBG2) ) *flags= SWS_PRINT_INFO;
 
 	if(src_filter) sws_freeFilter(src_filter);
 

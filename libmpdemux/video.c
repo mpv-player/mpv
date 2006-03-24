@@ -285,7 +285,7 @@ mpeg_header_parser:
       int i=sync_video_packet(d_video);
       if(i==0x1B3) break; // found it!
       if(!i || !skip_video_packet(d_video)){
-        if(verbose>0)  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
+        if( mp_msg_test(MSGT_DECVIDEO,MSGL_V) )  mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MpegNoSequHdr);
 	return 0;
       }

@@ -178,7 +178,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
             unsigned char segsizetype=0x80;
             int seg=-1;
             
-            if(verbose>1){
+            if( mp_msg_test(MSGT_DEMUX,MSGL_DBG2) ){
                 int i;
                 for(i=0;i<16;i++) printf(" %02X",asf_packet[i]);
                 printf("\n");
@@ -260,7 +260,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 
               if(p>=p_end) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! invalid packet 1, sig11 coming soon...\n");
 
-              if(verbose>1){
+              if( mp_msg_test(MSGT_DEMUX,MSGL_DBG2) ){
                 int i;
                 printf("seg %d:",seg);
                 for(i=0;i<16;i++) printf(" %02X",p[i]);

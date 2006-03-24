@@ -159,7 +159,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     real_index_table_t *index;
     int i, entries;
 
-    if (verbose<=1)
+    if ( mp_msg_test(MSGT_DEMUX,MSGL_V) )
 	return;
     
     if (stream_id >= MAX_STREAMS)
@@ -1448,7 +1448,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    sh->wf->wFormatTag = sh->format;
 		    
 		    mp_msg(MSGT_DEMUX,MSGL_V,"audio fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
-		    if (verbose > 0)
+		    if ( mp_msg_test(MSGT_DEMUX,MSGL_V) )
 		    print_wave_header(sh->wf);
 
 		    /* Select audio stream with highest bitrate if multirate file*/

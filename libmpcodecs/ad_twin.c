@@ -110,11 +110,11 @@ static int init_vqf_audio_codec(sh_audio_t *sh_audio){
     priv->o_wf.wBitsPerSample=in_fmt->wBitsPerSample;
     priv->o_wf.cbSize=0;
 
-    if(verbose)
+    if( mp_msg_test(MSGT_DECAUDIO,MSGL_V) )
     {
-    mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Input format:\n");
+    mp_msg(MSGT_DECAUDIO, MSGL_V, "Input format:\n");
     print_wave_header(in_fmt);
-    mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Output fmt:\n");
+    mp_msg(MSGT_DECAUDIO, MSGL_V, "Output fmt:\n");
     print_wave_header(&priv->o_wf);
     }
     memcpy(&priv->hi,&in_fmt[1],sizeof(headerInfo));

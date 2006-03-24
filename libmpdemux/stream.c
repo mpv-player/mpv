@@ -32,7 +32,6 @@
 #include "m_struct.h"
 
 
-extern int verbose; // defined in mplayer.c
 void cache_uninit(stream_t *s); // defined in cache2.c
 
 //#include "vcd_read_bincue.h"
@@ -246,7 +245,7 @@ int stream_fill_buffer(stream_t *s){
 int stream_seek_long(stream_t *s,off_t pos){
 off_t newpos=0;
 
-//  if(verbose>=3) printf("seek_long to 0x%X\n",(unsigned int)pos);
+//  if( mp_msg_test(MSGT_STREAM,MSGL_DBG3) ) printf("seek_long to 0x%X\n",(unsigned int)pos);
 
   s->buf_pos=s->buf_len=0;
 
@@ -271,7 +270,7 @@ off_t newpos=0;
     break;
   }
 
-if(verbose>=3){
+if( mp_msg_test(MSGT_STREAM,MSGL_DBG3) ){
   printf("s->pos=%"PRIX64"  newpos=%"PRIX64"  new_bufpos=%"PRIX64"  buflen=%X  \n",
     (int64_t)s->pos,(int64_t)newpos,(int64_t)pos,s->buf_len);
 }

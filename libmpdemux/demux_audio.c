@@ -438,7 +438,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
      }
     }
 
-    if(verbose>0) print_wave_header(w);
+    if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_wave_header(w);
     if(l)
       stream_skip(s,l);
     do

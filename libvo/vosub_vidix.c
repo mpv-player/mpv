@@ -24,6 +24,7 @@
 #include <errno.h>
 
 #include "config.h"
+#include "mp_msg.h"
 
 #include "vosub_vidix.h"
 #include "vidix/vidixlib.h"
@@ -41,7 +42,6 @@ static VDL_HANDLE vidix_handler = NULL;
 static uint8_t *vidix_mem = NULL;
 static uint8_t next_frame;
 static unsigned image_Bpp,image_height,image_width,src_format,forced_fourcc=0;
-extern int verbose;
 static int video_on=0;
 
 static vidix_capability_t vidix_cap;
@@ -84,7 +84,8 @@ int vidix_stop(void)
 
 void vidix_term( void )
 {
-  if(verbose > 1) printf("vosub_vidix: vidix_term() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vosub_vidix: vidix_term() was called\n"); }
 	vidix_stop();
 	vdlClose(vidix_handler);
 //  ((vo_functions_t *)vo_server)->control=server_control;
@@ -253,7 +254,8 @@ uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int 
 }
 
 static uint32_t  vidix_draw_image(mp_image_t *mpi){
-    if(verbose > 1) printf("vosub_vidix: vidix_draw_image() was called\n");
+    if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+      printf("vosub_vidix: vidix_draw_image() was called\n"); }
 
     // if -dr or -slices then do nothing:
     if(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK)) return VO_TRUE;
@@ -271,7 +273,8 @@ uint32_t vidix_draw_frame(uint8_t *image[])
 
 void     vidix_flip_page(void)
 {
-  if(verbose > 1) printf("vosub_vidix: vidix_flip_page() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vosub_vidix: vidix_flip_page() was called\n"); }
   if(vo_doublebuffering)
   {
 	vdlPlaybackFrameSelect(vidix_handler,next_frame);
@@ -331,14 +334,16 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 
 void     vidix_draw_osd(void)
 {
-  if(verbose > 1) printf("vosub_vidix: vidix_draw_osd() was called\n");
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vosub_vidix: vidix_draw_osd() was called\n"); }
   /* TODO: hw support */
   vo_draw_text(vidix_play.src.w,vidix_play.src.h,draw_alpha);
 }
 
 uint32_t vidix_query_fourcc(uint32_t format)
 {
-  if(verbose > 1) printf("vosub_vidix: query_format was called: %x (%s)\n",format,vo_format_name(format));
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vosub_vidix: query_format was called: %x (%s)\n",format,vo_format_name(format)); }
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
   if (vidix_fourcc.depth == VID_DEPTH_NONE)
@@ -408,7 +413,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
   size_t i;
   int err;
   uint32_t sstride,apitch;
-  if(verbose > 1)
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) )
      printf("vosub_vidix: vidix_init() was called\n"
     	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
 	    "format=%s dest_bpp=%u vid_w=%u vid_h=%u\n"
@@ -492,7 +497,8 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
 		return -1;
 	}
-	if (verbose) printf("vosub_vidix: using %d buffer(s)\n", vidix_play.num_frames);
+	if ( mp_msg_test(MSGT_VO,MSGL_V) ) {
+		printf("vosub_vidix: using %d buffer(s)\n", vidix_play.num_frames); }
 
 	vidix_mem = vidix_play.dga_addr;
 
@@ -702,7 +708,8 @@ uint32_t vidix_control(uint32_t request, void *data, ...)
 int vidix_preinit(const char *drvname,void *server)
 {
   int err;
-  if(verbose > 1) printf("vosub_vidix: vidix_preinit(%s) was called\n",drvname);
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) {
+    printf("vosub_vidix: vidix_preinit(%s) was called\n",drvname); }
 	if(vdlGetVersion() != VIDIX_VERSION)
 	{
 	  printf("vosub_vidix: You have wrong version of VIDIX library\n");

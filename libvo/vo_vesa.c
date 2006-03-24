@@ -43,6 +43,7 @@
 #ifdef CONFIG_VIDIX
 #include "vosub_vidix.h"
 #endif
+#include "mp_msg.h"
 
 #include "postproc/swscale.h"
 #include "libmpcodecs/vf_scale.h"
@@ -51,8 +52,6 @@
 #ifdef HAVE_PNG
 extern vo_functions_t video_out_png;
 #endif
-
-extern int verbose;
 
 extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
@@ -280,7 +279,7 @@ static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
     int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
     uint8_t *dst[3]= {dga_buffer, NULL, NULL};
     int dstStride[3];
-    if(verbose > 2)
+    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
 	printf("vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
     dstStride[0]=dstride*((dstBpp+7)/8);
     dstStride[1]=
@@ -361,7 +360,7 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 static void draw_osd(void)
 {
  uint32_t w,h;
- if(verbose > 2)
+ if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
 	printf("vo_vesa: draw_osd was called\n");
  {
 #ifdef OSD_OUTSIDE_MOVIE
@@ -377,7 +376,7 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-  if(verbose > 2)
+  if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
 	printf("vo_vesa: flip_page was called\n");
   if(flip_trigger) 
   {
@@ -412,7 +411,7 @@ static void flip_page(void)
 /* is called for rgb only */
 static int draw_frame(uint8_t *src[])
 {
-    if(verbose > 2)
+    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         printf("vo_vesa: draw_frame was called\n");
     if(sws)
     {
@@ -463,7 +462,7 @@ static uint32_t parseSubDevice(const char *sd)
 
 static int query_format(uint32_t format)
 {
-    if(verbose > 2)
+    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
 #ifdef CONFIG_VIDIX
     if(vidix_name)return(vidix_query_fourcc(format));
@@ -538,7 +537,8 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   screen_size = video_mode_info.XResolution*video_mode_info.YResolution*((dstBpp+7)/8);
   if(screen_size%64) screen_size=((screen_size/64)*64)+64;
   total = vsize / screen_size;
-  if(verbose) printf("vo_vesa: Can use up to %u video buffers\n",total);
+  if( mp_msg_test(MSGT_VO,MSGL_V) )
+    printf("vo_vesa: Can use up to %u video buffers\n",total);
   i = 0;
   offset = 0;
   total = min(total,nbuffs);
@@ -715,7 +715,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		   dstFourcc = IMGFMT_BGR16;
 		   break;
 	}
-	if(verbose)
+	if( mp_msg_test(MSGT_VO,MSGL_V) )
 	{
 	  printf("vo_vesa: Requested mode: %ux%u@%u (%s)\n",width,height,bpp,vo_format_name(format));
 	  printf("vo_vesa: Total modes found: %u\n",num_modes);
@@ -758,7 +758,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 				best_mode_idx = i;
 			   }
 		   }
-		if(verbose)
+		if( mp_msg_test(MSGT_VO,MSGL_V) )
 		{
 		  printf("vo_vesa: Mode (%03u): mode=%04X %ux%u@%u attr=%04X\n"
 			 "vo_vesa:             #planes=%u model=%u(%s) #pages=%u\n"
@@ -783,7 +783,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			PRINT_VBE_ERR("vbeGetMode",err);
 			return -1;
 		}
-		if(verbose) printf("vo_vesa: Initial video mode: %x\n",init_mode);
+		if( mp_msg_test(MSGT_VO,MSGL_V) ) {
+			printf("vo_vesa: Initial video mode: %x\n",init_mode); }
 		if((err=vbeGetModeInfo(video_mode,&video_mode_info)) != VBE_OK)
 		{
 			PRINT_VBE_ERR("vbeGetModeInfo",err);
@@ -828,7 +829,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			printf("vo_vesa: Can't initialize SwScaler\n");
 			return -1;
 		    }
-		    else if(verbose) printf("vo_vesa: Using SW BES emulator\n");
+		    else if( mp_msg_test(MSGT_VO,MSGL_V) ) {
+			printf("vo_vesa: Using SW BES emulator\n"); }
 		}
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 0; /* frame A */
@@ -855,7 +857,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		      printf("vo_vesa: Using DGA (physical resources: %08lXh, %08lXh)"
 			     ,video_mode_info.PhysBasePtr
 			     ,vsize);
-		      if(verbose) printf(" at %08lXh",(unsigned long)lfb);
+		      if( mp_msg_test(MSGT_VO,MSGL_V) ) {
+			printf(" at %08lXh",(unsigned long)lfb); }
 		      printf("\n");
 		      if(!(multi_size = fillMultiBuffer(vsize,2))) return -1;
 		      if(vo_doublebuffering && multi_size < 2)
@@ -891,7 +894,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		if(video_mode_info.YResolution > dstH)
 		    y_offset = (video_mode_info.YResolution - dstH) / 2;
 		else y_offset = 0;
-		if(verbose)
+		if( mp_msg_test(MSGT_VO,MSGL_V) )
 		  printf("vo_vesa: image: %ux%u screen = %ux%u x_offset = %u y_offset = %u\n"
 			,dstW,dstH
 			,video_mode_info.XResolution,video_mode_info.YResolution
@@ -915,7 +918,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		      printf("vo_vesa: Can't allocate temporary buffer\n");
 		      return -1;
 		    }
-		    if(verbose) printf("vo_vesa: dga emulator was allocated = %p\n",dga_buffer);
+		    if( mp_msg_test(MSGT_VO,MSGL_V) ) {
+			printf("vo_vesa: dga emulator was allocated = %p\n",dga_buffer); }
 		  }
 		}
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
@@ -956,7 +960,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		}
 		/* Now we are in video mode!!!*/
 		/* Below 'return -1' is impossible */
-		if(verbose)
+		if( mp_msg_test(MSGT_VO,MSGL_V) )
 		{
 		  printf("vo_vesa: Graphics mode was activated\n");
 		  fflush(stdout);
@@ -1013,7 +1017,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	  printf("vo_vesa: Can't find mode for: %ux%u@%u\n",width,height,bpp);
 	  return -1;
 	}
-	if(verbose)
+	if( mp_msg_test(MSGT_VO,MSGL_V) )
 	{
 	  printf("vo_vesa: VESA initialization complete\n");
 	  fflush(stdout);
@@ -1024,13 +1028,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	    {
 		win.ptr = dga_buffer = video_base + multi_buff[i];
                 clear_screen();	/* Clear screen for stupid BIOSes */
-		if(verbose>1) paintBkGnd();
+		if( mp_msg_test(MSGT_VO,MSGL_DBG2) ) paintBkGnd();
 	    }
 	}
 	else
 	{
             clear_screen();	/* Clear screen for stupid BIOSes */
-	    if(verbose>1)
+	    if( mp_msg_test(MSGT_VO,MSGL_DBG2) )
 	    {
 	        int x;
 	        x = (video_mode_info.XResolution/video_mode_info.XCharSize)/2-strlen(title)/2;
@@ -1047,14 +1051,14 @@ uninit(void)
 {
     // not inited
     vesa_term();
-    if(verbose > 2)
+    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         printf("vo_vesa: uninit was called\n");
 }
 
 
 static void check_events(void)
 {
-    if(verbose > 2)
+    if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         printf("vo_vesa: check_events was called\n");
 /* Nothing to do */
 }
@@ -1063,8 +1067,9 @@ static int preinit(const char *arg)
 {
   int pre_init_err = 0;
   int fd;
-  if(verbose>1) printf("vo_vesa: preinit(%s) was called\n",arg);
-  if(verbose > 2)
+  if( mp_msg_test(MSGT_VO,MSGL_DBG2) )
+        printf("vo_vesa: preinit(%s) was called\n",arg);
+  if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         printf("vo_vesa: subdevice %s is being initialized\n",arg);
   subdev_flags = 0;
   lvo_name = NULL;
@@ -1083,7 +1088,7 @@ static int preinit(const char *arg)
   	return -1;
   else
   	close(fd);
-  if(verbose > 2)
+  if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
         printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
   return pre_init_err;
 }

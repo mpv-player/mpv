@@ -964,7 +964,7 @@ case ACODEC_COPY:
     break;
 }
 
-if (verbose>1) print_wave_header(mux_a->wf);
+if ( mp_msg_test(MSGT_MENCODER,MSGL_DBG2) ) print_wave_header(mux_a->wf);
 
 if (! ignore_start)
     muxer->audio_delay_fix += sh_audio->stream_delay;
@@ -1447,7 +1447,7 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->movi_end);
 #else
       if(!quiet) {
-	if(verbose>0) {
+	if( mp_msg_test(MSGT_AVSYNC,MSGL_V) ) {
 		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/B/S %d/%d/%d \r",
 	    	mux_v->timer, decoded_frameno, (int)(p*100),
 	    	(t>1) ? (int)(decoded_frameno/t+0.5) : 0,
