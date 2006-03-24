@@ -346,7 +346,6 @@ int global_sub_pos = -1; // this encompasses all subtitle sources
 #define SUB_SOURCE_DEMUX 2
 #define SUB_SOURCES 3
 int global_sub_indices[SUB_SOURCES];
-int global_sub_quiet_osd_hack = 0;
 
 extern int mp_msg_levels[MSGT_MAX];
 extern int mp_msg_level_all;
@@ -1136,6 +1135,21 @@ static void rm_osd_msg(int id) {
     else
         osd_msg_stack = msg->prev;
     free(msg);
+}
+
+/**
+ *  \brief Remove all messages from the OSD stack
+ * 
+ */
+
+static void clear_osd_msgs(void) {
+    mp_osd_msg_t* msg = osd_msg_stack, *prev = NULL;
+    while(msg) {
+        prev = msg->prev;
+        free(msg);
+        msg = prev;
+    }
+    osd_msg_stack = NULL;
 }
 
 /**
@@ -2546,7 +2560,6 @@ play_next_file:
   // init global sub numbers
   global_sub_size = 0;
   { int i; for (i = 0; i < SUB_SOURCES; i++) global_sub_indices[i] = -1; }
-  global_sub_quiet_osd_hack = 1;
 
   if (filename) load_per_file_config (mconfig, filename);
 
@@ -3292,7 +3305,6 @@ fflush(stdout);
 float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
 int grab_frames=0;
-char osd_text_buffer[64];
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
 int too_slow_frame_cnt=0;
@@ -3308,11 +3320,10 @@ int frame_time_remaining=0; // flag
 int blit_frame=0;
 int was_paused=0;
 
-osd_text_buffer[0]=0;
 // make sure OSD old does not stay around,
 // e.g. with -fixed-vo and same-resolution files
-vo_osd_text = osd_text_buffer;
-vo_osd_changed(OSDTYPE_OSD);
+clear_osd_msgs();
+update_osd_msg();
 
 //================ SETUP AUDIO ==========================
 
