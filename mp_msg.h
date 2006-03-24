@@ -20,6 +20,7 @@ extern int identify;
 #define MSGL_DBG2 7   // v=2
 #define MSGL_DBG3 8   // v=3
 #define MSGL_DBG4 9   // v=4
+#define MSGL_DBG5 10  // v=5
 
 #define MSGL_FIXME 1  // for conversions from printf where the appropriate MSGL is not known; set equal to ERR for obtrusiveness
 #define MSGT_FIXME 0  // for conversions from printf where the appropriate MSGT is not known; set equal to GLOBAL for obtrusiveness
