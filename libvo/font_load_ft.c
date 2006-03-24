@@ -18,7 +18,9 @@
 #include <math.h>
 #include <string.h>
 
+#ifdef USE_ICONV
 #include <iconv.h>
+#endif
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -731,7 +733,7 @@ int generate_tables(font_desc_t *desc, double thickness, double radius)
     return 0;
 }
 
-
+#ifdef USE_ICONV
 /* decode from 'encoding' to unicode */
 static FT_ULong decode_char(iconv_t *cd, char c) {
     FT_ULong o;
@@ -830,6 +832,7 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
 
     return i;
 }
+#endif
 
 static font_desc_t* init_font_desc(void)
 {
@@ -1015,6 +1018,7 @@ font_desc_t* read_font_desc_ft(char *fname, int movie_width, int movie_height)
     }
     desc->face_cnt++;
 
+#ifdef USE_ICONV
     if (unicode) {
 	charset_size = prepare_charset_unicode(face, my_charset, my_charcodes);
     } else {
@@ -1030,6 +1034,9 @@ font_desc_t* read_font_desc_ft(char *fname, int movie_width, int movie_height)
 	free_font_desc(desc);
 	return NULL;
     }
+#else
+    return NULL;
+#endif
 
 //    fprintf(stderr, "fg: prepare t = %lf\n", GetTimer()-t);
 

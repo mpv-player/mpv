@@ -102,6 +102,10 @@ void mp_msg(int mod, int lev, const char *format, ... ){
         msgiconv = iconv_open(mp_msg_charset, MSG_CHARSET);
         old_charset = strdup(mp_msg_charset);
       }
+      if (msgiconv == (iconv_t)(-1)) {
+        fprintf(stderr,"iconv: conversion from %s to %s unsupported\n"
+               ,mp_msg_charset,MSG_CHARSET);
+      }else{
       memset(tmp2, 0, MSGSIZE_MAX);
       while (iconv(msgiconv, &in, &inlen, &out, &outlen) == -1) {
         if (!inlen || !outlen)
@@ -112,6 +116,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
       strncpy(tmp, tmp2, MSGSIZE_MAX);
       tmp[MSGSIZE_MAX-1] = 0;
       tmp[MSGSIZE_MAX-2] = '\n';
+      }
     }
 #endif
 
