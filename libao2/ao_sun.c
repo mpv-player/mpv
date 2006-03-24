@@ -166,13 +166,13 @@ static int realtime_samplecounter_available(char *dev)
 	}
 	if (info.play.samples < last_samplecnt) {
 	    if ( mp_msg_test(MSGT_AO,MSGL_V) )
-		printf("rtsc: %d > %d?\n", last_samplecnt, info.play.samples);
+		mp_msg(MSGT_AO,MSGL_V,"rtsc: %d > %d?\n", last_samplecnt, info.play.samples);
 	    goto error;
 	}
 
 	if ((increment = info.play.samples - last_samplecnt) > 0) {
 	    if ( mp_msg_test(MSGT_AO,MSGL_V) )
-		printf("ao_sun: sample counter increment: %d\n", increment);
+	        mp_msg(MSGT_AO,MSGL_V,"ao_sun: sample counter increment: %d\n", increment);
 	    if (increment < min_increment) {
 		min_increment = increment;
 		if (min_increment < 2000)
@@ -195,7 +195,7 @@ static int realtime_samplecounter_available(char *dev)
 	rtsc_ok = RTSC_ENABLED;
 
     if ( mp_msg_test(MSGT_AO,MSGL_V) )
-	printf("ao_sun: minimum sample counter increment per 10msec interval: %d\n"
+	mp_msg(MSGT_AO,MSGL_V,"ao_sun: minimum sample counter increment per 10msec interval: %d\n"
 	       "\t%susing sample counter based timing code\n",
 	       min_increment, rtsc_ok == RTSC_ENABLED ? "" : "not ");
     
@@ -465,7 +465,7 @@ static int init(int rate,int channels,int format,int flags){
 	enable_sample_timing = realtime_samplecounter_available(audio_dev);
     }
 
-    printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
+    mp_msg(MSGT_AO,MSGL_STATUS,"ao2: %d Hz  %d chans  %s [0x%X]\n",
 	   rate,channels,af_fmt2str_short(format),format);
 
     audio_fd=open(audio_dev, O_WRONLY);
