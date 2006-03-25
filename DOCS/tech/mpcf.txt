@@ -1,5 +1,5 @@
 ========================================
-NUT Open Container Format DRAFT 20060312
+NUT Open Container Format DRAFT 20060322
 ========================================
 
 
@@ -397,10 +397,14 @@ forward_ptr
     after the packet_header to the first byte of the next packet)
 
 max_distance
-    max distance of syncpoints, the distance may only be larger if
-    there is no more than a single frame between the two syncpoints. This can
-    be used by the demuxer to detect damaged frame headers if the damage
-    results in too long of a chain
+    max distance between startcodes. If p1 and p2 are the byte
+    positions of the first byte of two consecutive startcodes, then
+    p2-p1 MUST be less than or equal to max_distance unless the entire
+    span from p1 to p2 comprises a single packet or a syncpoint
+    followed by a single frame. This imposition places efficient upper
+    bounds on seek operations and allows for the detection of damaged
+    frame headers, should a chain of frame headers pass max_distance
+    without encountering any startcode.
 
     syncpoints SHOULD be placed immediately before a keyframe if the
     previous frame of the same stream was a non-keyframe, unless such
@@ -415,7 +419,9 @@ max_distance
 
 max_pts_distance
     max absoloute difference of pts of new frame from last_pts in the
-    timebase of the stream, without a checksum after the frameheader
+    timebase of the stream, without a checksum after the frameheader.
+    A frame header MUST include a checksum if abs(pts-last_pts) is
+    strictly greater than max_pts_distance.
     Note that last_pts is not necessarily the pts of the last frame
     on the same stream, as it is altered by syncpoint timestamps.
     SHOULD NOT be higher than 1/timebase
@@ -529,8 +535,10 @@ flags[frame_code], frame_flags
     end presentation time of the final frame.
     An EOR set stream is unset by the first content frames.
     EOR can only be unset in streams with zero decode_delay .
-    FLAG_CHECKSUM MUST be set if the frame is larger than 2*max_distance or
-    its pts differs by more then max_pts_distance from the last frame
+    FLAG_CHECKSUM MUST be set if the frame's data_size is strictly greater than
+    2*max_distance or the difference abs(pts-last_pts) is strictly greater than
+    max_pts_distance (where pts represents this frame's pts and last_pts is
+    defined as below).
 
 stream_id[frame_code]
     MUST be <250
