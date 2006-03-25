@@ -11,6 +11,7 @@ struct list_entry {
   list_entry_t* next;
 
   char* txt;
+  char hide;
 };
 
 

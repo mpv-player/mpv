@@ -28,8 +28,8 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   int w = mpriv->w;
   int dh = 0,dw =  0;
   int dy = 0;
-  int need_h = 0,need_w = 0,ptr_l = menu_text_length(mpriv->ptr) + 10,sidx = 0;
-  int th;
+  int need_h = 0,need_w = 0,ptr_l,sidx = 0;
+  int th,count = 0;
   list_entry_t* m;
 
   if(mpriv->count < 1)
@@ -39,17 +39,32 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   if(w <= 0) w = mpi->width;
   dh = h - 2*mpriv->minb;
   dw = w - 2*mpriv->minb;
-  ptr_l = menu_text_length(mpriv->ptr);
+  ptr_l = mpriv->ptr ? menu_text_length(mpriv->ptr) : 0;
   // mpi is too small
   if(h - vo_font->height <= 0 || w - ptr_l <= 0 || dw <= 0 || dh <= 0)
     return;
 
   th = menu_text_num_lines(mpriv->title,dw) * (mpriv->vspace + vo_font->height) + mpriv->vspace;
 
+  // the selected item is hidden, find a visible one
+  if(mpriv->current->hide) {
+    // try the next
+    for(m = mpriv->current->next ; m ; m = m->next)
+      if(!m->hide) break;
+    if(!m) // or the previous
+      for(m = mpriv->current->prev ; m ; m = m->prev)
+        if(!m->hide) break;
+    if(m) mpriv->current = m;
+    else ptr_l = 0;
+  }
+  
   for(i = 0, m = mpriv->menu ; m ; m = m->next, i++) {
-    int ll = menu_text_length(m->txt);
+    int ll;
+    if(m->hide) continue;
+    ll = menu_text_length(m->txt);
     if(ptr_l + ll > need_w) need_w = ptr_l + ll;
     if(m == mpriv->current) sidx = i;
+    count++;
   }
   if(need_w > dw) need_w = dw;
   if(x > 0)
@@ -59,7 +74,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   else 
     y = mpriv->minb;
 
-  need_h = mpriv->count * (mpriv->vspace + vo_font->height) - mpriv->vspace;
+  need_h = count * (mpriv->vspace + vo_font->height) - mpriv->vspace;
   if( need_h + th > dh) {
     int start,end;
     int maxl = (dh + mpriv->vspace - th) / (mpriv->vspace + vo_font->height);
@@ -74,14 +89,16 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
     start = sidx - (maxl/2);
     if(start < 0) start = 0;
     end = start + maxl;
-    if(end > mpriv->count) {
-      end = mpriv->count;
+    if(end > count) {
+      end = count;
       if(end - start < maxl)
 	start = end - maxl < 0 ? 0 : end - maxl;
     }
     m = mpriv->menu;
-    for(i = 0 ; m->next && i < start ; i++)
+    for(i = 0 ; m->next && i < start ; ) {
+      if(!m->hide) i++;
       m = m->next;
+    }
   } else
     m = mpriv->menu;
 
@@ -96,7 +113,8 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   }
   
   for( ; m != NULL && dy + vo_font->height < dh ; m = m->next ) {
-    if(m == mpriv->current)
+    if(m->hide) continue;
+    if(ptr_l > 0 && m == mpriv->current)
       menu_draw_text_full(mpi,mpriv->ptr,
 			  x < 0 ? (mpi->w - need_w) / 2 + ptr_l : x,
 			  dy+y,dw,dh - dy,
@@ -117,18 +135,26 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
 void menu_list_read_cmd(menu_t* menu,int cmd) {
   switch(cmd) {
   case MENU_CMD_UP:
-    if(mpriv->current->prev) {
-      mpriv->current = mpriv->current->prev;
-    } else {
+    if(!mpriv->current->prev) {
       for( ; mpriv->current->next != NULL ; mpriv->current = mpriv->current->next)
 	/* NOTHING */;
-    } break;
+      if(!mpriv->current->hide) return;
+    }
+    while(mpriv->current->prev) {
+      mpriv->current = mpriv->current->prev;
+      if(!mpriv->current->hide) return;
+    }
+    break;
   case MENU_CMD_DOWN:
-    if(mpriv->current->next) {
+    if(!mpriv->current->next) {
+      mpriv->current = mpriv->menu;
+      if(!mpriv->current->hide) return;
+    }
+    while(mpriv->current->next) {
       mpriv->current = mpriv->current->next;
-   } else {
-     mpriv->current = mpriv->menu;
-   } break;
+      if(!mpriv->current->hide) return;
+    }
+    break;
   case MENU_CMD_LEFT:
   case MENU_CMD_CANCEL:
     menu->show = 0;
