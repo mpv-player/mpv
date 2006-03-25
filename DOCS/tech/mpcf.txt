@@ -511,7 +511,7 @@ frame_code
     detection
 
 flags[frame_code], frame_flags
-    Bit  Name             Description
+     Bit  Name             Description
        1  FLAG_KEY         if set, frame is keyframe
        2  FLAG_EOR         if set, stream has no relevance on
                            presentation. (EOR)
