@@ -528,6 +528,7 @@ m_option_t msgl_config[]={
 	{ "afilter", &mp_msg_levels[MSGT_AFILTER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "netst", &mp_msg_levels[MSGT_NETST], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "muxer", &mp_msg_levels[MSGT_MUXER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "osd-menu", &mp_msg_levels[MSGT_OSD_MENU], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
         {"help", "Available msg modules:\n"
         "   global     - common player errors/information\n"
         "   cplayer    - console player (mplayer.c)\n"
@@ -566,6 +567,7 @@ m_option_t msgl_config[]={
         "   sws\n"
         "   vobsub\n"
         "   subreader\n"
+        "   osd-menu   - OSD menu messages\n"
         "   afilter    - Audio filter messages\n"
         "   netst      - Netstream\n"
         "   muxer      - muxer layer\n"

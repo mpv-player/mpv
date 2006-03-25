@@ -93,6 +93,8 @@ extern int identify;
 
 #define MSGT_MUXER 39 // muxer layer
 
+#define MSGT_OSD_MENU 40
+
 #define MSGT_MAX 64
 
 void mp_msg_init(void);
