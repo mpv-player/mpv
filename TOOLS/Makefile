@@ -43,4 +43,4 @@ fastmemcpybench: fastmemcpybench.c
 
 clean:
 	rm -f $(OBJS)
-	rm -f fastmem-mmx fastmem-k6 fastmem-k7 fastmem-sse fastmem2-mmx fastmem2-k6 fastmem2-k7 fastmem2-sse
+	rm -f fastmem-* fastmem2-*
