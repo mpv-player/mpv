@@ -4,7 +4,15 @@ LIBNAME = libDS_Filter.a
 include ../../config.mak
 
 # DS_AudioDec.c 
-SRCS	= DS_AudioDecoder.c DS_Filter.c DS_VideoDecoder.c allocator.c cmediasample.c guids.c inputpin.c outputpin.c
+SRCS	= DS_AudioDecoder.c \
+	  DS_Filter.c \
+	  DS_VideoDecoder.c \
+	  allocator.c \
+	  cmediasample.c \
+	  guids.c \
+	  inputpin.c \
+	  outputpin.c \
+
 OBJS = $(SRCS:.c=.o)
 
 # OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o

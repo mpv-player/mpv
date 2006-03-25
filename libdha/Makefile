@@ -22,7 +22,11 @@ else
 LIBNAME = libdha.so.$(VERSION)
 endif
 
-SRCS=libdha.c mtrr.c pci.c pci_names.c
+SRCS=libdha.c \
+     mtrr.c \
+     pci.c \
+     pci_names.c \
+
 OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -fPIC -I. -I..

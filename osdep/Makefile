@@ -3,9 +3,16 @@ include ../config.mak
 
 LIBNAME = libosdep.a
 
-SRCS= shmem.c strsep.c strl.c vsscanf.c scandir.c gettimeofday.c fseeko.c \
-      swab.c setenv.c
-      # timer.c
+SRCS= shmem.c \
+      strsep.c \
+      strl.c \
+      vsscanf.c \
+      scandir.c \
+      gettimeofday.c \
+      fseeko.c \
+      swab.c \
+      setenv.c \
+      # timer.c \
 
 getch = getch2.c
 timer = timer-lx.c
