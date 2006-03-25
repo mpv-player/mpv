@@ -164,6 +164,7 @@ PARTS = libmpdemux \
         libmpcodecs \
         libavutil \
         libavcodec \
+        libavcodec/libpostproc \
         libavformat \
         libao2 \
         osdep \
