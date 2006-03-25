@@ -86,6 +86,7 @@ MPlayer (1.0)
     * improved handling of text subs in Matroska files
     * DVD subtitles disabled by default
     * support sipr codec in old RealAudio files
+    * fixed detection of framerate of interlaced H264 in raw/PS/TS streams
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
