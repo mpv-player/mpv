@@ -23,23 +23,23 @@ endif
 all: $(OBJS)
 
 png2raw: png2raw.c
-	$(CC) png2raw.c -o png2raw -lpng
+	$(CC) $< -o $@ -lpng
 
 subrip: subrip.c
-	$(CC) $(CFLAGS) -g -o subrip subrip.c ../vobsub.o ../spudec.o ../mp_msg.o ../unrarlib.o ../postproc/swscale.o ../postproc/rgb2rgb.o ../postproc/yuv2rgb.o ../libmpcodecs/img_format.o -lm
+	$(CC) $(CFLAGS) -g -o $@ $< ../vobsub.o ../spudec.o ../mp_msg.o ../unrarlib.o ../postproc/swscale.o ../postproc/rgb2rgb.o ../postproc/yuv2rgb.o ../libmpcodecs/img_format.o -lm
 
 vivodump: vivodump.c
-	$(CC) $(CFLAGS) -o vivodump vivodump.c ../mp_msg.o ../libmpdemux/libmpdemux.a
+	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a
 
 fastmemcpybench: fastmemcpybench.c
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"mmx\"      -DHAVE_MMX fastmemcpybench.c -o fastmem-mmx
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"k6\ \"     -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem-k6
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"k7\ \"     -DHAVE_MMX2  -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem-k7
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"sse\"      -DHAVE_MMX2  -DHAVE_SSE   -DHAVE_MMX fastmemcpybench.c -o fastmem-sse
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"mga-mmx\"  -DHAVE_MGA   -DHAVE_MMX fastmemcpybench.c -o fastmem2-mmx
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"mga-k6\ \" -DHAVE_MGA   -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem2-k6
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"mga-k7\ \" -DHAVE_MGA   -DHAVE_MMX2  -DHAVE_3DNOW -DHAVE_MMX fastmemcpybench.c -o fastmem2-k7
-	$(CC) $(CFLAGS) -g ../libvo/aclib.o -DNAME=\"mga-sse\"  -DHAVE_MGA   -DHAVE_MMX2  -DHAVE_SSE   -DHAVE_MMX fastmemcpybench.c -o fastmem2-sse
+	$(CC) $(CFLAGS) -g $< -o fastmem-mmx  ../libvo/aclib.o -DNAME=\"mmx\"      -DHAVE_MMX
+	$(CC) $(CFLAGS) -g $< -o fastmem-k6   ../libvo/aclib.o -DNAME=\"k6\ \"     -DHAVE_MMX -DHAVE_3DNOW
+	$(CC) $(CFLAGS) -g $< -o fastmem-k7   ../libvo/aclib.o -DNAME=\"k7\ \"     -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) -g $< -o fastmem-sse  ../libvo/aclib.o -DNAME=\"sse\"      -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
+	$(CC) $(CFLAGS) -g $< -o fastmem2-mmx ../libvo/aclib.o -DNAME=\"mga-mmx\"  -DHAVE_MGA -DHAVE_MMX
+	$(CC) $(CFLAGS) -g $< -o fastmem2-k6  ../libvo/aclib.o -DNAME=\"mga-k6\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW 
+	$(CC) $(CFLAGS) -g $< -o fastmem2-k7  ../libvo/aclib.o -DNAME=\"mga-k7\ \" -DHAVE_MGA -DHAVE_MMX -DHAVE_3DNOW -DHAVE_MMX2
+	$(CC) $(CFLAGS) -g $< -o fastmem2-sse ../libvo/aclib.o -DNAME=\"mga-sse\"  -DHAVE_MGA -DHAVE_MMX -DHAVE_SSE   -DHAVE_MMX2
 
 clean:
 	rm -f $(OBJS)
