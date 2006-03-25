@@ -198,8 +198,7 @@ stream_header:
     msb_pts_shift                       v
     max_pts_distance                    v
     decode_delay                        v
-    reserved                            u(7)
-    fixed_fps                           u(1)
+    stream_flags                        v
     codec_specific_data                 vb
     if(stream_class == video){
         width                           v
@@ -441,7 +440,7 @@ fourcc
 
 time_base_nom / time_base_denom = time_base
     the length of a timer tick in seconds, this MUST be equal to the 1/fps
-    if fixed_fps is 1
+    if FLAG_FIXED_FPS is set
     time_base_nom and time_base_denom MUST NOT be 0
     time_base_nom and time_base_denom MUST be relatively prime
     time_base_denom MUST be < 2^31
@@ -497,8 +496,9 @@ decode_delay
     B-frames, may be larger for future codecs
     decode_delay MUST NOT be set higher than necessary for a codec.
 
-fixed_fps
-    1 indicates that the fps is fixed
+stream_flags
+     Bit  Name            Description
+       1  FLAG_FIXED_FPS  indicates that the fps is fixed
 
 codec_specific_data
     private global data for a codec (could be huffman tables or ...)
