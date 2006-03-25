@@ -105,6 +105,10 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
       menu_read_cmd(priv->current,MENU_CMD_UP);
     else if(strcmp(arg,"down") == 0)
       menu_read_cmd(priv->current,MENU_CMD_DOWN);
+    else if(strcmp(arg,"left") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_LEFT);
+    else if(strcmp(arg,"right") == 0)
+      menu_read_cmd(priv->current,MENU_CMD_RIGHT);
     else if(strcmp(arg,"ok") == 0)
       menu_read_cmd(priv->current,MENU_CMD_OK);
     else if(strcmp(arg,"cancel") == 0)

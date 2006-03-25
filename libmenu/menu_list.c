@@ -129,6 +129,7 @@ void menu_list_read_cmd(menu_t* menu,int cmd) {
    } else {
      mpriv->current = mpriv->menu;
    } break;
+  case MENU_CMD_LEFT:
   case MENU_CMD_CANCEL:
     menu->show = 0;
     menu->cl = 1;
@@ -224,3 +225,4 @@ void menu_list_uninit(menu_t* menu,free_entry_t free_func) {
   mpriv->menu = mpriv->current = NULL;
 
 }
+

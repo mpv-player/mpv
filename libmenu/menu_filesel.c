@@ -206,6 +206,9 @@ bailout:
 static void read_cmd(menu_t* menu,int cmd) {
   mp_cmd_t* c = NULL;
   switch(cmd) {
+  case MENU_CMD_LEFT:
+    mpriv->p.current = mpriv->p.menu; // Hack : we consider that the first entry is ../
+  case MENU_CMD_RIGHT:
   case MENU_CMD_OK: {
     // Directory
     if(mpriv->p.current->d) {
@@ -261,10 +264,9 @@ static void read_cmd(menu_t* menu,int cmd) {
 }
 
 static void read_key(menu_t* menu,int c){
-  if(c == KEY_BS) {
-    mpriv->p.current = mpriv->p.menu; // Hack : we consider that the first entry is ../
-    read_cmd(menu,MENU_CMD_OK);
-  } else
+  if(c == KEY_BS)
+    read_cmd(menu,MENU_CMD_LEFT);
+  else
     menu_list_read_key(menu,c,1);
 }
 

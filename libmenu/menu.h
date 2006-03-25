@@ -31,6 +31,8 @@ typedef struct menu_info_s {
 #define MENU_CMD_DOWN 1
 #define MENU_CMD_OK 2
 #define MENU_CMD_CANCEL 3
+#define MENU_CMD_LEFT 4
+#define MENU_CMD_RIGHT 5 
 
 /// Global init/uninit
 int menu_init(char* cfg_file);

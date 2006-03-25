@@ -50,6 +50,7 @@ static m_option_t cfg_fields[] = {
 
 static void read_cmd(menu_t* menu,int cmd) {
   switch(cmd) {
+  case MENU_CMD_RIGHT:
   case MENU_CMD_OK: {
     int d = 1;
     char str[15];

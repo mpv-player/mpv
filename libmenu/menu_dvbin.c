@@ -191,6 +191,7 @@ static void read_cmd(menu_t* menu, int cmd)
   char *cmd_name;
   switch(cmd)
   {
+	case MENU_CMD_RIGHT:
 	case MENU_CMD_OK:
 	{
 		elem = mpriv->p.current;
@@ -222,6 +223,7 @@ static void read_cmd(menu_t* menu, int cmd)
   	}
   	break;
 
+	case MENU_CMD_LEFT:
 	case MENU_CMD_CANCEL:
 	{
 		elem = mpriv->p.current;

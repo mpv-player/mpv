@@ -185,10 +185,14 @@ void menu_dflt_read_key(menu_t* menu,int cmd) {
     menu->read_cmd(menu,MENU_CMD_DOWN);
     break;
   case KEY_LEFT:
+    menu->read_cmd(menu,MENU_CMD_LEFT);
+    break;
   case KEY_ESC:
     menu->read_cmd(menu,MENU_CMD_CANCEL);
     break;
   case KEY_RIGHT:
+    menu->read_cmd(menu,MENU_CMD_RIGHT);
+    break;
   case KEY_ENTER:
     menu->read_cmd(menu,MENU_CMD_OK);
     break;
