@@ -1,4 +1,6 @@
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <dirent.h>
@@ -8,12 +10,12 @@
 #include <sys/stat.h>
 #include <ctype.h>
 
-
-#include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "m_struct.h"
 #include "m_option.h"
-#include "m_config.h"
+#include "m_property.h"
 #include "asxparser.h"
 
 #include "img_format.h"
@@ -26,34 +28,66 @@
 
 struct list_entry_s {
   struct list_entry p;
+  char* name;
   m_option_t* opt;
+  char* menu;
 };
 
 struct menu_priv_s {
   menu_list_priv_t p;
-  char* edit;
-  int edit_len;
+  char* ptr;
+  int edit;
   /// Cfg fields
+  char* na;
+  int hide_na;
 };
 
 static struct menu_priv_s cfg_dflt = {
   MENU_LIST_PRIV_DFLT,
   NULL,
-  0
+  0,
+  "N/A",
+  1
 };
 
 static m_option_t cfg_fields[] = {
   MENU_LIST_PRIV_FIELDS,
   { "title", M_ST_OFF(menu_list_priv_t,title),  CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "na", M_ST_OFF(struct menu_priv_s,na), CONF_TYPE_STRING, 0, 0, 0, NULL },
+  { "hide-na", M_ST_OFF(struct menu_priv_s,hide_na), CONF_TYPE_FLAG, CONF_RANGE, 0, 1, NULL },
   { NULL, NULL, NULL, 0,0,0,NULL }
 };
 
 #define mpriv (menu->priv)
 
-extern m_config_t* mconfig;
+m_option_t*  mp_property_find(char* name);
+
+static void entry_set_text(menu_t* menu, list_entry_t* e) {
+  char* val = m_property_print(e->opt);
+  int l,edit = (mpriv->edit && e == mpriv->p.current);
+  if(!val) {
+    if(mpriv->hide_na) {
+      e->p.hide = 1;
+      return;
+    }
+    val = strdup(mpriv->na);
+  } else if(mpriv->hide_na)
+      e->p.hide = 0;
+  l = strlen(e->name) + 2 + strlen(val) + (edit ? 4 : 0) + 1;
+  if(e->p.txt) free(e->p.txt);
+  e->p.txt = malloc(l);
+  sprintf(e->p.txt,"%s: %s%s%s",e->name,edit ? "> " : "",val,edit ? " <" : "");
+  free(val);
+}
+
+static void update_entries(menu_t* menu) {
+  list_entry_t* e;
+  for(e = mpriv->p.menu ; e ; e = e->p.next)
+    if(e->opt) entry_set_text(menu,e);
+}
 
 static int parse_args(menu_t* menu,char* args) {
-  char *element,*body, **attribs, *name, *ok, *cancel;
+  char *element,*body, **attribs, *name;
   list_entry_t* m = NULL;
   int r;
   m_option_t* opt;
@@ -63,33 +97,51 @@ static int parse_args(menu_t* menu,char* args) {
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);
     if(r < 0) {
-      printf("Syntax error at line %d\n",parser->line);
+      mp_msg(MSGT_OSD_MENU,MSGL_ERR,"Syntax error at line %d\n",parser->line);
       asx_parser_free(parser);
       return -1;
     } else if(r == 0) {      
       asx_parser_free(parser);
       if(!m)
-	printf("No entry found in the menu definition\n");
-      return m ? 1 : 0;
+        mp_msg(MSGT_OSD_MENU,MSGL_WARN,"No entry found in the menu definition\n");
+      m = calloc(1,sizeof(struct list_entry_s));
+      m->p.txt = strdup("Back");
+      menu_list_add_entry(menu,m);
+      return 1;
     }
-    // Has it a name ?
-    name = asx_get_attrib("name",attribs);
-    opt = name ? m_config_get_option(mconfig,name) : NULL;
+    if(!strcmp(element,"menu")) {
+      name = asx_get_attrib("menu",attribs);
+      if(!name) {
+        mp_msg(MSGT_OSD_MENU,MSGL_WARN,"Submenu definition need a 'menu' attribut.\n");
+        goto next_element;
+      }
+      m = calloc(1,sizeof(struct list_entry_s));
+      m->menu = name;
+      name = NULL; // we want to keep it
+      m->p.txt = asx_get_attrib("name",attribs);
+      if(!m->p.txt) m->p.txt = strdup(m->menu);
+      menu_list_add_entry(menu,m);
+      goto next_element;
+    }
+
+    name = asx_get_attrib("property",attribs);
+    opt = name ? mp_property_find(name) : NULL;
     if(!opt) {
-      printf("Pref menu entry definitions need a valid name attribut (line %d)\n",parser->line);
-      free(element);
-      if(name) free(name);
-      if(body) free(body);
-      asx_free_attribs(attribs);
-      continue;
+      mp_msg(MSGT_OSD_MENU,MSGL_WARN,"Pref menu entry definitions need a valid 'property'"
+             " attribut (line %d)\n",parser->line);
+      goto next_element;
     }
     m = calloc(1,sizeof(struct list_entry_s));
-    m->p.txt = name;
     m->opt = opt;
+    m->name = asx_get_attrib("name",attribs);
+    if(!m->name) m->name = strdup(opt->name);
+    entry_set_text(menu,m);
     menu_list_add_entry(menu,m);
 
+  next_element:
     free(element);
     if(body) free(body);
+    if(name) free(name);
     asx_free_attribs(attribs);
   }
 }
@@ -98,50 +150,101 @@ static void read_key(menu_t* menu,int c) {
   menu_list_read_key(menu,c,0);
 }
 
+static void read_cmd(menu_t* menu,int cmd) {
+  list_entry_t* e = mpriv->p.current;
+
+  if(e->opt) {
+    switch(cmd) {
+    case MENU_CMD_UP:
+      if(!mpriv->edit) break;
+    case MENU_CMD_RIGHT:
+      if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL) > 0)
+        update_entries(menu);
+      return;
+    case MENU_CMD_DOWN:
+      if(!mpriv->edit) break;
+    case MENU_CMD_LEFT:
+      if(m_property_do(e->opt,M_PROPERTY_STEP_DOWN,NULL) > 0)
+        update_entries(menu);
+      return;
+      
+    case MENU_CMD_OK:
+      // check that the property is writable
+      if(m_property_do(e->opt,M_PROPERTY_SET,NULL) < 0) return;
+      // shortcut for flags
+      if(e->opt->type == CONF_TYPE_FLAG) {
+        if(m_property_do(e->opt,M_PROPERTY_STEP_UP,NULL) > 0)
+          update_entries(menu);
+        return;
+      }
+      // switch
+      mpriv->edit = !mpriv->edit;
+      // update the menu
+      update_entries(menu);
+      // switch the pointer
+      if(mpriv->edit) {
+        mpriv->ptr = mpriv->p.ptr;
+        mpriv->p.ptr = NULL;
+      } else
+        mpriv->p.ptr = mpriv->ptr;
+      return;
+    case MENU_CMD_CANCEL:
+      if(!mpriv->edit) break;
+      mpriv->edit = 0;
+      update_entries(menu);
+      mpriv->p.ptr = mpriv->ptr;
+      return;
+    }
+  } else if(e->menu) {
+    switch(cmd) {
+    case MENU_CMD_RIGHT:
+    case MENU_CMD_OK: {
+      mp_cmd_t* c;
+      char* txt = malloc(10 + strlen(e->menu) + 1);
+      sprintf(txt,"set_menu %s",e->menu);
+      c = mp_input_parse_cmd(txt);
+      if(c) mp_input_queue_cmd(c);
+      return;
+    }
+    }
+  } else {
+    switch(cmd) {
+    case MENU_CMD_RIGHT:
+    case MENU_CMD_OK:
+      menu->show = 0;
+      menu->cl = 1;
+      return;
+    }
+  }
+  menu_list_read_cmd(menu,cmd);
+}
+
 static void free_entry(list_entry_t* entry) {
   free(entry->p.txt);
+  if(entry->name) free(entry->name);
+  if(entry->menu) free(entry->menu);
   free(entry);
 }
 
 static void closeMenu(menu_t* menu) {
   menu_list_uninit(menu,free_entry);
-  if(mpriv->edit)
-    free(mpriv->edit);
 }
 
 static int openMenu(menu_t* menu, char* args) {
-  list_entry_t* e;
 
   menu->draw = menu_list_draw;
-  menu->read_cmd = menu_list_read_cmd;
+  menu->read_cmd = read_cmd;
   menu->read_key = read_key;
   menu->close = closeMenu;
 
 
   if(!args) {
-    printf("Pref menu need an argument\n");
+    mp_msg(MSGT_OSD_MENU,MSGL_ERR,"Pref menu need an argument\n");
     return 0;
   }
  
   menu_list_init(menu);
-  if(!parse_args(menu,args))
-    return 0;
-
-  for(e = mpriv->p.menu ; e ; e = e->p.next) {
-    int l;
-    char* val = m_option_print(e->opt,e->opt->p);
-    if((int)val == -1) {
-      printf("Can't get value of option %s\n",e->opt->name);
-      continue;
-    } else if(!val)
-      val = strdup("NULL");
-    l = strlen(e->opt->name) + 2 + strlen(val) + 1;
-    e->p.txt = malloc(l);
-    sprintf(e->p.txt,"%s: %s",e->opt->name,val);
-    free(val);
-  }    
-
-  return 1;
+  return parse_args(menu,args);
 }
 
 const menu_info_t menu_info_pref = {
