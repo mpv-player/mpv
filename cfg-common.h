@@ -141,7 +141,7 @@
 	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 	// set A-V sync correction speed (0=disables it):
-	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10, NULL},
+	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
 	
 	// force video/audio rate:
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
