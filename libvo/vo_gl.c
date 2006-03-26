@@ -55,6 +55,7 @@ static GLuint osdatex[MAX_OSD_PARTS];
 static GLuint osdDispList[MAX_OSD_PARTS];
 //! How many parts the OSD currently consists of
 static int osdtexCnt;
+static int osd_color;
 
 static int use_aspect;
 static int use_yuv;
@@ -251,6 +252,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   glDisable(GL_CULL_FACE);
   glEnable(gl_target);
   glDrawBuffer(vo_doublebuffering?GL_BACK:GL_FRONT);
+  glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
@@ -529,6 +531,7 @@ flip_page(void)
     glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
     }
     glEnable(GL_BLEND);
+    glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff);
     // draw OSD
     glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
     // set rendering parameters back to defaults
@@ -690,6 +693,7 @@ static opt_t subopts[] = {
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
   {"customtex",    OPT_ARG_MSTRZ,&custom_tex,   NULL},
   {"customtlin",   OPT_ARG_BOOL, &custom_tlin,  NULL},
+  {"osdcolor",     OPT_ARG_INT,  &osd_color,    NULL},
   {NULL}
 };
 
@@ -708,6 +712,7 @@ static int preinit(const char *arg)
     custom_prog = NULL;
     custom_tex = NULL;
     custom_tlin = 1;
+    osd_color = 0xffffff;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
               "\n-vo gl command line help:\n"
@@ -744,6 +749,8 @@ static int preinit(const char *arg)
               "    use a custom YUV conversion lookup texture\n"
               "  nocustomtlin\n"
               "    use GL_NEAREST scaling for customtex texture\n"
+              "  osdcolor=<0xRRGGBB>\n"
+              "    use the given color for the OSD\n"
               "\n" );
       return -1;
     }
