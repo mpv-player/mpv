@@ -87,17 +87,17 @@ install:
 	rm -f $(LIBDIR)/libdha.so
 	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)
 ifeq ($(TARGET_OS),OpenBSD)
-	ldconfig -R
+	-ldconfig -R
 else
-	ldconfig
+	-ldconfig
 endif
 
 uninstall:
 	rm -f $(LIBDIR)/libdha.so $(LIBDIR)/$(SHORTNAME) $(LIBDIR)/$(LIBNAME)
 ifeq ($(TARGET_OS),OpenBSD)
-	ldconfig -R
+	-ldconfig -R
 else
-	ldconfig
+	-ldconfig
 endif
 
 #
