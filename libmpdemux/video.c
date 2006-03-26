@@ -597,7 +597,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     // override frame_time for variable/unknown FPS formats:
     if(!force_fps) switch(demuxer->file_format){
       case DEMUXER_TYPE_GIF:
-      case DEMUXER_TYPE_REAL:
       case DEMUXER_TYPE_MATROSKA:
 	if(d_video->pts>0 && pts1>0 && d_video->pts>pts1)
 	  frame_time=d_video->pts-pts1;
@@ -608,6 +607,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       case DEMUXER_TYPE_MOV:
       case DEMUXER_TYPE_FILM:
       case DEMUXER_TYPE_VIVO:
+      case DEMUXER_TYPE_REAL:
       case DEMUXER_TYPE_ASF: {
         float next_pts = ds_get_next_pts(d_video);
         float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
