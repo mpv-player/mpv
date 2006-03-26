@@ -131,7 +131,7 @@ set_menu <menu_name>
     Display the menu named <menu_name>.
 
 mute [value]
-    Toggle sound output mutting or set it to [value] when [value] >= 0
+    Toggle sound output muting or set it to [value] when [value] >= 0
     (1 == on, 0 == off).
 
 osd [level]
@@ -140,10 +140,10 @@ osd [level]
 osd_show_text <string>
     Show <string> on the OSD.
 
-panscan <-1.0 - 1.0> | <0.0 - 1.0> <absolute>
+panscan <-1.0 - 1.0> | <0.0 - 1.0> <abs>
     Increase or decrease the pan-and-scan range by <value>, 1.0 is the maximum.
     Negative values decrease the pan-and-scan range.
-    If <absolute> is != 0, then the pan-and scan range is interpreted as an
+    If <abs> is != 0, then the pan-and scan range is interpreted as an
     absolute range.
 
 pause
