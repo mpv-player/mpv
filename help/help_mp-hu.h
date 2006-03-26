@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.226 (2006. 03. 19.)
+// Sync'ed with help_mp-en.h 1.231 (2006. 03. 26.)
 
 // ========================= MPlayer help ===========================
 
@@ -202,31 +202,44 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "bekapcsolva"
 #define MSGTR_OSDdisabled "kikapcsolva"
-#define MSGTR_OSDnone "nincs"
-#define MSGTR_OSDunknown "ismeretlen"
-#define MSGTR_OSDDVDNAV "DVDNAV: %s"
 #define MSGTR_OSDChannel "Csatorna: %s"
-#define MSGTR_OSDSubtitles "Felirat: %s"
-#define MSGTR_OSDSubtitlesOff "Felirat: ki"
-#define MSGTR_OSDSubtitlesLanguage "Felirat: (%d) %s"
-#define MSGTR_OSDSub "Sub: (%d) %s%s"
 #define MSGTR_OSDSubDelay "Sub késés: %d ms"
-#define MSGTR_OSDSubPosition "Sub pozíció: %d/100"
-#define MSGTR_OSDSubAlignment "Sub igazítás: %s"
-#define MSGTR_OSDAVDelay "A-V késés: %d ms"
 #define MSGTR_OSDSpeed "Sebesség: x %6.2f"
-#define MSGTR_OSDStayOnTop "Mindig felül: %s"
-#define MSGTR_OSDRootwin "Fõablak: %s"
-#define MSGTR_OSDBorder "Határ: %s"
-#define MSGTR_OSDFramedrop "Képkocka dobás: %s"
-#define MSGTR_OSDFramedropOn "be"
-#define MSGTR_OSDFramedropHard "erõs"
-#define MSGTR_OSDFramedropOff "ki"
 #define MSGTR_OSDosd "OSD: %s"
-#define MSGTR_OSDSubBottom "alul"
-#define MSGTR_OSDSubCenter "középen"
-#define MSGTR_OSDSubTop "fent"
-#define MSGTR_OSDMute "Némít: %s"
+
+// property values
+#define MSGTR_Enabled "bekapcsolva"
+#define MSGTR_EnabledEdl "bekapcsolva (edl)"
+#define MSGTR_Disabled "kikapcsolva"
+#define MSGTR_HardFrameDrop "erõs"
+#define MSGTR_Unknown "ismeretlen"
+#define MSGTR_Bottom "alul"
+#define MSGTR_Center "középen"
+#define MSGTR_Top "fent"
+
+// osd bar names
+#define MSGTR_Volume "Hangerõ"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "Fényerõ"
+#define MSGTR_Contrast "Kontraszt"
+#define MSGTR_Saturation "Telítettség"
+#define MSGTR_Hue "Árnyalat"
+
+// property state
+#define MSGTR_MuteStatus "Némít: %s"
+#define MSGTR_AVDelayStatus "A-V késés: %d ms"
+#define MSGTR_OnTopStatus "Mindig felül: %s"
+#define MSGTR_RootwinStatus "Fõablak: %s"
+#define MSGTR_BorderStatus "Keret: %s"
+#define MSGTR_FramedroppingStatus "Képkocka dobás: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "Feliratok: %s"
+#define MSGTR_SubPosStatus "Felirat helye: %s/100"
+#define MSGTR_SubAlignStatus "Felirat illesztés: %s"
+#define MSGTR_SubDelayStatus "Felirat késés: %s"
+#define MSGTR_SubVisibleStatus "Feliratok: %s"
+#define MSGTR_SubForcedOnlyStatus "Csak kényszerített felirat: %s"
 
 // mencoder.c:
 
@@ -492,6 +505,10 @@ static char help_text[]=
 #define MSGTR_AvailableProfiles "Elérhetõ profilok:\n"
 #define MSGTR_UnknownProfile "Ismeretlen profil: '%s'.\n"
 #define MSGTR_Profile "Profil %s: %s\n"
+
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Név                  Típus           Min        Max\n\n"
+#define MSGTR_TotalProperties "\nÖsszesen: %d tulajdonság\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "A CD-ROM meghajtó (%s) nem található!\n"
