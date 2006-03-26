@@ -3562,11 +3562,12 @@ Flip image upside-down.
 .TP
 .B \-lavdopts <option1:option2:...> (DEBUG CODE)
 Specify libavcodec decoding parameters.
+Separate multiple options with a colon.
 .sp 1
 .I EXAMPLE:
 .PD 0
 .RSs
-\-lavdopts bug=1
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -3662,7 +3663,7 @@ Set error resilience strategy.
 .br
 4: very aggressive
 .REss
-.IPs fast\ 
+.IPs "fast (MPEG-2 only)"
 Enable optimizations which do not comply to the specification and might
 potentially cause problems, like simpler dequantization, assuming use
 of the default quantization matrix, assuming YUV 4:2:0 and skipping a few
