@@ -463,17 +463,17 @@ ifeq ($(VIDIX),yes)
 	$(MAKE) -C libdha install
 	$(MAKE) -C vidix install
 endif
-	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
+	$(INSTALL) -d $(BINDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)
 	-ln -sf $(PRG) $(BINDIR)/gmplayer
 endif
-	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
+	$(INSTALL) -d $(MANDIR)/man1
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
 			$(INSTALL) -c -m 644 DOCS/man/en/mplayer.1 $(MANDIR)/man1/mplayer.1 ; \
 		else \
-			mkdir -p $(MANDIR)/$$i/man1 ; \
+			$(INSTALL) -d $(MANDIR)/$$i/man1 ; \
 			$(INSTALL) -c -m 644 DOCS/man/$$i/mplayer.1 $(MANDIR)/$$i/man1/mplayer.1 ; \
 		fi ; \
 	done
@@ -487,30 +487,30 @@ ifeq ($(MENCODER),yes)
 		fi ; \
 	done
 endif
-	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
-	@if test ! -d $(DATADIR)/font ; then mkdir -p $(DATADIR)/font ; fi
+	@$(INSTALL) -d $(DATADIR)
+	@$(INSTALL) -d $(DATADIR)/font
 	@if test ! -f $(DATADIR)/font/font.desc ; then \
 	echo "*** Download font at http://www.mplayerhq.hu/dload.html" ; \
 	echo "*** for OSD/Subtitles support and extract to $(DATADIR)/font/" ; \
 	fi
 ifeq ($(GUI),yes)
-	@if test ! -d $(DATADIR)/Skin ; then mkdir -p $(DATADIR)/Skin ; fi
+	@$(INSTALL) -d $(DATADIR)/Skin
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/Skin/"
-	@if test ! -d $(prefix)/share/pixmaps ; then mkdir -p $(prefix)/share/pixmaps ; fi
+	@$(INSTALL) -d $(prefix)/share/pixmaps
 	$(INSTALL) -m 644 Gui/mplayer/pixmaps/mplayer-desktop.xpm $(prefix)/share/pixmaps/mplayer-desktop.xpm
-	@if test ! -d $(prefix)/share/applications ; then mkdir -p $(prefix)/share/applications ; fi
+	@$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/mplayer.desktop
 endif
-	@if test ! -d $(CONFDIR) ; then mkdir -p $(CONFDIR) ; fi
+	@$(INSTALL) -d $(CONFDIR)
 	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
 ifeq ($(DVDKIT_SHARED),yes)
 ifeq ($(DVDKIT2),yes)
-	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
+	$(INSTALL) -d $(LIBDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit2/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
 else
 ifeq ($(DVDKIT),yes)
-	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
+	$(INSTALL) -d $(LIBDIR)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
 endif
 endif
