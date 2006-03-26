@@ -21,12 +21,6 @@ ifeq ($(STRIPBINARIES),yes)
 INSTALLSTRIP = -s
 endif
 
-# These subdirectories require installation due to binaries within them.
-ifeq ($(VIDIX),yes)
-SUBDIRS += libdha vidix
-DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
-endif
-
 SRCS_COMMON = asxparser.c \
               codec-cfg.c \
               cpudetect.c \
@@ -466,7 +460,8 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h help_mp.h
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
-	$(DO_MAKE)
+	$(MAKE) -C libdha install
+	$(MAKE) -C vidix install
 endif
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)
@@ -535,7 +530,8 @@ uninstall:
 	  fi ; \
 	done
 ifeq ($(VIDIX),yes)
-	$(DO_MAKE)
+	$(MAKE) -C libdha uninstall
+	$(MAKE) -C vidix uninstall
 endif
 	@echo "Uninstall completed"
 
