@@ -29,15 +29,15 @@ Available commands ('mplayer -input cmdlist' will print a list):
 alt_src_step <value> (ASX playlist only)
     When more than one source is available it selects the next/previous one.
 
-audio_delay <value> [<abs>]
+audio_delay <value> [abs]
     Set/adjust the audio delay.
-    If <abs> is not given or is zero, adjust the delay by <value> seconds.
-    If <abs> is nonzero, set the delay to <value> seconds.
+    If [abs] is not given or is zero, adjust the delay by <value> seconds.
+    If [abs] is nonzero, set the delay to <value> seconds.
 
-[brightness|contrast|gamma|hue|saturation] <value> [<abs>]
+[brightness|contrast|gamma|hue|saturation] <value> [abs]
     Set/adjust video parameters.
-    If abs is not given or is zero, modifies parameter by <value>.
-    If abs is non-zero, parameter is set to <value>.
+    If [abs] is not given or is zero, modifies parameter by <value>.
+    If [abs] is non-zero, parameter is set to <value>.
     <value> is in the range [-100, 100].
 
 change_rectangle <val1> <val2>
@@ -76,7 +76,7 @@ dvdnav_event <value>
 edl_mark
     Write the current position into the EDL file.
 
-frame_drop [<value>]
+frame_drop [value]
     Toggle/set frame dropping mode.
 
 get_percent_pos
@@ -130,12 +130,12 @@ menu <command>
 set_menu <menu_name>
     Display the menu named <menu_name>.
 
-mute [<value>]
-    Toggle sound output mutting or set it to <value> when <value> >= 0
+mute [value]
+    Toggle sound output mutting or set it to [value] when [value] >= 0
     (1 == on, 0 == off).
 
-osd [<level>]
-    Toggle OSD mode or set it to level when <level> >= 0.
+osd [level]
+    Toggle OSD mode or set it to [level] when [level] >= 0.
 
 osd_show_text <string>
     Show <string> on the OSD.
@@ -152,20 +152,20 @@ pause
 frame_step
     Play one frame, then pause again.
 
-pt_step <value> [<force>]
+pt_step <value> [force]
     Go to the next/previous entry in the playtree. The sign of <value> tells
     the direction.  If no entry is available in the given direction it will do
-    nothing unless force is non-zero.
+    nothing unless [force] is non-zero.
 
-pt_up_step <value> [<force>]
+pt_up_step <value> [force]
     Similar to pt_step but jumps to the next/previous entry in the parent list.
     Useful to break out of the inner loop in the playtree.
 
-quit [<value>]
-    Quit MPlayer. The optional integer value is used as the return code
+quit [value]
+    Quit MPlayer. The optional integer [value] is used as the return code
     for the mplayer process (default: 0).
 
-seek <value> [<type>]
+seek <value> [type]
     Seek to some place in the movie.
         0 is a relative seek of +/- <value> seconds (default).
         1 is a seek to <value> % in the movie.
@@ -186,9 +186,9 @@ speed_set <value>
 sub_alignment [<value>]
     Toggle/set subtitle alignment.
 
-sub_delay <value> [<abs>]
+sub_delay <value> [abs]
     Adjust the subtitle delay by +/- <value> seconds or set it to <value>
-    seconds when <abs> is nonzero.
+    seconds when [abs] is nonzero.
 
 sub_load <subtitle_file>
     Loads subtitles from <subtitle_file>.
@@ -199,18 +199,18 @@ sub_log
     is to allow convenient marking of bogus subtitles which need to be
     fixed while watching the movie.
 
-sub_pos <value> [<abs>]
+sub_pos <value> [abs]
     Adjust/set subtitle position.
 
-sub_remove [<value>]
-    If the <value> argument is present and non-negative, removes the subtitle
-    file with index <value>. If the argument is omitted or negative, removes
+sub_remove [value]
+    If the [value] argument is present and non-negative, removes the subtitle
+    file with index [value]. If the argument is omitted or negative, removes
     all subtitle files.
 
-sub_select [<value>]
-    Display subtitle with index <value>. Turn subtitle display off if
-    <value> is -1 or greater than the highest available subtitle index.
-    Cycle through the available subtitles if <value> is omitted or less
+sub_select [value]
+    Display subtitle with index [value]. Turn subtitle display off if
+    [value] is -1 or greater than the highest available subtitle index.
+    Cycle through the available subtitles if [value] is omitted or less
     than -1. Supported subtitle sources are -sub options on the command
     line, VOBsubs, DVD subtitles, and Ogg and Matroska text streams.
 
@@ -221,23 +221,23 @@ sub_step <value>
     Step forward in the subtitle list by <value> steps or backwards if <value>
     is negative.
 
-sub_visibility [<value>]
+sub_visibility [value]
     Toggle/set subtitle visibility.
 
-forced_subs_only [<value>]
+forced_subs_only [value]
     Toggle/set forced subtitles only.
 
-switch_audio [<value>] (MPEG and Matroska only)
-    Switch to the audio track with the id <value>. Cycle through the
-    available tracks if <value> is omitted or negative.
+switch_audio [value] (MPEG and Matroska only)
+    Switch to the audio track with the id [value]. Cycle through the
+    available tracks if [value] is omitted or negative.
 
-switch_ratio [<value>]
-    Change aspect ratio at runtime. Value is the new aspect ratio expressed
+switch_ratio [value]
+    Change aspect ratio at runtime. [value] is the new aspect ratio expressed
     as a float (e.g. 1.77778 for 16/9).
     There might be problems with some video filters.
 
-switch_vsync [<value>]
-    Toggle vsync (1 == on, 0 == off). If no value is provided,
+switch_vsync [value]
+    Toggle vsync (1 == on, 0 == off). If [value] is not provided,
     vsync status is inverted.
 
 tv_step_channel <channel>
@@ -276,20 +276,20 @@ tv_set_saturation <-100 - 100>
 use_master
     Switch volume control between master and PCM.
 
-vo_border [<value>]
+vo_border [value]
     Toggle/set borderless display.
 
-vo_fullscreen [<value>]
+vo_fullscreen [value]
     Toggle/set fullscreen mode.
 
-vo_ontop [<value>]
+vo_ontop [value]
     Toggle/set stay-on-top.
 
-vo_rootwin [<value>]
+vo_rootwin [value]
     Toggle/set playback on the root window.
 
-volume <value> [<abs>]
-    Increase/decrease volume or set it to <value> if <abs> is nonzero.
+volume <value> [abs]
+    Increase/decrease volume or set it to <value> if [abs] is nonzero.
 
 
 The following commands are really only useful for OSD menu console mode:
