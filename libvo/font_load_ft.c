@@ -1147,7 +1147,7 @@ void load_font_ft(int width, int height)
     if (font_fontconfig)
     {
 	if (!font_name)
-	    font_name = "sans-serif";
+	    font_name = strdup("sans-serif");
 	FcInit();
 	fc_pattern = FcNameParse(font_name);
 	FcConfigSubstitute(0, fc_pattern, FcMatchPattern);
