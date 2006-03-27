@@ -745,7 +745,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 				mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found little endian PCM data, reversed fourcc:%04x\n", sh->format);
 			  }
 		          break;
-		         default: break;
+		         default:
+			  if (len > 8 && len + 44 <= trak->stdata_len) {
+				sh->codecdata_len = len-8;
+				sh->codecdata = trak->stdata+44+8;
+			  }
 		        }
 		    } else {
 		      if (len > 8 && len + 44 <= trak->stdata_len) {
