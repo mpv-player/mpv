@@ -131,6 +131,7 @@ extern int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t
 
 play_tree_t* playtree;
 play_tree_iter_t* playtree_iter = NULL;
+static int play_tree_step = 1;
 
 #define PT_NEXT_ENTRY 1
 #define PT_PREV_ENTRY -1
@@ -716,6 +717,7 @@ static int libmpdemux_was_interrupted(int eof) {
 	 exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
        case MP_CMD_PLAY_TREE_STEP: {
 	 eof = (cmd->args[0].v.i > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+	 play_tree_step = (cmd->args[0].v.i == 0) ? 1 : cmd->args[0].v.i;
        } break;
        case MP_CMD_PLAY_TREE_UP_STEP: {
 	 eof = (cmd->args[0].v.i > 0) ? PT_UP_NEXT : PT_UP_PREV;
@@ -768,8 +770,6 @@ int playtree_add_playlist(play_tree_t* entry)
   }
   return PT_NEXT_SRC;
 }
-
-static int play_tree_step = 1;
 
 int sub_source(void)
 {
