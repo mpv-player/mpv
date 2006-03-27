@@ -2,14 +2,12 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1246
+.\" In sync with rev 1.1250
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
 .\" --------------------------------------------------------------------------
 .
-.\" Standardeinrückung ist 7, nicht ändern!
-.nr IN 7
 .\" Einrückung für Suboptionen
 .nr SS 5
 .\" neue Suboption hinzufügen
@@ -18,7 +16,7 @@
 ..
 .\" Beginn des ersten Suboptionen-Levels, endet mit .RE
 .de RSs
-.RS \n(IN+3
+.RS 10
 ..
 .\" Beginn des zweiten Suboptionen-Levels
 .de RSss
@@ -3118,6 +3116,8 @@ Falls aktiviert ist das Verhalten den anderen Videoausgabetreibern ähnlicher,
 was bei Schriftarten mit fester Größe besser ist.
 Deaktiviert sieht es mit FreeType-Schriftarten besser aus und benutzt im
 Vollbildmodus die Ränder.
+.IPs osdcolor=<0xRRGGBB>
+Farbe für das OSD (Standard: 0xffffff, entspricht weiß).
 .IPs (no)aspect
 (De)aktiviert die Skalierung des Aspekts und die Unterstützung für Panscan
 (Standard: aktiviert).
@@ -3730,11 +3730,12 @@ Stellt das Bild auf den Kopf (horizontales Spiegeln).
 .TP
 .B \-lavdopts <Option1:Option2:...> (DEBUG-CODE)
 Gibt Parameter für die Decodierung mit libavcodec an.
+Trenne bei mehreren Optionen mit einem Doppelpunkt.
 .sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
-\-lavdopts bug=1
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -3838,7 +3839,7 @@ Fehler liefern können)
 .br
 4: sehr agressiv
 .REss
-.IPs fast\ 
+.IPs "fast (nur bei MPEG-2)"
 Aktiviere Optimierungen, die nicht den Spezifikationen entsprechen und
 möglicherweise Probleme verursachen können, wie beispielsweise einfachere
 Dequantisierung bei angenommener Benutzung der Standardquantisierungsmatrix und
