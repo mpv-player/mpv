@@ -100,7 +100,7 @@ static void append_char(char c)
 	{
 		if(cursor_pos==CC_MAX_LINE_LENGTH-1)
 		{
-			printf("sub_cc.c: append_char() reached CC_MAX_LINE_LENGTH!\n");
+			fprintf(stderr,"sub_cc.c: append_char() reached CC_MAX_LINE_LENGTH!\n");
 			return;
 		}
 		bb->text[bb->lines - 1][cursor_pos++]=c;

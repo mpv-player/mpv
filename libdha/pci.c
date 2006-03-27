@@ -717,7 +717,7 @@ int pci_config_read(unsigned char bus, unsigned char dev, unsigned char func,
     
     if (len != 4)
     {
-	printf("pci_config_read: reading non-dword not supported!\n");
+	fprintf(stderr,"pci_config_read: Reading non-dword not supported!\n");
 	return(ENOTSUP);
     }
     

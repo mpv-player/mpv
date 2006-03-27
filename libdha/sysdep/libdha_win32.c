@@ -85,7 +85,7 @@ void *map_phys_mem(unsigned long base, unsigned long size) {
     dhahelper_priv.base = base;
     if(hDriver==INVALID_HANDLE_VALUE)hDriver = CreateFile("\\\\.\\DHAHELPER",GENERIC_READ | GENERIC_WRITE,0,NULL,OPEN_EXISTING,FILE_ATTRIBUTE_NORMAL,NULL);
     if (!DeviceIoControl(hDriver, IOCTL_DHAHELPER_MAPPHYSTOLIN, &dhahelper_priv,sizeof(dhahelper_t), &dhahelper_priv, sizeof(dhahelper_t),&dwBytesReturned, NULL)){
-      printf("unable to map thre requested memory region\n");
+      fprintf(stderr,"Unable to map the requested memory region.\n");
       return NULL;
     }
     else return dhahelper_priv.ptr;

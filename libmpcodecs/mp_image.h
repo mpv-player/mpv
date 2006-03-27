@@ -202,7 +202,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 	mpi->chroma_y_shift=1;
 	return;
     }
-    printf("mp_image: Unknown out_fmt: 0x%X\n",out_fmt);
+    fprintf(stderr,"mp_image: unknown out_fmt: 0x%X\n",out_fmt);
     mpi->bpp=0;
 }
 #endif
