@@ -183,8 +183,11 @@ speed_mult <value>
 speed_set <value>
     Set the speed to <value>.
 
-sub_alignment [<value>]
+sub_alignment [value]
     Toggle/set subtitle alignment.
+        0 top alignment
+        1 center alignment
+        2 bottom alignment
 
 sub_delay <value> [abs]
     Adjust the subtitle delay by +/- <value> seconds or set it to <value>
