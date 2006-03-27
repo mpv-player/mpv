@@ -33,6 +33,8 @@ struct _DMO_AudioDecoder
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "../../mp_msg.h"
+
 #define __MODULE__ "DirectShow audio decoder"
 
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
