@@ -166,7 +166,7 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 	 mode=PROGRESSIVE;
       }
 
-   if(verbose)
+   if( mp_msg_test(MSGT_VFILTER,MSGL_V) )
       {
       printf("%c", mode==BOTTOM_FIRST?'b':mode==TOP_FIRST?'t':'p');
       if(tdiff==65536.0) printf("     N/A "); else printf(" %8.2f", tdiff);

@@ -12,8 +12,6 @@
 #include "cpudetect.h"
 #include "mangle.h"
 
-extern int verbose; // defined in mplayer.c
-
 #if defined(ARCH_X86) || defined(ARCH_X86_64)
 #define CAN_COMPILE_X86_ASM
 #endif
@@ -267,7 +265,7 @@ void vo_draw_alpha_init(void){
     }
 #endif
 //FIXME the optimized stuff is a lie for 15/16bpp as they aren't optimized yet
-	if(verbose)
+	if( mp_msg_test(MSGT_OSD,MSGL_V) )
 	{
 #ifdef RUNTIME_CPUDETECT
 #ifdef CAN_COMPILE_X86_ASM

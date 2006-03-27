@@ -47,9 +47,6 @@
 
 #include "libvo/fastmemcpy.h"
 
-/* external */
-extern int verbose;
-
 /* private data */
 struct vf_priv_s {
     /* configuration data */
@@ -290,7 +287,7 @@ static int open(vf_instance_t *vf, char* args)
     }
 
     /* Say what happen: use mp_msg(...)? */
-    if (verbose) {
+    if ( mp_msg_test(MSGT_VFILTER,MSGL_V) ) {
         printf("vf_tile: tiling %d * %d, output every %d frames\n",
                p->xtile,
                p->ytile,

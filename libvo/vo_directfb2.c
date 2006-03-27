@@ -64,8 +64,6 @@ static vo_info_t info = {
 
 LIBVO_EXTERN(directfb)
 
-extern int verbose;
-
 /******************************
 *      vo_directfb globals    *
 ******************************/
@@ -903,7 +901,7 @@ if (buffer) {
 
       DFBInputEvent event;
 
-//if (verbose) printf ("DirectFB: Check events entered\n");
+//if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf ("DirectFB: Check events entered\n");
      if (buffer->GetEvent(buffer, DFB_EVENT (&event)) == DFB_OK) {
 
      if (event.type == DIET_KEYPRESS) { 
@@ -932,7 +930,7 @@ if (buffer) {
     buffer->Reset(buffer);
 
 }
-//if (verbose) printf ("DirectFB: Check events finished\n");
+//if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf ("DirectFB: Check events finished\n");
 }
 
 static void flip_page(void)
@@ -941,7 +939,7 @@ static void flip_page(void)
 
 	unlock(); // unlock frame & primary
 
-//	if (verbose) printf("DirectFB: Flip page entered");
+//	if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Flip page entered");
 	
 	DFBCHECK (primary->SetBlittingFlags(primary,flags));
 
@@ -1143,7 +1141,7 @@ static uint32_t get_image(mp_image_t *mpi)
         void *dst;
         int pitch;
 
-//    if (verbose) printf("DirectFB: get_image() called\n");
+//    if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: get_image() called\n");
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram 
     if(mpi->type==MP_IMGTYPE_STATIC) return VO_FALSE; // it is not static
 
@@ -1199,7 +1197,7 @@ static uint32_t get_image(mp_image_t *mpi)
        }
        
        mpi->flags|=MP_IMGFLAG_DIRECT;
-//       if (verbose) printf("DirectFB: get_image() SUCCESS -> Direct Rendering ENABLED\n");
+//       if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: get_image() SUCCESS -> Direct Rendering ENABLED\n");
        return VO_TRUE;
 
     } 
@@ -1215,7 +1213,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
         void *srcp;
 	unsigned int p;
 
-//        if (verbose) printf("DirectFB: draw_slice entered\n");
+//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: draw_slice entered\n");
 
 	unlock();
 
@@ -1296,13 +1294,13 @@ static uint32_t put_image(mp_image_t *mpi){
     DFBSurfaceDescription dsc;
     DFBRectangle rect;
     
-//    if (verbose) printf("DirectFB: Put_image entered %i %i %i %i %i %i\n",mpi->x,mpi->y,mpi->w,mpi->h,mpi->width,mpi->height);
+//    if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image entered %i %i %i %i %i %i\n",mpi->x,mpi->y,mpi->w,mpi->h,mpi->width,mpi->height);
 
     unlock();
 
     // already out?
     if((mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))) {
-//        if (verbose) printf("DirectFB: Put_image - nothing todo\n");
+//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - nothing todo\n");
 	return VO_TRUE;
     }
 
@@ -1314,7 +1312,7 @@ static uint32_t put_image(mp_image_t *mpi){
 	void *src;
 	unsigned int p;
 
-//        if (verbose) printf("DirectFB: Put_image - planar branch\n");
+//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - planar branch\n");
 	if (frame) {
 		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));
 		framelocked = 1;
@@ -1398,7 +1396,7 @@ static uint32_t put_image(mp_image_t *mpi){
 	unsigned int pitch;
         void *dst;
 
-//        if (verbose) printf("DirectFB: Put_image - non planar branch\n");
+//        if ( mp_msg_test(MSGT_VO,MSGL_V) ) printf("DirectFB: Put_image - non planar branch\n");
 	if (frame) {
 		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
 		framelocked = 1;

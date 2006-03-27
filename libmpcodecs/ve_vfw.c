@@ -126,7 +126,7 @@ static int vfw_start_encoder(BITMAPINFOHEADER *input_bih, BITMAPINFOHEADER *outp
     for(i=sizeof(output_bih);i<temp_len;i++) mp_msg(MSGT_WIN32, MSGL_DBG2, "%02X ",temp[i]);
   }
 
-//  if(verbose) {
+//  if( mp_msg_test(MSGT_WIN32,MSGL_V) ) {
     printf("Starting compression:\n");
     printf(" Input format:\n");
 	printf("  biSize %d\n", input_bih->biSize);
