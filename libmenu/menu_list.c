@@ -135,21 +135,25 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
 void menu_list_read_cmd(menu_t* menu,int cmd) {
   switch(cmd) {
   case MENU_CMD_UP:
-    if(!mpriv->current->prev) {
-      for( ; mpriv->current->next != NULL ; mpriv->current = mpriv->current->next)
-	/* NOTHING */;
+    while(mpriv->current->prev) {
+      mpriv->current = mpriv->current->prev;
       if(!mpriv->current->hide) return;
     }
+    for( ; mpriv->current->next != NULL ; mpriv->current = mpriv->current->next)
+      /* NOTHING */;
+    if(!mpriv->current->hide) return;
     while(mpriv->current->prev) {
       mpriv->current = mpriv->current->prev;
       if(!mpriv->current->hide) return;
     }
     break;
   case MENU_CMD_DOWN:
-    if(!mpriv->current->next) {
-      mpriv->current = mpriv->menu;
+    while(mpriv->current->next) {
+      mpriv->current = mpriv->current->next;
       if(!mpriv->current->hide) return;
     }
+    mpriv->current = mpriv->menu;
+    if(!mpriv->current->hide) return;
     while(mpriv->current->next) {
       mpriv->current = mpriv->current->next;
       if(!mpriv->current->hide) return;
