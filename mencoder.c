@@ -356,7 +356,7 @@ static void exit_sighandler(int x){
 static muxer_t* muxer=NULL;
 static FILE* muxer_f=NULL;
 
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int main(int argc,char* argv[]){
 
@@ -964,7 +964,7 @@ case ACODEC_COPY:
     break;
 }
 
-if ( mp_msg_test(MSGT_MENCODER,MSGL_DBG2) ) print_wave_header(mux_a->wf);
+if ( mp_msg_test(MSGT_MENCODER,MSGL_DBG2) ) print_wave_header(mux_a->wf, MSGL_DBG2);
 
 if (! ignore_start)
     muxer->audio_delay_fix += sh_audio->stream_delay;

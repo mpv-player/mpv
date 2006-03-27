@@ -137,8 +137,8 @@ int asf_check_header(demuxer_t *demuxer){
   return DEMUXER_TYPE_ASF;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h);
-extern void print_video_header(BITMAPINFOHEADER *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 int find_asf_guid(char *buf, const char *guid, int cur_pos, int buf_len)
 {
@@ -210,7 +210,7 @@ int read_asf_header(demuxer_t *demuxer){
         sh_audio->wf=calloc((streamh->type_size<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):streamh->type_size,1);
         memcpy(sh_audio->wf,buffer,streamh->type_size);
 	le2me_WAVEFORMATEX(sh_audio->wf);
-        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf);
+        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf,MSGL_V);
 	if(ASF_LOAD_GUID_PREFIX(streamh->concealment)==ASF_GUID_PREFIX_audio_conceal_interleave){
           buffer = &hdr[pos];
           pos += streamh->stream_size;
@@ -238,7 +238,7 @@ int read_asf_header(demuxer_t *demuxer){
 	  mp_msg(MSGT_DEMUXER, MSGL_WARN, MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat);
         //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         //sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-        if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih);
+        if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
         //asf_video_id=streamh.stream_no & 0x7F;
 	//if(demuxer->video->id==-1) demuxer->video->id=streamh.stream_no & 0x7F;
         break;

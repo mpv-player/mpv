@@ -138,7 +138,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     return CONTROL_UNKNOWN;
 }
 
-extern void print_video_header(BITMAPINFOHEADER *h);
+extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 // init driver
 static int init(sh_video_t *sh){
@@ -241,9 +241,9 @@ static int init(sh_video_t *sh){
 	set_csp(priv->o_bih,sh->codec->outfmt[sh->outfmtidx]);
 
     mp_msg(MSGT_WIN32, MSGL_V, "Input format:\n");
-    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh->bih);
+    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh->bih,MSGL_V);
     mp_msg(MSGT_WIN32, MSGL_V, "Output format:\n");
-    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(priv->o_bih);
+    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(priv->o_bih,MSGL_V);
 
     // set postprocessing level in xvid/divx4 .dll
     ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality), 0);

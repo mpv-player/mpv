@@ -1070,7 +1070,7 @@ discard:
   }//    goto loop;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static demuxer_t* demux_open_real(demuxer_t* demuxer)
 {
@@ -1449,7 +1449,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    
 		    mp_msg(MSGT_DEMUX,MSGL_V,"audio fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 		    if ( mp_msg_test(MSGT_DEMUX,MSGL_V) )
-		    print_wave_header(sh->wf);
+		    print_wave_header(sh->wf, MSGL_V);
 
 		    /* Select audio stream with highest bitrate if multirate file*/
 		    if (priv->is_multirate && ((demuxer->audio->id == -1) ||

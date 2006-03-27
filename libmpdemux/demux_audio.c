@@ -44,7 +44,7 @@ typedef struct mp3_hdr {
 } mp3_hdr_t;
 
 extern void free_sh_audio(sh_audio_t* sh);
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int hr_mp3_seek = 0;
 
@@ -438,7 +438,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
      }
     }
 
-    if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_wave_header(w);
+    if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_wave_header(w, MSGL_V);
     if(l)
       stream_skip(s,l);
     do

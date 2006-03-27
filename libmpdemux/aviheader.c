@@ -20,15 +20,15 @@
 
 static MainAVIHeader avih;
 
-extern void print_avih(MainAVIHeader *h);
-extern void print_avih_flags(MainAVIHeader *h);
-extern void print_strh(AVIStreamHeader *h);
-extern void print_wave_header(WAVEFORMATEX *h);
-extern void print_video_header(BITMAPINFOHEADER *h);
-extern void print_index(AVIINDEXENTRY *idx,int idx_size);
-extern void print_avistdindex_chunk(avistdindex_chunk *h);
-extern void print_avisuperindex_chunk(avisuperindex_chunk *h);
-extern void print_vprp(VideoPropHeader *vprp);
+extern void print_avih(MainAVIHeader *h, int verbose_level);
+extern void print_avih_flags(MainAVIHeader *h, int verbose_level);
+extern void print_strh(AVIStreamHeader *h, int verbose_level);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
+extern void print_index(AVIINDEXENTRY *idx,int idx_size, int verbose_level);
+extern void print_avistdindex_chunk(avistdindex_chunk *h, int verbose_level);
+extern void print_avisuperindex_chunk(avisuperindex_chunk *h, int verbose_level);
+extern void print_vprp(VideoPropHeader *vprp, int verbose_level);
 
 static int odml_get_vstream_id(int id, unsigned char res[])
 {
@@ -185,7 +185,7 @@ while(1){
       stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
       le2me_MainAVIHeader(&avih); // swap to machine endian
       chunksize-=MIN(size2,sizeof(avih));
-      if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_avih(&avih); // else print_avih_flags(&avih);
+      if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_avih(&avih,MSGL_V); // else print_avih_flags(&avih,MSGL_V);
       break;
     case ckidSTREAMHEADER: {      // read 'strh'
       AVIStreamHeader h;
@@ -202,7 +202,7 @@ while(1){
         memcpy(&sh_audio->audio,&h,sizeof(h));
       }
       last_fccType=h.fccType;
-      if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_strh(&h);
+      if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_strh(&h,MSGL_V);
       break; }
     case mmioFOURCC('i', 'n', 'd', 'x'): {
       uint32_t i;
@@ -223,7 +223,7 @@ while(1){
       stream_read(demuxer->stream, (char *)s->dwReserved, 3*4);
       memset(s->dwReserved, 0, 3*4);
 	  
-      print_avisuperindex_chunk(s);
+      print_avisuperindex_chunk(s,MSGL_V);
 
       msize = sizeof (uint32_t) * s->wLongsPerEntry * s->nEntriesInUse;
       s->aIndex = malloc(msize);
@@ -254,7 +254,7 @@ while(1){
 	// fixup MS-RLE header (seems to be broken for <256 color files)
 	if(sh_video->bih->biCompression<=1 && sh_video->bih->biSize==40)
 	    sh_video->bih->biSize=chunksize;
-        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih);
+        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih,MSGL_V);
         chunksize=0;
 //        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
 //        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
@@ -309,7 +309,7 @@ while(1){
 	    sh_audio->wf=realloc(sh_audio->wf, sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize);
 	}
         chunksize=0;
-        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf);
+        if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf,MSGL_V);
 	++priv->audio_streams;
 //        if(demuxer->audio->id==-1) demuxer->audio->id=stream_id;
       }
@@ -332,7 +332,7 @@ while(1){
 	if (sh_video) {
 		sh_video->aspect = GET_AVI_ASPECT(vprp->dwFrameAspectRatio);
 	}
-	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_vprp(vprp);
+	if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_vprp(vprp,MSGL_V);
 	free(vprp);
 	break;
     }
@@ -368,7 +368,7 @@ while(1){
 	entry->dwFlags&=0xffff;
       }
       chunksize-=priv->idx_size<<4;
-      if( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx,priv->idx_size);
+      if( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx,priv->idx_size,MSGL_DBG2);
     }
     break;
     /* added May 2002 */
@@ -465,7 +465,7 @@ if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
 	    }
 
 	    le2me_AVISTDIDXCHUNK(&cx->stdidx[j]);
-	    print_avistdindex_chunk(&cx->stdidx[j]);
+	    print_avistdindex_chunk(&cx->stdidx[j],MSGL_V);
 	    priv->idx_size += cx->stdidx[j].nEntriesInUse;
 	    cx->stdidx[j].aIndex = malloc(cx->stdidx[j].nEntriesInUse*sizeof(avistdindex_entry));
 	    stream_read(demuxer->stream, (char *)cx->stdidx[j].aIndex, 
@@ -539,7 +539,7 @@ if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
 	}
     }
 
-    if ( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx, priv->idx_size);
+    if ( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx, priv->idx_size,MSGL_DBG2);
 
     demuxer->movi_end=demuxer->stream->end_pos;
 
@@ -677,7 +677,7 @@ skip_chunk:
   }
   priv->idx_size=priv->idx_pos;
   mp_msg(MSGT_HEADER,MSGL_INFO,MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks,priv->idx_size);
-  if( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx,priv->idx_size);
+  if( mp_msg_test(MSGT_HEADER,MSGL_DBG2) ) print_index(priv->idx,priv->idx_size,MSGL_DBG2);
 
   /* Write generated index to a file */
   if (index_file_save) {

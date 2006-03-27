@@ -94,8 +94,8 @@ DS_AudioDecoder * DS_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* 
     this->m_sDestType.cbFormat=18; //pWF->cbSize;
     this->m_sDestType.pbFormat=this->m_sVhdr2;
 
-//print_wave_header(this->m_sVhdr);
-//print_wave_header(this->m_sVhdr2);
+//print_wave_header(this->m_sVhdr,  MSGL_V);
+//print_wave_header(this->m_sVhdr2, MSGL_V);
 
     /*try*/
     {

@@ -90,7 +90,7 @@ static int load_dll( char *libname )
      TvqGetNumFixedBitsPerFrame;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 static int init_vqf_audio_codec(sh_audio_t *sh_audio){
     WAVEFORMATEX *in_fmt=sh_audio->wf;
     vqf_priv_t*priv=sh_audio->context;
@@ -113,9 +113,9 @@ static int init_vqf_audio_codec(sh_audio_t *sh_audio){
     if( mp_msg_test(MSGT_DECAUDIO,MSGL_V) )
     {
     mp_msg(MSGT_DECAUDIO, MSGL_V, "Input format:\n");
-    print_wave_header(in_fmt);
+    print_wave_header(in_fmt, MSGL_V);
     mp_msg(MSGT_DECAUDIO, MSGL_V, "Output fmt:\n");
-    print_wave_header(&priv->o_wf);
+    print_wave_header(&priv->o_wf, MSGL_V);
     }
     memcpy(&priv->hi,&in_fmt[1],sizeof(headerInfo));
     if((ver=TvqInitialize(&priv->hi,&priv->index,0))){

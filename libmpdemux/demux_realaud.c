@@ -144,7 +144,7 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 
 
 
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 
 
@@ -313,7 +313,7 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%d)\n", sh->format);
 	}
 
-	print_wave_header(sh->wf);
+	print_wave_header(sh->wf, MSGL_V);
 
 	/* disable seeking */
 	demuxer->seekable = 0;

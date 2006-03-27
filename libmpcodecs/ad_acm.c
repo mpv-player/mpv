@@ -40,7 +40,7 @@ static int init(sh_audio_t *sh_audio)
   return 1;
 }
 
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 static int preinit(sh_audio_t *sh_audio)
 {
@@ -77,9 +77,9 @@ static int preinit(sh_audio_t *sh_audio)
     if ( mp_msg_test(MSGT_DECAUDIO,MSGL_V) )
     {
 	mp_msg(MSGT_DECAUDIO, MSGL_V, "Input format:\n");
-	print_wave_header(in_fmt);
+	print_wave_header(in_fmt, MSGL_V);
 	mp_msg(MSGT_DECAUDIO, MSGL_V, "Output format:\n");
-	print_wave_header(priv->o_wf);
+	print_wave_header(priv->o_wf, MSGL_V);
     }
 
     MSACM_RegisterDriver((const char *)sh_audio->codec->dll, in_fmt->wFormatTag, 0);

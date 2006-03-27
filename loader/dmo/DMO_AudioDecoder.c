@@ -36,7 +36,7 @@ struct _DMO_AudioDecoder
 #define __MODULE__ "DirectShow audio decoder"
 
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
-extern void print_wave_header(WAVEFORMATEX *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 DMO_AudioDecoder * DMO_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX* wf,int out_channels)
 //DMO_AudioDecoder * DMO_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMATEX* wf)
@@ -89,8 +89,8 @@ DMO_AudioDecoder * DMO_AudioDecoder_Open(char* dllname, GUID* guid, WAVEFORMATEX
     this->m_sDestType.cbFormat=18; //pWF->cbSize;
     this->m_sDestType.pbFormat=this->m_sVhdr2;
 
-print_wave_header((WAVEFORMATEX *)this->m_sVhdr);
-print_wave_header((WAVEFORMATEX *)this->m_sVhdr2);
+print_wave_header((WAVEFORMATEX *)this->m_sVhdr,  MSGL_V);
+print_wave_header((WAVEFORMATEX *)this->m_sVhdr2, MSGL_V);
 
         this->m_pDMO_Filter = DMO_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType);
 	if( !this->m_pDMO_Filter ) {

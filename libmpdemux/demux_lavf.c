@@ -46,8 +46,8 @@ typedef struct lavf_priv_t{
     int64_t last_pts;
 }lavf_priv_t;
 
-extern void print_wave_header(WAVEFORMATEX *h);
-extern void print_video_header(BITMAPINFOHEADER *h);
+extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
+extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
 
 int64_t ff_gcd(int64_t a, int64_t b);
 
@@ -237,7 +237,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 sh_audio->format = 0x7;
                 break;
             }
-            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf);
+            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
             if(demuxer->audio->id != i && demuxer->audio->id != -1)
                 st->discard= AVDISCARD_ALL;
             else{
@@ -286,7 +286,7 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
             sh_video->ds= demuxer->video;
             if(codec->extradata_size)
                 memcpy(sh_video->bih + 1, codec->extradata, codec->extradata_size);
-            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih);
+            if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
 /*    short 	biPlanes;
     int  	biXPelsPerMeter;
     int  	biYPelsPerMeter;
