@@ -8,7 +8,8 @@ extern int identify;
 
 // verbosity elevel:
 
-// stuff from level MSGL_FATAL-MSGL_STATUS should be translated.
+/* Only messages level MSGL_FATAL-MSGL_STATUS should be translated,
+ * messages level MSGL_V and above should not be translated. */
 
 #define MSGL_FATAL 0  // will exit/abort
 #define MSGL_ERR 1    // continues
