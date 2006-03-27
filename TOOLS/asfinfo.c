@@ -105,7 +105,7 @@ char* chunk_type(unsigned char* guid){
   return NULL;
 }
 
-void print_wave_header(WAVEFORMATEX *h,MSGL_INFO){
+void print_wave_header(WAVEFORMATEX *h){
 
   printf("======= WAVE Format =======\n");
   
@@ -135,7 +135,7 @@ void print_wave_header(WAVEFORMATEX *h,MSGL_INFO){
 
 }
 
-void print_video_header(BITMAPINFOHEADER *h,MSGL_INFO){
+void print_video_header(BITMAPINFOHEADER *h){
   printf("======= VIDEO Format ======\n");
 	printf("  biSize %d\n", h->biSize);
 	printf("  biWidth %d\n", h->biWidth);
@@ -176,10 +176,10 @@ while(fread(&objh,sizeof(objh),1,f)>0){
       fread(buffer,streamh.type_size,1,f);
       switch(*((unsigned int*)&streamh.type)){
       case 0xF8699E40:  // guid_audio_stream
-        print_wave_header((WAVEFORMATEX*)buffer,MSGL_INFO);
+        print_wave_header((WAVEFORMATEX*)buffer);
         break;
       case 0xBC19EFC0:  // guid_video_stream
-        print_video_header((BITMAPINFOHEADER*)&buffer[4+4+1+2],MSGL_INFO);
+        print_video_header((BITMAPINFOHEADER*)&buffer[4+4+1+2]);
         break;
       }
       // stream-specific data:
