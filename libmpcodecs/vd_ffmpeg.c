@@ -58,6 +58,7 @@ int avcodec_inited=0;
 typedef struct {
     AVCodecContext *avctx;
     AVFrame *pic;
+    enum PixelFormat pix_fmt;
     float last_aspect;
     int do_slices;
     int do_dr1;
@@ -533,6 +534,7 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     if (// aspect != ctx->last_aspect ||
 	width != sh->disp_w  ||
 	height != sh->disp_h ||
+	pix_fmt != ctx->pix_fmt ||
 	!ctx->vo_inited)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
@@ -542,6 +544,7 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 	    sh->aspect = ctx->last_aspect;
 	sh->disp_w = width;
 	sh->disp_h = height;
+	ctx->pix_fmt = pix_fmt;
 	switch(pix_fmt){
 	// YUVJ are YUV formats that use the full Y range and not just
 	// 16 - 235 (see colorspaces.txt).
