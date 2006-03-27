@@ -542,13 +542,13 @@ Como <application>MPlayer</application> no tiene una piel incluida, debe
 bajarlas si desea usar la GUI. Vea la <ulink
 url="http://www.mplayerhq.hu/dload.html">página de descargas</ulink>.
 Deberían ser extraídas al directorio global de pieles normal (<filename
-class="directory">$PREFIX/share/mplayer/Skin</filename>), o al directorio
-personal  <filename class="directory">$HOME/.mplayer/Skin</filename>.
+class="directory">$PREFIX/share/mplayer/skins/</filename>), o al directorio
+personal  <filename class="directory">$HOME/.mplayer/skins/</filename>.
 <application>MPlayer</application> por omisión busca en esos directorios 
 por un directorio llamado <filename class="directory">default</filename>, pero
 puede usar la opción <option>-skin <replaceable>pielnueva</replaceable></option>,
 o usar la directiva <literal>skin=pielnueva</literal> en el archivo de configuración
-para usar el directorio <filename class="directory">*/Skin/pielnueva</filename>.
+para usar el directorio <filename class="directory">*/skins//pielnueva</filename>.
 </para>
 </sect1>
 

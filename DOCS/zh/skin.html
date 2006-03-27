@@ -40,9 +40,9 @@
 
 <p>skin的搜索目录(按顺序)是：</p>
 <pre>
-    $(DATADIR)/Skin/
-    $(PREFIX)/share/mplayer/Skin/
-    ~/.mplayer/Skin/
+    $(DATADIR)/skins/
+    $(PREFIX)/share/mplayer/skins/
+    ~/.mplayer/skins/
 </pre>
 
 <p>注意，第一个路径倚赖于MPlayer的安装配置(见<code>configure</code>脚本
@@ -50,7 +50,7 @@
 
 <p>所有的skin被安装到上面列出的一个目录下的自己的目录中，例如：</p>
 <pre>
-    $(PREFIX)/share/mplayer/Skin/default/
+    $(PREFIX)/share/mplayer/skins/default/
 </pre>
 
 
@@ -207,7 +207,7 @@ end
   </tr>
 </table>
 
-<p>图像文件的名称必须不带目录名 -- 图像在<code>Skin</code>目录中被搜索。你能(但是并不需要)规定扩展名。
+<p>图像文件的名称必须不带目录名 -- 图像在<code>skins</code>目录中被搜索。你能(但是并不需要)规定扩展名。
 如果文件不存在，MPlayer将试图装载<code>&lt;filename&gt;.&lt;ext&gt;</code>文件，
 <code>&lt;ext&gt;</code>可以是<code>png</code>或者<code>PNG</code>(按这个顺序尝试)。第一个匹配文件将被使用。</p>
 

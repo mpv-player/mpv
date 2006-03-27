@@ -586,13 +586,13 @@ co¾ pracuje s tìmito ovladaèi:
   muset nìjaký stáhnout abyste mohli pou¾ívat GUI. Viz na¹i <ulink
   url="http://www.mplayerhq.hu/dload.html">download stránku</ulink>.
   Skiny by mìly být rozbaleny do obvyklého systémového adresáøe
-  (<filename class="directory">$PREFIX/share/mplayer/Skin</filename>),
-  nebo do <filename class="directory">$HOME/.mplayer/Skin</filename>.
+  (<filename class="directory">$PREFIX/share/mplayer/skins</filename>),
+  nebo do <filename class="directory">$HOME/.mplayer/skins</filename>.
   <application>MPlayer</application> ve výchozím stavu hledá v tìchto adresáøích
   podadresáø jménem <filename class="directory">default</filename>, ale
   mù¾ete pou¾ít volbu <option>-skin <replaceable>nový_skin</replaceable></option>
   nebo direktivu <literal>skin=nový_skin</literal> konfiguraèního souboru pro
-  pou¾ití skinu v adresáøi <filename class="directory">*/Skin/nový_skin</filename>.
+  pou¾ití skinu v adresáøi <filename class="directory">*/skins/nový_skin</filename>.
 </para>
 </sect1>
 

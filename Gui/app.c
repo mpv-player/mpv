@@ -74,8 +74,11 @@ extern char *get_path(char *);
 
 listItems   appMPlayer;
 
+/* FIXME: Eventually remove the obsolete directory names. */
 char      * skinDirInHome=NULL;
+char      * skinDirInHome_obsolete=NULL;
 char      * skinMPlayerDir=NULL;
+char      * skinMPlayerDir_obsolete=NULL;
 char      * skinName = NULL;
 
 void appClearItem( wItem * item )

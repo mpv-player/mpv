@@ -42,6 +42,10 @@ FOR THE NEXT RELEASE:
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
+cruft removal:
+- remove support for skins directories using the obsolete name 'Skin'
+
+DVB:
 - display OSD and subtitles using DVB card's OSD
 
 mpg demuxer:

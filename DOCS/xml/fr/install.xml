@@ -540,11 +540,11 @@ ceci pour des raisons techniques.
 devrez la télécharger si vous voulez utiliser la GUI. Voir la <ulink
 url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
 Elles pourront se placer dans le répertoire commun (<filename class="directory">
-$PREFIX/share/mplayer/Skin</filename>), ou dans <filename class="directory">$HOME/.mplayer/Skin</filename>.
+$PREFIX/share/mplayer/skins</filename>), ou dans <filename class="directory">$HOME/.mplayer/skins</filename>.
 Par défaut, <application>MPlayer</application> consulte ces répertoires à la recherche
 d'un répertoire nommé <filename class="directory">default</filename>, mais vous pouvez utiliser l'option
 <option>-skin <replaceable>nouvelleskin</replaceable></option>, ou placer <literal>skin=nouvelleskin</literal>
-dans votre fichier de configuration pour utiliser la skin dans le répertoire <filename class="directory">*/Skin/newskin</filename>.
+dans votre fichier de configuration pour utiliser la skin dans le répertoire <filename class="directory">*/skins/newskin</filename>.
 </para>
 </sect1>
 

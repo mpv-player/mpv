@@ -561,14 +561,14 @@ Jako ¿e <application>MPlayer</application> nie zawiera ¿adnej skórki, musisz
 je ¶ci±gn±æ, je¿eli chcesz u¿ywaæ GUI. Sprawd¼ <ulink
 url="http://www.mplayerhq.hu/dload.html">stronê z zasobami do pobrania</ulink>.
 Skórki powinny byæ rozpakowane do katalogu dostêpnego dla wszystkich (<filename
-class="directory">$PREFIX/share/mplayer/Skin</filename>) lub do <filename
-class="directory">$HOME/.mplayer/Skin</filename>.
+class="directory">$PREFIX/share/mplayer/skins</filename>) lub do <filename
+class="directory">$HOME/.mplayer/skins</filename>.
 <application>MPlayer</application> sprawdza je w poszukiwaniu
 folderu nazwanego <filename class="directory">default</filename>, ale
 mo¿esz u¿yæ opcji <option>-skin <replaceable>nowaskórka</replaceable></option>
 lub wpisaæ do pliku konfiguracyjnego <literal>skin=nowaskórka</literal>, aby
 program korzysta³ ze skórki w katalogu
-<filename class="directory">*/Skin/nowaskórka</filename>.
+<filename class="directory">*/skins/nowaskórka</filename>.
 </para>
 </sect1>
 

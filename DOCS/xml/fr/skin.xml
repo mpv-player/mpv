@@ -18,13 +18,13 @@ la GUI.</emphasis>
 <application>MPlayer</application> cherche des skins dans ces répertoires (dans cet ordre):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/Skin/</filename>
+<filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/Skin/</filename>
+<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/Skin/</filename>
+<filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -38,7 +38,7 @@ du script <command>configure</command>).
 <para>
 Chaque skin est installée dans son propre répertoire sous l'un des répertoires
 listés ci-dessus, par exemple:
-<screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
+<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
@@ -254,7 +254,7 @@ end
 
 <para>
 Le nom d'un fichier image doit être donné sans distinction de répertoire - les
-images seront cherchées dans le répertoire <filename class="directory">Skin</filename>.
+images seront cherchées dans le répertoire <filename class="directory">skins</filename>.
 Vous pouvez (mais ce n'est pas obligatoire) spécifier l'extension du fichier. Si
 le fichier n'existe pas, <application>MPlayer</application> essaie de charger le fichier
 <filename>&lt;nomfichier&gt;.&lt;ext&gt;</filename>, où <literal>png</literal>

@@ -167,7 +167,10 @@ void gtkShow( int type,char * param )
    case evSkinBrowser:
 	ShowSkinBrowser();
 //        gtkClearList( SkinList );
-        if ( gtkFillSkinList( sbMPlayerPrefixDir ) && gtkFillSkinList( sbMPlayerDirInHome ) )
+        if ( gtkFillSkinList( sbMPlayerPrefixDir ) &&
+             gtkFillSkinList( sbMPlayerPrefixDir_obsolete ) &&
+             gtkFillSkinList( sbMPlayerDirInHome ) &&
+             gtkFillSkinList( sbMPlayerDirInHome_obsolete )  )
          {
           gtkSetDefaultToCList( SkinList,param );
 	  gtk_clist_sort( GTK_CLIST( SkinList ) );

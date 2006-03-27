@@ -18,13 +18,13 @@ in order to be able to use the GUI.</emphasis>
 The directories searched for skins are (in order):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/Skin/</filename>
+<filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/Skin/</filename>
+<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/Skin/</filename>
+<filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -38,7 +38,7 @@ arguments of the <command>configure</command> script).
 <para>
 Every skin is installed into its own directory under one of the directories
 listed above, for example:
-<screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
+<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
@@ -253,7 +253,7 @@ end
 
 <para>
 The name of an image file must be given without leading directories - images
-are searched for in the <filename class="directory">Skin</filename> directory.
+are searched for in the <filename class="directory">skins</filename> directory.
 You may (but you need not) specify the extension of the file. If the file does
 not exist, <application>MPlayer</application> tries to load the file
 <filename>&lt;filename&gt;.&lt;ext&gt;</filename>, where <literal>png</literal>

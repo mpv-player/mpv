@@ -538,14 +538,14 @@ Mivel az <application>MPlayer</application> nem rendelkezik beépített skin-nel,
 le kell töltened õket, ha a GUI-t használni akarod. Lásd a <ulink
 url="http://www.mplayerhq.hu/dload.html">letöltési oldalt</ulink>.
 Ajánlott egy rendszerszinten elérhetõ könyvtárba tenni õket (<filename
-class="directory">$PREFIX/share/mplayer/Skin</filename>), vagy a <filename
-class="directory">$HOME/.mplayer/Skin</filename>-be.
+class="directory">$PREFIX/share/mplayer/skins</filename>), vagy a <filename
+class="directory">$HOME/.mplayer/skins</filename>-be.
 Az <application>MPlayer</application> ezekben a könyvtárakban
 keres egy <filename class="directory">default</filename> nevû alkönyvtárat, amelyben
 az alapértelmezett skin van. Megadhatsz más könyvtárat is a
 <option>-skin <replaceable>newskin</replaceable></option> kapcsolóval vagy a
 <literal>skin=newskin</literal> sorral a konfigurációs fájlban, és ekkor a
-<filename class="directory">*/Skin/newskin</filename> könyvtárban lévõ skin lesz
+<filename class="directory">*/skins/newskin</filename> könyvtárban lévõ skin lesz
 használatban.
 </para>
 </sect1>

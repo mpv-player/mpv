@@ -33,13 +33,13 @@ poder usar el GUI.</emphasis>
 Los directorios donde se buscan los skins son (en orden):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/Skin/</filename>
+<filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/Skin/</filename>
+<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/Skin/</filename>
+<filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -54,7 +54,7 @@ configurado <application>MPlayer</application> (vea los argumentos
 <para>
 Todo skin es instalado en su propio directorio bajo uno de los directorios
 listados más arriba, por ejemplo:
-<screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
+<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
@@ -275,7 +275,7 @@ end
 
 <para>
 El nombre de un archivo de imagen se debe dar sin los directorios - las imágenes
-se buscan en el directorio <filename class="directory">Skin</filename>.
+se buscan en el directorio <filename class="directory">skins</filename>.
 También puede (pero necesita ser root) especificar la extensión del archivo. Si
 el archivo no existe, <application>MPlayer</application> intentará cargar el
 archivo

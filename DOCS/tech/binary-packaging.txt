@@ -101,7 +101,7 @@ for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 /usr/share/man/man1/            man page
 /usr/share/man/XX/man1/         translated man page
 /usr/share/mplayer/font/        fonts
-/usr/share/mplayer/Skin/        GUI skins
+/usr/share/mplayer/skins/       GUI skins
 
 You MUSTN'T include the codecs.conf file in your package. It is useful
 only for development purposes and often causes obscure problems for users.

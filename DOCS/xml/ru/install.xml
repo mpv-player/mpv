@@ -540,11 +540,11 @@ make install</screen>
 хотите использовать GUI. См. 
 <ulink url="http://www.mplayerhq.hu/dload.html">download page[страницу
 закачек]</ulink>. Они должны быть извлечены в системный каталог
-(<filename class="directory">$PREFIX/share/mplayer/Skin</filename>), или в 
-<filename class="directory">$HOME/.mplayer/Skin</filename>. По умолчанию, MPlayer ищет каталог <filename class="directory">default</filename>
+(<filename class="directory">$PREFIX/share/mplayer/skins</filename>), или в 
+<filename class="directory">$HOME/.mplayer/skins</filename>. По умолчанию, MPlayer ищет каталог <filename class="directory">default</filename>
 в этих каталогах, но вы можете использовать опцию <option>-skin <replaceable>newskin</replaceable></option>,
 или директиву конфигурационного файла <option>skin=newskin</option>, чтобы использовать
-шкуру из каталога <filename class="directory">*/Skin/newskin</filename>.
+шкуру из каталога <filename class="directory">*/skins/newskin</filename>.
 </para>
 </sect1>
 

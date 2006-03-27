@@ -494,9 +494,9 @@ endif
 	echo "*** for OSD/Subtitles support and extract to $(DATADIR)/font/" ; \
 	fi
 ifeq ($(GUI),yes)
-	@$(INSTALL) -d $(DATADIR)/Skin
+	@$(INSTALL) -d $(DATADIR)/skins
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
-	@echo "*** for GUI, and extract to $(DATADIR)/Skin/"
+	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
 	@$(INSTALL) -d $(prefix)/share/pixmaps
 	$(INSTALL) -m 644 Gui/mplayer/pixmaps/mplayer-desktop.xpm $(prefix)/share/pixmaps/mplayer-desktop.xpm
 	@$(INSTALL) -d $(prefix)/share/applications

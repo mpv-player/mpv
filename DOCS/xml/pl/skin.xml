@@ -35,13 +35,13 @@ jedna skórka musi byæ zainstalowana, aby¶ mia³ mo¿liwo¶æ korzystania z GUI.</emp
 Skórki s± szukane w nastêpuj±cych katalogach (w kolejno¶ci):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/Skin/</filename>
+<filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/Skin/</filename>
+<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/Skin/</filename>
+<filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -56,7 +56,7 @@ w skrypcie <command>configure</command>).
 <para>
 Ka¿da skórka jest instalowana w swoim w³asnym katalogu, w jednej z wy¿ej
 wymienionych lokacji, na przyk³ad:
-<screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
+<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
@@ -280,7 +280,7 @@ end
 
 <para>
 Nazwa pliku graficznego musi zostaæ podana bez ¿adnych nazw katalogów - obrazki
-s± szukane w katalogu <filename class="directory">Skin</filename>.
+s± szukane w katalogu <filename class="directory">skins</filename>.
 Mo¿esz (ale nie musisz) okre¶liæ rozszerzenia tego pliku. Je¶li plik taki nie
 istnieje, <application>MPlayer</application>
 spróbuje wczytaæ plik <filename>&lt;nazwa pliku&gt;.&lt;rozszerzenie&gt;</filename>,

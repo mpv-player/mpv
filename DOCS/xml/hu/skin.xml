@@ -18,13 +18,13 @@ kell lennie, hogy használni tudd a GUI-t.</emphasis>
 Az alábbi könyvtárak kerülnek átvizsgálásra (sorrendben):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/Skin/</filename>
+<filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/Skin/</filename>
+<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/Skin/</filename>
+<filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -38,7 +38,7 @@ konfigurációjának megfelelõen (lásd a <command>configure</command> script
 <para>
 Minden skin a saját könyvtárába kerül telepítésre a fent felsorolt könyvtárakon
 belül, például:
-<screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
+<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
@@ -253,7 +253,7 @@ end
 
 <para>
 Egy kép fájl nevét a hozzá vezetõ útvonal nélkül kell megadni - a képeknek
-a <filename class="directory">Skin</filename> könyvtárban kell lenniük.
+a <filename class="directory">skins</filename> könyvtárban kell lenniük.
 A fájl kiterjesztését megadhatod (de nem kötelezõ). Ha a fájl nem létezik,
 az <application>MPlayer</application> megpróbálja betölteni a
 <filename>&lt;filename&gt;.&lt;ext&gt;</filename> fájlt, ahol <literal>png</literal>

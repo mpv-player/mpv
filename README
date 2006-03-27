@@ -210,11 +210,11 @@ ____________________________
 STEP6: Installing a GUI skin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Unpack the archive and put the contents in /usr/local/share/mplayer/Skin/ or
-~/.mplayer/Skin/. MPlayer will use the skin in the subdirectory named default
-of /usr/local/share/mplayer/Skin/ or ~/.mplayer/Skin/ unless told otherwise via
-the '-skin' switch. You should therefore rename your skin subdirectory or make
-a suitable symbolic link.
+Unpack the archive and put the contents in /usr/local/share/mplayer/skins/ or
+~/.mplayer/skins/. MPlayer will use the skin in the subdirectory named default
+of /usr/local/share/mplayer/skins/ or ~/.mplayer/skins/ unless told otherwise
+via the '-skin' switch. You should therefore rename your skin subdirectory or
+make a suitable symbolic link.
 
 
 __________________

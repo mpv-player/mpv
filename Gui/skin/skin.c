@@ -676,8 +676,16 @@ int skinRead( char * dname )
    setname( skinMPlayerDir,dname );
    if ( ( skinFile = fopen( fn,"rt" ) ) == NULL )
     {
-     mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_SKIN_SkinFileNotFound,fn );
-     return -1;
+     setname( skinDirInHome_obsolete,dname );
+     if ( ( skinFile = fopen( fn,"rt" ) ) == NULL )
+      {
+       setname( skinMPlayerDir_obsolete,dname );
+       if ( ( skinFile = fopen( fn,"rt" ) ) == NULL )
+        {
+         mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_SKIN_SkinFileNotFound,fn );
+         return -1;
+        }
+      }
     }
   }
 

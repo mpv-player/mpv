@@ -122,6 +122,7 @@ MPlayer (1.0)
     * bitexact decoding
 
     GUI:
+    * skins now reside in a directory named 'skins', not 'Skin'
     * ported to GTK2
     * long standing up side down vpotmeter bug fixed
     * don't hang on unreadable skin files

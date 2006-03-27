@@ -34,13 +34,13 @@ nainstalovat, chcete-li pou¾ívat GUI.</emphasis>
 Adresáøe prohledávané na skiny jsou (v tomto poøadí):
 <orderedlist>
 <listitem><para>
-<filename class="directory">$(DATADIR)/Skin/</filename>
+<filename class="directory">$(DATADIR)/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">$(PREFIX)/share/mplayer/Skin/</filename>
+<filename class="directory">$(PREFIX)/share/mplayer/skins/</filename>
 </para></listitem>
 <listitem><para>
-<filename class="directory">~/.mplayer/Skin/</filename>
+<filename class="directory">~/.mplayer/skins/</filename>
 </para></listitem>
 </orderedlist>
 </para>
@@ -54,7 +54,7 @@ Poznamenejme, ¾e první z cest se mù¾e li¹it podle toho, jak je
 <para>
 Ka¾dı skin je instalován do vlastního adresáøe v nìkterém z vı¹e uvedenıch.
 Napøíklad:
-<screen>$(PREFIX)/share/mplayer/Skin/default/</screen>
+<screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
 </sect2>
 
@@ -267,7 +267,7 @@ end
 
 <para>
 Jméno souboru s obrázkem musí bıt zadáno bez úvodních adresáøù - obrázky jsou
-vyhledávány v adresáøi <filename class="directory">Skin</filename>.
+vyhledávány v adresáøi <filename class="directory">skins</filename>.
 Mìli byste (ale nemusíte) zadat pøíponu souboru. Pokud soubor neexistuje,
 zkou¹í <application>MPlayer</application> naèíst soubor
 <filename>&lt;jméno&gt;.&lt;pøíp&gt;</filename>, kdy jsou za
