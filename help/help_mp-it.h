@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.222
+// Updated to help_mp-en.h v1.231
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -65,8 +65,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Impossibile trovare la HOME directory\n"
 #define MSGTR_GetpathProblem "Problema in get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Creo il file di configurazione: %s\n"
-#define MSGTR_InvalidVOdriver "Nome del diver video di output non valido: %s\nUsa '-vo help' per avere una lista dei driver audio disponibili.\n"
-#define MSGTR_InvalidAOdriver "Nome del diver audio di output non valido: %s\nUsa '-ao help' per avere una lista dei driver audio disponibili.\n"
 #define MSGTR_CopyCodecsConf "(copia/linka etc/codecs.conf dai sorgenti di MPlayer a ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Utilizzo la versione interna predefinita di codecs.conf\n"
 #define MSGTR_CantLoadFont "Impossibile caricare i font: %s\n"
@@ -204,30 +202,44 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "abilitat"
 #define MSGTR_OSDdisabled "disabilitat"
-#define MSGTR_OSDnone "nessuno"
-#define MSGTR_OSDunknown "sconosciuto"
-#define MSGTR_OSDDVDNAV "DVDNAV: %s"
 #define MSGTR_OSDChannel "Canale: %s"
-#define MSGTR_OSDSubtitles "Sottotitoli: %si"
-#define MSGTR_OSDSubtitlesOff "Sottotitoli: off"
-#define MSGTR_OSDSubtitlesLanguage "Sottotitoli: (%d) %s"
-#define MSGTR_OSDSub "Sottotitoli: (%d) %s%s"
 #define MSGTR_OSDSubDelay "Ritardo sottotitoli: %d ms"
-#define MSGTR_OSDSubPosition "Posizione sottotitoli: %d/100"
-#define MSGTR_OSDSubAlignment "Allineamento sottotitoli: %s"
-#define MSGTR_OSDAVDelay "Ritardo A-V: %d ms"
 #define MSGTR_OSDSpeed "Velocità: x %6.2f"
-#define MSGTR_OSDStayOnTop "Resta in primo piano: %so"
-#define MSGTR_OSDRootwin "Rootwin: %so"
-#define MSGTR_OSDBorder "Bordo: %s"
-#define MSGTR_OSDFramedrop "Scarto fotogrammi: %s"
-#define MSGTR_OSDFramedropOn "on"
-#define MSGTR_OSDFramedropHard "hard"
-#define MSGTR_OSDFramedropOff "off"
 #define MSGTR_OSDosd "OSD: %so"
-#define MSGTR_OSDSubBottom "in basso"
-#define MSGTR_OSDSubCenter "al centro"
-#define MSGTR_OSDSubTop "in alto"
+
+// property values
+#define MSGTR_Enabled "abilitat"
+#define MSGTR_EnabledEdl "abilitato (edl)"
+#define MSGTR_Disabled "disabilitat"
+#define MSGTR_HardFrameDrop "hard"
+#define MSGTR_Unknown "sconosciuto"
+#define MSGTR_Bottom "in basso"
+#define MSGTR_Center "al centro"
+#define MSGTR_Top "in alto"
+
+// osd bar names
+#define MSGTR_Volume "Volume"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "Luminosità"
+#define MSGTR_Contrast "Contrasto"
+#define MSGTR_Saturation "Saturazione"
+#define MSGTR_Hue "Tonalità"
+
+// property state
+#define MSGTR_MuteStatus "Muto: %s"
+#define MSGTR_AVDelayStatus "Ritardo A-V: %s"
+#define MSGTR_OnTopStatus "Resta in primo piano: %so"
+#define MSGTR_RootwinStatus "Rootwin: %so"
+#define MSGTR_BorderStatus "Bordo: %s"
+#define MSGTR_FramedroppingStatus "Scarto fotogrammi: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "Sottotitoli: %s"
+#define MSGTR_SubPosStatus "Posizione sottotitoli: %s/100"
+#define MSGTR_SubAlignStatus "Allineamento sottotitoli: %s"
+#define MSGTR_SubDelayStatus "Ritardo sottotitoli: %s"
+#define MSGTR_SubVisibleStatus "Sottotitoli: %si"
+#define MSGTR_SubForcedOnlyStatus "Solo sottotitoli forzati: %si"
 
 // mencoder.c:
 
@@ -494,6 +506,10 @@ static char help_text[]=
 #define MSGTR_AvailableProfiles "Profili disponibili:\n"
 #define MSGTR_UnknownProfile "Profilo '%s' sconosciuto.\n"
 #define MSGTR_Profile "Profilo %s: %s\n"
+
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Nome                 Tipo            Min        Max\n\n"
+#define MSGTR_TotalProperties "\nTotale: %d proprietà\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo CD-ROM '%s' non trovato!\n"
@@ -1162,6 +1178,10 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "Non sono stati indicati abbastaza controlli sulla riga comando"
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Il controllo di input #%d è sotto il limite inferiore di %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Il controllo di input #%d è sopra al limite superiore di %0.4f.\n"
+
+// format.c
+
+#define MSGTR_AF_FORMAT_UnknownFormat "formato sconosciuto "
 
 // ========================== INPUT =========================================
 
