@@ -1,4 +1,4 @@
-.\" synced with 1.1241
+.\" synced with 1.1249
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -8,8 +8,6 @@
 .\" Définition des macros
 .\" --------------------------------------------------------------------------
 .
-.\" l'indentation par défaut est 7, ne pas changer!
-.nr IN 7
 .\" Définit l'indentation pour les sous-options
 .nr SS 4
 .\"
@@ -18,7 +16,7 @@
 ..
 .\" début du premier niveau de sous-options, se termine par .RE
 .de RSs
-.RS \n(IN+3
+.RS 10
 ..
 .\" début du 2nd niveau de sous-options
 .de RSss
@@ -859,6 +857,10 @@ Indique un fichier de configuration pour LIRC (Linux Infrared Remote
 Control, voir http://www.lirc.org) (par défaut\ : ~/.lircrc).
 .
 .TP
+.B \-list-properties
+Affiche la liste des propriétés disponibles.
+.
+.TP
 .B \-loop <nombre>
 Répète la lecture <nombre> fois.
 0 signifie illimité.
@@ -910,6 +912,17 @@ de mozplayerxp dépend de cette option).
 .B \-nortc (RTC uniquement)
 Désactive l'utilisation du RTC Linux (real-time clock \- /dev/\:rtc)
 comme mécanisme de synchro.
+.
+.TP
+.B \-playing-msg <chaîne_de_caractères>
+Affiche une chaîne de caractères avant de commencer la lecture.
+Les expansions suivantes sont gérées:
+.RSs
+.IPs ${NAME}
+Expand la valeur de la propriété NAME.
+.IPs $(NAME:TEXT)
+Expand TEXT uniquement si la propriété NAME est disponible.
+.RE
 .
 .TP
 .B \-playlist <fichier>
@@ -3145,6 +3158,8 @@ Lorsqu'il est activé, il se comporte comme les autres pilotes de sortie
 vidéo, ce qui est mieux pour les polices de caractères à taille fixe.
 En le désactivant, le résultat est plus esthétique avec les polices FreeType,
 et en mode plein-écran, s'affichera dans les bandes noires.
+.IPs osdcolor=<0xRRGGBB>
+Couleur de l'OSD (par défaut\ : 0xffffff, correspond à blanc).
 .IPs (no)aspect
 Active ou désactive la gestion du redimensionnement du ratio d'aspect et
 le "pan-and-scan" (par défaut\ : activé).
@@ -3769,7 +3784,7 @@ Définit les paramètres de décodage de libavcodec.
 .I EXEMPLE:
 .PD 0
 .RSs
-\-lavdopts bug=1
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -3869,7 +3884,7 @@ les flux valides)
 .br
 4: très agressive
 .REss
-.IPs fast\ 
+.IPs "fast (MPEG-2 only)"
 Active des optimisations non conformes aux spécifications, et
 qui peuvent éventuellement poser problème, comme une déquantification
 plus simple, l'hypothèse que les matrices de quantification ont été
@@ -7487,14 +7502,13 @@ actuellement inutile
 Méthode de ratecontrol (contrôle du débit).
 Notez que certaines des options agissant sur le ratecontrol n'auront
 d'effet que si vrc_strategy est à 0.
-Ratecontrol method.
 .PD 0
 .RSs
 .IPs 0
 Utilise le ratecontrol interne de lavc (par défaut).
 .IPs 1
 Utlise le ratecontrol d'XviD (expérimental; nécessite que MEncoder
-soit compilé par le support d'XviD).
+soit compilé par le support d'XviD 1.1 ou supérieur).
 .RE
 .PD 1
 .
@@ -9456,7 +9470,7 @@ rayon de de la recherche exhaustive et multi-hexagonale de mouvement
 (par défaut\ 16)
 .
 .TP
-.B subq=<1\-6>
+.B subq=<1\-7>
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
@@ -9488,7 +9502,10 @@ types de macro-blocs candidats, avant de choisir le meilleur type.
 (par défaut)
 .IPs 6
 Active la sélection des macro-blocs en fonction de leur taux de distortion,
-pour les trames-I et P (le meilleur).
+pour les trames-I et P.
+.IPs 7
+Active la sélection des macro-blocs en fonction de leur taux de distortion,
+pour les vecteurs de mouvement et les modes intras (le meilleur).
 .RE
 .PD 1
 .RS
@@ -9515,7 +9532,7 @@ Nécessite frameref>1.
 .B (no)brdo
 Active l'optimisation du types de macroblocs dans les trames-B d'après
 leur taux de distortion
-Nécessite subq=6.
+Nécessite subq>=6.
 .
 .TP
 .B (no)bime
@@ -9534,7 +9551,7 @@ désactivé
 activé uniquement lors de l'encodage final (par défaut)
 .IPs 2
 activé pour toutes les décisions de modes de macroblocs (lent, requiert
-subq=6)
+subq>=6)
 .RE
 .PD 1
 .
