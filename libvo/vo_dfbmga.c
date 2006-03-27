@@ -47,8 +47,6 @@ static vo_info_t info = {
 
 LIBVO_EXTERN(dfbmga)
 
-extern int verbose;
-
 /******************************
 *	   directfb 	      *
 ******************************/

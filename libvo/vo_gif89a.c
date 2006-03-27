@@ -70,8 +70,6 @@ static vo_info_t info = {
 
 LIBVO_EXTERN(gif89a)
 
-extern int verbose;
-
 
 // how many frames per second we are aiming for during output.
 static float target_fps;

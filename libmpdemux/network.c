@@ -37,7 +37,6 @@
 
 #include "version.h"
 
-extern int verbose;
 extern int stream_cache_size;
 
 extern int mp_input_check_interrupt(int time);
