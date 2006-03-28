@@ -62,7 +62,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Не можу знайти домашн╕й каталог\n"
 #define MSGTR_GetpathProblem "проблеми у get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Створення файлу конф╕гурац╕╖: %s\n"
-#define MSGTR_InvalidAOdriver "Неприпустиме ╕м'я драйверу ауд╕о виводу: %s\nДив. '-ao help' щоб отримати список доступних драйвер╕в.\n"
 #define MSGTR_CopyCodecsConf "(скоп╕юйте etc/codecs.conf (з текст╕в MPlayer) у ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Використовую вбудований codecs.conf\n"
 #define MSGTR_CantLoadFont "Не можу завантажити шрифт: %s\n"

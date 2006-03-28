@@ -60,7 +60,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "無法找到 HOME 目錄\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") 問題\n"
 #define MSGTR_CreatingCfgFile "建立 config 檔: %s\n"
-#define MSGTR_InvalidAOdriver "無效的音效輸出驅動程式名稱: %s\n用 '-ao help' 來取得可用的音效驅動程式列表\n"
 #define MSGTR_CopyCodecsConf "(把 etc/codecs.conf 從 MPlayer 原程式碼中複製/建立連接至 ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "使用內建預設的 codecs.conf。\n"
 #define MSGTR_CantLoadFont "無法載入字型: %s\n"

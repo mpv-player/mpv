@@ -63,7 +63,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "找不到HOME目录\n"
 #define MSGTR_GetpathProblem "get_path(\"config\")问题\n"
 #define MSGTR_CreatingCfgFile "创建config文件: %s\n"
-#define MSGTR_InvalidAOdriver "无效的视频输出驱动: %s\n用'-vo help' t查看可用的视频驱动的列表\n"
 #define MSGTR_CopyCodecsConf "(把etc/codecs.conf(从MPlayer的源代码中)复制/链接 ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "使用内建默认的codecs.conf.\n"
 #define MSGTR_CantLoadFont "无法加载字体: %s\n"
