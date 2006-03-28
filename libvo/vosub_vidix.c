@@ -716,7 +716,7 @@ int vidix_preinit(const char *drvname,void *server)
 	  return -1;
 	}
 #ifndef __MINGW32__
-	vidix_handler = vdlOpen(MPLAYER_LIBDIR "/mplayer/vidix/",
+	vidix_handler = vdlOpen(MP_VIDIX_PFX,
 				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,
 				verbose);

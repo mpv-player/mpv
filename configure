@@ -273,7 +273,8 @@ Codecs:
   --enable-codec=CODEC   dnable specified codec
   
 Video output:
-  --disable-vidix        disable VIDIX [enable on x86 *nix]
+  --disable-internal-vidix disable internal VIDIX [for x86 *nix]
+  --disable-external-vidix disable external VIDIX [for x86 *nix]
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
   --enable-vesa          build with VESA support [autodetect]
@@ -1561,7 +1562,8 @@ _edl=yes
 _network=yes
 _winsock2=auto
 _smbsupport=auto
-_vidix=auto
+_vidix_internal=auto
+_vidix_external=auto
 _joystick=no
 _xvid=auto
 _x264=auto
@@ -1798,8 +1800,10 @@ for ac_option do
   --disable-winsock2)	_winsock2=no	;;
   --enable-smb)		_smbsupport=yes	;;
   --disable-smb)	_smbsupport=no	;;
-  --enable-vidix)	_vidix=yes	;;
-  --disable-vidix)	_vidix=no	;;
+  --enable-internal-vidix)	_vidix_internal=yes	;;
+  --disable-internal-vidix)	_vidix_internal=no	;;
+  --enable-external-vidix)	_vidix_external=yes	;;
+  --disable-external-vidix)	_vidix_external=no	;;
   --enable-joystick)	_joystick=yes	;;
   --disable-joystick)	_joystick=no	;;
   --enable-xvid)	_xvid=yes	;;
@@ -2285,17 +2289,17 @@ if x86 && linux ; then
   fi
 fi
 
-if test "$_vidix" = auto ; then
-  _vidix=no
+if test "$_vidix_internal" = auto ; then
+  _vidix_internal=no
   # should check for x86 systems supporting VIDIX (does QNX have VIDIX?)
-  x86 && _vidix=yes
-  x86_64 && _vidix=yes
-  ppc && linux && _vidix=yes
-  alpha && linux && _vidix=yes
-  qnx && _vidix=no
-  sunos && _vidix=no
-  beos && _vidix=no
-  darwin && _vidix=no
+  x86 && _vidix_internal=yes
+  x86_64 && _vidix_internal=yes
+  ppc && linux && _vidix_internal=yes
+  alpha && linux && _vidix_internal=yes
+  qnx && _vidix_internal=no
+  sunos && _vidix_internal=no
+  beos && _vidix_internal=no
+  darwin && _vidix_internal=no
 fi
 
 echocheck "mplayer binary name"
@@ -2316,7 +2320,7 @@ fi
 
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
 _awk=
-if test "$_vidix" = yes ; then
+if test "$_vidix_internal" = yes ; then
 _awk_verc_fail=yes
 echocheck "awk"
 for _awk in mawk gawk nawk awk; do
@@ -7133,9 +7137,35 @@ _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
 
 # TODO cleanup the VIDIX stuff here
-echocheck "VIDIX"
-_def_vidix='#define CONFIG_VIDIX 1'
-test "$_vidix" = no && _def_vidix='#undef CONFIG_VIDIX'
+echocheck "VIDIX (internal)"
+echores "$_vidix_internal"
+
+echocheck "VIDIX (external)"
+if test "$_vidix_external" = auto; then
+ _vidix_external=no
+ cat > $TMPC <<EOF
+#include <vidix/vidix.h>
+int main(void) { return 0; }
+EOF
+  cc_check -lvidix && _vidix_external=yes
+fi
+echores "$_vidix_external"
+
+if test "$_vidix_internal" = yes || test "$_vidix_external" = yes ; then
+  _vidix=yes
+  _def_vidix='#define CONFIG_VIDIX 1'
+else
+  _vidix=no
+  _def_vidix='#undef CONFIG_VIDIX'
+fi
+
+if test "$_vidix_internal" = yes ; then
+  _def_vidix_pfx="#define MP_VIDIX_PFX \"$_libdir\" \"/mplayer/vidix/\" "
+elif test "$_vidix_external" = yes ; then
+  _ld_vidix_external="-lvidix"
+  _def_vidix_pfx='#define MP_VIDIX_PFX "" '
+fi
+
 if test "$_vidix" = yes; then
   _vosrc="$_vosrc vo_cvidix.c"
   _vomodules="cvidix $_vomodules"
@@ -7155,7 +7185,6 @@ if test "$_vidix" = yes && test "$_x11" = yes; then
 else
   _novomodules="xvidix $_novomodules"
 fi
-echores "$_vidix"
 
 echocheck "joystick"
 _def_joystick='#undef HAVE_JOYSTICK'
@@ -7244,7 +7273,9 @@ MPLAYER_NETWORK = $_network
 STREAMING_LIVE555 = $_live
 MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
 DVBIN = $_dvbin
-VIDIX = $_vidix
+VIDIX = $_vidix_internal
+EXTERNAL_VIDIX = $_vidix_external
+EXTERNAL_VIDIX_LIB = $_ld_vidix_external
 CONFIG_PP = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
@@ -8023,6 +8054,7 @@ $_def_cdparanoia
 
 /* enables / disables VIDIX usage */
 $_def_vidix
+$_def_vidix_pfx
 
 /* enables / disables new input joystick support */
 $_def_joystick

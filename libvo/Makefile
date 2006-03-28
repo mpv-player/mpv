@@ -29,6 +29,10 @@ ifeq ($(VIDIX),yes)
 SRCS += vosub_vidix.c
 endif
 
+ifeq ($(EXTERNAL_VIDIX),yes)
+SRCS += vosub_vidix.c
+endif
+
 CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep \
           $(LIBAV_INC) \
           $(FREETYPE_INC) \

@@ -75,6 +75,10 @@ VO_LIBS = $(AA_LIB) \
           $(CACA_LIB) \
 	  $(VESA_LIB) \
 
+ifeq ($(EXTERNAL_VIDIX),yes)
+VO_LIBS += $(EXTERNAL_VIDIX_LIB)
+endif
+
 AO_LIBS = $(ARTS_LIB) \
           $(ESD_LIB) \
           $(JACK_LIB) \
