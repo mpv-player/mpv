@@ -70,7 +70,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "No se puede encontrar el directorio HOME.\n"
 #define MSGTR_GetpathProblem "Problema en get_path(\"config\").\n"
 #define MSGTR_CreatingCfgFile "Creando archivo de configuración: %s.\n"
-#define MSGTR_InvalidAOdriver "Nombre del driver de salida de audio incorrecto: %s\nUsa '-ao help' para obtener la lista de drivers de salida de audio disponibles.\n"
 #define MSGTR_CopyCodecsConf "Copia/Enlaza <árbol del código fuente de MPlayer>/etc/codecs.conf a ~/.mplayer/codecs.conf\n"
 #define MSGTR_BuiltinCodecsConf "Usando codecs.conf interno por defecto.\n" 
 #define MSGTR_CantLoadFont "No se puede cargar fuente: %s.\n"

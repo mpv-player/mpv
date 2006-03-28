@@ -62,7 +62,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Nemohu nalézt domácí adresáø.\n"
 #define MSGTR_GetpathProblem "Nastal problém s get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Vytváøím konfiguraèní soubor: %s\n"
-#define MSGTR_InvalidAOdriver "Neplatné jméno výstupního audio rozhraní: %s\nSeznam dostupných rozhraní zobrazíte pomocí '-ao help'.\n"
 #define MSGTR_CopyCodecsConf "(Zkopírujte/nalinkujte etc/codecs.conf ze zdrojových kódù MPlayeru do ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Pou¾ívám zabudovaný výchozí codecs.conf.\n"
 #define MSGTR_CantLoadFont "Nemohu naèíst font: %s\n"

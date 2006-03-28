@@ -62,7 +62,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Nie mogê znale¼æ katalogu domowego\n"
 #define MSGTR_GetpathProblem "Problem z get_path (\"config\")\n"
 #define MSGTR_CreatingCfgFile "Tworzê plik konfiguracyjny: %s\n"
-#define MSGTR_InvalidAOdriver "Nieprawid³owa nazwa wyj¶ciowego sterownika audio -> %s\n(lista: '-ao help').\n"
 #define MSGTR_CopyCodecsConf "(Skopiuj etc/codecs.conf ze ¼róde³ MPlayera do ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "U¿ywam wbudowanego (domy¶lnego) pliku codecs.conf.\n"
 #define MSGTR_CantLoadFont "Nie mogê za³adowaæ czcionki: %s\n"

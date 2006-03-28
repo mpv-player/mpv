@@ -61,7 +61,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Kunne ikke finde hjemmekatalog\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
 #define MSGTR_CreatingCfgFile "Genererer konfigurationsfil: %s\n"
-#define MSGTR_InvalidAOdriver "Ugyldig lyddriver: %s\nBrug '-ao help' for at få en komplet liste over gyldige lyddrivere.\n"
 #define MSGTR_CopyCodecsConf "(kopier/link etc/codecs.conf (fra MPlayer kilde katalog) til ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Benytter indbyggede standardværdier for codecs.conf\n"
 #define MSGTR_CantLoadFont "Kunne ikke indlæse skrifttype: %s\n"

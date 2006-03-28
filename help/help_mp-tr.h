@@ -58,7 +58,6 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "ANADÝZÝN bulunumadý\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problemi\n"
 #define MSGTR_CreatingCfgFile "Ayar dosyasý oluþturuluyor: %s\n"
-#define MSGTR_InvalidAOdriver "Yanlýþ Ses çýkýþ sürücüsü adý: %s\n'-ao help' Komutunu kullanarak kullanýlabilir ses çýkýþ sürücüleri görebilirsiniz.\n"
 #define MSGTR_CopyCodecsConf "(etc/codecs.conf'u (MPlayer kaynak aðacýndan) ~/.mplayer/codecs.conf a kopyalayýn/bað yapýn)\n"
 #define MSGTR_BuiltinCodecsConf "Gömülü codecs.conf dosyasý kullanýlýyor\n"
 #define MSGTR_CantLoadFont "Yazýtipi açýlamadý: %s\n"
