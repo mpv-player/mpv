@@ -225,7 +225,12 @@ while(1){
 	  
       print_avisuperindex_chunk(s,MSGL_V);
 
-      msize = sizeof (uint32_t) * s->wLongsPerEntry * s->nEntriesInUse;
+      // Check and fix this useless crap
+      if(s->wLongsPerEntry != sizeof (avisuperindex_entry)/4) {
+          mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk size: %u\n",s->wLongsPerEntry);
+          s->wLongsPerEntry = sizeof(avisuperindex_entry)/4;
+      }
+      msize = sizeof (avisuperindex_entry) * s->nEntriesInUse;
       s->aIndex = malloc(msize);
       memset (s->aIndex, 0, msize);
       s->stdidx = malloc (s->nEntriesInUse * sizeof (avistdindex_chunk));
