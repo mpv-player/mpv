@@ -14,16 +14,16 @@
 .de IPs
 .IP "\\$1" \n(SS
 ..
-.\" début du premier niveau de sous-options, se termine par .RE
+.\" début du premier niveau des sous-options, se termine par .RE
 .de RSs
 .RS 10
 ..
-.\" début du 2nd niveau de sous-options
+.\" début du 2nd niveau des sous-options
 .de RSss
 .PD 0
 .RS \n(SS+3
 ..
-.\" fin du 2nd niveau de sous-options
+.\" fin du 2nd niveau des sous-options
 .de REss
 .RE
 .PD 1
@@ -174,7 +174,7 @@ mencoder \- Encodeur vidéo
 'in +\n[.k]u
 [options globales]
 .I file1
-[options spécifique] [fichier2] [options spécifique]
+[options spécifiques] [fichier2] [options spécifiques]
 .ad
 .hy
 .
@@ -274,7 +274,7 @@ pères.
 .IPs "INSER et SUPPR (liste de lecture ASX uniquement)"
 Va à la prochaine/\:précédente source de rechange.
 .IPs "p / ESPACE"
-Met en pause (un autre appuis reprend la lecture).
+Met en pause (un autre appui reprend la lecture).
 .IPs .\ \ \ \
 Avance d'une trame.
 Le premier appui mettra le film en pause, et chaque appui suivant jouera
@@ -291,7 +291,7 @@ Réduit/\:augmente le volume.
 .IPs m\ \ \ \ 
 Coupe le son (mute).
 .IPs "# (MPEG et Matroska uniquement)"
-Alterne entre les pistes audio disponible.
+Alterne entre les pistes audio disponibles.
 .IPs f\ \ \ \ 
 Bascule en plein-écran.
 .IPs T\ \ \ \ 
@@ -374,7 +374,7 @@ des touches multimédia.)
 .IPs PAUSE
 Pause.
 .IPs STOP\ 
-Stope la lecture et quitte.
+Stoppe la lecture et quitte.
 .IPs "AVANT et SUIVANT"
 Navigue en arrière/\:avant d'une minute.
 .RE
@@ -489,7 +489,7 @@ mplayer -ao pcm:file=%`longueur expr "$NOM"`%"$NOM" test.avi
 .\" --------------------------------------------------------------------------
 .
 Vous pouvez placer toutes les options dans des fichiers de configuration
-qui seront lu à chaque exécution de MPlayer/MEncoder.
+qui seront lues à chaque exécution de MPlayer/MEncoder.
 Le fichier de configuration général 'mplayer.conf' se trouve dans le répertoire
 habituel des fichiers de configuration (par ex.\& /etc/\:mplayer ou
 /usr/\:local/\:etc/\:mplayer), et le fichier de configuration spécifique à
@@ -673,7 +673,7 @@ Utilise le profil donné, \-profile help affichant la liste des profils définis.
 Affiche encore moins de messages d'état que \-quiet.
 .
 .B \-show-profile <profile>
-Affiche la description et le contenu du profil donnée..
+Affiche la description et le contenu du profil donné..
 .
 .TP
 .B \-v\ \ \ \ \ 
@@ -794,7 +794,7 @@ formate les noms de fichiers pour le shell.
 .B \-idle (voir aussi \-slave)
 Fait que MPlayer se met en attente au lieu de quitter lorsqu'il n'y a pas
 de fichier à jouer.
-Sutout utile en "slave mode" où MPlayer peut être controllé par l'envoi de
+Surtout utile en "slave mode" où MPlayer peut être controlé par l'envoi de
 commandes.
 .
 .TP
@@ -841,7 +841,7 @@ restera valide.
 .
 .TP
 .B \-key-fifo-size <2\-65000>
-Définit la taille de la FIFO qui tamponne les évènements clavier
+Défini la taille de la FIFO qui tamponne les évènements clavier
 (par défaut\ :10).
 Une FIFO de taille n peut tamponner (n - 1) évènements.
 Si elle est trop petite, quelques évènements risquent d'être perdus
@@ -965,7 +965,7 @@ Cette option enclenche le mode esclave.
 Ceci est prévu pour l'utilisation de MPlayer en tant que base (backend)
 pour d'autres programmes.
 Au lieu d'intercepter les évènements clavier, MPlayer va lire ses
-commandes séparés par un retour chariot (\\n) via l'entrée stdin.
+commandes séparées par un retour chariot (\\n) via l'entrée stdin.
 .br
 .I NOTE\ :
 Voir \-input cmdlist pour une liste des commandes esclaves, et
@@ -1029,7 +1029,7 @@ disponible.
 .B \-audio-demuxer <[+]nom> (\-audiofile uniquement)
 Force le type de démultiplexeur audio pour \-audiofile.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va sauter
-certain contrôles.
+certains contrôles.
 Indiquez le nom du demultiplexeur parmi la liste donnée par \-audio-demuxer
 help.
 Pour assurer la compatibilité ascendante, il est aussi possible de donner
@@ -1184,14 +1184,14 @@ encodés avec l'option \-audio-delay.
 Pendant l'encodage, cette option évite à MEncoder de transférer au
 nouveau fichier le moment original de démarrage du flux\ ;
 l'option \-audio-delay n'est pas affectée.
-Notez que MEncoder ajuste parfois automatique les moment de démarrage
-du flux pour compenser les délais de décodage anticipés, donc n'utilisez pas cette option avant de l'avoir testée avant.
+Notez que MEncoder ajuste parfois automatique les moments de démarrage
+du flux pour compenser les délais de décodage anticipés, donc n'utilisez pas cette option avant de l'avoir testée.
 .
 .TP
 .B \-demuxer <[+]nom>
 Forcer le type de démultiplexeur.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va sauter
-certain contrôles.
+certains contrôles.
 Indiquez le nom du démultiplexeur comme listé par \-demuxer help.
 Pour assurer la compatibilité ascendante, il est aussi possible de donner
 l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
@@ -1202,7 +1202,7 @@ démultiplexeur MP3.
 .B \-dumpaudio (MPlayer uniquement)
 Décharge le flux audio brut dans ./stream.dump (utile avec
 mpeg/\:ac3).
-Si vous spécifier plus qu'une des options \-dumpaudio, \-dumpvideo,
+Si vous spécifiez plus qu'une des options \-dumpaudio, \-dumpvideo,
 \-dumpstream, seule la dernière de la ligne de commande sera prise en
 compte.
 .
@@ -1215,14 +1215,14 @@ Devrait être utilisé avec \-dumpaudio / \-dumpvideo / \-dumpstream.
 .B \-dumpstream (MPlayer uniquement)
 Décharge le flux brut dans ./stream.dump.
 Utile en rippant depuis un DVD ou depuis le réseau.
-Si vous spécifier plus qu'une des options \-dumpaudio, \-dumpvideo,
+Si vous spécifiez plus qu'une des options \-dumpaudio, \-dumpvideo,
 \-dumpstream, seule la dernière de la ligne de commande sera prise en
 compte.
 .
 .TP
 .B \-dumpvideo (MPlayer uniquement)
 Décharge le flux vidéo brut dans ./stream.dump (pas très utilisable).
-Si vous spécifier plus qu'une des options \-dumpaudio, \-dumpvideo,
+Si vous spécifiez plus qu'une des options \-dumpaudio, \-dumpvideo,
 \-dumpstream, seule la dernière de la ligne de commande sera prise en
 compte.
 .
@@ -1252,7 +1252,7 @@ pour copier des titres de DVD (voir les exemples).
 .
 .TP
 .B \-dvdangle <ID angle> (DVD uniquement)
-Certains DVD contiennent des scènes qui peuvent être vues sous différents
+Certains DVDS contiennent des scènes qui peuvent être vues sous différents
 angles.
 Vous pouvez ainsi dire à MPlayer quels angles utiliser (par défaut\ : 1).
 .
@@ -1416,13 +1416,13 @@ Les options disponibles sont:
 .IPs fps=<valeur>
 débit en trames par seconde (par défaut\ : 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
-définit la taille d'image standard
+défini la taille d'image standard
 .IPs w=<valeur>
 largeur de l'image en pixels
 .IPs h=<valeur>
 hauteur de l'image en pixels
 .IPs i420|yv12|yuy2|y8
-définie l'espace de couleurs
+défini l'espace de couleurs
 .IPs format=<valeur>
 espace de couleur (fourcc) en hexa
 .IPs size=<valeur>
@@ -1430,7 +1430,7 @@ taille de trame en octets
 .REss
 .sp 1
 .RS
-.I EXAMPLE:
+.I EXEMPLE:
 .RE
 .PD 0
 .RSs
@@ -1523,7 +1523,7 @@ Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
 ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
 plus bas) comme URL de film.
-.\" FIXME: Le texte suivante ne doit pas etre ici...
+.\" FIXME: Le texte suivant ne doit pas etre ici...
 .I NOTE:
 .br
 MPlayer n'accepte pas les deux-points, vous devez donc taper l'ID périphérique
@@ -1544,7 +1544,7 @@ disponible: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valeur>
 Spécifie un autre périphérique que celui par défaut /dev/\:video0.
 .IPs input=<valeur>
-Définit une autre entrée que celle par défaut 0 (Télévision) (voir
+Défini une autre entrée que celle par défaut 0 (Télévision) (voir
 la sortie console pour en obtenir la liste)
 .IPs freq=<valeur>
 Spécifie sur quelle fréquence régler le tuner (par exemple \& 511.250).
@@ -1568,7 +1568,7 @@ Pour bsdbt848 et v4l, PAL, SECAM, NTSC sont disponibles.
 Pour v4l2, référez-vous à la sortie console pour avoir une liste des normes
 disponibles, voir aussi l'option normid ci-dessous.
 .IPs "normid=<value> (v4l2 uniquement)"
-Définit la norme TV à l'identifiant numérique donné.
+Défini la norme TV à l'identifiant numérique donné.
 La norme TV dépend de la carte d'acquisition.
 Voir les messages de MPlayer sur la console pour une liste des normes TV
 disponibles.
@@ -1577,7 +1577,7 @@ Régler le tuner sur le canal <valeur>
 .IPs chanlist=<valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<canal>\-<nom>,<canal>\-<nom>,...
-Définit des noms pour les canaux.
+Défini des noms pour les canaux.
 Utilisez _ pour les espaces dans les noms (ou jouez avec les guillemets ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes
 tv_step_channel, tv_set_channel et tv_last_channel seront utilisables
@@ -1697,13 +1697,13 @@ Crée un fichier dumpsub.js dans le répertoire courant.
 .TP
 .B \-dumpmicrodvdsub (MPlayer uniquement)
 Convertit les sous-titres donnés (via l'option \-sub) au format MicroDVD.
-Créé un fichier dumpsub.sub dans le répertoire courant.
+Crée un fichier dumpsub.sub dans le répertoire courant.
 .
 .TP
 .B \-dumpmpsub (MPlayer uniquement)
 Convertit les sous-titres donnés (via l'option \-sub) au format natif de
 MPlayer, MPsub.
-Créé un fichier dump.mpsub dans le répertoire courant.
+Crée un fichier dump.mpsub dans le répertoire courant.
 .
 .TP
 .B \-dumpsami (MPlayer uniquement)
@@ -1715,13 +1715,13 @@ Crée un fichier dumpsub.smi dans le répertoire courant.
 .B \-dumpsrtsub (MPlayer uniquement)
 Convertit les sous-titres donnés (via l'option \-sub) au format basé sur le
 temps SubViewer (SRT).
-Créé un fichier dump.srt dans le répertoire courant.
+Crée un fichier dump.srt dans le répertoire courant.
 .br
 .I NOTE\ :
 Certaines mauvaises platines de salons peuvent avoir du mal avec les
 sous-titres SRT dont les fins de ligne sont Unix.
 Si vous avez la malchance de posséder un tel matériel, transformez votre
-sous-titre avec unix2dos our un programme similaire pour remplacer les fins
+sous-titre avec unix2dos ou un programme similaire pour remplacer les fins
 de lignes avec des fins de ligne DOS/Windows.
 
 .
@@ -1791,7 +1791,7 @@ par ex.\& avec \-slang.
 .
 .TP
 .B \-fribidi-charset <nom charset>
-Définit le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
+Défini le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
 (par défaut\ : ISO8859-8).
 .
 .TP
@@ -1808,7 +1808,7 @@ Défini la durée d'affichage en ms des messages OSD (par défaut\ : 1000).
 .
 .TP
 .B \-osdlevel <0\-3> (MPlayer uniquement)
-Définit dans quel mode OSD démarrer.
+Défini dans quel mode OSD démarrer.
 .
 .PD 0
 .RSs
@@ -1831,7 +1831,7 @@ formats spécifiques).
 .
 .TP
 .B \-sid <ID> (voir aussi \-slang, \-vobsubid)
-Affiche la piste de sous-titre correspondant à <ID> (0\-31).
+Affiche la piste de sous-titres correspondant à <ID> (0\-31).
 MPlayer affiche la liste des IDs de sous-titres disponibles quand il est
 lancé en mode bavard (\-v).
 Si vous n'arrivez pas à sélectionner une des pistes de sous-titres d'un
@@ -1839,7 +1839,7 @@ DVD, essayez avec \-vobsubid.
 .
 .TP
 .B \-slang <code de pays[,code de langue,...]> (voir aussi l'option \-sid)
-Définit une liste de langues de sous-titres à afficher en priorité.
+Défini une liste de langues de sous-titres à afficher en priorité.
 Chaque format de conteneur utilise des codes de pays différents.
 Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska
 les codes à trois lettres ISO 639-2, tandis que OGM utilise des
@@ -1851,7 +1851,7 @@ MPlayer affiche les langues disponibles quand il est lancé en mode bavard
 .PD 0
 .RSs
 .IPs "mplayer dvd://1 \-slang hu,en"
-Sélectionne la piste de sous-titres hongroise du DVD et se rabat sur
+Sélectionne la piste de sous-titres hongroises du DVD et se rabat sur
 l'anglaise si le hongrois n'est pas disponible.
 .IPs "mplayer \-slang jpn example.mkv"
 Joue un fichier Matroska avec les sous-titres japonais.
@@ -1882,7 +1882,7 @@ utilise le flou gaussien swscaler (très joli)
 .
 .TP
 .B \-spualign <-1\-2> (OSD uniquement)
-Définit l'alignement des sous-titres SPU (DVD/\:VobSub).
+Défini l'alignement des sous-titres SPU (DVD/\:VobSub).
 .PD 0
 .RSs
 .IPs "-1"
@@ -1908,7 +1908,7 @@ Un seul fichier peut être affiché à la fois.
 .
 .TP
 .B \-sub-bg-alpha <0\-255>
-Définit la valeur du canal de transparence alpha pour le fond des sous-titres
+Défini la valeur du canal de transparence alpha pour le fond des sous-titres
 et de l'OSD.
 De grandes valeurs signifient plus transparent.
 La valeur 0 est une exception et signifie complètement transparent.
@@ -1924,10 +1924,10 @@ La valeur 255 signifie blanc et 0 noir.
 .B \-sub-demuxer <[+]nom> (\-subfile uniquement) (CODE BÉTA)
 Force le type de démultiplexeur de sous-titres pour \-subfile.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va sauter
-certain contrôles.
+certains contrôles.
 Indiquez le nom du démultiplexeur comme listé par \-sub-demuxer help.
 Pour assurer la compatibilité ascendante, il est aussi possible de donner
-l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
+l'ID du démultiplexeur comme défini dans libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-sub-fuzziness <mode>
@@ -1957,7 +1957,7 @@ hauteur définie par \-subpos.
 .IPs 0
 Aligne le bord du haut du sous-titre (comportement original).
 .IPs 1
-Aligne aux centre du sous-titre.
+Aligne au centre du sous-titre.
 .IPs 2
 Aligne le bas du sous-titre (par défaut).
 .RE
@@ -2065,7 +2065,7 @@ taille de l'écran) (par défaut\ : 5).
 .
 .TP
 .B \-subfps <flottant>
-Définit le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
+Défini le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
 que celui du film)
 .br
 .I NOTE:
@@ -2075,13 +2075,13 @@ comme le format MicroDVD.
 .
 .TP
 .B \-subpos <0\-100> (utile avec \-vf expand) (OSD uniquement)
-Définit la position des sous-titres sur l'écran.
+Défini la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .
 .TP
 .B \-subwidth <10\-100> (OSD uniquement)
-Définit la largeur maximum des sous-titres sur l'écran.
+Défini la largeur maximum des sous-titres sur l'écran.
 Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
 .
@@ -2107,13 +2107,13 @@ Indique à MPlayer de traiter le fichier de sous-titre au un format UTF-8.
 .
 .TP
 .B \-vobsub <fichier VOBsub sans extension>
-Définit le fichier VOBsub qui sera utilisé pour les sous-titres.
+Défini le fichier VOBsub qui sera utilisé pour les sous-titres.
 Indiquez le chemin complet sans extensions, c'est-à-dire
 sans '.idx', '.ifo' ou '.sub'.
 .
 .TP
 .B \-vobsubid <0\-31>
-Définit le numéro de sous-titre du fichier VOBsub.
+Défini le numéro de sous-titre du fichier VOBsub.
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
@@ -2188,7 +2188,7 @@ Force l'utilisation du mixeur logiciel à la place de celui de la carte son.
 .
 .TP
 .B \-softvol-max <10.0\-10000.0>
-Définit le niveau maximal d'amplification en pourcents (par défaut\ : 0).
+Défini le niveau maximal d'amplification en pourcents (par défaut\ : 0).
 Une valeur de 200 vous permet d'ajuster le volume, au maximum, jusqu'au double
 du niveau courant.
 Avec une valeur inférieure à 100, le niveau initial (qui est 100%) sera
@@ -2197,7 +2197,7 @@ correctement.
 .
 .TP
 .B \-volstep <0\-100>
-Définit l'importance de l'augmentation du volume, en pourcentage du volume
+Défini l'importance de l'augmentation du volume, en pourcentage du volume
 maximum (par défaut\ : 3).
 .
 .
@@ -2208,7 +2208,7 @@ La syntaxe est\ :
 .
 .TP
 .B \-ao <driver1[:sous-option1[=valeur]:...],driver2,...[,]>
-Définit une liste de priorité des drivers de sortie audio à utiliser.
+Défini une liste de priorité des drivers de sortie audio à utiliser.
 .PP
 Si la liste finit par ',', les autres pilotes seront essayés en cas d'échec.
 Les sous-options sont optionnelles et peuvent, la plupart du temps,
@@ -2239,7 +2239,7 @@ Pilote de sortie audio ALSA 0.9/1.x
 .IPs noblock
 Active le mode non-bloquant.
 .IPs device=<device>
-Définit le nom de périphérique.
+Défini le nom de périphérique.
 Remplacez les ',' par '.' et ':' par '=' dans les noms de périphérique ALSA.
 Assurez-vous bien de ne pas activer ceci lorsque vous voulez sortir
 directement hwac3 via S/PDIF, à moins que vous sachiez vraiment comment bien
@@ -2256,11 +2256,11 @@ Pilote de sortie audio OSS.
 .PD 0
 .RSs
 .IPs <périphérique-dsp>
-Définit le périphérique audio d'entrée (par défaut\ : /dev/\:dsp)
+Défini le périphérique audio d'entrée (par défaut\ : /dev/\:dsp)
 .IPs <périphérique_de_mixage>
-Définit le périphérique de mixage (par défaut\ : /dev/\:mixer)
+Défini le périphérique de mixage (par défaut\ : /dev/\:mixer)
 .IPs <canal_de_mixage>
-Définit le canal de mixage (par défaut\ : pcm).
+Défini le canal de mixage (par défaut\ : pcm).
 .RE
 .PD 1
 .
@@ -2272,7 +2272,7 @@ plateforme.
 .PD 0
 .RSs
 .IPs <pilote>
-Choisit explicitement le pilote SDL à utiliser (par défaut\ : SDL choisit
+Choisi explicitement le pilote SDL à utiliser (par défaut\ : SDL choisit
 tout seul).
 .RE
 .PD 1
@@ -2287,7 +2287,7 @@ sortie audio par le démon ESD
 .PD 0
 .RSs
 .IPs <serveur>
-Choisit explicitement le serveur ESD à utiliser (par défaut\ : localhost).
+Choisi explicitement le serveur ESD à utiliser (par défaut\ : localhost).
 .RE
 .PD 1
 .
@@ -2332,7 +2332,7 @@ Pilote de sortie audio natif de Sun.
 .PD 0
 .RSs
 .IPs <pilote>
-Choisit explicitement le périphérique audio à utiliser (par défaut\ :
+Choisi explicitement le périphérique audio à utiliser (par défaut\ :
 /dev/\:audio).
 .RE
 .PD 1
@@ -2347,7 +2347,7 @@ pilote de sortie audio DirectX DirectSound
 .PD 0
 .RSs
 .IPs device=<num_périph>
-Définit le numéro de périphérique à utiliser.
+Défini le numéro de périphérique à utiliser.
 Jouer un fichier avec l'option \-v vous donnera une liste des périphériques
 disponibles.
 .RE
@@ -2355,7 +2355,7 @@ disponibles.
 .
 .TP
 .B dxr2 (also see \-dxr2) (DXR2 uniquement)
-pilote de sortie de la Creative DXR2
+pilote de sortie de la Créative DXR2
 .
 .TP
 .B mpegpes (DVB uniquement)
@@ -2372,7 +2372,7 @@ extracteur de son PCM/\:wave brut
 .PD 0
 .RSs
 .IPs (no)waveheader
-Inclut ou n'inclut pas l'entête wave (par défaut\ inclut).
+Inclu ou n'inclu pas l'entête wave (par défaut\ inclut).
 Quand l'entête n'est pas incluse, un fichier PCM brut sera généré.
 .IPs file=<nomfichier>
 Écrit le son dans le <nomfichier> au lieu de ./audiodump.wav par défaut.
