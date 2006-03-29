@@ -52,17 +52,6 @@ const char asf_stream_group_guid[16] = {0xce, 0x75, 0xf8, 0x7b,
 const char asf_data_chunk_guid[16] = {0x36, 0x26, 0xb2, 0x75,
   0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9, 0x00, 0xaa, 0x00, 0x62, 0xce, 0x6c};
 
-static ASF_header_t asfh;
-
-unsigned char* asf_packet=NULL;
-int asf_scrambling_h=1;
-int asf_scrambling_w=1;
-int asf_scrambling_b=1;
-int asf_packetsize=0;
-double asf_packetrate=0;
-int asf_movielength=0;
-
-//int i;
 
 // the variable string is modify in this function
 void pack_asf_string(char* string, int length) {
@@ -122,18 +111,23 @@ static char* asf_chunk_type(unsigned char* guid) {
 
 int asf_check_header(demuxer_t *demuxer){
   unsigned char asfhdrguid[16]={0x30,0x26,0xB2,0x75,0x8E,0x66,0xCF,0x11,0xA6,0xD9,0x00,0xAA,0x00,0x62,0xCE,0x6C};
-  stream_read(demuxer->stream,(char*) &asfh,sizeof(asfh)); // header obj
-  le2me_ASF_header_t(&asfh);			// swap to machine endian
+  struct asf_priv* asf = calloc(1,sizeof(*asf));
+  asf->scrambling_h=asf->scrambling_w=asf->scrambling_b=1;
+  stream_read(demuxer->stream,(char*) &asf->header,sizeof(asf->header)); // header obj
+  le2me_ASF_header_t(&asf->header);			// swap to machine endian
 //  for(i=0;i<16;i++) printf(" %02X",temp[i]);printf("\n");
 //  for(i=0;i<16;i++) printf(" %02X",asfhdrguid[i]);printf("\n");
-  if(memcmp(asfhdrguid,asfh.objh.guid,16)){
+  if(memcmp(asfhdrguid,asf->header.objh.guid,16)){
     mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: not ASF guid!\n");
+    free(asf);
     return 0; // not ASF guid
   }
-  if(asfh.cno>256){
-    mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: invalid subchunks_no %d\n",(int) asfh.cno);
+  if(asf->header.cno>256){
+    free(asf);
+    mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: invalid subchunks_no %d\n",(int) asf->header.cno);
     return 0; // invalid header???
   }
+  demuxer->priv = asf;
   return DEMUXER_TYPE_ASF;
 }
 
@@ -150,8 +144,8 @@ int find_asf_guid(char *buf, const char *guid, int cur_pos, int buf_len)
   return -1;
 }
 
-int read_asf_header(demuxer_t *demuxer){
-  unsigned int hdr_len = asfh.objh.size - sizeof(asfh);
+int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
+  int hdr_len = asf->header.objh.size - sizeof(asf->header);
   char *hdr = NULL;
   char guid_buffer[16];
   int pos, start = stream_tell(demuxer->stream);
@@ -163,6 +157,11 @@ int read_asf_header(demuxer_t *demuxer){
   int best_audio = -1;
   uint64_t data_len;
 
+  if(hdr_len < 0) {
+    mp_msg(MSGT_HEADER, MSGL_FATAL, "Header size is too small.\n");
+    return 0;
+  }
+    
   if (hdr_len > 1024 * 1024) {
     mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB,
 			hdr_len);
@@ -215,14 +214,14 @@ int read_asf_header(demuxer_t *demuxer){
           buffer = &hdr[pos];
           pos += streamh->stream_size;
           if (pos > hdr_len) goto len_err_out;
-          asf_scrambling_h=buffer[0];
-          asf_scrambling_w=(buffer[2]<<8)|buffer[1];
-          asf_scrambling_b=(buffer[4]<<8)|buffer[3];
-  	  asf_scrambling_w/=asf_scrambling_b;
+          asf->scrambling_h=buffer[0];
+          asf->scrambling_w=(buffer[2]<<8)|buffer[1];
+          asf->scrambling_b=(buffer[4]<<8)|buffer[3];
+  	  asf->scrambling_w/=asf->scrambling_b;
 	} else {
-	  asf_scrambling_b=asf_scrambling_h=asf_scrambling_w=1;
+	  asf->scrambling_b=asf->scrambling_h=asf->scrambling_w=1;
 	}
-	mp_msg(MSGT_HEADER,MSGL_V,"ASF: audio scrambling: %d x %d x %d\n",asf_scrambling_h,asf_scrambling_w,asf_scrambling_b);
+	mp_msg(MSGT_HEADER,MSGL_V,"ASF: audio scrambling: %d x %d x %d\n",asf->scrambling_h,asf->scrambling_w,asf->scrambling_b);
 	//if(demuxer->audio->id==-1) demuxer->audio->id=streamh.stream_no & 0x7F;
         break;
         }
@@ -261,10 +260,10 @@ int read_asf_header(demuxer_t *demuxer){
               (int)fileh->num_packets, (int)fileh->flags, 
               (int)fileh->min_packet_size, (int)fileh->max_packet_size,
               (int)fileh->max_bitrate, (int)fileh->preroll);
-      asf_packetsize=fileh->max_packet_size;
-      asf_packet=malloc(asf_packetsize); // !!!
-      asf_packetrate=fileh->max_bitrate/8.0/(double)asf_packetsize;
-      asf_movielength=fileh->send_duration/10000000LL;
+      asf->packetsize=fileh->max_packet_size;
+      asf->packet=malloc(asf->packetsize); // !!!
+      asf->packetrate=fileh->max_bitrate/8.0/(double)asf->packetsize;
+      asf->movielength=fileh->send_duration/10000000LL;
   }
 
   // find content header

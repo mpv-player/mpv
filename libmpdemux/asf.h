@@ -212,4 +212,16 @@ typedef struct {
 #define le2me_ASF_stream_chunck_t(h) /**/
 #endif
 
+// priv struct for the demuxer
+struct asf_priv {
+    ASF_header_t header;
+    unsigned char* packet;
+    unsigned scrambling_h;
+    unsigned scrambling_w;
+    unsigned scrambling_b;
+    unsigned packetsize;
+    double   packetrate;
+    unsigned movielength;
+};
+
 #endif

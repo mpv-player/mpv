@@ -31,31 +31,25 @@
 #endif
 
 // defined at asfheader.c:
-extern unsigned char* asf_packet;
-extern int asf_scrambling_h;
-extern int asf_scrambling_w;
-extern int asf_scrambling_b;
-extern int asf_packetsize;
-extern double asf_packetrate;
-extern int asf_movielength;
+
 extern int asf_check_header(demuxer_t *demuxer);
-extern int read_asf_header(demuxer_t *demuxer);
+extern int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf);
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
-static void asf_descrambling(unsigned char **src,int len){
+static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* asf){
   unsigned char *dst=malloc(len);
   unsigned char *s2=*src;
-  int i=0,x,y;
-  while(len-i>=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b){
+  unsigned i=0,x,y;
+  while(len>=asf->scrambling_h*asf->scrambling_w*asf->scrambling_b+i){
 //    mp_msg(MSGT_DEMUX,MSGL_DBG4,"descrambling! (w=%d  b=%d)\n",w,asf_scrambling_b);
 	//i+=asf_scrambling_h*asf_scrambling_w;
-	for(x=0;x<asf_scrambling_w;x++)
-	  for(y=0;y<asf_scrambling_h;y++){
-	    memcpy(dst+i,s2+(y*asf_scrambling_w+x)*asf_scrambling_b,asf_scrambling_b);
-		i+=asf_scrambling_b;
+	for(x=0;x<asf->scrambling_w;x++)
+	  for(y=0;y<asf->scrambling_h;y++){
+	    memcpy(dst+i,s2+(y*asf->scrambling_w+x)*asf->scrambling_b,asf->scrambling_b);
+		i+=asf->scrambling_b;
 	  }
-	s2+=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b;
+	s2+=asf->scrambling_h*asf->scrambling_w*asf->scrambling_b;
   }
   //if(i<len) memcpy(dst+i,src+i,len-i);
   free(*src);
@@ -71,6 +65,7 @@ static void asf_descrambling(unsigned char **src,int len){
 #endif
 
 static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs,int keyframe){
+  struct asf_priv* asf = demux->priv;
   demux_stream_t *ds=NULL;
   
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
@@ -105,8 +100,8 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
       if(ds->asf_seq!=seq){
         // closed segment, finalize packet:
 		if(ds==demux->audio)
-		  if(asf_scrambling_h>1 && asf_scrambling_w>1)
-		    asf_descrambling(&ds->asf_packet->buffer,ds->asf_packet->len);
+		  if(asf->scrambling_h>1 && asf->scrambling_w>1)
+		    asf_descrambling(&ds->asf_packet->buffer,ds->asf_packet->len,asf);
         ds_add_packet(ds,ds->asf_packet);
         ds->asf_packet=NULL;
       } else {
@@ -151,6 +146,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
 static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
+  struct asf_priv* asf = demux->priv;
 
   demux->filepos=stream_tell(demux->stream);
   // Brodcast stream have movi_start==movi_end
@@ -160,17 +156,17 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
           return 0;
   }
 
-    stream_read(demux->stream,asf_packet,asf_packetsize);
+    stream_read(demux->stream,asf->packet,asf->packetsize);
     if(demux->stream->eof) return 0; // EOF
     
     {
-	    unsigned char* p=asf_packet;
-            unsigned char* p_end=asf_packet+asf_packetsize;
+	    unsigned char* p=asf->packet;
+            unsigned char* p_end=asf->packet+asf->packetsize;
             unsigned char flags=p[0];
             unsigned char segtype=p[1];
-            int padding;
-            int plen;
-	    int sequence;
+            unsigned padding;
+            unsigned plen;
+	    unsigned sequence;
             unsigned long time=0;
             unsigned short duration=0;
 
@@ -180,7 +176,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
             
             if( mp_msg_test(MSGT_DEMUX,MSGL_DBG2) ){
                 int i;
-                for(i=0;i<16;i++) printf(" %02X",asf_packet[i]);
+                for(i=0;i<16;i++) printf(" %02X",asf->packet[i]);
                 printf("\n");
             }
             
@@ -227,10 +223,10 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 	    if(((flags>>5)&3)!=0){
               // Explicit (absoulte) packet size
               mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Explicit packet size specified: %d  \n",plen);
-              if(plen>asf_packetsize) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! plen>packetsize! (%d>%d)  \n",plen,asf_packetsize);
+              if(plen>asf->packetsize) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! plen>packetsize! (%d>%d)  \n",plen,asf->packetsize);
 	    } else {
               // Padding (relative) size
-              plen=asf_packetsize-padding;
+              plen=asf->packetsize-padding;
 	    }
 
 	    // Read time & duration:
@@ -244,8 +240,8 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
               segs=p[0] & 0x3F;
               ++p;
             }
-            mp_dbg(MSGT_DEMUX,MSGL_DBG4,"%08X:  flag=%02X  segs=%d  seq=%d  plen=%d  pad=%d  time=%ld  dur=%d\n",
-              demux->filepos,flags,segs,sequence,plen,padding,time,duration);
+            mp_dbg(MSGT_DEMUX,MSGL_DBG4,"%08"PRIu64":  flag=%02X  segs=%d  seq=%u  plen=%u  pad=%u  time=%ld  dur=%d\n",
+              (uint64_t)demux->filepos,flags,segs,sequence,plen,padding,time,duration);
 
             for(seg=0;seg<segs;seg++){
               //ASF_segmhdr_t* sh;
@@ -320,11 +316,11 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 	          case 3: len=LOAD_LE32(p);p+=4;break;	// dword
 	          case 2: len=LOAD_LE16(p);p+=2;break;	// word
 	          case 1: len=p[0];p++;break;		// byte
-	          default: len=plen-(p-asf_packet); // ???
+	          default: len=plen-(p-asf->packet); // ???
 		}
               } else {
                 // single segment
-                len=plen-(p-asf_packet);
+                len=plen-(p-asf->packet);
               }
               if(len<0 || (p+len)>p_end){
                 mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! segment len=%d\n",len);
@@ -361,7 +357,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
             return 1; // success
     }
     
-    mp_msg(MSGT_DEMUX,MSGL_V,"%08"PRIX64":  UNKNOWN TYPE  %02X %02X %02X %02X %02X...\n",(int64_t)demux->filepos,asf_packet[0],asf_packet[1],asf_packet[2],asf_packet[3],asf_packet[4]);
+    mp_msg(MSGT_DEMUX,MSGL_V,"%08"PRIX64":  UNKNOWN TYPE  %02X %02X %02X %02X %02X...\n",(int64_t)demux->filepos,asf->packet[0],asf->packet[1],asf->packet[2],asf->packet[3],asf->packet[4]);
     return 0;
 }
 
@@ -370,6 +366,7 @@ static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 extern void skip_audio_frame(sh_audio_t *sh_audio);
 
 static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_delay,int flags){
+    struct asf_priv* asf = demuxer->priv;
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -379,11 +376,11 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
   //FIXME: reports good or bad to steve@daviesfam.org please
 
   //================= seek in ASF ==========================
-    float p_rate=asf_packetrate; // packets / sec
+    float p_rate=asf->packetrate; // packets / sec
     off_t rel_seek_packs=(flags&2)?	 // FIXME: int may be enough?
-	(rel_seek_secs*(demuxer->movi_end-demuxer->movi_start)/asf_packetsize):
+	(rel_seek_secs*(demuxer->movi_end-demuxer->movi_start)/asf->packetsize):
 	(rel_seek_secs*p_rate);
-    off_t rel_seek_bytes=rel_seek_packs*asf_packetsize;
+    off_t rel_seek_bytes=rel_seek_packs*asf->packetsize;
     off_t newpos;
     //printf("ASF: packs: %d  duration: %d  \n",(int)fileh.packets,*((int*)&fileh.duration));
 //    printf("ASF_seek: %d secs -> %d packs -> %d bytes  \n",
@@ -421,6 +418,7 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 }
 
 static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
+    struct asf_priv* asf = demuxer->priv;
 /*  demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -428,7 +426,7 @@ static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 */
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
-	    *((double *)arg)=(double)(asf_movielength);
+	    *((double *)arg)=(double)(asf->movielength);
 	    return DEMUXER_CTRL_OK;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
@@ -442,12 +440,16 @@ static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 
 static demuxer_t* demux_open_asf(demuxer_t* demuxer)
 {
+    struct asf_priv* asf = demuxer->priv;
     sh_audio_t *sh_audio=NULL;
     sh_video_t *sh_video=NULL;
 
     //---- ASF header:
-    if (!read_asf_header(demuxer))
+    if(!asf) return NULL;
+    if (!read_asf_header(demuxer,asf)) {
+        free(asf);
         return NULL;
+    }
     stream_reset(demuxer->stream);
     stream_seek(demuxer->stream,demuxer->movi_start);
 //    demuxer->idx_pos=0;
@@ -460,7 +462,7 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
         } else {
             sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
             sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
-            //sh_video->i_bps=10*asf_packetsize; // FIXME!
+            //sh_video->i_bps=10*asf->packetsize; // FIXME!
         }
     }
 
