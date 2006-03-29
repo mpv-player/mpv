@@ -6517,6 +6517,7 @@ EOF
   cc_check -lmp3lame $_ld_vorbis $_ld_lm && tmp_run && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME"
+    _def_lavc_mp3lame="#define CONFIG_MP3LAME 1"
     _ld_mp3lame="-lmp3lame $_ld_vorbis"
     cat > $TMPC << EOF
 #include <lame/lame.h>
@@ -7801,6 +7802,7 @@ $_def_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
 $_def_lavc_faac
 $_def_lavc_xvid
+$_def_lavc_mp3lame
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
