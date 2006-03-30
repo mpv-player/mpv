@@ -362,7 +362,6 @@ Advanced options:
   --enable-profile       compile profiling information into mplayer [disable]
   --disable-sighandler   disable sighandler for crashes [enable]
   --enable-crash-debug   enable automatic gdb attach on crash [disable]
-  --enable-i18n          _experimental_ gnu gettext() support [autodetect]
   --enable-dynamic-plugins  Enable support for dynamic a/v plugins [disable]
 
 Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"

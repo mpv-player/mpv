@@ -586,7 +586,7 @@ static void exit_sighandler(int x){
 #endif
   }
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
-      current_module?current_module:mp_gettext("unknown")
+      current_module?current_module:"unknown"
   );
   if (identify)
       mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SIGNAL=%d\n", x);
