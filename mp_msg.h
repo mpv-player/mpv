@@ -109,13 +109,6 @@ int mp_msg_test(int mod, int lev);
 #define mp_dbg(mod,lev, args... ) 
 #else
 
-#ifdef USE_I18N
-#include <libintl.h>
-#define mp_gettext(String) gettext(String)
-#else
-#define mp_gettext(String) String
-#endif
-
 #ifdef __GNUC__
 void mp_msg(int mod, int lev, const char *format, ... ) __attribute__ ((format (printf, 3, 4)));
 #   ifdef MP_DEBUG
