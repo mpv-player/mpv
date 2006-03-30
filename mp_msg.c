@@ -43,19 +43,6 @@ void mp_msg_init(void){
     char *env = getenv("MPLAYER_VERBOSE");
     if (env)
         verbose = atoi(env);
-#ifdef USE_I18N
-#ifdef MP_DEBUG
-    fprintf(stdout, "Using GNU internationalization\n");
-    fprintf(stdout, "Original domain: %s\n", textdomain(NULL));
-    fprintf(stdout, "Original dirname: %s\n", bindtextdomain(textdomain(NULL),NULL));
-#endif
-    bindtextdomain("mplayer", PREFIX"/share/locale");
-    textdomain("mplayer");
-#ifdef MP_DEBUG
-    fprintf(stdout, "Current domain: %s\n", textdomain(NULL));
-    fprintf(stdout, "Current dirname: %s\n\n", bindtextdomain(textdomain(NULL),NULL));
-#endif
-#endif
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
 #ifdef USE_ICONV
     mp_msg_charset = getenv("MPLAYER_CHARSET");

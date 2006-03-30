@@ -392,7 +392,6 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(LIRCC_LIB) \
                $(STATIC_LIB) \
                $(ARCH_LIB) \
-               $(I18NLIBS) \
                $(MATH_LIB) \
                $(LIBC_LIB) \
 
@@ -433,7 +432,6 @@ LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(LIRC_LIB) \
                 $(LIRCC_LIB) \
                 $(ARCH_LIB) \
-                $(I18NLIBS) \
                 $(MATH_LIB) \
                 $(LIBC_LIB) \
 

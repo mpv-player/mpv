@@ -1587,7 +1587,6 @@ _largefiles=no
 _shm=auto
 _linux_devfs=no
 #_charset=utf8
-_i18n=auto
 _dynamic_plugins=no
 _crash_debug=auto
 _sighandler=yes
@@ -1635,8 +1634,6 @@ for ac_option do
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
   --disable-mencoder)	_mencoder=no	;;
-  --enable-i18n)	_i18n=yes	;;
-  --disable-i18n)	_i18n=no	;;
   --enable-dynamic-plugins) _dynamic_plugins=yes ;;
   --disable-dynamic-plugins) _dynamic_plugins=no ;;
   --enable-x11)		_x11=yes	;;
@@ -2389,34 +2386,6 @@ else
   _ld_lm=""
   echores "no"
 fi
-
-# Checking for localization ...
-# CSAK EGY MARADHAT - A HEGYLAKO
-echocheck "i18n"
-if test "$_i18n" != no ; then
-  cat > $TMPC <<EOF
-#include <libintl.h>
-int main(void) { gettext("test"); return 0; }
-EOF
-  _i18n=no
-  _i18n_libs=""
-  if test "$_i18n" = auto ; then
-    cc_check && _i18n=yes
-  else
-    for i18n_lib in "" "-lintl"; do
-      cc_check $i18n_lib && _i18n=yes && _i18n_libs=$i18n_lib && break
-    done
-  fi
-fi
-if test "$_i18n" = yes ; then
-  _def_i18n='#define USE_I18N 1'
-else
-  _def_i18n='#undef USE_I18N'
-fi
-if test "$_i18n_libs" ; then
-  _res_comment="using $_i18n_libs"
-fi
-echores "$_i18n"
 
 
 echocheck "langinfo"
