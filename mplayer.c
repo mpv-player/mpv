@@ -540,7 +540,7 @@ static void exit_player_with_rc(char* how, int rc){
 #ifdef USE_EDL
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
 #endif
-  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,mp_gettext(how));
+  if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,how);
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
   exit(rc);

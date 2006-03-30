@@ -290,7 +290,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 static void mencoder_exit(int level, char *how)
 {
     if (how)
-	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ExitingHow, mp_gettext(how));
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ExitingHow, how);
     else
 	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_Exiting);
 
