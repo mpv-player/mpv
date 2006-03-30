@@ -72,3 +72,5 @@ void menu_text_size(char* txt,int max_width,
 void menu_draw_text_full(mp_image_t* mpi,char* txt,
 			 int x, int y,int w, int h,
 			 int vspace, int warp, int align, int anchor);
+
+void menu_draw_box(mp_image_t* mpi, char grey, char alpha, int x, int y, int w, int h);

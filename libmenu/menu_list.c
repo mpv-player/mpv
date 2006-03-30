@@ -30,6 +30,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   int dy = 0;
   int need_h = 0,need_w = 0,ptr_l,sidx = 0;
   int th,count = 0;
+  int bg_w;
   list_entry_t* m;
 
   if(mpriv->count < 1)
@@ -102,7 +103,15 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   } else
     m = mpriv->menu;
 
+  bg_w = need_w+2*mpriv->minb;
   if(th > 0) {
+    if(mpriv->title_bg >= 0) {
+      int tw,th2;
+      menu_text_size(mpriv->title,dw,mpriv->vspace,1,&tw,&th2);
+      if(tw+2*mpriv->minb > bg_w) bg_w = tw+2*mpriv->minb;
+      menu_draw_box(mpi,mpriv->title_bg,mpriv->title_bg_alpha,
+                    x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace,bg_w,th);
+    }
     menu_draw_text_full(mpi,mpriv->title,
 			x < 0 ? mpi->w / 2 : x,
 			dy+y,dw,0,
@@ -114,13 +123,22 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
   
   for( ; m != NULL && dy + vo_font->height < dh ; m = m->next ) {
     if(m->hide) continue;
-    if(ptr_l > 0 && m == mpriv->current)
-      menu_draw_text_full(mpi,mpriv->ptr,
-			  x < 0 ? (mpi->w - need_w) / 2 + ptr_l : x,
-			  dy+y,dw,dh - dy,
-			  mpriv->vspace,0,
-			  MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_RIGHT :MENU_TEXT_LEFT) ,
-			  MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_RIGHT :MENU_TEXT_LEFT));
+    if(m == mpriv->current) {
+      if(mpriv->ptr_bg >= 0)
+        menu_draw_box(mpi,mpriv->ptr_bg,mpriv->ptr_bg_alpha,
+                      x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace,
+                      bg_w,vo_font->height + mpriv->vspace);
+      if(ptr_l > 0)
+        menu_draw_text_full(mpi,mpriv->ptr,
+                            x < 0 ? (mpi->w - need_w) / 2 + ptr_l : x,
+                            dy+y,dw,dh - dy,
+                            mpriv->vspace,0,
+                            MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_RIGHT :MENU_TEXT_LEFT) ,
+                            MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_RIGHT :MENU_TEXT_LEFT));
+    } else if(mpriv->item_bg >= 0)
+      menu_draw_box(mpi,mpriv->item_bg,mpriv->item_bg_alpha,
+                    x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace,
+                    bg_w,vo_font->height + mpriv->vspace);
     menu_draw_text_full(mpi,m->txt,
 			x < 0 ? (mpi->w - need_w) / 2  + ptr_l : x + ptr_l,
 			dy+y,dw-ptr_l,dh - dy,

@@ -55,6 +55,7 @@ struct menu_priv_s {
   int height; // Display size in %
   int minb;
   int vspace;
+  int bg,bg_alpha;
   unsigned int hide_time;
   unsigned int show_time;
   int history_max;
@@ -81,6 +82,7 @@ static struct menu_priv_s cfg_dflt = {
   33, // %
   3,
   3,
+  0x80,0x40,
   500,
   500,
   10,
@@ -96,6 +98,8 @@ static m_option_t cfg_fields[] = {
   { "height", ST_OFF(height), CONF_TYPE_INT, M_OPT_RANGE, 1, 100, NULL },
   { "minbor", ST_OFF(minb), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "vspace", ST_OFF(vspace), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
+  { "bg", ST_OFF(bg), CONF_TYPE_INT, M_OPT_RANGE, -1, 255, NULL },
+  { "bg-alpha", ST_OFF(bg_alpha), CONF_TYPE_INT, M_OPT_RANGE, 0, 255, NULL },
   { "show-time",ST_OFF(show_time), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "hide-time",ST_OFF(hide_time), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL },
   { "history-size",ST_OFF(history_max), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL },
@@ -190,6 +194,9 @@ static void draw(menu_t* menu, mp_image_t* mpi) {
   if(x < 0 || y < 0 || w <= 0 || h <= 0 )
     return;
 
+  if(mpriv->bg >= 0)
+    menu_draw_box(mpi,mpriv->bg,mpriv->bg_alpha,0,0,mpi->w,h);
+  
   if(!mpriv->child || !mpriv->raw_child){
     char input[strlen(mpriv->cur_history->buffer) + strlen(mpriv->prompt) + 1];
     sprintf(input,"%s%s",mpriv->prompt,mpriv->cur_history->buffer);

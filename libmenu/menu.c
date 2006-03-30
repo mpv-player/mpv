@@ -559,3 +559,31 @@ char* menu_text_get_next_line(char* txt, int max_width) {
   }
   return txt;
 }
+
+
+void menu_draw_box(mp_image_t* mpi, char grey, char alpha, int x, int y, int w, int h) {
+  draw_alpha_f draw_alpha = get_draw_alpha(mpi->imgfmt);
+  
+  if(!draw_alpha) {
+    printf("Unsupported outformat !!!!\n");
+    return;
+  }
+  
+  if(x > mpi->w || y > mpi->h) return;
+  
+  if(x < 0) w += x, x = 0;
+  if(x+w > mpi->w) w = mpi->w-x;
+  if(y < 0) h += y, y = 0;
+  if(y+h > mpi->h) h = mpi->h-y;
+  
+  {
+    int stride = (w+7)&(~7); // round to 8
+    char pic[stride*h],pic_alpha[stride*h];
+    memset(pic,grey,stride*h);
+    memset(pic_alpha,alpha,stride*h);
+    draw_alpha(w,h,pic,pic_alpha,stride,
+               mpi->planes[0] + y * mpi->stride[0] + x * (mpi->bpp>>3),
+               mpi->stride[0]);
+  }
+  
+}

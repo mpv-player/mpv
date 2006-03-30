@@ -29,6 +29,9 @@ typedef struct menu_priv_s {
   int w,h;
   int vspace, minb;
   char* ptr;
+  int title_bg,title_bg_alpha;
+  int item_bg,item_bg_alpha;
+  int ptr_bg,ptr_bg_alpha;
 } menu_list_priv_t;
 
 typedef void (*free_entry_t)(list_entry_t* entry);
@@ -52,7 +55,10 @@ extern const menu_list_priv_t menu_list_priv_dflt;
   -1,-1, \
   0,0, \
   5, 3, \
-  ">" \
+  NULL, \
+  0x80, 0x80, \
+  0x40, 0x80, \
+  0x70, 0x80 \
 }
   
 
@@ -63,5 +69,15 @@ extern const menu_list_priv_t menu_list_priv_dflt;
   { "y", M_ST_OFF(menu_list_priv_t,y), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL }, \
   { "w", M_ST_OFF(menu_list_priv_t,w), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL }, \
   { "h", M_ST_OFF(menu_list_priv_t,h), CONF_TYPE_INT, M_OPT_MIN, 0, 0, NULL }, \
-  { "ptr", M_ST_OFF(menu_list_priv_t,ptr), CONF_TYPE_STRING, 0, 0, 0, NULL }
+  { "ptr", M_ST_OFF(menu_list_priv_t,ptr), CONF_TYPE_STRING, 0, 0, 0, NULL }, \
+  { "title-bg", M_ST_OFF(menu_list_priv_t,title_bg), CONF_TYPE_INT, M_OPT_RANGE, -1, 255, NULL }, \
+  { "title-bg-alpha", M_ST_OFF(menu_list_priv_t,title_bg_alpha), \
+    CONF_TYPE_INT, M_OPT_RANGE, 0, 255, NULL }, \
+  { "item-bg", M_ST_OFF(menu_list_priv_t,item_bg), CONF_TYPE_INT, M_OPT_RANGE, -1, 255, NULL }, \
+  { "item-bg-alpha", M_ST_OFF(menu_list_priv_t,item_bg_alpha), \
+    CONF_TYPE_INT, M_OPT_RANGE, 0, 255, NULL }, \
+  { "ptr-bg", M_ST_OFF(menu_list_priv_t,ptr_bg), CONF_TYPE_INT, M_OPT_RANGE, -1, 255, NULL }, \
+  { "ptr-bg-alpha", M_ST_OFF(menu_list_priv_t,ptr_bg_alpha), \
+    CONF_TYPE_INT, M_OPT_RANGE, 0, 255, NULL } \
+  
 
