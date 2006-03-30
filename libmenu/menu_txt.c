@@ -1,5 +1,7 @@
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -129,13 +131,13 @@ static int open(menu_t* menu, char* args) {
   menu->read_key = read_key;
 
   if(!mpriv->file) {
-    printf("Menu txt need a txt file name (param file)\n");
+    mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuTxtNeedATxtFileName);
     return 0;
   }
 
   fd = fopen(mpriv->file,"r");
   if(!fd) {
-    printf("Menu txt can't open: %s\n",mpriv->file);
+    mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_MenuTxtCantOpen,mpriv->file);
     return 0;
   }
 
@@ -166,7 +168,7 @@ static int open(menu_t* menu, char* args) {
       mpriv->num_lines++;
     }
     if(pos >= BUF_SIZE-1) {
-      printf("Warning too long line, splitting it\n");
+      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_WarningTooLongLineSplitting);
       mpriv->lines = realloc(mpriv->lines,(mpriv->num_lines + 1)*sizeof(char*));
       mpriv->lines[mpriv->num_lines] = strdup(buf);
       mpriv->num_lines++;
@@ -174,7 +176,7 @@ static int open(menu_t* menu, char* args) {
     }
   }
 
-  printf("Parsed %d lines\n",mpriv->num_lines);
+  mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_LIBMENU_ParsedLines,mpriv->num_lines);
 
   return 1;
 }

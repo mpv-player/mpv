@@ -1,5 +1,7 @@
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -260,10 +262,10 @@ static void check_child(menu_t* menu) {
         mpriv->prompt = mpriv->mp_prompt;
         //add_line(mpriv,"Child process exited");    
       }
-      else printf("waitpid error: %s\n",strerror(errno));
+      else mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WaitPidError,strerror(errno));
     }
   } else if(r < 0) {
-    printf("select error\n");
+    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_SelectError);
     return;
   }
   
@@ -273,7 +275,7 @@ static void check_child(menu_t* menu) {
       if(w) mpriv->add_line = 1;
       r = read(mpriv->child_fd[i],buffer,255);
       if(r < 0)
-	printf("Read error on child's %s \n", i == 1 ? "stdout":"stderr");
+	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReadErrorOnChilds, i == 1 ? "stdout":"stderr");
       else if(r>0) {
 	buffer[r] = '\0';
 	add_string(mpriv,buffer);
@@ -291,9 +293,9 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
 #ifndef __MINGW32__
   int in[2],out[2],err[2];
 
-  printf("Console run %s ...\n",cmd);
+  mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_LIBMENU_ConsoleRun,cmd);
   if(mpriv->child) {
-    printf("A child is alredy running\n");
+    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_AChildIsAlreadyRunning);
     return 0;
   }
 
@@ -303,7 +305,7 @@ static int run_shell_cmd(menu_t* menu, char* cmd) {
 
   mpriv->child = fork();
   if(mpriv->child < 0) {
-    printf("Fork failed !!!\n");
+    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ForkFailed);
     close_pipe(in);
     close_pipe(out);
     close_pipe(err);
@@ -377,14 +379,14 @@ static void read_key(menu_t* menu,int c) {
       while(l > 0) {
 	int w = write(mpriv->child_fd[0],str,l);
 	if(w < 0) {
-	  printf("Write error\n");
+	  mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WriteError);
 	  break;
 	}
 	l -= w;
 	str += w;
       }
       if(write(mpriv->child_fd[0],"\n",1) < 0)
-	printf("Write error\n");
+	mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_WriteError);
       enter_cmd(menu);
       return;
     }

@@ -5,6 +5,8 @@
 //#include <libgen.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -77,7 +79,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 	  d--;
 	}
 	if(i == NULL) {
-	  printf("Can't find the target item ????\n");
+	  mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_CantfindTheTargetItem);
 	  break;
 	}
       }
@@ -87,7 +89,7 @@ static void read_cmd(menu_t* menu,int cmd) {
     if(c)
       mp_input_queue_cmd(c);
     else
-      printf("Failed to build command %s\n",str);
+      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToBuildCommand,str);
   } break;
   default:
     menu_list_read_cmd(menu,cmd);

@@ -12,6 +12,8 @@
 
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "m_struct.h"
 #include "m_option.h"
@@ -142,7 +144,7 @@ static int open_dir(menu_t* menu,char* args) {
   mpriv->p.title = replace_path(mpriv->title,mpriv->dir);
 
   if ((dirp = opendir (mpriv->dir)) == NULL){
-    printf("opendir error: %s", strerror(errno));
+    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_OpendirError, strerror(errno));
     return 0;
   }
 
@@ -155,7 +157,7 @@ static int open_dir(menu_t* menu,char* args) {
     if(n%20 == 0){ // Get some more mem
       if((tp = (char **) realloc(namelist, (n+20) * sizeof (char *)))
          == NULL) {
-        printf("realloc error: %s", strerror(errno));
+        mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReallocError, strerror(errno));
 	n--;
         goto bailout;
       } 
@@ -164,7 +166,7 @@ static int open_dir(menu_t* menu,char* args) {
 
     namelist[n] = (char *) malloc(strlen(dp->d_name) + 2);
     if(namelist[n] == NULL){
-      printf("malloc error: %s", strerror(errno));
+      mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_MallocError, strerror(errno));
       n--;
       goto bailout;
     }
@@ -182,7 +184,7 @@ bailout:
   qsort(namelist, n, sizeof(char *), (kill_warn)compare);
 
   if (n < 0) {
-    printf("readdir error: %s\n",strerror(errno));
+    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_ReaddirError,strerror(errno));
     return 0;
   }
   while(n--) {
@@ -193,7 +195,7 @@ bailout:
       e->d = 1;
     menu_list_add_entry(menu,e);
     }else{
-      printf("malloc error: %s", strerror(errno));
+      mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_MallocError, strerror(errno));
     }
     free(namelist[n]);
   }
@@ -237,7 +239,7 @@ static void read_cmd(menu_t* menu,int cmd) {
 	}
 	menu_list_uninit(menu,free_entry);
 	if(!open_dir(menu,p)) {
-	  printf("Can't open directory %s\n",p);
+	  mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_LIBMENU_CantOpenDirectory,p);
 	  menu->cl = 1;
 	}
 	free(p);

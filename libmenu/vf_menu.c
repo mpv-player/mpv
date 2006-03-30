@@ -1,5 +1,7 @@
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -116,7 +118,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
     else if(strcmp(arg,"hide") == 0)
       priv->current->show = 0;
     else
-      printf("Unknown menu command: '%s'\n",arg);
+      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnknownMenuCommand,arg);
     return 1;
   }
   case MP_CMD_SET_MENU : {
@@ -124,7 +126,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
     menu_t* l = priv->current;
     priv->current = menu_open(menu);
     if(!priv->current) {
-      printf("Failed to open menu '%s'\n",menu);
+      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_FailedToOpenMenu,menu);
       priv->current = l;
       priv->current->show = 0;
     } else {

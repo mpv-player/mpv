@@ -139,9 +139,9 @@ void list_audio_out(void){
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_OUTPUTS\n");
       while (audio_out_drivers[i]) {
         const ao_info_t *info = audio_out_drivers[i++]->info;
-	printf("\t%s\t%s\n", info->short_name, info->name);
+	mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
       }
-      printf("\n");
+      mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
 ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int channels,int format,int flags){

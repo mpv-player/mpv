@@ -97,13 +97,13 @@ static int parse_args(menu_t* menu,char* args) {
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);
     if(r < 0) {
-      mp_msg(MSGT_OSD_MENU,MSGL_ERR,"Syntax error at line %d\n",parser->line);
+      mp_msg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
       asx_parser_free(parser);
       return -1;
     } else if(r == 0) {      
       asx_parser_free(parser);
       if(!m)
-        mp_msg(MSGT_OSD_MENU,MSGL_WARN,"No entry found in the menu definition\n");
+        mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition);
       m = calloc(1,sizeof(struct list_entry_s));
       m->p.txt = strdup("Back");
       menu_list_add_entry(menu,m);
@@ -112,7 +112,7 @@ static int parse_args(menu_t* menu,char* args) {
     if(!strcmp(element,"menu")) {
       name = asx_get_attrib("menu",attribs);
       if(!name) {
-        mp_msg(MSGT_OSD_MENU,MSGL_WARN,"Submenu definition need a 'menu' attribut.\n");
+        mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut);
         goto next_element;
       }
       m = calloc(1,sizeof(struct list_entry_s));
@@ -127,8 +127,7 @@ static int parse_args(menu_t* menu,char* args) {
     name = asx_get_attrib("property",attribs);
     opt = name ? mp_property_find(name) : NULL;
     if(!opt) {
-      mp_msg(MSGT_OSD_MENU,MSGL_WARN,"Pref menu entry definitions need a valid 'property'"
-             " attribut (line %d)\n",parser->line);
+      mp_msg(MSGT_OSD_MENU,MSGL_WARN,MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed,parser->line);
       goto next_element;
     }
     m = calloc(1,sizeof(struct list_entry_s));
@@ -239,7 +238,7 @@ static int openMenu(menu_t* menu, char* args) {
 
 
   if(!args) {
-    mp_msg(MSGT_OSD_MENU,MSGL_ERR,"Pref menu need an argument\n");
+    mp_msg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_PrefMenuNeedAnArgument);
     return 0;
   }
  

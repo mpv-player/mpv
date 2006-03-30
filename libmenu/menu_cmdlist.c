@@ -1,5 +1,7 @@
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -106,19 +108,19 @@ static int parse_args(menu_t* menu,char* args) {
   while(1) {
     r = asx_get_element(parser,&args,&element,&body,&attribs);
     if(r < 0) {
-      printf("Syntax error at line %d\n",parser->line);
+      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_SyntaxErrorAtLine,parser->line);
       asx_parser_free(parser);
       return -1;
     } else if(r == 0) {      
       asx_parser_free(parser);
       if(!m)
-	printf("No entry found in the menu definition\n");
+	mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition);
       return m ? 1 : 0;
     }
     // Has it a name ?
     name = asx_get_attrib("name",attribs);
     if(!name) {
-      printf("List menu entry definitions need a name (line %d)\n",parser->line);
+      mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName,parser->line);
       free(element);
       if(body) free(body);
       asx_free_attribs(attribs);
@@ -145,7 +147,7 @@ static int open(menu_t* menu, char* args) {
   menu->close = close;
 
   if(!args) {
-    printf("List menu need an argument\n");
+    mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuNeedAnArgument);
     return 0;
   }
  

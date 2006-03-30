@@ -1066,6 +1066,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Your audio driver DOES NOT support select()  ***\n Recompile MPlayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Unknown/Unsupported OSS format: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
@@ -1430,3 +1431,59 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "No password provided, trying blank password.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Server return %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache size set to %d KBytes\n"
+
+// ========================== LIBMPMENU ===================================
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntax error at line: %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Menu definitions need a name attribute (line %d)\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] Bad attribute %s=%s in menu '%s' at line %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Unknown menu type '%s' at line %d\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Can't open menu config file: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Config file is too big (> %d KB)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Config file is empty\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] Menu %s not found.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menu '%s': init failed\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Unsupported output format!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] List menu entry definitions needs a name (line %d).\n"
+#define MSGTR_LIBMENU_ListMenuNeedAnArgument "[MENU] List menu needs an argument.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid error: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Select error.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Read error on child's: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] Console run: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] A child is alredy running.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork failed !!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Write error.\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Opendir error: %s.\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Realloc error: %s.\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Memory allocation error: %s.\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Readdir error: %s.\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Can't open directory %s\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Submenu definition needs a 'menu' attribute.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menu entry definitions need a valid 'property' attribute (line %d).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedAnArgument "[MENU] Pref menu needs an argument.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Can't find the target item ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Failed to build command: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] Text menu needs a txt file name (param file).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Can't open: %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Warning, line too long. Splitting it.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] Parsed %d lines.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Unknown command: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Failed to open menu: '%s'.\n"
+

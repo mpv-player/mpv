@@ -140,7 +140,7 @@ static int oss2format(int format)
     case AFMT_AC3: return AF_FORMAT_AC3;
 #endif
     }
-    printf("Unknown/not supported OSS format: %x\n", format);
+    mp_msg(MSGT_GLOBAL,MSGL_ERR,MSGTR_AO_OSS_UnknownUnsupportedFormat, format);
     return -1;
 }
 
