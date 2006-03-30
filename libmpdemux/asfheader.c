@@ -184,7 +184,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   while ((pos = find_asf_guid(hdr, asf_stream_header_guid, pos, hdr_len)) >= 0)
   {
     ASF_stream_header_t *streamh = (ASF_stream_header_t *)&hdr[pos];
-    char *buffer;
+    uint8_t *buffer;
     pos += sizeof(ASF_stream_header_t);
     if (pos > hdr_len) goto len_err_out;
     le2me_ASF_stream_header_t(streamh);
@@ -217,7 +217,9 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
           asf->scrambling_h=buffer[0];
           asf->scrambling_w=(buffer[2]<<8)|buffer[1];
           asf->scrambling_b=(buffer[4]<<8)|buffer[3];
-  	  asf->scrambling_w/=asf->scrambling_b;
+          if(asf->scrambling_b>0){
+            asf->scrambling_w/=asf->scrambling_b;
+          }
 	} else {
 	  asf->scrambling_b=asf->scrambling_h=asf->scrambling_w=1;
 	}

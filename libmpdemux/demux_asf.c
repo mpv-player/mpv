@@ -100,7 +100,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
       if(ds->asf_seq!=seq){
         // closed segment, finalize packet:
 		if(ds==demux->audio)
-		  if(asf->scrambling_h>1 && asf->scrambling_w>1)
+		  if(asf->scrambling_h>1 && asf->scrambling_w>1 && asf->scrambling_b>0)
 		    asf_descrambling(&ds->asf_packet->buffer,ds->asf_packet->len,asf);
         ds_add_packet(ds,ds->asf_packet);
         ds->asf_packet=NULL;

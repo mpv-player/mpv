@@ -216,9 +216,9 @@ typedef struct {
 struct asf_priv {
     ASF_header_t header;
     unsigned char* packet;
-    unsigned scrambling_h;
-    unsigned scrambling_w;
-    unsigned scrambling_b;
+    int scrambling_h;
+    int scrambling_w;
+    int scrambling_b;
     unsigned packetsize;
     double   packetrate;
     unsigned movielength;
