@@ -7249,7 +7249,6 @@ EXTERNAL_VIDIX_LIB = $_ld_vidix_external
 CONFIG_PP = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
-I18NLIBS = $_i18n_libs
 MATROSKA = $_matroska_internal
 
 OPENDIVX = $_opendivx
