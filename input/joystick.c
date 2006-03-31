@@ -30,7 +30,7 @@
 
 #include <linux/joystick.h>
 
-int axis[10];
+int axis[256];
 int btns = 0;
 
 int mp_input_joystick_init(char* dev) {
