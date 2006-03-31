@@ -1536,7 +1536,7 @@ static char help_text[]=
 
 // libmpcodecs/vf_expand.c
 #define MSGTR_MPCODECS_FullDRNotPossible "Full DR not possible, trying SLICES instead!\n"
-#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "WARNING! next filter doesn't support SLICES, get ready for sig11...\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "WARNING! Next filter doesn't support SLICES, get ready for sig11...\n"
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Why do we get NULL??\n"
 
 // libmpcodecs/vf_fame.c
