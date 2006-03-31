@@ -238,7 +238,7 @@ static int openMenu(menu_t* menu, char* args) {
 
 
   if(!args) {
-    mp_msg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_PrefMenuNeedAnArgument);
+    mp_msg(MSGT_OSD_MENU,MSGL_ERR,MSGTR_LIBMENU_PrefMenuNeedsAnArgument);
     return 0;
   }
  

@@ -1448,15 +1448,15 @@ static char help_text[]=
 
 // libmenu/menu_cmdlist.c
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
-#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] List menu entry definitions needs a name (line %d).\n"
-#define MSGTR_LIBMENU_ListMenuNeedAnArgument "[MENU] List menu needs an argument.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] List menu entry definitions need a name (line %d).\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] List menu needs an argument.\n"
 
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid error: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Select error.\n"
 #define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Read error on child's: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Console run: %s ...\n"
-#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] A child is alredy running.\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] A child is already running.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork failed !!!\n"
 #define MSGTR_LIBMENU_WriteError "[MENU] Write error.\n"
 
@@ -1471,7 +1471,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Submenu definition needs a 'menu' attribute.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menu entry definitions need a valid 'property' attribute (line %d).\n"
-#define MSGTR_LIBMENU_PrefMenuNeedAnArgument "[MENU] Pref menu needs an argument.\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref menu needs an argument.\n"
 
 // libmenu/menu_pt.c
 #define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Can't find the target item ????\n"

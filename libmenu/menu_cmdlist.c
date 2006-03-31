@@ -147,7 +147,7 @@ static int open(menu_t* menu, char* args) {
   menu->close = close;
 
   if(!args) {
-    mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuNeedAnArgument);
+    mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuNeedsAnArgument);
     return 0;
   }
  
