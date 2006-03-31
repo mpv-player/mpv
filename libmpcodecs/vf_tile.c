@@ -39,6 +39,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 #include "cpudetect.h"
 
 #include "img_format.h"
@@ -278,7 +279,7 @@ static int open(vf_instance_t *vf, char* args)
 //    er |= parse_int( &args, &p->bkgSet, 0 );
 
     if (er) {
-        printf("Error parsing argument\n");
+        mp_msg(MSGT_VFILTER, MSGL_ERR, MSGTR_MPCODECS_ErrorParsingArgument);
         return(0);
     }
     /* Load some default */

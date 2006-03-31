@@ -4,6 +4,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -57,7 +58,7 @@ static int config(struct vf_instance_s* vf,
     // check:
     if(vf->priv->crop_w+vf->priv->crop_x>width ||
        vf->priv->crop_h+vf->priv->crop_y>height){
-	printf("crop: bad position/width/height - cropped area is out of the original!\n");
+	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_CropBadPositionWidthHeight);
 	return 0;
     }
     if(!opt_screen_size_x && !opt_screen_size_y){

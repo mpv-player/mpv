@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -23,7 +24,7 @@ static int config(struct vf_instance_s* vf,
     sws_rgb2rgb_init(get_sws_cpuflags());
     
     if(vf_next_query_format(vf,IMGFMT_YUY2)<=0){
-	printf("yuy2 not supported by next filter/vo :(\n");
+	mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_WarnNextFilterDoesntSupport, "YUY2");
 	return 0;
     }
     

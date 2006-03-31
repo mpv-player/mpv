@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -65,7 +66,7 @@ static int open(vf_instance_t *vf, char* args){
 	if(!strcasecmp(args,"argb")) vf->priv->fmt=IMGFMT_ARGB; else
 	if(!strcasecmp(args,"bgra")) vf->priv->fmt=IMGFMT_BGRA; else
 	if(!strcasecmp(args,"abgr")) vf->priv->fmt=IMGFMT_ABGR; else
-	{ printf("Unknown format name: '%s'\n",args);return 0;}
+	{ mp_msg(MSGT_VFILTER, MSGL_WARN, MSGTR_MPCODECS_UnknownFormatName, args);return 0;}
     }
         
 

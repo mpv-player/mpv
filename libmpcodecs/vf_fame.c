@@ -5,6 +5,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 //#ifdef USE_LIBFAME
 
@@ -103,7 +104,7 @@ static int open(vf_instance_t *vf, char* args){
 
     vf->priv->ctx=fame_open();
     if(!vf->priv->ctx){
-	printf("FATAL: cannot open libFAME!\n");
+	mp_msg(MSGT_VFILTER, MSGL_ERR, MSGTR_MPCODECS_FatalCantOpenlibFAME);
 	return 0;
     }
 

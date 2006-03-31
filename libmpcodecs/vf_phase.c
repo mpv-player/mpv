@@ -168,11 +168,11 @@ static enum mode analyze_plane(unsigned char *old, unsigned char *new,
 
    if( mp_msg_test(MSGT_VFILTER,MSGL_V) )
       {
-      printf("%c", mode==BOTTOM_FIRST?'b':mode==TOP_FIRST?'t':'p');
-      if(tdiff==65536.0) printf("     N/A "); else printf(" %8.2f", tdiff);
-      if(bdiff==65536.0) printf("     N/A "); else printf(" %8.2f", bdiff);
-      if(pdiff==65536.0) printf("     N/A "); else printf(" %8.2f", pdiff);
-      printf("        \n");
+      mp_msg(MSGT_VFILTER, MSGL_INFO, "%c", mode==BOTTOM_FIRST?'b':mode==TOP_FIRST?'t':'p');
+      if(tdiff==65536.0) mp_msg(MSGT_VFILTER, MSGL_INFO,"     N/A "); else mp_msg(MSGT_VFILTER, MSGL_INFO," %8.2f", tdiff);
+      if(bdiff==65536.0) mp_msg(MSGT_VFILTER, MSGL_INFO,"     N/A "); else mp_msg(MSGT_VFILTER, MSGL_INFO," %8.2f", bdiff);
+      if(pdiff==65536.0) mp_msg(MSGT_VFILTER, MSGL_INFO,"     N/A "); else mp_msg(MSGT_VFILTER, MSGL_INFO," %8.2f", pdiff);
+      mp_msg(MSGT_VFILTER, MSGL_INFO,"        \n");
       }
 
    return mode;

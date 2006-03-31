@@ -6,6 +6,8 @@
 #include <math.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #ifdef HAVE_LIBDV095
 
@@ -86,7 +88,7 @@ static int decode_audio(sh_audio_t *audio, unsigned char *buf, int minlen, int m
    dv_parse_header(decoder, dv_audio_frame);
    
    if(xx!=decoder->frame_size)
-       printf("warning! audio framesize differs! read=%d  hdr=%d  \n",
+       mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_MPCODECS_AudioFramesizeDiffers,
            xx, decoder->frame_size);
 
    if (dv_decode_full_audio(decoder, dv_audio_frame,(int16_t**) audioBuffers))

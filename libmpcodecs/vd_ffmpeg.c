@@ -248,7 +248,7 @@ static int init(sh_video_t *sh){
 #else
     if(lavc_codec->id == CODEC_ID_MPEG2VIDEO_XVMC){
 #endif
-        printf("vd_ffmpeg: XVMC accelerated codec\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedCodec);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
@@ -333,8 +333,8 @@ static int init(sh_video_t *sh){
 	    uint8_t *p = avctx->extradata;
 	    
 	    for (x=0; x<avctx->extradata_size; x++)
-		printf("[%x] ", p[x]);
-	    printf("\n");
+		mp_msg(MSGT_DECVIDEO, MSGL_INFO,"[%x] ", p[x]);
+	    mp_msg(MSGT_DECVIDEO, MSGL_INFO,"\n");
 	}
 #endif
     }
@@ -433,9 +433,9 @@ static void uninit(sh_video_t *sh){
     if(lavc_param_vstats){
         int i;
         for(i=1; i<32; i++){
-            printf("QP: %d, count: %d\n", i, ctx->qp_stat[i]);
+            mp_msg(MSGT_DECVIDEO, MSGL_INFO,"QP: %d, count: %d\n", i, ctx->qp_stat[i]);
         }
-        printf("Arithmetic mean of QP: %2.4f, Harmonic mean of QP: %2.4f\n", 
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO,MSGTR_MPCODECS_ArithmeticMeanOfQP, 
             ctx->qp_sum / avctx->coded_frame->coded_picture_number,
             1.0/(ctx->inv_qp_sum / avctx->coded_frame->coded_picture_number)
             );
@@ -634,7 +634,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
   if (!pic->buffer_hints) {
 #endif
     if(ctx->b_count>1 || ctx->ip_count>2){
-        printf("DR1 failure\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_DRIFailure);
 
         ctx->do_dr1=0; //FIXME
         avctx->get_buffer= avcodec_default_get_buffer;
@@ -921,7 +921,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
 	avctx->width, avctx->height);
     if(!mpi){	// temporary!
-	printf("couldn't allocate image for codec\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_CouldntAllocateImageForCodec);
 	return NULL;
     }
     
@@ -971,7 +971,7 @@ int i;
         avctx->get_buffer= mc_get_buffer;
         avctx->release_buffer= mc_release_buffer;
         avctx->draw_horiz_band = mc_render_slice;
-        printf("vd_ffmpeg: XVMC accelerated MPEG2\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_XVMCAcceleratedMPEG2);
         assert(ctx->do_dr1);//these are must to!
         assert(ctx->do_slices); //it is (vo_)ffmpeg bug if this fails
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
@@ -979,7 +979,7 @@ int i;
     }
 #endif
     for(i=0;fmt[i]!=-1;i++){
-        printf("trying pixfmt=%d\n",i);
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_TryingPixfmt,i);
         if( init_vo(sh,fmt[i]) >= 0)
 	    return fmt[i];
     }
@@ -997,7 +997,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     
 //  printf("vd_ffmpeg::mc_get_buffer (xvmc) %d %d %d\n", pic->reference, ctx->ip_count, ctx->b_count);
     if(!avctx->xvmc_acceleration){
-        printf("vd_ffmpeg::mc_get_buffer should work only with XVMC acceleration !!");
+        mp_msg(MSGT_DECVIDEO, MSGL_INFO, MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC);
         assert(0);
         exit(1);
 //        return -1;//!!fixme check error conditions
@@ -1005,10 +1005,10 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     assert(avctx->draw_horiz_band == mc_render_slice);
     assert(avctx->release_buffer == mc_release_buffer);
     if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
-        printf("vd_ffmpeg::mc_get_buffer\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer\n");
 
     if(init_vo(sh,avctx->pix_fmt) < 0){
-        printf("vd_ffmpeg: Unexpected init_vo error\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_UnexpectedInitVoError);
         exit(1);
 //        return -1;//!!fixme check error conditions
     }
@@ -1025,14 +1025,14 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     mpi= mpcodecs_get_image(sh, MP_IMGTYPE_IPB,flags ,
                             avctx->width, avctx->height);
     if(mpi==NULL){
-        printf("Unrecoverable error, render buffers not taken\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken);
         assert(0);
         exit(1);
 //        return -1;//!!fixme check error conditions in ffmpeg
     };
     
     if( (mpi->flags & MP_IMGFLAG_DIRECT) == 0){
-        printf("Only buffers allocated by vo_xvmc allowed\n");
+        mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed);
         assert(0);
         exit(1);
 //        return -1;//!!fixme check error conditions in ffmpeg
@@ -1072,7 +1072,7 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
 
     render=(xvmc_render_state_t*)mpi->priv;//same as data[2]
     if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
-        printf("vd_ffmpeg::mc_get_buffer (render=%p)\n",render);
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_get_buffer (render=%p)\n",render);
     assert(render != 0);
     assert(render->magic == MP_XVMC_RENDER_MAGIC);
     render->state |= MP_XVMC_STATE_PREDICTION;
@@ -1099,7 +1099,7 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 //mark the surface as not requared for prediction
     render=(xvmc_render_state_t*)pic->data[2];//same as mpi->priv
     if( mp_msg_test(MSGT_DECVIDEO,MSGL_DBG5) )
-        printf("vd_ffmpeg::mc_release_buffer (render=%p)\n",render);
+        mp_msg(MSGT_DECVIDEO, MSGL_DBG5, "vd_ffmpeg::mc_release_buffer (render=%p)\n",render);
     assert(render!=NULL);
     assert(render->magic==MP_XVMC_RENDER_MAGIC);
     render->state&=~MP_XVMC_STATE_PREDICTION;

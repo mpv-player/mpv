@@ -590,7 +590,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags = 0;
     if (lavc_param_mb_decision)
     {
-	printf("High quality encoding selected (non real time)!\n");
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_HighQualityEncodingSelected);
 #if LIBAVCODEC_BUILD < 4673
         lavc_venc_context->flags = CODEC_FLAG_HQ;
 #else
@@ -740,7 +740,7 @@ static int config(struct vf_instance_s* vf,
     /* fixed qscale :p */
     if (lavc_param_vqscale)
     {
-	printf("Using constant qscale = %f (VBR)\n", lavc_param_vqscale);
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_UsingConstantQscale, lavc_param_vqscale);
 	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
 #if LIBAVCODEC_BUILD >= 4668
         lavc_venc_context->global_quality= 
@@ -968,7 +968,7 @@ static void uninit(struct vf_instance_s* vf){
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
         f*= lavc_venc_context->coded_frame->coded_picture_number;
         
-        printf("PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n",
+        mp_msg(MSGT_MENCODER, MSGL_INFO, "PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n",
             psnr(lavc_venc_context->error[0]/f),
             psnr(lavc_venc_context->error[1]*4/f),
             psnr(lavc_venc_context->error[2]*4/f),
