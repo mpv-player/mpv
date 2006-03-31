@@ -638,11 +638,15 @@ static int init(int rate_hz, int channels, int format, int flags)
 	       snd_strerror(err));
 	return 0;
       }
+#if SND_LIB_VERSION >= 0x000901
       if ((err = snd_pcm_sw_params_get_boundary(alsa_swparams, &boundary)) < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get boundary: %s\n",
 	       snd_strerror(err));
 	return 0;
       }
+#else
+      boundary = 0x7fffffff;
+#endif
       /* start playing when one period has been written */
       if ((err = snd_pcm_sw_params_set_start_threshold(alsa_handler, alsa_swparams, chunk_size)) < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set start threshold: %s\n",
@@ -655,12 +659,14 @@ static int init(int rate_hz, int channels, int format, int flags)
 	       snd_strerror(err));
 	return 0;
       }
+#if SND_LIB_VERSION >= 0x000901
       /* play silence when there is an underrun */
       if ((err = snd_pcm_sw_params_set_silence_size(alsa_handler, alsa_swparams, boundary)) < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set silence size: %s\n",
 	       snd_strerror(err));
 	return 0;
       }
+#endif
       if ((err = snd_pcm_sw_params(alsa_handler, alsa_swparams)) < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set sw-parameters: %s\n",
 	       snd_strerror(err));
