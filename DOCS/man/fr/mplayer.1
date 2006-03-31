@@ -1950,7 +1950,7 @@ Utilisé pour débogage.
 .
 .TP
 .B \-subalign <0\-2> (OSD uniquement)
-Définit quel bord des sous-titres des sous-titres doit être aligné à la
+Défini quel bord des sous-titres doit être aligné à la
 hauteur définie par \-subpos.
 .PD 0
 .RSs
@@ -2229,7 +2229,7 @@ de la première carte, quatrième périphérique (ouf\ ! ;-).
 .PD 1
 .
 .sp 1
-Les pilotes de sorties audio sont\ :
+Les pilotes de sortie audio sont\ :
 .
 .TP
 .B alsa\ \ \ 
@@ -2240,7 +2240,7 @@ Pilote de sortie audio ALSA 0.9/1.x
 Active le mode non-bloquant.
 .IPs device=<device>
 Défini le nom de périphérique.
-Remplacez les ',' par '.' et ':' par '=' dans les noms de périphérique ALSA.
+Remplacez les ',' par '.' et ':' par '=' dans les noms de périphériques ALSA.
 Assurez-vous bien de ne pas activer ceci lorsque vous voulez sortir
 directement hwac3 via S/PDIF, à moins que vous sachiez vraiment comment bien
 le configurer.
@@ -2390,7 +2390,7 @@ pilote de plugin de sortie audio
 .
 .TP
 .B \-adapter <valeur>
-Définit la carte graphique qui recevra l'image
+Défini la carte graphique qui recevra l'image
 Vous pouvez obtenir une liste des cartes disponibles si cette option est
 combinée à l'option \-v.
 Ne fonctionne pour le moment qu'avec le pilote de sortie vidéo directx.
@@ -2404,7 +2404,7 @@ Géré uniquement par les pilotes de sortie vidéo fbdev, dga, svga, vesa.
 .B \-border
 Joue la vidéo avec les bordures et décorations de fenêtre (par défaut).
 Spécifiez \-noborder pour désactiver les décorations de fenêtre
-standards.
+standard.
 Supporté par le pilote de sortie vidéo directx.
 .
 .TP
@@ -2545,7 +2545,7 @@ Essayez cette option si vous avez encore des problèmes en plein-écran.
 .
 .TP
 .B \-fstype <type1,type2,...> (X11 uniquement)
-Définit une liste classée par ordre de priorité des modes plein-écran
+Défini une liste classée par ordre de priorité des modes plein-écran
 à utiliser.
 Vous pouvez inverser les modes en les préfixant par '\-'.
 Si vous avez des problèmes d'affichage, comme votre vidéo en plein-écran est
@@ -2630,22 +2630,22 @@ mplayerplug-in par exemple).
 .B \-hue <-100\-100>
 Ajuste la couleur (hue) du signal vidéo (par défaut\ : 0).
 Vous pouvez obtenir un négatif de l'image avec cette option.
-Non géné par tous les pilotes de sortie vidéo.
+Non géré par tous les pilotes de sortie vidéo.
 .
 .TP
 .B \-monitor-dotclock <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Définit les paramètres de rafraichissement dotclock ou pixelclock du moniteur.
+Défini les paramètres de rafraichissement dotclock ou pixelclock du moniteur.
 .
 .TP
 .B \-monitor-hfreq <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Définit l'intervalle de rafraichissement horizontal du moniteur.
+Défini l'intervalle de rafraichissement horizontal du moniteur.
 .
 .TP
 .B \-monitor-vfreq <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Définit l'intervalle de rafraichissement vertical du moniteur.
+Défini l'intervalle de rafraichissement vertical du moniteur.
 .
 .TP
 .B \-monitoraspect <rapport> (Voir aussi \-aspect)
@@ -2710,7 +2710,7 @@ N'envoyez pas de rapport de bug à moins que vous utilisiez \-vo gl.
 .
 .TP
 .B \-refreshrate <Hz>
-Définit la fréquence de rafraichissement en Hz.
+Défini la fréquence de rafraichissement en Hz.
 N'est géré actuellement que par \-vo directx combinée avec l'option \-vm.
 .
 .TP
@@ -2728,13 +2728,13 @@ N'est pas géré par tous les pilotes de sortie vidéo.
 .
 .TP
 .B \-screenh <pixels>
-Définit la résolution verticale de votre écran pour des pilotes de
+Défini la résolution verticale de votre écran pour des pilotes de
 sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .
 .TP
 .B \-screenw <pixels>
-Définit la résolution horizontale de votre écran pour des pilotes de
+Défini la résolution horizontale de votre écran pour des pilotes de
 sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .
@@ -2745,7 +2745,7 @@ Désactive xscreensaver (le reposeur d'écran) au lancement et le réactive
 .
 .TP
 .B \-vm \ \ \ 
-Essaie de changer vers autre mode vidéo.
+Essaie de changer vers un autre mode vidéo.
 Les pilotes de sortie vidéo dga, x11, xv, sdl et directx le permettent.
 Si utilisé avec le pilote de sortie vidéo directx, les options \-screenw,
 \-screenh, \-bpp et \-refreshrate peuvent être utilisées pour paramétrer ce
@@ -2807,7 +2807,7 @@ exemple de mode cinérama.
 .
 .TP
 .B \-zrnorm <norm> (\-vo zr uniquement)
-Définit la norme TV à PAL ou NTSC (par défaut\ : 'no change').
+Défini la norme TV à PAL ou NTSC (par défaut\ : 'no change').
 .
 .TP
 .B \-zrquality <1\-20> (\-vo zr uniquement)
@@ -2930,7 +2930,7 @@ Désactive l'affichage de toute image.
 Nécessaire pour évaluer les performances (benchmarking) des pilotes qui
 mettent à jour leurs tampons d'affichage uniquement lors du rafraîchissement
 de l'écran (nVidia).
-Par défault les images sont affichées (nobenchmark).
+Par défaut les images sont affichées (nobenchmark).
 .IPs (no)queue
 Met plusieurs trames dans queue d'affichage pour permettre aux circuits
 matériels de les traiter en parallèle.
@@ -2963,7 +2963,7 @@ MPlayer n'ont aucun effet sur SDL.
 .IPs driver=<pilote>
 Choisit explicitement le pilote SDL à utiliser.
 .IPs (no)forcexv
-Utilise XVideo à travers le pilote de sortie viéo sdl (par défaut\ : forcexv).
+Utilise XVideo à travers le pilote de sortie vidéo sdl (par défaut\ : forcexv).
 .IPs (no)hwaccel
 Utilise le redimensionnement matériel (par défaut\ : hwaccel).
 .RE
@@ -3177,7 +3177,7 @@ N'est dans certains cas que supporté de manière logicielle, donc lent.
 .RE
 .IPs (no)glfinish
 Appelle glFinish() avant d'échanger les tampons.
-Plus lent mais dans certain cas affichage "plus correct".
+Plus lent mais dans certains cas affichage "plus correct".
 .IPs swapinterval=<n>
 Intervalle minimum entre chaque échange de tampon, exprimé en nombre de
 trames affichées (par défaut\ : 1).
@@ -3201,13 +3201,13 @@ Au moins trois unitées de texture sont nécessaires.
 Offre le contrôle de la saturation et de la teinte.
 .br
 2: Utilise un "programme fragment".
-Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unités
 de textures.
 Offre le contrôle de la luminosité, du contraste, de la saturation, et
 de la teinte.
 .br
 3: Utilise un "programme fragment" utilisant l'instruction POW.
-Nécessite l'extension GL_ARB_fragment_program et au moins trois unitées
+Nécessite l'extension GL_ARB_fragment_program et au moins trois unités
 de texture.
 Offre le contrôle de la luminosité, du contraste, de la saturation, de
 la teinte et du gamma.
@@ -3215,7 +3215,7 @@ Le chaque composante rouge, verte et bleue du gamma peut être configurée.
 La méthode 4 est généralement plus rapide.
 .br
 4: Utilise un "programme fragment" avec une consultation de table.
-Nécessite l'extension GL_ARB_fragment_program et au moins quatre unitées
+Nécessite l'extension GL_ARB_fragment_program et au moins quatre unités
 de texture.
 Offre le contrôle de la luminosité, du contraste, de la saturation, de
 la teinte et du gamma.
@@ -3224,7 +3224,7 @@ Le chaque composante rouge, verte et bleue du gamma peut être configurée.
 5: Utilise des méthodes spécifiques à ATI (pour les cartes plus anciennes).
 Ceci utilise un extension spécifique à ATI (GL_ATI_fragment_shader - pas
 GL_ARB_fragment_shader\ !).
-Au moins trois unitées de texture sont nécessaires.
+Au moins trois unités de texture sont nécessaires.
 Permet le contrôle de la saturation et de la teinte.
 .RE
 .IPs customprog=<nom_fichier>
@@ -3240,7 +3240,7 @@ Peut être utilisé en même temps que yuv=4 ou avec l'option customprog.
 .TP
 .B gl2\ \ \ \ 
 Pilote de sortie vidéo OpenGL, seconde génération.
-Gère l'OSD et les vidéo de taille supérieure à la taille maximum d'une
+Gère l'OSD et les vidéos de taille supérieure à la taille maximum d'une
 texture.
 .PD 0
 .RSs
@@ -3324,7 +3324,7 @@ mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 Forcera l'utilisation de la couche dont l'ID est N pour la lecture
 (par défaut\ : -1 - auto).
 IPs dfbopts=<liste>
-Définit une liste de paramètres DirectFB.
+Défini une liste de paramètres DirectFB.
 .
 .TP
 .RE
@@ -3359,7 +3359,7 @@ La qualité de l'image y est époustouflante puisque toutes les spécificités
 et limitations de l'affichage sur une TV sont gérées (image entrelacée,
 synchro, etc ...)
 .IPs tvnorm=pal|ntsc|auto
-Définit la norme TV de la carte Matrox sans avoir besoin de modifier
+Défini la norme TV de la carte Matrox sans avoir besoin de modifier
 /etc/\:directfbrc (par défaut\ : désactivé).
 Les normes valides sont pal = PAL, ntsc = NTSC.
 La norme auto est particulière (auto-ajustement PAL/\:NTSC) puisqu'elle choisit
@@ -3405,13 +3405,13 @@ avec la fréquence de rafraichissement verticale de votre moniteur.
 Pilote de sortie vidéo spécifique aux cartes 3dfx.
 Ce pilote exploite directement les circuits matériels 3dfx sous X11.
 Ne gère que le 16 bits/pixel.
-FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
+FIXME: Meilleure explication des différences entre 3dfx, tdfxfb et tdfx_vid?
 .
 .TP
 .B tdfxfb (Linux uniquement)
 Ce pilote utilise le pilote framebuffer tdfx pour jouer les films avec
 accélération YUV des 3dfx.
-FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
+FIXME: Meilleure explication des différences entre 3dfx, tdfxfb et tdfx_vid?
 .PD 0
 .RSs
 .IPs <périph>
@@ -3424,7 +3424,7 @@ Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
 .B tdfx_vid (Linux uniquement)
 Pilote de sortie vidéo spécifique aux cartes 3Dfx.
 Ce pilote utilise directement le module noyau tdfx_vid.
-FIXME: Meilleure explication des differences entre 3dfx, tdfxfb et tdfx_vid?
+FIXME: Meilleure explication des différences entre 3dfx, tdfxfb et tdfx_vid?
 .PD 0
 .RSs
 .IPs <périph>
@@ -3435,11 +3435,11 @@ Choisit explicitement le périphérique à utiliser (par défaut\ :
 .
 .TP
 .B dxr2 (voir aussi \-dxr2) (DXR2 uniquement)
-Pilote de sortie vidéo spécifique aux cartes Creative DXR2.
+Pilote de sortie vidéo spécifique aux cartes Créatives DXR2.
 .PD 0
 .RSs
 .IPs <pilote_vo>
-Définit le sous-pilote à utiliser pour l'incrustation (overlay) (x11, xv).
+Défini le sous-pilote à utiliser pour l'incrustation (overlay) (x11, xv).
 .RE
 .PD 1
 .
@@ -3484,10 +3484,10 @@ MPEG-PES dans un fichier si aucune carte DVB n'est installée.
 .PD 0
 .RSs
 .IPs card=<1\-4>
-Définit le numéro de périphérique à utiliser si vous avez plus d'une carte
+Défini le numéro de périphérique à utiliser si vous avez plus d'une carte
 DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
 .IPs <nom_fichier>
-Définit le nom du fichier de sortie (par défaut\ : ./grab.mpg).
+Défini le nom du fichier de sortie (par défaut\ : ./grab.mpg).
 .RE
 .PD 1
 .
@@ -3503,7 +3503,7 @@ MJPEG, seconde génération.
 .PD 0
 .RSs
 .IPs dev=<périph>
-Définit le vidéo périphérique à utiliser.
+Défini le vidéo périphérique à utiliser.
 .IPs norm=<PAL|NTSC|SECAM|auto>
 Défini la norme vidéo à utiliser (par défaut\ : auto)
 .IPs (no)prebuf
@@ -3513,13 +3513,13 @@ Défini la norme vidéo à utiliser (par défaut\ : auto)
 .
 .TP
 .B md5sum\ 
-Calcule le somme de contrôle MD5 de chaque trame et l'écrit dans un fichier.
+Calcule la somme de contrôle MD5 de chaque trame et l'écrit dans un fichier.
 Gère les espaces de couleurs RGB24 et YV12.
 Utile pour le débogage.
 .PD 0
 .RSs
 .IPs outfile=<nom_fichier>
-Définit le nom de fichier de sortie (par défaut\ : ./md5sums).
+Défini le nom de fichier de sortie (par défaut\ : ./md5sums).
 .RE
 .PD 1
 .
@@ -3560,7 +3560,7 @@ sortie à 256 couleurs.
 Valeur flottante pour définir le nombre de trames/sec (framerate)
 (par défaut\ : 5.0).
 .IPs <nom_fichier>
-Définit le nom du fichier de sortie (par défaut\ : ./out.gif).
+Défini le nom du fichier de sortie (par défaut\ : ./out.gif).
 .REss
 .PD 1
 .RS
@@ -3595,7 +3595,7 @@ facteur d'adoucissement (par défaut\ : 0)
 .IPs quality=<0\-100>
 facteur de qualité (par défaut\ : 75)
 .IPs outdir=<chemin>
-Définit le répertoire où sauver les fichiers JPEG (par défaut\ ./).
+Défini le répertoire où sauver les fichiers JPEG (par défaut\ ./).
 .IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés, avec le préfixe donné pour y écrire
 les fichiers au lieu de les mettre tous dans le même répertoire.
@@ -3627,7 +3627,7 @@ en bas de l'image.
 .IPs ascii
 Écrit les fichiers PNM en mode ASCII (par défaut).
 .IPs outdir=<nom_répertoire>
-Définit le répertoire où écrire les fichiers PNM.
+Défini le répertoire où écrire les fichiers PNM.
 .IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés avec le préfixe donné
 pour y écrire les fichiers au lieu de les mettre tous dans le
@@ -3647,7 +3647,7 @@ Ne gère que les formats RGB et BGR 24 bits/pixel.
 .PD 0
 .RSs
 .IPs z=<0\-9>
-Définit le taux de compression.
+Défini le taux de compression.
 0 équivaut à pas de compression et 9 à la compression maximale.
 .RE
 .PD 1
@@ -3660,7 +3660,7 @@ des zéros.
 L'intérêt de ce pilote de sortie vidéo est de pouvoir facilement extraire
 sans perte des images sans l'aide d'une librairie externe.
 Ne gère que les formats BGR[A] à 15, 24 ou 32 bits/pixel.
-Vous pouvez forcez un certain format avec le filtre vidéo format.
+Vous pouvez forcer un certain format avec le filtre vidéo format.
 .sp 1
 .I EXEMPLE\ :
 .RE
@@ -3675,7 +3675,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .TP
 .B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
-Définit une liste de priorité des codecs audio à utiliser, à partir de leur
+Défini une liste de priorité des codecs audio à utiliser, à partir de leur
 nom de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va probablement
@@ -3702,7 +3702,7 @@ Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .
 .TP
 .B \-af-adv <force=(0\-7):list=(filtres)> (voir aussi \-af)
-Définit les options avancées de filtrage audio\ :
+Défini les options avancées de filtrage audio\ :
 .RSs
 .IPs force=<0\-7>
 Force l'insertion de filtres audios de l'une des façons suivantes:
@@ -3738,7 +3738,7 @@ Identique à \-af.
 .
 .TP
 .B \-afm <driver1,driver2,...>
-Définit une liste de priorité des familles de codecs audio à utiliser,
+Défini une liste de priorité des familles de codecs audio à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
@@ -3779,7 +3779,7 @@ Renverse l'image de haut en bas.
 .
 .TP
 .B \-lavdopts <option1:option2:...> (CODE DE DÉBOGAGE)
-Définit les paramètres de décodage de libavcodec.
+Défini les paramètres de décodage de libavcodec.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -3861,7 +3861,7 @@ teinte est verte.
 0x4000: Visualise le type de bloc.
 .REss
 .IPs ec=<valeur>
-Définit la stratégie de dissimulation des erreurs.
+Défini la stratégie de dissimulation des erreurs.
 .RSss
 1: Utilise un filtre de déblocage fort pour les macro-blocs endommagés.
 .br
@@ -3870,7 +3870,7 @@ Définit la stratégie de dissimulation des erreurs.
 3: toutes (par défaut)
 .REss
 .IPs er=<valeur>
-Définit la stratégie de résilience aux erreurs.
+Défini la stratégie de résilience aux erreurs.
 .RSss
 .br
 0: désactivé
@@ -3913,7 +3913,7 @@ réduite.
 3: 1/8 résolution
 .REss
 .RS
-Si <l> est définit, les décodage en résolution réduite sera effectué uniquement
+Si <l> est défini, les décodage en résolution réduite sera effectué uniquement
 si la largeur de la vidéo est plus grande ou égale à <l>.
 .RE
 .IPs "sb=<valeur> (MPEG-2 uniquement)"
@@ -3944,7 +3944,7 @@ des erreurs de décodage).
 .br
 bidir: Saute les Trames-B.
 .br
-nonkey: Saute toutes les trames à l'exception des trames-clées.
+nonkey: Saute toutes les trames à l'exception des trames-clés.
 .br
 all: Saute toutes les trames.
 .REss
@@ -3953,8 +3953,8 @@ Saute l'étape d'IDCT.
 Ceci dégrade énormément la qualité dans pratiquement tous les cas
 (voir skiploopfilter pour les valeurs de "skipvalue" disponibles).
 .IPs skipframe=<skipvalue>
-Saute complètement le décodgae des trames.
-Grosse accélération, mais mouvement saccadés et parfois artefacts
+Saute complètement le décodage des trames.
+Grosse accélération, mais mouvements saccadés et parfois artefacts
 visuels
 (voir skiploopfilter pour les valeurs de "skipvalue" disponibles).
 .IPs threads=<1\-8>
@@ -3973,7 +3973,7 @@ Visualise les vecteurs de mouvement.
 4: Visualise les MVs prédits en arrière des trames-B.
 .REss
 .IPs vstats
-Affiche quelques statistiques et les écrit dans ./vstats_*.log.
+Affiche quelques statistiques et les écrits dans ./vstats_*.log.
 .RE
 .
 .TP
@@ -4018,7 +4018,7 @@ utilisation.
 .
 .TP
 .B \-ssf <mode>
-Définit les paramètres de redimensionnement logiciel (scaler).
+Défini les paramètres de redimensionnement logiciel (scaler).
 .sp 1
 .I EXEMPLE\ :
 .PD 0
@@ -4061,7 +4061,7 @@ canal droit
 .
 .TP
 .B \-sws <type de zoom logiciel> (voir aussi \-vf scale et \-zoom)
-Définit l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
+Défini l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
 Agit sur les pilotes de sortie vidéo qui ne disposent pas de ce type
 d'accélération logicielle, ex.\& x11.
 .sp 1
@@ -4097,12 +4097,12 @@ bicubique spline naturelle
 .sp 1
 .RS
 .I NOTE\ :
-Certaines option de \-sws sont paramétrables.
+Certaines options de \-sws sont paramétrables.
 Plus d'informations sont disponibles dans la description du filtre scale.
 .
 .TP
 .B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
-Définit une liste de priorité des codecs vidéo à utiliser, suivant leur nom
+Défini une liste de priorité des codecs vidéo à utiliser, suivant leur nom
 de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va probablement
@@ -4128,7 +4128,7 @@ Essaie le codec MPEG-1/\:2 de libavcodec, puis libmpeg2, puis les autres.
 .
 .TP
 .B \-vfm <pilote1,pilote2,...>
-Définit une liste de priorité des familles de codecs vidéo à utiliser,
+Défini une liste de priorité des familles de codecs vidéo à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
@@ -4154,7 +4154,7 @@ Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
 .B \-xvidopts <option1:option2:...>
-Définit des paramètres additionnels de décodage avec XviD.
+Défini des paramètres additionnels de décodage avec XviD.
 .br NOTE\ :
 Étant donné que libavcodec est plus rapide qu'XviD, peut-être aurez-vous
 besoin d'utiliser les filtres de post-traitement de libavcodec (\-vf pp)
@@ -4257,7 +4257,7 @@ Défini la méthode de ré-échantillonnage à utiliser.
 0: interpolation linéaire (rapide, mauvaise qualité tout particulièrement
 en cas de sur-échantillonnage)
 .br
-1: banque de filtres polyphases et traitement en entiers
+1: banque de filtres polyphases et traitement en entier
 .br
 2: banque de filtres polyphases et traitement en virgule flottante
 (lent, meilleure qualité)
@@ -4380,8 +4380,8 @@ Amplifierait le son sur les fréquences les plus hautes et les plus basses tout e
 .B channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
 Peut être utilisé pour ajouter, supprimer, re-router et copier des
 canaux audios.
-Si seulement <nch> est donné, le routage par défaut est utilisée, ça
-fonctionne la la façon suivante\ : Si le nombre de canaux de sortie est
+Si seulement <nch> est donné, le routage par défaut est utilisé, ça
+fonctionne de la façon suivante\ : Si le nombre de canaux de sortie est
 plus grand que le nombre de canaux d'entrée des canaux vides sont insérés
 (excepté pour le mixage de mono vers stéréo, où le canal audio est répété
 sur chacun des canaux de sortie).
@@ -4403,7 +4403,7 @@ Paires de nombres entre 0 and 5 définissant où router chaque canal.
 .RSs
 .IPs "mplayer \-af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
 Changera le nombre de canaux à 4 et défini 4 routes qui
-échangent le canal 0 et le canal 1 et laisse le canal 2 et 3 intact.
+échangent le canal 0 et le canal 1 et laisse le canal 2 et 3 intacts.
 Veuillez noter que si un média contenant deux canaux était joué, les
 canaux 2 et 3 contiendraient uniquement du silence, mais 0 et 1 seraient
 quand même échangés.
@@ -4421,7 +4421,7 @@ Activé automatiquement lorsque la carte son ou un autre filtre le nécessite.
 .PD 0
 .RSs
 .IPs <format>
-Définit le format souhaité.
+Défini le format souhaité.
 Sa forme générale est 'sbe', où 's' indique le signe (soit 's' pour signé
 ou 'u' pour non signé (unsigned)), 'b' indique le nombre de bits par
 échantillon (16, 24 ou 32), et 'e' indique le boutisme (endianness)
@@ -4441,7 +4441,7 @@ Utilisez ce filtre avec précaution car il peut réduire le rapport
 signal sur bruit (et donc la fidélité) du son.
 Dans la plupart des cas il vaut mieux fixer le niveau du son PCM
 au max, laisser ce filtre de côté et contrôler le niveau de sortie
-de vos haut-parleurs avec le contrôleur de volume principal du mixeur.
+de vos hauts-parleur avec le contrôleur de volume principal du mixeur.
 Au cas où votre carte son a un mixeur numérique au lieu d'un
 analogique, et que vous entendez un son distordu, utilisez le mixeur
 MASTER à la place.
