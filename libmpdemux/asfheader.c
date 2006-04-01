@@ -123,8 +123,8 @@ int asf_check_header(demuxer_t *demuxer){
     return 0; // not ASF guid
   }
   if(asf->header.cno>256){
-    free(asf);
     mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: invalid subchunks_no %d\n",(int) asf->header.cno);
+    free(asf);
     return 0; // invalid header???
   }
   demuxer->priv = asf;
