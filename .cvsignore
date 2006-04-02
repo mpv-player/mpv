@@ -1,6 +1,4 @@
 .depend
-.developer
-.libdeps
 config.h
 config.mak
 configure.log
