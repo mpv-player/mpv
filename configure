@@ -6979,14 +6979,6 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
     CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
-  # always compile with '-g' if .developer:
-  if test -f ".developer" ; then
-    CFLAGS="-g $CFLAGS"
-    if test "$_crash_debug" = auto && not mingw32 ; then
-      _crash_debug=yes
-    fi
-    _stripbinaries=no
-  fi
 else
   _warn_CFLAGS=yes
 fi
@@ -7328,7 +7320,6 @@ DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
 DVDKIT = $_dvdkit
 DVDKIT2 = $_dvdkit2
-DVDKIT_SHARED = no
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32

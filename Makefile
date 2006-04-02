@@ -254,11 +254,7 @@ ifeq ($(FAME),yes)
 COMMON_DEPS += libfame/libfame.a
 endif
 ifeq ($(DVDKIT2),yes)
-ifeq ($(DVDKIT_SHARED),yes)
-COMMON_DEPS += libmpdvdkit2/libmpdvdkit.so
-else
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
-endif
 endif
 
 ifeq ($(GUI),yes)
@@ -270,7 +266,7 @@ endif
 
 #.PHONY: $(COMMON_DEPS)
 
-all:	version.h $(ALL_PRG)
+all:	$(ALL_PRG)
 
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -280,9 +276,6 @@ libaf/libaf.a:
 
 libmpdvdkit2/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit2
-
-libmpdvdkit2/libmpdvdkit.so:
-	$(MAKE) -C libmpdvdkit2 libmpdvdkit.so
 
 loader/libloader.a:
 	$(MAKE) -C loader
@@ -447,15 +440,6 @@ codec-cfg.o: codecs.conf.h
 codecs2html: mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
 
-# Every mplayer dependency depends on version.h, to force building version.h
-# first (in serial mode) before any other of the dependencies for a parallel make
-# run.  This is necessary, because the make rule for version.h removes objects
-# in a recursive "make distclean" and we must wait for this "make distclean" to
-# finish before we can start building new object files.
-# help_mp.h is also required by a lot of files, so force generating it early.
-$(MPLAYER_DEP): version.h help_mp.h
-$(MENCODER_DEP): version.h help_mp.h
-
 $(PRG_CFG): version.h codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) $(HOST_CFLAGS) -I. codec-cfg.c -o $(PRG_CFG) \
 	-DCODECS2HTML $(EXTRA_LIB) $(EXTRA_INC)
@@ -506,17 +490,6 @@ ifeq ($(GUI),yes)
 endif
 	@$(INSTALL) -d $(CONFDIR)
 	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
-ifeq ($(DVDKIT_SHARED),yes)
-ifeq ($(DVDKIT2),yes)
-	$(INSTALL) -d $(LIBDIR)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit2/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
-else
-ifeq ($(DVDKIT),yes)
-	$(INSTALL) -d $(LIBDIR)
-	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
-endif
-endif
-endif
 
 uninstall:
 	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(MANDIR)/man1/mplayer.1
@@ -560,19 +533,12 @@ config.h: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
-ifeq ($(wildcard .developer),)
-	@exit 1
-endif
 
 # do not rebuild after cvs commits if .developer file is present!
 
 # rebuild at every config.h/config.mak change:
 version.h:
 	./version.sh `$(CC) -dumpversion`
-ifeq ($(wildcard .developer),)
-	$(MAKE) distclean
-endif
-	$(MAKE) depend
 
 doxygen:
 	doxygen DOCS/tech/Doxyfile
@@ -596,12 +562,10 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 endif
 
 # rebuild at every CVS update or config/makefile change:
-ifeq ($(wildcard .developer),)
-ifneq ($(wildcard CVS/Entries),)
-version.h: CVS/Entries
-endif
+#ifneq ($(wildcard CVS/Entries),)
+#version.h: CVS/Entries
+#endif
 version.h: config.h config.mak Makefile
-endif
 
 #
 # include dependencies to get make to recurse into lib dirs,
