@@ -523,8 +523,7 @@ strip:
 
 dep:	depend
 
-depend: help_mp.h
-	./version.sh `$(CC) -dumpversion`
+depend:
 	$(CC) -MM $(CFLAGS) -DCODECS2HTML mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
@@ -533,8 +532,6 @@ config.h: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
-
-# do not rebuild after cvs commits if .developer file is present!
 
 # rebuild at every config.h/config.mak change:
 version.h:
@@ -569,6 +566,9 @@ version.h: config.h config.mak Makefile
 
 # explicit dependencies to force version.h to be built even if .depend is missing
 mplayer.o mencoder.o vobsub.o: version.h
+
+# temporary measure to make sure help_mp.h is built. we desperately need correct deps!
+$(MPLAYER_DEP) $(MENCODER_DEP): help_mp.h
 
 #
 # the following lines provide _partial_ dependency information
