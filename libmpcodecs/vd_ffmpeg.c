@@ -314,13 +314,14 @@ static int init(sh_video_t *sh){
     avctx->skip_frame = str2AVDiscard(lavc_param_skip_frame_str);
 #endif
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
+    switch (sh->format) {
+    case mmioFOURCC('A','V','R','n'):
+    case mmioFOURCC('M','J','P','G'):
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
        MJPG fourcc :( */
-    if (sh->bih && (sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
-	(sh->format == mmioFOURCC('A','V','R','n') ||
-	sh->format == mmioFOURCC('M','J','P','G')))
-    {
+	if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
+	    break;
 	avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
 	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
@@ -337,13 +338,13 @@ static int init(sh_video_t *sh){
 	    mp_msg(MSGT_DECVIDEO, MSGL_INFO,"\n");
 	}
 #endif
-    }
-    if(   sh->format == mmioFOURCC('R', 'V', '1', '0')
-       || sh->format == mmioFOURCC('R', 'V', '1', '3')
-       || sh->format == mmioFOURCC('R', 'V', '2', '0')
-       || sh->format == mmioFOURCC('R', 'V', '3', '0')
-       || sh->format == mmioFOURCC('R', 'V', '4', '0')
-       ){
+	break;
+
+    case mmioFOURCC('R', 'V', '1', '0'):
+    case mmioFOURCC('R', 'V', '1', '3'):
+    case mmioFOURCC('R', 'V', '2', '0'):
+    case mmioFOURCC('R', 'V', '3', '0'):
+    case mmioFOURCC('R', 'V', '4', '0'):
         avctx->extradata_size= 8;
         avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
         if(sh->bih->biSize!=sizeof(*sh->bih)+8){
@@ -361,30 +362,23 @@ static int init(sh_video_t *sh){
 	}
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
-    }
-    if (sh->bih && (sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
-	(sh->format == mmioFOURCC('M','4','S','2') ||
-	 sh->format == mmioFOURCC('M','P','4','S') ||
-	 sh->format == mmioFOURCC('H','F','Y','U') ||
-	 sh->format == mmioFOURCC('F','F','V','H') ||
-	 sh->format == mmioFOURCC('W','M','V','2') ||
-	 sh->format == mmioFOURCC('W','M','V','3') ||
-	 sh->format == mmioFOURCC('A','S','V','1') ||
-	 sh->format == mmioFOURCC('A','S','V','2') ||
-	 sh->format == mmioFOURCC('V','S','S','H') ||
-	 sh->format == mmioFOURCC('M','S','Z','H') ||
-	 sh->format == mmioFOURCC('Z','L','I','B') ||
-	 sh->format == mmioFOURCC('M','P','4','V') ||
-	 sh->format == mmioFOURCC('F','L','I','C') ||
-	 sh->format == mmioFOURCC('S','N','O','W') ||
-	 sh->format == mmioFOURCC('a','v','c','1') ||
-	 sh->format == mmioFOURCC('L','O','C','O') ||
-	 sh->format == mmioFOURCC('t','h','e','o')
-         ))
-    {
+        break;
+
+    case mmioFOURCC('S','V','Q','3'):
+	if (!sh->ImageDesc)
+	    break;
+	avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
+	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
+	break;
+
+    default:
+	if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
+	    break;
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
 	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
 	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
+	break;
     }
     /* Pass palette to codec */
 #if LIBAVCODEC_BUILD >= 4689
@@ -401,12 +395,6 @@ static int init(sh_video_t *sh){
                    min(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
 	}
 #endif
-    if (sh->ImageDesc &&
-	 sh->format == mmioFOURCC('S','V','Q','3')){
-	avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
-	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
-    }
     
     if(sh->bih)
 	avctx->bits_per_sample= sh->bih->biBitCount;
