@@ -440,7 +440,7 @@ codec-cfg.o: codecs.conf.h
 codecs2html: mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
 
-$(PRG_CFG): version.h codec-cfg.c codec-cfg.h help_mp.h
+$(PRG_CFG): codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) $(HOST_CFLAGS) -I. codec-cfg.c -o $(PRG_CFG) \
 	-DCODECS2HTML $(EXTRA_LIB) $(EXTRA_INC)
 
@@ -566,6 +566,9 @@ endif
 #version.h: CVS/Entries
 #endif
 version.h: config.h config.mak Makefile
+
+# explicit dependencies to force version.h to be built even if .depend is missing
+mplayer.o mencoder.o vobsub.o: version.h
 
 #
 # the following lines provide _partial_ dependency information
