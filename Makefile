@@ -568,12 +568,43 @@ endif
 version.h: config.h config.mak Makefile
 
 #
-# include dependencies to get make to recurse into lib dirs,
-# if the user desires such behavior
+# the following lines provide _partial_ dependency information
+# for the 'library' directories under main dir, in order to cause
+# the build process to recursively descend into them if something
+# has changed. ideally this will be replaced with a single
+# nonrecursive makefile for the whole project.
 #
-ifneq ($(wildcard .libdeps),)
-include .libdeps
-endif
+
+libvo/libvo.a: $(wildcard libvo/*.[ch])
+libao2/libao2.a: $(wildcard libao2/*.[ch])
+osdep/libosdep.a: $(wildcard osdep/*.[ch])
+input/libinput.a: $(wildcard input/*.[ch])
+
+libmenu/libmenu.a: $(wildcard libmenu/*.[ch])
+libaf/libaf.a: $(wildcard libaf/*.[ch])
+libmpdvdkit2/libmpdvdkit.a libmpdvdkit2/libmpdvdkit.so: $(wildcard libmpdvdkit2/*.[ch])
+
+libmpdemux/libmpdemux.a: $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
+libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch])
+libmpcodecs/libmpencoders.a: $(wildcard libmpcodecs/*.[ch])
+
+libavutil/libavutil.a: $(wildcard libavutil/*.[ch])
+libavcodec/libavcodec.a: $(wildcard libavcodec/*.[ch] libavcodec/*/*.[chS])
+libavformat/libavformat.a: $(wildcard libavformat/*.[ch])
+postproc/libswscale.a: $(wildcard postproc/*.[ch])
+
+libmpeg2/libmpeg2.a: $(wildcard libmpeg2/*.[ch])
+liba52/liba52.a: $(wildcard liba52/*.[ch])
+mp3lib/libMP3.a: $(wildcard mp3lib/*.[ch])
+libfaad2/libfaad2.a: $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
+
+loader/libloader.a: $(wildcard loader/*.[chSs])
+loader/dmo/libDMO_Filter.a: $(wildcard loader/dmo/*.[ch])
+loader/dshow/libDS_Filter.a: $(wildcard loader/dshow/*.[ch])
+
+libdha/libdha.so: $(wildcard libdha/*.[ch])
+vidix/libvidix.a: $(wildcard vidix/*.[ch])
+Gui/libgui.a: $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
 
 #
 # include dependency files if they exist
