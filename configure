@@ -204,7 +204,7 @@ Optional features:
   --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE555 Streaming Media support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
-  --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
+  --disable-mpdvdkit     Disable mpdvdkit2 support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-fontconfig   Disable fontconfig font lookup support [autodetect]
@@ -4971,22 +4971,16 @@ if test "$_dvdkit" = auto ; then
  _dvdkit=no
  if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux; then
   test -f "./libmpdvdkit2/Makefile" && _dvdkit=yes
-  test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
 if test "$_dvdkit" = yes ; then
   if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || test "$_hpux_scsi_h" = yes || darwin || win32 ; then
-   if test -f "./libmpdvdkit2/Makefile" ; then
     _inputmodules="mpdvdkit2 $_inputmodules"
     _dvdread=libmpdvdkit2
     _dvdkit2=yes
     _dvdkit=no
-   else
-    _inputmodules="mpdvdkit $_inputmodules"
-    _dvdread=libmpdvdkit
-   fi
   else
-    _noinputmodules="mpdvdkit $_noinputmodules"
+    _noinputmodules="mpdvdkit2 $_noinputmodules"
   fi
   _def_dvd_linux='#undef HAVE_LINUX_DVD_STRUCT'
   _def_dvd_bsd='#undef HAVE_BSD_DVD_STRUCT'
@@ -5007,9 +5001,9 @@ if test "$_dvdkit" = yes ; then
     fi
   fi
 else
-  _noinputmodules="mpdvdkit $_noinputmodules"
+  _noinputmodules="mpdvdkit2 $_noinputmodules"
 fi
-if test "$_dvdkit" = yes || test "$_dvdkit2" = yes; then
+if test "$_dvdkit2" = yes; then
   _have_dvd=yes
   echores "yes"
 else
@@ -5047,15 +5041,6 @@ case "$_dvdread" in
 	_def_dvdread='#undef USE_DVDREAD'
 	_noinputmodules="dvdread $_noinputmodules"
 	echores "no"
-	;;
-  libmpdvdkit)
-	_largefiles=yes
-	_def_dvdread='#define USE_DVDREAD 1'
-	_ld_dvdread='-Llibmpdvdkit -lmpdvdkit'
-	_noinputmodules="dvdread $_noinputmodules"
-	_def_mpdvdkit="#define USE_MPDVDKIT 1"
-	_have_dvd=yes
-	echores "disabled by libmpdvdkit"
 	;;
   libmpdvdkit2)
 	_largefiles=yes
@@ -7318,7 +7303,6 @@ LIRCC_LIB = $_ld_lircc
 HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
-DVDKIT = $_dvdkit
 DVDKIT2 = $_dvdkit2
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32

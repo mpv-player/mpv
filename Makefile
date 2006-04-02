@@ -193,9 +193,6 @@ endif
 ifeq ($(DVDKIT2),yes)
 PARTS += libmpdvdkit2
 else
-ifeq ($(DVDKIT),yes)
-PARTS += libmpdvdkit
-endif
 endif
 ifeq ($(GUI),yes)
 PARTS += Gui
