@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.233
+// In synch with rev 1.234
 
 // ========================= MPlayer help ===========================
 
@@ -1498,3 +1498,60 @@ static char help_text[]=
 #define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Unbekannter Befehl: '%s'.\n"
 #define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Konnte folgendes Menü nicht öffnen: '%s'.\n"
 
+// ========================== LIBMPCODECS ===================================
+
+// libmpcodecs/ad_libdv.c
+#define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Warnung! Audio-Framegröße weicht ab! read=%d  hdr=%d.\n"
+
+// libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
+#define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] Konnte Bild für cinepak-Codec nicht allozieren.\n"
+
+// libmpcodecs/vd_ffmpeg.c
+#define MSGTR_MPCODECS_XVMCAcceleratedCodec "[VD_FFMPEG] XVMC-beschleunigter Codec.\n"
+#define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Arithmetisches Mittel des QP: %2.4f, Harmonisches Mittel des QP: %2.4f\n"
+#define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI-Versagen.\n"
+#define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Konnte Bild für Codec nicht allozieren.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-beschleunigtes MPEG2.\n"
+#define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Versuche pixfmt=%d.\n"
+#define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Der mc_get_buffer sollte nur mit XVMC-Beschleunigung funktionieren!!"
+#define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Unerwarteter init_vo-Fehler.\n"
+#define MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken "[VD_FFMPEG] Nicht zu behebender Fehler, Puffer zum Zeichnen nicht genommen.\n"
+#define MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed "[VD_FFMPEG] Nur von vo_xvmc allozierte Puffer erlaubt.\n"
+
+// libmpcodecs/ve_lavc.c
+#define MSGTR_MPCODECS_HighQualityEncodingSelected "[VE_LAVC] Encodierung in hoher Qualität ausgewählt (keine Echtzeit)!\n"
+#define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] Benutze konstanten Wert für qscale = %f (VBR).\n"
+
+// libmpcodecs/ve_raw.c
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Raw-Ausgabe mit fourcc [%x] nicht unterstützt!\n"
+#define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] Benötigten VfW-Codec nicht angegeben!!\n"
+
+// libmpcodecs/vf_crop.c
+#define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] Schlechte Position/Breite/Höhe - abgeschnittener Bereich\n       außerhalb des Originals!\n"
+
+// libmpcodecs/vf_cropdetect.c
+#define MSGTR_MPCODECS_CropArea "[CROP] Schnittbereich: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d).\n"
+
+// libmpcodecs/vf_format.c, vf_palette.c, vf_noformat.c
+#define MSGTR_MPCODECS_UnknownFormatName "[VF_FORMAT] Unbekannter Formatname: '%s'.\n"
+
+// libmpcodecs/vf_framestep.c vf_noformat.c vf_palette.c vf_tile.c
+#define MSGTR_MPCODECS_ErrorParsingArgument "[VF_FRAMESTEP] Fehler beim Einlesen des Parameters.\n"
+
+// libmpcodecs/ve_vfw.c
+#define MSGTR_MPCODECS_CompressorType "Kompressionstyp: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorSubtype "Kompressionssubtyp: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorFlags "Kompressions-Flags: %lu, Version %lu, ICM-Version: %lu\n"
+#define MSGTR_MPCODECS_Flags "Flags:"
+#define MSGTR_MPCODECS_Quality " Qualität"
+
+// libmpcodecs/vf_expand.c
+#define MSGTR_MPCODECS_FullDRNotPossible "Vollständiges DR nicht möglich, versuche stattdessen SLICES!\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "WARNUNG! nächster Filter unterstützt SLICES nicht, bereite dich auf sig11 vor...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "Wieso bekommen wir NULL \n"
+
+// libmpcodecs/vf_fame.c
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "FATAL: Kann libFAME nicht öffnen!\n"
+
+// libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s vom nächsten Filter/vo nicht unterstützt :(\n"
