@@ -496,7 +496,6 @@ uninstall:
 	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
 	-rm -f $(prefix)/share/pixmaps/mplayer-desktop.xpm
 	-rm -f $(prefix)/share/applications/mplayer.desktop
-	-rm -f $(LIBDIR)/libmpdvdkit.so
 	for l in $(MAN_LANG); do \
 	  if test "$$l" != "en"; then \
 	    rm -f $(MANDIR)/$$l/man1/mplayer.1    \
@@ -585,7 +584,7 @@ input/libinput.a: $(wildcard input/*.[ch])
 
 libmenu/libmenu.a: $(wildcard libmenu/*.[ch])
 libaf/libaf.a: $(wildcard libaf/*.[ch])
-libmpdvdkit2/libmpdvdkit.a libmpdvdkit2/libmpdvdkit.so: $(wildcard libmpdvdkit2/*.[ch])
+libmpdvdkit2/libmpdvdkit.a: $(wildcard libmpdvdkit2/*.[ch])
 
 libmpdemux/libmpdemux.a: $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
 libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch])
