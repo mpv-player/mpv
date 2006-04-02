@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.231
+// In synch with rev 1.233
 
 // ========================= MPlayer help ===========================
 
@@ -1079,6 +1079,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Treiber unterstützt SNDCTL_DSP_GETOSPACE nicht :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   *** Dein Audiotreiber unterstützt select() NICHT ***\nKompiliere MPlayer mit #undef HAVE_AUDIO_SELECT in der Datei config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nKritischer Fehler: *** KANN AUDIO-GERÄT NICHT ERNEUT ÖFFNEN / ZURÜCKSETZEN *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Unbekanntes/Nicht unterstütztes OSS-Format: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
@@ -1441,3 +1442,59 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Kein Passwort angegeben, versuche leeres Passwort.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Server lieferte Fehler %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Setze Cache-Größe auf %d KByte.\n"
+
+// ========================== LIBMPMENU ===================================
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntaxfehler bei Zeile: %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Menüdefinitionen benötigen ein Namensattribut (Zeile %d)\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] Schlechtes Attribut %s=%s in Menü '%s' in Zeile %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Unbekannter Menütyp '%s' in Zeile %d\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Kann Menü-Konfigurationsdatei nicht öffnen: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Konfigurationsdatei ist zu groß (> %d KB)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Konfigurationsdatei ist leer\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] Menü %s nicht gefunden.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menü '%s': Initialisierung fehlgeschlagen\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nichtunterstütztes Ausgabeformat!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Kein Eintrag in der Menüdefinition gefunden.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] Definitionen für Listenmenüeinträge benötigen einen Namen (Zeile %d).\n"
+#define MSGTR_LIBMENU_ListMenuNeedAnArgument "[MENU] Listenmenü benötigt einen Parameter.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid-Fehler: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Fehler bei der Auswahl.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Lesefehler bei child's: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] Konsolenaufruf: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Es läuft schon ein Child.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork-Fehler!!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Schreibfehler.\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Opendir-Fehler: %s.\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Realloc-Fehler: %s.\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Fehler bei der Speicherreservierung: %s.\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Readdir-Fehler: %s.\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Kann Verzeichnis %s nicht öffnen\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Kein Eintrag in der Menüdefinition gefunden.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definition des Untermenüs benötit ein 'menu'-Attribut.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Definitionen für Konfigurationsmenüeinträge benötigen ein\n       gültiges 'property'-Attribut (Zeile %d).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedAnArgument "[MENU] Konfigurationsmenü benötigt einen Parameter.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Kann Ziel-Item nicht finden ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Konnte folgenden Befehl nicht erstellen: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] Textmenü benötigt einen txt-Dateinamen (Parameterdatei).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Öffnen nicht möglich: %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Warnung, Zeile zu lang. Zerlege sie.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] %d Zeilen eingelesen.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Unbekannter Befehl: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Konnte folgendes Menü nicht öffnen: '%s'.\n"
+
