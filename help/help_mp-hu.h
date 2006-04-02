@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.231 (2006. 03. 26.)
+// Sync'ed with help_mp-en.h 1.237 (2006. 04. 02.)
 
 // ========================= MPlayer help ===========================
 
@@ -1066,6 +1066,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: a vezérlõ nem támogatja a SNDCTL_DSP_GETOSPACE-t :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Az audio vezérlõd NEM támogatja a select() -et ***\n Fordítsd újra az MPlayer-t az #undef HAVE_AUDIO_SELECT sorral a config.h-ban!\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nVégzetes hiba: *** NEM LEHET ÚJRA MEGNYITNI / BEÁLLÍTANI AZ AUDIO ESZKÖZT *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Ismeretlen/Nem támogatott OSS formátum: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
@@ -1430,3 +1431,116 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nincs jelszó megadva, üres jelszót próbálok.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Szerver válasz %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache méret beállítva %d KByte-ra\n"
+
+// ========================== LIBMPMENU ===================================
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Szintaktikus hiba ebben a sorban: %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] A menü definíciókhoz nevesített attribútum kell (%d. sor)\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] Hibás attribútum %s=%s a(z) '%s' menüben a(z) %d. sorban\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Ismeretlen menü típus: '%s' a(z) %d. sorban\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] A menü konfigurációs fájl nem nyitható meg: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] A konfigurációs fájl túl nagy (> %d KB)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] A konfigurációs fájl üres\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] A(z) % menü nem található.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] '%s' menü: init sikertelen\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nem támogatott kimeneti formátum!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Nem található bejegyzés a menü definícióban.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] A lista menüelemek definícióihoz kell egy név (%d. sor).\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] A lista menühöz egy argumentum kell.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid hiba: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Kiválasztási hiba.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Olvasási hiba a gyerekben: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] Konzol futtatás: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Egy gyermek már fut.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork sikertelen !!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Írási hiba.\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Opendir hiba: %s.\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Realloc hiba: %s.\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Memória foglalási hiba: %s.\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Readdir hiba: %s.\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] A(z) %s könyvtár nem nyitható meg\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] A menü definícióban nincs bejegyzés.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Az almenü definíciókba kell egy 'menu' attribútum.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menü bejegyzés definícióihoz egy jó 'property' attribútum kell (%d. sor).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref menühöz egy argumentum kell.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Nem található a cél elem ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Nem sikerült a parancs felépítése: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] A szöveges menühöz egy txt fájl név kell (param file).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Nem nyitható meg: %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Figyelem, túl hozzú sor. Elvágom.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] %d sor értelmezve.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Ismeretlen parancs: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Sikertelen a menü megnyitása: '%s'.\n"
+
+// ========================== LIBMPCODECS ===================================
+
+// libmpcodecs/ad_libdv.c
+#define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Figyelem! Az audió keretméret különbözõ! read=%d  hdr=%d.\n"
+
+// libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
+#define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] Nem foglalható le a kép a cinepak codec-hez.\n"
+
+// libmpcodecs/vd_ffmpeg.c
+#define MSGTR_MPCODECS_XVMCAcceleratedCodec "[VD_FFMPEG] XVMC-vel gyorsított codec.\n"
+#define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] QP aritmetikus közepe: %2.4f, QP harmonikus közepe: %2.4f\n"
+#define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI hiba.\n"
+#define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Nem sikerült a kép lefoglalása a codec-hez.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-vel gyorsított MPEG2.\n"
+#define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] pixfmt=%d kipróbálása.\n"
+#define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Az mc_get_buffer csak XVMC gyorsítással mûködik!!"
+#define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Váratlan init_vo hiba.\n"
+#define MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken "[VD_FFMPEG] Helyrehozhatatlan hiba, a render bufferek nincsenek meg.\n"
+#define MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed "[VD_FFMPEG] Csak a vo_xvmc által lefoglalt bufferek használhatóak.\n"
+
+// libmpcodecs/ve_lavc.c
+#define MSGTR_MPCODECS_HighQualityEncodingSelected "[VE_LAVC] Nagyon jó minõségû kódolás kiválasztva (nem valós idejû)!\n"
+#define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] Konstans qscale = %f (VBR) használata.\n"
+
+// libmpcodecs/ve_raw.c
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Nyers kimenet fourcc-vel [%x] nem támogatott!\n"
+#define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] A kért VfW codec nincs megadva!!\n"
+
+// libmpcodecs/vf_crop.c
+#define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] Hibás pozíció/szélesség/magasság - a levágott terület az eredetin kívül van!\n"
+
+// libmpcodecs/vf_cropdetect.c
+#define MSGTR_MPCODECS_CropArea "[CROP] Vágási terület: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d).\n"
+
+// libmpcodecs/vf_format.c, vf_palette.c, vf_noformat.c
+#define MSGTR_MPCODECS_UnknownFormatName "[VF_FORMAT] Ismeretlen formátumnév: '%s'.\n"
+
+// libmpcodecs/vf_framestep.c vf_noformat.c vf_palette.c vf_tile.c
+#define MSGTR_MPCODECS_ErrorParsingArgument "[VF_FRAMESTEP] Hiba az argumentum értelmezésekor.\n"
+
+// libmpcodecs/ve_vfw.c
+#define MSGTR_MPCODECS_CompressorType "Tömörítõ típusa: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorSubtype "Tömörítõ altípusa: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorFlags "Tömörítõ flag-jei: %lu, %lu verzió, ICM verzió: %lu\n"
+#define MSGTR_MPCODECS_Flags "Flag-ek:"
+#define MSGTR_MPCODECS_Quality " minõség"
+
+// libmpcodecs/vf_expand.c
+#define MSGTR_MPCODECS_FullDRNotPossible "A teljes DR nem lehetséges, inkább SLICES-t próbálok helyette!\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "FIGYELEM! A következõ szûrõ nem támogatja a SLICES-t, készülj a sig11-re...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "Miért kaptunk itt NULL-t??\n"
+
+// libmpcodecs/vf_fame.c
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "VÉGZETES: a libFAME nem nyitható meg!\n"
+
+// libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s nem támogatott a következõ szûrõben/vo-ban :(\n"
