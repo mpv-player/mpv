@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.234
+// In synch with rev 1.237
 
 // ========================= MPlayer help ===========================
 
@@ -1460,7 +1460,7 @@ static char help_text[]=
 // libmenu/menu_cmdlist.c
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Kein Eintrag in der Menüdefinition gefunden.\n"
 #define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] Definitionen für Listenmenüeinträge benötigen einen Namen (Zeile %d).\n"
-#define MSGTR_LIBMENU_ListMenuNeedAnArgument "[MENU] Listenmenü benötigt einen Parameter.\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] Listenmenü benötigt einen Parameter.\n"
 
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid-Fehler: %s.\n"
@@ -1482,7 +1482,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Kein Eintrag in der Menüdefinition gefunden.\n"
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definition des Untermenüs benötit ein 'menu'-Attribut.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Definitionen für Konfigurationsmenüeinträge benötigen ein\n       gültiges 'property'-Attribut (Zeile %d).\n"
-#define MSGTR_LIBMENU_PrefMenuNeedAnArgument "[MENU] Konfigurationsmenü benötigt einen Parameter.\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Konfigurationsmenü benötigt einen Parameter.\n"
 
 // libmenu/menu_pt.c
 #define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Kann Ziel-Item nicht finden ????\n"
@@ -1547,8 +1547,8 @@ static char help_text[]=
 
 // libmpcodecs/vf_expand.c
 #define MSGTR_MPCODECS_FullDRNotPossible "Vollständiges DR nicht möglich, versuche stattdessen SLICES!\n"
-#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "WARNUNG! nächster Filter unterstützt SLICES nicht, bereite dich auf sig11 vor...\n"
-#define MSGTR_MPCODECS_FunWhydowegetNULL "Wieso bekommen wir NULL \n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "WARNUNG! Nächster Filter unterstützt SLICES nicht, bereite dich auf sig11 vor...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "Wieso bekommen wir NULL??\n"
 
 // libmpcodecs/vf_fame.c
 #define MSGTR_MPCODECS_FatalCantOpenlibFAME "FATAL: Kann libFAME nicht öffnen!\n"
