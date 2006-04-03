@@ -379,10 +379,10 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
   satisfy you, you may re-run your video encode with a different target
   bitrate, provided that you saved the statistics file of the previous
   pass.
-  This is possible because the statistics file primary goal is to record
-  the complexity of each frames, which doesn't depend on bitrate.
-  You should note though that you'll get best results if all passes are
-  run with a target bitrate that does not differ too much.
+  This is possible because the statistics file's primary goal is to
+  record the complexity of each frame, which doesn't depend heavily on
+  bitrate. You should note, though, that you'll get the best results if
+  all passes are run with target bitrates that do not differ very much.
 </para>
 </note>
 
