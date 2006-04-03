@@ -44,6 +44,24 @@
 #define MAX(a, b)	((a)>(b)?(a):(b))
 #endif
 
+static unsigned char sipr_swaps[38][2]={
+    {0,63},{1,22},{2,44},{3,90},{5,81},{7,31},{8,86},{9,58},{10,36},{12,68},
+    {13,39},{14,73},{15,53},{16,69},{17,57},{19,88},{20,34},{21,71},{24,46},
+    {25,94},{26,54},{28,75},{29,50},{32,70},{33,92},{35,74},{38,85},{40,56},
+    {42,87},{43,65},{45,59},{48,79},{49,93},{51,89},{55,95},{61,76},{67,83},
+    {77,80} };
+
+// Map flavour to bytes per second
+#define SIPR_FLAVORS 4
+#define ATRC_FLAVORS 8
+#define COOK_FLAVORS 34
+static int sipr_fl2bps[SIPR_FLAVORS] = {813, 1062, 625, 2000};
+static int atrc_fl2bps[ATRC_FLAVORS] = {8269, 11714, 13092, 16538, 18260, 22050, 33075, 44100};
+static int cook_fl2bps[COOK_FLAVORS] = {1000, 1378, 2024, 2584, 4005, 5513, 8010, 4005, 750, 2498,
+                                        4048, 5513, 8010, 11973, 8010, 2584, 4005, 2067, 2584, 2584,
+                                        4005, 4005, 5513, 5513, 8010, 12059, 1550, 8010, 12059, 5513,
+                                        12016, 16408, 22911, 33506};
+
 typedef struct
 {
   uint32_t order, type, scope;
@@ -81,6 +99,16 @@ typedef struct mkv_track
   int rv_kf_base, rv_kf_pts;
   float rv_pts;  /* previous video timestamp */
   float ra_pts;  /* previous audio timestamp */
+
+  /** realaudio descrambling */
+  int sub_packet_size; ///< sub packet size, per stream
+  int sub_packet_h; ///< number of coded frames per block
+  int coded_framesize; ///< coded frame size, per stream
+  int audiopk_size; ///< audio packet size
+  unsigned char *audio_buf; ///< place to store reordered audio data
+  float *audio_timestamp; ///< timestamp for each audio packet
+  int sub_packet_cnt; ///< number of subpacket already received
+  int audio_filepos; ///< file position of first audio packet in block
 
   /* stuff for quicktime */
   int fix_i_bps;
@@ -1947,25 +1975,57 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
           src = (unsigned char *) (ra4p + 1);
           src += src[0] + 1;
           src += src[0] + 1;
+          track->sub_packet_size = be2me_16 (ra4p->sub_packet_size);
+          track->sub_packet_h = be2me_16 (ra4p->sub_packet_h);
+          track->coded_framesize = be2me_32 (ra4p->coded_frame_size);
+          track->audiopk_size = be2me_16 (ra4p->frame_size);
         }
       else
+        {
         src = (unsigned char *) (ra5p + 1);
+        track->sub_packet_size = be2me_16 (ra5p->sub_packet_size);
+        track->sub_packet_h = be2me_16 (ra5p->sub_packet_h);
+        track->coded_framesize = be2me_32 (ra5p->coded_frame_size);
+        track->audiopk_size = be2me_16 (ra5p->frame_size);
+        }
 
       src += 3;
       if (version == 5)
         src++;
       codecdata_length = be2me_32 (*(uint32_t *)src);
       src += 4;
-      sh_a->wf->cbSize = 10 + codecdata_length;
+      sh_a->wf->cbSize = codecdata_length;
       sh_a->wf = (WAVEFORMATEX *) realloc (sh_a->wf,
                                            sizeof (WAVEFORMATEX) +
                                            sh_a->wf->cbSize);
-      ((short *)(sh_a->wf + 1))[0] = be2me_16 (ra4p->sub_packet_size);
-      ((short *)(sh_a->wf + 1))[1] = be2me_16 (ra4p->sub_packet_h);
-      ((short *)(sh_a->wf + 1))[2] = be2me_16 (ra4p->flavor);
-      ((short *)(sh_a->wf + 1))[3] = be2me_32 (ra4p->coded_frame_size);
-      ((short *)(sh_a->wf + 1))[4] = codecdata_length;
-      memcpy(((char *)(sh_a->wf + 1)) + 10, src, codecdata_length);
+      memcpy(((char *)(sh_a->wf + 1)), src, codecdata_length);
+
+      switch (track->a_formattag) {
+        case mmioFOURCC('a', 't', 'r', 'c'):
+          sh_a->wf->nAvgBytesPerSec = atrc_fl2bps[be2me_16 (ra4p->flavor)];
+          sh_a->wf->nBlockAlign = track->sub_packet_size;
+          track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          break;
+        case mmioFOURCC('c', 'o', 'o', 'k'):
+          sh_a->wf->nAvgBytesPerSec = cook_fl2bps[be2me_16 (ra4p->flavor)];
+          sh_a->wf->nBlockAlign = track->sub_packet_size;
+          track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          break;
+        case mmioFOURCC('s', 'i', 'p', 'r'):
+          sh_a->wf->nAvgBytesPerSec = sipr_fl2bps[be2me_16 (ra4p->flavor)];
+          sh_a->wf->nBlockAlign = track->coded_framesize;
+          track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          break;
+        case mmioFOURCC('2', '8', '_', '8'):
+          sh_a->wf->nAvgBytesPerSec = 3600;
+          sh_a->wf->nBlockAlign = track->coded_framesize;
+          track->audio_buf = malloc(track->sub_packet_h * track->audiopk_size);
+          track->audio_timestamp = malloc(track->sub_packet_h * sizeof(float));
+          break;
+      }
 
       track->realmedia = 1;
     }
@@ -2380,6 +2440,10 @@ demux_close_mkv (demuxer_t *demuxer)
                 free (mkv_d->tracks[i]->language);
               if (mkv_d->tracks[i]->private_data)
                 free (mkv_d->tracks[i]->private_data);
+              if (mkv_d->tracks[i]->audio_buf)
+                free (mkv_d->tracks[i]->audio_buf);
+              if (mkv_d->tracks[i]->audio_timestamp)
+                free (mkv_d->tracks[i]->audio_timestamp);
             }
           for (i=0; i < SUB_MAX_TEXT; i++)
             if (mkv_d->subs.text[i])
@@ -2772,9 +2836,85 @@ handle_realaudio (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
                   uint32_t size, int block_bref)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  demux_packet_t *dp = new_demux_packet (size);
+  int sps = track->sub_packet_size;
+  int sph = track->sub_packet_h;
+  int cfs = track->coded_framesize;
+  int w = track->audiopk_size;
+  int spc = track->sub_packet_cnt;
+  demux_packet_t *dp;
+  int x;
 
-  memcpy (dp->buffer, buffer, size);
+  if ((track->a_formattag == mmioFOURCC('2', '8', '_', '8')) ||
+      (track->a_formattag == mmioFOURCC('c', 'o', 'o', 'k')) ||
+      (track->a_formattag == mmioFOURCC('a', 't', 'r', 'c')) ||
+      (track->a_formattag == mmioFOURCC('s', 'i', 'p', 'r')))
+    {
+//      if(!block_bref)
+//        spc = track->sub_packet_cnt = 0;
+      switch (track->a_formattag) {
+        case mmioFOURCC('2', '8', '_', '8'):
+          for (x = 0; x < sph / 2; x++)
+            memcpy(track->audio_buf + x * 2 * w + spc * cfs, buffer + cfs * x, cfs);
+          break;
+        case mmioFOURCC('c', 'o', 'o', 'k'):
+        case mmioFOURCC('a', 't', 'r', 'c'):
+          for (x = 0; x < w / sps; x++)
+            memcpy(track->audio_buf + sps * (sph * x + ((sph + 1) / 2) * (spc & 1) + (spc >> 1)), buffer + sps * x, sps);
+          break;
+        case mmioFOURCC('s', 'i', 'p', 'r'):
+          memcpy(track->audio_buf + spc * w, buffer, w);
+          if (spc == sph - 1)
+            {
+              int n;
+              int bs = sph * w * 2 / 96;  // nibbles per subpacket
+              // Perform reordering
+              for(n=0; n < 38; n++)
+                {
+                  int j;
+                  int i = bs * sipr_swaps[n][0];
+                  int o = bs * sipr_swaps[n][1];
+                  // swap nibbles of block 'i' with 'o'      TODO: optimize
+                  for(j = 0;j < bs; j++)
+                    {
+                      int x = (i & 1) ? (track->audio_buf[i >> 1] >> 4) : (track->audio_buf[i >> 1] & 0x0F);
+                      int y = (o & 1) ? (track->audio_buf[o >> 1] >> 4) : (track->audio_buf[o >> 1] & 0x0F);
+                      if(o & 1)
+                        track->audio_buf[o >> 1] = (track->audio_buf[o >> 1] & 0x0F) | (x << 4);
+                      else
+                        track->audio_buf[o >> 1] = (track->audio_buf[o >> 1] & 0xF0) | x;
+                      if(i & 1)
+                        track->audio_buf[i >> 1] = (track->audio_buf[i >> 1] & 0x0F) | (y << 4);
+                      else
+                        track->audio_buf[i >> 1] = (track->audio_buf[i >> 1] & 0xF0) | y;
+                      ++i; ++o;
+                    }
+                }
+            }
+          break;
+      }
+      track->audio_timestamp[track->sub_packet_cnt] = (track->ra_pts == mkv_d->last_pts) ? 0 : (mkv_d->last_pts);
+      track->ra_pts = mkv_d->last_pts;
+      if (track->sub_packet_cnt == 0)
+        track->audio_filepos = demuxer->filepos;
+      if (++(track->sub_packet_cnt) == sph)
+        {
+           int apk_usize = ((WAVEFORMATEX*)((sh_audio_t*)demuxer->audio->sh)->wf)->nBlockAlign;
+           track->sub_packet_cnt = 0;
+           // Release all the audio packets
+           for (x = 0; x < sph*w/apk_usize; x++)
+             {
+               dp = new_demux_packet(apk_usize);
+               memcpy(dp->buffer, track->audio_buf + x * apk_usize, apk_usize);
+               /* Put timestamp only on packets that correspond to original audio packets in file */
+               dp->pts = (x * apk_usize % w) ? 0 : track->audio_timestamp[x * apk_usize / w];
+               dp->pos = track->audio_filepos; // all equal
+               dp->flags = x ? 0 : 0x10; // Mark first packet as keyframe
+               ds_add_packet(demuxer->audio, dp);
+             }
+        }
+   } else { // Not a codec that require reordering
+  dp = new_demux_packet (size);
+  memcpy(dp->buffer, buffer, size);
   if (track->ra_pts == mkv_d->last_pts && !mkv_d->a_skip_to_keyframe)
     dp->pts = 0;
   else
@@ -2784,6 +2924,7 @@ handle_realaudio (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
   dp->pos = demuxer->filepos;
   dp->flags = block_bref ? 0 : 0x10;
   ds_add_packet (demuxer->audio, dp);
+  }
 }
 
 /** Reorder timecodes and add cached demux packets to the queues.
