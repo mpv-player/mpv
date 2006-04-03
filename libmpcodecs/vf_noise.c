@@ -65,7 +65,8 @@ struct vf_priv_s {
 	unsigned int outfmt;
 };
 
-static int nonTempRandShift[MAX_RES]= {-1};
+static int nonTempRandShift_init;
+static int nonTempRandShift[MAX_RES];
 
 static int patt[4] = {
     -1,0,1,0
@@ -128,10 +129,11 @@ static int8_t *initNoise(FilterParam *fp){
 	    for (j = 0; j < 3; j++)
 		fp->prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
 
-	if(nonTempRandShift[0]==-1){
+	if(!nonTempRandShift_init){
 		for(i=0; i<MAX_RES; i++){
 			nonTempRandShift[i]= rand()&(MAX_SHIFT-1);
 		}
+		nonTempRandShift_init = 1;
 	}
 
 	fp->noise= noise;
