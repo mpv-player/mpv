@@ -82,7 +82,7 @@ typedef struct tvi_handle_s {
     /* specific */
     int			norm;
     int			chanlist;
-    struct CHANLIST	*chanlist_s;
+    const struct CHANLIST *chanlist_s;
     int			channel;
 } tvi_handle_t;
 

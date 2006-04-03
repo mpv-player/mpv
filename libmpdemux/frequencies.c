@@ -6,7 +6,7 @@
 /* --------------------------------------------------------------------- */
 
 /* US broadcast */
-static struct CHANLIST ntsc_bcast[] = {
+static const struct CHANLIST ntsc_bcast[] = {
     { "2",	 55250 },
     { "3",	 61250 },
     { "4",	 67250 },
@@ -93,7 +93,7 @@ static struct CHANLIST ntsc_bcast[] = {
 };
 
 /* US cable */
-static struct CHANLIST ntsc_cable[] = {
+static const struct CHANLIST ntsc_cable[] = {
     { "1",	 73250 },
     { "2",	 55250 },
     { "3",	 61250 },
@@ -234,7 +234,7 @@ static struct CHANLIST ntsc_cable[] = {
 };
 
 /* US HRC */
-static struct CHANLIST ntsc_hrc[] = {
+static const struct CHANLIST ntsc_hrc[] = {
     { "1",	  72000 },
     { "2",	  54000 }, 
     { "3",	  60000 }, 
@@ -377,7 +377,7 @@ static struct CHANLIST ntsc_hrc[] = {
 /* --------------------------------------------------------------------- */
 
 /* JP broadcast */
-static struct CHANLIST ntsc_bcast_jp[] = {
+static const struct CHANLIST ntsc_bcast_jp[] = {
     { "1",   91250 },
     { "2",   97250 },
     { "3",  103250 },
@@ -445,7 +445,7 @@ static struct CHANLIST ntsc_bcast_jp[] = {
 };
 
 /* JP cable */
-static struct CHANLIST ntsc_cable_jp[] = {
+static const struct CHANLIST ntsc_cable_jp[] = {
     { "13",	109250 },
     { "14",	115250 },
     { "15",	121250 },
@@ -503,7 +503,7 @@ static struct CHANLIST ntsc_cable_jp[] = {
 /* --------------------------------------------------------------------- */
 
 /* australia */
-static struct CHANLIST pal_australia[] = {
+static const struct CHANLIST pal_australia[] = {
     { "0",	 46250 },
     { "1",	 57250 },
     { "2",	 64250 },
@@ -717,14 +717,14 @@ static struct CHANLIST pal_australia[] = {
     { "68",  847250 },	\
     { "69",  855250 }
 
-static struct CHANLIST europe_west[] = {
+static const struct CHANLIST europe_west[] = {
     FREQ_CCIR_I_III,
     FREQ_CCIR_SL_SH,
     FREQ_CCIR_H,
     FREQ_UHF
 };
 
-static struct CHANLIST europe_east[] = {
+static const struct CHANLIST europe_east[] = {
     FREQ_OIRT_I_III,
     FREQ_OIRT_SL_SH,
     FREQ_CCIR_I_III,
@@ -733,7 +733,7 @@ static struct CHANLIST europe_east[] = {
     FREQ_UHF
 };
 
-static struct CHANLIST pal_italy[] = {
+static const struct CHANLIST pal_italy[] = {
     { "A",	 53750 },
     { "B",	 62250 },
     { "C",	 82250 },
@@ -747,7 +747,7 @@ static struct CHANLIST pal_italy[] = {
     FREQ_UHF
 };
 
-static struct CHANLIST pal_ireland[] = {
+static const struct CHANLIST pal_ireland[] = {
     { "0",    45750 },
     { "1",    53750 },
     { "2",    61750 },
@@ -760,7 +760,7 @@ static struct CHANLIST pal_ireland[] = {
     FREQ_UHF,
 };
 
-static struct CHANLIST secam_france[] = {
+static const struct CHANLIST secam_france[] = {
     { "K01",    47750 },
     { "K02",    55750 },
     { "K03",    60500 },
@@ -811,7 +811,7 @@ static struct CHANLIST secam_france[] = {
 
 /* --------------------------------------------------------------------- */
 
-static struct CHANLIST pal_newzealand[] = {
+static const struct CHANLIST pal_newzealand[] = {
     { "1", 	  45250 }, 
     { "2",	  55250 }, 
     { "3",	  62250 },
@@ -829,7 +829,7 @@ static struct CHANLIST pal_newzealand[] = {
 /* --------------------------------------------------------------------- */
 
 /* China broadcast */
-static struct CHANLIST pal_bcast_cn[] = {
+static const struct CHANLIST pal_bcast_cn[] = {
     { "1",	49750 },
     { "2",	57750 },
     { "3",	65750 },
@@ -929,7 +929,7 @@ static struct CHANLIST pal_bcast_cn[] = {
 /* --------------------------------------------------------------------- */
 /* South Africa Broadcast */
 
-static struct CHANLIST pal_bcast_za[] ={
+static const struct CHANLIST pal_bcast_za[] ={
     { "1", 175250 },
     { "2", 183250 },
     { "3", 191250 },
@@ -943,7 +943,7 @@ static struct CHANLIST pal_bcast_za[] ={
 
 /* --------------------------------------------------------------------- */
 
-static struct CHANLIST argentina[] = {
+static const struct CHANLIST argentina[] = {
     { "001",   56250 },
     { "002",   62250 },
     { "003",   68250 },
@@ -1041,7 +1041,7 @@ static struct CHANLIST argentina[] = {
 
 /* --------------------------------------------------------------------- */
 
-static struct CHANLIST russia[] = {
+static const struct CHANLIST russia[] = {
     {"1",     49750 },
     {"2",     59250 },
     {"3",     77250 },
@@ -1144,7 +1144,7 @@ static struct CHANLIST russia[] = {
 };
 /* --------------------------------------------------------------------- */
 
-struct CHANLISTS chanlists[] = {
+const struct CHANLISTS chanlists[] = {
     { "us-bcast",         ntsc_bcast,        CHAN_COUNT(ntsc_bcast)        },
     { "us-cable",         ntsc_cable,        CHAN_COUNT(ntsc_cable)        },
     { "us-cable-hrc",     ntsc_hrc,          CHAN_COUNT(ntsc_hrc)          },
