@@ -584,7 +584,7 @@ libaf/libaf.a: $(wildcard libaf/*.[ch])
 libmpdvdkit2/libmpdvdkit.a: $(wildcard libmpdvdkit2/*.[ch])
 
 libmpdemux/libmpdemux.a: $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
-libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch])
+libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
 libmpcodecs/libmpencoders.a: $(wildcard libmpcodecs/*.[ch])
 
 libavutil/libavutil.a: $(wildcard libavutil/*.[ch])
