@@ -3,4 +3,4 @@
   section="Apps/Viewers"\
   title="MPlayer"\
   command="/usr/bin/gmplayer"\
-  icon="/usr/share/pixmaps/mplayer-desktop.xpm"
+  icon="/usr/share/pixmaps/mplayer.xpm"

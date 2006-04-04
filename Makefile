@@ -481,7 +481,7 @@ ifeq ($(GUI),yes)
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
 	@echo "*** for GUI, and extract to $(DATADIR)/skins/"
 	@$(INSTALL) -d $(prefix)/share/pixmaps
-	$(INSTALL) -m 644 Gui/mplayer/pixmaps/mplayer-desktop.xpm $(prefix)/share/pixmaps/mplayer-desktop.xpm
+	$(INSTALL) -m 644 etc/mplayer.xpm $(prefix)/share/pixmaps/mplayer.xpm
 	@$(INSTALL) -d $(prefix)/share/applications
 	$(INSTALL) -m 644 etc/mplayer.desktop $(prefix)/share/applications/mplayer.desktop
 endif
@@ -491,7 +491,7 @@ endif
 uninstall:
 	-rm -f $(BINDIR)/$(PRG) $(BINDIR)/gmplayer $(MANDIR)/man1/mplayer.1
 	-rm -f  $(BINDIR)/$(PRG_MENCODER) $(MANDIR)/man1/mencoder.1
-	-rm -f $(prefix)/share/pixmaps/mplayer-desktop.xpm
+	-rm -f $(prefix)/share/pixmaps/mplayer.xpm
 	-rm -f $(prefix)/share/applications/mplayer.desktop
 	for l in $(MAN_LANG); do \
 	  if test "$$l" != "en"; then \
