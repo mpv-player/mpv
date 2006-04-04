@@ -2653,17 +2653,14 @@ int main(void) { return 0; }
 EOF
 _inttypes=no
 cc_check && _inttypes=yes
-if test "$_inttypes" = yes ; then
-  # nothing to do
-  :
-else
-  echores "no"
+echores "$_inttypes"
+
+if test "$_inttypes" = no ; then
   echocheck "bitypes.h (inttypes.h predecessor)"
   cat > $TMPC << EOF
 #include <sys/bitypes.h>
 int main(void) { return 0; }
 EOF
-  _inttypes=no
   cc_check && _inttypes=yes
   if test "$_inttypes" = yes ; then
     die "You don't have inttypes.h, but sys/bitypes.h is present. Please copy etc/inttypes.h into the include path, and re-run configure."
@@ -2671,7 +2668,6 @@ EOF
     die "Cannot find header either inttypes.h or bitypes.h (see DOCS/HTML/$_doc_lang/faq.html)."
   fi
 fi
-echores "$_inttypes"
 
 
 echocheck "int_fastXY_t in inttypes.h"
@@ -3839,20 +3835,20 @@ if test "$_dga" = 1 ; then
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  echores "yes (using DGA 1.0)"
+  _res_comment="(using DGA 1.0)"
 elif test "$_dga" = 2 ; then
   _def_dga='#define HAVE_DGA 1'
   _def_dga2='#define HAVE_DGA2 1'
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  echores "yes (using DGA 2.0)"
+  _res_comment="(using DGA 2.0)"
 elif test "$_dga" = no ; then
-  echores "no"
   _novomodules="dga $_novomodules"
 else
   die "DGA version must be 1 or 2"
 fi
+echores "$_dga"
 
 
 echocheck "OpenGL"
@@ -5005,10 +5001,8 @@ else
 fi
 if test "$_dvdkit2" = yes; then
   _have_dvd=yes
-  echores "yes"
-else
-  echores "no"
 fi  
+echores "$_dvdkit"
 
 echocheck "DVD support (libdvdread)"
 if test "$_dvdread" = auto ; then
@@ -5035,12 +5029,10 @@ case "$_dvdread" in
 	_ld_dvdread='-ldvdread'
 	_inputmodules="dvdread $_inputmodules"
 	_have_dvd=yes
-	echores "yes"
 	;;
   no)
 	_def_dvdread='#undef USE_DVDREAD'
 	_noinputmodules="dvdread $_noinputmodules"
-	echores "no"
 	;;
   libmpdvdkit2)
 	_largefiles=yes
@@ -5049,9 +5041,11 @@ case "$_dvdread" in
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 2"
 	_have_dvd=yes
-	echores "disabled by libmpdvdkit2"
+	_dvdread=no
+	_res_comment="disabled by libmpdvdkit2"
 	;;
 esac
+echores "$_dvdread"
 
 if test "$_have_dvd" = yes ; then
   _def_have_dvd='#define HAVE_DVD 1'
@@ -5096,12 +5090,11 @@ fi
 #    _inc_extra="$_inc_extra -I$_dvdnavdir"
 #   fi
 #   _inputmodules="dvdnav $_inputmodules"
-#   echores "yes"
 # else
 #   _def_dvdnav='#undef USE_DVDNAV'
 #   _noinputmodules="dvdnav $_noinputmodules"
-#   echores "no"
 # fi
+# echores "$_dvdnav"
 
 echocheck "cdparanoia"
 if test "$_cdparanoia" = auto ; then
@@ -5953,7 +5946,7 @@ EOF
   fi
 fi
 if test "$_live" = yes && test "$_network" = yes ; then
-  echores "yes (using $_livelibdir)"
+  _res_comment="(using $_livelibdir)"
   _def_live='#define STREAMING_LIVE555 1'
   _live_libs_def="# LIVE555 Streaming Media libraries:
 LIVE_LIB_DIR = $_livelibdir
@@ -5969,7 +5962,7 @@ LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/groupsock/include"
   _ld_live='$(LIVE_LIBS)'
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes ; then
-  echores "yes (using distribution version)"
+  _res_comment="(using distribution version)"
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
   _live_libs_def="# LIVE555 Streaming Media libraries:
@@ -5986,10 +5979,11 @@ LIVE_INCLUDES += -I/usr/include/groupsock"
   _ld_live='$(LIVE_LIBS)'
  _inputmodules="live555 $_inputmodules"
 else
-  echores "no"
   _def_live='#undef STREAMING_LIVE555'
   _noinputmodules="live555 $_noinputmodules"
 fi
+echores "$_live"
+
 
 echocheck "FFmpeg libavutil (static)"
 if test -d libavutil ; then
