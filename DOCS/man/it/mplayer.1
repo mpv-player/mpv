@@ -1,4 +1,4 @@
-.\" synced with 1.1223
+.\" synced with 1.1234
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -1152,9 +1152,20 @@ Ritardo audio in secondi (valore decimale positivo o negativo)
 .br
 .I NOTA:
 Quando viene usato con MEncoder, non è detto che funzioni correttamente
-con \-ovc copy.
+con \-ovc copy; al suo posto usa \-audio-delay.
 .
 .TP
+.B \-ignore-start
+Ignora il tempo di avvio dei flussi indicato nei file AVI.
+In MPlayer, questo annulla i ritardi di flusso nei file codificati con
+l'opzione \-audio-delay.
+Durante la codifica, questa opzione impedisce a MEncoder di trasferire i tempi
+di avvio originari al nuovo file; l'opzione \-audio-delay non viene
+influenzata.
+Nota che MEncoder alcune volte rettifica automaticamente i tempi di avvio per
+compensare ritardi di decodifica anticipata, perciò non usare questa opzione
+per la codifica senza prima provarla.
+.
 .B \-demuxer <[+]nome>
 Forza il nome del demuxer audio, come indicato da \-demuxer help.
 Usa un '+' prima del nome per forzarlo, il che eviterà alcuni controlli!
@@ -1402,6 +1413,11 @@ Riproduce un esempio YUV grezzo.
 .PD 1
 .
 .TP
+.B \-rtsp-port (solo LIVE555)
+Utilizzato con URL del tipo 'rtsp://' per forzare il numero di porta del client.
+Questa opzione può essere utile se sei dietro a un router e vuoi inoltrare il
+flusso RTSP dal server verso un client specifico.
+.
 .B \-rtsp-stream-over-tcp (solo LIVE555)
 Utilizzato con URL del tipo 'rtsp://' per specificare che i pacchetti RTP o RTCP
 devono essere fatti passare su TCP (utilizzando la stessa connessione di RTSP).
@@ -2144,8 +2160,8 @@ Vedi \-ao help per una lista dei driver di uscita audio compilati internamente.
 .RSs
 .IPs "\-ao alsa,oss,"
 Prova il driver ALSA, poi il driver OSS, poi gli altri.
-.IPs "\-ao alsa:mmap:noblock:device=hw=0.3"
-Attiva la modalità non bloccante, la modalità mmap e il nome del dispositivo
+.IPs "\-ao alsa:noblock:device=hw=0.3"
+Attiva la modalità non bloccante e il nome del dispositivo
 come prima scheda, quarto dispositivo.
 .RE
 .PD 1
@@ -2157,8 +2173,6 @@ I driver di uscita audio disponibili sono:
 driver di uscita audio ALSA 0.9/1.x
 .PD 0
 .RSs
-.IPs mmap\ \ \ 
-Attiva la modalità mmap sperimentale (non funziona per più di 2 canali).
 .IPs noblock
 Seleziona la modalità noblock (non bloccante).
 .IPs device=<dispositivo)
@@ -4853,7 +4867,7 @@ Ruota di 90 gradi in senso antiorario e ribalta.
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
 Scala l'immagine con la modalità software (lento) ed esegue una conversione
 dello spazio colore YUV<\->RGB (vedi anche \-sws).
 .RSs
@@ -4927,6 +4941,17 @@ pal:     720x576 (PAL standard)
 sntsc:   640x480 (NTSC con pixel quadrati)
 .br
 spal:    768x576 (PAL con pixel quadrati)
+.REss
+.IPs <noup>
+Impedisce un ridimensionamento più grande delle dimensioni originarie.
+.RSss
+0: Permette un ridimensionamento più grande (default).
+.br
+1: Impedisce il ridimensionamento se una delle dimensioni oltrepassa il
+suo valore originario.
+.br
+2: Impedisce il ridimensionamento se entrambe le dimensioni oltrepassano il
+loro valore originario.
 .REss
 .RE
 .
@@ -5719,7 +5744,7 @@ Lo sviluppo del filtro ivtc è attualmente fermo in quanto i filtri
 pullup e filmdint sembrano molto più accurati.
 .
 .TP
-.B pullup[=jl:jr:jt:jb:sb:mp]\ 
+.B pullup[=jl:jr:jt:jb:sb:mp]
 Filtro di inversione del telecine di terza generazione, capace
 di gestire materiale misto con telecine, progressivo a 24000/1001
 fotogrammi al secondo e progressivo a 30000/1001 fps.
@@ -6346,10 +6371,17 @@ configurazione.
 .
 .TP
 .B \-audio-delay <0.0\-...>
-Scrive il valore del ritardo audio nell'intestazione.
-Il default è 0.0, valori negativi non funzionano.
-Questo non ritarda l'audio durante la codifica ma il riproduttore vedrà
-il valore del ritardo e ti eviterà l'utilizzo dell'opzione \-delay.
+Ritarda l'audio oppure il video riempiendo il campo del ritardo
+nell'intestazione (default: 0.0).
+Questo non ritarda uno dei flussi durante la codifica ma il riproduttore vedrà
+il valore del ritardo e compenserà in rapporto a questo.
+Valori positivi ritardano l'audio, mentre valori negativi ritardano il video.
+Nota che questo è l'esatto opposto dell'opzione \-delay.
+Per esempio, se un filmato viene riprodotto correttamente con \-delay 0.2, puoi
+correggere tale filmato con MEncoder usando \-audio-delay -0.2.
+.sp 1
+Attualmente questa opzione funziona solo con il muxer di default (\-of avi).
+Se usi un muxer diverso, allora devi usare \-delay.
 .
 .TP
 .B \-audio-density <1\-50>
@@ -8243,6 +8275,10 @@ Chiude tutti i GOP.
 Attualmente funziona solo se la rilevazione del cambio scena è disattivata
 (sc_threshold=1000000000).
 .
+.TP
+.B vglobal
+FIXME: Da documentare.
+.
 .
 .SS nuv (\-nuvopts)
 .
@@ -9597,14 +9633,27 @@ Questa opzione è ignorata se utilizzata con l'opzione telecine.
 .
 .TP
 .B telecine
-Abilità la modalità soft telecine: il programma modificherà il flusso
-video in modo da farlo sembrare codificato a 30000/1001 oppure 30 fps (frame per
-second, fotogrammi al secondo); funziona solo con video in formato MPEG-2 con
-un framerate, eventualmente convertito con \-ofps, di 24000/1001 oppure 24 fps.
+Abilità la modalità soft telecine pulldown 3:2 : il programma modificherà il
+flusso video in modo da farlo sembrare codificato a 30000/1001 oppure 30 fps
+(frame per second, fotogrammi al secondo).
+Funziona solo con video in formato MPEG-2 quando il framerate di uscita,
+eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
+Qualsiasi altro valore di velocità è incompatibile con questa opzione.
+.
+.TP
+.B film2pal
+Abilita la modalità soft telecine da FILM a PAL e da NTSC a PAL: il programma
+modificherà il flusso video in modo da farlo sembrare codificato a 25 fps.
+Funziona solo  con video in formato MPEG-2 quando il framerate di uscita,
+eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .
 .
 .SS FFmpeg libavformat muxer (\-lavfopts) (vedi anche \-of lavf)
+.
+.TP
+.B delay\ \ 
+FIXME: Da documentare.
 .
 .TP
 .B format=<formato_contenitore>
@@ -9638,6 +9687,22 @@ Formato MPEG-4
 Formato contenitore Sony Digital Video
 .RE
 .PD 1
+.TP
+.B i_certify_that_my_video_stream_does_not_use_b_frames
+FIXME: Da documentare.
+.
+.TP
+.B muxrate
+FIXME: Da documentare.
+.
+.TP
+.B packetsize
+FIXME: Da documentare.
+.
+.TP
+.B preload
+FIXME: Da documentare.
+.
 .
 .
 .\" --------------------------------------------------------------------------
