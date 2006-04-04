@@ -12,7 +12,7 @@ ___________________
 The MPlayer project
 ~~~~~~~~~~~~~~~~~~~
 
-MPlayer was originally written by ¡rp·d Gereˆffy (for a more complete history
+MPlayer was originally written by √Årp√°d Gere√∂ffy (for a more complete history
 see DOCS/HTML/en/history.html) and later extended by a bunch of other people,
 some of which are listed here in alphabetical order. If you think you are
 missing, feel free to send a patch.
@@ -33,7 +33,7 @@ Anholt, Eric <eanholt@gladstone.uoregon.edu>
 Ashberg, Folke <folke@ashberg.de>
     * native AAlib driver (-vo aa)
 
-Balatoni, DÈnes <pnis@coder.hu>
+Balatoni, D√©nes <pnis@coder.hu>
     * XMMS inputplugin support
     * minor features & fixes mostly to make MPlayer work better on a PDA
 
@@ -74,7 +74,7 @@ Behrisch, Michael <list@behrisch.de>
 Belev, Luchezar (lucho) <lucho@haemimont.bg>
     * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
 
-BÈrczi, G·bor (Gabucino) <gabucino@mplayerhq.hu>
+B√©rczi, G√°bor (Gabucino) <gabucino@mplayerhq.hu>
     * large parts the original HTML and TXT documentation
     * original Hungarian documentation, homepage, console message translation
     * second homepage design & gfx
@@ -92,7 +92,7 @@ Berecz, Szabolcs (Szabi) <szabi@inf.elte.hu>
     * fbdev video output driver
     * type #7 subtitle support
 
-Beregsz·szi, Alex (al3x) <alex@fsn.hu>
+Beregsz√°szi, Alex (al3x) <alex@fsn.hu>
     * second project maintainer
     * alsa5 and alsa9 audio output drivers in libao2
     * ggi video output driver (www.ggi-project.org)
@@ -145,7 +145,7 @@ Bulgroz, Eviv <ebulgroz@yahoo.com>
     * AVI demuxer time/bitrate calculation fixes
     * various bug fixes
 
-B¸nemann, Felix (Atmos) <atmosfear@users.sourceforge.net>
+B√ºnemann, Felix (Atmos) <atmosfear@users.sourceforge.net>
     * additional YUV formats fixes
     * new font (mp_font2.zip)
     * png video output driver
@@ -209,7 +209,7 @@ Dietrich, Florian <flodt8@yahoo.de>
 Dobbelaere, Jeroen <jeroen.dobbelaere@acunia.com>
     * original libmad support
 
-Dˆffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
+D√∂ffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * GL code fixes
     * various fixes all over the place
     * reworked live changing playback speed
@@ -228,7 +228,7 @@ Dolbeau, Romain <romain@dolbeau.org>
     * vo_quartz YUV support & fixes
     * endianness fixes
 
-Dˆnmez, Ismail (cartman) <ismail.donmez@boun.edu.tr>
+D√∂nmez, ƒ∞smail (cartman) <ismail@pardus.org.tr>
     * compile fix for mga_vid to compile with Linux 2.5/2.6 kernels
     * small fixes all around
 
@@ -289,7 +289,7 @@ Franz, Fabian (Fabianx) <mplayer@fabian-franz.de>
 Gansser, Martin <mgansser@ngi.de>
     * HP-UX port
 
-Gereˆffy, ¡rp·d (A'rpi/ESP-team) <arpi@thot.banki.hu>
+Gere√∂ffy, √Årp√°d (A'rpi/ESP-team) <arpi@thot.banki.hu>
     * project founder, first project maintainer
     * MPlayer, MEncoder core, A-V sync
     * libmpdemux, demultiplexer for MPEG, ASF, AVI, various fixes in others
@@ -325,12 +325,12 @@ Gritsenko, Andriy N. (AG_LS) <andrej@lucky.net>
     * drop-deinterlace (dint) video filter
     * muxer layer, and new MPEG-PS muxer
 
-Guyomarch, RÈmi (rguyom) <rguyom@pobox.com>
+Guyomarch, R√©mi (rguyom) <rguyom@pobox.com>
     * various fixes
     * unsharp video filter
     * XviD encoding support
 
-Hammelmann, J¸rgen <juergen.hammelmann@gmx.de>
+Hammelmann, J√ºrgen <juergen.hammelmann@gmx.de>
     * TOOLS/mencvcd author
 
 Hertel, Christopher R. <crh@ubiqx.mn.org>
@@ -345,7 +345,7 @@ Hickey, Corey <bugfood-ml@fatooh.org>
     * advanced audio usage guide for the MPlayer documentation
     * muxer frame buffer for MEncoder
 
-HidvÈgi, Zolt·n (Zoli) <mplayer@hzoli.com>
+Hidv√©gi, Zolt√°n (Zoli) <mplayer@hzoli.com>
     * filmdint video filter
 
 Hoffmann, Jens <hoffmajs@gmx.de>
@@ -421,10 +421,10 @@ Kaplan, Kim Minh <kmkaplan@selfoffice.com>
     * DVD and VOBsub subtitles display support
     * DVD subtitles rip to VOBsub
 
-K‰rkk‰inen, Samuli <skarkkai@woods.iki.fi>
+K√§rkk√§inen, Samuli <skarkkai@woods.iki.fi>
     * first DVD ripping guide
 
-Keil, J¸rgen <jk@tools.de>
+Keil, J√ºrgen <jk@tools.de>
     * patched MPlayer to work on Solaris 8 x86
     * various fixes (Win32, configure, etc)
     * sun audio output driver in libao2
@@ -445,10 +445,10 @@ Kovriga, Gregory <gkovriga@techunix.technion.ac.il>
     * GUI DVD fixes
     * various small bug fixes in ASX/URL parser
 
-K¸hling, David <dvdkhlng@gmx.de>
+K√ºhling, David <dvdkhlng@gmx.de>
     * libtheora support, Ogg/Theora demuxing changes
 
-K¸Á¸k, Onur <onur@delipenguen.net>
+K√º√ß√ºk, Onur <onur@delipenguen.net>
     * GTK2 port of the GUI
     * Fix compilation in locales like TR, AZ etc.
 
@@ -475,7 +475,7 @@ Kushnir, Vladimir <vkushnir@Alfacom.net>
 Lambley, Dave <mplayer@davel.me.uk>
     * HTTP cookie support
 
-L·szlÛ, Gyula (Chass, TÈgla) <chass-@freemail.hu>
+L√°szl√≥, Gyula (Chass, T√©gla) <chass-@freemail.hu>
     * first fonts (mp_font1.zip)
     * third and fourth homepage design & gfx
 
@@ -484,7 +484,7 @@ Le Gaillart, Nicolas <n@tourmentine.com>
     * documentation updates and fixes
     * 2nd half of the documentation HTML --> XML conversion
 
-LÈn·rt, G·bor (LGB) <lgb@lgb.hu>
+L√©n√°rt, G√°bor (LGB) <lgb@lgb.hu>
     * configure script improvements
     * Makefile improvements
     * preliminary DVD support (libcss)
@@ -526,7 +526,7 @@ Marek, Rudolf <MAREKR2@cs.felk.cvut.cz>
     * gtf code for -vo vesa
     * NeoMagic TV out support through VESA VBE
 
-Megyer, L·szlÛ (Lez, Laaz) <lez@sch.bme.hu>
+Megyer, L√°szl√≥ (Lez, Laaz) <lez@sch.bme.hu>
     * subtitle reader
     * screensaver + DPMS disable for libvo
 
@@ -559,7 +559,7 @@ Milushev, Mihail <lanzz@lanzz.org>
 Mistry, Nehal (Nehal) <nehalmistry@gmx.net>
     * various audio driver fixes
 
-Mohari, Andr·s <mayday@varoshaza.nagyatad.hu>
+Mohari, Andr√°s <mayday@varoshaza.nagyatad.hu>
     * skin documentation
     * various docs updates and fixes
     * 1st half of the documentation HTML --> XML conversion
@@ -619,7 +619,7 @@ Poirier, Guillaume (poirierg) <poirierg@gmail.com>
     * code fixes to support GCC-4.0
     * patch review
 
-Ponekker, Zolt·n (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
+Ponekker, Zolt√°n (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compilation
     * GUI system
     * 3DNow! support into mp3lib and fastmemcpy.h
@@ -657,7 +657,7 @@ Sabbi, Nico <nsabbi@tiscali.it>
     * DVB input support
     * MPEG TS support
 
-Sandell, Bjˆrn <biorn@dce.chalmers.se>
+Sandell, Bj√∂rn <biorn@dce.chalmers.se>
     * various *BSD fixes
 
 Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
@@ -714,7 +714,7 @@ Swain, Robert <robert.swain@gmail.com>
     * CQM support and turbo multipass mode in x264 interface
     * Profile support in XviD interface
 
-Syrj‰l‰, Ville <syrjala@sci.fi>
+Syrj√§l√§, Ville <syrjala@sci.fi>
     * -vo dfbmga driver (G400 DVDMax-like feature using dfb 0.9.14)
 
 Szecsi, Gabor <deje@miki.hu>
@@ -747,7 +747,7 @@ Togni, Roberto (rxt) <r_togni@tiscali.it>
 Tropea, Salvador Eduardo <salvador@inti.gov.ar>
     * subtitle parsing/displaying related patches
 
-Vajna, MiklÛs (VMiklos) <mamajom@axelero.hu>
+Vajna, Mikl√≥s (VMiklos) <mamajom@axelero.hu>
     * TOOLS/divx2svcd author
     * TOOLS/ directory documentation
 
@@ -766,7 +766,7 @@ Witt, Derek J <djw@flinthills.com>
 Young, Alan <ayoung@teleport.com>
     * fixed support of RealMedia & XAnim binary plugins on Alpha
 
-Zaprzala, Artur (zybi) <zybi@fanthom.irc.pl>
+Zaprza≈Ça, Artur (zybi) <zybi@fanthom.irc.pl>
     * complete font generator prog + OSD font (TOOLS/subfont-c)
 
 Zealey, Mark <mark@zealos.org>
@@ -777,7 +777,7 @@ Ziv-Av, Matan <matan@svgalib.org>
     * vo_svga fixes, improvements
     * svgalib kernel helper support for VIDIX/libdha
 
-Zolt·n, M·rk Vici·n (Se7en) <se7en@sch.bme.hu>
+Zolt√°n, M√°rk Vici√°n (Se7en) <se7en@sch.bme.hu>
     * SVGAlib support in libvo
 
 
@@ -856,20 +856,20 @@ Heryan, Jiri <technik@domotech.cz>
     * Czech man page and documentation translation
     * some other Czech translation related work
 
-Kr‰mer, Sebastian <mplayer@skraemer.de>
+Kr√§mer, Sebastian <mplayer@skraemer.de>
     * German man page translation
 
-LÛpez, Juan Martin (nauj27) <nauj27@teleline.es>
+L√≥pez, Juan Martin (nauj27) <nauj27@teleline.es>
     * Spanish man page translation
     * Spanish documentation translation
 
-Mizda, G·bor (Gabrov) <gabrov@freemail.hu>
+Mizda, G√°bor (Gabrov) <gabrov@freemail.hu>
 	* Hungarian translation
 
 MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
-    * Waclaw Schiller (Torinthiel) <torinthiel@wp.pl>
+    * Wac≈Çaw Schiller (Torinthiel) <torinthiel@wp.pl>
     * Kuba Misiorny (Qba) <jim85@wp.pl>
-    * Lukasz Proszek (Frogu) <frogoo@o2.pl>
+    * ≈Åukasz Proszek (Frogu) <frogoo@o2.pl>
     * Maciek Paszta (paszczi) <paszczi@go2.pl>
     * Piotr Michniewski (Cobra) <cobra_666@poczta.onet.pl>
     * Marcin Biernat (Boski Cinek) <boski_cinek@o2.pl>
@@ -938,7 +938,7 @@ krivilli <krivilli@ajato.com.br>
 Kuehne, Andre <andre.kuehne@gmx.net>
     * tvisor
 
-Kuhlmann, R¸diger
+Kuhlmann, R√ºdiger
     * KDE
 
 LUIGI <lui77@freemail.hu>
