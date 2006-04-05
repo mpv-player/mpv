@@ -578,6 +578,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 					if(a52_check(pptr->buf, pptr->pos) > 2)
 					{
 						param->atype = AUDIO_A52;
+						param->apid = es.pid;
 						es.type = AUDIO_A52;
 					}
 				}
