@@ -362,7 +362,7 @@ Hug, Hampa <hhug@student.ethz.ch>
     * LUT-based soft eq video filter (vf_eq2)
     * .ogm demuxer endianness fixes
 
-Hurka, Tomas <tom@hukatronic.cz>
+Hůrka, Tomáš <tom@hukatronic.cz>
     * Darwin DVD support (mpdvdkit2)
     * various fixes
 
@@ -517,7 +517,7 @@ Madick, Puk <pingy@swirvemail.com>
     * KDE/GNOME2 fullscreen fix
     * configparser fixes
 
-Makovicka, Jindrich (henry, x0rph) <makovick@KMLinux.fjfi.cvut.cz>
+Makovička, Jindřich (henry, x0rph) <makovick@KMLinux.fjfi.cvut.cz>
     * various bug fixes
     * rewrote v4l video capturing, implemented audio capturing layer
     * FreeType 2 font rendering support
@@ -705,7 +705,7 @@ Strasser, Alexander (beastd) <eclipse7@gmx.net>
 Strzelecki, Kamil < esack at browarek.net >
     * first version of ao_jack, using bio2jack
 
-Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
+Svoboda, Jiří (zar) <Jiri.Svoboda@seznam.cz>
     * AQT type subtitles support
     * CRTC2 YUV support in mga_vid
     * DirectFB video output driver
@@ -803,7 +803,7 @@ Holtzman, Aaron <aholtzma@engr.uvic.ca>
 Janovetz, Jake
     * remez.c author [Used to calculate audio filter coefficients]
 
-Kabelac, Zdenek (kabi) <kabi@informatics.muni.cz>
+Kabeláč, Zdeněk (kabi) <kabi@informatics.muni.cz>
     * avifile author
     * some technical help about the Win32 stuff, ASF formats and timers
 
@@ -852,7 +852,7 @@ Translation
 Fargas, Marc (TeLeNiEkO) <telenieko@telenieko.com>
     * first Spanish documentation translation (outdated)
 
-Heryan, Jiri <technik@domotech.cz>
+Heryán, Jiří <technik@domotech.cz>
     * Czech man page and documentation translation
     * some other Czech translation related work
 
@@ -992,7 +992,7 @@ Szumiela, Marcin <marcin@szumiela.pl>
 Tisi, Massimo <massimotisi@yahoo.it>
     * clearplayer
 
-Tyr, Jiri jun. <jirka@dts.cz>
+Týř, Jiří jun. <jirka@dts.cz>
     * DVDPlayer
 
 Vasilev, Ognian <ogi28@mail.bg>
