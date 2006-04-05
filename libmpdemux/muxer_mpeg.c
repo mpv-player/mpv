@@ -2436,6 +2436,8 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
  
   if(s->buffer == NULL)
   	return;
+  if(len == -1)
+	return;
   
   pts = 0;
   if (s->type == MUXER_TYPE_VIDEO) { // try to recognize frame type...
