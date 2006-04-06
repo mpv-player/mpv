@@ -207,6 +207,9 @@ while(1){
     case mmioFOURCC('i', 'n', 'd', 'x'): {
       uint32_t i;
       avisuperindex_chunk *s;
+      if(chunksize<=24){
+        break;
+      }
       priv->suidx_size++;
       priv->suidx = realloc(priv->suidx, priv->suidx_size * sizeof (avisuperindex_chunk));
       s = &priv->suidx[priv->suidx_size-1];
