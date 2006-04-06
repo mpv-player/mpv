@@ -2127,9 +2127,9 @@ void dump_microdvd(sub_data* subd, float fps) {
     subtitle *subs = subd->subtitles;
     if (sub_fps == 0)
 	sub_fps = fps;
-    fd = fopen("dumpsub.txt", "w");
+    fd = fopen("dumpsub.sub", "w");
     if (!fd) {
-	perror("dumpsub.txt: fopen");
+	perror("dumpsub.sub: fopen");
 	return;
     }
     delay = sub_delay * sub_fps;
@@ -2153,7 +2153,7 @@ void dump_microdvd(sub_data* subd, float fps) {
 	fprintf(fd, "\n");
     }
     fclose(fd);
-    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.txt\'.\n");
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.sub\'.\n");
 }
 
 void dump_jacosub(sub_data* subd, float fps) {
