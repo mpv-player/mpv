@@ -187,6 +187,10 @@ Cook, Kees <mplayer@outflux.net>
     * dvdnav hacks
     * rawdv demuxer fixes
 
+Curry, Alan <pacman@TheWorld.com>
+    * swscale AltiVec/big-endian fixes
+    * misc vo_fbdev fixes
+
 Davies, Stephen <steve@daviesfam.org>
     * support for large video files (>2^32 bytes in size)
     * surround sound aop plugin
