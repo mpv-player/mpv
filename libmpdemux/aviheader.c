@@ -206,7 +206,6 @@ while(1){
       break; }
     case mmioFOURCC('i', 'n', 'd', 'x'): {
       uint32_t i;
-      unsigned msize = 0;
       avisuperindex_chunk *s;
       priv->suidx_size++;
       priv->suidx = realloc(priv->suidx, priv->suidx_size * sizeof (avisuperindex_chunk));
@@ -235,11 +234,8 @@ while(1){
           mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk size: %u\n",s->wLongsPerEntry);
           s->wLongsPerEntry = sizeof(avisuperindex_entry)/4;
       }
-      msize = sizeof (avisuperindex_entry) * s->nEntriesInUse;
-      s->aIndex = malloc(msize);
-      memset (s->aIndex, 0, msize);
-      s->stdidx = malloc (s->nEntriesInUse * sizeof (avistdindex_chunk));
-      memset (s->stdidx, 0, s->nEntriesInUse * sizeof (avistdindex_chunk));
+      s->aIndex = calloc(s->nEntriesInUse, sizeof (avisuperindex_entry));
+      s->stdidx = calloc(s->nEntriesInUse, sizeof (avistdindex_chunk));
 
       // now the real index of indices
       for (i=0; i<s->nEntriesInUse; i++) {
