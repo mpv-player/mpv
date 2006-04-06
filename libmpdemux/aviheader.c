@@ -646,6 +646,8 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     
     c=stream_read_dword(demuxer->stream);
 
+    if(!len) idx->dwFlags&=~AVIIF_KEYFRAME;
+
     // Fix keyframes for DivX files:
     if(idxfix_divx)
       if(avi_stream_id(id)==idxfix_videostream){
