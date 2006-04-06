@@ -224,6 +224,11 @@ while(1){
       memset(s->dwReserved, 0, 3*4);
 	  
       print_avisuperindex_chunk(s,MSGL_V);
+      
+      if( ((chunksize/4)/s->wLongsPerEntry) < s->nEntriesInUse){
+        mp_msg (MSGT_HEADER, MSGL_WARN, "Broken super index chunk\n");
+        s->nEntriesInUse = (chunksize/4)/s->wLongsPerEntry;
+      }
 
       // Check and fix this useless crap
       if(s->wLongsPerEntry != sizeof (avisuperindex_entry)/4) {
