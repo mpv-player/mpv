@@ -309,7 +309,7 @@ Bascule l'affichage des sous-titres.
 .IPs "b / j"\ \ \ 
 Alterne entre les différents sous-titres disponibles.
 .IPs "y et g"
-Choisi le sous-titre après/avant dans la liste des sous-titres.
+Choisit le sous-titre après/avant dans la liste des sous-titres.
 +Step forwards/backwards in the subtitle list.
 .IP F\ \ \ \ 
 Bascule l'affichage des "sous-titres forcés".
@@ -652,7 +652,7 @@ gèrent pas les retours chariot (c-a-d \\r).
 .
 .TP
 .B \-priority <prio> (Windows uniquement)
-Défini le niveau de priorité de MPlayer suivant les priorités prédéfinies
+Définit le niveau de priorité de MPlayer suivant les priorités prédéfinies
 de disponibles sous Windows.
 Valeurs possibles de <prio>\ :
 .RSs
@@ -841,7 +841,7 @@ restera valide.
 .
 .TP
 .B \-key-fifo-size <2\-65000>
-Défini la taille de la FIFO qui tamponne les évènements clavier
+Définit la taille de la FIFO qui tamponne les évènements clavier
 (par défaut\ :10).
 Une FIFO de taille n peut tamponner (n - 1) évènements.
 Si elle est trop petite, quelques évènements risquent d'être perdus
@@ -1125,7 +1125,7 @@ Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .
 .TP
 .B \-channels <nombre> (voir aussi \-af channels)
-Défini le nombre de canaux audio à utiliser. (défaut\ : 2).
+Définit le nombre de canaux audio à utiliser. (défaut\ : 2).
 MPlayer demande au décodeur de décoder l'audio sur le nombre requis de canaux.
 Maintenant c'est au décodeur de satisfaire cette demande.
 Généralement, c'est important seulement pour la lecture des vidéos avec de
@@ -1577,7 +1577,7 @@ Régler le tuner sur le canal <valeur>
 .IPs chanlist=<valeur>
 disponible: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<canal>\-<nom>,<canal>\-<nom>,...
-Défini des noms pour les canaux.
+Définit des noms pour les canaux.
 Utilisez _ pour les espaces dans les noms (ou jouez avec les guillemets ;-).
 Les noms de canaux seront ensuite écrits en utilisant l'OSD, et les commandes
 tv_step_channel, tv_set_channel et tv_last_channel seront utilisables
@@ -1791,7 +1791,7 @@ par ex.\& avec \-slang.
 .
 .TP
 .B \-fribidi-charset <nom charset>
-Défini le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
+Définit le charset à passer à FriBiDi pour le décodage de sous-titres non-UTF8
 (par défaut\ : ISO8859-8).
 .
 .TP
@@ -1804,11 +1804,11 @@ des sous-titres VOBSUB.
 Désactive le chargement automatique du fichier de sous-titres.
 .
 .B \-osd-duration <durée>
-Défini la durée d'affichage en ms des messages OSD (par défaut\ : 1000).
+Définit la durée d'affichage en ms des messages OSD (par défaut\ : 1000).
 .
 .TP
 .B \-osdlevel <0\-3> (MPlayer uniquement)
-Défini dans quel mode OSD démarrer.
+Définit dans quel mode OSD démarrer.
 .
 .PD 0
 .RSs
@@ -1839,7 +1839,7 @@ DVD, essayez avec \-vobsubid.
 .
 .TP
 .B \-slang <code de pays[,code de langue,...]> (voir aussi l'option \-sid)
-Défini une liste de langues de sous-titres à afficher en priorité.
+Définit une liste de langues de sous-titres à afficher en priorité.
 Chaque format de conteneur utilise des codes de pays différents.
 Les DVDs utilisent les codes à deux lettres ISO 639-1, Matroska
 les codes à trois lettres ISO 639-2, tandis que OGM utilise des
@@ -1882,7 +1882,7 @@ utilise le flou gaussien swscaler (très joli)
 .
 .TP
 .B \-spualign <-1\-2> (OSD uniquement)
-Défini l'alignement des sous-titres SPU (DVD/\:VobSub).
+Définit l'alignement des sous-titres SPU (DVD/\:VobSub).
 .PD 0
 .RSs
 .IPs "-1"
@@ -1908,7 +1908,7 @@ Un seul fichier peut être affiché à la fois.
 .
 .TP
 .B \-sub-bg-alpha <0\-255>
-Défini la valeur du canal de transparence alpha pour le fond des sous-titres
+Définit la valeur du canal de transparence alpha pour le fond des sous-titres
 et de l'OSD.
 De grandes valeurs signifient plus transparent.
 La valeur 0 est une exception et signifie complètement transparent.
@@ -1950,7 +1950,7 @@ Utilisé pour débogage.
 .
 .TP
 .B \-subalign <0\-2> (OSD uniquement)
-Défini quel bord des sous-titres doit être aligné à la
+Définit quel bord des sous-titres doit être aligné à la
 hauteur définie par \-subpos.
 .PD 0
 .RSs
@@ -2065,7 +2065,7 @@ taille de l'écran) (par défaut\ : 5).
 .
 .TP
 .B \-subfps <flottant>
-Défini le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
+Définit le rapport trame/\:sec du sous-titre (par défaut\ : le même rapport
 que celui du film)
 .br
 .I NOTE:
@@ -2075,13 +2075,13 @@ comme le format MicroDVD.
 .
 .TP
 .B \-subpos <0\-100> (utile avec \-vf expand) (OSD uniquement)
-Défini la position des sous-titres sur l'écran.
+Définit la position des sous-titres sur l'écran.
 Cette valeur est la position verticale des sous-titres en % de la hauteur
 de l'écran.
 .
 .TP
 .B \-subwidth <10\-100> (OSD uniquement)
-Défini la largeur maximum des sous-titres sur l'écran.
+Définit la largeur maximum des sous-titres sur l'écran.
 Utile pour la sortie TV.
 La valeur est la largeur des sous-titres en % de la largeur de l'écran.
 .
@@ -2107,13 +2107,13 @@ Indique à MPlayer de traiter le fichier de sous-titre au un format UTF-8.
 .
 .TP
 .B \-vobsub <fichier VOBsub sans extension>
-Défini le fichier VOBsub qui sera utilisé pour les sous-titres.
+Définit le fichier VOBsub qui sera utilisé pour les sous-titres.
 Indiquez le chemin complet sans extensions, c'est-à-dire
 sans '.idx', '.ifo' ou '.sub'.
 .
 .TP
 .B \-vobsubid <0\-31>
-Défini le numéro de sous-titre du fichier VOBsub.
+Définit le numéro de sous-titre du fichier VOBsub.
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
@@ -2188,7 +2188,7 @@ Force l'utilisation du mixeur logiciel à la place de celui de la carte son.
 .
 .TP
 .B \-softvol-max <10.0\-10000.0>
-Défini le niveau maximal d'amplification en pourcents (par défaut\ : 0).
+Définit le niveau maximal d'amplification en pourcents (par défaut\ : 0).
 Une valeur de 200 vous permet d'ajuster le volume, au maximum, jusqu'au double
 du niveau courant.
 Avec une valeur inférieure à 100, le niveau initial (qui est 100%) sera
@@ -2197,7 +2197,7 @@ correctement.
 .
 .TP
 .B \-volstep <0\-100>
-Défini l'importance de l'augmentation du volume, en pourcentage du volume
+Définit l'importance de l'augmentation du volume, en pourcentage du volume
 maximum (par défaut\ : 3).
 .
 .
@@ -2256,11 +2256,11 @@ Pilote de sortie audio OSS.
 .PD 0
 .RSs
 .IPs <périphérique-dsp>
-Défini le périphérique audio d'entrée (par défaut\ : /dev/\:dsp)
+Définit le périphérique audio d'entrée (par défaut\ : /dev/\:dsp)
 .IPs <périphérique_de_mixage>
-Défini le périphérique de mixage (par défaut\ : /dev/\:mixer)
+Définit le périphérique de mixage (par défaut\ : /dev/\:mixer)
 .IPs <canal_de_mixage>
-Défini le canal de mixage (par défaut\ : pcm).
+Définit le canal de mixage (par défaut\ : pcm).
 .RE
 .PD 1
 .
@@ -2272,7 +2272,7 @@ plateforme.
 .PD 0
 .RSs
 .IPs <pilote>
-Choisi explicitement le pilote SDL à utiliser (par défaut\ : SDL choisit
+Choisit explicitement le pilote SDL à utiliser (par défaut\ : SDL choisit
 tout seul).
 .RE
 .PD 1
@@ -2320,7 +2320,7 @@ pilote de sortie audio natif de SGI
 .PD 0
 .RSs
 .IPs "<nom du périphérique de sortie>"
-Choisi explicitement le périphérique/\:interface à utiliser
+Choisit explicitement le périphérique/\:interface à utiliser
 (par défaut\ : celui configuré pour le système global).
 Par exemple, 'Analog Out' ou 'Digital Out'.
 .RE
@@ -2332,7 +2332,7 @@ Pilote de sortie audio natif de Sun.
 .PD 0
 .RSs
 .IPs <pilote>
-Choisi explicitement le périphérique audio à utiliser (par défaut\ :
+Choisit explicitement le périphérique audio à utiliser (par défaut\ :
 /dev/\:audio).
 .RE
 .PD 1
@@ -2390,7 +2390,7 @@ pilote de plugin de sortie audio
 .
 .TP
 .B \-adapter <valeur>
-Défini la carte graphique qui recevra l'image
+Définit la carte graphique qui recevra l'image
 Vous pouvez obtenir une liste des cartes disponibles si cette option est
 combinée à l'option \-v.
 Ne fonctionne pour le moment qu'avec le pilote de sortie vidéo directx.
@@ -2545,7 +2545,7 @@ Essayez cette option si vous avez encore des problèmes en plein-écran.
 .
 .TP
 .B \-fstype <type1,type2,...> (X11 uniquement)
-Défini une liste classée par ordre de priorité des modes plein-écran
+Définit une liste classée par ordre de priorité des modes plein-écran
 à utiliser.
 Vous pouvez inverser les modes en les préfixant par '\-'.
 Si vous avez des problèmes d'affichage, comme votre vidéo en plein-écran est
@@ -2635,17 +2635,17 @@ Non géré par tous les pilotes de sortie vidéo.
 .TP
 .B \-monitor-dotclock <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Défini les paramètres de rafraichissement dotclock ou pixelclock du moniteur.
+Définit les paramètres de rafraichissement dotclock ou pixelclock du moniteur.
 .
 .TP
 .B \-monitor-hfreq <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Défini l'intervalle de rafraichissement horizontal du moniteur.
+Définit l'intervalle de rafraichissement horizontal du moniteur.
 .
 .TP
 .B \-monitor-vfreq <intervalle[,intervalle,...]> (\-vo fbdev et vesa \
 uniquement)
-Défini l'intervalle de rafraichissement vertical du moniteur.
+Définit l'intervalle de rafraichissement vertical du moniteur.
 .
 .TP
 .B \-monitoraspect <rapport> (Voir aussi \-aspect)
@@ -2710,7 +2710,7 @@ N'envoyez pas de rapport de bug à moins que vous utilisiez \-vo gl.
 .
 .TP
 .B \-refreshrate <Hz>
-Défini la fréquence de rafraichissement en Hz.
+Définit la fréquence de rafraichissement en Hz.
 N'est géré actuellement que par \-vo directx combinée avec l'option \-vm.
 .
 .TP
@@ -2728,13 +2728,13 @@ N'est pas géré par tous les pilotes de sortie vidéo.
 .
 .TP
 .B \-screenh <pixels>
-Défini la résolution verticale de votre écran pour des pilotes de
+Définit la résolution verticale de votre écran pour des pilotes de
 sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .
 .TP
 .B \-screenw <pixels>
-Défini la résolution horizontale de votre écran pour des pilotes de
+Définit la résolution horizontale de votre écran pour des pilotes de
 sortie vidéo qui ne connaissent pas la résolution de l'écran, comme
 fbdev, x11 et TVout
 .
@@ -2807,7 +2807,7 @@ exemple de mode cinérama.
 .
 .TP
 .B \-zrnorm <norm> (\-vo zr uniquement)
-Défini la norme TV à PAL ou NTSC (par défaut\ : 'no change').
+Définit la norme TV à PAL ou NTSC (par défaut\ : 'no change').
 .
 .TP
 .B \-zrquality <1\-20> (\-vo zr uniquement)
@@ -2879,7 +2879,7 @@ Sélectionne la source à partir de laquelle la couleur de transparence
 est prise (par défaut\ : cur).
 .RSss
 .IPs cur
-Choisi celle utilisée par Xv.
+Choisit celle utilisée par Xv.
 .IPs use
 Utilise mais ne défini pas la couleur de transparence depuis MPlayer
 (utilisez l'option \-colorkey pour la changer).
@@ -2887,14 +2887,14 @@ Utilise mais ne défini pas la couleur de transparence depuis MPlayer
 Comme 'use' mais défini aussi la couleur de transparence donnée.
 .RE
 .IPs ck-method=<man|bg|auto>
-Défini la méthode de remplissage de la couleur de transparence
+Définit la méthode de remplissage de la couleur de transparence
 (par défaut\ : man).
 .RSss
 .IPs man
-Rempli la couleur de transparence manuellement (déduit les sautillements
+Remplit la couleur de transparence manuellement (déduit les sautillements
 dans certains cas).
 .IPs bg
-Défini la couleur de transparence d'après l'arrière-plan de la fenêtre.
+Définit la couleur de transparence d'après l'arrière-plan de la fenêtre.
 .IPs auto
 Laisse Xv remplir la couleur de transparence.
 .RE
@@ -3165,7 +3165,7 @@ Active ou désactive la gestion du redimensionnement du ratio d'aspect et
 le "pan-and-scan" (par défaut\ : activé).
 Sa désactivation peut économiser un peu de temps processeur.
 .IPs rectangle=<0,1,2>
-Défini l'utilisation des textures rectangulaires ce qui économise de la
+Définit l'utilisation des textures rectangulaires ce qui économise de la
 RAM vidéo, mais est souvent plus lent (par défaut\ : 0).
 .RSss
 0: Utilise des textures de taille d'une puissance de deux (par défaut).
@@ -3189,7 +3189,7 @@ Requiert le support de GLX_SGI_swap_control pour fonctionner.
 Avec certaines implémentation (la plupart/toutes?) ceci ne fonctionne
 qu'en mode plein écran
 .IPs yuv=<n>
-Choisi le type de conversion YUV vers RGB.
+Choisit le type de conversion YUV vers RGB.
 .RSss
 0: Utilise la conversion logicielle (par défaut).
 Compatible avec toutes les versions d'OpenGL.
@@ -3247,7 +3247,7 @@ texture.
 .IPs (no)glfinish
 Fonctionne comme pour le pilote de sortie vidéo gl (par défaut\ : activé)
 .IPs yuv=<n>
-Choisi le type de conversion YUV vers RGB.
+Choisit le type de conversion YUV vers RGB.
 Si défini à autre chose que 0, l'OSD sera désactivé et le paramétrage de
 la luminosité, du contraste et du gamma sera uniquement paramétrable à
 travers les paramètres globaux du serveur X.
@@ -3359,7 +3359,7 @@ La qualité de l'image y est époustouflante puisque toutes les spécificités
 et limitations de l'affichage sur une TV sont gérées (image entrelacée,
 synchro, etc ...)
 .IPs tvnorm=pal|ntsc|auto
-Défini la norme TV de la carte Matrox sans avoir besoin de modifier
+Définit la norme TV de la carte Matrox sans avoir besoin de modifier
 /etc/\:directfbrc (par défaut\ : désactivé).
 Les normes valides sont pal = PAL, ntsc = NTSC.
 La norme auto est particulière (auto-ajustement PAL/\:NTSC) puisqu'elle choisit
@@ -3439,7 +3439,7 @@ Pilote de sortie vidéo spécifique aux cartes Créatives DXR2.
 .PD 0
 .RSs
 .IPs <pilote_vo>
-Défini le sous-pilote à utiliser pour l'incrustation (overlay) (x11, xv).
+Définit le sous-pilote à utiliser pour l'incrustation (overlay) (x11, xv).
 .RE
 .PD 1
 .
@@ -3487,7 +3487,7 @@ MPEG-PES dans un fichier si aucune carte DVB n'est installée.
 Défini le numéro de périphérique à utiliser si vous avez plus d'une carte
 DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
 .IPs <nom_fichier>
-Défini le nom du fichier de sortie (par défaut\ : ./grab.mpg).
+Définit le nom du fichier de sortie (par défaut\ : ./grab.mpg).
 .RE
 .PD 1
 .
@@ -3503,9 +3503,9 @@ MJPEG, seconde génération.
 .PD 0
 .RSs
 .IPs dev=<périph>
-Défini le vidéo périphérique à utiliser.
+Définit le vidéo périphérique à utiliser.
 .IPs norm=<PAL|NTSC|SECAM|auto>
-Défini la norme vidéo à utiliser (par défaut\ : auto)
+Définit la norme vidéo à utiliser (par défaut\ : auto)
 .IPs (no)prebuf
 (Dés)Active le pré-tamponnage (prebuffering), non géré pour le moment.
 .RE
@@ -3519,7 +3519,7 @@ Utile pour le débogage.
 .PD 0
 .RSs
 .IPs outfile=<nom_fichier>
-Défini le nom de fichier de sortie (par défaut\ : ./md5sums).
+Définit le nom de fichier de sortie (par défaut\ : ./md5sums).
 .RE
 .PD 1
 .
@@ -3560,7 +3560,7 @@ sortie à 256 couleurs.
 Valeur flottante pour définir le nombre de trames/sec (framerate)
 (par défaut\ : 5.0).
 .IPs <nom_fichier>
-Défini le nom du fichier de sortie (par défaut\ : ./out.gif).
+Définit le nom du fichier de sortie (par défaut\ : ./out.gif).
 .REss
 .PD 1
 .RS
@@ -3595,7 +3595,7 @@ facteur d'adoucissement (par défaut\ : 0)
 .IPs quality=<0\-100>
 facteur de qualité (par défaut\ : 75)
 .IPs outdir=<chemin>
-Défini le répertoire où sauver les fichiers JPEG (par défaut\ ./).
+Définit le répertoire où sauver les fichiers JPEG (par défaut\ ./).
 .IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés, avec le préfixe donné pour y écrire
 les fichiers au lieu de les mettre tous dans le même répertoire.
@@ -3627,7 +3627,7 @@ en bas de l'image.
 .IPs ascii
 Écrit les fichiers PNM en mode ASCII (par défaut).
 .IPs outdir=<nom_répertoire>
-Défini le répertoire où écrire les fichiers PNM.
+Définit le répertoire où écrire les fichiers PNM.
 .IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés avec le préfixe donné
 pour y écrire les fichiers au lieu de les mettre tous dans le
@@ -3647,7 +3647,7 @@ Ne gère que les formats RGB et BGR 24 bits/pixel.
 .PD 0
 .RSs
 .IPs z=<0\-9>
-Défini le taux de compression.
+Définit le taux de compression.
 0 équivaut à pas de compression et 9 à la compression maximale.
 .RE
 .PD 1
@@ -3675,7 +3675,7 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .
 .TP
 .B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
-Défini une liste de priorité des codecs audio à utiliser, à partir de leur
+Définit une liste de priorité des codecs audio à utiliser, à partir de leur
 nom de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va probablement
@@ -3738,7 +3738,7 @@ Identique à \-af.
 .
 .TP
 .B \-afm <driver1,driver2,...>
-Défini une liste de priorité des familles de codecs audio à utiliser,
+Définit une liste de priorité des familles de codecs audio à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
@@ -3779,7 +3779,7 @@ Renverse l'image de haut en bas.
 .
 .TP
 .B \-lavdopts <option1:option2:...> (CODE DE DÉBOGAGE)
-Défini les paramètres de décodage de libavcodec.
+Définit les paramètres de décodage de libavcodec.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -3861,7 +3861,7 @@ teinte est verte.
 0x4000: Visualise le type de bloc.
 .REss
 .IPs ec=<valeur>
-Défini la stratégie de dissimulation des erreurs.
+Définit la stratégie de dissimulation des erreurs.
 .RSss
 1: Utilise un filtre de déblocage fort pour les macro-blocs endommagés.
 .br
@@ -3870,7 +3870,7 @@ Défini la stratégie de dissimulation des erreurs.
 3: toutes (par défaut)
 .REss
 .IPs er=<valeur>
-Défini la stratégie de résilience aux erreurs.
+Définit la stratégie de résilience aux erreurs.
 .RSss
 .br
 0: désactivé
@@ -3913,7 +3913,7 @@ réduite.
 3: 1/8 résolution
 .REss
 .RS
-Si <l> est défini, les décodage en résolution réduite sera effectué uniquement
+Si <l> est défini, le décodage en résolution réduite sera effectué uniquement
 si la largeur de la vidéo est plus grande ou égale à <l>.
 .RE
 .IPs "sb=<valeur> (MPEG-2 uniquement)"
@@ -3935,7 +3935,7 @@ le décodage sans que cela n'affecte vraiment la qualité.
 .br
 none: Ne saute jamais.
 .br
-default: Saute les étapes de traitement inutiles
+default: Saute les étapes de traitements inutiles
 (par ex.\& les paquets AVI de taille nulle).
 .br
 nonref: Saute les trames qui ne sont pas référencées (i.e.\& non
@@ -4018,7 +4018,7 @@ utilisation.
 .
 .TP
 .B \-ssf <mode>
-Défini les paramètres de redimensionnement logiciel (scaler).
+Définit les paramètres de redimensionnement logiciel (scaler).
 .sp 1
 .I EXEMPLE\ :
 .PD 0
@@ -4061,7 +4061,7 @@ canal droit
 .
 .TP
 .B \-sws <type de zoom logiciel> (voir aussi \-vf scale et \-zoom)
-Défini l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
+Définit l'algorithme du zoom logiciel qui sera utilisé par l'option \-zoom.
 Agit sur les pilotes de sortie vidéo qui ne disposent pas de ce type
 d'accélération logicielle, ex.\& x11.
 .sp 1
@@ -4102,7 +4102,7 @@ Plus d'informations sont disponibles dans la description du filtre scale.
 .
 .TP
 .B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
-Défini une liste de priorité des codecs vidéo à utiliser, suivant leur nom
+Définit une liste de priorité des codecs vidéo à utiliser, suivant leur nom
 de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
 Ajoutez un '+' avant son nom pour le forcer, ce qui va probablement
@@ -4128,7 +4128,7 @@ Essaie le codec MPEG-1/\:2 de libavcodec, puis libmpeg2, puis les autres.
 .
 .TP
 .B \-vfm <pilote1,pilote2,...>
-Défini une liste de priorité des familles de codecs vidéo à utiliser,
+Définit une liste de priorité des familles de codecs vidéo à utiliser,
 d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
@@ -4154,7 +4154,7 @@ Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
 .B \-xvidopts <option1:option2:...>
-Défini des paramètres additionnels de décodage avec XviD.
+Définit des paramètres additionnels de décodage avec XviD.
 .br NOTE\ :
 Étant donné que libavcodec est plus rapide qu'XviD, peut-être aurez-vous
 besoin d'utiliser les filtres de post-traitement de libavcodec (\-vf pp)
@@ -4242,7 +4242,7 @@ Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
 .RSs
 .IPs <srate>
 fréquence d'échantillonnage de sortie en Hz.
-L'intervalle de valeurs valide pour ce paramètre est 8000 jusqu'à 192000.
+L'intervalle de valeurs valides pour ce paramètre est 8000 jusqu'à 192000.
 Si l'entrée et la sortie ont la même fréquence d'échantillonnage, ou
 si ce paramètre est omis, ce filtre est automatiquement déchargé.
 Une haute fréquence d'échantillonnage améliore généralement la qualité
@@ -4252,7 +4252,7 @@ Autorise (1) ou interdit (0) que la fréquence de sortie soit légèrement
 différente de la fréquence donnée par <srate> (par défaut\ : 1).
 Peut être utilisé si le démarrage de la lecture est extrêmement lent.
 .IPs <type>
-Défini la méthode de ré-échantillonnage à utiliser.
+Définit la méthode de ré-échantillonnage à utiliser.
 .RSss
 0: interpolation linéaire (rapide, mauvaise qualité tout particulièrement
 en cas de sur-échantillonnage)
@@ -4421,7 +4421,7 @@ Activé automatiquement lorsque la carte son ou un autre filtre le nécessite.
 .PD 0
 .RSs
 .IPs <format>
-Défini le format souhaité.
+Définit le format souhaité.
 Sa forme générale est 'sbe', où 's' indique le signe (soit 's' pour signé
 ou 'u' pour non signé (unsigned)), 'b' indique le nombre de bits par
 échantillon (16, 24 ou 32), et 'e' indique le boutisme (endianness)
@@ -4461,13 +4461,13 @@ fois pour chaque flux audio.
 .PD 0
 .RSs
 .IPs <v>\ \ 
-Défini le gain désiré en dB pour tous les canaux du flux,
+Définit le gain désiré en dB pour tous les canaux du flux,
 de -200dB à +60dB, où -200dB coupe le son complètement
 et +40dB équivaut à un gain de 1000 (par défaut\ : 0).
 .IPs <sc>\ 
 Active (1) ou désactive (0) le l'écrêtage logiciel.
 L'écrêtage logiciel peut rendre le son plus doux si le son filtré
-comporte des sont très forts.
+comporte des sons très forts.
 Activez cette option si la dynamique de vos enceintes est très
 faible.
 .br
@@ -4504,9 +4504,9 @@ Un exemple de mixage de six canaux vers deux à l'aide de ce filtre peut
 nombre de canaux de sortie (1\-6)
 .IPs <lij>
 Combien du canal i est mixé dans le canal de sortie j (0\-1).
-En principe, vous avez n nombres spécifiant ce que faire avec le premier
-canal d'entrée, et n nombres agissant sur le canal d'entrée, etc.
-Si vous ne donnez pas de nombre pour certains des canaux d'entrée, ils
+En principe, vous avez un nombre spécifiant ce que faire avec le premier
+canal d'entrée, et un nombre agissant sur le canal d'entrée, etc.
+Si vous ne donnez pas de nombres pour certains des canaux d'entrée, ils
 prennent la valeur 0.
 .RE
 .sp 1
@@ -4546,7 +4546,7 @@ Pour un meilleur résultat, essayez de baisser la fréquence de coupure
 aussi bas que possible.
 Cela améliorera l'effet surround ou stéréo.
 .IPs <ca>\ 
-Défini le numéro de canal vers lequel router le flux du caisson de basse.
+Définit le numéro de canal vers lequel router le flux du caisson de basse.
 Le numéro de canal doit être compris entre 0 et 5 (par défaut\ : 5).
 Notez que le nombre de canaux sera automatiquement incrémenté jusqu'à <ch>
 si nécessaire.
@@ -4590,10 +4590,10 @@ supportant au moins 4 canaux.
 .PD 0
 .RSs
 .IPs <retard>
-retard en ms pour les hauts-parleurs arrière (0 à 1000) (par défaut\ : 20)
+retard en ms pour les hauts-parleur arrière (0 à 1000) (par défaut\ : 20)
 Ce décalage devrait être défini ainsi\ : si d1 est la distance entre la
-position d'écoute et les haut-parleurs de devant et d2 la distance entre
-la position d'écoute et les haut-parleurs de derrière, alors le retard
+position d'écoute et les hauts-parleur de devant et d2 la distance entre
+la position d'écoute et les hauts-parleur de derrière, alors le retard
 d peut être fixé à 15ms si d1 si d1 <= d2 et à 15 + 5*(d1-d2) si d1 > d2.
 .RE
 .sp 1
@@ -4603,16 +4603,16 @@ d peut être fixé à 15ms si d1 si d1 <= d2 et à 15 + 5*(d1-d2) si d1 > d2.
 .RSs
 .IPs "mplayer \-af surround=15 \-channels 4 media.avi"
 Ajouterait un décodage de son surround avec un retard de 15ms pour le son des
-haut-parleurs arrière.
+haust-parleur arrière.
 .RE
 .PD 1
 .
 .TP
 .B delay[=ch1:ch2:...]
-Retarde l'envoi du son vers les haut-parleurs de façon à faire
+Retarde l'envoi du son vers les hauts-parleur de façon à faire
 arriver le son dans les différents canaux au même moment à la
 position d'écoute.
-Cela n'est utile que si vous avez plus de 2 haut-parleurs.
+Cela n'est utile que si vous avez plus de 2 hauts-parleur.
 .PD 0
 .RSs
 .IPs ch1,ch2,...
@@ -4624,7 +4624,7 @@ Le retard en millisecondes devant être imposé à chaque canal
 .RS
 Pour calculer le décalage requis pour chaque canal, faites comme ceci:
 .IP 1. 3
-Mesurez la distance en mètre entre les hauts parleurs et votre position
+Mesurez la distance en mètre entre les hauts parleur et votre position
 d'écoute, ce qui vous donne les distances s1 à s5 (pour un système 5.1).
 Ce n'est pas la peine de le faire pour le caisson de basses (vous
 n'entendrez pas la différence de toute façon).
@@ -4678,7 +4678,7 @@ droite ce qui permet d'obtenir un lecture avec un effet 'live'.
 .PD 0
 .RSs
 .IPs <mul>
-Défini le coefficient de différence (par défaut\ : 2.5)
+Définit le coefficient de différence (par défaut\ : 2.5)
 0.0 donne un son mono (moyenne des deux cannaux), 1.0 done un son
 inchangé, tandis qu'avec -1.0 les canaux gauche et droit seront
 inversés.
@@ -4709,14 +4709,14 @@ par le type d'échantillon (par défaut 0.25).
 .TP
 .B ladspa=nom_fichier:label[:contrôles...]
 Charge un plugin LADSPA (Linux Audio Developer's Simple Plugin API).
-Ce filtre est réentrant, donc plusieurs instances de plugins LADSPA penvent
-être utilisé à la fois.
+Ce filtre est réentrant, donc plusieurs instances de plugins LADSPA peuvent
+être utilisés à la fois.
 .PD 0
 .RSs
 .IPs <nom_fichier>
 Définit le fichier de la librairie du plugin LADSPA.
-Si LADSPA_PATH est définit, la recherche se fait dans le répertoire spécifié.
-S'il n'est pas définit, vous devez alors donner le chemin absolu.
+Si LADSPA_PATH est défini, la recherche se fait dans le répertoire spécifié.
+S'il n'est pas défini, vous devez alors donner le chemin absolu.
 .IPs <label>
 Sélectionne le filtre de la librairie.
 Certaines librairies disposent d'un seul filtre, mais d'autres en contiennent
@@ -4740,13 +4740,13 @@ LADSPA.
 Filtre de compression/expansion utile pour une entrée micro.
 Augmente le volume des sons faibles ou diminue celui des sons forts
 pour éviter des artefacts sonores.
-Ce filtre a été très peu testé, et n'es peut-être même pas
+Ce filtre a été très peu testé, et n'est peut-être même pas
 utilisable.
 .
 .TP
 .B gate\ \ \ 
 Filtre antiparasite similaire au filtre audio comp.
-Ce filtre a été très peu testé, et n'es peut-être même pas
+Ce filtre a été très peu testé, et n'est peut-être même pas
 utilisable.
 .
 .
@@ -4800,7 +4800,7 @@ noms.
 .
 .TP
 .B \-vf <filtre>=help
-Affiche les noms des paramètres et leur intervalle de valeurs pour un filtre
+Affiche les noms des paramètres et leur intervalle de valeur pour un filtre
 particulier.
 .
 .TP
@@ -4858,7 +4858,7 @@ position du coin supérieur gauche (par défaut\ : -1, le plus haut et le plus
 .
 .TP
 .B expand[=w:h:x:y:o:a:r]
-Étend (ne zoom pas) la résolution du film aux valeurs fournies et place
+Étend (ne zoome pas) la résolution du film aux valeurs fournies et place
 l'original non redimensionné aux coordonnées x y.
 Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
 .RSs
@@ -4930,7 +4930,7 @@ Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
 .IPs <l>,<h>
-largeur/\:hauteur redimensionnées (par défaut\ : largeur, hauteur originales)
+largeur/\:hauteur redimensionnée (par défaut\ : largeur, hauteur originales)
 .br
 .I NOTE:
 Si \-zoom est utilisée, et que les filtres sous-jacents (y compris libvo)
@@ -5049,7 +5049,7 @@ original de la vidéo.
 .PD 0
 .RSs
 .IP dsize=800:-2
-Défini une résolution d'affichage de 800x600 pour une vidéo dont le
+Définit une résolution d'affichage de 800x600 pour une vidéo dont le
 ratio d'aspect est 4/3, ou 800x450 pour une vidéo dont l'aspect ratio
 est 16/9.
 .RE
@@ -5075,7 +5075,7 @@ résolution minimale.
 .PD 0
 .RSs
 .IP dsize=800:600:0
-Défini une résolution d'affichage d'au plus 800x600, ou moins, tout en
+Définit une résolution d'affichage d'au plus 800x600, ou moins, tout en
 gardant le ratio d'aspect.
 .RE
 .PD 1
@@ -5093,7 +5093,7 @@ YUY2 rapidement.
 .TP
 .B yvu9\ \ \ 
 Force la conversion logicielle d'espace de couleur de YVU9 en YV12.
-Utilisez de préférence le zoom logiciel.
+Utiliser de préférence le zoom logiciel.
 .
 .TP
 .B yuvcsp\ 
@@ -5147,7 +5147,7 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .
 .TP
 .B pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi \-pphelp)
-Construit la chaîne de filtres spécifiée.
+Construit la chaîne de filtres qui est spécifiée.
 Les sous-filtres doivent être séparés avec '/', peuvent être désactivés
 en les préfixant de '-'.
 Chaque sous-filtre et quelques options ont une forme longue et une forme
@@ -5255,7 +5255,7 @@ filtrant une ligne sur deux avec un filtre (-1 4 2 4 -1).
 Applique un filtre passe-bas FIR désentrelaçant le bloc donné en
 filtrant toutes les lignes avec un filtre (-1 2 6 2 -1).
 .IPs fq/forceQuant[:quantum]
-Outrepasse la table des quantum de la source avec le quantum constant
+Outrepasse la table des quantums de la source avec le quantum constant
 que vous donnez.
 .RSss
 <quantum>: le quantum à utiliser
@@ -5622,7 +5622,7 @@ la limite <haut>, et si pas plus de <frac> portions (1 signifiant l'image
 entière) ne diffèrent de plus que la limite <bas>.
 Les valeurs de <haut> et <bas> sont pour des blocs de 8x8 pixels et
 représentent les différences effectives de pixels, donc une limite de 64
-corespond à 1 unité de différence pour chaque pixel, ou la même chose
+corespond à 1'unité de différence pour chaque pixel, ou la même chose
 répartie différemment sur le bloc.
 .RE
 .PD 1
@@ -5731,7 +5731,7 @@ multiplexe
 .TP
 .B fil[=i|d]
 (dé)multiplexe les lignes.
-Ce filtre est très proche du filtre il mais bien plus rapide, son principal
+Ce filtre est très proche du filtre"il" mais bien plus rapide, son principal
 inconvénient est qu'il ne fonctionne pas toujours.
 Surtout s'il est combiné avec d'autres filtres, il peut produire des images
 corrompues aléatoirement, donc soyez heureux si il fonctionne mais ne vous
@@ -5961,7 +5961,7 @@ pour faire la première passe divtc avant de commencer
 Utilisez les options \-nosound \-ovc raw \-o /dev/null
 pour ne pas gâcher inutilement du temps processeur pour
 cette passe.
-Vous pouvez aussi ajouter quelquechose comme
+Vous pouvez aussi ajouter quelque chose comme
 crop=2:2:0:0 après divtc pour accélérer encore le
 processus.
 Utilisez ensuite la passe deux divtc pour l'encodage
@@ -5975,7 +5975,7 @@ Utilise le mode deux passes.
 .IPs file=<nom_fichier>
 Définit le nom du fichier journal (par défaut\ : "framediff.log").
 .IPs threshold=<valeur>
-Définit la force minimum que le motif telecine doit avoir pour que le filtre
+Défini la force minimum que le motif telecine doit avoir pour que le filtre
 le voit (par défaut\ : 0.5).
 Ceci est utilisé pour éviter de reconnaître des motifs erronés lors des
 moments vraiment sombres ou statiques.
@@ -6138,11 +6138,11 @@ auto (par défaut)
 Ne fonctionne que si le décodeur exporte les informations nécessaires
 et que les filtres de la chaîne de filtres appliqués avant tfields
 ne supriment pas cette information, sinon on commence par défaut
-par le champs du haut.
+par le champ du haut.
 .IPs 0
-champs du haut d'abord
+champ du haut d'abord
 .IPs 1
-champs du bas d'abord
+champ du bas d'abord
 .RE
 .PD 1
 .
@@ -6315,7 +6315,7 @@ keyint (voir \-lavcopts keyint=valeur si vous utilisez MEncoder pour encoder la
 vidéo).
 .sp 1
 Quand une trame clé est trouvée, la chaine "I!" suivi d'un retour chariot est
-affiché, laissant la ligne courante de MPlayer/\:MEncoder à l'écran, car elle
+affichée, laissant la ligne courante de MPlayer/\:MEncoder à l'écran, car elle
 contient le temps (en secondes) et le numéro de trame de la trame clé
 (Vous pouvez utiliser cette information pour couper un AVI).
 .sp 1
@@ -6425,7 +6425,7 @@ L'option fd dit au filtre de toujours appliquer la décimation demandée
 .B screenshot
 Permet de réaliser des captures d'écran à chaque utilisation de la
 commande "screenshot" (correspond à la touche 's' par defaut).
-Chaque capture sera sauvegardé dans le répertoire de travail, et chaque un
+Chaque capture sera sauvegardée dans le répertoire de travail, et chaque
 fichier aura un nom de type 'shotNNNN.png' en utilisant le premier nombre
 disponible - aucun fichier ne sera écrasé.
 Ce filtre ne provoque pas de surcoût lorsqu'il n'est pas utilisé, et accepte
@@ -6463,7 +6463,7 @@ morceau.
 .
 .TP
 .B \-audio-preload <0.0\-2.0>
-Définit la durée du tampon audio (par défaut\ : 0.5s).
+Défini la durée du tampon audio (par défaut\ : 0.5s).
 .
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|taille[o|ko|mo]> (voir aussi \-ss et \-sb)
@@ -6519,7 +6519,7 @@ existant
 .
 .TP
 .B \-frameno-file <nom_fichier> (DEPRÉCIÉ)
-Défini le nom du fichier audio contenant la carte des numéros de trames
+Définit le nom du fichier audio contenant la carte des numéros de trames
 créé lors de la première passe (où juste l'audio est encodée) du mode
 d'encodage 3-passes spécial.
 .br
@@ -6538,7 +6538,7 @@ Les séquences marquées pour être sautées ne sont pas réellement
 sautées, à la place toutes les trames sont décodées, mais uniquement
 les trames utiles sont encodées.
 Ceci permet de pouvoir commencer en dehors de frontières de
-trames-clées.
+trames-clés.
 .br
 .I NOTE\ :
 Ceci n'est pas garanti de fonctionner correctement avec
@@ -6587,7 +6587,7 @@ Pour le moment, le seul filtre le permettant est harddup.
 .
 .TP
 .B \-noodml (\-of avi uniquement)
-Ne pas écrire l'index OpenDML des fichier AVI >1Go.
+Ne pas écrire l'index OpenDML des fichiers AVI >1Go.
 .
 .TP
 .B \-noskip
@@ -6688,7 +6688,7 @@ une trame (\-noskiplimit pour un nombre illimité).
 .B \-vobsubout <nom_de_base>
 Définit le nom de base pour les fichiers .idx et .sub de destination.
 Cela désactive le rendu des sous-titres dans le film encodé et le redirige
-vers un groupe de fichiers de sous-titre VOBsub.
+vers un groupe de fichiers de sous-titres VOBsub.
 .
 .TP
 .B \-vobsuboutid <langid>
@@ -7276,10 +7276,10 @@ intervalle (en trames) entre les trames-clé (keyframe)
 (par défaut\ : 250 ou une trame-clé toutes les dix secondes dans un
 film à 25fps.
 C'est la valeur par défaut recommandée pour MPEG-4.)
-La plupart des codecs requièrent des trames-clées espacées régulièrement
+La plupart des codecs requièrent des trames-clés espacées régulièrement
 de façon à ne pas accumuler des erreurs d'encodage.
-Les trames-clé sont de plus indispensables pour les déplacements, puisqu'il
-ne peut se faire que de trame-clée à trame-clée - mais celles-ci prennent plus
+Les trames-clés sont de plus indispensables pour les déplacements, puisqu'il
+ne peut se faire que de trame-clé à trame-clé - mais celles-ci prennent plus
 de place que les autres types de trames.
 Un espacement plus important des trames-clé signifie donc des fichiers
 légèrement plus petits, mais un déplacement moins précis.
@@ -7572,7 +7572,7 @@ Compression quantum, vrc_eq dépend de cette option (passe 1/2)
 (par défaut\ : 0.5).
 Par exemple, en prenant l'équation de contrôle de flux (rate control) par
 défaut, si vqcomp=1.0, le contrôle de flux alloue à chaque trame le nombre
-de bits nécessaire pour qu'elles soient toute encodées avec le même quantum
+de bits nécessaire pour qu'elles soient toutes encodées avec le même quantum
 (que cela soit nécessaire ou non).
 Si vqcomp=0.0, le contrôle de flux alloue à chaque trame le même nombre de
 bits, c-à-d un encodage à débit binaire strictement constant.
@@ -7688,7 +7688,7 @@ Définit comment garder le quantum entre qmin et qmax (passe 1/2).
 .IPs 0
 Utilise le découpage (clipping).
 .IPs 1
-Utilise une bonne fonction différentiable (par défaut).
+Utilise une bonne fonction différenciable (par défaut).
 .RE
 .PD 1
 .
@@ -7733,7 +7733,7 @@ référence.
 .IPs -1
 Autorise des extensions spécifiques à libavcodec (par défaut).
 .IPs -2
-Active les codecs et les fonctionnalitées expérimentales risquant de ne
+Active les codecs et les fonctionnalités expérimentales risquant de ne
 plus pouvoir être lues par les futures versions de MPlayer
 (snow, ffvhuff, ffv1).
 .RE
@@ -7839,10 +7839,10 @@ sh4
 .
 .TP
 .B lumi_mask=<0.0\-1.0>
-Le luminance masking (masquage des zones saturées de lumière) est un
+La luminance masking (masquage des zones saturées de lumière) est un
 algorithme psychosensoriel qui est sensé tenir compte de la moindre
 sensibilité rétinienne aux zones saturées de lumière.
-Le luminance masking compresse plus fortement les zones très lumineuses,
+La luminance masking compresse plus fortement les zones très lumineuses,
 économisant ainsi des bits, pouvant être redistribués à d'autres trames,
 augmentant ainsi la qualité subjective globale de la vidéo, tout en
 dégradant probablement un peu le PSNR.
@@ -7939,7 +7939,7 @@ scplx_mask ne rendra pas un résultat aussi bon.
 .TP
 .B p_mask=<0.0\-1.0> (voir aussi vi_qfactor)
 Réduit la qualité des blocs inter, ce qui revient à augmenter celle blocs
-intra blocks, puisque le même bitrate moyen sera distribué par le "rate
+intra, puisque le même bitrate moyen sera distribué par le "rate
 controller" à l'ensemble de la séquence vidéo (par défaut\ : 0.0 (désactivé)).
 p_mask=1.0 double la quantité de bits donnés à chaque bloc intra.
 .
@@ -8090,7 +8090,7 @@ somme des différences absolues de la transformée de Hadamard
 .IPs "3 (DCT)"
 somme des différences absolues de la transformée DCT
 .IPs "4 (PSNR)"
-somme des erreurs de quantification au carré (éviter, mauvaise qualité)
+somme des erreurs de quantification au carré (évitez, mauvaise qualité)
 .IPs "5 (BIT)"
 nombre de bits requis pour le bloc
 .IPs "6 (RD)"
@@ -8152,7 +8152,7 @@ La recherche de mouvement est un processus itératif.
 L'utilisation de diamants plus petits ne limitent pas la recherche à
 de petits vecteurs de mouvement.
 En revanche, la recherche risque de se terminer avant d'avoir trouvé
-celui serait vraiment meilleur, surtout en présence de bruit.
+celui qui serait vraiment meilleur, surtout en présence de bruit.
 De plus grands diamants permettent une recherche plus étendue du meilleur
 vecteur de mouvement, et sont par conséquent plus lents mais améliorent la
 qualité.
@@ -8329,7 +8329,7 @@ denoise3d ou hqdn3d.
 .TP
 .B qns=<0\-3>
 Quantification d'après un modèle de bruit.
-Au lieu d'effectuer la quantification dans le but d'obtenir avoir l'image la
+Au lieu d'effectuer la quantification dans le but d'essayer d'obtenir l'image la
 plus fidèle d'un point de vue PSNR, la quantification sera faite de façon à
 ce que le bruit (souvent le "ringing") soit masqué par des données de
 fréquence similaire dans l'image.
@@ -8546,13 +8546,13 @@ options [min|max]_[i|p|b]quant.
 .B min_key_interval=<valeur> (mode deux passes uniquement)
 Intervalle minimum entre les trames-clés.
 S'exprime en tant que gain en pourcentage, pour lequel la
-valeur 10 donnera au trames-clés 10% de plus de bits que
+valeur 10 donnera au trames-clé 10% de plus de bits que
 la normale
 (par défaut\ : 0).
 .
 .TP
 .B max_key_interval=<valeur>
-intervalle maximum entre les trames-clé (par défaut\ : 10*fps)
+intervalle maximum entre les trames-clés (par défaut\ : 10*fps)
 .
 .TP
 .B mpeg_quant
@@ -8728,7 +8728,7 @@ Aussi, dans un contexte d'encodage temps réel, pensez à cette option
 .TP
 .B (no)cartoon
 Ceci est un mode spécial d'XviD permettant de mieux tenir compte des grands
-à-plats de couleurs que l'on trouve typiquement dans les dessins animés.
+à-plats de couleur que l'on trouve typiquement dans les dessins animés.
 .
 .TP
 .B quant_type=<h263|mpeg>
@@ -8952,15 +8952,15 @@ Définit le mode de Pixel Aspect Ratio\ : Rapport largeur/\:hauteur des Pixels
 (à ne pas confondre avec le DAR, Display Aspect Ratio\ :
 Rapport hauteur/\:largeur d'affichage).
 PAR est le ratio entre la largeur et la hauteur d'un pixel.
-Ils sont tout deux liés par la formule\ : DAR = PAR * (largeur/hauteur).
+Ils sont tous deux liés par la formule\ : DAR = PAR * (largeur/hauteur).
 .br
-MPEG-4 définit 5 PAR et un étendu, pour permettre de définir des PAR
+MPEG-4 défini 5 PAR et un étendu, pour permettre de définir des PAR
 particuliers.
 5 modes standard peuvent être définis\ :
 .PD 0
 .RSs
 .IPs vga11
-C'est le PAR classique des vidéos informtiques.
+C'est le PAR classique des vidéos informatiques.
 Les pixels sont carrés.
 .IPs pal43
 le PAR du standard PAL 4:3.
@@ -9066,7 +9066,7 @@ Par exemple, MPEG à QP=2 est équivalent à H.264 à QP=18.
 Active le mode qualité constante, et choisi la qualité.
 L'échelle est similaire à QP.
 Tout comme les modes basés sur le bitrate, celui-ci permet aux trames
-d'utiliser des QP différent en fonction de la complexité de la trame.
+d'utiliser des QP différents en fonction de la complexité de la trame.
 .
 .TP
 .B pass=<1\-3>
@@ -9118,7 +9118,7 @@ Mode première passe rapide.
 Lors de la première passe d'un encodage deux (ou plus) passes, il est
 possible de gagner en vitesse en désactivant certaines options sans que
 cela ait d'effet notable, ou même sans aucun effet sur la qualité des
-statistiques récoltés lors de la première passe.
+statistiques récoltées lors de la première passe.
 .PD 0
 .RSs
 .IPs 0
@@ -9223,7 +9223,7 @@ pas la vitesse d'encodage.
 Cependant, c'est une option expérimentale\ : elle n'est pas encore
 peaufinée, et n'aide pas toujours la compression.
 Requière bframes >= 2.
-Désavantage\ : augmente de 2 trames le délais de décodage.
+Désavantage\ : augmente de 2 trames le délai de décodage.
 .
 .TP
 .B (no)deblock
@@ -9248,7 +9248,7 @@ Le paramétrage par défaut de ce filtre permet généralement d'atteindre
 une qualité optimale, il est donc conseillé de laisser la valeur par
 défaut ou de ne la changer qu'un peu.
 Par contre, si la vidéo source souffre déjà d'artefacts de blocking
-ou de bruit que vous voulez atténuer, vous deviez l'augmenter un peu.
+ou de bruit que vous voulez atténuer, vous devriez l'augmenter un peu.
 .
 .TP
 .B deblockbeta=<-6\-6>
@@ -9260,13 +9260,13 @@ dû au filtre seraient plus visibles que l'effet de bloc original.
 .TP
 .B (no)cabac
 Utilise CABAC (codage de l'information adaptée en fonction du contexte
-avec un codes de longueur variable non entière\ : Context-Adaptive Binary
+avec un code de longueur variable non entière\ : Context-Adaptive Binary
 Arithmetic Coding) (par défaut\ : activé).
 Ralentit un peu l'encodage mais permet d'économiser 10-15% du bitrate.
-À moins que vous ayez besoin de décoder à vitesse élevée, vous ne
+À moins que vous n'ayez besoin de décoder à vitesse élevée, vous ne
 devriez jamais le désactiver.
 Si vous désactivez cette option, le codage CAVLC (codage de l'information
-adaptée en fonction du contexte avec un codes de longueur variable
+adaptée en fonction du contexte avec un code de longueur variable
 entière\ : Context-Adaptive Variable Length Coding) est utilisé à la place.
 .
 .TP
@@ -9294,7 +9294,7 @@ pic maximum de débit binaire, en kbits/\:secondes
 .TP
 .B vbv_bufsize=<value> (ABR ou deux passes)
 temps de moyennage de vbv_maxrate, en kbits
-(par défaut\ : aucun, mais doit être définit si vbv_maxrate est activé)
+(par défaut\ : aucun, mais doit être défini si vbv_maxrate est activé)
 .
 .TP
 .B vbv_init=<0.0\-1.0> (ABR ou deux passes)
@@ -9322,7 +9322,7 @@ la courbe (défaut\ : 20).
 Des valeurs plus faibles permettent au quantum de plus changer d'une
 trame à l'autre, des valeurs plus hautes forcent une variation plus douce.
 cplx_blur permet de s'assurer que chaque trame-I ait une qualité comparable
-aux trame-P suivantes, et garantit qu'une alternance de trames à complexité
+aux trames-P suivantes, et garantit qu'une alternance de trames à complexité
 forte et faible (par exemple un dessin animé dont la cadence d'animation est
 faible) ne gâche pas de bits en faisant fluctuer les quantum.
 .
@@ -9350,7 +9350,7 @@ multiplicateur du débit binaire (bitrate)
 .PD 1
 .RS
 .I NOTE\ :
-L'option quanta n'est pas respectée strictemement.
+L'option quanta n'est pas respectée strictement.
 Elle affect uniquement le stade de planning du contrôleur
 de débit (ratecontrol), et est encore sujet à la compensation
 de débordement et à qp_min/qp_max.
@@ -9365,10 +9365,10 @@ directs dans les trames-B.
 .IPs 0
 Aucun\ : les macro-blocs directs ne sont pas utilisés.
 .IPs 1
-Spatial\ : Les vecteur de mouvements sont extrapolés d'après les blocs
+Spatial\ : Les vecteurs de mouvements sont extrapolés d'après les blocs
 adjacents (par défaut).
 .IPs 2
-Temporel\ : Les vecteur de mouvements sont interpolés d'après la trame-P
+Temporel\ : Les vecteurs de mouvements sont interpolés d'après la trame-P
 suivante.
 .IPs 3
 Auto: Le codec choisit entre Spatial et Temporel à chaque trame.
@@ -9414,7 +9414,7 @@ Utilise en plus les types de macro-blocs p16x8, p8x16, p8x8
 (par défaut\ : activé).
 Sans cette option, les trames-P n'utiliseront que les types
 i16x16, i8x8, i4x4, p16x16, skip.
-Cette option c'est fournie à titre expérimental.
+Cette option est fournie à titre expérimental.
 Il n'est guère recommandé de désactiver 8x8mv lors d'un vrai encodage.
 .
 .TP
@@ -9440,14 +9440,14 @@ Appartient au "High Profile" de la norme h264.
 .
 .TP
 .B me=<1\-4>
-Défini l'algorithme d'estimation du mouvement fullpixel.
+Définit l'algorithme d'estimation du mouvement fullpixel.
 Suivant chaque itérations, les macroblocs sont parcourus pour
 déterminer les vecteurs de mouvement des blocs de pixels.
 On retient celui qui donne la distorsion la plus faible.
 A partir de là, on teste les vecteurs de mouvement voisins.
 La méthode qui est utilisée ici permet donc de définir le nombre
 de vecteurs voisins qui seront testés.
-Pour se qui la recherche en "diamant", la méthode consiste à
+Pour ceux qui la recherche en "diamant", la méthode consiste à
 tester les 4 vecteurs de mouvements voisins.
 Pour la recherche hexagonale, c'est les 6 vecteurs de mouvement
 voisins. 
@@ -9530,7 +9530,7 @@ Nécessite frameref>1.
 .
 .TP
 .B (no)brdo
-Active l'optimisation du types de macroblocs dans les trames-B d'après
+Active l'optimisation du type de macroblocs dans les trames-B d'après
 leur taux de distortion
 Nécessite subq>=6.
 .
@@ -9584,7 +9584,7 @@ Les fichiers encodés avec des CQMs ne sont pas décodés correctement avec
 les lecteurs basés sur FFmpeg.
 .br
 Les utilisateurs de CMD.EXE de Windows peuvent rencontrer des problèmes
-de parsing de la ligne de command s'ils utilisent toutes les CQM sous
+d'analyse de la ligne de commande s'ils utilisent toutes les CQM sous
 forme de listes.
 Ceci est dû à la limite de la longueur de la ligne de commande.
 Dans ce cas, il est recommandé d'utiliser de mettre les listes dans un
@@ -9708,7 +9708,7 @@ bloc-B
 .RE
 .PD 1
 .RS
-Cette fonctionnalité est doit être considérée comme expérimentale, et peut
+Cette fonctionnalité doit être considérée comme expérimentale, et peut
 évoluer.
 En particulier, elle ne fonctionne que si x264 est compilé avec la
 visualisation activée
@@ -9777,25 +9777,25 @@ avant la vidéo.
 .
 .TP
 .B vwidth, vheight=<1\-4095>
-Défini la largeur et la hauteur de la vidéo lorsqu'il s'agit de MPEG-1/2.
+Définit la largeur et la hauteur de la vidéo lorsqu'il s'agit de MPEG-1/2.
 .
 .TP
 .B vpswidth, vpsheight=<1\-4095>
-Défini la largeur et la hauteur de la vidéo pan et scan lorsqu'il s'agit
+Définit la largeur et la hauteur de la vidéo pan et scan lorsqu'il s'agit
 de MPEG-1/2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Défini le ratio d'aspect pour les vidéos MPEG-1/2.
+Définit le ratio d'aspect pour les vidéos MPEG-1/2.
 .
 .TP
 .B vbitrate=<entier>
-Défini le débit binaire vidéo kbit/s pour les vidéos MPEG-1/2.
+Définit le débit binaire vidéo kbit/s pour les vidéos MPEG-1/2.
 .
 .TP
 .B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
-Défini le nombre de trames par secondes pour les vidéos MPEG-1/2.
-Cette option sera ignorée si vous l'utilisez l'utilisez en même
+Définit le nombre de trames par secondes pour les vidéos MPEG-1/2.
+Cette option sera ignorée si vous l'utilisez en même
 temps que l'option téléciné.
 .
 .TP
@@ -9811,7 +9811,7 @@ option.
 .TP
 .B film2pal
 Active le mode téléciné logiciel FILM vers PAL et NTSC vers PAL\ :
-Le va faire comme si la vidéo avait été encodée à 25 fps.
+Il va faire comme si la vidéo avait été encodée à 25 fps.
 Ne fonctionne qu'avec les vidéos MPEG-2 dont le nombre de trames par
 seconde, éventuellement convertit avec l'option \-ofps, est
 24000/1001 ou 24 fps.
@@ -9887,7 +9887,7 @@ Le répertoire où MPlayer lit la configuration de l'utilisateur.
 .
 .TP
 .B MPLAYER_VERBOSE (voir aussi \-v et \-msglevel)
-Défini le niveau initial de verbosité de tous les messages des
+Définit le niveau initial de verbosité de tous les messages des
 modules (par défaut\ : 0).
 Les valeurs négatives résultent en moins de messages alors que
 les valeurs positives résultent en plus.
@@ -9904,42 +9904,42 @@ FIXME: Ceci est une redite de la section LADSPA.
 .
 .TP
 .B DVDCSS_CACHE
-Un répertoire spécifique dans lequel stocker les valeurs de la clée
+Un répertoire spécifique dans lequel stocker les valeurs de la clé
 CSS.
-Ceci accélèrera le cassage de la protection du DVD si sa clée est
+Ceci accélèrera le cassage de la protection du DVD si sa clé est
 en cache.
 Le répertoire DVDCSS_CACHE sera créé s'il n'existe pas, et un répertoire
 nommé en fonction du titre ou de la date de fabrication du DVD sera créé
 en son sein.
-Si DVDCSS_CACHE n'est pas défini our vide, libdvdcss utilisera la valeur
+Si DVDCSS_CACHE n'est pas défini ou vide, libdvdcss utilisera la valeur
 par défaut, qui est "${HOME}/.dvdcss/" sous Unix et
 "C:\\Documents and Settings\\$USER\\Application Data\\dvdcss\\" sous Win32.
 La valeur spéciale "off" désactive la mise en cache.
 .
 .TP
 .B DVDCSS_METHOD
-Défini la méthode d'authentication et de decryptage que libdvdcss
+Définit la méthode d'authentication et de decryptage que libdvdcss
 utilisera pour lire les disques cryptés.
 Elles peuvent être 'title', 'key' ou 'disc'.
 .PD 0
 .RSs
 .IPs key\ \ 
 est la méthode par défaut.
-libdvdcss utilisera un set de clées de lecture pré-calculées pour
+libdvdcss utilisera un set de clés de lecture pré-calculées pour
 obtenir celle du disque.
-Ceci peut échouer si le lecteur ne reconnaît aucune des clées de lecture.
+Ceci peut échouer si le lecteur ne reconnaît aucune des clés de lecture.
 .IPs disc\ 
 est la méthode vers laquelle libdvdcss se rabat lorsque 'key' a échoué.
-Au lieu d'utiliser les clées de lecture, libdvdcss va casser la clée du
+Au lieu d'utiliser les clés de lecture, libdvdcss va casser la clé du
 disque en utilisant un algorithme de force brute.
 Ceci est assez coûteux en temps CPU, et nécessite 64 Mo de mémoire pour
 stocker les données temporaires.
 .IPs title
 est la méthode vers laquelle libdvdcss se rabat lorsque toute les autres
 méthodes ont échoué.
-Ceci ne se base pas sur un échange de clée avec le lecteur DVD, mais
-utilise à la place une attache crypto pour deviner la clée du titre.
-En de rares cas, ceci va échoué s'il n'y a pas assez de données cryptées
+Ceci ne se base pas sur un échange de clé avec le lecteur DVD, mais
+utilise à la place une attache crypto pour deviner la clé du titre.
+En de rares cas, ceci va échouer s'il n'y a pas assez de données cryptées
 sur le disque pour effectuer l'attaque statistique, mais d'un autre
 côté c'est la seule façon de décrypter les DVDs enregistrés sur disque
 dur, ou un disque dont la région ne correspond pas à la région RPC2 du
@@ -9949,7 +9949,7 @@ lecteur DVD.
 .
 .TP
 .B DVDCSS_RAW_DEVICE
-Défini le périphérique brut à utiliser.
+Définit le périphérique brut à utiliser.
 L'usage exact dépend de votre système d'exploitation, l'utilitaire
 raw(8) étant celui disponible sous Linux.
 Specify the raw device to use.
@@ -9959,7 +9959,7 @@ un alignement sur 2048 octets (qui est la taille d'un secteur DVD).
 .
 .TP
 .B DVDCSS_VERBOSE
-Défini le niveau de verbosité de libdvdcss.
+Définit le niveau de verbosité de libdvdcss.
 .PD 0
 .RSs
 .IPs 0
@@ -9973,7 +9973,7 @@ Envoie tous les messages d'erreurs et de débug sur stderr.
 .
 .TP
 .B DVDREAD_NOKEYS
-Saute la récupération de toute clée au démarrage.
+Saute la récupération de toute clé au démarrage.
 Désactivé pour le moment.
 .
 .TP
@@ -9992,7 +9992,7 @@ FIXME: Documente ceci.
 .
 .TP
 .B AUDIOSERVER
-Défini le serveur Network Audio System auquel le pilote de sortie
+Définit le serveur Network Audio System auquel le pilote de sortie
 audio nas doit se connecter et transporter les données.
 Si non défini, DISPLAY est utilisé à la place.
 Le type de transport peut être tcp et unix.
@@ -10007,12 +10007,12 @@ ajouté.
 .PD 0
 .RSs
 .IPs AUDIOSERVER=somehost:0
-Se connect au serveur NAS somehost en utilisant le port et le transport
+Se connecte au serveur NAS somehost en utilisant le port et le transport
 par défaut.
 .IPs AUDIOSERVER=tcp/somehost:8000
-Se connect au serveur NAS somehost écoutant sur le port TCP 8000.
+Se connecte au serveur NAS somehost écoutant sur le port TCP 8000.
 .IPs AUDIOSERVER=(unix)?:0
-Se connect au serveur NAS d'instance 0 sur localhost en utilisant des sockets Unix.
+Se connecte au serveur NAS d'instance 0 sur localhost en utilisant des sockets Unix.
 .RE
 .PD 1
 .
@@ -10140,7 +10140,7 @@ paramètres utilisateur de MEncoder
 .
 .TP
 ~/.mplayer/\:input.conf
-correspondances des entrées (voir '\-input keylist' pour la liste complète)
+correspondance des entrées (voir '\-input keylist' pour la liste complète)
 .
 .TP
 ~/.mplayer/\:gui.conf
@@ -10228,7 +10228,7 @@ mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .
 .PP
-.B Lecture sur cartes zoran (ancienne méthode, depréciée)\ :
+.B Lecture sur cartes zoran (ancienne méthode, dépréciée)\ :
 mplayer \-vo zr \-vf scale=352:288 file.avi
 .
 .PP
