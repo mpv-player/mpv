@@ -406,16 +406,13 @@ Kain, Nicholas <njk@aerifal.cx>
 Kalinski, Filip (filon) <filon@pld.org.pl>
     * X11 fulscreen switching fixes/cleanup
 
-Kalvachev, Ivan (iive) <iive@yahoo.com>
+Кълвачев, Иван (iive) <iive@yahoo.com>
     * interlaced MPEG-2 support (libmpeg2)
-    * libvo2 draft
     * configfile parser fixes
     * SRT subtitle dump support
-    * Bulgarian console message translation (help_mp-bg.h)
     * vo_svga rewrite
     * various fixes and small improvements
     * XvMC support (MPlayer & FFmpeg)
-    * XviD4 driver import (vd/ve_xvid4.c by GomGom)
 
 Kaniewski, Wojtek <wojtekka@bydg.pdi.net>
     * mouse wheel support
