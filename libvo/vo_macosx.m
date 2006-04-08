@@ -167,7 +167,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		
 		//connnect to mplayerosx
 		mplayerosxProxy=[NSConnection rootProxyForConnectionWithRegisteredName:@"mplayerosx" host:nil];
-		[mplayerosxProxy startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:movie_aspect];
+		[mplayerosxProxy startWithWidth: image_width withHeight: image_height withBytes: image_bytes withAspect:(int)(movie_aspect*100)];
 	}
 	return 0;
 }
@@ -249,7 +249,7 @@ static void uninit(void)
 	}
 
 	SetSystemUIMode( kUIModeNormal, 0);
-	ShowCursor();
+	CGDisplayShowCursor(kCGDirectMainDisplay);
 	
 	[autoreleasepool release];
 }
@@ -708,16 +708,12 @@ static int control(uint32_t request, void *data, ...)
 	//auto hide mouse cursor and futur on-screen control?
 	if(isFullscreen && !mouseHide && !isRootwin)
 	{
-		DateTimeRec d;
-		unsigned long curTime;
-		static unsigned long lastTime = 0;
+		int curTime = TickCount()/60;
+		static int lastTime = 0;
 		
-		GetTime(&d);
-		DateToSeconds( &d, &curTime);
-	
 		if( ((curTime - lastTime) >= 5) || (lastTime == 0) )
 		{
-			HideCursor();
+			CGDisplayHideCursor(kCGDirectMainDisplay);
 			mouseHide = YES;
 			lastTime = curTime;
 		}
@@ -725,14 +721,10 @@ static int control(uint32_t request, void *data, ...)
 	
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
-	DateTimeRec d;
-	unsigned long curTime;
-	static unsigned long lastTime = 0;
-	
-	GetTime(&d);
-	DateToSeconds( &d, &curTime);
-	
-	if( ( (curTime - lastTime) >= 30) || (lastTime == 0))
+	int curTime = TickCount()/60;
+	static int lastTime = 0;
+		
+	if( ((curTime - lastTime) >= 30) || (lastTime == 0) )
 	{
 		UpdateSystemActivity(UsrActivity);
 		lastTime = curTime;
@@ -782,7 +774,7 @@ static int control(uint32_t request, void *data, ...)
 		if(!isRootwin)
 		{
 			SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
-			HideCursor();
+			CGDisplayHideCursor(kCGDirectMainDisplay);
 			mouseHide = YES;
 		}
 		
@@ -803,7 +795,7 @@ static int control(uint32_t request, void *data, ...)
 		SetSystemUIMode( kUIModeNormal, 0);
 		
 		isFullscreen = 0;
-		ShowCursor();
+		CGDisplayShowCursor(kCGDirectMainDisplay);
 		mouseHide = NO;
 
 		//revert window to previous setting
@@ -946,7 +938,7 @@ static int control(uint32_t request, void *data, ...)
 {
 	if(isFullscreen && !isRootwin)
 	{
-		ShowCursor();
+		CGDisplayShowCursor(kCGDirectMainDisplay);
 		mouseHide = NO;
 	}
 }

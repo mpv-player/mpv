@@ -282,7 +282,7 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 			{
 				if(vo_quartz_fs)
 				{
-					ShowCursor();
+					CGDisplayShowCursor(kCGDirectMainDisplay);
 					mouseHide = FALSE;
 				}
 			}
@@ -967,16 +967,12 @@ static void flip_page(void)
 	//auto hide mouse cursor and futur on-screen control?
 	if(vo_quartz_fs && !mouseHide)
 	{
-		DateTimeRec d;
-		unsigned long curTime;
-		static unsigned long lastTime = 0;
+		int curTime = TickCount()/60;
+		static int lastTime = 0;
 		
-		GetTime(&d);
-		DateToSeconds( &d, &curTime);
-	
 		if( ((curTime - lastTime) >= 5) || (lastTime == 0) )
 		{
-			HideCursor();
+			CGDisplayHideCursor(kCGDirectMainDisplay);
 			mouseHide = TRUE;
 			lastTime = curTime;
 		}
@@ -984,14 +980,10 @@ static void flip_page(void)
 
 	//update activity every 30 seconds to prevent
 	//screensaver from starting up.
-	DateTimeRec d;
-	unsigned long curTime;
-	static unsigned long lastTime = 0;
-	
-	GetTime(&d);
-	DateToSeconds( &d, &curTime);
-	
-	if( ( (curTime - lastTime) >= 30) || (lastTime == 0))
+	int curTime = TickCount()/60;
+	static int lastTime = 0;
+		
+	if( ((curTime/ - lastTime) >= 5) || (lastTime == 0) )
 	{
 		UpdateSystemActivity(UsrActivity);
 		lastTime = curTime;
@@ -1359,7 +1351,7 @@ void window_fullscreen()
 			if(device_id == 0)
 			{
 				SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
-				HideCursor();
+				CGDisplayHideCursor(kCGDirectMainDisplay);
 				mouseHide = TRUE;
 			}
 			
@@ -1407,7 +1399,7 @@ void window_fullscreen()
 		SetSystemUIMode( kUIModeNormal, NULL);
 
 		//show mouse cursor
-		ShowCursor();
+		CGDisplayShowCursor(kCGDirectMainDisplay);
 		mouseHide = FALSE;
 		
 		//revert window to previous setting
