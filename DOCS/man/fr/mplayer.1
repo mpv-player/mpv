@@ -1,4 +1,4 @@
-.\" synced with 1.1249
+.\" synced with 1.1252
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -741,8 +741,7 @@ uniquement.
 .B \-crash-debug (CODE DE DÉBOGAGE)
 Attache gdb automatiquement lors d'un crash ou d'un SIGTRAP.
 N'est géré que si MPlayer a été compilé avec l'option de
-configuration \--enable-crash-debug ou si un fichier .developer était
-présent dans le répertoire source.
+configuration \--enable-crash-debug.
 .
 .TP
 .B \-edlout <nomfichier>
@@ -6103,6 +6102,10 @@ taille est inchangée.
 .IPs 3
 Étend chaque trame en pleine résolution, mais remplit une ligne sur deux
 en noir, le débit est inchangé.
+.IPs 4
+Entrelace les lignes paires a en utilisant des trames paires, et les lignes
+impaires avec d'après les trames impaires.
+Génère les trames de taille normale avec un débit réduit de moitié.
 .RE
 .PD 1
 .
