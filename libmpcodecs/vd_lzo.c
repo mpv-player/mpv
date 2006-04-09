@@ -119,7 +119,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    );
 
 	/* decompress the frame */
-	r = lzo1x_decompress (data, len, tmp, &w, priv->wrkmem);
+	w = sh->bih->biSizeImage;
+	r = lzo1x_decompress_safe (data, len, tmp, &w, priv->wrkmem);
 	free(tmp);
 
 	if (r != LZO_E_OK) {
@@ -154,7 +155,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	    return NULL;
     }
 
-    r = lzo1x_decompress (data, len, mpi->planes[0], &w, priv->wrkmem);
+    w = mpi->w * mpi->h;
+    r = lzo1x_decompress_safe (data, len, mpi->planes[0], &w, priv->wrkmem);
     if (r != LZO_E_OK) {
 	/* this should NEVER happen */
 	mp_msg (MSGT_DECVIDEO, MSGL_ERR, 

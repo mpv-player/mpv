@@ -27,7 +27,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		unsigned char *decoded, int width, int height)
 {
 	int r;
-	unsigned int out_len;
+	unsigned int out_len = width * height + ( width * height ) / 2;
 	struct rtframeheader *encodedh = ( struct rtframeheader* ) encoded;
 	static unsigned char *buffer = 0; /* for RTJpeg with LZO decompress */
 #ifdef KEEP_BUFFER
@@ -56,7 +56,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 	    {
 #ifdef KEEP_BUFFER		
 		if (!previous_buffer) 
-			previous_buffer = ( unsigned char * ) malloc ( width * height + ( width * height ) / 2 );
+			previous_buffer = ( unsigned char * ) malloc ( out_len );
 #endif
 
 		if (((encodedh->comptype == '2') ||
@@ -74,20 +74,20 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		switch(encodedh->comptype)
 		{
 		    case '0': /* raw YUV420 */
-			memcpy(decoded, encoded + 12, width*height*3/2);
+			memcpy(decoded, encoded + 12, out_len);
 			break;
 		    case '1': /* RTJpeg */
 			RTjpeg_decompressYUV420 ( ( __s8 * ) encoded + 12, decoded );
 			break;
 		    case '2': /* RTJpeg with LZO */
 			if (!buffer) 
-			    buffer = ( unsigned char * ) malloc ( width * height + ( width * height ) / 2 );
+			    buffer = ( unsigned char * ) malloc ( out_len );
 			if (!buffer)
 			{
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
 			    break;
 			}
-			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, buffer, &out_len, NULL );
+			r = lzo1x_decompress_safe ( encoded + 12, encodedh->packetlength, buffer, &out_len, NULL );
 			if ( r != LZO_E_OK ) 
 			{
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
@@ -96,7 +96,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			RTjpeg_decompressYUV420 ( ( __s8 * ) buffer, decoded );
 			break;
 		    case '3': /* raw YUV420 with LZO */
-			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, decoded, &out_len, NULL );
+			r = lzo1x_decompress_safe ( encoded + 12, encodedh->packetlength, decoded, &out_len, NULL );
 			if ( r != LZO_E_OK ) 
 			{
 			    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Nuppelvideo: error decompressing\n");
