@@ -11,6 +11,20 @@ receive obscene amounts of email. So while your feedback is crucial in improving
 that you have to provide <emphasis role="bold">all</emphasis> of the information
 we request and follow the instructions in this document closely.
 </para>
+<sect1 id="bugreports_security">
+<title>Report security releated bugs</title>
+<para>
+In case you have found an exploitable bug and you would like to do the
+right thing and let us fix it before you disclose it, we would be happy
+to get your security advisory at
+<ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>.
+Please add [SECURITY] or [ADVISORY] in the subject.
+Be sure that your report contains complete and detailed analysis of the bug.
+Sending a fix is highly appreciated.
+Please don't delay your report to write proof-of-concept exploit, you can
+send that one with another mail.
+</para>
+</sect1>
 <sect1 id="bugreports_fix">
 <title>How to fix bugs</title>
 <para>
