@@ -588,6 +588,7 @@ static char help_text[]=
 #define MSGTR_FontSelect "Выбор шрифта..."
 #define MSGTR_PlayList "Плейлист"
 #define MSGTR_Equalizer "Эквалайзер"
+#define MSGTR_ConfigureEqualizer "Настройка каналов"
 #define MSGTR_SkinBrowser "Просмотрщик скинов"
 #define MSGTR_Network "Сетевые потоки..."
 #define MSGTR_Preferences "Настройки"

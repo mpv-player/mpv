@@ -690,6 +690,7 @@ static char help_text[]=
 // Note: If you change MSGTR_PlayList please see if it still fits MSGTR_MENU_PlayList
 #define MSGTR_PlayList "Playlist"
 #define MSGTR_Equalizer "Equalizer"
+#define MSGTR_ConfigureEqualizer "Configure Equalizer"
 #define MSGTR_SkinBrowser "Skin Browser"
 #define MSGTR_Network "Network streaming..."
 // Note: If you change MSGTR_Preferences please see if it still fits MSGTR_MENU_Preferences
