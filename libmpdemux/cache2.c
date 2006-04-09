@@ -110,7 +110,7 @@ int cache_read(cache_vars_t* s,unsigned char* buf,int size){
     total+=len;
     
   }
-  cache_fill_status=100*(s->max_filepos-s->read_filepos)/s->buffer_size;
+  cache_fill_status=(s->max_filepos-s->read_filepos)/(s->buffer_size / 100);
   return total;
 }
 
