@@ -24,8 +24,8 @@ char      * sbMPlayerDirInHome_obsolete=NULL;
 char      * sbMPlayerPrefixDir=NULL;
 char      * sbMPlayerPrefixDir_obsolete=NULL;
 
-char * gtkOldSkin;
-static char * prev;
+char * gtkOldSkin=NULL;
+static char * prev=NULL;
 
 GtkWidget * SkinBrowser = NULL;
 
@@ -77,9 +77,11 @@ int gtkFillSkinList( gchar * mdir )
 
 static void prButton( GtkObject * object,gpointer user_data )
 {
- switch ( (int)user_data )
-  {
-   case 0: // cancel
+ if ( sbSelectedSkin )
+ {
+  switch ( (int)user_data )
+   {
+    case 0: // cancel
 	if ( strcmp( sbSelectedSkin,gtkOldSkin ) ) ChangeSkin( gtkOldSkin );
 	break;
    case 1: // ok
@@ -88,6 +90,7 @@ static void prButton( GtkObject * object,gpointer user_data )
 	skinName=strdup( sbSelectedSkin );
 	break;   
   }
+ }
  HideSkinBrowser();
 }
 
