@@ -708,6 +708,9 @@ decoders:
   alaw and ulaw, various gsm, adpcm and pcm formats and other simple old
   audio codecs
   </simpara></listitem>
+<listitem><simpara>
+  Adaptive Multi-Rate (AMR) speech codecs
+  </simpara></listitem>
 </itemizedlist>
 
 
@@ -879,6 +882,35 @@ Binaries are not available from audiocoding.com, but you can (apt-)get Debian
 packages from <ulink url="http://hpisi.nerim.net">Christian Marillat's homepage</ulink>,
 Mandrake/Mandriva RPMs from the <ulink url="http://plf.zarb.org">P.L.F</ulink> and RedHat RPMs
 from <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
+</para>
+</sect2>
+
+<sect2 id="amr">
+<title>AMR codecs</title>
+<para>
+Adaptive Multi-Rate speech codec is used in third generation (3G) mobile
+phones.
+Reference implementation is available from
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(free for private use).
+</para>
+<para>
+To enable support, download the sources for
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
+and
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
+codecs, put them in the directory where you unpacked the
+<application>MPlayer</application> source and run the following commands:
+<screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float
+</screen>
+After that, follow the usual <application>MPlayer</application>
+<link linkend="features">build procedure</link>.
 </para>
 </sect2>
 
