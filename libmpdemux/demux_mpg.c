@@ -99,11 +99,14 @@ static int parse_psm(demuxer_t *demux, int len) {
   return 1;
 }
 
+// 500000 is a wild guess
+#define TIMESTAMP_PROBE_LEN 500000
+
 /// Open an mpg physical stream
 static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
   stream_t *s = demuxer->stream;
   off_t pos = stream_tell(s);
-  off_t end_seq_start = demuxer->movi_end-500000; // 500000 is a wild guess
+  off_t end_seq_start = demuxer->movi_end-TIMESTAMP_PROBE_LEN;
   float half_pts = 0.0;
   mpg_demuxer_t* mpg_d;
 
@@ -114,13 +117,18 @@ static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
   mpg_d->has_valid_timestamps = 1;
   mpg_d->num_a_streams = 0;
   if (demuxer->seekable && stream_tell(demuxer->stream) < end_seq_start) {
-    stream_seek(s,(pos + end_seq_start / 2));
+    off_t half_pos = pos + end_seq_start / 2;
+    stream_seek(s, half_pos);
     while ((!s->eof) && ds_fill_buffer(demuxer->video) && half_pts == 0.0) {
       half_pts = mpg_d->last_pts;
+      if (stream_tell(s) > half_pos + TIMESTAMP_PROBE_LEN)
+        break;
     }
     stream_seek(s,end_seq_start);
     while ((!s->eof) && ds_fill_buffer(demuxer->video)) {
       if (mpg_d->final_pts < mpg_d->last_pts) mpg_d->final_pts = mpg_d->last_pts;
+      if (stream_tell(s) > demuxer->movi_end)
+        break;
     }
     // educated guess about validity of timestamps
     if (mpg_d->final_pts > 3 * half_pts || mpg_d->final_pts < 1.5 * half_pts) {
