@@ -36,6 +36,7 @@ int getch2(int time){
    	int i=0;
     if(!getch2_status)return -1;    
     /*check if there are input events*/
+	WaitForSingleObject(stdin, time);
 	if(!GetNumberOfConsoleInputEvents(stdin,&retval))
 	{
 		printf("getch2: can't get number of input events: %i\n",GetLastError());
