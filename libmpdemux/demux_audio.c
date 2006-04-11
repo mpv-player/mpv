@@ -27,6 +27,9 @@ typedef struct da_priv {
   float last_pts;
 } da_priv_t;
 
+//! rather arbitrary value for maximum length of wav-format headers
+#define MAX_WAVHDR_LEN (1 * 1024 * 1024)
+
 // how many valid frames in a row we need before accepting as valid MP3
 #define MIN_MP3_HDRS 5
 
@@ -409,6 +412,11 @@ static int demux_audio_open(demuxer_t* demuxer) {
     l = stream_read_dword_le(s);
     if(l < 16) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too short (%d)!!!\n",l);
+      free_sh_audio(sh_audio);
+      return 0;
+    }
+    if(l > MAX_WAVHDR_LEN) {
+      mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too long (%d)!!!\n",l);
       free_sh_audio(sh_audio);
       return 0;
     }
