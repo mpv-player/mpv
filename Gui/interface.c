@@ -738,6 +738,7 @@ int guiGetEvent( int type,char * arg )
 	  dvd_title=0;
 	  force_fps=0;
 	 }				
+	guiIntfStruct.demuxer=NULL;
 	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
    case guiSetParameters:
