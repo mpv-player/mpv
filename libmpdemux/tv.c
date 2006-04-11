@@ -224,7 +224,6 @@ static int open_tv(tvi_handle_t *tvh)
 	mp_msg(MSGT_TV, MSGL_V, "Selected norm id: %d\n", tv_param_normid);
 	if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tv_param_normid) != TVI_CONTROL_TRUE) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
-	    return 0;
 	}
     } else {
 #endif
@@ -234,7 +233,6 @@ static int open_tv(tvi_handle_t *tvh)
     mp_msg(MSGT_TV, MSGL_V, "Selected norm: %s\n", tv_param_norm);
     if (funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_NORM, &tvh->norm) != TVI_CONTROL_TRUE) {
 	mp_msg(MSGT_TV, MSGL_ERR, "Error: Cannot set norm!\n");
-	return 0;
     }
 #ifdef HAVE_TV_V4L2
     }

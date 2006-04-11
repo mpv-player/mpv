@@ -972,10 +972,11 @@ static int init(priv_t *priv)
 	return 0;
     }
 
-    if (getfmt(priv) < 0 || getstd(priv) < 0) {
+    if (getfmt(priv) < 0) {
 	uninit(priv);
 	return 0;
     }
+    getstd(priv);
     /*
     ** if this device has got a tuner query it's settings
     ** otherwise set some nice defaults

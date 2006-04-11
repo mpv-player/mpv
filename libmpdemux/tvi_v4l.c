@@ -799,7 +799,6 @@ static int start(priv_t *priv)
     if (ioctl(priv->video_fd, VIDIOCSPICT, &priv->picture) == -1)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "ioctl set picture failed: %s\n", strerror(errno));
-	return(0);
     }
 
     if ( !tv_param_mjpeg )
