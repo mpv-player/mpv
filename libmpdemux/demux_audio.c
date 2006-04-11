@@ -332,7 +332,6 @@ static int demux_audio_open(demuxer_t* demuxer) {
       }
     } else if( hdr[0] == 'f' && hdr[1] == 'L' && hdr[2] == 'a' && hdr[3] == 'C' ) {
       frmt = fLaC;
-      stream_skip(s,-4);
       break;
     }
     // Add here some other audio format detection
@@ -502,8 +501,23 @@ static int demux_audio_open(demuxer_t* demuxer) {
   } break;
   case fLaC:
 	    sh_audio->format = mmioFOURCC('f', 'L', 'a', 'C');
-	    demuxer->movi_start = stream_tell(s);
+	    demuxer->movi_start = stream_tell(s) - 4;
 	    demuxer->movi_end = s->end_pos;
+	    if (demuxer->movi_end > demuxer->movi_start) {
+	      // try to find out approx. bitrate
+	      int64_t size = demuxer->movi_end - demuxer->movi_start;
+	      int64_t num_samples = 0;
+	      int32_t srate = 0;
+	      stream_skip(s, 14);
+	      stream_read(s, (char *)&srate, 3);
+	      srate = be2me_32(srate) >> 12;
+	      stream_read(s, (char *)&num_samples, 5);
+	      num_samples = (be2me_64(num_samples) >> 24) & 0xfffffffff;
+	      if (num_samples && srate)
+	        sh_audio->i_bps = size * srate / num_samples;
+	    }
+	    if (sh_audio->i_bps < 1) // guess value to prevent crash
+	      sh_audio->i_bps = 64 * 1024;
 	    get_flac_metadata (demuxer);
 	    break;
   }
