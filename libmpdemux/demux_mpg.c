@@ -152,9 +152,9 @@ static void demux_close_mpg(demuxer_t* demuxer) {
 }
 
 
-static unsigned int read_mpeg_timestamp(stream_t *s,int c){
+static unsigned long long read_mpeg_timestamp(stream_t *s,int c){
   int d,e;
-  unsigned int pts;
+  unsigned long long pts;
   d=stream_read_word(s);
   e=stream_read_word(s);
   if( ((c&1)!=1) || ((d&1)!=1) || ((e&1)!=1) ){
@@ -187,8 +187,8 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;
   int len;
   unsigned char c=0;
-  unsigned int pts=0;
-  unsigned int dts=0;
+  unsigned long long pts=0;
+  unsigned long long dts=0;
   demux_stream_t *ds=NULL;
   mpg_demuxer_t *priv = (mpg_demuxer_t *) demux->priv;
   
