@@ -327,13 +327,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   }
 #endif
 #ifdef GL_WIN32
-  o_dwidth = d_width;
-  o_dheight = d_height;
-  vo_fs = flags & VOFLAG_FULLSCREEN;
-  vo_vm = flags & VOFLAG_MODESWITCHING;
-  vo_dwidth = d_width;
-  vo_dheight = d_height;
-  if (!createRenderingContext())
+  if (!vo_w32_config(d_width, d_height, flags))
     return -1;
 #else
   if (WinID >= 0) {

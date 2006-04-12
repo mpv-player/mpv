@@ -15,6 +15,16 @@ static const char* classname = "MPlayer - Media player for Win32";
 int vo_vm = 0;
 HDC vo_hdc = 0;
 
+// last non-fullscreen extends
+int prev_width;
+int prev_height;
+int prev_x;
+int prev_y;
+
+// top left coordinates of current monitor
+int vo_screenx;
+int vo_screeny;
+
 uint32_t o_dwidth;
 uint32_t o_dheight;
 
@@ -23,15 +33,28 @@ HWND vo_window = 0;
 static int cursor = 1;
 static int event_flags;
 
+static HMONITOR (WINAPI* myMonitorFromWindow)(HWND, DWORD);
+static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO);
+
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
+    RECT r;
+    POINT p;
     switch (message) {
 	case WM_PAINT:
 	    event_flags |= VO_EVENT_EXPOSE;
 	    break;
+	case WM_MOVE:
+	    p.x = 0;
+	    p.y = 0;
+	    ClientToScreen(vo_window, &p);
+	    vo_dx = p.x;
+	    vo_dy = p.y;
+	    break;
 	case WM_SIZE:
 	    event_flags |= VO_EVENT_RESIZE;
-	    vo_dwidth = lParam & 0xffff;
-	    vo_dheight = lParam >> 16;
+	    GetClientRect(vo_window, &r);
+	    vo_dwidth = r.right;
+	    vo_dheight = r.bottom;
 	    break;
 	case WM_CLOSE:
 	    mplayer_put_key(KEY_CLOSE_WIN);
@@ -122,6 +145,15 @@ static void updateScreenProperties() {
     vo_screenheight = dm.dmPelsHeight;
     vo_depthonscreen = dm.dmBitsPerPel;
     aspect_save_screenres(vo_screenwidth, vo_screenheight);
+    vo_screenx = vo_screeny = 0;
+    if (myMonitorFromWindow && myGetMonitorInfo) {
+        MONITORINFO mi;
+        HMONITOR m = myMonitorFromWindow(vo_window, MONITOR_DEFAULTTOPRIMARY);
+        mi.cbSize = sizeof(mi);
+        myGetMonitorInfo(m, &mi);
+        vo_screenx = mi.rcMonitor.left;
+        vo_screeny = mi.rcMonitor.top;
+    }
 }
 
 static void changeMode(void) {
@@ -162,7 +194,7 @@ static void resetMode(void) {
     ChangeDisplaySettings(0, 0);
 }
 
-int createRenderingContext(void) {
+static int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
     PIXELFORMATDESCRIPTOR pfd;
     RECT r;
@@ -187,11 +219,24 @@ int createRenderingContext(void) {
     updateScreenProperties();
     ShowWindow(vo_window, SW_HIDE);
     SetWindowLong(vo_window, GWL_STYLE, style);
-    vo_dwidth = vo_fs ? vo_screenwidth : o_dwidth;
-    vo_dheight = vo_fs ? vo_screenheight : o_dheight;
-    r.left = vo_fs ? 0 : vo_dy;
+    if (vo_fs) {
+        prev_width = vo_dwidth;
+        prev_height = vo_dheight;
+        prev_x = vo_dx;
+        prev_y = vo_dy;
+        vo_dwidth = vo_screenwidth;
+        vo_dheight = vo_screenheight;
+        vo_dx = vo_screenx;
+        vo_dy = vo_screeny;
+    } else {
+        vo_dwidth = prev_width;
+        vo_dheight = prev_height;
+        vo_dx = prev_x;
+        vo_dy = prev_y;
+    }
+    r.left = vo_dx;
     r.right = r.left + vo_dwidth;
-    r.top = vo_fs ? 0 : vo_dx;
+    r.top = vo_dy;
     r.bottom = r.top + vo_dheight;
     AdjustWindowRect(&r, style, 0);
     SetWindowPos(vo_window, layer, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW);
@@ -216,9 +261,25 @@ int createRenderingContext(void) {
     return 1;
 }
 
+int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
+    // store original size for videomode switching
+    o_dwidth = width;
+    o_dheight = height;
+
+    prev_width = width;
+    prev_height = height;
+    prev_x = vo_dx;
+    prev_y = vo_dy;
+
+    vo_fs = flags & VOFLAG_FULLSCREEN;
+    vo_vm = flags & VOFLAG_MODESWITCHING;
+    return createRenderingContext();
+}
+
 int vo_init(void) {
     HICON 	mplayerIcon = 0;
     char 	exedir[MAX_PATH];
+    HINSTANCE	user32;
 
     if (vo_window)
 	return 1;
@@ -253,6 +314,13 @@ int vo_init(void) {
 
     vo_hdc = GetDC(vo_window);
 
+    myMonitorFromWindow = NULL;
+    myGetMonitorInfo = NULL;
+    user32 = GetModuleHandle("user32.dll");
+    if (user32) {
+        myMonitorFromWindow = GetProcAddress(user32, "MonitorFromWindow");
+        myGetMonitorInfo = GetProcAddress(user32, "GetMonitorInfoA");
+    }
     updateScreenProperties();
 
     return 1;

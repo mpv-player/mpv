@@ -595,15 +595,7 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 #ifdef GL_WIN32
 
 static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
-    o_dwidth = d_width;
-    o_dheight = d_height;
-    vo_fs = flags & VOFLAG_FULLSCREEN;
-    vo_vm = flags & VOFLAG_MODESWITCHING;
-    
-    vo_dwidth = d_width;
-    vo_dheight = d_height;
-
-    if (!createRenderingContext())
+    if (!vo_w32_config(d_width, d_height, flags))
 	return -1;
 
     if (vo_fs)
