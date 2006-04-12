@@ -465,7 +465,10 @@ static int mp_describe_titleset(dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_n
         return 0;
 
     if(!vts_file->vtsi_mat || !vts_file->vts_pgcit)
+    {
+        ifoClose(vts_file);
         return 0;
+    }
 
     for(title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
     {
@@ -475,6 +478,7 @@ static int mp_describe_titleset(dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_n
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
     }
     ifoClose(vts_file);
+    return 1;
 }
 
 static int control(stream_t *stream,int cmd,void* arg) 
