@@ -11,6 +11,10 @@
 
 extern void mplayer_put_key(int code);
 
+#ifndef MONITOR_DEFAULTTOPRIMARY
+#define MONITOR_DEFAULTTOPRIMARY 1
+#endif
+
 static const char* classname = "MPlayer - Media player for Win32";
 int vo_vm = 0;
 HDC vo_hdc = 0;
