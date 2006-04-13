@@ -157,6 +157,8 @@ static void updateScreenProperties() {
         myGetMonitorInfo(m, &mi);
         vo_screenx = mi.rcMonitor.left;
         vo_screeny = mi.rcMonitor.top;
+        vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
+        vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
     }
 }
 
