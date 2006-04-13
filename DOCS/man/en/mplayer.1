@@ -4069,6 +4069,23 @@ Sine function delta, use very low values to hear the sweep.
 .PD 1
 .
 .TP
+.B sinesupress[=freq:delay]
+Remove a sine at the specified frequency.
+Usefull to get rid of the 50/60hz noise on low quality audio equipment.
+It probably only works on mono input.
+.PD 0
+.RSs
+.IPs <freq>
+The frequency of the sine which should be removed (in Hz) (default: 50) 
+.IPs <decay>
+Controls the adaptivity (a larger value will make the filter adapt to
+amplitude and phase changes quicker, a smaller value will make the
+adaptation slower) (default: 0.0001).
+Reasonable values are around 0.001.
+.RE
+.PD 1
+.
+.TP
 .B hrtf[=flag]
 Head-related transfer function: Converts multichannel audio to
 2 channel output for headphones, preserving the spatiality of the sound.
