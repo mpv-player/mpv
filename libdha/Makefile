@@ -82,7 +82,7 @@ depend: pci_names.c
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 install:
-	mkdir -p $(LIBDIR)
+	-mkdir -p $(LIBDIR)
 	install -m 755 $(INSTALLSTRIP) -p $(LIBNAME) $(LIBDIR)/$(LIBNAME)
 	rm -f $(LIBDIR)/libdha.so
 	ln -sf $(LIBNAME) $(LIBDIR)/$(SHORTNAME)

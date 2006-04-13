@@ -13,7 +13,7 @@ test: test.c
 	$(CC) -O $(INCLUDES) -o $@ $@.c
 
 install: dhahelper.o
-	if test ! -d $(MDIR) ; then mkdir -p $(MDIR) ; fi
+	-mkdir -p $(MDIR)
 	install -m 644 dhahelper.o $(MDIR)/dhahelper.o
 	depmod -a
 

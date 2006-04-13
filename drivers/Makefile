@@ -38,7 +38,7 @@ tdfx_vid_tst: tdfx_vid_tst.c
 	$(CC) -O $(INCLUDES) -o $@ $@.c
 
 install: mga_vid.o
-	if test ! -d $(MDIR) ; then mkdir -p $(MDIR) ; fi
+	-mkdir -p $(MDIR)
 ifneq (,$(findstring 2.6, $(VERSION)))
 	install -m 644 mga_vid.ko $(MDIR)/mga_vid.ko
 else
