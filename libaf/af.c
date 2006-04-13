@@ -29,6 +29,7 @@ extern af_info_t af_info_sweep;
 extern af_info_t af_info_hrtf;
 extern af_info_t af_info_ladspa;
 extern af_info_t af_info_center;
+extern af_info_t af_info_sinesupress;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -57,6 +58,7 @@ static af_info_t* filter_list[]={
    &af_info_ladspa,
 #endif
    &af_info_center,
+   &af_info_sinesupress,
    NULL 
 };
 
