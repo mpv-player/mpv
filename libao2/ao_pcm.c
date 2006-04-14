@@ -27,6 +27,7 @@ extern int vo_pts;
 
 static char *ao_outputfilename = NULL;
 static int ao_pcm_waveheader = 1;
+static int fast = 0;
 
 #define WAV_ID_RIFF 0x46464952 /* "RIFF" */
 #define WAV_ID_WAVE 0x45564157 /* "WAVE" */
@@ -83,6 +84,7 @@ static int init(int rate,int channels,int format,int flags){
 	opt_t subopts[] = {
 	  {"waveheader", OPT_ARG_BOOL, &ao_pcm_waveheader, NULL},
 	  {"file",       OPT_ARG_MSTRZ, &ao_outputfilename, NULL},
+	  {"fast",       OPT_ARG_BOOL, &fast, NULL},
 	  {NULL}
 	};
 	// set defaults
@@ -179,7 +181,7 @@ static void audio_resume(void)
 static int get_space(void){
 
     if(vo_pts)
-      return ao_data.pts < vo_pts ? ao_data.outburst : 0;
+      return ao_data.pts < vo_pts + fast * 30000 ? ao_data.outburst : 0;
     return ao_data.outburst;
 }
 

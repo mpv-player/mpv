@@ -2226,6 +2226,11 @@ When not included, raw PCM will be generated.
 Write the sound to <filename> instead of the default
 audiodump.wav.
 If nowaveheader is specified, the default is audiodump.pcm.
+.IPs fast
+Try to dump file faster than realtime.
+Make sure the output does not get truncated (usually with
+"Too many video packets in buffer" message).
+It is normal that you get a "Your system is too SLOW to play this!" message.
 .RE
 .PD 1
 .
