@@ -3142,7 +3142,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
                   memcpy (dp->buffer, buffer, size);
                   if (modified)
                     free (buffer);
-                  dp->flags = (block_bref == 0 && block_fref == 0) ? 1 : 0;
+                  dp->flags = (block_bref == 0 && block_fref == 0) ? 0x10 : 0;
                   dp->pts = mkv_d->last_pts + i * track->default_duration;
                   ds_add_packet (ds, dp);
                 }
