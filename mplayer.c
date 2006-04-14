@@ -3809,7 +3809,13 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	  ++drop_message;
 	  mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
 	}
-        x=AV_delay*0.1f;
+	if (autosync)
+	    x = AV_delay*0.1f;
+	else
+	    /* Do not correct target time for the next frame if this frame
+	     * was late not because of wrong target time but because the
+	     * target time could not be met */
+	    x = (AV_delay + time_frame * playback_speed) * 0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
         if(x> max_pts_correction) x= max_pts_correction;
         if(default_max_pts_correction>=0)
