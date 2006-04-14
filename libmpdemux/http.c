@@ -585,8 +585,9 @@ http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 
 int
 http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, const char *password ) {
-	char *auth, *usr_pass, *b64_usr_pass;
+	char *auth = NULL, *usr_pass = NULL, *b64_usr_pass = NULL;
 	int encoded_len, pass_len=0, out_len;
+	int res = -1;
 	if( http_hdr==NULL || username==NULL ) return -1;
 
 	if( password!=NULL ) {
@@ -596,7 +597,7 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 	usr_pass = (char*)malloc(strlen(username)+pass_len+2);
 	if( usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
-		return -1;
+		goto out;
 	}
 
 	sprintf( usr_pass, "%s:%s", username, (password==NULL)?"":password );
@@ -606,13 +607,13 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 	b64_usr_pass = (char*)malloc(encoded_len);
 	if( b64_usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
-		return -1;
+		goto out;
 	}
 
 	out_len = base64_encode( usr_pass, strlen(usr_pass), b64_usr_pass, encoded_len);
 	if( out_len<0 ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Base64 out overflow\n");
-		return -1;
+		goto out;
 	}
 
 	b64_usr_pass[out_len]='\0';
@@ -620,17 +621,19 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 	auth = (char*)malloc(encoded_len+22);
 	if( auth==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
-		return -1;
+		goto out;
 	}
 	
 	sprintf( auth, "Authorization: Basic %s", b64_usr_pass);
 	http_set_field( http_hdr, auth );
+	res = 0;
 	
+out:
 	free( usr_pass );
 	free( b64_usr_pass );
 	free( auth );
 	
-	return 0;
+	return res;
 }
 
 void
