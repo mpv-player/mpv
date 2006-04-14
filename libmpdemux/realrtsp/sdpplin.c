@@ -238,7 +238,6 @@ static sdpplin_stream_t *sdpplin_parse_stream(char **data) {
 sdpplin_t *sdpplin_parse(char *data) {
 
   sdpplin_t        *desc=calloc(1,sizeof(sdpplin_t));
-  sdpplin_stream_t *stream;
   char             *buf=xbuffer_init(32);
   char             *decoded=xbuffer_init(32);
   int              handled;
@@ -249,14 +248,17 @@ sdpplin_t *sdpplin_parse(char *data) {
     handled=0;
     
     if (filter(data, "m=", &buf)) {
-      stream=sdpplin_parse_stream(&data);
+      sdpplin_stream_t *stream=sdpplin_parse_stream(&data);
 #ifdef LOG
       printf("got data for stream id %u\n", stream->stream_id);
 #endif
       if (desc->stream && (stream->stream_id >= 0) && (stream->stream_id < desc->stream_count))
       desc->stream[stream->stream_id]=stream;
       else
+      {
       mp_msg(MSGT_OPEN, MSGL_ERR, "sdpplin: got 'm=', but 'a=StreamCount' is still unknown. Broken sdp?\n");
+      free(stream);
+      }
       continue;
     }
 
