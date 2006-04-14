@@ -140,9 +140,9 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	if(strcasecmp(opt,"loop") == 0 &&
 		  (! last_entry || last_entry->child) ) {
 	  int l;
-	  char* end;
+	  char* end = NULL;
 	  l = (i+1<argc) ? strtol(argv[i+1],&end,0) : 0;
-	  if(*end != '\0') {
+	  if(!end || *end != '\0') {
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "The loop option must be an integer: %s\n",argv[i+1]);
 	    tmp = ERR_OUT_OF_RANGE;
 	  } else {
