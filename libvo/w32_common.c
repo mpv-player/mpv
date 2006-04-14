@@ -148,7 +148,6 @@ static void updateScreenProperties() {
     vo_screenwidth = dm.dmPelsWidth;
     vo_screenheight = dm.dmPelsHeight;
     vo_depthonscreen = dm.dmBitsPerPel;
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
     vo_screenx = vo_screeny = 0;
     if (myMonitorFromWindow && myGetMonitorInfo) {
         MONITORINFO mi;
@@ -160,6 +159,7 @@ static void updateScreenProperties() {
         vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
         vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
     }
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
 static void changeMode(void) {
