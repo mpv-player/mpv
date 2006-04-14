@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1251
+.\" In sync with rev 1.1253
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -4269,6 +4269,24 @@ Sinusfunktions-Delta, benutze sehr geringe Werte, um die Schwingung zu hören.
 .PD 1
 .
 .TP
+.B sinesupress[=freq:delay]
+Entfernt einen Sinus an der angegebenen Frequenz.
+Nützlich, um bei Audiogeräten niedriger Qualität das 50/60hz-Rauschen
+loszuwerden.
+Funktioniert wahrscheinlich nur bei Mono-Input.
+.PD 0
+.RSs
+.IPs <freq>
+Die Frequenz des Sinus, der entfernt werden soll (in Hz) (Standard: 50)
+.IPs <decay>
+Kontrolliert die Anpassung (ein größerer Wert bewirkt, dass der Filter
+Änderungen von Amplitude und Phase schneller adaptiert, ein kleinerer Wert
+wird die Adaption langsamer machen (Standard: 0.0001).
+Sinnvolle Werte bewegen sich um 0.001.
+.RE
+.PD 1
+.
+.TP
 .B hrtf[=flag]
 Die "head-related transfer function": Konvertiert mehrkanäliges
 Audiosignal auf zwei Kanäle für Kopfhörer, behält dabei die Räumlichkeit des
@@ -6066,6 +6084,10 @@ unverändert.
 .IPs 3
 Expandiere jeden Frame zu voller Höhe, aber fülle alternierende Zeilen
 schwarz; die Framerate bleibt unverändert.
+.IPs 4
+Verschachtele gerade Zeilen von geraden Frames mit ungeraden Zeilen von
+ungeraden Frames.
+Generiert einen Frame voller Höhe bei halber Framerate.
 .RE
 .PD 1
 .
