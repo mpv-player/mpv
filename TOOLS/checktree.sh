@@ -22,6 +22,7 @@ _crlf=yes
 _trailws=no
 _rcsid=no
 _oll=no
+_charset=no
 _showcont=no
 
 _color=yes
@@ -46,6 +47,7 @@ enable_all_tests() {
     _trailws=yes
     _rcsid=yes
     _oll=yes
+    _charset=yes
 }
 
 disable_all_tests() {
@@ -55,6 +57,7 @@ disable_all_tests() {
     _trailws=no
     _rcsid=no
     _oll=no
+    _charset=no
 }
 
 printoption() {
@@ -101,6 +104,7 @@ for i in "$@"; do
         printoption "trailws   " "test for trailing whitespace" "$_trailws"
         printoption "rcsid     " "test for missing RCS Id's" "$_rcsid"
         printoption "oll       " "test for overly long lines" "$_oll"
+        printoption "charset   " "test for wrong charset" "$_charset"
         echo
         printoption "all       " "enable all tests" "no"
         echo
@@ -114,6 +118,12 @@ for i in "$@"; do
         echo -e "\nIf no files are specified, the whole tree is traversed."
         echo -e "If there are, -(no)cvs has no effect.\n"
         exit
+        ;;
+    -charset)
+        _charset=yes
+        ;;
+    -nocharset)
+        _charset=no
         ;;
     -oll)
         _oll=yes
@@ -210,6 +220,14 @@ fi
 
 filelist=`all_filenames`
 
+if [ "$_showcont" == "yes" ]; then
+  _diffopts="-u"
+  _grepopts="-n -I"
+else
+  _diffopts="-q"
+  _grepopts="-l -I"
+fi
+
 # -----------------------------------------------------------------------------
 
 # DO CHECKS
@@ -232,24 +250,15 @@ fi
 
 if [ "$_crlf" == "yes" ]; then
     printhead "checking for MSDOS line endings ..."
-    if [ "$_showcont" == "yes" ]; then
-        grep -n -I "
+    grep $_grepopts "
 " $filelist
-    else
-    grep -l -I "
-" $filelist
-    fi
 fi
 
 # -----------------------------------------------------------------------------
 
 if [ "$_trailws" == "yes" ]; then
     printhead "checking for trailing whitespace ..."
-    if [ "$_showcont" == "yes" ]; then
-        grep -n -I "[[:space:]]\+$" $filelist
-    else
-    grep -l -I "[[:space:]]\+$" $filelist
-    fi
+    grep $_grepopts "[[:space:]]\+$" $filelist
 fi
 
 # -----------------------------------------------------------------------------
@@ -263,11 +272,24 @@ fi
 
 if [ "$_oll" == "yes" ]; then
     printhead "checking for overly long lines (over 79 characters) ..."
-    if [ "$_showcont" == "yes" ]; then
-        grep -n -I "^[[:print:]]\{80,\}$" $filelist
-    else
-    grep -l -I "^[[:print:]]\{80,\}$" $filelist
-    fi
+    grep $_grepopts "^[[:print:]]\{80,\}$" $filelist
+fi
+
+# -----------------------------------------------------------------------------
+
+if [ "$_charset" == "yes" ]; then
+    printhead "checking bad charsets ..."
+    for I in $filelist ; do
+      case "$I" in
+        ./help/help_mp-*.h)
+          ;;
+        ./DOCS/*)
+          ;;
+        *.c|*.h)
+          iconv -c -f ascii -t ascii "$I" | diff $_diffopts "$I" -
+          ;;
+      esac
+    done
 fi
 
 # -----------------------------------------------------------------------------
