@@ -432,7 +432,7 @@ static int dvdtimetomsec(dvd_time_t *dt)
   return msec;
 }
 
-static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int vts_no, int title_no)
+static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no)
 {
     int vts_ttn;  ///< title number within video title set
     int pgc_no;   ///< program chain number
@@ -444,12 +444,9 @@ static int mp_get_titleset_length(ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, in
 
     if(vts_file->vtsi_mat && vts_file->vts_pgcit)
     {
-        if(tt_srpt->title[title_no].title_set_nr == vts_no)
-        {
             vts_ttn = tt_srpt->title[title_no].vts_ttn - 1;
             pgc_no = vts_file->vts_ptt_srpt->title[vts_ttn].ptt[0].pgcn - 1;
             msec = dvdtimetomsec(&vts_file->vts_pgcit->pgci_srp[pgc_no].pgc->playback_time);
-        }
     }
     return msec;
 }
@@ -474,7 +471,7 @@ static int mp_describe_titleset(dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_n
     {
         if (tt_srpt->title[title_no].title_set_nr != vts_no)
             continue;
-        msec = mp_get_titleset_length(vts_file, tt_srpt, vts_no, title_no);
+        msec = mp_get_titleset_length(vts_file, tt_srpt, title_no);
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
     }
     ifoClose(vts_file);
@@ -488,7 +485,7 @@ static int control(stream_t *stream,int cmd,void* arg)
         case STREAM_CTRL_GET_TIME_LENGTH:
         {
             dvd_priv_t *d = stream->priv;
-            *((unsigned int *)arg) = mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title, d->cur_title-1);
+            *((unsigned int *)arg) = mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1);
             return 1;
         }
     }
