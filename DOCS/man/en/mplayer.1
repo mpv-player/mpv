@@ -2505,6 +2505,13 @@ Set the aspect ratio of your monitor or TV screen.
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <ratio> (also see \-aspect)
+Set the aspect of a single pixel of your monitor or TV screen (default: disabled).
+Overrides the \-monitoraspect setting.
+A value of 0 disables, a value of 1 means square pixels
+(correct for (almost?) all LCDs).
+.
+.TP
 .B \-nodouble
 Disables double buffering, mostly for debugging purposes.
 Double buffering fixes flicker by storing two frames in memory, and

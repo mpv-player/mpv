@@ -109,6 +109,7 @@ extern int nortc;
 
 /* from libvo/aspect.c */
 extern float monitor_aspect;
+extern float monitor_pixel_aspect;
 
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
@@ -224,6 +225,7 @@ m_option_t mplayer_opts[]={
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TVout
 	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 9.0, NULL},
+	{"monitorpixelaspect", &monitor_pixel_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9.0, NULL},
 	// video mode switching: (x11,xv,dga)
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
