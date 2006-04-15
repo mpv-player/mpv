@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.100 -->
+<!--synced with 1.102 -->
 <chapter id="faq" xreflabel="FAQ">   
 <title>Foire Aux Questions</title>
 
@@ -754,6 +754,18 @@ Utilisez <ulink url="http://linvdr.org/projects/regionset/">l'outil regionset</u
 </para></answer>
 </qandaentry>
 
+<qandaentry>
+<question><para>
+Je ne peux pas jouer un DVD, MPlayer décroche ou affiche des erreurs
+"Encrypted VOB file!".
+</para></question>
+<answer><para>
+Le code de décryptage CSS ne marche pas avec certains lecteurs DVD à moins que 
+vous ne paramètriez le code de région de façon approprié. Voir la réponse à la 
+question précédente.
+</para></answer>
+</qandaentry>
+ 	 
 <qandaentry>
 <question><para>
 Dois-je être en (setuid) root pour pouvoir lire un DVD ?

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.15 -->
 <appendix id="skin">
 <title>Format de skins <application>MPlayer</application></title>
 
@@ -1110,4 +1110,53 @@ Ouvre le navigateur de skins.
 
 </sect1>
 
+<sect1 id="skin-quality">
+<title>Créer des skins de qualité</title>
+
+<para>
+Vous avez lu toute la doc expliquant comment faire un skin pour la GUI de
+<application>MPlayer</application>, fait de votre mieux avec
+<application>Gimp</application> et souhaitez nous soumettre votre skin?
+Lisez les guidelines pour éviter les erreurs communes et produire
+un skin de haute qualité.
+</para>
+ 	 
+<para>
+Nous voulons des skins que nous puissions ajouter à notre repository pour se 
+conformer à certain standards de qualité. Il y a aussi un nombre de choses que 
+vous pouvez faire pour rendre notre vie plus simple.
+</para>
+ 	 
+<para>
+En tant qu'exemple, vous pouvez jeter un oeil à la skin <systemitem>Blue</systemitem>,
+elle satisfait tous les critères listé ci-dessous depuis la version 1.5.
+</para>
+ 	 
+<itemizedlist>
+<listitem><para>Chaque skin devra joindre un fichier
+<filename>README</filename> qui contiendra les informations sur
+vous, l'auteur, le copyright et les notices de licence et n'importe quoi d'autre
+que vous souhaitiez ajouter. Si vous désirez avoir un changelog, ce fichier est 
+le bon endroit.</para></listitem>
+ 	 
+<listitem><para>Il devrez y avoir un fichier <filename>VERSION</filename>
+avec rien de plus que le numéro de version de la skin sur une simple 
+ligne (e.g. 1.0).</para></listitem>
+ 	 
+<listitem><para>Les contrôles horizontaux et verticaux (sliders comme le volume
+ou la position) devront avoir le centre du bouton proprement centré sur
+le milieu du slider. Il devra être possible de bouger le bouton aux deux
+extrémités du slider, mais pas de le dépasser.</para></listitem>
+ 	 
+<listitem><para>Les éléments de la skin devront avoir les bonnes tailles déclarées
+dans le fichier de la skin. Si cela n'est pas le cas vous pouvez cliquer en 
+dehors e.g. un bouton et encore le déclencher ou cliquer à l'intérieur de sa 
+zone et ne pas le déclencher.</para></listitem>
+ 	 
+<listitem><para>le fichier <filename>skin</filename> devra être prettyprinted 
+et ne pas contenir d'onglets. Prettyprinted signifie que les chiffres devront 
+s'aligner de façon ordonnée dans les colonnes</para></listitem>
+</itemizedlist>
+ 	 
+</sect1>
 </appendix>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.81 -->
-<sect1 id="video">
+<!-- synced with 1.85 -->
+<chapter id="video">
 <title>Sorties vidéo</title>
 
-<sect2 id="mtrr">
+<sect1 id="mtrr">
 <title>Réglage MTRR</title>
 
 <para>
@@ -86,11 +86,11 @@ Tous les processeurs ne supportent pas les MTRR. Les anciens K6-2 par exemple
 le sont
 (<command>cat /proc/cpuinfo</command> pour le vérifier).
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="output-trad">
+<sect1 id="output-trad">
 <title>Sortie vidéo pour cartes graphiques traditionnelles</title>
-<sect3 id="xv">
+<sect2 id="xv">
 <title>Xv</title>
 
 <para>
@@ -169,7 +169,7 @@ screen #0
 </orderedlist>
 </para>
 
-<sect4 id="tdfx">
+<sect3 id="tdfx">
 <title> Cartes 3dfx</title>
 
 <para>
@@ -188,10 +188,10 @@ Lisez la section <link linkend="sdl">SDL</link> pour plus de détails.
 <emphasis role="bold">OU</emphasis>, essayez le NOUVEAU pilote
 <option>-vo tdfxfb</option> ! Voir la section <link linkend="tdfxfb">tdfxfb</link>.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="s3">
+<sect3 id="s3">
 <title>Cartes S3</title>
 
 <para>
@@ -209,10 +209,10 @@ Si vous suspectez votre carte, prenez un pilote plus récent, ou demandez
 poliment un pilote qui gère MMX/3DNow sur la liste de diffusion MPlayer-users.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="nvidia">
+<sect3 id="nvidia">
 <title>Cartes nVidia</title>
 
 <para>
@@ -235,10 +235,10 @@ Cependant, <application>MPlayer</application> contient un pilote
 nVidia. Actuellement il est en phase béta, et a quelques inconvénients. Pour
 plus d'informations, voir la section <link linkend="vidix-nvidia">VIDIX nVidia</link>.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="ati">
+<sect3 id="ati">
 <title>Cartes ATI</title>
 
 <para>
@@ -259,10 +259,10 @@ avoir un affichage <emphasis role="bold">accéléré</emphasis>, avec ou sans
 <emphasis role="bold">sortie TV</emphasis>, et aucune librairie ou X ne
 sont requis. Lire la section <link linkend="vidix">VIDIX</link>.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="neomagic">
+<sect3 id="neomagic">
 <title>Cartes NeoMagic</title>
 
 <para>
@@ -294,10 +294,10 @@ Section "Device"
 EndSection<!--
 --></programlisting>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="trident">
+<sect3 id="trident">
 <title>Cartes Trident</title>
 <para>
 Si vous voulez utiliser Xv avec une carte Trident, puisque son support ne
@@ -309,22 +309,22 @@ Celui-ci ajoute le support Xv plein-écran avec la carte Cyberblade XP.
 <application>MPlayer</application> contient également un pilote
 <link linkend="vidix">VIDIX</link> pour la carte Cyberblade/i1.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="kyro">
+<sect3 id="kyro">
 <title>Cartes Kyro/PowerVR</title>
 <para>
 Si vous voulez utiliser Xv avec une carte Kyro (par exemple la Hercules
 Prophet 4000XT), vous devriez télécharger les pilotes depuis le
 <ulink url="http://www.powervr.com/">site de PowerVR</ulink>
 </para>
-</sect4>
 </sect3>
+</sect2>
 
 <!-- ********** -->
 
-<sect3 id="dga">
+<sect2 id="dga">
 <title>DGA</title>
 
 <formalpara>
@@ -425,7 +425,7 @@ les privilèges root par l'exécutable <application>MPlayer</application>.
 <para>
 Utilisez maintenant l'option <option>-vo dga</option> et c'est parti !
 (Enfin on peut l'espérer:) Vous pouvez alors essayer l'option
-<option>-vo sdl:dga</option> !
+<option>-vo sdl:driver=dga</option> !
 C'est beaucoup plus rapide !
 </para>
 
@@ -472,7 +472,7 @@ EndSection
 <title>DGA &amp; MPLAYER</title>
 <para>
 DGA est utilisé en deux endroits par <application>MPlayer</application>: Le pilote SDL
-peut se compiler pour en faire usage (<option>-vo sdl:dga</option>) et dans le pilote DGA
+peut se compiler pour en faire usage (<option>-vo sdl:driver=dga</option>) et dans le pilote DGA
 (<option>-vo dga</option>). Dans les sections suivantes je vous expliquerai comment
 fonctionne le driver DGA pour <application>MPlayer</application>.
 </para>
@@ -603,12 +603,12 @@ chaque chipset pour XFree.
   </simpara></listitem>
 </itemizedlist>
 
-</sect3>
-<!--</sect2>-->
+</sect2>
+<!--</sect1>-->
 
 <!-- ********** -->
 
-<sect3 id="sdl">
+<sect2 id="sdl">
 <title>SDL</title>
 
 <para>
@@ -642,7 +642,7 @@ bandes noires (si elles sont présentes).
 <variablelist>
 <title>Il existe plusieurs options en ligne de commande pour SDL:</title>
 <varlistentry>
-  <term><option>-vo sdl:<replaceable>nom</replaceable></option></term>
+  <term><option>-vo sdl:driver=<replaceable>nom</replaceable></option></term>
   <listitem><simpara>
     spécifie le driver vidéo SDL a utiliser (par ex. <literal>aalib</literal>,
     <literal>dga</literal>, <literal>x11</literal>)
@@ -689,7 +689,7 @@ bandes noires (si elles sont présentes).
 <itemizedlist>
 <title>Bogues connus:</title>
 <listitem><simpara>
-  Les touches pressées avec le driver sdl:aalib se répètent en continu (utiliser
+  Les touches pressées avec le driver sdl:driver=aalib se répètent en continu (utiliser
   <option>-vo aa</option> !). C'est un bogue dans la SDL, je ne peux pas le changer
   (testé avec SDL 1.2.1).
   </simpara></listitem>
@@ -697,10 +697,10 @@ bandes noires (si elles sont présentes).
   NE PAS UTILISER SDL avec la GUI! Cela ne fonctionnera pas comme il devrait.
   </simpara></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
 
-<sect3 id="svgalib">
+<sect2 id="svgalib">
 <title>SVGAlib</title>
 
 <formalpara>
@@ -774,10 +774,10 @@ Vous pouvez activer l'OSD et les sous-titres uniquement avec le filtre
 <option>expand</option>, voir la page de man pour les paramètres exacts.
 
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="fbdev">
+<sect2 id="fbdev">
 <title>Sortie Framebuffer (FBdev)</title>
 
 <para>
@@ -868,10 +868,10 @@ avec le framebuffer VESA, et ne nous le demandez pas, il ne s'agit pas d'une
 limitation de <application>MPlayer</application>.
 </para>
 </note>
-</sect3>
+</sect2>
 
 
-<sect3 id="mga_vid">
+<sect2 id="mga_vid">
 <title>Framebuffer Matrox (mga_vid)</title>
 
 <para>
@@ -942,10 +942,10 @@ luminosité:
 
 <screen>echo "brightness=120" &gt; /dev/mga_vid</screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
+<sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>Support YUV 3Dfx</title>
 <para>
 Ce pilote utilise le pilote framebuffer tdfx du noyau pour lire des films avec
@@ -953,10 +953,10 @@ accélération YUV. Vous aurez besoin d'un noyau avec support tdfxfb, et de recomp
 avec
 <screen>./configure --enable-tdfxfb</screen>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="opengl">
+<sect2 id="opengl">
 <title>Sortie OpenGL</title>
 
 <para>
@@ -991,10 +991,10 @@ d'environnement (au moins sur nVidia):
 <command>export $__GL_SYNC_TO_VBLANK=1</command>
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="aalib">
+<sect2 id="aalib">
 <title>AAlib - affichage en mode texte</title>
 
 <para>
@@ -1121,9 +1121,9 @@ un accès en écriture sur
 pas autodétecté par aalib, mais vo_aa essaie de déterminer le meilleur mode. Voir
 <ulink url="http://aa-project.sf.net/tune"/> pour une meilleure optimisation.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="caca">
+<sect2 id="caca">
 <title><systemitem class="library">libcaca</systemitem> - Librairie ASCII Art en couleur</title>
 
 <para>
@@ -1217,9 +1217,9 @@ Use the <option>-framedrop</option> option if your computer is not fast
 enough to render all frames.
 </para>
 
-</sect3>
+</sect2>
 
-<sect3 id="vesa">
+<sect2 id="vesa">
 <title>VESA - sortie sur BIOS VESA</title>
 
 <para>
@@ -1356,10 +1356,10 @@ fonctionnera pas !
   le BIOS vidéo s'initialise uniquement à ce moment-là.
   </simpara></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
 
-<sect3 id="x11">
+<sect2 id="x11">
 <title>X11</title>
 
 <para>
@@ -1403,10 +1403,10 @@ Si vous n'arrivez pas à trouver les mode que vous avez inséré, regardez dans la 
 de XFree86. Certains pilotes ne peuvent utiliser les pixelclocks bas qui sont requis
 pour les basses résolutions.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vidix">
+<sect2 id="vidix">
 <title>VIDIX</title>
 
 <formalpara>
@@ -1561,7 +1561,7 @@ vous pouvez utiliser un module noyau spécial, comme ceci:
   </para></step>
 </procedure>
 
-<sect4 id="vidix-ati">
+<sect3 id="vidix-ati">
 <title>Cartes ATI</title>
 <para>
 Actuellement la plupart des cartes ATI sont supportés nativement, de la Mach64
@@ -1573,9 +1573,9 @@ Il y a deux binaires compilés: <filename>radeon_vid</filename> pour les cartes R
 <filename>rage128_vid</filename> pour les Rage 128. Vous pouvez en forcer
 un ou laisser le système VIDIX le détecter parmis les pilotes disponibles.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-mga">
+<sect3 id="vidix-mga">
 <title>Cartes Matrox</title>
 <para>
 Les Matrox G200, G400, G450 et G550 doivent normalement fonctionner.
@@ -1585,9 +1585,9 @@ Les Matrox G200, G400, G450 et G550 doivent normalement fonctionner.
 Le pilote supporte les égaliseurs vidéo et devrait être presque aussi rapide que le
 <link linkend="mga_vid">framebuffer Matrox</link>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-trident">
+<sect3 id="vidix-trident">
 <title>Cartes Trident</title>
 <para>
 Il y a un pilote disponible pour les chipsets Trident Cyberblade/i1, qui peuvent être
@@ -1598,17 +1598,17 @@ trouvés sur les cartes-mère VIA Epia.
 Le pilote a été écrit et est maintenu par
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastair M. Robinson</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-3dlabs">
+<sect3 id="vidix-3dlabs">
 <title>Cartes 3DLabs</title>
 <para>
 Bien qu'il y ai un pilote pour les chips 3DLabs GLINT R3 et Permedia3,
 personne ne l'a testé, donc les rapports sont les bienvenus.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-nvidia">
+<sect3 id="vidix-nvidia">
 <title>Cartes nVidia</title>
 <para>
 Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Riva
@@ -1650,9 +1650,9 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
 <para>
 Rapports attendus !
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="vidix-sis">
+<sect3 id="vidix-sis">
 <title>Cartes SiS</title>
 <para>
 C'est du code très expérimental, comme nvidia_vid.
@@ -1666,10 +1666,10 @@ versions SiS des barebones "Shuttle XPC")
 <para>
 Rapports attendus !
 </para>
-</sect4>
 </sect3>
+</sect2>
 
-<sect3 id="directfb">
+<sect2 id="directfb">
 <title>DirectFB</title>
 <blockquote><para>
 "DirectFB est une librairie graphique conçue pour les systèmes embarqués. Il offre
@@ -1693,9 +1693,9 @@ La sélection de couche peut être faite par la méthode sous-périphérique, par
 ex. : <option>-vo directfb:2</option>
 (couche -1 par défaut: autodétection)
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="dfbmga">
+<sect2 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
 Veuillez lire la section <link linkend="directfb">DirectFB principale</link> pour
@@ -1724,13 +1724,13 @@ disponible sur l'URL ci-dessus). Le portage du code CRTC2 dans
 <emphasis role="bold">mga_vid</emphasis> est prévu depuis des années, les
  <ulink url="../../tech/patches.txt">patches</ulink> sont les bienvenus.
 </para></note>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="mpeg_decoders">
+<sect1 id="mpeg_decoders">
 <title>Décodeurs MPEG</title>
 
-<sect3 id="dvb">
+<sect2 id="dvb">
 <title>sorties et entrées DVB</title>
 <para>
 <application>MPlayer</application> supporte les cartes équipées du chipset DVB Siemens
@@ -1970,9 +1970,9 @@ utilisant la fonction OSD native des cartes DVB, ainsi qu'a une lecture plus rég
 des films non-25fps et le transcodage temps-réel entre MPEG-2 et MPEG-4 (décompression
 partielle).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="dxr2">
+<sect2 id="dxr2">
 <title>DXR2</title>
 <para>MPlayer supporte l'affichage accéléré avec la carte Creative DXR2.</para>
 <para>
@@ -2010,9 +2010,9 @@ résultats acceptables.
 </para>
 
 <para>Veuillez lire la page de man pour les options disponibles.</para>
-</sect3>
+</sect2>
 
-<sect3 id="dxr3">
+<sect2 id="dxr3">
 <title>DXR3/Hollywood+</title>
 <para>
 <application>MPlayer</application> supporte l'accélération matérielle avec les cartes
@@ -2144,14 +2144,14 @@ numérique de la carte. Voir l'option <option>-ao oss</option> plus haut, elle do
 </para></listitem>
 </varlistentry>
 </variablelist>
-</sect3>
-
 </sect2>
 
-<sect2 id="other">
+</sect1>
+
+<sect1 id="other">
 <title>Autres matériels de visualisation</title>
 
-<sect3 id="zr">
+<sect2 id="zr">
 <title>Zr</title>
 
 <para>
@@ -2237,9 +2237,9 @@ sans risque de lancer <emphasis role="bold">D'ABORD</emphasis> <application>XawT
 <emphasis role="bold">ENSUITE</emphasis> de lancer <application>MPlayer</application>, d'attendre que <application>MPlayer</application> se
 termine et <emphasis role="bold">ENSUITE</emphasis> de stopper <application>XawTV</application>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="blinkenlights">
+<sect2 id="blinkenlights">
 <title>Blinkenlights</title>
 <para>
 Ce pilote est capable de lire en utilisant le protocole UPD Blinkenlights. Si vous ne
@@ -2247,13 +2247,13 @@ savez pas ce qu'est <ulink url="http://www.blinkenlights.de/">Blinkenlights</uli
 vous n'avez pas besoin de ce pilote.
 
 </para>
-</sect3>
 </sect2>
+</sect1>
 
-<sect2 id="tvout">
+<sect1 id="tvout">
 <title>Sortie TV</title>
 
-<sect3 id="tvout-mga-g400">
+<sect2 id="tvout-mga-g400">
 <title>Cartes Matrox G400</title>
 
 <para>
@@ -2395,9 +2395,9 @@ La première broche du connecteur CRTC2 transmet le signal vidéo composite. La te
 (info donnée par Balázs Kerekes).
 </para>
 </formalpara>
-</sect3>
+</sect2>
 
-<sect3 id="tv-out_matrox_g450">
+<sect2 id="tv-out_matrox_g450">
 <title>Cartes Matrox G450/G550</title>
 <para>
 Le support de la sortie TV pour ces cartes n'a été introduit que récemment, et n'est
@@ -2421,10 +2421,10 @@ recommandé pour la G400, voir la section ci-dessus.
 Le patch noyau nécessaire et le HOWTO détaillé sont téléchargeables sur
 <ulink url="http://www.bglug.ca/matrox_tvout/"/>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tvout-ati">
+<sect2 id="tvout-ati">
 <title>Cartes ATI</title>
 
 <formalpara>
@@ -2467,17 +2467,17 @@ La seule chose que vous ayez à faire - <emphasis role="bold">avoir le connecteur
 branché avant de booter votre PC</emphasis> car le BIOS vidéo s'initialise
 uniquement durant cette phase.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="tvout-voodoo">
+<sect2 id="tvout-voodoo">
 <title>Voodoo 3</title>
 <para>
 Reportez-vous à <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">cette URL</ulink>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="tvout-nvidia">
+<sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
 D'abord, vous DEVEZ télécharger les pilotes closed-source depuis <ulink url="http://nvidia.com"/>.
@@ -2514,29 +2514,32 @@ EndSection
 <para>
 Bien sûr l'élément le plus important est la partie TwinView.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="tvout-neomagic">
+<sect2 id="tvout-neomagic">
 <title>Neomagic</title>
 <para>
 Le chip NeoMagic peut être trouvé sur de nombreux portables, certains équipés
 d'un encodeur TV analogique simple, certains en ont un plus avancé.
 <itemizedlist>
-<listitem><simpara>
+<listitem><para>
   <emphasis role="bold">Analog encoder chip</emphasis>:
-Testé sur un Toshiba Tecra 8000. Son chip de sortie TV est de très mauvaise qualité.
-À éviter si possible.
-</simpara><simpara>
-Vous devez utiliser <option>-vo vesa</option>. Le chipt testé n'était capable
-d'afficher que l'aspect ratio 1.333333, donc assurez-vous d'utiliser les options
-<option>-x</option>, <option>-y</option> et/ou les filtres
-<option>-vf scale,crop,expand</option> si la machine ne vous laisse pas activer
-la sortie TV. La résolution maximum était 720*576 à 16bpp.
-</simpara><simpara>
-Problèmes connus: VESA-uniquement, limitation 1.33333, l'image n'est pas toujours
-centrée, le film passe en 4bpp toutes les 10 minutes, et reste comme ça. bloquages
-matériels fréquents, problèmes d'affichage LCD.
- </simpara></listitem>
+  Il a été reporté qu'une sortie TV fiable pouvait être obtenue en utilisant
+  <option>-vo fbdev</option> ou <option>-vo fbdev2</option>.
+  Vous avez besoin d'avoir vesafb compilé dans votre noyau et de passer les 
+  paramètres suivants sur la ligne de commande du noyau:
+  <option>append="video=vesafb:ywrap,mtrr" vga=791</option>.
+  Vous devriez lancer <application>X</application>, puis passer en mode 
+  console avec e.g. <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>.
+  Si vous échouez en lancant <application>X</application> depuis la console, la vidéo 
+  devient lente et saccadé (toute explication de ce phénomène est bienvenue).
+  Identifiez-vous dans votre console, puis initiez la commande suivante:
+  <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
+  Maintenant vous devriez voir le film lancé en mode console remplir
+  à peu près la moitié de votre écran LCD de portable.
+  Pour switcher vers la TV tapez <keycap>Fn</keycap>+<keycap>F5</keycap> trois fois.
+  Testé sur un Tecra 8000, noyau 2.6.15 avec vesafb, ALSA v1.0.10.
+</para></listitem>
 <listitem><simpara>
   <emphasis role="bold">chip Chrontel 70xx encoder</emphasis>:
   Présent dans l'IBM Thinkpad 390E et probablement dans d'autres Thinkpads ou portables.
@@ -2563,6 +2566,6 @@ matériels fréquents, problèmes d'affichage LCD.
 </listitem>
 </itemizedlist>
 </para>
-</sect3>
 </sect2>
 </sect1>
+</chapter>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.72 -->
-<sect1 id="codecs">
+<!-- synced with 1.76 -->
+<chapter id="codecs">
 <title>Codecs Supportés</title>
 
-<sect2 id="video-codecs">
+<sect1 id="video-codecs">
 <title>Codecs vidéo</title>
 
 <para>
@@ -75,7 +75,7 @@ et aidez-nous à en ajouter le support.
 </para>
 
 
-<sect3 id="divx4-5">
+<sect2 id="divx4-5">
 <title>DivX4/DivX5</title>
 
 <para>
@@ -189,10 +189,10 @@ n'est pas correcte.
 
 </note>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
+<sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
 <para>
@@ -277,10 +277,10 @@ Vous devez suivre les étapes ci-dessus pour obtenir le source de cette librairie
 Avec FFmpeg et ma Matrox G400, je peut voir des films DivX en haute
 résolution sans sauter de trames sur mon K6-2 500.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="xanim">
+<sect2 id="xanim">
 <title>Codecs XAnim</title>
 
 <note>
@@ -341,10 +341,10 @@ de les utiliser si possible.
 Les codecs testés incluent: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
 H.263.</emphasis>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo-video">
+<sect2 id="vivo-video">
 <title>Vidéo VIVO</title>
 <para>
 <application>MPlayer</application> peut lire les vidéos Vivo (1.0 and 2.0).
@@ -355,10 +355,10 @@ fichiers 2.0, utilisez la DLL Win32 par l'intermédiaire de l'option
 commande,<application>MPlayer</application> sélectionne le meilleur codec
 automatiquement.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="mpeg12">
+<sect2 id="mpeg12">
 <title>Vidéo MPEG-1/2</title>
 <para>
 MPEG-1 et MPEG-2 sont décodés par la librairie multiplateforme <systemitem
@@ -369,10 +369,10 @@ MPEG-1/2 boguée en attrapant le <systemitem>Signal 11</systemitem>
 le codec, continuant ainsi exactement où l'erreur c'est produite. Cette
 technique de récupération n'a pas d'influence mesurable sur la vitesse.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="avicodecs">
+<sect2 id="avicodecs">
 <title>MS Video1, Cinepak CVID, et autres vieux codecs</title>
 <para>
 <application>MPlayer</application> est capable de lire la plupart des vieux
@@ -382,10 +382,10 @@ maintenant nous avons des <emphasis role="bold">codecs natifs</emphasis> pour
 la plupart d'entre eux en utilisant 
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realvideo">
+<sect2 id="realvideo">
 <title>RealVideo</title>
 
 <para>
@@ -418,10 +418,10 @@ ne fonctionnent actuellement qu'avec Linux, FreeBSD, NetBSD et Cygwin sur les
 plateformes x86, Alpha et PowerPC (Linux/Alpha et Linux/PowerPC ont été testés),
 et avec Mac OS X</emphasis>.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="xvid">
+<sect2 id="xvid">
 <title>XviD</title>
 
 <para>
@@ -485,10 +485,10 @@ Les deux projets ont donc la même origine.
   <option>--with-xvidincdir=<replaceable>/chemin/vers/</replaceable>xvid.h</option>
   </para></step>
 </procedure>
-</sect3>
+</sect2>
 
 
-<sect3 id="sorenson">
+<sect2 id="sorenson">
 <title>Sorenson</title>
 
 <para>
@@ -524,9 +524,9 @@ décodeurs suivants:
 <step><para>compilez <application>MPlayer</application></para></step>
 </procedure>
 
-</sect3>
+</sect2>
 
-<sect3 id="codec-x264">
+<sect2 id="codec-x264">
 <title>x264</title>
 <sect4 id="codec-x264-whatis">
 <title>Qu'est ce que le x264?</title>
@@ -544,22 +544,22 @@ décodeurs suivants:
 <title>Fonctions d'encodage</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Références multiple</para></listitem>
-  <listitem><para>Intra: Tout les types de macrobloc (16x16 et 4x4 avec
+  <listitem><para>Intra: Tout les types de macrobloc (16x16, 8x8, et 4x4 avec
     toutes les prédictions)</para></listitem>
-  <listitem><para>Inter P: Toutes les partitions (de 16x16 descendant à 
+  <listitem><para>Inter P: Toutes les partitions (de 16x16 jusqu'à
   4x4)</para></listitem>
-  <listitem><para>Inter B: Les partitions de 16x16 descendant à 8x8
+  <listitem><para>Inter B: Les partitions de 16x16 jusqu'à 8x8
     (incluant SKIP/DIRECT)</para></listitem>
   <listitem><para>Control Débit: quantificateur constant, débit constant,
-    ou passe mutliple ABR</para></listitem>
-  <listitem><para>Détection de découpage de scène</para></listitem>
+    simple ou multiple passe ABR, optionnel VBV</para></listitem>
+  <listitem><para>Détection de changement de scène</para></listitem>
   <listitem><para>Placement B-frame adaptif</para></listitem>
-  <listitem><para>B-frames commme références / ordre arbitraire de frame</para></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Limitations d'encodage</title>
-  <listitem><para>Pas de vrai RD</para></listitem>
+  <listitem><para>B-frames commme références / ordre arbitraire de frame</para>
+  </listitem>
+  <listitem><para>8x8 et 4x4 transformation spaciale adaptative</para></listitem>
+  <listitem><para>Mode sans perte</para></listitem>
+  <listitem><para>Matrices de quantification personnalisées</para></listitem>
+  <listitem><para>Encodage parallèle par découpage en de multiples tranches</para></listitem>
 </itemizedlist>
 
 </sect4>
@@ -661,12 +661,12 @@ décodeurs suivants:
   requis pour le <systemitem class="library">x264</systemitem>.
 </para>
 </sect4>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="audio-codecs">
+<sect1 id="audio-codecs">
 <title>Codecs audio</title>
 
 <itemizedlist>
@@ -709,12 +709,16 @@ décodeurs suivants:
   Voxware audio (en utilisant la DLL DirectShow)
   </simpara></listitem>
 <listitem><simpara>
-  alaw et ulaw, formats divers gsm, adpcm, pcm et autres vieux codecs audio simples
+  alaw et ulaw, formats divers gsm, adpcm, pcm et autres vieux codecs audio 
+  simples
+  </simpara></listitem>
+<listitem><simpara>
+  Adaptive Multi-Rate (AMR) codecs de voix
   </simpara></listitem>
 </itemizedlist>
 
 
-<sect3 id="swac3">
+<sect2 id="swac3">
 <title>Décodage AC3 logiciel</title>
 
 <para>
@@ -750,10 +754,10 @@ SNDCTL_DSP_CHANNELS. Un exemple de driver approprié est emu10k1 (utilisé par
 la carte Soundblaster Live!) depuis Août 2001 (Le CVS ALSA est également sensé
 fonctionner).
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="hwac3">
+<sect2 id="hwac3">
 <title>Décodage AC3 matériel</title>
 <para>
 Vous avez besoin d'une carte son gérant l'AC3, avec une sortie numérique
@@ -763,10 +767,10 @@ l'option <option>-ac hwac3</option>. C'est expérimental mais cela fonctionne
 avec les cartes C-Media, Soundblaster Live! en utilisant les pilotes ALSA (mais
 pas OSS) et les décodeurs MPEG DXR3/Hollywood+.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="libmad">
+<sect2 id="libmad">
 <title>support libmad</title>
 
 <para>
@@ -781,10 +785,22 @@ plateformes sans FPU (tel que <link linkend="arm">ARM</link>).
 Pour en activer le support, compilez avec l'option de configuration
 <option>--enable-mad</option>
 </para>
-</sect3>
+</sect2>
 
+<sect2 id="hwmpa">
+<title>codec audio MPEG matériel</title>
 
-<sect3 id="vivo-audio">
+<para>
+Ce codec (sélectionné par -ac hwmpa) passe directement les paquets audio
+MPEG vers les décodeurs matériels, comme creux trouvés dans les cartes
+DVB et les adaptateurs DXR2.
+Ne l'employez pas en combinaison avec n'importe quel autre dispositif de sortie 
+audio (comme OSS et ALSA) qui n'est pas capable de le décoder (vous n'entendriez 
+que du bruit blanc).
+</para>
+</sect2>
+
+<sect2 id="vivo-audio">
 <title>VIVO audio</title>
 <para>
 Le codec audio utilisé dans les fichiers VIVO dépend du fait que ce soit un fichier
@@ -793,10 +809,10 @@ VIVO/1.0 ou VIVO/2.0. Les fichiers VIVO/1.0 ont de l'audio
 <emphasis role="bold">Vivo Siren</emphasis>.
 Les deux sont supportés.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realaudio">
+<sect2 id="realaudio">
 <title>RealAudio</title>
 
 <para>
@@ -819,9 +835,9 @@ de RealAudio:
 Pour savoir comment installer les librairies RealPlayer, voyez la section
 <link linkend="realvideo">RealVideo</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qdesign">
+<sect2 id="qdesign">
 <title>Codecs QDesign</title>
 <para>
 Les flux audio QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) se trouvent
@@ -829,18 +845,18 @@ dans les fichiers MOV/QT. Les deux versions de ce codec peuvent être décodées
 avec les librairies QuickTime. Pour les instructions d'installation
 merci de voir la section <link linkend="sorenson">codec vidéo Sorenson</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qualcomm">
+<sect2 id="qualcomm">
 <title>Codec Qualcomm</title>
 <para>
 Les flux audio Qualcomm (fourcc:<emphasis>Qclp</emphasis>) se trouvent
 dans les fichiers MOV/QT. Pour les instructions d'installation merci de voir
 la section <link linkend="sorenson">codec vidéo Sorenson</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="aac">
+<sect2 id="aac">
 <title>Codec AAC</title>
 <para>
 AAC (Advanced Audio Coding) est un codec parfois présent dans les fichiers MOV et MP4.
@@ -872,18 +888,47 @@ obtenir les paquets Debian sur la
 les RPMs Mandrake sur le <ulink url="http://plf.zarb.org">P.L.F</ulink> et les RPMS
 RedHat sur <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
-</sect3>
-
 </sect2>
+
+<sect2 id="amr">
+<title>codecs AMR</title>
+<para>
+Adaptive Multi-Rate codec de voix est utilisé dans les téléphones mobiles de 
+troisième génération (3G).
+L'implémentation de référence est disponible depuis
+<ulink url="http://www.3gpp.org">Projet d'Association sur la 3ème Génération</ulink>
+(libre pour un usage privé).
+</para>
+<para>
+Pour activer le support, télécharger les sources pour les codecs
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
+et
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>, 
+mettez les dans le répertoire là où vous avez dézippé le source de
+<application>MPlayer</application> et lancez les commandes suivantes:
+<screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float
+</screen>
+Après ça, suivez la <link linkend="features">procédure de build</link>.
+habituelle de <application>MPlayer</application>
+</para>
+</sect2>
+ 	 
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="codec-importing">
+<sect1 id="codec-importing">
 <title>Comment importer les codecs Win32</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
 
-<sect3 id="vfw-codecs">
+<sect2 id="vfw-codecs">
 <title>codecs VFW</title>
 
 <para>
@@ -921,10 +966,10 @@ Sous Windows NT/2000/XP cherchez cette info dans la base de registre, c-a-d.
 cherchez &quot;VIDC.HFYU&quot;. Pour savoir comment faire, regardez l'ancienne
 méthode DirectShow ci-dessous.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="dshow-codecs">
+<sect2 id="dshow-codecs">
 <title>Codecs DirectShow</title>
 
 <para>
@@ -1036,6 +1081,6 @@ Si vous voulez ajouter un codec vous-même, lisez
 <ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink> (en anglais).
 </para>
 
-</sect3>
 </sect2>
 </sect1>
+</chapter>

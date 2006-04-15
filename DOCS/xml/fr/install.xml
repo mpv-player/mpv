@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.59 -->
-<sect1 id="install">
+<!-- synced with 1.63 -->
+<chapter id="install">
 <title>Installation</title>
 
 <para>
@@ -23,7 +23,7 @@ recommandés.
 </para>
 
 
-<sect2 id="softreq">
+<sect1 id="softreq">
 <title>Logiciels nécessaires</title>
 
 <itemizedlist>
@@ -133,10 +133,10 @@ recommandés.
   <filename>./configure</filename> où se trouve le fichier.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="installation_codecs">
 <title>Codecs</title>
 
 <itemizedlist>
@@ -255,10 +255,10 @@ recommandés.
   pour les instructions d'installation et plus d'information.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="video-cards">
+<sect1 id="video-cards">
 <title>Cartes graphiques</title>
 
 <para>
@@ -267,7 +267,7 @@ Il y a généralement deux types de cartes graphiques. Les premières (les cartes l
 </para>
 
 
-<sect3 id="yuv-cards">
+<sect2 id="yuv-cards">
 <title>Cartes YUV</title>
 
 <para>
@@ -344,10 +344,10 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
   </para></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Non-YUV cards">
+<sect2 id="non-yuv-cards" xreflabel="Non-YUV cards">
 <title>Cartes non-YUV</title>
 
 <para>
@@ -370,10 +370,10 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
   </simpara></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
 <title>Cartes Cirrus-Logic</title>
 <itemizedlist>
 <listitem><para>
@@ -403,11 +403,11 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
-</sect3>
 </sect2>
+</sect1>
 
 
-<sect2 id="sound-cards">
+<sect1 id="sound-cards">
 <title>Cartes son</title>
 
 <itemizedlist>
@@ -427,10 +427,10 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
   la section <link linkend="audio">cartes son</link> !</emphasis>
   </simpara></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="features">
 <title>Fonctionalités</title>
 
 <itemizedlist>
@@ -511,7 +511,6 @@ d'installer un fichier de police TTF et de dire à <application>MPlayer</applicat
 section <link linkend="subosd">Sous-titres et OSD</link> pour les détails.
 </para>
 
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -540,11 +539,13 @@ ceci pour des raisons techniques.
 devrez la télécharger si vous voulez utiliser la GUI. Voir la <ulink
 url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
 Elles pourront se placer dans le répertoire commun (<filename class="directory">
-$PREFIX/share/mplayer/skins</filename>), ou dans <filename class="directory">$HOME/.mplayer/skins</filename>.
-Par défaut, <application>MPlayer</application> consulte ces répertoires à la recherche
-d'un répertoire nommé <filename class="directory">default</filename>, mais vous pouvez utiliser l'option
-<option>-skin <replaceable>nouvelleskin</replaceable></option>, ou placer <literal>skin=nouvelleskin</literal>
-dans votre fichier de configuration pour utiliser la skin dans le répertoire <filename class="directory">*/skins/newskin</filename>.
+$PREFIX/share/mplayer/skins</filename>), ou dans <filename class="directory">
+$HOME/.mplayer/skins</filename>.
+Par défaut, <application>MPlayer</application> consulte ces répertoires à la 
+recherche d'un répertoire nommé <filename class="directory">default</filename>, 
+mais vous pouvez utiliser l'option <option>-skin <replaceable>nouvelleskin</replaceable></option>, 
+ou placer <literal>skin=nouvelleskin</literal> dans votre fichier de configuration 
+pour utiliser la skin dans le répertoire <filename class="directory">*/skins/newskin</filename>.
 </para>
 </sect1>
 
@@ -935,3 +936,4 @@ C'est une manière facile pour n'importe qui de devenir root.
 </para></note>
 </para>
 </sect1>
+</chapter>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.15 -->
+<!-- synced with 1.16 -->
 <chapter id="cd-dvd">
 <title>Utilisation des CD/DVD</title>
 
@@ -134,8 +134,9 @@ bogues, des incompatibilités de librairies, et une vitesse moins importante.
 </para>
 
 <note><para>
-En cas de problème de décodage de DVD, essayez de désactiver supermount, ou tous les
-outils de ce genre.
+En cas de problème de décodage de DVD, essayez de désactiver supermount, ou 
+tous les outils de ce genre. Certains lecteurs RPC-2 peuvent aussi avoir
+besoin que leur code de région soit bien paramétré.
 </para></note>
 
 <formalpara>

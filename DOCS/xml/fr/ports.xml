@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.72 -->
+<!-- synced with 1.80 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -95,8 +95,8 @@ Si vous avez besoin d'une GUI, vous pouvez utiliser xmms-embedded.
 <sect1 id="bsd">
 <title>*BSD</title>
 <para>
-<application>MPlayer</application> fonctionne sur FreeBSD, OpenBSD,
-NetBSD, BSD/OS et Darwin.
+<application>MPlayer</application> fonctionne sur toutes les variations
+de BSD connues.
 Il y a des versions ports/pkgsrc/fink/etc de <application>MPlayer</application>
 disponibles qui sont probablement plus faciles à utiliser que nos
 sources brutes.
@@ -154,8 +154,19 @@ Voir la section <link linkend="macos">Mac OS</link>.
 </sect2>
 </sect1>
 
-<sect1 id="solaris">
-<title>Sun Solaris</title>
+<sect1 id="unix">
+<title>Unix Commercial</title>
+
+<para>
+<application>MPlayer</application> a été porté sur un grand nombre d'Unix
+commerciaux.
+Étant donné que les environements de dévelopement sur ces systèmes
+ont tendances à être différent de ceux trouvé sur les Unix libres, vous devrez
+peut-être faire quelques ajustements manuels pour que le build fonctionne.
+</para>
+
+<sect2 id="solaris">
+<title>Solaris</title>
 <para>
 <application>MPlayer</application> devrait fonctionner sous Solaris 2.6
 ou supérieur.
@@ -264,10 +275,10 @@ Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc)
 / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
-</sect1>
+</sect2>
 
-<sect1 id="irix">
-<title>Silicon Graphics Irix</title>
+<sect2 id="irix">
+<title>IRIX</title>
 <para>
 Vous pouvez soit essayer d'installer le programme d'installation GNU, et
 (si vous ne l'avez pas mis dans votre chemin par défaut) précisez ensuite
@@ -295,9 +306,9 @@ Et ensuite faites (depuis le rép. source de <application>MPlayer</application>):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 finalement lancez la construction et l'installation.
 </para>
-</sect1>
+</sect2>
 
-<sect1 id="hpux">
+<sect2 id="hp-ux">
 <title>HP UX</title>
 <para>
 Joe Page héberge un 
@@ -424,22 +435,57 @@ suffisante ou non.)
 </listitem>
 </itemizedlist>
 
-</sect1>
+</sect2>
 
-<sect1 id="qnx">
-<title>QNX</title>
+<sect2 id="aix">
+<title>AIX</title>
 <para>
-Fonctionne. Vous devrez télécharger SDL pour QNX, et l'installer.
-Ensuite lancez <application>MPlayer</application> avec les options
-<option>-vo sdl:photon</option> et <option>-ao sdl:nto</option>, et
-ça devrait être rapide.
+<application>MPlayer</application> se compile parfaitement sous AIX 5.1, 
+5.2 et 5.3, en utilisant GCC 3.3 ou plus.
+La compilation de <application>MPlayer</application> sous AIX 4.3.3
+et inférieur n'a pas été testé.
+Il est hautement recommandé que vous compiliez
+<application>MPlayer</application> en utilisant GCC 3.4 ou plus, ou si
+vous êtes sous POWERS, GCC 4.0 est requis.
 </para>
 
 <para>
-La sortie <option>-vo x11</option> fonctionne encore plus lentement
-que sous Linux, car QNX ne dispose que d'une <emphasis>émulation</emphasis>
-X qui est TRÈS lente. Utilisez SDL.
+Assurez vous d'utiliser GNU make (<filename>/opt/freeware/bin/gmake</filename>) 
+pour construire <application>MPlayer</application>, autrement vous rencontreriez 
+des problèmes si vous utilisez <filename>/usr/ccs/bin/make</filename>.
 </para>
+
+<para>
+La détection CPU est toujours un travail en cours.
+Les architectures suivantes ont été testé:
+</para>
+
+<itemizedlist>
+<listitem><para>604e</para></listitem>
+<listitem><para>POWER4</para></listitem>
+</itemizedlist>
+
+<para>
+Les architectures suivantes n'ont pas été testé, mais devraient quand
+même marcher:
+</para>
+<itemizedlist>
+<listitem><para>POWER</para></listitem>
+<listitem><para>POWER2</para></listitem>
+<listitem><para>POWER3</para></listitem>
+<listitem><para>POWER5</para></listitem>
+</itemizedlist>
+
+<para>
+Le son à travers les Services Ultimedia n'est pas supporté, comme Ultimedia a 
+été abondonné dans AIX 5.1; , la seule option est d'utiliser les pilotes AIX OSS
+de 4Front Technologies depuis
+<ulink url="http://www.opensound.com/aix.html">http://www/opensound.com/aix/html</ulink>.
+4Front Technologies fourni librement les pilotes OSS pour un usage personnel 
+et non-commercial.
+</para>
+
+</sect2>
 </sect1>
 
 <sect1 id="windows">
@@ -471,11 +517,9 @@ Ajoutez <option>-fs</option> pour le mode plein écran.
 
 <para>
   Les meilleurs résultats sont obtenus avec le codec vidéo DirectX natif
-  (<option>-vo directx</option>) et le pilote waveout natif de Windows
-  (<option>-ao win32</option>). Vous pouvez aussi utiliser OpenGL et SDL,
+  (<option>-vo directx</option>). Vous pouvez aussi utiliser OpenGL et SDL,
   mais les performances d'OpenGL sont très variables suivant les systèmes
-  et SDL est connu pour distordre le son et l'image et planter sur certains
-  systèmes. 
+  et SDL est connu pour distordre l'image ou planter sur certains systèmes. 
   Si l'image est distordue, essayez de désactiver l'accélération matérielle avec
   <option>-vo directx:noaccel</option>. Téléchargez les
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">fichiers d'entête DirectX 7</ulink>
@@ -638,15 +682,15 @@ MinGW HOWTO</ulink>.</para>
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-<application>MPlayer</application> devrait compiler sans changement sur
-Mac OS X 10.2 et au dessus. Le compilateur préféré étant la version Apple de
-GCC 3.x ou plutard. Si vous avez Mac OS X 10.3.9 ou plutard et QuickTime 7
+<application>MPlayer</application> ne fonctionne pas sur des versions ultérieures 
+à Mac OS 10, mais devrait compiler sans changement sur Mac OS X 10.2 et supérieur. 
+Le compilateur préféré étant la version Apple de GCC 3.x ou supérieure.
+Si vous avez Mac OS X 10.3.9 ou supérieur et QuickTime 7
 vous pouvez utiliser le pilote macosx de sortie vidéo.
 </para>
 
-<sect2 id="mplayerosx">
-<title>MPlayer OS X</title>
-
+<sect2 id="osx_gui">
+<title>MPlayer OS X GUI</title>
 <para>
 Vous pouvez obtenir un GUI natif et un binaire pré-compilé de
 <application>MPlayer</application> pour Mac OS X depuis le projet
@@ -749,7 +793,33 @@ du tout en fonction.
 </sect2>
 </sect1>
 
-<sect1 id="amiga">
+<sect1 id="exotic_platforms">
+<title>Plateformes Exotiques</title>
+
+<para>
+<application>MPlayer</application> se lance sur bon nombre de plateformes exotiques, 
+mais la plupart des changements spécifiques à ces systèmes n'ont pas été
+mergé dans l'arbre des sources officielles de <application>MPlayer</application>.
+Pour les instructions de build vous devriez vous référer à la documentation
+spécifique du système.
+</para>
+
+<sect2 id="qnx">
+<title>QNX</title>
+<para>
+Vous aurez besoin de télécharger et installer SDL pour QNX. Puis de lancer
+<application>MPlayer</application> avec les options <option>-vo sdl:driver=photon</option> et
+<option>-ao sdl:nto</option>, cela devrait être rapide.
+</para>
+
+<para>
+La sortie de <option>-vo x11</option> sera encore plus lente que sous Linux,
+étant donné que QNX n'a qu'une <emphasis>émulation</emphasis> X, qui est
+très lente.
+</para>
+</sect2>
+
+<sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
 Les gens de chez <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
@@ -780,6 +850,7 @@ Binaire de <application>MEncoder</application> 1.0pre3</ulink>
 </para></listitem>
 </itemizedlist>
 </para>
+</sect2>
 </sect1>
 
 </chapter>

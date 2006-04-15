@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.16 -->
+<chapter id="tv">
+<title>TV</title>
+
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Entrée TV</title>
 
@@ -57,12 +60,19 @@ destination devraient être divisible par 16.
 <listitem>
 <para>
 Si vous capturez la vidéo avec une résolution verticale supérieure à la
-moitié de la pleine résolution (c-a-d. 288 pour PAL ou 240 pour NTSC,
-assurez-vous d'avoir désactivé l'entrelacement.
-Sinon votre film sera distordu pendant les scènes fast-motion et le
-contrôleur de bitrate ne sera probablement même pas capable de garder
-le bitrate demandé car l'artefact de désentrelacement produit un grand
-taux de détails et donc consomme plus de bande passante.
+moitié de la pleine résolution (c-a-d. 288 pour PAL ou 240 pour NTSC),
+alors les trames que vous obtenez seront en réalité des paires de champs
+entrelacées.
+En fonction de ce que vous voulez faire avec la vidéo, vous pourriez la laisser 
+sous cette forme, malheureusement désentrelacé, ou séparer les paires en champs 
+individuels.
+</para>
+<para>
+Autrement vous aurez un film qui a des distorsion durant les scènes à
+mouvements rapides et le contrôleur de bitrate ne sera probablement
+même pas capable de garder le bitrate demandé car les artefacts de
+désentrelacement produisent beaucoup de détails et donc consomment
+plus de bande passante.
 Vous pouvez désactiver l'entrelacement avec
 <option>-vf pp=DEINT_TYPE</option>.
 Généralement <option>pp=lb</option> peut faire du bon travail, mais
@@ -230,3 +240,4 @@ direction horizontale à cause d'une limitation matérielle.
 </informalexample>
 </sect2>
 </sect1>
+</chapter>

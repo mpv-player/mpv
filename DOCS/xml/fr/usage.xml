@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.34 -->
+<!-- synced with 1.36 -->
 <chapter id="usage">
 <title>Utilisation</title>
 
@@ -279,10 +279,6 @@ sauvegardera le contenu en flux depuis
 <replaceable>stream.asf</replaceable>.
 Cela marche avec tous les protocoles supportés par
 <application>MPlayer</application>, comme MMS, RSTP, et bien d'autre encore.
-Si vous souhaitez seulement sauvegarder l'audio ou la vidéo, utilisez <option>-dumpaudio</option>
-ou <option>-dumpvideo</option> respectivement, mais soyez averto que 
-<application>MPlayer</application> ignorera tout sauf la dernière option
-<option>-dump*</option> ajoutée dans la ligne de commande.
 </para>
 </sect2>
 </sect1>
@@ -516,6 +512,23 @@ d'audio est spécifiée.
 
 </sect3>
 
+<sect3 id="hwmpa-surround-passthrough">
+<title>PasseBande audio MPEG</title>
+
+<para>
+Les transmissions TV numérique (comme DVB et ATSC) et certains DVD ont 
+habituellement des flux audio MPEG (en particulier MP2).
+Certains décodeurs matériels MPEG comme les cartes DVB complètes et les 
+adaptateurs DXR2 peuvent décoder nativement ce format.
+<application>MPlayer</application> peut être configuré pour relayer les 
+données audio sans les décoder.
+</para>
+ 	 
+<para>
+Pour utiliser ce codec:
+<screen> mplayer -ac hwmpa </screen>
+</para>
+</sect3>
 
 <sect3 id="advaudio-surround-matrix">
 <title>Audio à encodage matriciel</title>

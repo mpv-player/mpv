@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.26 -->
+<!-- synced with 1.28 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Le Lecteur Vidéo</title>
@@ -180,14 +180,20 @@ peuvent être distribués selon les termes de la GNU General Public License Versio
 </para>
 
 &history.xml;
-&install.xml;
 </chapter>
 
+&install.xml;
 
-&features.xml;
 &usage.xml;
-&faq.xml;
 &cd-dvd.xml;
+&faq.xml;
+ 	 
+&formats.xml;
+&codecs.xml;
+&video.xml;
+&audio.xml;
+&tvinput.xml;
+
 &ports.xml;
 &mencoder.xml;
 &mail-lists.xml;
