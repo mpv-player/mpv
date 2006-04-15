@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.15 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 <para>
@@ -12,6 +12,21 @@ Tehát miközben a visszajelzések kritikus és nagyon megbecsült az
 hogy <emphasis role="bold">minden</emphasis> általunk kért információt meg
 kell adnod és követned kell az ebben a dokumentumban leírt lépéseket.
 </para>
+<sect1 id="bugreports_security">
+<title>Biztonsági hibák jelentése</title>
+<para>
+Ha egy kihasználható hibát találsz és a helyesen akarsz cselekedni,
+vagyis előbb a mi tudomásunkra akarod hozni, mielőtt publikálnád,
+szívesen vesszük a biztonsági figyelmeztetésedet a
+<ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>
+címen.
+Kérjük írd bele a tárgy mezőbe a [SECURITY] vagy [ADVISORY] szót.
+Figyelj rá, hogy a jelentésed a hiba teljes és részletes analízisét tartalmazza.
+Nagyon hálásak leszünk, ha javítást is küldesz.
+Kérjük ne késlekedj a jelentéseddel egy proof-of-concept exploit írása
+miatt, azt később is elküldheted egy másik levélben.
+</para>
+</sect1>
 <sect1 id="bugreports_fix">
 <title>Hogyan javíts hibákat</title>
 <para>
@@ -295,7 +310,7 @@ fájlt a hibajelentésedhez.
 </para>
 </sect2>
 
-<sect2 id="bugreports_conpilation">
+<sect2 id="bugreports_compilation">
 <title>Fordítási problémák</title>
 <para>
 Kérlek csatold a következő fájlokat:
