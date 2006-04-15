@@ -447,6 +447,13 @@ void MP3_Init(){
     }
     else
 #endif
+#ifdef HAVE_ALTIVEC
+    if (gCpuCaps.hasAltiVec)
+    {
+	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using AltiVec optimized decore!\n");
+    }
+    else
+#endif
     {
 	synth_func = NULL; /* use default c version */
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using generic C decore!\n");
