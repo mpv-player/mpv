@@ -162,7 +162,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     if ( mp_msg_test(MSGT_DEMUX,MSGL_V) )
 	return;
     
-    if (stream_id >= MAX_STREAMS)
+    if ((unsigned)stream_id >= MAX_STREAMS)
 	return;
 
     index = priv->index_table[stream_id];
@@ -1040,7 +1040,7 @@ got_video:
 	return 1;
     }
 
-if(stream_id<MAX_STREAMS){
+if((unsigned)stream_id<MAX_STREAMS){
 
     if(demuxer->audio->id==-1 && demuxer->a_streams[stream_id]){
 	sh_audio_t *sh = demuxer->a_streams[stream_id];
@@ -1635,14 +1635,14 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    priv->is_multirate = 1;
 		    stream_skip(demuxer->stream, 4); // Length of codec data (repeated)
 		    stream_cnt = stream_read_dword(demuxer->stream); // Get number of audio or video streams
-		    if (stream_cnt >= MAX_STREAMS) {
+		    if ((unsigned)stream_cnt >= MAX_STREAMS) {
 		        mp_msg(MSGT_DEMUX,MSGL_ERR,"Too many streams in %s. Big troubles ahead.\n", mimet);
 		        goto skip_this_chunk;
 		    }
 		    for (i = 0; i < stream_cnt; i++)
 		        stream_list[i] = stream_read_word(demuxer->stream);
 		    for (i = 0; i < stream_cnt; i++)
-		        if (stream_list[i] >= MAX_STREAMS) {
+		        if ((unsigned)stream_list[i] >= MAX_STREAMS) {
 		            mp_msg(MSGT_DEMUX,MSGL_ERR,"Stream id out of range: %d. Ignored.\n", stream_list[i]);
 		            stream_skip(demuxer->stream, 4); // Skip DATA offset for broken stream
 		        } else {
