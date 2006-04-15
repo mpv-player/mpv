@@ -6,6 +6,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
+#include "asmalign.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -66,7 +67,7 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 {
 	int j;
 	asm volatile (""
-		".balign 16 \n\t"
+		ASMALIGN16                
 		"1: \n\t"
 		"movq (%0), %%mm1 \n\t"
 		"movq (%0), %%mm2 \n\t"
@@ -105,7 +106,7 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 #endif
 		"pxor %%mm0, %%mm0 \n\t"
 		
-		".balign 16 \n\t"
+		ASMALIGN16 
 		".Lli0: \n\t"
 		"movq (%%"REG_S"), %%mm1 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"
@@ -213,7 +214,7 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 #endif
 		"pxor %%mm0, %%mm0 \n\t"
 		
-		".balign 16 \n\t"
+		ASMALIGN16  
 		".Lli1: \n\t"
 		"movq (%%"REG_S"), %%mm1 \n\t"
 		"movq (%%"REG_S"), %%mm2 \n\t"

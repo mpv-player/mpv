@@ -6972,7 +6972,10 @@ fi
 echores "$_crash_debug"
 
 if darwin ; then
-  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN"
+  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN -DCONFIG_DARWIN"  
+  if x86 ; then
+  CFLAGS="$CFLAGS -arch i386 -isysroot /Developer/SDKs/MacOSX10.4u.sdk"
+  fi
   if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
     CFLAGS="$CFLAGS -no-cpp-precomp"
   fi
