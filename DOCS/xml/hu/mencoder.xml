@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.101 -->
+<!-- synced with 1.103 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -370,6 +370,19 @@ mencoder <replaceable>bemenet.avi</replaceable> -of mpeg -mpegopts format=mpeg1:
 </screen>
 </para>
 </informalexample>
+
+<note><title>Tanács:</title>
+<para>
+  Ha valamilyen okból kifolyólag a videó minőség a második lépésben nem
+  kielégítő, ajánlott újrafuttatnod a videó kódolásod egy másik cél
+  bitrátával, feltéve, hogy elmentetted az előző lépés statisztikát
+  tartalmazó fájlját.
+  Ez azért lehetséges, mert a statisztika fájl elsődleges célja minden
+  egyes képkocka komplexitásának feljegyzése, ami nem függ erőteljesen
+  a bitrátától. Azonban vedd figyelembe, hogy akkor kapod a legjobb
+  minőséget, ha a lépések cél bitrátája nem különbözik nagy mértékben.
+</para>
+</note>
 
 </sect1>
 
