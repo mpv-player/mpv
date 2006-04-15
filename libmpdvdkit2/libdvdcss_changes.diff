@@ -70,3 +70,14 @@
  
  #include "common.h"
  #include "css.h"
+@@ -301,6 +301,10 @@
+         {
+             psz_home = getenv( "HOME" );
+         }
++        if( psz_home == NULL )
++        {
++            psz_home = getenv( "USERPROFILE" );
++        }
+ 
+         /* Cache our keys in ${HOME}/.dvdcss/ */
+         if( psz_home )

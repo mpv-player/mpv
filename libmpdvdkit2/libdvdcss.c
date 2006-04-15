@@ -301,6 +301,10 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
         {
             psz_home = getenv( "HOME" );
         }
+        if( psz_home == NULL )
+        {
+            psz_home = getenv( "USERPROFILE" );
+        }
 
         /* Cache our keys in ${HOME}/.dvdcss/ */
         if( psz_home )
