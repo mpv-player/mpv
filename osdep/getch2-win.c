@@ -93,7 +93,7 @@ int getch2(int time){
                         continue;              
 					}
 					/*check for function keys*/
-        			if(0x87 >= eventbuffer[i].Event.KeyEvent.wVirtualKeyCode >= 0x70)
+        			if(0x87 >= eventbuffer[i].Event.KeyEvent.wVirtualKeyCode && eventbuffer[i].Event.KeyEvent.wVirtualKeyCode >= 0x70)
 						return (KEY_F + 1 + eventbuffer[i].Event.KeyEvent.wVirtualKeyCode - 0x70);
  						
 					/*only characters should be remaining*/
