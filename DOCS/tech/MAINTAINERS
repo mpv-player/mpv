@@ -104,6 +104,7 @@ demuxers:
     * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
     * demux_mpg and demux_ts - Nico Sabbi
+    * demux_mpc.c - Reimar Döffinger
 
 muxers:
     * muxer_lavf.c - Michael Niedermayer
@@ -112,6 +113,7 @@ codec support:
     * FFmpeg: Michael Niedermayer
     * XviD: Ivan Kalvachev
     * x264: Loren Merritt
+    * musepack, speex: Reimar Döffinger
 
 video filters:
     * general: Richard Felker, Michael Niedermayer
@@ -164,6 +166,7 @@ libvo drivers:
     * vo_zr.c - Rik Snel
 
     * x11_common.c - Alexander Strasser
+    * w32_common.c - Reimar Döffinger
 
 VIDIX drivers:
     * mach64_vid - None
