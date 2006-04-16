@@ -95,7 +95,7 @@ int pva_sync(demuxer_t * demuxer)
 	}
 	if(priv->just_synced)
 	{
-		if(priv!=NULL) priv->synced_stream_id=buffer[2];
+		priv->synced_stream_id=buffer[2];
 		return 1;
 	}
 	else
