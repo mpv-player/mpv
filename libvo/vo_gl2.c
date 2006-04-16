@@ -706,9 +706,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
 	/* Map window. */
 	XMapWindow(mDisplay, vo_window);
-#ifdef HAVE_XINERAMA
-	vo_x11_xinerama_move(mDisplay,vo_window);
-#endif
 	vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
         XClearWindow(mDisplay,vo_window);
 
@@ -810,13 +807,15 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
-	aspect_save_screenres(vo_screenwidth,vo_screenheight);
+	update_xinerama_info();
 
 	aspect(&d_width,&d_height,A_NOZOOM);
 	vo_dx = (int)(vo_screenwidth - d_width) / 2;
 	vo_dy = (int)(vo_screenheight - d_height) / 2;
 	geometry(&vo_dx, &vo_dy, &d_width, &d_height,
 	          vo_screenwidth, vo_screenheight);
+	vo_dx += xinerama_x;
+	vo_dy += xinerama_y;
 
 #if defined(HAVE_NEW_GUI) && !defined(GL_WIN32)
 	if (use_gui) {

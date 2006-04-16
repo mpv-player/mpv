@@ -25,10 +25,6 @@ int prev_height;
 int prev_x;
 int prev_y;
 
-// top left coordinates of current monitor
-int vo_screenx;
-int vo_screeny;
-
 uint32_t o_dwidth;
 uint32_t o_dheight;
 
@@ -36,9 +32,11 @@ static HINSTANCE hInstance;
 HWND vo_window = 0;
 static int cursor = 1;
 static int event_flags;
+static int mon_cnt;
 
 static HMONITOR (WINAPI* myMonitorFromWindow)(HWND, DWORD);
 static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO);
+static BOOL (WINAPI* myEnumDisplayMonitors)(HDC, LPCRECT, MONITORENUMPROC, LPARAM);
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     RECT r;
@@ -135,6 +133,44 @@ int vo_w32_check_events(void) {
     return event_flags;
 }
 
+static BOOL CALLBACK mon_enum(HMONITOR hmon, HDC hdc, LPRECT r, LPARAM p) {
+    // this defaults to the last screen if specified number does not exist
+    xinerama_x = r->left;
+    xinerama_y = r->top;
+    vo_screenwidth = r->right - r->left;
+    vo_screenheight = r->bottom - r->top;
+    if (mon_cnt == xinerama_screen)
+        return FALSE;
+    mon_cnt++;
+    return TRUE;
+}
+
+void update_xinerama_info(void) {
+    xinerama_x = xinerama_y = 0;
+    if (xinerama_screen < -1) {
+        int tmp;
+        xinerama_x = GetSystemMetrics(SM_XVIRTUALSCREEN);
+        xinerama_y = GetSystemMetrics(SM_YVIRTUALSCREEN);
+        tmp = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+        if (tmp) vo_screenwidth = tmp;
+        tmp = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+        if (tmp) vo_screenheight = tmp;
+    } else if (xinerama_screen == -1 && myMonitorFromWindow && myGetMonitorInfo) {
+        MONITORINFO mi;
+        HMONITOR m = myMonitorFromWindow(vo_window, MONITOR_DEFAULTTOPRIMARY);
+        mi.cbSize = sizeof(mi);
+        myGetMonitorInfo(m, &mi);
+        xinerama_x = mi.rcMonitor.left;
+        xinerama_y = mi.rcMonitor.top;
+        vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
+        vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
+    } else if (xinerama_screen > 0 && myEnumDisplayMonitors) {
+        mon_cnt = 0;
+        myEnumDisplayMonitors(NULL, NULL, mon_enum, 0);
+    }
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
+
 static void updateScreenProperties() {
     DEVMODE dm;
     dm.dmSize = sizeof dm;
@@ -148,18 +184,7 @@ static void updateScreenProperties() {
     vo_screenwidth = dm.dmPelsWidth;
     vo_screenheight = dm.dmPelsHeight;
     vo_depthonscreen = dm.dmBitsPerPel;
-    vo_screenx = vo_screeny = 0;
-    if (myMonitorFromWindow && myGetMonitorInfo) {
-        MONITORINFO mi;
-        HMONITOR m = myMonitorFromWindow(vo_window, MONITOR_DEFAULTTOPRIMARY);
-        mi.cbSize = sizeof(mi);
-        myGetMonitorInfo(m, &mi);
-        vo_screenx = mi.rcMonitor.left;
-        vo_screeny = mi.rcMonitor.top;
-        vo_screenwidth = mi.rcMonitor.right - mi.rcMonitor.left;
-        vo_screenheight = mi.rcMonitor.bottom - mi.rcMonitor.top;
-    }
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+    update_xinerama_info();
 }
 
 static void changeMode(void) {
@@ -232,8 +257,8 @@ static int createRenderingContext(void) {
         prev_y = vo_dy;
         vo_dwidth = vo_screenwidth;
         vo_dheight = vo_screenheight;
-        vo_dx = vo_screenx;
-        vo_dy = vo_screeny;
+        vo_dx = xinerama_x;
+        vo_dy = xinerama_y;
     } else {
         vo_dwidth = prev_width;
         vo_dheight = prev_height;
@@ -322,10 +347,12 @@ int vo_init(void) {
 
     myMonitorFromWindow = NULL;
     myGetMonitorInfo = NULL;
+    myEnumDisplayMonitors = NULL;
     user32 = GetModuleHandle("user32.dll");
     if (user32) {
         myMonitorFromWindow = GetProcAddress(user32, "MonitorFromWindow");
         myGetMonitorInfo = GetProcAddress(user32, "GetMonitorInfoA");
+        myEnumDisplayMonitors = GetProcAddress(user32, "EnumDisplayMonitors");
     }
     updateScreenProperties();
 

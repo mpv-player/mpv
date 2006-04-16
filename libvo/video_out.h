@@ -179,6 +179,10 @@ extern int vo_flags;
 
 extern int vo_config_count;
 
+extern int xinerama_screen;
+extern int xinerama_x;
+extern int xinerama_y;
+
 // correct resolution/bpp on screen:  (should be autodetected by vo_init())
 extern int vo_depthonscreen;
 extern int vo_screenwidth;

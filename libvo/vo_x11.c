@@ -286,10 +286,13 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     in_format = format;
     srcW = width;
     srcH = height;
+    update_xinerama_info();
     vo_dx = (vo_screenwidth - d_width) / 2;
     vo_dy = (vo_screenheight - d_height) / 2;
     geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth,
              vo_screenheight);
+    vo_dx += xinerama_x;
+    vo_dy += xinerama_y;
     vo_dwidth = d_width;
     vo_dheight = d_height;
 
@@ -422,9 +425,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
                 if (fullscreen)
                     vo_x11_fullscreen();
-#ifdef HAVE_XINERAMA
-                vo_x11_xinerama_move(mDisplay, vo_window);
-#endif
             } else if (!fullscreen)
                 XMoveResizeWindow(mDisplay, vo_window, vo_dx, vo_dy,
                                   vo_dwidth, vo_dheight);

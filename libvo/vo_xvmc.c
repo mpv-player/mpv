@@ -604,15 +604,16 @@ found_subpic:
 
    vo_mouse_autohide = 1;
 
+   update_xinerama_info();
    vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;
    geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
+   vo_dx += xinerama_x;
+   vo_dy += xinerama_y;
    vo_dwidth=d_width; vo_dheight=d_height;
 
 #ifdef HAVE_XF86VM
    if( flags&VOFLAG_MODESWITCHING ) vm = 1;
 #endif
-
-   aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 #ifdef HAVE_NEW_GUI
    if(use_gui)
@@ -702,9 +703,6 @@ found_subpic:
 	 XMapWindow(mDisplay, vo_window);
 	 if ( flags&VOFLAG_FULLSCREEN ) vo_x11_fullscreen();
 	 else {
-#ifdef HAVE_XINERAMA
-	    vo_x11_xinerama_move(mDisplay,vo_window);
-#endif
 	    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
 	 }
       } else {

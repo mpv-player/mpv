@@ -108,11 +108,6 @@ static int vo_old_y = 0;
 static int vo_old_width = 0;
 static int vo_old_height = 0;
 
-#ifdef HAVE_XINERAMA
-int xinerama_screen = 0;
-int xinerama_x = 0;
-int xinerama_y = 0;
-#endif
 #ifdef HAVE_XF86VM
 XF86VidModeModeInfo **vidmodes = NULL;
 XF86VidModeModeLine modeline;
@@ -364,6 +359,43 @@ static void init_atoms(void)
     XA_INIT(_BLACKBOX_PID);
 }
 
+void update_xinerama_info(void) {
+    int screen = xinerama_screen;
+    xinerama_x = xinerama_y = 0;
+#ifdef HAVE_XINERAMA
+    if (screen >= -1 && XineramaIsActive(mDisplay))
+    {
+        XineramaScreenInfo *screens;
+        int num_screens;
+
+        screens = XineramaQueryScreens(mDisplay, &num_screens);
+        if (screen >= num_screens)
+            screen = num_screens - 1;
+        if (screen == -1) {
+            int x = vo_dx + vo_dwidth / 2;
+            int y = vo_dy + vo_dheight / 2;
+            for (screen = num_screens - 1; screen > 0; screen--) {
+               int left = screens[screen].x_org;
+               int right = left + screens[screen].width;
+               int top = screens[screen].y_org;
+               int bottom = top + screens[screen].height;
+               if (left <= x && x <= right && top <= y && y <= bottom)
+                   break;
+            }
+        }
+        if (screen < 0)
+            screen = 0;
+        vo_screenwidth = screens[screen].width;
+        vo_screenheight = screens[screen].height;
+        xinerama_x = screens[screen].x_org;
+        xinerama_y = screens[screen].y_org;
+
+        XFree(screens);
+    }
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+#endif
+}
+
 int vo_init(void)
 {
 // int       mScreen;
@@ -411,25 +443,6 @@ int vo_init(void)
 
     init_atoms();
 
-#ifdef HAVE_XINERAMA
-    if (XineramaIsActive(mDisplay))
-    {
-        XineramaScreenInfo *screens;
-        int num_screens;
-
-        screens = XineramaQueryScreens(mDisplay, &num_screens);
-        if (xinerama_screen >= num_screens)
-            xinerama_screen = 0;
-        if (!vo_screenwidth)
-            vo_screenwidth = screens[xinerama_screen].width;
-        if (!vo_screenheight)
-            vo_screenheight = screens[xinerama_screen].height;
-        xinerama_x = screens[xinerama_screen].x_org;
-        xinerama_y = screens[xinerama_screen].y_org;
-
-        XFree(screens);
-    } else
-#endif
 #ifdef HAVE_XF86VM
     {
         int clock;
@@ -1447,8 +1460,9 @@ void vo_x11_fullscreen(void)
             vo_old_y = vo_dy;
             vo_old_width = vo_dwidth;
             vo_old_height = vo_dheight;
-            x = 0;
-            y = 0;
+            update_xinerama_info();
+            x = xinerama_x;
+            y = xinerama_y;
             w = vo_screenwidth;
             h = vo_screenheight;
         }
@@ -1481,10 +1495,6 @@ void vo_x11_fullscreen(void)
     /* some WMs lose ontop after fullscreeen */
     if ((!(vo_fs)) & vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
-
-#ifdef HAVE_XINERAMA
-    vo_x11_xinerama_move(mDisplay, vo_window);
-#endif
 
     XMapRaised(mDisplay, vo_window);
     XRaiseWindow(mDisplay, vo_window);
@@ -1777,17 +1787,6 @@ void vo_x11_selectinput_witherr(Display * display, Window w,
                        PointerMotionMask)));
     }
 }
-
-#ifdef HAVE_XINERAMA
-void vo_x11_xinerama_move(Display * dsp, Window w)
-{
-    if (XineramaIsActive(dsp) && !geometry_xy_changed)
-    {
-        /* printf("XXXX Xinerama screen: x: %hd y: %hd\n",xinerama_x,xinerama_y); */
-        XMoveWindow(dsp, w, xinerama_x, xinerama_y);
-    }
-}
-#endif
 
 #ifdef HAVE_XF86VM
 void vo_vm_switch(uint32_t X, uint32_t Y, int *modeline_width,

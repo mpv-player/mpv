@@ -19,6 +19,10 @@
 
 //int vo_flags=0;
 
+int xinerama_screen = -1;
+int xinerama_x;
+int xinerama_y;
+
 // currect resolution/bpp on screen:  (should be autodetected by vo_init())
 int vo_depthonscreen=0;
 int vo_screenwidth=0;

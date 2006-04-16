@@ -371,9 +371,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 if (flags & VOFLAG_FULLSCREEN)
                     vo_x11_fullscreen();
 
-#ifdef HAVE_XINERAMA
-                vo_x11_xinerama_move(mDisplay, vo_window);
-#endif
             } else if (!(flags & VOFLAG_FULLSCREEN))
                 XMoveResizeWindow(mDisplay, vo_window, vo_dx, vo_dy,
                                   vo_dwidth, vo_dheight);
