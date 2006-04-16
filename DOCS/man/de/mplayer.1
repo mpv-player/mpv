@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1253
+.\" In sync with rev 1.1257
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -2322,6 +2322,12 @@ Wird er nicht hinzugefügt, erfolgt die Ausgabe als raw-PCM.
 Schreibe den Sound nach <Dateiname> und nicht in die Standarddatei
 audiodump.wav.
 Wurde nowaveheader angegeben, ist der Standard audiodump.pcm.
+.IPs fast
+Versuche, schneller als mit der eigentlichen Abspielgeschwindigkeit auszugeben.
+Stelle sicher, dass die Ausgabe nicht abgeschnitten wird (normalerweise mit
+der Nachricht "Zu viele Videopakete im Puffer").
+Es ist normal, dass du die Nachricht "Your system is too SLOW to play this!"
+bekommst.
 .RE
 .PD 1
 .
@@ -2605,6 +2611,14 @@ Gibt das Höhen-/\:Breitenverhältnis deines Monitors oder Fernsehers an.
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <ratio> (siehe auch \-aspect)
+Setze den Aspekt eines einzelnen Pixels deines Monitors oder TV-Schirms
+(Standard: deaktiviert).
+Überschreibt die Einstellung \-monitoraspect.
+Ein Wert von 0 deaktiviert, Wert von 1 bedeutet quadratische Pixel (korrekt
+für (fast?) alle LCDs).
+.
+.TP
 .B \-nodouble
 Deaktiviert Double-Buffering, hauptsächlich für Debugging-Zwecke.
 Double-Buffering vermeidet Flimmern dadurch, dass zwei Bilder im Speicher
@@ -2703,10 +2717,16 @@ beispielsweise nützlich ist, um MPlayer in einen Browser einzubetten (z.B.\&
 mit der plugger-Erweiterung).
 .
 .TP
-.B \-xineramascreen <0\-...>
+.B \-xineramascreen <\-2\-...> (nur bei X11)
 Bei Xinerama-Konfigurationen (z.B.\& bei einem einzigen Desktop, der sich
 über mehrere Monitore erstreckt) gibt diese Option an, auf welchem Schirm
 das Video angezeigt werden soll.
+Wert \-2 steht für die Wiedergabe auf dem gesamten virtuellen Display, \-1
+steht für Vollbildwiedergabe auf dem Display, das das aktuelle Fenster anzeigt.
+Die mit der Option \-geometry gesetzte Initialposition ist relativ zum
+angegebenen Bildschirm.
+Wird normalerweise nur mit "\-fstype \-fullscreen" oder "\-fstype none"
+funktionieren.
 .
 .TP
 .B \-zrbw (nur bei \-vo zr)
