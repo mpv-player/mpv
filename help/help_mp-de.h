@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.237
+// In synch with rev 1.240
 
 // ========================= MPlayer help ===========================
 
@@ -702,6 +702,7 @@ static char help_text[]=
 // Beachte: Wenn du MSGTR_PlayList änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_MENU_PlayList passt.
 #define MSGTR_PlayList "Playlist"
 #define MSGTR_Equalizer "Equalizer"
+#define MSGTR_ConfigureEqualizer "Equalizer-Konfiguration"
 #define MSGTR_SkinBrowser "Skin-Browser"
 #define MSGTR_Network "Netzwerk-Streaming..."
 // Beachte: Wenn du MSGTR_Preferences änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_MENU_Preferences passt.
@@ -799,6 +800,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Audiospur"
 #define MSGTR_MENU_Track "Spur %d"
 #define MSGTR_MENU_VideoTrack "Videospur"
+#define MSGTR_MENU_Subtitles "Untertitel"
 
 // --- equalizer
 // Beachte: Wenn du MSGTR_EQU_Audio änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_PREFERENCES_Audio passt.
@@ -1106,7 +1108,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Datei: %s (%s)\nPCM: Samplerate: %iHz Kanäle: %s Format %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am Schnellsten mit -vc dummy -vo null erreicht.\n[AO PCM] Info: Um WAVE-Dateien zu schreiben, benutze -ao pcm:waveheader (Standard).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Das Anlegen von Dump-Dateien wird am Schnellsten mit -vc dummy\n -vo null -ao pcm:fast erreicht.\n[AO PCM] Info: Um WAVE-Dateien zu schreiben, benutze -ao pcm:waveheader (Standard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Öffnen von %s zum Schreiben fehlgeschlagen!\n"
 
 // ao_sdl.c
