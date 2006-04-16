@@ -1,4 +1,4 @@
-.\" synced with 1.1252
+.\" synced with 1.1257
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -2377,6 +2377,13 @@ Quand l'entête n'est pas incluse, un fichier PCM brut sera généré.
 Écrit le son dans le <nomfichier> au lieu de ./audiodump.wav par défaut.
 Si l'option nowaveheader est définie, le fichier par défaut
 est ./audiodump.pcm.
+.IPs fast
+Essaye d'écrire le fichier plus rapidement qu'en temps réel.
+Assurez-vous la sortie ne se trouve pas tronquée (le message
+"Too many video packets in buffer / trop de paquets vidéos dans le buffer"
+s'affiche généralement dans ce cas).
+C'est normal que le message "Your system is too SLOW to play this! /
+Votre machine est trop LENTE pour jouer cette vidéo" s'affiche.
 .RE
 .PD 1
 .
@@ -2660,6 +2667,15 @@ Fixe le rapport hauteur/\:largeur de votre moniteur ou de votre TV.
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <ratio> (voir aussi \-aspect)
+Défini l'aspect d'un seul pixel de votre moniteur ou écran TB
+(par défaut\ : désactivé).
+Écrase le paramétrage de \-monitoraspect.
++Overrides the \-monitoraspect setting.
+La valeur 0 désactive, la valeur 1 signifie des pixels carrés (correct
+pour presque tous les écrans LCD).
+.
+.TP
 .B \-nodouble
 Désactive le double tamponnage (buffering), surtout à des fins de débogage.
 Le double tamponnage évite les phénomènes de scintillement en plaçant
@@ -2762,9 +2778,15 @@ Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
 par exemple).
 .
 .TP
-.B \-xineramascreen <0\-...>
+.B \-xineramascreen <-2\-...> (X11 uniquement)
 Dans les configurations xinerama (c'est à dire un bureau unique s'étendant sur
 plusieurs écrans, cette option dit à MPlayer sur quel écran afficher le film.
+La valeur \-2 signifie plein écran sur la totalité de l'écran virtuel, la valeur
+\-1 signifie plein écran sur l'écran où se trouve la fenêtre.
+La position initiale définie par l'option \-geometry est relative à l'écran
+défini.
+Fontionnera généralement uniquement avec  "\-fstype \-fullscreen" ou
+"\-fstype none".
 .
 .TP
 .B \-zrbw (\-vo zr uniquement)
@@ -4311,6 +4333,22 @@ temps.
 .IPs <0.0\-1.0>
 Delat de la fonction sinus, prenez des valeurs très faible pour
 entrendre le balayage.
+.RE
+.PD 1
+.
+.TP
+.B sinesupress[=freq:decay]
+Enlève un sinosoïde à la fréquence spécifiée.
+Utile pour supprimer le bruit à 50/60hz que l'on trouve dans les équipements
+audios bon marchés.
+Ceci ne fonctionne probablement qu'avec une entrée mono.
+.PD 0
+.RSs
+.IPs <freq>
+La fréquence (en Hz) de la sinusoïde à enlever (par défaut\ : 50).
+.IPs <decay>
+Contrôle l'adaptivité (une plus grande valeur rend le filtre plus rapide à réagir à des changements de phase et d'amplitude, une plus petite valueur rendra l'adaptation plus lente (par défaut\ : 0.0001).
+Les valeurs utiles sont autour de 0.001.
 .RE
 .PD 1
 .
