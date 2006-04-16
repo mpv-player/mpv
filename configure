@@ -884,7 +884,7 @@ case "$host_arch" in
 	fi
 	;;
     6) iproc=686
-	if test "$pmodel" -eq 9 -o "$pmodel" -eq 13; then
+	if test "$pmodel" -eq 9 -o "$pmodel" -ge 13; then
 		proc=pentium-m
 	elif test "$pmodel" -ge 7; then
 		proc=pentium3
