@@ -684,6 +684,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Аудио дорожка"
 #define MSGTR_MENU_Track "дорожка %d"
 #define MSGTR_MENU_VideoTrack "Видео дорожка"
+#define MSGTR_MENU_Subtitles "Субтитры"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Аудио"

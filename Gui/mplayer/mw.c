@@ -32,6 +32,12 @@
 #include "widgets.h"
 
 extern mixer_t mixer; // mixer from mplayer.c
+extern int global_sub_size;
+extern int global_sub_pos;
+extern int global_sub_indices[];
+extern int sub_source(void);
+#define SUB_SOURCE_VOBSUB 1
+#define SUB_SOURCE_DEMUX  2
 
 extern unsigned int GetTimerMS( void );
 
@@ -108,6 +114,24 @@ void mplEventHandling( int msg,float param )
    case evSetVideo:
         if ( !guiIntfStruct.demuxer || video_id == iparam ) break;
 	video_id=iparam;
+	goto play;
+
+   case evSetSubtitle:
+	if ( !guiIntfStruct.demuxer || global_sub_pos == iparam ) break;
+	global_sub_pos = iparam;
+	if ( global_sub_pos >= 0 )
+	 switch ( sub_source() )
+	  {
+	   case SUB_SOURCE_VOBSUB:
+		vobsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_VOBSUB];
+		goto play;
+	   case SUB_SOURCE_DEMUX:
+		vobsub_id = -1;
+		dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
+		goto play;
+	  }
+	vobsub_id = -1;
+	dvdsub_id = -2;
 	goto play;
 
 #ifdef HAVE_VCD

@@ -377,6 +377,8 @@ char * GetLanguage( int language )
  return NULL;
 }
 
+extern int global_sub_size;
+
 GtkWidget * DVDSubMenu;
 GtkWidget * DVDTitleMenu;
 GtkWidget * DVDChapterMenu;
@@ -567,6 +569,20 @@ GtkWidget * create_PopUpMenu( void )
          snprintf( tmp,32,MSGTR_MENU_Track,i );
          AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( i << 16 ) + evSetVideo );
         }
+     }
+   }
+  
+  /* cheap subtitle switching for non-DVD streams */
+  if ( global_sub_size && guiIntfStruct.StreamType != STREAMTYPE_DVD )
+   {
+    int i;
+    SubMenu=AddSubMenu( window1, (const char*)empty_xpm, Menu, MSGTR_MENU_Subtitles );
+    AddMenuItem( window1, (const char*)empty_xpm, SubMenu, MSGTR_MENU_None, (-1 << 16) + evSetSubtitle );
+    for ( i=0;i < global_sub_size;i++ )
+     {
+      char tmp[32];
+      snprintf( tmp, 32, MSGTR_MENU_Track, i );
+      AddMenuItem( window1,(const char*)empty_xpm,SubMenu,tmp,( i << 16 ) + evSetSubtitle );
      }
    }
 

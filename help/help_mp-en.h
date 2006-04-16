@@ -788,6 +788,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Audio track"
 #define MSGTR_MENU_Track "Track %d"
 #define MSGTR_MENU_VideoTrack "Video track"
+#define MSGTR_MENU_Subtitles "Subtitles"
 
 // --- equalizer
 // Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio

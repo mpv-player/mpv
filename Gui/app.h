@@ -60,7 +60,8 @@
 #define evSetAspect         44
 #define evSetAudio	    45
 #define evSetVideo	    46
-// 47 ...
+#define evSetSubtitle       47
+// 48 ...
 
 #define evExit              1000
 
