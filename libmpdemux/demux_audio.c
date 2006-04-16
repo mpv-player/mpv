@@ -512,7 +512,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	      stream_read(s, (char *)&srate, 3);
 	      srate = be2me_32(srate) >> 12;
 	      stream_read(s, (char *)&num_samples, 5);
-	      num_samples = (be2me_64(num_samples) >> 24) & 0xfffffffff;
+	      num_samples = (be2me_64(num_samples) >> 24) & 0xfffffffffULL;
 	      if (num_samples && srate)
 	        sh_audio->i_bps = size * srate / num_samples;
 	    }
