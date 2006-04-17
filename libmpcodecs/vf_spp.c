@@ -35,13 +35,8 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#include <ffmpeg/dsputil.h>
-#else
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
-#endif
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>

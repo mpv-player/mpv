@@ -37,15 +37,9 @@ double ff_eval(char *s, double *const_value, const char **const_name,
 // Needed to bring in lrintf.
 #define HAVE_AV_CONFIG_H
 
-#ifdef USE_LIBAVCODEC_SO
-#include <ffmpeg/avcodec.h>
-#include <ffmpeg/dsputil.h>
-#include <ffmpeg/common.h>
-#else
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
 #include "libavutil/common.h"
-#endif
 
 /* FIXME: common.h defines printf away when HAVE_AV_CONFIG
  * is defined, but mp_image.h needs printf.
