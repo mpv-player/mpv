@@ -528,7 +528,7 @@ décodeurs suivants:
 
 <sect2 id="codec-x264">
 <title>x264</title>
-<sect4 id="codec-x264-whatis">
+<sect3 id="codec-x264-whatis">
 <title>Qu'est ce que le x264?</title>
 <para>
   <systemitem class="library">x264</systemitem> est une librairie pour
@@ -562,9 +562,9 @@ décodeurs suivants:
   <listitem><para>Encodage parallèle par découpage en de multiples tranches</para></listitem>
 </itemizedlist>
 
-</sect4>
+</sect3>
 
-<sect4 id="codec-h264-whatis">
+<sect3 id="codec-h264-whatis">
 <title>Qu'est ce que le H.264?</title>
 <para>
   H.264 est un des noms pour le nouveau codec video numérique développé conjointement
@@ -602,9 +602,9 @@ décodeurs suivants:
   mais si vous êtes intéressé par une brêve vue d'ensemble, vous devriez lire
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">L'Encodage Video Avancé H.264/AVC Standard: Vue d'ensemble et Introduction aux Extensions de Chaîne de Fidélité</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-playback">
+<sect3 id="codec-x264-playback">
 <title>Comment puis-je jouer des vidéos H.264 avec <application>MPlayer</application>?</title>
 <para>
   <application>MPlayer</application> utilise le décodeur H264 de
@@ -621,9 +621,9 @@ décodeurs suivants:
   vous devriez garder un oeil sur
   <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">Interface Web du site CVS de FFmpeg</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-encode">
+<sect3 id="codec-x264-encode">
 <title>Comment puis-je encoder des vidéos avec <application>MEncoder</application> et
 <systemitem class="library">x264</systemitem>?</title>
 <para>
@@ -660,7 +660,7 @@ décodeurs suivants:
   Le script configure détectera automatiquement que vous avez ce qui est
   requis pour le <systemitem class="library">x264</systemitem>.
 </para>
-</sect4>
+</sect3>
 </sect2>
 </sect1>
 
