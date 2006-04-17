@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<!-- in sync with rev 1.13 $ -->
+<appendix id="bugs">
+<title>Bekannte Fehler</title>
+<sect1 id="bugs-special">
+<title>System-/CPU-spezifische Fehler/Probleme</title>
+<itemizedlist>
+<listitem>
+<para>SIGILL (Signal 4) auf P3 bei 2.2.x-Kernels:</para>
+<para>Problem: Kernel 2.2.x hat keine angemessene (funktionierende) SSE-Unterstützung</para>
+<para>Lösung: Upgrade auf Kernel 2.4.x</para>
+<para>Workaround: <command>./configure --disable-sse</command></para>
+</listitem>
+<listitem>
+<para>Allgemeines SIGILL (Signal 4):</para>
+<para>Problem: du hast <application>MPlayer</application> auf unterschiedlichen Maschinen
+compiliert und und gestartet (zum Beispiel compiliert auf P3 und gestartet auf Celeron)</para>
+<para>Lösung: compiliere <application>MPlayer</application> auf der Maschine, auf der du ihn
+benutzen wirst!</para>
+<para>Workaround: du kannst all das vergessen, indem du configure mit der Option
+<option>--enable-runtime-cpudetection</option> ausführst oder bestimmte CPU-Instruktionssets mit
+spezielleren Optionen(wie <option>--disable-mmx</option>, <option>--disable-3dnow</option>, usw)
+deaktivierst.
+</para>
+</listitem>
+<listitem>
+<para>&quot;Interne Buffer-Inkonsistenz&quot; während <application>MEncoder</application> läuft:</para>
+<para>Problem: bekanntest Problem, falls lame &lt; 3.90 mit gcc 2.96 oder 3.x compiliert wurde.</para>
+<para>Lösung: benutze lame &gt;=3.90.</para>
+<para>Workaround: compiliere lame mit gcc 2.95.x und entferne alle schon installierten lame-Pakete,
+sie könnten mit gcc 2.96 compiliert worden sein.</para>
+</listitem>
+<listitem>
+<para>Gestörter MP2/MP3-Sound auf PPC:</para>
+<para>Problem: bekannte GCC-Fehlcompilierung auf PPC-Plattform, bisher keine Lösung.</para>
+<para>Workaround: Benutze FFmpegs (langsamen) MP1/MP2/MP3-Decoder (<option>-ac ffmpeg</option>)</para>
+</listitem>
+<listitem>
+<para>SIGSEGV (Signal 11) in libmpeg2, bei Skalierung+Encodierung:</para>
+<para>Problem: bekannter MMX-Fehler in GCC 2.95.2</para>
+<para>Lösung: Upgrade auf 2.95.3</para>
+</listitem>
+<listitem>
+<para>Abstürze bei Ausgabe (Dump) von Streams:</para>
+<para>Problem: Core Dump</para>
+<para>Lösung: Keine Panik. Stelle sicher, dass du weißt, wo dein Handtuch ist.</para>
+</listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="bugs-audio">
+<title>Verschiedene A-V-Sync und andere Audioprobleme</title>
+
+<sect2 id="bugs-delay-all">
+<title>Allgemeine Audioverzögerung oder mieser Ton (existiert bei allen oder vielen Videodateien)</title>
+<itemizedlist>
+<listitem><para>
+am häufigsten: fehlerhafter Audiotreiber! - versuche, verschiedene Treiber zu verwenden, probiere
+ALSA 0.9 OSS-Emulation mit der Option <option>-ao oss</option> und auch <option>-ao sdl</option>,
+das hilft manchmal. Wenn deine Datei mit der Option <option>-nosound</option> gut abspielbar ist,
+kannst du dir sicher sein, dass es sich um Problem mit der Soundkarte (dem Treiber) handelt.
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>Audiopuffer-Probleme (Puffergröße schlecht erkannt)</para>
+<para>Workaround: <application>MPlayer</application>s Option <option>-abs</option></para>
+</listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem><para>
+Probleme mit der Samplerate - vielleicht unterstützt deine Karte nicht die Samplerate
+deiner Dateien - probiere den Resample-Filter (<option>-af resample=...</option>)
+</para></listitem>
+</itemizedlist>
+<itemizedlist>
+<listitem>
+<para>langsame Maschine (CPU oder VGA)</para>
+<para>probiere es mit <option>-vo null</option>, wenn das gut abspielt, hast du eine langsame
+VGA-Karte/Treiber</para>
+<para>Workaround: kaufe eine schnellere Karte oder lies die Dokumentationsteil, der
+Geschwindigkeitsoptimierung behandelt</para>
+<para>Probiere außerdem <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-delay-specific">
+<title>Audioverzögerung/-desynchronisation speziell bei einer oder wenigen Dateien</title>
+<itemizedlist>
+<listitem>
+<para>schlechte Datei</para>
+<para>
+Workaround:
+  <itemizedlist>
+  <listitem>
+    <para>Option <option>-ni</option> oder <option>-nobps</option> (für
+    nicht-interleaved- oder schlechte Dateien)</para>
+    <para>und/oder</para>
+  </listitem>
+  <listitem>
+    <para><option>-mc 0</option>(benötigt für Dateien mit schlecht interleavedem
+    VBR-Audio)</para>
+    <para>und/oder</para>
+  </listitem>
+  <listitem>
+    <para><option>-delay</option> oder <keycap>+</keycap>/<keycap>-</keycap>
+    Tasten zur Laufzeit, um die Verzögerung anzupassen</para>
+  </listitem>
+  </itemizedlist>
+Wenn nichts davon hilft, lade die Datei bitte hoch, wir überprüfen (und fixen) das.
+</para>
+</listitem>
+<listitem>
+<para>deine Soundkarte unterstützt keine Wiedergabe bei 48kHz</para>
+<para>Workaround: kaufe eine bessere Soundkarte... oder versuche, fps um 10% zu senken
+(benutze <option>-fps 27</option> bei einem 30fps-Film) oder verwende des Filter resample</para>
+</listitem>
+<listitem>
+<para>langsame Maschine (wenn A-V nicht um 0 ist und die letzte Zahl in der Statuszeile ansteigt</para>
+<para>Workaround: <option>-framedrop</option></para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nosound">
+<title>Überhaupt kein Ton</title>
+<itemizedlist>
+<listitem>
+<para>deine Datei enthält einen nicht-unterstützten Audiocodec</para>
+<para>lies die Dokumentation und hilf uns, Unterstützung dafür hinzuzufügen</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-nopicture">
+<title>Überhaupt kein Bild (nur graues/grünes Fenster)</title>
+<itemizedlist>
+<listitem>
+<para>deine Datei enthält einen nicht-unterstützten Videocodec</para>
+<para>lies die Dokumentation und hilf uns, Unterstützung dafür hinzuzufügen</para>
+</listitem>
+<listitem>
+<para>
+automatisch ausgewählter Codec kann die Datei nicht decodieren, probiere, mit
+den Optionen <option>-vc</option> oder <option>-vfm</option> einen anderen auszuwählen.
+</para>
+</listitem>
+<listitem>
+<para>
+du versuchst, eine DivX 3.x Datei mit dem OpenDivX-Decoder oder XviD (<option>-vc odivx</option>)
+abzuspielen - installiere DivX4Linux und compiliere den Player neu
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+<sect2 id="bugs-video">
+<title>Video-out-Probleme</title>
+<para>
+Erste Anmerkung: Die Optionen <option>-fs -vm</option> und <option>-zoom</option> sind
+nur Empfehlungen, (noch) nicht von allen Treibern unterstützt. Es ist daher kein Bug,
+wenn es nicht funktioniert. Nur ein paar Treiber unterstützten Skalierung/Zoom,
+erwarte dies nicht von x11 oder dga.
+</para>
+
+<formalpara>
+<title>OSD/Untertitel-Flimmern</title>
+<para>
+<itemizedlist>
+<listitem><para>x11-Treiber: Sorry, kann im Moment nicht behoben werden</para></listitem>
+<listitem><para>xv-Treiber: benutze die Option <option>-double</option></para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+<formalpara>
+<title>Grünes Bild bei mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+<para>
+<itemizedlist>
+<listitem><para>mga_vid hat die Größe deines RAMs falsch erkannt, lade es neu mit der Option
+<option>mga_ram_size</option>
+</para></listitem>
+</itemizedlist>
+</para>
+</formalpara>
+
+</sect2>
+</sect1>
+
+</appendix>
