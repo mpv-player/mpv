@@ -76,6 +76,4 @@ $(filter-out main.xml, $(patsubst ../en/%,%, $(wildcard ../en/*.xml))):
 
 distclean:
 	rm -f main.xml
-	if test "$(USE_SYMLINKS)" = "yes" ; then \
-		rm -f `find *.xml -type l`; \
-	fi
+	rm -f `find *.xml -type l`;
