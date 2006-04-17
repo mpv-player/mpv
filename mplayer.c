@@ -3494,8 +3494,7 @@ while(sh_audio){
   if(playsize>0){
       sh_audio->a_out_buffer_len-=playsize;
       memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
-      sh_audio->delay+=playback_speed*playsize/((float)((ao_data.bps && sh_audio->afilter) ?
-          ao_data.bps : sh_audio->o_bps));
+      sh_audio->delay+=playback_speed*playsize/(float)ao_data.bps;
   }
 
   break;
@@ -3798,7 +3797,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	  -sh_audio->a_in_buffer_len/(float)sh_audio->i_bps,
 	  a_pts+(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps);
 #endif	  
-      a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+      a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps - sh_audio->a_out_buffer_len*playback_speed/(float)ao_data.bps;
     }
     v_pts=sh_video ? sh_video->pts : d_video->pts;
 
