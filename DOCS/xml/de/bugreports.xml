@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with revision 1.14 $ -->
+<!-- in sync with revision 1.15 $ -->
 <appendix id="bugreports">
 <title>Wie Fehler (Bugs) berichtet werden</title>
 <para>
@@ -12,6 +12,21 @@ Verbesserung von <application>MPlayer</application> sehr wichtig ist und geschät
 wird, <emphasis role="bold">alle</emphasis> Informationen, die wir fordern, zur
 Verfügung stellen und die Anweisungen dieses Dokuments strikt befolgen musst.
 </para>
+<sect1 id="bugreports_security">
+<title>Berichte sicherheitsrelevante Fehler</title>
+<para>
+Im Falle, dass du einen Exploit-fähigen Fehler gefunden hast und gern das richtige tun
+möchtest und uns diesen beseitigen lässt, bevor du ihn veröffentlichst, würden wir uns
+freuen, deinen Rat zur Sicherheit unter
+<ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>
+zu erhalten.
+Füge dem Betreff bitte [SECURITY] oder [ADVISORY] hinzu.
+Stelle bitte sicher, dass dein Bericht eine vollständige und detaillierte Analyse des Fehlers enthält.
+Einsendung einer Lösung wird sehr dankend angenommen.
+Bitte verzögere deinen Bericht nicht, um einen Proof-of-concept-Exploit zu schreiben, den
+kannst du in einer weiteren Mail schicken.
+</para>
+</sect1>
 <sect1 id="bugreports_fix">
 <title>Wie Fehler beseitigt werden</title>
 <para>
