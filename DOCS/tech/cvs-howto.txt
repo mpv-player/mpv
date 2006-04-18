@@ -37,8 +37,6 @@ I. TECH SIDE:
 
   Replace LOGIN with your login name. Leave 'passwd' unchanged, it's a command.
 
-  Note: If you need a real shell for something, tell A'rpi.
-
 2. Checking out development source tree:
 
     export CVS_RSH=ssh
@@ -93,7 +91,7 @@ I. TECH SIDE:
 
 8. Renaming/moving files or content of files, removing empty directories:
 
-  You CANNOT do that. Ask the CVS server admin (A'rpi) to do it!
+  You CANNOT do that. Ask the CVS server admin to do it!
   Do NOT remove & readd a file - it will kill the changelog!!!!
 
   Don't do a lot of cut'n'paste from one file to another without a very good
