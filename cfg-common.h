@@ -71,6 +71,15 @@
 	{"user-agent", "MPlayer was compiled without streaming (network) support.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 
+#ifdef STREAMING_LIVE555
+        {"sdp", "-sdp is obsolete, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
+        {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},
+#else
+	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+        {"rtsp-port", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
 	
 // ------------------------- demuxer options --------------------
 
@@ -412,6 +421,11 @@ extern m_config_t dvbin_opts_conf[];
 #ifdef  USE_FRIBIDI
 extern char *fribidi_charset;
 extern int flip_hebrew;
+#endif
+
+#ifdef STREAMING_LIVE555
+extern int rtspStreamOverTCP;
+extern int rtsp_port;
 #endif
 
 

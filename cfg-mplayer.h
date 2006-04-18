@@ -83,12 +83,6 @@ extern void vo_zr_revertoption(m_option_t* opt,char* pram);
 extern m_option_t dxr2_opts[];
 #endif
 
-#ifdef STREAMING_LIVE555
-extern int isSDPFile;
-extern int rtspStreamOverTCP;
-extern int rtsp_port;
-#endif
-
 #ifdef HAVE_NEW_GUI
 extern char * skinName;
 extern int enqueue;
@@ -293,15 +287,6 @@ m_option_t mplayer_opts[]={
 	{"dxr2", &dxr2_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
-#ifdef STREAMING_LIVE555
-        {"sdp", "-sdp is obsolete, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
-        {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-        {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},
-#else
-	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-        {"rtsp-port", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
 
 //---------------------- mplayer-only options ------------------------
 
