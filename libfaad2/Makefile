@@ -8,6 +8,7 @@ SRCS    = bits.c \
           common.c \
           decoder.c \
           drc.c \
+          drm_dec.c \
           error.c \
           filtbank.c \
           hcr.c \

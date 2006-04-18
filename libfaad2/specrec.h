@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: specrec.h,v 1.26 2004/05/17 10:18:03 menno Exp $
+** $Id: specrec.h,v 1.28 2004/09/04 14:56:29 menno Exp $
 **/
 
 #ifndef __SPECREC_H__

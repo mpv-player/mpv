@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: huffman.c,v 1.20 2004/03/10 19:45:41 menno Exp $
+** $Id: huffman.c,v 1.22 2004/09/04 14:56:28 menno Exp $
 **/
 
 #include "common.h"
@@ -50,6 +50,7 @@ static uint8_t huffman_binary_quad_sign(uint8_t cb, bitfile *ld, int16_t *sp);
 static uint8_t huffman_binary_pair(uint8_t cb, bitfile *ld, int16_t *sp);
 static uint8_t huffman_binary_pair_sign(uint8_t cb, bitfile *ld, int16_t *sp);
 static int16_t huffman_codebook(uint8_t i);
+static void vcb11_check_LAV(uint8_t cb, int16_t *sp);
 
 int8_t huffman_scale_factor(bitfile *ld)
 {
@@ -310,6 +311,26 @@ static int16_t huffman_codebook(uint8_t i)
     else        return (int16_t)data & 0xFFFF;
 }
 
+static void vcb11_check_LAV(uint8_t cb, int16_t *sp)
+{
+    static const uint16_t vcb11_LAV_tab[] = {
+        16, 31, 47, 63, 95, 127, 159, 191, 223,
+        255, 319, 383, 511, 767, 1023, 2047
+    };
+    uint16_t max = 0;
+
+    if (cb < 16 || cb > 31)
+        return;
+
+    max = vcb11_LAV_tab[cb - 16];
+
+    if ((abs(sp[0]) > max) || (abs(sp[1]) > max))
+    {
+        sp[0] = 0;
+        sp[1] = 0;
+    }
+}
+
 uint8_t huffman_spectral_data(uint8_t cb, bitfile *ld, int16_t *sp)
 {
     switch (cb)
@@ -336,18 +357,28 @@ uint8_t huffman_spectral_data(uint8_t cb, bitfile *ld, int16_t *sp)
         sp[0] = huffman_codebook(0); sp[1] = huffman_codebook(1); 
         return err; }
     case 11:
-#ifdef ERROR_RESILIENCE
-    /* VCB11 uses codebook 11 */
-    case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
-    case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31:
-        /* TODO: If ER is used, some extra error checking should be done */
-#endif
     {
         uint8_t err = huffman_2step_pair_sign(11, ld, sp);
         sp[0] = huffman_getescape(ld, sp[0]);
         sp[1] = huffman_getescape(ld, sp[1]);
         return err;
     }
+#ifdef ERROR_RESILIENCE
+    /* VCB11 uses codebook 11 */
+    case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
+    case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31:
+    {
+        uint8_t err = huffman_2step_pair_sign(11, ld, sp);
+        sp[0] = huffman_getescape(ld, sp[0]);
+        sp[1] = huffman_getescape(ld, sp[1]);
+
+        /* check LAV (Largest Absolute Value) */
+        /* this finds errors in the ESCAPE signal */
+        vcb11_check_LAV(cb, sp);
+
+        return err;
+    }
+#endif
     default:
         /* Non existent codebook number, something went wrong */
         return 11;
@@ -369,7 +400,7 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
     uint32_t cw;
     uint16_t offset = 0;
     uint8_t extra_bits;
-    uint8_t i;
+    uint8_t i, vcb11 = 0;
 
 
     switch (cb)
@@ -406,9 +437,12 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
     case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
     case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31:
 
-        /* TODO: If ER is used, some extra error checking should be done */
         if (cb >= 16)
+        {
+            /* store the virtual codebook */
+            vcb11 = cb;
             cb = 11;
+        }
             
         cw = showbits_hcr(ld, hcbN[cb]);
         offset = hcb_table[cb][cw].offset;
@@ -463,8 +497,8 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
     }
 
 	/* decode sign bits */
-    if (unsigned_cb[cb]) {
-
+    if (unsigned_cb[cb])
+    {
         for(i = 0; i < ((cb < FIRST_PAIR_HCB) ? QUAD_LEN : PAIR_LEN); i++)
         {
             if(sp[i])
@@ -500,12 +534,19 @@ int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp)
                     if (b == 0)
                         break;
                 }
-// TODO: here we would need to test "off" if VCB11 is used!
+
                 if (getbits_hcr(ld, i, &off))
                     return -1;
                 j = off + (1<<i);
                 sp[k] = (int16_t)((neg) ? -j : j);
             }
+        }
+
+        if (vcb11 != 0)
+        {
+            /* check LAV (Largest Absolute Value) */
+            /* this finds errors in the ESCAPE signal */
+            vcb11_check_LAV(vcb11, sp);
         }
     }    
     return ld->len;

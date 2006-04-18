@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_syntax.c,v 1.31 2004/05/17 10:18:03 menno Exp $
+** $Id: sbr_syntax.c,v 1.34 2004/09/04 14:56:28 menno Exp $
 **/
 
 #include "common.h"
@@ -73,16 +73,6 @@ static void sbr_reset(sbr_info *sbr)
 #endif
 
     /* if these are different from the previous frame: Reset = 1 */
-    if ((sbr->bs_start_freq != sbr->bs_start_freq_prev) ||
-        (sbr->bs_stop_freq != sbr->bs_stop_freq_prev) ||
-        (sbr->bs_freq_scale != sbr->bs_freq_scale_prev) ||
-        (sbr->bs_alter_scale != sbr->bs_alter_scale_prev))
-    {
-        sbr->Reset = 1;
-    } else {
-        sbr->Reset = 0;
-    }
-
     if ((sbr->bs_start_freq != sbr->bs_start_freq_prev) ||
         (sbr->bs_stop_freq != sbr->bs_stop_freq_prev) ||
         (sbr->bs_freq_scale != sbr->bs_freq_scale_prev) ||
@@ -401,6 +391,9 @@ static uint8_t sbr_single_channel_element(bitfile *ld, sbr_info *sbr)
     if (sbr->bs_extended_data)
     {
         uint16_t nr_bits_left;
+#if (defined(PS_DEC) || defined(DRM_PS))
+        uint8_t ps_ext_read = 0;
+#endif
         uint16_t cnt = (uint16_t)faad_getbits(ld, 4
             DEBUGVAR(1,225,"sbr_single_channel_element(): bs_extension_size"));
         if (cnt == 15)
@@ -417,6 +410,32 @@ static uint8_t sbr_single_channel_element(bitfile *ld, sbr_info *sbr)
             sbr->bs_extension_id = (uint8_t)faad_getbits(ld, 2
                 DEBUGVAR(1,227,"sbr_single_channel_element(): bs_extension_id"));
             tmp_nr_bits += 2;
+
+            /* allow only 1 PS extension element per extension data */
+#if (defined(PS_DEC) || defined(DRM_PS))
+#if (defined(PS_DEC) && defined(DRM_PS))
+            if (sbr->bs_extension_id == EXTENSION_ID_PS || sbr->bs_extension_id == DRM_PARAMETRIC_STEREO)
+#else
+#ifdef PS_DEC
+            if (sbr->bs_extension_id == EXTENSION_ID_PS)
+#else
+#ifdef DRM_PS
+            if (sbr->bs_extension_id == DRM_PARAMETRIC_STEREO)
+#endif
+#endif
+#endif
+            {
+                if (ps_ext_read == 0)
+                {
+                    ps_ext_read = 1;
+                } else {
+                    /* to be safe make it 3, will switch to "default"
+                     * in sbr_extension() */
+                    sbr->bs_extension_id = 3;
+                }
+            }
+#endif
+
             tmp_nr_bits += sbr_extension(ld, sbr, sbr->bs_extension_id, nr_bits_left);
 
             /* check if the data read is bigger than the number of available bits */
@@ -797,16 +816,28 @@ static void invf_mode(bitfile *ld, sbr_info *sbr, uint8_t ch)
 static uint16_t sbr_extension(bitfile *ld, sbr_info *sbr,
                               uint8_t bs_extension_id, uint16_t num_bits_left)
 {
+#ifdef PS_DEC
+    uint8_t header;
+    uint16_t ret;
+#endif
+
     switch (bs_extension_id)
     {
 #ifdef PS_DEC
     case EXTENSION_ID_PS:
-        sbr->ps_used = 1;
         if (!sbr->ps)
         {
             sbr->ps = ps_init(get_sr_index(sbr->sample_rate));
         }
-        return ps_data(sbr->ps, ld);
+        ret = ps_data(sbr->ps, ld, &header);
+
+        /* enable PS if and only if: a header has been decoded */
+        if (sbr->ps_used == 0 && header == 1)
+        {
+            sbr->ps_used = 1;
+        }
+
+        return ret;
 #endif
 #ifdef DRM_PS
     case DRM_PARAMETRIC_STEREO:

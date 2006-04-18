@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: syntax.c,v 1.80 2004/06/30 12:45:57 menno Exp $
+** $Id: syntax.c,v 1.82 2004/09/04 14:56:29 menno Exp $
 **/
 
 /*
@@ -1042,6 +1042,9 @@ static uint8_t fill_element(NeAACDecHandle hDecoder, bitfile *ld, drc_info *drc
             if (hDecoder->sbr[sbr_ele]->ps_used)
             {
                 hDecoder->ps_used[sbr_ele] = 1;
+
+                /* set element independent flag to 1 as well */
+                hDecoder->ps_used_global = 1;
             }
 #endif
         } else {
@@ -1254,13 +1257,20 @@ void aac_scalable_main_element(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo
         if (hDecoder->sbr[0]->ps_used)
         {
             hDecoder->ps_used[0] = 1;
+            hDecoder->ps_used_global = 1;
         }
 #endif
 
         /* check CRC */
         /* no need to check it if there was already an error */
-//        if (hDecoder->sbr[0]->ret == 0)
-//            hDecoder->sbr[0]->ret = (uint8_t)faad_check_CRC(&ld_sbr, (uint16_t)faad_get_processed_bits(&ld_sbr) - 8);
+        if (hDecoder->sbr[0]->ret == 0)
+            hDecoder->sbr[0]->ret = (uint8_t)faad_check_CRC(&ld_sbr, (uint16_t)faad_get_processed_bits(&ld_sbr) - 8);
+
+        /* SBR data was corrupted, disable it until the next header */
+        if (hDecoder->sbr[0]->ret != 0)
+        {
+            hDecoder->sbr[0]->header_count = 0;  
+        }
 
         faad_endbits(&ld_sbr);
 

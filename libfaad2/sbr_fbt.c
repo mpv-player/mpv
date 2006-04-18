@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_fbt.c,v 1.14 2004/05/17 10:18:03 menno Exp $
+** $Id: sbr_fbt.c,v 1.17 2004/09/08 09:43:11 gcp Exp $
 **/
 
 /* Calculate frequency band tables */
@@ -197,7 +197,7 @@ uint8_t master_frequency_table_fs0(sbr_info *sbr, uint8_t k0, uint8_t k2,
     if (k2 <= k0)
     {
         sbr->N_master = 0;
-        return 0;
+        return 1;
     }
 
     dk = bs_alter_scale ? 2 : 1;
@@ -363,7 +363,7 @@ uint8_t master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
     if (k2 <= k0)
     {
         sbr->N_master = 0;
-        return 0;
+        return 1;
     }
 
     bands = temp1[bs_freq_scale-1];

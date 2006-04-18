@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: filtbank.h,v 1.20 2004/01/13 14:24:10 menno Exp $
+** $Id: filtbank.h,v 1.23 2004/09/08 09:43:11 gcp Exp $
 **/
 
 #ifndef __FILTBANK_H__
@@ -51,12 +51,6 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
                   uint8_t window_shape_prev, real_t *freq_in,
                   real_t *time_out, real_t *overlap,
                   uint8_t object_type, uint16_t frame_len);
-
-#ifdef USE_SSE
-void ifilter_bank_sse(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
-                      uint8_t window_shape_prev, real_t *freq_in,
-                      real_t *time_out, uint8_t object_type, uint16_t frame_len);
-#endif
 
 #ifdef __cplusplus
 }

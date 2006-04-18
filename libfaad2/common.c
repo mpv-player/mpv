@@ -1,19 +1,19 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
 ** Copyright (C) 2003-2004 M. Bakker, Ahead Software AG, http://www.nero.com
-**  
+**
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
-** 
+**
 ** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software 
+** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
 ** Any non-GPL usage of this software or parts of this software is strictly
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: common.c,v 1.19 2004/06/30 12:45:56 menno Exp $
+** $Id: common.c,v 1.22 2004/09/08 09:43:11 gcp Exp $
 **/
 
 /* just some common functions that could be used anywhere */
@@ -33,67 +33,6 @@
 #include <stdlib.h>
 #include "syntax.h"
 
-#ifdef USE_SSE
-__declspec(naked) static int32_t __fastcall test_cpuid(void)
-{
-    __asm
-    {
-        pushf
-        pop eax
-        mov ecx,eax
-        xor eax,(1<<21)
-        push eax
-        popf
-        pushf
-        pop eax
-        push ecx
-        popf
-        cmp eax,ecx
-        mov eax,0
-        setne al
-        ret
-    }
-}
-
-__declspec(naked) static void __fastcall run_cpuid(int32_t param, int32_t out[4])
-{
-    __asm
-    {
-        pushad
-        push edx
-        mov eax,ecx
-        cpuid
-        pop edi
-        mov [edi+0],eax
-        mov [edi+4],ebx
-        mov [edi+8],ecx
-        mov [edi+12],edx
-        popad
-        ret
-    }
-}
-
-uint8_t cpu_has_sse()
-{
-    int32_t features[4];
-
-    if (test_cpuid())
-    {
-        run_cpuid(1, features);
-    }
-
-    /* check for SSE */
-    if (features[3] & 0x02000000)
-        return 1;
-
-    return 0;
-}
-#else
-uint8_t cpu_has_sse()
-{
-    return 0;
-}
-#endif
 
 /* Returns the sample rate index based on the samplerate */
 uint8_t get_sr_index(const uint32_t samplerate)
@@ -146,7 +85,7 @@ uint8_t max_pred_sfb(const uint8_t sr_index)
 uint8_t max_tns_sfb(const uint8_t sr_index, const uint8_t object_type,
                     const uint8_t is_short)
 {
-    /* entry for each sampling rate	
+    /* entry for each sampling rate
      * 1    Main/LC long window
      * 2    Main/LC short window
      * 3    SSR long window
@@ -230,14 +169,13 @@ int8_t can_decode_ot(const uint8_t object_type)
     return -1;
 }
 
-/* common malloc function */
 void *faad_malloc(size_t size)
 {
 #if 0 // defined(_WIN32) && !defined(_WIN32_WCE)
     return _aligned_malloc(size, 16);
-#else
+#else   // #ifdef 0
     return malloc(size);
-#endif
+#endif  // #ifdef 0
 }
 
 /* common free function */
@@ -247,18 +185,18 @@ void faad_free(void *b)
     _aligned_free(b);
 #else
     free(b);
-#endif
 }
+#endif
 
 static const  uint8_t    Parity [256] = {  // parity
-	0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
-	1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
-	1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
-	0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
-	1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
-	0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
-	0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
-	1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0
+    0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
+    1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
+    1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
+    0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
+    1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,
+    0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
+    0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,
+    1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,0
 };
 
 static uint32_t  __r1 = 1;
@@ -293,14 +231,14 @@ static uint32_t  __r2 = 1;
  */
 uint32_t random_int(void)
 {
-	uint32_t  t1, t2, t3, t4;
+    uint32_t  t1, t2, t3, t4;
 
-	t3   = t1 = __r1;   t4   = t2 = __r2;       // Parity calculation is done via table lookup, this is also available
-	t1  &= 0xF5;        t2 >>= 25;              // on CPUs without parity, can be implemented in C and avoid unpredictable
-	t1   = Parity [t1]; t2  &= 0x63;            // jumps and slow rotate through the carry flag operations.
-	t1 <<= 31;          t2   = Parity [t2];
+    t3   = t1 = __r1;   t4   = t2 = __r2;       // Parity calculation is done via table lookup, this is also available
+    t1  &= 0xF5;        t2 >>= 25;              // on CPUs without parity, can be implemented in C and avoid unpredictable
+    t1   = Parity [t1]; t2  &= 0x63;            // jumps and slow rotate through the carry flag operations.
+    t1 <<= 31;          t2   = Parity [t2];
 
-	return (__r1 = (t3 >> 1) | t1 ) ^ (__r2 = (t4 + t4) | t2 );
+    return (__r1 = (t3 >> 1) | t1 ) ^ (__r2 = (t4 + t4) | t2 );
 }
 
 uint32_t ones32(uint32_t x)
@@ -496,7 +434,7 @@ int32_t log2_int(uint32_t val)
 {
     uint32_t frac;
     uint32_t whole = (val);
-    int8_t exp = 0;
+    int32_t exp = 0;
     uint32_t index;
     uint32_t index_frac;
     uint32_t x1, x2;
@@ -533,5 +471,49 @@ int32_t log2_int(uint32_t val)
     errcorr = (index_frac * (x2-x1)) >> INTERP_BITS;
 
     return ((exp+REAL_BITS) << REAL_BITS) + errcorr + x1;
+}
+
+/* ld(x) = ld(x*y/y) = ld(x/y) + ld(y), with y=2^N and [1 <= (x/y) < 2] */
+real_t log2_fix(uint32_t val)
+{
+    uint32_t frac;
+    uint32_t whole = (val >> REAL_BITS);
+    int8_t exp = 0;
+    uint32_t index;
+    uint32_t index_frac;
+    uint32_t x1, x2;
+    uint32_t errcorr;
+
+    /* error */
+    if (val == 0)
+        return -100000;
+
+    exp = floor_log2(val);
+    exp -= REAL_BITS;
+
+    /* frac = [1..2] */
+    if (exp >= 0)
+        frac = val >> exp;
+    else
+        frac = val << -exp;
+
+    /* index in the log2 table */
+    index = frac >> (REAL_BITS-TABLE_BITS);
+
+    /* leftover part for linear interpolation */
+    index_frac = frac & ((1<<(REAL_BITS-TABLE_BITS))-1);
+
+    /* leave INTERP_BITS bits */
+    index_frac = index_frac >> (REAL_BITS-TABLE_BITS-INTERP_BITS);
+
+    x1 = log2_tab[index & ((1<<TABLE_BITS)-1)];
+    x2 = log2_tab[(index & ((1<<TABLE_BITS)-1)) + 1];
+
+    /* linear interpolation */
+    /* retval = exp + ((index_frac)*x2 + (1-index_frac)*x1) */
+
+    errcorr = (index_frac * (x2-x1)) >> INTERP_BITS;
+
+    return (exp << REAL_BITS) + errcorr + x1;
 }
 #endif

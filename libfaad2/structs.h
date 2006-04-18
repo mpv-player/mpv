@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: structs.h,v 1.39 2004/05/17 10:18:03 menno Exp $
+** $Id: structs.h,v 1.42 2004/09/08 09:43:11 gcp Exp $
 **/
 
 #ifndef __STRUCTS_H__
@@ -76,9 +76,6 @@ typedef struct
     mdct_info *mdct2048;
 #ifdef PROFILE
     int64_t cycles;
-#endif
-#ifdef USE_SSE
-    void (*if_func)(void *a, uint8_t b, uint8_t c, uint8_t d, real_t *e, real_t *f, uint8_t g, uint16_t h);
 #endif
 } fb_info;
 
@@ -366,6 +363,9 @@ typedef struct NeAACDecFrameInfo
     /*uint8_t*/ unsigned char num_back_channels;
     /*uint8_t*/ unsigned char num_lfe_channels;
     /*uint8_t*/ unsigned char channel_position[MAX_CHANNELS];
+
+    /* PS: 0: off, 1: on */
+    /*uint8_t*/ unsigned char ps;
 } NeAACDecFrameInfo;
 
 typedef struct
@@ -431,6 +431,7 @@ typedef struct
 #endif
 #if (defined(PS_DEC) || defined(DRM_PS))
     uint8_t ps_used[MAX_SYNTAX_ELEMENTS];
+    uint8_t ps_used_global;
 #endif
 
 #ifdef SSR_DEC
@@ -454,10 +455,6 @@ typedef struct
 
     /* Configuration data */
     NeAACDecConfiguration config;
-
-#ifdef USE_SSE
-    void (*apply_sf_func)(void *a, void *b, void *c, uint16_t d);
-#endif
 
 #ifdef PROFILE
     int64_t cycles;

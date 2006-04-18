@@ -1,6 +1,6 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
-** Copyright (C) 2002-2004 A. Kurpiers
+** Copyright (C) 2004 G.C. Pascutto, Ahead Software AG, http://www.nero.com
 **  
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: hcr.c,v 1.15 2004/03/02 20:09:58 menno Exp $
+** $Id: hcr.c,v 1.18 2004/09/04 14:56:28 menno Exp $
 **/
 
 #include "common.h"
@@ -31,295 +31,337 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "syntax.h"
 #include "specrec.h"
-#include "bits.h"
-#include "pulse.h"
-#include "analysis.h"
-#include "bits.h"
 #include "huffman.h"
 
-/* Implements the HCR11 tool as described in ISO/IEC 14496-3/Amd.1, 8.5.3.3 */
+/* ISO/IEC 14496-3/Amd.1 
+ * 8.5.3.3: Huffman Codeword Reordering for AAC spectral data (HCR) 
+ *
+ * HCR devides the spectral data in known fixed size segments, and 
+ * sorts it by the importance of the data. The importance is firstly 
+ * the (lower) position in the spectrum, and secondly the largest 
+ * value in the used codebook. 
+ * The most important data is written at the start of each segment
+ * (at known positions), the remaining data is interleaved inbetween, 
+ * with the writing direction alternating.
+ * Data length is not increased.
+*/
 
 #ifdef ERROR_RESILIENCE
 
-/* rewind len (max. 32) bits so that the MSB becomes LSB */
+/* 8.5.3.3.1 Pre-sorting */
 
-static uint32_t rewind_word( uint32_t W, uint8_t len)
-{
-    uint8_t i;
-    uint32_t tmp_W=0;
+#define NUM_CB      6
+#define NUM_CB_ER   22
+#define MAX_CB      32
+#define VCB11_FIRST 16
+#define VCB11_LAST  31
 
-    for ( i=0; i<len; i++ )
-    {
-        tmp_W<<=1;
-        if (W & (1<<i)) tmp_W |= 1;
-    }
-    return tmp_W;
-}
+static const uint8_t PreSortCB_STD[NUM_CB] = 
+    { 11, 9, 7, 5, 3, 1};
 
-static void rewind_lword( uint32_t *highW, uint32_t *lowW, uint8_t len)
-{
-    uint32_t tmp_lW=0;
+static const uint8_t PreSortCB_ER[NUM_CB_ER] = 
+    { 11, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 9, 7, 5, 3, 1};
 
-    if (len > 32)
-    {
-        tmp_lW = rewind_word( (*highW << (64-len)) | (*lowW >> (len-32)), 32);
-        *highW = rewind_word( *lowW << (64-len) , 32);
-        *lowW = tmp_lW;
-    } else {
-        *highW = 0;
-        *lowW = rewind_word( *lowW, len);
-    }
-}    
+/* 8.5.3.3.2 Derivation of segment width */
 
-/* Takes a codeword as stored in r, rewinds the remaining bits and stores it back */
-static void rewind_bits(bits_t * r)
-{
-    uint32_t hw, lw;
-
-    if (r->len == 0) return;
-
-    if (r->len >32)
-    {
-        lw = r->bufa;
-        hw = r->bufb & (0xFFFFFFFF >> (64 - r->len));
-        rewind_lword( &hw, &lw, r->len );
-        r->bufa = lw;
-        r->bufb = hw;
-
-    } else {
-        lw = showbits_hcr(r, r->len );
-        r->bufa = rewind_word( lw, r->len);
-        r->bufb = 0;
-    }
-}
-
-/* takes codewords from a and b, concatenate them and store them in b */
-static void concat_bits( bits_t * a, bits_t * b)
-{
-    uint32_t	hwa, lwa, hwb, lwb;
-
-    if (a->len == 0) return;
-
-    if (a->len >32)
-    {
-        lwa = a->bufa;
-        hwa = a->bufb & (0xFFFFFFFF >> (64 - a->len));
-    } else {
-        lwa = showbits_hcr(a, a->len );
-        hwa = 0;
-    }
-    if (b->len >=32) {
-        lwb = b->bufa;
-        hwb = (b->bufb & (0xFFFFFFFF >> (64 - b->len)) ) | ( lwa << (b->len - 32));
-    } else {
-        lwb = showbits_hcr(b, b->len ) | (lwa << (b->len));
-        hwb = (lwa >> (32 - b->len)) | (hwa << (b->len));
-    }
-
-    b->bufa = lwb;
-    b->bufb = hwb;
-    b->len += a->len;
-}
-
-/* 8.5.3.3.1 */
-
-static const uint8_t PresortedCodebook_VCB11[] = { 11, 31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20, 19, 18, 17, 16, 9, 7, 5, 3, 1};
-static const uint8_t PresortedCodebook[] = { 11, 9, 7, 5, 3, 1};
-
-static const uint8_t maxCwLen[32] = {0, 11, 9, 20, 16, 13, 11, 14, 12, 17, 14, 49,
+static const uint8_t maxCwLen[MAX_CB] = {0, 11, 9, 20, 16, 13, 11, 14, 12, 17, 14, 49,
     0, 0, 0, 0, 14, 17, 21, 21, 25, 25, 29, 29, 29, 29, 33, 33, 33, 37, 37, 41};
+
+#define segmentWidth(cb)    min(maxCwLen[cb], ics->length_of_longest_codeword)
+
+/* bit-twiddling helpers */
+static const uint8_t  S[] = {1, 2, 4, 8, 16};    
+static const uint32_t B[] = {0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF, 0x0000FFFF};
 
 typedef struct
 {
-    bits_t		bits;
-    uint8_t		decoded;
+    uint8_t     cb;
+    uint8_t     decoded;
     uint16_t	sp_offset;
-    uint8_t		cb;
-} codeword_state;
+    bits_t      bits;
+} codeword_t;
 
+/* rewind and reverse */
+/* 32 bit version */
+static uint32_t rewrev_word(uint32_t v, const uint8_t len)
+{  
+    /* 32 bit reverse */
+    v = ((v >> S[0]) & B[0]) | ((v << S[0]) & ~B[0]); 
+    v = ((v >> S[1]) & B[1]) | ((v << S[1]) & ~B[1]); 
+    v = ((v >> S[2]) & B[2]) | ((v << S[2]) & ~B[2]); 
+    v = ((v >> S[3]) & B[3]) | ((v << S[3]) & ~B[3]);
+    v = ((v >> S[4]) & B[4]) | ((v << S[4]) & ~B[4]);
 
-#define segmentWidth( codebook )	min( maxCwLen[codebook], ics->length_of_longest_codeword )
-     
-uint8_t reordered_spectral_data(NeAACDecHandle hDecoder, ic_stream *ics, bitfile *ld,
-                                int16_t *spectral_data)
-{
-    uint16_t sp_offset[8];
-    uint16_t g,i, presort;
-    uint16_t NrCodeWords=0, numberOfSegments=0, BitsRead=0;
-    uint8_t numberOfSets, set;
-    codeword_state Codewords[ 1024 ];	// FIXME max length? PCWs are not stored, so index is Codewordnr - numberOfSegments!, maybe malloc()?
-    bits_t	Segment[ 512 ];
+    /* shift off low bits */
+    v >>= (32 - len);
 
-    uint8_t PCW_decoded=0;
-    uint16_t nshort = hDecoder->frameLength/8;
+    return v;
+}
 
-
-    /*memset (spectral_data, 0, hDecoder->frameLength*sizeof(uint16_t));*/
-
-    if (ics->length_of_reordered_spectral_data == 0)
-        return 0; /* nothing to do */
-
-    /* if we have a corrupted bitstream this can happen... */
-    if ((ics->length_of_longest_codeword == 0) ||
-        (ics->length_of_reordered_spectral_data <
-        ics->length_of_longest_codeword) ||
-        (ics->max_sfb == 0))
+/* 64 bit version */
+static void rewrev_lword(uint32_t *hi, uint32_t *lo, const uint8_t len)
+{   
+    if (len <= 32) {
+        *hi = 0;
+        *lo = rewrev_word(*lo, len);
+    } else
     {
-        return 10; /* this is not good... */
+        uint32_t t = *hi, v = *lo;
+
+        /* double 32 bit reverse */
+        v = ((v >> S[0]) & B[0]) | ((v << S[0]) & ~B[0]); 
+        t = ((t >> S[0]) & B[0]) | ((t << S[0]) & ~B[0]); 
+        v = ((v >> S[1]) & B[1]) | ((v << S[1]) & ~B[1]); 
+        t = ((t >> S[1]) & B[1]) | ((t << S[1]) & ~B[1]); 
+        v = ((v >> S[2]) & B[2]) | ((v << S[2]) & ~B[2]); 
+        t = ((t >> S[2]) & B[2]) | ((t << S[2]) & ~B[2]); 
+        v = ((v >> S[3]) & B[3]) | ((v << S[3]) & ~B[3]);
+        t = ((t >> S[3]) & B[3]) | ((t << S[3]) & ~B[3]);
+        v = ((v >> S[4]) & B[4]) | ((v << S[4]) & ~B[4]);                
+        t = ((t >> S[4]) & B[4]) | ((t << S[4]) & ~B[4]);
+
+        /* last 32<>32 bit swap is implicit below */
+        
+        /* shift off low bits (this is really only one 64 bit shift) */
+        *lo = (t >> (64 - len)) | (v << (len - 32));
+        *hi = v >> (64 - len);          
+    }
+}
+
+
+/* bits_t version */
+static void rewrev_bits(bits_t *bits)
+{
+    if (bits->len == 0) return;
+    rewrev_lword(&bits->bufb, &bits->bufa,  bits->len);
+}
+
+
+/* merge bits of a to b */
+static void concat_bits(bits_t *b, bits_t *a)
+{
+    uint32_t bl, bh, al, ah;
+
+    if (a->len == 0) return;
+
+    al = a->bufa;
+    ah = a->bufb;
+    
+    if (b->len > 32)
+    {
+        /* maskoff superfluous high b bits */
+        bl = b->bufa;
+        bh = b->bufb & ((1 << (b->len-32)) - 1);
+        /* left shift a b->len bits */
+        ah = al << (b->len - 32);
+        al = 0;
+    } else {
+        bl = b->bufa & ((1 << (b->len)) - 1);
+        bh = 0;   
+        ah = (ah << (b->len)) | (al >> (32 - b->len));
+        al = al << b->len;
     }
 
-    /* store the offset into the spectral data for all the window groups because we can't do it later */
+    /* merge */
+    b->bufa = bl | al;
+    b->bufb = bh | ah;
+
+    b->len += a->len;
+}
+     
+uint8_t is_good_cb(uint8_t this_CB, uint8_t this_sec_CB)
+{
+    /* only want spectral data CB's */
+    if ((this_sec_CB > ZERO_HCB && this_sec_CB <= ESC_HCB) || (this_sec_CB >= VCB11_FIRST && this_sec_CB <= VCB11_LAST))
+    {
+        if (this_CB < ESC_HCB)
+        {
+            /* normal codebook pairs */
+            return ((this_sec_CB == this_CB) || (this_sec_CB == this_CB + 1));
+        } else
+        {
+            /* escape codebook */
+            return (this_sec_CB == this_CB);
+        }
+    }
+    return 0;
+}
+                    
+void read_segment(bits_t *segment, uint8_t segwidth, bitfile *ld)
+{
+    segment->len = segwidth;
+
+     if (segwidth > 32)
+     {
+        segment->bufb = faad_getbits(ld, segwidth - 32);        
+        segment->bufa = faad_getbits(ld, 32);        
+
+    } else {
+        segment->bufa = faad_getbits(ld, segwidth);
+        segment->bufb = 0;        
+    }    
+}
+
+void fill_in_codeword(codeword_t *codeword, uint16_t index, uint16_t sp, uint8_t cb)
+{
+    codeword[index].sp_offset = sp;
+    codeword[index].cb = cb;
+    codeword[index].decoded = 0;
+    codeword[index].bits.len = 0;
+}
+
+uint8_t reordered_spectral_data(NeAACDecHandle hDecoder, ic_stream *ics, 
+                                bitfile *ld, int16_t *spectral_data)
+{   
+    uint16_t PCWs_done;
+    uint16_t numberOfSegments, numberOfSets, numberOfCodewords;  
+
+    codeword_t codeword[512];
+    bits_t segment[512];
+
+    uint16_t sp_offset[8];
+    uint16_t g, i, sortloop, set, bitsread;
+    uint8_t w_idx, sfb, this_CB, last_CB, this_sec_CB; 
+    
+    const uint16_t nshort = hDecoder->frameLength/8;
+    const uint16_t sp_data_len = ics->length_of_reordered_spectral_data;
+    
+    const uint8_t *PreSortCb;
+
+    /* no data (e.g. silence) */
+    if (sp_data_len == 0)
+        return 0;
+
+    /* since there is spectral data, at least one codeword has nonzero length */
+    if (ics->length_of_longest_codeword == 0)
+        return 10;
+    
+    if (sp_data_len < ics->length_of_longest_codeword)
+        return 10; 
 
     sp_offset[0] = 0;
-    for (g=1; g < ics->num_window_groups; g++)
+    for (g = 1; g < ics->num_window_groups; g++)
     {
         sp_offset[g] = sp_offset[g-1] + nshort*ics->window_group_length[g-1];
     }
 
-    /* All data is sorted according to the codebook used */        
-    for (presort = 0; presort < (hDecoder->aacSectionDataResilienceFlag ? 22 : 6); presort++)
+    PCWs_done = 0;
+    numberOfSegments = 0;
+    numberOfCodewords = 0;
+    bitsread = 0;
+
+    /* VCB11 code books in use */
+    if (hDecoder->aacSectionDataResilienceFlag)
     {
-        uint8_t sfb;
-
-        /* next codebook that has to be processed according to presorting */
-        uint8_t nextCB = hDecoder->aacSectionDataResilienceFlag ? PresortedCodebook_VCB11[ presort ] : PresortedCodebook[ presort ];
-
-        /* Data belonging to the same spectral unit and having the same codebook comes in consecutive codewords.
-           This is done by scanning all sfbs for possible codewords. For sfbs with more than 4 elements this has to be
-           repeated */
-
-        for (sfb=0; sfb<ics->max_sfb; sfb ++)
+        PreSortCb = PreSortCB_ER;
+        last_CB = NUM_CB_ER;
+    } else
+    {
+        PreSortCb = PreSortCB_STD;
+        last_CB = NUM_CB;
+    }
+ 
+    /* step 1: decode PCW's (set 0), and stuff data in easier-to-use format */
+    for (sortloop = 0; sortloop < last_CB; sortloop++)
+    {
+        /* select codebook to process this pass */
+        this_CB = PreSortCb[sortloop];
+        
+        /* loop over sfbs */
+        for (sfb = 0; sfb < ics->max_sfb; sfb++)
         {
-            uint8_t sect_cb, w;
-
-            for (w=0; w< (ics->swb_offset[sfb+1] - ics->swb_offset[sfb]); w+=4)
+            /* loop over all in this sfb, 4 lines per loop */
+            for (w_idx = 0; 4*w_idx < (ics->swb_offset[sfb+1] - ics->swb_offset[sfb]); w_idx++)
             {
                 for(g = 0; g < ics->num_window_groups; g++)
                 {
                     for (i = 0; i < ics->num_sec[g]; i++)
                     {
-                        sect_cb = ics->sect_cb[g][i];
-
-                        if (
-                            /* process only sections that are due now */
-                            (( sect_cb == nextCB ) || (( nextCB < ESC_HCB ) && ( sect_cb == nextCB+1)) ) &&
-
-                            /* process only sfb's that are due now */
-                            ((ics->sect_start[g][i] <= sfb) && (ics->sect_end[g][i] > sfb))
-                            )
-                        {
-                            if ((sect_cb != ZERO_HCB) &&
-                                (sect_cb != NOISE_HCB) &&
-                                (sect_cb != INTENSITY_HCB) &&
-                                (sect_cb != INTENSITY_HCB2))
+                        /* check whether sfb used here is the one we want to process */
+                        if ((ics->sect_start[g][i] <= sfb) && (ics->sect_end[g][i] > sfb))
+                        {                            
+                            /* check whether codebook used here is the one we want to process */
+                            this_sec_CB = ics->sect_cb[g][i];
+                 
+                            if (is_good_cb(this_CB, this_sec_CB))                              
                             {
-                                uint8_t inc = (sect_cb < FIRST_PAIR_HCB) ? QUAD_LEN : PAIR_LEN;
-                                uint16_t k;
+                                /* precalculate some stuff */
+                                uint16_t sect_sfb_size = ics->sect_sfb_offset[g][sfb+1] - ics->sect_sfb_offset[g][sfb];
+                                uint8_t inc = (this_sec_CB < FIRST_PAIR_HCB) ? QUAD_LEN : PAIR_LEN;
+                                uint16_t group_cws_count = (4*ics->window_group_length[g])/inc;
+                                uint8_t segwidth = segmentWidth(this_sec_CB);
+                                uint16_t cws;                                
 
-                                uint32_t	hw, lw;
-
-                                for  (k=0; (k < (4/inc)*ics->window_group_length[g]) &&
-                                    ( (k+w*ics->window_group_length[g]/inc) < (ics->sect_sfb_offset[g][sfb+1] - ics->sect_sfb_offset[g][sfb])); k++)
+                                /* read codewords until end of sfb or end of window group (shouldn't only 1 trigger?) */                                 
+                                for (cws = 0; (cws < group_cws_count) && ((cws + w_idx*group_cws_count) < sect_sfb_size); cws++)
                                 {
-                                    uint16_t sp = sp_offset[g] + ics->sect_sfb_offset[g][sfb] + inc*(k+w*ics->window_group_length[g]/inc);
+                                    uint16_t sp = sp_offset[g] + ics->sect_sfb_offset[g][sfb] + inc * (cws + w_idx*group_cws_count);                                   
 
-                                    if (!PCW_decoded)
-                                    {
-                                        /* if we haven't yet read until the end of the buffer, we can directly decode the so-called PCWs */
-                                        if ((BitsRead + segmentWidth( sect_cb ))<= ics->length_of_reordered_spectral_data)
-                                        {
-                                            Segment[ numberOfSegments ].len = segmentWidth( sect_cb );
+                                    /* read and decode PCW */
+                                    if (!PCWs_done)
+                                    {         
+                                        /* read in normal segments */
+                                        if (bitsread + segwidth <= sp_data_len)
+                                        {                                            
+                                            read_segment(&segment[numberOfSegments], segwidth, ld);                          
+                                            bitsread += segwidth;
+                                            
+                                            huffman_spectral_data_2(this_sec_CB, &segment[numberOfSegments], &spectral_data[sp]);                                            
 
-                                            if (segmentWidth( sect_cb ) > 32)
-                                            {
-                                                Segment[ numberOfSegments ].bufb = faad_showbits(ld, segmentWidth( sect_cb ) - 32);
-                                                faad_flushbits(ld, segmentWidth( sect_cb) - 32);
-                                                Segment[ numberOfSegments ].bufa = faad_showbits(ld, 32),
-                                                    faad_flushbits(ld, 32 );
-
-                                            } else {
-                                                Segment[ numberOfSegments ].bufa = faad_showbits(ld,  segmentWidth( sect_cb ));
-                                                Segment[ numberOfSegments ].bufb = 0;
-                                                faad_flushbits(ld, segmentWidth( sect_cb) );
-                                            }
-
-                                            huffman_spectral_data_2(sect_cb, &Segment[ numberOfSegments ], &spectral_data[sp]);
-
-                                            BitsRead += segmentWidth( sect_cb );
-
-                                            /* skip to next segment, but store left bits in new buffer */
-                                            rewind_bits( &Segment[ numberOfSegments ]);
+                                            /* keep leftover bits */
+                                            rewrev_bits(&segment[numberOfSegments]);
 
                                             numberOfSegments++;
                                         } else {
+                                            /* remaining stuff after last segment, we unfortunately couldn't read
+                                               this in earlier because it might not fit in 64 bits. since we already
+                                               decoded (and removed) the PCW it is now guaranteed to fit */
+                                            if (bitsread < sp_data_len)
+                                            {                                                
+                                                const uint8_t additional_bits = sp_data_len - bitsread;                                               
 
-                                            /* the last segment is extended until length_of_reordered_spectral_data */
+                                                read_segment(&segment[numberOfSegments], additional_bits, ld);                                                
+                                                segment[numberOfSegments].len += segment[numberOfSegments-1].len;
+                                                rewrev_bits(&segment[numberOfSegments]);                                               
 
-                                            if (BitsRead < ics->length_of_reordered_spectral_data)
-                                            {
-
-                                                uint8_t additional_bits = (ics->length_of_reordered_spectral_data - BitsRead);
-
-                                                if ( additional_bits > 32)
+                                                if (segment[numberOfSegments-1].len > 32)
                                                 {
-                                                    hw = faad_showbits(ld, additional_bits - 32);
-                                                    faad_flushbits(ld, additional_bits - 32);
-                                                    lw = faad_showbits(ld, 32);
-                                                    faad_flushbits(ld, 32 );
+                                                    segment[numberOfSegments-1].bufb = segment[numberOfSegments].bufb + 
+                                                        showbits_hcr(&segment[numberOfSegments-1], segment[numberOfSegments-1].len - 32);
+                                                    segment[numberOfSegments-1].bufa = segment[numberOfSegments].bufa + 
+                                                        showbits_hcr(&segment[numberOfSegments-1], 32);
                                                 } else {
-                                                    lw = faad_showbits(ld, additional_bits);
-                                                    hw = 0;
-                                                    faad_flushbits(ld, additional_bits );
-                                                }
-                                                rewind_lword( &hw, &lw, additional_bits + Segment[ numberOfSegments-1 ].len );
-                                                if (Segment[ numberOfSegments-1 ].len > 32)
-                                                {
-                                                    Segment[ numberOfSegments-1 ].bufb = hw + 
-                                                        showbits_hcr(&Segment[ numberOfSegments-1 ], Segment[ numberOfSegments-1 ].len - 32);
-                                                    Segment[ numberOfSegments-1 ].bufa = lw + 
-                                                        showbits_hcr(&Segment[ numberOfSegments-1 ], 32);
-                                                } else {
-                                                    Segment[ numberOfSegments-1 ].bufa = lw + 
-                                                        showbits_hcr(&Segment[ numberOfSegments-1 ], Segment[ numberOfSegments-1 ].len);
-                                                    Segment[ numberOfSegments-1 ].bufb = hw;
-                                                }
-                                                Segment[ numberOfSegments-1 ].len += additional_bits;
+                                                    segment[numberOfSegments-1].bufa = segment[numberOfSegments].bufa + 
+                                                        showbits_hcr(&segment[numberOfSegments-1], segment[numberOfSegments-1].len);
+                                                    segment[numberOfSegments-1].bufb = segment[numberOfSegments].bufb;
+                                                }                                                
+                                                segment[numberOfSegments-1].len += additional_bits;
                                             }
-                                            BitsRead = ics->length_of_reordered_spectral_data;
-                                            PCW_decoded = 1;
+                                            bitsread = sp_data_len;
+                                            PCWs_done = 1;
 
-                                            Codewords[ 0 ].sp_offset = sp;
-                                            Codewords[ 0 ].cb = sect_cb;
-                                            Codewords[ 0 ].decoded = 0;
-                                            Codewords[ 0 ].bits.len = 0;
+                                            fill_in_codeword(codeword, 0, sp, this_sec_CB);                                            
                                         }
-                                    } else {
-                                        Codewords[ NrCodeWords - numberOfSegments ].sp_offset = sp;
-                                        Codewords[ NrCodeWords - numberOfSegments ].cb = sect_cb;
-                                        Codewords[ NrCodeWords - numberOfSegments ].decoded = 0;
-                                        Codewords[ NrCodeWords - numberOfSegments ].bits.len = 0;
-
-                                    } /* PCW decoded */
-                                    NrCodeWords++;
-                                } /* of k */
+                                    } else {    
+                                        fill_in_codeword(codeword, numberOfCodewords - numberOfSegments, sp, this_sec_CB);                                         
+                                    }
+                                    numberOfCodewords++;
+                                }                             
                             }
                         }
-                    } /* of i */
-                 } /* of g */
-             } /* of w */
-         } /* of sfb */
-    } /* of presort */
+                    } 
+                 } 
+             }
+         }
+    }
 
-    /* Avoid divide by zero */
     if (numberOfSegments == 0)
-        return 10; /* this is not good... */
+        return 10; 
 
-    numberOfSets = NrCodeWords / numberOfSegments;     
+    numberOfSets = numberOfCodewords / numberOfSegments;     
 
-    /* second step: decode nonPCWs */
-
+    /* step 2: decode nonPCWs */
     for (set = 1; set <= numberOfSets; set++)
     {
         uint16_t trial;
@@ -327,85 +369,40 @@ uint8_t reordered_spectral_data(NeAACDecHandle hDecoder, ic_stream *ics, bitfile
         for (trial = 0; trial < numberOfSegments; trial++)
         {
             uint16_t codewordBase;
-            uint16_t set_decoded=numberOfSegments;
-
-            if (set == numberOfSets)
-                set_decoded = NrCodeWords - set*numberOfSegments;	/* last set is shorter than the rest */
 
             for (codewordBase = 0; codewordBase < numberOfSegments; codewordBase++)
             {
-                uint16_t segment_index = (trial + codewordBase) % numberOfSegments;
-                uint16_t codeword_index = codewordBase + set*numberOfSegments - numberOfSegments;
+                const uint16_t segment_idx = (trial + codewordBase) % numberOfSegments;
+                const uint16_t codeword_idx = codewordBase + set*numberOfSegments - numberOfSegments;
 
-                if ((codeword_index + numberOfSegments) >= NrCodeWords)
-                    break;
-                if (!Codewords[ codeword_index ].decoded)
+                /* data up */
+                if (codeword_idx >= numberOfCodewords - numberOfSegments) break;
+
+                if (!codeword[codeword_idx].decoded && segment[segment_idx].len > 0)
                 {
-                    if ( Segment[ segment_index ].len > 0)
+                    uint8_t tmplen;
+
+                    if (codeword[codeword_idx].bits.len != 0)                   
+                        concat_bits(&segment[segment_idx], &codeword[codeword_idx].bits);                            
+                    
+                    tmplen = segment[segment_idx].len;
+
+                    if (huffman_spectral_data_2(codeword[codeword_idx].cb, &segment[segment_idx],
+                                               &spectral_data[codeword[codeword_idx].sp_offset]) >= 0)
                     {
-                        uint8_t tmplen;
-
-                        if (Codewords[ codeword_index ].bits.len != 0)
-                        {
-                            /* on the first trial the data is only stored in Segment[], not in Codewords[]. 
-                               On next trials first collect the data stored for this codeword and
-                               concatenate the new data from Segment[] */
-
-                            concat_bits( &Codewords[ codeword_index ].bits, &Segment[ segment_index ]);                            
-                            /* Now everthing is stored in Segment[] */
-                        }
-                        tmplen = Segment[ segment_index ].len;
-                        if ( huffman_spectral_data_2(Codewords[ codeword_index ].cb, &Segment[ segment_index ],
-                            &spectral_data[ Codewords[ codeword_index ].sp_offset ]) >=0)
-                        {
-                            /* CW did fit into segment */
-
-                            Codewords[ codeword_index ].decoded = 1;
-                            set_decoded--;
-                        } else {
-
-                            /* CW did not fit, so store for later use */
-
-                            Codewords[ codeword_index ].bits.len = tmplen;
-                            Codewords[ codeword_index ].bits.bufa = Segment[ segment_index ].bufa;
-                            Codewords[ codeword_index ].bits.bufb = Segment[ segment_index ].bufb;
-                        }
-                    }                        
+                        codeword[codeword_idx].decoded = 1;
+                    } else 
+                    {   
+                        codeword[codeword_idx].bits = segment[segment_idx];
+                        codeword[codeword_idx].bits.len = tmplen;                        
+                    }
+                                            
                 }
-            } /* of codewordBase */
-
-            if (set_decoded == 0) break;	/* no undecoded codewords left in this set */
-
-        } /* of trial */
-
-        /* rewind all bits in remaining segments with len>0 */
-        for (i=0; i < numberOfSegments; i++)
-            rewind_bits( &Segment[ i ] );
-    }
-
-#if 0
-    {
-        int i, r=0, c=0;
-        for (i=0; i< numberOfSegments; i++)
-            r += Segment[ i ].len;
-        if (r != 0)
-        {
-            printf("reordered_spectral_data: %d bits remaining!\n", r);
-        }
-        for (i=0; i< NrCodeWords - numberOfSegments; i++)
-        {
-            if (Codewords[ i ].decoded == 0)
-            {
-                c++;
             }
         }
-        if (c != 0)
-        {
-            printf("reordered_spectral_data: %d Undecoded Codewords remaining!\n",c );
-        }
-        if ((r !=0) || (c!=0))	return 10;
+        for (i = 0; i < numberOfSegments; i++)
+            rewrev_bits(&segment[i]);
     }
-#endif
 
     return 0;
 }

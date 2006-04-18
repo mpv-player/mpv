@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: decoder.c,v 1.104 2004/06/30 12:45:56 menno Exp $
+** $Id: decoder.c,v 1.107 2004/09/08 09:43:11 gcp Exp $
 **/
 
 #include "common.h"
@@ -142,15 +142,6 @@ NeAACDecHandle NEAACDECAPI NeAACDecOpen(void)
 #endif
 
     hDecoder->drc = drc_init(REAL_CONST(1.0), REAL_CONST(1.0));
-
-#ifdef USE_SSE
-    if (cpu_has_sse())
-    {
-        hDecoder->apply_sf_func = apply_scalefactors_sse;
-    } else {
-        hDecoder->apply_sf_func = apply_scalefactors;
-    }
-#endif
 
     return hDecoder;
 }
@@ -901,6 +892,9 @@ static void* aac_frame_decode(NeAACDecHandle hDecoder, NeAACDecFrameInfo *hInfo,
         hInfo->header_type = ADIF;
     if (hDecoder->adts_header_present)
         hInfo->header_type = ADTS;
+#if (defined(PS_DEC) || defined(DRM_PS))
+    hInfo->ps = hDecoder->ps_used_global;
+#endif
 
     /* check if frame has channel elements */
     if (channels == 0)

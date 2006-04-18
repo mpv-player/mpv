@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: ps_dec.h,v 1.5 2004/05/17 10:18:03 menno Exp $
+** $Id: ps_dec.h,v 1.8 2004/09/04 14:56:28 menno Exp $
 **/
 
 #ifndef __PS_DEC_H__
@@ -83,6 +83,9 @@ typedef struct
     /* ps data was correctly read */
     uint8_t ps_data_available;
 
+    /* a header has been read */
+    uint8_t header_read;
+
     /* hybrid filterbank parameters */
     void *hyb;
     uint8_t use34hybrid_bands;
@@ -129,7 +132,7 @@ typedef struct
 } ps_info;
 
 /* ps_syntax.c */
-uint16_t ps_data(ps_info *ps, bitfile *ld);
+uint16_t ps_data(ps_info *ps, bitfile *ld, uint8_t *header);
 
 /* ps_dec.c */
 ps_info *ps_init(uint8_t sr_index);

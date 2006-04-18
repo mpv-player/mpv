@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_qmf.h,v 1.18 2004/06/30 12:45:57 menno Exp $
+** $Id: sbr_qmf.h,v 1.21 2004/09/08 09:43:11 gcp Exp $
 **/
 
 #ifndef __SBR_QMF_H__
@@ -43,10 +43,6 @@ void sbr_qmf_synthesis_32(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][6
                           real_t *output);
 void sbr_qmf_synthesis_64(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
                           real_t *output);
-#ifdef USE_SSE
-void sbr_qmf_synthesis_64_sse(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
-                              real_t *output);
-#endif
 
 
 #ifdef __cplusplus

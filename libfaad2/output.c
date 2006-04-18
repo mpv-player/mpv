@@ -589,7 +589,7 @@ void* output_to_PCM(NeAACDecHandle hDecoder,
     {
         for (ch = 0; ch < channels; ch++)
         {
-            int32_t tmp = input[ch][i];
+            int32_t tmp = input[hDecoder->internal_channel[ch]][i];
             tmp += (1 << (REAL_BITS-1));
             tmp >>= REAL_BITS;
 	    if ((tmp+0x8000) & ~0xffff) tmp = ~(tmp>>31)-0x8000;

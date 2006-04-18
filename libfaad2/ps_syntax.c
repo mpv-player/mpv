@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: ps_syntax.c,v 1.3 2004/06/30 12:45:56 menno Exp $
+** $Id: ps_syntax.c,v 1.6 2004/09/04 14:56:28 menno Exp $
 **/
 
 #include "common.h"
@@ -322,15 +322,21 @@ static void huff_data(bitfile *ld, const uint8_t dt, const uint8_t nr_par,
 static INLINE int8_t ps_huff_dec(bitfile *ld, ps_huff_tab t_huff);
 
 
-uint16_t ps_data(ps_info *ps, bitfile *ld)
+uint16_t ps_data(ps_info *ps, bitfile *ld, uint8_t *header)
 {
     uint8_t tmp, n;
     uint16_t bits = (uint16_t)faad_get_processed_bits(ld);
+
+    *header = 0;
 
     /* check for new PS header */
     if (faad_get1bit(ld
         DEBUGVAR(1,1000,"ps_data(): enable_ps_header")))
     {
+        *header = 1;
+
+        ps->header_read = 1;
+
         ps->use34hybrid_bands = 0;
 
         /* Inter-channel Intensity Difference (IID) parameters enabled */
@@ -371,6 +377,10 @@ uint16_t ps_data(ps_info *ps, bitfile *ld)
         ps->enable_ext = (uint8_t)faad_get1bit(ld
             DEBUGVAR(1,1005,"ps_data(): enable_ext"));
     }
+
+    /* we are here, but no header has been read yet */
+    if (ps->header_read == 0)
+        return 1;
 
     ps->frame_class = (uint8_t)faad_get1bit(ld
         DEBUGVAR(1,1006,"ps_data(): frame_class"));

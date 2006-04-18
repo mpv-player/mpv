@@ -19,10 +19,10 @@
 ** Any non-GPL usage of this software or parts of this software is strictly
 ** forbidden.
 **
-** Commercial non-GPL licensing of this software is possible.
-** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
-**
-** $Id: specrec.c,v 1.51 2004/06/30 12:45:57 menno Exp $
+** Initially modified for use with MPlayer on 2006/04/18
+** $Id: specrec.c,v 1.56 2004/09/08 09:43:11 gcp Exp $
+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** local_changes.diff contains the exact changes to this file.
 **/
 
 /*
@@ -544,9 +544,11 @@ static uint8_t quant_to_spec(NeAACDecHandle hDecoder,
     const real_t *tab = iq_table;
 
     uint8_t g, sfb, win;
-    uint16_t width, bin, k, gindex;
+    uint16_t width, bin, k, gindex, wa, wb;
     uint8_t error = 0; /* Init error flag */
-
+#ifndef FIXED_POINT
+    real_t scf;
+#endif
 
     k = 0;
     gindex = 0;
@@ -590,57 +592,69 @@ static uint8_t quant_to_spec(NeAACDecHandle hDecoder,
             }
 #endif
 
+            wa = gindex + j;
+
+#ifndef FIXED_POINT
+            scf = pow2sf_tab[exp/*+25*/] * pow2_table[frac];
+#endif
+
             for (win = 0; win < ics->window_group_length[g]; win++)
             {
                 for (bin = 0; bin < width; bin += 4)
                 {
 #ifndef FIXED_POINT
-                    spec_data[gindex+(win*win_inc)+j+bin+0] = iquant(quant_data[k+0], tab, &error) *
-                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
-                    spec_data[gindex+(win*win_inc)+j+bin+1] = iquant(quant_data[k+1], tab, &error) *
-                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
-                    spec_data[gindex+(win*win_inc)+j+bin+2] = iquant(quant_data[k+2], tab, &error) *
-                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
-                    spec_data[gindex+(win*win_inc)+j+bin+3] = iquant(quant_data[k+3], tab, &error) *
-                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
+                    wb = wa + bin;
+
+                    spec_data[wb+0] = iquant(quant_data[k+0], tab, &error) * scf;
+                    spec_data[wb+1] = iquant(quant_data[k+1], tab, &error) * scf;                        
+                    spec_data[wb+2] = iquant(quant_data[k+2], tab, &error) * scf;                        
+                    spec_data[wb+3] = iquant(quant_data[k+3], tab, &error) * scf;
+                        
 #else
                     real_t iq0 = iquant(quant_data[k+0], tab, &error);
                     real_t iq1 = iquant(quant_data[k+1], tab, &error);
                     real_t iq2 = iquant(quant_data[k+2], tab, &error);
                     real_t iq3 = iquant(quant_data[k+3], tab, &error);
+
+                    wb = wa + bin;
+
                     if (exp < 0)
                     {
-                        spec_data[gindex+(win*win_inc)+j+bin+0] = iq0 >>= -exp;
-                        spec_data[gindex+(win*win_inc)+j+bin+1] = iq1 >>= -exp;
-                        spec_data[gindex+(win*win_inc)+j+bin+2] = iq2 >>= -exp;
-                        spec_data[gindex+(win*win_inc)+j+bin+3] = iq3 >>= -exp;
+                        spec_data[wb+0] = iq0 >>= -exp;
+                        spec_data[wb+1] = iq1 >>= -exp;
+                        spec_data[wb+2] = iq2 >>= -exp;
+                        spec_data[wb+3] = iq3 >>= -exp;
                     } else {
-                        spec_data[gindex+(win*win_inc)+j+bin+0] = iq0 <<= exp;
-                        spec_data[gindex+(win*win_inc)+j+bin+1] = iq1 <<= exp;
-                        spec_data[gindex+(win*win_inc)+j+bin+2] = iq2 <<= exp;
-                        spec_data[gindex+(win*win_inc)+j+bin+3] = iq3 <<= exp;
+                        spec_data[wb+0] = iq0 <<= exp;
+                        spec_data[wb+1] = iq1 <<= exp;
+                        spec_data[wb+2] = iq2 <<= exp;
+                        spec_data[wb+3] = iq3 <<= exp;
                     }
-                    spec_data[gindex+(win*win_inc)+j+bin+0] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+0],pow2_table[frac]);
-                    spec_data[gindex+(win*win_inc)+j+bin+1] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+1],pow2_table[frac]);
-                    spec_data[gindex+(win*win_inc)+j+bin+2] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+2],pow2_table[frac]);
-                    spec_data[gindex+(win*win_inc)+j+bin+3] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+3],pow2_table[frac]);
+                    if (frac != 0)
+                    {
+                        spec_data[wb+0] = MUL_C(spec_data[wb+0],pow2_table[frac]);
+                        spec_data[wb+1] = MUL_C(spec_data[wb+1],pow2_table[frac]);
+                        spec_data[wb+2] = MUL_C(spec_data[wb+2],pow2_table[frac]);
+                        spec_data[wb+3] = MUL_C(spec_data[wb+3],pow2_table[frac]);
+                    }
 
 //#define SCFS_PRINT
 #ifdef SCFS_PRINT
-                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+0]);
-                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+1]);
-                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+2]);
-                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+3]);
-                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+0]);
-                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+1]);
-                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+2]);
-                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+3]);
+                    printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+0]);
+                    printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+1]);
+                    printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+2]);
+                    printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+3]);
+                    //printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+0]);
+                    //printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+1]);
+                    //printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+2]);
+                    //printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+3]);
 #endif
 #endif
 
                     gincrease += 4;
                     k += 4;
                 }
+                wa += win_inc;
             }
             j += width;
         }
@@ -659,29 +673,19 @@ static uint8_t allocate_single_channel(NeAACDecHandle hDecoder, uint8_t channel,
     /* MAIN object type prediction */
     if (hDecoder->object_type == MAIN)
     {
-        /* allocate the state only when needed */
-        if (hDecoder->pred_stat[channel] == NULL)
-        {
-            hDecoder->pred_stat[channel] = (pred_state*)faad_malloc(hDecoder->frameLength * sizeof(pred_state));
+            hDecoder->pred_stat[channel] = (pred_state*)realloc(hDecoder->pred_stat[channel], hDecoder->frameLength * sizeof(pred_state));
             reset_all_predictors(hDecoder->pred_stat[channel], hDecoder->frameLength);
-        }
     }
 #endif
 
 #ifdef LTP_DEC
     if (is_ltp_ot(hDecoder->object_type))
     {
-        /* allocate the state only when needed */
-        if (hDecoder->lt_pred_stat[channel] == NULL)
-        {
-            hDecoder->lt_pred_stat[channel] = (int16_t*)faad_malloc(hDecoder->frameLength*4 * sizeof(int16_t));
+            hDecoder->lt_pred_stat[channel] = (int16_t*)realloc(hDecoder->lt_pred_stat[channel], hDecoder->frameLength*4 * sizeof(int16_t));
             memset(hDecoder->lt_pred_stat[channel], 0, hDecoder->frameLength*4 * sizeof(int16_t));
-        }
     }
 #endif
 
-    if (hDecoder->time_out[channel] == NULL)
-    {
         mul = 1;
 #ifdef SBR_DEC
         hDecoder->sbr_alloced[hDecoder->fr_ch_ele] = 0;
@@ -692,41 +696,28 @@ static uint8_t allocate_single_channel(NeAACDecHandle hDecoder, uint8_t channel,
             hDecoder->sbr_alloced[hDecoder->fr_ch_ele] = 1;
         }
 #endif
-        hDecoder->time_out[channel] = (real_t*)faad_malloc(mul*hDecoder->frameLength*sizeof(real_t));
+        hDecoder->time_out[channel] = (real_t*)realloc(hDecoder->time_out[channel], mul*hDecoder->frameLength*sizeof(real_t));
         memset(hDecoder->time_out[channel], 0, mul*hDecoder->frameLength*sizeof(real_t));
-    }
 #if (defined(PS_DEC) || defined(DRM_PS))
     if (output_channels == 2)
     {
-        if (hDecoder->time_out[channel+1] == NULL)
-        {
-            hDecoder->time_out[channel+1] = (real_t*)faad_malloc(mul*hDecoder->frameLength*sizeof(real_t));
+            hDecoder->time_out[channel+1] = (real_t*)realloc(hDecoder->time_out[channel+1], mul*hDecoder->frameLength*sizeof(real_t));
             memset(hDecoder->time_out[channel+1], 0, mul*hDecoder->frameLength*sizeof(real_t));
-        }
     }
 #endif
 
-    if (hDecoder->fb_intermed[channel] == NULL)
-    {
-        hDecoder->fb_intermed[channel] = (real_t*)faad_malloc(hDecoder->frameLength*sizeof(real_t));
+        hDecoder->fb_intermed[channel] = (real_t*)realloc(hDecoder->fb_intermed[channel], hDecoder->frameLength*sizeof(real_t));
         memset(hDecoder->fb_intermed[channel], 0, hDecoder->frameLength*sizeof(real_t));
-    }
 
 #ifdef SSR_DEC
     if (hDecoder->object_type == SSR)
     {
-        if (hDecoder->ssr_overlap[channel] == NULL)
-        {
-            hDecoder->ssr_overlap[channel] = (real_t*)faad_malloc(2*hDecoder->frameLength*sizeof(real_t));
-            memset(hDecoder->ssr_overlap[channel], 0, 2*hDecoder->frameLength*sizeof(real_t));
-        }
-        if (hDecoder->prev_fmd[channel] == NULL)
-        {
             uint16_t k;
-            hDecoder->prev_fmd[channel] = (real_t*)faad_malloc(2*hDecoder->frameLength*sizeof(real_t));
+            hDecoder->ssr_overlap[channel] = (real_t*)realloc(hDecoder->ssr_overlap[channel], 2*hDecoder->frameLength*sizeof(real_t));
+            memset(hDecoder->ssr_overlap[channel], 0, 2*hDecoder->frameLength*sizeof(real_t));
+            hDecoder->prev_fmd[channel] = (real_t*)realloc(hDecoder->prev_fmd[channel], 2*hDecoder->frameLength*sizeof(real_t));
             for (k = 0; k < 2*hDecoder->frameLength; k++)
                 hDecoder->prev_fmd[channel][k] = REAL_CONST(-1);
-        }
     }
 #endif
 
@@ -849,29 +840,15 @@ uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics,
 #endif
 
 
-    /* determine whether some mono->stereo tool is used */
+    /* always allocate 2 channels, PS can always "suddenly" turn up */
 #if (defined(PS_DEC) || defined(DRM_PS))
     output_channels = hDecoder->ps_used[hDecoder->fr_ch_ele] ? 2 : 1;
 #else
     output_channels = 1;
 #endif
-#ifdef DRM_PS
-    /* for DRM error recovery is crucial */
-    /* simply always allocate 2 channels, you never know when PS will pop up */
-    if (hDecoder->object_type == DRM_ER_LC)
-        output_channels = 2;
-#endif
-    if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] == 0)
-    {
-        /* element_output_channels not set yet */
-        hDecoder->element_output_channels[hDecoder->fr_ch_ele] = output_channels;
-    } else if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] != output_channels) {
-        /* element inconsistency */
-        return 21;
-    }
 
-    if (hDecoder->element_alloced[hDecoder->fr_ch_ele] == 0)
-    {
+    if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] < output_channels) {
+        hDecoder->element_output_channels[hDecoder->fr_ch_ele] = output_channels;
         retval = allocate_single_channel(hDecoder, sce->channel, output_channels);
         if (retval > 0)
             return retval;
@@ -948,16 +925,10 @@ uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics,
     if (hDecoder->object_type != SSR)
     {
 #endif
-#ifdef USE_SSE
-        hDecoder->fb->if_func(hDecoder->fb, ics->window_sequence, ics->window_shape,
-            hDecoder->window_shape_prev[sce->channel], spec_coef,
-            hDecoder->time_out[sce->channel], hDecoder->object_type, hDecoder->frameLength);
-#else
         ifilter_bank(hDecoder->fb, ics->window_sequence, ics->window_shape,
             hDecoder->window_shape_prev[sce->channel], spec_coef,
             hDecoder->time_out[sce->channel], hDecoder->fb_intermed[sce->channel],
             hDecoder->object_type, hDecoder->frameLength);
-#endif
 #ifdef SSR_DEC
     } else {
         ssr_decode(&(ics->ssr), hDecoder->fb, ics->window_sequence, ics->window_shape,
@@ -1023,12 +994,10 @@ uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics,
     {
         return 23;
     }
-#endif
 
-#ifdef DRM_PS
-    /* copy L to R for DRM when no PS is used */
-    if ((hDecoder->object_type == DRM_ER_LC) &&
-        (hDecoder->ps_used[hDecoder->fr_ch_ele] == 0))
+    /* copy L to R when no PS is used */
+#if (defined(PS_DEC) || defined(DRM_PS))
+    if ((hDecoder->ps_used[hDecoder->fr_ch_ele] == 0) && (output_channels == 2))
     {
         uint8_t ele = hDecoder->fr_ch_ele;
         uint8_t ch = sce->channel;
@@ -1037,6 +1006,7 @@ uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics,
 
         memcpy(hDecoder->time_out[ch+1], hDecoder->time_out[ch], frame_size);
     }
+#endif
 #endif
 
     return 0;
@@ -1087,8 +1057,40 @@ uint8_t reconstruct_channel_pair(NeAACDecHandle hDecoder, ic_stream *ics1, ic_st
     /* mid/side decoding */
     ms_decode(ics1, ics2, spec_coef1, spec_coef2, hDecoder->frameLength);
 
+#if 0
+    {
+        int i;
+        for (i = 0; i < 1024; i++)
+        {
+            //printf("%d\n", spec_coef1[i]);
+            printf("0x%.8X\n", spec_coef1[i]);
+        }
+        for (i = 0; i < 1024; i++)
+        {
+            //printf("%d\n", spec_coef2[i]);
+            printf("0x%.8X\n", spec_coef2[i]);
+        }
+    }
+#endif
+
     /* intensity stereo decoding */
     is_decode(ics1, ics2, spec_coef1, spec_coef2, hDecoder->frameLength);
+
+#if 0
+    {
+        int i;
+        for (i = 0; i < 1024; i++)
+        {
+            printf("%d\n", spec_coef1[i]);
+            //printf("0x%.8X\n", spec_coef1[i]);
+        }
+        for (i = 0; i < 1024; i++)
+        {
+            printf("%d\n", spec_coef2[i]);
+            //printf("0x%.8X\n", spec_coef2[i]);
+        }
+    }
+#endif
 
 #ifdef MAIN_DEC
     /* MAIN object type prediction */
@@ -1162,14 +1164,6 @@ uint8_t reconstruct_channel_pair(NeAACDecHandle hDecoder, ic_stream *ics1, ic_st
     if (hDecoder->object_type != SSR)
     {
 #endif
-#ifdef USE_SSE
-        hDecoder->fb->if_func(hDecoder->fb, ics1->window_sequence, ics1->window_shape,
-            hDecoder->window_shape_prev[cpe->channel], spec_coef1,
-            hDecoder->time_out[cpe->channel], hDecoder->object_type, hDecoder->frameLength);
-        hDecoder->fb->if_func(hDecoder->fb, ics2->window_sequence, ics2->window_shape,
-            hDecoder->window_shape_prev[cpe->paired_channel], spec_coef2,
-            hDecoder->time_out[cpe->paired_channel], hDecoder->object_type, hDecoder->frameLength);
-#else
         ifilter_bank(hDecoder->fb, ics1->window_sequence, ics1->window_shape,
             hDecoder->window_shape_prev[cpe->channel], spec_coef1,
             hDecoder->time_out[cpe->channel], hDecoder->fb_intermed[cpe->channel],
@@ -1178,7 +1172,6 @@ uint8_t reconstruct_channel_pair(NeAACDecHandle hDecoder, ic_stream *ics1, ic_st
             hDecoder->window_shape_prev[cpe->paired_channel], spec_coef2,
             hDecoder->time_out[cpe->paired_channel], hDecoder->fb_intermed[cpe->paired_channel],
             hDecoder->object_type, hDecoder->frameLength);
-#endif
 #ifdef SSR_DEC
     } else {
         ssr_decode(&(ics1->ssr), hDecoder->fb, ics1->window_sequence, ics1->window_shape,
