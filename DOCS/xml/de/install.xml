@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<chapter id="install">
+<title>Installation</title>
+
+<para>
+Eine Anleitung für eine schnelle Installation steht in der Datei
+<filename>README</filename>. Bitte lies diese zuerst und komm erst dann für
+den Rest der mörderischen Details zurück.
+</para>
+
+<para>
+In diesem Abschnitt werde ich versuchen, dich durch den Vorgang des
+Compilierens und Konfigurierens von <application>MPlayer</application> zu
+leiten. Es ist nicht leicht, muss aber nicht unbedingt schwierig sein. Wenn du
+andere Erfahrungen machst als das, was ich erkläre, durchsuche bitte die
+Dokumentation und du wirst deine Antworten finden. Wenn du Links siehst, folge
+ihnen und lies ihren Inhalt sorgfältig. Das wird etwas Zeit in Anspruch
+nehmen, aber das IST es wert.
+</para>
+
+<para>
+Du brauchst ein ziemlich aktuelles System. Unter Linux werden die Kernel der
+Version 2.4.x empfohlen.
+</para>
+
+<sect1 id="softreq">
+<title>Softwareanforderungen</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">binutils</emphasis> - empfohlene Version ist <emphasis
+role="bold">2.11.x</emphasis>.
+  Dieses Programm ist verantwortlich für die Generierung von Instruktionen für
+  MMX/3DNow!/usw. und daher sehr wichtig.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">gcc</emphasis> - empfohlene Versionen sind: 
+  <emphasis role="bold">2.95.3</emphasis> (vielleicht <emphasis
+  role="bold">2.95.4</emphasis>) und <emphasis role="bold">3.2+</emphasis>.
+  Benutze <emphasis role="bold">niemals</emphasis> 2.96 oder 3.0.x! Diese
+  generieren im Falle von <application>MPlayer</application> fehlerhaften Code.
+  Solltest du dich dafür entscheiden, die von gcc-Version 2.96 zu wechseln,
+  dann entscheide dich nicht zu Gunsten von 3.x, nur weil es neuer ist. Frühe
+  Veröffentlichungen von 3.x waren fehlerhafter als 2.96. Downgrade also zu
+  2.95.x (downgrade auch <systemitem class="library">libstdc++</systemitem>,
+  andere Programme könnten dies benötigen) oder wechsle die Version überhaupt
+  nicht (in diesem Falle sei jedoch gewarnt, dass es zur Laufzeit Probleme
+  geben kann). Solltest du dich für 3.x entscheiden, versuche die neueste
+  Version zu bekommen, frühe Versionen hatten verschiedenartige Fehler, benutze
+  also mindestens Version 3.1, diese ist getestet und funktioniert. Für
+  detaillierte Informationen über die Fehler in gcc 2.96 (die immernoch NICHT
+  korrigiert sind, die in <application>MPlayer</application> UMGANGEN wurden!),
+  siehe Abschnitt <link linkend="gcc-296">gcc 2.96</link> und die <xref
+  linkend="faq"/>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">XFree86</emphasis> - empfohlene Version ist
+  <emphasis role="bold">immer die neueste</emphasis> (4.3). Normalerweise
+  möchte das jeder. Mit XFree86 4.0.2 beginnend enthält es die <link
+  linkend="xv">XVideo</link>-Erweiterung (irgendwo als <emphasis
+  role="bold">Xv</emphasis> bezeichnet), die bei Karten, die dies unterstützen,
+  für die YUV-Hardwarebeschleunigung (schnelle Bilddarstellung) benötigt wird.
+  Stelle auch sicher, dass das <emphasis role="bold">Entwicklerpaket</emphasis>
+  installiert ist, sonst wird es nicht funktionieren.
+  Bei manchen Grafikkarten benötigst du kein XFree86. Siehe Liste unten.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">make</emphasis> - empfohlene Version ist
+  <emphasis role="bold">immer die neueste</emphasis> (mindestens 3.79.x). Dies
+  ist normalerweise nicht so wichtig.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">SDL</emphasis> - ist nicht zwingend notwendig, kann 
+  in manchen Fällen aber helfen (schlechter Klang, Grafikkarten, die zusammen
+  mit  dem xv-Treiber komischerweise hinterherhingen).
+  Benutze immer die neueste Version (beginnend bei 1.2.x).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-Decoder, der
+  von der Option <option>-mf</option> und für mache QT MOV-Dateien verwendet
+  wird. Nützlich sowohl für <application>MPlayer</application> als auch
+  <application>MEncoder</application>, wenn du vorhast, mit JPEG-Dateien zu
+  arbeiten.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libpng</emphasis> - empfohlen und
+  Standard-(M)PNG-Decoder. Wird für die GUI benötigt.
+  Nützlich sowohl für <application>MPlayer</application> als auch
+  <application>MEncoder</application>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">lame</emphasis> - empfohlen, benötigt für
+  Audioencodierung in das MP3-Format mit <application>MEncoder</application>,
+  empfohlene Version ist <emphasis>immer die neueste</emphasis> (mindestens
+  3.90).
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">zlib</emphasis> - empfohlen, benötigt für die
+  Unterstützung von komprimierten MOV-Headern und PNG.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libogg</emphasis> - optional, benötigt für die
+  Wiedergabe von Dateien im OGG-Format.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libvorbis</emphasis> - optional, benötigt für die
+  Audiowiedergabe von OGG Vorbis.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  - optional, benötigt für die Wiedergabe von RTSP/RTP-Streams.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">directfb</emphasis> - optional, von
+  <ulink url="http://www.directfb.org"/>. Version 0.9.13 ist mindestens
+  erforderlich.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">cdparanoia</emphasis> - optional, für CDDA-Unterstützung
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libfreetype</emphasis> - optional, für Unterstützung 
+  von TTF-Schriftarten. Version 2.0.9 ist mindestens erforderlich.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libxmms</emphasis> - optional, für Unterstützung des
+  XMMS-Input-Plugins. Version 1.2.7 ist mindestens erforderlich.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">libsmb</emphasis> - optional, für Samba-Unterstützung.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">ALSA</emphasis> - optional, für Unterstützung der
+  Audioausgabe mit ALSA. Version 0.9.0rc4 ist mindestens erforderlich.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">bio2jack</emphasis> - optional, für
+  Unterstützung der Audioausgabe mit JACK, wird nur zur Compilezeit benötigt.
+  Du kannst es von
+  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink> beziehen.
+  Da es keine Installationsoptionen hat, musst du die Datei
+  <filename>libbio2jack.a</filename> manuell in deinen Bibliothekspfad
+  kopieren, oder benutze die Option <option>--with-bio2jack=DIR</option>, damit
+  <filename>./configure</filename> weiß, wo sich die Datei befindet.
+  </para></listitem>
+</itemizedlist>
+</sect1>
+
+
+<sect1 id="installation_codecs">
+<title>Codecs</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold"><systemitem
+class="library">libavcodec</systemitem></emphasis>:
+  Dies ist ein Codec, der in der Lage ist,
+  H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-encodierte
+  Videostreams und WMA (Windows Media Audio) v1/v2-Streams auf mehreren
+  Plattformen zu decodieren. Er ist außerdem dafür bekannt, der schnellste
+  dafür zu sein. Siehe <link linkend="ffmpeg">FFmpeg</link> für Details.
+  Features:
+  <itemizedlist>
+  <listitem><simpara>
+    ermöglicht Decodierung von oben genannten Videos auf nicht-x86-Maschinen
+    </simpara></listitem>
+  <listitem><simpara>
+    Encodierung mit den meisten der genannten Codecs
+    </simpara></listitem>
+  <listitem><simpara>
+    Dieser Codec ist der <emphasis role="bold">schnellste verfügbare
+    Codec</emphasis> für DivX/3/4/5 und andere MPEG-4-Typen. Empfohlen!
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Win32-Codecs</emphasis>: Wenn du vorhast,
+  <application>MPlayer</application> auf der x86-Architektur zu benutzen,
+  wirst du sie vermutlich brauchen. Lade ein Codecpaket von unserer
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">Codec-Seite
+  </ulink> herunter und packe es in <filename
+  class="directory">/usr/local/lib/codecs</filename>, bevor du 
+  <application>MPlayer</application> compilierst, sonst wird keine
+  Unterstützung für Win32 mitcompiliert!
+  <note><para>Das avifile-Projekt hat ein ähnliches Codecs-Paket, das sich je
+  jedoch von unserem unterscheidet. Wenn du also alle unterstützten Codecs
+  benutzen möchtest, benutze unser Paket (und mach dir keine Sorgen, avifile
+  funktioniert ohne Probleme damit).</para>
+  </note>
+  Features:
+  <itemizedlist>
+  <listitem><simpara>
+    du brauchst dies, wenn du z.B. Filme abspielen oder encodieren möchtest,
+    die mit verschiedenartigen Kompressoren, wie Tuner-Karten oder
+    Digitalkameras aufgenommen wurden (Beispiel: DV, ATI VCR, MJPEG)
+    </simpara></listitem>
+  <listitem><simpara>
+    benötigt, wenn du <emphasis role="bold">WMV9/WMA9-Filme</emphasis> abspielen
+    möchtest.
+   </simpara></listitem>
+  <listitem><simpara>
+    Nicht nötig für alte ASFs mit MP41- oder MP42-Video (obwohl VoxWare-Audio bei
+    diesen Dateien recht häufig vorkommt - wird erledigt vom Win32-Codec), oder WMV7.
+    Wird für WMA (Windows Media Audio) also nicht benötigt,
+    <systemitem class="library">libavcodec</systemitem> hat einen Open-Source-Decoder dafür.
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">QuickTime-Codecs</emphasis>: Auf der x86-Plattform
+  können diese Codecs benutzt werden, um RPZA und anderes QuickTime-Video sowie
+  QDesign-Audiostreams zu decodieren. Installationsanleitungen können in der
+  Sektion <link linkend="sorenson">Sorenson Video-Codec</link> gefunden werden.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">DivX4/DivX5</emphasis>: Informationen über diesen
+  Codecs sind verfügbar im Absatz <link linkend="divx4-5">DivX4/DivX5</link>.
+  Du möchtest diesen Codec aber vermutlich nicht, da
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
+  (siehe oben) wesentlich schneller ist und bessere Qualität bietet als jener, sowohl bei
+  Decodierung als auch Encodierung. Features:
+  <itemizedlist>
+  <listitem><simpara>
+    Encodierung in ein oder zwei Durchläufen mit
+    <link linkend="mencoder"><application>MEncoder</application></link>
+    </simpara></listitem>
+  <listitem><simpara>
+    kann alte <emphasis role="bold">DivX3</emphasis>-Filme viel schneller als die
+    WIN32-DLL abspielen, ist aber langsamer als
+    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
+    </simpara></listitem>
+  <listitem><simpara>
+    ist Closed-Source, und es gibt nur eine x86-Version.
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">XviD</emphasis>: Open-Source-Encodierungsalternative zu
+  DivX4Linux. Features:
+  <itemizedlist>
+  <listitem><simpara>
+    Encodierung in ein oder zwei Durchläufen mit
+    <link linkend="mencoder"><application>MEncoder</application></link>
+    </simpara></listitem>
+  <listitem><simpara>
+    ist Open Source, daher multiplatform
+    </simpara></listitem>
+  <listitem><simpara>
+    ist ungefähr doppelt so schnell wie DivX4 bei der Encodierung - bei
+    ungefähr gleicher Qualität
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+<listitem><para>
+  Die <emphasis role="bold"><link linkend="xanim">XAnim-Codecs</link></emphasis>
+  sind die besten (Vollbild, Hardware YUV-Zoom) für die Decodierung von
+  <emphasis role="bold">3ivx</emphasis> und Indeo 3/4/5-Filmen und manchen alten
+  Formaten. Und sie laufen auf mehreren Plattformen, sind daher die einzige
+  Möglichkeit, Indeo auf nicht-x86-Plattformen anzuschauen (naja, außer XAnim:).
+  Cinepak-Filme sind aber zum Beispiel am besten mit <application>MPlayer</application>s
+  eigenem Cinepak-Decoder anzuschauen!
+  </para></listitem>
+<listitem><para>
+  Für <emphasis role="bold">Ogg Vorbis</emphasis>-Audiodecodierung musst du
+  <systemitem class="library">libvorbis</systemitem> richtig installieren.
+  Binärpakete und Sourcecode können von der 
+  <ulink url="http://www.vorbis.com/download.psp">Ogg Vorbis Seite</ulink>
+  heruntergeladen werden.
+  </para></listitem>
+<listitem><para>
+  <application>MPlayer</application> kann die Bibliotheken von RealPlayer 8 und
+  RealONE verwenden, um Dateien mit 
+  <emphasis role="bold">RealVideo 3.0 und 4.0</emphasis>-Video und Sipro/Cook-Audio
+  abzuspielen. Siehe im Abschnitt
+  <link linkend="realmedia">RealMedia Dateiformat</link> für Installationsanweisungen
+  und weitere Informationen.
+  </para></listitem>
+</itemizedlist>
+</sect1>
+
+
+<sect1 id="video-cards">
+<title>Grafikkarten</title>
+
+<para>
+Es gibt allgemein zwei Arten Grafikkarten. Die eine (die neueren Karten) haben
+Unterstützung für
+<emphasis role="bold">Hardware-Skalierung und YUV-Beschleunigung</emphasis>,
+die anderen nicht.
+</para>
+
+
+<sect2 id="yuv-cards">
+<title>YUV-Karten</title>
+
+<para>
+Diese können das Bild in jeder Größe darstellen und auf jede Größe
+skalieren (zoomen), die in ihren Speicher passt, und das mit
+<emphasis role="bold">geringer CPU-Last</emphasis> (sogar beim Zoom), daher ist
+die Vollbildwiedergabe nett und sehr schnell.
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Matrox G200/G400/G450/G550-Karten</emphasis>: Obwohl ein
+  <link linkend="vidix">Vidix-Treiber</link> zur Verfügung steht, wird empfohlen,
+  statt dessen das mga_vid-Modul zu verwenden, da es wesentlich besser funktioniert.
+  Siehe bitte den Abschnitt <link linkend="mga_vid">mga_vid</link> für dessen Installation
+  und Umgang. Es ist wichtig, diese Schritte <emphasis>vor</emphasis> der Compilierung
+  von <application>MPlayer</application> durchzuführen, da sonst keine Unterstützung
+  für mga_vid gebaut wird. Schaue dir auch den Abschnitt
+  <link linkend="tvout-mga-g400">Matrox TV-out</link> an.
+  <emphasis role="bold"> Wenn du nicht Linux benutzt</emphasis>, ist deine einzige
+  Möglichkeit der VIDIX-Treiber: Lies den Abschnitt <link linkend="vidix">VIDIX</link>.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">3Dfx Voodoo3/Banshee-Karten</emphasis>: Bitte siehe den Abschnitt
+  <link linkend="tdfxfb">tdfxfb</link>, um große Geschwindigkeitsvorteile zu nutzen.
+  Es ist wichtig, diese Schritte <emphasis>vor</emphasis> der Compilierung
+  von <application>MPlayer</application> durchzuführen, da sonst keine Unterstützung
+  für 3Dfx gebaut wird. Schaue dir auch den Abschnitt
+  <link linkend="tvout-voodoo">3dfx TV-out</link> an.   Wenn du X benutzt, benutze
+  mindestens <emphasis role="bold">4.2.0</emphasis>, da der 3dfx Xv-Treiber in der
+  Version 4.1.0 und davor nicht funktioniert.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">ATI-Karten</emphasis>: Der <link linkend="vidix">VIDIX</link>-Treiber
+  wird für folgende Karten bereitgestellt:
+  <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
+  Siehe auch den Abschnitt <link linkend="tvout-ati">ATI-Karten</link> für die Dokumentation
+  des TV-out, damit du weißt, ob das TV-out deiner Karte unter Linux/mit
+  <application>MPlayer</application> unterstützt wird.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">S3-Karten</emphasis>: Die Savage- und Virge/DX-Chips verfügen
+  über Hardwarebeschleunigung. Benutze eine XFree86-Version, die so neu wir möglich ist,
+  ältere Treiber sind buggy. Savage-Chips haben Probleme mit YV12-Darstellung, siehe
+  Abschnitt <link linkend="s3">S3 Xv</link> für Details. Ältere Trio-Karten haben keine
+  oder nur langsame Hardwareunterstützung.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">nVidia-Karten</emphasis>: Können oder können keine gute Wahl sein
+  für die Videowiedergabe. Wenn du eine GeForce2-Karte hast (oder neuer), ist es nicht
+  wahrscheinlich, dass sie ohne Fehler funktioniert.
+  <emphasis role="bold">Der in XFree86 eingebaute nVidia-Treiber unterstützt nicht auf
+  allen Karten YUV-Hardwarebeschleunigung.</emphasis> Du musst die Closed-Source-Treiber von
+  <ulink url="http://nvidia.com">nVidia.com</ulink> herunterladen. Siehe Abschnitt
+  <link linkend="nvidia">nVidia Xv-Treiber</link> für Details. Bitte siehe auch Abschnitt
+  <link linkend="tvout-nvidia">nVidia TV-out</link>, wenn du einen Fernseher verwenden möchtest.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">3DLabs GLINT R3 und Permedia3</emphasis>: Ein VIDIX-Treiber wird
+  bereitgestellt (pm3_vid). Bitte siehe Abschnitt <link linkend="vidix">VIDIX</link> für Details.
+  </para></listitem>
+<listitem><para>
+  <emphasis role="bold">Andere Karten</emphasis>: keine der oben genannten?
+  <itemizedlist>
+  <listitem><simpara>
+    Probiere, ob der XFree86-Treiber (und deine Karte) Hardwarebeschleunigung unterstützen.
+    Siehe Abschnitt <link linkend="xv">Xv</link> für Details.
+    </simpara></listitem>
+  <listitem><simpara>
+    Sollten sie dies nicht, werden die Features unter deinem Betriebssystem nicht
+    unterstützt :( Wenn Hardwarebeschleunigung unter Windows funktioniert, bedeutet
+    das nicht, dass sie unter Linux oder anderen Betriebssystemen funktioniert, das
+    hängt von den Treibern ab. Die meisten Hersteller stellen weder Linuxtreiber her,
+    noch veröffentlichen sie die Spezifikationen ihrer Chips - daher hast du Pech,
+    wenn du ihre Karten benutzt.
+    Siehe <xref linkend="non-yuv-cards"/>.
+    </simpara></listitem>
+  </itemizedlist>
+  </para></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+
+<sect2 id="non-yuv-cards" xreflabel="Non-YUV cards">
+<title>Nicht-YUV-Karten</title>
+
+<para>
+Vollbildwiedergabe kann erreicht werden, indem entweder <emphasis role="bold">Softwareskalierung</emphasis>
+ (benutze die Option <option>-zoom</option> oder <option>-vf</option>, aber ich warne dich,
+die ist langsam) aktiviert wird, oder durch Wechsel zu einem kleineren Videomodus, zum Beispiel
+352x288. Wenn du keine YUV-Beschleunigung hast, wird letztere Methode empfohlen.
+Der Wechsel des Videomodus kann aktiviert werden durch die Option <option>-vm</option>,
+und sie funktioniert mit folgenden Treibern:
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Benutzung von </emphasis> XFree86: Siehe Details in den Abschnitten
+  <link linkend="dga">DGA-Treiber</link> und <link linkend="x11">X11-Treiber</link>.
+  DGA wird empfohlen! Probiere auch DGA via SDL, das funktioniert manchmal besser.
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Nicht-Benutzung von</emphasis> XFree86: Probiere die Treiber
+  in folgender Reihenfolge:
+  <link linkend="vesa">vesa</link>,
+  <link linkend="fbdev">fbdev</link>,
+  <link linkend="svgalib">svgalib</link>,
+  <link linkend="aalib">aalib</link>.
+  </simpara></listitem>
+</itemizedlist>
+</para>
+</sect2>
+
+<!-- FIXME: finde eine logisch sinnvollere Ordnung für diesen Abschnitt -->
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic-Karten">
+<title>Cirrus-Logic-Karten</title>
+<itemizedlist>
+<listitem><para>
+  GD 7548: verfügbar on-board und getestet in der Compaq Armada 41xx Notebook-Serie.
+  <itemizedlist>
+  <listitem><simpara>
+    XFree86 3: Funktioniert in 8/16bpp-Modi. Trotzdem, der Treiber ist übel langsam in
+    800x600@16bpp. <emphasis role="bold">Empfohlen: 640x480@16bpp</emphasis>
+   </simpara></listitem>
+  <listitem><simpara>
+    XFree86 4: Der Xserver friert kurz nach dem Start ein, wenn Beschleunigung nicht
+    aktiviert ist, dann jedoch laufen die Dinge noch langsamer als mit XFree86 3.
+    Kein XVideo.
+   </simpara></listitem>
+  <listitem><simpara>
+    FBdev: Framebuffer kann mit dem <systemitem>clgenfb</systemitem>-Treiber im Kernel
+    aktiviert werden, auch wenn er für mich nur mit 8bpp funktioniert hat, daher
+    unbrauchbar. Die clgenfb-Source musste um die 7548-ID vor der Compilierung
+    erweitert werden.
+   </simpara></listitem>
+  <listitem><simpara>
+    VESA: Die Karte ist nur VBE 1.2-fähig, daher kann VESA-Ausgabe nicht benutzt
+    werden. Kann mit UniVBE nicht umgangen werden.
+  </simpara></listitem>
+  <listitem><simpara>
+    SVGAlib: erkennt einen älteren Cirrus-Chip. Langsam, aber nutzbar mit der Option
+    <option>-bpp 8</option>.
+  </simpara></listitem>
+</itemizedlist>
+</para></listitem>
+</itemizedlist>
+</sect2>
+</sect1>
+
+
+<sect1 id="sound-cards">
+<title>Soundkarten</title>
+
+<itemizedlist>
+<listitem><simpara>
+  <emphasis role="bold">Soundblaster Live!</emphasis>: Mit dieser Karte kannst du
+  AC3-Decodierung mit 4 oder 6 (<emphasis role="bold">5.1</emphasis>) anstatt 2 Kanälen
+  verwenden. Lies den Abschnitt <link linkend="swac3">Software-AC3-Decodierung</link>.
+  Für Hardware-AC3-Passthrough <emphasis role="bold">musst</emphasis> du ALSA 0.9 mit
+  OSS-Emulation verwenden!
+  </simpara></listitem>
+<listitem><simpara>
+  <emphasis role="bold">C-Media mit S/PDIF out</emphasis>: Hardware-AC3-Passthrough
+  ist mit diesen Karten möglich, siehe Abschnitt
+  <link linkend="hwac3">Hardware-AC3-Decodierung</link>.
+  </simpara></listitem>
+<listitem><simpara>
+  Features von <emphasis role="bold">anderen Karten</emphasis> werden von
+  <application>MPlayer</application> nicht unterstützt.
+  <emphasis role="bold">Es wird dringend empfohlen, die Sektion
+  <link linkend="audio">Soundkarte</link> zu lesen!</emphasis>
+  </simpara></listitem>
+</itemizedlist>
+</sect1>
+
+
+<sect1 id="features">
+<title>Features</title>
+
+<itemizedlist>
+<listitem><para>
+  Entscheide, ob du eine GUI benötigst. Wenn dies der Fall ist, siehe Abschnitt
+  <link linkend="gui">GUI</link>, bevor du compilierst.
+  </para></listitem>
+<listitem><para>
+  Wenn Du <application>MEncoder</application> (unseren super Allzweck-Encoder)
+  installieren möchtest, siehe Abschnitt
+  <link linkend="mencoder"><application>MEncoder</application></link>.
+  </para></listitem>
+<listitem><para>
+  Wenn du eine V4L-kompatible <emphasis role="bold">TV-Tuner</emphasis>-Karte hast
+  und Filme mit <application>MPlayer</application> anschauen/grabben und encodieren
+  möchtest, lies den Abschnitt <link linkend="tv-input">TV-Input</link>.
+  </para></listitem>
+<listitem><para>
+  Es gibt Unterstützung für ein schickes <emphasis role="bold">OSD-Menü</emphasis>,
+  das benutzt werden kann. Siehe Abschnitt <link linkend="subosd">OSD-Menü</link>.
+  </para></listitem>
+</itemizedlist>
+
+<para>
+Baue dann <application>MPlayer</application>:
+<screen>
+./configure
+make
+make install</screen>
+</para>
+
+<para>
+Zu diesem Zeitpunkt ist <application>MPlayer</application> benutzbar. Das Verzeichnis
+<filename class="directory">$PREFIX/share/mplayer</filename> enthält die Datei
+<filename>codecs.conf</filename>, die dem Programm mitteilt, welche
+Codecs verfügbar sind und was diese können. Du brauchst die Datei nur, wenn du
+Eigenschaften ändern möchtest, da die ausführbare Datei intern eine eigene
+Kopie enthält. Überprüfe, ob du eine Kopie von <filename>codecs.conf</filename> einer
+älteren <application>MPlayer</application>-Version in deinem
+Home-Verzeichnis (<filename>~/.mplayer/codecs.conf</filename>) hast, und entferne diese.
+</para>
+
+<para>
+Beachte, dass die eingebaute und vom System bereitgestellte <filename>codecs.conf</filename>
+ignoriert wird, wenn du eine <filename>codecs.conf</filename> im Verzeichnis
+<filename>~/.mplayer/</filename>, hast.
+Benutze diese nicht, wenn du nicht an den Interna von <application>MPlayer</application>
+herumbasteln möchtest, da dies viele Probleme hervorrufen kann. Wenn du die Reihenfolge
+der Suche nach Codecs ändern möchtest, benutze die Optionen <option>-vc</option>,
+<option>-ac</option>, <option>-vfm</option>, oder <option>-afm</option> auf der
+Kommandozeile oder in deiner Konfigurationsdatei (siehe man page).
+</para>
+
+
+<para>
+Debian-Benutzer können ihr eigenes .deb-Paket bauen, das ist sehr leicht.
+Führe nur <screen>fakeroot debian/rules binary</screen>
+in <application>MPlayer</application>s Wurzelverzeichnis aus. Siehe
+<link linkend="debian">Debian-Packaging</link> für detaillierte Informationen.
+</para>
+
+<para>
+<emphasis role="bold">Überprüfe immer die Ausgabe von </emphasis>
+<filename>./configure</filename> und die Datei <filename>configure.log</filename>,
+sie enthalten Informationen darüber, was eingebaut wird und was nicht.
+Du möchtest dir vielleicht auch die Dateien
+<filename>config.h</filename> und <filename>config.mak</filename> anschauen.
+Wenn du manche Bibliotheken installiert hast, die von 
+<filename>./configure</filename> aber nicht erkannt werden, überprüfe auch
+die entsprechenden Header-Dateien (normalerweise die -dev-Pakete) und ob deren
+Versionen passen. Die Datei <filename>configure.log</filename> gibt
+normalerweise Auskunft darüber, was fehlt.
+</para>
+
+<para>
+Obwohl sie nicht notwendig sind, sollten die Fonts installiert werden, um  die
+Funktionalität von OSD- und Untertiteldarstellung nutzen zu können. Die
+empfohlene Methode dazu ist, eine TTF-Fontdatei zu installieren und
+<application>MPlayer</application> anzuweisen, diese zu benutzen.
+Siehe Abschnitt <link linkend="subosd">Untertitel und OSD</link> für Details.
+</para>
+
+</sect1>
+
+<!-- ********** -->
+
+<sect1 id="gui">
+<title>Was ist mit der GUI?</title>
+
+<para>
+Die GUI benötigt GTK 1.2.x oder GTK 2.0 (sie ist nicht vollständig GTK, aber
+die Panels). Die Skins werden im PNG-Format gespeichert, daher müssen GTK,
+ <systemitem class="library">libpng</systemitem> (und deren Entwicklungskram,
+normalerweise <systemitem class="library">gtk-dev</systemitem> genannt),
+installiert sein. Du kannst die GUI durch Angabe von <option>--enable-gui</option>
+während <filename>./configure</filename> aktivieren. Dann musst du, um den
+GUI-Modus zu aktivieren, die Binärdatei <command>gmplayer</command> starten.
+</para>
+
+<para>
+Aus technischen Gründen kannst du die Option <option>-gui</option> auf
+der Kommandozeile nicht verwenden.
+</para>
+
+<para>
+Da <application>MPlayer</application> kein Skin enthält, musst du eins
+herunterladen, um die GUI benutzen zu können. Siehe <ulink
+url="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</ulink>.
+Sie sollten in das normale systemweite Verzeichnis
+(<filename class="directory">$PREFIX/share/mplayer/Skin</filename>) oder nach
+ <filename class="directory">$HOME/.mplayer/Skin</filename> installiert werden.
+<application>MPlayer</application> schaut nach Voreinstellung in diesen Verzeichnissen
+nach einem Verzeichnis mit dem Namen <filename class="directory">default</filename>,
+ du kannst aber die Option <option>-skin <replaceable>newskin</replaceable></option>
+ oder die Konfigurationsdateianweisung
+ <literal>skin=newskin</literal> nutzen, um ein Skin im Verzeichnis
+ <filename class="directory">*/Skin/newskin</filename> zu benutzen.
+</para>
+</sect1>
+
+<!-- ********** -->
+
+<sect1 id="subosd">
+<title>Untertitel und OSD</title>
+
+<para>
+<application>MPlayer</application> kann Untertitel bei Filmen darstellen.
+Momentan werden die folgenden Formate unterstützt:
+<itemizedlist>
+<listitem><para>VOBsub</para></listitem>
+<listitem><para>OGM</para></listitem>
+<listitem><para>CC (closed caption)</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
+<listitem><para>SubRip</para></listitem>
+<listitem><para>SubViewer</para></listitem>
+<listitem><para>Sami</para></listitem>
+<listitem><para>VPlayer</para></listitem>
+<listitem><para>RT</para></listitem>
+<listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
+<listitem><para>AQTitle</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> kann (<emphasis role="bold">außer den ersten drei</emphasis>)
+ die oben gelisteten Zielformate ausgeben (speichern), und zwar mit folgenden Optionen:
+<itemizedlist>
+<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MEncoder</application> kann DVD-Untertitel im
+<link linkend="menc-feat-extractsub">VOBsub</link>-Format ausgeben.
+</para>
+
+<para>
+Die Kommandozeilenoptionen unterscheiden sich leicht von den anderen Formaten:
+</para>
+
+<formalpara>
+<title>VOBsub-Untertitel</title>
+<para>
+VOBsub-Untertitel bestehen aus einer (ein paar Megabyte) großen
+<filename>.SUB</filename> Datei, und optional <filename>.IDX-</filename> und/oder
+<filename>.IFO</filename>-Dateien. Wenn du Dateien hast wie 
+ <filename><replaceable>beispiel.sub</replaceable></filename>,
+ <filename><replaceable>beispiel.ifo</replaceable></filename> (optional),
+oder <filename><replaceable>beispiel.idx</replaceable></filename>, musst du
+<application>MPlayer</application> die Optionen  <option>-vobsub beispiel
+[-vobsubid <replaceable>id</replaceable>]</option> übergeben (vollständige
+Pfadangabe optional). Die Option <option>-vobsubid</option> verhält sich wie
+die Option <option>-sid</option> für DVDs, du kannst damit Tracks (Sprachen) wählen.
+Im Falle, dass <option>-vobsubid</option> nicht angegeben wird, wird
+<application>MPLayer</application> versuchen, auf die Sprachen zurückzugreifen,
+die mit der Option <option>-slang</option> angegeben werden, und sonst auf
+<systemitem>langidx</systemitem> zurückzugreifen, um die Untertitelsprache zu wählen.
+Wenn dies fehlschlägt, wird es keine Untertitel geben.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Andere Untertitel</title>
+<para>
+Die anderen Formate bestehen aus einer Textdatei, die Zeit-, Platzierungs- und
+Textinformationen enthält. Gebrauch:
+Wenn du eine Datei hast wie
+<filename><replaceable>beispiel.txt</replaceable></filename>,
+musst du die Option <option>-sub <replaceable>beispiel.txt</replaceable></option>
+(vollständiger Pfad optional) angeben.
+</para>
+</formalpara>
+
+<variablelist>
+<title>Untertitel-Timing und Platzierung angeben:</title>
+<varlistentry>
+  <term><option>-subdelay <replaceable>sek</replaceable></option></term>
+  <listitem><simpara>
+    Verzögert Untertitel um <option><replaceable>sek</replaceable></option>
+    Sekunden. Kann negativ sein. Dieser Wert wird zum Zeitpositionszähler
+    hinzuaddiert.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subfps <replaceable>RATE</replaceable></option></term>
+  <listitem><simpara>
+    Gibt die Frame/sek-Rate der Untertiteldatei (Fließkommazahl) an.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
+  <listitem><simpara>
+    Gibt die Position der Untertitel an.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Wenn du bei Benutzung einer MicroDVD-Untertiteldatei eine zunehmende Verzögerung
+zwischen Film und Untertiteln feststellst, ist vermutlich die Framerate vom
+Film und der Untertiteldatei unterschiedlich. Beachte bitte, dass das MicroDVD-Untertitelformat
+absolute Framenummern benutzt, daher sollte die Option <option>-subfps</option>
+bei diesem Format benutzt werden. Wenn du dieses Problem auf Dauer beheben willst,
+musst du die Framerate manuell konvertieren.
+<application>MPlayer</application> kann diese Konvertierung für dich übernehmen:
+
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>untertitel_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>untertitel_dateiname</replaceable> <replaceable>dummy.avi</replaceable></screen>
+</para>
+
+<para>
+Für Ausführungen über DVD-Untertitel lies den Abschnitt <link linkend="dvd">DVD</link>.
+</para>
+
+
+<sect2 id="mpsub">
+<title><application>MPlayer</application>s eigenes Untertitelformat (MPsub)</title>
+
+<para>
+<application>MPlayer</application> führt ein eigenes Untertitelformat, genannt
+<emphasis role="bold">MPsub</emphasis> ein, welches von Gabucino entworfen wurde.
+Im Grunde ist dessen Hauptfeature, dass es <emphasis>dynamisch</emphasis>
+zeitbasiert funktioniert (obwohl es auch einenFrame-basiertenn Modus hat).
+Beispiel (von <ulink
+url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
+<programlisting>
+FORMAT=TIME
+# erste Zahl  : warte solang, bis der vorige Untertitel verschwunden ist
+# zweite Zahl : stelle den aktuellen Untertitel soundsolange dar
+
+15 3
+Es war einmal...
+
+0 3
+in einer weit entfernten Galaxie...
+
+0 3
+Naboo wurde angegriffen.<!--
+--></programlisting>
+</para>
+
+<para>
+Du siehst, das Hauptziel war, <emphasis role="bold">die Bearbeitung/Timing/Zusammenfügen/Schneiden
+von Untertiteln leicht zu machen</emphasis>. Und angenommen, du bekommst einen
+SSA-Untertitel, der aber schlecht getimed/verzögert ist hinsichtlich deiner Version eines Films,
+dann machst du einfach 
+<screen>mplayer <replaceable>dummy.avi</replaceable> -sub quelle.ssa -dumpmpsub</screen>
+Eine <filename>dump.mpsub</filename>-Datei wird dann im aktuellen Verzeichnis erstellt, die
+den Text der Untertitelquelle enthält aber im <emphasis role="bold">MPsub</emphasis>-Format
+ist. Dann kannst du leicht Sekunden vom/zum Untertitel hinzufügen.
+</para>
+
+<para>
+Untertitel werden mit einer Technik dargestellt namens <emphasis role="bold">'OSD',
+On Screen Display</emphasis>. OSD wird benutzt, um die aktuelle Zeit, den Lautstärke-
+und Spulbalken darzustellen.
+</para>
+</sect2>
+
+
+<sect2 id="mpsub-install">
+<title>OSD und Untertitel installieren</title>
+
+<para>
+Du benötigst das <application>MPlayer</application>-Schriftenpaket, um das OSD/SUB-Feature
+nutzen zu können. Es gibt mehrere Möglichkeiten, dies zu erreichen:
+</para>
+
+<itemizedlist>
+<listitem><para>
+  Benutze das Tool zur Font-Erstellung in <filename class="directory">TOOLS/subfont-c</filename>.
+  Das ist ein vollständiges Tool, um von TTF/Type1/usw.-Font zu mplayer-font-pkg zu konvertierten
+  (lies <filename>TOOLS/subfont-c/README</filename> für Details).
+  </para></listitem>
+<listitem><para>
+  Benutze das Font-erzeugende <application>GIMP</application>-Plugin  in
+  <filename class="directory">TOOLS/subfont-GIMP</filename> (Anmerkung: Du brauchst auch das
+  HSI RAW-Plugin, siehe <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
+ </para></listitem>
+<listitem><para>
+  die Benutzung eines TrueType-Fonts (TTF), nach Maßstäben der
+  <systemitem class="library">freetype</systemitem>-Bibliothek. Version 2.0.9 oder höher
+  ist unbedingt notwendig! Dann hast du zwei Möglichkeiten:
+  <itemizedlist>
+    <listitem><para>
+      benutze die Option <option>-font <replaceable>/pfad/zu/beispiel_font.ttf</replaceable></option>,
+      um eine TrueType-Font-Datei bei jeder Gelegenheit anzugeben
+      </para></listitem>
+    <listitem><para>
+      erstelle einen Symlink:
+      <screen>ln -s <replaceable>/pfad/zu/beispiel_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+      </para></listitem>
+      </itemizedlist>
+  Wenn <application>MPlayer</application> mit
+  <systemitem class="library">fontconfig</systemitem>-Unterstützung compiliert wurde,
+  werden die oben genannten Methoden nicht funktionieren, statt dessen erwartet die Option
+  <option>-font</option> einen <systemitem class="library">fontconfig</systemitem>-Fontnamen,
+  und der Standard ist die Schriftart Sans-serif. Um eine Liste der
+  <systemitem class="library">fontconfig</systemitem> bekannten Dateien zu erhalten,
+  benutze <command>fc-list</command>. Beispiel: <option>-font
+  <replaceable>'Bitstream Vera Sans'</replaceable></option>
+  </para></listitem>
+<listitem><para>
+  Lade Schriftartenpakete von der <application>MPlayer</application>-Seite herunter,
+  die fertig sind für die Benutzung. Beachte: Momentan sind die verfügbaren Schriftarten
+  begrenzt auf ISO 8859-1/2-Unterstützung, es gibt jedoch andere, von Benutzern
+  erstellte Schriftarten (inklusive Koreanisch, Russisch, ISO 8859-8 usw.) im
+  FTP-Verzeichnis contrib/font.
+  </para><para>
+  <!-- FIXME: dieser Abschnitt sollte vor der Liste kommen -->
+  Du solltest eine passende <filename>font.desc</filename>-Datei haben, die
+  Schriftpositionen eines Unicode-Fonts auf die aktuelle Codepage des Untertiteltexts
+  abbildet. Eine andere Möglichkeit ist, die Untertitel in UTF-8 codiert zu haben
+  und die Option <option>-utf8</option> zu verwenden oder die Untertiteldatei einfach
+  <filename>&lt;video_name&gt;.utf</filename> zu nennen und sie in dasselbe Verzeichnis
+  wie das Video zu legen. Recodierung von unterschiedlichen Codepages nach UTF-8 kann mit
+  den Programmen <command>konwert</command> oder <command>iconv</command> gemacht werden.
+  </para><para>
+
+  <table>
+  <title>Ein paar URLs</title>
+  <tgroup cols="2">
+  <thead>
+    <row><entry>URL</entry><entry>Kommentar</entry></row>
+  </thead>
+  <tbody>
+  <row><entry>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
+    </entry><entry>
+    ISO-Fonts
+    </entry></row>
+  <row><entry>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
+    </entry><entry>
+    verschiedene Fonts von Benutzern
+    </entry></row>
+  <row><entry>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
+    </entry><entry>
+    Koreanische Fonts und RAW-Plugin
+    </entry></row>
+  </tbody>
+  </tgroup>
+  </table>
+
+  </para></listitem>
+</itemizedlist>
+<para>
+Solltest du nicht-TTF-Schriften gewählt haben, UNZIPpe die heruntergeladene Datei nach
+<filename class="directory">~/.mplayer</filename> oder <filename
+class="directory">$PREFIX/share/mplayer</filename>. Benenne dann eins der entpackten
+Verzeichnisse um, oder erstelle einen Symlink mit dem Namen
+<filename class="directory">font</filename>, zum Beispiel:
+
+<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
+
+Du müsstest jetzt eine Zeitanzeige in der oberen linken Ecke des Films sehen
+(schalte sie mit der Taste <keycap>o</keycap> aus).
+</para>
+
+<para>
+(Untertitel sind <emphasis>immer aktiviert</emphasis>, lies bitte die man page,
+wenn du wissen möchtest, wie man sie deaktiviert)
+</para>
+
+<para>
+Das OSD hat 4 Zustände (wechsle mit <keycap>o</keycap>):
+
+<orderedlist>
+<listitem><simpara>
+  Lautstärkeleiste + Positionsanzeige (Standard)
+  </simpara></listitem>
+<listitem><simpara>
+  Lautstärkeleiste + Positionsanzeige + Zeitangabe + prozentuale Dateiposition
+  </simpara></listitem>
+<listitem><simpara>
+  Lautstärkeleiste + Positionsanzeige + Zeitangabe + prozentuale Dateiposition + Gesamtzeit des Mediums
+  </simpara></listitem>
+<listitem><simpara>
+  nur Untertitel
+  </simpara></listitem>
+</orderedlist>
+
+Du kannst das Standardverhalten ändern, indem du die Variable <varname>osdlevel</varname>
+in der Konfigurationsdatei setzt oder die Kommandozeilenoption <option>-osdlevel</option>
+verwendest.
+
+</para>
+</sect2>
+
+
+<sect2 id="osdmenu">
+<title>OSD-Menü</title>
+
+<para>
+<application>MPlayer</application> hat eine komplett benutzerdefinierbare OSD-Menü-Schnittstelle.
+</para>
+
+<note><simpara>
+Das Einstellungen-Menü ist momentan NICHT IMPLEMENTIERT!
+</simpara></note>
+
+<orderedlist>
+<title>Installation</title>
+<listitem><simpara>
+  compiliere <application>MPlayer</application> mit Übergabe von <option>--enable-menu</option>
+  an <filename>./configure</filename>
+  </simpara></listitem>
+<listitem><simpara>
+  stelle sicher, dass du ein OSD-Font installiert hast
+  </simpara></listitem>
+<listitem><simpara>
+  kopiere <filename>etc/menu.conf</filename> in dein
+  <filename class="directory">.mplayer</filename>-Verzeichnis
+  </simpara></listitem>
+<listitem><simpara>
+  kopiere <filename>etc/input.conf</filename> in dein 
+  <filename class="directory">.mplayer</filename>-Verzeichnis oder in das systemweite
+  <application>MPlayer</application>-Konfigurationsverzeichnis (Standard:
+  <filename class="directory">/usr/local/etc/mplayer</filename>)
+  </simpara></listitem>
+<listitem><simpara>
+  überprüfe und editiere <filename>input.conf</filename>, um Menüsteuerungstasten
+  zu aktivieren (das ist dort beschrieben).
+  </simpara></listitem>
+<listitem><para>
+  starte <application>MPlayer</application> mit folgendem Beispiel:
+  <screen>$ mplayer -menu <replaceable>datei.avi</replaceable></screen>
+  </para></listitem>
+<listitem><simpara>
+  drücke irgendeine Menütaste, die du definiert hast
+  </simpara></listitem>
+</orderedlist>
+
+</sect2>
+</sect1>
+
+<!-- ********** -->
+
+<sect1 id="rtc">
+<title>RTC</title>
+<para>
+Es gibt drei Zeitgebermethoden in <application>MPlayer</application>.
+
+<itemizedlist>
+<listitem><simpara>
+<emphasis role="bold">Um die alte Methode zu verwenden</emphasis>, musst du
+  gar nichts machen. Diese benutzt <systemitem>usleep()</systemitem>, um
+  A/V-Synchronisation abzustimmen, mit +/- 10ms Genauigkeit. Trotzdem, manchmal
+  muss die Synchronisation noch feiner abgestimmt werden.
+  </simpara></listitem>
+<listitem><para>
+<emphasis role="bold">Der neue Zeitgeber</emphasis>-Code benutzt RTC (RealTime Clock, Echtzeituhr)
+  für diese Aufgabe, da dieser präzise 1ms-Timer besitzt. Falls er verfügbar ist, wird
+  er automagisch aktiviert, benötigt jedoch root-Rechte, eine <emphasis>setuid root</emphasis>
+  <application>MPlayer</application>-Binärdatei oder einen korrekt aufgesetzten Kernel.
+  Wenn du Kernel 2.4.19pre8 oder neuer laufen hast, kannst du die maximale RTC-Frequenz
+  für normale Benutzer durch das <systemitem class="systemname">/proc</systemitem>-Dateisystem
+  festlegen. Benutze folgenden Befehl, um RTC für normale Benutzer zu aktivieren
+  <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
+  Wenn du keinen so neuen Kernel hast, kannst du auch eine Zeile in 
+  <filename>drivers/char/rtc.c</filename> ändern und deinen Kernel neu compilieren.
+  Finde den Abschnitt, der folgendermaßen lautet:
+  <programlisting>
+       * We don't really want Joe User enabling more
+       * than 64Hz of interrupts on a multi-user machine.
+       */
+      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
+   </programlisting>
+   und ändere die 64 auf 1024. Du solltest jedoch wirklich wissen, was du tust.
+   Du kannst die Effizienz des neuen Zeitgebers in der Statuszeile sehen.
+   Die Power Management-Funktionen der BIOSse mancher Notebooks mit speedstep-CPUs
+   vertragen sich nicht gut mit RTC. Audio und Video könnten Synchronisation verlieren.
+   Die externe Stromversorgung anzuschließen, bevor du dein Notebook einschaltest,
+   scheint zu helfen. Du kannst RTC-Unterstützung jederzeit mit der Option
+   <option>-nortc</option> abschalten. Bei manchen Hardwarekombinationen (bestätigt
+   während des Gebrauchs eines nicht-DMA-DVD-Laufwerks auf einem ALi1541-Board)
+   führt der Gebrauch des RTC-Zeitgebers zu sprunghafter Wiedergabe. Es wird empfohlen,
+   in solchen Fällen die dritte Methode zu verwenden.
+  </para></listitem>
+<listitem><simpara>
+  <emphasis role="bold">Der Code des dritten Zeitgebers</emphasis> wird mit der Option
+  <option>-softsleep</option> aktiviert. Der hat die Effizienz von RTC, benutzt RTC aber nicht.
+  Auf der anderen Seite benötigt er mehr CPU.
+  </simpara></listitem>
+</itemizedlist>
+<note><para><emphasis role="bold">Installiere NIEMALS eine setuid root
+<application>MPlayer</application>-Binärdatei auf einem Multiuser-System!</emphasis>
+Es ist eine Einladung für jeden, root zu werden.
+</para></note>
+</para>
+</sect1>
+
+</chapter>
