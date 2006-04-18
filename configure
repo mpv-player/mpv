@@ -4962,7 +4962,7 @@ else
   echores "not supported on this OS"
 fi
 
-echocheck "DVD support (libmpdvdkit)"
+echocheck "DVD support (libmpdvdkit2)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
  if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux; then
@@ -4973,8 +4973,6 @@ if test "$_dvdkit" = yes ; then
   if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || test "$_hpux_scsi_h" = yes || darwin || win32 ; then
     _inputmodules="mpdvdkit2 $_inputmodules"
     _dvdread=libmpdvdkit2
-    _dvdkit2=yes
-    _dvdkit=no
   else
     _noinputmodules="mpdvdkit2 $_noinputmodules"
   fi
@@ -4999,9 +4997,6 @@ if test "$_dvdkit" = yes ; then
 else
   _noinputmodules="mpdvdkit2 $_noinputmodules"
 fi
-if test "$_dvdkit2" = yes; then
-  _have_dvd=yes
-fi  
 echores "$_dvdkit"
 
 echocheck "DVD support (libdvdread)"
@@ -5069,7 +5064,7 @@ fi
 #   fi
 #   test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
 #   _used_css=
-#   test "$_dvdkit" = no && test "$_dvdkit2" = no && _used_css=$_ld_css
+#   test "$_dvdkit" = no && _used_css=$_ld_css
 #   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
 # fi
 # if test "$_dvdnav" = yes ; then
@@ -7300,7 +7295,7 @@ LIRCC_LIB = $_ld_lircc
 HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
-DVDKIT2 = $_dvdkit2
+DVDKIT2 = $_dvdkit
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
