@@ -100,6 +100,8 @@ static Atom XA_WIN_PROTOCOLS;
 static Atom XA_WIN_LAYER;
 static Atom XA_WIN_HINTS;
 static Atom XA_BLACKBOX_PID;
+static Atom XAWM_PROTOCOLS;
+static Atom XAWM_DELETE_WINDOW;
 
 #define XA_INIT(x) XA##x = XInternAtom(mDisplay, #x, False)
 
@@ -357,6 +359,8 @@ static void init_atoms(void)
     XA_INIT(_WIN_LAYER);
     XA_INIT(_WIN_HINTS);
     XA_INIT(_BLACKBOX_PID);
+    XA_INIT(WM_PROTOCOLS);
+    XA_INIT(WM_DELETE_WINDOW);
 }
 
 void update_xinerama_info(void) {
@@ -1137,6 +1141,11 @@ int vo_x11_check_events(Display * mydisplay)
                 XSetWMNormalHints(mDisplay, vo_window, &vo_hint);
                 vo_fs_flip = 0;
                 break;
+	    case ClientMessage:
+                if (Event.xclient.message_type == XAWM_PROTOCOLS &&
+                    Event.xclient.data.l[0] == XAWM_DELETE_WINDOW)
+                    mplayer_put_key(KEY_CLOSE_WIN);
+                break;
         }
     }
     return ret;
@@ -1241,6 +1250,7 @@ Window vo_x11_create_smooth_window(Display * mDisplay, Window mRoot,
     ret_win =
         XCreateWindow(mDisplay, mRootWin, x, y, width, height, 0, depth,
                       CopyFromParent, vis, xswamask, &xswa);
+    XSetWMProtocols(mDisplay, ret_win, &XAWM_DELETE_WINDOW, 1);
     if (!f_gc)
         f_gc = XCreateGC(mDisplay, ret_win, 0, 0);
     XSetForeground(mDisplay, f_gc, 0);
