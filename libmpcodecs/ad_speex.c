@@ -5,6 +5,7 @@
  * becomes part of the FFmpeg project (ffmpeg.org)
  */
 #include "config.h"
+#include <stdlib.h>
 #include <speex/speex.h>
 #include <speex/speex_stereo.h>
 #include <speex/speex_header.h>
@@ -27,7 +28,10 @@ typedef struct {
   SpeexHeader *hdr;
 } context_t;
 
+#define MAX_FRAMES_PER_PACKET 100
+
 static int preinit(sh_audio_t *sh) {
+  sh->audio_out_minsize = 2 * 320 * MAX_FRAMES_PER_PACKET * 2 * sizeof(short);
   return 1;
 }
 
@@ -35,7 +39,6 @@ static int init(sh_audio_t *sh) {
   context_t *ctx = (context_t *)calloc(1, sizeof(context_t));
   const SpeexMode *spx_mode;
   const SpeexStereoState st_st = SPEEX_STEREO_STATE_INIT; // hack
-  int mode;
   if (!sh->wf || sh->wf->cbSize < 80) {
     mp_msg(MSGT_DECAUDIO, MSGL_FATAL, "Missing extradata!\n");
     return 0;
@@ -46,6 +49,11 @@ static int init(sh_audio_t *sh) {
             "assuming mono\n", ctx->hdr->nb_channels);
     ctx->hdr->nb_channels = 1;
   }
+  if (ctx->hdr->frames_per_packet > MAX_FRAMES_PER_PACKET) {
+    mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Invalid number of frames per packet (%i), "
+            "assuming 1\n", ctx->hdr->frames_per_packet);
+    ctx->hdr->frames_per_packet = 1;
+  }
   switch (ctx->hdr->mode) {
     case 0:
       spx_mode = &speex_nb_mode; break;
@@ -54,7 +62,7 @@ static int init(sh_audio_t *sh) {
     case 2:
       spx_mode = &speex_uwb_mode; break;
     default:
-      mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Unknown speex mode (%i)\n", mode);
+      mp_msg(MSGT_DECAUDIO, MSGL_WARN, "Unknown speex mode (%i)\n", ctx->hdr->mode);
       spx_mode = &speex_nb_mode;
   }
   ctx->dec_context = speex_decoder_init(spx_mode);
