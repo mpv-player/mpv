@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.241
+// In synch with rev 1.242
 
 // ========================= MPlayer help ===========================
 
@@ -1456,7 +1456,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Konfigurationsdatei ist zu groß (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Konfigurationsdatei ist leer\n"
 #define MSGTR_LIBMENU_MenuNotFound "[MENU] Menü %s nicht gefunden.\n"
-#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menü '%s': Initialisierung fehlgeschlagen\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menü '%s': Initialisierung fehlgeschlagen.\n"
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nichtunterstütztes Ausgabeformat!!!!\n"
 
 // libmenu/menu_cmdlist.c
