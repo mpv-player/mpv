@@ -63,7 +63,7 @@ MPlayer (1.0)
     * removed native RealAudio codecs (ported to lavc)
     * Zip Motion-Block Video (ZMB) decoder via binary DLL
     * support for QuickTime in24/in32/fl32 PCM audio
-    * internal faad updated to CVS 20060915+MPlayer patches
+    * internal faad updated to CVS 20040915+MPlayer patches
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
