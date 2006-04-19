@@ -43,7 +43,7 @@
 Wenn du zum ersten Mal installierst: Lies in jedem Fall alles von hier bis zum
 Ende des Installationsabschnitts, und folge den Links, die du findest. Wenn Fragen
 bleiben, gehe zurück zum <link linkend="toc">Inhaltsverzeichnis</link> und suche nach
-dem Theme, lies die <xref linkend="faq"/> oder versuche, die Dateien zu greppen.
+dem Thema, lies die <xref linkend="faq"/> oder versuche, die Dateien zu greppen.
 Die meisten Fragen sollten irgendwo hier beantwortet werden, und nach dem Rest wurde
 vermutlich auf den <link linkend="mailinglists">Mailing-Listen</link> gefragt.
 Checke die <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">Archive</ulink>,
@@ -137,7 +137,7 @@ zu encodieren. Er kann mit verschiedenen Codecs encodieren, zum Beispiel
   Streamkopien
   </simpara></listitem>
 <listitem><simpara>
-  Input-A/V-Synchronisation (PTS-bassiert, kann mit der Option
+  Input-A/V-Synchronisation (PTS-basiert, kann mit der Option
   <option>-mc 0</option> deaktiviert werden)
   </simpara></listitem>
 <listitem><simpara>
