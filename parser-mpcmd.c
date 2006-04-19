@@ -199,6 +199,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  tmp = M_OPT_EXIT - tmp;
 	} else
 	if (tmp < 0) {
+	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing option on the command line: -%s\n",opt);
 	  goto err_out;
 	}
 	i += tmp;
