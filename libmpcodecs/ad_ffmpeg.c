@@ -113,7 +113,8 @@ static int init(sh_audio_t *sh_audio)
   sh_audio->samplerate=lavc_context->sample_rate;
   sh_audio->i_bps=lavc_context->bit_rate/8;
   if(sh_audio->wf){
-      sh_audio->channels=sh_audio->wf->nChannels;
+      // If the decoder uses the wrong number of channels all is lost anyway.
+      // sh_audio->channels=sh_audio->wf->nChannels;
       sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
       sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
   }
