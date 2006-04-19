@@ -2213,7 +2213,7 @@ int gui_no_filename=0;
 #ifdef HAVE_SSE2
   mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
 #endif
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
 #endif /* RUNTIME_CPUDETECT */
 #endif /* defined(ARCH_X86) || defined(ARCH_X86_64) */
 
