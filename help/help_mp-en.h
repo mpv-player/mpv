@@ -1445,7 +1445,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Config file is too big (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Config file is empty\n"
 #define MSGTR_LIBMENU_MenuNotFound "[MENU] Menu %s not found.\n"
-#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menu '%s': init failed\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menu '%s': Init failed.\n"
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Unsupported output format!!!!\n"
 
 // libmenu/menu_cmdlist.c
