@@ -100,7 +100,7 @@ mpc_reader header_reader = {
 };
 
 static int preinit(sh_audio_t *sh) {
-//  sh->audio_out_minsize = 2 * MPC_DECODER_BUFFER_LENGTH;
+  sh->audio_out_minsize = 2 * MPC_DECODER_BUFFER_LENGTH;
   return 1;
 }
 
