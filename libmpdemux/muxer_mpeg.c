@@ -201,15 +201,6 @@ static void fix_audio_sys_header(muxer_priv_t *priv, uint8_t id, uint8_t newid, 
 	}
 }
 
-static void fix_buffer_params(muxer_priv_t *priv, uint8_t id, uint32_t size)
-{
-	uint8_t i;
-	
-	for(i = 0; i < priv->sys_info.cnt; i++)
-		if(priv->sys_info.streams[i].id == id)
-			priv->sys_info.streams[i].bufsize = size;
-}
-
 static inline int is_mpeg1(uint32_t x)
 {
 	return (
@@ -2019,36 +2010,13 @@ static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_he
 				ptr = tmp;
 			}
 		}
-		
-		switch (pt) {
-			case 2: // predictive
-			  if (s->ipb[0]) {
-			    sz = len + s->ipb[0];
-			    s->ipb[0] = max(s->ipb[0], s->ipb[2]);
-			    s->ipb[2] = 0;
-			  } else if (s->ipb[2]) {
-			    sz = len + s->ipb[2];
-			    s->ipb[0] = s->ipb[2];
-			    s->ipb[2] = 0;
-			  } else
-			    sz = 4 * len; // no bidirectional frames yet?
-		
-			  s->ipb[1] = len;
-			  break;
-			case 3: // bidirectional
-			  s->ipb[2] += len;
-			  sz = s->ipb[1] + s->ipb[2];
-			  break;
-			default: // intra-coded
-			  sz = len; // no extra buffer for it...
-		}
 
 		spriv->vframes++;
 		add_frame(spriv, spriv->delta_pts, s->buffer, len, pt, temp_ref);
 	}
 	
 	mp_msg(MSGT_MUXER, MSGL_DBG2,"parse_mpeg12_video, return %u\n", (uint32_t) len);
-	return sz;
+	return len;
 }
 
 
@@ -2524,15 +2492,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
   }
   
 
-  //if genmpeg1/2 and sz > last buffer size in the system header we must write the new sysheader
-  if(sz > s->h.dwSuggestedBufferSize) { // increase and set STD 
-	s->h.dwSuggestedBufferSize = sz;
-	if(priv->is_genmpeg1 || priv->is_genmpeg2) {
-		fix_buffer_params(priv, spriv->id, s->h.dwSuggestedBufferSize);
-		priv->update_system_header = 1;
-	}
-  }
-  
   if(spriv->psm_fixed == 0) {
   	add_to_psm(priv, spriv->id, stream_format);
 	spriv->psm_fixed = 1;
