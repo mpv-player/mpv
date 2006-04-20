@@ -190,9 +190,15 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
        // rgb24 -> bgr32
        case IMGFMT_BGR32:
            for(x=0;x<width;x++){
+#ifdef WORDS_BIGENDIAN
+	       drow[4*x+1]=row[3*x+0];
+	       drow[4*x+2]=row[3*x+1];
+	       drow[4*x+3]=row[3*x+2];
+#else
 	       drow[4*x+0]=row[3*x+2];
 	       drow[4*x+1]=row[3*x+1];
 	       drow[4*x+2]=row[3*x+0];
+#endif
 	   }
 	   break;
        }
