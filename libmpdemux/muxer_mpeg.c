@@ -2139,7 +2139,7 @@ static size_t parse_mpeg4_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_hea
 			delta = vpriv->picture.timeinc_unit - vpriv->last_tr;
 			if((delta > 0) && (delta > (vpriv->picture.timeinc_resolution/2)))
 				delta -= vpriv->picture.timeinc_resolution;
-			else if((delta < 0) && (delta < (-vpriv->picture.timeinc_resolution/2)))
+			else if((delta < 0) && (delta < (-(vpriv->picture.timeinc_resolution/2))))
 				delta += vpriv->picture.timeinc_resolution;
 			
 			delta_pts = (27000000 * (int64_t) delta) / vpriv->picture.timeinc_resolution;
