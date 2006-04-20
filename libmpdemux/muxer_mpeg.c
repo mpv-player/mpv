@@ -247,7 +247,9 @@ static inline int is_mpeg4(uint32_t x)
 		(x == mmioFOURCC('m','p','4','v')) ||
 		(x == mmioFOURCC('M','P','4','V')) ||
 		(x == mmioFOURCC('F', 'M','P','4')) ||
-		(x == mmioFOURCC('f', 'm','p','4'))
+		(x == mmioFOURCC('f', 'm','p','4')) ||
+		(x == mmioFOURCC('D', 'X','5','0')) ||
+		(x == mmioFOURCC('d', 'x','5','0'))
 	);
 }
 
