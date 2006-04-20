@@ -80,7 +80,6 @@ static int conf_init_vpts = 200, conf_init_apts = 200;
 static int conf_ts_allframes = 0;
 static int conf_init_adelay = 0;
 static int conf_drop = 0;
-static int conf_skip_padding = 0;
 static int conf_telecine = 0;
 
 enum FRAME_TYPE {
@@ -124,7 +123,6 @@ typedef struct {
 	psm_info_t psm_info;
 	uint16_t packet_size;
 	int is_dvd, is_xvcd, is_xsvcd, is_genmpeg1, is_genmpeg2, ts_allframes, has_video, has_audio;
-	int skip_padding;
 	int update_system_header, use_psm;
 	off_t headers_size, data_size;
 	uint64_t scr, vbytes, abytes, init_delay_pts;
@@ -183,7 +181,6 @@ m_option_t mpegopts_conf[] = {
 	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, CONF_RANGE, 1, 32760, NULL},
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"skip_padding", &conf_skip_padding, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"telecine", &conf_telecine, CONF_TYPE_FLAG, 0, 0, PULLDOWN32, NULL},
 	{"film2pal", &conf_telecine, CONF_TYPE_FLAG, 0, 0, TELECINE_FILM2PAL, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -919,13 +916,7 @@ static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, FILE *f, char *bl,
 			}
 		}
 		
-		if(priv->skip_padding)	//variable packet size, just for fun and to reduce file size
-		{
-			stuffing_len = 0;
-			len = min(len, priv->packet_size - pack_hlen - pes_hlen - stflen);
-		}
-		else
-			len = priv->packet_size - pack_hlen - pes_hlen - stflen - stuffing_len;
+		len = priv->packet_size - pack_hlen - pes_hlen - stflen - stuffing_len;
 		
 		mp_msg(MSGT_MUXER, MSGL_DBG2, "LEN=%d, pack: %d, pes: %d, stf: %d, stf2: %d\n", len, pack_hlen, pes_hlen, stflen, stuffing_len);
 
@@ -2708,7 +2699,6 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   mp_msg(MSGT_MUXER, MSGL_INFO, "PACKET SIZE: %u bytes\n", priv->packet_size);
   setup_sys_params(priv);
 
-  priv->skip_padding = conf_skip_padding;
   if(conf_vaspect > 0)
   {
 	int asp = (int) (conf_vaspect * 1000.0f);
