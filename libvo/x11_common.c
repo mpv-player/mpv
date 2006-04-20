@@ -396,8 +396,8 @@ void update_xinerama_info(void) {
 
         XFree(screens);
     }
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
 #endif
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
 }
 
 int vo_init(void)
