@@ -2733,33 +2733,35 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   {
 	int fps;
 	
-	fps = (int) (conf_vframerate * 1000.0);
+	fps = (int) (conf_vframerate * 1001 + 0.5);
 	switch(fps)
 	{
 		case 24000:
+			priv->vframerate = FRAMERATE_23976;
+			break;
+		case 24024:
 			priv->vframerate = FRAMERATE_24;
 			break;
-		case 25000:
+		case 25025:
 			priv->vframerate = FRAMERATE_25;
 			break;
 		case 30000:
+			priv->vframerate = FRAMERATE_2997;
+			break;
+		case 30030:
 			priv->vframerate = FRAMERATE_30;
 			break;
-		case 50000:
+		case 50050:
 			priv->vframerate = FRAMERATE_50;
 			break;
 		case 60000:
+			priv->vframerate = FRAMERATE_5994;
+			break;
+		case 60060:
 			priv->vframerate = FRAMERATE_60;
 			break;
 		default:
-			if(fps >= 23975 && fps <= 23977)
-				priv->vframerate = FRAMERATE_23976;
-			else if(fps >= 29969 && fps <= 29971)
-				priv->vframerate = FRAMERATE_2997;
-			else if(fps >= 59939 && fps <= 59941)
-				priv->vframerate = FRAMERATE_5994;
-			else
-				mp_msg(MSGT_MUXER, MSGL_ERR, "WRONG FPS: %d/1000, ignoring\n", fps);
+			mp_msg(MSGT_MUXER, MSGL_ERR, "WRONG FPS: %d/1000, ignoring\n", fps);
 	}
   }
   
