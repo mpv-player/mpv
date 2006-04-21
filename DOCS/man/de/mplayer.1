@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1257
+.\" In sync with rev 1.1260
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -315,6 +315,8 @@ Passt die Untertitel-Anzeige um +/- 0.1 Sekunde an.
 Bewegt die Untertitel nach oben/unten.
 .IPs i\ \ \ \ 
 Setze EDL-Markierung.
+.IPs "s (nur bei \-vf screenshot)"
+Mache einen Schnappschuss.
 .RE
 .PD 1
 .PP
@@ -2322,7 +2324,7 @@ Wird er nicht hinzugefügt, erfolgt die Ausgabe als raw-PCM.
 Schreibe den Sound nach <Dateiname> und nicht in die Standarddatei
 audiodump.wav.
 Wurde nowaveheader angegeben, ist der Standard audiodump.pcm.
-.IPs fast
+.IPs fast\ 
 Versuche, schneller als mit der eigentlichen Abspielgeschwindigkeit auszugeben.
 Stelle sicher, dass die Ausgabe nicht abgeschnitten wird (normalerweise mit
 der Nachricht "Zu viele Videopakete im Puffer").
