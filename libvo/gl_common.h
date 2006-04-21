@@ -228,8 +228,8 @@ void glSetupYUVConversion(GLenum target, int type,
                           float brightness, float contrast,
                           float hue, float saturation,
                           float rgamma, float ggamma, float bgamma);
-void inline glEnableYUVConversion(GLenum target, int type);
-void inline glDisableYUVConversion(GLenum target, int type);
+void glEnableYUVConversion(GLenum target, int type);
+void glDisableYUVConversion(GLenum target, int type);
 
 /** \addtogroup glcontext
   * \{ */

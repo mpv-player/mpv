@@ -359,6 +359,8 @@ static void ppm_skip(FILE *f) {
     ungetc(c, f);
 }
 
+#define MAXDIM (16 * 1024)
+
 /**
  * \brief creates a texture from a PPM file
  * \param target texture taget, usually GL_TEXTURE_2D
@@ -373,22 +375,24 @@ static void ppm_skip(FILE *f) {
  */
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval) {
-  int w, h, m, val;
+  unsigned w, h, m, val;
   char *data;
   ppm_skip(f);
   if (fgetc(f) != 'P' || fgetc(f) != '6')
     return 0;
   ppm_skip(f);
-  if (fscanf(f, "%i", &w) != 1)
+  if (fscanf(f, "%u", &w) != 1)
     return 0;
   ppm_skip(f);
-  if (fscanf(f, "%i", &h) != 1)
+  if (fscanf(f, "%u", &h) != 1)
     return 0;
   ppm_skip(f);
-  if (fscanf(f, "%i", &m) != 1)
+  if (fscanf(f, "%u", &m) != 1)
     return 0;
   val = fgetc(f);
   if (!isspace(val))
+    return 0;
+  if (w > MAXDIM || h > MAXDIM)
     return 0;
   data = (char *)malloc(w * h * 3);
   if (fread(data, w * 3, h, f) != h)
@@ -806,7 +810,7 @@ void glSetupYUVConversion(GLenum target, int type,
  * \param type type of YUV conversion
  * \ingroup glconversion
  */
-void inline glEnableYUVConversion(GLenum target, int type) {
+void glEnableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
   switch (type) {
     case YUV_CONVERSION_COMBINERS:
@@ -839,7 +843,7 @@ void inline glEnableYUVConversion(GLenum target, int type) {
  * \param type type of YUV conversion
  * \ingroup glconversion
  */
-void inline glDisableYUVConversion(GLenum target, int type) {
+void glDisableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
   switch (type) {
     case YUV_CONVERSION_COMBINERS:
