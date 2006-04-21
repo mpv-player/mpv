@@ -119,6 +119,8 @@ void vo_vm_switch(uint32_t, uint32_t, int*, int*);
 void vo_vm_close(Display*);
 #endif
 
+void update_xinerama_info(void);
+
 int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return);
 
 #endif

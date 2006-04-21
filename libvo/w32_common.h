@@ -16,3 +16,4 @@ extern void vo_w32_fullscreen(void);
 extern int vo_w32_check_events(void);
 extern int vo_w32_config(uint32_t, uint32_t, uint32_t);
 extern void destroyRenderingContext(void);
+extern void update_xinerama_info(void);
