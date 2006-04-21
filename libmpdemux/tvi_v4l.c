@@ -964,11 +964,6 @@ static int start(priv_t *priv)
     return(1);
 }
 
-// 2nd order polynomial with p(-100)=0, p(100)=65535, p(0)=y0
-static int poly(int x, int y0)
-{
-    return ((65535-2*y0)*x*x+6553500*x+20000*y0)/20000;
-}
 
 static int control(priv_t *priv, int cmd, void *arg)
 {
@@ -1083,21 +1078,33 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    }
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_SET_BRIGHTNESS:
-	    priv->picture.brightness = 65535*(*(int *)arg+100)/200;
-	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
-	    return(TVI_CONTROL_TRUE);
+	    priv->picture.brightness = (327*(*(int *)arg+100)) + 68;
+	    return control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	case TVI_CONTROL_VID_SET_HUE:
-	    priv->picture.hue = 65535*(*(int *)arg+100)/200;
-	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
-	    return(TVI_CONTROL_TRUE);
+	    priv->picture.hue = (327*(*(int *)arg+100)) + 68;
+	    return control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	case TVI_CONTROL_VID_SET_SATURATION:
-	    priv->picture.colour = 65535*(*(int *)arg+100)/200;
-	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
-	    return(TVI_CONTROL_TRUE);
+	    priv->picture.colour = (327*(*(int *)arg+100)) + 68;
+	    return control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
 	case TVI_CONTROL_VID_SET_CONTRAST:
-	    priv->picture.contrast = poly(*(int *)arg, 24576);
-	    control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
-	    return(TVI_CONTROL_TRUE);
+	    priv->picture.contrast = (327*(*(int *)arg+100)) + 68;
+	    return control(priv, TVI_CONTROL_VID_SET_PICTURE, 0);
+	case TVI_CONTROL_VID_GET_BRIGHTNESS:
+	    if(!control(priv, TVI_CONTROL_VID_GET_PICTURE, 0)) return 0;
+	    *(int*)arg = ((int)priv->picture.brightness-68)/327-100;
+	    return 1;
+	case TVI_CONTROL_VID_GET_HUE:
+	    if(!control(priv, TVI_CONTROL_VID_GET_PICTURE, 0)) return 0;
+	    *(int*)arg = ((int)priv->picture.hue-68)/327-100;
+	    return 1;
+	case TVI_CONTROL_VID_GET_SATURATION:
+	    if(!control(priv, TVI_CONTROL_VID_GET_PICTURE, 0)) return 0;
+	    *(int*)arg = ((int)priv->picture.colour-68)/327-100;
+	    return 1;
+	case TVI_CONTROL_VID_GET_CONTRAST:
+	    if(!control(priv, TVI_CONTROL_VID_GET_PICTURE, 0)) return 0;
+	    *(int*)arg = ((int)priv->picture.contrast-68)/327-100;
+	    return 1;
 	case TVI_CONTROL_VID_GET_FPS:
 	    *(float *)arg=priv->fps;
 	    return(TVI_CONTROL_TRUE);
