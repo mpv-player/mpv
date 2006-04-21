@@ -163,6 +163,7 @@ extern int tv_init(tvi_handle_t *tvh);
 extern int tv_uninit(tvi_handle_t *tvh);
 
 int tv_set_color_options(tvi_handle_t *tvh, int opt, int val);
+int tv_get_color_options(tvi_handle_t *tvh, int opt, int* val);
 #define TV_COLOR_BRIGHTNESS	1
 #define TV_COLOR_HUE		2
 #define TV_COLOR_SATURATION	3

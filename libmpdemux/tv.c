@@ -679,22 +679,39 @@ int tv_set_color_options(tvi_handle_t *tvh, int opt, int value)
     switch(opt)
     {
 	case TV_COLOR_BRIGHTNESS:
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_BRIGHTNESS, &value);
-	    break;
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_BRIGHTNESS, &value);
 	case TV_COLOR_HUE:
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HUE, &value);
-	    break;
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_HUE, &value);
 	case TV_COLOR_SATURATION:
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_SATURATION, &value);
-	    break;
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_SATURATION, &value);
 	case TV_COLOR_CONTRAST:
-	    funcs->control(tvh->priv, TVI_CONTROL_VID_SET_CONTRAST, &value);
-	    break;
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_SET_CONTRAST, &value);
 	default:
 	    mp_msg(MSGT_TV, MSGL_WARN, "Unknown color option (%d) specified!\n", opt);
     }
     
-    return(1);
+    return(TVI_CONTROL_UNKNOWN);
+}
+
+int tv_get_color_options(tvi_handle_t *tvh, int opt, int* value)
+{
+    tvi_functions_t *funcs = tvh->functions;
+
+    switch(opt)
+    {
+	case TV_COLOR_BRIGHTNESS:
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_BRIGHTNESS, value);
+	case TV_COLOR_HUE:
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_HUE, value);
+	case TV_COLOR_SATURATION:
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_SATURATION, value);
+	case TV_COLOR_CONTRAST:
+	    return funcs->control(tvh->priv, TVI_CONTROL_VID_GET_CONTRAST, value);
+	default:
+	    mp_msg(MSGT_TV, MSGL_WARN, "Unknown color option (%d) specified!\n", opt);
+    }
+    
+    return(TVI_CONTROL_UNKNOWN);
 }
 
 int tv_get_freq(tvi_handle_t *tvh, unsigned long *freq)
