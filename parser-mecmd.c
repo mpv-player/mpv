@@ -100,7 +100,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	  else
 	  if(tmp < 0){
 //	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error parsing option on the command line: -%s\n",opt);
+	    mp_msg(MSGT_CFGPARSER, MSGL_FATAL, "Error parsing option on the command line: -%s\n",opt);
 	    goto err_out;
 	  }
 	} else {
