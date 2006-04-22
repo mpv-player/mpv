@@ -115,6 +115,10 @@ typedef struct {
 	} streams[50];		//16 video + 16 audio mpa + 16 audio private + bd/bf for dvd
 } psm_info_t;
 
+typedef struct {
+	int size;
+	uint64_t dts;
+} buffer_track_t;
 
 typedef struct {
 	int mux;
@@ -125,6 +129,7 @@ typedef struct {
 	int update_system_header, use_psm;
 	off_t headers_size, data_size;
 	uint64_t scr, vbytes, abytes, init_delay_pts;
+	uint64_t delta_scr;
 	uint32_t muxrate;
 	uint8_t *buff, *tmp, *abuf;
 	uint32_t headers_cnt;
@@ -160,6 +165,13 @@ typedef struct {
 	uint64_t vframes;
 	uint8_t trf;
 	mp_mpeg_header_t picture;
+	int max_buffer_size;
+	buffer_track_t *buffer_track;
+	int track_pos, track_len, track_bufsize;	//pos and len control the array, bufsize is the size of the buffer
+	unsigned char *pack;
+	int pack_offset, pes_offset, pes_set, payload_offset;
+	int frames;
+	int last_frame_rest; 	//the rest of the previous frame
 	int is_ready;
 } muxer_headers_t;
 
@@ -939,6 +951,42 @@ static int write_mpeg_pack(muxer_t *muxer, muxer_stream_t *s, FILE *f, char *bl,
 	}
 }
 
+static int update_demux_bufsize(muxer_headers_t *spriv, uint64_t dts, int framelen, int type)
+{
+	int dim = (spriv->track_len+16)*sizeof(buffer_track_t);
+
+	if(spriv->track_pos+1 >= spriv->track_len)
+	{
+		buffer_track_t *tmp = realloc(spriv->buffer_track, dim);
+		if(!tmp)
+		{
+			mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nERROR, couldn't realloc %d bytes for tracking buffer\r\n", dim);
+			return 0;
+		}
+		spriv->buffer_track = tmp;
+		memset(&(spriv->buffer_track[spriv->track_pos+1]), 0, 16*sizeof(buffer_track_t));
+		spriv->track_len += 16;
+	}
+
+	spriv->buffer_track[spriv->track_pos].size = framelen;
+	spriv->buffer_track[spriv->track_pos].dts = dts;	//must be dts
+
+	spriv->track_pos++;
+}
+
+static void inline remove_frames(muxer_headers_t *spriv, int n)
+{
+	mpeg_frame_t tmp;
+	int i;
+
+	for(i = n; i < spriv->framebuf_used; i++)
+	{
+		tmp = spriv->framebuf[i - n];
+		spriv->framebuf[i - n] = spriv->framebuf[i];
+		spriv->framebuf[i] = tmp;
+	}
+	spriv->framebuf_used -= n;
+}
 
 static void patch_seq(muxer_priv_t *priv, unsigned char *buf)
 {
@@ -2259,6 +2307,45 @@ static int parse_audio(muxer_stream_t *s, int finalize, unsigned int *nf, double
 	return tot;
 }
 
+static void fix_parameters(muxer_stream_t *stream)
+{
+	muxer_headers_t *spriv = stream->priv;
+	muxer_t *muxer = stream->muxer;
+	muxer_priv_t *priv = muxer->priv;
+
+	if(stream->type == MUXER_TYPE_AUDIO)
+	{
+		spriv->max_buffer_size = 4*1024;
+		if(stream->wf->wFormatTag == AUDIO_A52)
+		{
+			stream->ckid = be2me_32 (0x1bd);
+			if(priv->is_genmpeg1 || priv->is_genmpeg2)
+				fix_audio_sys_header(priv, spriv->id, 0xbd, 58*1024);	//only one audio at the moment
+			spriv->id = 0xbd;
+			spriv->max_buffer_size = 16*1024;
+		}
+		else if(stream->wf->wFormatTag == AUDIO_AAC1 || stream->wf->wFormatTag == AUDIO_AAC2)
+		{
+			priv->use_psm = 1;
+		}
+	}
+	else	//video
+	{
+		if(priv->is_dvd)
+			spriv->max_buffer_size = 232*1024;
+		else if(priv->is_xsvcd)
+			spriv->max_buffer_size = 230*1024;
+		else if(priv->is_xvcd)
+			spriv->max_buffer_size = 46*1024;
+		else
+			spriv->max_buffer_size = 232*1024;	//no profile => unconstrained :) FIXME!!!
+		
+		if(is_mpeg4(stream->bih->biCompression))
+			spriv->is_ready = 0;
+		else
+			spriv->is_ready = 1;
+	}
+}
 
 
 static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags, double dts_arg, double pts_arg){
@@ -2640,6 +2727,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   muxer->cont_write_chunk = &mpegfile_write_chunk;
   muxer->cont_write_header = &mpegfile_write_header;
   muxer->cont_write_index = &mpegfile_write_index;
+  muxer->fix_stream_parameters = &fix_parameters;
   return 1;
 }
 
