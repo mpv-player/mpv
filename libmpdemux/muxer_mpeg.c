@@ -2430,24 +2430,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 	memcpy(&(s->b_buffer[s->b_buffer_ptr + s->b_buffer_len]), s->buffer, len);
 	s->b_buffer_len += len;
 	
-	if(stream_format == AUDIO_A52)
-	{
-		s->type = 1;
-		s->ckid = be2me_32 (0x1bd);
-		if(s->size == 0) 
-		{
-			spriv->max_pl_size -= 4;
-			if(priv->is_genmpeg1 || priv->is_genmpeg2)
-				fix_audio_sys_header(priv, spriv->id, 0xbd, 58*1024);	//only one audio at the moment
-			spriv->id = 0xbd;
-		}
-	}
-	else if(stream_format == AUDIO_AAC1 || stream_format == AUDIO_AAC2)
-	{
-		if(spriv->size == 0)
-        		priv->use_psm = 1;
-	}
-	
 	parse_audio(s, 0, &nf, &fake_timer, priv->init_adelay, priv->drop);
 	spriv->vframes += nf;
 	sz = max(len, 2 * priv->packet_size);
