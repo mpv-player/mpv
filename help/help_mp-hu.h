@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.237 (2006. 04. 02.)
+// Sync'ed with help_mp-en.h 1.243 (2006. 04. 22.)
 
 // ========================= MPlayer help ===========================
 
@@ -107,7 +107,7 @@ static char help_text[]=
 
 #define MSGTR_NoGui "Az MPlayer grafikus felület NÉLKÜL lett fordítva!\n"
 #define MSGTR_GuiNeedsX "Az MPlayer grafikus felületének X11-re van szüksége!\n"
-#define MSGTR_Playing "%s lejátszása\n"
+#define MSGTR_Playing "\n%s lejátszása.\n"
 #define MSGTR_NoSound "Audio: nincs hang!!!\n"
 #define MSGTR_FPSforced "FPS kényszerítve %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Futásidejû CPU detektálás használata.\n"
@@ -690,6 +690,7 @@ static char help_text[]=
 // Megjegyzés: Ha megváltoztatod az MSGTR_PlayList-et, nézd meg, hogy megfelel-e az MSGTR_MENU_PlayList-nek is!
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_Equalizer "Equalizer"
+#define MSGTR_ConfigureEqualizer "Equalizer beállítása"
 #define MSGTR_SkinBrowser "Skin böngészõ"
 #define MSGTR_Network "Hálózati stream-elés..."
 // Megjegyzés: Ha megváltoztatod az MSGTR_Preferences-t, nézd meg, hogy megfelel-e az MSGTR_MENU_Preferences-nek is!
@@ -787,6 +788,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Audio track"
 #define MSGTR_MENU_Track "%d. sáv"
 #define MSGTR_MENU_VideoTrack "Video track"
+#define MSGTR_MENU_Subtitles "Feliratok"
 
 // --- equalizer
 // Megjegyzés: Ha megváltoztatod az MSGTR_EQU_Audio-t, nézd meg, hogy megfelel-e az MSGTR_PREFERENCES_Audio-nak is!
@@ -1093,7 +1095,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fájl: %s (%s)\nPCM: Samplerate: %iHz Csatorna: %s Formátum: %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Gyorsabb dump-olás a -vc null -vo null kapcsolóval érhetõ el\n[AO PCM] Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Infó: Gyorsabb dump-olás a -vc null -vo null -ao pcm:fast kapcsolóval érhetõ el\n[AO PCM] Info: WAVE fájlok írásához használd a -ao pcm:waveheader kapcsolót (alapértelmezett)!\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] %s megnyitása írásra nem sikerült!\n"
 
 // ao_sdl.c
@@ -1432,6 +1434,23 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Szerver válasz %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache méret beállítva %d KByte-ra\n"
 
+// demux_audio.c
+
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: %d ismeretlen formátum.\n"
+
+// demux_demuxers.c
+
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer hiba: hibás demuxer: nem vd, ad vagy sd.\n"
+
+// demux_nuv.c
+
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "Nincs videó blokk a fájlban.\n"
+
+// demux_xmms.c
+
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Megtalált plugin: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Plugin lezárása: %s.\n"
+
 // ========================== LIBMPMENU ===================================
 
 // libmenu/menu.c
@@ -1443,7 +1462,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] A konfigurációs fájl túl nagy (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] A konfigurációs fájl üres\n"
 #define MSGTR_LIBMENU_MenuNotFound "[MENU] A(z) % menü nem található.\n"
-#define MSGTR_LIBMENU_MenuInitFailed "[MENU] '%s' menü: init sikertelen\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] '%s' menü: init sikertelen.\n"
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nem támogatott kimeneti formátum!!!!\n"
 
 // libmenu/menu_cmdlist.c
