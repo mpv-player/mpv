@@ -110,7 +110,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
       menu_text_size(mpriv->title,dw,mpriv->vspace,1,&tw,&th2);
       if(tw+2*mpriv->minb > bg_w) bg_w = tw+2*mpriv->minb;
       menu_draw_box(mpi,mpriv->title_bg,mpriv->title_bg_alpha,
-                    x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace,bg_w,th);
+                    x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace/2,bg_w,th);
     }
     menu_draw_text_full(mpi,mpriv->title,
 			x < 0 ? mpi->w / 2 : x,
@@ -126,7 +126,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
     if(m == mpriv->current) {
       if(mpriv->ptr_bg >= 0)
         menu_draw_box(mpi,mpriv->ptr_bg,mpriv->ptr_bg_alpha,
-                      x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace,
+                      x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace/2,
                       bg_w,vo_font->height + mpriv->vspace);
       if(ptr_l > 0)
         menu_draw_text_full(mpi,mpriv->ptr,
@@ -137,7 +137,7 @@ void menu_list_draw(menu_t* menu,mp_image_t* mpi) {
                             MENU_TEXT_TOP|(x < 0 ? MENU_TEXT_RIGHT :MENU_TEXT_LEFT));
     } else if(mpriv->item_bg >= 0)
       menu_draw_box(mpi,mpriv->item_bg,mpriv->item_bg_alpha,
-                    x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace,
+                    x < 0 ? (mpi->w-bg_w)/2 : x-mpriv->minb,dy+y-mpriv->vspace/2,
                     bg_w,vo_font->height + mpriv->vspace);
     menu_draw_text_full(mpi,m->txt,
 			x < 0 ? (mpi->w - need_w) / 2  + ptr_l : x + ptr_l,
