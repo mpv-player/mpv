@@ -92,7 +92,7 @@ int set_video_colors(sh_video_t *sh_video,char *item,int value)
     if(mpvdec)
 	if( mpvdec->control(sh_video,VDCTRL_SET_EQUALIZER, item, (int *)value)
 	    == CONTROL_OK) return 1;
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_VideoAttributeNotSupportedByVO_VD,item);
+    mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_VideoAttributeNotSupportedByVO_VD,item);
     return 0;
 }
 

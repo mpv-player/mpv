@@ -1622,7 +1622,7 @@ static int mp_property_framedropping(m_option_t* prop,int action,void* arg) {
 }
 
 static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
-    int* gamma = prop->priv;
+    int* gamma = prop->priv, r;
 
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
 
@@ -1636,19 +1636,36 @@ static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
         if(!arg) return 0;
         M_PROPERTY_CLAMP(prop,*(int*)arg);
         *gamma = *(int*)arg;
-        set_video_colors(sh_video, prop->name, *gamma);
-        return 1;
+        r = set_video_colors(sh_video, prop->name, *gamma);
+        if(r <= 0) break;
+        return r;
     case M_PROPERTY_GET:
         if(!arg) return 0;
-        return get_video_colors (sh_video, prop->name, arg);
+        r = get_video_colors (sh_video, prop->name, arg);
+        if(r <= 0) break;
+        return r;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         *gamma += (arg ? *(int*)arg : 1) *
             (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
         M_PROPERTY_CLAMP(prop,*gamma);
-        return set_video_colors(sh_video, prop->name, *gamma);
+        r = set_video_colors(sh_video, prop->name, *gamma);
+        if(r <= 0) break;
+        return r;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
     }
-    return M_PROPERTY_NOT_IMPLEMENTED;
+    
+#ifdef USE_TV
+    if(demuxer->type == DEMUXER_TYPE_TV) {
+        int l = strlen(prop->name);
+        char tv_prop[3+l+1];
+        sprintf(tv_prop,"tv_%s",prop->name);
+        return mp_property_do(tv_prop,action,arg);
+    }
+#endif
+    
+    return M_PROPERTY_UNAVAILABLE;
 }
 
 static int mp_property_vsync(m_option_t* prop,int action,void* arg) {
@@ -1948,6 +1965,38 @@ static int mp_property_sub_forced_only(m_option_t* prop,int action,void* arg) {
 
 }
 
+// TV properties
+
+#ifdef USE_TV
+
+static int mp_property_tv_color(m_option_t* prop,int action,void* arg) {
+    int r,val;
+    tvi_handle_t* tvh = demuxer->priv;
+    if(demuxer->type != DEMUXER_TYPE_TV || !tvh) return M_PROPERTY_UNAVAILABLE;
+    
+    switch(action) {
+    case M_PROPERTY_SET:
+        if(!arg) return 0;
+        M_PROPERTY_CLAMP(prop,*(int*)arg);
+        return tv_set_color_options(tvh,(int)prop->priv,*(int*)arg);
+    case M_PROPERTY_GET:
+        return tv_get_color_options(tvh,(int)prop->priv,arg);
+    case M_PROPERTY_STEP_UP:
+    case M_PROPERTY_STEP_DOWN:
+        if((r = tv_get_color_options(tvh,(int)prop->priv,&val)) >= 0) {
+            if(!r) return 0;
+            val += (arg ? *(int*)arg : 1) *
+                (action == M_PROPERTY_STEP_DOWN ? -1 : 1);
+            M_PROPERTY_CLAMP(prop,val);
+            return tv_set_color_options(tvh,(int)prop->priv,val);
+        }
+        return 0;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+#endif
+
 static m_option_t mp_properties[] = {
     // General
     { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
@@ -2030,6 +2079,17 @@ static m_option_t mp_properties[] = {
       M_OPT_RANGE, 0, 1, NULL },
     { "sub_forced_only", mp_property_sub_forced_only, CONF_TYPE_FLAG,
       M_OPT_RANGE, 0, 1, NULL },
+    
+#ifdef USE_TV
+    { "tv_brightness", mp_property_tv_color, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, (void*)TV_COLOR_BRIGHTNESS },
+    { "tv_contrast", mp_property_tv_color, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, (void*)TV_COLOR_CONTRAST },
+    { "tv_saturation", mp_property_tv_color, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, (void*)TV_COLOR_SATURATION },
+    { "tv_hue", mp_property_tv_color, CONF_TYPE_INT,
+      M_OPT_RANGE, -100, 100, (void*)TV_COLOR_HUE },
+#endif
 
     { NULL, NULL, NULL, 0, 0, 0, NULL }
 };
