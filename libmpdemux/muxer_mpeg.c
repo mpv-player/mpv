@@ -128,10 +128,10 @@ typedef struct {
 	int is_dvd, is_xvcd, is_xsvcd, is_genmpeg1, is_genmpeg2, ts_allframes, has_video, has_audio;
 	int update_system_header, use_psm;
 	off_t headers_size, data_size;
-	uint64_t scr, vbytes, abytes, init_delay_pts;
+	uint64_t scr;
 	uint64_t delta_scr;
 	uint32_t muxrate;
-	uint8_t *buff, *tmp, *abuf;
+	uint8_t *buff;
 	uint32_t headers_cnt;
 	double init_adelay;
 	int drop;
@@ -146,19 +146,15 @@ typedef struct {
 
 
 typedef struct {
-	int has_pts, has_dts, pes_is_aligned, type, is_late, min_pes_hlen, psm_fixed;
+	int has_pts, has_dts, pes_is_aligned, type, min_pes_hlen, psm_fixed;
 	int real_framerate, delay_rff;
-	uint64_t pts, last_pts, last_dts, dts, size, frame_duration, delta_pts, nom_delta_pts, frame_size, last_saved_pts;
+	uint64_t pts, last_pts, last_dts, dts, size, frame_duration, delta_pts, nom_delta_pts, last_saved_pts;
 	uint32_t buffer_size;
-	uint8_t pes_priv_headers[4], has_pes_priv_headers;	//for A52 and LPCM
-	uint32_t bitrate, rest;
-	int32_t compensate;
-	double delta_clock, timer, aframe_delta_pts, last_dpts;
+	double delta_clock, timer;
 	int drop_delayed_frames;
 	mpeg_frame_t *framebuf;
 	uint16_t framebuf_cnt;
 	uint16_t framebuf_used;
-	uint16_t max_pl_size;
 	int32_t last_tr;
 	int max_tr;
 	uint8_t id, is_mpeg12, telecine;
@@ -1416,7 +1412,6 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 	muxer_stream_t *s, *vs, *as;
 	muxer_headers_t *vpriv = NULL, *apriv = NULL;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
-	uint8_t *tmp;
 	double duration;
 	uint64_t iduration, iaduration;
 	
@@ -1453,7 +1448,6 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 	{
 		mp_msg(MSGT_MUXER, MSGL_DBG2, "\nVIDEO, FLUSH %d frames (of %d), 0 to %d\n", n, vpriv->framebuf_used, n-1);
 
-		tmp = priv->tmp;
 		vpriv = (muxer_headers_t*) vs->priv;
 		
 		duration = 0;
@@ -2304,9 +2298,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     }
 
     mp_msg(MSGT_MUXER, MSGL_DBG2,"mpegfile_write_chunk, Video codec=%x, len=%u, mpeg12 returned %u\n", stream_format, (uint32_t) len, (uint32_t) sz);
-
-    ptr = 0;
-    priv->vbytes += len;
   } else { // MUXER_TYPE_AUDIO
   	double fake_timer;
   	spriv->type = 0;
@@ -2590,9 +2581,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   priv->drop = conf_drop;
   
   priv->buff = (uint8_t *) malloc(priv->packet_size);
-  priv->tmp = (uint8_t *) malloc(priv->packet_size);
-  priv->abuf = (uint8_t *) malloc(priv->packet_size);
-  if((priv->buff == NULL) || (priv->tmp == NULL) || (priv->abuf == NULL))
+  if((priv->buff == NULL))
   {
 	mp_msg(MSGT_MUXER, MSGL_ERR, "\nCouldn't allocate %d bytes, exit\n", priv->packet_size);
 	return 0;
