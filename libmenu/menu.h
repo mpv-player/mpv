@@ -73,4 +73,4 @@ void menu_draw_text_full(mp_image_t* mpi,char* txt,
 			 int x, int y,int w, int h,
 			 int vspace, int warp, int align, int anchor);
 
-void menu_draw_box(mp_image_t* mpi, char grey, char alpha, int x, int y, int w, int h);
+void menu_draw_box(mp_image_t* mpi, unsigned char grey, unsigned char alpha, int x, int y, int w, int h);
