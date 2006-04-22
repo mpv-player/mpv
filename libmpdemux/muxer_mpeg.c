@@ -2569,8 +2569,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 	priv->mux = MUX_MPEG2;
 	priv->is_xsvcd = 1;
 	priv->packet_size = 2324;
-	//what's the right muxrate?
-	priv->muxrate = 2788 * 125;
+	priv->muxrate = 150*2324;
 	priv->ts_allframes = 1;
     }
     else if(! strcasecmp(conf_mux, "xvcd"))
@@ -2578,8 +2577,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
 	priv->mux = MUX_MPEG1;
 	priv->is_xvcd = 1;
 	priv->packet_size = 2324;
-	//what's the right muxrate?
-	priv->muxrate = 1394 * 125;
+	priv->muxrate = 75*2352;
 	priv->ts_allframes = 1;
     }
     else
