@@ -5334,6 +5334,7 @@ int main(void) { return RTC_PIE_ON; }
 EOF
   _rtc=no
   cc_check && _rtc=yes
+  ppc && _rtc=no
 fi
 if test "$_rtc" = yes ; then
   _def_rtc='#define HAVE_RTC 1'
