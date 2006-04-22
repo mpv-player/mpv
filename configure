@@ -1463,6 +1463,7 @@ _prefix="/usr/local"
 # GOTCHA: the variables below defines the default behavior for autodetection
 # and have - unless stated otherwise - at least 2 states : yes no
 # If autodetection is available then the third state is: auto
+_libavutil=auto
 _libavcodec=auto
 _amr_nb=auto
 _amr_nb_fixed=auto
@@ -5979,10 +5980,12 @@ echores "$_live"
 
 
 echocheck "FFmpeg libavutil (static)"
-if test -d libavutil ; then
-  _libavutil=yes
-else
-  _libavutil=no
+if test "$_libavutil" = auto ; then
+  if test -d libavutil ; then
+    _libavutil=yes
+  else
+    _libavutil=no
+  fi
 fi
 echores "$_libavutil"
 
