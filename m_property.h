@@ -37,6 +37,14 @@ void m_properties_print_help_list(m_option_t* list);
 
 char* m_properties_expand_string(m_option_t* prop_list,char* str);
 
+// Helpers to use MPlayer's properties
+
+m_option_t*  mp_property_find(char* name);
+
+int mp_property_do(char* name,int action, void* val);
+
+// Helpers for property implementations
+
 #define M_PROPERTY_CLAMP(prop,val) do {                                 \
         if(((prop)->flags & M_OPT_MIN) && (val) < (prop)->min)          \
             (val) = (prop)->min;                                        \
