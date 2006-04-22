@@ -1811,6 +1811,8 @@ for ac_option do
   --disable-divx4linux)	_divx4linux=no	;;
   --enable-opendivx)	_opendivx=yes	;;
   --disable-opendivx)	_opendivx=no	;;
+  --enable-libavutil)	_libavutil=yes	;;
+  --disable-libavutil)	_libavutil=no	;;
   --enable-libavcodec)	_libavcodec=yes	;;
   --disable-libavcodec)	_libavcodec=no	;;
   --enable-libavcodec_so)	_libavcodec_so=yes	;;
