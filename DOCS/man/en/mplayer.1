@@ -9086,6 +9086,15 @@ This usually improves speed at no cost, but it can sometimes produce
 artifacts in areas with no details, like sky.
 .
 .TP
+.B (no)dct_decimate
+Eliminate dct blocks in P-frames containing only a small single coefficient
+(default: enabled).
+This will remove some details, so it will save bits that can be spent
+again on other frames, hopefully raising overall subjective quality.
+If you are compressing non-anime content with a high target bitrate, you
+may want to disable this to preserve as much detail as possible.
+.
+.TP
 .B nr=<0\-100000>
 Noise reduction, 0 means disabled.
 100\-1000 is a useful range for typical content, but you may want to turn it
