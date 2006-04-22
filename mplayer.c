@@ -2155,7 +2155,12 @@ static struct  {
     { "sub_delay", MP_CMD_SUB_DELAY, 0, 0, OSD_MSG_SUB_DELAY, MSGTR_SubDelayStatus },
     { "sub_visibility", MP_CMD_SUB_VISIBILITY, 1, 0, -1, MSGTR_SubVisibleStatus },
     { "sub_forced_only", MP_CMD_SUB_FORCED_ONLY, 1, 0, -1, MSGTR_SubForcedOnlyStatus },
-
+#ifdef USE_TV
+    { "tv_brightness", MP_CMD_TV_SET_BRIGHTNESS, 0, OSD_BRIGHTNESS, -1, MSGTR_Brightness },
+    { "tv_hue", MP_CMD_TV_SET_HUE, 0, OSD_HUE, -1, MSGTR_Hue },
+    { "tv_saturation", MP_CMD_TV_SET_SATURATION, 0, OSD_SATURATION, -1, MSGTR_Saturation },
+    { "tv_contrast", MP_CMD_TV_SET_CONTRAST, 0, OSD_CONTRAST, -1, MSGTR_Contrast },
+#endif
     { NULL, 0, 0, 0, -1, NULL }
 };
 
@@ -4273,22 +4278,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_TV_SET_NORM :  {
       if (file_format == DEMUXER_TYPE_TV)
         tv_set_norm((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
-    } break;
-    case MP_CMD_TV_SET_BRIGHTNESS :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_BRIGHTNESS, cmd->args[0].v.i);
-    } break;
-    case MP_CMD_TV_SET_HUE :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_HUE, cmd->args[0].v.i);
-    } break;
-    case MP_CMD_TV_SET_SATURATION :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_SATURATION, cmd->args[0].v.i);
-    } break;
-    case MP_CMD_TV_SET_CONTRAST :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_CONTRAST, cmd->args[0].v.i);
     } break;
     case MP_CMD_TV_STEP_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
