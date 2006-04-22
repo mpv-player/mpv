@@ -18,6 +18,9 @@
 #include "demuxer.h"
 #include "stheader.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 #define XMMS_PACKETSIZE 65536  // some plugins won't play if this is too small
 
 #include "demux_xmms_plugin.h"
@@ -171,7 +174,7 @@ static void init_plugins(){
 	    gpi=dlsym(handle, "get_iplugin_info");
 	    if(gpi){
 		InputPlugin *p=gpi();
-		printf("XMMS: found plugin: %s (%s)\n",ent->d_name,p->description);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_FoundPlugin,ent->d_name,p->description);
 		p->handle = handle;
 		p->filename = strdup(filename);
 		p->get_vis_type = input_get_vis_type;
@@ -190,7 +193,7 @@ static void init_plugins(){
 static void cleanup_plugins(){
     while(no_plugins>0){
 	--no_plugins;
-	printf("XMMS: Closing plugin %s\n",input_plugins[no_plugins]->filename);
+	mp_msg(MSGT_DEMUX, MSGL_INFO, MSGTR_MPDEMUX_XMMS_ClosingPlugin,input_plugins[no_plugins]->filename);
 	if(input_plugins[no_plugins]->cleanup)
 	    input_plugins[no_plugins]->cleanup();
 	dlclose(input_plugins[no_plugins]->handle);

@@ -331,7 +331,7 @@ static demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	/* no video */
 	if (rtjpeg_fileheader.videoblocks == 0)
 	{
-	    printf("No video blocks in file\n");
+	    mp_msg(MSGT_DEMUXER, MSGL_INFO, MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile);
 	    return NULL;
 	}
 

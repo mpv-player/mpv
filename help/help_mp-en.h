@@ -1434,6 +1434,23 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Server return %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache size set to %d KBytes\n"
 
+// demux_audio.c
+
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: unknown format %d.\n"
+
+// demux_demuxers.c
+
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer error: bad demuxer: not vd, ad or sd.\n"
+
+// demux_nuv.c
+
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "No video blocks in file.\n"
+
+// demux_xmms.c
+
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Found plugin: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Closing plugin: %s.\n"
+
 // ========================== LIBMPMENU ===================================
 
 // libmenu/menu.c

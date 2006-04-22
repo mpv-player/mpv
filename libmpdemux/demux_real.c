@@ -1225,7 +1225,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    descr = malloc(len+1);
 	    	stream_read(demuxer->stream, descr, len);
 		    descr[len] = 0;
-		    printf("Stream description: %s\n", descr);
+		    mp_msg(MSGT_DEMUX, MSGL_INFO,"Stream description: %s\n", descr);
 		    free(descr);
 		}
 //		skip_str(1, demuxer);	/* mimetype */
@@ -1233,7 +1233,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    mimet = malloc(len+1);
 	    	stream_read(demuxer->stream, mimet, len);
 		    mimet[len] = 0;
-		    printf("Stream mimetype: %s\n", mimet);
+		    mp_msg(MSGT_DEMUX, MSGL_INFO,"Stream mimetype: %s\n", mimet);
 		}
 		
 		/* Type specific header */

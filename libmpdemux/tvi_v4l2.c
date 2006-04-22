@@ -1031,7 +1031,7 @@ static int init(priv_t *priv)
 	standard.index = i;
 	if (-1 == ioctl(priv->video_fd, VIDIOC_ENUMSTD, &standard))
 	    break;
-	printf(" %d = %s;", i, standard.name);
+	mp_msg(MSGT_TV, MSGL_INFO, " %d = %s;", i, standard.name);
     }
     mp_msg(MSGT_TV, MSGL_INFO, "\n inputs:");
     for (i = 0; 1; i++) {

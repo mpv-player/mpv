@@ -57,7 +57,7 @@ static void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, float audio
       new_current_chunk += rel_seek_secs * film_data->chunks_per_second; // secs
 
 
-printf ("current, total chunks = %d, %d; seek %5.3f sec, new chunk guess = %d\n",
+mp_msg(MSGT_DECVIDEO, MSGL_INFO,"current, total chunks = %d, %d; seek %5.3f sec, new chunk guess = %d\n",
   film_data->current_chunk, film_data->total_chunks,
   rel_seek_secs, new_current_chunk);
 
@@ -74,7 +74,7 @@ printf ("current, total chunks = %d, %d; seek %5.3f sec, new chunk guess = %d\n"
 
   film_data->current_chunk = new_current_chunk;
 
-printf ("  (flags = %X)  actual new chunk = %d (syncinfo1 = %08X)\n",
+mp_msg(MSGT_DECVIDEO, MSGL_INFO,"  (flags = %X)  actual new chunk = %d (syncinfo1 = %08X)\n",
   flags, film_data->current_chunk, film_data->chunks[film_data->current_chunk].syncinfo1);
   demuxer->video->pts=film_data->chunks[film_data->current_chunk].pts;
   
@@ -289,7 +289,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
         stream_skip(demuxer->stream, 8);
 
       if(demuxer->audio->id<-1){
-          printf("chunk size = 0x%X \n",chunk_size);
+          mp_msg(MSGT_DECVIDEO, MSGL_INFO,"chunk size = 0x%X \n",chunk_size);
 	stream_skip(demuxer->stream, chunk_size-12-8);
 	break; // audio disabled (or no soundcard)
       }

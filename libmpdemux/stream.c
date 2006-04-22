@@ -271,7 +271,7 @@ off_t newpos=0;
   }
 
 if( mp_msg_test(MSGT_STREAM,MSGL_DBG3) ){
-  printf("s->pos=%"PRIX64"  newpos=%"PRIX64"  new_bufpos=%"PRIX64"  buflen=%X  \n",
+  mp_msg(MSGT_STREAM,MSGL_DBG3, "s->pos=%"PRIX64"  newpos=%"PRIX64"  new_bufpos=%"PRIX64"  buflen=%X  \n",
     (int64_t)s->pos,(int64_t)newpos,(int64_t)pos,s->buf_len);
 }
   pos-=newpos;

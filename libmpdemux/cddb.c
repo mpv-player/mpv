@@ -282,7 +282,7 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 	if( reply_parser==NULL || command==NULL || cddb_data==NULL ) return -1;
 	
 	sprintf( request, "http://%s/~cddb/cddb.cgi?cmd=%s%s&proto=%d", cddb_data->freedb_server, command, cddb_data->cddb_hello, cddb_data->freedb_proto_level );
-	printf("Request[%s]\n", request );
+	mp_msg(MSGT_OPEN, MSGL_INFO,"Request[%s]\n", request );
 
 	url = url_new(request);
 	if( url==NULL ) {
@@ -303,7 +303,7 @@ cddb_http_request(char *command, int (*reply_parser)(HTTP_header_t*,cddb_data_t*
 	}
 
 	http_debug_hdr(http_hdr);
-	printf("body=[%s]\n", http_hdr->body );
+	mp_msg(MSGT_OPEN, MSGL_INFO,"body=[%s]\n", http_hdr->body );
 
 	switch(http_hdr->status_code) {
 		case 200:

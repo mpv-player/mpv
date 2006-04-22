@@ -1047,7 +1047,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  sh->aspect/=trak->tkdata[81]|(trak->tkdata[80]<<8);
 		}
 		
-		if(depth>32+8) printf("*** depth = 0x%X\n",depth);
+		if(depth>32+8) mp_msg(MSGT_DEMUX, MSGL_INFO,"*** depth = 0x%X\n",depth);
 
 		// palettized?
 		gray = 0;

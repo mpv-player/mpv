@@ -1,6 +1,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -615,7 +616,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
     break;
   }
   default:
-    printf("Audio demuxer : unknown format %d\n",priv->frmt);
+    mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_MPDEMUX_AUDIO_UnknownFormat,priv->frmt);
     return 0;
   }
 

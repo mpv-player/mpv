@@ -1,5 +1,7 @@
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -53,7 +55,7 @@ static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
   else if(ds->demuxer == priv->sd)
     return demux_fill_buffer(priv->sd,ds);
  
-  printf("Demux demuxers fill_buffer error : bad demuxer : not vd, ad nor sd\n");
+  mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MPDEMUX_DEMUXERS_FillBufferError);
   return 0;
 }
 
