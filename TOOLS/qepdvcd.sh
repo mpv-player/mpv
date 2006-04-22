@@ -279,7 +279,7 @@ for j in $(seq 0 $CICLES); do
 		
 # Mencoder Time ;-) ###################################################
 
-mencoder -ovc lavc -oac lavc -vf expand=:::::$RATIOX/$RATIOY:1,scale=$SCALEX:$SCALEY,harddup -srate 44100 -af lavcresample=44100 -lavcopts acodec=mp2:abitrate=$ABPS:vcodec=$VCODEC:vbitrate=$VBPS:keyint=$KEYINT:mbd=$ENCQ:vrc_buf_size=$VRCBUFSIZE:vrc_maxrate=$VRCMAXRATE:vrc_minrate=$VRCMINRATE:aspect=$RATIOX/$RATIOY -of mpeg -mpegopts format=$FORMAT$TELECINE -sub $SUBTITLESTRING -subpos $TOLERANCE -subwidth $TOLERANCE -ofps $OFPS $TIMESTRING -o $NEWNAME $INPUTFILENAME
+mencoder -ovc lavc -oac lavc -vf expand=:::::$RATIOX/$RATIOY:1,scale=$SCALEX:$SCALEY,harddup -srate 44100 -af lavcresample=44100 -lavcopts acodec=mp2:abitrate=$ABPS:vcodec=$VCODEC:vbitrate=$VBPS:keyint=$KEYINT:mbd=$ENCQ:vrc_buf_size=$VRCBUFSIZE:vrc_maxrate=$VRCMAXRATE:vrc_minrate=$VRCMINRATE:vi_qfactor=0.1:vi_qoffset=1.5:aspect=$RATIOX/$RATIOY -of mpeg -mpegopts format=$FORMAT$TELECINE -sub $SUBTITLESTRING -subpos $TOLERANCE -subwidth $TOLERANCE -ofps $OFPS $TIMESTRING -o $NEWNAME $INPUTFILENAME
 
 echo "Encoding of $NEWNAME finished."
 echo "Run vcdimager -t svcd/vcd $NEWNAME and burn with cdrecord."
