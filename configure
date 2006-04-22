@@ -5665,22 +5665,17 @@ fi
 echores "$_faac"
 
 echocheck "internal FAAD2 (AAC) support"
-_inc_faad="-I`pwd`/libfaad2"
 if test "$_faad_internal" = auto ; then
-  # the faad check needs a config.h file
-  if not test -f "config.h" ; then
-    cat > config.h << EOF
-/* C99 lrintf function available */
-$_def_lrintf
-EOF
-  fi
-  # internal faad: check if our dear gcc is able to compile it...
-  cp "`pwd`/libfaad2/cfft.c" $TMPC
-  if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer -D_GNU_SOURCE $_inc_faad ); then
-    _faad_internal=yes
-  else
-    _faad_internal=no
-    _res_comment="(broken gcc)"
+  if x86 && test cc_vendor=gnu; then
+    case $cc_version in
+      3.1*|3.2) # ICE/insn with these versions
+        _faad_internal=no
+        _res_comment="broken gcc"
+        ;;
+      *)
+        _faad_internal=yes
+        ;;
+    esac
   fi
 fi
 if test "$_faad_internal" = yes ; then
