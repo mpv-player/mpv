@@ -164,6 +164,8 @@ MPlayer (1.0)
     * VBR audio in MPEG support
     * muxer_mpeg: added an experimental film2pal teleciner and fixed previous bugs that could 
       lead to desync and to wrong TFF/RFF flags being set
+    * rewritten muxer_mpeg.c: buffering and timing constraints will always be respected, 
+      provided that the muxrate is big enough
 
     Ports:
     * improved timer function on Mac OS X
