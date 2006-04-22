@@ -1015,7 +1015,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	//if audio and a52 insert the headers
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
-	int pes_hlen = 0, len, stflen, stuffing_len, i, m, n, testlen, frpos, dvd_pack = 0, len2, target, hlen;
+	int pes_hlen = 0, len, stflen, stuffing_len, m, n, testlen, dvd_pack = 0, len2, target, hlen;
 	uint64_t spts, sdts, pts=0, dts=0;
 	mpeg_frame_t *frm;
 
@@ -1410,10 +1410,9 @@ static int calc_frames_to_flush(muxer_headers_t *vpriv)
 
 static int flush_buffers(muxer_t *muxer, int finalize)
 {
-	int i, n, pl_size, found;
-	int inc_scr, skip_cnt;
-	size_t saved;
-	uint64_t idur, init_delay = 0;
+	int i, n, found;
+	int skip_cnt;
+	uint64_t init_delay = 0;
 	muxer_stream_t *s, *vs, *as;
 	muxer_headers_t *vpriv = NULL, *apriv = NULL;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
@@ -1642,7 +1641,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 
 static size_t parse_mpeg12_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_headers_t *spriv, float fps, size_t len)
 {
-	size_t ptr = 0, sz = 0, tmp = 0;
+	size_t ptr = 0, tmp = 0;
 	uint8_t *fps_ptr = NULL;	//pointer to the fps byte in the sequence header
 	uint8_t *se_ptr = NULL;		//pointer to sequence extension
 	uint8_t *pce_ptr = NULL;	//pointer to picture coding extension
