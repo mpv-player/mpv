@@ -895,7 +895,7 @@ static void fix_a52_headers(muxer_stream_t *s)
 		spriv->pack[x+2] = spriv->pack[x+3] = 0;
 }
 
-static void inline remove_frames(muxer_headers_t *spriv, int n)
+static inline void remove_frames(muxer_headers_t *spriv, int n)
 {
 	mpeg_frame_t tmp;
 	int i;
