@@ -264,17 +264,17 @@ tv_set_freq <frequency in MHz>
 tv_set_norm <norm>
     Set the TV tuner norm (PAL, SECAM, NTSC, ...).
 
-tv_set_brightness <-100 - 100>
-    Set TV tuner brightness.
+tv_set_brightness <-100 - 100> [abs]
+    Set TV tuner brightness or adjust it if [abs] is set to 0.
 
-tv_set_contrast <-100 -100>
-    Set TV tuner contrast.
+tv_set_contrast <-100 -100> [abs]
+    Set TV tuner contrast or adjust it if [abs] is set to 0.
 
-tv_set_hue <-100 - 100>
-    Set TV tuner hue.
+tv_set_hue <-100 - 100> [abs]
+    Set TV tuner hue or adjust it if [abs] is set to 0.
 
-tv_set_saturation <-100 - 100>
-    Set TV tuner saturation.
+tv_set_saturation <-100 - 100> [abs]
+    Set TV tuner saturation or adjust it if [abs] is set to 0.
 
 use_master
     Switch volume control between master and PCM.
