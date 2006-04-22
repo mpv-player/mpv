@@ -278,6 +278,8 @@ inline static draw_alpha_f get_draw_alpha(uint32_t fmt) {
     return vo_draw_alpha_yv12;
   case IMGFMT_YUY2:
     return vo_draw_alpha_yuy2;
+  case IMGFMT_UYVY:
+    return vo_draw_alpha_uyvy;
   }
 
   return NULL;
