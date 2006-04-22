@@ -242,6 +242,7 @@ Codecs:
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
   --disable-libpostproc  disable libpostproc [autodetect]
+  --disable-libavutil_so   disable shared libavutil [autodetect]
   --disable-libavcodec_so  disable shared libavcodec [autodetect]
   --disable-libavformat_so disable shared libavformat [autodetect]
   --disable-libpostproc_so disable shared libpostproc [autodetect]
@@ -1465,6 +1466,7 @@ _prefix="/usr/local"
 # and have - unless stated otherwise - at least 2 states : yes no
 # If autodetection is available then the third state is: auto
 _libavutil=auto
+_libavutil_so=auto
 _libavcodec=auto
 _amr_nb=auto
 _amr_nb_fixed=auto
@@ -1814,6 +1816,8 @@ for ac_option do
   --disable-opendivx)	_opendivx=no	;;
   --enable-libavutil)	_libavutil=yes	;;
   --disable-libavutil)	_libavutil=no	;;
+  --enable-libavutil_so)	_libavutil_so=yes	;;
+  --disable-libavutil_so)	_libavutil_so=no	;;
   --enable-libavcodec)	_libavcodec=yes	;;
   --disable-libavcodec)	_libavcodec=no	;;
   --enable-libavcodec_so)	_libavcodec_so=yes	;;
@@ -6044,6 +6048,28 @@ fi
 echores "$_libpostproc"
 
 
+if test "$_libavutil" != yes ; then
+echocheck "FFmpeg libavutil (dynamic)"
+if test "$_libavutil_so" = auto ; then
+  _libavutil_so=no
+  cat > $TMPC << EOF
+#include <ffmpeg/common.h>
+int main(void) { ff_gcd(1,1); return 0; }
+EOF
+  if pkg-config --exists libavutil ; then
+    _inc_libavutil=`pkg-config --cflags libavutil`
+    _ld_libavutil=`pkg-config --libs libavutil`
+    cc_check $_inc_libavutil $_ld_libavutil && _libavutil_so=yes
+  elif cc_check -lavutil $_ld_lm ; then
+    _libavutil_so=yes
+  fi
+  if test "$_libavutil_so" == yes ; then
+    _res_comment="using libavutil.so, but static libavutil is recommended"
+  fi
+fi
+echores "$_libavutil_so"
+fi
+
 if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
 if test "$_libavcodec_so" = auto ; then
@@ -7308,6 +7334,7 @@ DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec $_dep_libavformat $_dep_libavutil $_dep_libpostproc
 AV_LIB = $_ld_libavcodec  $_ld_libavformat  $_ld_libavutil  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
+CONFIG_LIBAVUTIL_SO = $_libavutil_so
 CONFIG_LIBAVCODEC = $_libavcodec
 CONFIG_LIBAVCODEC_SO = $_libavcodec_so
 CONFIG_LIBAVFORMAT = $_libavformat
