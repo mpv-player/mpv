@@ -988,6 +988,357 @@ static void inline remove_frames(muxer_headers_t *spriv, int n)
 	spriv->framebuf_used -= n;
 }
 
+static int calc_packet_len(muxer_stream_t *s, int psize, int finalize)
+{
+	muxer_headers_t *spriv = s->priv;
+	int n, len, frpos, m;
+
+	n = len = 0;
+	frpos = spriv->framebuf[0].pos;
+	while(len < psize && n < spriv->framebuf_used)
+	{
+		if(!frpos && len>0 && s->type == MUXER_TYPE_VIDEO && spriv->framebuf[n].type==I_FRAME)
+			return len;
+		m = min(spriv->framebuf[n].size - frpos, psize - len);
+		len += m;
+		frpos += m;
+		if(frpos == spriv->framebuf[n].size)
+		{
+			frpos = 0;
+			n++;
+		}
+	}
+
+	if(len < psize && !finalize)
+		return 0;
+	return len;
+}
+
+static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, uint64_t *dts, uint64_t *pts)
+{
+	muxer_headers_t *spriv = s->priv;
+	int i, m, pes_hlen, ret, threshold;
+	uint64_t spts, sdts, dpts;
+
+	if(!spriv->framebuf_used)
+		return 0;
+
+	spts = spriv->pts;
+	sdts = spriv->dts;
+	spriv->dts = spriv->pts = 0;
+	ret = 0;
+	if(spriv->framebuf[0].pos == 0)	// start of frame
+		i = 0;
+	else
+	{
+		pes_hlen = calc_pes_hlen(priv->mux, spriv, priv);
+
+		if(pes_hlen < spriv->min_pes_hlen) 
+			pes_hlen = spriv->min_pes_hlen;
+
+		m = spriv->framebuf[0].size - spriv->framebuf[0].pos;
+
+		if(spriv->pack_offset + pes_hlen + m  >= priv->packet_size)
+			i = -1;	//this pack won't have a pts: no space available
+		else
+		{
+			if(spriv->framebuf_used < 2)
+				goto fail;
+			
+			if(spriv->framebuf[1].pts == spriv->framebuf[1].dts)
+				threshold = 5;
+			else
+				threshold = 10;
+
+			//headers+frame 0 < space available including timestamps	
+			if(spriv->pack_offset + pes_hlen + m  < priv->packet_size - threshold)
+				i = 1;
+			else
+				i = -1;
+		}
+	}
+
+	if(i > -1)
+	{
+		dpts = max(spriv->last_saved_pts, spriv->framebuf[i].pts) - 
+			min(spriv->last_saved_pts, spriv->framebuf[i].pts) +
+			spriv->framebuf[0].idur;
+
+		if(s->type != MUXER_TYPE_VIDEO)
+			ret = 1;
+		else if((spriv->framebuf[i].type == I_FRAME || priv->ts_allframes || dpts >= 45000*300))	//0.5 seconds
+			ret = 1;
+
+		if(ret)
+		{
+			*pts = spriv->framebuf[i].pts;
+			*dts = spriv->framebuf[i].dts;
+			if(*dts == *pts)
+				*dts = 0;
+			//spriv->last_saved_pts = spriv->pts;
+		}
+	}
+
+fail:
+	spriv->pts = spts;
+	spriv->dts = sdts;
+	return ret;
+}
+
+
+static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
+{
+	//try to fill a packet as much as possible
+	//spriv->pack_offset is the start position inited to 0
+	//data is taken from spriv->framebuf
+	//if audio and a52 insert the headers
+	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
+	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
+	int pes_hlen = 0, len, stflen, stuffing_len, i, m, n, testlen, frpos, dvd_pack = 0, len2, target, hlen;
+	uint64_t spts, sdts, pts=0, dts=0;
+	mpeg_frame_t *frm;
+
+	spts = spriv->pts;
+	sdts = spriv->dts;
+
+	if(! spriv->framebuf_used)
+	{
+		spriv->pack_offset = 0;
+		return 0;
+	}
+
+	if(!spriv->pack_offset)
+	{
+		spriv->pack_offset = write_mpeg_pack_header(muxer, spriv->pack);
+		if(priv->update_system_header && (priv->is_genmpeg1 || priv->is_genmpeg2))
+		{
+			spriv->pack_offset += write_mpeg_system_header(muxer, &spriv->pack[spriv->pack_offset]);
+			priv->update_system_header = 0;
+		}
+		spriv->pes_set = 0;
+		spriv->pes_offset = spriv->pack_offset;
+		spriv->payload_offset = 0;
+		spriv->frames = 0;
+		spriv->last_frame_rest = 0;
+	}
+
+	if(!spriv->pes_set)
+	{
+		//search the pts. yes if either it's video && (I-frame or priv->ts_allframes) && framebuf[i].pos == 0
+		//or  it's audio && framebuf[i].pos == 0
+		//NB pts and dts can only be relative to the first frame beginning in this pack
+		if((priv->is_xsvcd || priv->is_xvcd) && spriv->size == 0)
+			spriv->buffer_size = 4*1024;
+
+		if(priv->is_dvd && s->type == MUXER_TYPE_VIDEO 
+			&& spriv->framebuf[0].type==I_FRAME && spriv->framebuf[0].pos==0)
+			dvd_pack = 1;
+
+		spriv->dts = spriv->pts = 0;
+		if(find_packet_timestamps(priv, s, &dts, &pts))
+		{
+			spriv->pts = pts;
+			spriv->dts = dts;
+			spriv->last_saved_pts = pts;
+		}
+
+		pes_hlen = calc_pes_hlen(priv->mux, spriv, priv);
+		stflen = (spriv->min_pes_hlen > pes_hlen ? spriv->min_pes_hlen - pes_hlen : 0);
+
+		target = len = priv->packet_size - spriv->pack_offset - pes_hlen - stflen;	//max space available
+		if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
+			hlen = 4;
+		else
+			hlen = 0;
+
+		len -= hlen;
+		target -= hlen;
+		
+		len2 = calc_packet_len(s, target, finalize);
+		if(!len2)
+		{
+			spriv->pack_offset = 0;
+			return 0;
+		}
+		if(len2 < target)
+		{
+			if(s->type == MUXER_TYPE_AUDIO && !finalize)
+			{
+				spriv->pack_offset = 0;
+				spriv->pts = spts;
+				spriv->dts = sdts;
+				return 0;
+			}
+		}
+		len = len2;
+		stuffing_len = 0;
+		if(len < target)
+		{
+			if(s->type == MUXER_TYPE_VIDEO)	//FIXME: check i_frame
+			{
+				if(spriv->pts)
+					target += 5;
+				if(spriv->dts)
+					target += 5;
+				spriv->pts = spriv->dts = 0;
+			}
+
+			stuffing_len = target - len;
+			if(stuffing_len > 0 && stuffing_len < 7)
+			{
+				if(stflen + stuffing_len > 16)
+				{
+					int x = 7 - stuffing_len;
+					stflen -= x;
+					stuffing_len += x;
+
+					/*int x = stflen + stuffing_len;
+					stflen = 16;
+					stuffing_len = x - stflen;
+					*/
+				}
+				else
+				{
+					stflen += stuffing_len;
+					stuffing_len = 0;
+				}
+			}
+		}
+		
+		len += hlen;
+		spriv->pack_offset += write_mpeg_pes_header(spriv, (uint8_t *) &s->ckid, &(spriv->pack[spriv->pack_offset]), 
+			len, stflen, priv->mux);
+
+		if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
+		{
+			spriv->payload_offset = spriv->pack_offset;
+			spriv->pack_offset += 4;	//for the 4 bytes of header
+			if(!spriv->framebuf[0].pos)
+				spriv->last_frame_rest = 0;
+			else
+				spriv->last_frame_rest = spriv->framebuf[0].size - spriv->framebuf[0].pos;
+		}
+
+		spriv->pes_set = 1;
+	}
+
+
+	if(spriv->dts || spriv->pts)
+	{
+		if((spriv->dts && priv->scr >= spriv->dts) || priv->scr >= spriv->pts)
+			mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nERROR: scr %.3lf, dts %.3lf, pts %.3lf\r\n", (double) priv->scr/27000000.0, (double) spriv->dts/27000000.0, (double) spriv->pts/27000000.0);
+		else if(priv->scr + 63000*300 < spriv->dts)
+			mp_msg(MSGT_MUXER, MSGL_INFO, "\r\nWARNING>: scr %.3lf, dts %.3lf, pts %.3lf, diff %.3lf, piff %.3lf\r\n", (double) priv->scr/27000000.0, (double) spriv->dts/27000000.0, (double) spriv->pts/27000000.0, (double)(spriv->dts - priv->scr)/27000000.0, (double)(spriv->pts - priv->scr)/27000000.0);
+	}
+
+	n = 0;
+	len = 0;
+	testlen = 0;
+
+	frm = spriv->framebuf;
+	while(spriv->pack_offset < priv->packet_size && n < spriv->framebuf_used)
+	{
+		if(!frm->pos)
+		{
+			//since iframes must always be aligned at block boundaries exit when we find the 
+			//beginning of one in the middle of the flush
+			if(len > 0 && s->type == MUXER_TYPE_VIDEO && frm->type == I_FRAME)
+			{
+				testlen = len;
+				break;
+			}
+			spriv->frames++;
+			update_demux_bufsize(spriv, frm->dts, frm->size, s->type);
+		}
+
+		m = min(frm->size - frm->pos, priv->packet_size - spriv->pack_offset);
+		memcpy(&(spriv->pack[spriv->pack_offset]), &(frm->buffer[frm->pos]), m);
+
+		len += m;
+		spriv->pack_offset += m;
+		frm->pos += m;
+		
+		if(frm->pos == frm->size)	//end of frame
+		{
+			frm->pos = frm->size = 0;
+			frm->pts = frm->dts = 0;
+			n++;
+			frm++;
+		}
+	}
+
+	if((priv->is_xsvcd || priv->is_xvcd) && spriv->size == 0)
+		spriv->buffer_size = 0;
+
+	spriv->size += len;
+
+	if(dvd_pack && (spriv->pack_offset == priv->packet_size))
+		write_mpeg_pack(muxer, s, muxer->file, NULL, 0, 0);	//insert fake Nav Packet
+
+	if(n > 0)
+		remove_frames(spriv,  n);
+
+	spriv->track_bufsize += len;
+	if(spriv->track_bufsize > spriv->max_buffer_size)
+		mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nBUFFER OVERFLOW: %d > %d\r\n", spriv->track_bufsize, spriv->max_buffer_size);
+
+	if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
+		fix_a52_headers(s);
+	
+	if(spriv->pack_offset < priv->packet_size)	//here finalize is set
+	{
+		int diff = priv->packet_size - spriv->pack_offset;
+		write_pes_padding(&(spriv->pack[spriv->pack_offset]), diff);
+		spriv->pack_offset += diff;
+	}
+	
+	fwrite(spriv->pack, spriv->pack_offset, 1, muxer->file);
+
+	priv->headers_size += spriv->pack_offset - len;
+	priv->data_size += len;
+	muxer->movi_end += spriv->pack_offset;
+
+	spriv->pack_offset = 0;
+	spriv->pes_set = 0;
+	spriv->frames = 0;
+	
+	spriv->pts = spts;
+	spriv->dts = sdts;
+
+	return len;
+}
+
+static inline int find_best_stream(muxer_t *muxer)
+{
+	int i, ndts;
+	uint64_t dts = -1;
+	muxer_priv_t *priv = muxer->priv;
+	muxer_headers_t *spriv;
+
+	ndts = -1;
+	
+	//MUST ALWAYS apply: [pd]ts  < SCR + 0.7 seconds
+	//FIXME: find pack_dts and pack_len instead, for the time being the code below is still reasonable
+	for(i = 0; i < muxer->avih.dwStreams; i++)
+	{
+		spriv = muxer->streams[i]->priv;
+
+		if(! spriv->framebuf_used || spriv->track_bufsize + priv->packet_size - 20 > spriv->max_buffer_size)
+			continue;
+		//59000 ~= 0.7 seconds - max(frame_duration) (<42 ms at 23.976 fps)
+		if(spriv->framebuf[0].pts > priv->scr + 59000*300)
+			continue;
+
+		if(spriv->framebuf[0].dts <= dts)
+		{
+			dts = spriv->framebuf[0].dts;
+			ndts = i;
+		}
+	}
+
+	return ndts;
+}
+
 static void patch_seq(muxer_priv_t *priv, unsigned char *buf)
 {
 	if(priv->vwidth > 0)
