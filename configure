@@ -238,6 +238,7 @@ Codecs:
   --disable-x264         disable H.264 encoder [autodetect]
   --disable-divx4linux   disable DivX4linux/Divx5linux codec [autodetect]
   --enable-opendivx      enable _old_ OpenDivx codec [disable]
+  --disable-libavutil    disable libavutil [autodetect]
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
   --disable-libpostproc  disable libpostproc [autodetect]
