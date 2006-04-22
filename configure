@@ -5673,6 +5673,9 @@ if test "$_faad_internal" = auto ; then
         _faad_internal=no
         _res_comment="broken gcc"
         ;;
+      *)
+        _faad_internal=yes
+        ;;
     esac
   else
     _faad_internal=yes
