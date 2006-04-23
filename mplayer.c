@@ -1361,6 +1361,51 @@ static int mp_property_demuxer(m_option_t* prop,int action,void* arg) {
     return m_property_string_ro(prop,action,arg,(char*)demuxer->desc->name);
 }
 
+static int mp_property_stream_pos(m_option_t* prop,int action,void* arg) {
+    if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
+    if (!arg) return M_PROPERTY_ERROR;
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(off_t*)arg = stream_tell(demuxer->stream);
+        return M_PROPERTY_OK;
+    case M_PROPERTY_SET:
+        M_PROPERTY_CLAMP(prop,*(off_t*)arg);
+        stream_seek(demuxer->stream, *(off_t*)arg);
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_stream_start(m_option_t* prop,int action,void* arg) {
+    if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(off_t*)arg = demuxer->stream->start_pos;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_stream_end(m_option_t* prop,int action,void* arg) {
+    if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(off_t*)arg = demuxer->stream->end_pos;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
+static int mp_property_stream_length(m_option_t* prop,int action,void* arg) {
+    if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
+    switch (action) {
+    case M_PROPERTY_GET:
+        *(off_t*)arg = demuxer->stream->end_pos - demuxer->stream->start_pos;
+        return M_PROPERTY_OK;
+    }
+    return M_PROPERTY_NOT_IMPLEMENTED;
+}
+
 static int mp_property_length(m_option_t* prop,int action,void* arg) {
     double len;
     
@@ -2009,6 +2054,14 @@ static m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "demuxer", mp_property_demuxer, CONF_TYPE_STRING,
       0, 0, 0, NULL },
+    { "stream_pos", mp_property_stream_pos, CONF_TYPE_POSITION,
+      M_OPT_MIN, 0, 0, NULL },
+    { "stream_start", mp_property_stream_start, CONF_TYPE_POSITION,
+      M_OPT_MIN, 0, 0, NULL },
+    { "stream_end", mp_property_stream_end, CONF_TYPE_POSITION,
+      M_OPT_MIN, 0, 0, NULL },
+    { "stream_length", mp_property_stream_length, CONF_TYPE_POSITION,
+      M_OPT_MIN, 0, 0, NULL },
     { "length", mp_property_length, CONF_TYPE_DOUBLE,
       0, 0, 0, NULL },
 
