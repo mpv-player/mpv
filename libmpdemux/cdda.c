@@ -151,6 +151,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
   if(!cdd) {
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice);
     m_struct_free(&stream_opts,opts);
+    free(cddb_info);
     return STREAM_ERROR;
   }
 
@@ -167,6 +168,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_MPDEMUX_CDDA_CantOpenDisc);
     cdda_close(cdd);
     m_struct_free(&stream_opts,opts);
+    free(cddb_info);
     return STREAM_ERROR;
   }
 
@@ -222,6 +224,7 @@ static int open_cdda(stream_t *st,int m, void* opts, int* file_format) {
     free(priv);
     cd_info_free(cd_info);
     m_struct_free(&stream_opts,opts);
+    free(cddb_info);
     return STREAM_ERROR;
   }
 
