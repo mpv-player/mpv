@@ -2283,7 +2283,9 @@ int delay_corrected=1;
 
 // movie info:
 
+#ifdef HAVE_RTC
 int rtc_fd=-1;
+#endif
 
 int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
 
