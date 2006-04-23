@@ -351,9 +351,9 @@ Miscellaneous options:
 
 Advanced options:
   --enable-mmx           build with MMX support [autodetect]
-  --enable-mmx2          build with MMX2 support (PIII, Athlon) [autodetect]
+  --enable-mmxext        build with MMX2 support (PIII, Athlon) [autodetect]
   --enable-3dnow         build with 3DNow! support [autodetect]
-  --enable-3dnowex       build with extended 3DNow! support [autodetect]
+  --enable-3dnowext      build with extended 3DNow! support [autodetect]
   --enable-sse           build with SSE support [autodetect]
   --enable-sse2          build with SSE2 support [autodetect]
   --enable-shm           build with shm support [autodetect]
@@ -793,8 +793,8 @@ x86_exts_check()
 
   _mmx=no
   _3dnow=no
-  _3dnowex=no
-  _mmx2=no
+  _3dnowext=no
+  _mmxext=no
   _sse=no
   _sse2=no
   _mtrr=no
@@ -802,11 +802,11 @@ x86_exts_check()
   for i in $pparam ; do
     case "$i" in
     3dnow)        _3dnow=yes               ;;
-    3dnowext)     _3dnowex=yes             ;;
+    3dnowext)     _3dnowext=yes            ;;
     mmx)          _mmx=yes                 ;;
-    mmxext)       _mmx2=yes                ;;
+    mmxext)       _mmxext=yes              ;;
     mtrr|k6_mtrr|cyrix_arr)   _mtrr=yes    ;;
-    xmm|sse|kni)  _sse=yes    _mmx2=yes    ;;
+    xmm|sse|kni)  _sse=yes    _mmxext=yes  ;;
     sse2)         _sse2=yes                ;;
     esac
   done
@@ -1389,8 +1389,8 @@ if test "$_runtime_cpudetection" = yes ; then
   if x86; then
     _mmx=yes
     _3dnow=yes
-    _3dnowex=yes
-    _mmx2=yes
+    _3dnowext=yes
+    _mmxext=yes
     _sse=yes
     _sse2=yes
     _mtrr=yes
@@ -1428,9 +1428,9 @@ EOF
   }
 
   extcheck $_mmx "mmx" "emms" || _mmx=no
-  extcheck $_mmx2 "mmx2" "sfence" || _mmx2=no
+  extcheck $_mmxext "mmxext" "sfence" || _mmxext=no
   extcheck $_3dnow "3dnow" "femms" || _3dnow=no
-  extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" || _3dnowex=no
+  extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0" || _3dnowext=no
   extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" || _sse=no _gcc3_ext="$_gcc3_ext -mno-sse"
   extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" || _sse2=no _gcc3_ext="$_gcc3_ext -mno-sse2"
   echocheck "mtrr support"
@@ -2002,17 +2002,17 @@ for ac_option do
   --disable-sse) _sse=no ;;
   --enable-sse2) _sse2=yes ;;
   --disable-sse2) _sse2=no ;;
-  --enable-mmx2) _mmx2=yes ;;
-  --disable-mmx2) _mmx2=no ;;
+  --enable-mmxext) _mmxext=yes ;;
+  --disable-mmxext) _mmxext=no ;;
   --enable-3dnow) _3dnow=yes ;;
-  --disable-3dnow) _3dnow=no _3dnowex=no ;;
-  --enable-3dnowex) _3dnow=yes _3dnowex=yes ;;
-  --disable-3dnowex) _3dnowex=no ;;
+  --disable-3dnow) _3dnow=no _3dnowext=no ;;
+  --enable-3dnowext) _3dnow=yes _3dnowext=yes ;;
+  --disable-3dnowext) _3dnowext=no ;;
   --enable-altivec) _altivec=yes ;;
   --disable-altivec) _altivec=no ;;
   --enable-mmx)	_mmx=yes ;;
   --disable-mmx) # 3Dnow! and MMX2 require MMX
-        _3dnow=no _3dnowex=no _mmx=no _mmx2=no ;;
+        _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
 
   --enable-win32) _win32=yes ;;
   --disable-win32) _win32=no _dshow=no ;;
@@ -2134,11 +2134,11 @@ if x86 ; then
     _pref_as_version='2.10.1'
     echo 'femms' >> $TMPS
   fi
-  if test "$_3dnowex" = yes ; then
+  if test "$_3dnowext" = yes ; then
     _pref_as_version='2.10.1'
     echo 'pswapd	%mm0, %mm0' >> $TMPS
   fi
-  if test "$_mmx2" = yes ; then
+  if test "$_mmxext" = yes ; then
     _pref_as_version='2.10.1'
     echo 'movntq	%mm0, (%eax)' >> $TMPS
   fi
@@ -2254,12 +2254,12 @@ fi
 
 _def_mmx='#undef HAVE_MMX'
 test "$_mmx" = yes && _def_mmx='#define HAVE_MMX 1'
-_def_mmx2='#undef HAVE_MMX2'
-test "$_mmx2" = yes && _def_mmx2='#define HAVE_MMX2 1'
+_def_mmxext='#undef HAVE_MMX2'
+test "$_mmxext" = yes && _def_mmxext='#define HAVE_MMX2 1'
 _def_3dnow='#undef HAVE_3DNOW'
 test "$_3dnow" = yes && _def_3dnow='#define HAVE_3DNOW 1'
-_def_3dnowex='#undef HAVE_3DNOWEX'
-test "$_3dnowex" = yes && _def_3dnowex='#define HAVE_3DNOWEX 1'
+_def_3dnowext='#undef HAVE_3DNOWEX'
+test "$_3dnowext" = yes && _def_3dnowext='#define HAVE_3DNOWEX 1'
 _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
 _def_sse2='#undef HAVE_SSE2'
@@ -7406,9 +7406,9 @@ $_target_arch
 $_confwin32
 TARGET_CPU=$iproc
 TARGET_MMX = $_mmx
-TARGET_MMX2 = $_mmx2
+TARGET_MMX2 = $_mmxext
 TARGET_3DNOW = $_3dnow
-TARGET_3DNOWEX = $_3dnowex
+TARGET_3DNOWEX = $_3dnowext
 TARGET_SSE = $_sse
 TARGET_ALTIVEC = $_altivec
 TARGET_VIS = $_vis
@@ -8045,9 +8045,9 @@ $_def_gethostbyname2
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
-$_def_3dnowex	// only define if you have 3DNOWEX (AMD Athlon, etc.)
+$_def_3dnowext	// only define if you have 3DNOWEXT (AMD Athlon, etc.)
 $_def_mmx	// only define if you have MMX (newer x86 chips, not P54C/PPro)
-$_def_mmx2	// only define if you have MMX2 (Athlon/PIII/4/CelII)
+$_def_mmxext	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
 $_def_altivec	// only define if you have Altivec (G4)
