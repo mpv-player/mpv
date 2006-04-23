@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1260
+.\" In sync with rev 1.1265
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -317,6 +317,8 @@ Bewegt die Untertitel nach oben/unten.
 Setze EDL-Markierung.
 .IPs "s (nur bei \-vf screenshot)"
 Mache einen Schnappschuss.
+.IPs "I"
+Zeige den Dateinamen im OSD.
 .RE
 .PD 1
 .PP
@@ -593,6 +595,20 @@ eingelesen werden soll.
 .TP
 .B \-list-options
 Gibt alle verfügbaren Optionen aus.
+.
+.TP
+.B \-msgcharset <Zeichensatz>
+Konvertiere Konsolenausgaben in den angegebenen Zeichensatz (Standard:
+automatische Erkennung).
+Der Text wird diejenige Codierung haben, die mit der configure-Option
+--charset angegeben wurde.
+Setze dies auf "noconv", um jegliche Konvertierung zu deaktivieren (z.B.\& bei
+Problemen mit iconv).
+.br
+.I ANMERKUNG:
+Diese Option tritt nach dem Einlesen der Kommandozeile in Kraft.
+Die Umgebungsvariable MPLAYER_CHARSET kann dir helfen, fehlerhafte erste
+Zeilen der Ausgabe loszuwerden.
 .
 .TP
 .B \-msglevel <all=<Level>:<Modul>=<Level>:...>
@@ -8305,6 +8321,16 @@ Eine eher positive Verzerrung (-32 \- -16 anstatt -64) scheint den
 PSNR-Wert zu verbessern.
 .
 .TP
+.B (no)dct_decimate
+Eliminiert dct-Blocks in P-Frames, die nur einen einzigen kleinen
+Koeffizienten beinhalten (Standard: aktiviert).
+Dies wird ein paar Details entfernen, daher wird es Bits einsparen, die auf
+andere Frames verwendet werden können, was hoffentlich die wahrgenommene
+Qualität insgesamt verbessert.
+Wenn du nicht-Anime-Inhalt mit hoher Bitrate komprimierst, möchtest du diese
+Option vielleicht deaktivieren, um so viele Details wie möglich beizubehalten.
+.
+.TP
 .B nr=<0\-100000>
 Rauschunterdrückung (noise reduction), 0 bedeutet deaktiviert.
 0\-600 ist ein sinnvoller Bereich für typischen Inhalt, für etwas
@@ -9887,6 +9913,11 @@ sucht MPlayer nach Untertiteldateien in folgender Reihenfolge:
 Es gibt einige Umgebungsvariablen, die benutzt werden können, um das Verhalten
 von MPlayer und MEncoder zu steuern.
 .
+.TP
+.B MPLAYER_CHARSET (siehe auch \-msgcharset)
+Konvertiere Konsolenausgaben in den angegebenen Zeichensatz (Standard:
+automatische Erkennung).
+Der Wert "noconv" bedeutet keine Konvertierung.
 .TP
 .B MPLAYER_HOME
 Verzeichnis, in dem MPlayer nach dem Benutzereinstellungen sucht.
