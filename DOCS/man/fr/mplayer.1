@@ -1,4 +1,4 @@
-.\" synced with 1.1257
+.\" synced with 1.1265
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -321,8 +321,10 @@ Ajuste le décalage des sous-titres de +/- 0.1 secondes.
 Translate les sous-titres vers le haut/bas.
 .IPs i
 Créé une marque EDL.
-.IPs "s (nécessite que le filtre "screenshot" soit chargé)"
+.IPs "s (\-vf screenshot uniquement)"
 Réalise une capture d'écran.
+.IPs "I"
+Affiche le nom de fichier dans l'OSD.
 .RE
 .PD 1
 .PP
@@ -603,13 +605,27 @@ Spécifie le fichier de configuration à analyser après ceux par défaut.
 Affiche toutes les options disponibles.
 .
 .TP
+.B \-msgcharset <charset>
+Convertit les messages consoles à la l'ensemble de caractères spécifié
+(par défaut\ : auto-détection).
+Le texte sera alors dans l'encodage défini par l'option du script configure
+--charset.
+La valeur "noconv" permet de désactiver toute conversion (par ex. en
+cas de problèmes avec iconv)\ ;
+.br
+.I NOTE\ :
+Ceci n'aura d'effet qu'après la ligne de commande aura été analysée,
+La variable d'environnment MPLAYER_CHARSET vous permettra de ne plus subir
+la troncature des premières lignes affichées.
+.
+.TP
 .B \-msglevel <all=<niveau>:<module>=<niveau>:...>
 Contrôle directement le niveau de verbosité de chaque module.
 Le module 'all' change le niveau de verbosité de tous les modules
 à part ceux explicitement donnés sur la ligne de commande.
 Tapez '-msglevel help' pour avoir la liste de tous les modules.
 .br
-.I NOTE\ :
+NOTE\ :
 Les messages affichés avant que la ligne de commande soit chargée ne
 peuvent être contrôlés que par la variable d'environnement $MPLAYER_VERBOSE,
 qui s'applique à tous les modules.
@@ -2377,7 +2393,7 @@ Quand l'entête n'est pas incluse, un fichier PCM brut sera généré.
 Écrit le son dans le <nomfichier> au lieu de ./audiodump.wav par défaut.
 Si l'option nowaveheader est définie, le fichier par défaut
 est ./audiodump.pcm.
-.IPs fast
+.IPs fast\ 
 Essaye d'écrire le fichier plus rapidement qu'en temps réel.
 Assurez-vous la sortie ne se trouve pas tronquée (le message
 "Too many video packets in buffer / trop de paquets vidéos dans le buffer"
@@ -9605,6 +9621,17 @@ cas, ceci produit des artefacts dans les régions sans détails, comme le
 ciel.
 .
 .TP
+.B (no)dct_decimate
+Élimine les blocs dct des trames-P contenant uniquement un petit
+coefficient isolé (par défaut\ : activé).
+Enlève certains détails, ce qui économise des bits pouvant être
+redistribués aux autres trames, améliorant probablement la qualité
+globale subjective.
+Si vous compressez avec un haut débit binaire des sources qui ne
+sont pas des dessins animés, pous pouvez désactiver cette option pour
+préserver le plus de détails possibles.
+.
+.TP
 .B nr=<0\-100000>
 Réduction du  bruit, 0 signifie désactivé.
 Les valeurs typiques se situent dans l'intervalle 100\-1000 pour la plupart
@@ -9922,6 +9949,12 @@ FIXME: Documente ceci.
 .
 Il existe un grand nombre de variables d'environnement qui peuvent être
 utilisées pour contrôler le comportement de MPlayer et MEncoder.
+.
+.TP
+.B MPLAYER_CHARSET (voir aussi \-msgcharset)
+Convertit les messages console à la charset spécifiée
+(par défaut\ : auto-détection).
+La valeur "noconv" signifie aucune conversion.
 .
 .TP
 .B MPLAYER_HOME
