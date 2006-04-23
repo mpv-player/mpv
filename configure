@@ -1110,8 +1110,6 @@ EOF
     _optimizing=""
 
     echores "$proc"
-
-    x86_exts_check
     ;;
 
   sparc)
