@@ -1916,7 +1916,7 @@ char** sub_filenames(char* path, char *fname)
 		    if (!prio && tmp_sub_id)
 		    {
 			sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
-			printf("dvdsublang...%s\n", tmpresult);
+			mp_msg(MSGT_SUBREADER,MSGL_INFO,"dvdsublang...%s\n", tmpresult);
 			if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
 			    // matches the movie name + lang extension
 			    prio = 5;
@@ -2007,20 +2007,20 @@ void list_sub_file(sub_data* subd){
 
     for(j=0; j < subd->sub_num; j++){
 	subtitle* egysub=&subs[j];
-        printf ("%i line%c (%li-%li)\n",
+        mp_msg(MSGT_SUBREADER,MSGL_INFO,"%i line%c (%li-%li)\n",
 		    egysub->lines,
 		    (1==egysub->lines)?' ':'s',
 		    egysub->start,
 		    egysub->end);
 	for (i=0; i<egysub->lines; i++) {
-	    printf ("\t\t%d: %s%s", i,egysub->text[i], i==egysub->lines-1?"":" \n ");
+	    mp_msg(MSGT_SUBREADER,MSGL_INFO,"\t\t%d: %s%s", i,egysub->text[i], i==egysub->lines-1?"":" \n ");
 	}
-	printf ("\n");
+	mp_msg(MSGT_SUBREADER,MSGL_INFO,"\n");
     }
 
-    printf ("Subtitle format %s time.\n", 
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"Subtitle format %s time.\n", 
                                   subd->sub_uses_time ? "uses":"doesn't use");
-    printf ("Read %i subtitles, %i errors.\n", subd->sub_num, subd->sub_errs);
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"Read %i subtitles, %i errors.\n", subd->sub_num, subd->sub_errs);
 }
 
 void dump_srt(sub_data* subd, float fps){
