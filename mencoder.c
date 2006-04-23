@@ -649,16 +649,14 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf || playback_spee
     subdata=sub_read_file(sub_name[0], sh_video->fps);
     if(!subdata) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name[0]);
   } else
-  if(sub_auto) { // auto load sub file ...
+  if(sub_auto && filename) { // auto load sub file ...
     char **tmp = NULL;
     int i = 0;
-    if (filename) {
-      char *psub = get_path( "sub/" );
-      tmp = sub_filenames((psub ? psub : ""), filename);
-      free(psub);
-    }
-    subdata=sub_read_file(tmp ? tmp[0] : "default.sub", sh_video->fps);
-    while (tmp && tmp[i])
+    char *psub = get_path( "sub/" );
+    tmp = sub_filenames((psub ? psub : ""), filename);
+    free(psub);
+    subdata=sub_read_file(tmp[0], sh_video->fps);
+    while (tmp[i])
       free(tmp[i++]);
     free(tmp);
   }

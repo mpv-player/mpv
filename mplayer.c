@@ -3229,14 +3229,6 @@ if(sh_video) {
         free(tmp[i++]);
     }
     free(tmp);
-    if (set_of_sub_size == 0)
-    {
-        struct stat st;
-        mem_ptr = get_path("default.sub");
-        if (stat(mem_ptr, &st) == 0)
-            add_subtitles (mem_ptr, sh_video->fps, 0);
-    free(mem_ptr); // release the buffer created by get_path()
-    }
   }
   if (set_of_sub_size > 0)  {
       // setup global sub numbering
