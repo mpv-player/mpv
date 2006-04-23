@@ -577,13 +577,15 @@ Specify configuration file to be parsed after the default ones.
 Prints all available options.
 .
 .TP
-.B \-msgcharset (see also MPLAYER_CHARSET environment variable)
-Convert console messages to the specified charset (default: autodetect).
-This will only come into effect after commandline parsing has finished,
-use MPLAYER_CHARSET to get rid of the first lines of garbled output.
-You can set this to "noconv" to completely disable the conversion (e.g. if you
-have problems with iconv). Text will then be in the encoding specified
-with the --charset configure option.
+.B \-msgcharset <charset>
+Convert console messages to the specified character set (default: autodetect).
+Text will be in the encoding specified with the --charset configure option.
+Set this to "noconv" to disable conversion (for e.g.\& iconv problems).
+.br
+.I NOTE:
+The option takes effect after command line parsing has finished.
+The MPLAYER_CHARSET environment variable can help you get rid of
+the first lines of garbled output.
 .
 .TP
 .B \-msglevel <all=<level>:<module>=<level>:...>
@@ -9397,9 +9399,9 @@ There are a number of environment variables that can be used to
 control the behavior of MPlayer and MEncoder.
 .
 .TP
-.B MPLAYER_CHARSET (see also \-msgcharset commandline option)
+.B MPLAYER_CHARSET (also see \-msgcharset)
 Convert console messages to the specified charset (default: autodetect).
-A value of "noconv" means no conversion will be done.
+A value of "noconv" means no conversion.
 .
 .TP
 .B MPLAYER_HOME
