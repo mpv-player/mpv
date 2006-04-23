@@ -4234,6 +4234,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_OSD_SHOW_TEXT :  {
       set_osd_msg(OSD_MSG_TEXT,1,osd_duration,"%-.63s",cmd->args[0].v.s);
     } break;
+    case MP_CMD_OSD_SHOW_PROPERTY_TEXT : {
+      char* txt = m_properties_expand_string(mp_properties,cmd->args[0].v.s);
+      /* if no argument supplied take default osd_duration, otherwise <arg> ms. */
+      if(txt) {
+        set_osd_msg(OSD_MSG_TEXT,cmd->args[2].v.i,
+                    (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
+                    "%-.63s",txt);
+        free(txt);
+      }
+    } break;
     case MP_CMD_LOADFILE : {
       play_tree_t* e = play_tree_new();
       play_tree_add_file(e,cmd->args[0].v.s);
