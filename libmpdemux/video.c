@@ -33,7 +33,7 @@
 /* biCompression constant */
 #define BI_RGB        0L
 
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
 #include "demux_rtp.h"
 #endif
 
@@ -59,7 +59,7 @@ if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002))) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TY) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
   || ((d_video->demuxer->file_format == DEMUXER_TYPE_RTP) && demux_is_mpeg_rtp_stream(d_video->demuxer))
 #endif
   )
@@ -429,7 +429,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 		  || demuxer->file_format==DEMUXER_TYPE_PVA || 
 		  ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
 		  || demuxer->file_format==DEMUXER_TYPE_MPEG_TY
-#ifdef STREAMING_LIVE_DOT_COM
+#ifdef STREAMING_LIVE555
     || (demuxer->file_format==DEMUXER_TYPE_RTP && demux_is_mpeg_rtp_stream(demuxer))
 #endif
   ){
