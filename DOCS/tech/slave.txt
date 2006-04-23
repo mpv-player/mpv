@@ -140,8 +140,8 @@ osd [level]
 osd_show_property_text <string> [duration] [level]
     Show an expanded property string on the OSD, see -playing-msg for a
     description of the available expansions. If [duration] is >= 0 the text
-    is shown for [duration] ms. [level] set the minimum OSD level needed for
-    the message to be visible, default to 0 (always show).
+    is shown for [duration] ms. [level] sets the minimum OSD level needed
+    for the message to be visible (default: 0 - always show).
 
 osd_show_text <string> [duration] [level]
     Show <string> on the OSD.
