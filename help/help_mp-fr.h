@@ -203,17 +203,17 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nAucun encodeur vidéo (-ovc) choisi ! Choisissez-en un (voir l'aide pour -ovc).\n"
 #define MSGTR_CannotOpenOutputFile "Impossible d'ouvrir le fichier de sortie '%s'\n"
 #define MSGTR_EncoderOpenFailed "Impossible d'ouvrir l'encodeur\n"
-**************************
+//**************************
 #define MSGTR_ForcingOutputFourcc "Code fourcc de sortie forcé à %x [%.4s]\n"
-***************************
+//***************************
 #define MSGTR_DuplicateFrames "\n%d image(s) répétée(s)!\n"
 #define MSGTR_SkipFrame "\nImage sautée!\n"
-*****************************
+//*****************************
 #define MSGTR_ErrorWritingFile "%s: Erreur durant l'écriture du fichier.\n"
 #define MSGTR_RecommendedVideoBitrate "Débit binaire (bitrate) vidéo recommandé pour le CD %s: %d\n"
 #define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d B/s)  taille: %d octets  %5.3f secs  %d images\n"
 #define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d B/s)  taille: %d octets  %5.3f secs\n"
-************************************
+//************************************
 
 // cfg-mencoder.h:
 
@@ -265,7 +265,7 @@ static char help_text[]=
 "                 (bitrate 320 kbps)\n"\
 "                 <8-320>: encodage ABR au débit binaire (bitrate) moyen indiqué en kbps.\n\n"
 
-*****************************
+//*****************************
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Lecteur CD-ROM '%s' non trouvé.\n"
@@ -285,15 +285,15 @@ static char help_text[]=
 #define MSGTR_DVDinvalidTitle "Numéro de titre DVD invalide: %d\n"
 #define MSGTR_DVDnumChapters "Il y a %d chapitres sur ce titre DVD.\n"
 #define MSGTR_DVDinvalidChapter "Numéro de chapitre DVD invalide: %d\n"
-***************************
+//***************************
 #define MSGTR_DVDnumAngles "Il y a %d angles sur ce titre DVD.\n"
 #define MSGTR_DVDinvalidAngle "Numéro d'angle DVD invalide: %d\n"
 #define MSGTR_DVDnoIFO "Impossible d'ouvrir le fichier IFO pour le titre DVD %d.\n"
-***********************
+//***********************
 #define MSGTR_DVDnoVOBs "Impossible d'ouvrir le titre VOBS (VTS_%02d_1.VOB).\n"
 ***************************
 #define MSGTR_DVDopenOk "DVD ouvert avec succès.\n"
-***************************
+//***************************
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "ATTENTION: Entête du flux audio %d redéfini.\n"
@@ -323,7 +323,7 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Impossible de déterminer le nombre d'images (pour recherche absolue)\n"
 #define MSGTR_CantSeekRawAVI "Impossible de chercher dans un flux AVI brut ! (Index requis, essayez l'option -idx.)\n"
 #define MSGTR_CantSeekFile "Impossible de chercher dans ce fichier.\n"
-*******************
+//*******************
 
 #define MSGTR_MOVcomprhdr "MOV: Le support d'entêtes compressées nécessite ZLIB !\n"
 #define MSGTR_MOVvariableFourCC "MOV: ATTENTION: FOURCC Variable détecté !?\n"
@@ -343,7 +343,7 @@ static char help_text[]=
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: contenu NTSC 30000/1001fps détecté, ajustement du débit.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: contenu NTSC 24000/1001fps progressif détecté, ajustement du débit.\n"
-**********************
+//**********************
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Impossible d'ouvrir le codec.\n"
@@ -370,9 +370,9 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Famille de codecs vidéo demandée [%s] (vfm=%s) non disponible (activez-la à la compilation)\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Famille de codecs audio demandée [%s] (afm=%s) non disponible (activez-la à la compilation)\n"
 #define MSGTR_OpeningVideoDecoder "Ouverture du décodeur vidéo: [%s] %s\n"
-****************
+//****************
 #define MSGTR_OpeningAudioDecoder "Ouverture du décodeur audio: [%s] %s\n"
-***********************
+//***********************
 #define MSGTR_UninitVideoStr "Désinitialisation vidéo: %s  \n"
 #define MSGTR_UninitAudioStr "Désinitialisation audio: %s  \n"
 #define MSGTR_VDecoderInitFailed "Echec de l'initialisation de VDecoder :(\n"
@@ -399,7 +399,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "N'a pas pu trouver espace colorimétrique correspondant - nouvel essai avec -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "L'aspect du film est %.2f:1 - pré-redimensionnement à l'aspect correct.\n"
 #define MSGTR_MovieAspectUndefined "L'aspect du film est indéfini - pas de pré-dimensionnement appliqué.\n"
-*********************
+//*********************
 
 // ====================== messages/boutons GUI ========================
 
@@ -414,11 +414,11 @@ static char help_text[]=
 #define MSGTR_FontSelect "Choisir une police..."
 #define MSGTR_PlayList "Liste de lecture"
 #define MSGTR_Equalizer "Égalisateur"
-*********************
+//*********************
 #define MSGTR_SkinBrowser "Navigateur de skins"
 #define MSGTR_Network "Streaming depuis le réseau ..."
 #define MSGTR_Preferences "Préférences"
-*********************
+//*********************
 #define MSGTR_NoMediaOpened "Aucun média ouvert"
 #define MSGTR_VCDTrack "Piste du VCD %d"
 #define MSGTR_NoChapter "Aucun chapitre"
@@ -446,7 +446,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING1 "[skin] attention à la ligne %d du fichier de config de skin: Widget (%s) trouvé mais aucune \"section\" trouvé avant lui."
 #define MSGTR_SKIN_WARNING2 "[skin] attention à la ligne %d du fichier de config de skin: Widget (%s) trouvé mais aucune \"subsection\" trouvé avant lui."
 #define MSGTR_SKIN_WARNING3 "[skin] attention à la ligne %d du fichier de config de skin: cette sous-section n'est pas supporté par le widget (%s)"
-************************
+//************************
 #define MSGTR_SKIN_BITMAP_16bit  "les images bitmaps 16 bits ou moins ne sont pas supportées ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Fichier non trouvé (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "erreur de lecture BMP (%s)\n"
@@ -463,7 +463,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "identificateur de fonte inéxistant (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "paramètre inconnu (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trouvée (%s).\n"
-**************************
+//**************************
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "erreur de lecture du fichier de configuration du skin (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
@@ -484,7 +484,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Flux suivant"
 #define MSGTR_MENU_PrevStream "Flux précédent"
 #define MSGTR_MENU_Size "Taille"
-*************
+//*************
 #define MSGTR_MENU_NormalSize "Taille normale"
 #define MSGTR_MENU_DoubleSize "Taille double"
 #define MSGTR_MENU_FullScreen "Plein écran"
@@ -501,7 +501,7 @@ static char help_text[]=
 #define MSGTR_MENU_SubtitleLanguages "Langues des sous-titres"
 #define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Navigateur de skins"
-*************************
+//*************************
 #define MSGTR_MENU_Exit "Quitter..."
 #define MSGTR_MENU_Mute "Silence"
 #define MSGTR_MENU_Original "Original"
@@ -538,18 +538,18 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Hiérarchie des dossiers"
 
 // --- preferences
-************************
+//************************
 #define MSGTR_PREFERENCES_SubtitleOSD "Sous-titres & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Divers"
 
 #define MSGTR_PREFERENCES_None "Aucun"
-************************
+//************************
 #define MSGTR_PREFERENCES_AvailableDrivers "Pilotes disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Ne pas jouez le son"
 #define MSGTR_PREFERENCES_NormalizeSound "Normaliser le son"
 #define MSGTR_PREFERENCES_EnEqualizer "Activer l'équaliseur"
-**********************
+//**********************
 #define MSGTR_PREFERENCES_ExtraStereo "Activer stéréo supplémentaire"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Retard audio"
@@ -585,7 +585,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "post-traitement"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-***********************
+//***********************
 #define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent un redémarrage de la lecture!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encodeur vidéo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Utiliser LAVC (FFmpeg)"
@@ -633,10 +633,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "Périphérique DVD:"
 #define MSGTR_PREFERENCES_FPS "FPS du film:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Affiche la fenêtre vidéo inactive"
-********************************
+//********************************
 
 #define MSGTR_ABOUT_UHU "Le développement de la GUI est commandité par UHU Linux\n"
-*********************************
+//*********************************
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale !"
