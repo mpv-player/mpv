@@ -312,6 +312,10 @@ Gereöffy, Árpád (A'rpi/ESP-team) <arpi@thot.banki.hu>
 Giani, Matteo <matgiani@ctonet.it>
     * PVA demuxer
 
+Giaquinta, Emanuele (exg) <emanuele.giaquinta@gmail.com>
+    * Darwin/ppc fixes
+    * libfaad2 update
+
 Goethel, Sven <sgoethel@jausoft.com>
     * vo_gl2 video output driver
 
