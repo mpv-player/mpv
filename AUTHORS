@@ -596,6 +596,9 @@ Noring, Fredrik <noring@nocrew.org>
 Ohm, Christian <chr.ohm@gmx.net>
     * various small bug fixes
 
+Ötvös, Attila <oattila@chello.hu>
+	* A huge pile of printf to mp_msg patches
+
 Parrish, Joey <joey@nicewarrior.org>
     * various fixes
     * -vo gif89a author
