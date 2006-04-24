@@ -28,7 +28,7 @@ typedef struct {
     unsigned char fps;            
 } nsv_priv_t;
 
-#define HEADER_SEARCH_SIZE 65000
+#define HEADER_SEARCH_SIZE 256000
 
 
 /**
