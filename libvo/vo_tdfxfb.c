@@ -248,7 +248,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		break;
 
 	default:
-		MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported, fb_vinfo.bits_per_pixel);
+		mp_msg(MSGT_VO, MSGL_ERR, MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported, fb_vinfo.bits_per_pixel);
 		return -1;
 	}
 
