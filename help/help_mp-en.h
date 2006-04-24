@@ -407,11 +407,11 @@ static char help_text[]=
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     variable bitrate method\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh(default)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
+"                0: cbr (constant bitrate)\n"\
+"                1: mt (Mark Taylor VBR algorithm)\n"\
+"                2: rh (Robert Hegemann VBR algorithm - default)\n"\
+"                3: abr (available bitrate)\n"\
+"                4: mtrh (Mark Taylor Robert Hegemann VBR algorithm)\n"\
 "\n"\
 " abr           average bitrate\n"\
 "\n"\
@@ -1473,7 +1473,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid error: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Select error.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Read error on child's: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Read error on child's file descriptor: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Console run: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] A child is already running.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork failed !!!\n"
@@ -1519,7 +1519,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Arithmetic mean of QP: %2.4f, Harmonic mean of QP: %2.4f\n"
 #define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI failure.\n"
 #define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Couldn't allocate image for codec.\n"
-#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC accelerated MPEG2.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC accelerated MPEG-2.\n"
 #define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Trying pixfmt=%d.\n"
 #define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] The mc_get_buffer should work only with XVMC acceleration!!"
 #define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Unexpected init_vo error.\n"
