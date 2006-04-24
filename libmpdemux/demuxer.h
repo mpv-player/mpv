@@ -284,6 +284,7 @@ inline static int demux_getc(demux_stream_t *ds){
 
 void ds_free_packs(demux_stream_t *ds);
 int ds_get_packet(demux_stream_t *ds,unsigned char **start);
+int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts);
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start);
 float ds_get_next_pts(demux_stream_t *ds);
 

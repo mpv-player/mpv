@@ -149,8 +149,13 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     int y,len=-1;
     while(len<minlen){
 	int len2=0;
-	int x=ds_get_packet(sh_audio->ds,&start);
+	double pts;
+	int x=ds_get_packet_pts(sh_audio->ds,&start, &pts);
 	if(x<=0) break; // error
+	if (pts != MP_NOPTS_VALUE) {
+	    sh_audio->pts = pts;
+	    sh_audio->pts_bytes = 0;
+	}
 	y=avcodec_decode_audio(sh_audio->context,(int16_t*)buf,&len2,start,x);
 //printf("return:%d samples_out:%d bitstream_in:%d sample_sum:%d\n", y, len2, x, len); fflush(stdout);
 	if(y<0){ mp_msg(MSGT_DECAUDIO,MSGL_V,"lavc_audio: error\n");break; }
@@ -159,6 +164,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	  //len=len2;break;
 	  if(len<0) len=len2; else len+=len2;
 	  buf+=len2;
+	  sh_audio->pts_bytes += len2;
 	}
         mp_dbg(MSGT_DECAUDIO,MSGL_DBG2,"Decoded %d -> %d  \n",y,len2);
     }

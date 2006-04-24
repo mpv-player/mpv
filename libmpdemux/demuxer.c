@@ -224,6 +224,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
         sh->samplesize=2;
         sh->sample_format=AF_FORMAT_S16_NE;
         sh->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
+        sh->pts=MP_NOPTS_VALUE;
         if (!demux_aid_vid_mismatch)
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", id);
     }
@@ -500,6 +501,26 @@ int ds_get_packet(demux_stream_t *ds,unsigned char **start){
         ds->buffer_pos+=len;
         return len;
     }
+}
+
+int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
+{
+    int len;
+    *pts = MP_NOPTS_VALUE;
+    if(ds->buffer_pos>=ds->buffer_size){
+	if (!ds_fill_buffer(ds)) {
+            // EOF
+            *start = NULL;
+            return -1;
+	}
+	// Should use MP_NOPTS_VALUE for "unknown pts" in the packets too
+	if (ds->current->pts)
+	    *pts = ds->current->pts;
+    }
+    len=ds->buffer_size-ds->buffer_pos;
+    *start = &ds->buffer[ds->buffer_pos];
+    ds->buffer_pos+=len;
+    return len;
 }
 
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){

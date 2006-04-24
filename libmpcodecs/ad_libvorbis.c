@@ -229,9 +229,14 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 	while(len < minlen) {
 	  while((samples=vorbis_synthesis_pcmout(&ov->vd,&pcm))<=0){
 	    ogg_packet op;
+	    double pts;
 	    memset(&op,0,sizeof(op)); //op.b_o_s = op.e_o_s = 0;
-	    op.bytes = ds_get_packet(sh->ds,&op.packet);
+	    op.bytes = ds_get_packet_pts(sh->ds,&op.packet, &pts);
 	    if(op.bytes<=0) break;
+	    if (pts != MP_NOPTS_VALUE) {
+		sh->pts = pts;
+		sh->pts_bytes = 0;
+	    }
 	    if(vorbis_synthesis(&ov->vb,&op)==0) /* test for success! */
 	      vorbis_synthesis_blockin(&ov->vd,&ov->vb);
 	  }
@@ -303,6 +308,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 	    if(clipflag)
 	      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"Clipping in frame %ld\n",(long)(ov->vd.sequence));
 	    len+=2*ov->vi.channels*bout;
+	    sh->pts_bytes += 2*ov->vi.channels*bout;
 	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\n[decoded: %d / %d ]\n",bout,samples);
 	    samples-=bout;
 	    vorbis_synthesis_read(&ov->vd,bout); /* tell libvorbis how

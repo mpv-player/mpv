@@ -253,8 +253,13 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   } else {
    // packetized (.mp4) aac stream:
     unsigned char* bufptr=NULL;
-    int buflen=ds_get_packet(sh->ds, &bufptr);
+    double pts;
+    int buflen=ds_get_packet_pts(sh->ds, &bufptr, &pts);
     if(buflen<=0) break;
+    if (pts != MP_NOPTS_VALUE) {
+	sh->pts = pts;
+	sh->pts_bytes = 0;
+    }
     faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, bufptr, buflen);
   }
   //for (j=0;j<faac_finfo.channels;j++) printf("%d:%d\n", j, faac_finfo.channel_position[j]);
@@ -271,6 +276,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       memcpy(buf+len,faac_sample_buffer, sh->samplesize*faac_finfo.samples);
       last_dec_len = sh->samplesize*faac_finfo.samples;
       len += last_dec_len;
+      sh->pts_bytes += last_dec_len;
     //printf("FAAD: buffer: %d bytes  consumed: %d \n", k, faac_finfo.bytesconsumed);
     }
   }

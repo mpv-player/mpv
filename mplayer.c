@@ -3874,6 +3874,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
       delay=sh_audio->delay;
       delay+=(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
     }
+    delay += sh_audio->a_out_buffer_len*playback_speed/(float)ao_data.bps;
 
 #if 0
     if(pts_from_bps){
@@ -3890,16 +3891,15 @@ if(time_frame>0.001 && !(vo_flags&256)){
 #endif
     {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
-      a_pts=d_audio->pts;
-      if(!delay_corrected) if(a_pts) delay_corrected=1;
-#if 0
-      mp_msg(MSGT_FIXME, MSGL_FIXME, "\n#X# pts=%5.3f ds_pts=%5.3f buff=%5.3f total=%5.3f\n",
-          a_pts,
-	  ds_tell_pts(d_audio)/(float)sh_audio->i_bps,
-	  -sh_audio->a_in_buffer_len/(float)sh_audio->i_bps,
-	  a_pts+(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps);
-#endif	  
-      a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps - sh_audio->a_out_buffer_len*playback_speed/(float)ao_data.bps;
+      a_pts = sh_audio->pts;
+      if (a_pts == MP_NOPTS_VALUE) {
+	  // Decoder doesn't support tracking timestamps or demuxer doesn't
+	  // set them properly in individual packets, use old inaccurate method
+	  a_pts=d_audio->pts;
+	  a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+      }
+      else
+	  a_pts += sh_audio->pts_bytes / (float)sh_audio->o_bps;
     }
     v_pts=sh_video ? sh_video->pts : d_video->pts;
 

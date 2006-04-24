@@ -47,6 +47,8 @@ typedef struct {
   void* context; // codec-specific stuff (usually HANDLE or struct pointer)
   unsigned char* codecdata; // extra header data passed from demuxer to codec
   int codecdata_len;
+  double pts;  // last known pts value in output from decoder
+  int pts_bytes; // bytes output by decoder after last known pts
 } sh_audio_t;
 
 typedef struct {
