@@ -3143,6 +3143,10 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
                   if (modified)
                     free (buffer);
                   dp->flags = (block_bref == 0 && block_fref == 0) ? 0x10 : 0;
+                  /* If default_duration is 0, assume no pts value is known
+                   * for packets after the first one (rather than all pts
+                   * values being the same) */
+                  if (i == 0 || track->default_duration)
                   dp->pts = mkv_d->last_pts + i * track->default_duration;
                   ds_add_packet (ds, dp);
                 }
