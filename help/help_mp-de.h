@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.242
+// In synch with rev 1.244
 
 // ========================= MPlayer help ===========================
 
@@ -1557,3 +1557,251 @@ static char help_text[]=
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s vom nächsten Filter/vo nicht unterstützt :(\n"
+
+// ================================== LIBMPVO ====================================
+
+// mga_common.c
+
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "Fehler im ioctl von mga_vid_config (falsche mga_vid.o-Version?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "Konnte keine Helligkeitswerte vom Kernelmodul ermitteln!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "Konnte keine Helligkeitswerte vom Kernelmodul setzen!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Bildschirmbreite/-höhe unbekannt!\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Ungültiges Ausgabeformat %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "Deine Treiberversion von mga_vid ist mit dieser MPlayer-Version nicht kompatibel!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "Benutze %d Buffer.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "Konnte nicht öffnen: %s\n"
+
+// libvo/vesa_lvo.c
+
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Dieser Zweig wird nicht länger unterstützt.\n[VESA_LVO] Benutze stattdessen bitte -vo vesa:vidix.\n"
+#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] Konnte nicht öffnen: '%s'\n"
+#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Ungültiges Ausgabeformat: %s(%0X)\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] Die fb_vid-Treiberversion ist mit dieser MPlayer-Version nicht kompatibel!\n"
+
+// libvo/vo_3dfx.c
+
+#define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Nur 16bpp unterstützt!"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visuelle Id ist  %lx.\n"
+#define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Kann /dev/3dfx nicht öffnen.\n"
+#define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Fehler: %d.\n"
+#define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Konnte 3dfx-Speicherbereiche nicht abbilden: %p,%p,%d.\n"
+#define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Initialisiert: %p.\n"
+#define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Unbekanntes Subgerät: %s.\n"
+
+// libvo/vo_dxr3.c
+
+#define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Kann neue SPU-Palette nicht laden!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Kann Wiedergabemodus nicht setzen!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Kann Subbild-Modus nicht setzen!\n"
+#define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] Kann TV-Norm nicht ermitteln!\n"
+#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] TV-Norm automatisch durch Framerate gewählt: "
+#define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] Kann TV-Norm nicht setzen!\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] Mache Einstellungen für NTSC.\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Mache Einstellungen für PAL/SECAM.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Setze Aspekt auf 4:3.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Setze Aspekt auf 16:9.\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] Kein Speicher mehr.\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Kann Schlüsselfarbe nicht ermitteln!\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Kann Schlüsselfarbe nicht ermitteln, benutze nächstgelegenen Treffer (0x%lx).\n"
+#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Deinitialisierung.\n"
+#define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] Konnte TV-Norm nicht wiederherstellen!\n"
+#define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Prebuffering aktiviert.\n"
+#define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Benutze neue Sync-Maschine.\n"
+#define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Benutze Overlay.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Fehler: Du musst mplayer mit x11-Bibliotheken und Headern installiert compilieren, um Overlay zu benutzen.\n"
+#define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] Werde TV-Norm setzen auf: "
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "Automatische Anpassung der Video-Framerate (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "Automatische Anpassung der Video-Framerate (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Benutze aktuelle Norm"
+#define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Unbekannte Norm geliefert. Benutze aktuelle Norm."
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Fehler beim Öffnen von %s zum Schreiben, versuche stattdessen /dev/em8300.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] Fehler beim Öffnen von %s zum Schreiben, versuche stattdessen /dev/em8300_mv.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell "[VO_DXR3] Fehler auch beim Öffnen von /dev/em8300 zum Schreiben! Steige aus.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV "[VO_DXR3] Fehler auch beim Öffnen von /dev/em8300_mv zum Schreiben! Steige aus.\n"
+#define MSGTR_LIBVO_DXR3_Opened "[VO_DXR3] Geöffnet: %s.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Fehler beim Öffnen von %s zum Schreiben, versuche stattdessen /dev/em8300_sp.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Fehler auch beim Öffnen von /dev/em8300_sp zum Schreiben! Steige aus.\n"
+#define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Konnte Bildschirm während gehackten Overlaysetup nicht öffnen!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Konnte x11 nicht initialisieren!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Konnte Overlayattribut nicht setzen.\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Konnte Overlaybildschirm nicht setzen!\nBeende.\n"
+#define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Konnte Overlay nicht aktivieren!\nBeende.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Konnte Größe des Overlayfensters nicht ändern!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] Konnter Overlay-bcs nicht setzen!\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] Konnte Y-Offset-Wert des Overlays nicht ermitteln!\nBeende.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] Konnte X-Offset-Wert des Overlays nicht ermitteln!\nBeende.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] Konnte X-Skalierungskorrektur des Overlays nicht ermitteln!\nBeende.\n"
+#define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Y-Offset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] X-Offset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] X-Koorektur: %d.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3]  Konnte Größe des Overlayfensters nicht ändern!\n"
+#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Konnte Singal-Mix nicht setzen!\n"
+
+// libvo/vo_mga.c
+
+#define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): Größe geändert auf %dx%d.\n"
+#define MSGTR_LIBVO_MGA_Uninit "[VO] Deinitialisierung!\n"
+
+// libvo/vo_null.c
+
+#define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Unbekanntes Subgerät: %s.\n"
+															
+// libvo/vo_png.c
+
+#define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Warnung: Kompressionslevel auf 0 gesetzt, Kompression deaktiviert!\n"
+#define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] Info: Benutze -vo png:z=<n>, um Kompressionslevel von 0 bis 9 zu setzen.\n"
+#define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Info: (0 = keine Kompression, 1 = am schnellsten, wenigsten - 9 beste, langsamste Kompression)\n"
+#define MSGTR_LIBVO_PNG_ErrorOpeningForWriting "\n[VO_PNG] Fehler beim Öffnen von '%s' zum Schreiben!\n"
+#define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] Fehler in create_png.\n"
+
+// libvo/vo_sdl.c
+
+#define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Konnte keinen akzeptierbaren SDL-Modus für die Ausgabe ermitteln.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode fehlgeschlagen: %s.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode fehlgeschlagen: %s.\n"
+#define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] Abbildung von I420 auf IYUV.\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] Nichtunterstütztes Bildformat (0x%X).\n"
+#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Info - bitte benutze -vm oder -zoom, um zur besten Auflösung zu wechseln.\n"
+#define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] Konnte Videomodus nicht setzen: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay "[VO_SDL] Konnte kein YUV-Overlay erstellen: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateARGBSurface "[VO_SDL] Konnte keine RGB-Oberfläche erstellen: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Benutze Tiefen-/Farbraumkonvertierung, dies wird Dinge verlangsamen (%ibpp -> %ibpp).\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Nichtunterstütztes Bildformat in draw_slice, kontaktiere MPlayer-Entwickler!\n"
+#define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit fehlgeschlagen: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] Initialisierung von SDL fehlgeschlagen: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Benutze Treiber: %s.\n"
+
+// libvo/vobsub_vidix.c
+
+#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht starten: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht anhalten: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved uv für yuv410p nicht unterstützt.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_slice() wurde aufgerufen.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_frame() wurde aufgerufen.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Nichtunterstützter fourcc für folgenden vidix-Treiber: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] Videoserver hat nichtunterstützte Auflösung (%dx%d), unterstützt: %dx%d-%dx%d.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Videoserver hat von vidix nichtunterstützte Farbtiefe (%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] Vidix-Treiber kann Bild nicht hochskalieren (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] Vidix-Treiber kann Bild nicht herunterskalieren (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht konfigurieren: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Du hast eine falsche Version der VIDIX-Bibliothek.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Konnte keinen funktionierenden VIDIX-Treiber finden.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Konnte Fähigkeit nicht ermitteln: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] Beschreibung: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] Autor: %s.\n"
+
+// libvo/vo_svga.c
+
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] Erzwungener vid_mode %d (%s) nicht verfügbar.\n"
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] Erzwungener vid_mode %d (%s) zu klein.\n"
+#define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
+#define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) fehlgeschlagen.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] Videomodus ist linear, und memcpy könnte für Bildtransfer benutzt werden.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] Videomodus besitzt Hardwarebeschleunigung, und put_image könnte benutzt werden.\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] Wenn es für dich funktioniert, würde ich das gerne wissen. \n[VO_SVGA] (sende Log mit `mplayer test.avi -v -v -v -v &> svga.log`). Danke\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Videomodus hat %d Seite(n).\n"
+#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Zentriere Bild. Beginn bei (%d,%d)\n"
+#define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Benutze VIDIX. b=%i h=%i  mb=%i mh=%i\n"
+
+// libvo/vo_syncfb.c
+
+#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] Konnte /dev/syncfb oder /dev/mga_vid nicht öffnen.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Benutze Palette yuv420p3.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Benutze Palette yuv420p2.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Benutze Palette yuv420.\n"
+#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Keine unterstützte Palette gefunden.\n"
+#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] Größe des BES Sourcer: %d x %d.\n"
+#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] Framebuffer-Speicher: %ld in %ld Buffern.\n"
+#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] Fordere ersten Buffer #%d.\n"
+#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] Ersten Buffer #%d erhalten.\n"
+#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] Unbekanntes Subgerät: %s.\n"
+
+// libvo/vo_tdfxfb.c
+
+#define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Konnte %s nicht öffnen: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problem mit FBITGET_FSCREENINFO ioctl: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problem mit FBITGET_VSCREENINFO ioctl: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] Dieser Treiber unterstützt nur 3Dfx Banshee, Voodoo3 und Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] Ausgabe mit %d bpp wird nicht unterstützt.\n"
+#define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Konnte Speicherbereiche nicht abbilden: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] Ausgabe mit %d bpp wird nicht unterstützt (Dies sollte niemals passiert sein).\n"
+#define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] Ächz! Etwas läuft falsch mit control().\n"
+#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] Nicht genug Speicher, um diesen Film abzuspielen. Probiere eine geringere Auflösung.\n"
+#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] Bildschirm ist %dx%d bei %d bpp, Input ist %dx%d bei %d bpp, Norm ist %dx%d.\n"
+
+// libvo/vo_tdfx_vid.c
+
+#define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Verschiebe %d(%d) x %d => %d.\n"
+#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP-Verschiebung konnte Bildschirm nicht löschen.\n"
+#define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion "[VO_TDFXVID] Nicht-natives Overlayformat benötigt Konvertierung.\n"
+#define MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat "[VO_TDFXVID] Nichtunterstütztes Eingabeformat 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlaySetupFailed "[VO_TDFXVID] Overlaysetup fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOnFailed "[VO_TDFXVID] Aktiverung des Overlays fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] Overlay fertig: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] Textur-Blit fertig: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] Deaktivierung des Overlay fehlgeschlagen\n"
+#define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] Kann %s nicht öffnen: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] Kann aktuelle Konfiguration nicht ermitteln: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap fehlgeschlagen!!!!!\n"
+#define MSGTR_LIBVO_TDFXVID_GetImageTodo "Ermittle Bild-Todo.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP-Verschiebung fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] yuv setzen fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP-Verschiebung bei Y-Ebene fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP-Verschiebung bei U-Ebene fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP-Verschiebung bei V-Ebene fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] Was ist das für ein Format 0x%x.\n"
+
+// libvo/vo_tga.c
+
+#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Unbekanntes Subgerät: %s.\n"
+
+// libvo/vo_vesa.c
+
+#define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fataler Fehler aufgetreten! Kann nicht fortfahren.\n"
+#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Unbekanntes Subgerät: '%s'.\n"
+#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] Du hast einen zu geringen Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Du musst die Fähigkeiten deines Monitors angeben.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Kann Modus nicht in die Beschränkung des Monitors einpassen.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
+#define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Internen fatalen Fehler erkannt: init wird vor preinit aufgerufen.\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] Schalter -flip wird nicht unterstützt.\n"
+#define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] Möglicher Grund: Kein VBE2 BIOS gefunden.\n"
+#define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] VESA VBE BIOS Version %x.%x Revision gefunden: %x.\n"
+#define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] Videospeicher: %u Kb.\n"
+#define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA-Fähigkeiten: %s %s %s %s %s.\n"
+#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! OEM-Informationen werden unten ausgegeben. !!!\n"
+#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] Du solltest unten 5 OEM-zugehörige Zeilen sehen; ansonsten ist vm86 kaputt.\n"
+#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM-Info: %s.\n"
+#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM-Revision: %x.\n"
+#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM-Händler: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM-Produktname: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM-Produktrevision: %s.\n"
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Tip: Um funktionierendes TV-Out zu bekommen, solltest du das TV-Verbindungskabel eingesteckt haben,\n"\
++"[VO_VESA] bevor der PC hochgefahren wird, da sich das VESA-BIOS nur während\n"\
++"[VO_VESA] POST initialisiert.\n"
+#define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] Benutze VESA-Modus (%u) = %x [%ux%u@%u]\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Kann SwScaler nicht initialisieren.\n"
+#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] Kann DGA nicht verwenden. Erzwinge bank switching Modus. :(\n"
+#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] Benutze DGA (physikalische Ressourcen: %08lXh, %08lXh)"
+#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] Kann Doublebuffering nicht verwenden: nicht genügend Speicher.\n"
+#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] Kann weder DGA- noch verschiebbaren Fensterrahmen finden.\n"
+#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] Du hast DGA erzwungen. Beende\n"
+#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] Kann keine gültige Fensteradresse finden.\n"
+#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] Verwende bank switching Modus (physikalische Ressourcen: %08lXh, %08lXh).\n"
+#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] Kann temporären Buffer nicht allozieren.\n"
+#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] Sorry, nichtunterstützter Modus -- probiere -x 640 -zoom.\n"
+#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] Oh, du hast wirklich ein Bild auf dem TV!\n"
+#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] Kann Linux Video Overlay nicht initialisieren.\n"
+#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] Benutze Video-Overlay: %s.\n"
+#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] Kann VIDIX-Treiber nicht initialisieren.\n"
+#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] Benutze VIDIX.\n"
+#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] Kann keinen Modus finden für: %ux%u@%u.\n"
+#define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA-Initialisierung abgeschlossen.\n"
+
+// libvo/vo_x11.c
+
+#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] draw_frame() aufgerufen!!!!!!\n"
+
+// libvo/vo_xv.c
+
+#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() aufgerufen!!!!!!\n"
