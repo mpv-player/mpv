@@ -224,8 +224,8 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
         sh->samplesize=2;
         sh->sample_format=AF_FORMAT_S16_NE;
         sh->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
-        if (identify && !demux_aid_vid_mismatch)
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", id);
+        if (!demux_aid_vid_mismatch)
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", id);
     }
     return demuxer->a_streams[id];
 }
@@ -249,8 +249,8 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
-        if (identify && !demux_aid_vid_mismatch)
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", id);
+        if (!demux_aid_vid_mismatch)
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", id);
     }
     return demuxer->v_streams[id];
 }
@@ -552,8 +552,7 @@ void demuxer_help(void)
 
   mp_msg(MSGT_DEMUXER, MSGL_INFO, "Available demuxers:\n");
   mp_msg(MSGT_DEMUXER, MSGL_INFO, " demuxer:  type  info:  (comment)\n");
-  if (identify)
-    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DEMUXERS\n");
+  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DEMUXERS\n");
   for (i = 0; demuxer_list[i]; i++) {
     if (demuxer_list[i]->type > DEMUXER_TYPE_MAX) // Don't display special demuxers
       continue;
@@ -935,13 +934,10 @@ int demux_info_print(demuxer_t *demuxer)
     for(n = 0; info[2*n] != NULL ; n++)
     {
       mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n",info[2*n],info[2*n+1]);
-      if (identify) {
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CLIP_INFO_NAME%d=%s\n", n, info[2*n]);
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CLIP_INFO_VALUE%d=%s\n", n, info[2*n+1]);
-      }
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CLIP_INFO_NAME%d=%s\n", n, info[2*n]);
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CLIP_INFO_VALUE%d=%s\n", n, info[2*n+1]);
     }
-    if (identify)
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CLIP_INFO_N=%d\n", n);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CLIP_INFO_N=%d\n", n);
 
     return 0;
 }

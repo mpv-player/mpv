@@ -88,7 +88,6 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 int slave_mode=0;
 int player_idle_mode=0;
 extern int verbose;
-int identify=0;
 int quiet=0;
 
 #ifdef WIN32
@@ -588,8 +587,7 @@ static void exit_sighandler(int x){
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
       current_module?current_module:"unknown"
   );
-  if (identify)
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SIGNAL=%d\n", x);
+  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SIGNAL=%d\n", x);
   if(sig_count<=1)
   switch(x){
   case SIGINT:
@@ -804,11 +802,8 @@ void add_subtitles(char *filename, float fps, int silent)
         mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub, filename);
     if (subd == NULL || set_of_sub_size >= MAX_SUBTITLE_FILES) return;
     set_of_subtitles[set_of_sub_size] = subd;
-    if (identify)
-    {
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", set_of_sub_size);
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
-    }
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", set_of_sub_size);
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
     ++set_of_sub_size;
     mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AddedSubtitleFile, set_of_sub_size, filename);
 }
@@ -2450,16 +2445,14 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
     if(audio_codec_list && strcmp(audio_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
-      if (identify)
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_CODECS\n");
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_CODECS\n");
       list_codecs(1);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       opt_exit = 1;
     }
     if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
-      if (identify)
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_CODECS\n");
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODECS\n");
       list_codecs(0);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       opt_exit = 1;
@@ -3284,35 +3277,33 @@ if(sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 }
 
-if(identify) {
-  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_FILENAME=%s\n", filename);
-  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_DEMUXER=%s\n", demuxer->desc->name);
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n", filename);
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", demuxer->desc->name);
   if (sh_video) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_video->format >= 0x20202020)
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", (char *)&sh_video->format);
+	mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", (char *)&sh_video->format);
     else
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=0x%08X\n", sh_video->format);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", sh_video->i_bps*8);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", sh_video->disp_w);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", sh_video->disp_h);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", sh_video->fps);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", sh_video->aspect);
+	mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FORMAT=0x%08X\n", sh_video->format);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", sh_video->i_bps*8);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", sh_video->disp_w);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", sh_video->disp_h);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_FPS=%5.3f\n", sh_video->fps);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", sh_video->aspect);
   }
   if (sh_audio) {
     if (sh_audio->codec)
-      mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_audio->format >= 0x20202020)
-      mp_msg(MSGT_GLOBAL,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", (char *)&sh_audio->format);
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", (char *)&sh_audio->format);
     else
-      mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_FORMAT=%d\n", sh_audio->format);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", sh_audio->i_bps*8);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_RATE=%d\n", sh_audio->samplerate);
-    mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_NCH=%d\n", sh_audio->channels);
+      mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_FORMAT=%d\n", sh_audio->format);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_BITRATE=%d\n", sh_audio->i_bps*8);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_RATE=%d\n", sh_audio->samplerate);
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_NCH=%d\n", sh_audio->channels);
   }
-  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_LENGTH=%.2lf\n", demuxer_get_time_length(demuxer));
-}
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_LENGTH=%.2lf\n", demuxer_get_time_length(demuxer));
 
 if(!sh_video) goto main; // audio-only
 
@@ -3365,8 +3356,8 @@ if(!sh_video->inited){
 
 inited_flags|=INITED_VCODEC;
 
-if (identify && sh_video->codec)
-    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
+if (sh_video->codec)
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_CODEC=%s\n", sh_video->codec->name);
 
 if(auto_quality>0){
     // Auto quality option enabled
@@ -4000,8 +3991,7 @@ if(auto_quality>0){
 	  update_osd_msg();
 	} else
 	  mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
-        if (identify)
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_PAUSED\n");
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_PAUSED\n");
 	fflush(stdout);
       }
 #ifdef HAVE_NEW_GUI
@@ -4538,8 +4528,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_SWITCH_AUDIO : {
         int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
-        if (identify)
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", v);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", v);
     } break;
     case MP_CMD_RUN : {
 #ifndef __MINGW32__

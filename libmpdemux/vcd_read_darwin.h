@@ -124,11 +124,8 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
     }
 	
 	//print all track info
-	if (identify)
-	{
-		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", hdr.firstTrackNumberInLastSessionLSB);
-		mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", hdr.lastTrackNumberInLastSessionLSB);
-	}
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", hdr.firstTrackNumberInLastSessionLSB);
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", hdr.lastTrackNumberInLastSessionLSB);
 	for (i=hdr.firstTrackNumberInLastSessionLSB ; i<=hdr.lastTrackNumberInLastSessionLSB + 1; i++)
 	{
 		memset( &tocentry, 0, sizeof(tocentry));
@@ -157,7 +154,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
           (int)trackMSF.frame
 		);
 
-		if (identify)
+		if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
 		{
 		  if (i > hdr.firstTrackNumberInLastSessionLSB)
 		  {
@@ -174,7 +171,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd)
 		      sec += 60;
 		      min --;
 		    }
-		    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
+		    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
 		  }
 		  min = trackMSF.minute;
 		  sec = trackMSF.second;

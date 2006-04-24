@@ -465,13 +465,10 @@ static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vor
     if (!strncasecmp(*cmt, "LANGUAGE=", 9))
     {
       val = *cmt + 9;
-      if (identify)
-      {
-        if (ogg_d->subs[id].text)
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", ogg_d->subs[id].id, val);
-        else if (id != d->video->id)
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", ogg_d->subs[id].id, val);
-      }
+      if (ogg_d->subs[id].text)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", ogg_d->subs[id].id, val);
+      else if (id != d->video->id)
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", ogg_d->subs[id].id, val);
       if (ogg_d->subs[id].text)
         mp_msg(MSGT_DEMUX, MSGL_INFO, "[Ogg] Language for -sid %d is '-slang \"%s\"'\n", ogg_d->subs[id].id, val);
       // copy this language name into the array
@@ -921,8 +918,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
       sh_a->format = FOURCC_VORBIS;
       ogg_d->subs[ogg_d->num_sub].vorbis = 1;
-      if (identify)
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
       ogg_d->subs[ogg_d->num_sub].id = n_audio;
       n_audio++;
       mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Vorbis), -aid %d\n",ogg_d->num_sub,n_audio-1);
@@ -942,8 +938,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 
       ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate;
       ogg_d->subs[ogg_d->num_sub].speex = 1;
-      if (identify)
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
       ogg_d->subs[ogg_d->num_sub].id = n_audio;
       n_audio++;
       mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Speex), -aid %d\n",ogg_d->num_sub,n_audio-1);
@@ -982,8 +977,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 				      sh_v->bih->biWidth*sh_v->bih->biHeight);
 	    ogg_d->subs[ogg_d->num_sub].samplerate = sh_v->fps;
 	    ogg_d->subs[ogg_d->num_sub].theora = 1;
-	    if (identify)
-	      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
+	    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
 	    ogg_d->subs[ogg_d->num_sub].id = n_video;
 	    n_video++;
 	    mp_msg(MSGT_DEMUX,MSGL_INFO,
@@ -1000,8 +994,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     } else if (pack.bytes >= 4 && !strncmp (&pack.packet[0], "fLaC", 4)) {
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
 	sh_a->format =  mmioFOURCC('f', 'L', 'a', 'C');
-	if (identify)
-	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
 	ogg_d->subs[ogg_d->num_sub].flac = 1;
@@ -1030,8 +1023,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
 
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_v->fps;
-	if (identify)
-	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
 	ogg_d->subs[ogg_d->num_sub].id = n_video;
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: video (FOURCC %c%c%c%c), -vid %d\n",
@@ -1055,8 +1047,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  memcpy(((char *)sh_a->wf)+sizeof(WAVEFORMATEX),pack.packet+142,extra_size);
 
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
-	if (identify)
-	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (format 0x%04x), -aid %d\n",ogg_d->num_sub,sh_a->format,n_audio-1);
@@ -1086,8 +1077,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	sh_v->bih->biSizeImage=(sh_v->bih->biBitCount>>3)*sh_v->bih->biWidth*sh_v->bih->biHeight;
 
 	ogg_d->subs[ogg_d->num_sub].samplerate= sh_v->fps;
-	if (identify)
-	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", n_video);
 	ogg_d->subs[ogg_d->num_sub].id = n_video;
 	n_video++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: video (FOURCC %c%c%c%c), -vid %d\n",
@@ -1126,8 +1116,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	  memcpy(((char *)sh_a->wf)+sizeof(WAVEFORMATEX),((char *)(st+1))+extra_offset,extra_size);
 
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
-	if (identify)
-	  mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", n_audio);
 	ogg_d->subs[ogg_d->num_sub].id = n_audio;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (format 0x%04x), -aid %d\n",ogg_d->num_sub,sh_a->format,n_audio-1);
@@ -1138,8 +1127,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
           mp_msg(MSGT_DEMUX, MSGL_INFO, "[Ogg] stream %d: subtitles (SRT-like text subtitles), -sid %d\n", ogg_d->num_sub, ogg_d->n_text);
 	  ogg_d->subs[ogg_d->num_sub].samplerate= get_uint64(&st->time_unit)/10;
 	  ogg_d->subs[ogg_d->num_sub].text = 1;
-	  if (identify)
-	    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", ogg_d->n_text);
+	  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", ogg_d->n_text);
           ogg_d->subs[ogg_d->num_sub].id = ogg_d->n_text;
           if (demuxer->sub->id == ogg_d->n_text)
             text_id = ogg_d->num_sub;

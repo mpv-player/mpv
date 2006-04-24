@@ -312,8 +312,7 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
 //printf("Track %d, sector=%d\n", i, p->sector-1);
 		  if( cd_track!=NULL ) {
 			mp_msg(MSGT_SEEK, MSGL_INFO, "\n%s\n", cd_track->name); 
-			if (identify)
-				mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACK=%d\n", cd_track->track_nb);
+			mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CDDA_TRACK=%d\n", cd_track->track_nb);
 		  }
 		  break;
 	  }
@@ -355,8 +354,7 @@ static int seek(stream_t* s,off_t newpos) {
 		  cd_track = cd_info_get_track(p->cd_info, seeked_track+1);
 		  if( cd_track!=NULL ) {
 			  mp_msg(MSGT_SEEK, MSGL_INFO, "\n%s\n", cd_track->name);
-			  if (identify)
-			    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACK=%d\n", cd_track->track_nb);
+			  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CDDA_TRACK=%d\n", cd_track->track_nb);
 		  }
 
 	}

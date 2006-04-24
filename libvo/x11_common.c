@@ -216,8 +216,7 @@ static int x11_errorhandler(Display * display, XErrorEvent * event)
 void fstype_help(void)
 {
     mp_msg(MSGT_VO, MSGL_INFO, MSGTR_AvailableFsType);
-    if (identify)
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_FULL_SCREEN_TYPES\n");
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FULL_SCREEN_TYPES\n");
 
     mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "none",
            "don't set fullscreen window layer");

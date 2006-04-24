@@ -89,11 +89,8 @@ vcd_read_toc(int fd)
     mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return;
   }
-  if (identify)
-  {
-    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", tochdr.starting_track);
-    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
-  }
+  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_START_TRACK=%d\n", tochdr.starting_track);
+  mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_END_TRACK=%d\n", tochdr.ending_track);
   for (i = tochdr.starting_track; i <= tochdr.ending_track + 1; i++) {
     struct ioc_read_toc_entry tocentry;
     struct cd_toc_entry tocentry_data;
@@ -118,7 +115,7 @@ vcd_read_toc(int fd)
 	   (int) tocentry.data->addr.msf.frame
       );
 
-    if (identify)
+    if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
     {
       if (i > tochdr.starting_track)
       {
@@ -135,7 +132,7 @@ vcd_read_toc(int fd)
           sec += 60;
           min --;
         }
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VCD_TRACK_%d_MSF=%02d:%02d:%02d\n", i - 1, min, sec, frame);
       }
       min = tocentry.data->addr.msf.minute;
       sec = tocentry.data->addr.msf.second;

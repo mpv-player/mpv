@@ -1548,26 +1548,19 @@ display_tracks (mkv_demuxer_t *mkv_d)
         {
         case MATROSKA_TRACK_VIDEO:
           type = "video";
-          if (identify)
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
           sprintf (str, "-vid %u", vid++);
           break;
         case MATROSKA_TRACK_AUDIO:
           type = "audio";
-          if (identify)
-            {
-              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
-              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", aid, mkv_d->tracks[i]->language);
-            }
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", aid, mkv_d->tracks[i]->language);
           sprintf (str, "-aid %u, -alang %.5s",aid++,mkv_d->tracks[i]->language);
           break;
         case MATROSKA_TRACK_SUBTITLE:
           type = "subtitles";
-          if (identify)
-            {
-              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
-              mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, mkv_d->tracks[i]->language);
-            }
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, mkv_d->tracks[i]->language);
           sprintf (str, "-sid %u, -slang %.5s",sid++,mkv_d->tracks[i]->language);
           break;
         }

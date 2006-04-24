@@ -44,6 +44,7 @@ void mp_msg_init(void){
     if (env)
         verbose = atoi(env);
     for(i=0;i<MSGT_MAX;i++) mp_msg_levels[i] = -2;
+    mp_msg_levels[MSGT_IDENTIFY] = -1; // no -identify output by default
 #ifdef USE_ICONV
     mp_msg_charset = getenv("MPLAYER_CHARSET");
 #ifdef USE_LANGINFO

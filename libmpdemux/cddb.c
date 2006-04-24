@@ -222,7 +222,7 @@ read_toc(const char *dev) {
 int cdd_identify(const char *dev)
 {
 	cdtoc_last_track = 0;
-	if (identify)
+	if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
 	{
 		int i, min, sec, frame;
 		cdtoc_last_track = read_toc(dev);
@@ -238,7 +238,7 @@ int cdd_identify(const char *dev)
 			frame -= sec * 75;
 			min = sec / 60;
 			sec -= min * 60;
-			mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CDDA_TRACK_%d_MSF=%02d:%02d:%02d\n", i, min, sec, frame);
+			mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_CDDA_TRACK_%d_MSF=%02d:%02d:%02d\n", i, min, sec, frame);
 		}
 	}
 	return cdtoc_last_track;

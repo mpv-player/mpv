@@ -472,7 +472,7 @@ static int mp_describe_titleset(dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_n
         if (tt_srpt->title[title_no].title_set_nr != vts_no)
             continue;
         msec = mp_get_titleset_length(vts_file, tt_srpt, title_no);
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
+        mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_TITLE_%d_LENGTH=%d.%03d\n", title_no + 1, msec / 1000, msec % 1000);
     }
     ifoClose(vts_file);
     return 1;
@@ -569,17 +569,20 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       return STREAM_UNSUPORTED;
     }
     tt_srpt = vmg_file->tt_srpt;
-    if (identify)
+    if (mp_msg_test(MSGT_IDENTIFY, MSGL_INFO))
+    {
+      int title_no; ///< title number
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
+      for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
+      {
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_ptts);
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_angles);
+      }
+    }
+    if (mp_msg_test(MSGT_IDENTIFY, MSGL_V))
     {
       unsigned char discid [16]; ///< disk ID, a 128 bit MD5 sum
       int vts_no;   ///< video title set number
-      int title_no; ///< title number
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLES=%d\n", tt_srpt->nr_of_srpts);
-      for (title_no = 0; title_no < tt_srpt->nr_of_srpts; title_no++)
-      {
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_CHAPTERS=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_ptts);
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_TITLE_%d_ANGLES=%d\n", title_no + 1, tt_srpt->title[title_no].nr_of_angles);
-      }
       for (vts_no = 1; vts_no <= vmg_file->vts_atrt->nr_of_vtss; vts_no++)
         mp_describe_titleset(dvd, tt_srpt, vts_no);
       if (DVDDiscID(dvd, discid) >= 0)
@@ -588,7 +591,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
         char buf[33];
         for (i = 0; i < 16; i ++)
           sprintf(buf+2*i, "%02X", discid[i]);
-        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_DVD_DISC_ID=%s\n", buf);
+        mp_msg(MSGT_IDENTIFY, MSGL_V, "ID_DVD_DISC_ID=%s\n", buf);
       }
     }
     /**
@@ -731,11 +734,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
              tmp,
              d->audio_streams[d->nr_of_channels].id
            );
-           if(identify) {
-             mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", d->audio_streams[d->nr_of_channels].id);
-             if(language && tmp[0])
-               mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", d->audio_streams[d->nr_of_channels].id, tmp);
-           }
+           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", d->audio_streams[d->nr_of_channels].id);
+           if(language && tmp[0])
+             mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", d->audio_streams[d->nr_of_channels].id, tmp);
 
            d->nr_of_channels++;
          }
@@ -784,11 +785,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
 
         mp_msg(MSGT_OPEN,MSGL_V,"[open] subtitle ( sid ): %d language: %s\n", d->nr_of_subtitles, tmp);
-        if(identify) {
-          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->subtitles[d->nr_of_subtitles].id);
-          if(language && tmp[0])
-            mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", d->nr_of_subtitles, tmp);
-        }
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", d->subtitles[d->nr_of_subtitles].id);
+        if(language && tmp[0])
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", d->nr_of_subtitles, tmp);
         d->nr_of_subtitles++;
       }
       mp_msg(MSGT_OPEN,MSGL_V,"[open] number of subtitles on disk: %d\n",d->nr_of_subtitles );

@@ -656,12 +656,9 @@ vobsub_add_id(vobsub_t *vob, const char *id, size_t idlen, const unsigned int in
 	memcpy(vob->spu_streams[index].id, id, idlen);
     }
     vob->spu_streams_current = index;
-    if (identify)
-    {
-	mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VOBSUB_ID=%d\n", index);
-	if (id && idlen)
-	    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VSID_%d_LANG=%s\n", index, vob->spu_streams[index].id);
-    }
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VOBSUB_ID=%d\n", index);
+    if (id && idlen)
+	mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VSID_%d_LANG=%s\n", index, vob->spu_streams[index].id);
     mp_msg(MSGT_VOBSUB,MSGL_V,"[vobsub] subtitle (vobsubid): %d language %s\n",
 		index, vob->spu_streams[index].id);
     return 0;

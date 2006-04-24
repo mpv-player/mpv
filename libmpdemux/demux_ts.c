@@ -594,20 +594,16 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 
 			if(is_video)
 			{
-				if (identify)
-					mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_ID=%d\n", es.pid);
+				mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", es.pid);
     				chosen_pid = (req_vpid == es.pid);
 				if((! chosen_pid) && (req_vpid > 0))
 					continue;
 			}
 			else if(is_audio)
 			{
-				if (identify)
-				{
-					mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_ID=%d\n", es.pid);
-					if (es.lang[0] > 0)
-						mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AID_%d_LANG=%s\n", es.pid, es.lang);
-				}
+				mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", es.pid);
+				if (es.lang[0] > 0)
+					mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", es.pid, es.lang);
 				if(req_apid > 0)
 				{
 					chosen_pid = (req_apid == es.pid);
@@ -625,12 +621,9 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			}
 			else if(is_sub)
 			{
-				if (identify)
-				{
-					mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", es.pid);
-					if (es.lang[0] > 0)
-						mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_SID_%d_LANG=%s\n", es.pid, es.lang);
-				}
+				mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", es.pid);
+				if (es.lang[0] > 0)
+					mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", es.pid, es.lang);
 				chosen_pid = (req_spid == es.pid);
 				if((! chosen_pid) && (req_spid > 0))
 					continue;
