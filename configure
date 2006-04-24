@@ -3738,11 +3738,12 @@ if test "$_xvmc" = yes ; then
   _ld_xvmc="-lXvMC -l$_xvmclib"
   _vosrc="$_vosrc vo_xvmc.c"
   _vomodules="xvmc $_vomodules"
+  _res_comment="using $_xvmclib"
 else
   _def_xvmc='#undef HAVE_XVMC'
   _novomodules="xvmc $_novomodules"
 fi
-echores "$_xvmc (using $_xvmclib)"
+echores "$_xvmc"
 
 
 echocheck "Xinerama"
@@ -3841,14 +3842,14 @@ if test "$_dga" = 1 ; then
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  _res_comment="(using DGA 1.0)"
+  _res_comment="using DGA 1.0"
 elif test "$_dga" = 2 ; then
   _def_dga='#define HAVE_DGA 1'
   _def_dga2='#define HAVE_DGA2 1'
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
-  _res_comment="(using DGA 2.0)"
+  _res_comment="using DGA 2.0"
 elif test "$_dga" = no ; then
   _novomodules="dga $_novomodules"
 else
