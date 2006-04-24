@@ -4834,6 +4834,8 @@ if(rel_seek_secs || abs_seek_pos){
       if(sh_audio){
         current_module="seek_audio_reset";
         audio_out->reset(); // stop audio, throwing away buffered data
+        sh_audio->a_buffer_len = 0;
+        sh_audio->a_out_buffer_len = 0;
       }
         // Set OSD:
       if(!loop_seek){
