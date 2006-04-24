@@ -3789,15 +3789,14 @@ if(time_frame>0.001 && !(vo_flags&256)){
 #else
     {
 	// -------- TIMER + SOFTSLEEP -----------
-	float min=softsleep?0.021:0.005;
+	// assume kernel HZ=100 for softsleep, works with larger HZ but with
+	// unnecessarily high CPU usage
+	float margin = softsleep ? 0.011 : 0;
 	current_module="sleep_timer";
-        while(time_frame>min){
-          if(time_frame<=0.020)
-             usec_sleep(0); // sleeps 1 clock tick (10ms)!
-          else
-             usec_sleep(1000000*(time_frame-0.020));
-          time_frame-=GetRelativeTime();
-        }
+	while (time_frame > margin) {
+	    usec_sleep(1000000 * (time_frame - margin));
+	    time_frame -= GetRelativeTime();
+	}
 	if(softsleep){
 	    current_module="sleep_soft";
 	    if(time_frame<0) mp_msg(MSGT_AVSYNC, MSGL_WARN, MSGTR_SoftsleepUnderflow);
