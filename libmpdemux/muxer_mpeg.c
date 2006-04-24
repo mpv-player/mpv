@@ -169,6 +169,7 @@ typedef struct {
 	int frames;
 	int last_frame_rest; 	//the rest of the previous frame
 	int is_ready;
+	int mpa_layer;
 } muxer_headers_t;
 
 #define PULLDOWN32 1
@@ -2040,6 +2041,38 @@ static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int le
 	return idx;
 }
 
+static int analyze_mpa(muxer_stream_t *s)
+{
+	int i = 0, len, max, chans, srate, spf, layer;
+	int score[4] = {0, 0, 0, 0};
+	
+	while(i < s->b_buffer_len + 3)
+	{
+		if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xE0) == 0xE0))
+		{
+			len = mp_get_mp3_header(&(s->b_buffer[i]), &chans, &srate, &spf, &layer, NULL);
+			if(len > 0 && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
+			{
+				score[layer]++;
+				i += len;
+			}
+		}
+		i++;
+	}
+
+	max = 0;
+	layer = 2;
+	for(i = 1; i <= 3; i++)
+	{
+		if(score[i] >= max)
+		{
+			max = score[i];
+			layer = i;
+		}
+	}
+
+	return layer;	//actual layer with the highest score
+}
 
 extern int aac_parse_frame(uint8_t *buf, int *srate, int *num);
 
@@ -2071,7 +2104,8 @@ static int parse_audio(muxer_stream_t *s, int finalize, unsigned int *nf, double
 				if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xE0) == 0xE0))
 				{
 					len = mp_get_mp3_header(&(s->b_buffer[i]), &chans, &srate, &spf, &layer, NULL);
-					if(len > 0 && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
+					if(len > 0 && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len) 
+						&& layer == spriv->mpa_layer)
 					{
 						dur = (double) spf / (double) srate;
 						idur = (27000000ULL * spf) / srate;
@@ -2200,6 +2234,7 @@ static void fix_parameters(muxer_stream_t *stream)
 
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
+		spriv->is_ready = 1;
 		spriv->max_buffer_size = 4*1024;
 		if(stream->wf->wFormatTag == AUDIO_A52)
 		{
@@ -2213,6 +2248,8 @@ static void fix_parameters(muxer_stream_t *stream)
 		{
 			priv->use_psm = 1;
 		}
+		else if(stream->wf->wFormatTag == AUDIO_MP2 || stream->wf->wFormatTag == AUDIO_MP3)
+			spriv->is_ready = 0;
 	}
 	else	//video
 	{
@@ -2294,8 +2331,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
   	spriv->type = 0;
 	stream_format = s->wf->wFormatTag;
 
-	if(! spriv->vframes)
-		mp_msg(MSGT_MUXER, MSGL_INFO, "AINIT: %.3lf\r\n", (double) spriv->last_pts/27000000.0f);	
 	if(s->b_buffer_size - s->b_buffer_len < len)
 	{
 		s->b_buffer = realloc(s->b_buffer, len  + s->b_buffer_len);
@@ -2311,9 +2346,22 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 	memcpy(&(s->b_buffer[s->b_buffer_ptr + s->b_buffer_len]), s->buffer, len);
 	s->b_buffer_len += len;
 	
+	if(!spriv->is_ready)
+	{
+		if(s->b_buffer_len >= 32*1024)
+		{
+			spriv->mpa_layer = analyze_mpa(s);
+			spriv->is_ready = 1;
+		}
+	}
+	else
+	{
 	parse_audio(s, 0, &nf, &fake_timer, priv->init_adelay, priv->drop);
 	spriv->vframes += nf;
 	sz = max(len, 2 * priv->packet_size);
+	if(! spriv->vframes)
+		mp_msg(MSGT_MUXER, MSGL_INFO, "AINIT: %.3lf\r\n", (double) spriv->last_pts/27000000.0f);	
+	}
   }
   
 
