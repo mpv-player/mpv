@@ -1407,7 +1407,7 @@ static int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
     cal.cal_mode = EM8300_OVERLAY_CALMODE_XCORRECTION;
     if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
 	{
- 	    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedGettingOverlayYScaleCorrection);
+ 	    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection);
  	    return -1;
 	}
     mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_DXR3_XCorrection,cal.result);
