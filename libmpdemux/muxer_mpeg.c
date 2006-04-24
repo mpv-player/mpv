@@ -2046,57 +2046,50 @@ extern int aac_parse_frame(uint8_t *buf, int *srate, int *num);
 static int parse_audio(muxer_stream_t *s, int finalize, unsigned int *nf, double *timer, double delay, int drop)
 {
 	int i, j, len, chans, srate, spf, layer, dummy, tot, num, frm_idx;
+	int finished;
 	unsigned int frames;
 	uint64_t idur;
 	double dur;
 	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
 
 	i = tot = frames = 0;
-	switch(s->wf->wFormatTag)
+	finished = 0;
+	while(1)
 	{
+		len = 0;
+		switch(s->wf->wFormatTag)
+		{
 		case AUDIO_MP2:
 		case AUDIO_MP3:
-		{
-			while(i + 3 < s->b_buffer_len)
 			{
+				if(i + 3 >= s->b_buffer_len)
+				{
+					finished = 1;
+					break;
+				}
+			
 				if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xE0) == 0xE0))
 				{
 					len = mp_get_mp3_header(&(s->b_buffer[i]), &chans, &srate, &spf, &layer, NULL);
 					if(len > 0 && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
 					{
 						dur = (double) spf / (double) srate;
-						spriv->timer += dur;
-						if(spriv->drop_delayed_frames && delay < 0 && spriv->timer <= -delay)
-						{
-							i += len;
-							tot = i;
-							continue;
-						}
-						frames++;
-						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
-
 						idur = (27000000ULL * spf) / srate;
-						frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, spriv->last_pts, spriv->last_pts);
-						if(frm_idx < 0)
-							continue;
-						for(j = frm_idx; j < spriv->framebuf_cnt; j++)
-							spriv->framebuf[j].pts = spriv->last_pts;
-						spriv->last_pts += idur;
-
-						i += len;
-						tot = i;
-						continue;
 					}
+					else
+						len = 0;
 				}
-				i++;
 			}
-		}
 		break;
 
 		case AUDIO_A52:
-		{
-			while(i + 6 < s->b_buffer_len)
 			{
+				if(i + 6 >= s->b_buffer_len)
+				{
+					finished = 1;
+					break;
+				}
+	
 				if(s->b_buffer[i] == 0x0B && s->b_buffer[i+1] == 0x77)
 				{
 					srate = 0;
@@ -2108,73 +2101,71 @@ static int parse_audio(muxer_stream_t *s, int finalize, unsigned int *nf, double
 					if((len > 0) && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
 					{
 						dur = (double) 1536 / (double) srate;
-						spriv->timer += dur;
-						if(spriv->drop_delayed_frames && delay < 0 && spriv->timer <= -delay)
-						{
-							i += len;
-							tot = i;
-							continue;
-						}
-						frames++;
-						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
-
 						idur = (27000000ULL * 1536) / srate;
-						frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, spriv->last_pts, spriv->last_pts);
-						if(frm_idx < 0)
-							continue;
-						for(j = frm_idx; j < spriv->framebuf_cnt; j++)
-							spriv->framebuf[j].pts = spriv->last_pts;
-						spriv->last_pts += idur;
-
-						i += len;
-						tot = i;
-						continue;
 					}
+					else
+						len = 0;
 				}
-				i++;
 			}
-		}
 		break;
 
 		case AUDIO_AAC1:
 		case AUDIO_AAC2:
-		{
-			while(i + 7 < s->b_buffer_len)
 			{
+				if(i + 7 >= s->b_buffer_len)
+				{
+					finished = 1;
+					break;
+				}
+	
 				if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xF6) == 0xF0))
 				{
 					len = aac_parse_frame(&(s->b_buffer[i]), &srate, &num);
 					if((len > 0) && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
 					{
 						dur = (double) 1024 / (double) srate;
-						spriv->timer += dur;
-						if(spriv->drop_delayed_frames && delay < 0 && spriv->timer <= -delay)
-						{
-							i += len;
-							tot = i;
-							continue;
-						}
-						frames++;
-						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
-
 						idur = (27000000ULL * 1024 * num) / srate;
-						frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, spriv->last_pts, spriv->last_pts);
-						if(frm_idx < 0)
-							continue;
-						for(j = frm_idx; j < spriv->framebuf_cnt; j++)
-							spriv->framebuf[j].pts = spriv->last_pts;
-						spriv->last_pts += idur;
-
-						i += len;
-						tot = i;
-						continue;
 					}
+					else
+						len = 0;
 				}
-				i++;
 			}
 		}
+
+		if(finished)
+			break;
+
+		if(!len)
+		{
+			i++;
+			continue;
+		}
+		
+		spriv->timer += dur;
+		if(spriv->drop_delayed_frames && delay < 0 && spriv->timer <= -delay)
+		{
+			i += len;
+			tot = i;
+			continue;
+		}
+
+		frames++;
+		fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
+		frm_idx = add_frame(spriv, idur, &(s->b_buffer[i]), len, 0, spriv->last_pts, spriv->last_pts);
+		if(frm_idx < 0)
+		{
+			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't add audio frame buffer(frame), abort\n");
+			goto audio_exit;
+		}
+		for(j = frm_idx; j < spriv->framebuf_cnt; j++)
+			spriv->framebuf[j].pts = spriv->last_pts;
+		spriv->last_pts += idur;
+
+		i += len;
+		tot = i;
 	}
 
+audio_exit:
 	if(tot)
 	{
 		memmove(s->b_buffer, &(s->b_buffer[tot]), s->b_buffer_len - tot);
