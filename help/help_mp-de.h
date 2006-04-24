@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.244
+// In synch with rev 1.245
 
 // ========================= MPlayer help ===========================
 
@@ -415,11 +415,11 @@ static char help_text[]=
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     Modus für variable Bitrate\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh (Standard)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
+"                0: cbr (konstante Bitrate)\n"\
+"                1: mt (Mark Taylor VBR Algorithmus)\n"\
+"                2: rh (Robert Hegemann VBR Algorithmus - Standard)\n"\
+"                3: abr (verfügbare Bitrate)\n"\
+"                4: mtrh (Mark Taylor Robert Hegemann VBR Algorithmus)\n"\
 "\n"\
 " abr           durchschnittliche Bitrate\n"\
 "\n"\
@@ -1467,7 +1467,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid-Fehler: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Fehler bei der Auswahl.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Lesefehler bei child's: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Lesefehler bei child-Dateideskriptor: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Konsolenaufruf: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Es läuft schon ein Child.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork-Fehler!!!\n"
@@ -1513,7 +1513,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Arithmetisches Mittel des QP: %2.4f, Harmonisches Mittel des QP: %2.4f\n"
 #define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI-Versagen.\n"
 #define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Konnte Bild für Codec nicht allozieren.\n"
-#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-beschleunigtes MPEG2.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-beschleunigtes MPEG-2.\n"
 #define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Versuche pixfmt=%d.\n"
 #define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Der mc_get_buffer sollte nur mit XVMC-Beschleunigung funktionieren!!"
 #define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Unerwarteter init_vo-Fehler.\n"
