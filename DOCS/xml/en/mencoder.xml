@@ -639,8 +639,8 @@ way!
 <para>
 MPEG-4 has an unique feature: the video stream can contain its needed aspect
 ratio. Yes, just like MPEG-1/2 (DVD, SVCD) and H.263 files. Regretfully, there are
-<emphasis role="bold">no</emphasis> video players outside which support this
-attribute of MPEG-4, except <application>MPlayer</application>.
+few video players apart from <application>MPlayer</application> support this
+MPEG-4 attribute.
 </para>
 
 <para>
@@ -648,7 +648,7 @@ This feature can be used only with
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
 <systemitem>mpeg4</systemitem> codec. Keep in mind: although
 <application>MPlayer</application> will correctly play the created file,
-other players will use the wrong aspect ratio.
+other players may use the wrong aspect ratio.
 </para>
 
 <para>
