@@ -1,9 +1,9 @@
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
 #include "geometry.h"
-#ifndef ASPECT_TEST
+//#ifndef ASPECT_TEST
 #include "mp_msg.h"
-#endif
+//#endif
 
 //#define ASPECT_DEBUG
 
@@ -105,7 +105,7 @@ void aspect(int *srcw, int *srch, int zoom){
 #ifndef ASPECT_TEST
       mp_msg(MSGT_VO,MSGL_WARN,"aspect: Warning: no suitable new res found!\n");
 #else
-      printf("error: no new size found that fits into res!\n");
+      mp_msg(MSGT_VO,MSGL_WARN,"error: no new size found that fits into res!\n");
 #endif
     }
   }

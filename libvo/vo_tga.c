@@ -32,6 +32,8 @@
 #include <math.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
@@ -230,7 +232,7 @@ static void check_events(void)
 static int preinit(const char *arg)
 {
     if(arg) {
-	printf("vo_tga: Unknown subdevice: %s\n",arg);
+	mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TGA_UnknownSubdevice,arg);
 	return ENOSYS;
     }
     return 0;

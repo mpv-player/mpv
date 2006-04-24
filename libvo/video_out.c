@@ -267,9 +267,9 @@ void list_video_out(void){
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
       while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->info;
-      	printf("\t%s\t%s\n", info->short_name, info->name);
+      	mp_msg(MSGT_GLOBAL, MSGL_INFO,"\t%s\t%s\n", info->short_name, info->name);
       }
-      printf("\n");
+      mp_msg(MSGT_GLOBAL, MSGL_INFO,"\n");
 }
 
 vo_functions_t* init_best_video_out(char** vo_list){
@@ -354,7 +354,7 @@ range_t *str2range(char *s)
 		if (*s == ',')
 			goto out_err;
 		if (!(r = (range_t *) realloc(r, sizeof(*r) * (i + 2)))) {
-			printf("can't realloc 'r'\n");
+			mp_msg(MSGT_GLOBAL, MSGL_WARN,"can't realloc 'r'\n");
 			return NULL;
 		}
 		tmp_min = strtod(s, &endptr);

@@ -31,6 +31,8 @@
 #include <errno.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 
@@ -286,7 +288,7 @@ flip_page(void)
 
 	if ( dbg_singleframe ) {
 		if ( debug_skip_first == 0 ) {
-			printf( "Press 'anykey' for field 1\n" );
+			mp_msg(MSGT_VO,MSGL_INFO, "Press 'anykey' for field 1\n" );
 			getchar();
 			ioctl(f,SYNCFB_VBI,0);
 		}
@@ -302,14 +304,14 @@ flip_page(void)
 		}
 
 		if ( debug_skip_first == 0 ) {
-			printf( "Press 'anykey' for field 2\n" );
+			mp_msg(MSGT_VO,MSGL_INFO, "Press 'anykey' for field 2\n" );
 			getchar();
 			ioctl(f,SYNCFB_VBI,0);
 		}
 	}
 
 	ioctl(f,SYNCFB_REQUEST_BUFFER,&bufinfo);
-	if ( bufinfo.id == -1 ) printf( "Got buffer #%d\n", bufinfo.id );
+	if ( bufinfo.id == -1 ) mp_msg(MSGT_VO,MSGL_INFO, "Got buffer #%d\n", bufinfo.id );
 
 	vid_data = (uint_8 *)(frame_mem + bufinfo.offset);
 	if ( bufinfo.id == -1 ) {
@@ -322,7 +324,7 @@ flip_page(void)
 
 static int draw_frame(uint8_t *src[])
 {
-	printf("DRAW FRAME!!!\n");
+	mp_msg(MSGT_VO,MSGL_INFO, "DRAW FRAME!!!\n");
 	if ( conf_palette == VIDEO_PALETTE_YUV422 ) {
 		write_frame_YUV422(src[0],src[1], src[2]);
 	} else if ( conf_palette == VIDEO_PALETTE_YUV420P2 ) {
@@ -358,7 +360,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		f = open("/dev/mga_vid",O_RDWR);
 		if(f == -1)
 		{
-			printf("Couldn't open /dev/syncfb or /dev/mga_vid\n");
+			mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SYNCFB_CouldntOpen);
 			return(-1);
 		}
 	}
@@ -368,15 +370,15 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 	if (sfb_caps.palettes & (1<<VIDEO_PALETTE_YUV420P3) ) {
 		_config.src_palette= VIDEO_PALETTE_YUV420P3;
-		printf("using palette yuv420p3\n");
+		mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3);
 	}else if ( sfb_caps.palettes & (1<<VIDEO_PALETTE_YUV420P2) ) {
 		_config.src_palette= VIDEO_PALETTE_YUV420P2;
-		printf("using palette yuv420p2\n");
+		mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2);
 	} else if ( sfb_caps.palettes & (1<<VIDEO_PALETTE_YUV422) ) {
 		_config.src_palette= VIDEO_PALETTE_YUV422;
-		printf("using palette yuv422\n");
+		mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420);
 	} else {
-		printf("no supported palette found\n");
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound);
 		return -1;
 	}
 
@@ -409,19 +411,19 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	_config.image_yorg= 0;
 
 
-	printf ("BES Sourcer size: %d x %d\n", width, height);
+	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_BesSourcerSize, width, height);
 
 	ioctl(f,SYNCFB_ON,0);
 	if (ioctl(f,SYNCFB_SET_CONFIG,&_config)) perror("Error in mga_vid_config ioctl");
 
-	printf ("Framebuffer memory: %ld in %ld buffers\n", sfb_caps.memory_size, _config.buffers);
+	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_FramebufferMemory, sfb_caps.memory_size, _config.buffers);
 
 	frame_size = ((width + 31) & ~31) * height + (((width + 31) & ~31) * height) / 2;
 	frame_mem = (uint_8*)mmap(0,sfb_caps.memory_size,PROT_WRITE,MAP_SHARED,f,0);
 
-	printf( "Requesting first buffer #%d\n", bufinfo.id );
+	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer, bufinfo.id );
 	ioctl(f,SYNCFB_REQUEST_BUFFER,&bufinfo);
-	printf( "Got first buffer #%d\n", bufinfo.id );
+	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SYNCFB_GotFirstBuffer, bufinfo.id );
 
 
 	vid_data = (uint_8 *)(frame_mem + bufinfo.offset);
@@ -447,7 +449,7 @@ static int preinit(const char *arg)
 {
     if(arg) 
     {
-	printf("vo_syncfb: Unknown subdevice: %s\n",arg);
+	mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SYNCFB_UnknownSubdevice,arg);
 	return ENOSYS;
     }
     return 0;

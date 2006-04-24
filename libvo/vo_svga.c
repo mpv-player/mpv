@@ -45,6 +45,7 @@ TODO:
 #include "sub.h"
 
 #include "mp_msg.h"
+#include "help_mp.h"
 //#include "mp_image.h"
 
 #include <assert.h>
@@ -171,7 +172,7 @@ char s[64];
 
         force_vm=vga_getmodenumber(s);
         if(force_vm>0) {
-          if( mp_msg_test(MSGT_VO,MSGL_V) ) printf("vo_svga: Forcing mode %i\n",force_vm);
+          if( mp_msg_test(MSGT_VO,MSGL_V) ) mp_msg(MSGT_VO,MSGL_V, "vo_svga: Forcing mode %i\n",force_vm);
         }else{ 
           force_vm = 0;
         }
@@ -191,7 +192,7 @@ int i;
 
   if (mode_capabilities&CAP_ACCEL_CLEAR){
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-      printf("vo_svga: clearing box %d,%d - %d,%d with HW acceleration\n",
+      mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: clearing box %d,%d - %d,%d with HW acceleration\n",
              x,y,w,h);
     if(mode_capabilities&CAP_ACCEL_BACKGR)  
       vga_accel(ACCEL_SYNC);
@@ -201,7 +202,7 @@ int i;
   }
   if (mode_capabilities & CAP_LINEAR){
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-      printf("vo_svga: clearing box %d,%d - %d,%d with memset\n",x,y,w,h);
+      mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: clearing box %d,%d - %d,%d with memset\n",x,y,w,h);
     rgbplane=PageStore[0].vbase + (y*mode_stride) + (x*modeinfo->bytesperpixel);
     for(i=0;i<h;i++){
 //i'm afraid that memcpy is better optimized than memset;)
@@ -213,7 +214,7 @@ int i;
   }
   //native
   if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-    printf("vo_svga: clearing box %d,%d - %d,%d with native draw \n",x,y,w,h);
+    mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: clearing box %d,%d - %d,%d with native draw \n",x,y,w,h);
   if(modeinfo->bytesperpixel!=0) w*=modeinfo->bytesperpixel;
   for(i=0;i<h;i++){
     vga_drawscansegment(zerobuf,x,y+i,w);
@@ -229,7 +230,7 @@ int page;
 
   if(mpi->flags & MP_IMGFLAG_DIRECT){
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-      printf("vo_svga: drawing direct rendered surface\n");
+      mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: drawing direct rendered surface\n");
     cpage=(uint32_t)mpi->priv;
     assert((cpage>=0)&&(cpage<max_pages));
     return VO_TRUE; //it's already done
@@ -259,7 +260,7 @@ int page;
       w=(stride*8)/mpi->bpp;//we transfer pixels in the stride so the source
 //ACCELERATE
       if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-        printf("vo_svga: using HW PutImage (x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
+        mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: using HW PutImage (x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
       if(mode_capabilities & CAP_ACCEL_BACKGR)
         vga_accel(ACCEL_SYNC);
 
@@ -270,7 +271,7 @@ int page;
     if( mode_capabilities&CAP_LINEAR){
 //DIRECT  
       if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-        printf("vo_svga: using Direct memcpy (x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
+        mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: using Direct memcpy (x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
       bytesperline=(w*mpi->bpp)/8;
       base=PageStore[cpage].vbase + (y*mode_stride) + (x*mpi->bpp)/8;     
 
@@ -292,7 +293,7 @@ int page;
     if(mpi->imgfmt==IMGFMT_RG4B || mpi->imgfmt==IMGFMT_BG4B) length=w;
   
     if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-      printf("vo_svga: using Native vga_draw(x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
+      mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: using Native vga_draw(x=%d,y=%d,w=%d,h=%d)\n",x,y,w,h);
     y+=PageStore[cpage].yoffset;//y position of the page beggining
     for(i=0;i<h;i++){
       vga_drawscansegment(rgbplane,x,y+i,length);
@@ -328,7 +329,7 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
     vminfo = vga_getmodeinfo(i);
     if( vminfo == NULL ) continue;
     if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
-      printf("vo_svga: testing mode %d (%s)\n",i,vga_getmodename(i));
+      mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: testing mode %d (%s)\n",i,vga_getmodename(i));
     if( vga_hasmode(i) == 0 ) continue;
     if( req_bpp != bpp_from_vminfo(vminfo) )continue;
     if( (vminfo->width < req_w) || (vminfo->height < req_h) ) continue;
@@ -341,7 +342,7 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
       prev_badness=badness;
       bestmode=i;
       if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
-        printf("vo_svga: found good mode %d with badness %d\n",i,badness);
+        mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: found good mode %d with badness %d\n",i,badness);
     }
   }
   return bestmode;
@@ -404,7 +405,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   
   uint32_t accflags;
   if( mp_msg_test(MSGT_VO,MSGL_V) )
-    printf("vo_svga: config(%i, %i, %i, %i, %08x, %s, %08x)\n", width, height,
+    mp_msg(MSGT_VO,MSGL_V, "vo_svga: config(%i, %i, %i, %i, %08x, %s, %08x)\n", width, height,
            d_width, d_height, flags, title, format);
 //Only RGB modes supported
   if (!IMGFMT_IS_RGB(format) && !IMGFMT_IS_BGR(format)) {assert(0);return -1;} 
@@ -414,8 +415,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     
   if(!force_vm) {
     if ( mp_msg_test(MSGT_VO,MSGL_V) ) {
-      printf("vo_svga: Looking for the best resolution...\n");
-      printf("vo_svga: req_w: %d, req_h: %d, bpp: %d\n",req_w,req_h,req_bpp);
+      mp_msg(MSGT_VO,MSGL_V, "vo_svga: Looking for the best resolution...\n");
+      mp_msg(MSGT_VO,MSGL_V, "vo_svga: req_w: %d, req_h: %d, bpp: %d\n",req_w,req_h,req_bpp);
     }
     vid_mode=find_best_svga_mode(req_w,req_h,req_bpp);
     if(vid_mode==0) 
@@ -424,24 +425,24 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   }else{//force_vm
     vid_mode=force_vm;
     if(vga_hasmode(vid_mode) == 0){
-      printf("vo_svga: forced vid_mode %d (%s) not available\n",
+      mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable,
              vid_mode,vga_getmodename(vid_mode));
       return 1; //error;
     }
     modeinfo=vga_getmodeinfo(vid_mode);
     if( (modeinfo->width < req_w) || (modeinfo->height < req_h) ){
-      printf("vo_svga: forced vid_mode %d (%s) too small\n",
+      mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall,
              vid_mode,vga_getmodename(vid_mode));
       return 1;
     }
   }
   mode_bpp=bpp_from_vminfo(modeinfo);
      
-  printf("vo_svga: vid_mode: %d, %dx%d %dbpp\n",
+  mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_Vidmode,
          vid_mode,modeinfo->width,modeinfo->height,mode_bpp);
   
   if (vga_setmode(vid_mode) == -1) {
-    printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
+    mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SVGA_VgasetmodeFailed,vid_mode);
     uninit();
     return 1; // error
   }
@@ -491,11 +492,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
   }//fi force native
   if(mode_capabilities&CAP_LINEAR){
-    printf("vo_svga: video mode is linear and memcpy could be used for image transfer\n");
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed);
   }
   if(mode_capabilities&CAP_ACCEL_PUTIMAGE){
-    printf("vo_svga: video mode have hardware acceleration and put_image could be used\n");
-    printf("vo_svga: If it works for you i would like to know \nvo_svga: (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx\n");
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration);
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow);
   }
   
 //here is the place to handle strides for accel_ modes;
@@ -529,7 +530,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
   }
   assert(max_pages>0);
-  printf("vo_svga: video mode have %d page(s)\n",max_pages);
+  mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeHas,max_pages);
   //15bpp
   if(modeinfo->bytesperpixel!=0)
     vga_claimvideomemory(max_pages * modeinfo->height * modeinfo->width * modeinfo->bytesperpixel);
@@ -544,14 +545,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   x_pos = (modeinfo->width  - req_w) / 2;
   y_pos = (modeinfo->height - req_h) / 2;
   x_pos &= ~(15); //align x offset position to 16 pixels
-  printf("vo_svga: centering image. start at (%d,%d)\n",x_pos,y_pos);
+  mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_CenteringImageStartAt,x_pos,y_pos);
 
 #ifdef CONFIG_VIDIX
 
   if(vidix_name[0]){ 
     vidix_init(width, height, x_pos, y_pos, modeinfo->width, modeinfo->height, 
         format, mode_bpp, modeinfo->width,modeinfo->height);
-    printf("vo_svga: Using VIDIX. w=%i h=%i  mw=%i mh=%i\n",width,height,
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_UsingVidix,width,height,
            modeinfo->width,modeinfo->height);
     vidix_start();
     /*set colorkey*/       
@@ -593,7 +594,7 @@ UNUSED(src);
 static void draw_osd(void)
 {
   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
-     printf("vo_svga: draw_osd()\n");
+     mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: draw_osd()\n");
   //only modes with bytesperpixel>0 can draw OSD
   if(modeinfo->bytesperpixel==0) return;
   if(!(mode_capabilities&CAP_LINEAR)) return;//force_native will remove OSD
@@ -622,9 +623,9 @@ static void flip_page(void) {
   PageStore[cpage].locks=PAGE_BUSY;
 
   if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-    printf("vo_svga: viewing page %d\n",cpage);
+    mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: viewing page %d\n",cpage);
   if(sync_flip && old_page!=cpage){
-    if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) printf("vo_svga:vga_waitretrace\n");
+    if( mp_msg_test(MSGT_VO,MSGL_DBG3) ) mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga:vga_waitretrace\n");
     vga_waitretrace();
   }
   vga_setdisplaystart(PageStore[cpage].doffset);
@@ -650,7 +651,7 @@ int i,lastmode;
 vga_modeinfo * vminfo;
 
   if ( mp_msg_test(MSGT_VO,MSGL_DBG4) )
-    printf("vo_svga: query_format=%X \n",format);
+    mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: query_format=%X \n",format);
 //only RGB modes supported
   if( (!IMGFMT_IS_RGB(format)) && (!IMGFMT_IS_BGR(format)) ) return 0; 
 
@@ -688,7 +689,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
   char* base;
 
   if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-    printf("vo_svga: draw_alpha(x0=%d,y0=%d,w=%d,h=%d,src=%p,srca=%p,stride=%d\n",
+    mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: draw_alpha(x0=%d,y0=%d,w=%d,h=%d,src=%p,srca=%p,stride=%d\n",
            x0,y0,w,h,src,srca,stride);
   if(!blackbar_osd) {
     //drawing in the image, so place the stuff there
@@ -697,7 +698,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
   }
   
   if( mp_msg_test(MSGT_VO,MSGL_DBG4) )
-    printf("vo_svga: OSD draw in page %d\n",cpage);
+    mp_msg(MSGT_VO,MSGL_DBG4, "vo_svga: OSD draw in page %d\n",cpage);
   base=PageStore[cpage].vbase + y0*mode_stride + x0*modeinfo->bytesperpixel;
   switch (mode_bpp) {
     case 32: 
@@ -745,7 +746,7 @@ int page;
              y_pos*mode_stride + (x_pos*mpi->bpp)/8;
       mpi->priv=(void *)page;
       if( mp_msg_test(MSGT_VO,MSGL_DBG3) )
-        printf("vo_svga: direct render allocated! page=%d\n",page);
+        mp_msg(MSGT_VO,MSGL_DBG3, "vo_svga: direct render allocated! page=%d\n",page);
       return(VO_TRUE);
     }
   }

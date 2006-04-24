@@ -668,7 +668,7 @@ static int draw_slice(uint8_t * image[], int stride[], int w, int h,
 
 static int draw_frame(uint8_t * src[])
 {
-    printf("draw_frame() called!!!!!!");
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_XV_DrawFrameCalled);
     return -1;
 }
 

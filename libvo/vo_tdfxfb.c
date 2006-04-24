@@ -38,6 +38,8 @@
 #include <linux/fb.h>
 
 #include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 #include "fastmemcpy.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -91,12 +93,12 @@ static int preinit(const char *arg)
 		name = "/dev/fb0";
 
 	if((fd = open(name, O_RDWR)) == -1) {
-		printf("tdfxfb: can't open %s: %s\n", name, strerror(errno));
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_CantOpen, name, strerror(errno));
 		return -1;
 	}
 
 	if(ioctl(fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-		printf("tdfxfb: problem with FBITGET_FSCREENINFO ioctl: %s\n",
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo,
 				strerror(errno));
 		close(fd);
 		fd = -1;
@@ -104,7 +106,7 @@ static int preinit(const char *arg)
 	}
 
 	if(ioctl(fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-		printf("tdfxfb: problem with FBITGET_VSCREENINFO ioctl: %s\n",
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo,
 				strerror(errno));
 		close(fd);
 		fd = -1;
@@ -113,8 +115,7 @@ static int preinit(const char *arg)
 
 	/* BANSHEE means any of the series aparently */
 	if (fb_finfo.accel != FB_ACCEL_3DFX_BANSHEE) {
-		printf("tdfxfb: This driver is only supports the 3Dfx Banshee,"
-				" Voodoo3 and Voodoo 5\n");
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports);
 		close(fd);
 		fd = -1;
 		return -1;
@@ -127,7 +128,7 @@ static int preinit(const char *arg)
 	case 32:
 	  break; // Ok
 	default:
-	  printf("tdfxfb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
+	  mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_OutputIsNotSupported, fb_vinfo.bits_per_pixel);
 	  close(fd);
 	  fd = -1;
 	  return -1;
@@ -140,7 +141,7 @@ static int preinit(const char *arg)
 					MAP_SHARED, fd, fb_finfo.smem_len);
 
 	if((long)memBase0 == -1 || (long)memBase1 == -1) {
-		printf("tdfxfb: Couldn't map memory areas: %s\n", strerror(errno));
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas, strerror(errno));
 		if((long)memBase0 != -1)
 		  munmap(memBase0, fb_finfo.smem_len);
 		if((long)memBase1 != -1)
@@ -247,7 +248,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		break;
 
 	default:
-		printf("tdfxfb: %d bpp output is not supported (This should never happend)\n", fb_vinfo.bits_per_pixel);
+		MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported, fb_vinfo.bits_per_pixel);
 		return -1;
 	}
 
@@ -285,7 +286,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 		break;
 
 	default:
-		printf("tdfxfb: Eik! Something's wrong with control().\n");
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl);
 		return -1;
 	}
 
@@ -302,7 +303,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 	inpageoffset = hidpageoffset + screenwidth * screenheight * screendepth;
 
 	if(inpageoffset + in_width * in_depth * in_height > fb_finfo.smem_len) {
-		printf("tdfxfb: Not enough video memory to play this movie. Try at a lower resolution\n");
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay);
 		return -1;
 	}
 
@@ -314,7 +315,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
 
 	memset(inpage, 0, in_width * in_height * in_depth);
 
-	printf("tdfxfb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d\n",
+	mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_TDFXFB_ScreenIs,
 			screenwidth, screenheight, screendepth * 8,
 			in_width, in_height, in_depth * 8,
 			d_width, d_height);

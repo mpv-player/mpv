@@ -44,6 +44,7 @@ int XShmGetEventBase(Display *);
 #include "libmpcodecs/vf_scale.h"
 
 #include "mp_msg.h"
+#include "help_mp.h"
 
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
@@ -654,7 +655,7 @@ static int draw_frame(uint8_t * src[])
 
     return draw_slice(src, stride, srcW, srcH, 0, 0);
 #else
-    printf("draw_frame() called!!!!!!\n");
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_X11_DrawFrameCalled);
     return -1;
 #endif
 }
