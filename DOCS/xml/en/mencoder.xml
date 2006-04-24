@@ -637,9 +637,9 @@ way!
 <para>There is</para>
 
 <para>
-MPEG-4 has an unique feature: the video stream can contain its needed aspect
+MPEG-4 has a unique feature: the video stream can contain its needed aspect
 ratio. Yes, just like MPEG-1/2 (DVD, SVCD) and H.263 files. Regretfully, there are
-few video players apart from <application>MPlayer</application> support this
+few video players apart from <application>MPlayer</application> that support this
 MPEG-4 attribute.
 </para>
 
