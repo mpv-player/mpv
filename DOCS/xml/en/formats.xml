@@ -81,7 +81,7 @@ functional.
 One important feature of MPGs is that they have a field to describe the
 aspect ratio of the video stream within. For example SVCDs have 480x480
 resolution video, and in the header that field is set to 4:3, so that it is
-played at 640x480. AVI files do not have this field, so they have to be
+played at 640x480. AVI files often lack this field, so they have to be
 rescaled during encoding or played with the <option>-aspect</option>
 option.
 </para>
