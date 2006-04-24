@@ -1,3 +1,7 @@
+
+/// \file
+/// \ingroup Options
+
 #include "config.h"
 
 #include <stdlib.h>
