@@ -2864,11 +2864,11 @@ if not hpux ; then
 fi
 fi
 if test "$_pthreads" = yes ; then
-  _res_comment="(using $_ld_pthread)"
+  _res_comment="using $_ld_pthread"
   _def_pthreads='#define HAVE_PTHREADS 1'
   _def_threads='#define HAVE_THREADS 1'
 else
-  _res_comment="(v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
+  _res_comment="v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled"
   _def_pthreads='#undef HAVE_PTHREADS'
   _nas=no ; _tv_v4l=no ; _macosx=no
   if not mingw32 ; then
@@ -4314,7 +4314,7 @@ if test "$_gif" = yes ; then
   _codecmodules="gif $_codecmodules"
   _vomodules="gif89a $_vomodules"
   _mkf_gif="yes"
-  _res_comment="(old version, some encoding functions disabled)"
+  _res_comment="old version, some encoding functions disabled"
   _def_gif_4='#undef HAVE_GIF_4'
 
   cat > $TMPC << EOF
@@ -4416,7 +4416,7 @@ EOF
           fi
           _sdl=yes
         else
-          _res_comment=outdated
+          _res_comment="outdated"
         fi
      fi
   fi
@@ -5157,7 +5157,7 @@ if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _ld_libcdio=`pkg-config --libs libcdio_paranoia`
 else
     if test "$_cdparanoia" = yes ; then
-       _res_comment="(using cdparanoia)"
+       _res_comment="using cdparanoia"
     fi
     _def_libcdio='#undef HAVE_LIBCDIO'
     _def_havelibcdio='no'
@@ -5946,7 +5946,7 @@ EOF
   fi
 fi
 if test "$_live" = yes && test "$_network" = yes ; then
-  _res_comment="(using $_livelibdir)"
+  _res_comment="using $_livelibdir"
   _def_live='#define STREAMING_LIVE555 1'
   _live_libs_def="# LIVE555 Streaming Media libraries:
 LIVE_LIB_DIR = $_livelibdir
@@ -5962,7 +5962,7 @@ LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/groupsock/include"
   _ld_live='$(LIVE_LIBS)'
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes ; then
-  _res_comment="(using distribution version)"
+  _res_comment="using distribution version"
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
   _live_libs_def="# LIVE555 Streaming Media libraries:
