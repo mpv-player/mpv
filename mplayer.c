@@ -1,3 +1,7 @@
+
+/// \file
+/// \ingroup Properties Command2Property OSDMsgStack
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "config.h"
@@ -1050,6 +1054,10 @@ static void log_sub(void){
 }
 #endif /* USE_SUB */
 
+/// \defgroup OSDMsgStack OSD message stack
+///
+///@{
+
 #define OSD_MSG_TV_CHANNEL              0
 #define OSD_MSG_TEXT                    1
 #define OSD_MSG_SUB_DELAY               2
@@ -1057,18 +1065,22 @@ static void log_sub(void){
 #define OSD_MSG_OSD_STATUS              4
 #define OSD_MSG_BAR                     5
 #define OSD_MSG_PAUSE                   6
-// Base id for the messages generated from the commmand to property bridge
+/// Base id for the messages generated from the commmand to property bridge.
 #define OSD_MSG_PROPERTY                0x100
 
 
 typedef struct mp_osd_msg mp_osd_msg_t;
 struct mp_osd_msg {
+    /// Previous message on the stack.
     mp_osd_msg_t* prev;
+    /// Message text.
     char msg[64];
     int  id,level,started;
-    unsigned  time; // Display duration in ms
+    /// Display duration in ms.
+    unsigned  time;
 };
 
+/// OSD message stack.
 static mp_osd_msg_t* osd_msg_stack = NULL;
 
 /**
@@ -1310,13 +1322,22 @@ static void update_osd_msg(void) {
     }
 }
 
+///@}
+// OSDMsgStack
 
-// General properties
+/// \defgroup Properties
+///@{
 
+/// \defgroup GeneralProperties General properties
+/// \ingroup Properties
+///@{
+
+/// OSD level (RW)
 static int mp_property_osdlevel(m_option_t* prop,int action,void* arg) {
     return m_property_choice(prop,action,arg,&osd_level);
 }
 
+/// Playback speed (RW)
 static int mp_property_playback_speed(m_option_t* prop,int action,void* arg) {
     switch(action) {
     case M_PROPERTY_SET:
@@ -1336,10 +1357,12 @@ static int mp_property_playback_speed(m_option_t* prop,int action,void* arg) {
     return m_property_float_range(prop,action,arg,&playback_speed);
 }
 
+/// filename with path (RO)
 static int mp_property_path(m_option_t* prop,int action,void* arg) {
     return m_property_string_ro(prop,action,arg,filename);
 }
 
+/// filename without path (RO)
 static int mp_property_filename(m_option_t* prop,int action,void* arg) {
     char* f;
     if(!filename) return M_PROPERTY_UNAVAILABLE;
@@ -1350,12 +1373,13 @@ static int mp_property_filename(m_option_t* prop,int action,void* arg) {
     return m_property_string_ro(prop,action,arg,f);
 }
 
-
+/// Demuxer name (RO)
 static int mp_property_demuxer(m_option_t* prop,int action,void* arg) {
     if(!demuxer) return M_PROPERTY_UNAVAILABLE;
     return m_property_string_ro(prop,action,arg,(char*)demuxer->desc->name);
 }
 
+/// Position in the stream (RW)
 static int mp_property_stream_pos(m_option_t* prop,int action,void* arg) {
     if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
     if (!arg) return M_PROPERTY_ERROR;
@@ -1371,6 +1395,7 @@ static int mp_property_stream_pos(m_option_t* prop,int action,void* arg) {
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+/// Stream start offset (RO)
 static int mp_property_stream_start(m_option_t* prop,int action,void* arg) {
     if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
     switch (action) {
@@ -1381,6 +1406,7 @@ static int mp_property_stream_start(m_option_t* prop,int action,void* arg) {
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+/// Stream end offset (RO)
 static int mp_property_stream_end(m_option_t* prop,int action,void* arg) {
     if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
     switch (action) {
@@ -1391,6 +1417,7 @@ static int mp_property_stream_end(m_option_t* prop,int action,void* arg) {
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+/// Stream length (RO)
 static int mp_property_stream_length(m_option_t* prop,int action,void* arg) {
     if (!demuxer || !demuxer->stream) return M_PROPERTY_UNAVAILABLE;
     switch (action) {
@@ -1401,6 +1428,7 @@ static int mp_property_stream_length(m_option_t* prop,int action,void* arg) {
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
+/// Media length in seconds (RO)
 static int mp_property_length(m_option_t* prop,int action,void* arg) {
     double len;
     
@@ -1428,8 +1456,13 @@ static int mp_property_length(m_option_t* prop,int action,void* arg) {
     return m_property_double_ro(prop,action,arg,len);
 }
 
-// Audio properties
+///@}
 
+/// \defgroup AudioProperties Audio properties
+/// \ingroup Properties
+///@{
+
+/// Volume (RW)
 static int mp_property_volume(m_option_t* prop,int action,void* arg) {
 
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
@@ -1480,7 +1513,7 @@ static int mp_property_volume(m_option_t* prop,int action,void* arg) {
     return M_PROPERTY_NOT_IMPLEMENTED;
 }
 
-
+/// Mute (RW)
 static int mp_property_mute(m_option_t* prop,int action,void* arg) {
     
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
@@ -1515,6 +1548,7 @@ static int mp_property_mute(m_option_t* prop,int action,void* arg) {
     }
 }
 
+/// Audio delay (RW)
 static int mp_property_audio_delay(m_option_t* prop,int action,void* arg) {
     if(!(sh_audio && sh_video)) return M_PROPERTY_UNAVAILABLE;
     switch(action) {
@@ -1533,21 +1567,25 @@ static int mp_property_audio_delay(m_option_t* prop,int action,void* arg) {
     }
 }
 
+/// Audio codec tag (RO)
 static int mp_property_audio_format(m_option_t* prop,int action,void* arg) {
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_audio->format);
 }
 
+/// Audio bitrate (RO)
 static int mp_property_audio_bitrate(m_option_t* prop,int action,void* arg) {
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_audio->i_bps);
 }
 
+/// Samplerate (RO)
 static int mp_property_samplerate(m_option_t* prop,int action,void* arg) {
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_audio->samplerate);
 }
 
+/// Number of channels (RO)
 static int mp_property_channels(m_option_t* prop,int action,void* arg) {
     if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
     switch(action) {
@@ -1565,8 +1603,13 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
     return m_property_int_ro(prop,action,arg,sh_audio->channels);
 }
 
-// Video properties
+///@}
 
+/// \defgroup VideoProperties Video properties
+/// \ingroup Properties
+///@{
+
+/// Fullscreen state (RW)
 static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
 
     if(!video_out) return M_PROPERTY_UNAVAILABLE;
@@ -1589,6 +1632,7 @@ static int mp_property_fullscreen(m_option_t* prop,int action,void* arg) {
     }
 }
 
+/// Panscan (RW)
 static int mp_property_panscan(m_option_t* prop,int action,void* arg) {
 
     if(!video_out || video_out->control(VOCTRL_GET_PANSCAN,NULL ) != VO_TRUE)
@@ -1614,7 +1658,9 @@ static int mp_property_panscan(m_option_t* prop,int action,void* arg) {
     }
 }
 
-
+/// Helper to set vo flags.
+/** \ingroup PropertyImplHelper
+ */
 static int mp_property_vo_flag(m_option_t* prop,int action,void* arg,
                                int vo_ctrl,int* vo_var) {
 
@@ -1634,18 +1680,22 @@ static int mp_property_vo_flag(m_option_t* prop,int action,void* arg,
     }
 }
 
+/// Window always on top (RW)
 static int mp_property_ontop(m_option_t* prop,int action,void* arg) {
     return mp_property_vo_flag(prop,action,arg,VOCTRL_ONTOP,&vo_ontop);
 }
 
+/// Display in the root window (RW)
 static int mp_property_rootwin(m_option_t* prop,int action,void* arg) {
     return mp_property_vo_flag(prop,action,arg,VOCTRL_ROOTWIN,&vo_rootwin);
 }
 
+/// Show window borders (RW)
 static int mp_property_border(m_option_t* prop,int action,void* arg) {
     return mp_property_vo_flag(prop,action,arg,VOCTRL_BORDER,&vo_border);
 }
 
+/// Framedropping state (RW)
 static int mp_property_framedropping(m_option_t* prop,int action,void* arg) {
 
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
@@ -1661,6 +1711,7 @@ static int mp_property_framedropping(m_option_t* prop,int action,void* arg) {
     }
 }
 
+/// Color settings, try to use vf/vo then fallback on TV. (RW)
 static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
     int* gamma = prop->priv, r;
 
@@ -1708,43 +1759,54 @@ static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
     return M_PROPERTY_UNAVAILABLE;
 }
 
+/// VSync (RW)
 static int mp_property_vsync(m_option_t* prop,int action,void* arg) {
     return m_property_flag(prop,action,arg,&vo_vsync);
 }
 
+/// Video codec tag (RO)
 static int mp_property_video_format(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_video->format);
 }
 
+/// Video bitrate (RO)
 static int mp_property_video_bitrate(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_video->i_bps);
 }
 
-
+/// Video display width (RO)
 static int mp_property_width(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_video->disp_w);
 }
 
+/// Video display height (RO)
 static int mp_property_height(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_int_ro(prop,action,arg,sh_video->disp_h);
 }
 
+/// Video fps (RO)
 static int mp_property_fps(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_float_ro(prop,action,arg,sh_video->fps);
 }
 
+/// Video aspect (RO)
 static int mp_property_aspect(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_float_ro(prop,action,arg,sh_video->aspect);
 }
 
-// Subtitles properties
+///@}
 
+/// \defgroup SubProprties Subtitles properties
+/// \ingroup Properties
+///@{
+
+/// Text subtitles position (RW)
 static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
 #ifdef USE_SUB
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
@@ -1763,6 +1825,7 @@ static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
 #endif
 }
 
+/// Selected subs (RW)
 static int mp_property_sub(m_option_t* prop,int action,void* arg) {
     int source = -1, reset_spu = 0;
 
@@ -1938,11 +2001,13 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
     return 1;
 }
 
+/// Subtitles delay (RW)
 static int mp_property_sub_delay(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_delay(prop,action,arg,&sub_delay);
 }
 
+/// Alignment of text subtitles (RW) 
 static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
 #ifdef USE_SUB
     char* name[] = { MSGTR_Top, MSGTR_Center, MSGTR_Bottom };
@@ -1969,6 +2034,7 @@ static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
 #endif
 }
 
+/// Subtitles visibility (RW)
 static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
 #ifdef USE_SUB
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
@@ -1988,6 +2054,7 @@ static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
 #endif
 }
 
+/// Show only forced subtitles (RW)
 static int mp_property_sub_forced_only(m_option_t* prop,int action,void* arg) {
     if(!vo_spudec) return M_PROPERTY_UNAVAILABLE;
 
@@ -2005,10 +2072,15 @@ static int mp_property_sub_forced_only(m_option_t* prop,int action,void* arg) {
 
 }
 
-// TV properties
+///@}
+
+/// \defgroup TVProperties TV properties
+/// \ingroup Properties
+///@{
 
 #ifdef USE_TV
 
+/// TV color settings (RW)
 static int mp_property_tv_color(m_option_t* prop,int action,void* arg) {
     int r,val;
     tvi_handle_t* tvh = demuxer->priv;
@@ -2037,6 +2109,11 @@ static int mp_property_tv_color(m_option_t* prop,int action,void* arg) {
 
 #endif
 
+///@}
+
+/// All properties available in MPlayer.
+/** \ingroup Properties
+ */
 static m_option_t mp_properties[] = {
     // General
     { "osdlevel", mp_property_osdlevel, CONF_TYPE_INT,
@@ -2152,9 +2229,12 @@ int mp_property_do(char* name,int action, void* val) {
     return m_property_do(p,action,val);
 }
 
+///@}
+// Properties group
 
-/*
- * \brief Commands to property bridge.
+
+/**
+ * \defgroup Command2Property Command to property bridge
  * 
  * It is used to handle most commands that just set a property
  * and optionaly display something on the OSD.
@@ -2169,15 +2249,23 @@ int mp_property_do(char* name,int action, void* val) {
  * property to it's next value. Otherwise it set it to the given
  * value.
  *
+ *@{
  */
 
+/// List of the commands that can be handled by setting a property.
 static struct  {
-    char* name;         // property name
-    int cmd;            // cmd id
-    int toggle;         // set/adjust or toggle command
-    int osd_progbar;    // progbar type
-    int osd_id;         // osd msg id if it must be shared
-    char* osd_msg;      // osd msg template
+    /// property name
+    char* name;
+    /// cmd id
+    int cmd;
+    /// set/adjust or toggle command
+    int toggle;
+    /// progbar type
+    int osd_progbar;
+    /// osd msg id if it must be shared
+    int osd_id;
+    /// osd msg template
+    char* osd_msg;
 } set_prop_cmd[] = {
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
@@ -2212,6 +2300,7 @@ static struct  {
     { NULL, 0, 0, 0, -1, NULL }
 };
 
+/// Handle commands that set a property.
 static int set_property_command(mp_cmd_t* cmd) {
     int i,r;
     m_option_t* prop;
@@ -2266,6 +2355,9 @@ static int set_property_command(mp_cmd_t* cmd) {
     }
     return 1;
 }
+
+///@}
+// Command2Property
 
 int main(int argc,char* argv[]){
 
