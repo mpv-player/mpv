@@ -5,7 +5,6 @@
 #include <string.h>
 #include "pullup.h"
 #include "config.h"
-#include "asmalign.h"
 
 
 
@@ -19,7 +18,6 @@ static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
 		
-		ASMALIGN16
 		"1: \n\t"
 		
 		"movq (%%esi), %%mm0 \n\t"
@@ -68,7 +66,6 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"pxor %%mm7, %%mm7 \n\t"
 		"subl %%eax, %%edi \n\t"
 		
-		ASMALIGN16
 		"2: \n\t"
 
 		"movq (%%esi), %%mm0 \n\t"
@@ -157,7 +154,6 @@ static int var_y_mmx(unsigned char *a, unsigned char *b, int s)
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
 		
-		ASMALIGN16
 		"1: \n\t"
 		
 		"movq (%%esi), %%mm0 \n\t"
