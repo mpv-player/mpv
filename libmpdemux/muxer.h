@@ -97,8 +97,6 @@ typedef struct muxbuf_t {
   unsigned int flags;
 } muxbuf_t;
 
-#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
-
 muxer_t *muxer_new_muxer(int type,FILE *);
 #define muxer_new_stream(muxer,a) muxer->cont_new_stream(muxer,a)
 #define muxer_stream_fix_parameters(muxer, a) muxer->fix_stream_parameters(a)

@@ -61,10 +61,7 @@
 #define DEMUXER_TYPE_PLAYLIST (2<<16)
 
 
-#define DEMUXER_TIME_NONE 0
-#define DEMUXER_TIME_PTS 1
-#define DEMUXER_TIME_FILE 2
-#define DEMUXER_TIME_BPS 3
+#define MP_NOPTS_VALUE (-1LL<<63) //both int64_t and double should be able to represent this exactly
 
 
 // DEMUXER control commands/answers
