@@ -2271,23 +2271,19 @@ static void fix_parameters(muxer_stream_t *stream)
 
 
 static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags, double dts_arg, double pts_arg){
-  size_t ptr=0, sz = 0;
-  uint64_t pts, tmp;
+  size_t sz = 0;
+  uint64_t tmp;
   muxer_t *muxer = s->muxer;
   muxer_priv_t *priv = (muxer_priv_t *)muxer->priv;
   muxer_headers_t *spriv = (muxer_headers_t*) s->priv;
-  FILE *f;
   float fps;
   uint32_t stream_format, nf;
-  
-  f = muxer->file;
  
   if(s->buffer == NULL)
   	return;
   if(len == -1)
 	return;
   
-  pts = 0;
   if (s->type == MUXER_TYPE_VIDEO) { // try to recognize frame type...
 	fps = (float) s->h.dwRate/ (float) s->h.dwScale;
   	spriv->type = 1;
@@ -2358,7 +2354,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 	{
 	parse_audio(s, 0, &nf, &fake_timer, priv->init_adelay, priv->drop);
 	spriv->vframes += nf;
-	sz = max(len, 2 * priv->packet_size);
 	if(! spriv->vframes)
 		mp_msg(MSGT_MUXER, MSGL_INFO, "AINIT: %.3lf\r\n", (double) spriv->last_pts/27000000.0f);	
 	}
