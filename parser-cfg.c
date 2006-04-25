@@ -1,3 +1,12 @@
+
+/// \defgroup ConfigParsers Config parsers
+///
+/// The \ref ConfigParsers make use of the \ref Config to setup the config variables,
+/// the command line parsers also build the playlist.
+///@{
+
+/// \file
+
 #include "config.h"
 
 #include <stdio.h>
@@ -14,10 +23,17 @@
 #include "m_option.h"
 #include "m_config.h"
 
+/// Maximal include depth.
 #define MAX_RECURSION_DEPTH	8
 
+/// Current include depth.
 static int recursion_depth = 0;
 
+/// Setup the \ref Config from a config file.
+/** \param config The config object.
+ *  \param conffile Path to the config file.
+ *  \return 1 on sucess, -1 on error.
+ */
 int m_config_parse_config_file(m_config_t* config, char *conffile)
 {
 #define PRINT_LINENUM	mp_msg(MSGT_CFGPARSER,MSGL_V,"%s(%d): ", conffile, line_num)
@@ -226,3 +242,5 @@ out:
 	--recursion_depth;
 	return ret;
 }
+
+///@}

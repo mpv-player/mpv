@@ -1,3 +1,7 @@
+
+/// \file
+/// \ingroup ConfigParsers MEntry
+
 #include "config.h"
 
 #include <stdio.h>

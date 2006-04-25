@@ -1,3 +1,7 @@
+
+/// \file
+/// \ingroup ConfigParsers Playtree
+
 #include "config.h"
 
 #include <stdio.h>
@@ -56,6 +60,9 @@ static inline void add_entry(play_tree_t **last_parentp,
     *last_entryp = entry;
 }
 
+/// Setup the \ref Config from command line arguments and build a playtree.
+/** \ingroup ConfigParsers
+ */
 play_tree_t*
 m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 {
