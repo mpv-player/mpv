@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.26 -->
 <chapter id="containers">
 <title>Konténerek</title>
 
@@ -80,8 +80,8 @@ marad.
 Az MPG-k egyik legfontosabb tulajdonsága, hogy van egy mezőjük, mely a videó
 folyam képarányát írja le. Például az SVCD-knek 480x480 felbontású videójuk van,
 a fejlécben ilyenkor ez a mező 4:3 arányra van állítva, ezért játszódnak le
-640x480-ban. AVI fájlokban nincs ilyen mező, ezért ezeket újra kell méretezni a
-<option>-aspect</option> kapcsolóval kódolás vagy lejátszás közben.
+640x480-ban. Az AVI fájlokból gyakran hiányzik ez a mező, ezért ezeket újra kell
+méretezni a <option>-aspect</option> kapcsolóval kódolás vagy lejátszás közben.
 </para>
 </sect2>
 
