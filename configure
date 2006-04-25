@@ -419,6 +419,13 @@ done # for parm in ...
 
 
 # 1st pass checking for vital options
+_mmx=auto
+_3dnow=auto
+_3dnowext=auto
+_mmxext=auto
+_sse=auto
+_sse2=auto
+_mtrr=auto
 _install=install
 _ranlib=ranlib
 _cc=cc
@@ -784,34 +791,6 @@ elif x86; then
   _cpuinfo="TOOLS/cpuinfo"
 fi
 
-x86_exts_check()
-{
-  pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2 | _head 1`
-  if test -z "$pparam" ; then
-    pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2 | _head 1`
-  fi
-
-  _mmx=no
-  _3dnow=no
-  _3dnowext=no
-  _mmxext=no
-  _sse=no
-  _sse2=no
-  _mtrr=no
-
-  for i in $pparam ; do
-    case "$i" in
-    3dnow)        _3dnow=yes               ;;
-    3dnowext)     _3dnowext=yes            ;;
-    mmx)          _mmx=yes                 ;;
-    mmxext)       _mmxext=yes              ;;
-    mtrr|k6_mtrr|cyrix_arr)   _mtrr=yes    ;;
-    xmm|sse|kni)  _sse=yes    _mmxext=yes  ;;
-    sse2)         _sse2=yes                ;;
-    esac
-  done
-}
-
 if x86 || x86_64 ; then
   # gather more CPU information
   pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | _head 1`
@@ -820,7 +799,17 @@ if x86 || x86_64 ; then
   pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1`
   pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1`
 
-  x86_exts_check
+  exts=`$_cpuinfo | grep 'features\|flags' | cut -d ':' -f 2 | _head 1`
+
+  pparam=`echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ \
+                           -e s/xmm/sse/ -e s/kni/sse/`
+
+  for ext in $pparam ; do
+    eval _$ext=auto && eval _$ext=yes
+  done
+
+  # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
+  test _sse=yes && _mmxext=yes
 
   echocheck "CPU vendor"
   echores "$pvendor ($pfamily:$pmodel:$pstepping)"
