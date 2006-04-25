@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.12 -->
+<!-- Synced with: 1.15 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
 <para>
@@ -13,6 +13,20 @@ pochopte, že musíte poskytnout <emphasis role="bold">veškeré</emphasis>
 informace které požadujeme a postupovat přesně podle instrukcí v tomto
 dokumentu.
 </para>
+<sect1 id="bugreports_security">
+<title>Hlášení bezpečnostních chyb</title>
+<para>
+V případě že jste nalezli exploitovatelnou chybu, chtěli byste udělat správnou
+věc a nechali nás ji opravit než ji odhalíte, budeme rádi, když nám pošlete
+bezpečnostní hlášení na
+<ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>.
+Do hlavičky prosíme přidejte [SECURITY] nebo [ADVISORY].
+Ujistěte se, že vaše hlášení obsahuje úplnou a podrobnou analýzu chyby.
+Zaslání opravy je velice žádoucí.
+Prosíme neodkládejte hlášení do doby než vytvoříte 'dokazovací' exploit, ten nám
+můžete zaslat dalším mailem.
+</para>
+</sect1>
 <sect1 id="bugreports_fix">
 <title>Jak napravovat chyby</title>
 <para>
@@ -294,7 +308,7 @@ jste zapomněli nainstalovat vývojový (devel) balíček (to jsou ty s koncovkou
 </para>
 </sect2>
 
-<sect2 id="bugreports_conpilation">
+<sect2 id="bugreports_compilation">
 <title>Problémy s kompilací</title>
 <para>
 Zahrňte prosím tyto soubory:

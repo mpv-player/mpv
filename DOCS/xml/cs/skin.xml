@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.12 -->
+<!-- Synced with: 1.15 -->
 <appendix id="skin">
 <title>Formát skinů <application>MPlayer</application>u</title>
-<para>
-Účel tohoto dokumentu je popis formátu skinu
-<application>MPlayer</application>u. Zde uvedené informace mohou být
-chybné, protože:
-<orderedlist>
-<listitem><para>Nejsem to já, kdo píše GUI.</para></listitem>
-<listitem><para>GUI není dokončeno.</para></listitem>
-<listitem><para>Mohu se mýlit.</para></listitem>
-</orderedlist>
-Takže nebuďte překvapeni, pokud něco nebude pracovat přesně tak, jak je to zde
-popsáno.
-</para>
-
-<para>Děkuji <emphasis>Zoltánu Ponekkerovi</emphasis> za jeho pomoc.</para>
-
-<para><emphasis>András Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
 
 <sect1 id="skin-overview">
 <title>Přehled</title>
@@ -1112,6 +1096,58 @@ Otevře okno voliče skinů.
     </para></listitem>
 </varlistentry>
 </variablelist>
+
+</sect1>
+
+<sect1 id="skin-quality">
+<title>Tvorba kvalitních skinů</title>
+
+<para>
+Co když jste si přečetli o skinech pro GUI
+<application>MPlayer</application>u, odvedli to nejlepší s
+<application>Gimp</application>em a chcete nám poslat svůj skin?
+Přečtěte si pár návodů, abyste se vyhnuli běžným omylům a vytvořili
+vysoce kvalitní skin.
+</para>
+
+<para>
+Chceme, aby skiny, které přidáme do našeho repozitáře odpovídaly
+určitým standardům kvality. Je zde také mnoho věcí, které můžete
+udělat, abyste nám ulehčili práci.
+</para>
+
+<para>
+Za příklad si vemte skin <systemitem>Blue</systemitem>.
+Ten splňuje všechna kritéria od verze 1.5.
+</para>
+
+<itemizedlist>
+  <listitem><para>Ke každému skinu by měl být soubor
+  <filename>README</filename>, obsahující informace o vás jako autorovi,
+  o copyrightu a licenci a vše ostatní, co chcete dodat.
+  Chcete-li mít changelog, tento soubor je dobrým místem.
+  </para></listitem>
+
+  <listitem><para>Mel by tu být soubor <filename>VERSION</filename>
+  neobsahující nic jiného, než číslo verze na jediném řádku (např. 1.0).
+  </para></listitem>
+
+  <listitem><para>Horizontální a vertikální ovládání (posuvníky jako hlasitost
+  nebo pozice) by měly mít střed knoflíku správně zarovnán na stred posuvníku.
+  Mělo by být možné posouvat knoflík na oba konce posuvníku, ale ne za ně.
+  </para></listitem>
+
+  <listitem><para>Jednotlivé součásti skinu by měly mít správné rozměry
+  deklarované v souboru skin. Pokud to tak není, můžete kliknout mimo např.
+  tlačítko a to se stejně stiskne, nebo kliknout na jeho plochu a nestisknout
+  jej.
+  </para></listitem>
+
+  <listitem><para>Soubor <filename>skin</filename> by měl být srovnán na znaky
+  a neobsahovat tabulátory. Srovnán na znaky znamená, že se čísla budou rovnat
+  do úhledných sloupců.
+  </para></listitem>
+</itemizedlist>
 
 </sect1>
 
