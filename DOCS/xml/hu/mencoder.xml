@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.103 -->
+<!-- synced with 1.105 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -632,18 +632,18 @@ megoldás!
 <para>Van is.</para>
 
 <para>
-Az MPEG-4-nek van egy egyedülálló sajátossága: a videó stream tartalmazhatja a szükséges
-képarányt. Igen, úgy mint az MPEG-1/2 (DVD, SVCD) és a H.263 fájlok. Sajnos azonban
-<emphasis role="bold">nincs</emphasis> olyan videó lejátszó, mely az MPEG-4 ezen attribútumát
-támogatná, kivéve az <application>MPlayer</application>t.
+Az MPEG-4-nek van egy egyedülálló sajátossága: a videó stream tartalmazhatja
+a szükséges képarányt. Igen, úgy mint az MPEG-1/2 (DVD, SVCD) és a H.263 fájlok.
+Sajnos azonban kevés videó lejtászó van az <application>MPlayer</application>en
+kívül, ami támogatná ezt az attribútumot.
 </para>
 
 <para>
 Ez a tulajdonság csak a
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-<systemitem>mpeg4</systemitem> codec-jével használható. Tartsd észben: habár az
-<application>MPlayer</application> hibátlanul lejátsza a létrehozott fájlt,
-a többi lejátszó rossz képarányt fog használni.
+<systemitem>mpeg4</systemitem> codec-jével használható. Tartsd észben: habár
+az <application>MPlayer</application> hibátlanul lejátsza a létrehozott
+fájlt, a többi lejátszó lehet, hogy rossz képarányt fog használni.
 </para>
 
 <para>
