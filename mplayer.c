@@ -118,6 +118,7 @@ char * proc_priority=NULL;
 #ifdef HAS_DVBIN_SUPPORT
 #include "libmpdemux/dvbin.h"
 static int last_dvb_step = 1;
+static int dvbin_reopen = 0;
 extern void cache_uninit(stream_t *s);
 #endif
 
@@ -3224,11 +3225,7 @@ if(!sh_video && !sh_audio){
 			dir = DVB_CHANNEL_LOWER;
 			
 		if(dvb_step_channel(priv, dir))
-		{
-	  		uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
-			cache_uninit(stream);
-			goto goto_enable_cache;
-		}
+			eof = dvbin_reopen = 1;
 	  }
 	}
 #endif	
@@ -4451,11 +4448,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 			
 			
 		if(dvb_step_channel(priv, dir))
-		{
-	  		uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
-			cache_uninit(stream);
-			goto goto_enable_cache;
-		}
+			eof = dvbin_reopen = 1;
 	  }
 	}
 #endif /* HAS_DVBIN_SUPPORT */
@@ -4484,11 +4477,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		    last_dvb_step = -1;
 
   		if(dvb_set_channel(priv, cmd->args[1].v.i, cmd->args[0].v.i))
-		{
-	  	  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
-		  cache_uninit(stream);
-		  goto goto_enable_cache;
-		}
+		  eof = dvbin_reopen = 1;
 	  }
 	}
   }
@@ -5084,6 +5073,16 @@ if(vo_config_count && vo_spudec) {
 
 mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
+#ifdef HAS_DVBIN_SUPPORT
+if(dvbin_reopen)
+{
+  eof = 0;
+  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
+  cache_uninit(stream);
+  dvbin_reopen = 0;
+  goto goto_enable_cache;
+}
+#endif
 }
 
 goto_next_file:  // don't jump here after ao/vo/getch initialization!
