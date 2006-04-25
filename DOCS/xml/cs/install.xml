@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced to: 1.60 -->
+<!-- Synced to: 1.63 -->
 <chapter id="install">
 <title>Instalace</title>
 
@@ -98,7 +98,7 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   OGG Vorbis zvuku.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - volitelná, nutná pro přehrávání RTSP/RTP datových proudů.
   </para></listitem>
 <listitem><para>
