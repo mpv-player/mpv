@@ -78,7 +78,6 @@ void mplMainDraw( void )
 
 extern void exit_player(char* how);
 extern int vcd_track;
-extern int osd_visible;
 static unsigned last_redraw_time = 0;
 
 void mplEventHandling( int msg,float param )
@@ -271,7 +270,7 @@ set_volume:
 #ifdef USE_OSD
 	if ( osd_level )
 	 {
-	  osd_visible=vo_mouse_timer_const;
+	  osd_visible=(GetTimerMS() + 1000) | 1;
 	  vo_osd_progbar_type=OSD_VOLUME;
 	  vo_osd_progbar_value=( ( guiIntfStruct.Volume ) * 256.0 ) / 100.0;
 	  vo_osd_changed( OSDTYPE_PROGBAR );

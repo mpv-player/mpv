@@ -33,7 +33,6 @@ extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
 
-extern int vo_mouse_timer_const;
 extern int vo_mouse_autohide;
 
 extern int vo_init( void );

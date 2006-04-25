@@ -20,7 +20,7 @@ extern char * audio_driver;
 extern float  audio_delay;
 
 extern int osd_level;
-extern int osd_visible;
+extern unsigned int osd_visible;
 
 extern char * font_name;
 extern float  font_factor;

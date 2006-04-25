@@ -239,7 +239,8 @@ static int list_properties = 0;
 
 int osd_level=1;
 int osd_level_saved=-1;
-int osd_visible=100;
+// if nonzero, hide current OSD contents when GetTimerMS() reaches this
+unsigned int osd_visible;
 static int osd_function=OSD_PLAY;
 static int osd_show_percentage = 0;
 static int osd_duration = 1000;
@@ -1229,7 +1230,7 @@ void set_osd_bar(int type,char* name,double min,double max,double val) {
     
 #ifdef USE_OSD
     if(sh_video) {
-        osd_visible = sh_video->fps;
+        osd_visible = (GetTimerMS() + 1000) | 1;
         vo_osd_progbar_type = type;
         vo_osd_progbar_value = 256*(val-min)/(max-min);
         vo_osd_changed(OSDTYPE_PROGBAR);
@@ -3195,9 +3196,6 @@ if(sh_video){
       sh_video->frametime=1.0f/sh_video->fps;
     }
     vo_fps = sh_video->fps;
-#ifdef HAVE_X11
-    vo_mouse_timer_const=(int)sh_video->fps;
-#endif
 
     if(!sh_video->fps && !force_fps){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_FPSnotspecified);
@@ -3725,9 +3723,6 @@ if(!sh_video) {
 	time_frame+=frame_time;  // for nosound
 	// video_read_frame can change fps (e.g. for asf video)
 	vo_fps = sh_video->fps;
-#ifdef HAVE_X11
-	vo_mouse_timer_const = (int)sh_video->fps;
-#endif
 	// check for frame-drop:
 	current_module="check_framedrop";
 	if(sh_audio && !d_audio->eof){
@@ -4056,7 +4051,10 @@ if(auto_quality>0){
 
 #ifdef USE_OSD
   if(osd_visible){
-    if (!--osd_visible){
+      // 36000000 means max timed visibility is 1 hour into the future, if
+      // the difference is greater assume it's wrapped around from below 0
+    if (osd_visible - GetTimerMS() > 36000000) {
+       osd_visible = 0;
        vo_osd_progbar_type=-1; // disable
        vo_osd_changed(OSDTYPE_PROGBAR);
        if (osd_function != OSD_PAUSE)
@@ -4929,7 +4927,7 @@ if(rel_seek_secs || abs_seek_pos){
       if(sh_video) {
 	c_total=0;
 	max_pts_correction=0.1;
-	osd_visible=sh_video->fps; // to rewert to PLAY pointer after 1 sec
+	osd_visible=(GetTimerMS() + 1000) | 1; // to revert to PLAY pointer after 1 sec
 	audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 	drop_frame_cnt=0;
 	too_slow_frame_cnt=0;

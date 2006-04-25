@@ -217,7 +217,6 @@ extern int vo_gamma_red_intensity;
 extern int vo_gamma_green_intensity;
 extern int vo_gamma_blue_intensity;
 
-extern int vo_mouse_timer_const;
 extern int vo_nomouse_input;
 
 extern int vo_pts;

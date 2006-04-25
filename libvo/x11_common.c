@@ -1001,8 +1001,8 @@ void vo_x11_uninit(void)
     }
 }
 
-int vo_mouse_timer_const = 30;
-static int vo_mouse_counter = 30;
+static unsigned int mouse_timer;
+static int mouse_waiting_hide;
 
 int vo_x11_check_events(Display * mydisplay)
 {
@@ -1014,8 +1014,11 @@ int vo_x11_check_events(Display * mydisplay)
 
 // unsigned long  vo_KeyTable[512];
 
-    if ((vo_mouse_autohide) && (--vo_mouse_counter == 0))
+    if ((vo_mouse_autohide) && mouse_waiting_hide &&
+                                 (GetTimerMS() - mouse_timer >= 1000)) {
         vo_hidecursor(mydisplay, vo_window);
+        mouse_waiting_hide = 0;
+    }
 
     while (XPending(mydisplay))
     {
@@ -1084,14 +1087,16 @@ int vo_x11_check_events(Display * mydisplay)
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(mydisplay, vo_window);
-                    vo_mouse_counter = vo_mouse_timer_const;
+                    mouse_waiting_hide = 1;
+                    mouse_timer = GetTimerMS();
                 }
                 break;
             case ButtonPress:
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(mydisplay, vo_window);
-                    vo_mouse_counter = vo_mouse_timer_const;
+                    mouse_waiting_hide = 1;
+                    mouse_timer = GetTimerMS();
                 }
                 // Ignore mouse whell press event
                 if (Event.xbutton.button > 3)
@@ -1112,7 +1117,8 @@ int vo_x11_check_events(Display * mydisplay)
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(mydisplay, vo_window);
-                    vo_mouse_counter = vo_mouse_timer_const;
+                    mouse_waiting_hide = 1;
+                    mouse_timer = GetTimerMS();
                 }
 #ifdef HAVE_NEW_GUI
                 // Ignor mouse button 1 - 3 under gui 
