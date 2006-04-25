@@ -111,7 +111,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(DS_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
-              input/libinput.a \
               postproc/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
@@ -370,6 +369,7 @@ endif
 
 LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
+               input/libinput.a \
                $(MENU_LIBS) \
                $(VIDIX_LIBS) \
                $(GUI_LIBS) \

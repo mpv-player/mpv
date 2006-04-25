@@ -213,7 +213,11 @@ char *info_copyright=NULL;
 char *info_sourceform=NULL;
 char *info_comment=NULL;
 
-
+// Needed by libmpdemux.
+int mp_input_check_interrupt(int time) {
+  usec_sleep(time);
+  return 0;
+}
 
 //char *out_audio_codec=NULL; // override audio codec
 //char *out_video_codec=NULL; // override video codec
