@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.74 -->
+<!-- Synced with 1.76 -->
 <chapter id="codecs">
 <title>Kodeky</title>
 
@@ -712,6 +712,9 @@ platformy.</para></note>
   alaw a ulaw, různé gsm, adpcm a pcm formáty a ostatní jednoduché starší
   audio kodeky
   </simpara></listitem>
+<listitem><simpara>
+  Adaptivní Multi-Rate (AMR) kodeky pro mluvené slovo
+  </simpara></listitem>
 </itemizedlist>
 
 
@@ -782,6 +785,18 @@ FPU (jako je <link linkend="arm">ARM</link>) než mp3lib.
 <para>
 Pokud pro ni chcete podporu, předejte před kompilací skriptu configure volbu
 <option>--enable-mad</option>.
+</para>
+</sect2>
+
+<sect2 id="hwmpa">
+<title>Hardwarový MPEG audio kodek</title>
+
+<para>
+Tento kodek (zvolený pomocí -ac hwmpa) posílá MPEG audio pakety do hardwarových
+dekodérů dostupných např. v plně vybavených DVB kartách a
+DXR2 adaptérech.
+Nepoužívejte je v kombinaci s jinými výstupními audio rozhraními
+(jako OSS a ALSA), které je nedokáží dekódovat (uslyšíte pouze rušení).
 </para>
 </sect2>
 
@@ -875,6 +890,36 @@ Marillata</ulink>, Mandrake/Mandriva RPM z
 ze stránek <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
 </sect2>
+
+<sect2 id="amr">
+<title>AMR kodeky</title>
+<para>
+Adaptivní Multi-Rate kodek pro mluvené slovo je používán třetí generací (3G)
+mobilních telefonů.
+Referenční implementace je dostupná od
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(zdarma pro osobní použití).
+</para>
+<para>
+Pro zapnutí podpory si stáhněte zdrojový kód
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
+a
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
+kodeků, umístěte je do adresáře, kde jste si rozbalili zdrojový kód
+<application>MPlayer</application>u a spusťte následující příkazy:
+<screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float
+</screen>
+Pak proveďte obvyklou <link linkend="features">kompilační proceduru</link>
+<application>MPlayer</application>u.
+</para>
+</sect2>
+
 
 </sect1>
 
