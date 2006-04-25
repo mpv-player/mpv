@@ -2,7 +2,7 @@
 #define _M_OPTION_H
 
 /// \defgroup Options
-/// m_option allow to parse, print and copy data of various types.
+/// m_option allows to parse, print and copy data of various types.
 /// It is the base of the \ref OptionsStruct, \ref Config and
 /// \ref Properties APIs.
 ///@{
@@ -81,7 +81,7 @@ typedef struct m_obj_settings {
 } m_obj_settings_t;
 
 /// A parser to setup a list of objects.
-/** It create a NULL terminated array \ref m_obj_settings. The option priv
+/** It creates a NULL terminated array \ref m_obj_settings. The option priv
  *  field (\ref m_option::priv) must point to a \ref m_obj_list_t describing
  *  the available object types.
  */
@@ -100,7 +100,7 @@ typedef struct {
 } m_obj_presets_t;
 
 /// Set several fields in a struct at once.
-/** For this two struct description are used. One for the struct holding the
+/** For this two struct descriptions are used. One for the struct holding the
  *  preset and one for the struct beeing set. Every field present in both
  *  struct will be copied from the preset struct to the destination one.
  *  The option priv field (\ref m_option::priv) must point to a correctly
@@ -116,7 +116,7 @@ extern m_option_type_t m_option_type_custom_url;
 
 /// Extra definition needed for \ref m_option_type_obj_params options.
 typedef struct {
-  /// Fields description.
+  /// Field descriptions.
   struct m_struct_st* desc;
   /// Field separator to use.
   char separator;
@@ -124,7 +124,7 @@ typedef struct {
 
 /// Parse a set of parameters.
 /** Parameters are separated by the given separator and each one
- *  successively set a field from the struct. The option priv field
+ *  successively sets a field from the struct. The option priv field
  *  (\ref m_option::priv) must point to a \ref m_obj_params_t.
  */
 extern m_option_type_t m_option_type_obj_params;
@@ -178,10 +178,10 @@ struct m_option_type {
    *  \param opt The option that is parsed.
    *  \param name The full option name.
    *  \param param The parameter to parse.
-   *  \param dst Pointer to the memory where the data should be writen.
+   *  \param dst Pointer to the memory where the data should be written.
    *             If NULL the parameter validity should still be checked.
    *  \param src Source of the option, see \ref OptionParserModes.
-   *  \return On error a negative value is returned, on success the number of argument
+   *  \return On error a negative value is returned, on success the number of arguments
    *          consumed. For details see \ref OptionParserReturn.
    */
   int (*parse)(m_option_t* opt,char *name, char *param, void* dst, int src);
@@ -196,7 +196,7 @@ struct m_option_type {
 
   /** \name
    *  These functions are called to save/set/restore the status of the
-   *  variables. The difference between the 3 only matter for types like 
+   *  variables. The difference between the 3 only matters for types like
    *  \ref m_option_type_func where 'setting' need to do more than just
    *  copying some data.
    */
@@ -243,7 +243,7 @@ struct m_option {
   
   /// Reserved for higher level APIs, it shouldn't be used by parsers.
   /** The suboption parser and func types do use it. They should instead
-   *  use the priv field but this was herited from older versions of the
+   *  use the priv field but this was inherited from older versions of the
    *  config code.
    */
   void *p;
@@ -254,15 +254,15 @@ struct m_option {
   /// See \ref OptionFlags.
   unsigned int flags;
   
-  /// \brief Mostly usefull for numeric types, the \ref M_OPT_MIN flags must
+  /// \brief Mostly useful for numeric types, the \ref M_OPT_MIN flags must
   /// also be set.
   double min;
 
-  /// \brief Mostly usefull for numeric types, the \ref M_OPT_MAX flags must
+  /// \brief Mostly useful for numeric types, the \ref M_OPT_MAX flags must
   /// also be set.
   double max;
   
-  /// Type dependent data (for all kind of extended setting).
+  /// Type dependent data (for all kind of extended settings).
   /** This used to be function pointer to hold a 'reverse to defaults' func.
    *  Now it can be used to pass any type of extra args needed by the parser.
    *  Passing a 'default func' is still valid for all func based option types
@@ -274,19 +274,19 @@ struct m_option {
 /// \defgroup OptionFlags Option flags
 ///@{
 
-/// The option have a minimum set in \ref m_option::min.
+/// The option has a minimum set in \ref m_option::min.
 #define M_OPT_MIN		(1<<0)
 
-/// The option have a maximum set in \ref m_option::max.
+/// The option has a maximum set in \ref m_option::max.
 #define M_OPT_MAX		(1<<1)
 
-/// The option have a minimum and maximum in \ref m_option::min and \ref m_option::max.
+/// The option has a minimum and maximum in \ref m_option::min and \ref m_option::max.
 #define M_OPT_RANGE		(M_OPT_MIN|M_OPT_MAX)
 
 /// The option is forbidden in config files.
 #define M_OPT_NOCFG		(1<<2)
 
-/// The option is forbiden on the command line.
+/// The option is forbidden on the command line.
 #define M_OPT_NOCMD		(1<<3)
 
 /// The option is global in the \ref Config.
@@ -297,8 +297,8 @@ struct m_option {
 #define M_OPT_GLOBAL		(1<<4)
 
 /// The \ref Config won't save this option on push.
-/** It won't be saved on push but the command line parser will put it with
- *  it's entry (ie : it may be set later)
+/** It won't be saved on push but the command line parser will add it with
+ *  its entry (ie : it may be set later)
  *  e.g options : -include
  */
 #define M_OPT_NOSAVE		(1<<5)
@@ -335,22 +335,22 @@ struct m_option {
  *  array. Only the parse function will be called. If dst is set, it should
  *  create/update an array of char* containg opt/val pairs. The options in
  *  the child array will then be set automatically by the \ref Config.
- *  Also note that sub options may be directly accessed by using
+ *  Also note that suboptions may be directly accessed by using
  *  -option:subopt blah.
  */
 #define M_OPT_TYPE_HAS_CHILD		(1<<0)
 
 /// Wildcard matching flag.
-/** If set the option type have a use for option name ending with a *
- *  (used for -aa*), this only affect the option name matching.
+/** If set the option type has a use for option name ending with a *
+ *  (used for -aa*), this only affects the option name matching.
  */
 #define M_OPT_TYPE_ALLOW_WILDCARD	(1<<1)
 
 /// Dynamic data type.
-/** This flag indicate that the data is dynamicly allocated (m_option::p point
- *  to a pointer). It enable a little hack in the \ref Config wich replace
+/** This flag indicate that the data is dynamically allocated (m_option::p point
+ *  to a pointer). It enables a little hack in the \ref Config wich replace
  *  the initial value of such variables with a dynamic copy in case the
- *  initial value is staticaly allocated (pretty common with strings).
+ *  initial value is statically allocated (pretty common with strings).
  */
 #define M_OPT_TYPE_DYNAMIC		(1<<2)
 
@@ -372,7 +372,7 @@ struct m_option {
 /// \defgroup OptionParserModes Option parser modes
 /// \ingroup Options
 ///
-/// Some parser behave differently depending on the mode passed in the src
+/// Some parsers behaves differently depending on the mode passed in the src
 /// parameter of m_option_type::parse. For example the flag type doesn't take
 /// an argument when parsing from the command line.
 ///@{
@@ -387,16 +387,16 @@ struct m_option {
 /// \defgroup OptionParserReturn Option parser return code
 /// \ingroup Options
 ///
-/// On sucess parsers return the number of arguments consumed: 0 or 1.
+/// On success parsers return the number of arguments consumed: 0 or 1.
 ///
-/// To indicate that mplayer should exit without playing anything,
+/// To indicate that MPlayer should exit without playing anything,
 /// parsers return M_OPT_EXIT minus the number of parameters they
 /// consumed: \ref M_OPT_EXIT or \ref M_OPT_EXIT-1.
 ///
-/// On error one of the following (negative) error code is returned:
+/// On error one of the following (negative) error codes is returned:
 ///@{
 
-/// For use by higer level APIs when the option name is invalid.
+/// For use by higher level APIs when the option name is invalid.
 #define M_OPT_UNKNOWN		-1
 
 /// Returned when a parameter is needed but wasn't provided.
@@ -419,7 +419,7 @@ struct m_option {
 
 /// \defgroup OldOptionParserReturn Backward compatibility
 ///
-/// Those are kept for compatibility with older code.
+/// These are kept for compatibility with older code.
 ///
 ///@{
 #define ERR_NOT_AN_OPTION	M_OPT_UNKNOWN
@@ -432,7 +432,7 @@ struct m_option {
 
 /// Find the option matching the given name in the list.
 /** \ingroup Options
- *  This function take the possible wildcards in account (see
+ *  This function takes the possible wildcards into account (see
  *  \ref M_OPT_TYPE_ALLOW_WILDCARD).
  * 
  *  \param list Pointer to an array of \ref m_option.

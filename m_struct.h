@@ -12,7 +12,7 @@ struct m_option;
 
 /// Struct definition
 typedef struct m_struct_st {
-  /// For error msg and debuging
+  /// For error messages and debugging
   char* name;
   /// size of the whole struct
   unsigned int size;

@@ -61,7 +61,7 @@
 /// Returned on error.
 #define M_PROPERTY_ERROR             0
 
-/// \brief Returned when the property can't be used, for ex something about
+/// \brief Returned when the property can't be used, for example something about
 /// the subs while playing audio only
 #define M_PROPERTY_UNAVAILABLE      -1
 
@@ -90,7 +90,7 @@ int m_property_do(m_option_t* prop, int action, void* arg);
 
 /// Print the current value of a property.
 /** \param prop The property.
- *  \return A newly allocated string with current value or NULL on error.
+ *  \return A newly allocated string with the current value or NULL on error.
  */
 char* m_property_print(m_option_t* prop);
 
@@ -105,7 +105,7 @@ int m_property_parse(m_option_t* prop, char* txt);
 void m_properties_print_help_list(m_option_t* list);
 
 /// Expand a property string.
-/** This function allow to print strings containing property values.
+/** This function allows to print strings containing property values.
  *  ${NAME} is expanded to the value of property NAME or an empty
  *  string in case of error. $(NAME:STR) expand STR only if the property
  *  NAME is available.

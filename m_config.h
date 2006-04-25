@@ -3,8 +3,8 @@
 
 /// \defgroup Config Config manager
 ///
-/// m_config provide an API to manipulate the config variables in MPlayer.
-/// It make use of the \ref Options API to provide a context stack that
+/// m_config provides an API to manipulate the config variables in MPlayer.
+/// It make uses of the \ref Options API to provide a context stack that
 /// allow saving and later restoring the state of all variables.
 ///@{
 
@@ -44,7 +44,7 @@ struct m_config_option {
 /// \defgroup ConfigProfiles Config profiles
 /// \ingroup Config
 ///
-/// Profiles allow to predefine some set of options that can then
+/// Profiles allow to predefine some sets of options that can then
 /// be applied later on with the internal -profile option.
 ///
 ///@{
@@ -65,14 +65,14 @@ struct m_profile {
 /** \ingroup Config */
 typedef struct m_config {
   /// Registered options.
-  /** This contain all options and suboptions.
+  /** This contains all options and suboptions.
    */ 
   m_config_option_t* opts;
   /// Current stack level.
   int lvl;
   /// \ref OptionParserModes
   int mode;
-  /// List of the defined profiles.
+  /// List of defined profiles.
   m_profile_t* profiles;
   /// Depth when recursively including profiles.
   int profile_depth;
@@ -87,7 +87,7 @@ typedef struct m_config {
 /// Set if an option have been set at the current level.
 #define M_CFG_OPT_SET    (1<<0)
 
-/// Set if another option already use the same variable.
+/// Set if another option already uses the same variable.
 #define M_CFG_OPT_ALIAS  (1<<1)
 
 ///@}
