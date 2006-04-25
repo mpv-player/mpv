@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.100 -->
+<!-- Synced with: 1.103 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -323,7 +323,7 @@ Dvouprůchodové enkódování druhé stopy z DVD do MPEG-4 (&quot;DivX&quot;)
 AVI zatímco se zvuk pouze zkopíruje.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -337,7 +337,7 @@ Při této metodě buďte opatrní, jelikož v některých případech může vést k rozjetí
 zvuku s videem.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>výstup.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -374,6 +374,18 @@ mencoder <replaceable>vstup.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
 </para>
 </informalexample>
 
+<note><title>Tip:</title>
+<para>
+  Pokud vás z nějakého důvodu neuspokojí kvalita videa z druhého průchodu,
+  můžete znovu spustit enkódování videa s jiným cílovým datovým tokem, s tím,
+  že máte uložen soubor se statistikami z předchozího průchodu.
+  To je možné proto, že cílem statistického souboru je především zaznamenat
+  komplexitu každého snímku, která příliš nezávisí na datovém toku.
+  Povšimněte si, že ačkoli nejvyšší kvality dosáhnete pokud všechny
+  průchody poběží při stejném datovém toku, tak se výsledek příliš neliší.
+</para>
+</note>
+
 </sect1>
 
 <sect1 id="menc-feat-rescale">
@@ -396,7 +408,7 @@ Pokud ji neuvedete, <application>MEncoder</application> použije 2: bikubickou.
 <para>
 Použití:
 <screen>
-mencoder <replaceable>vstup.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vf scale=640:480 -o <replaceable>výstup.avi</replaceable>
+mencoder <replaceable>vstup.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -vf scale=640:480 -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -441,9 +453,9 @@ způsoby:
 </para>
 
 <para>
-Example:
+Příklad:
 <screen>
-mencoder <replaceable>vstupní.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o <replaceable>výstupní.avi</replaceable>
+mencoder <replaceable>vstupní.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -o <replaceable>výstupní.avi</replaceable>
 </screen>
 </para>
 
@@ -481,7 +493,7 @@ Vysvětlení volby <option>-mf</option> je v man stránce.
 <para>
 Vytvoření MPEG-4 souboru ze všech JPEG souborů v aktuálním adresáři:
 <screen>
-mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -490,7 +502,7 @@ mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=m
 <para>
 Vytvoření MPEG-4 souboru z některých JPEG souborů v aktuálním adresáři:
 <screen>
-mencoder mf://<replaceable>snímek001.jpg,snímek002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>výstup.avi</replaceable>
+mencoder mf://<replaceable>snímek001.jpg,snímek002.jpg</replaceable> -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o <replaceable>výstup.avi</replaceable>
 </screen>
 </para>
 </informalexample>
@@ -594,8 +606,8 @@ dříve než začnete.
 <title>Kopírování dvojích titulků z DVD během dvouprůchodového enkódování</title>
 <screen>
 rm titulky.idx titulky.sub
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout titulky -vobsuboutindex 0 -sid 2
-mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout titulky -vobsuboutindex 1 -sid 5<!--
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout titulky
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -vobsubout titulky -vobsuboutindex 1 -sid 5<!--
 --></screen>
 </example>
 
@@ -644,7 +656,7 @@ Nastudujte si použití filtrů <systemitem>cropdetect</systemitem> a
 
 <para>
 Použití
-<screen>mencoder <replaceable>vzorové-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>výstup.avi</replaceable></screen>
+<screen>mencoder <replaceable>vzorové-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>výstup.avi</replaceable></screen>
 </para>
 </sect1>
 
