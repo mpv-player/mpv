@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.100  -->
+<!-- Synced with: 1.102  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -770,6 +770,16 @@ Jak nastavím kód regionu na mé DVD mechanice? Nemám Windows!
 </para></question>
 <answer><para>
 Použijte nástroj <ulink url="http://linvdr.org/projects/regionset/">regionset</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nemohu přehrát DVD, MPlayer skončí nebo vypíše chyby "Encrypted VOB file!".
+</para></question>
+<answer><para>
+CSS dešifrovací kód nepracuje s některými DVD mechanikami, pokud správně
+nenastavíte kód regionu. Viz odpověď na předchozí otázku.
 </para></answer>
 </qandaentry>
 
