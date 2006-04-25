@@ -8,9 +8,9 @@
 
 <para>
   Une question fréquemment posée est "Comment faire le meilleur rip DVD possible ?
-  Une autre question est "Comment dois-je faire pour avoir un rip de la meilleur
+  Une autre question est "Comment dois-je faire pour avoir un rip de la meilleure
   qualité possible ?" Peu importe la taille du fichier, je veux simplement la 
-  meilleur qualité."
+  meilleure qualité."
 </para>
 
 <para>
@@ -54,10 +54,10 @@
 <para>
   La première et plus importante étape avant l'encodage sera la détermination du 
   type de contenu utilisé. Si la source physique provient d'un DVD ou bien d'un 
-  média de diffusion comme la télé par câble ou le satellite, elle sera stocké
-  sous deux formats : NTSC pour l'amérique du nord et le Japon, et le PAL pour
-  l'Europe et autres...
-  C'est important de la prendre en compte, pourtant, ceci est juste le format
+  média de diffusion comme la télé par câble ou le satellite, elle sera stockée
+  sous deux formats : NTSC pour l'Amérique du nord et le Japon, et PAL pour
+  l'Europe et les autres pays...
+  C'est important de la prendre en compte ce paramètre: ceci est juste le format
   de présentation à la télévision, ce n'est en <emphasis role="bold">aucun</emphasis>
   cas le format original du film.
   L'expérience montre que le NTSC est bien plus dur à encoder car il y a plus
@@ -65,7 +65,7 @@
   Afin de produire l'encodage désiré, vous devez connaître le format original.
   Négliger cette étape aura pour conséquence des résultats hasardeux, des artefacts 
   bizarroïdes, des trames en double ou ignorées.
-  En plus d'avoir des résultats bizarres, le rendu global en souffrirai par une 
+  En plus d'avoir des résultats bizarres, le rendu global risque d'en souffrir avec une 
   qualité médiocre par unité du bitrate.
 </para>
 
@@ -73,7 +73,7 @@
 <title>Identification du framerate de la source</title>
 <para>
   Voici une liste de types de sources matérielles, il est possible que vous
-  trouvez la votre avec ces propriétés :
+  trouviez la vôtre avec ces propriétés :
 </para>
 <itemizedlist>
 <listitem><para>
@@ -82,31 +82,31 @@
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Vidéo PAL</emphasis>: Enregistré par une caméra à 50 trames 
-  par secondes. Une trame est par exemple les lignes paires ou autre d'une image.
-  La télévision a été crée pour rafraîchir l'image de cette manière, une version
-  de la compression analogique.
+  par secondes. Une trame est, par exemple, l'ensemble des lignes paires ou des lignes impaires d'une image.
+  La télévision a été créée pour afficher l'image de cette manière (en fait une version bas de gamme
+  de compression analogique).
   L'oeil humain est censé compenser cette alternance de trames mais dès lors que vous 
   comprenez ce fonctionnement, vous ne regarderez plus la télévision de la même façon.
   Deux trames ne font <emphasis role="bold">pas</emphasis> une image complète, car elles
-  sont capturées 1/50 de seconde décalé dans le temps et ceci, sans bouger tant qu'il n'y
-  a pas de mouvement
+  sont capturées avec un décalage de 1/50e de seconde, et donc, elles ne s'alignent pas
+  parfaitement sauf s'il y a du mouvement
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Vidéo NTSC</emphasis> : Enregistré par une caméra à
   60000/1001 trames par secondes, ou 60 trames par secondes dans l'ère noir/blanc.
-  Sinon, c'est similaire au PAL.
+  A part cela, c'est similaire au PAL.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Animation</emphasis>: Normalement dessiné pour 24fps, 
-  mais il en existe de toute sorte.
+  <emphasis role="bold">Animation</emphasis>: Habituellement dessiné pour du 24fps,
+  mais on peut en trouver de toute sorte.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Animation Graphique, Effets Spéciaux</emphasis>: il est
-  possible d'en trouver avec n'importe quel framerate, mais 24 et 30 fps sont généralement
-  destiné au NTSC et 25 pour le PAL.
+  possible d'en trouver avec n'importe quel framerate, mais en général, le NTSC utilise 24fps et 30fps, le PAL utilise plutôt
+  25fps.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Vieux films</emphasis>: un framerate généralement plus
+  <emphasis role="bold">Vieux films</emphasis>: le framerate est généralement plus
    bas.
 </para></listitem>
 </itemizedlist>
@@ -115,29 +115,30 @@
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-material">
 <title>Identification de la source matérielle</title>
 <para>
-  (?)Les films composés de trames sont dits progressive,
-  tandis que ceux composés de champs indépendant sont appelés
+  (?)Les films composés de trames sont dits 'progressive',
+  alors que ceux composés de champs indépendant sont appelés
   soit entrelacé soit vidéo - ce dernier terme est plutôt ambigu.
 </para>
 <para>
-  Pour compliquer le tout, quelques films font un film des techniques vues ci-dessus.
+  Pour compliquer le tout, certains films utiliset un mélange de plusieurs des
+  techniques vues ci-dessus.
 </para>
 <para>
   La distinction la plus importante qui doit être faire entre ces formats
-  est que certains sont basés sur l'image d'autre sur le champs
+  est que certains utilisent les trames alors que d'autres, les champs.
   <emphasis role="bold">Même si</emphasis> un film a été préparé pour être projeté
-  sur une télévision (même les DVDs), il est converti dans un format basé sur des champs.
+  sur une télévision (DVDs inclus), il est converti dans un format basé sur des champs.
   Les nombreuses méthodes peuvent être rassemblé sous le terme de redimensionnement comme
-  l'infâme NTSC "3:2 telecine" qui en ai une variété.
-  A part que l'oeuvre originale soit basé sur des champs (et avec le même fieldrate),
-  vous obtiendrez un format d'image différent de celui d'origine.
+  l'infâme NTSC "3:2 telecine" qui en est une variété.
+  Sauf si l'oeuvre originale est basée sur des champs (et avec le même fieldrate),
+  le format d'image obtenu sera différent de celui d'origine.
 </para>
 
 <itemizedlist>
 <title>Plusieurs variétés communes de redimensionnement :</title>
 <listitem><para>
   <emphasis role="bold">Redimensionnement PAL 2:2 </emphasis>: Le meilleur de tous.
-  Chaque image est affiché pendant la durée de deux trames, par extraction des lignes
+  Chaque image est affichée pendant la durée de deux trames, par extraction des lignes
   paires et impaires, puis en les affichant par alternance.
   Si l'original est à 24 images par secondes, ce redimensionnement augmentera la vitesse
   du film de 4%.
@@ -146,52 +147,52 @@
   <emphasis role="bold">Redimensionnement PAL 2:2:2:2:2:2:2:2:2:2:2:3</emphasis>:
   La douzième image est affiché pendant la durée de 3 frames au lieu de deux. Cela
   permet d'éviter le problème de l'accélération de 4% mais rend le processus trés 
-  difficil à inverser.
+  difficile à inverser.
   Cette technique est généralement utilisé dans les productions musicales où 
-  l'accélération de 4% endommagerai sérieusement la qualité musicale.
+  l'accélération de 4% endommagerait sérieusement la qualité musicale.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Télécine NTSC 3:2</emphasis>: Les images sont alternativement
-  affichées la durée de 3 ou 2 frames. Cela provoque un redimensionnement de 2,5 fois le 
-  ratio original. Le résultat est très légèrement de 60 frames par secondes à 60000/1001
+  affichées pendant une durée de 3 ou 2 frames. Cela provoque un redimensionnement de 2,5 fois le 
+  ratio original. Le résultat est très légèrement ralenti de 60 frames par secondes à 60000/1001
   frames par seconde pour maintenir le fieldrate NTSC
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Redimmensionnement NTSC 2:2</emphasis>: Utilisé pour le NTSC avec une 
-  source en 3Dfps. Le rendu est correct, similaire au redimensionnement PAL 2:2
+  <emphasis role="bold">Redimensionnement NTSC 2:2</emphasis>: Utilisé pour le NTSC avec une 
+  source en 30fps. Le rendu est correct, similaire au redimensionnement PAL 2:2
 </para></listitem>
 </itemizedlist>
 
 <para>
-  Il y aussi d'autres manière de convertir des vidéos NTSC et du PAL 
+  Il y aussi d'autres manière de convertir des vidéos NTSC et PAL 
   mais ce sujet s'éloigne des limites de ce guide.
-  Si vous désirez encoder une film par exemple, le mieux reste de trouver
+  Si vous désirez encoder un film par exemple, le mieux reste de trouver
   une copie de l'original.
   La conversion entre ces deux formats est hautement destructrice et il n'est 
   pas possible de l'inverser proprement, donc l'encodage sera d'autant plus
   mauvais s'il est fait à partir d'une source déjà converti.
 </para>
 <para>
-  Quand des vidéos sont stockés sur un DVD, des groupes de trames 
-  consécutives sont groupés en une image, même si elles ne sont pas censés
+  Quand des vidéos sont stockées sur un DVD, des groupes de trames 
+  consécutives sont rassemblés en une image, même si elles ne sont pas censées
   être affichées au même moment.
-  Le standard MPEG-2 utilisé dans les DVDs et la télévision numérique fourni
+  Le standard MPEG-2 utilisé dans les DVDs et la télévision numérique fournit
   un moyen d'encoder les images originales progressivement et de stocker le 
-  nombre de trames pour chaque image qui devra être afficher avant cette 
+  nombre de trames pour chaque image qui devra être affiché avant cette 
   image.
-  Si cette méthode avait été utilisé, le film aurait été souvent décrit comme 
-  "soft-telecined" ("contenu progressif"), car le processus de redimentionnement 
-  est appliqué directement par le lecteur de DVD au lieu de détériorer le film lui même.
-  Ce cas est préféré car il peut être tout aussi bien inversé
-  (ignoré ici) par l'encodeur puisqu'il préserve la qualité maximale.
+  Si cette méthode autilisée, on dit que le film est "soft-telecined"
+  ("contenu progressif"), car le processus de rendu est
+  appliqué directement par le lecteur DVD et non pas en dégradant le film.
+  Ce cas est de loin le mieux car il peut être tout aussi bien inversé
+  (en fait, non pris en compte) par l'encodeur puisqu'il préserve la qualité maximale.
   Malgré cela, beaucoup de DVD et d'émissions studios diffusées n'utilisent pas
   des techniques d'encodage propres mais plutôt des films "hard telecine" ("contenu brut") 
-  où les trames sont dupliquées puis encodées en MPEG-2.
+  dans lesquels les trames sont dupliquées puis encodées en MPEG-2.
 </para>
 <para>
-  Les étapes pour gérer correctement ce genre de cas sera évoqué <link
+  Les étapes pour gérer correctement ce genre de cas seront évoquées <link
   linkend="menc-feat-telecine">plus tard dans ce guide</link>.
-  Pour l'instant, nous allons vous donner quelques indices pour définir à quel
+  Pour l'instant, nous allons vous donner quelques indices pour définir à quelle
   source vous avez à faire : 
 </para>
 
@@ -204,31 +205,32 @@
 </para></listitem>
 <listitem><para>
   Si <application>MPlayer</application> affiche un nombre d'images alternant 
-  entre 24000/1001 et 30000/1001 et les bords de l'image sont effilés, alors 
+  entre 24000/1001 et 30000/1001 et que les bords de l'image affichent des espèces de "peignes", alors 
   il y a plusieurs possibilités.
   Les segments à 24000/1001 fps ont très certainement un contenu progressif, 
-  "soft teleciné" mais les parties 30000/1001 fps  peuvent être "hard-teleciné" 
+  "soft teleciné" mais les parties 30000/1001 fps ont pu être "hard-telecinées" 
   depuis un contenu 24000/1001 fps ou 60000/1001 frames par secondes d'une vidéo NTSC.
+  Utilisez les mêmes conseils que ceux pour les deux cas qui suivent.
 </para></listitem>
 <listitem><para>
   Si <application>MPlayer</application> montre un nombre d'images constant et que chacune 
-  des images avec des mouvements apparaît effiles sur les cotés, alors votre film 
-  est à 60000/1001 images par secondes sur une vidéo en NTSC.
+  des images avec des mouvements semble avoir un "peigne" sur les cotés, alors votre film 
+  est une vidéo NTSC à 60000/1001 images par seconde.
 </para></listitem>
 <listitem><para>
   Si <application>MPlayer</application> montre un nombre d'images constant et que deux 
-  images sur cinq apparaît effilé, le film est "hard teleciné" avec un contenu 
-  de 24000/1001fps.
+  images sur cinq apparaissent avec des "peignes", le film est "hard teleciné" avec un contenu
+  à 24000/1001fps.
 </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
 <title>Domaine du PAL:</title>
 <listitem><para>
-  Si vous ne voyez pas d'effilement sur les cotés, le film à un redimensionnement 2:2.
+  Si vous ne voyez pas de "peigne" sur les cotés, le film a un redimensionnement 2:2.
 </para></listitem>
 <listitem><para>
-  Si vous voyez une alternance régulière d'éffilement, de pseudo entrelacement 
+  Si vous voyez une alternance régulière d'effet "peigne", de pseudo-entrelacement 
   toutes les demi-secondes, alors le film a subi une réduction 2:2:2:2:2:2:2:2:2:2:2:3.
 </para></listitem>
 <listitem><para>
@@ -254,10 +256,10 @@
 <title>Quantiseur constant contre deux passes</title>
 
 <para>
-  Il est possible d'encoder votre film suivant différentes qualités. 
-  Les encoders vidéo modernes et quelques pre-codec de compression 
-  (anti-bruit et redimensionnement), il est possible d'obtenir un 
-  trés bon rendu pour un film grand écran de 90-110 minutes tenant sur 700Mo. 
+  Il est possible d'encoder votre film suivant une large gamme de qualités.
+  Les compresseurs vidéo modernes et quelques pre-codec de compression 
+  (anti-bruit et redimensionnement) permettent d'obtenir un 
+  trés bon rendu pour un film grand écran de 90-110 minutes sur 700Mo. 
   De plus, la plupart des films longs peuvent approcher un résultat parfait 
   avec un fichier d'un taille de 1400Mo.
 </para>
@@ -272,21 +274,21 @@
   cette compression fera varier grandement le résultat d'une scène à l'autre. 
   Les encodeurs vidéo modernes savent s'ajuster en fonction des besoins par 
   variation du débit vidéo (bitrate).
-  Dans un mode simple comme le CBR, quel qu'il soit, l'encodeur ne connaît pas 
+  Cependant, dans un mode simple comme le CBR, le compresseur ne connaît pas 
   le besoin en débit vidéo pour les scènes à venir, donc il ne sait pas définir 
   un bitrate moyen sur la longueur du film.
-  Les modes avancés actuels, comme le mode multipass (plusieurs passages) prends 
+  Les modes avancés actuels, comme le mode 'multipass' (plusieurs passages), prennent
   en compte les statistiques des passes précédentes pour l'encodage, fixant le 
   problème ci-dessus. 
 </para>
 
 <note><title>Note:</title>
 <para>
-  La plupart des codecs qui supporte l'encodage ABR supportent seulement deux 
+  La plupart des codecs qui supportent la compression ABR supportent seulement deux 
   passages alors que d'autres comme le <systemitem class="library">x264</systemitem>,
   le <systemitem class="library">XviD</systemitem> et <systemitem   class="library">libavcodec</systemitem> supportent des 
-  passes multiples qui permettent d'affiner à chaque fois les statistiques mais 
-  cela sera négligeable après la quatrième passe.
+  passes multiples qui permettent d'affiner à chaque fois les statistiques (ces améliorations seront cependant négligeables
+  après la quatrième passe).
   Dans cette section, deux passages ou plus peuvent être utilisés indifféremment.
 </para>
 </note>
@@ -297,22 +299,23 @@
   un quantificateur sur chaque macrobloc. Plus le quantificateur est bas, plus 
   la qualité est bonne et le débit est gros. La méthode utilisée par
   <systemitem class="library">libavcodec</systemitem> pour déterminer quel
-  quantificateur utiliser varie et est très réglable (ceci est une simplification
+  quantificateur utiliser varie et est configurable (ceci est une simplification
   à l'extrême du processus, mais il est utile de comprendre le principe de base).
 </para>
 
+<!-- FIXME -->
 <para>
-  Lorsque vous spécifiez un débit constant, le codec vidéo encodera la vidéo 
-  sans porter suffisamment attention aux détails, et ceux-ci, d'autant plus 
-  que le bitrate sera petit. Si vous n'en avez rien à faire de la taille du 
-  fichier, vous pouvez fixé un débit contant et infini. (En pratique, cette 
-  valeur aura une limite haute, comme par exemple 10000Kbit). Sans réelle 
+  Lorsque vous spécifiez un débit constant, le compresseur vidéo codera la vidéo 
+  en laissant de côté les détails, et ceci, d'autant plus 
+  que le bitrate sera petit. Si la taille du fichier vous importe peu,
+  vous pouvez fixer un débit contant et infini. (En pratique, cette 
+  valeur aura une limite haute dans les 10000Kbit). Sans réelle 
   restriction de débit, 
   <systemitem class="library">libavcodec</systemitem> utilisera le plus
   bas quantificateur possible pour chaque macrobloc (tel que spécifié par
   <option>vqmin</option>, qui vaut 2 par défaut). 
-  Si vous spécifiez un débit si bas que <systemitem class="library">
-  libavcodec</systemitem> soit forcé d'utiliser un quantificateur plus haut, 
+  Si vous spécifiez un débit si petit que <systemitem class="library">
+  libavcodec</systemitem> doit utiliser un quantificateur plus haut, 
   alors vous êtes certainement en train de massacrer la qualité de votre 
   vidéo. En général, vous devriez éviter le CBR si vous vous souciez de 
   la qualité.
@@ -321,7 +324,7 @@
 <para>
   Avec un quantificateur constant <systemitem class="library">libavcodec</systemitem> utilise 
   le même quantificateur, spécifié par l'option <option>vqscale</option>, sur chaque macrobloc. 
-  Si vous voulez un rip de la meilleure qualité possible, là encore en ignorant 
+  Si vous voulez un rip de la meilleure qualité possible, cette fois encore en ignorant 
   le débit, vous pouvez utiliser <option>vqscale=2</option>. Cela donnera le même débit 
   et le même PSNR (Peak Signal-to-Noise Ratio, rapport signal sur bruit de crête) 
   que le CBR avec <option>vbitrate</option>=infini et la valeur de <option>vqmin</option> par 
@@ -333,8 +336,8 @@
   demandé même si le macrobloc n'en a pas besoin. En fait, il doit être possible
   d'utiliser un quantificateur plus haut sur un macrobloc sans sacrifier de la 
   qualité visuelle. Pourquoi gaspiller des bits avec un quantificateur inutilement 
-  bas ? Votre microprocesseur a assez de ressources cette fois ci, mais seulement 
-  quelques octects sur le disque.
+  bas ? Votre microprocesseur a assez de ressources car il a le temps, mais votre
+  disque lui a une taille fixée.
 </para>
 
 <para>
@@ -342,42 +345,42 @@
   en CBR, mais va garder un log des propriétés de chaque trame. Ces données
   sont ensuites utilisées pendant la seconde passe de façon à choisir intelligemment
   quels quantificateurs utiliser. Lors des scènes d'action rapide ou celles ayant 
-  peu de détails, des quantificateurs plus haut seront utilisés, et durant les 
-  scènes avec peu de mouvements ou avec beaucoup de détails, des quantificateurs 
-  plus bas seront utilisés.
+  beaucoup de détails, des quantificateurs plus élevés seront utilisés. Pendant les 
+  scènes avec peu de mouvements ou avec peu de détails, ce sera des quantificateurs 
+  plus bas.
 </para>
 
 <para>
   Si vous utilisez <option>vqscale=2</option>, alors vous gaspillerez des bits.
   Si vous utilisez <option>vqscale=3</option>, vous n'aurez pas la meilleur
   qualité de rip. Supposez que vous rippiez un DVD avec <option>vqscale=3</option>, 
-  et que le résultat soit 1800Kbit. Si vous faites un encodage deux passes avec
+  et que le résultat soit 1800Kbit. Si vous faites un encodage en deux passes avec
   <option>vbitrate=1800</option>, la vidéo produite aura une 
-  <emphasis role="bold">meilleur qualité</emphasis> pour le <emphasis role="bold">même débit</emphasis>.
+  <emphasis role="bold">meilleure qualité</emphasis> pour le <emphasis role="bold">même débit</emphasis>.
 </para>
 
 <para>
   Maintenant que vous êtes convaincu que l'encodage deux passes est la bonne méthode,
   la vraie question est maintenant de savoir quel débit utiliser. Il n'y a pas de réponse 
-  unique. Idéalement, vous devriez choisir un débit offrant un compromis entre 
-  qualité et taille de fichier. Cela varie suivant la source vidéo.
+  toute faite. Idéalement, vous devriez choisir un débit offrant un compromis entre 
+  qualité et taille de fichier. Cette valeur varie selon la source vidéo.
 </para>
 
 <para>
   Si la taille ne compte pas, un bon point de départ pour un rip de très haute 
   qualité est environ 2000kbps, plus ou moins 200kbps. 
-  Pour les vidéos comportant beaucoup d'actions ou de détails, ou si vous avez 
+  Pour les vidéos comportant beaucoup d'actions ou de détails, et/ou si vous avez 
   de très bon yeux, vous pouvez choisir 2400 ou 2600.
-  Pour certains DVDs, vous pourriez voir une différence à 1400kbps. C'est une bonne
-  idée que d'essayer sur des scènes à différents débits pour se rendre compte.
+  Pour certains DVDs, vous pourrez ne pas voir de différence à 1400kbps. C'est une bonne
+  idée que d'essayer sur des scènes avec différents débits pour se rendre compte.
 </para>
 
 <para>
-  Si vous avez fixé une taille limite, alors il faudra se livré à un petit calcul 
+  Si vous avez fixé une taille limite, alors il faudra se livrer à un petit calcul 
   pour obtenir le débit souhaité. Mais avant cela, il faudra définir l'espace que 
-  vous réservez aux piste(s) audio et vous devrez <link linkend="menc-feat-dvd-mpeg4-audio">
+  vous réserverez aux piste(s) audio et vous devrez <link linkend="menc-feat-dvd-mpeg4-audio">
   les ripper</link> en premier.
-  Vous pouvez calculer le débit désiré avec l'équation suivante :
+  Vous pourrez alors calculer le débit souhaité avec l'équation suivante :
   <systemitem>Débit = (taille_fichier_final_en_Mo - taille_fichier_son_en_Mo) *
   1024 * 1024 / durée_en_secondes * 8 / 1000</systemitem>
   Par exemple, pour ramener deux heures de films sur un cd de 702Mo avec une piste 
@@ -387,21 +390,20 @@
 
 </sect2>
 <sect2 id="menc-feat-dvd-mpeg4-constraints">
-<title>Contraintes pour un encodage efficace</title>
+<title>Contraintes pour une compression efficace</title>
 
 <para>
-  De part la nature intrinsèque de la compresssion MPEG, de nombreux 
-  paramètres rentrent en jeu afin d'obtenir une qualité maximum.
-  Le MPEG découpe la vidéo en carré de 16x16 appelé macroblocs, chacun 
-  d'entre eux et composé de 4 blocs 8x8 petits blocs d'information sur 
-  la luminosité (intensité) et deux moitié de la résolution par des petits 
-  blocs 8x8 pour des informations chromatiques (couleur) (un pour l'axe 
-  rouge-cyan et l'autre pour l'autre le bleu-jaune).
-  Même si la longueur et largeur du film ne sont pas des multiples de 16, 
+  De par la nature intrinsèque de la compresssion MPEG, de nombreux 
+  paramètres entrent en jeu afin d'obtenir une qualité maximale.
+  Le MPEG découpe la vidéo en carré de 16x16 appelé macroblocs. Chacun 
+  d'entre eux est composé de 4 petits (8x8) blocs contenant des informations sur 
+  la luminosité (intensité) ainsi que de 2 blocs (donc à résolution moitié)
+  contenant des informations chromatiques (pour les teinte rouge-cyan et bleu-jaune).
+  Même si la longueur et la largeur du film ne sont pas des multiples de 16, 
   l'encodeur utilisera des macroblocs de 16x16 pour couvrir l'image entiere, 
   l'espace restant sera alors perdu.
-  Si votre intérêt est de conserver une très bonne qualité, il sera une 
-  mauvaise idée d'utiliser d'autres dimensions que des multiples de 16.
+  Si votre intérêt est de conserver une très bonne qualité, utiliser des résolutions 
+  non multiples de 16 n'est pas une bonne idée.
 </para>
 
 <para>
@@ -413,20 +415,20 @@
 <listitem>
 <para>
   La compression MPEG est aussi dépendante du domaine de transformation des 
-  fréquences, en particulier du "Discrete Cosine Transform (DCT)", similaire 
-  à la transformation de Fourrier. Ce type d'encodage est efficace pour les 
-  formes et les transitions douces, mais fonctionne moins bien avec les bords 
-  francs. Afin d'encoder correctement, il demandera plus de bits, sinon des 
+  fréquences, en particulier du "Discrete Cosine Transform (DCT)" (une espèce de
+  transformée de Fourier). Ce type d'encodage est efficace pour les 
+  formes et les transitions douces, mais fonctionne moins bien avec les contours
+  acérés. Afin d'encoder correctement, il demandera plus de bits, sinon des 
   artefacts de compression apparaitront, aussi connus sous le nom de "ringing".
 </para>
 
 <para>
   La transformation en fréquence (DCT) prend place séparément dans chaque 
-  macrobloc (en effet dans chaque bloc même), donc le problème n'apparaitra 
-  que si un bord franc est dans ce bloc. Si vos bordures noires commencent 
-  exactement sur un multiple de 16, ce n'est pas un problème. En pratique, 
-  les bordures ne sont jamais franchement alignées, et il sera certainement 
-  nécessaire de les couper pour éviter des soucis.
+  macrobloc (en fait, dans chaque bloc), donc le problème n'apparaitra 
+  que si un bord franc se situe dans ce bloc. Si vos bordures noires commencent 
+  exactement sur un multiple de 16, ce ne sera pas un problème. En pratique, 
+  les bordures ne sont jamais bien alignées, et il sera certainement 
+  nécessaire de les couper pour éviter ces défauts.
 </para>
 </listitem>
 </orderedlist>
@@ -436,38 +438,37 @@
   utilise des vecteurs de mouvements représentant les changements d'une image 
   à la suivante. Ces vecteurs de mouvements voient leur utilité grandement 
   réduite quand la prochaine image à un contenu totalement différent. Quand 
-  il y a un mouvement qui s'étend sur le région encodé, les vecteurs n'ont 
-  aucun soucis avec ce mouvement. Alors qu'en présence de bordures noires, 
-  cela en créera :
+  il y a un mouvement qui sort de la région encodée, cela ne pose pas de problème
+  aux vecteurs. En revanche, cela peut poser des problèmes avec les bandes noires:
 </para>
 
 <orderedlist continuation="continues">
 <listitem>
 <para>
   Pour chaque macrobloc, la compression MPEG stocke un vecteur identifiant 
-  quelle partie de la précédente image devrait être copier dans les macroblocs 
-  de l'image suivante. Seules les différences devront alors être encoder. 
+  quelle partie de l'image précédente devrait être copiée dans les macroblocs 
+  de l'image suivante. Seules les différences devront alors être encodées.
   Si le macrobloc s'étend et prend en compte une des bordures noire de l'image, 
   alors le vecteur de mouvement écrasera la bordure noire. Cela veut dire que de 
-  nombreux bits sont gaspillés pour renoircir la bande noire ou sinon, le vecteur 
-  de mouvement ne sera pas du tout utiliser (par chance) et tout le macrobloc 
-  devra alors être ré-encoder. Autrement, la qualité de l'encodage en est 
-  grandement amélioré.
+  nombreux bits sont gaspillés pour renoircir la bande noire ou alors (plus probable) que le vecteur 
+  de mouvement ne sera pas du tout utilisé et que tout le macrobloc 
+  devra alors être ré-encodé. Dans tous les cas, l'efficacité de l'encodage en est 
+  grandement améliorée.
 </para>
 
 <para>
-  Encore une fois, ce problème s'applique que si les lignes des bordures noires 
+  Une fois encore, ce problème n'existe que si les lignes des bordures noires 
   ne sont pas un multiple de 16.
 </para>
 </listitem>
 
 <listitem>
 <para>
-  Enfin, supposons que l'on a un macrobloc à l'intérieur d'une image et qu'un 
+  Enfin, supposons que l'on ait un macrobloc à l'intérieur d'une image et qu'un 
   objet se déplace dans ce bloc proche d'un bord de l'image. Malheureusement, le 
   MPEG ne sait pas faire "copier juste la partie qui dans l'image et laisser tomber 
-  la partie noire". Donc la partie noire sera alors aussi copiée, ce qui fait encore 
-  beaucoup de bits encodé alors qu'ils n'ont pas à être gaspillé.
+  la partie noire". Donc la partie noire sera alors aussi copiée, ce qui fait encore gaspiller
+  beaucoup de bits pour compresser un morceau d'image qui n'est pas sensé être là.
 </para>
 
 <para>
@@ -475,7 +476,7 @@
   le MPEG dispose d'optimisation spéciales pour copier en répétition des pixels 
   depuis le bord de l'image lorsque celui vient de l'extérieur de la partie encodée. 
   Ces optimisations deviennent inutiles quand le film à des bandes noires. Contrairement 
-  aux problèmes 1 et 2, même les bordures noires multiples de 16 n'aident dans ce cas.
+  aux problèmes 1 et 2, même les bordures noires multiples de 16 n'aident pas dans ce cas.
 </para>
 </listitem>
 
@@ -489,13 +490,13 @@
 
 <para>
   Pour toutes ces raisons, il est préférable de couper entièrement ces bandes 
-  noires. Dans la même optique, si il y a une partie contenant du bruit ou de la 
+  noires. Dans la même optique, s'il y a une partie contenant du bruit ou de la 
   distorsion d'image prés d'une bordure, la coupure l'enlevera et permettra d'avoir 
-  une amélioration significative de la qualité de l'encodage. Les vidéophiles les 
-  plus puristes souhaiteront préserver l'encodage le plus proche possible de 
-  l'original, à moins qu'ils encodent avec un quantificateur constant, la qualité 
-  gagnée après l'amputation des bandes noires améliorent grandement la qualité 
-  finale de l'encodage au regards des quelques rares informations perdues.
+  une amélioration significative de la qualité de l'encodage. Les puristes parmi les vidéophiles 
+  souhaiteront préserver l'encodage le plus proche possible de 
+  l'original, à moins qu'ils n'encodent avec un quantificateur constant, la qualité 
+  gagnée après la suppression des bandes noires améliorera grandement la qualité 
+  finale de l'encodage au regard des quelques informations perdues.
 </para>
 </sect2>
 
@@ -505,17 +506,17 @@
 
 <para>
   Rappel de la section prédécente, la taille de l'image finale devra être un 
-  multiple de 16 (en hauteur et largeur). Cela peut être réalisé par découpage, 
+  multiple de 16 (en hauteur et largeur). Cela peut être réalisé par découpage (recadrage), 
   redimensionnement ou les deux.
 </para>
 
 <para>
-  Lors de la recoupe, il y a quelques règles qui doivent être respecté sous peine 
-  d'endomager votre film.
-  Le format normal YUV, 4:2:0 stock l'information chromatique (couleur) 
-  sous-échantillonnée, par exemple, la chrominance est samplé en moitié moins 
+  Lors du recadrage, il y a quelques règles qui doivent être respectées sous peine 
+  d'endommager votre film.
+  Le format normal YUV, 4:2:0 stocke l'information chromatique (couleur) de manière
+  sous-échantillonnée, par exemple, la chrominance est échantillonée en moitié moins 
   de temps que l'information de la luminance (intensité). Observez le schéma 
-  suivant, L indique un échantillon de luminance, et C pour la chroma.
+  suivant, L indique un échantillon de luminance, et C pour la chrominance.
 </para>
 
 <informaltable>
@@ -593,17 +594,17 @@
 
 <para>
   Comme vous pouvez le voir, les lignes et colonnes de l'image naturelle 
-  viennent par deux. Donc votre découpe devra <emphasis>absolument</emphasis> 
-  avoir des dimensions paires. Sinon, les informations chromatique et de 
+  viennent par deux. Ainsi, votre découpe devra <emphasis>absolument</emphasis> 
+  avoir des dimensions paires. Si ce n'est pas le cas, les informations chromatiques et de 
   luminosité ne seront plus alignées.
   En théorie, il est possible de découper d'une dimension impaire, mais cela 
-  demandera alors un re-sampling des informations chromatique, et donc 
-  potentiellement de générer des pertes d'information et non supporté par 
+  demandera alors un re-sampling des informations chromatique, ce qui,
+  potentiellement, génère des pertes d'information et n'est pas supporté par 
   le filtre de redimensionnement.
 </para>
 
 <para>
-  Ensuite, la vidéo entrelacée est samplée de la façon suivante:
+  Ensuite, la vidéo entrelacée est échantillonée de la façon suivante:
 </para>
 
 <informaltable>
@@ -842,6 +843,8 @@
   </tbody>
 </tgroup>
 </informaltable>
+
+<!-- checked so far / pl / diff 1-->
 
 <para>
   Comme vous pouvez le voir, les répétitions n'apparaissent pas aprés 
