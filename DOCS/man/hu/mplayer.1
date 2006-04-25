@@ -1,4 +1,4 @@
-.\" Synced with 1.1036
+.\" Synced with 1.1042
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -119,7 +119,7 @@ mencoder \- film kódoló
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ fájl | mms[t] | http | http_proxy | rt[s]p | ftp | udp] ://
+.RI [ fájl | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv] ://
 [felhasználó:jelszó@]\fIURL\fP[:port] [opciók]
 .
 .br
@@ -276,7 +276,7 @@ Hangerõ csökkentése/\:növelése.
 Hangerõ csökkentése/\:növelése.
 .IPs m\ \ \ \ 
 Hang elnémítása.
-.IPs "#" (csak MPEG és Matroska)
+.IPs "# (csak MPEG és Matroska)"
 Váltás az elérhetõ audió sávok között.
 .IPs f\ \ \ \ 
 Teljes képernyõs lejátszás (lásd a \-fs\-t).
@@ -914,6 +914,12 @@ Cookie-k küldése HTTP kéréseknél.
 Beolvassa a HTTP cookie-t a <fájlnév> fájlból (alapértelmezett: ~/.mozilla/ és
 ~/.netscape/) és kihagyja az alapértelmezett helyeket.
 A fájlt Netscape formátumúnak feltételezi.
+.
+.TP
+.B \-delay <másodperc>
+audió késleltetés másodpercben (pozitív vagy negatív lebegõpontos szám)
+.I MEGJEGYZÉS:
+Ha MEncoder-rel használod, nem garantált a helyes mûködés \-ovc copy mellett.
 .
 .TP
 .B \-demuxer <szám>
@@ -1755,10 +1761,6 @@ A VobSub felirat ID-je itt adható meg.
 .TP
 .B \-abs <érték> (csak \-ao oss) (RÉGI)
 Felülbírálja az audió vezérlõ/\:kártya buffer méretének detektálását.
-.
-.TP
-.B \-delay <sec>
-Audió késleltetés másodpercben (pozitív vagy negatív lebegõpontos érték).
 .
 .TP
 .B \-format <formátum> (lásd még a format audió szûrõt)
@@ -3338,6 +3340,38 @@ videó szélessége nagyobb vagy egyenlõ mint <w>.
 Kihagyja a megadott számú makroblokk sort a tetején.
 .IPs "st=<szám> (csak MPEG-2)"
 Kihagyja a megadott számú makroblokk sort az alján.
+.IPs skiploopfilter=<kihagyási érték> (csak H.264)
+Kihagyja a loop szûrõt (deblocking szûrõ) a H.264 dekódolás közben.
+Mivel a szûrt kocka referenciaként lesz felhasználva a függõ
+kockák dekódolásánál, ennek rosszabb hatása van a minõségre,
+mint a deblocking elhagyásának pl. MPEG-2-es videónál.
+De legalább a nagy bitrátájú HDTV-nél jelentõs gyorsulást
+biztosít látható minõségvesztés nélkül.
+.sp 1
+A <kihagyási érték> a következõk egyike lehet:
+.RSss
+.br
+none: Soha ne hagyja ki.
+.br
+default: Hagyja ki, ha a feldolgozási lépés haszontalan (pl. 0 méretû csomag AVI-ban).
+.br
+nonref: Hagyja ki a nem referencia kockákat (pl.\& nem lesz felhasználva
+másik kocka dekódolásánál, a hiba nem tud "tovább épülni").
+.br
+bidir: Hagyja ki a B-kockákat.
+.br
+nonkey: Hagyjon ki minden kockát, kivéve a kulcs kockákat.
+.br
+all: Hagyjon ki minden kockát.
+.REss
+.IPs skipidct=<kihagyási érték> (csak MPEG1/2)
+Kihagyja az IDCT lépést.
+Ez nagy arányú minõségromlást okoz a legtöbb esetben
+(lásd a skiploopfilter-t a használható kihagyási értékekért).
+.IPs skipframe=<kihagyási érték>
+Teljesen kihagyja a kocka dekódolását.
+Nagy sebességnövekedés, de ugráló mozgás és rossz mellékhatások
+(lásd a skiploopfilter-t a használható kihagyási értékekért).
 .IPs vismv=<érték>
 Mozgás vektorok vizualizációja.
 .RSss
@@ -6343,12 +6377,12 @@ a kódolótól és a szerencsétõl.
 Ha erõteljesen ragaszkodni kell az MPEG-1/2/4-hez, ajánlott a <=132.
 .
 .TP
-.B sc_threshold=<-1000000\-1000000>
+.B sc_threshold=<-1000000000\-1000000000>
 A jelenet váltás detektálásának küszöbértéke.
 A libavcodec egy kulcs képkockát illeszt be ha jelenetváltást érzékel.
 Ezzel az opcióval megadhatod a detektálás érzékenyésgét.
-A -1000000 azt jelenti, hogy jelenet váltást talál minen képkocka váltásnál,
-a 1000000 pedig azt, hogy nem lesz jelenetváltás találat (alapértelmezett: 0).
+A -1000000000 azt jelenti, hogy jelenet váltást talál minen képkocka váltásnál,
+a 1000000000 pedig azt, hogy nem lesz jelenetváltás találat (alapértelmezett: 0).
 .
 .TP
 .B vb_strategy=<0\-1> (csak elsõ lépés)
@@ -7319,9 +7353,10 @@ intra DC pontosság bitekben (alapértelmezett: 8).
 Ha megadod a vcodec=mpeg2video-t, az értéke 8, 9, 10 vagy 11 lehet.
 .
 .TP
-.B cgop (lásd még scenecut)
+.B cgop (lásd még sc_threshold)
 Bezár minden GOP-ot.
-Jelenleg csak akkor mûködik, ha a jelenet váltás detektáló le van tiltva (scenecut=-1).
+Jelenleg csak akkor mûködik, ha a jelenet váltás detektáló le van tiltva
+(sc_threshold=1000000000).
 .
 .
 .SS nuv (\-nuvopts)
