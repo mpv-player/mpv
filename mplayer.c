@@ -4183,13 +4183,13 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if(abs==2) { /* Absolute seek to a specific timestamp in seconds */
         abs_seek_pos = 1;
 	if(sh_video)
-	  osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
+	  osd_function= (v > sh_video->pts) ? OSD_FFW : OSD_REW;
 	rel_seek_secs = v;
       }
       else if(abs) { /* Absolute seek by percentage */
 	abs_seek_pos = 3;
 	if(sh_video)
-	  osd_function= (v > sh_video->timer) ? OSD_FFW : OSD_REW;
+	  osd_function= OSD_FFW;   // Direction isn't set correctly
 	rel_seek_secs = v/100.0;
       }
       else {
