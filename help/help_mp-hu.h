@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.243 (2006. 04. 22.)
+// Sync'ed with help_mp-en.h 1.246 (2006. 04. 25.)
 
 // ========================= MPlayer help ===========================
 
@@ -407,11 +407,11 @@ static char help_text[]=
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     a változó bitrátájú kódolás módja\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh(alapértelmezett)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
+"                0: cbr (konstans bitráta)\n"\
+"                1: mt (Mark Taylor VBR algoritmus)\n"\
+"                2: rh (Robert Hegemann VBR algoritmus - alapértelmezett)\n"\
+"                3: abr (elérhetõ bitráta)\n"\
+"                4: mtrh (Mark Taylor Robert Hegemann VBR algoritmus)\n"\
 "\n"\
 " abr           átlagos bitráta\n"\
 "\n"\
@@ -1473,7 +1473,7 @@ static char help_text[]=
 // libmenu/menu_console.c
 #define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid hiba: %s.\n"
 #define MSGTR_LIBMENU_SelectError "[MENU] Kiválasztási hiba.\n"
-#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Olvasási hiba a gyerekben: %s.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Olvasási hiba a gyerek fájlleírójában: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Konzol futtatás: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Egy gyermek már fut.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Fork sikertelen !!!\n"
@@ -1519,7 +1519,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] QP aritmetikus közepe: %2.4f, QP harmonikus közepe: %2.4f\n"
 #define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI hiba.\n"
 #define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Nem sikerült a kép lefoglalása a codec-hez.\n"
-#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-vel gyorsított MPEG2.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-vel gyorsított MPEG-2.\n"
 #define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] pixfmt=%d kipróbálása.\n"
 #define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Az mc_get_buffer csak XVMC gyorsítással mûködik!!"
 #define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Váratlan init_vo hiba.\n"
@@ -1563,3 +1563,251 @@ static char help_text[]=
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s nem támogatott a következõ szûrõben/vo-ban :(\n"
+
+// ================================== LIBMPVO ====================================
+
+// mga_common.c
+
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "Hiba az mga_vid_config ioctl-ben (hibás verziójú mga_vid.o?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "Nem kérdezhetõek le a luma értékek a kernel modulból!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "Nem állíthatóak be a luma értékek a kernel modulból!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Képernyõ szélesség/magasság ismeretlen!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: hibás kimeneti formátum %0X\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Hibás kimeneti formátum %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "Az mga_vid vezérlõd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "%d buffer használata.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "Nem nyitható meg: %s\n"
+
+// libvo/vesa_lvo.c
+
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Ez a ág már nem támogatott.\n[VESA_LVO] Kérjük használd a -vo vesa:vidix kapcsolót helyette.\n"
+#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] Nem nyitható meg: '%s'\n"
+#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Hibás kimeneti formátum: %s(%0X)\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] Az fb_vid vezérlõd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
+
+// libvo/vo_3dfx.c
+
+#define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Csak 16bpp támogatott!"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] A vizuális id  %lx.\n"
+#define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] A /dev/3dfx nem nyitható meg.\n"
+#define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Hiba: %d.\n"
+#define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Nem mappolhatóak a 3dfx memória területek: %p,%p,%d.\n"
+#define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Inicializálva: %p.\n"
+#define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Ismeretlen aleszköz: %s.\n"
+
+// libvo/vo_dxr3.c
+
+#define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Sikertelen az új SPU paletta betöltése!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Sikertelen a lejátszási mód beállítása!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Sikertelen a subpicture mód beállítása!\n"
+#define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] Sikertelen a TV norma lekérdezése!\n"
+#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] Auto-kiválasztásos TV norma a frame rátából: "
+#define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] Sikertelen a TV normba beállítása!\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] Beállítás NTSC-re.\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Beállítás PAL/SECAM-ra.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Képarány beállítása 4:3-ra.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Képarány beállítása 16:9-re.\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] Elfogyott a memória.\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Sikertelen a színkulcs lefoglalása!\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Sikertelen a pontos színkulcs lefoglalása, legközelebbi találat használata (0x%lx).\n"
+#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Nem inicializált.\n"
+#define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] Sikertelen a TV norma visszaállítása!\n"
+#define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Elõbufferelés engedélyezése.\n"
+#define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Új sync motor használata.\n"
+#define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Átlapolás használata.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Hiba: Az MPlayert telepített x11 könyvtárakkal és fejlécekkel kell lefordítanod az átlapolás használatához.\n"
+#define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] TV norma beállítása erre: "
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "Automatikus beállítás a film frame rátájára (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "Automatikus beállítás a film frame rátájára (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Jelenlegi norma használata"
+#define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Ismeretlen norma lett megadva. Aktuális norma használata."
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Hiba a(z) %s írásra történõ megnyitásakor, /dev/em8300-at próbálom helyette.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] Hiba a(z) %s írásra történõ megnyitásakor, /dev/em8300_mv-t próbálom helyette.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell "[VO_DXR3] Hiba a /dev/em8300 írásra történõ megnyitásakor is!\nFeladom.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV "[VO_DXR3] hiba a /dev/em8300_mv írásra történõ megnyitásakor is!\nFeladom.\n"
+#define MSGTR_LIBVO_DXR3_Opened "[VO_DXR3] Megnyitva: %s.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Hiba %s írásra történõ megnyitásakor, /dev/em8300_sp-t próbálom helyette.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Hiba a /dev/em8300_sp írásra történõ megnyitásakor is!\nFeladom.\n"
+#define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Nem nyitható meg a képernyõ az overlay hack beállítása alatt!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Nem sikerült az x11 inicializálása!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Sikertelen az átlapolási attribútumok beállítása.\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Sikertelen az átlapolt képernyõ beállítása!\nKilépés.\n"
+#define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Sikertelen az átlapolás bekapcsolása!\nKilépés.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Sikertelen az átlapolt ablak átméretezése!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] Sikertelen az átlapolási bcs beállítása!\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] Sikertelen az átlapolás Y-offset értékének beállítása!\nKilépés.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] Sikertelen az átlapolás X-offset értékének beállítása!\nKilépés.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] Sikertelen az átlapolás X arány korrekciójának lekérdezése!\nKilépés.\n"
+#define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Yoffset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Xoffset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Sikertelen az átlapolt ablak átméretezése!\n"
+#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Sikertelen a kkevert jel beállítása!\n"
+
+// libvo/vo_mga.c
+
+#define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): átméretezve erre: %dx%d.\n"
+#define MSGTR_LIBVO_MGA_Uninit "[VO] uninit!\n"
+
+// libvo/vo_null.c
+
+#define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Ismeretlen aleszköz: %s.\n"
+															
+// libvo/vo_png.c
+
+#define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Figyelmeztetés: a tömörítési szint 0-ra állítva, tömörítés kikapcsolva!\n"
+#define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] Infó: Használd a -vo png:z=<n> opciót a tömörítési szint beállításához 0-tól 9-ig.\n"
+#define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Infó: (0 = nincs tömörítés, 1 = leggyorsabb, legrosszabb - 9 legjobb, leglassabb tömörítés)\n"
+#define MSGTR_LIBVO_PNG_ErrorOpeningForWriting "\n[VO_PNG] Hiba a(z) '%s' írásra történõ megnyitásakor!\n"
+#define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] Hiba a create_png-ben.\n"
+
+// libvo/vo_sdl.c
+
+#define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Sikertelen bármilyen elfogadható SDL mód lekérdezése a kimenethez.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode sikertelen: %s.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode sikertelen: %s.\n"
+#define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] I420 mappolása IYUV.\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] Nem támogatott kép formátum (0x%X).\n"
+#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Infó - Kérlek használd a -vm vagy -zoom opciót a legjobb felbontásra váltáshoz.\n"
+#define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] Sikertelen a videó mód beállítása: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay "[VO_SDL] Nem hozható létre a YUV átlapolás: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateARGBSurface "[VO_SDL] Nem hozható létre az RGB felület: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Mélység/színtér konverzió használata, ez lelassítja a dolgokat (%ibpp -> %ibpp).\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Nem támogatott kép formátum a draw_slice-ban, lépj kapcsolatba az MPlayer fejlesztõkkel!\n"
+#define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit sikertelen: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] SDL inicializálása sikertelen: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Használt vezérlõ: %s.\n"
+
+// libvo/vobsub_vidix.c
+
+#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Nem indítható el a lejátszás: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Nem állítható meg a lejátszás: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Az átlapolt uv a yuv410p-höz nem támogatott.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Üres vidix_draw_slice() meghívva.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Üres vidix_draw_frame() meghívva.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Nem támogatott fourcc ehhez a vidix vezérlõhöz: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] A videó szerver felbontása (%dx%d) nem támogatott, a támogatott: %dx%d-%dx%d.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] A videó szerver vidix által nem támogatott színmélységet használ (%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] A vidix vezérlõ nem tudja felméretezni a képet (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] A vidix vezérlõ nem tudja leméretezni a képet (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] Nem állítható be a lejátszás: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Rossz verziójú VIDIX függvénykönyvtárad van.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Nem található mûködõ VIDIX vezérlõ.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Nem elérhetõ képesség: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] Leírás: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] Szerzõ: %s.\n"
+
+// libvo/vo_svga.c
+
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] Kényszerített vid_mode %d (%s) nem elérhetõ.\n"
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] Kényszerített vid_mode %d (%s) túl kicsi.\n"
+#define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
+#define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) sikertelen.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] A videó mód lineáris, a memcpy használható a kép átvitelre.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] A videó módnak hardveres gyorsítása van, a put_image használható.\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] Ha mûködik nálad, szeretnénk tudni róla. \n[VO_SVGA] (küldj logot: `mplayer test.avi -v -v -v -v &> svga.log`). Thx\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] A videó módnak %d lapja van.\n"
+#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Kép középre igazítása. Kezdõpont (%d,%d)\n"
+#define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] VIDIX használata. w=%i h=%i  mw=%i mh=%i\n"
+
+// libvo/vo_syncfb.c
+
+#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] A /dev/syncfb vagy a /dev/mga_vid nem nyitható meg.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Yuv420p3 paletta használata.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Yuv420p2 paletta használata.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Yuv420 paletta használata.\n"
+#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Nem találtam támogatott palettát.\n"
+#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES Sourcer méret: %d x %d.\n"
+#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] Framebuffer memória: %ld, %ld bufferben.\n"
+#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] #%d. számú elsõ buffer igénylése.\n"
+#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] #%d. számú elsõ buffer megvan.\n"
+#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] Ismeretlen aleszköz: %s.\n"
+
+// libvo/vo_tdfxfb.c
+
+#define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Nem nyitható meg %s: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Probléma az FBITGET_FSCREENINFO ioctl-lel: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Probléma az FBITGET_VSCREENINFO ioctl-lel: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] Ez a vezérlõ csak a 3Dfx Banshee-t, a Voodoo3-at és a Voodoo 5-öt támogatja.\n"
+#define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp-s kimenet nem támogatott.\n"
+#define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Nem mappolhatóak a memóriaterületek: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp-s kimenet nem támogatott (Ennek soha nem szabad megtörténnie).\n"
+#define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] Eik! Valami baj van a control()-lal.\n"
+#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] Nincs elég videó memória ezen film lejátszásához. Próbáld meg csökkenteni a felbontást.\n"
+#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] A képernyõ %dx%d %d bpp-vel, ezen van %dx%d %d bpp-vel, a norma %dx%d.\n"
+
+// libvo/vo_tdfx_vid.c
+
+#define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Mozgatás: %d(%d) x %d => %d.\n"
+#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP mozgatás sikertelen a képernyõ törléséhez.\n"
+#define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit sikertelen.\n"
+#define MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion "[VO_TDFXVID] Nem-natív átlapolási formátumhoz konverzió kell.\n"
+#define MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat "[VO_TDFXVID] Nem támogatott bemeneti formátum 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlaySetupFailed "[VO_TDFXVID] Átlapolás beállítása sikertelen.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOnFailed "[VO_TDFXVID] Átlapolás bekapcsolása sikertelen.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] Átlapolás kész: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] Textúra blit kész: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] Átlapolás kikapcsolása sikertelen\n"
+#define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] Nem nyitható meg %s: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] Nem található az aktuális cfg: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap sikertelen !!!!!\n"
+#define MSGTR_LIBVO_TDFXVID_GetImageTodo "Get image todo.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP mozgatás sikertelen.\n"
+#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] Yuv beállítása sikertelen.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP mozgatás sikertelen az Y síkon.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP mozgatás sikertelen az U síkon.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP mozgatás sikertelen a V síkon.\n"
+#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] Miféle formátum ez: 0x%x.\n"
+
+// libvo/vo_tga.c
+
+#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Ismeretlen aleszköz: %s.\n"
+
+// libvo/vo_vesa.c
+
+#define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Végzetes hiba történt! Nem lehet folytatni.\n"
+#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Ismeretlen aleszköz: '%s'.\n"
+#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] Túl kicsi méretû videó memóriád van ehhez a módhoz:\n[VO_VESA] Szükséges: %08lX rendelkezésre áll: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Meg kell adnod a monitor adatait. Nem változott a frissítési ráta.\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] A mód nem egyeztethetõ össze a monitor korlátaival. Nem változott a frissítési ráta.\n"
+#define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Végzetes belsõ hibát találtam: az init a preinit elõtt lett meghívva.\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] A -flip kapcsoló nem támogatott.\n"
+#define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] Lehetséges ok: Nem található VBE2 BIOS.\n"
+#define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] VESA VBE BIOS Version %x.%x Revision: %x található.\n"
+#define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] Videó memória: %u Kb.\n"
+#define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA Képességek: %s %s %s %s %s.\n"
+#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! Ez után következik az OEM infó. !!!\n"
+#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] 5 OEM-mel kapcsolatos sort kell látnod ez alatt; különben hibás a vm86.\n"
+#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM infó: %s.\n"
+#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM Revision: %x.\n"
+#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM szállító: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM Termék Neve: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM Termék Rev: %s.\n"
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Tanács: Mûködõ TV-Kimenethez a PC boot-olásakor már bedugott\n"\
+"[VO_VESA] TV-csatlakozó kell, mivel a VESA BIOS inicializálja azt saját maga a POST során.\n"
+#define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] VESA mód (%u) használata = %x [%ux%u@%u]\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Az SwScaler nem inicializálható.\n"
+#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] A DGA nem használható. Bank váltásos mód kényszerítése. :(\n"
+#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] DGA használata (fizikai erõforrások: %08lXh, %08lXh)"
+#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] Nem használható a dupla bufferelés: nincs elég videó memória.\n"
+#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] Nem található sem DGA, sem áthelyezhetõ ablak keret.\n"
+#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] DGA-t kényszerítettél. Kilépés\n"
+#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] Nem található helyes ablak cím.\n"
+#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] Bank váltás mód használata (fizikai erõforrások: %08lXh, %08lXh).\n"
+#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] Nem foglalható le az ideiglenes buffer.\n"
+#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] Bocs, nem támogatott mód -- próbáld a -x 640 -zoom opciókat.\n"
+#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] Óó tényleg van képed a TV-n!\n"
+#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] A Linux Video Overlay nem inicializálható.\n"
+#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] Videó átlapolás használata: %s.\n"
+#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] Nem inicializálható a VIDIX vezérlõ.\n"
+#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] VIDIX használata.\n"
+#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] Nem található mód ehhez: %ux%u@%u.\n"
+#define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA inicializálás kész.\n"
+
+// libvo/vo_x11.c
+
+#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] draw_frame() meghívva!!!!!!\n"
+
+// libvo/vo_xv.c
+
+#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() meghívva!!!!!!\n"
