@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.15 -->
+<!-- Synced with: 1.16 -->
 <chapter id="cd-dvd">
 <title>Použití CD/DVD</title>
 
@@ -136,6 +136,7 @@ protože může vést k chybám, nekompatibilitě knihovny a nižší rychlosti.
 
 <note><para>
 V případě problémů s dekódováním DVD, zkuste vypnout supermount a podobná udělátka.
+Některé RPC-2 mechaniky mohou rovněž vyžadovat nastavení region kódu.
 </para></note>
 
 <formalpara>
