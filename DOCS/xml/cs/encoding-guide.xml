@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.38 -->
+<!-- Synced with: 1.47 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -345,8 +345,9 @@
   Při dvouprůchodovém enkódování se v prvním průchodu projde film jakoby měl být
   CBR, ale vlastnosti každého snímku se zaznamenají do logu. Tato data jsou pak
   použita při druhém průchodu pro inteligentní stanovení použitého kvantizeru.
-  V rychlých scénách nebo scénách s malým počtem detailů budou častěji používány
-  vyšší kvantizery a v pomalých nebo detailních scénách zase nižší kvantizery.
+  V rychlých scénách nebo scénách s velkým počtem detailů budou častěji používány
+  vyšší kvantizery a v pomalých nebo méně detailních scénách zase nižší kvantizery.
+  Obvykle je důležitější množství pohybu než detailů.
 </para>
 
 <para>
@@ -1285,16 +1286,18 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
 <title>Výběr video kodeku</title>
 
 <para>
-  Výběr vhodného video kodeku k použití závisí na několika faktorech.
-  Některé z nich jsou čistě věcí osobního vkusu, některé závisí na technických
+  Výběr vhodného video kodeku k použití závisí na několika faktorech,
+  jako je velikost, kvalita, schopnost přehrávání po síti, použitelnost nebo
+  obliba, z nichž některé čistě věcí osobního vkusu, některé závisí na technických
   omezeních.
 </para>
 <itemizedlist>
   <listitem><para>
   <emphasis role="bold">Účinost komprimace</emphasis>:
-  Jednoduše můžeme říct, že novější generace kodeků jsou vytvořeny
-  tak, aby dosahovaly vyšší kvality obrazu než ty předchozí.
-  Proto neuděláte chybu,
+  Jednoduše můžeme říct, že většina kodeků novější generace je vytvořena
+  tak, aby dosahovala vyšší kvality a komrimace než předchozí generace.
+  Proto se autoři této příručky a mnoho jiných lidí, domnívají že
+  neuděláte chybu,
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Buďte však opartní: Dekódování MPEG-4 AVC videa v DVD
   rozlišení vyžaduje rychlý stroj (např.Pentium 4 nad 1.5Ghz, nebo
@@ -1304,11 +1307,9 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
   <systemitem class="library">x264</systemitem> místo MPEG-4 ASP kodeků
   jako jsou <systemitem class="library">libavcodec</systemitem> MPEG-4, nebo
   <systemitem class="library">XviD</systemitem>.
-  (Pro lepší představu o fundamentálních rozdílech mezi
-  MPEG-4 ASP a MPEG-4 AVC si můžete přečíst článek
-  "<ulink url="http://guru.multimedia.cx/?p=10">15 důvodů proč mě štve MPEG4</ulink>"
-  z blogu Michaela Niedermayera.)
-  Podobně dosáhnete lepší kvality použitím MPEG-4 ASP místo
+  (Pokročilé vývojáře kodeků by mohl zajímat názor Michaela Niedermayera na
+  "<ulink url="http://guru.multimedia.cx/?p=10">proč mě štve MPEG4-ASP</ulink>".)
+  Podobně byste měli dosáhnout lepší kvality použitím MPEG-4 ASP místo
   MPEG-2 kodeků.
   </para>
   <para>
@@ -1326,7 +1327,10 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
   <emphasis role="bold">Hardwarová kompatibilita</emphasis>:
   Obvykle trvá dlouhou dobu, než začnou stolní video přehrávače podporovat
   nejnovější videokodeky. Výsledkem toho je, že většina z nich podporuje
-  pouze kodeky MPEG-2 a MPEG-4 ASP
+  pouze kodeky MPEG-1 (jako VCD, XVCD a KVCD), MPEG-2 (jako DVD, SVCD a KVCD)
+  a MPEG-4 ASP (jako DivX,
+  LMP4 z <systemitem class="library">libavcodec</systemitem>u a
+  <systemitem class="library">XviD</systemitem>)
   (Pozor: obvykle nejsou podporovány všechny vlastnosti (features) MPEG-4 ASP).
   Nahlédněte prosím do technických specifikací vašeho přehrávače (pokud jsou),
   nebo si vygooglete více informací.
@@ -1344,19 +1348,21 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
   </para>
   <para>
   Pokud vám jde o rychlost, měli byste se držet výchozího nastavení
-  video kodeku (což neznamená, že byste neměli experimentovat s některými
-  volbami zmíněnými v ostatních částech této příručky).
+  video kodeku (ačkoli byste stejně měli zkusit ostatní volby
+  zmíněné v dalších částech této příručky).
   </para>
   <para>
-  Rovněž můžete zvážit použití kodeku, který umí vícevláknové zpracování.
-  <systemitem class="library">libavcodec</systemitem> MPEG-4 to umožňuje.
-  Získáte tím malý nárůst rychlosti za cenu nižší kvality obrazu.
-  <systemitem class="library">XviD</systemitem> má k dispozici některé
-  experimentální záplaty pro zrychlení rychlosti enkódování, obvykle
-  o 40&ndash;60%, s nízkým zhoršením obrazu.
+  Rovněž můžete zvážit použití kodeku, který umí vícevláknové zpracování,
+  což je ovšem k něčemu jen uživatelům víceprocesorových strojů.
+  <systemitem class="library">libavcodec</systemitem> MPEG-4 to umožňuje,
+  ale nárůst rychlosti je omezený a dostanete nepatrně méně kvalitní obraz.
+  Vícevláknový režim <systemitem class="library">XviD</systemitem>, aktivovaný
+  volbou <option>threads</option>, můžete využít ke zvýšení rychlosti
+  enkódování &mdash; obvykle o 40&ndash;60% &mdash; s velmi malým nebo žádným
+  zhoršením obrazu.
   <systemitem class="library">x264</systemitem> rovněž umožňuje vícevláknové
   enkódování, které v současnosti zrychluje enkódování asi o 15&ndash;30%
-  ale sníží PSNR o 0.05dB.
+  (v závislosti na použitých volbách), ale snížuje PSNR o 0.05dB.
   </para></listitem>
 
   <listitem><para>
@@ -1368,9 +1374,12 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
   <systemitem class="library">x264</systemitem>.
   </para>
   <para>
-  Posuďte to sami a ne vždy poslouchejte to, co vám někteří lidé budou
-  říkat, že máte dělat nebo myslet: Nejlepší kodek je ten, který nejlépe
-  ovládáte a který se pro vás vypadá nejlépe na vaší obrazovce
+  Udělejte si vlastní úsudek a neposlouchejte lidi, kteří přísahají na jediný
+  kodek.
+  Udělejte si několik vzorků ze surových zdrojů a porovnejte různé volby
+  enkódování a kodeky, abyste nalezli ten, který vám vyhovuje nejlépe.
+  Nejlepší kodek je ten, který nejlépe
+  ovládáte a který vypadá nejlépe na vaší obrazovce
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
   <para>Stejný film nemusí vypadat stejně na monitoru někoho jiného, nebo
   když je přehráván jiným dekodérem, takže si prověřujte své výtvory
@@ -2729,13 +2738,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Nyní jsme připraveni provést dvouprůchodové enkódování. Průchod jedna:
 
-  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
   A průchod dva je stejný, jen nastavíme <option>vpass=2</option>:
 
-  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
 -o Harry_Potter_2.avi</screen>
 </para>
@@ -4054,6 +4063,21 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   1024/2.35 = 432
 </para>
 
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-a-v-sync">
+<title>Zachování A/V synchronizace</title>
+<para>
+  Aby byla zachována synchronizace zvuku s videem během enkódování, musí
+  <application>MEncoder</application> zahazovat nebo duplikovat snímky.
+  To funguje celkem dobře při muxování do AVI souboru, ale téměř s jistotou
+  neudrží A/V synchronizaci s jinými muxery jako MPEG.
+  To je důvodem pro nutnost přidání video fitru <option>harddup</option> na
+  konec řetězu filtrů, aby jsme se tomuto problému vyhli.
+  Více technických informací o <option>harddup</option> naleznete v sekci
+  <link linkend="menc-feat-dvd-mpeg4-muxing-filter-issues">Zlepšení muxování a
+  A/V synchronizace</link>, nebo v man tsránce.
+</para>
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-output-srate">
