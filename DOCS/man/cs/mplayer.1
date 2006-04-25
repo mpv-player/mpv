@@ -1,4 +1,4 @@
-.\" Synced with 1.1234
+.\" Synced with 1.1258
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -9,8 +9,6 @@
 .\" Definice maker
 .\" --------------------------------------------------------------------------
 .
-.\" výchozí odsazení je 7, nemìnit!
-.nr IN 7
 .\" definice odsazení pro pododstavce
 .nr SS 5
 .\" pøidat novou podvolbu
@@ -19,7 +17,7 @@
 ..
 .\" zaèátek první úrovnì podvoleb, ukonèeno pomocí .RE
 .de RSs
-.RS \n(IN+3
+.RS 10
 ..
 .\" zaèátek druhé úrovnì podvoleb
 .de RSss
@@ -715,8 +713,7 @@ xvidix, xover, xv (viz \-vo xv:ck), xvmc (viz \-vo xv:ck) a directx.
 .TP
 .B \-crash-debug (DEBUG KÓD)
 Automaticky pøipojí gdb pøi pádu nebo SIGTRAP.
-Podpora musí být zakompilována pomocí konfiguraèní volby --enable-crash-debug nebo
-tak, ¾e budete mít soubor .developer v adresáøovém stromu zdrojových kódù.
+Podpora musí být zakompilována pomocí konfiguraèní volby --enable-crash-debug.
 .
 .TP
 .B \-edlout <soubor> (Pouze EDL)
@@ -822,6 +819,10 @@ nastavte ji na 2 v Linuxu nebo 1024 ve Windows.
 Urèuje konfiguraèní soubor pro LIRC (výchozí: ~/.lircrc).
 .
 .TP
+.B \-list-properties
+Vypí¹e seznam dostupných nastavení.
+.
+.TP
 .B \-loop <èíslo>
 Pøehraje film <èíslo> krát.
 0 znamená poøád.
@@ -869,6 +870,17 @@ tuto volbu).
 .B \-nortc (pouze RTC)
 Vypne pou¾ití Linuxového RTC (hodiny reálného èasu \- /dev/\:rtc) jako
 èasové základny.
+.
+.TP
+.B \-playing-msg <øetìzec>
+Vypí¹e <øetìzec> pøed zaèátkem pøehrávání.
+Podporovány jsou následující expanze:
+.RSs
+.IPs ${NÁZEV}
+Expanduje na hodnotu parametru NÁZEV.
+.IPs $(NÁZEV:TEXT)
+Expanduje TEXT jen pokud je dostupný parametr NÁZEV.
+.RE
 .
 .TP
 .B \-playlist <soubor>
@@ -2214,6 +2226,11 @@ Pokud ji nezahrne, bude vygenerována surová (raw) PCM.
 .IPs file=<soubor>
 Zapí¹e zvuk do <souboru> místo výchozího audiodump.wav.
 Pokud jste zadali nowaveheader, je výchozí audiodump.pcm.
+.IPs fast\ 
+Zkusí dumpovat rychleji ne¾ v reálném èase.
+Ujistìte se, ¾e nedojde k oøíznutí výstupu (obvykle se
+zprávou "Pøíli¹ mnoho paketù ve vyrovnávací pamìti").
+Je bì¾né dostat zprávu "Vá¹ systém je pøíli¹ pomalý pro toto pøehrávání".
 .RE
 .PD 1
 .
@@ -2230,7 +2247,6 @@ Plugin audio výstup.
 .TP
 .B \-adapter <hodnota>
 Nastaví grafickou kartu na kterou se bude posílat obrázek.
-K\ zprovoznìní potøebuje volbu \-vm.
 Seznam dostupných karet získáte, doplníte-li tuto volbu o \-v.
 V souèasnosti pracuje pouze s video rozhraním directx.
 .
@@ -2488,6 +2504,13 @@ Nastaví pomìr stran va¹eho monitoru nebo TV obrazovky.
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <pomìr> (viz také volbu \-aspect)
+Nastaví pomìr stran jednotlivých pixelù va¹eho monitoru nebo TV (výchozí:
+vypnuto). Má pøednost pøed nastavením \-monitoraspect.
+Hodnota 0 funkci vypíná, hodnota 1 znamená ètvercové pixely
+(správnì pro (skoro) v¹echny LCD).
+.
+.TP
 .B \-nodouble
 Vypíná dvojitou vyrovnávací pamì», vìt¹inou pro úèely ladìní.
 Dvojitá vyrovnávací pamì» odstraòuje tøepotání ukládáním dvou snímkù v pamìti,
@@ -2578,9 +2601,14 @@ To je vyu¾itelné k vestavìní MPlayeru do internetového prohlí¾eèe
 (napøíklad s roz¹íøením plugger).
 .
 .TP
-.B \-xineramascreen <0\-...>
+.B \-xineramascreen <\-2\-...> (pouze X11)
 V Xinerama konfiguracích (jedna pracovní plocha je rozprostøena
 na více monitorù) touto volbou sdìlíte MPlayeru kterou obrazovku pou¾ít.
+Hodnota \-2 znamená celoobrazovkové zobrazení pøes celou virtuální plochu, \-1
+znamená celoobrazovkové zobrazení na zobrazovaèi s aktuálním oknem.
+Poèáteèní pozice nastavenou pomocí \-geometry je relativní k nastavené
+obrazovce.
+Obvykle pracuje pouze s "\-fstype \-fullscreen" nebo "\-fstype none".
 .
 .TP
 .B \-zrbw (pouze \-vo zr)
@@ -2965,6 +2993,8 @@ Pokud volbu zapnete, chová se OSD více jako v jiných video rozhraních, co¾
 je lep¹í pro fonty s pevnou vý¹kou.
 Je-li volba vypnuta, vypadá lépe s\ FreeType fonty a pou¾ívá okraje
 v\ celoobrazovkovém re¾imu.
+.IPs osdcolor=<0xRRGGBB>
+Barva OSD (výchozí: 0xffffff, odpovídá bílé).
 .IPs (no)aspect
 Zapne nebo vypne ¹kálování na správný pomìr stran a podporu 'pan-and-scan'
 (výchozí: zapnuto).
@@ -3548,11 +3578,12 @@ Pøevrátí obraz vzhùru nohama.
 .TP
 .B \-lavdopts <volba1:volba2:...> (DEBUG KÓD)
 Nastavuje parametry dekódování pro libavcodec.
+Více voleb oddìlujte dvojteèkou.
 .sp 1
 .I PØÍKLAD:
 .PD 0
 .RSs
-\-lavdopts bug=1
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -3649,7 +3680,7 @@ Nastavení strategie odolnosti proti chybám.
 .br
 4: velmi agresivní
 .REss
-.IPs fast\ 
+.IPs fast (pouze MPEG-2)
 Zapne optimalizace nevyhovující specifikaci, co¾ mù¾e potenciálnì zpùsobit
 problémy jako: zjednodu¹enou dekvantizaci, pøedpokládané pou¾ití výchozí
 kvantizaèní matice, pøedpokládaný YUV 4:2:0 a pøeskoèení nìkolika testù
@@ -4059,6 +4090,22 @@ Provádí sinusové vyhlazování.
 .RSs
 .IPs <0.0\-1.0>
 Sinusová funkce delta, pou¾ívejte velmi malé hodnoty, abyste sly¹eli vyhlazení.
+.RE
+.PD 1
+.
+.TP
+.B sinesupress[=frekv:zpo¾dìní]
+Odstaní sinusovku zadaného kmitoètu.
+Vhodné pro odstranìní 50/60Hz ru¹ení na nekvalitním audio zaøízení.
+Pravdìpodobnì pracuje pouze na mono vstupu.
+.PD 0
+.RSs
+.IPs <frekv>
+Sinusový kmitoèet, který má být odstranìn (v Hz) (výchozí: 50)
+.IPs <zpo¾dìní>
+Ovládá pøizpùsobivost (vy¹¹í hodnota umo¾ní filtru rychlej¹í pøizpùsobení se
+zmìnám amplitudy a fáze, ni¾¹í hodnota pøizpùsobování zpomalí) (výchozí: 0.001).
+Rozumné hodnoty jsou kolem 0.001.
 .RE
 .PD 1
 .
@@ -5736,6 +5783,9 @@ Do výstupu jdou pouze sudé snímky, liché se zahodí, vý¹ka zùstane nezmìnìna.
 .IPs 3
 Ka¾dý snímek je expandován na plnou (2x pùvodní) vý¹ku, ale jednotlivé øádky
 jsou prolo¾eny èernou; snímková rychlost se nezmìní.
+.IPs 4
+Prokládá liché øádky z lichých pùlsnímkù sudými øádky ze sudých pùlsnímkù.
+Generuje snímky s plnou vý¹kou pøi polovièní snímkové rychlosti.
 .RE
 .PD 1
 .
@@ -7050,7 +7100,18 @@ v souèasnosti nepou¾itelné
 .
 .TP
 .B vrc_strategy
-Nic, vyhrazeno pro budoucí pou¾ití.
+Metoda kontroly toku.
+Pamatujte, ¾e nìkteré volby ovlivòující kontrolu toku pøestanou mít vliv, pokud
+vrc_strategy nebude nastavena na 0.
+.PD 0
+.RSs
+.IPs 0
+Pou¾ije interní lavc kontrolu toku (výchozí).
+.IPs 1
+Pou¾ije XviD kontrolu toku (experimentální; vy¾aduje MEncoder skompilovaný s
+podporou XviD 1.1 nebo vy¹¹ím).
+.RE
+.PD 1
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
@@ -8481,7 +8542,7 @@ Vrácené hodnoty jsou v dB (decibel), èím vy¹¹í tím lep¹í.
 .
 .PP
 .sp 1
-Následující volba je dostupná pouze ve vývojových verzích XviD 1.1.x.
+Následující volba je dostupná pouze v XviD 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
@@ -8490,6 +8551,17 @@ operátoru optimalizovaného na omezení datového toku.
 To samé zaji¹»uje volba vhq pro P-snímky.
 Takto dostaneme hezèí B-snímky s témìø nepostøehnutelným dopadem na rychlost
 (výchozí: 1).
+.
+.PP
+.sp 1
+Následující volby je dostupná pouze v CVS verzi XviD.
+.
+.TP
+.B threads=<0\-n>
+Vytvoøí n vláken pro bìh odhadu pohybu (výchozí: 0).
+Maximální poèet vláken, které mù¾ete pou¾ít získáte vydìlením vý¹ky obrazu
+èíslem 16.
+.
 .
 .SS x264enc (\-x264encopts)
 .
@@ -8774,22 +8846,25 @@ kompenzace pøeplnìní a qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-2>
+.B direct_pred=<0\-3>
 Urèuje typ odhadování pohybu pou¾ité pro pøímé (direct) makrobloky v B-snímcích.
 .PD 0
 .RSs
 .IPs 0
-®ádná: pøímé makrobloky nejsou pou¾ívány.
+®ádná: Pøímé makrobloky nejsou pou¾ívány.
 .IPs 1
-Prostorová: vektory pohybu jsou extrapolovány ze sousedních blokù.
+Prostorová: Vektory pohybu jsou extrapolovány ze sousedních blokù.
 .IPs 2
-Prùbì¾ná: vektory pohybu jsou odvozeny z následujícího P-snímku.
+Prùbì¾ná: Vektory pohybu jsou odvozeny z následujícího P-snímku.
 (výchozí)
+.IPs 3
+Auto: Kodek volí mezi prostorovou a prùbì¾nou pro ka¾dý snímek.
 .RE
 .PD 1
 .RS
 Prostorová a prùbì¾ná metoda mají v prùmìru stejné PSNR a jsou i stejnì rychlé.
-®ádná z nich není jednoznaènì lep¹í ne¾ ta druhá.
+Volba mezi nimi závisí na obsahu videa.
+Auto je o nìco lep¹í, ale pomalej¹í.
 direct_pred=0 je jak pomalej¹í, tak ménì kvalitní.
 .RE
 .
@@ -8869,7 +8944,7 @@ dùkladné vyhledávání (velmi pomalé a o nic lep¹í ne¾ 3)
 rádius dùkladného nebo více¹estiúhelníkového vyhledávání pohybu (výchozí: 16)
 .
 .TP
-.B subq=<1\-6>
+.B subq=<1\-7>
 Nastavuje kvalitu subpel dolaïování.
 Tento parametr ovlivòuje pomìr kvalita versus rychlost v procesu rozhodování
 o predikovaném pohybu.
@@ -8897,7 +8972,9 @@ Pou¾ije nejkvalitnìj¹í vyhledávání pohybu s ètvrtpixelovou pøesností
 na v¹ech kandidátských typech makrobloku, ne¾ je vybrán ten nejlep¹í (výchozí).
 .IPs 6
 Zapne optimalizaci omezování toku typù makroblokù v
-I- a P-snímcích. (nejlep¹í)
+I- a P-snímcích.
+.IPs 7
+Zapne optimalizaci omezení toku pro vektory pohybu a intra re¾imy. (nejlep¹í)
 .RE
 .PD 1
 .RS
@@ -8921,7 +8998,7 @@ Vy¾aduje frameref>1.
 .TP
 .B (no)brdo
 Zapne optimalizaci oøezání datového toku makroblokových typù v B-snímcích.
-Vy¾aduje subq=6.
+Vy¾aduje subq>=6.
 .
 .TP
 .B (no)bime
@@ -8939,7 +9016,7 @@ vypnuto
 .IPs 1
 zapnuto pouze pro koneèný výsledek (encode) (výchozí)
 .IPs 2
-zapnuto pøi v¹ech rozhodováních o re¾imech (pomalé, vy¾aduje subq=6)
+zapnuto pøi v¹ech rozhodováních o re¾imech (pomalé, vy¾aduje subq>=6)
 .RE
 .PD 1
 .
@@ -9094,6 +9171,13 @@ výchozí volby, které si u¾ivatel mù¾e upravit.
 Obecnì, kdy¾ enkódujete MPEG soubory, bývá vhodné vypnout MEncoderùv
 kód pro pøeskakování snímkù (viz video filtry \-noskip, \-mc a také
 harddup a softskip).
+.PP
+.I PØÍKLAD:
+.PD 0
+.RSs
+.IPs format=mpeg2:tsaf:vbitrate=8000
+.RE
+.PD 1
 .
 .TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
