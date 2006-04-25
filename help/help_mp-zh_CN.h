@@ -1,6 +1,8 @@
-// Translated by Emfox Zhou <EmfoxZhou@gmail.com>
-// Synced with help_mp-en.h 1.216
+// Translated by Lu Ran <hephooey@fastmail.fm>
+// Synced with help_mp-en.h 1.245
 
+// (Translator before 2006-04-24)
+// Emfox Zhou <EmfoxZhou@gmail.com>
 // (Translator before 2005-10-12)
 // Lu Ran <hephooey@fastmail.fm>
 
@@ -76,7 +78,6 @@ static char help_text[]=
 #define MSGTR_RTFMCodecs "请看DOCS/zh/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "尝试指定视频解码器驱动族 %s...\n"
 #define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的解码器!\n"
-#define MSGTR_VOincompCodec "抱歉, 所选的视频输出设备与这个解码器不兼容.\n"
 #define MSGTR_CannotInitVO "致命错误: 无法初始化视频驱动!\n"
 #define MSGTR_CannotInitAO "无法打开/初始化音频设备 -> NOSOUND\n"
 #define MSGTR_StartPlaying "开始播放...\n"
@@ -104,10 +105,10 @@ static char help_text[]=
 
 #define MSGTR_NoGui "MPlayer没有编译GUI的支持!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI需要X11!\n"
-#define MSGTR_Playing "播放 %s.\n"
+#define MSGTR_Playing "\n播放 %s.\n"
 #define MSGTR_NoSound "音频: no sound\n"
 #define MSGTR_FPSforced "FPS指定为 %5.3f  (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "编译实时CPU检测 - 警告, 这不是最佳选择! 如果你想获得最佳的表现, 加上--disable-runtime-cpudetection选项重新编译mplayer.\n"
+#define MSGTR_CompiledWithRuntimeDetection "编译了实时CPU检测.\n"
 #define MSGTR_CompiledWithCPUExtensions "针对有扩展指令集x86 CPU编译:"
 #define MSGTR_AvailableVideoOutputDrivers "可用的视频输出驱动:\n"
 #define MSGTR_AvailableAudioOutputDrivers "可用的音频输出驱动:\n"
@@ -197,30 +198,44 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "启用"
 #define MSGTR_OSDdisabled "禁用"
-#define MSGTR_OSDnone "无"
-#define MSGTR_OSDunknown "未知"
-#define MSGTR_OSDDVDNAV "DVDNAV: %s"
-#define MSGTR_OSDChannel "通道: %s"
-#define MSGTR_OSDSubtitles "字幕: %s"
-#define MSGTR_OSDSubtitlesOff "字幕: 关闭"
-#define MSGTR_OSDSubtitlesLanguage "字幕: (%d) %s"
-#define MSGTR_OSDSub "字幕: (%d) %s%s"
-#define MSGTR_OSDSubDelay "字幕延迟: %d ms"
-#define MSGTR_OSDSubPosition "字幕位置: %d/100"
-#define MSGTR_OSDSubAlignment "字幕对齐: %s"
-#define MSGTR_OSDAVDelay "A-V 延迟: %d ms"
-#define MSGTR_OSDSpeed "速率: x %6.2f"
-#define MSGTR_OSDStayOnTop "置顶: %s"
-#define MSGTR_OSDRootwin "根窗口: %s"
-#define MSGTR_OSDBorder "边框: %s"
-#define MSGTR_OSDFramedrop "跳帧: %s"
-#define MSGTR_OSDFramedropOn "开"
-#define MSGTR_OSDFramedropHard "强制"
-#define MSGTR_OSDFramedropOff "关"
+#define MSGTR_OSDChannel "频道: %s"
+#define MSGTR_OSDSubDelay "字幕延迟: %d 毫秒"
+#define MSGTR_OSDSpeed "速度: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
-#define MSGTR_OSDSubBottom "底部"
-#define MSGTR_OSDSubCenter "中间"
-#define MSGTR_OSDSubTop "顶部"
+
+// property values
+#define MSGTR_Enabled "启用"
+#define MSGTR_EnabledEdl "启用 (edl)"
+#define MSGTR_Disabled "禁用"
+#define MSGTR_HardFrameDrop "强制"
+#define MSGTR_Unknown "位置"
+#define MSGTR_Bottom "底部"
+#define MSGTR_Center "中部"
+#define MSGTR_Top "顶部"
+
+// osd bar names
+#define MSGTR_Volume "音量"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "亮度"
+#define MSGTR_Contrast "对比度"
+#define MSGTR_Saturation "饱和度"
+#define MSGTR_Hue "色调"
+
+// property state
+#define MSGTR_MuteStatus "静音: %s"
+#define MSGTR_AVDelayStatus "A-V 延迟: %s"
+#define MSGTR_OnTopStatus "常居顶端: %s"
+#define MSGTR_RootwinStatus "根窗口: %s"
+#define MSGTR_BorderStatus "边框: %s"
+#define MSGTR_FramedroppingStatus "掉帧: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "字幕: %s"
+#define MSGTR_SubPosStatus "字幕位置: %s/100"
+#define MSGTR_SubAlignStatus "字幕对齐: %s"
+#define MSGTR_SubDelayStatus "字幕延迟: %s"
+#define MSGTR_SubVisibleStatus "显示字幕: %s"
+#define MSGTR_SubForcedOnlyStatus "仅使用指定字幕: %s"
 
 // mencoder.c:
 
@@ -251,17 +266,18 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs\n"
 #define MSGTR_OpenedStream "成功: 格式: %d数据: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "视频编解码器: 帧复制 (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "音频编解码器: 帧复制 (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "音频编解码器: 帧复制 (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "选定CBR PCM音频\n"
 #define MSGTR_MP3AudioSelected "选定MP3音频\n"
 #define MSGTR_CannotAllocateBytes "无法分配%d字节\n"
 #define MSGTR_SettingAudioDelay "设置音频延迟为%5.3f\n"
+#define MSGTR_SettingVideoDelay "设置视频延迟为%5.3fs\n"
 #define MSGTR_SettingAudioInputGain "设置音频输出增益(gain)为%f\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "限制音频预设值为0.4s\n"
 #define MSGTR_IncreasingAudioDensity "增加音频密度(density)为4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "强制音频预设值为0, 最大pts校验为0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR音频: %ld字节/秒, %d字节/块\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR音频: %d字节/秒, %d字节/块\n"
 #define MSGTR_LameVersion "LAME版本 %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "错误: 在这个预设值上指定的比特率超出合法的范围\n"\
 "\n"\
@@ -378,11 +394,11 @@ static char help_text[]=
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     变比特率方式\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh(默认)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
+"                0: cbr (常比特率)\n"\
+"                1: mt (Mark Taylor VBR 算法)\n"\
+"                2: rh (Robert Hegemann VBR 算法 - 默认)\n"\
+"                3: abr (可用比特率)\n"\
+"                4: mtrh (Mark Taylor Robert Hegemann VBR 算法)\n"\
 "\n"\
 " abr           平均比特率\n"\
 "\n"\
@@ -470,6 +486,15 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "错误: 选项'%s'必须要有一个参数!\n"
 #define MSGTR_OptionListHeader "\n 名字                 类型            最小       最大     全局  命令行 配置文件\n\n"
 #define MSGTR_TotalOptions "\n总共: %d个选项\n"
+#define MSGTR_TooDeepProfileInclusion "警告: Profile 引用太深.\n"
+#define MSGTR_NoProfileDefined "没有 profile 的定义.\n"
+#define MSGTR_AvailableProfiles "可用的 profile:\n"
+#define MSGTR_UnknownProfile "未知的 profile '%s'.\n"
+#define MSGTR_Profile "Profile %s: %s\n"
+
+// m_property.c
+#define MSGTR_PropertyListHeader "\n 名称                 类型            最小        最大\n\n"
+#define MSGTR_TotalProperties "\n总计: %d 条属性\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "找不到CD-ROM设备 '%s'!\n"
@@ -564,7 +589,7 @@ static char help_text[]=
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到30fps的NTSC内容, 改变帧速率.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到24fps渐进的NTSC内容, 改变帧速率.\n"
 
-#define MSGTR_CacheFill "\r缓冲填充: %5.2f%% (%d 字节)   "
+#define MSGTR_CacheFill "\r缓冲填充: %5.2f%% (%"PRId64" 字节)   "
 #define MSGTR_NoBindFound "没有找到键 '%s' 的键绑定"
 #define MSGTR_FailedToOpen "打开 %s 失败\n"
 
@@ -651,6 +676,7 @@ static char help_text[]=
 // Note: If you change MSGTR_PlayList please see if it still fits MSGTR_MENU_PlayList
 #define MSGTR_PlayList "播放列表"
 #define MSGTR_Equalizer "均衡器"
+#define MSGTR_ConfigureEqualizer "配置均衡器"
 #define MSGTR_SkinBrowser "Skin浏览器"
 #define MSGTR_Network "网络流媒体..."
 // Note: If you change MSGTR_Preferences please see if it still fits MSGTR_MENU_Preferences
@@ -748,6 +774,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "音频轨道"
 #define MSGTR_MENU_Track "轨道 %d"
 #define MSGTR_MENU_VideoTrack "视频轨道"
+#define MSGTR_MENU_Subtitles "字幕"
 
 // --- equalizer
 // Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio
@@ -1027,6 +1054,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: 驱动不支持 SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  你的音频驱动不支持 select()  ***\n 请用 #undef HAVE_AUDIO_SELECT in config.h 重编译MPlayer!\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\n严重错误: *** 无法重新打开或重设音频设备 *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] 未知/不支持的 OSS 格式: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
@@ -1136,6 +1164,10 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: 输入控制 #%d 在下限 %0.4f 之下.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: 输入控制 #%d 在上限 %0.4f 之上.\n"
 
+// format.c
+
+#define MSGTR_AF_FORMAT_UnknownFormat "未知格式"
+
 // ========================== INPUT =========================================
 
 // joystick.c
@@ -1193,7 +1225,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "访问类型不可用\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "采样文件不可用\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "通道数不可用 - 使用默认: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "无法安装硬件参数:"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "无法安装硬件参数: ％s"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "无法使用等于缓冲大小的间隔 (%u == %lu)\n"
 #define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "无法安装软件参数:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "打开音频错误: %s\n"
@@ -1297,7 +1329,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "为 MPEG4 视频重新生成关键帧表\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "找到 'wf', %d 字节的 %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: 发现 dmlh (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "读 INDEX 块, %d 区块的 %ld 帧 (fpos=%p)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames  "读 INDEX 块, %d 区块的 %d 帧 (fpos=%"PRId64")\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "附加的 RIFF 头...\n"
 #define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** 警告: 这不是扩展的 AVI 头..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "损坏的区块?  chunksize=%d  (id=%.4s)\n"
@@ -1322,7 +1354,7 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "无法打开 cdda 设备.\n"
 #define MSGTR_MPDEMUX_CDDA_CantOpenDisc "无法打开盘.\n"
-#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "发现音频 CD，共 %d 音轨.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "发现音频 CD，共 %ld 音轨.\n"
 
 // cddb.c
 
@@ -1387,3 +1419,381 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "没有给定密码, 试着使用空密码.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "服务器返回 %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "缓存大小设为 %d K字节\n"
+
+// demux_audio.c
+
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "音频分路器: 未知格式 %d.\n"
+
+// demux_demuxers.c
+
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer 错误: 分路器错误: 不是 vd, ad 或 sd.\n"
+
+// demux_nuv.c
+
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "文件中没有视频块.\n"
+
+// demux_xmms.c
+
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "找到插件: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "关闭插件: %s.\n"
+
+// ========================== LIBMPMENU ===================================
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] 语法错误: %d 行\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] 菜单定义需要名称属性 (%d 行)\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] 错误属性 %s=%s，菜单 '%s' 中 %d 行\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] 未知菜单类型 '%s': %d行\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] 无法打开菜单配置文件: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] 配置文件过长 (> %d KB)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] 配置文件是空文件\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] 找不到菜单 %s.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] 菜单 '%s': 初始化失败.\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] 输出格式不支持!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有内容.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] 列表菜单的定义需要名称 (%d 行).\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] 列表菜单需要参数.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid 错误: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Select 错误.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] 子进程的文件描述符读取错误: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] 终端运行: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] 子进程已经运行.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork 失败!!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Write 错误.\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Opendir 错误: %s.\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Realloc 错误: %s.\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] 内存分配错误: %s.\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Readdir 错误: %s.\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] 无法打开目录 %s\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有内容.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] 子菜单定义需要需要 'menu' 属性.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref 菜单选项的定义需要有效的 'property' 属性 (%d 行).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref 菜单需要参数.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] 找不到目标项 ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] 生成命令失败: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] 文本菜单需要 txt 文件名(参数文件).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] 无法打开: %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] 警告, 行过长. 分割之.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] 分析了 %d 行.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] 未知命令: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] 打开菜单失败: '%s'.\n"
+
+// ========================== LIBMPCODECS ===================================
+
+// libmpcodecs/ad_libdv.c
+#define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] 警告! 音频帧大小不一致! read=%d  hdr=%d.\n"
+
+// libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
+#define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] 无法为 cinepak 编解码器分配图像.\n"
+
+// libmpcodecs/vd_ffmpeg.c
+#define MSGTR_MPCODECS_XVMCAcceleratedCodec "[VD_FFMPEG] XVMC 加速的编解码器.\n"
+#define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] QP 的算术平均值: %2.4f, QP 的调和平均值: %2.4f\n"
+#define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI失败.\n"
+#define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] 无法为编解码器分配图像.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC 加速的 MPEG-2.\n"
+#define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] 尝试 pixfmt=%d.\n"
+#define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Mc_get_buffer 只能用于 XVMC 加速!!"
+#define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Init_vo 意外错误.\n"
+#define MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken "[VD_FFMPEG] 无法恢复的错误, 渲染缓冲无法获得.\n"
+#define MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed "[VD_FFMPEG] 只允许 vo_xvmc 分配的缓冲.\n"
+
+// libmpcodecs/ve_lavc.c
+#define MSGTR_MPCODECS_HighQualityEncodingSelected "[VE_LAVC] 选用高质量编码 (非实时)!\n"
+#define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] 使用常数的 qscale = %f (VBR).\n"
+
+// libmpcodecs/ve_raw.c
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] 不支持 fourcc [%x] 的 raw 输出!\n"
+#define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] 未指定需要的 VfW 编解码器!!\n"
+
+// libmpcodecs/vf_crop.c
+#define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] 错误的位置/宽度/高度 - 切割区域在原始图像外!\n"
+
+// libmpcodecs/vf_cropdetect.c
+#define MSGTR_MPCODECS_CropArea "[CROP] 切割区域: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d).\n"
+
+// libmpcodecs/vf_format.c, vf_palette.c, vf_noformat.c
+#define MSGTR_MPCODECS_UnknownFormatName "[VF_FORMAT] 未知格式名: '%s'.\n"
+
+// libmpcodecs/vf_framestep.c vf_noformat.c vf_palette.c vf_tile.c
+#define MSGTR_MPCODECS_ErrorParsingArgument "[VF_FRAMESTEP] 分析参数错误.\n"
+
+// libmpcodecs/ve_vfw.c
+#define MSGTR_MPCODECS_CompressorType "压缩类型: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorSubtype "副压缩类型: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorFlags "压缩标记: %lu, 版本 %lu, ICM 版本: %lu\n"
+#define MSGTR_MPCODECS_Flags "标记:"
+#define MSGTR_MPCODECS_Quality "质量"
+
+// libmpcodecs/vf_expand.c
+#define MSGTR_MPCODECS_FullDRNotPossible "无法完全使用 DR, 尝试使用 SLICES!\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "警告! 下一个滤镜不支持 SLICES, 等着 sig11...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "为什么我们得到了 NULL??\n"
+
+// libmpcodecs/vf_fame.c
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "致命错误: 无法打开 libFAME!\n"
+
+// libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "下一个滤镜/视频输出不支持 %s :(\n"
+
+// ================================== LIBMPVO ====================================
+
+// mga_common.c
+
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "mga_vid_config ioctl 错误 (mga_vid.o 版本错误?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "无法在内核模块中获得 luma 值!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "无法在内核模块中设置 luma 值!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "屏幕宽度/高度未知!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: 非法的输出格式 %0X\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "非法输出格式 %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "你的 mga_vid 驱动的版本与 MPlayer 的版本不兼容!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "使用 %d 缓冲.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "无法打开: %s\n"
+
+// libvo/vesa_lvo.c
+
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] 这个分支已经不再维护.\n[VESA_LVO] 请使用 -vo vesa:vidix.\n"
+#define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] 无法打开: '%s'\n"
+#define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] 非法的输出格式: %s(%0X)\n"
+#define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] 你的 fb_vid 驱动的版本与 MPlayer 的版本不兼容!\n"
+
+// libvo/vo_3dfx.c
+
+#define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] 只支持 16bpp!"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visual id 是  %lx.\n"
+#define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] 无法打开 /dev/3dfx.\n"
+#define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] 错误: %d.\n"
+#define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] 无法映射 3dfx 内存区域: %p,%p,%d.\n"
+#define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] 初始化: %p.\n"
+#define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] 未知子设备: %s.\n"
+
+// libvo/vo_dxr3.c
+
+#define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] 无法载入新的 SPU 调色板!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] 无法设置播放模式!\n"
+#define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] 无法设置 subpicture 模式!\n"
+#define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] 无法获得电视制式!\n"
+#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] 利用帧速率自动选择电视制式: "
+#define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] 无法设置电视制式!\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] 设置 NTSC.\n"
+#define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] 设置 PAL/SECAM.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] 长宽比设为 to 4:3.\n"
+#define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] 长宽比设为 16:9.\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] 内存耗尽.\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] 无法分配 keycolor!\n"
+#define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] 无法精确分配 keycolor, 使用最接近的匹配 (0x%lx).\n"
+#define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] 释放资源.\n"
+#define MSGTR_LIBVO_DXR3_FailedRestoringTVNorm "[VO_DXR3] 恢复电视制式失败!\n"
+#define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] 启用 prebuffering.\n"
+#define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] 使用新的同步引擎.\n"
+#define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] 使用 overlay.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] 错误: 你需要安装 x11 的库和头文件后编译 mplayer 来使用 overlay.\n"
+#define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] 将电视制式设置为: "
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "自动调节电影的帧速率 (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "自动调节电影的帧速率 (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_UseCurrentNorm "使用当前制式"
+#define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "未知制式，使用当前制式."
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] 打开 %s 写入错误, 尝试 /dev/em8300.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] 打开 %s 写入错误, 尝试 /dev/em8300_mv.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWell "[VO_DXR3] 打开 /dev/em8300 写入错误!\nBailing.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellMV "[VO_DXR3] 打开 /dev/em8300_mv 写入错误!\nBailing.\n"
+#define MSGTR_LIBVO_DXR3_Opened "[VO_DXR3] 打开: %s.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] 打开 %s 写入错误, 尝试 /dev/em8300_sp.\n"
+#define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] 打开 /dev/em8300_sp 写入错误!\nBailing.\n"
+#define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] 在 overlay hack 设置中无法打开显示设备!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] 无法初始化 x11!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] 设置 overlay 属性失败.\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] 设置 overlay screen 失败!\n退出.\n"
+#define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] 启用 overlay 失败!\n退出.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] 设置 overlay 窗口大小失败!\n"
+#define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] 设置 overlay bcs 失败!\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] 无法获得 overlay Y-offset 的值!\n退出.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] 无法获得 overlay X-offset 的值!\n退出.\n"
+#define MSGTR_LIBVO_DXR3_FailedGettingOverlayXScaleCorrection "[VO_DXR3] 无法获得 overlay X scale correction!\n退出.\n"
+#define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Yoffset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Xoffset: %d.\n"
+#define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
+#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] 设置 overlay 窗口大小失败!\n"
+#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] 设置 signal mix 失败!\n"
+
+// libvo/vo_mga.c
+
+#define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): 改变大小为 %dx%d.\n"
+#define MSGTR_LIBVO_MGA_Uninit "[VO] 释放资源!\n"
+
+// libvo/vo_null.c
+
+#define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] 未知子设备: %s.\n"
+															
+// libvo/vo_png.c
+
+#define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] 警告: 压缩级别设置为 0, 禁用压缩!\n"
+#define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] 信息: 使用 -vo png:z=<n> 设置 0 到 9 的压缩级别.\n"
+#define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] 信息: (0 = 不压缩, 1 = 最快，压缩率最低 - 9 最好，最慢的压缩)\n"
+#define MSGTR_LIBVO_PNG_ErrorOpeningForWriting "\n[VO_PNG] 打开 '%s' 写入错误!\n"
+#define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] create_png 错误.\n"
+
+// libvo/vo_sdl.c
+
+#define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] 无法获得可用的 SDL 输出模式.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode 失败: %s.\n"
+#define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode 失败: %s.\n"
+#define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] I420 映射到 IYUV.\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] 不支持的图像格式 (0x%X).\n"
+#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] 信息 - 请使用 -vm 或 -zoom 切换到最佳分辨率.\n"
+#define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] 设置视频模式失败: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay "[VO_SDL] 无法创建 YUV overlay: %s.\n"
+#define MSGTR_LIBVO_SDL_CouldntCreateARGBSurface "[VO_SDL] 无法创建 RGB surface: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] 使用深度/颜色空间转换, 这会减慢速度 (%ibpp -> %ibpp).\n"
+#define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] draw_slice 不支持的图像格式, 联系 MPlayer 的开发者!\n"
+#define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit 失败: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] 初始化 SDL 失败: %s.\n"
+#define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] 使用驱动: %s.\n"
+
+// libvo/vobsub_vidix.c
+
+#define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] 无法开始播放: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] 无法停止播放: %s\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] 对 yuv410p 不支持交错的 uv.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] 调用 dummy vidix_draw_slice().\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] 调用 dummy vidix_draw_frame().\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] 这个 vidix 驱动不支持 fourcc: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] 视频服务器不支持分辨率 (%dx%d), 支持的分辨率: %dx%d-%dx%d.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Vidix 不支持视频服务器的色深 (%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] Vidix 驱动无法放大图像 (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] Vidix 驱动无法缩小图像 (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] 无法配置播放: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] VIDIX 库版本错误.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] 无法找到可用的 VIDIX 驱动.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] 无法获得兼容性: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] 描述: %s.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] 作者: %s.\n"
+
+// libvo/vo_svga.c
+
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] 指定的 vid_mode %d (%s) 不可用.\n"
+#define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] 指定的 vid_mode %d (%s) 太小.\n"
+#define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
+#define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) 失败.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] 视频模式是线性的可以使用 memcpy 操作图像.\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] 视频模式是硬件加速的可以使用 put_image.\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] 如果工作正常请告诉我. \n[VO_SVGA] (发送 `mplayer test.avi -v -v -v -v &> svga.log` 生成的 log). 谢\n"
+#define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] 视频模式有 %d 页.\n"
+#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] 图像居中. 开始于 (%d,%d)\n"
+#define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] 使用 VIDIX. w=%i h=%i  mw=%i mh=%i\n"
+
+// libvo/vo_syncfb.c
+
+#define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] 无法打开 /dev/syncfb 或 /dev/mga_vid.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] 使用 yuv420p3 调色板.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] 使用 yuv420p2 调色板.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] 使用 yuv420 调色板.\n"
+#define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] 没有找到支持的调色板.\n"
+#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES Sourcer 尺寸: %d x %d.\n"
+#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] Framebuffer 内存: %ld in %ld buffers.\n"
+#define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] 申请第一个缓冲 #%d.\n"
+#define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] 获得第一个缓冲 #%d.\n"
+#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] 未知子设备: %s.\n"
+
+// libvo/vo_tdfxfb.c
+
+#define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] 无法打开 %s: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] FBITGET_FSCREENINFO ioctl 出错: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] FBITGET_VSCREENINFO ioctl 出错: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] 这个驱动仅支持 3Dfx Banshee, Voodoo3 和 Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp 输出不支持.\n"
+#define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] 无法映射内存区域: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp 输出不支持 (应该永远不会发生).\n"
+#define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] Eik! control() 出错.\n"
+#define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] 没有足够的显存播放这个电影. 尝试较低的分辨率.\n"
+#define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] 屏幕 %dx%d 色深 %d bpp, 输入 %dx%d 色深 %d bpp, 输出 %dx%d.\n"
+
+// libvo/vo_tdfx_vid.c
+
+#define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Move %d(%d) x %d => %d.\n"
+#define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP move 清除屏幕失败.\n"
+#define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit 失败.\n"
+#define MSGTR_LIBVO_TDFXVID_NonNativeOverlayFormatNeedConversion "[VO_TDFXVID] 非本地支持的 overlay 格式需要转换.\n"
+#define MSGTR_LIBVO_TDFXVID_UnsupportedInputFormat "[VO_TDFXVID] 不支持的输入格式 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlaySetupFailed "[VO_TDFXVID] Overlay 设置失败.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOnFailed "[VO_TDFXVID] Overlay 打开失败.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayReady "[VO_TDFXVID] Overlay 准备完成: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] Texture blit 准备完成: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
+#define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] Overlay 关闭失败\n"
+#define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] 无法打开 %s: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] 无法获得当前配置: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap 失败 !!!!!\n"
+#define MSGTR_LIBVO_TDFXVID_GetImageTodo "获得图像格式 todo.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP move 失败.\n"
+#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] 设置 yuv 失败.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP move 操作 Y plane 失败.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP move 操作 U plane 失败.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP move 操作 V plane 失败.\n"
+#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] 这是什么格式 0x%x.\n"
+
+// libvo/vo_tga.c
+
+#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] 未知子设备: %s.\n"
+
+// libvo/vo_vesa.c
+
+#define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] 发生致命错误! 无法恢复.\n"
+#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] 未知子设备: '%s'.\n"
+#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] 显存太小不能支持这个模式:\n[VO_VESA] 需要: %08lX 可用: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] 你需要设置显示器的兼容性. 不改变刷新率.\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] 模式超出显示器的限制. 不改变刷新率.\n"
+#define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] 检测到内部致命错误: init 在 preinit 前被调用.\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] -flip 命令不支持.\n"
+#define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] 可能的原因: 找不到 VBE2 BIOS.\n"
+#define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] 找到 VESA VBE BIOS 版本 %x.%x 修订版本: %x.\n"
+#define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] 显存: %u Kb.\n"
+#define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA 兼容性: %s %s %s %s %s.\n"
+#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! 下面显示 OEM 信息. !!!\n"
+#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] 你应该看到 5 行 OEM 相关内容，否则, 你的 vm86 有问题.\n"
+#define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM 信息: %s.\n"
+#define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM 版本: %x.\n"
+#define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM 发行商: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM 产品名: %s.\n"
+#define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM 产品版本: %s.\n"
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] 提示: 为使用电视输出你需要在启动 PC 之前插入电视接口.\n"\
+"[VO_VESA] 因为 VESA BIOS 只在自检的时候初始化自己.\n"
+#define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] 使用 VESA 模式 (%u) = %x [%ux%u@%u]\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] 无法初始化 SwScaler.\n"
+#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] 无法使用 DGA. 指定 bank 切换模式. :(\n"
+#define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] 使用 DGA (物理资源: %08lXh, %08lXh)"
+#define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] 无法使用双缓冲: 显存不足.\n"
+#define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] 找不到 DGA 也不能重新分配窗口的大小.\n"
+#define MSGTR_LIBVO_VESA_YouveForcedDga "[VO_VESA] 你指定了 DGA. 退出\n"
+#define MSGTR_LIBVO_VESA_CantFindValidWindowAddress "[VO_VESA] 找不到可用的窗口地址.\n"
+#define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] 使用 bank 切换模式 (物理资源: %08lXh, %08lXh).\n"
+#define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] 无法分配临时缓冲.\n"
+#define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] 对不起, 模式不支持 -- 尝试 -x 640 -zoom.\n"
+#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] 啊你的电视上有图像了!\n"
+#define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] 无法初始化 Linux Video Overlay.\n"
+#define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] 使用视频 overlay: %s.\n"
+#define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] 无法初始化 VIDIX driver.\n"
+#define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] 使用 VIDIX.\n"
+#define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] 找不到适合 %ux%u@%u 的模式.\n"
+#define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] VESA 初始化完成.\n"
+
+// libvo/vo_x11.c
+
+#define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] 调用 draw_frame()!!!!!!\n"
+
+// libvo/vo_xv.c
+
+#define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] 调用 draw_frame()!!!!!!\n"
