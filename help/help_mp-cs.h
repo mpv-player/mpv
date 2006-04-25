@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.222
+// Synced to 1.242
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -103,7 +103,7 @@ static char help_text[]=
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI.\n"
 #define MSGTR_GuiNeedsX "GUI MPlayeru vy¾aduje X11.\n"
-#define MSGTR_Playing "Pøehrávám %s\n"
+#define MSGTR_Playing "\nPøehrávám %s\n"
 #define MSGTR_NoSound "Audio: ¾ádný zvuk\n"
 #define MSGTR_FPSforced "FPS vynuceno na hodnotu %5.3f  (vyn. èas: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU za bìhu."
@@ -195,31 +195,45 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "zapnuto"
 #define MSGTR_OSDdisabled "vypnuto"
-#define MSGTR_OSDnone "nic"
-#define MSGTR_OSDunknown "neznámé"
-#define MSGTR_OSDDVDNAV "DVDNAV: %s"
 #define MSGTR_OSDChannel "Kanál: %s"
-#define MSGTR_OSDSubtitles "Titulky: %s"
-#define MSGTR_OSDSubtitlesOff "Titulky: vypnuty"
-#define MSGTR_OSDSubtitlesLanguage "Titulky: (%d) %s"
-#define MSGTR_OSDSub "Tit: (%d) %s%s"
 #define MSGTR_OSDSubDelay "Zpo¾dìní tit: %d ms"
-#define MSGTR_OSDSubPosition "Pozice tit: %d/100"
-#define MSGTR_OSDSubAlignment "Zarovnání tit: %s"
-#define MSGTR_OSDAVDelay "A-V odstup: %d ms"
 #define MSGTR_OSDSpeed "Rychlost: x %6.2f"
-#define MSGTR_OSDStayOnTop "V¾dy nahoøe: %s"
-#define MSGTR_OSDRootwin "Koøenové okno: %s"
-#define MSGTR_OSDBorder "Rámek: %s"
-#define MSGTR_OSDFramedrop "Zahazování snímkù: %s"
-#define MSGTR_OSDFramedropOn "zapnuto"
-#define MSGTR_OSDFramedropHard "hard"
-#define MSGTR_OSDFramedropOff "vypnuto"
 #define MSGTR_OSDosd "OSD: %s"
-#define MSGTR_OSDSubBottom "dolù"
-#define MSGTR_OSDSubCenter "na støed"
-#define MSGTR_OSDSubTop "nahoru"
 
+// property values
+#define MSGTR_Enabled "zapnuto"
+#define MSGTR_EnabledEdl "zapnuto (edl)"
+#define MSGTR_Disabled "vypnuto"
+#define MSGTR_HardFrameDrop "hard"
+#define MSGTR_Unknown "neznámé"
+#define MSGTR_Bottom "dolù"
+#define MSGTR_Center "na støed"
+#define MSGTR_Top "nahoru"
+
+// osd bar names
+#define MSGTR_Volume "Hlasitost"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gama"
+#define MSGTR_Brightness "Jas"
+#define MSGTR_Contrast "Kontrast"
+#define MSGTR_Saturation "Sytost"
+#define MSGTR_Hue "Tón"
+
+// property state
+#define MSGTR_MuteStatus "Mute: %s"
+#define MSGTR_AVDelayStatus "A-V odchylka: %s"
+#define MSGTR_OnTopStatus "V¾dy nahoøe: %s"
+#define MSGTR_RootwinStatus "Rootwin: %s"
+#define MSGTR_BorderStatus "Ohranièení: %s"
+#define MSGTR_FramedroppingStatus "Zahazování snímkù: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "Titulky: %s"
+#define MSGTR_SubPosStatus "Pozice tit.: %s/100"
+#define MSGTR_SubAlignStatus "Zarovnání tit.: %s"
+#define MSGTR_SubDelayStatus "Zpo¾dìní tit.: %s"
+#define MSGTR_SubVisibleStatus "Zobr. titulkù: %s"
+#define MSGTR_SubForcedOnlyStatus "Pouze vynucené tit.: %s"
+ 
 // mencoder.c:
 
 #define MSGTR_UsingPass3ControllFile "Øídicí soubor pro tøíprùchodový re¾im: %s\n"
@@ -483,6 +497,10 @@ static char help_text[]=
 #define MSGTR_UnknownProfile "Neznámý profil '%s'.\n"
 #define MSGTR_Profile "Profil %s: %s\n"
 
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Jméno                Typ             Min        Max\n\n"
+#define MSGTR_TotalProperties "\nCelkem: %d nastavení\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM zaøízení '%s' nebylo nalezeno.\n"
 #define MSGTR_ErrTrackSelect "Chyba pøi výbìru VCD stopy."
@@ -664,6 +682,7 @@ static char help_text[]=
 // Poznámka: Pokud zmìníte MSGTR_PlayList, ujistìte se prosím, ¾e vyhovuje i pro  MSGTR_MENU_PlayList
 #define MSGTR_PlayList "Playlist"
 #define MSGTR_Equalizer "Ekvalizér"
+#define MSGTR_ConfigureEqualizer "Konfigurace Ekvalizéru"
 #define MSGTR_SkinBrowser "Prohlí¾eè témat"
 #define MSGTR_Network "Sí»ové vysílání..."
 // Poznámka: Pokud zmìníte MSGTR_Preferences, ujistìte se prosím, ¾e vyhovuje i pro  MSGTR_MENU_Preferences
@@ -761,6 +780,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Audio stopa"
 #define MSGTR_MENU_Track "Stopa %d"
 #define MSGTR_MENU_VideoTrack "Video stopa"
+#define MSGTR_MENU_Subtitles "Titulky"
 
 // --- equalizer
 // Poznámka: Pokud zmìníte MSGTR_EQU_Audio, ujistìte se prosím, ¾e vyhovuje i pro MSGTR_PREFERENCES_Audio
@@ -1041,6 +1061,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Ovladaè nepodporuje SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Ovladaè Va¹í zvukové karty NEPODPORUJE select()  ***\n Pøekompilujte MPlayer s #undef HAVE_AUDIO_SELECT v config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nKritická chyba: *** NELZE ZNOVUOTEVØÍT / RESTARTOVAT ZVUKOVÉ ZAØÍZENÍ *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Neznámý/Nepodporovaný OSS formát: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
@@ -1067,7 +1088,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Soubor: %s (%s)\nPCM: Vzorkování: %iHz Kanál(y): %s Formát %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info:  Nejrychlej¹í extrakce dosáhnete s -vc null -vo null\n[AO PCM] Info: Pro zápis WAVE souborù pou¾ijte -ao pcm:waveheader (výchozí).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info:  Nejrychlej¹í extrakce dosáhnete s -vc null -vo null -ao pcm:fast\n[AO PCM] Info: Pro zápis WAVE souborù pou¾ijte -ao pcm:waveheader (výchozí).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Selhalo otevøení %s pro zápis!\n"
 
 // ao_sdl.c
@@ -1149,7 +1170,11 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrNotEnoughControls "Na pøíkazovém øádku bylo uvedeno málo volièù"
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Vstupní voliè #%d je ni¾¹í ne¾ minimální hodnota %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Vstupní voliè #%d je vy¹¹í ne¾ maximální hodnota %0.4f.\n"
- 
+
+// format.c
+
+#define MSGTR_AF_FORMAT_UnknownFormat "neznámý-formát "
+
 // ========================== INPUT =========================================
 
 // joystick.c
@@ -1401,3 +1426,116 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nezadáno heslo, zkou¹ím prázdné heslo.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Server vrátil %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Vyrovnávací pamì» nastavena na %d KBajtù\n"
+
+// ========================== LIBMPMENU ===================================
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntaktická chyba na øádku: %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Definice Menu vy¾adují pojmenovaný atribut (øádek %d)\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] ©patný atribut %s=%s v menu '%s' na øádku %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Neznámý typ menu '%s' na øádku %d\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Nelze otevøít konfiguraèní soubor menu: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Konfiguraèní soubor je pøíli¹ velký (> %d KB)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Konfiguraèní soubor je prázdný\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] Menu %s nenalezeno.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menu '%s': Inicializace selhala.\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nepodporovaný výstupní formát!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] V definici menu nebyla nalezena ¾ádná polo¾ka.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] Polo¾ky typu seznam vy¾adují název (øádek %d).\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] Polo¾ka typu seznam vy¾aduje argument.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Waitpid error: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Chyba výbìru.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Read error on child's: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] Console run: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Potomek je ji¾ spu¹tìn.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork selhal !!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Chyba zápisu.\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Opendir error: %s.\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Realloc error: %s.\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Chyba alokace pamìti: %s.\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Readdir error: %s.\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Nelze otevøít adresáø %s\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] V definici menu nebyla nalezena ¾ádná polo¾ka.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definice podmenu vy¾aduje atribut 'menu'.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Polo¾ka menu Pref vy¾aduje platný atribut 'property' (øádek %d).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Menu Pref vy¾aduje argument.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Nelze nalézt cílovou polo¾ku ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Selhalo vytvoøení pøíkazu: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] Textová menu vy¾adují jméno souboru txt (param soubor).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Nelze otevøít: %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Varování, øádek je pøíli¹ dlouhý. Rozdìluji jej.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] Zpracováno %d øádkù.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Neznámý pøíkaz: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Selhalo otevøení menu: '%s'.\n"
+
+// ========================== LIBMPCODECS ===================================
+
+// libmpcodecs/ad_libdv.c
+#define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Varování! Velikosti audio rámcù se li¹í! read=%d  hdr=%d.\n"
+
+// libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
+#define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] Nemohu alokovat obraz pro kodek cinepak.\n"
+
+// libmpcodecs/vd_ffmpeg.c
+#define MSGTR_MPCODECS_XVMCAcceleratedCodec "[VD_FFMPEG] XVMC akcelerovaný kodek.\n"
+#define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Aritmetický prùmìr QP: %2.4f, Harmonický prùmìr QP: %2.4f\n"
+#define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI selhalo.\n"
+#define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Nemohu alokovat obraz pro kodek.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC elerované MPEG2.\n"
+#define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Zkou¹ím pixfmt=%d.\n"
+#define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Bufer mc_get_buffer by mìl pracovat pouze pøi XVMC akceleraci!!"
+#define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Neoèekávaná init_vo chyba.\n"
+#define MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken "[VD_FFMPEG] Nezotavitelná chyba, renderovací bufery nepou¾ity.\n"
+#define MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed "[VD_FFMPEG] Povoleny pouze bufery alokované pomocí vo_xvmc.\n"
+
+// libmpcodecs/ve_lavc.c
+#define MSGTR_MPCODECS_HighQualityEncodingSelected "[VE_LAVC] Vybráno enkódování s vysokou kvalitou (non real time)!\n"
+#define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] Pou¾ívám konstantní qscale = %f (VBR).\n"
+
+// libmpcodecs/ve_raw.c
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Surový výstup s fourcc [%x] není podporován!\n"
+#define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] Nebyl specifikován potøebný VfW kodek!!\n"
+
+// libmpcodecs/vf_crop.c
+#define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] ©patná pozice/¹íøka/vý¹ka - oøezová oblast mimo originál!\n"
+
+// libmpcodecs/vf_cropdetect.c
+#define MSGTR_MPCODECS_CropArea "[CROP] Oøezová oblast: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d).\n"
+
+// libmpcodecs/vf_format.c, vf_palette.c, vf_noformat.c
+#define MSGTR_MPCODECS_UnknownFormatName "[VF_FORMAT] Neznámý název formátu: '%s'.\n"
+
+// libmpcodecs/vf_framestep.c vf_noformat.c vf_palette.c vf_tile.c
+#define MSGTR_MPCODECS_ErrorParsingArgument "[VF_FRAMESTEP] Chyba pøi zpracování argumentu.\n"
+
+// libmpcodecs/ve_vfw.c
+#define MSGTR_MPCODECS_CompressorType "Typ komprasoru: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorSubtype "Podtyp kompresoru: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorFlags "Pøíznaky kompresoru: %lu, verze %lu, ICM verze: %lu\n"
+#define MSGTR_MPCODECS_Flags "Pøíznaky:"
+#define MSGTR_MPCODECS_Quality " kvalita"
+
+// libmpcodecs/vf_expand.c
+#define MSGTR_MPCODECS_FullDRNotPossible "Plný DR není mo¾ný, zkou¹ím místo nìj SLICES!\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "VAROVÁNÍ! Dal¹í filtr nepodporuje SLICES, oèekávejte sig11...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "Proè jsme dostali NULL??\n"
+
+// libmpcodecs/vf_fame.c
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "FATAL: nelze otevøít libFAME!\n"
+
+// libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s nepodporován dal¹ím filtrem/vo :(\n"
