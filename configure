@@ -809,7 +809,7 @@ if x86 || x86_64 ; then
   done
 
   # SSE implies MMX2, but not all SSE processors report the mmxext CPU flag.
-  test _sse=yes && _mmxext=yes
+  test $_sse = yes && _mmxext=yes
 
   echocheck "CPU vendor"
   echores "$pvendor ($pfamily:$pmodel:$pstepping)"
