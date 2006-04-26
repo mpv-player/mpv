@@ -410,7 +410,7 @@ static char help_text[]=
 "                0: cbr (constant bitrate)\n"\
 "                1: mt (Mark Taylor VBR algorithm)\n"\
 "                2: rh (Robert Hegemann VBR algorithm - default)\n"\
-"                3: abr (available bitrate)\n"\
+"                3: abr (average bitrate)\n"\
 "                4: mtrh (Mark Taylor Robert Hegemann VBR algorithm)\n"\
 "\n"\
 " abr           average bitrate\n"\
