@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.245
+// In synch with rev 1.247
 
 // ========================= MPlayer help ===========================
 
@@ -418,7 +418,7 @@ static char help_text[]=
 "                0: cbr (konstante Bitrate)\n"\
 "                1: mt (Mark Taylor VBR Algorithmus)\n"\
 "                2: rh (Robert Hegemann VBR Algorithmus - Standard)\n"\
-"                3: abr (verfügbare Bitrate)\n"\
+"                3: abr (durchschnittliche Bitrate)\n"\
 "                4: mtrh (Mark Taylor Robert Hegemann VBR Algorithmus)\n"\
 "\n"\
 " abr           durchschnittliche Bitrate\n"\
@@ -1566,6 +1566,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "Konnte keine Helligkeitswerte vom Kernelmodul ermitteln!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "Konnte keine Helligkeitswerte vom Kernelmodul setzen!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Bildschirmbreite/-höhe unbekannt!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: ungültiges Ausgabeformat %0X\n"
 #define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Ungültiges Ausgabeformat %0X.\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "Deine Treiberversion von mga_vid ist mit dieser MPlayer-Version nicht kompatibel!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "Benutze %d Buffer.\n"
