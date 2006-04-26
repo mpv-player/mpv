@@ -1572,10 +1572,10 @@ if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
 }
 
 mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_VideoStreamResult,
-    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (int)mux_v->size, (float)mux_v->timer, decoded_frameno);
+    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (uint64_t)mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
 mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_AudioStreamResult,
-    (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
+    (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (uint64_t)mux_a->size, (float)mux_a->timer);
 
 if(sh_audio){ uninit_audio(sh_audio);sh_audio=NULL; }
 if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
