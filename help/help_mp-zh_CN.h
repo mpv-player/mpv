@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.245
+// Synced with help_mp-en.h 1.246
 
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
@@ -397,7 +397,7 @@ static char help_text[]=
 "                0: cbr (常比特率)\n"\
 "                1: mt (Mark Taylor VBR 算法)\n"\
 "                2: rh (Robert Hegemann VBR 算法 - 默认)\n"\
-"                3: abr (可用比特率)\n"\
+"                3: abr (平均比特率)\n"\
 "                4: mtrh (Mark Taylor Robert Hegemann VBR 算法)\n"\
 "\n"\
 " abr           平均比特率\n"\
