@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1266
+.\" In sync with rev 1.1269
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -797,10 +797,16 @@ Führt zu Bildstörungen!
 .
 .TP
 .B \-identify
+Kurzschreibweise für \-msglevel identify=4.
 Zeigt Dateiparameter in einem einfach einzulesenden Format an.
 Gibt außerdem detailliertere Informationen über IDs und die Sprachen von
 Untertiteln und Audiospuren.
-Das Script TOOLS/\:midentify unterdrückt die anderen Ausgaben von MPlayer
+In manchen Fällen erhältst du mehr Informationen durch Benutzung von \-msglevel
+identify=6.
+Zum Beispiel listet es für eine DVD die zeitliche Länge jedes Titels sowie die
+Disc-ID.
+Das Wrapper-Script TOOLS/\:midentify unterdrückt die anderen Ausgaben von
+MPlayer
 und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
 .
 .TP
