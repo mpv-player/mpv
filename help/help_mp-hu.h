@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.246 (2006. 04. 25.)
+// Sync'ed with help_mp-en.h 1.247 (2006. 04. 26.)
 
 // ========================= MPlayer help ===========================
 
@@ -410,7 +410,7 @@ static char help_text[]=
 "                0: cbr (konstans bitráta)\n"\
 "                1: mt (Mark Taylor VBR algoritmus)\n"\
 "                2: rh (Robert Hegemann VBR algoritmus - alapértelmezett)\n"\
-"                3: abr (elérhetõ bitráta)\n"\
+"                3: abr (átlagos bitráta)\n"\
 "                4: mtrh (Mark Taylor Robert Hegemann VBR algoritmus)\n"\
 "\n"\
 " abr           átlagos bitráta\n"\
