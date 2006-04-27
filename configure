@@ -6212,9 +6212,7 @@ if test "$_amr_nb_fixed" = auto ; then
   fi
 fi
 if test "$_amr_nb_fixed" = yes ; then
-  _def_amr_nb='#define AMR_NB 1'
   _def_amr_nb_fixed='#define AMR_NB_FIXED 1'
-  _amr_nb=yes;
 else
   _def_amr_nb_fixed='#undef AMR_NB_FIXED'
 fi
