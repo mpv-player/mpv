@@ -1619,7 +1619,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] 设置 overlay 属性失败.\n"
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] 设置 overlay screen 失败!\n退出.\n"
 #define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] 启用 overlay 失败!\n退出.\n"
-#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] 设置 overlay 窗口大小失败!\n"
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayBcs "[VO_DXR3] 设置 overlay bcs 失败!\n"
 #define MSGTR_LIBVO_DXR3_FailedGettingOverlayYOffsetValues "[VO_DXR3] 无法获得 overlay Y-offset 的值!\n退出.\n"
 #define MSGTR_LIBVO_DXR3_FailedGettingOverlayXOffsetValues "[VO_DXR3] 无法获得 overlay X-offset 的值!\n退出.\n"
