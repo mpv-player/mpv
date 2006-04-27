@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.246
+// Synced with help_mp-en.h 1.248
 
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
@@ -262,8 +262,8 @@ static char help_text[]=
 "你的编码可能失败!\n"
 #define MSGTR_ErrorWritingFile "%s: 写入文件错误.\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD推荐的视频比特率为: %d\n"
-#define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs  %d frames\n"
-#define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs\n"
+#define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %"PRIu64" bytes  %5.3f secs  %d frames\n"
+#define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %"PRIu64" bytes  %5.3f secs\n"
 #define MSGTR_OpenedStream "成功: 格式: %d数据: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "视频编解码器: 帧复制 (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "音频编解码器: 帧复制 (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
