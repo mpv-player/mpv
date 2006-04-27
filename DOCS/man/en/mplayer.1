@@ -9343,7 +9343,12 @@ Any other framerate is incompatible with this option.
 .
 .TP
 .B delay\ \ 
-FIXME: Document this.
+Currently only meaningful for MPEG[12]: maximum allowed distance, 
+in seconds, between the reference timer of the output stream (SCR) 
+and the decoding timestamp (DTS) for any stream present 
+(demux to decode delay).
+Default is 0.7 (as mandated by the standard). 
+Higher values require larger buffers and must not be used.
 .
 .TP
 .B format=<container_format>
@@ -9383,15 +9388,22 @@ FIXME: Document this.
 .
 .TP
 .B muxrate
-FIXME: Document this.
+Nominal bitrate of the multiplex, in units of 50 bytes per second;
+currently it's meaningful only for MPEG[12].
+Sometimes raising it is necessary in order to avoid "buffer underflows".
 .
 .TP
 .B packetsize
-FIXME: Document this.
+Size, expressed in bytes, of the unitary packet for the chosen format.
+When muxing to MPEG[12] implementations the default values are: 
+2324 for [S]VCD, 2048 for all others formats.
 .
 .TP
 .B preload
-FIXME: Document this.
+Currently only meaningful for MPEG[12]: initial distance, 
+in seconds, between the reference timer of the output stream (SCR) 
+and the decoding timestamp (DTS) for any stream present 
+(demux to decode delay).
 .
 .
 .
