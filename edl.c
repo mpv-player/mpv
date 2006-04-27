@@ -8,8 +8,6 @@
 char *edl_filename; // file to extract EDL entries from (-edl)
 char *edl_output_filename; // file to put EDL entries in (-edlout)
 
-#ifdef USE_EDL
-
 /**
  *  Allocates a new EDL record and makes sure allocation was successful.
  *
@@ -131,5 +129,3 @@ edl_record_ptr edl_parse_file(void)
 
     return edl_records;
 }
-
-#endif

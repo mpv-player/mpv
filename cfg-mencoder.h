@@ -204,10 +204,8 @@ m_option_t mencoder_opts[]={
 
 	{"frameno-file", &frameno_filename, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 
-#ifdef USE_EDL
         {"hr-edl-seek", &edl_seek_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"nohr-edl-seek", &edl_seek_type, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-#endif
 
 	// set output framerate - recommended for variable-FPS (ASF etc) files
 	// and for 29.97FPS progressive MPEG2 streams

@@ -268,7 +268,6 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
 /// Deletes audio or video as told by -delay to sync
 static void fixdelay(demux_stream_t *d_video, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy);
 
-#ifdef USE_EDL
 #include "edl.h"
 static edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 static edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
@@ -279,7 +278,6 @@ static short edl_seek_type; ///< When non-zero, frames are discarded instead of 
     \return 1 for success, 0 for failure, 2 for EOF.
 */
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy);
-#endif
 
 #include "cfg-mencoder.h"
 
@@ -1074,7 +1072,6 @@ if(file_format == DEMUXER_TYPE_TV)
 play_n_frames=play_n_frames_mf;
 if (curfile && end_at_type == END_AT_TIME) end_at += mux_v->timer;
 
-#ifdef USE_EDL
 if (edl_records) free_edl(edl_records);
 next_edl_record = edl_records = NULL;
 edl_muted = 0;
@@ -1082,7 +1079,6 @@ edl_seeking = 1;
 if (edl_filename) {
     next_edl_record = edl_records = edl_parse_file();
 }
-#endif
 
 if (sh_audio && audio_delay != 0.) fixdelay(d_video, d_audio, mux_a, &frame_data, mux_v->codec==VCODEC_COPY);
 
@@ -1102,7 +1098,6 @@ while(!at_eof){
       if(play_n_frames<0) break;
     }
 
-#ifdef USE_EDL
 goto_redo_edl:
     if (next_edl_record && sh_video && sh_video->pts >= next_edl_record->start_sec) {
         if (next_edl_record->action == EDL_SKIP && edl_seeking) {
@@ -1140,7 +1135,6 @@ goto_redo_edl:
             next_edl_record=next_edl_record->next;
         }
     }
-#endif
 
 
 if(sh_audio){
@@ -1655,7 +1649,6 @@ static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
 	float timeleft = -1;
 	if (play_n_frames >= 0) timeleft = mux_v->timer + play_n_frames * (double)(mux_v->h.dwScale) / mux_v->h.dwRate;
 	if (end_at_type == END_AT_TIME && (timeleft > end_at || timeleft == -1)) timeleft = end_at;
-#ifdef USE_EDL
 	if (next_edl_record && demuxer && demuxer->video) { // everything is OK to be checked
 		float tmp = mux_v->timer + next_edl_record->start_sec - demuxer->video->pts;
 		if (timeleft == -1 || timeleft > tmp) {
@@ -1668,7 +1661,6 @@ static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
 			}
 		}
 	}
-#endif
 	return timeleft;
 }
 
@@ -1743,12 +1735,10 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
             decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip, MP_NOPTS_VALUE);
         }
 
-#ifdef USE_EDL
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,
                "EDL SKIP: Start: %.2f  End: %.2f   Current: V: %.2f  A: %.2f     \r",
                next_edl_record->start_sec, next_edl_record->stop_sec,
                sh_video->pts, a_pts);
-#endif
     }
     if (interrupted) return 2;
     return 1;
@@ -1775,7 +1765,6 @@ static void fixdelay(demux_stream_t *d_video, demux_stream_t *d_audio, muxer_str
     slowseek(a_pts - audio_delay, d_video, d_audio, mux_a, frame_data, framecopy, 0);
 }
 
-#ifdef USE_EDL
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy) {
     sh_video_t * sh_video = demuxer->video ? demuxer->video->sh : NULL;
 
@@ -1799,4 +1788,3 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 
     return slowseek(next_edl_record->stop_sec, demuxer->video, d_audio, mux_a, frame_data, framecopy, 1);
 }
-#endif

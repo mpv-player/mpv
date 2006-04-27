@@ -90,11 +90,8 @@
 	{"sb", &seek_to_byte, CONF_TYPE_POSITION, CONF_MIN, 0, 0, NULL},
 	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
 
-#ifdef USE_EDL
 	{"edl", &edl_filename,  CONF_TYPE_STRING, 0, 0, 0, NULL},
-#else
-	{"edl", "MPlayer was compiled without EDL support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
+
 	// AVI specific: force non-interleaved mode
 	{"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -361,10 +358,8 @@ extern off_t ts_probe;
 
 #include "libmpdemux/tv.h"
 
-#ifdef USE_EDL
 extern char* edl_filename;
 extern char* edl_output_filename;
-#endif
 
 #ifdef USE_TV
 m_option_t tvopts_conf[]={

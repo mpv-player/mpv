@@ -71,9 +71,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #include <dvdnav.h>
 #endif
 
-#ifdef USE_EDL
 #include "edl.h"
-#endif
 
 #include "spudec.h"
 #include "vobsub.h"
@@ -395,14 +393,12 @@ static int nortc;
 static char* rtc_device;
 #endif
 
-#ifdef USE_EDL
 edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
 short user_muted = 0; ///< Stores whether User wanted muted mode.
 short edl_muted  = 0; ///< Stores whether EDL is currently in muted mode.
 short edl_decision = 0; ///< 1 when an EDL operation has been made
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode
-#endif
 
 static unsigned int inited_flags=0;
 #define INITED_VO 1
@@ -542,9 +538,7 @@ static void exit_player_with_rc(char* how, int rc){
     play_tree_free(playtree, 1);
 
 
-#ifdef USE_EDL
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
-#endif
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ExitingHow,how);
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
@@ -1488,10 +1482,8 @@ static int mp_property_volume(m_option_t* prop,int action,void* arg) {
         return M_PROPERTY_NOT_IMPLEMENTED;
     }
 
-#ifdef USE_EDL
     if (edl_muted) return M_PROPERTY_DISABLED;
     user_muted = 0;
-#endif
 
     switch(action) {
    case M_PROPERTY_SET:
@@ -1522,28 +1514,22 @@ static int mp_property_mute(m_option_t* prop,int action,void* arg) {
     
     switch(action) {
     case M_PROPERTY_SET:
-#ifdef USE_EDL
         if(edl_muted) return M_PROPERTY_DISABLED;
-#endif
         if(!arg) return 0;
         if((!!*(int*)arg) != mixer.muted)
             mixer_mute(&mixer);
         return 1;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
-#ifdef USE_EDL
         if(edl_muted) return M_PROPERTY_DISABLED;
-#endif
         mixer_mute(&mixer);
         return 1;
     case M_PROPERTY_PRINT:
         if(!arg) return 0;
-#ifdef USE_EDL
         if(edl_muted) {
             *(char**)arg = strdup(MSGTR_EnabledEdl);
             return 1;
         }
-#endif
     default:
         return m_property_flag(prop,action,arg,&mixer.muted);
 
@@ -2869,7 +2855,6 @@ while (player_idle_mode && !filename) {
 
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
 
-#ifdef USE_EDL
 if (edl_filename) {
     if (edl_records) free_edl(edl_records);
     next_edl_record = edl_records = edl_parse_file();
@@ -2882,7 +2867,6 @@ if (edl_output_filename) {
                edl_output_filename);
     }
 }
-#endif
 
 //==================== Open VOB-Sub ============================
 
@@ -4137,7 +4121,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
 //================= EDL =========================================
 
-#ifdef USE_EDL
  if( next_edl_record ) { // Are we (still?) doing EDL?
   if ( !sh_video ) {
     mp_msg( MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video );
@@ -4161,7 +4144,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
    }
   }
  }
-#endif
 
 //================= Keyboard events, SEEKing ====================
 
@@ -4227,14 +4209,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_%s=%s\n",cmd->args[0].v.s,tmp);
         free(tmp);
     } break;
-#ifdef USE_EDL
     case MP_CMD_EDL_MARK:
       if( edl_fd ) {
 	float v = sh_video->pts;
 	fprintf( edl_fd, "%f %f %d\n", v-2, v, 0 );
       }
       break;
-#endif
     case MP_CMD_SWITCH_RATIO : {
       if (cmd->nargs == 0)
 	movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
@@ -4918,9 +4898,7 @@ if(rel_seek_secs || abs_seek_pos){
       }
         // Set OSD:
       if(!loop_seek){
-#ifdef USE_EDL
 	if( !edl_decision )
-#endif
           set_osd_bar(0,"Position",0,100,demuxer_get_percent_pos(demuxer));
       }
 
@@ -4936,7 +4914,6 @@ if(rel_seek_secs || abs_seek_pos){
         if(vo_spudec) spudec_reset(vo_spudec);
       }
   }
-#ifdef USE_EDL
 /*
  * We saw a seek, have to rewind the EDL operations stack
  * and find the next EDL action to take care of.
@@ -4959,7 +4936,7 @@ while (next_edl_record)
 
 }
 if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
-#endif
+
   rel_seek_secs=0;
   abs_seek_pos=0;
   frame_time_remaining=0;
