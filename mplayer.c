@@ -2355,8 +2355,6 @@ char * mem_ptr;
 
 int file_format=DEMUXER_TYPE_UNKNOWN;
 
-int delay_corrected=1;
-
 // movie info:
 
 #ifdef HAVE_RTC
@@ -3963,7 +3961,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 
       mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
-      if(delay_corrected){
+      {
 	static int drop_message=0;
         float x;
 	AV_delay=(a_pts-delay-audio_delay)-v_pts;
