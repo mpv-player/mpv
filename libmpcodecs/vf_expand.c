@@ -357,11 +357,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 		vf->dmpi->stride[0],mpi->stride[0]);
 	memcpy_pic(vf->dmpi->planes[1]+
 		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
-		mpi->planes[1], mpi->chroma_width, mpi->chroma_height,
+		mpi->planes[1], (mpi->w>>mpi->chroma_x_shift), (mpi->h>>mpi->chroma_y_shift),
 		vf->dmpi->stride[1],mpi->stride[1]);
 	memcpy_pic(vf->dmpi->planes[2]+
 		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
-		mpi->planes[2], mpi->chroma_width, mpi->chroma_height,
+		mpi->planes[2], (mpi->w>>mpi->chroma_x_shift), (mpi->h>>mpi->chroma_y_shift),
 		vf->dmpi->stride[2],mpi->stride[2]);
     } else {
 	memcpy_pic(vf->dmpi->planes[0]+
