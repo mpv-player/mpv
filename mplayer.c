@@ -3684,7 +3684,7 @@ while(sh_audio){
   if(playsize>0){
       sh_audio->a_out_buffer_len-=playsize;
       memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
-      sh_audio->delay+=playback_speed*playsize/(float)ao_data.bps;
+      sh_audio->delay+=playback_speed*playsize/(double)ao_data.bps;
   }
 
   break;
@@ -3937,8 +3937,8 @@ if(time_frame>0.001 && !(vo_flags&256)){
   current_module="av_sync";
 
   if(sh_audio){
-    float a_pts=0;
-    float v_pts=0;
+    double a_pts=0;
+    double v_pts=0;
 
     // unplayed bytes in our and soundcard/dma buffer:
     float delay=playback_speed*audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;

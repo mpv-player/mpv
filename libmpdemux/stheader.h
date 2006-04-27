@@ -11,7 +11,7 @@ typedef struct {
   struct codecs_st *codec;
   unsigned int format;
   int inited;
-  float delay;	   // relative (to sh_video->timer) time in audio stream
+  double delay;	   // relative (to sh_video->timer) time in audio stream
   float stream_delay; // number of seconds stream should be delayed (according to dwStart or similar)
   // output format:
   int sample_format;
@@ -62,8 +62,8 @@ typedef struct {
   float num_frames;       // number of frames played
   int num_frames_decoded; // number of frames decoded
   // timing (mostly for mpeg):
-  float pts;     // predicted/interpolated PTS of the current frame
-  float i_pts;   // PTS for the _next_ I/P frame
+  double pts;     // predicted/interpolated PTS of the current frame
+  double i_pts;   // PTS for the _next_ I/P frame
   // output format: (set by demuxer)
   float fps;              // frames per second (set only if constant fps)
   float frametime;        // 1/fps

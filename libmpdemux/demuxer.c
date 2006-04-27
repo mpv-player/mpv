@@ -314,7 +314,7 @@ void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
         dp->len,dp->pts,(unsigned int)dp->pos,ds->demuxer->audio->packs,ds->demuxer->video->packs);
 }
 
-void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t pos,int flags){
+void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, off_t pos, int flags) {
     demux_packet_t* dp=new_demux_packet(len);
     len = stream_read(stream,dp->buffer,len);
     resize_demux_packet(dp, len);
@@ -538,7 +538,8 @@ int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start){
     }
 }
 
-float ds_get_next_pts(demux_stream_t *ds) {
+double ds_get_next_pts(demux_stream_t *ds)
+{
   demuxer_t* demux = ds->demuxer;
   while(!ds->first) {
     if(demux->audio->packs>=MAX_PACKS || demux->audio->bytes>=MAX_PACK_BYTES){

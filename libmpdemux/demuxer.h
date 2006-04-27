@@ -76,7 +76,7 @@
 // Holds one packet/frame/whatever
 typedef struct demux_packet_st {
   int len;
-  float pts;
+  double pts;
   off_t pos;  // position in index (AVI) or file (MPG)
   unsigned char* buffer;
   int flags; // keyframe, etc
@@ -89,7 +89,7 @@ typedef struct {
   int buffer_pos;          // current buffer position
   int buffer_size;         // current buffer size
   unsigned char* buffer;   // current buffer, never free() it, always use free_demux_packet(buffer_ref);
-  float pts;               // current buffer's pts
+  double pts;              // current buffer's pts
   int pts_bytes;           // number of bytes read after last pts stamp
   int eof;                 // end of demuxed stream? (true if all buffer empty)
   off_t pos;                 // position in the input stream (file)
@@ -244,7 +244,7 @@ void free_demuxer_stream(demux_stream_t *ds);
 void free_demuxer(demuxer_t *demuxer);
 
 void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp);
-void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t pos,int flags);
+void ds_read_packet(demux_stream_t *ds, stream_t *stream, int len, double pts, off_t pos, int flags);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int ds_fill_buffer(demux_stream_t *ds);
@@ -286,7 +286,7 @@ void ds_free_packs(demux_stream_t *ds);
 int ds_get_packet(demux_stream_t *ds,unsigned char **start);
 int ds_get_packet_pts(demux_stream_t *ds, unsigned char **start, double *pts);
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start);
-float ds_get_next_pts(demux_stream_t *ds);
+double ds_get_next_pts(demux_stream_t *ds);
 
 // This is defined here because demux_stream_t ins't defined in stream.h
 stream_t* new_ds_stream(demux_stream_t *ds);
