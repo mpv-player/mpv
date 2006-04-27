@@ -217,9 +217,9 @@ int vixProbe(int verbose, int force){
 #define VID_RD08(p,i)     ({ MEM_BARRIER(); ((uint8_t *)(p))[(i)]; })
 
 #undef	VID_WR32
-#define VID_WR32(p,i,val) ({ MEM_BARRIER(); ((uint32_t *)(p))[(i)/4]=le2me_32(val); })
+#define VID_WR32(p,i,val) ({ MEM_BARRIER(); ((uint32_t *)(p))[(i)/4]=val; })
 #undef	VID_RD32
-#define VID_RD32(p,i)     ({ MEM_BARRIER(); le2me_32(((uint32_t *)(p))[(i)/4]); })
+#define VID_RD32(p,i)     ({ MEM_BARRIER(); ((uint32_t *)(p))[(i)/4]; })
 
 #define VID_AND32(p,i,val) VID_WR32(p,i,VID_RD32(p,i)&(val))
 #define VID_OR32(p,i,val)  VID_WR32(p,i,VID_RD32(p,i)|(val))
