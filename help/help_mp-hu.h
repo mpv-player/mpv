@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.247 (2006. 04. 26.)
+// Sync'ed with help_mp-en.h 1.249 (2006. 04. 27.)
 
 // ========================= MPlayer help ===========================
 
@@ -265,8 +265,8 @@ static char help_text[]=
 "A kódolásod hibás lehet!\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
 #define MSGTR_RecommendedVideoBitrate "Ajánlott video bitráta %s CD-hez: %d\n"
-#define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/mp  (%d B/s)  méret: %d byte  %5.3f mp  %d képkocka\n"
-#define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/mp  (%d B/s)  méret: %d byte  %5.3f mp\n"
+#define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/mp  (%d B/s)  méret: %"PRIu64" byte  %5.3f mp  %d képkocka\n"
+#define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/mp  (%d B/s)  méret: %"PRIu64" byte  %5.3f mp\n"
 #define MSGTR_OpenedStream "kész: formátum: %d  adat: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "audiocodec: framecopy (formátum=%x csati=%d ráta=%d bit=%d B/s=%d sample-%ld)\n"
@@ -1641,7 +1641,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Yoffset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Xoffset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Xcorrection: %d.\n"
-#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Sikertelen az átlapolt ablak átméretezése!\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Sikertelen a kkevert jel beállítása!\n"
 
 // libvo/vo_mga.c
