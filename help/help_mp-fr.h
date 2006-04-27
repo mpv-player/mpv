@@ -211,8 +211,8 @@ static char help_text[]=
 //*****************************
 #define MSGTR_ErrorWritingFile "%s: Erreur durant l'écriture du fichier.\n"
 #define MSGTR_RecommendedVideoBitrate "Débit binaire (bitrate) vidéo recommandé pour le CD %s: %d\n"
-#define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d B/s)  taille: %d octets  %5.3f secs  %d images\n"
-#define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d B/s)  taille: %d octets  %5.3f secs\n"
+#define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d B/s)  taille: %"PRIu64" octets  %5.3f secs  %d images\n"
+#define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d B/s)  taille: %"PRIu64" octets  %5.3f secs\n"
 //************************************
 
 // cfg-mencoder.h:

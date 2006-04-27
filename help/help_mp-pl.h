@@ -217,8 +217,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nZapisujê indeks AVI...\n"
 #define MSGTR_FixupAVIHeader "Naprawiam nag³ówek AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Zalecany video bitrate dla tego %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nStrumieñ video: %8.3f kbit/s (%d B/s) rozmiar: %d bajtów %5.3f s %d ramek\n"
-#define MSGTR_AudioStreamResult "\nStrumieñ audio: %8.3f kbit/s (%d B/s) rozmiar: %d bajtów %5.3f s\n"
+#define MSGTR_VideoStreamResult "\nStrumieñ video: %8.3f kbit/s (%d B/s) rozmiar: %"PRIu64" bajtów %5.3f s %d ramek\n"
+#define MSGTR_AudioStreamResult "\nStrumieñ audio: %8.3f kbit/s (%d B/s) rozmiar: %"PRIu64" bajtów %5.3f s\n"
 
 #define MSGTR_OpenedStream "sukces: format: %d  dane: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"

@@ -161,8 +161,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nЗапишување на AVI индексот...\n"
 #define MSGTR_FixupAVIHeader "Поправање на AVI хедерот...\n"
 #define MSGTR_RecommendedVideoBitrate "Препорачана видео битрата за %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nВидео проток: %8.3f kbit/s  (%d B/s)  големина: %d бајти %5.3f сек %d фрејма\n"
-#define MSGTR_AudioStreamResult "\nАудио проток: %8.3f kbit/s (%d B/s) големина: %d бајти %5.3f сек\n"
+#define MSGTR_VideoStreamResult "\nВидео проток: %8.3f kbit/s  (%d B/s)  големина: %"PRIu64" бајти %5.3f сек %d фрејма\n"
+#define MSGTR_AudioStreamResult "\nАудио проток: %8.3f kbit/s (%d B/s) големина: %"PRIu64" бајти %5.3f сек\n"
 
 // cfg-mencoder.h:
 

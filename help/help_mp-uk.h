@@ -158,8 +158,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nЗаписую index...\n"
 #define MSGTR_FixupAVIHeader "Оновлюю заголовок...\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендований б╕трейт для %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nВ╕део пот╕к: %8.3f kbit/s  (%d Б/с)  розм╕р: %d байт  %5.3f секунд  %d кадр╕в\n"
-#define MSGTR_AudioStreamResult "\nАуд╕о пот╕к: %8.3f kbit/s  (%d Б/с)  розм╕р: %d байт  %5.3f секунд\n"
+#define MSGTR_VideoStreamResult "\nВ╕део пот╕к: %8.3f kbit/s  (%d Б/с)  розм╕р: %"PRIu64" байт  %5.3f секунд  %d кадр╕в\n"
+#define MSGTR_AudioStreamResult "\nАуд╕о пот╕к: %8.3f kbit/s  (%d Б/с)  розм╕р: %"PRIu64" байт  %5.3f секунд\n"
 
 // cfg-mencoder.h:
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
