@@ -726,7 +726,7 @@ Automatically attaches gdb upon crash or SIGTRAP.
 Support must be compiled in by configuring with --enable-crash-debug.
 .
 .TP
-.B \-edlout <filename> (EDL only)
+.B \-edlout <filename>
 Creates a new file and writes edit decision list (EDL) records to that file.
 During playback, when the user hits 'i', an entry to skip over the last two
 seconds of playback will be written to the file.
@@ -1204,7 +1204,7 @@ Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
 .
 .TP
-.B \-edl <filename> (EDL only)
+.B \-edl <filename>
 Enables edit decision list (EDL) actions during playback.
 Video will be skipped over and audio will be muted and unmuted according to
 the entries in the given file.
@@ -6238,7 +6238,7 @@ It is kept for backwards compatibility only and will possibly
 be removed in a future version.
 .
 .TP
-.B \-hr-edl-seek (EDL only)
+.B \-hr-edl-seek
 Use a more precise, but much slower method for skipping areas.
 Areas marked for skipping are not seeked over, instead all
 frames are decoded, but only the necessary frames are encoded.
