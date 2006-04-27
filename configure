@@ -512,6 +512,21 @@ for ac_option do
   --with-install=*)
     _install=`echo $ac_option | cut -d '=' -f 2 `
     ;;
+  --enable-profile)
+    _profile='-p'
+    ;;
+  --disable-profile)
+    _profile=
+    ;;
+  --enable-debug)
+    _debug='-g'
+    ;;
+  --enable-debug=*)
+    _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
+    ;;
+  --disable-debug)
+    _debug=
+    ;;
   esac
 done
 
@@ -1473,6 +1488,28 @@ int main(void) { return 0; }
 EOF
 cc_check -pipe && _pipe="-pipe" && echores "yes" || echores "no"
 
+# Checking for CFLAGS
+_stripbinaries=yes
+if test "$_profile" != "" || test "$_debug" != "" ; then
+  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
+  if test "$_cc_major" -ge "3" ; then
+    CFLAGS=`echo "$CFLAGS" | sed -e 's/\(-Wall\)/\1 -Wno-unused-parameter/'`
+  fi
+  _stripbinaries=no
+elif test -z "$CFLAGS" ; then
+    CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
+else
+  _warn_CFLAGS=yes
+fi
+if test -n "$LDFLAGS" ; then
+  _ld_extra="$_ld_extra $LDFLAGS"
+  _warn_CFLAGS=yes
+fi
+if test -n "$CPPFLAGS" ; then
+  _inc_extra="$_inc_extra $LDFLAGS"
+  _warn_CFLAGS=yes
+fi
+
 _prefix="/usr/local"
 
 # GOTCHA: the variables below defines the default behavior for autodetection
@@ -1645,6 +1682,11 @@ for ac_option do
   --disable-cross-compile) ;;
   --install-path=*) ;;
   --with-install=*) ;;
+  --enable-profile) ;;
+  --disable-profile) ;;
+  --enable-debug) ;;
+  --enable-debug=*) ;;
+  --disable-debug) ;;
 
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
@@ -1982,21 +2024,6 @@ for ac_option do
     _xmmsplugindir=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
-  --enable-profile)
-    _profile='-p'
-    ;;
-  --disable-profile)
-    _profile=
-    ;;
-  --enable-debug)
-    _debug='-g'
-    ;;
-  --enable-debug=*)
-    _debug=`echo $_echo_n '-g'$_echo_c; echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --disable-debug)
-    _debug=
-    ;;
   --enable-crash-debug)
     _crash_debug=yes
     ;;
@@ -6972,20 +6999,6 @@ fi
 
 #############################################################################
 
-# Checking for CFLAGS
-_stripbinaries=yes
-if test "$_profile" != "" || test "$_debug" != "" ; then
-  CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
-  if test "$_cc_major" -ge "3" ; then
-    CFLAGS=`echo "$CFLAGS" | sed -e 's/\(-Wall\)/\1 -Wno-unused-parameter/'`
-  fi
-  _stripbinaries=no
-elif test -z "$CFLAGS" ; then
-    CFLAGS="-O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer"
-else
-  _warn_CFLAGS=yes
-fi
-
 echocheck "automatic gdb attach"
 if test "$_crash_debug" = yes ; then
   _def_crash_debug='#define CRASH_DEBUG 1'
@@ -8256,7 +8269,7 @@ fi
 if test "$_warn_CFLAGS" = yes; then
   cat <<EOF
 
-MPlayer compilation will use the CFLAGS set by you, but:
+MPlayer compilation will use the CPPFLAGS/CFLAGS/LDFLAGS set by you, but:
 
     *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
 
