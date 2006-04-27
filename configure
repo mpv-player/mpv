@@ -8,19 +8,46 @@
 # Cleanups all over the place (c) 2001 pl
 #
 #
-# Guidelines:
-# If the option is named 'opt':
-#   _opt : should have a value in yes/no/auto
-#   _def_opt : '#define ... 1' or '#undef ...' that is: some C code
-#   _ld_opt : ' -L/path/dir -lopt ' that is: some GCC option
-#   _inc_opt : ' -I/path/dir/include '
+# This configure script is *not* autoconf-based and has different semantics.
+# It attempts to autodetect all settings and options where possible. It is
+# possible to override autodetection with the --enable-option/--disable-option
+# command line parameters.  --enable-option forces the option on skipping
+# autodetection. Yes, this means that compilation may fail and yes, this is not
+# how autoconf-based configure scripts behave.
 #
-# In this file, a tab is 8 chars and indentation shift is 2 characters
+# configure generates a series of configuration files:
+#  - config.h contains #defines that are used in the C code.
+#  - config.mak libvo/config.mak libao2/config.mak Gui/config.mak
+#    and libaf/config.mak are included from the Makefiles.
 #
-# GOTCHAS:
-#  - config files are currently:
-#    config.h config.mak libvo/config.mak libao2/config.mak Gui/config.mak
-#    libaf/config.mak
+# If you want to add a new check for $feature, here is a simple skeleton:
+#
+# echocheck "$feature"
+# if "$_feature" = auto; then
+# cat > $TMPC << EOF
+# #include <feature.h>
+# int main(void) { return 0; }
+# EOF
+# _feature=no
+# cc_check && _feature=yes
+# if test "$_feature" = yes ; then
+#   _def_feature='#define HAVE_FEATURE 1'
+# else
+#   _def_feature='#undef HAVE_FEATURE'
+# fi
+# echores "$_feature"
+#
+# Furthermore you need to add the variable _feature to the list of default
+# settings and set it to one of yes/no/auto. Also add appropriate
+# --enable-feature/--disable-feature command line options.
+# The results of the check should be written to config.h and config.mak
+# at the end of this script. The variable names used for this should be
+# uniform, i.e. if the option is named 'feature':
+#
+# _feature     : should have a value of yes/no/auto
+# _def_feature : '#define ... 1' or '#undef ...' for conditional compilation
+# _ld_feature  : '-L/path/dir -lfeature' GCC options
+# _inc_feature : '-I/path/dir/include' extra include paths
 #
 #############################################################################
 
