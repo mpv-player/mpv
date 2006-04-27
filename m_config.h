@@ -4,8 +4,8 @@
 /// \defgroup Config Config manager
 ///
 /// m_config provides an API to manipulate the config variables in MPlayer.
-/// It make uses of the \ref Options API to provide a context stack that
-/// allow saving and later restoring the state of all variables.
+/// It makes use of the \ref Options API to provide a context stack that
+/// allows saving and later restoring the state of all variables.
 ///@{
 
 /// \file
@@ -23,8 +23,8 @@ struct m_config_save_slot {
   m_config_save_slot_t* prev;
   /// Level at which the save was made.
   int lvl;
-  // we have to store other datatypes in this as well,
-  // so make sure we get properly aligned addresses
+  // We have to store other datatypes in this as well,
+  // so make sure we get properly aligned addresses.
   unsigned char data[0] __attribute__ ((aligned (8)));
 };
 
@@ -84,7 +84,7 @@ typedef struct m_config {
 /// \ingroup Config
 ///@{
 
-/// Set if an option have been set at the current level.
+/// Set if an option has been set at the current level.
 #define M_CFG_OPT_SET    (1<<0)
 
 /// Set if another option already uses the same variable.
@@ -173,7 +173,7 @@ m_profile_t*
 m_config_add_profile(m_config_t* config, char* name);
 
 /// Set the description of a profile.
-/** This is used by the config file parser when defining a profile. 
+/** Used by the config file parser when defining a profile.
  * 
  *  \param p The profile object.
  *  \param arg The profile's name.
@@ -182,7 +182,7 @@ void
 m_profile_set_desc(m_profile_t* p, char* desc);
 
 /// Add an option to a profile.
-/** This is used by the config file parser when defining a profile. 
+/** Used by the config file parser when defining a profile.
  * 
  *  \param config The config object.
  *  \param p The profile object.

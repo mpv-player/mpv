@@ -395,10 +395,10 @@ static char* rtc_device;
 
 edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
-short user_muted = 0; ///< Stores whether User wanted muted mode.
+short user_muted = 0; ///< Stores whether user wanted muted mode.
 short edl_muted  = 0; ///< Stores whether EDL is currently in muted mode.
-short edl_decision = 0; ///< 1 when an EDL operation has been made
-FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode
+short edl_decision = 0; ///< 1 when an EDL operation has been made.
+FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 
 static unsigned int inited_flags=0;
 #define INITED_VO 1
@@ -464,7 +464,7 @@ static void uninit_player(unsigned int mask){
     video_out=NULL;
   }
 
-  // must be after libvo uninit, as few vo drivers (svgalib) has tty code
+  // Must be after libvo uninit, as few vo drivers (svgalib) have tty code.
   if(mask&INITED_GETCH2){
     inited_flags&=~INITED_GETCH2;
     current_module="uninit_getch2";
@@ -517,7 +517,7 @@ static void exit_player_with_rc(char* how, int rc){
 #ifdef HAVE_NEW_GUI
   if ( !use_gui )
 #endif
-  vo_uninit();	// close the X11 connection (if any opened)
+  vo_uninit();	// Close the X11 connection (if any is open).
 #endif
 
 #ifdef HAVE_FREETYPE
@@ -704,9 +704,10 @@ void load_per_file_config (m_config_t* conf, const char *const file)
     }
 }
 
-// When libmpdemux perform a blocking operation (network connection or cache filling)
-// if the operation fail we use this function to check if it was interrupted by the user.
-// The function return a new value for eof.
+/* When libmpdemux performs a blocking operation (network connection or
+ * cache filling) if the operation fails we use this function to check
+ * if it was interrupted by the user.
+ * The function returns a new value for eof. */
 static int libmpdemux_was_interrupted(int eof) {
   mp_cmd_t* cmd;
   if((cmd = mp_input_get_cmd(0,0,0)) != NULL) {
@@ -899,11 +900,11 @@ static void print_status(float a_pos, float a_v, float corr)
   else
   width = 80;
 #ifdef WIN32
-  // windows command line is broken (MinGW's rxvt works though, but we
-  // should not depend on that).
+  /* Windows command line is broken (MinGW's rxvt works, but we
+   * should not depend on that). */
   width--;
 #endif
-  line = malloc(width + 1); // one additional for terminating null
+  line = malloc(width + 1); // one additional char for the terminating null
   
   // Audio time
   if (sh_audio) {
@@ -1061,7 +1062,7 @@ static void log_sub(void){
 #define OSD_MSG_OSD_STATUS              4
 #define OSD_MSG_BAR                     5
 #define OSD_MSG_PAUSE                   6
-/// Base id for the messages generated from the commmand to property bridge.
+/// Base id for messages generated from the commmand to property bridge.
 #define OSD_MSG_PROPERTY                0x100
 
 
@@ -1156,9 +1157,9 @@ static void clear_osd_msgs(void) {
 }
 
 /**
- *  \brief Get the current message fron the OSD stack
+ *  \brief Get the current message from the OSD stack.
  * 
- *  This function decrement the message timer and destroy the old ones.
+ *  This function decrements the message timer and destroys the old ones.
  *  The message that should be displayed is returned (if any).
  *  
  */
@@ -1175,12 +1176,12 @@ static mp_osd_msg_t* get_osd_msg(void) {
     
     last_update = now;
     
-    // look for the first message in the stack with high enouth level
+    // Look for the first message in the stack with high enough level.
     for(msg = osd_msg_stack ; msg ; last = msg, msg = prev) {
         prev = msg->prev;
         if(msg->level > osd_level && hidden_dec_done) continue;
-        // The message have an high enouth level or it is the first hidden one
-        // in both case we decrement the timer or kill it
+        // The message has a high enough level or it is the first hidden one
+        // in both cases we decrement the timer or kill it.
         if(!msg->started || msg->time > diff) {
             if(msg->started) msg->time -= diff;
             else msg->started = 1;
@@ -1203,7 +1204,7 @@ static mp_osd_msg_t* get_osd_msg(void) {
     return NULL;
 }
 
-// Make a define to test if we are using the term osd without having
+// Make a define to test if we are using the term OSD without having
 // to #ifdef USE_OSD all the time.
 #ifdef USE_OSD
 #define use_term_osd (term_osd && !sh_video)
@@ -1214,7 +1215,7 @@ static mp_osd_msg_t* get_osd_msg(void) {
 /**
  * \brief Display the OSD bar.
  *
- * Display the osd bar or fallback on a simple message.
+ * Display the OSD bar or fall back on a simple message.
  *
  */
 
@@ -1240,9 +1241,9 @@ void set_osd_bar(int type,char* name,double min,double max,double val) {
 /**
  * \brief Update the OSD message line.
  *
- * This function display the current message on the vo osd or on the term.
- * If the stack is empty and the osd level is high enouth the timer
- * is displayed (only on the vo osd).
+ * This function displays the current message on the vo OSD or on the term.
+ * If the stack is empty and the OSD level is high enough the timer
+ * is displayed (only on the vo OSD).
  * 
  */
 
@@ -1699,7 +1700,7 @@ static int mp_property_framedropping(m_option_t* prop,int action,void* arg) {
     }
 }
 
-/// Color settings, try to use vf/vo then fallback on TV. (RW)
+/// Color settings, try to use vf/vo then fall back on TV. (RW)
 static int mp_property_gamma(m_option_t* prop,int action,void* arg) {
     int* gamma = prop->priv, r;
 
@@ -1794,7 +1795,7 @@ static int mp_property_aspect(m_option_t* prop,int action,void* arg) {
 /// \ingroup Properties
 ///@{
 
-/// Text subtitles position (RW)
+/// Text subtitle position (RW)
 static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
 #ifdef USE_SUB
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
@@ -1813,7 +1814,7 @@ static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
 #endif
 }
 
-/// Selected subs (RW)
+/// Selected subtitles (RW)
 static int mp_property_sub(m_option_t* prop,int action,void* arg) {
     int source = -1, reset_spu = 0;
 
@@ -1989,7 +1990,7 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
     return 1;
 }
 
-/// Subtitles delay (RW)
+/// Subtitle delay (RW)
 static int mp_property_sub_delay(m_option_t* prop,int action,void* arg) {
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
     return m_property_delay(prop,action,arg,&sub_delay);
@@ -2022,7 +2023,7 @@ static int mp_property_sub_alignment(m_option_t* prop,int action,void* arg) {
 #endif
 }
 
-/// Subtitles visibility (RW)
+/// Subtitle visibility (RW)
 static int mp_property_sub_visibility(m_option_t* prop,int action,void* arg) {
 #ifdef USE_SUB
     if(!sh_video) return M_PROPERTY_UNAVAILABLE;
@@ -2225,16 +2226,16 @@ int mp_property_do(char* name,int action, void* val) {
  * \defgroup Command2Property Command to property bridge
  * 
  * It is used to handle most commands that just set a property
- * and optionaly display something on the OSD.
+ * and optionally display something on the OSD.
  * Two kinds of commands are handled: adjust or toggle.
  *
- * Adjust commands take 1 or 2 paramter: <value> <abs>
- * If <abs> is none zero the property is set to the given value
+ * Adjust commands take 1 or 2 parameters: <value> <abs>
+ * If <abs> is non-zero the property is set to the given value
  * otherwise it is adjusted.
  *
- * Toggle commands take 0 or 1 parameter. With no parameter
- * or a value less than the property minimum it just step the
- * property to it's next value. Otherwise it set it to the given
+ * Toggle commands take 0 or 1 parameters. With no parameter
+ * or a value less than the property minimum it just steps the
+ * property to its next value. Otherwise it sets it to the given
  * value.
  *
  *@{
@@ -2248,7 +2249,7 @@ static struct  {
     int cmd;
     /// set/adjust or toggle command
     int toggle;
-    /// progbar type
+    /// progressbar type
     int osd_progbar;
     /// osd msg id if it must be shared
     int osd_id;
@@ -2362,7 +2363,8 @@ int delay_corrected=1;
 int rtc_fd=-1;
 #endif
 
-int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
+/* Flag indicating whether MPlayer should exit without playing anything. */
+int opt_exit = 0;
 
 //float a_frame=0;    // Audio
 
@@ -2379,7 +2381,7 @@ int gui_no_filename=0;
   mp_msg_init();
 
   mp_msg(MSGT_CPLAYER,MSGL_INFO, "MPlayer " VERSION " (C) 2000-2006 MPlayer Team\n");
-  /* Test for cpu capabilities (and corresponding OS support) for optimizing */
+  /* Test for CPU capabilities (and corresponding OS support) for optimizing */
   GetCpuCaps(&gCpuCaps);
 #if defined(ARCH_X86) || defined(ARCH_X86_64)
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"CPUflags:  MMX: %d MMX2: %d 3DNow: %d 3DNow2: %d SSE: %d SSE2: %d\n",
@@ -2476,7 +2478,7 @@ int gui_no_filename=0;
     }
     if (use_gui && playtree_iter){
       char cwd[PATH_MAX+2];
-      // Remove Playtree and Playtree-Iter from memory as its not used by gui
+      // Free Playtree and Playtree-Iter as it's not used by the GUI.
       play_tree_iter_free(playtree_iter);
       playtree_iter=NULL;
       
@@ -2486,7 +2488,7 @@ int gui_no_filename=0;
           // Prefix relative paths with current working directory
           play_tree_add_bpf(playtree, cwd);
       }      
-      // Import initital playtree into gui
+      // Import initital playtree into GUI.
       import_initial_playtree_into_gui(playtree, mconfig, enqueue);
     }
 #endif /* HAVE_NEW_GUI */
@@ -2501,7 +2503,7 @@ int gui_no_filename=0;
       opt_exit = 1;
     }
 
-// check codec.conf
+/* Check codecs.conf. */
 if(!codecs_file || !parse_codec_cfg(codecs_file)){
   if(!parse_codec_cfg(mem_ptr=get_path("codecs.conf"))){
     if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
@@ -2817,7 +2819,7 @@ while (player_idle_mode && !filename) {
             // prepare a tree entry with the new filename
             entry = play_tree_new();
             play_tree_add_file(entry, cmd->args[0].v.s);
-            // actual entering the entry into the main playtree done after switch()
+            // The entry is added to the main playtree after the switch().
             break;
         case MP_CMD_LOADLIST:
             entry = parse_playlist_file(cmd->args[0].v.s);
@@ -2838,7 +2840,8 @@ while (player_idle_mode && !filename) {
 
         play_tree_set_child(playtree, entry);
 
-        playtree_iter = play_tree_iter_new(playtree, mconfig); // make iterator starting at top of tree
+        /* Make iterator start at the top the of tree. */
+        playtree_iter = play_tree_iter_new(playtree, mconfig);
         if (!playtree_iter) continue;
 
         // find the first real item in the tree
@@ -3276,7 +3279,7 @@ if (vo_spudec!=NULL)
 #ifdef USE_SUB
 if(sh_video) {
 // after reading video params we should load subtitles because
-// we know fps so now we can adjust subtitles time to ~6 seconds AST
+// we know fps so now we can adjust subtitle time to ~6 seconds AST
 // check .sub
   current_module="read_subtitles_file";
   if(sub_name){
@@ -3338,7 +3341,7 @@ if (global_sub_size) {
 
 //================== Init AUDIO (codec) ==========================
 if(sh_audio){
-  // Go through the codec.conf and find the best codec...
+  /* Go through codecs.conf and find the best codec... */
   current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
@@ -3461,7 +3464,7 @@ current_module="main";
     }
         
 
-// Disable the term osd in verbose mode
+// Disable the term OSD in verbose mode
 if(verbose) term_osd = 0;
 fflush(stdout);
 
@@ -3497,7 +3500,7 @@ int frame_time_remaining=0; // flag
 int blit_frame=0;
 int was_paused=0;
 
-// make sure OSD old does not stay around,
+// Make sure old OSD does not stay around,
 // e.g. with -fixed-vo and same-resolution files
 clear_osd_msgs();
 update_osd_msg();
@@ -3705,14 +3708,14 @@ if(!sh_video) {
 	sh_video->timer+=frame_time;
 	if(sh_audio) sh_audio->delay-=frame_time;
 	time_frame+=frame_time;  // for nosound
-	// video_read_frame can change fps (e.g. for asf video)
+	// video_read_frame can change fps (e.g. for ASF video)
 	vo_fps = sh_video->fps;
 	// check for frame-drop:
 	current_module="check_framedrop";
 	if(sh_audio && !d_audio->eof){
 	    float delay=playback_speed*audio_out->get_delay();
 	    float d=delay-sh_audio->delay;
-	    // we should avoid dropping to many frames in sequence unless we
+	    // we should avoid dropping too many frames in sequence unless we
 	    // are too late. and we allow 100ms A-V delay here:
 	    if(d<-dropped_frames*frame_time-0.100 && osd_function != OSD_PAUSE){
 		drop_frame=frame_dropping;
@@ -3909,8 +3912,8 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	   vout_time_usage+=tt;
 	 } else {
              /*
-	     Well, no blitting is needed, but some devices (such as yuv4mpeg) must output frame
-             otherwise A/V desync will occur. -- Alvieboy
+	     Well, no blitting is needed, but some devices (such as yuv4mpeg)
+             must output frames otherwise A/V desync will occur. -- Alvieboy
 	     */
 	    if (vo_config_count)
 		video_out->control(VOCTRL_DUPLICATE_FRAME, NULL);
@@ -4037,7 +4040,7 @@ if(auto_quality>0){
   if(osd_function==OSD_PAUSE){
     mp_cmd_t* cmd;
       if(!quiet) {
-        // small hack to display the pause message in the osd line
+        // Small hack to display the pause message on the OSD line.
         // The pause string is: "\n == PAUSE == \r" so we need to
         // take the first and the last char out
 	if(use_term_osd) {
@@ -4180,7 +4183,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         void* val;
         prop = mp_property_find(cmd->args[0].v.s);
         if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
-        // use m_option_print directly to get easily parsable values
+        /* Use m_option_print directly to get easily parseable values. */
         val = calloc(1,prop->type->size);
         if(m_property_do(prop,M_PROPERTY_GET,val) <= 0) {
             mp_msg(MSGT_CPLAYER,MSGL_WARN,"Failed to get value of property '%s'.\n",
@@ -4314,7 +4317,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	else
 	  osd_level= v > max ? max : v;
 	/* Show OSD state when disabled, but not when an explicit
-	   argument is given to the osd command, i.e. in slave mode. */
+	   argument is given to the OSD command, i.e. in slave mode. */
 	if (v == -1 && osd_level <= 1)
 	  set_osd_msg(OSD_MSG_OSD_STATUS,0,osd_duration,
                       MSGTR_OSDosd, osd_level ? MSGTR_OSDenabled : MSGTR_OSDdisabled);
@@ -4328,7 +4331,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_OSD_SHOW_PROPERTY_TEXT : {
       char* txt = m_properties_expand_string(mp_properties,cmd->args[0].v.s);
-      /* if no argument supplied take default osd_duration, otherwise <arg> ms. */
+      /* if no argument supplied take default osd_duration, else <arg> ms. */
       if(txt) {
         set_osd_msg(OSD_MSG_TEXT,cmd->args[2].v.i,
                     (cmd->args[1].v.i < 0 ? osd_duration : cmd->args[1].v.i),
@@ -4343,7 +4346,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if (cmd->args[1].v.i) // append
         play_tree_append_entry(playtree, e);
       else {
-      // Go back to the start point
+      // Go back to the starting point.
       while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
 	/* NOP */;
       play_tree_free_list(playtree->child,1);
@@ -4361,7 +4364,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	if (cmd->args[1].v.i) // append
 	  play_tree_append_entry(playtree, e);
 	else {
-	// Go back to the start point
+	// Go back to the starting point.
 	while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
 	  /* NOP */;
 	play_tree_free_list(playtree->child,1);
@@ -4705,7 +4708,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         if (d_audio && audio_id!=aid_temp) {
                 mp_msg(MSGT_INPUT,MSGL_DBG2,"d_audio->id change: was %d is now %d\n",
                         d_audio->id,aid_temp);
-                // FIXME: need a bettery way to change audio stream id
+                // FIXME: need a better way to change audio stream id
                 d_audio->id=dvdsub_id=aid_temp;
                 if(sh_audio) resync_audio_stream(sh_audio);
         }
@@ -4980,7 +4983,8 @@ if(vo_config_count && vo_spudec) {
   int len,timestamp;
   current_module="spudec";
   spudec_heartbeat(vo_spudec,90000*sh_video->timer);
-    // Get a sub packet from the dvd or a vobsub and make a timestamp relative to sh_video->timer
+  /* Get a sub packet from the DVD or a vobsub and make a timestamp
+     relative to sh_video->timer */
   while(1) {
     // Vobsub
     len = 0;

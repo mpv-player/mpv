@@ -247,7 +247,7 @@ parse_playlist_file(char* file);
 /// by Fabian Franz (mplayer@fabian-franz.de).
 ///@{
 
-/// Cleanups pt and creates a new iter.
+// Cleans up pt and creates a new iter.
 play_tree_iter_t* pt_iter_create(play_tree_t** pt, struct m_config* config);
 
 /// Frees the iter.

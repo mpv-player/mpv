@@ -36,7 +36,7 @@ extern m_option_type_t m_option_type_subconfig;
 extern m_option_type_t m_option_type_imgfmt;
 extern m_option_type_t m_option_type_afmt;
 
-// Func based types 
+// Func-based types
 extern m_option_type_t m_option_type_func_full;
 extern m_option_type_t m_option_type_func_param;
 extern m_option_type_t m_option_type_func;
@@ -53,7 +53,7 @@ typedef int (*m_opt_func_param_t)(m_option_t *, char *);
 /// Callback used by m_option_type_func options.
 typedef int (*m_opt_func_t)(m_option_t *);
 
-// Backward compat
+// Backwards compatibility
 typedef m_opt_default_func_t cfg_default_func_t;
 typedef m_opt_func_full_t cfg_func_arg_param_t;
 typedef m_opt_func_param_t cfg_func_param_t;
@@ -80,7 +80,7 @@ typedef struct m_obj_settings {
   char** attribs;
 } m_obj_settings_t;
 
-/// A parser to setup a list of objects.
+/// A parser to set up a list of objects.
 /** It creates a NULL terminated array \ref m_obj_settings. The option priv
  *  field (\ref m_option::priv) must point to a \ref m_obj_list_t describing
  *  the available object types.
@@ -93,7 +93,7 @@ typedef struct {
   struct m_struct_st* in_desc;
   /// Description of the struct that should be set by the presets.
   struct m_struct_st* out_desc;
-  /// Pointer to an array of struct defining the various presets.
+  /// Pointer to an array of structs defining the various presets.
   void* presets;
   /// Offset of the preset's name inside the in_struct.
   void* name_off;
@@ -102,7 +102,7 @@ typedef struct {
 /// Set several fields in a struct at once.
 /** For this two struct descriptions are used. One for the struct holding the
  *  preset and one for the struct beeing set. Every field present in both
- *  struct will be copied from the preset struct to the destination one.
+ *  structs will be copied from the preset struct to the destination one.
  *  The option priv field (\ref m_option::priv) must point to a correctly
  *  filled \ref m_obj_presets_t.
  */
@@ -165,7 +165,7 @@ extern m_obj_params_t m_span_params_def;
 /// Option type description
 struct m_option_type {
   char* name;
-  /// Syntax desc, etc
+  /// Syntax description, etc
   char* comments;
   /// Size needed for the data.
   unsigned int size;
@@ -197,19 +197,19 @@ struct m_option_type {
   /** \name
    *  These functions are called to save/set/restore the status of the
    *  variables. The difference between the 3 only matters for types like
-   *  \ref m_option_type_func where 'setting' need to do more than just
+   *  \ref m_option_type_func where 'setting' needs to do more than just
    *  copying some data.
    */
   //@{
 
-  /// Update a save slot (dst) from the current value in the prog (src).
+  /// Update a save slot (dst) from the current value in the program (src).
   /** \param opt The option to copy.
    *  \param dst Pointer to the destination memory.
    *  \param src Pointer to the source memory.
    */
   void (*save)(m_option_t* opt,void* dst, void* src);
   
-  /// Set the value in the prog (dst) from a save slot.
+  /// Set the value in the program (dst) from a save slot.
   /** \param opt The option to copy.
    *  \param dst Pointer to the destination memory.
    *  \param src Pointer to the source memory.
@@ -262,10 +262,10 @@ struct m_option {
   /// also be set.
   double max;
   
-  /// Type dependent data (for all kind of extended settings).
-  /** This used to be function pointer to hold a 'reverse to defaults' func.
+  /// Type dependent data (for all kinds of extended settings).
+  /** This used to be a function pointer to hold a 'reverse to defaults' func.
    *  Now it can be used to pass any type of extra args needed by the parser.
-   *  Passing a 'default func' is still valid for all func based option types
+   *  Passing a 'default func' is still valid for all func based option types.
    */
   void* priv;
 };
@@ -291,25 +291,25 @@ struct m_option {
 
 /// The option is global in the \ref Config.
 /** It won't be saved on push and the command line parser will set it when
- *  it's parsed (ie. it won't be set later)
+ *  it's parsed (i.e. it won't be set later)
  *  e.g options : -v, -quiet
  */
 #define M_OPT_GLOBAL		(1<<4)
 
 /// The \ref Config won't save this option on push.
 /** It won't be saved on push but the command line parser will add it with
- *  its entry (ie : it may be set later)
+ *  its entry (i.e. it may be set later)
  *  e.g options : -include
  */
 #define M_OPT_NOSAVE		(1<<5)
 
-/// \brief The \ref Config will emulate the old behaviour by pushing the
+/// \brief The \ref Config will emulate the old behavior by pushing the
 /// option only if it was set by the user.
 #define M_OPT_OLD		(1<<6)
 
 /// \defgroup OldOptionFlags Backward compatibility
 ///
-/// Those are kept for compatibility with older code.
+/// These are kept for compatibility with older code.
 /// @{
 #define CONF_MIN		M_OPT_MIN
 #define CONF_MAX		M_OPT_MAX
@@ -326,7 +326,7 @@ struct m_option {
 /// \defgroup OptionTypeFlags Option type flags
 /// \ingroup OptionTypes
 ///
-/// These flags are used to describe special parser capabilities or behaviour.
+/// These flags are used to describe special parser capabilities or behavior.
 ///
 ///@{
 
@@ -341,16 +341,16 @@ struct m_option {
 #define M_OPT_TYPE_HAS_CHILD		(1<<0)
 
 /// Wildcard matching flag.
-/** If set the option type has a use for option name ending with a *
+/** If set the option type has a use for option names ending with a *
  *  (used for -aa*), this only affects the option name matching.
  */
 #define M_OPT_TYPE_ALLOW_WILDCARD	(1<<1)
 
 /// Dynamic data type.
-/** This flag indicate that the data is dynamically allocated (m_option::p point
- *  to a pointer). It enables a little hack in the \ref Config wich replace
- *  the initial value of such variables with a dynamic copy in case the
- *  initial value is statically allocated (pretty common with strings).
+/** This flag indicates that the data is dynamically allocated (m_option::p
+ *  points to a pointer). It enables a little hack in the \ref Config wich
+ *  replaces the initial value of such variables with a dynamic copy in case
+ *  the initial value is statically allocated (pretty common with strings).
  */
 #define M_OPT_TYPE_DYNAMIC		(1<<2)
 
@@ -360,7 +360,7 @@ struct m_option {
  *  until the set call to be able to correctly set the target var.
  *  So for those types new values must first be parsed, then set to the target
  *  var. If this flag isn't set then new values can be parsed directly to the
- *  target var. It's used by the callback based option as the callback call
+ *  target var. It's used by the callback-based options as the callback call
  *  may append later on.
  */
 #define M_OPT_TYPE_INDIRECT		(1<<3)
@@ -372,7 +372,7 @@ struct m_option {
 /// \defgroup OptionParserModes Option parser modes
 /// \ingroup Options
 ///
-/// Some parsers behaves differently depending on the mode passed in the src
+/// Some parsers behave differently depending on the mode passed in the src
 /// parameter of m_option_type::parse. For example the flag type doesn't take
 /// an argument when parsing from the command line.
 ///@{

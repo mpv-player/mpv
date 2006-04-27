@@ -2,8 +2,8 @@
 /// \defgroup PlaytreeParser Playtree parser
 /// \ingroup Playtree
 ///
-/// The playtree parser allow to read various playlist formats. It read from
-/// stream allowing to handle playlist from local files and the network.
+/// The playtree parser allows to read various playlist formats. It reads from
+/// a stream allowing to handle playlists from local files and the network.
 ///@{
 
 /// \file
@@ -22,7 +22,7 @@ typedef struct play_tree_parser {
 
 /// Create a new parser.
 /** \param stream The stream to read from.
- *  \param deep Parser depth. Some format allow including other files,
+ *  \param deep Parser depth. Some formats allow including other files,
  *              this is used to track the inclusion depth.
  *  \return The new parser.
  */
