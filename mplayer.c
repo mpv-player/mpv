@@ -3944,19 +3944,6 @@ if(time_frame>0.001 && !(vo_flags&256)){
     }
     delay += sh_audio->a_out_buffer_len*playback_speed/(float)ao_data.bps;
 
-#if 0
-    if(pts_from_bps){
-	// PTS = sample_no / samplerate
-        unsigned int samples=
-//	  (sh_audio->audio.dwSampleSize)?
-//          ((ds_tell(d_audio)-sh_audio->a_in_buffer_len)/sh_audio->audio.dwSampleSize) :
-          ds_tell_block(d_audio); // <- used for VBR audio
-	samples+=sh_audio->audio.dwStart; // offset
-        a_pts=samples*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
-	delay_corrected=1;
-	a_pts-=(sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-    } else 
-#endif
     {
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts = sh_audio->pts;
@@ -4866,22 +4853,6 @@ if(rel_seek_secs || abs_seek_pos){
       if (vo_vobsub)
 	//vobsub_reset(vo_vobsub);
 	vobsub_seek(vo_vobsub,sh_video->pts);
-#if 0
-      if(sh_video && d_video->packs == 0)
-	ds_fill_buffer(d_video);
-      if(sh_audio){
-	if(d_audio->packs == 0)
-	  ds_fill_buffer(d_audio);
-	if( mp_msg_test(MSGT_AVSYNC,MSGL_V) ){
-	    float a_pts=d_audio->pts;
-            a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-	    mp_msg(MSGT_AVSYNC,MSGL_V,"SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);
-	}
-        mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
-      } else {
-        mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A: ---   V:%6.1f   \r",d_video->pts);
-      }
-#endif
       fflush(stdout);
 
       if(sh_video){
