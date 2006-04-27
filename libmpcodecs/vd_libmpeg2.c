@@ -29,9 +29,16 @@ LIBVD_EXTERN(libmpeg2)
 
 #include "cpudetect.h"
 
+typedef struct {
+    mpeg2dec_t *mpeg2dec;
+    int quant_store_idx;
+    char *quant_store[3];
+} vd_libmpeg2_ctx_t;
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
-    mpeg2dec_t * mpeg2dec = sh->context;
+    vd_libmpeg2_ctx_t *context = sh->context;
+    mpeg2dec_t * mpeg2dec = context->mpeg2dec;
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
 
     switch(cmd) {
@@ -52,6 +59,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
+    vd_libmpeg2_ctx_t *context;
     mpeg2dec_t * mpeg2dec;
 //    const mpeg2_info_t * info;
     int accel;
@@ -75,8 +83,10 @@ static int init(sh_video_t *sh){
     if(!mpeg2dec) return 0;
 
     mpeg2_custom_fbuf(mpeg2dec,1); // enable DR1
-    
-    sh->context=mpeg2dec;
+
+    context = calloc(1, sizeof(vd_libmpeg2_ctx_t));
+    context->mpeg2dec = mpeg2dec;
+    sh->context = context;
 
     mpeg2dec->pending_buffer = 0;
     mpeg2dec->pending_length = 0;
@@ -86,16 +96,22 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-    mpeg2dec_t * mpeg2dec = sh->context;
+    int i;
+    vd_libmpeg2_ctx_t *context = sh->context;
+    mpeg2dec_t * mpeg2dec = context->mpeg2dec;
     if (mpeg2dec->pending_buffer) free(mpeg2dec->pending_buffer);
     mpeg2dec->decoder.convert=NULL;
     mpeg2dec->decoder.convert_id=NULL;
     mpeg2_close (mpeg2dec);
+    for (i=0; i < 3; i++)
+	free(context->quant_store[i]);
+    free(sh->context);
 }
 
 static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){ 
     sh_video_t* sh = (sh_video_t*) _sh;
-    mpeg2dec_t* mpeg2dec = sh->context;
+    vd_libmpeg2_ctx_t *context = sh->context;
+    mpeg2dec_t* mpeg2dec = context->mpeg2dec;
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
     int stride[3];
 
@@ -113,7 +129,8 @@ static void draw_slice (void * _sh, uint8_t * const * src, unsigned int y){
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
-    mpeg2dec_t * mpeg2dec = sh->context;
+    vd_libmpeg2_ctx_t *context = sh->context;
+    mpeg2dec_t * mpeg2dec = context->mpeg2dec;
     const mpeg2_info_t * info = mpeg2_info (mpeg2dec);
     int drop_frame, framedrop=flags&3;
 
@@ -200,9 +217,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    mpi_new->fields |= MP_IMGFIELD_ORDERED;
 
 #ifdef MPEG12_POSTPROC
-	    if(!mpi_new->qscale){
-		mpi_new->qstride=info->sequence->width>>4;
-		mpi_new->qscale=malloc(mpi_new->qstride*(info->sequence->height>>4));
+	    mpi_new->qstride=info->sequence->width>>4;
+	    {
+	    char **p = &context->quant_store[type==PIC_FLAG_CODING_TYPE_B ?
+					2 : (context->quant_store_idx ^= 1)];
+	    *p = realloc(*p, mpi_new->qstride*(info->sequence->height>>4));
+	    mpi_new->qscale = *p;
 	    }
 	    mpeg2dec->decoder.quant_store=mpi_new->qscale;
 	    mpeg2dec->decoder.quant_stride=mpi_new->qstride;

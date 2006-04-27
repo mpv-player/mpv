@@ -412,6 +412,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	    mpi->flags|=MP_IMGFLAG_TYPE_DISPLAYED;
     }
 
+  mpi->qscale = NULL;
   }
 //    printf("\rVF_MPI: %p %p %p %d %d %d    \n",
 //	mpi->planes[0],mpi->planes[1],mpi->planes[2],
