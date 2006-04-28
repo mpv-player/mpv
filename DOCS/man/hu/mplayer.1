@@ -1,4 +1,4 @@
-.\" Synced with 1.1114
+.\" Synced with 1.1124
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -252,10 +252,12 @@ Lépés vissza/\:elõre 10 perccel.
 Csökkenti/növeli az aktuális lejátszási sebességet 10%-kal.
 .IPs "{ és }"
 Felezi/duplázza az aktuális lejátszási sebességet.
-.IPs "Backspace"
+.IPs "backspace"
 Visszaállítja a lejátszási sebességet normálisra.
 .IPs "< és >"
 Vissza/\:elõre lépés a lejátszási listában
+.IPs "ENTER"
+elõre lépés a lejátszási listában, akár a végén túlra is
 .IPs "HOME és END"
 következõ/\:elõzõ szülõi playtree bejegyzésre ugrás
 .IPs "INS és DEL"
@@ -293,6 +295,8 @@ Váltás a Képkocka eldobási módok között: nincs / megjelenítés kihagyása / dekódo
 Feliratok láthatóságának ki-/bekapcsolása.
 .IPs "b / j"
 Lépegetés az elérhetõ feliratok között.
+.IPs "y és g"
+Elõre/hátra lépés a felirat listában.
 .IP F\ \ \ \ 
 "Kényszerített felirat" megjelenítése.
 .IPs a\ \ \ \ 
@@ -352,10 +356,14 @@ Lejátszás elindítása.
 Lejátszás megállítása.
 .IPs l\ \ \ \ 
 Fájl betöltése.
+.IPs t\ \ \ \ 
+Felirat betöltése.
 .IPs c\ \ \ \ 
-Skin böngészõ.
+skin böngészõ
 .IPs p\ \ \ \ 
-Playlist ki-/bekapcsolása.
+lejátszási lista
+.IPs r\ \ \ \ 
+beállítások
 .RE
 .PD 1
 .
@@ -1112,17 +1120,16 @@ Automatikusan visszavált IPv4-ra, amennyiben szükséges.
 .
 .TP
 .B \-rawaudio <opció1:opció2:...>
-Ezzel az opcióval le lehet játszani nyers audio fájlokat.
+Ezzel az opcióval le lehet játszani nyers audió fájlokat.
+Használnod kell a \-demuxer rawaudio kapcsolót is.
 Használható olyan audió CD-k lejátszásához, melyek nem 44kHz 16-bit sztereók.
-Nyers AC3 folyamok lejátszásához használd a \-rawaudio on:format=0x2000
-kapcsolót.
+Nyers AC3 folyamok lejátszásához használd a
+\-rawaudio format=0x2000 \-demuxer rawaudio kapcsolót.
 .sp 1
 A használható opciók:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
-Nyers audio demuxer használata.
 .IPs channels=<érték>
 csatornák száma
 .IPs rate=<érték>
@@ -1139,13 +1146,12 @@ fourcc hexában
 .TP
 .B \-rawvideo <option1:option2:...>
 Ezzel az opcióval le lehet játszani nyers videó fájlokat.
+Használnod kell a \-demuxer rawvideo kapcsolót is.
 .sp 1
 A használható opciók:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
-Nyers video demuxer bekapcsolása.
 .IPs fps=<érték>
 képkocka/másodperc (alapértelmezett: 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
@@ -2283,8 +2289,17 @@ kivéve az SDL-t, valamint a directx, macosx, quartz, ggi és gl2.
 Pan & Scan funkció bekapcsolása (pl.\& egy 16:9 arányú film széleinek a
 levágása, hogy elférjen egy 4:3 arányú képernyõn fekete sávok nélkül)
 A tartomány vezérli, hogy a képbõl mennyi kerül levágásra.
-Ez a funkció csak az xv, xmga, mga, gl, quartz, macosx és xvidix videó
+Ez a funkció csak az xv, xmga, mga, gl, gl2, quartz, macosx és xvidix videó
 kimeneti meghajtókkal mûködik.
+.
+.TP
+.B \-panscanrange <-19.0\-99.0> (kísérleti)
+Megváltoztatja a pan-and-scan funkcionalítás tartományát (alapértelmezett: 1).
+A pozitív értékek az alapértelmezett tartomány többszörösét jelentik.
+A negatív számok azt jelentik, hogy -panscanrange+1 faktorik tudsz nagyítani.
+Pl. \-panscanrange -3 4-es nagyítási faktort enged.
+Ez a képesség még kísérleti.
+Ne jelents hibákat, hacsak nem -vo gl-t használsz.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2712,8 +2727,8 @@ Az egy darabban a textúrára másolandó sorok száma (alapértelmezett: 4).
 0 a teljes kép.
 .IPs (no)osd
 Engedélyezi vagy letiltja az OSD OpenGL-en keresztüli renderelésének
-támogatását (alapértelmezett: engedélyezett). Leginkább teszteléshez, a
-\-osdlevel 0 kapcsolóval letilthatod az OSD-t.
+támogatását (alapértelmezett: engedélyezett). Ez az opció teszteléshez van,
+az OSD letiltásához használd helyette a \-osdlevel 0 kapcsolót.
 .IPs (no)scaled-osd
 Az OSD viselkedésének megváltoztatása, amikor az ablakméret módosul
 (alapértelmezett: letiltva).
@@ -2731,10 +2746,11 @@ meg, de sokszor lassabb (alapértelmezett: 0).
 .RSss
 0: Power-of-two textúrák használata (alapértelmezett).
 .br
-1: Texture_rectangle használata, nem kompatibilis a hardveres YUV konverzióval.
+1: GL_ARB_texture_rectangle kiterjesztés használata.
 .br
-2: Texture_non_power_of_two használata.
-.RE
+2: GL_ARB_texture_non_power_of_two kiterjesztés használata.
+Néhány esetben csak szoftveresen támogatott és ezért nagyon lassú.
+.REss
 .IPs (no)glfinish
 Buffer csere elõtt a glFinish() meghívása.
 Lassabb, de a legtöbb esetben jobb kimenetet biztosít (alapértelmezett: kikapcsolva).
@@ -2761,7 +2777,7 @@ Telítettség és színárnyalat beállítását teszi lehetõvé.
 2: Fragmentum programot használ.
 A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
 három textúra egység.
-Fényesség, kontreaszt, telítettség és színárnyalat beállítását
+Fényesség, kontraszt, telítettség és színárnyalat beállítását
 teszi lehetõvé.
 .br
 3: POW utasítást használó fragmentum programot használ.
@@ -2795,7 +2811,32 @@ Támogatja az OSD-t és a maximum textúra méretnél nagyobb videókat.
 .IPs (no)glfinish
 ugyan az, mint a gl-nél (alapértelmezett: engedélyezve)
 .IPs yuv=<n>
-ugyan az, mint a gl-nél
+Kiválasztja a YUV-ból RGB-be történõ konverzió típusát.
+Ha 0-tól különbözõ értékre van állítva, az OSD le lesz tiltva és a fényerõsség,
+a kontraszt és a gamma beállítások csak a globális X szerver beállításain
+keresztül érhetõek el.
+.RSss
+0: Szoftveres konverzió használata (alapértelmezett).
+Kompatibilis minden OpenGL verzióval.
+Fényesség, kontraszt és telítettség beállítását teszi lehetõvé.
+.br
+1: Összekötõ regisztereket használ.
+Ez egy nVidia-specifikus kiterjesztés (GL_NV_register_combiners).
+Legalább három textúra egység szükséges.
+.br
+2: Fragmentum programot használ.
+A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
+három textúra egység.
+.br
+3: POW utasítást használó fragmentum programot használ.
+A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
+három textúra egység.
+A 4. módszer általában gyorsabb.
+.br
+4: Fragmentum programot használ további elemzéssel.
+A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
+négy textúra egység.
+.REss
 .REss
 .
 .TP
@@ -3027,15 +3068,11 @@ második generáció.
 .PD 0
 .RSs
 .IPs dev=<eszköz>
-Megadja a használni kívánt eszközt.
-.IPs pal\ \ 
-Aktiválja a PAL videó normát.
-.IPs secam
-Aktiválja a SECAM videó normát.
-.IPs ntsc\ 
-Activálja az NTSC videó normát.
-.IPs prebuf
-Aktiválja az elõpufferelést, még nem támogatott.
+Megadja a használni kívánt videó eszközt.
+.IPs norm=<PAL|NTSC|SECAM|auto>
+Megadja a használni kívánt videó normát (alapértelmezett: auto).
+.IPs (no)prebuf
+(De)aktiválja az elõpufferelést, még nem támogatott.
 .RE
 .PD 1
 .
@@ -5478,7 +5515,7 @@ a frameráta változatlan.
 .PD 1
 .
 .TP
-.B tfields[=mód]
+.B tfields[=mód[:mezõ_dominancia]]
 Ideiglenes mezõ szétválasztás \- a mezõket kockákra vágja, megduplázva a
 kimeneti framerátát.
 Csakúgy mint a telecine szûrõ, a tfields is csak a MEncoder-rel
@@ -5495,6 +5532,20 @@ Interpolálja a hiányzó sorokat. (A használt algoritmus nem túl jó.)
 Eltolja a mezõket 1/4 pixellel, lineáris interpolációval (nincs ugrás).
 .IPs 4
 Eltolja a mezõket 1/4 pixellel, 4tap szûrõvel (jó minõség). (alapértelmezett)
+.RE
+.PD 1
+A használható mezõ dominanciák:
+.PD 0
+.RSs
+.IPs -1
+auto (alapértelmezett)
+Csak akkor mûködik, ha a dekódoló exportálja a megfelelõ információkat
+és nincs semmilyen más, ezen információkat eldobó szûrõ betöltve a
+tfields elõtt, különben visszalép 0-ra (felsõ mezõ elõször).
+.IPs 0
+felsõ elõször
+.IPs 1
+alsó elõször
 .RE
 .PD 1
 .
@@ -8947,7 +8998,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .
 .TP
 .B Felirat konvertálása MPsub formátumba a film megtekintése nélkül:
-mplayer /dev/\:zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
+mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop
 \-benchmark \-sub source.sub \-dumpmpsub
 .
 .TP
@@ -8965,7 +9016,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Egy 6 csatornás AAC fájl lejátszása két hangszórón:
-mplayer \-rawaudio on:format=0xff \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
+mplayer \-rawaudio format=0xff \-demuxer rawaudio \-af pan=2:.32:.32:.39:.06:.06:.39:.17:-.17:-.17:.17:.33:.33 adts_he-aac160_51.aac
 .br
 Egy kicsit játszadoznod kell a pan értékekkel (pl. felszorozni az értékeket) a
 hangerõ növeléséhez vagy a kattogás elkerüléséhez.
