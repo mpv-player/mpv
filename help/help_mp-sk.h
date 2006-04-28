@@ -136,7 +136,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Pou¾ívam pass3 ovládací súbor: %s\n"
+#define MSGTR_UsingPass3ControlFile "Pou¾ívam pass3 ovládací súbor: %s\n"
 #define MSGTR_MissingFilename "\nChýbajúce meno súboru!\n\n"
 #define MSGTR_CannotOpenFile_Device "Nemô¾em otvori» súbor/zariadenie\n"
 #define MSGTR_CannotOpenDemuxer "Nemô¾em otvori» demuxer\n"
@@ -380,7 +380,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "chyba èítania PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "formát RLE packed TGA nepodporovaný (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "neznámy typ súboru (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "chyba konverzie z 24 bit do 32 bit (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "chyba konverzie z 24 bit do 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "neznáma správa: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "nedostatok pamäte\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "príli¹ mnoho fontov deklarovaných\n"
@@ -472,7 +472,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostupné ovládaèe:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nehra» zvuk"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizova» zvuk"
-#define MSGTR_PREFERENCES_EnEqualizer "Zapnú» equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Zapnú» equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "Zapnú» extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koeficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio oneskorenie"

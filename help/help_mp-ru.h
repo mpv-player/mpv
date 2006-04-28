@@ -192,7 +192,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Использую следующий файл для контроля 3-го прохода: %s\n"
+#define MSGTR_UsingPass3ControlFile "Использую следующий файл для контроля 3-го прохода: %s\n"
 #define MSGTR_MissingFilename "\nПропущено имя файла.\n\n"
 #define MSGTR_CannotOpenFile_Device "Не могу открыть файл/устройство.\n"
 #define MSGTR_CannotOpenDemuxer "Не могу открыть демуксер [demuxer].\n"
@@ -326,7 +326,7 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_ConfigfileError "ошибка в конфигурационном файле"
+#define MSGTR_ConfigFileError "ошибка в конфигурационном файле"
 #define MSGTR_ErrorParsingCommandLine "ошибка при разборе синтаксиса командной строки"
 #define MSGTR_VideoStreamRequired "Наличие видеопотока обязательно!\n"
 #define MSGTR_ForcingInputFPS "входные кадры/сек будут заменены на %5.2f\n"
@@ -629,7 +629,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "ошибка чтения PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE упакованный TGA не поддерживается (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "неизвестный тип файла (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "ошибка преобразования 24-бит в 32-бит (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "ошибка преобразования 24-бит в 32-бит (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "неизвестное сообщение: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "не хватает памяти\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Объявлено слишком много шрифтов.\n"
@@ -723,7 +723,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Доступные драйверы:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Не проигрывать звук"
 #define MSGTR_PREFERENCES_NormalizeSound "Нормализовать звук"
-#define MSGTR_PREFERENCES_EnEqualizer "Включить эквалайзер"
+#define MSGTR_PREFERENCES_EnableEqualizer "Включить эквалайзер"
 #define MSGTR_PREFERENCES_ExtraStereo "Включить дополнительное стерео"
 #define MSGTR_PREFERENCES_Coefficient "Коэффициент:"
 #define MSGTR_PREFERENCES_AudioDelay "Задержка аудио"

@@ -194,7 +194,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Използва се файл за контрол на pass3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Използва се файл за контрол на pass3: %s\n"
 #define MSGTR_MissingFilename "\nЛипсва име на файл.\n\n"
 #define MSGTR_CannotOpenFile_Device "Файла/устройството не може да бъде отворен.\n"
 #define MSGTR_CannotOpenDemuxer "Не може да бъде отворен разпределител.\n"
@@ -334,7 +334,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Не могат да се зададат LAME опциите, проверете битрейтовете/честотите на дискретите,"\
 "някои много ниски битрейтове (<32) изискват ниски честоти на дискретите (напр. -srate 8000)."\
 "Ако нищо друго не помага пробвайте някой preset."
-#define MSGTR_ConfigfileError "грешка в конфигурационния файл"
+#define MSGTR_ConfigFileError "грешка в конфигурационния файл"
 #define MSGTR_ErrorParsingCommandLine "грешка при обработката на командния ред"
 #define MSGTR_VideoStreamRequired "Задължително е да има видео поток!\n"
 #define MSGTR_ForcingInputFPS "Входящите кадри в секунда ще се интерпретират като %5.2f\n"
@@ -636,7 +636,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "грешка при четене на PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "TGA с RLE компресия не се поддържа (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "неизвестен вид на файла (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "Грешка при преобразуване от 24 към 32 бита (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "Грешка при преобразуване от 24 към 32 бита (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "неизвестно съобщение: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "недостатъчно памет\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Декларирани са твърде много шрифтове.\n"
@@ -731,7 +731,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Достъпни драйвери:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Без звук"
 #define MSGTR_PREFERENCES_NormalizeSound "Изравняване на звука"
-#define MSGTR_PREFERENCES_EnEqualizer "Включване на еквалайзера"
+#define MSGTR_PREFERENCES_EnableEqualizer "Включване на еквалайзера"
 #define MSGTR_PREFERENCES_SoftwareMixer "Включва Софтуерен Смесител"
 #define MSGTR_PREFERENCES_ExtraStereo "Включване на допълнително стерео"
 #define MSGTR_PREFERENCES_Coefficient "Коефициент:"

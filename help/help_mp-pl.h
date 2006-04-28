@@ -195,7 +195,7 @@ static char help_text[]=
  
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "U¿ywam pliku kontrolnego pass3: %s\n" 
+#define MSGTR_UsingPass3ControlFile "U¿ywam pliku kontrolnego pass3: %s\n" 
 #define MSGTR_MissingFilename "\nBrak nazwy pliku.\n\n"
 #define MSGTR_CannotOpenFile_Device "Nie mogê otworzyæ pliku/urz±dzenia\n"
 #define MSGTR_CannotOpenDemuxer "Nie mogê otworzyæ demuxera.\n"
@@ -336,7 +336,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Nie mo¿na ustawiæ opcji LAME, sprawd¼ bitrate/czêstotliwo¶ci "\
 "próbkowania. Niektóre bardzo niskie bitrate (<32) wymagaj± ni¿szych czêstotliwo¶ci próbkowania "\
 "(n.p. -srate 8000). Je¶li wszysto zawiedzie wypróbuj wbudowane ustawienie."
-#define MSGTR_ConfigfileError "b³±d pliku konfiguracyjnego"
+#define MSGTR_ConfigFileError "b³±d pliku konfiguracyjnego"
 #define MSGTR_ErrorParsingCommandLine "b³±d przy przetwarzaniu wiersza poleceñ"
 #define MSGTR_VideoStreamRequired "Strumieñ video jest wymagany!\n"
 #define MSGTR_ForcingInputFPS "wej¶ciowa warto¶æ fps bêdzie zinterpretowana jako %5.2f\n"
@@ -652,7 +652,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "b³±d odczytu png (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "tga kompresowane przez RLE nie obs³ugiwane (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "nieznany typ pliku (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "b³±d przy konwersji 24 bitów na 32 bity (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "b³±d przy konwersji 24 bitów na 32 bity (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "nieznany komunikat: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "za ma³o pamiêci\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "za du¿o zadeklarowanych czcionek\n"
@@ -743,7 +743,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostêpne sterowniki:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nie odtwarzaj d¼wiêku"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizuj d¼wiêk"
-#define MSGTR_PREFERENCES_EnEqualizer "W³±cz equalizer (korektor)"
+#define MSGTR_PREFERENCES_EnableEqualizer "W³±cz equalizer (korektor)"
 #define MSGTR_PREFERENCES_SoftwareMixer "W³±cz Mikser Programowy"
 #define MSGTR_PREFERENCES_ExtraStereo "W³±cz extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Wspó³czynnik:"

@@ -328,7 +328,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "png 読み込みエラー (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed tga はサポートされていません (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "未知のファイルタイプです (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24bitから32bitへの変換エラー (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24bitから32bitへの変換エラー (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "未知のメッセージ: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "メモリが不足しています\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "フォントファイルが存在しません\n"
@@ -405,7 +405,7 @@ static char help_text[]=
 
 #define MSGTR_PREFERENCES_None "無し"
 #define MSGTR_PREFERENCES_AvailableDrivers "有効なドライバ:"
-#define MSGTR_PREFERENCES_EnEqualizer "イコライザーの有効"
+#define MSGTR_PREFERENCES_EnableEqualizer "イコライザーの有効"
 #define MSGTR_PREFERENCES_DoubleBuffer "double buffering 有効"
 #define MSGTR_PREFERENCES_DirectRender "direct rendering 有効"
 #define MSGTR_PREFERENCES_FrameDrop "frame dropping 有効"

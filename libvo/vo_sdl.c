@@ -1638,7 +1638,8 @@ static int preinit(const char *arg)
     /* initialize the SDL Video system */
     if (!SDL_WasInit(SDL_INIT_VIDEO)) {
         if (SDL_Init (SDL_INIT_VIDEO|SDL_INIT_NOPARACHUTE)) {
-            mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_InitializingOfSDLFailed, SDL_GetError());
+            mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_SDL_InitializationFailed, SDL_GetError());
+
             return -1;
         }
     }

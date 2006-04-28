@@ -196,7 +196,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Använder pass3-kontrollfil: %s\n"
+#define MSGTR_UsingPass3ControlFile "Använder pass3-kontrollfil: %s\n"
 #define MSGTR_MissingFilename "\nFilnamn saknas.\n\n"
 #define MSGTR_CannotOpenFile_Device "Kan inte öppna fil/enhet.\n"
 #define MSGTR_CannotOpenDemuxer "Kan inte öppna demuxer.\n"
@@ -329,7 +329,7 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_ConfigfileError "konfigurationsfilsfel"
+#define MSGTR_ConfigFileError "konfigurationsfilsfel"
 #define MSGTR_ErrorParsingCommandLine "fel vid tolkning av cmdline"
 #define MSGTR_VideoStreamRequired "Videoström är obligatoriskt!\n"
 #define MSGTR_ForcingInputFPS "'input fps' kommer att bli tolkad som %5.2f istället\n"
@@ -642,7 +642,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG läsfel (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE-packad TGA stödjs ej (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "okänd filtyp (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24-bitars till 32-bitars konverteringsfel (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24-bitars till 32-bitars konverteringsfel (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "okänt meddelande: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "ej tillräckligt minne\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Allt för många fonter deklarerade.\n"
@@ -735,7 +735,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Tillgängliga drivrutioner:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spela inte upp ljud"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizera ljud"
-#define MSGTR_PREFERENCES_EnEqualizer "AKtivera equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "AKtivera equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "Aktivera extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audiofördröjning"

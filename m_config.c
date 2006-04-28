@@ -481,7 +481,7 @@ static void
 m_config_set_profile(m_config_t* config, m_profile_t* p) {
   int i;
   if(config->profile_depth > MAX_PROFILE_DEPTH) {
-    mp_msg(MSGT_CFGPARSER, MSGL_WARN, MSGTR_TooDeepProfileInclusion);
+    mp_msg(MSGT_CFGPARSER, MSGL_WARN, MSGTR_ProfileInclusionTooDeep);
     return;
   }
   config->profile_depth++;

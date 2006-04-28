@@ -305,7 +305,7 @@ void parse_cfgfiles( m_config_t* conf )
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_GetpathProblem);
   } else {
     if (m_config_parse_config_file(conf, conffile) < 0)
-      mencoder_exit(1,MSGTR_ConfigfileError);
+      mencoder_exit(1,MSGTR_ConfigFileError);
     free(conffile);
   }
 }
@@ -497,7 +497,7 @@ if (frameno_filename) {
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
     demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
-    if(demuxer2) mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_UsingPass3ControllFile, frameno_filename);
+    if(demuxer2) mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_UsingPass3ControlFile, frameno_filename);
     else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
 }

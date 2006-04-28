@@ -117,7 +117,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "pass3 kontrol dosyasý kullanýlýyor: %s\n"
+#define MSGTR_UsingPass3ControlFile "pass3 kontrol dosyasý kullanýlýyor: %s\n"
 #define MSGTR_MissingFilename "\nHatalý dosyaadý!\n\n"
 #define MSGTR_CannotOpenFile_Device "dosya/aygýt açýlamadý\n"
 #define MSGTR_CannotOpenDemuxer "Ayrýþtýrýcý açýlamadý\n"
@@ -307,7 +307,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG okuma hatasý (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE paket TGA desteklenmiyor (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "bilinmeyen dosya tipi (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit den 32 bit e çevirme hatasý (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 bit den 32 bit e çevirme hatasý (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "Bilinmeyen mesaj: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "yetersiz hafýza\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Çok fazla yazýtipi tanýtýldý\n"
@@ -390,7 +390,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Kullanýlabilir sürücüler:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Sesleri çalma"
 #define MSGTR_PREFERENCES_NormalizeSound "Sesi normalle"
-#define MSGTR_PREFERENCES_EnEqualizer "Equalizerý Aç"
+#define MSGTR_PREFERENCES_EnableEqualizer "Equalizerý Aç"
 #define MSGTR_PREFERENCES_ExtraStereo "Extra stereoyu aç"
 #define MSGTR_PREFERENCES_Coefficient "Katsayý:"
 #define MSGTR_PREFERENCES_AudioDelay "Ses Gecikmesi"

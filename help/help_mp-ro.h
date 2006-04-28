@@ -135,7 +135,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Folosesc fiºierul de control pass3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Folosesc fiºierul de control pass3: %s\n"
 #define MSGTR_MissingFilename "\nLipseºte numele fiºierului.\n\n"
 #define MSGTR_CannotOpenFile_Device "Nu pot deschide fiºierul/dispozitivul.\n"
 #define MSGTR_CannotOpenDemuxer "Nu pot deschide demultiplexorul.\n"
@@ -412,7 +412,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Drivere disponibile:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nu reda sunetul"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizeazã sunetul"
-#define MSGTR_PREFERENCES_EnEqualizer "Activeazã egalizatorul"
+#define MSGTR_PREFERENCES_EnableEqualizer "Activeazã egalizatorul"
 #define MSGTR_PREFERENCES_ExtraStereo "Activeazã extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coeficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Decalaj audio"

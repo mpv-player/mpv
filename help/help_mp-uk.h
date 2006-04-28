@@ -142,7 +142,7 @@ static char help_text[]=
 "  won't help unless you provide this information when reporting a possible bug.\n"
 
 // mencoder.c:
-#define MSGTR_UsingPass3ControllFile "Використовую pass3 файл: %s\n"
+#define MSGTR_UsingPass3ControlFile "Використовую pass3 файл: %s\n"
 #define MSGTR_MissingFilename "\nНевизначений файл.\n\n"
 #define MSGTR_CannotOpenFile_Device "Неможливо в╕дкрити файл/пристр╕й.\n"
 #define MSGTR_CannotOpenDemuxer "Неможливо в╕дкрити demuxer.\n"
@@ -381,7 +381,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "помилка читання PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE запакований TGA не п╕дтриму╓ться (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "нев╕домий тип файлу (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "помилка перетворення 24-б╕т у 32-б╕т (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "помилка перетворення 24-б╕т у 32-б╕т (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "нев╕доме пов╕домлення: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "не вистача╓ пам'ят╕\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "оголошено надто багато шрифт╕в\n"
@@ -469,7 +469,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Доступн╕ драйвери:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Не грати звук"
 #define MSGTR_PREFERENCES_NormalizeSound "Нормал╕зувати звук"
-#define MSGTR_PREFERENCES_EnEqualizer "Дозволити еквалайзер"
+#define MSGTR_PREFERENCES_EnableEqualizer "Дозволити еквалайзер"
 #define MSGTR_PREFERENCES_ExtraStereo "Дозволити додаткове стерео"
 #define MSGTR_PREFERENCES_Coefficient "Коеф╕ц╕ент:"
 #define MSGTR_PREFERENCES_AudioDelay "Затримка ауд╕о"

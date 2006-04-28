@@ -146,7 +146,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Benytter 3. pass kontrolfilen: %s\n"
+#define MSGTR_UsingPass3ControlFile "Benytter 3. pass kontrolfilen: %s\n"
 #define MSGTR_MissingFilename "\nFilnavn mangler\n\n"
 #define MSGTR_CannotOpenFile_Device "Kunne ikke åbne fil/enhed\n"
 #define MSGTR_CannotOpenDemuxer "Kunne ikke åbne demuxer\n"
@@ -388,7 +388,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG læse fejl (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE pakket TGA ikke supporteret (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "ukendt filtype (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "Fejl i 24 bit to 32 bit convertering (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "Fejl i 24 bit to 32 bit convertering (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "ukendt besked: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "ikke nok ram\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "for mange skrifttyper specificeret\n"
@@ -478,7 +478,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Tilgængelige drivere:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Afspil ikke lyd"
 #define MSGTR_PREFERENCES_NormalizeSound "Normaliser lydstyrke"
-#define MSGTR_PREFERENCES_EnEqualizer "Anvend equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Anvend equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "Anvend extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Lydforsinkelse"

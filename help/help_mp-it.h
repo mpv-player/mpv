@@ -243,7 +243,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Sto usando il file di controllo passo3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Sto usando il file di controllo passo3: %s\n"
 #define MSGTR_MissingFilename "\nNome file mancante.\n\n"
 #define MSGTR_CannotOpenFile_Device "Impossibile aprire il file/dispositivo.\n"
 #define MSGTR_CannotOpenDemuxer "Impossibile aprire il demuxer.\n"
@@ -391,7 +391,7 @@ static char help_text[]=
 "Non posso impostare le opzioni di LAME, controlla bitrate/samplerate,\n"\
 "per bitrate molto bassi (<32) servono minori samplerate (es. -srate 8000).\n"\
 "Se ogni altra cosa non funziona, prova un Preset."
-#define MSGTR_ConfigfileError "errore file di configurazione"
+#define MSGTR_ConfigFileError "errore file di configurazione"
 #define MSGTR_ErrorParsingCommandLine "errore leggendo la riga comando"
 #define MSGTR_VideoStreamRequired "Il flusso video è obbligatorio!\n"
 #define MSGTR_ForcingInputFPS "i fps saranno interpretati come %5.2f\n"
@@ -501,7 +501,7 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Errore: l'opzione '%s' deve avere un parametro!\n"
 #define MSGTR_OptionListHeader "\n Nome                 Tipo            Min        Max      Global  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nTotale: %d opzioni\n"
-#define MSGTR_TooDeepProfileInclusion "ATTENZIONE: Livello di inclusione troppo profondo nel profilo.\n"
+#define MSGTR_ProfileInclusionTooDeep "ATTENZIONE: Livello di inclusione troppo profondo nel profilo.\n"
 #define MSGTR_NoProfileDefined "Non è stato definito alcun profilo.\n"
 #define MSGTR_AvailableProfiles "Profili disponibili:\n"
 #define MSGTR_UnknownProfile "Profilo '%s' sconosciuto.\n"
@@ -734,7 +734,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG, errore di lettura (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA non supportato (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "tipo di file sconosciuto (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "errore nella conversione da 24 bit a 32 bit (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "errore nella conversione da 24 bit a 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "messaggio sconosciuto: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "memoria insufficiente\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "dichiarati troppi font\n"
@@ -828,7 +828,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Driver disponibili:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Non riprodurre l'audio"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizza l'audio"
-#define MSGTR_PREFERENCES_EnEqualizer "Abilita l'equalizzatore"
+#define MSGTR_PREFERENCES_EnableEqualizer "Abilita l'equalizzatore"
 #define MSGTR_PREFERENCES_SoftwareMixer "Abilita Mixer Software"
 #define MSGTR_PREFERENCES_ExtraStereo "Abilita l'extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficiente:"

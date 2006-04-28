@@ -190,7 +190,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Pass3 control bestand gebruikend: %s\n"
+#define MSGTR_UsingPass3ControlFile "Pass3 control bestand gebruikend: %s\n"
 #define MSGTR_MissingFilename "\nOntbrekende bestandsnaam!\n\n"
 #define MSGTR_CannotOpenFile_Device "Kan bestand/aparaat niet openen\n"
 #define MSGTR_CannotOpenDemuxer "Kan demuxer niet openen\n"
@@ -321,7 +321,7 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_ConfigfileError "Fout in het configuratie bestand of configuratie bestand ontbreekt"
+#define MSGTR_ConfigFileError "Fout in het configuratie bestand of configuratie bestand ontbreekt"
 #define MSGTR_ErrorParsingCommandLine "Fout bij het analyseren van de commandoregel"
 #define MSGTR_VideoStreamRequired "Een Video stream is verplicht!\n"
 #define MSGTR_ForcingInputFPS "input fps zal geinterpreteerd worden als %5.2f \n"
@@ -617,7 +617,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG lees fout (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA niet ondersteund (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "onbekend bestandstype (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit naar 32 bit converteerfout (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 bit naar 32 bit converteerfout (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "onbekende boodschap: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "onvoldoende geheugen\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "te veel fonts gedeclareerd\n"
@@ -708,7 +708,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Beschikbare drivers:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Speel geen geluid af"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizeer het geluid"
-#define MSGTR_PREFERENCES_EnEqualizer "Gebruik equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Gebruik equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "Gebruik extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio vertraging"

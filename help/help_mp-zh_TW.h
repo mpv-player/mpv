@@ -146,7 +146,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "正在使用 pass3 控制檔: %s\n"
+#define MSGTR_UsingPass3ControlFile "正在使用 pass3 控制檔: %s\n"
 #define MSGTR_MissingFilename "\n沒有檔案名稱。\n\n"
 #define MSGTR_CannotOpenFile_Device "無法開啟檔案/裝置。\n"
 #define MSGTR_CannotOpenDemuxer "無法開啟 demuxer。\n"
@@ -401,7 +401,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG 讀取錯誤 (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE 壓縮的 TGA 並不支援 (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "不明的檔案類別 (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 位元至 32 位元轉換錯誤 (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 位元至 32 位元轉換錯誤 (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "不明的訊息: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "記憶體不足\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "宣告了太多字型。\n"
@@ -491,7 +491,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "可用的驅動程式:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "不播放聲音"
 #define MSGTR_PREFERENCES_NormalizeSound "正常化聲音"
-#define MSGTR_PREFERENCES_EnEqualizer "採用調音器"
+#define MSGTR_PREFERENCES_EnableEqualizer "採用調音器"
 #define MSGTR_PREFERENCES_ExtraStereo "採用額外立體聲"
 #define MSGTR_PREFERENCES_Coefficient "係數:"
 #define MSGTR_PREFERENCES_AudioDelay "音效延遲"

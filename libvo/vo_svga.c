@@ -496,7 +496,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
   }
   if(mode_capabilities&CAP_ACCEL_PUTIMAGE){
     mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration);
-    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow);
+    mp_msg(MSGT_VO,MSGL_INFO, MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow);
   }
   
 //here is the place to handle strides for accel_ modes;

@@ -145,7 +145,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Користи pass3 контролна датотека: %s\n"
+#define MSGTR_UsingPass3ControlFile "Користи pass3 контролна датотека: %s\n"
 #define MSGTR_MissingFilename "\nНедостасува името на датотеката.\n\n"
 #define MSGTR_CannotOpenFile_Device "Не може да ја/го отвори датотеката/уредот.\n"
 #define MSGTR_CannotOpenDemuxer "Не може да го отвори демуксерот.\n"
@@ -391,7 +391,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG грешка во читањето ( %s )\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE пакуван TGA не е подржан ( %s )\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "непознат тип на датотека ( %s )\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "грешка при конвертирање од 24 бита во 32 бита ( %s )\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "грешка при конвертирање од 24 бита во 32 бита ( %s )\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "непозната порака: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "нема доволно меморија\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "премногу означени фонтови\n"
@@ -479,7 +479,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Достапни драјвери:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Не го пуштај звукот"
 #define MSGTR_PREFERENCES_NormalizeSound "Нормализирај го звукот"
-#define MSGTR_PREFERENCES_EnEqualizer "Овозможи еквилајзер"
+#define MSGTR_PREFERENCES_EnableEqualizer "Овозможи еквилајзер"
 #define MSGTR_PREFERENCES_ExtraStereo "Овозможи екстра стерео"
 #define MSGTR_PREFERENCES_Coefficient "Коефициент:"
 #define MSGTR_PREFERENCES_AudioDelay "Аудио задоцнување"

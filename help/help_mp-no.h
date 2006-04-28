@@ -204,7 +204,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG lesefeil (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA ikke støttet (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "ukjent filtype (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit til 32 bit konverteringsfeil (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 bit til 32 bit konverteringsfeil (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "ukjent beskjed: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "ikke nok minne\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "for mange skrifttyper deklarert\n"

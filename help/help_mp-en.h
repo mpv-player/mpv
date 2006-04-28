@@ -243,7 +243,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Using pass3 control file: %s\n"
+#define MSGTR_UsingPass3ControlFile "Using pass3 control file: %s\n"
 #define MSGTR_MissingFilename "\nFilename missing.\n\n"
 #define MSGTR_CannotOpenFile_Device "Cannot open file/device.\n"
 #define MSGTR_CannotOpenDemuxer "Cannot open demuxer.\n"
@@ -388,7 +388,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Cannot set LAME options, check bitrate/samplerate,"\
 "some very low bitrates (<32) need lower samplerates (i.e. -srate 8000)."\
 "If everything else fails, try a preset."
-#define MSGTR_ConfigfileError "configfile error"
+#define MSGTR_ConfigFileError "configfile error"
 #define MSGTR_ErrorParsingCommandLine "error parsing cmdline"
 #define MSGTR_VideoStreamRequired "Video stream is mandatory!\n"
 #define MSGTR_ForcingInputFPS "input fps will be interpreted as %5.2f instead\n"
@@ -499,7 +499,7 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Error: option '%s' must have a parameter!\n"
 #define MSGTR_OptionListHeader "\n Name                 Type            Min        Max      Global  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nTotal: %d options\n"
-#define MSGTR_TooDeepProfileInclusion "WARNING: Too deep profile inclusion.\n"
+#define MSGTR_ProfileInclusionTooDeep "WARNING: Too deep profile inclusion.\n"
 #define MSGTR_NoProfileDefined "No profiles have been defined.\n"
 #define MSGTR_AvailableProfiles "Available profiles:\n"
 #define MSGTR_UnknownProfile "Unknown profile '%s'.\n"
@@ -733,7 +733,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG read error (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA not supported (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "unknown file type (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit to 32 bit convert error (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 bit to 32 bit convert error (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "not enough memory\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Too many fonts declared.\n"
@@ -832,7 +832,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Available drivers:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Do not play sound"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalize sound"
-#define MSGTR_PREFERENCES_EnEqualizer "Enable equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Enable equalizer"
 #define MSGTR_PREFERENCES_SoftwareMixer "Enable Software Mixer"
 #define MSGTR_PREFERENCES_ExtraStereo "Enable extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
@@ -1674,7 +1674,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Using depth/colorspace conversion, this will slow things down (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Unsupported image format in draw_slice, contact MPlayer developers!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit failed: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] Initializing of SDL failed: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Initializing of SDL failed: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Using driver: %s.\n"
 
 // libvo/vobsub_vidix.c
@@ -1704,7 +1704,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) failed.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] Video mode is linear and memcpy could be used for image transfer.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] Video mode has hardware acceleration and put_image could be used.\n"
-#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] If it works for you i would like to know. \n[VO_SVGA] (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow "[VO_SVGA] If it works for you I would like to know. \n[VO_SVGA] (send log with `mplayer test.avi -v -v -v -v &> svga.log`). Thx\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Video mode has %d page(s).\n"
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Centering image. start at (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Using VIDIX. w=%i h=%i  mw=%i mh=%i\n"
@@ -1727,7 +1727,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Can't open %s: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problem with FBITGET_FSCREENINFO ioctl: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problem with FBITGET_VSCREENINFO ioctl: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] This driver is only supports the 3Dfx Banshee, Voodoo3 and Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] This driver is only supports the 3Dfx Banshee, Voodoo3 and Voodoo 5.\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp output is not supported.\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Couldn't map memory areas: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp output is not supported (This should never have happened).\n"
@@ -1756,7 +1756,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP move failed on Y plane.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP move failed on U plane.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP move failed on V plane.\n"
-#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] What's that for a format 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] What's that for a format 0x%x.\n"
 
 // libvo/vo_tga.c
 
@@ -1766,7 +1766,7 @@ static char help_text[]=
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fatal error occurred! Can't continue.\n"
 #define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Unknown subdevice: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] Your have too small size of video memory for this mode:\n[VO_VESA] Requires: %08lX exists: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Your have too small size of video memory for this mode:\n[VO_VESA] Required: %08lX exists: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] You have to specify the capabilities of the monitor. Not changing refresh rate.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Unable to fit the mode into monitor's limitation. Not changing refresh rate.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Detected internal fatal error: init is called before preinit.\n"

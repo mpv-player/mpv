@@ -236,7 +236,7 @@ static char help_text[]=
  
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Øídicí soubor pro tøíprùchodový re¾im: %s\n"
+#define MSGTR_UsingPass3ControlFile "Øídicí soubor pro tøíprùchodový re¾im: %s\n"
 #define MSGTR_MissingFilename "\nChybí jméno souboru.\n\n"
 #define MSGTR_CannotOpenFile_Device "Nelze otevøít soubor/zaøízení.\n"
 #define MSGTR_CannotOpenDemuxer "Nelze otevøít demuxer.\n"
@@ -380,7 +380,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Nelze nastavit volby pro LAME, ovìøte datový_tok/vzorkovou_rychlost,"\
 "nìkteré velmi nízké datové toky (<32) vy¾adují ni¾¹í vzorkovou rychlost (napø. -srate 8000)."\
 "Pokud v¹e sel¾e, zkuste pøednastavené."
-#define MSGTR_ConfigfileError "chyba konfiguraèního souboru"
+#define MSGTR_ConfigFileError "chyba konfiguraèního souboru"
 #define MSGTR_ErrorParsingCommandLine "chyba pøi zpracovávání pøíkazového øádku"
 #define MSGTR_VideoStreamRequired "Videoproud je povinný!\n"
 #define MSGTR_ForcingInputFPS "místo toho bude vstupní fps interpretováno jako %5.2f\n"
@@ -491,7 +491,7 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Chyba: volba '%s' musí mít parametr!\n"
 #define MSGTR_OptionListHeader "\n Název                Typ             Min        Max      Globál  CL    Konfig\n\n"
 #define MSGTR_TotalOptions "\nCelkem: %d voleb\n"
-#define MSGTR_TooDeepProfileInclusion "VAROVÁNÍ: Pøíli¹ hluboké vnoøování profilù.\n"
+#define MSGTR_ProfileInclusionTooDeep "VAROVÁNÍ: Pøíli¹ hluboké vnoøování profilù.\n"
 #define MSGTR_NoProfileDefined "®ádný profil nebyl definován.\n"
 #define MSGTR_AvailableProfiles "Dostupné profily:\n"
 #define MSGTR_UnknownProfile "Neznámý profil '%s'.\n"
@@ -725,7 +725,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "chyba ètení PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "formát TGA zapouzdøený v RLE není podporován (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "neznámý typ souboru (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "chyba konverze z 24 do 32 bitù (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "chyba konverze z 24 do 32 bitù (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "neznámá zpráva: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "nedostatek pamìti\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "deklarováno pøíli¹ mnoho fontù\n"
@@ -824,7 +824,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Dostupné ovladaèe:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nepøehrávat zvuk"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizovat zvuk"
-#define MSGTR_PREFERENCES_EnEqualizer "Aktivovat ekvalizér"
+#define MSGTR_PREFERENCES_EnableEqualizer "Aktivovat ekvalizér"
 #define MSGTR_PREFERENCES_SoftwareMixer "Aktivovat softwarový smì¹ovaè"
 #define MSGTR_PREFERENCES_ExtraStereo "Aktivovat extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koeficient:"

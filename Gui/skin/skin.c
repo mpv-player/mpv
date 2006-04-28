@@ -90,7 +90,7 @@ int skinBPRead( char * fname, txSample * bf )
    case -5: ERRORMESSAGE( MSGTR_SKIN_BITMAP_PNGReadError,fname ); break;
    case -6: ERRORMESSAGE( MSGTR_SKIN_BITMAP_RLENotSupported,fname ); break;
    case -7: ERRORMESSAGE( MSGTR_SKIN_BITMAP_UnknownFileType,fname ); break;
-   case -8: ERRORMESSAGE( MSGTR_SKIN_BITMAP_ConvertError,fname ); break;
+   case -8: ERRORMESSAGE( MSGTR_SKIN_BITMAP_ConversionError,fname ); break;
   }
  return i;
 }

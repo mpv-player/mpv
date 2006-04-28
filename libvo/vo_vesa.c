@@ -546,7 +546,7 @@ unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
   total = min(total,nbuffs);
   while(i < total) { multi_buff[i++] = offset; offset += screen_size; }
   if(!i)
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory, screen_size, vsize);
+    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory, screen_size, vsize);
   return i;
 }
 

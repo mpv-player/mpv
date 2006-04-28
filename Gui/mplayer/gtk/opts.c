@@ -846,7 +846,7 @@ GtkWidget * create_Preferences( void )
     gtk_widget_set_usize( vbox3,250,-2 );
 
   CBNormalize=AddCheckButton( MSGTR_PREFERENCES_NormalizeSound,vbox3 );
-  CBAudioEqualizer=AddCheckButton( MSGTR_PREFERENCES_EnEqualizer,vbox3 );
+  CBAudioEqualizer=AddCheckButton( MSGTR_PREFERENCES_EnableEqualizer,vbox3 );
   CBSoftwareMixer=AddCheckButton( MSGTR_PREFERENCES_SoftwareMixer,vbox3 );
 #if 0
   CBSurround=AddCheckButton( "Enable surround",vbox3 );

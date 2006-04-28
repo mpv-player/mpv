@@ -115,7 +115,7 @@ static int preinit(const char *arg)
 
 	/* BANSHEE means any of the series aparently */
 	if (fb_finfo.accel != FB_ACCEL_3DFX_BANSHEE) {
-		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports);
+		mp_msg(MSGT_VO,MSGL_ERR, MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports);
 		close(fd);
 		fd = -1;
 		return -1;

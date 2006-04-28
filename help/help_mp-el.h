@@ -145,7 +145,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Χρήση του αρχείου ελέγχου pass3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Χρήση του αρχείου ελέγχου pass3: %s\n"
 #define MSGTR_MissingFilename "\n Παράλειψη ονόματος αρχείου!\n\n"
 #define MSGTR_CannotOpenFile_Device "Αδύνατο το άνοιγμα του αρχείου/συσκευή\n"
 #define MSGTR_CannotOpenDemuxer "Αδύνατο το άνοιγμα του demuxer\n"
@@ -400,7 +400,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "σφάλμα κατά την ανάγνωση του PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "Το RLE packed TGA δεν υποστηρίζεται (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "μη αναγνωρίσιμο είδος αρχείου (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "σφάλμα κατά τη μετατροπή από 24 bit σε 32 bit (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "σφάλμα κατά τη μετατροπή από 24 bit σε 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "μη αναγνωρίσιμο μήνυμα: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "δεν υπάρχει αρκετή μνήμη διαθέσιμη\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "πολλαπλές ορισμένες γραμματοσειρές\n"
@@ -490,7 +490,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Διαθέσιμοι οδηγοί:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Μη-αναπαραγωγή ήχου"
 #define MSGTR_PREFERENCES_NormalizeSound "Κανονικοποίηση ήχου"
-#define MSGTR_PREFERENCES_EnEqualizer "Ενεργοποίηση του equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Ενεργοποίηση του equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "Ενεργοποίηση του extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Καθυστέρηση ήχου"

@@ -604,7 +604,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     }
     break;
   default:
-    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat,mpi->imgfmt);
+    mp_msg(MSGT_VO,MSGL_WARN, MSGTR_LIBVO_TDFXVID_UnknownFormat,mpi->imgfmt);
     return VO_TRUE;
   }
 

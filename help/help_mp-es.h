@@ -206,7 +206,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Usando el archivo de control pass3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Usando el archivo de control pass3: %s\n"
 #define MSGTR_MissingFilename "\nFalta el nombre del archivo.\n\n"
 #define MSGTR_CannotOpenFile_Device "No se pudo abrir el archivo o el dispositivo.\n"
 #define MSGTR_CannotOpenDemuxer "No se pudo abrir el demuxer.\n"
@@ -349,7 +349,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "No se pudo setear las opciones de Lame, revise el"\
 " bitrate/samplerate, algunos bitrates muy bajos (<32) necesitan una tasa de"\
 " muestreo más baja (ej. -srate 8000). Si todo falla, pruebe con un preset."
-#define MSGTR_ConfigfileError "error en archivo de configuración"
+#define MSGTR_ConfigFileError "error en archivo de configuración"
 #define MSGTR_ErrorParsingCommandLine "error en parametros de la línea de comando"
 #define MSGTR_VideoStreamRequired "¡El flujo de video es obligatorio!\n"
 #define MSGTR_ForcingInputFPS "en su lugar los cuadros por segundos de entrada serán interpretados como %5.2f\n"
@@ -671,7 +671,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "Error al leer PNG (%s).\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA no soportado (%s).\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "Tipo de archivo desconocido (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "Error de conversión de 24 bit a 32 bit (%s).\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "Error de conversión de 24 bit a 32 bit (%s).\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "Mensaje desconocido: %s.\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "No hay suficiente memoria.\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Demasiadas fuentes declaradas.\n"
@@ -767,7 +767,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Drivers disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "No reproducir sonido"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizar sonido"
-#define MSGTR_PREFERENCES_EnEqualizer "Activar equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Activar equalizer"
 #define MSGTR_PREFERENCES_SoftwareMixer "Activar mezclador por software"
 #define MSGTR_PREFERENCES_ExtraStereo "Activar estereo extra"
 #define MSGTR_PREFERENCES_Coefficient "Coeficiente:"
@@ -1579,7 +1579,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Utilizando conversión de depth/colorspace, va a andar un poco más lento.. (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Formato no soportado de imagen en draw_slice, contacta a los desarrolladores de MPlayer!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit falló: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] Fallo la inicialización de SDL: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Fallo la inicialización de SDL: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Utilizando el driver: %s.\n"
 
 // libvo/vobsub_vidix.c
@@ -1632,7 +1632,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] No pude abrir %s: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problema con el ioctl FBITGET_FSCREENINFO: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problema con el ioctl FBITGET_VSCREENINFO: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] Este driver solo soporta las 3Dfx Banshee, Voodoo3 y Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] Este driver solo soporta las 3Dfx Banshee, Voodoo3 y Voodoo 5.\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] La salida %d bpp no esta soporatda.\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] No pude mapear las áreas de memoria: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] La salida %d bpp no esta soportada (esto de debería haber pasado).\n"
@@ -1661,7 +1661,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] El AGP move falló en el plano Y.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] El AGP move falló en el plano U.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] El AGP move fallo en el plano V.\n"
-#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] Qué es esto como formato 0x%x?\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] Qué es esto como formato 0x%x?\n"
 
 // libvo/vo_tga.c
 
@@ -1671,7 +1671,7 @@ static char help_text[]=
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Error fatal! no puedo continuar.\n"
 #define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Sub-dispositivo desconocido: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] Tienes muy poca memoria de video para este modo:\n[VO_VESA] Requiere: %08lX tienes: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Tienes muy poca memoria de video para este modo:\n[VO_VESA] Requiere: %08lX tienes: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Tienes que especificar las capacidades del monitor. No voy a cambiar la tasa de refresco.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] No pude encajar este modo en las limitaciones del  monitor. No voy a cambiar la tasa de refresco.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Error fatal interno detectado: init se llama despues de preinit.\n"

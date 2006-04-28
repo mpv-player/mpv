@@ -242,7 +242,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Pass3 vezérlõ fájl használata: %s\n"
+#define MSGTR_UsingPass3ControlFile "Pass3 vezérlõ fájl használata: %s\n"
 #define MSGTR_MissingFilename "\nHiányzó fájlnév!\n\n"
 #define MSGTR_CannotOpenFile_Device "Fájl/eszköz megnyitása sikertelen.\n"
 #define MSGTR_CannotOpenDemuxer "Demuxer meghívása sikertelen.\n"
@@ -388,7 +388,7 @@ static char help_text[]=
 "bitrátát/mintavételi rátát, néhány nagyon alacsony bitrátához (<32) alacsonyabb"\
 "mintavételi ráta kell (pl. -srate 8000)."\
 "Ha minden más sikertelen, próbálj ki egy preset-et."
-#define MSGTR_ConfigfileError "konfigurációs fájl hibája"
+#define MSGTR_ConfigFileError "konfigurációs fájl hibája"
 #define MSGTR_ErrorParsingCommandLine "hiba a parancssor értelmezésekor"
 #define MSGTR_VideoStreamRequired "Video stream szükséges!\n"
 #define MSGTR_ForcingInputFPS "az input fps inkább %5.2f-ként lesz értelmezve\n"
@@ -499,7 +499,7 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Hiba: a(z) '%s' kapcsolóhoz kell egy paraméter!\n"
 #define MSGTR_OptionListHeader "\n Név                  Típus           Min        Max      Globál  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nÖsszesen: %d kapcsoló\n"
-#define MSGTR_TooDeepProfileInclusion "FIGYELMEZTETÉS: Túl mély profil beágyazás.\n"
+#define MSGTR_ProfileInclusionTooDeep "FIGYELMEZTETÉS: Túl mély profil beágyazás.\n"
 #define MSGTR_NoProfileDefined "Nincs profil megadva.\n"
 #define MSGTR_AvailableProfiles "Elérhetõ profilok:\n"
 #define MSGTR_UnknownProfile "Ismeretlen profil: '%s'.\n"
@@ -733,7 +733,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG olvasási hiba (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE tömörített TGA-k nincsenek támogatva (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "ismeretlen tipusú fájl (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "hiba a 24-rõl 32 bitre konvertálás közben (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "hiba a 24-rõl 32 bitre konvertálás közben (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "ismeretlen üzenet: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "nincs elég memória\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Túl sok betûtipus van deklarálva.\n"
@@ -832,7 +832,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Driverek:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Hang nélkül"
 #define MSGTR_PREFERENCES_NormalizeSound "Hang normalizálása"
-#define MSGTR_PREFERENCES_EnEqualizer "Audio equalizer"
+#define MSGTR_PREFERENCES_EnableEqualizer "Audio equalizer"
 #define MSGTR_PREFERENCES_SoftwareMixer "Szoftveres keverés"
 #define MSGTR_PREFERENCES_ExtraStereo "Extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Együttható:"
@@ -1674,7 +1674,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Mélység/színtér konverzió használata, ez lelassítja a dolgokat (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Nem támogatott kép formátum a draw_slice-ban, lépj kapcsolatba az MPlayer fejlesztõkkel!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit sikertelen: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] SDL inicializálása sikertelen: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] SDL inicializálása sikertelen: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Használt vezérlõ: %s.\n"
 
 // libvo/vobsub_vidix.c
@@ -1727,7 +1727,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Nem nyitható meg %s: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Probléma az FBITGET_FSCREENINFO ioctl-lel: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Probléma az FBITGET_VSCREENINFO ioctl-lel: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] Ez a vezérlõ csak a 3Dfx Banshee-t, a Voodoo3-at és a Voodoo 5-öt támogatja.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] Ez a vezérlõ csak a 3Dfx Banshee-t, a Voodoo3-at és a Voodoo 5-öt támogatja.\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp-s kimenet nem támogatott.\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Nem mappolhatóak a memóriaterületek: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp-s kimenet nem támogatott (Ennek soha nem szabad megtörténnie).\n"
@@ -1756,7 +1756,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP mozgatás sikertelen az Y síkon.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP mozgatás sikertelen az U síkon.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP mozgatás sikertelen a V síkon.\n"
-#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] Miféle formátum ez: 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] Miféle formátum ez: 0x%x.\n"
 
 // libvo/vo_tga.c
 
@@ -1766,7 +1766,7 @@ static char help_text[]=
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Végzetes hiba történt! Nem lehet folytatni.\n"
 #define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Ismeretlen aleszköz: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] Túl kicsi méretû videó memóriád van ehhez a módhoz:\n[VO_VESA] Szükséges: %08lX rendelkezésre áll: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Túl kicsi méretû videó memóriád van ehhez a módhoz:\n[VO_VESA] Szükséges: %08lX rendelkezésre áll: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Meg kell adnod a monitor adatait. Nem változott a frissítési ráta.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] A mód nem egyeztethetõ össze a monitor korlátaival. Nem változott a frissítési ráta.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Végzetes belsõ hibát találtam: az init a preinit elõtt lett meghívva.\n"

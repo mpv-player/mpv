@@ -144,7 +144,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "pass3 컨트롤 파일을 사용합니다.: %s\n"
+#define MSGTR_UsingPass3ControlFile "pass3 컨트롤 파일을 사용합니다.: %s\n"
 #define MSGTR_MissingFilename "\n파일이름이 없습니다.\n\n"
 #define MSGTR_CannotOpenFile_Device "파일/장치를 열 수 없습니다.\n"
 #define MSGTR_CannotOpenDemuxer "해석기를 열 수 없습니다.\n"
@@ -394,7 +394,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG 읽기 오류입니다. (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE로 압축된 TGA는 지원되지 않습니다. (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "알 수 없는 파일 형식입니다. (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 비트에서 32 비트로 전환 오류 (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 비트에서 32 비트로 전환 오류 (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "알 수 없는 메세지입니다.: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "메모리가 부족합니다.\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "폰트가 너무 많이 선언되어 있습니다.\n"
@@ -482,7 +482,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "가능한 드라이버:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "사운드 재생 안함"
 #define MSGTR_PREFERENCES_NormalizeSound "사운드 표준화"
-#define MSGTR_PREFERENCES_EnEqualizer "이퀄라이저 사용"
+#define MSGTR_PREFERENCES_EnableEqualizer "이퀄라이저 사용"
 #define MSGTR_PREFERENCES_ExtraStereo "외부 스테레오 사용"
 #define MSGTR_PREFERENCES_Coefficient "계수:"
 #define MSGTR_PREFERENCES_AudioDelay "오디오 지연:"

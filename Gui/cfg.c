@@ -218,7 +218,7 @@ int cfg_read( void )
  m_config_register_options( gui_conf,gui_opts );
  if ( m_config_parse_config_file( gui_conf,cfg ) < 0 ) 
   {
-   mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_ConfigfileError );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_ConfigFileError );
 //   exit( 1 );
   }
  free( cfg );

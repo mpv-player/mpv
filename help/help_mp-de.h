@@ -249,7 +249,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Verwende Pass 3 Kontrolldatei: %s\n"
+#define MSGTR_UsingPass3ControlFile "Verwende Pass 3 Kontrolldatei: %s\n"
 #define MSGTR_MissingFilename "\nDateiname nicht angegeben.\n\n"
 #define MSGTR_CannotOpenFile_Device "Kann Datei/Gerät nicht öffnen.\n"
 #define MSGTR_CannotOpenDemuxer "Kann Demuxer nicht öffnen.\n"
@@ -396,7 +396,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Kann Optionen für Lame nicht setzen, überprüfe Bitrate/Samplerate. "\
 "Manche sehr niedrige Bitraten (<32) benötigen niedrigere Sampleraten (z.B. -srate 8000). "\
 "Wenn alles andere nicht funktioniert, versuche es mit einem Preset."
-#define MSGTR_ConfigfileError "Konfigurationsdatei-Fehler"
+#define MSGTR_ConfigFileError "Konfigurationsdatei-Fehler"
 #define MSGTR_ErrorParsingCommandLine "Fehler beim Parsen der Kommandozeile."
 #define MSGTR_VideoStreamRequired "Videostream zwingend notwendig!\n"
 #define MSGTR_ForcingInputFPS "Erzwungene Bildrate der Eingabedatei: %5.2ffps\n"
@@ -509,7 +509,7 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Fehler: Option '%s' benötigt einen Parameter!\n"
 #define MSGTR_OptionListHeader "\n Name                 Typ             Min        Max      Global  CL    Cfg\n\n"
 #define MSGTR_TotalOptions "\nInsgesamt: %d Optionen\n"
-#define MSGTR_TooDeepProfileInclusion "WARNUNG: Zu tiefe Profileinfügung.\n"
+#define MSGTR_ProfileInclusionTooDeep "WARNUNG: Zu tiefe Profileinfügung.\n"
 #define MSGTR_NoProfileDefined "Es wurden keine Profile definiert.\n"
 #define MSGTR_AvailableProfiles "Verfügbare Profile:\n"
 #define MSGTR_UnknownProfile "Unbekanntes Profil '%s'.\n"
@@ -745,7 +745,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG-Lesefehler (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE-gepacktes TGA wird nicht unterstützt (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "unbekannter Dateityp (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "Konvertierungsfehler von 24 Bit auf 32 Bit (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "Konvertierungsfehler von 24 Bit auf 32 Bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "unbekannte Nachricht: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "nicht genug Speicher\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Zu viele Schriften deklariert.\n"
@@ -844,7 +844,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Verfügbare Treiber:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spiele keinen Ton"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalisiere Ton"
-#define MSGTR_PREFERENCES_EnEqualizer "Equalizer verwenden"
+#define MSGTR_PREFERENCES_EnableEqualizer "Equalizer verwenden"
 #define MSGTR_PREFERENCES_SoftwareMixer "Aktiviere Software-Mixer"
 #define MSGTR_PREFERENCES_ExtraStereo "Extra Stereo verwenden"
 #define MSGTR_PREFERENCES_Coefficient "Koeffizient:"
@@ -1669,7 +1669,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Benutze Tiefen-/Farbraumkonvertierung, dies wird Dinge verlangsamen (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Nichtunterstütztes Bildformat in draw_slice, kontaktiere MPlayer-Entwickler!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit fehlgeschlagen: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] Initialisierung von SDL fehlgeschlagen: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Initialisierung von SDL fehlgeschlagen: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Benutze Treiber: %s.\n"
 
 // libvo/vobsub_vidix.c
@@ -1722,7 +1722,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Konnte %s nicht öffnen: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problem mit FBITGET_FSCREENINFO ioctl: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problem mit FBITGET_VSCREENINFO ioctl: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] Dieser Treiber unterstützt nur 3Dfx Banshee, Voodoo3 und Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] Dieser Treiber unterstützt nur 3Dfx Banshee, Voodoo3 und Voodoo 5.\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] Ausgabe mit %d bpp wird nicht unterstützt.\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Konnte Speicherbereiche nicht abbilden: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] Ausgabe mit %d bpp wird nicht unterstützt (Dies sollte niemals passiert sein).\n"
@@ -1751,7 +1751,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP-Verschiebung bei Y-Ebene fehlgeschlagen.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP-Verschiebung bei U-Ebene fehlgeschlagen.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP-Verschiebung bei V-Ebene fehlgeschlagen.\n"
-#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] Was ist das für ein Format 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] Was ist das für ein Format 0x%x.\n"
 
 // libvo/vo_tga.c
 
@@ -1761,7 +1761,7 @@ static char help_text[]=
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fataler Fehler aufgetreten! Kann nicht fortfahren.\n"
 #define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Unbekanntes Subgerät: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] Du hast einen zu geringen Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Du hast einen zu geringen Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Du musst die Fähigkeiten deines Monitors angeben.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Kann Modus nicht in die Beschränkung des Monitors einpassen.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Internen fatalen Fehler erkannt: init wird vor preinit aufgerufen.\n"

@@ -239,7 +239,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "使用pass3控制文件: %s\n"
+#define MSGTR_UsingPass3ControlFile "使用pass3控制文件: %s\n"
 #define MSGTR_MissingFilename "\n没有文件名!\n\n"
 #define MSGTR_CannotOpenFile_Device "无法打开文件/设备\n"
 #define MSGTR_CannotOpenDemuxer "无法打开demuxer\n"
@@ -375,7 +375,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "无法设定LAME选项, 检查比特率/采样率,"\
 "一些非常低的比特率(<32)需要低采样率(如 -srate 8000)."\
 "如果都不行, 试试使用预设值."
-#define MSGTR_ConfigfileError "配置文件错误"
+#define MSGTR_ConfigFileError "配置文件错误"
 #define MSGTR_ErrorParsingCommandLine "解析命令行错误"
 #define MSGTR_VideoStreamRequired "视频流是必须的!\n"
 #define MSGTR_ForcingInputFPS "输入帧率将被%5.2f代替\n"
@@ -486,7 +486,7 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "错误: 选项'%s'必须要有一个参数!\n"
 #define MSGTR_OptionListHeader "\n 名字                 类型            最小       最大     全局  命令行 配置文件\n\n"
 #define MSGTR_TotalOptions "\n总共: %d个选项\n"
-#define MSGTR_TooDeepProfileInclusion "警告: Profile 引用太深.\n"
+#define MSGTR_ProfileInclusionTooDeep "警告: Profile 引用太深.\n"
 #define MSGTR_NoProfileDefined "没有 profile 的定义.\n"
 #define MSGTR_AvailableProfiles "可用的 profile:\n"
 #define MSGTR_UnknownProfile "未知的 profile '%s'.\n"
@@ -719,7 +719,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG读取错误(%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "不支持RLE格式压缩的TGA(%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "未知的文件格式(%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "24 bit到32 bit的转换发生错误(%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "24 bit到32 bit的转换发生错误(%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "未知信息: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "没有足够内存\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "声明了太多字体.\n"
@@ -818,7 +818,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "可用驱动:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "不播放声音"
 #define MSGTR_PREFERENCES_NormalizeSound "声音标准化"
-#define MSGTR_PREFERENCES_EnEqualizer "开启均衡器"
+#define MSGTR_PREFERENCES_EnableEqualizer "开启均衡器"
 #define MSGTR_PREFERENCES_SoftwareMixer "开启软件混音器"
 #define MSGTR_PREFERENCES_ExtraStereo "开启立体声加强"
 #define MSGTR_PREFERENCES_Coefficient "参数:"
@@ -1660,7 +1660,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] 使用深度/颜色空间转换, 这会减慢速度 (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] draw_slice 不支持的图像格式, 联系 MPlayer 的开发者!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit 失败: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializingOfSDLFailed "[VO_SDL] 初始化 SDL 失败: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] 初始化 SDL 失败: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] 使用驱动: %s.\n"
 
 // libvo/vobsub_vidix.c
@@ -1713,7 +1713,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] 无法打开 %s: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] FBITGET_FSCREENINFO ioctl 出错: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] FBITGET_VSCREENINFO ioctl 出错: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverIsOnlySupports "[VO_TDFXFB] 这个驱动仅支持 3Dfx Banshee, Voodoo3 和 Voodoo 5.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] 这个驱动仅支持 3Dfx Banshee, Voodoo3 和 Voodoo 5.\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp 输出不支持.\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] 无法映射内存区域: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp 输出不支持 (应该永远不会发生).\n"
@@ -1742,7 +1742,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP move 操作 Y plane 失败.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP move 操作 U plane 失败.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP move 操作 V plane 失败.\n"
-#define MSGTR_LIBVO_TDFXVID_WhatsThatForAFormat "[VO_TDFXVID] 这是什么格式 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] 这是什么格式 0x%x.\n"
 
 // libvo/vo_tga.c
 
@@ -1752,7 +1752,7 @@ static char help_text[]=
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] 发生致命错误! 无法恢复.\n"
 #define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] 未知子设备: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YourHaveTooSmallSizeOfVideoMemory "[VO_VESA] 显存太小不能支持这个模式:\n[VO_VESA] 需要: %08lX 可用: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] 显存太小不能支持这个模式:\n[VO_VESA] 需要: %08lX 可用: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] 你需要设置显示器的兼容性. 不改变刷新率.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] 模式超出显示器的限制. 不改变刷新率.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] 检测到内部致命错误: init 在 preinit 前被调用.\n"

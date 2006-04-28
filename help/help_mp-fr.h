@@ -195,7 +195,7 @@ static char help_text[]=
 
 // mencoder.c
 
-#define MSGTR_UsingPass3ControllFile "Utilisation du fichier de contrôle de la passe 3: %s\n"
+#define MSGTR_UsingPass3ControlFile "Utilisation du fichier de contrôle de la passe 3: %s\n"
 #define MSGTR_MissingFilename "\nNom de fichier manquant.\n\n"
 #define MSGTR_CannotOpenFile_Device "Impossible d'ouvrir le fichier/périph.\n"
 #define MSGTR_CannotOpenDemuxer "Impossible d'ouvrir le démuxeur.\n"
@@ -454,7 +454,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "erreur de lecture PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "tga compacté en RLE non supporté (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "format de fichier inconnu (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConvertError "erreur de conversion de 24 bit en 32 bit (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConversionError "erreur de conversion de 24 bit en 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "message inconnu: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "pas assez de mémoire\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "trop de polices déclarées.\n"
@@ -548,7 +548,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AvailableDrivers "Pilotes disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Ne pas jouez le son"
 #define MSGTR_PREFERENCES_NormalizeSound "Normaliser le son"
-#define MSGTR_PREFERENCES_EnEqualizer "Activer l'équaliseur"
+#define MSGTR_PREFERENCES_EnableEqualizer "Activer l'équaliseur"
 //**********************
 #define MSGTR_PREFERENCES_ExtraStereo "Activer stéréo supplémentaire"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
