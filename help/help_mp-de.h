@@ -1635,7 +1635,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Y-Offset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] X-Offset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] X-Koorektur: %d.\n"
-#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3]  Konnte Größe des Overlayfensters nicht ändern!\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Konnte Singal-Mix nicht setzen!\n"
 
 // libvo/vo_mga.c
