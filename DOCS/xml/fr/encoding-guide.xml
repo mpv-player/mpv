@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- $Revision$ -->
+<!-- synced with 1.47 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -33,7 +33,7 @@
   devriez comprendre ces détails, ou vous serez déçus par les résultats. Ci-dessous
   nous allons examiner quelques-uns de ces problèmes, et voir un exemple. Nous
   supposerons que vous utilisez <systemitem class="library">libavcodec</systemitem> pour encoder 
-  la vidéo, bien que cette exemple théorique s'applique également à d'autres codecs.
+  la vidéo, bien que cet exemple théorique s'applique également à d'autres codecs.
 </para>
 
 <para>
@@ -505,18 +505,18 @@
 <title>Découpage et Redimensionnement</title>
 
 <para>
-  Rappel de la section prédécente, la taille de l'image finale devra être un 
-  multiple de 16 (en hauteur et largeur). Cela peut être réalisé par découpage (recadrage), 
-  redimensionnement ou les deux.
+  Vous vous souvenez de la section prédécente que les dimensions (à la fois largeur et hauteur) 
+  de l'image finale doivent être des 
+  multiples de 16. Cela peut être réalisé par recadrage (découpe), 
+  redimensionnement ou une combinaison des deux.
 </para>
 
 <para>
-  Lors du recadrage, il y a quelques règles qui doivent être respectées sous peine 
+  Lors du recadrage, il y a quelques règles qui doivent être respectées pour éviter 
   d'endommager votre film.
-  Le format normal YUV, 4:2:0 stocke l'information chromatique (couleur) de manière
-  sous-échantillonnée, par exemple, la chrominance est échantillonée en moitié moins 
-  de temps que l'information de la luminance (intensité). Observez le schéma 
-  suivant, L indique un échantillon de luminance, et C pour la chrominance.
+  Le format YUV normal, 4:2:0, stocke la chrominance (la couleur) de manière
+  sous-échantillonnée, c'est à dire que la chrominance est échantillonée moitié moins 
+  souvent que la luminance (intensité). Sur le schéma suivant, L indique l'échantillonage en luminance et C en chrominance.
 </para>
 
 <informaltable>
@@ -593,14 +593,14 @@
 </informaltable>
 
 <para>
-  Comme vous pouvez le voir, les lignes et colonnes de l'image naturelle 
-  viennent par deux. Ainsi, votre découpe devra <emphasis>absolument</emphasis> 
-  avoir des dimensions paires. Si ce n'est pas le cas, les informations chromatiques et de 
-  luminosité ne seront plus alignées.
-  En théorie, il est possible de découper d'une dimension impaire, mais cela 
-  demandera alors un re-sampling des informations chromatique, ce qui,
-  potentiellement, génère des pertes d'information et n'est pas supporté par 
-  le filtre de redimensionnement.
+  Comme vous pouvez le voir, les lignes et colonnes de l'image viennent naturellement par deux. 
+  Ainsi, les dimensions de votre recadrage ainsi que ses distances au bords d'origine 
+  <emphasis>doivent</emphasis> être paires. Si elles ne 
+  l'étaient pas, les chrominances et luminances ne seraient plus alignées.
+  En théorie, il est possible d'avoir des dimensions impaires, mais cela 
+  requière un rééchantillonage de la chrominance, ce qui 
+  engendre potentiellement des pertes d'information et n'est pas supporté par 
+  le filtre de recadrage.
 </para>
 
 <para>
@@ -847,9 +847,9 @@
 <!-- checked so far / pl / diff 1-->
 
 <para>
-  Comme vous pouvez le voir, le motif n'apparaissent pas pour moins de
-  4 lignes. Ainsi, pour la vidéo entrelacée, le décalage (offset) sur y 
-  et la hauteur pour le recadrage doivent être multiples de 4.
+  Comme vous pouvez le voir, le plus petit motif à se répéter est sur 4 lignes. 
+  Donc, pour la vidéo entrelacée, la hauteur de votre recadrage et sa distance 
+  verticale aux bords doivent être des multiples de 4.
 </para>
 
 <para>
