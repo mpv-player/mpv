@@ -303,8 +303,8 @@ Toggle subtitle alignment: top / middle / bottom.
 Adjust subtitle delay by +/- 0.1 seconds.
 .IPs "r and t"
 Move subtitles up/down.
-.IPs i\ \ \ \ 
-Set EDL mark (while in \-edlout mode).
+.IPs "i (\-edlout mode only)"
+Set EDL mark.
 .IPs "s (\-vf screenshot only)"
 Take a screenshot.
 .IPs "I"
@@ -8003,8 +8003,22 @@ Currently it only works if scene change detection is disabled
 (sc_threshold=1000000000).
 .
 .TP
-.B vglobal
-FIXME: Document this.
+.B vglobal=<0\-3>
+Control writing global video headers.
+.PD 0
+.RSs
+.IPs 0
+Do not write global headers (default).
+.IPs 1
+Write global headers only in extradata (needed for .mp4/MOV/NUT).
+.IPs 2
+Write global headers only in front of keyframes.
+.IPs 3
+Combine 1 and 2.
+.
+.TP
+.B aglobal=<0\-3>
+Same as vglobal for audio headers.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9384,7 +9398,8 @@ Sony Digital Video container
 .PD 1
 .TP
 .B i_certify_that_my_video_stream_does_not_use_b_frames
-FIXME: Document this.
+MEncoder cannot assign correct timestamps when there are
+B-frames in the video stream, resulting in broken encodes.
 .
 .TP
 .B muxrate
