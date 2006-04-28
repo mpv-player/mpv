@@ -193,7 +193,7 @@ too.
 MPlayer supports a wide range of video and audio output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, Mac OS X CoreVideo, but you can also use GGI, SDL (and all their drivers),
-VESA (on every VESA-compatible card, even without X11), some low-level 
+VESA (on every VESA-compatible card, even without X11), some low-level
 card-specific drivers (for Matrox, 3dfx and ATI) and some hardware MPEG decoder
 boards, such as the Siemens DVB, DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
@@ -767,7 +767,7 @@ Leads to image distortion!
 Shorthand for \-msglevel identify=4.
 Show file parameters in an easily parseable format.
 Also prints more detailed information about subtitle and audio
-track languages and IDs. 
+track languages and IDs.
 In some cases you can get more information by using \-msglevel identify=6.
 For example, for a DVD it will list the time length of each title, as well
 as a disk ID.
@@ -4110,7 +4110,7 @@ It probably only works on mono input.
 .PD 0
 .RSs
 .IPs <freq>
-The frequency of the sine which should be removed (in Hz) (default: 50) 
+The frequency of the sine which should be removed (in Hz) (default: 50)
 .IPs <decay>
 Controls the adaptivity (a larger value will make the filter adapt to
 amplitude and phase changes quicker, a smaller value will make the
@@ -6153,14 +6153,14 @@ colorspace, so it is safe to add it to the configuration file.
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
 .
 .TP
-.B \-audio-delay <any floating-point number> 
+.B \-audio-delay <any floating-point number>
 Delays either audio or video by setting a delay field in the header
 (default: 0.0).
 This does not delay either stream while encoding, but the player will
 see the delay field and compensate accordingly.
 Positive values delay the audio, and negative values delay the video.
-Note that this is the exact opposite of the \-delay option. 
-For example, if a video plays correctly with \-delay 0.2, you can 
+Note that this is the exact opposite of the \-delay option.
+For example, if a video plays correctly with \-delay 0.2, you can
 fix the video with MEncoder by using \-audio-delay -0.2.
 .sp 1
 Currently, this option only works with the default muxer (\-of avi).
@@ -6955,7 +6955,7 @@ Does absolutely nothing at the moment.
 maximum interval between keyframes in frames (default: 250 or one
 keyframe every ten seconds in a 25fps movie.
 This is the recommended default for MPEG-4).
-Most codecs require regular keyframes in order to limit the accumulation of mismatch error. 
+Most codecs require regular keyframes in order to limit the accumulation of mismatch error.
 Keyframes are also needed for seeking, as seeking is only possible to a keyframe - but
 keyframes need more space than other frames, so larger numbers here mean
 slightly smaller files but less precise seeking.
@@ -8806,10 +8806,10 @@ A higher b_bias produces more B-frames (default: 0).
 Allows B-frames to be used as references for predicting other frames.
 For example, consider 3 consecutive B-frames: I0 B1 B2 B3 P4.
 Without this option, B-frames follow the same pattern as MPEG-[124].
-So they are coded in the order I0 P4 B1 B2 B3, and all the B-frames 
+So they are coded in the order I0 P4 B1 B2 B3, and all the B-frames
 are predicted from I0 and P4.
 With this option, they are coded as I0 P4 B2 B1 B3.
-B2 is the same as above, but B1 is predicted from I0 and B2, and 
+B2 is the same as above, but B1 is predicted from I0 and B2, and
 B3 is predicted from B2 and P4.
 This usually results in slightly improved compression, at almost no
 speed cost.
@@ -8969,7 +8969,7 @@ Requires bframes > 1.
 .TP
 .B (no)i4x4
 Use additional macroblock type i4x4 (default: enabled).
-Without this option, P- and B-frames will use only 
+Without this option, P- and B-frames will use only
 i16x16 and the inter types specified below.
 .
 .TP
@@ -9357,11 +9357,11 @@ Any other framerate is incompatible with this option.
 .
 .TP
 .B delay\ \ 
-Currently only meaningful for MPEG[12]: Maximum allowed distance, 
-in seconds, between the reference timer of the output stream (SCR) 
-and the decoding timestamp (DTS) for any stream present 
+Currently only meaningful for MPEG[12]: Maximum allowed distance,
+in seconds, between the reference timer of the output stream (SCR)
+and the decoding timestamp (DTS) for any stream present
 (demux to decode delay).
-Default is 0.7 (as mandated by the standards defined by MPEG). 
+Default is 0.7 (as mandated by the standards defined by MPEG).
 Higher values require larger buffers and must not be used.
 .
 .TP
@@ -9410,14 +9410,14 @@ Sometimes raising it is necessary in order to avoid "buffer underflows".
 .TP
 .B packetsize
 Size, expressed in bytes, of the unitary packet for the chosen format.
-When muxing to MPEG[12] implementations the default values are: 
+When muxing to MPEG[12] implementations the default values are:
 2324 for [S]VCD, 2048 for all others formats.
 .
 .TP
 .B preload
-Currently only meaningful for MPEG[12]: Initial distance, 
-in seconds, between the reference timer of the output stream (SCR) 
-and the decoding timestamp (DTS) for any stream present 
+Currently only meaningful for MPEG[12]: Initial distance,
+in seconds, between the reference timer of the output stream (SCR)
+and the decoding timestamp (DTS) for any stream present
 (demux to decode delay).
 .
 .
