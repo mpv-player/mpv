@@ -1,4 +1,4 @@
-.\" synced with 1.1266
+.\" synced with 1.1278
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -33,7 +33,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "14 Août 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "30 Avril 2006" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -319,7 +319,7 @@ Bascule l'alignement des sous-titres: haut/milieu/bas.
 Ajuste le décalage des sous-titres de +/- 0.1 secondes.
 .IPs "r et t"
 Translate les sous-titres vers le haut/bas.
-.IPs i
+.IPs i (mode \-edlout uniquement)
 Créé une marque EDL.
 .IPs "s (\-vf screenshot uniquement)"
 Réalise une capture d'écran.
@@ -799,9 +799,14 @@ Mène à des distorsions d'image!
 .
 .TP
 .B \-identify
+Raccourci pour \-msglevel identify=4.
 Affiche les paramètres de fichier dans un format facilement analysable.
 Affiche aussi des informations plus détaillées à propos des langues et des
 identifiants des sous-titres et des pistes audio.
+Dans certains cas, vous aurez encore plus d'informations en utilisant
+\-msglevel identify=6.
+Par exemple, pour les DVDs, cela listera la durée de chaque titre, tout
+comme le numéro d'identifiant du DVD.
 Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
 .
@@ -1272,7 +1277,7 @@ angles.
 Vous pouvez ainsi dire à MPlayer quels angles utiliser (par défaut\ : 1).
 .
 .TP
-.B \-edl <nomfichier> (EDL uniquement)
+.B \-edl <nomfichier>
 Active les actions d'édition de liste de décision (EDL) durant la lecture.
 La vidéo sera sautée et le son coupé et remis suivant les entrées du
 fichier indiqué.
@@ -6589,7 +6594,7 @@ Cette option est gardée uniquement pour maintenir la compatibilité
 ascendante et risque d'être enlevée dans les versions futures.
 .
 .TP
-.B \-hr-edl-seek (EDL uniquement)
+.B \-hr-edl-seek
 Utilise une méthode précise, mais plus lente pour sauter des
 séquences de film.
 Les séquences marquées pour être sautées ne sont pas réellement
@@ -8436,8 +8441,25 @@ Ne fonctionne pour le moment que si la détection de changement de scène
 est désactivée (sc_threshold=1000000000).
 .
 .TP
-.B vglobal
-FIXME: Documente ceci.
+.B vglobal=<0\-3>
+Contrôle l'écriture des en-têtes vidéos globales.
+Control writing global video headers.
+.PD 0
+.RSs
+.IPs 0
+Laisse le codec décider où écrire les en-têtes vidéos globales
+(par défaut).
+.IPs 1
+N'écrit les en-têtes vidéos globales que dans les données extras (requis
+pour .mp4/MOV/NUT).
+.IPs 2
+N'écrit les en-têtes vidéos globales que devant les trames-clées.
+.IPs 3
+Combine 1 et 2.
+.
+.TP
+.B aglobal=<0\-3>
+Pareil que vglobal pour les en-têtes audios.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9803,8 +9825,14 @@ tout comme les filtres vidéo harddup et softskip).
 .PD 1
 .
 .TP
-.B delay\ \
-FIXME: Documente ceci.
+.B delay\ \ 
+N'a de sens pour le moment que pour MPEG[12]: Distance maximale
+permise, en secondes, entre la référence temporelle du flux de sortie
+(SCR) et le timestamp de décodage (DTS) pour tout flux présent (délais
+entre le démultiplexage et le décodage) (par défaut: 0.7 requis par les
+standards MPEG).
+Des valeurs plus grandes demandent des tampons plus grands, et est
+découragé.
 .
 .TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
@@ -9925,19 +9953,28 @@ Sony Digital Video container
 .PD 1
 .TP
 .B i_certify_that_my_video_stream_does_not_use_b_frames
-FIXME: Documente ceci.
+MEncoder ne peut pas assigner les timestamps correctes quand il y a des
+trames-B dans le flux vidéo, ce qui donne des encodes incorrects.
 .
 .TP
 .B muxrate
-FIXME: Documente ceci.
+Débit binaire du multiplexe, en unités de 50 octets par secondes;
+n'a de sens pour le moment que pour MPEG[12].
+Il arrive qu'il faille augmenter ce paramètre pour éviter des débordements
+de tampons "buffer underflows".
 .
 .TP
 .B packetsize
-FIXME: Documente ceci.
+Size, expressed in bytes, of the unitary packet for the chosen format.
++When muxing to MPEG[12] implementations the default values are: 
++2324 for [S]VCD, 2048 for all others formats.
 .
 .TP
 .B preload
-FIXME: Documente ceci.
+N'a de sens pour le moment que pour MPEG[12]: Distance maximale
+permise, en secondes, entre la référence temporelle du flux de sortie
+(SCR) et le timestamp de décodage (DTS) pour tout flux présent (délais
+entre le démultiplexage et le décodage).
 .
 .
 .
