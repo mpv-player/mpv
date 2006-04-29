@@ -4,6 +4,7 @@ MPlayer (1.0)
 
     Security:
     * support for compilation with non-executable stack
+    * fix the majority of issues caught by Coverity's static analysis runs
 
     DOCS:
     * environment variables documentation started
@@ -24,6 +25,8 @@ MPlayer (1.0)
     * AIX port documentation added
     * all XviD options documented
     * CONFIGURATION FILES section added to the man page
+    * Doxygen comments added to configuration parser and OpenGL
+      video out driver,
 
     Drivers:
     * JACK audio output rewritten without bio2jack
@@ -97,8 +100,8 @@ MPlayer (1.0)
     * bandwidth selection for Real RTSP streams (for faster stream dumps)
 
     FFmpeg/libavcodec:
-    * Snow bug fixes and speedup
-    * MPEG-1/2 decoder speedup
+    * Snow bug fixes and speedup on x86, x86-64 and Altivec
+    * MPEG-1/2/4 and H.264 decoder speedup
     * Indeo2 (RT21) video decoder
     * Fraps video decoder (v0 & v1)
     * Vorbis audio decoder
@@ -119,6 +122,8 @@ MPlayer (1.0)
     * CamStudio video decoder
     * Theora decoder
     * WMV3 decoder (unfinished)
+    * improved MOV and QuickTime demuxer
+    * improved AVI muxer
     * multithreaded decoding
     * bitexact decoding
 
@@ -127,6 +132,7 @@ MPlayer (1.0)
     * ported to GTK2
     * long standing up side down vpotmeter bug fixed
     * don't hang on unreadable skin files
+    * random fixes and improvements
 
     Filters:
     * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6")
@@ -136,8 +142,10 @@ MPlayer (1.0)
     * screenshot filter
     * -af pan command line fix, now outputs the right number of channels
       and accepts values < 0 or > 1. Channel order had to be changed.
+    * - af sinesupress to remove a sine at a certain frequency
     * negative stride support in swscale
-    * big-endian and AltiVec fixes and performance improvements for swscaler
+    * big-endian and AltiVec fixes and performance improvements for swscaler,
+      color conversions and post-processing
     * -srate fixed
     * hqdn3d: 2.5x faster temporal-only, 1.6x faster spatial-only
 
@@ -162,10 +170,10 @@ MPlayer (1.0)
     * twolame support
     * libavformat muxers support
     * VBR audio in MPEG support
-    * muxer_mpeg: added an experimental film2pal teleciner and fixed previous bugs that could 
-      lead to desync and to wrong TFF/RFF flags being set
-    * rewritten muxer_mpeg.c: buffering and timing constraints will always be respected, 
-      provided that the muxrate is big enough
+    * muxer_mpeg: added an experimental film2pal teleciner and fixed previous
+      bugs that could lead to desync and to wrong TFF/RFF flags being set
+    * rewritten muxer_mpeg.c: buffering and timing constraints will always
+      be respected, provided that the muxrate is big enough
 
     Ports:
     * improved timer function on Mac OS X
@@ -189,8 +197,10 @@ MPlayer (1.0)
     * MIPS64 support
     * Darwin portability fixes
     * improved Debian packaging
+    * improved Win32 xinerama support
 
     Others:
+    * Audio/Video synchronisation fixes
     * enabled hinting for TrueType fonts
     * support for file:// syntax
     * -fb option removed, use the device suboption of -vo fbdev/fbdev2 instead
@@ -221,7 +231,8 @@ MPlayer (1.0)
     * TOOLS/aconvert: allows mencoder to encode from an audio only file
     * TOOLS/3*m_convert: D-Cinema Audio and Video conversion program
     * TOOLS/qepdvcd.sh: Anything supported to vcd/svcd pal/ntsc
-    * TOOLS/encode2mpeglight: new tool to encode to mpeg formats using only mencoder
+    * TOOLS/encode2mpeglight: new tool to encode to mpeg formats using
+      only mencoder
     * allow multiple -help clauses on the command line
     * console "OSD" for audio-only files
     * show total time when playing audio-only files
@@ -230,6 +241,7 @@ MPlayer (1.0)
     * parallel make fixed
     * (improved) support for shared libav* libraries
     * playback/encoding profiles support
+    * new property API
 
 
   pre7try2: August 26, 2005
