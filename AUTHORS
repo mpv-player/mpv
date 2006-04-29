@@ -410,7 +410,7 @@ Kain, Nicholas <njk@aerifal.cx>
 Kalinski, Filip (filon) <filon@pld.org.pl>
     * X11 fulscreen switching fixes/cleanup
 
-Кълвачев, Иван (iive) <iive@yahoo.com>
+Иван Кълвачев [Ivan Kalvachev] (iive) <iive@yahoo.com>
     * interlaced MPEG-2 support (libmpeg2)
     * configfile parser fixes
     * SRT subtitle dump support
