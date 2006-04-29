@@ -853,78 +853,73 @@
 </para>
 
 <para>
-  La résolution native pour un DVD NTSC est 720x480 et 720x576 pour un 
-  PAL, mais il y a un indicateur d'aspect qui spécifie que le mode est 
-  plein-écran (full-screen  4:3) ou bien écran large (wide-screen  16:9).
-  Un grand nombre (pas tous) des DVDs en wide-screen ne respecte pas
-  strictement le format 16:9, mais est plutôt en 1,85:1 ou 2,35:1 (cinémascope).
-  Ceci signifie qu'il y aura des bandes noires à enlever sur la vidéo.
+  La résolution native pour un DVD est 720x480 pour un NTSC et 720x576 pour un 
+  PAL, mais il y a un indicateur d'aspect qui spécifie si le mode est 
+  plein-écran (4:3) ou écran large (16:9).
+  Un grand nombre (si ce n'est la plupart) des DVD en écran large ne sont pas strictement
+  en 16:9 mais est plutôt en 1,85:1 ou 2,35:1 (cinémascope).
+  Ceci signifie qu'il y aura des bandes noires sur la vidéo qui auront besoin d'être retirées.
 </para>
 
 <para>
-  <application>MPlayer</application> fournit un filtre de détection pour le
-  recadrage qui déterminera le rectangle de découpe (<option>-vf cropdetect</option>).
+  <application>MPlayer</application> fournit un filtre de détection 
+  qui détermine le rectangle de recadrage (<option>-vf cropdetect</option>).
   Lancer l'application <application>MPlayer</application> avec l'option 
-  <option>-vf cropdetect</option> et il affichera les informations nécessaires 
-  pour faire une découpe propre afin d'enlever les bandes.
-  Vous devez laisser le film assez longtemps avec une utilisation complète de 
-  l'image pour obtenir des valeurs précises.
+  <option>-vf cropdetect</option> et il affichera les options de recadrage pour enlever les bandes.
+  Vous devez laisser tourner le film suffisament longtemps pour que toute la zone de l'image soit utilisée
+  de façon à obtenir des valeurs précises.
 </para>
 
 <para>
-  Ensuite, testez les valeurs avec <application>MPlayer</application> en utilisant 
-  les informations affichées par la ligne de commande <option>cropdetect</option>, 
-  et éventuellement ajustez le rectangle de découpe.
-  Ce filtre <option>rectangle</option> offre la possibilité de modifier 
-  sa position pendant le film. Faites bien attention à suivre les 
-  recommendations précédentes en ce qui concerne les dimensions qui doivent 
-  être des multiples de certaines valeurs ou bien  
-  l'information chromatique ne sera plus alignée.
+  Ensuite, testez les valeurs obtenues avec <application>MPlayer</application> en utilisant 
+  la ligne de commande fournie par <option>cropdetect</option>, 
+  et éventuellement ajustez le rectangle de recadrage.
+  Ce filtre <option>rectangle</option> offre la possibilité de le positionner 
+  de façon interactive pendant le film. N'oubliez pas de suivre les 
+  recommendations précédentes sur la divisibilité des dimensions de l'image afin de ne pas 
+  désaligner les plans de chrominance.
 </para>
 
 <para>
-  Dans certain cas, la réduction ne sera pas désirée. Ce redimensionnement 
-  vertical est difficile dès lors que la vidéo est entrelacée, si vous désirez 
-  la conserver ainsi, abstenez-vous d'appliquer un redimensionnement.
-  Si vous ne voulez pas redimensionner mais que vous voulez toujours utiliser 
-  une dimension multiple de 16, il vous faudra couper au delà de la taille 
-  normale. Ne coupez pas en dessous car les bandes noires ont un effet néfaste
-  pour la compression.
+  Dans certain cas, le redimensionnement n'est pas souhaitable. Il est délicat  
+  dans le sens vertical avec des vidéos entrelacées, si vous désirez 
+  conserver l'entrelacement, vous devriez vous abstenir de redimensionner.
+  Sans redimensionner, pour utiliser des dimensions multiples de 16,
+  il vous faudra recadrer plus petit que l'image. Ne recadrer pas plus grand que l'image
+  parce que car les bandes noires sont nuisibles à la compression.
 </para>
 
 <para>
-  Le MPEG-4 utilisant des macroblos de 16x16, vérifiez bien que les dimensions 
+  Le MPEG-4 utilisant des macroblocs de 16x16, assurez-vous que les dimensions 
   de la vidéo que vous encodez sont des multiples de 16, sinon vous dégraderez la 
-  qualité de la vidéo encodée, surtout sur aux faibles débits. Le mieux est 
-  d'arrondir les dimensions du rectangle de découpe au multiple de 16 le plus 
-  proche.
-  Dans l'état initial, durant le redimensionnement, vous devrez augmenter le 
-  décallage sur Y par la moitié de la différence entre l'ancienne et la nouvelle 
-  taille pour que le résultat sur la vidéo se situe au milieu de l'image. Aussi,
-  la vidéo DVD étant samplée, vérifiez bien que l'offset est un nombre pair
-  (En fait, c'est une règle: n'utilisez jamais une valeur impaire lors d'un recadrage ou 
-  lors d'un redimensionnement d'une vidéo). Si vous ne vous faites pas à l'idée de jeter quelques 
-  pixels, vous préfèrerez sans doute redimensionner la vidéo par le zoom. Nous allons voir cela 
-  dans l'example ci-dessous.
-  En fait, vous pouvez laisser faire l'option du filtre <option>cropdetect</option> qui fera 
-  tout cela pour vous: il a un paramètre optionnel <option>round</option> qui vaut
+  qualité, surtout à de faibles débits. Pour ce faire, vous pouvez
+  arrondir les dimensions du rectangle de recadrage au multiple de 16 inférieur.
+  Comme expliqué plus haut, durant le recadrage, vous devrez augmenter le 
+  décalage en Y de la moitié de la différence entre l'ancienne et la nouvelle 
+  hauteur pour que l'image résultante se situe au milieu de l'ancienne. Et à cause
+  de la façon dont les videos DVD sont échantillonées, assurez-vous que ce décalage en Y
+  est un nombre pair. (En fait, c'est une règle: n'utilisez jamais une valeur impaire lors d'un recadrage ou 
+  d'un redimensionnement de vidéo). Si vous ne vous faites pas à l'idée de vous débarrasser de quelques 
+  pixels, vous préfèrerez sans doute redimensionner la vidéo. Nous allons voir cela 
+  dans notre exemple ci-dessous.
+  En fait, vous pouvez laisser le filtre <option>cropdetect</option> faire 
+  tout cela pour vous: il a un paramètre optionnel d'arrondi <option>round</option> qui vaut
   16 par défaut.
 </para>
 
 <para>
-  Faites bien aussi attention aux pixels à "demi-noir" sur les bords. Assurez-vous qu'ils seront 
-  enlevés lors de la découpe, autrement, ils seront une source de gaspillage de 
-  bits alors qu'il pourrait être utilisés ailleurs.
+  Faites aussi attention aux pixels à "demi-noir" sur les bords. Assurez-vous qu'ils sont 
+  en dehaors de votre recadrage, autrement, vous gâcherez des bits qui seraient mieux utilisés ailleurs.
 </para>
 
 <para>
-  Aprés tout ceci, vous obtiendrez une vidéo avec des pixels ne s'approchant 
-  plus de 1,85:1 ou 2,35:1, mais quelque chose d'assez proche. Vous pouvez alors 
-  calculer le ratio à la main mais <application>MEncoder</application> propose 
+  Après tout ceci, vous obtiendrez une vidéo qui n'est pas tout à fait au format
+  1,85:1 ou 2,35:1, mais quelque chose d'assez proche. Vous pourriez alors 
+  calculer le nouveau format à la main mais <application>MEncoder</application> propose 
   une option appelée <option>autoaspect</option> pour <systemitem class="library">libavcodec</systemitem> 
-  qui fera cela pour vous. N'agrandissez pas cette vidéo pour
-  d'obtenir des pixels carrés sauf si vous avez de l'espace disque à revendre. 
-  Ce changement d'échelle se fera à la lecture, le lecteur utilisera les données 
+  qui fera cela pour vous. N'agrandissez surtout pas cette vidéo pour
+  obtenir les dimensions standards à moins que vous n'aimiez gâcher votre espace disque. 
+  Ce changement d'échelle se fait à la lecture, le lecteur utilisera les données 
   stockés dans le fichier AVI pour effectuer le bon rendu.
   Malheureusement, tous les lecteurs vidéos n'appliquent pas ce redimensionnement 
   automatique, c'est peut-être pour cela que vous voudrez quand même procéder à ce redimensionnement.
