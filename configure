@@ -3380,6 +3380,23 @@ fi
 echores "$_setenv"
 
 
+if sunos; then
+echocheck "sysi86()"
+cat > $TMPC << EOF
+#include <sys/sysi86.h>
+int main (void) { sysi86(0); return 0; }
+EOF
+_sysi86=no
+cc_check && _sysi86=yes
+if test "$_sysi86" = yes ; then
+  _def_sysi86='#define HAVE_SYSI86 1'
+else
+  _def_sysi86='#undef HAVE_SYSI86'
+fi
+echores "$_sysi86"
+fi
+
+
 echocheck "sys/sysinfo.h"
 cat > $TMPC << EOF
 #include <sys/sysinfo.h>
@@ -7700,6 +7717,9 @@ $_def_setenv
 #ifndef HAVE_SETENV
 int setenv(const char *name, const char *val, int overwrite);
 #endif
+
+/* Define this if your system has sysi86 */
+$_def_sysi86
 
 /* Define this if your system has pthreads */
 $_def_pthreads

@@ -60,12 +60,14 @@ int modify_ldt(int func, void *ptr, unsigned long bytecount);
 #include <sys/sysi86.h>
 
 /* solaris x86: add missing prototype for sysi86() */
+#ifdef HAVE_SYSI86
 #ifdef  __cplusplus
 extern "C" {
 #endif
 int sysi86(int, void*);
 #ifdef  __cplusplus
 }
+#endif
 #endif
 
 #ifndef NUMSYSLDTS             /* SunOS 2.5.1 does not define NUMSYSLDTS */
