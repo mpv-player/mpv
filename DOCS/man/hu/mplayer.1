@@ -1,5 +1,5 @@
-.\" Synced with 1.1124
-.\" MPlayer (C) 2000-2005 MPlayer Team
+.\" Synced with 1.1200
+.\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
 .
@@ -34,7 +34,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005. 05. 15." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 01. 04." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -105,7 +105,7 @@ mencoder \- film kódoló
 .in
 .B mplayer
 'in +\n[.k]u
-.I [cdda|cddb]://sáv[:sebesség][/eszköznév]
+.I [cdda|cddb]://sáv[-végsáv][:sebesség][/eszköznév]
 [opciók]
 .
 .br
@@ -229,19 +229,19 @@ A gyors kezdéshez példákat ezen man oldal végén találhatsz.
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Irányítás billentyûzetrõl
+.\" interaktív vezérlés
 .\" --------------------------------------------------------------------------
 .
-.SH "IRÁNYÍTÁS BILLENTYÛZETRÕL"
+.SH "INTERAKTÍV VEZÉRLÉS"
 Az MPlayernek egy teljesen személyre szabható, parancs-vezérelt irányító rétege
 van, aminek a segítségével vezérelhetõ billentyûzettel, egérrel, joystickkal,
 vagy távirányítóval (LIRC-cel).
 Lásd a \-input kapcsolót a testreszabásához.
 .
 .TP
-.B általános irányítás
+.B irányítás billentyûzetrõl
 .PD 0
-.RSs
+.RS
 .IPs "<\- és \->"
 Lépés vissza/\:elõre 10 másodperccel.
 .IPs "fel és le"
@@ -255,15 +255,15 @@ Felezi/duplázza az aktuális lejátszási sebességet.
 .IPs "backspace"
 Visszaállítja a lejátszási sebességet normálisra.
 .IPs "< és >"
-Vissza/\:elõre lépés a lejátszási listában
+Vissza/\:elõre lépés a lejátszási listában.
 .IPs "ENTER"
-elõre lépés a lejátszási listában, akár a végén túlra is
+Elõre lépés a lejátszási listában, akár a végén túlra is.
 .IPs "HOME és END"
 következõ/\:elõzõ szülõi playtree bejegyzésre ugrás
-.IPs "INS és DEL"
-következõ/\:elõzõ alternatív forrás (csak ASX lejátszási listánál)
+.IPs "INS és DEL (csak ASX lejátszási listában)"
+Következõ/\:elõzõ alternatív forrás.
 .IPs "p / SPACE"
-Film megállítása (újra megnyomva elindítja).
+Szünet (újra megnyomva indít).
 .IPs .\ \ \ \ 
 Elõre lépés.
 Egyszer megnyomva megállítja a filmet, majd minden egyes megnyomásra egy
@@ -301,23 +301,25 @@ Elõre/hátra lépés a felirat listában.
 "Kényszerített felirat" megjelenítése.
 .IPs a\ \ \ \ 
 Felirat igazítás állítása: fent/\:középen/\:lent.
-.IPs "z és x"
+.IPs "x és z"
 Felirat késleltetés állítása +/\:- 0.1 másodperccel.
 .IPs "r és t"
 Felirat mozgatása fel/\:le.
 .IPs i\ \ \ \ 
 EDL jelzés beállítása.
-.IPs s\ \ \ \ 
-Képernyõmentés készítése (betöltött screenshot szûrõ kell hozzá).
+.IPs "s (screenshot szûrõnek betöltve kell lennie)"
+Képernyõmentés készítése.
 .RE
 .PD 1
 .PP
+.RS
 (A következõ billentyûk csak hardveres támogatású videó kimeneteken
 (xv, (x)vidix, (x)mga, stb.), a szoftveres equalizer
 (\-vf eq vagy \-vf eq2) vagy hue szûrõ (\-vf hue) használatakor mûködnek.
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "1 és 2"
 Kontraszt beállítása.
 .IPs "3 és 4"
@@ -329,10 +331,12 @@ Szaturáció beállítása.
 .RE
 .PD 1
 .PP
+.RS
 (A következõ billentyûk csak quartz vagy macosx videó kimeneten mûködnek.)
+.RE
 .PP
 .PD 0
-.RSs
+.RS
 .IPs "command + 0"
 Film ablak eredeti méretének felére állítása.
 .IPs "command + 1"
@@ -345,11 +349,29 @@ Teljes képernyõs lejátszás (lásd még a \-fs\-t).
 Film ablak alpha-jának beállítása.
 .RE
 .PD 1
-.
-.TP
-.B GUI irányítása billentyûzetrõl
+.PP
+.RS
+(A következõ gombok csak akkor mûködnek, ha multimédiás billentyûzeted van.)
+.RE
+.PP
 .PD 0
-.RSs
+.RS
+.IPs "PAUSE"
+Szünet.
+.IPs "STOP\ "
+Lejátszás megállítása és kilépés.
+.IPs "PREVIOUS és NEXT"
+Lépés hátra/\:elõre 1 perccel.
+.RE
+.PD 1
+.PP
+.RS
+(A következõ gombok csak akkor mûködnek, ha GUI támogatás be van fordítva
+és elsõbbséget élveznek a fenti gomb-definíciókkal szemben.)
+.RE
+.PP
+.PD 0
+.RS
 .IPs ENTER
 Lejátszás elindítása.
 .IPs ESC\ \ 
@@ -359,18 +381,21 @@ Fájl betöltése.
 .IPs t\ \ \ \ 
 Felirat betöltése.
 .IPs c\ \ \ \ 
-skin böngészõ
+Skin böngészõ megnyitása.
 .IPs p\ \ \ \ 
-lejátszási lista
+Lejátszási lista megnyitása.
 .IPs r\ \ \ \ 
-beállítások
+Beállítások megnyitása.
 .RE
 .PD 1
-.
-.TP
-.B TV bemenet vezérlése
+.PP
+.RS
+(A következõ gombok csak akkor mûködnek, ha TV bemenet támogatással fordítottál
+és elsõbbséget élveznek a fenti gomb-definíciókkal szemben.)
+.RE
+.PP
 .PD 0
-.RSs
+.RS
 .IPs "h és k"
 Elõzõ/\:következõ csatorna kiválasztása.
 .IPs n\ \ \ \ 
@@ -380,9 +405,37 @@ Csatornalista átváltása.
 .RE
 .PD 1
 .
+.TP
+.B irányítás egérrel
+.PD 0
+.RS
+.IPs "3. gomb és 4. gomb"
+Lépés hátra/\:elõre 1 perccel.
+.IPs "5. gomb és 6. gomb"
+Hangerõ csökkentése/\:növelése.
+.RE
+.PD 1
+.
+.TP
+.B irányítás botkormánnyal
+.PD 0
+.RS
+.IPs "balra és jobbra"
+Lépés hátra/\:elõre 10 másodperccel.
+.IPs "fel és le"
+Lépés hátra/\:elõre 1 perccel.
+.IPs "1. gomb"
+szünet
+.IPs "2. gomb"
+OSD állapotok váltása: nincs / léptetés / léptetés + idõzítõ / léptetõ + idõzítõ + össz idõ.
+.IPs "3. gomb és 4. gomb"
+Hangerõ csökkentése/\:növelése.
+.RE
+.PD 1
+.
 .
 .\" --------------------------------------------------------------------------
-.\" Opciók
+.\" Használat
 .\" --------------------------------------------------------------------------
 .
 .SH "HASZNÁLAT"
@@ -399,10 +452,20 @@ Formátuma az alábbi:
 .br
 %n%n_hosszusagu_karakterlanc
 .br
-.I PÉLDA:
+.I PÉLDÁK:
 .br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
+.br
+Vagy script-ben:
+.br
+mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
+.
+.\" --------------------------------------------------------------------------
+.\" Konfigurációs fájlok
+.\" --------------------------------------------------------------------------
+.
+.SH "KONFIGURÁCIÓS FÁJLOK"
 Ezen opciók mindegyike beleírható a konfigurációs fájlokba, amit az
 MPlayer/MEncoder minden indításkor beolvas.
 A rendszerszintû konfigurációs fájl az 'mplayer.conf', a konfigurációs
@@ -419,7 +482,8 @@ Az olyan opciók melyek egyébként érték megadása nélkül használandóak, itt
 a 'true' vagy '1' értékkel engedélyezhetõek, míg a 'false' illetve '0'
 értékkel letilthatóak. Még az al-opciók is paraméterezhetõek ily módon.
 .PP
-.I PÉLDÁUL:
+.I PÉLDA AZ MPLAYER KONFIGURÁCIÓS FÁJLJÁRA:
+.sp 1
 .nf
 # Matrox vezérlõ használata alapértelmezésként.
 vo=xmga
@@ -432,12 +496,39 @@ mf=type=png:fps=25
 vf=eq2=1.0:-0.8
 .fi
 .PP
+.I "PÉLDA A MENCODER KONFIGURÁCIÓS FÁJLJÁRA:"
+.sp 1
+.nf
+# Az MEncoder kimenetének alapértelmezett fájlneve.
+o=encoded.avi
+# A következõ 4 sor megengedi a mencoder tv:// -nek, hogy azonnal kezdje el a mentést.
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# sokkal bonyolultabb alapértelmezett kódolási beállítások
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
+.fi
+.PP
 File-specifikus konfigurációs file-okat is írhatsz.
 Ha például a 'movie.avi' file-hoz szeretnél konfigurációs file-t,
 hozz létre egy 'movie.avi.conf' nevû file-t az opciókkal, és tedd
 a ~/.mplayer könyvtárba vagy a fájl mellé.
 .
-.
+.\" --------------------------------------------------------------------------
+.\" Opciók
+.\" --------------------------------------------------------------------------
 .
 .SH "ÁLTALÁNOS OPCIÓK"
 .
@@ -449,6 +540,43 @@ használja a beépített codecs.conf helyett.
 .TP
 .B \-include <configurációs\ fájl>
 Az alapértelmezettek után beolvasandó konfigurációs fájl.
+.
+.TP
+.B \-msglevel <all=<szint>:<module>=<szint>:...>
+Külön beállítja a beszédességet minden modulhoz.
+Az 'all' modul minden más, explicit nem megadott modul beszédességét beállítja.
+Lásd a '\-msglevel help' kimenetét a modulok listájához.
+.br
+.I MEGJEGYZÉS:
+A parancssor betöltése elõtti kiírások nem vezérelhetõek.
+.br
+Használható szintek:
+.PD 0
+.RSs
+.IPs -1
+teljes némaság
+.IPs 0
+csak végzetes üzenetek
+.IPs 1
+hiba üzenetek
+.IPs 2
+figyelmeztetõ üzenetek
+.IPs 3
+rövid tanácsok
+.IPs 4
+információs üzenetek
+.IPs 5
+státusz üzenetek (amiket elrejt a -quiet)
+.IPs 6
+bõbeszédû üzenetek
+.IPs 7
+2. szintû debug
+.IPs 8
+3. szintû debug
+.IPs 9
+4. szintû debug
+.RE
+.PD 1
 .
 .TP
 .B \-quiet\ 
@@ -473,20 +601,16 @@ A realtime priorítás használata rendszer leakadást eredményezhet.
 .RE
 .
 .TP
-.B \-v, \-verbose
-Növeli a beszédességet (több \-v több szövegelést jelent).
-.PD 0
-.RSs
-.IPs <semmi>
-csak néhány információs kimenet (alapértelmezett)
-.IPs \-v\ \ \
-néhány alap debug információ, AVI fejléc, függvény értékek (init debug)
-.IPs \-v\ \-v
-AVI index kiírása, chunk bemenet, több debug infó (lejátszó debug).
-.IPs \-v\ \-v\ \-v
-Kiír mindent a bemenet értelmezõkrõl (értelmezõ debug).
-.RE
-.PD 1
+.B \-really-quiet (lásd még \-quiet)
+Még kevesebb kimenet és státusz üzenet kiírása, mint a \-quiet esetén.
+.
+.TP
+
+.
+.TP
+.B \-v\ \ \ \ \ 
+Növeli a beszédességet egy szinttel minden parancssorban található
+\-v esetén.
 .
 .
 .
@@ -714,11 +838,6 @@ csak ezen lejátszási lista elemeire lesznek érvényesek.
 FIXME: Ezen még javítani kell és pontosan dokumentálni.
 .
 .TP
-.B \-really-quiet (lásd még \-quiet)
-Még kevesebb kimenet és státusz üzenet megjelenítése, mint a
-\-quiet-nél.
-.
-.TP
 .B \-rtc-device <eszköz>
 A megadott eszköz használata az RTC idõzítéshez.
 .
@@ -840,7 +959,7 @@ Különösen hasznos lassú médián.
 A lejátszás akkor indul, ha a cache <százalék>-ig feltöltõdött.
 .
 .TP
-.B \-cache-seek-min <százalék> (még nincs implementálva)
+.B \-cache-seek-min <százalék>
 Ha léptetést kell végezni az aktuális pozícióból a cache méretének
 <százalék>-kal megadott részén belüli pozícióba, az MPlayer
 megvárja, hogy a cache feltöltõdjön addig a pozícióig
@@ -857,10 +976,12 @@ Az elérhetõ opciók:
 CD pörgetési sebesség állítása.
 .IPs paranoia=<0\-2>
 Paranoia szint állítása.
+A 0-tól különbözõ értékek úgy tûnik, elrontják a lejátszást az elsõ sáv
+kivételével mindenhol.
 .RSss
-0: ellenõrzés kikapcsolása
+0: ellenõrzés kikapcsolása (alapértelmezett)
 .br
-1: csak overlap ellenõrzés (alapértelmezett)
+1: csak overlap ellenõrzés
 .br
 2: teljes adatjavítás és ellenõrzés
 .REss
@@ -1166,15 +1287,26 @@ színtér beállítása
 színtér (fourcc) hexában
 .IPs size=<érték>
 képkockák mérete bájtban
+.REss
+.sp 1
+.RS
+.I PÉLDA:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+Lejátsza a népszerû "foreman" minta videót.
+.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+Nyers YUV minta lejátszása.
 .RE
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (csak LIVE.COM)
+.B \-rtsp-stream-over-tcp (csak LIVE555)
 rtsp:// URL-ekkel használandó, azt adja meg hogy a bejövõ RTP és RTCP
 csomagok TCP-n keresztül jöjjenek (ugyan azt a TCP kapcsolatot használva,
 mint az RTSP). Olyan internet kapcsolat esetében hasznos, amely nem
-engedi be az UDP csomagokat. (lásd http://www.live.com/mplayer/).
+engedi be az UDP csomagokat (lásd http://www.live555.com/\:mplayer/).
 .
 .TP
 .B \-saveidx <fájlnév>
@@ -1413,6 +1545,13 @@ Az aktuális könyvtárban hoz létre egy dumpsub.smi fájlt.
 A használt felirat (amit a \-sub opció ad meg) idõ alapú SubViewer formátumba
 konvertálása.
 Az aktuális könyvtárban hoz létre egy dumpsub.srt fájlt.
+.br
+.I MEGJEGYZÉS:
+Néhány hibás hardveres lejátszó meghal a Unix sorvégzõdésû SRT felirat
+fájlokon.
+Ha elég peches vagy és ilyened van, ereszd át a feliratodat a
+unix2dos vagy hasonló programon a Unix-os sorvégzõdések DOS/Windows
+sorvégzõdésekre cseréléséhez.
 .
 .TP
 .B \-dumpsub (csak MPlayer) (BÉTA KÓD)
@@ -1488,7 +1627,11 @@ fájlban tárolódik.
 .
 .TP
 .B \-noautosub
-Automatikus feliratkeresés kikapcsolása.
+Automatikus felirat betöltés kikapcsolása.
+.
+.TP
+.B \-osd-duration <idõ>
+Beállítja az OSD üzenetek hosszát ms-ben (alapértelmezett: 1000).
 .
 .TP
 .B \-osdlevel <0\-3> (csak MPlayer)
@@ -1568,11 +1711,11 @@ Megadja, hogy az SPU (DVD/\:VOBsub) feliratok hogyan legyenek helyezve.
 .IPs "-1"
 eredeti pozíció
 .IPs " 0"
-felülre igazítás (eredeti/\:alapértelmezett viselkedés)
+Felülre igazítás (eredeti viselkedés, alapértelmezett).
 .IPs " 1"
-középre igazítás
+Középre igazítás.
 .IPs " 2"
-alulra igazítás
+Alulra igazítás.
 .RE
 .PD 1
 .
@@ -1627,15 +1770,16 @@ Hibakeresési célra használatos.
 .
 .TP
 .B \-subalign <0\-2> (OSD only)
-Megadja, hogy a feliratok merre legyenek igazítva a \-subpos kapcsolóval.
+Megadja, hogy a felirat melyik sarkát kell a \-subpos által megadott
+magassághoz igazítani.
 .PD 0
 .RSs
 .IPs 0
-Igazítás felülre (eredeti/\:alapértelmezett tulajdonság).
+Felirat felsõ sarkának igazítása (eredeti tulajdonság).
 .IPs 1
-Igazítás középre.
+Felirat közepének igazítása.
 .IPs 2
-Igazítás alulra.
+Felirat alsó sarkának igazítása (alapértelmezett).
 .RE
 .PD 1
 .
@@ -1756,6 +1900,17 @@ Megadja a feliratok maximális szélességét a képernyõn.
 Hasznos a TV kimenethez.
 Az érték a felirat szélessége százalékban, a képernyõ szélességéhez
 viszonyítva.
+.
+.TP
+.B \-noterm-osd
+Letiltja az OSD üzenetek konzolon történõ megjelenítését, ha nincs elérhetõ
+videó kimenet.
+.
+.TP
+.B \-term-osd-esc <escape szekvencia>
+Megadja a konzolra írt OSD üzenetek kiírásakor használatos escape szekvenciát.
+Az escape szekvenciának az OSD-hez használt sor elejére kell vinnie a kurzort és
+le kell törölnie (alapértelmezett: ^[[A\\r^[[K).
 .
 .TP
 .B \-unicode
@@ -1886,8 +2041,12 @@ ALSA 0.5 audió kimeneti meghajtó
 OSS audió kimeneti meghajtó
 .PD 0
 .RSs
-.IPs dsp-device
-Beállítja az audió-kimeneti eszközt (alapértelmezett: /dev/\:dsp).
+.IPs <dsp-device>
+Beállítja az audió kimeneti eszközt (alapértelmezett: /dev/\:dsp).
+.IPs <mixer-eszköz>
+Beállítja a mixer eszközt (alapértelmezett: /dev/\:mixer).
+.IPs <mixer-csatorna>
+Beállítja a mixer csatornát (alapértelmezett: pcm).
 .RE
 .PD 1
 .
@@ -1944,6 +2103,14 @@ natív Mac OS X audió kimeneti vezérlõ
 .TP
 .B sgi (csak SGI)
 natív SGI audió kimeneti vezérlõ
+.PD 0
+.RSs
+.IPs "<kimeneti eszköz neve>"
+Explicit kiválasztja a használandó kimeneti eszközt/\:interfészt
+(alapértelmezett: rendszerszintû alapértelmezés).
+Például 'Analog\ Out' vagy 'Digital\ Out'.
+.RE
+.PD 1
 .
 .TP
 .B sun (csak Sun)
@@ -2018,6 +2185,13 @@ Jelenleg csak a directx kimeneti videó vezérlõvel mûködik.
 .B \-bpp <mélység>
 Felülbírálja az automatikusan megállapított színmélységet.
 Csak az fbdev, dga, svga, vesa videó kimenet támogatja.
+.
+.TP
+.B \-border
+Ablakkerettel és dekorációkkal játsza le a filmet.
+Mivel alapértelmezésként ez be van kapcsolva, használd a \-noborder opciót
+a szabványos ablak dekorációk kikapcsolásához.
+A directx videó kimeneti vezérlõ támogatja.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -2296,10 +2470,10 @@ kimeneti meghajtókkal mûködik.
 .B \-panscanrange <-19.0\-99.0> (kísérleti)
 Megváltoztatja a pan-and-scan funkcionalítás tartományát (alapértelmezett: 1).
 A pozitív értékek az alapértelmezett tartomány többszörösét jelentik.
-A negatív számok azt jelentik, hogy -panscanrange+1 faktorik tudsz nagyítani.
+A negatív számok azt jelentik, hogy \-panscanrange+1 faktorig tudsz nagyítani.
 Pl. \-panscanrange -3 4-es nagyítási faktort enged.
 Ez a képesség még kísérleti.
-Ne jelents hibákat, hacsak nem -vo gl-t használsz.
+Ne jelents hibákat, hacsak nem \-vo gl-t használsz.
 .
 .TP
 .B \-refreshrate <Hz>
@@ -2725,10 +2899,20 @@ OpenGL verzió >= 1.2 szükséges hozzá.
 .IPs slice-height=<0\-...>
 Az egy darabban a textúrára másolandó sorok száma (alapértelmezett: 4).
 0 a teljes kép.
+.br
+.I MEGJEGYZÉS:
+Ha YUV színteret használsz (lásd yuv alopció), különleges szabályok lépnek életbe:
+.RSss
+Ha a dekódoló slice renderelést használ (lásd \-noslices), ennek a beállításnak
+nincs hatása, a dekódoló által megadott slice méret lesz használva.
+.br
+Ha a dekódoló nem használ slice renderelést, az alapértelmezett 16.
+.RE
 .IPs (no)osd
 Engedélyezi vagy letiltja az OSD OpenGL-en keresztüli renderelésének
-támogatását (alapértelmezett: engedélyezett). Ez az opció teszteléshez van,
-az OSD letiltásához használd helyette a \-osdlevel 0 kapcsolót.
+támogatását (alapértelmezett: engedélyezett).
+Ez az opció teszteléshez van; az OSD letiltásához használd helyette a
+\-osdlevel 0 kapcsolót.
 .IPs (no)scaled-osd
 Az OSD viselkedésének megváltoztatása, amikor az ablakméret módosul
 (alapértelmezett: letiltva).
@@ -2750,7 +2934,7 @@ meg, de sokszor lassabb (alapértelmezett: 0).
 .br
 2: GL_ARB_texture_non_power_of_two kiterjesztés használata.
 Néhány esetben csak szoftveresen támogatott és ezért nagyon lassú.
-.REss
+.RE
 .IPs (no)glfinish
 Buffer csere elõtt a glFinish() meghívása.
 Lassabb, de a legtöbb esetben jobb kimenetet biztosít (alapértelmezett: kikapcsolva).
@@ -2794,10 +2978,19 @@ négy textúra egység.
 Fényesség, kontraszt, telítettség, színárnyalat és gamma
 beállítását teszi lehetõvé.
 A gamma külön állítható a vörös, zöld és kék színre.
+.br
+5: ATI-specifikus módszer (régebbi kártyákhoz).
+Ez egy ATI-specifikus kiterjesztés (GL_ATI_fragment_shader - nem
+GL_ARB_fragment_shader!).
+Legalább három textúra egység szükséges.
+Telítettség és színárnyalat beállítását teszi lehetõvé.
 .RE
 .IPs customprog=<fájlnév>
 Saját fragmentum programot tölt be a <fájlnév>-bõl.
 Lásd a TOOLS/edgedect.fp fájl példáért.
+.IPs customtex=<fájlnév>
+Egyéni "gamma ramp" textúrát tölt be a <fájlnév>-bõl.
+A yuv=4 vagy a customprog opcióval együtt használható.
 .REss
 .RE
 .PD 1
@@ -2815,28 +3008,7 @@ Kiválasztja a YUV-ból RGB-be történõ konverzió típusát.
 Ha 0-tól különbözõ értékre van állítva, az OSD le lesz tiltva és a fényerõsség,
 a kontraszt és a gamma beállítások csak a globális X szerver beállításain
 keresztül érhetõek el.
-.RSss
-0: Szoftveres konverzió használata (alapértelmezett).
-Kompatibilis minden OpenGL verzióval.
-Fényesség, kontraszt és telítettség beállítását teszi lehetõvé.
-.br
-1: Összekötõ regisztereket használ.
-Ez egy nVidia-specifikus kiterjesztés (GL_NV_register_combiners).
-Legalább három textúra egység szükséges.
-.br
-2: Fragmentum programot használ.
-A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
-három textúra egység.
-.br
-3: POW utasítást használó fragmentum programot használ.
-A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
-három textúra egység.
-A 4. módszer általában gyorsabb.
-.br
-4: Fragmentum programot használ további elemzéssel.
-A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
-négy textúra egység.
-.REss
+Ettõl eltekintve az értékeknek ugyan az a jelentésük, mint a \-vo gl esetén.
 .REss
 .
 .TP
@@ -3136,7 +3308,7 @@ A framerátát a fájlnév elõtt kell megadnod, különben a fájlnév része lesz.
 .RE
 .PD 0
 .RSs
-mplayer video.nut \-vo gif89a:15.0:test.gif
+mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
 .RE
 .PD 1
 .
@@ -3349,6 +3521,9 @@ Megadja a libavcodec dekódolási paramétereit.
 Elérhetõ opciók:
 .RE
 .RSs
+.IPs bitexact
+Csak bit-pontosságú algoritmusokat használ a dekódolás minden lépésében (codec
+teszteléshez).
 .IPs bug=<érték>
 A kódoló hibáinak kézi megkerülése.
 .RSss
@@ -3500,6 +3675,8 @@ Ez nagy arányú minõségromlást okoz a legtöbb esetben
 Teljesen kihagyja a kocka dekódolását.
 Nagy sebességnövekedés, de ugráló mozgás és rossz mellékhatások
 (lásd a skiploopfilter-t a használható kihagyási értékekért).
+.IPs threads=<0\-8>
+dekódoláshoz használandó szálak száma (alapértelmezett: 1)
 .IPs vismv=<érték>
 Mozgás vektorok vizualizációja.
 .RSss
@@ -3531,6 +3708,7 @@ Hasznos sebesség méréshez.
 .TP
 .B \-novideo
 Nem játszik le/\:kódol videót.
+Sok esetben ez nem mûködik, használd a \-vc null \-vo null opciókat helyette.
 .
 .TP
 .B \-oldpp <minõség> (csak OpenDivX) (ELAVULT)
@@ -4200,7 +4378,7 @@ változatlan marad, -1.0-val a bal és a jobb csatorna felcserélõdik.
 .PD 1
 .
 .TP
-.B volnorm[=metódus]
+.B volnorm[=metódus:cél]
 Maximalizálja a hangerõt a hang torzítása nélkül.
 .PD 0
 .RSs
@@ -4213,6 +4391,8 @@ szabványos súlyozott középértékének a segítségével (alapértelmezett).
 2: Több mintát használ a variációk finomításához az elõzõ minták
 szabványos súlyozott középértékének a segítségével.
 .REss
+.IPs <cél>
+Megadja a cél amplitudót a minta típusának töredékeként (alapértelmezett: 0.25).
 .RE
 .PD 1
 .
@@ -4776,10 +4956,29 @@ Kvantálási paraméter kényszerítése (alapértelmezett: 0, a videó QP-jét használja
 0: erõs korlát (alapértelmezett)
 .br
 1: gyenge korlát (jobb deringing, de homályosabb)
+.br
+4: mint a 0, de a B-kockák QP-jét is használja (vibrálást okozhat)
+.br
+5: mint az 1, de a B-kockák QP-jét is használja (vibrálást okozhat)
 .RE
 .
 .TP
-.B fspp[=minõség[:qp[:erõsség]]]
+.B uspp[=minõség[:qp]]
+Ultra egyszerû & lassú utófeldolgozó szûrõ, ami tömöríti és kibontja a
+képet több (vagy \- 8-as minõségi szint esetén \- az összes)
+lépésben és átlagolja az eredményeket.
+Annyiban különbözik az spp-tõl, hogy az uspp minden esetben a lavc-mpeg4-gyel
+végzi a kódolást & dekódolást, míg az spp egy MJPEG-hez hasonló
+egyszerûsített csak intra 8x8 DCT-t használ.
+.RSs
+.IPs <minõség>
+0\-8 (alapértelmezett: 3)
+.IPs <qp>\ 
+Kvantálási paraméter kényszerítése (alapértelmezett: 0, a videó QP-jének használata).
+.RE
+.
+.TP
+.B fspp[=minõség[:qp[:erõsség[:bframes]]]]
 az egyszerû utófeldolgozó szûrõ gyorsabb változata
 .RSs
 .IPs <minõség>
@@ -4790,6 +4989,10 @@ Kvantálási paraméterek kényszerítése (alapértelmezett: 0, a videó QP-jét használ
 Szûrõ erõssége, az alacsonyabb érték nagyobb részletességet jelent, de több mellékhatást is,
 míg a nagy érték simábbá teszi a képet, de homályosabbá is (alapértelmezett:
 0 \- PSNR optimális).
+.IPs <bframes>
+0: ne használja a B-kockák QP-jét (alapértelmezett)
+.br
+1: használja a B-kockák QP-jét is (vibrálást okozhat)
 .RE
 .
 .TP
@@ -5534,7 +5737,9 @@ Eltolja a mezõket 1/4 pixellel, lineáris interpolációval (nincs ugrás).
 Eltolja a mezõket 1/4 pixellel, 4tap szûrõvel (jó minõség). (alapértelmezett)
 .RE
 .PD 1
+.RS
 A használható mezõ dominanciák:
+.RE
 .PD 0
 .RSs
 .IPs -1
@@ -5961,8 +6166,10 @@ Ne ugorjon át képkockákat.
 .
 .TP
 .B \-o <fájlnév>
-Megadott nevû file használata kimenetként az alapértelmezett 'test.avi'
-helyett.
+Megadott nevû file használata kimenetként.
+.br
+Ha egy alapértelmezett fájlnevet szeretnél, beleírhatod ezt az opciót a
+MEncoder konfigurációs fájljába is.
 .
 .TP
 .B \-oac <codec név>
@@ -6462,7 +6669,7 @@ nem szabványos 20%-kal kisebb HuffYUV YV12 használattal
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1 (also see: vstrict)
+.IPs "ffv1 (lásd még: vstrict)"
 FFmpeg veszteségmentes videó codec-je
 .IPs flv\ \ 
 Flash videókban használt Sorenson H.263
@@ -6470,7 +6677,7 @@ Flash videókban használt Sorenson H.263
 Sony Digital Video
 .IPs svq1\ 
 Apple Sorenson Video 1
-.IPs snow (lásd még: vstrict)
+.IPs "snow (lásd még: vstrict)"
 FFmpeg kísérleti wavelet-alapú codec-je
 .RE
 .PD 1
@@ -6557,6 +6764,8 @@ EPZS: size=1 diamond, a méret állítható a *dia opciókkal
 (alapértelmezett)
 .IPs 5
 X1 (kísérleti, jelenleg EPZS-re alias-olva)
+.IPs 8
+iter (iteratív átlapolt blokk, csak snow-ban használják)
 .RE
 .PD 1
 .sp 1
@@ -6612,15 +6821,18 @@ Jelenleg abszolút semmit sem csinál.
 .TP
 .B keyint=<0\-300>
 Maximális idõköz a kulcs képkockák között képkockákban (alapértelmezett: 250
-vagy egy kulcs képkocka tíz másodpercenként egy 25fps-es filmben).
-A kulcs képkockák szükségesek a léptetéshez, mivel a léptetés csak a kulcs
+vagy egy kulcs képkocka tíz másodpercenként egy 25fps-es filmben.
+Ez a javasolt alapértelmezés az MPEG-4-hez).
+A legtöbb codec-nek szabályos kulcskockák kellenek a különbözõ hibák halmozódásának
+megakadályozásához.
+Kulcs képkockák szükségesek a léptetéshez is, mivel a léptetés csak a kulcs
 kockákhoz lehetséges, de a kulcs kockáknak több hely kell, mint a többi
 képkockának, így a nagyobb érték valamivel kisebb fájl méretet jelent, de
 kevésbé precíz léptetést.
 A 0 egyenlõ az 1-gyel, ami minden kockából kulcs képkockát készít.
 A >300 értékek nem javasoltak, mivel a minõség bizonytalanul függ a dekódolótól,
 a kódolótól és a szerencsétõl.
-Ha erõteljesen ragaszkodni kell az MPEG-1/2/4-hez, ajánlott a <=132.
+MPEG-1/2-höz általában <=30 az ajánlott.
 .
 .TP
 .B sc_threshold=<-1000000000\-1000000000>
@@ -6631,7 +6843,7 @@ A -1000000000 azt jelenti, hogy jelenet váltást talál minen képkocka váltásnál,
 a 1000000000 pedig azt, hogy nem lesz jelenetváltás találat (alapértelmezett: 0).
 .
 .TP
-.B vb_strategy=<0\-1> (csak elsõ lépés)
+.B vb_strategy=<0\-2> (csak elsõ lépés)
 I/\:P/\:B-kockák közötti választás stratégiája:
 .PD 0
 .RSs
@@ -6639,6 +6851,30 @@ I/\:P/\:B-kockák közötti választás stratégiája:
 Mindig a maximális számú B-kocka használata (alapértelmezett).
 .IPs 1
 B-kockák elkerülése a gyors mozgású jeleneteknél.
+.IPs 2
+A maximális minõség elérése érdekében a B-kockákat többé-kevésbé optimálisan
+helyezi el (lassabb).
+Valószínûleg csökkenteni akarod ezen opció sebességre gyakorolt hatását a
+brd_scale opcióval.
+.RE
+.PD 1
+.
+.TP
+.B brd_scale=<0\-10>
+Leméretezi a kockákat a dinamikus B-kocka döntéshez (alapértelmezett: 0).
+A sebesség 4-es faktorral nõ a brd_scale minden egyes 1-gyel történõ növelésével.
+.
+.TP
+.B bidir_refine=<0\-4>
+Finomítja a kétirányú makroblokkokban használt két mozgásvektort,
+az elõre és visszafelé történõ keresésbõl származó vektorok újrafelhasználása helyett.
+Ennek az opciónakl nincs hatása B-kockák nélkül.
+.PD 0
+.RSs
+.IPs 0
+Letiltva (alapértelmezett).
+.IPs 1\-4
+Egy szélesebb keresés használata (a nagyobb számú lassabb).
 .RE
 .PD 1
 .
@@ -7346,6 +7582,10 @@ abszolút függõleges különbségek összege
 négyzetes függõleges különbségek összege
 .IPs "10 (NSSE)"
 négyzetes különbségek zajtartó összege
+.IPs "11 (W53)"
+5/3 wavelet, csak a snow-ban használják
+.IPs "12 (W97)"
+9/7 wavelet, csak a snow-ban használják
 .IPs +256\ 
 A színtelítettséget is használja, jelenleg nem mûködik (helyesen) a B-kockákkal.
 .RE
@@ -8093,7 +8333,7 @@ A 0-nak speciális jelentése van, ez engedi az XviD-nek a saját alapértelmezett
 értékeit használni (alapértelmezett: 24 \- AVI átlagos többlet).
 .
 .TP
-.B profile=<opció>
+.B profile=<profil_név>
 Lekorlátozza az opciókat és a VBV-t (csúcs bitráta egy rövid periódusban)
 a Simple, Advanced Simple és DivX profiloknak megfelelõen.
 Ezen profil specifikációknak megfelelõ eredmény videóknak lejátszhatóaknak
@@ -8241,6 +8481,13 @@ Figyelj rá, hogy a kvantálás a H.264-ben máshogy mûködik, mint az MPEG-1/2/4-ben
 A H.264 kvantálási paramétere (QP) egy logaritmikus skála.
 A map-polás körülbelül H264QP = 12 + 6*log2(MPEGQP).
 Például az MPEG QP=2-vel azonos a H.264 QP=18-cal.
+.
+.TP
+.B crf=<1\-50>
+Engedélyezi a konstans minõségi módot és kiválasztja a minõséget.
+Ez a skála hasonló a QP-hez.
+Csakúgy, mint a bitráta-alapú módok, ez is megengedi az egyes kockáknak
+különbözõ QP-k használatát a kocka komplexitásától függõen.
 .
 .TP
 .B pass=<1\-3>
@@ -8645,6 +8892,38 @@ A színtelítettségi információkat is figyelembe veszi a subpixel mozgáskeresésnél
 subq>=5 szükséges.
 .
 .TP
+.B (no)mixed_refs
+Megengedi minden 8x8-as vagy 16x8-as mozgás partíciónak a független
+referencia kocka választást.
+Ezen opció nélkül az egész makroblokknak ugyan azt a referencia kockát kell használni.
+frameref>1 szükséges.
+.
+.TP
+.B (no)brdo
+Engedélyezi a ráta-torzító optimalizálást a B-kockák makroblokk típusain.
+subq=6 szükséges.
+.
+.TP
+.B (no)bime
+Finomítja a kétirányú makroblokkokban használt két mozgásvektort,
+az elõre és visszafelé történõ keresésbõl származó vektorok újrafelhasználása helyett.
+Ennek az opciónakl nincs hatása B-kockák nélkül.
+.
+.TP
+.B trellis=<0\-2>
+ráta-torzító optimális kvantálás
+.PD 0
+.RSs
+.IPs 0
+letiltva
+.IPs 1
+csak a végsõ kódoláshoz engedélyezi (alapértelmezett)
+.IPs 2
+minden mód döntésnél engedélyezi (lassú, subq=6 szükséges)
+.RE
+.PD 1
+.
+.TP
 .B chroma_qp_offset=<-12\-12>
 Különbözõ kvantálót használ a színtelítettséghez és a fényerõhöz.
 A használható értékek <-2\-2> (alapértelmezett: 0).
@@ -8664,9 +8943,7 @@ A megadott JM formátumú mátrix fájl használata.
 .PD 1
 .RE
 .RS
-.I MEGJEGYZÉSEK:
-A CQM-ekkel kódolt fájlok jelenleg nem dekódolhatóak az FFmpeg alapú lejátszókkal.
-.br
+.I MEGJEGYZÉS:
 A Windows-os CMD.EXE-t használók problémákat tapasztalhatnak a parancssor
 értelmezésekor, ha az összes CQM listát használni szeretnék.
 Ez a parancssor hosszának korlátozása miatt van.
@@ -8707,7 +8984,7 @@ elválasztott szám sorozata.
 .TP
 .B level_idc=<10\-51>
 Beállítja a bitfolyam szintjét a H.264 szabvány A mellékletében definiáltaknak
-megfelelõen (alapértelmezett: 40 - 4.0 szint).
+megfelelõen (alapértelmezett: 51 - 5.1 szint).
 Ez arra használatos, hogy közölje a dekóderrel, milyen tulajdonságokat kell
 támogatnia.
 Csak akkor használd ezt a paramétert, ha tudod, hogy mit jelent
@@ -8807,14 +9084,6 @@ Akkor lesz frissítve, ha szükséges, 'format=mpeg1' vagy 'mpeg2' esetén.
 Beállítja az idõbélyeget minden képkockán, ha lehetséges.
 .
 .TP
-.B (no)reorder
-Engedélyezi a képkocka újrarendezõ kódot, ami dekódolási
-(és nem megjelenítési) sorrendben tárolja a kockákat (alapértelmezett: letiltva).
-Csak akkor használd, ha úgy hiszed, hogy az eredeti folyamban a
-videó kockák hibásan voltak tárolva.
-Csak MPEG-1/2 videóval mûködik.
-.
-.TP
 .B init_vpts=<100\-700>
 kezdeti videó pts milliszekundumokban (alapértelmezett: 200)
 .
@@ -8892,7 +9161,7 @@ NUT nyílt konténer formátum (kísérleti)
 QuickTime
 .IPs mp4\ \ 
 MPEG-4 formátum
-.IPs dv\ \ 
+.IPs dv\ \ \ 
 Sony Digital Video konténer
 .RE
 .PD 1
@@ -8900,7 +9169,249 @@ Sony Digital Video konténer
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Files
+.\" környezeti változók
+.\" --------------------------------------------------------------------------
+.
+.SH KÖRNYEZETI VÁLTOZÓK
+.
+Számos környezeti változó van, amivel szabályozható az MPlayer és
+a MEncoder mûködése.
+.
+.TP
+.B MPLAYER_CHARSET (lásd még \-msgcharset)
+A konzol üzeneteket a megadott karaktertáblára kódolja (alapértelmezett: automatikusan detektált).
+A "noconv" érték hatására nem lesz konverzió.
+.
+.TP
+.B MPLAYER_HOME
+A könyvtár, ahol az MPlayer a felhasználói beállításokat keresi.
+.
+.TP
+.B MPLAYER_VERBOSE (lásd még \-v és \-msglevel)
+Beállítja a kezdeti beszédességi szintet az összes modulban
+(alapértelmezett: 0).
+A negatív értékek kevesebb üzenetet eredményeznek, míg a pozitívak
+többet.
+.
+.SS libaf:
+.
+.TP
+.B LADSPA_PATH
+Ha a LADSPA_PATH be van állítva, keresi a megadott fájlt.
+Ha nincs beállítva, egy teljes elérési utat kell megadnod.
+FIXME: Ez meg van említve a ladspa részben is.
+.
+.SS libmpdvdkit2:
+.
+.TP
+.B DVDCSS_CACHE
+Megadja a könyvtárat, ahol a fejezet kulcsok értékeit tárolni kell.
+Ez felgyorsítja a cache-ben lévõ DVD-k descrambling-jét.
+A DVDCSS_CACHE könyvtár létrejön, ha nem létezik és a DVD címébõl vagy
+készítésének dátumából képzett névvel egy alkönyvtár is.
+Ha a DVDCSS_CACHE nincs beállítva vagy üres, a libdvdcss az alapértelmezett
+könyvtárat fogja használni, ami "${HOME}/.dvdcss/" Unix alatt és
+"C:\\Documents and Settings\\$USER\\Application Data\\dvdcss\\" Win32 alatt.
+Az "off" speciális érték letiltja a cache-t.
+.
+.TP
+.B DVDCSS_METHOD
+Beállítja az azonosítási és titkosítási módszert, amit a libdvdcss
+használni fog a titkosított lemezeknél.
+Lehet title, key vagy disc.
+.PD 0
+.RSs
+.IPs key\ \ 
+az alapértelmezett módszer.
+A libdvdcss kiszámított lejátszó kulcsok halmazát fogja használni a lemez
+kulcsának megállapításához.
+Ez sikertelen lehet, ha a meghajtó nem ismeri fel a lejátszó kulcsokat.
+.IPs disc\ 
+egy módszer, amire visszalép ha a key sikertelen.
+Lejátszó kulcsok helyett a libdvdcss egy brute force algoritmussal feltöri
+a lemez kulcsát.
+Ez a lépés CPU igényes és 64 MB memória kell az ideiglenes adatok tárolásához.
+.IPs title
+egy módszer, amire visszalép, ha minden más módszer sikertelen.
+Nem a DVD meghajtóval való kulcs cserén alapszik, hanem egy crypto támadást
+alkalmaz a title kulcs kitalálásához.
+Ritka esetekben ez sikertelen lehet, mert nincs elég titkosított adat
+a lemezen a statisztikai támadáshoz, de másrészt ez az egyetlen módszer
+egy merevlemezen tárolt DVD titkosításának feloldására, vagy rossz régiókódú
+vagy RPC2-es meghajtóban lévõ DVD esetén.
+.RE
+.PD 1
+.
+.TP
+.B DVDCSS_RAW_DEVICE
+Megadja a használandó nyers eszközt.
+A pontos használat az operációs rendszeredtõl függ, Linux alatt
+például a raw(8) eszközzel állíthatsz be nyers eszközöket.
+Kérlek figyelj rá, hogy a legtöbb operációs rendszeren a nyers
+eszköz nagyon nagy igazítást igényel a bufferhez: a Linux 2048 bájtos
+igazítást kér (ami egy DVD szektor hossza).
+.
+.TP
+.B DVDCSS_VERBOSE
+Beállítja a libdvdcss beszédességi szintjét.
+.PD 0
+.RSs
+.IPs 0
+Nem ír ki semmilyen üzenetet.
+.IPs 1
+Az stderr-re írja ki a hibaüzeneteket.
+.IPs 2
+Az stderr-re írja ki a hiba és debug üzeneteket.
+.RE
+.PD 1
+.
+.TP
+.B DVDREAD_NOKEYS
+Kihagyja a kulcsok lekérdezését indításnál.
+Jelenleg letiltva.
+.
+.TP
+.B HOME
+FIXME: Ezt még dokumentálni kell.
+.
+.SS libao2:
+.
+.TP
+.B AO_SUN_DISABLE_SAMPLE_TIMING
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B AUDIODEV
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B AUDIOSERVER
+Megadja a Network Audio System szervert amihez a nas audió
+kimeneti vezérlõnek csatlakoznia kell és a használandó átvitelt.
+Ha nincs beállítva, a DISPLAY lesz használva helyette.
+Az átvitel lehet tcp vagy unix lehet.
+A szintaxis tcp/<valamihoszt>:<valamiport>, <valamihoszt>:<példányszám>
+vagy [unix]:<példányszám>.
+A NAS alap portja 8000, a <példányszám> ehhez adódik hozzá.
+.sp 1
+.RS
+.I PÉLDÁK:
+.RE
+.PD 0
+.RSs
+.IPs AUDIOSERVER=valamihoszt:0
+Csatlakozik a valamihoszt-on lévõ NAS szerverhez az alapértelmezett
+porton és átvitellel.
+.IPs AUDIOSERVER=tcp/valamihoszt:8000
+Csatlakozik a valamihoszt-on lévõ 8000-es TCP porton figyelõ NAS szerverhez.
+.IPs AUDIOSERVER=(unix)?:0
+Csatlakozik a 0. példányszámú, localhost-on futó NAS szerverhez unix domain
+socket segítségével.
+.RE
+.PD 1
+.
+.TP
+.B DISPLAY
+FIXME: Ezt még dokumentálni kell.
+.
+.SS vidix:
+.
+.TP
+.B VIDIX_CRT
+FIXME: Ezt még dokumentálni kell.
+.
+.SS osdep:
+.
+.TP
+.B TERM
+FIXME: Ezt még dokumentálni kell.
+.
+.SS libvo:
+.
+.TP
+.B DISPLAY
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B FRAMEBUFFER
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B HOME
+FIXME: Ezt még dokumentálni kell.
+.
+.SS libmpdemux:
+.
+.TP
+.B HOME
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B HOMEPATH
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B http_proxy
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B LOGNAME
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B USERPROFILE
+FIXME: Ezt még dokumentálni kell.
+.
+.SS libmpcodecs:
+.
+.TP
+.B XANIM_MOD_DIR
+FIXME: Ezt még dokumentálni kell.
+.
+.SS GUI:
+.
+.TP
+.B CHARSET
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B DISPLAY
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B HOME
+FIXME: Ezt még dokumentálni kell.
+.
+.SS libavformat:
+.
+.TP
+.B AUDIO_FLIP_LEFT
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B BKTR_DEV
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B BKTR_FORMAT
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B BKTR_FREQUENCY
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B http_proxy
+FIXME: Ezt még dokumentálni kell.
+.
+.TP
+.B no_proxy
+FIXME: Ezt még dokumentálni kell.
+.
+.
+.
+.\" --------------------------------------------------------------------------
+.\" Fájlok
 .\" --------------------------------------------------------------------------
 .
 .SH FÁJLOK
@@ -8947,7 +9458,7 @@ alábbi sorrendben keresi a felirat fájlokat:
 .
 .
 .\" --------------------------------------------------------------------------
-.\" Examples
+.\" Példák
 .\" --------------------------------------------------------------------------
 .
 .SH PÉLDÁK AZ MPLAYER HASZNÁLATÁRA
@@ -9078,7 +9589,7 @@ leírja, hogyan készíthetsz hasznos hibajelentést.
 Az MPlayert eredetileg Gereöffy Árpád írta.
 Lásd az AUTHORS fájlt a többi közremûködõ listájához.
 .PP
-MPlayer (C) 2000\-2006 The MPlayer Team
+MPlayer (C) 2000\-2006 Az MPlayer Csapat
 .PP
 Ezt a man oldalt nagyrészt Gabucino, Jonas Jermann és Diego Biurrun írta.
 A karbantartó Diego Biurrun.
