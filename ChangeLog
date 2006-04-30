@@ -198,7 +198,7 @@ MPlayer (1.0)
     * configure can now run with cross compiling, new configure option
       --enable-cross-compile
     * -(no)border option to get a bordered/borderless window on Windows
-    * MPlayer ported to AIX
+    * Experimental AIX support
     * AltiVec support fixes
     * POWER5 support
     * OpenGL output ported to Windows
