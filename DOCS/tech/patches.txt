@@ -22,10 +22,14 @@ that your patch will be included.
     diff easier to apply as it saves the step of changing to the correct
     directory.
 
- 3. Test the functionality of your patch. We'll *refuse* it if it breaks
+ 3. Patches shoud always be created from the project root directory.
+    This simplifies applying a patch without first searching for the
+    right directory.
+
+ 4. Test the functionality of your patch. We'll *refuse* it if it breaks
     something, even if it extends other features!
 
- 4. Read your patch. We'll *refuse* it if it changes indentation of the
+ 5. Read your patch. We'll *refuse* it if it changes indentation of the
     code or if it does tab/space conversion or other cosmetic changes!
 
     NOTE: If you already wrote some code and did cosmetic changes, you can
@@ -33,26 +37,26 @@ that your patch will be included.
     patch to make sure diff didn't ignore some important change and remove
     any remaining cosmetics!
 
- 5. Comment parts that really need it (tricky side-effects etc).
+ 6. Comment parts that really need it (tricky side-effects etc).
     Always document string operations! Comment on what you are doing
     and why it is safe. This makes it easy to review and change your
     code if needed. Commenting trivial code not required.
     Comments must be English!
 
- 6. If you implement new features, add or change command line switches or
+ 7. If you implement new features, add or change command line switches or
     modify the behavior of existing features, please do not forget to also
     update the documentation. The documentation maintainers will assist you
     in doing this. Updating the English documentation is enough. If you
     speak several languages you are of course welcome to update some of the
     translations as well.
 
- 7. If you make independent changes, try to send them as separate patches
+ 8. If you make independent changes, try to send them as separate patches
     in separate mails. Likewise, if your patch is very big, try splitting
     it into several self-contained pieces. Each part can then be reviewed
     and committed separately. Logical units should stay together, though,
     e.g. do not send a patch for every file you change.
 
- 8. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
+ 9. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
     attachment with the subject line:
     '[PATCH] very short description of the patch'.
     In the mail, describe in a few sentences what you change and why.
@@ -77,7 +81,7 @@ that your patch will be included.
     the likelihood for it to get reviewed and applied. If your patch is so
     big you cannot send it by mail, try splitting it into smaller pieces.
 
- 9. Give us a few days to react. We try to review patches as fast as possible,
+10. Give us a few days to react. We try to review patches as fast as possible,
     but unfortunately we are constantly overloaded with work, be it MPlayer-
     related or from our day to day lives. If your patch seems to be ignored,
     send a reminder asking for opinions as a reply to the original patch and
@@ -89,16 +93,16 @@ that your patch will be included.
     reminders must be sent as replies to the original patch to preserve proper
     mail threading.
 
-10. Do not immediately ask for CVS write access. If you have contributed one or
+11. Do not immediately ask for CVS write access. If you have contributed one or
     more nice, acceptable patches and they need maintaining or you want to
     be an MPlayer developer, you'll get CVS write access.
 
-11. For consistency reasons, all option names must use '-' instead of '_'.
+12. For consistency reasons, all option names must use '-' instead of '_'.
 
-12. If you make a nontrivial contribution and wish to be mentioned in the
+13. If you make a nontrivial contribution and wish to be mentioned in the
     AUTHORS file, include that in your patch.
 
-13. Do not use printf for console output, use our own mp_msg functions instead.
+14. Do not use printf for console output, use our own mp_msg functions instead.
     For the output to be translated (which includes all messages of level
     MSGL_HINT and below), put the strings in help/help_mp-en.h. If you change
     strings, remove the occurrences of these strings from the translations.
@@ -106,7 +110,7 @@ that your patch will be included.
     and translators will pick up changes more easily if they see a new message
     that has to be translated.
 
-14. If you send a modified or updated version of you patch, always resend
+15. If you send a modified or updated version of you patch, always resend
     the complete patch. It is very time consuming and error prone to piece 
     patches together that are distributed over several mails.
     Please always resend patches as replies to the original mail to keep
