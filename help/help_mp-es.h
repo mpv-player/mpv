@@ -1254,7 +1254,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Chunk arruinado?  chunksize=%d  (id=%.4s)\n"
 #define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Construyendo el índice odml (%d superindexchunks)\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Archivo arruinado (incompleto?) detectado. Utilizaré el índice tradicional\n"
-#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "No pude leer el archivo de indice %s: %s\n"na,
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "No pude leer el archivo de indice %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s No es un archivo de indice MPlayer válido\n"
 #define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Imposible disponer de memoria suficiente para los datos de índice de %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "El archivo de índice termina prematuramente %s\n"
