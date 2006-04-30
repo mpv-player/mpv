@@ -1454,6 +1454,10 @@ static char help_text[]=
 
 // ========================== LIBMPMENU ===================================
 
+// common
+
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Nem található bejegyzés a menü definícióban.\n"
+
 // libmenu/menu.c
 #define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] szintaktikai hiba ebben a sorban: %d\n"
 #define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] A menü definíciókhoz nevesített attribútum kell (%d. sor).\n"
@@ -1467,7 +1471,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nem támogatott kimeneti formátum!!!!\n"
 
 // libmenu/menu_cmdlist.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Nem található bejegyzés a menü definícióban.\n"
 #define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] A lista menüelemek definícióihoz kell egy név (%d. sor).\n"
 #define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] A lista menühöz egy argumentum kell.\n"
 
@@ -1488,7 +1491,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_CantOpenDirectory "[MENU] A(z) %s könyvtár nem nyitható meg.\n"
 
 // libmenu/menu_param.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] A menü definícióban nincs bejegyzés.\n"
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Az almenü definíciókba kell egy 'menu' attribútum.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menü bejegyzés definícióihoz egy jó 'property' attribútum kell (%d. sor).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref menühöz egy argumentum kell.\n"

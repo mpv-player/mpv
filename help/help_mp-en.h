@@ -1454,6 +1454,10 @@ static char help_text[]=
 
 // ========================== LIBMPMENU ===================================
 
+// common
+
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
+
 // libmenu/menu.c
 #define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] syntax error at line: %d\n"
 #define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Menu definitions need a name attribute (line %d).\n"
@@ -1467,7 +1471,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Unsupported output format!!!!\n"
 
 // libmenu/menu_cmdlist.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
 #define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] List menu entry definitions need a name (line %d).\n"
 #define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] List menu needs an argument.\n"
 
@@ -1488,7 +1491,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Can't open directory %s.\n"
 
 // libmenu/menu_param.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Submenu definition needs a 'menu' attribute.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref menu entry definitions need a valid 'property' attribute (line %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref menu needs an argument.\n"

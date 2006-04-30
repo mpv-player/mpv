@@ -1440,6 +1440,10 @@ static char help_text[]=
 
 // ========================== LIBMPMENU ===================================
 
+// common
+
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有内容.\n"
+
 // libmenu/menu.c
 #define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] 语法错误: %d 行\n"
 #define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] 菜单定义需要名称属性 (%d 行).\n"
@@ -1453,7 +1457,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] 输出格式不支持!!!!\n"
 
 // libmenu/menu_cmdlist.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有内容.\n"
 #define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] 列表菜单的定义需要名称 (%d 行).\n"
 #define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] 列表菜单需要参数.\n"
 
@@ -1474,7 +1477,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_CantOpenDirectory "[MENU] 无法打开目录 %s.\n"
 
 // libmenu/menu_param.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有内容.\n"
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] 子菜单定义需要需要 'menu' 属性.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref 菜单选项的定义需要有效的 'property' 属性 (%d 行).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref 菜单需要参数.\n"

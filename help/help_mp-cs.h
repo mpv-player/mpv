@@ -1429,6 +1429,10 @@ static char help_text[]=
 
 // ========================== LIBMPMENU ===================================
 
+// common
+
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] V definici menu nebyla nalezena ¾ádná polo¾ka.\n"
+
 // libmenu/menu.c
 #define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntaktická chyba na øádku: %d\n"
 #define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Definice Menu vy¾adují pojmenovaný atribut (øádek %d)\n"
@@ -1442,7 +1446,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nepodporovaný výstupní formát!!!!\n"
 
 // libmenu/menu_cmdlist.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] V definici menu nebyla nalezena ¾ádná polo¾ka.\n"
 #define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] Polo¾ky typu seznam vy¾adují název (øádek %d).\n"
 #define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] Polo¾ka typu seznam vy¾aduje argument.\n"
 
@@ -1463,7 +1466,6 @@ static char help_text[]=
 #define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Nelze otevøít adresáø %s\n"
 
 // libmenu/menu_param.c
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] V definici menu nebyla nalezena ¾ádná polo¾ka.\n"
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definice podmenu vy¾aduje atribut 'menu'.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Polo¾ka menu Pref vy¾aduje platný atribut 'property' (øádek %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Menu Pref vy¾aduje argument.\n"
