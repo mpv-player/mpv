@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1276
+.\" In sync with rev 1.1279
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -33,7 +33,7 @@
 .\" Titel
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-05-03" "Das MPlayer Projekt"
+.TH MPlayer 1 "2006-04-29" "Das MPlayer Projekt"
 .
 .SH NAME
 mplayer  \- Movie Player
@@ -5305,7 +5305,7 @@ je nach verfügbarer CPU-Auslastung hinzu.
 .
 .TP
 .B spp[=Qualität[:qp[:Modus]]]
-Einfacher Nachbearbeitungsfilter, der das Bild 
+Einfacher Nachbearbeitungsfilter, der das Bild
 mit mehreren (bzw.\& \- im Falle von Qualitätslevel 6 \- allen) Verschiebungen
 komprimiert und dekomprimiert und daraus den Mittelwert bildet.
 .RSs
@@ -8404,7 +8404,7 @@ Kontrolliere das Schreiben globaler Videoheader.
 .PD 0
 .RSs
 .IPs 0
-Schreibe keine globalen Header (Standard).
+Der Codec entscheidet, wo globale Header geschrieben werden (Standard).
 .IPs 1
 Schreibe globale Header nur in Extradata (benötigt für .mp4/MOV/NUT).
 .IPs 2
@@ -9247,7 +9247,7 @@ Ermöglicht die Verwendung von B-Frames als Referenz für die Vorhersage anderer
 Frames.
 Nehmen wir als Beispiel 3 aufeinanderfolgende Frames: I0 B1 B2 B3 P4.
 Ohne diese Option verhalten sich B-Frames genau wie MPEG-[124].
-Sie werden also in der Reihenfolge I0 P4 B1 B2 B3 kodiert, und alle B-Frames 
+Sie werden also in der Reihenfolge I0 P4 B1 B2 B3 kodiert, und alle B-Frames
 werden auf Grundlage von I0 und P4 berechnet.
 Mit dieser Option werden sie als I0 P4 B2 B1 B3 encodiert.
 B2 ist das gleiche wie oben, jedoch wird B1 aus I0 and B2 berechnet, während B3
@@ -9363,7 +9363,7 @@ höhere Werte forcieren sanftere Schwankungen.
 .
 .TP
 .B zones=<Zone0>[/<Zone1>[/...]]
-Vom Benutzer festgelegte Qualität für besondere Abschnitte (Ende, Abspann, 
+Vom Benutzer festgelegte Qualität für besondere Abschnitte (Ende, Abspann,
 ...)
 (ABR oder Modus mit zwei Durchläufen).
 Jede Zone ist <Start-Frame>,<End-Frame>,<Option>, wobei Option die folgenden
