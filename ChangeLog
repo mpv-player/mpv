@@ -64,9 +64,10 @@ MPlayer (1.0)
     * tremor updated to libogg 1.1.2
     * PNG decoding via libavcodec
     * removed native RealAudio codecs (ported to lavc)
-    * Zip Motion-Block Video (ZMB) decoder via binary DLL
+    * Zip Motion-Block Video (ZMBV) decoder via lavc and binary DLL
     * support for QuickTime in24/in32/fl32 PCM audio
     * internal faad updated to CVS 20040915+MPlayer patches
+    * RTJpeg decoder from lavc is preferred
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -121,11 +122,19 @@ MPlayer (1.0)
     * JPEG-LS decoder (unfinished)
     * CamStudio video decoder
     * Theora decoder
-    * WMV3 decoder (unfinished)
     * improved MOV and QuickTime demuxer
     * improved AVI muxer
     * multithreaded decoding
     * bitexact decoding
+    * DV50 encoder, decoder, muxer and demuxer
+    * true audio (TTA) decoder
+    * AIFF/AIFF-C audio format, encoding and decoding
+    * Creative VOC demuxing
+    * Zip Motion-Block Video (ZBMV) decoder
+    * KMVC decoder
+    * NuppelVideo/MythTV demuxer and RTJpeg decoder
+    * AVS demuxer and video decoder
+    * American Laser Games multimedia (*.mm) playback system
 
     GUI:
     * skins now reside in a directory named 'skins', not 'Skin'
