@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1273
+.\" In sync with rev 1.1276
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -8399,9 +8399,22 @@ Schließt alle GOPs.
 Funktioniert momentan nur, wenn die Szenenwechselerkennung deaktiviert ist
 (sc_threshold=1000000000).
 .TP
-.B vglobal
-FIXME: Dokumentiere diese Option.
+.B vglobal=<0\-3>
+Kontrolliere das Schreiben globaler Videoheader.
+.PD 0
+.RSs
+.IPs 0
+Schreibe keine globalen Header (Standard).
+.IPs 1
+Schreibe globale Header nur in Extradata (benötigt für .mp4/MOV/NUT).
+.IPs 2
+Schreibe globale Header nur vor Keyframes.
+.IPs 3
+Kombiniere 1 und 2.
 .
+.TP
+.B aglobal=<0\-3>
+Das gleiche wie vglobal für Audioheader.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9855,7 +9868,8 @@ Sony Digital Video Container
 .PD 1
 .TP
 .B i_certify_that_my_video_stream_does_not_use_b_frames
-FIXME: Dokumentiere diese Option.
+MEncoder kann Zeitstempel nicht korrekt zuweisen, wenn im Videostream B-Frames
+vorhanden sind, was zu kaputten Encodierungen führt.
 .
 .TP
 .B muxrate
