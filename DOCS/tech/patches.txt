@@ -106,4 +106,10 @@ that your patch will be included.
     and translators will pick up changes more easily if they see a new message
     that has to be translated.
 
+14. If you send a modified or updated version of you patch, always resend
+    the complete patch. It is very time consuming and error prone to piece 
+    patches together that are distributed over several mails.
+    Please always resend patches as replies to the original mail to keep
+    the thread with the discussion together.
+
 Thank you!
