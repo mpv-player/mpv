@@ -26,7 +26,7 @@ MPlayer (1.0)
     * all XviD options documented
     * CONFIGURATION FILES section added to the man page
     * Doxygen comments added to configuration parser and OpenGL
-      video out driver,
+      video out driver
 
     Drivers:
     * JACK audio output rewritten without bio2jack
@@ -197,7 +197,7 @@ MPlayer (1.0)
     * MIPS64 support
     * Darwin portability fixes
     * improved Debian packaging
-    * improved Win32 xinerama support
+    * improved Win32 multi-monitor support
 
     Others:
     * Audio/Video synchronisation fixes
