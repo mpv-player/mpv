@@ -1,4 +1,4 @@
-.\" synced with 1.1279
+.\" synced with 1.1281
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -9825,7 +9825,7 @@ tout comme les filtres vidéo harddup et softskip).
 .PD 1
 .
 .TP
-.B delay\ \ 
+.B delay=<valeur>
 N'a de sens pour le moment que pour MPEG[12]: Distance maximale
 permise, en secondes, entre la référence temporelle du flux de sortie
 (SCR) et le timestamp de décodage (DTS) pour tout flux présent (délais
@@ -9957,20 +9957,20 @@ MEncoder ne peut pas assigner les timestamps correctes quand il y a des
 trames-B dans le flux vidéo, ce qui donne des encodes incorrects.
 .
 .TP
-.B muxrate
-Débit binaire du multiplexe, en unités de 50 octets par secondes;
+.B muxrate=<débit>
+Débit binaire du multiplexe, en bits par secondes;
 n'a de sens pour le moment que pour MPEG[12].
 Il arrive qu'il faille augmenter ce paramètre pour éviter des débordements
 de tampons "buffer underflows".
 .
 .TP
-.B packetsize
+.B packetsize=<taille>
 Size, expressed in bytes, of the unitary packet for the chosen format.
 +When muxing to MPEG[12] implementations the default values are: 
 +2324 for [S]VCD, 2048 for all others formats.
 .
 .TP
-.B preload
+.B preload=<distance>
 N'a de sens pour le moment que pour MPEG[12]: Distance maximale
 permise, en secondes, entre la référence temporelle du flux de sortie
 (SCR) et le timestamp de décodage (DTS) pour tout flux présent (délais
