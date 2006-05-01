@@ -375,7 +375,7 @@ static int open_tv(tvi_handle_t *tvh)
   	  tv_channel_current->prev->next = NULL;
 	free(tv_channel_current);
     } else 
-	    tv_channel_last_real = malloc(sizeof(char)*5);
+	    tv_channel_last_real = malloc(5);
 
     if (tv_channel_list) {
 	int i;

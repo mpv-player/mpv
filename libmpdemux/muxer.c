@@ -82,7 +82,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       buf->pts= pts;
       buf->len = len;
       buf->flags = flags;
-      buf->buffer = malloc(len * sizeof (unsigned char));
+      buf->buffer = malloc(len);
       if (!buf->buffer) {
         mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufMallocErr);
         return;

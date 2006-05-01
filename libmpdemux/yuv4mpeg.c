@@ -103,7 +103,7 @@ ssize_t y4m_write(int fd, char *buf, size_t len)
 
 static char *y4m_new_xtag(void)
 {
-  return _y4m_alloc(Y4M_MAX_XTAG_SIZE * sizeof(char));
+  return _y4m_alloc(Y4M_MAX_XTAG_SIZE);
 }
 
 

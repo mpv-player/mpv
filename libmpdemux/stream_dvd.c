@@ -518,7 +518,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     /* Dynamic DVD drive selection on Darwin */
     if(!strcmp(dvd_device, "/dev/rdiskN")) {
       int i;
-      char *temp_device = malloc((strlen(dvd_device)+1)*sizeof(char));
+      char *temp_device = malloc(strlen(dvd_device)+1);
 
       for (i = 1; i < 10; i++) {
         sprintf(temp_device, "/dev/rdisk%d", i);
