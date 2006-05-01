@@ -19,6 +19,7 @@ MPlayer (1.0)
     * Czech documentation translation finished
     * French MPlayer documentation synced
     * German man page synced
+    * Hungarian man page synced
     * Italian man page synced
     * Chinese console messages synced
     * misc improvements all over the place
@@ -39,7 +40,7 @@ MPlayer (1.0)
     * support for custom fragment programs for -vo gl (see TOOLS/*.fp)
     * use libvbe from vesautils as VESA video driver
     * several fixes for the GGI video output driver
-    * fallback to next vo if vo_3dfx failed to init
+    * fall back on next video output driver if vo_3dfx failed to initialize
     * improved XvMC library detection (disabled by default)
     * DPI (Print-Resolution) and Pixel-Aspect support in vo_jpeg
     * ALSA audio output: several small fixes and improvements
@@ -66,8 +67,9 @@ MPlayer (1.0)
     * removed native RealAudio codecs (ported to lavc)
     * Zip Motion-Block Video (ZMBV) decoder via lavc and binary DLL
     * support for QuickTime in24/in32/fl32 PCM audio
-    * internal faad updated to CVS 20040915+MPlayer patches
+    * internal libfaad updated to CVS 20040915+MPlayer patches
     * RTJpeg decoder from lavc is preferred
+    * bug fix for lavc WMA v2 decoder, now all files should be playable
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -79,32 +81,31 @@ MPlayer (1.0)
     * MPEG in GXF container support with extension-based detection
     * faster MPEG and much faster GXF demuxing
     * more user-friendly demuxer forcing
-    * bug fix for lavc WMA v2 decoder, now all files should be playable
     * MPEG Layer 1 and 2 demuxing fixed
-    * pass Vorbis extradata from Matroska container properly
+    * properly pass Vorbis extradata from Matroska container
     * DVR format support
     * H.264 ES high profile support
     * TV channel cycling
     * DVD subtitle and audio stream mappings fixed
-    * fixed RealAudio demuxing
+    * fixed RealAudio demuxing, now all files should have correct A/V sync
     * partial support for QuickTime sound atom version 2
     * improved handling of text subs in Matroska files
     * DVD subtitles disabled by default
     * support sipr codec in old RealAudio files
-    * fixed detection of framerate of interlaced H264 in raw/PS/TS streams
+    * fixed framerate detection of interlaced H.264 in raw/PS/TS streams
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
     * show SHOUT/Icecast metadata while playing
     * ultravox (unsv://) streaming support
-    * stream code ported to new modular api, massive code cleanup
+    * stream code ported to new modular API, massive code cleanup
     * bandwidth selection for Real RTSP streams (for faster stream dumps)
 
     FFmpeg/libavcodec:
-    * Snow bug fixes and speedup on x86, x86-64 and Altivec
+    * Snow bug fixes and speedup on x86, x86-64 and AltiVec
     * MPEG-1/2/4 and H.264 decoder speedup
     * Indeo2 (RT21) video decoder
-    * Fraps video decoder (v0 & v1)
+    * Fraps video decoder (v0 & v1, v2 not yet supported)
     * Vorbis audio decoder
     * RV20 fixes
     * VP3 decoder fixes and speedup
@@ -139,7 +140,7 @@ MPlayer (1.0)
     GUI:
     * skins now reside in a directory named 'skins', not 'Skin'
     * ported to GTK2
-    * long standing up side down vpotmeter bug fixed
+    * long standing upside down vpotmeter bug fixed
     * don't hang on unreadable skin files
     * random fixes and improvements
 
@@ -151,7 +152,7 @@ MPlayer (1.0)
     * screenshot filter
     * -af pan command line fix, now outputs the right number of channels
       and accepts values < 0 or > 1. Channel order had to be changed.
-    * - af sinesupress to remove a sine at a certain frequency
+    * -af sinesupress to remove a sine at a certain frequency
     * negative stride support in swscale
     * big-endian and AltiVec fixes and performance improvements for swscaler,
       color conversions and post-processing
@@ -171,9 +172,9 @@ MPlayer (1.0)
     * -delay allows real audio delay instead of just a delay in the header
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)
-    * -o is now manditory. You can add 'o=test.avi' in ~/.mplayer/mencoder
-      to get old behaviour back.
-    * In multiple file encoding, all files must now have audio or none. Use
+    * -o is now mandatory. You can add 'o=test.avi' in ~/.mplayer/mencoder
+      to get the old behavior back.
+    * In multiple file encoding, either all or no files must have audio. Use
       -nosound to force.
     * support for VBR MP2 encoding in toolame
     * twolame support
@@ -190,10 +191,10 @@ MPlayer (1.0)
       and 10.3 with QuickTime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
     * macosx audio output driver fixes
-    * preliminary support for macintel
+    * preliminary support for Intel Macs
     * support for playing DVDs copied to harddisk on Cygwin
     * DragonFly BSD support
-    * liba52 asm optimizations ported to amd64
+    * liba52 ASM optimizations ported to AMD64
     * configure check and compiler optimizations for VIA C3, C3-2 and Pentium-M
     * configure check and compiler optimizations for AMD-64 extended
     * configure can now run with cross compiling, new configure option
@@ -228,21 +229,20 @@ MPlayer (1.0)
     * libdvdcss updated to 1.2.9
     * ~/.dvdcss is used instead of ~/.mplayer/DVDKeys for cached CSS keys
     * libcdio support for CD playback
-    * new option -msglevel, control verbosity of modules of MPlayer directly
-    * -verbose option removed, use -v or "-msglevel all" instead.
-    * -edl is now per-file in MPlayer.
+    * new option -msglevel to directly control the verbosity of MPlayer modules
+    * -verbose option removed, use -v or "-msglevel all" instead
+    * -edl is now per-file in MPlayer
     * new input command prefixes, "pausing_keep" and "pausing_toggle" which
-      alter pausing state immediately after command.
-    * environment variable MPLAYER_VERBOSE controls verbosity before command
-      line is parsed
+      alter pausing state immediately after command
+    * environment variable MPLAYER_VERBOSE controls verbosity before the
+      command line is parsed
     * environment variable MPLAYER_HOME controls location where
       configuration files are searched for
     * memleak fixes all over the code
-    * TOOLS/aconvert: allows mencoder to encode from an audio only file
-    * TOOLS/3*m_convert: D-Cinema Audio and Video conversion program
-    * TOOLS/qepdvcd.sh: Anything supported to vcd/svcd pal/ntsc
-    * TOOLS/encode2mpeglight: new tool to encode to mpeg formats using
-      only mencoder
+    * TOOLS/aconvert: allows MEncoder to encode from an audio-only file
+    * TOOLS/3*m_convert: D-Cinema audio and video conversion program
+    * TOOLS/qepdvcd.sh: anything supported to VCD/SVCD PAL/NTSC
+    * TOOLS/encode2mpeglight: MPEG format encoding tool using only MEncoder
     * allow multiple -help clauses on the command line
     * console "OSD" for audio-only files
     * show total time when playing audio-only files
@@ -340,7 +340,7 @@ MPlayer (1.0)
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
-    * fallback to HTTP if connection refused on pnm://
+    * fall back on HTTP if connection refused on pnm://
     * support for UDP streaming (udp://)
     * support for vstream TiVo streams (tivo://)
     * EOF detect and bugfixes in pnm:// streams
@@ -799,7 +799,7 @@ MPlayer (1.0)
     * support for URL redirection
     * support for seeking in HTTP streams
     * updated LIVE.COM streaming code
-    * fallback to live.com RTSP after Real RTSP
+    * fall back on live.com RTSP after Real RTSP
     * suggests -playlist if normal streaming fails
     * many improvements and bug fixes in the streaming code
 
@@ -1468,7 +1468,7 @@ MPlayer (0.90)
     Codecs:
     * libavcodec: fixed possible 20% speedloss bug
     * support for the experimental (and buggy) dev-api-3 XviD CVS branch
-    * fallback to built-in codecs.conf if no compatible external file found
+    * fall back on built-in codecs.conf if no compatible external file found
     * experimental Sorenson 1/3 encoding (using QuickTime DLLs)
     * more accurate video bitrate calculation for AVI files
     * presets support for libmp3lame encoding
@@ -1624,7 +1624,7 @@ MPlayer (0.90)
     * unrarlib included for rar'ed VOBsubs
     * native XviD encoding (-ovc xvid) interface for MEncoder
     * new softeq filter with gamma support: -vop eq2
-    * -ao/-vo accepts list of drivers and can fall back to one, like -ac/-vc
+    * -ao/-vo accepts list of drivers and can fall back on one, like -ac/-vc
     * audio/video codec selection (-ac/-afm) rewritten, now uses codec/fm list
     * get_delay() smoothing (-autosync) - should help buggy sound drivers
     * smb:// URL support (disabled by default, ./configure part not yet done!)
@@ -2138,7 +2138,7 @@ MPlayer v0.11-pre12: Jan 30, 2001
   ./configure fixes, improved odivx-encoding, streaming fixes
   - ./configure: use /tmp/main$$.c instead of /tmp.main.c, and
     remove file after tests  [SaPe]
-  - ./configure: trying the gcc optimize options and fallback to 'pentium'
+  - ./configure: trying the gcc optimize options and fall back on 'pentium'
     if it fails (useful for people with old gcc and new CPU :))
   - removed -fomit-frame-pointer from OPTFLAGS at config.mak
   - version number incremented [Gabucino]
@@ -2298,7 +2298,7 @@ MPlayer v0.11-pre2: Jan 4, 2001
     'mplayer test.avi -aid -2' still not works without option '-nosound'
   - adding new config.h option to set default MP3 audio codec (mpg123/l3codeca)
     ./configure selects mp3lib only if you have 3DNow!   [idea: Gabucino]
-  - automatic fallback to mp3lib/mpg123 if l3codeca.acm can't be loaded/inited
+  - automatic fall back on mp3lib/mpg123 if l3codeca.acm can't be loaded/inited
 
 
 
