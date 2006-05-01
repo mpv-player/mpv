@@ -190,6 +190,7 @@ MPlayer (1.0)
       and 10.3 with QuickTime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
     * macosx audio output driver fixes
+    * preliminary support for macintel
     * support for playing DVDs copied to harddisk on Cygwin
     * DragonFly BSD support
     * liba52 asm optimizations ported to amd64
