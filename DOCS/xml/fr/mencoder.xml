@@ -309,10 +309,9 @@ où se trouve le DVD copié
 Les options <option>-dvd-device</option> et
 <option>-cdrom-device</option>
 peuvent être aussi utilisées pour forcer le chemin vers le
-périphérique utilisé
-qui ceux utilisés par défaut comme
+périphérique utilisé (ceux utilisés par défaut sont
 <filename>/dev/dvd</filename> et
-<filename>/dev/cdrom</filename> ne marche pas sur votre système.
+<filename>/dev/cdrom</filename>).
 </para>
 <para>
 Pour un encodage depuis un DVD, il est souvent préférable de
