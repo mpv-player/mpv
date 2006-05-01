@@ -109,7 +109,7 @@ temps réel.</entry>
 </row>
 <row>
 <entry>raw</entry>
-<entry>Frames vidéo non compressées</entry>
+<entry>Frames vidéos non compressées</entry>
 </row>
 <row>
 <entry>copy</entry>
@@ -150,7 +150,7 @@ Container</entry><entry>Description</entry></row>
 </row>
 <row>
 <entry>avi</entry>
-<entry>Audio-Video Interleaved</entry>
+<entry>Audio-Vidéo Interleaved</entry>
 </row>
 <row>
 <entry>mpeg</entry>
@@ -301,7 +301,7 @@ encoder depuis un chapitre DVD ou une piste VCD.
 Si vous avez déjà copié le DVD sur votre disque dur (en
 utilisant par exemple un logiciel comme
 <application>dvdbackup</application>,
-généralement disponible sur les systèmes), et que vous souhaiter
+généralement disponible sur les systèmes), et que vous souhaitez
 encoder depuis cette copie, vous devrez quand même utiliser la
 syntaxe <option>dvd://</option>, avec l'option
 <option>-dvd-device</option> pointant vers la racine du répertoire
@@ -318,7 +318,7 @@ qui ceux utilisés par défaut comme
 Pour un encodage depuis un DVD, il est souvent préférable de
 selectionner un ou plusieurs chapitres à encoder.
 Vous pouvez utiliser l'option <option>-chapter</option> prévu
-à cette effet.
+à cet effet.
 Par exemple, <option>-chapter</option>
 <replaceable>1-4</replaceable>
 encodera seulement les chapitres 1 à 4 du DVD.
@@ -328,7 +328,7 @@ Ceci permettant de couper votre film sur un chapitre et non au
 milieu d'une scène.
 </para>
 <para>
-Si vous disposez d'un carte pouvant acquerir le signal Télé,
+Si vous disposez d'un carte pouvant acquérir le signal Télé,
 vous pouvez sans soucis encoder le signal d'entrée.
 Utilisez l'option
 <option>tv://</option><replaceable>NuméroChaine</replaceable>
@@ -344,7 +344,7 @@ Les entrés DVB marchent sur le même principe.
 <para>
 Le nom vient du fait que cette méthode encode le fichier
 <emphasis>deux fois</emphasis>.
-Le premier encodage (du mode deux passes) créé quelques
+Le premier encodage (du mode deux passes) crée quelques
 fichiers temporaires (<filename>*.log</filename>) avec
 une taille de quelques méga-octets, ne les détruisez pas
 tout de suite (vous pouvez effacer l'AVI ou redirigez le
@@ -457,7 +457,7 @@ utilisera 2: bicubique.
 <para>
 Utilisation :
 <screen>
-mencoder <replaceable>entree.mpg</replaceable> -ovc lavc -lavcopts
+mencoder <replaceable>entrée.mpg</replaceable> -ovc lavc -lavcopts
 vcodec=mpeg4 -vf scale=640:480 -o
 <replaceable>sortie.avi</replaceable>
 </screen>
@@ -485,7 +485,7 @@ ou VIVO ou MPEG1 dans un fichier AVI ! Bien sûr seul
 <application>MPlayer</application>
 peut lire de tels fichiers :) et ça n'a probablement aucun
 intérêt.
-Concrètement: copier des flux vidéo peut être utile par exemple
+Concrètement: copier des flux vidéos peut être utile par exemple
 quand seul le flux audio doit être encodé (comme du PCM
 non-compressé en MP3).
 </para></listitem>
@@ -758,7 +758,7 @@ et <systemitem>crop</systemitem>.
 <para>
 Utilisation
 <screen>mencoder
-<replaceable>echantillon-svcd.mpg</replaceable> -ovc
+<replaceable>échantillon-svcd.mpg</replaceable> -ovc
 lavc -lavcopts vcodec=mpeg4:autoaspect -vf
 crop=714:548:0:14 -oac copy -o
 <replaceable>sortie.avi</replaceable></screen>
