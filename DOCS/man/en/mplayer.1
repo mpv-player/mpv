@@ -2275,7 +2275,7 @@ Only supported by the fbdev, dga, svga, vesa video output drivers.
 Play movie with window border and decorations.
 Since this is on by default, use \-noborder to disable the standard window
 decorations.
-Supported by directx video output driver.
+Supported by the directx video output driver.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -9356,7 +9356,7 @@ Any other framerate is incompatible with this option.
 .SS FFmpeg libavformat muxers (\-lavfopts) (also see \-of lavf)
 .
 .TP
-.B delay\ \ 
+.B delay=<value>
 Currently only meaningful for MPEG[12]: Maximum allowed distance,
 in seconds, between the reference timer of the output stream (SCR)
 and the decoding timestamp (DTS) for any stream present
@@ -9402,19 +9402,19 @@ MEncoder cannot assign correct timestamps when there are
 B-frames in the video stream, resulting in broken encodes.
 .
 .TP
-.B muxrate
+.B muxrate=<rate>
 Nominal bitrate of the multiplex, in bits per second;
 currently it is meaningful only for MPEG[12].
 Sometimes raising it is necessary in order to avoid "buffer underflows".
 .
 .TP
-.B packetsize
+.B packetsize=<size>
 Size, expressed in bytes, of the unitary packet for the chosen format.
 When muxing to MPEG[12] implementations the default values are:
 2324 for [S]VCD, 2048 for all others formats.
 .
 .TP
-.B preload
+.B preload=<distance>
 Currently only meaningful for MPEG[12]: Initial distance,
 in seconds, between the reference timer of the output stream (SCR)
 and the decoding timestamp (DTS) for any stream present
