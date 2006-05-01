@@ -1,7 +1,7 @@
 diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
 --- dvdread.orig/bswap.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/bswap.h	2005-06-23 00:19:10.000000000 +0200
-@@ -20,8 +20,6 @@
+@@ -20,8 +24,6 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
   */
  
@@ -10,7 +10,7 @@ diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
  #if defined(WORDS_BIGENDIAN)
  /* All bigendian systems are fine, just ignore the swaps. */  
  #define B2N_16(x) (void)(x)
-@@ -59,13 +57,57 @@
+@@ -59,13 +61,57 @@
  #define B2N_32(x) x = be32toh(x)
  #define B2N_64(x) x = be64toh(x)
  
@@ -73,7 +73,7 @@ diff -Naur dvdread.orig/.cvsignore dvdread/.cvsignore
 diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
 --- dvdread.orig/dvd_input.c	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/dvd_input.c	2005-06-23 00:30:23.000000000 +0200
-@@ -37,7 +37,7 @@
+@@ -37,7 +41,7 @@
  
  #ifdef HAVE_DVDCSS_DVDCSS_H
  /* linking to libdvdcss */
@@ -82,7 +82,7 @@ diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
  #define DVDcss_open(a) dvdcss_open((char*)(a))
  #define DVDcss_close   dvdcss_close
  #define DVDcss_seek    dvdcss_seek
-@@ -74,7 +74,7 @@
+@@ -74,7 +78,7 @@
    dvd_input_t dev;
      
    /* Allocate the handle structure */
@@ -91,7 +91,7 @@ diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
    if(dev == NULL) {
      fprintf(stderr, "libdvdread: Could not allocate memory.\n");
      return NULL;
-@@ -158,7 +158,7 @@
+@@ -154,7 +158,7 @@
    dvd_input_t dev;
    
    /* Allocate the library structure */
@@ -100,7 +100,7 @@ diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
    if(dev == NULL) {
      fprintf(stderr, "libdvdread: Could not allocate memory.\n");
      return NULL;
-@@ -320,8 +320,10 @@
+@@ -320,8 +324,10 @@
      fprintf(stderr, "DVDCSS_METHOD %s\n", psz_method);
      fprintf(stderr, "DVDCSS_VERBOSE %s\n", psz_verbose);
      */
@@ -115,7 +115,7 @@ diff -Naur dvdread.orig/dvd_input.h dvdread/dvd_input.h
 diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
 --- dvdread.orig/dvd_reader.c	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/dvd_reader.c	2005-06-23 00:19:10.000000000 +0200
-@@ -32,24 +32,36 @@
+@@ -32,24 +36,36 @@
  #include <limits.h>
  #include <dirent.h>
   
@@ -155,7 +155,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  
  struct dvd_reader_s {
      /* Basic information. */
-@@ -194,6 +206,13 @@
+@@ -194,6 +210,13 @@
  }
  
  
@@ -169,7 +169,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  
  /**
   * Open a DVD image or block device file.
-@@ -278,11 +297,16 @@
+@@ -278,11 +301,16 @@
     Darwin  /dev/rdisk0,  it needs to be the raw device
     BSD/OS  /dev/sr0c (if not mounted) or /dev/rsr0c ('c' any letter will do) */
  static char *bsd_block2char( const char *path )
@@ -187,7 +187,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
        return (char *) strdup( path );
  
      /* Replace "/dev/" with "/dev/r" */
-@@ -292,6 +316,7 @@
+@@ -292,6 +320,7 @@
  
      return new_path;
  }
@@ -195,7 +195,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  #endif
  
  dvd_reader_t *DVDOpen( const char *path )
-@@ -303,6 +328,16 @@
+@@ -303,6 +332,16 @@
      if( path == NULL )
        return 0;
  
@@ -212,7 +212,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
      ret = stat( path, &fileinfo );
      if( ret < 0 ) {
  	/* If we can't stat the file, give up */
-@@ -310,6 +345,7 @@
+@@ -310,6 +349,7 @@
  	perror("");
  	return 0;
      }
@@ -220,7 +220,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  
      /* Try to open libdvdcss or fall back to standard functions */
      have_css = dvdinput_setup();
-@@ -335,7 +371,7 @@
+@@ -335,7 +375,7 @@
  	char *path_copy;
  #if defined(SYS_BSD)
  	struct fstab* fe;
@@ -229,7 +229,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  	FILE *mntfile;
  #endif
  
-@@ -350,7 +386,9 @@
+@@ -350,7 +390,9 @@
  	    if( cdir >= 0 ) {
  		chdir( path_copy );
  		new_path = getcwd( NULL, PATH_MAX );
@@ -239,7 +239,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  		close( cdir );
  		if( new_path ) {
  		    free( path_copy );
-@@ -406,7 +444,7 @@
+@@ -406,7 +448,7 @@
  	    }
  	    fclose( mntfile );
  	}
@@ -248,7 +248,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
          mntfile = fopen( MOUNTED, "r" );
          if( mntfile ) {
              struct mntent *me;
-@@ -425,6 +463,9 @@
+@@ -425,6 +467,9 @@
              }
              fclose( mntfile );
  	}
@@ -258,7 +258,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
  #endif
  	if( !dev_name ) {
  	  fprintf( stderr, "libdvdread: Couldn't find device name.\n" );
-@@ -615,8 +656,8 @@
+@@ -615,8 +660,8 @@
      }
      
      if( dvd->css_state == 1 /* Need key init */ ) {
@@ -269,7 +269,7 @@ diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
      }
      /*    
      if( dvdinput_title( dvd_file->dvd->dev, (int)start ) < 0 ) {
-@@ -915,7 +956,7 @@
+@@ -915,7 +960,7 @@
      return (ssize_t)ret;
  }
  
@@ -298,7 +298,7 @@ diff -Naur dvdread.orig/dvdread_internal.h dvdread/dvdread_internal.h
 diff -Naur dvdread.orig/dvd_udf.c dvdread/dvd_udf.c
 --- dvdread.orig/dvd_udf.c	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/dvd_udf.c	2005-06-23 00:19:10.000000000 +0200
-@@ -33,7 +33,9 @@
+@@ -33,7 +37,9 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include <string.h>
@@ -332,7 +332,7 @@ diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
 diff -Naur dvdread.orig/ifo_print.h dvdread/ifo_print.h
 --- dvdread/ifo_print.h 2002-08-15 22:13:21.000000000 +0200
 +++ /home/diego/src/mplayer/vanilla/libmpdvdkit2/ifo_print.h    2005-12-29 13:13:21.000000000 +0100
-@@ -20,8 +20,8 @@
+@@ -20,8 +24,8 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -374,7 +374,7 @@ diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
 diff -Naur dvdread.orig/ifo_read.h dvdread/ifo_read.h
 --- dvdread.orig/ifo_read.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/ifo_read.h	2005-06-23 00:19:10.000000000 +0200
-@@ -20,8 +20,8 @@
+@@ -20,8 +24,8 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -388,7 +388,7 @@ diff -Naur dvdread.orig/ifo_read.h dvdread/ifo_read.h
 diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
 --- dvdread.orig/ifo_types.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/ifo_types.h	2005-06-23 00:19:10.000000000 +0200
-@@ -21,7 +21,7 @@
+@@ -21,7 +25,7 @@
   */
  
  #include <inttypes.h>
@@ -397,7 +397,7 @@ diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
  
  
  #undef ATTRIBUTE_PACKED
-@@ -394,6 +394,55 @@
+@@ -394,6 +398,55 @@
  } ATTRIBUTE_PACKED user_ops_t;
  
  /**
@@ -453,7 +453,7 @@ diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
   * Program Chain Information.
   */
  typedef struct {
-@@ -402,8 +451,8 @@
+@@ -402,8 +455,8 @@
    uint8_t  nr_of_cells;
    dvd_time_t playback_time;
    user_ops_t prohibited_ops;
@@ -468,7 +468,7 @@ diff -Naur dvdread.orig/nav_print.c dvdread/nav_print.c
 diff -Naur dvdread.orig/nav_print.h dvdread/nav_print.h
 --- dvdread.orig/nav_print.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/nav_print.h	2005-06-23 00:19:10.000000000 +0200
-@@ -20,7 +20,7 @@
+@@ -20,7 +24,7 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -481,7 +481,7 @@ diff -Naur dvdread.orig/nav_read.c dvdread/nav_read.c
 diff -Naur dvdread.orig/nav_read.h dvdread/nav_read.h
 --- dvdread.orig/nav_read.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/nav_read.h	2005-06-23 00:19:10.000000000 +0200
-@@ -19,7 +19,7 @@
+@@ -19,7 +23,7 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -493,7 +493,7 @@ diff -Naur dvdread.orig/nav_read.h dvdread/nav_read.h
 diff -Naur dvdread.orig/nav_types.h dvdread/nav_types.h
 --- dvdread.orig/nav_types.h	2005-06-23 00:18:54.000000000 +0200
 +++ dvdread/nav_types.h	2005-06-23 00:19:10.000000000 +0200
-@@ -30,7 +30,7 @@
+@@ -30,7 +34,7 @@
   */
  
  #include <inttypes.h>
