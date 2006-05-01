@@ -291,7 +291,7 @@ static char help_text[]=
 #define MSGTR_DVDnoIFO "Impossible d'ouvrir le fichier IFO pour le titre DVD %d.\n"
 //***********************
 #define MSGTR_DVDnoVOBs "Impossible d'ouvrir le titre VOBS (VTS_%02d_1.VOB).\n"
-***************************
+//***************************
 #define MSGTR_DVDopenOk "DVD ouvert avec succès.\n"
 //***************************
 
