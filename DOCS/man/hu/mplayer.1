@@ -1,4 +1,4 @@
-.\" Synced with 1.1280
+.\" Synced with 1.1281
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -9371,7 +9371,7 @@ Bármelyik más frameráta inkompatibilis ezzel az opcióval.
 .SS FFmpeg libavformat muxer-ek (\-lavfopts) (lásd még \-of lavf)
 .
 .TP
-.B delay\ \ 
+.B delay=<érték>
 Jelenleg csak az MPEG[12]-nél van értelme: Maximálisan megengedett különbség
 másodpercben, a kimenet referencia idõzítõje (SCR) és a dekódolási idõbélyeg
 (DTS) között bármelyik jelenlévõ folyamnál (késleltetés demux-ból dekódolásba).
@@ -9416,19 +9416,19 @@ A MEncoder nem tud megfelelõ idõbélyegeket elõállítani, ha
 B-kockák vannak a videó folyamban, hibás kódolást eredményezve.
 .
 .TP
-.B muxrate
+.B muxrate=<ráta>
 A multiplex névleges bitrátája bit/másodpercben;
 jelenleg csak MPEG[12] esetén van értelme.
 Néha szükséges növelni a "buffer alulcsordulás" elkerüléséhez.
 .
 .TP
-.B packetsize
+.B packetsize=<méret>
 A kiválasztott formátum egységes csomagmérete, bájtokban kifejezve.
 MPEG[12] implementációkba történõ muxálásánál az alapértelmezett értékek:
 2324 [S]VCD-hez, 2048 minden más formátumhoz.
 .
 .TP
-.B preload
+.B preload=<különbség>
 Jelenleg csak az MPEG[12]-nél van értelme: Kezdeti különbség másodpercben
 a kimenet referencia idõzítõje (SCR) és a dekódolási idõbélyeg (DTS) között
 bármelyik jelenlévõ folyamnál (késleltetés demux-ból dekódolásba).
