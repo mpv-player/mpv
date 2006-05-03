@@ -162,7 +162,7 @@ static unsigned long long read_mpeg_timestamp(stream_t *s,int c){
     return 0; // invalid pts
   }
   pts=(((uint64_t)((c>>1)&7))<<30)|((d>>1)<<15)|(e>>1);
-  mp_dbg(MSGT_DEMUX,MSGL_DBG3,"{%d}",pts);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG3," pts {%"PRIu64"}",pts);
   return pts;
 }
 
