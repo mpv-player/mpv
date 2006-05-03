@@ -153,7 +153,7 @@ static void demux_close_mpg(demuxer_t* demuxer) {
 
 
 static unsigned long long read_mpeg_timestamp(stream_t *s,int c){
-  int d,e;
+  unsigned int d,e;
   unsigned long long pts;
   d=stream_read_word(s);
   e=stream_read_word(s);
