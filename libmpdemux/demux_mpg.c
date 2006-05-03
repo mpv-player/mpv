@@ -161,7 +161,7 @@ static unsigned long long read_mpeg_timestamp(stream_t *s,int c){
     ++mpeg_pts_error;
     return 0; // invalid pts
   }
-  pts=(((c>>1)&7)<<30)|((d>>1)<<15)|(e>>1);
+  pts=(((uint64_t)((c>>1)&7))<<30)|((d>>1)<<15)|(e>>1);
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"{%d}",pts);
   return pts;
 }
