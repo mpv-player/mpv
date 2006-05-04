@@ -436,6 +436,12 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 
     panscan_calc();
+    
+    vo_xv_draw_colorkey(drwX - (vo_panscan_x >> 1),
+                        drwY - (vo_panscan_y >> 1),
+                        vo_dwidth + vo_panscan_x - 1,
+                        vo_dheight + vo_panscan_y - 1);
+
 
 #if 0
 #ifdef HAVE_SHM
