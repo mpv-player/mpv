@@ -3694,6 +3694,7 @@ if(!sh_video) {
 
   if(!frame_time_remaining){
     //--------------------  Decode a frame: -----------------------
+    blit_frame = 0; // Don't blit if we hit EOF
     vdecode_time=video_time_usage;
     while(1)
     {   unsigned char* start=NULL;
