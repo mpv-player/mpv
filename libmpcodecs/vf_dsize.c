@@ -46,10 +46,10 @@ static int config(struct vf_instance_s* vf,
 		d_height = vf->priv->h;
 	} else {
 		if (vf->priv->aspect * height > width) {
-			d_width = height * vf->priv->aspect;
+			d_width = height * vf->priv->aspect + .5;
 			d_height = height;
 		} else {
-			d_height = width / vf->priv->aspect;
+			d_height = width / vf->priv->aspect + .5;
 			d_width = width;
 		}
 	}
