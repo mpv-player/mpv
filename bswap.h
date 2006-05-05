@@ -117,21 +117,21 @@ static inline uint64_t ByteSwap64(uint64_t x)
 
 #endif	/* !HAVE_BYTESWAP_H */
 
-static float inline bswap_flt(float x) {
+static inline float bswap_flt(float x) {
   union {uint32_t i; float f;} u;
   u.f = x;
   u.i = bswap_32(u.i);
   return u.f;
 }
 
-static double inline bswap_dbl(double x) {
+static inline double bswap_dbl(double x) {
   union {uint64_t i; double d;} u;
   u.d = x;
   u.i = bswap_64(u.i);
   return u.d;
 }
 
-static long double inline bswap_ldbl(long double x) {
+static inline long double bswap_ldbl(long double x) {
   union {char d[10]; long double ld;} uin;
   union {char d[10]; long double ld;} uout;
   uin.ld = x;
