@@ -9,6 +9,7 @@
 #ifdef ARCH_X86_64
 #  define REGa    rax
 #  define REGb    rbx
+#  define REGBP   rbp
 #  define REGSP   rsp
 #  define REG_a  "rax"
 #  define REG_b  "rbx"
@@ -21,6 +22,7 @@
 #else
 #  define REGa    eax
 #  define REGb    ebx
+#  define REGBP   ebp
 #  define REGSP   esp
 #  define REG_a  "eax"
 #  define REG_b  "ebx"
