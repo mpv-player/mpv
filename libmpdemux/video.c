@@ -607,13 +607,15 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       case DEMUXER_TYPE_MOV:
       case DEMUXER_TYPE_FILM:
       case DEMUXER_TYPE_VIVO:
+      case DEMUXER_TYPE_OGG:
       case DEMUXER_TYPE_REAL:
       case DEMUXER_TYPE_ASF: {
         float next_pts = ds_get_next_pts(d_video);
         float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
         if(d>=0){
           if(d>0){
-            if((int)sh_video->fps==1000)
+            /* 10000 is used for OGM only */
+            if((int)sh_video->fps==1000||(int)sh_video->fps==10000)
               mp_msg(MSGT_CPLAYER,MSGL_V,"\navg. framerate: %d fps             \n",(int)(1.0f/d));
 	    sh_video->frametime=d; // 1ms
             sh_video->fps=1.0f/d;
