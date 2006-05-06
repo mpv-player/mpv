@@ -565,8 +565,8 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
   // calculating audio/video bitrate:
   if(priv->idx_size>0){
     // we have index, let's count 'em!
-    size_t vsize=0;
-    size_t asize=0;
+    int64_t vsize=0;
+    int64_t asize=0;
     size_t vsamples=0;
     size_t asamples=0;
     int i;
@@ -582,14 +582,14 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
 	asamples+=(len+priv->audio_block_size-1)/priv->audio_block_size;
       }
     }
-    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%u (%u) audio size=%u (%u)\n",vsize,vsamples,asize,asamples);
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%"PRId64" (%u) audio size=%"PRId64" (%u)\n",vsize,vsamples,asize,asamples);
     priv->numberofframes=vsamples;
     sh_video->i_bps=((float)vsize/(float)vsamples)*(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
     if(sh_audio) sh_audio->i_bps=((float)asize/(float)asamples)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
   } else {
     // guessing, results may be inaccurate:
-    size_t vsize;
-    size_t asize=0;
+    int64_t vsize;
+    int64_t asize=0;
 
     if((priv->numberofframes=sh_video->video.dwLength)<=1)
       // bad video header, try to get number of frames from audio
@@ -609,7 +609,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       }
     }
     vsize=demuxer->movi_end-demuxer->movi_start-asize-8*priv->numberofframes;
-    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%d (%u)  audio size=%d\n",vsize,priv->numberofframes,asize);
+    mp_msg(MSGT_DEMUX,MSGL_V,"AVI video size=%"PRId64" (%u)  audio size=%"PRId64"\n",vsize,priv->numberofframes,asize);
     sh_video->i_bps=(float)vsize/(sh_video->frametime*priv->numberofframes);
   }
 
