@@ -8,6 +8,8 @@
 #include "config.h"
 #include "mpeg_hdr.h"
 
+#include "mp_msg.h"
+
 static float frameratecode2framerate[16] = {
   0,
   // Official mpeg1/2 framerates: (1-8)
@@ -102,6 +104,37 @@ int mp_header_process_extension (mp_mpeg_header_t * picture, unsigned char * buf
     return 0;
 }
 
+float mpeg12_aspect_info(mp_mpeg_header_t *picture)
+{
+    float aspect = 0.0;
+    
+    switch(picture->aspect_ratio_information) {
+      case 2:  // PAL/NTSC SVCD/DVD 4:3
+      case 8:  // PAL VCD 4:3
+      case 12: // NTSC VCD 4:3
+        aspect=4.0/3.0;
+        break;
+      case 3:  // PAL/NTSC Widescreen SVCD/DVD 16:9
+      case 6:  // (PAL?)/NTSC Widescreen SVCD 16:9
+        aspect=16.0/9.0;
+        break;
+      case 4:  // according to ISO-138182-2 Table 6.3
+        aspect=2.21;
+        break;
+      case 1:  // VGA 1:1 - do not prescale
+      case 9: // Movie Type ??? / 640x480
+        aspect=0.0;
+        break;
+      default:
+        mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
+               "Please report the aspect value (%i) along with the movie type (VGA,PAL,NTSC,"
+               "SECAM) and the movie resolution (720x576,352x240,480x480,...) to the MPlayer"
+               " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
+               picture->aspect_ratio_information);
+    }
+    
+    return aspect;
+}
 
 //MPEG4 HEADERS
 unsigned char mp_getbits(unsigned char *buffer, unsigned int from, unsigned char len)

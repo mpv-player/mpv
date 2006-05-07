@@ -326,34 +326,7 @@ mpeg_header_parser:
    }
    
 //   printf("picture.fps=%d\n",picture.fps);
-   
-   // fill aspect info:
-   switch(picture.aspect_ratio_information){
-     case 2:  // PAL/NTSC SVCD/DVD 4:3
-     case 8:  // PAL VCD 4:3
-     case 12: // NTSC VCD 4:3
-       sh_video->aspect=4.0/3.0;
-     break;
-     case 3:  // PAL/NTSC Widescreen SVCD/DVD 16:9
-     case 6:  // (PAL?)/NTSC Widescreen SVCD 16:9
-       sh_video->aspect=16.0/9.0;
-     break;
-     case 4:  // according to ISO-138182-2 Table 6.3
-       sh_video->aspect=2.21;
-       break;
-     case 9: // Movie Type ??? / 640x480
-       sh_video->aspect=0.0;
-     break;
-     default:
-       mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
-               "Please report the aspect value (%i) along with the movie type (VGA,PAL,NTSC,"
-               "SECAM) and the movie resolution (720x576,352x240,480x480,...) to the MPlayer"
-               " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
-               picture.aspect_ratio_information);
-     case 1:  // VGA 1:1 - do not prescale
-       sh_video->aspect=0.0;
-     break;
-   }
+   sh_video->aspect = mpeg12_aspect_info(&picture);
    // display info:
    sh_video->format=picture.mpeg1?0x10000001:0x10000002; // mpeg video
    sh_video->fps=picture.fps;
