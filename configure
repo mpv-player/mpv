@@ -6281,6 +6281,8 @@ if test "$_amr_nb" = auto ; then
   fi
 fi
 if test "$_amr_nb" = yes ; then
+  _amr=yes
+  _def_amr='#define AMR 1'
   _def_amr_nb='#define AMR_NB 1'
 else
   _def_amr_nb='#undef AMR_NB'
@@ -6303,6 +6305,8 @@ if test "$_amr_nb_fixed" = auto ; then
   fi
 fi
 if test "$_amr_nb_fixed" = yes ; then
+  _amr=yes
+  _def_amr='#define AMR 1'
   _def_amr_nb_fixed='#define AMR_NB_FIXED 1'
 else
   _def_amr_nb_fixed='#undef AMR_NB_FIXED'
@@ -6327,6 +6331,8 @@ if test "$_amr_wb" = auto ; then
   fi
 fi
 if test "$_amr_wb" = yes ; then
+  _amr=yes
+  _def_amr='#define AMR 1'
   _def_amr_wb='#define AMR_WB 1'
   _codecmodules="amr_wb $_codecmodules"
 else
@@ -7467,6 +7473,7 @@ TWOLAME_LIB=$_twolame_lib
 MUSEPACK_LIB = $_ld_musepack
 FAAC=$_faac
 FAAC_LIB=$_ld_faac
+AMR=$_amr
 AMR_NB=$_amr_nb
 AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
@@ -7835,6 +7842,7 @@ $_def_libavformat_win32
 #define CONFIG_GPL 1
 
 /* Use amr codecs from libavcodec (requires amr sources) */
+$_def_amr
 $_def_amr_nb
 $_def_amr_nb_fixed
 $_def_amr_wb
