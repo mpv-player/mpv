@@ -93,6 +93,7 @@ MPlayer (1.0)
     * DVD subtitles disabled by default
     * support sipr codec in old RealAudio files
     * fixed framerate detection of interlaced H.264 in raw/PS/TS streams
+    * support for variable framerate Ogg/OGM files
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
