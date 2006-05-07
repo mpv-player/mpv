@@ -6265,7 +6265,7 @@ if test "$_amr_nb" = yes ; then
 else
   _def_amr_nb='#undef AMR_NB'
 fi
-echores "$_amr_nb $_echomsg"
+echores "$_amr_nb"
 
 echocheck "amr narrowband, fixed point"
 if test "$_amr_nb_fixed" = auto ; then
