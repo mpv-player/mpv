@@ -2194,8 +2194,8 @@ if x86 ; then
   if test "$as_verc_fail" != yes ; then
     echores "ok"
   else
+    _res_comment="Upgrade binutils to ${_pref_as_version} ..."
     echores "failed"
-    echo "Upgrade binutils to ${_pref_as_version} ..."
     die "obsolete binutils version"
   fi
 fi
@@ -2627,7 +2627,8 @@ EOF
   cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2=yes
 fi
 if test "$_ld_sock" ; then
-  echores "yes (using $_ld_sock)"
+  _res_comment="using $_ld_sock"
+  echores "yes"
 else
   echores "no"
 fi
@@ -2650,17 +2651,21 @@ cat > $TMPC << EOF
 int main(void) { (void) inet_pton(0, 0, 0); return 0; }
 EOF
 if test "$_winsock2" = yes ; then
-    echores "not needed (using winsock2 functions)"
+    _res_comment="using winsock2 functions instead"
+    echores "no"
 elif cc_check $_ld_sock ; then
   # NOTE: Linux has libresolv but does not need it
   :
-  echores "yes (using $_ld_sock)"
+  _res_comment="using $_ld_sock"
+  echores "yes"
 elif cc_check $_ld_sock -lresolv ; then
   # NOTE: needed for SunOS at least
   _ld_sock="$_ld_sock -lresolv"
-  echores "yes (using $_ld_sock)"
+  _res_comment="using $_ld_sock"
+  echores "yes"
 else
-  echores "no (=> i'll try inet_aton next)"
+  _res_comment="trying inet_aton next"
+  echores "no"
   
   echocheck "inet_aton()"
   cat > $TMPC << EOF
@@ -2673,16 +2678,17 @@ EOF
   if cc_check $_ld_sock ; then
       # NOTE: Linux has libresolv but does not need it
     :
-    echores "yes (using $_ld_sock)"
+    _res_comment="using $_ld_sock"
   elif cc_check $_ld_sock -lresolv ; then
     # NOTE: needed for SunOS at least
     _ld_sock="$_ld_sock -lresolv"
-    echores "yes (using $_ld_sock)"
+    _res_comment="using $_ld_sock"
   else
     _use_aton=no
     _network=no
-    echores "no (=> network support disabled)"
+    _res_comment="network support disabled"
   fi
+  echores "$_use_aton"
 fi
 
 _def_use_aton='#undef USE_ATON'
@@ -2993,7 +2999,8 @@ if linux || test "$_ossaudio" != no ; then
   echores "$_soundcard"
 else
   # we don't want to use soundcard.h on non-Linux if OSS support not enabled!
-  echores "$_soundcard, but ignored!"
+  _res_comment= "but ignored!"
+  echores "$_soundcard"
   _soundcard=no
 fi
 if test "$_soundcard" = yes ; then
@@ -3578,12 +3585,14 @@ if test -z "$_inc_directfb" ; then
   for I in /usr/include /usr/local/include `echo $_inc_extra | sed s/-I//g`; do
     if test -d "$I/directfb" && test -f "$I/directfb/directfb.h" ; then
       _inc_directfb="-I$I/directfb"
-      echores "yes (using $_inc_directfb)"
+      _res_comment="using $_inc_directfb"
+      echores "yes"
       break
     fi
     if test -d "$I" && test -f "$I/directfb.h" ; then
       _inc_directfb="-I$I"
-      echores "yes (using $_inc_directfb)"
+      _res_comment="using $_inc_directfb"
+      echores "yes"
       break
     fi
   done
@@ -3592,7 +3601,8 @@ if test -z "$_inc_directfb" ; then
     echores "not found"
   fi
 else
-  echores "yes (using $_inc_directfb)"
+  _res_comment="using $_inc_directfb"
+  echores "yes"
 fi
 if test "$_inc_directfb" = "-I/usr/include" ; then
   _inc_directfb=""
@@ -3656,20 +3666,24 @@ if test -z "$_inc_x11" ; then
   for I in /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
     if test -d "$I/X11" && test -f "$I/X11/Xlib.h" ; then
       _inc_x11="-I$I"
-      echores "yes (using $I)"
+      _x11_headers="yes"
+      _res_comment="using $I"
       break
     fi
   done
   if test -z "$_inc_x11" ; then
     _x11=no
-    echores "not found (check if the dev(el) packages are installed)"
+    _x11_headers="no"
+    _res_comment="check if the dev(el) packages are installed"
   fi
 else
-  echores "yes (using $_inc_x11)"
+  _x11_headers="yes"
+  _res_comment="using $_inc_x11"
 fi
 if test "$_inc_x11" = "-I/usr/include" ; then
   _inc_x11=""
 fi
+echores "$_x11_headers"
 
 
 echocheck "X11"
@@ -3735,11 +3749,13 @@ EOF
 fi
 if test "$_xdpms4" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
-  echores "yes (using Xdpms 4)"
+  _res_comment="using Xdpms 4"
+  echores "yes"
 elif test "$_xdpms3" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
   _ld_x11="-lXdpms $_ld_x11"
-  echores "yes (using Xdpms 3)"
+  _res_comment="using Xdpms 3"
+  echores "yes"
 else
   _def_xdpms='#undef HAVE_XDPMS'
   echores "no"
@@ -5018,12 +5034,15 @@ echocheck "VCD support"
 if linux || bsdos || freebsd || netbsd || sunos || darwin ; then
   _inputmodules="vcd $_inputmodules"
   _def_vcd='#define HAVE_VCD 1'
-  echores "ok"
+  _vcd="yes"
 else
   _def_vcd='#undef HAVE_VCD'
   _noinputmodules="vcd $_noinputmodules"
-  echores "not supported on this OS"
+  _res_comment="not supported on this OS"
+  _vcd="no"
 fi
+echores "$_vcd"
+
 
 echocheck "DVD support (libmpdvdkit2)"
 if test "$_dvdkit" = auto ; then
@@ -5855,12 +5874,13 @@ if test "$_win32" != no ; then
   fi
   if not win32 ; then
     _def_win32_loader='#define WIN32_LOADER 1'
-    echores "yes"
   else
     _ld_win32libs="$_ld_win32libs -ladvapi32 -lole32"
-    echores "no (using native windows)"
+    _res_comment="using native windows"
   fi
 fi
+echores "$_win32"
+
 
 echocheck "DirectShow"
 if false ; then
@@ -6481,6 +6501,7 @@ cat > $TMPC << EOF
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
 EOF
 if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
+  _divx=yes
   _opendivx=no
   _ld_decore='-ldivxdecore'
   _def_decore='#define NEW_DECORE 1'
@@ -6488,7 +6509,7 @@ if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
   _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="divx4linux $_codecmodules"
-  echores "DivX4linux (with libdivxdecore.so)"
+  _res_comment="DivX4linux - with libdivxdecore.so"
 else
 # if test "$_divx4linux" != no ; then 
 # DivX5 check
@@ -6499,6 +6520,7 @@ cat > $TMPC << EOF
 int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_INIT; }
 EOF
 if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
+  _divx=yes
   _opendivx=no
 #  _ld_decore='-ldivxdecore opendivx/postprocess.o'
   _ld_decore='-ldivxdecore'
@@ -6509,8 +6531,9 @@ if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _codecmodules="divx5linux $_codecmodules"
   _nocodecmodules="divx4linux $_nocodecmodules"
-  echores "DivX5linux (with libdivxdecore.so)"
+  _res_comment="DivX5linux - with libdivxdecore.so"
 elif test "$_opendivx" != no ; then
+  _divx=yes
   _opendivx=yes
   _ld_decore='opendivx/libdecore.a'
   _def_decore='#undef NEW_DECORE'
@@ -6519,8 +6542,9 @@ elif test "$_opendivx" != no ; then
   _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
   _codecmodules="opendivx $_codecmodules"
   _nocodecmodules="divx5linux $_nocodecmodules"
-  echores "OpenDivX"
+  _res_comment="OpenDivX"
 elif test "$_xvidcompat" = yes ; then
+  _divx=yes
   _opendivx=no
   _ld_decore=''
   _def_decore='#define NEW_DECORE 1'
@@ -6529,8 +6553,9 @@ elif test "$_xvidcompat" = yes ; then
   _def_decore_xvid='#define DECORE_XVID 1'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _nocodecmodules="opendivx divx5linux divx4linux $_nocodecmodules"
-  echores "XviD compat."
+  _res_comment="XviD compat."
 else
+  _divx=no
   _opendivx=no
   _ld_decore=''
   _def_decore='#undef NEW_DECORE'
@@ -6538,9 +6563,9 @@ else
   _def_divx5='#undef DECORE_DIVX5'
   _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
   _nocodecmodules="opendivx $_nocodecmodules"
-  echores "no"
 fi # DivX5 check
 fi
+echores "$_divx"
 
 
 # mencoder requires (optional) those libs: libmp3lame and divx4linux encore
@@ -6582,18 +6607,21 @@ EOF
 int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
   if test "$_divx4linux" != no && cc_check -ldivxencore $_ld_lm ; then
+    _divx_encore=yes
     _def_encore='#define HAVE_DIVX4ENCORE 1'
     _ld_encore='-ldivxencore'
-    echores "DivX4linux (with libdivxencore.so)"
+    _res_comment="DivX4linux - with libdivxencore.so"
   elif test "$_xvidcompat" = yes ; then
+    _divx_encore=yes
     _def_encore='#define HAVE_DIVX4ENCORE 1'
     _ld_encore=''
     _def_encore_xvid='#define ENCORE_XVID 1'
-    echores "XviD compat."
+    _res_comment="XviD compatibility"
   else
+    _divx_encore=no
     _def_encore='#undef HAVE_DIVX4ENCORE'
-    echores "no"
   fi
+  echores "$_divx_encore"
 
 fi
 
