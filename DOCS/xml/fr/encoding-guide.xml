@@ -3362,11 +3362,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Augmenter le <option>frameref</option> à des valeurs inutilement élevées
   <emphasis role="bold">peut affecter</emphasis> et <emphasis role="bold">habituellement affecte</emphasis>
-  l'efficacité d'encodage si vous arrêtez le CABAC.
-  Avec le CABAC activé (comportement par défaut), la possibilité de réglagles
-  de <option>frameref</option> "trop élevé" actuellement semble trop distant 
-  pour même s'en inquiéter, et dans l'avenir, les optimisations peuvent enlever 
-  complètement cette possibilité.
+  l'efficacité d'encodage si vous désactivez le CABAC.
+  Avec le CABAC activé (comportement par défaut), il n'y a pas vraiment de risque
+  qu'un réglage de <option>frameref</option> "trop élevé" diminue l'efficacité
+  de l'encodage, et dans l'avenir, des optimisations pouront peut-être
+  rendre ce risque nul.
 </para>
 </note>
 
@@ -3378,7 +3378,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Vous perdrez probablement bien moins de 0.1dB du PSNR, ce qui devrait
   être une différence beaucoup trop faible pour être visible.
   Cependant, des valeurs différentes de <option>frameref</option> peuvent
-  parfois affecter le choix du frametype.
+  parfois affecter le choix du type de frame.
   Très probablement, ce sont des cas périphériques rares, mais si vous voulez 
   en être complètement certain, considérez que votre vidéo a soit des modèles 
   plein écran, clignotants et répétitifs, soit des occlusions provisoires très 
@@ -3392,20 +3392,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   action en directe, mais cela arrive quelquefois dans des captures de jeu vidéo.
 </para></listitem>
 
-<!--STARTOF-REREADME-->
 <listitem><para>
   <emphasis role="bold">me</emphasis>:
-  Cette option est pour choisir la méthode de recherche d'estimation de mouvement.
-  Modifier cette option fournit une compromis franche entre qualité et vitesse. 
-  <option>me=1</option> est seulement quelque pourcent plus rapide que
-  la recherche par défaut, à un coût en dessous de 0.1dB du PSNR global. Le 
-  paramètre par défaut (<option>me=2</option>) est une compensation raisonnable
-  entre vitesse et qualité. <option>me=3</option> gagne un petit peu en dessous 
-  de 0.1dB du PSNR global, avec une pénalité sur la vitesse qui varie dépendamment 
-  du <option>frameref</option>.  A de hautes valeurs du <option>frameref</option> 
-  (e.g. 12 ou autre), <option>me=3</option> est environ 40% plus lente que la 
-  valeur par défaut <option> me=2</option>. Avec <option>frameref=3</option>, 
-  la pénalité encourue sur la vitesse chute à 25%-30%.
+  Cette option est utilisée pour choisir une méthode de recherche d'estimation de mouvement.
+  Cette option modifie de manière notable le rapport entre qualité et vitesse. 
+  <option>me=1</option> est seulement quelques pour cent plus rapide que
+  la recherche par défaut et entraîne une diminution du PSNR global inférieure à 0.1dB. Le 
+  paramètre par défaut (<option>me=2</option>) est offre un compromis raisonnable
+  entre vitesse et qualité. <option>me=3</option> améliore de moins de 0.1dB le
+  PSNR global - la pénalité sur la vitesse varie en fonction
+  du <option>frameref</option>.  Pour de hautes valeurs du <option>frameref</option> 
+  (par exemple 12 ou plus), <option>me=3</option> est environ 40% plus lent que la 
+  valeur par défaut <option>me=2</option>. Avec <option>frameref=3</option>, 
+  la pénalité sur la vitesse chute dans les 25%-30%.
 </para>
 <para>
   <option>me=4</option> utilise une recherche exhaustive qui est trop lente pour
@@ -3416,37 +3415,37 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">4x4mv</emphasis>:
   Cette option active l'utilisation des sous-partitions 8x4, 4x8 et 4x4 dans
-  les macroblocs prévus. L'activer résulte en une assez consistente perte de 
-  vitesse de 10%-15%. Cette option est plutôt inutile dans une source contenant
-  seulement des mouvements bas, bien que dans certaines sources de mouvement élevés,
-  particulièrement des sources avec beaucoup de petits objets en mouvement, un 
-  gain d'environ 0.1dB peut être attendu.
+  les macroblocs prévus. L'activer résulte en une perte de vitesse habituellement
+  dans les 10% à 15%. Cette option est plutôt inutile pour une source contenant
+  peu de mouvements, bien que dans certaines sources riches en mouvements,
+  ou bien des sources avec beaucoup de petits objets en mouvement, un 
+  gain d'environ 0.1dB peut être espéré.
 </para>
 </listitem>
 
 <listitem><para>
   <emphasis role="bold">bframes</emphasis>:
-  Si vous avez l'habitude d'encoder avec d'autre codecs, vous pourriez avoir 
-  trouvé que les B-frames ne sont pas toujours utile.
-  Avec le H.264, ceci a changé: il y a de nouvelles techniques et types de blocs 
-  qui sont possibles avec les B-frames.
-  Habituellement, même un choix naïf d'algorithme de B-frame peut avoir un 
+  Si vous avez l'habitude d'encoder avec d'autre codecs, vous pourriez penser
+  que les trames-B ne sont pas toujours utiles.
+  Avec le H.264, ceci a changé: il y a de nouvelles techniques et types de blocs
+  qui sont possibles avec les trames-B.
+  Habituellement, même un choix naïf d'algorithme de trames-B peut avoir un
   bénéfice significatif sur le PSNR.
-  Il est intéressant de noter que l'utilisation de B-frames accélère 
-  habituellement le second passage de manière légère, et peut aussi accélèrer 
-  un encodage en un seul passage si le choix de B-frame adaptatif est stoppé.
+  Il est intéressant de noter que l'utilisation de trames-B accélère
+  habituellement légèrement la seconde passe, et peut aussi accélérer
+  l'encodage en un seul passage si le choix de trames-B adaptatif est désactivé.
 </para>
 <para>
-  Avec le choix de B-frame adaptatif stoppé
-  (<option>nob_adapt</option> de <option>x264encopts</option>),
-  la valeur optimale pour le paramètrage est habituellement pas plus que
-  <option>bframes=1</option>, ou bien les scènes élevées en mouvement peuvent 
-  en patir.
-  Avec le choix de B-frame adaptatif activé (le comportement par défaut), il 
-  est sûr d'utiliser des valeurs plus élevées; l'encodeur réduira l'utilisation 
-  de B-frames dans les scènes où cela pourrait abîmer la compression.
-  L'encodeur choisi rarement d'utiliser plus de 3 ou 4 B-frames;
-  paramètrer cette option a une valeur plus élevée aura peu d'effet.
+  Avec le choix de trames-B adaptatif désactivé
+  (l'option <option>nob_adapt</option> de <option>x264encopts</option>),
+  le réglage optimal est habituellement inférieur à
+  <option>bframes=1</option>, sinon les scènes riches en mouvement vont en souffrir.
+  Avec le choix de B-frame adaptatif activé (le comportement par défaut), cela
+  ne pose plus de problème d'utiliser des valeurs plus élevées;
+  l'encodeur réduira l'utilisation de trames-B dans les scènes pour lesquelles
+  cela risque de diminuer la qualité.
+  L'encodeur choisi rarement d'utiliser plus de 3 ou 4 trames-B;
+  paramétrer cette option à une valeur plus élevée aura peu d'effet.
 </para></listitem>
 
 <listitem><para>
@@ -3454,236 +3453,230 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Note: il est activé par défaut.
 </para>
 <para>
-  Avec cette option activée, l'encodeur utilisera un traitement de choix 
-  raisonnablement rapide pour réduire le nombre de B-frames utilisés par les 
-  scènes qui ne pourraient pas en bénéficier autant qu'elles le voudraient.
-  Vous pouvez utiliser <option>b_bias</option> pour bidouiller combien 
-  l'encodeur est heureux de ces B-frames.
-  La pénalité sur la vitesse des B-frames adaptatives est actuellement
-  plutôt modeste, mais il en est de même pour le gain potentiel en qualité.
-  Cela n'endomage pas habituellement, cependant.
-  Notez que cela affecte seulement le choix de vitesse et de frametype sur 
-  le premier passage.
-  <option>b_adapt</option> et <option>b_bias</option> n'ont aucun effet sur 
-  les passages suivants.
+  Avec cette option activée, l'encodeur décidera quand réduire le nombre
+  de trames-B utilisées dans les scènes pour lesquelles ces trames
+  n'apporteraient rien.
+  Vous pouvez utiliser <option>b_bias</option> pour tempérer la tendance
+  de l'encodeur à insérer des trames-B.
+  Le surcoût sur la vitesse des trames-B adaptatives est actuellement
+  plutôt modeste, mais il en est de même pour le gain de qualité potentiel.
+  En général, cela ne fait pas de mal...
+  Notez que cela affecte seulement la vitesse et le choix du type de trames
+  lors de la première passe.
+  Les options <option>b_adapt</option> et <option>b_bias</option> n'ont pas
+  d'effet lors des passages suivants.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
-  Vous devriez aussi bien activer cette option si vous utilisez >=2 B-frames;
-  comme la page man le dit, vous obtiendrez une faible améliroration de la 
-  qualité avec aucun surcoût sur la vitesse.
-  Notez que ces vidéos ne peuvent pas être lues sur des décodeurs basés sur 
-  une version de libavcodec datant d'avant le 5 Mars, 2005.
+  Vous pouvez aussi activer cette option si vous utilisez >=2 trames-B;
+  comme l'indique la page man, vous obtiendrez une faible amélioration de la 
+  qualité sans surcoût en vitesse.
+  Notez que ces vidéos ne peuvent pas être lues avec les décodeurs utilisant
+  une version de libavcodec antérieur au 5 mars 2005.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">weight_b</emphasis>:
-  Dans des cas typiques, il n'y a pas assez de gain avec cette option.
-  Cependant, dans des scènes crossfades ou fade-to-black, la prédiction de 
-  poids donne de plutôt larges bénéfices en bitrate.
-  Dans le MPEG-4 ASP, un fade-to-black est habituellement mieux codé comme une 
-  série de I-frames onéreuses; utiliser la prédiction de poids dans les 
-  B-frames rend possible la conversion d'un certain nombre en de beaucoup plus 
-  petites B-frames.
+  En théorie, il n'y a beaucoup de gain à espérer de cette option.
+  En effet, dans des scènes de fondu ou de fondu au noir, la prédiction
+  pondérée permet d'économiser beaucoup de bitrate.
+  Dans le MPEG-4 ASP, un fondu-au-noir est souvent mieux compressé comme une
+  coûteuse série de I-frames; utiliser la prédiction pondérée pour les
+  trames-B permet d'en convertir une partie en plus petites B-frames.
   Le coût sur la durée d'encodage est minimal, étant donné qu'aucun choix 
   supplémentaire n'a besoin d'être fait.
-  Aussi, contrairement à ce que les gens semble deviner, les requis en CPU par 
-  le décodeur ne sont pas énormement affecté par la prédiction de poids, tout 
-  le reste étant égal.
+  Aussi, contrairement à ce que les gens croient deviner, les besoins en CPU par 
+  le décodeur ne sont pas énormément affecté par la prédiction pondérée, toutes
+  choses étant égales par ailleurs.
 </para>
 <para>
-  Malheureusement, l'algorithme courant de choix de B-frame adaptative
-  a une forte tendance à éviter les B-frames durant les fondus.
-  Jusqu'à ce que cela change, il peut être une bonne idée d'ajouter
-  <option>nob_adapt</option> à votre x264encopts, si vous vous attendiez
-  à ce que le fondu ait un plus grand effet sur votre clip vidéo particulier.
+  Malheureusement, l'algorithme actuel de choix de trames-B adaptative
+  a une forte tendance à éviter les trames-B pendant les fondus.
+  Tant que ce sera le cas, ajouter <option>nob_adapt</option>
+  à votre x264encopts sera une bonne idée si vous pensez que les
+  fondus vont avoir un gros effet dans votre vidéo.
 </para></listitem>
 </itemizedlist>
 </sect3>
 
 <sect3 id="menc-feat-x264-encoding-options-misc-preferences">
-<title>Options concernants des préférences diverses</title>
+<title>Options diverses et/ou dépendant des goûts de chacun</title>
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Encodage en deux passages</emphasis>:
-  Ci-dessus, il a été suggéré de toujours utiliser un encodage en deux passages, 
-  mais il y a encore des raisons pour ne pas l'utiliser. Par exemple, si vous 
-  capturez la télévision en direct et l'encoder en temps réel, vous êtes forcé 
-  d'utiliser un encodage en un passage.
-  Aussi, un passage est évidemment plus rapide que deux passages; si vous 
-  utilisez l'exact même jeu d'options sur les deux passages, deux passages 
-  d'encodage est à peu près deux fois plus lent.
+  <emphasis role="bold">Encodage en deux passes</emphasis>:
+  On a suggéré ci-dessus de toujours utiliser un encodage en deux passages, 
+  mais il y a reste quelques cas pour ne pas l'utiliser. Par exemple, si vous
+  capturez la télévision en direct et que vous l'encodez en temps réel, vous 
+  êtes obligé d'utiliser un encodage mono-passe.
+  Aussi, une compression en une passe est évidemment plus rapide qu'une en deux
+  passes pour un jeu d'options donné - un encodage en deux passes est presque deux 
+  fois plus lent qu'un encodage en une passe.
 </para>
 <para>
-  Encore, il y a de très bonnes raisons pour utiliser l'encodage en deux passages. 
-  Pour une chose, taux de contrôle d'un seul passage n'est pas psychic, et il 
-  fait souvent des choix irraisonnables parce qu'il ne peut pas voir l'ensemble 
-  de l'image. Par exemple, supposez que vous avez une vidéo de deux minutes de 
-  long consistant en deux moitiés distinctes. La première moitié est une scène
-  à mouvement élevé durant 60 secondes ce qui, en de manière isolée, demande 
-  environ 2500kbps afin d'avoir l'air correcte.
-  Immédiatement suivi d'une scène de 60 secondes beaucoup moins demandante qui 
-  a l'air bien à 300kbps. Supposez que vous demandiez pour 1400kbps sur la 
-  théorie que ceci est suffisant pour accomoder les deux scènes. Un taux de 
-  contrôle en un seul passage fera quelques "fautes" dans un cas comme celui-là. 
-  Premièrement, il ciblera 1400kbps pour les deux segments. Le premier segment 
-  pourrait finir lourdement sur-quantifié, l'entraînant à ressembler à un bloc
-  de façon inadmissible et irraisonable. le second segment serait lourdement 
-  sous-quantifié; cela pourrait avoir l'air parfait, mais le coût en bitrate de 
-  cette perfection sera complètement irraisonnable. Ce qui est d'autant plus dur 
-  à éviter que le problème est à la transition entre les deux scènes. Les premières 
-  secondes de moitié de mouvement lente sera grandement sur-quantifié, parce que 
-  le taux de contrôle prévoit encore le genre de conditions en bitrate qu'il 
-  rencontre dans la première moitié de la vidéo. Cette "période d'erreur" de 
-  grandement sur-quantifié mouvement faible aura l'air mauvais, et utilisera 
-  réellement moins que les 300kbps qu'il aurait pris pour le rendre un semblant 
-  correct. IL y a des façons pour atténuer les pièges de l'encodage en simple 
-  passage, mais ils peuvent tendre à augmenter la mauvaise prédiction de bitrate.
+  Cependant, il y a de très bonnes raisons pour utiliser l'encodage en deux passages.
+  D'une part, le taux de contrôle d'un seul passage ne peut pas prédire le futur, il
+  fait donc souvent des choix sous-optimaux parce qu'il ne peut pas voir l'ensemble 
+  de la vidéo. Par exemple, supposez que vous ayez une vidéo de deux minutes 
+  consistant en deux moitiés distinctes. La première moitié est une scène
+  riche en mouvements pendant 60 secondes, ce qui, hors de tout contexte, demande
+  environ 2500kbps afin d'avoir l'air correct.
+  Une scène de 60 secondes beaucoup plus statique suit et peut être très bien à
+  300kbps. Supposez que vous demandiez 1400kbps sur la 
+  théorie que ceci soit suffisant pour les deux scènes. Un taux de 
+  contrôle en un seul passage fera quelques "fautes" dans un cas comme celui-là.
+  Premièrement, il essaiera de viser 1400kbps pour les deux segments. Alors que le
+  premier segment va manquer de bits et donc avoir beaucoup d'artefacts de blocs,
+  le second segment va avoir trop de bits et les gaspiller. Ceci est d'autant plus difficile
+  à éviter que le problème se produit à la transition entre les deux scènes. Les premières 
+  secondes de la seconde partie vont être grandement sur-quantifiés, parce que 
+  le taux de contrôle suppose qu'il va avoir les mêmes besoins en bitrate que pour
+  la première moitié de la vidéo. Cette "période d'erreur" de sur-quantification pour
+  les mouvements faibles va étrangement mauvais, et utilisera en réalité moins
+  que les 300kbps qu'il aurait pris pour le rendre correct. Il y a des façons
+  d'atténuer les pièges de l'encodage en simple passe, mais ils peuvent avoir
+  tendance à empirer la mauvaise prédiction de bitrate.
 </para>
 <para>
-  Le taux de contrôle multiple passage peut offrir d'énormes avantages sur un 
-  encodage simple passage.
-  En utilisant les statistiques récupérées depuis le premier passage d'encodage, 
-  l'encodeur peut estimer, avec une raisonnable exactitude, le "coût" (en bits) 
-  de l'encodage de n'importe quelle frame donnée, à n'importe quel quantificateur 
-  donné. Cela permet une beaucoup plus rationnelle, mieux plannifiée allocation 
-  de bits entre les scènes onéreuses (mouvement élevé) et bon marché (mouvement 
-  faible). Voir <option>qcomp</option> ci-dessous pour quelques idées sur comment 
-  bidouiller cette allocation à vos besoins.
+  Le taux de contrôle en multi-passes apporte d'énormes avantages sur une
+  compression mono-passe. En utilisant les statistiques récupérées depuis le
+  premier passage d'encodage, l'encodeur peut estimer, avec exactitude, le "coût"
+  (en bits) de l'encodage de n'importe quelle frame donnée, à n'importe quel
+  quantificateur donné. Cela permet d'avoir une allocation de bits beaucoup plus
+  rationnelle car mieux planifiée entre les scènes riches (beaucoup de
+  mouvements) et celles pauves en détails (peu de mouvements). Voir
+  <option>qcomp</option> ci-dessous pour quelques suggestions sur la manière
+  d'adapter cette allocation à vos besoins.
 </para>
 <para>
-  D'ailleurs, deux passages n'ont pas besoin de prendre deux fois plus de temps 
-  qu'un seul passage. Vous pouvez bidouiller les options dans le premier passage
-  pour une vitesse plus élevée et une qualité plus faible.
+  De plus, la compression en deux passes ne prend pas nécessairement deux fois plus de temps
+  que celle mono-passe. Vous pouvez jouer avec les options dans le première passe
+  pour avoir une vitesse plus élevée et une qualité plus faible.
   Si vous choisissez bien vos options, vous pouvez obtenir un premier passage 
   très rapide.
-  La qualité résultante dans le second passage sera légèrement plus basse parce 
-  que la prédiction de taille est moins précise, mais la différence de qualité 
-  est normalement beaucoup trop petite pour être visible. Essayez, par exemple, 
+  La qualité résultante de la seconde passe sera légèrement plus basse parce 
+  que la prédiction de taille sera moins précise, mais la différence de qualité 
+  sera usuellement trop faible pour être visible. Essayez, par exemple, 
   d'ajouter <option>subq=1:frameref=1</option> au premier passage <option>x264encopts</option>. 
-  Ensuite, sur le second passage, utilise des options plus lentes, de plus 
-  grandes qualités:
+  Ensuite, sur le second passage, utilisez des options plus lentes pour avoir une
+  meilleure qualité:
   <option>subq=6:frameref=15:4x4mv:me=3</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Encodage en trois passages</emphasis>?
-
-  x264 offre la capacité de faire un nombre arbitraire de passages consécutifs. 
-  Si vous spécifiez <option>pass=1</option> sur le premier passage, alors 
-  utilisez <option>pass=3</option> sur un passage suivant, le passage suivant
-  lira les statistiques depuis le passage précédent, et écrira ses propres 
-  statistiques. Un passage additionnel suivant celui-là aura une très bonne base
-  depuis laquelle faire des prédictions hautement précises de framesizes à un
-  quantificateur choisi. En pratique, les gains sur la qualité d'ensemble de 
-  ceci est habituellement proche de zéro, et tout à fait possiblement un 
-  troisième passage résultera en un PSNR global légèrement plus mauvais que le 
-  passage avant ça. Dans une utilisation typique, trois passages aident si vous 
-  obtenez soit une mauvaise prédiction de bitrate ou soit une mauvaise apparence 
-  des transitions de scènes lors de l'utilisation de seulement deux passages.
+  x264 offre la possibilité de faire un nombre arbitraire de passages consécutifs. 
+  Si vous spécifiez <option>pass=1</option> lors de la première passe, alors 
+  utilisez <option>pass=3</option> pour la passe suivante, cette passe
+  lira les statistiques calculées lors du passage précédent, et écrira ses propres 
+  statistiques. Une passe suivante aura une très bonne base depuis laquelle
+  faire des prédictions très précises de tailles de trame pour un quantificateur donné.
+  En pratique, les gains sur la qualité d'ensemble sont plutôt proches de zéro,
+  il est même possible qu'une troisième passe dégrade le PSNR global...
+  Pour utilisation typique, trois passages aident si vous obtenez une mauvaise
+  prédiction de bitrate ou un mauvais rendu lors des transitions de scènes
+  lors de l'utilisation de seulement deux passages.
   Ceci peut se produire sur les clips extrêmement courts. Il y a aussi quelques 
-  cas spéciaux dans lequels trois (ou plus) passages sont pratiqués pour les 
-  utilisateurs avancés, mais par souci de brièveté, ce guide omet de traiter ces 
-  cas spéciaux.
+  cas spéciaux dans lesquels trois (ou plus) passages sont utiles pour les 
+  utilisateurs avancés, mais par souci de brièveté, ce guide ne traitera pas
+  ces cas spéciaux.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">qcomp</emphasis>:
-  <option>qcomp</option> compense le nombre de bits alloués entre les frames 
-  "onéreux" mouvement élevé et les frames "bon marché" mouvement bas. A une 
-  extrémité, <option>qcomp=0</option> vis pour le vrai bitrate constant. 
-  Typiquement cela rendrait des scènes élevées en mouvement complètement moches, 
-  tandis que les scènes basses en mouvement seraient absolument parfaites, mais 
-  utiliseraient aussi beaucoup plus de bitrates qu'ils n'en auraient besoin dans 
-  le but de les rendre simplement excellentes. A une autre extrémité, <option>qcomp=1</option> 
-  réalise le paramètre de quantification (QP) presque constant. Un QP constant 
-  n'a pas l'air mauvais, mais la plupart des gens pensent qu'il est plus raisonnable 
-  d'enlever quelques bitrates des scènes extrêmement onéreuses (où la perte de 
-  qualité ne sera pas aussi apparente) et les ré-allouer aux scènes qui sont 
-  plus faciles à encoder à une excellente qualité.
-  <option>qcomp</option> est règlé à 0.6 par défaut, ce qui pourrait être un 
-  peu faible pour les goûts de plein de gens (0.7-0.8 sont aussi communément 
-  utilisé).
+  <option>qcomp</option> compense le nombre de bits alloués entre les trames
+  coûteuses car riches en mouvement et celles pauvres en mouvement. Dans
+  les cas extrêmes, <option>qcomp=0</option> vise un vrai bitrate constant. 
+  Typiquement, cela rendrait des scènes riches en mouvements vraiment laides, 
+  alors que les scènes plus statiques seraient absolument parfaites, mais cela
+  utiliserait aussi beaucoup plus de bits que nécessaire pour les rendre excellentes.
+  A l'autre extrême, <option>qcomp=1</option> rend les paramètres de quantifications
+  (QP) presque constants. Un QP constant n'a pas l'air mauvais, mais la plupart des
+  gens pensent qu'il est plus raisonnable d'enlever quelques bits des scènes
+  coûteuses (car la perte de qualité sera moins visible) et les ré-allouer
+  aux scènes qui sont plus faciles à encoder pour qu'elles aient une excellente qualité.
+  <option>qcomp</option> vaut 0.6 par défaut, ce qui peut être un 
+  peu trop faible pour certains (des valeurs entre 0.7-0.8 sont aussi communément 
+  utilisées).
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">keyint</emphasis>:
-  <option>keyint</option> est seulement pour compenser l'habilité de recherche 
-  de fichiers contre l'efficacité de codage. Par défaut, <option>keyint</option> 
-  est paramètré à 250. Sur des matériaux à 25 fps, cela garanti l'habilité de 
-  faire une recherche avec une précision de 10 secondes. Si vous pensez qu'il 
-  serait important et utile d'être capable de faire une recherche dans les 5 
-  secondes de précision, paramètrez <option>keyint=125</option>;
-  cela endommagera un peu la qualité/bitrate. Si vous vous inquiétez seulement 
-  de la qualité et non de l'habilité à faire une recherche, vous pouvez le 
-  paramètrer à des valeurs beaucoup plus élevées (comprenant qu'il y a des 
-  retours diminuants qui peuvent devenir extrèmement bas, ou même zéro). Le flux 
-  vidéo aura encore des points recherchables aussi longtemps qu'il y aura des 
-  changements dans la scène.
+  <option>keyint</option> est seulement là pour permetre de jouer sur le compromis entre la
+  précision de la navigation dans les fichiers et leur compression.
+  Par défaut, <option>keyint</option> est égal à 250.
+  Sur des sources à 25 fps, cela garantit que la navigation peut se faire
+  avec une précision de 10 secondes.
+  Si vous pensez qu'il est important et utile de pouvoir faire une recherche
+  avec une granularité de 5 secondes, mettez cette option à <option>keyint=125</option>;
+  cela dégradera un peu la qualité/bitrate. Si vous vous souciez seulement
+  de la qualité et non de la capacité à faire une recherche, vous pouvez le
+  mettre à des valeurs beaucoup plus élevées (mais gardez à l'esprit que plus
+  vous augmenterez, moins il aura de gain visuels).
+  Le flux vidéo aura encore des points de recherche à chaque changement de
+  de scène.
 </para></listitem> 
 <listitem><para>
   <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
-  Ce sujet va être un peu controversé.
+  Ce sujet risque d'être une source de controverses.
 </para>
 <para>
-  H.264 défini une simple procédure de déblocage sur les I-blocs qui utilise
-  des pré-règlages de forces et de seuils en dépendance avec le QP du bloc en 
-  question.
-  Par défaut, des blocs QP élevés sont fortement filtrés, et des blocs QP bas
-  ne sont pas débloqués du tout.
-  Les pré-règlages de forces définies par les standards sont bien choisis et les 
-  chances sont très bonnes pour qu'elles aient des PSNR optimal quelque soit la 
-  vidéo que vous essayez d'encoder.
-  Les paramètres de <option>deblockalpha</option> et <option>deblockbeta</option>
-  vous permettent de spécifier des décalages aux pré-règlages des seuils de 
-  déblocage.
+  H.264 définit une procédure simple pour retirer les blocs sur les I-blocs
+  qui utilisent des forces et des seuils pré-régléss en fonction du QP du
+  bloc en question.
+  Par défaut, les blocs QP élevés sont fortement filtrés, les blocs à bas QP
+  ne seront pas "débloqués" du tout.
+  Les pré-réglages de force définies par les standards sont bien choisis et
+  il y a de grandes chances qu'elles aient des PSNR optimaux quel que soit la 
+  vidéo que vous compressez.
+  Les paramètres <option>deblockalpha</option> et <option>deblockbeta</option>
+  permettent de spécifier des offsets par rapport aux seuils de "déblocage"
+  pré-définis.
 </para>
 <para>
-  Beaucoup de gens semblent penser que c'est une bonne idée de baisser la force
-  du filtre de déblocage par de large montants (disons, -3).
+  Il semble que beaucoup de gens pensent que baisser la force du filtre de
+  "déblocage" de beaucoup (par exemple -3) est une bonne idée.
   Ce n'est cependant presque jamais une bonne idée, et dans la plupart des cas, 
-  les gens qui le font ne comprennent pas très bien comment le déblocage 
+  ceux qui font cela ne comprennent pas très bien comment le déblocage 
   fonctionne par défaut.
 </para>
 <para>
   La première et plus importante chose à savoir à propos du filtre de déblocage 
-  in-loop est que les seuils par défaut sont à peu près toujours optimals PSNR.
-  Dans les rares cas où ils ne sont pas optimals, le décalage idéal est plus ou 
+  in-loop est que les seuils par défaut sont à peu près toujours optimaux du point de vue du PSNR.
+  Dans les rares cas où ce n'est pas le cas, le décalage idéal est de plus ou 
   moins 1.
-  Ajustant les paramètres de déblocage par un montant plus large est à peu près 
-  garanti d'abimer le PSNR.
-  Le renforcement du filtre enduira plus de détails; l'affaiblissement du filtre 
-  augmentera l'aspect du carré.
+  Ajuster les paramètres de déblocage avec une quantité plus importante a de forts
+  risques de dégrader le PSNR.
+  Renforcer le filtrage fera disparaître plus de détails; l'affaiblissement du filtre 
+  augmentera la visibilité des blocs.
 </para>
 <para>
-  C'est définitivement une mauvaise idée de baisser les seuils de déblocage si
-  votre source est principalement basse en complexité spaciale (i.e., peu de 
-  détail ou bruit).
-  Le filtre in-loop fait un travail plutôt excellent en cachant les artefacts 
-  qui se surviennent.
-  Si la source est élevée en complexité spaciale, cependant, les artefacts sont
-  moins apparents.
-  C'est parce que le déclencheur tend à ressembler à du détail ou du bruit.
-  La perception visuelle humaine remarque facilement quand un détail est enlevé,
-  mais elle ne remarque pas si facilement quand le bruit est faussement 
+  C'est une mauvaise idée que de baisser les seuils de déblocage si
+  votre source est de complexité spatiale basse (c-à-d avec peu de 
+  détails ou de bruit).
+  Le filtre in-loop fait un travail plutôt bon en cachant les artefacts 
+  qui se produisent.
+  Cependant, si la source a une complexité spatiale élevée, les
+  artefacts sont moins apparents.
+  Ceci vient du fait que "ringing" tend à ressembler à du détail
+  ou du bruit.
+  La vision humaine remarque facilement qu'un détail a été enlevé
+  mais elle le remarque plus difficilement s'il y a du bruit faussement
   représenté.
-  Quand on en vient à une qualité subjective, bruit et détail sont quelque peu 
-  interchangeables.
-  En baissant la force du filtre de déblocage, vous aurez des erreurs 
-  croissantes le plus susceptible en ajoutant des artefacts qui donneront 
-  l'alerte, mais l'oeil ne les remarque pas parce qu'il confond les 
-  artefacts avec des détails.
+  Subjectivement, le bruit et les détails sont quelque peu interchangeables.
+  En baissant la force du filtre de déblocage, vous allez très probablement
+  avoir des erreurs croissantes en ajoutant des artefacts de ringing mais
+  l'oeil ne les remarquera pas parce qu'il les confondra avec des détails.
 </para>
 
 <para>
-  Ceci ne justifie <emphasis role="bold">toujours</emphasis> pas d'abaisser 
-  la force du filtre de déblocage, cependant.
-  Vous pouvez généralement obtenir une meilleure qualité de bruit du 
+  Ceci ne justifie <emphasis role="bold">toujours</emphasis> pas de diminuer
+  la force du filtre de déblocage.
+  Vous pouvez généralement obtenir une meilleure qualité de bruit lors du
   post-traitement.
-  Si votre encodage en H.264 est trop flou ou souillé, essayez de lui rajouter
+  Si votre encodage en H.264 est trop flou ou sale, essayez de lui rajouter
   <option>-vf noise</option> quand vous jouez votre film encodé.
-  <option>-vf noise=8a:4a</option> devrez cacher la plupart des simples 
-  artefacts.
-  Cela aura l'air certainement mieux que les résultats que vous auriez obtenus 
-  juste en jouant du violon avec le filtre de déblocage.
+  <option>-vf noise=8a:4a</option> devrait cacher la plupart des artefacts
+  simples.
+  Cela aura l'air certainement mieux ce que ous obtiendriez en jouant
+  juste avec le filtre de déblocage.
 </para></listitem>
 </itemizedlist>
 </sect3>
@@ -3693,21 +3686,21 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Exemples de paramètre d'encodage</title>
 
 <para>
-  Les paramètres suivant sont des exemples de différentes combinaisons 
-  d'option d'encodage qui affectent la compensation entre la vitesse et 
-  la qualité pour le même bitrate cible.
+  Les paramètres ci-dessous sont des exemples de différentes combinaisons 
+  d'option de compression illustrant le compromis entre vitesse et
+  qualité pour un même bitrate.
 </para>
 
 <para>
   Tous les paramètres d'encodage sont testés sur un échantillon vidéo à 
-  720x448 @30000/1001 fps, le bitrate cible était à 900kbps, et la machine 
-  était un AMD-64 3400+ à 2400 Mhz en mode 64 bits.
-  Chaque paramètre d'encodage exploite la vitesse d'encodage mesuré (en
+  720x448 @30000/1001 fps, le bitrate cible est à 900kbps, et la machine 
+  est un AMD-64 3400+ à 2400 Mhz en mode 64 bits.
+  Chaque paramètre d'encodage exploite la vitesse de compression mesurée (en
   frames par seconde) et la perte PSNR (en dB) en la comparant au paramètre 
   de "très haute qualité".
-  Veuillez comprendre que dépendemment de votre source, de votre type de machine
-  et des avancements en développement, vous pouvez obtenir des résultats très 
-  différents.
+  Veuillez comprendre que selon votre source, le type de votre machine et
+  les derniers développements logiciels, vous pourrez obtenir des résultats
+  très différents.
 </para>
 
 <para>
@@ -3742,7 +3735,6 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect2>
 
 </sect1>
-<!--ENDOF-REREADME-->
 <sect1 id="menc-feat-vcd-dvd">
 <title>Utiliser MEncoder pour créer des fichiers conforme VCD/SVCD/DVD.</title>
 
@@ -3779,7 +3771,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>Résolution</entry>
         <entry>V. Codec</entry>
         <entry>V. Bitrate</entry>
-        <entry>Taux d'Echantillonnage</entry>
+        <entry>Taux d'échantillonnage</entry>
         <entry>A. Codec</entry>
         <entry>A. Bitrate</entry>
         <entry>FPS</entry>
@@ -3901,7 +3893,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   de GOP (Group of Pictures ou "Groupe d'Images").
   Pour des matériaux à 30 fps la plus large taille de GOP permise est 18.
   Pour 25 ou 24 fps, le maximum est 15.
-  La taille du GOP est règlée en utilisant l'option <option>keyint</option>.
+  La taille du GOP est réglée en utilisant l'option <option>keyint</option>.
 </para>
 </sect3>
 
@@ -3910,7 +3902,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Une vidéo VCD doit être nécessairement en CBR à 1152 kbps.
   Cette contrainte grandement limitante vient aussi avec une taille du buffer 
-  vbv de 327 kilobits extrèmement basse.
+  vbv de 327 kilobits extrêmement basse.
   SVCD permet de varier des bitrates vidéo jusqu'à 2500 kbps, et une taille du buffer vbv légèrement 
   moins restrictive de 917 kilobits est permise.
   Les bitrates de vidéo DVD peuvent aller jusqu'à 9800 kbps 
@@ -3978,14 +3970,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  16:9 ou "Ecran Large"
+  16:9 ou "Écran Large"
   <screen>
   -lavcopts aspect=16/9
   </screen>
 </para>
 
 <para>
-  4:3 ou "Plein Ecran"
+  4:3 ou "Plein Écran"
   <screen>
   -lavcopts aspect=4/3
   </screen>
@@ -4012,7 +4004,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-output-srate">
-<title>Conversion du Taux d'Echantillonnage</title>
+<title>Conversion du Taux d'échantillonnage</title>
 <para>
   Si le taux d'échantillonnage de l'audio du fichier original n'est pas le même 
   que celui demandé par le format cible, la conversion du taux d'échantillonnage 
@@ -4062,7 +4054,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   L'audio PCM peut aussi être utilisée pour le DVD, mais c'est surtout
   une grosse perte d'espace.
   Notez que l'audio MP3 n'est compatible avec aucun de ces formats, cependant
-  le kecteurs n'ont souvent aucun problème pour les jouer.
+  les lecteurs n'ont souvent aucun problème pour les jouer.
 </para></listitem>
 
 <listitem><para>
@@ -4082,7 +4074,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">keyint</emphasis>:
-  Utilisé pour règler la taille du GOP.
+  Utilisé pour régler la taille du GOP.
   18 pour les matériaux à 30 fps, ou 15 pour les matériaux  à 25/24 fps.
   Les producteurs commerciaux semblent préférer des keyframe à des intervalles 
   de 12.
@@ -4098,7 +4090,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">vrc_minrate</emphasis>:
-  1152, pour le VCD. Pëut être laissé seul pour le SVCD et le DVD.
+  1152, pour le VCD. Peut être laissé seul pour le SVCD et le DVD.
 </para></listitem>
 
 <listitem><para>
@@ -4113,11 +4105,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   1152 pour le VCD;
   jusqu'à 2500 pour le SVCD;
   jusqu'à 9800 pour le DVD.
-  Pour les deux derniers formats, les valeurs de vbitrate devrait être règlé
+  Pour les deux derniers formats, les valeurs de vbitrate devrait être réglées
   selon vos goûts.
   Par exemple, si vous insistez pour faire tenir 20 heures ou plus sur un DVD, 
   vous pouvez utiliser vbitrate=400.
-  La qualité vidéo résutante sera probablement assez mauvaise.
+  La qualité vidéo résultante sera probablement assez mauvaise.
   Si vous essayez d'avoir la qualité maximum possible sur un DVD, utilisez 
   vbitrate=9800, mais sachez que cela pourrait vous forcer
   à ne stocker que moins d'une heure de vidéo sur un DVD simple couche.
@@ -4128,7 +4120,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <sect3 id="menc-feat-vcd-dvd-lavc-examples">
 <title>Exemples</title>
 <para>
-  Ceci est un paramètrage typique minimal de <option>-lavcopts</option> pour
+  Ceci est un paramétrage typique minimal de <option>-lavcopts</option> pour
   encoder une vidéo:
 </para>
 <para>
@@ -4169,7 +4161,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   peut-il être utile d'ajouter <option>dc=10</option> à lavcopts.
   Le faire peut aider à réduire l'apparition de blocs dans les zones plates 
   colorées.
-  Pour résumer, la ligne suivante est un exemple de paramètrage de lavcopts 
+  Pour résumer, la ligne suivante est un exemple de paramétrage de lavcopts 
   pour une meilleure qualité pour un DVD:
 </para>
 
