@@ -81,9 +81,7 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_nuv,
   &demuxer_desc_real,
   &demuxer_desc_smjpeg,
-#ifdef HAVE_MATROSKA
   &demuxer_desc_matroska,
-#endif
   &demuxer_desc_realaudio,
   &demuxer_desc_vqf,
   &demuxer_desc_mov,

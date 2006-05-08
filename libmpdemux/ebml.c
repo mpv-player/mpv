@@ -6,7 +6,6 @@
  */
 
 #include "config.h"
-#ifdef HAVE_MATROSKA
 
 #include <stdlib.h>
 
@@ -363,5 +362,3 @@ ebml_read_header (stream_t *s, int *version)
 
   return str;
 }
-
-#endif /* HAVE_MATROSKA */

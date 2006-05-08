@@ -7,7 +7,6 @@
  */
 
 #include "config.h"
-#ifdef HAVE_MATROSKA
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -3618,5 +3617,3 @@ demuxer_desc_t demuxer_desc_matroska = {
   demux_mkv_seek,
   demux_mkv_control
 };
-
-#endif /* HAVE_MATROSKA */

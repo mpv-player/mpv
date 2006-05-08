@@ -279,7 +279,6 @@ Codecs:
   --disable-vorbis       disable OggVorbis support entirely [autodetect]
   --disable-speex        disable Speex support [autodetect]
   --enable-theora        build with OggTheora support [autodetect]
-  --disable-internal-matroska disable internal Matroska support [enabled]
   --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
   --disable-internal-faad disable internal FAAD2 (AAC) support [autodetect]
   --disable-faac         disable support for FAAC (AAC encoder) [autodetect]
@@ -1578,7 +1577,6 @@ _mp3lib=yes
 _liba52=yes
 _libdts=auto
 _libmpeg2=yes
-_matroska_internal=yes
 _tremor=no
 _faad_internal=auto
 _faad_external=auto
@@ -1793,8 +1791,6 @@ for ac_option do
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-musepack)	_musepack=yes	;;
   --disable-musepack)	_musepack=no	;;
-  --enable-internal-matroska)  _matroska_internal=yes ;;
-  --disable-internal-matroska) _matroska_internal=no ;;
   --enable-internal-faad)	_faad_internal=yes	_faad_external=no	;;
   --disable-internal-faad)	_faad_internal=no	;;
   --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
@@ -5715,16 +5711,6 @@ fi
 echores "$_musepack"
 
 
-echocheck "Matroska support"
-if test "$_matroska_internal" = yes ; then
-  _inputmodules="matroska $_inputmodules"
-  _def_matroska='#define HAVE_MATROSKA 1'
-else
-  _noinputmodules="matroska $_noinputmodules"
-  _def_matroska='#undef HAVE_MATROSKA'
-fi
-echores "$_matroska_internal"
-
 echocheck "FAAC (AAC encoder) support"
 if test "$_faac" = auto ; then
   cat > $TMPC <<EOF
@@ -7326,7 +7312,6 @@ EXTERNAL_VIDIX_LIB = $_ld_vidix_external
 CONFIG_PP = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
-MATROSKA = $_matroska_internal
 
 OPENDIVX = $_opendivx
 
@@ -8068,9 +8053,6 @@ $_def_musepack
 
 /* enable OggTheora support */
 $_def_theora
-
-/* enable Matroska support */
-$_def_matroska
 
 /* enable FAAD (AAC) support */
 $_def_faad

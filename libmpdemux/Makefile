@@ -86,6 +86,7 @@ SRCS += demuxer.c \
         demux_viv.c \
         demux_vqf.c \
         demux_y4m.c \
+        demux_mkv.c ebml.c \
 
 ifeq ($(HAVE_DVD),yes)
 SRCS += stream_dvd.c
@@ -95,9 +96,6 @@ SRCS += demux_xmms.c
 endif 
 ifneq ($(W32_LIB),)
 SRCS += demux_avs.c
-endif
-ifeq ($(MATROSKA),yes)
-SRCS += demux_mkv.c ebml.c
 endif
 
 # Muxers
