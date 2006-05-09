@@ -183,9 +183,7 @@ static int max_framesize=0;
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 //#include "parse_es.h"
-#ifdef HAVE_MATROSKA
 #include "libmpdemux/matroska.h"
-#endif
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
@@ -1843,7 +1841,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             return 1;
         }
 #endif
-#ifdef HAVE_MATROSKA
         if (demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
             char lang[40] = MSGTR_Unknown;
             demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
@@ -1851,7 +1848,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             snprintf(*(char**)arg, 63, "(%d) %s", dvdsub_id, lang);
             return 1;
         }
-#endif
 #ifdef HAVE_OGGVORBIS
         if (demuxer->type == DEMUXER_TYPE_OGG && d_dvdsub && dvdsub_id >= 0) {
             char *lang = demux_ogg_sub_lang(demuxer, dvdsub_id);
@@ -1947,7 +1943,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             if (demuxer->type == DEMUXER_TYPE_OGG)
                 d_dvdsub->id = demux_ogg_sub_id(demuxer, dvdsub_id);
 #endif
-#ifdef HAVE_MATROSKA
             if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
                 d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
                 if (d_dvdsub->id >= 0 &&
@@ -1971,7 +1966,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
                     }
                 }
             }
-#endif
         }
     } else { // off
 #ifdef USE_SUB
@@ -3100,13 +3094,11 @@ if(!demuxer)
 }
 inited_flags|=INITED_DEMUXER;
 
-#ifdef HAVE_MATROSKA
 if (demuxer->type==DEMUXER_TYPE_MATROSKA) {
   // setup global sub numbering
   global_sub_indices[SUB_SOURCE_DEMUX] = global_sub_size; // the global # of the first demux-specific sub.
   global_sub_size += demux_mkv_num_subs(demuxer);
 }
-#endif
 #ifdef HAVE_OGGVORBIS
 if (demuxer->type==DEMUXER_TYPE_OGG) {
   // setup global sub numbering
@@ -3246,7 +3238,6 @@ if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
 }
 #endif
 
-#ifdef HAVE_MATROSKA
 if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
     (d_dvdsub->sh != NULL) && (((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
   mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
@@ -3257,7 +3248,6 @@ if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
                              mkv_sh_sub->height);
   forced_subs_only = mkv_sh_sub->forced_subs_only;
 }
-#endif
 
 if (vo_spudec==NULL) {
   current_module="spudec_init_normal";
