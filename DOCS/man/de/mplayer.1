@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1281
+.\" In sync with rev 1.1283
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -6730,7 +6730,7 @@ folgende Syntax benutzt:
 .
 .PP
 Wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, divx4, lame,
-toolame, twolame, nuv, vfw, faac, x264enc, mpeg und lavf.
+toolame, twolame, nuv, xvfw, faac, x264enc, mpeg und lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6800,6 +6800,7 @@ Parametern und pass=2.
 Überschreibt den pass-Parameter und benutzt die VBR-Bibliothek von XviD
 anstelle der von DivX4.
 Verfügbare Optionen sind:
+.PD 0
 .RSs
 .IPs 0
 Encodieren in einem Durchlauf (als ob pass überhaupt nicht verwendet würde)
@@ -6809,6 +6810,7 @@ Das erstellte AVI kann nach /dev/\:null umgeleitet werden.
 .IPs 2
 Finaler (zweiter) Durchlauf im Modus mit zwei Durchläufen.
 .RE
+.PD 1
 .
 .
 .SS lame (\-lameopts)
@@ -9721,6 +9723,15 @@ Frames anhält, auf einen Tastendruck des Benutzers wartet und dann erst den
 nächsten Frame enkodiert.
 .RE
 .
+.
+.SS xvfw (\-xvfwopts)
+.
+Encodierung mit Video for Windows Codecs ist hauptsächlich obsolet, es sei
+denn, du möchtest mit irgendeinem obskuren Codec encodieren.
+.
+.TP
+.B codec=<Name>
+Der Name der Binärcodecdatei, mit der encodiert werden soll.
 .
 .
 .SS MPEG Muxer (\-mpegopts)
