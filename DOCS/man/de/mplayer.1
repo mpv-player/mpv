@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1280
+.\" In sync with rev 1.1281
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -2380,7 +2380,7 @@ Wird nur von fbdev-, dga2-, svga- und vesa-Videoausgabetreibern unterstützt.
 Spiele den Film mit Fensterrand und Dekoration.
 Da dies standardmäßig an ist, benutze \-noborder um die normale
 Fensterdekoration abzuschalten.
-Wird nur vom directx-Videoausgabetreiber unterstützt.
+Wird vom directx-Videoausgabetreiber unterstützt.
 .
 .TP
 .B \-brightness <-100\-100>
@@ -9826,7 +9826,7 @@ Jede andere Framerate ist mit dieser Option inkompatibel.
 .SS FFmpeg-libavformat-Muxer (\-lavfopts) (siehe auch \-of lavf)
 .
 .TP
-.B delay\ \ 
+.B delay=<Wert>
 Momentan nur für MPEG[12] von Bedeutung: Maximal erlaubter Abstand in Sekunden
 zwischen dem Referenzzeitgeber des Ausgabestreams (SCR) und des
 Decodierungszeitstempels (DTS) für jeden vorhandenen Stream
@@ -9872,19 +9872,19 @@ MEncoder kann Zeitstempel nicht korrekt zuweisen, wenn im Videostream B-Frames
 vorhanden sind, was zu kaputten Encodierungen führt.
 .
 .TP
-.B muxrate
+.B muxrate=<Rate>
 Nominale Bitrate des Multiplex in Bits pro Sekunde;
 momentan nur für MPEG[12] von Bedeutung.
 Manchmal ist es nötig, diese zu erhöhen, um "Buffer Underflows" zu verweiden.
 .
 .TP
-.B packetsize
+.B packetsize=<Größe>
 Größe, ausgedrückt in Bytes, des einheitlichen Pakets für das gewählte Format.
 Beim Muxing zu MPEG[12]-Implementierungen sind die Standardwerte 2324 für
 [S]VCD und 2048 für alle anderen Formate.
 .
 .TP
-.B preload
+.B preload=<Abstand>
 Momentan nur für MPEG[12] von Bedeutung: Initialer Abstand in Sekunden zwischen
 dem Referenzzeitgeber des Ausgabestreams (SCR) und des
 Decodierungszeitstempels (DTS) für jeden vorhandenen Stream
