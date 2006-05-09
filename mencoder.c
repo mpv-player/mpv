@@ -1316,7 +1316,7 @@ case VCODEC_FRAMENO:
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     blit_frame=decode_video(sh_video,frame_data.start,frame_data.in_size,
-      skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), mux_v->timer);
+      skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE), MP_NOPTS_VALUE);
     
     if (sh_video->vf_inited < 0) mencoder_exit(1, NULL);
     
