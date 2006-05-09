@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.247
+// In synch with rev 1.250
 
 // ========================= MPlayer help ===========================
 
@@ -13,22 +13,22 @@ static char help_text[]=
 "Verwendung:   mplayer [Optionen] [URL|Verzeichnis/]Dateiname\n"
 "\n"
 "Basisoptionen: (siehe Manpage für eine vollständige Liste aller Optionen!)\n"
-" -vo <drv[:dev]>  Videoausgabetreiber & -gerät ('-vo help' für eine Liste)\n"
-" -ao <drv[:dev]>  Audioausgabetreiber & -gerät ('-ao help' für eine Liste)\n"
+" -vo <drv>        Wähle Videoausgabetreiber ('-vo help' für eine Liste)\n"
+" -ao <drv>        Wähle Audioausgabetreiber ('-ao help' für eine Liste)\n"
 #ifdef HAVE_VCD
-" vcd://<tracknr>   Spiele einen (S)VCD-Titel (Super Video CD) ab\n"
-"                   ( direkter Gerätezugriff, kein mount! )\n"
+" vcd://<tracknr>  Spiele einen (S)VCD-Titel (Super Video CD) ab\n"
+"                  ( direkter Gerätezugriff, kein mount! )\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<titelnr>   Spiele DVD-Titel direkt vom Gerät anstelle einer Datei\n"
+" dvd://<titelnr>  Spiele DVD-Titel direkt vom Gerät anstelle einer Datei\n"
 " -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen-Ländercode)\n"
 #endif
-" -ss <zeitpos>    Spiele ab Position (Sekunden oder hh:mm:ss)\n"
+" -ss <Position>   Spiele ab Position (Sekunden oder hh:mm:ss)\n"
 " -nosound         Ohne Ton abspielen\n"
 " -fs              Im Vollbildmodus abspielen (oder -vm, -zoom, siehe Manpage)\n"
 " -x <x> -y <y>    Setze Bildschirmauflösung (für Benutzung mit -vm oder -zoom)\n"
-" -sub <datei>     Benutze Untertitel-Datei (siehe auch -subfps, -subdelay)\n"
-" -playlist <datei> Benutze Playlist aus Datei\n"
+" -sub <Datei>     Benutze Untertitel-Datei (siehe auch -subfps, -subdelay)\n"
+" -playlist <Datei> Benutze Playlist aus Datei\n"
 " -vid x -aid y    Wähle Video- (x) und Audiostream (y) zum Abspielen\n"
 " -fps x -srate y  Ändere Videoframerate (x fps) und Audiosamplingrate (y Hz)\n"
 " -pp <Qualität>   Aktiviere Postprocessing-Filter (siehe Manpage für Details)\n"
@@ -51,6 +51,7 @@ static char help_text[]=
 "\n";
 #endif
 
+// libmpcodecs/ad_dvdpcm.c:
 #define MSGTR_SamplesWanted "Beispiele für dieses Format werden gebraucht, um die Unterstützung zu verbessern. Bitte kontaktiere die Entwickler.\n"
 
 // ========================= MPlayer Ausgaben ===========================
@@ -196,9 +197,9 @@ static char help_text[]=
 #define MSGTR_EdlCantOpenForRead "Kann EDL-Datei [%s] nicht zum Lesen öffnen.\n"
 #define MSGTR_EdlNOsh_video "Kann EDL nicht ohne Video verwenden, deaktiviere.\n"
 #define MSGTR_EdlNOValidLine "Ungültige EDL-Zeile: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "Schlecht formatierte EDL-Zeile [%d]. Verwerfe.\n"
-#define MSGTR_EdlBadLineOverlap "Letzte Stop-Position war [%f]; nächster Start ist "\
-"[%f]. Einträge müssen in chronologischer Reihenfolge sein, ohne Überschneidung. Verwerfe.\n"
+#define MSGTR_EdlBadlyFormattedLine "Schlecht formatierte EDL-Zeile [%d], verwerfe.\n"
+#define MSGTR_EdlBadLineOverlap "Letzte Stop-Position war [%f]; nächster Start ist [%f].\n"\
+"Einträge müssen in chronologischer Reihenfolge sein, ohne Überschneidung. Verwerfe.\n"
 #define MSGTR_EdlBadLineBadStop "Zeit des Stops muß nach der Startzeit sein.\n"
 
 // mplayer.c OSD
@@ -215,7 +216,7 @@ static char help_text[]=
 
 // property values
 #define MSGTR_Enabled "aktiviert"
-#define MSGTR_EnabledEdl "aktiviert (edl)"
+#define MSGTR_EnabledEdl "aktiviert (EDL)"
 #define MSGTR_Disabled "deaktiviert"
 #define MSGTR_HardFrameDrop "hart"
 #define MSGTR_Unknown "unbekannt"
@@ -257,8 +258,8 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nKein Videoencoder (-ovc) ausgewählt. \nWähle einen aus (siehe -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Kann Ausgabedatei '%s' nicht öffnen.\n"
 #define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen.\n"
-#define MSGTR_MencoderWrongFormatAVI "\nWARNING: Format der Ausgabedatei ist _AVI_, siehe '-of help'.\n"
-#define MSGTR_MencoderWrongFormatMPG "\nWARNUNG: Format der Ausgabedatei ist _MPEG_, siehe '-of help'.\n"
+#define MSGTR_MencoderWrongFormatAVI "\nWARNING: Format der Ausgabedatei ist _AVI_. Siehe '-of help'.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nWARNUNG: Format der Ausgabedatei ist _MPEG_. Siehe '-of help'.\n"
 #define MSGTR_MissingOutputFilename "Keine Ausgabedatei angegeben, schaue dir bitte die Option '-o' an."
 #define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Erzwinge Audioformatkennzeichnung 0x%x in der Ausgabe.\n"
@@ -399,7 +400,7 @@ static char help_text[]=
 #define MSGTR_ConfigFileError "Konfigurationsdatei-Fehler"
 #define MSGTR_ErrorParsingCommandLine "Fehler beim Parsen der Kommandozeile."
 #define MSGTR_VideoStreamRequired "Videostream zwingend notwendig!\n"
-#define MSGTR_ForcingInputFPS "Erzwungene Bildrate der Eingabedatei: %5.2ffps\n"
+#define MSGTR_ForcingInputFPS "Input-Framerate wird als statt dessen als %5.2f interpretiert.\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Ausgabedateiformat RAWVIDEO unterstützt kein Audio - Audio wird deaktiviert.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Dieser Demuxer unterstützt -nosound no nicht.\n"
 #define MSGTR_MemAllocFailed "Speicherreservierung fehlgeschlagen."
@@ -501,7 +502,7 @@ static char help_text[]=
 #define MSGTR_CannotMakePipe "Kann PIPE nicht anlegen!\n"
 
 // m_config.c
-#define MSGTR_SaveSlotTooOld "Zu alte Speicherstelle gefunden von lvl %d: %d !!!\n"
+#define MSGTR_SaveSlotTooOld "Von lvl gefundene Speicherstelle %d ist zu alt: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "Die Option %s kann in Konfigurationsdateien nicht verwendet werden.\n"
 #define MSGTR_InvalidCmdlineOption "Die Option %s kann auf der Kommandozeile nicht verwendet werden.\n"
 #define MSGTR_InvalidSuboption "Fehler: Option '%s' hat keine Unteroption '%s'.\n"
@@ -532,7 +533,7 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer wurde ohne SMB-Unterstützung kompiliert.\n"
 
 #define MSGTR_CantOpenDVD "Kann DVD-Laufwerk nicht öffnen: %s\n"
-#define MSGTR_NoDVDSupport "MPlayer wurde ohne DVD-Unterstützung übersetzt.\n"
+#define MSGTR_NoDVDSupport "MPlayer wurde ohne DVD-Unterstützung übersetzt, beende.\n"
 #define MSGTR_DVDwait "Lese Disc-Struktur, bitte warten...\n"
 #define MSGTR_DVDnumTitles "Es sind %d Titel auf dieser DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ungültige DVD-Titelnummer: %d\n"
@@ -555,8 +556,8 @@ static char help_text[]=
 #define MSGTR_TooManyStreams "Zu viele Streams!"
 #define MSGTR_RawMuxerOnlyOneStream "Der rawaudio-Muxer unterstützt nur einen Audiostream!\n"
 #define MSGTR_IgnoringVideoStream "Ignoriere Videostream!\n"
-#define MSGTR_UnknownStreamType "Warnung! Unbekannter Streamtyp: %d\n"
-#define MSGTR_WarningLenIsntDivisible "Warnung! 'len' ist nicht durch 'samplesize' teilbar!\n"
+#define MSGTR_UnknownStreamType "Warnung, unbekannter Streamtyp: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Warnung, 'len' ist nicht durch Samplegröße teilbar!\n"
 
 #define MSGTR_MuxbufMallocErr "Speicher für Muxer-Framepuffer konnte nicht alloziert werden!\n"
 #define MSGTR_MuxbufReallocErr "Speicher für Muxer-Framepuffer konnte nicht vergrößert werden!\n"
@@ -597,12 +598,12 @@ static char help_text[]=
 #define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/HTML/en/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: komprimierte Header benötigen ZLIB-Unterstützung.\n"
-#define MSGTR_MOVvariableFourCC "MOV: Warnung: Variable FOURCC erkannt!?\n"
+#define MSGTR_MOVvariableFourCC "MOV: Warnung: Variable FourCC erkannt!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: WARNUNG: Zu viele Tracks."
 #define MSGTR_FoundAudioStream "==> Audiostream gefunden: %d\n"
 #define MSGTR_FoundVideoStream "==> Videostream gefunden: %d\n"
 #define MSGTR_DetectedTV "TV erkannt! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "Öffnen des OGG-Demuxers fehlgeschlagen.\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Öffnen des Ogg-Demuxers fehlgeschlagen.\n"
 #define MSGTR_ASFSearchingForAudioStream "ASF: Suche nach Audiostream (Id:%d).\n"
 #define MSGTR_CannotOpenAudioStream "Kann Audiostream nicht öffnen: %s\n"
 #define MSGTR_CannotOpenSubtitlesStream "Kann Untertitelstream nicht öffnen: %s\n"
@@ -616,7 +617,7 @@ static char help_text[]=
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressiver NTSC-Inhalt erkannt, wechsele Framerate.\n"
 
 #define MSGTR_CacheFill "\rFülle Zwischenpuffer: %5.2f%% (%"PRId64" Bytes)   "
-#define MSGTR_NoBindFound "Taste '%s' ist nicht gebunden."
+#define MSGTR_NoBindFound "Bindung für Taste '%s' nicht gefunden."
 #define MSGTR_FailedToOpen "Konnte '%s' nicht öffnen.\n"
 
 // dec_video.c & dec_audio.c:
@@ -725,17 +726,17 @@ static char help_text[]=
 #define MSGTR_Browse "Durchsuchen"
 
 // --- error messages ---
-#define MSGTR_NEMDB "Sorry, nicht genug Speicher für den Zeichnungs-Puffer."
+#define MSGTR_NEMDB "Sorry, nicht genug Speicher zum Zeichnen des Puffers."
 #define MSGTR_NEMFMR "Sorry, nicht genug Speicher für Menü-Rendering."
-#define MSGTR_IDFGCVD "Sorry, kann keinen GUI-kompatiblen Ausgabetreiber finden."
-#define MSGTR_NEEDLAVCFAME "Sorry, du versuchst, Nicht-MPEG Dateien ohne erneute Encodierung abzuspielen.\nBitte aktiviere lavc oder fame in der DXR3/H+-Configbox."
+#define MSGTR_IDFGCVD "Sorry, habe keinen GUI-kompatiblen Ausgabetreiber gefunden."
+#define MSGTR_NEEDLAVCFAME "Sorry, du versuchst, Nicht-MPEG Dateien ohne erneute Encodierung abzuspielen.\nBitte aktiviere lavc oder fame in der DXR3/H+-Konfigurationsbox."
 #define MSGTR_UNKNOWNWINDOWTYPE "Unbekannten Fenstertyp gefunden ..."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
-#define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"section\" nicht gefunden"
-#define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s)."
+#define MSGTR_SKIN_WARNING1 "[Skin] Warnung: in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"section\" nicht gefunden"
+#define MSGTR_SKIN_WARNING2 "[Skin] Warnung: in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
+#define MSGTR_SKIN_WARNING3 "[skin] Warnung: in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s)."
 #define MSGTR_SKIN_SkinFileNotFound "[skin] Datei ( %s ) nicht gefunden.\n"
 #define MSGTR_SKIN_SkinFileNotReadable "[skin] Datei ( %s ) nicht lesbar.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder weniger werden nicht unterstützt (%s).\n"
@@ -976,7 +977,7 @@ static char help_text[]=
 #define MSGTR_WS_ColorDepthTooLow "[ws] Sorry, die Farbtiefe ist zu niedrig.\n"
 #define MSGTR_WS_TooManyOpenWindows "[ws] Es sind zu viele Fenster geöffnet.\n"
 #define MSGTR_WS_ShmError "[ws] Fehler der Shared-Memory-Erweiterung\n"
-#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Sorry, nicht genügend Speicher zum Schreiben in den Buffer.\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Sorry, nicht genügend Speicher zum Schreiben des Buffers.\n"
 #define MSGTR_WS_DpmsUnavailable "DPMS nicht verfügbar?\n"
 #define MSGTR_WS_DpmsNotEnabled "Konnte DPMS nicht aktivieren.\n"
  
@@ -1003,7 +1004,7 @@ static char help_text[]=
 #define MSGTR_VO_SuboptionsParsedOK "Parsen der Unteroptionen OK."
 #define MSGTR_VO_ValueOutOfRange "Wert außerhalb des gültigen Bereichs"
 #define MSGTR_VO_NoValueSpecified "Kein Wert angegeben."
-#define MSGTR_VO_UnknownSuboptions "Unbekannte Unteroption(en)"
+#define MSGTR_VO_UnknownSuboptions "unbekannte Unteroption(en)"
 
 // vo_aa.c
 
@@ -1115,7 +1116,7 @@ static char help_text[]=
 #define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Kanäle: %s Format %s\n"
 #define MSGTR_AO_SDL_DriverInfo "[AO SDL] benutze Audiotreiber %s.\n"
 #define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Nichtunterstütztes Audioformat: 0x%x.\n"
-#define MSGTR_AO_SDL_CantInit "[AO SDL] Initialisierung von SDL-Audio fehlgeschlagen: %s\n"
+#define MSGTR_AO_SDL_CantInit "[AO SDL] SDL-Audio-Initialisierung fehlgeschlagen: %s\n"
 #define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Kann Audio nicht öffnen: %s\n"
 
 // ao_sgi.c
@@ -1193,7 +1194,7 @@ static char help_text[]=
 
 // format.c
 
-#define MSGTR_AF_FORMAT_UnknownFormat "unbekanntes-Format "
+#define MSGTR_AF_FORMAT_UnknownFormat "unbekanntes Format "
 
 // ========================== INPUT =========================================
 
@@ -1267,7 +1268,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Konnte Kanalzahl nicht setzen: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Konnte Stereo nicht setzen: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2Open "Konnte '%s' nicht öffnen: %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Format ist nicht unterstützt.\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Nichtunterstütztes Format\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Konnte Tonformat nicht setzen."
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Konnte Samplerate nicht setzen: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Konnte Trigger nicht setzen: %d\n"
@@ -1278,8 +1279,8 @@ static char help_text[]=
 // asfheader.c
 
 #define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: Dateikopf größer als 1 MB (%d)!\nSetze dich mit den MPlayer-Autoren in Verbindung und sende oder lade diese Datei hoch.\n"
-#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "%d Byte konnten nicht für den Kopf reserviert werden.\n"
-#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "Dateiende beim lesen des Kopfes, kaputte/unvollständige Datei?\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "%d Bytes konnten nicht für den Kopf reserviert werden.\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "Dateiende beim lesen des ASF-Headers, kaputte/unvollständige Datei?\n"
 #define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR funktioniert vermutlich nur mit libavformat, versuche -demuxer 35, falls du Probleme hast.\n"
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Auf den Kopf folgt kein Datenblock!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: Kein Ton/Bild-Kopf gefunden - kaputte Datei?\n"
@@ -1287,7 +1288,7 @@ static char help_text[]=
 
 // asf_mmst_streaming.c
 
-#define MSGTR_MPDEMUX_MMST_WriteError "Schreibfehler.\n"
+#define MSGTR_MPDEMUX_MMST_WriteError "Schreibfehler\n"
 #define MSGTR_MPDEMUX_MMST_EOFAlert "\nAchtung! Dateiende.\n"
 #define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "Konnte 'pre-header' nicht lesen.\n"
 #define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Ungültige Kopfgröße, gebe auf.\n"
@@ -1298,11 +1299,11 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_HeaderObject "Kopfobjekt.\n"
 #define MSGTR_MPDEMUX_MMST_DataObject "Datenobjekt.\n"
 #define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "Dateiobjekt, Paketgröße = %d (%d).\n"
-#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Datenstromobjekt, Identifikationsnummer: %d\n"
-#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Zu viele Identifikationsnummern, Datenstrom übersprungen."
-#define MSGTR_MPDEMUX_MMST_UnknownObject "Unbekannter Objekttyp.\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Datenstromobjekt, ID: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Zu viele IDs, Datenstrom übersprungen."
+#define MSGTR_MPDEMUX_MMST_UnknownObject "unbekannter Objekt\n"
 #define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Konnte Mediendaten nicht lesen.\n"
-#define MSGTR_MPDEMUX_MMST_MissingSignature "Fehlende Signatur.\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "fehlende Signatur\n"
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, daß Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "Unbekanntes Kommando %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet lieferte Fehler zurück: %s\n"
@@ -1314,8 +1315,8 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm passt nicht!: %d %d\n"
 #define MSGTR_MPDEMUX_ASF_WarnDropHeader "Warnung: 'header' verloren ????\n"
 #define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Fehler beim Parsen des Blockkopfes.\n"
-#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Habe keinen 'header' als ersten Block bekommen!!!!\n"
-#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Konnte %d Byte Puffer nicht reservieren.\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Habe keinen Header als ersten Block bekommen!!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Konnte Puffer über %d Bytes nicht reservieren.\n"
 #define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Fehler beim Lesen des Datenstroms über das Netzwerk.\n"
 #define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Fehler: Block ist zu klein.\n"
 #define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Fehler: Unterblocknummer ist ungültig.\n"
@@ -1327,17 +1328,17 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Fehler: Blockgröße > Paketgröße.\n"
 #define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Fehler beim Lesen des Blocks.\n"
 #define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
-#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "Ungültige Proxy-URL.\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Unbekannter ASF-Datenstromtyp.\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "ungültige Proxy-URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "unbekannter ASF-Datenstromtyp\n"
 #define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Konnte HTTP-Antworte nicht parsen.\n"
-#define MSGTR_MPDEMUX_ASF_ServerReturn "Server liefert %d: %s\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "Server hat %d zurückgegeben: %s\n"
 #define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF-HTTP-Parser Warnung: Pragma '%s' von %d auf %d Byte abgeschnitten.\n"
-#define MSGTR_MPDEMUX_ASF_SocketWriteError "Fehler beim Schreiben in Socket: %s\n"
-#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Konnte Kopf nicht parsen.\n"
-#define MSGTR_MPDEMUX_ASF_NoStreamFound "Kein Datenstrom gefunden.\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Unbekannte ASF-'streaming'-Variante.\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Socketschreibfehler: %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Konnte Header nicht parsen.\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "Kein Stream gefunden.\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Unbekannter ASF-Streamingtyp\n"
 #define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
-#define MSGTR_MPDEMUX_ASF_StreamingFailed "Fehlgeschlagen, breche ab.\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Fehlgeschlagen, beende.\n"
 
 // audio_in.c
 
@@ -1351,22 +1352,22 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_EmptyList "** leere Liste?!\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Film von 0x%X - 0x%X gefunden.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "'bih' gefunden, %u Byte von %d.\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Erstelle Keyframe-Tabelle für MS-mpg4v1-Video neu...\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Erstelle Keyframe-Tabelle für DIVX3-Video neu...\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Erstelle Keyframe-Tabelle für MPEG4-Video neu...\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Erstelle Keyframe-Tabelle für MS-mpg4v1-Video neu.\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Erstelle Keyframe-Tabelle für DIVX3-Video neu.\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Erstelle Keyframe-Tabelle für MPEG4-Video neu.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "'wf' gefunden, %d Bytes von %d.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh gefunden (size=%d) (total_frames=%d).\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Lese INDEX-Block, %d Blöcke für %d Frames (fpos=%"PRId64")\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Lese INDEX-Block, %d Blöcke für %d Frames (fpos=%"PRId64").\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "zusätzlicher RIFF-Kopf...\n"
-#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** Warnung: Dies ist kein erweiterter AVI-Kopf...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** Warnung: Dies ist kein erweiterter AVI-Header...\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Kaputter Block?  Blockgröße=%d  (id=%.4s)\n"
 #define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Erstelle ODML-Index (%d Superindexblöcke).\n"
-#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Kaputte (unfertige?) Datei erkannt.  Benutze den herkömmlichen Index.\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Kaputte (unfertige?) Datei erkannt. Benutze den herkömmlichen Index.\n"
 #define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "Konnte Index-Datei '%s' nicht lesen: %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "'%s' ist keine gültige MPlayer-Index-Datei.\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "'%s' ist keine gültige MPlayer-Indexdatei.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Konnte Speicher für Indexdaten von '%s' nicht reservieren.\n"
-#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Vorzeitiges Ende der Indexdatei '%s'.\n"
-#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Indexdatei '%s' geladen.\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "vorzeitiges Ende der Indexdatei %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Indexdatei geladen: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Erzeuge Index: %3lu %s     \r"
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Erzeuge Indextabelle für %d Blöcke!\n"
 #define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Konnte Indexdatei '%s' nicht schreiben: %s\n"
@@ -1375,7 +1376,7 @@ static char help_text[]=
 // cache2.c
 
 #define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rDieser Datenstrom lässt sich nicht zwischenspeichern.\n"
-#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!!Unterschied in read_filepos!!! Bitte Melde diesen Fehler...\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!!Unterschied in read_filepos!!! Melde diesen Fehler...\n"
 
 // cdda.c
 
@@ -1387,23 +1388,23 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Konnte Inhaltsverzeichnis der CD nicht lesen.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Konnte Gerät '%s' nicht öffnen.\n"
-#define MSGTR_MPDEMUX_CDDB_NotAValidURL "Ungültige URL.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "ungültige URL\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Konnte die HTTP-Anfrage nicht senden.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Konnte die HTTP-Antwort nicht lesen.\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Nicht gefunden.\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Unbekannter Fehlercode.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "unbekannter Fehlercode\n"
 #define MSGTR_MPDEMUX_CDDB_NoCacheFound "Kein Cache gefunden.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Konnte die XMCD-Datei nicht komplett lesen.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Konnte Verzeichnis '%s' nicht erstellen.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Konnte die XMCD-Datei nicht komplett schreiben.\n"
 #define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "XMCD-Datenbankdatei ist ungültig.\n"
-#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Unerwarteter Fehler.\n"
-#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Unbehandelter Statuscode.\n"
-#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Konnte Zeilenendemarkierung nicht finden.\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "unerwartetes FIXME\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "unbehandelter Code\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Konnte Zeilenendmarkierung nicht finden.\n"
 #define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Album '%s' gefunden.\n"
 #define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album nicht gefunden.\n"
 #define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Fehlercode des Servers: Kommandosyntaxfehler.\n"
-#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Liste der CDDB-Seiten nicht verfügbar.\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Keine Sites-Informationen verfügbar.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Konnte aktuelle Protokollebene nicht ermitteln.\n"
 #define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Keine CD im Laufwerk.\n"
 
@@ -1412,9 +1413,9 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Unerwartete Zeile in der Cue-Datei: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] Zugehörige Bin-Datei unter dem Namen '%s' nicht gefunden.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Konnte Bin-Datei nicht finden. Gebe auf.\n"
-#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Benutze Bin-Datei '%s'.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Benutze Bin-Datei %s.\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Unbekannter Typ der Bin-Datei. Dies sollte nicht auftreten, breche ab.\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Kann Cue-Datei '%s' nicht öffnen.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Kann %s nicht öffnen.\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Fehler beim Lesen von '%s'.\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Konnte Größe der Bin-Datei nicht ermitteln.\n"
 #define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Titel %02d: Format=%d  %02d:%02d:%02d\n"
