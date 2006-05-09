@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.250
+// In synch with rev 1.252
 
 // ========================= MPlayer help ===========================
 
@@ -598,7 +598,7 @@ static char help_text[]=
 #define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/HTML/en/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: komprimierte Header benötigen ZLIB-Unterstützung.\n"
-#define MSGTR_MOVvariableFourCC "MOV: Warnung: Variable FourCC erkannt!?\n"
+#define MSGTR_MOVvariableFourCC "MOV: Warnung: Variabler FourCC erkannt!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: WARNUNG: Zu viele Tracks."
 #define MSGTR_FoundAudioStream "==> Audiostream gefunden: %d\n"
 #define MSGTR_FoundVideoStream "==> Videostream gefunden: %d\n"
@@ -1415,9 +1415,9 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Konnte Bin-Datei nicht finden. Gebe auf.\n"
 #define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Benutze Bin-Datei %s.\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Unbekannter Typ der Bin-Datei. Dies sollte nicht auftreten, breche ab.\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Kann %s nicht öffnen.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Fehler beim Öffnen von %s.\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Fehler beim Lesen von '%s'.\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Konnte Größe der Bin-Datei nicht ermitteln.\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Fehler beim Ermitteln der Größe der Bin-Datei.\n"
 #define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Titel %02d: Format=%d  %02d:%02d:%02d\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Unerwartetes Ende der Bin-Datei.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Konnte Block der Größe %dByte nicht lesen.\n"
@@ -1431,19 +1431,19 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ConnectingToServer "Verbinde mit Server %s[%s]:%d ...\n"
 #define MSGTR_MPDEMUX_NW_CantConnect2Server "Konnte nicht mit %s zu Server verbinden.\n"
 #define MSGTR_MPDEMUX_NW_SelectFailed "Select fehlgeschlagen.\n"
-#define MSGTR_MPDEMUX_NW_ConnTimeout "Zeitüberschreitung der Verbindung.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Zeitüberschreitung bei Verbindung.\n"
 #define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt fehlgeschlagen: %s\n"
 #define MSGTR_MPDEMUX_NW_ConnectError "Verbindung fehlgeschlagen: %s\n"
 #define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Ungültige Proxyeinstellung... Versuche es ohne Proxy.\n"
 #define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Konnte Hostnamen nicht für AF_INET auflösen. Versuche es ohne Proxy.\n"
 #define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Fehler beim Senden der HTTP-Anforderung: Anfrage wurde unvollständig gesendet.\n"
 #define MSGTR_MPDEMUX_NW_ReadFailed "Lesen der HTTP-Antwort fehlgeschlagen.\n"
-#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response: 0 Bytes gelesen, d.h. EOF\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response: 0 Bytes gelesen (z.B. EOF).\n"
 #define MSGTR_MPDEMUX_NW_AuthFailed "Authentifizierung fehlgeschlagen. Benutze bitte die Optionen -user und -passwd um deinen Benutzernamen/Passwort für eine Liste von URLs anzugeben, oder eine URL der Form: http://benutzer:passwort@hostname/datei\n"
 #define MSGTR_MPDEMUX_NW_AuthRequiredFor "Authentifizierung erforderlich für Bereich '%s'.\n"
 #define MSGTR_MPDEMUX_NW_AuthRequired "Authentifizierung erforderlich.\n"
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Kein Passwort angegeben, versuche leeres Passwort.\n"
-#define MSGTR_MPDEMUX_NW_ErrServerReturned "Server lieferte Fehler %d: %s\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Server liefert Fehler %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Setze Cache-Größe auf %d KByte.\n"
 
 // ========================== LIBMPMENU ===================================
@@ -1454,12 +1454,12 @@ static char help_text[]=
 
 // libmenu/menu.c
 #define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntaxfehler bei Zeile: %d\n"
-#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Menüdefinitionen benötigen ein Namensattribut (Zeile %d)\n"
-#define MSGTR_LIBMENU_BadAttrib "[MENU] Schlechtes Attribut %s=%s in Menü '%s' in Zeile %d\n"
-#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Unbekannter Menütyp '%s' in Zeile %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Menüdefinitionen benötigen ein Namensattribut (Zeile %d).\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] schlechtes Attribut %s=%s in Menütyp '%s' in Zeile %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] unbekannter Menütyp '%s' in Zeile %d\n"
 #define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Kann Menü-Konfigurationsdatei nicht öffnen: %s\n"
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Konfigurationsdatei ist zu groß (> %d KB)\n"
-#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Konfigurationsdatei ist leer\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Konfigurationsdatei ist leer.\n"
 #define MSGTR_LIBMENU_MenuNotFound "[MENU] Menü %s nicht gefunden.\n"
 #define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menü '%s': Initialisierung fehlgeschlagen.\n"
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nichtunterstütztes Ausgabeformat!!!!\n"
@@ -1474,18 +1474,18 @@ static char help_text[]=
 #define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Lesefehler bei child-Dateideskriptor: %s.\n"
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Konsolenaufruf: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Es läuft schon ein Child.\n"
-#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork-Fehler!!!\n"
-#define MSGTR_LIBMENU_WriteError "[MENU] Schreibfehler.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork fehlgeschlagen!!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Schreibfehler\n"
 
 // libmenu/menu_filesel.c
-#define MSGTR_LIBMENU_OpendirError "[MENU] Opendir-Fehler: %s.\n"
-#define MSGTR_LIBMENU_ReallocError "[MENU] Realloc-Fehler: %s.\n"
-#define MSGTR_LIBMENU_MallocError "[MENU] Fehler bei der Speicherreservierung: %s.\n"
-#define MSGTR_LIBMENU_ReaddirError "[MENU] Readdir-Fehler: %s.\n"
-#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Kann Verzeichnis %s nicht öffnen\n"
+#define MSGTR_LIBMENU_OpendirError "[MENU] opendir-Fehler: %s\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] realloc-Fehler: %s\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Speicherreservierungsfehler: %s\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] readdir-Fehler: %s\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Kann Verzeichnis %s nicht öffnen.\n"
 
 // libmenu/menu_param.c
-#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definition des Untermenüs benötit ein 'menu'-Attribut.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Definition des Untermenüs benötigt ein 'menu'-Attribut.\n"
 #define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Definitionen für Konfigurationsmenüeinträge benötigen ein\n       gültiges 'property'-Attribut (Zeile %d).\n"
 #define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Konfigurationsmenü benötigt einen Parameter.\n"
 
@@ -1494,8 +1494,8 @@ static char help_text[]=
 #define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Konnte folgenden Befehl nicht erstellen: %s.\n"
 
 // libmenu/menu_txt.c
-#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] Textmenü benötigt einen txt-Dateinamen (Parameterdatei).\n"
-#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Öffnen nicht möglich: %s.\n"
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] Textmenü benötigt einen Textdateinamen (Parameterdatei).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Kann %s nicht öffnen.\n"
 #define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Warnung, Zeile zu lang. Zerlege sie.\n"
 #define MSGTR_LIBMENU_ParsedLines "[MENU] %d Zeilen eingelesen.\n"
 
@@ -1528,7 +1528,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] Benutze konstanten Wert für qscale = %f (VBR).\n"
 
 // libmpcodecs/ve_raw.c
-#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Raw-Ausgabe mit fourcc [%x] nicht unterstützt!\n"
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Raw-Ausgabe mit FourCC [%x] nicht unterstützt!\n"
 #define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] Benötigten VfW-Codec nicht angegeben!!\n"
 
 // libmpcodecs/vf_crop.c
@@ -1585,7 +1585,7 @@ static char help_text[]=
 // libvo/vo_3dfx.c
 
 #define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Nur 16bpp unterstützt!"
-#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visuelle Id ist  %lx.\n"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visuelle ID ist  %lx.\n"
 #define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Kann /dev/3dfx nicht öffnen.\n"
 #define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Fehler: %d.\n"
 #define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Konnte 3dfx-Speicherbereiche nicht abbilden: %p,%p,%d.\n"
@@ -1604,7 +1604,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Mache Einstellungen für PAL/SECAM.\n"
 #define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Setze Aspekt auf 4:3.\n"
 #define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Setze Aspekt auf 16:9.\n"
-#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] Kein Speicher mehr.\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] kein Speicher mehr\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Kann Schlüsselfarbe nicht ermitteln!\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Kann Schlüsselfarbe nicht ermitteln, benutze nächstgelegenen Treffer (0x%lx).\n"
 #define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Deinitialisierung.\n"
@@ -1612,11 +1612,11 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Prebuffering aktiviert.\n"
 #define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Benutze neue Sync-Maschine.\n"
 #define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Benutze Overlay.\n"
-#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Fehler: Du musst mplayer mit x11-Bibliotheken und Headern installiert compilieren, um Overlay zu benutzen.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Fehler: Overlay verlangt Compilierung mit installierten X11-Headern/-Libs.\n"
 #define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] Werde TV-Norm setzen auf: "
-#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "Automatische Anpassung der Video-Framerate (PAL/PAL-60)"
-#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "Automatische Anpassung der Video-Framerate (PAL/NTSC)"
-#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Benutze aktuelle Norm"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "automatische Anpassung zu Video-Framerate (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "automatische Anpassung zu Video-Framerate (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_UseCurrentNorm "Benutze aktuelle Norm."
 #define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Unbekannte Norm geliefert. Benutze aktuelle Norm."
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Fehler beim Öffnen von %s zum Schreiben, versuche stattdessen /dev/em8300.\n"
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingMV "[VO_DXR3] Fehler beim Öffnen von %s zum Schreiben, versuche stattdessen /dev/em8300_mv.\n"
@@ -1626,7 +1626,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Fehler beim Öffnen von %s zum Schreiben, versuche stattdessen /dev/em8300_sp.\n"
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Fehler auch beim Öffnen von /dev/em8300_sp zum Schreiben! Steige aus.\n"
 #define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Konnte Bildschirm während gehackten Overlaysetup nicht öffnen!\n"
-#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Konnte x11 nicht initialisieren!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Konnte X11 nicht initialisieren!\n"
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Konnte Overlayattribut nicht setzen.\n"
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Konnte Overlaybildschirm nicht setzen!\nBeende.\n"
 #define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Konnte Overlay nicht aktivieren!\nBeende.\n"
@@ -1638,7 +1638,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Y-Offset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] X-Offset: %d.\n"
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] X-Koorektur: %d.\n"
-#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Konnte Singal-Mix nicht setzen!\n"
+#define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Konnte Signal-Mix nicht setzen!\n"
 
 // libvo/vo_mga.c
 
@@ -1648,7 +1648,7 @@ static char help_text[]=
 // libvo/vo_null.c
 
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Unbekanntes Subgerät: %s.\n"
-															
+
 // libvo/vo_png.c
 
 #define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Warnung: Kompressionslevel auf 0 gesetzt, Kompression deaktiviert!\n"
@@ -1671,23 +1671,23 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Benutze Tiefen-/Farbraumkonvertierung, dies wird Dinge verlangsamen (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Nichtunterstütztes Bildformat in draw_slice, kontaktiere MPlayer-Entwickler!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit fehlgeschlagen: %s.\n"
-#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Initialisierung von SDL fehlgeschlagen: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] SDL-Initialisierung fehlgeschlagen: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Benutze Treiber: %s.\n"
 
 // libvo/vobsub_vidix.c
 
 #define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht starten: %s\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht anhalten: %s\n"
-#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved uv für yuv410p nicht unterstützt.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Interleaved UV für YUV410P nicht unterstützt.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_slice() wurde aufgerufen.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Dummy vidix_draw_frame() wurde aufgerufen.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Nichtunterstützter fourcc für folgenden vidix-Treiber: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Nichtunterstützter FourCC für folgenden VIDIX-Treiber: %x (%s).\n"
 #define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] Videoserver hat nichtunterstützte Auflösung (%dx%d), unterstützt: %dx%d-%dx%d.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Videoserver hat von vidix nichtunterstützte Farbtiefe (%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] Vidix-Treiber kann Bild nicht hochskalieren (%d%d -> %d%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] Vidix-Treiber kann Bild nicht herunterskalieren (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] VIDIX-Treiber kann Bild nicht hochskalieren (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] VIDIX-Treiber kann Bild nicht herunterskalieren (%d%d -> %d%d).\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] Kann Wiedergabe nicht konfigurieren: %s.\n"
-#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Du hast eine falsche Version der VIDIX-Bibliothek.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Du hast die falsche Version der VIDIX-Bibliothek.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Konnte keinen funktionierenden VIDIX-Treiber finden.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Konnte Fähigkeit nicht ermitteln: %s.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] Beschreibung: %s.\n"
@@ -1701,23 +1701,23 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) fehlgeschlagen.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] Videomodus ist linear, und memcpy könnte für Bildtransfer benutzt werden.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] Videomodus besitzt Hardwarebeschleunigung, und put_image könnte benutzt werden.\n"
-#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] Wenn es für dich funktioniert, würde ich das gerne wissen. \n[VO_SVGA] (sende Log mit `mplayer test.avi -v -v -v -v &> svga.log`). Danke\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] Wenn es für dich funktioniert, würde ich das gerne wissen.\n[VO_SVGA] (sende Log mit `mplayer test.avi -v -v -v -v &> svga.log`). Danke!\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Videomodus hat %d Seite(n).\n"
-#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Zentriere Bild. Beginn bei (%d,%d)\n"
+#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Zentriere Bild. Starte bei (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Benutze VIDIX. b=%i h=%i  mb=%i mh=%i\n"
 
 // libvo/vo_syncfb.c
 
 #define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] Konnte /dev/syncfb oder /dev/mga_vid nicht öffnen.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Benutze Palette yuv420p3.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Benutze Palette yuv420p2.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Benutze Palette yuv420.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Benutze Palette YUV420P3.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Benutze Palette YUV420P2.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Benutze Palette YUV420.\n"
 #define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Keine unterstützte Palette gefunden.\n"
-#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] Größe des BES Sourcer: %d x %d.\n"
+#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] Größe des BES sourcer: %d x %d.\n"
 #define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] Framebuffer-Speicher: %ld in %ld Buffern.\n"
 #define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] Fordere ersten Buffer #%d.\n"
 #define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] Ersten Buffer #%d erhalten.\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] Unbekanntes Subgerät: %s.\n"
+#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] unbekanntes Subgerät: %s.\n"
 
 // libvo/vo_tdfxfb.c
 
@@ -1749,11 +1749,11 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap fehlgeschlagen!!!!!\n"
 #define MSGTR_LIBVO_TDFXVID_GetImageTodo "Ermittle Bild-Todo.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP-Verschiebung fehlgeschlagen.\n"
-#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] yuv setzen fehlgeschlagen.\n"
+#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] YUV setzen fehlgeschlagen.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP-Verschiebung bei Y-Ebene fehlgeschlagen.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP-Verschiebung bei U-Ebene fehlgeschlagen.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP-Verschiebung bei V-Ebene fehlgeschlagen.\n"
-#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] Was ist das für ein Format 0x%x.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] unbekanntes Format: 0x%x.\n"
 
 // libvo/vo_tga.c
 
@@ -1762,28 +1762,27 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fataler Fehler aufgetreten! Kann nicht fortfahren.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Unbekanntes Subgerät: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Du hast einen zu geringen Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
+#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] unbekanntes Subgerät: '%s'.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Du hast zu wenig Videospeicher für diesen Modus:\n[VO_VESA] Benötigt: %08lX vorhanden: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Du musst die Fähigkeiten deines Monitors angeben.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
-#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Kann Modus nicht in die Beschränkung des Monitors einpassen.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Der Modus passt nicht zu den Beschränkungen des Monitors.\n[VO_VESA] Ändere Bildwiederholrate nicht.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Internen fatalen Fehler erkannt: init wird vor preinit aufgerufen.\n"
-#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] Schalter -flip wird nicht unterstützt.\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] Die Option -flip wird nicht unterstützt.\n"
 #define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] Möglicher Grund: Kein VBE2 BIOS gefunden.\n"
 #define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] VESA VBE BIOS Version %x.%x Revision gefunden: %x.\n"
 #define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] Videospeicher: %u Kb.\n"
 #define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA-Fähigkeiten: %s %s %s %s %s.\n"
 #define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! OEM-Informationen werden unten ausgegeben. !!!\n"
-#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] Du solltest unten 5 OEM-zugehörige Zeilen sehen; ansonsten ist vm86 kaputt.\n"
+#define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] Du solltest unten 5 OEM-zugehörige Zeilen sehen; Wenn nicht, ist dein vm86 kaputt.\n"
 #define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM-Info: %s.\n"
 #define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM-Revision: %x.\n"
 #define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM-Händler: %s.\n"
 #define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM-Produktname: %s.\n"
 #define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM-Produktrevision: %s.\n"
-#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Tip: Um funktionierendes TV-Out zu bekommen, solltest du das TV-Verbindungskabel eingesteckt haben,\n"\
-+"[VO_VESA] bevor der PC hochgefahren wird, da sich das VESA-BIOS nur während\n"\
-+"[VO_VESA] POST initialisiert.\n"
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Tip: Für funktionierendes TV-Out solltest du das TV-Verbindungskabel vor dem Booten\n"\
+"[VO_VESA] eingesteckt haben, da das VESA-BIOS nur während POST initialisiert.\n"
 #define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] Benutze VESA-Modus (%u) = %x [%ux%u@%u]\n"
-#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Kann SwScaler nicht initialisieren.\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Kann Softwareskalierer nicht initialisieren.\n"
 #define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] Kann DGA nicht verwenden. Erzwinge bank switching Modus. :(\n"
 #define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] Benutze DGA (physikalische Ressourcen: %08lXh, %08lXh)"
 #define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] Kann Doublebuffering nicht verwenden: nicht genügend Speicher.\n"
