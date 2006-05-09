@@ -6408,7 +6408,7 @@ syntax:
 .
 .PP
 Where <codec> may be: lavc, xvidenc, divx4, lame, toolame, twolame,
-nuv, vfw, faac, x264enc, mpeg, lavf.
+nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -9264,6 +9264,16 @@ Note that as of writing this, x264 pauses after encoding and visualizing
 each frame, waiting for the user to press a key, at which point the next
 frame will be encoded.
 .RE
+.
+.
+.SS xvfw (\-xvfwopts)
+.
+Encoding with Video for Windows codecs is mostly obsolete unless you wish
+to encode to some obscure fringe codec.
+.
+.TP
+.B codec=<name>
+The name of the binary codec file with which to encode.
 .
 .
 .SS MPEG muxer (\-mpegopts)
