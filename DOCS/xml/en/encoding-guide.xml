@@ -3960,14 +3960,14 @@ codec</title>
 <title>Encoding with the <systemitem class="library">Video For Windows</systemitem> codec family</title>
 
 <para>
-Video for Windows provides simple encoding to a lot of binary video codecs.
-You can encode to the following codecs (if you have more, please tell us!)
-Note that this is very experimental support and some codecs may not work
+Video for Windows provides simple encoding by means of binary video codecs.
+You can encode with the following codecs (if you have more, please tell us!)
+Note that support for this is very experimental and some codecs may not work
 correctly.
 </para>
 
 <sect2 id="menc-feat-enc-vfw-video-codecs">
-<title>Video for Windows Supported codecs</title>
+<title>Video for Windows supported codecs</title>
 
 <para>
 <informaltable frame="all">
@@ -4082,8 +4082,8 @@ correctly.
 </informaltable>
 
 The first column contains the codec names that should be passed after the
-<literal>codec</literal> config, like: <option>-xvfcopts codec=divx.dll</option>
-The FourCC code each codec encodes to is in the paranthese.
+<literal>codec</literal> parameter, like: <option>-xvfwopts codec=divx.dll</option>
+The FourCC code used by each codec is given in the parentheses.
 </para>
 <informalexample>
 <para>
