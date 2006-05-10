@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.252
+// In sync with rev 1.252
 
 // ========================= MPlayer help ===========================
 
@@ -66,19 +66,19 @@ static char help_text[]=
 #define MSGTR_NoHomeDir "Kann Homeverzeichnis nicht finden.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") fehlgeschlagen.\n"
 #define MSGTR_CreatingCfgFile "Erstelle Konfigurationsdatei: %s\n"
-#define MSGTR_CopyCodecsConf "(Kopiere/verlinke etc/codecs.conf aus dem MPlayer-Quelltext nach ~/.mplayer/codecs.conf)\n"
+#define MSGTR_CopyCodecsConf "(Kopiere/linke etc/codecs.conf aus dem MPlayer-Quelltext nach ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Benutze eingebaute Standardwerte für codecs.conf.\n"
 #define MSGTR_CantLoadFont "Kann Schriftdatei nicht laden: %s\n"
 #define MSGTR_CantLoadSub "Kann Untertitel nicht laden: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Ausgewählter Stream fehlt!\n"
 #define MSGTR_CantOpenDumpfile "Kann dump-Datei nicht öffnen!\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
-#define MSGTR_FPSnotspecified "FPS ist im Header nicht angegeben (oder ungültig)! Benutze die -fps Option!\n"
+#define MSGTR_FPSnotspecified "FPS ist im Header nicht angegeben (oder ungültig)! Benutze die Option -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Versuche Audiocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
 #define MSGTR_RTFMCodecs "Lies DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Versuche Videocodecfamilie %s zu erzwingen...\n"
-#define MSGTR_CantFindVideoCodec "Kann keinen Codec finden, der  zur gewählten -vo-Option und Videoformat 0x%X passt!\n"
+#define MSGTR_CantFindVideoCodec "Kann keinen Codec finden, der zu gewählter Option -vo und Videoformat 0x%X passt!\n"
 #define MSGTR_CannotInitVO "FATAL: Kann Videoausgabetreiber nicht initialisieren!\n"
 #define MSGTR_CannotInitAO "Kann Audiotreiber/Soundkarte nicht öffnen/initialisieren -> kein Ton\n"
 #define MSGTR_StartPlaying "Starte Wiedergabe...\n"
@@ -119,8 +119,8 @@ static char help_text[]=
 #define MSGTR_AvailableAudioOutputDrivers "Verfügbare Audioausgabetreiber:\n"
 #define MSGTR_AvailableAudioCodecs "Verfügbare Audiocodecs:\n"
 #define MSGTR_AvailableVideoCodecs "Verfügbare Videocodecs:\n"
-#define MSGTR_AvailableAudioFm "Verfügbare (in das Binary kompilierte) Audio Codec Familien:\n"
-#define MSGTR_AvailableVideoFm "Verfügbare (in das Binary kompilierte) Video Codec Familien:\n"
+#define MSGTR_AvailableAudioFm "Verfügbare (in das Binary kompilierte) Audiocodecfamilien:\n"
+#define MSGTR_AvailableVideoFm "Verfügbare (in das Binary kompilierte) Videocodecfamilien:\n"
 #define MSGTR_AvailableFsType "Verfügbare Vollbildschirm-Modi:\n"
 #define MSGTR_UsingRTCTiming "Verwende Linux Hardware RTC-Timing (%ldHz).\n"
 #define MSGTR_CannotReadVideoProperties "Video: Kann Eigenschaften nicht lesen.\n"
@@ -160,9 +160,9 @@ static char help_text[]=
 #define MSGTR_ErrorOpeningOutputFile "Fehler beim Öffnen von Datei [%s] zum Schreiben!\n"
 #define MSGTR_CommandLine "Kommandozeile:"
 #define MSGTR_RTCDeviceNotOpenable "Konnte %s nicht öffnen: %s (sollte für den Benutzer lesbar sein).\n"
-#define MSGTR_LinuxRTCInitErrorIrqpSet "Linux RTC-Initialisierungsfehler in ioctl (rtc_irqp_set %lu): %s\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "Linux-RTC-Initialisierungsfehler in ioctl (rtc_irqp_set %lu): %s\n"
 #define MSGTR_IncreaseRTCMaxUserFreq "Versuche, \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" zu deinen Systemstartskripten hinzuzufügen.\n"
-#define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC-Initialisierungsfehler in ioctl (rtc_pie_on): %s\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "Linux-RTC-Initialisierungsfehler in ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Benutze %s-Zeitgeber.\n"
 #define MSGTR_NoIdleAndGui "Die Option -idle kann mit GMPlayer nicht verwendet werden.\n"
 #define MSGTR_MenuInitialized "Menü initialisiert: %s\n"
@@ -172,7 +172,7 @@ static char help_text[]=
 #define MSGTR_FallingBackOnPlaylist "Falle zurück auf den Versuch, Playlist %s einzulesen...\n"
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kann den libmenu-Videofilter nicht mit dem Ursprungsmenü %s öffnen.\n"
 #define MSGTR_AudioFilterChainPreinitError "Fehler bei der Vorinitialisierung der Audiofilterkette!\n"
-#define MSGTR_LinuxRTCReadError "Linux RTC-Lesefehler: %s\n"
+#define MSGTR_LinuxRTCReadError "Linux-RTC-Lesefehler: %s\n"
 #define MSGTR_SoftsleepUnderflow "Warnung! Unterlauf des Softsleep!\n"
 #define MSGTR_DvdnavNullEvent "DVDNAV-Ereignis NULL?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "DVDNAV-Ereignis: Hervorhebungs-Ereignis kaputt\n"
@@ -200,7 +200,7 @@ static char help_text[]=
 #define MSGTR_EdlBadlyFormattedLine "Schlecht formatierte EDL-Zeile [%d], verwerfe.\n"
 #define MSGTR_EdlBadLineOverlap "Letzte Stop-Position war [%f]; nächster Start ist [%f].\n"\
 "Einträge müssen in chronologischer Reihenfolge sein, ohne Überschneidung. Verwerfe.\n"
-#define MSGTR_EdlBadLineBadStop "Zeit des Stops muß nach der Startzeit sein.\n"
+#define MSGTR_EdlBadLineBadStop "Zeit des Stopps muss nach der Startzeit sein.\n"
 
 // mplayer.c OSD
 
@@ -254,21 +254,21 @@ static char help_text[]=
 #define MSGTR_MissingFilename "\nDateiname nicht angegeben.\n\n"
 #define MSGTR_CannotOpenFile_Device "Kann Datei/Gerät nicht öffnen.\n"
 #define MSGTR_CannotOpenDemuxer "Kann Demuxer nicht öffnen.\n"
-#define MSGTR_NoAudioEncoderSelected "\nKein Audioencoder (-oac)  ausgewählt. \nWähle einen aus (siehe -oac help) oder verwende  -nosound.\n"
+#define MSGTR_NoAudioEncoderSelected "\nKein Audioencoder (-oac)  ausgewählt. \nWähle einen aus (siehe -oac help) oder verwende -nosound.\n"
 #define MSGTR_NoVideoEncoderSelected "\nKein Videoencoder (-ovc) ausgewählt. \nWähle einen aus (siehe -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Kann Ausgabedatei '%s' nicht öffnen.\n"
 #define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen.\n"
 #define MSGTR_MencoderWrongFormatAVI "\nWARNING: Format der Ausgabedatei ist _AVI_. Siehe '-of help'.\n"
 #define MSGTR_MencoderWrongFormatMPG "\nWARNUNG: Format der Ausgabedatei ist _MPEG_. Siehe '-of help'.\n"
 #define MSGTR_MissingOutputFilename "Keine Ausgabedatei angegeben, schaue dir bitte die Option '-o' an."
-#define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x [%.4s].\n"
+#define MSGTR_ForcingOutputFourcc "Erzwinge Ausgabe-FourCC %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Erzwinge Audioformatkennzeichnung 0x%x in der Ausgabe.\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
 #define MSGTR_SkipFrame "\nFrame übersprungen!\n"
 #define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung oder anderen Farbraum als die vorige.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAlle Videodateien müssen für -ovc copy identische fps, Auflösung und Codec haben.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAlle Videodateien müssen für -oac copy identischen Audiocodec und Format haben.\n"
-#define MSGTR_NoAudioFileMismatch "\nNur-Video-Dateien können nicht mit Audio/Video-Dateien gemischt werden.  Versuche -nosound.\n"
+#define MSGTR_NoAudioFileMismatch "\nVideodateien ohne Ton können nicht mit Audio/Video-Dateien gemischt werden.  Versuche -nosound.\n"
 #define MSGTR_NoSpeedWithFrameCopy "WARNUNG: Korrektes Funktionieren von -speed kann zusammen mit -oac copy nicht garantiert werden!\n"\
 "Das Ergebnis der Encodierung könnte defekt sein!\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
@@ -292,7 +292,7 @@ static char help_text[]=
 #define MSGTR_LameVersion "LAME-Version %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Fehler: Die angegebene Bitrate ist außerhalb des gültigen Bereichs\nfür dieses Preset.\n"\
 "\n"\
-"Bei Benutzung dieses Modus mußt du einen Wert zwischen \"8\" und \"320\" angeben.\n"\
+"Bei Benutzung dieses Modus musst du einen Wert zwischen \"8\" und \"320\" angeben.\n"\
 "\n"\
 "Für weitere Informationen hierzu versuche: \"-lameopts preset=help\"\n"
 #define MSGTR_InvalidLamePresetOptions "Fehler: Du hast kein gültiges Profil und/oder ungültige Optionen mit\n        dem Preset angegeben.\n"\
@@ -321,8 +321,8 @@ static char help_text[]=
 "Sie waren Thema von großangelegten Doppelblind-Hörtests und wurden\n"\
 "dementsprechend verfeinert, um diese Objektivität zu erreichen.\n"\
 "\n"\
-"Diese werden kontinuierlich aktualisiert, um den neuesten Entwicklungen zu\n"\
-"entsprechen, die stattfinden. Daher sollte dir das Resultat die fast beste\n"\
+"Diese werden kontinuierlich aktualisiert, um den neuesten stattfindenden\n"\
+"Entwicklungen zu entsprechen. Daher sollte dir das Resultat die fast beste\n"\
 "Qualität liefern, die zur Zeit mit LAME möglich ist.\n"\
 "\n"\
 "Um diese Presets zu aktivieren:\n"\
