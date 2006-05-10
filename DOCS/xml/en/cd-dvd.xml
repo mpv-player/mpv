@@ -122,7 +122,7 @@ subdirectory of the <application>MPlayer</application> source tree, you do not h
 to install them separately. We opted for this solution because we had to fix a
 <systemitem>libdvdread</systemitem> bug and apply a patch which adds
 <emphasis role="bold">cracked CSS keys caching support</emphasis> to
-<systemitem>libdvdcss</systemitem> This results in a large speed increase because the
+<systemitem>libdvdcss</systemitem>. This results in a large speed increase because the
 keys do not have to be cracked every time before playing.
 </para>
 </formalpara>
