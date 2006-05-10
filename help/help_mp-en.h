@@ -388,7 +388,7 @@ static char help_text[]=
 "cd => 192kbps               studio => 256kbps"
 #define MSGTR_LameCantInit \
 "Cannot set LAME options, check bitrate/samplerate, some very low bitrates\n"\
-"(<32) need lower samplerates (i.e. -srate 8000)."\
+"(<32) need lower samplerates (i.e. -srate 8000).\n"\
 "If everything else fails, try a preset."
 #define MSGTR_ConfigFileError "config file error"
 #define MSGTR_ErrorParsingCommandLine "error parsing command line"
