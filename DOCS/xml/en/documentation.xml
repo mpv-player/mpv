@@ -68,7 +68,7 @@ feature of <application>MPlayer</application> is the wide range of
 supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib,
 fbdev, AAlib, libcaca, DirectFB, but you can use GGI and SDL (and this way all
 their drivers) and some lowlevel card-specific drivers (for Matrox, 3Dfx and
-Radeon, Mach64, Permedia3) too! Most of them supports software or hardware
+Radeon, Mach64, Permedia3) too! Most of them support software or hardware
 scaling, so you can enjoy movies in fullscreen.
 <application>MPlayer</application> supports displaying through some
 hardware MPEG decoder boards, such as the <link linkend="dvb">DVB</link> and
