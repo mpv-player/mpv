@@ -326,7 +326,6 @@ mpeg_header_parser:
    }
    
 //   printf("picture.fps=%d\n",picture.fps);
-   sh_video->aspect = mpeg12_aspect_info(&picture);
    // display info:
    sh_video->format=picture.mpeg1?0x10000001:0x10000002; // mpeg video
    sh_video->fps=picture.fps;

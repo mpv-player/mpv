@@ -157,6 +157,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	int state=mpeg2_parse (mpeg2dec);
 	int type, use_callback;
 	mp_image_t* mpi_new;
+	unsigned long pw, ph;
 	
 	switch(state){
 	case STATE_BUFFER:
@@ -170,6 +171,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    }
 	    break;
 	case STATE_SEQUENCE:
+	    pw = info->sequence->display_width * info->sequence->pixel_width;
+	    ph = info->sequence->display_height * info->sequence->pixel_height;
+	    if(ph) sh->aspect = (float) pw / (float) ph;
 	    // video parameters inited/changed, (re)init libvo:
 	    if (info->sequence->width >> 1 == info->sequence->chroma_width &&
 		info->sequence->height >> 1 == info->sequence->chroma_height) {
