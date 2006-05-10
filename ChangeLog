@@ -70,6 +70,7 @@ MPlayer (1.0)
     * internal libfaad updated to CVS 20040915+MPlayer patches
     * RTJpeg decoder from lavc is preferred
     * bug fix for lavc WMA v2 decoder, now all files should be playable
+    * -vc mpeg12 resizes the window when aspect ratio changes
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
