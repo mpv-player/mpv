@@ -4,7 +4,7 @@ MPlayer (1.0)
 
     Security:
     * support for compilation with non-executable stack
-    * fix the majority of issues caught by Coverity's static analysis runs
+    * fix the major issues caught by Coverity's static analysis runs
 
     DOCS:
     * environment variables documentation started
@@ -135,6 +135,8 @@ MPlayer (1.0)
     * Zip Motion-Block Video (ZBMV) decoder
     * KMVC decoder
     * NuppelVideo/MythTV demuxer and RTJpeg decoder
+    * MP4 and MOV demuxer greatly improved to support all varieties of
+      currently available files
     * AVS demuxer and video decoder
     * American Laser Games multimedia (*.mm) playback system
 
@@ -164,12 +166,12 @@ MPlayer (1.0)
     * audio encoding modularized
     * AAC (FAAC) audio encoding
     * border processing adaptive quantization in libavcodec
-    * encoding zones, DivX profiles support and luminance masking for XviD
+    * encoding zones, DivX profiles support, luminance masking,
+      multi-threaded encoding for XviD
     * raw audio muxer
     * fixed various bugs in the EDL code
     * x264 "turbo mode" to speed up first pass of multi-pass encoding
     * x264 custom quantization matrices
-    * XviD multi-threaded encoding support
     * -delay allows real audio delay instead of just a delay in the header
     * search for (deprecated!) frameno.avi is now disabled by default (use
       -frameno-file frameno.avi to enable)
