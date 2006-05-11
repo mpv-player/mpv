@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In sync with rev 1.252
+// In sync with rev 1.254
 
 // ========================= MPlayer help ===========================
 
