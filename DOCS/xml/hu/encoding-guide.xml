@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.48 $ -->
+<!-- synced with 1.49 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -3897,7 +3897,7 @@ codec-kal</title>
 <title>Kódolás a <systemitem class="library">Video For Windows</systemitem> codec családdal</title>
 
 <para>
-A Video for Windows egyszerű kódolást biztosít rengeteg bináris videó codec-kel.
+A Video for Windows egyszerű kódolást biztosít bináris videó codec-ekkel.
 A következő codec-ekkel kódolhatsz (ha több is van, kérjük áruld el!)
 Tartsd észben, hogy ez nagyon kísérleti támogatás és néhány codec hibásan
 működhet.
@@ -4019,8 +4019,8 @@ működhet.
 </informaltable>
 
 Az első oszlop a codec nevét tartalmazza, amit a <literal>codec</literal>
-opció után kell megadni, így: <option>-xvfcopts codec=divx.dll</option>
-A FourCC kód, amibe a codec kódol, zárójelben látható.
+paraméter után kell megadni, így: <option>-xvfcopts codec=divx.dll</option>
+Az egyes codec-ek által használt FourCC kód zárójelben látható.
 </para>
 <informalexample>
 <para>
