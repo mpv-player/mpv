@@ -1,4 +1,4 @@
-.\" synced with 1.1281
+.\" synced with 1.1285
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -6774,7 +6774,7 @@ la syntaxe ci-dessous\ :
 .
 .PP
 Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, twolame,
-nuv, vfw, faac, x264enc, mpeg, lavf.
+nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6842,6 +6842,7 @@ Encodez d'abord avec pass=1, puis encodez avec les mêmes paramètres et pass=2.
 Outrepasse l'argument \-pass et utilise la librairie VBR XviD au lieu
 du VBR DivX4.
 Les options disponibles sont\ :
+.PD 0
 .
 .RSs
 .IPs 0
@@ -6852,6 +6853,7 @@ Le fichier AVI de destination peut être redirigé vers /dev/\:null.
 .IPs 2
 (Seconde) passe finale de l'encodage deux passes.
 .RE
+.PD 1
 .
 .
 .SS lame (\-lameopts)
@@ -9807,6 +9809,16 @@ Notez qu'au moment où ceci est écrit, x264 se met en pause après avoir
 encodé et affiché chaque trame, en attente que l'utilisateur appuie sur
 une touche pour encoder la trame suivante.
 .RE
+.
+.
+.SS xvfw (\-xvfwopts)
+.
+L'encodage avec les codecs Video for Windows est presque obsolète à moins
+que vous vouliez encoder avec des codecs confidentiels.
+.
+.TP
+.B codec=<nom>
+Le nom du fichier du codec binaire avec lequel vous souhaitez encoder.
 .
 .
 .SS multiplexeur MPEG (\-mpegopts)
