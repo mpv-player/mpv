@@ -88,7 +88,7 @@ m_option_t ovc_conf[]={
 	"   lavc     - libavcodec codecs - best quality!\n"
 #endif
 #ifdef USE_WIN32DLL
-	"   vfw      - VfW DLLs, currently only AVID is supported.\n"
+	"   vfw      - VfW DLLs, read DOCS/HTML/en/encoding-guide.html.\n"
 	"   qtvideo  - QuickTime DLLs, currently only SVQ1/3 are supported.\n"
 #endif
 #ifdef HAVE_LIBDV095
