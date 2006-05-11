@@ -5834,6 +5834,8 @@ if test "$_win32" != no ; then
           break;
         fi;
       done
+      # Fall back on a subfolder of the current dir on Windows
+      mingw32 && _win32libdir="codecs"
     fi
 fi
 
@@ -5971,6 +5973,8 @@ if test "$_real" = auto ; then
             _reallibdir="$I"
             break
           fi
+          # Fall back on a subfolder of the current dir on Windows
+          mingw32 && _reallibdir="codecs"
         done
       fi
       test "$_reallibdir" && _real=yes
