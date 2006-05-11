@@ -7293,7 +7293,6 @@ HOST_CC = $_host_cc
 AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
-# OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu $_pipe -fomit-frame-pointer -ffast-math
 EXTRA_INC = $_inc_extra
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
