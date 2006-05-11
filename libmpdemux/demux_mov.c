@@ -145,6 +145,16 @@ typedef struct {
     void* desc; // image/sound/etc description (pointer to ImageDescription etc)
 } mov_track_t;
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
+
+void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
+  if (nmemb > SIZE_MAX / size)
+    return NULL;
+  return realloc(ptr, nmemb * size);
+}
+
 void mov_build_index(mov_track_t* trak,int timescale){
     int i,j,s;
     int last=trak->chunks_size;
@@ -206,7 +216,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
     // workaround for fixed-size video frames (dv and uncompressed)
     if(!trak->samples_size && trak->type!=MOV_TRAK_AUDIO){
 	trak->samples_size=s;
-	trak->samples=malloc(sizeof(mov_sample_t)*s);
+	trak->samples=calloc(s, sizeof(mov_sample_t));
 	for(i=0;i<s;i++)
 	    trak->samples[i].size=trak->samplesize;
 	trak->samplesize=0;
@@ -225,7 +235,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
              "MOV: durmap or chunkmap bigger than sample count (%i vs %i)\n",
              s, trak->samples_size);
       trak->samples_size = s;
-      trak->samples = realloc(trak->samples, sizeof(mov_sample_t) * s);
+      trak->samples = realloc_struct(trak->samples, s, sizeof(mov_sample_t));
     }
 
     // calc pts:
@@ -899,7 +909,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //      82  char[4]	atom type
 //	86  ...		atom data
 
-	{	ImageDescription* id=malloc(8+trak->stdata_len);
+	{	ImageDescription* id=malloc(8+trak->stdata_len);  // safe
 		trak->desc=id;
 		id->idSize=8+trak->stdata_len;
 //		id->cType=bswap_32(trak->fourcc);
@@ -1145,6 +1155,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		else
 		{
 		 if (trak->fourcc == mmioFOURCC('a','v','c','1')) {
+		  if (trak->stream_header_len > 0xffffffff - sizeof(BITMAPINFOHEADER)) {
+		    mp_msg(MSGT_DEMUXER, MSGL_ERR, "Invalid extradata size %d, skipping\n");
+		    trak->stream_header_len = 0;
+		  }
 		  sh->bih=malloc(sizeof(BITMAPINFOHEADER) + trak->stream_header_len);
 		  memset(sh->bih,0,sizeof(BITMAPINFOHEADER) + trak->stream_header_len);
 		  sh->bih->biSize=40  + trak->stream_header_len;
@@ -1258,12 +1272,18 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //	    int temp=stream_read_dword(demuxer->stream);
 	    unsigned int moov_sz=stream_read_dword(demuxer->stream);
 	    unsigned int cmov_sz=len-4;
-	    unsigned char* cmov_buf=malloc(cmov_sz);
-	    unsigned char* moov_buf=malloc(moov_sz+16);
+	    unsigned char* cmov_buf;
+	    unsigned char* moov_buf;
 	    int zret;
 	    z_stream zstrm;
 	    stream_t* backup;
 
+	    if (moov_sz > 0xffffffff - 16) {
+              mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid cmvd atom size %d\n", moov_sz);
+              break;
+            }
+	    cmov_buf=malloc(cmov_sz);
+	    moov_buf=malloc(moov_sz+16);
 	    mp_msg(MSGT_DEMUX, MSGL_V, "Compressed header size: %d / %d\n",cmov_sz,moov_sz);
 
 	    stream_read(demuxer->stream,cmov_buf,cmov_sz);
@@ -1582,8 +1602,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       mp_msg(MSGT_DEMUX, MSGL_V,
              "MOV: %*sSample duration table! (%d blocks)\n", level, "",
              len);
-      trak->durmap = malloc(sizeof(mov_durmap_t) * len);
-      memset(trak->durmap, 0, sizeof(mov_durmap_t) * len);
+      trak->durmap = calloc(len, sizeof(mov_durmap_t));
       trak->durmap_size = len;
       for (i = 0; i < len; i++) {
         trak->durmap[i].num = stream_read_dword(demuxer->stream);
@@ -1606,7 +1625,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              len, ver, flags);
       // read data:
       trak->chunkmap_size = len;
-      trak->chunkmap = malloc(sizeof(mov_chunkmap_t) * len);
+      trak->chunkmap = calloc(len, sizeof(mov_chunkmap_t));
       for (i = 0; i < len; i++) {
         trak->chunkmap[i].first = stream_read_dword(demuxer->stream) - 1;
         trak->chunkmap[i].spc = stream_read_dword(demuxer->stream);
@@ -1627,7 +1646,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       trak->samplesize = ss;
       if (!ss) {
         // variable samplesize
-        trak->samples = realloc(trak->samples,sizeof(mov_sample_t)*entries);
+        trak->samples = realloc_struct(trak->samples, entries, sizeof(mov_sample_t));
         trak->samples_size = entries;
         for (i = 0; i < entries; i++)
           trak->samples[i].size = stream_read_dword(demuxer->stream);
@@ -1643,7 +1662,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              len);
       // extend array if needed:
       if (len > trak->chunks_size) {
-        trak->chunks = realloc(trak->chunks, sizeof(mov_chunk_t) * len);
+        trak->chunks = realloc_struct(trak->chunks, len, sizeof(mov_chunk_t));
         trak->chunks_size = len;
       }
       // read elements:
@@ -1660,7 +1679,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              len);
       // extend array if needed:
       if (len > trak->chunks_size) {
-        trak->chunks = realloc(trak->chunks, sizeof(mov_chunk_t) * len);
+        trak->chunks = realloc_struct(trak->chunks, len, sizeof(mov_chunk_t));
         trak->chunks_size = len;
       }
       // read elements:
@@ -1685,7 +1704,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              "MOV: %*sSyncing samples (keyframes) table! (%d entries) (ver:%d,flags:%d)\n", level, "",
              entries, ver, flags);
       trak->keyframes_size = entries;
-      trak->keyframes = malloc(sizeof(unsigned int) * entries);
+      trak->keyframes = calloc(entries, sizeof(unsigned int));
       for (i = 0; i < entries; i++)
         trak->keyframes[i] = stream_read_dword(demuxer->stream) - 1;
       break;
@@ -1721,7 +1740,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
              entries, ver, flags);
 #if 1
       trak->editlist_size = entries;
-      trak->editlist = malloc(trak->editlist_size * sizeof(mov_editlist_t));
+      trak->editlist = calloc(trak->editlist_size, sizeof(mov_editlist_t));
       for (i = 0; i < entries; i++) {
         int dur = stream_read_dword(demuxer->stream);
         int mt = stream_read_dword(demuxer->stream);

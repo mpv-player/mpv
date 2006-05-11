@@ -122,6 +122,9 @@ typedef struct {
     int audio_filepos; ///< file position of first audio packet in block
 } real_priv_t;
 
+//! use at most 200 MB of memory for index, corresponds to around 25 million entries
+#define MAX_INDEX_ENTRIES (200*1024*1024 / sizeof(real_index_table_t))
+
 /* originally from FFmpeg */
 static void get_str(int isbyte, demuxer_t *demuxer, char *buf, int buf_size)
 {
@@ -222,7 +225,7 @@ read_index:
     
     next_header_pos = stream_read_dword(demuxer->stream);
     mp_msg(MSGT_DEMUX, MSGL_V,"next_header_pos: %d\n", next_header_pos);
-    if (entries <= 0)
+    if (entries <= 0 || entries > MAX_INDEX_ENTRIES)
     {
 	if (next_header_pos)
 	    goto read_index;
@@ -231,7 +234,7 @@ read_index:
     }
 
     priv->index_table_size[stream_id] = entries;
-    priv->index_table[stream_id] = malloc(priv->index_table_size[stream_id] * sizeof(real_index_table_t));
+    priv->index_table[stream_id] = calloc(priv->index_table_size[stream_id], sizeof(real_index_table_t));
     
     for (i = 0; i < entries; i++)
     {
@@ -267,6 +270,10 @@ static void add_index_item(demuxer_t *demuxer, int stream_id, int timestamp, int
   {
     real_priv_t *priv = demuxer->priv;
     real_index_table_t *index;
+    if (priv->index_table_size[stream_id] >= MAX_INDEX_ENTRIES) {
+      mp_msg(MSGT_DEMUXER, MSGL_WARN, "Index too large during building\n");
+      return;
+    }
     if (priv->index_table_size[stream_id] >= priv->index_malloc_size[stream_id])
     {
       if (priv->index_malloc_size[stream_id] == 0)
