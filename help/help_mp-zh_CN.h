@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.251
+// Synced with help_mp-en.h 1.254
 
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
@@ -373,8 +373,9 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "无法设定LAME选项, 检查比特率/采样率,"\
-"一些非常低的比特率(<32)需要低采样率(如 -srate 8000)."\
+#define MSGTR_LameCantInit \
+"无法设定LAME选项, 检查比特率/采样率,\n"\
+"一些非常低的比特率(<32)需要低采样率(如 -srate 8000).\n"\
 "如果都不行, 试试使用预设值."
 #define MSGTR_ConfigFileError "配置文件错误"
 #define MSGTR_ErrorParsingCommandLine "解析命令行错误"
