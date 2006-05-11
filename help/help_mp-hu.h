@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.252 (2006. 04. 30.)
+// Sync'ed with help_mp-en.h 1.254 (2006. 05. 11.)
 
 // ========================= MPlayer help ===========================
 
@@ -385,9 +385,9 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "A Lame opciók nem állíthatóak be, ellenõrizd a"\
-"bitrátát/mintavételi rátát, néhány nagyon alacsony bitrátához (<32) alacsonyabb"\
-"mintavételi ráta kell (pl. -srate 8000)."\
+#define MSGTR_LameCantInit \
+"A Lame opciók nem állíthatók be, ellenõrizd a bitrátát/mintavételi rátát, néhány\n"\
+"alacsony bitrátához (<32) alacsonyabb mintavételi ráta kell (pl. -srate 8000).\n"\
 "Ha minden más sikertelen, próbálj ki egy preset-et."
 #define MSGTR_ConfigFileError "konfigurációs fájl hibája"
 #define MSGTR_ErrorParsingCommandLine "hiba a parancssor értelmezésekor"
