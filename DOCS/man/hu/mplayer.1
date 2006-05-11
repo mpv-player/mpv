@@ -1,4 +1,4 @@
-.\" Synced with 1.1281
+.\" Synced with 1.1284
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 04. 29." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 05. 11." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -6420,7 +6420,7 @@ A codec specifikus kódolási paramétereket a következõ szintaxissal adhatod meg:
 .
 .PP
 Ahol a <codec> lehet: lavc, xvidenc, divx4, lame, toolame, twolame,
-nuv, vfw, faac, x264enc, mpeg, lavf.
+nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6488,6 +6488,7 @@ a paraméterekkel és pass=2-vel.
 .B vbrpass=<0\-2>
 A pass opció felülbírálása és a DivX4 VBR-je helyett az XviD VBR használata.
 A rendelkezésre álló opciók:
+.PD 0
 .RSs
 .IPs 0
 egy menetes kódolás (egyenértékû az opció elhagyásával)
@@ -6497,6 +6498,7 @@ Az eredmény AVI fájl átirányítható a /dev/\:null-ra.
 .IPs 2
 Végsõ (második) lépés a két lépéses kódolásban.
 .RE
+.PD 1
 .
 .
 s.SS lame (\-lameopts)
@@ -9276,6 +9278,16 @@ fordították-e le. Vedd figyelembe, hogy ezen rész írásakor az x264 megáll
 minden egyes kocka kódolása és megjelenítése után és vár egy gombnyomásra,
 aminek a hatására a következõ kocka kódolása fog végrehajtódni.
 .RE
+.
+.
+.SS vfw (\-xvfwopts)
+.
+Kódolás Video for Windows codec-ekkel, ami a legtöbbször elavult, hacsak
+nem akarsz valami periférikus, titokzatos codec-kel kódolni.
+.
+.TP
+.B codec=<név>
+A bináris codec fájl neve, amivel kódolni akarsz.
 .
 .
 .SS MPEG muxer (\-mpegopts)
