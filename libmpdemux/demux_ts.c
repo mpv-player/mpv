@@ -2823,6 +2823,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			if(*dp == NULL)
 			{
+				if(*buffer_size > MAX_PACK_BYTES)
+					*buffer_size = MAX_PACK_BYTES;
 				*dp = new_demux_packet(*buffer_size);	//es->size
 				*dp_offset = 0;
 				if(! *dp)
@@ -2930,7 +2932,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 						(*dp)->pos = stream_tell(demuxer->stream);
 						(*dp)->pts = es->pts;
 
-				if(is_audio)
+				if(*dp_offset >= MAX_PACK_BYTES)
 				{
 					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
 					return 1;
@@ -3002,7 +3004,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				stream_skip(stream, junk);
 
-				if(is_audio)
+				if(*dp_offset >= MAX_PACK_BYTES)
 				{
 					(*dp)->pts = tss->last_pts;
 					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
