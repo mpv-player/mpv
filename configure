@@ -1763,7 +1763,9 @@ for ac_option do
   --disable-openal)	_openal=no	;;
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
+  --enable-toolame)	_toolame=yes	;;
   --disable-toolame)	_toolame=no	;;
+  --enable-twolame)	_twolame=yes	;;
   --disable-twolame)	_twolame=no	;;
   --enable-libcdio)	_libcdio=yes	;;
   --disable-libcdio)	_libcdio=no	;;
