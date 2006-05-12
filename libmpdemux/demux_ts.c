@@ -1309,7 +1309,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 
 			return 1;
 		}
-		else if ((p[0] & 0xF8) == 0x80)
+		else if (pes_is_aligned && (p[0] & 0xF8) == 0x80)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "A52 WITH HEADER\n");
 			es->start   = p+4;
