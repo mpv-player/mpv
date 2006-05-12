@@ -1193,39 +1193,40 @@
 <title>Encodage de vidéos entrelacées</title>
 
 <para>
-  Si la vidéo que vous désirez encoder est entrelacée (NTSC ou PAL), il vous faudra 
-  alors choisir de la dés-entrelacer ou pas.
-  D'un coté, si vous la passez en dés-entrelacé, votre film sera utilisable en 
-  progressive scan pour les écrans d'ordinateurs ou les projecteurs vidéos, mais 
-  cela aura un prix : le fieldrate de 50 ou 60000/1001 trames par seconde passera à 
-  25 ou 30000/1001 trames par seconde, et en gros, vous perdrez la moitié des 
-  informations durant les scènes avec beaucoup de mouvements.
+  Si la vidéo que vous désirez encoder est entrelacée (NTSC ou PAL), vous devez décider
+  si vous voulez la dés-entrelacer ou non.
+  Si le dés-entrelaçage rend votre film visionable sur des appareil à balayage progressif
+  tels que les écrans d'ordinateur ou les projecteurs, cela a un coup: le taux de 50 ou
+  60 000/1001 trames par secondes passera à 25 ou 30 000/1001 et en gros, la moitié de
+ l'information de votre film sera perdue pendant les scènes avec beaucoup de mouvement.
 </para>
 
 <para>
-  Ainsi, si vous encodez pour avoir des archives de haute qualité, il est recommandé 
+  Ainsi, si votre encodage a pour but l'archivage de haute qualité, il est recommandé
   de ne pas dés-entrelacer.
-  Vous pouvez toujours dés-entrelacer le film au moment de la lecture avec des 
-  appareils en progressive scan, et les les futurs lecteurs pourront dés-entrelacer 
-  toutes les trames, en interpolant les 50 ou 60000/1001 frames par seconde depuis 
-  la vidéo entrelacée.
+  Le film pourra toujours être dés-entrelacé lors de sa lecture sur un appareil à
+  balayage progressif.
+  La puissance des ordinateurs actuels oblige les lecteurs à utiliser pour ce
+  faire des filtres de désentrelaçage qui offrent un rendu final imparfait.
+  Mais les lecteurs du futur seront capables de mimer l'affichage entrelacé des 
+  téléviseurs.
 </para>
 
 <para>
-Des précautions spéciales doivent être prises lors d'un travail sur les vidéos entrelacées:
+Des précautions particulières doivent être prises lors d'un travail sur vidéo entrelacée:
 </para>
 
 <orderedlist>
 <listitem><para>
-  Les découpes sur la hauteur et l'offset sur Y doivent être des multiples de 4
+  La hauteur de recadrage et son décalage vertical doivent être des multiples de 4.
 </para></listitem>
 <listitem><para>
-  Tout redimensionnement vertical doit être effectué en mode entrelacé
+  Tout redimensionnement vertical doit être effectué en mode entrelacé.
 </para></listitem>
 <listitem><para>
-  Les filtres de post-traitement et d'antibruit ne marcheront pas comme prévu, 
-  sauf si vous faites bien attention à ce qu'ils travaillent sur une frame à la fois, et
-  ils peuvent endommager la qualité finale s'ils sont utilisés de manière incorrecte.
+  Les filtres de post-traitement et d'antibruit peuvent ne pas marcher comme
+  souhaité si vous ne prenez pas soin de ne travailler que sur une trame
+  à la fois et ils peuvent détériorerla video s'ils sont utilisés incorrectement.
 </para></listitem>
 </orderedlist>
 
@@ -1237,49 +1238,54 @@ En tenant compte de ces recommandations, voici notre premier exemple :
   vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224
 </screen>
 <para>
-Remarquez l'option <option>ilme</option> et <option>ildct</option>. 
+Notez l'usage des options <option>ilme</option> et <option>ildct</option>. 
 </para>
 </sect2>
 
 
 <sect2 id="menc-feat-dvd-mpeg4-av-sync">
-<title>Commentaires sur le synchronisation Audio/Vidéo</title>
+<title>Remarques sur la synchronisation Audio/Vidéo</title>
 <para>
   Le système de synchronisation audio/vidéo de <application>MEncoder</application> 
-  a été créé dans le but de pouvoir lire même des fichiers dont la synchronisation
-  a été mal faite ou des fichiers corrompus.
-  Il arrive que dans certain cas, il y ait des sauts ou des frames en double, 
-  ce qui provoque une désynchronisation A/V, quand vous utilisez des entrées propres 
-  (bien sûr, les problèmes de synchronisation A/V ne s'appliquent que si vous avez copié ou 
-  rippé le son en même temps que l'encodage de la vidéo).
-  Vous pouvez ensuite activer l'option de synchronisation <option>-mc 0</option>, 
-  ou la mettre dans votre fichier de configuration <systemitem>~/.mplayer/mencoder</systemitem>. 
-  Elle ne sera utilisée qu'avec les sources vidéos propres (DVD, capture Télé, 
-  bon rip MPEG-4, etc) mais pas pour des fichiers ASF/RM/MOV détériorés.
+  a été créé dans le but de pouvoir lire et restaurer même des fichiers dont la synchronisation
+  est faussée ou été mal faite, ou des fichiers corrompus.
+  Cependant, dans certains cas, ils peuvent créer des duplications ou des sauts
+  d'image non désirés et peut-être une légère désynchronisation lorsqu'ils sont utilisés sur
+  des fichiers sources propres (bien sûr, les questions de synchronisation A/V ne se posent
+  que si vous encodez ou copiez la bande son en même temps que vous encodez la video, ce qui 
+  est fortement encouragé).
+  Ainsi, vous devez peut-être passer à la synchronisation A/V basique 
+  grâce à l'option  <option>-mc 0</option>.
+  Vous pouvez la mettre dans votre fichier de configuration
+  <systemitem>~/.mplayer/mencoder</systemitem> tant que vous ne travaillez
+  que sur des fichiers sources propres (DVD, capture Télé, encodage MPEG-4
+  de haute qualité, etc) et des fichiers ASF/RM/MOV non-détériorés.
 </para>
 <para>
-  Si vous désirez une protection plus efficace contre les sauts ou multiplications 
-  de frames, utilisez ces deux options : <option>-mc 0</option> et <option>-noskip</option>.
-  Cela empêchera <emphasis>toutes</emphasis> synchronisation A/V, ou la copie de 
-  frames à frames, donc vous ne pouvez l'utiliser avec aucun autre filtre qui 
-  pourrait produire aléatoirement des ajouts ou sauts de frames, ou si votre source 
-  a un framerate variable!
-  C'est pour cela que l'option <option>-noskip</option> n'est en général pas recommandée.
+  Si vous désirez vous protéger encore plus contre les sauts et les duplication
+  étranges d'images, vous pouvez utiliser à la fois <option>-mc 0</option> et
+  <option>-noskip</option>.
+  Cela empêche <emphasis>toute</emphasis> synchronisation A/V et copie les
+  images une à une.
+  Vous ne pouvez donc pas l'utiliser avec des filtres qui ajoutent ou enlèvent
+  des image de façon imprévisible ou si votre fichier source a un nombre d'images
+  par seconde variable!
+  L'option <option>-noskip</option> n'est donc généralement pas recommandée.
 </para>
 <para>
-  L'encodage audio nommé "3 passes" que <application>MEncoder</application>
-  supporte est connu pour provoquer des désynchronisations A/V
-  Ceci arrive généralement que lorsqu'il rentre en conjonction avec certains filtres, 
-  donc il n'est pas recommandé d'utiliser ce mode "3 passes".
-  Cette fonctionnalité est conservée seulement pour une question de compatibilité 
-  et pour certains utilisateurs experts qui savent quand il est bon de l'utiliser 
-  ou pas. Si vous n'avez jamais entendu parler de ce mode "3 passes", oubliez le 
-  maintenant.
+  Il a été signalé que l'encodage audio nommé "3 passes" que <application>MEncoder</application>
+  supporte provoquait des désynchronisations A/V.
+  Cela arrive en tout cas quand il est utilisé en même temps que certains
+  filtres, donc, il est maintenant recommandé de <emphasis>ne pas</emphasis>
+  utiliser le mode audio "3 passes".
+  Cette possibilité n'est conservé que pour des raisons de compatibilité
+  et pour les utilisateurs experts qui savent quand l'utiliser.
 </para>
 <para>
-  On a rapporté des désynchronisations A/V lors d'un encodage depuis stdin 
+  Il a été signalé des désynchronisations A/V lors d'encodage à partir de
+  l'entrée standard
   avec <application>MEncoder</application>. Ne faites pas ça ! Utilisez toujours 
-  un fichier ou bien une source telle qu'un CD/DVD/etc.
+  un fichier ou un CD/DVD/etc comme source.
 </para>
 </sect2>
 <sect2 id="menc-feat-dvd-mpeg4-audio">
