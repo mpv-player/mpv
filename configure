@@ -1826,7 +1826,7 @@ for ac_option do
   --disable-vm)		_vm=no		;;
   --enable-xf86keysym)	_xf86keysym=yes	;;
   --disable-xf86keysym)	_xf86keysym=no	;;
-  --enable-mlib)	_mlib=auto	;;
+  --enable-mlib)	_mlib=yes	;;
   --disable-mlib)	_mlib=no	;;
   --enable-sunaudio)	_sunaudio=yes	;;
   --disable-sunaudio)	_sunaudio=no	;;
