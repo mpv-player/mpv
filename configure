@@ -1826,7 +1826,7 @@ for ac_option do
   --disable-vm)		_vm=no		;;
   --enable-xf86keysym)	_xf86keysym=yes	;;
   --disable-xf86keysym)	_xf86keysym=no	;;
-  --enable-mlib)	_mlib=yes	;;
+  --enable-mlib)	_mlib=auto	;;
   --disable-mlib)	_mlib=no	;;
   --enable-sunaudio)	_sunaudio=yes	;;
   --disable-sunaudio)	_sunaudio=no	;;
@@ -4989,7 +4989,6 @@ fi
 echores "$_sunaudio"
 
 
-if sunos; then
 echocheck "Sun mediaLib"
 if test "$_mlib" = auto ; then
   _mlib=no
@@ -5008,7 +5007,6 @@ else
   _def_mlib='#undef HAVE_MLIB'
 fi
 echores "$_mlib"
-fi
 
 
 echocheck "SGI audio"
