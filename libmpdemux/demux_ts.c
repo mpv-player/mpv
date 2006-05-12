@@ -114,10 +114,11 @@ typedef struct {
 	int offset, buffer_size;
 } av_fifo_t;
 
+#define MAX_EXTRADATA_SIZE 64*1024
 typedef struct {
 	int32_t object_type;	//aka codec used
 	int32_t stream_type;	//video, audio etc.
-	uint8_t buf[4096];
+	uint8_t buf[MAX_EXTRADATA_SIZE];
 	uint16_t buf_size;
 	uint8_t szm1;
 } mp4_decoder_config_t;
@@ -1859,6 +1860,11 @@ static uint16_t parse_mp4_decoder_specific_descriptor(pmt_t *pmt, uint8_t *buf, 
 		mp_msg(MSGT_DEMUX, MSGL_DBG2, "%02x ", buf[i]);
 	mp_msg(MSGT_DEMUX, MSGL_DBG2, "\n");
 
+	if(len > MAX_EXTRADATA_SIZE)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "DEMUX_TS, EXTRADATA SUSPICIOUSLY BIG: %d, REFUSED\r\n", len);
+		return len;
+	}
 	memcpy(dec->buf, buf, len);
 	dec->buf_size = len;
 	
