@@ -923,7 +923,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 		if(params.vtype == VIDEO_AVC && es->extradata && es->extradata_len)
 		{
 			int w = 0, h = 0;
-			sh_video->bih = (BITMAPINFOHEADER *) calloc(1, sizeof(BITMAPINFOHEADER) + 4096);
+			sh_video->bih = (BITMAPINFOHEADER *) calloc(1, sizeof(BITMAPINFOHEADER) + es->extradata_len);
 			sh_video->bih->biSize= sizeof(BITMAPINFOHEADER) + es->extradata_len;
 			sh_video->bih->biCompression = params.vtype;
 			memcpy(sh_video->bih + 1, es->extradata, es->extradata_len);
