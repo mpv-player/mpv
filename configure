@@ -2342,7 +2342,7 @@ if test "$_vidix_internal" = auto ; then
   darwin && _vidix_internal=no
 fi
 
-echocheck "mplayer binary name"
+echocheck "MPlayer binary name"
 if win32 ; then
   _prg="mplayer.exe"
   _prg_mencoder="mencoder.exe"
@@ -3091,7 +3091,7 @@ fi
 echores "$_bsdi_dvd"
 
 
-echocheck "HPUX SCSI header"
+echocheck "HP-UX SCSI header"
 cat > $TMPC << EOF
 #include <sys/scsi.h>
 int main(void) { return 0; }
@@ -3319,7 +3319,7 @@ else
 fi
 echores "$_swab"
 
-echocheck "posix select()"
+echocheck "POSIX select()"
 cat > $TMPC << EOF
 #include <stdio.h>
 #include <stdlib.h>
@@ -6264,7 +6264,7 @@ else
   fi
 fi
 
-echocheck "amr narrowband"
+echocheck "AMR narrowband"
 if test "$_amr_nb" = auto ; then
   _amr_nb=no
   if test -f libavcodec/amr_float/sp_dec.c ; then
@@ -6284,7 +6284,7 @@ else
 fi
 echores "$_amr_nb"
 
-echocheck "amr narrowband, fixed point"
+echocheck "AMR narrowband, fixed point"
 if test "$_amr_nb_fixed" = auto ; then
   _amr_nb_fixed=no
   if test -f libavcodec/amr/dtx_dec.c ; then
@@ -6314,7 +6314,7 @@ else
   _nocodecmodules="amr_nb $_nocodecmodules"
 fi
 
-echocheck "amr wideband"
+echocheck "AMR wideband"
 if test "$_amr_wb" = auto ; then
   _amr_wb=no
   if test -f libavcodec/amrwb_float/dec_dtx.c ; then
