@@ -214,6 +214,7 @@ MPlayer (1.0)
     * Darwin portability fixes
     * improved Debian packaging
     * improved Win32 multi-monitor support
+    * Sun's mediaLib disabled by default on Solaris (broken and non-optimal)
 
     Others:
     * Audio/Video synchronisation fixes

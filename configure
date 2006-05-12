@@ -1596,7 +1596,7 @@ _mga=auto
 _xmga=auto
 _vm=auto
 _xf86keysym=auto
-_mlib=auto
+_mlib=no #broken, thus disabled
 _sgiaudio=auto
 _sunaudio=auto
 _alsa=auto
@@ -4987,6 +4987,7 @@ fi
 echores "$_sunaudio"
 
 
+if sunos; then
 echocheck "Sun mediaLib"
 if test "$_mlib" = auto ; then
   _mlib=no
@@ -5005,6 +5006,7 @@ else
   _def_mlib='#undef HAVE_MLIB'
 fi
 echores "$_mlib"
+fi
 
 
 echocheck "SGI audio"
