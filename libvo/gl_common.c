@@ -270,7 +270,7 @@ static const extfunc_desc_t extfuncs[] = {
   {(void **)&ColorFragmentOp3, NULL, {"glColorFragmentOp3ATI", NULL}},
   {(void **)&SetFragmentShaderConstant, NULL, {"glSetFragmentShaderConstantATI", NULL}},
   {(void **)&ActiveTexture, NULL, {"glActiveTexture", "glActiveTextureARB", NULL}},
-  {(void **)&BindTexture, NULL, {"glBindTexture", "glBindTextureARB", NULL}},
+  {(void **)&BindTexture, NULL, {"glBindTexture", "glBindTextureARB", "glBindTextureEXT", NULL}},
   {(void **)&MultiTexCoord2f, NULL, {"glMultiTexCoord2f", "glMultiTexCoord2fARB", NULL}},
   {(void **)&GenPrograms, NULL, {"glGenPrograms", "glGenProgramsARB", "glGenProgramsNV", NULL}},
   {(void **)&DeletePrograms, NULL, {"glDeletePrograms", "glDeleteProgramsARB", "glDeleteProgramsNV", NULL}},
