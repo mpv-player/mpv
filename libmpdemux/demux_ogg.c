@@ -665,7 +665,7 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
       demux_ogg_read_packet(os,&op,context,&pts,&flags,samplesize);
       if(op.granulepos >= 0) ogg_d->final_granulepos = op.granulepos;
       if(index_mode == 2 && (flags || (os->vorbis && op.granulepos >= 0))) {
-        if (ogg_d->num_syncpoint > SIZE_MAX / sizeof(ogg_syncpoint_t) - 1) break;
+	if (ogg_d->num_syncpoint > SIZE_MAX / sizeof(ogg_syncpoint_t) - 1) break;
 	ogg_d->syncpoints = realloc_struct(ogg_d->syncpoints,(ogg_d->num_syncpoint+1), sizeof(ogg_syncpoint_t));
 	ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos = op.granulepos;
 	ogg_d->syncpoints[ogg_d->num_syncpoint].page_pos = (ogg_page_continued(page) && p == 0) ? last_pos : pos;
