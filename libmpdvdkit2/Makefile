@@ -67,7 +67,7 @@ dep:    depend
 
 depend: .depend
 
-.depend: Makefile config.h
+.depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
