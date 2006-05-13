@@ -8,6 +8,7 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
+#include <limits.h>
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -348,10 +349,11 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
     else if (ogg_d->vi_inited)
     {
        vorbis_info *vi;
+       int32_t blocksize;
        
        // When we dump the audio, there is no vi, but we don't care of timestamp in this case
        vi = &(ogg_d->vi);
-       int32_t blocksize = vorbis_packet_blocksize(vi,pack) / samplesize;
+       blocksize = vorbis_packet_blocksize(vi,pack) / samplesize;
        // Calculate the timestamp if the packet don't have any
        if(pack->granulepos == -1) {
 	  pack->granulepos = os->lastpos;
@@ -663,7 +665,8 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
       demux_ogg_read_packet(os,&op,context,&pts,&flags,samplesize);
       if(op.granulepos >= 0) ogg_d->final_granulepos = op.granulepos;
       if(index_mode == 2 && (flags || (os->vorbis && op.granulepos >= 0))) {
-	ogg_d->syncpoints = (ogg_syncpoint_t*)realloc(ogg_d->syncpoints,(ogg_d->num_syncpoint+1)*sizeof(ogg_syncpoint_t));
+        if (ogg_d->num_syncpoint > SIZE_MAX / sizeof(ogg_syncpoint_t) - 1) break;
+	ogg_d->syncpoints = realloc_struct(ogg_d->syncpoints,(ogg_d->num_syncpoint+1), sizeof(ogg_syncpoint_t));
 	ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos = op.granulepos;
 	ogg_d->syncpoints[ogg_d->num_syncpoint].page_pos = (ogg_page_continued(page) && p == 0) ? last_pos : pos;
 	ogg_d->num_syncpoint++;
