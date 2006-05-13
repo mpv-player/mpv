@@ -821,8 +821,6 @@ WINE_MODREF *PE_CreateModule( HMODULE hModule,
     }
 
     return wm;
-
-    return wm;
 }
 
 /******************************************************************************
