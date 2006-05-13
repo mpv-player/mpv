@@ -7868,6 +7868,21 @@ Try to encode each MB with MV=<0,0> and choose the better one.
 This has no effect if mbd=0.
 .
 .TP
+.B mv0_threshold=<any non-negative integer>
+When surrounding motion vectors are <0,0> and the motion estimation
+score of the current block is less than mv0_threshold, <0,0> is used for
+the motion vector and further motion estimation is skipped (default:
+256).
+Lowering mv0_threshold to 0 can give a slight (0.01dB) PSNR increase and
+possibly make the encoded video look slightly better; raising
+mv0_threshold past 320 results in diminished PSNR and visual quality.
+Higher values speed up encoding very slightly (usually less than 1%,
+depending on the other options used).
+.br
+.I NOTE:
+This option does not require mv0 to be enabled.
+.
+.TP
 .B qprd (mbd=2 only)
 rate distorted optimal quantization parameter (QP) for the given
 lambda of each macroblock
