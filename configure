@@ -879,7 +879,6 @@ case "$host_arch" in
 		proc=k6
 	else
 		proc=i586
-		iproc=586
 	fi
 	;;
     6) iproc=686
