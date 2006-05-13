@@ -65,9 +65,7 @@ distclean: clean
 
 dep:    depend
 
-depend: .depend
-
-.depend:
+depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #

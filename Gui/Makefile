@@ -45,7 +45,7 @@ OBJS = $(SRCS:.c=.o)
 
 ### TARGETS ###
 
-$(LIBNAME): .depend $(OBJS)
+$(LIBNAME): $(OBJS)
 	rm -f $(LIBNAME)
 	$(AR) rc $(LIBNAME) $(OBJS) $(MPLAYEROBJS)
 	$(RANLIB) $(LIBNAME)
@@ -70,9 +70,7 @@ distclean: clean
 
 dep:    depend
 
-depend: .depend
-
-.depend: Makefile config.mak
+depend:
 	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
