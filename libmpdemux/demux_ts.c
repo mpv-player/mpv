@@ -570,6 +570,8 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			if((es.type == PES_PRIVATE1) && (! audio_found))
 			{
 				pptr = &pes_priv1[es.pid];
+				if(pptr->pos < 64*1024)
+				{
 				tmpbuf = (char*) realloc(pptr->buf, pptr->pos + es.size);
 				if(tmpbuf != NULL)
 				{
@@ -582,6 +584,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 						param->apid = es.pid;
 						es.type = AUDIO_A52;
 					}
+				}
 				}
 			}
 			
