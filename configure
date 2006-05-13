@@ -7057,6 +7057,24 @@ else
   _def_charset="#undef MSG_CHARSET"
 fi
 
+echocheck "iconv program"
+iconv -f `cat ${_mp_help}.charset` -t $_charset ${_mp_help} > /dev/null 2>> "$TMPLOG"
+if test "$?" -ne 0 ; then
+  echores "no"
+  if test "$_charset" != `cat ${_mp_help}.charset` ; then
+    echo "No working iconv program found, use "
+    echo "--charset=`cat ${_mp_help}.charset` to continue anyway."
+    echo "Messages in the GTK-2 interface will be broken then."
+    exit 1
+  fi
+else
+  echores "yes"
+fi
+
+if test "$_charset" = `cat ${_mp_help}.charset` ; then
+  # hack to disable conversion in the Makefile
+  _charset=""
+fi
 
 #############################################################################
 
