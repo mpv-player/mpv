@@ -78,7 +78,7 @@ static int rtp_open_socket( URL_t *url ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", url->hostname);
 			goto err_out;
 		}
-		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
+		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr_list[0], hp->h_length );
 #else
 		server_address.sin_addr.s_addr = htonl(INADDR_ANY);
 #endif

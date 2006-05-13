@@ -199,7 +199,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 			return -2;
 		}
 		
-		memcpy( our_s_addr, (void*)hp->h_addr, hp->h_length );
+		memcpy( our_s_addr, (void*)hp->h_addr_list[0], hp->h_length );
 	}
 #ifdef HAVE_WINSOCK2
 	else {
