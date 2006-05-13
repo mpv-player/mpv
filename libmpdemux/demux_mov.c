@@ -1156,7 +1156,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		{
 		 if (trak->fourcc == mmioFOURCC('a','v','c','1')) {
 		  if (trak->stream_header_len > 0xffffffff - sizeof(BITMAPINFOHEADER)) {
-		    mp_msg(MSGT_DEMUXER, MSGL_ERR, "Invalid extradata size %d, skipping\n");
+		    mp_msg(MSGT_DEMUXER, MSGL_ERR, "Invalid extradata size %d, skipping\n",trak->stream_header_len);
 		    trak->stream_header_len = 0;
 		  }
 		  sh->bih=malloc(sizeof(BITMAPINFOHEADER) + trak->stream_header_len);
