@@ -31,9 +31,8 @@ int usec_sleep(int usec_delay)
 // Returns current time in microseconds
 unsigned int GetTimer(void){
   struct timeval tv;
-  struct timezone tz;
 //  float s;
-  gettimeofday(&tv,&tz);
+  gettimeofday(&tv,NULL);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
   return (tv.tv_sec*1000000+tv.tv_usec);
 }  
@@ -41,9 +40,8 @@ unsigned int GetTimer(void){
 // Returns current time in milliseconds
 unsigned int GetTimerMS(void){
   struct timeval tv;
-  struct timezone tz;
 //  float s;
-  gettimeofday(&tv,&tz);
+  gettimeofday(&tv,NULL);
 //  s=tv.tv_usec;s*=0.000001;s+=tv.tv_sec;
   return (tv.tv_sec*1000+tv.tv_usec/1000);
 }  
