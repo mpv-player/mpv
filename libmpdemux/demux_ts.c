@@ -51,6 +51,9 @@
 #define NUM_CONSECUTIVE_AUDIO_PACKETS 348
 #define MAX_A52_FRAME_SIZE 3840
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
 
 int ts_prog;
 int ts_keep_broken=0;
@@ -231,6 +234,13 @@ typedef struct {
 
 #define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC))
 #define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC))
+
+static void *realloc_struct(void *ptr, size_t nmemb, size_t size)
+{
+	if (nmemb > SIZE_MAX / size)
+		return NULL;
+	return realloc(ptr, nmemb * size);
+}
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
 
@@ -1622,7 +1632,7 @@ static int parse_pat(ts_priv_t * priv, int is_start, unsigned char *buff, int si
 		if((idx = prog_idx_in_pat(priv, progid)) == -1)
 		{
 			int sz = sizeof(struct pat_progs_t) * (priv->pat.progs_cnt+1);
-			tmp = (struct pat_progs_t*) realloc(priv->pat.progs, sz);
+			tmp = realloc_struct(priv->pat.progs, priv->pat.progs_cnt+1, sizeof(struct pat_progs_t));
 			if(tmp == NULL)
 			{
 				mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PAT: COULDN'T REALLOC %d bytes, NEXT\n", sz);
@@ -1913,7 +1923,7 @@ static uint16_t parse_mp4_es_descriptor(pmt_t *pmt, uint8_t *buf, int len, void 
 			
 			if(! found)
 			{
-				tmp = (mp4_es_descr_t *) realloc(pmt->mp4es, sizeof(mp4_es_descr_t)*(pmt->mp4es_cnt+1));
+				tmp = realloc_struct(pmt->mp4es, pmt->mp4es_cnt+1, sizeof(mp4_es_descr_t));
 				if(tmp == NULL)
 				{
 					fprintf(stderr, "CAN'T REALLOC MP4_ES_DESCR\n");
@@ -2228,7 +2238,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 	if(idx == -1)
 	{
 		int sz = (priv->pmt_cnt + 1) * sizeof(pmt_t);
-		tmp = (pmt_t *) realloc(priv->pmt, sz);
+		tmp = realloc_struct(priv->pmt, priv->pmt_cnt + 1, sizeof(pmt_t));
 		if(tmp == NULL)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PMT: COULDN'T REALLOC %d bytes, NEXT\n", sz);
@@ -2289,7 +2299,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 		if(idx == -1)
 		{
 			int sz = sizeof(struct pmt_es_t) * (pmt->es_cnt + 1);
-			tmp_es = (struct pmt_es_t *) realloc(pmt->es, sz);
+			tmp_es = realloc_struct(pmt->es, pmt->es_cnt + 1, sizeof(struct pmt_es_t));
 			if(tmp_es == NULL)
 			{
 				mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PMT, COULDN'T ALLOCATE %d bytes for PMT_ES\n", sz);
