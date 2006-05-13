@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1284
+.\" In sync with rev 1.1289
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -4771,6 +4771,16 @@ Dieser Filter ist nicht getestet und möglicherweise unbrauchbar.
 Ein das Rauschen beschränkender Filter, ähnlich dem Audiofilter comp.
 Dieser Filter ist nicht getestet und möglicherweise unbrauchbar.
 .
+.TP
+.B karaoke
+Einfacher Filter zur Entfernung von Stimmen, der die Tatsache ausnutzt, dass
+diese normalerweise mit einem Monogerät aufgenommen werden und später
+'mittig' in den endgültigen Audiostream gemixt werden.
+Sei dir im klaren darüber, dass dieser Filter dein Signal in Mono umwandelt.
+Funktioniert gut für Tracks mit zwei Kanälen; mach dir nicht die Mühe, es auf
+etwas anderes als 2-Kanal-Stereo anzuwenden.
+.
+.
 .
 .SH "VIDEOFILTER"
 Videofilter erlauben dir, den Videostream und seine Eigenschaften zu ändern.
@@ -8238,6 +8248,22 @@ den besseren.
 Dies hat keinen Effekt, falls mbd=0.
 .
 .TP
+.B mv0_threshold=<jede nicht-negative Ganzzahl>
+Wenn umgebende Bewegungsvektoren <0,0> sind und die Auswertung der
+Bewegungsabschätzung des aktuellen Blocks kleiner als mv0_threshold ist, so
+wird <0,0> für den Bewegungsvektor benutzt und jede weitere
+Bewegungsabschätzung wird übersprungen (Standard: 256).
+mv0_threshold auf 0 abzusenken kann eine leichte (0.01dB) Erhöhung des PSNR
+zur Folge haben und das encodierte Video möglicherweise leicht besser aussehen
+lassen; mv0_threshold auf über 320 zu erhöhen führt zu einem niedrigeren PSNR
+und visueller Qualität.
+Höhere Werte beschleunigen die Encodierung ganz leicht (normalerweise weniger
+als 1%, abhängig von den anderen verwendeten Optionen).
+.br
+.I ANMERKUNG:
+Diese Option setzt nicht voraus, dass mvm0 aktiviert ist.
+.
+.TP
 .B qprd (nur mit mbd=2)
 ratenverzerrter optimaler Quantisierungsparameter bei gegebenem lambda für
 jeden Macroblock
@@ -8413,6 +8439,8 @@ Schreibe globale Header nur in Extradata (benötigt für .mp4/MOV/NUT).
 Schreibe globale Header nur vor Keyframes.
 .IPs 3
 Kombiniere 1 und 2.
+.RE
+.PD 1
 .
 .TP
 .B aglobal=<0\-3>
@@ -9724,7 +9752,7 @@ nächsten Frame enkodiert.
 .RE
 .
 .
-.SS vfw (\-xvfwopts)
+.SS xvfw (\-xvfwopts)
 .
 Encodierung mit Video for Windows Codecs ist hauptsächlich obsolet, es sei
 denn, du möchtest mit irgendeinem obskuren Codec encodieren.
