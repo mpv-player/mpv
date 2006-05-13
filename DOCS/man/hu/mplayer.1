@@ -1,4 +1,4 @@
-.\" Synced with 1.1284
+.\" Synced with 1.1288
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -4558,6 +4558,15 @@ Ez a szûrõ még nincs tesztelve, lehet, hogy használhatatlan.
 Zaj kapu szûrõ, hasonló a comp audió szûrõhöz.
 Ez a szûrõ nem tesztelt, lehet, hogy használhatatlan.
 .
+.TP
+.B karaoke
+Egyszerû hang eltávolító szûrõ, mely azt a tényt használja ki, hogy
+a beszédhang általában mono-ként kerül rögzítésre majd késõbb lesz
+'középre' mixelve az audió folyamban.
+Ügyelj rá, hogy ez a szûrõ valójában mono-vá alakítja a jeledet.
+Két csatornás sávokon remekül mûködik; soha ne próbáld ki máson, mint
+két csatornás sztereón.
+.
 .
 .
 .SH "VIDEÓ SZÛRÕK"
@@ -8029,6 +8038,8 @@ Csak az extra adatba írjon globális fejléceket (.mp4/MOV/NUT esetén szükséges).
 Csak kulcskockák elõtt írjon globális fejlécet.
 .IPs 3
 Az 1 és a 2 kombinációja.
+.RE
+.PD 1
 .
 .TP
 .B aglobal=<0\-3>
@@ -9280,7 +9291,7 @@ aminek a hatására a következõ kocka kódolása fog végrehajtódni.
 .RE
 .
 .
-.SS vfw (\-xvfwopts)
+.SS xvfw (\-xvfwopts)
 .
 Kódolás Video for Windows codec-ekkel, ami a legtöbbször elavult, hacsak
 nem akarsz valami periférikus, titokzatos codec-kel kódolni.
