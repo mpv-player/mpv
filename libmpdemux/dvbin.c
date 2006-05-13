@@ -779,7 +779,7 @@ dvb_config_t *dvb_get_config(void)
 	char filename[30], *conf_file, *name;
 	dvb_channels_list *list;
 	dvb_card_config_t *cards = NULL;
-	dvb_config_t *conf = NULL;
+	dvb_config_t *conf = NULL, *tmp;
 	
 	if(dvb_config != NULL)
 		return dvb_config;
@@ -833,13 +833,14 @@ dvb_config_t *dvb_get_config(void)
 			continue;
 		
 		size = sizeof(dvb_card_config_t) * (conf->count + 1);
-		cards = realloc(conf->cards, size);
+		tmp = realloc(conf->cards, size);
 
-		if(cards == NULL)
+		if(tmp == NULL)
 	{
 			fprintf(stderr, "DVB_CONFIG, can't realloc %d bytes, skipping\n", size);
 			continue;
 	}
+		cards = tmp;
 
 		name = (char*) malloc(20);
 		if(name==NULL)
