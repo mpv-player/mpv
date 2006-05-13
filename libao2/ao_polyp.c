@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <string.h>
 
 #include <polyp/polyplib.h>
 #include <polyp/polyplib-error.h>
