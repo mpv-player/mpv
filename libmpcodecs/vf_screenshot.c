@@ -54,7 +54,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
-static int write_png(char *fname, unsigned char *buffer, int width, int height, int stride)
+static void write_png(char *fname, unsigned char *buffer, int width, int height, int stride)
 {
     FILE * fp;
     png_structp png_ptr;
@@ -69,13 +69,13 @@ static int write_png(char *fname, unsigned char *buffer, int width, int height, 
     if (setjmp(png_ptr->jmpbuf)) {
 	png_destroy_write_struct(&png_ptr, &info_ptr);
 	fclose(fp);
-	return 0;
+	return;
     }
 
     fp = fopen (fname, "wb");
     if (fp == NULL) {
 	mp_msg(MSGT_VFILTER,MSGL_ERR,"\nPNG Error opening %s for writing!\n", fname);
-	return 0;
+	return;
     }
         
     png_init_io(png_ptr, fp);
