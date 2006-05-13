@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.49 $ -->
+<!-- synced with 1.50 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -3899,8 +3899,12 @@ codec-kal</title>
 <para>
 A Video for Windows egyszerű kódolást biztosít bináris videó codec-ekkel.
 A következő codec-ekkel kódolhatsz (ha több is van, kérjük áruld el!)
+</para>
+<para>
 Tartsd észben, hogy ez nagyon kísérleti támogatás és néhány codec hibásan
-működhet.
+működhet. Néhány codec csak bizonyos színterekben működik jól, próbáld ki
+a <option>-vf format=bgr24</option> és <option>-vf format=yuy2</option>
+opciókat, ha a codec hibázik vagy rossz kimenetet ad.
 </para>
 
 <sect2 id="menc-feat-enc-vfw-video-codecs">
@@ -3908,112 +3912,118 @@ működhet.
 
 <para>
 <informaltable frame="all">
-<tgroup cols="3">
+<tgroup cols="4">
 <thead>
-<row><entry>Videó codec fájl név</entry><entry>Leírás</entry><entry>md5sum</entry></row>
+<row>
+<entry>Videó codec fájl név</entry>
+<entry>Leírás</entry>
+<entry>md5sum</entry>
+<entry>Megjegyzés</entry>
+</row>
 </thead>
 <tbody>
 <row>
   <entry>aslcodec_vfw.dll</entry>
-  <entry>
-  Alparysoft veszteségmentes codec vfw (ASLC)
-  </entry><entry></entry></row>
-<row>
-  <entry>asusasv2.dll</entry>
-  <entry>ASUS V2 (ASV1)</entry>
-  <entry>63e52674a21094d6b04bcd4c616cbd1e</entry>
-</row>
-<row>
-  <entry>asusasvd.dll</entry>
-  <entry>ASUS V1 (ASV2)</entry>
-  <entry>68247044e50ce4724497fd0afa217851</entry>
+  <entry>Alparysoft veszteségmentes codec vfw (ASLC)</entry>
+  <entry>608af234a6ea4d90cdc7246af5f3f29a</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>avimszh.dll</entry>
   <entry>AVImszh (MSZH)</entry>
   <entry>253118fe1eedea04a95ed6e5f4c28878</entry>
+  <entry><option>-vf format</option> kell hozzá</entry>
 </row>
 <row>
   <entry>avizlib.dll</entry>
   <entry>AVIzlib (ZLIB)</entry>
   <entry>2f1cc76bbcf6d77d40d0e23392fa8eda</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>divx.dll</entry>
   <entry>DivX4Windows-VFW</entry>
   <entry>acf35b2fc004a89c829531555d73f1e6</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>huffyuv.dll</entry>
   <entry>HuffYUV (veszteségmentes) (HFYU)</entry>
   <entry>b74695b50230be4a6ef2c4293a58ac3b</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>iccvid.dll</entry>
-  <entry>
-  Cinepak Video (cvid)
-  </entry>
+  <entry>Cinepak Video (cvid)</entry>
   <entry>cb3b7ee47ba7dbb3d23d34e274895133</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>icmw_32.dll</entry>
   <entry>Motion Wavelets (MWV1)</entry>
   <entry>c9618a8fc73ce219ba918e3e09e227f2</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>jp2avi.dll</entry>
   <entry>ImagePower MJPEG2000 (IPJ2)</entry>
   <entry>d860a11766da0d0ea064672c6833768b</entry>
+  <entry><option>-vf flip</option></entry>  
 </row>
 <row>
   <entry>m3jp2k32.dll</entry>
   <entry>Morgan MJPEG2000 (MJ2C)</entry>
-  <entry>211bbaffbde1256c19db2bedca480bfc</entry>
+  <entry>f3c174edcbaef7cb947d6357cdfde7ff</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>m3jpeg32.dll</entry>
   <entry>Morgan Motion JPEG Codec (MJPG)</entry>
-  <entry>5cfdebaf698853247670ca4f59f09213</entry>
-</row>
-<row>
-  <entry>mcmjpg32.dll</entry>
-  <entry>MainConcept Motion JPEG (MJPG)</entry>
-  <entry>bc463312c13e705f489997a347e6ed8b</entry>
+  <entry>1cd13fff5960aa2aae43790242c323b1</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>mpg4c32.dll</entry>
   <entry>Microsoft MPEG-4 v1/v2</entry>
   <entry>b5791ea23f33010d37ab8314681f1256</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>tsccvid.dll</entry>
   <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
   <entry>8230d8560c41d444f249802a2700d1d5</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>vp31vfw.dll</entry>
   <entry>On2 Open Source VP3 Codec (VP31)</entry>
   <entry>845f3590ea489e2e45e876ab107ee7d2</entry>
+  <entry></entry>
 </row>
 <row>
   <entry>vp4vfw.dll</entry>
   <entry>On2 VP4 Personal Codec (VP40)</entry>
   <entry>fc5480a482ccc594c2898dcc4188b58f</entry>
+  <entry></entry>
 </row>
 <row>
-  <entry>wnvplay1.dll</entry>
-  <entry>Winnov Videum wnv1 codec (WNV1)</entry>
-  <entry>71f22ea4f7f0752b951f9f17ca58227a</entry>
+  <entry>vp6vfw.dll</entry>
+  <entry>On2 VP6 Personal Codec (VP60)</entry>
+  <entry>04d635a364243013898fd09484f913fb</entry>
+  <entry>összeomlik Linux alatt</entry>
 </row>
 <row>
-  <entry>wnvwinx.dll</entry>
-  <entry>Winnov Videum winx codec (WINX)</entry>
-  <entry>0bef4e34e0c829565cf7b4c63ca6d704</entry>
+  <entry>vp7vfw.dll</entry>
+  <entry>On2 VP7 Personal Codec (VP70)</entry>
+  <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
+  <entry>hibás FourCC?</entry>
 </row>
 <row>
   <entry>ViVD2.dll</entry>
- <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
- <entry></entry></row>
+  <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
+  <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
+  <entry></entry>
+</row>
 </tbody>
 </tgroup>
 </informaltable>
