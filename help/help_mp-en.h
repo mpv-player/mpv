@@ -390,8 +390,8 @@ static char help_text[]=
 "Cannot set LAME options, check bitrate/samplerate, some very low bitrates\n"\
 "(<32) need lower samplerates (i.e. -srate 8000).\n"\
 "If everything else fails, try a preset."
-#define MSGTR_ConfigFileError "config file error"
-#define MSGTR_ErrorParsingCommandLine "error parsing command line"
+#define MSGTR_ConfigFileError "Config file error"
+#define MSGTR_ErrorParsingCommandLine "Error parsing command line"
 #define MSGTR_VideoStreamRequired "Video stream is mandatory!\n"
 #define MSGTR_ForcingInputFPS "Input fps will be interpreted as %5.2f instead.\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Output file format RAWVIDEO does not support audio - disabling audio.\n"
@@ -456,13 +456,13 @@ static char help_text[]=
 "                 <8-320>: ABR encoding at average given kbps bitrate.\n\n"
 
 //codec-cfg.c:
-#define MSGTR_DuplicateFourcc "duplicated FourCC"
-#define MSGTR_TooManyFourccs "too many FourCCs/formats..."
-#define MSGTR_ParseError "parse error"
-#define MSGTR_ParseErrorFIDNotNumber "parse error (format ID not a number?)"
-#define MSGTR_ParseErrorFIDAliasNotNumber "parse error (format ID alias not a number?)"
-#define MSGTR_DuplicateFID "duplicated format ID"
-#define MSGTR_TooManyOut "too many out..."
+#define MSGTR_DuplicateFourcc "Duplicated FourCC"
+#define MSGTR_TooManyFourccs "Too many FourCCs/formats..."
+#define MSGTR_ParseError "Parse error"
+#define MSGTR_ParseErrorFIDNotNumber "Parse error (format ID not a number?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "Parse error (format ID alias not a number?)"
+#define MSGTR_DuplicateFID "Duplicated format ID"
+#define MSGTR_TooManyOut "Too many out..."
 #define MSGTR_InvalidCodecName "\ncodec(%s) name is not valid!\n"
 #define MSGTR_CodecLacksFourcc "\ncodec(%s) does not have FourCC/format!\n"
 #define MSGTR_CodecLacksDriver "\ncodec(%s) does not have a driver!\n"
@@ -484,7 +484,7 @@ static char help_text[]=
 #define MSGTR_OutdatedCodecsConf "This codecs.conf is too old and incompatible with this MPlayer release!"
 
 // divx4_vbr.c:
-#define MSGTR_OutOfMemory "out of memory"
+#define MSGTR_OutOfMemory "Out of memory"
 #define MSGTR_OverridingTooLowBitrate "Specified bitrate is too low for this clip.\n"\
 "Minimum possible bitrate for the clip is %.0f kbps. Overriding\n"\
 "user-specified value.\n"
@@ -568,7 +568,7 @@ static char help_text[]=
 #define MSGTR_NotSystemStream "Not MPEG System Stream format... (maybe Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Invalid MPEG-ES stream??? Contact the author, it may be a bug :(\n"
 #define MSGTR_FormatNotRecognized "============ Sorry, this file format is not recognized/supported =============\n"\
-				  "=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
+"=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n"
 #define MSGTR_MissingVideoStream "No video stream found.\n"
 #define MSGTR_MissingAudioStream "No audio stream found -> no sound.\n"
 #define MSGTR_MissingVideoStreamBug "Missing video stream!? Contact the author, it may be a bug :(\n"
@@ -734,18 +734,18 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_TGAReadError "TGA read error (%s)\n"
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG read error (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "RLE packed TGA not supported (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "unknown file type (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "Unknown file type (%s)\n"
 #define MSGTR_SKIN_BITMAP_ConversionError "24 bit to 32 bit conversion error (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "not enough memory\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "Unknown message: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "Not enough memory\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Too many fonts declared.\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "Font file not found.\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "Font image file not found.\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "unknown parameter (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "Unknown parameter (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin not found (%s).\n"
 #define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Selected skin ( %s ) not found, trying 'default'...\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skin config file read error (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin config file read error (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
@@ -830,7 +830,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Misc"
 
 #define MSGTR_PREFERENCES_None "None"
-#define MSGTR_PREFERENCES_DriverDefault "driver default"
+#define MSGTR_PREFERENCES_DriverDefault "Driver default"
 #define MSGTR_PREFERENCES_AvailableDrivers "Available drivers:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Do not play sound"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalize sound"
@@ -938,12 +938,12 @@ static char help_text[]=
 
 // bitmap.c
 
-#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] not enough memory for image\n"
-#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] not enough memory for image\n"
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] Not enough memory for image\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] Not enough memory for image\n"
 
 // cfg.c
 
-#define MSGTR_ConfigFileReadError "[cfg] config file read error ...\n"
+#define MSGTR_ConfigFileReadError "[cfg] Config file read error ...\n"
 #define MSGTR_UnableToSaveOption "[cfg] Unable to save the '%s' option.\n"
 
 // interface.c
@@ -1077,7 +1077,7 @@ static char help_text[]=
 #define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Connected to sound server.\n"
 #define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Unable to open a stream.\n"
 #define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Stream opened.\n"
-#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] buffer size: %d\n"
+#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] Buffer size: %d\n"
 
 // ao_dxr2.c
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Setting volume to %d failed.\n"
@@ -1086,7 +1086,7 @@ static char help_text[]=
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound failed: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latency: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n"
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] failed to open ESD playback stream: %s\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] Failed to open ESD playback stream: %s\n"
 
 // ao_mpegpes.c
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio set mixer failed: %s.\n"
@@ -1102,13 +1102,13 @@ static char help_text[]=
 
 // ao_sdl.c
 #define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Channels: %s Format %s\n"
-#define MSGTR_AO_SDL_DriverInfo "[AO SDL] using %s audio driver.\n"
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] Using %s audio driver.\n"
 #define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Unsupported audio format: 0x%x.\n"
 #define MSGTR_AO_SDL_CantInit "[AO SDL] SDL Audio initialization failed: %s\n"
 #define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Unable to open audio: %s\n"
 
 // ao_sgi.c
-#define MSGTR_AO_SGI_INFO "[AO SGI] control.\n"
+#define MSGTR_AO_SGI_INFO "[AO SGI] Control.\n"
 #define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Channels: %s Format %s\n"
 #define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: invalid device.\n"
 #define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams failed: %s\nCould not set desired samplerate.\n"
@@ -1127,8 +1127,8 @@ static char help_text[]=
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: write failed.\n"
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Can't open audio device %s, %s  -> nosound.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate.\n"
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Your audio driver DOES NOT support select()  ***\nRecompile MPlayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n"
-#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatal error: *** CANNOT REOPEN / RESET AUDIO DEVICE (%s) ***\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]   ***  Your audio driver DOES NOT support select()  ***\nRecompile MPlayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN] Fatal: *** CANNOT REOPEN / RESET AUDIO DEVICE (%s) ***\n"
 
 // ao_alsa5.c
 #define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: requested format: %d Hz, %d channels, %s\n"
@@ -1157,7 +1157,7 @@ static char help_text[]=
 
 // ao_plugin.c
 
-#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] invalid plugin: %s\n"
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] Invalid plugin: %s\n"
 
 // ======================= AF Audio Filters ================================
 
@@ -1165,12 +1165,12 @@ static char help_text[]=
 
 // af_ladspa.c
 
-#define MSGTR_AF_LADSPA_AvailableLabels "available labels in"
+#define MSGTR_AF_LADSPA_AvailableLabels "Available labels in"
 #define MSGTR_AF_LADSPA_WarnNoInputs "WARNING! This LADSPA plugin has no audio inputs.\n  The incoming audio signal will be lost."
 #define MSGTR_AF_LADSPA_ErrMultiChannel "Multi-channel (>2) plugins are not supported (yet).\n  Use only mono and stereo plugins."
 #define MSGTR_AF_LADSPA_ErrNoOutputs "This LADSPA plugin has no audio outputs."
 #define MSGTR_AF_LADSPA_ErrInOutDiff "The number of audio inputs and audio outputs of the LADSPA plugin differ."
-#define MSGTR_AF_LADSPA_ErrFailedToLoad "failed to load"
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "Failed to load"
 #define MSGTR_AF_LADSPA_ErrNoDescriptor "Couldn't find ladspa_descriptor() function in the specified library file."
 #define MSGTR_AF_LADSPA_ErrLabelNotFound "Couldn't find label in plugin library."
 #define MSGTR_AF_LADSPA_ErrNoSuboptions "No suboptions specified."
@@ -1182,7 +1182,7 @@ static char help_text[]=
 
 // format.c
 
-#define MSGTR_AF_FORMAT_UnknownFormat "unknown format "
+#define MSGTR_AF_FORMAT_UnknownFormat "Unknown format "
 
 // ========================== INPUT =========================================
 
@@ -1256,7 +1256,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Unable to set channel count: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Unable to set stereo: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2Open "Unable to open '%s': %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "unsupported format\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Unsupported format\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Unable to set audio format."
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Unable to set samplerate: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Unable to set trigger: %d\n"
@@ -1276,7 +1276,7 @@ static char help_text[]=
 
 // asf_mmst_streaming.c
 
-#define MSGTR_MPDEMUX_MMST_WriteError "write error\n"
+#define MSGTR_MPDEMUX_MMST_WriteError "Write error\n"
 #define MSGTR_MPDEMUX_MMST_EOFAlert "\nAlert! EOF\n"
 #define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "pre-header read failed\n"
 #define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Invalid header size, giving up.\n"
@@ -1284,22 +1284,22 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "packet_len read failed.\n"
 #define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Invalid RTSP packet size, giving up.\n"
 #define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Command data read failed.\n"
-#define MSGTR_MPDEMUX_MMST_HeaderObject "header object\n"
-#define MSGTR_MPDEMUX_MMST_DataObject "data object\n"
-#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "file object, packet length = %d (%d)\n"
-#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "stream object, stream ID: %d\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "Header object\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "Data object\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "File object, packet length = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Stream object, stream ID: %d\n"
 #define MSGTR_MPDEMUX_MMST_2ManyStreamID "Too many IDs, stream skipped."
-#define MSGTR_MPDEMUX_MMST_UnknownObject "unknown object\n"
-#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Media data read failed.\n"
-#define MSGTR_MPDEMUX_MMST_MissingSignature "missing signature\n"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "Unknown object\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Failed to read data from media.\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "Missing signature\n"
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Everything done. Thank you for downloading a media file containing proprietary and patented technology.\n"
-#define MSGTR_MPDEMUX_MMST_UnknownCmd "unknown command %02x\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "Unknown command %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet error : %s\n"
 #define MSGTR_MPDEMUX_MMST_Connected "Connected\n"
 
 // asf_streaming.c
 
-#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunck size is too small: %d\n"
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, stream_chunk size is too small: %d\n"
 #define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "size_confirm mismatch!: %d %d\n"
 #define MSGTR_MPDEMUX_ASF_WarnDropHeader "Warning: drop header ????\n"
 #define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Error while parsing chunk header\n"
@@ -1316,15 +1316,15 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Error: chunk_size > packet_size\n"
 #define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Error while reading chunk.\n"
 #define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
-#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "invalid proxy URL\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "unknown ASF stream type\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "Invalid proxy URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Unknown ASF stream type\n"
 #define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Failed to parse HTTP response.\n"
 #define MSGTR_MPDEMUX_ASF_ServerReturn "Server returned %d:%s\n"
 #define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP PARSE WARNING : Pragma %s cut from %d bytes to %d\n"
-#define MSGTR_MPDEMUX_ASF_SocketWriteError "socket write error: %s\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Socket write error: %s\n"
 #define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Failed to parse header.\n"
 #define MSGTR_MPDEMUX_ASF_NoStreamFound "No stream found.\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "unknown ASF streaming type\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Unknown ASF streaming type\n"
 #define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
 #define MSGTR_MPDEMUX_ASF_StreamingFailed "Failed, exiting.\n"
 
@@ -1337,7 +1337,7 @@ static char help_text[]=
 
 // aviheader.c
 
-#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** empty list?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** Empty list?!\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Found movie at 0x%X - 0x%X\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "Found 'bih', %u bytes of %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regenerating keyframe table for M$ mpg4v1 video.\n"
@@ -1354,7 +1354,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "Can't read index file %s: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s is not a valid MPlayer index file.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Could not allocate memory for index data from %s.\n"
-#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "premature end of index file %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Premature end of index file %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Loaded index file: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Generating Index: %3lu %s     \r"
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Generated index table for %d chunks!\n"
@@ -1376,18 +1376,18 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Failed to read TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Failed to open %s device.\n"
-#define MSGTR_MPDEMUX_CDDB_NotAValidURL "not a valid URL\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "Not a valid URL\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Failed to send the HTTP request.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Failed to read the HTTP response.\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Not Found.\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "unknown error code\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Unknown error code\n"
 #define MSGTR_MPDEMUX_CDDB_NoCacheFound "No cache found.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Not all the xmcd file has been read.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Failed to create directory %s.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Not all of the xmcd file has been written.\n"
 #define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Invalid xmcd database file returned.\n"
-#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "unexpected FIXME\n"
-#define MSGTR_MPDEMUX_CDDB_UnhandledCode "unhandled code\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Unexpected FIXME\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Unhandled code\n"
 #define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Unable to find end of line.\n"
 #define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parse OK, found: %s\n"
 #define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album not found.\n"
@@ -1402,12 +1402,12 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] bin filename tested: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Couldn't find the bin file - giving up.\n"
 #define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Using bin file %s.\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] unknown mode for binfile. Should not happen. Aborting.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] Unknown mode for binfile. Should not happen. Aborting.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Cannot open %s.\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Error reading from  %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Error getting size of bin file.\n"
-#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "track %02d:  format=%d  %02d:%02d:%02d\n"
-#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] unexpected end of bin file\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "Track %02d:  format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] Unexpected end of bin file\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Couldn't read %d bytes of payload.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n"
 
@@ -1419,9 +1419,9 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ConnectingToServer "Connecting to server %s[%s]: %d...\n"
 #define MSGTR_MPDEMUX_NW_CantConnect2Server "Failed to connect to server with %s\n"
 #define MSGTR_MPDEMUX_NW_SelectFailed "Select failed.\n"
-#define MSGTR_MPDEMUX_NW_ConnTimeout "connection timeout\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Connection timeout\n"
 #define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt failed: %s\n"
-#define MSGTR_MPDEMUX_NW_ConnectError "connect error: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "Connect error: %s\n"
 #define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Invalid proxy setting... Trying without proxy.\n"
 #define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Could not resolve remote hostname for AF_INET. Trying without proxy.\n"
 #define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Error while sending HTTP request: Didn't send all the request.\n"
@@ -1460,10 +1460,10 @@ static char help_text[]=
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] No entry found in the menu definition.\n"
 
 // libmenu/menu.c
-#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] syntax error at line: %d\n"
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntax error at line: %d\n"
 #define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Menu definitions need a name attribute (line %d).\n"
-#define MSGTR_LIBMENU_BadAttrib "[MENU] bad attribute %s=%s in menu '%s' at line %d\n"
-#define MSGTR_LIBMENU_UnknownMenuType "[MENU] unknown menu type '%s' at line %d\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] Bad attribute %s=%s in menu '%s' at line %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Unknown menu type '%s' at line %d\n"
 #define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Can't open menu config file: %s\n"
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Config file is too big (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Config file is empty.\n"
@@ -1487,7 +1487,7 @@ static char help_text[]=
 // libmenu/menu_filesel.c
 #define MSGTR_LIBMENU_OpendirError "[MENU] opendir error: %s\n"
 #define MSGTR_LIBMENU_ReallocError "[MENU] realloc error: %s\n"
-#define MSGTR_LIBMENU_MallocError "[MENU] memory allocation error: %s\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Memory allocation error: %s\n"
 #define MSGTR_LIBMENU_ReaddirError "[MENU] readdir error: %s\n"
 #define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Can't open directory %s.\n"
 
@@ -1611,7 +1611,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Setting up for PAL/SECAM.\n"
 #define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Setting aspect ratio to 4:3.\n"
 #define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Setting aspect ratio to 16:9.\n"
-#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] out of memory\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] Out of memory\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Unable to allocate keycolor!\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Unable to allocate exact keycolor, using closest match (0x%lx).\n"
 #define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Uninitializing.\n"
@@ -1724,7 +1724,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] framebuffer memory: %ld in %ld buffers.\n"
 #define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] Requesting first buffer #%d.\n"
 #define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] Got first buffer #%d.\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] unknown subdevice: %s.\n"
+#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] Unknown subdevice: %s.\n"
 
 // libvo/vo_tdfxfb.c
 
@@ -1769,7 +1769,7 @@ static char help_text[]=
 // libvo/vo_vesa.c
 
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Fatal error occurred! Can't continue.\n"
-#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] unknown subdevice: '%s'.\n"
+#define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Unknown subdevice: '%s'.\n"
 #define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] You have too little video memory for this mode:\n[VO_VESA] Required: %08lX present: %08lX.\n"
 #define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] You have to specify the capabilities of the monitor. Not changing refresh rate.\n"
 #define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] The mode does not fit the monitor limits. Not changing refresh rate.\n"
