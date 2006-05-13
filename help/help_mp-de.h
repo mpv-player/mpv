@@ -1019,7 +1019,7 @@ static char help_text[]=
 #define MSGTR_VO_AA_AdditionalOptions \
 "Zusätzlich von vo_aa bereitgestellte Optionen:\n" \
 "  help        gib diese Hilfsnachricht aus\n" \
-"  osdcolor    setze OSD-Farbe\n\
+"  osdcolor    setze OSD-Farbe\n" \
 "  subcolor    setze Untertitelfarbe\n" \
 "        die Farbparameter sind folgende:\n"\
 "           0 : normal\n" \
