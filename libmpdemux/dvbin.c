@@ -387,6 +387,11 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 		list->channels = tmp;
 		memcpy(&(list->channels[list->NUM_CHANNELS]), ptr, sizeof(dvb_channel_t));
 		list->NUM_CHANNELS++;
+		if(sizeof(dvb_channel_t) * list->NUM_CHANNELS >= 1024*1024)
+		{
+			mp_msg(MSGT_DEMUX, MSGL_V, "dvbin.c, > 1MB allocated for channels struct, dropping the rest of the file\r\n");
+			break;
+		}
 	}
 
 	fclose(f);
