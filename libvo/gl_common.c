@@ -297,6 +297,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   strcpy(allexts, extensions);
   strcat(allexts, " ");
   strcat(allexts, ext2);
+  mp_msg(MSGT_VO, MSGL_V, "OpenGL extensions string:\n%s\n", allexts);
   if (!getProcAddress)
     getProcAddress = setNull;
   for (dsc = extfuncs; dsc->funcptr; dsc++) {
