@@ -14,6 +14,7 @@ SRCS=af.c \
      af_format.c \
      af_gate.c \
      af_hrtf.c \
+     af_karaoke.c \
      af_pan.c \
      af_resample.c \
      af_sinesupress.c \

@@ -767,6 +767,8 @@ Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * mp_msg transition on unmaintained libao2 drivers
     * translatables to help_mp on input/libmpdemux
     * .wpl playlist support hack
+    * karaoke audio filter
+    * TOOLS/qepdvcd.sh
 
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter

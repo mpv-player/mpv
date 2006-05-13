@@ -569,6 +569,7 @@ MPlayer (1.0)
     * big-endian fixes in rgb2rgb converter
     * yuv2rgb Altivec optimization fixes
     * support for LADSPA plugins
+    * new proof-of-concept karaoke (voice removal) filter
 
     GUI:
     * unified audio options dialog, also for ALSA

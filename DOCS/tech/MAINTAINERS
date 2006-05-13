@@ -123,6 +123,7 @@ audio filters:
     * general: Alex Beregszaszi
     * af_ladspa.c - Ivo van Poorten
     * af_equalizer.c - Reynaldo H. Verdejo Pinochet
+    * af_karaoke.c - Reynaldo H. Verdejo Pinochet
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb

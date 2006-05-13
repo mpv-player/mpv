@@ -4538,6 +4538,18 @@ This filter is untested, maybe even unusable.
 Noise gate filter similar to the comp audio filter.
 This filter is untested, maybe even unusable.
 .
+.TP
+.B karaoke\ \ \ 
+Simple voice removal filter.
+.
+This filter exploits the fact that voice is usually recorded with
+mono gear and later 'center' mixed on the final audio stream.
+.
+Beware that this filter will in fact turn your signal into mono.
+.
+Works well over 2 channel tracks; Don't ever bother trying it on anything
+but 2 chan stereo.
+.
 .
 .
 .SH "VIDEO FILTERS"
