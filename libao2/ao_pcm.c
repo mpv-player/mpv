@@ -89,11 +89,13 @@ static int init(int rate,int channels,int format,int flags){
 	};
 	// set defaults
 	ao_pcm_waveheader = 1;
-	ao_outputfilename =
-	      strdup((ao_pcm_waveheader)?"audiodump.wav":"audiodump.pcm");
+
 	if (subopt_parse(ao_subdevice, subopts) != 0) {
 	  return 0;
 	}
+
+	ao_outputfilename =
+	      strdup((ao_pcm_waveheader)?"audiodump.wav":"audiodump.pcm");
 
 	/* bits is only equal to format if (format == 8) or (format == 16);
 	   this means that the following "if" is a kludge and should
