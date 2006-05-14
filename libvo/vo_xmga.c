@@ -134,6 +134,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     vo_panscan_x = vo_panscan_y = vo_panscan_amount = 0;
 
+    aspect(&d_width, &d_height, A_NOZOOM);
     vo_dx = (vo_screenwidth - d_width) / 2;
     vo_dy = (vo_screenheight - d_height) / 2;
     geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth,
@@ -170,8 +171,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     mp_msg(MSGT_VO, MSGL_V, "Using colorkey: %x\n", colorkey);
 
     inited = 1;
-
-    aspect(&d_width, &d_height, A_NOZOOM);
 
 #ifdef HAVE_NEW_GUI
     if (use_gui)
