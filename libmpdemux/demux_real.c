@@ -407,7 +407,7 @@ read_index:
     for (i = 0; i < MAX_STREAMS; i++)
     {
     priv->index_table_size[i] = num_of_packets;
-    priv->index_table[i] = malloc(priv->index_table_size[i] * sizeof(real_index_table_t));
+    priv->index_table[i] = calloc(priv->index_table_size[i], sizeof(real_index_table_t));
 //    priv->index_table[stream_id] = realloc(priv->index_table[stream_id],
 //	priv->index_table_size[stream_id] * sizeof(real_index_table_t));
     }
@@ -1054,8 +1054,8 @@ if((unsigned)stream_id<MAX_STREAMS){
 	demuxer->audio->id=stream_id;
 	sh->ds=demuxer->audio;
 	demuxer->audio->sh=sh;
-	priv->audio_buf = malloc(priv->sub_packet_h[demuxer->audio->id] * priv->audiopk_size[demuxer->audio->id]);
-	priv->audio_timestamp = malloc(priv->sub_packet_h[demuxer->audio->id] * sizeof(float));
+	priv->audio_buf = calloc(priv->sub_packet_h[demuxer->audio->id], priv->audiopk_size[demuxer->audio->id]);
+	priv->audio_timestamp = calloc(priv->sub_packet_h[demuxer->audio->id], sizeof(float));
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM audio ID = %d\n",stream_id);
 	goto got_audio;
     }
@@ -1416,6 +1416,11 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			    if (version==5)
 			      stream_skip(demuxer->stream,1);  // Skip 1 additional unknown byte 
 			    codecdata_length=stream_read_dword(demuxer->stream);
+			    // Check extradata len, we can't store bigger values in cbSize anyway
+			    if ((unsigned)codecdata_length > 0xffff) {
+			        mp_msg(MSGT_DEMUX,MSGL_ERR,"Extradata too big (%d)\n", codecdata_length);
+				goto skip_this_chunk;
+			    }
 			    sh->wf->cbSize = codecdata_length;
 			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+sh->wf->cbSize);
 			    stream_read(demuxer->stream, ((char*)(sh->wf+1)), codecdata_length); // extras
@@ -1470,8 +1475,8 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			demuxer->audio->id=stream_id;
 			sh->ds=demuxer->audio;
 			demuxer->audio->sh=sh;
-        	priv->audio_buf = malloc(priv->sub_packet_h[demuxer->audio->id] * priv->audiopk_size[demuxer->audio->id]);
-        	priv->audio_timestamp = malloc(priv->sub_packet_h[demuxer->audio->id] * sizeof(float));
+        	priv->audio_buf = calloc(priv->sub_packet_h[demuxer->audio->id], priv->audiopk_size[demuxer->audio->id]);
+        	priv->audio_timestamp = calloc(priv->sub_packet_h[demuxer->audio->id], sizeof(float));
 		    }
 		    
 		    ++a_streams;

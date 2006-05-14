@@ -298,7 +298,7 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 		case FOURCC_288:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: 28_8\n");
             sh->wf->nBlockAlign = ra_priv->coded_framesize;
-            ra_priv->audio_buf = malloc(ra_priv->sub_packet_h * ra_priv->frame_size);
+            ra_priv->audio_buf = calloc(ra_priv->sub_packet_h, ra_priv->frame_size);
 			break;
 		case FOURCC_DNET:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
@@ -307,7 +307,7 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: SIPR\n");
 			sh->wf->nBlockAlign = ra_priv->coded_framesize;
 			sh->wf->nAvgBytesPerSec = sipr_fl2bps[ra_priv->codec_flavor];
-			ra_priv->audio_buf = malloc(ra_priv->sub_packet_h * ra_priv->frame_size);
+			ra_priv->audio_buf = calloc(ra_priv->sub_packet_h, ra_priv->frame_size);
 			break;
 		default:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%d)\n", sh->format);
