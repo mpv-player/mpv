@@ -112,8 +112,8 @@ static int preinit(sh_audio_t *sh)
 static int init(sh_audio_t *sh_audio)
 {
   /* Dolby AC3 passthrough:*/
-  sample_t *a52_samples = a52_init(0);
-  if(a52_samples == NULL)
+  a52_state_t *a52_state = a52_init(0);
+  if(a52_state == NULL)
   {
     mp_msg(MSGT_DECAUDIO, MSGL_ERR, "A52 init failed\n");
     return 0;
