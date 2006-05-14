@@ -2095,6 +2095,7 @@ demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
         {
           free (track->private_data);
           track->private_data = buffer;
+          track->private_size = size;
         }
       if (!demux_mkv_parse_idx (track))
         {
