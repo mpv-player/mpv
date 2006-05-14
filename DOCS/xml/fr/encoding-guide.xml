@@ -1288,6 +1288,129 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   un fichier ou un CD/DVD/etc comme source.
 </para>
 </sect2>
+
+
+<sect2 id="menc-feat-dvd-mpeg4-codec">
+<title>Choisir le codec video</title>
+
+<para>
+  Le choix du meilleur codec video dépend de plusieurs facteurs comme
+  la taille, la qualité, la lecture en transit (streamability), la
+  facilité d'utilisation, la popularité qui, pour certains d'entre
+  eux dépendent de préférences personnelles et de contraintes techniques.
+</para>
+<itemizedlist>
+  <listitem><para>
+  <emphasis role="bold">L'efficacité de la compression</emphasis>:
+  Il est assez évident que les codec des toutes dernières générations
+  sont faits pour augmenter la qualité et la compression.
+   Donc, les auteurs de ce guide et de nombreuses autres personnes
+   pensent que vous ne pouvez pas vous tromper
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
+  <para>Attention tout de même: décoder une video MPEG-4 AVC de la
+    resolution d'un DVD nécessite une machine puissante (i.e. un
+    Pentium 4 à plus de 1.5Ghz ou un Pentium M à plus de 1Ghz).
+  </para></footnote>
+  si vous choisissez un codec MPEG-4 AVC comme le
+  <systemitem class="library">x264</systemitem> au lieu de codecs MPEG-4 ASP
+  tels que le <systemitem class="library">libavcodec</systemitem> MPEG-4 ou le
+  <systemitem class="library">XviD</systemitem>.
+  (Les développeurs de codec peuvent être intéressés parla leture de l'avis
+  de Michael Niedermayer's sur
+  "<ulink url="http://guru.multimedia.cx/?p=10">why MPEG4-ASP sucks</ulink>".)
+  De la même manière, vous devriez obtenir une meilleure qualité en utilisant
+  un codec MPEG-4 ASP plutôt que MPEG-2.
+</para>
+<para>
+  Néanmoins, les nouveaux codecs qui sont en développement peuvent souffrir
+  de bugs qui n'ont pas encore été repérés et qui peuvent saboter un encodage.
+  Ce malheureusement parfois le prix à payer pour l'utilisation de
+  technologies de pointe.
+</para>
+<para>
+  De plus, commencer à utiliser un nouveau codec impose que vous passiez
+  du temps pour vous habituer à ses options de façon à ce que vous
+  sachiez quoi ajuster pour parvenir à la qualité désirée.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">Compatibilité du matériel</emphasis>:
+  Cela prend habituellement beaucoup de temps pour que les lecteurs vidéos
+  de salon se mettent à supporter les derniers codecs vidéos.
+  Ainsi, la plupart ne supportent que le MPEG-1 (comme les VCD, XVCD et KVCD),
+  le MPEG-2 (comme les DVD, SVCD and KVCD) et le MPEG-4 ASP (comme les
+  DivX, LMP4 <systemitem class="library">libavcodec</systemitem> et 
+  <systemitem class="library">XviD</systemitem>)
+  (attention: toutes les fonctionnalités MPEG-4 ASP ne sont généralement
+  pas supportées).
+  Référez-vous aux spécifications techniques de votre lecteur (si elles
+  existent), ou surfez sur le net pour plus d'infos.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">La meilleure qualité par temps d'encodage</emphasis>:
+  Les codecs qui sont sortis depuis un certain temps (comme l'encodeur MPEG-4
+  de <systemitem class="library">libavcodec</systemitem> et
+  <systemitem class="library">XviD</systemitem>) sont habituellement
+  largement optimisés avec toutes sortes d'algorithmes astucieux et des
+  routines optimiées en assembleur SIMD.
+  C'est pourquoi ils tendent à fournir la meilleure qualité par temps
+  d'encodage.
+  Par contre, ils peuvent avoir des options très avancées qui, si elles
+  sont enclenchées, rendent l'encodage très lent pour des gains limités.
+</para>
+<para>
+  Si vous recherchez la vitesse, vous devriez conserver à peu près les
+  réglages par défaut du codec video (bien que vous deviez quand même essayer
+  les autres options qui sont mentionnées dans d'autres sections de ce guide)
+</para>
+<para>
+  Vous pouvez aussi vouloir choisir un codec multi-threadé, bien que ce
+  ne soit utile que pour les utilisateurs de machines avec plusieurs 
+  processeurs.
+  Le codec MPEG-4 de <systemitem class="library">libavcodec</systemitem>
+  le permet  mais les gains en temps sont limités et cela procure une
+  légère baisse de qualité d'image
+  L'encodage multi-threadé du codec
+  <systemitem class="library">XviD</systemitem>, activé par l'option
+  <option>threads</option>, peut être utilisé pour améliorer la vitesse
+  d'encodage &mdash; de typiquement 40-60% &mdash; avec très peu voire aucune 
+  détérioration de l'image.
+  Le codec <systemitem class="library">x264</systemitem> permet aussi
+  l'encodage multi-threadé ce qui l'accélère pour le moment de 15-30%
+  (selon les réglages) avec une baisse de PSNR d'environ 0.05dB.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">Les préférences personnelles</emphasis>:
+  Là les choses deviennent presqu'irrationnel: pour la même raison pour
+  laquelle certains s'accrochaient encore à DivX&nbsp;3 alors que d'autres
+  codecs plus modernes faisaient des merveilles depuis des années,
+  certaines personnes préfèrent <systemitem class="library">XviD</systemitem>
+  ou le codec MPEG-4 de <systemitem class="library">libavcodec</systemitem>
+  par rapport à <systemitem class="library">x264</systemitem>.
+</para>
+<para>
+  Vous devriez vous faire votre propre optinion.
+  Ne croyez pas ceux qui ne jurent que par un seul codec.
+  Prenez quelques échantillons de sources brutes et comparez les
+  différentes options et codecs pour en trouver un qui vous convienne
+  le mieux.
+  Le meilleur codec est celui que vous maîtrisez et celui qui vous semble
+  le plus joli à vous yeux
+  <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
+  <para>Le même encodage peut apparaître différement sur le moniteur de
+  quelqu'un d'autre ou lorsqu'il est lu par un autre décodeur, donc armez
+  vos encodages pour le futur en les lisant sur différentes machines.
+</para></footnote>!
+</para></listitem>
+</itemizedlist>
+<para>
+  Référez-vous à la section
+  <link linkend="menc-feat-selecting-codec">Sélection des codecs et du format du conteneur</link>
+  pour avoir une liste des codecs supportés.
+</para>
+</sect2>
 <sect2 id="menc-feat-dvd-mpeg4-audio">
 <title>Audio</title>
 
