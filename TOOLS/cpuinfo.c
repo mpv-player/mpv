@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifdef __MINGW32__
 #include <sys/timeb.h>
@@ -42,13 +43,9 @@ static cpuid_regs_t
 cpuid(int func) {
   cpuid_regs_t regs;
 #define CPUID   ".byte 0x0f, 0xa2; "
-  asm("push %%ebx; "
-      "movl %4,%%eax; " CPUID
-      "movl %%eax,%0; movl %%ebx,%1; movl %%ecx,%2; movl %%edx,%3; "
-      "pop %%ebx"
-      : "=m" (regs.eax), "=m" (regs.ebx), "=m" (regs.ecx), "=m" (regs.edx)
-      : "g" (func)
-      : "%eax", "%ecx", "%edx");
+  asm( CPUID
+      : "=a" (regs.eax), "=b" (regs.ebx), "=c" (regs.ecx), "=d" (regs.edx)
+      : "0" (func));
   return regs;
 }
 
@@ -58,10 +55,29 @@ rdtsc(void)
 {
   unsigned int i, j;
 #define RDTSC   ".byte 0x0f, 0x31; "
-  asm(RDTSC : "=a"(i), "=d"(j) : );
+  asm volatile (RDTSC : "=a"(i), "=d"(j) : );
   return ((int64_t)j<<32) + (int64_t)i;
 }
 
+static const char*
+brandname(int i)
+{
+  const static char* brandmap[] = {
+    NULL,
+    "Intel(R) Celeron(R) processor",
+    "Intel(R) Pentium(R) III processor",
+    "Intel(R) Pentium(R) III Xeon(tm) processor",
+    "Intel(R) Pentium(R) III processor",
+    NULL,
+    "Mobile Intel(R) Pentium(R) III processor-M",
+    "Mobile Intel(R) Celeron(R) processor"
+  };
+
+  if (i >= sizeof(brandmap))
+    return NULL;
+  else
+    return brandmap[i];
+}
 
 static void
 store32(char *d, unsigned int v)
@@ -82,7 +98,7 @@ main(int argc, char **argv)
   unsigned max_ext_cpuid;
   unsigned int amd_flags;
   unsigned int amd_flags2;
-  char *model_name = "Unknown CPU";
+  const char *model_name = NULL;
   int i;
   char processor_name[49];
 
@@ -95,11 +111,6 @@ main(int argc, char **argv)
   store32(idstr+8, regs.ecx);
   idstr[12] = 0;
   printf("vendor_id\t: %s\n", idstr); 
-
-  if (strcmp(idstr, "GenuineIntel") == 0)
-    model_name = "Unknown Intel CPU";
-  else if (strcmp(idstr, "AuthenticAMD") == 0)
-    model_name = "Unknown AMD CPU";
 
   regs_ext = cpuid((1<<31) + 0);
   max_ext_cpuid = regs_ext.eax;
@@ -139,7 +150,7 @@ main(int argc, char **argv)
       { 6,  "pae",   "Physical Address Extension" },
       { 7,  "mce",   "Machine Check Exception" },
       { 8,  "cx8",   "CMPXCHG8B Instruction Supported" },
-      { 9,  "apic",  "On-chip CPIC Hardware Enabled" },
+      { 9,  "apic",  "On-chip APIC Hardware Enabled" },
       { 11, "sep",   "SYSENTER and SYSEXIT" },
       { 12, "mtrr",  "Memory Type Range Registers" },
       { 13, "pge",   "PTE Global Bit" },
@@ -147,16 +158,16 @@ main(int argc, char **argv)
       { 15, "cmov",  "Conditional Move/Compare Instruction" },
       { 16, "pat",   "Page Attribute Table" },
       { 17, "pse36", "Page Size Extension 36-bit" },
-      { 18, "psn",   "Processor Serial Number" },
+      { 18, "pn",    "Processor Serial Number" },
       { 19, "cflsh", "CFLUSH instruction" },
-      { 21, "ds",    "Debug Store" },
+      { 21, "dts",   "Debug Store" },
       { 22, "acpi",  "Thermal Monitor and Clock Ctrl" },
       { 23, "mmx",   "MMX Technology" },
       { 24, "fxsr",  "FXSAVE/FXRSTOR" },
       { 25, "sse",   "SSE Extensions" },
       { 26, "sse2",  "SSE2 Extensions" },
       { 27, "ss",    "Self Snoop" },
-      { 28, "htt",   "Multi-threading" },
+      { 28, "ht",    "Multi-threading" },
       { 29, "tm",    "Therm. Monitor" },
       { 30, "ia64",  "IA-64 Processor" },
       { 31, "pbe",   "Pend. Brk. EN." },
@@ -167,14 +178,15 @@ main(int argc, char **argv)
       char *desc;
       char *description;
     } cap2[] = {
-      { 0, "sse3", "SSE3 Extensions" },
+      { 0, "pni", "SSE3 Extensions" },
       { 3, "monitor", "MONITOR/MWAIT" },
-      { 4, "ds-cpl", "CPL Qualified Debug Store" },
+      { 4, "ds_cpl", "CPL Qualified Debug Store" },
       { 5, "vmx", "Virtual Machine Extensions" },
       { 7, "est", "Enhanced Intel SpeedStep Technology" },
       { 8, "tm2", "Thermal Monitor 2" },
-      { 10, "cnxt-id", "L1 Context ID" },
-      { 13, "cmpxchg16b", "CMPXCHG16B Available" },
+      { 10, "cid", "L1 Context ID" },
+      { 13, "cx16", "CMPXCHG16B Available" },
+      { 14, "xtpr", "xTPR Disable" }, 
       { -1 }
     };
     static struct {
@@ -188,8 +200,9 @@ main(int argc, char **argv)
       { 22, "mmxext","MMX Technology (AMD Extensions)" },
       { 25, "fxsr_opt", "Fast FXSAVE/FXRSTOR" },
       { 27, "rdtscp", "RDTSCP Instruction" },
-      { 30, "3dnowext","3Dnow! Extensions" },
-      { 31, "3dnow", "3Dnow!" },
+      { 29, "lm", "Long Mode Capable" },
+      { 30, "3dnowext","3DNow! Extensions" },
+      { 31, "3dnow", "3DNow!" },
       { -1 }
     };
     static struct {
@@ -200,19 +213,36 @@ main(int argc, char **argv)
       { 0, "lahf_lm", "LAHF/SAHF Supported in 64-bit Mode" },
       { 1, "cmp_legacy", "Chip Multi-Core" },
       { 2, "svm", "Secure Virtual Machine" },
-      { 4, "cr8", "CR8 Available in Legacy Mode" },
+      { 4, "cr8legacy", "CR8 Available in Legacy Mode" },
       { -1 }
     };
     unsigned int family, model, stepping;
 
     regs = cpuid(1);
+    family = (regs.eax >> 8) & 0xf;
+    model = (regs.eax >> 4) & 0xf;
+    stepping = regs.eax & 0xf;
+
+    if (family == 0xf)
+    {
+      family += (regs.eax >> 20) & 0xff;
+      model += ((regs.eax >> 16) & 0xf) << 4;
+    }
+
     printf("cpu family\t: %d\n"
            "model\t\t: %d\n"
            "stepping\t: %d\n" ,
-           family = (regs.eax >> 8) & 0xf,
-           model = (regs.eax >> 4) & 0xf,
-           stepping = regs.eax & 0xf);
-                
+           family,
+           model,
+           stepping);
+
+    if (strstr(idstr, "Intel") && !model_name) {
+      if (family == 6 && model == 0xb && stepping == 1)
+        model_name = "Intel (R) Celeron (R) processor";
+      else
+        model_name = brandname(regs.ebx & 0xf);
+    }   
+
     printf("flags\t\t:");
     for (i = 0; cap[i].bit >= 0; i++) {
       if (regs.edx & (1 << cap[i].bit)) {
@@ -220,7 +250,7 @@ main(int argc, char **argv)
       }
     }
     for (i = 0; cap2[i].bit >= 0; i++) {
-      if (regs.ecx & (1 << cap[i].bit)) {
+      if (regs.ecx & (1 << cap2[i].bit)) {
         printf(" %s", cap2[i].desc);
       }
     }
@@ -231,7 +261,11 @@ main(int argc, char **argv)
         family == 5 && 
         (model >= 9 || model == 8 && stepping >= 8))
       printf(" %s", "k6_mtrr");
-
+    /* similar for cyrix_arr. */
+    if (strstr(idstr, "Cyrix") &&
+        (family == 5 && model < 4 || family == 6))
+      printf(" %s", "cyrix_arr");
+ 
     for (i = 0; cap_amd[i].bit >= 0; i++) {
       if (amd_flags & (1 << cap_amd[i].bit)) {
         printf(" %s", cap_amd[i].desc);
@@ -267,7 +301,9 @@ main(int argc, char **argv)
     }
   }
 
-  printf("model name\t: %s\n", model_name);
-
-  exit(0);
+  printf("model name\t: ");
+  if (model_name)
+    printf("%s\n", model_name);
+  else
+    printf("Unknown %s CPU\n", idstr); 
 }
