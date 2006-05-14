@@ -1325,7 +1325,7 @@ void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
     mp_msg(MSGT_SUBREADER, MSGL_V, "\n");
     
     for (i = 0; i < langcnt; i++) {
-	char *tmp;
+	const char *tmp;
 	
 	if (strcasecmp(languages[i], preferred_language) != 0) continue;
 	analyser = enca_analyser_alloc(languages[i]);
