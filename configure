@@ -1480,6 +1480,41 @@ EOF
 
 fi
 
+
+# intrinsics headers for use with FFmpeg
+if test "$_sse" = yes ; then
+  echocheck "xmmintrin.h"
+  cat > $TMPC << EOF
+#include <xmmintrin.h>
+int main() { _mm_sfence ; return 0; }
+EOF
+  _builtin_vector=no
+  cc_check -msse && _builtin_vector=yes
+  if test "$_builtin_vector" = yes ; then
+    _def_builtin_vector='#define HAVE_BUILTIN_VECTOR 1'
+  else
+    _def_builtin_vector='#undef HAVE_BUILTIN_VECTOR'
+  fi
+  echores "$_builtin_vector"
+fi
+
+if test "$_3dnow" = yes ; then
+  echocheck "mm3dnow.h"
+  cat > $TMPC << EOF
+#include <mm3dnow.h>
+int main() { _m_femms(); return 0; }
+EOF
+  _mm3dnow=no
+  cc_check -m3dnow && _mm3dnow=yes
+  if test "$_mm3dnow" = yes ; then
+    _def_mm3dnow='#define HAVE_MM3DNOW 1'
+  else
+    _def_mm3dnow='#undef HAVE_MM3DNOW'
+  fi
+  echores "$_mm3dnow"
+fi
+
+
 echocheck "assembler support of -pipe option"
 cat > $TMPC << EOF
 int main(void) { return 0; }
@@ -7504,6 +7539,8 @@ TARGET_3DNOWEX = $_3dnowext
 TARGET_SSE = $_sse
 TARGET_ALTIVEC = $_altivec
 TARGET_VIS = $_vis
+TARGET_BUILTIN_VECTOR = $_builtin_vector
+TARGET_BUILTIN_3DNOW  = $_mm3dnow
 
 # --- GUI stuff ---
 GTKINC = $_inc_gtk
@@ -8144,6 +8181,8 @@ $_def_altivec	// only define if you have Altivec (G4)
 
 $_def_altivec_h	// enables usage of altivec.h
 
+$_def_builtin_vector  // enables usage of xmmintrin.h
+$_def_mm3dnow         // enables usage of mm3dnow.h
 
 $_def_mlib  // Sun mediaLib, available only on solaris
 $_def_vis	// only define if you have VIS ( ultrasparc )
