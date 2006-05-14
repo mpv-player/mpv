@@ -778,8 +778,8 @@ dvb_config_t *dvb_get_config(void)
 	int i, fd, type, size;
 	char filename[30], *conf_file, *name;
 	dvb_channels_list *list;
-	dvb_card_config_t *cards = NULL;
-	dvb_config_t *conf = NULL, *tmp;
+	dvb_card_config_t *cards = NULL, *tmp;
+	dvb_config_t *conf = NULL;
 	
 	if(dvb_config != NULL)
 		return dvb_config;
