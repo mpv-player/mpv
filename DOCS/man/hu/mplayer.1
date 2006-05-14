@@ -1,4 +1,4 @@
-.\" Synced with 1.1288
+.\" Synced with 1.1289
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -7877,6 +7877,22 @@ Ez csak a rácsos kvantálással együtt használható.
 .B mv0\ \ \ \ 
 Megpróbál elkódolni minden MB-t a MV=<0,0>-lal és kiválasztja a legjobbat.
 Nincs hatása, ha mbd=0.
+.
+.TP
+.B mv0_threshold=<bármilyen nem negatív szám>
+Ha a környezõ mozgásvektorok értéke <0,0> és az aktuális blokk mozgás
+becslésének értéke kevesebb, mint az mv0_threshold, <0,0> lesz
+mozgásvektorként használva és a további mozgás becslés el lesz hagyva
+(alapértelmezett: 256).
+Az mv0_threshold értékének 0-ra csökkentése egy kicsi (0.01dB) PSNR
+növekedést eredményez és valószínûleg egy kicsit javítja a kódolt videó
+kinézetét; az mv0_threshold növelése 320 fölé csökkent PSNR-t és vizuális
+minõséget eredményez.
+A nagyobb értékek felgyorsítják a kódolást egy kicsit (általában kisebb,
+mint 1%-kal, a többi használt opciótól függõen).
+.br
+.I MEGJEGYZÉS:
+Ehhez az opcióhoz nem szükséges az engedélyezett mv0.
 .
 .TP
 .B qprd (csak mbd=2)
