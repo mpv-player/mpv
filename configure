@@ -1504,7 +1504,7 @@ if test -n "$LDFLAGS" ; then
   _warn_CFLAGS=yes
 fi
 if test -n "$CPPFLAGS" ; then
-  _inc_extra="$_inc_extra $LDFLAGS"
+  _inc_extra="$_inc_extra $CPPFLAGS"
   _warn_CFLAGS=yes
 fi
 
