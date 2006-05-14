@@ -1272,8 +1272,12 @@
   Therefore, if you are encoding for high quality archival purposes,
   it is recommended not to deinterlace.
   You can always deinterlace the movie at playback time when
-  displaying it on progressive scan devices, and future players will
-  be able to deinterlace to full fieldrate, interpolating 50 or
+  displaying it on progressive scan devices.
+  The power of currently available computers forces players to use a
+  deinterlacing filter, which which results in a slight degradation in
+  image quality.
+  But future players will be able to mimic the interlaced display of
+  a TV, deinterlacing to full fieldrate and interpolating 50 or
   60000/1001 entire frames per second from the interlaced video.
 </para>
 
