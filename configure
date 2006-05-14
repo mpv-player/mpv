@@ -1486,7 +1486,7 @@ if test "$_sse" = yes ; then
   echocheck "xmmintrin.h"
   cat > $TMPC << EOF
 #include <xmmintrin.h>
-int main() { _mm_sfence ; return 0; }
+int main() { _mm_sfence(); return 0; }
 EOF
   _builtin_vector=no
   cc_check -msse && _builtin_vector=yes
