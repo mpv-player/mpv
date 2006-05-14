@@ -839,7 +839,7 @@ if x86 || x86_64 ; then
   pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1`
   pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | _head 1`
 
-  exts=`$_cpuinfo | grep 'features\|flags' | cut -d ':' -f 2 | _head 1`
+  exts=`$_cpuinfo | egrep 'features|flags' | cut -d ':' -f 2 | _head 1`
 
   pparam=`echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ \
                            -e s/xmm/sse/ -e s/kni/sse/`
