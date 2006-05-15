@@ -187,7 +187,7 @@ receive your answer.
 <para>
 You may need to include log, configuration or sample files in your bug report.
 If some of them are quite big then it is better to upload them to our
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">FTP server</ulink> in a
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/">FTP server</ulink> in a
 compressed format (gzip and bzip2 preferred) and include only the path and file
 name in your bug report. Our mailing lists have a message size limit of 80k, if
 you have something bigger you have to compress or upload it.

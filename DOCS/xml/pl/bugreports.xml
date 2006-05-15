@@ -117,7 +117,7 @@ odpowiedzi.
 Mo¿e zaj¶æ potrzeba do³±czenia logu, konfiguracji lub przyk³adowego
 pliku w Twoim
 zg³oszeniu b³êdu. Je¿eli który¶ z nich ma du¿y rozmiar, lepiej za³adowaæ go na
-nasz <ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">serwer FTP</ulink>
+nasz <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/">serwer FTP</ulink>
 w skompresowanej postaci (gzip i bzip2 s± preferowanymi formatami) i za³±czyæ
 tylko ¶cie¿kê i nazwê pliku do zg³oszenia b³êdu. Nasza lista ma ustawiony limit
 rozmiaru ka¿dej wiadomo¶ci na 80k. Je¿eli potrzebujesz wys³aæ co¶ wiêkszego,

@@ -191,7 +191,7 @@ obdr¾eli svou odpovìï.
 <para>
 Bude potøeba pøipojit log, konfiguraci nebo vzorky souborù ke svému hlá¹ení chyb.
 Pokud jsou nìkteré z nich opravdu velké, pak je radìji nahrajte na ná¹
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/">FTP server</ulink>
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/">FTP server</ulink>
 v komprimovaném formátu (preferujeme gzip a bzip2) a do zprávy zahròte pouze
 cestu a název souboru. Na¹e konference mají limit velikosti zprávy 80k, pokud
 máte nìco vìt¹ího, musíte to zkomprimovat a nahrát na FTP.
