@@ -1,4 +1,4 @@
-.\" synced with 1.1285
+.\" synced with 1.1289
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -4808,6 +4808,15 @@ Filtre antiparasite similaire au filtre audio comp.
 Ce filtre a été très peu testé, et n'est peut-être même pas
 utilisable.
 .
+.TP
+.B karaoke
+Filtre simple de suppression de voix exploitant le fait que la voix
+est généralement enregistrée en mono pour être ensuite répartie
+sur les deux canaux dans le flux final.
+Attention, ce filtre transformera votre son en mono.
+Fonctionne mieux avec les sons stéréo; il est vain d'essayer ce
+filtre avec d'autres types de sources.
+.
 .
 .
 .SH "FILTRES VIDÉO"
@@ -8288,6 +8297,21 @@ Essaie d'encoder chaque MB avec MV=<0,0> et choisit le meilleur.
 Ceci n'a pas d'effet si mbd=0.
 .
 .TP
+.B mv0_threshold=<nombre positif>
+Quand les vecteurs de mouvement des alentours sont <0,0> et que le score
+du bloc courant donné par l'estimation de mouvement est moins que
+mv0_threshold, <0,0> est utilisé comme vecteur de mouvement et la suite
+de l'estimation de mouvement est sauté (par défaut: 256).
+Baisser mv0_threshold à 0 peut permettre une petite augmentation du PSNR
+(0.01dB) et peut-être rendre la vidéo plus jolie\ ; augmenter
+mv0_threshold au-delà de 320 diminue le PSNR PSNR et la qualité visuelle.
+Des valeurs plus grandes accélèrent l'encodage un tout petit peu
+(généralement moins de 1%, en fonction des options utilisées).
+.br
+.I NOTE\ :
+Cette option ne requière pas que mv0 soit activé.
+.
+.TP
 .B qprd (mbd=2 uniquement)
 paramètres de quantification (QP) à taux de distortion optimal pour le
 lambda donné de chaque macrobloc
@@ -8458,6 +8482,8 @@ pour .mp4/MOV/NUT).
 N'écrit les en-têtes vidéos globales que devant les trames-clées.
 .IPs 3
 Combine 1 et 2.
+.RE
+.PD 1
 .
 .TP
 .B aglobal=<0\-3>
