@@ -163,6 +163,7 @@ MPlayer (1.0)
       color conversions and post-processing
     * -srate fixed
     * hqdn3d: 2.5x faster temporal-only, 1.6x faster spatial-only
+    * new proof-of-concept karaoke (voice removal) filter
 
     MEncoder:
     * audio encoding modularized
@@ -569,7 +570,6 @@ MPlayer (1.0)
     * big-endian fixes in rgb2rgb converter
     * yuv2rgb Altivec optimization fixes
     * support for LADSPA plugins
-    * new proof-of-concept karaoke (voice removal) filter
 
     GUI:
     * unified audio options dialog, also for ALSA
