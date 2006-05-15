@@ -4059,7 +4059,7 @@ if a codec fails or gives wrong output.
   <entry>tsccvid.dll</entry>
   <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
   <entry>8230d8560c41d444f249802a2700d1d5</entry>
-  <entry></entry>
+  <entry>shareware error on windows</entry>
 </row>
 <row>
   <entry>vp31vfw.dll</entry>
@@ -4090,6 +4090,21 @@ if a codec fails or gives wrong output.
   <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
   <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
   <entry></entry>
+</row>
+<row>
+  <entry>msulvc06.DLL</entry>
+  <entry>MSU Lossless codec (MSUD)</entry>
+  <entry>294bf9288f2f127bb86f00bfcc9ccdda</entry>
+  <entry>
+    Decodable by <application>Window Media Player</application>,
+    not <application>MPlayer</application> (yet).
+  </entry>
+</row>
+<row>
+  <entry>camcodec.dll</entry>
+  <entry>CamStudio lossless video codec(CSCD)</entry>
+  <entry>0efe97ce08bb0e40162ab15ef3b45615</entry>
+  <entry>sf.net/projects/camstudio</entry>
 </row>
 </tbody>
 </tgroup>
