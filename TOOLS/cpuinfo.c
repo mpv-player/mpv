@@ -43,9 +43,17 @@ static cpuid_regs_t
 cpuid(int func) {
   cpuid_regs_t regs;
 #define CPUID   ".byte 0x0f, 0xa2; "
+#ifdef __x86_64__
+  asm("mov %%rbx, %%rsi\n\t"
+#else
   asm("mov %%ebx, %%esi\n\t" 
+#endif
       CPUID"\n\t"
-      "xchg %%esi, %%ebx"
+#ifdef __x86_64__
+      "xchg %%rsi, %%rbx\n\t"
+#else
+      "xchg %%esi, %%ebx\n\t"
+#endif
       : "=a" (regs.eax), "=S" (regs.ebx), "=c" (regs.ecx), "=d" (regs.edx)
       : "0" (func));
   return regs;
