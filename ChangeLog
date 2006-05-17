@@ -45,6 +45,7 @@ MPlayer (1.0)
     * DPI (Print-Resolution) and Pixel-Aspect support in vo_jpeg
     * ALSA audio output: several small fixes and improvements
     * removed experimental mmap suboption from the ALSA driver
+    * YUY2 and back end scaling for S3 Virge chips on fbdev
 
     Decoders:
     * Indeo2 (RT21) support via lavc
