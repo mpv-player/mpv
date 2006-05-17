@@ -912,7 +912,6 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] инициализация аудио: У микшера аудиокарты отсутствует канал '%s',\nиспользую канал по умолчанию.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] инициализация аудио: Не могу открыть аудиоустройство %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] инициализация аудио: Не могу заблокировать файловый описатель: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Не могу установить аудиоустройство %s в режим AC3 вывода, пробую S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] инициализация аудио: Не могу установить аудиоустройство в %d-канальный режим.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] инициализация аудио: драйвер не поддерживает SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Ваш аудиодрайвер НЕ поддерживает select()  ***\n Перекомпилируйте MPlayer с #undef HAVE_AUDIO_SELECT в config.h !\n\n"

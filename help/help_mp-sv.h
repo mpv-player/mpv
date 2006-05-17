@@ -162,9 +162,7 @@ static char help_text[]=
 #define MSGTR_AudioFilterChainPreinitError "Fel vid förinitiering av audiofilter!\n"
 #define MSGTR_LinuxRTCReadError "'Linux RTC' läsfel: %s\n"
 #define MSGTR_SoftsleepUnderflow "Varning! Softsleep underflow!\n"
-#define MSGTR_EDLSKIPStartStopLength "\nEDL_SKIP: start [%f], stopp [%f], längd [%f]\n"
 #define MSGTR_MenuCall "Menyanrop\n"
-#define MSGTR_EdlCantUseBothModes "Kan inte använda -edl och -edlout samtidigt.\n"
 #define MSGTR_EdlOutOfMem "Kan inte allokera tillräckligt med minne för att hålla EDL-data.\n"
 #define MSGTR_EdlRecordsNo "Läst %d EDL-funtioner.\n"
 #define MSGTR_EdlQueueEmpty "Det är inga EDL-funktioner att ta hand om.\n"
@@ -434,7 +432,7 @@ static char help_text[]=
 #define MSGTR_InvalidCfgfileOption "Alternativ %s kan inte användas i en konfigurationsfil\n"
 #define MSGTR_InvalidCmdlineOption "Alternativ %s kan inte bli används som ett kommandoradsargument\n"
 #define MSGTR_InvalidSuboption "Fel: alternativ '%s' har inga underalternativ '%s'\n" // FIXME suboption?
-#define MSGTR_MissingSuboptionParameter "Fel: underalternativ '%s' av '%s' måste ha en parameter!\n" // FIXME Don't know what seccond %s is, perhaps totaly wrong to have 'av' there 
+#define MSGTR_MissingSuboptionParameter "Fel: underalternativ '%s' av '%s' måste ha en parameter!\n"
 #define MSGTR_MissingOptionParameter "Fel: alternativ '%s' måste ha en parameter!\n"
 #define MSGTR_OptionListHeader "\n Namn                 Typ             Min        Max      Global  CL    Cfg\n\n" // TODO why static tabs?
 #define MSGTR_TotalOptions "\nTotalt: %d alternativ\n"
@@ -898,7 +896,6 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audiokortsmixer har inte kanal '%s' använder standard.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Kan inte öppna audioenhet %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Kan inte få till 'filedescriptor'sblockning: %s\n" // FIXME filedescriptor
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kan inte sätta audioenhet %s till AC3-ut, prövar S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Misslyckades att sätta audioenhet till %d kanaler.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: dirvrutin hanerar ej SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Din audiodrivrutin hanterar inte select()  ***\n Komplilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n" // TODO shoud be a better way to do this

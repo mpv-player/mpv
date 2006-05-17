@@ -857,7 +857,6 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: De mixer van de geluidskaart heeft geen kanaal dat de standaard '%s' gebruikt.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Kan het audio apparaat niet openen %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Can't make filedescriptor blocking: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kan de geluidskaart  %s niet in AC3 output mode instellen, we proberen S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Kon het audio apparaat niet instellen op %d kanalen.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: het stuurprogramma ondersteunt SNDCTL_DSP_GETOSPACE niet :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Het stuurprogramma van uw geluidskaart ondersteunt select() niet  ***\n Hercompileer MPlayer met #undef HAVE_AUDIO_SELECT in config.h !\n\n"
