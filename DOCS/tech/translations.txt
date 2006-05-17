@@ -37,15 +37,21 @@ http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/help/
 
 help_mp-en.h is the master file that you should use as a base for translations.
 If you are adopting an already existing translation, please check it from top
-to bottom once. Later it should suffice to just translate missing messages. If
-you want to check for untranslated messages the help/help-diff.sh script comes
-in handy:
+to bottom once. Later it should suffice to just translate missing messages.
+Additionally, please make sure that your translated messages fit on an 80
+character wide display to avoid overflowing output.
 
-  help_diff.sh help_mp-XX.h < help_mp-en.h
+TOOLS/mphelp_check.py is a small tool to check translated files. It will report
+conflicting arguments, strings not present in the master file and (optionally)
+strings missing from the translation. Running it as
 
-will print untranslated messages to the screen, just substitute XX with your
-language code. Additionally, please make sure that your translated messages fit
-on an 80 character wide display to avoid overflowing output.
+  mphelp_check.py help_mp-en.h help_mp-XX.h
+
+will output errors to the screen, just substitute XX with your language code.
+
+  mphelp_check.py -missing help_mp-en.h help_mp-XX.h
+
+will additionally print untranslated messages to the screen.
 
 If you do not translate all messages at once, please do not leave untranslated
 messages in your translated file, just leave them out instead. The MPlayer
