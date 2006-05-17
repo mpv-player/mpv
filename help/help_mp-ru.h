@@ -176,8 +176,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSpuClutChange "Событие DVDNAV: Изменение Nav SPU CLUT\n"
 #define MSGTR_DvdnavNavSeekDone "Событие DVDNAV: Завершено позиционирование Nav\n"
 #define MSGTR_MenuCall "Вызов меню\n"
-
-#define MSGTR_EdlCantUseBothModes "Нельзя использовать -edl и -edlout одновременно.\n"
 #define MSGTR_EdlOutOfMem "Не могу выделить достаточный объём памяти для хранения данных EDL.\n"
 #define MSGTR_EdlRecordsNo "Читение %d EDL действий.\n"
 #define MSGTR_EdlQueueEmpty "Нет действий EDL, которые следует исполнить (очередь пуста).\n"
@@ -201,18 +199,15 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Не могу открыть файл вывода '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Не могу открыть кодировщик.\n"
 #define MSGTR_ForcingOutputFourcc "Выходной fourcc форсирован в %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Пишу заголовок AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d повторяющийся(хся) кадр(а/ов)!\n"
 #define MSGTR_SkipFrame "\nПропускаю кадр!\n"
 #define MSGTR_ErrorWritingFile "%s: Ошибка при записи файла.\n"
-#define MSGTR_WritingAVIIndex "\nПишу индекс AVI...\n"
-#define MSGTR_FixupAVIHeader "Подправляю заголовок AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендуемый битпоток для %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nПоток видео: %8.3f кбит/с  (%d B/s)  размер: %"PRIu64" байт(а/ов)  %5.3f сек.  %d кадр(а/ов)\n"
 #define MSGTR_AudioStreamResult "\nПоток аудио: %8.3f кбит/с  (%d B/s)  размер: %"PRIu64" байт(а/ов)  %5.3f сек.\n"
 #define MSGTR_OpenedStream "успех: формат: %d  данные: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "видеокодек: копирование кадров (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "аудиокодек: копирование кадров (формат=%x цепочек=%d скорость=%ld битов=%d B/s=%ld образец=%ld)\n"
+#define MSGTR_ACodecFramecopy "аудиокодек: копирование кадров (формат=%x цепочек=%d скорость=%d битов=%d B/s=%d образец=%d)\n"
 #define MSGTR_CBRPCMAudioSelected "Выбрано CBR PCM аудио\n"
 #define MSGTR_MP3AudioSelected "Выбрано MP3 аудио\n"
 #define MSGTR_CannotAllocateBytes "Не могу выделить память для %d байт\n"
@@ -222,7 +217,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Ограничиваю предзагрузку аудио до 0.4с\n"
 #define MSGTR_IncreasingAudioDensity "Увеличиваю плотность аудио до 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Форсирую предзагрузку аудио в 0, максимальную коррекцию pts в 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR аудио: %ld байт/сек, %d байт/блок\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR аудио: %d байт/сек, %d байт/блок\n"
 #define MSGTR_LameVersion "Версия LAME %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Ошибка: Заданный битпоток вне допустимого значения для данной предустановки\n"\
 "\n"\
@@ -809,11 +804,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "DVD устройство:"
 #define MSGTR_PREFERENCES_FPS "FPS фильма:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Показывать окно видео, когда неактивен"
-
 #define MSGTR_ABOUT_UHU "Разработка GUI спонсирована UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   Основная команда MPlayer'а:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Дополнительные кодеры:\n"
-#define MSGTR_ABOUT_MainTesters "   Главные тестеры:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Фатальная ошибка!"

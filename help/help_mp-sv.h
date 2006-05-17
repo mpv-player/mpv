@@ -205,18 +205,15 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Kan inte öppna utfil '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Misslyckade att öppna encodern.\n"
 #define MSGTR_ForcingOutputFourcc "Forcerar utmatning 'fourcc' till %x [%.4s]\n" // FIXME fourcc?
-#define MSGTR_WritingAVIHeader "Skriver AVI-filhuvud...\n"
 #define MSGTR_DuplicateFrames "\n%d duplicerad bildruta/or!\n"
 #define MSGTR_SkipFrame "\nHoppar över bildruta!\n"
 #define MSGTR_ErrorWritingFile "%s: Fel vid skrivning till fil.\n"
-#define MSGTR_WritingAVIIndex "\nSkriver AVI-index...\n"
-#define MSGTR_FixupAVIHeader "Fixering AVI-filhuvud...\n" // FIXME fixing?
 #define MSGTR_RecommendedVideoBitrate "Rekommenderad videobitrate för %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideostöm: %8.3f kbit/s  (%d B/s)  storlek: %"PRIu64" byte  %5.3f sekunder  %d bildrutor\n"
 #define MSGTR_AudioStreamResult "\nAudiostöm: %8.3f kbit/s  (%d B/s)  storlek: %"PRIu64" byte  %5.3f sekunder\n"
 #define MSGTR_OpenedStream "klart: format: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n" // FIXME translate?
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n" // -''-
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n" // -''-
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio valt\n"
 #define MSGTR_MP3AudioSelected "MP3 audio valt\n"
 #define MSGTR_CannotAllocateBytes "Kunde inte allokera %d byte\n"
@@ -226,7 +223,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Begränsar audioförinladdning till 0.4s\n" // preload?
 #define MSGTR_IncreasingAudioDensity "Höjer audiodensitet till 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forcerar audioförinladdning till 0, 'max pts correction' till 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld byte/sec, %d byte/block\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %d byte/sec, %d byte/block\n"
 #define MSGTR_LameVersion "LAME version %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Fel: Angiven bitrate är utanför godkänd rymd för detta val\n"\
     "\n"\
@@ -825,9 +822,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Visa videofönster när den är inaktiv"
 
 #define MSGTR_ABOUT_UHU "GUI-utveckling sponstrat av UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayers kärngrupp:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Övriga kodare:\n"
-#define MSGTR_ABOUT_MainTesters "    Huvudsakliga testare:\n"
 
 // --- messagebox
 
@@ -876,7 +870,7 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "indata är ej i RGB-format, kan inte separera 'chrominance' via fält!" // FIXME chrominance
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Bildbredd måste vara delbart med 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Ej tillräckligt med minne för att allokera RGB-bildramsbuffert."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Kan inte få minnes- eller filhanterare att skriva till \"stream.yuv\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Kan inte få minnes- eller filhanterare att skriva till \"%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Fel vid skrivning av bild till ut!" // FIXME output here?
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Okänd subdevice: %s" // FIXME subdevice
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Använder 'interlaced output mode', övre fältet först." // FIXME top-field first? && 'interlaced output mode'

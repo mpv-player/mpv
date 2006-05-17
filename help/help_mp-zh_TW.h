@@ -155,12 +155,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "無法開啟輸出檔 '%s'。\n"
 #define MSGTR_EncoderOpenFailed "無法開啟編碼器。\n"
 #define MSGTR_ForcingOutputFourcc "強行輸出 fourcc 到 %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "正在寫下 AVI Writing AVI 標頭...\n"
 #define MSGTR_DuplicateFrames "\n有 %d 格重覆﹗\n"
 #define MSGTR_SkipFrame "\n跳過這一格﹗\n"
 #define MSGTR_ErrorWritingFile "%s: 寫入檔案有錯誤。\n"
-#define MSGTR_WritingAVIIndex "\n正在寫入 AVI 索引...\n"
-#define MSGTR_FixupAVIHeader "正在修補 AVI 標頭...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD 所建議之視訊 bitrate: %d\n"
 #define MSGTR_VideoStreamResult "\n視訊串流: %8.3f kbit/s  (%d B/s)  大少: %"PRIu64" bytes  %5.3f 秒 %d 格\n"
 #define MSGTR_AudioStreamResult "\n音效串流: %8.3f kbit/s  (%d B/s)  大少: %"PRIu64" bytes  %5.3f 秒\n"
@@ -576,9 +573,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "不活躍時顯示影像視窗"
 
 #define MSGTR_ABOUT_UHU "GUI 開發由 UHU Linux 贊助\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayer 核心小組:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   其他開發者:\n"
-#define MSGTR_ABOUT_MainTesters "   主要測試者:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命錯誤﹗"

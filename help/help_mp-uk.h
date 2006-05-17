@@ -151,12 +151,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Неможливо створити файл '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Неможливо в╕дкрити кодек.\n"
 #define MSGTR_ForcingOutputFourcc "Встановлюю вих╕дний fourcc в %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Записую заголовок...\n"
 #define MSGTR_DuplicateFrames "\n%d повторних кадр╕в!\n"
 #define MSGTR_SkipFrame "\nКадр пропущено!\n"
 #define MSGTR_ErrorWritingFile "%s: Помилка запису файлу.\n"
-#define MSGTR_WritingAVIIndex "\nЗаписую index...\n"
-#define MSGTR_FixupAVIHeader "Оновлюю заголовок...\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендований б╕трейт для %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nВ╕део пот╕к: %8.3f kbit/s  (%d Б/с)  розм╕р: %"PRIu64" байт  %5.3f секунд  %d кадр╕в\n"
 #define MSGTR_AudioStreamResult "\nАуд╕о пот╕к: %8.3f kbit/s  (%d Б/с)  розм╕р: %"PRIu64" байт  %5.3f секунд\n"
@@ -554,9 +551,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Показувати неактивне в╕кно зображення"
 
 #define MSGTR_ABOUT_UHU "GUI розробку спонсовано UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayer команда розробник╕в:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Додатков╕ кодувальники:\n"
-#define MSGTR_ABOUT_MainTesters "   Головн╕ тестувач╕:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "фатальна помилка..."

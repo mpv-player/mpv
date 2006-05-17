@@ -237,7 +237,7 @@ static char help_text[]=
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "Pou¾ívam pass3 ovládací súbor: %s\n"
+#define MSGTR_UsingPass3ControlFile "Pou¾ívam pass3 ovládací súbor: %s\n"
 #define MSGTR_MissingFilename "\nChýbajúce meno súboru.\n\n"
 #define MSGTR_CannotOpenFile_Device "Nemô¾em otvori» súbor/zariadenie\n"
 #define MSGTR_CannotOpenDemuxer "Nemô¾em otvori» demuxer\n"
@@ -380,7 +380,7 @@ static char help_text[]=
 #define MSGTR_LameCantInit "Nedá sa nastavi» voµba pre LAME, overte dátový_tok/vzorkovaciu_frekv.,"\
 "niektoré veµmi nízke dátové toky (<32) vy¾adujú ni¾¹iu vzorkovaciu frekv. (napr. -srate 8000)."\
 "Pokud v¹etko ostané zlyhá, zkúste prednastavenia (presets)."
-#define MSGTR_ConfigfileError "chyba konfiguraèného súboru"
+#define MSGTR_ConfigFileError "chyba konfiguraèného súboru"
 #define MSGTR_ErrorParsingCommandLine "chyba pri spracovávaní príkazového riadku"
 #define MSGTR_VideoStreamRequired "Video prúd je povinný!\n"
 #define MSGTR_ForcingInputFPS "vstupné fps bude interpretované ako %5.2f\n"

@@ -144,12 +144,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Nu pot deschide fiºierul de ieºire '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Nu pot deschide encoderul.\n"
 #define MSGTR_ForcingOutputFourcc "Forþez ieºirea fourcc la %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Scriu header-ul AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d cadre duplicate!\n"
 #define MSGTR_SkipFrame "\nSkipping frame!\n"
 #define MSGTR_ErrorWritingFile "%s: Eroare la scrierea fiºierului.\n"
-#define MSGTR_WritingAVIIndex "\nScriu indexul AVI...\n"
-#define MSGTR_FixupAVIHeader "Repar header-ul AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Bitrate-ul video recomandatpentru %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nCanal video: %8.3f kbit/s (%d B/s)  dimensiune: %"PRIu64" bytes %5.3f sec %d cadre\n"
 #define MSGTR_AudioStreamResult "\nCanal audio: %8.3f kbit/s (%d B/s)  dimensiune: %"PRIu64" bytes %5.3f sec\n"
@@ -495,9 +492,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Afiºeazã fereastra video cand e inactivã"
 
 #define MSGTR_ABOUT_UHU "Dezvoltare GUI sponsorizatã de UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   echipa MPlayer principalã:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Alþi progamatori:\n"
-#define MSGTR_ABOUT_MainTesters "   Testeri principali:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Eroare fatalã!"
