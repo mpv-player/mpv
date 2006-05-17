@@ -71,6 +71,7 @@ MPlayer (1.0)
     * RTJpeg decoder from lavc is preferred
     * bug fix for lavc WMA v2 decoder, now all files should be playable
     * -vc mpeg12 resizes the window when aspect ratio changes
+    * Smacker audio and video decoding via lavc
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -134,13 +135,14 @@ MPlayer (1.0)
     * true audio (TTA) decoder
     * AIFF/AIFF-C audio format, encoding and decoding
     * Creative VOC demuxing
-    * Zip Motion-Block Video (ZBMV) decoder
+    * Zip Motion-Block Video (ZMBV) decoder
     * KMVC decoder
     * NuppelVideo/MythTV demuxer and RTJpeg decoder
     * MP4 and MOV demuxer greatly improved to support all varieties of
       currently available files
     * AVS demuxer and video decoder
     * American Laser Games multimedia (*.mm) playback system
+    * Smacker demuxer and decoder
 
     GUI:
     * skins now reside in a directory named 'skins', not 'Skin'
