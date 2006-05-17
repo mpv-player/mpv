@@ -36,6 +36,7 @@
 
 typedef struct cpucaps_s {
 	int cpuType;
+	int cpuModel;
 	int cpuStepping;
 	int hasMMX;
 	int hasMMX2;

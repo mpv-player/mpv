@@ -118,12 +118,13 @@ void GetCpuCaps( CpuCaps *caps)
 			(char*) (regs+1),(char*) (regs+3),(char*) (regs+2), regs[0]);
 	if (regs[0]>=0x00000001)
 	{
-		char *tmpstr;
+		char *tmpstr, *ptmpstr;
 		unsigned cl_size;
 
 		do_cpuid(0x00000001, regs2);
 
 		caps->cpuType=(regs2[0] >> 8)&0xf;
+		caps->cpuModel=(regs2[0] >> 4)&0xf;
 
 // see AMD64 Architecture Programmer's Manual, Volume 3: General-purpose and
 // System Instructions, Table 3-2: Effective family computation, page 120.
@@ -131,6 +132,9 @@ void GetCpuCaps( CpuCaps *caps)
 		    // use extended family (P4, IA64, K8)
 		    caps->cpuType=0xf+((regs2[0]>>20)&255);
 		}
+		if(caps->cpuType==0xf || caps->cpuType==6)
+		    caps->cpuModel |= ((regs2[0]>>16)&0xf) << 4;
+
 		caps->cpuStepping=regs2[0] & 0xf;
 
 		// general feature flags:
@@ -142,11 +146,13 @@ void GetCpuCaps( CpuCaps *caps)
 		cl_size = ((regs2[1] >> 8) & 0xFF)*8;
 		if(cl_size) caps->cl_size = cl_size;
 
-		tmpstr=GetCpuFriendlyName(regs, regs2);
+		ptmpstr=tmpstr=GetCpuFriendlyName(regs, regs2);
+		while(*ptmpstr == ' ')
+		    ptmpstr++;
 		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: %s ",tmpstr);
 		free(tmpstr);
-		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"(Family: %d, Stepping: %d)\n",
-		    caps->cpuType, caps->cpuStepping);
+		mp_msg(MSGT_CPUDETECT,MSGL_INFO,"(Family: %d, Model: %d, Stepping: %d)\n",
+		    caps->cpuType, caps->cpuModel, caps->cpuStepping);
 
 	}
 	do_cpuid(0x80000000, regs);
@@ -225,7 +231,7 @@ void GetCpuCaps( CpuCaps *caps)
 
 char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 #include "cputable.h" /* get cpuname and cpuvendors */
-	char vendor[17];
+	char vendor[13];
 	char *retname;
 	int i;
 
@@ -235,6 +241,19 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 	}
 
 	sprintf(vendor,"%.4s%.4s%.4s",(char*)(regs+1),(char*)(regs+3),(char*)(regs+2));
+
+	do_cpuid(0x80000000,regs);
+	if (regs[0] >= 0x80000004)
+	{
+		// CPU has built-in namestring
+		retname[0] = '\0';
+		for (i = 0x80000002; i <= 0x80000004; i++)
+		{
+			do_cpuid(i, regs);
+			strncat(retname, (char*)regs, 16);
+		}
+		return retname;
+	}
 
 	for(i=0; i<MAX_VENDORS; i++){
 		if(!strcmp(cpuvendors[i].string,vendor)){
@@ -495,6 +514,7 @@ static void sigill_handler (int sig)
 void GetCpuCaps( CpuCaps *caps)
 {
 	caps->cpuType=0;
+	caps->cpuModel=0;
 	caps->cpuStepping=0;
 	caps->hasMMX=0;
 	caps->hasMMX2=0;
