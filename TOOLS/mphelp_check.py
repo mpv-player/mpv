@@ -56,7 +56,7 @@ if len(sys.argv) < 3:
     sys.exit(1)
 i = 1
 show_missing = False
-if sys.argv[i] == ( '--missing' or '-missing' ):
+if sys.argv[i] in ( '--missing', '-missing' ):
     show_missing = True
     i = 2
 base = parse(sys.argv[i])
