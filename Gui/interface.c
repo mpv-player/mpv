@@ -739,6 +739,7 @@ int guiGetEvent( int type,char * arg )
 	  force_fps=0;
 	 }				
 	guiIntfStruct.demuxer=NULL;
+	guiIntfStruct.sh_video=NULL;
 	wsPostRedisplay( &appMPlayer.subWindow );
 	break;
    case guiSetParameters:
