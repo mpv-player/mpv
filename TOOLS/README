@@ -405,6 +405,19 @@ Note:         This script is meant for developers to check the current (CVS)
               source tree and/or the patches they are working on.
 
 
+mphelp_check.py
+
+Author:       Uoti Urpala
+
+Description:  Check console message translations for common errors.
+
+Usage:        mphelp_check.py [--missing] <master file> <files to check>
+
+Note:         Compares MPlayer translation files against a master file and
+              reports conflicting arguments, extra strings not present in
+              the base file and (optionally) missing strings.
+
+
 cpuinfo
 
 Author:       Jürgen Keil
