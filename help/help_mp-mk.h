@@ -154,12 +154,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Не може да ја отвори излезната датотека '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Не успеа да се отвори енкодерот.\n"
 #define MSGTR_ForcingOutputFourcc "Присилување на излезното fourcc на %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Запишување на AVI хедерот...\n"
 #define MSGTR_DuplicateFrames "\n%d дуплирање на фрејмо(ви)т!\n"
 #define MSGTR_SkipFrame "\nПрескокнување на фрејмот!\n"
 #define MSGTR_ErrorWritingFile "%s: Грешка при запишување на датотеката.\n"
-#define MSGTR_WritingAVIIndex "\nЗапишување на AVI индексот...\n"
-#define MSGTR_FixupAVIHeader "Поправање на AVI хедерот...\n"
 #define MSGTR_RecommendedVideoBitrate "Препорачана видео битрата за %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nВидео проток: %8.3f kbit/s  (%d B/s)  големина: %"PRIu64" бајти %5.3f сек %d фрејма\n"
 #define MSGTR_AudioStreamResult "\nАудио проток: %8.3f kbit/s (%d B/s) големина: %"PRIu64" бајти %5.3f сек\n"
@@ -564,9 +561,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Прикажи го видео прозорецот кога не е активен"
 
 #define MSGTR_ABOUT_UHU "GUI развивањето спонзорирано од UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   Тимот за јадрото на MPlayer:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Други програмери:\n"
-#define MSGTR_ABOUT_MainTesters "   Главни Тестери:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Фатална Грешка!"

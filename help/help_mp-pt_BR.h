@@ -159,12 +159,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Impossível abrir arquivo de saída '%s'\n"
 #define MSGTR_EncoderOpenFailed "Falha ao abrir o codificador\n"
 #define MSGTR_ForcingOutputFourcc "Forçando saída fourcc para %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Gravando cabeçalho do AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d quadro(s) duplicado(s)!\n"
 #define MSGTR_SkipFrame "\npulando frame!!!    \n"
 #define MSGTR_ErrorWritingFile "%s: erro gravando arquivo.\n"
-#define MSGTR_WritingAVIIndex "\nGravando índice do AVI...\n"
-#define MSGTR_FixupAVIHeader "Corrigindo cabeçalho do AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Bitrate do vídeo recomendado para CD de %s: %d\n"
 #define MSGTR_VideoStreamResult "\nTrilha de vídeo: %8.3f kbit/s  (%d B/s)  tamanho: %"PRIu64" bytes  %5.3f segundos  %d quadros\n"
 #define MSGTR_AudioStreamResult "\nTrilha de audio: %8.3f kbit/s  (%d B/s)  tamanho: %"PRIu64" bytes  %5.3f segundos\n"
@@ -382,7 +379,7 @@ static char help_text[]=
 #define MSGTR_NEEDLAVCFAME "Desculpe, você não pode reproduzir arquivos não-MPEG com o seu dispositivo DXR3/H+ sem recodificar.\nPor favor habilite lavc ou fame na configuração do DXR3/H+."
 
 // --- skin loader error messages
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] erro no arquivo de configuração do skin na linha: %s"
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] erro no arquivo de configuração do skin na linha %d: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] aviso no arquivo de configuração do skin na linha %d: widget encontrado mas antes de \"section\" não encontrado (%s)"
 #define MSGTR_SKIN_WARNING2 "[skin] aviso no arquivo de configuração do skin na linha %d: widget encontrado mas antes de \"subsection\" não encontrtado (%s)"
 #define MSGTR_SKIN_WARNING3 "[skin] aviso no arquivo de configuração do skin na linha %d: esta sub-seção não é suportada por este widget (%s)"
@@ -563,11 +560,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "Dispositivo de DVD:"
 #define MSGTR_PREFERENCES_FPS "Quadros por segundo do filme:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Mostrar janela do vídeo quando inativo"
-
 #define MSGTR_ABOUT_UHU "Desenvolvimento do GUI patrocinado por UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   Núcleo do time do MPlayer:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Programadores adicionais:\n"
-#define MSGTR_ABOUT_MainTesters "   Testadores principais:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erro fatal!"

@@ -228,7 +228,7 @@ static char help_text[]=
 
 // property state
 #define MSGTR_MuteStatus "Némít: %s"
-#define MSGTR_AVDelayStatus "A-V késés: %d ms"
+#define MSGTR_AVDelayStatus "A-V késés: %s ms"
 #define MSGTR_OnTopStatus "Mindig felül: %s"
 #define MSGTR_RootwinStatus "Fõablak: %s"
 #define MSGTR_BorderStatus "Keret: %s"
@@ -270,7 +270,7 @@ static char help_text[]=
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/mp  (%d B/s)  méret: %"PRIu64" byte  %5.3f mp\n"
 #define MSGTR_OpenedStream "kész: formátum: %d  adat: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (formátum=%x csati=%d ráta=%d bit=%d B/s=%d sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (formátum=%x csati=%d ráta=%d bit=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audió kiválasztva.\n"
 #define MSGTR_MP3AudioSelected "MP3 audió kiválasztva.\n"
 #define MSGTR_CannotAllocateBytes "%d byte nem foglalható le.\n"
@@ -722,8 +722,8 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] hiba a skin konfigurációs fájljának %d. sorában: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] figyelmeztetés: a skin konfigurációs fájljának %d. sorában: widget (%S) megvan, de nincs elõtte \"section\""
-#define MSGTR_SKIN_WARNING2 "[skin] figyelmeztetés: a skin konfigurációs fájljának %d. sorában: widget (%S) megvan, de nincs elõtte \"subsection\""
+#define MSGTR_SKIN_WARNING1 "[skin] figyelmeztetés: a skin konfigurációs fájljának %d. sorában: widget (%s) megvan, de nincs elõtte \"section\""
+#define MSGTR_SKIN_WARNING2 "[skin] figyelmeztetés: a skin konfigurációs fájljának %d. sorában: widget (%s) megvan, de nincs elõtte \"subsection\""
 #define MSGTR_SKIN_WARNING3 "[skin] figyelmeztetés: a skin konfigurációs fájljának %d. sorában: ez az elem nem használható ebben az alrészben (%s)"
 #define MSGTR_SKIN_SkinFileNotFound "[skin] a fájl ( %s ) nem található.\n"
 #define MSGTR_SKIN_SkinFileNotReadable "[skin] fájl ( %s ) nem olvasható.\n"
@@ -1240,7 +1240,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Elérési típus nem használható.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Minta formátum nem elérhetõ.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Csatorna számláló nem elérhetõ - visszatérés az alapértelmezetthez: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Sikertelen a hardver paraméterek beállítása:"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Sikertelen a hardver paraméterek beállítása: %s"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Nem használható a buffer mérettel egyezõ periódus (%u == %lu)\n"
 #define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Sikertelen a szoftver paraméterek beállítása:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Hiba az audió megnyitásakor: %s\n"
@@ -1466,7 +1466,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] A menü konfigurációs fájl nem nyitható meg: %s\n"
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] A konfigurációs fájl túl nagy (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] A konfigurációs fájl üres.\n"
-#define MSGTR_LIBMENU_MenuNotFound "[MENU] A(z) % menü nem található.\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] A(z) %s menü nem található.\n"
 #define MSGTR_LIBMENU_MenuInitFailed "[MENU] '%s' menü: init sikertelen.\n"
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Nem támogatott kimeneti formátum!!!!\n"
 

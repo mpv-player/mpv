@@ -179,8 +179,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSpuClutChange "Zdarzenie DVDNAV: Zmiana Nav SPU CLUT\n"
 #define MSGTR_DvdnavNavSeekDone "Zdarzenie DVDNAV: Przeszukiwanie Nav Zrobione\n"
 #define MSGTR_MenuCall "Wywo³anie menu\n"
-
-#define MSGTR_EdlCantUseBothModes "Nie mo¿na uzywaæ -edl i -edlout w tym samym czasie.\n"
 #define MSGTR_EdlOutOfMem "Nie mogê zaalokowaæ wystarczaj±co du¿o pamiêci dla danych EDL.\n"
 #define MSGTR_EdlRecordsNo "Odczyta³em %d akcji EDL.\n"
 #define MSGTR_EdlQueueEmpty "Nie ma ¿adnych akcji EDL do wykonania.\n"
@@ -205,7 +203,6 @@ static char help_text[]=
 #define MSGTR_EncoderOpenFailed "Nie mogê otworzyæ kodera.\n"
 #define MSGTR_ForcingOutputFourcc "Wymuszam wyj¶ciowe fourcc na %x [%.4s]\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Wymuszam znacznik wyj¶ciowego formatu audio na 0x%x\n"
-#define MSGTR_WritingAVIHeader "Zapisujê nag³ówek AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d powtórzona(e) ramka(i)!\n"
 #define MSGTR_SkipFrame "\nOpuszczam ramkê!\n"
 #define MSGTR_ResolutionDoesntMatch "\nNowy film ma inn± rozdzielczo¶æ lub przestrzeñ kolorów ni¿ poprzedni.\n"
@@ -214,15 +211,13 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "UWAGA: Nie ma gwarancji ¿e -speed dzia³a prawid³owo przy -oac copy"\
 "Kodowanie mo¿e byæ popsute!\n"
 #define MSGTR_ErrorWritingFile "%s B³±d przy zapisie pliku.\n"
-#define MSGTR_WritingAVIIndex "\nZapisujê indeks AVI...\n"
-#define MSGTR_FixupAVIHeader "Naprawiam nag³ówek AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Zalecany video bitrate dla tego %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nStrumieñ video: %8.3f kbit/s (%d B/s) rozmiar: %"PRIu64" bajtów %5.3f s %d ramek\n"
 #define MSGTR_AudioStreamResult "\nStrumieñ audio: %8.3f kbit/s (%d B/s) rozmiar: %"PRIu64" bajtów %5.3f s\n"
 
 #define MSGTR_OpenedStream "sukces: format: %d  dane: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "Wybrano d¼wiêk CBR PCM\n"
 #define MSGTR_MP3AudioSelected "Wybrano d¼wiêk MP3\n"
 #define MSGTR_CannotAllocateBytes "Nie mo¿na by³o zaalokowaæ %d bajtów\n"
@@ -232,7 +227,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Ograniczam buforowanie d¼wiêku do 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Zwiêkszam gêsto¶æ d¼wiêku do 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Wymuszam buforowanie d¼wiêku na 0, maksymaln± korekcjê pts na 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld bajtów/sek, %d bajtów/blok\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %d bajtów/sek, %d bajtów/blok\n"
 #define MSGTR_LameVersion "Wersja LAME %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "B³±d: Wybrany bitrate jest poza prawid³owym zasiegiem tego ustawienia\n"\
 "\n"\
@@ -832,9 +827,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Pokazuj okno video gdy nieaktywne"
 
 #define MSGTR_ABOUT_UHU "Rozwój GUI sponsorowany przez UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   G³ówni cz³onkowie zespo³u MPlayera:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Dodatkowi koderzy (programi¶ci):\n"
-#define MSGTR_ABOUT_MainTesters "   G³owni testerzy:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "B³±d krytyczny!"

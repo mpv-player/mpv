@@ -153,12 +153,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "출력 파일 '%s'을(를) 열 수 없습니다.\n"
 #define MSGTR_EncoderOpenFailed "인코더 열기에 실패했습니다.\n"
 #define MSGTR_ForcingOutputFourcc "fourcc를 %x [%.4s](으)로 강제출력합니다.\n"
-#define MSGTR_WritingAVIHeader "AVI 해더를 쓰고 있습니다...\n"
 #define MSGTR_DuplicateFrames "\n%d 프레임(들)이 중복되었습니다!\n"
 #define MSGTR_SkipFrame "\n프레임을 건너 뜁니다!\n"
 #define MSGTR_ErrorWritingFile "%s: 파일 쓰기 오류가 발생했습니다.\n"
-#define MSGTR_WritingAVIIndex "\nAVI 인덱스를 쓰고 있습니다...\n"
-#define MSGTR_FixupAVIHeader "AVI 해더를 고치고 있습니다...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD용으로 추천할 만한 비디오 주사율: %d\n"
 #define MSGTR_VideoStreamResult "\n비디오 스트림: %8.3f kbit/s  (%d B/s)  크기: %"PRIu64" 바이트  %5.3f 초  %d 프레임\n"
 #define MSGTR_AudioStreamResult "\n오디오 스트림: %8.3f kbit/s  (%d B/s)  크기: %"PRIu64" 바이트  %5.3f 초\n"
@@ -567,9 +564,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "정지 중일 때 비디오 창 보이기"
 
 #define MSGTR_ABOUT_UHU "GUI 개발 지원: UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "한글번역: DongCheon Park (동쪽하늘)\n          <dcpark@kaist.ac.kr>\n\n   MPlayer 코어 팀:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   그 외의 코더:\n"
-#define MSGTR_ABOUT_MainTesters "   메인 테스터:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "치명적 오류!"

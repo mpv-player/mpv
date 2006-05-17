@@ -150,12 +150,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "出力ファイル'%s'を開く事が出来ません.\n"
 #define MSGTR_EncoderOpenFailed "エンコーダを開くことに失敗しました.\n"
 #define MSGTR_ForcingOutputFourcc "fourccを %x [%.4s] に指定します\n"
-#define MSGTR_WritingAVIHeader "AVIヘッダを書きだし中...\n"
 #define MSGTR_DuplicateFrames "\n%d 重複したフレーム\n"
 #define MSGTR_SkipFrame "\nフレームをスキップしています\n"
 #define MSGTR_ErrorWritingFile "%s: ファイル書き込みエラー.\n"
-#define MSGTR_WritingAVIIndex "\nAVI indexを書き込み中...\n"
-#define MSGTR_FixupAVIHeader "AVIヘッダを修復中...\n"
 #define MSGTR_VideoStreamResult "\n映像ストリーム: %8.3f kbit/s  (%d B/s)  サイズ: %"PRIu64" bytes  %5.3f secs  %d フレーム\n"
 #define MSGTR_AudioStreamResult "\n音声ストリーム: %8.3f kbit/s  (%d B/s)  サイズ: %"PRIu64" bytes  %5.3f secs\n"
 
@@ -445,9 +442,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM デバイス:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD デバイス:"
 #define MSGTR_PREFERENCES_FPS "Movie FPS:"
-
-#define MSGTR_ABOUT_CoreTeam "   MPlayer コアチーム:\n"
-#define MSGTR_ABOUT_MainTesters "   メインテスター:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命的エラー!"
