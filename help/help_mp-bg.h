@@ -179,7 +179,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSeekDone "DVDNAV Събитие: Nav Превъртането Приключено\n"
 #define MSGTR_MenuCall "Menu call\n"
 
-#define MSGTR_EdlCantUseBothModes "Не се допуска -edl и -edlout да се използват едновременно.\n"
 #define MSGTR_EdlOutOfMem "Не може да се задели достатъчно памет за EDL данните.\n"
 #define MSGTR_EdlRecordsNo "Прочетени са %d EDL действия.\n"
 #define MSGTR_EdlQueueEmpty "Няма EDL действия, които да бъдат извършени.\n"
@@ -203,7 +202,6 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Изходния файл '%s'не може да бъде отворен.\n"
 #define MSGTR_EncoderOpenFailed "Енкодерът не може да бъде отворен.\n"
 #define MSGTR_ForcingOutputFourcc "Налагане на изходния fourcc код да бъде %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Запис на AVI header...\n"
 #define MSGTR_DuplicateFrames "\n%d дублиращи се кадъра!\n"
 #define MSGTR_SkipFrame "\nПрескочен кадър!\n"
 #define MSGTR_ResolutionDoesntMatch "\nНовият видео файл има различна резолюция или цветови формат от предишния.\n" 
@@ -212,14 +210,12 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "ПРЕДУПРЕЖДЕНИЕ: -speed не работи гарантирано правилно с -oac copy!\n"\
 "Кодирането ви може да се окаже повредено!\n"
 #define MSGTR_ErrorWritingFile "%s: Грешка при запис на файла.\n"
-#define MSGTR_WritingAVIIndex "\nЗаписва се AVI индекс...\n"
-#define MSGTR_FixupAVIHeader "Поправка на AVI header...\n"
 #define MSGTR_RecommendedVideoBitrate "Препоръчителен битрейт за %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nВидео поток: %8.3f Кбита/с  (%d B/s)  размер: %"PRIu64" байта  %5.3f сек.  %d кадъра\n"
 #define MSGTR_AudioStreamResult "\nАудио поток: %8.3f Кбита/с  (%d B/s)  размер: %"PRIu64" байта  %5.3f сек.\n"
 #define MSGTR_OpenedStream "успех: формат: %d  данни: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%d bits=%d B/s=%d sample-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "Избрано е CBR (постоянен битрейт) PCM аудио\n"
 #define MSGTR_MP3AudioSelected "Избрано е MP3 аудио\n"
 #define MSGTR_CannotAllocateBytes "Не може да се заделят %d байта\n"
@@ -229,7 +225,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Предварителното аудио зареждане е ограничено на 0.4с\n"
 #define MSGTR_IncreasingAudioDensity "Гъстотата на звука е увеличена на 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Налагане на нулево предварително аудио зареждане, max pts correction to 0\n"
-#define MSGTR_CBRAudioByterate "\n\nCBR аудио: %ld байта/сек, %d байта за блок\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR аудио: %d байта/сек, %d байта за блок\n"
 #define MSGTR_LameVersion "LAME версия %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Грешка: Указаният битрейт е извън допустимите граници за този профил\n"\
 "\n"\
@@ -820,9 +816,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Показване на видео прозореца при неактивност"
 
 #define MSGTR_ABOUT_UHU "Разработката на графичния интерфейс се спонсорира от UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayer основни разработчици:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Допълнителни програмисти:\n"
-#define MSGTR_ABOUT_MainTesters "   Основни тестери:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Фатална грешка!"

@@ -155,12 +155,9 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Kunne ikke åbne '%s' til skrivning\n"
 #define MSGTR_EncoderOpenFailed "Kunne ikke åbne enkoderen\n"
 #define MSGTR_ForcingOutputFourcc "Tvinger udgangskode (fourcc) til %x [%.4s]\n"
-#define MSGTR_WritingAVIHeader "Skriver AVI header...\n"
 #define MSGTR_DuplicateFrames "\n%d ens billede(r)!!!    \n"
 #define MSGTR_SkipFrame "\nSpringer over billede!!!    \n"
 #define MSGTR_ErrorWritingFile "%s: Fejl ved skrivning til fil.\n"
-#define MSGTR_WritingAVIIndex "\nSkriver AVI index...\n"
-#define MSGTR_FixupAVIHeader "Fixup AVI header...\n"
 #define MSGTR_RecommendedVideoBitrate "Anbefalet video bitrate til %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideospor: %8.3f kbit/s  (%d B/s)  størrelse: %"PRIu64" bytes  %5.3f sek.  %d billeder\n"
 #define MSGTR_AudioStreamResult "\nAudiospor: %8.3f kbit/s  (%d B/s)  størrelse: %"PRIu64" bytes  %5.3f sek.\n"
@@ -565,9 +562,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ShowVideoWindow "Vis video vindue når inaktiv"
 
 #define MSGTR_ABOUT_UHU "GUI udvikling sponsereret af UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayer kernen:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Yderligere kodere:\n"
-#define MSGTR_ABOUT_MainTesters "   Hovedtestere:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatal fejl!"

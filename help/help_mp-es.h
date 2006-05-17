@@ -80,10 +80,10 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "No se puede abrir el archivo de dump.\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS no especificado (o inválido) en la cabecera! Usa la opción -fps.\n"
-#define MSGTR_TryForceAudioFmtStr "Tratando de forzar la familia de codecs de audio %d...\n"
+#define MSGTR_TryForceAudioFmtStr "Tratando de forzar la familia de codecs de audio %s...\n"
 #define MSGTR_RTFMCodecs "Lee el archivo DOCS/HTML/es/codecs.html!\n"
 #define MSGTR_CantFindAudioCodec "No se encuentra codec para el formato de audio 0x%X!\n"
-#define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia de codecs de video %d...\n"
+#define MSGTR_TryForceVideoFmtStr "Tratando de forzar la familia de codecs de video %s...\n"
 #define MSGTR_CantFindVideoCodec "No se encuentra codec para el formato de video 0x%X!\n"
 #define MSGTR_CannotInitVO "FATAL: No se puede inicializar el driver de video!\n"
 #define MSGTR_CannotInitAO "No se puede abrir o inicializar dispositivo de audio, no se reproducirá sonido.\n"
@@ -190,8 +190,6 @@ static char help_text[]=
 #define MSGTR_DvdnavNavSpuClutChange "Evento DVDNAV: Cambio de Nav SPU CLUT\n"
 #define MSGTR_DvdnavNavSeekDone "Evento DVDNAV: Busqueda Nav hecha\n"
 #define MSGTR_MenuCall "Llamada a menú\n"
-
-#define MSGTR_EdlCantUseBothModes "Imposible usar -edl y -edlout al mismo tiempo.\n"
 #define MSGTR_EdlOutOfMem "No hay memoria suficiente para almacenar los datos EDL.\n"
 #define MSGTR_EdlRecordsNo "Leidas %d acciones EDL.\n"
 #define MSGTR_EdlQueueEmpty "No hay acciones EDL de las que ocuparse.\n"
@@ -217,7 +215,6 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "No se puede abrir el archivo de salida'%s'.\n"
 #define MSGTR_EncoderOpenFailed "No pude abrir el codificador.\n"
 #define MSGTR_ForcingOutputFourcc "Forzando salida fourcc a %x [%.4s].\n"
-#define MSGTR_WritingAVIHeader "Escribiendo cabecera AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d frame(s) duplicados.\n"
 #define MSGTR_SkipFrame "\nse salta frame...\n"
 #define MSGTR_ResolutionDoesntMatch "\nEl nuevo archivo de video tiene diferente resolución o espacio de colores que el anterior.\n"
@@ -227,14 +224,12 @@ static char help_text[]=
 #define MSGTR_NoSpeedWithFrameCopy "ADVERTENCIA: No se garantiza que -speed funcione adecuadamente con -oac copy!\n"\
 "Su codificación puede salir mal!\n"
 #define MSGTR_ErrorWritingFile "%s: error escribiendo el archivo.\n"
-#define MSGTR_WritingAVIIndex "\nEscribiendo index AVI...\n"
-#define MSGTR_FixupAVIHeader "Arreglando cabecera AVI..\n"
 #define MSGTR_RecommendedVideoBitrate "Bitrate recomendado para %s CD: %d.\n"
 #define MSGTR_VideoStreamResult "\nStream de video: %8.3f kbit/s (%d B/s), tamaño: %"PRIu64" bytes, %5.3f segundos, %d frames\n"
 #define MSGTR_AudioStreamResult "\nStream de audio: %8.3f kbit/s (%d B/s), tamaño: %"PRIu64" bytes, %5.3f segundos\n"
 #define MSGTR_OpenedStream "exito: formato: %d  datos: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "Codec de video: framecopy (%dx%d %dbpp fourcc=%x)\n"
-#define MSGTR_ACodecFramecopy "Codec de audio: framecopy (formato=%x canales=%d razón=%ld bits=%d B/s=%ld muestra-%ld)\n"
+#define MSGTR_ACodecFramecopy "Codec de audio: framecopy (formato=%x canales=%d razón=%d bits=%d B/s=%d muestra-%d)\n"
 #define MSGTR_CBRPCMAudioSelected "Audio PCM CBR seleccionado\n"
 #define MSGTR_MP3AudioSelected "Audio MP3 seleccionado\n"
 #define MSGTR_CannotAllocateBytes "No se pueden asignar %d bytes\n"
@@ -244,7 +239,7 @@ static char help_text[]=
 #define MSGTR_LimitingAudioPreload "Limitando la pre-carda de audio a 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Incrementando la densidad de audio a 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forzando la precarga de audio a 0, corrección pts a 0\n"
-#define MSGTR_CBRAudioByterate "\n\naudio CBR: %ld bytes/seg, %d bytes/bloque\n"
+#define MSGTR_CBRAudioByterate "\n\naudio CBR: %d bytes/seg, %d bytes/bloque\n"
 #define MSGTR_LameVersion "Versión de LAME %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Error: La tasa de bits especificada esta fuera de los rangos de valor para esta preconfiguración\n"\
 "\n"\
@@ -546,7 +541,7 @@ static char help_text[]=
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: contenido NTSC de 30000/1001cps detectado, cambiando cuadros por segundo.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: contenido NTSC progresivo de 24000/1001cps detectado, cambiando cuadros por segundo.\n"
-#define MSGTR_CacheFill "\rLlenando cache: %5.2f%% (%d bytes)   "
+#define MSGTR_CacheFill "\rLlenando cache: %5.2f%% (%"PRId64" bytes)   "
 #define MSGTR_NoBindFound "No se econtró una asignación para la tecla '%s'"
 #define MSGTR_FailedToOpen "No se pudo abrir %s\n"
 
@@ -861,9 +856,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "Las versiones nuevas de aRts no son compatibles con GTK 1.x y botan GMPlayer!"
 
 #define MSGTR_ABOUT_UHU " Desarrollo de GUI patrocinado por UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   Equipo principal de MPlayer:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Otros programadores:\n"
-#define MSGTR_ABOUT_MainTesters "   Testeadores más importantes:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Error fatal"
@@ -957,7 +949,7 @@ static char help_text[]=
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Entrada no es RGB, imposible separar crominancia por campos!"
 #define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "El ancho de la imagen debe ser divisible por 2."
 #define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "No hay memoria suficiente para reservar framebuffer RGB."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Imposible obtener memoria o descriptor de archivos para escribir \"stream.yuv\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Imposible obtener memoria o descriptor de archivos para escribir \"%s\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Error escribiendo imagen a la salida!"
 #define MSGTR_VO_YUV4MPEG_UnknownSubDev "Se desconoce el subdevice: %s"
 #define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Usando modo de salida interlaceado, top-field primero."
@@ -981,7 +973,6 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: El mezclador de la tarjeta de audio no tiene el canal '%s' usando valor por omisión.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Imposible abrir dispositivo de audio %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Imposible crear descriptor de archivo, bloqueando: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Imposible configurar dispositivo de audio %s a salida AC3, tratando S16...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Imposible configurar dispositivo de audio a %d channels.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: El controlador no soporta SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Su controlador de audio no soporta select()  ***\n Recompile MPlayer con #undef HAVE_AUDIO_SELECT en config.h !\n\n"
@@ -1613,7 +1604,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) fallido.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] El modo de video es lineal y memcpy puede ser usado para la transferencia de imagenes.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] El modo de video dispone de aceleración por hardware y put_image puede ser utilizada.\n"
-#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLineToKnow "[VO_SVGA] Si funciona para ti, me gustaria que me contaras. \n[VO_SVGA] (envía un log con `mplayer test.avi -v -v -v -v &> svga.log`). Gracias.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] El modo de video tiene %d pagina(s).\n"
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Centrando imagén, comenzando en (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Utilizando VIDIX. w=%i h=%i  mw=%i mh=%i\n"
