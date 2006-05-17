@@ -329,6 +329,7 @@ Video output:
   --enable-mlib          build with mediaLib support (Solaris only) [disable]
   --enable-3dfx          build with obsolete /dev/3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb (Voodoo 3/banshee) support [disable]
+  --enable-s3fb          build with s3fb (S3 ViRGE) support [disable]
   --enable-directfb      build with DirectFB support [autodetect]
   --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
   --enable-bl		 build with Blinkenlights support [disable]
@@ -1660,6 +1661,7 @@ _gtk1=no
 _termcap=auto
 _termios=auto
 _3dfx=no
+_s3fb=no
 _tdfxfb=no
 _tdfxvid=no
 _tga=yes
@@ -1937,6 +1939,8 @@ for ac_option do
   --disable-termios)    _termios=no     ;;
   --enable-3dfx)	_3dfx=yes	;;
   --disable-3dfx)	_3dfx=no	;;
+  --enable-s3fb)	_s3fb=yes	;;
+  --disable-s3fb)	_s3fb=no	;;
   --enable-tdfxfb)	_tdfxfb=yes	;;
   --disable-tdfxvid)	_tdfxvid=no	;;
   --enable-tdfxvid)	_tdfxvid=yes	;;
@@ -3593,6 +3597,17 @@ else
   _novomodules="tdfxfb $_novomodules"
 fi
 echores "$_tdfxfb"
+
+echocheck "s3fb"
+if test "$_s3fb" = yes ; then
+  _def_s3fb='#define HAVE_S3FB 1'
+  _vosrc="$_vosrc vo_s3fb.c"
+  _vomodules="s3fb $_vomodules"
+else
+  _def_s3fb='#undef HAVE_S3FB'
+  _novomodules="s3fb $_novomodules"
+fi
+echores "$_s3fb"
 
 echocheck "tdfxvid"
 if test "$_tdfxvid" = yes ; then
@@ -8212,6 +8227,7 @@ $_def_directx
 $_def_ggi
 $_def_ggiwmh
 $_def_3dfx
+$_def_s3fb
 $_def_tdfxfb
 $_def_tdfxvid
 $_def_directfb

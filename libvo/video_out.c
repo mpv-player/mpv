@@ -77,6 +77,7 @@ extern vo_functions_t video_out_fsdga;
 extern vo_functions_t video_out_sdl;
 extern vo_functions_t video_out_3dfx;
 extern vo_functions_t video_out_tdfxfb;
+extern vo_functions_t video_out_s3fb;
 extern vo_functions_t video_out_null;
 //extern vo_functions_t video_out_odivx;
 extern vo_functions_t video_out_zr;
@@ -163,6 +164,9 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_TDFXFB
         &video_out_tdfxfb,
+#endif
+#ifdef HAVE_S3FB
+        &video_out_s3fb,
 #endif
 #ifdef HAVE_3DFX
         &video_out_3dfx,

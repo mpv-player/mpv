@@ -190,6 +190,13 @@ S3 Savage3D's should work fine, but for Savage4, use XFree86 version 4.0.3
 or greater (in case of image problems, try 16bpp). As for S3 Virge: there is
 xv support, but the card itself is very slow, so you better sell it.
 </para>
+<para>
+There is now a native framebuffer driver for S3 Virge cards similiar to 
+tdfxfb.  Set up your framebuffer (eg append
+"<option>vga=792 video=vesa:mtrr</option>" to your kernel) and use
+<option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
+will also help).
+</para>
 
 <note>
 <para>

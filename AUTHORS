@@ -668,6 +668,9 @@ Sabbi, Nico <nsabbi@tiscali.it>
 Sandell, Björn <biorn@dce.chalmers.se>
     * various *BSD fixes
 
+Sanderson, Mark <mmp@kiora.ath.cx>
+    * -vo s3fb driver
+
 Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
     * TGA decoder (RLE/uncomp), -mf tga support
 
