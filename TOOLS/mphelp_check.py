@@ -51,16 +51,16 @@ def compare(base, other, show_missing=False):
         print 'Missing: ', ' '.join(missing)
 
 if len(sys.argv) < 3:
-    print 'Usage:\n'+sys.argv[0]+' [-missing] base_helpfile otherfile1 '\
+    print 'Usage:\n'+sys.argv[0]+' [--missing] base_helpfile otherfile1 '\
           '[otherfile2 ...]'
     sys.exit(1)
 i = 1
 show_missing = False
-if sys.argv[i] == '-missing':
+if sys.argv[i] == ( '--missing' or '-missing' ):
     show_missing = True
     i = 2
 base = parse(sys.argv[i])
 for filename in sys.argv[i+1:]:
     print '*****', filename
     compare(base, parse(filename), show_missing)
-    print '\n\n\n'
+    print '\n'
