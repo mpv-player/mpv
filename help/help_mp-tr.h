@@ -54,7 +54,7 @@ static char help_text[]=
 #define MSGTR_Exit_quit "Çýkýþ"
 #define MSGTR_Exit_eof "Dosyanýn Sonu"
 #define MSGTR_Exit_error "Ölümcül Hata"
-#define MSGTR_IntBySignal "\nMPlayer %s modülündeki %d hatasý ile kapandý\n"
+#define MSGTR_IntBySignal "\nMPlayer %d hatasý ile %s modülünde kapandý\n"
 #define MSGTR_NoHomeDir "ANADÝZÝN bulunumadý\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problemi\n"
 #define MSGTR_CreatingCfgFile "Ayar dosyasý oluþturuluyor: %s\n"
