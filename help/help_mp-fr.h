@@ -29,7 +29,7 @@ static char help_text[]=
 " -pp <qualité>    active le filtre de post-traitement (détails page man)\n"
 " -framedrop       active saut d'images (pour machines lentes)\n"
 "\n"
-"Fonctions au clavier: (liste complète dans la page de man, voir aussi input.conf)\n"
+"Fonctions au clavier: (liste complète dans page man, voir aussi input.conf)\n"
 " <- ou ->         arrière/avant 10 secondes\n"
 " haut ou bas      arrière/avant 1 minute\n"
 " PgUp ou PgDown   arrière/avant 10 minutes\n"
@@ -46,7 +46,7 @@ static char help_text[]=
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Échantillons de ce format demandés pour améliorer le support. SVP contacter les developpeurs.\n"
+#define MSGTR_SamplesWanted "Échantillons ce format demandés pour améliorer support. Contacter developpeurs.\n"
 
 // ========================= Messages MPlayer ===========================
 
@@ -123,7 +123,7 @@ static char help_text[]=
 #define MSGTR_ForcedVideoCodec "Codec vidéo forcé: %s\n"
 #define MSGTR_ForcedAudioCodec "Codec audio forcé: %s\n"
 #define MSGTR_Video_NoVideo "Vidéo: pas de vidéo\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: impossible d'initialiser les filtres vidéo (-vf) ou la sortie vidéo (-vo).\n"
+#define MSGTR_NotInitializeVOPorVO "\nFATAL: impossible d'initialiser filtres vidéo (-vf) ou sortie vidéo (-vo).\n"
 #define MSGTR_Paused "\n  =====  PAUSE  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nImpossible de charger la liste de lecture %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
@@ -136,23 +136,23 @@ static char help_text[]=
 "  de celui pour lequel il a été compilé/optimisé.\n Vérifiez !\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer a planté à cause d'une mauvaise utilisation de CPU/FPU/RAM.\n"\
-"  Recompilez MPlayer avec --enable-debug et faites un backtrace 'gdb'\n"\
-"  et désassemblage. Pour les détails, voir DOCS/HTML/fr/bugreports_what.html#bugreports_crash\n"
+"  Recompilez MPlayer avec --enable-debug et faites un backtrace 'gdb' et\n"\
+"  désassemblage. Détails: DOCS/HTML/fr/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer a planté. Cela n'aurait pas dû arriver.\n"\
-"  Il y a peut-être un bogue dans le code de MPlayer _ou_ dans vos pilotes _ou_ dans votre\n"\
-"  version de gcc. Si vous pensez que c'est la faute de MPlayer, SVP lire DOCS/HTML/fr/bugreports.html\n"\
-"  et suivre les instructions. Nous ne pourrons et ne voudrons pas vous aider à moins que vous\n"\
-"  ne fournissiez ces informations en rapportant un bogue possible.\n"
+"  Peut-être un bogue dans code de MPlayer _ou_ dans vos pilotes _ou_ dans votre\n"\
+"  version de gcc. C'est la faute de MPlayer? Lire DOCS/HTML/fr/bugreports.html\n"\
+"  et suivre les instructions. Nous pourrons et voudrons vous aider si vous\n"\
+"  fournissiez ces informations en rapportant un bogue possible.\n"
 #define MSGTR_LoadingConfig "Chargement du config '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: fichier sous-titres ajouté (%d): %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: fichier sous-titres enlevé (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Erreur d'ouverture du fichier [%s] en écriture!\n"
 #define MSGTR_CommandLine "Ligne de commande:"
 #define MSGTR_RTCDeviceNotOpenable "Échec à l'ouverture de %s: %s (devrait être lisible par l'utilisateur.)\n"
-#define MSGTR_LinuxRTCInitErrorIrqpSet "Erreur d'initiation horloge temps réel Linux (RTC) dans ioctl (rtc_irqp_set %lu): %s\n"
-#define MSGTR_IncreaseRTCMaxUserFreq "Essayez d'ajouter \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" au script de démarrage de votre système.\n"
-#define MSGTR_LinuxRTCInitErrorPieOn "Erreur d'initiation horloge temps réel Linux (RTC) dans ioctl (rtc_pie_on): %s\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "Erreur init RTC Linux dans ioctl (rtc_irqp_set %lu): %s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Essayer ajout \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" au script démar de votre sys.\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "Erreur init RTC Linux dans ioctl (rtc_pie_on): %s\n"
 #define MSGTR_UsingTimingType "Utilisation de minuterie %s.\n"
 #define MSGTR_NoIdleAndGui "L'option -idle ne peut être utilisée avec GMPlayer.\n"
 #define MSGTR_MenuInitialized "Menu initialisé: %s\n"
@@ -163,57 +163,239 @@ static char help_text[]=
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Impossible d'ouvrir filtre vidéo libmenu avec menu root %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Erreur de pré-initialisation de la chaîne de filtres audio !\n"
 #define MSGTR_LinuxRTCReadError "Erreur de lecture horloge temps réel (RTC) Linux: %s\n"
-#define MSGTR_SoftsleepUnderflow "Attention! Softsleep soupassement!\n"
+#define MSGTR_SoftsleepUnderflow "Attention! Soupassement sommeil léger (time_frame négatif)!\n"
 #define MSGTR_DvdnavNullEvent "Événement DVDNAV NUL?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "Événement DVDNAV : Événement surbrillance rompu\n"
 #define MSGTR_DvdnavEvent "Événement DVDNAV : %s\n"
 #define MSGTR_DvdnavHighlightHide "Événement DVDNAV : Cache surbrillance\n"
-#define MSGTR_DvdnavStillFrame "######################################## Événement DVDNAV : Image fixe : %d sec(s)\n"
-#define MSGTR_DvdnavNavStop "Événement DVDNAV : Arret de nav \n"
-#define MSGTR_DvdnavNavNOP "Événement DVDNAV : Pas d'opération (NOP) nav \n"
-#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV Event: Nav SPU Stream Change: phys: %d/%d/%d logical: %d\n"
-#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV Event: Nav SPU Stream Change: phys: %d logical: %d\n"
-#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV Event: Nav Audio Stream Change: phys: %d logical: %d\n"
-#define MSGTR_DvdnavNavVTSChange "DVDNAV Event: Nav VTS Change\n"
-#define MSGTR_DvdnavNavCellChange "DVDNAV Event: Nav Cell Change\n"
-#define MSGTR_DvdnavNavSpuClutChange "DVDNAV Event: Nav SPU CLUT Change\n"
-#define MSGTR_DvdnavNavSeekDone "DVDNAV Event: Nav Seek Done\n"
-#define MSGTR_MenuCall "Menu call\n"
+#define MSGTR_DvdnavStillFrame "#################################### Événement DVDNAV : Image fixe : %d sec(s)\n"
+#define MSGTR_DvdnavNavStop "Événement DVDNAV : Arret de navigation \n"
+#define MSGTR_DvdnavNavNOP "Événement DVDNAV : Pas d'opération (NOP) navigation \n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "Événement DVDNAV: Changement flux SPU nav : phys: %d/%d/%d log: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "Événement DVDNAV: Changement de flux de navigation SPU: phys: %d logique: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "Événement DVDNAV: Changement de flux de navigation Audio: phys: %d logique: %d\n"
+#define MSGTR_DvdnavNavVTSChange "Événement DVDNAV: Changement de navigation VTS\n"
+#define MSGTR_DvdnavNavCellChange "Événement DVDNAV: Changement de cellule de navigation\n"
+#define MSGTR_DvdnavNavSpuClutChange "Événement DVDNAV: Changement de navigation SPU CLUT\n"
+#define MSGTR_DvdnavNavSeekDone "Événement DVDNAV: Cherche navigation faite\n"
+#define MSGTR_MenuCall "Appel menu\n"
 
-#define MSGTR_EdlOutOfMem "Can't allocate enough memory to hold EDL data.\n"
-#define MSGTR_EdlRecordsNo "Read %d EDL actions.\n"
-#define MSGTR_EdlQueueEmpty "There are no EDL actions to take care of.\n"
-#define MSGTR_EdlCantOpenForWrite "Can't open EDL file [%s] for writing.\n"
-#define MSGTR_EdlCantOpenForRead "Can't open EDL file [%s] for reading.\n"
-#define MSGTR_EdlNOsh_video "Cannot use EDL without video, disabling.\n"
-#define MSGTR_EdlNOValidLine "Invalid EDL line: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "Badly formatted EDL line [%d] Discarding.\n"
-#define MSGTR_EdlBadLineOverlap "Last stop position was [%f]; next start is "\
-"[%f]. Entries must be in chronological order, cannot overlap. Discarding.\n"
-#define MSGTR_EdlBadLineBadStop "Stop time has to be after start time.\n"
+#define MSGTR_EdlOutOfMem "Impossible d'allouer assez de mémoire pour contenir les données EDL.\n"
+#define MSGTR_EdlRecordsNo "Lu %d actions EDL.\n"
+#define MSGTR_EdlQueueEmpty "Aucune action EDL à gérer.\n"
+#define MSGTR_EdlCantOpenForWrite "Impossible d'ouvrir fichier EDL [%s] en écriture.\n"
+#define MSGTR_EdlCantOpenForRead "Impossible d'ouvrir fichier EDL [%s] en lecture.\n"
+#define MSGTR_EdlNOsh_video "Impossible d'utiliser EDL sans video, désactive.\n"
+#define MSGTR_EdlNOValidLine "Ligne EDL invalide: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Ligne EDL mal formatée [%d] Rejet.\n"
+#define MSGTR_EdlBadLineOverlap "Dernière position d'arret: [%f]; départ suivant: "\
+"[%f]. Entrées doivent être en ordre chrono, ne peuvent se chevaucher. Rejet.\n"
+#define MSGTR_EdlBadLineBadStop "Temps d'arret doit être après temps de départ.\n"
 
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "activé"
+#define MSGTR_OSDdisabled "désactivé"
+#define MSGTR_OSDChannel "Canal: %s"
+#define MSGTR_OSDSubDelay "Décalage: %d ms"
+#define MSGTR_OSDSpeed "Vitesse: x %6.2f"
+#define MSGTR_OSDosd "OSD: %s"
+
+// property values
+#define MSGTR_Enabled "activé"
+#define MSGTR_EnabledEdl "activé (edl)"
+#define MSGTR_Disabled "désactivé"
+#define MSGTR_HardFrameDrop "dur"
+#define MSGTR_Unknown "inconnu"
+#define MSGTR_Bottom "bas"
+#define MSGTR_Center "centre"
+#define MSGTR_Top "haut"
+
+// osd bar names
+#define MSGTR_Volume "Volume"
+#define MSGTR_Panscan "Recadrage"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "Brillance"
+#define MSGTR_Contrast "Contraste"
+#define MSGTR_Saturation "Saturation"
+#define MSGTR_Hue "Tonalité"
+
+// property state
+#define MSGTR_MuteStatus "Silence: %s"
+#define MSGTR_AVDelayStatus "delai A-V: %s"
+#define MSGTR_OnTopStatus "Reste au dessus: %s"
+#define MSGTR_RootwinStatus "Fenêtre racine: %s"
+#define MSGTR_BorderStatus "Bordure: %s"
+#define MSGTR_FramedroppingStatus "Saut d'images: %s"
+#define MSGTR_VSyncStatus "Sync vertical: %s"
+#define MSGTR_SubSelectStatus "Sous-titres: %s"
+#define MSGTR_SubPosStatus "Sous position: %s/100"
+#define MSGTR_SubAlignStatus "Sous alignment: %s"
+#define MSGTR_SubDelayStatus "Décalage: %s"
+#define MSGTR_SubVisibleStatus "Sous-titres: %s"
+#define MSGTR_SubForcedOnlyStatus "Sub forcé seulement: %s"
 
 // mencoder.c
 
-#define MSGTR_UsingPass3ControlFile "Utilisation du fichier de contrôle de la passe 3: %s\n"
+#define MSGTR_UsingPass3ControllFile "Utilisation du fichier de contrôle de la passe 3: %s\n"
 #define MSGTR_MissingFilename "\nNom de fichier manquant.\n\n"
 #define MSGTR_CannotOpenFile_Device "Impossible d'ouvrir le fichier/périph.\n"
 #define MSGTR_CannotOpenDemuxer "Impossible d'ouvrir le démuxeur.\n"
-#define MSGTR_NoAudioEncoderSelected "\nAucun encodeur audio (-oac) choisi ! Choisissez-en un (voir l'aide pour -oac) ou utilisez -nosound! \n"
+#define MSGTR_NoAudioEncoderSelected "\nAucun encodeur audio (-oac) choisi. Choisir un (voir aide -oac) ou -nosound.\n"
 #define MSGTR_NoVideoEncoderSelected "\nAucun encodeur vidéo (-ovc) choisi ! Choisissez-en un (voir l'aide pour -ovc).\n"
 #define MSGTR_CannotOpenOutputFile "Impossible d'ouvrir le fichier de sortie '%s'\n"
 #define MSGTR_EncoderOpenFailed "Impossible d'ouvrir l'encodeur\n"
-//**************************
+#define MSGTR_MencoderWrongFormatAVI "\nATTENTION: LE FORMAT DU FICHIER DE SORTIE EST _AVI_. Voir '-of help'.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nATTENTION: LE FICHIER DU FICHIER DE SORTIE EST _MPEG_. Voir '-of help'.\n"
+#define MSGTR_MissingOutputFilename "Aucun fichier de sortie spécifié, veuillez voir l'option -o"
 #define MSGTR_ForcingOutputFourcc "Code fourcc de sortie forcé à %x [%.4s]\n"
-//***************************
+#define MSGTR_ForcingOutputAudiofmtTag "Forçage du tag du format audio de sortie à 0x%x\n"
 #define MSGTR_DuplicateFrames "\n%d image(s) répétée(s)!\n"
 #define MSGTR_SkipFrame "\nImage sautée!\n"
-//*****************************
+#define MSGTR_ResolutionDoesntMatch "\nLe nouveau fichier vidéo a résolution ou espace couleur différent du précédent.\n"
+#define MSGTR_FrameCopyFileMismatch "\nTous fichiers vidéo doivent utiliser mêmes fps, résolution, codec pour copie -ovc.\n"
+#define MSGTR_AudioCopyFileMismatch "\nTous fichiers audio doivent utiliser mêmes codec et format pour copie -oac.\n"
+#define MSGTR_NoAudioFileMismatch "\nNe peut mélanger fichiers vidéo seul et fichiers vidéo/audio. -nosound?\n"
+#define MSGTR_NoSpeedWithFrameCopy "ATTENTION: -speed peut ne pas fonctionner correctement avec -oac copy!\n"\
+"Votre encodement pourrait être brisé!\n"
 #define MSGTR_ErrorWritingFile "%s: Erreur durant l'écriture du fichier.\n"
 #define MSGTR_RecommendedVideoBitrate "Débit binaire (bitrate) vidéo recommandé pour le CD %s: %d\n"
-#define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d B/s)  taille: %"PRIu64" octets  %5.3f secs  %d images\n"
-#define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d B/s)  taille: %"PRIu64" octets  %5.3f secs\n"
-//************************************
+#define MSGTR_VideoStreamResult "\nFlux vidéo: %8.3f kbit/s  (%d B/s)  taille: %d octets  %5.3f secs  %d images\n"
+#define MSGTR_AudioStreamResult "\nFlux audio: %8.3f kbit/s  (%d B/s)  taille: %d octets  %5.3f secs\n"
+#define MSGTR_OpenedStream "succès: format: %d  data: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "codec vidéo: copie de trame (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "codec audio: copie img (format=%x canaux=%d taux=%d bits=%d B/s=%d échant-%d)\n"
+#define MSGTR_CBRPCMAudioSelected "Audio CBR PCM selectionné\n"
+#define MSGTR_MP3AudioSelected "Audio MP3 sélectionné\n"
+#define MSGTR_CannotAllocateBytes "N'a pu allouer %d octets\n"
+#define MSGTR_SettingAudioDelay "Réglage du délai audio à %5.3fs\n"
+#define MSGTR_SettingVideoDelay "Réglage du délai vidéo à %5.3fs\n"
+#define MSGTR_SettingAudioInputGain "Réglage du gain audio en entrée à %f\n"
+#define MSGTR_LamePresetEquals "\npré-réglages=%s\n\n"
+#define MSGTR_LimitingAudioPreload "Limitation du préchargement audio à 0.4s\n"
+#define MSGTR_IncreasingAudioDensity "Augmentation de la densité audio à 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forçage du pré-chargement audio à 0 et de la correction max des pts à 0\n"
+#define MSGTR_CBRAudioByterate "\n\nAudio CBR: %d octets/s, %d octets/bloc\n"
+#define MSGTR_LameVersion "LAME version %s (%s)\n\n"
+#define MSGTR_InvalidBitrateForLamePreset "Erreur: le bitrate spécifié est hors de l'intervalle valide pour ce pré-réglage\n"\
+"\n"\
+"Lorsque vous utilisez ce mode, la valeur doit être entre \"8\" et \"320\"\n"\
+"\n"\
+"Pour plus d'information, essayez: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Erreur: vous n'avez pas entré de profil valide et/ou d'option avec preset (pré-réglage)\n"\
+"\n"\
+"Les profils disponibles sont:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (Mode ABR) - C'est le mode par défaut. Pour l'utiliser,\n"\
+"                      il suffit de préciser un bitrate. Par exemple:\n"\
+"                      \"preset=185\" active ce pré-réglage\n"\
+"                      et utilise un bitrate moyen de 185kbps.\n"\
+"\n"\
+"    Quelques exemples:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" ou \"-lameopts  cbr:preset=192       \"\n"\
+" ou \"-lameopts      preset=172       \"\n"\
+" ou \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"Pour plus d'informations, essayez: \"-lameopts preset=help\"\n"
+#define MSGTR_LamePresetsLongInfo "\n"\
+"Les pré-réglages ont été conçus pour offrir la plus haute qualité possible.\n"\
+"\n"\
+"Ces réglages ont été optimisés par le biais de double écoute en aveugle\n"\
+"pour vérifier qu'ils atteignaient leurs objectifs.\n"\
+"\n"\
+"Ils sont continuellement mis à jour pour tirer partie des derniers développements\n"\
+"et offrent donc par conséquent la meilleure qualité possible avec LAME.\n"\
+"\n"\
+"Pour activer ces pré-réglages:\n"\
+"\n"\
+"   Pour les modes VBR (en géneral, la plus haute qualité):\n"\
+"\n"\
+"     \"preset=standard\" Ce mode devrait être transparent pour la plupart\n"\
+"                             des gens, sur la plupart des musiques. Sa\n"\
+"                             qualité est vraiment élevée.\n"\
+"\n"\
+"     \"preset=extreme\" Si vous avez une très bonne audition, ainsi que du\n"\
+"                             matériel de qualité, ce pré-réglage offrira\n"\
+"                             une qualité légèrement supérieure à celle du\n"\
+"                             mode \"standard\"\n"\
+"\n"\
+"   Pour le CBR à 320kbps (la plus haute qualité possible avec les pré-réglages):\n"\
+"\n"\
+"     \"preset=insane\"  Ce réglage sera excessif pour la plupart des gens\n"\
+"                             et des situations mais, si vous devez absolument\n"\
+"                             avoir la plus haute qualité et que vous n'avez pas\n"\
+"                             de contrainte de taille, choisissez cette option.\n"\
+"\n"\
+"   Pour les modes ABR (haute qualité pour un bitrate donnée - mais moins que pour du VBR):\n"\
+"\n"\
+"     \"preset=<kbps>\"  Utiliser ce pré-réglage fournira une bonne qualité\n"\
+"                             pour un bitrate spécifié. Selon le bitrate\n"\
+"                             entré, ce pré-réglage déterminera les réglages\n"\
+"                             optimaux pour cette situation particulière.\n"\
+"                             Bien que cette approche fonctionne, elle n'est pas\n"\
+"                             aussi flexible que le VBR, et n'offrira pas en général\n"\
+"                             les mêmes niveaux que ceux du VBR aux bitrates élevés.\n"\
+"\n"\
+"Les options suivantes sont aussi disponibles pour les profils correspondants:\n"\
+"\n"\
+"   <fast>        standard\n"\
+"   <fast>        extreme\n"\
+"                 insane\n"\
+"   <cbr> (Mode ABR) - C'est le mode par défaut. Pour l'utiliser,\n"\
+"                      il suffit de préciser un bitrate. Par exemple:\n"\
+"                      \"preset=185\" active ce pré-réglage\n"\
+"                      et utilise un bitrate moyen de 185kbps.\n"\
+"\n"\
+"   \"fast\" - Active le nouveau mode rapide VBR pour un profil donné. Les\n"\
+"              désavantages de cette option sont que, souvent, le bitrate\n"\
+"              final sera légèrement plus élevé que pour le mode normal\n"\
+"              et que la qualité peut aussi être légèrement inférieure.\n"\
+"   Attention: avec la version actuelle, les pré-réglages en mode 'fast'\n"\
+"              peuvent utiliser des bitrates trop élevés par rapport à ceux\n"\
+"              des pré-réglages normaux.\n"\
+"\n"\
+"   \"cbr\"  - Si vous utilisez le mode ABR (voir ci-dessus) avec un bitrate\n"\
+"              spécial tel que 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"              vous pouvez utiliser l'option \"cbr\" pour forcer une compression\n"\
+"              en CBR au lieu d'ABR. ABR fournit une qualité plus élevée\n"\
+"              mais le CBR peut être utile dans certains cas comme par exemple, pour\n"\
+"              pour distribuer un flux MP3 sur Internet.\n"\
+"\n"\
+"    Par exemple:\n"\
+"\n"\
+"    \"-lameopts fast:preset=standard  \"\n"\
+" ou \"-lameopts  cbr:preset=192       \"\n"\
+" ou \"-lameopts      preset=172       \"\n"\
+" ou \"-lameopts      preset=extreme   \"\n"\
+"\n"\
+"\n"\
+"Quelques noms de pré-réglages sont disponibles pour le mode ABR:\n"\
+"phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
+"mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
+"fm/radio/tape => 112kbps    hifi => 160kbps\n"\
+"cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "Ne peux pas régler les options de LAME, vérifiez dans bitrate/samplerate,"\
+"certains bitrates très bas (<32) requièrent des taux d'échantillonages plus bas (i.e. -srate 8000)."\
+"Si rien ne marche, essayez un pré-réglage (preset)."
+#define MSGTR_ConfigfileError "Erreur du fichier de configuration"
+#define MSGTR_ErrorParsingCommandLine "Erreur en parsant la ligne de commande"
+#define MSGTR_VideoStreamRequired "La présence d'un flux vidéo est obligatoire !\n"
+#define MSGTR_ForcingInputFPS "Le fps d'entrée sera plutôt interprété comme %5.2f\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "Le format de sortie RAWVIDEO ne supporte pas l'audio - audio désactivé\n"
+#define MSGTR_DemuxerDoesntSupportNosound "Ce demuxer ne supporte pas encore l'option -nosound.\n"
+#define MSGTR_MemAllocFailed "Une allocation mémoire a échoué\n"
+#define MSGTR_NoMatchingFilter "N'a pas pu trouver une correspondance filtre/ao!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, peut-être un compilateur C cassé?\n"
+#define MSGTR_NoLavcAudioCodecName "Audio LAVC, nom de codec manquant!\n"
+#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, encodeur pour le codec %s introuvable\n"
+#define MSGTR_CouldntAllocateLavcContext "Audio LAVC, échec lors de l'allocation du contexte!\n"
+#define MSGTR_CouldntOpenCodec "Échec de l'ouvertur du codec %s, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "Le format audio 0x%x est incompatible avec '-oac copy', veuillez essayer '-oac pcm' à la place, ou bien utilisez '-fafmttag' pour forcer ce mode.\n"
 
 // cfg-mencoder.h:
 
@@ -265,7 +447,60 @@ static char help_text[]=
 "                 (bitrate 320 kbps)\n"\
 "                 <8-320>: encodage ABR au débit binaire (bitrate) moyen indiqué en kbps.\n\n"
 
-//*****************************
+//codec-cfg.c:
+#define MSGTR_DuplicateFourcc "code FourCC dupliqué"
+#define MSGTR_TooManyFourccs "trop de FourCCs..."
+#define MSGTR_ParseError "erreur de syntaxe"
+#define MSGTR_ParseErrorFIDNotNumber "erreur de syntaxe (l'ID du format n'est pas un nombre ?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "erreur de syntaxe (l'ID de l'alias n'est pas un nombre ?)"
+#define MSGTR_DuplicateFID "ID du format dupliqué"
+#define MSGTR_TooManyOut "Trop de 'out'..."
+#define MSGTR_InvalidCodecName "\nLe nom de codec (%s) n'est pas valide!\n"
+#define MSGTR_CodecLacksFourcc "\nLe nom de codec(%s) n'a pas de FourCC!\n"
+#define MSGTR_CodecLacksDriver "\nLe codec (%s) n'a pas de pilote!\n"
+#define MSGTR_CodecNeedsDLL "\nLe codec (%s) requiert une 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\nLe codec (%s) requier un 'outfmt'!\n"
+#define MSGTR_CantAllocateComment "Ne peut allouer de mémoire pour le commentaire. "
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
+#define MSGTR_ReadingFile "Lecture de %s: "
+#define MSGTR_CantOpenFileError "Ne peut ouvrir '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "Ne peut allouer de mémoire pour 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "Ne peut pas effectuer de realloc() pour '*codecsp': %s\n"
+#define MSGTR_CodecNameNotUnique "Le nom du codec '%s' n'est pas unique."
+#define MSGTR_CantStrdupName "Ne peut appeler strdup() -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Ne peut appler strdup() -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Ne peut appeler strdup() -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Ne peut appeler strdup() -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d codecs audio & %d codecs vidéo\n"
+#define MSGTR_CodecDefinitionIncorrect "Le codec n'est pas défini correctement."
+#define MSGTR_OutdatedCodecsConf "Ce fichier codecs.conf est trop vieux et est incompatible avec cette version de MPlayer !"
+
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "plus de mémoire libre"
+#define MSGTR_OverridingTooLowBitrate "Le débit binaire demandé est trop bas pour ce clip.\n"\
+"Le débit binaire minimum pour ce clip est %.0f kbps.\n"\
+"Les valeurs demandées par l'utilisateur vont être ignorées.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Ne peut créer de canal de communication (pipe) !\n"
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Case de sauvegarde trop ancienne trouvée lvl %d: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "L'option '%s' ne peut être utilisée dans un fichier de configuration.\n"
+#define MSGTR_InvalidCmdlineOption "L'option '%s' ne peut être utilisée sur la ligne de commande.\n"
+#define MSGTR_InvalidSuboption "Erreur: l'option '%s' n'a pas de sous-option '%s'.\n"
+#define MSGTR_MissingSuboptionParameter "Erreur: la sous-option '%s' de '%s' doit avoir un paramètre!\n"
+#define MSGTR_MissingOptionParameter "Erreur: l'option '%s' doit avoir un paramètre!\n"
+#define MSGTR_OptionListHeader "\n Nom                  Type            Min        Max      Global  CL    Cfg\n\n"
+#define MSGTR_TotalOptions "\nTotal: %d options\n"
+#define MSGTR_TooDeepProfileInclusion "ATTENTION: inclusion de profils trop imbriquée.\n"
+#define MSGTR_NoProfileDefined "Aucun profil n'a été défini.\n"
+#define MSGTR_AvailableProfiles "Profils disponibles:\n"
+#define MSGTR_UnknownProfile "Profil inconnu '%s'.\n"
+#define MSGTR_Profile "Profil %s: %s\n"
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Nom                  Type            Min        Max\n\n"
+#define MSGTR_TotalProperties "\nTotal: %d propriétés\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Lecteur CD-ROM '%s' non trouvé.\n"
@@ -280,20 +515,36 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer n'a pas été compilé avec le support de lecture SMB\n"
 
 #define MSGTR_CantOpenDVD "Impossible d'ouvrir le lecteur DVD: %s\n"
+#define MSGTR_NoDVDSupport "MPlayer a été compilé sans support pour les DVD - terminaison\n"
 #define MSGTR_DVDwait "Lecture de la structure du disque, veuillez patienter...\n"
 #define MSGTR_DVDnumTitles "Il y a %d titres sur ce DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numéro de titre DVD invalide: %d\n"
 #define MSGTR_DVDnumChapters "Il y a %d chapitres sur ce titre DVD.\n"
 #define MSGTR_DVDinvalidChapter "Numéro de chapitre DVD invalide: %d\n"
-//***************************
+#define MSGTR_DVDinvalidChapterRange "Intervalle des chapitre invalide %s\n"
+#define MSGTR_DVDinvalidLastChapter "Numéro de dernier chapitre du DVD invalide: %d\n"
 #define MSGTR_DVDnumAngles "Il y a %d angles sur ce titre DVD.\n"
 #define MSGTR_DVDinvalidAngle "Numéro d'angle DVD invalide: %d\n"
 #define MSGTR_DVDnoIFO "Impossible d'ouvrir le fichier IFO pour le titre DVD %d.\n"
-//***********************
+#define MSGTR_DVDnoVMG "Ne peut ouvrir les informations VMG!\n"
 #define MSGTR_DVDnoVOBs "Impossible d'ouvrir le titre VOBS (VTS_%02d_1.VOB).\n"
-//***************************
+#define MSGTR_DVDnoMatchingAudio "Aucun canal audio correspondant sur ce DVD!\n"
+#define MSGTR_DVDaudioChannel "Canal audio du DVD choisi: %d langage: %c%c\n"
+#define MSGTR_DVDnoMatchingSubtitle "Aucun sous-titre correspondant sur ce DVD!\n"
+#define MSGTR_DVDsubtitleChannel "Canal de sous-titres du DVD choisi: %d language: %c%c\n"
 #define MSGTR_DVDopenOk "DVD ouvert avec succès.\n"
-//***************************
+
+// muxer.c, muxer_*.c:
+#define MSGTR_TooManyStreams "Trop de flux!"
+#define MSGTR_RawMuxerOnlyOneStream "Le multiplexeur RAWAUDIO ne supporte qu'un seul flux audio!\n"
+#define MSGTR_IgnoringVideoStream "Flux vidéo non pris en compte!\n"
+#define MSGTR_UnknownStreamType "Attention! flux de type inconnu: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Attention! la longueur 'len' n'est pas divisible par la taille de l'échantillon (!\n"
+#define MSGTR_MuxbufMallocErr "Tampon d'image Muxeur ne peut allouer de la mémoire!\n"
+#define MSGTR_MuxbufReallocErr "Tampon d'image Muxeur ne peut réallouer de la mémoire!\n"
+#define MSGTR_MuxbufSending "Tampon d'image Muxeur envoie %d image(s) au muxeur.\n"
+#define MSGTR_WritingHeader "Écriture de l'entête...\n"
+#define MSGTR_WritingTrailer "Écriture de l'index...\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "ATTENTION: Entête du flux audio %d redéfini.\n"
@@ -323,7 +574,7 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Impossible de déterminer le nombre d'images (pour recherche absolue)\n"
 #define MSGTR_CantSeekRawAVI "Impossible de chercher dans un flux AVI brut ! (Index requis, essayez l'option -idx.)\n"
 #define MSGTR_CantSeekFile "Impossible de chercher dans ce fichier.\n"
-//*******************
+#define MSGTR_EncryptedVOB "Fichier VOB chiffré! Veuillez lire DOCS/HTML/fr/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Le support d'entêtes compressées nécessite ZLIB !\n"
 #define MSGTR_MOVvariableFourCC "MOV: ATTENTION: FOURCC Variable détecté !?\n"
@@ -343,7 +594,9 @@ static char help_text[]=
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: contenu NTSC 30000/1001fps détecté, ajustement du débit.\n"
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: contenu NTSC 24000/1001fps progressif détecté, ajustement du débit.\n"
-//**********************
+#define MSGTR_CacheFill "\rRemplissage du cache: %5.2f%% (%"PRId64" octets)   "
+#define MSGTR_NoBindFound "Aucune action attachée à la touche '%s'"
+#define MSGTR_FailedToOpen "Échec à l'ouverture de '%s'\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Impossible d'ouvrir le codec.\n"
@@ -370,9 +623,7 @@ static char help_text[]=
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Famille de codecs vidéo demandée [%s] (vfm=%s) non disponible (activez-la à la compilation)\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Famille de codecs audio demandée [%s] (afm=%s) non disponible (activez-la à la compilation)\n"
 #define MSGTR_OpeningVideoDecoder "Ouverture du décodeur vidéo: [%s] %s\n"
-//****************
-#define MSGTR_OpeningAudioDecoder "Ouverture du décodeur audio: [%s] %s\n"
-//***********************
+#define MSGTR_SelectedVideoCodec "Codec vidéo choisi: [%s] vfm: %s (%s)\n"
 #define MSGTR_UninitVideoStr "Désinitialisation vidéo: %s  \n"
 #define MSGTR_UninitAudioStr "Désinitialisation audio: %s  \n"
 #define MSGTR_VDecoderInitFailed "Echec de l'initialisation de VDecoder :(\n"
@@ -399,7 +650,18 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "N'a pas pu trouver espace colorimétrique correspondant - nouvel essai avec -vf scale...\n"
 #define MSGTR_MovieAspectIsSet "L'aspect du film est %.2f:1 - pré-redimensionnement à l'aspect correct.\n"
 #define MSGTR_MovieAspectUndefined "L'aspect du film est indéfini - pas de pré-dimensionnement appliqué.\n"
-//*********************
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "Vous devez mettre à jour/installer le package contenant les codecs binaires.\nAllez sur http://www.mplayerhq.hu/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: initialisation réussie du codec vidéo Win32/DShow.\n"
+#define MSGTR_DMOInitOK "INFO: initialisation réussie du codec vidéo Win32/DMO.\n"
+
+// x11_common.c
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: n'a pas pu envoyer l'événement EWMH pour passer en plein écran!\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: n'a pas pu trouver de fenêtre XScreenSaver.\n"
+#define MSGTR_SelectedVideoMode "XF86VM: le mode vidéo %dx%d a été choisi pour une taille d'image %dx%d.\n"
+
+#define MSGTR_InsertingAfVolume "[Mixer] Pas de support matériel pour le mixage, insertion du filtre logiciel de volume.\n"
+#define MSGTR_NoVolume "[Mixer] Aucun contrôle de volume disponible.\n"
 
 // ====================== messages/boutons GUI ========================
 
@@ -414,11 +676,11 @@ static char help_text[]=
 #define MSGTR_FontSelect "Choisir une police..."
 #define MSGTR_PlayList "Liste de lecture"
 #define MSGTR_Equalizer "Égalisateur"
-//*********************
-#define MSGTR_SkinBrowser "Navigateur de skins"
+#define MSGTR_ConfigureEqualizer "Configure Égalisateur"
+#define MSGTR_SkinBrowser "Navigateur de peaux"
 #define MSGTR_Network "Streaming depuis le réseau ..."
 #define MSGTR_Preferences "Préférences"
-//*********************
+#define MSGTR_AudioPreferences "Configuration de pilote Audio"
 #define MSGTR_NoMediaOpened "Aucun média ouvert"
 #define MSGTR_VCDTrack "Piste du VCD %d"
 #define MSGTR_NoChapter "Aucun chapitre"
@@ -440,13 +702,15 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Désolé, pas assez de mémoire pour le rendu des menus."
 #define MSGTR_IDFGCVD "Désolé, aucun pilote de sortie vidéo compatible avec la GUI."
 #define MSGTR_NEEDLAVCFAME "Désolé, vous ne pouvez pas jouer de fichier non-MPEG avec votre périphérique DXR3/H+ sans réencodage.\nVeuillez activer lavc ou fame dans la boîte de configuration DXR3/H+."
+#define MSGTR_UNKNOWNWINDOWTYPE "Genre de fenêtre inconnue trouvé ..."
 
-// --- messages d'erreurs du chargement de skin ---
-#define MSGTR_SKIN_ERRORMESSAGE "[Skin] erreur à la ligne %d du fichier de config de skin: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] attention à la ligne %d du fichier de config de skin: Widget (%s) trouvé mais aucune \"section\" trouvé avant lui."
-#define MSGTR_SKIN_WARNING2 "[skin] attention à la ligne %d du fichier de config de skin: Widget (%s) trouvé mais aucune \"subsection\" trouvé avant lui."
-#define MSGTR_SKIN_WARNING3 "[skin] attention à la ligne %d du fichier de config de skin: cette sous-section n'est pas supporté par le widget (%s)"
-//************************
+// --- messages d'erreurs du chargement de peau ---
+#define MSGTR_SKIN_ERRORMESSAGE "[Peau] erreur à la ligne %d du fichier de config de peau: %s"
+#define MSGTR_SKIN_WARNING1 "[Peau] attention à la ligne %d du fichier de config de peau: Widget (%s) trouvé mais aucune \"section\" trouvé avant lui."
+#define MSGTR_SKIN_WARNING2 "[Peau] attention à la ligne %d du fichier de config de peau: Widget (%s) trouvé mais aucune \"subsection\" trouvé avant lui."
+#define MSGTR_SKIN_WARNING3 "[Peau] attention à la ligne %d du fichier de config de peau: cette sous-section n'est pas supporté par le widget (%s)"
+#define MSGTR_SKIN_SkinFileNotFound "[peau] fichier ( %s ) non trouvé.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[peau] fichier ( %s ) non lisible.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "les images bitmaps 16 bits ou moins ne sont pas supportées ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Fichier non trouvé (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "erreur de lecture BMP (%s)\n"
@@ -454,7 +718,7 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_PNGReadError "erreur de lecture PNG (%s)\n"
 #define MSGTR_SKIN_BITMAP_RLENotSupported "tga compacté en RLE non supporté (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "format de fichier inconnu (%s)\n"
-#define MSGTR_SKIN_BITMAP_ConversionError "erreur de conversion de 24 bit en 32 bit (%s)\n"
+#define MSGTR_SKIN_BITMAP_ConvertError "erreur de conversion de 24 bit en 32 bit (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "message inconnu: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "pas assez de mémoire\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "trop de polices déclarées.\n"
@@ -463,9 +727,9 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "identificateur de fonte inéxistant (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "paramètre inconnu (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trouvée (%s).\n"
-//**************************
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "erreur de lecture du fichier de configuration du skin (%s)\n"
-#define MSGTR_SKIN_LABEL "Skins:"
+#define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Peau choisi ( %s ) non trouvé, essaie de 'par défaut'...\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "erreur de lecture du fichier de configuration du peau (%s)\n"
+#define MSGTR_SKIN_LABEL "Peaux:"
 
 // --- menus gtk
 #define MSGTR_MENU_AboutMPlayer "À propos de MPlayer"
@@ -484,7 +748,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Flux suivant"
 #define MSGTR_MENU_PrevStream "Flux précédent"
 #define MSGTR_MENU_Size "Taille"
-//*************
+#define MSGTR_MENU_HalfSize   "Demi taille"
 #define MSGTR_MENU_NormalSize "Taille normale"
 #define MSGTR_MENU_DoubleSize "Taille double"
 #define MSGTR_MENU_FullScreen "Plein écran"
@@ -500,8 +764,8 @@ static char help_text[]=
 #define MSGTR_MENU_AudioLanguages "Langues audio"
 #define MSGTR_MENU_SubtitleLanguages "Langues des sous-titres"
 #define MSGTR_MENU_PlayList MSGTR_PlayList
-#define MSGTR_MENU_SkinBrowser "Navigateur de skins"
-//*************************
+#define MSGTR_MENU_SkinBrowser "Navigateur de peaux"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Quitter..."
 #define MSGTR_MENU_Mute "Silence"
 #define MSGTR_MENU_Original "Original"
@@ -538,18 +802,19 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Hiérarchie des dossiers"
 
 // --- preferences
-//************************
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "Sous-titres & OSD"
-#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxeur"
 #define MSGTR_PREFERENCES_Misc "Divers"
 
 #define MSGTR_PREFERENCES_None "Aucun"
-//************************
+#define MSGTR_PREFERENCES_DriverDefault "Pilote par défaut"
 #define MSGTR_PREFERENCES_AvailableDrivers "Pilotes disponibles:"
-#define MSGTR_PREFERENCES_DoNotPlaySound "Ne pas jouez le son"
+#define MSGTR_PREFERENCES_DoNotPlaySound "Ne pas jouer le son"
 #define MSGTR_PREFERENCES_NormalizeSound "Normaliser le son"
-#define MSGTR_PREFERENCES_EnableEqualizer "Activer l'équaliseur"
-//**********************
+#define MSGTR_PREFERENCES_EnEqualizer "Activer l'équaliseur"
+#define MSGTR_PREFERENCES_SoftwareMixer "Activer mixeur logiciel"
 #define MSGTR_PREFERENCES_ExtraStereo "Activer stéréo supplémentaire"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Retard audio"
@@ -585,7 +850,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "post-traitement"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-//***********************
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
+#define MSGTR_PREFERENCES_Audio_Device "Périférique:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mixeur:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Canal de mixeur:"
 #define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent un redémarrage de la lecture!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encodeur vidéo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Utiliser LAVC (FFmpeg)"
@@ -633,15 +901,477 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "Périphérique DVD:"
 #define MSGTR_PREFERENCES_FPS "FPS du film:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Affiche la fenêtre vidéo inactive"
-//********************************
+#define MSGTR_PREFERENCES_ArtsBroken "Versions aRts plus récentes sont incompatibles "\
+           "avec GTK 1.x et feront planter GMPlayer!"
 
 #define MSGTR_ABOUT_UHU "Le développement de la GUI est commandité par UHU Linux\n"
-//*********************************
+#define MSGTR_ABOUT_Contributors "contribuants de code et de documentation\n"
+#define MSGTR_ABOUT_Codecs_libs_contributions "Codecs et libraries tiers\n"
+#define MSGTR_ABOUT_Translations "Traductions\n"
+#define MSGTR_ABOUT_Skins "Peaux\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale !"
 #define MSGTR_MSGBOX_LABEL_Error "Erreur !"
 #define MSGTR_MSGBOX_LABEL_Warning "Attention !"
-*******************
+
+// bitmap.c
+
+#define MSGTR_NotEnoughMemoryC32To1 "[c32to1] mémoire insuffisante pour image\n"
+#define MSGTR_NotEnoughMemoryC1To32 "[c1to32] mémoire insuffisante pour image\n"
+
+// cfg.c
+
+#define MSGTR_ConfigFileReadError "[cfg] erreur lecture fichier config ...\n"
+#define MSGTR_UnableToSaveOption "[cfg] impossible de sauvegarder l'option '%s'.\n"
+
+// interface.c
+
+#define MSGTR_DeletingSubtitles "[GUI] Suppression des sous-titres.\n"
+#define MSGTR_LoadingSubtitles "[GUI] Chargement des soustitres: %s\n"
+#define MSGTR_AddingVideoFilter "[GUI] Ajout de filtre vidéo: %s\n"
+#define MSGTR_RemovingVideoFilter "[GUI] Enlèvement de filtre video: %s\n"
+
+// mw.c
+
+#define MSGTR_NotAFile "Ceci ne semble pas être un fichier: %s !\n"
+
+// ws.c
+
+#define MSGTR_WS_CouldNotOpenDisplay "[ws] Impossible d'ouvrir l'affichage.\n"
+#define MSGTR_WS_RemoteDisplay "[ws] Affichage à distance, désactive XMITSHM.\n"
+#define MSGTR_WS_NoXshm "[ws] Désolé, votre système ne supporte pas l'extension de mémoire partagée X.\n"
+#define MSGTR_WS_NoXshape "[ws] Désolé, votre système ne supporte pas l'extension XShape.\n"
+#define MSGTR_WS_ColorDepthTooLow "[ws] Désolé, la profondeur d'échantillonnage est trop basse.\n"
+#define MSGTR_WS_TooManyOpenWindows "[ws] Trop de fenêtres ouvertes.\n"
+#define MSGTR_WS_ShmError "[ws] erreur d'extension de mémoire partagée\n"
+#define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Désolé, mémoire insuffisante pour tampon de dessin.\n"
+#define MSGTR_WS_DpmsUnavailable "DPMS non disponible?\n"
+#define MSGTR_WS_DpmsNotEnabled "Imposssible d'activer DPMS.\n"
+
+// wsxdnd.c
+
+#define MSGTR_WS_NotAFile "Ceci ne semble pas être un fichier...\n"
+#define MSGTR_WS_DDNothing "D&D: Rien de retourné!\n"
 
 #endif
+
+// ======================= VO Video Output drivers ========================
+
+#define MSGTR_VOincompCodec "Le périphérique de sortie vidéo sélectionné est incompatible avec ce codec.\n"\
+                "Essayer d'ajouter le filtre d'échelle, e.g. -vf spp,scale plutôt que -vf spp.\n"
+#define MSGTR_VO_GenericError "Cette erreur s'est produite"
+#define MSGTR_VO_UnableToAccess "Impossible d'accéder"
+#define MSGTR_VO_ExistsButNoDirectory "existe déjà, mais n'est pas un répertoire."
+#define MSGTR_VO_DirExistsButNotWritable "Répertoire de sortie existe déjà, mais n'est pas en écriture."
+#define MSGTR_VO_DirExistsAndIsWritable "Répertoire de sortie existe déjà et n'est pas en écriture."
+#define MSGTR_VO_CantCreateDirectory "Impossible de créer répertoire de sortie."
+#define MSGTR_VO_CantCreateFile "Impossible de créer fichier de sortie."
+#define MSGTR_VO_DirectoryCreateSuccess "Répertoire de sorti crée avec succès."
+#define MSGTR_VO_ParsingSuboptions "Analyse de sous-options."
+#define MSGTR_VO_SuboptionsParsedOK "sous-options analysées OK."
+#define MSGTR_VO_ValueOutOfRange "Valeur hors plage"
+#define MSGTR_VO_NoValueSpecified "Nulle valeur spécifiée."
+#define MSGTR_VO_UnknownSuboptions "Sous-option(s) inconnue(s)"
+
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\nVoici les sous-options aalib vo_aa:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Options supplémentaires fournies par vo_aa:\n" \
+"  help        imprime ce message d'aide\n" \
+"  osdcolor    met couleur osd\n  subcolor    met couleur sous-titre\n" \
+"        les paramètres de couleur sont:\n           0 : normal\n" \
+"           1 : faible\n           2 : fort\n           3 : police forte\n" \
+"           4 : inversé\n           5 : spécial\n\n\n"
+
+// vo_jpeg.c
+#define MSGTR_VO_JPEG_ProgressiveJPEG "JPEG progressif activé."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "JPEG progressif désactivé."
+#define MSGTR_VO_JPEG_BaselineJPEG "Ligne de base JPEG activée."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "Ligne de base JPEG désactivée."
+
+// vo_pnm.c
+#define MSGTR_VO_PNM_ASCIIMode "Mode ASCII activé."
+#define MSGTR_VO_PNM_RawMode "Mode cru activé."
+#define MSGTR_VO_PNM_PPMType "Écriture de fichiers PPM."
+#define MSGTR_VO_PNM_PGMType "Écriture de fichiers PGM."
+#define MSGTR_VO_PNM_PGMYUVType "Écriture de fichiers PGMYUV."
+
+// vo_yuv4mpeg.c
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "Mode entrelacé requiert hauteur d'image divisible par 4."
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Impossible d'allouer tampon de ligne pour mode entrelacé."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "Entré non RGB, impossible décomposer chrominance!"
+#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Largeur d'image doit être divisible par 2."
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Mémoire insuffisante pour allouer tampon d'image RGB."
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Impossible d'obtenir ident. de fichier ou mémoire pour écriture \"%s\"!"
+#define MSGTR_VO_YUV4MPEG_OutFileWriteError "Erreur d'écriture d'image vers sortie!"
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "Sous-périférique inconnu: %s"
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Mode sortie entrelacée utilisée, champ haut au début."
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Mode sortie entrelacée utilisée, champ bas au début."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Mode image progressive (par defaut) utilisé."
+
+// sub.c
+#define MSGTR_VO_SUB_Seekbar "Recherche"
+#define MSGTR_VO_SUB_Play "Lecture"
+#define MSGTR_VO_SUB_Pause "Pause"
+#define MSGTR_VO_SUB_Stop "Arret"
+#define MSGTR_VO_SUB_Rewind "Rembobine"
+#define MSGTR_VO_SUB_Forward "Avant"
+#define MSGTR_VO_SUB_Clock "Horloge"
+#define MSGTR_VO_SUB_Contrast "Contraste"
+#define MSGTR_VO_SUB_Saturation "Saturation"
+#define MSGTR_VO_SUB_Volume "Volume"
+#define MSGTR_VO_SUB_Brightness "Luminosité"
+#define MSGTR_VO_SUB_Hue "Tonalité"
+
+// vo_xv.c
+#define MSGTR_VO_XV_ImagedimTooHigh "Dimensions d'image source trop élevées: %ux%u (maximum %ux%u)\n"
+
+// Old vo drivers that have been replaced
+
+#define MSGTR_VO_PGM_HasBeenReplaced "Pilote sortie vidéo pgm remplacé par -vo pnm:pgmyuv.\n"
+#define MSGTR_VO_MD5_HasBeenReplaced "Pilote sortie vidéo md5 remplacé par -vo md5sum.\n"
+
+// ======================= AO Audio Output drivers ========================
+
+// libao2 
+
+// audio_out.c
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: modules alsa9 et alsa1x enlevés, utiliser -ao alsa.\n"
+
+// ao_oss.c
+#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Impossible d'ouvrir mixeur %s: %s\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Mixeur de carte audio n'a pas canal '%s' utilise default.\n"
+#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Impossible ouvrir périférique audio %s: %s\n"
+#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Impossible identifier desc de fichier gelé: %s\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] Impossible régler périf audio %s à sortie %s, essaie %s...\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: N'a pu régler périf audio à %d canaux.\n"
+#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: Pilote ne supporte pas SNDCTL_DSP_GETOSPACE :-(\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Votre pilote audio ne supporte PAS select()  ***\n Recompiler MPlayer avec #undef HAVE_AUDIO_SELECT dans config.h !\n\n"
+#define MSGTR_AO_OSS_CantReopen "[AO OSS]\nErreur fatale: *** IMPOSSIBLE RÉOUVRIR / REPARTIR PÉRIF AUDIO *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Format OSS inconnu/non-supporté: %x.\n"
+
+// ao_arts.c
+#define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
+#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Connecté au serveur de son.\n"
+#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Impossible ouvrir flux.\n"
+#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Flux ouvert.\n"
+#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] Grandeur tampon: %d\n"
+
+// ao_dxr2.c
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] N'a pu régler volume à %d.\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] %d Hz non-supporté, essayer rééchantillonnage.\n"
+
+// ao_esd.c
+#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] échec de esd_open_sound: %s\n"
+#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latence: [serveur: %0.2fs, net: %0.2fs] (ajuste %0.2fs)\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] échec d'ouverture de flux rappel ESD: %s\n"
+
+// ao_mpegpes.c
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] échec mixeur ensemble audio DVB: %s.\n"
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz non supporté, essayer rééchantillonnage.\n"
+
+// ao_null.c
+// This one desn't even  have any mp_msg nor printf's?? [CHECK]
+
+// ao_pcm.c
+#define MSGTR_AO_PCM_FileInfo "[AO PCM] Fichier: %s (%s)\nPCM: Échantillonnement: %iHz Canaux: %s Format %s\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Accélérer déchargement avec -vc null -vo null\n[AO PCM] Info: Pour écrire fichers WAVE utiliser -ao pcm:waveheader (par defaut).\n"
+#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Échec ouverture %s en écriture!\n"
+
+// ao_sdl.c
+#define MSGTR_AO_SDL_INFO "[AO SDL] Échantillonnage: %iHz Canaux: %s Format %s\n"
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] pilote audio %s utilisé.\n"
+#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] format audio non supporté: 0x%x.\n"
+#define MSGTR_AO_SDL_CantInit "[AO SDL] Échec initialiation audio SDL: %s\n"
+#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Impossible ouvrir audio: %s\n"
+
+// ao_sgi.c
+#define MSGTR_AO_SGI_INFO "[AO SGI] contrôle.\n"
+#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Échantillonnage: %iHz Canaux: %s Format %s\n"
+#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] lecture: périphérique invalide.\n"
+#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: échec setparams: %s\nImpossible régler échantillonnage désiré.\n"
+#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE non acceptée sur la ressource donnée.\n"
+#define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: échec getparams: %s\n"
+#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: échantillonnage maintenant %lf (taux désiré: %lf)\n"
+#define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
+#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Impossible ouvrir canal audio: %s\n"
+#define MSGTR_AO_SGI_Uninit "[AO SGI] desinit: ...\n"
+#define MSGTR_AO_SGI_Reset "[AO SGI] repart: ...\n"
+#define MSGTR_AO_SGI_PauseInfo "[AO SGI] pause_audio: ...\n"
+#define MSGTR_AO_SGI_ResumeInfo "[AO SGI] repart_audio: ...\n"
+
+// ao_sun.c
+#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: échec SETINFO.\n"
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: échec écriture.\n"
+#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Impossible ouvrir périphérique audio %s, %s  -> aucun son.\n"
+#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: votre carte ne supporte pas canal %d, %s, %d Hz échantillonnage.\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Votre pilote audio ne supporte PAS select()  ***\nRecompiler MPlayer avec #undef HAVE_AUDIO_SELECT dans config.h !\n\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nÉrreur fatale: *** IMPOSSIBLE RÉOUVRIR/REPARTIR PÉRIPHÉRIQUE AUDIO (%s) ***\n"
+
+// ao_alsa5.c
+#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: format requis: %d Hz, %d canaux, %s\n"
+#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: nulle carte son trouvée.\n"
+#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: format invalide (%s) requis - sortie désactivée.\n"
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: erreur ouverture lecture: %s\n"
+#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: erreur pcm info: %s\n"
+#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d carte(s) son trouvée(s), utilise: %s\n"
+#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: erreur info canal pcm: %s\n"
+#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: erreur parametrage: %s\n"
+#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: erreur ouverture canal: %s\n"
+#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: erreur préparation canal: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: erreur drain de lecture: %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: erreur vidage de lecture: %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: erreur fermeture pcm: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: erreur drain de lecture: %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: erreur vidage de lecture: %s\n"
+#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: erreur préparation canal: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: erreur drain de lecture: %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: erreur vidage de lecture: %s\n"
+#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: erreur préparation canal: %s\n"
+#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: sous-passement alsa, réinit flux.\n"
+#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: erreur préparation lecture: %s\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: erreur écriture après réinit: %s - abandon.\n"
+#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: erreur de sortie: %s\n"
+
+// ao_plugin.c
+
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] plugiciel invalide: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf 
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "labels disponibles dans"
+#define MSGTR_AF_LADSPA_WarnNoInputs "GARE! Plugiciel LADSPA sans entré audio.\n  Le signal entrée audio sera perdu."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "Plugiciels multi-canal (>2) non (encore) supportés.\n  Utiliser plugiciels mono ou stéréo."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "Plugiciel LADSPA sans sortie audio."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "Désaccord entre le nombre d'entrées et de sorties audio du plugiciel LADSPA."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "échec de chargement"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "Fonction ladspa_descriptor() introuvable dans fichier lib spécifié."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Label introuvable dans lib du plugiciel."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "Nulle sous-option spécifiée"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "Nul fichier lib spécifié"
+#define MSGTR_AF_LADSPA_ErrNoLabel "Nul label de filtre spécifié"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Pas assez de contrôles spécifiés sur ligne de commande"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Contrôle d'entré #%d sous limite inférieure de %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Contrôle d'entré #%d sous limite supérieure de %0.4f.\n"
+
+// format.c
+
+#define MSGTR_AF_FORMAT_UnknownFormat "format inconnu "
+
+// ========================== INPUT =========================================
+
+// joystick.c
+
+#define MSGTR_INPUT_JOYSTICK_Opening "Ouverture périphérique manette de jeux %s\n"
+#define MSGTR_INPUT_JOYSTICK_CantOpen "Impossible ouvrir périphérique manette de jeux %s: %s\n"
+#define MSGTR_INPUT_JOYSTICK_ErrReading "Erreur lecture périphérique manette de jeux: %s\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Manette de jeux: perdons %d bytes de données\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Manette de jeux: alerte évennement init, perdu sync avec pilote\n"
+#define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Alerte manette de jeux événement inconnu de type %d\n"
+
+// input.c
+
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyCmdFds "Trop de descripteurs de fichiers de commande, Impossible enrégister descripteur fichier %d.\n"
+#define MSGTR_INPUT_INPUT_ErrCantRegister2ManyKeyFds "Trop de descripteurs de fichiers touche, Impossible enrégister descripteur fichier %d.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeInt "Commande %s: argument %d pas un nombre entier.\n"
+#define MSGTR_INPUT_INPUT_ErrArgMustBeFloat "Commande %s: argument %d pas un nombre réel.\n"
+#define MSGTR_INPUT_INPUT_ErrUnterminatedArg "Commande %s: argument %d non terminé.\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownArg "Argument inconnu %d\n"
+#define MSGTR_INPUT_INPUT_Err2FewArgs "Commande %s requiert au moins %d arguments, trouvé seulement %d.\n"
+#define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Erreur lecture descripteur fichier commande %d: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Tampon de commande du descripteur de fichier %d plein: omet contenu\n"
+#define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "Commande invalide pour touche liée %s"
+#define MSGTR_INPUT_INPUT_ErrSelect "Erreur sélection: %s\n"
+#define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Erreur sur descripteur de fichier entré touche %d\n"
+#define MSGTR_INPUT_INPUT_ErrDeadKeyOnFd "Entré couche morte sur descripteur fichier %d\n"
+#define MSGTR_INPUT_INPUT_Err2ManyKeyDowns "Trop événements touche appuyé en même temps\n"
+#define MSGTR_INPUT_INPUT_ErrOnCmdFd "Erreur sur descripteur fichier commande %d\n"
+#define MSGTR_INPUT_INPUT_ErrReadingInputConfig "Erreur lecture fichier config entré %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrUnknownKey "Clé inconnue '%s'\n"
+#define MSGTR_INPUT_INPUT_ErrUnfinishedBinding "Liaison non terminée %s\n"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForKeyName "Tampon trop petit pour nom de touche: %s\n"
+#define MSGTR_INPUT_INPUT_ErrNoCmdForKey "Aucune commande trouvée pour touche %s"
+#define MSGTR_INPUT_INPUT_ErrBuffer2SmallForCmd "Tampon trop petit pour commande %s\n"
+#define MSGTR_INPUT_INPUT_ErrWhyHere "Que faisons-nous ici?\n"
+#define MSGTR_INPUT_INPUT_ErrCantInitJoystick "Impossible initier manette entrée\n"
+#define MSGTR_INPUT_INPUT_ErrCantStatFile "Impossible lire %s: %s\n"
+#define MSGTR_INPUT_INPUT_ErrCantOpenFile "Impossible ouvrir %s: %s\n"
+
+// ========================== LIBMPDEMUX ===================================
+
+// url.c
+
+#define MSGTR_MPDEMUX_URL_StringAlreadyEscaped "Chaîne semble déjà échappée dans url_escape %c%c1%c2\n"
+
+// ai_alsa1x.c
+
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Impossible réger taux échantillon\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Impossible régler heure tampon\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Impossible régler heure période\n"
+
+// ai_alsa1x.c / ai_alsa.c
+
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Configuration brisée pour ce PCM: nulle configuration disponible\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Type accès non disponible\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Format échantillon non disponible\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Compte de canaux non disp. - retour à valeur défaut: %d\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Impossible installer params hw: %s"
+#define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Impossible utiliser période égale à grandeur tampon (%u == %lu)\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Impossible installer params sw:n"
+#define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Erreur ouverture audio: %s\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "Erreur statut ALSA: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (au moins %.3f ms long)\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaStatus "Statut ALSA:\n"
+#define MSGTR_MPDEMUX_AIALSA_AlsaXRUNPrepareError "ALSA xrun: erreur préparation: %s"
+#define MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError "Erreur écrit/lect ALSA"
+
+// ai_oss.c
+
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Impossible mettre compte canaux: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Impossible mettre stéréo: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2Open "Impossible ouvrir '%s': %s\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Format non supporté\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Impossible mettre format audio."
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Impossible mettre taux échantillon: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Impossible mettre déclencheur: %d\n"
+#define MSGTR_MPDEMUX_AIOSS_Unable2GetBlockSize "Impossible obtenir grandeur bloc!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSizeZero "Grandeur bloc audio zéro, met à %d!\n"
+#define MSGTR_MPDEMUX_AIOSS_AudioBlockSize2Low "Grandeur bloc audio trop bas, met à %d!\n"
+
+// asfheader.c
+
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: grandeur entête plus grande que 1 MB (%d)!\nContacter auteurs MPlayer, et télécharge/envoie ce fichier.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Impossible allouer %d octets pour entête\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF en lisant entête asf, fichier brisé/incomplet?\n"
+#define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR pourrait fonctionner seulement avec libavformat, en cas problème, essayer -demuxer 35\n"
+#define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Nul morceau données suit entête!\n"
+#define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: nul entête audio ou vidéo trouvé - fichier brisé?\n"
+#define MSGTR_MPDEMUX_ASFHDR_InvalidLengthInASFHeader "Longueur entête ASF invalide!\n"
+
+// asf_mmst_streaming.c
+
+#define MSGTR_MPDEMUX_MMST_WriteError "Erreur écriture\n"
+#define MSGTR_MPDEMUX_MMST_EOFAlert "\nAlerte! EOF\n"
+#define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "Échec lecture pré-entête\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "Grandeur entête invalide, abandon\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Échec lecture données entête\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "Échec lecture packet_len\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "Grandeur paquet rtsp invalide, abandon\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Échec lecture données commande\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "Objet entête\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "Objet données\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "Objet fichier, longueur paquet = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Objet flux, id flux: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "trop de id, flux sauté"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "Objet inconnu\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Échec lecture données média\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "Signature manquante\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Tout est fait. Merci pour téléchargement de fichier contenant technologie propriétaire et patenté.\n"
+#define MSGTR_MPDEMUX_MMST_UnknownCmd "commande inconnue %02x\n"
+#define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "erreur get_media_packet : %s\n"
+#define MSGTR_MPDEMUX_MMST_Connected "Connecté\n"
+
+// asf_streaming.c
+
+#define MSGTR_MPDEMUX_ASF_StreamChunkSize2Small "Ahhhh, grandeur bloc flux trop petite: %d\n"
+#define MSGTR_MPDEMUX_ASF_SizeConfirmMismatch "désaccord confirme grandeur!: %d %d\n"
+#define MSGTR_MPDEMUX_ASF_WarnDropHeader "Alerte : omet entête ????\n"
+#define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Échec analyse entête morceau\n"
+#define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Nul entête comme premier morceau !!!!\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Erreur ne peux allouer tampon %d octets\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Erreur lecture flux réseau\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Erreur morceau trop petit\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Erreur nombre sous-morceaus invalide\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Bande passante trop petite, ne peux lire fichier!\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Bande passante trop petite, flux audio désélectionné\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Bande passante trop petite, flux vidéo désélectionné\n"
+#define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Longueur entête ASF invalide!\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Erreur lecture entête morceau\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Erreur grandeur morceau > grandeur paquet\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Erreur lecture morceau\n"
+#define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> Redirecteur ASF\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "Proxy URL invalide\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Genre de flux asf inconnu\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Échec analyse réponse HTTP\n"
+#define MSGTR_MPDEMUX_ASF_ServerReturn "Retour de serveur %d:%s\n"
+#define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ALERTE ANALYSE ASF HTTP: Pragma %s coupé de %d octets à %d\n"
+#define MSGTR_MPDEMUX_ASF_SocketWriteError "Erreur lecture interface (socket): %s\n"
+#define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Échec analyse entête\n"
+#define MSGTR_MPDEMUX_ASF_NoStreamFound "nul flux trouvé\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "genre flux ASF inconnu\n"
+#define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Échec, abandon\n"
+
+// audio_in.c
+
+#define MSGTR_MPDEMUX_AUDIOIN_ErrReadingAudio "\nErreur lecture audio: %s\n"
+#define MSGTR_MPDEMUX_AUDIOIN_XRUNSomeFramesMayBeLeftOut "Rétabli de cross-run, quelques images pourraient être échappées!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_ErrFatalCannotRecover "Erreur fatale, impossible de se rétablir!\n"
+#define MSGTR_MPDEMUX_AUDIOIN_NotEnoughSamples "\nNombre insuffisant échantillons audio!\n"
+
+// aviheader.c
+
+#define MSGTR_MPDEMUX_AVIHDR_EmptyList "** liste vide?!\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Trouvé film à 0x%X - 0x%X\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "Trouvé 'bih', %u octets de %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regeneration de table image clé pour vidéo M$ mpg4v1\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Regeneration de table image clé pour DIVX3 video\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regeneration de table image clé pour MPEG4 video\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Trouvé 'wf', %d octets de %d\n"
+#define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: dmlh trouvé (grandeur=%d) (total images=%d)\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Lecture morceau INDEX, %d morceaux pour %d images (fpos=%"PRId64")\n"
+#define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Entête RIFF additionnel...\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** alerte: pas un entête AVI étendu..\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Morceau brisé?  grandeur morceau=%d  (id=%.4s)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Construction index odml (%d super moreaux index)\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Fichier brisé (incomplet?) détecté. Utilise index traditionnel\n"
+#define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "Impossible lire fichier index %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s n'est pas un fichier index MPlayer valide\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Impossible allouer mémoire pour données index de %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Fin de fichier index inattendu %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Fichier index chargé: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Génération Index: %3lu %s     \r"
+#define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: table index générée pour %d morceaux!\n"
+#define MSGTR_MPDEMUX_AVIHDR_Failed2WriteIdxFile "Impossible écrire fichier index %s: %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_IdxFileSaved "Sauvegardé fichier index: %s\n"
+
+// cache2.c
+
+#define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rFlux non enrégistrable en mémoire cache.\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! diff lecture position fichier!!! rapporter ce bogue...\n"
+
+// cdda.c
+
+#define MSGTR_MPDEMUX_CDDA_CantOpenCDDADevice "Impossible ouvrir périphérique CDDA.\n"
+#define MSGTR_MPDEMUX_CDDA_CantOpenDisc "Impossible ouvrir disque.\n"
+#define MSGTR_MPDEMUX_CDDA_AudioCDFoundWithNTracks "trouvé CD audio avec %ld pistes.\n"
+
+// cddb.c
+
+#define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Échec lecture TDM.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Échec ouverture périphérique %s.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "URL non valide\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Échec envoie requète HTTP.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Échec lecture réponse HTTP.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Non trouvé.\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Code erreur inconnu\n"
+#define MSGTR_MPDEMUX_CDDB_NoCacheFound "Nul tampon trouvé.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Lecture incomplète de fichier xmcd.\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Échec création répertoire %s.\n"
+#define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Écriture incomplète de fichier xmcd.\n"
+#define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Retour invalide de fichier base de données xmcd.\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "FIXME inattendu\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Code non géré\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Impossible trouver fin de ligne\n"
+#define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Analyse OK, trouvé: %s\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album non trouvé\n"
+#define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Réponse serveur: Erreur syntaxe commande\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nulle information sites disponible\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Échec obtention niveau de protocol\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Nul CD dans lecteur\n"
+
