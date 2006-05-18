@@ -16,7 +16,7 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/fb.h>
-#include <asm/io.h>
+#include <sys/io.h>
 
 #include "config.h"
 #ifdef HAVE_SYS_MMAN_H
