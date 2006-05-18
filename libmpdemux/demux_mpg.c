@@ -45,7 +45,7 @@ static int parse_psm(demuxer_t *demux, int len) {
   mpg_demuxer_t *priv = (mpg_demuxer_t *) demux->priv;
   
   mp_dbg(MSGT_DEMUX,MSGL_V, "PARSE_PSM, len=%d\n", len);
-  if(! len)
+  if(! len || len > 1018)
     return 0;
   
   c = stream_read_char(demux->stream);
