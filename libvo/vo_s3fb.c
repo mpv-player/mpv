@@ -22,6 +22,7 @@
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
+#include "mp_msg.h"
 #include "fastmemcpy.h"
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -225,12 +226,12 @@ static int preinit(const char *arg)
     name = "/dev/fb0";
 
   if((fd = open(name, O_RDWR)) == -1) {
-    printf("s3fb: can't open %s: %s\n", name, strerror(errno));
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: can't open %s: %s\n", name, strerror(errno));
     return -1;
   }
 
   if(ioctl(fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-    printf("s3fb: problem with FBITGET_FSCREENINFO ioctl: %s\n",
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: problem with FBITGET_FSCREENINFO ioctl: %s\n",
            strerror(errno));
     close(fd);
     fd = -1;
@@ -238,7 +239,7 @@ static int preinit(const char *arg)
   }
 
   if(ioctl(fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-    printf("s3fb: problem with FBITGET_VSCREENINFO ioctl: %s\n",
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: problem with FBITGET_VSCREENINFO ioctl: %s\n",
            strerror(errno));
     close(fd);
     fd = -1;
@@ -252,7 +253,7 @@ static int preinit(const char *arg)
   case 32:
     break; // Ok
   default:
-    printf("s3fb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: %d bpp output is not supported\n", fb_vinfo.bits_per_pixel);
     close(fd);
     fd = -1;
     return -1;
@@ -263,7 +264,7 @@ static int preinit(const char *arg)
   sreg = fb_finfo.smem_start;
 
   if((long)smem == -1) {
-    printf("s3fb: Couldn't map memory areas: %s\n", strerror(errno));
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Couldn't map memory areas: %s\n", strerror(errno));
     if((long)smem != -1)
       munmap(smem, fb_finfo.smem_len);
     smem = NULL;
@@ -337,7 +338,7 @@ static void setup_screen(uint32_t full)
   inpageoffset = yuv_on(in_s3_format, in_width, in_height, vidx, vidy, vidwidth, vidheight, 0, screenwidth, screenheight, screenstride, 0);
   inpage0 = smem + inpageoffset;
   inpage = inpage0;
-  printf("s3fb: output is at %dx%d +%dx%d\n", vidx, vidy, vidwidth, vidheight);
+  mp_msg(MSGT_VO, MSGL_INFO, "s3fb: output is at %dx%d +%dx%d\n", vidx, vidy, vidwidth, vidheight);
    
   clear_screen();
 }
@@ -393,7 +394,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     break;
 
   default:
-    printf("s3fb: Eik! Something's wrong with control().\n");
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Eik! Something's wrong with control().\n");
     return -1;
   }
    
@@ -404,7 +405,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
     page = 0;
    
   if(screenheight * screenstride + page + offset > fb_finfo.smem_len) {
-    printf("s3fb: Not enough video memory to play this movie. Try at a lower resolution\n");
+    mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Not enough video memory to play this movie. Try at a lower resolution\n");
     return -1;
   }
 
@@ -412,7 +413,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_
   if (vo_doublebuffering)
     inpage = inpage0 + page;
       
-  printf("s3fb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d\n",
+  mp_msg(MSGT_VO, MSGL_INFO, "s3fb: screen is %dx%d at %d bpp, in is %dx%d at %d bpp, norm is %dx%d\n",
          screenwidth, screenheight, screendepth * 8,
          in_width, in_height, in_depth * 8,
          d_width, d_height);
