@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.50 $ -->
+<!-- synced with 1.53 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1236,10 +1236,14 @@
   Így hát ha archiválási okokból jó minőség kell, akkor kerüld el a
   deinterlace-t.
   Bármikor deinterlace-lheted a filmet lejátszás közben is, ha
-  progresszív scan-es megjelenítőd van, valamint a jövő lejátszói
-  képesek lesznek teljes mezőrátával deinterlacing-elni, 50 vagy
-  60000/1001 teljes képkocka per másodpercre interpolálni az átlapolt
-  videóból.
+  progresszív scan-es megjelenítőd van.
+  A jelenleg kapható számítógépek teljesítménye deinterlacing szűrő
+  használatára kényszerítik a lejátszókat, ami egy kis mértékű
+  képminőség romlást okoz.
+  Azonban a jövő lejátszói képesek lesznek az átlapolt képernyő
+  TV-vé történő átváltoztatására, teljes mezőrátás deinterlacing-re és
+  az átlapolt videó 50 vagy 60000/1001 teljes képkocka per másodpercre
+  interpolálására.
 </para>
 
 <para>
@@ -3992,7 +3996,7 @@ opciókat, ha a codec hibázik vagy rossz kimenetet ad.
   <entry>tsccvid.dll</entry>
   <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
   <entry>8230d8560c41d444f249802a2700d1d5</entry>
-  <entry></entry>
+  <entry>shareware hiba windows-on</entry>
 </row>
 <row>
   <entry>vp31vfw.dll</entry>
@@ -4023,6 +4027,21 @@ opciókat, ha a codec hibázik vagy rossz kimenetet ad.
   <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
   <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
   <entry></entry>
+</row>
+<row>
+  <entry>msulvc06.DLL</entry>
+  <entry>MSU Lossless codec (MSUD)</entry>
+  <entry>294bf9288f2f127bb86f00bfcc9ccdda</entry>
+  <entry>
+    Dekódolható a <application>Window Media Player</application>rel,
+    de az <application>MPlayer</application>rel nem (még).
+  </entry>
+</row>
+<row>
+  <entry>camcodec.dll</entry>
+  <entry>CamStudio veszteségmentes videó codec (CSCD)</entry>
+  <entry>0efe97ce08bb0e40162ab15ef3b45615</entry>
+  <entry>sf.net/projects/camstudio</entry>
 </row>
 </tbody>
 </tgroup>
