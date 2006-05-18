@@ -15,11 +15,13 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
-#include <sys/mman.h>
 #include <linux/fb.h>
 #include <asm/io.h>
 
 #include "config.h"
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+#endif
 #include "fastmemcpy.h"
 #include "video_out.h"
 #include "video_out_internal.h"
