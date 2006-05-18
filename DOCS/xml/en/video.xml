@@ -192,7 +192,7 @@ xv support, but the card itself is very slow, so you better sell it.
 </para>
 <para>
 There is now a native framebuffer driver for S3 Virge cards similiar to 
-tdfxfb.  Set up your framebuffer (eg append
+tdfxfb. Set up your framebuffer (e.g. append
 "<option>vga=792 video=vesa:mtrr</option>" to your kernel) and use
 <option>-vo s3fb</option> (<option>-vf yuy2</option> and <option>-dr</option>
 will also help).
