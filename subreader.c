@@ -1194,8 +1194,8 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
   int char_set_num;
   fribidi_boolean log2vis;
   if(flip_hebrew) { // Please fix the indentation someday
-  fribidi_set_mirroring (FRIBIDI_TRUE);
-  fribidi_set_reorder_nsm (FRIBIDI_FALSE);
+  fribidi_set_mirroring(1);
+  fribidi_set_reorder_nsm(0);
    
   if( sub_utf8 == 0 ) {
     char_set_num = fribidi_parse_charset (fribidi_charset?fribidi_charset:"ISO8859-8");
