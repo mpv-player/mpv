@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.85 -->
+<!-- synced with 1.87 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -192,6 +192,13 @@ részt.
 Az S3 Savage3D nem működik megfelelően, de a Savage4 igen 4.0.3 vagy újabb XFree86
 használata mellett (képhibák esetén próbáld 16bpp-vel). Ami az S3 Virge-eket illeti:
 van xv támogatás, de maga a kártya túl lassú, így jobb, ha eladod.
+</para>
+<para>
+Már van natív framebuffer vezérlő az S3 Virge kártyákhoz, hasonlóan a tdfxfb-hez.
+Állítsd be a framebuffer-ed (pl. add hozzá a
+"<option>vga=792 video=vesa:mtrr</option>" opciót a kerneledhez) és használd
+a <option>-vo s3fb</option> opciót (<option>-vf yuy2</option> és <option>-dr</option>
+szintén segíthet).
 </para>
 
 <note>
