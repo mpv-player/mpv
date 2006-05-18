@@ -1274,7 +1274,7 @@
   You can always deinterlace the movie at playback time when
   displaying it on progressive scan devices.
   The power of currently available computers forces players to use a
-  deinterlacing filter, which which results in a slight degradation in
+  deinterlacing filter, which results in a slight degradation in
   image quality.
   But future players will be able to mimic the interlaced display of
   a TV, deinterlacing to full fieldrate and interpolating 50 or
@@ -4102,7 +4102,7 @@ if a codec fails or gives wrong output.
 </row>
 <row>
   <entry>camcodec.dll</entry>
-  <entry>CamStudio lossless video codec(CSCD)</entry>
+  <entry>CamStudio lossless video codec (CSCD)</entry>
   <entry>0efe97ce08bb0e40162ab15ef3b45615</entry>
   <entry>sf.net/projects/camstudio</entry>
 </row>
