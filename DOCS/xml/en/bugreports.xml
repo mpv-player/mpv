@@ -332,7 +332,7 @@ diagnose a problem. You can direct the output into a file like this:
 
 <para>
 If your problem is specific to one or more files, then please upload the offender(s) to:
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>
