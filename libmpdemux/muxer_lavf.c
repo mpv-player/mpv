@@ -28,6 +28,16 @@ extern unsigned int codec_get_wav_tag(int id);
 extern enum CodecID codec_get_bmp_id(unsigned int tag);
 extern enum CodecID codec_get_wav_id(unsigned int tag);
 
+extern char *info_name;
+extern char *info_artist;
+extern char *info_genre;
+extern char *info_subject;
+extern char *info_copyright;
+extern char *info_sourceform;
+extern char *info_comment;
+
+void pstrcpy(char *buf, int buf_size, const char *str);
+
 typedef struct {
 	//AVInputFormat *avif;
 	AVFormatContext *oc;
@@ -372,7 +382,16 @@ int muxer_init_muxer_lavf(muxer_t *muxer)
         priv->oc->mux_rate= mux_rate;
         priv->oc->preload= (int)(mux_preload*AV_TIME_BASE);
         priv->oc->max_delay= (int)(mux_max_delay*AV_TIME_BASE);
-
+        if (info_name)
+            pstrcpy(priv->oc->title    , sizeof(priv->oc->title    ), info_name     );
+        if (info_artist)
+            pstrcpy(priv->oc->author   , sizeof(priv->oc->author   ), info_artist   );
+        if (info_genre)
+            pstrcpy(priv->oc->genre    , sizeof(priv->oc->genre    ), info_genre    );
+        if (info_copyright)
+            pstrcpy(priv->oc->copyright, sizeof(priv->oc->copyright), info_copyright);
+        if (info_comment)
+            pstrcpy(priv->oc->comment  , sizeof(priv->oc->comment  ), info_comment  );
 	register_protocol(&mp_protocol);
 
 	if(url_fopen(&priv->oc->pb, mp_filename, URL_WRONLY))
