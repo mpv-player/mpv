@@ -265,9 +265,9 @@ static int preinit(const char *arg)
 
   if((long)smem == -1) {
     mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Couldn't map memory areas: %s\n", strerror(errno));
-    if((long)smem != -1)
-      munmap(smem, fb_finfo.smem_len);
     smem = NULL;
+    close(fd);
+    fd = -1;
     return -1;
   }
 
