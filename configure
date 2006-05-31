@@ -842,7 +842,7 @@ if x86 || x86_64 ; then
 
   exts=`$_cpuinfo | egrep 'features|flags' | cut -d ':' -f 2 | _head 1`
 
-  pparam=`echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ \
+  pparam=`echo $exts | sed -e s/k6_mtrr/mtrr/ -e s/cyrix_arr/mtrr/ -e s/centaur_mcr/mtrr/ \
                            -e s/xmm/sse/ -e s/kni/sse/`
 
   for ext in $pparam ; do

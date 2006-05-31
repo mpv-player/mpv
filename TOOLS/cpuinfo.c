@@ -275,6 +275,10 @@ main(int argc, char **argv)
     if (strstr(idstr, "Cyrix") &&
         (family == 5 && model < 4 || family == 6))
       printf(" %s", "cyrix_arr");
+    /* as well as centaur_mcr. */
+    if (strstr(idstr, "Centaur") &&
+        family == 5)
+      printf(" %s", "centaur_mcr");
  
     for (i = 0; cap_amd[i].bit >= 0; i++) {
       if (amd_flags & (1 << cap_amd[i].bit)) {
