@@ -21,10 +21,10 @@
 #include <postproc/postprocess.h>
 #elif defined(USE_LIBPOSTPROC)
 #define EMU_OLD
-#include "libavcodec/libpostproc/postprocess.h"
+#include "libpostproc/postprocess.h"
 
 #ifdef EMU_OLD
-#include "libavcodec/libpostproc/postprocess_internal.h"
+#include "libpostproc/postprocess_internal.h"
 #endif
 #endif
 

@@ -161,7 +161,7 @@ PARTS = libmpdemux \
         libmpcodecs \
         libavutil \
         libavcodec \
-        libavcodec/libpostproc \
+        libpostproc \
         libavformat \
         libao2 \
         osdep \
@@ -297,8 +297,8 @@ libavutil/libavutil.a:
 libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
 
-libavcodec/libpostproc/libpostproc.a:
-	$(MAKE) -C libavcodec/libpostproc LIBPREF=lib LIBSUF=.a
+libpostproc/libpostproc.a:
+	$(MAKE) -C libpostproc LIBPREF=lib LIBSUF=.a
 
 libavformat/libavformat.a:
 	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a

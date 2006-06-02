@@ -6161,7 +6161,7 @@ echores "$_libavformat"
 echocheck "FFmpeg libpostproc (static)"
 if test "$_libpostproc" = auto ; then
 _libpostproc=no
-if test -d libavcodec && test -f libavcodec/libpostproc/postprocess.h ; then
+if test -d libpostproc && test -f libpostproc/postprocess.h ; then
    _libpostproc='yes'
 fi
 fi
@@ -6305,8 +6305,8 @@ _def_libpostproc='#undef USE_LIBPOSTPROC'
 _def_libpostproc_so='#undef USE_LIBPOSTPROC_SO'
 if test "$_libpostproc" = yes ; then
   _def_libpostproc='#define USE_LIBPOSTPROC 1'
-  _ld_libpostproc='libavcodec/libpostproc/libpostproc.a'
-  _dep_libpostproc='libavcodec/libpostproc/libpostproc.a'
+  _ld_libpostproc='libpostproc/libpostproc.a'
+  _dep_libpostproc='libpostproc/libpostproc.a'
 else
   if test "$_libpostproc_so" = yes ; then
     _def_libpostproc_so='#define USE_LIBPOSTPROC_SO 1'
