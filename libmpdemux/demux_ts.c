@@ -2103,7 +2103,7 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 		}
 
 
-		if(ptr[j] == 0x6a)	//A52 Descriptor
+		if(ptr[j] == 0x6a || ptr[j] == 0x7a)	//A52 Descriptor
 		{
 			if(es->type == 0x6)
 			{
