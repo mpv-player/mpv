@@ -1351,7 +1351,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "PES_PRIVATE1\n");
 			es->start   = p;
 			es->size    = packet_len;
-			es->type    = PES_PRIVATE1;
+			es->type    = (type_from_pmt == UNKNOWN ? PES_PRIVATE1 : type_from_pmt);
 			es->payload_size -= packet_len;
 
 			return 1;
