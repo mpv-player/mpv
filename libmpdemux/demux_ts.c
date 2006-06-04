@@ -71,6 +71,7 @@ typedef enum
 	VIDEO_AVC	= mmioFOURCC('a', 'v', 'c', '1'),
 	AUDIO_MP2   	= 0x50,
 	AUDIO_A52   	= 0x2000,
+	AUDIO_DTS	= 0x2001,
 	AUDIO_LPCM_BE  	= 0x10001,
 	AUDIO_AAC	= mmioFOURCC('M', 'P', '4', 'A'),
 	SPU_DVD		= 0x3000000,
@@ -232,7 +233,7 @@ typedef struct {
 } TS_pids_t;
 
 
-#define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC))
+#define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC) || ((x) == AUDIO_DTS))
 #define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC))
 
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
@@ -772,6 +773,8 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO MPA(pid=%d)", param->apid);
 	else if(param->atype == AUDIO_A52)
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO A52(pid=%d)", param->apid);
+	else if(param->atype == AUDIO_DTS)
+		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO DTS(pid=%d)", param->apid);
 	else if(param->atype == AUDIO_LPCM_BE)
 		mp_msg(MSGT_DEMUXER, MSGL_INFO, "AUDIO LPCM(pid=%d)", param->apid);
 	else if(param->atype == AUDIO_AAC)
@@ -2167,6 +2170,10 @@ static int parse_descriptors(struct pmt_es_t *es, uint8_t *ptr)
 				{
 					es->type = AUDIO_A52;
 				}
+				else if(d[0] == 'D' && d[1] == 'T' && d[2] == 'S' && d[3] == '2')
+				{
+					es->type = AUDIO_DTS;
+				}
 				else
 					es->type = UNKNOWN;
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "FORMAT %s\n", es->format_descriptor);
@@ -2357,6 +2364,9 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 				break;
 			case 0x81:
 				pmt->es[idx].type = AUDIO_A52;
+				break;
+			case 0x8A:
+				pmt->es[idx].type = AUDIO_DTS;
 				break;
 			default:
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "UNKNOWN ES TYPE=0x%x\n", es_type);
