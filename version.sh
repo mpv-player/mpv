@@ -3,13 +3,13 @@
 OS=`uname -s`
 case "$OS" in
   CYGWIN*|Linux|MINGW*)
-    last_cvs_update=`date -r CVS/Entries +%y%m%d-%H:%M 2>/dev/null`
+    last_cvs_update=`date -r .svn +%y%m%d-%H:%M 2>/dev/null`
     ;;
   Darwin|*BSD*)
     # BSD 'date -r' does not print modification time
     # LC_ALL=C sets month/day order and English language in the date string
     # The if in the awk call works around wrong day/month order.
-    last_cvs_update=`LC_ALL=C ls -lT CVS/Entries | \
+    last_cvs_update=`LC_ALL=C ls -lT .svn | \
       awk '{ \
         day=$7; \
         month=index(" JanFebMarAprMayJunJulAugSepOctNovDec", $6); \
