@@ -194,6 +194,8 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	    return -1;
 	  }
 	  
+	  // audit: do not overflow buffer_size
+	  if (size > SIZE_MAX - buffer_size) return -1;
 	  buffer = (char*) malloc(size+buffer_size);
 	  if(buffer == NULL) {
 	    mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MPDEMUX_ASF_BufferMallocFailed,size+buffer_size);

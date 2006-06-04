@@ -211,7 +211,7 @@ while(1){
         break;
       }
       priv->suidx_size++;
-      priv->suidx = realloc(priv->suidx, priv->suidx_size * sizeof (avisuperindex_chunk));
+      priv->suidx = realloc_struct(priv->suidx, priv->suidx_size, sizeof (avisuperindex_chunk));
       s = &priv->suidx[priv->suidx_size-1];
 
       chunksize-=24;

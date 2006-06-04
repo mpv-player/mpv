@@ -145,16 +145,6 @@ typedef struct {
     void* desc; // image/sound/etc description (pointer to ImageDescription etc)
 } mov_track_t;
 
-#ifndef SIZE_MAX
-#define SIZE_MAX ((size_t)-1)
-#endif
-
-void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
-  if (nmemb > SIZE_MAX / size)
-    return NULL;
-  return realloc(ptr, nmemb * size);
-}
-
 void mov_build_index(mov_track_t* trak,int timescale){
     int i,j,s;
     int last=trak->chunks_size;
@@ -166,6 +156,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
 	mp_msg(MSGT_DEMUX, MSGL_WARN, "No chunk offset table, trying to build one!\n");
 	
 	trak->chunks_size = trak->samples_size; /* XXX: FIXME ! */
+	// audit: this code will be vulnerable if it is reenabled (currently #if 0)
 	trak->chunks = realloc(trak->chunks, sizeof(mov_chunk_t)*trak->chunks_size);
 	
 	for (i=0; i < trak->chunks_size; i++)
@@ -1278,7 +1269,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    z_stream zstrm;
 	    stream_t* backup;
 
-	    if (moov_sz > 0xffffffff - 16) {
+	    if (moov_sz > SIZE_MAX - 16) {
               mp_msg(MSGT_DEMUX, MSGL_ERR, "Invalid cmvd atom size %d\n", moov_sz);
               break;
             }

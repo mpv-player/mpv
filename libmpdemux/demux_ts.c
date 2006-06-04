@@ -235,13 +235,6 @@ typedef struct {
 #define IS_AUDIO(x) (((x) == AUDIO_MP2) || ((x) == AUDIO_A52) || ((x) == AUDIO_LPCM_BE) || ((x) == AUDIO_AAC))
 #define IS_VIDEO(x) (((x) == VIDEO_MPEG1) || ((x) == VIDEO_MPEG2) || ((x) == VIDEO_MPEG4) || ((x) == VIDEO_H264) || ((x) == VIDEO_AVC))
 
-static void *realloc_struct(void *ptr, size_t nmemb, size_t size)
-{
-	if (nmemb > SIZE_MAX / size)
-		return NULL;
-	return realloc(ptr, nmemb * size);
-}
-
 static int ts_parse(demuxer_t *demuxer, ES_stream_t *es, unsigned char *packet, int probe);
 
 static uint8_t get_packet_size(const unsigned char *buf, int size)

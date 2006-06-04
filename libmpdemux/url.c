@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #include "url.h"
 #include "mp_msg.h"
@@ -24,6 +25,10 @@ url_new(const char* url) {
 
 	if( url==NULL ) return NULL;
 	
+        if (strlen(url) > (SIZE_MAX / 3 - 1)) {
+                mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
+                goto err_out;
+        }
         escfilename=malloc(strlen(url)*3+1);
         if (!escfilename ) {
                 mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);

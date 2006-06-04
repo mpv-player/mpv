@@ -1976,6 +1976,8 @@ static int fill_last_frame(muxer_headers_t *spriv,  uint8_t *ptr, int len)
 
 	if(spriv->framebuf[idx].alloc_size < spriv->framebuf[idx].size + len)
 	{
+		if(spriv->framebuf[idx].size > SIZE_MAX - (size_t)len)
+			return 0;
 		spriv->framebuf[idx].buffer = (uint8_t*) realloc(spriv->framebuf[idx].buffer, spriv->framebuf[idx].size + len);
 		if(! spriv->framebuf[idx].buffer)
 			return 0;
@@ -1995,7 +1997,7 @@ static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int le
 	idx = spriv->framebuf_used;
 	if(idx >= spriv->framebuf_cnt)
 	{
-		spriv->framebuf = (mpeg_frame_t*) realloc(spriv->framebuf, (spriv->framebuf_cnt+1)*sizeof(mpeg_frame_t));
+		spriv->framebuf = (mpeg_frame_t*) realloc_struct(spriv->framebuf, (spriv->framebuf_cnt+1), sizeof(mpeg_frame_t));
 		if(spriv->framebuf == NULL)
 		{
 			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(idx), abort\n");
@@ -2018,6 +2020,11 @@ static int add_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int le
 	
 	if(spriv->framebuf[idx].alloc_size < spriv->framebuf[idx].size + len)
 	{
+		if(spriv->framebuf[idx].size > SIZE_MAX - (size_t)len)
+		{
+			mp_msg(MSGT_MUXER, MSGL_FATAL, "Size overflow, couldn't realloc frame buffer(frame), abort\n");
+			return -1;
+		}
 		spriv->framebuf[idx].buffer = realloc(spriv->framebuf[idx].buffer, spriv->framebuf[idx].size + len);
 		if(spriv->framebuf[idx].buffer == NULL)
 		{
@@ -2329,6 +2336,11 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 
 	if(s->b_buffer_size - s->b_buffer_len < len)
 	{
+		if(s->b_buffer_len > SIZE_MAX - len)
+		{
+			mp_msg(MSGT_MUXER, MSGL_FATAL, "\nFATAL! couldn't realloc, integer overflow\n");
+			return;
+		}
 		s->b_buffer = realloc(s->b_buffer, len  + s->b_buffer_len);
 		if(s->b_buffer == NULL)
 		{

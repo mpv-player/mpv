@@ -109,9 +109,9 @@ static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
     s->priv=si=malloc(sizeof(struct avi_stream_info));
     memset(si,0,sizeof(struct avi_stream_info));
     si->idxsize=256;
-    si->idx=malloc(sizeof(struct avi_odmlidx_entry)*si->idxsize);
+    si->idx=calloc(si->idxsize, sizeof(struct avi_odmlidx_entry));
     si->riffofssize=16;
-    si->riffofs=malloc(sizeof(off_t)*(si->riffofssize+1));
+    si->riffofs=calloc((si->riffofssize+1), sizeof(off_t));
     memset(si->riffofs, 0, sizeof(off_t)*si->riffofssize);
 
     switch(type){
@@ -174,7 +174,7 @@ static void avifile_odml_new_riff(muxer_t *muxer)
     vsi->riffofspos++;
     if (vsi->riffofspos>=vsi->riffofssize) {
         vsi->riffofssize+=16;
-        vsi->riffofs=realloc(vsi->riffofs,sizeof(off_t)*(vsi->riffofssize+1));
+        vsi->riffofs=realloc_struct(vsi->riffofs,(vsi->riffofssize+1),sizeof(off_t));
     }
     vsi->riffofs[vsi->riffofspos] = ftello(f);
 
@@ -220,7 +220,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
         // add to the traditional index:
         if(muxer->idx_pos>=muxer->idx_size){
             muxer->idx_size+=256; // 4kB
-            muxer->idx=realloc(muxer->idx,16*muxer->idx_size);
+            muxer->idx=realloc_struct(muxer->idx,muxer->idx_size,16);
         }
         muxer->idx[muxer->idx_pos].ckid=s->ckid;
         muxer->idx[muxer->idx_pos].dwFlags=flags; // keyframe?
@@ -232,7 +232,7 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags,
     // add to odml index
     if(si->idxpos>=si->idxsize){
 	si->idxsize+=256;
-	si->idx=realloc(si->idx,sizeof(*si->idx)*si->idxsize);
+	si->idx=realloc_struct(si->idx,si->idxsize,sizeof(*si->idx));
     }
     si->idx[si->idxpos].flags=(flags&AVIIF_KEYFRAME)?0:ODML_NOTKEYFRAME;
     si->idx[si->idxpos].ofs=muxer->file_end;
@@ -599,7 +599,7 @@ static void avifile_odml_write_index(muxer_t *muxer){
 		i, entries_per_subidx, si->superidxpos);
 
     si->superidxsize = si->superidxpos;
-    si->superidx = malloc(sizeof(*si->superidx) * si->superidxsize);
+    si->superidx = calloc(si->superidxsize, sizeof(*si->superidx));
     memset(si->superidx, 0, sizeof(*si->superidx) * si->superidxsize);
 
     idxpos = 0;

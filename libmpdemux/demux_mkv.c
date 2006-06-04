@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
+#include <inttypes.h>
 
 #include "stream.h"
 #include "demuxer.h"
@@ -1083,6 +1084,8 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           {
             int x;
             uint64_t num = ebml_read_length (s, &x);
+	    // audit: cheap guard against overflows later..
+	    if (num > SIZE_MAX - 1000) return 0;
             l = x + num;
             track->private_data = malloc (num);
             if (stream_read(s, track->private_data, num) != (int) num)

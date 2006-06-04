@@ -315,6 +315,10 @@ int
 http_response_append( HTTP_header_t *http_hdr, char *response, int length ) {
 	if( http_hdr==NULL || response==NULL || length<0 ) return -1;
 
+	if( (unsigned)length > SIZE_MAX - http_hdr->buffer_size - 1) {
+		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Bad size in memory (re)allocation\n");
+		return -1;
+	}
 	http_hdr->buffer = (char*)realloc( http_hdr->buffer, http_hdr->buffer_size+length+1 );
 	if( http_hdr->buffer==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory (re)allocation failed\n");
@@ -340,7 +344,8 @@ int
 http_response_parse( HTTP_header_t *http_hdr ) {
 	char *hdr_ptr, *ptr;
 	char *field=NULL;
-	int pos_hdr_sep, hdr_sep_len, len;
+	int pos_hdr_sep, hdr_sep_len;
+	size_t len;
 	if( http_hdr==NULL ) return -1;
 	if( http_hdr->is_parsed ) return 0;
 

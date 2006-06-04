@@ -1169,18 +1169,18 @@ static int start(priv_t *priv)
     
     if (!tv_param_noaudio) {
 	setup_audio_buffer_sizes(priv);
-	priv->audio_skew_buffer = (long long*)malloc(sizeof(long long)*priv->aud_skew_cnt);
+	priv->audio_skew_buffer = (long long*)calloc(priv->aud_skew_cnt, sizeof(long long));
 	if (!priv->audio_skew_buffer) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate skew buffer: %s\n", strerror(errno));
 	    return 0;
 	}
-	priv->audio_skew_delta_buffer = (long long*)malloc(sizeof(long long)*priv->aud_skew_cnt);
+	priv->audio_skew_delta_buffer = (long long*)calloc(priv->aud_skew_cnt, sizeof(long long));
 	if (!priv->audio_skew_delta_buffer) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate skew buffer: %s\n", strerror(errno));
 	    return 0;
 	}
 
-	priv->audio_ringbuffer = (unsigned char*)malloc(priv->audio_in.blocksize*priv->audio_buffer_size);
+	priv->audio_ringbuffer = (unsigned char*)calloc(priv->audio_in.blocksize, priv->audio_buffer_size);
 	if (!priv->audio_ringbuffer) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate audio buffer: %s\n", strerror(errno));
 	    return 0;
@@ -1226,14 +1226,14 @@ static int start(priv_t *priv)
 	       priv->video_buffer_size_max*priv->format.fmt.pix.height*bytesperline/(1024*1024));
     }
 
-    priv->video_ringbuffer = (unsigned char**)malloc(priv->video_buffer_size_max*sizeof(unsigned char*));
+    priv->video_ringbuffer = (unsigned char**)calloc(priv->video_buffer_size_max, sizeof(unsigned char*));
     if (!priv->video_ringbuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate video buffer: %s\n", strerror(errno));
 	return 0;
     }
     for (i = 0; i < priv->video_buffer_size_max; i++)
 	priv->video_ringbuffer[i] = NULL;
-    priv->video_timebuffer = (long long*)malloc(sizeof(long long) * priv->video_buffer_size_max);
+    priv->video_timebuffer = (long long*)calloc(priv->video_buffer_size_max, sizeof(long long));
     if (!priv->video_timebuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
 	return 0;
@@ -1261,7 +1261,7 @@ static int start(priv_t *priv)
     }
 
     /* query buffers */
-    if (!(priv->map = malloc(sizeof(struct map) * request.count))) {
+    if (!(priv->map = calloc(request.count, sizeof(struct map)))) {
 	mp_msg(MSGT_TV, MSGL_ERR, "%s: malloc capture buffers failed: %s\n",
 	       info.short_name, strerror(errno));
 	return 0;
@@ -1561,7 +1561,7 @@ static int get_video_framesize(priv_t *priv)
 // for testing purposes only
 static void read_doublespeed(priv_t *priv)
 {
-    char *bufx = (char*)malloc(priv->audio_in.blocksize*2);
+    char *bufx = (char*)calloc(priv->audio_in.blocksize, 2);
     short *s;
     short *d;
     int i;

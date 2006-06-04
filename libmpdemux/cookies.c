@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+#include <inttypes.h>
 
 #include "cookies.h"
 #include "http.h"
@@ -107,6 +108,11 @@ static char *load_file(const char *filename, off_t * length)
 
     if (*length < 0) {
 	mp_msg(MSGT_NETWORK, MSGL_V, "Could not find EOF");
+	return NULL;
+    }
+
+    if (*length > SIZE_MAX - 1) {
+	mp_msg(MSGT_NETWORK, MSGL_V, "File too big, could not malloc.");
 	return NULL;
     }
 

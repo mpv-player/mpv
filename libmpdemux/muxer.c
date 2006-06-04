@@ -68,7 +68,7 @@ void muxer_write_chunk(muxer_stream_t *s, size_t len, unsigned int flags, double
       int num = s->muxer->muxbuf_num++;
       muxbuf_t *buf, *tmp;
       
-      tmp = realloc(s->muxer->muxbuf, (num+1) * sizeof(muxbuf_t));
+      tmp = realloc_struct(s->muxer->muxbuf, (num+1), sizeof(muxbuf_t));
       if(!tmp) {
         mp_msg(MSGT_MUXER, MSGL_FATAL, MSGTR_MuxbufReallocErr);
         return;

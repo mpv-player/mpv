@@ -103,6 +103,7 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   frames->current_frame = 0;
 
   // allocate enough entries for the indices
+  //   audit: num_frames is 16bit so it is safe against overflow
   frames->filepos = (off_t *)malloc(frames->num_frames * sizeof(off_t));
   frames->frame_size = (int *)malloc(frames->num_frames * sizeof(int));
 

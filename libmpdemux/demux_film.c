@@ -377,7 +377,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
 
       // allocate enough entries for the chunk
       film_data->chunks = 
-        (film_chunk_t *)malloc(film_data->total_chunks * sizeof(film_chunk_t));
+        (film_chunk_t *)calloc(film_data->total_chunks, sizeof(film_chunk_t));
 
       // build the chunk index
       counting_chunks = 1;

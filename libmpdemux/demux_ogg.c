@@ -8,7 +8,7 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-#include <limits.h>
+#include <inttypes.h>
 
 #include "mp_msg.h"
 #include "help_mp.h"

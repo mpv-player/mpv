@@ -221,6 +221,8 @@ ebml_read_ascii (stream_t *s, uint64_t *length)
   len = ebml_read_length (s, &l);
   if (len == EBML_UINT_INVALID)
     return NULL;
+  if (len > SIZE_MAX - 1)
+    return NULL;
   if (length)
     *length = len + l;
 

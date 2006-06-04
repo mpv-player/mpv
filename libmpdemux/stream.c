@@ -354,7 +354,11 @@ int stream_control(stream_t *s, int cmd, void *arg){
 }
 
 stream_t* new_memory_stream(unsigned char* data,int len){
-  stream_t *s=malloc(sizeof(stream_t)+len);
+  stream_t *s;
+
+  if(len < 0)
+    return NULL;
+  s=malloc(sizeof(stream_t)+len);
   memset(s,0,sizeof(stream_t));
   s->fd=-1;
   s->type=STREAMTYPE_MEMORY;

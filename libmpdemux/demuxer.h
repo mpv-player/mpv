@@ -238,6 +238,18 @@ inline static void free_demux_packet(demux_packet_t* dp){
   free(dp);
 }
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
+
+static void *realloc_struct(void *ptr, size_t nmemb, size_t size) {
+  if (nmemb > SIZE_MAX / size) {
+    free(ptr);
+    return NULL;
+  }
+  return realloc(ptr, nmemb * size);
+}
+
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
 demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char *filename);
 void free_demuxer_stream(demux_stream_t *ds);
