@@ -64,11 +64,12 @@ static struct stream_priv_s
 	int card;
 	char *type;
 	int vid, aid;
+	int timeout;
 	char *file;
 }
 stream_defaults =
 {
-	"", 1, "", 0, 0, NULL
+	"", 1, "", 0, 0, 3, NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s, f)
@@ -80,6 +81,7 @@ static m_option_t stream_params[] = {
 	{"type", ST_OFF(type), CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"vid",  ST_OFF(vid),  CONF_TYPE_INT, 0, 0 ,0, NULL},
 	{"aid",  ST_OFF(aid),  CONF_TYPE_INT, 0, 0 ,0, NULL},
+	{"timeout",ST_OFF(timeout),  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
 	{"file", ST_OFF(file), CONF_TYPE_STRING, 0, 0 ,0, NULL},
 
 	{"hostname", 	ST_OFF(prog), CONF_TYPE_STRING, 0, 0, 0, NULL },
@@ -102,6 +104,7 @@ m_option_t dvbin_opts_conf[] = {
 	{"type", "DVB card type is autodetected and can't be overridden\n", CONF_TYPE_PRINT, CONF_NOCFG, 0 ,0, NULL},
 	{"vid",  &stream_defaults.vid,  CONF_TYPE_INT, 0, 0 ,0, NULL},
 	{"aid",  &stream_defaults.aid,  CONF_TYPE_INT, 0, 0 ,0, NULL},
+	{"timeout",  &stream_defaults.timeout,  CONF_TYPE_INT, M_OPT_RANGE, 1, 30, NULL},
 	{"file", &stream_defaults.file, CONF_TYPE_STRING, 0, 0 ,0, NULL},
 
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -119,7 +122,7 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt, int *pids);
 extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
-		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier);
+		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout);
 extern char *dvb_dvrdev[4], *dvb_demuxdev[4], *dvb_frontenddev[4];
 
 static dvb_config_t *dvb_config = NULL;
@@ -560,7 +563,7 @@ int dvb_set_channel(dvb_priv_t *priv, int card, int n)
 
 	if(do_tuning)
 		if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
-			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier))
+			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier, priv->timeout))
 			return 0;
 
 
@@ -733,6 +736,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
  		return STREAM_ERROR;
  	}
 	priv->card = p->card - 1;
+	priv->timeout = p->timeout;
 	
 	tuner_type = priv->config->cards[priv->card].type;
 

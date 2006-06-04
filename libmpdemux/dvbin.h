@@ -99,6 +99,7 @@ typedef struct {
 	stream_t *stream;
 	char new_tuning[256], prev_tuning[256];
 	int retry;
+	int timeout;
 } dvb_priv_t;
 
 

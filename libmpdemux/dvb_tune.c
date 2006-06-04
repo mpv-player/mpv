@@ -238,19 +238,19 @@ int dvb_demux_start(int fd)
 static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
 	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
-	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier);
+	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int tmout);
 
 
 int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
 		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
-		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier)
+		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
 	int ris;
 
 	mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier);
+		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier, timeout);
 
 	if(ris != 0)
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune, TUNING FAILED\n");
@@ -338,7 +338,7 @@ static void print_status(fe_status_t festatus)
 
 
 #ifdef HAVE_DVB_HEAD
-static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams, int tuner_type, uint32_t base)
+static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams, int tuner_type, uint32_t base, int tmout)
 {
 	int32_t strength;
 	fe_status_t festatus;
@@ -360,7 +360,7 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 	while(!ok)
 	{
 		festatus = 0;
-		if(poll(pfd,1,3000) > 0)
+		if(poll(pfd,1,tmout*1000) > 0)
 		{
 			if (pfd[0].revents & POLLPRI)
 			{
@@ -371,7 +371,7 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 		}
 		usleep(10000);
 		tm2 = time((time_t*) NULL);
-		if((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= 3))
+		if((festatus & FE_TIMEDOUT) || (locks >= 2) || (tm2 - tm1 >= tmout))
 			ok = 1;
 	}
 
@@ -426,7 +426,7 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 	}
 	else
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "Not able to lock to the signal on the given frequency\n");
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "Not able to lock to the signal on the given frequency, timeout: %d\n", tmout);
 		return -1;
 	}
 	return 0;
@@ -434,7 +434,7 @@ static int check_status(int fd_frontend,struct dvb_frontend_parameters* feparams
 
 #else
 
-static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_type,uint32_t base)
+static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_type,uint32_t base, int tmout)
 {
 	int i,res;
 	int32_t strength;
@@ -461,7 +461,7 @@ static int check_status(int fd_frontend,FrontendParameters* feparams,int tuner_t
 		pfd[0].fd = fd_frontend;
 		pfd[0].events = POLLIN | POLLPRI;
 
-		if(poll(pfd,1,10000) > 0)
+		if(poll(pfd,1,tmout*1000) > 0)
 		{
 			if (pfd[0].revents & POLLPRI)
 			{
@@ -643,7 +643,7 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
 	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
 	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
-	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier)
+	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier, int timeout)
 {
   int res, hi_lo, dfd;
 #ifdef HAVE_DVB_HEAD
@@ -787,5 +787,5 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
   if (fd_sec) SecGetStatus(fd_sec, &sec_state);
 #endif
 
-  return(check_status(fd_frontend,&feparams,fe_info.type, (hi_lo ? LOF2 : LOF1)));
+  return(check_status(fd_frontend,&feparams,fe_info.type, (hi_lo ? LOF2 : LOF1), timeout));
 }
