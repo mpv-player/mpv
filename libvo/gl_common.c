@@ -513,6 +513,11 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
   GLfloat ucoef[4];
   GLfloat vcoef[4];
   GLint i;
+  if (!CombinerInput || !CombinerOutput ||
+      !CombinerParameterfv || !CombinerParameteri) {
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner functions missing!\n");
+    return;
+  }
   glGetIntegerv(GL_MAX_GENERAL_COMBINERS_NV, &i);
   if (i < 2)
     mp_msg(MSGT_VO, MSGL_ERR,
@@ -521,11 +526,6 @@ static void glSetupYUVCombiners(float uvcos, float uvsin) {
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 3 texture units needed for YUV combiner support (found %i)\n", i);
-  if (!CombinerInput || !CombinerOutput ||
-      !CombinerParameterfv || !CombinerParameteri) {
-    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner functions missing!\n");
-    return;
-  }
   fillUVcoeff(ucoef, vcoef, uvcos, uvsin);
   CombinerParameterfv(GL_CONSTANT_COLOR0_NV, ucoef);
   CombinerParameterfv(GL_CONSTANT_COLOR1_NV, vcoef);
@@ -572,6 +572,12 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
   GLfloat ucoef[4];
   GLfloat vcoef[4];
   GLint i;
+  if (!BeginFragmentShader || !EndFragmentShader ||
+      !SetFragmentShaderConstant || !SampleMap ||
+      !ColorFragmentOp2 || !ColorFragmentOp3) {
+    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner (ATI) functions missing!\n");
+    return;
+  }
   glGetIntegerv(GL_NUM_FRAGMENT_REGISTERS_ATI, &i);
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
@@ -580,12 +586,6 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
   if (i < 3)
     mp_msg(MSGT_VO, MSGL_ERR,
            "[gl] 3 texture units needed for YUV combiner (ATI) support (found %i)\n", i);
-  if (!BeginFragmentShader || !EndFragmentShader ||
-      !SetFragmentShaderConstant || !SampleMap ||
-      !ColorFragmentOp2 || !ColorFragmentOp3) {
-    mp_msg(MSGT_VO, MSGL_FATAL, "[gl] Combiner (ATI) functions missing!\n");
-    return;
-  }
   fillUVcoeff(ucoef, vcoef, uvcos, uvsin);
   BeginFragmentShader();
   SetFragmentShaderConstant(GL_CON_0_ATI, ucoef);

@@ -274,6 +274,10 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
         glBindTexture(GL_TEXTURE_2D, lookupTex);
       case YUV_CONVERSION_FRAGMENT_POW:
       case YUV_CONVERSION_FRAGMENT:
+        if (!GenPrograms || !BindProgram) {
+          mp_msg(MSGT_VO, MSGL_ERR, "[gl] fragment program functions missing!\n");
+          break;
+        }
         GenPrograms(1, &fragprog);
         BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
