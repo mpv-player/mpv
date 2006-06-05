@@ -54,6 +54,8 @@ void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                        GLfloat, GLfloat);
 int (APIENTRY *SwapInterval)(int);
+void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei,
+                            GLint, GLenum, GLenum, const GLvoid *);
 /** \} */ // end of glextfunctions group
 
 //! \defgroup glgeneral OpenGL general helper functions
@@ -278,6 +280,7 @@ static const extfunc_desc_t extfuncs[] = {
   {(void **)&ProgramString, "_program", {"glProgramString", "glProgramStringARB", "glProgramStringNV", NULL}},
   {(void **)&ProgramEnvParameter4f, "_program", {"glProgramEnvParameter4f", "glProgramEnvParameter4fARB", "glProgramEnvParameter4fNV", NULL}},
   {(void **)&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalEXT", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
+  {(void **)&TexImage3D, NULL, {"glTexImage3D", NULL}},
   {NULL}
 };
 

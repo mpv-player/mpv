@@ -290,5 +290,7 @@ extern void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 extern void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                               GLfloat, GLfloat);
 extern int (APIENTRY *SwapInterval)(int);
+extern void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei,
+                             GLsizei, GLint, GLenum, GLenum, const GLvoid *);
 
 #endif
