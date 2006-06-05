@@ -1815,7 +1815,7 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	}
     }
 
-#if 1
+#if 0
     if( mp_msg_test(MSGT_DEMUX,MSGL_DBG3) ){
 	for(t_no=0;t_no<priv->track_db;t_no++){
 	    mov_track_t* trak=priv->tracks[t_no];
