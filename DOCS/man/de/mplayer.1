@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r18570
+.\" In sync with r18587
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -3203,6 +3203,7 @@ Ermöglicht Helligkeits-, Kontrast- und Sättigungseinstellung.
 Dies benutzt eine nVidia-spezifische Erweiterung (GL_NV_register_combiners).
 Es werden mindestens drei Textureinheiten benötigt.
 Ermöglicht Sättigungs- und Farbwerteinstellung.
+Diese Methode ist schnell aber ungenau.
 .br
 2: Benutze ein Fragmentprogramm.
 Benötigt die GL_ARB_fragment_program-Erweiterung und mindestens drei
@@ -3230,6 +3231,7 @@ Benutzt eine ATI-spezifische Erweiterung (GL_ATI_fragment_shader \- nicht
 GL_ARB_fragment_shader!).
 Mindestens drei Textureinheiten werden benötigt.
 Ermöglicht Sättigungs- und Farbwerteinstellung.
+Diese Methode ist schnell aber ungenau.
 .RE
 .IPs customprog=<Dateiname>
 Lädt ein eigenes Fragmentprogramm aus <Dateiname>.
@@ -7343,6 +7345,8 @@ Strategie, mit der zwischen Intra-/P-/B-Frames gewählt wird:
 Benutzt immer die maximale Anzahl B-Frames (Standard).
 .IPs 1
 Vermeide B-Frames in schnell bewegten Szenen.
+Siehe die Option b_sensitivity, um Feineinstellungen für diese Option
+vorzunehmen.
 .IPs 2
 Platziert B-Frames mehr oder weniger optimal, um maximale Qualität zu
 erbringen (langsamer).
@@ -7350,6 +7354,17 @@ Du kannst versuchen, den Einfluß auf die Geschwindigkeit durch
 Herumprobieren mit der Option brd_scale zu verringern.
 .RE
 .PD 1
+.
+.TP
+.B b_sensitivity=<jede Ganzzahl größer als 0>
+Macht Anpassungen, wie sensitiv vb_strategy=1 Bewegung erkennt und den Gebrauch
+von B-Frames vermeidet (Standard: 40).
+Geringere Empfindlichkeit führt zu mehr B-Frames.
+Der Gebrauch von mehr B-Frames verbessert PSNR normalerweise, zu viele B-Frames
+jedoch können die Qualität in hochbewegten Szenen stören.
+Wenn es nicht gerade einen extrem hohen Anteil Bewegung gibt, kann 
+b_sensitivity sicher auf einen Wert unter dem Standardwert verringert werden;
+10 ist in den meisten Fällen ein brauchbarer Wert.
 .
 .TP
 .B brd_scale=<0\-10>
@@ -8324,8 +8339,10 @@ Benutze MPEG-Quantisierungsparameter anstelle von H.263.
 .
 .TP
 .B aic\ \ \ \ 
-AC-Vorhersage (advanced intra prediction, verbesserte Intra-Vorhersage für
-H.263+)
+Aktiviere AC-Vorhersage für MPEG-4 oder fortgeschrittene Intra-Vorhersage
+(advanced intra prediction) für H.263+.
+Dies wird die Qualität leicht erhöhen (um die 0.02 dB PSNR) und die Encodierung
+leicht verlangsamen (ungefähr 1%).
 .br
 .I ANMERKUNG:
 vqmin sollte 8 oder höher sein für H.263+ AIC.
