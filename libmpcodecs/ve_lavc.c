@@ -58,7 +58,7 @@ static int lavc_param_vrate_tolerance = 1000*8;
 static int lavc_param_mb_decision = 0; /* default is realtime encoding */
 static int lavc_param_v4mv = 0;
 static int lavc_param_vme = 4;
-static float lavc_param_vqscale = 0.0;
+static float lavc_param_vqscale = -1;
 static int lavc_param_vqmin = 2;
 static int lavc_param_vqmax = 31;
 static int lavc_param_mb_qmin = 2;
@@ -161,6 +161,7 @@ static int lavc_param_bidir_refine = 0;
 static int lavc_param_sc_factor = 1;
 static int lavc_param_video_global_header= 0;
 static int lavc_param_mv0_threshold = 256;
+static int lavc_param_refs = 1;
 
 char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
@@ -181,7 +182,7 @@ m_option_t lavcopts_conf[]={
 	{"mbd", &lavc_param_mb_decision, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"v4mv", &lavc_param_v4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"vme", &lavc_param_vme, CONF_TYPE_INT, CONF_RANGE, 0, 8, NULL},
-	{"vqscale", &lavc_param_vqscale, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 255.0, NULL},
+	{"vqscale", &lavc_param_vqscale, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 255.0, NULL},
 	{"vqmin", &lavc_param_vqmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqmax", &lavc_param_vqmax, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"mbqmin", &lavc_param_mb_qmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
@@ -321,6 +322,7 @@ m_option_t lavcopts_conf[]={
 	{"vglobal", &lavc_param_video_global_header, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"aglobal", &lavc_param_audio_global_header, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"mv0_threshold", &lavc_param_mv0_threshold, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
+	{"refs", &lavc_param_refs, CONF_TYPE_INT, CONF_RANGE, 1, 16, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -652,6 +654,7 @@ static int config(struct vf_instance_s* vf,
         lavc_venc_context->flags2 |= CODEC_FLAG2_LOCAL_HEADER;
     }
     lavc_venc_context->mv0_threshold = lavc_param_mv0_threshold;
+    lavc_venc_context->refs = lavc_param_refs;
 
     switch(lavc_param_format)
     {
@@ -741,7 +744,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->me_method = ME_ZERO+lavc_param_vme;
 
     /* fixed qscale :p */
-    if (lavc_param_vqscale)
+    if (lavc_param_vqscale >= 0.0)
     {
 	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_MPCODECS_UsingConstantQscale, lavc_param_vqscale);
 	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
