@@ -46,9 +46,9 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	register int  i;
 
 	/*	  
-		FIXME1 add a low band pass filter to avoid supressing 
+		FIXME1 add a low band pass filter to avoid suppressing 
 		centered bass/drums
-		FIXME2 better calculated* atenuation factor
+		FIXME2 better calculated* attenuation factor
 	*/
 	
 	for(i=0;i<len;i+=nch)

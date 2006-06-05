@@ -687,7 +687,7 @@ static int control(priv_t *priv, int cmd, void *arg)
     case TVI_CONTROL_TUN_SET_FREQ:
 #if 0
 	set_mute(priv, 1);
-	usleep(100000); // wait to supress noise during switching
+	usleep(100000); // wait to suppress noise during switching
 #endif
 	frequency.tuner = 0;
 	frequency.type  = V4L2_TUNER_ANALOG_TV;
@@ -698,7 +698,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return TVI_CONTROL_FALSE;
 	}
 #if 0
-	usleep(100000); // wait to supress noise during switching
+	usleep(100000); // wait to suppress noise during switching
 	set_mute(priv, 0);
 #endif
 	return TVI_CONTROL_TRUE;

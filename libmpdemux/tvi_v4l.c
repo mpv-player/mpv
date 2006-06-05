@@ -1147,7 +1147,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 		mp_msg(MSGT_TV, MSGL_ERR, "ioctl set freq failed: %s\n", strerror(errno));
 		return(TVI_CONTROL_FALSE);
 	    }
-	    usleep(100000); // wait to supress noise during switching
+	    usleep(100000); // wait to suppress noise during switching
 
 	    if (priv->capability.audios) {
 		priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
