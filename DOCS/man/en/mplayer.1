@@ -7953,7 +7953,9 @@ Use MPEG quantizers instead of H.263.
 .
 .TP
 .B aic\ \ \ \ 
-ac prediction (advanced intra prediction for H.263+)
+Enable AC prediction for MPEG-4 or advanced intra prediction for H.263+.
+This will improve quality very slightly (around 0.02 dB PSNR) and slow
+down encoding very slightly (about 1%).
 .br
 .I NOTE:
 vqmin should be 8 or larger for H.263+ AIC.
