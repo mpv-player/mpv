@@ -3053,6 +3053,7 @@ Provides brightness, contrast and saturation control.
 This uses an nVidia-specific extension (GL_NV_register_combiners).
 At least three texture units are needed.
 Provides saturation and hue control.
+This method is fast but inexact.
 .br
 2: Use a fragment program.
 Needs the GL_ARB_fragment_program extension and at least three texture units.
@@ -3074,6 +3075,7 @@ This uses an ATI-specific extension (GL_ATI_fragment_shader - not
 GL_ARB_fragment_shader!).
 At least three texture units are needed.
 Provides saturation and hue control.
+This method is fast but inexact.
 .RE
 .IPs customprog=<filename>
 Load a custom fragment program from <filename>.
