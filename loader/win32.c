@@ -3750,6 +3750,16 @@ static WIN_BOOL WINAPI expGetProcessAffinityMask(HANDLE hProcess,
     return 1;
 }
 
+// Fake implementation: does nothing, but does it right :)
+static WIN_BOOL WINAPI expSetProcessAffinityMask(HANDLE hProcess,
+                                              LPDWORD dwProcessAffinityMask)
+{
+    dbgprintf("SetProcessAffinityMask(0x%x, 0x%x) => 1\n",
+	      hProcess, dwProcessAffinityMask);
+
+    return 1;
+};
+
 static int WINAPI expMulDiv(int nNumber, int nNumerator, int nDenominator)
 {
     static const long long max_int=0x7FFFFFFFLL;
@@ -4778,12 +4788,27 @@ static double exp_CIsin(void)
     return sin(x);
 }
 
+static double exp_CIsqrt(void)
+{
+    FPU_DOUBLE(x);
+
+    dbgprintf("_CIsqrt(%lf)\n", x);
+    return sqrt(x);
+}
+
 /* Needed by rp8 sipr decoder */
 static LPSTR WINAPI expCharNextA(LPCSTR ptr)
 {
     if (!*ptr) return (LPSTR)ptr;
 //    dbgprintf("CharNextA(0x%08x), %s\n", ptr, ptr);
     return (LPSTR)(ptr + 1);
+}
+
+// Fake implementation, needed by wvc1dmod.dll
+static int WINAPI expPropVariantClear(void *pvar)
+{
+//    dbgprintf("PropVariantclear (0x%08x), %s\n", ptr, ptr);
+    return 1;
 }
 
 struct exports
@@ -4957,6 +4982,7 @@ struct exports exp_kernel32[]=
     FF(ExitProcess,-1)
     {"LoadLibraryExA", -1, (void*)&LoadLibraryExA},
     FF(SetThreadIdealProcessor,-1)
+    FF(SetProcessAffinityMask, -1)
 };
 
 struct exports exp_msvcrt[]={
@@ -4999,6 +5025,7 @@ struct exports exp_msvcrt[]={
     FF(_CIpow,-1)
     FF(_CIcos,-1)
     FF(_CIsin,-1)
+    FF(_CIsqrt,-1)
     FF(ldexp,-1)
     FF(frexp,-1)
     FF(sprintf,-1)
@@ -5119,6 +5146,7 @@ struct exports exp_ole32[]={
     FF(CoTaskMemAlloc, -1)
     FF(CoTaskMemFree, -1)
     FF(StringFromGUID2, -1)
+    FF(PropVariantClear, -1)
 };
 // do we really need crtdll ???
 // msvcrt is the correct place probably...
