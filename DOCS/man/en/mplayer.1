@@ -7005,12 +7005,24 @@ strategy to choose between I/P/B-frames:
 Always use the maximum number of B-frames (default).
 .IPs 1
 Avoid B-frames in high motion scenes.
+See the b_sensitivity option to tune this strategy.
 .IPs 2
 Places B-frames more or less optimally to yield maximum quality (slower).
 You may want to reduce the speed impact of this option by tuning the
 option brd_scale.
 .RE
 .PD 1
+.
+.TP
+.B b_sensitivity=<any integer greater than 0>
+Adjusts how sensitively vb_strategy=1 detects motion and avoids using
+B-frames (default: 40). 
+Lower sensitivities will result in more B-frames.
+Using more B-frames usually improves PSNR, but too many B-frames can
+hurt quality in high-motion scenes.
+Unless there is an extremely high amount of motion, b_sensitivity can
+safely be lowered below the default; 10 is a reasonable value in most
+cases.
 .
 .TP
 .B brd_scale=<0\-10>

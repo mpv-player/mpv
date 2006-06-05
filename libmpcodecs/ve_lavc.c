@@ -162,6 +162,7 @@ static int lavc_param_sc_factor = 1;
 static int lavc_param_video_global_header= 0;
 static int lavc_param_mv0_threshold = 256;
 static int lavc_param_refs = 1;
+static int lavc_param_b_sensitivity = 40;
 
 char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
@@ -323,6 +324,7 @@ m_option_t lavcopts_conf[]={
 	{"aglobal", &lavc_param_audio_global_header, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"mv0_threshold", &lavc_param_mv0_threshold, CONF_TYPE_INT, CONF_RANGE, 0, INT_MAX, NULL},
 	{"refs", &lavc_param_refs, CONF_TYPE_INT, CONF_RANGE, 1, 16, NULL},
+        {"b_sensitivity", &lavc_param_b_sensitivity, CONF_TYPE_INT, CONF_RANGE, 1, INT_MAX, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -655,6 +657,7 @@ static int config(struct vf_instance_s* vf,
     }
     lavc_venc_context->mv0_threshold = lavc_param_mv0_threshold;
     lavc_venc_context->refs = lavc_param_refs;
+    lavc_venc_context->b_sensitivity = lavc_param_b_sensitivity;
 
     switch(lavc_param_format)
     {
