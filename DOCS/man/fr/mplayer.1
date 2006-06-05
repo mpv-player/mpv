@@ -1,4 +1,4 @@
-.\" synced with 1.1289
+.\" synced with r18567
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1259,6 +1259,9 @@ Spécifie le numéro de carte à utiliser (par défaut\ : 1).
 Dit à MPlayer de lire les canaux depuis <nom_fichier>.
 ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc} par défaut (en fonction de votre
 type de carte) ou ~/.mplayer/\:channels.conf en dernier recours.
+.IPs timeout=<1\-30>
+Nombre maximal de secondes à attendre lors des tentatives de synthonisation
+du transpondeur avant d'abandonner (par défaut\ : 3).
 .RE
 .PD 1
 .
@@ -7060,13 +7063,13 @@ mode qualité, plus la valeur est grande, plus la qualité est bonne
 complexité du type d'objet
 .PD 0
 .RSs
-.IPs 0
-MAIN (par défaut)
 .IPs 1
-LOW
+MAIN (par défaut)
 .IPs 2
-SSR
+LOW
 .IPs 3
+SSR
+.IPs 4
 LTP (extrêmement lent)
 .RE
 .PD 1
