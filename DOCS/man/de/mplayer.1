@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with rev 1.1289
+.\" In sync with r18567
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1254,6 +1254,10 @@ Weist MPlayer an, die Liste der Kanäle aus <Dateiname> zu lesen
 Standardeinstellung ist ~/\:.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (je
 nach Kartentyp)
 oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit.
+.IPs timeout=<1\-30>
+Maximale Anzahl Sekunden, die benutzt werden, um einen Sender einzustellen,
+bevor aufgegeben wird.
+Standard ist 3.
 .RE
 .PD 1
 .
@@ -7012,13 +7016,13 @@ Qualitätsmodus, je höher desto besser (schließt Option br aus)
 Komplexität des Objekttyps
 .PD 0
 .RSs
-.IPs 0
-MAIN (Standard)
 .IPs 1
-LOW
+MAIN (Standard)
 .IPs 2
-SSR
+LOW
 .IPs 3
+SSR
+.IPs 4
 LTP (extrem langsam)
 .RE
 .PD 1
