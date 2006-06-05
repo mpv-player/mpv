@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with rev. 1.50 -->
+<!-- In sync with r18457 -->
 <chapter id="encoding-guide">
 <title>Encodieren mit <application>MEncoder</application></title>
 
@@ -8,7 +8,7 @@
 
 <para>
   Eine häufig gestellte Frage ist &quot;Wie mache ich den hochwertigsten
-  Rip für eine gegebene Größe?&quot;. Eine weitere Frage ist &quot;Wie mache den qualitativ
+  Rip für eine gegebene Größe?&quot;. Eine weitere Frage ist &quot;Wie mache ich den qualitativ
   bestmöglichen DVD-Rip? Die Dateigröße ist mir egal, ich will einfach nur
   die beste Qualität.&quot;
 </para>
@@ -23,24 +23,24 @@
 </para>
 
 <para>
-  Tatsache ist, der Grund eine DVD eigens in MPEG-4 umzuencodieren ist
+  Tatsache ist, der Grund eine DVD in MPEG-4 umzuencodieren ist
   gerade <emphasis role="bold">weil</emphasis> dir die Größe wichtig ist.
 </para>
 
 <para>
   Es ist sehr schwierig, ein Rezept zum Erzeugen eines sehr
   hochwertigen DVD-Rips anzubieten. Es gilt mehrere Faktoren zu
-  berücksichtigen und du solltest dich mit diesen Details auskennen oder
+  berücksichtigen, und du solltest dich mit diesen Details auskennen oder
   du wirst voraussichtlich am Ende von den Resultaten enttäuscht.
   Nachfolgend werden wir einige dieser Themen etwas näher untersuchen
-  und uns  danach ein Beispiel ansehen. Wir gehen davon aus, dass Du
+  und uns danach ein Beispiel ansehen. Wir gehen davon aus, dass Du
   <systemitem class="library">libavcodec</systemitem> zum Encodieren des
   Videos verwendest, obwohl diese Theorie genauso gut auf andere Codecs
   zutrifft.
 </para>
 
 <para>
-  Ist dies alles zu viel für Dich, solltest du womöglich auf einen der vielen
+  Ist dies alles zu viel für dich, solltest du womöglich auf eins der vielen
   guten Frontends zurückgreifen, die in der
   <ulink url="http://www.mplayerhq.hu/design7/projects.html#mencoder_frontends">MEncoder-Sektion</ulink>
   unserer diesbezüglichen Projektseite zu finden sind.
@@ -50,7 +50,7 @@
 </para>
 
 <sect2 id="menc-feat-dvd-mpeg4-preparing-encode">
-<title>Vorbereitung aufs Encodieren: Identifizieren Sie Quellmaterial und Framerate</title>
+<title>Vorbereitung aufs Encodieren: Identifiziere Quellmaterial und Framerate</title>
 <para>
   Bevor du über das Encodieren eines Films nachdenkst, solltest du einige einleitende
   Schritte vornehmen.
@@ -74,7 +74,7 @@
   und doppelten oder gar verlorenen Frames.
   Abgesehen davon, dass sie unschön sind, beeinflussen diese Artefakte die
   Codierungseffizienz negativ:
-  du erhältst eine schlechtere Qualität pro Bitrateneinheit.
+  Du erhältst eine schlechtere Qualität pro Bitrateneinheit.
 </para>
 
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
@@ -105,7 +105,7 @@
 <listitem><para>
   <emphasis role="bold">NTSC-Video</emphasis>: Aufgenommen mit einer
   NTSC-Videokamera bei 60000/1001 Feldern pro Sekunde oder 60 Feldern
-  pro Sekunde zu Zeiten vor der Farbe.
+  pro Sekunde zu Zeiten vor dem Farbfernsehen.
   Ansonsten ähnlich wie PAL.
 </para></listitem>
 <listitem><para>
@@ -134,20 +134,20 @@
   genannt werden - somit ist letzterer Terminus zweideutig.
 </para>
 <para>
-  Um das ganze noch zu komplizieren, sind manche Filme ein
-  Gemisch aus einigen der oben Beschriebenen.
+  Um das ganze noch komplizierter zu machen, sind manche Filme ein
+  Gemisch aus einigem des oben Beschriebenen.
 </para>
 <para>
   Das wichtigste Unterscheidungsmerkmal zwischen all diesen
-  Formaten ist, dass einige Frame-basiert andere wiederum
+  Formaten ist, dass einige Frame-basiert, andere wiederum
   Feld-basiert sind.
   <emphasis role="bold">Immer</emphasis> wenn ein Film für die
   Anzeige auf dem Fernseher vorbereitet wird (einschließlich
   DVD), wird er in ein Feld-basiertes Format konvertiert.
-  Die zahlreichen Methoden mit denen dies bewerkstelligt werden
+  Die zahlreichen Methoden, mit denen dies bewerkstelligt werden
   kann, werden insgesamt dem &quot;pulldown&quot; zugeordnet, von welchem
   das verrufene NTSC &quot;3:2 telecine&quot; eine Abart darstellt.
-  Solange das Originalmaterial Feld-basiert war (bei gleicher
+  Sofern das Originalmaterial nicht Feld-basiert war (bei gleicher
   Feldrate), erhältst du einen Film in einem anderen Format als
   das Original.
 </para>
@@ -183,7 +183,7 @@
 <listitem><para>
   <emphasis role="bold">NTSC 2:2 pulldown</emphasis>: Verwendet zur
   Darstellung von 30fps Material auf NTSC.
-  Schön, wie das 2:2 PAL pulldown.
+  Schön, genau wie das 2:2 PAL pulldown.
 </para></listitem>
 </itemizedlist>
 
@@ -212,14 +212,14 @@
   leicht vom Encoder rückgängig gemacht werden kann und da er die maximale
   Qualität beibehält.
   Wie auch immer, viele DVD- und Rundfunkproduktionsstudios verwenden
-  keine passenden Encodiertechniken, sie produzieren stattdessen Filme mit
+  keine passenden Encodierungstechniken, sie produzieren stattdessen Filme mit
   &quot;hard telecine&quot;, bei denen Felder sogar in encodiertes MPEG-2 dupliziert
   werden.
 </para>
 <para>
-  Die damit arbeitenden Produzenten werden
+  Die Vorgehensweisen für den Umgang mit solchen Fällen werden
   <link linkend="menc-feat-telecine">später in diesem Handbuch</link>
-  mit einbezogen.
+  behandelt.
   Wir lassen dich jetzt mit einigen Anleitungen zur Identifizierung der
   Materialtypen zurück, mit denen du es zu tun hast:
 </para>
@@ -228,19 +228,19 @@
 <title>NTSC-Bereiche:</title>
 <listitem><para>
   Wenn <application>MPlayer</application> angibt, dass die Framerate
-  während des Betrachtens des Films nach 24000/1001 gewechselt ist
+  während des Betrachtens des Films zu 24000/1001 gewechselt hat
   und diese nie wieder zurückwechselt, handelt es sich meist mit
   Sicherheit um progressiven Inhalt, der &quot;soft telecined&quot; wurde.
 </para></listitem>
 <listitem><para>
   Wenn <application>MPlayer</application> anzeigt, dass die Framerate
   zwischen 24000/1001 und 30000/1001 vor und zurück wechselt, und Du
-  siehst hin und wieder &quot;combing&quot;, dann gibt es mehrere Möglichkeiten.
+  siehst hin und wieder Kammartefakte, dann gibt es mehrere Möglichkeiten.
   Die Segmente mit 24000/1001 fps sind meist mit Sicherheit progressiver
   Inhalt, &quot;soft telecined&quot;, jedoch die Teile mit 30000/1001 fps könnten
   entweder &quot;hard telecined&quot; 24000/1001 fps Inhalt oder 60000/1001 Felder
   pro Sekunde NTSC-Video sein.
-  Verwende die selben Richtwerte wie in folgenden zwei Fällen, um zu
+  Verwende die selben Richtwerte wie in den folgenden zwei Fällen, um zu
   bestimmen, um was es sich handelt.
 </para></listitem>
 <listitem><para>
@@ -270,7 +270,7 @@
 </para></listitem>
 </itemizedlist>
 
-<note><title>Hint:</title>
+<note><title>Tipp:</title>
 <para>
   <application>MPlayer</application> kann das Filmplayback
   mittels der Option -speed verlangsamen oder Frame für Frame abspielen.
@@ -284,30 +284,30 @@
 </sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Konstantenquantisierer vs. Multipass</title>
+<title>Konstanter Quantisierungsparameter vs. Multipass</title>
 
 <para>
   Es ist möglich, deinen Film in einer großen Auswahl von Qualitäten zu
   encodieren.
   Mit modernen Videoencodern und ein wenig Pre-Codec-Kompression
-  (Herunterskalierung (downscaling) und Rauschunterdrückung (denoising)), kann eine sehr gute
-  Qualität bei 700 MB erreicht werden, für einen 90-110 Minute Breitwandfilm.
+  (Herunterskalierung und Rauschunterdrückung), kann eine sehr gute
+  Qualität bei 700 MB erreicht werden, für einen 90-110-minütigen Breitwandfilm.
   Des Weiteren können alle - sogar die längsten - Filme mit nahezu perfekter
   Qualität bei 1400 MB encodiert werden.
 </para>
 
 <para>
   Es gibt drei Annäherungen für das Encodieren eines Videos: konstante Bitrate
-  (CBR), konstanter Quantisierer und Multipass (ABR, oder mittlere Bitrate).
+  (CBR), konstanter Quantisierungsparameter und Multipass (ABR, oder mittlere Bitrate).
 </para>
 
 <para>
   Die Komplexität der Frames eines Filmes und somit die Anzahl der für
   deren Komprimierung erforderlichen Bits kann von einer Szene zur anderen
   außerordentlich variieren.
-  Moderne Videoencodern können sich durch Variieren der Bitrate an diese
+  Moderne Videoencoder können sich durch Variieren der Bitrate an diese
   Anforderungen anpassen.
-  In einfachen Modi wie CBR, kennen die Encoder jedoch nicht den
+  In einfachen Modi wie CBR kennen die Encoder jedoch nicht den
   Bitratenbedarf zukünftiger Szenen und sind somit nicht in der Lage,
   die angeforderte mittlere Bitrate über längere Zeitspannen zu
   überschreiten.
@@ -316,7 +316,7 @@
   Problem.
 </para>
 
-<note><title>Beachten Sie:</title>
+<note><title>Anmerkung:</title>
 <para>
   Die meisten Codecs, die ABR-Encodierung unterstützen, unterstützen nur
   die Encodierung in zwei Durchgängen (two pass) während einige andere wie
@@ -339,8 +339,8 @@
   besser die Qualität und desto höher die Bitrate.
   Die Methode, die der Filmencoder zur Bestimmung des auf einen gegebenen
   Macroblock anzuwendenden Quantisierer verwendet, variiert und ist in
-  hohem Maße einstellbar. (Dies ist eine extreme übertriebene Vereinfachung
-  des aktuellen Prozesses, aber nützlich das Grundkonzept zu verstehen.)
+  hohem Maße einstellbar. (Dies ist eine extrem übertriebene Vereinfachung
+  des aktuellen Prozesses aber nützlich, um das Grundkonzept zu verstehen.)
 </para>
 
 <para>
@@ -354,7 +354,7 @@
   der Codec als Ergebnis den niedrigsten möglichen Quantisierer für jeden
   Macroblock anwenden (wie durch <option>vqmin</option> für
   <systemitem class="library">libavcodec</systemitem>
-  spezifiziert, standardmäßig ist dies 2).
+  spezifiziert, Standardwert ist 2).
   Sobald du eine Bitrate festlegst, die niedrig genug ist, den
   Codec zur Anwendung eines höheren Quantisierers zu zwingen, bist Du
   nahezu sicher dabei, die Qualität deines Videos zu ruinieren.
@@ -365,15 +365,15 @@
 </para>
 
 <para>
-  Mit konstantem Quantisierer wendet der Codec den selben Quantisierer, wie
+  Mit konstantem Quantisierer wendet der Codec denselben Quantisierer, wie
   durch die Option <option>vqscale</option> (für
   <systemitem class="library">libavcodec</systemitem>) spezifiziert, auf jeden
   Macroblock an.
   Willst du einen Rip mit höchstmöglicher Qualität und ignorierst dabei
   wiederum die Bitrate, kannst du <option>vqscale=2</option> verwenden.
-  Dies wird die selbe Bitrate und PSNR (peak signal-to-noise ratio) liefern
-  wie CBR mit <option>vbitrate</option>=infinity und dem standardmäßigen
-  <option>vqmin</option> von 2.
+  Dies wird dieselbe Bitrate und PSNR (peak signal-to-noise ratio) liefern
+  wie CBR mit <option>vbitrate</option>=infinity und der Standardeinstellung
+  <option>vqmin</option>=2.
 </para>
 
 <para>
@@ -381,7 +381,7 @@
   zum Einsatz kommt, egal ob der Macroblock ihn benötigt oder nicht. Dies heißt,
   es wäre möglich, einen höheren Quantisierer auf einen Macroblock anzuwenden,
   ohne sichtbare Qualität zu opfern. Warum die Bits für einen unnötig kleinen
-  Quantisierer verschwenden? deine CPU hat soundso viele Arbeitsgänge Zeit zur
+  Quantisierer verschwenden? Deine CPU hat soundso viele Arbeitsgänge Zeit zur
   Verfügung, die Festplatte jedoch nur soundso viele Bits.
 </para>
 
@@ -390,7 +390,7 @@
   den Film so rippen, als würde CBR vorliegen, jedoch wird ein Log die Eigenschaften
   jedes Frames beibehalten. Diese Daten werden danach während des zweiten Durchgangs
   dazu verwendet, intelligente Entscheidungen zur Wahl des Quantisierers zu treffen.
-  Während schneller Aktionen oder hochdetaillierter Szenen werden womöglich
+  Während schneller Action oder hochdetaillierter Szenen werden womöglich
   höhere Quantisierer, während langsamen Bewegungen und Szenen mit weniger Details
   niedrigere Quantisierer verwendet.
   Normalerweise ist die Anzahl der Bewegungen wichtiger als die der Details.
@@ -400,7 +400,7 @@
   Wenn du <option>vqscale=2</option> verwendest, verschwendest du Bits. Wenn
   du <option>vqscale=3</option> anwendest, wirst du keinen Rip mit bestmöglicher
   Qualität erhalten. Angenommen du rippst eine DVD mit <option>vqscale=3</option>
-  und das Resultat ist 1800Kbit. Wenn du in zwei Durchgängen (two pass) mit
+  und das Resultat ist 1800Kbit. Wenn du in zwei Durchgängen mit
   <option>vbitrate=1800</option> encodierst, wird das daraus resultierende Video
   eine <emphasis role="bold">bessere Qualität</emphasis> bei
   <emphasis role="bold">gleicher Bitrate</emphasis> haben.
@@ -418,19 +418,19 @@
 <para>
   Interessiert die Größe nicht, stellen etwa 2000Kbit plus oder minus 200Kbit
   einen guten Ausgangspunkt für einen sehr hochqualitativen Rip dar.
-  Bei einem Video mit schnellen Aktionen oder hohen Details, oder wenn du schlicht
+  Bei einem Video mit schneller Action oder hohen Details, oder wenn du schlicht
   und ergreifend ein sehr kritisches Auge besitzst, könntest du dich für 2400
   oder 2600 entscheiden.
   Bei einigen DVDs kannst du eventuell keinen Unterschied bei 1400Kbit feststellen.
   um ein besseres Gefühl zu bekommen, ist es eine gute Idee, mit Szenen bei
-  unterschiedlichen Bitraten herum zu experimentieren.
+  unterschiedlichen Bitraten herumzuexperimentieren.
 </para>
 
 <para>
-  Wenn du eine bestimmte Größe anvisierst, mußt du die Bitrate irgendwie
+  Wenn du eine bestimmte Größe anvisierst, musst du die Bitrate irgendwie
   kalkulieren.
   Aber zuvor solltest du wissen, wieviel Platz du für den/die Audiotrack(s)
-  reservieren mußt, daher solltest Du
+  reservieren musst, daher solltest Du
   <link linkend="menc-feat-dvd-mpeg4-audio">diese(n) zuerst rippen</link>.
   du kannst die Bitrate mit folgender Gleichung berechnen:
   <systemitem>Bitrate = (zielgroesse_in_MByte - soundgroesse_in_MByte) *
@@ -448,25 +448,25 @@
 <title>Randbedingungen für effizientes Encodieren</title>
 
 <para>
-  Aufgrund der Natur der MPEG-Komrimierung, gibt es zahlreiche
+  Aufgrund der Natur der MPEG-Komrimierung gibt es zahlreiche
   Randbedingungen, denen du zum Erreichen maximaler Qualität folgen
   solltest.
   MPEG splittet das Video in Macroblöcke genannte 16x16 Quadrate auf,
   jeder davon zusammengesetzt aus 4 8x8 Blöcken mit
   Luma-(Intensitäts)-Informationen und zwei halb-auflösenden 8x8
-  Chroma-(Farb)-Blöcken (einer für die Rot-Zyan-Achse und der andere für
+  Chroma-(Farb)-Blöcken (einer für die Rot-Cyan-Achse und der andere für
   die Blau-Gelb-Achse).
-  Selbst wenn breite und Höhe deines Films kein Vielfaches von 16 sind,
+  Selbst wenn Breite und Höhe deines Films kein Vielfaches von 16 sind,
   wird der Encoder ausreichend 16x16 Macroblöcke zur Abdeckung des
   gesamten Bildbereichs verwenden und der Extraplatz wird verschwendet.
   Folglich ist es keine gute Idee, im Interesse der Maximierung der
-  Qualität bei fester Dateigröße, Abmessungen zu verwenden die kein
+  Qualität bei fester Dateigröße, Abmessungen zu verwenden, die kein
   Vielfaches von 16 sind.
 </para>
 
 <para>
-  Die meisten DVDs besitzen ein bestimmtes Maß schwarzer Ränder
-  an ihren Kanten. Diese dort zu belassen, kann die Qualität auf
+  Die meisten DVDs besitzen ein bestimmtes Maß schwarzer Balken
+  an ihren Rändern. Diese dort zu belassen kann die Qualität auf
   verschiedene Art und Weise negativ beeinflussen.
 </para>
 
@@ -478,26 +478,26 @@
   Discrete Cosine Transform (DCT), die der Fourier Transform ähnelt.
   Diese Art Encodierung ist für darstellende Muster und weiche
   Übergänge effizient, hat jedoch große Probleme mit scharfen Kanten.
-  Um diese zu encodieren muß sie viel mehr Bits verwenden,
-  oder andernfalls wird ein als Klingeln (ringing) bekannter Artefakt
+  Um diese zu encodieren muss sie viel mehr Bits verwenden,
+  oder andernfalls wird ein als Ringing bekannter Artefakt
   auftreten.
 </para>
 
 <para>
-  Die Frequency Transform (DCT) erfolgt separat auf jeden
+  Die Discrete Frequency Transform (DCT) erfolgt separat auf jeden
   Macroblock (eigentlich auf jeden Block), somit trifft dieses Problem
   nur zu, wenn sich in einem Block eine scharfe Kante befindet.
   Beginnt dein schwarzer Rand exakt an den Grenzen zum Vielfachen von
   16 Pixeln, stellt dies kein Problem dar.
   Seis drum, die schwarzen Ränder bei DVDs werden in den seltensten
   Fällen schön angeordnet, daher wirst du sie in der Praxis immer
-  abschneiden müssen um diesen Nachteil zu vermeiden.
+  abschneiden müssen, um diesen Nachteil zu vermeiden.
 </para>
 </listitem>
 </orderedlist>
 
 <para>
-  Zusätzlich zu den Frequenzbereichs-Transformationen, verwendet die
+  Zusätzlich zu den Frequenzbereichs-Transformationen verwendet die
   MPEG-Kompression Bewegungsvektoren, um den Wechsel von einem Frame
   zum anderen darzustellen.
   Bewegungsvektoren arbeiten bei Inhalt, der von den Kanten eines Bildes
@@ -519,15 +519,15 @@
   Teil des schwarzen Randes, werden Bewegungsvektoren aus anderen
   Teilen des Bildes den schwarzen Rand überschreiben. Dies bedeutet, dass
   jede Menge Bits entweder zur wiederholten Schwärzung des überschriebenen
-  Randes aufgewendet werden müssen oder es wird (eher) erst gar kein
+  Randes aufgewendet werden müssen, oder es wird (eher) erst gar kein
   Bewegungsvektor genutzt und alle Änderungen innerhalb dieses Macroblocks
   müssen explizit encodiert werden. So oder so wird die Encodiereffizienz
   außerordentlich reduziert.
 </para>
 
 <para>
-  Nochmal, dieses Problem trifft nur dann zu, wenn keine schwarzen Ränder
-  an den Grenzen eines Vielfachen von 16 anstehen.
+  Nochmal, dieses Problem trifft nur dann zu, wenn schwarze Ränder
+  nicht an den Grenzen eines Vielfachen von 16 anstehen.
 </para>
 </listitem>
 
@@ -547,14 +547,14 @@
   MPEG spezielle Optimierungen, um immer wieder dann die Pixel am Rand des
   Bildes zu kopieren, wenn ein Bewegungsvektor von außerhalb des
   encodierten Bereichs ankommt. Dieses Feature wird nutzlos, wenn der Film
-  schwarze Ränder hat. Im Gegensatz zu den Problemen 1 und 2, hilft hier
+  schwarze Ränder hat. Im Gegensatz zu den Problemen 1 und 2 hilft hier
   kein Anordnen der Ränder am Vielfachen von 16.
 </para>
 </listitem>
 
 <listitem>
 <para>
-  Trotzdem die Ränder komplett schwarz sind und sich nie ändern, ist
+  Obwohl die Ränder komplett schwarz sind und sich nie ändern, ist
   zumindest ein minimaler Overhead damit verbunden, mehr Macroblöcke
   zu besitzen.
 </para>
@@ -562,7 +562,7 @@
 </orderedlist>
 
 <para>
-  Aus all diesen Gründen wird empfohlen, schwarze Ränder voll abzuschneiden.
+  Aus all diesen Gründen wird empfohlen, schwarze Ränder komplett abzuschneiden.
   Mehr noch, liegt ein Bereich mit Rauschen/Verzerrung an der Kante des Bildes,
   steigert dessen Abschneiden ebenso die Encodiereffizienz. Videophile Puristen,
   die den Originalzustand so nah wie möglich sichern wollen,
@@ -670,12 +670,12 @@
 
 <para>
   Wie du sehen kannst, kommen Zeilen und Spalten des Bildes natürlich paarweise.
-  Folglich <emphasis>müssen</emphasis> deine Abschneide-(crop)-Offsets und
+  Folglich <emphasis>müssen</emphasis> deine Abschneide-Offsets und
   Abmessungen geradzahlig sein.
   Sind sie dies nicht, wird Chroma nicht mehr korrekt mit Luma abgeglichen.
   In der Theorie ist es möglich, mit ungeraden Offsets abzuschneiden, jedoch
   erfordert dies ein Resampling von Chroma, was potentiell eine mit Verlust
-  verbundene (lossy) Operation bedeutet und vom Crop-Filter nicht unterstützt
+  verbundene Operation bedeutet und vom Crop-Filter nicht unterstützt
   wird.
 </para>
 
@@ -928,9 +928,9 @@
 
 <para>
   Die ursprüngliche DVD-Auflösung ist 720x480 für NTSC und 720x576 für PAL, es
-  gibt jedoch ein Aspektkennzeichen das spezifiziert, ob Vollbild (4:3) oder
+  gibt jedoch ein Aspektkennzeichen, das spezifiziert, ob Vollbild (4:3) oder
   Breitwandfilm (16:9) vorliegt. Viele (wenn nicht die meisten) Breitwandfilm-DVDs
-  sind micht grundsätzlich 16:9 und werden entweder 1.85:1 oder 2.35:1 (Cinescope).
+  sind nicht grundsätzlich 16:9, sondern entweder 1.85:1 oder 2.35:1 (Cinescope).
   Dies bedeutet, dass es schwarze Bänder im Video geben wird, die herausgeschnitten
   werden müssen.
 </para>
@@ -940,7 +940,7 @@
   zur Verfügung, der das Ausschnittsrechteck (<option>-vf cropdetect</option>)
   bestimmt.
   Starte <application>MPlayer</application> mit
-  <option>-vf cropdetect</option> und er wird die Crop-Einstellungen
+  <option>-vf cropdetect</option>, und er wird die Crop-Einstellungen
   zum Entfernen der Ränder ausgeben.
   du solltest den Film lange genug laufen lassen, damit die gesamte Bildfläche
   verwendet wird, um akkurate Crop-Werte zu erhalten.
@@ -958,11 +958,11 @@
 
 <para>
   In bestimmten Fällen könnte Skalieren nicht wünschenswert sein.
-  das Skalieren in vertikaler Richtung ist mit interlaced Video
-  schwierig und wenn du das interlacing erhalten willst, solltest
+  Skalierung in vertikaler Richtung ist mit interlaced Video
+  schwierig, und wenn du das Interlacing beibehalten willst, solltest
   du für gewöhnlich das Skalieren bleiben lassen.
-  Hast du nicht vor, zu Skalieren, willst aber nach wie vor Abmessungen
-  in einem Vielfachen von 16 verwenden, mußt du über den Rand
+  Hast du nicht vor zu skalieren, willst aber nach wie vor Abmessungen
+  in einem Vielfachen von 16 verwenden, musst du über den Rand
   hinausschneiden.
   Schneide aber lieber nicht über den Rand hinaus, da schwarze Ränder
   sehr schlecht zu encodieren sind!
@@ -985,7 +985,7 @@
   Pixel nicht wohl fühlst, ziehst du es stattdessen vor, das Video zu
   skalieren.
   Wir werden uns dies im unten stehenden Beispiel mal ansehen.
-  du kannst den <option>cropdetect</option>-Filter sogar alles oben erwähnte
+  Du kannst den <option>cropdetect</option>-Filter sogar alles oben erwähnte
   für dich erledigen lassen, da dieser einen optionalen Parameter
   <option>round</option> besitzt, der standardmäßig gleich 16 ist.
 </para>
@@ -993,11 +993,11 @@
 <para>
   Pass auch auf &quot;halbschwarze&quot; Pixel an den Kanten auf. Stelle sicher, dass
   du diese ebenfalls mit abschneidest oder du vergeudest dort Bits, wo sie
-  doch besser anderswo verschwendet werden sollten.
+  doch besser anderswo verwendet werden sollten.
 </para>
 
 <para>
-  Nachdem nun alles gesagt ist, wirst du möglicherweise mit bei einem
+  Nachdem nun alles gesagt ist, wirst du möglicherweise bei einem
   Video landen, dessen Pixel nicht ganz 1.85:1 oder 2.35:1, aber ziemlich
   nahe dran sind. Du könntest ein neues Seitenverhältnis manuell berechnen,
   aber <application>MEncoder</application> bietet eine Option für <systemitem
@@ -1008,7 +1008,7 @@
   in der AVI gespeicherte Seitenverhältnis zur Bestimmung der besten
   Auflösung verwenden.
   Unglücklicherweise erzwingen nicht alle Players diese Auto-Skalierinformation,
-  und deshalb willst du trotzdem neu skalieren.
+  und deshalb willst du vielleicht trotzdem neu skalieren.
 </para>
 </sect2>
 
@@ -1017,25 +1017,25 @@
 <title>Auswahl von Auflösung und Bitrate</title>
 
 <para>
-  Wenn du nicht vor hast, in konstantem Quantisiermodus zu encodieren,
-  mußt du eine Bitrate auswählen.
+  Wenn du nicht vor hast, im Modus mit konstantem Quantisier zu encodieren,
+  musst du eine Bitrate auswählen.
   Das Konzept der Bitrate ist denkbar einfach.
-  Sie ist die (mittlere) Anzahl Bits, die pro Sekunde zum Speichern
+  Sie ist die (mittlere) Anzahl Bits, die pro Sekunde zum Speichern des
   Films verbraucht werden.
-  Normalerweise wird die Bitratein Kilobit (1000 Bit) pro Sekunde gemessen.
+  Normalerweise wird die Bitrate in Kilobit (1000 Bit) pro Sekunde gemessen.
   Die Größe deines Films auf der Platte ist die Bitrate multipliziert mit der
   Dauer des Films, plus einem kleinen &quot;Overhead&quot; (siehe zum Beispiel in der
   Sektion über
   <link linkend="menc-feat-dvd-mpeg4-muxing-avi-limitations">den AVI-Container</link>).
   Weitere Parameter wie Skalierunng, Cropping, usw. werden die Dateigröße
   <emphasis role="bold">nicht</emphasis> ändern, solange du nicht auch
-  die Bitrate veränderst!.
+  die Bitrate veränderst!
 </para>
 <para>
   Die Bitrate skaliert <emphasis role="bold">nicht</emphasis> proportional
   zur Auflösung.
-  Dies ist zu sagen, eine Datei 320x240 mit 200 KBit/Sek wird nicht die selbe
-  Qualität aufweisen wie des gleiche Film bei 640x480 und 800 KBit/Sek!
+  Dies bedeutet, eine Datei 320x240 mit 200 KBit/Sek wird nicht dieselbe
+  Qualität aufweisen wie der gleiche Film bei 640x480 und 800 KBit/Sek!
   Dafür gibt es zwei Gründe:
 <orderedlist>
   <listitem><para>
@@ -1056,7 +1056,7 @@
     Somit enthält dein herunterskaliertes Bild 1/4 der Information
     in räumlichen Richtungen, es könnte immer noch einen hohen Anteil
     Information im Frequenzbereich enthalten (vorausgesetzt dass die
-    hohen Frequenzen im originalen 640x480 Bild nicht ausgenutzt waren).
+    hohen Frequenzen im originalen 640x480 Bild nicht ausgenutzt wurden).
   </para></listitem>
   </orderedlist>
 </para>
@@ -1068,8 +1068,8 @@
   Quadratwurzel der Auflösung skalieren, sodass 320x240 und 400 KBit/Sek
   vergleichbar mit 640x480 bei 800 KBit/Sek wären.
   Dies wurde aber nicht mit theoretischer oder empirischer Strenge verifiziert.
-  Weiters, in Anbetracht das Filme außerordentlich in Bezug auf Rauschen, Details,
-  Bewegungsgrad usw. variieren, ist es zwecklos allgemeine Empfehlungen
+  Desweiteren ist es in Anbetracht der Tatsache, dass Filme in Bezug auf Rauschen, Details,
+  Bewegungsgrad usw. außerordentlich variieren, zwecklos, allgemeine Empfehlungen
   für die Bits pro Diagonallänge (dem Analog zu Bits pro Pixel
   unter Verwendung der Quadratwurzel) abzugeben.
 </para>
@@ -1082,7 +1082,7 @@
 <sect3 id="menc-feat-dvd-mpeg4-resolution-bitrate-compute">
 <title>Berechnen der Auflösung</title>
 <para>
-  Die folgenden Schritte werden dich in der Berechnen der Auflösung
+  Die folgenden Schritte werden dich in der Berechnung der Auflösung
   deiner Encodierung anleiten, ohne das Video allzusehr zu verzerren,
   indem verschiedene Typen von Informationen über das Quellvideo in
   Betracht gezogen werden.
@@ -1129,29 +1129,30 @@
   Länge des Films berechnest, die ja konstant sind.
   Mit MPEG-4 ASP-Codecs wie <systemitem class="library">XviD</systemitem>
   und <systemitem class="library">libavcodec</systemitem>, resultiert ein CQ
-  unter 0.18 für gewöhnlich in einem blockmäßig schönen Bild, weil nicht
+  unter 0.18 für gewöhnlich in einem ziemlich blockhaften Bild, weil nicht
   genug Bits zum Codieren der Information jedes Macroblocks vorhanden sind.
   (MPEG4, wie auch viele andere Codecs, gruppiert Pixel nach Blöcken verschiedener
   Pixel, um das Bild zu komprimieren; sind nicht genügend Bits vorhanden,
   werden die Kanten dieser Blöcke sichtbar.)
   Es ist daher weise, einen CQ im Bereich von 0.20 bis 0.22 für einen 1 CD-Rip
   und 0.26-0.28 für einen 2 CD-Rip mit Standard-Encodieroptionen zu nehmen.
-  höherntwickelte Encodieroptionen wie die hier für
+  Höherentwickelte Encodieroptionen wie die hier für
   <link linkend="menc-feat-mpeg4-lavc-example-settings"><systemitem class="library">libavcodec</systemitem></link>
   und
-<link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
-  aufgelisteten sollten es möglich machen, die selbe Qualität mit einem CQ im Bereich
+  <link linkend="menc-feat-xvid-example-settings"><systemitem class="library">XviD</systemitem></link>
+  aufgelisteten sollten es möglich machen, dieselbe Qualität mit einem CQ im Bereich
   von 0.18 bis 0.20 für einen 1 CD-CDip und 0.24 bis 0.26 für einen 2 CD-Rip zu erreichen.
   Mit den MPEG-4 ASP-Codecs wie <systemitem class="library">x264</systemitem>,
   kannst du einen CQ im Bereich von 0.14 bis 0.16 mit Standard-Encodieroptionen
   verwenden, und solltest bis auf 0.10 bis 0.12 mit den
-  <link linkend="menc-feat-x264-example-settings">erweiterten Encodieroptionen von <systemitem class="library">x264</systemitem></link>
+  <link linkend="menc-feat-x264-example-settings">erweiterten Encodieroptionen von
+  <systemitem class="library">x264</systemitem></link>
   runter gehen können.
 </para>
 
 <para>
-  Bitte nimm zur Kenntnis, dass der CQ lediglich eine hinweisende Zahl ist,
-  da sie vom encodierten Inhalt abhängt, ein CQ von 0.18 kann für einen
+  Bitte nimm zur Kenntnis, dass der CQ lediglich eine richtungsweisendes Maß ist,
+  da sie vom encodierten Inhalt abhängt. Ein CQ von 0.18 kann für einen
   Bergman-Film recht hübsch aussehen, im Gegensatz zu einem Film wie
   The Matrix, der jede Menge High-Motion-Szenen enthält.
   Auf der anderen Seite ist es wertlos, den CQ höher als 0.30 zu schrauben,
@@ -1168,11 +1169,11 @@
 <title>Filtern</title>
 
 <para>
-  Zu lernen, wie man <application>MEncoder</application>'s Videofilter
+  Zu lernen, wie man <application>MEncoder</application>s Videofilter
   verwendet, ist essentiell, um gute Encodierungen zu produzieren.
   Jede Videoverarbeitung wird über Filter ausgeführt -- Ausschneiden,
-  Skalieren, Farbanpassung, Rauschentfernung, Scharfzeichnen, deinterlacing,
-  telecine, umgekehrtes telecine und deblocking, um nur ein paar davon aufzuzählen.
+  Skalieren, Farbanpassung, Rauschentfernung, Scharfzeichnen, Deinterlacing,
+  telecine, inverses telecine und Deblocking, um nur ein paar davon aufzuzählen.
   Zusammen mit der gewaltigen Zahl unterstützter Inputformate, ist die Vielfalt der
   in <application>MEncoder</application> verfügbaren Filter eine seiner
   Hauptvorteile im Vergleich zu ähnlichen Programmen.
@@ -1181,9 +1182,9 @@
 <para>
   Filter werden in einer Kette über die Option -vf geladen:
 
-  <screen>-vf filter1=options,filter2=options,...</screen>
+  <screen>-vf filter1=Optionen,filter2=Optionen,...</screen>
 
-  Die meisten Filter nehmen mehrere numerische, Komma-getrennte
+  Die meisten Filter nehmen mehrere numerische, kommagetrennte
   Optionen entgegen, jedoch variiert die Syntax der Optionen von
   Filter zu Filter, also lies bitte die Man Page für Details
   zu den Filtern, die du verwenden willst.
@@ -1213,12 +1214,12 @@
 </para>
 
 <para>
-  Im allgemeinen solltest du den Film so wenig wie möglich Filtern, um
+  Im Allgemeinen solltest du den Film so wenig wie möglich Filtern, um
   nahe an der originalen DVD-Quelle zu bleiben. Ausschneiden ist oft
   notwendig (wie oben beschrieben), vermeide aber das Skalieren von Videos.
   Obwohl das Herunterskalieren manchmal vorgezogen wird, um höhere Quantisierer
-  zu verwenden, wollen wir beide diese Dinge vermeiden: erinnere dich daran,
-  dass wir von Anfang an beschlossen hatten, um einen Kompromiss zwischen
+  zu verwenden, wollen wir beide diese Dinge vermeiden: Erinnere dich daran,
+  dass wir von Anfang an beschlossen hatten, einen Kompromiss zwischen
   Bits und Qualität zu schließen.
 </para>
 
@@ -1229,10 +1230,10 @@
 </para>
 
 <para>
-  Eine Sache, die du vielleicht machen willst, das Video durch einen sehr
+  Eine Sache, die du vielleicht machen willst, ist, das Video durch einen sehr
   feinen Entrauschfilter (Denoise) zu schicken, wie etwa <option>-vf hqdn3d=2:1:2</option>.
-  Nochmals, es geht darum, die Bits einer besseren Verwendung zuzuführen: warum
-  zu Encodieren des Rauschens verschwenden, wenn du dieses Rauschen auch während
+  Nochmals, es geht darum, die Bits einer besseren Verwendung zuzuführen: Warum
+  zum Encodieren des Rauschens verschwenden, wenn du dieses Rauschen auch während
   des Playback entfernen kannst?
   Die Parameter für <option>hqdn3d</option> zu erhöhen, wird überdies
   die Komprimierbarkeit erhöhen, erhöhst du jedoch die Werte zu sehr, riskierst Du
@@ -1249,13 +1250,13 @@
 <title>Interlacing und telecine</title>
 
 <para>
-  Nahezu alle Filme sind bei 24 fps aufgenommen. Weil NTSC 30000/1001 fps ist,
+  Nahezu alle Filme sind bei 24 fps aufgenommen. Weil NTSC 30000/1001 fps entspricht,
   müssen mit diesen 24 fps Videos einige Verarbeitungen durchgeführt werden,
   um sie mit der korrekten NTSC-Framerate laufen zu lassen. Der Prozess wird 3:2
   pulldown genannt, allgemein telecine zugeordnet (weil pulldown des öfteren
   während des telecine-Prozesses angewandt wird), und naiv so beschrieben,
-  er arbeite mit einer Verlangsamung des Films auf 24000/1001 fps und dem
-  Wiederholen jeden vierten Frames.
+  dass er durch Verlangsamung des Films auf 24000/1001 fps und dem
+  Wiederholen jeden vierten Frames arbeitet.
 </para>
 
 <para>
@@ -1271,17 +1272,17 @@
 </para>
 
 <para>
-  Weil das Video in einer PAL-DVD nicht verändert wurde, mußt du dich nicht
+  Weil das Video in einer PAL-DVD nicht verändert wurde, musst du dich nicht
   viel um die Framerate sorgen. Die Quelle ist 25 fps und dein Rip wird 25
-  fps haben. Wenn du jedoch einen NTSC-DVD-Film rippst, mußt du eventuell
+  fps haben. Wenn du jedoch einen NTSC-DVD-Film rippst, musst du eventuell
   umgekehrtes telecine anwenden.
 </para>
 
 <para>
-  Für mit 24 fps aufgenommene Filme, ist das Video auf der NTSC-DVD entweder telecined
+  Für mit 24 fps aufgenommene Filme ist das Video auf der NTSC-DVD entweder telecined
   30000/1001 oder hat andernfalls progressive 24000/1001 fps und es ist vorgesehen,
   on-the-fly vom DVD-Player telecined zu werden. Auf der anderen Seite sind TV-Serien
-  üblicherweise nur interlaced, nicht telecined. Dies ist keine harte Regel: einige
+  üblicherweise nur interlaced, nicht telecined. Dies ist keine harte Regel: Einige
   TV-Serien sind interlaced (wie etwa Buffy die Vampirkillerin), wogegen andere
   eine Mixtur aus progressive und interlaced sind (so wie Angel oder 24) - wers kennt :).
 </para>
@@ -1335,12 +1336,12 @@
   Ausschneidehöhe und y-Offset müssen Vielfache von 4 sein.
 </para></listitem>
 <listitem><para>
-  Jedes vertikale Skalieren muß im interlaced Modus durchgeführt werden.
+  Jedes vertikale Skalieren muss im interlaced Modus durchgeführt werden.
 </para></listitem>
 <listitem><para>
   Nachbearbeitungs- (postprocessing) und Rauschunterdrückungsfilter (denoising)
-  funktioniert eventuell nicht wie erwartet bis du speziell darauf achtest,
-  sie jeweils Feld für Feld auf sie einzuwirken und sie können das Video
+  funktionieren eventuell nicht wie erwartet, wenn du nicht speziell darauf achtest,
+  dass sie zu einem Zeitpunkt nur ein Feld verarbeiten, und sie können das Video
   kaputt machen, wenn sie inkorrekt angewendet werden.
 </para></listitem>
 </orderedlist>
@@ -1361,19 +1362,19 @@
 <sect2 id="menc-feat-dvd-mpeg4-av-sync">
 <title>Anmerkungen zur Audio-/Videosynchronisation</title>
 <para>
-  <application>MEncoder</application>'s Algorithmen der Audio-/Videosynchronisation
-  wurden mit der Intention entwickelt, Dateien mit kaputter sync wieder herzustellen.
+  <application>MEncoder</application>s Algorithmen der Audio-/Videosynchronisation
+  wurden mit der Intention entwickelt, Dateien mit kaputter Sychronisation wieder herzustellen.
   In einigen Fällen können unnötiges Überspringen und Duplizieren
   von Frames und möglicherweise leichte A/V-Desynchronisation verursachen, auch wenn sie
   mit dem richtigen Input verwendet werden
   (gewiss, Probleme mit A/V-Synchronisation treffen nur zu, wenn du den Audiotrack während
-  der Transcodierung des Videos verarbeitest oder kopierst, zu was auch nachhaltig
+  der Transcodierung des Videos verarbeitest oder kopierst, wozu auch nachhaltig
   ermutigt wird).
   Hierfür müsstest du mit der Option <option>-mc 0</option> in die
   Grundeinstellung der A/V-Synchronisation wechseln oder diese in deine
   <systemitem>~/.mplayer/mencoder</systemitem> Konfigurationsdatei eintragen,
   solange du ausschließlich mit guten Quellen arbeitest (DVD, TV-Capture,
-  hochqualitativen MPEG-4-Rips usw.) und mit nicht kaputten ASF/RM/MOV-Dateien.
+  hochqualitativen MPEG-4-Rips usw.) und mit nicht-kaputten ASF/RM/MOV-Dateien.
 </para>
 <para>
   Wenn du dich überdies gegen merkwürdige Frameübersprünge und -duplikationen
@@ -1395,7 +1396,7 @@
   Dieses Feature ist nur aus Kompatibilitätsgründen übrig geblieben und für
   erfahrene Benutzer, die wissen, wann es sicher anzuwenden ist und wann nicht.
   Wenn du zuvor noch nie etwas vom 3-pass-Modus gehört hast, vergiss, dass wir es je
-  erwähnt hatten!
+  erwähnt haben!
 </para>
 <para>
   Es gab auch Berichte über A/V-Desynchronisation, wenn
@@ -1409,7 +1410,7 @@
 <title>Auswahl des Videocodecs</title>
 
 <para>
-  Welcher Videocodec am besten zu wählen, hängt von mehreren Faktoren ab,
+  Welcher Videocodec die beste Wahl ist, hängt von mehreren Faktoren ab,
   wie Größe, Qualität, Streambarkeit, Brauchbarkeit und Popularität, manche
   davon hängen weitgehend vom persönlichen Geschmack und technischen
   Randbedingungen ab.
@@ -1419,7 +1420,7 @@
   <emphasis role="bold">Kompressionseffizienz</emphasis>:
   Es ist leicht zu verstehen, dass die meisten Codecs der neueren Generation
   dafür gemacht wurden, Qualität und Komprimierung zu verbessern.
-  Deshalb behauptet der Autor dieses Handbuches und viele anderen Leute, dass
+  Deshalb behauptet der Autor dieses Handbuches und viele andere Leute, dass
   du nichts verkehrt machen kannst,
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Sei trotzdem vorsichtig: MPEG-4 AVC-Videos in DVD-Auflösung zu
@@ -1440,35 +1441,35 @@
   <para>
   Allerdings können neuere Codecs, die noch stark in der Entwicklung stecken,
   unter unentdeckten Bugs leiden, die die Encodierung ruinieren können.
-  Dies nimmt man schlicht in Kauf, wenn man Technologie mit blutigen Kanten
-  anwendet.
+  Dies nimmt man schlicht in Kauf, wenn man "bleeding edge"-Technologie
+  verwendet.
   </para>
   <para>
-  Außerdem, mit einem neuen Codec umzugehen erfordert einige Zeit, sich
-  mit dessen Optionen vertraut zu machen, sodass du weißt, was alles anzupassen
+  Außerdem erfordert der Umgang mit einem neuen Codec und sich mit dessen Optionen
+  vertraut zu machen eine Zeit, bis du weißt, was alles anzupassen
   ist, um die erhoffte Bildqualität zu erreichen.
   </para></listitem>
 
   <listitem><para>
   <emphasis role="bold">Hardware-Kompatibilität</emphasis>:
-  Gewöhnlich dauert es bei neuen standalone Video-Playern lange bis der
+  Gewöhnlich dauert es bei neuen standalone Video-Playern lange, bis der
   Support für die neuesten Videocodecs eingebunden ist.
   Als ein Ergebnis unterstützen die meisten nur MPEG-1 (wie VCD, XVCD
   und KVCD), MPEG-2 (wie DVD, SVCD und KVCD) und MPEG-4 ASP (wie DivX,
   LMP4 von <systemitem class="library">libavcodec</systemitem> und
   <systemitem class="library">XviD</systemitem>)
-  (Vorsicht: Im allgemeinen werden nicht alle MPEG-4 ASP-Features unterstützt).
+  (Vorsicht: Im Allgemeinen werden nicht alle MPEG-4 ASP-Features unterstützt).
   Sieh bitte in den technischen Spezifikationen deines Players nach (falls
-  welche vorhanden sind) oder google nach mehr Informationen rum.
+  welche vorhanden sind) oder google nach mehr Informationen.
   </para></listitem>
 
   <listitem><para>
   <emphasis role="bold">Beste Qualität pro Encodierzeit</emphasis>:
-  Codecs die es schon einige Zeit gibt (wie
+  Codecs, die es schon einige Zeit gibt (wie
   <systemitem class="library">libavcodec</systemitem> MPEG-4 und
-  <systemitem class="library">XviD</systemitem>) sind gewöhnlich heftig
+  <systemitem class="library">XviD</systemitem>), sind gewöhnlich heftig
   mit allen möglichen intelligenten Algorithmen und SIMD Assembly-Code optimiert.
-  Das ist, weil sie darauf abzielen, das beste Verhältnis von Qualität
+  Das sind sie deshalb, weil sie darauf abzielen, das beste Verhältnis von Qualität
   pro Encodierzeit zu liefern.
   Jedoch haben sie oft einige sehr fortschrittliche Optionen, die,
   wenn aktiviert, das Encodieren bei marginalem Gewinn wirklich langsam
@@ -1476,14 +1477,14 @@
   </para>
   <para>
   Wenn du es auf die Wahnsinnsgeschwindigkeit abzielst, solltest du
-  in der Nähe der Standard-Einstellungen des Videocodecs bleiben
+  in der Nähe der Standardeinstellungen des Videocodecs bleiben
   (obwohl du ruhig weitere Optionen ausprobieren solltest, die in
   anderen Sektionen dieses Handbuchs angesprochen werden).
   </para>
   <para>
   Vielleicht überlegst du auch, einen Codec auszuwählen, der mit
-  Multi-Threading klar kommt, was nur für Benutzer von Rechnern
-  mit einigen CPUs von Nutzen ist.
+  Multi-Threading klarkommt, was nur für Benutzer von Rechnern
+  mit mehreren CPUs von Nutzen ist.
   <systemitem class="library">libavcodec</systemitem> MPEG-4 erlaubt
   dies zwar, aber die Geschwindigkeitsgewinne sind begrenzt und es gibt
   einen leicht negativen Effekt in Bezug auf die Bildqualität.
@@ -1511,11 +1512,11 @@
   vollquasseln, die auf den einen Codec schwören.
   Nimm ein paar Beispiel-Clips von Originalquellen und vergleiche die
   verschiedenen Encodier-Optionen und Codecs, um den einen zu finden, mit
-  dem du am besten klar kommst.
+  dem du am besten klarkommst.
   Der beste Codec ist der, den du beherrschst und der in deinen Augen
   auf deinem Display am besten aussieht.
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-playback'>
-  <para>Die selbe Encodierung kann auf dem Monitor eines anderen vollkommen
+  <para>Dieselbe Encodierung kann auf dem Monitor eines anderen vollkommen
   anders aussehen oder wenn sie von einem anderen Decoder abgespielt wird,
   also mach deine Encodierungen zukunftssicher indem du sie unter verschiedenen
   Setups ablaufen lässt.</para></footnote>!
@@ -1532,12 +1533,12 @@
 <title>Audio</title>
 
 <para>
-  Audio ist ein leichter zu lösendes Problem: wenn du Wert auf Qualität legst,
+  Audio ist ein leichter zu lösendes Problem: Wenn du Wert auf Qualität legst,
   lass es einfach so wie es ist.
   Gerade AC3 5.1 Streams sind meist 448Kbit/s und jedes Bit wert.
   Möglicherweise gerätst du in Versuchung, Audio in hochwertiges Vorbis
   umzuwandeln, aber nur weil du heute keinen A/V-Receiver für AC3-pass-through
-  besitzt, dies bedeutet nicht, dass du nicht morgen doch einen hast.
+  besitzt, bedeutet dies nicht, dass du nicht morgen doch einen hast.
   Halte deine DVD-Rips zukunftssicher, indem du den AC3-Stream beibehältst.
   Du behältst den AC3-Stream entweder, indem du ihn
   <link linkend="menc-feat-mpeg4">während der Encodierung</link> direkt in den
@@ -1570,12 +1571,12 @@
   In anderen Worten, einen Soundtrack während dem Encodieren zu haben, stellt sicher,
   vorausgesetzt du siehst keine Meldungen wie
   <quote>Too many audio packets in the buffer</quote>, dass du in der Lage sein
-  wirst eine korrekte Synchronisation zu erhalten.
+  wirst, eine korrekte Synchronisation zu erhalten.
 </para>
 
 <para>
   Du brauchst <application>MEncoder</application> zur Verarbeitung des Sounds.
-  Du kannst zum Beispiel den originalen Soundtrack während dem Encodieren it
+  Du kannst zum Beispiel den originalen Soundtrack während dem Encodieren mit
   <option>-oac copy</option> kopieren oder ihn mittels
   <option>-oac pcm -channels 1 -srate 4000</option> in eine &quot;leichte&quot;
   4 kHz Mono WAV-PCM konvertieren.
@@ -1613,7 +1614,7 @@
   Du kannst beispielsweise das Tool <application>normalize</application> verwenden,
   das in den meisten Distributionen zur Verfügung steht.
   Wenn du Windows nutzt, kann ein Tool wie <application>BeSweet</application>
-  den selben Job erledigen.
+  denselben Job erledigen.
   Du wirst entweder nach Vorbis oder MP3 komprimieren.
   Zum Beispiel:
   <screen>oggenc -q1 <replaceable>destination_sound.wav</replaceable></screen>
@@ -1639,7 +1640,7 @@
   Nun da du dein Video encodiert hast, wirst du es höchstwahrscheinlich
   mit einem oder mehr Audiotracks in einen Movie-Container wie etwa
   AVI, MPEG, Matroska oder NUT muxen.
-  <application>MEncoder</application> ist aktuell nur un der Lage,
+  <application>MEncoder</application> ist aktuell nur in der Lage,
   Audio und Video nativ in MPEG- und AVI-Containerformate auszugeben.
   Zum Beispiel:
   <screen>mencoder -oac copy -ovc copy -o <replaceable>output_movie.avi</replaceable> -audiofile <replaceable>input_audio.mp2</replaceable> <replaceable>input_video.avi</replaceable></screen>
@@ -1676,7 +1677,7 @@
   ändert, wenn du das Audiodelay anpasst, du bekommst nie eine korrekte
   Synchronisation zu Stande.
   Dies kann vorkommen, wenn du manche Videofilter verwendest, die einige Frames
-  weglassen oder duplizieren, wie etwa die umgekehrten telecine-Filter.
+  weglassen oder duplizieren, wie etwa die inverse telecine-Filter.
   ich kann dich nur dazu ermutigen, den <option>harddup</option>-Videofilter
   ans Ende der Filterkette anzuhängen, um solcherlei Problemen aus dem Weg
   zu gehen.
@@ -1690,9 +1691,9 @@
   Mit <option>harddup</option> wird <application>MEncoder</application>
   statt dessen einfach den zuletzt angezeigten Frame nochmal in die Filterkette
   einschieben.
-  Dies bedeutet, dass der Encoder <emphasis>exakt</emphasis> den selben Frame
+  Dies bedeutet, dass der Encoder <emphasis>exakt</emphasis> denselben Frame
   zweimal entgegen nimmt und komprimiert.
-  Die ergibt eine etwas größere Datei, verursacht jedoch keine Probleme
+  Dies ergibt eine etwas größere Datei, verursacht jedoch keine Probleme
   beim Demuxen oder Remuxen in ein anderes Containerformat.
 </para>
 
@@ -1716,7 +1717,7 @@
   verschwendet.
   Dies heißt übersetzt etwas mehr als 5 MB pro Stunde oder 1-2.5%
   Overhead für einen 700 MB Film. Das sieht nicht nach viel aus, könnte aber
-  die Dfferenz zwischen einem Video mit 700 KBit/Sek oder 714 KBit/Sek
+  die Differenz zwischen einem Video mit 700 KBit/Sek oder 714 KBit/Sek
   bedeuten, und jedes bisschen mehr an Qualität zählt.
 </para>
 
@@ -1739,8 +1740,8 @@
 </listitem>
 <listitem>
 <para>
-  Audio in AVI-Dateien muß entweder konstante Bitrate (CBR) oder
-  konstante Framegröße haben (z.B. alle Frames decodieren zur selben Anzahl
+  Audio in AVI-Dateien muss entweder konstante Bitrate (CBR) oder
+  konstante Framegröße haben (also alle Frames decodieren zur selben Anzahl
   Samples).
   Unglücklicherweise erfüllt der effektivste Codec, Vorbis, keine dieser
   Anforderungen.
@@ -1751,13 +1752,13 @@
 </orderedlist>
 
 <para>
-  Nachdem ich nun all dies erzählt habe, muß ich anmerken, momentan
+  Nachdem ich nun all dies erzählt habe, muss ich anmerken, momentan
   unterstützt <application>MEncoder</application> keinen Output mit
   variablen fps oder Vorbis-Encodierung.
   Deswegen magst du dies nicht als Einschränkung ansehen, wenn
   <application>MEncoder</application> das einzige Tool ist, das du
-  nutzt um deine Ecodierungen zu produzieren.
-  Es ist dennoch möglich <application>MEncoder</application> nur zur
+  nutzt, um deine Ecodierungen zu produzieren.
+  Es ist dennoch möglich, <application>MEncoder</application> nur zur
   Videoencodierung zu verwenden und danach externe Tools, um Audio
   zum Encodieren und in ein anderes Containerformat zu muxen.
 </para>
@@ -1778,7 +1779,7 @@
 
 <para>
   Die zum Erzeugen von Matroska-Dateien erforderlichen Tools werden
-  kollectiv <application>mkvtoolnix</application> genannt und stehen
+  zusammen <application>mkvtoolnix</application> genannt und stehen
   für die meisten Unix-Plattformen wie auch <application>Windows</application>
   zur Verfügung.
   Weil Matroska ein offener Standard ist, findest du vielleicht andere
@@ -1789,7 +1790,7 @@
 
 <para>
   Möglicherweise der einfachste Weg, mit Matroska anzufangen, ist
-  <application>MMG</application> zu verwenden, das grafische Frontend
+  <application>MMG</application> zu verwenden, das grafische Frontend,
   das mit <application>mkvtoolnix</application> daherkommt, und dem
   <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">guide to mkvmerge GUI (mmg)</ulink>
   zu folgen.
@@ -1822,10 +1823,10 @@
 <formalpara>
 <title>Was ist telecine?</title>
 <para>
-  Ich schlage vor du besuchst diese Seite, wenn du nicht viel von dem
+  Ich schlage vor, du besuchst diese Seite, wenn du nicht viel von dem
   verstehst, was in diesem Dokument beschrieben wird:
   <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
-  Diese URL führt zu einer verständlichen und einigermaßen umfassend
+  Diese URL führt zu einer verständlichen und einigermaßen umfassenden
   Beschreibung was telecine ist.
 </para></formalpara>
 
@@ -1833,17 +1834,17 @@
 <title>Eine Anmerkung zu Zahlen.</title>
 <para>
   Viele Dokumente, einschließlich des oben verlinkten Handbuchs, beziehen
-  sich auf den Wert Felder pro Sekunde von NTSC-Video als 59.94 und dem
+  sich auf den Wert Felder pro Sekunde von NTSC-Video als 59.94 und den
   korrespondierenden Frames pro Sekunde als 29.97 (für telecined und
   interlaced) und 23.976 (für progressiv). Zur Vereinfachung runden
   manche dieser Dokumente sogar auf 60, 30 und 24 auf.
 </para></formalpara>
 
 <para>
-  Streng genommen sind alle diese Zahlen Näherungswerte. Das Schwarz/Weiß
+  Streng genommen sind alle diese Zahlen Näherungswerte. Das schwarz/weiße
   NTSC-Video war exakt 60 Felder pro Sekunde, aber 60000/1001
   wurde später gewählt, um die Farbdaten anzupassen, solange man gleichzeitig
-  zu Schwarz/Weiß-Fernsehen kompatibel blieb. Digitales NTSC-Video
+  zu Schwarz/weiß-Fernsehen kompatibel blieb. Digitales NTSC-Video
   (so wie auf einer DVD) hat ebenfalls 60000/1001 Felder pro Sekunde. Hieraus
   wird interlaced und telecined Video als 30000/1001 Frames pro Sekunde
   enthaltend abgeleitet; progressive Video hat 24000/1001 Frames pro Sekunde.
@@ -1854,7 +1855,7 @@
   und viele archivierten Posts in Mailing-Listen beziehen sich auf 59.94,
   29.97 und 23.976.
   Alle <application>MEncoder</application>-Dokumentationen wurden insofern
-  aktualisiert, dass sie fraktionale Werte verwenden und du solltest das
+  aktualisiert, dass sie fraktionale Werte verwenden, und du solltest das
   auch tun.
 </para>
 
@@ -1864,30 +1865,30 @@
 </para>
 
 <formalpara>
-<title>Wie telecine angewandt wird.</title>
+<title>Wie telecine angewandt wird</title>
 <para>
-  Jedes Video, das zur Anzeige auf einem NTSC-Fernseh-Set vorgesehen ist
-  muß 60000/1001 Felder pro Sekunde haben. Für TV-Filme und Shows
-  hergestellt sind sie häufig direkt mit 60000/1001 Felder pro Sekunde
+  Jedes Video, das zur Anzeige auf einem NTSC-Fernseh-Set vorgesehen ist,
+  muss 60000/1001 Felder pro Sekunde haben. Für TV-Filme und Shows
+  hergestellt sind sie häufig direkt mit 60000/1001 Feldern pro Sekunde
   aufgenommen, die Mehrheit der Kinofilme jedoch mit 24 oder 24000/1001
   Frames pro Sekunde. Wenn cinematische Movie-DVDs gemastert werden,
-  wird das Video dabach fürs Fernsehen mittels eines telecine genannten
+  wird das Video danach fürs Fernsehen mittels eines telecine genannten
   Prozesses konvertiert.
 </para></formalpara>
 
 <para>
   Auf einer DVD wird das Video eigentlich nie als 60000/1001 Felder
-  pro Sekunde abgelegt. Für ein Video das ursprünglich 60000/1001 war,
+  pro Sekunde abgelegt. Für ein Video, das ursprünglich 60000/1001 war,
   wird jedes Feldpaar zu einem Frame kombiniert, was dann 30000/1001
   Frames pro Sekunde ergibt. Hardware-DVD-Player lesen dann ein im
-  Videostream eingebettetes Kennzeichen aus, um zu bestimmen ob die gerade
+  Videostream eingebettetes Kennzeichen aus, um zu bestimmen, ob die gerade
   oder ungerade nummerierten Zeilen das erste Feld formen sollen.
 </para>
 
 <para>
   Üblicherweise bleibt ein Inhalt mit 24000/1001 Frames pro Sekunde
-  so wie er ist, wenn er für eine DVD encodiert wird und der DVD-Player
-  muß das Telecining on-the-fly bewerkstelligen. Manchmal jedoch wird das
+  so wie er ist, wenn er für eine DVD encodiert wird, und der DVD-Player
+  muss das Telecining on-the-fly bewerkstelligen. Manchmal jedoch wird das
   Video telecined <emphasis>bevor</emphasis> es auf der DVD gespeichert wird;
   selbst wenn es ursprünglich 24000/1001 Frames pro Sekunde war, wird es
   60000/1001 Felder pro Sekunde. Wenn es auf der DVD gespeichert wird,
@@ -1895,18 +1896,18 @@
 </para>
 
 <para>
-  Wenn man sich das aus 60000/10001 Feldern pro Sekunde geformten Einzelframes
-  erzeugte Video betrachtet, ist telecined oder anderenfalls interlacing
+  Wenn man das aus 60000/10001 Feldern pro Sekunde geformten Einzelframes
+  erzeugte Video betrachtet, ist telecined oder anderenfalls Interlacing
   klar sichtbar woimmer Bewegung auftritt, da ein Feld (sagen wir, die
-  gerade bummerierten Zeilen) einen Moment zur Zeit 1/(60000/1001) Sekunden
+  gerade nummerierten Zeilen) einen Moment zur Zeit 1/(60000/1001) Sekunden
   später als das andere repräsentiert. Spielt man ein interlaced Video auf
   einem Computer ab, sehen beide hässlich aus, weil der Monitor eine höhere
   Auflösung besitzt und weil das Video Frame für Frame anstatt Feld für Feld
-  gezeigt wird.
+  angezeigt wird.
 </para>
 
 <itemizedlist>
-<title>Anmerkungen:</title>
+<title>Anmerkungen</title>
 <listitem><para>
   Diese Sektion gilt nur für NTSC-DVDs und nicht für PAL.
   </para></listitem>
@@ -1928,17 +1929,17 @@
 </sect2>
 
 <sect2 id="menc-feat-telecine-ident">
-<title>Wie soll man sagen, welchen Typ Video man hat</title>
+<title>Wie kann man sagen, welchen Typ Video man hat</title>
 
 <sect3 id="menc-feat-telecine-ident-progressive">
 <title>Progressiv</title>
 <para>
   Progressive Video wurde ursprünglich mit 24000/1001 fps gefilmt und
-  ohne Änderung aud der DVD abgespeichert.
+  ohne Änderung auf der DVD abgespeichert.
 </para>
 
 <para>
-  Wenn du ein progressive DVD in <application>MPlayer</application> abspielst,
+  Wenn du eine progressive DVD in <application>MPlayer</application> abspielst,
   wird <application>MPlayer</application> folgende Zeile ausgeben, sobald
   das Abspielen des Films beginnt:
 
@@ -1949,12 +1950,12 @@
 </para>
 
 <para>
-  Wenn du progressive Video ankuckst, solltest du nie irgendein
-  interlacing sehen. Sei trotzdem vorsichtig, weil manchmal ein winziges
-  bisschen telecine dort hin eingemischt wurde, wo du es nicht erwartest.
-  Ich bin TV-Show-DVDs begegnet, die eine Sekunde telecine bei jedem
+  Wenn du progressives Video ankuckst, solltest du nie irgendein
+  Interlacing sehen. Sei trotzdem vorsichtig, weil manchmal ein winziges
+  bisschen telecine dort hineingemischt wurde, wo du es nicht erwartest.
+  Ich bin TV-Serien-DVDs begegnet, die eine Sekunde telecine bei jedem
   Szenenwechsel haben oder an extrem zufälligen Stellen. Ich hatte einmal
-  eine DVD angesehen, die eine progressive erste Hälfte hatte und die
+  eine DVD angesehen, die eine progressive erste Hälfte hatte, und die
   zweite Hälfte war telecined. Willst du<emphasis>wirklich</emphasis>
   gründlich sein, kannst du den kompletten Film scannen:
 
@@ -1962,15 +1963,15 @@
 
   Das Verwenden von <option>-benchmark</option> veranlasst
   <application>MPlayer</application>, den Film so schnell er es nur kann
-  abzuspielen; dies dauert je nach deiner Hardware, trotzdem noch eine
+  abzuspielen; dies dauert je nach Hardware trotzdem noch eine
   Weile. Jedesmal wenn demux_mpg einen Frameratenwechsel meldet, wird dir
-  die Zeile unmittelbar darüber die Zeit anzeigen bei welcher der Wechsel
+  die Zeile unmittelbar darüber die Zeit zeigen, bei welcher der Wechsel
   auftrat.
 </para>
 
 <para>
   Manchmal wird progressive Video auf DVDs
-  &quot;soft telecine&quot; zugeordnet, weil es dafür vorgesehen ist
+  &quot;soft telecine&quot; zugeordnet, weil es dafür vorgesehen ist,
   durch den DVD-Player telecined zu werden.
 </para>
 </sect3>
@@ -1978,8 +1979,8 @@
 <sect3 id="menc-feat-telecine-ident-telecined">
 <title>Telecined</title>
 <para>
-  Telecined Video was ursprünlich mit 24000/1001 aufgenommen, aber wurde
-  telecined <emphasis>bevor</emphasis> es auf die DVD geschrieben wurde.
+  Telecined Video war ursprünglich mit 24000/1001 aufgenommen, wurde aber
+  telecined, <emphasis>bevor</emphasis> es auf die DVD geschrieben wurde.
 </para>
 
 <para>
@@ -1988,7 +1989,7 @@
 </para>
 
 <para>
-  Beim betrachten eines telecined Videos wirst du interlacing-Artefakte
+  Beim Betrachten eines telecined Videos wirst du Interlacing-Artefakte
   sehen, die zu &quot;blinken&quot; scheinen: sie erscheinen wiederholt
   und verschwinden wieder.
   Du kannst dir das so genauer hinschauen
@@ -2000,15 +2001,15 @@
     Suche einen Teil mit Bewegung.
     </para></listitem>
   <listitem><para>
-    Benutze die Taste <keycap>.</keycap> um jeweils einen Frame vorwärts zu rücken.
+    Benutze die Taste <keycap>.</keycap>, um jeweils einen Frame vorwärts zu rücken.
     </para></listitem>
   <listitem><para>
-    Schau auf das Muster der der interlaced und progressive aussehenden
+    Schau auf das Muster der interlaced und progressive aussehenden
     Frames. Ist das Muster, das du siehst PPPII,PPPII,PPPII,... dann ist das
     Video telecined. Siehst du andere Muster, dann wurde das Video womöglich
     mittels einiger Nicht-Standard-Methoden telecined;
     <application>MEncoder</application> kann ein Nicht-Standard-telecine
-    nicht Verlustfrei nach progressive konvertieren. Siehst du überhaupt
+    nicht verlustfrei nach progressive konvertieren. Siehst du überhaupt
     keine Muster, ist es höchstwahrscheinlich interlaced.
     </para></listitem>
   </orderedlist>
@@ -2016,20 +2017,20 @@
 
 <para>
   Manchmal wird telecined Video auf DVDs &quot;hard telecine&quot;
-  zugeordnet. Da hard telecine bereits 60000/1001 Feldern pro Sekunde hat,
+  zugeordnet. Da hard telecine bereits 60000/1001 Felder pro Sekunde hat,
   spielt der DVD-Player das Video ohne irgendeine Manipulation ab.
 </para>
 
 <para>
-  Ein anderer Weg, zu sagen, dass deine Quelle telecined ist oder nicht
+  Ein anderer Weg, zu sagen, dass deine Quelle telecined ist oder nicht,
   ist die Quelle mit den Befehlszeilenoptionen <option>-vf pullup</option>
-  und <option>-v</option> abzuspielen. um zu nachzusehen, wie
+  und <option>-v</option> abzuspielen, um nachzusehen, wie
   <option>pullup</option> zu den Frames passt.
   Ist die Quelle telecined, solltest du in der Befehlszeile ein 3:2 Muster
   mit abwechselnd <systemitem>0+.1.+2</systemitem> und <systemitem>0++1</systemitem>
   anzeigen.
   Diese Technik hat den Vorteil, dass du die Quelle nicht zu beobachten
-  brauchst, umsie zu identifizieren, was von Nutzen sein könnte, falls du
+  brauchst, um sie zu identifizieren, was von Nutzen sein könnte, falls du
   den Encodiervorgang automatisieren willst oder besagte Prozedur ferngesteuert
   mittels einer langsamen Verbindung vornehmen willst.
 </para>
@@ -2048,13 +2049,13 @@
 </para>
 
 <para>
-  Wie bei telecined Video, sollte <application>MPlayer</application> niemals
+  Wie bei telecined Video sollte <application>MPlayer</application> niemals
   einen Frameratewechsel beim Abspielen des interlaced Inhalts melden.
 </para>
 
 <para>
-  Wenn du ein interlaced Video genau ansiehst, in dem du dich mit der Tast
-  <keycap>.</keycap> durch die Frames tastest, wirst du sehen, dass
+  Wenn du ein interlaced Video genau ansiehst, in dem du dich mit der Taste
+  <keycap>.</keycap> durch die Frames bewegst, wirst du sehen, dass
   jeder einzelne Frame interlaced ist.
 </para>
 </sect3>
@@ -2062,7 +2063,7 @@
 <sect3 id="menc-feat-telecine-ident-mixedpt">
 <title>Gemischtes progressive und telecine</title>
 <para>
-  Alle &quot;gemischten progressive und telecine&quot; Videos wurden ürsprünglich
+  Alle &quot;gemischten progressive und telecine&quot; Videos wurden ursprünglich
   als 24000/1001 Frames pro Sekunde aufgenommen, jedoch werden einige Teile
   telecined beendet.
 </para>
@@ -2071,7 +2072,7 @@
   Spielt <application>MPlayer</application> diese Kategorie ab, wird er
   (oft wiederholt) zurück und vor zwischen &quot;30000/1001 fps NTSC&quot;
   und &quot;24000/1001 fps progressive NTSC&quot; wechseln. Beobachte die
-  untere Hälfte von <application>MPlayer</application>'s Ausgabe, um diese
+  untere Hälfte von <application>MPlayer</application>s Ausgabe, um diese
   Meldungen anzusehen.
 </para>
 
@@ -2085,13 +2086,13 @@
 <sect3 id="menc-feat-telecine-ident-mixedpi">
 <title>Gemischtes progressive und interlaced</title>
 <para>
-  In &quot;gemischtem progressive und interlaced&quot; Inhalt, wurde progressive
+  In &quot;gemischtem progressive und interlaced&quot; Inhalt wurde progressive
   und interlaced Video zusammengeklebt.
 </para>
 
 <para>
   Diese Kategorie sieht aus wie &quot;gemischtes progressive und telecine&quot;,
-  bis su die Sektion 30000/1001 fps untersuchst und feststellst, dass
+  bis du die Sektion 30000/1001 fps untersuchst und feststellst, dass
   sie das telecine-Muster nicht haben.
 </para>
 </sect3>
@@ -2114,7 +2115,7 @@
   Der einzige Parameter, den du gewiss anwenden solltest ist
   <option>-ofps 24000/1001</option>. Andernfalls wird
   <application>MEncoder</application> versuchen, bei 30000/1001 fps
-  zu encodieren und wird Frames duplizieren.
+  zu encodieren und Frames duplizieren.
 </para>
 
 <para>
@@ -2122,7 +2123,7 @@
 </para>
 
 <para>
-  Dennoch ist es öfters der Fall, dass ein Video, das progressive aussieht
+  Dennoch ist es öfters der Fall, dass ein Video, das progressive aussieht,
   eigentlich kurze Teile telecine eingemischt hat. Solange du dir nicht
   sicher bist, ist es am sichersten, das Video als
   <link linkend="menc-feat-telecine-encode-mixedpt">gemischtes progressive und telecine</link>.
@@ -2137,17 +2138,18 @@
   Telecine kann umgekehrt werden, um den originalen 24000/1001-Inhalt zu erhalten,
   indem man einen Prozess verwendet, der inverse-telecine genannt wird.
   <application>MPlayer</application> enthält verschiedene Filter, um dies
-  zu erreichen; der beste Filter, <option>pullup</option>, wird in der Sektion
+  zu erreichen; der beste Filter, <option>pullup</option> wird in der Sektion
   <link linkend="menc-feat-telecine-encode-mixedpt">Gemischtes progressive und telecine</link>
   beschrieben.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-interlaced">
-<title>Interlaced</title>
+<title>Interlaced:</title>
 <para>
-  In den meisten praktischen Fällen ist es nicht möglich, ein komplettes
-  progressive Video aus interlaced Inhalt zu erhalten. Der einzige Weg,
+
+  In den meisten praktischen Fällen ist es nicht möglich, ein komplett
+  progressives Video aus interlaced Inhalt zu erhalten. Der einzige Weg,
   dies ohne den Verlust der Hälfte der vertikalen Auflösung zu erreichen,
   ist das Verdoppeln der Framerate, und man kann versuchen zu
   &quot;schätzen&quot;, wie die korrespondierenden Zeilen für jedes Feld
@@ -2156,70 +2158,68 @@
 
 <orderedlist>
 <listitem><para>
-
-  Das Video in interlaced Form encodieren. Normalerweise richtet interlacing
-  verheerenden Schaden mit der Fähigkeit des Encoders an, gur zu komprimieren,
+  Das Video in interlaced Form encodieren. Normalerweise richtet Interlacing
+  verheerenden Schaden für die Fähigkeit des Encoders an, gut zu komprimieren,
   <systemitem class="library">libavcodec</systemitem> hat jedoch zwei
   eigens für das ein wenig bessere Abspeichern von interlaced Video gedachte
-  Parameter: <option> ildct</option> und <option>ilme</option>. Auch wenn
+  Parameter: <option>ildct</option> und <option>ilme</option>. Auch wenn
   die Verwendung von <option>mbd=2</option> dringend zu empfehlen ist
   <link linkend="menc-feat-telecine-footnotes">[2]</link>, weil es
-  Macroblöck wie nicht-interlaced an Stellen encodiert, an denen keine Bewegung
+  Macroblöcke wie nicht-interlaced an Stellen encodiert, an denen keine Bewegung
   stattfindet. Beachte, dass <option>-ofps</option> hier NICHT notwendig ist.
 
   <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
 <listitem><para>
-  Nutze einen deinterlacing-Filter vor dem Encodieren. Es stehen verschiedene
-  dieser Filter zu Auswahl zur Verfügung, jeder mit seinen eigenen Vor-
-  und Nachteilen. Ziehe <option>mplayer -pphelp</option> zu Rate, um zu sehen, was
-  verfügbar ist (suche nach &quot;deint&quot;) und durchsuche die
+  Nutze einen Deinterlacing-Filter vor dem Encodieren. Es stehen verschiedene
+  dieser Filter zur Auswahl verfügbar, jeder mit seinen eigenen Vor-
+  und Nachteilen. Ziehe <option>mplayer -pphelp</option> zu Rate, um zu sehen, welche
+  verfügbar sind (suche nach &quot;deint&quot;) und durchsuche die
   <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
   MPlayer-Mailinglisten</ulink>, um Diskussionen über die zahlreichen Filter
   zu finden. Nochmals, die Framerate wechselt nicht, also kein
-  <option>-ofps</option>. Deinterlacing sollte auch nach dem Zuschneiden
+  <option>-ofps</option>. Deinterlacing sollte außerdem nach dem Zuschneiden
   (cropping) <link linkend="menc-feat-telecine-footnotes">[1]</link>
   und vor dem Skalieren angewandt werden.
 
   <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
-  Unglücklicherweise ist diese Option buggy zusammen mit
+  Unglücklicherweise ist diese Option fehlerhaft zusammen mit
   <application>MEncoder</application>; sie sollte mit
   <application>MEncoder G2</application> gut funktionieren, aber den gibts
   noch nicht. Du könntest Abstürze erleben. Seis drum, der Zweck von
   <option> -vf tfields</option> ist es, einen vollen Frame aus jedem Feld
-  zu erzeugen, was eine Framerate von 60000/1001 macht. Der Vorteil dieses
+  zu erzeugen, was eine Framerate von 60000/1001 ergibt. Der Vorteil dieses
   Lösungsansatzes ist, dass nie irgendwelche Daten verloren gehen;
   dennoch, da jeder Frame aus nur einem Feld kommt, müssen die fehlenden Zeilen
   irgendwie interpoliert werden. Es gibt keine sehr guten Methoden, die
-  fehlenden Daten zu generieren und so wird das Resultat ein bisschen aussehen,
-  als hätte man einige deinterlacing-Filter verwendet. Die fehlenden Zeilen
-  zu generieren, erzeugt auch weitere Probleme, einfach weil sich die Menge
+  fehlenden Daten zu generieren, und so wird das Resultat ein bisschen aussehen,
+  als hätte man einige Deinterlacing-Filter verwendet. Die fehlenden Zeilen
+  zu generieren erzeugt auch weitere Probleme, einfach weil sich die Menge
   an Daten verdoppelt. Somit sind höhere Encodier-Bitraten nötig, um
   die Qualität beizubehalten und mehr CPU-Power wird für beides,
-  Encodieren und Decodieren aufgewendet. Das Attribut tfields hat mehrere
+  Encodieren und Decodieren, aufgewendet. Das Attribut tfields hat mehrere
   verschiedene Optionen dafür, wie die fehlenden Zeilen jedes Frames erzeugt
   werden.
-  Wenn du diese Methode nutzt, dann nimm Bezug auf das Manual und wähle
+  Wenn du diese Methode nutzt, dann nimm Bezug auf das Handbuch und wähle,
   welche Option auch immer am besten für dein Material aussieht.
   Beachte, dass du wenn <option>tfields</option> verwendet wird,
-  beides spezifizieren <emphasis role="bold">mußt</emphasis>
-  <option>-fps</option> und <option>-ofps</option>, um die zweifache
-  Framerate der originalen Quelle zu haben.
+  sowhl <option>-fps</option> als auch <option>-ofps</option>spezifizieren <emphasis role="bold">musst</emphasis>,
+  um die doppelte Framerate der originalen Quelle zu erhalten.
 
   <screen>mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
-  Wenn du vor hast, dramatisch runter zu skalieren, kannst du nur einen
+  Wenn du vorhast, dramatisch herunterzuskalieren, kannst du nur eins
   der beiden Felder extrahieren und encodieren. Sicherlich, du wirst die
-  Hälfte der vertikalen Auflösung verlieren, aber wenn du planst bis auf
+  Hälfte der vertikalen Auflösung verlieren, aber wenn du planst, bis auf
   1/2 des Originals herunter zu skalieren, macht der Verlust so gut wie
   gar nichts aus. Das Resultat wird eine progressive Datei mit 30000/1001
   Frames pro Sekunde sein. Die Prozedur ist, <option>-vf field</option>
-  zu verwenden, dann die Ränder abzuschneiden (crop)
+  zu verwenden, dann die Ränder abzuschneiden
   <link linkend="menc-feat-telecine-footnotes">[1]</link> und angemessen
-  zu skalieren. Vergiss nicht, dass du die Skalierung anpassen mußt, um
+  zu skalieren. Vergiss nicht, dass du die Skalierung anpassen musst, um
   das Halbieren der vertikalen Auflösung zu kompensieren.
   <screen>mencoder dvd://1 -oac copy -vf field=0 -ovc lavc</screen>
   </para></listitem>
@@ -2227,14 +2227,14 @@
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-mixedpt">
-<title>Gemischtes progressive und telecine</title>
+<title>Gemischtes progressive und telecine:</title>
 <para>
   Um progressive und telecine Video komplett in progressive Video
   umzuwandeln, müssen die telecined Teile inverse-telecined werden.
-  Die drei Wege dies zu werreichen, werden unten beschrieben.
+  Die drei Wege, dies zu erreichen, werden unten beschrieben.
   Beachte, dass du inverse-telecine <emphasis role="bold">immer</emphasis>
-  vor der Reskalierung durchführen solltest; es sei denn du weißt wirklich,
-  was du tust, mach inverse-telecine auch vor dem Entfernen der Ränder
+  vor der Reskalierung durchführen solltest; es sei denn, du weißt wirklich,
+  was du tust; mache inverse-telecine auch vor dem Entfernen der Ränder
   <link linkend="menc-feat-telecine-footnotes">[1]</link>.
   <option>-ofps 24000/1001</option> wird hier benötigt, weil das Output-Video
   24000/1001 Frames pro Sekunde werden soll.
@@ -2244,9 +2244,9 @@
 <listitem><para>
   <option>-vf pullup</option> wurde entworfen, um auf telecined Material
   inverse-telecine anzuwenden, während die progressiven Daten unangetastet
-  bleiben. Um richtig zu zu funktionieren, <emphasis role="bold">muß</emphasis>
-  <option>pullup</option> vom <option>softskip</option>-Filter gefolgt werden oder
-  <application>MEncoder</application> wird abstürzen.
+  bleiben. Damit dies richtig funktioniert, <emphasis role="bold">muss</emphasis>
+  <option>pullup</option> vom <option>softskip</option>-Filter gefolgt werden, sonst
+  wird <application>MEncoder</application> abstürzen.
   <option>pullup</option> ist trotz allem die sauberste und akkurateste
   Methode, die zum Encodieren von beidem telecine und
   &quot;gemischtem progressive und telecine&quot; zur Verfügung steht.
@@ -2257,10 +2257,10 @@
 
   </listitem>
   <listitem><para>
-  Eine ältere Methode ist, eher noch als inverse-telecine auf die telecined Teile
-  anzuwenden, telecine auf nicht-telecined Teile und dann auf das
-  ganze Video inverse-telecine anzuwenden. Hört sich verwirrend an? softpulldown ist
-  ein Filter, der durch ein Video geht und die komplette Datei telecined macht.
+  Eine ältere Methode ist, anstatt inverse-telecine auf die telecined Teile
+  anzuwenden, telecine auf nicht-telecined Teile und dann inverse-telecine auf das
+  ganze Video anzuwenden. Hört sich verwirrend an? softpulldown ist
+  ein Filter, der ein Video durchgeht und die komplette Datei telecined macht.
   Lassen wir auf softpulldown entweder <option>detc</option> oder <option>ivtc</option>
   folgen, wird das Endergebnis vollkommen progressiv. <option>-ofps 24000/1001</option>
   wird benötigt.
@@ -2275,8 +2275,8 @@
 
   <blockquote><para>Es ist OK, aber IMO versucht er eher ein deinterlace
     als ein inverse telecine zu oft durchzuführen (ganz wie Settop-DVD-Player
-    &amp; progressive TVs) was ein hässliches Flimmern erzeugt und
-    andere Artefakte. Wenn du vor hast, es anzuwenden, mußt du zumindest
+    &amp; progressive TVs), was ein hässliches Flimmern erzeugt und
+    andere Artefakte. Wenn du vorhast, es anzuwenden, musst du zumindest
     einige Zeit darauf verwenden, die Optionen zu tunen und zuerst den Output
     zu beobachten, damit du auch sicher sein kannst, dass du nichts
     vermasselst.</para></blockquote>
@@ -2285,10 +2285,10 @@
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-mixedpi">
-<title>Gemischtes progressive und interlaced</title>
+<title>Gemischtes progressive und interlaced:</title>
 <para>
-  Es gibt zwei Optionen für den Umgang mit dieser Kategorie, jeder von
-  beiden stellt einen Kompromiss dar. Zu solltest basierend auf
+  Es gibt zwei Optionen für den Umgang mit dieser Kategorie, jede von
+  beiden stellt einen Kompromiss dar. Du solltest basierend auf
   Dauer/Stelle jedes Typs entscheiden.
 </para>
 
@@ -2296,7 +2296,7 @@
 <listitem><para>
   Behandle es wie progressive. Die interlaced Teile werden interlaced
   aussehen und einige der interlaced Felder müssen weggelassen werden,
-  was zu ein wenig nervöser Unruhe führt. Du kannst einen
+  was ein wenig zu Sprüngen führt. Du kannst einen
   Nachbearbeitungsfilter verwenden, wenn du willst, aber dies wird die
   progressive-Anteile geringfügig verringern.
   </para>
@@ -2306,19 +2306,19 @@
   Video auf einem interlaced Gerät anzeigen willst (mit einer TV-Karte
   zum Beispiel). Wenn du interlaced Frames in einem Video mit 24000/1001
   Frames pro Sekunde hast, werden diese zusammen mit den progressive
-  Frames telecined. Die Hälfte der interlaced &quot;Frames&quot; werdem für die
+  Frames telecined. Die Hälfte der interlaced &quot;Frames&quot; werden für die
   Dauer von drei Feldern (3/(60000/1001) Sekunden) angezeigt, was
   einen flimmernden &quot;Zeitrücksprung&quot;-Effekt zur Folge hat, der
-  segr schlecht aussieht. Solltest du dies dennoch veruchen,
+  ziemlich schlecht aussieht. Solltest du dies dennoch versuchen,
   <emphasis role="bold">musst</emphasis> du einen
-  deinterlacing-Filter wie <option>lb</option> oder <option>l5</option>
+  Deinterlacing-Filter wie <option>lb</option> oder <option>l5</option>
   anwenden.
   </para>
 
   <para>
   Es wäre auch keine gute Idee für eine progressive Anzeige. Es wird
   Paare aufeinander folgender interlaced Felder auslassen, was eine
-  Unstetigkeit zur Folge hat, die eher sichtbar ist, als mit der
+  Unstetigkeit zur Folge hat, die eher sichtbar ist als mit der
   zweiten Methode, die einige progressive Frames zweimal anzeigt.
   Ein interlaced Video mit 30000/1001 Frames pro Sekunde ist bereits
   ein bisschen abgehackt, weil es wirklich mit 60000/1001 Felder pro
@@ -2327,7 +2327,7 @@
   </para>
 
   <para>
-  Egal welchen Weg du einschlägst, es ist das beste, deinen Inhalt
+  Egal welchen Weg du wählst, es ist das beste, deinen Inhalt
   zu berücksichtigen und wie du ihn anzeigen willst. Ist dein Video
   zu 90% progressive und du hast nie vor, es auf einem TV-Bildschirm
   anzuzeigen, solltest du einen progressive-Ansatz wählen. Ist es nur
@@ -2337,9 +2337,9 @@
   </listitem>
 
 <listitem><para>
-  Behandle es als sei es interlaced. Einige Frames des progressive-Anteils
-  müssen dupliziert werden, was zu nervöser Unruhe führt. Nochmal,
-  deinterlacing-Filter können die progressive-Anteile leicht verringern.
+  Behandle es wie interlaced. Einige Frames des progressive-Anteils
+  müssen dupliziert werden, was zu Sprüngen führt. Nochmal,
+  Deinterlacing-Filter können die progressive-Anteile leicht verringern.
   </para></listitem>
 
 </itemizedlist>
@@ -2354,23 +2354,23 @@
   <title>Über das Zuschneiden (cropping):</title>
   <para>
   Videodaten auf DVDs werden in einem Format, das YUV 4:2:0 genannt wird,
-  dort abgelegt. In einem YUV-Video, werden luma (&quot;Helligkeit&quot;)
-  und chroma (&quot;Farbe&quot;) separat gespeichert. Da das menschliche
+  abgelegt. In einem YUV-Video, werden Helligkeit
+  und Chrominanz separat gespeichert. Da das menschliche
   Auge ein bisschen weniger empfindlich auf Farbe reagiert als auf Helligkeit,
-  ist in einem YUV 4:2:0 Bild nur ein chroma-Pixel alle vier luma-Pixel vorhanden.
+  ist in einem YUV 4:2:0 Bild nur ein Chrominanz-Pixel für alle vier Helligkeits-Pixel vorhanden.
   In einem progressive Bild, besitzt jedes Quadrat von vier luma-Pixeln (zwei
-  auf jeder Seite) ein gemeinsames chroma-Pixel. Du mußt progressive YUV
+  auf jeder Seite) ein gemeinsames chroma-Pixel. Du musst progressive YUV
   4:2:0 zu geradzahligen Auflösungen zurechtschneiden und geradzahlige
   Offsets verwenden. Zum Beispiel ist
-  <option>crop=716:380:2:26</option> OK aber
-  <option>crop=716:380:3:26 </option> ist nicht.
+  <option>crop=716:380:2:26</option> OK,
+  <option>crop=716:380:3:26 </option> aber nicht.
   </para>
   </formalpara>
 
   <para>
   Wenn du es mit interlaced YUV 4:2:0 zu tun hast, ist die Situation
   ein wenig komplizierter. Anstatt dass immer vier luma-Pixel im
-  <emphasis>frame</emphasis> sich ein chroma-Pixel teilen, teilen sich
+  <emphasis>Frame</emphasis> sich ein chroma-Pixel teilen, teilen sich
   immer vier luma-Pixel in jedem <emphasis>Feld</emphasis> ein
   chroma-Pixel. Wenn Feld zur Formung des Frames interlaced werden,
   ist jede Scanzeile ein Pixel hoch. Jetzt liegen anstatt immer vier
@@ -2379,24 +2379,24 @@
   Die zwei luma-Pixel in der dazwischen liegenden Scanzeile sind vom
   anderen Feld und teilen sich somit ein anderes chroma-Pixel mit
   zwei luma-Pixeln zwei Scanzeile entfernt. All diese Konfusion macht
-  ws notwendig, vertikale Ausschneide-Abmessungen und Offsets zu
-  haben, die ein Vielfaches von Vier sind. Horizontal kann geradzahlig
+  es notwendig, vertikale Ausschneide-Abmessungen und Offsets zu
+  haben, die ein Vielfaches von vier sind. Horizontal kann geradzahlig
   bleiben.
   </para>
 
   <para>
-  Für telecined Video empfehle ich, das zuschneiden nach dem inverse
+  Für telecined Video empfehle ich, das Zuschneiden nach dem inverse
   telecining stattfinden zu lassen. Ist das Video einmal progressive,
-  mußt du nur noch mit geraden Zahlen zuschneiden. Wenn du wirklich die
-  leichte Beschleunigung haben willst, die &quot;zuerst Zuschneiden&quot;
-  möglicherweise bietet, mußt du vertikal mit einem Vielfachen von Vier
-  zuschneiden oder der inverse-telecine Filter wird keine korrekten Daten
+  musst du nur noch mit geraden Zahlen zuschneiden. Wenn du wirklich die
+  leichte Beschleunigung haben willst, die zuerst zuzuschneiden
+  möglicherweise bietet, musst du vertikal mit einem Vielfachen von vier
+  zuschneiden, oder der inverse-telecine Filter wird keine korrekten Daten
   haben.
   </para>
 
   <para>
-  Für interlaced (nicht telecined) Video mußt du immer
-  mit einem Vielfachen von Vier zuschneiden, es sei denn du verwendest
+  Für interlaced (nicht telecined) Video musst du immer
+  mit einem Vielfachen von vier zuschneiden, es sei denn, du verwendest
   <option>-vf field</option> vor dem Schneiden.
   </para>
   </listitem>
@@ -2408,9 +2408,9 @@
   dass es woanders benutzt werden soll. Zusammen mit <option>trell</option>
   ist <option>mbd=2</option> eine der Optionen von
   <systemitem class="library">libavcodec</systemitem>, welche die
-  Qualität am deutlichste heben, und du solltest stets das letzte der beiden
+  Qualität am deutlichsten heben, und du solltest stets das letzte der beiden
   anwenden, außer das Abfallen der Encodiergeschwindigkeit ist abschreckend
-  hoch (z.B. Realtime Encodierung). Es gibt eine Menge anderer Optionen für
+  hoch (z.B. Encodierung in Echtzeit). Es gibt eine Menge anderer Optionen für
   <systemitem class="library">libavcodec</systemitem>, die die Encodierqualität
   verbessern (und Encodiergeschwindigkeit verringern), dies liegt aber jenseits
   des Rahmens dieses Dokuments.
@@ -2423,11 +2423,11 @@
   <para>
   <option>Pullup</option> kann sicher (zusammen mit <option>softskip</option>)
   auf progressive Video angewandt werden und ist für gewöhnlich eine gute Idee,
-  es sei denn die Quelle wurde definitiv als vollkommen progressive verifiziert.
-  Der Performaceverlust ist in den meisten Fällen gering. Bei einer Minialencodierung,
-  veranlasst <option>pullup</option> <application>MEncoder</application> dazu,
-  um 50% langsamer zu werden. Das Hinzufügen von Soundverarbeitung und erweiterten
-  <option>lavcopts</option> Überschattungen, verringert diesen Unterschied
+  es sei denn, die Quelle wurde definitiv als vollkommen progressive verifiziert.
+  Der Performaceverlust ist in den meisten Fällen gering. Bei einer Minimalencodierung
+  macht <option>pullup</option> <application>MEncoder</application>
+  50% langsamer. Das Hinzufügen von Soundverarbeitung und erweiterten
+  <option>lavcopts</option> überschattet diesen Unterschied
   und drückt den Performanceabfall, der mit dem Verwenden von <option>pullup</option>
   verbunden war, runter auf 2%.
   </para>
@@ -2443,11 +2443,11 @@
 
 <sect1 id="menc-feat-enc-libavcodec">
 <title>Encodieren mit der <systemitem class="library">libavcodec</systemitem>
-  Codec-Familie</title>
+  Codecfamilie</title>
 
 <para>
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  stellt ein einfaches Encodieren für eine Menge interessanter Video- und Audioformate
+  stellt einfache Encodierung für eine Menge interessanter Video- und Audioformate
   zur Verfügung.
   Du kannst folgende Codecs encodieren (mehr oder weniger aktuell):
 </para>
@@ -2466,7 +2466,7 @@
    Motion-JPEG
   </entry></row>
 <row><entry>ljpeg</entry><entry>
-   Verlustfreies (lossless) JPEG
+   Verlustfreies JPEG
   </entry></row>
 <row><entry>h261</entry><entry>
   H.261
@@ -2532,13 +2532,13 @@
 </tgroup>
 </informaltable>
 
-  Die erste Spalte enthält die Codec-Namen, die nach der Konfiguration
+  Die erste Spalte enthält die Codecnamen, die nach der Konfiguration
   <literal>vcodec</literal> übergeben werden müssen, wie:
   <option>-lavcopts vcodec=msmpeg4</option>
 </para>
 <informalexample>
 <para>
-  An example with MJPEG compression:
+  Ein Beispiel mit MJPEG-Komprimierung:
   <screen>mencoder dvd://2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg -oac copy</screen>
 </para>
 </informalexample>
@@ -2567,13 +2567,13 @@
   </row>
   <row>
     <entry>sonic</entry>
-    <entry>experimental lossy/lossless codec</entry>
+    <entry>experimenteller verlustbehafteter/verlustfreier Codec</entry>
   </row>
 </tbody>
 </tgroup>
 </informaltable>
 
-  Die erste Spalte enthält die Codec-Namen, die nach der Konfiguration
+  Die erste Spalte enthält die Codecnamen, die nach der Konfiguration
   <literal>acodec</literal> übergeben werden müssen, wie:
   <option>-lavcopts acodec=ac3</option>
 </para>
@@ -2594,7 +2594,7 @@ Ein Beispiel mit AC3-Kompression:
   Beachte jedoch, dass all diese Audiocodecs sehr schnell sind und überall dort
   hervorragend arbeiten, wo <application>MEncoder</application> mit
   <systemitem class="library">libavcodec</systemitem> kompiliert wurde (was
-  meistens der Fall ist), und nicht von externen Programmbibliotheken abhängen.
+  meistens der Fall ist) und nicht von externen Programmbibliotheken abhängt.
 </para>
 </sect2>
 
@@ -2608,8 +2608,7 @@ Ein Beispiel mit AC3-Kompression:
   Das wäre vermutlich nett, aber unglücklicherweise schwer zu implementieren, da
   verschiedene Encodieroptionen unterschiedliche Qualitätsresultate hervorbringen,
   abhängig vom Quellmaterial.
-  Das ist weil die Komprimierung von den visuellen Eigenschaften des fraglichen Videos
-  abhängt.
+  Das liegt daran, dass die Komprimierung von den visuellen Eigenschaften des fraglichen Videos abhängt.
   Zum Beispiel haben Anime und Live-Action sehr unterschiedliche Eigenschaften und
   benötigen aus diesm Grund verschiedene Optionen, um optimale Encodierung zu erreichen.
   Die gute Neuigkeit ist, dass einige Optionen wie <option>mbd=2</option>,
@@ -2623,30 +2622,30 @@ Ein Beispiel mit AC3-Kompression:
 <listitem><para>
   <emphasis role="bold">vmax_b_frames</emphasis>: 1 oder 2 ist gut, abhängig vom
   Film.
-  Beachte dass du, falls deine Encodierung von DivX5 decodierbar sein muß, den
-  gesperrten GOP-Support aktivieren mußt, indem du die
+  Beachte, dass du, falls deine Encodierung von DivX5 decodierbar sein muss, den
+  Support für "closed GOP" aktivieren musst, indem du die
   <systemitem class="library">libavcodec</systemitem>-Option <option>cgop</option>
-  verwendest, aber du mußt Szenenerkennung deaktivieren, was wiederum keine gute
+  verwendest, du musst jedoch Szenenerkennung deaktivieren, was wiederum keine gute
   Idee ist, da es die Ecodierungseffizienz etwas angreift.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">vb_strategy=1</emphasis>: hilft in Szenen mit viel
   Bewegung (high-motion).
-  Bei manchen Videos wird vmax_b_frames der Qualität schaden, jedoch vmax_b_frames=2
-  zusammen mit vb_strategy=1 hilft.
+  Bei manchen Videos wird vmax_b_frames der Qualität schaden, vmax_b_frames=2
+  zusammen mit vb_strategy=1 hilft jedoch.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">dia</emphasis>: Bewegungssuchbereich. Größer ist besser
   als kleiner.
   Negative Werte sind ein komplett anderer Maßstab.
-  Gute Werte sind -1 für ein schnelles Encodieren oder 2-4 für ein langsames.
+  Gute Werte sind -1 für ein schnelle oder 2-4 für langsame Encodierung.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">predia</emphasis>: Bewegungssuche Vorabdurchlauf (pre-pass).
-  Nicht so wichtig wie dia. Gute Werte sind 1 (Standard) bis 4. erfordert preme=2, um
+  Nicht so wichtig wie dia. Gute Werte sind 1 (Standard) bis 4. Erfordert preme=2, um
   wirklich was zu nützen.
 </para></listitem>
 
@@ -2654,9 +2653,9 @@ Ein Beispiel mit AC3-Kompression:
   <emphasis role="bold">cmp, subcmp, precmp</emphasis>: Vergleichsfunktion zur
   Bewegungseinschätzung.
   Experimentiere mit Werten von 0 (Standard), 2 (hadamard), 3 (dct) und
-  6 (Frequenzverzerrung).
+  6 (Ratenverzerrung).
   0 ist am schnellsten und ausreichend für precmp.
-  Für cmp und subcmp ist 2 gut bei Anime und 3 ist gut bei Live-Action.
+  Für cmp und subcmp ist 2 gut bei Anime, und 3 ist gut bei Live-Action.
   6 kann leicht besser sein oder auch nicht, ist aber langsam.
 </para></listitem>
 
@@ -2673,10 +2672,10 @@ Ein Beispiel mit AC3-Kompression:
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">qprd</emphasis>: adaptive Quantisierung basierend auf die
-  Komplexität des Macroblock.
+  <emphasis role="bold">qprd</emphasis>: adaptive Quantisierung basierend auf der
+  Komplexität des Macroblocks.
   Kann hilfreich sein oder schaden, abhängig vom Video und anderen Optionen.
-  dies kann Artefakte verursachen, es sei denn du setzt vqmax auf einen halbwegs
+  Dies kann Artefakte verursachen, es sei denn, du setzt vqmax auf einen halbwegs
   kleinen Wert (6 ist gut, vielleicht so langsam wie 4); vqmin=1 sollte ebenfalls
   helfen.
 </para></listitem>
@@ -2684,15 +2683,15 @@ Ein Beispiel mit AC3-Kompression:
 <listitem><para>
   <emphasis role="bold">qns</emphasis>: sehr langsam, speziell wenn kombiniert
   mit qprd.
-  Diese Option veranlasst den Encoder, infolge Kompressionsartefakten entstandenes
+  Diese Option veranlasst den Encoder, durch Kompressionsartefakte entstandenes
   Rauschen zu minimieren anstatt das encodierte Video strikt der Quelle anzupassen.
-  Verwende dies nicht, es sei denn du hast bereits alles andere so weit wie möglich
+  Verwende dies nicht, es sei denn du, hast bereits alles andere so weit wie möglich
   optimiert und die Resultate sind immer noch nicht gut genug.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">vqcomp</emphasis>: Frequenzkontrolle optimieren.
-  Welche Werte gut sind hängt vom Film ab.
+  Welche Werte gut sind, hängt vom Film ab.
   Du kannst dies sicher so lassen wie es ist, wenn du willst.
   Wird vqcomp verringert, werden mehr Bits auf Szenen mit geringer Komlexität
   gelegt, wird es erhöht, legt es diese auf Szenen mit hoher Komlexität
@@ -2710,16 +2709,16 @@ Ein Beispiel mit AC3-Kompression:
   Block einfach so zu encodieren als fände &quot;kein Wechsel&quot; statt.
   Das spart Bits und beschleunigt womöglich die Encodierunng. vlelim=-4 und vcelim=9
   scheinen gut für Live-Filme zu sein, helfen aber scheinbar nicht bei Anime;
-  beim Encodieren einer Animation, solltest du sie womöglich unverändert lassen.
+  beim Encodieren einer Animation solltest du sie womöglich unverändert lassen.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">qpel</emphasis>: Bewegungsabschätzung auf ein viertel
   Pixel (quarter pel).
-  MPEG-4 verwendet standardmäßig eine Halbpixel-Genauigkeit für seine Bewegungssuche,
-  deswegen verfügt diese Option über einen Overhead je mehr Informationen in der
+  MPEG-4 verwendet als Voreinstellung eine Halbpixel-Genauigkeit für die Bewegungssuche,
+  deswegen hat diese Option über einen Overhead, da mehr Informationen in der
   encodierte Datei untergebracht werden.
-  Der Kompressionsgewinn/-verlust hängt vom Film ab, ist aber un der Regel nicht
+  Der Kompressionsgewinn/-verlust hängt vom Film ab, ist aber in der Regel nicht
   sonderlich effektiv bei Anime.
   qpel zieht immer eine signifikante Erhöhung der CPU-Decodierzeit nach
   sich (+25% in der Praxis).
@@ -2735,7 +2734,7 @@ Ein Beispiel mit AC3-Kompression:
 </itemizedlist>
 
 <itemizedlist>
-<title>Optionen mit denen besser nicht herumgespielt werden sollte:</title>
+<title>Optionen, mit denen besser nicht herumgespielt werden sollte:</title>
 <listitem><para>
   <emphasis role="bold">vme</emphasis>: Der Standardwert ist der beste.
 </para></listitem>
@@ -2750,30 +2749,29 @@ Ein Beispiel mit AC3-Kompression:
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">scplx_mask</emphasis>: Versucht, blockhafte Artefakte
-  zu verhindern, Nachbearbeitung (postprocessing) ist aber besser.
+  <emphasis role="bold">scplx_mask</emphasis>: Versucht, Blockartefakte
+  zu verhindern, Postprocessing ist aber besser.
 </para></listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="menc-feat-mpeg4-lavc-example-settings">
-<title>Encodiereinstellung Beispiel</title>
+<title>Beispiele für Encodierungseinstellungen</title>
 
 <para>
   Die folgenden Einstellungen sind Beispiele verschiedener Kombinationen
-  von Encodieroptionen, welche den Kompromiss Geschwindigkeit gegenüber
-  Qualität bei gleicher Zielbitrate betrifft.
+  von Encodierungsoptionen, welche den Kompromiss Geschwindigkeit gegenüber
+  Qualität bei gleicher Zielbitrate beeinflusst.
 </para>
 
 <para>
-  Alle Encodiereinstellungen wurden auf einem Beispielvideo
+  Alle Encodierungseinstellungen wurden getestet auf einem Beispielvideo
   mit 720x448 @30000/1001 fps, die Zielbitrate war 900kbps und
-  der Rechner war ein
-  AMD-64 3400+ mit 2400 Mhz im 64bit-Modus.
+  der Rechner war ein AMD-64 3400+ mit 2400 Mhz im 64bit-Modus.
   Jede Encodiereinstellung zeichnet sich aus durch die gemessene
   Encodiergeschwindigkeit (in Frames pro Sekunde) und den PSNR-Verlust
   (in dB) im Vergleich zu Einstellungen für &quot;sehr hohe Qualität&quot;.
-  Bitte hab Verständnis, dass du abhängig von deiner Quelldatei,
+  Bitte habe Verständnis, dass du abhängig von deiner Quelldatei,
   deinem Rechnertyp und Entwicklungsfortschritten sehr unterschiedliche
   Resultate erzielen wirst.
 </para>
@@ -2818,12 +2816,11 @@ Ein Beispiel mit AC3-Kompression:
 <sect2 id="custommatrices"><title>Maßgeschneiderte inter/intra-Matrizen</title>
 
 <para>
-Mit diesem Feature von
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+Mit diesem Feature von <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
 bist du in der Lage, eigene inter- (I-Frames/Keyframes) und intra-Matrizen
 (P-Frames/predicted Frames) zu setzen. Es wird von vielen Codecs unterstützt:
 <systemitem>mpeg1video</systemitem> und <systemitem>mpeg2video</systemitem>
-soll damit gehen, so wurde berichtet.
+sollen damit funktionieren.
 </para>
 
 <para>
@@ -2833,7 +2830,7 @@ bevorzugten Matrizen zu setzen.
 </para>
 
 <para>
-Die <emphasis role="bold">KVCD &quot;Nuten&quot; (Notch) Quantisierungsmatrix:</emphasis>
+Die <emphasis role="bold">KVCD &quot;Notch&quot; Quantisierungsmatrix:</emphasis>
 </para>
 
 <para>
@@ -2888,12 +2885,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Jetzt hast du gerade eben deine brandneue Kopie von Harry Potter und die
-  Kammer des Schreckens gekauft (Breitbildedition, aber sicher) und du
-  willst diese DVD so rippen, dass du sie in deinem Home Theatre PC einfügen
+  Kammer des Schreckens gekauft (natürlich die Breitbildedition), und du
+  willst diese DVD so rippen, dass du sie deinem Home Theatre PC hinzufügen
   kannst. Dies ist eine Region-1-DVD, also ist sie NTSC. Das unten stehende
   Beispiel wird auch auf PAL zutreffen, nur dass du
-  <option>-ofps 24000/1001</option> weglässt (weil die Outputframerate die
-  gleiche ist wie die Inputframerate), und logischerweise werden die
+  <option>-ofps 24000/1001</option> weglässt (weil die Ausgabeframerate die
+  gleiche ist wie die Eingabeframerate), und logischerweise werden die
   Ausschnittsabmessungen anders sein.
 </para>
 
@@ -2902,19 +2899,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   detailliert in der Sektion <link linkend="menc-feat-telecine">Wie mit telecine
   und interlacing in NTSC-DVDs umgehen</link> beschriebenen Prozess und
   entdecken, dass es progressive Video mit 24000/1001 fps ist, was bedeutet, dass
-  wir keinen umgekehrten telecine-Filter wie <option>pullup</option> oder
+  wir keinen inverse telecine-Filter wie <option>pullup</option> oder
   <option>filmdint</option> anwenden müssen.
 </para>
 
 <para>
   Als Nächstes wollen wir das passende Ausschnittsrechteck bestimmen, also
-  verwenden wir der crop-Erkennungsfilter:
+  verwenden wir den crop-Erkennungsfilter:
 
   <screen>mplayer dvd://1 -vf cropdetect</screen>
 
   Stelle sicher, dass du einen voll gefüllten Frame anstrebst (wie zum
   Beispiel eine helle Szene), und dass du diese Ausgabe in
-  <application>MPlayer</application>'s Console siehst:
+  <application>MPlayer</application>'s Konsole siehst:
 
   <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 
@@ -2924,7 +2921,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
   Und wir sehen, dass er einfach perfekt aussieht. Als Nächstes vergewissern wir
   uns, dass Breite und Höhe ein Vielfaches von 16 sind. Die Breite ist gut,
-  aber die Höhe ist es nicht. da wir in der 7-ten Klasse Mathe nicht gefehlt
+  aber die Höhe ist es nicht. da wir in der 7-ten Klasse in Mathe nicht gefehlt
   haben, wissen wir, dass das am nähesten liegende Vielfache von 16 kleiner
   als 362 der Wert 352 ist (Taschenrechner ist erlaubt).
 </para>
@@ -2932,7 +2929,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Wir könnten einfach <option>crop=720:352:0:58</option> verwenden, aber es wäre
   nett, ein bisschen von oben und ein bisschen von unten wegzunehmen, sodass
-  wir zentriert bleiben. Wir haben die Höhe um 10 Pixel schrumpen lassen, aber
+  wir zentriert bleiben. Wir haben die Höhe um 10 Pixel schrumpfen lassen, aber
   wir wollen das y-Offset nicht um 5 Pixel erhöhen, da dies eine ungerade Zahl
   ist und die Qualität nachteilig beeinflussen würde. Statt dessen werden wir
   das y-Offset um 4 Pixel erhöhen:
@@ -2944,9 +2941,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   haben, falls welche existieren. Beachte, falls das Video telecined
   ist, stelle sicher, dass der <option>pullup</option>-Filter (oder für
   welchen umgekehrten telecine-Filter auch immer du dich entschieden hast)
-  in der Filterkette auftaucht bevor du zuschneidest. Ist es interlaced,
+  in der Filterkette auftaucht, bevor du zuschneidest. Ist es interlaced,
   deinterlace es vor dem Zuschneiden.
-  (Wenn du wählst, interlaced Video beizubehalten, dann vergewissere dich, dass
+  (Wenn du dich entscheidest, interlaced Video beizubehalten, dann vergewissere dich, dass
   das vertikale crop-Offset ein Vielfaches von 4 ist.)
 </para>
 
@@ -2960,8 +2957,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
   Das Video auf diese Art herunter zu skalieren wird bedeuten, dass eine
   kleine Menge Details verloren geht, obwohl es vermutlich nicht wahrnehmbar
-  sein wird. Hoch zu skalieren führt zu niedrigerer Qualität (es sei denn
-  du erhöhst die Bitrate). Ausschneiden sondert sämtlich dieser Pixel
+  sein wird. Hoch zu skalieren führt zu niedrigerer Qualität (es sei denn,
+  du erhöhst die Bitrate). Ausschneiden sondert sämtliche dieser Pixel
   aus. Es ist ein Kompromiss, den du unter allen Umständen
   in Betracht ziehen solltest. Zum Beispiel, wenn das DVD-Video für das Fernsehen
   hergestellt wurde, solltest du vertikales Skalieren vermeiden, da das
@@ -2971,17 +2968,17 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Bei der Überprüfung sehen wir, dass unser Film ordentlich Action enthält
-  und sehr viele Details, also nehmen wir 2400Kbit für unsere Bitrate.
+  und sehr viele Details, also wählen wir 2400Kbit für unsere Bitrate.
 </para>
 
 <para>
-  Wir sind nun bereit, die 2-pass Encodierung durchzuführen. Erster Durchgang:
+  Wir sind nun bereit, die 2-pass Encodierung durchzuführen. Erster Durchlauf:
 
   <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
-  Und der zweite durchgang ist der selbe, außer dass wir <option>vpass=2</option>
+  Und der zweite Durchlauf ist derselbe, außer dass wir <option>vpass=2</option>
   festlegen:
 
   <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
@@ -2998,18 +2995,18 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   die eine höhere Qualität liefert als die Standardeinstellungen.
   Du darfst mit diesem Parameter rumexperimentieren (ziehe die Man Page
   zu möglichen Werten zu Rate) da verschiedene Funktionen abhängig vom
-  Quellmaterial einen starken Einfluss auf die Qualität haben. Zum Beispiel
+  Quellmaterial einen starken Einfluss auf die Qualität haben. Wenn du zum Beispiel
   meinst, dass <systemitem class="library">libavcodec</systemitem> zu
-  viele blockhaft Artefakte produziert, könntest du ja das experimentellen
+  viele Blockartefakte produziert, könntest du ja das experimentelle
   NSSE als Vergleichsfunktion via <option>*cmp=10</option> wählen.
 </para>
 
 <para>
   Für diesen Film wird das resultierende AVI 138 Minuten lang und nahezu
   3GB groß sein. Und weil du erzählt hast, dass eine große Datei nichts
-  ausmacht, ist dies eine perfekt akzeptierbare Größe. wolltest du sie aber
-  kleiner haben, könntest du eine niedrigere Bitrate hernehmen. erhöhte
-  Bitraten haben vermindernde Rückgaben, während wir also deutlich eine
+  ausmacht, ist dies eine perfekt akzeptierbare Größe. Wolltest du sie aber
+  kleiner haben, könntest du eine niedrigere Bitrate hernehmen. Erhöhte
+  Bitraten haben verminderte Rückgaben, während wir also deutlich eine
   Verbesserung von 1800Kbit nach 2000Kbit sehen, ist es oberhalb 2000Kbit
   nicht so auffällig. Fühl dich frei solange herum zu experimentieren bis
   du glücklich bist.
@@ -3018,10 +3015,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Weil wir das Quellvideo durch einen Denoise-Filter geschickt haben,
   könntest du einige davon während des Playbacks wieder hinzufügen wollen.
-  dies zusammen mit dem Nachbearbeitungsfilter <option>spp</option>,
+  Dies zusammen mit dem Nachbearbeitungsfilter <option>spp</option>
   verbessert die Wahrnehmung der Qualität drastisch und hilft dabei,
   blockhafte Artefakte aus dem Video zu eliminieren.
-  Mit <application>MPlayer</application>'s Option <option>autoq</option>
+  Mit <application>MPlayer</application>s Option <option>autoq</option>
   kannst du den Nachbearbeitungsaufwand des spp-Filters abhängig von der
   verfügbaren CPU variieren. An dieser Stelle kannst du auch Gamma- und/oder
   Farbkorrektur zur besten Anpassung an dein Display verwenden, wenn du willst.
@@ -3039,13 +3036,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
  <systemitem class="library">XviD</systemitem> ist eine freie
  Programmbibliothek zum Encodieren von MPEG-4 ASP-Videostreams.
- Bevor du mit dem Encodieren beginnst, mußt du <link linkend="xvid">
+ Bevor du mit dem Encodieren beginnst, musst du <link linkend="xvid">
  <application>MEncoder</application> so einstellen, dass er es unterstützt</link>.
 </para>
 <para>
- Dieses Handbuch beabsichtigt, sich vorwiegend durch die selbe Art von
+ Dieses Handbuch beabsichtigt, sich vorwiegend durch dieselbe Art von
  Informationen auszuzeichnen wie x264's Encodier-Handbuch.
- Deshalb beginne damit,
+ Beginne deshalb damit,
  <link linkend="menc-feat-x264-encoding-options-intro">den ersten Teil</link>
  dieses Handbuchs zu lesen.
 </para>
@@ -3058,10 +3055,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
  Bitte beginne mit der Durchsicht der
  <systemitem class="library">XviD</systemitem>-Sektion von
  <application>MPlayer</application>'s Man Page.
- Diese Sektion ist als Anhang zur Man Page vorsehen.
+ Diese Sektion ist als Ergänzung zur Man Page zu verstehen.
 </para>
 <para>
- Die Standard-Einstellungen von XviD sind bereits ein guter Kompromiss zwischen
+ Die Standardeinstellungen von XviD sind bereits ein guter Kompromiss zwischen
  Geschwindigkeit und Qalität, deshalb kannst du ruhig bei ihnen
  bleiben, wenn nachfolgende Sektion dich allzusehr ins Grübeln bringt.
 </para>
@@ -3076,19 +3073,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Diese Einstellung betreffen den Entscheidungsalgorithmus für
   Macroblöcke, wobei gilt, je höher die Einstellung desto weiser die
   Entscheidung.
-  Die Standard-Einstellung kannfür jede Encodierung sicher verwendet
-  werden, während höhere Einstellungen immer PSNR behilflich sind, jedoch
+  Die Standardeinstellung kann für jede Encodierung sicher verwendet
+  werden, während höhere Einstellungen immer für PSNR hilfreich, jedoch
   signifikant langsamer sind.
   Nimm bitte zur Kenntnis, dass ein besserer PSNR nicht notwedigerweise
-  bedeutet, dass das Bild besser aussehen wird, aber er erzählt dir, dass
+  bedeutet, dass das Bild besser aussehen wird, aber er zeigt dir, dass
   du näher am Original bist.
-  Wird er abschalten, beschleunigt sich die Encodierung spürbar; wenn
+  Wird er deaktiviert, beschleunigt dies die Encodierung spürbar; wenn
   Geschwindigkeit ein Kriterium für dich ist, kann dieser Kompromiss es wert sein.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">bvhq</emphasis>
-  Dies erledigt die selbe Arbeit wie vhq, macht dies jedoch bei B-Frames.
+  Dies erledigt dieselbe Arbeit wie vhq, macht dies jedoch bei B-Frames.
   Es hat einen vernachlässigbar kleinen Einfluss auf die Geschwindigkeit, und
   verbessert geringfügig die Qualität (um etwa +0.1dB PSNR).
 </para></listitem>
@@ -3098,13 +3095,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Eine höhere Anzahl von erlaubten hintereinander folgenden B-frames verbessert
   gewöhnlich die Komprimierbarkeit, obwohl dies auch zu mehr Blockartefakten
   führt.
-  Die Standard-Einstellung ist ein guter Kompromiss zwischen Komprimierbarkeit
+  Die Standardeinstellung ist ein guter Kompromiss zwischen Komprimierbarkeit
   und Qualität, aber wenn du Bitrate-hungrig bist kannst du sie bis auf 3
   hochschrauben.
   Du kannst sie auch auf 1 oder 0 verringern, wenn du auf perfekte Qualität
   abzielst, wenngleich du in diesem Fall sicherstellen solltest, dass deine
-  Zielbitrate hochgenug ist, um zu gewährleisten, dass der Encoder nicht
-  die Quantisierer höher setzen muß, um den Wert zu erreichen.
+  Zielbitrate hoch genug ist, um zu gewährleisten, dass der Encoder nicht
+  die Quantisierer höher setzen muss, um den Wert zu erreichen.
 </para></listitem>
 
 <listitem><para>
@@ -3112,8 +3109,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Dies kontrolliert die B-Frame-Empfindlichkeit des Encoders, wobei ein
   höherer Wert dazu führt, dass mehr B-frames angewendet werden (und
   umgekehrt).
-  Diese Einstellung muß zusammen mit <option>max_bframes</option>
-  verwendet werden; bist du Bitrate-hungrig, solltest du beides erhöhen
+  Diese Einstellung muss zusammen mit <option>max_bframes</option>
+  verwendet werden; bist du Bitrate-hungrig, solltest du beides erhöhen,
   <option>max_bframes</option> und <option>bf_threshold</option>,
   während du <option>max_bframes</option> erhöhen und
   <option>bf_threshold</option> verringern kannst, sodass der Encoder
@@ -3121,9 +3118,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">wirklich</emphasis> brauchen.
   Eine niedrigere Zahl an <option>max_bframes</option> und ein höherer Wert
   bei <option>bf_threshold</option> ist möglicherweise keine weise Wahl,
-  da dies den Encoder zwingt, B-frames in stellen zu setzen, die nicht
+  da dies den Encoder zwingt, B-frames in Stellen zu setzen, die nicht
   davon profitieren würden und daher die visuelle Qualität reduzieren.
-  Wie auch immer, wenn du mit Standalone-Playern kompatibel bleiben mußt,
+  Wie auch immer, wenn du mit Standalone-Playern kompatibel bleiben musst,
   die nur alte DivX-Profile unterstützen (der wiederum höchstens einen
   aufeinander folgenden B-frame unterstützt), wäre dies dein einziger Weg,
   die Komprimierbarkeit mittels B-frames zu verbessern.
@@ -3134,7 +3131,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Optimiert den Quantisierungsprozess um einen optimalen Kompromiss
   zwischen PSNR und Bitrate zu erhalten, was signifikant Bit-sparend
   wirkt.
-  Diese Bits können woanders im Video wieder aufgewendet werden,
+  Diese Bits können woanders im Video wieder verwendet werden
   und verbessern die visuelle Gesamtqualität.
   Du solltest es immer eingeschaltet lassen, da sein Einfluss auf
   die Qualität gewaltig ist.
@@ -3147,7 +3144,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
   Aktiviert die Vorhersagemethode für einen besseren Koeffizientenaufwand, was
-  die dateigröße leicht um etwa 0.15 bis 0.19% reduziert (was mit einer
+  die Dateigröße leicht um etwa 0.15 bis 0.19% reduziert (was mit einer
   PSNR-Erhöhung um weniger als 0.01dB einhergeht), während es eine
   vernachlässigbar kleine Einwirkung auf die Geschwindigkeit hat.
   Es empfiehlt sich deshalb, dies immer eingeschaltet zu lassen.
@@ -3169,19 +3166,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   die Originabewegung einfangen.
  </para>
  <para>
-  Die Standard-Einstellung ist in jedem Fall die beste;
+  Die Standardeinstellung ist in jedem Fall die beste;
   folglich ist es nicht empfehlenswert, sie herunter zu drehen,
   es sei denn du hast es wirklich auf Geschwindigkeit abgesehen,
   da alle durch eine gute Bewegungseinschätzung gesparten Bits
-  woanders vergebracht würden, was die Gesamtqualität verbessern
+  woanders verwendet würden, was die Gesamtqualität verbessern
   würde.
-  Geh deshalb nie unter 5 und selbst wenn es der letzte Ausweg
+  Gehe deshalb nie unter 5, selbst wenn es der letzte Ausweg
   sein sollte.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">chroma_me</emphasis>
-  Verbessert die Bewegungseinschätzung dadurch, dass auch die
+  Verbessert die Bewegungsabschätzung dadurch, dass auch die
   chroma-(Farb)-Informationen einbezogen werden, wobei
   <option>me_quality</option> alleine nur luma (Graustufen)
   verwendet.
@@ -3189,14 +3186,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   visuelle Qualität durch Reduzieren von Blockeffekten ein wenig
   und reduziert die Dateigröße um rund 1.3%.
   Wenn du Geschwindigkeit haben willst, solltest du diese Option
-  deaktivieren bevor du anfängst zu überlegen,
+  deaktivieren, bevor du anfängst zu überlegen,
   <option>me_quality</option> zu reduzieren.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">chroma_opt</emphasis>
     Ist dafür vorgesehen, die chroma-Bildqualität rund um reine
-    weiße/schwarze Kanten zu verbessern, eher moch als die
+    weiße/schwarze Kanten zu verbessern, eher noch als die
     Kompression zu verbessern.
     Dies kann dabei helfen, den &quot;Rote Stufen&quot;-Effekt zu reduzieren.
 </para></listitem>
@@ -3205,7 +3202,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">lumi_mask</emphasis>
     Versucht, weniger Bitrate auf den Teil eines Bildes zu übergeben,
     der vom menschlichen Auge nicht gut zu sehen ist, was dem Encoder
-    erlaunem sollte, die eingesparten Bits auf wichtigere Teile des
+    erlauben sollte, die eingesparten Bits auf wichtigere Teile des
     Bildes anzuwenden.
     Die durch diese Option gewonnene Encodierungsqualität hängt in
     hohem Maße von persönlichen Vorlieben und von Monitortyp und
@@ -3223,17 +3220,17 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
     was wiederum die Bitrate reduziert (deshalb wird die Qualität
     verbessert).
     Bewegungsvektoren mit viertel Pixel Präzision brauchen ein
-    paar Extrabits zum codieren, aber die Bewegungsvektoren ergeben
+    paar Extrabits für die Codierung, die Bewegungsvektoren ergeben aber
     nicht immer ein (viel) besseres Resultat.
     Sehr oft verbraucht der Codec dennoch Bits für die Extrapräzision,
     jedoch wird im Gegenzug eine geringe oder keine Extraqualität
     gewonnen.
-    Unglücklicherweise gibt es keinen Weg den möglichen Gewinn von
-    <option>qpel</option> vorzuaussagen, also mußt du eigentlich
+    Unglücklicherweise gibt es keinen Weg, den möglichen Gewinn von
+    <option>qpel</option> vorzuaussagen, also musst du eigentlich
     mit und ohne encodieren, um sicher zu gehen.
   </para><para>
     <option>qpel</option> kann fast die doppelte Encodierzeit in
-    Anspruch nehmen und erfordert so gut wie 25% mehr
+    Anspruch nehmen und erfordert etwa 25% mehr
     Verarbeitungsleistung fürs Decodieren.
     es wird nicht von allen Standalone-Playern unterstützt.
 </para></listitem>
@@ -3246,7 +3243,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
     die Encodierung (genauso wie die Decodierung).
     Deshalb solltest du es nur nutzen, wenn du <option>vhq</option>
     auf das Maximum gestellt hast.
-    <systemitem class="library">XviD</systemitem>'s GMC ist höher
+    <systemitem class="library">XviD</systemitem>s GMC ist höher
     entwickelt als das von DivX, wird aber nur von ein paar
     Standalone-Playern unterstützt.
 </para></listitem>
@@ -3261,7 +3258,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   die dazu verwendet werden, den Eigenschaften des XviD-Videostreams
   Restriktionen so aufzuerlegen, dass es überall dort abgespielt werden kann,
   wo das gewählte Profil unterstützt wird.
-  Die Restriktionen beziehen sich azf Auflösungen, Bitrates und
+  Die Restriktionen beziehen sich auf Auflösungen, Bitrates und
   bestimmte MPEG-4-Features.
   Die folgende Tabelle zeigt, was jedes Profil unterstützt.
 </para>
@@ -3594,7 +3591,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   <systemitem class="library">x264</systemitem> ist eine freie
   Programmbibliothek zum Encodieren von H.264/AVC-Videostreams.
-  Bevor du mit dem Encodieren beginnst, mußt du <link linkend="xvid">
+  Bevor du mit dem Encodieren beginnst, musst du <link linkend="xvid">
  <application>MEncoder</application> so einstellen, dass er es unterstützt</link>.
 </para>
 
@@ -3602,9 +3599,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Encodieroptionen von x264</title>
 
 <para>
- Bitte beginne mit der Durchsicht der
+  Bitte beginne mit der Durchsicht der
   <systemitem class="library">x264</systemitem>-Sektion von
-  <application>MPlayer</application>'s Man Page.
+  <application>MPlayer</application>s Man Page.
   Diese Sektion ist als Anhang zur Man Page vorsehen.
   Hier wirst du Schnellhinweise dazu finden, welche Optionen am
   wahrscheinlichsten die meisten Leute interessieren. Die Man Page
@@ -3626,22 +3623,22 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Letztendlich kannst nur du entscheiden, welche Optionen für deine
-  Zwecke am besten  geeignet sind. Die Entscheidung für die erste
+  Zwecke am besten geeignet sind. Die Entscheidung für die erste
   Klasse der Optionen ist die einfachste:
-  du mußt nur entscheiden, ob du denkst, dass Qualitätsunterschiede
+  Iu musst nur entscheiden, ob du denkst, dass Qualitätsunterschiede
   Geschwindigkeitsunterschiede rechtfertigen. Für die zweite Klasse
   der Optionen sind die Vorzüge weitaus subjektiver, und mehr Faktoren
   können involviert sein. Beachte, dass manche der Optionen für
   &quot;persönliche Vorlieben und spezielle Anforderungen&quot;
   noch große Auswirkungen auf Geschwindigkeit oder Qualität haben können,
-  aber es nicht dies zu was sie primär benutzt werden. Ein paar der
+  das ist aber nicht, wozu sie primär benutzt werden. Ein paar der
   Optionen für &quot;persönliche Vorlieben&quot; können sogar Änderungen
-  verursachen, die für manche Leute besser aussehen, aber schlechter
+  verursachen, die für manche Leute besser aussehen aber schlechter
   für andere.
 </para>
 
 <para>
-  Bevor du fortfährst, mußt du verstehen, dass dieses Handbuch nur
+  Bevor du fortfährst, musst du verstehen, dass dieses Handbuch nur
   eine Qualitätsmetrik verwendet: globaler PSNR.
   Für eine kurze Erklärung, was PSNR ist, schau dir
   <ulink url="http://en.wikipedia.org/wiki/PSNR">den Wikipedia-Artikel zu PSNR</ulink>
@@ -3656,7 +3653,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Nahezu alle dieser Handbuchkommentare unterstellen, dass du
   2-pass anwendest.
-  Beim Vergleich der Optionen, gibt es zwei Hauptgründe, 2-pass-Encodierung
+  Beim Vergleich der Optionen gibt es zwei Hauptgründe, 2-pass-Encodierung
   zu nutzen.
   Der erste ist, 2-pass bringt rund 1dB PSNR, was einen sehr
   großen Unterschied ausmacht.
@@ -3676,22 +3673,22 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">subq</emphasis>:
-  Von den Optionen, die die erlauben, einen Kompromiss zwischen
-  Geschwindigkeit und Qalität einzugehen, sind <option>subq</option>
-  und <option>frameref</option> (siehe unten) gewöhnlich die bei weiten
+  Von den Optionen, die dir erlauben, einen Kompromiss zwischen
+  Geschwindigkeit und Qualität einzugehen, sind <option>subq</option>
+  und <option>frameref</option> (siehe unten) gewöhnlich die bei weitem
   wichtigsten.
-  Wenn du dich für das Optimieren entweder Geschwindigkeit oder Qalität
+  Wenn du dich für die Optimierung von entweder Geschwindigkeit oder Qalität
   interessierst, sind diese die ersten, die du in Erwägung ziehen solltest.
-  Bei der Dimension Geschwindigkeits, interagieren die Optionen
+  Bei der Dimension Geschwindigkeit, interagieren die Optionen
   <option>frameref</option> und <option>subq</option> ziemlich stark
   miteinander.
   Die Erfahrung zeigt, dass mit einem Referenzframe <option>subq=5</option>
   (die Standardeinstellung) etwa 35% mehr Zeit in Anspruch nimmt als
   <option>subq=1</option>.
-  Mit 6 Referenzframes, wächst der Nachteil auf 60%.
+  Mit 6 Referenzframes wächst der Nachteil auf 60%.
   Der Effekt, den <option>subq</option> auf den PSNR ausübt, scheint ziemlich
   konstant zu sein, ungeachtet der Anzahl der Referenzframes.
-  Typischerweise erreicht <option>subq=5</option> 0.2-0.5 dB höheren globalen
+  Typischerweise erreicht <option>subq=5</option> einen 0.2-0.5 dB höheren globalen
   PSNR im Vergleich zu <option>subq=1</option>.
   Dies ist gewöhnlich ausreichend, um sichtbar zu werden.
 </para>
@@ -3705,18 +3702,18 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Verhalten von <option>subq=6</option> nicht sehr von <option>frameref</option>
   und <option>me</option> ab.  Stattdessen hängt die Effektivität von
   <option>subq=6</option> größtenteils von der Anzahl der verwendeten
-  B-frames ab. Im normal Gebrauch bedeutet dies, <option>subq=6</option>
-  hat einen großen Einfluss auf beides Geschwindigkeit und Qualität
-  in komplexen, stark bewegten Szenen, aber es kann einen geringen Effekt
-  in Szenen mit wenig Bewegung. Beachte, dass dennoch empfohlen wird,
-  <option>bframes</option> immer auf etwas anderes something als Null
+  B-frames ab. Im Normalgebrauch bedeutet dies, <option>subq=6</option>
+  hat einen großen Einfluss auf Geschwindigkeit und Qualität
+  in komplexen, stark bewegten Szenen, kann aber auch einen geringen Effekt
+  in Szenen mit wenig Bewegung haben. Beachte, dass dennoch empfohlen wird,
+  <option>bframes</option> immer auf etwas anderes als null
   zu setzen (siehe unten).
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">frameref</emphasis>:
-  <option>frameref</option> ist standardmäßicg auf 1 gesetzt, jedoch
+  <option>frameref</option> ist per Voreinstellung auf 1 gesetzt, jedoch
   sollte dies nicht darauf schließen lassen, dass es unbedingt
-  auf 1 gesetzt sein muß.
+  auf 1 gesetzt sein muss.
   Lediglich die Erhöhung von <option>frameref</option> auf 2 bringt rund
   0.15dB PSNR mit einem Geschwindigkeitsnachteil von 5-10%; dies sieht nach
   einem guten Kompromiss aus.
@@ -4160,7 +4157,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect1>
 
 <sect1 id="menc-feat-video-for-windows">
-<title>Encodieren mit der <systemitem class="library">Video for Windows</systemitem> Codec-Familie</title>
+<title>Encodieren mit der <systemitem class="library">Video for Windows</systemitem> Codecfamilie</title>
 
 <para>
   Video for Windows bietet ein einfaches Encodieren mittels binärer Video-Codecs.
@@ -4457,7 +4454,7 @@ Ein Beispiel mit VP3Kompression:
   Wenn du schwarze Ränder hinzufügst, versuche diese an 16-Pixel-Rändern
   auszurichten, um den Einfluß auf die Encodier-Performance zu minimieren.
   Dankbarweise besitzt DVD eine ausreichend Bitrate, damit du dich
-  nicht zu sehr um die Encodier-Effizienz sorgen mußt, jedoch SVCD
+  nicht zu sehr um die Encodier-Effizienz sorgen musst, jedoch SVCD
   und VCD sind höchst mager an Bitrate und erfordern Aufwand, akzeptable
   Qualität zu erreichen.
 </para>
@@ -4504,7 +4501,7 @@ Ein Beispiel mit VP3Kompression:
   erweiterte Formate sind.
   Sie sind nicht strikt Standard-konform, hauptsächlich weil der Output
   keine Scan-Offsets enthält.
-  Wenn du ein SVCD-Image generieren mußt, solltest du die Output-Datei
+  Wenn du ein SVCD-Image generieren musst, solltest du die Output-Datei
   dem
   <ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>
   übergeben.
@@ -4587,7 +4584,7 @@ Ein Beispiel mit VP3Kompression:
 <title>Aufrechterhalten der A/V-Synchronisation</title>
 <para>
   Um die Audio-/Video-Synchronisation während des ganzen
-  Encodierens aufrecht zu erhalten, muß
+  Encodierens aufrecht zu erhalten, muss
   <application>MEncoder</application> Frames auslassen oder duplizieren.
   Dies funktioniert beim Muxen in eine AVI-Datei ziemlich gut,
   aber meist schlägt das Aufrechterhalten der A/V-Synchronisation mit
@@ -4643,7 +4640,7 @@ Ein Beispiel mit VP3Kompression:
 <title>lavcopts</title>
 <para>
   Dies ist eine Liste von Feldern in <option>-lavcopts</option>, die du
-  möglicherweise ändern mußt, um einen für VCD, SVCD
+  möglicherweise ändern musst, um einen für VCD, SVCD
   oder DVD konformen Film herzustellen :
 </para>
 
