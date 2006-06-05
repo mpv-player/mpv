@@ -583,6 +583,8 @@ m_option_t msgl_config[]={
         "   muxer      - muxer layer\n"
         "   identify   - identify output\n"
         "\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+      	{NULL, NULL, 0, 0, 0, 0, NULL}
+
 };
 
 #ifdef WIN32
