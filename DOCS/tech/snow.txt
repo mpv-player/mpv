@@ -39,7 +39,7 @@ OPTIONS RECOGNIZED BY SNOW
    inter (mbcmp) when using fast motion estimation, but is not the best for
    the actual search (cmp, subcmp).
    The wavelet functions (use the one that matches pred) are best quality,
-   especially whith vme=8, but are very slow.
+   especially with vme=8, but are very slow.
    SATD is a good balance.
    You can add 256 to any of the options to enable chroma motion
    estimation for that comparison (e.g. mbcmp=257 for SSD with chroma),
@@ -75,7 +75,7 @@ OPTIONS RECOGNIZED BY SNOW
 
  * refs=<1-8>
    Allows each block to choose which of several reference frames to
-   motion compensate from. Defult: 1. Larger values always improve
+   motion compensate from. Default: 1. Larger values always improve
    compression, but cost lots of CPU-time when encoding and extra
    memory when decoding.
 
