@@ -1,4 +1,6 @@
-// Last sync on 2003-11-10 with help_mp-en.h 1.114
+// Last sync on 2006-06-23 with help_mp-en.h 1.238
+// Additionnal updates, fixes and translations by P Lombard <p_l@gmx.fr> 
+//        & G Pelletier <pellgill@gmail.com>
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
@@ -1375,3 +1377,155 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Échec obtention niveau de protocol\n"
 #define MSGTR_MPDEMUX_CDDB_NoCDInDrive "Nul CD dans lecteur\n"
 
+// cue_read.c
+
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Ligne de fichier signal inattendue: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] nom fichier bin testé: %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Impossible trouver fichier bin - abandon\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Utilise fichier bin %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] mode inconnu pour fichier bin. Improbable. Fin.\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Impossible ouvrir %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Erreur lecture %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Erreur lecture grandeur fichier bin\n"
+#define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "piste %02d:  format=%d  %02d:%02d:%02d\n"
+#define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] fin inattendue de fichier bin\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Impossible lire %d octets de données\n"
+#define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "Signal flux ouvert, nom fichier=%s, piste=%d, pistes disponibles: %d -> %d\n"
+
+// network.c
+
+#define MSGTR_MPDEMUX_NW_UnknownAF "Famille d'adresses inconnue %d\n"
+#define MSGTR_MPDEMUX_NW_ResolvingHostForAF "Solution de %s pour %s...\n"
+#define MSGTR_MPDEMUX_NW_CantResolv "Impossible trouver nom pour %s: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectingToServer "Connexion au serveur %s[%s]: %d...\n"
+#define MSGTR_MPDEMUX_NW_CantConnect2Server "Échec connexion au serveur avec %s\n"
+#define MSGTR_MPDEMUX_NW_SelectFailed "Échec sélection.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "Dépassement de temps pour connecter.\n"
+#define MSGTR_MPDEMUX_NW_GetSockOptFailed "Échec getsockopt: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "Erreur de connection: %s\n"
+#define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "Réglage proxy invalide... Essaie sans proxy.\n"
+#define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Impossible résoudre nom hôte distant pour AF_INET. Essaie sans proxy.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Erreur lors envoie requète HTTP: envoie incomplêt.\n"
+#define MSGTR_MPDEMUX_NW_ReadFailed "Échec lecture.\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response = 0 (i.e. EOF)\n"
+#define MSGTR_MPDEMUX_NW_AuthFailed "Échec authentication. Utiliser options -user et -passwd pour donner votre\n"\
+"nom_utilisateur/mot_passe pour une liste de URLs, ou donner un URL tel que:\n"\
+"http://nom_utilisateur:mot_passe@nom_hôte/fichier\n"
+#define MSGTR_MPDEMUX_NW_AuthRequiredFor "Authentication requise pour %s\n"
+#define MSGTR_MPDEMUX_NW_AuthRequired "Authentication requise.\n"
+#define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nul mot_passe fourni, essaie mot_passe vide.\n"
+#define MSGTR_MPDEMUX_NW_ErrServerReturned "Serveur retourne %d: %s\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Grandeur cache réglé à %d K octets\n"
+
+// ========================== LIBMPMENU ===================================
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Erreur syntaxe ligne: %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] Définitions de menu exigent attribut de nom (ligne %d)\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] Mauvais attribut %s=%s dans menu '%s', ligne %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Genre menu inconnu '%s' ligne %d\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Ne peux ouvrir fichier config menu: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Fichier config trop gros (> %d KO)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Fichier config vide\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] Menu %s non trouvé.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menu '%s': échec init\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Format de sortie non supporté!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Nulle entrée trouvée dans définition menu.\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] Besoin de nom pour définitions entrée menu liste (ligne %d).\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] menu liste exige argument.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Erreur attente identificateur processus: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Erreur sélection.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Erreur lecture sur processus enfant: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] Console run: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Processus enfant déjà en cours.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Échec branchement !!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] Erreur écriture.\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Erreur ouverture répertoire: %s.\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Erreur réallocation mémoire: %s.\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Erreur allocation mémoire: %s.\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Erreur lecture répertoire: %s.\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Ne peux ouvrir répertoire %s\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Nulle entrée trouvée dans définition menu.\n"
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Définition sous-menu exige attribut 'menu'.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Définition entré menu pref exige attribut 'propriété' valide (ligne %d).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Menu pref exige argument.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Ne peux trouver item cible ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Echec composition commande: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] Menu texte exibe nom fichier txt (fichier param).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Ne peux ouvrir: %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Alerte, ligne trop longue. Je la coupe.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] %d lignes analisées.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Commande inconnue: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Échec ouverture menu: '%s'.\n"
+
+// ========================== LIBMPCODECS ===================================
+
+// libmpcodecs/ad_libdv.c
+#define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Alerte! Différence grandeur trame audio ! lu=%d  hdr=%d.\n"
+
+// libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
+#define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] Impossible allouer image pour codec cinepak.\n"
+
+// libmpcodecs/vd_ffmpeg.c
+#define MSGTR_MPCODECS_XVMCAcceleratedCodec "[VD_FFMPEG] codec accéléré XVMC .\n"
+#define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Moyenne arithmétique de QP: %2.4f, moyenne harmonique de QP: %2.4f\n"
+#define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] Échec DRI.\n"
+#define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Impossible allouer image pour codec.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] MPEG2 accéléré XVMC.\n"
+#define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Essaie pixfmt=%d.\n"
+#define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] Le mc_get_buffer devrait fonctionner seulement avec accélération XVMC!!"
+#define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Erreur init_vo inattendue.\n"
+#define MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken "[VD_FFMPEG] Erreur fatale, tampons de rendement non pris.\n"
+#define MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed "[VD_FFMPEG] Seuls les tampons alloués par vo_xvmc permis.\n"
+
+// libmpcodecs/ve_lavc.c
+#define MSGTR_MPCODECS_HighQualityEncodingSelected "[VE_LAVC] Codage haute qualité sélectionné (non temps réel)!\n"
+#define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] Utilise qscale constant = %f (VBR).\n"
+
+// libmpcodecs/ve_raw.c
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Sortie brut avec fourcc [%x] non supporté!\n"
+#define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] Codec VfW requis non spécifié!!\n"
+
+// libmpcodecs/vf_crop.c
+#define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] Mauvaise position/largeur/hauteur - aire coupée hors original!\n"
+
+// libmpcodecs/vf_cropdetect.c
+#define MSGTR_MPCODECS_CropArea "[CROP] Aire coupée: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d).\n"
+
+// libmpcodecs/vf_format.c, vf_palette.c, vf_noformat.c
+#define MSGTR_MPCODECS_UnknownFormatName "[VF_FORMAT] Nom de format inconnu: '%s'.\n"
+
+// libmpcodecs/vf_framestep.c vf_noformat.c vf_palette.c vf_tile.c
+#define MSGTR_MPCODECS_ErrorParsingArgument "[VF_FRAMESTEP] Erreur transmission arguments.\n"
+
+// libmpcodecs/ve_vfw.c
+#define MSGTR_MPCODECS_CompressorType "Genre compresseur %.4lx\n"
+#define MSGTR_MPCODECS_CompressorSubtype "Sous-genre compresseur: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorFlags "Indicateurs de compresseur: %lu, version %lu, ICM version: %lu\n"
+#define MSGTR_MPCODECS_Flags "Indicateurs:"
+#define MSGTR_MPCODECS_Quality " qualité"
+
+// libmpcodecs/vf_expand.c
+#define MSGTR_MPCODECS_FullDRNotPossible "Plein DR impossible, essaie plutôt TRANCHES!\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "Alerte! Filtre suivant ne supporte pas TRANCHES, gare au sig11...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "Pourquoi ce NULL??\n"
+
+// libmpcodecs/vf_fame.c
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "FATAL: ne peux ouvrir libFAME!\n"
+
+// libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s non supporté par filtre suivant/vo :(\n"
