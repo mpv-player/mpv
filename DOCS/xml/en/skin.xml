@@ -1047,7 +1047,7 @@ Loads an audio file (with the fileselector)
 <varlistentry>
   <term><emphasis role="bold">evNone</emphasis></term>
   <listitem><para>
-Empty message, it has no effect (except maybe in CVS versions :-)).
+Empty message, it has no effect (except maybe in Subversion versions :-)).
     </para></listitem>
 </varlistentry>
 

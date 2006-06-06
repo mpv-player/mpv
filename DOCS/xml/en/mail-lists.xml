@@ -81,14 +81,14 @@ fix or you have noticed a possible bug/problem in the commit).
 </para>
 <para>This list is about <application>MPlayer</application> documentation
 and homepage discussions.
-Documentation and homepage related CVS logs are also sent here.
+Documentation and homepage related SVN logs are also sent here.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>This list is about <application>MPlayer</application> documentation
 and homepage translation discussions.
-Documentation and homepage translation CVS logs are also sent here.
+Documentation and homepage translation Subversion logs are also sent here.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>

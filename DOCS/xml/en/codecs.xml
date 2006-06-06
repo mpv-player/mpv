@@ -221,56 +221,11 @@ and <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> codecs.
 </para>
 
 <para>
-If you use an <application>MPlayer</application> release you have
-<systemitem class="library">libavcodec</systemitem>
-right in the package, just build  as usual. If you use
-<application>MPlayer</application> from CVS you have to extract
-<systemitem class="library">libavcodec</systemitem> from
-the FFmpeg CVS tree as FFmpeg releases are very rare. The CVS is mostly stable
-and offers the most features. In order to achieve this do:
-</para>
-
-<procedure>
-<step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
-  </para></step>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
-  </para></step>
-<step><para>
-  Move the <filename>libavcodec</filename> and <filename>libavutil</filename>
-  directories from the FFmpeg
-  sources to the root of the <application>MPlayer</application> CVS tree.
-  It should look like this:
-  <filename class="directory">main/libavcodec</filename>
-  <filename class="directory">main/libavutil</filename>
-  </para><para>
-  Symlinking is <emphasis role="bold">not</emphasis> enough, you have to
-  copy/move it!
-  </para></step>
-<step><para>
-  If you prefer having <systemitem class="library">libavcodec</systemitem>
-  updated at the same time you update
-  <application>MPlayer</application> CVS, put the following line into the
-  <filename>main/CVS/Entries</filename> file:
-  <screen>D/libavcodec////</screen>
-  <screen>D/libavutil////</screen>
-  </para></step>
-<step><para>
-  Compile. <filename>configure</filename> should detect problems before
-  compilation.
-  </para></step>
-</procedure>
-
-<note>
-<para>
-<application>MPlayer</application> from CVS does contain a
-<filename>libavcodec</filename> subdirectory, but it does
-<emphasis role="bold">not</emphasis> contain the source for
-<systemitem class="library">libavcodec</systemitem>!
-You must follow the steps above to obtain the source for this library.
-</para>
-</note>
+Both <application>MPlayer</application> releases and
+<application>MPlayer</application> from Subversion contain
+<systemitem class="library">libavcodec</systemitem> so you don't have
+to care about making a separate <systemitem class="library">libavcodec</systemitem> checkout.
+Just run <filename>configure</filename> and compile.
 
 <para>
 With FFmpeg and my Matrox G400, I can view even the highest resolution DivX
@@ -507,7 +462,7 @@ decoders:
 <procedure>
 <title>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</title>
 <note><para>Currently only 32-bit Intel platforms are supported.</para></note>
-<step><para>download <application>MPlayer</application> CVS</para></step>
+<step><para>download <application>MPlayer</application> Subversion</para></step>
 <step><para>download QuickTime DLL pack from
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -610,14 +565,14 @@ decoders:
   however major changes and improvements have been implemented since
   that time, both in terms of more functionalities supported and in
   terms of improved CPU usage.
-  Just to be certain, it is always a good idea to use a recent CVS
+  Just to be certain, it is always a good idea to use a recent Subversion
   checkout.
 </para>
 <para>
   If you want a quick and easy way to know whether there have been
   recent changes to <systemitem class="library">libavcodec</systemitem>'s
   H.264 decoding, you might keep an eye on 
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS repository's web interface</ulink>.
+  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">FFmpeg Subversion repository's web interface</ulink>.
 </para>
 </sect3>
 
@@ -631,8 +586,8 @@ decoders:
   --></screen>
   <application>MPlayer</application> sources are updated whenever
   an <systemitem class="library">x264</systemitem> API change
-  occurs, so it is always suggested to use CVS
-  <application>MPlayer</application> as well.
+  occurs, so it is always suggested to use
+  <application>MPlayer</application> from Subversion as well.
   Perhaps this situation will change when and if an
   <systemitem class="library">x264</systemitem> "release" occurs.
   Meanwhile, <systemitem class="library">x264</systemitem> should

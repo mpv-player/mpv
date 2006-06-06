@@ -37,7 +37,7 @@ mailing list will assist you if you have questions.
 </para>
 </sect1>
 <sect1 id="bugreports_regression_test">
-<title>How to do regression testing using CVS</title>
+<title>How to do regression testing using Subversion</title>
 <para>
 A problem that can happen sometimes is 'it used to work before, now it
 doesn't anymore...'.
@@ -45,17 +45,17 @@ Here is a step by step procedure to try to pinpoint when the problem
 occurred. This is <emphasis role="bold">not</emphasis> for casual users.
 </para>
 <para>
-First, you'd need to fetch MPlayer's source tree from CVS.
+First, you'd need to fetch MPlayer's source tree from Subversion.
 Instructions can be found at the bottom of
 <ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink>.
 </para>
 <para>
-You will have now in the main/ directory an image of the CVS tree, on the
+You will have now in the mplayer/ directory an image of the Subversion tree, on the
 client side.
 Now update this image to the date you want:
 <screen>
-cd main/
-cvs update -PAd -D "2004-08-23"
+cd mplayer/
+svn update -r {"2004-08-23"}
 </screen>
 The date format is YYYY-MM-DD HH:MM:SS.
 Using this date format ensure that you will be able to extract patches
@@ -72,7 +72,7 @@ make
 <para>
 If any non-programmer reads this, the fastest method to get at the point
 where the problem occurred is to use a binary search &mdash; that is,
-search the date of the breackage by repeatedly dividing the search
+search the date of the breakage by repeatedly dividing the search
 interval in half.
 For example, if the problem occurred in 2003, start at mid-year, then ask
 "Is the problem already here?".
@@ -91,10 +91,10 @@ back to the present.)
 </para>
 <para>
 When you have found the day where the problem happened, continue the search
-using the mplayer-cvslog archive (sorted by date) and a more precise cvs
+using the mplayer-cvslog archive (sorted by date) and a more precise svn
 update including hour, minute and second:
 <screen>
-cvs update -PAd -D "2004-08-23 15:17:25"
+svn update -r {"2004-08-23 15:17:25"}
 </screen>
 This will allow you to easily find the exact patch that did it.
 </para>
@@ -113,11 +113,11 @@ the bug is :-).
 <sect1 id="bugreports_report">
 <title>How to report bugs</title>
 <para>
-First of all please try the latest CVS version of <application>MPlayer</application>
+First of all please try the latest Subversion version of <application>MPlayer</application>
 as your bug might already be fixed there. Development moves extremely fast,
 most problems in official releases are reported within days or even hours, so
-please use <emphasis role="bold">only CVS</emphasis> to report bugs. This
-includes binary packages of <application>MPlayer</application>. CVS
+please use <emphasis role="bold">only Subversion</emphasis> to report bugs. This
+includes binary packages of <application>MPlayer</application>. Subversion
 instructions can be found at the bottom of
 <ulink url="http://www.mplayerhq.hu/dload.html">this page</ulink> or in
 the README. If this did not help please refer to the list of
