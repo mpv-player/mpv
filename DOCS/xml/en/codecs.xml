@@ -226,6 +226,7 @@ Both <application>MPlayer</application> releases and
 <systemitem class="library">libavcodec</systemitem> so you don't have
 to care about making a separate <systemitem class="library">libavcodec</systemitem> checkout.
 Just run <filename>configure</filename> and compile.
+</para>
 
 <para>
 With FFmpeg and my Matrox G400, I can view even the highest resolution DivX
