@@ -5891,10 +5891,22 @@ bottom-first
 .PD 1
 .
 .TP
+.B yadif=[mode[:field_dominance]]
+Yet another deinterlacing filter
+.PD 0
+.RSs
+.IPs <mode>
+0 (output 1 frame for each frame), 1 (output 1 frame for each field)
+.IPs <field_dominance>
+like tfields
+.RE
+.PD 1
+.
+.TP
 .B mcdeint=[mode[:parity[:qp]]]
 Motion compensating deinterlacer.
 It needs one field per frame as input and must thus be used together
-with tfields=1 or equivalent.
+with tfields=1 or yadif=1 or equivalent.
 .PD 0
 .RSs
 .IPs <mode>

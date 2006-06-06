@@ -101,6 +101,7 @@ extern vf_info_t vf_info_harddup;
 extern vf_info_t vf_info_softskip;
 extern vf_info_t vf_info_screenshot;
 extern vf_info_t vf_info_mcdeint;
+extern vf_info_t vf_info_yadif;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -195,6 +196,7 @@ static vf_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
     &vf_info_mcdeint,
 #endif
+    &vf_info_yadif,
     NULL
 };
 

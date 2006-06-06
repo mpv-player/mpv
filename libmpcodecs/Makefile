@@ -149,6 +149,7 @@ VFILTER_SRCS=vf.c \
              vf_yuy2.c \
              vf_yvu9.c \
              vf_screenshot.c \
+             vf_yadif.c \
 
 VFILTER_LAVC_SRCS += vf_lavc.c \
                      vf_lavcdeint.c \
