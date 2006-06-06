@@ -14,6 +14,11 @@
 
 #include "libvo/fastmemcpy.h"
 
+#define ASFMIN(a,b) ((a) > (b) ? (b) : (a))
+#define SLICE_MIN_START_CODE    0x00000101
+#define SLICE_MAX_START_CODE    0x000001af
+#define END_NOT_FOUND -100
+
 /*
  * Load 16/32-bit values in little endian byte order
  * from an unaligned address
@@ -21,6 +26,10 @@
 #ifdef ARCH_X86
 #define	LOAD_LE32(p)	(*(unsigned int*)(p))
 #define	LOAD_LE16(p)	(*(unsigned short*)(p))
+#define	LOAD_BE32(p)	(((unsigned char*)(p))[3]     | \
+ 			 ((unsigned char*)(p))[2]<< 8 | \
+ 			 ((unsigned char*)(p))[1]<<16 | \
+ 			 ((unsigned char*)(p))[0]<<24 )
 #else
 #define	LOAD_LE32(p)	(((unsigned char*)(p))[0]     | \
  			 ((unsigned char*)(p))[1]<< 8 | \
@@ -28,6 +37,7 @@
  			 ((unsigned char*)(p))[3]<<24 )
 #define	LOAD_LE16(p)	(((unsigned char*)(p))[0]     | \
 			 ((unsigned char*)(p))[1]<<8)
+#define	LOAD_BE32(p)	(*(unsigned int*)(p))
 #endif
 
 // defined at asfheader.c:
@@ -64,9 +74,86 @@ static void asf_descrambling(unsigned char **src,unsigned len, struct asf_priv* 
 #define FF_INPUT_BUFFER_PADDING_SIZE 8
 #endif
 
+static const uint8_t *find_start_code(const uint8_t * restrict p, const uint8_t *end, uint32_t * restrict state){
+  int i;
+  if(p>=end)
+    return end;
+
+  for(i=0; i<3; i++){
+    uint32_t tmp= *state << 8;
+    *state= tmp + *(p++);
+    if(tmp == 0x100 || p==end)
+      return p;
+  }
+
+  while(p<end){
+    if     (p[-1] > 1      ) p+= 3;
+    else if(p[-2]          ) p+= 2;
+    else if(p[-3]|(p[-1]-1)) p++;
+    else{
+      p++;
+      break;
+    }
+  }
+
+  p= ASFMIN(p, end)-4;
+  *state=  LOAD_BE32(p);
+
+  return p+4;
+}
+
+static int mpeg1_find_frame_end(demuxer_t *demux, const uint8_t *buf, int buf_size)
+{
+  int i;
+  struct asf_priv* asf = demux->priv;
+
+  i=0;
+   if(!asf->asf_frame_start_found){
+    for(i=0; i<buf_size; i++){
+      i= find_start_code(buf+i, buf+buf_size, &asf->asf_frame_state) - buf - 1;
+      if(asf->asf_frame_state >= SLICE_MIN_START_CODE && asf->asf_frame_state <= SLICE_MAX_START_CODE){
+        i++;
+        asf->asf_frame_start_found=1;
+        break;
+      }
+    }
+  }
+
+  if(asf->asf_frame_start_found){
+    /* EOF considered as end of frame */
+      if (buf_size == 0)
+          return 0;
+            
+    for(; i<buf_size; i++){
+      i= find_start_code(buf+i, buf+buf_size, &asf->asf_frame_state) - buf - 1;
+      if((asf->asf_frame_state&0xFFFFFF00) == 0x100){
+        //if NOT in range 257 - 431
+        if(asf->asf_frame_state < SLICE_MIN_START_CODE || asf->asf_frame_state > SLICE_MAX_START_CODE){
+          asf->asf_frame_start_found=0;
+          asf->asf_frame_state=-1;
+          return i-3;
+        }
+      }
+    }
+  }
+  return END_NOT_FOUND;
+}
+
+static void demux_asf_append_to_packet(demux_packet_t* dp,unsigned char *data,int len,int offs)
+{
+  if(dp->len!=offs && offs!=-1) mp_msg(MSGT_DEMUX,MSGL_V,"warning! fragment.len=%d BUT next fragment offset=%d  \n",dp->len,offs);
+  dp->buffer=realloc(dp->buffer,dp->len+len+FF_INPUT_BUFFER_PADDING_SIZE);
+  memcpy(dp->buffer+dp->len,data,len);
+  memset(dp->buffer+dp->len+len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
+  mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
+  dp->len+=len;
+}
+
 static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,int id,int seq,unsigned long time,unsigned short dur,int offs,int keyframe){
   struct asf_priv* asf = demux->priv;
   demux_stream_t *ds=NULL;
+  int close_seg=0;
+  int frame_end_pos=END_NOT_FOUND;
   
   mp_dbg(MSGT_DEMUX,MSGL_DBG4,"demux_asf.read_packet: id=%d seq=%d len=%d\n",id,seq,len);
   
@@ -97,7 +184,23 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
   
   if(ds){
     if(ds->asf_packet){
-      if(ds->asf_seq!=seq){
+      demux_packet_t* dp=ds->asf_packet;
+
+      if (ds==demux->video && asf->asf_is_dvr_ms) {
+        frame_end_pos=mpeg1_find_frame_end(demux, data, len);
+
+        if (frame_end_pos != END_NOT_FOUND) {
+          dp->pos=demux->filepos;
+          if (frame_end_pos > 0) {
+            demux_asf_append_to_packet(dp,data,frame_end_pos,offs);
+            data += frame_end_pos;
+            len -= frame_end_pos;
+          }
+          close_seg = 1;
+        } else seq = ds->asf_seq;
+      } else close_seg = ds->asf_seq!=seq;
+
+      if(close_seg){
         // closed segment, finalize packet:
 		if(ds==demux->audio)
 		  if(asf->scrambling_h>1 && asf->scrambling_w>1 && asf->scrambling_b>0)
@@ -106,13 +209,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         ds->asf_packet=NULL;
       } else {
         // append data to it!
-        demux_packet_t* dp=ds->asf_packet;
-        if(dp->len!=offs && offs!=-1) mp_msg(MSGT_DEMUX,MSGL_V,"warning! fragment.len=%d BUT next fragment offset=%d  \n",dp->len,offs);
-        dp->buffer=realloc(dp->buffer,dp->len+len+FF_INPUT_BUFFER_PADDING_SIZE);
-        memcpy(dp->buffer+dp->len,data,len);
-        memset(dp->buffer+dp->len+len, 0, FF_INPUT_BUFFER_PADDING_SIZE);
-        mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
-        dp->len+=len;
+        demux_asf_append_to_packet(dp,data,len,offs);
         // we are ready now.
         return 1;
       }

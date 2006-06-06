@@ -222,6 +222,9 @@ struct asf_priv {
     unsigned packetsize;
     double   packetrate;
     unsigned movielength;
+    int asf_is_dvr_ms;
+    uint32_t asf_frame_state;
+    int asf_frame_start_found;
 };
 
 #endif
