@@ -3,7 +3,7 @@
 OS=`uname -s`
 case "$OS" in
   CYGWIN*|Linux|MINGW*)
-    last_cvs_update=`date -r .svn +%y%m%d-%H:%M 2>/dev/null`
+    last_cvs_update=r`grep committed-rev .svn/entries | head -n 1 | cut -d '"' -f 2 2>/dev/null`
     ;;
   Darwin|*BSD*)
     # BSD 'date -r' does not print modification time
