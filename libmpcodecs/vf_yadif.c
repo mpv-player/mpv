@@ -90,7 +90,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         int temporal_diff0= ABS(prev2[0] - next2[0]);
                         int temporal_diff1=( ABS(prev[-refs] - cur[-refs]) + ABS(prev[+refs] - cur[+refs]) )>>1;
                         int temporal_diff2=( ABS(next[-srcs] - cur[-refs]) + ABS(next[+srcs] - cur[+refs]) )>>1;
-                        int diff= MAX(temporal_diff0>>1, MAX(temporal_diff1, temporal_diff2));
+                        int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
                         int temporal_pred= (prev2[0] + next2[0])>>1;
                         int spatial_pred= 0;
                         int spatial_score= 1<<30;
@@ -142,9 +142,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         dst[i][x + y*dst_stride[i]]= p->ref[1][i][x + y*refs];
                 }
             }else{
-                for(x=0; x<w; x++){
-                    dst[i][x + y*dst_stride[i]]= p->ref[1][i][x + y*refs];
-                }
+                memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
             }
         }
     }
