@@ -5892,15 +5892,24 @@ bottom-first
 .
 .TP
 .B mcdeint=[mode[:parity[:qp]]]
-Motion compensating deinterlacer, this must be used together with tfields=1 or equivalent so that mcdeint has 1 field per frame as input
+Motion compensating deinterlacer.
+It needs one field per frame as input and must thus be used together
+with tfields=1 or equivalent.
 .PD 0
 .RSs
 .IPs <mode>
-0 (fast), 1 (medium), 2(slow, uses iterative me), 3(extra slow, multiple reference frames too)
+0: fast
+.br
+1: medium
+.br
+2: slow, iterative motion estimation
+.br
+3: extra slow, like 2 plus multiple reference frames
 .IPs <parity>
-0 or 1 selects which field to use (note, no autodetection yet!)
-.IPs <qp>
-higher values should result in a more smooth motion vector field but less optimal individual vectors
+0 or 1 selects which field to use (note: no autodetection yet!).
+.IPs <qp>\ 
+Higher values should result in a smoother motion vector
+field but less optimal individual vectors.
 .RE
 .PD 1
 .
