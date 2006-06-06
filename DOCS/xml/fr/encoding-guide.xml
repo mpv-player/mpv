@@ -1113,7 +1113,7 @@
   nécessaire (comme expliqué plus haut), mais évitez de redimensionner l'image.
   Bien qu'il soit parfois préférable de réduire la taille de l'image plutôt que d'utiliser
   un quantificateur plus élevé, nous voulons éviter tout ceci:souvenez-vous que
-  nous avons décidé qu départ d'échanger des bits pour de la qualité.
+  nous avons décidé au départ d'échanger des bits pour de la qualité.
 </para>
 
 <para>
@@ -1315,7 +1315,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   <systemitem class="library">x264</systemitem> au lieu de codecs MPEG-4 ASP
   tels que le <systemitem class="library">libavcodec</systemitem> MPEG-4 ou le
   <systemitem class="library">XviD</systemitem>.
-  (Les développeurs de codec peuvent être intéressés parla leture de l'avis
+  (Les développeurs de codec peuvent être intéressés par la leture de l'avis
   de Michael Niedermayer's sur
   "<ulink url="http://guru.multimedia.cx/?p=10">why MPEG4-ASP sucks</ulink>".)
   De la même manière, vous devriez obtenir une meilleure qualité en utilisant
@@ -1361,7 +1361,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 </para>
 <para>
   Si vous recherchez la vitesse, vous devriez conserver à peu près les
-  réglages par défaut du codec video (bien que vous deviez quand même essayer
+  réglages par défaut du codec vidéo (bien que vous deviez quand même essayer
   les autres options qui sont mentionnées dans d'autres sections de ce guide)
 </para>
 <para>
@@ -1412,67 +1412,68 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 </para>
 </sect2>
 <sect2 id="menc-feat-dvd-mpeg4-audio">
-<title>Audio</title>
+<title>Le son</title>
 
 <para>
-  L'audio est un problème bien plus simple à résoudre : si la qualité importe,
+  Le son est un problème bien plus simple à résoudre : si la qualité vous intéresse,
   laissez le flux audio tel quel.
   Même les flux AC3 5.1 utilisent au plus 448Kbit/s, et tous ces bits sont utiles.
-  Vous pouvez être tenté de convertir l'audio en Ogg Vorbis de haute qualité,
-  mais ne pas avoir de décodeur AC3 aujourd'hui ne veut pas dire que vous n'en
-  n'aurez pas demain. Préparez le futur de vos rips DVDs en gardant le flux AC3.
-  Vous pouvez conserver le flux AC3 en le copiant directement dans le flux vidéo 
-  <link linkend="menc-feat-mpeg4">pendant l'encodage</link>. On peut aussi extraire 
-  le flux AC3 pour le mixer dans des conteneurs comme NUT ou Matroska.
+  Vous pourriez être tenté de convertir le son en Ogg Vorbis de haute qualité,
+  mais le fait que vous n'ayez pas d'entrée AC3 (dolby digital) sur votre chaîne HIFI 
+  aujourd'hui ne signifie pas que vous n'en n'aurez pas demain.
+  Pensez au futur en conservant le flux AC3.
+  Vous pouvez le garder en le copiant directement dans le flux vidéo 
+  <link linkend="menc-feat-mpeg4">pendant l'encodage</link>. Vous pouvez aussi l'extraire 
+  avec l'intention de l'inclure dans des conteneurs tels que NUT ou Matroska.
   <screen>mplayer <replaceable>fichier_source.vob</replaceable> -aid 129 -dumpaudio 
   -dumpfile <replaceable>son.ac3</replaceable></screen>
-  mettra dans ce fichier <replaceable>sond.ac3</replaceable> la piste audio numéro 
-  129 du fichier source <replaceable>fichier_source.vob</replaceable> (NB : les fichiers 
-  VOB d'un DVD utilise normalement une autre système de numérotation pour l'audio,
-  ainsi la piste 129 est la seconde piste de ce fichier VOB).
+  mettra dans le fichier <replaceable>son.ac3</replaceable> la piste audio  
+  129 du fichier <replaceable>fichier_source.vob</replaceable> (NB : les fichiers 
+  VOB des DVD utilisent normalement un système de numérotation différent pour les pistes audio,
+  ainsi la piste numéro 129 est la deuxième piste du fichier).
 </para>
 
 <para>
-  Parfois, il arrivera que vous n'ayez pas d'autre choix que de compresser le son 
-  pour laisser plus de place à la vidéo. La plupart des gens optent alors pour le 
-  codec MP3 ou le Vorbis.
-  Bien que le codec MP3 soit moyennement efficace, il est de mieux en mieux 
-  accepté par les lecteurs de salon, mais cette tendance évolue.
+  Mais parfois vous n'aurez d'autres choix que de re-compresser le son afin de laisser
+  plus de place à la vidéo.
+  La plupart des gens optent alors pour le codec MP3 ou le Vorbis.
+  Bien que ce dernier soit très efficace, le MP3 est bien mieux accepté par les
+  lecteurs de salon même si cette tendance évolue.
 </para>
 
 <para>
-  N'utilisez <emphasis>pas</emphasis> l'option <option>-nosound</option> quand vous 
-  encodez un fichier avec de l'audio, même si vous voulez encoder puis mixer l'audio 
-  dans un deuxième temps.
-  Cela devrait pourtant marcher dans la plupart des cas, mais l'option <option>-nosound</option> 
-  cache certains problèmes dans les réglages en ligne de commande.
-  En d'autres mots, avoir une piste audio pendant l'encodage vous permettra de ne pas 
-  avoir ce type de messages comme <quote>Trop de paquets audio dans la mémoire tampon
-  </quote>, et vous aurez ainsi une synchronisation propre.
+  N'utilisez <emphasis>pas</emphasis> l'option <option>-nosound</option> 
+  si vous avez l'intention d'ajouter du son à votre encodage vidéo, même plus tard.
+  En effet, même s'il est probable que tout fonctionne correctement, l'utilisation de
+  l'option <option>-nosound</option> peut cacher certains problèmes dans la ligne de 
+  commande de votre encodage. En d'autres mots, avoir une bande son pendant l'encodage
+  vous certifie que vous pourrez avoir une synchronisation propre (en supposant que 
+  vous ne receviez pas de messages comme <quote>Trop de paquets audio dans la mémoire tampon
+  </quote>)
 </para>
 
 <para>
-  Vous aurez besoin de <application>MEncoder</application> pour traiter le son. 
-  Vous pouvez copier la bande son originale pendant l'encodage avec l'option 
-  <option>-oac copy</option> ou la convertir en un "petit" 4kHz mono WAV PCM 
+  Vous aurez besoin que <application>MEncoder</application> traite le son. 
+  Vous pouvez par exemple copier la bande son originale pendant l'encodage avec l'option 
+  <option>-oac copy</option> ou la convertir en "léger" 4kHz mono WAV PCM 
   avec l'option <option>-oac pcm -channels 1 -srate 4000</option>.
   Autrement, dans certains cas, cela générera un fichier vidéo qui ne se synchronisera pas avec l'audio.
-  Cela arrive quand le nombre de frames vidéos dans le fichier source ne correspond 
-  pas exactement à la longueur totale des frames audio, ou bien lorsqu'il y a une 
-  discontinuité ou des frames audio en trop ou manquantes. La meilleure
-  façon de traiter ces soucis est d'insérer un silence ou bien de couper l'audio 
-  à ces points.
-  Cependant, <application>MPlayer</application> ne sait pas faire cela, si vous 
-  avez dé-multiplexé l'AC3, vous pourrez l'encoder avec une application externe 
-  (ou le transformer en PCM avec <application>MPlayer</application>), les superpositions
-  de son seront mises de coté, et la seule manière de corriger cela au niveau de 
-  la vidéo, sera de la couper pendant des erreurs.
-  Du moment que <application>MEncoder</application> voit l'audio pendant qu'il 
-  encode la vidéo, il peut faire ces découpes (ce qui fonctionne habituellement 
-  car elles se produisent lors d'un changement de scène avec fondu au noir) mais si 
-  <application>MEncoder</application> ne voit pas l'audio, il encodera toutes les frames telles quelles
-  et elles ne tiendront pas dans le fichier audio final, quand, par exemple, 
-  vous mélangerez la piste vidéo et sonore dans un fichier Matroska.
+  Cela arrive quand le nombre de trames vidéos dans le fichier source ne correspond 
+  pas exactement à la longueur totale des trames audio ou lorsqu'il y a une 
+  discontinuité ou des frames audio en trop ou manquantes. La bonne
+  façon de gérer ce type de problèmes est d'insérer un silence ou bien de couper l'audio 
+  à ces emplacements.
+  Cependant, <application>MPlayer</application> ne sait pas le faire, donc si vous 
+  dé-multiplexez l'AC3 et l'encodez avec une autre application (ou le sortez en PCM 
+  avec <application>MPlayer</application>), les discontinuités subsistent et la seule 
+  façon de les corriger est de supprimer ou de rajouter des trames. 
+  Tant que <application>MEncoder</application> voit la piste son pendant qu'il 
+  encode la vidéo, il peut faire ces suppressions/rajouts (ce qui fonctionne habituellement 
+  car cela se produit lors de changements de scènes avec fondu au noir) mais si 
+  <application>MEncoder</application> ne voit pas la piste son, il encodera
+  toutes les trames telles quelles et elles ne correspondront pas au le fichier
+  audio final, quand, par exemple, vous multiplexerez la piste vidéo et la piste
+  son dans un fichier Matroska.
 </para>
 
 <para>
@@ -1481,26 +1482,24 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Par exemple :
   <screen>mplayer <replaceable>fichier_source.vob</replaceable> -ao pcm:file=<replaceable>fichier_destination_son.wav</replaceable>
    -vc dummy -aid 1 -vo null</screen> 
-  aura pour effet de prendre la seconde piste du fichier <replaceable>source_file.vob</replaceable> 
-  pour la placer dans le fichier <replaceable>destination_sound.wav</replaceable>.
-  Vous devrez ensuite normaliser le son avec l'encodage, car les pistes 
-  audio des DVDs sont généralement enregistrés avec un volume bas.
-  Vous pouvez utiliser l'outil <application>normalize</application> qui est 
-  normalement disponible dans toutes les distributions.
+  aura pour effet de prendre la seconde piste audio du fichier <replaceable>fichier_source.vob</replaceable> 
+  pour la placer dans le fichier <replaceable>fichier_destination_son.wav</replaceable>.
+  Vous voudrez ensuite peut-être normaliser le son avant l'encodage, car les pistes 
+  audio des DVDs sont généralement enregistrées à un faible volume.
+  Vous pouvez par exemple utiliser l'outil <application>normalize</application> qui est 
+  normalement disponible sur la plupart des distributions.
   Si vous utilisez Windows, un outil comme <application>BeSweet</application> 
-  donnera le même résultat.
-  Il faudra ensuite l'encoder en Vorbis ou MP3.
+  fera le même travail.
+  Vous le compresserez ensuite en Vorbis ou MP3.
   Par exemple :
   <screen>oggenc -q1 <replaceable>fichier_destination_son.wav</replaceable></screen> 
   encodera <replaceable>fichier_destination_son.wav</replaceable> avec une qualité de 1, 
-  ce qui est équivalent à environ 80Kb/s, soit le strict minimum en terme de qualité.
-  Notez que <application>MEncoder</application> ne sait pas 
-  encore multiplexer des pistes audio Vorbis car il ne supporte que des conteneurs 
-  en sortie du type AVI ou MPEG, ce qui signifie qu'il y aura des problèmes de 
-  synchronisation lors de la lecture avec quelques lecteurs vidéo avec l'AVI 
-  contenant un flux audio VBR en Vorbis.
-  Soyez sans crainte, ce document vous montrera comment y arriver avec un programme 
-  tiers.
+  ce qui est équivaut à environ 80Kb/s, soit le minimum si vous voulez de la qualité.
+  Notez que <application>MEncoder</application> ne sait actuellement pas 
+  multiplexer les pistes audio Vorbis dans le fichier final car il ne supporte que les conteneurs 
+  AVI ou MPEG en sortie, chacun pouvant mener à des problèmes de synchronisation A/V avec certains lecteurs
+  quand le fichier AVI contient des flux audio VBR comme Vorbis. Ne vous inquiétez pas, ce
+  document vous montrera comment y arriver avec un programme tiers.
 </para>
 
 </sect2>
