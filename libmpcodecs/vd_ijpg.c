@@ -22,7 +22,7 @@ static vd_info_t info = {
 	"ijpg",
 	"Pontscho",
 	"based on vd_mpng.c",
-	"uses Indipended JPEG Group's jpeglib"
+	"uses Independent JPEG Group's jpeglib"
 };
 
 LIBVD_EXTERN(ijpg)
