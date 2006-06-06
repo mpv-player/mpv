@@ -120,7 +120,7 @@ News releases.
 <para>List for discussion about <application>MPlayer</application>'s OS/2 port.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-qt-codecs-porting"><application>MPlayer</application>-qt-codecs-porting</ulink> (INACTIVE)
+<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INACTIVE)
 </para>
 <para>List for discussion about QuickTime codec support.
 </para></listitem>
