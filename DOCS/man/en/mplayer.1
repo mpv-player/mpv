@@ -5891,6 +5891,20 @@ bottom-first
 .PD 1
 .
 .TP
+.B mcdeint=[mode[:parity[:qp]]]
+Motion compensating deinterlacer, this must be used together with tfields=1 or equivalent so that mcdeint has 1 field per frame as input
+.PD 0
+.RSs
+.IPs <mode>
+0 (fast), 1 (medium), 2(slow, uses iterative me), 3(extra slow, multiple reference frames too)
+.IPs <parity>
+0 or 1 selects which field to use (note, no autodetection yet!)
+.IPs <qp>
+higher values should result in a more smooth motion vector field but less optimal individual vectors
+.RE
+.PD 1
+.
+.TP
 .B boxblur=radius:power[:radius:power]
 box blur
 .PD 0
