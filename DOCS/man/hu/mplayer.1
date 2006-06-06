@@ -1,4 +1,4 @@
-.\" Synced with 1.1289
+.\" Synced with r18591
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -1192,6 +1192,9 @@ Megmondja az MPlayer-nek, hogy a csatornalistát a <fájlnév> nevû fájlból
 olvassa. Az alapértelmezett a ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc}
 (a kártyád típusától függõen) vagy ~/.mplayer/\:channels.conf mint utolsó
 lehetõség.
+.IPs timeout=<1\-30>
+Transponder beállításának sikertelenné nyilvánítása elõtt a várakozással
+töltött másodpercek maximális száma. Alapértelmezett 3.
 .RE
 .PD 1
 .
@@ -3064,6 +3067,7 @@ Fényesség, kontraszt és telítettség beállítását teszi lehetõvé.
 Ez egy nVidia-specifikus kiterjesztés (GL_NV_register_combiners).
 Legalább három textúra egység szükséges.
 Telítettség és színárnyalat beállítását teszi lehetõvé.
+Ez a módszer gyors, de pontatlan.
 .br
 2: Fragmentum programot használ.
 A GL_ARB_fragment_program kiterjesztés kell hozzá és legalább
@@ -3091,6 +3095,7 @@ Ez egy ATI-specifikus kiterjesztés (GL_ATI_fragment_shader - nem
 GL_ARB_fragment_shader!).
 Legalább három textúra egység szükséges.
 Telítettség és színárnyalat beállítását teszi lehetõvé.
+Ez a módszer gyors, de pontatlan.
 .RE
 .IPs customprog=<fájlnév>
 Saját fragmentum programot tölt be a <fájlnév>-bõl.
@@ -5901,6 +5906,21 @@ alsó elõször
 .PD 1
 .
 .TP
+.B mcdeint=[mód[:paritás[:qp]]]
+Mozgás kompenzációs deinterlacer, tfields=1 vagy azonos kapcsolóval együtt kell
+használni, hogy az mcdeint-nek 1 mezõ/kocka bemenete legyen
+.PD 0
+.RSs
+.IPs <mód>
+0 (gyors), 1 (közepes), 2 (lassú, iteratív me-t használ), 3 (nagyon lassú, többszörös referencia kockák)
+.IPs <paritás>
+0 vagy 1 válaszja ki a használandó mezõt (figyelj, még nincs automatikus detektálás!)
+.IPs <qp>
+a nagyobb érték sokkal simább mozgásvektort eredményez, de kevésbé optimális egyéni vektort
+.RE
+.PD 1
+.
+.TP
 .B boxblur=hatáskör:erõsség[:hatáskör:erõsség]
 box blur
 .PD 0
@@ -6698,13 +6718,13 @@ minõség módja, a nagyobb a jobb (a br-rel összeegyeztethetetlen)
 objektum típus komplexitása
 .PD 0
 .RSs
-.IPs 0
-FÕ (alapértelmezett)
 .IPs 1
-ALACSONY
+FÕ (alapértelmezett)
 .IPs 2
-SSR
+ALACSONY
 .IPs 3
+SSR
+.IPs 4
 LTP (hihetetlenül lassú)
 .RE
 .PD 1
@@ -7016,6 +7036,7 @@ I/P/B-kockák közötti választás stratégiája:
 Mindig a maximális számú B-kocka használata (alapértelmezett).
 .IPs 1
 B-kockák elkerülése a gyors mozgású jeleneteknél.
+Lásd a b_sensitivity opciót ezen stratégia finomhangolásához.
 .IPs 2
 A maximális minõség elérése érdekében a B-kockákat többé-kevésbé optimálisan
 helyezi el (lassabb).
@@ -7023,6 +7044,16 @@ Valószínûleg csökkenteni akarod ezen opció sebességre gyakorolt hatását a
 brd_scale opció állításával.
 .RE
 .PD 1
+.
+.TP
+.B b_sensitivity=<bármilyen 0-nál nagyobb egész>
+Beállítja, hogy a vb_strategy=1 mennyire érzékenyen detektálja a mozgást és
+kerüli el a B-kocka használatát (alapértelmezett: 40).
+Az alacsonyabb érzékenység több B-kockát eredményez.
+Több B-kocka használata növeli a PSNR-t, de a túl sok B-kocka ronthatja a
+minõséget a gyors mozgású jelenetekben.
+Hacsak nincs nagyon nagy mennyiségû mozgás, a b_sensitivity nyugodtan
+csökkenthetõ az alapértelmezett alá; a 10 megfelelõ a legtöbb esetben.
 .
 .TP
 .B brd_scale=<0\-10>
@@ -7934,6 +7965,11 @@ subpel finomítási minõség (qpel-hez) (alapértelmezett: 8 (nagyon jó minõség))
 Nincs jelentõs hatással a sebességre.
 .
 .TP
+.B refs=<1\-8>
+a figyelembe vett referencia képkockák száma mozgás kompenzációnál
+(csak Snow) (alapértelmezett: 1)
+.
+.TP
 .B psnr\ \ \ 
 kiírja a PSNR-t (peak signal to noise ratio, csúcsjel aránya a zajhoz) a teljes
 videóra a kódolás után és eltárolja a kockánkénti PSNR-t egy fájlba, melynek
@@ -7946,7 +7982,9 @@ MPEG kvanálók használata H.263 helyett.
 .
 .TP
 .B aic\ \ \ \ 
-ac elõrejelzés (fejltett intra elõrejelzés H.263+-hoz)
+Engedélyezi az AC elõrejelzést MPEG-4 vagy fejlett intra elõrejelzést H.263+ esetén.
+Ez kicsit javít a minõségen (0.02 dB PSNR körül) és nagyon kicsit csökkenti
+a kódolást (1% körül).
 .br
 .I MEGJEGYZÉS:
 A vqmin-nek 8-nak vagy nagyobbnak kell lennie a H.263+ AIC-hez.
