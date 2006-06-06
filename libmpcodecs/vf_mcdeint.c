@@ -16,6 +16,33 @@
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
+
+/*
+Known Issues:
+* The motion estimation is somewhat at the mercy of the input, if the input
+  frames are created purely based on spatial interpolation then for example
+  a thin black line or another random and not interpolateable pattern
+  will cause problems
+  Note: completly ignoring the "unavailable" lines during motion estimation 
+  didnt look any better, so the most obvious solution would be to improve
+  tfields or penalize problematic motion vectors ...
+
+* If non iterative ME is used then snow currently ignores the OBMC window
+  and as a result sometimes creates artifacts
+
+* only past frames are used, we should ideally use future frames too, something
+  like filtering the whole movie in forward and then backward direction seems 
+  like a interresting idea but the current filter framework is FAR from
+  supporting such things
+
+* combining the motion compensated image with the input image also isnt
+  as trivial as it seems, simple blindly taking even lines from one and
+  odd ones from the other doesnt work at all as ME/MC sometimes simple
+  has nothing in the previous frames which matches the current, the current
+  algo has been found by trial and error and almost certainly can be
+  improved ...
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
