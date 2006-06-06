@@ -2172,7 +2172,7 @@
   </para></listitem>
 <listitem><para>
   Nutze einen Deinterlacing-Filter vor dem Encodieren. Es stehen verschiedene
-  dieser Filter zur Auswahl verfügbar, jeder mit seinen eigenen Vor-
+  dieser Filter zur Auswahl, jeder mit seinen eigenen Vor-
   und Nachteilen. Ziehe <option>mplayer -pphelp</option> zu Rate, um zu sehen, welche
   verfügbar sind (suche nach &quot;deint&quot;) und durchsuche die
   <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
@@ -3700,7 +3700,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   bewegen.
   Im Unterschied zu anderen Levels von <option>subq</option> hängt das
   Verhalten von <option>subq=6</option> nicht sehr von <option>frameref</option>
-  und <option>me</option> ab.  Stattdessen hängt die Effektivität von
+  und <option>me</option> ab.  Statt dessen hängt die Effektivität von
   <option>subq=6</option> größtenteils von der Anzahl der verwendeten
   B-frames ab. Im Normalgebrauch bedeutet dies, <option>subq=6</option>
   hat einen großen Einfluss auf Geschwindigkeit und Qualität
@@ -3712,9 +3712,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">frameref</emphasis>:
   <option>frameref</option> ist per Voreinstellung auf 1 gesetzt, jedoch
-  sollte dies nicht darauf schließen lassen, dass es unbedingt
+  solltest du deshalb nicht darauf schließen, dass es unbedingt
   auf 1 gesetzt sein muss.
-  Lediglich die Erhöhung von <option>frameref</option> auf 2 bringt rund
+  Allein die Erhöhung von <option>frameref</option> auf 2 bringt rund
   0.15dB PSNR mit einem Geschwindigkeitsnachteil von 5-10%; dies sieht nach
   einem guten Kompromiss aus.
   <option>frameref=3</option> bringt rund 0.25dB PSNR mehr als
@@ -3728,11 +3728,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   15% Geschwindigkeitsnachteil.
   Oberhalb <option>frameref=6</option> sind die Qualitätsgewinne
   für gewöhnlich sehr klein (obwohl du während der ganzen Diskussion
-  im Kopf behalten solltest, es abhängig von deiner Quelle stark
-  variieren kann).
+  im Kopf behalten solltest, dass sie abhängig von deiner Quelle stark
+  variieren können).
   In einem ziemlich typischen Fall wird <option>frameref=12</option>
   den globalen PSNR um ein bisschen mehr als 0.02dB gegenüber
-  <option>frameref=6</option> verbessern, bei Geschwindigkeitsenbußen
+  <option>frameref=6</option> verbessern, bei Geschwindigkeitseinbußen
   von 15%-20%.
   Bei so hohen <option>frameref</option>-Werten ist das wirklich
   einzig Gute, dass man sagen kann, dass ein weiteres Anheben dieses
@@ -3742,7 +3742,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 <note><title>Beachte:</title>
 <para>
-  das Erhöhen von <option>frameref</option> auf unnötig hohe Werte
+  Das Erhöhen von <option>frameref</option> auf unnötig hohe Werte
   <emphasis role="bold">kann</emphasis> und
   <emphasis role="bold">tut dies ublicherweise auch</emphasis>
   die Codiereffizienz schädigen, wenn du CABAC ausschaltest.
@@ -3754,25 +3754,25 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 </note>
 <para>
-  Wenn du es auf Geschwindigkeit abzielst, ist ein  vernünftiger
-  Kompromiss, im ersten Durchgang niedere <option>subq</option> und
+  Wenn du auf Geschwindigkeit abzielst, ist ein vernünftiger
+  Kompromiss, im ersten Durchgang niedrigere <option>subq</option>- und
   <option>frameref</option>-Werte zu nehmen, und sie danach im
   zweten Durchgang zu erhöhen.
   Typischerweise hat dies einen vernachlässigbar negativen Effekt
-  auf die Endualität: Du wirst womöglich wohl unter 0.1dB PSNR
+  auf die Encodierqualität: Du wirst womöglich unter 0.1dB PSNR
   verlieren, was viel zu klein für einen sichtbaren Unterschied
   sein sollte.
   Trotzdem, unterschiedliche Werte für <option>frameref</option>
-  können verschiedentlich die Frametypenbestimmung beeinflussen.
-  Höchst wahrscheinlich sind dies außerordentlich seltene Fälle,
+  können auf verschiedene Weise die Frametypenbestimmung beeinflussen.
+  Höchstwahrscheinlich sind dies außerordentlich seltene Fälle,
   willst du jedoch wirklich sicher gehen, ziehe in Betracht, ob
   dein Video entweder Vollbild- respektive Einblendungsmuster
-  oderr sehr große temporäre Überdeckungen, was einen I-Frame
+  oder sehr große temporäre Überdeckungen enthält, was einen I-Frame
   erzwingen könnte.
   Passe <option>frameref</option> des ersten Durchgangs so an,
   dass es groß genug ist, um die Dauer des Einblendungszyklus
-  enthält (oder der Überdeckungen).
-  Zum Beispiel, wenn die Szenezwischen zwei Bildern über eine
+  (oder der Überdeckungen) enthält.
+  Zum Beispiel, wenn die Szene zwischen zwei Bildern über eine
   Zeitspanne von drei Frames rückwärts und vorwärts springt,
   setze <option>frameref</option> des ersten Durchgangs auf 3
   oder höher.
@@ -3785,16 +3785,16 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">me</emphasis>:
   Diese Option dient der Wahl der Suchmethode der Bewegungseinschätzung.
   Diese Option zu verändern stellt einen überschaubaren Kompromiss
-  zwischen Qualität un Geschwindigkeit dar.
+  zwischen Qualität und Geschwindigkeit dar.
   <option>me=1</option> ist nur ein paar Prozent schneller als
-  die Standardsuche, auf kosten von unter 0.1dB globalen PSNR. Die
+  die Standardsuche, auf Kosten von unter 0.1dB globalem PSNR. Die
   Standardeinstellung (<option>me=2</option>) ist ein angemessener
-  Kompromiss zwischen Qualität un Geschwindigkeit.
-  <option>me=3</option> bringt ein wenig unter 0.1dB globalen PSNR,
+  Kompromiss zwischen Qualität und Geschwindigkeit.
+  <option>me=3</option> bringt ein wenig unter 0.1dB globalem PSNR,
   mit Geschwindigkeitsnachteil, der abhängig von <option>frameref</option>
   variiert. Bei hohen <option>frameref</option>-Werten (z.B. 12 oder so)
-  ist <option>me=3</option> etwa 40% langsamer als das standardmäßige
-  <option> me=2</option>. Mit <option>frameref=3</option> fällt der
+  ist <option>me=3</option> etwa 40% langsamer als die Standardeinstellung
+  <option>me=2</option>. Mit <option>frameref=3</option> fällt der
   Geschwindigkeitsnachteil auf 25%-30%.
 </para>
 <para>
@@ -3805,7 +3805,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">4x4mv</emphasis>:
-  Diese Option aktiviert das Verwenden von 8x4, 4x8 und 4x4 Unterteilungen
+  Diese Option aktiviert die Verwendung von 8x4, 4x8 und 4x4 Unterteilungen
   in den vorhergesagten Macroblöcken. Sie zu aktivieren führt zu einem
   ziemlich beständigen Verlust von 10%-15% an Geschwindigkeit. Sie ist
   ziemlich nutzlos bei Quellen, die nur langsame Bewegungen enthalten,
@@ -3819,23 +3819,23 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Wenn du gewohnt bist, mit anderen Codecs zu encodieren, hast du
   womöglich empfunden, dass B-Frames nicht immer nützlich sind.
   Bei H.264 wurde dies geändert: es gibt neue Techniken und Blocktypen,
-  die in in B-Frames möglich sind.
+  die in B-Frames möglich sind.
   Für gewöhnlich kann selbst ein einfältiger Algorithmus zur Wahl
-  der B-Frame einen signifikanten PSNR-Vorteil bringen.
+  der B-Frames einen signifikanten PSNR-Vorteil bringen.
   Es ist interessant festzustellen, dass die Anwendung von B-Frames
   normalerweise den zweiten Durchgang ein bisschen beschleunigt,
   und er kann auch eine Encodierung mit einfachem Durchgang etwas
-  schneller machen, wenn adaptive B-Framebestimmung abschalten
+  schneller machen, wenn adaptive B-Frame-Bestimmung deaktiviert
   ist.
 </para>
 <para>
-  Mit abschaltener adaptiver B-Framebestimmung
-  (<option>nob_adapt</option> von <option>x264encopts</option> ),
+  Mit deaktivierter adaptiver B-Framebestimmung
+  (<option>nob_adapt</option> von <option>x264encopts</option>)
   ist der optimale Wert für diese Einstellung normalerweise nicht
   mehr als <option>bframes=1</option>, andernfalls leiden Szenen
   mit sehr viel Bewegung darunter.
-  Mit einschaltener adaptiver B-Framebestimmung (das Standardverhalten),
-  ist es sicher, höhere Werte zu verwenden; der Encoder will die Anwendung
+  Mit aktivierter adaptiver B-Framebestimmung (das Standardverhalten)
+  ist es sicher, höhere Werte zu verwenden; der Encoder wird die Anwendung
   von B-frames in Szenen reduzieren, in denen sie die Kompression
   schädigen könnten.
   Der Encoder zieht es selten vor, mehr als 3 oder 4 B-Frames zu
@@ -3864,7 +3864,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
   Du kannst diese Option genauso gut aktivieren, falls du >=2 B-Frames
-  verwendest; wie die Man Page erzählt, erreichst du eine kleine
+  verwendest; wie die Man Page dir sagt, erreichst du eine kleine
   Qualitätsverbesserung bei keinerlei Geschwindigkeitseinbuße.
   Beachte, dass diese Videos von libavcodec-basierten Decodern
   älter als etwa 5. März 2005 nicht gelesen werden können.
@@ -3874,7 +3874,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">weight_b</emphasis>:
   In typischen Fällen gibt es nicht viel Gewinn mit dieser Option.
   Trotzdem, in überblendenden oder ins Schwarze übergehenden Szenen
-  liefert die gewichtete Vorhersage ziemlich große Bitrate-Einsparungen.
+  liefert die gewichtete Vorhersage ziemlich große Einsparungen bei der Bitrate.
   In MPEG-4 ASP wird ein Übergang ins Schwarze gewöhnlich am besten
   als eine Serie aufwändiger I-Frames codiert; das Verwenden einer
   gewichteten Vorhersage in B-Frames macht es möglich, wenigstens
@@ -3886,7 +3886,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   beeinflusst, ansonsten bleibt alles gleich.
 </para>
 <para>
-  Leider hat der aktuelle Algorithmus zur adaptiven B-Framebestimmung
+  Leider hat der aktuelle Algorithmus zur adaptiven B-Frame-Bestimmung
   eine starke Tendenz, B-Frames während des Fadens zu verhindern.
   Bis sich dies ändert, kann es eine gute Idee sein,
   <option>nob_adapt</option> zu deinen x264encopts hinzuzufügen, falls
@@ -3907,13 +3907,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   gezwungen, einen einzigen Durchgang zu verwenden.
   Auch ist ein Durchgang offensichtlich schneller als zwei Durchgänge;
   wenn du exakt die gleichen Optionen bei beiden Durchgängen anwendest,
-  istdas Encodieren in zwei Durchgängen mindestens zweimal so langsam.
+  ist das Encodieren in zwei Durchgängen mindestens zweimal so langsam.
 </para>
 <para>
-  Noch gibt es sehr gute Gründe, in zwei Durchgängen zu encodieren. Für
-  eine Sache ist Ratenkontrolle in einem Durchgang kein Heilmittel,
-  sie trifft oft eine unvernünftige Auswahl weil sie das große
-  Bild nicht sehen kann. Zum Beispiel, angenommen du hast ein zwei Minuten
+  Noch gibt es sehr gute Gründe, in zwei Durchgängen zu encodieren.
+  Zum einen ist Ratenkontrolle in einem Durchgang kein Heilmittel,
+  sie trifft oft eine unvernünftige Auswahl, weil sie das große
+  Bild nicht sehen kann. Zum Beispiel angenommen, du hast ein zwei Minuten
   langes Video bestehend aus zwei ausgeprägten Hälften.  Die erste Hälfte
   besitzt eine 60 Sekunden dauernde Szenen mit sehr viel Bewegung, die
   einzeln für sich etwa 2500kbps benötigt, um anständig auszusehen.
@@ -3921,34 +3921,34 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   lange Szene, die bei 300kbps gut aussieht. Angenommen du forderst in
   der Theorie 1400kbps an, was beiden Szenen ausreichend entgegenkommen
   würde. Die Ratenkontrolle in einem Durchgang wird in diesem Fall
-  ein paar &quot;Fehler&quot;. Zuallererst wird es in beiden Segmenten
+  ein paar &quot;Fehler&quot; machen. Zuallererst wird es in beiden Segmenten
   1400kbps anpeilen. Das erste Segment könnte schwer überquantisiert enden,
   was es unakzeptabel und unangemessen blockhaft aussehen lässt.
   Das zweite Segment wird schwer unterquantisiert sein; es sieht vielleicht
   perfekt aus, aber der Bitratenverlust dieser Perfektion wird komplett
   unangemessen sein.
-  Sogar scherer vermeidbar ist das Problem am Übergang beider Szenen.
+  Noch schwerer vermeidbar ist das Problem am Übergang beider Szenen.
   Die ersten Sekunden der Hälfte mit wenig Bewegung wird enorm
   überquantisiert sein, weil die Ratenkontrolle noch die Art Anforderung
   an die Bitrate erwartet, der sie in der ersten Hälfte des Videos begegnet
   war. Diese &quot;Fehlerperiode&quot; der extrem überquantisierten Szene
   mit wenig Bewegung wird fürchterlich schlecht aussehen, und wird sogar
-  weniger als die 300kbps verwenden, die sie genommen hätte, um annehmbar
-  auszusehen. Es gibt Mittel und Wege, diese Falle des Encodierens in einem
+  weniger als die 300kbps in Anspruch nehmen als das, was sie genommen hätte, um annehmbar
+  auszusehen. Es gibt Mittel und Wege, diese Fälle des Encodierens in einem
   Durchgang zu mildern, diese werden allerdingst dahin tendieren, die
   fehlerhaften Vorhersagen der Bitraten zu häufen.
 </para>
 <para>
   Multipass-Ratenkontrolle kann gegenüber der eines einzigen Durchgangs
-  riesen Vorteile bieten.
+  enorm große Vorteile bieten.
   Indem sie die im ersten Encodierungsdurchlauf gesammelte Statistik
-  verwendet, kann der Encoder mit angemessener Geneuigkeit den Aufwand
-  (in Bit)abschätzen, den das Encodieren jeden gegebenen Frames bei
+  verwendet, kann der Encoder mit angemessener Genauigkeit den Aufwand
+  (in Bit) abschätzen, den das Encodieren jeden gegebenen Frames bei
   jedem gegebenen Quantisierer erfordert. Dies erlaubt eine viel
-  rationellere, besser geplante Zuweisung von Bits zwischen den
-  Bit-hungrigen Szenen mit viel Bewegung und denen bescheidenen mit
+  rationalere, besser geplante Zuweisung von Bits zwischen den
+  bithungrigen Szenen mit viel Bewegung und denen bescheidenen mit
   wenig Bewegung.
-  Siehe <option>qcomp</option> unten für einige Ideen darüber wie man
+  Siehe <option>qcomp</option> unten für einige Ideen darüber, wie man
   diese Zuweisungen nach seinem Geschmack optimiert.
 </para>
 <para>
@@ -3959,10 +3959,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   ersten Durchgang hinkriegen.
   Die resultierende Qualität im zweiten Durchgang wird geringfügig niedriger
   ausfallen, weil die Größenvorhersage weniger akkurat ist, jedoch
-  ist die Qualitätsdifferenz normalerweiseviel zu klein um sichtbar zu sein
+  ist die Qualitätsdifferenz normalerweise viel zu klein, um sichtbar zu sein.
   Versuche zum Beispiel <option>subq=1:frameref=1</option> zu
   <option>x264encopts</option> des ersten Durchgangs hinzuzufügen.
-  Dann verwende im zweiten Durchgang langsamere, hochwertigere Optionen:
+  Verwende dann im zweiten Durchgang langsamere, hochwertigere Optionen:
   <option>subq=6:frameref=15:4x4mv:me=3</option>
 </para></listitem>
 <listitem><para>
@@ -3973,19 +3973,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   spezifizierst, dann verwende <option>pass=3</option> im nachfolgenden
   Durchgang, der nachfolgende Durchgang wird beides tun, die Statistik des
   vorhergehenden Durchgangs lesen und seine eigene Statistik schreiben.
-  Ei zusätzlicher Durhgang, der diesem folgt wird eine sehr gute Basis
+  Ein zusätzlicher Durchgang, der diesem folgt, wird eine sehr gute Basis
   haben, von der aus er hochpräzise Vorhersagen der Framegrößen bei
   einem gewählten Quantisierer machen kann.
   In der Praxis ist der damit erzielte gesamte Qualitätsgewinn
-  gewöhnlich nahezu Null, und ziemlich wahrscheinlich resultiert ein dritter
+  gewöhnlich nahezu null, und ziemlich wahrscheinlich resultiert ein dritter
   Durchgang in einem geringfügig schlechteren globalen PSNR als der Durchgang
-  davor. In der typischen Anwendung, helfen drei Durchgänge, wenn du entweder
-  eine schleche Vorhersagen der Bitraten oder schlecht aussehende Szenenübergänge
+  davor. In der typischen Anwendung helfen drei Durchgänge, wenn du entweder
+  eine schleche Vorhersage der Bitraten oder schlecht aussehende Szenenübergänge
   beim Verwenden nur eines Durchlaufs bekommst.
   Dies passiert mit ziemlicher Wahrscheinlichkeit mit extrem kurzen Clips.
   Ebenso gibt es ein paar Spezialfälle, in denen drei (oder mehr) Durchgänge
   erfahrenen Nutzern dienlich sind, aber um es kurz zu machen, dieses Handbuch
-  unterlässt die Diskussion solcher speziellen Fälle.
+  behandelt die Diskussion solcher speziellen Fälle nicht.
 
 </para></listitem>
 <listitem><para>
@@ -3996,17 +3996,17 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Bei einem Extrem zielt <option>qcomp=0</option> auf eine echte konstante
   Bitrate ab. Typischerweise würde dies Szenen mit viel Bewegung vollkommen
   ätzend aussehen lassen, während Szenen mit wenig Bewegung womöglich absolut
-  perfekt aussehen, jedoch öfter mehr Bitrate verwenden würden, als sie das
-  sonst für ein lediglich exzellent Aussehen tun müssten. Bei anderen Extrem
+  perfekt aussehen, jedoch öfter mehr Bitrate verwenden würden, als sie sond für
+  lediglich sehr gutes Aussehen tun müssten. Beim anderen Extrem
   erreicht <option>qcomp=1</option> nahezu konstante Quantisierungsparameter
   (QP). Ein konstanter QP sieht nicht schlecht aus, die meisten Leute meinen
-  aber es sei vernünftiger, etwas Bitrate aus den extrem aufwändigen Szenen
+  aber, es sei vernünftiger, etwas Bitrate aus den extrem aufwändigen Szenen
   zu nehmen (wobei dort der Qualitätsverlust micht ganz so augenfällig ist)
-  und sie wieder den Szenen zuzuweisen, die bei exzellenter Qualität leichter
+  und sie wieder den Szenen zuzuweisen, die bei sehr guter Qualität leichter
   zu encodieren sind.
-  <option>qcomp</option> ist standardmäßig auf 0.6 gesetzt, was für den
+  <option>qcomp</option> ist per Voreinstellung auf 0.6 gesetzt, was für den
   Geschmack mancher Leute etwas zu langsam sein könnte (0.7-0.8 werden im
-  allgemeinen auch verwendet).
+  Allgemeinen auch verwendet).
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">keyint</emphasis>:
@@ -4016,10 +4016,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Material mit 25fps garantiert dies, auf 10 Sekunden genau
   suchen zu können. Wenn du meinst, es wäre wichtig und nützlich,
   auf 5 Sekunden genau suchen zu können, setze es auf <option>keyint=125</option>;
-  dies wird der Qualität/Bitrate leicht schaden. Wenns dir nur um Qualität
-  geht und nicht um die Durchsuchbarkeit, kannst du  viel höhere Werte
-  setzen (vorausgesetzt es gibt schrumpfende Erträge, die verschwindend
-  klein werden oder sogar gegen Null gehen). Der Videostream wird nach
+  dies wird der Qualität/Bitrate leicht schaden. Wenn es dir nur um Qualität
+  geht und nicht um die Durchsuchbarkeit, kannst du viel höhere Werte
+  setzen (vorausgesetzt du verstehst, daß es verringerte Resultate gibt, die verschwindend
+  klein werden oder sogar gegen null gehen). Der Videostream wird nach
   wie vor suchbare Stellen besitzen, solange einige Szenenwechsel
   vorhanden sind.
 </para></listitem>
@@ -4031,9 +4031,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   H.264 definiert eine simple Deblocking-Prozedur bei I-Blöcken, die
   von vorgegebenen Stärken und vom QP des strittigen Blocks
   abhängigen.
-  Mit dem Standardwert werden hohe QP-Blöcke schwer gefiltert, und
+  Mit dem Standardwert werden hohe QP-Blöcke stark gefiltert, und
   niedrige QP-Blöcke werden überhaupt nicht entblockt.
-  Die vom Standard definierten, vorgegebenen Stärken sind mit
+  Die vom Standard definierten vorgegebenen Stärken sind mit
   Bedacht gewählt und die Chancen stehen sehr gut, dass sie
   PSNR-optimal sind, egal welches Video auch immer du zu encodieren
   versuchst.
@@ -4050,13 +4050,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 <para>
   Die erste und wichtigste Sache, die man über den
-  in-loop-Deblocking-Filter wissen sollte ist, dass die
+  in-loop-Deblocking-Filter wissen sollte, ist, dass die
   Standardschwellenwerte meistens PSNR-optimal sind.
   In den seltenen Fällen, in denen sie nicht optimal sind, ist das
   ideale Offset plus oder minus 1.
   Die Deblocking-Parameter durch einen höheren Betrag anzupassen
   garantiert meist, dem PSNR zu schaden.
-  das Verstärken des Filters wird mehr Details verwischen; den
+  Das Verstärken des Filters wird mehr Details verwischen; den
   Filter zu schwächen wird das Auftreten von Blockeffekten
   erhöhen.
 </para>
@@ -4067,7 +4067,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Der in-loop-Filter macht eigentlich einen exzellenten Job durch
   das Kaschieren auftretender Artefakte.
   Besitzt die Quelle eine hohe räumliche Komplexität, sind Artefakte
-  dennoch weniger bemerkbar.
+  weniger bemerkbar.
   Dies ist so, weil das Schwingen (ringing) dazu neigt, wie Details
   oder Rauschen auszusehen.
   Die viselle Wahrnehmung des Menschen erkennt leicht, wenn Details
@@ -4084,9 +4084,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Dies rechtfertigt jedoch <emphasis role="bold">nach wie vor</emphasis>
   nicht das Herabsetzen der Deblocking-Filterstärke.
-  Du kannst im allgemeinen besseres Qualitätsrauschen im Postprocessing
+  Du kannst im Allgemeinen besseres Qualitätsrauschen im Postprocessing
   erzielen.
-  falls deine H.264-Encodierungen zu verschwommen oder verschmiert
+  Falls deine H.264-Encodierungen zu verschwommen oder verschmiert
   aussehen, versuche, mit
   <option>-vf noise</option> beim Abspielen des encodierten Films
   herumzuspielen.
@@ -4101,17 +4101,17 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect2>
 
 <sect2 id="menc-feat-x264-example-settings">
-<title>Encodieroptionen Beispiele</title>
+<title>Beispiele für Encodieroptionen</title>
 
 <para>
   Die folgenden Einstellungen sind Beispiele unterschiedlicher
   Kombinationen von Encodier-Optionen, die einen Kompromiss zwischen
-  Geschwindigkeit und Qualität bei gleicher Zielbitrate betreffen.
+  Geschwindigkeit und Qualität bei gleicher Zielbitrate darstellen.
 </para>
 
 <para>
-  All diese Encodier-Einstellungen wurden an einem Beispiel-Video
-  mit 720x448 @30000/1001 fps getestet, die Zielbitrate wars 900kbps,
+  All diese Encodier-Einstellungen wurden an einem Beispielvideo
+  mit 720x448 @30000/1001 fps getestet, die Zielbitrate war 900kbps,
   und der Rechner war ein
   AMD-64 3400+ mit 2400 Mhz im 64-bit-Modus.
   Jede Encodier-Einstellung zeichnet sich durch eine gemessene
@@ -4160,15 +4160,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Encodieren mit der <systemitem class="library">Video for Windows</systemitem> Codecfamilie</title>
 
 <para>
-  Video for Windows bietet ein einfaches Encodieren mittels binärer Video-Codecs.
-  Du kannst mit folgenden Codecs encodieren (solltest du mehr haben, teil es
+  Video for Windows bietet einfaches Encodieren mittels binärer Video-Codecs.
+  Du kannst mit folgenden Codecs encodieren (solltest du mehr haben, teile es
   uns bitte mit!)
 </para>
 <para>
-  Beachte, dass der Support für diesen Codec sehr experimentell ist und
+  Beachte, dass der Support hierfür sehr experimentell ist, und
   einige Codecs arbeiten vielleicht nicht korrekt. Manche Codecs werden
   nur in bestimmten Farbräumen funktionieren, versuche
-  <option>-vf format=bgr24</option> und <option>-vf format=yuy2</option>
+  <option>-vf format=bgr24</option> und <option>-vf format=yuy2</option>,
   falls ein Codec versagt oder einen falschen Output liefert.
 </para>
 
@@ -4275,13 +4275,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <entry>vp6vfw.dll</entry>
   <entry>On2 VP6 Personal Codec (VP60)</entry>
   <entry>04d635a364243013898fd09484f913fb</entry>
-  <entry>crashing on Linux</entry>
+  <entry>stürzt unter Linux ab</entry>
 </row>
 <row>
   <entry>vp7vfw.dll</entry>
   <entry>On2 VP7 Personal Codec (VP70)</entry>
   <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
-  <entry>wrong FourCC?</entry>
+  <entry>falscher FourCC?</entry>
 </row>
 <row>
   <entry>ViVD2.dll</entry>
@@ -4295,12 +4295,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 Die erste Spalte enthält die Codec-Namen, die nach dem
 <literal>codec</literal>-Parameter übergeben werden sollten, wie:
-<option>-xvfwopts codec=divx.dll</option>
+<option>-xvfwopts codec=divx.dll</option>.
 Der FourCC-Code, der von jedem Codec verwendet wird, steht in Klammern.
 </para>
 <informalexample>
 <para>
-Ein Beispiel mit VP3Kompression:
+Ein Beispiel mit VP3-Kompression:
 <screen>mencoder dvd://2 -o title2.avi -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy</screen>
 </para>
 </informalexample>
@@ -4314,8 +4314,8 @@ Ein Beispiel mit VP3Kompression:
 <sect2 id="menc-feat-vcd-dvd-constraints">
 <title>Formatbeschränkungen</title>
 <para>
-  <application>MEncoder</application> ist fähig, MPEG-Dateien im VCD-, SCVD-
-  und DVD-Format durch verwenden der
+  <application>MEncoder</application> ist in der Lage, MPEG-Dateien im VCD-, SCVD-
+  und DVD-Format durch Verwendung der
   <systemitem class="library">libavcodec</systemitem>-Programmbibliothek
   zu erzeugen.
   Diese Dateien können danach im Zusammenhang mit
@@ -4327,10 +4327,10 @@ Ein Beispiel mit VP3Kompression:
 </para>
 
 <para>
-  Die Formate DVD, SVCD und VCD sind schweren Sachzwängen unterworfen.
-  Es ist nur eine kleine Auswahl an encodierten Bildergrößen und Seitenverhältnissen
+  Die Formate DVD, SVCD und VCD sind starken Beschränkungen unterworfen.
+  Es ist nur eine kleine Auswahl an encodierten Bildgrößen und Seitenverhältnissen
   verfügbar.
-  Wenn dein Film nicht bereits die Anforderungen erfüllt, müsstest du das Bild
+  Wenn dein Film nicht bereits die Anforderungen erfüllt, musst du das Bild
   skalieren, zuschneiden oder schwarze Ränder hinzufügen, um es konform zu machen.
 </para>
 
@@ -4453,9 +4453,9 @@ Ein Beispiel mit VP3Kompression:
   um eine DVD oder VCD herzustellen.
   Wenn du schwarze Ränder hinzufügst, versuche diese an 16-Pixel-Rändern
   auszurichten, um den Einfluß auf die Encodier-Performance zu minimieren.
-  Dankbarweise besitzt DVD eine ausreichend Bitrate, damit du dich
-  nicht zu sehr um die Encodier-Effizienz sorgen musst, jedoch SVCD
-  und VCD sind höchst mager an Bitrate und erfordern Aufwand, akzeptable
+  Zum Glück besitzen DVDs eine ausreichend hohe Bitrate, damit du dich
+  nicht zu sehr um die Encodier-Effizienz sorgen musst, SVCD
+  und VCD jedoch sind höchst mager an Bitrate und erfordern Aufwand, um akzeptable
   Qualität zu erreichen.
 </para>
 </sect3>
@@ -4474,10 +4474,10 @@ Ein Beispiel mit VP3Kompression:
 <sect3 id="menc-feat-vcd-dvd-constraints-bitrate">
 <title>Bitraten-Beschränkungen</title>
 <para>
-  VCD Video erfordert, CBR bei 1152 kbps zu sein.
-  Zu dieser nach oben begrenzende Einschränkung kommt auch noch eine
+  VCD Video muss bei CBR 1152 kbps sein.
+  Zu dieser nach oben begrenzten Einschränkung kommt auch noch eine
   extrem niedrige vbv-Puffergröße von 327 Kilobit.
-  SVCD erlaugt das variieren der Video-Bitraten auf bis zu 2500 kbps
+  SVCD erlaubt das Variieren der Video-Bitraten auf bis zu 2500 kbps,
   und eine etwas weniger restriktive vbv-Puffergröße von 917 Kilobit
   ist erlaubt.
   DVD-Video-Bitraten können sich bis auf irgendwo um die 9800 kbps
@@ -4533,35 +4533,35 @@ Ein Beispiel mit VP3Kompression:
   <screen>
   -of mpeg -mpegopts format=dvd:telecine -ofps 24000/1001
   </screen>
-  dies erlaubt 24000/1001 fps progressive-Inhalt bei 30000/1001
-  fps encodiert zu werden, während dieser DVD-Konformität erhalten bleibt.
+  Dies erlaubt 24000/1001 fps progressive-Inhalt bei 30000/1001
+  fps encodiert zu werden, wobei die DVD-Konformität erhalten bleibt.
 </para>
 
 <sect3 id="menc-feat-vcd-dvd-output-aspect">
 <title>Seitenverhältnis</title>
 <para>
-  Das Seitenargument von <option>-lavcopts</option> wird zum Encodieren
+  Der Parameter für das Seitenverhältnis von <option>-lavcopts</option> wird zum Encodieren
   des Seitenverhältnisses einer Datei verwendet.
-  Während des Playbacks wird Seitenverhältnis dazu benutzt, die korrekte
-  Größe des Videos wierder herzustellen.
+  Während des Playbacks wird das Seitenverhältnis dazu benutzt, die korrekte
+  Größe des Videos wieder herzustellen.
 </para>
 
 <para>
-  16:9 or "Breitbild"
+  16:9 oder "Breitbild"
   <screen>
   -lavcopts aspect=16/9
   </screen>
 </para>
 
 <para>
-  4:3 or "Vollbild"
+  4:3 oder "Vollbild"
   <screen>
   -lavcopts aspect=4/3
   </screen>
 </para>
 
 <para>
-  2.35:1 or "Cinemascope" NTSC
+  2.35:1 oder "Cinemascope" NTSC
   <screen>
   -vf scale=720:368,expand=720:480 -lavcopts aspect=16/9
   </screen>
@@ -4583,8 +4583,8 @@ Ein Beispiel mit VP3Kompression:
 <sect3 id="menc-feat-vcd-dvd-a-v-sync">
 <title>Aufrechterhalten der A/V-Synchronisation</title>
 <para>
-  Um die Audio-/Video-Synchronisation während des ganzen
-  Encodierens aufrecht zu erhalten, muss
+  Um die Audio-/Video-Synchronisation während der kompletten
+  Encodierung aufrechtzuerhalten, muss
   <application>MEncoder</application> Frames auslassen oder duplizieren.
   Dies funktioniert beim Muxen in eine AVI-Datei ziemlich gut,
   aber meist schlägt das Aufrechterhalten der A/V-Synchronisation mit
@@ -4602,7 +4602,7 @@ Ein Beispiel mit VP3Kompression:
 <sect3 id="menc-feat-vcd-dvd-output-srate">
 <title>Sampleraten-Konvertierung</title>
 <para>
-  Wenn die Audio-Samplerate in der Originaldatei nicht die selbe wie
+  Wenn die Audio-Samplerate in der Originaldatei nicht dieselbe wie die
   vom Zielformat angeforderte ist, wird eine Sampleraten-Konvertierung
   erforderlich.
   Dies wird erreicht, indem man die Option <option>-srate</option> und
@@ -4631,7 +4631,7 @@ Ein Beispiel mit VP3Kompression:
 <title>Einführung</title>
 <para>
   <systemitem class="library">libavcodec</systemitem> kann verwendet
-  werden, um ein VCD/SVCD/DVD-Konformes Video durch die Anwendung der
+  werden, um ein VCD/SVCD/DVD-konformes Video durch die Anwendung der
   passenden Optionen zu erzeugen.
 </para>
 </sect3>
@@ -4648,7 +4648,7 @@ Ein Beispiel mit VP3Kompression:
 <listitem><para>
   <emphasis role="bold">acodec</emphasis>:
   <option>mp2</option> für VCD, SVCD oder PAL DVD;
-  <option>ac3</option> wird am häufigsten für DVD gebraucht.
+  <option>ac3</option> wird am häufigsten für DVD verwendet.
   PCM-Audio kann auch für DVD verwendet werden, aber dies ist meistens
   eine riesen Platzverschwendung.
   Beachte, dass MP3-Audio nicht konform für irgendeines dieser Formate
@@ -4693,8 +4693,8 @@ Ein Beispiel mit VP3Kompression:
 <listitem><para>
   <emphasis role="bold">vrc_maxrate</emphasis>:
   1152 für VCD; 2500 für SVCD; 9800 für DVD.
-  Für SVCD und DVD könnte du niedrigere Werte verwenden, abhängig von
-  deinen persänlichen Vorlieben und Anforderungen.
+  Für SVCD und DVD könntest du niedrigere Werte verwenden, abhängig von
+  deinen persönlichen Vorlieben und Anforderungen.
 </para></listitem>
 
 <listitem><para>
@@ -4702,7 +4702,7 @@ Ein Beispiel mit VP3Kompression:
   1152 für VCD;
   bis zu 2500 für SVCD;
   bis zu 9800 für DVD.
-  Für letzteren zwei Formate, sollte vbitrate basierend auf persönliche
+  Für letztere zwei Formate sollte vbitrate basierend auf persönliche
   Vorlieben gesetzt werden.
   Zum Beispiel, wenn du darauf bestehst, 20 Stunden oder so passend auf
   eine DVD zu bringen, könntest du vbitrate=400 benutzen.
@@ -4717,8 +4717,8 @@ Ein Beispiel mit VP3Kompression:
 <sect3 id="menc-feat-vcd-dvd-lavc-examples">
 <title>Beispiele</title>
 <para>
-  Dies ist eine typische Mindest-Zusammenstellung von <option>-lavcopts</option>
-  zum Encodieren eines Videos:
+  Dies ist eine typische Zusammenstellung von mindestens zu verwendenden
+  <option>-lavcopts</option>-Optionen zum Encodieren eines Videos:
 </para>
 <para>
   VCD:
@@ -4749,7 +4749,7 @@ Ein Beispiel mit VP3Kompression:
 <sect3 id="menc-feat-vcd-dvd-lavc-advanced">
 <title>Erweiterte Optionen</title>
 <para>
-  Für das Encodieren höherer Qualität könntest du auch Qualitäts-steigernde
+  Für das Encodieren höherer Qualität könntest du auch qualitätssteigernde
   Optionen an lavcopts anzufügen, wie etwa <option>trell</option>,
   <option>mbd=2</option> und weitere.
   Beachte, dass <option>qpel</option> und <option>v4mv</option>, obwohl
@@ -4759,7 +4759,7 @@ Ein Beispiel mit VP3Kompression:
   anzufügen.
   Wobei dies helfen könnte, das Auftreten von Blöcken in fahl-farbenen
   Bereichen zu reduzieren.
-  Zusammenfassend ist die ein Beispiel einer Zusammenstellung von lavcopts für
+  Zusammenfassend ist dies ein Beispiel einer Zusammenstellung von lavcopts für
   für eine höherwertige DVD:
 </para>
 
@@ -4787,7 +4787,7 @@ Ein Beispiel mit VP3Kompression:
   anderen zwei Bibliotheken, dennoch sollte er immer verfügbar sein.
   VCD unterstützt nur Audio mit konstanten Bitraten (CBR) wogegen SVCD
   auch variable Bitraten (VBR) unterstützt.
-  Sei vorsichtig, wenn Du VBR benutzt, weil einige schlechten
+  Sei vorsichtig, wenn du VBR benutzt, weil einige schlechte
   Standalone-Player diese nicht so gut unterstützen könnten.
 </para>
 
@@ -4842,9 +4842,9 @@ Ein Beispiel mit VP3Kompression:
 </sect2>
 
 <sect2 id="menc-feat-vcd-dvd-all">
-<title>zusammenfassung</title>
+<title>Zusammenfassung</title>
 <para>
-  Diese Sektion zeigt einige kompletten befehle zum Erzeugen von
+  Diese Sektion zeigt einige komplette Befehle zum Erzeugen von
   VCD/SVCD/DVD-konformen Videos.
 </para>
 
@@ -4889,7 +4889,7 @@ Ein Beispiel mit VP3Kompression:
 </sect3>
 
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
-<title>NTSC AVI Containing AC3 Audio to DVD</title>
+<title>NTSC AVI mit AC3-Ton zu DVD</title>
 <para>
   Hat die Quelle bereits AC3-Audio und ist NTSC @ 24000/1001 fps:
   <screen>
