@@ -48,23 +48,23 @@ struct vf_priv_s {
     int mode;
     int parity;
     int stride[3];
-    uint8_t *ref[3][3];
+    uint8_t *ref[4][3];
 };
 
 static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], int width, int height){
     int i;
 
-    memcpy (p->ref[2], p->ref[0], sizeof(uint8_t *)*3);
-    memmove(p->ref[0], p->ref[1], sizeof(uint8_t *)*3*2);
+    memcpy (p->ref[3], p->ref[0], sizeof(uint8_t *)*3);
+    memmove(p->ref[0], p->ref[1], sizeof(uint8_t *)*3*3);
 
     for(i=0; i<3; i++){
         int is_chroma= !!i;
 
-        memcpy_pic(p->ref[1][i], src[i], width>>is_chroma, height>>is_chroma, p->stride[i], src_stride[i]);
+        memcpy_pic(p->ref[2][i], src[i], width>>is_chroma, height>>is_chroma, p->stride[i], src_stride[i]);
     }
 }
 
-static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int dst_stride[3], int src_stride[3], int width, int height, int parity, int tff){
+static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int width, int height, int parity, int tff){
     int x, y, i, j;
 
     for(i=0; i<3; i++){
@@ -72,27 +72,22 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
         int w= width >>is_chroma;
         int h= height>>is_chroma;
         int refs= p->stride[i];
-        int srcs= src_stride[i];
-
-//        assert(refs == src_stride[i]); //FIXME
 
         for(y=0; y<h; y++){
             if((y ^ parity) & 1){
                 for(x=0; x<w; x++){
-                    if(x>0 && y>0 && x+1<w && y+1<h){
                         uint8_t *prev= &p->ref[0][i][x + y*refs];
                         uint8_t *cur = &p->ref[1][i][x + y*refs];
-                        uint8_t *next= &src[i][x + y*srcs];
+                        uint8_t *next= &p->ref[2][i][x + y*refs];
                         uint8_t *prev2= (tff ^ parity) ? prev : cur ;
                         uint8_t *next2= (tff ^ parity) ? cur  : next;
-                        int next2s=     (tff ^ parity) ? refs : srcs;
 
                         int c= cur[-refs];
                         int d= (prev2[0] + next2[0])>>1;
                         int e= cur[+refs];
                         int temporal_diff0= ABS(prev2[0] - next2[0]);
                         int temporal_diff1=( ABS(prev[-refs] - c) + ABS(prev[+refs] - e) )>>1;
-                        int temporal_diff2=( ABS(next[-srcs] - c) + ABS(next[+srcs] - e) )>>1;
+                        int temporal_diff2=( ABS(next[-refs] - c) + ABS(next[+refs] - e) )>>1;
                         int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
                         int spatial_pred= (c+e)>>1;
                         int spatial_score= ABS(cur[-refs-1] - cur[+refs-1]) + ABS(c-e)
@@ -108,12 +103,12 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                                 spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;
                             }
                         }
-                        if(y>1 && y+2<h){
-                            int b= (prev2[-2*refs] + next2[-2*next2s])>>1;
-                            int f= (prev2[+2*refs] + next2[+2*next2s])>>1;
+                        {
+                            int b= (prev2[-2*refs] + next2[-2*refs])>>1;
+                            int f= (prev2[+2*refs] + next2[+2*refs])>>1;
 #if 0
-                            int a= y>2 ? cur[-3*refs] : 0;
-                            int g= y+3<h ? cur[+3*refs] : 0;
+                            int a= cur[-3*refs];
+                            int g= cur[+3*refs];
                             int max= MAX3(d-e, d-c, MIN3(MAX(b-c,f-e),MAX(b-c,b-a),MAX(f-g,f-e)) );
                             int min= MIN3(d-e, d-c, MAX3(MIN(b-c,f-e),MIN(b-c,b-a),MIN(f-g,f-e)) );
 #else
@@ -128,8 +123,6 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         else                 d= MAX(d - diff, spatial_pred);
 
                         dst[i][x + y*dst_stride[i]]= d;
-                    }else
-                        dst[i][x + y*dst_stride[i]]= p->ref[1][i][x + y*refs];
                 }
             }else{
                 memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
@@ -141,16 +134,16 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-        int i;
+        int i, j;
 
         for(i=0; i<3; i++){
             int is_chroma= !!i;
-            int w= ((width  + 31) & (~31))>>is_chroma;
-            int h= ((height + 31) & (~31))>>is_chroma;
+            int w= ((width   + 31) & (~31))>>is_chroma;
+            int h= ((height+6+ 31) & (~31))>>is_chroma;
 
             vf->priv->stride[i]= w;
-            vf->priv->ref[0][i]= malloc(w*h*sizeof(uint8_t));
-            vf->priv->ref[1][i]= malloc(w*h*sizeof(uint8_t));
+            for(j=0; j<3; j++)
+                vf->priv->ref[j][i]= malloc(w*h*sizeof(uint8_t))+3*w;
         }
 
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
@@ -169,18 +162,19 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     }
     else tff = (vf->priv->parity&1)^1;
 
+    store_ref(vf->priv, mpi->planes, mpi->stride, mpi->w, mpi->h);
+
     for(i=0; i<=vf->priv->mode; i++){
         dmpi=vf_get_image(vf->next,mpi->imgfmt,
             MP_IMGTYPE_TEMP,
             MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
             mpi->width,mpi->height);
         vf_clone_mpi_attributes(dmpi, mpi);
-        filter(vf->priv, dmpi->planes, mpi->planes, dmpi->stride, mpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
+        filter(vf->priv, dmpi->planes, dmpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
         ret |= vf_next_put_image(vf, dmpi, pts /*FIXME*/);
         if(i<vf->priv->mode)
             vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
     }
-    store_ref(vf->priv, mpi->planes, mpi->stride, mpi->w, mpi->h);
 
     return ret;
 }
@@ -189,9 +183,10 @@ static void uninit(struct vf_instance_s* vf){
     int i;
     if(!vf->priv) return;
 
-    for(i=0; i<3*2; i++){
-        if(vf->priv->ref[i&1][i/2]) free(vf->priv->ref[i&1][i/2]);
-        vf->priv->ref[i&1][i/2]= NULL;
+    for(i=0; i<3*3; i++){
+        uint8_t **p= &vf->priv->ref[i%3][i/3];
+        if(*p) free(*p - 3*vf->priv->stride[i/3]);
+        *p= NULL;
     }
     free(vf->priv);
     vf->priv=NULL;
