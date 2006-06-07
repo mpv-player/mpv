@@ -40,7 +40,7 @@ vous assisterons si vous avez des questions.
 </para>
 </sect1>
 <sect1 id="bugreports_regression_test">
-<title>Comment faire des tests de regression en utilisant CVS</title>
+<title>Comment faire des tests de regression en utilisant Subversion</title>
 <para>
 Un problème qui peut survenir quelque fois est 'cela marchait avant, et
 plus maintenant...'.
@@ -49,21 +49,22 @@ le problème s'est produit. Ceci n'est <emphasis role="bold">pas</emphasis> pour 
 occasionnels.
 </para>
 <para>
-Premièrement, vous aurez besoin de récuperer l'arbre des sources de MPlayer depuis le CVS.
+Premièrement, vous aurez besoin de récuperer l'arbre des sources de MPlayer depuis le dépot
+Subversion.
 Les instructions peuvent être trouvé au bas de
 <ulink url="http://www.mplayerhq.hu/dload.html">cette page</ulink>.
 </para>
 <para>
-Vous aurez donc dans le repertoire main/ une image de l'arbre CVS, du coté 
+Vous aurez donc dans le repertoire mplayer/ une image de l'arbre Subversion, du coté 
 client.
 Maintenant mettez à jour cette image à la date voulue:
 <screen>
-cd main/
-cvs update -PAd -D "2004-08-23"
+cd mplayer/
+svn update -r {"2004-08-23"}
 </screen>
 Le format de date est AAAA-MM-JJ HH:MM:SS.
 Utiliser ce format de date vous assure que vous pourrez extraire les patches
-selon la date à laquelle elles ont été ajoutés au CVS, comme dans l'
+selon la date à laquelle elles ont été fusionnés au dépot, comme dans l'
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">archive MPlayer-cvslog</ulink>.
 </para>
 <para>
@@ -95,10 +96,10 @@ source original, vous devrez tout recompiler dedans quand vous reviendrez
 </para>
 <para>
 Quand vous avez trouvé le jour où le problème survient, continuez la recherche
-en utilisant l'archive mplayer-cvslog (triée par date) et une faites mise-à-jour depuis le
-CVS précisant heure, minute et seconde:
+en utilisant l'archive mplayer-cvslog (triée par date) et en affinant par des
+mises-à-jour depuis Subversion en précisant heure, minute et seconde:
 <screen>
-cvs update -PAd -D "2004-08-23 15:17:25"
+svn update -r {"2004-08-23 15:17:25"}
 </screen>
 Cela vous permettra de trouver facilement le patch exact à l'origine du problème.
 </para>
@@ -116,13 +117,13 @@ Vous pouvez également décortiquer le patch jusqu'à ce que le bug vous saute aux 
 <sect1 id="bugreports_report">
 <title>Comment rapporter les bogues</title>
 <para>
-Tout d'abord veuillez essayer la dernière version CVS de <application>MPlayer</application>
+Tout d'abord veuillez essayer la dernière version Subversion de <application>MPlayer</application>
 car votre bogue y est peut-être déjà réparé. Le développement évolue
 très rapidement, la plupart des problèmes des versions officielles sont
 rapportés dans les jours voir les heures qui suivent, donc n'utilisez
-<emphasis role="bold">que le CVS</emphasis> pour rapporter les bogues. Ceci
+<emphasis role="bold">que la version Subversion</emphasis> pour rapporter les bogues. Ceci
 est également valable pour les paquets binaires de <application>MPlayer</application>.
-Les instructions CVS peuvent être trouvées en bas de 
+Les instructions Subversion peuvent être trouvées en bas de
 <ulink url="http://www.mplayerhq.hu/dload.html">cette page</ulink>
 ou dans le README. Si tout cela ne vous aide pas, veuillez vous référer à
 <link linkend="bugs">la liste des bogues connus</link> et au reste de la
