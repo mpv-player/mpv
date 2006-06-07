@@ -802,6 +802,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
       return;
     memcpy(buf[i], op[i].packet, op[i].bytes);
 
+    op[i].b_o_s = (i==0);
     ris = vorbis_synthesis_headerin(&(od->vi),&(od->vc),&(op[i]));
     if(ris < 0) {
       init_error = 1;
