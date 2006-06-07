@@ -466,6 +466,9 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
             for (i=0;i<6;i++) RVA(0x7688)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x82c3)[i]=0x90;
             for (i=0;i<6;i++) RVA(0x84aa)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x1d2cc)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x2179d)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x1977f)[i]=0x90;
           } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3e70)) {
             // looks like VP 6.0.7.3
             for (i=0;i<6;i++) RVA(0x7559)[i]=0x90;
