@@ -179,6 +179,7 @@ static vf_info_t* filter_list[]={
     &vf_info_uspp,
     &vf_info_fspp,
     &vf_info_qp,
+    &vf_info_mcdeint,
 #endif
     &vf_info_yuvcsp,
     &vf_info_kerndeint,
@@ -192,9 +193,6 @@ static vf_info_t* filter_list[]={
     &vf_info_softskip,
 #ifdef HAVE_PNG
     &vf_info_screenshot,
-#endif
-#ifdef USE_LIBAVCODEC
-    &vf_info_mcdeint,
 #endif
     &vf_info_yadif,
     NULL
