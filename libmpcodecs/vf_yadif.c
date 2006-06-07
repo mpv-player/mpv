@@ -103,7 +103,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
                                 spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;
                             }
                         }
-                        {
+                        if(p->mode<2){
                             int b= (prev2[-2*refs] + next2[-2*refs])>>1;
                             int f= (prev2[+2*refs] + next2[+2*refs])>>1;
 #if 0
@@ -164,7 +164,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
     store_ref(vf->priv, mpi->planes, mpi->stride, mpi->w, mpi->h);
 
-    for(i=0; i<=vf->priv->mode; i++){
+    for(i=0; i<=(vf->priv->mode&1); i++){
         dmpi=vf_get_image(vf->next,mpi->imgfmt,
             MP_IMGTYPE_TEMP,
             MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
@@ -172,7 +172,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         vf_clone_mpi_attributes(dmpi, mpi);
         filter(vf->priv, dmpi->planes, dmpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
         ret |= vf_next_put_image(vf, dmpi, pts /*FIXME*/);
-        if(i<vf->priv->mode)
+        if(i<(vf->priv->mode&1))
             vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
     }
 
@@ -218,9 +218,6 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->parity= -1;
 
     if (args) sscanf(args, "%d:%d", &vf->priv->mode, &vf->priv->parity);
-
-    if(vf->priv->mode < 0 || vf->priv->mode > 1)
-        vf->priv->mode=0;
 
     return 1;
 }
