@@ -65,7 +65,7 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
 }
 
 static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int dst_stride[3], int src_stride[3], int width, int height, int parity, int tff){
-    int x, y, i, j, k;
+    int x, y, i, j;
 
     for(i=0; i<3; i++){
         int is_chroma= !!i;
@@ -87,20 +87,21 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         uint8_t *next2= (tff ^ parity) ? cur  : next;
                         int next2s=     (tff ^ parity) ? refs : srcs;
 
+                        int c= cur[-refs];
+                        int d= (prev2[0] + next2[0])>>1;
+                        int e= cur[+refs];
                         int temporal_diff0= ABS(prev2[0] - next2[0]);
-                        int temporal_diff1=( ABS(prev[-refs] - cur[-refs]) + ABS(prev[+refs] - cur[+refs]) )>>1;
-                        int temporal_diff2=( ABS(next[-srcs] - cur[-refs]) + ABS(next[+srcs] - cur[+refs]) )>>1;
+                        int temporal_diff1=( ABS(prev[-refs] - c) + ABS(prev[+refs] - e) )>>1;
+                        int temporal_diff2=( ABS(next[-srcs] - c) + ABS(next[+srcs] - e) )>>1;
                         int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
-                        int temporal_pred= (prev2[0] + next2[0])>>1;
-                        int spatial_pred= 0;
-                        int spatial_score= 1<<30;
-                        int v= temporal_pred;
+                        int spatial_pred= (c+e)>>1;
+                        int spatial_score= ABS(cur[-refs-1] - cur[+refs-1]) + ABS(c-e)
+                                         + ABS(cur[-refs+1] - cur[+refs+1]);
 
-                        for(j=-1; j<=1; j++){
+                        for(j=-1; j<=1; j+=2){
                             int score= ABS(cur[-refs-1+j] - cur[+refs-1-j])
                                      + ABS(cur[-refs  +j] - cur[+refs  -j])
-                                     + ABS(cur[-refs+1+j] - cur[+refs+1-j])
-                                     + ABS(j);
+                                     + ABS(cur[-refs+1+j] - cur[+refs+1-j]) + 1;
 
                             if(score < spatial_score){
                                 spatial_score= score;
@@ -109,9 +110,6 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         }
                         if(y>1 && y+2<h){
                             int b= (prev2[-2*refs] + next2[-2*next2s])>>1;
-                            int c= cur[-refs];
-                            int d= temporal_pred;
-                            int e= cur[+refs];
                             int f= (prev2[+2*refs] + next2[+2*next2s])>>1;
 #if 0
                             int a= y>2 ? cur[-3*refs] : 0;
@@ -126,10 +124,10 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                             diff= MAX3(diff, min, -max);
                         }
 
-                        if(v < spatial_pred) v= MIN(v + diff, spatial_pred);
-                        else                 v= MAX(v - diff, spatial_pred);
+                        if(d < spatial_pred) d= MIN(d + diff, spatial_pred);
+                        else                 d= MAX(d - diff, spatial_pred);
 
-                        dst[i][x + y*dst_stride[i]]= v;
+                        dst[i][x + y*dst_stride[i]]= d;
                     }else
                         dst[i][x + y*dst_stride[i]]= p->ref[1][i][x + y*refs];
                 }
