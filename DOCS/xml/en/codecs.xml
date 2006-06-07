@@ -125,9 +125,7 @@ that it transfers image data in YV12 (planar YUV 4:2:0) format, thus
 requiring much less bandwidth on the bus. For packed YUV modes (YUY2, UYVY)
 use the <option>-vc divx4</option> method. For RGB modes the speed is the
 same, differing at best according to your current color depth.
-<note>
-<para>
-If your <option>-vo</option> driver supports direct rendering, then <option>-vc
+If your video output driver supports direct rendering, then <option>-vc
 divx4</option> may be faster, or even the fastest solution.
 </para>
 
@@ -135,50 +133,10 @@ divx4</option> may be faster, or even the fastest solution.
 The DivX4/5 binary codec library can be downloaded from
 <ulink url="http://avifile.sf.net">avifile</ulink> or
 <ulink url="http://www.divx.com">divx.com</ulink>
-Unpack it, run <filename>./install.sh</filename> as root and do not forget adding
+Unpack it, run <filename>./install.sh</filename> as root and do not forget to add
 <filename class="directory">/usr/local/lib</filename> to your
 <filename>/etc/ld.so.conf</filename> and running <command>ldconfig</command>.
 </para>
-
-<para>
-Get the CVS version of the OLD OpenDivX core library like this:
-</para>
-
-<procedure>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</screen>
-</para></step>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</screen>
-</para></step>
-<step><para>
-This core library is split into a decore and encore library that have to be
-compiled separately. For the decore Library, simply type
-<screen>
-cd divxcore/decore/build/linux
-make
-cp libdivxdecore.so /usr/local/lib
-ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
-cp ../../src/decore.h /usr/local/include
-</screen>
-</para></step>
-<step><para>
-Alas, for the encore library there is no Linux Makefile available, and the
-MMX optimized code only works on Windows. You can still compile it, though,
-by using this
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>.
-<screen>
-cd ../../../encore/build
-mkdir linux
-cd linux
-cp path/Makefile .
-make
-cp libdivxencore.so /usr/local/lib
-ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
-cp ../../src/encore.h /usr/local/include
-</screen>
-</para></step>
-</procedure>
 
 <para>
 <application>MPlayer</application> autodetects DivX4/DivX5 if it is
@@ -186,8 +144,6 @@ properly installed, just compile as usual. If it does not detect it, you
 did not install or configure it correctly.
 </para>
 
-</note>
-</para>
 </sect2>
 
 
