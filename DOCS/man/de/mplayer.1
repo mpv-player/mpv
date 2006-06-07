@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r18631
+.\" In sync with r18640
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -7239,11 +7239,14 @@ Maximaler Lagrange-Multiplikator für die Bitratenkontrolle (Standard: 31.0)
 .RE
 .
 .TP
-.B vqscale=<1\-31>
+.B vqscale=<0\-31>
 Encodierung mit konstantem Quantisierungsparameter bzw.\& konstanter Qualität
 (wählt den 'fixed quantizer'-Modus).
-Ein kleinerer Wert bedeutet bessere Qualität bei größeren Dateien (Standard: 0
-(deaktiviert)).
+Ein kleinerer Wert bedeutet bessere Qualität bei größeren Dateien (Standard: 0).
+Im Falle des snow Codecs bedeutet der Wert 0 verlustfreie Encodierung.
+Da die anderen Codecs dies nicht unterstützen, wird vqscale=0 bei diesen
+ignoriert, und variable Quantisierer werden verwendet, was die 
+Standardeinstellung ist.
 Der Wert 1 wird nicht empfohlen (siehe vqmin für Details).
 .
 .TP

@@ -6914,7 +6914,8 @@ maximum Lagrange multiplier for ratecontrol (default: 31.0)
 Constant quantizer /\: constant quality encoding (selects fixed quantizer mode).
 A lower value means better quality but larger files (default: 0).
 In case of snow codec, value 0 means lossless encoding.
-For every other codec, constant quantizer encoding is disabled.
+Since the other codecs do not support this, vqscale=0 will be ignored and
+and variable quantizers are used, which is the default.
 1 is not recommended (see vqmin for details).
 .
 .TP
