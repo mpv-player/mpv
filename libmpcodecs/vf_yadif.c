@@ -83,9 +83,9 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         uint8_t *prev= &p->ref[0][i][x + y*refs];
                         uint8_t *cur = &p->ref[1][i][x + y*refs];
                         uint8_t *next= &src[i][x + y*srcs];
-                        uint8_t *prev2= (tff ^ (y&1)) ? cur  : prev;
-                        uint8_t *next2= (tff ^ (y&1)) ? next : cur ;
-                        int next2s=     (tff ^ (y&1)) ? srcs : refs;
+                        uint8_t *prev2= (tff ^ parity) ? prev : cur ;
+                        uint8_t *next2= (tff ^ parity) ? cur  : next;
+                        int next2s=     (tff ^ parity) ? refs : srcs;
 
                         int temporal_diff0= ABS(prev2[0] - next2[0]);
                         int temporal_diff1=( ABS(prev[-refs] - cur[-refs]) + ABS(prev[+refs] - cur[+refs]) )>>1;
@@ -95,20 +95,12 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         int spatial_pred= 0;
                         int spatial_score= 1<<30;
                         int v= temporal_pred;
-#if 0
-#define RANGE 8
-                        for(j=-RANGE; j<=RANGE; j++){
-                            int score= 0;
-                            for(k=-ABS(j)-1; k<=ABS(j)+1; k++)
-                                score+= ABS(cur[-refs+k+j] - cur[+refs+k-j]);
-#else
-#define RANGE 1
-                        for(j=-RANGE; j<=RANGE; j++){
+
+                        for(j=-1; j<=1; j++){
                             int score= ABS(cur[-refs-1+j] - cur[+refs-1-j])
                                      + ABS(cur[-refs  +j] - cur[+refs  -j])
                                      + ABS(cur[-refs+1+j] - cur[+refs+1-j])
                                      + ABS(j);
-#endif
 
                             if(score < spatial_score){
                                 spatial_score= score;
