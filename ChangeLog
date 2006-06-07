@@ -73,6 +73,7 @@ MPlayer (1.0)
     * bug fix for lavc WMA v2 decoder, now all files should be playable
     * -vc mpeg12 resizes the window when aspect ratio changes
     * Smacker audio and video decoding via lavc
+    * Windows Media VC1 video decoder via binary DLL
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -167,6 +168,8 @@ MPlayer (1.0)
     * -srate fixed
     * hqdn3d: 2.5x faster temporal-only, 1.6x faster spatial-only
     * new proof-of-concept karaoke (voice removal) filter
+    * motion compensating deinterlacer (-vf mcdeint)
+    * Yet Another DeInterlacing Filter (-vf yadif)
 
     MEncoder:
     * audio encoding modularized
