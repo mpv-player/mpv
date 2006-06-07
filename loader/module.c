@@ -427,14 +427,15 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	if (!wm)
 	    printf("Win32 LoadLibrary failed to load: %s\n", checked);
 
+#define RVA(x) ((char *)wm->module+(unsigned int)(x))
 	if (strstr(libname,"vp31vfw.dll") && wm)
 	{
 	    int i;
 
 	  // sse hack moved from patch dll into runtime patching
-          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10001000) {
+          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x1000)) {
 	    fprintf(stderr, "VP3 DLL found\n");
-	    for (i=0;i<18;i++) ((char*)0x10004bd6)[i]=0x90;
+	    for (i=0;i<18;i++) RVA(0x4bd6)[i]=0x90;
 	  }
 	}
 
@@ -442,10 +443,10 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
         if (strstr(libname,"vp5vfw.dll") && wm)
         {
           int i;
-          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10003930) {
-            for (i=0;i<3;i++) ((char*)0x10004e86)[i]=0x90;
-            for (i=0;i<3;i++) ((char*)0x10005a23)[i]=0x90;
-            for (i=0;i<3;i++) ((char*)0x10005bff)[i]=0x90;
+          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3930)) {
+            for (i=0;i<3;i++) RVA(0x4e86)[i]=0x90;
+            for (i=0;i<3;i++) RVA(0x5a23)[i]=0x90;
+            for (i=0;i<3;i++) RVA(0x5bff)[i]=0x90;
           } else {
             fprintf(stderr, "Unsupported VP5 version\n");
             return 0;
@@ -455,21 +456,21 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
         if (strstr(libname,"vp6vfw.dll") && wm)
         {
           int i;
-          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10003ef0) {
+          if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3ef0)) {
             // looks like VP 6.1.0.2
-            for (i=0;i<6;i++) ((char*)0x10007268)[i]=0x90;
-            for (i=0;i<6;i++) ((char*)0x10007e83)[i]=0x90;
-            for (i=0;i<6;i++) ((char*)0x1000806a)[i]=0x90;
-          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10004120) {
+            for (i=0;i<6;i++) RVA(0x7268)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x7e83)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x806a)[i]=0x90;
+          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x4120)) {
             // looks like VP 6.2.0.10
-            for (i=0;i<6;i++) ((char*)0x10007688)[i]=0x90;
-            for (i=0;i<6;i++) ((char*)0x100082c3)[i]=0x90;
-            for (i=0;i<6;i++) ((char*)0x100084aa)[i]=0x90;
-          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==(void*)0x10003e70) {
+            for (i=0;i<6;i++) RVA(0x7688)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x82c3)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x84aa)[i]=0x90;
+          } else if (PE_FindExportedFunction(wm, "DriverProc", TRUE)==RVA(0x3e70)) {
             // looks like VP 6.0.7.3
-            for (i=0;i<6;i++) ((char*)0x10007559)[i]=0x90;
-            for (i=0;i<6;i++) ((char*)0x100081c3)[i]=0x90;
-            for (i=0;i<6;i++) ((char*)0x1000839e)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x7559)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x81c3)[i]=0x90;
+            for (i=0;i<6;i++) RVA(0x839e)[i]=0x90;
           } else {
             fprintf(stderr, "Unsupported VP6 version\n");
             return 0;
@@ -481,9 +482,9 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
         {
           // The codec calls IsRectEmpty with coords 0,0,0,0 => result is 0
           // but it really wants the rectangle to be not empty
-          if (PE_FindExportedFunction(wm, "CreateInstance", TRUE)==(void*)0x08c4b812) {
+          if (PE_FindExportedFunction(wm, "CreateInstance", TRUE)==RVA(0xb812)) {
             // Dll version is 10.0.0.3645
-            *((char*)0x08c48b0f)=0xeb; // Jump always, ignoring IsRectEmpty result
+            *RVA(0x8b0f)=0xeb; // Jump always, ignoring IsRectEmpty result
           } else {
             fprintf(stderr, "Unsupported WMVA version\n");
             return 0;
@@ -498,52 +499,52 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 
 //	    dispatch_addr = GetProcAddress(wm->module, "theQuickTimeDispatcher", TRUE);
 	    dispatch_addr = PE_FindExportedFunction(wm, "theQuickTimeDispatcher", TRUE);
-	    if (dispatch_addr == (void *)0x62924c30)
+	    if (dispatch_addr == RVA(0x124c30))
 	    {
 	        fprintf(stderr, "QuickTime5 DLLs found\n");
-		ptr = (void **)0x62b75ca4; // dispatch_ptr
-	        for (i=0;i<5;i++)  ((char*)0x6299e842)[i]=0x90; // make_new_region ?
-	        for (i=0;i<28;i++) ((char*)0x6299e86d)[i]=0x90; // call__call_CreateCompatibleDC ?
-		for (i=0;i<5;i++)  ((char*)0x6299e898)[i]=0x90; // jmp_to_call_loadbitmap ?
-	        for (i=0;i<9;i++)  ((char*)0x6299e8ac)[i]=0x90; // call__calls_OLE_shit ?
-	        for (i=0;i<106;i++) ((char*)0x62a61b10)[i]=0x90; // disable threads
+		ptr = (void **)RVA(0x375ca4); // dispatch_ptr
+	        for (i=0;i<5;i++)  RVA(0x19e842)[i]=0x90; // make_new_region ?
+	        for (i=0;i<28;i++) RVA(0x19e86d)[i]=0x90; // call__call_CreateCompatibleDC ?
+		for (i=0;i<5;i++)  RVA(0x19e898)[i]=0x90; // jmp_to_call_loadbitmap ?
+	        for (i=0;i<9;i++)  RVA(0x19e8ac)[i]=0x90; // call__calls_OLE_shit ?
+	        for (i=0;i<106;i++) RVA(0x261b10)[i]=0x90; // disable threads
 #if 0
 		/* CreateThread callers */
-		for (i=0;i<5;i++) ((char*)0x629487c5)[i]=0x90;
-		for (i=0;i<5;i++) ((char*)0x6294b275)[i]=0x90;
-		for (i=0;i<5;i++) ((char*)0x629a24b1)[i]=0x90;
-		for (i=0;i<5;i++) ((char*)0x629afc5a)[i]=0x90;
-		for (i=0;i<5;i++) ((char*)0x62af799c)[i]=0x90;
-		for (i=0;i<5;i++) ((char*)0x62af7efe)[i]=0x90;
-		for (i=0;i<5;i++) ((char*)0x62afa33e)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x1487c5)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x14b275)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x1a24b1)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x1afc5a)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x2f799c)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x2f7efe)[i]=0x90;
+		for (i=0;i<5;i++) RVA(0x2fa33e)[i]=0x90;
 #endif
 
 #if 0
 		/* TerminateQTML fix */
-		for (i=0;i<47;i++) ((char*)0x62afa3b8)[i]=0x90; // terminate thread
-		for (i=0;i<47;i++) ((char*)0x62af7f78)[i]=0x90; // terminate thread
-		for (i=0;i<77;i++) ((char*)0x629a13d5)[i]=0x90;
-		((char *)0x6288e0ae)[0] = 0xc3; // font/dc remover
-		for (i=0;i<24;i++) ((char*)0x6287a1ad)[i]=0x90; // destroy window
+		for (i=0;i<47;i++) RVA(0x2fa3b8)[i]=0x90; // terminate thread
+		for (i=0;i<47;i++) RVA(0x2f7f78)[i]=0x90; // terminate thread
+		for (i=0;i<77;i++) RVA(0x1a13d5)[i]=0x90;
+		RVA(0x08e0ae)[0] = 0xc3; // font/dc remover
+		for (i=0;i<24;i++) RVA(0x07a1ad)[i]=0x90; // destroy window
 #endif
-	    } else if (dispatch_addr == (void *)0x6693b330)
+	    } else if (dispatch_addr == RVA(0x13b330))
 	    {
     		fprintf(stderr, "QuickTime6 DLLs found\n");
-		ptr = (void **)0x66bb9524; // dispatcher_ptr
-		for (i=0;i<5;i++)  ((char *)0x66a730cc)[i]=0x90; // make_new_region
-		for (i=0;i<28;i++) ((char *)0x66a730f7)[i]=0x90; // call__call_CreateCompatibleDC
-		for (i=0;i<5;i++)  ((char *)0x66a73122)[i]=0x90; // jmp_to_call_loadbitmap
-		for (i=0;i<9;i++)  ((char *)0x66a73131)[i]=0x90; // call__calls_OLE_shit
-		for (i=0;i<96;i++) ((char *)0x66aac852)[i]=0x90; // disable threads
-	    } else if (dispatch_addr == (void *)0x6693c3e0)
+		ptr = (void **)RVA(0x3b9524); // dispatcher_ptr
+		for (i=0;i<5;i++)  RVA(0x2730cc)[i]=0x90; // make_new_region
+		for (i=0;i<28;i++) RVA(0x2730f7)[i]=0x90; // call__call_CreateCompatibleDC
+		for (i=0;i<5;i++)  RVA(0x273122)[i]=0x90; // jmp_to_call_loadbitmap
+		for (i=0;i<9;i++)  RVA(0x273131)[i]=0x90; // call__calls_OLE_shit
+		for (i=0;i<96;i++) RVA(0x2ac852)[i]=0x90; // disable threads
+	    } else if (dispatch_addr == RVA(0x13c3e0))
 	    {
     		fprintf(stderr, "QuickTime6.3 DLLs found\n");
-		ptr = (void **)0x66bca01c; // dispatcher_ptr
-		for (i=0;i<5;i++)  ((char *)0x66a68f6c)[i]=0x90; // make_new_region
-		for (i=0;i<28;i++) ((char *)0x66a68f97)[i]=0x90; // call__call_CreateCompatibleDC
-		for (i=0;i<5;i++)  ((char *)0x66a68fc2)[i]=0x90; // jmp_to_call_loadbitmap
-		for (i=0;i<9;i++)  ((char *)0x66a68fd1)[i]=0x90; // call__calls_OLE_shit
-		for (i=0;i<96;i++) ((char *)0x66ab4722)[i]=0x90; // disable threads
+		ptr = (void **)RVA(0x3ca01c); // dispatcher_ptr
+		for (i=0;i<5;i++)  RVA(0x268f6c)[i]=0x90; // make_new_region
+		for (i=0;i<28;i++) RVA(0x268f97)[i]=0x90; // call__call_CreateCompatibleDC
+		for (i=0;i<5;i++)  RVA(0x268fc2)[i]=0x90; // jmp_to_call_loadbitmap
+		for (i=0;i<9;i++)  RVA(0x268fd1)[i]=0x90; // call__calls_OLE_shit
+		for (i=0;i<96;i++) RVA(0x2b4722)[i]=0x90; // disable threads
 	    } else
 	    {
 	        fprintf(stderr, "Unsupported QuickTime version (%p)\n",
@@ -560,6 +561,7 @@ HMODULE WINAPI LoadLibraryExA(LPCSTR libname, HANDLE hfile, DWORD flags)
 	    ptr[0]=wrapper;
 #endif
 	}
+#undef RVA
 
 	return wm ? wm->module : 0;
 }
