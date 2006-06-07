@@ -17,7 +17,7 @@ SRCS=af.c \
      af_karaoke.c \
      af_pan.c \
      af_resample.c \
-     af_sinesupress.c \
+     af_sinesuppress.c \
      af_sub.c \
      af_surround.c \
      af_sweep.c \

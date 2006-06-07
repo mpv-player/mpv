@@ -160,7 +160,7 @@ MPlayer (1.0)
     * screenshot filter
     * -af pan command line fix, now outputs the right number of channels
       and accepts values < 0 or > 1. Channel order had to be changed.
-    * -af sinesupress to remove a sine at a certain frequency
+    * -af sinesuppress to remove a sine at a certain frequency
     * negative stride support in swscale
     * big-endian and AltiVec fixes and performance improvements for swscaler,
       color conversions and post-processing
