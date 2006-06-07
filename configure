@@ -5922,8 +5922,8 @@ if test "$_win32" != no ; then
     _ld_win32libs="$_ld_win32libs -ladvapi32 -lole32"
     _res_comment="using native windows"
   fi
+  echores "$_win32"
 fi
-echores "$_win32"
 
 
 echocheck "DirectShow"
