@@ -3077,6 +3077,16 @@ At least three texture units are needed.
 Provides saturation and hue control.
 This method is fast but inexact.
 .RE
+.IPs [l|c]scaler=<n>
+Select the scaling function to use (seperately for luma and chroma).
+Only valid for yuv modes 2, 3 and 4.
+.RSss
+0: Use simple linear filtering (default)
+.br
+1: Use bicubic filtering (better quality).
+Older cards will not be able to handle this for chroma at least in fullscreen mode.
+Also needs one additional texture unit.
+.RE
 .IPs customprog=<filename>
 Load a custom fragment program from <filename>.
 See TOOLS/edgedect.fp for an example.

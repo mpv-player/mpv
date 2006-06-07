@@ -607,8 +607,77 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
   EndFragmentShader();
 }
 
+static void store_weights(float x, GLfloat *dst) {
+  float w0 = (((-1 * x + 3) * x - 3) * x + 1) / 6;
+  float w1 = ((( 3 * x - 6) * x + 0) * x + 4) / 6;
+  float w2 = (((-3 * x + 3) * x + 3) * x + 1) / 6;
+  float w3 = ((( 1 * x + 0) * x + 0) * x + 0) / 6;
+  *dst++ = 1 + x - w1 / (w0 + w1);
+  *dst++ = 1 - x + w3 / (w2 + w3);
+  *dst++ = w0 + w1;
+  *dst++ = 0;
+}
+
+//! to avoid artefacts this should be rather large
+#define LOOKUP_BSPLINE_RES (1024)
+/**
+ * \brief creates the 1D lookup texture needed for fast higher-order filtering
+ * \param unit texture unit to attach texture to
+ */
+static void gen_spline_lookup_tex(GLenum unit) {
+  GLfloat tex[4 * (LOOKUP_BSPLINE_RES + 2)];
+  GLfloat *tp = &tex[4];
+  int i;
+  for (i = 0; i < LOOKUP_BSPLINE_RES; i++) {
+    float x = (float)(i + 0.5) / LOOKUP_BSPLINE_RES;
+    store_weights(x, tp);
+    tp += 4;
+  }
+  store_weights(0, tex);
+  store_weights(1, &tex[4 * (LOOKUP_BSPLINE_RES + 1)]);
+  ActiveTexture(unit);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, LOOKUP_BSPLINE_RES + 2, 1, GL_RGBA, GL_FLOAT, tex);
+  glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_PRIORITY, 1.0);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  ActiveTexture(GL_TEXTURE0);
+}
+
 static const char *bilin_filt_template =
   "TEX yuv.%c, fragment.texcoord[%c], texture[%c], %s;";
+
+#define BICUB_FILT_MAIN(textype) \
+  /* first y-interpolation */ \
+  "SUB coord.xy, fragment.texcoord[%c], parmx.rara;" \
+  "SUB coord.zw, coord.xyxy, parmy.arar;" \
+  "TEX a.r, coord.zwzw, texture[%c], "textype";" \
+  "ADD coord.zw, coord.xyxy, parmy.agag;" \
+  "TEX a.g, coord.zwzw, texture[%c], "textype";" \
+  "LRP a.b, parmy.b, a.rrrr, a.gggg;" \
+  /* second y-interpolation */ \
+  "ADD coord.xy, fragment.texcoord[%c], parmx.gaga;" \
+  "SUB coord.zw, coord.xyxy, parmy.arar;" \
+  "TEX a.r, coord.zwzw, texture[%c], "textype";" \
+  "ADD coord.zw, coord.xyxy, parmy.agag;" \
+  "TEX a.g, coord.zwzw, texture[%c], "textype";" \
+  "LRP a.a, parmy.b, a.rrrr, a.gggg;" \
+  /* x-interpolation */ \
+  "LRP yuv.%c, parmx.b, a.bbbb, a.aaaa;"
+
+static const char *bicub_filt_template_2D =
+  "MAD coord.xy, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
+  "TEX parmx, coord.x, texture[%c], 1D;"
+  "MUL parmx.rg, parmx, {%f, %f};"
+  "TEX parmy, coord.y, texture[%c], 1D;"
+  "MUL parmy.rg, parmy, {%f, %f};"
+  BICUB_FILT_MAIN("2D");
+
+static const char *bicub_filt_template_RECT =
+  "ADD coord, fragment.texcoord[%c], {0.5, 0.5};"
+  "TEX parmx, coord.x, texture[%c], 1D;"
+  "TEX parmy, coord.y, texture[%c], 1D;"
+  BICUB_FILT_MAIN("RECT");
 
 static const char *yuv_prog_template =
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
@@ -656,6 +725,11 @@ static void create_scaler_textures(int scaler, int *texu, char *texs) {
   switch (scaler) {
     case YUV_SCALER_BILIN:
       break;
+    case YUV_SCALER_BICUB:
+      texs[0] = (*texu)++;
+      gen_spline_lookup_tex(GL_TEXTURE0 + texs[0]);
+      texs[0] += '0';
+      break;
     default:
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown scaler type %i\n", scaler);
   }
@@ -701,6 +775,18 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
       snprintf(*prog_pos, *remain, bilin_filt_template, out_comp, in_tex,
                  in_tex, rect ? "RECT" : "2D");
       break;
+    case YUV_SCALER_BICUB:
+      if (rect)
+        snprintf(*prog_pos, *remain, bicub_filt_template_RECT,
+                 in_tex, texs[0], texs[0],
+                 in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+      else
+        snprintf(*prog_pos, *remain, bicub_filt_template_2D,
+                 in_tex, (float)texw, (float)texh,
+                 texs[0], (float)1.0 / texw, (float)1.0 / texw,
+                 texs[0], (float)1.0 / texh, (float)1.0 / texh,
+                 in_tex, in_tex, in_tex, in_tex, in_tex, in_tex, out_comp);
+      break;
   }
   *remain -= strlen(*prog_pos);
   *prog_pos += strlen(*prog_pos);
@@ -724,7 +810,7 @@ static void glSetupYUVFragprog(float brightness, float contrast,
     "OPTION ARB_precision_hint_fastest;"
     // all scaler variables must go here so they aren't defined
     // multiple times when the same scaler is used more than once
-    "TEMP yuv;";
+    "TEMP coord, parmx, parmy, a, yuv;";
   int prog_remain = sizeof(yuv_prog) - strlen(yuv_prog);
   char *prog_pos = &yuv_prog[strlen(yuv_prog)];
   int cur_texu = 3;

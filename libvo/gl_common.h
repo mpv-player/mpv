@@ -225,6 +225,8 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #define YUV_CONVERSION_COMBINERS_ATI 5
 //! use normal bilinear scaling for textures
 #define YUV_SCALER_BILIN 0
+//! use higher quality bicubic scaling for textures
+#define YUV_SCALER_BICUB 1
 //! mask for conversion type
 #define YUV_CONVERSION_MASK 0xF
 //! mask for scaler type
