@@ -100,6 +100,7 @@ MPlayer (1.0)
     * fixed framerate detection of interlaced H.264 in raw/PS/TS streams
     * support for variable framerate Ogg/OGM files
     * made demux_ogg.c work with ffvorbis decoder
+    * fixed playback of RealVideo in Matroska files on ppc
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
