@@ -225,37 +225,19 @@ et <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> suppor
 <para>
 Si vous utilisez une version officielle de <application>MPlayer</application>,
 vous avez <systemitem class="library">libavcodec</systemitem> directement dans
-le paquetage, construisez comme d'habitude. Si vous utilisez la version CVS de
-<application>MPlayer</application> vous devrez extraire
-<systemitem class="library">libavcodec</systemitem>
-de l'arborescence CVS de FFmpeg car les versions officielles sont très rares. Le CVS est
-pratiquement stable et offre le plus de fonctions. Pour y arriver faites:
+le paquetage, construisez comme d'habitude.
+Si vous utilisez la version Subversion de <application>MPlayer</application>
+<systemitem class="library">libavcodec</systemitem> est automatiquement extrait
+de l'arborescence Subversion de FFmpeg car les versions officielles sont très
+rares.
+La version issue de Subversion est pratiquement toujours stable et offre le
+plus de fonctions.
+Pour y arriver faites:
 </para>
 
 <procedure>
 <step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
-  </para></step>
-<step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
-  </para></step>
-<step><para>
-  Déplacez le répertoire <filename>libavcodec</filename> et <filename>libavutil</filename>
-  des sources FFmpeg à la racine de
-  l'arborescence CVS de <application>MPlayer</application>. Cela devrait ressembler à cela:
-  <filename class="directory">main/libavcodec</filename>
-  <filename class="directory">main/libavutil</filename>
-  </para><para>
-  Faire un lien symbolique n'est <emphasis role="bold">pas</emphasis> suffisant, vous devez
-  le copier/déplacer!
-  </para></step>
-<step><para>
-  Si vous préférez que <systemitem class="library">libavcodec</systemitem>
-  soit mis à jour en même temps que vous mettez à jour le CVS de 
-  <application>MPlayer</application>, indiquez la ligne suivante
-  dans le fichier <filename>main/CVS/Entries</filename>:
-  <screen>D/libavcodec////</screen>
-  <screen>D/libavutil////</screen>
+  <screen>svn checkout svn://svn.mplayerhq.hu/ffmpeg/trunk ffmpeg</screen>
   </para></step>
 <step><para>
   Compilez. <filename>configure</filename> devrait détecter les problèmes avant la
@@ -265,7 +247,7 @@ pratiquement stable et offre le plus de fonctions. Pour y arriver faites:
 
 <note>
 <para>
-La version CVS de <application>MPlayer</application> contient un sous-répertoire
+La version Subversion de <application>MPlayer</application> contient un sous-répertoire
 <filename>libavcodec</filename>, mais il ne contient
 <emphasis role="bold">pas</emphasis> le source de
 <systemitem class="library">libavcodec</systemitem> !
@@ -514,7 +496,7 @@ décodeurs suivants:
 <procedure>
 <title>COMPILATION DE MPLAYER AVEC LE SUPPORT DES LIBRAIRIES QUICKTIME</title>
 <note><para>actuellement seules les plateformes Intel 32-bit sont supportées.</para></note>
-<step><para>téléchargez le CVS de <application>MPlayer</application></para></step>
+<step><para>téléchargez la version Subversion de <application>MPlayer</application></para></step>
 <step><para>téléchargez le pack de DLL QuickTime depuis
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -613,13 +595,14 @@ décodeurs suivants:
   un décodeur H.264 qui est un fonctionne un minimum depuis les alentours de Juillet 2004,
   cependant des changements et améliorations majeurs ont été implémentés depuis cette date,
   que ce soit en terme de fonctionalités supportées et en terme d'utilisation améliorée du CPU.
-  Juste pour être certain, c'est toujours une bonne idée d'utiliser une version récente extraite du CVS.
+  Juste pour être certain, c'est toujours une bonne idée d'utiliser une version récente extraite
+  du dépot Subversion.
 </para>
 <para>
   Si vous voulez une façon rapide et facile de savoir si il y a eu des
   changements récents du décodage H.264 de <systemitem class="library">libavcodec</systemitem>, 
   vous devriez garder un oeil sur
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">Interface Web du site CVS de FFmpeg</ulink>.
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">Interface Web du Subversion de FFmpeg</ulink>.
 </para>
 </sect3>
 
@@ -634,7 +617,7 @@ décodeurs suivants:
   --></screen>
   Les sources de <application>MPlayer</application> sont mises à jour lorsque survient
   un changement de l'API de <systemitem class="library">x264</systemitem>, 
-  donc il est toujours conseillé d'utiliser le CVS de
+  donc il est toujours conseillé d'utiliser la version Subversion de
   <application>MPlayer</application>.
   Peut-être cette situtation changera quand et si une "release" de
   <systemitem class="library">x264</systemitem> survient.

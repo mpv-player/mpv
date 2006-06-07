@@ -96,7 +96,7 @@ l'envoi).
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
 </para>
 <para>Cette liste concerne les discussions relatives à la documentation et
-à la homepage de <application>MPlayer</application>. Les logs CVS de
+à la homepage de <application>MPlayer</application>. Les logs Subversion de
 la documentation et du site internet sont également envoyés là.
 </para></listitem>
 <listitem><para>
@@ -104,7 +104,7 @@ la documentation et du site internet sont également envoyés là.
 </para>
 <para>Cette liste concerne les discussions relatives à la traduction de la
 documentation et du site internet de <application>MPlayer</application>.
-Les logs CVS de le documentation et du site internet sont également
+Les logs Subversion de le documentation et du site internet sont également
 envoyés là.
 </para></listitem>
 <listitem><para>
