@@ -629,7 +629,7 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
 }
 
 /* sync the stream and get a page.  Keep trying until we find a page.
-   Supress 'sync errors' after reporting the first.
+   Suppress 'sync errors' after reporting the first.
 
    return values:
    -1) recapture (hole in data)
