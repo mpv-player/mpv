@@ -74,6 +74,7 @@ MPlayer (1.0)
     * -vc mpeg12 resizes the window when aspect ratio changes
     * Smacker audio and video decoding via lavc
     * Windows Media VC1 video decoder via binary DLL
+    * Flash Screen video decoder via lavc
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -145,6 +146,8 @@ MPlayer (1.0)
     * AVS demuxer and video decoder
     * American Laser Games multimedia (*.mm) playback system
     * Smacker demuxer and decoder
+    * Flash screen Video decoder
+    * Trellis-optimized ADPCM audio encoder
 
     GUI:
     * skins now reside in a directory named 'skins', not 'Skin'
