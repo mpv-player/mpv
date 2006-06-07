@@ -219,6 +219,7 @@ MPlayer (1.0)
     * improved Debian packaging
     * improved Win32 multi-monitor support
     * Sun's mediaLib disabled by default on Solaris (broken and non-optimal)
+    * VP6 and WMVA binary codecs should now work also under FreeBSD 6
 
     Others:
     * Audio/Video synchronisation fixes
@@ -262,6 +263,8 @@ MPlayer (1.0)
     * (improved) support for shared libav* libraries
     * playback/encoding profiles support
     * new property API
+    * new -monitorpixelaspect option to determine monitor aspect from
+      screen resolution
 
 
   pre7try2: August 26, 2005
