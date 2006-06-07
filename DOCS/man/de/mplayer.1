@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r18587
+.\" In sync with r18631
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1256,8 +1256,7 @@ nach Kartentyp)
 oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit.
 .IPs timeout=<1\-30>
 Maximale Anzahl Sekunden, die benutzt werden, um einen Sender einzustellen,
-bevor aufgegeben wird.
-Standard ist 3.
+bevor aufgegeben wird (Standard: 3).
 .RE
 .PD 1
 .
@@ -3233,6 +3232,18 @@ Mindestens drei Textureinheiten werden benötigt.
 Ermöglicht Sättigungs- und Farbwerteinstellung.
 Diese Methode ist schnell aber ungenau.
 .RE
+.IPs [l|c]scaler=<n>
+Wählt die zu benutzende Skalierungsmethode (unabhängig für Luminanz und
+Chrominanz).
+Nur gültig für yuv-Modi 2, 3 und 4.
+.RSss
+0: Benutze einfache lineare Filterung (Standard).
+.br
+1: Benutze bikubische Filterung (bessere Qualität).
+Ältere Karten werden dies für Chrominanz zumindest im Vollbildmodus nicht
+verarbeiten können.
+Benötigt außerdem eine zusätzliche Textureinheit.
+.RE
 .IPs customprog=<Dateiname>
 Lädt ein eigenes Fragmentprogramm aus <Dateiname>.
 Siehe TOOLS/\:edgedetect.fp als Beispiel.
@@ -4319,16 +4330,16 @@ Sinusfunktions-Delta, benutze sehr geringe Werte, um die Schwingung zu hören.
 .PD 1
 .
 .TP
-.B sinesuppress[=freq:delay]
+.B sinesuppress[=Frequenz:Abfall]
 Entfernt einen Sinus an der angegebenen Frequenz.
 Nützlich, um bei Audiogeräten niedriger Qualität das 50/60hz-Rauschen
 loszuwerden.
 Funktioniert wahrscheinlich nur bei Mono-Input.
 .PD 0
 .RSs
-.IPs <freq>
+.IPs <Frequenz>
 Die Frequenz des Sinus, der entfernt werden soll (in Hz) (Standard: 50)
-.IPs <decay>
+.IPs <Abfall>
 Kontrolliert die Anpassung (ein größerer Wert bewirkt, dass der Filter
 Änderungen von Amplitude und Phase schneller adaptiert, ein kleinerer Wert
 wird die Adaption langsamer machen (Standard: 0.0001).
@@ -6187,6 +6198,48 @@ verwefen; sonst fällt der Filter zurück auf 0 (obere Felder zuerst).
 obere Felder zuerst
 .IPs 1
 untere Felder zuerst
+.RE
+.PD 1
+.
+.TP
+.B yadif=[Modus[:Felddominanz]]
+Noch ein Deinterlacing-Filter
+.PD 0
+.RSs
+.IPs <Modus>
+0: Gib 1 Frame für jeden Frame aus.
+.br
+1: Gib 1 Frame für jedes Feld aus.
+.br
+2: Wie 0, überspringt aber die Überprüfung für räumliches Interlacing.
+.br
+3: Wie 1, überspringt aber die Überprüfung für räumliches Interlacing.
+.IPs <Felddominanz>
+Arbeitet wie tfields.
+.RE
+.PD 1
+.
+.TP
+.B mcdeint=[Modus[:Parität[:QP]]]
+Bewegungskompensierender Deinterlacer.
+Dieser benötigt ein Feld pro Frame als Input und muss daher zusammen mit
+tfields=1 oder yadif=1/3 oder einem Äquivalent verwendet werden.
+.PD 0
+.RSs
+.IPs <Modus>
+0: schnell
+.br
+1: mittel
+.br
+2: langsam, iterative Bewegungsabschätzung
+.br
+3: besonders langsam, wie 2 plus mehrere Referenzframes
+.IPs <Parität>
+0 oder 1 bestimmt, welches Feld verwendet wird (Beachte: bisher keine
+automatische Erkennung!).
+.IPs <QP>\ 
+Höhere Werte sollten zu einem weicheren Bewegungsvektorfeld aber weniger
+optimalen individuellen Vektoren führen.
 .RE
 .PD 1
 .
