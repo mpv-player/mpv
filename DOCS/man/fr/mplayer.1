@@ -1,4 +1,4 @@
-.\" synced with r18574
+.\" synced with r18631
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -3244,6 +3244,7 @@ Offre le contrôle de la luminosité, du contraste et de la saturation.
 Ceci utilise un extension nVidia (GL_NV_register_combiners).
 Au moins trois unitées de texture sont nécessaires.
 Offre le contrôle de la saturation et de la teinte.
+Cette méthode est rapide mais inexacte.
 .br
 2: Utilise un "programme fragment".
 Nécessite l'extension GL_ARB_fragment_program et au moins trois unités
@@ -3271,6 +3272,7 @@ Ceci utilise un extension spécifique à ATI (GL_ATI_fragment_shader - pas
 GL_ARB_fragment_shader\ !).
 Au moins trois unités de texture sont nécessaires.
 Permet le contrôle de la saturation et de la teinte.
+Cette méthode est rapide mais inexacte.
 .RE
 .IPs customprog=<nom_fichier>
 Charge un programme fragment personnalisé depuis <nom_fichier>.
@@ -6218,6 +6220,45 @@ par le champ du haut.
 champ du haut d'abord
 .IPs 1
 champ du bas d'abord
+.RE
+.PD 1
+.
+.TP
+.B yadif=[mode[:dominance_de_champ]]
+"Yet another deinterlacing filter" (encore un autre filtre de désentrelacement).
+.PD 0
+.RSs
+.IPs <mode>
+0: sort une trame pour chaque trame d'entrée
+1: sort une trame pour chaque champ d'entrée
+2: comme 0 mais ne vérifie pas l'entrelacement spatial
+3: comme 3 mais ne vérifie pas l'entrelacement spatial 
+.IPs <dominance_de_champ>
+cf tfields
+.RE
+.PD 1
+.
+.TP
+.B mcdeint=[mode[:parité[:qp]]]
+Dés-entrelaceur à compensation de mouvement.
+Doit être avoir en entrée un champ par trame, c'est pourquoi il doit être
+utilisé avec tfields=1 our yadif=1 ou 3 ou équivalent.
+.PD 0
+.RSs
+.IPs <mode>
+0: rapide
+.br
+1: medium
+.br
+2: lent, réalise une estimation de mouvement itérative
+.br
+3: encore plus lent, utilise plusieurs trames de références
+.IPs <parité>
+0 ou 1 en fonction du champ à utiliser (note\ : pas d'auto-détection
+pour le moment)
+.IPs <qp>\ 
+Des valeurs plus grandes devraient produire pour le champ des vecteurs de
+mouvement plus doux, mais des vecteurs moins optimals individuellement.
 .RE
 .PD 1
 .
