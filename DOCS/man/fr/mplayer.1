@@ -1,4 +1,4 @@
-.\" synced with r18573
+.\" synced with r18574
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -8381,7 +8381,10 @@ Utilise les quantum MPEG au lieu de H.263.
 .
 .TP
 .B aic\ \ \ \ 
-Prédiction AC (prédiction intra avancée pour H.263+)
+Active la prédiction AC pour MPEG-4 ou la prédiction intra avancée pour
+H.263+.
+Améliore un petit peu la qualité (environ 0.02 dB de PSNR) et réduit
+un peu la rapidité d'encodage (environ about 1%).
 .br
 .I NOTE\ :
 vqmin devrait être égal à 8 ou plus pour H263+ AIC.
