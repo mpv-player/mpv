@@ -773,7 +773,8 @@ static int initGl(uint32_t d_width, uint32_t d_height)
         BindProgram(GL_FRAGMENT_PROGRAM, fragprog);
         break;
     }
-    glSetupYUVConversion(GL_TEXTURE_2D, use_yuv, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0);
+    glSetupYUVConversion(GL_TEXTURE_2D, use_yuv, 0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+                         texture_width, texture_height);
   }
 
   gl_set_antialias(0);

@@ -59,6 +59,9 @@ static int osd_color;
 
 static int use_aspect;
 static int use_yuv;
+static int lscale;
+static int cscale;
+static int yuvconvtype;
 static int use_rectangle;
 static int err_shown;
 static uint32_t image_width;
@@ -156,8 +159,9 @@ static void update_yuvconv(void) {
   float rgamma = exp(log(8.0) * eq_rgamma / 100.0);
   float ggamma = exp(log(8.0) * eq_ggamma / 100.0);
   float bgamma = exp(log(8.0) * eq_bgamma / 100.0);
-  glSetupYUVConversion(gl_target, use_yuv, bri, cont, hue, sat,
-                       rgamma, ggamma, bgamma);
+  glSetupYUVConversion(gl_target, yuvconvtype, bri, cont, hue, sat,
+                       rgamma, ggamma, bgamma,
+                       texture_width, texture_height);
   if (custom_prog) {
     FILE *f = fopen(custom_prog, "r");
     if (!f)
@@ -511,13 +515,13 @@ flip_page(void)
 
   glColor3f(1,1,1);
   if (image_format == IMGFMT_YV12)
-    glEnableYUVConversion(gl_target, use_yuv);
+    glEnableYUVConversion(gl_target, yuvconvtype);
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
             use_rectangle == 1, image_format == IMGFMT_YV12, mpi_flipped);
   if (image_format == IMGFMT_YV12)
-    glDisableYUVConversion(gl_target, use_yuv);
+    glDisableYUVConversion(gl_target, yuvconvtype);
 
   if (osdtexCnt > 0) {
     // set special rendering parameters
@@ -685,6 +689,8 @@ static opt_t subopts[] = {
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
   {"yuv",          OPT_ARG_INT,  &use_yuv,      (opt_test_f)int_non_neg},
+  {"lscale",       OPT_ARG_INT,  &lscale,       (opt_test_f)int_non_neg},
+  {"cscale",       OPT_ARG_INT,  &cscale,       (opt_test_f)int_non_neg},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
   {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
@@ -702,6 +708,8 @@ static int preinit(const char *arg)
     scaled_osd = 0;
     use_aspect = 1;
     use_yuv = 0;
+    lscale = 0;
+    cscale = 0;
     use_rectangle = 0;
     use_glFinish = 0;
     swap_interval = 1;
@@ -757,6 +765,7 @@ static int preinit(const char *arg)
       gl_target = GL_TEXTURE_2D;
     if (slice_height == -1)
       slice_height = use_yuv ? 16 : 4;
+    yuvconvtype = use_yuv | lscale << YUV_LUM_SCALER_SHIFT | cscale << YUV_CHROM_SCALER_SHIFT;
     if (many_fmts)
       mp_msg (MSGT_VO, MSGL_INFO, "[gl] using extended formats. "
                "Use -vo gl:nomanyfmts if playback fails.\n");

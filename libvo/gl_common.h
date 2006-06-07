@@ -223,11 +223,28 @@ void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
 #define YUV_CONVERSION_FRAGMENT_LOOKUP 4
 //! use ATI specific register combiners ("fragment program")
 #define YUV_CONVERSION_COMBINERS_ATI 5
+//! use normal bilinear scaling for textures
+#define YUV_SCALER_BILIN 0
+//! mask for conversion type
+#define YUV_CONVERSION_MASK 0xF
+//! mask for scaler type
+#define YUV_SCALER_MASK 0xF
+//! shift value for luminance scaler type
+#define YUV_LUM_SCALER_SHIFT 8
+//! shift value for chrominance scaler type
+#define YUV_CHROM_SCALER_SHIFT 12
+//! extract conversion out of type
+#define YUV_CONVERSION(t) (t & YUV_CONVERSION_MASK)
+//! extract luminance scaler out of type
+#define YUV_LUM_SCALER(t) ((t >> YUV_LUM_SCALER_SHIFT) & YUV_SCALER_MASK)
+//! extract chrominance scaler out of type
+#define YUV_CHROM_SCALER(t) ((t >> YUV_CHROM_SCALER_SHIFT) & YUV_SCALER_MASK)
 /** \} */
 void glSetupYUVConversion(GLenum target, int type,
                           float brightness, float contrast,
                           float hue, float saturation,
-                          float rgamma, float ggamma, float bgamma);
+                          float rgamma, float ggamma, float bgamma,
+                          int texw, int texh);
 void glEnableYUVConversion(GLenum target, int type);
 void glDisableYUVConversion(GLenum target, int type);
 

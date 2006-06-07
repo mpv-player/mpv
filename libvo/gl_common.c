@@ -607,64 +607,104 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
   EndFragmentShader();
 }
 
+static const char *bilin_filt_template =
+  "TEX yuv.%c, fragment.texcoord[%c], texture[%c], %s;";
+
 static const char *yuv_prog_template =
-  "!!ARBfp1.0\n"
-  "OPTION ARB_precision_hint_fastest;"
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
   "PARAM ucoef = {%.4f, %.4f, %.4f};"
   "PARAM vcoef = {%.4f, %.4f, %.4f};"
   "PARAM offsets = {%.4f, %.4f, %.4f};"
-  "PARAM gamma = {%.4f, %.4f, %.4f};"
-  "TEMP res, y, u, v;"
-  "TEX y, fragment.texcoord[0], texture[0], %s;"
-  "MAD res, y, ycoef, offsets;"
-  "TEX u, fragment.texcoord[1], texture[1], %s;"
-  "MAD res, u, ucoef, res;"
-  "TEX v, fragment.texcoord[2], texture[2], %s;"
-  "MAD result.color, v, vcoef, res;"
+  "TEMP res;"
+  "MAD res.rgb, yuv.rrrr, ycoef, offsets;"
+  "MAD res.rgb, yuv.gggg, ucoef, res;"
+  "MAD result.color.rgb, yuv.bbbb, vcoef, res;"
   "END";
 
 static const char *yuv_pow_prog_template =
-  "!!ARBfp1.0\n"
-  "OPTION ARB_precision_hint_fastest;"
   "PARAM ycoef = {%.4f, %.4f, %.4f};"
   "PARAM ucoef = {%.4f, %.4f, %.4f};"
   "PARAM vcoef = {%.4f, %.4f, %.4f};"
   "PARAM offsets = {%.4f, %.4f, %.4f};"
   "PARAM gamma = {%.4f, %.4f, %.4f};"
-  "TEMP res, y, u, v;"
-  "TEX y, fragment.texcoord[0], texture[0], %s;"
-  "MAD res, y, ycoef, offsets;"
-  "TEX u, fragment.texcoord[1], texture[1], %s;"
-  "MAD res, u, ucoef, res;"
-  "TEX v, fragment.texcoord[2], texture[2], %s;"
-  "MAD_SAT res, v, vcoef, res;"
+  "TEMP res;"
+  "MAD res.rgb, yuv.rrrr, ycoef, offsets;"
+  "MAD res.rgb, yuv.gggg, ucoef, res;"
+  "MAD_SAT res.rgb, yuv.bbbb, vcoef, res;"
   "POW result.color.r, res.r, gamma.r;"
   "POW result.color.g, res.g, gamma.g;"
   "POW result.color.b, res.b, gamma.b;"
   "END";
 
 static const char *yuv_lookup_prog_template =
-  "!!ARBfp1.0\n"
-  "OPTION ARB_precision_hint_fastest;"
   "PARAM ycoef = {%.4f, %.4f, %.4f, 0};"
   "PARAM ucoef = {%.4f, %.4f, %.4f, 0};"
   "PARAM vcoef = {%.4f, %.4f, %.4f, 0};"
   "PARAM offsets = {%.4f, %.4f, %.4f, 0.125};"
-  "PARAM gamma = {%.4f, %.4f, %.4f};"
-  "TEMP res, y, u, v;"
-  "TEX y, fragment.texcoord[0], texture[0], %s;"
-  "MAD res, y, ycoef, offsets;"
-  "TEX u, fragment.texcoord[1], texture[1], %s;"
-  "MAD res, u, ucoef, res;"
-  "TEX v, fragment.texcoord[2], texture[2], %s;"
-  "MAD res, v, vcoef, res;"
-  "TEX result.color.r, res.raaa, texture[3], 2D;"
+  "TEMP res;"
+  "MAD res, yuv.rrrr, ycoef, offsets;"
+  "MAD res.rgb, yuv.gggg, ucoef, res;"
+  "MAD res.rgb, yuv.bbbb, vcoef, res;"
+  "TEX result.color.r, res.raaa, texture[%c], 2D;"
   "ADD res.a, res.a, 0.25;"
-  "TEX result.color.g, res.gaaa, texture[3], 2D;"
+  "TEX result.color.g, res.gaaa, texture[%c], 2D;"
   "ADD res.a, res.a, 0.25;"
-  "TEX result.color.b, res.baaa, texture[3], 2D;"
+  "TEX result.color.b, res.baaa, texture[%c], 2D;"
   "END";
+
+static void create_scaler_textures(int scaler, int *texu, char *texs) {
+  switch (scaler) {
+    case YUV_SCALER_BILIN:
+      break;
+    default:
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown scaler type %i\n", scaler);
+  }
+}
+
+static void gen_gamma_map(unsigned char *map, int size, float gamma);
+
+//! resolution of texture for gamma lookup table
+#define LOOKUP_RES 512
+static void create_conv_textures(int conv, int *texu, char *texs,
+              int brightness, int contrast, int uvcos, int uvsin,
+              int rgamma, int ggamma, int bgamma) {
+  unsigned char *lookup_data = NULL;
+  switch (conv) {
+    case YUV_CONVERSION_FRAGMENT:
+    case YUV_CONVERSION_FRAGMENT_POW:
+     break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP:
+      texs[0] = (*texu)++;
+      ActiveTexture(GL_TEXTURE0 + texs[0]);
+      lookup_data = malloc(4 * LOOKUP_RES);
+      gen_gamma_map(lookup_data, LOOKUP_RES, rgamma);
+      gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, ggamma);
+      gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, bgamma);
+      glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LINEAR,
+                       LOOKUP_RES, 4, 0);
+      glUploadTex(GL_TEXTURE_2D, GL_LUMINANCE, GL_UNSIGNED_BYTE, lookup_data,
+                  LOOKUP_RES, 0, 0, LOOKUP_RES, 4, 0);
+      ActiveTexture(GL_TEXTURE0);
+      texs[0] += '0';
+      break;
+    default:
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", conv);
+  }
+  if (lookup_data)
+    free(lookup_data);
+}
+
+static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
+                    char in_tex, char out_comp, int rect, int texw, int texh) {
+  switch (scaler) {
+    case YUV_SCALER_BILIN:
+      snprintf(*prog_pos, *remain, bilin_filt_template, out_comp, in_tex,
+                 in_tex, rect ? "RECT" : "2D");
+      break;
+  }
+  *remain -= strlen(*prog_pos);
+  *prog_pos += strlen(*prog_pos);
+}
 
 /**
  * \brief setup a fragment program that will do YUV->RGB conversion
@@ -677,37 +717,48 @@ static const char *yuv_lookup_prog_template =
  */
 static void glSetupYUVFragprog(float brightness, float contrast,
                         float uvcos, float uvsin, float rgamma,
-                        float ggamma, float bgamma, int type, int rect) {
-  char yuv_prog[1000];
-  const char *prog_template = yuv_prog_template;
-  char *tex_type = rect ? "RECT" : "2D";
-  int lookup = 0;
+                        float ggamma, float bgamma, int type, int rect,
+                        int texw, int texh) {
+  char yuv_prog[4000] =
+    "!!ARBfp1.0\n"
+    "OPTION ARB_precision_hint_fastest;"
+    // all scaler variables must go here so they aren't defined
+    // multiple times when the same scaler is used more than once
+    "TEMP yuv;";
+  int prog_remain = sizeof(yuv_prog) - strlen(yuv_prog);
+  char *prog_pos = &yuv_prog[strlen(yuv_prog)];
+  int cur_texu = 3;
+  char lum_scale_texs[1];
+  char chrom_scale_texs[1];
+  char conv_texs[1];
   GLint i;
   // this is the conversion matrix, with y, u, v factors
   // for red, green, blue and the constant offsets
   float ry, ru, rv, rc;
   float gy, gu, gv, gc;
   float by, bu, bv, bc;
-  switch (type) {
-    case YUV_CONVERSION_FRAGMENT_POW:
-      prog_template = yuv_pow_prog_template;
-      break;
-    case YUV_CONVERSION_FRAGMENT_LOOKUP:
-      prog_template = yuv_lookup_prog_template;
-      lookup = 1;
-      break;
-  }
-  glGetIntegerv (GL_MAX_TEXTURE_UNITS, &i);
-  if (i < 3)
+  create_scaler_textures(YUV_LUM_SCALER(type), &cur_texu, lum_scale_texs);
+  if (YUV_CHROM_SCALER(type) == YUV_LUM_SCALER(type))
+    memcpy(chrom_scale_texs, lum_scale_texs, sizeof(chrom_scale_texs));
+  else
+    create_scaler_textures(YUV_CHROM_SCALER(type), &cur_texu, chrom_scale_texs);
+  create_conv_textures(YUV_CONVERSION(type), &cur_texu, conv_texs,
+      brightness, contrast, uvcos, uvsin, rgamma, ggamma, bgamma);
+  glGetIntegerv(GL_MAX_TEXTURE_UNITS, &i);
+  if (i < cur_texu)
     mp_msg(MSGT_VO, MSGL_ERR,
-           "[gl] 3 texture units needed for YUV fragment support (found %i)\n", i);
-  if (lookup && i < 4)
-    mp_msg(MSGT_VO, MSGL_ERR,
-           "[gl] 4 texture units needed for YUV fragment support with lookup (found %i)\n", i);
+           "[gl] %i texture units needed for this type of YUV fragment support (found %i)\n",
+           cur_texu, i);
   if (!ProgramString) {
     mp_msg(MSGT_VO, MSGL_FATAL, "[gl] ProgramString function missing!\n");
     return;
   }
+  add_scaler(YUV_LUM_SCALER(type), &prog_pos, &prog_remain, lum_scale_texs,
+             '0', 'r', rect, texw, texh);
+  add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
+             '1', 'g', rect, texw / 2, texh / 2);
+  add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
+             '2', 'b', rect, texw / 2, texh / 2);
   ry = 1.164 * contrast;
   gy = 1.164 * contrast;
   by = 1.164 * contrast;
@@ -725,11 +776,26 @@ static void glSetupYUVFragprog(float brightness, float contrast,
   rc += 0.5 - contrast / 2.0;
   gc += 0.5 - contrast / 2.0;
   bc += 0.5 - contrast / 2.0;
-  rgamma = 1.0 / rgamma;
-  ggamma = 1.0 / ggamma;
-  bgamma = 1.0 / bgamma;
-  snprintf(yuv_prog, 1000, prog_template, ry, gy, by, ru, gu, bu, rv, gv, bv,
-           rc, gc, bc, rgamma, bgamma, bgamma, tex_type, tex_type, tex_type);
+  switch (YUV_CONVERSION(type)) {
+    case YUV_CONVERSION_FRAGMENT:
+      snprintf(prog_pos, prog_remain, yuv_prog_template,
+               ry, gy, by, ru, gu, bu, rv, gv, bv, rc, gc, bc);
+      break;
+    case YUV_CONVERSION_FRAGMENT_POW:
+      snprintf(prog_pos, prog_remain, yuv_pow_prog_template,
+               ry, gy, by, ru, gu, bu, rv, gv, bv, rc, gc, bc,
+               (float)1.0 / rgamma, (float)1.0 / bgamma, (float)1.0 / bgamma);
+      break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP:
+      snprintf(prog_pos, prog_remain, yuv_lookup_prog_template,
+               ry, gy, by, ru, gu, bu, rv, gv, bv, rc, gc, bc,
+               conv_texs[0], conv_texs[0], conv_texs[0]);
+      break;
+    default:
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(type));
+      break;
+  }
+  mp_msg(MSGT_VO, MSGL_V, "[gl] generated fragment program:\n%s\n", yuv_prog);
   ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
                 strlen(yuv_prog), yuv_prog);
   glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
@@ -757,9 +823,6 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
   }
 }
 
-//! resolution of texture for gamma lookup table
-#define LOOKUP_RES 512
-
 /**
  * \brief setup YUV->RGB conversion
  * \param target texture target for Y, U and V textures (e.g. GL_TEXTURE_2D)
@@ -776,10 +839,11 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma) {
 void glSetupYUVConversion(GLenum target, int type,
                           float brightness, float contrast,
                           float hue, float saturation,
-                          float rgamma, float ggamma, float bgamma) {
+                          float rgamma, float ggamma, float bgamma,
+                          int texw, int texh) {
   float uvcos = saturation * cos(hue);
   float uvsin = saturation * sin(hue);
-  switch (type) {
+  switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       glSetupYUVCombiners(uvcos, uvsin);
       break;
@@ -787,24 +851,15 @@ void glSetupYUVConversion(GLenum target, int type,
       glSetupYUVCombinersATI(uvcos, uvsin);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
-      {
-        unsigned char lookup_data[4 * LOOKUP_RES];
-        gen_gamma_map(lookup_data, LOOKUP_RES, rgamma);
-        gen_gamma_map(&lookup_data[LOOKUP_RES], LOOKUP_RES, ggamma);
-        gen_gamma_map(&lookup_data[2 * LOOKUP_RES], LOOKUP_RES, bgamma);
-        ActiveTexture(GL_TEXTURE3);
-        glCreateClearTex(GL_TEXTURE_2D, GL_LUMINANCE8, GL_LINEAR,
-                         LOOKUP_RES, 4, 0);
-        glUploadTex(GL_TEXTURE_2D, GL_LUMINANCE, GL_UNSIGNED_BYTE, lookup_data,
-                    LOOKUP_RES, 0, 0, LOOKUP_RES, 4, 0);
-        ActiveTexture(GL_TEXTURE0);
-      }
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_FRAGMENT_POW:
       glSetupYUVFragprog(brightness, contrast, uvcos, uvsin,
                          rgamma, ggamma, bgamma, type,
-                         target == GL_TEXTURE_RECTANGLE);
+                         target == GL_TEXTURE_RECTANGLE,
+                         texw, texh);
       break;
+    default:
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(type));
   }
 }
 
@@ -816,7 +871,7 @@ void glSetupYUVConversion(GLenum target, int type,
  */
 void glEnableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
-  switch (type) {
+  switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
       glEnable(target);
@@ -849,7 +904,7 @@ void glEnableYUVConversion(GLenum target, int type) {
  */
 void glDisableYUVConversion(GLenum target, int type) {
   if (type <= 0) return;
-  switch (type) {
+  switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_COMBINERS:
       ActiveTexture(GL_TEXTURE1);
       glDisable(target);
