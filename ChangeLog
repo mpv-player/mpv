@@ -149,6 +149,7 @@ MPlayer (1.0)
     * Smacker demuxer and decoder
     * Flash screen Video decoder
     * Trellis-optimized ADPCM audio encoder
+    * Major improovements to Snow quality and encoding
 
     GUI:
     * skins now reside in a directory named 'skins', not 'Skin'
