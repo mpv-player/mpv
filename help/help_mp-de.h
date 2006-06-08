@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In sync with rev 1.254
+// In sync with r18498
 
 // ========================= MPlayer help ===========================
 
@@ -1469,7 +1469,24 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_AuthRequired "Authentifizierung erforderlich.\n"
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Kein Passwort angegeben, versuche leeres Passwort.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Server liefert Fehler %d: %s\n"
-#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Setze Cache-Größe auf %d KByte.\n"
+#define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Cache-Größe auf %d KByte gesetzt.\n"
+
+// demux_audio.c
+
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audiodemuxer: unbekanntes Format %d.\n"
+
+// demux_demuxers.c
+
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer-Fehler: schlechter Demuxer: weder vd noch ad oder sd.\n"
+
+// demux_nuv.c
+
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "Datei enthält keine Videoblöcke.\n"
+
+// demux_xmms.c
+
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Plugin gefunden: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Plugin geschlossen: %s.\n"
 
 // ========================== LIBMPMENU ===================================
 
@@ -1744,6 +1761,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration \
 "[VO_SVGA] Videomodus besitzt Hardwarebeschleunigung, und put_image könnte \n" \
 "          benutzt werden.\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow "[VO_SVGA] Wenn es für dich funktioniert, würde ich das gerne wissen.\n[VO_SVGA] (sende Log mit `mplayer test.avi -v -v -v -v &> svga.log`). Danke!\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Videomodus hat %d Seite(n).\n"
 #define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Zentriere Bild. Starte bei (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Benutze VIDIX. b=%i h=%i  mb=%i mh=%i\n"
