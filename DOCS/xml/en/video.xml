@@ -796,7 +796,7 @@ The FBdev output takes some additional parameters above the others:
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    specify the framebuffer device to use (<filename>/dev/fb0</filename>)
+    specify the framebuffer device to use (default: <filename>/dev/fb0</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -808,7 +808,7 @@ The FBdev output takes some additional parameters above the others:
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    config file of modes (default <filename>/etc/fb.modes</filename>)
+    config file of modes (default: <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -1053,7 +1053,7 @@ You can use some keys in the AA Window to change rendering options:
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    change subtitle color
+    Change subtitle color
     </para><para>
     where <replaceable>V</replaceable> can be:
     <literal>0</literal> (normal),
@@ -1072,25 +1072,25 @@ important:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    set recommended aa driver (X11, curses, Linux)
+    Set recommended aa driver (X11, curses, Linux).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    use all 256 characters
+    Use all 256 characters.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
-    use eight bit ASCII
+    Use eight bit ASCII.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    prints out all aalib options
+    Prints out all aalib options.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1619,9 +1619,7 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> and some
   others. Please note that this is only
   a temporal inconvenience. The usage syntax is as follows:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable>
-  </screen>
+  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable> </screen>
   </para></listitem>
 </itemizedlist>
 
@@ -1630,9 +1628,7 @@ There's a relatively new nVidia driver out there, it's known to work on Riva
   <emphasis role="bold">plain, pure, text-only console</emphasis> - with no
   framebuffer or X magic whatsoever. For this purpose, we'll have to use the
   <option>cvidix</option> video output, as the following example shows:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable>
-  </screen>
+  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable> </screen>
 </para>
 
 <para>
@@ -1971,12 +1967,12 @@ the drivers and installation instructions at the
 <title>USAGE</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>enable TV output</para></listitem>
+<listitem><para>Enable TV output.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> or <option>-vo dxr2:xv</option></term>
-<listitem><para>enable Overlay output in X11</para></listitem>
+<listitem><para>Enable Overlay output in X11.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2492,7 +2488,6 @@ Section "Device"
         Option          "ConnectedMonitor" "CRT, TV"
         Option          "TVStandard" "PAL-B"
         Option          "TVOutFormat" "Composite"
-
 EndSection
 </programlisting>
 </para>
