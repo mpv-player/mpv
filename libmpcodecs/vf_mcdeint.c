@@ -89,7 +89,7 @@ struct vf_priv_s {
 };
 
 static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int dst_stride[3], int src_stride[3], int width, int height){
-    int x, y, i;
+    int x, y, i, j;
     int out_size;
 
     for(i=0; i<3; i++){
@@ -116,25 +116,35 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                     if(x>0 && y>0 && x+1<w && y+1<h){
                         uint8_t *filp= &p->frame_dec->data[i][x + y*fils];
                         uint8_t *srcp= &src[i][x + y*srcs];
-                        int diff0=
-                               filp[-1-fils] + 2*filp[-fils] + filp[1-fils]
-                              -srcp[-1-srcs] - 2*srcp[-srcs] - srcp[1-srcs];
-                        int diff1=
-                              +filp[-1+fils] + 2*filp[+fils] + filp[1+fils]
-                              -srcp[-1+srcs] - 2*srcp[+srcs] - srcp[1+srcs];
+                        int diff0= filp[-fils] - srcp[-srcs];
+                        int diff1= filp[+fils] - srcp[+srcs];
+                        int diffscore= ABS(srcp[-srcs-1] - srcp[+srcs-1])
+                                      +ABS(srcp[-srcs  ] - srcp[+srcs  ])
+                                      +ABS(srcp[-srcs+1] - srcp[+srcs+1]);
                         int temp= filp[0];
+
+                        for(j=-1; j<=1; j+=2){
+                            int score= ABS(srcp[-srcs+j-1] - srcp[+srcs-j-1])
+                                      +ABS(srcp[-srcs+j  ] - srcp[+srcs-j  ])
+                                      +ABS(srcp[-srcs+j+1] - srcp[+srcs-j+1]) + 1;
+                            if(score < diffscore){
+                                diffscore= score;
+                                diff0= filp[-fils+j] - srcp[-srcs+j];
+                                diff1= filp[+fils-j] - srcp[+srcs-j];
+                            }
+                        }
 #if 0
                         if((diff0 ^ diff1) > 0){
                             int mindiff= ABS(diff0) > ABS(diff1) ? diff1 : diff0;
-                            temp-= (mindiff + 2)>>2;
+                            temp-= mindiff;
                         }
 #elif 1
                         if(diff0 + diff1 > 0)
-                            temp-= (diff0 + diff1 - ABS( ABS(diff0) - ABS(diff1) )/2)/8;
+                            temp-= (diff0 + diff1 - ABS( ABS(diff0) - ABS(diff1) )/2)/2;
                         else
-                            temp-= (diff0 + diff1 + ABS( ABS(diff0) - ABS(diff1) )/2)/8;
+                            temp-= (diff0 + diff1 + ABS( ABS(diff0) - ABS(diff1) )/2)/2;
 #else
-                        temp-= (diff0 + diff1)/8;
+                        temp-= (diff0 + diff1)/2;
 #endif
 #if 1
                         filp[0]=
