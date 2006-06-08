@@ -113,7 +113,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
         for(y=0; y<h; y++){
             if((y ^ p->parity) & 1){
                 for(x=0; x<w; x++){
-                    if(x>0 && y>0 && x+1<w && y+1<h){
+                    if((x-2)+(y-1)*w>=0 && (x+2)+(y+1)*w<w*h){ //FIXME either alloc larger images or optimize this
                         uint8_t *filp= &p->frame_dec->data[i][x + y*fils];
                         uint8_t *srcp= &src[i][x + y*srcs];
                         int diff0= filp[-fils] - srcp[-srcs];
