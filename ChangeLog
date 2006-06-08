@@ -38,6 +38,7 @@ MPlayer (1.0)
     * streaming textures for -vo gl, much faster if supported (use -dr)
     * hardware YUV to RGB conversion for -vo gl and -vo gl2, see yuv suboption
     * support for custom fragment programs for -vo gl (see TOOLS/*.fp)
+    * support for bicubic hardware scaling in -vo gl, see lscale suboption
     * use libvbe from vesautils as VESA video driver
     * several fixes for the GGI video output driver
     * fall back on next video output driver if vo_3dfx failed to initialize
