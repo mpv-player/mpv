@@ -5,9 +5,9 @@
 
 <para>
   Es ist wichtig, einen häufigen Fehler zu berichtigen. Wenn Leute eine
-  Datei mit <filename>.AVI</filename>-Erweiterung sehen denken
+  Datei mit <filename>.AVI</filename>-Erweiterung sehen, denken
   sie sofort, dass es keine MPEG-Datei ist. Das ist nicht wahr. Zumindest
-  nicht vollständig. Im Gegensatz zur verbreiteten Ansicht
+  nicht ganz. Im Gegensatz zur verbreiteten Ansicht
   <emphasis>kann</emphasis> solche eine Datei MPEG1-Video
   enthalten.
 </para>
@@ -62,7 +62,7 @@
 <listitem><simpara>
   VOB: VOB ist das MPEG-Dateiformat bei <emphasis role="bold">DVD</emphasis>s.
   Es ist das gleiche wie MPG mit zusätzlicher Unterstützung für Untertitel
-  oder nicht-MPEG-(AC3)-Audio. Es enthält MPEG2-Video und normalerweise
+  oder nicht-MPEG-(AC3)-Audio. Es enthält MPEG-2-Video und normalerweise
   AC3-Audio, aber auch DTS, MP2 und unkomprimierte LPCMs sind erlaubt.
   <emphasis role="bold">Lies die <link linkend="dvd">DVD-Sektion</link>!</emphasis>
   </simpara></listitem>
@@ -72,8 +72,7 @@
   Titel. Der Container ist kein MPEG-Programmstream, sondern ein geschlossenes,
   von TiVo erzeugtes Format. Mehr Informationen zum TiVo-Streamformat
   findest Du auf der
-  <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
-  der TyStudio-Seite</ulink>.
+  <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">TyStudio-Seite</ulink>.
   </simpara></listitem>
 </itemizedlist>
 
@@ -87,7 +86,7 @@
 
 <para>
   Ein wichtiges Feature von MPGs ist, dass sie ein Feld besitzen, das das
-  Breiten-/Höhenverhältnis des Video-Streams angibt. SVCDs haben zum
+  Breiten-/Höhenverhältnis des Videostreams angibt. SVCDs haben zum
   Beispiel Video mit einer Auflösung von 480x480, und im Header ist dieses
   Feld auf 4:3 gesetzt. Also wird es als 640x480 abgespielt. AVI-Dateien fehlt
   dieses Feld oft, sodass diese während des Encodierens skaliert werden
@@ -114,7 +113,7 @@
 
 <para>
   Es gibt einen Hack, der es AVI-Dateien erlaubt, Ogg Vorbis Audio-Streams zu
-  enthalten, sie aber auch inkompatibel zu Standard-AVIs macht.
+  enthalten, was sie aber auch inkompatibel zu Standard-AVIs macht.
   <application>MPlayer</application>
   unterstützt die Wiedergabe solcher Dateien. Eine Spulfunktion ist auch
   implementiert, jedoch wird diese stark von schlecht konvertierten Dateien mit
@@ -137,9 +136,9 @@
   Es gibt 2 Arten von AVI-Dateien:
 <itemizedlist>
 <listitem><simpara>
-  <emphasis role="bold">Interleaved:</emphasis> Audio- und Video-Inhalt
+  <emphasis role="bold">Interleaved:</emphasis> Audio- und Videoinhalt
   werden paketweise ineinander geschachtelt. Die ist üblich, wird empfohlen
-  und auch meist verwendet. Einige Tools erzeugen interleaved AVIs mit
+  und auch meist gemacht. Einige Tools erzeugen interleaved AVIs mit
   schlechter Synchronisation.
   <application>MPlayer</application> erkennt diese als interleaved, was
   zum Verlust von A/V-Synchronisation führen kann (evtl. erst beim Vor-/Zurückspulen).
@@ -148,7 +147,7 @@
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Non-interleaved:</emphasis> Als erstes kommt der
-  ganze Videostream, dann dann der ganze Audiostream. Dies erfordert viel
+  ganze Videostream, dann der ganze Audiostream. Dies erfordert viel
   Suchen in der Datei, was die Wiedergabe vom Netzwerk oder von CDROM schwierig
   macht.
   </simpara></listitem>
@@ -161,7 +160,7 @@
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">bps-basiert</emphasis>: Diese Methode basiert auf
-  der Bitrate/Samplerate des Video-/Audio-Streams. Diese Methode wird von den
+  der Bitrate/Samplerate des Video-/Audiostreams. Diese Methode wird von den
   meisten Playern verwendet, inklusive
   <ulink url="http://avifile.sf.net">avifile</ulink>
   und <application>Windows Media Player</application>. Dateien mit kaputten
@@ -181,9 +180,9 @@
 <para>
   Jeglicher Audio- und Video-Codec ist erlaubt. Aber bedenke, dass VBR-Audio
   von den meisten Playern nicht gut unstützt wird. Das Dateiformat macht es
-  möglich, VBR-Audio zu verwendenm, aber die meinsten Player erwarten CBR-Audio,
+  möglich, VBR-Audio zu verwenden, aber die meisten Player erwarten CBR-Audio,
   weswegen VBR-Audio nicht funktioniert. VBR ist ungewöhnlich, und
-  Microsofts Spezifikation zu AVI beschreiben nur CBR-Audio. Bedenke auch, dass
+  Microsofts Spezifikation zu AVI beschreibt nur CBR-Audio. Bedenke auch, dass
   die meisten AVI-Encoder/Multiplexer schlechte Dateien mit VBR-Audio erzeugen.
   Es gibt nur zwei Ausnahmen: <application>NanDub</application> und
   <link linkend="mencoder"><application>MEncoder</application></link>.
@@ -194,7 +193,7 @@
 <sect2 id="asf-wmv">
 <title>ASF/WMV-Dateien</title>
 <para>
-  ASF (Active Streaming Format) kommt von Microsoft. Sie habe zwei Arten von
+  ASF (Active Streaming Format) kommt von Microsoft. Sie haben zwei Arten von
   ASF entwickelt, v1.0 und v2.0. v1.0 wird von ihren Media Tools
   (<application>Windows Media Player</application> und
   <application> Windows Media Encoder</application>) verwendet und ist sehr
@@ -217,8 +216,8 @@
   oder <filename>.MOV</filename>.
   Seitdem die MPEG4-Gruppe QuickTime als das empfohlene Dateiformat für
   MPEG4 ausgewählt hat, kommen ihre .MOV-Dateien mit den Endungen
-  <filename>.MPG</filename> oder <filename>.MP4</filename> daher. (
-  Interessanterweise sind bei diesen Dateien die Video- und Audiostreams
+  <filename>.MPG</filename> oder <filename>.MP4</filename> daher.
+  (Interessanterweise sind bei diesen Dateien die Video- und Audiostreams
   richtige MPG- und AAC-Dateien. Mit den den Optionen <option>-dumpvideo</option>
   und <option>-dumpaudio</option> kannst du sie sogar extrahieren.).
 </para>
@@ -298,7 +297,7 @@
   <application>MPlayer</application>
   alle decodiert (und diese auch mit <application>MEncoder</application> zu
   MPEG4 (DivX)/etc!) <emphasis role="bold">encodiert</emphasis>).
-  Spulen (seeking) funktioniert.
+  Spulen funktioniert.
 </para>
 </sect2>
 
@@ -381,7 +380,7 @@ Die Nur-Audio-Version von NSV hat die Erweiterung <filename>.nsa</filename>.
 Beachte bitte, dass die meisten Dateien von der
 <ulink url="http://www.winamp.com">Winamp-Seite</ulink> VLB-Audio verwenden, welches
 noch nicht decodiert werden kann. Darüber hinaus benötigen Streams von dieser Seite
-einen extra Layer zum Extrahieren der Pakete, der immer noch aud seine Implementierung
+einen extra Layer zum Extrahieren der Pakete, der immer noch auf seine Implementierung
 wartet (diese Dateien sind ohnehin nicht abspielbar, weil sie VLB-Audio verwenden).
 </para>
 </sect2>
@@ -401,7 +400,7 @@ Lies mehr dazu auf der <ulink url="http://www.matroska.org/">offiziellen Site</u
 <para>
 NUT ist das von <application>MPlayer</application>- und
 <application>FFmpeg</application>-Leuten entwickelte Containerformat.
-Beide Projekts unterstützen es.
+Beide Projekte unterstützen es.
 Lies mehr dazu auf der <ulink url="http://www.nut.hu/">offiziellen Site</ulink>.
 </para>
 </sect2>
@@ -458,9 +457,9 @@ Lies mehr dazu auf der <ulink url="http://www.nut.hu/">offiziellen Site</ulink>.
 
 <para>
   <application>MPlayer</application> ist ein <emphasis role="bold">Movie</emphasis>-
-  (Film)und kein <emphasis role="bold">Media</emphasis>-Player.
+  und kein <emphasis role="bold">Media</emphasis>-Player.
   Er kann auch einige Audioformate wiedergeben (diese sind in der unteren
-  Sektion beschrieben). Dies ist jedoch nicht die empfohlene Verwendung in
+  Sektion beschrieben). Dies ist jedoch nicht die empfohlene Verwendung von
   <application>MPlayer</application>, du solltest besser
   <ulink url="http://www.xmms.org">XMMS</ulink> verwenden.
 </para>
@@ -472,7 +471,7 @@ Lies mehr dazu auf der <ulink url="http://www.nut.hu/">offiziellen Site</ulink>.
   <application>MPlayer</application> fälschlicherweise als MPEGs erkennt und
   dementsprechend falsch oder gar nicht wiedergibt. Dies kann nicht gelöst
   werden, ohne die Unterstützung für einige kaputte MPEG-Dateien aufzugeben
-  und wird desshalb bis auf weiteres so bleiben. Die Option
+  und wird deshalb bis auf weiteres so bleiben. Die Option
   <option>-demuxer</option>, welche in der Man Page beschrieben wird, könnte
   dir in diesen Fällen helfen.
 </para>
