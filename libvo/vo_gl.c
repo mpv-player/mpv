@@ -172,12 +172,7 @@ static void update_yuvconv(void) {
       char *prog = calloc(1, MAX_CUSTOM_PROG_SIZE + 1);
       fread(prog, 1, MAX_CUSTOM_PROG_SIZE, f);
       fclose(f);
-      ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
-                   strlen(prog), prog);
-      glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
-      if (i != -1)
-        mp_msg(MSGT_VO, MSGL_ERR,
-          "[gl] Error in custom program at pos %i (%.20s)\n", i, &prog[i]);
+      loadGPUProgram(GL_FRAGMENT_PROGRAM, prog);
       free(prog);
     }
     ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 0,

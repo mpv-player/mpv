@@ -51,6 +51,7 @@ void (APIENTRY *GenPrograms)(GLsizei, GLuint *);
 void (APIENTRY *DeletePrograms)(GLsizei, const GLuint *);
 void (APIENTRY *BindProgram)(GLenum, GLuint);
 void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
+void (APIENTRY *GetProgramiv)(GLenum, GLenum, GLint *);
 void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                        GLfloat, GLfloat);
 int (APIENTRY *SwapInterval)(int);
@@ -278,6 +279,7 @@ static const extfunc_desc_t extfuncs[] = {
   {(void **)&DeletePrograms, "_program", {"glDeletePrograms", "glDeleteProgramsARB", "glDeleteProgramsNV", NULL}},
   {(void **)&BindProgram, "_program", {"glBindProgram", "glBindProgramARB", "glBindProgramNV", NULL}},
   {(void **)&ProgramString, "_program", {"glProgramString", "glProgramStringARB", "glProgramStringNV", NULL}},
+  {(void **)&GetProgramiv, "_program", {"glGetProgramiv", "glGetProgramivARB", "glGetProgramivNV", NULL}},
   {(void **)&ProgramEnvParameter4f, "_program", {"glProgramEnvParameter4f", "glProgramEnvParameter4fARB", "glProgramEnvParameter4fNV", NULL}},
   {(void **)&SwapInterval, "_swap_control", {"glXSwapInterval", "glXSwapIntervalEXT", "glXSwapIntervalSGI", "wglSwapInterval", "wglSwapIntervalEXT", "wglSwapIntervalSGI", NULL}},
   {(void **)&TexImage3D, NULL, {"glTexImage3D", NULL}},
@@ -792,6 +794,56 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
   *prog_pos += strlen(*prog_pos);
 }
 
+static const struct {
+  char *name;
+  GLenum cur;
+  GLenum max;
+} progstats[] = {
+  {"instructions", 0x88A0, 0x88A1},
+  {"native instructions", 0x88A2, 0x88A3},
+  {"temporaries", 0x88A4, 0x88A5},
+  {"native temporaries", 0x88A6, 0x88A7},
+  {"parameters", 0x88A8, 0x88A9},
+  {"native parameters", 0x88AA, 0x88AB},
+  {"attribs", 0x88AC, 0x88AD},
+  {"native attribs", 0x88AE, 0x88AF},
+  {"ALU instructions", 0x8805, 0x880B},
+  {"TEX instructions", 0x8806, 0x880C},
+  {"TEX indirections", 0x8807, 0x880D},
+  {"native ALU instructions", 0x8808, 0x880E},
+  {"native TEX instructions", 0x8809, 0x880F},
+  {"native TEX indirections", 0x880A, 0x8810},
+  {NULL, 0, 0}
+};
+
+int loadGPUProgram(GLenum target, char *prog) {
+  int i;
+  GLint cur = 0, max = 0, err = 0;
+  if (!ProgramString) {
+    mp_msg(MSGT_VO, MSGL_ERR, "[gl] Missing GPU program function\n");
+    return 0;
+  }
+  ProgramString(target, GL_PROGRAM_FORMAT_ASCII, strlen(prog), prog);
+  glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &err);
+  if (err != -1) {
+    mp_msg(MSGT_VO, MSGL_ERR,
+      "[gl] Error compiling fragment program, make sure your card supports\n"
+      "[gl]   GL_ARB_fragment_program (use glxinfo to check).\n"
+      "[gl]   Error message:\n  %s at %.10s\n",
+      glGetString(GL_PROGRAM_ERROR_STRING), &prog[err]);
+    return 0;
+  }
+  if (!GetProgramiv || !mp_msg_test(MSGT_VO, MSGL_V))
+    return 1;
+  mp_msg(MSGT_VO, MSGL_V, "[gl] Program statistics:\n");
+  for (i = 0; progstats[i].name; i++) {
+    GetProgramiv(target, progstats[i].cur, &cur);
+    GetProgramiv(target, progstats[i].max, &max);
+    mp_msg(MSGT_VO, MSGL_V, "[gl]   %s: %i/%i\n", progstats[i].name, cur, max);
+  }
+  return 1;
+}
+
 /**
  * \brief setup a fragment program that will do YUV->RGB conversion
  * \param brightness brightness adjustment offset
@@ -882,13 +934,7 @@ static void glSetupYUVFragprog(float brightness, float contrast,
       break;
   }
   mp_msg(MSGT_VO, MSGL_V, "[gl] generated fragment program:\n%s\n", yuv_prog);
-  ProgramString(GL_FRAGMENT_PROGRAM, GL_PROGRAM_FORMAT_ASCII,
-                strlen(yuv_prog), yuv_prog);
-  glGetIntegerv(GL_PROGRAM_ERROR_POSITION, &i);
-  if (i != -1)
-    mp_msg(MSGT_VO, MSGL_ERR,
-      "[gl] Error compiling fragment program, make sure your card supports\n"
-      "GL_ARB_fragment_program (use glxinfo to check).%.10s\n", &yuv_prog[i]);
+  loadGPUProgram(GL_FRAGMENT_PROGRAM, yuv_prog);
 }
 
 /**

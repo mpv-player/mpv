@@ -189,6 +189,9 @@
 #ifndef GL_PROGRAM_ERROR_POSITION
 #define GL_PROGRAM_ERROR_POSITION 0x864B
 #endif
+#ifndef GL_PROGRAM_ERROR_STRING
+#define GL_PROGRAM_ERROR_STRING 0x8874
+#endif
 /** \} */ // end of glextdefines group
 
 void glAdjustAlignment(int stride);
@@ -208,6 +211,7 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
 void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
                GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
                int sx, int sy, int rect_tex, int is_yv12, int flip);
+int loadGPUProgram(GLenum target, char *prog);
 
 /** \addtogroup glconversion
   * \{ */
