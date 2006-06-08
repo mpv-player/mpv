@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with revision 1.16 $ -->
+<!-- in sync with r18600 -->
 <appendix id="bugreports">
 <title>Wie Fehler (Bugs) berichtet werden</title>
 <para>
@@ -41,7 +41,7 @@ werden dir zur Seite stehen, wenn du Fragen hast.
 </para>
 </sect1>
 <sect1 id="bugreports_regression_test">
-<title>Wie Regressionstests mit CVS durchgeführt werden</title>
+<title>Wie Regressionstests mit Subversion durchgeführt werden</title>
 <para>
 Ein Problem, das manchmal auftreten kann ist "es hat vorher funktioniert, jetzt nicht
 mehr...".
@@ -49,18 +49,18 @@ Hier ist eine Schritt-für-Schritt-Prozedur, um herauszufinden, wann das Problem
 aufgetreten ist. Dies ist <emphasis role="bold">nicht</emphasis> für gelegentliche Benutzer.
 </para>
 <para>
-Zuerst musst du dir MPlayers Sourcenverzeichnis aus dem CVS besorgen.
+Zuerst musst du dir MPlayers Sourcenverzeichnis aus dem Subversion-Repository besorgen.
 Eine Anleitung hierzu kann unten auf
 <ulink url="http://www.mplayerhq.hu/dload.html">dieser Seite</ulink>
 gefunden werden.
 </para>
 <para>
-Du wirst dann im main/-Verzeichnis ein Abbild des CVS-Baums auf der Client-Seite
+Du wirst dann im mplayer/-Verzeichnis ein Abbild des Subversion-Baums auf der Client-Seite
 haben.
 Führe jetzt ein Update für dieses Abbild durch auf das Datum, das du möchtest:
 <screen>
-cd main/
-cvs update -PAd -D "2004-08-23"
+cd mplayer/
+svn update -r {"2004-08-23"}
 </screen>
 Das Datumsformat ist YYYY-MM-DD HH:MM:SS.
 Die Benutzung des Datumsformats stellt sicher, dass du in der Lage sein wirst,
@@ -94,10 +94,10 @@ gegenwärtigen wieder angekommen bist.)
 </para>
 <para>
 Wenn du den Tag gefunden hast, an dem das Problem auftrat, fahre mit der Suche mit
-dem mplayer-cvslog-Archiv (sortiert nach Datum) und einem genaueren cvs update,
+dem mplayer-cvslog-Archiv (sortiert nach Datum) und einem genaueren svn update,
 welches Stunde, Minute und Sekunde beinhaltet, fort:
 <screen>
-cvs update -PAd -D "2004-08-23 15:17:25"
+svn update -r {"2004-08-23 15:17:25"}
 </screen>
 Dies wird dir erlauben, den genauen verursachenden Patch leicht zu finden.
 </para>
@@ -116,12 +116,12 @@ zu offenbaren, wo der Fehler ist :-).
 <sect1 id="bugreports_report">
 <title>Wie Fehler berichtet werden</title>
 <para>
-Probiere vor allem zu allererst die letzte CVS-Version von <application>MPlayer</application>,
+Probiere vor allem zu allererst die letzte Subversion-Version von <application>MPlayer</application>,
 da dein Problem dort möglicherweise schon behoben ist. Die Entwicklung geht extrem schnell
 voran, die meisten Probleme in offiziellen Versionen werden innerhalb von Tagen oder sogar
 Stunden den Entwicklern mitgeteilt. Benutze daher bitte <emphasis role="bold">nur
-CVS</emphasis> beim Berichten von Fehlern. Dies gilt auch für Binärpakete von
-<application>MPlayer</application>. CVS-Anweisungen findest du am unteren Ende <ulink
+Subversion</emphasis> beim Berichten von Fehlern. Dies gilt auch für Binärpakete von
+<application>MPlayer</application>. Subversion-Anweisungen findest du am unteren Ende <ulink
 url="http://www.mplayerhq.hu/dload.html">dieser Seite</ulink> oder in der README.
 Wenn dies nicht hilft, ziehe die Liste <link linkend="bugs">bekannter Fehler</link> und den
 Rest der Dokumentation zurate. Wenn dein Problem nicht bekannt ist oder durch unsere
@@ -343,7 +343,7 @@ angemessen zu untersuchen. Du kannst die Ausgabe folgendermaßen in eine Datei au
 
 <para>
 Wenn dein Problem speziell mit einer oder mehreren Dateien zu tun hat, lade diese bitte hoch nach:
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>

@@ -13,7 +13,7 @@
 </para>
 
 <para>
-  Gebe den Befehl <command>cat /proc/mtrr</command> ein:
+  Gib den Befehl <command>cat /proc/mtrr</command> ein:
 <screen>
 <prompt>--($:~)--</prompt> cat /proc/mtrr
 reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9

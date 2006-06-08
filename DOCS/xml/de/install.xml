@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
+<!-- in sync with r17975 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -107,7 +108,7 @@ role="bold">2.11.x</emphasis>.
   Audiowiedergabe von OGG Vorbis.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - optional, benötigt für die Wiedergabe von RTSP/RTP-Streams.
   </para></listitem>
 <listitem><para>
@@ -177,7 +178,7 @@ class="library">libavcodec</systemitem></emphasis>:
   <emphasis role="bold">Win32-Codecs</emphasis>: Wenn du vorhast,
   <application>MPlayer</application> auf der x86-Architektur zu benutzen,
   wirst du sie vermutlich brauchen. Lade ein Codecpaket von unserer
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">Codec-Seite
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">Codec-Seite
   </ulink> herunter und packe es in <filename
   class="directory">/usr/local/lib/codecs</filename>, bevor du 
   <application>MPlayer</application> compilierst, sonst wird keine
@@ -573,16 +574,16 @@ der Kommandozeile nicht verwenden.
 <para>
 Da <application>MPlayer</application> kein Skin enthält, musst du eins
 herunterladen, um die GUI benutzen zu können. Siehe <ulink
-url="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</ulink>.
+url="http://www.mplayerhq.hu/dload.html">Download-Seite</ulink>.
 Sie sollten in das normale systemweite Verzeichnis
-(<filename class="directory">$PREFIX/share/mplayer/Skin</filename>) oder nach
- <filename class="directory">$HOME/.mplayer/Skin</filename> installiert werden.
+(<filename class="directory">$PREFIX/share/mplayer/skins</filename>) oder nach
+ <filename class="directory">$HOME/.mplayer/skins</filename> installiert werden.
 <application>MPlayer</application> schaut nach Voreinstellung in diesen Verzeichnissen
 nach einem Verzeichnis mit dem Namen <filename class="directory">default</filename>,
  du kannst aber die Option <option>-skin <replaceable>newskin</replaceable></option>
  oder die Konfigurationsdateianweisung
  <literal>skin=newskin</literal> nutzen, um ein Skin im Verzeichnis
- <filename class="directory">*/Skin/newskin</filename> zu benutzen.
+ <filename class="directory">*/skins/newskin</filename> zu benutzen.
 </para>
 </sect1>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with rev. 1.16 $ -->
+<!-- in sync with r18606 -->
 <appendix id="mailinglists">
 <title>Mailing-Listen</title>
 <para>
@@ -81,14 +81,14 @@ möglichen Fehler/Problem im Commit bemerkt hast).
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
 </para>
 <para>Diese Liste behandelt die Dokumentation von <application>MPlayer</application>
-und Homepage-Diskussionen. Auch CVS-Logs, die Dokumentation und Homepage betreffen,
+und Homepage-Diskussionen. Auch Subversion-Logs, die Dokumentation und Homepage betreffen,
 werden hierhin geschickt.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>Diese Liste behandelt die Übersetzung der Dokumentation von <application>MPlayer</application>
-und der Homepage. Auch CVS-Logs, die die Übersetzung von Dokumentation und Homepage betreffen,
+und der Homepage. Auch Subversion-Logs, die die Übersetzung von Dokumentation und Homepage betreffen,
 werden hierhin geschickt.
 </para></listitem>
 <listitem><para>
@@ -118,7 +118,7 @@ werden hierhin geschickt.
 <para>Liste für die Diskussionen über die OS/2-Portierung von <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-qt-codecs-porting"><application>MPlayer</application>-qt-codecs-porting</ulink> (INAKTIV)
+<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INAKTIV)
 </para>
 <para>Liste für die Diskussionen über QuickTime-Codec-Unterstützung.
 </para></listitem>

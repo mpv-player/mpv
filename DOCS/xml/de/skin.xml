@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- in sync with r18600 -->
 <appendix id="skin">
-<title><application>MPlayer</application> Skinformat</title>
+<title><application>MPlayer</application>s Skinformat</title>
 
 <sect1 id="skin-overview">
 <title>Überblick</title>
 <para>
   Es hat nicht wirklich etwas mit dem Skinformat zu tun, aber du solltest
-  wissen, dass <application>MPlayer</application> <emphasis role="bold">keinen</emphasis>
-  eingebauten Skin besitzt, also <emphasis role="bold">muß zumindest ein Skin
+  wissen, dass <application>MPlayer</application> <emphasis role="bold">kein</emphasis>
+  eingebautes Skin besitzt, also <emphasis role="bold">muss zumindest ein Skin
   installiert sein, damit das GUI verwendet werden kann.</emphasis>
 </para>
 
@@ -37,7 +37,7 @@
 </para>
 
 <para>
-  Jeder Skin wird in sein eigenes Verzeichnis unterhalb einem der oben
+  Jedes Skin wird in sein eigenes Verzeichnis unterhalb einem der oben
   aufgeführten Verzeichnisse installiert, zum Beispiel:
 <screen>$(PREFIX)/share/mplayer/skins/default/</screen>
 </para>
@@ -50,7 +50,7 @@
 </para>
 
 <para>
-  Im Hauptfenster und in der Abspilleiste (siehe unten) kannst du Bilder
+  Im Hauptfenster und in der Abspieleiste (siehe unten) kannst du Bilder
   mit 'Transparenz' verwenden: Mit der Farbe #FF00FF (Magenta) gefüllte Bereiche
   sind beim Betrachten mit <application>MPlayer</application> voll transparent.
   Die bedeutet, dass du sogar Formfenster haben kannst, wenn dein X-Server die
@@ -70,20 +70,20 @@
   Zur Zeit sind vier Fenster zu dekorieren: das
   <link linkend="skin-file-main">Hauptfenster</link>, das
   <link linkend="skin-file-subwindow">Unterfenster</link>, die
-  <link linkend="skin-file-main">Abspielleise</link> und das
+  <link linkend="skin-file-main">Abspielleitse</link> und das
   <link linkend="skin-file-menu">Skin-Menü</link> (das durch einen
   Rechtsklick aktiviert werden kann).
 
 <itemizedlist>
 <listitem><para>
   Das <emphasis role="bold">Hauptfenster</emphasis> und/oder die
-  <emphasis role="bold">Abspielleise</emphasis> befindet sich dort, wo du
+  <emphasis role="bold">Abspielleiste</emphasis> befindet sich dort, wo du
   <application>MPlayer</application> kontrollieren kannst. Der Hintergrund
   des Fensters ist ein Grafik.
   Ins Fenster können (und müssen) diverse Elemente platziert werden:
   <emphasis>Buttons</emphasis>, <emphasis>Potentiometer</emphasis> (Schieberegler)
   und <emphasis>Labels</emphasis>.
-  Für jedes Element, musst du dessen Position und Größe.
+  Für jedes Element musst du dessen Position und Größe angeben.
 </para><para>
   Ein <emphasis role="bold">Button</emphasis> besitzt drei Zustände (gedrückt,
   losgelassen, deaktiviert), deshalb muss seine Grafik vertikal in drei Teile
@@ -92,14 +92,14 @@
 </para><para>
   Ein <emphasis role="bold">Potentiometer</emphasis> (hauptsächlich für
   die Suchleiste und die Lautstärke-/Balance-Regler) kann eine beliebige
-  Anzahl von Phasen by dividing its Grafik
-  into different parts below each other. See
-  <link linkend="skin-hpotmeter">hpotmeter</link> and
-  <link linkend="skin-potmeter">Potentiometer</link> for details.
+  durch die Aufteilung der Grafik in verschiedene untereinander liegende Teile
+  eine beliebige Anzahl von Phasen haben. Siehe
+  <link linkend="skin-hpotmeter">hpotmeter</link> und
+  <link linkend="skin-potmeter">Potentiometer</link> für Details.
 </para><para>
   <emphasis role="bold">Labels</emphasis> sind ein wenig speziell: Die Zeichen,
-  die manzu ihrer Darzustellung benötigt, werden von einer Grafikdatei, und
-  die Zeichen in der Grafik werden durch eine
+  die man zu ihrer Darstellung benötigt, werden von einer Grafikdatei und
+  die Zeichen in der Grafik durch eine
   <link linkend="skin-fonts">Schrift-Beschreibungsdatei</link> festgelegt.
   Letztere ist eine Volltextdatei, welche die x-,y-Position und Größe jedes
   Zeichens in der Grafik beschreibt (die Grafikdatei und ihre
@@ -107,7 +107,7 @@
   Siehe
   <link linkend="skin-dlabel">dlabel</link>
   und
-  <link linkend="skin-slabel">slabel</link> fpr Details.
+  <link linkend="skin-slabel">slabel</link> für Details.
 </para>
 <note>
 <para>
@@ -122,9 +122,9 @@
 </listitem>
 
 <listitem><para>
-  Das <emphasis role="bold">Unterfenster</emphasis> ist dort wo der Film
+  Das <emphasis role="bold">Unterfenster</emphasis> ist dort, wo der Film
   erscheint. Es kann eine festgelegte Grafik anzeigen, wenn kein Film geladen
-  iat (es ist ziemlich langweilig, ein leeres Fenster vor sich zu haben :-))
+  ist (es ist ziemlich langweilig, ein leeres Fenster vor sich zu haben :-))
   <emphasis role="bold">Beachte:</emphasis> Transparenz ist hier
   <emphasis role="bold">nicht erlaubt</emphasis>.
 </para></listitem>
@@ -134,13 +134,13 @@
   Weg, <application>MPlayer</application> mittels der Menüeinträge zu
   kontrollieren. Zwei Grafiken sind für das Menü erforderlich:
   eine davon ist die Basisgrafik, die den Normalzustand des Menüs darstellt,
-  die andere wird zur Anzeige des gewählten Einträge verwendet.
-  Wenn due das Menü aufklappst, wird die erste Grafik angezeigt. Bewegst du
+  die andere wird zur Anzeige der gewählten Einträge verwendet.
+  Wenn du das Menü aufklappst, wird die erste Grafik angezeigt. Bewegst du
   die Maus über die Menüeinträge, wird der aktuell gewählte Eintrag aus der
   zweiten Grafik über den Menüeintrag unterhalb des Mauszeigers kopiert
-  (die zweite Grafik wird nie als Ganzes angezeigt).
+  (die zweite Grafik wird nie als ganzes angezeigt).
 </para><para>
-  Rin Menüeintrag wird definiert durch seine Position und Größe innerhalb
+  Ein Menüeintrag wird definiert durch seine Position und Größe innerhalb
   der Grafik (sieh nach mehr Details im Abschnitt über das
   <link linkend="skin-file-menu">Skin-Menü</link>).
 </para></listitem>
@@ -160,11 +160,11 @@
 <sect2 id="skin-files">
 <title>Dateien</title>
 <para>
-  Du benötigst folgende Dateien, um einen Skin zu bauen:
+  Du benötigst folgende Dateien, um ein Skin zu bauen:
 <itemizedlist>
 <listitem><para>
   Die Konfigurationsdatei genannt <link linkend="skin-file">skin</link> erzählt
-  <application>MPlayer</application>, wie er unterschiedliche Teile des Skins
+  <application>MPlayer</application>, wie unterschiedliche Teile des Skins
   zusammengefügt werden und was er tun soll, wenn du irgendwo innerhalb des Fenster
   hinklickst.
 </para></listitem>
@@ -173,18 +173,18 @@
 </para></listitem>
 <listitem><para>
   Grafiken für die Elemente im Hauptfenster (einschließlich einer oder mehrerer
-  Schrift-Beschreibungsdateien zum zeichnen der Labels).
+  Schrift-Beschreibungsdateien zum Zeichnen der Labels).
 </para></listitem>
 <listitem><para>
   Die Grafik, die im Unterfenster angezeigt werden soll (optional).
 </para></listitem>
 <listitem><para>
-  Zwei Grafiken für das Skin-Menü (sie werden nur gebraucht, wenn du want
-  ein Menü erzeugst).
+  Zwei Grafiken für das Skin-Menü (sie werden nur gebraucht, wenn du
+  ein Menü erzeugen möchtest).
 </para></listitem>
 </itemizedlist>
-  Mit Ausnahme der skin-Konfigurationsdatei, kannst du die anderen Dateien
-  benenne, wie es dir beliebt (beachte aber, dass Schrift-Beschreibungsdateien
+  Mit Ausnahme der skin-Konfigurationsdatei kannst du die anderen Dateien
+  benennen, wie es dir beliebt (beachte aber, dass Schrift-Beschreibungsdateien
   eine <filename>.fnt</filename>-Erweiterung besitzen müssen).
 </para>
 </sect2>
@@ -195,7 +195,7 @@
 <para>
   Wie oben erwähnt, ist dies die skin-Konfigurationsdatei. Sie ist
   Zeilen-orientiert;
-  Kommentarzeilen beginnen mit einem '<literal>;</literal>' Semikolon-Zeichen
+  Kommentarzeilen beginnen mit einem '<literal>;</literal>' Semikolon
   am Zeilenanfang (es sind nur Leer- und Tabulator-Zeichen vor dem
   '<literal>;</literal>' erlaubt).
 </para>
@@ -204,7 +204,7 @@
   Die Datei ist in Abschnitte unterteilt. Jeder Abschnitt beschreibt den Skin
   für eine Anwendung und besitzt folgende Form:
 <programlisting>
-section = <replaceable>abschnittsname</replaceable>
+section = <replaceable>Abschnittsname</replaceable>
 .
 .
 .
@@ -214,14 +214,14 @@ end
 
 <para>
   Zur Zeit gibt es nur eine Anwendung, somit brauchst du nur einen Abschnitt:
-  sein Name ist <emphasis role="bold">movieplayer</emphasis>.
+  Sein Name ist <emphasis role="bold">movieplayer</emphasis>.
 </para>
 
 <para>
   Innerhalb dieses Abschnitts wird jedes Fenster durch einen Block folgender
   Form beschrieben:
 <programlisting>
-window = <replaceable>fenstername</replaceable>
+window = <replaceable>Fenstername</replaceable>
 .
 .
 .
@@ -230,13 +230,13 @@ end
 </para>
 
 <para>
-  wobei <replaceable>fenstername</replaceable> einer dieser Strings sein
+  wobei <replaceable>Fenstername</replaceable> einer dieser Zeichenketten sein
   kann:
 <itemizedlist>
 <listitem><para><emphasis role="bold">main</emphasis> - für das Hauptfenster</para></listitem>
 <listitem><para><emphasis role="bold">sub</emphasis> - für das Unterfenster</para></listitem>
 <listitem><para><emphasis role="bold">menu</emphasis> - für das Skin-Menü</para></listitem>
-<listitem><para><emphasis role="bold">playbar</emphasis> - Abspielleise</para></listitem>
+<listitem><para><emphasis role="bold">playbar</emphasis> - Abspielleiste</para></listitem>
 </itemizedlist>
 </para>
 
@@ -247,9 +247,9 @@ end
 
 <para>
   Innerhalb des Fensterblocks kannst du jedes Element für das Fenster durch eine
-  Zeile in dieser Form definieren:
-<programlisting>item = parameter</programlisting>
-  Wobei <literal>item</literal> ein String ist, der den Typ des GUI-elements
+  Zeile dieser Form definieren:
+<programlisting>item = Parameter</programlisting>
+  Wobei <literal>item</literal> eine Zeichenkette ist, die den Typ des GUI-Elements
   identifiziert, <literal>parameter</literal> ist ein numerischer oder textueller
   Wert (oder eine Liste Komma-getrennter Werte).
 </para>
@@ -259,19 +259,19 @@ end
 <programlisting>
 section = movieplayer
   window = main
-  ; ... Elemente fürs Hauptfenster ...
+  ; ... Elemente für das Hauptfenster ...
   end
 
   window = sub
-  ; ... Elemente fürs Unterfenster ...
+  ; ... Elemente für das Unterfenster ...
   end
 
   window = menu
-  ; ... Elemente fürs Menü ...
+  ; ... Elemente für das Menü ...
   end
 
   window = playbar
-  ; ... Elemente für die Abspielleise ...
+  ; ... Elemente für die Abspielleiste ...
   end
 end
 </programlisting>
@@ -281,11 +281,11 @@ end
   Der Name einer Grafikdatei muss ohne führende Pfadangaben angegeben werden -
   Grafiken werden im Verzeichnis <filename class="directory">skins</filename>
   gesucht.
-  Du kannst (musst aber nicht) die Erweiterungder Datei spezifizieren.
-  Existiert die Datei nicht, versucht <application>MPlayer</application> die
-  <filename>&lt;dateiname&gt;.&lt;ext&gt;</filename> zu laden, wobwei
+  Du kannst (musst aber nicht) die Erweiterung der Datei spezifizieren.
+  Existiert die Datei nicht, versucht <application>MPlayer</application> die Datei
+  <filename>&lt;Dateiname&gt;.&lt;ext&gt;</filename> zu laden, wobei
   <literal>png</literal> und <literal>PNG</literal> als
-  <filename>&lt;ext&gt;</filename> (Erweiterung) versucht werden
+  <filename>&lt;ext&gt;</filename> (Erweiterung) probiert werden
   (in dieser Reihenfolge). Die erste zutreffende Datei wird verwendet.
 </para>
 
@@ -310,7 +310,7 @@ end
 </informalfigure>
 
 <para>
-  Hier ein Beispiel, um es zu verdeutlichen. Angenommen du hast eine Grafik
+  Hier ein Beispiel, um es zu verdeutlichen. Angenommen, du hast eine Grafik
   mit Namen <filename>main.png</filename>, die für das Hauptfenster nutzt:
   <programlisting>base = main, -1, -1</programlisting>
   <application>MPlayer</application> versucht, die Dateien
@@ -322,11 +322,11 @@ end
 
 
 <sect2 id="skin-file-main">
-<title>Hauptfenster und Abspielleise</title>
+<title>Hauptfenster und Abspielleiste</title>
 <para>
   Unten steht eine Liste von Einträgen, die in den Blöcken
   '<literal>window = main</literal>' ... '<literal>end</literal>',
-  und the '<literal>window = playbar</literal>' ... '<literal>end</literal>'
+  und '<literal>window = playbar</literal>' ... '<literal>end</literal>'
   genutzt werden können.
 </para>
 
@@ -415,8 +415,8 @@ end
   der Größe <literal>width</literal> * <literal>height</literal> an Position
   <literal>X,Y</literal>. Die Grafik kann in unterschiedliche Teile für die
   verschiedenen Phasen des Potentiometers aufgeteilt werden (du kannst zum Beispiel
-  eines für die Lautstärkeregelung haben, das von rot nach grün wechselt während
-  sein Wert sich vom Minimum zum Mmaximum ändert.).
+  eines für die Lautstärkeregelung haben, das von rot nach grün wechselt, während sich
+  sein Wert vom Minimum zum Maximum ändert.).
   <literal>hpotmeter</literal> kann einen Button besitzen, der horizontal gezogen
   werden kann. Die Parameter sind:
     </para>
@@ -426,7 +426,7 @@ end
     <link linkend="skin-button">Buttons</link>)
   </para></listitem>
     <listitem><para><literal>bwidth</literal>, <literal>bheight</literal> - Größe
-    de Buttons
+    des Buttons
   </para></listitem>
    <listitem><para><literal>phases</literal> - die für die verschiedenen Phasen
    zu verwendende Grafik des hpotmeter. Ein spezieller Wert von <literal>NULL</literal>
@@ -450,7 +450,7 @@ end
     <listitem><para><literal>numphases</literal> - Anzahl der Phasen, die in der
     <literal>phases</literal>-Grafik untergebracht sind
   </para></listitem>
-    <listitem><para><literal>default</literal> - Standard Wert fürs hpotmeter
+    <listitem><para><literal>default</literal> - Standardwert für hpotmeter
     (im Bereich <literal>0</literal> bis <literal>100</literal>)
   </para></listitem>
     <listitem><para><literal>X</literal>, <literal>Y</literal> - Position fürs hpotmeter
@@ -524,7 +524,7 @@ end
   Wert <literal>length</literal> vorgegeben (seine Höhe ist die der
   Zeichen).
   Wird der anzuzeigende Text breiter als dieser Wert, wird er gescrollt,
-  andernfalls wird er innerhalb des mittels des Wertes des
+  andernfalls wird er innerhalb des Mittels des Wertes des
   <literal>align</literal>-Parameters festgelegten Zwischenraums ausgerichtet:
   <literal>0</literal> steht für rechts,
   <literal>1</literal> steht für zentriert,
@@ -536,7 +536,7 @@ end
   nicht Teil des Textes sein).
   Das Label wird mittels der über die <literal>fontid</literal> identifizierten
   Schrift angezeigt.
-  Kannst folgende Variablen im Text verwenden:
+  Du kannst folgende Variablen im Text verwenden:
 </para>
 
 <informaltable>
@@ -620,7 +620,7 @@ Mono: <literal>m</literal>, Stereo: <literal>t</literal>)</entry>
 </row>
 <row>
 <entry>$T</entry>
-<entry>Ein dem Stream-Typen entsprechendes Zeichen (Datei: <literal>f</literal>,
+<entry>Ein dem Streamtyp entsprechendes Zeichen (Datei: <literal>f</literal>,
 Video-CD: <literal>v</literal>, DVD: <literal>d</literal>, URL: <literal>u</literal>)</entry>
 </row>
 <row>
@@ -681,7 +681,7 @@ das Zeichen <keycap>e</keycap> enthält)</entry>
 <variablelist>
 <varlistentry>
   <term><literal>
-  <anchor id="skin-sub-base"/>base = image, X, Y, breite, hoehe
+  <anchor id="skin-sub-base"/>base = image, X, Y, Breite, Hoehe
   </literal></term>
   <listitem><para>
   Die im Fenster anzuzeigende Grafik. Das Fenster wird an der angegebenen
@@ -690,9 +690,9 @@ das Zeichen <keycap>e</keycap> enthält)</entry>
   Du kannst <literal>-1</literal> für zentriert und <literal>-2</literal>
   für rechts (<literal>X</literal>) und unten (<literal>Y</literal>) festlegen.
   Das Fenster wird so groß sein wie die Grafik.
-  <literal>width</literal> und <literal>height</literal>
+  <literal>Breite</literal> und <literal>Höhe</literal>
   kennzeichnen die Größe des Fensters; sie sind optional (wenn sie fehlen, hat
-  das Fenster die selbe Größe wie die Grafik).
+  das Fenster dieselbe Größe wie die Grafik).
   </para></listitem>
 </varlistentry>
 
@@ -705,7 +705,7 @@ das Zeichen <keycap>e</keycap> enthält)</entry>
   kleiner ist als das Fenster.
   <literal>R</literal>, <literal>G</literal> und <literal>B</literal>
   spezifizieren die Rot-, Grün- und Blau-Komponenten der Farbe (jede davon ist
-  eine Dzimalzahl von 0 bis 255).
+  eine Dezimalzahl von 0 bis 255).
   </para></listitem>
 </varlistentry>
 </variablelist>
@@ -748,11 +748,11 @@ das Zeichen <keycap>e</keycap> enthält)</entry>
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-menu"/>menu = X, Y, width, height, message
+  <anchor id="skin-menu"/>menu = X, Y, Breite, Höhe, Nachricht
   </literal></term>
   <listitem><para>
   Definiert die Position <literal>X,Y</literal> und die Größe eines Menüeintrags
-  innerhalb der Grafik. <literal>message</literal> ist die Meldung, die erzeugt
+  innerhalb der Grafik. <literal>Nachricht</literal> ist die Meldung, die erzeugt
   werden soll, wenn die Maustaste über dem Eintrag losgelassen wird.
   </para></listitem>
 </varlistentry>
@@ -806,7 +806,7 @@ image = font.png
   Einige Zeichen haben spezielle Bedeutungen, wenn sie von bestimmten
   Variablen in <link linkend="skin-dlabel">dlabel</link> zurückgegeben
   werden. Diese Zeichen sind dazu gedacht, als Symbole angezeigt zu werden,
-  sodass Sachen wie ein hübsches DVD-Logo an Stelle des Zeichens
+  so dass Dinge wie ein hübsches DVD-Logo an Stelle des Zeichens
   '<literal>d</literal>' für einen DVD-Stream angezeigt werden können.
 </para>
 <para>
@@ -865,7 +865,7 @@ image = font.png
   Formt einen Schalter zusammen mit <literal>evPlaySwitchToPause</literal>.
   Sie können dazu benutzt werden, einen gebräuchlichen Play/Pause-Button
   zu bekommen. Beide Meldungen sollten den Buttons zugewiesen werden, die
-  an genau der selben Position inerhalb des Fensters dargestellt werden.
+  an genau derselben Position innerhalb des Fensters dargestellt werden.
   Diese Meldung pausiert das Abspielen und die Grafik für den
   <literal>evPlaySwitchToPause</literal>-Button wird gezeigt
   (um anzudeuten, dass der Button zum Fortsetzen des Abspielens gedrückt
@@ -1034,14 +1034,14 @@ image = font.png
 <varlistentry>
   <term><emphasis role="bold">evMute</emphasis></term>
   <listitem><para>
-   Schalte den Sound an/aus (Mute/Unmute).
+   Schalte den Ton an/aus.
   </para></listitem>
 </varlistentry>
 
 <varlistentry>
   <term><emphasis role="bold">evSetBalance</emphasis></term>
   <listitem><para>
-  Setze die Balance(kann von einem Potentiometer genutzt werden;
+  Setze die Balance (kann von einem Potentiometer genutzt werden;
   mit dem relativen Wert (0-100%) des Potentiometers).
   </para></listitem>
 </varlistentry>
@@ -1103,7 +1103,7 @@ image = font.png
 <varlistentry>
   <term><emphasis role="bold">evLoadPlay</emphasis></term>
   <listitem><para>
-  Macht das selbe wie <literal>evLoad</literal>, es startet jedoch
+  Macht dasselbe wie <literal>evLoad</literal>, es startet jedoch
   das Abspielen nach dem Laden der Datei automatisch.
   </para></listitem>
 </varlistentry>
@@ -1182,20 +1182,20 @@ image = font.png
 </sect1>
 
 <sect1 id="skin-quality">
-<title>Herstellung von Qualitätsskins</title>
+<title>Erstellen von qualitativen Skins</title>
 
 <para>
   Jetzt hast du dich über das Herstellen eines Skins für das
   <application>MPlayer</application>-GUI informiert, in
   <application>Gimp</application> dein bestes gegeben und willst
   deinen Skin an uns schicken?
-  Lies weiter dann findest du einige Vorgaben häufige Irrtümer zu
-  vermeiden und produiere einen hochwertigen Skin.
+  Lies weiter, dann findest du einige Vorgaben dafür, wie häufige Irrtümer
+  vermieden und hochqualitative Skins erstellt werden können.
 </para>
 
 <para>
-  Wir wollen dass Skins, die wir in unser Repository eingefügt werden,
-  zu bestimmten Qualitätsstandars konform sind. Es gibt auch vieles, das
+  Wir wollen, dass Skins, die wir in unser Repository eingefügt werden,
+  bestimmten Qualitätsstandards entsprechen. Es gibt auch vieles, das
   du tun kannst, um uns das Leben leichter zu machen.
 </para>
 
@@ -1207,10 +1207,10 @@ image = font.png
 <itemizedlist>
 <listitem><para>
   Jeder Skin sollte mit einer
-  <filename>README</filename>-Datei ankommen, die Iformationen über
-  dich, den Autor, Copyright- und Licenzanmerkungen und alles, was du
+  <filename>README</filename>-Datei kommen, die Informationen über
+  dich, den Autor, Copyright- und Lizenzanmerkungen und alles, was du
   sonst noch anfügen willst, enthält.
-  Willst du einen Changelog, ist diese Datei ein geeigneter Ort dafür.
+  Willst du ein Changelog, ist diese Datei ein geeigneter Ort dafür.
 </para></listitem>
 
 <listitem><para>
