@@ -27,13 +27,13 @@ nicht so effizient sind wie die von <application>MPlayer</application>.
 Die Benutzung von <application>MPlayer</application> mit einem ordentlich
 geschriebenen Audiotreiber wird niemals zu mit Audio im Zusammenhang
 stehender A/V-Desynchronisation führen, außer bei sehr schlecht erstellten
-Dateien (siehe man page für Umgehungsmöglichkeiten).
+Dateien (siehe Manpage für Umgehungsmöglichkeiten).
 </para>
 
 <para>
 Sollte es der Fall sein, dass du einen schlechten Audiotreiber hast, probiere
 die Option <option>-autosync</option>, diese sollte deine Probleme lösen.
-Siehe man page für detaillierte Informationen.
+Siehe Manpage für detaillierte Informationen.
 </para>
 </sect1>
 

@@ -101,7 +101,7 @@ echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt;| /proc
   darüber hinaus die Anpassung von Helligkeit/Kontrast/Sättigung etc
   (es sei denn, du benutzt den alten und langsamen DirectShow DivX-Codec,
   welcher diese Anpassungen unabhängig vom Videoausgabetreiber unterstützt).
-  Schau in der Man Page nach.
+  Schau in der Manpage nach.
 </para>
 
 <para>
@@ -835,7 +835,7 @@ EndSection
 
 <para>
   Du kannst das OSD und Untertitel mit dem <option>expand</option>-Filter
-  aktivieren. Die Man Page enthält die exakten Parameter.
+  aktivieren. Die Manpage enthält die exakten Parameter.
 </para>
 </sect2>
 
@@ -2094,7 +2094,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen>
 
 <para>
-  Lies dir in der Man Page eine Liste von Optionen durch, die du an das DVB-Input-Modul
+  Lies dir in der Manpage eine Liste von Optionen durch, die du an das DVB-Input-Modul
   übergeben kannst.
 </para>
 
@@ -2157,7 +2157,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   Lage sein, akzeptable Resultate zu bekommen.
 </para>
 
-<para>Lies bitte in der Man Page über die vorhandenen Optionen.</para>
+<para>Lies bitte in der Manpage über die vorhandenen Optionen.</para>
 </sect2>
 
 <sect2 id="dxr3">
@@ -2277,7 +2277,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   <systemitem class="library">libavcodec</systemitem> (lavc) oder
   <systemitem class="library">libfame</systemitem> (fame) verwenden.
   Momentan ist lavc sowohl schneller als auch qualitativ besser,
-  sodass die Empfehlung lavc lautet. Schau in der Man Page nach.
+  sodass die Empfehlung lavc lautet. Schau in der Manpage nach.
   Dort stehen weitere Informationen zu <option>-vf lavc/fame</option>.
   Die Benutzung von lavc wird empfohlen. Momentan gibt es keine
   Möglichkeit, die Anzahl der Bilder pro Sekunde des em8300 zu setzen,
@@ -2352,7 +2352,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 <para>
   Die Ausgabe kann mit diversen Optionen gesteuert werden. Eine
-  vollständige Liste findest du in der Man Page. Eine kurze Auflistung gibt
+  vollständige Liste findest du in der Manpage. Eine kurze Auflistung gibt
   dir auch
   <screen>mplayer -zrhelp</screen>
 </para>

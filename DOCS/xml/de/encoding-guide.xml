@@ -1186,7 +1186,7 @@
 
   Die meisten Filter nehmen mehrere numerische, kommagetrennte
   Optionen entgegen, jedoch variiert die Syntax der Optionen von
-  Filter zu Filter, also lies bitte die Man Page für Details
+  Filter zu Filter, also lies bitte die Manpage für Details
   zu den Filtern, die du verwenden willst.
 </para>
 
@@ -2993,7 +2993,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   die Qualität ist. Die Optionen
   <option>cmp=3:subcmp=3:mbcmp=3</option> wählen eine Vergleichsfunktion,
   die eine höhere Qualität liefert als die Standardeinstellungen.
-  Du darfst mit diesem Parameter rumexperimentieren (ziehe die Man Page
+  Du darfst mit diesem Parameter rumexperimentieren (ziehe die Manpage
   zu möglichen Werten zu Rate) da verschiedene Funktionen abhängig vom
   Quellmaterial einen starken Einfluss auf die Qualität haben. Wenn du zum Beispiel
   meinst, dass <systemitem class="library">libavcodec</systemitem> zu
@@ -3054,8 +3054,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
  Bitte beginne mit der Durchsicht der
  <systemitem class="library">XviD</systemitem>-Sektion von
- <application>MPlayer</application>'s Man Page.
- Diese Sektion ist als Ergänzung zur Man Page zu verstehen.
+ <application>MPlayer</application>s Manpage.
+ Diese Sektion ist als Ergänzung zur Manpage zu verstehen.
 </para>
 <para>
  Die Standardeinstellungen von XviD sind bereits ein guter Kompromiss zwischen
@@ -3601,10 +3601,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Bitte beginne mit der Durchsicht der
   <systemitem class="library">x264</systemitem>-Sektion von
-  <application>MPlayer</application>s Man Page.
-  Diese Sektion ist als Anhang zur Man Page vorsehen.
+  <application>MPlayer</application>s Manpage.
+  Diese Sektion ist als Anhang zur Manpage vorgesehen.
   Hier wirst du Schnellhinweise dazu finden, welche Optionen am
-  wahrscheinlichsten die meisten Leute interessieren. Die Man Page
+  wahrscheinlichsten die meisten Leute interessieren. Die Manpage
   ist knapper gehalten, aber auch vollständiger, und zeigt oft
   viel bessere technische Details.
 </para>
@@ -3864,7 +3864,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
   Du kannst diese Option genauso gut aktivieren, falls du >=2 B-Frames
-  verwendest; wie die Man Page dir sagt, erreichst du eine kleine
+  verwendest; wie die Manpage dir sagt, erreichst du eine kleine
   Qualitätsverbesserung bei keinerlei Geschwindigkeitseinbuße.
   Beachte, dass diese Videos von libavcodec-basierten Decodern
   älter als etwa 5. März 2005 nicht gelesen werden können.
@@ -4595,7 +4595,7 @@ Ein Beispiel mit VP3-Kompression:
   Du findest mehr technische Informationen zu <option>harddup</option>
   in der Sektion
   <link linkend="menc-feat-dvd-mpeg4-muxing-filter-issues">Verbessern der Mux- und A/V-Synchronisationszuverlässigkeit</link>
-  oder in der Man Page.
+  oder in der Manpage.
 </para>
 </sect3>
 

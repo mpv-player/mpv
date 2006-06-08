@@ -1000,7 +1000,7 @@ Starte Wiedergabe...<!--
 				</question>
 				<answer>
 					<para>
-						Verwende die Option <option>-cache</option> (beschrieben in der man page) und versuche, mit dem
+						Verwende die Option <option>-cache</option> (beschrieben in der Manpage) und versuche, mit dem
 						Tool <command>hdparm</command> (beschrieben im Kapitel <link linkend="drives">CD</link>), DMA
 						für das DVD-Laufwerk zu aktivieren.
 					</para>
@@ -1049,7 +1049,7 @@ Starte Wiedergabe...<!--
 				<answer>
 					<para>
 						Du kannst jeweils einen Frame vorwärtsgehen durch Drücken von <keycap>.</keycap>.
-						Wenn der Film nicht pausiert war, wird er danach pausiert (siehe man page für Details).
+						Wenn der Film nicht pausiert war, wird er danach pausiert (siehe Manpage für Details).
 						Rückwärts gehen zu können wird in naher Zukunft vermutlich nicht implementiert.
 					</para>
 				</answer>

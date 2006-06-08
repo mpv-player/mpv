@@ -9,7 +9,7 @@
 		<para>
 			Dieser Abschnitt behandelt das <emphasis role="bold">Anschauen/Grabben von einem
 				V4L-kompatiblen TV-Empfänger</emphasis>.
-			Siehe man page für eine Beschreibung der TV-Optionen und Tastensteuerungen.
+			Siehe Manpage für eine Beschreibung der TV-Optionen und Tastensteuerungen.
 		</para>
 		
 		
@@ -37,7 +37,7 @@
 		<sect2 id="tv-tips">
 			<title>Tipps zum Gebrauch</title>
 			<para>
-				Die vollständige Liste der Optionen ist in der man page verfügbar.
+				Die vollständige Liste der Optionen ist in der Manpage verfügbar.
 				Hier sind nur ein paar Tipps:
 			</para>
 			<itemizedlist>

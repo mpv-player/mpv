@@ -5,7 +5,7 @@
 
 <para>
 Eine komplette Liste der <application>MEncoder</application>-Optionen
-und Beispiele findest du in der Man Page. Eine Reihe praktischer Beispiele
+und Beispiele findest du in der Manpage. Eine Reihe praktischer Beispiele
 und detaillierter Anleitungen zur Anwendung verschiedener Encodier-Parameter
 findet du in den
 <ulink url="../../tech/encoding-tips.txt">Encodier-Tipps (im Moment nur auf englisch)</ulink>,
@@ -505,7 +505,7 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc la
 <formalpara>
 <title>Beispiele</title>
 <para>
-Die Erklärung der Option <option>-mf</option> steht in der Man Page.
+Die Erklärung der Option <option>-mf</option> steht in der Manpage.
 
 <informalexample>
 <para>
@@ -678,7 +678,7 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 <para>
   Du solltest auf jeden Fall die schwarzen Bänder oberhalb und unterhalb des
   Filmbildes abschneiden.
-  In der Man Page steht mehr zur Verwendung der Filter <systemitem>cropdetect</systemitem>
+  In der Manpage steht mehr zur Verwendung der Filter <systemitem>cropdetect</systemitem>
   und <systemitem>crop</systemitem>.
 </para>
 

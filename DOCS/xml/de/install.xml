@@ -517,7 +517,7 @@ Benutze diese nicht, wenn du nicht an den Interna von <application>MPlayer</appl
 herumbasteln möchtest, da dies viele Probleme hervorrufen kann. Wenn du die Reihenfolge
 der Suche nach Codecs ändern möchtest, benutze die Optionen <option>-vc</option>,
 <option>-ac</option>, <option>-vfm</option>, oder <option>-afm</option> auf der
-Kommandozeile oder in deiner Konfigurationsdatei (siehe man page).
+Kommandozeile oder in deiner Konfigurationsdatei (siehe Manpage).
 </para>
 
 
@@ -854,7 +854,7 @@ Du müsstest jetzt eine Zeitanzeige in der oberen linken Ecke des Films sehen
 </para>
 
 <para>
-(Untertitel sind <emphasis>immer aktiviert</emphasis>, lies bitte die man page,
+(Untertitel sind <emphasis>immer aktiviert</emphasis>, lies bitte die Manpage,
 wenn du wissen möchtest, wie man sie deaktiviert)
 </para>
 

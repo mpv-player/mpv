@@ -472,7 +472,7 @@ Lies mehr dazu auf der <ulink url="http://www.nut.hu/">offiziellen Site</ulink>.
   dementsprechend falsch oder gar nicht wiedergibt. Dies kann nicht gelöst
   werden, ohne die Unterstützung für einige kaputte MPEG-Dateien aufzugeben
   und wird deshalb bis auf weiteres so bleiben. Die Option
-  <option>-demuxer</option>, welche in der Man Page beschrieben wird, könnte
+  <option>-demuxer</option>, welche in der Manpage beschrieben wird, könnte
   dir in diesen Fällen helfen.
 </para>
 </sect2>
@@ -497,7 +497,7 @@ Lies mehr dazu auf der <ulink url="http://www.nut.hu/">offiziellen Site</ulink>.
 </para>
 
 <para>
-  Schau in der Man Page bei der Option <option>-cdda</option> nach, wie mit ihr
+  Schau in der Manpage bei der Option <option>-cdda</option> nach, wie mit ihr
   Parameter an <application>cdparanoia</application> übergeben
   werden können.
 </para>
