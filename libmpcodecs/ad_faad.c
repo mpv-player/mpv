@@ -232,7 +232,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   if(!sh->codecdata_len){
    // raw aac stream:
    do {
-    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer+j, sh->a_in_buffer_len);
+    faac_sample_buffer = faacDecDecode(faac_hdec, &faac_finfo, sh->a_in_buffer, sh->a_in_buffer_len);
 	
     /* update buffer index after faacDecDecode */
     if(faac_finfo.bytesconsumed >= sh->a_in_buffer_len) {
@@ -245,11 +245,13 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     if(faac_finfo.error > 0) {
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: error: %s, trying to resync!\n",
               faacDecGetErrorMessage(faac_finfo.error));
-      j++;
+      sh->a_in_buffer_len--;
+      memmove(sh->a_in_buffer,&sh->a_in_buffer[1],sh->a_in_buffer_len);
+      aac_sync(sh);
       errors++;
     } else
       break;
-   } while(j < FAAD_BUFFLEN && errors < MAX_FAAD_ERRORS);	  
+   } while(errors < MAX_FAAD_ERRORS);	  
   } else {
    // packetized (.mp4) aac stream:
     unsigned char* bufptr=NULL;
