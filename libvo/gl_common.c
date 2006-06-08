@@ -723,6 +723,10 @@ static const char *yuv_lookup_prog_template =
   "TEX result.color.b, res.baaa, texture[%c], 2D;"
   "END";
 
+static const char *yuv_lookup3d_prog_template =
+  "TEX result.color, yuv, texture[%c], 3D;"
+  "END";
+
 static void create_scaler_textures(int scaler, int *texu, char *texs) {
   switch (scaler) {
     case YUV_SCALER_BILIN:
@@ -737,10 +741,50 @@ static void create_scaler_textures(int scaler, int *texu, char *texs) {
   }
 }
 
+static void gen_yuv2rgb_map(unsigned char *map, int size, float brightness,
+                            float contrast, float uvcos, float uvsin,
+                            float rgamma, float ggamma, float bgamma) {
+  int i, j, k;
+  float step = 1.0 / size;
+  float y, u, v, u_, v_;
+  float r, g, b;
+  v = -0.5;
+  for (i = -1; i <= size; i++) {
+    u = -0.5;
+    for (j = -1; j <= size; j++) {
+      y = -(16.0 / 255.0);
+      for (k = -1; k <= size; k++) {
+        u_ = uvcos * u + uvsin * v;
+        v_ = uvcos * v + uvsin * u;
+        r = 1.164 * y              + 1.596 * v_;
+        g = 1.164 * y - 0.391 * u_ - 0.813 * v_;
+        b = 1.164 * y + 2.018 * u_             ;
+        r = pow(contrast * (r - 0.5) + 0.5 + brightness, 1.0 / rgamma);
+        g = pow(contrast * (g - 0.5) + 0.5 + brightness, 1.0 / ggamma);
+        b = pow(contrast * (b - 0.5) + 0.5 + brightness, 1.0 / bgamma);
+        if (r > 1) r = 1;
+        if (r < 0) r = 0;
+        if (g > 1) g = 1;
+        if (g < 0) g = 0;
+        if (b > 1) b = 1;
+        if (b < 0) b = 0;
+        *map++ = 255 * r;
+        *map++ = 255 * g;
+        *map++ = 255 * b;
+        y += (k == -1 || k == size - 1) ? step / 2 : step;
+      }
+      u += (j == -1 || j == size - 1) ? step / 2 : step;
+    }
+    v += (i == -1 || i == size - 1) ? step / 2 : step;
+  }
+}
+
 static void gen_gamma_map(unsigned char *map, int size, float gamma);
 
 //! resolution of texture for gamma lookup table
 #define LOOKUP_RES 512
+//! resolution for 3D yuv->rgb conversion lookup table
+#define LOOKUP_3DRES 32
 static void create_conv_textures(int conv, int *texu, char *texs,
               int brightness, int contrast, int uvcos, int uvsin,
               int rgamma, int ggamma, int bgamma) {
@@ -762,6 +806,32 @@ static void create_conv_textures(int conv, int *texu, char *texs,
                   LOOKUP_RES, 0, 0, LOOKUP_RES, 4, 0);
       ActiveTexture(GL_TEXTURE0);
       texs[0] += '0';
+      break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
+      {
+        int sz = LOOKUP_3DRES + 2; // texture size including borders
+        if (!TexImage3D) {
+          mp_msg(MSGT_VO, MSGL_ERR, "[gl] Missing 3D texture function!\n");
+          break;
+        }
+        texs[0] = (*texu)++;
+        ActiveTexture(GL_TEXTURE0 + texs[0]);
+        lookup_data = malloc(3 * sz * sz * sz);
+        gen_yuv2rgb_map(lookup_data, LOOKUP_3DRES, brightness, contrast,
+                        uvcos, uvsin, rgamma, ggamma, bgamma);
+        glAdjustAlignment(sz);
+        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+        TexImage3D(GL_TEXTURE_3D, 0, 3, sz, sz, sz, 1,
+                   GL_RGB, GL_UNSIGNED_BYTE, lookup_data);
+        glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_PRIORITY, 1.0);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+        ActiveTexture(GL_TEXTURE0);
+        texs[0] += '0';
+      }
       break;
     default:
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", conv);
@@ -929,6 +999,9 @@ static void glSetupYUVFragprog(float brightness, float contrast,
                ry, gy, by, ru, gu, bu, rv, gv, bv, rc, gc, bc,
                conv_texs[0], conv_texs[0], conv_texs[0]);
       break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
+      snprintf(prog_pos, prog_remain, yuv_lookup3d_prog_template, conv_texs[0]);
+      break;
     default:
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] unknown conversion type %i\n", YUV_CONVERSION(type));
       break;
@@ -983,6 +1056,7 @@ void glSetupYUVConversion(GLenum target, int type,
       glSetupYUVCombinersATI(uvcos, uvsin);
       break;
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
+    case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT:
     case YUV_CONVERSION_FRAGMENT_POW:
       glSetupYUVFragprog(brightness, contrast, uvcos, uvsin,
@@ -1020,6 +1094,7 @@ void glEnableYUVConversion(GLenum target, int type) {
       ActiveTexture(GL_TEXTURE0);
       glEnable(GL_FRAGMENT_SHADER_ATI);
       break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:
@@ -1053,6 +1128,7 @@ void glDisableYUVConversion(GLenum target, int type) {
       ActiveTexture(GL_TEXTURE0);
       glDisable(GL_FRAGMENT_SHADER_ATI);
       break;
+    case YUV_CONVERSION_FRAGMENT_LOOKUP3D:
     case YUV_CONVERSION_FRAGMENT_LOOKUP:
     case YUV_CONVERSION_FRAGMENT_POW:
     case YUV_CONVERSION_FRAGMENT:

@@ -227,6 +227,8 @@ int loadGPUProgram(GLenum target, char *prog);
 #define YUV_CONVERSION_FRAGMENT_LOOKUP 4
 //! use ATI specific register combiners ("fragment program")
 #define YUV_CONVERSION_COMBINERS_ATI 5
+//! use a fragment program with 3D table lookup for YUV conversion
+#define YUV_CONVERSION_FRAGMENT_LOOKUP3D 6
 //! use normal bilinear scaling for textures
 #define YUV_SCALER_BILIN 0
 //! use higher quality bicubic scaling for textures
