@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.76 -->
+<!-- synced with r18637 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -125,10 +125,8 @@ kisebb sávszélesség kell neki az adatbuszon. A csomagolt YUV módok (YUY2, UYVY)
 a <option>-vc divx4</option> módszert használják. Az RGB módoknál a sebesség
 ugyan akkora, csak az aktuális színmélységedhez történő alkalmazkodásukban
 különböznek.
-<note>
-<para>
-Ha a <option>-vo</option> vezérlőd támogatja a direkt renderelést, akkor a <option>-vc
-divx4</option> gyorsabb lehet vagy akár a leggyorsabb is.
+Ha a <option>-vo</option> vezérlőd támogatja a direkt renderelést, akkor a
+<option>-vc divx4</option> gyorsabb lehet vagy akár a leggyorsabb is.
 </para>
 
 <para>
@@ -142,54 +140,11 @@ könyvtárat az <filename>/etc/ld.so.conf</filename> fájlba, majd futtatni az
 </para>
 
 <para>
-A RÉGI OpenDivX függvénykönyvtárnak a CVS verziója is letölthető:
-</para>
-
-<procedure>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</screen>
-</para></step>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</screen>
-</para></step>
-<step><para>
-Ez a fő függvénykönyvtár decore és encore könyvtárakra van osztva, amiket külön
-kell fordítani. A decore könyvtárhoz egyszerűen írd be:
-<screen>
-cd divxcore/decore/build/linux
-make
-cp libdivxdecore.so /usr/local/lib
-ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
-cp ../../src/decore.h /usr/local/include
-</screen>
-</para></step>
-<step><para>
-Sajnos az encore könyvtárhoz nincs Linuxos Makefile és az MMX optimalizáció csak
-Windowson működik. De így is le tudod fordítani,
-ezen
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>
-használatával.
-<screen>
-cd ../../../encore/build
-mkdir linux
-cd linux
-cp path/Makefile .
-make
-cp libdivxencore.so /usr/local/lib
-ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
-cp ../../src/encore.h /usr/local/include
-</screen>
-</para></step>
-</procedure>
-
-<para>
 Az <application>MPlayer</application> automatikusan megtalálja a DivX4/DivX5-öt ha az
 megfelelően van telepítve, csak fordítsd le úgy, mint máskor. Ha nem találja meg,
 nem telepítetted vagy nem állítottad be megfelelően.
 </para>
 
-</note>
-</para>
 </sect2>
 
 
@@ -223,53 +178,12 @@ Támogatott <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">videó</ulink>
 </para>
 
 <para>
-Ha egy <application>MPlayer</application> kiadást használsz, a
-<systemitem class="library">libavcodec</systemitem>
-benne van a csomagban, csak fordítsd le a szokásos módon. Ha az
-<application>MPlayer</application>t CVS-ből szedted, ki kell csomagolnod
-a <systemitem class="library">libavcodec</systemitem>-et az FFmpeg
-CVS fájából, mivel az FFmpeg kiadások elég ritkán jönnek. A CVS
-legtöbbször stabil és több funkciót nyújt. Mindez így hajtható végre:
+Mind az <application>MPlayer</application> kiadások, mind az
+<application>MPlayer</application> Subversionből származó verziói tartalmazzák
+a <systemitem class="library">libavcodec</systemitem>-et, így nem kell azzal
+foglalkoznod, hogy legyen egy külön <systemitem class="library">libavcodec</systemitem> checkout-od.
+Csak futtasd a <filename>configure</filename>-t és fordíts.
 </para>
-
-<procedure>
-<step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
-  </para></step>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
-  </para></step>
-<step><para>
-  Mozgasd át a <filename>libavcodec</filename> és <filename>libavutil</filename>
-  könyvtárakat az FFmpeg forrásából az <application>MPlayer</application> CVS
-  fájának gyökérkönyvtárába. Valahogy így kell kinéznie:
-  <filename class="directory">main/libavcodec</filename>
-  <filename class="directory">main/libavutil</filename>
-  </para><para>
-  A szimbólikus link készítése <emphasis role="bold">nem</emphasis> elég, át kell
-  másolnod/mozgatnod!
-  </para></step>
-<step><para>
-  Ha azt szeretnéd, hogy a <systemitem class="library">libavcodec</systemitem>
-  mindig frissüljön, amikor frissíted az <application>MPlayer</application> CVS-t,
-  írd be a következő sort a <filename>main/CVS/Entries</filename> fájlba:
-  <screen>D/libavcodec////</screen>
-  <screen>D/libavutil////</screen>
-  </para></step>
-<step><para>
-  Fordíts. Ha baj van, a <filename>configure</filename> megtalálja még a fordítás előtt.
-  </para></step>
-</procedure>
-
-<note>
-<para>
-Az CVS-ből származó <application>MPlayer</application> tartalmaz egy
-<filename>libavcodec</filename> alkönyvtárat, de ebben
-<emphasis role="bold">nincs</emphasis> bent a
-<systemitem class="library">libavcodec</systemitem> forrása!
-Kövesd a fenti lépéseket a függvénykönyvtár forrásának beszerzéséhez.
-</para>
-</note>
 
 <para>
 Az FFmpeg-gel és a Matrox G400-as kártyámmal még a legnagyobb felbontású DivX
@@ -507,7 +421,7 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
 <procedure>
 <title>MPLAYER FORDÍTÁSA QUICKTIME KÖNYVTÁRAK TÁMOGATÁSÁVAL</title>
 <note><para>Jelenleg csak a 32-bit-es Intel platformok támogatottak.</para></note>
-<step><para>Töltsd le az <application>MPlayer</application> CVS-t</para></step>
+<step><para>Töltsd le az <application>MPlayer</application> Subversion-t</para></step>
 <step><para>Töltsd le a QuickTime DLL csomagot:
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -608,7 +522,7 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   júliusa óta tartalmaz egy minimálisan használható H.264 dekódolást,
   de azóta több fontos változás és fejlesztés történt, mind a
   támogatott funkcionalitások, mind a CPU felhasználás szempontjából.
-  Csak a biztonság kedvéért érdemes mindig a legfrissebb CVS
+  Csak a biztonság kedvéért érdemes mindig a legfrissebb Subversion
   kódot használni.
 </para>
 <para>
@@ -616,7 +530,7 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   arról, hogy milyen új változások történtek a
   <systemitem class="library">libavcodec</systemitem>
   H.264 dekódolójában, tartsd figyelemmel az
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS fájának web-es felületét</ulink>.
+  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">FFmpeg Subversion fájának web-es felületét</ulink>.
 </para>
 </sect3>
 
@@ -630,8 +544,8 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   --></screen>
   Az <application>MPlayer</application> forrás mindig frissül, ha
   egy <systemitem class="library">x264</systemitem> API változás
-  jelenik meg, így javasolt az <application>MPlayer</application> CVS
-  verziójának használata.
+  jelenik meg, így javasolt az <application>MPlayer</application>
+  Subversion verziójának használata.
   Talán ez a szituáció változni fog ha egy
   <systemitem class="library">x264</systemitem> "kiadás" megjelenik.
   Addig az <systemitem class="library">x264</systemitem> nagyon

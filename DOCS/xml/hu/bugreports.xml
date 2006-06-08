@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16 -->
+<!-- synced with r18600 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 <para>
@@ -38,7 +38,7 @@ levelezési listán lévő emberkék segítenek neked, ha kérdésed van.
 </para>
 </sect1>
 <sect1 id="bugreports_regression_test">
-<title>Hogyan tesztelj a CVS segítségével</title>
+<title>Hogyan tesztelj a Subversion segítségével</title>
 <para>
 Egy néha előforduló probléma, hogy "régen még működött, de most már nem...".
 Következzék hát egy lépésenkénti leírás, mely segít a probléma
@@ -46,17 +46,17 @@ megtalálásában. Ez <emphasis role="bold">nem</emphasis> az átlagos
 felhasználóknak szól.
 </para>
 <para>
-Először is, be kell szerezned az MPlayer forrás fáját a CVS-ből.
+Először is, be kell szerezned az MPlayer forrás fáját a Subversionből.
 Az utasításokat megtalálod
 <ulink url="http://www.mplayerhq.hu/dload.html">ennek az oldalnak</ulink>
 az alján.
 </para>
 <para>
-Ezután lesz a main/ könyvtárban a CVS fáról egy pillanatképed, a kliens oldalon.
-Ezután frissítsd ezt a kívánt dátumúra:
+Ezután lesz az mplayer/ könyvtárban a Subversion fáról egy pillanatképed,
+a kliens oldalon. Ezután frissítsd ezt a kívánt dátumúra:
 <screen>
-cd main/
-cvs update -PAd -D "2004-08-23"
+cd mplayer/
+svn update -r {"2004-08-23"}
 </screen>
 A dátum formátum YYYY-MM-DD HH:MM:SS.
 Ezen dátum formátum használata biztosítja, hogy benne legyen minden olyan
@@ -92,9 +92,9 @@ mindent, ha visszajössz a jelenbe.)
 <para>
 Ha megvan a nap, amikor a probléma megjelent, folytasd a keresést az
 mplayer-cvslog archívum segítségével (dátum szerint rendezve) és egy sokkal
-precízebb CVS update-tel, melybe órát, percet és másodpercet is írsz:
+precízebb svn update-tel, melybe órát, percet és másodpercet is írsz:
 <screen>
-cvs update -PAd -D "2004-08-23 15:17:25"
+svn update -r {"2004-08-23 15:17:25"}
 </screen>
 Így könnyen megtalálod azt a javítást, ami okozta.
 </para>
@@ -114,10 +114,10 @@ is van a hiba :-).
 <title>Hogyan jelentsd a hibákat</title>
 <para>
 Mindenek előtt kérlek, hogy mindig próbáld ki az <application>MPlayer</application>
-legújabb CVS verzióját, hátha az általad felfedezett hibát már kijavították
+legújabb Subversion verzióját, hátha az általad felfedezett hibát már kijavították
 benne. A fejlesztés borzasztó gyorsan halad, a legtöbb, hivatalos kiadásban
 meglévő problémát napokon vagy akár órákon belül jelentik, így
-<emphasis role="bold">csak a CVS-ből</emphasis> küldj hibajelentést. Ebbe
+<emphasis role="bold">csak a Subversionből</emphasis> küldj hibajelentést. Ebbe
 beleértendőek az <application>MPlayer</application> bináris csomagjai is. A
 CVS utasításokat megtalálod
 <ulink url="http://www.mplayerhq.hu/dload.html">ennek az oldalnak</ulink>
@@ -339,7 +339,7 @@ diagnosztizálják a problémát. A kimenetet átirányíthatod fájlba így:
 
 <para>
 Ha a probléma egy vagy több fájl esetén specifikus, kérlek töltsd fel ide:
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>

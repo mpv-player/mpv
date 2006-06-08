@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16 -->
+<!-- synced with r18606 -->
 <appendix id="mailinglists">
 <title>Levelezési listák</title>
 <para>
@@ -81,14 +81,14 @@ vagy egy lehetséges hibát/problémát találtál a beküldött változtatásban).
 </para>
 <para>Ez a lista az <application>MPlayer</application> dokumentációjával
 és weboldalával kapcsolatos kérdésekkel foglalkozik.
-A dokumentációval és a weboldallal kapcsolatos CVS logot is elküldjük ide.
+A dokumentációval és a weboldallal kapcsolatos SVN logot is elküldjük ide.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>Ez a lista az <application>MPlayer</application> dokumentációjának
 és a weboldalának fordításaival kapcsolatos megbeszéléseket tartalmazza.
-A dokumentáció és weboldal fordítások CVS logjait is megkapják a tagok.
+A dokumentáció és weboldal fordítások Subversion logjait is megkapják a tagok.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
@@ -121,7 +121,7 @@ News (<application>MPlayer</application> Heti Hírek) kiadásaival kapcsolatos dol
 <para>Az <application>MPlayer</application> OS/2-es portjával foglalkozó lista.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-qt-codecs-porting"><application>MPlayer</application>-qt-codecs-porting</ulink> (INAKTÍV)
+<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INAKTÍV)
 </para>
 <para>A QuickTime codec-ek támogatásával foglalkozó lista.
 </para></listitem>

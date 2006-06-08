@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.87 -->
+<!-- synced with r18650 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -802,7 +802,7 @@ Az FBdev kimenetnek a fentiek mellett van néhány paramétere is:
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    megadhatod a használni kívánt framebuffer eszközt (<filename>/dev/fb0</filename>)
+    megadhatod a használni kívánt framebuffer eszközt (alapértelmezett: <filename>/dev/fb0</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -814,7 +814,7 @@ Az FBdev kimenetnek a fentiek mellett van néhány paramétere is:
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    módokat tartalmazó konfigurációs fájl (alapértelmezésben <filename>/etc/fb.modes</filename>)
+    módokat tartalmazó konfigurációs fájl (alapértelmezett: <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -1054,13 +1054,13 @@ Pár billentyű segítségével állíthatod a renderelési opciókat az AA Ablakban:
 <varlistentry>
   <term><option>-aaosdcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    OSD szín megváltoztatása
+    OSD színének megváltoztatása
     </para></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    felirat szín megváltoztatása
+    Felirat színének megváltoztatása
     </para><para>
     ahol a <replaceable>V</replaceable> lehet:
     <literal>0</literal> (normális),
@@ -1078,25 +1078,25 @@ Pár billentyű segítségével állíthatod a renderelési opciókat az AA Ablakban:
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    beállítja a javasolt aa vezérlőt (X11, curses, Linux)
+    Beállítja a javasolt aa vezérlőt (X11, curses, Linux).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    mind a 256 karakter használata
+    Mind a 256 karakter használata.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
-    nyolc bites ASCII
+    Nyolc bites ASCII.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    kiírja az összes aalib kapcsolót
+    Kiírja az összes aalib kapcsolót.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1624,9 +1624,7 @@ Van egy eléggé új nVidia vezérlő, tudvalevőleg működik a Riva
   <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> és pár
   egyéb. Kérjük vedd figyelembe, hogy ez csak ideiglenes kényelmetlenség.
   A használati szintaxis a következő:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable>
-  </screen>
+  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable></screen>
   </para></listitem>
 </itemizedlist>
 
@@ -1635,9 +1633,7 @@ Van egy eléggé új nVidia vezérlő, tudvalevőleg működik a Riva
   <emphasis role="bold">sima, egyszerű, csak szöveges konzolon</emphasis> történő
   videó megjelenítés - framebuffer vagy X varázslag és egyebek nélkül. Ehhez a
   <option>cvidix</option> videó kimenetet kell használni, amint az itt látható:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable>
-  </screen>
+  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
 
 <para>
@@ -1975,12 +1971,12 @@ a telepítési útmutatót megtalálhatod a
 <title>HASZNÁLAT</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>TV kimenet bekapcsolása</para></listitem>
+<listitem><para>TV kimenet engedélyezése.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> vagy <option>-vo dxr2:xv</option></term>
-<listitem><para>átlapolásos kimenet bekapcsolása X11-en</para></listitem>
+<listitem><para>Átlapolásos kimenet bekapcsolása X11-en.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2501,7 +2497,6 @@ Section "Device"
         Option          "ConnectedMonitor" "CRT, TV"
         Option          "TVStandard" "PAL-B"
         Option          "TVOutFormat" "Composite"
-
 EndSection
 </programlisting>
 </para>

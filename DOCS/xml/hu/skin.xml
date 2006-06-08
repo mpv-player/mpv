@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.15 -->
+<!-- synced with r18600 -->
 <appendix id="skin">
 <title><application>MPlayer</application> skin formátum</title>
 
@@ -1050,7 +1050,7 @@ Audió fájl betöltése (a fájlválasztóval)
 <varlistentry>
   <term><emphasis role="bold">evNone</emphasis></term>
   <listitem><para>
-Üres üzenet, nincs hatása (kivéve talán a CVS verziót :-)).
+Üres üzenet, nincs hatása (kivéve talán a Subversion verziót :-)).
     </para></listitem>
 </varlistentry>
 
