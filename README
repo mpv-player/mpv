@@ -45,9 +45,9 @@ ______________________
 STEP0: Getting MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Official releases, prereleases and CVS snapshots, as well as fonts for the
-OSD, codec packages and a number of different skins for the GUI are available
-from the download section of our homepage at
+Official releases and Subversion snapshots, as well as fonts for the OSD, codec
+packages and a number of different skins for the GUI are available from the
+download section of our homepage at
 
   http://www.mplayerhq.hu/dload.html
 
@@ -56,62 +56,25 @@ TrueType fonts, the GUI needs at least one skin and codec packages add support
 for some more video and audio formats. MPlayer does not come with any of these
 by default, you have to download and install them separately.
 
-You can also get MPlayer via anonymous CVS. Issue the following commands to get
+You can also get MPlayer via Subversion. Issue the following commands to get
 the latest sources:
 
-  cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-  cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+  svn checkout svn://svn.mplayerhq.hu/mplayer/trunk mplayer
 
-When asked for a password, just hit enter. A directory named 'main' will be
-created. You can later update your sources by saying
+A directory named 'mplayer' will be created. It will include all necessary
+FFmpeg libraries, you don't need to get them separately as was the case in
+the past. You can later update your sources by saying
 
-  cvs -z3 update -dPA
+  svn update
 
 from within that directory.
 
 
-_________________________________________________________
-STEP1: Installing FFmpeg libavcodec/libavutil/libavformat
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you are using an official (pre)release or a CVS snapshot, skip this step,
-since official releases include libavcodec. CVS sources do not include
-libavcodec. To verify if you do have libavcodec or not, check if a subdirectory
-named 'libavcodec' exists in the MPlayer source tree.
-
-The FFmpeg project provides libavcodec, a very portable codec collection (among
-the supported formats is MPEG-4/DivX) with excellent quality and speed, that is
-the preferred MPEG-4/DivX codec of MPlayer. You have to get libavcodec directly
-from the FFmpeg CVS server.
-
-To get the FFmpeg sources, use the following commands in a suitable directory
-outside the MPlayer source directory:
-
-cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg
-
-When asked for a password, you can just hit enter. A directory named 'ffmpeg'
-with subdirectories named 'libavcodec' and 'libavutil' inside will be created.
-Copy (symbolic linking does NOT suffice) these subdirectories into the MPlayer
-source tree.
-
-In order to force automatic updates of libavcodec when you update MPlayer, add
-the following lines to main/CVS/Entries:
-
-D/libavcodec////
-D/libavutil////
-
-FFmpeg also contains libavformat, a library to decode container formats that
-can optionally be used to extend MPlayer's container format support. If you
-wish to use it, also copy the libavformat subdirectory into the MPlayer
-source tree and add another line to main/CVS/Entries.
-
-
 _______________________________
-STEP2: Installing Binary Codecs
+STEP1: Installing Binary Codecs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MPlayer and libavcodec have builtin support for the most common audio and video
+MPlayer has builtin support for the most common audio and video
 formats, but some formats require external codecs. Examples include Real, Indeo
 and QuickTime audio formats. Support for Windows Media formats except WMV9
 exists but still has some bugs, your mileage may vary. This step is not
@@ -126,7 +89,7 @@ something else by using the '--with-codecsdir=DIR' option when you run
 
 
 __________________________
-STEP3: Configuring MPlayer
+STEP2: Configuring MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 MPlayer can be adapted to all kinds of needs and hardware environments. Run
@@ -153,7 +116,7 @@ you are satisfied with the enabled feature set.
 
 
 ________________________
-STEP4: Compiling MPlayer
+STEP3: Compiling MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now you can start the compilation by typing
@@ -194,7 +157,7 @@ To clean up the source tree run the following command:
   fakeroot debian/rules clean
 
 ____________________________________________
-STEP5: Installing the onscreen display fonts
+STEP4: Installing the onscreen display fonts
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Unpack the archive and choose one of the available font sizes. Then copy the
@@ -207,7 +170,7 @@ make a symbolic link from either /usr/local/share/mplayer/subfont.ttf or
 
 
 ____________________________
-STEP6: Installing a GUI skin
+STEP5: Installing a GUI skin
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Unpack the archive and put the contents in /usr/local/share/mplayer/skins/ or
@@ -218,7 +181,7 @@ make a suitable symbolic link.
 
 
 __________________
-STEP7: Let's play!
+STEP6: Let's play!
 ~~~~~~~~~~~~~~~~~~
 
 That's it for the moment. To start playing movies, open a command line and try
