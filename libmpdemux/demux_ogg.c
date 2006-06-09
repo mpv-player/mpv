@@ -1,6 +1,22 @@
 
 #include "config.h"
 
+unsigned int store_ughvlc(unsigned char *s, unsigned int v)
+{
+  unsigned int n = 0;
+
+  while(v >= 0xff)
+  {
+    *s++ = 0xff;
+    v -= 0xff;
+    n++;
+  }
+  *s = v;
+  n++;
+
+  return n;
+}
+
 #ifdef HAVE_OGGVORBIS
 
 #include <stdlib.h>
@@ -762,22 +778,6 @@ char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
 }
 
 static void demux_close_ogg(demuxer_t* demuxer);
-
-unsigned int store_ughvlc(unsigned char *s, unsigned int v)
-{
-  unsigned int n = 0;
-
-  while(v >= 0xff)
-  {
-    *s++ = 0xff;
-    v -= 0xff;
-    n++;
-  }
-  *s = v;
-  n++;
-
-  return n;
-}
 
 static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
 {
