@@ -239,6 +239,8 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     sh_pos = find_backwards_asf_guid(hdr, asf_stream_header_guid, pos);
  
     if (sh_pos > 0) {
+      sh_audio_t *sh_audio;
+
        mp_msg(MSGT_HEADER, MSGL_V, "read_asf_header found dvr-ms audio stream header pos=%d\n", sh_pos);
       // found audio stream header - following code reads header and
       // initializes audio stream.
@@ -247,7 +249,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
       le2me_ASF_stream_header_t(streamh);
       audio_pos += 64; //16+16+4+4+4+16+4;
       buffer = &hdr[audio_pos];
-      sh_audio_t* sh_audio=new_sh_audio(demuxer,streamh->stream_no & 0x7F);
+      sh_audio=new_sh_audio(demuxer,streamh->stream_no & 0x7F);
       ++audio_streams;
       if (!asf_init_audio_stream(demuxer, asf, sh_audio, streamh, &audio_pos, &buffer, hdr, hdr_len))
         goto len_err_out;
