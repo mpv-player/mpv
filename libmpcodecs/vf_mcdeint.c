@@ -89,7 +89,7 @@ struct vf_priv_s {
 };
 
 static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int dst_stride[3], int src_stride[3], int width, int height){
-    int x, y, i, j;
+    int x, y, i;
     int out_size;
 
     for(i=0; i<3; i++){
@@ -118,21 +118,22 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
                         uint8_t *srcp= &src[i][x + y*srcs];
                         int diff0= filp[-fils] - srcp[-srcs];
                         int diff1= filp[+fils] - srcp[+srcs];
-                        int diffscore= ABS(srcp[-srcs-1] - srcp[+srcs-1])
-                                      +ABS(srcp[-srcs  ] - srcp[+srcs  ])
-                                      +ABS(srcp[-srcs+1] - srcp[+srcs+1]);
+                        int spatial_score= ABS(srcp[-srcs-1] - srcp[+srcs-1])
+                                          +ABS(srcp[-srcs  ] - srcp[+srcs  ])
+                                          +ABS(srcp[-srcs+1] - srcp[+srcs+1]) - 1;
                         int temp= filp[0];
 
-                        for(j=-1; j<=1; j+=2){
-                            int score= ABS(srcp[-srcs+j-1] - srcp[+srcs-j-1])
-                                      +ABS(srcp[-srcs+j  ] - srcp[+srcs-j  ])
-                                      +ABS(srcp[-srcs+j+1] - srcp[+srcs-j+1]) + 1;
-                            if(score < diffscore){
-                                diffscore= score;
-                                diff0= filp[-fils+j] - srcp[-srcs+j];
-                                diff1= filp[+fils-j] - srcp[+srcs-j];
-                            }
-                        }
+#define CHECK(j)\
+    {   int score= ABS(srcp[-srcs-1+j] - srcp[+srcs-1-j])\
+                 + ABS(srcp[-srcs  +j] - srcp[+srcs  -j])\
+                 + ABS(srcp[-srcs+1+j] - srcp[+srcs+1-j]);\
+        if(score < spatial_score){\
+            spatial_score= score;\
+            diff0= filp[-fils+j] - srcp[-srcs+j];\
+            diff1= filp[+fils-j] - srcp[+srcs-j];
+
+                        CHECK(-1) CHECK(-2) }} }}
+                        CHECK( 1) CHECK( 2) }} }}
 #if 0
                         if((diff0 ^ diff1) > 0){
                             int mindiff= ABS(diff0) > ABS(diff1) ? diff1 : diff0;

@@ -65,7 +65,7 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
 }
 
 static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int width, int height, int parity, int tff){
-    int x, y, i, j;
+    int x, y, i;
 
     for(i=0; i<3; i++){
         int is_chroma= !!i;
@@ -91,18 +91,19 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
                         int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
                         int spatial_pred= (c+e)>>1;
                         int spatial_score= ABS(cur[-refs-1] - cur[+refs-1]) + ABS(c-e)
-                                         + ABS(cur[-refs+1] - cur[+refs+1]);
+                                         + ABS(cur[-refs+1] - cur[+refs+1]) - 1;
 
-                        for(j=-1; j<=1; j+=2){
-                            int score= ABS(cur[-refs-1+j] - cur[+refs-1-j])
-                                     + ABS(cur[-refs  +j] - cur[+refs  -j])
-                                     + ABS(cur[-refs+1+j] - cur[+refs+1-j]) + 1;
+#define CHECK(j)\
+    {   int score= ABS(cur[-refs-1+j] - cur[+refs-1-j])\
+                 + ABS(cur[-refs  +j] - cur[+refs  -j])\
+                 + ABS(cur[-refs+1+j] - cur[+refs+1-j]);\
+        if(score < spatial_score){\
+            spatial_score= score;\
+            spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;\
 
-                            if(score < spatial_score){
-                                spatial_score= score;
-                                spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;
-                            }
-                        }
+                        CHECK(-1) CHECK(-2) }} }}
+                        CHECK( 1) CHECK( 2) }} }}
+
                         if(p->mode<2){
                             int b= (prev2[-2*refs] + next2[-2*refs])>>1;
                             int f= (prev2[+2*refs] + next2[+2*refs])>>1;
