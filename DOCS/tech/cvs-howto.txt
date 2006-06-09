@@ -1,6 +1,6 @@
 
-About CVS write access:
-~~~~~~~~~~~~~~~~~~~~~~~
+About Subversion write access:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before everything else, you should know how to use CVS properly. CVS comes with
 some documentation, as usual
@@ -181,7 +181,7 @@ II. POLICY / RULES:
    particular bug. Comments such as "fixed!" or "Changed it." are unacceptable.
 
 8. If you apply a patch by someone else, include the name and email address in
-   the CVS log message. Since the mplayer-cvslog mailing list is publicly
+   the log message. Since the mplayer-cvslog mailing list is publicly
    archived you should add some spam protection to the email address. Send an
    answer to mplayer-dev-eng (or wherever you got the patch from) saying that
    you applied the patch. If the patch contains a documentation change, commit
@@ -190,7 +190,7 @@ II. POLICY / RULES:
 9. Do NOT commit to code actively maintained by others without permission. Send
    a patch to mplayer-dev-eng instead.
 
-10. Subscribe to the mplayer-cvslog mailing list. The diffs of all CVS commits
+10. Subscribe to the mplayer-cvslog mailing list. The diffs of all commits
     are sent there and reviewed by all the other developers. Bugs and possible
     improvements or general questions regarding commits are discussed there. We
     expect you to react if problems with your code are uncovered.
@@ -198,14 +198,6 @@ II. POLICY / RULES:
 11. Update the documentation if you change behavior or add features. If you are
     unsure how best to do this, send a patch to mplayer-docs, the documentation
     maintainers will review and commit your stuff.
-
-12. Revert a commit ONLY in case of a big blunder like committing something not
-    intended to be committed or committing a wrong file, the wrong version of a
-    patch, cosmetics or broken code and you are going to recommit the right
-    thing immediately.
-
-    Never revert changes made a long time ago or buggy code. Fix it in the
-    normal way instead.
 
 Also read DOCS/tech/patches.txt !!!!
 
