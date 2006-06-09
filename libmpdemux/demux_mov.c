@@ -544,6 +544,7 @@ static void demux_close_mov(demuxer_t *demuxer) {
 static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
                            off_t pos, off_t len, mov_track_t* trak);
 
+extern unsigned int store_ughvlc(unsigned char *s, unsigned int v);
 static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
     mov_priv_t* priv=demuxer->priv;
 //    printf("lschunks (level=%d,endpos=%x)\n", level, endpos);
@@ -618,6 +619,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		} my_stdata;		  
 #endif		
 		int version, adjust;
+		int is_vorbis = 0;
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
 
@@ -780,7 +782,54 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			if(atom_len > 8) {
 			  esds_t esds; 				  
 			  if(!mp4_parse_esds(&trak->stdata[36+adjust], atom_len-8, &esds)) {
-			    
+			    if(sh->format==0x6134706D && esds.decoderConfigLen > 8)
+				{
+					//vorbis audio
+					unsigned char *buf[3];
+					unsigned short sizes[3];
+					int offset, len, k;
+					unsigned char *ptr = esds.decoderConfig;
+
+					if(ptr[0] != 0 || ptr[1] != 30) goto quit_vorbis_block; //wrong extradata layout
+
+					offset = len = 0;
+					for(k = 0; k < 3; k++)
+					{
+						sizes[k] = (ptr[offset]<<8) | ptr[offset+1];
+						len += sizes[k];
+						offset += 2;
+						if(offset + sizes[k] > esds.decoderConfigLen)
+						{
+							mp_msg(MSGT_DEMUX, MSGL_FATAL, "MOV: ERROR!, not enough vorbis extradata to read: offset = %d, k=%d, size=%d, len: %d\n", offset, k, sizes[k], esds.decoderConfigLen);
+							goto quit_vorbis_block;
+						}
+						buf[k] = malloc(sizes[k]);
+						if(!buf[k]) goto quit_vorbis_block;
+						memcpy(buf[k], &ptr[offset], sizes[k]);
+						offset += sizes[k];
+					}
+
+					sh->codecdata_len = len + len/255 + 64;
+					sh->codecdata = malloc(sh->codecdata_len);
+					ptr = sh->codecdata;
+					
+					ptr[0] = 2;
+					offset = 1;
+					offset += store_ughvlc(&ptr[offset], sizes[0]);
+					offset += store_ughvlc(&ptr[offset], sizes[1]);
+					for(k = 0; k < 3; k++) 
+					{
+						memcpy(&ptr[offset], buf[k], sizes[k]);
+						offset += sizes[k];
+					}
+
+					sh->codecdata_len = offset;
+					sh->codecdata = realloc(sh->codecdata, offset);
+					mp_msg(MSGT_DEMUX,MSGL_V, "demux_mov, vorbis extradata size: %d\n", offset);
+					is_vorbis = 1;
+quit_vorbis_block:
+					sh->format = mmioFOURCC('v', 'r', 'b', 's');
+				}
 			    sh->i_bps = esds.avgBitrate/8; 
 
 //			    printf("######## audio format = %d ########\n",esds.objectTypeId);
@@ -791,9 +840,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    if(esds.decoderConfigLen){
 			    if( (esds.decoderConfig[0]>>3) == 29 )
 			    	sh->format = 0x1d61346d; // request multi-channel mp3 decoder
+			    if(!is_vorbis)
+			    {
 			    sh->codecdata_len = esds.decoderConfigLen;
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, esds.decoderConfig, sh->codecdata_len);
+			    }
 			    }
 			  }
 			  mp4_free_esds(&esds); // freeup esds mem
@@ -837,7 +889,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  fclose(f); }
 #endif
 		// Emulate WAVEFORMATEX struct:
-		sh->wf=malloc(sizeof(WAVEFORMATEX));
+		sh->wf=malloc(sizeof(WAVEFORMATEX) + (is_vorbis ? sh->codecdata_len : 0));
 		memset(sh->wf,0,sizeof(WAVEFORMATEX));
 		sh->wf->nChannels=sh->channels;
 		sh->wf->wBitsPerSample=(trak->stdata[18]<<8)+trak->stdata[19];
@@ -854,6 +906,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  // workaround for ms11 ima4
 		  if (sh->format == 0x1100736d && trak->stdata_len >= 36)
 		      sh->wf->nBlockAlign=char2int(trak->stdata,36);
+		}
+
+		if(is_vorbis && sh->codecdata_len)
+		{
+			memcpy(sh->wf+1, sh->codecdata, sh->codecdata_len);
+			sh->wf->cbSize = sh->codecdata_len;
 		}
 		// Selection:
 //		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){

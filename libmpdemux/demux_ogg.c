@@ -763,7 +763,7 @@ char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
 
 static void demux_close_ogg(demuxer_t* demuxer);
 
-static inline unsigned int store_ughvlc(unsigned char *s, unsigned int v)
+unsigned int store_ughvlc(unsigned char *s, unsigned int v)
 {
   unsigned int n = 0;
 
