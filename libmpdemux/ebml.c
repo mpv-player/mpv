@@ -14,6 +14,10 @@
 #include "bswap.h"
 
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
+
 /*
  * Read: the element content data ID.
  * Return: the ID.

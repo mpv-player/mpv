@@ -15,6 +15,10 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ((size_t)-1)
+#endif
+
 URL_t*
 url_new(const char* url) {
 	int pos1, pos2,v6addr = 0;
