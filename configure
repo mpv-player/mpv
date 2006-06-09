@@ -248,6 +248,7 @@ Optional features:
   --disable-ftp          Disable ftp support [enabled]
   --disable-vstream      Disable tivo vstream client support [autodetect]
   --disable-pthreads     Disable Posix threads support [autodetect]
+  --enable-rpath         Enable runtime linker path for extra libs [disabled]
 
 Codecs:
   --enable-gif		 enable gif support [autodetect]
@@ -639,13 +640,6 @@ TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
   _inc_extra="$_inc_extra -I/usr/local/include"
-fi
-
-if netbsd ; then
-  for I in `echo $_ld_extra | sed 's/-L//g'` ; do
-    tmp="$tmp ` echo $I | sed 's/.*/ -L& -Wl,-R&/'`"
-  done
-  _ld_extra=$tmp
 fi
 
 _ldd=ldd
@@ -1698,6 +1692,7 @@ _ftp=yes
 _musepack=auto
 _vstream=auto
 _pthreads=yes
+_rpath=no
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -1980,6 +1975,8 @@ for ac_option do
   --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
   --disable-pthreads)   _pthreads=no    ;;
+  --enable-rpath)       _rpath=yes      ;;
+  --disable-rpath)      _rpath=no       ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -2962,6 +2959,15 @@ else
 fi
 echores "$_pthreads"
 
+echocheck "rpath"
+netbsd &&_rpath=yes
+if test "$_rpath" = yes ; then
+  for I in `echo $_ld_extra | sed 's/-L//g'` ; do
+    tmp="$tmp ` echo $I | sed 's/.*/ -L& -Wl,-R&/'`"
+  done
+_ld_extra=$tmp
+fi
+echores "$_rpath"
 
 echocheck "iconv"
 if test "$_iconv" = auto ; then
