@@ -102,6 +102,7 @@ MPlayer (1.0)
     * support for variable framerate Ogg/OGM files
     * made demux_ogg.c work with ffvorbis decoder
     * fixed playback of RealVideo in Matroska files on ppc
+    * added support for Vorbis in MOV/MP4
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
