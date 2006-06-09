@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r18640
+.\" In sync with r18656
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -3231,6 +3231,15 @@ GL_ARB_fragment_shader!).
 Mindestens drei Textureinheiten werden benötigt.
 Ermöglicht Sättigungs- und Farbwerteinstellung.
 Diese Methode ist schnell aber ungenau.
+.br
+6: Benutze eine 3D-Textur für die Konvertierung via Nachschlagetabelle.
+Benötigt die GL_ARB_fragment_program-Erweiterung und mindestens vier
+Textureinheiten.
+Stellt Kontrolle über Helligkeit, Kontrast, Sättigung, Farbton und Gamma
+bereit.
+Gamma kann außerdem unabhängig für rot, grün und blau gesetzt werden.
+Die Geschwindigkeit hängt mehr von der Speicherbandbreite der GPU ab als
+andere Methoden.
 .RE
 .IPs [l|c]scaler=<n>
 Wählt die zu benutzende Skalierungsmethode (unabhängig für Luminanz und
