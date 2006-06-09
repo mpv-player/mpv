@@ -6365,7 +6365,7 @@ else
 fi
 echores "$_amr_nb_fixed"
 
-if test "$_amr_nb" = yes ; then
+if test "$_amr_nb" = yes || test "$_amr_nb_fixed" = yes ; then
   _codecmodules="amr_nb $_codecmodules"
 else
   _nocodecmodules="amr_nb $_nocodecmodules"
