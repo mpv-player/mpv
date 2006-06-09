@@ -87,7 +87,7 @@ typedef struct {
   uint32_t avgBitrate;
 
   /* 0x05 DecSpecificDescrTag */
-  uint8_t  decoderConfigLen;
+  uint16_t  decoderConfigLen;
   uint8_t *decoderConfig;
 
   /* 0x06 SLConfigDescrTag */

@@ -39,7 +39,7 @@ int mp4_read_descr_len(stream_t *s) {
 int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   /* create memory stream from data */
   stream_t *s = new_memory_stream(data, datalen);
-  uint8_t len;
+  uint16_t len;
 #ifdef MP4_DUMPATOM
   {int i;
   printf("ESDS Dump (%dbyte):\n", datalen);  
