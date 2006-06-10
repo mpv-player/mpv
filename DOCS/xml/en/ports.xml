@@ -171,6 +171,23 @@ on a 400MHz CPU. You'll need
 installed.
 </para>
 
+<para><emphasis role="bold">Caveat:</emphasis></para>
+<itemizedlist>
+<listitem><para><emphasis role="bold">mediaLib</emphasis> is
+<emphasis role="bold">currently disabled</emphasis> by default in
+<application>MPlayer</application> because of brokenness. SPARC users
+who build MPlayer with mediaLib support have reported a thick,
+green-tint on video encoded and decoded with libavcodec. You may enable
+it if you wish with:
+<screen>
+$ ./configure --enable-mlib
+</screen>
+You do this at your own risk. x86 users should
+<emphasis role="bold">never</emphasis> use mediaLib, as this will
+result in very poor MPlayer performance.
+</para></listitem>
+</itemizedlist>
+
 <para>
 To build the package you will need GNU <application>make</application>
 (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), native
@@ -202,7 +219,9 @@ option to tell the <filename>configure</filename> script where it can find GNU
 "as" on your system).
 </para>
 
-<para>
+<para>Solutions to common problems:</para>
+<itemizedlist>
+<listitem><para>
 Error message from <filename>configure</filename> on a Solaris x86 system using
 GCC without GNU assembler:
 <screen>
@@ -227,8 +246,33 @@ Typical error you get when building with a GNU C compiler that does not use GNU 
    ... more "Illegal mnemonic" and "Syntax error" errors ...
 </screen>
 </para>
+</listitem>
 
-<para>
+<listitem><para><application>MPlayer</application> may segfault when decoding
+and encoding video that uses the win32codecs:
+<screen>
+...
+Trying to force audio codec driver family acm...
+Opening audio decoder: [acm] Win32/ACM decoders
+sysi86(SI86DSCR): Invalid argument
+Couldn't install fs segment, expect segfault
+
+
+MPlayer interrupted by signal 11 in module: init_audio_codec
+...
+</screen>
+This is because of a change to sysi86() in Solaris 10 and pre-Solaris
+Nevada b31 releases. This has been fixed in Solaris Nevada b32;
+however, Sun has yet to backport the fix to Solaris 10. The MPlayer
+Project has made Sun aware of the problem and a patch is currently in
+progress for Solaris 10. More information about this bug can be found
+at:
+<ulink
+url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+</para>
+</listitem>
+
+<listitem><para>
 Due to bugs in Solaris 8, you may not be able to play DVD discs larger than 4 GB:
 </para>
 
@@ -248,6 +292,8 @@ accessed modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
 The hsfs problem can be fixed by installing patch 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
+</itemizedlist>
+</listitem>
 </itemizedlist>
 </sect2>
 
@@ -425,6 +471,7 @@ The following architectures have been tested:
 
 <itemizedlist>
 <listitem><para>604e</para></listitem>
+<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER4</para></listitem>
 </itemizedlist>
 
@@ -434,7 +481,6 @@ The following architectures are untested, but should still work:
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
 <listitem><para>POWER2</para></listitem>
-<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER5</para></listitem>
 </itemizedlist>
 
@@ -442,10 +488,37 @@ The following architectures are untested, but should still work:
 Sound via the Ultimedia Services is not supported, as Ultimedia was
 dropped in AIX 5.1; therefore, the only option is to use the AIX Open
 Sound System (OSS) drivers from 4Front Technologies at <ulink
-url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>.
-4Front Technologies freely provides the OSS drivers for personal and
-non-commercial usage.
+url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html
+</ulink>.
+4Front Technologies freely provides OSS drivers for AIX 5.1 for
+non-commercial use; however, there are currently no sound output
+drivers for AIX 5.2 or 5.3. This means <emphasis role="bold">AIX 5.2
+and 5.3 are not capable of MPlayer audio output, presently.</emphasis>
 </para>
+
+<para>Solutions to common problems:</para>
+
+<itemizedlist>
+<listitem>
+<para>
+If you encounter this error message from <filename>configure</filename>:
+<screen>
+$ ./configure
+...
+Checking for iconv program ... no
+No working iconv program found, use
+--charset=US-ASCII to continue anyway.
+Messages in the GTK-2 interface will be broken then.
+</screen>
+This is because AIX uses non-standard character set names; therefore,
+converting MPlayer output to another character set is currently not
+supported. The solution is to use:
+<screen>
+$ ./configure --charset=noconv
+</screen>
+</para>
+</listitem>
+</itemizedlist>
 
 </sect2>
 </sect1>
