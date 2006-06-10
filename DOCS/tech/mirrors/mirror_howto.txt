@@ -1,0 +1,151 @@
+			  ------------------------------
+                          How to build an MPlayer mirror
+			  ------------------------------
+
+=======================================================================
+WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! WARNING! 
+-----------------------------------------------------------------------
+This is a preliminary version. Do not rely on anything here.
+Please send feedback, corrections etc to mplayer-mirror.
+=======================================================================
+
+About this document
+~~~~~~~~~~~~~~~~~~~
+
+Mirroring MPlayer is quite easy but requires a few steps to be taken
+and a few things taken care of. This document describes these steps
+in detail so that anyone wishing to build an official or an unofficial
+mirror can do that without much trouble.
+
+
+
+A note on performance issues
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A few of the commands used here will generate some load on our main server.
+Executed too often and by to many clients at once will overload our server
+and cause a performance degradation for all our users. Thus we kindly ask
+you to be considerate about what you do. We do not want to restrict mirroring
+to a few selected people, but this requires that everyone using the system 
+outlined here to behave.
+
+
+Outline of the mirroring system
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The mirroring system uses rsync to transfere the data and to perform
+updates. A script is provided to call the rsync client with the right
+set of parameters. This script should be called periodicaly with cron.
+Additionaly, official mirrors should set up an ssh account so that
+updates can be triggered when important updates on the main server
+are performed.
+Mirrors should provide their data over http or ftp or both. Each official
+mirror will be assigned a mirror number. This mirror number determines
+the hostname over which it will be reached.
+
+
+Getting the data, mirroring script and cron setup
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The mirroring script to be used is provided over the svn repo at
+svn://svn.mplayerhq.hu/mplayer/trunk/DOCS/tech/mirrors/update_mplayer_rsync .
+
+This script requires a working `rsync` client. The handling of the
+lock file is done by using `lockfile` from the procmail package.
+Using a lock file is recommended but not necessary. The temporary file
+generation is handled by `mktemp` which is available on from 
+http://www.mktemp.org/mktemp/ . 
+
+The script contains a few configuration variables at the begining that
+can and should be set:
+PATH: The $PATH to be used within the script (recommended).
+LOCK: The full path to the lock file to be used 
+	(/var/lock/mplayer-mirror-lock or something similar, recommended).
+MIRROR_ROOT: The root of the mirror. This is the directory where all files
+	are downloaded to (required).
+MAILADR: The mail address where reports should be send to (required).
+TMPDIR: The directory where the temporary should be created.
+	If you set this explicitly, you have to uncomment the export below too.
+	(defaults to /tmp if not set)
+
+Install this script and set the variables according to your setup. Then run
+it once to get the first checkout of the mirror. This will require at the
+time of this writing (2006-06-10) about 500MB of disk space.
+You should get two directories in your $MIRROR_ROOT: homepage and MPlayer.
+The former containing the html pages for the mirror and the later the
+files for download. 
+
+If this worked out ok, you should set up a cron job that periodicaly updates
+the files. If you run an official mirror you should run the script every
+6h to 12h (6h recommended). If you do not run an official mirror, you should
+not run the script more often than once a day. Please use an "odd" time
+to run the script when it is unlikely that any other cron job is running.
+Bad times are e.g. full hours, or minutes that are divisible by 5.
+An example crontab line would look like this:
+---
+17 1,8,13,19 * * * /path/to/update_mplayer_rsync
+---
+(please change the minute and hours to something random)
+
+You can change the rest of the script as you see fit, although it is not
+recommended. Please DO NOT CHANGE the options of the rsync commands.
+Especially DO NOT REMOVE the -t and -W options. These prevent calculating
+checksums on the server side which are very expensive.
+
+
+Setting up an ssh account for update triggers
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Official mirrors should also provide an ssh based trigger to run the
+update script on request. This makes it possible to distribute releases
+and other important files imediatly to all mirrors.
+
+The way it is set up does not need a special user other than the one
+with which the update script is run already and does not allow to run
+any other command.
+
+First you need to create an ssh key pair by running the following command:
+---
+ssh-keygen -t dsa -C MPHQ_rsync_trigger -f www#_sshkey
+---
+(replace the '#' by your mirror number)
+
+You should send the private key to us by mail and specify the host and
+user to be used. Please do use a private mail of one of us and DO NOT
+send the private key onto the mirror mailinglist.
+
+The public key should be placed into the ~/.ssh/authorized_keys file of the 
+user. To restrict the sshkey to one command only please place the follwoing
+directives at the begining of the line with the key:
+from="*.mplayerhq.hu",command="<path_to_update_mplayer_rsync"
+e.g.:
+---
+from="*.mplayerhq.hu",command="/path/to/update_mplayer_all" ssh-dss AAAA
+B3NzaC1kc3MAAAEBAI20yhE3/bRjzojUhhMz4DHnGhcJUiPWOfoP9CygnFOYOxJTFlxgqM3iJiHWRxgK
+FJ/Uw40eV9K4Ww4fp2pe1guXJzKna8+6vBXaPPVEVxSyaxgtt4Xt3zpUuCnNljgArcEhwcNyOyH2RVln
+yhyxsrKhuq5ZoNHD3caBGjZu3eOR2atPGS1NOdeN/hytIoh8T8DicPqPI29yWX9yAjnHv6wdPutwMLu6
+[...]
+n0Fs3CJY6/1UpgDGH7VPey0SdpJEDewltRLA+buP++2vJD/NUOeGzcRydo2NdZ1wiiaytXxkaec928JC
+NABTeBh6NKAg4vnPvcRLKEBVdSrar/fARSbOmf3HOcsw3uZoAIE9jDGhnMKcnXfHjPZ2tZP9CHs6Wo4n
+yDOxIfDZmJ7VJqMRc6//p5k81pkkGvawbPA63StI/Dkv/648l4XONuJc2z5gaUdjrTA8TsD/VJGiGcHl
+mlGj3IWCBz7e4+XB3L64kFZwLCYN8kwDUAaHq4EtcMVOnQ== MPHQ_rsync_trigger
+---
+(lines split for readability)
+
+
+Setting up a webserver
+~~~~~~~~~~~~~~~~~~~~~~
+
+TO BE DONE
+
+
+Setting up an FTP server
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+TO BE DONE
+
+
+Mailinglist
+~~~~~~~~~~~
+
+TO BE DONE
