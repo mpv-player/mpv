@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r17707 -->
+<!-- in sync with r18673 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -179,6 +179,23 @@
   installiert sein.
 </para>
 
+<para><emphasis role="bold">Vorbehalt:</emphasis></para>
+<itemizedlist>
+	<listitem><para><emphasis role="bold">mediaLib</emphasis> wird in
+			<application>MPlayer</application> momentan aufgrund Fehlerhaftigkeit
+			per Voreinstellung <emphasis role="bold">deaktiviert</emphasis>. SPARC-Benutzer,
+			die MPlayer mit mediaLib-Unterstützung bauen, haben große grüne Farbstiche
+			gemeldet bei Video, das mit libavcodec en- und decodiert wurde.
+			Du kannst es, wenn du möchtest, aktivieren mit:
+<screen>
+	$ ./configure --enable-mlib
+</screen>
+			Du tust dies auf eigenes Risiko. x86-Benutzer sollten mediaLib
+			<emphasis role="bold">niemals</emphasis> benutzen, da dies zu sehr schlechter
+			Performance von MPlayer führt.
+			</para></listitem>
+</itemizedlist>
+
 <para>
   Um das Package zu erstellen, brauchst du GNU <application>make</application>
   (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), das native
@@ -213,7 +230,9 @@
   deinem System finden kann).
 </para>
 
-<para>
+<para>Lösung für gebräuchliche Probleme:</para>
+<itemizedlist>
+<listitem><para>
   Fehlermeldung von <filename>configure</filename> auf einem Solaris x86 System,
   wenn man GCC ohne GNU Assembler anwendet:
 <screen>
@@ -240,8 +259,32 @@
    ... more "Illegal mnemonic" and "Syntax error" errors ...
 </screen>
 </para>
+</listitem>
 
-<para>
+<listitem>
+	<para><application>MPlayer</application> kann eine Schutzverletzung auslösen, wenn
+		mit win32codecs decodiert und encodiert wird:
+<screen>
+...
+Trying to force audio codec driver family acm...
+Opening audio decoder: [acm] Win32/ACM decoders
+sysi86(SI86DSCR): Invalid argument
+Couldn't install fs segment, expect segfault
+
+
+MPlayer interrupted by signal 11 in module: init_audio_codec
+...
+</screen>
+Das liegt an einer Änderung an sysi86() in Solaris 10 und prä-Solaris Nevada b31-Releases.
+Bei Solaris Nevada b32 wurde dieser Fehler behoben; trotzdem, Sun muss diese Lösung noch immer
+nach Solaris 10 rückportieren. Das MPlayer-Projekt hat Sun auf das Problem hingewiesen, und ein Patch
+für Solaris 10 ist gerade in Vorbereitung. Weitere Informationen über diesen Fehler können hier gefunden werden:
+		<ulink
+				 url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+		</para>
+</listitem>
+
+<listitem><para>
   Aufgrund von Bugs in Solaris 8 kann es dazu kommen, dass du keine DVD-Disks
   größer 4 GB abspielen kannst:
 </para>
@@ -264,6 +307,8 @@
   Dieses hsfs-Problem kann  durch die Installation von Patch 109764-04 (sparc) / 109765-04 (x86)
   gefixt werden.
 </para></listitem>
+</itemizedlist>
+</listitem>
 </itemizedlist>
 </sect2>
 
@@ -442,6 +487,7 @@ Segmentation fault
 
 <itemizedlist>
 <listitem><para>604e</para></listitem>
+<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER4</para></listitem>
 </itemizedlist>
 
@@ -451,7 +497,6 @@ Segmentation fault
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
 <listitem><para>POWER2</para></listitem>
-<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER5</para></listitem>
 </itemizedlist>
 
@@ -460,9 +505,35 @@ Segmentation fault
   AIX 5.1 weggelassen wurde; deshalb ist die einzige Option, die Treiber des
   AIX Open Sound System (OSS) von 4Front Technologies auf
   <ulink url="http://www.opensound.com/aix.html"/> zu verwenden.
-  4Front Technologies stellt die OSS-Treiber frei für den persönlichen und
-  nicht-kommerziellen Gebrauch zur Verfügung.
+  4Front Technologies stellt die OSS-Treiber für AIX 5.1 für den nicht-kommerziellen Gebrauch
+  frei zur Verfügung; wie auch immer, momentan gibt es keine
+  Soundausgabetreiber für AIX 5.2 oder 5.3. Dies bedeutet, dass
+  <emphasis role="bold">AIX 5.2 und 5.3 momentan keine MPlayer-Tonausgabe beherrschen.</emphasis>
 </para>
+
+<para>Lösung für gebräuchliche Probleme:</para>
+
+<itemizedlist>
+	<listitem>
+		<para>
+			Wenn du folgende Fehlermeldung von <filename>configure</filename> erhältst:
+<screen>
+$ ./configure
+...
+Checking for iconv program ... no
+No working iconv program found, use
+--charset=US-ASCII to continue anyway.
+Messages in the GTK-2 interface will be broken then.
+</screen>
+			Das liegt daran, dass AIX Namen für Zeichensätze benutzt, die nicht dem Standard entsprechen;
+			daher wird die Konvertierung von MPlayer-Ausgaben zu anderen Zeichensätzen momentan nicht
+			unterstützt. Die Lösung besteht darin, folgendes zu tun:
+<screen>
+$ ./configure --charset=noconv
+</screen>
+		</para>
+	</listitem>
+</itemizedlist>
 
 </sect2>
 </sect1>
