@@ -25,6 +25,8 @@
 #include "m_option.h"
 #include "m_struct.h"
 
+#include "stream_dvd.h"
+
 /// We keep these 2 for the gui atm, but they will be removed.
 extern int dvd_title;
 extern int dvd_chapter;

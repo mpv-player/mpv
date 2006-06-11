@@ -185,6 +185,10 @@ static int max_framesize=0;
 //#include "parse_es.h"
 #include "libmpdemux/matroska.h"
 
+#ifdef USE_DVDREAD
+#include "libmpdemux/stream_dvd.h"
+#endif
+
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/mp_image.h"

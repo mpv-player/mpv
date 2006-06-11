@@ -76,6 +76,10 @@
 
 #include "get_path.c"
 
+#ifdef USE_DVDREAD
+#include "libmpdemux/stream_dvd.h"
+#endif
+
 #ifdef USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>

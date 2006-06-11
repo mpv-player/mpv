@@ -41,6 +41,11 @@ extern af_cfg_t af_cfg;
 #include "libmpdemux/stheader.h"
 #include "libmpcodecs/dec_video.h"
 
+#ifdef USE_DVDREAD
+#include "libmpdemux/stream_dvd.h"
+#endif
+
+
 #include "m_config.h"
 #include "m_option.h"
 
