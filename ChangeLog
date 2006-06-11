@@ -1,6 +1,6 @@
 MPlayer (1.0)
 
-  pre8:
+  pre8: June 11, 2006
 
     Security:
     * support for compilation with non-executable stack
@@ -275,6 +275,12 @@ MPlayer (1.0)
     * new property API
     * new -monitorpixelaspect option to determine monitor aspect from
       screen resolution
+
+
+  pre7try3: February 15, 2006 (unreleased)
+
+    Security:
+    * heap overflow in demuxer.h fixed
 
 
   pre7try2: August 26, 2005
