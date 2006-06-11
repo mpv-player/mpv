@@ -786,8 +786,8 @@ static void gen_gamma_map(unsigned char *map, int size, float gamma);
 //! resolution for 3D yuv->rgb conversion lookup table
 #define LOOKUP_3DRES 32
 static void create_conv_textures(int conv, int *texu, char *texs,
-              int brightness, int contrast, int uvcos, int uvsin,
-              int rgamma, int ggamma, int bgamma) {
+              float brightness, float contrast, float uvcos, float uvsin,
+              float rgamma, float ggamma, float bgamma) {
   unsigned char *lookup_data = NULL;
   switch (conv) {
     case YUV_CONVERSION_FRAGMENT:
