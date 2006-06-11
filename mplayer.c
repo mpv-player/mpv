@@ -2339,6 +2339,75 @@ static int set_property_command(mp_cmd_t* cmd) {
     return 1;
 }
 
+static int reinit_audio_chain() {
+if(sh_audio){
+  current_module="init_audio_codec";
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+  if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
+    sh_audio=d_audio->sh=NULL; // failed to init :(
+    return;
+  } else
+    inited_flags|=INITED_ACODEC;
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+
+
+  //const ao_info_t *info=audio_out->info;
+  current_module="af_preinit";
+  ao_data.samplerate=force_srate;
+  ao_data.channels=0;
+  ao_data.format=audio_output_format;
+#if 1
+  // first init to detect best values
+  if(!preinit_audio_filters(sh_audio,
+        // input:
+        (int)(sh_audio->samplerate*playback_speed),
+	sh_audio->channels, sh_audio->sample_format,
+	// output:
+	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
+      exit_player(MSGTR_Exit_error);
+  }
+#endif  
+  current_module="ao2_init";
+  if(!(audio_out=init_best_audio_out(audio_driver_list,
+      0, // plugin flag
+      ao_data.samplerate,
+      ao_data.channels,
+      ao_data.format,0))){
+    // FAILED:
+    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
+    uninit_player(INITED_ACODEC); // close codec
+    sh_audio=d_audio->sh=NULL; // -> nosound
+    return;
+  } else {
+    // SUCCESS:
+    inited_flags|=INITED_AO;
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
+      audio_out->info->short_name,
+      ao_data.samplerate, ao_data.channels,
+      af_fmt2str_short(ao_data.format),
+      af_fmt2bits(ao_data.format)/8 );
+    mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
+      audio_out->info->name, audio_out->info->author);
+    if(strlen(audio_out->info->comment) > 0)
+      mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", audio_out->info->comment);
+    // init audio filters:
+#if 1
+    current_module="af_init";
+    if(!build_afilter_chain(sh_audio, &ao_data)) {
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
+//      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
+//      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
+//      sh_audio=d_audio->sh=NULL; // -> nosound
+    }
+#endif
+  }
+  mixer.audio_out = audio_out;
+  mixer.volstep = volstep;
+}
+}
+
+
 ///@}
 // Command2Property
 
@@ -3327,18 +3396,6 @@ if (global_sub_size) {
     }
 }
 
-//================== Init AUDIO (codec) ==========================
-if(sh_audio){
-  /* Go through codecs.conf and find the best codec... */
-  current_module="init_audio_codec";
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-  if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
-    sh_audio=d_audio->sh=NULL; // failed to init :(
-  } else
-    inited_flags|=INITED_ACODEC;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-}
-
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_FILENAME=%s\n", filename);
   mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_DEMUXER=%s\n", demuxer->desc->name);
   if (sh_video) {
@@ -3496,58 +3553,7 @@ update_osd_msg();
 //================ SETUP AUDIO ==========================
 
 if(sh_audio){
-  //const ao_info_t *info=audio_out->info;
-  current_module="af_preinit";
-  ao_data.samplerate=force_srate;
-  ao_data.channels=0;
-  ao_data.format=audio_output_format;
-#if 1
-  // first init to detect best values
-  if(!preinit_audio_filters(sh_audio,
-        // input:
-        (int)(sh_audio->samplerate*playback_speed),
-	sh_audio->channels, sh_audio->sample_format,
-	// output:
-	&ao_data.samplerate, &ao_data.channels, &ao_data.format)){
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
-      exit_player(MSGTR_Exit_error);
-  }
-#endif  
-  current_module="ao2_init";
-  if(!(audio_out=init_best_audio_out(audio_driver_list,
-      0, // plugin flag
-      ao_data.samplerate,
-      ao_data.channels,
-      ao_data.format,0))){
-    // FAILED:
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
-    uninit_player(INITED_ACODEC); // close codec
-    sh_audio=d_audio->sh=NULL; // -> nosound
-  } else {
-    // SUCCESS:
-    inited_flags|=INITED_AO;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bytes per sample)\n",
-      audio_out->info->short_name,
-      ao_data.samplerate, ao_data.channels,
-      af_fmt2str_short(ao_data.format),
-      af_fmt2bits(ao_data.format)/8 );
-    mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
-      audio_out->info->name, audio_out->info->author);
-    if(strlen(audio_out->info->comment) > 0)
-      mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", audio_out->info->comment);
-    // init audio filters:
-#if 1
-    current_module="af_init";
-    if(!build_afilter_chain(sh_audio, &ao_data)) {
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
-//      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
-//      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
-//      sh_audio=d_audio->sh=NULL; // -> nosound
-    }
-#endif
-  }
-  mixer.audio_out = audio_out;
-  mixer.volstep = volstep;
+  reinit_audio_chain();
 }
 
 current_module="av_init";
@@ -4564,7 +4570,18 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_TIME_POSITION=%.1f\n", pos);
     } break;
     case MP_CMD_SWITCH_AUDIO : {
+        int current_id = demuxer->audio->id;
         int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
+        if(v > -1 && v < MAX_A_STREAMS && v != current_id) {
+          sh_audio_t *sh2;
+          uninit_player(INITED_AO | INITED_ACODEC);
+          sh2 = demuxer->a_streams[v];
+          if(sh2) {
+            sh2->ds = demuxer->audio;
+            sh_audio = sh2;
+            reinit_audio_chain();
+          }
+        }
         mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", v);
     } break;
     case MP_CMD_RUN : {
