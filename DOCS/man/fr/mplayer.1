@@ -1,4 +1,4 @@
-.\" synced with r18631
+.\" synced with r18656
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -3268,11 +3268,33 @@ la teinte et du gamma.
 Le chaque composante rouge, verte et bleue du gamma peut être configurée.
 .br
 5: Utilise des méthodes spécifiques à ATI (pour les cartes plus anciennes).
-Ceci utilise un extension spécifique à ATI (GL_ATI_fragment_shader - pas
+Ceci utilise une extension spécifique à ATI (GL_ATI_fragment_shader - pas
 GL_ARB_fragment_shader\ !).
 Au moins trois unités de texture sont nécessaires.
 Permet le contrôle de la saturation et de la teinte.
 Cette méthode est rapide mais inexacte.
+.br
+6: Utilise une texture 3D pour réaliser la conversion en utilisant une
+table de lookup.
+Nécessite l'extension GL_ARB_fragment_program et au moins 4 unités de
+texture.
+Permet le contrôle de la luminosité, du contraste, de la saturation, de
+la teinte et du gamma.
+Le gamma du rouge, vert et bleu peut aussi être ajusté indépendement.
+La vitesse de ce type de conversion dépend plus de la bande passante
+de la carte vidéo que les autres méthodes.
+.RE
+.IPs [l|c]scaler=<n>
+Sélection de la fonction de mise à l'échelle à utiliser (pour le luma
+et le chroma séparément).
+Valide uniquement pour les modes yuv 2, 3 et 4.
+.RSss
+0: Utilise un simple fitrage linéraire (par défaut)
+.br
+1: Utilise un fitrage bicubique (meilleure qualité).
+Les cartes plus anciennes ne pourront pas gérer le chroma, tout du moins
+pas en mode plein écran.
+Nécessite une unité de texture supplémentaire.
 .RE
 .IPs customprog=<nom_fichier>
 Charge un programme fragment personnalisé depuis <nom_fichier>.
@@ -7277,10 +7299,14 @@ Multiplicateur de Lagrange maximum pour le contrôleur de débit.
 .RE
 .
 .TP
-.B vqscale=<1\-31>
+.B vqscale=<0\-31>
 Quantificateur constant /\: qualité d'encodage constante.
 Une valeur basse signifie une meilleur qualité mais de gros fichiers
-(par défaut\ : 0 (désactivé)).
+(par défaut\ : 0).
+Dans le cas du codec Snow, 0 signifie encodage sans perte.
+Étant donné que tous les codecs ne le supporte pas, vqscale=0 sera ignoré
+et l'encodage à quanta variable sera utilisé, ce qui est le comportement
+par défaut.
 1 est déconseillé (voir vqmin pour plus de détails).
 .
 .TP
