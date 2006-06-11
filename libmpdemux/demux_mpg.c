@@ -838,18 +838,14 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
               for (i = 0; i < mpg_d->num_a_streams; i++) {
                 if (d_audio->id == mpg_d->a_stream_ids[i]) break;
               }
-              do {
                 i = (i+1) % mpg_d->num_a_streams;
                 sh_a = (sh_audio_t*)demuxer->a_streams[mpg_d->a_stream_ids[i]];
-              } while (sh_a->format != sh_audio->format);
               }
               else {
                 for (i = 0; i < mpg_d->num_a_streams; i++)
                   if (*((int*)arg) == mpg_d->a_stream_ids[i]) break;
                 if (i < mpg_d->num_a_streams)
                   sh_a = (sh_audio_t*)demuxer->a_streams[*((int*)arg)];
-                if (sh_a->format != sh_audio->format)
-                  i = mpg_d->num_a_streams;
               }
               if (i < mpg_d->num_a_streams && d_audio->id != mpg_d->a_stream_ids[i]) {
                 d_audio->id = mpg_d->a_stream_ids[i];
