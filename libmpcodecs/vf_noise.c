@@ -461,7 +461,7 @@ static int open(vf_instance_t *vf, char* args){
 }
 
 vf_info_t vf_info_noise = {
-    "noise genenerator",
+    "noise generator",
     "noise",
     "Michael Niedermayer",
     "",
