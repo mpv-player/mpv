@@ -651,17 +651,13 @@ static const char *bilin_filt_template =
 
 #define BICUB_FILT_MAIN(textype) \
   /* first y-interpolation */ \
-  "SUB coord.xy, fragment.texcoord[%c], parmx.rara;" \
-  "SUB coord.zw, coord.xyxy, parmy.arar;" \
-  "TEX a.r, coord.zwzw, texture[%c], "textype";" \
-  "ADD coord.zw, coord.xyxy, parmy.agag;" \
+  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;" \
+  "TEX a.r, coord.xyxy, texture[%c], "textype";" \
   "TEX a.g, coord.zwzw, texture[%c], "textype";" \
   "LRP a.b, parmy.b, a.rrrr, a.gggg;" \
   /* second y-interpolation */ \
-  "ADD coord.xy, fragment.texcoord[%c], parmx.gaga;" \
-  "SUB coord.zw, coord.xyxy, parmy.arar;" \
-  "TEX a.r, coord.zwzw, texture[%c], "textype";" \
-  "ADD coord.zw, coord.xyxy, parmy.agag;" \
+  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
+  "TEX a.r, coord.xyxy, texture[%c], "textype";" \
   "TEX a.g, coord.zwzw, texture[%c], "textype";" \
   "LRP a.a, parmy.b, a.rrrr, a.gggg;" \
   /* x-interpolation */ \
@@ -670,15 +666,17 @@ static const char *bilin_filt_template =
 static const char *bicub_filt_template_2D =
   "MAD coord.xy, fragment.texcoord[%c], {%f, %f}, {0.5, 0.5};"
   "TEX parmx, coord.x, texture[%c], 1D;"
-  "MUL parmx.rg, parmx, {%f, %f};"
+  "MUL cdelta.xz, parmx.rrgg, {-%f, 0, %f, 0};"
   "TEX parmy, coord.y, texture[%c], 1D;"
-  "MUL parmy.rg, parmy, {%f, %f};"
+  "MUL cdelta.yw, parmy.rrgg, {0, -%f, 0, %f};"
   BICUB_FILT_MAIN("2D");
 
 static const char *bicub_filt_template_RECT =
   "ADD coord, fragment.texcoord[%c], {0.5, 0.5};"
   "TEX parmx, coord.x, texture[%c], 1D;"
+  "MUL cdelta.xz, parmx.rrgg, {-1, 0, 1, 0};"
   "TEX parmy, coord.y, texture[%c], 1D;"
+  "MUL cdelta.yw, parmy.rrgg, {0, -1, 0, 1};"
   BICUB_FILT_MAIN("RECT");
 
 static const char *yuv_prog_template =
@@ -932,7 +930,7 @@ static void glSetupYUVFragprog(float brightness, float contrast,
     "OPTION ARB_precision_hint_fastest;"
     // all scaler variables must go here so they aren't defined
     // multiple times when the same scaler is used more than once
-    "TEMP coord, parmx, parmy, a, yuv;";
+    "TEMP coord, cdelta, parmx, parmy, a, yuv;";
   int prog_remain = sizeof(yuv_prog) - strlen(yuv_prog);
   char *prog_pos = &yuv_prog[strlen(yuv_prog)];
   int cur_texu = 3;
