@@ -1,5 +1,11 @@
 MPlayer (1.0)
 
+  rc1:
+
+    MEncoder:
+    * support of x264 encoding over lavc
+
+
   pre8: "NeuTeam strikes back" June 11, 2006
 
     Security:

@@ -6543,11 +6543,13 @@ fi
 if test "$_x264" = yes ; then
   _x264=yes
   _def_x264='#define HAVE_X264 1'
+  _def_lavc_x264='#define CONFIG_X264 1'
   _codecmodules="x264 $_codecmodules"
 else
   _x264=no
   _ld_x264=''
   _def_x264='#undef HAVE_X264'
+  _def_lavc_x264='#undef CONFIG_X264'
   _nocodecmodules="x264 $_nocodecmodules"
 fi
 echores "$_x264"
@@ -7548,6 +7550,7 @@ AMR_WB=$_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_FAAC=$_faac
 CONFIG_XVID=$_lavc_xvid
+CONFIG_X264=$_x264
 CONFIG_GPL=yes
 CONFIG_MUXERS=yes
 
@@ -7922,6 +7925,7 @@ $_def_amr_wb
 $_def_lavc_faac
 $_def_lavc_xvid
 $_def_lavc_mp3lame
+$_def_lavc_x264
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
