@@ -621,14 +621,14 @@ static void store_weights(float x, GLfloat *dst) {
 }
 
 //! to avoid artefacts this should be rather large
-#define LOOKUP_BSPLINE_RES (1024)
+#define LOOKUP_BSPLINE_RES (2 * 1024)
 /**
  * \brief creates the 1D lookup texture needed for fast higher-order filtering
  * \param unit texture unit to attach texture to
  */
 static void gen_spline_lookup_tex(GLenum unit) {
-  GLfloat tex[4 * (LOOKUP_BSPLINE_RES + 2)];
-  GLfloat *tp = &tex[4];
+  GLfloat tex[4 * LOOKUP_BSPLINE_RES];
+  GLfloat *tp = tex;
   int i;
   for (i = 0; i < LOOKUP_BSPLINE_RES; i++) {
     float x = (float)(i + 0.5) / LOOKUP_BSPLINE_RES;
@@ -636,9 +636,9 @@ static void gen_spline_lookup_tex(GLenum unit) {
     tp += 4;
   }
   store_weights(0, tex);
-  store_weights(1, &tex[4 * (LOOKUP_BSPLINE_RES + 1)]);
+  store_weights(1, &tex[4 * (LOOKUP_BSPLINE_RES - 1)]);
   ActiveTexture(unit);
-  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, LOOKUP_BSPLINE_RES + 2, 1, GL_RGBA, GL_FLOAT, tex);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA16, LOOKUP_BSPLINE_RES, 0, GL_RGBA, GL_FLOAT, tex);
   glTexParameterf(GL_TEXTURE_1D, GL_TEXTURE_PRIORITY, 1.0);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
