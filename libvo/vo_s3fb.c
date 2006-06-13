@@ -270,7 +270,7 @@ static int preinit(const char *arg)
   smem = mmap(0, fb_finfo.smem_len, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
   sreg = fb_finfo.smem_start;
 
-  if((long)smem == -1) {
+  if(smem == (void *)-1) {
     mp_msg(MSGT_VO, MSGL_FATAL, "s3fb: Couldn't map memory areas: %s\n", strerror(errno));
     smem = NULL;
     close(fd);
