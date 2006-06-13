@@ -8,8 +8,8 @@ nicht ausdrücklich anders angegeben, ist die Sprache dieser Listen
 <emphasis role="bold">Englisch</emphasis>. Sende bitte keine Nachrichten in anderen
 Sprachen oder HTML-Mails! Wenn du einen übermäßig großen Anhang schickst und deine
 Mail abgelehnt wird, stelle den Anhang irgendwo zum Download zur Verfügung.
-Klicke auf die Links, um dich anzumelden. Auf den Mailing-Listen gelten die Regeln
-der Netiquette für das Schreiben und Zitieren genau wir im Usenet. Bitte befolge
+Klicke auf die Links, um dich anzumelden. Auf den Mailing-Listen gelten fürs
+Schreiben und Zitieren die Regeln der Netiquette genau wie im Usenet. Bitte befolge
 sie, sie machen das Leben derjenigen, die deine Mails lesen, wesentlich leichter.
 Wenn du sie nicht kennst, lies bitte
 <ulink url="http://www.river.com/users/share/etiquette/edit.html">HOWTO Edit Messages</ulink>.
@@ -27,7 +27,7 @@ Melde dich hier an, wenn du Ankündigungen zur Sicherheit und zu Releases bekomme
 <para>Allgemeine Support-Mailing-Liste für Fragen, die mit <application>MPlayer</application>
 zu tun haben. Bitte lies die <emphasis role="bold">gesamte Dokumentation</emphasis>, bevor
 du hier deine Probleme einschickst oder Feature-Anfragen stellst.
-Fehlerbereichte zu <application>MPlayer</application> gehören auch auf diese Liste,
+Fehlerberichte zu <application>MPlayer</application> gehören auch auf diese Liste,
 lies aber bitte zuerst die Abschnitte <link linkend="bugs">Bekannte Fehler</link> und
 <link linkend="bugreports">Wie Fehler (Bugs) berichtet werden</link>.
 </para></listitem>
@@ -39,7 +39,7 @@ lies aber bitte zuerst die Abschnitte <link linkend="bugs">Bekannte Fehler</link
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
 </para>
-<para>Liste für Fragen, die mit Matrox-Grafikkarten zu tun haben, wie
+<para>Liste für Fragen, die mit Matrox-Grafikkarten zu tun haben, wie etwa
 <link linkend="mga_vid">mga_vid</link>, die offiziellen Beta-Treiber von Matrox (für
 XFree86 4.x.x), matroxfb-TVout-Kram.
 </para></listitem>
@@ -55,7 +55,7 @@ XFree86 4.x.x), matroxfb-TVout-Kram.
 <para>Allgemeine Support-Mailing-Liste für Fragen, die mit <application>MEncoder</application>
 zu tun haben. Bitte lies die <emphasis role="bold">gesamte Dokumentation</emphasis>, bevor
 du hier deine Probleme einschickst oder Feature-Anfragen stellst.
-Fehlerbereichte zu <application>MEncoder</application> gehören auch auf diese Liste,
+Fehlerberichte zu <application>MEncoder</application> gehören auch auf diese Liste,
 lies aber bitte zuerst die Abschnitte <link linkend="bugs">Bekannte Fehler</link> und
 <link linkend="bugreports">Wie Fehler (Bugs) berichtet werden</link>.
 </para></listitem>
@@ -65,7 +65,7 @@ lies aber bitte zuerst die Abschnitte <link linkend="bugs">Bekannte Fehler</link
 <para>Diese Liste behandelt die <application>MPlayer</application>-Entwicklung!
 Gespräche über Interface/API-Änderungen, neue Bibliotheken, Code-Optimierungen,
 configure-Änderungen sind hier die richtigen Themen.
-Sende hierhin Patches, aber keine Fehlerbereichte, Benutzerfragen, Feature-Anfragen oder
+Sende hierhin Patches, aber keine Fehlerberichte, Benutzerfragen, Feature-Anfragen oder
 Flames, um den Listen-Traffic gering zu halten.
 </para></listitem>
 <listitem>
@@ -124,7 +124,7 @@ werden hierhin geschickt.
 </para></listitem>
 </itemizedlist>
 <note><para>
-Das Mailing-Listen-Listen Archiv, das auch durchsucht werden kann, findest du unter
+Das Mailing-Listen-Archiv, das auch durchsucht werden kann, findest du unter
 <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
 </para>

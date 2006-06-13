@@ -34,7 +34,7 @@ Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 21. Okt. - 2. Nov. 2000
   </para><para>MPEG-Codec war libmpeg2 (mpeg2dec) von Aaron Holtzman und
-  Michel Lespinasse.  Er ist super, optimierter, sehr schneller C-Code mit perfekter
+  Michel Lespinasse. Er ist super, optimierter, sehr schneller C-Code mit perfekter
   Bildqualität und 100% MPEG-Standard-Konformität.
   </para></listitem>
 <listitem><para>
@@ -70,7 +70,7 @@ Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
   <emphasis role="bold"><application>MPlayer</application> 0.50 "The Faszom(C)ounter"</emphasis> 8. Okt. 2001
   </para><para>Hmm. Wieder ein Release. Tonnen neuer Features, Beta-GUI-Version,
   Bugs gefixt, neue vo- und ao-Treiber, auf viele Systeme portiert, einschließlich
-  Opensource-DivX-Codecs und vieles mehr. Probiere es aus!
+  Opensource-DivX-Codecs und vieles mehr. Probiers aus!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> 3. Jan. 2002
@@ -81,7 +81,7 @@ Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The BirthdayCounter"</emphasis> 11. Nov. 2002
-  </para><para>Obwohl dies kein Release ist, erwähne ich esn denn es kam
+  </para><para>Obwohl dies kein Release ist, erwähne ich es, denn es kam
   2 Jahre nach <application>MPlayer</application> v0.01 heraus.
   Happy birthday, <application>MPlayer</application>!
   </para></listitem>
@@ -96,7 +96,7 @@ Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
   </para><para>Nach mehr als einem Jahr kamen wir letztendlich zu dem Entschluß, dass
   der Code tatsächlich wieder stabil und bereit zur Veröffentlichung als
   Release ist. Leider vergaßen wir, die Versionsnummer zu erhöhen, und weitere
-  widerliche Bugs flossen ein, also sei bereit dafür...
+  widerliche Bugs flossen ein, also sei darauf vorbebereitet...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 13. Aug. 2003

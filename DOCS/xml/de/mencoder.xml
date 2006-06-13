@@ -249,7 +249,7 @@ Containerformate:
 <informalexample>
 <para>Beispiel:</para>
 <para>
-  Erzeugen eines Macromedia Flash Video, das in einem Web-Browser mit dem
+  Erzeugen eines Macromedia Flash Videos, das in einem Web-Browser mit dem
   Macromedia Flash Plugin abgespielt werden kann:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replaceable> -of lavf -oac mp3lame -lameopts abr:br=56 -ovc lavc \
@@ -269,14 +269,14 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
   <application>MEncoder</application> kann aus Dateien oder direkt von
   einer DVD- oder VCD-Disk encodieren.
   Schließe einfach den Dateinamen in der Befehlszeile mit ein, um
-  von einer Datei, oder
+  von einer Datei zu ecodieren, oder
   <option>dvd://</option><replaceable>Titelnummer</replaceable>
-  bzw. <option>vcd://</option><replaceable>Tracknummer</replaceable>, um
-  von einem DVD-Titel oder VCD-Track zu ecodieren.
+  bzw. <option>vcd://</option><replaceable>Tracknummer</replaceable> zum
+  Ecodieren von einem DVD-Titel oder VCD-Track.
   Wenn du bereits einmal eine DVD auf deine Festplatte kopiert hast
   (du kannst ein Tool wie etwa <application>dvdbackup</application>
   verwenden, auf den meisten Systemen verfügbar)
-  und willst von der Kopie encodieren, solltest du nach wie vor die Syntax
+  und von der Kopie encodieren willst, solltest du nach wie vor die Syntax
   <option>dvd://</option> benutzen, zusammen mit <option>-dvd-device</option>
   gefolgt vom Pfad zur kopierten DVD-Root.
 
@@ -360,15 +360,15 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 MPEG (MPEG-PS) erzeugen.
 Gewöhnlich, wenn du MPEG1- oder MPEG2-Videos benutzt, tust du dies, weil
 du in ein erzwungenes Format wie SVCD, VCD oder DVD encodierst.
-die spezifischen Anforderungen an diese Formate werden im Abschnitt
+Die spezifischen Anforderungen an diese Formate werden im Abschnitt
 <link linkend="menc-feat-vcd-dvd">Verwenden von MEncoder zum Erzeugen
 VCD/SVCD/DVD-konformer Dateien</link>
 beschrieben.
 </para>
 
 <para>
-Um das Format der Ausgabedatei von <application>MEncoder</application>
-zu ändern, verwende die Option <option>-of mpeg</option>.
+Verwende die Option <option>-of mpeg</option>, um das Format der
+Ausgabedatei von <application>MEncoder</application> zu ändern.
 </para>
 
 <informalexample>
@@ -407,7 +407,7 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
 
 <para>
 Oft taucht die Notwendigkeit auf, die Größe der Bilder eines Films zu
-ändern. Das kann viele Gründe haben: das Wachsen der Dateigröße,
+ändern. Das kann viele Gründe haben: das Anwachsen der Dateigröße,
 Netzwerkbandbreite etc. Die meisten Leute reskalieren gerade beim
 Konvertieren von DVDs oder SVCDs nach DivX AVI. Wenn du reskalieren willst,
 lies den Abschnitt <link linkend="aspect">Beibehalten des Seitenverhältnisses</link>.
@@ -442,7 +442,7 @@ sie. Dieser Abschnitt behandelt das <emphasis role="bold">Kopieren</emphasis>.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Videostream</emphasis> (Option <option>-ovc copy</option>):
-  Damit kann man nette Sachen machen :) Wie FLI oder VIVO oder
+  Damit kann man nette Sachen machen :) Wie etwa FLI oder VIVO oder
   MPEG1-Video in eine AVI-Datei legen (nicht konvertieren!)! Sicherlich kann
   nur <application>MPlayer</application> solche Dateien abspielen :)
   Und es hat tatsächlich keine wirkliche Daseinsberechtigung.
@@ -485,8 +485,8 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc la
 <para>
   <application>MEncoder</application> ist in der Lage, Filme aus einer oder
   mehreren JPEG-, PNG- oder TGA-Dateien zu erzeugen. Mit einem einfachen
-  framecopy kann es MJPEG (Motion JPEG), MPNG (Motion PNG) oder MTGA (Motion TGA)
-  Dateien generieren.
+  framecopy kann es Dateien wie MJPEG (Motion JPEG), MPNG (Motion PNG)
+  oder MTGA (Motion TGA) generieren.
 </para>
 
 <orderedlist>
@@ -587,12 +587,12 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 
 
 <sect1 id="menc-feat-extractsub">
-<title>Extraieren von DVD-Untertiteln in eine VOBsub-Datei</title>
+<title>Extrahieren von DVD-Untertiteln in eine VOBsub-Datei</title>
 
 <para>
   <application>MEncoder</application> kann Untertitel aus einer DVD
   in VOBsub-formatierte Dateien extrahieren. Diese bestehen aus einem
-  Paar Dateien mit den Endungen <filename>.idx</filename> und
+  Paar von Dateien mit den Endungen <filename>.idx</filename> und
   <filename>.sub</filename> und sind für gewöhnlich in ein einzelnes
   <filename>.rar</filename>-Archiv gepackt.
   <application>MPlayer</application> kann diese mit den Optionen
@@ -651,7 +651,7 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
   Dateien von DVDs und SVCDs (z.B. MPEG1/2) enthalten einen Wert für das
   Seitenverhältnis, welcher beschreibt, wie der Player den Videostream
   skalieren soll, damit Menschen keine Eierköpfe kriegen
-  (Bsp.: 480x480 + 4:3 = 640x480). Beim Encodieren zu AVI-(DivX)-Dateien
+  (Beispiel: 480x480 + 4:3 = 640x480). Beim Encodieren zu AVI-(DivX)-Dateien
   musst du dir bewusst sein, dass AVI-Header diesen Wert nicht abspeichern.
   Das Reskalieren des Films ist ätzend und zeitaufwändig, da muss es doch
   einen besseren Weg geben!

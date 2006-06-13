@@ -43,7 +43,7 @@ Siehe Manpage für detaillierte Informationen.
 <para>Ein paar Anmerkungen:</para>
 
 <para>
-  Wenn du ALSA Version 0.5 in Benutzung hast, musst du fast immer
+  Wenn du ALSA Version 0.5 in nutzt, musst du fast immer
   <option>-ao alsa5</option> verwenden, da ALSA 0.5 fehlerhaften Code für die
   OSS-Emulation enthält und <application>MPlayer</application>
   <emphasis role="bold"> zum Absturz bringen wird</emphasis>, mit einer

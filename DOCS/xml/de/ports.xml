@@ -45,8 +45,8 @@
 <para>
   Christian Marillat hatte eine Weile lang inoffizielle Debian-Packages von
   <application>MPlayer</application>, <application>MEncoder</application> und
-  unseren Bitmap-Fonts erstellt, du kannst sie (passend) auf
-  <ulink url="http://hpisi.nerim.net/">seiner Homepage</ulink> bekommen.
+  unseren Bitmap-Fonts erstellt, du kannst sie auf
+  <ulink url="http://hpisi.nerim.net/">seiner Homepage</ulink> (passend) bekommen.
 </para>
 </sect2>
 
@@ -323,7 +323,7 @@ für Solaris 10 ist gerade in Vorbereitung. Weitere Informationen über diesen Feh
 <para>
   Oder du kannst die mit IRIX 6.5 gelieferte Standard-Installation verwenden, falls
   du das <filename>Makefile</filename> ein bisschen von Hand editieren willst.
-  Ändere folgende beiden Zeilen:
+  Ändere folgende beiden Zeilen von:
 <programlisting>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 
@@ -335,7 +335,7 @@ für Solaris 10 ist gerade in Vorbereitung. Weitere Informationen über diesen Feh
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </programlisting>
-  Mache dann (vom <application>MPlayer</application>-Quellverzeichnis aus):
+  Mache dann (vom <application>MPlayer</application>-Quellverzeichnis aus)
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
   und fahre dann fort mit Compilierung und Installation.
 </para>
@@ -569,8 +569,8 @@ $ ./configure --charset=noconv
 </para>
 
 <para>
-  Die besten Ergebnisse werden erzielt mit dem nativen DirectX-Video-Ausgabetreiber
-  (<option>-vo directx</option>). Alternativen sind OpenGL und SDL, jedoch variiert die
+  Die besten Ergebnisse werden mit dem nativen DirectX-Video-Ausgabetreiber
+  (<option>-vo directx</option>) erzielt. Alternativen sind OpenGL und SDL, jedoch variiert die
   OpenGL-Performance stark von System zu System, und SDL ist dafür bekannt,
   Videos kaputt zu machen oder auf manchen Systemen abzurauchen. Wird das Bild zerstört,
   versuche, die Hardwarebeschleunigung mit
@@ -606,7 +606,7 @@ $ ./configure --charset=noconv
 </para>
 
 <para>
-  Für die besten Resulte sollte <application>MPlayer</application> einen
+  Für die besten Resultate sollte <application>MPlayer</application> einen
   Farbraum anwenden, den deine Grafikkarte hardwareseitig unterstützt.
   Leider melden viele Windows-Grafikkartetreiber fälschlich einige Farbräume
   als von der Hardware unterstützt. Um herauszufinden welche das sind, versuche
@@ -814,12 +814,12 @@ MPlayer_source_verzeichnis
 </para>
 
 <para>
-  Wenn du für eine G4 oder neuere CPU mit AltiVec-Support konfigurierst,
+  Wenn du für eine G4 oder eine neuere CPU mit AltiVec-Support konfigurierst,
   mache folgendes:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 </screen>
-  Wenn du für eine G3-getriebene Maschine mit AltiVec konfigurierst,
+  Wenn du für einen G3-getriebenen Rechner mit AltiVec konfigurierst,
   mache dies:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
@@ -872,7 +872,7 @@ make dist
 </para>
 
 <para>
-  Der <option>-vo x11</option>-Output wird etwas langsamer sein als unter Linux,
+  Der Output mit <option>-vo x11</option> wird etwas langsamer sein als unter Linux,
   da QNX nur X-<emphasis>Emulation</emphasis> besitzt, was sehr langsam ist.
 </para>
 </sect2>
