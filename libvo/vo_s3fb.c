@@ -45,14 +45,14 @@ typedef struct vga_type {
 } vga_t;
 
 static vga_t *v = NULL;
-     static int fd = -1;
-     static struct fb_fix_screeninfo fb_finfo;
-     static struct fb_var_screeninfo fb_vinfo;
-     static uint32_t in_width, in_height, in_format, in_depth, in_s3_format,
+static int fd = -1;
+static struct fb_fix_screeninfo fb_finfo;
+static struct fb_var_screeninfo fb_vinfo;
+static uint32_t in_width, in_height, in_format, in_depth, in_s3_format,
   screenwidth, screenheight, screendepth, screenstride,
   vidwidth, vidheight, vidx, vidy, page, offset, sreg;
-     static char *inpage, *inpage0, *smem = NULL;
-     static void (*alpha_func)();
+static char *inpage, *inpage0, *smem = NULL;
+static void (*alpha_func)();
 
 static void clear_screen();
 
@@ -114,14 +114,14 @@ int enable() {
                  S3_MEMBASE + S3_NEWMMIO_REGBASE);
         close(fd);
         if (v->mmio != MAP_FAILED) {
-  v->cr38 = readcrtc(0x38);
-  v->cr39 = readcrtc(0x39);
-  v->cr53 = readcrtc(0x53);
-  writecrtc(0x38, 0x48);
-  writecrtc(0x39, 0xa5);
-  writecrtc(0x53, 0x08);
-  return 1;
-}
+          v->cr38 = readcrtc(0x38);
+          v->cr39 = readcrtc(0x39);
+          v->cr53 = readcrtc(0x53);
+          writecrtc(0x38, 0x48);
+          writecrtc(0x39, 0xa5);
+          writecrtc(0x53, 0x08);
+          return 1;
+	}
       }
       iopl(0);
     }
@@ -132,11 +132,11 @@ int enable() {
 
 void disable() {
   if (v) {
-  writecrtc(0x53, v->cr53);
-  writecrtc(0x39, v->cr39);
-  writecrtc(0x38, v->cr38);
+    writecrtc(0x53, v->cr53);
+    writecrtc(0x39, v->cr39);
+    writecrtc(0x38, v->cr38);
     ioperm(0x3d4, 2, 0);
-  munmap(v->mmio, S3_NEWMMIO_REGSIZE);
+    munmap(v->mmio, S3_NEWMMIO_REGSIZE);
     free(v);
     v = NULL;
   }
@@ -157,7 +157,7 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   pitch = src_w * bpp;
    
   // video card memory layout:
-  // 0-n: visable screen memory, n = width * height * bytes per pixel
+  // 0-n: visible screen memory, n = width * height * bytes per pixel
   // n-m: scaler source memory, n is aligned to a page boundary
   // m+: scaler source memory for multiple buffers
 
@@ -205,7 +205,7 @@ int yuv_on(int format, int src_w, int src_h, int dst_x, int dst_y, int dst_w, in
   writecrtc(0x93, (pitch + 7) / 8);
    
   writecrtc(0x67, readcrtc(0x67) | 0x4);
-
+   
   return offset;
 }
 
@@ -283,7 +283,7 @@ static int preinit(const char *arg)
     close(fd);
     fd = -1;
     return -1;
-}
+  }
 
   return 0; // Success
 }
@@ -301,7 +301,7 @@ static void uninit(void)
     munmap(smem, fb_finfo.smem_len);
     smem = NULL;
   }
-
+   
   disable();
 
   if(fd != -1) {
