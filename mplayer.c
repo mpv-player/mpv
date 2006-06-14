@@ -4232,7 +4232,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_EDL_MARK:
       if( edl_fd ) {
-	float v = sh_video->pts;
+	float v = sh_video ? sh_video->pts :
+	    playing_audio_pts(sh_audio, d_audio, audio_out);
 	fprintf( edl_fd, "%f %f %d\n", v-2, v, 0 );
       }
       break;
