@@ -287,7 +287,7 @@ static int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
 
   pthread_mutex_lock(&xmms_mutex);
   dp = new_demux_packet(XMMS_PACKETSIZE/2);
-  ds->pts = priv->spos / sh_audio->wf->nAvgBytesPerSec;
+  dp->pts = priv->spos / sh_audio->wf->nAvgBytesPerSec;
   ds->pos = priv->spos;
 
   memcpy(dp->buffer,xmms_audiobuffer,XMMS_PACKETSIZE/2);
@@ -319,7 +319,6 @@ static void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_d
 
   priv->ip->seek((pos<0)?0:pos);
   priv->spos=pos * sh_audio->wf->nAvgBytesPerSec;
-  sh_audio->delay=pos; //priv->spos / sh_audio->wf->nAvgBytesPerSec;
 }
 
 static void demux_close_xmms(demuxer_t* demuxer) {

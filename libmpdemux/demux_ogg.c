@@ -1599,8 +1599,6 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
         vo_osd_changed(OSDTYPE_SUBTITLE);
         clear_sub = -1;
 	demux_ogg_add_packet(ds,os,ds->id,&op);
-        if (demuxer->video->id < 0)
-          sh_audio->delay = pts;
 	return;
       }
      }

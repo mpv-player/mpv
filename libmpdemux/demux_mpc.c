@@ -145,8 +145,7 @@ static int demux_mpc_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
     priv->last_pts = 0;
   else
     priv->last_pts += priv->pts_per_packet;
-  ds->pts = priv->last_pts - (ds_tell_pts(demux->audio) -
-              sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+  dp->pts = priv->last_pts;
   ds_add_packet(ds, dp);
   return 1;
 }
@@ -177,8 +176,6 @@ static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
     if (s->eof) break;
   }
   if (!sh_audio) return;
-  sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio) -
-                     sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
 }
 
 static void demux_close_mpc(demuxer_t* demuxer) {

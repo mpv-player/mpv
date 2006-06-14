@@ -2415,6 +2415,58 @@ if(sh_audio){
 ///@}
 // Command2Property
 
+
+// Return pts value corresponding to the end point of audio written to the
+// ao so far.
+static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
+{
+    // first calculate the end pts of audio that has been output by decoder
+    double a_pts = sh_audio->pts;
+    if (a_pts != MP_NOPTS_VALUE)
+	// Good, decoder supports new way of calculating audio pts.
+	// sh_audio->pts is the timestamp of the latest input packet with
+	// known pts that the decoder has decoded. sh_audio->pts_bytes is
+	// the amount of bytes the decoder has written after that timestamp.
+	a_pts += sh_audio->pts_bytes / (double) sh_audio->o_bps;
+    else {
+	// Decoder doesn't support new way of calculating pts (or we're
+	// being called before it has decoded anything with known timestamp).
+	// Use the old method of audio pts calculation: take the timestamp
+	// of last packet with known pts the decoder has read data from,
+	// and add amount of bytes read after the beginning of that packet
+	// divided by input bps. This will be inaccurate if the input/output
+	// ratio is not constant for every audio packet or if it is constant
+	// but not accurately known in sh_audio->i_bps.
+
+	a_pts = d_audio->pts;
+	// ds_tell_pts returns gets bytes read after last timestamp from
+	// demuxing layer, decoder might use sh_audio->a_in_buffer for bytes
+	// it has read but not decoded
+	a_pts += (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len) /
+	    (double)sh_audio->i_bps;
+    }
+    // Now a_pts hopefully holds the pts for end of audio from decoder.
+    // Substract data in buffers between decoder and audio out.
+
+    // Decoded but not filtered
+    a_pts -= sh_audio->a_buffer_len / (double)sh_audio->o_bps;
+
+    // Data that was ready for ao but was buffered because ao didn't fully
+    // accept everything to internal buffers yet
+    a_pts -= sh_audio->a_out_buffer_len * playback_speed / (double)ao_data.bps;
+
+    return a_pts;
+}
+
+// Return pts value corresponding to currently playing audio.
+static double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
+				ao_functions_t *audio_out)
+{
+    return written_audio_pts(sh_audio, d_audio) - playback_speed *
+	audio_out->get_delay();
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -3539,7 +3591,6 @@ int dropped_frames=0; // how many frames dropped since last non-dropped frame
 int too_slow_frame_cnt=0;
 int too_fast_frame_cnt=0;
 // for auto-quality:
-float AV_delay=0; // average of A-V timestamp differences
 double vdecode_time;
 unsigned int lastframeout_ts=0;
 /*float time_frame_corr_avg=0;*/ /* unused */
@@ -3678,7 +3729,7 @@ while(sh_audio){
 if(!sh_video) {
   // handle audio-only case:
   if(!quiet) {
-    float a_pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
+    double a_pos = playing_audio_pts(sh_audio, d_audio, audio_out);
     print_status(a_pos, 0, 0);
   }
   if(d_audio->eof && sh_audio->a_in_buffer_len <= 0 && sh_audio->a_buffer_len <= 0) eof = PT_NEXT_ENTRY;
@@ -3923,13 +3974,9 @@ if(time_frame>0.001 && !(vo_flags&256)){
   current_module="av_sync";
 
   if(sh_audio){
-    double a_pts=0;
-    double v_pts=0;
+    double a_pts, v_pts;
 
-    // unplayed bytes in our and soundcard/dma buffer:
-    float delay=playback_speed*audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
-
-    if (autosync){
+    if (autosync)
       /*
        * If autosync is enabled, the value for delay must be calculated
        * a bit differently.  It is set only to the difference between
@@ -3941,31 +3988,16 @@ if(time_frame>0.001 && !(vo_flags&256)){
        * value here, even a "corrected" one, would be incompatible with
        * autosync mode.)
        */
-      delay=sh_audio->delay;
-      delay+=(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
-    }
-    delay += sh_audio->a_out_buffer_len*playback_speed/(float)ao_data.bps;
+	a_pts = written_audio_pts(sh_audio, d_audio) - sh_audio->delay;
+    else
+	a_pts = playing_audio_pts(sh_audio, d_audio, audio_out);
 
-    {
-      // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
-      a_pts = sh_audio->pts;
-      if (a_pts == MP_NOPTS_VALUE) {
-	  // Decoder doesn't support tracking timestamps or demuxer doesn't
-	  // set them properly in individual packets, use old inaccurate method
-	  a_pts=d_audio->pts;
-	  a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-      }
-      else
-	  a_pts += sh_audio->pts_bytes / (float)sh_audio->o_bps;
-    }
     v_pts=sh_video ? sh_video->pts : d_video->pts;
-
-      mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"### A:%8.3f (%8.3f)  V:%8.3f  A-V:%7.4f  \n",a_pts,a_pts-audio_delay-delay,v_pts,(a_pts-delay-audio_delay)-v_pts);
 
       {
 	static int drop_message=0;
-        float x;
-	AV_delay=(a_pts-delay-audio_delay)-v_pts;
+	double AV_delay = a_pts - audio_delay - v_pts;
+	double x;
 	if(AV_delay>0.5 && drop_frame_cnt>50 && drop_message==0){
 	  ++drop_message;
 	  mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
@@ -3985,7 +4017,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
 	if(!frame_time_remaining){ sh_audio->delay+=x; c_total+=x;} // correction
         if(!quiet)
-          print_status(a_pts - audio_delay - delay, AV_delay, c_total);
+          print_status(a_pts - audio_delay, AV_delay, c_total);
       }
     
   } else {
@@ -4570,7 +4602,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         pos = sh_video->pts;
       else
       if (sh_audio && audio_out)
-        pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
+        pos = playing_audio_pts(sh_audio, d_audio, audio_out);
       mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_TIME_POSITION=%.1f\n", pos);
     } break;
     case MP_CMD_SWITCH_AUDIO : {

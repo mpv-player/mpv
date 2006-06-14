@@ -493,9 +493,7 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
       ds_fill_buffer(d_audio);
     }
     
-    if (d_video->id < 0)
-      sh_audio->delay = d_audio->pts;
-    else
+    if (d_video->id >= 0)
     while(1){
 	if(sh_audio && !d_audio->eof){
 	  float a_pts=d_audio->pts;

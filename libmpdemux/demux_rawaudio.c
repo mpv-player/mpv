@@ -92,7 +92,6 @@ static void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 
   pos -= (pos % (sh_audio->channels * sh_audio->samplesize) );
   stream_seek(s,pos);
-  sh_audio->delay= (pos-ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len) / (float)(sh_audio->wf->nAvgBytesPerSec);
 //  printf("demux_rawaudio: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
 

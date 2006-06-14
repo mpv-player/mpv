@@ -2123,8 +2123,6 @@ static void demux_seek_mov(demuxer_t *demuxer,float pts,float audio_delay,int fl
 	//if(!(flags&1)) pts+=ds->pts;
 	ds->pts=mov_seek_track(trak,pts,flags);
 	if (ds->pts < 0) ds->eof = 1;
-	if (demuxer->video->id < 0)
-	  ((sh_audio_t*)ds->sh)->delay = ds->pts;
     }
 
 }

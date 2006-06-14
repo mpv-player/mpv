@@ -620,8 +620,7 @@ static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   }
 
   resize_demux_packet(dp, l);
-  ds->pts = priv->last_pts - (ds_tell_pts(demux->audio) -
-              sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+  dp->pts = priv->last_pts;
   ds_add_packet(ds, dp);
   return 1;
 }
@@ -667,7 +666,6 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
     }
     if(len > 0)
       high_res_mp3_seek(demuxer,len);
-    sh_audio->delay = priv->last_pts -  (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     return;
   }
 
@@ -679,13 +677,10 @@ static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_
 
   if(demuxer->movi_end && pos >= demuxer->movi_end) {
      pos = demuxer->movi_end;
-    //sh_audio->delay = (stream_tell(s) - demuxer->movi_start)/(float)sh_audio->i_bps;
-    //return;
   } else if(pos < demuxer->movi_start)
     pos = demuxer->movi_start;
 
   priv->last_pts = (pos-demuxer->movi_start)/(float)sh_audio->i_bps;
-  sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
   
   switch(priv->frmt) {
   case WAV:

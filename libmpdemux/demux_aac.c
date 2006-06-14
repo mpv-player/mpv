@@ -248,7 +248,6 @@ static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, float audio_
 			nf -= num;
 		}
 	}
-	sh_audio->delay = priv->last_pts - (ds_tell_pts(demuxer->audio)-sh_audio->a_in_buffer_len)/(float)priv->bitrate;
 }
 
 
