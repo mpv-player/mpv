@@ -2,25 +2,22 @@
 About Subversion write access:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Before everything else, you should know how to use CVS properly. CVS comes with
-some documentation, as usual
+Before everything else, you should know how to use Subversion properly.
+Subversion comes with some documentation.
 
-  cvs --help
-  man cvs
+  svn help
+  man svn
+  info svn
 
-are a good start. The most comprehensive manual is the book "Version Management
-with CVS" by Per Cederqvist. It may be available on your system via
+are a good start. The most comprehensive manual is the book "Version Control
+with Subversion" by Ben Collins-Sussman, Brian W. Fitzpatrick and C. Michael
+Pilato. It can be viewed online at
 
-  info cvs
+http://svnbook.org/
 
-or online at
+For more information about the Subversion project, visit
 
-  http://www.cvshome.org/docs/manual/
-
-Another very good resource is "The CVS Book - Open Source Development with CVS"
-by Karl Fogel and Moshe Bar. It is also available online:
-
-http://cvsbook.red-bean.com/
+http://subversion.tigris.org/
 
 Consult these resources whenever you have problems, they are quite exhaustive.
 What follows now are MPlayer specific guidelines.
