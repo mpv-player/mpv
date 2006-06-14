@@ -27,8 +27,6 @@ typedef struct da_priv {
   float length;
 } da_priv_t;
 
-extern void free_sh_audio(sh_audio_t* sh);
-
 static uint32_t get_bits(da_priv_t* priv, stream_t* s, int bits) {
   uint32_t out = priv->dword;
   uint32_t mask = (1 << bits) - 1;
