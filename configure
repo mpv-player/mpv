@@ -1614,8 +1614,7 @@ _faac=auto
 _ladspa=auto
 _xmms=no
 _have_dvd=no
-# dvdnav disabled, it does not work
-#_dvdnav=no
+_dvdnav=no
 _dvdread=auto
 _dvdkit=auto
 _xanim=auto
@@ -1839,9 +1838,8 @@ for ac_option do
   --disable-dvdread)	_dvdread=no	;;
   --enable-mpdvdkit)	_dvdkit=yes	;;
   --disable-mpdvdkit)	_dvdkit=no	;;
-# dvdnav disabled, it does not work
-#  --enable-dvdnav)	_dvdnav=yes	;;
-#  --disable-dvdnav)	_dvdnav=no	;;
+  --enable-dvdnav)	_dvdnav=yes	;;
+  --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
   --disable-xanim)	_xanim=no	;;
   --enable-real)	_real=yes	;;
@@ -2016,11 +2014,10 @@ for ac_option do
   --language=*)
     _language=`echo $ac_option | cut -d '=' -f 2`
     ;;
-# dvdnav disabled, it does not work
-#  --with-libdvdnav=*)
-#    _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
-#    _dvdnav=yes
-#    ;;
+  --with-libdvdnav=*)
+    _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
+    _dvdnav=yes
+    ;;
 
   --with-codecsdir=*)
     _win32libdir=`echo $ac_option | cut -d '=' -f 2`
@@ -2140,10 +2137,9 @@ for ac_option do
   --with-glib-config=*)
     _glibconfig=`echo $ac_option | cut -d '=' -f 2`
     ;;
-# dvdnav disabled, it does not work
-#  --with-dvdnav-config=*)
-#    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
-#    ;;
+  --with-dvdnav-config=*)
+    _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
+    ;;
   --with-madlibdir=*)
     _ld_mad=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
@@ -5188,48 +5184,52 @@ else
   _def_have_dvd='#undef HAVE_DVD'
 fi
 
-# dvdnav disabled, it does not work
-# echocheck "DVD support (libdvdnav)"
-# if test "$_dvdnav" = yes ; then
-#   cat > $TMPC <<EOF
-# #include <dvdnav.h>
-# int main(void) { dvdnav_t *dvd=0; return 0; }
-# EOF
-#   _dvdnav=no
-#   test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
-#   if test -z "$_dvdnavconfig" ; then
-#     if ( dvdnav-config --version ) >/dev/null 2>&1 ; then
-#       _dvdnavconfig="dvdnav-config"
-#     fi
-#   fi
-#   test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
-#   _used_css=
-#   test "$_dvdkit" = no && _used_css=$_ld_css
-#   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
-# fi
-# if test "$_dvdnav" = yes ; then
-#   _largefiles=yes
-#   _def_dvdnav='#define USE_DVDNAV 1'
-#   if test -n "$_legal_dvdnavdir" ; then
-#    _ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
-#   elif test -n "$_dvdnavconfig" ; then
-#    _ld_css="$_ld_css `$_dvdnavconfig --libs`"
-#   else
-#    _ld_css="$_ld_css -ldvdnav"
-#   fi
-#   if test -n "$_dvdnavconfig" ; then
-#    _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
-#    _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
-#   fi
-#   if test -n "$_dvdnavdir" ; then
-#    _inc_extra="$_inc_extra -I$_dvdnavdir"
-#   fi
-#   _inputmodules="dvdnav $_inputmodules"
-# else
-#   _def_dvdnav='#undef USE_DVDNAV'
-#   _noinputmodules="dvdnav $_noinputmodules"
-# fi
-# echores "$_dvdnav"
+echocheck "DVD support (libdvdnav)"
+if test "$_dvdnav" = yes ; then
+  cat > $TMPC <<EOF
+#include <dvdnav.h>
+int main(void) { dvdnav_t *dvd=0; return 0; }
+EOF
+  _dvdnav=no
+  test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
+  if test -z "$_dvdnavconfig" ; then
+    if ( dvdnav-config --version ) >/dev/null 2>&1 ; then
+      _dvdnavconfig="dvdnav-config"
+    fi
+  fi
+  test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
+  _used_css=
+  #test "$_dvdkit" = no && _used_css=$_ld_css
+  cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  _largefiles=yes
+  _def_dvdnav='#define USE_DVDNAV 1'
+  _ld_dvdnav=
+  if test -n "$_legal_dvdnavdir" ; then
+   #_ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
+   _ld_dvdnav="$_legal_dvdnavdir -ldvdnav"
+  elif test -n "$_dvdnavconfig" ; then
+   #_ld_css="$_ld_css `$_dvdnavconfig --libs`"
+   _ld_dvdnav="`$_dvdnavconfig --libs`"
+  else
+   #_ld_css="$_ld_css -ldvdnav"
+   _ld_dvdnav="-ldvdnav"
+  fi
+  if test -n "$_dvdnavconfig" ; then
+   _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
+   _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
+   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+  fi
+  if test -n "$_dvdnavdir" ; then
+   _inc_extra="$_inc_extra -I$_dvdnavdir"
+  fi
+  _inputmodules="dvdnav $_inputmodules"
+else
+  _def_dvdnav='#undef USE_DVDNAV'
+  _noinputmodules="dvdnav $_noinputmodules"
+fi
+echores "$_dvdnav"
 
 echocheck "cdparanoia"
 if test "$_cdparanoia" = auto ; then
@@ -7475,6 +7475,7 @@ HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
 DVDKIT2 = $_dvdkit
+DVDNAV_LIB = $_ld_dvdnav
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32

@@ -114,6 +114,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               postproc/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
+              $(DVDNAV_LIB) \
               $(CODEC_LIBS) \
               $(FREETYPE_LIB) \
               $(TERMCAP_LIB) \

@@ -115,7 +115,7 @@ stream_info_t* auto_open_streams[] = {
   &stream_info_dvd,
 #endif
 #ifdef USE_DVDNAV
-  &stream_info_dvdnav;
+  &stream_info_dvdnav,
 #endif
 
   &stream_info_null,

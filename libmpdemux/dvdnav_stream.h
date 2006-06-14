@@ -35,7 +35,7 @@ int dvdnav_stream_reset(dvdnav_priv_t * dvdnav_priv);
 void free_dvdnav_stream(dvdnav_priv_t * dvdnav_priv);
 
 void dvdnav_stream_ignore_timers(dvdnav_priv_t * dvdnav_priv, int ignore);
-void dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len);
+int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len);
 
 void dvdnav_stream_sleep(dvdnav_priv_t *dvdnav_priv, int seconds);
 int dvdnav_stream_sleeping(dvdnav_priv_t * dvdnav_priv);

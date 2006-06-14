@@ -67,6 +67,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 #include "codec-cfg.h"
 
+#undef USE_DVDNAV
 #ifdef USE_DVDNAV
 #include <dvdnav.h>
 #endif
