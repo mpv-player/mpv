@@ -1378,6 +1378,7 @@ sub_data* sub_read_file (char *filename, float fps) {
     struct subreader *srp;
     
     if(filename==NULL) return NULL; //qnx segfault
+    i = 0;
     fd=open_stream (filename, NULL, &i); if (!fd) return NULL;
     
     sub_format=sub_autodetect (fd, &uses_time);
