@@ -229,7 +229,9 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     return demuxer->a_streams[id];
 }
 
-void free_sh_audio(sh_audio_t* sh){
+void free_sh_audio(demuxer_t *demuxer, int id) {
+    sh_audio_t *sh = demuxer->a_streams[id];
+    demuxer->a_streams[id] = NULL;
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"DEMUXER: freeing sh_audio at %p\n",sh);
     if(sh->wf) free(sh->wf);
     free(sh);
@@ -270,11 +272,9 @@ void free_demuxer(demuxer_t *demuxer){
       goto skip_streamfree;
     // free streams:
     for(i = 0; i < MAX_A_STREAMS; i++)
-	if(demuxer->a_streams[i]) free_sh_audio(demuxer->a_streams[i]);
+	if(demuxer->a_streams[i]) free_sh_audio(demuxer, i);
     for(i = 0; i < MAX_V_STREAMS; i++)
 	if(demuxer->v_streams[i]) free_sh_video(demuxer->v_streams[i]);
-    //if(sh_audio) free_sh_audio(sh_audio);
-    //if(sh_video) free_sh_video(sh_video);
     // free demuxers:
     free_demuxer_stream(demuxer->audio);
     free_demuxer_stream(demuxer->video);

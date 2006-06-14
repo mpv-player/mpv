@@ -89,7 +89,7 @@ typedef struct {
 // demuxer.c:
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id);
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id);
-void free_sh_audio(sh_audio_t *sh);
+void free_sh_audio(demuxer_t *demuxer, int id);
 void free_sh_video(sh_video_t *sh);
 
 // video.c:

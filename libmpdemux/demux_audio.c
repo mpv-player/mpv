@@ -47,7 +47,6 @@ typedef struct mp3_hdr {
   struct mp3_hdr *next;
 } mp3_hdr_t;
 
-extern void free_sh_audio(sh_audio_t* sh);
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 
 int hr_mp3_seek = 0;
@@ -412,12 +411,12 @@ static int demux_audio_open(demuxer_t* demuxer) {
     l = stream_read_dword_le(s);
     if(l < 16) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too short (%d)!!!\n",l);
-      free_sh_audio(sh_audio);
+      free_sh_audio(demuxer, 0);
       return 0;
     }
     if(l > MAX_WAVHDR_LEN) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too long (%d)!!!\n",l);
-      free_sh_audio(sh_audio);
+      free_sh_audio(demuxer, 0);
       return 0;
     }
     sh_audio->wf = w = (WAVEFORMATEX*)malloc(l > sizeof(WAVEFORMATEX) ? l : sizeof(WAVEFORMATEX));

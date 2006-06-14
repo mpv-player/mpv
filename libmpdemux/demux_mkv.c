@@ -1837,7 +1837,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
           mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Unknown/unsupported audio "
                   "codec ID '%s' for track %u or missing/faulty private "
                   "codec data.\n", track->codec_id, track->tnum);
-          free_sh_audio (sh_a);
+          free_sh_audio(demuxer, track->tnum);
           return 1;
         }
     }
@@ -2061,7 +2061,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
     }
   else if (!track->ms_compat || (track->private_size < sizeof(WAVEFORMATEX)))
     {
-      free_sh_audio (sh_a);
+      free_sh_audio(demuxer, track->tnum);
       return 1;
     }
 
