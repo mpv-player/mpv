@@ -27,8 +27,7 @@ rsync -pxlrHtWv --delete --delete-after natsuki.mplayerhq.hu::homepage/ \
 
 echo "************ rsyncing MPlayer ************" >> $TMPFILE
 rsync -pxlrHtWv --delete --delete-after --exclude '/benchmark' \
-      --exclude '/old_stuff' --exclude '/tests' \
-      --exclude '/README.incoming' natsuki.mplayerhq.hu::ftp/ \
+      --exclude '/old_stuff' --exclude '/tests' natsuki.mplayerhq.hu::ftp/ \
       MPlayer  >> $TMPFILE 2>&1
 
 x=`wc -l $TMPFILE | awk '{print $1}'`
