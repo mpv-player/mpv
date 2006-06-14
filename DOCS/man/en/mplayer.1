@@ -5876,33 +5876,25 @@ output framerate.
 Like the telecine filter, tfields will only work properly with
 MEncoder, and only if both \-fps and \-ofps are set to the
 desired (double) framerate!
-Available modes are:
 .PD 0
 .RSs
-.IPs 0
-Leave fields unchanged. (This will jump/\:flicker.)
-.IPs 1
-Interpolate missing lines. (The algorithm used might not be so good.)
-.IPs 2
-Translate fields by 1/4 pixel with linear interpolation (no jump).
-.IPs 4
-Translate fields by 1/4 pixel with 4tap filter (higher quality). (default)
-.RE
-.PD 1
-.RS
-Available field dominances are:
-.RE
-.PD 0
-.RSs
-.IPs -1
-auto (default)
+.IPs <mode>
+0: Leave fields unchanged (will jump/\:flicker).
+.br
+1: Interpolate missing lines. (The algorithm used might not be so good.)
+.br
+2: Translate fields by 1/4 pixel with linear interpolation (no jump).
+.br
+4: Translate fields by 1/4 pixel with 4tap filter (higher quality) (default).
+.IPs <field_dominance>
+-1: auto (default)
 Only works if the decoder exports the appropriate information and
 no other filters which discard that information come before tfields
 in the filter chain, otherwise it falls back to 0 (top field first).
-.IPs 0
-top-first
-.IPs 1
-bottom-first
+.br
+0: top field first
+.br
+1: bottom field first
 .RE
 .PD 1
 .
