@@ -1398,7 +1398,7 @@ sub_data* sub_read_file (char *filename, float fps) {
 	    if ((l=strlen(filename))>4){
 		    char *exts[] = {".utf", ".utf8", ".utf-8" };
 		    for (k=3;--k>=0;)
-			if (!strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
+			if (l >= strlen(exts[k]) && !strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
 			    sub_utf8 = 1;
 			    break;
 			}
