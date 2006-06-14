@@ -3079,20 +3079,25 @@ This method is fast but inexact.
 .br
 6: Use a 3D texture to do conversion via lookup.
 Needs the GL_ARB_fragment_program extension and at least four texture units.
+Extremely slow (software emulation) on some (all?) ATI cards since it uses
+a texture with border pixels.
 Provides brightness, contrast, saturation, hue and gamma control.
 Gamma can also be set independently for red, green and blue.
 Speed depends more on GPU memory bandwidth than other methods.
 .RE
-.IPs [l|c]scale=<n>
-Select the scaling function to use (seperately for luma and chroma).
-Only valid for yuv modes 2, 3 and 4.
+.IPs lscale=<n>
+Select the scaling function to use for luminance scaling.
+Only valid for yuv modes 2, 3, 4 and 6.
 .RSss
 0: Use simple linear filtering (default).
 .br
 1: Use bicubic filtering (better quality).
+Needs one additional texture unit.
 Older cards will not be able to handle this for chroma at least in fullscreen mode.
-Also needs one additional texture unit.
 .RE
+.IPs cscale=<n>
+Select the scaling function to use for chrominance scaling.
+For details see lscale.
 .IPs customprog=<filename>
 Load a custom fragment program from <filename>.
 See TOOLS/edgedect.fp for an example.
