@@ -26,52 +26,54 @@ What follows now are MPlayer specific guidelines.
 I. TECH SIDE:
 =============
 
-1. Changing password:
+1. Checking out development source tree:
 
-  As you probably got a restricted CVS-only shell, it's not trivial:
+    svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/
 
-    ssh LOGIN@mplayerhq.hu passwd
+    or
 
-  Replace LOGIN with your login name. Leave 'passwd' unchanged, it's a command.
+    svn co svn://svn.mplayerhq.hu/mplayer/trunk/
 
-2. Checking out development source tree:
+2. Updating source tree to latest revision:
 
-    export CVS_RSH=ssh
-    cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co -P main
+    svn update
 
-  Replace LOGIN with your login name.
-  NOTE: cvs -d:pserver: mode doesn't allow writing, even with password!
+    or
+
+    svn up
 
 3. Committing changes:
 
-    cvs -z3 update -dPA
-    cvs -z3 commit filename(s)
+    svn up
+    svn commit --username USERNAME filename(s)
 
   Do not use comments such as: "bug fix." or "files changed" or "dunno".
   You don't have to include the filename in the comment, as comments are linked
   to files. If you have made several independent changes, commit them
   separately, not at the same time. You will be prompted for a comment in an
-  editor (see 'cvs -e', usually vi).
+  editor, which is either specified by --editor-cmd on the command line, set
+  in your personal configuration file (~/.subversion/config) or set by one of
+  the following environment variables: SVN_EDITOR, VISUAL or EDITOR. When
+  prompted for a password, type the password you got assigned by the Subversion
+  server admin. By default, Subversion caches all authentication tokens. This
+  behaviour can be disabled by setting both 'store-passwords' and
+  'store-auth-creds' to "no" in ~/.subversion/config. You might need to remove
+  previous cache files, which are located in ~/.subversion/auth, by hand.
 
 4. Adding new files/dirs:
 
-    cvs add filename/dirname
-    cvs commit filename
-
-  Directories are added immediately, no commit necessary. Make sure you do not
-  wrongly commit non-executable files with execute permissions set as this has
-  to be fixed manually in the repository. Binary files must be added with
-  'cvs add -kb'.
+    svn add filename/dirname
+    svn commit filename
 
 5. Removing files:
 
     rm filename
-    cvs remove filename
-    cvs commit filename
+    svn delete filename
+    svn commit filename
 
 6. Checking changes:
 
-    cvs -z3 diff -u filename(s)
+    svn diff filename(s)
 
   Doublecheck your changes before committing to avoid trouble later on.
   This way you will see if your patch has debug stuff or indentation
@@ -79,17 +81,19 @@ I. TECH SIDE:
 
 7. Checking changelog:
 
-    cvs -z3 log filename(s)
-    cvs -z3 annotate filename(s)
+    svn log filename(s)
 
-  You may also find viewcvs, a web frontend for CVS helpful. It's often more
-  comfortable than using cvs log, cvs annotate and cvs diff. Find it here:
-  http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main
+  You may also find viewvc, a web frontend for Subversion, helpful. It's often
+  more comfortable than using svn log and svn diff. Find it here:
+  http://svn.mplayerhq.hu/mplayer/trunk/
 
-8. Renaming/moving files or content of files, removing empty directories:
+8. Renaming/moving files or content of files:
 
-  You CANNOT do that. Ask the CVS server admin to do it!
-  Do NOT remove & readd a file - it will kill the changelog!!!!
+  svn move source destination
+  svn commit source destination
+
+  Do not move or rename files before discussing it on the mplayer-dev-eng
+  mailing list first!
 
   Don't do a lot of cut'n'paste from one file to another without a very good
   reason and discuss it on the mplayer-dev-eng mailing list first. It will make
@@ -100,36 +104,31 @@ I. TECH SIDE:
 
 9. Reverting broken commits
 
-  Should you commit something really broken, notice it quickly and wish to undo
-  it completely, the 'cvs admin -o' command can be used as a last resort. This
-  command removes entries from the revision history of a file. For the corner
-  case of removing the last revision (and only then!) this amounts to reverting
-  a commit. The HEAD version is not affected by removing revisions that came
-  before, only revision history will be lost and holes left in the revision
-  numbering. ONLY EVER use this command to delete the LAST revision of a file.
+  There is no Subversion equivalent of the 'cvs admin -o' command. Instead,
+  be very careful about what you commit! If somehow you broke something,
+  revert the changes locally and re-commit with a proper commit message.
+  You may want to use 'svn cat -r<revision> filename' to inspect an older
+  revision.
 
-  In short, if you use this improperly you can wreak permanent havoc. Employ it
-  only if you are completely sure of what you are doing.
+10. Checking status of source tree
 
-  Assuming that 1.123 is the last revision
+  svn status
 
-    cvs -z3 admin -o1.123 filename
+  This will detect all the changes you made and list what actions will be
+  taken in case of a commit (Additions, Modifications, Deletions, et cetera).
 
-  will remove revision 1.123, thus reverting the file back to revision 1.122.
+11. Reverting local changes
 
-10. RSA authentication
+  svn revert filename(s)
 
-  Since mplayerhq.hu uses ssh.com and not OpenSSH you will have to convert your
-  OpenSSH RSA keys to IETF SECSH format with
-
-    ssh-keygen -e
-
-  if you want to use RSA authentication. See ssh(1) and ssh-keygen(1) for
-  details.
-
+  In case you made a lot of local changes to a file and want to start over
+  with a fresh checkout of that file, you can use svn revert filename(s).
+  NOTE: This has nothing to do with reverting changes on the Subversion
+  server! It only reverts changes that were not committed yet. If you need
+  to revert a broken commit, see 9.
 
 Contact the project admin <root at mplayerhq dot hu> if you have technical
-problems with the CVS server.
+problems with the Subversion server.
 
 
 
