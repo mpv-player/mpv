@@ -1,6 +1,6 @@
 /*
  * bitstream.h
- * Copyright (C) 2000-2001 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of a52dec, a free ATSC A-52 stream decoder.
@@ -77,7 +77,7 @@ static inline uint32_t unaligned32(const void *v) {
 #	if defined (__i386__)
 
 #	define swab32(x) __i386_swab32(x)
-	static always_inline const uint32_t __i386_swab32(uint32_t x)
+	static inline const uint32_t __i386_swab32(uint32_t x)
 	{
 		__asm__("bswap %0" : "=r" (x) : "0" (x));
 		return x;
@@ -95,23 +95,17 @@ static inline uint32_t unaligned32(const void *v) {
 #endif
 
 #ifdef ALT_BITSTREAM_READER
-extern uint32_t *buffer_start; 
 extern int indx;
-#else
-extern uint32_t bits_left;
-extern uint32_t current_word;
 #endif
 
-void bitstream_set_ptr (uint8_t * buf);
-uint32_t bitstream_get_bh(uint32_t num_bits);
-int32_t bitstream_get_bh_2(uint32_t num_bits);
+void a52_bitstream_set_ptr (a52_state_t * state, uint8_t * buf);
+uint32_t a52_bitstream_get_bh (a52_state_t * state, uint32_t num_bits);
+int32_t a52_bitstream_get_bh_2 (a52_state_t * state, uint32_t num_bits);
 
-
-static inline uint32_t 
-bitstream_get(uint32_t num_bits) // note num_bits is practically a constant due to inlineing
+static inline uint32_t bitstream_get (a52_state_t * state, uint32_t num_bits)
 {
 #ifdef ALT_BITSTREAM_READER
-    uint32_t result= swab32( unaligned32(((uint8_t *)buffer_start)+(indx>>3)) );
+    uint32_t result= swab32( unaligned32(((uint8_t *)state->buffer_start)+(indx>>3)) );
 
     result<<= (indx&0x07);
     result>>= 32 - num_bits;
@@ -121,30 +115,29 @@ bitstream_get(uint32_t num_bits) // note num_bits is practically a constant due 
 #else
     uint32_t result;
     
-    if(num_bits < bits_left) {
-	result = (current_word << (32 - bits_left)) >> (32 - num_bits);
-	bits_left -= num_bits;
+    if (num_bits < state->bits_left) {
+	result = (state->current_word << (32 - state->bits_left)) >> (32 - num_bits);
+	state->bits_left -= num_bits;
 	return result;
     }
 
-    return bitstream_get_bh(num_bits);
+    return a52_bitstream_get_bh (state, num_bits);
 #endif
 }
 
-static inline void bitstream_skip(int num_bits)
+static inline void bitstream_skip(a52_state_t * state, int num_bits)
 {
 #ifdef ALT_BITSTREAM_READER
 	indx+= num_bits;
 #else
-	bitstream_get(num_bits);
+	bitstream_get(state, num_bits);
 #endif
 }
 
-static inline int32_t 
-bitstream_get_2(uint32_t num_bits)
+static inline int32_t bitstream_get_2 (a52_state_t * state, uint32_t num_bits)
 {
 #ifdef ALT_BITSTREAM_READER
-    int32_t result= swab32( unaligned32(((uint8_t *)buffer_start)+(indx>>3)) );
+    int32_t result= swab32( unaligned32(((uint8_t *)state->buffer_start)+(indx>>3)) );
 
     result<<= (indx&0x07);
     result>>= 32 - num_bits;
@@ -154,12 +147,12 @@ bitstream_get_2(uint32_t num_bits)
 #else
     int32_t result;
 	
-    if(num_bits < bits_left) {
-	result = (((int32_t)current_word) << (32 - bits_left)) >> (32 - num_bits);
-	bits_left -= num_bits;
+    if (num_bits < state->bits_left) {
+	result = (((int32_t)state->current_word) << (32 - state->bits_left)) >> (32 - num_bits);
+	state->bits_left -= num_bits;
 	return result;
     }
 
-    return bitstream_get_bh_2(num_bits);
+    return a52_bitstream_get_bh_2 (state, num_bits);
 #endif
 }

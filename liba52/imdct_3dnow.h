@@ -469,7 +469,7 @@ imdct_do_512_3dnow
 	
     data_ptr = data;
     delay_ptr = delay;
-    window_ptr = imdct_window;
+    window_ptr = a52_imdct_window;
 
     /* Window and convert to real valued signal */
 #if 1

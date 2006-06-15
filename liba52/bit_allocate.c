@@ -1,6 +1,6 @@
 /*
  * bit_allocate.c
- * Copyright (C) 2000-2001 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of a52dec, a free ATSC A-52 stream decoder.
@@ -121,9 +121,9 @@ do {						\
     mask -= floor;				\
 } while (0)
 
-void bit_allocate (a52_state_t * state, a52_ba_t * ba, int bndstart,
+void a52_bit_allocate (a52_state_t * state, ba_t * ba, int bndstart,
 		   int start, int end, int fastleak, int slowleak,
-		   uint8_t * exp, int8_t * bap)
+		       expbap_t * expbap)
 {
     static int slowgain[4] = {0x540, 0x4d8, 0x478, 0x410};
     static int dbpbtab[4]  = {0xc00, 0x500, 0x300, 0x100};
@@ -131,6 +131,8 @@ void bit_allocate (a52_state_t * state, a52_ba_t * ba, int bndstart,
 			      0xa10, 0xa90, 0xb10, 0x1400};
 
     int i, j;
+    uint8_t * exp;
+    int8_t * bap;
     int fdecay, fgain, sdecay, sgain, dbknee, floor, snroffset;
     int psd, mask;
     int8_t * deltba;
@@ -138,20 +140,23 @@ void bit_allocate (a52_state_t * state, a52_ba_t * ba, int bndstart,
     int halfrate;
 
     halfrate = state->halfrate;
-    fdecay = (63 + 20 * state->fdcycod) >> halfrate;
-    fgain = 128 + 128 * ba->fgaincod;
-    sdecay = (15 + 2 * state->sdcycod) >> halfrate;
-    sgain = slowgain[state->sgaincod];
-    dbknee = dbpbtab[state->dbpbcod];
+    fdecay = (63 + 20 * ((state->bai >> 7) & 3)) >> halfrate;	/* fdcycod */
+    fgain = 128 + 128 * (ba->bai & 7);				/* fgaincod */
+    sdecay = (15 + 2 * (state->bai >> 9)) >> halfrate;		/* sdcycod */
+    sgain = slowgain[(state->bai >> 5) & 3];			/* sgaincod */
+    dbknee = dbpbtab[(state->bai >> 3) & 3];			/* dbpbcod */
     hth = hthtab[state->fscod];
     /*
      * if there is no delta bit allocation, make deltba point to an area
      * known to contain zeroes. baptab+156 here.
      */
     deltba = (ba->deltbae == DELTA_BIT_NONE) ? baptab + 156 : ba->deltba;
-    floor = floortab[state->floorcod];
-    snroffset = 960 - 64 * state->csnroffst - 4 * ba->fsnroffst + floor;
+    floor = floortab[state->bai & 7];				/* floorcod */
+    snroffset = 960 - 64 * state->csnroffst - 4 * (ba->bai >> 3) + floor;
     floor >>= 5;
+
+    exp = expbap->exp;
+    bap = expbap->bap;
 
     i = bndstart;
     j = start;

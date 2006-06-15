@@ -1,6 +1,6 @@
 /*
  * downmix.c
- * Copyright (C) 2000-2001 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
  * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of a52dec, a free ATSC A-52 stream decoder.
@@ -40,9 +40,9 @@
 #define CONVERT(acmod,output) (((output) << 3) + (acmod))
 
 
-void (*downmix)(sample_t * samples, int acmod, int output, sample_t bias,
+void (*a52_downmix)(sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev)= NULL;
-void (*upmix)(sample_t * samples, int acmod, int output)= NULL;
+void (*a52_upmix)(sample_t * samples, int acmod, int output)= NULL;
 
 static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev);
@@ -55,16 +55,16 @@ static void upmix_C (sample_t * samples, int acmod, int output);
 
 void downmix_accel_init(uint32_t mm_accel)
 {
-    upmix= upmix_C;
-    downmix= downmix_C;
+    a52_upmix= upmix_C;
+    a52_downmix= downmix_C;
 #if defined(ARCH_X86) || defined(ARCH_X86_64)
-    if(mm_accel & MM_ACCEL_X86_MMX) upmix= upmix_MMX;
-    if(mm_accel & MM_ACCEL_X86_SSE) downmix= downmix_SSE;
-    if(mm_accel & MM_ACCEL_X86_3DNOW) downmix= downmix_3dnow;
+    if(mm_accel & MM_ACCEL_X86_MMX) a52_upmix= upmix_MMX;
+    if(mm_accel & MM_ACCEL_X86_SSE) a52_downmix= downmix_SSE;
+    if(mm_accel & MM_ACCEL_X86_3DNOW) a52_downmix= downmix_3dnow;
 #endif
 }
    
-int downmix_init (int input, int flags, sample_t * level,
+int a52_downmix_init (int input, int flags, sample_t * level,
 		  sample_t clev, sample_t slev)
 {
     static uint8_t table[11][8] = {
@@ -183,7 +183,7 @@ int downmix_init (int input, int flags, sample_t * level,
     return output;
 }
 
-int downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
+int a52_downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
 		   sample_t clev, sample_t slev)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
@@ -478,7 +478,7 @@ static void zero (sample_t * samples)
 	samples[i] = 0;
 }
 
-static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
+void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
@@ -619,7 +619,7 @@ static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
     }
 }
 
-static void upmix_C (sample_t * samples, int acmod, int output)
+void upmix_C (sample_t * samples, int acmod, int output)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
 

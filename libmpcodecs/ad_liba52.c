@@ -19,8 +19,7 @@
 #include "liba52/a52.h"
 #include "liba52/mm_accel.h"
 
-static sample_t * a52_samples;
-static a52_state_t a52_state;
+static a52_state_t *a52_state;
 static uint32_t a52_flags=0;
 /** Used by a52_resample_float, it defines the mapping between liba52
  * channels and output channels.  The ith nibble from the right in the
@@ -169,8 +168,8 @@ static int init(sh_audio_t *sh_audio)
   if(gCpuCaps.has3DNow) a52_accel|=MM_ACCEL_X86_3DNOW;
   if(gCpuCaps.has3DNowExt) a52_accel|=MM_ACCEL_X86_3DNOWEXT;
   if(gCpuCaps.hasAltiVec) a52_accel|=MM_ACCEL_PPC_ALTIVEC;
-  a52_samples=a52_init (a52_accel);
-  if (a52_samples == NULL) {
+  a52_state=a52_init (a52_accel);
+  if (a52_state == NULL) {
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
 	return 0;
   }
@@ -210,7 +209,7 @@ while(sh_audio->channels>0){
   /* test:*/
   flags=a52_flags|A52_ADJUST_LEVEL;
   mp_msg(MSGT_DECAUDIO,MSGL_V,"A52 flags before a52_frame: 0x%X\n",flags);
-  if (a52_frame (&a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
+  if (a52_frame (a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"a52: error decoding frame -> nosound\n");
     return 0;
   }
@@ -288,16 +287,12 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     sample_t level=a52_level, bias=384;
     int flags=a52_flags|A52_ADJUST_LEVEL;
     int i,len=-1;
-	if (maxlen / sh_audio->samplesize / 256 / sh_audio->channels < 6) {
-	    mp_msg(MSGT_DECAUDIO, MSGL_V, "maxlen too small in decode_audio\n");
-	    return len;
-	}
 	if (sh_audio->sample_format == AF_FORMAT_FLOAT_NE)
 	    bias = 0;
 	if(!sh_audio->a_in_buffer_len) 
 	    if(a52_fillbuff(sh_audio)<0) return len; /* EOF */
 	sh_audio->a_in_buffer_len=0;
-	if (a52_frame (&a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
+	if (a52_frame (a52_state, sh_audio->a_in_buffer, &flags, &level, bias)){
 	    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error decoding frame\n");
 	    return len;
 	}
@@ -305,18 +300,18 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	/* handle dynrng */
 	if (a52_drc_action != DRC_NO_ACTION) {
 	    if (a52_drc_action == DRC_NO_COMPRESSION)
-		a52_dynrng(&a52_state, NULL, NULL);
+		a52_dynrng(a52_state, NULL, NULL);
 	    else
-		a52_dynrng(&a52_state, dynrng_call, NULL);
+		a52_dynrng(a52_state, dynrng_call, NULL);
 	}
 
 	len=0;
 	for (i = 0; i < 6; i++) {
-	    if (a52_block (&a52_state, a52_samples)){
+	    if (a52_block (a52_state)){
 		mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error at resampling\n");
 		break;
 	    }
-	    len+=2*a52_resample(a52_samples,(int16_t *)&buf[len]);
+	    len+=2*a52_resample(a52_samples(a52_state),(int16_t *)&buf[len]);
 	}
 	assert(len <= maxlen);
   return len;
