@@ -460,6 +460,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 		char_position = 0;
 		xsize = -vo_font->charspace;
 	    }
+	    free(char_seq);
 
 	    if (osl != NULL) {
 		int value = 0, exit = 0, minimum = 0;
