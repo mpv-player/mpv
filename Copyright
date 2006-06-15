@@ -27,7 +27,7 @@ Directory:  libmpcodecs/native/
 License:    permissive, see libmpcodecs/native/xa_gsm.c
 
 Name:       liba52
-Version:    0.7.1b + patches
+Version:    0.7.4 + patches
 Homepage:   http://liba52.sourceforge.net/
 Directory:  liba52
 License:    GNU General Public License

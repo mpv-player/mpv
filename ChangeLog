@@ -5,6 +5,9 @@ MPlayer (1.0)
     MEncoder:
     * support of x264 encoding over lavc
     
+    Decoders:
+    * liba52 updated to 0.7.4 (slightly faster)
+    
     Demuxers:
     * support for audio stream switching in MPEG-TS
 
