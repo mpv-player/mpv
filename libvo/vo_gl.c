@@ -53,6 +53,9 @@ static GLuint osdatex[MAX_OSD_PARTS];
 #endif
 //! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
+#ifndef FAST_OSD
+static GLuint osdaDispList[MAX_OSD_PARTS];
+#endif
 //! How many parts the OSD currently consists of
 static int osdtexCnt;
 static int osd_color;
@@ -210,6 +213,8 @@ static void clearOSD(void) {
   glDeleteTextures(osdtexCnt, osdtex);
 #ifndef FAST_OSD
   glDeleteTextures(osdtexCnt, osdatex);
+  for (i = 0; i < osdtexCnt; i++)
+    glDeleteLists(osdaDispList[i], 1);
 #endif
   for (i = 0; i < osdtexCnt; i++)
     glDeleteLists(osdDispList[i], 1);
@@ -473,16 +478,17 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   BindTexture(gl_target, 0);
 
   // Create a list for rendering this OSD part
-  osdDispList[osdtexCnt] = glGenLists(1);
-  glNewList(osdDispList[osdtexCnt], GL_COMPILE);
 #ifndef FAST_OSD
+  osdaDispList[osdtexCnt] = glGenLists(1);
+  glNewList(osdaDispList[osdtexCnt], GL_COMPILE);
   // render alpha
-  glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
   BindTexture(gl_target, osdatex[osdtexCnt]);
   glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0, 0);
+  glEndList();
 #endif
+  osdDispList[osdtexCnt] = glGenLists(1);
+  glNewList(osdDispList[osdtexCnt], GL_COMPILE);
   // render OSD
-  glBlendFunc (GL_ONE, GL_ONE);
   BindTexture(gl_target, osdtex[osdtexCnt]);
   glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1, 0, 0);
   glEndList();
@@ -529,6 +535,11 @@ flip_page(void)
     glEnable(GL_BLEND);
     glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff);
     // draw OSD
+#ifndef FAST_OSD
+    glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+    glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdaDispList);
+#endif
+    glBlendFunc(GL_ONE, GL_ONE);
     glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
     // set rendering parameters back to defaults
     glDisable (GL_BLEND);
