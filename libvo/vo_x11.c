@@ -424,11 +424,11 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                 while (xev.type != MapNotify
                        || xev.xmap.event != vo_window);
 
+                vo_x11_nofs_sizepos(vo_dx, vo_dy, vo_dwidth, vo_dheight);
                 if (fullscreen)
                     vo_x11_fullscreen();
-            } else if (!fullscreen)
-                XMoveResizeWindow(mDisplay, vo_window, vo_dx, vo_dy,
-                                  vo_dwidth, vo_dheight);
+            } else
+                vo_x11_nofs_sizepos(vo_dx, vo_dy, vo_dwidth, vo_dheight);
         }
 
         XSync(mDisplay, False);

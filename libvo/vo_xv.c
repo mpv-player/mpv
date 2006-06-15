@@ -348,15 +348,14 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
                                    NULL, 0, &hint);
             vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
             XMapWindow(mDisplay, vo_window);
+            vo_x11_nofs_sizepos(hint.x, hint.y, hint.width, hint.height);
             if (flags & VOFLAG_FULLSCREEN)
                 vo_x11_fullscreen();
         } else
         {
             // vo_fs set means we were already at fullscreen
             vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
-            if (!vo_fs)
-                XMoveResizeWindow(mDisplay, vo_window, hint.x, hint.y,
-                                  hint.width, hint.height);
+            vo_x11_nofs_sizepos(hint.x, hint.y, hint.width, hint.height);
             if (flags & VOFLAG_FULLSCREEN && !vo_fs)
                 vo_x11_fullscreen();    // handle -fs on non-first file
         }
