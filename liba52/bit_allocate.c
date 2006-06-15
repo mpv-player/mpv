@@ -122,7 +122,7 @@ do {						\
 } while (0)
 
 void a52_bit_allocate (a52_state_t * state, ba_t * ba, int bndstart,
-		   int start, int end, int fastleak, int slowleak,
+		       int start, int end, int fastleak, int slowleak,
 		       expbap_t * expbap)
 {
     static int slowgain[4] = {0x540, 0x4d8, 0x478, 0x410};

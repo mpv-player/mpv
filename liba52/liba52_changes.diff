@@ -35,13 +35,13 @@
  		       expbap_t * expbap);
  
  int a52_downmix_init (int input, int flags, sample_t * level,
- 		  sample_t clev, sample_t slev);
+ 		      sample_t clev, sample_t slev);
 +void downmix_accel_init(uint32_t mm_accel);
  int a52_downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
- 		   sample_t clev, sample_t slev);
+ 		       sample_t clev, sample_t slev);
 -void a52_downmix (sample_t * samples, int acmod, int output, sample_t bias,
 +extern void (*a52_downmix) (sample_t * samples, int acmod, int output, sample_t bias,
- 	      sample_t clev, sample_t slev);
+ 		  sample_t clev, sample_t slev);
 -void a52_upmix (sample_t * samples, int acmod, int output);
 +extern void (*a52_upmix) (sample_t * samples, int acmod, int output);
  
@@ -120,7 +120,7 @@
 +#endif //!ARCH_X86
 +
 +#endif
-+ 
++
  /* (stolen from the kernel) */
  #ifdef WORDS_BIGENDIAN
  
@@ -254,9 +254,9 @@
 +    if(mm_accel & MM_ACCEL_X86_3DNOW) a52_downmix= downmix_3dnow;
 +#endif
 +}
-+   
++ 
  int a52_downmix_init (int input, int flags, sample_t * level,
- 		  sample_t clev, sample_t slev)
+ 		      sample_t clev, sample_t slev)
  {
 @@ -451,7 +480,7 @@
  	samples[i] = 0;
@@ -264,7 +264,7 @@
  
 -void a52_downmix (sample_t * samples, int acmod, int output, sample_t bias,
 +void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
- 	      sample_t clev, sample_t slev)
+ 		  sample_t clev, sample_t slev)
  {
      switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
 @@ -563,7 +592,7 @@
@@ -1533,14 +1533,14 @@
 +static float __attribute__((aligned(16))) *sseW[7]=
 +	{NULL /*sseW0*/,sseW1,sseW2,sseW3,sseW4,sseW5,sseW6};
 +static float __attribute__((aligned(16))) sseWindow[512];
-+#endif    
-+    
++#endif
++
  /* Root values for IFFT */
  static sample_t roots16[3];
  static sample_t roots32[7];
 @@ -245,7 +322,7 @@
      ifft_pass (buf, roots128 - 32, 32);
-     }
+ }
  
 -void a52_imdct_512 (sample_t * data, sample_t * delay, sample_t bias)
 +void imdct_do_512 (sample_t * data, sample_t * delay, sample_t bias)
@@ -1973,7 +1973,7 @@
 +		"add $16, %%"REG_S"			\n\t"
 +		"add $2, %%"REG_a"			\n\t" // avoid complex addressing for P4 crap
 +		"sub $16, %%"REG_D"			\n\t"
-+		" jnc 1b				\n\t"
++		"jnc 1b				 	\n\t"
 +		"pop %%"REG_BP"				\n\t"//no we didnt touch ebp *g*
 +		:: "b" (data), "c" (buf)
 +		: "%"REG_S, "%"REG_D, "%"REG_a, "%"REG_d
@@ -2125,7 +2125,7 @@
 +		"movaps %%xmm0, (%%"REG_d", %%"REG_D")	\n\t"
 +		"add $16, %%"REG_D"			\n\t"
 +		"cmp %3, %%"REG_D"			\n\t" //FIXME (opt) count against 0 
-+		" jb 2b					\n\t"
++		"jb 2b					\n\t"
 +		"add %2, %%"REG_S"			\n\t"
 +		"cmp %1, %%"REG_S"			\n\t"
 +		" jb 1b					\n\t"
@@ -2265,7 +2265,7 @@
 @@ -368,7 +1153,7 @@
  
  void a52_imdct_init (uint32_t mm_accel)
-     {
+ {
 -    int i, k;
 +    int i, j, k;
      double sum;
@@ -2274,7 +2274,7 @@
 @@ -420,6 +1205,99 @@
  	post2[i].real = cos ((M_PI / 128) * (i + 0.5));
  	post2[i].imag = sin ((M_PI / 128) * (i + 0.5));
- 	}
+     }
 +    for (i = 0; i < 128; i++) {
 +	xcos1[i] = -cos ((M_PI / 2048) * (8 * i + 1));
 +	xsin1[i] = -sin ((M_PI / 2048) * (8 * i + 1));
@@ -2345,7 +2345,7 @@
 +	{
 +	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
 +	  a52_imdct_512 = imdct_do_512_sse;
-+	}  
++	}
 +	else
 +	if(mm_accel & MM_ACCEL_X86_3DNOWEXT)
 +	{
@@ -2366,7 +2366,7 @@
 +	  fprintf(stderr, "Using AltiVec optimized IMDCT transform\n");
 +          a52_imdct_512 = imdct_do_512_altivec;
 +	}
-+        else
++	else
 +#endif
  
  #ifdef LIBA52_DJBFFT
@@ -2437,7 +2437,7 @@
 +      mm_accel &=~MM_ACCEL_X86_SSE;
 +      fprintf(stderr, "liba52: unable to get 16 byte aligned memory disabling usage of SSE instructions\n");
 +    }   
-+    
++ 
      if (state->samples == NULL) {
  	free (state);
  	return NULL;

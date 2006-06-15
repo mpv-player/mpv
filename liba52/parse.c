@@ -78,10 +78,10 @@ a52_state_t * a52_init (uint32_t mm_accel)
       mm_accel &=~MM_ACCEL_X86_SSE;
       fprintf(stderr, "liba52: unable to get 16 byte aligned memory disabling usage of SSE instructions\n");
     }   
-    
+ 
     if (state->samples == NULL) {
 	free (state);
-	return NULL;    
+	return NULL;
     }
 
     for (i = 0; i < 256 * 12; i++)
@@ -90,10 +90,10 @@ a52_state_t * a52_init (uint32_t mm_accel)
     state->downmixed = 1;
 
     state->lfsr_state = 1;
-    
+
     a52_imdct_init (mm_accel);
     downmix_accel_init(mm_accel);
-    
+
     return state;
 }
 
@@ -174,7 +174,7 @@ int a52_frame (a52_state_t * state, uint8_t * buf, int * flags,
     state->lfeon = bitstream_get (state, 1);
 
     state->output = a52_downmix_init (acmod, *flags, level,
-				  state->clev, state->slev);
+				      state->clev, state->slev);
     if (state->output < 0)
 	return 1;
     if (state->lfeon && (*flags & A52_LFE))
@@ -580,7 +580,7 @@ int a52_block (a52_state_t * state)
 	state->chincpl = 0;
 	if (bitstream_get (state, 1)) {	/* cplinu */
 	    static uint8_t bndtab[16] = {31, 35, 37, 39, 41, 42, 43, 44,
-				     45, 45, 46, 46, 47, 47, 48, 48};
+					 45, 45, 46, 46, 47, 47, 48, 48};
 	    int cplbegf;
 	    int cplendf;
 	    int ncplsubnd;
@@ -608,7 +608,7 @@ int a52_block (a52_state_t * state)
 		if (bitstream_get (state, 1)) {
 		    state->cplbndstrc |= 1 << i;
 		    state->ncplbnd--;
-	    }
+		}
 	}
     }
 
@@ -755,7 +755,7 @@ int a52_block (a52_state_t * state)
 	} else {
 	    if (state->chincpl && (do_bit_alloc & 64))	/* cplinu */
 		a52_bit_allocate (state, &state->cplba, state->cplstrtbnd,
-			      state->cplstrtmant, state->cplendmant,
+				  state->cplstrtmant, state->cplendmant,
 				  state->cplfleak << 8, state->cplsleak << 8,
 				  &state->cpl_expbap);
 	    for (i = 0; i < nfchans; i++)
@@ -782,7 +782,7 @@ int a52_block (a52_state_t * state)
 	samples += 256;	/* shift for LFE channel */
 
     chanbias = a52_downmix_coeff (coeff, state->acmod, state->output,
-			      state->dynrng, state->clev, state->slev);
+				  state->dynrng, state->clev, state->slev);
 
     quantizer.q1_ptr = quantizer.q2_ptr = quantizer.q4_ptr = -1;
     done_cpl = 0;
@@ -874,10 +874,10 @@ int a52_block (a52_state_t * state)
 	    if (coeff[i]) {
 		if (blksw[i])
 		    a52_imdct_256 (samples + 256 * i, samples + 1536 + 256 * i,
-			       bias);
+				   bias);
 		else 
 		    a52_imdct_512 (samples + 256 * i, samples + 1536 + 256 * i,
-			       bias);
+				   bias);
 	    } else {
 		int j;
 
@@ -887,27 +887,27 @@ int a52_block (a52_state_t * state)
 	}
 
 	a52_downmix (samples, state->acmod, state->output, state->bias,
-		 state->clev, state->slev);
+		     state->clev, state->slev);
     } else {
 	nfchans = nfchans_tbl[state->output & A52_CHANNEL_MASK];
 
 	a52_downmix (samples, state->acmod, state->output, 0,
-		 state->clev, state->slev);
+		     state->clev, state->slev);
 
 	if (!state->downmixed) {
 	    state->downmixed = 1;
 	    a52_downmix (samples + 1536, state->acmod, state->output, 0,
-		     state->clev, state->slev);
+			 state->clev, state->slev);
 	}
 
 	if (blksw[0])
 	    for (i = 0; i < nfchans; i++)
 		a52_imdct_256 (samples + 256 * i, samples + 1536 + 256 * i,
-			   state->bias);
+			       state->bias);
 	else 
 	    for (i = 0; i < nfchans; i++)
 		a52_imdct_512 (samples + 256 * i, samples + 1536 + 256 * i,
-			   state->bias);
+			       state->bias);
     }
 
     return 0;

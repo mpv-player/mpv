@@ -63,9 +63,9 @@ void downmix_accel_init(uint32_t mm_accel)
     if(mm_accel & MM_ACCEL_X86_3DNOW) a52_downmix= downmix_3dnow;
 #endif
 }
-   
+ 
 int a52_downmix_init (int input, int flags, sample_t * level,
-		  sample_t clev, sample_t slev)
+		      sample_t clev, sample_t slev)
 {
     static uint8_t table[11][8] = {
 	{A52_CHANNEL,	A52_DOLBY,	A52_STEREO,	A52_STEREO,
@@ -96,7 +96,7 @@ int a52_downmix_init (int input, int flags, sample_t * level,
     output = flags & A52_CHANNEL_MASK;
     if (output > A52_DOLBY)
 	return -1;
-    
+
     output = table[output][input & 7];
 
     if ((output == A52_STEREO) &&
@@ -180,11 +180,12 @@ int a52_downmix_init (int input, int flags, sample_t * level,
 	    *level *= 1 / (1 + 3 * LEVEL_3DB);
 	    break;
 	}
+
     return output;
 }
 
 int a52_downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
-		   sample_t clev, sample_t slev)
+		       sample_t clev, sample_t slev)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
 
@@ -474,12 +475,13 @@ static void move2to1 (sample_t * src, sample_t * dest, sample_t bias)
 static void zero (sample_t * samples)
 {
     int i;
+
     for (i = 0; i < 256; i++)
 	samples[i] = 0;
 }
 
 void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
-	      sample_t clev, sample_t slev)
+		  sample_t clev, sample_t slev)
 {
     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
 
