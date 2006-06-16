@@ -2339,7 +2339,7 @@ static int set_property_command(mp_cmd_t* cmd) {
     return 1;
 }
 
-static int reinit_audio_chain() {
+static void reinit_audio_chain(void) {
 if(sh_audio){
   current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
