@@ -205,7 +205,7 @@ Installation directories:
 Optional features:
   --disable-mencoder     disable mencoder (a/v encoder) compilation [enable]
   --enable-gui           enable gmplayer compilation (GTK+ GUI) [disable]
-  --enable-old-gtk       force using GTK 1.2 for GUI  [disable]
+  --enable-gtk1          force using GTK 1.2 for GUI  [disable]
   --enable-largefiles    enable support for files > 2 GBytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
@@ -272,14 +272,14 @@ Codecs:
   --disable-libavformat_so disable shared libavformat [autodetect]
   --disable-libpostproc_so disable shared libpostproc [autodetect]
   --enable-libfame       enable libfame realtime encoder [autodetect]
-  --disable-internal-tremor do not build internal OggVorbis support [enabled]
+  --disable-tremor-internal do not build internal OggVorbis support [enabled]
   --enable-tremor-low    build with lower accuracy internal tremor [disabled]
-  --enable-external-tremor build with external tremor [disabled]
+  --enable-tremor-external build with external tremor [disabled]
   --disable-vorbis       disable OggVorbis support entirely [autodetect]
   --disable-speex        disable Speex support [autodetect]
   --enable-theora        build with OggTheora support [autodetect]
-  --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
-  --disable-internal-faad disable internal FAAD2 (AAC) support [autodetect]
+  --enable-faad-external build with external FAAD2 (AAC) support [autodetect]
+  --disable-faad-internal disable internal FAAD2 (AAC) support [autodetect]
   --disable-faac         disable support for FAAC (AAC encoder) [autodetect]
   --disable-ladspa       disable LADSPA plugin support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
@@ -299,8 +299,8 @@ Codecs:
   --enable-codec=CODEC   dnable specified codec
   
 Video output:
-  --disable-internal-vidix disable internal VIDIX [for x86 *nix]
-  --disable-external-vidix disable external VIDIX [for x86 *nix]
+  --disable-vidix-internal disable internal VIDIX [for x86 *nix]
+  --disable-vidix-external disable external VIDIX [for x86 *nix]
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
   --enable-vesa          build with VESA support [autodetect]
@@ -478,10 +478,10 @@ for ac_option do
     _as=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --enable-gcc-checking)
-    _skip_cc_check=no
+    _gcc_checking=yes
     ;;
   --disable-gcc-checking)
-    _skip_cc_check=yes
+    _gcc_checking=no
     ;;
   --enable-static)
     _ld_static='-static'
@@ -671,7 +671,7 @@ else
 fi
 
 # Checking CC version...
-if test "$_skip_cc_check" != yes ; then
+if test "$_gcc_checking" != no ; then
  # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
  if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   echocheck "$_cc version"
@@ -1559,7 +1559,7 @@ _libavformat=auto
 _libavformat_so=auto
 _libpostproc=auto
 _libpostproc_so=auto
-_fame=auto
+_libfame=auto
 _mp1e=no
 _mencoder=yes
 _x11=auto
@@ -1571,7 +1571,7 @@ _directx=auto
 _win32waveout=auto
 _nas=auto
 _png=auto
-_jpg=auto
+_jpeg=auto
 _pnm=yes
 _md5sum=yes
 _gif=auto
@@ -1603,6 +1603,7 @@ _toolame=auto
 _twolame=auto
 _tremor_internal=yes
 _tremor_low=no
+_tremor_external=no
 _vorbis=auto
 _speex=auto
 _theora=auto
@@ -1610,7 +1611,6 @@ _mp3lib=yes
 _liba52=yes
 _libdts=auto
 _libmpeg2=yes
-_tremor=no
 _faad_internal=auto
 _faad_external=auto
 _faac=auto
@@ -1619,7 +1619,7 @@ _xmms=no
 _have_dvd=no
 _dvdnav=no
 _dvdread=auto
-_dvdkit=auto
+_mpdvdkit=auto
 _xanim=auto
 _real=auto
 _live=auto
@@ -1741,8 +1741,8 @@ for ac_option do
   --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
   --disable-png)	_png=no		;;
-  --enable-jpeg)	_jpg=yes	;;
-  --disable-jpeg)	_jpg=no		;;
+  --enable-jpeg)	_jpeg=yes	;;
+  --disable-jpeg)	_jpeg=no		;;
   --enable-pnm)		_pnm=yes	;;
   --disable-pnm)	_pnm=no		;;
   --enable-md5sum)	_md5sum=yes	;;
@@ -1809,12 +1809,12 @@ for ac_option do
   --disable-vorbis)	_vorbis=no	;;
   --enable-speex)	_speex=yes	;;
   --disable-speex)	_speex=no	;;
-  --enable-internal-tremor)	_tremor_internal=yes	;;
-  --disable-internal-tremor)	_tremor_internal=no	;;
+  --enable-tremor-internal)	_tremor_internal=yes	;;
+  --disable-tremor-internal)	_tremor_internal=no	;;
   --enable-tremor-low)	_tremor_low=yes	;;
   --disable-tremor-low)	_tremor_low=no	;;
-  --enable-external-tremor)	_tremor=yes	;;
-  --disable-external-tremor)	_tremor=no	;;
+  --enable-tremor-external)	_tremor_external=yes	;;
+  --disable-tremor-external)	_tremor_external=no	;;
   --enable-theora)	_theora=yes	;;
   --disable-theora)	_theora=no	;;
   --enable-mp3lib)	_mp3lib=yes	;;
@@ -1827,10 +1827,10 @@ for ac_option do
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-musepack)	_musepack=yes	;;
   --disable-musepack)	_musepack=no	;;
-  --enable-internal-faad)	_faad_internal=yes	_faad_external=no	;;
-  --disable-internal-faad)	_faad_internal=no	;;
-  --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
-  --disable-external-faad)	_faad_external=no	;;
+  --enable-faad-internal)	_faad_internal=yes	_faad_external=no	;;
+  --disable-faad-internal)	_faad_internal=no	;;
+  --enable-faad-external)	_faad_external=yes	_faad_internal=no	;;
+  --disable-faad-external)	_faad_external=no	;;
   --enable-faac)	_faac=yes	;;
   --disable-faac)	_faac=no	;;
   --enable-ladspa)	_ladspa=yes	;;
@@ -1839,8 +1839,8 @@ for ac_option do
   --disable-xmms)	_xmms=no	;;
   --enable-dvdread)	_dvdread=yes	;;
   --disable-dvdread)	_dvdread=no	;;
-  --enable-mpdvdkit)	_dvdkit=yes	;;
-  --disable-mpdvdkit)	_dvdkit=no	;;
+  --enable-mpdvdkit)	_mpdvdkit=yes	;;
+  --disable-mpdvdkit)	_mpdvdkit=no	;;
   --enable-dvdnav)	_dvdnav=yes	;;
   --disable-dvdnav)	_dvdnav=no	;;
   --enable-xanim)	_xanim=yes	;;
@@ -1885,8 +1885,8 @@ for ac_option do
   --disable-smb)	_smbsupport=no	;;
   --enable-internal-vidix)	_vidix_internal=yes	;;
   --disable-internal-vidix)	_vidix_internal=no	;;
-  --enable-external-vidix)	_vidix_external=yes	;;
-  --disable-external-vidix)	_vidix_external=no	;;
+  --enable-vidix-external)	_vidix_external=yes	;;
+  --disable-vidix-external)	_vidix_external=no	;;
   --enable-joystick)	_joystick=yes	;;
   --disable-joystick)	_joystick=no	;;
   --enable-xvid)	_xvid=yes	;;
@@ -1921,16 +1921,16 @@ for ac_option do
   --disable-libpostproc)	_libpostproc=no		;;
   --enable-libpostproc_so)	_libpostproc_so=yes	;;
   --disable-libpostproc_so)	_libpostproc_so=no	;;
-  --enable-libfame)	_fame=yes	;;
-  --disable-libfame)	_fame=no	;;
+  --enable-libfame)	_libfame=yes	;;
+  --disable-libfame)	_libfame=no	;;
   --enable-lirc)	_lirc=yes	;;
   --disable-lirc)	_lirc=no	;;
   --enable-lircc)	_lircc=yes	;;
   --disable-lircc)	_lircc=no	;;
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
-  --enable-old-gtk)	_gtk1=yes	;;
-  --disable-old-gtk)	_gtk1=no	;;
+  --enable-gtk1)	_gtk1=yes	;;
+  --disable-gtk1)	_gtk1=no	;;
   --enable-termcap)	_termcap=yes	;;
   --disable-termcap)	_termcap=no	;;
   --enable-termios)	_termios=yes    ;;
@@ -4342,8 +4342,8 @@ else
 fi
 
 echocheck "JPEG support"
-if test "$_jpg" = auto ; then
-  _jpg=no
+if test "$_jpeg" = auto ; then
+  _jpeg=no
 cat > $TMPC << EOF
 #include <stdio.h>
 #include <stdlib.h>
@@ -4356,22 +4356,22 @@ int main(void) {
 EOF
     if cc_check -ljpeg $_ld_lm ; then
       if tmp_run ; then
-        _jpg=yes
+        _jpeg=yes
       fi
     fi
 fi
-echores "$_jpg"
+echores "$_jpeg"
 
-if test "$_jpg" = yes ; then
-  _def_jpg='#define HAVE_JPEG 1'
+if test "$_jpeg" = yes ; then
+  _def_jpeg='#define HAVE_JPEG 1'
   _vosrc="$_vosrc vo_jpeg.c"
   _vomodules="jpeg $_vomodules"
-  _ld_jpg="-ljpeg"
-  _mkf_jpg="yes"
+  _ld_jpeg="-ljpeg"
+  _mkf_jpeg="yes"
 else
-  _def_jpg='#undef HAVE_JPEG'
+  _def_jpeg='#undef HAVE_JPEG'
   _novomodules="jpeg $_novomodules"
-  _mkf_jpg="no"
+  _mkf_jpeg="no"
 fi
 
 
@@ -4712,27 +4712,27 @@ echores "$_mp1e"
 
 
 echocheck "libfame"
-if test "$_fame" = auto ; then
-  _fame=no
-  test "$_dxr2" = yes && _fame=auto
-  test "$_dxr3" = yes && _fame=auto
-  test "$_dvb" = yes && _fame=auto
+if test "$_libfame" = auto ; then
+  _libfame=no
+  test "$_dxr2" = yes && _libfame=auto
+  test "$_dxr3" = yes && _libfame=auto
+  test "$_dvb"  = yes && _libfame=auto
 fi
-if test "$_fame" = auto ; then
-  _fame=no
+if test "$_libfame" = auto ; then
+  _libfame=no
   if test -d libfame && test -f libfame/fame.h ; then
-    # disable fame on cygwin as no sense to port - atmos	  
-    cygwin || _fame=yes
+    # disable libfame on Cygwin as porting makes no sense
+    cygwin || _libfame=yes
   else
-    _res_comment="no fame dir"
+    _res_comment="no libfame dir"
   fi
 fi
-echores "$_fame"
+echores "$_libfame"
 
-_def_fame='#undef USE_LIBFAME'
-if test "$_fame" = yes ; then
-  _def_fame='#define USE_LIBFAME 1'	
-  _ld_fame='libfame/libfame.a'
+_def_libfame='#undef USE_LIBFAME'
+if test "$_libfame" = yes ; then
+  _def_libfame='#define USE_LIBFAME 1'
+  _ld_libfame='libfame/libfame.a'
 fi
 
 
@@ -5103,13 +5103,13 @@ echores "$_vcd"
 
 
 echocheck "DVD support (libmpdvdkit2)"
-if test "$_dvdkit" = auto ; then
- _dvdkit=no
+if test "$_mpdvdkit" = auto ; then
+ _mpdvdkit=no
  if linux || freebsd || netbsd || darwin || openbsd || win32 || sunos || hpux; then
-  test -f "./libmpdvdkit2/Makefile" && _dvdkit=yes
+  test -f "./libmpdvdkit2/Makefile" && _mpdvdkit=yes
  fi
 fi
-if test "$_dvdkit" = yes ; then
+if test "$_mpdvdkit" = yes ; then
   if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bsdi_dvd" = yes || test "$_hpux_scsi_h" = yes || darwin || win32 ; then
     _inputmodules="mpdvdkit2 $_inputmodules"
     _dvdread=libmpdvdkit2
@@ -5137,7 +5137,7 @@ if test "$_dvdkit" = yes ; then
 else
   _noinputmodules="mpdvdkit2 $_noinputmodules"
 fi
-echores "$_dvdkit"
+echores "$_mpdvdkit"
 
 echocheck "DVD support (libdvdread)"
 if test "$_dvdread" = auto ; then
@@ -5203,7 +5203,7 @@ EOF
   fi
   test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
   _used_css=
-  #test "$_dvdkit" = no && _used_css=$_ld_css
+  #test "$_mpdvdkit" = no && _used_css=$_ld_css
   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
@@ -5597,7 +5597,7 @@ if test "$_vorbis" = yes ; then
 	_tremor_flags=''
     fi
     _codecmodules="tremor(internal) $_codecmodules"
-  elif test "$_tremor" = yes ; then
+  elif test "$_tremor_external" = yes ; then
     _def_tremor='#define TREMOR 1'
     _ld_vorbis='-lvorbisidec'
     _codecmodules="tremor $_codecmodules"
@@ -5615,8 +5615,8 @@ if test "$_vorbis" = yes -a "$_tremor_internal" = yes -a "$_tremor_low" = yes ; 
   _res_comment="internal low accuracy Tremor"
 elif test "$_vorbis" = yes -a "$_tremor_internal" = yes ; then
   _res_comment="internal Tremor"
-elif test "$_vorbis" = yes -a "$_tremor" = yes ; then
-  _res_comment="Tremor"
+elif test "$_vorbis" = yes -a "$_tremor_external" = yes ; then
+  _res_comment="external Tremor"
 fi
 echores "$_vorbis"
 
@@ -7415,7 +7415,7 @@ MUSEPACK = $_musepack
 
 UNRARLIB = $_unrarlib
 PNG = $_mkf_png
-JPEG = $_mkf_jpg
+JPEG = $_mkf_jpeg
 GIF = $_mkf_gif
 
 EXTRA_LIB = $_ld_extra
@@ -7447,7 +7447,7 @@ MLIB_INC = $_inc_mlib
 DXR2_INC = $_inc_dxr2
 DVB_INC = $_inc_dvb
 PNG_LIB = $_ld_png
-JPEG_LIB = $_ld_jpg
+JPEG_LIB = $_ld_jpeg
 GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
@@ -7478,7 +7478,7 @@ LIRCC_LIB = $_ld_lircc
 HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
-DVDKIT2 = $_dvdkit
+DVDKIT2 = $_mpdvdkit
 DVDNAV_LIB = $_ld_dvdnav
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
@@ -7496,8 +7496,8 @@ CONFIG_LIBAVFORMAT_SO = $_libavformat_so
 CONFIG_LIBPOSTPROC = $_libpostproc
 CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
-FAME = $_fame
-FAME_LIB = $_ld_fame
+FAME = $_libfame
+FAME_LIB = $_ld_libfame
 MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
@@ -7939,7 +7939,7 @@ $_def_libdts
 $_def_libmpeg2
 
 /* Use libfame encoder filter */
-$_def_fame
+$_def_libfame
 
 /* XAnim DLL support */
 $_def_xanim
@@ -8099,7 +8099,7 @@ $_def_termios_sys_h
 $_def_png
 
 /* enable JPEG support */
-$_def_jpg
+$_def_jpeg
 
 /* enable PNM support */
 $_def_pnm
