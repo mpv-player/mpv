@@ -1927,6 +1927,7 @@ for ac_option do
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
   --enable-old-gtk)	_gtk1=yes	;;
+  --disable-old-gtk)	_gtk1=no	;;
   --enable-termcap)	_termcap=yes	;;
   --disable-termcap)	_termcap=no	;;
   --enable-termios)	_termios=yes    ;;
@@ -1940,6 +1941,7 @@ for ac_option do
   --enable-tdfxvid)	_tdfxvid=yes	;;
   --disable-tga)	_tga=no	  	;;
   --enable-tga)		_tga=yes	;;
+  --enable-tdfxfb)	_tdfxfb=yes	;;
   --disable-tdfxfb)	_tdfxfb=no	;;
   --enable-directfb)	_directfb=yes	;;
   --disable-directfb)	_directfb=no	;;
@@ -2151,7 +2153,6 @@ for ac_option do
     ;;
   --with-termcaplib=*)
     _ld_termcap=-l`echo $ac_option | cut -d '=' -f 2`
-    _termcap=yes
     ;;
   --prefix=*)
     _prefix=`echo $ac_option | cut -d '=' -f 2`
