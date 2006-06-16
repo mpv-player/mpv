@@ -142,13 +142,30 @@ mlGj3IWCBz7e4+XB3L64kFZwLCYN8kwDUAaHq4EtcMVOnQ== MPHQ_rsync_trigger
 Setting up a webserver
 ~~~~~~~~~~~~~~~~~~~~~~
 
-TO BE DONE
+Set up Apache or whatever web server you prefer. We just have static pages,
+so no fancy configuration is necessary. However, we need a few aliases so that
+links on our pages work correctly. /MPlayer and /DOCS should redirect to the
+directory with the downloadable files and /homepage should redirect to the
+directory with the HTML pages.
+
+Here is an example stanza to paste into your Apache configuration:
+
+<VirtualHost www#.mplayerhq.hu>
+        DocumentRoot /path/to/htdocs
+        Options FollowSymLinks
+        Alias /homepage /path/to/htdocs
+        Alias /MPlayer  /path/to/MPlayer
+        Alias /DOCS     /path/to/MPlayer/DOCS
+</VirtualHost>
 
 
 Setting up an FTP server
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-TO BE DONE
+Any FTP server will do. We use vsftpd, it's fast and secure. You should have
+the same directory layout as we do on our server, so there should be a
+subdirectory named 'MPlayer' (notice the capitals) that contains the
+downloadable files.
 
 
 Mailinglist
