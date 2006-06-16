@@ -159,6 +159,7 @@ void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf);
 #define MPEG2_ACCEL_X86_MMX 1
 #define MPEG2_ACCEL_X86_3DNOW 2
 #define MPEG2_ACCEL_X86_MMXEXT 4
+#define MPEG2_ACCEL_X86_SSE2 8
 #define MPEG2_ACCEL_PPC_ALTIVEC 1
 #define MPEG2_ACCEL_ALPHA 1
 #define MPEG2_ACCEL_ALPHA_MVI 2

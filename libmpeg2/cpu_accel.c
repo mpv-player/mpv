@@ -26,6 +26,7 @@
  */
 
 #include "config.h"
+#include "cpudetect.h"
 
 #include <inttypes.h>
 
@@ -35,8 +36,16 @@
 
 #ifdef ACCEL_DETECT
 #if defined(ARCH_X86) || defined(ARCH_X86_64)
+
+/* MPlayer imports libmpeg2 as decoder, which detects MMX / 3DNow! 
+ * instructions via assembly. However, it is regarded as duplicaed work
+ * in MPlayer, so that we enforce to use MPlayer's implementation.
+ */
+#define USE_MPLAYER_CPUDETECT
+
 static inline uint32_t arch_accel (void)
 {
+#if !defined(USE_MPLAYER_CPUDETECT)
     uint32_t eax, ebx, ecx, edx;
     int AMD;
     uint32_t caps;
@@ -109,6 +118,20 @@ static inline uint32_t arch_accel (void)
 	caps |= MPEG2_ACCEL_X86_MMXEXT;
 
     return caps;
+#else /* USE_MPLAYER_CPUDETECT: Use MPlayer's cpu capability property */
+    caps = 0;
+    if (gCpuCaps.hasMMX)
+        caps |= MPEG2_ACCEL_X86_MMX;
+    if (gCpuCaps.hasSSE2)
+	caps |= MPEG2_ACCEL_X86_SSE2;
+    if (gCpuCaps.hasMMX2)
+	caps |= MPEG2_ACCEL_X86_MMXEXT;
+    if (gCpuCaps.has3DNow)
+	caps |= MPEG2_ACCEL_X86_3DNOW;
+
+    return caps;
+
+#endif /* USE_MPLAYER_CPUDETECT */
 }
 #endif /* ARCH_X86 || ARCH_X86_64 */
 
