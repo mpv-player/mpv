@@ -65,6 +65,8 @@ extern ao_functions_t* audio_out_drivers[];
 #define AOCONTROL_SET_PLUGIN_DRIVER 6
 #define AOCONTROL_SET_PLUGIN_LIST 7
 
+#define AOPLAY_FINAL_CHUNK 1
+
 typedef struct ao_control_vol_s {
 	float left;
 	float right;

@@ -3657,6 +3657,8 @@ while(sh_audio){
   unsigned int t;
   double tt;
   int playsize;
+  int playflags=0;
+  int audio_eof=0;
 
   current_module="play_audio";
   
@@ -3675,31 +3677,44 @@ while(sh_audio){
   // Fill buffer if needed:
   current_module="decode_audio";   // Enter AUDIO decoder module
   t=GetTimer();
-  while(sh_audio->a_out_buffer_len<playsize &&
-        (!d_audio->eof || sh_audio->a_in_buffer_len > 0 || sh_audio->a_buffer_len > 0)){
+  while (sh_audio->a_out_buffer_len < playsize) {
     int ret=decode_audio(sh_audio,&sh_audio->a_out_buffer[sh_audio->a_out_buffer_len],
         playsize-sh_audio->a_out_buffer_len,sh_audio->a_out_buffer_size-sh_audio->a_out_buffer_len);
     if(ret<=0) { // EOF?
-      if (d_audio->eof)
-        sh_audio->a_in_buffer_len = 0; // make sure we don't hang if something's broken
+      if (d_audio->eof) {
+	audio_eof = 1;
+	if (!sh_video && sh_audio->a_out_buffer_len == 0)
+	    eof = PT_NEXT_ENTRY;
+      }
       break;
     }
     sh_audio->a_out_buffer_len+=ret;
   }
   t=GetTimer()-t;
   tt = t*0.000001f; audio_time_usage+=tt;
-  if(playsize>sh_audio->a_out_buffer_len) playsize=sh_audio->a_out_buffer_len;
+  if (playsize > sh_audio->a_out_buffer_len) {
+      playsize = sh_audio->a_out_buffer_len;
+      if (audio_eof)
+	  playflags |= AOPLAY_FINAL_CHUNK;
+  }
+  if (!playsize)
+      break;
 
   // play audio:  
   current_module="play_audio";
-  playsize=audio_out->play(sh_audio->a_out_buffer,playsize,0);
+  playsize = audio_out->play(sh_audio->a_out_buffer, playsize, playflags);
 
   if(playsize>0){
       sh_audio->a_out_buffer_len-=playsize;
       memmove(sh_audio->a_out_buffer,&sh_audio->a_out_buffer[playsize],sh_audio->a_out_buffer_len);
       sh_audio->delay+=playback_speed*playsize/(double)ao_data.bps;
   }
-
+  else if (audio_eof && audio_out->get_delay() < .04) {
+      // Sanity check to avoid hanging in case current ao doesn't output
+      // partial chunks and doesn't check for AOPLAY_FINAL_CHUNK
+      mp_msg(MSGT_CPLAYER, MSGL_WARN, "Audio output truncated at end.\n");
+      sh_audio->a_out_buffer_len = 0;
+  }
   break;
 } // while(sh_audio)
 
@@ -3709,8 +3724,6 @@ if(!sh_video) {
     double a_pos = playing_audio_pts(sh_audio, d_audio, audio_out);
     print_status(a_pos, 0, 0);
   }
-  if(d_audio->eof && sh_audio->a_in_buffer_len <= 0 && sh_audio->a_buffer_len <= 0) eof = PT_NEXT_ENTRY;
-
 } else {
 
 /*========================== PLAY VIDEO ============================*/
