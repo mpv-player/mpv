@@ -1,4 +1,4 @@
-.\" Synced with r18656
+.\" Synced with r18712
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -3105,16 +3105,19 @@ beállítását teszi lehetõvé.
 A gamma külön állítható a vörös, zöld és kék színre.
 A sebessége jobban függ a GPU memória sávszélességétõl, mint a többi módszernél.
 .RE
-.IPs [l|c]scaler=<n>
-Kiválasztja a használandó méretezõ függvényt (külön a fényerõsséghez és a telítettséghez).
-Csak a 2-es, 3-as és 4-es yuv módok a helyesek.
+.IPs lscale=<n>
+Kiválasztja a használandó méretezõ függvényt a fényerõsséghez.
+Csak a 2-es, 3-as, 4-es és 6-os yuv módoknál helyes.
 .RSss
 0: Egyszerû lineáris szûrés használata (alapértelmezett)
 .br
 1: Bicubic szûrõ használata (jobb minõség).
+További egy textúra egység kell hozzá.
 A régi kártyák nem tudják használni ezt a telítettséget, legalábbis teljes képernyõnél.
-További egy textúra egység szükséges.
 .RE
+.IPs cscale=<n>
+Kiválasztja a használandó méretezõ függvényt a színességhez.
+A részletekért lásd a lscale-t.
 .IPs customprog=<fájlnév>
 Saját fragmentum programot tölt be a <fájlnév>-bõl.
 Lásd a TOOLS/edgedect.fp fájl példáért.
@@ -5893,33 +5896,25 @@ kimeneti framerátát.
 Csakúgy mint a telecine szûrõ, a tfields is csak a MEncoder-rel
 mûködik és csak ha az \-fps és \-ofps be van állítva a
 kívánt (dupla) framerátára!
-A használható módok:
 .PD 0
 .RSs
-.IPs 0
-Változatlanul hagyja a mezõket. (Ez ugrálni/\:villogni fog.)
-.IPs 1
-Interpolálja a hiányzó sorokat. (A használt algoritmus nem túl jó.)
-.IPs 2
-Eltolja a mezõket 1/4 pixellel, lineáris interpolációval (nincs ugrás).
-.IPs 4
-Eltolja a mezõket 1/4 pixellel, 4tap szûrõvel (jó minõség). (alapértelmezett)
-.RE
-.PD 1
-.RS
-A használható mezõ dominanciák:
-.RE
-.PD 0
-.RSs
-.IPs -1
-auto (alapértelmezett)
+.IPs <mód>
+0: Változatlanul hagyja a mezõket (ez ugrálni/\:villogni fog).
+.br
+1: Interpolálja a hiányzó sorokat. (A használt algoritmus nem túl jó.)
+.br
+2: Eltolja a mezõket 1/4 pixellel, lineáris interpolációval (nincs ugrás).
+.br
+4: Eltolja a mezõket 1/4 pixellel, 4tap szûrõvel (jobb minõségû) (alapértelmezett).
+.IPs <mezõ_dominancia>
+-1: auto (alapértelmezett)
 Csak akkor mûködik, ha a dekódoló exportálja a megfelelõ információkat
 és nincs semmilyen más, ezen információkat eldobó szûrõ betöltve a
 tfields elõtt, különben visszalép 0-ra (felsõ mezõ elõször).
-.IPs 0
-felsõ elõször
-.IPs 1
-alsó elõször
+.br
+0: felsõ elõször
+.br
+1: alsó elõször
 .RE
 .PD 1
 .
