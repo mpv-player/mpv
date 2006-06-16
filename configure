@@ -3444,7 +3444,7 @@ else
   _def_sysi86='#undef HAVE_SYSI86'
 fi
 echores "$_sysi86"
-fi
+fi #if sunos
 
 
 echocheck "sys/sysinfo.h"
@@ -5969,7 +5969,7 @@ EOF
   fi
 fi
 
-fi
+fi # if false
 
 echores "$_dshow"
 
@@ -6195,7 +6195,7 @@ EOF
   fi
 fi
 echores "$_libavutil_so"
-fi
+fi #if test "$_libavutil" != yes ; then
 
 if test "$_libavcodec" != yes ; then
 echocheck "FFmpeg libavcodec (dynamic)"
@@ -6222,7 +6222,7 @@ EOF
   fi
 fi
 echores "$_libavcodec_so"
-fi
+fi #if test "$_libavcodec" != yes ; then
 
 if test "$_libavformat" != yes ; then
 echocheck "FFmpeg libavformat (dynamic)"
@@ -6244,7 +6244,7 @@ EOF
   fi
 fi
 echores "$_libavformat_so"
-fi
+fi #if test "$_libavformat" != yes ; then
 
 if test "$_libpostproc" != yes ; then
 echocheck "FFmpeg libpostproc (dynamic)"
@@ -6264,7 +6264,7 @@ EOF
   fi
 fi
 echores "$_libpostproc_so"
-fi
+fi #if test "$_libpostproc" != yes ; then
 
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
