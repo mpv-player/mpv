@@ -67,11 +67,6 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 #include "codec-cfg.h"
 
-#undef USE_DVDNAV
-#ifdef USE_DVDNAV
-#include <dvdnav.h>
-#endif
-
 #include "edl.h"
 
 #include "spudec.h"
@@ -3115,10 +3110,6 @@ if(stream->type==STREAMTYPE_DVD){
 }
 #endif
 
-#ifdef USE_DVDNAV
-  if (stream->type==STREAMTYPE_DVDNAV) stream_cache_size=0;	// must disable caching...
-#endif
-
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
 #ifdef HAS_DVBIN_SUPPORT
 goto_enable_cache:
@@ -3201,7 +3192,6 @@ if(!demuxer)
   switch(stream->type){
   case STREAMTYPE_VCD:
   case STREAMTYPE_DVD:
-  case STREAMTYPE_DVDNAV:
   case STREAMTYPE_CDDA:
   case STREAMTYPE_VCDBINCUE:
     // don't try to parse raw media as playlist, it's unlikely
@@ -3347,14 +3337,6 @@ if (spudec_ifo) {
   if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
     vo_spudec=spudec_new_scaled(palette, width, height);
 }
-
-#ifdef USE_DVDNAV
-if (vo_spudec==NULL && stream->type==STREAMTYPE_DVDNAV) {
-  current_module="spudec_init_dvdnav";
-  vo_spudec=spudec_new_scaled(dvdnav_stream_get_palette((dvdnav_priv_t*)(stream->priv)),
-			    sh_video->disp_w, sh_video->disp_h);
-}
-#endif
 
 #ifdef USE_DVDREAD
 if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
@@ -3656,12 +3638,6 @@ if(loop_times>1) loop_times--; else
 if(loop_times==1) loop_times = -1;
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
-
-#ifdef USE_DVDNAV
-if (stream->type==STREAMTYPE_DVDNAV) {
-  dvdnav_stream_fullstart((dvdnav_priv_t *)stream->priv);
-}
-#endif
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
@@ -4135,11 +4111,6 @@ if(step_sec>0) {
 	osd_function=OSD_FFW;
 	rel_seek_secs+=step_sec;
 }
-
-#ifdef USE_DVDNAV
-if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
-    dvdnav_stream_sleeping((dvdnav_priv_t*)stream->priv);
-#endif
 
 //================= EDL =========================================
 
@@ -4633,213 +4604,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_KEYDOWN_EVENTS : {
 		mplayer_put_key(cmd->args[0].v.i);
     } break;
-#ifdef USE_DVDNAV
-    case MP_CMD_DVDNAV_EVENT: {
-      dvdnav_priv_t * dvdnav_priv = (dvdnav_priv_t*)(stream->priv);
-      dvdnav_event_t * dvdnav_event = (dvdnav_event_t *)(cmd->args[0].v.v);
-
-      /* ignore these events if we're not in dvd_nav mode */
-      if (stream->type != STREAMTYPE_DVDNAV) break;
-
-      if (!dvdnav_event) {
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNullEvent);
-        break;
-      }
-
-      //printf("mplayer: got event: %d\n",dvdnav_event->event);
-
-      switch (dvdnav_event->event) {
-      case DVDNAV_BLOCK_OK: {
-          /* be silent about this one */
-                break;
-          }
-      case DVDNAV_HIGHLIGHT: {
-          dvdnav_highlight_event_t *hevent = (dvdnav_highlight_event_t*)(dvdnav_event->details);
-          if (!hevent) {
-                mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavHighlightEventBroken);
-                break;
-          }
-
-          if (hevent->display && hevent->buttonN>0)
-          {
-                //dvdnav_priv->seen_root_menu=1; /* if we got a highlight, we're on a menu */
-                sprintf( dvd_nav_text, "Highlight button %d (%u,%u)-(%u,%u) PTS %d (now is %5.2f)",
-                     hevent->buttonN,
-                     hevent->sx,hevent->sy,
-                     hevent->ex,hevent->ey,
-                     hevent->pts, d_video->pts);
-                mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavEvent,dvd_nav_text);
-                //osd_show_dvd_nav_delay = 60;
-
-                osd_show_dvd_nav_highlight=1; /* this is just a flag */
-                osd_show_dvd_nav_sx=hevent->sx;
-                osd_show_dvd_nav_ex=hevent->ex;
-                osd_show_dvd_nav_sy=hevent->sy;
-                osd_show_dvd_nav_ey=hevent->ey;
-          }
-          else {
-                  osd_show_dvd_nav_highlight=0;
-                  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavHighlightHide);
-          }
-        break;
-        }
-      case DVDNAV_STILL_FRAME: {
-          dvdnav_still_event_t *still_event = (dvdnav_still_event_t*)(dvdnav_event->details);
-
-          mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavStillFrame, still_event->length );
-          while (dvdnav_stream_sleeping(dvdnav_priv)) {
-            usec_sleep(1000); /* 1ms */
-          }
-          dvdnav_stream_sleep(dvdnav_priv,still_event->length);
-        break;
-        }
-      case DVDNAV_STOP: {
-          mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavStop );
-        break;
-        }
-      case DVDNAV_NOP: {
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavNOP);
-        break;
-        }
-      case DVDNAV_SPU_STREAM_CHANGE: {
-#if DVDNAVVERSION > 012
-        dvdnav_spu_stream_change_event_t *stream_change = (dvdnav_spu_stream_change_event_t*)(dvdnav_event->details);
-
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSpuStreamChangeVerbose,
-                stream_change->physical_wide,
-                stream_change->physical_letterbox,
-                stream_change->physical_pan_scan,
-                stream_change->logical);
-
-        if (vo_spudec && dvdsub_id!=stream_change->physical_wide) {
-                mp_msg(MSGT_INPUT,MSGL_DBG2,"d_dvdsub->id change: was %d is now %d\n",
-                        d_dvdsub->id,stream_change->physical_wide);
-                // FIXME: need a better way to change SPU id
-                d_dvdsub->id=dvdsub_id=stream_change->physical_wide;
-                if (vo_spudec) spudec_reset(vo_spudec);
-        }
-#else
-        dvdnav_stream_change_event_t *stream_change = (dvdnav_stream_change_event_t*)(dvdnav_event->details);
-
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSpuStreamChange,
-                stream_change->physical,
-                stream_change->logical);
-
-        if (vo_spudec && dvdsub_id!=stream_change->physical) {
-                mp_msg(MSGT_INPUT,MSGL_DBG2,"d_dvdsub->id change: was %d is now %d\n",
-                        d_dvdsub->id,stream_change->physical);
-                // FIXME: need a better way to change SPU id
-                d_dvdsub->id=dvdsub_id=stream_change->physical;
-                if (vo_spudec) spudec_reset(vo_spudec);
-        }
-#endif /* DVDNAVVERSION > 012 */
-        break;
-        }
-      case DVDNAV_AUDIO_STREAM_CHANGE: {
-        int aid_temp;
-#if DVDNAVVERSION > 012
-        dvdnav_audio_stream_change_event_t *stream_change = (dvdnav_audio_stream_change_event_t*)(dvdnav_event->details);
-#else
-        dvdnav_stream_change_event_t *stream_change = (dvdnav_stream_change_event_t*)(dvdnav_event->details);
-#endif
-
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavAudioStreamChange,
-                stream_change->physical,
-                stream_change->logical);
-
-        aid_temp=stream_change->physical;
-        if (aid_temp>=0) aid_temp+=128; // FIXME: is this sane?
-        if (d_audio && audio_id!=aid_temp) {
-                mp_msg(MSGT_INPUT,MSGL_DBG2,"d_audio->id change: was %d is now %d\n",
-                        d_audio->id,aid_temp);
-                // FIXME: need a better way to change audio stream id
-                d_audio->id=dvdsub_id=aid_temp;
-                if(sh_audio) resync_audio_stream(sh_audio);
-        }
-
-        break;
-      }
-      case DVDNAV_VTS_CHANGE: {
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavVTSChange);
-        break;
-        }
-      case DVDNAV_CELL_CHANGE: {
-        dvdnav_cell_change_event_t *cell_change = (dvdnav_cell_change_event_t*)(dvdnav_event->details);
-        cell_playback_t * cell_playback = cell_change->new_cell;
-
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavCellChange);
-        osd_show_dvd_nav_highlight=0; /* screen changed, disable menu */
-        /*
-        printf("new still time: %d\n",cell_playback->still_time);
-        printf("new cell_cmd_nr: %d\n",cell_playback->cell_cmd_nr);
-        printf("new playback_time: %02d:%02d:%02d.%02d\n",
-                        cell_playback->playback_time.hour,
-                        cell_playback->playback_time.minute,
-                        cell_playback->playback_time.second,
-                        cell_playback->playback_time.frame_u);
-
-        */
-        //rel_seek_secs=1; // not really: we can't seek, but it'll reset the muxer
-        //abs_seek_pos=0;
-        break;
-        }
-      case DVDNAV_NAV_PACKET: {
-        // printf("DVDNAV Event: Nav Packet\n");
-        break;
-        }
-      case DVDNAV_SPU_CLUT_CHANGE: {
-        uint32_t * new_clut = (uint32_t *)(dvdnav_event->details);
-
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSpuClutChange);
-        // send new palette to SPU decoder
-        if (vo_spudec) spudec_update_palette(vo_spudec,new_clut);
-
-        break;
-        }
-      case DVDNAV_SEEK_DONE: {
-        mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_DvdnavNavSeekDone);
-        break;
-        }
-      }
-
-      // free the dvdnav event
-      free(dvdnav_event->details);
-      free(dvdnav_event);
-      cmd->args[0].v.v=NULL;
-    }
-    case MP_CMD_DVDNAV: {
-      dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
-
-      /* ignore these events if we're not in dvd_nav mode */
-      if (stream->type != STREAMTYPE_DVDNAV) break;
-
-      switch (cmd->args[0].v.i) {
-        case MP_CMD_DVDNAV_UP:
-          dvdnav_upper_button_select(dvdnav_priv->dvdnav);
-          break;
-        case MP_CMD_DVDNAV_DOWN:
-          dvdnav_lower_button_select(dvdnav_priv->dvdnav);
-          break;
-        case MP_CMD_DVDNAV_LEFT:
-          dvdnav_left_button_select(dvdnav_priv->dvdnav);
-          break;
-        case MP_CMD_DVDNAV_RIGHT:
-          dvdnav_right_button_select(dvdnav_priv->dvdnav);
-          break;
-        case MP_CMD_DVDNAV_MENU:
-          mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MenuCall);
-          dvdnav_menu_call(dvdnav_priv->dvdnav,DVD_MENU_Root);
-          break;
-        case MP_CMD_DVDNAV_SELECT:
-          dvdnav_button_activate(dvdnav_priv->dvdnav);
-          break;
-        default:
-          mp_msg(MSGT_CPLAYER, MSGL_V, "Weird DVD Nav cmd %d\n",cmd->args[0].v.i);
-          break;
-      }
-      break;
-    }
-#endif /* USE_DVDNAV */
     default : {
 #ifdef HAVE_NEW_GUI
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );

@@ -290,10 +290,6 @@ extern int dvd_angle;
 
 extern char * audio_stream;
 
-#ifdef USE_DVDNAV
-#include "dvdnav_stream.h"
-#endif
-
 typedef struct {
  int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm
  int language; 
