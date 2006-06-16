@@ -184,10 +184,8 @@ esac
 
 LANGUAGES=`echo help/help_mp-??.h help/help_mp-??_??.h | sed "s:help/help_mp-\(..\).h:\1:g" | sed "s:help/help_mp-\(.....\).h:\1:g"`
 
-for parm in "$@" ; do
-  if test "$parm" = "--help" || test "$parm" = "-help" || test "$parm" = "-h" ; then
-    cat << EOF
-
+show_help(){
+cat << EOF
 Usage: $0 [OPTIONS]...
 
 Configuration:
@@ -440,10 +438,15 @@ It will try to autodetect all configuration options. If you --enable an option
 it will be forcefully turned on, skipping autodetection. This can break
 compilation, so you need to know what you are doing.
 EOF
-    exit 0
-  fi
-done # for parm in ...
+exit 0
+} #show_help()
 
+for parm in "$@" ; do
+  case $parm in
+    --help|-help|-h)
+      show_help
+  esac
+done
 
 # 1st pass checking for vital options
 _mmx=auto
