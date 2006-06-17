@@ -2021,7 +2021,6 @@ for ac_option do
     ;;
   --with-libdvdnav=*)
     _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
-    _dvdnav=yes
     ;;
 
   --with-codecsdir=*)
@@ -2031,15 +2030,12 @@ for ac_option do
     ;;
   --with-win32libdir=*)
     _win32libdir=`echo $ac_option | cut -d '=' -f 2`
-    _win32=yes
     ;;
   --with-xanimlibdir=*)
     _xanimlibdir=`echo $ac_option | cut -d '=' -f 2`
-    _xanim=yes
     ;;
   --with-reallibdir=*)
     _reallibdir=`echo $ac_option | cut -d '=' -f 2`
-    _real=yes
     ;;
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -2049,7 +2045,6 @@ for ac_option do
     ;;
   --with-mlibdir=*)
     _mlibdir=`echo $ac_option | cut -d '=' -f 2`
-    _mlib=yes
     ;;
 
   --with-xmmslibdir=*)
