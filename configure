@@ -2085,8 +2085,8 @@ for ac_option do
         _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
 
   --enable-win32) _win32=yes ;;
-  --disable-win32) _win32=no _dshow=no ;;
-  --enable-dshow) _win32=yes _dshow=yes ;;
+  --disable-win32) _win32=no ;;
+  --enable-dshow) _dshow=yes ;;
   --disable-dshow) _dshow=no ;;
 
   --with-x11incdir=*)
