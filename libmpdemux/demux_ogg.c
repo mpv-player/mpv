@@ -1648,7 +1648,7 @@ static int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
     rate = os->samplerate;
   } else {
     os = &ogg_d->subs[demuxer->audio->id];
-    rate = (float)((ov_struct_t*)((sh_audio_t*)demuxer->audio->sh)->context)->vi.rate;
+    rate = ogg_d->vi.rate;
   }
 
 
