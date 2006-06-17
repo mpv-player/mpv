@@ -1827,9 +1827,9 @@ for ac_option do
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-musepack)	_musepack=yes	;;
   --disable-musepack)	_musepack=no	;;
-  --enable-faad-internal)	_faad_internal=yes	_faad_external=no	;;
+  --enable-faad-internal)	_faad_internal=yes	;;
   --disable-faad-internal)	_faad_internal=no	;;
-  --enable-faad-external)	_faad_external=yes	_faad_internal=no	;;
+  --enable-faad-external)	_faad_external=yes	;;
   --disable-faad-external)	_faad_external=no	;;
   --enable-faac)	_faac=yes	;;
   --disable-faac)	_faac=no	;;
@@ -5794,7 +5794,8 @@ else
 fi
 echores "$_faac"
 
-echocheck "internal FAAD2 (AAC) support"
+
+echocheck "FAAD2 (AAC) support"
 if test "$_faad_internal" = auto ; then
   if x86 && test cc_vendor=gnu; then
     case $cc_version in
@@ -5809,19 +5810,7 @@ if test "$_faad_internal" = auto ; then
   else
     _faad_internal=yes
   fi
-fi
-if test "$_faad_internal" = yes ; then
-  _def_faad_internal="#define USE_INTERNAL_FAAD 1"
-  _faad_external=no
-else
-  _def_faad_internal="#undef USE_INTERNAL_FAAD"
-  _inc_faad=
-fi
-echores "$_faad_internal"
-
-
-echocheck "external FAAD2 (AAC) support"
-if test "$_faad_external" != no ; then
+elif test "$_faad_external" = auto ; then
   _ld_faad='-lfaad'
   _inc_faad="$_inc_extra"
   # external faad: check if it's really faad2 :)
@@ -5837,19 +5826,27 @@ EOF
     cc_check $_inc_faad $_ld_faad $_ld_lm && _faad_external=yes
   fi
 fi
-echores "$_faad_external"
 
-if test "$_faad_external" = yes; then
+if test "$_faad_internal" = yes ; then
+  _def_faad_internal="#define USE_INTERNAL_FAAD 1"
+  _faad=yes
+elif test "$_faad_external" = yes ; then
+  _faad=yes
+else
+  _def_faad_internal="#undef USE_INTERNAL_FAAD"
+  _faad=no
+fi
+
+if test "$_faad" = yes ; then
   _def_faad='#define HAVE_FAAD 1'
-  _codecmodules="faad2(external) $_codecmodules"
-elif test "$_faad_internal" = yes; then
-  _def_faad='#define HAVE_FAAD 1'
-  _codecmodules="faad2(internal) $_codecmodules"
+  _codecmodules="faad2 $_codecmodules"
 else
   _def_faad='#undef HAVE_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
   _ld_faad=
+  _inc_faad=
 fi
+echores "$_faad"
 
 
 echocheck "LADSPA plugin support"
@@ -7404,6 +7401,7 @@ LIBA52 = $_liba52
 LIBMPEG2 = $_libmpeg2
 TREMOR = $_tremor_internal
 TREMOR_FLAGS = $_tremor_flags
+FAAD = $_faad
 
 SPEEX = $_speex
 MUSEPACK = $_musepack
