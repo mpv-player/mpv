@@ -15,12 +15,11 @@
 #include "video_out_internal.h"
 #include "sub.h"
 
+#include "gl_common.h"
+#include "aspect.h"
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 #endif
-
-#include "gl_common.h"
-#include "aspect.h"
 
 #define NDEBUG
 //#undef NDEBUG
