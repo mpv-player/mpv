@@ -10,8 +10,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#include "postproc/rgb2rgb.h"
-
 //===========================================================================//
 
 static unsigned int bgr_list[]={

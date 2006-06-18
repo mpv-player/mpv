@@ -24,7 +24,6 @@
 
 #include "libvo/fastmemcpy.h"
 #include "postproc/swscale.h"
-#include "postproc/rgb2rgb.h"
 
 struct vf_priv_s {
     int frameno;

@@ -14,7 +14,6 @@
 
 #include "libvo/video_out.h"
 #include "libvo/fastmemcpy.h"
-#include "postproc/rgb2rgb.h"
 
 #include "m_option.h"
 #include "m_struct.h"

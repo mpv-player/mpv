@@ -13,7 +13,6 @@
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
-#include "postproc/rgb2rgb.h"
 
 typedef void (pack_func_t)(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w, int us, int vs);

@@ -2,7 +2,6 @@
 #include "fastmemcpy.h"
 #include "cpudetect.h"
 #include "postproc/swscale.h"
-#include "postproc/rgb2rgb.h"
 #include "libmpcodecs/vf_scale.h"
 #include "mp_msg.h"
 #include "help_mp.h"

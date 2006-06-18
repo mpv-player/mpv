@@ -39,9 +39,9 @@ int XShmGetEventBase(Display *);
 #include "sub.h"
 
 #include "postproc/swscale.h"
-#include "postproc/swscale_internal.h"       //FIXME
-#include "postproc/rgb2rgb.h"
 #include "libmpcodecs/vf_scale.h"
+#define MODE_RGB  0x1
+#define MODE_BGR  0x2
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -144,7 +144,8 @@ static void draw_alpha_null(int x0, int y0, int w, int h,
 {
 }
 
-static SwsContext *swsContext = NULL;
+static struct SwsContext *swsContext = NULL;
+static int dst_width;
 extern int sws_flags;
 
 static XVisualInfo vinfo;
@@ -509,6 +510,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     if (!swsContext)
         return -1;
 
+    dst_width = width;
     //printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
     // If we have blue in the lowest bit then obviously RGB
@@ -553,16 +555,16 @@ static void Display_Image(XImage * myximage, uint8_t * ImageData)
     {
         XShmPutImage(mDisplay, vo_window, vo_gc, myximage,
                      0, 0,
-                     (vo_dwidth - swsContext->dstW) / 2,
-                     (vo_dheight - myximage->height) / 2, swsContext->dstW,
+                     (vo_dwidth - dst_width) / 2,
+                     (vo_dheight - myximage->height) / 2, dst_width,
                      myximage->height, True);
     } else
 #endif
     {
         XPutImage(mDisplay, vo_window, vo_gc, myximage,
                   0, 0,
-                  (vo_dwidth - swsContext->dstW) / 2,
-                  (vo_dheight - myximage->height) / 2, swsContext->dstW,
+                  (vo_dwidth - dst_width) / 2,
+                  (vo_dheight - myximage->height) / 2, dst_width,
                   myximage->height);
     }
 }
@@ -590,7 +592,7 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
         int newW = vo_dwidth;
         int newH = vo_dheight;
         int newAspect = (newW * (1 << 16) + (newH >> 1)) / newH;
-        SwsContext *oldContext = swsContext;
+        struct SwsContext *oldContext = swsContext;
 
         if (newAspect > aspect)
             newW = (newH * aspect + (1 << 15)) >> 16;
@@ -617,6 +619,7 @@ static int draw_slice(uint8_t * src[], int stride[], int w, int h,
         {
             swsContext = oldContext;
         }
+        dst_width = newW;
     }
     dstStride[1] = dstStride[2] = 0;
     dst[1] = dst[2] = NULL;

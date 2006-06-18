@@ -11,7 +11,6 @@
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
-#include "postproc/rgb2rgb.h"
 
 
 static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcstride,int w,int h,int bpp,unsigned int fmt){
