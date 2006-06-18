@@ -3118,6 +3118,7 @@ fi
 echores "$_dvd"
 
 
+if bsdos; then
 echocheck "BSDI dvd.h"
 cat > $TMPC << EOF
 #include <dvd.h>
@@ -3131,8 +3132,10 @@ else
   _def_bsdi_dvd='#undef DVD_STRUCT_IN_BSDI_DVDIOCTL_DVD_H'
 fi
 echores "$_bsdi_dvd"
+fi #if bsdos
 
 
+if hpux; then
 # also used by AIX, but AIX does not support VCD and/or libdvdread
 echocheck "HP-UX SCSI header"
 cat > $TMPC << EOF
@@ -3147,8 +3150,10 @@ else
   _def_hpux_scsi_h='#undef HPUX_SCTL_IO'
 fi
 echores "$_hpux_scsi_h"
+fi #if hpux
 
 
+if sunos; then
 echocheck "userspace SCSI headers (Solaris)"
 cat > $TMPC << EOF
 #   include <unistd.h>
@@ -3165,6 +3170,7 @@ else
   _def_sol_scsi_h='#undef SOLARIS_USCSI'
 fi
 echores "$_sol_scsi_h"
+fi #if sunos
 
 
 echocheck "termcap"
@@ -3466,8 +3472,10 @@ fi
 echores "$_sys_sysinfo"
 
 
+if darwin; then
+
 echocheck "Mac OS X APIs"
-if test "$_macosx" = auto && darwin ; then
+if test "$_macosx" = auto ; then
     productName=`/usr/bin/sw_vers -productName`
     if test "$productName" = "Mac OS X" ; then
         _macosx=yes
@@ -3546,6 +3554,9 @@ else
   _macosx_bundle=no
 fi 
 echores "$_macosx_bundle"
+
+fi #if darwin
+
 
 echocheck "Samba support (libsmbclient)"
 if test "$_smbsupport" = yes; then
@@ -4570,6 +4581,9 @@ else
 fi
 echores "$_sdl"
 
+
+if win32; then
+
 echocheck "Windows waveout"
 if test "$_win32waveout" = auto ; then
   cat > $TMPC << EOF
@@ -4615,6 +4629,9 @@ else
   _noaomodules="dsound $_noaomodules"
 fi
 echores "$_directx"
+
+fi #if win32; then
+
 
 echocheck "NAS"
 if test "$_nas" = auto ; then
@@ -5041,6 +5058,7 @@ fi
 echores "$_sunaudio"
 
 
+if sunos; then
 echocheck "Sun mediaLib"
 if test "$_mlib" = auto ; then
   _mlib=no
@@ -5059,8 +5077,10 @@ else
   _def_mlib='#undef HAVE_MLIB'
 fi
 echores "$_mlib"
+fi #if sunos
 
 
+if irix; then
 echocheck "SGI audio"
 if test "$_sgiaudio" = auto ; then
   # check for SGI audio
@@ -5081,6 +5101,7 @@ else
   _noaomodules="sgi $_noaomodules"
 fi
 echores "$_sgiaudio"
+fi #if irix
 
 
 echocheck "VCD support"
@@ -5873,13 +5894,8 @@ fi
 echores "$_ladspa"
 
 
-if test "$_win32" = auto ; then
-  if x86 ; then
-    qnx && _win32=no
-  else
-    _win32=no # x86 arch only
-  fi
-fi
+
+if x86 && not qnx; then
 
 if test "$_win32" != no ; then
     if test -z "$_win32libdir" ; then
@@ -5978,6 +5994,9 @@ else
   _def_dshow='#undef USE_DIRECTSHOW'
   _nocodecmodules="dshow/dmo $_nocodecmodules"
 fi
+
+fi #if x86 && not qnx
+
 
 
 echocheck "XAnim DLL"
@@ -6715,6 +6734,8 @@ else
 fi
 echores "$_tv"
 
+
+if bsd; then
 echocheck "*BSD BrookTree 848 TV interface"
 if test "$_tv_bsdbt848" = auto ; then
  _tv_bsdbt848=no
@@ -6739,6 +6760,8 @@ else
   _noinputmodules="tv-bsdbt848 $_noinputmodules"
 fi
 echores "$_tv_bsdbt848"
+fi #if bsd
+
 
 echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l" = auto ; then
@@ -6874,6 +6897,8 @@ _def_menu='#undef HAVE_MENU'
 fi
 echores "$_menu"
 
+
+if x86; then
 # Check to see if they want QTX codecs enabled
 echocheck "QTX codecs"
 if test "$_qtx" = auto ; then
@@ -6887,6 +6912,7 @@ else
     _nocodecmodules="qtx $_nocodecmodules"
 fi
 echores "$_qtx"
+fi #if x86
 
 
 echocheck "Subtitles sorting"
