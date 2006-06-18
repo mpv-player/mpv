@@ -121,6 +121,12 @@ typedef struct {
 } buffer_track_t;
 
 typedef struct {
+	uint64_t dts, pts;
+	uint64_t frame_dts, frame_pts;
+	int len, stflen;
+} pack_stats_t;
+
+typedef struct {
 	int mux;
 	sys_info_t sys_info;
 	psm_info_t psm_info;
@@ -932,7 +938,7 @@ static int calc_packet_len(muxer_stream_t *s, int psize, int finalize)
 	return len;
 }
 
-static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, uint64_t *dts, uint64_t *pts)
+static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, unsigned int start, uint64_t *dts, uint64_t *pts)
 {
 	muxer_headers_t *spriv = s->priv;
 	int i, m, pes_hlen, ret, threshold;
@@ -956,7 +962,7 @@ static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, uint64_
 
 		m = spriv->framebuf[0].size - spriv->framebuf[0].pos;
 
-		if(spriv->pack_offset + pes_hlen + m  >= priv->packet_size)
+		if(start + pes_hlen + m  >= priv->packet_size)	//spriv->pack_offset
 			i = -1;	//this pack won't have a pts: no space available
 		else
 		{
@@ -969,7 +975,7 @@ static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, uint64_
 				threshold = 10;
 
 			//headers+frame 0 < space available including timestamps	
-			if(spriv->pack_offset + pes_hlen + m  < priv->packet_size - threshold)
+			if(start + pes_hlen + m  < priv->packet_size - threshold)
 				i = 1;
 			else
 				i = -1;
@@ -993,7 +999,6 @@ static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, uint64_
 			*dts = spriv->framebuf[i].dts;
 			if(*dts == *pts)
 				*dts = 0;
-			//spriv->last_saved_pts = spriv->pts;
 		}
 	}
 
@@ -1003,6 +1008,90 @@ fail:
 	return ret;
 }
 
+static int get_packet_stats(muxer_priv_t *priv, muxer_stream_t *s, pack_stats_t *p, int finalize)
+{
+	muxer_headers_t *spriv = s->priv;
+	int len, len2, pack_hlen, pes_hlen, hlen, target, stflen, stuffing_len;
+	uint64_t pts, dts;
+
+	spriv->pts = spriv->dts = 0;
+	p->dts = p->pts = p->frame_pts = p->frame_dts = 0;
+	p->len = 0;
+
+	if(priv->mux == MUX_MPEG1)
+		pack_hlen = 12;
+	else
+		pack_hlen = 14;
+
+	if(find_packet_timestamps(priv, s, pack_hlen, &dts, &pts))
+	{
+		p->pts = p->frame_pts = pts;
+		p->dts = p->frame_dts = dts;
+
+		spriv->pts = pts;
+		spriv->dts = dts;
+	}
+	pes_hlen = calc_pes_hlen(priv->mux, spriv, priv);
+
+	p->stflen = stflen = (spriv->min_pes_hlen > pes_hlen ? spriv->min_pes_hlen - pes_hlen : 0);
+
+	target = len = priv->packet_size - pack_hlen - pes_hlen - stflen;	//max space available
+	if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
+		hlen = 4;
+	else
+		hlen = 0;
+
+	len -= hlen;
+	target -= hlen;
+	
+	len2 = calc_packet_len(s, target, finalize);
+	if(!len2 || (len2 < target && s->type == MUXER_TYPE_AUDIO && !finalize))
+	{
+		//p->len = 0;
+		//p->dts = p->pts = 0;
+		spriv->pts = spriv->dts = 0;
+		//fprintf(stderr, "\r\nLEN2: %d, target: %d, type: %d\r\n", len2, target, s->type);
+		return 0;
+	}
+
+	len = len2;
+	stuffing_len = 0;
+	if(len < target)
+	{
+		if(s->type == MUXER_TYPE_VIDEO)
+		{
+			if(spriv->pts)
+				target += 5;
+			if(spriv->dts)
+				target += 5;
+			spriv->pts = spriv->dts = 0;
+			p->pts = p->dts = 0;
+		}
+
+		stuffing_len = target - len;
+		if(stuffing_len > 0 && stuffing_len < 7)
+		{
+			if(stflen + stuffing_len > 16)
+			{
+				int x = 7 - stuffing_len;
+				stflen -= x;
+				stuffing_len += x;
+			}
+			else
+			{
+				stflen += stuffing_len;
+				stuffing_len = 0;
+			}
+		}
+	}
+	
+	len += hlen;
+	
+	p->len = len;
+	p->stflen = stflen;
+
+	return p->len;
+}
 
 static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 {
@@ -1012,12 +1101,12 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	//if audio and a52 insert the headers
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
-	int pes_hlen = 0, len, stflen, stuffing_len, m, n, testlen, dvd_pack = 0, len2, target, hlen;
-	uint64_t spts, sdts, pts=0, dts=0;
+	int pes_hlen = 0, len, stflen, stuffing_len, m, n, dvd_pack = 0, len2, target, hlen;
+	uint64_t pts=0, dts=0;
 	mpeg_frame_t *frm;
+	pack_stats_t p;
 
-	spts = spriv->pts;
-	sdts = spriv->dts;
+	spriv->dts = spriv->pts = 0;
 
 	if(! spriv->framebuf_used)
 	{
@@ -1052,80 +1141,18 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 			&& spriv->framebuf[0].type==I_FRAME && spriv->framebuf[0].pos==0)
 			dvd_pack = 1;
 
-		spriv->dts = spriv->pts = 0;
-		if(find_packet_timestamps(priv, s, &dts, &pts))
-		{
-			spriv->pts = pts;
-			spriv->dts = dts;
-			spriv->last_saved_pts = pts;
-		}
-
-		pes_hlen = calc_pes_hlen(priv->mux, spriv, priv);
-		stflen = (spriv->min_pes_hlen > pes_hlen ? spriv->min_pes_hlen - pes_hlen : 0);
-
-		target = len = priv->packet_size - spriv->pack_offset - pes_hlen - stflen;	//max space available
-		if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
-			hlen = 4;
-		else
-			hlen = 0;
-
-		len -= hlen;
-		target -= hlen;
-		
-		len2 = calc_packet_len(s, target, finalize);
-		if(!len2)
+		if(! get_packet_stats(priv, s, &p, finalize))
 		{
 			spriv->pack_offset = 0;
 			return 0;
 		}
-		if(len2 < target)
-		{
-			if(s->type == MUXER_TYPE_AUDIO && !finalize)
-			{
-				spriv->pack_offset = 0;
-				spriv->pts = spts;
-				spriv->dts = sdts;
-				return 0;
-			}
-		}
-		len = len2;
-		stuffing_len = 0;
-		if(len < target)
-		{
-			if(s->type == MUXER_TYPE_VIDEO)	//FIXME: check i_frame
-			{
-				if(spriv->pts)
-					target += 5;
-				if(spriv->dts)
-					target += 5;
-				spriv->pts = spriv->dts = 0;
-			}
-
-			stuffing_len = target - len;
-			if(stuffing_len > 0 && stuffing_len < 7)
-			{
-				if(stflen + stuffing_len > 16)
-				{
-					int x = 7 - stuffing_len;
-					stflen -= x;
-					stuffing_len += x;
-
-					/*int x = stflen + stuffing_len;
-					stflen = 16;
-					stuffing_len = x - stflen;
-					*/
-				}
-				else
-				{
-					stflen += stuffing_len;
-					stuffing_len = 0;
-				}
-			}
-		}
+		spriv->dts = p.dts;
+		spriv->pts = p.pts;
+		if(spriv->pts)
+			spriv->last_saved_pts = p.pts;
 		
-		len += hlen;
 		spriv->pack_offset += write_mpeg_pes_header(spriv, (uint8_t *) &s->ckid, &(spriv->pack[spriv->pack_offset]), 
-			len, stflen, priv->mux);
+			p.len, p.stflen, priv->mux);
 
 		if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
 		{
@@ -1151,7 +1178,6 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 
 	n = 0;
 	len = 0;
-	testlen = 0;
 
 	frm = spriv->framebuf;
 	while(spriv->pack_offset < priv->packet_size && n < spriv->framebuf_used)
@@ -1162,7 +1188,6 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 			//beginning of one in the middle of the flush
 			if(len > 0 && s->type == MUXER_TYPE_VIDEO && frm->type == I_FRAME)
 			{
-				testlen = len;
 				break;
 			}
 			spriv->frames++;
@@ -1198,7 +1223,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 
 	spriv->track_bufsize += len;
 	if(spriv->track_bufsize > spriv->max_buffer_size)
-		mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nBUFFER OVERFLOW: %d > %d\r\n", spriv->track_bufsize, spriv->max_buffer_size);
+		mp_msg(MSGT_MUXER, MSGL_ERR, "\r\nBUFFER OVERFLOW: %d > %d, pts: %llu\r\n", spriv->track_bufsize, spriv->max_buffer_size, spriv->pts);
 
 	if(s->type == MUXER_TYPE_AUDIO && s->wf->wFormatTag == AUDIO_A52)
 		fix_a52_headers(s);
@@ -1220,9 +1245,6 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	spriv->pes_set = 0;
 	spriv->frames = 0;
 	
-	spriv->pts = spts;
-	spriv->dts = sdts;
-
 	return len;
 }
 
@@ -1232,19 +1254,21 @@ static inline int find_best_stream(muxer_t *muxer)
 	uint64_t dts = -1;
 	muxer_priv_t *priv = muxer->priv;
 	muxer_headers_t *spriv;
+	pack_stats_t p;
 
 	ndts = -1;
 	
-	//MUST ALWAYS apply: [pd]ts  < SCR + 0.7 seconds
-	//FIXME: find pack_dts and pack_len instead, for the time being the code below is still reasonable
+	//THIS RULE MUST ALWAYS apply: dts  <= SCR + 0.7 seconds
 	for(i = 0; i < muxer->avih.dwStreams; i++)
 	{
 		spriv = muxer->streams[i]->priv;
 
-		if(spriv->track_bufsize + priv->packet_size - 20 > spriv->max_buffer_size)
+		p.len = 0;
+		get_packet_stats(priv, muxer->streams[i], &p, 0);
+		
+		if(spriv->track_bufsize + p.len > spriv->max_buffer_size)
 			continue;
-		//59000 ~= 0.7 seconds - max(frame_duration) (<42 ms at 23.976 fps)
-		if(spriv->framebuf[0].pts > priv->scr + 59000*300)
+		if(p.frame_pts && p.frame_dts > priv->scr + 63000*300)
 			continue;
 
 		if(spriv->framebuf[0].dts <= dts)
