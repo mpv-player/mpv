@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r18697
+.\" In sync with r18712
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -3235,24 +3235,28 @@ Diese Methode ist schnell aber ungenau.
 6: Benutze eine 3D-Textur für die Konvertierung via Nachschlagetabelle.
 Benötigt die GL_ARB_fragment_program-Erweiterung und mindestens vier
 Textureinheiten.
+Extrem langsam (Softwareemulation) auf manchen (allen?) ATI-Karten, da es eine
+Textur mit Randpixeln verwendet.
 Stellt Kontrolle über Helligkeit, Kontrast, Sättigung, Farbton und Gamma
 bereit.
 Gamma kann außerdem unabhängig für rot, grün und blau gesetzt werden.
 Die Geschwindigkeit hängt mehr von der Speicherbandbreite der GPU ab als
 andere Methoden.
 .RE
-.IPs [l|c]scale=<n>
-Wählt die zu benutzende Skalierungsmethode (unabhängig für Luminanz und
-Chrominanz).
-Nur gültig für yuv-Modi 2, 3 und 4.
+.IPs lscale=<n>
+Wählt die zu benutzende Skalierungsmethode für Luminanzskalierung.
+Nur gültig für yuv-Modi 2, 3, 4 und 6.
 .RSss
 0: Benutze einfache lineare Filterung (Standard).
 .br
 1: Benutze bikubische Filterung (bessere Qualität).
+Benötigt eine zusätzliche Textureinheit.
 Ältere Karten werden dies für Chrominanz zumindest im Vollbildmodus nicht
 verarbeiten können.
-Benötigt außerdem eine zusätzliche Textureinheit.
 .RE
+.IPs cscale=<n>
+Wählt die zu benutzende Skalierungsmethode für Chrominanzskalierung.
+Für Details siehe lscale.
 .IPs customprog=<Dateiname>
 Lädt ein eigenes Fragmentprogramm aus <Dateiname>.
 Siehe TOOLS/\:edgedetect.fp als Beispiel.
@@ -6172,41 +6176,32 @@ Generiert einen Frame voller Höhe bei halber Framerate.
 .PD 1
 .
 .TP
-.B tfields[=Modus]
+.B tfields[=Modusi[:Feld_Dominanz]]
 Temporäre Auftrennung der Felder \- trenne die Felder in ganze Frames auf;
 dies verdoppelt die Framerate.
 Genau wie beim Filter telecine wird tfields nur bei MEncoder korrekt arbeiten,
 und nur dann, wenn sowohl \-fps als auch \-ofps mit der gewünschten (doppelten)
 Framerate angegeben werden!
-Verfügbare Modi sind:
 .PD 0
 .RSs
-.IPs 0
-Lasse die Felder unangetastet.
-(Dies wird zu Sprüngen/\:Flackern führen.)
-.IPs 1
-Interpoliere fehlende Zeilen.
-(Der benutzte Algorithmus könnte nicht allzu gut sein.)
-.IPs 2
-Wandle Felder mit linearer Interpolation zu 1/4 Pixel um (kein Sprung).
-.IPs 4
-Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität) (Standard).
-.RE
-.PD 1
-.RS
-Verfügbare Feld-Dominanzen sind folgende:
-.RE
-.PD 0
-.RSs
-.IPs -1
-automatisch (Standard)
+.IPs <Modus>
+0: Lasse die Felder unangetastet (wird zu Sprüngen/\:Flackern führen).
+.br
+1: Interpoliere fehlende Zeilen. (Der benutzte Algorithmus ist möglicherweise
+nicht allzu gut.)
+.br
+2: Wandle Felder mit linearer Interpolation zu 1/4 Pixel um (kein Sprung).
+.br
+4: Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität) (Standard).
+.IPs <Feld_Dominanz>
+-1: automatisch (Standard)
 Funktioniert nur, wenn der Decoder angemessene Informationen ausgibt und keine
 anderen Filter in der Filterkette vor tfields kommen, die diese Informationen
 verwefen; sonst fällt der Filter zurück auf 0 (obere Felder zuerst).
-.IPs 0
-obere Felder zuerst
-.IPs 1
-untere Felder zuerst
+.br
+0: obere Felder zuerst
+.br
+1: untere Felder zuerst
 .RE
 .PD 1
 .
