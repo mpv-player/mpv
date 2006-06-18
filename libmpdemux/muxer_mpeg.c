@@ -990,7 +990,7 @@ static int find_packet_timestamps(muxer_priv_t *priv, muxer_stream_t *s, unsigne
 
 		if(s->type != MUXER_TYPE_VIDEO)
 			ret = 1;
-		else if((spriv->framebuf[i].type == I_FRAME || priv->ts_allframes || dpts >= 45000*300))	//0.5 seconds
+		else if((spriv->framebuf[i].type == I_FRAME || priv->ts_allframes || dpts >= 36000*300))	//0.4 seconds
 			ret = 1;
 
 		if(ret)
