@@ -1883,8 +1883,8 @@ for ac_option do
   --disable-winsock2)	_winsock2=no	;;
   --enable-smb)		_smbsupport=yes	;;
   --disable-smb)	_smbsupport=no	;;
-  --enable-internal-vidix)	_vidix_internal=yes	;;
-  --disable-internal-vidix)	_vidix_internal=no	;;
+  --enable-vidix-internal)	_vidix_internal=yes	;;
+  --disable-vidix-internal)	_vidix_internal=no	;;
   --enable-vidix-external)	_vidix_external=yes	;;
   --disable-vidix-external)	_vidix_external=no	;;
   --enable-joystick)	_joystick=yes	;;
