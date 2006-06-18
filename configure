@@ -412,8 +412,8 @@ multiple paths separated by ':'):
   --with-xvidincdir=DIR    XviD header in DIR (*)
   --with-x264libdir=DIR    libx264 in DIR
   --with-x264incdir=DIR    x264 header in DIR
-  --with-dtslibdir=DIR     libdts library in DIR  (*)
-  --with-dtsincdir=DIR     libdts header in DIR (*)
+  --with-libdtslibdir=DIR  libdts library in DIR  (*)
+  --with-libdtsincdir=DIR  libdts header in DIR (*)
   --with-livelibdir=DIR    LIVE555 Streaming Media libraries in DIR
   --with-toolamedir=DIR    path to Toolame library and include file
   --with-xmmsplugindir=DIR XMMS plugins in DIR
@@ -2110,10 +2110,10 @@ for ac_option do
   --with-xvidincdir=*)
     _inc_xvid=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
-  --with-dtslibdir=*)
+  --with-libdtslibdir=*)
     _ld_libdts=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
-  --with-dtsincdir=*)
+  --with-libdtsincdir=*)
     _inc_libdts=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-x264libdir=*)
