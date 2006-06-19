@@ -246,9 +246,6 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     int pts_flags;
     int hdrlen;
     // System-2 (.VOB) stream:
-    if((c>>4)&3) {
-        mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_EncryptedVOB);
-    }
     c=stream_read_char(demux->stream); pts_flags=c>>6;
     c=stream_read_char(demux->stream); hdrlen=c;
     len-=2;
