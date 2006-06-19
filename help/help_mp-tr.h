@@ -1,5 +1,6 @@
 // MPlayer Turkish Translation
 // Translated by: "heart_of_the_ocean" Murat ALKAN <oceanrat@gmail.com>
+// synced with help_mp-en.h r18498
 
 // ========================= MPlayer help ===========================
 
