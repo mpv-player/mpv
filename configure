@@ -1207,7 +1207,7 @@ EOF
       Darwin)
 	proc=`$_cpuinfo | grep "Processor type" | cut -f 3 -d ' ' | sed 's/ppc//'`
 	if [ `sysctl -n hw.vectorunit` -eq 1 -o \
-	    "`sysctl -n hw.optional.altivec 2>/dev/null`" -eq 1 ]; then
+	    "`sysctl -n hw.optional.altivec 2> /dev/null`" = "1" ]; then
 	    _altivec=yes
 	fi
         ;;
