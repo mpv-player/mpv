@@ -179,6 +179,9 @@ typedef struct mkv_demuxer
   mkv_chapter_t *chapters;
   int num_chapters;
   int64_t stop_timecode;
+  
+  int last_aid;
+  int audio_tracks[MAX_A_STREAMS];
 } mkv_demuxer_t;
 
 
@@ -1750,7 +1753,10 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
 static int
 demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
 {
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   sh_audio_t *sh_a = new_sh_audio(demuxer, track->tnum);
+  if(!sh_a) return 1;
+  mkv_d->audio_tracks[mkv_d->last_aid] = track->tnum;
   demux_packet_t *dp;
 
   sh_a->ds = demuxer->audio;
@@ -2341,18 +2347,29 @@ demux_mkv_open (demuxer_t *demuxer)
   else if (demuxer->audio->id != -2)  /* -2 = no audio at all */
     track = demux_mkv_find_track_by_num (mkv_d, demuxer->audio->id,
                                          MATROSKA_TRACK_AUDIO);
-
-  if (track && !demux_mkv_open_audio (demuxer, track))
-              {
-                mp_msg (MSGT_DEMUX, MSGL_INFO,
-                        "[mkv] Will play audio track %u\n", track->tnum);
-                demuxer->audio->id = track->tnum;
-                demuxer->audio->sh = demuxer->a_streams[track->tnum];
-              }
   else
     {
       mp_msg (MSGT_DEMUX, MSGL_INFO, "[mkv] No audio track found/wanted.\n");
       demuxer->audio->id = -2;
+    }
+
+
+  if(demuxer->audio->id != -2)
+  for (i=0; i < mkv_d->num_tracks; i++)
+    {
+      if(mkv_d->tracks[i]->type != MATROSKA_TRACK_AUDIO)
+          continue;
+      if(!demux_mkv_open_audio (demuxer, mkv_d->tracks[i]))
+        {
+          if(track && mkv_d->tracks[i] == track)
+            {
+              demuxer->audio->id = track->tnum;
+              demuxer->audio->sh = demuxer->a_streams[track->tnum];
+            }
+          mkv_d->last_aid++;
+          if(mkv_d->last_aid == MAX_A_STREAMS)
+            break;
+        }
     }
 
   demux_mkv_parse_vobsub_data (demuxer);
@@ -3469,31 +3486,21 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
         int i;
         demux_stream_t *d_audio = demuxer->audio;
         int idx = d_audio->id - 1; // track ids are 1 based
-        int num = mkv_d->num_tracks;
         mkv_track_t *otrack = mkv_d->tracks[idx];
         mkv_track_t *track = 0;
         if (*((int*)arg) < 0)
-        for (i = 1; i <= num; i++) {
-          track = mkv_d->tracks[(idx+i)%num];
-          if ((track->type == MATROSKA_TRACK_AUDIO) &&
-              !strcmp(track->codec_id, otrack->codec_id) &&
-              (track->private_size == otrack->private_size) &&
-              !memcmp(track->private_data, otrack->private_data, track->private_size) &&
-              (track->a_channels == otrack->a_channels) &&
-              (track->a_bps == otrack->a_bps) &&
-              (track->a_sfreq == otrack->a_sfreq)) {
-            break;
-          }
-        }
+        for(i = 0; i < mkv_d->last_aid; i++) {
+          if(mkv_d->audio_tracks[i] == d_audio->id) {
+            idx = mkv_d->audio_tracks[(i+1) % mkv_d->last_aid] - 1;
+            track = mkv_d->tracks[idx];
+            if(! track)
+              continue;
+            if (track->type == MATROSKA_TRACK_AUDIO) break;
+	  }
+	}
         else {
           track = demux_mkv_find_track_by_num (mkv_d, *((int*)arg), MATROSKA_TRACK_AUDIO);
-          if (track == NULL ||
-              strcmp (track->codec_id, otrack->codec_id) ||
-              (track->private_size != otrack->private_size) ||
-              memcmp(track->private_data, otrack->private_data, track->private_size) ||
-              track->a_channels != otrack->a_channels ||
-              track->a_bps != otrack->a_bps ||
-              track->a_sfreq != otrack->a_sfreq)
+          if (track == NULL)
             track = otrack;
         }
         if (track != otrack) {
@@ -3501,7 +3508,7 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
           ds_free_packs(d_audio);
         }
       }
-      *((int*)arg) = demux_mkv_reverse_id (mkv_d, demuxer->audio->id, MATROSKA_TRACK_AUDIO);
+      *((int*)arg) = demuxer->audio->id;
       return DEMUXER_CTRL_OK;
 
     default:
