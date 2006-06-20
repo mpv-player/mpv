@@ -10,7 +10,8 @@ MPlayer (1.0)
     
     Demuxers:
     * support for audio stream switching in MPEG-TS
-    * it's possible to switch to any of the available audio tracks in MPEG TS/PS and MKV streams
+    * it's possible to switch to any of the available audio tracks in MPEG TS/PS, MKV and streams
+      supported by libavformat
 
 
   pre8: "NeuTeam strikes back" June 11, 2006
