@@ -1,10 +1,7 @@
 #!/bin/sh
 
-revision=r`grep committed-rev .svn/entries | sed 1q | cut -d '"' -f 2 2>/dev/null`
+revision=r`grep revision .svn/entries | cut -d '"' -f 2 2> /dev/null`
 
-extra=""
-if test "$1" ; then
-  extra="-$1"
-fi
+test "$1" && extra="-$1"
 
 echo "#define VERSION \"dev-SVN-${revision}${extra}\"" > version.h
