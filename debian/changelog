@@ -1,3 +1,9 @@
+mplayer (1.0svn) unstable; urgency=low
+
+  * change version naming from cvs to svn.
+
+ -- Aurelien Jacobs <aurel@gnuage.org>  Tue, 20 Jun 2006 13:02:14 +0200
+
 mplayer (1.0cvs) unstable; urgency=low
 
   * debian/rules: now compiled without --enable-runtime-cpudetection.
