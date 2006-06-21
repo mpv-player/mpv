@@ -24,6 +24,9 @@
  *
  * a minimalistic implementation of rtsp protocol,
  * *not* RFC 2326 compilant yet.
+ *
+ *    2006, Benjamin Zores and Vincent Mussard
+ *      fixed a lot of RFC compliance issues.
  */
  
 #ifndef HAVE_RTSP_H
@@ -41,10 +44,10 @@ rtsp_t*  rtsp_connect (int fd, char *mrl, char *path, char *host, int port, char
 
 int rtsp_request_options(rtsp_t *s, const char *what);
 int rtsp_request_describe(rtsp_t *s, const char *what);
-int rtsp_request_setup(rtsp_t *s, const char *what);
+int rtsp_request_setup(rtsp_t *s, const char *what, char *control);
 int rtsp_request_setparameter(rtsp_t *s, const char *what);
 int rtsp_request_play(rtsp_t *s, const char *what);
-int rtsp_request_tearoff(rtsp_t *s, const char *what);
+int rtsp_request_teardown(rtsp_t *s, const char *what);
 
 int rtsp_send_ok(rtsp_t *s);
 

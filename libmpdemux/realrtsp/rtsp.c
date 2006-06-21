@@ -24,6 +24,9 @@
  *
  * a minimalistic implementation of rtsp protocol,
  * *not* RFC 2326 compilant yet.
+ *
+ *    2006, Benjamin Zores and Vincent Mussard
+ *      fixed a lot of RFC compliance issues.
  */
 
 #include <unistd.h>
@@ -382,7 +385,7 @@ static void rtsp_schedule_standard(rtsp_t *s) {
 
   char tmp[16];
   
-  snprintf(tmp, 16, "Cseq: %u", s->cseq);
+  snprintf(tmp, 16, "CSeq: %u", s->cseq);
   rtsp_schedule_field(s, tmp);
   
   if (s->session) {
@@ -419,11 +422,11 @@ static int rtsp_get_answers(rtsp_t *s) {
     if (!answer)
       return 0;
     
-    if (!strncmp(answer,"Cseq:",5)) {
-      sscanf(answer,"Cseq: %u",&answer_seq);
+    if (!strncmp(answer,"CSeq:",5)) {
+      sscanf(answer,"CSeq: %u",&answer_seq);
       if (s->cseq != answer_seq) {
 #ifdef LOG
-        mp_msg(MSGT_OPEN, MSGL_WARN, "librtsp: warning: Cseq mismatch. got %u, assumed %u", answer_seq, s->cseq);
+        mp_msg(MSGT_OPEN, MSGL_WARN, "librtsp: warning: CSeq mismatch. got %u, assumed %u", answer_seq, s->cseq);
 #endif
         s->cseq=answer_seq;
       }
@@ -518,11 +521,26 @@ int rtsp_request_describe(rtsp_t *s, const char *what) {
   return rtsp_get_answers(s);
 }
 
-int rtsp_request_setup(rtsp_t *s, const char *what) {
+int rtsp_request_setup(rtsp_t *s, const char *what, char *control) {
 
-  rtsp_send_request(s,"SETUP",what);
+  char *buf = NULL;
+
+  if (what)
+    buf = strdup (what);
+  else
+  {
+    int len = strlen (s->host) + strlen (s->path) + 16;
+    if (control)
+      len += strlen (control) + 1;
+    
+    buf = malloc (len);
+    sprintf (buf, "rtsp://%s:%i/%s%s%s", s->host, s->port, s->path,
+             control ? "/" : "", control ? control : "");
+  }
   
-  return rtsp_get_answers(s);
+  rtsp_send_request (s, "SETUP", buf);
+  free (buf);
+  return rtsp_get_answers (s);
 }
 
 int rtsp_request_setparameter(rtsp_t *s, const char *what) {
@@ -545,7 +563,8 @@ int rtsp_request_setparameter(rtsp_t *s, const char *what) {
 int rtsp_request_play(rtsp_t *s, const char *what) {
 
   char *buf;
-
+  int ret;
+  
   if (what) {
     buf=strdup(what);
   } else
@@ -556,13 +575,28 @@ int rtsp_request_play(rtsp_t *s, const char *what) {
   rtsp_send_request(s,"PLAY",buf);
   free(buf);
   
-  return rtsp_get_answers(s);
+  ret = rtsp_get_answers (s);
+  if (ret == 200)
+    s->server_state = RTSP_PLAYING;
+
+  return ret;
 }
 
-int rtsp_request_tearoff(rtsp_t *s, const char *what) {
+int rtsp_request_teardown(rtsp_t *s, const char *what) {
 
-  rtsp_send_request(s,"TEAROFF",what);
+  char *buf;
   
+  if (what)
+    buf = strdup (what);
+  else
+  {
+    buf =
+      malloc (strlen (s->host) + strlen (s->path) + 16);
+    sprintf (buf, "rtsp://%s:%i/%s", s->host, s->port, s->path);
+  }
+  rtsp_send_request (s, "TEARDOWN", buf);
+  free (buf);
+ 
   return rtsp_get_answers(s);
 }
 
@@ -596,7 +630,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
       free(rest);
       if (seq<0) {
 #ifdef LOG
-        mp_msg(MSGT_OPEN, MSGL_WARN, "rtsp: warning: cseq not recognized!\n");
+        mp_msg(MSGT_OPEN, MSGL_WARN, "rtsp: warning: CSeq not recognized!\n");
 #endif
         seq=1;
       }
@@ -640,7 +674,7 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   s->server_state=0;
   s->server_caps=0;
   
-  s->cseq=1;
+  s->cseq=0;
   s->session=NULL;
   
   if (user_agent)
@@ -690,7 +724,13 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
 
 void rtsp_close(rtsp_t *s) {
 
-  if (s->server_state) closesocket(s->s); /* TODO: send a TEAROFF */
+  if (s->server_state)
+  {
+    if (s->server_state == RTSP_PLAYING)
+      rtsp_request_teardown (s, NULL);
+    closesocket (s->s);
+  }
+
   if (s->path) free(s->path);
   if (s->host) free(s->host);
   if (s->mrl) free(s->mrl);
@@ -805,6 +845,8 @@ void rtsp_unschedule_field(rtsp_t *s, const char *string) {
   while(*ptr) {
     if (!strncmp(*ptr, string, strlen(string)))
       break;
+    else
+      ptr++;
   }
   if (*ptr) free(*ptr);
   ptr++;

@@ -800,7 +800,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   rtsp_schedule_field(rtsp_session, "Transport: x-pn-tng/tcp;mode=play,rtp/avp/tcp;unicast;mode=play");
   buf = xbuffer_ensure_size(buf, strlen(mrl) + 32);
   sprintf(buf, "%s/streamid=0", mrl);
-  rtsp_request_setup(rtsp_session,buf);
+  rtsp_request_setup(rtsp_session,buf,NULL);
 
   if (h->prop->num_streams > 1) {
     rtsp_schedule_field(rtsp_session, "Transport: x-pn-tng/tcp;mode=play,rtp/avp/tcp;unicast;mode=play");
@@ -810,7 +810,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
 
     buf = xbuffer_ensure_size(buf, strlen(mrl) + 32);
     sprintf(buf, "%s/streamid=1", mrl);
-    rtsp_request_setup(rtsp_session,buf);
+    rtsp_request_setup(rtsp_session,buf,NULL);
   }
   /* set stream parameter (bandwidth) with our subscribe string */
   rtsp_schedule_field(rtsp_session, subscribe);
