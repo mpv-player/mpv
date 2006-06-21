@@ -23,8 +23,6 @@ AUDIO_SRCS_NAT=ad_alaw.c \
                ad_pcm.c \
 
 AUDIO_SRCS_OPT=ad_acm.c \
-               ad_dmo.c \
-               ad_dshow.c \
                ad_faad.c \
                ad_libdv.c \
                ad_libmad.c \
@@ -38,6 +36,9 @@ AUDIO_SRCS_OPT+=ad_ffmpeg.c
 endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 AUDIO_SRCS_OPT+=ad_ffmpeg.c
+endif
+ifeq ($(WIN32DLL),yes)
+AUDIO_SRCS_OPT+=ad_dshow.c ad_dmo.c
 endif
 
 AUDIO_SRCS=dec_audio.c \
@@ -58,8 +59,6 @@ VIDEO_SRCS_NAT=vd_hmblck.c \
                vd_sgi.c \
 
 VIDEO_SRCS_OPT=vd_divx4.c \
-               vd_dmo.c \
-               vd_dshow.c \
                vd_libdv.c \
                vd_odivx.c \
                vd_qtvideo.c \
@@ -77,6 +76,9 @@ VIDEO_SRCS_OPT+=vd_ffmpeg.c
 endif
 ifeq ($(CONFIG_LIBAVCODEC_SO),yes)
 VIDEO_SRCS_OPT+=vd_ffmpeg.c
+endif
+ifeq ($(WIN32DLL),yes)
+VIDEO_SRCS_OPT+=vd_dmo.c vd_dshow.c
 endif
 
 VIDEO_SRCS=dec_video.c \

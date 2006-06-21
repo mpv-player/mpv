@@ -255,7 +255,6 @@ Codecs:
   --enable-libcdio	 enable external libcdio support [autodetect]
   --enable-liblzo	 enable external liblzo support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
-  --disable-dshow        disable Win32/DirectShow support [autodetect]
   --disable-qtx          disable Quicktime codecs [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
   --disable-real         disable RealPlayer DLL support [autodetect]
@@ -1635,7 +1634,6 @@ _alsa=auto
 _fastmemcpy=yes
 _unrarlib=yes
 _win32=auto
-_dshow=yes
 _select=yes
 _tv=yes
 _tv_v4l=auto
@@ -2086,8 +2084,6 @@ for ac_option do
 
   --enable-win32) _win32=yes ;;
   --disable-win32) _win32=no ;;
-  --enable-dshow) _dshow=yes ;;
-  --disable-dshow) _dshow=no ;;
 
   --with-x11incdir=*)
     _inc_x11=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
@@ -5921,15 +5917,14 @@ if test "$_win32" = yes ; then
 else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
-  _dshow=no
 fi
 echores "$_win32"
 
 if test "$_win32" != no ; then
   _def_win32_loader='#undef WIN32_LOADER'
   echocheck "Win32 loader support"
-  _ld_win32='loader/libloader.a'
-  _dep_win32='loader/libloader.a'
+  _ld_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
+  _dep_win32='loader/libloader.a loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
   _codecmodules="win32 $_codecmodules"
   if openbsd ; then
     x86 && _ld_win32="$_ld_win32 -li386"
@@ -5941,58 +5936,6 @@ if test "$_win32" != no ; then
     _res_comment="using native windows"
   fi
   echores "$_win32"
-fi
-
-
-echocheck "DirectShow"
-if false ; then
-
-if test "$_dshow" != no ; then
-  _dshow=no
-  # check if compiler supports C++ and C++-libs are installed correctly
-  cat > "$TMPCPP" << EOF
-#include <string>
-class myclass {
-  private: int ret;
-  public: int myreturn(void);
-};
-int myclass::myreturn(void) { ret = 0; return ret ; }
-int main(void) { myclass myobject; return myobject.myreturn(); }
-EOF
-  if cxx_check && tmp_run ; then
-    _dshow=yes
-    echores "yes (C++ is ok)"
-  else
-    echores "no"
-    cat << EOF
-
-Your C++ runtime environment is broken.
-
-Hints: Does $_cc support C++? Do you have you a C++ compiler installed?
-       Are the C++ libraries correctly installed?
-       Check for libstdc++ and in (/etc/)ld.so.conf.
-
-If you do not need DirectShow support, you can also use:
-  ./configure --disable-dshow <your-normal-configure-options>
-to disable building the C++ based DirectShow code.
-
-EOF
-    die "$_cc's C++ is broken"
-  fi
-fi
-
-fi # if false
-
-echores "$_dshow"
-
-if test "$_dshow" = yes ; then
-  _def_dshow='#define USE_DIRECTSHOW 1'
-  _ld_dshow='loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
-  _dep_dshow='loader/dshow/libDS_Filter.a loader/dmo/libDMO_Filter.a'
-  _codecmodules="dshow/dmo $_codecmodules"
-else
-  _def_dshow='#undef USE_DIRECTSHOW'
-  _nocodecmodules="dshow/dmo $_nocodecmodules"
 fi
 
 fi #if x86 && not qnx
@@ -7500,10 +7443,9 @@ DVDREAD_LIB = $_ld_dvdread
 DVDKIT2 = $_mpdvdkit
 DVDNAV_LIB = $_ld_dvdnav
 SDL_INC = $_inc_sdl
+WIN32DLL = $_win32
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
-DS_DEP = $_dep_dshow
-DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec $_dep_libavformat $_dep_libavutil $_dep_libpostproc
 AV_LIB = $_ld_libavcodec  $_ld_libavformat  $_ld_libavutil  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
@@ -7901,9 +7843,6 @@ $_def_odivx_postprocess
 /* Win32 DLL support */
 $_def_win32
 #define WIN32_PATH "$_win32libdir"
-
-/* DirectShow support */
-$_def_dshow
 
 /* Mac OS X specific features */
 $_def_macosx

@@ -64,10 +64,8 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_dk3adpcm,
   &mpcodecs_ad_msgsm,
 #ifdef USE_WIN32DLL
-#ifdef USE_DIRECTSHOW
   &mpcodecs_ad_dshow,
   &mpcodecs_ad_dmo,
-#endif
   &mpcodecs_ad_acm,
   &mpcodecs_ad_twin,
 #endif

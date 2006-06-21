@@ -62,10 +62,8 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_theora,
 #endif
 #ifdef USE_WIN32DLL
-#ifdef USE_DIRECTSHOW
         &mpcodecs_vd_dshow,
         &mpcodecs_vd_dmo,
-#endif
         &mpcodecs_vd_vfw,
         &mpcodecs_vd_vfwex,
 #endif

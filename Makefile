@@ -108,7 +108,6 @@ CODEC_LIBS = $(AV_LIB) \
 
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
-              $(DS_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
               postproc/libswscale.a \
@@ -213,7 +212,6 @@ ALL_PRG += $(PRG_MENCODER)
 endif
 
 COMMON_DEPS = $(W32_DEP) \
-              $(DS_DEP) \
               $(MP1E_DEP) \
               $(AV_DEP) \
               libmpdemux/libmpdemux.a \

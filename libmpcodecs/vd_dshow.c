@@ -3,7 +3,6 @@
 #include <stdarg.h>
 
 #include "config.h"
-#ifdef USE_DIRECTSHOW
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -114,5 +113,3 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     return mpi;
 }
-
-#endif
