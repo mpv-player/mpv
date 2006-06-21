@@ -5,8 +5,6 @@
 
 #include "config.h"
 
-#ifdef USE_REALCODECS
-
 //#include <stddef.h>
 #ifdef HAVE_LIBDL
 #include <dlfcn.h>
@@ -449,5 +447,3 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...){
     }
   return CONTROL_UNKNOWN;
 }
-
-#endif

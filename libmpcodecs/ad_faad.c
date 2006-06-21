@@ -11,8 +11,6 @@
 #include "config.h"
 #include "ad_internal.h"
 
-#ifdef HAVE_FAAD
-
 static ad_info_t info = 
 {
 	"AAC (MPEG2/4 Advanced Audio Coding)",
@@ -284,6 +282,3 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   }
   return len;
 }
-
-#endif /* !HAVE_FAAD */
-

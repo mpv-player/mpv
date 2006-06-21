@@ -1,5 +1,4 @@
 #include "config.h"
-#ifdef HAVE_PNG
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -299,5 +298,3 @@ vf_info_t vf_info_screenshot = {
 };
 
 //===========================================================================//
-
-#endif /* HAVE_PNG */

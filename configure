@@ -6841,11 +6841,9 @@ fi
 echores "$_menu"
 
 
-if x86; then
-# Check to see if they want QTX codecs enabled
-echocheck "QTX codecs"
+echocheck "QuickTime codecs"
 if test "$_qtx" = auto ; then
-    _qtx=$_win32
+  test "$_win32" = yes || darwin && _qtx=yes
 fi
 if test "$_qtx" = yes ; then
     _def_qtx='#define USE_QTX_CODECS 1'
@@ -6855,7 +6853,6 @@ else
     _nocodecmodules="qtx $_nocodecmodules"
 fi
 echores "$_qtx"
-fi #if x86
 
 
 echocheck "Subtitles sorting"
@@ -7363,7 +7360,9 @@ CONFIG_PP = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
 
+DIVX     = $_divx
 OPENDIVX = $_opendivx
+DIVX4ENCORE = $_divx_encore
 
 MP3LIB = $_mp3lib
 LIBA52 = $_liba52
@@ -7446,6 +7445,9 @@ SDL_INC = $_inc_sdl
 WIN32DLL = $_win32
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
+QTX_CODECS = $_qtx
+REAL_CODECS = $_real
+XANIM_CODECS = $_xanim
 AV_DEP = $_dep_libavcodec $_dep_libavformat $_dep_libavutil $_dep_libpostproc
 AV_LIB = $_ld_libavcodec  $_ld_libavformat  $_ld_libavutil  $_ld_libpostproc
 CONFIG_LIBAVUTIL = $_libavutil
@@ -7459,10 +7461,12 @@ CONFIG_LIBPOSTPROC_SO = $_libpostproc_so
 ZORAN = $_zr
 FAME = $_libfame
 FAME_LIB = $_ld_libfame
+LIBDV = $_libdv
 MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 XVID = $_xvid
+XVID4 = $_xvid4
 XVID_INC = $_inc_xvid
 XVID_LIB = $_ld_xvid
 X264 = $_x264
@@ -7487,9 +7491,12 @@ FRIBIDI_LIB = $_ld_fribidi
 LIBCDIO_INC = $_inc_libcdio
 LIBCDIO_LIB = $_ld_libcdio
 LIBLZO_LIB= $_ld_liblzo
+LIBMAD = $_mad
 MAD_LIB = $_ld_mad
+LIBVORBIS = $_vorbis
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
 SPEEX_LIB = $_ld_speex
+LIBTHEORA = $_theora
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
 INTERNAL_FAAD = $_faad_internal

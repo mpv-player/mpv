@@ -6,8 +6,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifdef USE_WIN32DLL
-
 #include "wineacm.h"
 
 #include "ad_internal.h"
@@ -243,4 +241,3 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
     }
     return len;
 }
-#endif

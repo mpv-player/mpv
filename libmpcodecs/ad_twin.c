@@ -3,8 +3,6 @@
 #include <unistd.h>
 #include "config.h"
 
-#ifdef USE_WIN32DLL
-
 #include "ad_internal.h"
 #include "vqf.h"
 #include "loader/ldt_keeper.h"
@@ -506,5 +504,3 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
     }
     return len;
 }
-
-#endif

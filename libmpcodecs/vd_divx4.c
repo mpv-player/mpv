@@ -7,9 +7,6 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#ifdef USE_DIVX
-#ifdef NEW_DECORE
-
 #include "vd_internal.h"
 
 static vd_info_t info = {
@@ -328,5 +325,3 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     return mpi;
 }
-#endif /* NEW_DECORE */
-#endif /* USE_DIVX */

@@ -7,8 +7,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_LIBDV095
-
 #include "img_format.h"
 
 #include <libdv/dv.h>
@@ -83,5 +81,3 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    
    return mpi;
 }
-#endif
-

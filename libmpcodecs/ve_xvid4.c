@@ -36,8 +36,6 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#ifdef HAVE_XVID4
-
 #include "codec-cfg.h"
 #include "stream.h"
 #include "demuxer.h"
@@ -1596,8 +1594,6 @@ vf_info_t ve_info_xvid = {
 	vf_open
 };
 
-
-#endif /* HAVE_XVID4 */
 
 /* Please do not change that tag comment.
  * arch-tag: 42ccc257-0548-4a3e-9617-2876c4e8ac88 mplayer xvid encoder module */

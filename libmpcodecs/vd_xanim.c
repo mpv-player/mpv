@@ -14,7 +14,6 @@
 
 #include "config.h"
 
-#ifdef USE_XANIM
 #include "mp_msg.h"
 
 #include "vd_internal.h"
@@ -822,4 +821,3 @@ static mp_image_t* decode(sh_video_t *sh, void *data, int len, int flags)
     
     return priv->mpi;
 }
-#endif

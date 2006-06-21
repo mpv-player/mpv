@@ -8,8 +8,6 @@
 #include "config.h"
 #include "ad_internal.h"
 
-#ifdef HAVE_OGGVORBIS
-
 static ad_info_t info = 
 {
 	"Ogg/Vorbis audio decoder",
@@ -322,6 +320,3 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
   return len;
 }
-
-#endif /* !HAVE_OGGVORBIS */
-

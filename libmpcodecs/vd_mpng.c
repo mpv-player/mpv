@@ -4,8 +4,6 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#ifdef HAVE_PNG
-
 #include <png.h>
 
 #include "bswap.h"
@@ -160,5 +158,3 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     return mpi;
 }
-
-#endif

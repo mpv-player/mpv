@@ -5,7 +5,6 @@
 #include <inttypes.h>
 
 #include "config.h"
-#ifdef USE_WIN32DLL
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -290,4 +289,3 @@ vf_info_t ve_info_vfw = {
 };
 
 //===========================================================================//
-#endif

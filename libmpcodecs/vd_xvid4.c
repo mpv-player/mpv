@@ -31,8 +31,6 @@
 #include "config.h"
 #include "mp_msg.h"
 
-#ifdef HAVE_XVID4
-
 #include "vd_internal.h"
 #include "m_option.h"
 
@@ -390,8 +388,6 @@ static vd_info_t info =
 };
 
 LIBVD_EXTERN(xvid)
-
-#endif  /* HAVE_XVID4 */
 
 /* Please do not change that tag comment.
  * arch-tag: b7d654a5-76ea-4768-9713-2c791567fe7d mplayer xvid decoder module */

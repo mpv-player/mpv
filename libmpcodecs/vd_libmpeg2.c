@@ -2,7 +2,6 @@
 #include <stdlib.h>
 
 #include "config.h"
-#ifdef USE_LIBMPEG2
 
 #include "mp_msg.h"
 
@@ -269,4 +268,3 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	}
     }
 }
-#endif

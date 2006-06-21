@@ -3,7 +3,6 @@
 #include <unistd.h>
 
 #include "config.h"
-#ifdef USE_MP3LIB
 
 #include "ad_internal.h"
 
@@ -80,4 +79,3 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 {
    return MP3_DecodeFrame(buf,-1);
 }
-#endif
