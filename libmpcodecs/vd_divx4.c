@@ -20,15 +20,15 @@ static vd_info_t info = {
 	"XviD lib (divx4 compat.)",
 #else
 	"DivX4Linux lib",
-#endif
-#endif
+#endif /* #ifdef DECORE_XVID  */
+#endif /* #ifdef DECORE_DIVX5 */
 	"divx4",
 	"A'rpi",
 #ifdef DECORE_XVID
 	"http://www.xvid.com",
 #else
 	"http://www.divx.com",
-#endif
+#endif /* #ifdef DECORE_XVID */
 	"native binary codec"
 };
 
@@ -38,7 +38,7 @@ LIBVD_EXTERN(divx4)
 #include <divx4.h>
 #else
 #include <decore.h>
-#endif
+#endif /* #ifdef DECORE_XVID */
 
 #define USE_DIVX_BUILTIN_PP
 
@@ -59,7 +59,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
         return 6; // divx4linux >= 5.0.5 -> 0..60
 #else
         return 10; // divx4linux < 5.0.5 -> 0..100
-#endif 
+#endif /* #if DECORE_VERSION >= 20021112 */
     case VDCTRL_SET_PP_LEVEL: {
         int quality=*((int*)arg);
 #if DECORE_VERSION >= 20021112
@@ -73,10 +73,10 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	if(quality<0 || quality>10) quality=10;
 	dec_set.postproc_level=quality*10;
 	decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
-#endif
+#endif /* #if DECORE_VERSION >= 20021112 */
 	return CONTROL_OK;
     }
-#endif
+#endif /* #ifdef USE_DIVX_BUILTIN_PP */
 #if DECORE_VERSION >= 20011010
     case VDCTRL_SET_EQUALIZER: {
 	va_list ap;
@@ -91,19 +91,19 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
             option=DEC_ADJ_BRIGHTNESS | DEC_ADJ_SET;
 #else
             option=DEC_GAMMA_BRIGHTNESS;
-#endif
+#endif /* #if DECORE_VERSION >= 20021112 */
         else if(!strcasecmp(arg, "Contrast"))
 #if DECORE_VERSION >= 20021112
             option=DEC_ADJ_CONTRAST | DEC_ADJ_SET;
 #else
             option=DEC_GAMMA_CONTRAST;
-#endif
+#endif /* #if DECORE_VERSION >= 20021112 */
         else if(!strcasecmp(arg,"Saturation"))
 #if DECORE_VERSION >= 20021112
             option=DEC_ADJ_SATURATION | DEC_ADJ_SET;
 #else
             option=DEC_GAMMA_SATURATION;
-#endif
+#endif /* #if DECORE_VERSION >= 20021112 */
         else return CONTROL_FALSE;
 	
         value = (value * 128) / 100;
@@ -111,10 +111,10 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
         decore(dec_handle, DEC_OPT_ADJUST, &option, &value);
 #else
         decore(0x123, DEC_OPT_GAMMA, (void *)option, (void *) value);
-#endif
+#endif /* #if DECORE_VERSION >= 20021112 */
 	return CONTROL_OK;
     }
-#endif
+#endif /* #if DECORE_VERSION >= 20011010 */
     
     }
 
@@ -205,7 +205,7 @@ static int init(sh_video_t *sh){
 #endif
 
     free(pbi);
-#else // DECORE_VERSION < 20021112
+#else /* DECORE_VERSION >= 20021112 */
     DEC_PARAM dec_param;
     DEC_SET dec_set;
     int bits=16;
@@ -262,7 +262,7 @@ static int init(sh_video_t *sh){
     dec_set.postproc_level = divx_quality;
     decore(0x123, DEC_OPT_SETPP, &dec_set, NULL);
 #endif
-#endif // DECORE_VERSION    
+#endif /* DECORE_VERSION >= 20021112 */
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: DivX4Linux video codec init OK!\n");
 
@@ -328,5 +328,5 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     return mpi;
 }
-#endif
-#endif
+#endif /* NEW_DECORE */
+#endif /* USE_DIVX */
