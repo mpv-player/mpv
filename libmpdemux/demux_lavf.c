@@ -37,6 +37,8 @@
 
 #define PROBE_BUF_SIZE 2048
 
+extern char *audio_lang;
+
 typedef struct lavf_priv_t{
     AVInputFormat *avif;
     AVFormatContext *avfc;
@@ -244,12 +246,14 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 break;
             }
             if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_wave_header(sh_audio->wf, MSGL_V);
-            if(demuxer->audio->id != i && demuxer->audio->id != -1)
-                st->discard= AVDISCARD_ALL;
-            else{
-                demuxer->audio->id = i;
+	    if((audio_lang && st->language[0] && !strncmp(audio_lang, st->language, 3))
+	        || (demuxer->audio->id == i || demuxer->audio->id == -1)
+	    ) {
+	        demuxer->audio->id = i;
                 demuxer->audio->sh= demuxer->a_streams[i];
-            }
+	    }
+            else
+                st->discard= AVDISCARD_ALL;
             break;}
         case CODEC_TYPE_VIDEO:{
             BITMAPINFOHEADER *bih=calloc(sizeof(BITMAPINFOHEADER) + codec->extradata_size,1);
