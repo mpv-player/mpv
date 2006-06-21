@@ -12,6 +12,7 @@ MPlayer (1.0)
     * support for audio stream switching in MPEG-TS
     * it's possible to switch to any of the available audio tracks in MPEG TS/PS, MKV and streams
       supported by libavformat
+    * lavf demuxer now honors -alang
 
 
   pre8: "NeuTeam strikes back" June 11, 2006
