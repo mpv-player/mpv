@@ -3940,11 +3940,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 		too_slow_frame_cnt++;
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
 
-	   if(vo_config_count){
-                if(CONTROL_OK!=((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_FLIP_PAGE, 0))
-                    video_out->flip_page();
-           }
-
+	   if(vo_config_count) video_out->flip_page();
 	   if (play_n_frames >= 0) {
 	     --play_n_frames;
 	     if (play_n_frames <= 0) eof = PT_NEXT_ENTRY;
