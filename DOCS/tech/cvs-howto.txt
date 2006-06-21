@@ -127,6 +127,13 @@ I. TECH SIDE:
   server! It only reverts changes that were not committed yet. If you need
   to revert a broken commit, see 9.
 
+12. Changing commit messages
+
+  svn propedit svn:log --revprop -r <revision>
+
+  If your commit message is too short or not explanatory enough, you can edit
+  it afterwards with svn propedit.
+
 Contact the project admin <root at mplayerhq dot hu> if you have technical
 problems with the Subversion server.
 
