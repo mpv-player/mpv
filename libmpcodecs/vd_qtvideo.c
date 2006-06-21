@@ -90,7 +90,7 @@ static    OSErr           (*QTNewGWorldFromPtr)(GWorldPtr *gw,
                                void *baseAddr,
                                long rowBytes); 
 static    OSErr           (*NewHandleClear)(Size byteCount);                          
-#endif
+#endif /* #if defined(USE_QTX_CODECS) && !defined(MACOSX) */
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -155,7 +155,7 @@ static int init(sh_video_t *sh){
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"InitializeQTML returned %li\n",result);
 //    result=EnterMovies();
 //    printf("EnterMovies->%d\n",result);
-#endif /* !MACOSX */
+#endif /* MACOSX */
 
 #if 0
     memset(&desc,0,sizeof(desc));
@@ -438,4 +438,4 @@ if((int)sh->context==0x73797639){	// Sorenson 16-bit YUV -> std YVU9
 
     return mpi;
 }
-#endif
+#endif /* #if defined(USE_QTX_CODECS) || defined(MACOSX) */
