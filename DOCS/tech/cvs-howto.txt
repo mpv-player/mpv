@@ -30,21 +30,13 @@ I. TECH SIDE:
 
     svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/
 
-    or
-
-    svn co svn://svn.mplayerhq.hu/mplayer/trunk/
-
 2. Updating source tree to latest revision:
 
     svn update
 
-    or
-
-    svn up
-
 3. Committing changes:
 
-    svn up
+    svn update
     svn commit --username USERNAME filename(s)
 
   Do not use comments such as: "bug fix." or "files changed" or "dunno".
@@ -60,14 +52,13 @@ I. TECH SIDE:
   'store-auth-creds' to "no" in ~/.subversion/config. You might need to remove
   previous cache files, which are located in ~/.subversion/auth, by hand.
 
-4. Adding new files/dirs:
+4. Adding new files/directories:
 
     svn add filename/dirname
-    svn commit filename
+    svn commit filename/dirname
 
 5. Removing files:
 
-    rm filename
     svn delete filename
     svn commit filename
 
