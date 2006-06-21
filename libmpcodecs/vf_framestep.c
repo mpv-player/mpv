@@ -73,6 +73,7 @@ struct vf_priv_s {
     int  frame_step;
     /* Only I-Frame (2), print on I-Frame (1) */
     int  dump_iframe;
+    int last_skip;
 };
 
 /* Filter handler */
@@ -108,6 +109,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     /* Increment current frame */
     ++priv->frame_cur;
 
+    priv->last_skip= skip;
+
     if (skip == 0) {
 	/* Get image, export type (we don't modify tghe image) */
 	dmpi=vf_get_image(vf->next, mpi->imgfmt,
@@ -133,6 +136,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
     return 0;
 }
 
+static int control(struct vf_instance_s* vf, int request, void* data){
+    if(request == VFCTRL_FLIP_PAGE && vf->priv->last_skip){
+        return CONTROL_TRUE;
+    }
+    return vf_next_control(vf,request,data);
+}
+
 static void uninit(struct vf_instance_s* vf)
 {
     /* Free private data */
@@ -145,6 +155,7 @@ static int open(vf_instance_t *vf, char* args)
 	struct vf_priv_s *p;
 
         vf->put_image = put_image;
+        vf->control= control;
 	vf->uninit = uninit;
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
