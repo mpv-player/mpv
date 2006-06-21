@@ -38,6 +38,13 @@
 #define RTSP_STATUS_SET_PARAMETER  10
 #define RTSP_STATUS_OK            200
 
+#define RTSP_METHOD_OPTIONS "OPTIONS"
+#define RTSP_METHOD_DESCRIBE "DESCRIBE"
+#define RTSP_METHOD_SETUP "SETUP"
+#define RTSP_METHOD_PLAY "PLAY"
+#define RTSP_METHOD_TEARDOWN "TEARDOWN"
+#define RTSP_METHOD_SET_PARAMETER "SET_PARAMETER"
+
 typedef struct rtsp_s rtsp_t;
 
 rtsp_t*  rtsp_connect (int fd, char *mrl, char *path, char *host, int port, char *user_agent);

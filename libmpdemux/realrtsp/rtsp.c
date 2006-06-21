@@ -92,7 +92,7 @@ struct rtsp_s {
  * constants
  */
 
-const char rtsp_protocol_version[]="RTSP/1.0";
+#define RTSP_PROTOCOL_VERSION "RTSP/1.0"
 
 /* server states */
 #define RTSP_CONNECTED 1
@@ -339,17 +339,17 @@ static int rtsp_get_code(const char *string) {
   char buf[4];
   int code=0;
  
-  if (!strncmp(string, rtsp_protocol_version, strlen(rtsp_protocol_version)))
+  if (!strncmp(string, RTSP_PROTOCOL_VERSION, strlen(RTSP_PROTOCOL_VERSION)))
   {
-    memcpy(buf, string+strlen(rtsp_protocol_version)+1, 3);
+    memcpy(buf, string+strlen(RTSP_PROTOCOL_VERSION)+1, 3);
     buf[3]=0;
     code=atoi(buf);
-  } else if (!strncmp(string, "SET_PARAMETER",8))
+  } else if (!strncmp(string, RTSP_METHOD_SET_PARAMETER,8))
   {
     return RTSP_STATUS_SET_PARAMETER;
   }
 
-  if(code != 200) mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: server responds: '%s'\n",string);
+  if(code != RTSP_STATUS_OK) mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: server responds: '%s'\n",string);
 
   return code;
 }
@@ -363,9 +363,9 @@ static void rtsp_send_request(rtsp_t *s, const char *type, const char *what) {
   char **payload=s->scheduled;
   char *buf;
   
-  buf = malloc(strlen(type)+strlen(what)+strlen(rtsp_protocol_version)+3);
+  buf = malloc(strlen(type)+strlen(what)+strlen(RTSP_PROTOCOL_VERSION)+3);
   
-  sprintf(buf,"%s %s %s",type, what, rtsp_protocol_version);
+  sprintf(buf,"%s %s %s",type, what, RTSP_PROTOCOL_VERSION);
   rtsp_put(s,buf);
   free(buf);
   if (payload)
@@ -498,7 +498,7 @@ int rtsp_request_options(rtsp_t *s, const char *what) {
     buf=malloc(sizeof(char)*(strlen(s->host)+16));
     sprintf(buf,"rtsp://%s:%i", s->host, s->port);
   }
-  rtsp_send_request(s,"OPTIONS",buf);
+  rtsp_send_request(s,RTSP_METHOD_OPTIONS,buf);
   free(buf);
 
   return rtsp_get_answers(s);
@@ -515,7 +515,7 @@ int rtsp_request_describe(rtsp_t *s, const char *what) {
     buf=malloc(sizeof(char)*(strlen(s->host)+strlen(s->path)+16));
     sprintf(buf,"rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
-  rtsp_send_request(s,"DESCRIBE",buf);
+  rtsp_send_request(s,RTSP_METHOD_DESCRIBE,buf);
   free(buf);
   
   return rtsp_get_answers(s);
@@ -538,7 +538,7 @@ int rtsp_request_setup(rtsp_t *s, const char *what, char *control) {
              control ? "/" : "", control ? control : "");
   }
   
-  rtsp_send_request (s, "SETUP", buf);
+  rtsp_send_request (s, RTSP_METHOD_SETUP, buf);
   free (buf);
   return rtsp_get_answers (s);
 }
@@ -554,7 +554,7 @@ int rtsp_request_setparameter(rtsp_t *s, const char *what) {
     buf=malloc(sizeof(char)*(strlen(s->host)+strlen(s->path)+16));
     sprintf(buf,"rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
-  rtsp_send_request(s,"SET_PARAMETER",buf);
+  rtsp_send_request(s,RTSP_METHOD_SET_PARAMETER,buf);
   free(buf);
   
   return rtsp_get_answers(s);
@@ -572,11 +572,11 @@ int rtsp_request_play(rtsp_t *s, const char *what) {
     buf=malloc(sizeof(char)*(strlen(s->host)+strlen(s->path)+16));
     sprintf(buf,"rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
-  rtsp_send_request(s,"PLAY",buf);
+  rtsp_send_request(s,RTSP_METHOD_PLAY,buf);
   free(buf);
   
   ret = rtsp_get_answers (s);
-  if (ret == 200)
+  if (ret == RTSP_STATUS_OK)
     s->server_state = RTSP_PLAYING;
 
   return ret;
@@ -594,7 +594,7 @@ int rtsp_request_teardown(rtsp_t *s, const char *what) {
       malloc (strlen (s->host) + strlen (s->path) + 16);
     sprintf (buf, "rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
-  rtsp_send_request (s, "TEARDOWN", buf);
+  rtsp_send_request (s, RTSP_METHOD_TEARDOWN, buf);
   free (buf);
  
   return rtsp_get_answers(s);
