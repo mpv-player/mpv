@@ -652,14 +652,14 @@ static const char *bilin_filt_template =
 #define BICUB_FILT_MAIN(textype) \
   /* first y-interpolation */ \
   "ADD coord, fragment.texcoord[%c].xyxy, cdelta.xyxw;" \
+  "ADD coord2, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
   "TEX a.r, coord.xyxy, texture[%c], "textype";" \
   "TEX a.g, coord.zwzw, texture[%c], "textype";" \
-  "LRP a.b, parmy.b, a.rrrr, a.gggg;" \
   /* second y-interpolation */ \
-  "ADD coord, fragment.texcoord[%c].xyxy, cdelta.zyzw;" \
-  "TEX a.r, coord.xyxy, texture[%c], "textype";" \
-  "TEX a.g, coord.zwzw, texture[%c], "textype";" \
-  "LRP a.a, parmy.b, a.rrrr, a.gggg;" \
+  "TEX b.r, coord2.xyxy, texture[%c], "textype";" \
+  "TEX b.g, coord2.zwzw, texture[%c], "textype";" \
+  "LRP a.b, parmy.b, a.rrrr, a.gggg;" \
+  "LRP a.a, parmy.b, b.rrrr, b.gggg;" \
   /* x-interpolation */ \
   "LRP yuv.%c, parmx.b, a.bbbb, a.aaaa;"
 
@@ -930,7 +930,7 @@ static void glSetupYUVFragprog(float brightness, float contrast,
     "OPTION ARB_precision_hint_fastest;"
     // all scaler variables must go here so they aren't defined
     // multiple times when the same scaler is used more than once
-    "TEMP coord, cdelta, parmx, parmy, a, yuv;";
+    "TEMP coord, coord2, cdelta, parmx, parmy, a, b, yuv;";
   int prog_remain = sizeof(yuv_prog) - strlen(yuv_prog);
   char *prog_pos = &yuv_prog[strlen(yuv_prog)];
   int cur_texu = 3;
