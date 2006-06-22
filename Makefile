@@ -522,14 +522,14 @@ depend: help_mp.h
 	$(CC) -MM $(CFLAGS) -DCODECS2HTML mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
-# ./configure must be run if it changed in CVS
+# ./configure must be rerun if it changed
 config.h: configure
 	@echo "############################################################"
 	@echo "####### Please run ./configure again - it's changed! #######"
 	@echo "############################################################"
 
-# rebuild at every config.h/config.mak change:
-version.h:
+# rebuild at every config.h/config.mak/Makefile change:
+version.h: config.h config.mak Makefile
 	./version.sh `$(CC) -dumpversion`
 
 doxygen:
@@ -552,12 +552,6 @@ ifneq ($(HELP_FILE),help/help_mp-en.h)
 	@echo '// untranslated messages from the English master file:' >> help_mp.h
 	@help/help_diff.sh $(HELP_FILE) < help/help_mp-en.h >> help_mp.h
 endif
-
-# rebuild at every CVS update or config/makefile change:
-#ifneq ($(wildcard CVS/Entries),)
-#version.h: CVS/Entries
-#endif
-version.h: config.h config.mak Makefile
 
 # explicit dependencies to force version.h to be built even if .depend is missing
 mplayer.o mencoder.o vobsub.o: version.h
