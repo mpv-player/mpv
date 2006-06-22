@@ -1,7 +1,12 @@
 #!/bin/sh
 
-revision=r`grep revision .svn/entries | cut -d '"' -f 2 2> /dev/null`
-
 test "$1" && extra="-$1"
 
-echo "#define VERSION \"dev-SVN-${revision}${extra}\"" > version.h
+svn_revision=`svn info | grep Revision | cut -d' ' -f2 || echo UNKNOWN`
+NEW_REVISION="#define VERSION \"dev-SVN-r${svn_revision}${extra}\""
+OLD_REVISION=`cat version.h 2> /dev/null`
+
+# Update version.h only on revision changes to avoid spurious rebuilds
+if test "$NEW_REVISION" != "$OLD_REVISION"; then
+    echo "$NEW_REVISION" > version.h
+fi
