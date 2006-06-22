@@ -1,7 +1,7 @@
 /* 
  * vo_quartz.h
  * Mac keyboard def taken from SDL
- * See the CVS log for a list of changes.
+ * See the Subversion log for a list of changes.
  */
 
 /*
