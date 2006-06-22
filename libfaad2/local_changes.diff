@@ -6,7 +6,7 @@
  **
 +** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
  ** $Id: bits.h,v 1.40 2004/09/04 14:56:27 menno Exp $
-+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
++** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 +** local_changes.diff contains the exact changes to this file.
  **/
  
@@ -28,7 +28,7 @@
  **
 +** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
  ** $Id: common.h,v 1.65 2004/09/08 09:43:11 gcp Exp $
-+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
++** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 +** local_changes.diff contains the exact changes to this file.
  **/
  
@@ -156,7 +156,7 @@
 -** $Id: output.c,v 1.42 2004/09/04 14:56:28 menno Exp $
 +** Initially modified for use with MPlayer by Rich Felker on 2005/03/29
 +** $Id: output.c,v 1.11 2005/04/05 05:43:41 rfelker Exp $
-+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
++** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  **/
  
  #include "common.h"
@@ -229,7 +229,7 @@
  **
 +** Initially modified for use with MPlayer on 2005/12/05
  ** $Id: ps_dec.c,v 1.10 2004/09/04 14:56:28 menno Exp $
-+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
++** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 +** local_changes.diff contains the exact changes to this file.
  **/
  
@@ -271,7 +271,7 @@
  **
 +** Initially modified for use with MPlayer on 2005/12/05
  ** $Id: sbr_dec.c,v 1.39 2004/09/04 14:56:28 menno Exp $
-+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
++** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 +** local_changes.diff contains the exact changes to this file.
  **/
  
@@ -298,7 +298,7 @@
 -**
 +** Initially modified for use with MPlayer on 2006/04/18
  ** $Id: specrec.c,v 1.56 2004/09/08 09:43:11 gcp Exp $
-+** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
++** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 +** local_changes.diff contains the exact changes to this file.
  **/
  

@@ -1,8 +1,8 @@
 /*
  * Copyright 1998 Marcus Meissner
  *
- * Modified for use with MPlayer, detailed CVS changelog at
- * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * Modified for use with MPlayer, detailed changelog at
+ * http://svn.mplayerhq.hu/mplayer/trunk/
  * $Id$
  *
  */

@@ -10,7 +10,7 @@
  *
  * Initially modified for use with MPlayer by Diego Biurrun on 2004-08-22
  * $Id$
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  */
 
 

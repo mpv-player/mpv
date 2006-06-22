@@ -17,7 +17,7 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
 @@ -22,10 +22,11 @@
   *
   * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
-  * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 - * $Id$
 + * $Id$
   */
@@ -336,7 +336,7 @@ diff -u libmpeg2.orig/mpeg2.h libmpeg2/mpeg2.h
 @@ -22,7 +22,7 @@
   *
   * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
-  * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 - * $Id$
 + * $Id$
   */

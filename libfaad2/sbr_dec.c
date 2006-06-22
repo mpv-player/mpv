@@ -24,7 +24,7 @@
 **
 ** Initially modified for use with MPlayer on 2005/12/05
 ** $Id: sbr_dec.c,v 1.39 2004/09/04 14:56:28 menno Exp $
-** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 ** local_changes.diff contains the exact changes to this file.
 **/
 

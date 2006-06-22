@@ -21,7 +21,7 @@
 **
 ** Initially modified for use with MPlayer by Rich Felker on 2005/03/29
 ** $Id$
-** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 **/
 
 #include "common.h"
