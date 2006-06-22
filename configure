@@ -211,7 +211,6 @@ Optional features:
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-termios       use termios database for key codes [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
-  --disable-setlocale    disable setlocale using in mplayer [autodetect]
   --disable-langinfo     do not use langinfo [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
