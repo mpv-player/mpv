@@ -61,7 +61,7 @@ binary-arch: build
 
 
 	dh_installdebconf	
-	dh_installdocs -XCVS -Xmplayer.1 -X.cvsignore DOCS/*
+	dh_installdocs -X.svn -Xmplayer.1 DOCS/*
 	dh_installexamples etc/example.conf etc/dvb-menu.conf etc/input.conf etc/menu.conf
 	dh_installmenu
 	dh_installmime
