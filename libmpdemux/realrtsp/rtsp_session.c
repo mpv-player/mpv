@@ -191,22 +191,6 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
   return 0;
 }
 
-int rtsp_session_peek_header(rtsp_session_t *this, char *buf, int maxsize) {
-
-  int len;
-
-  if (this->real_session)
-  {
-  len = (this->real_session->header_len < maxsize)
-    ? this->real_session->header_len : maxsize;
-
-  memcpy(buf, this->real_session->header, len);
-  return len;
-  }
-
-  return 0;
-}
-
 void rtsp_session_end(rtsp_session_t *session) {
 
   rtsp_close(session->s);

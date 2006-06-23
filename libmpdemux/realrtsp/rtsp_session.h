@@ -34,8 +34,6 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
 
 int rtsp_session_read(rtsp_session_t *session, char *data, int len);
 
-int rtsp_session_peek_header(rtsp_session_t *this, char *buf, int maxsize);
-
 void rtsp_session_end(rtsp_session_t *session);
 
 #endif
