@@ -51,9 +51,8 @@
 #include <sys/types.h>
 #include <inttypes.h>
 
+#include "mp_msg.h"
 #include "rtsp.h"
-#include "../stream.h"
-#include "../demuxer.h"
 #include "rtsp_session.h"
 #include "osdep/timer.h"
 
