@@ -65,7 +65,6 @@
 #define HEADER_SIZE 1024
 #define MAX_FIELDS 256
 
-extern int network_bandwidth;
 struct rtsp_s {
 
   int           s;
@@ -889,96 +888,3 @@ void rtsp_free_answers(rtsp_t *s) {
     answer++;
   }
 }
-
-static int realrtsp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl ) {
-  return rtsp_session_read(stream_ctrl->data, buffer, size);
-}
-
-
-static int realrtsp_streaming_start( stream_t *stream ) {
-  int fd;
-  rtsp_session_t *rtsp;
-  char *mrl;
-  char *file;
-  int port;
-  int redirected, temp;
-  if( stream==NULL ) return -1;
-
-  temp = 5; // counter so we don't get caught in infinite redirections (you never know)
-
-  do {
-    redirected = 0;
-
-    fd = connect2Server( stream->streaming_ctrl->url->hostname,
-         port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554),1 );
-    if(fd<0 && !stream->streaming_ctrl->url->port)
-      fd = connect2Server(stream->streaming_ctrl->url->hostname, port = 7070, 1);
-    if(fd<0) return -1;
-
-    file = stream->streaming_ctrl->url->file;
-    if (file[0] == '/')
-      file++;
-    mrl = malloc(sizeof(char)*(strlen(stream->streaming_ctrl->url->hostname)+strlen(file)+16));
-    sprintf(mrl,"rtsp://%s:%i/%s",stream->streaming_ctrl->url->hostname,port,file);
-    rtsp = rtsp_session_start(fd,&mrl, file, stream->streaming_ctrl->url->hostname, port, &redirected, stream->streaming_ctrl->bandwidth);
-
-    if( redirected == 1) {
-      url_free(stream->streaming_ctrl->url);
-      stream->streaming_ctrl->url = url_new(mrl);
-      closesocket(fd);
-    }
-
-    free(mrl);
-    temp--;
-  } while( (redirected != 0) && (temp > 0) );	
-
-  if(!rtsp) return -1;
-
-  stream->fd=fd;
-  stream->streaming_ctrl->data=rtsp;
-
-  stream->streaming_ctrl->streaming_read = realrtsp_streaming_read;
-  //stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
-  stream->streaming_ctrl->prebuffer_size = 128*1024;  // 8 KBytes
-  stream->streaming_ctrl->buffering = 1;
-  stream->streaming_ctrl->status = streaming_playing_e;
-  return 0;
-}
-
-
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
-  URL_t *url;
-
-  mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_RTSP, URL: %s\n", stream->url);
-  stream->streaming_ctrl = streaming_ctrl_new();
-  if( stream->streaming_ctrl==NULL )
-    return STREAM_ERROR;
-
-  stream->streaming_ctrl->bandwidth = network_bandwidth;
-  url = url_new(stream->url);
-  stream->streaming_ctrl->url = check4proxies(url);
-  //url_free(url);
-
-  stream->fd = -1;
-  if(realrtsp_streaming_start( stream ) < 0) {
-    streaming_ctrl_free(stream->streaming_ctrl);
-    stream->streaming_ctrl = NULL;
-    return STREAM_UNSUPORTED;
-  }
-
-  fixup_network_stream_cache(stream);
-  stream->type = STREAMTYPE_STREAM;
-  return STREAM_OK;
-}
-
-
-stream_info_t stream_info_rtsp = {
-  "RealNetworks rtsp streaming",
-  "realrtsp",
-  "Roberto Togni, xine team",
-  "ported from xine",
-  open_s,
-  {"rtsp", NULL},
-  NULL,
-  0 // Urls are an option string
-};
