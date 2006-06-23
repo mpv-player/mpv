@@ -2,7 +2,9 @@
 
 test "$1" && extra="-$1"
 
-svn_revision=`svn info | grep Revision | cut -d' ' -f2 || echo UNKNOWN`
+svn_revision=`svn info 2> /dev/null | grep Revision | cut -d' ' -f2`
+test $svn_revision || svn_revision=UNKNOWN
+
 NEW_REVISION="#define VERSION \"dev-SVN-r${svn_revision}${extra}\""
 OLD_REVISION=`cat version.h 2> /dev/null`
 
