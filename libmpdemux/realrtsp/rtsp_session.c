@@ -41,6 +41,7 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_session.h"
 #include "real.h"
@@ -76,7 +77,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
   rtsp_session->s=rtsp_connect(fd,*mrl,path,host,port,NULL);
   if (!rtsp_session->s)
   {
-    printf("rtsp_session: failed to connect to server %s\n", path);
+    mp_msg (MSGT_OPEN, MSGL_ERR,"rtsp_session: failed to connect to server %s\n", path);
     free(rtsp_session);
     return NULL;
   }
@@ -101,7 +102,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
       {
         free(mrl_line);
 	mrl_line=strdup(rtsp_search_answers(rtsp_session->s, "Location"));
-        printf("rtsp_session: redirected to %s\n", mrl_line);
+        mp_msg (MSGT_OPEN, MSGL_INFO,"rtsp_session: redirected to %s\n", mrl_line);
 	rtsp_close(rtsp_session->s);
 	free(server);
         free(*mrl);
@@ -113,7 +114,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
 //	goto connect; /* *shudder* i made a design mistake somewhere */
       } else
       {
-        printf("rtsp_session: session can not be established.\n");
+        mp_msg (MSGT_OPEN, MSGL_ERR,"rtsp_session: session can not be established.\n");
         rtsp_close(rtsp_session->s);
         free (server);
         free(rtsp_session);
@@ -135,7 +136,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
     rtsp_session->real_session->recv_read = 0;
   } else
   {
-    printf("rtsp_session: Not a Real server. Server type is '%s'.\n",server);
+    mp_msg (MSGT_OPEN, MSGL_ERR,"rtsp_session: Not a Real server. Server type is '%s'.\n",server);
     rtsp_close(rtsp_session->s);
     free(server);
     free(rtsp_session);
@@ -171,7 +172,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
 
     if (this->real_session->recv_size == 0) {
 #ifdef LOG
-      printf ("librtsp: %d of %d bytes provided\n", len-to_copy, len);
+      mp_msg (MSGT_OPEN, MSGL_INFO, "librtsp: %d of %d bytes provided\n", len-to_copy, len);
 #endif
       return len-to_copy;
     }
@@ -181,7 +182,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
   this->real_session->recv_read += to_copy;
 
 #ifdef LOG
-  printf ("librtsp: %d bytes provided\n", len);
+  mp_msg (MSGT_OPEN, MSGL_INFO, "librtsp: %d bytes provided\n", len);
 #endif
 
   return len;
