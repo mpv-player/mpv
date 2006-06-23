@@ -594,8 +594,10 @@ int rtsp_request_teardown(rtsp_t *s, const char *what) {
   }
   rtsp_send_request (s, RTSP_METHOD_TEARDOWN, buf);
   free (buf);
- 
-  return rtsp_get_answers(s);
+
+  /* after teardown we're done with RTSP streaming, no need to get answer as
+     reading more will only result to garbage and buffer overflow */
+  return RTSP_STATUS_OK;
 }
 
 /*
