@@ -59,6 +59,8 @@ const unsigned char xor_table[] = {
 #define MAX(x,y) ((x>y) ? x : y)
 #endif
 
+#define BUF_SIZE 4096
+
 #ifdef LOG
 static void hexdump (const char *buf, int length) {
 
@@ -845,4 +847,25 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   subscribe = xbuffer_free(subscribe);
   buf = xbuffer_free(buf);
   return h;
+}
+
+struct real_rtsp_session_t *
+init_real_rtsp_session (void)
+{
+  struct real_rtsp_session_t *real_rtsp_session = NULL;
+
+  real_rtsp_session = malloc (sizeof (struct real_rtsp_session_t));
+  real_rtsp_session->recv = xbuffer_init (BUF_SIZE);
+
+  return real_rtsp_session;
+}
+
+void
+free_real_rtsp_session (struct real_rtsp_session_t* real_session)
+{
+  if (!real_session)
+    return;
+  
+  xbuffer_free (real_session->recv);
+  free (real_session);
 }
