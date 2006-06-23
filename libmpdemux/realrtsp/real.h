@@ -31,7 +31,7 @@
 #define HAVE_REAL_H
 
 #include "rmff.h"
-#include "rtsp.h"
+#include "../librtsp/rtsp.h"
 
 #define HEADER_SIZE 4096
 

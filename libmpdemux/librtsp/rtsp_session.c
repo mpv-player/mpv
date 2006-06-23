@@ -44,10 +44,10 @@
 #include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_session.h"
-#include "real.h"
-#include "rmff.h"
-#include "asmrp.h"
-#include "xbuffer.h"
+#include "../realrtsp/real.h"
+#include "../realrtsp/rmff.h"
+#include "../realrtsp/asmrp.h"
+#include "../realrtsp/xbuffer.h"
 
 /*
 #define LOG

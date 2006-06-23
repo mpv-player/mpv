@@ -37,8 +37,8 @@
 #include <errno.h>
 
 #include "stream.h"
-#include "realrtsp/rtsp.h"
-#include "realrtsp/rtsp_session.h"
+#include "librtsp/rtsp.h"
+#include "librtsp/rtsp_session.h"
 
 #define RTSP_DEFAULT_PORT 554
 

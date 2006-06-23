@@ -135,10 +135,11 @@ SRCS += asf_streaming.c \
 SRCS += realrtsp/asmrp.c \
         realrtsp/real.c \
         realrtsp/rmff.c \
-        realrtsp/rtsp.c \
-        realrtsp/rtsp_session.c \
         realrtsp/sdpplin.c \
         realrtsp/xbuffer.c \
+
+SRCS += librtsp/rtsp.c \
+        librtsp/rtsp_session.c \
 
 ifeq ($(STREAMING_LIVE555),yes)
 CPLUSPLUSSRCS = demux_rtp.cpp demux_rtp_codec.cpp
@@ -185,7 +186,9 @@ test:	$(LIBNAME) test.c
 	  $(ALSA_LIB) $(VORBIS_LIB) $(CDPARANOIA_LIB) -lz -lpthread
 
 clean:
-	rm -f *.o *.a *~ realrtsp/*.o realrtsp/*.a realrtsp/*~
+	rm -f *.o *.a *~ \
+	realrtsp/*.o realrtsp/*.a realrtsp/*~ \
+	librtsp/*.o librtsp/*.a librtsp/*~
 
 distclean: clean
 	rm -f .depend test
