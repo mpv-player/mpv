@@ -149,6 +149,7 @@ rtsp_streaming_open (stream_t *stream, int mode, void *opts, int *file_format)
   stream->streaming_ctrl->url = check4proxies (url);
 
   stream->fd = -1;
+  index_mode = -1; /* prevent most RTSP streams from locking due to -idx */
   if (rtsp_streaming_start (stream) < 0)
   {
     streaming_ctrl_free (stream->streaming_ctrl);
