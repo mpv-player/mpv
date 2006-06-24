@@ -22,12 +22,12 @@ trap "rm -f $LOCK > /dev/null 2>&1" exit
 cd $MIRROR_ROOT
 
 echo "************ rsyncing homepage ************" >> $TMPFILE
-rsync -pxlrHtWv --delete --delete-after natsuki.mplayerhq.hu::homepage/ \
+rsync -pxlrHtWv --delete --delete-after rsync.mplayerhq.hu::homepage/ \
       homepage >> $TMPFILE 2>&1
 
 echo "************ rsyncing MPlayer ************" >> $TMPFILE
 rsync -pxlrHtWv --delete --delete-after --exclude '/benchmark' \
-      --exclude '/old_stuff' --exclude '/tests' natsuki.mplayerhq.hu::ftp/ \
+      --exclude '/old_stuff' --exclude '/tests' rsync.mplayerhq.hu::ftp/ \
       MPlayer  >> $TMPFILE 2>&1
 
 x=`wc -l $TMPFILE | awk '{print $1}'`
