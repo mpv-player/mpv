@@ -32,6 +32,6 @@ struct rtpheader {	/* in network byte order */
 };
 
 
-int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData);
+static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData);
 
 #endif
