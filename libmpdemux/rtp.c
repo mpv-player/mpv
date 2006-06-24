@@ -353,11 +353,11 @@ static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
   if (lengthPacket==0)
     exit(1);
   if (lengthPacket<0) {
-    fprintf(stderr,"socket read error\n");
+    mp_msg(MSGT_NETWORK,MSGL_ERR,"rtp: socket read error\n");
     exit(2);
   }
   if (lengthPacket<12) {
-    fprintf(stderr,"packet too small (%d) to be an rtp frame (>12bytes)\n", lengthPacket);
+    mp_msg(MSGT_NETWORK,MSGL_ERR,"rtp: packet too small (%d) to be an rtp frame (>12bytes)\n", lengthPacket);
     exit(3);
   }
   rh->b.v  = (unsigned int) ((buf[0]>>6)&0x03);
@@ -378,7 +378,7 @@ static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
   *lengthData = lengthPacket - headerSize;
   *data = (char*) buf + headerSize;
 
-  //  fprintf(stderr,"Reading rtp: v=%x p=%x x=%x cc=%x m=%x pt=%x seq=%x ts=%x lgth=%d\n",rh->b.v,rh->b.p,rh->b.x,rh->b.cc,rh->b.m,rh->b.pt,rh->b.sequence,rh->timestamp,lengthPacket);
+  //  mp_msg(MSGT_NETWORK,MSGL_DBG2,"Reading rtp: v=%x p=%x x=%x cc=%x m=%x pt=%x seq=%x ts=%x lgth=%d\n",rh->b.v,rh->b.p,rh->b.x,rh->b.cc,rh->b.m,rh->b.pt,rh->b.sequence,rh->timestamp,lengthPacket);
 
   return(0);
 }
