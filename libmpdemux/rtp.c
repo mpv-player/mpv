@@ -32,25 +32,175 @@
 
 extern int network_bandwidth;
 
-int read_rtp_from_server(int fd, char *buffer, int length) {
-	struct rtpheader rh;
-	char *data;
-	int len;
-	static int got_first = 0;
-	static unsigned short sequence;
 
-	if( buffer==NULL || length<0 ) return -1;
+#define DEBUG        1
+#include "../mp_msg.h"
+#include "rtp.h"
 
-	getrtp2(fd, &rh, &data, &len);
-	if( got_first && rh.b.sequence != (unsigned short)(sequence+1) )
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"RTP packet sequence error!  Expected: %d, received: %d\n", 
-			sequence+1, rh.b.sequence);
-	got_first = 1;
-	sequence = rh.b.sequence;
-	memcpy(buffer, data, len);
-	return(len);
+// RTP reorder routines
+// Also handling of repeated UDP packets (a bug of ExtremeNetworks switches firmware)
+// rtpreord procedures
+// write rtp packets in cache
+// get rtp packets reordered
+
+#define MAXRTPPACKETSIN 32   // The number of max packets being reordered
+
+struct rtpbuffer
+{
+	unsigned char  data[MAXRTPPACKETSIN][STREAM_BUFFER_SIZE];
+	unsigned short  seq[MAXRTPPACKETSIN];
+	unsigned short  len[MAXRTPPACKETSIN];
+	unsigned short first;
+};
+static struct rtpbuffer rtpbuf;
+
+// RTP Reordering functions
+// Algorithm works as follows:
+// If next packet is in sequence just copy it to buffer
+// Otherwise copy it in cache according to its sequence number
+// Cache is a circular array where "rtpbuf.first" points to next sequence slot
+// and keeps track of expected sequence
+
+// Initialize rtp cache
+static void rtp_cache_reset(unsigned short seq)
+{
+	int i;
+	
+	rtpbuf.first = 0;
+	rtpbuf.seq[0] = ++seq;
+	
+	for (i=0; i<MAXRTPPACKETSIN; i++) {
+		rtpbuf.len[i] = 0;
+	}
 }
 
+// Write in a cache the rtp packet in right rtp sequence order
+static int rtp_cache(int fd, char *buffer, int length)
+{
+	struct rtpheader rh;
+	int newseq;
+	char *data;
+	unsigned short seq;
+	static int is_first = 1;
+	
+	getrtp2(fd, &rh, &data, &length);
+	seq = rh.b.sequence;
+	
+	newseq = seq - rtpbuf.seq[rtpbuf.first];
+	
+	if ((newseq == 0) || is_first)
+	{
+		is_first = 0;
+		
+		//mp_msg(MSGT_NETWORK, MSGL_DBG4, "RTP (seq[%d]=%d seq=%d, newseq=%d)\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first], seq, newseq);
+		rtpbuf.first = ( 1 + rtpbuf.first ) % MAXRTPPACKETSIN;
+		rtpbuf.seq[rtpbuf.first] = ++seq;
+		goto feed;
+	}
+	
+	if (newseq > MAXRTPPACKETSIN)
+	{
+		mp_msg(MSGT_NETWORK, MSGL_DBG2, "Overrun(seq[%d]=%d seq=%d, newseq=%d)\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first], seq, newseq);
+		rtp_cache_reset(seq);
+		goto feed;
+	}
+	
+	if (newseq < 0)
+	{
+		int i;
+		
+		// Is it a stray packet re-sent to network?
+		for (i=0; i<MAXRTPPACKETSIN; i++) {
+			if (rtpbuf.seq[i] == seq) {
+				mp_msg(MSGT_NETWORK, MSGL_ERR, "Stray packet (seq[%d]=%d seq=%d, newseq=%d found at %d)\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first], seq, newseq, i);
+				return  0; // Yes, it is!
+			}
+		}
+		// Some heuristic to decide when to drop packet or to restart everything
+		if (newseq > -(3 * MAXRTPPACKETSIN)) {
+			mp_msg(MSGT_NETWORK, MSGL_ERR, "Too Old packet (seq[%d]=%d seq=%d, newseq=%d)\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first], seq, newseq);
+			return  0; // Yes, it is!
+		}
+		
+		mp_msg(MSGT_NETWORK, MSGL_ERR,  "Underrun(seq[%d]=%d seq=%d, newseq=%d)\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first], seq, newseq);
+		
+		rtp_cache_reset(seq);
+		goto feed;
+	}
+	
+	mp_msg(MSGT_NETWORK, MSGL_DBG4, "Out of Seq (seq[%d]=%d seq=%d, newseq=%d)\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first], seq, newseq);
+	newseq = ( newseq + rtpbuf.first ) % MAXRTPPACKETSIN;
+	memcpy (rtpbuf.data[newseq], data, length);
+	rtpbuf.len[newseq] = length;
+	rtpbuf.seq[newseq] = seq;
+	
+	return 0;
+
+feed:
+	memcpy (buffer, data, length);
+	return length;
+}
+
+// Get next packet in cache
+// Look in cache to get first packet in sequence
+static int rtp_get_next(int fd, char *buffer, int length)
+{
+	int i;
+	unsigned short nextseq;
+
+	// If we have empty buffer we loop to fill it
+	for (i=0; i < MAXRTPPACKETSIN -3; i++) {
+		if (rtpbuf.len[rtpbuf.first] != 0) break;
+		
+		length = rtp_cache(fd, buffer, length) ;
+		
+		// returns on first packet in sequence 
+		if (length > 0) {
+			//mp_msg(MSGT_NETWORK, MSGL_DBG4, "Getting rtp [%d] %hu\n", i, rtpbuf.first);
+			return length;
+		} else if (length < 0) break;
+		
+		// Only if length == 0 loop continues!
+	}
+	
+	i = rtpbuf.first;
+	while (rtpbuf.len[i] == 0) {
+		mp_msg(MSGT_NETWORK, MSGL_ERR,  "Lost packet %hu\n", rtpbuf.seq[i]);
+		i = ( 1 + i ) % MAXRTPPACKETSIN;
+		if (rtpbuf.first == i) break;
+	}
+	rtpbuf.first = i;
+	
+	// Copy next non empty packet from cache
+	mp_msg(MSGT_NETWORK, MSGL_DBG4, "Getting rtp from cache [%d] %hu\n", rtpbuf.first, rtpbuf.seq[rtpbuf.first]);
+	memcpy (buffer, rtpbuf.data[rtpbuf.first], rtpbuf.len[rtpbuf.first]);
+	length = rtpbuf.len[rtpbuf.first]; // can be zero?
+	
+	// Reset fisrt slot and go next in cache
+	rtpbuf.len[rtpbuf.first] = 0;
+	nextseq = rtpbuf.seq[rtpbuf.first];
+	rtpbuf.first = ( 1 + rtpbuf.first ) % MAXRTPPACKETSIN;
+	rtpbuf.seq[rtpbuf.first] = nextseq + 1;
+	
+	return length;
+}
+
+
+// Read next rtp packet using cache 
+int read_rtp_from_server(int fd, char *buffer, int length) {
+	// Following test is ASSERT (i.e. uneuseful if code is correct)
+	if(buffer==NULL || length<STREAM_BUFFER_SIZE) {
+		mp_msg(MSGT_NETWORK, MSGL_ERR, "RTP buffer invalid; no data return from network\n");
+		return 0;
+	}
+	
+	// loop just to skip empty packets
+	while ((length = rtp_get_next(fd, buffer, length)) == 0) {
+		mp_msg(MSGT_NETWORK, MSGL_ERR, "Got empty packet from RTP cache!?\n");
+	}
+	
+	return(length);
+}
 
 // Start listening on a UDP port. If multicast, join the group.
 static int rtp_open_socket( URL_t *url ) {
