@@ -84,6 +84,8 @@ static int rtp_cache(int fd, char *buffer, int length)
 	static int is_first = 1;
 	
 	getrtp2(fd, &rh, &data, &length);
+	if(!length)
+		return 0;
 	seq = rh.b.sequence;
 	
 	newseq = seq - rtpbuf.seq[rtpbuf.first];
@@ -350,15 +352,13 @@ static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
   int headerSize;
   int lengthPacket;
   lengthPacket=recv(fd,buf,1590,0);
-  if (lengthPacket==0)
-    exit(1);
-  if (lengthPacket<0) {
+  if (lengthPacket<0)
     mp_msg(MSGT_NETWORK,MSGL_ERR,"rtp: socket read error\n");
-    exit(2);
-  }
-  if (lengthPacket<12) {
+  else if (lengthPacket<12)
     mp_msg(MSGT_NETWORK,MSGL_ERR,"rtp: packet too small (%d) to be an rtp frame (>12bytes)\n", lengthPacket);
-    exit(3);
+  if(lengthPacket<12) {
+    *lengthData = 0;
+    return 0;
   }
   rh->b.v  = (unsigned int) ((buf[0]>>6)&0x03);
   rh->b.p  = (unsigned int) ((buf[0]>>5)&0x01);
