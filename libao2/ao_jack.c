@@ -132,7 +132,6 @@ static int write_buffer(unsigned char* data, int len) {
  * read is res * num_bufs * sizeof(float), where res is the return value.
  */
 static int read_buffer(float **bufs, int cnt, int num_bufs) {
-  int first_len = BUFFSIZE - read_pos;
   int buffered = buf_used();
   int i, j;
   if (cnt * sizeof(float) * num_bufs > buffered)
