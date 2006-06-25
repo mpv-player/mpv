@@ -433,6 +433,8 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
   stream_read(demuxer->stream, guid_buffer, 16);
   if (memcmp(guid_buffer, asf_data_chunk_guid, 16) != 0) {
     mp_msg(MSGT_HEADER, MSGL_FATAL, MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader);
+    free(streams);
+    streams = NULL;
     return 0;
   }
   // read length of chunk
