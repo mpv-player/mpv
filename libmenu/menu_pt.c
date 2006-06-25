@@ -100,7 +100,7 @@ static void read_key(menu_t* menu,int c){
   menu_list_read_key(menu,c,1);
 }
 
-static void close(menu_t* menu) {
+static void close_menu(menu_t* menu) {
   menu_list_uninit(menu,NULL);
 }
 
@@ -112,7 +112,7 @@ static int op(menu_t* menu, char* args) {
   menu->draw = menu_list_draw;
   menu->read_cmd = read_cmd;
   menu->read_key = read_key;
-  menu->close = close;
+  menu->close = close_menu;
 
   menu_list_init(menu);
 

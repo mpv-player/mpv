@@ -95,7 +95,7 @@ static void free_entry(list_entry_t* entry) {
   free(entry);
 }
 
-static void close(menu_t* menu) {
+static void close_menu(menu_t* menu) {
   menu_list_uninit(menu,free_entry);
 }
 
@@ -144,7 +144,7 @@ static int open(menu_t* menu, char* args) {
   menu->draw = menu_list_draw;
   menu->read_cmd = read_cmd;
   menu->read_key = read_key;
-  menu->close = close;
+  menu->close = close_menu;
 
   if(!args) {
     mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_ListMenuNeedsAnArgument);
