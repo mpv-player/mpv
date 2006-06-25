@@ -1473,7 +1473,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] No pude setear los valores de luma que obtuve desde el módulo del kernel!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Ancho/Alto de la pantalla desconocidos!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Formáto de salida inválido %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Formato de salida inválido %0X.\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] La versión de tu driver mga_vid no es compatible con esta versión de MPlayer!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Utilizando %d buffers.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] No pude abrir: %s\n"

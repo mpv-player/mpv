@@ -1570,7 +1570,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Kernel modülünden luma değerleri ayarlanamadı!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Ekran genişliği/yüksekliği bilinmiyor!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Geçersiz çıktı biçimi %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Geçersiz çıktı biçimi %0X.\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] mga_video sürücünüzün sürümü bu MPlayer sürümüyle bağdaşmıyor!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d tampon kullanılıyor.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Açılamadı: %s\n"

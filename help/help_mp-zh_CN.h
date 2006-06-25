@@ -1563,7 +1563,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] 无法在内核模块中设置 luma 值!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] 屏幕宽度/高度未知!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] 非法的输出格式 %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] 非法输出格式 %0X.\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] 你的 mga_vid 驱动的版本与 MPlayer 的版本不兼容!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] 使用 %d 缓冲.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] 无法打开: %s\n"

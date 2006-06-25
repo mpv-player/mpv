@@ -1576,7 +1576,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Nem állíthatóak be a luma értékek a kernel modulból!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Képernyõ szélesség/magasság ismeretlen!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X.\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Az mga_vid vezérlõd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d buffer használata.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nem nyitható meg: %s\n"

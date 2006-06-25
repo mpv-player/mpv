@@ -1553,7 +1553,6 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Nemohu získat hodnoty luma z jaderného modulu!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Nemohu nastavit hodnoty luma v jaderném modulu!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Pomìr stran obrazovky není znám!\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] ©patný výstupní formát %0X.\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Verze va¹eho mga_vid ovladaèe není kompatibilní s touto verzí MPlayeru!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Pou¾ívám %d buferù.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nemohu otevøít: %s\n"
