@@ -130,10 +130,13 @@ static int write_buffer(unsigned char* data, int len) {
  *
  * Assumes the data in the buffer is of type float, the number of bytes
  * read is res * num_bufs * sizeof(float), where res is the return value.
+ * If there is not enough data in the buffer remaining parts will be filled
+ * with silence.
  */
 static int read_buffer(float **bufs, int cnt, int num_bufs) {
   int buffered = buf_used();
   int i, j;
+  int orig_cnt = cnt;
   if (cnt * sizeof(float) * num_bufs > buffered)
     cnt = buffered / sizeof(float) / num_bufs;
   for (i = 0; i < cnt; i++) {
@@ -142,6 +145,9 @@ static int read_buffer(float **bufs, int cnt, int num_bufs) {
       read_pos = (read_pos + sizeof(float)) % BUFFSIZE;
     }
   }
+  for (i = cnt; i < orig_cnt; i++)
+    for (j = 0; j < num_bufs; j++)
+      bufs[j][i] = 0;
   return cnt;
 }
 
@@ -177,11 +183,11 @@ static int outputaudio(jack_nframes_t nframes, void *arg) {
   int i;
   for (i = 0; i < num_ports; i++)
     bufs[i] = jack_port_get_buffer(ports[i], nframes);
-  if (!paused && !underrun)
-    if (read_buffer(bufs, nframes, num_ports) < nframes)
-      underrun = 1;
   if (paused || underrun)
     silence(bufs, nframes, num_ports);
+  else
+    if (read_buffer(bufs, nframes, num_ports) < nframes)
+      underrun = 1;
   if (estimate) {
     float now = (float)GetTimer() / 1000000.0;
     float diff = callback_time + callback_interval - now;
@@ -349,6 +355,7 @@ static int get_space() {
  * \brief write data into buffer and reset underrun flag
  */
 static int play(void *data, int len, int flags) {
+  if (!(flags & AOPLAY_FINAL_CHUNK))
   len -= len % ao_data.outburst;
   underrun = 0;
   return write_buffer(data, len);
