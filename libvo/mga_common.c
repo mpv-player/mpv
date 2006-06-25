@@ -371,6 +371,12 @@ static int mga_init(int width,int height,unsigned int format){
             return (-1);
         }
 
+	if(width>1023 || height >1024)
+	{
+		mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
+		return (-1);
+	}
+
 	mga_vid_config.src_width = width;
 	mga_vid_config.src_height= height;
 	if(!mga_vid_config.dest_width)

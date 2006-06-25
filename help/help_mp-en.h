@@ -1579,6 +1579,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "Your mga_vid driver version is incompatible with this MPlayer version!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "Using %d buffers.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "Couldn't open: %s\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "Source resolution is in at least one dimension larger than 1023x1023. Please rescale in software or use -lavdopts lowres=1\n"
 
 // libvo/vesa_lvo.c
 
