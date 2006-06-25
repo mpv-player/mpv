@@ -4223,7 +4223,7 @@ if(step_sec>0) {
       }
       break;
     case MP_CMD_SWITCH_RATIO : {
-      if (cmd->nargs == 0)
+      if (cmd->nargs == 0 || cmd->args[0].v.f == -1)
 	movie_aspect = (float) sh_video->disp_w / sh_video->disp_h;
       else
 	movie_aspect = cmd->args[0].v.f;
