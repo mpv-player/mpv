@@ -1565,15 +1565,15 @@ static char help_text[]=
 
 // mga_common.c
 
-#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "mga_video_ayarı'nda ioctl hatası (yanlış mga_vid.o sürümü?)"
-#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "Kernel modülünden luma değerlerine ulaşılamadı!\n"
-#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "Kernel modülünden luma değerleri ayarlanamadı!\n"
-#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Ekran genişliği/yüksekliği bilinmiyor!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: geçersiz çıktı biçimi %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Geçersiz çıktı biçimi %0X.\n"
-#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "mga_video sürücünüzün sürümü bu MPlayer sürümüyle bağdaşmıyor!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "%d tampon kullanılıyor.\n"
-#define MSGTR_LIBVO_MGA_CouldntOpen "Açılamadı: %s\n"
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] mga_video_ayarı'nda ioctl hatası (yanlış mga_vid.o sürümü?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Kernel modülünden luma değerlerine ulaşılamadı!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Kernel modülünden luma değerleri ayarlanamadı!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Ekran genişliği/yüksekliği bilinmiyor!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Geçersiz çıktı biçimi %0X\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Geçersiz çıktı biçimi %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] mga_video sürücünüzün sürümü bu MPlayer sürümüyle bağdaşmıyor!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d tampon kullanılıyor.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Açılamadı: %s\n"
 
 // libvo/vesa_lvo.c
 

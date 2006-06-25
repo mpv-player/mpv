@@ -1571,15 +1571,15 @@ static char help_text[]=
 
 // mga_common.c
 
-#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "hiba az mga_vid_config ioctl-ben (hibás verziójú mga_vid.o?)"
-#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "Nem kérdezhetõek le a luma értékek a kernel modulból!\n"
-#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "Nem állíthatóak be a luma értékek a kernel modulból!\n"
-#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Képernyõ szélesség/magasság ismeretlen!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: hibás kimeneti formátum %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Hibás kimeneti formátum %0X.\n"
-#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "Az mga_vid vezérlõd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "%d buffer használata.\n"
-#define MSGTR_LIBVO_MGA_CouldntOpen "Nem nyitható meg: %s\n"
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] hiba az mga_vid_config ioctl-ben (hibás verziójú mga_vid.o?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Nem kérdezhetõek le a luma értékek a kernel modulból!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Nem állíthatóak be a luma értékek a kernel modulból!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Képernyõ szélesség/magasság ismeretlen!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Hibás kimeneti formátum %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Az mga_vid vezérlõd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d buffer használata.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nem nyitható meg: %s\n"
 
 // libvo/vesa_lvo.c
 

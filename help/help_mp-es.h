@@ -1468,15 +1468,15 @@ static char help_text[]=
 
 // mga_common.c
 
-#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "Error en mga_vid_config ioctl (versión de mga_vid.o erronea?)"
-#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "No pude obtener los valores de luma desde el módulo del kernel!\n"
-#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "No pude setear los valores de luma que obtuve desde el módulo del kernel!\n"
-#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Ancho/Alto de la pantalla desconocidos!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: formáto de salida inválido %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Formato de salida inválido %0X.\n"
-#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "La versión de tu driver mga_vid no es compatible con esta versión de MPlayer!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "Utilizando %d buffers.\n"
-#define MSGTR_LIBVO_MGA_CouldntOpen "No pude abrir: %s\n"
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] Error en mga_vid_config ioctl (versión de mga_vid.o erronea?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] No pude obtener los valores de luma desde el módulo del kernel!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] No pude setear los valores de luma que obtuve desde el módulo del kernel!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Ancho/Alto de la pantalla desconocidos!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Formáto de salida inválido %0X\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Formato de salida inválido %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] La versión de tu driver mga_vid no es compatible con esta versión de MPlayer!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Utilizando %d buffers.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] No pude abrir: %s\n"
 
 // libvo/vesa_lvo.c
 

@@ -1570,16 +1570,16 @@ static char help_text[]=
 
 // mga_common.c
 
-#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "error in mga_vid_config ioctl (wrong mga_vid.o version?)"
-#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "Could not get luma values from the kernel module!\n"
-#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "Could not set luma values from the kernel module!\n"
-#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "Screen width/height unknown!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: invalid output format %0X\n"
-#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "Invalid output format %0X.\n"
-#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "Your mga_vid driver version is incompatible with this MPlayer version!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "Using %d buffers.\n"
-#define MSGTR_LIBVO_MGA_CouldntOpen "Couldn't open: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "Source resolution is in at least one dimension larger than 1023x1023. Please rescale in software or use -lavdopts lowres=1\n"
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] error in mga_vid_config ioctl (wrong mga_vid.o version?)"
+#define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Could not get luma values from the kernel module!\n"
+#define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Could not set luma values from the kernel module!\n"
+#define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Screen width/height unknown!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] invalid output format %0X\n"
+#define MSGTR_LIBVO_MGA_MgaInvalidOutputFormat "[MGA] Invalid output format %0X.\n"
+#define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Your mga_vid driver version is incompatible with this MPlayer version!\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Using %d buffers.\n"
+#define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Couldn't open: %s\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Source resolution is in at least one dimension larger than 1023x1023. Please rescale in software or use -lavdopts lowres=1\n"
 
 // libvo/vesa_lvo.c
 
