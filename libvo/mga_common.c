@@ -371,7 +371,7 @@ static int mga_init(int width,int height,unsigned int format){
             return (-1);
         }
 
-	if(width>1023 || height >1024)
+	if(width>1023 || height >1023)
 	{
 		mp_msg(MSGT_VO,MSGL_ERR, MGSTR_LIBVO_MGA_ResolutionTooHigh);
 		return (-1);
