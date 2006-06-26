@@ -45,7 +45,7 @@ As root you can then install the <filename>.deb</filename> package as usual:
 Christian Marillat has been making unofficial Debian packages of
 <application>MPlayer</application>, <application>MEncoder</application> and
 our bitmap fonts for a while, you can (apt-)get them from
-<ulink url="http://hpisi.nerim.net/">his homepage</ulink>.
+<ulink url="http://www.debian-multimedia.org/">his homepage</ulink>.
 </para>
 </sect2>
 
