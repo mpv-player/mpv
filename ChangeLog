@@ -13,6 +13,7 @@ MPlayer (1.0)
     * it's possible to switch to any of the available audio tracks in MPEG TS/PS, MKV and streams
       supported by libavformat
     * lavf demuxer now honors -alang
+    * new native RTSP demuxer (handles MPEG-TS over RTP) from generic RTSP servers.
 
 
   pre8: "NeuTeam strikes back" June 11, 2006
