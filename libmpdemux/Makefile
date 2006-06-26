@@ -141,6 +141,10 @@ SRCS += realrtsp/asmrp.c \
 SRCS += librtsp/rtsp.c \
         librtsp/rtsp_session.c \
 
+SRCS += freesdp/common.c \
+        freesdp/errorlist.c \
+        freesdp/parser.c \
+
 ifeq ($(STREAMING_LIVE555),yes)
 CPLUSPLUSSRCS = demux_rtp.cpp demux_rtp_codec.cpp
 CPLUSPLUSINCLUDE = $(LIVE_INCLUDES)
@@ -188,7 +192,8 @@ test:	$(LIBNAME) test.c
 clean:
 	rm -f *.o *.a *~ \
 	realrtsp/*.o realrtsp/*.a realrtsp/*~ \
-	librtsp/*.o librtsp/*.a librtsp/*~
+	librtsp/*.o librtsp/*.a librtsp/*~ \
+	freesdp/*.o freesdp/*.a freesdp/*~
 
 distclean: clean
 	rm -f .depend test
