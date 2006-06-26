@@ -109,3 +109,9 @@ Version:    development files as of september 2004
 Homepage:   http://ubiqx.org/libcifs/
 Directory:  libvo/md5sum.[ch]
 License:    GNU Lesser General Public License
+
+Name:       FreeSDP
+Version:    0.4.1
+Homepage:   https://savannah.nongnu.org/projects/freesdp/
+Directory:  libmpdemux/freesdp/
+License:    GNU General Public License
