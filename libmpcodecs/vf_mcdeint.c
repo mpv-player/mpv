@@ -282,8 +282,10 @@ static void uninit(struct vf_instance_s* vf){
         vf->priv->src[i]= NULL;
     }
 #endif
+    if (vf->priv->avctx_enc) {
     avcodec_close(vf->priv->avctx_enc);
     av_freep(&vf->priv->avctx_enc);
+    }
 
     free(vf->priv->outbuf);
     free(vf->priv);
