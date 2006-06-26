@@ -53,6 +53,13 @@
 #define LOG
 */
 
+#define RTSP_OPTIONS_SERVER "Server"
+#define RTSP_OPTIONS_LOCATION "Location"
+#define RTSP_OPTIONS_REAL "RealChallenge1"
+#define RTSP_SERVER_TYPE_REAL "Real"
+#define RTSP_SERVER_TYPE_HELIX "Helix"
+#define RTSP_SERVER_TYPE_UNKNOWN "unknown"
+
 struct rtsp_session_s {
   rtsp_t       *s;
   struct real_rtsp_session_t* real_session;
@@ -83,25 +90,25 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
   }
 
   /* looking for server type */
-  if (rtsp_search_answers(rtsp_session->s,"Server"))
-    server=strdup(rtsp_search_answers(rtsp_session->s,"Server"));
+  if (rtsp_search_answers(rtsp_session->s,RTSP_OPTIONS_SERVER))
+    server=strdup(rtsp_search_answers(rtsp_session->s,RTSP_OPTIONS_SERVER));
   else {
-    if (rtsp_search_answers(rtsp_session->s,"RealChallenge1"))
-      server=strdup("Real");
+    if (rtsp_search_answers(rtsp_session->s,RTSP_OPTIONS_REAL))
+      server=strdup(RTSP_SERVER_TYPE_REAL);
     else
-      server=strdup("unknown");
+      server=strdup(RTSP_SERVER_TYPE_UNKNOWN);
   }
-  if (strstr(server,"Real") || strstr(server,"Helix"))
+  if (strstr(server,RTSP_SERVER_TYPE_REAL) || strstr(server,RTSP_SERVER_TYPE_HELIX))
   {
     /* we are talking to a real server ... */
 
     h=real_setup_and_get_header(rtsp_session->s, bandwidth);
     if (!h) {
       /* got an redirect? */
-      if (rtsp_search_answers(rtsp_session->s, "Location"))
+      if (rtsp_search_answers(rtsp_session->s, RTSP_OPTIONS_LOCATION))
       {
         free(mrl_line);
-	mrl_line=strdup(rtsp_search_answers(rtsp_session->s, "Location"));
+	mrl_line=strdup(rtsp_search_answers(rtsp_session->s, RTSP_OPTIONS_LOCATION));
         mp_msg (MSGT_OPEN, MSGL_INFO,"rtsp_session: redirected to %s\n", mrl_line);
 	rtsp_close(rtsp_session->s);
 	free(server);
