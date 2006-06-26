@@ -189,7 +189,7 @@ static int rtp_get_next(int fd, char *buffer, int length)
 
 
 // Read next rtp packet using cache 
-static int read_rtp_from_server(int fd, char *buffer, int length) {
+int read_rtp_from_server(int fd, char *buffer, int length) {
 	// Following test is ASSERT (i.e. uneuseful if code is correct)
 	if(buffer==NULL || length<STREAM_BUFFER_SIZE) {
 		mp_msg(MSGT_NETWORK, MSGL_ERR, "RTP buffer invalid; no data return from network\n");

@@ -23,6 +23,9 @@
  *
  *
  * high level interface to rtsp servers.
+ *
+ *    2006, Benjamin Zores and Vincent Mussard
+ *      Support for MPEG-TS streaming through RFC compliant RTSP servers
  */
 
 #include <sys/types.h>
@@ -42,7 +45,9 @@
 #include <inttypes.h>
 
 #include "mp_msg.h"
+#include "../rtp.h"
 #include "rtsp.h"
+#include "rtsp_rtp.h"
 #include "rtsp_session.h"
 #include "../realrtsp/real.h"
 #include "../realrtsp/rmff.h"
@@ -53,6 +58,7 @@
 #define LOG
 */
 
+#define RTSP_OPTIONS_PUBLIC "Public"
 #define RTSP_OPTIONS_SERVER "Server"
 #define RTSP_OPTIONS_LOCATION "Location"
 #define RTSP_OPTIONS_REAL "RealChallenge1"
@@ -63,6 +69,7 @@
 struct rtsp_session_s {
   rtsp_t       *s;
   struct real_rtsp_session_t* real_session;
+  struct rtp_rtsp_session_t* rtp_session;
 };
 
 //rtsp_session_t *rtsp_session_start(char *mrl) {
@@ -76,6 +83,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
   rtsp_session = malloc (sizeof (rtsp_session_t));
   rtsp_session->s = NULL;
   rtsp_session->real_session = NULL;
+  rtsp_session->rtp_session = NULL;
  
 //connect:
   *redir = 0;
@@ -141,13 +149,52 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
     rtsp_session->real_session->recv_size =
       rtsp_session->real_session->header_len;
     rtsp_session->real_session->recv_read = 0;
-  } else
+  } else /* not a Real server : try RTP instead */
   {
-    mp_msg (MSGT_OPEN, MSGL_ERR,"rtsp_session: Not a Real server. Server type is '%s'.\n",server);
-    rtsp_close(rtsp_session->s);
-    free(server);
-    free(rtsp_session);
-    return NULL;
+    char *public = NULL;
+
+    /* look for the Public: field in response to RTSP OPTIONS */
+    public = strdup (rtsp_search_answers (rtsp_session->s,
+                                          RTSP_OPTIONS_PUBLIC));
+    if (!public)
+    {
+      rtsp_close (rtsp_session->s);
+      free (server);
+      free (mrl_line);
+      free (rtsp_session);
+      return NULL;
+    }
+
+    /* check for minimalistic RTSP RFC compliance */
+    if (!strstr (public, RTSP_METHOD_DESCRIBE)
+        || !strstr (public, RTSP_METHOD_SETUP)
+        || !strstr (public, RTSP_METHOD_PLAY)
+        || !strstr (public, RTSP_METHOD_TEARDOWN))
+    {
+      free (public);
+      mp_msg (MSGT_OPEN, MSGL_ERR,
+              "Remote server does not meet minimal RTSP 1.0 compliance.\n");
+      rtsp_close (rtsp_session->s);
+      free (server);
+      free (mrl_line);
+      free (rtsp_session);
+      return NULL;
+    }
+
+    free (public);
+    rtsp_session->rtp_session = rtp_setup_and_play (rtsp_session->s);
+
+    /* neither a Real or an RTP server */
+    if (!rtsp_session->rtp_session)
+    {
+      mp_msg (MSGT_OPEN, MSGL_ERR, "rtsp_session: unsupported RTSP server. ");
+      mp_msg (MSGT_OPEN, MSGL_ERR, "Server type is '%s'.\n", server);
+      rtsp_close (rtsp_session->s);
+      free (server);
+      free (mrl_line);
+      free (rtsp_session);
+      return NULL;
+    }
   }
   free(server);
   
@@ -194,6 +241,19 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
 
   return len;
   }
+  else if (this->rtp_session)
+  {
+    int l = 0;
+
+    l = read_rtp_from_server (this->rtp_session->rtp_socket, data, len);
+    /* send RTSP and RTCP keepalive  */
+    rtcp_send_rr (this->s, this->rtp_session);
+
+    if (l == 0)
+      rtsp_session_end (this);
+    
+    return l;
+  }
 
   return 0;
 }
@@ -203,5 +263,7 @@ void rtsp_session_end(rtsp_session_t *session) {
   rtsp_close(session->s);
   if (session->real_session)
     free_real_rtsp_session (session->real_session);
+  if (session->rtp_session)
+    rtp_session_free (session->rtp_session);
   free(session);
 }

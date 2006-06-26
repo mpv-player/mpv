@@ -23,6 +23,9 @@
  *
  *
  * high level interface to rtsp servers.
+ *
+ *    2006, Benjamin Zores and Vincent Mussard
+ *      Support for MPEG-TS streaming through RFC compliant RTSP servers
  */
 
 #ifndef HAVE_RTSP_SESSION_H

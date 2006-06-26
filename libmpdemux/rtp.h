@@ -33,5 +33,6 @@ struct rtpheader {	/* in network byte order */
 
 
 static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData);
+int read_rtp_from_server(int fd, char *buffer, int length);
 
 #endif

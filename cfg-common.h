@@ -70,12 +70,11 @@
         {"sdp", "-sdp is obsolete, use sdp://file instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -rtsp-stream-over-tcp option, specifying TCP streaming of RTP/RTCP
         {"rtsp-stream-over-tcp", &rtspStreamOverTCP, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-        {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},
 #else
 	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-        {"rtsp-port", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
-	
+        {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},	
+
 // ------------------------- demuxer options --------------------
 
 	// number of frames to play/convert
@@ -415,8 +414,8 @@ extern int flip_hebrew;
 
 #ifdef STREAMING_LIVE555
 extern int rtspStreamOverTCP;
-extern int rtsp_port;
 #endif
+extern int rtsp_port;
 
 
 extern int audio_stream_cache;

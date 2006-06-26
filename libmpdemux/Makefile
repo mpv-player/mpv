@@ -139,6 +139,7 @@ SRCS += realrtsp/asmrp.c \
         realrtsp/xbuffer.c \
 
 SRCS += librtsp/rtsp.c \
+        librtsp/rtsp_rtp.c \
         librtsp/rtsp_session.c \
 
 SRCS += freesdp/common.c \
