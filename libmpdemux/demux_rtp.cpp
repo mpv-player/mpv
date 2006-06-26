@@ -90,7 +90,7 @@ static char* openURL_sip(SIPClient* client, char const* url) {
 }
 
 int rtspStreamOverTCP = 0; 
-int rtsp_port = 0; 
+extern int rtsp_port;
 
 extern "C" int audio_id, video_id, dvdsub_id;
 extern "C" demuxer_t* demux_open_rtp(demuxer_t* demuxer) {
