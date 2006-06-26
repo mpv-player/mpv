@@ -201,3 +201,65 @@ We think our rules are not too hard. If you have comments, contact us.
 
 III. Beginners Guide
 ====================
+
+The typical flow of development would be:
+
+1. Check out the source:
+
+    svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ devel
+
+2. Make your changes.
+
+3. Create a patch:
+
+  Run svn diff from the root of the source tree, like this:
+
+    cd devel
+    svn diff > ../my_changes.patch
+
+  If you have made several changes, but only want to submit one for review
+  by other developers, you can specify the filename(s), for example:
+
+    svn diff mplayer.c > ../major_cleanup.patch
+
+4. Check the patch:
+
+  Check out another, clean source tree and verify your patch:
+
+    svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ clean
+    cd clean
+    patch -p0 --dry-run < ../my_changes.patch
+
+  If there are no errors, you can apply your patch:
+
+    patch -p0 < ../my_changes.patch
+
+  After that, verify that MPlayer still builds correctly with your patch
+  applied. Also, be sure that your patch meets our policy as described in
+  section II, specifically rules 1 to 6, before you continue submitting
+  the patch.
+
+5. Submit the patch:
+
+  Send an e-mail to the mplayer-dev-eng mailing list. Describe what your
+  patch does and why, and attach the patch file for review by others.
+
+6. During the review process, incorporate all suggested fixes. Go to step 2
+  repeatedly until there is nothing more to do for step 6. Of course, if
+  you don't agree with certain suggestions, things can be discussed on
+  the mailing list in a polite manner.
+
+7. Commit the patch:
+
+  If your patch is accepted, double check if your source tree contains the
+  most recent version of your patch with svn diff! After verifying that you
+  met these conditions, commit with:
+
+    svn commit filename(s)
+
+  Go to step 2 ad infinitum until MPlayer is the perfect media player ;)
+
+Note: If you are listed as the maintainer for a particular piece of code,
+you can skip step 5 and 6 if your patch _only_ applies to the code you
+maintain. If it touches other code or is otherwise very intrusive, please
+post it to mplayer-dev-eng first.
