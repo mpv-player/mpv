@@ -94,6 +94,7 @@ Imported libs/projects:
     * libfaad2: Alex Beregszaszi
     * realrtsp: Roberto Togni
     * librtsp: Benjamin Zores
+    * freesdp: Benjamin Zores
 
 demuxers:
     * demux_fli.c - Roberto Togni
