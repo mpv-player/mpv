@@ -381,8 +381,17 @@ is_multicast_address (char *addr)
     return -1;
   
   sin.sin_family = AF_INET;
-  inet_pton (AF_INET, addr, &sin.sin_addr);
 
+#ifndef HAVE_WINSOCK2
+#ifdef USE_ATON
+    inet_aton (addr, &sin.sin_addr);
+#else
+    inet_pton (AF_INET, addr, &sin.sin_addr);
+#endif
+#else
+    sin.sin_addr.s_addr = htonl (INADDR_ANY);
+#endif
+  
   if ((ntohl (sin.sin_addr.s_addr) >> 28) == 0xe)
     return 1;
 
