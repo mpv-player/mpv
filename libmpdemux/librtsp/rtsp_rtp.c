@@ -25,6 +25,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 
+#include "config.h"
+
 #ifndef HAVE_WINSOCK2
 #include <netdb.h>
 #include <netinet/in.h>
@@ -35,7 +37,6 @@
 #include <ws2tcpip.h>
 #endif
 
-#include "config.h"
 #include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_rtp.h"
