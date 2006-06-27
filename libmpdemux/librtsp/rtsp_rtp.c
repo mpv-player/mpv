@@ -18,8 +18,6 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <pthread.h>
-#include <netdb.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
@@ -28,15 +26,16 @@
 #include <sys/types.h>
 
 #ifndef HAVE_WINSOCK2
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#define closesocket close
 #else
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #endif
 
+#include "config.h"
 #include "mp_msg.h"
 #include "rtsp.h"
 #include "rtsp_rtp.h"

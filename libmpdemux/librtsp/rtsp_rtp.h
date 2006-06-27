@@ -21,8 +21,6 @@
 #ifndef _HAVE_RTSP_RTP_H_
 #define _HAVE_RTSP_RTP_H_
 
-#include <pthread.h>
-
 #include "rtsp.h"
 
 #define MAX_PREVIEW_SIZE 4096
