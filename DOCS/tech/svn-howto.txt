@@ -30,6 +30,7 @@ guidelines. Read it at least once, if you are granted commit privileges to the
 MPlayer project you are expected to be familiar with these rules.
 
 
+
 I. BASICS:
 ==========
 
@@ -39,11 +40,13 @@ I. BASICS:
 
   This will put the MPlayer sources into the directory <target>.
 
+
 2. Updating the source tree to the latest revision:
 
     svn update
 
   pulls in the latest changes from the repository to your working directory.
+
 
 3. Adding/removing files/directories:
 
@@ -53,11 +56,13 @@ I. BASICS:
   Subversion needs to get notified of all changes you make to your working
   directory.
 
+
 4. Showing modifications:
 
     svn diff <filename(s)>
 
   will show all local modifications in your working directory as unified diff.
+
 
 5. Inspecting the changelog:
 
@@ -67,12 +72,14 @@ I. BASICS:
   more comfortable than using 'svn log' and 'svn diff'. Find it here:
   http://svn.mplayerhq.hu/mplayer/trunk/
 
+
 6. Checking source tree status:
 
   svn status
 
   detects all the changes you made and lists what actions will be taken in case
   of a commit (additions, modifications, deletions, etc.).
+
 
 7. Committing:
 
@@ -113,6 +120,7 @@ I. BASICS:
   levels look at and educate themselves while reading through your code. Don't
   include filenames in log messages, Subversion provides that information.
 
+
 8. Renaming/moving files or contents of files:
 
   svn move <source> <destination>
@@ -128,6 +136,7 @@ I. BASICS:
   Such actions are useless and treated as cosmetics in 99% of cases,
   so try to avoid them.
 
+
 9. Reverting broken commits
 
   There is no Subversion equivalent of the 'cvs admin -o' command. Instead,
@@ -135,6 +144,7 @@ I. BASICS:
   revert the changes locally and re-commit with a proper commit message.
   You may want to use 'svn cat -r<revision> <filename>' to inspect an older
   revision.
+
 
 10. Reverting local changes
 
@@ -146,12 +156,14 @@ I. BASICS:
   server! It only reverts changes that were not committed yet. If you need
   to revert a broken commit, see 9.
 
+
 11. Changing commit messages
 
   svn propedit svn:log --revprop -r <revision>
 
   If your commit message is too short or not explanatory enough, you can edit
   it afterwards with svn' propedit'.
+
 
 Contact the project admins <root at mplayerhq dot hu> if you have technical
 problems with the Subversion server.
@@ -167,17 +179,21 @@ II. POLICY / RULES:
    (#ifdef etc) by default so it does not interfere with other developers'
    work.
 
+
 2. You don't have to over-test things. If it works for you, and you think it
    should work for others, too, then commit. If your code has problems
    (portability, exploits compiler bugs, unusual environment etc) they will be
    reported and eventually fixed.
 
+
 3. Do not commit unrelated changes together, split them into self-contained
    pieces.
+
 
 4. Do not change behavior of the program (renaming options etc) or
    remove functionality from the code without approval in a discussion on
    the mplayer-dev-eng mailing list.
+
 
 5. Do not commit changes to the build system (Makefiles, configure script)
    which change behaviour, defaults etc, without asking first. The same
@@ -186,6 +202,7 @@ II. POLICY / RULES:
    the way we do. Send your changes as patches to the mplayer-dev-eng mailing
    list, and if the code maintainers say OK, you may commit. This does not
    apply to files you wrote and/or maintain.
+
 
 6. We refuse source indentation and other cosmetic changes if they are mixed
    with functional changes, such commits will be rejected and removed. Every
@@ -198,9 +215,11 @@ II. POLICY / RULES:
    NOTE: If you had to put if(){ .. } over a large (> 5 lines) chunk of code,
    do NOT change the indentation of the inner part (don't move it to the right)!
 
+
 7. Always fill out the commit log message. Describe in a few lines what you
    changed and why. You can refer to mailing list postings if you fix a
    particular bug. Comments such as "fixed!" or "Changed it." are unacceptable.
+
 
 8. If you apply a patch by someone else, include the name and email address in
    the log message. Since the mplayer-cvslog mailing list is publicly
@@ -209,17 +228,21 @@ II. POLICY / RULES:
    you applied the patch. If the patch contains a documentation change, commit
    that as well; do not leave it to the documentation maintainers.
 
+
 9. Do NOT commit to code actively maintained by others without permission. Send
    a patch to mplayer-dev-eng instead.
+
 
 10. Subscribe to the mplayer-cvslog mailing list. The diffs of all commits
     are sent there and reviewed by all the other developers. Bugs and possible
     improvements or general questions regarding commits are discussed there. We
     expect you to react if problems with your code are uncovered.
 
+
 11. Update the documentation if you change behavior or add features. If you are
     unsure how best to do this, send a patch to mplayer-docs, the documentation
     maintainers will review and commit your stuff.
+
 
 Also read DOCS/tech/patches.txt !!!!
 
@@ -236,7 +259,9 @@ The typical flow of development would be:
 
     svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ devel
 
+
 2. Make your changes.
+
 
 3. Create a patch:
 
@@ -249,6 +274,7 @@ The typical flow of development would be:
   by other developers, you can specify the filename(s), for example:
 
     svn diff mplayer.c > ../major_cleanup.patch
+
 
 4. Check the patch:
 
@@ -267,15 +293,18 @@ The typical flow of development would be:
   section II, specifically rules 1 to 6, before you continue submitting
   the patch.
 
+
 5. Submit the patch:
 
   Send an e-mail to the mplayer-dev-eng mailing list. Describe what your
   patch does and why, and attach the patch file for review by others.
 
+
 6. During the review process, incorporate all suggested fixes. Go to step 2
   repeatedly until there is nothing more to do for step 6. Of course, if
   you don't agree with certain suggestions, things can be discussed on
   the mailing list in a polite manner.
+
 
 7. Commit the patch:
 
@@ -286,6 +315,7 @@ The typical flow of development would be:
     svn commit <filename(s)>
 
   Go to step 2 ad infinitum until MPlayer is the perfect media player ;)
+
 
 Note: If you are listed as the maintainer for a particular piece of code,
 you can skip step 5 and 6 if your patch _only_ applies to the code you
