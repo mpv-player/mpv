@@ -685,37 +685,43 @@ $ ./configure --charset=noconv
 
 <sect1 id="macos">
 <title>Mac OS</title>
+
 <para>
 <application>MPlayer</application> does not work on Mac OS versions before
 10, but should compile out-of-the-box on Mac OS X 10.2 and up.
 The preferred compiler is the Apple version of
 GCC 3.x or later.
-You can get the basic compilation environement by installing Apple's
+You can get the basic compilation environment by installing Apple's
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>.
 If you have Mac OS X 10.3.9 or later and QuickTime 7
-you can use the macosx video output driver.
+you can use the <option>macosx</option> video output driver.
 </para>
+
 <para>
-Unfortunately, this basic environment won't allow you to take advantage
+Unfortunately, this basic environment will not allow you to take advantage
 of all the nice features of <application>MPlayer</application>.
-For instance, in order to have OSD support compiled in, you will need
-to have fontconfig and freetype libraries installed in your machine.
-Contrary to other Unixes such as most Linux and BSDs, OSX doesn't have just
-one packaging system that comes with the system.
+For instance, in order to have OSD support compiled in, you will
+need to have <systemitem class="library">fontconfig</systemitem>
+and <systemitem class="library">freetype</systemitem> libraries
+installed on your machine. Contrary to other Unixes such as most
+Linux and BSD variants, OS X does not have a package system
+that comes with the system.
 </para>
+
 <para>
-There's at least two to choose from:
+There are at least two to choose from:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
 <ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.
 Both of them provide about the same service (i.e. a lot of packages to
-choose from, dependencies resolution, the ability to simply add/update/remove
+choose from, dependency resolution, the ability to simply add/update/remove
 packages, etc...).
-Fink offers both precompiled binary packages or to build everything from
-source, whereas DarwinPorts only offers to build them from source.
+Fink offers both precompiled binary packages or building everything from
+source, whereas DarwinPorts only offers building from source.
 The author of this guide chose DarwinPorts for the simple fact that its basic
 setup was more lightweight.
 Later examples will be based on DarwinPorts.
 </para>
+
 <para>
 For instance, to compile <application>MPlayer</application> with OSD support:
 <screen>sudo port install pkgconfig</screen>
@@ -729,7 +735,7 @@ similar way:
 Then you can proceed with launching <application>MPlayer</application>'s
 <systemitem>configure</systemitem> script (note the
 <systemitem>PKG_CONFIG_PATH</systemitem> and <systemitem>PATH</systemitem>
-environment variables so that <systemitem>configure</systemitem> find the
+environment variables so that <systemitem>configure</systemitem> finds the
 libraries installed with DarwinPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
