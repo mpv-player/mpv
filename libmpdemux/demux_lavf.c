@@ -339,11 +339,6 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
 
     demux->filepos=stream_tell(demux->stream);
 
-    if(stream_eof(demux->stream)){
-//        demuxre->stream->eof=1;
-        return 0;
-    }
-
     if(av_read_frame(priv->avfc, &pkt) < 0)
         return 0;
         
