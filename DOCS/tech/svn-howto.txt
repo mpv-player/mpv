@@ -3,15 +3,19 @@ About Subversion write access:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Before everything else, you should know how to use Subversion properly.
-Subversion comes with some documentation.
+Luckily Subversion comes with excellent documentation.
 
   svn help
-  man svn
-  info svn
 
-are a good start. The most comprehensive manual is the book "Version Control
-with Subversion" by Ben Collins-Sussman, Brian W. Fitzpatrick and C. Michael
-Pilato. It can be viewed online at
+shows you the available subcommands,
+
+  svn help <command>
+
+shows information about the subcommand <command>.
+
+The most comprehensive manual is the book "Version Control with Subversion"
+by Ben Collins-Sussman, Brian W. Fitzpatrick and C. Michael Pilato. It can
+be viewed online at
 
 http://svnbook.org/
 
@@ -20,75 +24,106 @@ For more information about the Subversion project, visit
 http://subversion.tigris.org/
 
 Consult these resources whenever you have problems, they are quite exhaustive.
-What follows now are MPlayer specific guidelines.
+
+What follows now is a basic introduction to Subversion and some MPlayer-specific
+guidelines. Read it at least once, if you are granted commit privileges to the
+MPlayer project you are expected to be familiar with these rules.
 
 
-I. TECH SIDE:
-=============
+I. BASICS:
+==========
 
-1. Checking out development source tree:
+1. Checking out the source tree:
 
-    svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/
+    svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ <target>
 
-2. Updating source tree to latest revision:
+  This will put the MPlayer sources into the directory <target>.
+
+2. Updating the source tree to the latest revision:
 
     svn update
 
-3. Committing changes:
+  pulls in the latest changes from the repository to your working directory.
+
+3. Adding/removing files/directories:
+
+    svn add <filename/dirname>
+    svn delete <filename/dirname>
+
+  Subversion needs to get notified of all changes you make to your working
+  directory.
+
+4. Showing modifications:
+
+    svn diff <filename(s)>
+
+  will show all local modifications in your working directory as unified diff.
+
+5. Inspecting the changelog:
+
+    svn log <filename(s)>
+
+  You may also find viewvc, a web frontend for Subversion, helpful. It's often
+  more comfortable than using 'svn log' and 'svn diff'. Find it here:
+  http://svn.mplayerhq.hu/mplayer/trunk/
+
+6. Checking source tree status:
+
+  svn status
+
+  detects all the changes you made and lists what actions will be taken in case
+  of a commit (additions, modifications, deletions, etc.).
+
+7. Committing:
 
     svn update
-    svn commit --username USERNAME filename(s)
 
-  Do not use comments such as: "bug fix." or "files changed" or "dunno".
-  You don't have to include the filename in the comment, as comments are linked
-  to files. If you have made several independent changes, commit them
-  separately, not at the same time. You will be prompted for a comment in an
-  editor, which is either specified by --editor-cmd on the command line, set
-  in your personal configuration file (~/.subversion/config) or set by one of
-  the following environment variables: SVN_EDITOR, VISUAL or EDITOR. When
-  prompted for a password, type the password you got assigned by the Subversion
-  server admin. By default, Subversion caches all authentication tokens. This
-  behaviour can be disabled by setting both 'store-passwords' and
+  Run 'svn update' before committing to make sure there were no changes to the
+  files you worked on in the meantime. Afterwards look at the output of
+
+    svn diff <filename(s)>
+
+  to doublecheck your changes before committing to avoid trouble later on. All
+  experienced developers do this on each and every commit, no matter how small.
+  Every one of them has been saved from looking like a fool by this many times.
+  It's very easy for stray debug output or cosmetic modifications to slip in,
+  please avoid problems through this extra level of scrutiny.
+
+  Once you have made sure everything is fine
+
+    svn commit <filename(s)>
+
+  propagates your stuff to the repository. If you have made several independent
+  changes, commit them separately, not at the same time.
+
+  When prompted for a password, type the password you got assigned by the
+  project admins. By default, Subversion caches all authentication tokens.
+  This behaviour can be disabled by setting both 'store-passwords' and
   'store-auth-creds' to "no" in ~/.subversion/config. You might need to remove
   previous cache files, which are located in ~/.subversion/auth, by hand.
 
-4. Adding new files/directories:
+  You will be prompted for a log message in an editor, which is either specified
+  by --editor-cmd on the command line, set in your personal configuration file
+  (~/.subversion/config) or set by one of the following environment variables:
+  SVN_EDITOR, VISUAL or EDITOR.
 
-    svn add filename/dirname
-    svn commit filename/dirname
+  Log messages should be concise but descriptive. Explain why you made a change,
+  what you did will be obvious from the changes themselves most of the time.
+  Saying just "bug fix" or "10l" is bad. Remember that people of varying skill
+  levels look at and educate themselves while reading through your code. Don't
+  include filenames in log messages, Subversion provides that information.
 
-5. Removing files:
+8. Renaming/moving files or contents of files:
 
-    svn delete filename
-    svn commit filename
-
-6. Checking changes:
-
-    svn diff filename(s)
-
-  Doublecheck your changes before committing to avoid trouble later on.
-  This way you will see if your patch has debug stuff or indentation
-  changes and you can fix it before committing and triggering flames.
-
-7. Checking changelog:
-
-    svn log filename(s)
-
-  You may also find viewvc, a web frontend for Subversion, helpful. It's often
-  more comfortable than using svn log and svn diff. Find it here:
-  http://svn.mplayerhq.hu/mplayer/trunk/
-
-8. Renaming/moving files or content of files:
-
-  svn move source destination
-  svn commit source destination
+  svn move <source> <destination>
+  svn commit <source> <destination>
 
   Do not move or rename files before discussing it on the mplayer-dev-eng
   mailing list first!
 
   Don't do a lot of cut'n'paste from one file to another without a very good
   reason and discuss it on the mplayer-dev-eng mailing list first. It will make
-  those changes untraceable!
+  those changes hard to trace.
 
   Such actions are useless and treated as cosmetics in 99% of cases,
   so try to avoid them.
@@ -98,34 +133,27 @@ I. TECH SIDE:
   There is no Subversion equivalent of the 'cvs admin -o' command. Instead,
   be very careful about what you commit! If somehow you broke something,
   revert the changes locally and re-commit with a proper commit message.
-  You may want to use 'svn cat -r<revision> filename' to inspect an older
+  You may want to use 'svn cat -r<revision> <filename>' to inspect an older
   revision.
 
-10. Checking status of source tree
+10. Reverting local changes
 
-  svn status
-
-  This will detect all the changes you made and list what actions will be
-  taken in case of a commit (Additions, Modifications, Deletions, et cetera).
-
-11. Reverting local changes
-
-  svn revert filename(s)
+  svn revert <filename(s)>
 
   In case you made a lot of local changes to a file and want to start over
-  with a fresh checkout of that file, you can use svn revert filename(s).
+  with a fresh checkout of that file, you can use 'svn revert <filename(s)>'.
   NOTE: This has nothing to do with reverting changes on the Subversion
   server! It only reverts changes that were not committed yet. If you need
   to revert a broken commit, see 9.
 
-12. Changing commit messages
+11. Changing commit messages
 
   svn propedit svn:log --revprop -r <revision>
 
   If your commit message is too short or not explanatory enough, you can edit
-  it afterwards with svn propedit.
+  it afterwards with svn' propedit'.
 
-Contact the project admin <root at mplayerhq dot hu> if you have technical
+Contact the project admins <root at mplayerhq dot hu> if you have technical
 problems with the Subversion server.
 
 
@@ -212,7 +240,7 @@ The typical flow of development would be:
 
 3. Create a patch:
 
-  Run svn diff from the root of the source tree, like this:
+  Run 'svn diff' from the root of the source tree, like this:
 
     cd devel
     svn diff > ../my_changes.patch
@@ -252,10 +280,10 @@ The typical flow of development would be:
 7. Commit the patch:
 
   If your patch is accepted, double check if your source tree contains the
-  most recent version of your patch with svn diff! After verifying that you
-  met these conditions, commit with:
+  most recent version of your patch with 'svn diff'! After verifying that
+  you met these conditions, commit with:
 
-    svn commit filename(s)
+    svn commit <filename(s)>
 
   Go to step 2 ad infinitum until MPlayer is the perfect media player ;)
 
