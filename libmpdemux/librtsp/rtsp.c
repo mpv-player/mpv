@@ -232,42 +232,6 @@ static ssize_t read_stream(int fd, void *buf, size_t count) {
 }
 
 /*
- * debugging utilities
- */
-#if 0 
-static void hexdump (char *buf, int length) {
-
-  int i;
-
-  mp_msg(MSGT_OPEN, MSGL_INFO, "rtsp: ascii>");
-  for (i = 0; i < length; i++) {
-    unsigned char c = buf[i];
-
-    if ((c >= 32) && (c <= 128))
-      mp_msg(MSGT_OPEN, MSGL_INFO, "%c", c);
-    else
-      mp_msg(MSGT_OPEN, MSGL_INFO, ".");
-  }
-  mp_msg(MSGT_OPEN, MSGL_INFO, "\n");
-
-  mp_msg(MSGT_OPEN, MSGL_INFO, "rtsp: hexdump> ");
-  for (i = 0; i < length; i++) {
-    unsigned char c = buf[i];
-
-    mp_msg(MSGT_OPEN, MSGL_INFO, "%02x", c);
-
-    if ((i % 16) == 15)
-      mp_msg(MSGT_OPEN, MSGL_INFO, "\nrtsp:         ");
-
-    if ((i % 2) == 1)
-      mp_msg(MSGT_OPEN, MSGL_INFO, " ");
-
-  }
-  mp_msg(MSGT_OPEN, MSGL_INFO, "\n");
-}
-#endif
-
-/*
  * rtsp_get gets a line from stream
  * and returns a null terminated string.
  */
