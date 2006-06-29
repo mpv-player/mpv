@@ -114,58 +114,6 @@ struct rtsp_s {
  * network utilities
  */
  
-static int host_connect_attempt(struct in_addr ia, int port) {
-
-  int                s;
-  struct sockaddr_in sin;
-
-  s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);  
-  if (s == -1) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: socket(): %s\n", strerror(errno));
-    return -1;
-  }
-
-  sin.sin_family = AF_INET;
-  sin.sin_addr   = ia;
-  sin.sin_port   = htons(port);
-  
-  if (connect(s, (struct sockaddr *)&sin, sizeof(sin))==-1 
-#ifndef HAVE_WINSOCK2
-      && errno != EINPROGRESS) {
-#else
-      && WSAGetLastError() == WSAEINPROGRESS) {
-#endif
-    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: connect(): %s\n", strerror(errno));
-    closesocket(s);
-    return -1;
-  }
-
-  return s;
-}
-
-static int host_connect(const char *host, int port) {
-
-  struct hostent *h;
-  int             i, s;
-  
-  h = gethostbyname(host);
-  if (h == NULL) {
-    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: unable to resolve '%s'.\n", host);
-    return -1;
-  }
-
-  for (i = 0; h->h_addr_list[i]; i++) {
-    struct in_addr ia;
-
-    memcpy (&ia, h->h_addr_list[i], 4);
-    s = host_connect_attempt(ia, port);
-    if(s != -1)
-      return s;
-  }
-  mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: unable to connect to '%s'.\n", host);
-  return -1;
-}
-
 static int write_stream(int s, const char *buf, int len) {
   int total, timeout;
 
