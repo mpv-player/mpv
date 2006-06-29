@@ -162,7 +162,7 @@ I. BASICS:
   svn propedit svn:log --revprop -r <revision>
 
   If your commit message is too short or not explanatory enough, you can edit
-  it afterwards with svn' propedit'.
+  it afterwards with 'svn propedit'.
 
 
 Contact the project admins <root at mplayerhq dot hu> if you have technical
