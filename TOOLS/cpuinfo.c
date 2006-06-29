@@ -63,10 +63,10 @@ cpuid(int func) {
 static int64_t
 rdtsc(void)
 {
-  unsigned int i, j;
+  uint64_t i;
 #define RDTSC   ".byte 0x0f, 0x31; "
-  asm volatile (RDTSC : "=a"(i), "=d"(j) : );
-  return ((int64_t)j<<32) + (int64_t)i;
+  asm volatile (RDTSC : "=A"(i) : );
+  return i;
 }
 
 static const char*
