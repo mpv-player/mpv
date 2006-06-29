@@ -24,6 +24,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <inttypes.h>
 
 #include "config.h"
 
