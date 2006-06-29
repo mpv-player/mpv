@@ -201,7 +201,7 @@ static char *rtsp_get(rtsp_t *s) {
     mp_msg(MSGT_OPEN, MSGL_FATAL, "librtsp: buffer overflow in rtsp_get\n");
     exit(1);
   }
-  string=malloc(sizeof(char)*n);
+  string=malloc(n);
   memcpy(string,buffer,n-1);
   string[n-1]=0;
 
@@ -221,7 +221,7 @@ static char *rtsp_get(rtsp_t *s) {
 static void rtsp_put(rtsp_t *s, const char *string) {
 
   int len=strlen(string);
-  char *buf=malloc(sizeof(char)*len+2);
+  char *buf=malloc(len+2);
 
 #ifdef LOG
   mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: >> '%s'", string);
@@ -405,7 +405,7 @@ int rtsp_request_options(rtsp_t *s, const char *what) {
     buf=strdup(what);
   } else
   {
-    buf=malloc(sizeof(char)*(strlen(s->host)+16));
+    buf=malloc(strlen(s->host)+16);
     sprintf(buf,"rtsp://%s:%i", s->host, s->port);
   }
   rtsp_send_request(s,RTSP_METHOD_OPTIONS,buf);
@@ -422,7 +422,7 @@ int rtsp_request_describe(rtsp_t *s, const char *what) {
     buf=strdup(what);
   } else
   {
-    buf=malloc(sizeof(char)*(strlen(s->host)+strlen(s->path)+16));
+    buf=malloc(strlen(s->host)+strlen(s->path)+16);
     sprintf(buf,"rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
   rtsp_send_request(s,RTSP_METHOD_DESCRIBE,buf);
@@ -461,7 +461,7 @@ int rtsp_request_setparameter(rtsp_t *s, const char *what) {
     buf=strdup(what);
   } else
   {
-    buf=malloc(sizeof(char)*(strlen(s->host)+strlen(s->path)+16));
+    buf=malloc(strlen(s->host)+strlen(s->path)+16);
     sprintf(buf,"rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
   rtsp_send_request(s,RTSP_METHOD_SET_PARAMETER,buf);
@@ -479,7 +479,7 @@ int rtsp_request_play(rtsp_t *s, const char *what) {
     buf=strdup(what);
   } else
   {
-    buf=malloc(sizeof(char)*(strlen(s->host)+strlen(s->path)+16));
+    buf=malloc(strlen(s->host)+strlen(s->path)+16);
     sprintf(buf,"rtsp://%s:%i/%s", s->host, s->port, s->path);
   }
   rtsp_send_request(s,RTSP_METHOD_PLAY,buf);
@@ -548,7 +548,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
       }
       /* let's make the server happy */
       rtsp_put(s, "RTSP/1.0 451 Parameter Not Understood");
-      rest=malloc(sizeof(char)*17);
+      rest=malloc(17);
       sprintf(rest,"CSeq: %u", seq);
       rtsp_put(s, rest);
       rtsp_put(s, "");
