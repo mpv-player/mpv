@@ -551,6 +551,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
       rest=malloc(17);
       sprintf(rest,"CSeq: %u", seq);
       rtsp_put(s, rest);
+      free(rest);
       rtsp_put(s, "");
       i=read_stream(s->s, buffer, size);
     } else
