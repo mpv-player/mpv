@@ -332,8 +332,8 @@ static int rtsp_get_answers(rtsp_t *s) {
     if (!answer)
       return 0;
     
-    if (!strncmp(answer,"CSeq:",5)) {
-      sscanf(answer,"CSeq: %u",&answer_seq);
+    if (!strncasecmp(answer,"CSeq:",5)) {
+      sscanf(answer,"%*s %u",&answer_seq);
       if (s->cseq != answer_seq) {
 #ifdef LOG
         mp_msg(MSGT_OPEN, MSGL_WARN, "librtsp: warning: CSeq mismatch. got %u, assumed %u", answer_seq, s->cseq);
@@ -341,16 +341,16 @@ static int rtsp_get_answers(rtsp_t *s) {
         s->cseq=answer_seq;
       }
     }
-    if (!strncmp(answer,"Server:",7)) {
+    if (!strncasecmp(answer,"Server:",7)) {
       char *buf = malloc(strlen(answer));
-      sscanf(answer,"Server: %s",buf);
+      sscanf(answer,"%*s %s",buf);
       if (s->server) free(s->server);
       s->server=strdup(buf);
       free(buf);
     }
-    if (!strncmp(answer,"Session:",8)) {
+    if (!strncasecmp(answer,"Session:",8)) {
       char *buf = calloc(1, strlen(answer));
-      sscanf(answer,"Session: %s",buf);
+      sscanf(answer,"%*s %s",buf);
       if (s->session) {
         if (strcmp(buf, s->session)) {
           mp_msg(MSGT_OPEN, MSGL_WARN, "rtsp: warning: setting NEW session: %s\n", buf);
@@ -536,8 +536,8 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
         rest=rtsp_get(s);
         if (!rest)
           return -1;
-        if (!strncmp(rest,"CSeq:",5))
-          sscanf(rest,"CSeq: %u",&seq);
+        if (!strncasecmp(rest,"CSeq:",5))
+          sscanf(rest,"%*s %u",&seq);
       } while (strlen(rest)!=0);
       free(rest);
       if (seq<0) {
