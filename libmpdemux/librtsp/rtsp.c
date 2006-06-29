@@ -293,9 +293,9 @@ static void rtsp_send_request(rtsp_t *s, const char *type, const char *what) {
 
 static void rtsp_schedule_standard(rtsp_t *s) {
 
-  char tmp[16];
+  char tmp[17];
   
-  snprintf(tmp, 16, "CSeq: %u", s->cseq);
+  snprintf(tmp, 17, "CSeq: %u", s->cseq);
   rtsp_schedule_field(s, tmp);
   
   if (s->session) {
@@ -548,7 +548,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
       }
       /* let's make the server happy */
       rtsp_put(s, "RTSP/1.0 451 Parameter Not Understood");
-      rest=malloc(sizeof(char)*16);
+      rest=malloc(sizeof(char)*17);
       sprintf(rest,"CSeq: %u", seq);
       rtsp_put(s, rest);
       rtsp_put(s, "");
