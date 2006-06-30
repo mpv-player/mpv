@@ -52,7 +52,7 @@ int dvd_angle=1;
 
 char * dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 char * dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };
-#endif
+#endif /* #ifdef USE_DVDREAD */
 
 
 static struct stream_priv_s {
@@ -386,7 +386,7 @@ void dvd_close(dvd_priv_t *d) {
   dvd_last_chapter = 0;
 }
 
-#endif
+#endif /* #ifdef USE_DVDREAD */
 
 static int fill_buffer(stream_t *s, char *but, int len)
 {
@@ -832,7 +832,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     stream->priv = (void*)d;
     return STREAM_OK;
   }
-#endif
+#endif /* #ifdef USE_DVDREAD */
   mp_msg(MSGT_DVD,MSGL_ERR,MSGTR_NoDVDSupport);
   m_struct_free(&stream_opts,opts);
   return STREAM_UNSUPORTED;
