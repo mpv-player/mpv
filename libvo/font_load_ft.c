@@ -11,8 +11,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_FREETYPE
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -1170,5 +1168,3 @@ void load_font_ft(int width, int height)
     vo_font=read_font_desc_ft(font_name, width, height);
 #endif
 }
-
-#endif /* HAVE_FREETYPE */

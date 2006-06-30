@@ -7481,6 +7481,7 @@ DIRECTFB_INC = $_inc_directfb
 DIRECTFB_LIB = $_ld_directfb
 CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
+FREETYPE = $_freetype
 FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_INC = $_inc_fontconfig
