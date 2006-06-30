@@ -155,7 +155,7 @@ static void
 decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
 {
   unsigned char *rle_data, *dest_row;
-  unsigned long *starttab;
+  uint32_t *starttab;
   int y, z, xsize, ysize, zsize, chan_offset;
   long start_offset;
   
@@ -164,7 +164,7 @@ decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
   zsize = info->zsize;
 
   /* rle offset table is right after the header */
-  starttab = (long*)(data + SGI_HEADER_LEN); 
+  starttab = (uint32_t*)(data + SGI_HEADER_LEN); 
   
    for (z = 0; z < zsize; z++) {
 
@@ -177,7 +177,7 @@ decode_rle_sgi(SGIInfo *info, unsigned char *data, mp_image_t *mpi)
        dest_row = mpi->planes[0] + mpi->stride[0] * (ysize - 1 - y);
     
       /* set start of next run (offsets are from start of header) */
-      start_offset = be2me_32(*(unsigned long*) &starttab[y + z * ysize]);
+      start_offset = be2me_32(*(uint32_t*) &starttab[y + z * ysize]);
       
       rle_data = &data[start_offset];
     
