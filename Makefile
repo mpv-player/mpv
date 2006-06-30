@@ -110,7 +110,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
-              postproc/libswscale.a \
+              libswscale/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
               $(DVDNAV_LIB) \
@@ -163,9 +163,9 @@ PARTS = libmpdemux \
         libavcodec \
         libpostproc \
         libavformat \
+        libswscale \
         libao2 \
         osdep \
-        postproc \
         input \
         libvo \
         libaf \
@@ -218,7 +218,7 @@ COMMON_DEPS = $(W32_DEP) \
               libmpcodecs/libmpcodecs.a \
               libao2/libao2.a \
               osdep/libosdep.a \
-              postproc/libswscale.a \
+              libswscale/libswscale.a \
               input/libinput.a \
               libvo/libvo.a \
               libaf/libaf.a \
@@ -302,6 +302,9 @@ libpostproc/libpostproc.a:
 libavformat/libavformat.a:
 	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a
 
+libswscale/libswscale.a:
+	$(MAKE) -C libswscale
+
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
 
@@ -334,9 +337,6 @@ Gui/libgui.a:
 
 osdep/libosdep.a:
 	$(MAKE) -C osdep
-
-postproc/libswscale.a:
-	$(MAKE) -C postproc
 
 input/libinput.a:
 	$(MAKE) -C input
@@ -583,7 +583,7 @@ libmpcodecs/libmpencoders.a: $(wildcard libmpcodecs/*.[ch])
 libavutil/libavutil.a: $(wildcard libavutil/*.[ch])
 libavcodec/libavcodec.a: $(wildcard libavcodec/*.[ch] libavcodec/*/*.[chS])
 libavformat/libavformat.a: $(wildcard libavformat/*.[ch])
-postproc/libswscale.a: $(wildcard postproc/*.[ch])
+libswscale/libswscale.a: $(wildcard libswscale/*.[ch])
 
 libmpeg2/libmpeg2.a: $(wildcard libmpeg2/*.[ch])
 liba52/liba52.a: $(wildcard liba52/*.[ch])

@@ -13,7 +13,7 @@
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
-#include "postproc/rgb2rgb.h"
+#include "libswscale/rgb2rgb.h"
 
 struct vf_priv_s {
 	int field;

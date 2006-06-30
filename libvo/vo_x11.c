@@ -38,7 +38,7 @@ int XShmGetEventBase(Display *);
 #include "fastmemcpy.h"
 #include "sub.h"
 
-#include "postproc/swscale.h"
+#include "libswscale/swscale.h"
 #include "libmpcodecs/vf_scale.h"
 #define MODE_RGB  0x1
 #define MODE_BGR  0x2

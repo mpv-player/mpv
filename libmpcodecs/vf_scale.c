@@ -12,7 +12,7 @@
 #include "vf.h"
 
 #include "libvo/fastmemcpy.h"
-#include "postproc/swscale.h"
+#include "libswscale/swscale.h"
 #include "vf_scale.h"
 
 #include "m_option.h"

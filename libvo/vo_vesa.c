@@ -47,7 +47,7 @@
 #endif
 #include "mp_msg.h"
 
-#include "postproc/swscale.h"
+#include "libswscale/swscale.h"
 #include "libmpcodecs/vf_scale.h"
 
 
