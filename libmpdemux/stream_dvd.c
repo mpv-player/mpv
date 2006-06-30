@@ -52,6 +52,7 @@ int dvd_angle=1;
 
 char * dvd_audio_stream_types[8] = { "ac3","unknown","mpeg1","mpeg2ext","lpcm","unknown","dts" };
 char * dvd_audio_stream_channels[6] = { "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };
+#endif
 
 
 static struct stream_priv_s {
@@ -848,4 +849,3 @@ stream_info_t stream_info_dvd = {
   &stream_opts,
   1 // Urls are an option string
 };
-#endif
