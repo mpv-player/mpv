@@ -2993,7 +2993,7 @@ if (edl_output_filename) {
         mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
     }else if(sub_auto && filename && (strlen(filename)>=5)){
       /* try to autodetect vobsub from movie filename ::atmos */
-      char *buf = malloc((strlen(filename)-3) * sizeof(char)),*psub;
+      char *buf = malloc((strlen(filename)-3)),*psub;
       memset(buf,0,strlen(filename)-3); // make sure string is terminated
       strncpy(buf, filename, strlen(filename)-4); 
       vo_vobsub=vobsub_open(buf,spudec_ifo,0,&vo_spudec);
@@ -3152,7 +3152,7 @@ if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
     
     if (filename && !strcmp(mp_basename(playlist_entry),playlist_entry)) // add reference path of current file
     {
-      temp=malloc((strlen(filename)-strlen(mp_basename(filename))+strlen(playlist_entry)+1)*sizeof(char));
+      temp=malloc((strlen(filename)-strlen(mp_basename(filename))+strlen(playlist_entry)+1));
       if (temp)
       {
 	strncpy(temp, filename, strlen(filename)-strlen(mp_basename(filename)));

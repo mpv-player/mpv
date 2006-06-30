@@ -1218,7 +1218,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
     if(log2vis) {
       len = fribidi_remove_bidi_marks (visual, len, NULL, NULL,
 				       NULL);
-      if((op = (char*)malloc(sizeof(char)*(max(2*orig_len,2*len) + 1))) == NULL) {
+      if((op = (char*)malloc((max(2*orig_len,2*len) + 1))) == NULL) {
 	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
 	l++;
 	break;	
@@ -1314,7 +1314,7 @@ void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
     char *detected_sub_cp = NULL;
     int i;
 
-    buffer = (unsigned char*)malloc(MAX_GUESS_BUFFER_SIZE*sizeof(char));
+    buffer = (unsigned char*)malloc(MAX_GUESS_BUFFER_SIZE);
     buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
 
     languages = enca_get_languages(&langcnt);
