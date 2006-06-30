@@ -43,18 +43,19 @@ man pages:
     * Italian: Daniele Forghieri
     * Polish: Waclaw Schiller
     * Spanish: Juan Martin, Reynaldo H. Verdejo Pinochet (outdated)
-    * Swedish: Carl Fürstenberg (incomplete)
+    * Chinese: unmaintained, outdated
+    * Swedish: unmaintained, outdated, incomplete
 
 Documentation translations:
-    * Chinese (simplified): Lu Ran (outdated)
     * Czech: Jiri Heryan
     * French: Nicolas Le Gaillart, Guillaume Poirier
-    * German: outdated
-    * Hungarian: Gabor Mizdad
-    * Italian: outdated
+    * German: Sebastian Krämer
+    * Hungarian: Gabor Mizda
     * Polish: Waclaw Schiller
-    * Russian: Dmitry Baryshkov (incomplete)
     * Spanish: Juan Martin, Reynaldo H. Verdejo Pinochet (outdated)
+    * Chinese (simplified): unmaintained, outdated, still HTML
+    * Italian: unmaintained, outdated, still HTML
+    * Russian: unmaintained, outdated, incomplete
 
 Platforms/ports:
     * Debian packaging: None
