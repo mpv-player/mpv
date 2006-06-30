@@ -272,7 +272,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
 
     Setup_FS_Segment();
 
-    ldt_fs->prev_struct = (char*)malloc(sizeof(char) * 8);
+    ldt_fs->prev_struct = (char*)malloc(8);
     *(void**)array.base_addr = ldt_fs->prev_struct;
 
     return ldt_fs;

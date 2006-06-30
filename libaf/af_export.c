@@ -135,7 +135,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     if(s->filename)
       free(s->filename);
 
-    s->filename = calloc(i + 1, sizeof(char));
+    s->filename = calloc(i + 1, 1);
     memcpy(s->filename, str, i);
     s->filename[i] = 0;
 	
