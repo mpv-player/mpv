@@ -74,7 +74,8 @@
 	{"rtsp-stream-over-tcp", "RTSP support requires the \"LIVE555 Streaming Media\" libraries.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
         {"rtsp-port", &rtsp_port, CONF_TYPE_INT, CONF_RANGE, -1, 65535, NULL},	
-
+        {"rtsp-destination", &rtsp_destination, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
+  
 // ------------------------- demuxer options --------------------
 
 	// number of frames to play/convert
@@ -416,6 +417,7 @@ extern int flip_hebrew;
 extern int rtspStreamOverTCP;
 #endif
 extern int rtsp_port;
+extern char *rtsp_destination;
 
 
 extern int audio_stream_cache;

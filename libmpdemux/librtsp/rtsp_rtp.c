@@ -74,6 +74,7 @@
 #define RTCP_SEND_FREQUENCY 1024
 
 int rtsp_port = 0;
+char *rtsp_destination = NULL;
 
 void
 rtcp_send_rr (rtsp_t *s, struct rtp_rtsp_session_t *st)
@@ -656,7 +657,10 @@ rtp_setup_and_play (rtsp_t *rtsp_session)
   }
 
   /* now check network settings as determined by server */
-  destination = parse_destination (answer);
+  if (rtsp_destination)
+    destination = strdup (rtsp_destination);
+  else
+    destination = parse_destination (answer);
   if (!destination)
     destination = strdup (server_addr);
   free (server_addr);
