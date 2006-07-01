@@ -580,7 +580,6 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       case DEMUXER_TYPE_FILM:
       case DEMUXER_TYPE_VIVO:
       case DEMUXER_TYPE_OGG:
-      case DEMUXER_TYPE_REAL:
       case DEMUXER_TYPE_ASF: {
         float next_pts = ds_get_next_pts(d_video);
         float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
@@ -599,6 +598,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
         }
       }
       break;
+      case DEMUXER_TYPE_REAL:
       case DEMUXER_TYPE_LAVF:
         if((int)sh_video->fps==1000 || (int)sh_video->fps<=1){
           float next_pts = ds_get_next_pts(d_video);
