@@ -80,7 +80,7 @@ static GLenum gl_type;
 static GLuint gl_buffer;
 static int gl_buffersize;
 static GLuint fragprog;
-static GLuint uvtexs[2];
+static GLuint default_texs[8];
 static char *custom_prog;
 static char *custom_tex;
 static int custom_tlin;
@@ -224,12 +224,15 @@ static void clearOSD(void) {
  * \brief uninitialize OpenGL context, freeing textures, buffers etc.
  */
 static void uninitGl(void) {
+  int i = 0;
   if (DeletePrograms && fragprog)
     DeletePrograms(1, &fragprog);
   fragprog = 0;
-  if (uvtexs[0] || uvtexs[1])
-    glDeleteTextures(2, uvtexs);
-  uvtexs[0] = uvtexs[1] = 0;
+  while (default_texs[i] != 0)
+    i++;
+  if (i)
+    glDeleteTextures(i, default_texs);
+  default_texs[0] = 0;
   clearOSD();
   if (DeleteBuffers && gl_buffer)
     DeleteBuffers(1, &gl_buffer);
@@ -243,7 +246,7 @@ static void uninitGl(void) {
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
   osdtexCnt = 0; gl_buffer = 0; gl_buffersize = 0; err_shown = 0;
-  fragprog = 0; uvtexs[0] = 0; uvtexs[1] = 0;
+  fragprog = 0;
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
@@ -258,13 +261,19 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
           texture_width, texture_height);
 
   if (image_format == IMGFMT_YV12) {
-    glGenTextures(2, uvtexs);
+    int i;
+    glGenTextures(7, default_texs);
+    default_texs[7] = 0;
+    for (i = 0; i < 7; i++) {
+      ActiveTexture(GL_TEXTURE1 + i);
+      BindTexture(GL_TEXTURE_2D, default_texs[i]);
+      BindTexture(GL_TEXTURE_RECTANGLE, default_texs[i]);
+      BindTexture(GL_TEXTURE_3D, default_texs[i]);
+    }
     ActiveTexture(GL_TEXTURE1);
-    BindTexture(gl_target, uvtexs[0]);
     glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
                      texture_width / 2, texture_height / 2, 128);
     ActiveTexture(GL_TEXTURE2);
-    BindTexture(gl_target, uvtexs[1]);
     glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
                      texture_width / 2, texture_height / 2, 128);
     switch (use_yuv) {
