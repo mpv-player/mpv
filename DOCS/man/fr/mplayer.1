@@ -1472,6 +1472,11 @@ Cette option peut être utile si vous êtes derrière un routeur et souhaitez
 redistribuer le flux RTSP du serveur vers un client spécifique.
 .
 .TP
+.B \-rtsp-destination
+Utilisé avec les URLs de type 'rtsp://', permet de forcer l'addresse IP de destination qui doit être utilisée.
+Cette option peut s'avérer utile lorsque le serveur RTSP n'envoit pas les paquets RTP vers la bonne interface. Si la connection au serveur RTSP échoue, utilisez l'option -v pour connaître l'adresse IP auto-détectée par MPlayer et tentez de la remplacer par celle d'une de vos interfaces par le biais de cette option.
+.
+.TP
 .B \-rtsp-stream-over-tcp (LIVE555 uniquement)
 Utilisé avec 'rtsp://', URLs pour indiquer que les paquets RTP et RTCP
 entrants seront streamés sur TCP (en utilisant la même connexion TCP que
