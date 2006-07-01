@@ -25,7 +25,6 @@
 #endif
 
 #define ERR ((void *) -1)
-#define eol(x) ((x)=='\r' || (x)=='\n' || (x)=='\0')
 
 #ifdef USE_ICONV
 #include <iconv.h>
@@ -67,6 +66,10 @@ int sub_format=SUB_INVALID;
  */
 unsigned long previous_sub_end;
 #endif
+
+static int eol(char p) {
+	return (p=='\r' || p=='\n' || p=='\0');
+}
 
 /* Remove leading and trailing space */
 static void trail_space(char *s) {
