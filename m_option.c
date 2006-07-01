@@ -574,7 +574,7 @@ static int parse_str_list(m_option_t* opt,char *name, char *param, void* dst, in
       break;
     }
     len = ptr - last_ptr;
-    res[n] = (char*)malloc(len + 1);
+    res[n] = malloc(len + 1);
     if(len) strncpy(res[n],last_ptr,len);
     res[n][len] = '\0';
     ptr++;
@@ -615,7 +615,7 @@ static void copy_str_list(m_option_t* opt,void* dst, void* src) {
 
   for(n = 0 ; s[n] != NULL ; n++)
     /* NOTHING */;
-  d = (char**)malloc((n+1)*sizeof(char*));
+  d = malloc((n+1)*sizeof(char*));
   for( ; n >= 0 ; n--)
     d[n] = s[n] ? strdup(s[n]) : NULL;
 

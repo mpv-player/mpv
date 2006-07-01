@@ -202,7 +202,7 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 //		    fprintf(stderr, "(%s) frames %d, texture %lld, motion %lld, total %lld, complexity %lld\n", __FILE__, iNumFrames, text_bits, motion_bits, total_bits, complexity);
 //		}
 		
-		m_vFrames = (entry*)malloc(iNumFrames*sizeof(entry));
+		m_vFrames = malloc(iNumFrames*sizeof(entry));
 		if (!m_vFrames) 
 		{	mp_msg(MSGT_FIXME, MSGL_FIXME,MSGTR_OutOfMemory);
 			return -2; //TC_EXPORT_ERROR;

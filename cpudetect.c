@@ -235,7 +235,7 @@ char *GetCpuFriendlyName(unsigned int regs[], unsigned int regs2[]){
 	char *retname;
 	int i;
 
-	if (NULL==(retname=(char*)malloc(256))) {
+	if (NULL==(retname=malloc(256))) {
 		mp_msg(MSGT_CPUDETECT,MSGL_FATAL,"Error: GetCpuFriendlyName() not enough memory\n");
 		exit(1);
 	}

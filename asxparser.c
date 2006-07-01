@@ -118,7 +118,7 @@ asx_warning_attrib_invalid(ASX_Parser_t* parser, char* elem, char* attrib,
     len += strlen(ptr[0]);
     len += ((ptr[1] == NULL) ? 4 : 2);
   }
-  str = vals = (char*)malloc(len);
+  str = vals = malloc(len);
   vals += sprintf(vals,"%s",valid_vals[0]);
   for(ptr = valid_vals + 1 ; ptr[0] != NULL ; ptr++) {
     if(ptr[1] == NULL)
@@ -189,7 +189,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
 	break;
       }
     }
-    attrib = (char*)malloc(ptr2-ptr1+2);
+    attrib = malloc(ptr2-ptr1+2);
     strncpy(attrib,ptr1,ptr2-ptr1+1);
     attrib[ptr2-ptr1+1] = '\0';
 
@@ -207,7 +207,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs) {
       break;
     }
     ptr1++;
-    val = (char*)malloc(ptr2-ptr1+1);
+    val = malloc(ptr2-ptr1+1);
     strncpy(val,ptr1,ptr2-ptr1);
     val[ptr2-ptr1] = '\0';
     n_attrib++;
@@ -322,7 +322,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
     if(ptr2[0] == '\n') parser->line++;
   }
 
-  element = (char*)malloc(ptr2-ptr1+1);
+  element = malloc(ptr2-ptr1+1);
   strncpy(element,ptr1,ptr2-ptr1);
   element[ptr2-ptr1] = '\0';
 
@@ -352,7 +352,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 
   // Save attribs string
   if(ptr3-ptr2 > 0) {
-    attribs = (char*)malloc(ptr3-ptr2+1);
+    attribs = malloc(ptr3-ptr2+1);
     strncpy(attribs,ptr2,ptr3-ptr2);
     attribs[ptr3-ptr2] = '\0';
   }
@@ -411,7 +411,7 @@ asx_get_element(ASX_Parser_t* parser,char** _buffer,
 	  //	    if(ptr4[0] == '\0') parser->line--;
 	  //}
 	  ptr4++;
-	  body = (char*)malloc(ptr4-ptr3+1);
+	  body = malloc(ptr4-ptr3+1);
 	  strncpy(body,ptr3,ptr4-ptr3);
 	  body[ptr4-ptr3] = '\0';	  
 	}

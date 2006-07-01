@@ -830,7 +830,7 @@ play_tree_iter_new_copy(play_tree_iter_t* old) {
   assert(old != NULL);
 #endif
 
-  iter = (play_tree_iter_t*)malloc(sizeof(play_tree_iter_t));
+  iter = malloc(sizeof(play_tree_iter_t));
   if(iter == NULL) {
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",sizeof(play_tree_iter_t));
     return NULL;
@@ -838,7 +838,7 @@ play_tree_iter_new_copy(play_tree_iter_t* old) {
 ;
   memcpy(iter,old,sizeof(play_tree_iter_t));
   if(old->status_stack) {
-    iter->status_stack = (int*)malloc(old->stack_size * sizeof(int));
+    iter->status_stack = malloc(old->stack_size * sizeof(int));
     if(iter->status_stack == NULL) {
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",old->stack_size * sizeof(int));
       free(iter);

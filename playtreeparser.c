@@ -53,7 +53,7 @@ play_tree_parser_get_line(play_tree_parser_t* p) {
   int r,resize = 0;
 
   if(p->buffer == NULL) {
-    p->buffer = (char*)malloc(BUF_STEP);
+    p->buffer = malloc(BUF_STEP);
     p->buffer_size = BUF_STEP;
     p->iter = p->buffer;
   }
