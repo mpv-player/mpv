@@ -676,6 +676,7 @@ rtp_setup_and_play (rtsp_t *rtsp_session)
   statut = rtsp_request_play (rtsp_session, NULL);
   if (statut < 200 || statut > 299)
   {
+    free (destination);
     rtp_session_free (rtp_session);
     return NULL;
   }
