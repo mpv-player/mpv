@@ -170,7 +170,6 @@ static void update_yuvconv(void) {
       mp_msg(MSGT_VO, MSGL_WARN,
              "[gl] Could not read customprog %s\n", custom_prog);
     else {
-      int i;
       char *prog = calloc(1, MAX_CUSTOM_PROG_SIZE + 1);
       fread(prog, 1, MAX_CUSTOM_PROG_SIZE, f);
       fclose(f);
