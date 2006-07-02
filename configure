@@ -4390,19 +4390,6 @@ echores "$_pnm"
 
 
 
-echocheck "md5sum support"
-if test "$_md5sum" = yes; then
-  _def_md5sum="#define HAVE_MD5SUM"
-  _vosrc="$_vosrc vo_md5sum.c md5sum.c"
-  _vomodules="md5sum $_vomodules"
-else
-  _def_md5sum="#undef HAVE_MD5SUM"
-  _novomodules="md5sum $_novomodules"
-fi
-echores "$_md5sum"
-
-
-
 echocheck "GIF support"
 # This is to appease people who want to force gif support.
 # If it is forced to yes, then we still do checks to determine
@@ -6277,6 +6264,17 @@ else
     _ld_libpostproc='-lpostproc'
   fi
 fi
+
+echocheck "md5sum support"
+if test "$_md5sum" = yes; then
+  _def_md5sum="#define HAVE_MD5SUM"
+  _vosrc="$_vosrc vo_md5sum.c"
+  _vomodules="md5sum $_vomodules"
+else
+  _def_md5sum="#undef HAVE_MD5SUM"
+  _novomodules="md5sum $_novomodules"
+fi
+echores "$_md5sum"
 
 echocheck "AMR narrowband"
 if test "$_amr_nb" = auto ; then
