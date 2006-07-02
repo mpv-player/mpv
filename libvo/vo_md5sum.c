@@ -10,6 +10,7 @@
  *
  * Changelog
  * 
+ * 2006-07-02   Removed imported md5sum code and rely on libavutil now
  * 2005-01-16   Replaced suboption parser by call to subopt-helper.
  * 2004-09-16   Second draft. It now acts on VOCTRL_DRAW_IMAGE and does not
  *              maintain a local copy of the image if the format is YV12.
@@ -38,7 +39,7 @@
 #include "video_out_internal.h"
 #include "mplayer.h"			/* for exit_player() */
 #include "help_mp.h"
-#include "md5sum.h"
+#include "libavutil/md5.h"
 
 /* ------------------------------------------------------------------------- */
 
@@ -201,22 +202,23 @@ static uint32_t draw_image(mp_image_t *mpi)
     uint32_t strideU = mpi->stride[1];
     uint32_t strideV = mpi->stride[2];
 
-    auth_md5Ctx md5_context;
+    uint8_t md5_context_memory[av_md5_size];
+    struct AVMD5 *md5_context = (struct AVMD5*) md5_context_memory;
     unsigned int i;
 
     if (mpi->flags & MP_IMGFLAG_PLANAR) { /* Planar */
         if (mpi->flags & MP_IMGFLAG_YUV) { /* Planar YUV */
-            auth_md5InitCtx(&md5_context);
+            av_md5_init(md5_context);
             for (i=0; i<h; i++) {
-                auth_md5SumCtx(&md5_context, planeY + i * strideY, w);
+                av_md5_update(md5_context, planeY + i * strideY, w);
             }
             w = w / 2;
             h = h / 2;
             for (i=0; i<h; i++) {
-                auth_md5SumCtx(&md5_context, planeU + i * strideU, w);
-                auth_md5SumCtx(&md5_context, planeV + i * strideV, w);
+                av_md5_update(md5_context, planeU + i * strideU, w);
+                av_md5_update(md5_context, planeV + i * strideV, w);
             }
-            auth_md5CloseCtx(&md5_context, md5sum);
+            av_md5_final(md5_context, md5sum);
             md5sum_output_sum(md5sum);
             return VO_TRUE;
         } else { /* Planar RGB */
@@ -227,7 +229,7 @@ static uint32_t draw_image(mp_image_t *mpi)
             
             return VO_FALSE;
         } else { /* Packed RGB */
-            auth_md5Sum(md5sum, rgbimage, mpi->w * (mpi->bpp >> 3) * mpi->h);
+            av_md5_sum(md5sum, rgbimage, mpi->w * (mpi->bpp >> 3) * mpi->h);
             md5sum_output_sum(md5sum);
             return VO_TRUE;
         }
