@@ -20,7 +20,7 @@ int main(int argc,char* argv[]){
     fread(&bih,sizeof(BITMAPINFOHEADER),1,f);
     printf("frame dim: %d x %d \n",(int)bih.biWidth,(int)bih.biHeight);
 
-    src=(char*)malloc(512000);
+    src=malloc(512000);
     len=fread(src,1,512000,f);
     printf("frame len = %d\n",len);
 

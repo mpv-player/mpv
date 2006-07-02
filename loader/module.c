@@ -242,7 +242,7 @@ static WIN_BOOL MODULE_DllProcessAttach( WINE_MODREF *wm, LPVOID lpReserved )
     }
     else
     {
-	local_wm = (modref_list*)malloc(sizeof(modref_list));
+	local_wm = malloc(sizeof(modref_list));
 	local_wm->next=local_wm->prev=NULL;
 	local_wm->wm=wm;
     }

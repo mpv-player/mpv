@@ -78,7 +78,7 @@ ICOpen(long filename,long fccHandler,unsigned int wMode) {
 	/* FIXME: do we need to fill out the rest too? */
 	hdrv=OpenDriverA((long)&icopen);
 	if (!hdrv) return 0;
-	whic = (WINE_HIC*)malloc(sizeof(WINE_HIC));
+	whic = malloc(sizeof(WINE_HIC));
 	whic->hdrv	= hdrv;
 	whic->driverproc= ((DRVR*)hdrv)->DriverProc;
 //	whic->private	= ICSendMessage((HIC)whic,DRV_OPEN,0,(long)&icopen);

@@ -618,9 +618,9 @@ static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx
 
     desc->faces[pic_idx] = face;
 
-    desc->pic_a[pic_idx] = (raw_file*)malloc(sizeof(raw_file));
+    desc->pic_a[pic_idx] = malloc(sizeof(raw_file));
     if (!desc->pic_a[pic_idx]) return -1;
-    desc->pic_b[pic_idx] = (raw_file*)malloc(sizeof(raw_file));
+    desc->pic_b[pic_idx] = malloc(sizeof(raw_file));
     if (!desc->pic_b[pic_idx]) return -1;
 
     desc->pic_a[pic_idx]->bmp = NULL;
@@ -628,11 +628,11 @@ static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx
     desc->pic_b[pic_idx]->bmp = NULL;
     desc->pic_b[pic_idx]->pal = NULL;
 
-    desc->pic_a[pic_idx]->pal = (unsigned char*)malloc(sizeof(unsigned char)*256*3);
+    desc->pic_a[pic_idx]->pal = malloc(sizeof(unsigned char)*256*3);
     if (!desc->pic_a[pic_idx]->pal) return -1;
     for (i = 0; i<768; ++i) desc->pic_a[pic_idx]->pal[i] = i/3;
 
-    desc->pic_b[pic_idx]->pal = (unsigned char*)malloc(sizeof(unsigned char)*256*3);
+    desc->pic_b[pic_idx]->pal = malloc(sizeof(unsigned char)*256*3);
     if (!desc->pic_b[pic_idx]->pal) return -1;
     for (i = 0; i<768; ++i) desc->pic_b[pic_idx]->pal[i] = i/3;
 
@@ -673,13 +673,13 @@ int generate_tables(font_desc_t *desc, double thickness, double radius)
 //    fprintf(stderr, "o_r = %d\n", desc->tables.o_r);
 
     if (desc->tables.g_r) {
-	desc->tables.g = (unsigned*)malloc(desc->tables.g_w * sizeof(unsigned));
-	desc->tables.gt2 = (unsigned*)malloc(256 * desc->tables.g_w * sizeof(unsigned));
+	desc->tables.g = malloc(desc->tables.g_w * sizeof(unsigned));
+	desc->tables.gt2 = malloc(256 * desc->tables.g_w * sizeof(unsigned));
 	if (desc->tables.g==NULL || desc->tables.gt2==NULL) {
 	    return -1;
 	}
     }
-    desc->tables.om = (unsigned*)malloc(desc->tables.o_w*desc->tables.o_w * sizeof(unsigned));
+    desc->tables.om = malloc(desc->tables.o_w*desc->tables.o_w * sizeof(unsigned));
     desc->tables.omt = malloc(desc->tables.o_size*256);
 
     omtp = desc->tables.omt;

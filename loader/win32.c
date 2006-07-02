@@ -2759,7 +2759,7 @@ static int WINAPI expGetPrivateProfileIntA(const char* appname,
 	dbgprintf("GetPrivateProfileIntA('%s', '%s', %d, '%s') => %d\n", appname, keyname, default_value, filename, default_value );
 	return default_value;
     }
-    fullname=(char*)malloc(50+strlen(appname)+strlen(keyname)+strlen(filename));
+    fullname=malloc(50+strlen(appname)+strlen(keyname)+strlen(filename));
     strcpy(fullname, "Software\\IniFileMapping\\");
     strcat(fullname, appname);
     strcat(fullname, "\\");
@@ -2797,7 +2797,7 @@ static int WINAPI expGetPrivateProfileStringA(const char* appname,
     char* fullname;
     dbgprintf("GetPrivateProfileStringA('%s', '%s', def_val '%s', 0x%x, 0x%x, '%s')", appname, keyname, def_val, dest, len, filename );
     if(!(appname && keyname && filename) ) return 0;
-    fullname=(char*)malloc(50+strlen(appname)+strlen(keyname)+strlen(filename));
+    fullname=malloc(50+strlen(appname)+strlen(keyname)+strlen(filename));
     strcpy(fullname, "Software\\IniFileMapping\\");
     strcat(fullname, appname);
     strcat(fullname, "\\");
@@ -2828,7 +2828,7 @@ static int WINAPI expWritePrivateProfileStringA(const char* appname,
 	dbgprintf(" => -1\n");
 	return -1;
     }
-    fullname=(char*)malloc(50+strlen(appname)+strlen(keyname)+strlen(filename));
+    fullname=malloc(50+strlen(appname)+strlen(keyname)+strlen(filename));
     strcpy(fullname, "Software\\IniFileMapping\\");
     strcat(fullname, appname);
     strcat(fullname, "\\");
@@ -3542,7 +3542,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strstr(cs1, "QuickTime.qts"))
     {
 	int result;
-	char* tmp=(char*)malloc(strlen(def_path)+50);
+	char* tmp=malloc(strlen(def_path)+50);
 	strcpy(tmp, def_path);
 	strcat(tmp, "/");
 	strcat(tmp, "QuickTime.qts");
@@ -3553,7 +3553,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strstr(cs1, ".qtx"))
     {
 	int result;
-	char* tmp=(char*)malloc(strlen(def_path)+250);
+	char* tmp=malloc(strlen(def_path)+250);
 	char* x=strrchr(cs1,'\\');
 	sprintf(tmp,"%s/%s",def_path,x?(x+1):cs1);
 //	printf("### Open: %s -> %s\n",cs1,tmp);
@@ -3566,7 +3566,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strncmp(cs1, "AP", 2) == 0)
     {
 	int result;
-	char* tmp=(char*)malloc(strlen(def_path)+50);
+	char* tmp=malloc(strlen(def_path)+50);
 	strcpy(tmp, def_path);
 	strcat(tmp, "/");
 	strcat(tmp, "APmpg4v1.apl");
@@ -3578,7 +3578,7 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     {
 	int r;
 	int flg = 0;
-	char* tmp=(char*)malloc(20 + strlen(cs1));
+	char* tmp=malloc(20 + strlen(cs1));
 	strcpy(tmp, "/tmp/");
 	strcat(tmp, cs1);
 	r = 4;

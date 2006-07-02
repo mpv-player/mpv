@@ -282,7 +282,7 @@ PWINE_ACMDRIVERID MSACM_RegisterDriver(const char* pszFileName,
 	MSACM_hHeap = GetProcessHeap();
 #endif
     padid = (PWINE_ACMDRIVERID) HeapAlloc(MSACM_hHeap, 0, sizeof(WINE_ACMDRIVERID));
-    padid->pszFileName = (char*)malloc(strlen(pszFileName)+1);
+    padid->pszFileName = malloc(strlen(pszFileName)+1);
     strcpy(padid->pszFileName, pszFileName);
 //    1~strdup(pszDriverAlias);
     padid->wFormatTag = wFormatTag;

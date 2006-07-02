@@ -465,7 +465,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 255);
   {
   int i;
-  char *tmp = (char *)malloc(stride * h);
+  char *tmp = malloc(stride * h);
   // convert alpha from weird MPlayer scale.
   // in-place is not possible since it is reused for future OSDs
   for (i = h * stride - 1; i > 0; i--)

@@ -105,7 +105,7 @@ int enable() {
   if (v)
     return 1;
   errno = 0;
-  v = (vga_t *)malloc(sizeof(vga_t));
+  v = malloc(sizeof(vga_t));
   if (v) {
     if (ioperm(0x3d4, 2, 1) == 0) {
       fd = open("/dev/mem", O_RDWR);

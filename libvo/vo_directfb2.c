@@ -222,7 +222,7 @@ static int preinit(const char *arg)
 	{
 	    int argc = 2;
 	    char arg0[10] = "mplayer";
-	    char *arg1 = (char *)malloc(dfb_params.len + 7);
+	    char *arg1 = malloc(dfb_params.len + 7);
 	    char* argv[3];
 	    char ** a;
 	    

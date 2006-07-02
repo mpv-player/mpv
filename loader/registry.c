@@ -66,11 +66,11 @@ static void create_registry(void){
 	save_registry();
 	return;
     }
-    regs=(struct reg_value*)malloc(3*sizeof(struct reg_value));
+    regs=malloc(3*sizeof(struct reg_value));
     regs[0].type=regs[1].type=DIR;
-    regs[0].name=(char*)malloc(5);
+    regs[0].name=malloc(5);
     strcpy(regs[0].name, "HKLM");
-    regs[1].name=(char*)malloc(5);
+    regs[1].name=malloc(5);
     strcpy(regs[1].name, "HKCU");
     regs[0].value=regs[1].value=NULL;
     regs[0].len=regs[1].len=0;
@@ -97,13 +97,13 @@ static void open_registry(void)
 	    return;
 	}
 	read(fd, &reg_size, 4);
-	regs=(struct reg_value*)malloc(reg_size*sizeof(struct reg_value));
+	regs=malloc(reg_size*sizeof(struct reg_value));
 	head = 0;
 	for(i=0; i<reg_size; i++)
 	{
 		read(fd,&regs[i].type,4);
 		read(fd,&len,4);
-		regs[i].name=(char*)malloc(len+1);
+		regs[i].name=malloc(len+1);
 		if(regs[i].name==0)
 		{
 			reg_size=i+1;
@@ -112,7 +112,7 @@ static void open_registry(void)
 		read(fd, regs[i].name, len);
 		regs[i].name[len]=0;
 		read(fd,&regs[i].len,4);
-		regs[i].value=(char*)malloc(regs[i].len+1);
+		regs[i].value=malloc(regs[i].len+1);
 		if(regs[i].value==0)
 		{
 		        free(regs[i].name);
@@ -226,7 +226,7 @@ static int generate_handle()
 static reg_handle_t* insert_handle(long handle, const char* name)
 {
 	reg_handle_t* t;
-	t=(reg_handle_t*)malloc(sizeof(reg_handle_t));
+	t=malloc(sizeof(reg_handle_t));
 	if(head==0)
 	{
 		t->prev=0;
@@ -237,7 +237,7 @@ static reg_handle_t* insert_handle(long handle, const char* name)
 		t->prev=head;
 	}
 	t->next=0;
-	t->name=(char*)malloc(strlen(name)+1);
+	t->name=malloc(strlen(name)+1);
 	strcpy(t->name, name);
 	t->handle=handle;
 	head=t;
@@ -254,7 +254,7 @@ static char* build_keyname(long key, const char* subkey)
 	}
 	if(subkey==NULL)
 		subkey="<default>";
-	full_name=(char*)malloc(strlen(t->name)+strlen(subkey)+10);
+	full_name=malloc(strlen(t->name)+strlen(subkey)+10);
 	strcpy(full_name, t->name);
 	strcat(full_name, "\\");
 	strcat(full_name, subkey);
@@ -290,9 +290,9 @@ static struct reg_value* insert_reg_value(int handle, const char* name, int type
 	TRACE("RegInsert '%s'  %p  v:%d  len:%d\n", name, value, *(int*)value, len);
 	v->type=type;
 	v->len=len;
-	v->value=(char*)malloc(len);
+	v->value=malloc(len);
 	memcpy(v->value, value, len);
-	v->name=(char*)malloc(strlen(fullname)+1);
+	v->name=malloc(strlen(fullname)+1);
 	strcpy(v->name, fullname);
         free(fullname);
 	save_registry();
@@ -325,7 +325,7 @@ static void init_registry(void)
                 pthn = pwent->pw_dir;
 	    }
 
-	    localregpathname = (char*)malloc(strlen(pthn)+20);
+	    localregpathname = malloc(strlen(pthn)+20);
 	    strcpy(localregpathname, pthn);
 	    strcat(localregpathname, "/.registry");
 	}
@@ -347,7 +347,7 @@ static reg_handle_t* find_handle_2(long key, const char* subkey)
 	}
 	if(subkey==NULL)
 		return t;
-	full_name=(char*)malloc(strlen(t->name)+strlen(subkey)+10);
+	full_name=malloc(strlen(t->name)+strlen(subkey)+10);
 	strcpy(full_name, t->name);
 	strcat(full_name, "\\");
 	strcat(full_name, subkey);

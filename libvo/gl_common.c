@@ -298,7 +298,7 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
   char *allexts;
   if (!extensions) extensions = "";
   if (!ext2) ext2 = "";
-  allexts = (char *)malloc(strlen(extensions) + strlen(ext2) + 2);
+  allexts = malloc(strlen(extensions) + strlen(ext2) + 2);
   strcpy(allexts, extensions);
   strcat(allexts, " ");
   strcat(allexts, ext2);
@@ -332,7 +332,7 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
   GLfloat fval = (GLfloat)val / 255.0;
   GLfloat border[4] = {fval, fval, fval, fval};
   GLenum clrfmt = (fmt == GL_ALPHA) ? GL_ALPHA : GL_LUMINANCE;
-  char *init = (char *)malloc(w * h);
+  char *init = malloc(w * h);
   memset(init, val, w * h);
   glAdjustAlignment(w);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
@@ -400,7 +400,7 @@ int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
     return 0;
   if (w > MAXDIM || h > MAXDIM)
     return 0;
-  data = (char *)malloc(w * h * 3);
+  data = malloc(w * h * 3);
   if (fread(data, w * 3, h, f) != h)
     return 0;
   glCreateClearTex(target, fmt, filter, w, h, 0);

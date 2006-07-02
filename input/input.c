@@ -690,7 +690,7 @@ mp_input_parse_cmd(char* str) {
 	ptr2 = e + 1;
         l--;
       }
-      cmd->args[i].v.s = (char*)malloc(l+1);
+      cmd->args[i].v.s = malloc(l+1);
       strncpy(cmd->args[i].v.s,start,l);
       cmd->args[i].v.s[l] = '\0';
       if(term != ' ') ptr += l+2;
@@ -746,7 +746,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
 
   // Allocate the buffer if it doesn't exist
   if(!mp_fd->buffer) {
-    mp_fd->buffer = (char*)malloc(MP_CMD_MAX_SIZE);
+    mp_fd->buffer = malloc(MP_CMD_MAX_SIZE);
     mp_fd->pos = 0;
     mp_fd->size = MP_CMD_MAX_SIZE;
   } 
@@ -802,7 +802,7 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
 
     // Not dropping : put the cmd in ret
     if( ! (mp_fd->flags & MP_FD_DROP)) {
-      (*ret) = (char*)malloc(l+1);
+      (*ret) = malloc(l+1);
       strncpy((*ret),mp_fd->buffer,l);
       (*ret)[l] = '\0';
     } else { // Remove the dropping flag
@@ -1275,7 +1275,7 @@ mp_cmd_clone(mp_cmd_t* cmd) {
   assert(cmd != NULL);
 #endif
 
-  ret = (mp_cmd_t*)malloc(sizeof(mp_cmd_t));
+  ret = malloc(sizeof(mp_cmd_t));
   memcpy(ret,cmd,sizeof(mp_cmd_t));
   if(cmd->name)
     ret->name = strdup(cmd->name);

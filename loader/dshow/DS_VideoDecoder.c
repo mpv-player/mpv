@@ -114,7 +114,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 	bihs = (format->biSize < (int) sizeof(BITMAPINFOHEADER)) ?
 	    sizeof(BITMAPINFOHEADER) : format->biSize;
      
-        this->iv.m_bh = (BITMAPINFOHEADER*)malloc(bihs);
+        this->iv.m_bh = malloc(bihs);
         memcpy(this->iv.m_bh, format, bihs);
 
         this->iv.m_State = STOP;
@@ -126,7 +126,7 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
         this->iv.m_bCapable16b = true;
                 
         bihs += sizeof(VIDEOINFOHEADER) - sizeof(BITMAPINFOHEADER);
-	this->m_sVhdr = (VIDEOINFOHEADER*)malloc(bihs);
+	this->m_sVhdr = malloc(bihs);
 	memset(this->m_sVhdr, 0, bihs);
 	memcpy(&this->m_sVhdr->bmiHeader, this->iv.m_bh, this->iv.m_bh->biSize);
 	this->m_sVhdr->rcSource.left = this->m_sVhdr->rcSource.top = 0;

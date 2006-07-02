@@ -779,7 +779,7 @@ static void init_osd_yuv_pal(){
 
       snum = subpicture.num_palette_entries;
       seb = subpicture.entry_bytes;
-      palette = (char*)malloc(snum*seb);//check fail
+      palette = malloc(snum*seb);//check fail
       if(palette == NULL) return;
       for(i=0; i<snum; i++){
          // 0-black max-white the other are gradients
