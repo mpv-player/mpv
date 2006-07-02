@@ -699,7 +699,7 @@ static int parse_func_pf(m_option_t* opt,char *name, char *param, void* dst, int
   if(!dst)
     return 1;
 
-  s = (m_func_save_t*)calloc(1,sizeof(m_func_save_t));
+  s = calloc(1,sizeof(m_func_save_t));
   s->name = strdup(name);
   s->param = param ? strdup(param) : NULL;
 
@@ -724,7 +724,7 @@ static void copy_func_pf(m_option_t* opt,void* dst, void* src) {
     free_func_pf(dst);
 
   while(s) {
-    d = (m_func_save_t*)calloc(1,sizeof(m_func_save_t));
+    d = calloc(1,sizeof(m_func_save_t));
     d->name = strdup(s->name);
     d->param = s->param ? strdup(s->param) : NULL;
     if(last)

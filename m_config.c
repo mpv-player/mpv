@@ -47,7 +47,7 @@ m_config_new(void) {
   };
   int i;
 
-  config = (m_config_t*)calloc(1,sizeof(m_config_t));
+  config = calloc(1,sizeof(m_config_t));
   config->lvl = 1; // 0 Is the defaults
   if(!inited) {
     inited = 1;
@@ -133,7 +133,7 @@ m_config_push(m_config_t* config) {
     m_option_save(co->opt,co->slots->data,co->opt->p);
     
     // Allocate a new slot    
-    slot = (m_config_save_slot_t*)calloc(1,sizeof(m_config_save_slot_t) + co->opt->type->size);
+    slot = calloc(1,sizeof(m_config_save_slot_t) + co->opt->type->size);
     slot->lvl = config->lvl;
     slot->prev = co->slots;
     co->slots = slot;
@@ -193,7 +193,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
 #endif
 
   // Allocate a new entry for this option
-  co = (m_config_option_t*)calloc(1,sizeof(m_config_option_t) + arg->type->size);
+  co = calloc(1,sizeof(m_config_option_t) + arg->type->size);
   co->opt = arg;
 
   // Fill in the full name
@@ -225,7 +225,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
     }
     if(!(co->flags & M_CFG_OPT_ALIAS)) {
     // Allocate a slot for the defaults
-    sl = (m_config_save_slot_t*)calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
+    sl = calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
     m_option_save(arg,sl->data,(void**)arg->p);
     // Hack to avoid too much trouble with dynamicly allocated data :
     // We always use a dynamic version
@@ -235,7 +235,7 @@ m_config_add_option(m_config_t *config, m_option_t *arg, char* prefix) {
     }
     sl->lvl = 0;
     sl->prev = NULL;
-    co->slots = (m_config_save_slot_t*)calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
+    co->slots = calloc(1,sizeof(m_config_save_slot_t) + arg->type->size);
     co->slots->prev = sl;
     co->slots->lvl = config->lvl;
     m_option_copy(co->opt,co->slots->data,sl->data);

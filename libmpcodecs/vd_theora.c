@@ -64,7 +64,7 @@ static int init(sh_video_t *sh){
     /* this is not a loop, just a context, from which we can break on error */
     do
     {
-       context = (theora_struct_t *)calloc (sizeof (theora_struct_t), 1);
+       context = calloc (sizeof (theora_struct_t), 1);
        sh->context = context;
        if (!context)
 	  break;

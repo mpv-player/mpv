@@ -40,7 +40,7 @@ url_new(const char* url) {
         }
 
 	// Create the URL container
-	Curl = (URL_t*)malloc(sizeof(URL_t));
+	Curl = malloc(sizeof(URL_t));
 	if( Curl==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
@@ -72,7 +72,7 @@ url_new(const char* url) {
 		}
 	}
 	pos1 = ptr1-escfilename;
-	Curl->protocol = (char*)malloc(pos1+1);
+	Curl->protocol = malloc(pos1+1);
 	if( Curl->protocol==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
@@ -94,7 +94,7 @@ url_new(const char* url) {
 	if( ptr2!=NULL ) {
 		// We got something, at least a username...
 		int len = ptr2-ptr1;
-		Curl->username = (char*)malloc(len+1);
+		Curl->username = malloc(len+1);
 		if( Curl->username==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			goto err_out;
@@ -107,7 +107,7 @@ url_new(const char* url) {
 			// We also have a password
 			int len2 = ptr2-ptr3-1;
 			Curl->username[ptr3-ptr1]='\0';
-			Curl->password = (char*)malloc(len2+1);
+			Curl->password = malloc(len2+1);
 			if( Curl->password==NULL ) {
 				mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 				goto err_out;
@@ -159,7 +159,7 @@ url_new(const char* url) {
 	}
 	if( v6addr ) pos2--;
 	// copy the hostname in the URL container
-	Curl->hostname = (char*)malloc(pos2-pos1+1);
+	Curl->hostname = malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		goto err_out;
@@ -183,7 +183,7 @@ url_new(const char* url) {
 	} 
 	// Check if a filename was given or set, else set it with '/'
 	if( Curl->file==NULL ) {
-		Curl->file = (char*)malloc(2);
+		Curl->file = malloc(2);
 		if( Curl->file==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 			goto err_out;

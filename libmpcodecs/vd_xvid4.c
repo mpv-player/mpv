@@ -174,7 +174,7 @@ static int init(sh_video_t *sh)
 		return(0);
 	}
 
-	p = (priv_t*)malloc(sizeof(priv_t));
+	p = malloc(sizeof(priv_t));
 	p->cs = cs;
 	p->hdl = dec_p.handle;
 	p->vo_initialized = 0;

@@ -87,7 +87,7 @@ static void write_png(char *fname, unsigned char *buffer, int width, int height,
         
     png_set_bgr(png_ptr);
 
-    row_pointers = (png_byte**)malloc(height*sizeof(png_byte*));
+    row_pointers = malloc(height*sizeof(png_byte*));
     for (k = 0; k < height; k++) {
 	unsigned char* s=buffer + stride*k;
 	row_pointers[k] = s;

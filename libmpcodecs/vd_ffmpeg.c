@@ -383,7 +383,7 @@ static int init(sh_video_t *sh){
     /* Pass palette to codec */
 #if LIBAVCODEC_BUILD >= 4689
     if (sh->bih && (sh->bih->biBitCount <= 8)) {
-        avctx->palctrl = (AVPaletteControl*)calloc(1,sizeof(AVPaletteControl));
+        avctx->palctrl = calloc(1,sizeof(AVPaletteControl));
         avctx->palctrl->palette_changed = 1;
         if (sh->bih->biSize-sizeof(BITMAPINFOHEADER))
             /* Palette size in biSize */

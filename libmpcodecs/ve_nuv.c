@@ -217,7 +217,7 @@ static int vf_open(vf_instance_t *vf, char* args){
       vf->priv->lzo = 0;
     }
     vf->priv->zbuffer = (lzo_bytep)malloc(FRAMEHEADERSIZE + LZO_OUT_LEN);
-    vf->priv->zmem = (long*)malloc(sizeof(long)*LZO_AL(LZO1X_1_MEM_COMPRESS));
+    vf->priv->zmem = malloc(sizeof(long)*LZO_AL(LZO1X_1_MEM_COMPRESS));
   }
 
   return 1;

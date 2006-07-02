@@ -36,7 +36,7 @@ static int preinit(sh_audio_t *sh) {
 }
 
 static int init(sh_audio_t *sh) {
-  context_t *ctx = (context_t *)calloc(1, sizeof(context_t));
+  context_t *ctx = calloc(1, sizeof(context_t));
   const SpeexMode *spx_mode;
   const SpeexStereoState st_st = SPEEX_STEREO_STATE_INIT; // hack
   if (!sh->wf || sh->wf->cbSize < 80) {

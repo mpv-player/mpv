@@ -203,7 +203,7 @@ static int check_clip(void *buf, int len) {
 
 static int control(sh_audio_t *sh, int cmd, void* arg, ...) {
   if (cmd == ADCTRL_RESYNC_STREAM) {
-    unsigned char *buf = (unsigned char *)malloc(MAX_FRAMESIZE);
+    unsigned char *buf = malloc(MAX_FRAMESIZE);
     int i;
     int nr_ok = 0;
     for (i = 0; i < MAX_SEEK_DISCARD; i++) {

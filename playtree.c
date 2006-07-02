@@ -20,7 +20,7 @@ play_tree_is_valid(play_tree_t* pt);
 
 play_tree_t*
 play_tree_new(void) {
-  play_tree_t* r = (play_tree_t*)calloc(1,sizeof(play_tree_t));
+  play_tree_t* r = calloc(1,sizeof(play_tree_t));
   if(r == NULL)
     mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate %d bytes of memory\n",sizeof(play_tree_t));
   r->entry_type = PLAY_TREE_ENTRY_NODE;
@@ -480,7 +480,7 @@ play_tree_iter_new(play_tree_t* pt,m_config_t* config) {
   if( ! play_tree_is_valid(pt))
     return NULL;
 
-  iter = (play_tree_iter_t*)calloc(1,sizeof(play_tree_iter_t));
+  iter = calloc(1,sizeof(play_tree_iter_t));
   if(! iter) {
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Can't allocate new iterator (%d bytes of memory)\n",sizeof(play_tree_iter_t));
       return NULL;

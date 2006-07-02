@@ -111,7 +111,7 @@ static void scast_meta_read(int fd, streaming_ctrl_t *sc) {
   my_read(fd, &tmp, 1, sc);
   metalen = tmp * 16;
   if (metalen > 0) {
-    char *info = (char *)malloc(metalen + 1);
+    char *info = malloc(metalen + 1);
     unsigned nlen = my_read(fd, info, metalen, sc);
     info[nlen] = 0;
     mp_msg(MSGT_DEMUXER, MSGL_INFO, "\nICY Info: %s\n", info);
@@ -282,7 +282,7 @@ HTTP_header_t *
 http_new_header(void) {
 	HTTP_header_t *http_hdr;
 
-	http_hdr = (HTTP_header_t*)malloc(sizeof(HTTP_header_t));
+	http_hdr = malloc(sizeof(HTTP_header_t));
 	if( http_hdr==NULL ) return NULL;
 	memset( http_hdr, 0, sizeof(HTTP_header_t) );
 
@@ -356,7 +356,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		return -1;
 	}
 	len = hdr_ptr-http_hdr->buffer;
-	http_hdr->protocol = (char*)malloc(len+1);
+	http_hdr->protocol = malloc(len+1);
 	if( http_hdr->protocol==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
@@ -384,7 +384,7 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 		return -1;
 	}
 	len = ptr-hdr_ptr;
-	http_hdr->reason_phrase = (char*)malloc(len+1);
+	http_hdr->reason_phrase = malloc(len+1);
 	if( http_hdr->reason_phrase==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return -1;
@@ -448,7 +448,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 	if( http_hdr->method==NULL ) http_set_method( http_hdr, "GET");
 	if( http_hdr->uri==NULL ) http_set_uri( http_hdr, "/");
 	else {
-		uri = (char*)malloc(strlen(http_hdr->uri) + 1);
+		uri = malloc(strlen(http_hdr->uri) + 1);
 		if( uri==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 			return NULL;
@@ -476,7 +476,7 @@ http_build_request( HTTP_header_t *http_hdr ) {
 		free( http_hdr->buffer );
 		http_hdr->buffer = NULL;
 	}
-	http_hdr->buffer = (char*)malloc(len+1);
+	http_hdr->buffer = malloc(len+1);
 	if( http_hdr->buffer==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Memory allocation failed\n");
 		return NULL;
@@ -542,13 +542,13 @@ http_set_field( HTTP_header_t *http_hdr, const char *field_name ) {
 	HTTP_field_t *new_field;
 	if( http_hdr==NULL || field_name==NULL ) return;
 
-	new_field = (HTTP_field_t*)malloc(sizeof(HTTP_field_t));
+	new_field = malloc(sizeof(HTTP_field_t));
 	if( new_field==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
 	}
 	new_field->next = NULL;
-	new_field->field_name = (char*)malloc(strlen(field_name)+1);
+	new_field->field_name = malloc(strlen(field_name)+1);
 	if( new_field->field_name==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
@@ -568,7 +568,7 @@ void
 http_set_method( HTTP_header_t *http_hdr, const char *method ) {
 	if( http_hdr==NULL || method==NULL ) return;
 
-	http_hdr->method = (char*)malloc(strlen(method)+1);
+	http_hdr->method = malloc(strlen(method)+1);
 	if( http_hdr->method==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
@@ -580,7 +580,7 @@ void
 http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 	if( http_hdr==NULL || uri==NULL ) return;
 
-	http_hdr->uri = (char*)malloc(strlen(uri)+1);
+	http_hdr->uri = malloc(strlen(uri)+1);
 	if( http_hdr->uri==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		return;
@@ -599,7 +599,7 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 		pass_len = strlen(password);
 	}
 	
-	usr_pass = (char*)malloc(strlen(username)+pass_len+2);
+	usr_pass = malloc(strlen(username)+pass_len+2);
 	if( usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;
@@ -609,7 +609,7 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 
 	// Base 64 encode with at least 33% more data than the original size
 	encoded_len = strlen(usr_pass)*2;
-	b64_usr_pass = (char*)malloc(encoded_len);
+	b64_usr_pass = malloc(encoded_len);
 	if( b64_usr_pass==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;
@@ -623,7 +623,7 @@ http_add_basic_authentication( HTTP_header_t *http_hdr, const char *username, co
 
 	b64_usr_pass[out_len]='\0';
 	
-	auth = (char*)malloc(encoded_len+22);
+	auth = malloc(encoded_len+22);
 	if( auth==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 		goto out;

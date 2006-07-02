@@ -694,7 +694,7 @@ play_tree_parser_t*
 play_tree_parser_new(stream_t* stream,int deep) {
   play_tree_parser_t* p;
 
-  p = (play_tree_parser_t*)calloc(1,sizeof(play_tree_parser_t));
+  p = calloc(1,sizeof(play_tree_parser_t));
   if(!p)
     return NULL;
   p->stream = stream;

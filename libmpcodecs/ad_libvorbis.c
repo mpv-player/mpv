@@ -72,7 +72,7 @@ static int init(sh_audio_t *sh)
   }
 
   /// Init the decoder with the 3 header packets
-  ov = (struct ov_struct_st*)malloc(sizeof(struct ov_struct_st));
+  ov = malloc(sizeof(struct ov_struct_st));
   vorbis_info_init(&ov->vi);
   vorbis_comment_init(&vc);
 
