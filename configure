@@ -6266,6 +6266,7 @@ else
 fi
 
 echocheck "md5sum support"
+test "$_libavutil" = yes || test "$_libavutil_so" = yes || _md5sum=no
 if test "$_md5sum" = yes; then
   _def_md5sum="#define HAVE_MD5SUM"
   _vosrc="$_vosrc vo_md5sum.c"
