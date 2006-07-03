@@ -43,7 +43,6 @@ SRCS_MENCODER = mencoder.c \
                 divx4_vbr.c \
                 libvo/aclib.c \
                 libvo/font_load.c \
-                libvo/font_load_ft.c \
                 libvo/osd.c \
                 libvo/sub.c \
                 parser-mecmd.c \
@@ -59,6 +58,10 @@ SRCS_MPLAYER = mplayer.c \
 
 ifeq ($(UNRARLIB),yes)
 SRCS_COMMON += unrarlib.c
+endif
+
+ifeq ($(FREETYPE),yes)
+SRCS_MENCODER += font_load_ft.c
 endif
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
