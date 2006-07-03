@@ -758,7 +758,6 @@ play_tree_iter_down_step(play_tree_iter_t* iter, int d,int with_nodes) {
 
 char*
 play_tree_iter_get_file(play_tree_iter_t* iter, int d) {
-  char* entry;
 #ifdef MP_DEBUG
   assert(iter != NULL);
   assert(iter->tree->child == NULL);
