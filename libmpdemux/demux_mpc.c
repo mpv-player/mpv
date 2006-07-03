@@ -78,7 +78,7 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
   sh_audio = new_sh_audio(demuxer,0);
 
   {
-    char *wf = (char *)calloc(1, sizeof(WAVEFORMATEX) + HDR_SIZE);
+    char *wf = calloc(1, sizeof(WAVEFORMATEX) + HDR_SIZE);
     char *header = &wf[sizeof(WAVEFORMATEX)];
     const int freqs[4] = {44100, 48000, 37800, 32000};
     int frames;
@@ -102,7 +102,7 @@ static demuxer_t *demux_mpc_open(demuxer_t* demuxer) {
     demuxer->movi_end = s->end_pos;
   }
 
-  priv = (da_priv_t *)malloc(sizeof(da_priv_t));
+  priv = malloc(sizeof(da_priv_t));
   priv->last_pts = -1;
   priv->pts_per_packet = (32 * 36) / (float)sh_audio->wf->nSamplesPerSec;
   priv->length = seconds;

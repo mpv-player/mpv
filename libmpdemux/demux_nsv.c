@@ -209,7 +209,7 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
             // new video stream! parse header
             sh_video->disp_w=hdr[12]|(hdr[13]<<8);
             sh_video->disp_h=hdr[14]|(hdr[15]<<8);
-            sh_video->bih=(BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
+            sh_video->bih=calloc(1,sizeof(BITMAPINFOHEADER));
             sh_video->bih->biSize=sizeof(BITMAPINFOHEADER);
             sh_video->bih->biPlanes=1; 
             sh_video->bih->biBitCount=24;

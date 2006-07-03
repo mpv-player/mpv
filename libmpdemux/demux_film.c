@@ -221,7 +221,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
   int counting_chunks;
   unsigned int total_audio_bytes = 0;
 
-  film_data = (film_data_t *)malloc(sizeof(film_data_t));
+  film_data = malloc(sizeof(film_data_t));
   film_data->total_chunks = 0;
   film_data->current_chunk = 0;
   film_data->chunks = NULL;
@@ -310,7 +310,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
           demuxer->audio->sh = sh_audio;
           sh_audio->ds = demuxer->audio;
 
-          sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+          sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
 
           // uncompressed PCM format
           sh_audio->wf->wFormatTag = 1;
@@ -341,7 +341,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
 
-        sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+        sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
 
         // uncompressed PCM format
         sh_audio->wf->wFormatTag = 1;
@@ -377,7 +377,7 @@ static demuxer_t* demux_open_film(demuxer_t* demuxer)
 
       // allocate enough entries for the chunk
       film_data->chunks = 
-        (film_chunk_t *)calloc(film_data->total_chunks, sizeof(film_chunk_t));
+        calloc(film_data->total_chunks, sizeof(film_chunk_t));
 
       // build the chunk index
       counting_chunks = 1;

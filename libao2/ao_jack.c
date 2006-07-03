@@ -240,7 +240,7 @@ static int init(int rate, int channels, int format, int flags) {
     goto err_out;
   }
   if (!client_name) {
-    client_name = (char *)malloc(40);
+    client_name = malloc(40);
   sprintf(client_name, "MPlayer [%d]", getpid());
   }
   client = jack_client_new(client_name);

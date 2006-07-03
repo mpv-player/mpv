@@ -248,7 +248,7 @@ void demux_ogg_init_sub (void) {
   int lcv;
   if(!ogg_sub.text[0]) // not yet allocated
   for (lcv = 0; lcv < SUB_MAX_TEXT; lcv++) {
-    ogg_sub.text[lcv] = (char*)malloc(OGG_SUB_MAX_LINE);
+    ogg_sub.text[lcv] = malloc(OGG_SUB_MAX_LINE);
   }
 }
 
@@ -813,7 +813,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
     od->vi_inited = 1;
 
   len = op[0].bytes + op[1].bytes + op[2].bytes;
-  sh->wf = (WAVEFORMATEX*)calloc(1, sizeof(WAVEFORMATEX) + len + len/255 + 64);
+  sh->wf = calloc(1, sizeof(WAVEFORMATEX) + len + len/255 + 64);
   ptr = (unsigned char*) (sh->wf+1);
 
   ptr[0] = 2;
@@ -879,7 +879,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   s = demuxer->stream;
 
   demuxer->priv =
-  ogg_d = (ogg_demuxer_t*)calloc(1,sizeof(ogg_demuxer_t));
+  ogg_d = calloc(1,sizeof(ogg_demuxer_t));
   sync = &ogg_d->sync;
   page = &ogg_d->page;
 
@@ -948,7 +948,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (Vorbis), -aid %d\n",ogg_d->num_sub,n_audio-1);
     } else if (pack.bytes >= 80 && !strncmp(pack.packet,"Speex", 5)) {
       sh_a = new_sh_audio(demuxer, ogg_d->num_sub);
-      sh_a->wf = (WAVEFORMATEX*)calloc(1, sizeof(WAVEFORMATEX) + pack.bytes);
+      sh_a->wf = calloc(1, sizeof(WAVEFORMATEX) + pack.bytes);
       sh_a->format = FOURCC_SPEEX;
       sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint32(&pack.packet[36]);
       sh_a->channels = sh_a->wf->nChannels = get_uint32(&pack.packet[48]);
@@ -986,7 +986,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	    sh_v = new_sh_video(demuxer,ogg_d->num_sub);
 
 	    sh_v->context = NULL;
-	    sh_v->bih = (BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
+	    sh_v->bih = calloc(1,sizeof(BITMAPINFOHEADER));
 	    sh_v->bih->biSize=sizeof(BITMAPINFOHEADER);
 	    sh_v->bih->biCompression= sh_v->format = FOURCC_THEORA;
 	    sh_v->fps = ((double)inf.fps_numerator)/
@@ -1032,7 +1032,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
        // Old video header
       if(get_uint32 (pack.packet+96) == 0x05589f80 && pack.bytes >= 184) {
 	sh_v = new_sh_video(demuxer,ogg_d->num_sub);
-	sh_v->bih = (BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
+	sh_v->bih = calloc(1,sizeof(BITMAPINFOHEADER));
 	sh_v->bih->biSize=sizeof(BITMAPINFOHEADER);
 	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(pack.packet[68],pack.packet[69],
@@ -1058,7 +1058,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	unsigned int extra_size;
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
 	extra_size = get_uint16(pack.packet+140);
-	sh_a->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX)+extra_size);
+	sh_a->wf = calloc(1,sizeof(WAVEFORMATEX)+extra_size);
 	sh_a->format = sh_a->wf->wFormatTag = get_uint16(pack.packet+124);
 	sh_a->channels = sh_a->wf->nChannels = get_uint16(pack.packet+126);
 	sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint32(pack.packet+128);
@@ -1086,7 +1086,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       /// New video header
       if(strncmp(st->streamtype,"video",5) == 0) {
 	sh_v = new_sh_video(demuxer,ogg_d->num_sub);
-	sh_v->bih = (BITMAPINFOHEADER*)calloc(1,sizeof(BITMAPINFOHEADER));
+	sh_v->bih = calloc(1,sizeof(BITMAPINFOHEADER));
 	sh_v->bih->biSize=sizeof(BITMAPINFOHEADER);
 	sh_v->bih->biCompression=
 	sh_v->format = mmioFOURCC(st->subtype[0],st->subtype[1],
@@ -1127,7 +1127,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	}
 
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
-	sh_a->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX)+extra_size);
+	sh_a->wf = calloc(1,sizeof(WAVEFORMATEX)+extra_size);
 	sh_a->format =  sh_a->wf->wFormatTag = strtol(buffer, NULL, 16);
 	sh_a->channels = sh_a->wf->nChannels = get_uint16(&st->sh.audio.channels);
 	sh_a->samplerate = sh_a->wf->nSamplesPerSec = get_uint64(&st->samples_per_unit);
@@ -1368,9 +1368,9 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
   }
 
   // Build the ogg demuxer private datas
-  ogg_d = (ogg_demuxer_t*)calloc(1,sizeof(ogg_demuxer_t));
+  ogg_d = calloc(1,sizeof(ogg_demuxer_t));
   ogg_d->num_sub = 1;
-  ogg_d->subs = (ogg_stream_t*)malloc(sizeof(ogg_stream_t));
+  ogg_d->subs = malloc(sizeof(ogg_stream_t));
   ogg_d->subs[0].vorbis = 1;
 
    // Init the ogg physical stream

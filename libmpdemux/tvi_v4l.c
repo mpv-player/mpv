@@ -568,7 +568,7 @@ static int init(priv_t *priv)
       }
 
     mp_msg(MSGT_TV, MSGL_INFO, " Inputs: %d\n", priv->capability.channels);
-    priv->channels = (struct video_channel *)calloc(priv->capability.channels, sizeof(struct video_channel));
+    priv->channels = calloc(priv->capability.channels, sizeof(struct video_channel));
     if (!priv->channels)
 	goto malloc_failed;
     memset(priv->channels, 0, sizeof(struct video_channel)*priv->capability.channels);
@@ -621,7 +621,7 @@ static int init(priv_t *priv)
     priv->nbuf = priv->mbuf.frames;
     
     /* video buffers */
-    priv->buf = (struct video_mmap *)calloc(priv->nbuf, sizeof(struct video_mmap));
+    priv->buf = calloc(priv->nbuf, sizeof(struct video_mmap));
     if (!priv->buf)
 	goto malloc_failed;
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
@@ -856,13 +856,13 @@ static int start(priv_t *priv)
     if (!tv_param_noaudio) {
 	setup_audio_buffer_sizes(priv);
 	bytes_per_sample = priv->audio_in.bytes_per_sample;
-	priv->audio_skew_buffer = (long long*)calloc(priv->aud_skew_cnt, sizeof(long long));
+	priv->audio_skew_buffer = calloc(priv->aud_skew_cnt, sizeof(long long));
 	if (!priv->audio_skew_buffer) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate skew buffer: %s\n", strerror(errno));
 	    return 0;
 	}
 
-	priv->audio_ringbuffer = (unsigned char*)calloc(priv->audio_in.blocksize, priv->audio_buffer_size);
+	priv->audio_ringbuffer = calloc(priv->audio_in.blocksize, priv->audio_buffer_size);
 	if (!priv->audio_ringbuffer) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate audio buffer: %s\n", strerror(errno));
 	    return 0;
@@ -900,7 +900,7 @@ static int start(priv_t *priv)
 	   priv->video_buffer_size_max,
 	   priv->video_buffer_size_max*priv->height*priv->bytesperline/(1024*1024));
 
-    priv->video_ringbuffer = (unsigned char**)calloc(priv->video_buffer_size_max, sizeof(unsigned char*));
+    priv->video_ringbuffer = calloc(priv->video_buffer_size_max, sizeof(unsigned char*));
     if (!priv->video_ringbuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate video buffer: %s\n", strerror(errno));
 	return 0;
@@ -908,12 +908,12 @@ static int start(priv_t *priv)
     for (i = 0; i < priv->video_buffer_size_max; i++)
 	priv->video_ringbuffer[i] = NULL;
     
-    priv->video_timebuffer = (long long*)calloc(priv->video_buffer_size_max, sizeof(long long));
+    priv->video_timebuffer = calloc(priv->video_buffer_size_max, sizeof(long long));
     if (!priv->video_timebuffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
 	return 0;
     }
-    priv->video_avg_buffer = (long long*)malloc(sizeof(long long) * VIDEO_AVG_BUFFER_SIZE);
+    priv->video_avg_buffer = malloc(sizeof(long long) * VIDEO_AVG_BUFFER_SIZE);
     if (!priv->video_avg_buffer) {
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate period buffer: %s\n", strerror(errno));
 	return 0;
@@ -1569,7 +1569,7 @@ static void *video_grabber(void *data)
 	    pthread_mutex_lock(&priv->video_buffer_mutex);
 	    if (priv->video_buffer_size_current < priv->video_buffer_size_max) {
 		if (priv->video_cnt == priv->video_buffer_size_current) {
-		    unsigned char *newbuf = (unsigned char*)calloc(priv->bytesperline, priv->height);
+		    unsigned char *newbuf = calloc(priv->bytesperline, priv->height);
 		    if (newbuf) {
 			memmove(priv->video_ringbuffer+priv->video_tail+1, priv->video_ringbuffer+priv->video_tail,
 			       (priv->video_buffer_size_current-priv->video_tail)*sizeof(unsigned char *));

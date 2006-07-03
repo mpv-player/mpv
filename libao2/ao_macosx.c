@@ -221,7 +221,7 @@ OSStatus err;
 UInt32 size, maxFrames;
 int aoIsCreated = ao != NULL;
 
-	if (!aoIsCreated)	ao = (ao_macosx_t *)malloc(sizeof(ao_macosx_t));
+	if (!aoIsCreated)	ao = malloc(sizeof(ao_macosx_t));
 
 	// Build Description for the input format
 	inDesc.mSampleRate=rate;
@@ -315,8 +315,8 @@ int aoIsCreated = ao != NULL;
     
 	ao->num_chunks = NUM_BUFS;
     ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
-    ao->buffer = aoIsCreated ? (unsigned char *)realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
-							: (unsigned char *)calloc(ao->num_chunks + 1, ao->chunk_size);
+    ao->buffer = aoIsCreated ? realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
+							: calloc(ao->num_chunks + 1, ao->chunk_size);
 	
 	ao_data.samplerate = inDesc.mSampleRate;
 	ao_data.channels = inDesc.mChannelsPerFrame;

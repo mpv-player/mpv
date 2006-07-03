@@ -59,7 +59,7 @@ dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   if (!filename)
     return NULL;
 
-  if (!(dvdnav_priv=(dvdnav_priv_t*)calloc(1,sizeof(*dvdnav_priv))))
+  if (!(dvdnav_priv=calloc(1,sizeof(*dvdnav_priv))))
     return NULL;
 
   if (!(dvdnav_priv->filename=strdup(filename))) {
@@ -166,7 +166,7 @@ void dvdnav_stream_add_event(dvdnav_priv_t* dvdnav_priv, int event, unsigned cha
 
   if (!dvdnav_priv->started) return;
 
-  if (!(dvdnav_event=(dvdnav_event_t*)calloc(1,sizeof(*dvdnav_event)))) {
+  if (!(dvdnav_event=calloc(1,sizeof(*dvdnav_event)))) {
     mp_msg(MSGT_OPEN,MSGL_V, "%s: dvdnav_event: out of memory!\n",__FUNCTION__);
     return;
   }
@@ -175,7 +175,7 @@ void dvdnav_stream_add_event(dvdnav_priv_t* dvdnav_priv, int event, unsigned cha
   memcpy(dvdnav_event->details,buf,len);
   dvdnav_event->len=len;
 
-  if (!(cmd = (mp_cmd_t*)calloc(1,sizeof(*cmd)))) {
+  if (!(cmd = calloc(1,sizeof(*cmd)))) {
     mp_msg(MSGT_OPEN,MSGL_V, "%s: mp_cmd_t: out of memory!\n",__FUNCTION__);
     free(dvdnav_event->details);
     free(dvdnav_event);

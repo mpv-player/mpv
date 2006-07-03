@@ -111,7 +111,7 @@ static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
   mpg_demuxer_t* mpg_d;
 
   if (!ds_fill_buffer(demuxer->video)) return 0;
-  mpg_d = (mpg_demuxer_t*)calloc(1,sizeof(mpg_demuxer_t));
+  mpg_d = calloc(1,sizeof(mpg_demuxer_t));
   demuxer->priv = mpg_d;
   mpg_d->final_pts = 0.0;
   mpg_d->has_valid_timestamps = 1;

@@ -503,7 +503,7 @@ demux_mkv_parse_idx (mkv_track_t *t)
     return 0;
 
   things_found = 0;
-  buf = (char *)malloc(t->private_size + 1);
+  buf = malloc(t->private_size + 1);
   if (buf == NULL)
     return 0;
   memcpy(buf, t->private_data, t->private_size);
@@ -1891,7 +1891,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
       track->qt_last_a_pts = 0.0;
       if (track->private_data != NULL)
         {
-          sh_a->codecdata=(unsigned char *)malloc(track->private_size);
+          sh_a->codecdata=malloc(track->private_size);
           memcpy (sh_a->codecdata, track->private_data,
                   track->private_size);
           sh_a->codecdata_len = track->private_size;
@@ -1907,7 +1907,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
       if (!strcmp (track->codec_id, MKV_A_AAC) &&
           (NULL != track->private_data))
         {
-          sh_a->codecdata=(unsigned char *)malloc(track->private_size);
+          sh_a->codecdata=malloc(track->private_size);
           memcpy (sh_a->codecdata, track->private_data,
                   track->private_size);
           sh_a->codecdata_len = track->private_size;
@@ -2495,7 +2495,7 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
     {
     case 0:  /* no lacing */
       *laces = 1;
-      lace_size = (uint32_t *)calloc(*laces, sizeof(uint32_t));
+      lace_size = calloc(*laces, sizeof(uint32_t));
       lace_size[0] = *size;
       break;
 
@@ -2505,7 +2505,7 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
       *laces = *buffer++;
       (*size)--;
       (*laces)++;
-      lace_size = (uint32_t *)calloc(*laces, sizeof(uint32_t));
+      lace_size = calloc(*laces, sizeof(uint32_t));
 
       switch ((flags & 0x06) >> 1)
         {

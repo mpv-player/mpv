@@ -21,9 +21,9 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   demuxer_t* ret;
   dd_priv_t* priv;
 
-  ret = (demuxer_t*)calloc(1,sizeof(demuxer_t));
+  ret = calloc(1,sizeof(demuxer_t));
   
-  priv = (dd_priv_t*)malloc(sizeof(dd_priv_t));
+  priv = malloc(sizeof(dd_priv_t));
   priv->vd = vd;
   priv->ad = ad;
   priv->sd = sd;

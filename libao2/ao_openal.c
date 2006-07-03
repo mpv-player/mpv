@@ -96,7 +96,7 @@ static int init(int rate, int channels, int format, int flags) {
   ao_data.bps = channels * rate * 2;
   ao_data.buffersize = CHUNK_SIZE * NUM_BUF;
   ao_data.outburst = channels * CHUNK_SIZE;
-  tmpbuf = (int16_t *)malloc(CHUNK_SIZE);
+  tmpbuf = malloc(CHUNK_SIZE);
   return 1;
 
 err_out:
