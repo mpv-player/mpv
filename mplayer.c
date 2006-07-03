@@ -639,7 +639,7 @@ int volstep = 3;
 
 #include "cfg-mplayer.h"
 
-void parse_cfgfiles( m_config_t* conf )
+static void parse_cfgfiles( m_config_t* conf )
 {
 char *conffile;
 int conffile_fd;

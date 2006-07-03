@@ -302,7 +302,7 @@ static void mencoder_exit(int level, char *how)
     exit(level);
 }
 
-void parse_cfgfiles( m_config_t* conf )
+static void parse_cfgfiles( m_config_t* conf )
 {
   char *conffile;
   if ((conffile = get_path("mencoder.conf")) == NULL) {
