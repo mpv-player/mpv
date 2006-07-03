@@ -4335,11 +4335,9 @@ if test "$_png" = yes ; then
   _ld_png='-lpng -lz'
   _vosrc="$_vosrc vo_png.c"
   _vomodules="png $_vomodules"
-  _mkf_png="yes"
 else
   _def_png='#undef HAVE_PNG'
   _novomodules="png $_novomodules"
-  _mkf_png="no"
 fi
 
 echocheck "JPEG support"
@@ -4368,11 +4366,9 @@ if test "$_jpeg" = yes ; then
   _vosrc="$_vosrc vo_jpeg.c"
   _vomodules="jpeg $_vomodules"
   _ld_jpeg="-ljpeg"
-  _mkf_jpeg="yes"
 else
   _def_jpeg='#undef HAVE_JPEG'
   _novomodules="jpeg $_novomodules"
-  _mkf_jpeg="no"
 fi
 
 
@@ -4431,7 +4427,6 @@ if test "$_gif" = yes ; then
   _vosrc="$_vosrc vo_gif89a.c"
   _codecmodules="gif $_codecmodules"
   _vomodules="gif89a $_vomodules"
-  _mkf_gif="yes"
   _res_comment="old version, some encoding functions disabled"
   _def_gif_4='#undef HAVE_GIF_4'
 
@@ -4455,7 +4450,6 @@ else
   _def_gif_4='#undef HAVE_GIF_4'
   _novomodules="gif89a $_novomodules"
   _nocodecmodules="gif $_nocodecmodules"
-  _mkf_gif="no"
 fi
 echores "$_gif"
 
@@ -7373,9 +7367,9 @@ SPEEX = $_speex
 MUSEPACK = $_musepack
 
 UNRARLIB = $_unrarlib
-PNG = $_mkf_png
-JPEG = $_mkf_jpeg
-GIF = $_mkf_gif
+PNG = $_png
+JPEG = $_jpeg
+GIF = $_gif
 
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib
