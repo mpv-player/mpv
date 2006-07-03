@@ -213,7 +213,7 @@ static int initAllCSSKeys( dvd_reader_t *dvd )
 #ifndef HAVE_MPLAYER
  #include "get_path.c"
 #else
- extern char * get_path( char * filename );
+ extern char * get_path( const char * filename );
 #endif
 
 //extern char * dvdcss_cache_dir;

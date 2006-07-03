@@ -1562,7 +1562,7 @@ mp_input_parse_config(char *file) {
   return 0;
 }
 
-extern char *get_path(char *filename);
+extern char *get_path(const char *filename);
 
 void
 mp_input_init(int use_gui) {

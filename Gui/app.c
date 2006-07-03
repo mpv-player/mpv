@@ -70,7 +70,7 @@ int evBoxs = sizeof( evNames ) / sizeof( evName );
 
 // ---
 
-extern char *get_path(char *);
+extern char *get_path(const char *);
 
 listItems   appMPlayer;
 

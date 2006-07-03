@@ -199,7 +199,7 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
     return 0;
 }
 
-extern char *get_path(char *filename);
+extern char *get_path(const char *filename);
 
 int init_best_audio_codec(sh_audio_t *sh_audio,char** audio_codec_list,char** audio_fm_list){
 char* ac_l_default[2]={"",(char*)NULL};

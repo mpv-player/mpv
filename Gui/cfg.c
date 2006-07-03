@@ -75,7 +75,7 @@ int    gui_sub_pos_x = -1;
 int    gui_sub_pos_y = -1;
 // ---
 
-extern char * get_path( char * filename );
+extern char * get_path( const char * filename );
 extern int    flip;
 extern int    frame_dropping;
 extern int    stop_xscreensaver;

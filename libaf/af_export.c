@@ -23,7 +23,7 @@
 
 #include "af.h"
 
-extern char * get_path( char * filename );
+extern char * get_path( const char * filename );
 
 
 #define DEF_SZ 512 // default buffer size (in samples)

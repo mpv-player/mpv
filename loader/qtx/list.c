@@ -11,7 +11,7 @@
 #include "qtxsdk/components.h"
 #include "qtxsdk/select.h"
 
-char* get_path(char* x){  return strdup(x);}
+char* get_path(const char* x){  return strdup(x);}
 void* LoadLibraryA(char* name);
 void* GetProcAddress(void* handle,char* func);
 

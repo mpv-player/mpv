@@ -623,7 +623,7 @@ int dvb_step_channel(dvb_priv_t *priv, int dir)
 
 
 
-extern char *get_path(char *);
+extern char *get_path(const char *);
 
 static void dvbin_close(stream_t *stream)
 {

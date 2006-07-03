@@ -26,7 +26,7 @@
 #include <dxr2ioctl.h>
 
 
-extern char *get_path(char *filename);
+extern char *get_path(const char *filename);
 
 extern float monitor_aspect;
 extern float movie_aspect;

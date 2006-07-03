@@ -38,7 +38,7 @@
 #define HAVE_FREETYPE21
 #endif
 
-char *get_path(char *filename);
+char *get_path(const char *filename);
 
 char *subtitle_font_encoding = NULL;
 float text_font_scale_factor = 5.0;

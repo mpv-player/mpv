@@ -18,7 +18,7 @@
 #include <string.h>
 #endif
 
-char *get_path(char *filename){
+char *get_path(const char *filename){
 	char *homedir;
 	char *buff;
 #if defined(__MINGW32__)

@@ -22,7 +22,7 @@ ComponentResult ComponentDummy(
     return(0);
 }
 
-char *get_path(char* x){  return strdup(x);}
+char *get_path(const char* x){  return strdup(x);}
 
 void* LoadLibraryA(char* name);
 void* GetProcAddress(void* handle,char* func);

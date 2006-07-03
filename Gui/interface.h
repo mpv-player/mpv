@@ -142,7 +142,7 @@ extern guiInterface_t guiIntfStruct;
 #define guiFilenames	4
 #define guiALL		0xffffffff
 
-extern char *get_path(char *filename); 
+extern char *get_path(const char *filename); 
 
 extern void guiInit( void );
 extern void guiDone( void );
