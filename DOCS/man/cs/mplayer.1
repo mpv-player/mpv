@@ -1,4 +1,4 @@
-.\" Synced with 1.1258
+.\" Synced with 18835
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -34,7 +34,7 @@
 .\" Název
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006-01-04" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2006-04-29" "The MPlayer Project" "The Movie Player"
 .
 .SH NÁZEV
 mplayer  \- pøehrávaè filmù
@@ -309,10 +309,12 @@ Pøepínaè zarovnání titulkù: vrch / støed / spodek.
 Nastavení zpo¾dìní titulkù po +/- 0.1 sekundy.
 .IPs "r a t"
 Posun titulkù nahoru/dolù.
-.IPs i\ \ \ \ 
+.IPs "i (pouze re¾im \-edlout)"
 Nastavení EDL znaèky.
-.IPs s (filtr screenshot musí být nahrán)
+.IPs s (pouze \-vf screenshot)
 Poøídí snímek obrazovky.
+.IPs "I"
+Zobrazí jméno souboru na OSD.
 .RE
 .PD 1
 .PP
@@ -583,6 +585,17 @@ Zadaný <konfiguraèní\ soubor> bude zpracován po ostatních konfiguraèních soubore
 Vypí¹e v¹echny dostupné volby.
 .
 .TP
+.B \-msgcharset <znaková_sada>
+Pøevádí terminálové zprávy na zadanou znakovou sadu (výchozí: autodetekce).
+Text bude ve znakové sadì nastavené configure volbou --charset.
+Nastavte ji na "noconv" pro potlaèení konverze (napø. kvùli potí¾ím s iconv).
+.br
+.I POZNÁMKA:
+Volba zaène pracovat a¾ po zpracování pøíkazového øádku.
+Promìnná prostøedí MPLAYER_CHARSET vám pomù¾e zbavit se prvních øádek
+vadného výstupu.
+.
+.TP
 .B \-msglevel <all=<úroveò>:<module>=<úroveò>:...>
 Ovládá upovídanost ka¾dého modulu pøímo.
 Modul 'all' zmìní upovídanost v¹ech modulù neuvedených explicitnì
@@ -716,7 +729,7 @@ Automaticky pøipojí gdb pøi pádu nebo SIGTRAP.
 Podpora musí být zakompilována pomocí konfiguraèní volby --enable-crash-debug.
 .
 .TP
-.B \-edlout <soubor> (Pouze EDL)
+.B \-edlout <soubor>
 Vytvoøí nový soubor a zapí¹e do nìj editaèní (EDL) záznamy.
 Kdykoli bìhem pøehrávání stiskne u¾ivatel 'i', zapí¹e se do souboru záznam pro
 vynechání pøedchozích dvou sekund z pøehrávání.
@@ -755,9 +768,13 @@ Vede ke zkreslení obrazu!
 .
 .TP
 .B \-identify
+Zkratka pro \-msglevel identify=4.
 Vypí¹e parametry souboru ve snadno zpracovatelném formátu.
 Rovnì¾ vypí¹e mnohem podrobnìj¹í informace o titulcích, jazycích zvukových proudù
 a ID.
+V nìkterých pøípadech dostanete více informací pou¾itím \-msglevel identify=6.
+Napøíklad pro DVD vypí¹e délku (èas) ka¾dého titulu, stejnì jako
+ID disku.
 Skript TOOLS/\:midentify potlaèí ostatní výstup MPlayeru a (s\ trochou ¹tìstí)
 upraví jména souborù pro shell.
 .
@@ -1174,6 +1191,9 @@ Urèí èíslo karty k pou¾ití 1\-4 (výchozí: 1).
 Dá pokyn MPlayeru aby èetl kanály ze <souboru>.
 Výchozím je ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (podle typu va¹í karty)
 nebo ~/.mplayer/\:channels.conf jako poslední záchrana.
+.IPs timeout=<1\-30>
+Maximální poèet sekund po který se bude MPlayer pokou¹et vyladit
+transpondér, ne¾ to vzdá (výchozí: 3).
 .RE
 .PD 1
 .
@@ -1191,7 +1211,7 @@ Nìkteré DVD disky obsahují scény, které mohou být pozorovány z nìkolika úhlù.
 Zde mù¾ete sdìlit MPlayeru které úhly pou¾ít (výchozí: 1).
 .
 .TP
-.B \-edl <soubor> (pouze EDL)
+.B \-edl <soubor>
 Zapne editaèní akce (EDL) ze souboru bìhem pøehrávání.
 Video bude pøeskakováno, zvuk bude vypínán a zapínán podle vstupù ze zadaného
 souboru.
@@ -3034,6 +3054,7 @@ Poskytuje ovládání jasu, kontrastu a sytosti.
 Pou¾ívá specifické nVidia roz¹íøení (GL_NV_register_combiners).
 Vy¾aduje aspoò tøi texturové jednotky.
 Poskytuje ovládání sytosti a barevného tónu.
+Tato metoda je rychlá, ale nepøesná.
 .br
 2: Pou¾ije se fragment program.
 Vy¾aduje roz¹íøení GL_ARB_fragment_program a aspoò tøi texturové jednotky.
@@ -3055,7 +3076,30 @@ Pou¾ívá roz¹íøení specifické pro ATI (GL_ATI_fragment_shader - nikoli
 GL_ARB_fragment_shader!).
 Vy¾aduje aspoò tøi texturovací jednotky.
 Poskytuje ovládání sytosti a tónování.
+Tato metoda je rychlá, ale nepøesná.
+.br
+6: Pou¾ije 3D texturu pro konverzi pomocí lookup.
+Vy¾aduje roz¹íøení GL_ARB_fragment_program a aspoò ètyøi texturovací jednotky.
+Extrémnì pomalé (softwarová emulatce) na nìkterých (v¹ech?) ATI kartách,
+jeliko¾ pou¾ívá textury s porder pixely.
+Poskytuje nastavení jasu, kontrastu, sytosti, tónování a gama.
+Gamu lze rovnì¾ nastavit nezávisle pro èervenou, zelenou a modrou.
+Rychlost je mnohem více závislá na rychlosti GPU pamìti ne¾ u jiných metod.
 .RE
+.IPs lscale=<n>
+Vybere ¹kálovací funkci pro ¹kálovaní jasové slo¾ky.
+Platná pouze pro YUV re¾imy 2, 3, 4 a 6.
+.RSss
+0: Pou¾ije jednoduchou lineární filtraci (výchozí).
+.br
+1: Pou¾ije bikubickou filtraci (lep¹í kvalita).
+Vy¾aduje je¹tì jednu texturovací jednotku.
+Star¹í karty to nebudou schopny zvládnout pro barevnou slo¾ku minimálnì
+v re¾imu celé obrazovky.
+.RE
+.IPs cscale=<n>
+Vybere ¹kálovací funkci pro ¹kálování barevné slo¾ky.
+Podrobnosti viz lscale.
 .IPs customprog=<soubor>
 Nahraje u¾ivatelský fragment program ze <souboru>.
 Jako pøíklad viz TOOLS/edgedect.fp.
@@ -4515,6 +4559,15 @@ Tento filtr je netestován, mo¾ná dokonce nepou¾itelný.
 Filtr Noise gate podobný zvukovému filtru comp.
 Tento filtr je netestován, mo¾ná dokonce nepou¾itelný.
 .
+.TP
+.B karaoke
+Jednoduchý filtr pro odstranìní hlasu vyu¾ívající fakt, ¾e hlasy
+je obvykle zaznamenány v mono a pozdìji 'centrálnì' mixovány do
+finálního zvuku.
+Pamatujte, ¾e tento filtr pøevede signál na mono.
+Pracuje dobøe pro dvoukanálové stopy; nenamáhejte se jej
+zkou¹et na nìèem jiném ne¾ dvoukanálovém stereu.
+.
 .
 .
 .SH "VIDEO FILTRY"
@@ -5795,33 +5848,64 @@ Rozdìlení pracovního (temporal) snímku \- rozdìlí snímek na dvì políèka a
 tím zdvojnásobí snímkovou rychlost.
 Podobnì jako telecine filtr, pracuje tfields správnì pouze v MEncoder a jen
 kdy¾ jsou volby \-fps a \-ofps nastaveny na po¾adovanou (dvojitou) rychlost!
-Dostupné re¾imy jsou:
 .PD 0
 .RSs
-.IPs 0
-Ponechá políèka beze zmìn. (To zpùsobí poskakování/\:chvìní.)
-.IPs 1
-Odvodí chybìjící øádky. (Pou¾itý algoritmus nemusí být to pravé oøechové.)
-.IPs 2
-Pøekládá políèka o 1/4 pixelu s lineární interpolací (¾ádné poskakování).
-.IPs 4
-Pøekládá políèka o 1/4 pixelu s 4tap filtrem (vy¹¹í kvalita). (výchozí)
-.RE
-.PD 1
-.RS
-Dostupná nastavení dominantního pùlsnímku jsou:
-.RE
-.PD 0
-.RSs
-.IPs -1
-auto (výchozí)
+.IPs <re¾im>
+0: Ponechá políèka beze zmìn. (To zpùsobí poskakování/\:chvìní.)
+.br
+1: Odvodí chybìjící øádky. (Pou¾itý algoritmus nemusí být to pravé oøechové.)
+.br
+2: Pøekládá políèka o 1/4 pixelu s lineární interpolací (¾ádné poskakování).
+.br
+4: Pøekládá políèka o 1/4 pixelu s 4tap filtrem (vy¹¹í kvalita) (výchozí).
+.IPs <dominantní_pùlsnímek>
+-1: auto (výchozí)
 Pracuje pouze pokud dekodér exportuje vhodné informace a pøed tfields nejsou
 ¾ádné filtry odstraòující tyto informace,
 jinak se pou¾ije nastavení 0 (nejprve horní pùlsnímek).
-.IPs 0
-nejprve horní
-.IPs 1
-nejprve spodní
+.br
+0: nejprve horní
+.br
+1: nejprve spodní
+.RE
+.PD 1
+.
+.TP
+.B yadif=[=re¾im[:dominantní_pùlsnímek]]
+Dal¹í filtr pro odstranìní prokladu
+.PD 0
+.RSs
+.IPs <re¾im>
+0: Produkuje 1 snímek na ka¾dý snímek.
+.br
+1: Produkuje 1 snímek na ka¾dý pùlsnímek.
+.br
+2: Jako 0, ale vynechá prostorové ovìøení prokládání.
+.br
+3: Jako 1, ale vynechá prostorové ovìøení prokládání.
+.IPs <dominantní_pùlsnímek>
+Pracuje jako v tfields.
+.RE
+.PD 1
+.
+.TP
+.B mcdeint=[re¾im[:parita[:qp]]]
+Odstraòovaè prokladu s kompenzací pohybu.
+Vy¾aduje jeden pùlsnímek z ka¾dého snímku jako vstup aproto musí být
+pou¾itý spolu s tfields=1 nebo yadif=1/3 nebo podobný.
+.IPs <re¾im>
+0: rychlý
+.br
+1: støední
+.br
+2: pomalý, opakovaný odhad pohybu
+.br
+3: velmi pomalý, jako 2 plus více referenèních snímkù
+.IPs <parita>
+0 nebo 1 vybírá, který pùlsnímek pou¾ít (poznámka: zatím ¾ádná autodetekce!).
+.IPs <qp>\ 
+Vy¹¹í hodnoty by mìly vést k hlad¹ímu vektoru pohybu pùlsnímku,
+ale ménì optimálním individuálním vektorùm.
 .RE
 .PD 1
 .
@@ -6184,7 +6268,7 @@ Re¾im ponechán pouze pro zpìtnou kompatibilitu a v budoucí verzi
 bude nejspí¹ odstranìn.
 .
 .TP
-.B \-hr-edl-seek (pouze EDL)
+.B \-hr-edl-seek
 Pou¾ívá preciznìj¹í, ale mnohem pomalej¹í metodu pro vynechávání èástí.
 Èásti urèené k vynechání nejsou pøeskakovány, místo toho jsou v¹echny
 snímky dekódovány, ale pouze ty potøebné jsou enkódovány.
@@ -6352,7 +6436,7 @@ Enkódovací volby pro kodeky mù¾ete pøedat pomocí následující syntaxe:
 .
 .PP
 Kde <kodek> mù¾e být: lavc, xvidenc, divx4, lame, toolame, twolame,
-nuv, vfw, faac, x264enc, mpeg, lavf.
+nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6421,6 +6505,7 @@ ale pass=2.
 .B vbrpass=<0\-2>
 Pøepí¹e volbu pass a pou¾ije XviD VBR Library namísto DivX4 VBR.
 Dostupné volby jsou:
+.PD 0
 .RSs
 .IPs 0
 jednoprùchodové enkódování (stejné jako byste pass vùbec nezadali)
@@ -6430,6 +6515,7 @@ Výsledný AVI soubor mù¾e být pøesmìrován do /dev/\:null.
 .IPs 2
 Koneèný (druhý) prùchod dvouprùchodového enkódování.
 .RE
+.PD 1
 .
 .
 .SS lame (\-lameopts)
@@ -6617,17 +6703,17 @@ prùmìrný datový tok v kbps (vzájemnì se vyluèuje s quality)
 re¾im kvality, èím vy¹¹í, tím lep¹í (vzájemnì se vyluèuje s br)
 .
 .TP
-.B object=<0\-3>
+.B object=<1\-4>
 komplexita typu objektu
 .PD 0
 .RSs
-.IPs 0
-MAIN (výchozí)
 .IPs 1
-LOW
+MAIN (výchozí)
 .IPs 2
-SSR
+LOW
 .IPs 3
+SSR
+.IPs 4
 LTP (extrémnì pomalé)
 .RE
 .PD 1
@@ -6789,10 +6875,13 @@ maximální Lagrangeùv násobiè pro regulátor datového toku (výchozí: 31.0)
 .RE
 .
 .TP
-.B vqscale=<1\-31>
+.B vqscale=<0\-31>
 Konstantní kvantizer /\: enkódování s konstantní kvalitou (nastaví pevný
 kvantizer re¾im).
-Ni¾¹í hodnota znamená lep¹í kvalitu, ale vìt¹í soubory (výchozí: 0 (vypnuto)).
+Ni¾¹í hodnota znamená lep¹í kvalitu, ale vìt¹í soubory (výchozí: 0).
+V pøípadì snow kodeku znamená hodnota 0 bezztrátové enkódování.
+Jeliko¾ ostatní kodeky to nepodporují, vqscale=0 bude ignorováno a
+pou¾ity budou promìnné kvantizery, co¾ je výchozí.
 1 není doporuèována (podrobnì viz vqmin).
 .
 .TP
@@ -6935,12 +7024,23 @@ strategie výbìru mezi I/P/B-snímky:
 V¾dy pou¾ívat maximální poèet B-snímkù (výchozí).
 .IPs 1
 Vyhnout se B-snímkùm ve vysoce pohyblivých scénách.
+Viz volbu b_sensitivity pro vyladìní této strategie.
 .IPs 2
 Umís»uje B-snímky více ménì optimálnì pro dosa¾ení maximální kvality
 (pomalej¹í). Spomalení zpùsobené touto volbou mù¾ete sní¾it doladìním volby
 brd_scale.
 .RE
 .PD 1
+.
+.TP
+.B b_sensitivity=<jakékoli celé èíslo vìt¹í ne¾ 0>
+Nastavuje jak citlivì bude vb_strategy=1 detekovat pohyb a zabraòuje pou¾ití
+B-snímkù (výchozí: 40).
+Ni¾¹í citlivost povede k více B-snímkùm.
+Pou¾ití více B-snímkù obvykle vylep¹í PSNR, ale pøíli¹ mnoho B-snímkù mù¾e
+po¹kodit kvalitu ve velmi pohyblivých scénách.
+Pokud zde není extrémnì mnoho pohybu, mù¾e být b_sensitivity bezpeènì
+sní¾ena pod výchozí hodnotu; 10 je ve vìt¹inì pøípadù rozumná hodnota.
 .
 .TP
 .B brd_scale=<0\-10>
@@ -7789,6 +7889,21 @@ Zkou¹í enkódovat ka¾dý MB s MV=<0,0> a vybere ten lep¹í.
 Nemá ¾ádný vliv pokud mbd=0.
 .
 .TP
+.B mv0_threshold=<jakékoli nezáporné celé èíslo>
+Pokud jsou okolní vektory pohybu <0,0> a skóre odhadu pohybu
+daného bloku je men¹í ne¾ mv0_threshold, pak je <0,0> pou¾itý jako
+vektor pohybu a dal¹í odhad pohybu je pøeskoèen (výchozí:
+256).
+Sní¾ení mv0_threshold na 0 mù¾e ponìkud (0.01dB) zvý¹it PSNR a
+mo¾ná o nìco zlep¹it vzhled enkódovaného videa; zvý¹ení
+mv0_threshold nad 320 vede ke zmen¹ení PSNR a vizuální kvality.
+Vy¹¹í hodnoty trochu zrychlí enkódování (obvykle ménì ne¾ 1%,
+podle ostatních pou¾itých voleb).
+.br
+.I POZNÁMKA:
+Zapnutí této volby nevy¾aduje mv0.
+.
+.TP
 .B qprd (pouze mbd=2)
 Datovým tokem zkreslený optimální kvantizaèní parametr QP pro danou
 lambda ka¾dého makrobloku.
@@ -7828,6 +7943,11 @@ subpel vylep¹ení kvality (pro qpel) (výchozí: 8 (vysoká kvalita))
 Toto má podstatný vliv na rychlost.
 .
 .TP
+.B refs=<1\-8>
+poèet referenèních snímkù pro zvá¾ení kompenzace pohybu
+(pouze Snow) (výchozí: 1)
+.
+.TP
 .B psnr\ \ \ 
 vypí¹e PSNR (odstup signálu od ¹umu) pro celé video po skonèení enkódování
 a ulo¾í hodnotu PSNR pro ka¾dý snímek do souboru s názvem
@@ -7840,7 +7960,9 @@ Pou¾ije MPEG kvantizery namísto H.263.
 .
 .TP
 .B aic\ \ \ \ 
-predikce AC (pokroèilá predikce klíèového snímku pro H.263+)
+Zapíná AC predikci pro MPEG-4 nebo pokroèilou intra predikci pro H.263+.
+To malinko yvý¹í kvalitu (kolem 0.02 dB PSNR) a mírnì zpomalí
+enkódování (okolo 1%).
 .br
 .I POZNÁMKA:
 vqmin by mìl být 8 nebo vìt¹í pro H.263+ AIC.
@@ -7936,8 +8058,24 @@ V souèasnosti pracuje pouze tehdy, pokud je vypnutá detekce zmìn scény
 (sc_threshold=1000000000).
 .
 .TP
-.B vglobal
-FIXME: Document this.
+.B vglobal=<0\-3>
+Ovládá zápis globálních video hlavièek.
+.PD 0
+.RSs
+.IPs 0
+Kodek rozhodne, kde zapsat globální hlavièky (výchozí).
+.IPs 1
+Zapí¹e globální hlavièky pouze v extradata (vy¾adováno pro .mp4/MOV/NUT).
+.IPs 2
+Zapí¹e globální hlavièky pouze do èela klíèových snímkù.
+.IPs 3
+Kombinuje 1 a 2.
+.RE
+.PD 1
+.
+.TP
+.B aglobal=<0\-3>
+Stejné jako vglobal pro audio hlavièky.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9027,6 +9165,15 @@ To obvykle zadarmo zlep¹í rychlost, ale mù¾e obèas zpùsobovat artefakty v
 plochách bez detailù, jako je obloha.
 .
 .TP
+.B (no)dct_decimate
+Eliminuje dct bloky v P-snímcích obsahujících pouze malý jediný koeficient
+(výchozí: zapnuto).
+Odstraní to nìkteré detaily, tak¾e u¹etøí bity, které mohou být pou¾ity
+v jiných snímcích, co¾ jak doufáme zvý¹í celkovou subjektivní kvalitu.
+Pokud komprimujete ne-anime obsah s vysokým datovým tokem, mìli byste to
+vypnout pro zachování tolika detailù, kolik je mo¾né.
+.
+.TP
 .B nr=<0\-100000>
 Omezení ¹umu, 0 znamená vypnuto.
 Pro typický obsah je vhodný rozsah 100\-1000, ale mù¾ete ji o nìco
@@ -9164,6 +9311,16 @@ na stisk klávesy, ne¾ enkóduje dal¹í snímek.
 .RE
 .
 .
+.SS xvfw (\-xvfwopts)
+.
+Enkódování pomocí Video for Windows kodekù je zpravidla zastaralé, pokud
+nechcete enkódovat nìkterým obskurním otøepaným kodekem.
+.
+.TP
+.B codec=<jméno>
+Jméno binárního kodeku, kterým se má enkódovat.
+.
+.
 .SS MPEG muxer (\-mpegopts)
 .
 MPEG muxer umí generovat 5 typù datových proudù, z nich¾ ka¾dý má rozumné
@@ -9257,8 +9414,13 @@ Jakákoli jiná snímková rychlost je nekompatibilní s touto volbou.
 .SS FFmpeg libavformat muxery (\-lavfopts) (viz také \-of lavf)
 .
 .TP
-.B delay\ \ 
-FIXME: Document this.
+.B delay=<hodnota>
+V souèasnosti má význam pouze pro MPEG[12]: Maximální povolená odchylka
+v sekundách, mezi referenèním èasovaèem výstupního proudu (SCR)
+a dekódovanou èasovou znaèkou (DTS) pro jakýkoli dostupný datový proud
+(prodleva od demux do dekódování).
+Výchozí je 0.7 (jak pøikazují standardy definované MPEG).
+Vy¹¹í hodnoty vy¾adují vìt¹í vyrovnávací pamìti a nesmí být pou¾ívány.
 .
 .TP
 .B format=<nosný_formát>
@@ -9293,12 +9455,27 @@ Sony Digital Video kontejner
 .RE
 .PD 1
 .TP
-.B packetsize
-FIXME: Document this.
+.B i_certify_that_my_video_stream_does_not_use_b_frames
+MEncoder neumí nastavit správné èasové znaèky, pokud jsou ve videu
+B-snímky, co¾ zpùsobí vydný výsledek.
 .
 .TP
-.B preload
-FIXME: Document this.
+.B muxrate=<tok>
+Nominální datový tok multiplexu v bitech za sekundu;
+v souèasnosti má význam pouze pro MPEG[12].
+Obèas je zvý¹ení nutné pro pøedejití "podteèení bufferu".
+.
+.TP
+.B packetsize=<velikost>
+Velikost, vyjádøená v bajtech, jednotkového paketu pro zvolený formát.
+Kdy¾ muxujete do MPEG[12] implementací, výchozí hodnoty jsou:
+2324 pro [S]VCD, 2048 pro v¹echny ostatní formáty.
+.
+.TP
+.B preload=<odchylka>
+V souèasnosti má význam pouze pro MPEG[12]: Poèáteèní odchylka v sekundách,
+mezi referenèním èasovaèem výstupního proudu (SCR) a èasovou znaèkou (DTS)
+pro jakýkoli dostupný datový proud (doba od demux do dekódování).
 .
 .
 .
@@ -9310,6 +9487,11 @@ FIXME: Document this.
 .
 K ovládání chování MPlayeru a MEncoderu lze pou¾ít øadu
 promìnných prostøedí.
+.
+.TP
+.B MPLAYER_CHARSET (viz také \-msgcharset)
+Konvertuje terminálové zprávy na zadanou znakovou sadu (výchozí: autodetekce).
+Hodnota "noconv" znamená ¾ádnou konverzi.
 .
 .TP
 .B MPLAYER_HOME
@@ -9587,8 +9769,6 @@ s titulky vyhledávat v tomto poøadí:
 /path/\:to/\:movie.sub
 .br
 ~/.mplayer/\:sub/\:movie.sub
-.br
-~/.mplayer/\:default.sub
 .RE
 .PD 1
 .
