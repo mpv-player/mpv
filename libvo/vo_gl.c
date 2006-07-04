@@ -80,7 +80,7 @@ static GLenum gl_type;
 static GLuint gl_buffer;
 static int gl_buffersize;
 static GLuint fragprog;
-static GLuint default_texs[8];
+static GLuint default_texs[22];
 static char *custom_prog;
 static char *custom_tex;
 static int custom_tlin;
@@ -261,13 +261,13 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 
   if (image_format == IMGFMT_YV12) {
     int i;
-    glGenTextures(7, default_texs);
-    default_texs[7] = 0;
+    glGenTextures(21, default_texs);
+    default_texs[21] = 0;
     for (i = 0; i < 7; i++) {
       ActiveTexture(GL_TEXTURE1 + i);
       BindTexture(GL_TEXTURE_2D, default_texs[i]);
-      BindTexture(GL_TEXTURE_RECTANGLE, default_texs[i]);
-      BindTexture(GL_TEXTURE_3D, default_texs[i]);
+      BindTexture(GL_TEXTURE_RECTANGLE, default_texs[i + 7]);
+      BindTexture(GL_TEXTURE_3D, default_texs[i + 14]);
     }
     ActiveTexture(GL_TEXTURE1);
     glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
