@@ -2345,6 +2345,7 @@ if(sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
   if(!init_best_audio_codec(sh_audio,audio_codec_list,audio_fm_list)){
     sh_audio=d_audio->sh=NULL; // failed to init :(
+    d_audio->id = -2;
     return;
   } else
     inited_flags|=INITED_ACODEC;
@@ -2378,6 +2379,7 @@ if(sh_audio){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     uninit_player(INITED_ACODEC); // close codec
     sh_audio=d_audio->sh=NULL; // -> nosound
+    d_audio->id = -2;
     return;
   } else {
     // SUCCESS:
@@ -3611,7 +3613,7 @@ if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks.\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
-  d_audio->id=-2;         // do not read audio chunks
+  //d_audio->id=-2;         // do not read audio chunks
   //uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
@@ -3650,6 +3652,11 @@ if(play_n_frames==0){
 
 while(!eof){
     float aq_sleep_time=0;
+if(!sh_audio && d_audio->sh) {
+  sh_audio = d_audio->sh;
+  sh_audio->ds = d_audio;
+  reinit_audio_chain();
+}
 
 /*========================== PLAY AUDIO ============================*/
 
