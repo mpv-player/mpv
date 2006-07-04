@@ -107,14 +107,8 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_mpeg_gxf,
   &demuxer_desc_mpeg4_es,
   &demuxer_desc_h264_es,
-#ifdef HAVE_LIBDV095
-  &demuxer_desc_rawdv,
-#endif
   &demuxer_desc_mpc,
   &demuxer_desc_audio,
-#ifdef HAVE_XMMS
-  &demuxer_desc_xmms,
-#endif
   &demuxer_desc_mpeg_ty,
 #ifdef STREAMING_LIVE555
   &demuxer_desc_rtp,
@@ -122,7 +116,13 @@ demuxer_desc_t* demuxer_list[] = {
 #if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
   &demuxer_desc_lavf,
 #endif
+#ifdef HAVE_LIBDV095
+  &demuxer_desc_rawdv,
+#endif
   &demuxer_desc_aac,
+#ifdef HAVE_XMMS
+  &demuxer_desc_xmms,
+#endif
   NULL
 };
 
