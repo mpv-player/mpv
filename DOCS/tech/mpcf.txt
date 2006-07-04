@@ -443,6 +443,8 @@ fourcc
     example: "H264"
     MUST contain 2 or 4 bytes, note, this might be increased in the future
     if needed
+    the id values used are the same as in avi, so if a codec uses a specific
+    fourcc in avi then the same fourcc MUST be used here
 
 time_base_nom / time_base_denom = time_base
     the length of a timer tick in seconds, this MUST be equal to the 1/fps
@@ -716,6 +718,11 @@ info packet types
     "Source"
         "DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", "LD"
         Optional: appended PAL, NTSC, SECAM, ... in parentheses
+    "SourceContainer"
+        "nut", "mkv", "mov", "avi", "ogg", "rm", "mpeg-ps", "mpeg-ts", "raw"
+    "SourceCodecTag"
+        the source codec id like a fourcc which was used to store a specific
+        stream in its SourceContainer
     "CaptureDevice"
         "BT878", "BT848", "webcam", ... (more exact names are fine too)
     "CreationTime"
