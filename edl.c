@@ -69,63 +69,69 @@ edl_record_ptr edl_parse_file(void)
         if ((fd = fopen(edl_filename, "r")) == NULL)
         {
             return NULL;
-        } else
-        {
-            while (fgets(line, 99, fd) != NULL)
-            {
-                lineCount++;
-                if ((sscanf(line, "%f %f %d", &start, &stop, &action))
-                    != 3)
-                {
-                    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
-                           lineCount + 1);
-                    continue;
-                } else
-                {
-                    if (next_edl_record && start <= next_edl_record->stop_sec)
-                    {
-                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
-                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
-                               next_edl_record->prev->stop_sec, start);
-                        continue;    
-                    }
-                    if (stop <= start)
-                    {
-                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine,
-                               line);
-                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineBadStop);
-                        continue;
-                    }
-                    next_edl_record = edl_alloc_new(next_edl_record);
-                    if (!edl_records) edl_records = next_edl_record;
-
-                    next_edl_record->action = action;
-                    if (action == EDL_MUTE)
-                    {
-                        next_edl_record->length_sec = 0;
-                        next_edl_record->start_sec = start;
-                        next_edl_record->stop_sec = start;
-                        
-                        next_edl_record = edl_alloc_new(next_edl_record);
-                        
-                        next_edl_record->action = action;
-                        next_edl_record->length_sec = 0;
-                        next_edl_record->start_sec = stop;
-                        next_edl_record->stop_sec = stop;
-                    } else
-                    {
-                        next_edl_record->length_sec = stop - start;
-                        next_edl_record->start_sec = start;
-                        next_edl_record->stop_sec = stop;
-                    }
-                    record_count++;
-                }
-            }
         }
+
+        while (fgets(line, 99, fd) != NULL)
+        {
+            lineCount++;
+
+            if ((sscanf(line, "%f %f %d", &start, &stop, &action))
+                != 3)
+            {
+                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
+                       lineCount);
+                continue;
+            }
+
+            if (next_edl_record && start <= next_edl_record->stop_sec)
+            {
+                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
+                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
+                       next_edl_record->stop_sec, start);
+                continue;    
+            }
+
+            if (stop <= start)
+            {
+                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine,
+                       line);
+                mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineBadStop);
+                continue;
+            }
+
+            next_edl_record = edl_alloc_new(next_edl_record);
+            if (!edl_records) edl_records = next_edl_record;
+
+            next_edl_record->action = action;
+
+            if (action == EDL_MUTE)
+            {
+                next_edl_record->length_sec = 0;
+                next_edl_record->start_sec = start;
+                next_edl_record->stop_sec = start;
+                
+                next_edl_record = edl_alloc_new(next_edl_record);
+                 
+                next_edl_record->action = action;
+                next_edl_record->length_sec = 0;
+                next_edl_record->start_sec = stop;
+                next_edl_record->stop_sec = stop;
+            } else
+            {
+                next_edl_record->length_sec = stop - start;
+                next_edl_record->start_sec = start;
+                next_edl_record->stop_sec = stop;
+            }
+            record_count++;
+        }
+
         fclose(fd);
     }        
-    if (edl_records) mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
-    else mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
+
+    if (edl_records) 
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
+    else 
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
 
     return edl_records;
 }
