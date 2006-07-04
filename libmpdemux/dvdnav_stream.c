@@ -216,6 +216,9 @@ int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len
         dvdnav_still_skip(dvdnav_priv->dvdnav); // don't let dvdnav stall on this image
 
       break;
+    case DVDNAV_WAIT:
+        dvdnav_wait_skip(dvdnav_priv->dvdnav);
+        break;
     }
     }
 
