@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.76 -->
+<!-- Synced with 18824 -->
 <chapter id="codecs">
 <title>Kodeky</title>
 
@@ -131,9 +131,7 @@ ve formátu YV12 (rovinný YUV 4:2:0), který vyžaduje mnohem menší propustnost
 sběrnice. Pro režimy zhuštěného YUV (YUY2, UYVY) použijte režim
 <option>-vc divx4</option>. Rychlost RGB režimů je stejná, mírně se odlišuje
 v závislosti na vaší akuální barevné hloubce.
-<note>
-<para>
-Pokud vaše <option>-vo</option> rozhraní podporuje direct rendering, pak může
+Pokud vaše výstupní video rozhraní podporuje direct rendering, pak může
 být <option>-vc divx4</option> rychlejší, nebo dokonce nejrychlejší volbou.
 </para>
 
@@ -147,53 +145,12 @@ přidat <filename class="directory">/usr/local/lib</filename> do svého
 </para>
 
 <para>
-CVS verzi STARÉ core OpenDivX knihovny získáte následovně:
-</para>
-
-<procedure>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</screen>
-</para></step>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</screen>
-</para></step>
-<step><para>
-Tato core knihovna je rozdělena na decore a encore knihovnu, které by se měly
-kompilovat odděleně. Pro kompilaci decore knihovny zadejte
-<screen>
-cd divxcore/decore/build/linux
-make
-cp libdivxdecore.so /usr/local/lib
-ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
-cp ../../src/decore.h /usr/local/include
-</screen>
-</para></step>
-<step><para>
-Bohužel encore knihovna neobsahuje Makefile pro Linux a MMX optimalizovaný
-kód pracuje pouze ve Windows. I přesto ji můžete skompilovat pomocí tohoto
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>.
-<screen>
-cd ../../../encore/build
-mkdir linux
-cd linux
-cp path/Makefile .
-make
-cp libdivxencore.so /usr/local/lib
-ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
-cp ../../src/encore.h /usr/local/include
-</screen>
-</para></step>
-</procedure>
-
-<para>
 <application>MPlayer</application> automaticky detekuje DivX4/DivX5, pokud
 jsou zprávně nainstalovány, stačí jej jen zkompilovat jako obvykle.
 Pokud je nedetekuje, pak jste je nenainstalovali nebo nenakonfigurovali
 správně.
 </para>
 
-</note>
-</para>
 </sect2>
 
 
@@ -228,56 +185,12 @@ a <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink> kodeky.
 </para>
 
 <para>
-Pokud používáte <application>MPlayer</application> z balíčku, máte již
-<systemitem class="library">libavcodec</systemitem>
-zahrnutý, stačí provést kompilaci jako obvykle. Pokud používáte CVS verzi
-<application>MPlayer</application>u, vyextrahujte si
-<systemitem class="library">libavcodec</systemitem> z CVS stromu FFmpegu,
-jelikož nová verze FFmpeg je vydávána jen zřídka. Verze z CVS je většinou
-stabilní a nabízí nejvíce vlastností. Pro její získání proveďte:
+Jak ostré verze <application>MPlayer</application>u, tak
+<application>MPlayer</application> ze Subversion obsahují
+<systemitem class="library">libavcodec</systemitem>, takže jej nemusíte
+stahovat zvlášť.
+Jen spusťte <filename>configure</filename> a kompilujte.
 </para>
-
-<procedure>
-<step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
-  </para></step>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
-  </para></step>
-<step><para>
-  Přesuňte adresáře <filename>libavcodec</filename> a
-  <filename>libavutil</filename> z FFmpeg do kořenového
-  adresáře <application>MPlayer</application>ova CVS stromu.
-  Mělo by to vypadat asi takto:
-  <filename class="directory">main/libavcodec</filename>
-  <filename class="directory">main/libavutil</filename>
-  </para><para>
-  Symbolický link <emphasis role="bold">nestačí</emphasis>, musíte jej
-  zkopírovat/přesunout!
-  </para></step>
-<step><para>
-  Pokud chcete mít <systemitem class="library">libavcodec</systemitem>
-  aktualizován vždy když aktualizujete
-  <application>MPlayer</application> z CVS, vložte do souboru
-  <filename>main/CVS/Entries</filename> následující řádky:
-  <screen>D/libavcodec////</screen>
-  <screen>D/libavutil////</screen>
-  </para></step>
-<step><para>
-  Kompilujte. Skript <filename>configure</filename> by měl zjistit problémy
-  před kompilací.
-  </para></step>
-</procedure>
-
-<note>
-<para>
-<application>MPlayer</application> z CVS obsahuje podadresář
-<filename>libavcodec</filename>, ten ale
-<emphasis role="bold">neobsahuje</emphasis> zdrojové kódy
-<systemitem class="library">libavcodec</systemitem>u!
-Musíte následovat výše uvedený postup, abyste získali zdrojové hódy knihovny.
-</para>
-</note>
 
 <para>
 S pomocí FFmpeg a mé Matrox G400, mohu sledovat DivX dokonce i v tom nejvyšším
@@ -517,7 +430,7 @@ pomocí následujících dekodérů:
 <title>KOMPILACE MPLAYERU S PODPOROU QUICKTIME KNIHOVEN</title>
 <note><para>V současnosti jsou podporovány pouze 32-bitové Intel kompatibilní
 platformy.</para></note>
-<step><para>stáhněte si <application>MPlayer</application> z CVS</para></step>
+<step><para>stáhněte si <application>MPlayer</application> ze Subversion</para></step>
 <step><para>stáhněte si balíček QuickTime DLL z
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -614,12 +527,12 @@ platformy.</para></note>
   minimálně použitelný H.264 dekodér již asi od července 2004,
   od té doby však byly provedeny velké změny a vylepšení jak v počtu funkčností,
   tak ve vylepšení použití CPU.
-  Pro jistotu je vždy nejlepší používat aktuální CVS verzi.
+  Pro jistotu je vždy nejlepší používat aktuální Subversion verzi.
 </para>
 <para>
   Chcete-li se snadno a rychle dozvědět o změnách v H.264 dekódování
   <systemitem class="library">libavcodec</systemitem>u, sledujte
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">webové rozhraní FFmpeg CVS repozitáře</ulink>.
+  <ulink url="http://svn.mplayerhq.hu/ffmpeg/trunk/libavcodec/h264.c?view=log">webové FFmpeg Subversion rozhraní</ulink>.
 </para>
 </sect3>
 
@@ -633,7 +546,7 @@ platformy.</para></note>
   --></screen>
   Zdrojové kódy <application>MPlayer</application>u jsou aktualizovány, kdykoli
   nastane změna API v <systemitem class="library">x264</systemitem>, takže vždy
-  doporučujeme používat také CVS verzi <application>MPlayer</application>u.
+  doporučujeme používat také Subversion verzi <application>MPlayer</application>u.
   Tato situace se snad změní, až <systemitem class="library">x264</systemitem>
   dospěje k "vydání".
   Mezi tím by měla být <systemitem class="library">x264</systemitem> považována
@@ -884,7 +797,7 @@ make
 make install
 </screen>
 Binárky na audiocoding.com nenajdete, ale můžete si je opatřit v balíčcích pro
-Debian z <ulink url="http://hpisi.nerim.net">domácí stránky Christiana
+Debian z <ulink url="http://www.debian-multimedia.org/">domácí stránky Christiana
 Marillata</ulink>, Mandrake/Mandriva RPM z
 <ulink url="http://plf.zarb.org">P.L.F</ulink> a RedHat RPM
 ze stránek <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.16  -->
+<!-- Synced with: 18606  -->
 <appendix id="mailinglists">
 <title>E-mailové konference</title>
 <para>
@@ -85,14 +85,14 @@ nebo jste si povšimli možné chyby/problému v commitu).
 </para>
 <para>Tato konference je zaměřena na dokumentaci
 <application>MPlayer</application>u a diskuse k domácí stránce.
-CVS logy vztažené k dokumentaci a domácí stránce jsou zde rovněž posílány.
+Subversion logy vztažené k dokumentaci a domácí stránce jsou zde rovněž posílány.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>Tato konference je zaměřena na diskuse k překladům dokumentace
 <application>MPlayer</application>u a domácí stránky.
-CVS logy překladů dokumentace a domácí stránky jsou zde rovněž posílány.
+Subversion logy překladů dokumentace a domácí stránky jsou zde rovněž posílány.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
@@ -123,7 +123,7 @@ News.
 <para>Konference pro diskuse o OS/2 portu <application>MPlayer</application>u.
 </para></listitem> 
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-qt-codecs-porting"><application>MPlayer</application>-qt-codecs-porting</ulink> (INACTIVE)
+<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INACTIVE)
 </para>
 <para>Konference pro dikuse o podpoře QuickTime kodeku.
 </para></listitem>

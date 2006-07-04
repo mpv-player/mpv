@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.82 -->
+<!-- Synced with: 18650 -->
 <chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -189,6 +189,14 @@ Pokud zažívate podivné situace při používání <option>-vo xv</option>, zkuste SDL
 S3 Savage3D by měly fungovat dobře, ale pro Savage4 použijte XFree86 verze 4.0.3
 nebo vyšší (v případě problémů s obrazem, zkuste 16bpp). Stejně ajko S3 Virge:
 má sice podporu xv, ale karta samotná je velmi pomalá, takže ji raději prodejte.
+</para>
+
+<para>
+Pro karty S3 Virge nyní existuje nativní framebuffer ovladač podobný 
+tdfxfb. Nastavte si framebuffer (čili přidejte
+"<option>vga=792 video=vesa:mtrr</option>" do kernelu) a použijte
+<option>-vo s3fb</option> (<option>-vf yuy2</option> a <option>-dr</option>
+rovněž pomůžou).
 </para>
 
 <note>
@@ -794,7 +802,7 @@ Výstup FBdev přijímá několik dodatečných voleb:
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    nastaví zařízení framebufferu k použití (<filename>/dev/fb0</filename>)
+    nastaví zařízení framebufferu k použití (výchozí: <filename>/dev/fb0</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -806,7 +814,7 @@ Výstup FBdev přijímá několik dodatečných voleb:
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    config soubor režimů (výchozí <filename>/etc/fb.modes</filename>)
+    config soubor režimů (výchozí: <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -1067,25 +1075,25 @@ důležitých:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    nastaví doporučený aa ovladač (X11, curses, Linux)
+    Nastaví doporučený aa ovladač (X11, curses, Linux).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    použití všech 256 znaků
+    Použití všech 256 znaků.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
-    použití osmibitového ASCII
+    Použití osmibitového ASCII.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    vypíše všechny aalib volby
+    Vypíše všechny aalib volby.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1608,9 +1616,7 @@ funkční.
   <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> a některé
   další. Mějte však prosím na paměti, že to je pouze dočasná obtíž.
   Syntaxe pro použití je následující:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds <replaceable>divx3soubor.avi</replaceable>
-  </screen>
+  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable> </screen>
   </para></listitem>
 </itemizedlist>
 
@@ -1620,9 +1626,7 @@ funkční.
   &ndash; bez framebufferu nebo nějaké X magie. Pro tento účel budete muset
   použít video rozhraní <option>cvidix</option>, jak to ukazuje následující
   příklad:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>příklad.avi</replaceable>
-  </screen>
+  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>příklad.avi</replaceable> </screen>
 </para>
 
 <para>
@@ -1964,12 +1968,12 @@ k jejich instalaci naleznete na stránkách
 <title>POUŽITÍ</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>zapíná TV výstup</para></listitem>
+<listitem><para>Zapíná TV výstup.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> nebo <option>-vo dxr2:xv</option></term>
-<listitem><para>zapíná Overlay výstup v X11</para></listitem>
+<listitem><para>Zapíná Overlay výstup v X11.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2483,7 +2487,6 @@ Section "Device"
         Option          "ConnectedMonitor" "CRT, TV"
         Option          "TVStandard" "PAL-B"
         Option          "TVOutFormat" "Composite"
-
 EndSection
 </programlisting>
 </para>

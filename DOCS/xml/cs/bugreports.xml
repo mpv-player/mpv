@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.15 -->
+<!-- Synced with: 18600 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
 <para>
@@ -40,7 +40,7 @@ vám pomohou, pokud budete mít otázky.
 </para>
 </sect1>
 <sect1 id="bugreports_regression_test">
-<title>Jak provádět regresní testování pomocí CVS</title>
+<title>Jak provádět regresní testování pomocí Subversion</title>
 <para>
 Občas nastane problém typu 'předtím to fungovalo, teď už ne...'.
 Zde přinášíme postup krok za krokem, jak vyhledat, kdy problém
@@ -48,16 +48,16 @@ nastal. Toto <emphasis role="bold">není</emphasis> určeno příležitostným
 uživatelům.
 </para>
 <para>
-Nejprve si musíte opatřit zdrojové kódy MPlayeru z CVS.
+Nejprve si musíte opatřit zdrojové kódy MPlayeru ze Subversion.
 Instrukce lze nalést na konci
 <ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>.
 </para>
 <para>
-Tak dostanete v adresáři main/ obraz CVS stromu na straně klienta.
+Tak dostanete v adresáři mplayer/ obraz Subversion stromu na straně klienta.
 Nyní aktualizujte tento obraz k datu, které chcete:
 <screen>
-cd main/
-cvs update -PAd -D "2004-08-23"
+cd mplayer/
+svn update -r {"2004-08-23"}
 </screen>
 Formát data je YYYY-MM-DD HH:MM:SS.
 Požití tohoto datového formátu zajišťuje, že budete schopni extrahovat
@@ -112,12 +112,12 @@ Rovněž si můžete patch rozpitvat, dokud z něj nevytlučete, kde je chyba :-).
 <sect1 id="bugreports_report">
 <title>Jak oznamovat chyby</title>
 <para>
-Nejprve, prosím, vyzkoušejte poslední CVS verzi
+Nejprve, prosím, vyzkoušejte poslední Subversion verzi
 <application>MPlayer</application>u, jelikož vaše chyba již mohla být
 odstraněna. Vývoj je velmi rychlý, většina chyb v oficiálních balíčcích je
 nahlášena během několika dnů, nebo dokonce hodin, takže prosím používejte
-<emphasis role="bold">pouze CVS</emphasis> pro hlášení chyb. To zahrnuje binární
-balíčky <application>MPlayer</application>u. CVS instrukce naleznete na konci
+<emphasis role="bold">pouze Subversion</emphasis> pro hlášení chyb. To zahrnuje binární
+balíčky <application>MPlayer</application>u. Subversion instrukce naleznete na konci
 <ulink url="http://www.mplayerhq.hu/dload.html">této stránky</ulink>,
 nebo v souboru README. Pokud to nepomůže, prostudujte si prosím seznam
 <link linkend="bugs">známých chyb</link> a zbytek dokumentace. Pokud je váš
@@ -338,7 +338,7 @@ problému. Takto můžete přesměrovat výstup do souboru:
 <para>
 Pokud se problém vztahuje k jednomu nebo více souborům, pak prosím nahrajte
 potížisty na:
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.80 -->
+<!-- Synced with: 18824 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -46,7 +46,7 @@ způsobem:
 Christian Marillat vytvářel jistou dobu neoficiální Debianí balíčky
 <application>MPlayer</application>u, <application>MEncoder</application>u a
 našich bitmapových fontů, můžete si je stáhnout (apt-get) z
-<ulink url="http://hpisi.nerim.net/">jeho domácí stránky</ulink>.
+<ulink url="http://www.debian-multimedia.org/">jeho domácí stránky</ulink>.
 </para>
 </sect2>
 
@@ -177,6 +177,23 @@ na 400MHz CPU. Budete k tomu potřebovat nainstalovanou
 <ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>.
 </para>
 
+<para><emphasis role="bold">Caveat:</emphasis></para>
+<itemizedlist>
+<listitem><para>Podpora <emphasis role="bold">mediaLib</emphasis> je
+<emphasis role="bold">v současnosti vypnutá</emphasis> ve výchozím nastavení
+<application>MPlayer</application>u kvůli chybovosti. Uživatelé SPARCu
+překládající MPlayer s podporou mediaLib hlásili tlustý zelený pruh
+v enkódovaném videu dekódovaném libavcodecem. Pokud chcete, můžete si ji
+zapnout:
+<screen>
+$ ./configure --enable-mlib
+</screen>
+Děláte to na vlastní nebezpečí. Uživatelé x86 by
+<emphasis role="bold">nikdy</emphasis> neměli používat mediaLib, jelikož
+vede k velmi slabému výkonu MPlayeru.
+</para></listitem>
+</itemizedlist>
+
 <para>
 Pro kompilaci balíku budete potřebovat GNU <application>make</application>
 (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), jelikož
@@ -208,7 +225,9 @@ pro nastavení <filename>configure</filename> skriptu tak, aby našel GNU
 "as" na vašem systému).
 </para>
 
-<para>
+<para>Řešení běžných potíží:</para>
+<itemizedlist>
+<listitem><para>
 Chybová zpráva z <filename>configure</filename> na systému Solaris x86
 s použitím GCC bez GNU assembleru:
 <screen>
@@ -234,8 +253,33 @@ nepoužívá GNU as:
    ... more "Illegal mnemonic" and "Syntax error" errors ...
 </screen>
 </para>
+</listitem>
 
-<para>
+<listitem><para><application>MPlayer</application> může zhavarovat (segfault),
+pokud dekódujete nebo enkódujete video používající win32 kodeky:
+<screen>
+...
+Trying to force audio codec driver family acm...
+Opening audio decoder: [acm] Win32/ACM decoders
+sysi86(SI86DSCR): Invalid argument
+Couldn't install fs segment, expect segfault
+
+
+MPlayer interrupted by signal 11 in module: init_audio_codec
+...
+</screen>
+To díky změně na sysi86() ve verzích Solaris 10 a před-Solaris
+Nevada b31. V Solaris Nevada b32 to bylo opraveno;
+Sun však ještě musí portovat opravu do Solaris 10. MPlayer
+Project upozornil Sun na tento problém a záplata pro Solaris 10
+je v současnosti rozpracována. Více informací o této chybě naleznete
+na:
+<ulink
+url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+</para>
+</listitem>
+
+<listitem><para>
 Díky chybám v Solarisu 8, nemůžete přehrávat DVD disky větší než 4 GB:
 </para>
 
@@ -255,6 +299,8 @@ modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
 Problém hsfs může být odstraněn nainstalováním patche 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
+</itemizedlist>
+</listitem>
 </itemizedlist>
 </sect2>
 
@@ -432,6 +478,7 @@ Testovány byly následující architektury:
 
 <itemizedlist>
 <listitem><para>604e</para></listitem>
+<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER4</para></listitem>
 </itemizedlist>
 
@@ -441,7 +488,6 @@ Následující architektury nebyly testovány, ale měly by pracovat:
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
 <listitem><para>POWER2</para></listitem>
-<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER5</para></listitem>
 </itemizedlist>
 
@@ -449,9 +495,37 @@ Následující architektury nebyly testovány, ale měly by pracovat:
 Zvuk přes Ultimedia Services není podporován, jelikož Ultimedia byla
 opuštěna v AIX 5.1; tudíš je jedinou možností použití ovladačů AIX Open
 Sound System (OSS) od 4Front Technologies z <ulink
-url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>.
-4Front Technologies dodává OSS ovladače zdarma pro osobní a nekomerční využití.
+url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html
+</ulink>.
+4Front Technologies volně poskytuje OSS ovladače pro AIX 5.1 pro
+nekomerční použití; zatím však neexistují zvukové ovladače
+pro AIX 5.2 nebo 5.3. To znamená, že <emphasis role="bold">AIX 5.2
+a 5.3 nejsou nyní schopny provozovat MPlayer se zvukem.</emphasis>
 </para>
+
+<para>Řešení běžných potíží:</para>
+
+<itemizedlist>
+<listitem>
+<para>
+Pokud dostanete tuto chybovou hlášku z <filename>configure</filename>:
+<screen>
+$ ./configure
+...
+Checking for iconv program ... no
+No working iconv program found, use
+--charset=US-ASCII to continue anyway.
+Messages in the GTK-2 interface will be broken then.
+</screen>
+To proto, že AIX používá nestandardní názvy znakových sad; proto
+konverze výstupu MPlayeru do jiné znakové sady není zatím podporováno.
+Řešením je:
+<screen>
+$ ./configure --charset=noconv
+</screen>
+</para>
+</listitem>
+</itemizedlist>
 
 </sect2>
 </sect1>
@@ -534,47 +608,46 @@ url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink
   zakáže jeho použití. Přidejte si to do vašeho konfig souboru, aby zůstal
   zakázán natrvalo.</para>
 
-<para>There are special codec packages for Windows available on our
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
-  to allow playing formats for which there is no native support yet.
-  Put the codecs somewhere in your path or pass
-  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
-  (alternatively
-  <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>
-  only on <application>Cygwin</application>) to <filename>configure</filename>.
-  We have had some reports that Real DLLs need to be writable by the user
-  running <application>MPlayer</application>, but only on some systems (NT4).
-  Try making them writable if you have problems.</para>
+<para>Pro Windows máme k dispozici speciální balíčky kodeků na naší
+  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">stránce kodeků</ulink>,
+  abyste mohli přehrávat formáty, pro které zatím není nativní podpora.
+  Umístěte kodeky někde do cesty (path), nebo přidejte
+  <option>--with-codecsdir=<replaceable>c:/cesta/ke/kodekům</replaceable></option>
+  (případně
+  <option>--with-codecsdir=<replaceable>/cesta/ke/kodekům</replaceable></option>
+  používate-li <application>Cygwin</application>) do <filename>configure</filename>.
+  Máme několik zpráv, že Real DLL musí mít práva zápisu pro uživatele, který
+  pouští <application>MPlayer</application>, ale pouze na některých systémech (NT4).
+  Máte-li potíže, zkuste jim přidat právo zápisu.</para>
 
-<para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
-  that Windows exposes on VCDs. It works like this (adjust for the drive letter
-  of your CD-ROM):</para>
+<para>Můžete přehrávat VCD přehráváním <filename>.DAT</filename> nebo <filename>.MPG</filename>
+  souborů, které Windows ukazuje na VCD. Pracuje to takto
+  (upravte písmeno disku vaší CD-ROM):</para>
 
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
 
-<para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
-  of your DVD-ROM:</para>
+<para>DVD pracují také, upravte <option>-dvd-device</option> na písmeno
+  DVD-ROM mechaniky:</para>
 
-<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
+<screen>mplayer dvd://<replaceable>&lt;titul&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
 
-<para>The <application>Cygwin</application>/<application>MinGW</application>
-  console is rather slow. Redirecting output or using the
-  <option>-quiet</option> option has been reported to improve performance on
-  some systems. Direct rendering (<option>-dr</option>) may also help.
-  If playback is jerky, try
-  <option>-autosync 100</option>. If some of these options help you, you
-  may want to put them in your config file.</para>
+<para><application>Cygwin</application>/<application>MinGW</application>
+  terminál je spíše pomalý. Přesměrování výstupu nebo použití volby
+  <option>-quiet</option> podle hlášení zvýší výkon na některých systémech.
+  Direct rendering (<option>-dr</option>) může rovněž pomoci.
+  Pokud je přehrávání trhané, zkuste
+  <option>-autosync 100</option>. Pokud vám některé z těchto voleb pomohly,
+  měli byste si je zapsat do konfiguračního souboru.</para>
 
 <note>
 
-<para>On Windows the runtime CPU detection disables SSE support
-  because of recurring and hard-to-trace SSE-related crashes. If you
-  wish to have SSE support under Windows, you will have to compile without
-  runtime CPU-detection.
+<para>Runtime CPU detekce na Windows vypíná podporu SSE kvůli opakovaným a
+  těžko vystopovatelným se SSE souvisejícím pádům. Pokud chcete mít podporu
+  SSE pod Windows, budete muset kompilovat bez runtime CPU detekce.
 </para>
 
-<para>If you have a Pentium 4 and are experiencing a crash using the
-  RealPlayer codecs, you may need to disable hyperthreading support.
+<para>Máte-li Pentium 4 a dojde k pádu při použití
+  RealPlayer kodeků, možná budete muset vypnout podporu hyperthreading.
 </para>
 
 </note>
@@ -583,15 +656,15 @@ url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para>You need to run <application>Cygwin</application> 1.5.0 or later in
-  order to compile <application>MPlayer</application>.</para>
+<para>Musíte používat <application>Cygwin</application> 1.5.0 nebo vyšší,
+  abyste mohli kompilovat <application>MPlayer</application>.</para>
 
-<para>DirectX header files need to be extracted to <filename class="directory">/usr/include/</filename> or
+<para>Hlavičkové soubory DirectX musí být rozbaleny do <filename class="directory">/usr/include/</filename> nebo
   <filename class="directory">/usr/local/include/</filename>.</para>
 
-<para>Instructions and files for making SDL run under
-  <application>Cygwin</application> can be found on the
-  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.</para>
+<para>Instrukce a soubory nutné pro běh SDL pod
+  <application>Cygwin</application> lze nalézt na
+  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl stránkách</ulink>.</para>
 
 </sect2>
 
@@ -599,22 +672,22 @@ url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink
 <sect2 id="mingw">
 <title><application>MinGW</application></title>
 
-<para>Installing a version of <application>MinGW</application> that could
-  compile <application>MPlayer</application> used to be quite tricky, but it
-  works out of the box now. Just install <application>MinGW</application>
-  3.1.0 or later and MSYS 1.0.9 or later and tell the MSYS postinstall that
-  <application>MinGW</application> is installed.</para>
+<para>Instalace takové verze <application>MinGW</application>, aby bylo lze
+  kompilovat <application>MPlayer</application>, byla obtížná, ale nyní
+  pracuje bez dalších úprav. Jen nainstalujte <application>MinGW</application>
+  3.1.0 nebo vyšší a MSYS 1.0.9 nebo vyšší a zvolte v MSYS postinstall, že je
+  <application>MinGW</application> nainstalováno.</para>
 
-<para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
+<para>Rozbalte DirectX hlavičkové soubory do <filename class="directory">/mingw/include/</filename>.</para>
 
-<para>MOV compressed header support requires
-  <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, which
-  <application>MinGW</application> does not provide by default.
-  Configure it with <option>--prefix=/mingw</option> and install
-  it before compiling <application>MPlayer</application>.</para>
+<para>Podpora MOV compressed header vyžaduje
+  <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, kterou
+  <application>MinGW</application> neobsahuje.
+  Konfigurujte ji s <option>--prefix=/mingw</option> a nainstalujte
+  ji před kompilací <application>MPlayer</application>u.</para>
 
-<para>Complete instructions for building <application>MPlayer</application>
-  and necessary libraries can be found in the
+<para>Kompletní instrukce pro překlad <application>MPlayer</application>u
+  a potřebné knihovny naleznete v
   <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
 
 </sect2>
@@ -625,11 +698,11 @@ url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink
 <sect1 id="macos">
 <title>Mac OS</title>
 <para>
-<application>MPlayer</application> does not work on Mac OS versions before
-10, but should compile out-of-the-box on Mac OS X 10.2 and up.
-The preferred compiler is the Apple version of
-GCC 3.x or later. If you have Mac OS X 10.3.9 or later and QuickTime 7
-you can use the macosx video output driver.
+<application>MPlayer</application> nepracuje na Mac OS verzích pod
+10, ale měl by být bez úprav kompilovatelný na Mac OS X 10.2 a vyšších.
+Preferovaná verze kompileru je Apple verze
+GCC 3.x a vyšších. Máte-li Mac OS X 10.3.9 nebo vyšší a QuickTime 7,
+můžete použít výstupní video rozhraní macosx.
 </para>
 
 <sect2 id="osx_gui">
