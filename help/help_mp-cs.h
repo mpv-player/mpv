@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.cz
 //                 Jiri Heryan
-// Synced to 1.252
+// Synced to 18818
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -9,8 +9,8 @@ static char help_text[]=
 "Pou¾ití:          mplayer [volby] [url|cesta/]jméno_souboru\n"
 "\n"
 "Základní volby: (úplný seznam najdete v manuálové stránce)\n"
-" -vo <roz[:zaø]>  vybere výst. video rozhraní a zaøízení (seznam: -vo help)\n"
-" -ao <roz[:zaø]>  vybere výst. audio rozhraní a zaøízení (seznam: -ao help)\n"
+" -vo <rozhraní>   vybere výstupní video rozhraní (seznam: -vo help)\n"
+" -ao <rozhraní>   vybere výstupní audio rozhraní (seznam: -ao help)\n"
 #ifdef HAVE_VCD
 " vcd://<è_stopy>  pøehraje (S)VCD (Super Video CD) stopu (z nepøipojeného\n"
 "                  zaøízení)\n"
@@ -145,8 +145,8 @@ static char help_text[]=
 "  DOCS/HTML/en/bugreports.html a pokraèujte podle tam uvedeného návodu. My vám nemù¾eme\n"\
 "  pomoci, pokud tyto informace neuvedete pøi ohla¹ování mo¾né chyby.\n"
 #define MSGTR_LoadingConfig "Naèítám konfiguraci '%s'\n"
-#define MSGTR_AddedSubtitleFile "SUB: pøidán soubor s titulky (%d): %s\n"
-#define MSGTR_RemovedSubtitleFile "SUB: odebrán soubor s titulky (%d): %s\n"
+#define MSGTR_AddedSubtitleFile "SUB: Pøidán soubor s titulky (%d): %s\n"
+#define MSGTR_RemovedSubtitleFile "SUB: Odebrán soubor s titulky (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Chyba pøi otevírání souboru [%s] pro zápis!\n"
 #define MSGTR_CommandLine "Pøíkazový øádek:"
 #define MSGTR_RTCDeviceNotOpenable "Selhalo otevøení %s: %s (by mìlo být èitelné u¾ivatelem.)\n"
@@ -187,9 +187,9 @@ static char help_text[]=
 #define MSGTR_EdlCantOpenForRead "Nelze otevøít EDL soubor [%s] pro ètení.\n"
 #define MSGTR_EdlNOsh_video "EDL nelze pou¾ít bez videa, vypínám.\n"
 #define MSGTR_EdlNOValidLine "Chybná EDL na øádku: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "©patnì formátovaná EDL na øádku [%d] Zahazuji.\n"
-#define MSGTR_EdlBadLineOverlap "Poslední stop znaèka byla [%f]; dal¹í start je "\
-"[%f]. Vstupy musí být v chronologickém poøadí a nesmí se pøekrývat. Zahazuji.\n"
+#define MSGTR_EdlBadlyFormattedLine "©patnì formátovaná EDL na øádku [%d], zahazuji.\n"
+#define MSGTR_EdlBadLineOverlap "Poslední stop znaèka byla [%f]; dal¹í start je [%f].\n"\
+"Vstupy musí být v chronologickém poøadí a nesmí se pøekrývat. Zahazuji.\n"
 #define MSGTR_EdlBadLineBadStop "Èasová znaèka stop má být za znaèkou start.\n"
 
 // mplayer.c OSD
@@ -203,7 +203,7 @@ static char help_text[]=
 
 // property values
 #define MSGTR_Enabled "zapnuto"
-#define MSGTR_EnabledEdl "zapnuto (edl)"
+#define MSGTR_EnabledEdl "zapnuto (EDL)"
 #define MSGTR_Disabled "vypnuto"
 #define MSGTR_HardFrameDrop "intenzivní"
 #define MSGTR_Unknown "neznámé"
@@ -245,10 +245,10 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nNebyl vybrán video enkodér (-ovc). Nìjaký vyberte (viz  -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Nelze otevøít výstupní soubor '%s'\n"
 #define MSGTR_EncoderOpenFailed "Selhalo spu¹tìní enkodéru\n"
-#define MSGTR_MencoderWrongFormatAVI "\nVAROVÁNÍ: FORMÁT VÝSTUPNÍHO SOUBORU JE _AVI_. viz -of help.\n"
-#define MSGTR_MencoderWrongFormatMPG "\nVAROVÁNÍ: FORMÁT VÝSTUPNÍHO SOUBORU JE _MPEG_. viz -of help.\n"
-#define MSGTR_MissingOutputFilename "Nebyl nastaven výstupní soubor, prostudujte si volbu -o"
-#define MSGTR_ForcingOutputFourcc "Vynucuji výstupní fourcc na %x [%.4s]\n"
+#define MSGTR_MencoderWrongFormatAVI "\nVAROVÁNÍ: FORMÁT VÝSTUPNÍHO SOUBORU JE _AVI_. Viz -of help.\n"
+#define MSGTR_MencoderWrongFormatMPG "\nVAROVÁNÍ: FORMÁT VÝSTUPNÍHO SOUBORU JE _MPEG_. Viz -of help.\n"
+#define MSGTR_MissingOutputFilename "Nebyl nastaven výstupní soubor, prostudujte si volbu -o."
+#define MSGTR_ForcingOutputFourcc "Vynucuji výstupní FourCC na %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Vynucuji znaèku výstupního zvukového formátu 0x%x\n"
 #define MSGTR_DuplicateFrames "\n%d opakujících se snímkù!\n"
 #define MSGTR_SkipFrame "\nPøeskakuji snímek!\n"
@@ -265,16 +265,16 @@ static char help_text[]=
 #define MSGTR_OpenedStream "úspìch: formát: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videokodek: framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "audiokodek: framecopy (formát=%x kanálù=%d frekvence=%d bitù=%d B/s=%d vzorek-%d)\n"
-#define MSGTR_CBRPCMAudioSelected "vybrán CBR PCM zvuk\n"
-#define MSGTR_MP3AudioSelected "vybrán MP3 zvuk\n"
-#define MSGTR_CannotAllocateBytes "Nelze alokovat %d bajtù\n"
-#define MSGTR_SettingAudioDelay "Nastavuji zpo¾dìní zvuku na %5.3f\n"
-#define MSGTR_SettingVideoDelay "Nastavuji zpo¾dìní videa na %5.3fs\n"
-#define MSGTR_SettingAudioInputGain "Nastavuji pøedzesílení zvukového vstupu na %f\n"
+#define MSGTR_CBRPCMAudioSelected "Vybrán CBR PCM zvuk.\n"
+#define MSGTR_MP3AudioSelected "Vybrán MP3 zvuk.\n"
+#define MSGTR_CannotAllocateBytes "Nelze alokovat %d bajtù.\n"
+#define MSGTR_SettingAudioDelay "Nastavuji zpo¾dìní zvuku na %5.3fs.\n"
+#define MSGTR_SettingVideoDelay "Nastavuji zpo¾dìní videa na %5.3fs.\n"
+#define MSGTR_SettingAudioInputGain "Nastavuji pøedzesílení zvukového vstupu na %f.\n"
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n"
-#define MSGTR_LimitingAudioPreload "Omezuji pøednaèítání zvuku na 0.4s\n"
-#define MSGTR_IncreasingAudioDensity "Zvy¹uji hustotu audia na 4\n"
-#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Vynucuji pøednaèítání zvuku na 0, max korekci pts  na 0\n"
+#define MSGTR_LimitingAudioPreload "Omezuji pøednaèítání zvuku na 0.4s.\n"
+#define MSGTR_IncreasingAudioDensity "Zvy¹uji hustotu audia na 4.\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Vynucuji pøednaèítání zvuku na 0, max korekci pts  na 0.\n"
 #define MSGTR_CBRAudioByterate "\n\nCBR zvuk: %d bajtù/s, %d bajtù/blok\n"
 #define MSGTR_LameVersion "LAME ve verzi %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Chyba: Specifikovaný datový tok je mimo rozsah pro tento preset re¾im.\n"\
@@ -363,7 +363,7 @@ static char help_text[]=
 "            mù¾ete pou¾ít volbu \"cbr\" k vynucení kódování v re¾imu CBR\n"\
 "            (konstantní tok) namísto standardního ABR re¾imu. ABR poskytuje\n"\
 "            lep¹í kvalitu, ale CBR mù¾e být u¾iteèný v situacích jako je\n"\
-"            vysílání mp3 proudu po internetu.\n"\
+"            vysílání MP3 proudu po internetu.\n"\
 "\n"\
 "    Napøíklad:\n"\
 "\n"\
@@ -378,33 +378,34 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "Nelze nastavit volby pro LAME, ovìøte datový_tok/vzorkovou_rychlost,"\
-"nìkteré velmi nízké datové toky (<32) vy¾adují ni¾¹í vzorkovou rychlost (napø. -srate 8000)."\
-"Pokud v¹e sel¾e, zkuste pøednastavené."
+#define MSGTR_LameCantInit \
+"Nelze nastavit volby pro LAME, ovìøte datový_tok/vzorkovou_rychlost. Nìkteré"\
+"velmi nízké datové toky (<32) vy¾adují ni¾¹í vzorkovou rychlost (napø. -srate 8000).\n"\
+"Pokud v¹e sel¾e, zkuste preset."
 #define MSGTR_ConfigFileError "chyba konfiguraèního souboru"
 #define MSGTR_ErrorParsingCommandLine "chyba pøi zpracovávání pøíkazového øádku"
 #define MSGTR_VideoStreamRequired "Videoproud je povinný!\n"
-#define MSGTR_ForcingInputFPS "místo toho bude vstupní fps interpretováno jako %5.2f\n"
-#define MSGTR_RawvideoDoesNotSupportAudio "Výstupní formát souboru RAWVIDEO nepodporuje zvuk - vypínám ho\n"
+#define MSGTR_ForcingInputFPS "Vstupní fps bude interpretováno jako %5.2f\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "Výstupní formát souboru RAWVIDEO nepodporuje zvuk - vypínám ho.\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Tento demuxer zatím nepodporuje -nosound.\n"
-#define MSGTR_MemAllocFailed "Alokace pamìti selhala\n"
+#define MSGTR_MemAllocFailed "Alokace pamìti selhala.\n"
 #define MSGTR_NoMatchingFilter "Nemohu najít odpovídající filtr/ao formát!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, mo¾ná je vadný pøekladaè C?\n"
 #define MSGTR_NoLavcAudioCodecName "Audio LAVC, chybí jméno kodeku!\n"
-#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nemohu najít enkodér pro kodek %s\n"
+#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nemohu najít enkodér pro kodek %s.\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nemohu alokovat kontext!\n"
-#define MSGTR_CouldntOpenCodec "Nelze otevøít kodek %s, br=%d\n"
+#define MSGTR_CouldntOpenCodec "Nelze otevøít kodek %s, br=%d.\n"
 #define MSGTR_CantCopyAudioFormat "Audio formát 0x%x je nekompatibilní s '-oac copy', zkuste prosím '-oac pcm',\n nebo pou¾ijte '-fafmttag' pro jeho pøepsání.\n"
 
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
 " vbr=<0-4>     metoda promìnného datového toku\n"\
-"                0: cbr\n"\
-"                1: mt\n"\
-"                2: rh(výchozí)\n"\
-"                3: abr\n"\
-"                4: mtrh\n"\
+"                0: cbr  (konstantní tok)\n"\
+"                1: mt   (VBR algoritmus Mark Taylor)\n"\
+"                2: rh   (VBR algoritmus Robert Hegemann - výchozí)\n"\
+"                3: abr  (prùmìrný tok)\n"\
+"                4: mtrh (VBR alogoritmus Mark Taylor Robert Hegemann)\n"\
 "\n"\
 " abr           prùmìrný datový tok\n"\
 "\n"\
@@ -484,7 +485,7 @@ static char help_text[]=
 #define MSGTR_CannotMakePipe "Nelze vytvoøit ROURU!\n"
 
 // m_config.c
-#define MSGTR_SaveSlotTooOld "Nalezen pøíli¹ starý save slot z lvl %d: %d !!!\n"
+#define MSGTR_SaveSlotTooOld "Nalezený save slot z lvl %d je pøíli¹ starý: %d !!!\n"
 #define MSGTR_InvalidCfgfileOption "Volbu %s nelze pou¾ít v konfiguraèním souboru\n"
 #define MSGTR_InvalidCmdlineOption "Volbu %s nelze pou¾ít z pøíkazového øádku\n"
 #define MSGTR_InvalidSuboption "Chyba: volba '%s' nemá ¾ádnou podvolbu '%s'\n"
@@ -515,7 +516,7 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer nebyl pøelo¾en s podporou ètení SMB.\n"
 
 #define MSGTR_CantOpenDVD "Nelze otevøít DVD zaøízení: %s\n"
-#define MSGTR_NoDVDSupport "MPlayer byl zkompilován bez podpory DVD, konèím\n"
+#define MSGTR_NoDVDSupport "MPlayer byl zkompilován bez podpory DVD, konèím.\n"
 #define MSGTR_DVDwait "Naèítám strukturu disku, èekejte prosím...\n"
 #define MSGTR_DVDnumTitles "Na tomto DVD je %d titul(ù).\n"
 #define MSGTR_DVDinvalidTitle "Neplatné èíslo DVD titulu: %d\n"
@@ -538,8 +539,8 @@ static char help_text[]=
 #define MSGTR_TooManyStreams "Pøíli¹ mnoho datových proudù!"
 #define MSGTR_RawMuxerOnlyOneStream "Muxer surového zvuku podporuje pouze jeden zvukový proud!\n"
 #define MSGTR_IgnoringVideoStream "Ignoruji video proud!\n"
-#define MSGTR_UnknownStreamType "Varování! Neznámý typ datového proudu: %d\n"
-#define MSGTR_WarningLenIsntDivisible "Varování! Délka není násobkem velikosti vzorku!\n"
+#define MSGTR_UnknownStreamType "Varování, neznámý typ datového proudu: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Varování, délka není násobkem velikosti vzorku!\n"
 #define MSGTR_MuxbufMallocErr "Nelze alokovat pamì» pro snímkovou vyrovnávací pamì» muxeru!\n"
 #define MSGTR_MuxbufReallocErr "Nelze realokovat pamì» pro snímkovou vyrovnávací pamì» muxeru!\n"
 #define MSGTR_MuxbufSending "Snímková vyrovnávací pamì» muxeru posílá %d snímkù do muxeru.\n"
@@ -575,15 +576,13 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Nelze se posouvat v surových (raw) AVI proudech! (Potøebuji index, zkuste pou¾ít volbu -idx.)\n"
 #define MSGTR_CantSeekFile "Nemohu se posouvat v tomto souboru.\n"
 
-#define MSGTR_EncryptedVOB "©ifrovaný soubor VOB! Pøeètìte si DOCS/HTML/cs/cd-dvd.html.\n"
-
 #define MSGTR_MOVcomprhdr "MOV: Komprimované hlavièky vy¾adují ZLIB!\n"
-#define MSGTR_MOVvariableFourCC "MOV: VAROVÁNÍ: Promìnná FOURCC detekována!?\n"
+#define MSGTR_MOVvariableFourCC "MOV: VAROVÁNÍ: Promìnná FourCC detekována!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: VAROVÁNÍ: pøíli¹ mnoho stop"
 #define MSGTR_FoundAudioStream "==> Nalezen audio proud: %d\n"
 #define MSGTR_FoundVideoStream "==> Nalezen video proud: %d\n"
 #define MSGTR_DetectedTV "Detekována TV! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "Nelze otevøít ogg demuxer.\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Nelze otevøít Ogg demuxer.\n"
 #define MSGTR_ASFSearchingForAudioStream "ASF: Hledám audio proud (id: %d).\n"
 #define MSGTR_CannotOpenAudioStream "Nemohu otevøít audio proud: %s\n"
 #define MSGTR_CannotOpenSubtitlesStream "Nemohu otevøít proud s titulky: %s\n"
@@ -598,14 +597,14 @@ static char help_text[]=
 
 #define MSGTR_CacheFill "\rNaplnìní cache: %5.2f%% (%"PRId64" bajtù)   "
 #define MSGTR_NoBindFound "Tlaèítko '%s' nemá pøiøazenu ¾ádnou funkci."
-#define MSGTR_FailedToOpen "Selhalo otevøení %s\n"
+#define MSGTR_FailedToOpen "Selhalo otevøení %s.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nelze otevøít kodek.\n"
 #define MSGTR_CantCloseCodec "Nelze uzavøít kodek.\n"
 
 #define MSGTR_MissingDLLcodec "CHYBA: Nelze otevøít po¾adovaný DirectShow kodek %s.\n"
-#define MSGTR_ACMiniterror "Nemohu naèíst/inicializovat Win32/ACM AUDIO kodek (chybí DLL soubor?).\n"
+#define MSGTR_ACMiniterror "Nemohu naèíst/inicializovat Win32/ACM audio kodek (chybí DLL soubor?).\n"
 #define MSGTR_MissingLAVCcodec "Nemohu najít kodek '%s' v libavcodec...\n"
 
 #define MSGTR_MpegNoSequHdr "MPEG: KRITICKÁ CHYBA: Konec souboru v prùbìhu vyhledávání hlavièky sekvence.\n"
@@ -629,8 +628,8 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDecoder "Otevírám audio dekodér: [%s] %s\n"
 #define MSGTR_SelectedAudioCodec "Vybrán audio kodek: [%s] afm: %s (%s)\n"
 #define MSGTR_BuildingAudioFilterChain "Vytváøím zvukový øetìzec filtrù pro %dHz/%dch/%s -> %dHz/%dch/%s...\n"
-#define MSGTR_UninitVideoStr "uninit video: %s\n"
-#define MSGTR_UninitAudioStr "uninit audio: %s\n"
+#define MSGTR_UninitVideoStr "Uninit video: %s\n"
+#define MSGTR_UninitAudioStr "Uninit audio: %s\n"
 #define MSGTR_VDecoderInitFailed "Video dekodér - inicializace selhala :(\n"
 #define MSGTR_ADecoderInitFailed "Audio dekodér - inicializace selhala :(\n"
 #define MSGTR_ADecoderPreinitFailed "Audio dekodér - pøedinicializace selhala :(\n"
@@ -717,10 +716,10 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING1 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget nalezen ale pøed ním nebyla nalezena ¾ádná \"section\" (%s)"
 #define MSGTR_SKIN_WARNING2 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget nalezen ale pøed ním nebyla nalezena ¾ádná \"subsection\" (%s)"
 #define MSGTR_SKIN_WARNING3 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget (%s) nepodporuje tuto subsekci"
-#define MSGTR_SKIN_SkinFileNotFound "[skin] soubor ( %s ) nenalezen.\n"
-#define MSGTR_SKIN_SkinFileNotReadable "[skin] soubor ( %s ) nelze pøeèíst.\n"
-#define MSGTR_SKIN_BITMAP_16bit  "bitmapa s hloubkou 16 bitù a ménì není podporována (%s).\n"
-#define MSGTR_SKIN_BITMAP_FileNotFound  "soubor nenalezen (%s)\n"
+#define MSGTR_SKIN_SkinFileNotFound "[témata] soubor ( %s ) nenalezen.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[témata] soubor ( %s ) nelze pøeèíst.\n"
+#define MSGTR_SKIN_BITMAP_16bit  "Bitmapy s hloubkou 16 bitù a ménì nejsou podporovány (%s).\n"
+#define MSGTR_SKIN_BITMAP_FileNotFound  "Soubor nenalezen (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "chyba ètení BMP (%s)\n"
 #define MSGTR_SKIN_BITMAP_TGAReadError "chyba ètení TGA (%s)\n"
 #define MSGTR_SKIN_BITMAP_PNGReadError "chyba ètení PNG (%s)\n"
@@ -982,16 +981,16 @@ static char help_text[]=
 #define MSGTR_VO_DirectoryCreateSuccess "Úspì¹nì vytvoøen výstupní adresáø."
 #define MSGTR_VO_ParsingSuboptions "Interpretuji podvolby."
 #define MSGTR_VO_SuboptionsParsedOK "Podvolby interpretovány OK."
-#define MSGTR_VO_ValueOutOfRange "Hodnota je mimo rozsah"
+#define MSGTR_VO_ValueOutOfRange "hodnota mimo rozsah"
 #define MSGTR_VO_NoValueSpecified "Nebyla zadána hodnota."
-#define MSGTR_VO_UnknownSuboptions "Neznámá(é) podvolba(y)"
+#define MSGTR_VO_UnknownSuboptions "neznámá(é) podvolba(y)"
 
 // vo_aa.c
 
 #define MSGTR_VO_AA_HelpHeader "\n\nZde jsou podvolby aalib vo_aa:\n"
 #define MSGTR_VO_AA_AdditionalOptions "Dodateèné volby vo_aa zaji¹»ují:\n" \
 "  help        vypí¹e tuto nápovìdu\n" \
-"  osdcolor    nastaví barvu osd\n  subcolor    nastaví barvu titulkù\n" \
+"  osdcolor    nastaví barvu OSD\n  subcolor    nastaví barvu titulkù\n" \
 "        parametry barev jsou:\n           0 : normal\n" \
 "           1 : dim\n           2 : bold\n           3 : boldfont\n" \
 "           4 : reverse\n           5 : special\n\n\n"
@@ -1126,15 +1125,15 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: ¾ádná zvuková karta nebyla nalezena.\n"
 #define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: po¾adován neplatný formát (%s) - výstup odpojen.\n"
 #define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: chyba otevøení pøehrávání zvuku: %s\n"
-#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: chyba v pcm info: %s\n"
+#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: chyba v PCM info: %s\n"
 #define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: nalezeno %d zvukových karet, pou¾ívám: %s\n"
-#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: chyba info v pcm kanálu: %s\n"
+#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: chyba info v PCM kanálu: %s\n"
 #define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: chyba pøi nastavování parametrù: %s\n"
 #define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: chyba pøi nastavování kanálu: %s\n"
 #define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: chyba pøi pøípravì kanálu: %s\n"
 #define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: chyba playback drain: %s\n"
 #define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: chyba playback flush: %s\n" //to jsou názvy ¾e by jeden pad
-#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: chyba uzavøení pcm: %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: chyba uzavøení PCM: %s\n"
 #define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: chyba playback drain: %s\n"
 #define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: chyba playback flush: %s\n"
 #define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: chyba pøi pøípravì kanálù: %s\n"
@@ -1164,10 +1163,10 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrFailedToLoad "selhalo naètení"
 #define MSGTR_AF_LADSPA_ErrNoDescriptor "Nelze nalézt funkci ladspa_descriptor() v uvedené knihovnì."
 #define MSGTR_AF_LADSPA_ErrLabelNotFound "Nelze nalézt po¾adovaný název v knihovnì pluginù."
-#define MSGTR_AF_LADSPA_ErrNoSuboptions "Nebyla zadány ¾ádné podvolby"
-#define MSGTR_AF_LADSPA_ErrNoLibFile "Nebyla zadána ¾ádná knihovna"
-#define MSGTR_AF_LADSPA_ErrNoLabel "Nebyl zadán název ¾ádného filtru"
-#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Na pøíkazovém øádku bylo uvedeno málo volièù"
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "Nebyla zadány ¾ádné podvolby."
+#define MSGTR_AF_LADSPA_ErrNoLibFile "Nebyla zadána ¾ádná knihovna."
+#define MSGTR_AF_LADSPA_ErrNoLabel "Nebyl zadán název ¾ádného filtru."
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Na pøíkazovém øádku bylo uvedeno málo voleb."
 #define MSGTR_AF_LADSPA_ErrControlBelow "%s: Vstupní voliè #%d je ni¾¹í ne¾ minimální hodnota %0.4f.\n"
 #define MSGTR_AF_LADSPA_ErrControlAbove "%s: Vstupní voliè #%d je vy¹¹í ne¾ maximální hodnota %0.4f.\n"
 
@@ -1182,8 +1181,8 @@ static char help_text[]=
 #define MSGTR_INPUT_JOYSTICK_Opening "Otevírám zaøízení joysticku %s\n"
 #define MSGTR_INPUT_JOYSTICK_CantOpen "Nelze otevøít zaøízení joysticku %s: %s\n"
 #define MSGTR_INPUT_JOYSTICK_ErrReading "Chyba pøi ètení zaøízení joysticku: %s\n"
-#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: uvolnili jsme %d bajtù dat\n"
-#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: warning init event, ztratili jsme synchronizaci s ovladaèem\n"
+#define MSGTR_INPUT_JOYSTICK_LoosingBytes "Joystick: Uvolnili jsme %d bajtù dat\n"
+#define MSGTR_INPUT_JOYSTICK_WarnLostSync "Joystick: warning init event, ztratili jsme synchronizaci s ovladaèem.\n"
 #define MSGTR_INPUT_JOYSTICK_WarnUnknownEvent "Joystick: varování, neznámý typ události %d\n"
 
 // input.c
@@ -1196,7 +1195,7 @@ static char help_text[]=
 #define MSGTR_INPUT_INPUT_ErrUnknownArg "Neznámý argument %d\n"
 #define MSGTR_INPUT_INPUT_Err2FewArgs "Pøíkaz %s vy¾aduje aspoò %d argumentù, nalezli jsme jich v¹ak pouze %d.\n"
 #define MSGTR_INPUT_INPUT_ErrReadingCmdFd "Chyba pøi ètení pøíkazového deskriptoru souboru %d: %s\n"
-#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Vyrovnávací pamì» deskriptoru souboru pøíkazù %d je plná: zahazuji obsah\n"
+#define MSGTR_INPUT_INPUT_ErrCmdBufferFullDroppingContent "Vyrovnávací pamì» deskriptoru souboru pøíkazù %d je plná: zahazuji obsah.\n"
 #define MSGTR_INPUT_INPUT_ErrInvalidCommandForKey "©patný pøíkaz pro pøiøazení klávese %s"
 #define MSGTR_INPUT_INPUT_ErrSelect "Chyba výbìru: %s\n"
 #define MSGTR_INPUT_INPUT_ErrOnKeyInFd "Chyba v deskriptoru souboru klávesového vstupu %d\n"
@@ -1222,19 +1221,19 @@ static char help_text[]=
 
 // ai_alsa1x.c
 
-#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Nelze nastavit vzorkovací kmitoèet\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Nelze nastavit èas vyrovnávací pamìti\n"
-#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Nelze nastavit èas opakování\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetSamplerate "Nelze nastavit vzorkovací kmitoèet.\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetBufferTime "Nelze nastavit èas vyrovnávací pamìti.\n"
+#define MSGTR_MPDEMUX_AIALSA1X_CannotSetPeriodTime "Nelze nastavit èas opakování.\n"
 
 // ai_alsa1x.c / ai_alsa.c
 
-#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Vadná konfigurace pro toto PCM: ¾ádné konfigurace nejsou k dispozici\n"
-#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Typ pøístupu není k dispozici\n"
-#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Formát vzorku není k dispozici\n"
+#define MSGTR_MPDEMUX_AIALSA_PcmBrokenConfig "Vadná konfigurace pro toto PCM: ¾ádné konfigurace nejsou k dispozici.\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableAccessType "Typ pøístupu není k dispozici.\n"
+#define MSGTR_MPDEMUX_AIALSA_UnavailableSampleFmt "Formát vzorku není k dispozici.\n"
 #define MSGTR_MPDEMUX_AIALSA_UnavailableChanCount "Poèet kanálù není k dispozici - vracím výchozí: %d\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Nelze nainstalovat hw parametry: %s"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallHWParams "Nelze nainstalovat hardwarové parametry: %s"
 #define MSGTR_MPDEMUX_AIALSA_PeriodEqualsBufferSize "Nelze pou¾ít opakování odpovídající velikosti vyrovnávací pamìti (%u == %lu)\n"
-#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Nelze nainstalovat sw parametry:\n"
+#define MSGTR_MPDEMUX_AIALSA_CannotInstallSWParams "Nelze nainstalovat softwarové parametry:\n"
 #define MSGTR_MPDEMUX_AIALSA_ErrorOpeningAudio "Chyba pøi otevírání zvuku: %s\n"
 #define MSGTR_MPDEMUX_AIALSA_AlsaStatusError "ALSA status error: %s"
 #define MSGTR_MPDEMUX_AIALSA_AlsaXRUN "ALSA xrun!!! (minimálnì %.3f ms dlouhý)\n"
@@ -1247,7 +1246,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetChanCount "Nelze nastavit poèet kanálù: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetStereo "Nelze nastavit stereo: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2Open "Nelze otevøít '%s': %s\n"
-#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "Nepodporovaný formát\n"
+#define MSGTR_MPDEMUX_AIOSS_UnsupportedFmt "nepodporovaný formát\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetAudioFmt "Nelze nastavit audio formát."
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetSamplerate "Nelze nastavit vzorkovací kmitoèet: %d\n"
 #define MSGTR_MPDEMUX_AIOSS_Unable2SetTrigger "Nelze nastavit spou¹»: %d\n"
@@ -1258,8 +1257,8 @@ static char help_text[]=
 // asfheader.c
 
 #define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: velikost hlavièky je vìt¹í ne¾ 1 MB (%d)!\nKontaktujte prosím tvùrce MPlayeru a nahrajte/po¹lete jim tento soubor.\n"
-#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Nemohu alokovat %d bajtù pro hlavièku\n"
-#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "konec souboru pøi ètení asf hlavièky, po¹kozený/neúplný soubor?\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Nemohu alokovat %d bajtù pro hlavièku.\n"
+#define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "konec souboru pøi ètení ASF hlavièky, po¹kozený/neúplný soubor?\n"
 #define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR bude pravdìpodobnì pracovat pouze s libavformat, v pøípadì problémù zkuste -demuxer 35\n"
 #define MSGTR_MPDEMUX_ASFHDR_NoDataChunkAfterHeader "Po hlavièce nenásleduje ¾ádný datový chunk!\n"
 #define MSGTR_MPDEMUX_ASFHDR_AudioVideoHeaderNotFound "ASF: ani audio ani video hlavièky nebyly nalezeny - vadný soubor?\n"
@@ -1267,22 +1266,22 @@ static char help_text[]=
 
 // asf_mmst_streaming.c
 
-#define MSGTR_MPDEMUX_MMST_WriteError "Chyba zápisu\n"
+#define MSGTR_MPDEMUX_MMST_WriteError "chyba zápisu\n"
 #define MSGTR_MPDEMUX_MMST_EOFAlert "\nVýstraha! EOF\n"
 #define MSGTR_MPDEMUX_MMST_PreHeaderReadFailed "ètení pre-hlavièky selhalo\n"
-#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "©patná velikost hlavièky, vzdávám to\n"
-#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Ètení dat hlavièky selhalo\n"
-#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "selhalo ètení packet_len\n"
-#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "©patná velikost rtsp paketu, vzdávám to\n"
-#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Selhalo ètení pøíkazových dat\n"
-#define MSGTR_MPDEMUX_MMST_HeaderObject "Hlavièkový objekt\n"
-#define MSGTR_MPDEMUX_MMST_DataObject "Datový objekt\n"
-#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "Souborový objekt, délka paketu = %d (%d)\n"
-#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Proudový objekt, ID datového proudu: %d\n"
-#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Pøíli¹ mnoho ID, proud pøeskoèen"
-#define MSGTR_MPDEMUX_MMST_UnknownObject "Neznámý objekt\n"
-#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Ètení media dat selhalo\n"
-#define MSGTR_MPDEMUX_MMST_MissingSignature "Chybí signatura\n"
+#define MSGTR_MPDEMUX_MMST_InvalidHeaderSize "©patná velikost hlavièky, vzdávám to.\n"
+#define MSGTR_MPDEMUX_MMST_HeaderDataReadFailed "Ètení dat hlavièky selhalo.\n"
+#define MSGTR_MPDEMUX_MMST_packet_lenReadFailed "Selhalo ètení packet_len.\n"
+#define MSGTR_MPDEMUX_MMST_InvalidRTSPPacketSize "©patná velikost RTSP paketu, vzdávám to.\n"
+#define MSGTR_MPDEMUX_MMST_CmdDataReadFailed "Selhalo ètení pøíkazových dat.\n"
+#define MSGTR_MPDEMUX_MMST_HeaderObject "hlavièkový objekt\n"
+#define MSGTR_MPDEMUX_MMST_DataObject "datový objekt\n"
+#define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "souborový objekt, délka paketu = %d (%d)\n"
+#define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "proudový objekt, ID datového proudu: %d\n"
+#define MSGTR_MPDEMUX_MMST_2ManyStreamID "Pøíli¹ mnoho ID, proud pøeskoèen."
+#define MSGTR_MPDEMUX_MMST_UnknownObject "neznámý objekt\n"
+#define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Ètení media dat selhalo.\n"
+#define MSGTR_MPDEMUX_MMST_MissingSignature "chybí signatura\n"
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "V¹e hotovo. Dìkujeme, ¾e jste si stáhli mediální soubor obsahující proprietární a patentovanou technologii.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "neznámý pøíkaz %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "chyba get_media_packet: %s\n"
@@ -1295,29 +1294,29 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_ASF_WarnDropHeader "Varování: zahozena hlavièka ????\n"
 #define MSGTR_MPDEMUX_ASF_ErrorParsingChunkHeader "Chyba pøi parsování hlavièky chunku\n"
 #define MSGTR_MPDEMUX_ASF_NoHeaderAtFirstChunk "Hlavièka nedo¹la jako první chunk !!!!\n"
-#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Chyba: nelze alokovat %d bajtù vyrovnávací pamìti\n"
-#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Chyba pøi ètení proudu ze sítì\n"
-#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Chyba: chunk je pøíli¹ malý\n"
-#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Chyba: poèet sub chunkù je nesprávný\n"
+#define MSGTR_MPDEMUX_ASF_BufferMallocFailed "Chyba: nelze alokovat %d bajtù vyrovnávací pamìti.\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingNetworkStream "Chyba pøi ètení proudu ze sítì.\n"
+#define MSGTR_MPDEMUX_ASF_ErrChunk2Small "Chyba: chunk je pøíli¹ malý.\n"
+#define MSGTR_MPDEMUX_ASF_ErrSubChunkNumberInvalid "Chyba: poèet sub chunkù je nesprávný.\n"
 #define MSGTR_MPDEMUX_ASF_Bandwidth2SmallCannotPlay "Pøíli¹ malá pøenosová rychlost, soubor nelze pøehrávat!\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Pøíli¹ malá pøenosová rychlost, odvolaný audio proud\n"
-#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Pøíli¹ malá pøenosová rychlost, odvolaný video proud\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedAudio "Pøíli¹ malá pøenosová rychlost, odvolaný audio proud.\n"
+#define MSGTR_MPDEMUX_ASF_Bandwidth2SmallDeselectedVideo "Pøíli¹ malá pøenosová rychlost, odvolaný video proud.\n"
 #define MSGTR_MPDEMUX_ASF_InvalidLenInHeader "Nesprávná délka v ASF hlavièce!\n"
-#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Chyba pøi ètení hlavièky chunku\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunkHeader "Chyba pøi ètení hlavièky chunku.\n"
 #define MSGTR_MPDEMUX_ASF_ErrChunkBiggerThanPacket "Chyba: chunk_size > packet_size\n"
-#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Chyba pøi ètení chunku\n"
+#define MSGTR_MPDEMUX_ASF_ErrReadingChunk "Chyba pøi ètení chunku.\n"
 #define MSGTR_MPDEMUX_ASF_ASFRedirector "=====> ASF Redirector\n"
-#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "Neplatné proxy URL\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "Neznámý typ asf proudu\n"
-#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Selhalo parsování HTTP odpovìdi\n"
+#define MSGTR_MPDEMUX_ASF_InvalidProxyURL "neplatná proxy URL\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamType "neznámý typ ASF proudu\n"
+#define MSGTR_MPDEMUX_ASF_Failed2ParseHTTPResponse "Selhalo parsování HTTP odpovìdi.\n"
 #define MSGTR_MPDEMUX_ASF_ServerReturn "Server vrátil %d:%s\n"
 #define MSGTR_MPDEMUX_ASF_ASFHTTPParseWarnCuttedPragma "ASF HTTP PARSE VAROVÁNÍ: Pragma %s zkrácena z %d bajtù na %d\n"
 #define MSGTR_MPDEMUX_ASF_SocketWriteError "Chyba zápisu soketu: %s\n"
 #define MSGTR_MPDEMUX_ASF_HeaderParseFailed "Selhalo parsování hlavièky\n"
 #define MSGTR_MPDEMUX_ASF_NoStreamFound "Nenalezen datový proud\n"
-#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Neznámý typ ASF streamování\n"
+#define MSGTR_MPDEMUX_ASF_UnknownASFStreamingType "Neznámý typ ASF proudu\n"
 #define MSGTR_MPDEMUX_ASF_InfoStreamASFURL "STREAM_ASF, URL: %s\n"
-#define MSGTR_MPDEMUX_ASF_StreamingFailed "Selhalo, konèím\n"
+#define MSGTR_MPDEMUX_ASF_StreamingFailed "Selhalo, konèím.\n"
 
 // audio_in.c
 
@@ -1331,21 +1330,21 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_AVIHDR_EmptyList "** prázdný seznam?!\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundMovieAt "Nalezen film na 0x%X - 0x%X\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundBitmapInfoHeader "Nalezena 'bih', %u bajtù z %d\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regeneruji tabulku klíèových snímkù pro M$ mpg4v1 video\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Regeneruji tabulku klíèových snímkù pro DIVX3 video\n"
-#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regeneruji tabulku klíèových snímkù pro MPEG4 video\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPG4V1 "Regeneruji tabulku klíèových snímkù pro MS mpg4v1 video.\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForDIVX3 "Regeneruji tabulku klíèových snímkù pro DIVX3 video.\n"
+#define MSGTR_MPDEMUX_AVIHDR_RegeneratingKeyfTableForMPEG4 "Regeneruji tabulku klíèových snímkù pro MPEG4 video.\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundWaveFmt "Nalezen 'wf', %d bajtù z %d\n"
 #define MSGTR_MPDEMUX_AVIHDR_FoundAVIV2Header "AVI: nalezena dmlh (size=%d) (total_frames=%d)\n"
-#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Ètu INDEX blok, %d chunkù pro %d snímkù (fpos=%"PRId64")\n"
+#define MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames "Ètu INDEX blok, %d chunkù pro %d snímkù (fpos=%"PRId64").\n"
 #define MSGTR_MPDEMUX_AVIHDR_AdditionalRIFFHdr "Dodateèná RIFF hlavièka...\n"
-#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** varování: toto není roz¹íøená AVI hlavièka..\n"
+#define MSGTR_MPDEMUX_AVIHDR_WarnNotExtendedAVIHdr "** Varování: toto není roz¹íøená AVI hlavièka..\n"
 #define MSGTR_MPDEMUX_AVIHDR_BrokenChunk "Vadný chunk?  chunksize=%d  (id=%.4s)\n"
-#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Vytváøím odml index (%d superindexchunkù)\n"
-#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Detekován vadný (neúplný?) soubor. Pou¾ije se tradièní index\n"
+#define MSGTR_MPDEMUX_AVIHDR_BuildingODMLidx "AVI: ODML: Vytváøím ODML index (%d superindexchunkù).\n"
+#define MSGTR_MPDEMUX_AVIHDR_BrokenODMLfile "AVI: ODML: Detekován vadný (neúplný?) soubor. Pou¾ije se tradièní index.\n"
 #define MSGTR_MPDEMUX_AVIHDR_CantReadIdxFile "Nelze èíst indexový soubor %s: %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s není planý indexový soubor pro MPlayer\n"
-#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Nemohu alokovat pamì» pro data indexu od %s\n"
-#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "Pøedèasný konec indexového souboru %s\n"
+#define MSGTR_MPDEMUX_AVIHDR_NotValidMPidxFile "%s není planý indexový soubor pro MPlayer.\n"
+#define MSGTR_MPDEMUX_AVIHDR_FailedMallocForIdxFile "Nemohu alokovat pamì» pro data indexu od %s.\n"
+#define MSGTR_MPDEMUX_AVIHDR_PrematureEOF "pøedèasný konec indexového souboru %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_IdxFileLoaded "Nahrán indexový soubor: %s\n"
 #define MSGTR_MPDEMUX_AVIHDR_GeneratingIdx "Generuji index: %3lu %s     \r"
 #define MSGTR_MPDEMUX_AVIHDR_IdxGeneratedForHowManyChunks "AVI: Vygenerována tabulka indexu pro %d chunkù!\n"
@@ -1355,7 +1354,7 @@ static char help_text[]=
 // cache2.c
 
 #define MSGTR_MPDEMUX_CACHE2_NonCacheableStream "\rTento proud nelze ukládat do vyrovnávací pamìti.\n"
-#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos se li¹í!!! ohlaste tuto chybu...\n"
+#define MSGTR_MPDEMUX_CACHE2_ReadFileposDiffers "!!! read_filepos se li¹í !!! Ohlaste tuto chybu...\n"
 
 // cdda.c
 
@@ -1367,39 +1366,39 @@ static char help_text[]=
 
 #define MSGTR_MPDEMUX_CDDB_FailedToReadTOC "Selhalo ètení TOC.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToOpenDevice "Selhalo otevøení zaøízení %s.\n"
-#define MSGTR_MPDEMUX_CDDB_NotAValidURL "Neplatná URL\n"
+#define MSGTR_MPDEMUX_CDDB_NotAValidURL "neplatná URL\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToSendHTTPRequest "Selhalo odeslání HTTP po¾adavku.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToReadHTTPResponse "Selhalo ètení HTTP odpovìdi.\n"
 #define MSGTR_MPDEMUX_CDDB_HTTPErrorNOTFOUND "Není k dispozici.\n"
-#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "Neznámý Error kód\n"
+#define MSGTR_MPDEMUX_CDDB_HTTPErrorUnknown "neznámý error kód\n"
 #define MSGTR_MPDEMUX_CDDB_NoCacheFound "Vyrovnávací pamì» nenalezena.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenRead "Nebyl pøeèten celý xmcd soubor.\n"
 #define MSGTR_MPDEMUX_CDDB_FailedToCreateDirectory "Selhalo vytvoøení adresáøe %s.\n"
 #define MSGTR_MPDEMUX_CDDB_NotAllXMCDFileHasBeenWritten "Nebyl zapsán celý xmcd soubor.\n"
 #define MSGTR_MPDEMUX_CDDB_InvalidXMCDDatabaseReturned "Vrácen chybný soubor xmcd databáze.\n"
-#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "Neoèekávané UROB-SI-SÁM\n"
-#define MSGTR_MPDEMUX_CDDB_UnhandledCode "Neo¹etøený kód\n"
-#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Nelze nalést konec øádku\n"
+#define MSGTR_MPDEMUX_CDDB_UnexpectedFIXME "neoèekávané UROB-SI-SÁM\n"
+#define MSGTR_MPDEMUX_CDDB_UnhandledCode "neo¹etøený kód\n"
+#define MSGTR_MPDEMUX_CDDB_UnableToFindEOL "Nelze nalést konec øádku.\n"
 #define MSGTR_MPDEMUX_CDDB_ParseOKFoundAlbumTitle "Parsování OK, nalezeno: %s\n"
-#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album nenalezeno\n"
+#define MSGTR_MPDEMUX_CDDB_AlbumNotFound "Album nenalezeno.\n"
 #define MSGTR_MPDEMUX_CDDB_ServerReturnsCommandSyntaxErr "Server vrátil: Syntaktická chyba pøíkazu\n"
-#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nejsou informace o sitech (serverech)\n"
-#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Selhalo získání úrovnì protokolu\n"
-#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "V mechanice není CD\n"
+#define MSGTR_MPDEMUX_CDDB_NoSitesInfoAvailable "Nejsou informace o sitech (serverech).\n"
+#define MSGTR_MPDEMUX_CDDB_FailedToGetProtocolLevel "Selhalo získání úrovnì protokolu.\n"
+#define MSGTR_MPDEMUX_CDDB_NoCDInDrive "V mechanice není CD.\n"
 
 // cue_read.c
 
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedCuefileLine "[bincue] Neoèekávaný øádek v cue souboru: %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_BinFilenameTested "[bincue] otestován bin soubor: %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Nelze nalézt bin soubor - vzdávám to\n"
-#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Pou¾ívám bin soubor %s\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotFindBinFile "[bincue] Nelze nalézt bin soubor - vzdávám to.\n"
+#define MSGTR_MPDEMUX_CUEREAD_UsingBinFile "[bincue] Pou¾ívám bin soubor %s.\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnknownModeForBinfile "[bincue] neznámý re¾im pro bin soubor. To by se nemìlo stát. Konèím.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CannotOpenCueFile "[bincue] Nelze otevøít %s\n"
 #define MSGTR_MPDEMUX_CUEREAD_ErrReadingFromCueFile "[bincue] Chyba ètení z  %s\n"
-#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Chyba získání velikosti bin souboru\n"
+#define MSGTR_MPDEMUX_CUEREAD_ErrGettingBinFileSize "[bincue] Chyba získání velikosti bin souboru.\n"
 #define MSGTR_MPDEMUX_CUEREAD_InfoTrackFormat "stopa %02d:  format=%d  %02d:%02d:%02d\n"
 #define MSGTR_MPDEMUX_CUEREAD_UnexpectedBinFileEOF "[bincue] neoèekávaný konec bin souboru\n"
-#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Nelze pøeèíst %d bajtù 'payloadu'\n"
+#define MSGTR_MPDEMUX_CUEREAD_CannotReadNBytesOfPayload "[bincue] Nelze pøeèíst %d bajtù 'payloadu'.\n"
 #define MSGTR_MPDEMUX_CUEREAD_CueStreamInfo_FilenameTrackTracksavail "CUE stream_open, soubor=%s, stopa=%d, dostupné stopy: %d -> %d\n"
 
 // network.c
@@ -1410,14 +1409,14 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ConnectingToServer "Pøipojuji se k serveru %s[%s]: %d...\n"
 #define MSGTR_MPDEMUX_NW_CantConnect2Server "Selhalo pøipojení k serveru pomocí %s\n"
 #define MSGTR_MPDEMUX_NW_SelectFailed "Select selhal.\n"
-#define MSGTR_MPDEMUX_NW_ConnTimeout "Spojení vypr¹elo.\n"
+#define MSGTR_MPDEMUX_NW_ConnTimeout "spojení vypr¹elo\n"
 #define MSGTR_MPDEMUX_NW_GetSockOptFailed "getsockopt selhal: %s\n"
-#define MSGTR_MPDEMUX_NW_ConnectError "Chyba spojení: %s\n"
+#define MSGTR_MPDEMUX_NW_ConnectError "chyba spojení: %s\n"
 #define MSGTR_MPDEMUX_NW_InvalidProxySettingTryingWithout "©patné nastavení proxy... Zkou¹ím bez proxy.\n"
 #define MSGTR_MPDEMUX_NW_CantResolvTryingWithoutProxy "Nelze resolvovat jméno vzdáleného systému pro AF_INET. Zkou¹ím bez proxy.\n"
-#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Chyba pøi odesílání HTTP po¾adavku: nebyl odeslán celý po¾adavek.\n"
+#define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Chyba pøi odesílání HTTP po¾adavku: Nebyl odeslán celý po¾adavek.\n"
 #define MSGTR_MPDEMUX_NW_ReadFailed "Chyba pøi ètení.\n"
-#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response pøeèetlo 0 (to je EOF)\n"
+#define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response pøeèetlo 0 (to je EOF).\n"
 #define MSGTR_MPDEMUX_NW_AuthFailed "Autentifikace selhala. Pou¾ijte volby -user a -passwd pro zadání svého\n"\
 "u¾ivatelského_jména/hesla pro seznam URL, nebo URL v následující formì:\n"\
 "http://u¾ivatelské_jméno:heslo@jméno_serveru/soubor\n"
@@ -1434,10 +1433,10 @@ static char help_text[]=
 #define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] V definici menu není ¾ádná polo¾ka.\n"
 
 // libmenu/menu.c
-#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] Syntaktická chyba na øádku: %d\n"
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] syntaktická chyba na øádku: %d\n"
 #define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] V definici menu je potøeba jmenný atribut (øádek %d)\n"
-#define MSGTR_LIBMENU_BadAttrib "[MENU] ©patný atribut %s=%s v menu '%s' na øádku %d\n"
-#define MSGTR_LIBMENU_UnknownMenuType "[MENU] Neznámý typ menu '%s' na øádce %d\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] ¹patný atribut %s=%s v menu '%s' na øádku %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] neznámý typ menu '%s' na øádce %d\n"
 #define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Nemohu otevøít konfiguraèní soubor menu: %s\n"
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Konfiguraèní soubor je pøíli¹ velký. (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Konfiguraèní soubor je prázdný.\n"
@@ -1456,14 +1455,14 @@ static char help_text[]=
 #define MSGTR_LIBMENU_ConsoleRun "[MENU] Spu¹tìní v konsoli: %s ...\n"
 #define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Potomek u¾ bì¾í.\n"
 #define MSGTR_LIBMENU_ForkFailed "[MENU] Forkování selhalo!!!\n"
-#define MSGTR_LIBMENU_WriteError "[MENU] Chyba pøi zápisu.\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] chyba pøi zápisu.\n"
 
 // libmenu/menu_filesel.c
-#define MSGTR_LIBMENU_OpendirError "[MENU] Chyba pøi otevírání adresáøe: %s.\n"
-#define MSGTR_LIBMENU_ReallocError "[MENU] Chyba pøi relokaci: %s.\n"
-#define MSGTR_LIBMENU_MallocError "[MENU] Chyba pøi alokaci pamìti: %s.\n"
-#define MSGTR_LIBMENU_ReaddirError "[MENU] Chyba ètení adresáøe: %s.\n"
-#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Nelze otevøít adresáø %s\n"
+#define MSGTR_LIBMENU_OpendirError "[MENU] chyba pøi otevírání adresáøe: %s\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] chyba pøi relokaci: %s\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] chyba pøi alokaci pamìti: %s\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] chyba ètení adresáøe: %s\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Nelze otevøít adresáø %s.\n"
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] Pøi definici podmenu je potøeba uvést atribut 'menu'.\n"
@@ -1497,7 +1496,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Aritmetický prùmìr QP: %2.4f, harmonický prùmìr QP: %2.4f\n"
 #define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] DRI selhalo.\n"
 #define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Nemohu alokovat obraz pro kodek.\n"
-#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC akcelerovaný MPEG-2.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC-akcelerovaný MPEG-2.\n"
 #define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Zkou¹ím pixfmt=%d.\n"
 #define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] mc_get_buffer by mìlo fungovat jen s XVMC akcelerací!"
 #define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Neoèekávaná chyba init_vo.\n"
@@ -1537,7 +1536,7 @@ static char help_text[]=
 #define MSGTR_MPCODECS_FunWhydowegetNULL "Proè jsme dostali NULL??\n"
 
 // libmpcodecs/vf_fame.c
-#define MSGTR_MPCODECS_FatalCantOpenlibFAME "Fatální chyba: nemohu otevøít libFAME!\n"
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "Fatální chyba: Nelze otevøít libFAME!\n"
 
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s není dal¹ím filtrem/vo podporován :(\n"
@@ -1549,19 +1548,30 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "V souboru nejsou ¾ádné bloky videa.\n"
 #define MSGTR_MPDEMUX_XMMS_FoundPlugin "Nalezen plugin: %s (%s).\n"
 #define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Uzavírám plugin: %s.\n"
-#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] Chyba v mga_vid_config ioctl (¹patná verze mga_vid.o?)"
+
+// mga_common.c
+
+#define MSGTR_LIBVO_MGA_ErrorInConfigIoctl "[MGA] Chyba v mga_vid_config ioctl (¹patná verze mga_vid.o?)."
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Nemohu získat hodnoty luma z jaderného modulu!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Nemohu nastavit hodnoty luma v jaderném modulu!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Pomìr stran obrazovky není znám!\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Neplatný formát výstupu %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Verze va¹eho mga_vid ovladaèe není kompatibilní s touto verzí MPlayeru!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Pou¾ívám %d buferù.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nemohu otevøít: %s\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Vstupní rozli¹ení minimálnì v jednom rozmìru vìt¹í ne¾ 1023x1023. Pøe¹kálujte prosím softwarovì, nebo pou¾ijte -lavdopts lowres=1\n"
+ 
+// libvo/vesa_lvo.c
+ 
 #define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Tato vìtev není nadále podporována.\n[VESA_LVO] Pou¾ijte prosím -vo vesa:vidix.\n"
 #define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] Nemohu otevøít: '%s'\n"
 #define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Neplatný výstupní formát: %s(%0X)\n"
 #define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] Verze va¹eho fb_vid ovladaèe není koémpatibilní s touto verzí MPlayeru!\n"
+
+// libvo/vo_3dfx.c
+
 #define MSGTR_LIBVO_3DFX_Only16BppSupported "[VO_3DFX] Podporováno je jen 16bpp!"
-#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visual id je  %lx.\n"
+#define MSGTR_LIBVO_3DFX_VisualIdIs "[VO_3DFX] Visual ID je  %lx.\n"
 #define MSGTR_LIBVO_3DFX_UnableToOpenDevice "[VO_3DFX] Nemohu otevøít /dev/3dfx.\n"
 #define MSGTR_LIBVO_3DFX_Error "[VO_3DFX] Chyba: %d.\n"
 #define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Nemohu namapovat oblasti pamìti 3dfx: %p,%p,%d.\n"
@@ -1571,13 +1581,13 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Nemohu nastavit re¾im pøehrávání!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Nemohu nastavit re¾im titulkù!\n"
 #define MSGTR_LIBVO_DXR3_UnableToGetTVNorm "[VO_DXR3] Nemohu zjistit televizní normu!\n"
-#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] Automaticky nastavená televizní norma podle rychlosti snímkù: "
+#define MSGTR_LIBVO_DXR3_AutoSelectedTVNormByFrameRate "[VO_DXR3] Automaticky nastavená televizní norma podle snímkové rychlosti: "
 #define MSGTR_LIBVO_DXR3_UnableToSetTVNorm "[VO_DXR3] Nemohu nastavit televizní normu!\n"
 #define MSGTR_LIBVO_DXR3_SettingUpForNTSC "[VO_DXR3] Nastavuji pro NTSC.\n"
 #define MSGTR_LIBVO_DXR3_SettingUpForPALSECAM "[VO_DXR3] Nastavuji pro PAL/SECAM.\n"
 #define MSGTR_LIBVO_DXR3_SettingAspectRatioTo43 "[VO_DXR3] Nastavuji pomìr stran 4:3.\n"
 #define MSGTR_LIBVO_DXR3_SettingAspectRatioTo169 "[VO_DXR3] Nastavuji pomìr stran 16:9.\n"
-#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] Do¹la pamì».\n"
+#define MSGTR_LIBVO_DXR3_OutOfMemory "[VO_DXR3] do¹la pamì»\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateKeycolor "[VO_DXR3] Nemohu alokovat klíèovací barvu!\n"
 #define MSGTR_LIBVO_DXR3_UnableToAllocateExactKeycolor "[VO_DXR3] Nemohu alokovat klíèovací barvu pøesnì, pou¾ívám nejbli¾¹í (0x%lx).\n"
 #define MSGTR_LIBVO_DXR3_Uninitializing "[VO_DXR3] Deinicializuji.\n"
@@ -1585,10 +1595,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_EnablingPrebuffering "[VO_DXR3] Zapínám prebuffering.\n"
 #define MSGTR_LIBVO_DXR3_UsingNewSyncEngine "[VO_DXR3] Pou¾ívám nový synchronizaèní kód.\n"
 #define MSGTR_LIBVO_DXR3_UsingOverlay "[VO_DXR3] Pou¾ívám overlay.\n"
-#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Chyba: Abyste mohl pou¾ít overlay, musíte zkompilovat mplayer s nainstalovanýma x11 knihovnama a hlavièkama.\n"
+#define MSGTR_LIBVO_DXR3_ErrorYouNeedToCompileMplayerWithX11 "[VO_DXR3] Chyba: Overlay vy¾aduje kompilaci s nainstalovanými x11 knihovnami a hlavièkami.\n"
 #define MSGTR_LIBVO_DXR3_WillSetTVNormTo "[VO_DXR3] Nastavím televizní normu na: "
-#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "Pøepínám na rychlost snímkù podle filmu (PAL/PAL-60)"
-#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "Pøepínám na rychlost snímkù podle filmu (PAL/NTSC)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALPAL60 "pøepínám na rychlost snímkù podle filmu (PAL/PAL-60)"
+#define MSGTR_LIBVO_DXR3_AutoAdjustToMovieFrameRatePALNTSC "pøepínám na rychlost snímkù podle filmu (PAL/NTSC)"
 #define MSGTR_LIBVO_DXR3_UseCurrentNorm "Pou¾ít souèasnou normu"
 #define MSGTR_LIBVO_DXR3_UseUnknownNormSuppliedCurrentNorm "Pøedána neznámá norma. Pou¾iji souèasnou."
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTrying "[VO_DXR3] Chyba pøi otevírání %s pro zápis, zkusím /dev/em8300.\n"
@@ -1599,7 +1609,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingTryingSP "[VO_DXR3] Chyba pøi otevírání %s pro zápis, zkou¹ím /dev/em8300_sp.\n"
 #define MSGTR_LIBVO_DXR3_ErrorOpeningForWritingAsWellSP "[VO_DXR3] Chyba pøi otevírání /dev/em8300_sp pro zápis!\nVzdávám to.\n"
 #define MSGTR_LIBVO_DXR3_UnableToOpenDisplayDuringHackSetup "[VO_DXR3] Bìhem hacku na nastavení overlaye se nepodaøilo otevøít display!\n"
-#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Nemohu inicializovat x11!\n"
+#define MSGTR_LIBVO_DXR3_UnableToInitX11 "[VO_DXR3] Nemohu inicializovat X11!\n"
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayAttribute "[VO_DXR3] Nepodaøilo se nastavit atribut overlaye.\n"
 #define MSGTR_LIBVO_DXR3_FailedSettingOverlayScreen "[VO_DXR3] Nepodaøilo se nastavit obrazovku pro overlay!\nKonèím.\n"
 #define MSGTR_LIBVO_DXR3_FailedEnablingOverlay "[VO_DXR3] Nepodaøilo se zapnout overlay!\nKonèím.\n"
@@ -1610,11 +1620,19 @@ static char help_text[]=
 #define MSGTR_LIBVO_DXR3_YOffset "[VO_DXR3] Posunutí Y: %d.\n"
 #define MSGTR_LIBVO_DXR3_XOffset "[VO_DXR3] Posunutí X: %d.\n"
 #define MSGTR_LIBVO_DXR3_XCorrection "[VO_DXR3] Korekce X: %d.\n"
-#define MSGTR_LIBVO_DXR3_FailedResizingOverlayWindow "[VO_DXR3] Nepodaøilo se zmìnit velikost okna overlaye!\n"
 #define MSGTR_LIBVO_DXR3_FailedSetSignalMix "[VO_DXR3] Nepodaøilo se nastavit signál mix!\n"
+
+// libvo/vo_mga.c
+
 #define MSGTR_LIBVO_MGA_AspectResized "[VO_MGA] aspect(): velikost zmìnìna na %dx%d.\n"
 #define MSGTR_LIBVO_MGA_Uninit "[VO] deinicializace!\n"
+
+// libvo/vo_null.c
+
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Neznámé podzaøízení: %s.\n"
+
+// libvo/vo_png.c
+
 #define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Upozornìní: úroveò komprimace nastavena na 0, komprimace vypnuta!\n"
 #define MSGTR_LIBVO_PNG_Warning2 "[VO_PNG] Info: Pou¾ijte -vo png:z=<n> k nastavení úrovnì komprese v rozsahu 0 a¾ 9.\n"
 #define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Info: (0 = ¾ádná komprese, 1 = nejrychlej¹í, nejni¾¹í - 9 nejvy¹¹í, ale nejpomalej¹í komprese)\n"
@@ -1632,17 +1650,21 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_UsingDepthColorspaceConversion "[VO_SDL] Pou¾ívám konverzi hloubky/barevného prostoru, co¾ zpomaluje (%ibpp -> %ibpp).\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormatInDrawslice "[VO_SDL] Ve draw_slice se vyskytl nepodporovaný obrazový formát, kontaktujte vývojáøe MPlayeru!\n"
 #define MSGTR_LIBVO_SDL_BlitFailed "[VO_SDL] Blit selhal: %s.\n"
+#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Inicializace SDL selhala: %s.\n"
 #define MSGTR_LIBVO_SDL_UsingDriver "[VO_SDL] Pou¾ívám ovladaè: %s.\n"
+
+// libvo/vobsub_vidix.c
+
 #define MSGTR_LIBVO_SUB_VIDIX_CantStartPlayback "[VO_SUB_VIDIX] Nemohu spustit pøehrávání: %s\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CantStopPlayback "[VO_SUB_VIDIX] Nemohu zastavit pøehrávání: %s\n"
-#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Prokládané uv pro yuv410p není podporováno.\n"
+#define MSGTR_LIBVO_SUB_VIDIX_InterleavedUvForYuv410pNotSupported "[VO_SUB_VIDIX] Prokládané UV pro YUV410P není podporováno.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawsliceWasCalled "[VO_SUB_VIDIX] Bylo zavoláno prázdné vidix_draw_slice().\n"
 #define MSGTR_LIBVO_SUB_VIDIX_DummyVidixdrawframeWasCalled "[VO_SUB_VIDIX] Bylo zavoláno prázdné vidix_draw_frame().\n"
-#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Nepodporovaný fourcc v tomto vidix ovladaèi: %x (%s).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_UnsupportedFourccForThisVidixDriver "[VO_SUB_VIDIX] Nepodporovaný FourCC pro tento VIDIX ovladaè: %x (%s).\n"
 #define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedResolution "[VO_SUB_VIDIX] Video server má nepodporované rozli¹ení (%dx%d), podporováno je: %dx%d-%dx%d.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_VideoServerHasUnsupportedColorDepth "[VO_SUB_VIDIX] Video server má vidixem nepodporovanou barevnou hloubku (%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] Ovladaè vidix nemù¾e zvìt¹it obraz (%d%d -> %d%d).\n"
-#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] Ovladaè vidix nemù¾e zmen¹it obraz (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantUpscaleImage "[VO_SUB_VIDIX] Ovladaè VIDIX nemù¾e zvìt¹it obraz (%d%d -> %d%d).\n"
+#define MSGTR_LIBVO_SUB_VIDIX_DriverCantDownscaleImage "[VO_SUB_VIDIX] Ovladaè VIDIX nemù¾e zmen¹it obraz (%d%d -> %d%d).\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CantConfigurePlayback "[VO_SUB_VIDIX] Nemohu nakonfigurovat pøehrávání: %s.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_YouHaveWrongVersionOfVidixLibrary "[VO_SUB_VIDIX] Máte ¹patnou verzi knihovny VIDIX.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntFindWorkingVidixDriver "[VO_SUB_VIDIX] Nemohu nalézt funkèní ovladaè VIDIX.\n"
@@ -1655,22 +1677,30 @@ static char help_text[]=
 #define MSGTR_LIBVO_SVGA_VgasetmodeFailed "[VO_SVGA] Vga_setmode(%d) selhal.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeIsLinearAndMemcpyCouldBeUsed "[VO_SVGA] Grafický re¾im je lineární a mù¾eme pou¾ít k pøenosu obrazu memcpy.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHasHardwareAcceleration "[VO_SVGA] Grafický re¾im má hardwarovou akceleraci a mù¾eme pou¾ít put_image.\n"
+#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow "[VO_SVGA] Pokud vám to funguje, dejte mi vìdìt. \n[VO_SVGA] (po¹lete záznam z `mplayer test.avi -v -v -v -v &> svga.log`). Díky.\n"
 #define MSGTR_LIBVO_SVGA_VideoModeHas "[VO_SVGA] Grafický re¾im má %d stránek.\n"
-#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Vystøeïuji obraz, zaèátek na (%d,%d)\n"
+#define MSGTR_LIBVO_SVGA_CenteringImageStartAt "[VO_SVGA] Vystøeïuji obraz. Zaèínám na (%d,%d)\n"
 #define MSGTR_LIBVO_SVGA_UsingVidix "[VO_SVGA] Pou¾ívám VIDIX. w=%i h=%i  mw=%i mh=%i\n"
+
+// libvo/vo_syncfb.c
+
 #define MSGTR_LIBVO_SYNCFB_CouldntOpen "[VO_SYNCFB] Nemohu otevøít /dev/syncfb nebo /dev/mga_vid.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Pou¾ívám paletu yuv420p3.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Pou¾ívám paletu yuv420p2.\n"
-#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Pou¾ívám paletu yuv420.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p3 "[VO_SYNCFB] Pou¾ívám paletu YUV420P3.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420p2 "[VO_SYNCFB] Pou¾ívám paletu YUV420P2.\n"
+#define MSGTR_LIBVO_SYNCFB_UsingPaletteYuv420 "[VO_SYNCFB] Pou¾ívám paletu YUV420.\n"
 #define MSGTR_LIBVO_SYNCFB_NoSupportedPaletteFound "[VO_SYNCFB] Nenalezl jsem ¾ádnou podporovanou paletu.\n"
-#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES Sourcer velikost: %d x %d.\n"
-#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] Pamì» framebufferu: %ld v %ld bufferech.\n"
+#define MSGTR_LIBVO_SYNCFB_BesSourcerSize "[VO_SYNCFB] BES sourcer velikost: %d x %d.\n"
+#define MSGTR_LIBVO_SYNCFB_FramebufferMemory "[VO_SYNCFB] pamì» framebufferu: %ld v %ld bufferech.\n"
 #define MSGTR_LIBVO_SYNCFB_RequestingFirstBuffer "[VO_SYNCFB] Po¾aduji první buffer #%d.\n"
 #define MSGTR_LIBVO_SYNCFB_GotFirstBuffer "[VO_SYNCFB] Získal jsem první buffer #%d.\n"
-#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] Neznámé podzaøízení: %s.\n"
+#define MSGTR_LIBVO_SYNCFB_UnknownSubdevice "[VO_SYNCFB] neznámé podzaøízení: %s.\n"
+
+// libvo/vo_tdfxfb.c
+
 #define MSGTR_LIBVO_TDFXFB_CantOpen "[VO_TDFXFB] Nemohu otevøít %s: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetFscreenInfo "[VO_TDFXFB] Problém s ioctl FBITGET_FSCREENINFO: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_ProblemWithFbitgetVscreenInfo "[VO_TDFXFB] Problém s ioctl FBITGET_VSCREENINFO: %s.\n"
+#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] Ovladaè podporuje jen 3Dfx Banshee, Voodoo3 a Voodoo 5.\n"
 #define MSGTR_LIBVO_TDFXFB_OutputIsNotSupported "[VO_TDFXFB] %d bpp výstup není podporován.\n"
 #define MSGTR_LIBVO_TDFXFB_CouldntMapMemoryAreas "[VO_TDFXFB] Nemohu namapovat pamì»ové bloky: %s.\n"
 #define MSGTR_LIBVO_TDFXFB_BppOutputIsNotSupported "[VO_TDFXFB] %d bpp výstup není podporován. (To by se nemìlo nikdy stát.)\n"
@@ -1688,21 +1718,29 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXVID_TextureBlitReady "[VO_TDFXVID] Pøipraven blit textury: %d(%d) x %d @ %d => %d(%d) x %d @ %d.\n"
 #define MSGTR_LIBVO_TDFXVID_OverlayOffFailed "[VO_TDFXVID] Vypnutí overlaye selhalo.\n"
 #define MSGTR_LIBVO_TDFXVID_CantOpen "[VO_TDFXVID] Nemohu otevøít %s: %s.\n"
-#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] Nemohu získat souèasnou koniguraci: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_CantGetCurrentCfg "[VO_TDFXVID] Nemohu získat souèasnou konfiguraci: %s.\n"
 #define MSGTR_LIBVO_TDFXVID_MemmapFailed "[VO_TDFXVID] Memmap selhako!!!\n"
 #define MSGTR_LIBVO_TDFXVID_GetImageTodo "Get image bude dodìlán.\n"
 #define MSGTR_LIBVO_TDFXVID_AgpMoveFailed "[VO_TDFXVID] AGP pøesun selhal.\n"
-#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] Nastavení yuv selhalo.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP pøesun selhal na Y pláni.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP pøesun selhal na U pláni.\n"
-#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP pøesun selhal na V pláni.\n"
-#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Neznáme podzaøízení: %s.\n"
+#define MSGTR_LIBVO_TDFXVID_SetYuvFailed "[VO_TDFXVID] Nastavení YUV selhalo.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnYPlane "[VO_TDFXVID] AGP pøesun selhal na slo¾ce Y.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnUPlane "[VO_TDFXVID] AGP pøesun selhal na slo¾ce U.\n"
+#define MSGTR_LIBVO_TDFXVID_AgpMoveFailedOnVPlane "[VO_TDFXVID] AGP pøesun selhal na slo¾ce V.\n"
+#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] Neznámý formát: 0x%x.\n"
+
+// libvo/vo_tga.c
+
+#define MSGTR_LIBVO_TGA_UnknownSubdevice "[VO_TGA] Neznámé podzaøízení: %s.\n"
+
+// libvo/vo_vesa.c
+
 #define MSGTR_LIBVO_VESA_FatalErrorOccurred "[VO_VESA] Nastala záva¾ná chyba! Nemohu pokraèovat.\n"
 #define MSGTR_LIBVO_VESA_UnkownSubdevice "[VO_VESA] Neznámé podzaøízení: '%s'.\n"
-#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Mìl byste specifikovat mo¾nosti monitoru. Nebudu mìnit obnovovací frekvenci.\n"
-#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Nemohu se s re¾imem vejít do limitù monitoru. Nebudu mìnit obnovovací frekvenci.\n"
+#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Pro tento re¾im máte málo videopamìti:\n[VO_VESA] Po¾adováno: %08lX dostupné: %08lX.\n"
+#define MSGTR_LIBVO_VESA_YouHaveToSpecifyTheCapabilitiesOfTheMonitor "[VO_VESA] Mìl(a) byste specifikovat mo¾nosti monitoru. Nebudu mìnit obnovovací frekvenci.\n"
+#define MSGTR_LIBVO_VESA_UnableToFitTheMode "[VO_VESA] Po¾adavky re¾imu pøesahují schopnosti monitoru. Nebudu mìnit obnovovací frekvenci.\n"
 #define MSGTR_LIBVO_VESA_DetectedInternalFatalError "[VO_VESA] Byla zji¹tìna záva¾ná chyba: init byl zavolán pøed preinit.\n"
-#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] Pøepínaè -flip není podporován.\n"
+#define MSGTR_LIBVO_VESA_SwitchFlipIsNotSupported "[VO_VESA] Volba -flip není podporována.\n"
 #define MSGTR_LIBVO_VESA_PossibleReasonNoVbe2BiosFound "[VO_VESA] Mo¾né pøíèiny: Nenalezen VBE2 BIOS.\n"
 #define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] Nalezen VESA VBE BIOS verze %x.%x revize: %x.\n"
 #define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] Video pamì»: %u Kb.\n"
@@ -1714,10 +1752,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_OemVendor "[VO_VESA] OEM výrobce: %s.\n"
 #define MSGTR_LIBVO_VESA_OemProductName "[VO_VESA] OEM název produktu: %s.\n"
 #define MSGTR_LIBVO_VESA_OemProductRev "[VO_VESA] OEM revize produktu: %s.\n"
-#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Tip: Aby fungoval TV-Out, mìl byste zasunout televizní konektor.\n"\
+#define MSGTR_LIBVO_VESA_Hint "[VO_VESA] Tip: Aby fungoval TV-Out, mìl(a) byste zasunout televizní konektor\n"\
 "[VO_VESA] pøed nabootováním PC, proto¾e VESA BIOS se inicializuje jen bìhem POST.\n"
 #define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] Pou¾ívám VESA re¾im (%u) = %x [%ux%u@%u]\n"
-#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Nemohu inicializovat SwScaler.\n"
+#define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] Nemohu inicializovat softwarové ¹kálování.\n"
 #define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] Nemohu pou¾ít DGA. Vynucuji re¾im pøepínání bank. :(\n"
 #define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] Pou¾ívám DGA (fyzické zdroje: %08lXh, %08lXh)"
 #define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] Nemohu pou¾ít double buffering: není dostatek videopamìti.\n"
@@ -1727,7 +1765,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_UsingBankSwitchingMode "[VO_VESA] Pou¾ívám øe¾im pøepínání bank (fyzické zdroje: %08lXh, %08lXh).\n"
 #define MSGTR_LIBVO_VESA_CantAllocateTemporaryBuffer "[VO_VESA] Nemohu alokovat doèasný buffer.\n"
 #define MSGTR_LIBVO_VESA_SorryUnsupportedMode "[VO_VESA] Promiòte, tento re¾im není podporován, zkuste -x 640 -zoom.\n"
-#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] Ó, skuteènì máte obraz na televizi!\n"
+#define MSGTR_LIBVO_VESA_OhYouReallyHavePictureOnTv "[VO_VESA] No, skuteènì máte obraz na televizi!\n"
 #define MSGTR_LIBVO_VESA_CantInitialozeLinuxVideoOverlay "[VO_VESA] Nemohu inicializovat Linux Video Overlay.\n"
 #define MSGTR_LIBVO_VESA_UsingVideoOverlay "[VO_VESA] Pou¾ívám video overlay: %s.\n"
 #define MSGTR_LIBVO_VESA_CantInitializeVidixDriver "[VO_VESA] Nemohu inicializovat ovladaè VIDIX.\n"
@@ -1738,7 +1776,3 @@ static char help_text[]=
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] Zavoláno draw_frame()!!!\n"
 #define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: ©patný výstupní formát %0X\n"
 #define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Nepodaøilo se inicializovat SDL: %s.\n"
-#define MSGTR_LIBVO_TDFXFB_ThisDriverOnlySupports "[VO_TDFXFB] Ovladaè podporuje jen 3Dfx Banshee, Voodoo3 and Voodoo 5.\n"
-#define MSGTR_LIBVO_TDFXVID_UnknownFormat "[VO_TDFXVID] Neznámý formát: 0x%x.\n"
-#define MSGTR_LIBVO_VESA_YouHaveTooLittleVideoMemory "[VO_VESA] Na tento re¾im máte málo video pamìti:\n[VO_VESA] Po¾adováno: %08lX dostupné: %08lX.\n"
-#define MSGTR_LIBVO_SVGA_IfItWorksForYouIWouldLikeToKnow "[VO_SVGA] Pokud vám to funguje, dejte mi vìdìt. \n[VO_SVGA] (po¹lete záznam z `mplayer test.avi -v -v -v -v &> svga.log`). Díky.\n"
