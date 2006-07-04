@@ -61,7 +61,7 @@ SRCS_COMMON += unrarlib.c
 endif
 
 ifeq ($(FREETYPE),yes)
-SRCS_MENCODER += font_load_ft.c
+SRCS_MENCODER += libvo/font_load_ft.c
 endif
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
