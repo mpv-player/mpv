@@ -78,7 +78,7 @@ edl_record_ptr edl_parse_file(void)
                     != 3)
                 {
                     mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadlyFormattedLine,
-                           lineCount + 1);
+                           lineCount);
                     continue;
                 } else
                 {
