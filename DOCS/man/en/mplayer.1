@@ -304,7 +304,7 @@ Adjust subtitle delay by +/- 0.1 seconds.
 .IPs "r and t"
 Move subtitles up/down.
 .IPs "i (\-edlout mode only)"
-Set EDL mark.
+Set start or end of an EDL skip and write it out to the given file.
 .IPs "s (\-vf screenshot only)"
 Take a screenshot.
 .IPs "I"
@@ -727,9 +727,8 @@ Support must be compiled in by configuring with --enable-crash-debug.
 .
 .TP
 .B \-edlout <filename>
-Creates a new file and writes edit decision list (EDL) records to that file.
-During playback, when the user hits 'i', an entry to skip over the last two
-seconds of playback will be written to the file.
+Creates a new file and writes edit decision list (EDL) records to it.
+During playback, the user hits 'i' to mark the start or end of a skip block
 This provides a starting point from which the user can fine-tune EDL entries
 later.
 See DOCS/\:HTML/\:en/\:edl.html for details.

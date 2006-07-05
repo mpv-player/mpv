@@ -198,6 +198,9 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "Last stop position was [%f]; next start is [%f].\n"\
 "Entries must be in chronological order, cannot overlap. Discarding.\n"
 #define MSGTR_EdlBadLineBadStop "Stop time has to be after start time.\n"
+#define MSGTR_EdloutBadStop "EDL skip canceled, last start > stop\n"
+#define MSGTR_EdloutStartSkip "EDL skip start, press 'i' again to end block.\n"
+#define MSGTR_EdloutEndSkip "EDL skip end, line written.\n"
 
 // mplayer.c OSD
 

@@ -397,6 +397,7 @@ short user_muted = 0; ///< Stores whether user wanted muted mode.
 short edl_muted  = 0; ///< Stores whether EDL is currently in muted mode.
 short edl_decision = 0; ///< 1 when an EDL operation has been made.
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
+float begin_skip = MP_NOPTS_VALUE; ///< start time of the current skip while on edlout mode
 
 static unsigned int inited_flags=0;
 #define INITED_VO 1
@@ -4226,7 +4227,21 @@ if(step_sec>0) {
       if( edl_fd ) {
 	float v = sh_video ? sh_video->pts :
 	    playing_audio_pts(sh_audio, d_audio, audio_out);
-	fprintf( edl_fd, "%f %f %d\n", v-2, v, 0 );
+
+	if(begin_skip == MP_NOPTS_VALUE)
+	{
+	  begin_skip = v; 
+	  mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutStartSkip);
+	}else{
+	  if(begin_skip > v)
+	  {
+	    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdloutBadStop);
+	  }else{
+	    fprintf(edl_fd, "%f %f %d\n", begin_skip, v, 0);
+	    mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdloutEndSkip);
+	  }
+	  begin_skip = MP_NOPTS_VALUE;
+	}
       }
       break;
     case MP_CMD_SWITCH_RATIO : {
