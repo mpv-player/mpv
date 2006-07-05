@@ -6204,6 +6204,14 @@ fi
 echores "$_libpostproc_so"
 fi #if test "$_libpostproc" != yes ; then
 
+_def_libavutil='#undef USE_LIBAVUTIL'
+_def_libavutil_so='#undef USE_LIBAVUTIL_SO'
+if test "$_libavutil" = yes ; then
+  _def_libavutil='#define USE_LIBAVUTIL 1'
+elif test "$_libavutil_so" = yes ; then
+  _def_libavutil_so='#define USE_LIBAVUTIL_SO 1'
+fi
+
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
 _def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
@@ -7862,6 +7870,9 @@ $_def_lavc_dsputil
 $_def_libavformat
 $_def_libavformat_so
 $_def_libavformat_win32
+
+$_def_libavutil
+$_def_libavutil_so
 
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
