@@ -101,7 +101,6 @@ static af_data_t* play_s16(struct af_instance_s* af, af_data_t* data)
   register int i = 0;
   int16_t *a = (int16_t*)data->audio;	// Audio data
   int len = data->len/2;		// Number of samples
-  int avg, l, r;
   
   for (i = 0; i < len; i++)
   {
