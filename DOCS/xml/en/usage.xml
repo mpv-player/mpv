@@ -352,9 +352,8 @@ uses, like automatically skipping over commercials in video files you watch.
 </para>
 
 <para>
-The EDL file format is pretty bare-bones. Once the EDL system has reached a
-certain level of maturity, an XML-based file format will probably be implemented
-(keeping backwards compatibility with previous EDL formats).
+The EDL file format is pretty bare-bones. Each line on the file dictates what
+to do (skip/mute) and when to do it (using pts in seconds). 
 </para>
 
 <sect2 id="edl_using">
@@ -388,9 +387,10 @@ reaches the times given in the file.
 
 <para>
 To create an EDL file to work from, use the <option>-edlout &lt;filename&gt;</option>
-flag. During playback, when you want to mark the previous two seconds to skip over,
-hit <keycap>i</keycap>. A corresponding entry will be written to the file for
-that time. You can then go back and fine-tune the generated EDL file.
+flag. During playback, just hit <keycap>i</keycap> to mark the beginning and 
+end of a skip block. A corresponding entry will be written to the file for
+that time. You can then go back and fine-tune the generated EDL file as well as
+change the default operation which is to skip the block described by each line.
 </para>
 </sect2>
 
