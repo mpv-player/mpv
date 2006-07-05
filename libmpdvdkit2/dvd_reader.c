@@ -50,7 +50,7 @@
 #include <mntent.h>
 #endif
 
-#ifdef __MINGW32__
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION <= 3) && (__MINGW32_MINOR_VERSION < 10)
 #include <sys/timeb.h>
 static void gettimeofday(struct timeval* t,void* timezone){
     struct timeb timebuffer;
