@@ -773,9 +773,8 @@ support.
 To check out CVS modules use:
 
 <screen>
-cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 </screen>
 </para>
 
@@ -786,11 +785,11 @@ set up something like this:
 <screen>
 MPlayer_source_directory
    |
-   |--->main           (MPlayer CVS source)
+   |--->main           (MPlayer Subversion source)
    |
-   |--->main_noaltivec (MPlayer CVS source configured with --disable-altivec)
+   |--->main_noaltivec (MPlayer Subversion source configured with --disable-altivec)
    |
-   |--->mplayerosx     (MPlayer OS X CVS source)
+   |--->mplayerosx     (MPlayer OS X Subversion source)
 </screen>
 
 You first need to build main and main_noaltivec.
