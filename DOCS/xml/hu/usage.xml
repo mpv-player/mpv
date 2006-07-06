@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r17865 -->
+<!-- synced with r18917 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -358,9 +358,8 @@ is vannak, például automatikusan átlépni a videó fájlokban lévő reklámokat.
 </para>
 
 <para>
-Az EDL fájl formátuma eléggé egyszerű. Majd ha az EDL rendszer elér egy bizonyos
-fejlettségi szintet, egy XML alapú fájl formátum lesz implementálva valószínűleg
-(megtartva a kompatibilitást visszafelé, a régi EDL formátumokkal).
+Az EDL fájl formátuma eléggé egyszerű. A fájl minden sora megadja, hogy
+mit kell csinálni (skip/mute) és mikor (másodperc alapú mutatóval).
 </para>
 
 <sect2 id="edl_using">
@@ -393,10 +392,12 @@ időzítője eléri a fájlban megadott időket.
 
 <para>
 Ha készíteni akarsz egy EDL fájl, amit utána szerkeszthetsz, használd a
-<option>-edlout &lt;fájlnév&gt;</option> kapcsolót. Lejátszás közben, ha meg akarod
-jelölni az előző két másodpercet kihagyásra, nyomd meg az <keycap>i</keycap>
-billentyűt. A megfelelő bejegyzés bekerül a fájlba erre az időszakra. Ezután
-kézzel tetszőlegesen beigazíthatod az EDL fájlt.
+<option>-edlout &lt;fájlnév&gt;</option> kapcsolót. Lejátszás közben csak
+nyomd meg az <keycap>i</keycap> billentyűt a kihagyandó rész elejének és
+végének a megjelöléséhez. A megfelelő bejegyzés bekerül a fájlba erre az
+időszakra. Ezután kézzel tetszőlegesen beigazíthatod az EDL fájlt és
+megváltoztathatod az alapértelmezett műveletet, ami az egyes sorok által
+leírt blokkok kihagyása.
 </para>
 </sect2>
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18637 -->
+<!-- synced with r18824 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -789,7 +789,7 @@ make
 make install
 </screen>
 Binárisok nem tölthetőek le az audiocoding.com-ról, de (apt-)get-tel feltelepítheted
-Debian csomagokból <ulink url="http://hpisi.nerim.net">Christian Marillat weboldaláról</ulink>,
+Debian csomagokból <ulink url="http://www.debian-multimedia.org/">Christian Marillat weboldaláról</ulink>,
 vagy Mandrake/Mandriva RPM-ből a <ulink url="http://plf.zarb.org">P.L.F</ulink>-ről, RedHat RPM-ből
 pedig a <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>-tól.
 </para>

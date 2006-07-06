@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18673 -->
+<!-- synced with r18923 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -46,7 +46,7 @@ Rendszergazdaként a szokásos módszerrel telepíthető a <filename>.deb</filename> 
 Christian Marillat már régóta készít nem-hivatalos Debian csomagokat
 az <application>MPlayerből</application>, <application>MEncoderből</application> és
 a betűtípusokból, melyek akár az apt-get segítségével is telepíthetők
-<ulink url="http://hpisi.nerim.net/">a weboldaláról</ulink>.
+<ulink url="http://www.debian-multimedia.org/">a weboldaláról</ulink>.
 </para>
 </sect2>
 
@@ -500,7 +500,7 @@ AIX 5.2 és 5.3 alá. Ez azt jelenti, hogy az <emphasis role="bold">AIX 5.2
 és 5.3 alatt jelenleg az MPlayer nem képes audió kimenetre.</emphasis>
 </para>
 
-<para>Solutions to common problems:</para>
+<para>Megoldás a gyakori problémákra:</para>
 
 <itemizedlist>
 <listitem>
@@ -694,12 +694,58 @@ $ ./configure --charset=noconv
 
 <sect1 id="macos">
 <title>Mac OS</title>
+
 <para>
 Az <application>MPlayer</application> nem működik a 10-esnél régebbi Mac OS-eken,
 de könnyedén lefordítható Mac OS X 10.2 és későbbi verziók alatt.
-A javasolt fordító a GCC 3.x vagy későbbi Apple féle
-változata. Ha Mac OS X 10.3.9 vagy régebbi verziód és QuickTime 7-esed van,
-használhatod a macosx videó kimeneti vezérlőt is.
+A javasolt fordító a GCC 3.x vagy későbbi Apple féle változata.
+Az alap fordítási környezetet az Apple
+<ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
+telepítésével kapod meg.
+Ha Mac OS X 10.3.9 vagy régebbi verziód és QuickTime 7-esed van,
+használhatod a <option>macosx</option> videó kimeneti vezérlőt is.
+</para>
+
+<para>
+Sajnos az alap környezet nem teszi lehetővé az <application>MPlayer</application>
+összes képességének kihasználását.
+Például ha befordított OSD támogatást szeretnél, telepített
+<systemitem class="library">fontconfig</systemitem> és a
+<systemitem class="library">freetype</systemitem> függvénykönyvtárakra
+lesz szükséged. Más Unix-okkal ellentétben, mint amilyen a legtöbb
+Linux és BSD variáns, az OS X nem rendelkezik alapértelmezett csomag
+kezelővel, ami az operációs rendszerhez tartozna.
+</para>
+
+<para>
+Két független közül választhatsz:
+<ulink url="http://fink.sourceforge.net/">Fink</ulink> és
+<ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.
+Mindkettő nagyjából ugyan azt a szolgáltatást nyújtja (pl. rengeteg választható
+csomag, függőségek kezelése, csomagok egyszerű telepítése/frissítése/eltávolítása,
+stb...).
+A Fink biztosít előfordított bináris csomagokat, de forrásból is lefordítható
+bármi, míg a DarwinPorts csak forrásból történő fordítást tesz lehetővé.
+Ezen leírás szerzője a DarwinPorts-ot választotta, azon egyszerű okból kifolyólag,
+hogy a beállítása sokkal egyszerűbb.
+A későbbi példák mind DarwinPorts-on alapszanak.
+</para>
+
+<para>
+Például az <application>MPlayer</application> lefordítása OSD támogatással:
+<screen>sudo port install pkgconfig</screen>
+Ez telepíti a <application>pkg-config</application>-ot, ami a függvénykönyvtárak
+fordítási/szerkesztési flag-jeinek kezelését végző rendszer.
+Az <application>MPlayer</application> <systemitem>configure</systemitem> script-je
+is ezt használja a függvénykönyvtárak megfelelő detektálásához.
+Ezután hasonló módon telepítheted a <application>fontconfig</application>-ot:
+<screen>sudo port install fontconfig</screen>
+Ezek után indíthatod az <application>MPlayer</application>
+<systemitem>configure</systemitem> script-jét (figyelj a
+<systemitem>PKG_CONFIG_PATH</systemitem> és <systemitem>PATH</systemitem>
+környezeti változók beállítására, hogy a <systemitem>configure</systemitem> megtalálja
+a DarwinPorts-szal telepített függvénykönyvtárakat):
+<screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
 
 <sect2 id="osx_gui">
@@ -735,9 +781,8 @@ nélkül.
 A CVS modulok letöltéséhez használt az alábbi parancsokat:
 
 <screen>
-cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 </screen>
 </para>
 
@@ -748,11 +793,11 @@ csinálnod:
 <screen>
 MPlayer_forras_konyvtar
    |
-   |--->main           (MPlayer CVS forrás)
+   |--->main           (MPlayer Subversion forrás)
    |
-   |--->main_noaltivec (MPlayer CVS forrás --disable-altivec -kel konfigurálva)
+   |--->main_noaltivec (MPlayer Subversion forrás --disable-altivec -kel konfigurálva)
    |
-   |--->mplayerosx     (MPlayer OS X CVS forrás)
+   |--->mplayerosx     (MPlayer OS X Subversion forrás)
 </screen>
 
 Először a main és main_noaltivec-et kell lefordítanod.
