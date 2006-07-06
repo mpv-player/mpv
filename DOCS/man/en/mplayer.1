@@ -1389,8 +1389,12 @@ the RTSP stream from the server to a specific client.
 .
 .TP
 .B \-rtsp-destination
-Used with 'rtsp://' URLs to force the destination IP address to be binded.
-This option may be useful against some RTSP server which don't send RTP packets to the right interface. If the connection to RTSP server fails, use -v to see which IP address MPlayer tries to bind and try to force it to one assigned to your computer instead.
+Used with 'rtsp://' URLs to force the destination IP address to be bound.
+This option may be useful with some RTSP server which do not
+send RTP packets to the right interface.
+If the connection to the RTSP server fails, use \-v to see
+which IP address MPlayer tries to bind to and try to force
+it to one assigned to your computer instead.
 .
 .TP
 .B \-rtsp-stream-over-tcp (LIVE555 only)
