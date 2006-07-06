@@ -12,8 +12,6 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && defined(HAVE_TV_BSDBT848)
-
 #define RINGSIZE 8
 #define FRAGSIZE 4096 /* (2^12 see SETFRAGSIZE below) */
 
@@ -846,5 +844,3 @@ switch(innumber)
 
 return 0;
 }
-
-#endif /* USE_TV */

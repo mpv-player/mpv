@@ -14,8 +14,6 @@
 
 #include "config.h"
 
-#if defined(HAVE_CDDA) && defined(MPLAYER_NETWORK)
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -878,5 +876,3 @@ cddb_parse_xmcd(char *xmcd_file) {
 	
 	return cd_info;
 }
-
-#endif

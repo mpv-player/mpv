@@ -17,8 +17,6 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && defined(HAVE_TV_V4L)
-
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -1759,5 +1757,3 @@ static int get_audio_framesize(priv_t *priv)
 {
     return(priv->audio_in.blocksize);
 }
-
-#endif /* USE_TV */

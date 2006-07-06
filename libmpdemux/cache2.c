@@ -1,7 +1,5 @@
 #include "config.h"
 
-#ifdef USE_STREAM_CACHE
-
 // Initial draft of my new cache system...
 // Note it runs in 2 processes (using fork()), but doesn't requires locking!!
 // TODO: seeking, data consistency checking
@@ -367,5 +365,3 @@ int cache_stream_seek_long(stream_t *stream,off_t pos){
   mp_msg(MSGT_CACHE,MSGL_V,"cache_stream_seek: WARNING! Can't seek to 0x%"PRIX64" !\n",(int64_t)(pos+newpos));
   return 0;
 }
-
-#endif

@@ -4973,30 +4973,35 @@ _def_alsa_asoundlib_h='#undef HAVE_ALSA_ASOUNDLIB_H'
 if test "$_alsaver" ; then
   _alsa=yes
   if test "$_alsaver" = '0.5.x' ; then
+    _alsa5=yes
     _aosrc="$_aosrc ao_alsa5.c"
     _aomodules="alsa5 $_aomodules"
     _def_alsa5='#define HAVE_ALSA5 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.5.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-sys' ; then
+    _alsa9=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_sys_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.9.x and sys/asoundlib.h"
   elif test "$_alsaver" = '0.9.x-alsa' ; then
+    _alsa9=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa9='#define HAVE_ALSA9 1'
     _def_alsa_asoundlib_h='#define HAVE_ALSA_ASOUNDLIB_H 1'
     _res_comment="using alsa 0.9.x and alsa/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-sys' ; then
+    _alsa1x=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa1x="#define HAVE_ALSA1X 1"
     _def_alsa_asoundlib_h='#define HAVE_SYS_ASOUNDLIB_H 1'
     _res_comment="using alsa 1.0.x and sys/asoundlib.h"
   elif test "$_alsaver" = '1.0.x-alsa' ; then
+    _alsa1x=yes
     _aosrc="$_aosrc ao_alsa.c"
     _aomodules="alsa $_aomodules"
     _def_alsa1x="#define HAVE_ALSA1X 1"
@@ -5241,6 +5246,7 @@ EOF
     done
 fi
 if test "$_cdparanoia" = yes ; then
+    _cdda='yes'
     _def_cdparanoia='#define HAVE_CDDA'
     _inputmodules="cdda $_inputmodules"
     _ld_cdparanoia="$_ld_cdparanoia -lcdda_interface -lcdda_paranoia"
@@ -5278,6 +5284,7 @@ EOF
     fi
 fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
+    _cdda='yes'
     _def_libcdio='#define HAVE_LIBCDIO'
     _def_cdparanoia='#define HAVE_CDDA'
     _def_havelibcdio='yes'
@@ -7358,8 +7365,11 @@ PRG_MENCODER = $_prg_mencoder
 $_live_libs_def
 
 MPLAYER_NETWORK = $_network
+FTP = $_ftp
 STREAMING_LIVE555 = $_live
+VSTREAM = $_vstream
 MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
+STREAM_CACHE = yes
 DVBIN = $_dvbin
 VIDIX = $_vidix_internal
 EXTERNAL_VIDIX = $_vidix_external
@@ -7426,6 +7436,11 @@ CACA_INC = $_inc_caca
 CACA_LIB = $_ld_caca
 
 # audio output
+OSS = $_ossaudio
+ALSA = $_alsa
+ALSA5 = $_alsa5
+ALSA9 = $_alsa9
+ALSA1X = $_alsa1x
 ALSA_LIB = $_ld_alsa
 NAS_LIB = $_ld_nas
 ARTS_LIB = $_ld_arts
@@ -7444,10 +7459,16 @@ SGIAUDIO_LIB = $_ld_sgiaudio
 TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
 LIRCC_LIB = $_ld_lircc
+TV = $_tv
+TV_V4L = $_tv_v4l
+TV_V4L2 = $_tv_v4l2
+TV_BSDBT848 = $_tv_bsdbt848
+VCD = $_vcd
 HAVE_DVD = $_have_dvd
 DVDREAD = $_dvdread
 DVDREAD_LIB = $_ld_dvdread
 DVDKIT2 = $_mpdvdkit
+DVDNAV = $_dvdnav
 DVDNAV_LIB = $_ld_dvdnav
 SDL_INC = $_inc_sdl
 WIN32DLL = $_win32
@@ -7488,6 +7509,7 @@ MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore $_ld_mp3lame
 DIRECTFB_INC = $_inc_directfb
 DIRECTFB_LIB = $_ld_directfb
+CDDA = $_cdda
 CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
 FREETYPE = $_freetype
@@ -7509,6 +7531,7 @@ LIBTHEORA = $_theora
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
 INTERNAL_FAAD = $_faad_internal
+LIBSMBCLIENT = $_smbsupport
 SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib

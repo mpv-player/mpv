@@ -4,8 +4,6 @@
 
 #include "config.h"
 
-#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)) && defined(HAVE_ALSA1X)
-
 #include <alsa/asoundlib.h>
 #include "audio_in.h"
 #include "mp_msg.h"
@@ -185,5 +183,3 @@ int ai_alsa_xrun(audio_in_t *ai)
     mp_msg(MSGT_TV, MSGL_ERR, MSGTR_MPDEMUX_AIALSA_AlsaReadWriteError);
     return -1;
 }
-
-#endif /* HAVE_ALSA1X */

@@ -17,8 +17,6 @@ unsigned int store_ughvlc(unsigned char *s, unsigned int v)
   return n;
 }
 
-#ifdef HAVE_OGGVORBIS
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -1685,5 +1683,3 @@ demuxer_desc_t demuxer_desc_ogg = {
   demux_ogg_seek,
   demux_ogg_control
 };
-
-#endif

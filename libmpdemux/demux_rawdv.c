@@ -12,8 +12,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_LIBDV095
-
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -262,5 +260,3 @@ demuxer_desc_t demuxer_desc_rawdv = {
   demux_seek_rawdv,
   demux_rawdv_control
 };
-
-#endif

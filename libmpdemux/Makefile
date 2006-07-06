@@ -11,52 +11,85 @@ SRCS  = mp3_hdr.c \
         aviprint.c \
 
 # Core
-SRCS += cache2.c \
-        extension.c \
+SRCS += extension.c \
         mf.c \
         open.c \
         url.c \
         video.c \
 
+ifeq ($(STREAM_CACHE),yes)
+SRCS += cache2.c
+endif
+
 # Miscellaneous
-SRCS += cdda.c \
-        cddb.c \
-        cdinfo.c \
+SRCS += cdinfo.c \
         cue_read.c \
-        dvdnav_stream.c \
         parse_es.c \
         parse_mp4.c \
         yuv4mpeg.c \
         yuv4mpeg_ratio.c \
 
+ifeq ($(CDDA),yes)
+SRCS += cdda.c
+  ifeq ($(MPLAYER_NETWORK),yes)
+  SRCS += cddb.c
+  endif
+endif
+
 # Stream readers/writers
 SRCS += stream.c \
         stream_file.c \
-        stream_ftp.c \
-        stream_livedotcom.c \
-        stream_netstream.c \
         stream_null.c \
-        stream_smb.c \
-        stream_vcd.c \
-        stream_vstream.c \
 
 ifeq ($(HAVE_DVD),yes)
 SRCS += stream_dvd.c
 endif
+ifeq ($(DVDNAV),yes)
+SRCS += dvdnav_stream.c
+endif
+ifeq ($(VCD),yes)
+SRCS += stream_vcd.c
+endif
+ifeq ($(FTP),yes)
+SRCS += stream_ftp.c
+endif
+ifeq ($(LIBSMBCLIENT),yes)
+SRCS += stream_smb.c
+endif
+ifeq ($(MPLAYER_NETWORK),yes)
+  SRCS += stream_netstream.c
+  ifeq ($(STREAMING_LIVE555),yes)
+  SRCS += stream_livedotcom.c
+  endif
+endif
+ifeq ($(VSTREAM),yes)
+SRCS += stream_vstream.c
+endif
 
 # TV in
-SRCS += tv.c \
-        frequencies.c \
-        tvi_bsdbt848.c \
-        tvi_dummy.c \
-        tvi_v4l2.c \
-        tvi_v4l.c \
-
-# Audio in
-SRCS += audio_in.c \
-        ai_alsa1x.c \
-        ai_alsa.c \
-        ai_oss.c \
+ifeq ($(TV),yes)
+SRCS += tv.c frequencies.c tvi_dummy.c
+  ifeq ($(TV_BSDBT848),yes)
+  SRCS += tvi_bsdbt848.c
+  endif
+  ifeq ($(TV_V4L2),yes)
+  SRCS += tvi_v4l2.c audio_in.c
+  endif
+  ifeq ($(TV_V4L),yes)
+  SRCS += tvi_v4l.c audio_in.c
+  endif
+  ifeq ($(TV_V4L)$(TV_V4L2),yes)
+    ifeq ($(ALSA1X),yes)
+     SRCS += ai_alsa1x.c
+    endif
+    ifeq ($(ALSA9),yes)
+     SRCS += ai_alsa.c
+    endif
+    ifeq ($(OSS),yes)
+     SRCS += ai_oss.c
+    endif
+  endif
+endif
 
 # Demuxers
 SRCS += demuxer.c \
@@ -67,7 +100,6 @@ SRCS += demuxer.c \
         demux_demuxers.c \
         demux_film.c \
         demux_fli.c \
-        demux_gif.c \
         demux_lmlm4.c \
         demux_mf.c \
         demux_mov.c \
@@ -75,10 +107,8 @@ SRCS += demuxer.c \
         demux_mpg.c \
         demux_nsv.c \
         demux_nuv.c \
-        demux_ogg.c \
         demux_pva.c \
         demux_rawaudio.c \
-        demux_rawdv.c \
         demux_rawvideo.c \
         demux_realaud.c \
         demux_real.c \
@@ -92,6 +122,15 @@ SRCS += demuxer.c \
         demux_y4m.c \
         demux_mkv.c ebml.c \
 
+ifeq ($(LIBVORBIS),yes)
+SRCS += demux_ogg.c
+endif
+ifeq ($(LIBDV),yes)
+SRCS += demux_rawdv.c
+endif
+ifeq ($(GIF),yes)
+SRCS += demux_gif.c
+endif
 ifeq ($(XMMS_PLUGINS),yes)
 SRCS += demux_xmms.c
 endif

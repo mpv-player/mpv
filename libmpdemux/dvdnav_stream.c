@@ -1,6 +1,5 @@
 #include "config.h"
 
-#ifdef USE_DVDNAV
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -395,5 +394,3 @@ stream_info_t stream_info_dvdnav = {
   &stream_opts,
   1 // Urls are an option string
 };
-
-#endif /* USE_DVDNAV */

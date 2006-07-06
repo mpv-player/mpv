@@ -1,8 +1,6 @@
 
 #include "config.h"
 
-#ifdef LIBSMBCLIENT
-
 #include <libsmbclient.h>
 #include <unistd.h>
 
@@ -148,5 +146,3 @@ stream_info_t stream_info_smb = {
   &stream_opts,
   0 //Url is an option string
 };
-
-#endif

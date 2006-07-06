@@ -1,7 +1,5 @@
 #include "config.h"
 
-#ifdef HAVE_CDDA
-
 #include "stream.h"
 #include "m_option.h"
 #include "m_struct.h"
@@ -391,5 +389,3 @@ stream_info_t stream_info_cdda = {
   &stream_opts,
   1 // Urls are an option string
 };
-
-#endif

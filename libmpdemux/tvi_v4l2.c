@@ -25,8 +25,6 @@ known issues:
 
 #include "config.h"
 
-#if defined(USE_TV) && defined(HAVE_TV_V4L2)
-
 #include <errno.h>
 #include <fcntl.h>
 #include <pthread.h>
@@ -1747,5 +1745,3 @@ static int get_audio_framesize(priv_t *priv)
 {
     return(priv->audio_in.blocksize);
 }
-
-#endif /* USE_TV && HAVE_TV_V4L2 */

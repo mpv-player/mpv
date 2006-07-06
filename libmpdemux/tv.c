@@ -21,7 +21,6 @@
 
 int tv_param_on = 0;
 
-#ifdef USE_TV
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -918,5 +917,3 @@ demuxer_desc_t demuxer_desc_tv = {
   NULL,
   NULL
 };
-
-#endif /* USE_TV */

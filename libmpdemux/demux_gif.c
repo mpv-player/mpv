@@ -9,8 +9,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_GIF
-
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -236,5 +234,3 @@ demuxer_desc_t demuxer_desc_gif = {
   NULL,
   NULL
 };
-
-#endif /* HAVE_GIF */

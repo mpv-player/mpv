@@ -1,7 +1,6 @@
 
 #include "config.h"
 
-#ifdef MPLAYER_NETWORK
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,8 +10,6 @@
 #include "network.h"
 #include "demuxer.h"
 #include "help_mp.h"
-
-#ifdef STREAMING_LIVE555
 
 extern int network_bandwidth;
 
@@ -120,6 +117,3 @@ stream_info_t stream_info_sdp = {
   NULL,
   0 // Urls are an option string
 };
-
-#endif
-#endif

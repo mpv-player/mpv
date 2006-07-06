@@ -4,8 +4,6 @@
 
 #include "config.h"
 
-#ifdef USE_TV
-
 #include <stdio.h>
 #include "libvo/img_format.h"
 #include "tv.h"
@@ -120,5 +118,3 @@ static int get_audio_framesize(priv_t *priv)
 {
     return(1);
 }
-
-#endif /* USE_TV */
