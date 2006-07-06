@@ -133,7 +133,7 @@ play_tree_parser_stop_keeping(play_tree_parser_t* p) {
 }
 
 
-play_tree_t*
+static play_tree_t*
 parse_asx(play_tree_parser_t* p) {
   int comments = 0,get_line = 1;
   char* line = NULL;
@@ -243,7 +243,7 @@ pls_read_entry(char* line,pls_entry_t** _e,int* _max_entry,char** val) {
 }
 
 
-play_tree_t*
+static play_tree_t*
 parse_pls(play_tree_parser_t* p) {
   char *line,*v;
   pls_entry_t* entries = NULL;
@@ -335,7 +335,7 @@ parse_pls(play_tree_parser_t* p) {
 /*
  Reference Ini-Format: Each entry is assumed a reference
  */
-play_tree_t*
+static play_tree_t*
 parse_ref_ini(play_tree_parser_t* p) {
   char *line,*v;
   play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
@@ -378,7 +378,7 @@ parse_ref_ini(play_tree_parser_t* p) {
   return entry;
 }
 
-play_tree_t*
+static play_tree_t*
 parse_m3u(play_tree_parser_t* p) {
   char* line;
   play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
@@ -426,7 +426,7 @@ parse_m3u(play_tree_parser_t* p) {
   return entry;    
 }
 
-play_tree_t*
+static play_tree_t*
 parse_smil(play_tree_parser_t* p) {
   int entrymode=0;
   char* line,source[512],*pos,*s_start,*s_end;
@@ -515,7 +515,7 @@ parse_smil(play_tree_parser_t* p) {
   return entry;
 }
 
-play_tree_t*
+static play_tree_t*
 embedded_playlist_parse(char *line) {
   int f=DEMUXER_TYPE_PLAYLIST;
   stream_t* stream;
@@ -540,7 +540,7 @@ embedded_playlist_parse(char *line) {
   return entry;
 }
 
-play_tree_t*
+static play_tree_t*
 parse_textplain(play_tree_parser_t* p) {
   char* line;
   char *c;
