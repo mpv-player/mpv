@@ -40,6 +40,10 @@ SRCS += stream.c \
         stream_vcd.c \
         stream_vstream.c \
 
+ifeq ($(HAVE_DVD),yes)
+SRCS += stream_dvd.c
+endif
+
 # TV in
 SRCS += tv.c \
         frequencies.c \
@@ -88,12 +92,9 @@ SRCS += demuxer.c \
         demux_y4m.c \
         demux_mkv.c ebml.c \
 
-ifeq ($(HAVE_DVD),yes)
-SRCS += stream_dvd.c
-endif 
 ifeq ($(XMMS_PLUGINS),yes)
 SRCS += demux_xmms.c
-endif 
+endif
 ifneq ($(W32_LIB),)
 SRCS += demux_avs.c
 endif
