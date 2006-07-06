@@ -197,19 +197,19 @@ static int play(void* data, int len, int flags) {
 }
 
 /** Pause the audio stream by corking it on the server */
-static void audio_pause() {
+static void audio_pause(void) {
     assert(stream && context && pa_stream_get_state(stream) == PA_STREAM_READY);
     wait_for_operation(pa_stream_cork(stream, 1, NULL, NULL));
 }
 
 /** Resume the audio stream by uncorking it on the server */
-static void audio_resume() {
+static void audio_resume(void) {
     assert(stream && context && pa_stream_get_state(stream) == PA_STREAM_READY);
     wait_for_operation(pa_stream_cork(stream, 0, NULL, NULL));
 }
 
 /** Reset the audio stream, i.e. flush the playback buffer on the server side */
-static void reset() {
+static void reset(void) {
     assert(stream && context && pa_stream_get_state(stream) == PA_STREAM_READY);
     wait_for_operation(pa_stream_flush(stream, NULL, NULL));
 }

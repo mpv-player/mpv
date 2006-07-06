@@ -254,7 +254,7 @@ static void uninit(int immed)
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset()
+static void reset(void)
 {
    	waveOutReset(hWaveOut);
 	buf_write=0;
@@ -264,19 +264,19 @@ static void reset()
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
     waveOutPause(hWaveOut);
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
 	waveOutRestart(hWaveOut);
 }
 
 // return: how many bytes can be played without blocking
-static int get_space()
+static int get_space(void)
 {
     return BUFFER_COUNT*BUFFER_SIZE - buffered_bytes;
 }
@@ -322,7 +322,7 @@ static int play(void* data,int len,int flags)
 }
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay()
+static float get_delay(void)
 {
 	return (float)(buffered_bytes + ao_data.buffersize)/(float)ao_data.bps;
 }

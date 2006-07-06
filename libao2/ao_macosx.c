@@ -98,7 +98,7 @@ static ao_macosx_t *ao = NULL;
  *    two immediately following calls, and the real number of free bytes
  *    might actually be larger!
  */
-static int buf_free() {
+static int buf_free(void) {
   int free = ao->buf_read_pos - ao->buf_write_pos - ao->chunk_size;
   if (free < 0) free += ao->buffer_len;
   return free;
@@ -111,7 +111,7 @@ static int buf_free() {
  *    two immediately following calls, and the real number of buffered bytes
  *    might actually be larger!
  */
-static int buf_used() {
+static int buf_used(void) {
   int used = ao->buf_write_pos - ao->buf_read_pos;
   if (used < 0) used += ao->buffer_len;
   return used;
@@ -346,7 +346,7 @@ static int play(void* output_samples,int num_bytes,int flags)
 }
 
 /* set variables and buffer to initial state */
-static void reset()
+static void reset(void)
 {
   audio_pause();
   /* reset ring-buffer state */
@@ -359,14 +359,14 @@ static void reset()
 
 
 /* return available space */
-static int get_space()
+static int get_space(void)
 {
   return buf_free();
 }
 
 
 /* return delay until audio is played */
-static float get_delay()
+static float get_delay(void)
 {
   int buffered = ao->buffer_len - ao->chunk_size - buf_free(); // could be less
   // inaccurate, should also contain the data buffered e.g. by the OS
@@ -393,7 +393,7 @@ static void uninit(int immed)
 
 
 /* stop playing, keep buffers (for pause) */
-static void audio_pause()
+static void audio_pause(void)
 {
   OSErr status=noErr;
 
@@ -406,7 +406,7 @@ static void audio_pause()
 
 
 /* resume playing, after audio_pause() */
-static void audio_resume()
+static void audio_resume(void)
 {
   OSErr status=noErr;
   

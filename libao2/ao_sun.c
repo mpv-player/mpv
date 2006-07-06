@@ -358,7 +358,7 @@ find_highest_samplerate(int dev)
 }
 
 
-static void setup_device_paths()
+static void setup_device_paths(void)
 {
     if (audio_dev == NULL) {
 	if ((audio_dev = getenv("AUDIODEV")) == NULL)
@@ -621,7 +621,7 @@ static void uninit(int immed){
 }
 
 // stop playing and empty buffers (for seeking/pause)
-static void reset(){
+static void reset(void){
     audio_info_t info;
 
     uninit(1);
@@ -650,7 +650,7 @@ static void reset(){
 }
 
 // stop playing, keep buffers (for pause)
-static void audio_pause()
+static void audio_pause(void)
 {
     struct audio_info info;
     AUDIO_INITINFO(&info);
@@ -659,7 +659,7 @@ static void audio_pause()
 }
 
 // resume playing, after audio_pause()
-static void audio_resume()
+static void audio_resume(void)
 {
     struct audio_info info;
     AUDIO_INITINFO(&info);
@@ -669,7 +669,7 @@ static void audio_resume()
 
 
 // return: how many bytes can be played without blocking
-static int get_space(){
+static int get_space(void){
     audio_info_t info;
 
     // check buffer
@@ -721,7 +721,7 @@ static int play(void* data,int len,int flags){
 
 
 // return: delay in seconds between first and last sample in buffer
-static float get_delay(){
+static float get_delay(void){
     audio_info_t info;
     ioctl(audio_fd, AUDIO_GETINFO, &info);
 #if defined (__OpenBSD__) || defined(__NetBSD__)

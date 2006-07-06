@@ -77,7 +77,7 @@ static volatile int write_pos;
  * return value may change between immediately following two calls,
  * and the real number of free bytes might be larger!
  */
-static int buf_free() {
+static int buf_free(void) {
   int free = read_pos - write_pos - CHUNK_SIZE;
   if (free < 0) free += BUFFSIZE;
   return free;
@@ -91,7 +91,7 @@ static int buf_free() {
  * return value may change between immediately following two calls,
  * and the real number of buffered bytes might be larger!
  */
-static int buf_used() {
+static int buf_used(void) {
   int used = write_pos - read_pos;
   if (used < 0) used += BUFFSIZE;
   return used;
@@ -203,7 +203,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg) {
 /**
  * \brief print suboption usage help
  */
-static void print_help ()
+static void print_help (void)
 {
   mp_msg (MSGT_AO, MSGL_FATAL,
            "\n-ao jack commandline help:\n"
@@ -326,7 +326,7 @@ static void uninit(int immed) {
 /**
  * \brief stop playing and empty buffers (for seeking/pause)
  */
-static void reset() {
+static void reset(void) {
   paused = 1;
   read_pos = 0;
   write_pos = 0;
@@ -336,18 +336,18 @@ static void reset() {
 /**
  * \brief stop playing, keep buffers (for pause)
  */
-static void audio_pause() {
+static void audio_pause(void) {
   paused = 1;
 }
 
 /**
  * \brief resume playing, after audio_pause()
  */
-static void audio_resume() {
+static void audio_resume(void) {
   paused = 0;
 }
 
-static int get_space() {
+static int get_space(void) {
   return buf_free();
 }
 
@@ -361,7 +361,7 @@ static int play(void *data, int len, int flags) {
   return write_buffer(data, len);
 }
 
-static float get_delay() {
+static float get_delay(void) {
   int buffered = BUFFSIZE - CHUNK_SIZE - buf_free(); // could be less
   float in_jack = jack_latency;
   if (estimate && callback_interval > 0) {
