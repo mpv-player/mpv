@@ -9,6 +9,16 @@ OPTIMIZE =  $(OPTFLAGS)
 
 CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG) 
 
+ifeq ($(TARGET_WIN32),yes)
+SRCS = win32/dialogs.c \
+       win32/gui.c \
+       win32/interface.c \
+       win32/playlist.c \
+       win32/preferences.c \
+       win32/skinload.c \
+       win32/widgetrender.c \
+       win32/wincfg.c
+else
 SRCS = wm/ws.c \
        wm/wsxdnd.c \
        app.c \
@@ -34,8 +44,8 @@ SRCS = wm/ws.c \
        mplayer/gtk/opts.c \
        mplayer/gtk/url.c \
        mplayer/gtk/eq.c \
-       mplayer/gtk/common.c \
-
+       mplayer/gtk/common.c
+endif
 OBJS = $(SRCS:.c=.o)
 
 .SUFFIXES: .c .o
@@ -57,7 +67,8 @@ clean:
               mplayer/*.o mplayer/*~ \
               mplayer/gtk/*.o mplayer/gtk/*~ \
               skin/*.o skin/*~ \
-              wm/*.o wm/*~
+              wm/*.o wm/*~ \
+              win32/*.o
 
 #dep:	depend
 #

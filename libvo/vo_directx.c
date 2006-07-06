@@ -35,6 +35,10 @@
 #include "aspect.h"
 #include "geometry.h"
 
+#ifdef HAVE_NEW_GUI
+#include "Gui/interface.h"
+#endif
+
 #ifndef WM_XBUTTONDOWN
 # define WM_XBUTTONDOWN    0x020B
 # define WM_XBUTTONUP      0x020C
@@ -1311,6 +1315,13 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     vo_dx = 0;
     vo_dy = 0;   
 
+#ifdef HAVE_NEW_GUI
+    if(use_gui && WinID != -1){
+        vo_dwidth = d_image_width;
+        vo_dheight = d_image_height;
+        guiGetEvent(guiSetShVideo, 0);
+    }
+#endif
     /*release all directx objects*/
     if (g_cc != NULL)g_cc->lpVtbl->Release(g_cc);
     g_cc=NULL;

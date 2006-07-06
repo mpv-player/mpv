@@ -2538,10 +2538,16 @@ int gui_no_filename=0;
   tv_param_immediate = 1;
 #endif
 
+#if defined(WIN32) && defined(HAVE_NEW_GUI)
+  char *cmdline = GetCommandLine();
+  if(!strstr(cmdline, "-slave"))
+    use_gui=1;
+#else
   if ( argv[0] )
     if(!strcmp(argv[0],"gmplayer") ||
       (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
           use_gui=1;
+#endif
 
     mconfig = m_config_new();
     m_config_register_options(mconfig,mplayer_opts);
@@ -2570,6 +2576,21 @@ int gui_no_filename=0;
     }
     }
 	
+#if defined(WIN32) && defined(HAVE_NEW_GUI)
+    void *runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
+    if(runningmplayer && filename && use_gui){
+        COPYDATASTRUCT csData;
+        char file[MAX_PATH];
+        char *filepart = filename;
+        if(GetFullPathName(filename, MAX_PATH, file, &filepart)){
+            csData.dwData = 0;
+            csData.cbData = strlen(file)*2;
+            csData.lpData = file;
+            SendMessage(runningmplayer, WM_COPYDATA, (WPARAM)runningmplayer, (LPARAM)&csData);
+        }
+    }
+#endif
+
 #ifdef WIN32
 	if(proc_priority){
 		int i;
@@ -2598,12 +2619,14 @@ int gui_no_filename=0;
       play_tree_iter_free(playtree_iter);
       playtree_iter=NULL;
       
+#ifndef WIN32 //Allow playing movies from network drives. eg. \\Desktop\c\somemovie.avi
       if (getcwd(cwd, PATH_MAX) != (char *)NULL)
       {
 	  strcat(cwd, "/");
           // Prefix relative paths with current working directory
           play_tree_add_bpf(playtree, cwd);
       }      
+#endif /* WIN32 */
       // Import initital playtree into GUI.
       import_initial_playtree_into_gui(playtree, mconfig, enqueue);
     }
