@@ -2466,6 +2466,40 @@ static double playing_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio,
 }
 
 
+static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
+{
+    unsigned char *start;
+    int in_size;
+    int hit_eof=0;
+    double pts;
+
+    while (1) {
+	current_module = "decode video";
+	// XXX Time used in this call is not counted in any performance
+	// timer now
+	if (vf_output_queued_frame(sh_video->vfilter))
+	    break;
+	current_module = "video_read_frame";
+	in_size = ds_get_packet_pts(d_video, &start, &pts);
+	if (in_size < 0) {
+	    // try to extract last frames in case of decoder lag
+	    in_size = 0;
+	    pts = 1e300;
+	    hit_eof = 1;
+	}
+	if (in_size > max_framesize)
+	    max_framesize = in_size;
+	if (pts == MP_NOPTS_VALUE)
+	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts value from demuxer MISSING\n");
+	if (decode_video(sh_video, start, in_size, 0, pts))
+	    break;
+	if (hit_eof)
+	    return 0;
+    }
+    return 1;
+}
+
+
 int main(int argc,char* argv[]){
 
 
@@ -3505,9 +3539,11 @@ sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
 }
 
+struct {double pts; vo_functions_t *vo;} vf_vo_data;
+vf_vo_data.vo = video_out;
 current_module="init_video_filters";
 {
-  char* vf_arg[] = { "_oldargs_", (char*)video_out , NULL };
+  char* vf_arg[] = { "_oldargs_", (char*)&vf_vo_data , NULL };
   sh_video->vfilter=(void*)vf_open_filter(NULL,"vo",vf_arg);
 }
 #ifdef HAVE_MENU
@@ -3594,6 +3630,7 @@ fflush(stdout);
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
+double last_pts = MP_NOPTS_VALUE;
 int grab_frames=0;
 int drop_frame=0;     // current dropping status
 int dropped_frames=0; // how many frames dropped since last non-dropped frame
@@ -3768,7 +3805,7 @@ if(!sh_video) {
     //--------------------  Decode a frame: -----------------------
     blit_frame = 0; // Don't blit if we hit EOF
     vdecode_time=video_time_usage;
-    while(1)
+    if (!correct_pts) while(1)
     {   unsigned char* start=NULL;
 	int in_size;
 	// get it!
@@ -3803,6 +3840,32 @@ if(!sh_video) {
 	blit_frame=decode_video(sh_video,start,in_size,drop_frame, MP_NOPTS_VALUE);
 	break;
     }
+    else while (1) {
+	if (!generate_video_frame(sh_video, d_video)) {
+	    eof = 1;
+	    break;
+	}
+	sh_video->pts = vf_vo_data.pts;
+	if (sh_video->pts == MP_NOPTS_VALUE) {
+	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
+	    sh_video->pts == last_pts;
+	}
+	if (last_pts == MP_NOPTS_VALUE)
+	    last_pts = sh_video->pts;
+	else if (last_pts >= sh_video->pts) {
+	    last_pts = sh_video->pts;
+	    mp_msg(MSGT_CPLAYER, MSGL_WARN, "pts value <= previous");
+	}
+	frame_time = sh_video->pts - last_pts;
+	last_pts = sh_video->pts;
+	sh_video->timer += frame_time;
+	time_frame += frame_time;  // for nosound
+	if(sh_audio)
+	    sh_audio->delay -= frame_time;
+	blit_frame = 1;
+	break;
+    }
+	
     vdecode_time=video_time_usage-vdecode_time;
     //------------------------ frame decoded. --------------------
 
@@ -4728,6 +4791,8 @@ if(rel_seek_secs || abs_seek_pos){
 	 current_module="seek_video_reset";
          resync_video_stream(sh_video);
          if(vo_config_count) video_out->control(VOCTRL_RESET,NULL);
+	 sh_video->num_buffered_pts = 0;
+	 last_pts = MP_NOPTS_VALUE;
       }
       
       if(sh_audio){

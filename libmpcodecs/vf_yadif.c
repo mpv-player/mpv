@@ -47,6 +47,10 @@
 struct vf_priv_s {
     int mode;
     int parity;
+    int buffered_i;
+    int buffered_tff;
+    double buffered_pts;
+    mp_image_t *buffered_mpi;
     int stride[3];
     uint8_t *ref[4][3];
 };
@@ -150,10 +154,11 @@ static int config(struct vf_instance_s* vf,
 	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
+static int continue_buffered_image(struct vf_instance_s *vf);
+extern int correct_pts;
+
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
-    mp_image_t *dmpi;
-    int ret=0;
-    int tff, i;
+    int tff;
 
     if(vf->priv->parity < 0) {
         if (mpi->fields & MP_IMGFIELD_ORDERED)
@@ -165,18 +170,41 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 
     store_ref(vf->priv, mpi->planes, mpi->stride, mpi->w, mpi->h);
 
-    for(i=0; i<=(vf->priv->mode&1); i++){
+    vf->priv->buffered_mpi = mpi;
+    vf->priv->buffered_tff = tff;
+    vf->priv->buffered_i = 0;
+    vf->priv->buffered_pts = pts;
+
+    return continue_buffered_image(vf);
+}
+
+static int continue_buffered_image(struct vf_instance_s *vf)
+{
+    mp_image_t *mpi = vf->priv->buffered_mpi;
+    int tff = vf->priv->buffered_tff;
+    double pts = vf->priv->buffered_pts;
+    int i;
+    int ret=0;
+    mp_image_t *dmpi;
+
+    pts += vf->priv->buffered_i * .02; // XXX not right
+
+    for(i = vf->priv->buffered_i; i<=(vf->priv->mode&1); i++){
         dmpi=vf_get_image(vf->next,mpi->imgfmt,
             MP_IMGTYPE_TEMP,
             MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
             mpi->width,mpi->height);
         vf_clone_mpi_attributes(dmpi, mpi);
         filter(vf->priv, dmpi->planes, dmpi->stride, mpi->w, mpi->h, i ^ tff ^ 1, tff);
+        if (correct_pts && i < (vf->priv->mode & 1))
+            vf_queue_frame(vf, continue_buffered_image);
         ret |= vf_next_put_image(vf, dmpi, pts /*FIXME*/);
+        if (correct_pts)
+            break;
         if(i<(vf->priv->mode&1))
             vf_next_control(vf, VFCTRL_FLIP_PAGE, NULL);
     }
-
+    vf->priv->buffered_i = 1;
     return ret;
 }
 

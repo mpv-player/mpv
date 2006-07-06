@@ -188,7 +188,9 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     break;
     case VDCTRL_RESYNC_STREAM:
         avcodec_flush_buffers(avctx);
-    return CONTROL_TRUE;
+	return CONTROL_TRUE;
+    case VDCTRL_QUERY_UNSEEN_FRAMES:
+	return avctx->has_b_frames + 10;
     }
     return CONTROL_UNKNOWN;
 }

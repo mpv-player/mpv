@@ -126,6 +126,8 @@ typedef struct demuxer_info_st {
 
 struct demuxer_st;
 
+extern int correct_pts;
+
 /**
  * Demuxer description structure
  */
@@ -182,7 +184,9 @@ inline static demux_packet_t* new_demux_packet(int len){
   demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   dp->len=len;
   dp->next=NULL;
-  dp->pts=0;
+  // still using 0 by default in case there is some code that uses 0 for both
+  // unknown and a valid pts value
+  dp->pts=correct_pts ? MP_NOPTS_VALUE : 0;
   dp->pos=0;
   dp->flags=0;
   dp->refcount=1;

@@ -43,6 +43,8 @@ typedef struct vf_instance_s {
     void (*draw_slice)(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y);
     void (*uninit)(struct vf_instance_s* vf);
+
+    void (*continue_buffered_image)(struct vf_instance_s* vf);
     // caps:
     unsigned int default_caps; // used by default query_format()
     unsigned int default_reqs; // used by default config()
@@ -93,6 +95,8 @@ vf_instance_t* vf_open_encoder(vf_instance_t* next, char *name, char *args);
 
 unsigned int vf_match_csp(vf_instance_t** vfp,unsigned int* list,unsigned int preferred);
 void vf_clone_mpi_attributes(mp_image_t* dst, mp_image_t* src);
+void vf_queue_frame(vf_instance_t *vf, int (*)(vf_instance_t *));
+int vf_output_queued_frame(vf_instance_t *vf);
 
 // default wrappers:
 int vf_next_config(struct vf_instance_s* vf,

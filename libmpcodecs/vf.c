@@ -558,6 +558,38 @@ void vf_clone_mpi_attributes(mp_image_t* dst, mp_image_t* src){
 	dst->qscale= src->qscale;
     }
 }
+
+void vf_queue_frame(vf_instance_t *vf, int (*func)(vf_instance_t *))
+{
+    vf->continue_buffered_image = func;
+}
+
+// Output the next buffered image (if any) from the filter chain.
+// The queue could be kept as a simple stack/list instead avoiding the
+// looping here, but there's currently no good context variable where
+// that could be stored so this was easier to implement.
+
+int vf_output_queued_frame(vf_instance_t *vf)
+{
+    while (1) {
+	int ret;
+	vf_instance_t *current;
+	vf_instance_t *last=NULL;
+	int (*tmp)(vf_instance_t *);
+	for (current = vf; current; current = current->next)
+	    if (current->continue_buffered_image)
+		last = current;
+	if (!last)
+	    return 0;
+	tmp = last->continue_buffered_image;
+	last->continue_buffered_image = NULL;
+	ret = tmp(last);
+	if (ret)
+	    return ret;
+    }
+}
+
+
 /**
  * \brief Video config() function wrapper
  *

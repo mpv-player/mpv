@@ -1690,12 +1690,12 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
       else if (!strcmp(track->codec_id, MKV_V_MPEG1))
         {
           bih->biCompression = mmioFOURCC('m', 'p', 'g', '1');
-          track->reorder_timecodes = 1;
+          track->reorder_timecodes = !correct_pts;
         }
       else if (!strcmp(track->codec_id, MKV_V_MPEG2))
         {
           bih->biCompression = mmioFOURCC('m', 'p', 'g', '2');
-          track->reorder_timecodes = 1;
+          track->reorder_timecodes = !correct_pts;
         }
       else if (!strcmp(track->codec_id, MKV_V_MPEG4_AVC))
         {
@@ -1706,7 +1706,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
               bih = (BITMAPINFOHEADER *) realloc (bih, bih->biSize);
               memcpy (bih + 1, track->private_data, track->private_size);
             }
-          track->reorder_timecodes = 1;
+          track->reorder_timecodes = !correct_pts;
         }
       else
         {

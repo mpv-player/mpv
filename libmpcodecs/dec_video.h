@@ -19,5 +19,6 @@ extern int get_video_colors(sh_video_t *sh_video,char *item,int *value);
 extern int set_video_colors(sh_video_t *sh_video,char *item,int value);
 extern int set_rectangle(sh_video_t *sh_video,int param,int value);
 extern void resync_video_stream(sh_video_t *sh_video);
+extern int get_current_video_decoder_lag(sh_video_t *sh_video);
 
 extern int divx_quality;

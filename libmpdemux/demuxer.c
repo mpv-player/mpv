@@ -355,7 +355,7 @@ int ds_fill_buffer(demux_stream_t *ds){
       ds->pos=p->pos;
       ds->dpos+=p->len; // !!!
       ++ds->pack_no;
-      if(p->pts){
+      if (p->pts != (correct_pts ? MP_NOPTS_VALUE : 0)) {
         ds->pts=p->pts;
         ds->pts_bytes=0;
       }
@@ -511,10 +511,11 @@ int ds_get_packet_pts(demux_stream_t *ds,unsigned char **start, double *pts)
             *start = NULL;
             return -1;
 	}
-	// Should use MP_NOPTS_VALUE for "unknown pts" in the packets too
-	if (ds->current->pts)
-	    *pts = ds->current->pts;
     }
+    // Should use MP_NOPTS_VALUE for "unknown pts" in the packets too
+    // Return pts unless this read starts from the middle of a packet
+    if (!ds->buffer_pos && (correct_pts || ds->current->pts))
+	*pts = ds->current->pts;
     len=ds->buffer_size-ds->buffer_pos;
     *start = &ds->buffer[ds->buffer_pos];
     ds->buffer_pos+=len;
@@ -623,6 +624,8 @@ int get_demuxer_type_from_name(char *demuxer_name, int *force)
 }
 
 int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
+
+int correct_pts=0;
 
 /*
   NOTE : Several demuxers may be opened at the same time so

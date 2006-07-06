@@ -137,6 +137,18 @@ void resync_video_stream(sh_video_t *sh_video)
     if(mpvdec) mpvdec->control(sh_video, VDCTRL_RESYNC_STREAM, NULL);
 }
 
+int get_current_video_decoder_lag(sh_video_t *sh_video)
+{
+    int ret;
+
+    if (!mpvdec)
+	return -1;
+    ret = mpvdec->control(sh_video, VDCTRL_QUERY_UNSEEN_FRAMES, NULL);
+    if (ret >= 10)
+	return ret-10;
+    return -1;
+}
+
 void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_UninitVideoStr,sh_video->codec->drv);
@@ -311,6 +323,36 @@ unsigned int t2;
 double tt;
 int ret;
 
+ if (correct_pts) {
+     int delay = get_current_video_decoder_lag(sh_video);
+     if (delay >= 0) {
+	 if (delay > sh_video->num_buffered_pts)
+#if 0
+	     // this is disabled because vd_ffmpeg reports the same lag
+	     // after seek even when there are no buffered frames,
+	     // leading to incorrect error messages
+	     mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Not enough buffered pts\n");
+#else
+	 ;
+#endif
+	 else
+	     sh_video->num_buffered_pts = delay;
+     }
+     if (sh_video->num_buffered_pts ==
+	                     sizeof(sh_video->buffered_pts)/sizeof(double))
+	 mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Too many buffered pts\n");
+     else {
+	 int i, j;
+	 for (i = 0; i < sh_video->num_buffered_pts; i++)
+	     if (sh_video->buffered_pts[i] < pts)
+		 break;
+	 for (j = sh_video->num_buffered_pts; j > i; j--)
+	     sh_video->buffered_pts[j] = sh_video->buffered_pts[j-1];
+	 sh_video->buffered_pts[i] = pts;
+	 sh_video->num_buffered_pts++;
+     }
+ }
+
 //if(!(sh_video->ds->flags&1) || sh_video->ds->pack_no<5)
 mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
 
@@ -332,6 +374,11 @@ tt = t*0.000001f;
 video_time_usage+=tt;
 
 if(!mpi || drop_frame) return 0; // error / skipped frame
+
+ if (correct_pts) {
+     sh_video->num_buffered_pts--;
+     pts = sh_video->buffered_pts[sh_video->num_buffered_pts];
+ }
 
 //vo_draw_image(video_out,mpi);
 vf=sh_video->vfilter;
