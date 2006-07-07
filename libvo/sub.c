@@ -140,7 +140,7 @@ inline static void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)
     }
 }
 
-static unsigned utf8_get_char(char **str) {
+unsigned utf8_get_char(char **str) {
   uint8_t *strp = (uint8_t *)*str;
   unsigned c = *strp++;
   unsigned mask = 0x80;
