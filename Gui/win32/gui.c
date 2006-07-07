@@ -41,6 +41,10 @@
 #include "wincfg.h"
 #include "dialogs.h"
 
+// HACK around bug in old mingw
+#undef INVALID_FILE_ATTRIBUTES
+#define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
+
 #ifndef WM_XBUTTONDOWN
 # define WM_XBUTTONDOWN    0x020B
 # define WM_XBUTTONUP      0x020C
