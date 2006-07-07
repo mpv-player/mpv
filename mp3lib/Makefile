@@ -15,8 +15,8 @@ SRCS += decode_MMX.c dct64_MMX.c tabinit_MMX.c
 OBJS += decode_MMX.o dct64_MMX.o tabinit_MMX.o
 SRCS += dct36_3dnow.c dct64_3dnow.c
 OBJS += dct36_3dnow.o dct64_3dnow.o
-SRCS += dct36_k7.c dct64_k7.c
-OBJS += dct36_k7.o dct64_k7.o
+SRCS += dct36_k7.c dct64_k7.c dct64_sse.c
+OBJS += dct36_k7.o dct64_k7.o dct64_sse.o
 endif
 ifeq ($(TARGET_ARCH_POWERPC),yes)
 ifeq ($(TARGET_ALTIVEC),yes)

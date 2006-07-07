@@ -13,7 +13,7 @@
 
 static unsigned long long attribute_used __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;
 static unsigned long long attribute_used __attribute__((aligned(8))) one_null = 0xffff0000ffff0000ULL;
-unsigned long __attribute__((aligned(8))) costab_mmx[] =
+unsigned long __attribute__((aligned(16))) costab_mmx[] =
 {
 	1056974725,
 	1057056395,
