@@ -1972,8 +1972,8 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         else 
 #endif
         {
-        subdata = set_of_subtitles[set_of_sub_pos];
-        vo_osd_changed(OSDTYPE_SUBTITLE);
+            subdata = set_of_subtitles[set_of_sub_pos];
+            vo_osd_changed(OSDTYPE_SUBTITLE);
         }
 #endif
     } else if (source == SUB_SOURCE_DEMUX) {
