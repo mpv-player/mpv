@@ -633,10 +633,12 @@ play_tree_add_basepath(play_tree_t* pt, char* bp) {
       continue;
     // if the path begins with \ then prepend drive letter to it.
     if (pt->files[i][0] == '\\') {
+      if (pt->files[i][1] == '\\')
+        continue;
       pt->files[i] = (char*)realloc(pt->files[i],2+fl+1);
       memmove(pt->files[i] + 2,pt->files[i],fl+1);
       memcpy(pt->files[i],bp,2);
-      return;
+      continue;
     }
     pt->files[i] = (char*)realloc(pt->files[i],bl+fl+1);
     memmove(pt->files[i] + bl,pt->files[i],fl+1);
