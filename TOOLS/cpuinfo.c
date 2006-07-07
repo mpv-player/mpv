@@ -16,6 +16,8 @@ void gettimeofday(struct timeval* t,void* timezone) {
   t->tv_sec=timebuffer.time;
   t->tv_usec=1000*timebuffer.millitm;
 }
+#endif
+#ifdef __MINGW32__
 #define MISSING_USLEEP
 #define sleep(t) _sleep(1000*t);
 #endif
