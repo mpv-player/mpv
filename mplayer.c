@@ -2653,14 +2653,12 @@ int gui_no_filename=0;
       play_tree_iter_free(playtree_iter);
       playtree_iter=NULL;
       
-#ifndef WIN32 //Allow playing movies from network drives. eg. \\Desktop\c\somemovie.avi
       if (getcwd(cwd, PATH_MAX) != (char *)NULL)
       {
 	  strcat(cwd, "/");
           // Prefix relative paths with current working directory
           play_tree_add_bpf(playtree, cwd);
       }      
-#endif /* WIN32 */
       // Import initital playtree into GUI.
       import_initial_playtree_into_gui(playtree, mconfig, enqueue);
     }
