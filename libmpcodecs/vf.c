@@ -100,6 +100,7 @@ extern vf_info_t vf_info_divtc;
 extern vf_info_t vf_info_harddup;
 extern vf_info_t vf_info_softskip;
 extern vf_info_t vf_info_screenshot;
+extern vf_info_t vf_info_ass;
 extern vf_info_t vf_info_mcdeint;
 extern vf_info_t vf_info_yadif;
 
@@ -193,6 +194,9 @@ static vf_info_t* filter_list[]={
     &vf_info_softskip,
 #ifdef HAVE_PNG
     &vf_info_screenshot,
+#endif
+#ifdef USE_ASS
+    &vf_info_ass,
 #endif
     &vf_info_yadif,
     NULL

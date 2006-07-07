@@ -245,6 +245,7 @@ Optional features:
   --disable-ftp          Disable ftp support [enabled]
   --disable-vstream      Disable tivo vstream client support [autodetect]
   --disable-pthreads     Disable Posix threads support [autodetect]
+  --disable-ass          Disable internal SSA/ASS subtitles support [autodetect]
   --enable-rpath         Enable runtime linker path for extra libs [disabled]
 
 Codecs:
@@ -1691,6 +1692,7 @@ _ftp=yes
 _musepack=auto
 _vstream=auto
 _pthreads=yes
+_ass=auto
 _rpath=no
 for ac_option do
   case "$ac_option" in
@@ -1975,6 +1977,8 @@ for ac_option do
   --disable-vstream)    _vstream=no     ;;
   --enable-pthreads)    _pthreads=yes   ;;
   --disable-pthreads)   _pthreads=no    ;;
+  --enable-ass)         _ass=yes        ;;
+  --disable-ass)        _ass=no         ;;
   --enable-rpath)       _rpath=yes      ;;
   --disable-rpath)      _rpath=no       ;;
 
@@ -5390,6 +5394,35 @@ else
 fi
 echores "$_fontconfig"
 
+echocheck "SSA/ASS support"
+# libass depends on freetype
+if test "$_freetype" = no ; then
+    _ass=no
+    _res_comment="FreeType support needed"
+fi
+
+if test "$_ass" = auto ; then
+    cat > $TMPC << EOF
+#include <ft2build.h>
+#include FT_FREETYPE_H
+#if ((FREETYPE_MAJOR < 2) || (FREETYPE_MINOR < 1) || ((FREETYPE_MINOR == 1) && (FREETYPE_PATCH < 8)))
+#error "Need FreeType 2.1.8 or newer"
+#endif
+int main() { return 0; }
+EOF
+    _ass=no
+    cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && tmp_run && _ass=yes
+    if test "$_ass" = no ; then
+        _res_comment="FreeType >= 2.1.8 needed"
+    fi
+fi
+if test "$_ass" = yes ; then
+    _def_ass='#define USE_ASS'
+else
+    _def_ass='#undef USE_ASS'
+fi
+echores "$_ass"
+
 echocheck "fribidi with charsets"
 if test "$_fribidi" = auto ; then
     if ( $_fribidiconfig --version ) >/dev/null 2>&1 ; then
@@ -7517,6 +7550,7 @@ FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_INC = $_inc_fontconfig
 FONTCONFIG_LIB = $_ld_fontconfig
+CONFIG_ASS = $_ass
 FRIBIDI_INC = $_inc_fribidi
 FRIBIDI_LIB = $_ld_fribidi
 LIBCDIO_INC = $_inc_libcdio
@@ -8117,6 +8151,9 @@ $_def_freetype
 
 /* enable Fontconfig support */
 $_def_fontconfig
+
+/* enable SSA/ASS support */
+$_def_ass
 
 /* enable FriBiDi usage */
 $_def_fribidi

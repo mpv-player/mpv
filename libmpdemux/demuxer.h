@@ -1,6 +1,10 @@
 #ifndef __DEMUXER_H
 #define __DEMUXER_H 1
 
+#ifdef USE_ASS
+#include "libass/ass_types.h"
+#endif
+
 #define MAX_PACKS 4096
 #ifdef HAVE_TV_BSDBT848
 #define MAX_PACK_BYTES 0x2000000
@@ -122,13 +126,16 @@ typedef struct demuxer_info_st {
 } demuxer_info_t;
 
 typedef struct {
-  char type;                    // t = text, v = VobSub
+  char type;                    // t = text, v = VobSub, a = SSA/ASS
   int has_palette;              // If we have a valid palette
   unsigned int palette[16];     // for VobSubs
   int width, height;            // for VobSubs
   int custom_colors;
   unsigned int colors[4];
   int forced_subs_only;
+#ifdef USE_ASS
+  ass_track_t* ass_track;  // for SSA/ASS streams (type == 'a')
+#endif
 } sh_sub_t;
 
 #define MAX_A_STREAMS 256

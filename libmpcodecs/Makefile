@@ -310,6 +310,10 @@ ifeq ($(FAAC),yes)
 ENCODER_SRCS += ae_faac.c
 endif
 
+ifeq ($(CONFIG_ASS),yes)
+VFILTER_SRCS += vf_ass.c
+endif
+
 SRCS=$(AUDIO_SRCS) \
      $(VIDEO_SRCS) \
      $(VFILTER_SRCS) \

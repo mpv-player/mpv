@@ -82,6 +82,12 @@ ifeq ($(EXTERNAL_VIDIX),yes)
 VO_LIBS += $(EXTERNAL_VIDIX_LIB)
 endif
 
+ASS_LIB =
+
+ifeq ($(CONFIG_ASS),yes)
+ASS_LIB += libass/libass.a
+endif
+
 AO_LIBS = $(ARTS_LIB) \
           $(ESD_LIB) \
           $(JACK_LIB) \
@@ -113,6 +119,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
+              $(ASS_LIB) \
               libswscale/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
@@ -254,6 +261,10 @@ endif
 ifeq ($(DVDKIT2),yes)
 COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
+ifeq ($(CONFIG_ASS),yes)
+COMMON_DEPS += libass/libass.a
+PARTS += libass
+endif
 
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
@@ -280,6 +291,9 @@ loader/libloader.a:
 
 libfame/libfame.a:
 	$(MAKE) -C libfame
+
+libass/libass.a:
+	$(MAKE) -C libass
 
 libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux
@@ -600,6 +614,8 @@ loader/dshow/libDS_Filter.a: $(wildcard loader/dshow/*.[ch])
 libdha/libdha.so: $(wildcard libdha/*.[ch])
 vidix/libvidix.a: $(wildcard vidix/*.[ch])
 Gui/libgui.a: $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
+
+libass/libass.a: $(wildcard libass/*.[ch])
 
 #
 # include dependency files if they exist

@@ -26,4 +26,6 @@
 #define VFCAP_POSTPROC 0x800
 // filter cannot be reconfigured to different size & format
 #define VFCAP_CONSTANT 0x1000
+// filter can draw EOSD
+#define VFCAP_EOSD 0x2000
 

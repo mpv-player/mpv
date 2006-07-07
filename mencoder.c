@@ -223,6 +223,13 @@ int mp_input_check_interrupt(int time) {
   return 0;
 }
 
+#ifdef USE_ASS
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
+
+ass_track_t* ass_track = 0; // current track to render
+#endif
+
 //char *out_audio_codec=NULL; // override audio codec
 //char *out_video_codec=NULL; // override video codec
 

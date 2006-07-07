@@ -23,6 +23,9 @@
 #include "subreader.h"
 #include "libvo/sub.h"
 
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
+
 #ifdef USE_QTX_CODECS
 #include "qtx/qtxsdk/components.h"
 #endif
@@ -128,7 +131,7 @@ typedef struct mkv_track
   mkv_content_encoding_t *encodings;
   int num_encodings;
 
-  /* For VobSubs */
+  /* For VobSubs and SSA/ASS */
   sh_sub_t sh_sub;
 } mkv_track_t;
 
@@ -142,6 +145,15 @@ typedef struct mkv_chapter
 {
   uint64_t start, end;
 } mkv_chapter_t;
+
+typedef struct mkv_attachment
+{
+  char* name;
+  char* mime;
+  uint64_t uid;
+  void* data;
+  unsigned int data_size;
+} mkv_attachment_t;
 
 typedef struct mkv_demuxer
 {
@@ -182,6 +194,9 @@ typedef struct mkv_demuxer
   
   int last_aid;
   int audio_tracks[MAX_A_STREAMS];
+  
+  mkv_attachment_t *attachments;
+  int num_attachments;
 } mkv_demuxer_t;
 
 
@@ -1424,6 +1439,119 @@ demux_mkv_read_tags (demuxer_t *demuxer)
 }
 
 static int
+demux_mkv_read_attachments (demuxer_t *demuxer)
+{
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+  stream_t *s = demuxer->stream;
+  uint64_t length, l;
+  int il;
+
+  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] /---- [ parsing attachments ] ---------\n");
+  length = ebml_read_length (s, NULL);
+
+  while (length > 0)
+    {
+      switch (ebml_read_id (s, &il))
+        {
+          case MATROSKA_ID_ATTACHEDFILE:
+            {
+              uint64_t len;
+              int i;
+              char* name = NULL;
+              char* mime = NULL;
+              uint64_t uid = 0;
+              char* data = NULL;
+              int data_size = 0;
+
+              len = ebml_read_length (s, &i);
+              l = len + i;
+
+              mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + an attachment...\n");
+
+              if (mkv_d->attachments == NULL)
+                mkv_d->attachments = malloc (32*sizeof(*mkv_d->attachments));
+              else if (!(mkv_d->num_attachments % 32))
+                mkv_d->attachments = realloc (mkv_d->attachments,
+                                           (mkv_d->num_attachments + 32)
+                                           * sizeof(*mkv_d->attachments));
+
+              while (len > 0)
+                {
+                  uint64_t l;
+                  int il;
+
+                  switch (ebml_read_id (s, &il))
+                    {
+                    case MATROSKA_ID_FILENAME:
+                      name = ebml_read_utf8 (s, &l);
+                      if (name == NULL)
+                        return 0;
+                      mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileName: %s\n",
+                        name);
+                      break;
+
+                    case MATROSKA_ID_FILEMIMETYPE:
+                      mime = ebml_read_ascii (s, &l);
+                      if (mime == NULL)
+                        return 0;
+                      mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileMimeType: %s\n",
+                        mime);
+                      break;
+
+                    case MATROSKA_ID_FILEUID:
+                      uid = ebml_read_uint (s, &l);
+                      break;
+
+                    case MATROSKA_ID_FILEDATA:
+                      {
+                        int x;
+                        uint64_t num = ebml_read_length (s, &x);
+                        l = x + num;
+                        data = malloc (num);
+                        if (stream_read(s, data, num) != (int) num)
+                          return 0;
+                        data_size = num;
+                        mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileData, length "
+                                "%u\n", data_size);
+                        break;
+                      }
+
+                    default:
+                      ebml_read_skip (s, &l);
+                      break;
+                    }
+                  len -= l + il;
+                }
+
+              mkv_d->attachments[mkv_d->num_attachments].name = name;
+              mkv_d->attachments[mkv_d->num_attachments].mime = mime;
+              mkv_d->attachments[mkv_d->num_attachments].uid = uid;
+              mkv_d->attachments[mkv_d->num_attachments].data = data;
+              mkv_d->attachments[mkv_d->num_attachments].data_size = data_size;
+              mkv_d->num_attachments ++;
+              mp_msg(MSGT_DEMUX, MSGL_V,
+                     "[mkv] Attachment: %s, %s, %u bytes\n",
+                     name, mime, data_size);
+#ifdef USE_ASS
+              if (extract_embedded_fonts && name && data && data_size &&
+                  mime && (strcmp(mime, "application/x-truetype-font") == 0))
+                ass_process_font(name, data, data_size);
+#endif
+              break;
+            }
+
+          default:
+            ebml_read_skip (s, &l);
+            break;
+        }
+      length -= l + il;
+    }
+
+  mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing attachments ] ---------\n");
+  return 0;
+}
+
+static int
 demux_mkv_read_seekhead (demuxer_t *demuxer)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -2115,12 +2243,52 @@ demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
     }
 }
 
+/** \brief Parse the private data for SSA/ASS subtitle tracks.
+
+  This function tries to parse the private data for all SSA/ASS tracks.
+  The private data contains the normal text from the original script,
+  from the start to the beginning of 'Events' section, including '[Events]' line.
+
+  \param demuxer The generic demuxer.
+*/
+#ifdef USE_ASS
+static void
+demux_mkv_parse_ass_data (demuxer_t *demuxer)
+{
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+  mkv_track_t *track;
+  int i, m, size;
+  uint8_t *buffer;
+
+  for (i = 0; i < mkv_d->num_tracks; i++)
+    {
+      track = mkv_d->tracks[i];
+      if ((track->type != MATROSKA_TRACK_SUBTITLE) ||
+          (track->subtitle_type != MATROSKA_SUBTYPE_SSA))
+        continue;
+
+      size = track->private_size;
+      m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
+      if (buffer && m)
+        {
+          free (track->private_data);
+          track->private_data = buffer;
+          track->private_size = size;
+        }
+      track->sh_sub.type = 'a';
+      track->sh_sub.ass_track = ass_new_track();
+      ass_process_chunk(track->sh_sub.ass_track, track->private_data, track->private_size);
+    }
+}
+#endif
+
 static int
 demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
 {
   if (track->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN)
     {
-      if (track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
+      if ((track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB) ||
+          (track->subtitle_type == MATROSKA_SUBTYPE_SSA))
         {
           if (track->private_data != NULL)
             {
@@ -2237,6 +2405,10 @@ demux_mkv_open (demuxer_t *demuxer)
           cont = demux_mkv_read_chapters (demuxer);
           break;
 
+        case MATROSKA_ID_ATTACHMENTS:
+          cont = demux_mkv_read_attachments (demuxer);
+          break;
+
         case MATROSKA_ID_CLUSTER:
           {
             int p, l;
@@ -2266,7 +2438,6 @@ demux_mkv_open (demuxer_t *demuxer)
 
         default:
           cont = 1;
-        case MATROSKA_ID_ATTACHMENTS:
         case EBML_ID_VOID:
           ebml_read_skip (s, NULL);
           break;
@@ -2373,6 +2544,10 @@ demux_mkv_open (demuxer_t *demuxer)
     }
 
   demux_mkv_parse_vobsub_data (demuxer);
+#ifdef USE_ASS
+  if (ass_enabled)
+    demux_mkv_parse_ass_data (demuxer);
+#endif
   /* DO NOT automatically select a subtitle track and behave like DVD */
   /* playback: only show subtitles if the user explicitely wants them. */
   track = NULL;
@@ -2457,6 +2632,10 @@ demux_close_mkv (demuxer_t *demuxer)
                 free (mkv_d->tracks[i]->audio_buf);
               if (mkv_d->tracks[i]->audio_timestamp)
                 free (mkv_d->tracks[i]->audio_timestamp);
+#ifdef USE_ASS
+              if (mkv_d->tracks[i]->sh_sub.ass_track)
+                ass_free_track (mkv_d->tracks[i]->sh_sub.ass_track);
+#endif
             }
           for (i=0; i < SUB_MAX_TEXT; i++)
             if (mkv_d->subs.text[i])
@@ -2473,6 +2652,17 @@ demux_close_mkv (demuxer_t *demuxer)
         free (mkv_d->parsed_cues);
       if (mkv_d->parsed_seekhead)
         free (mkv_d->parsed_seekhead);
+      if (mkv_d->attachments) {
+        for (i = 0; i < mkv_d->num_attachments; ++i) {
+          if (mkv_d->attachments[i].name)
+            free (mkv_d->attachments[i].name);
+          if (mkv_d->attachments[i].mime)
+            free (mkv_d->attachments[i].mime);
+          if (mkv_d->attachments[i].data)
+            free (mkv_d->attachments[i].data);
+        }
+        free (mkv_d->attachments);
+      }
       free (mkv_d);
     }
 }
@@ -2577,6 +2767,13 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
               "for subtitle track found.\n");
       return;
     }
+
+#ifdef USE_ASS
+  if (ass_enabled && track->subtitle_type == MATROSKA_SUBTYPE_SSA) {
+    ass_process_line(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
+    return;
+  }
+#endif
 
   ptr1 = block;
   while (ptr1 - block <= size && (*ptr1 == '\n' || *ptr1 == '\r'))

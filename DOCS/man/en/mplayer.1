@@ -1709,6 +1709,11 @@ With fontconfig, this option determines the fontconfig font name.
 Enables the usage of fontconfig managed fonts.
 .
 .TP
+.B \-(no)embeddedfonts (FreeType only)
+Enables extraction of matroska embedded fonts. This fonts can be used for SSA/ASS subtitles
+rendering (-ass option).
+.
+.TP
 .B \-forcedsubsonly
 Display only forced subtitles for the DVD subtitle stream selected by e.g.\&
 \-slang.
@@ -2025,6 +2030,28 @@ the '.idx', '.ifo' or '.sub'.
 .TP
 .B \-vobsubid <0\-31>
 Specify the VOBsub subtitle ID.
+.
+.TP
+.B \-ass (FreeType only) (FontConfig optional)
+Tells MPlayer/MEncoder to turn on SSA/ASS subtitles rendering.
+With this option, libass will be used for SSA/ASS external subtitles and
+matroska tracks. You may also want to use -embeddedfonts.
+.
+.TP
+.B \-ass-font-scale <value>
+Set the scale coefficient to be used for all fonts in SSA/ASS renderer.
+.
+.TP
+.B \-ass-line-spacing <value>
+Sets line spacing value for SSA/ASS renderer.
+.
+.TP
+.B \-ass-top-margin <value>
+Adds a black band at the top of the frame. SSA/ASS renderer will place toptitles there.
+.
+.TP
+.B \-ass-bottom-margin <value>
+Adds a black band at the bottom of the frame. SSA/ASS renderer will place subtitles there.
 .
 .
 .
@@ -6222,6 +6249,12 @@ Files named 'shotNNNN.png' will be saved in the working directory,
 using the first available number - no files will be overwritten.
 The filter has no overhead when not used and accepts an arbitrary
 colorspace, so it is safe to add it to the configuration file.
+.RE
+.
+.TP
+.B ass\ \ \ \ \ 
+Moves SSA/ASS subtitle rendering to arbitary point in video filter chain.
+Only useful with -ass option.
 .RE
 .
 .

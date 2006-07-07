@@ -296,6 +296,16 @@
  	{"subfont-outline", &subtitle_font_thickness, CONF_TYPE_FLOAT, CONF_RANGE, 0, 8, NULL},
  	{"subfont-autoscale", &subtitle_autoscale, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 #endif
+#ifdef USE_ASS
+	{"ass", &ass_enabled, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noass", &ass_enabled, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"ass-font-scale", &ass_font_scale, CONF_TYPE_FLOAT, CONF_RANGE, 0, 100, NULL},
+	{"ass-line-spacing", &ass_line_spacing, CONF_TYPE_FLOAT, CONF_RANGE, -1000, 1000, NULL},
+	{"ass-top-margin", &ass_top_margin, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+	{"ass-bottom-margin", &ass_bottom_margin, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
+	{"embeddedfonts", &extract_embedded_fonts, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noembeddedfonts", &extract_embedded_fonts, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+#endif
 #ifdef HAVE_FONTCONFIG
 	{"fontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nofontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 1, 0, NULL},

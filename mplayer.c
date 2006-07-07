@@ -349,6 +349,16 @@ int global_sub_pos = -1; // this encompasses all subtitle sources
 #define SUB_SOURCES 3
 int global_sub_indices[SUB_SOURCES];
 
+#ifdef USE_ASS
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
+
+// set_of_ass_tracks[i] contains subtitles from set_of_subtitles[i] parsed by libass
+// or NULL if format unsupported
+ass_track_t* set_of_ass_tracks[MAX_SUBTITLE_FILES];
+ass_track_t* ass_track = 0; // current track to render
+#endif
+
 extern int mp_msg_levels[MSGT_MAX];
 extern int mp_msg_level_all;
 
@@ -792,15 +802,30 @@ static subtitle* vo_sub_last = NULL;
 void add_subtitles(char *filename, float fps, int silent)
 {
     sub_data *subd;
+#ifdef USE_ASS
+    ass_track_t *asst = 0;
+#endif
 
-    if (filename == NULL) {
+    if (filename == NULL || set_of_sub_size >= MAX_SUBTITLE_FILES) {
 	return;
     }
 
     subd = sub_read_file(filename, fps);
+#ifdef USE_ASS
+    if (ass_enabled)
+        asst = ass_read_file(filename);
+    if (!asst && !subd && !silent)
+#else
     if(!subd && !silent) 
+#endif
         mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_CantLoadSub, filename);
-    if (subd == NULL || set_of_sub_size >= MAX_SUBTITLE_FILES) return;
+    
+#ifdef USE_ASS
+    if (!asst && !subd) return;
+    set_of_ass_tracks[set_of_sub_size] = asst;
+#else
+    if (!subd) return;
+#endif
     set_of_subtitles[set_of_sub_size] = subd;
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_ID=%d\n", set_of_sub_size);
     mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_FILE_SUB_FILENAME=%s\n", filename);
@@ -1816,6 +1841,7 @@ static int mp_property_sub_pos(m_option_t* prop,int action,void* arg) {
 /// Selected subtitles (RW)
 static int mp_property_sub(m_option_t* prop,int action,void* arg) {
     int source = -1, reset_spu = 0;
+    char* sub_name;
 
     if(global_sub_size <= 0) return M_PROPERTY_UNAVAILABLE;
 
@@ -1828,10 +1854,19 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         if(!arg) return 0;
         *(char**)arg = malloc(64);
         (*(char**)arg)[63] = 0;
+        sub_name = 0;
 #ifdef USE_SUB
-        if(subdata) {
+        if(subdata)
+            sub_name = subdata->filename;
+#endif
+#ifdef USE_ASS
+        if (ass_track && ass_track->name)
+            sub_name = ass_track->name;
+#endif
+#if defined(USE_SUB) || defined(USE_ASS)
+        if(sub_name) {
             char *tmp,*tmp2;
-            tmp = subdata->filename;
+            tmp = sub_name;
             if ((tmp2 = strrchr(tmp, '/')))
                 tmp = tmp2+1;
 
@@ -1922,14 +1957,24 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         if(d_dvdsub->id > -2) reset_spu = 1;
         d_dvdsub->id = -2;
     }
+#ifdef USE_ASS
+    ass_track = 0;
+#endif
 
     if (source == SUB_SOURCE_VOBSUB) {
         vobsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_VOBSUB];
 #ifdef USE_SUB
     } else if (source == SUB_SOURCE_SUBS) {
         set_of_sub_pos = global_sub_pos - global_sub_indices[SUB_SOURCE_SUBS];
+#ifdef USE_ASS
+        if (ass_enabled && set_of_ass_tracks[set_of_sub_pos])
+            ass_track = set_of_ass_tracks[set_of_sub_pos];
+        else 
+#endif
+        {
         subdata = set_of_subtitles[set_of_sub_pos];
         vo_osd_changed(OSDTYPE_SUBTITLE);
+        }
 #endif
     } else if (source == SUB_SOURCE_DEMUX) {
         dvdsub_id = global_sub_pos - global_sub_indices[SUB_SOURCE_DEMUX];
@@ -1946,6 +1991,12 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
 #endif
             if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
                 d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
+#ifdef USE_ASS
+                if (ass_enabled && (d_dvdsub->id >= 0) &&
+                        (((sh_sub_t *)d_dvdsub->sh)->type == 'a')) {
+                    ass_track = ((sh_sub_t *)d_dvdsub->sh)->ass_track;
+                }
+#endif
                 if (d_dvdsub->id >= 0 &&
                     ((sh_sub_t *)d_dvdsub->sh)->type == 'v') {
                     sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
@@ -3554,10 +3605,36 @@ if(use_menu) {
   }
 }
 if(vf_menu)
-  sh_video->vfilter=(void*)append_filters(vf_menu);
-else
+  sh_video->vfilter=(void*)vf_menu;
+#endif
+#ifdef USE_ASS
+if(ass_enabled) {
+  int i;
+  int insert = 1;
+  if (vf_settings)
+    for (i = 0; vf_settings[i].name; ++i)
+      if (strcmp(vf_settings[i].name, "ass") == 0) {
+        insert = 0;
+        break;
+      }
+  if (insert) {
+    extern vf_info_t vf_info_ass;
+    vf_info_t* libass_vfs[] = {&vf_info_ass, NULL};
+    char* vf_arg[] = {"auto", "1", NULL};
+    vf_instance_t* vf_ass = vf_open_plugin(libass_vfs,sh_video->vfilter,"ass",vf_arg);
+    if (vf_ass)
+      sh_video->vfilter=(void*)vf_ass;
+    else
+      mp_msg(MSGT_CPLAYER,MSGL_ERR, "ASS: cannot add video filter\n");
+  }
+}
 #endif
 sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
+
+#ifdef USE_ASS
+if (ass_enabled)
+  ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_EOSD, 0);
+#endif
 
 current_module="init_video_codec";
 
@@ -3835,7 +3912,7 @@ if(!sh_video) {
 	// decode:
 	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
-	blit_frame=decode_video(sh_video,start,in_size,drop_frame, MP_NOPTS_VALUE);
+	blit_frame=decode_video(sh_video,start,in_size,drop_frame, sh_video->pts);
 	break;
     }
     else while (1) {
@@ -4421,6 +4498,10 @@ if(step_sec>0) {
     if (sh_video) {
       int movement = cmd->args[0].v.i;
       step_sub(subdata, sh_video->pts, movement);
+#ifdef USE_ASS
+      if (ass_track)
+        sub_delay += ass_step_sub(ass_track, (sh_video->pts + sub_delay) * 1000 + .5, movement) / 1000.;
+#endif
       set_osd_msg(OSD_MSG_SUB_DELAY,1,osd_duration,
                   MSGTR_OSDSubDelay, ROUND(sub_delay*1000));
     }
@@ -5001,11 +5082,19 @@ uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
   if ( set_of_sub_size > 0 ) 
    {
     current_module="sub_free";
-    for (i = 0; i < set_of_sub_size; ++i)
+    for (i = 0; i < set_of_sub_size; ++i) {
         sub_free( set_of_subtitles[i] );
+#ifdef USE_ASS
+        if ( set_of_ass_tracks[i] )
+            ass_free_track( set_of_ass_tracks[i] );
+#endif
+    }
     set_of_sub_size = 0;
     vo_sub_last = vo_sub=NULL;
     subdata=NULL;
+#ifdef USE_ASS
+    ass_track = NULL;
+#endif
    }
 #endif
 

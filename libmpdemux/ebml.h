@@ -138,6 +138,12 @@
 #define MATROSKA_ID_BLOCK                0xA1
 #define MATROSKA_ID_REFERENCEBLOCK       0xFB
 
+/* IDs in the attachments master */
+#define MATROSKA_ID_ATTACHEDFILE	 0x61A7
+#define MATROSKA_ID_FILENAME		 0x466E
+#define MATROSKA_ID_FILEMIMETYPE	 0x4660
+#define MATROSKA_ID_FILEDATA		 0x465C
+#define MATROSKA_ID_FILEUID		 0x46AE
 
 /* matroska track types */
 #define MATROSKA_TRACK_VIDEO    0x01 /* rectangle-shaped pictures aka video */
