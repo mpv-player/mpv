@@ -1303,19 +1303,14 @@ struct subreader {
 };
 
 #ifdef HAVE_ENCA
-#define MAX_GUESS_BUFFER_SIZE (256*1024)
-void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
+void* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_language, char *fallback)
 {
     const char **languages;
-    size_t langcnt, buflen;
+    size_t langcnt;
     EncaAnalyser analyser;
     EncaEncoding encoding;
-    unsigned char *buffer;
     char *detected_sub_cp = NULL;
     int i;
-
-    buffer = malloc(MAX_GUESS_BUFFER_SIZE);
-    buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
 
     languages = enca_get_languages(&langcnt);
     mp_msg(MSGT_SUBREADER, MSGL_V, "ENCA supported languages: ");
@@ -1339,9 +1334,6 @@ void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
     }
     
     free(languages);
-    free(buffer);
-    stream_reset(st);
-    stream_seek(st,0);
 
     if (!detected_sub_cp) {
 	detected_sub_cp = strdup(fallback);
@@ -1350,6 +1342,26 @@ void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
 
     return detected_sub_cp;
 }
+
+#define MAX_GUESS_BUFFER_SIZE (256*1024)
+void* guess_cp(stream_t *st, char *preferred_language, char *fallback)
+{
+    size_t buflen;
+    unsigned char *buffer;
+    char *detected_sub_cp = NULL;
+
+    buffer = malloc(MAX_GUESS_BUFFER_SIZE);
+    buflen = stream_read(st,buffer, MAX_GUESS_BUFFER_SIZE);
+
+    detected_sub_cp = guess_buffer_cp(buffer, buflen, preferred_language, fallback);
+    
+    free(buffer);
+    stream_reset(st);
+    stream_seek(st,0);
+
+    return detected_sub_cp;
+}
+#undef MAX_GUESS_BUFFER_SIZE
 #endif
 
 sub_data* sub_read_file (char *filename, float fps) {
