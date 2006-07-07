@@ -148,6 +148,50 @@ It's called <filename>XFree86-devel*</filename> under Red Hat, and
 can be a problem on Mandrake systems).
 </para></answer>
 </qandaentry>
+
+
+<qandaentry>
+<question><para>
+Building on Mac OS 10.3 leads to several link errors</para></question>
+<answer><para>
+The link error you're experiencing most likely looks like this:
+<screen>
+ld: Undefined symbols:
+_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
+</screen>
+This problem is the result of Apple developers using 10.4 to compile
+their software and distributing the binaries to 10.3 users via
+Software Update.
+The undefined symbols are present in Mac OS 10.4,
+but not 10.3.
+One solution can be to downgrade to QuickTime 7.0.1.
+Here is a better solution.
+</para><para>
+Get an <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">older copy of the frameworks</ulink>.
+This will give you a compressed file that contains the QuickTime
+7.0.1 Framework and a 10.3.9 QuartzCore Framework.
+</para><para>
+Uncompress the files somewhere that is not in your System folder.
+(i.e. do not install these frameworks into your
+<filename class="directory">/System/Library/Frameworks</filename>!
+Using this older copy is only meant to get around link errors!)
+<screen>
+gunzip &lt; CompatFrameworks.tgz | tar xvf -
+</screen>
+In config.mak, you should append 
+<systemitem>-F/path/to/where/you/extracted</systemitem>
+to the <systemitem>OPTFLAGS</systemitem> variable.
+If you use <application>X-Code</application>, you can just select these
+frameworks instead of the system ones.
+</para><para>
+The resulting <application>MPlayer</application> binary will actually
+use the framework that is installed on your system via dynamic links that
+are resolved at run-time.
+(You can verify this using <systemitem>otool -l</systemitem>).
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 
 <qandadiv id="faq-general">
