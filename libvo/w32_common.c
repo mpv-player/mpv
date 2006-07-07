@@ -58,6 +58,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 	    vo_dwidth = r.right;
 	    vo_dheight = r.bottom;
 	    break;
+	case WM_WINDOWPOSCHANGING:
+            return 0;
 	case WM_CLOSE:
 	    mplayer_put_key(KEY_CLOSE_WIN);
 	    break;
