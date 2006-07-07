@@ -121,6 +121,16 @@ typedef struct demuxer_info_st {
   char *copyright;
 } demuxer_info_t;
 
+typedef struct {
+  char type;                    // t = text, v = VobSub
+  int has_palette;              // If we have a valid palette
+  unsigned int palette[16];     // for VobSubs
+  int width, height;            // for VobSubs
+  int custom_colors;
+  unsigned int colors[4];
+  int forced_subs_only;
+} sh_sub_t;
+
 #define MAX_A_STREAMS 256
 #define MAX_V_STREAMS 256
 

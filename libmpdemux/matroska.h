@@ -58,16 +58,6 @@
 #define MKV_S_SSA        "S_SSA" // Deprecated
 #define MKV_S_ASS        "S_ASS" // Deprecated
 
-typedef struct {
-  char type;                    // t = text, v = VobSub
-  int has_palette;              // If we have a valid palette
-  unsigned int palette[16];     // for VobSubs
-  int width, height;            // for VobSubs
-  int custom_colors;
-  unsigned int colors[4];
-  int forced_subs_only;
-} mkv_sh_sub_t;
-
 int demux_mkv_num_subs(demuxer_t *demuxer);
 int demux_mkv_change_subs(demuxer_t *demuxer, int new_num);
 void demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,

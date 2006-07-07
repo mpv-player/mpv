@@ -129,7 +129,7 @@ typedef struct mkv_track
   int num_encodings;
 
   /* For VobSubs */
-  mkv_sh_sub_t sh_sub;
+  sh_sub_t sh_sub;
 } mkv_track_t;
 
 typedef struct mkv_index
@@ -2124,9 +2124,9 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
         {
           if (track->private_data != NULL)
             {
-              demuxer->sub->sh = malloc(sizeof(mkv_sh_sub_t));
+              demuxer->sub->sh = malloc(sizeof(sh_sub_t));
               if (demuxer->sub->sh != NULL)
-                memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(mkv_sh_sub_t));
+                memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(sh_sub_t));
             }
         }
     }
@@ -3571,9 +3571,9 @@ demux_mkv_change_subs (demuxer_t *demuxer, int new_num)
     return -1;
 
   if (demuxer->sub->sh == NULL)
-    demuxer->sub->sh = malloc(sizeof(mkv_sh_sub_t));
+    demuxer->sub->sh = malloc(sizeof(sh_sub_t));
   if (demuxer->sub->sh != NULL)
-    memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(mkv_sh_sub_t));
+    memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(sh_sub_t));
 
   return track->tnum;
 }

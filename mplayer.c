@@ -1947,8 +1947,8 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
             if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
                 d_dvdsub->id = demux_mkv_change_subs(demuxer, dvdsub_id);
                 if (d_dvdsub->id >= 0 &&
-                    ((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v') {
-                    mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
+                    ((sh_sub_t *)d_dvdsub->sh)->type == 'v') {
+                    sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
                     if (vo_spudec != NULL)
                         spudec_free(vo_spudec);
                     vo_spudec =
@@ -3405,8 +3405,8 @@ if (vo_spudec==NULL && stream->type==STREAMTYPE_DVD) {
 #endif
 
 if ((vo_spudec == NULL) && (demuxer->type == DEMUXER_TYPE_MATROSKA) &&
-    (d_dvdsub->sh != NULL) && (((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
-  mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
+    (d_dvdsub->sh != NULL) && (((sh_sub_t *)d_dvdsub->sh)->type == 'v')) {
+  sh_sub_t *mkv_sh_sub = (sh_sub_t *)d_dvdsub->sh;
   current_module = "spudec_init_matroska";
   vo_spudec =
     spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
