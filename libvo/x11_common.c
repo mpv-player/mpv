@@ -559,7 +559,7 @@ void vo_uninit(void)
 extern void mplayer_put_key(int code);
 
 #ifdef XF86XK_AudioPause
-void vo_x11_putkey_ext(int keysym)
+static void vo_x11_putkey_ext(int keysym)
 {
     switch (keysym)
     {

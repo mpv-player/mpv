@@ -234,7 +234,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 }
 
 // general outline
-void outline(
+static void outline(
 	unsigned char *s,
 	unsigned char *t,
 	int width,
@@ -277,7 +277,7 @@ void outline(
 
 
 // 1 pixel outline
-void outline1(
+static void outline1(
 	unsigned char *s,
 	unsigned char *t,
 	int width,
@@ -315,7 +315,7 @@ void outline1(
 }
 
 // "0 pixel outline"
-void outline0(
+static void outline0(
 	unsigned char *s,
 	unsigned char *t,
 	int width,
@@ -330,7 +330,7 @@ void outline0(
 }
 
 // gaussian blur
-void blur(
+static void blur(
 	unsigned char *buffer,
 	unsigned short *tmp2,
 	int width,
@@ -654,7 +654,7 @@ static int prepare_font(font_desc_t *desc, FT_Face face, float ppem, int pic_idx
     
 }
 
-int generate_tables(font_desc_t *desc, double thickness, double radius)
+static int generate_tables(font_desc_t *desc, double thickness, double radius)
 {
     int width = desc->max_height;
     int height = desc->max_width;

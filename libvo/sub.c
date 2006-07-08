@@ -765,7 +765,7 @@ extern void vo_draw_alpha_init(void);
 
        mp_osd_obj_t* vo_osd_list=NULL;
 
-mp_osd_obj_t* new_osd_obj(int type){
+static mp_osd_obj_t* new_osd_obj(int type){
     mp_osd_obj_t* osd=malloc(sizeof(mp_osd_obj_t));
     memset(osd,0,sizeof(mp_osd_obj_t));
     osd->next=vo_osd_list;

@@ -96,7 +96,7 @@ char *pnm_file_extension = NULL;
  * \return nothing It does not return.
  */
 
-void pnm_write_error(void) {
+static void pnm_write_error(void) {
     mp_msg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
     exit_player(MSGTR_Exit_error);
 }
@@ -197,7 +197,7 @@ static int preinit(const char *arg)
  *                  returns, everything went well.
  */
 
-void pnm_mkdir(char *buf, int verbose) { 
+static void pnm_mkdir(char *buf, int verbose) { 
     struct stat stat_p;
 
 /* Silly MING32 bug workaround */
@@ -298,7 +298,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
  * \return none         The player will exit if anything goes wrong.
  */
 
-void pnm_write_pnm(FILE *outfile, mp_image_t *mpi)
+static void pnm_write_pnm(FILE *outfile, mp_image_t *mpi)
 {
     uint32_t w = mpi->w;
     uint32_t h = mpi->h;
@@ -433,7 +433,7 @@ void pnm_write_pnm(FILE *outfile, mp_image_t *mpi)
  * \return none     The player will exit if anything goes wrong.
  */
 
-void pnm_write_image(mp_image_t *mpi)
+static void pnm_write_image(mp_image_t *mpi)
 {
     static int framenum = 0, framecounter = 0, subdircounter = 0;
     char buf[BUFLENGTH];

@@ -85,7 +85,7 @@ int framenum = 0;
  * \return nothing It does not return.
  */
 
-void md5sum_write_error(void) {
+static void md5sum_write_error(void) {
     mp_msg(MSGT_VO, MSGL_ERR, MSGTR_ErrorWritingFile, info.short_name);
     exit_player(MSGTR_Exit_error);
 }

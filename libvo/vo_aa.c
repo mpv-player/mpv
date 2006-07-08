@@ -136,8 +136,8 @@ resize(void){
 
 }
 
-void
-osdmessage(int duration, int deko, char *fmt, ...)
+static void
+osdmessage(int duration, int deko, const char *fmt, ...)
 {
     /*
      * for outputting a centered string at the bottom
@@ -163,8 +163,8 @@ osdmessage(int duration, int deko, char *fmt, ...)
     posbar[0]='\0';
 }
 
-void
-osdpercent(int duration, int deko, int min, int max, int val, char * desc, char * unit)
+static void
+osdpercent(int duration, int deko, int min, int max, int val, const char * desc, const char * unit)
 {
     /*
      * prints a bar for setting values
@@ -190,7 +190,7 @@ osdpercent(int duration, int deko, int min, int max, int val, char * desc, char 
  
 }
 
-void
+static void
 printosdtext(void)
 {
   if(osd_text_length > 0 && !vo_osd_text) {
@@ -220,7 +220,7 @@ printosdtext(void)
   }
 }
 
-void
+static void
 printosdprogbar(void){
     /* print mplayer osd-progbar */
     if (vo_osd_progbar_type!=-1){
@@ -574,7 +574,7 @@ draw_osd(void){
 #endif
 }
 
-int
+static int
 getcolor(char * s){
     int i;
     char * rest;

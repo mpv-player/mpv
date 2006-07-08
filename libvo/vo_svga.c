@@ -303,7 +303,7 @@ int page;
   return VO_TRUE;
 }
 
-int bpp_from_vminfo(vga_modeinfo *vminfo){
+static int bpp_from_vminfo(vga_modeinfo *vminfo){
   switch(vminfo->colors){
     case 2: return 1;
     case 16: return 4;
@@ -315,7 +315,7 @@ int bpp_from_vminfo(vga_modeinfo *vminfo){
   return 0;
 }
 
-int find_best_svga_mode(int req_w,int req_h, int req_bpp){
+static int find_best_svga_mode(int req_w,int req_h, int req_bpp){
  int badness,prev_badness;
  int bestmode,lastmode;
  int i;

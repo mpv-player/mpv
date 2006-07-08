@@ -59,7 +59,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 }
 
 
-struct pngdata create_png (char * fname, int image_width, int image_height, int swapped)
+static struct pngdata create_png (char * fname, int image_width, int image_height, int swapped)
 {
     struct pngdata png;
 

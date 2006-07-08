@@ -98,7 +98,7 @@ static int framenum = 0;
  *                  returns, everything went well.
  */
 
-void jpeg_mkdir(char *buf, int verbose) { 
+static void jpeg_mkdir(char *buf, int verbose) { 
     struct stat stat_p;
 
 #ifndef __MINGW32__	
