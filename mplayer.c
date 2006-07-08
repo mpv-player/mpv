@@ -2694,10 +2694,12 @@ int gui_no_filename=0;
       use_gui=0;
     }
 #else
+#ifndef WIN32
     if(use_gui && !vo_init()){
       mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_GuiNeedsX);
       use_gui=0;
     }
+#endif
     if (use_gui && playtree_iter){
       char cwd[PATH_MAX+2];
       // Free Playtree and Playtree-Iter as it's not used by the GUI.
