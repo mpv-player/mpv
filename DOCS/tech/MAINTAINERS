@@ -96,6 +96,7 @@ Imported libs/projects:
     * realrtsp: Roberto Togni
     * librtsp: Benjamin Zores
     * freesdp: Benjamin Zores
+    * libass: Evgeniy Stepanov
 
 demuxers:
     * demux_fli.c - Roberto Togni
