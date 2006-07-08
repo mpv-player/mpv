@@ -6689,6 +6689,8 @@ echocheck "mencoder"
 _mencoder_flag='#undef HAVE_MENCODER'
 if test "$_mencoder" = yes ; then
   _mencoder_flag='#define HAVE_MENCODER'
+  _def_encoders='#define CONFIG_ENCODERS 1'
+  _def_muxers='#define CONFIG_MUXERS 1'
 fi
 echores "$_mencoder"
 
@@ -7593,7 +7595,8 @@ CONFIG_FAAC=$_faac
 CONFIG_XVID=$_lavc_xvid
 CONFIG_X264=$_x264
 CONFIG_GPL=yes
-CONFIG_MUXERS=yes
+CONFIG_ENCODERS=$_mencoder
+CONFIG_MUXERS=$_mencoder
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -7944,12 +7947,12 @@ $_def_libavutil_so
 /* Use libavcodec's decoders */
 #define CONFIG_DECODERS 1
 /* Use libavcodec's encoders */
-#define CONFIG_ENCODERS 1
+$_def_encoders
 
 /* Use libavformat's demuxers */
 #define CONFIG_DEMUXERS 1
 /* Use libavformat's muxers */
-#define CONFIG_MUXERS 1
+$_def_muxers
 
 #define CONFIG_MPEGAUDIO_HP 1
 
