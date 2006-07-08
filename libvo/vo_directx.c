@@ -1316,7 +1316,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     vo_dy = 0;   
 
 #ifdef HAVE_NEW_GUI
-    if(use_gui && WinID != -1){
+    if(use_gui){
         vo_dwidth = d_image_width;
         vo_dheight = d_image_height;
         guiGetEvent(guiSetShVideo, 0);
