@@ -1112,7 +1112,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 		{
 			unsigned char b1;
 			unsigned char b2;
-			unsigned char buffer[ 16 ];
 
 			b1 = ( ( ( recPtr[ 0 ] & 0x0f ) << 4 ) | 
 				( ( recPtr[ 1 ] & 0xf0 ) >> 4 ) );
@@ -1145,7 +1144,6 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 		{
 			unsigned char b1;
 			unsigned char b2;
-			unsigned char buffer[ 16 ];
 
 			b1 = ( ( ( recPtr[ 0 ] & 0x0f ) << 4 ) | 
 				( ( recPtr[ 1 ] & 0xf0 ) >> 4 ) );

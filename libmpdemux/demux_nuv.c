@@ -226,7 +226,6 @@ static int demux_nuv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
 /* Scan for the extended data in MythTV nuv streams */
 static int demux_xscan_nuv(demuxer_t* demuxer, int width, int height) {
   int i;
-  int res = 0;
   off_t orig_pos = stream_tell(demuxer->stream);
   struct rtframeheader rtjpeg_frameheader;
   struct extendeddata ext;

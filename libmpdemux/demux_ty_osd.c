@@ -84,7 +84,6 @@ void ty_ClearOSD( int start )
 
 static void ty_DrawChar( int *x, int *y, char disChar, int fgColor, int bgColor )
 {
-	int index;
    int cx;
    int cy;
 

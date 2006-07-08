@@ -358,8 +358,6 @@ while(1){
 	demuxer->movi_end=stream_tell(demuxer->stream); // fixup movi-end
     if(index_mode && !priv->isodml){
       int i;
-      off_t base = 0;
-      uint32_t last_off = 0;
       priv->idx_size=size2>>4;
       mp_msg(MSGT_HEADER,MSGL_V,MSGTR_MPDEMUX_AVIHDR_ReadingIndexBlockChunksForFrames,
         priv->idx_size,avih.dwTotalFrames, (int64_t)stream_tell(demuxer->stream));
@@ -443,7 +441,6 @@ if (priv->suidx_size > 0 && priv->idx_size == 0) {
 
 if (priv->isodml && (index_mode==-1 || index_mode==0 || index_mode==1)) {
     int i, j, k;
-    int safety=1000;
 
     avisuperindex_chunk *cx;
     AVIINDEXENTRY *idx;

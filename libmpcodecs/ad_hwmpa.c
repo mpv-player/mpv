@@ -109,7 +109,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 {
-	int start, len, n;
+	int start, len;
 
 	switch(cmd)
 	{

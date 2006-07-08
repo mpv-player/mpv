@@ -1101,8 +1101,7 @@ static int fill_packet(muxer_t *muxer, muxer_stream_t *s, int finalize)
 	//if audio and a52 insert the headers
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
-	int pes_hlen = 0, len, stflen, stuffing_len, m, n, dvd_pack = 0, len2, target, hlen;
-	uint64_t pts=0, dts=0;
+	int len, m, n, dvd_pack = 0;
 	mpeg_frame_t *frm;
 	pack_stats_t p;
 

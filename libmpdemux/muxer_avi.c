@@ -274,7 +274,6 @@ static void avifile_write_header(muxer_t *muxer){
   FILE *f = muxer->file;
   VideoPropHeader vprp;
   uint32_t aspect = avi_aspect(muxer->def_v);
-  off_t pos;
   struct avi_stream_info *vsi = muxer->def_v->priv;
   int isodml = vsi->riffofspos > 0;
 

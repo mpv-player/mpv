@@ -1198,7 +1198,7 @@ static int find_obj_desc(char* name,m_obj_list_t* l,m_struct_t** ret) {
 
 static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
 			 char* str,int* nold,int oldmax,char** dst) {
-  char* eq,param;
+  char* eq;
   m_option_t* opt;
   int r;
 
@@ -1252,7 +1252,7 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
 static int get_obj_params(char* opt_name, char* name,char* params,
 			  m_struct_t* desc,char separator, char*** _ret) {
   int n = 0,nold = 0, nopts,r;
-  char* ptr,*last_ptr = params,*eq;
+  char* ptr,*last_ptr = params;
   char** ret;
 
   if(!strcmp(params,"help")) { // Help

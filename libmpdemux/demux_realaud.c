@@ -73,8 +73,6 @@ static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 {
 	ra_priv_t *ra_priv = demuxer->priv;
 	int len;
-	int timestamp;
-	int flags;
 	demux_stream_t *ds = demuxer->audio;
 	sh_audio_t *sh = ds->sh;
 	WAVEFORMATEX *wf = sh->wf;

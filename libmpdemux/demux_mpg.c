@@ -798,8 +798,6 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
 }
 
 int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
-    demux_stream_t *d_video=demuxer->video;
-    sh_video_t *sh_video=d_video->sh;
     mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
     int msec = 0;
 

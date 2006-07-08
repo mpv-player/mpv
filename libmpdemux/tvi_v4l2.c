@@ -1336,7 +1336,6 @@ static void *video_grabber(void *data)
     priv_t *priv = (priv_t*)data;
     long long skew, prev_skew, xskew, interval, prev_interval, delta;
     int i;
-    int err_count = 0;
     int framesize = priv->format.fmt.pix.height*priv->format.fmt.pix.width*
 	pixfmt2depth(priv->format.fmt.pix.pixelformat)/8;
     fd_set rdset;

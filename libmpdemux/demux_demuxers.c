@@ -86,7 +86,6 @@ static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
 }
 
 static void demux_close_demuxers(demuxer_t* demuxer) {
-  int i;
   dd_priv_t* priv = demuxer->priv;
   stream_t *s;
 

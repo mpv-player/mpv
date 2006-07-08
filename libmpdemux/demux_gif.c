@@ -39,7 +39,6 @@ static int gif_check_file(demuxer_t *demuxer)
 static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
   GifFileType *gif = (GifFileType *)demuxer->priv;
-  sh_video_t *sh_video = (sh_video_t *)demuxer->video->sh;
   GifRecordType type = UNDEFINED_RECORD_TYPE;
   int len = 0;
   demux_packet_t *dp = NULL;

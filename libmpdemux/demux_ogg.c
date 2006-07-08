@@ -1436,7 +1436,6 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
   ogg_stream_state* oss;
   ogg_stream_t* os;
   demux_stream_t* ds;
-  sh_audio_t* sh_audio = demuxer->audio->sh;
   ogg_packet op;
   float rate;
   int i,sp,first,precision=1,do_seek=1;

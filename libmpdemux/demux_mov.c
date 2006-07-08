@@ -412,7 +412,6 @@ static int mov_check_file(demuxer_t* demuxer){
 	  skipped+=8;
 	  i = stream_read_dword(demuxer->stream)-8;
 	  if(stream_read_dword(demuxer->stream)==MOV_FOURCC('r','m','r','a')){
-	      int ref=0;
 	      skipped+=i;
 	      mp_msg(MSGT_DEMUX,MSGL_INFO,"MOV: Reference Media file!!!\n");
 	      //set demuxer type to playlist ...

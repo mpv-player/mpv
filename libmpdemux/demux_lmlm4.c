@@ -127,7 +127,6 @@ int searchMPEG4Stream(demuxer_t* demuxer, IME6400Header *imeHeader)
 
 static int getFrame(demuxer_t *demuxer, FrameInfo *frameInfo)
 {
-    int retCode;
     unsigned int packetSize;
 
     frameInfo->channelNo = stream_read_word(demuxer->stream);
