@@ -239,6 +239,9 @@ static void guiSetEvent(int event)
         {
             float l,r;
 
+            if (guiIntfStruct.Playing == 0)
+                break;
+
             if (guiIntfStruct.Balance == 50.0f)
                 mixer_setvolume(&mixer, guiIntfStruct.Volume, guiIntfStruct.Volume);
 
