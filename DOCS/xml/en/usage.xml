@@ -352,8 +352,8 @@ uses, like automatically skipping over commercials in video files you watch.
 </para>
 
 <para>
-The EDL file format is pretty bare-bones. Each line on the file dictates what
-to do (skip/mute) and when to do it (using pts in seconds). 
+The EDL file format is pretty bare-bones. There is one command per line that
+indicates what to do (skip/mute) and when to do it (using pts in seconds).
 </para>
 
 <sect2 id="edl_using">
