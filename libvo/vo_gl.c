@@ -84,6 +84,7 @@ static GLuint default_texs[22];
 static char *custom_prog;
 static char *custom_tex;
 static int custom_tlin;
+static int custom_trect;
 
 static int int_pause;
 static int eq_bri = 0;
@@ -188,7 +189,7 @@ static void update_yuvconv(void) {
     else {
       int width, height, maxval;
       ActiveTexture(GL_TEXTURE3);
-      if (glCreatePPMTex(GL_TEXTURE_2D, 3,
+      if (glCreatePPMTex(custom_trect?GL_TEXTURE_RECTANGLE:GL_TEXTURE_2D, 0,
                      custom_tlin?GL_LINEAR:GL_NEAREST,
                      f, &width, &height, &maxval))
         ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 1,
@@ -706,6 +707,7 @@ static opt_t subopts[] = {
   {"customprog",   OPT_ARG_MSTRZ,&custom_prog,  NULL},
   {"customtex",    OPT_ARG_MSTRZ,&custom_tex,   NULL},
   {"customtlin",   OPT_ARG_BOOL, &custom_tlin,  NULL},
+  {"customtrect",  OPT_ARG_BOOL, &custom_trect, NULL},
   {"osdcolor",     OPT_ARG_INT,  &osd_color,    NULL},
   {NULL}
 };
@@ -727,6 +729,7 @@ static int preinit(const char *arg)
     custom_prog = NULL;
     custom_tex = NULL;
     custom_tlin = 1;
+    custom_trect = 0;
     osd_color = 0xffffff;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
@@ -769,6 +772,8 @@ static int preinit(const char *arg)
               "    use a custom YUV conversion lookup texture\n"
               "  nocustomtlin\n"
               "    use GL_NEAREST scaling for customtex texture\n"
+              "  customtrect\n"
+              "    use texture_rectangle for customtex texture\n"
               "  osdcolor=<0xRRGGBB>\n"
               "    use the given color for the OSD\n"
               "\n" );
