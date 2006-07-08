@@ -68,15 +68,6 @@ int console_state = 0;
 static HBRUSH    colorbrush = NULL;           //Handle to colorkey brush
 static COLORREF windowcolor = RGB(0,0,16);    //Windowcolor == colorkey
 
-/* vo_gl includes vo_init in w32_common.c, without gl this file is not included */
-#if !defined(GL_WIN32) && !defined(HAVE_GL)
-int vo_init(void)
-{
-    mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] dummy vo_init()\n");
-    return 1;
-}
-#endif
-
 void console_toggle(void)
 {
     if (console_state)
