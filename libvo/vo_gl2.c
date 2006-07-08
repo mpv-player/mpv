@@ -731,6 +731,7 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
         return 0;
 }
+#endif
 
 #ifdef HAVE_NEW_GUI
 static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
@@ -739,8 +740,6 @@ static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
   guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
   return 0;
 }
-#endif
-
 #endif
 
 static int initGl(uint32_t d_width, uint32_t d_height)
@@ -821,11 +820,14 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	vo_dx += xinerama_x;
 	vo_dy += xinerama_y;
 
-#if defined(HAVE_NEW_GUI) && !defined(GL_WIN32)
+#ifdef HAVE_NEW_GUI
 	if (use_gui) {
 	  if (config_glx_gui(d_width, d_height) == -1)
 	    return -1;
-	} else
+	}
+#ifndef GL_WIN32	
+	else
+#endif
 #endif
 #ifdef GL_WIN32
 	if (config_w32(width, height, d_width, d_height, flags, title, format) == -1)
