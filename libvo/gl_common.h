@@ -180,6 +180,12 @@
 #ifndef GL_UNSIGNED_SHORT_1_5_5_5_REV
 #define GL_UNSIGNED_SHORT_1_5_5_5_REV 0x8366
 #endif
+#ifndef GL_RGB32F
+#define GL_RGB32F 0x8815
+#endif
+#ifndef GL_FLOAT_RGB32_NV
+#define GL_FLOAT_RGB32_NV 0x8889
+#endif
 #ifndef GL_FRAGMENT_PROGRAM
 #define GL_FRAGMENT_PROGRAM 0x8804
 #endif

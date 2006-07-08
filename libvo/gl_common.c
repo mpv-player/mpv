@@ -67,6 +67,8 @@ void (APIENTRY *TexImage3D)(GLenum, GLint, GLenum, GLsizei, GLsizei, GLsizei,
 
 //! \defgroup glconversion OpenGL conversion helper functions
 
+static GLint hqtexfmt;
+
 /**
  * \brief adjusts the GL_UNPACK_ALIGNMENT to fit the stride.
  * \param stride number of bytes per line for which alignment should fit.
@@ -314,6 +316,12 @@ static void getFunctions(void *(*getProcAddress)(const GLubyte *),
     }
     *(dsc->funcptr) = ptr;
   }
+  if (strstr(allexts, "_texture_float"))
+    hqtexfmt = GL_RGB32F;
+  else if (strstr(allexts, "NV_float_buffer"))
+    hqtexfmt = GL_FLOAT_RGB32_NV;
+  else
+    hqtexfmt = GL_RGB16;
   free(allexts);
 }
 
@@ -370,7 +378,7 @@ static void ppm_skip(FILE *f) {
 /**
  * \brief creates a texture from a PPM file
  * \param target texture taget, usually GL_TEXTURE_2D
- * \param fmt internal texture format
+ * \param fmt internal texture format, 0 for default
  * \param filter filter used for scaling, e.g. GL_LINEAR
  * \param f file to read PPM from
  * \param width [out] width of texture
@@ -381,7 +389,7 @@ static void ppm_skip(FILE *f) {
  */
 int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
                    FILE *f, int *width, int *height, int *maxval) {
-  unsigned w, h, m, val;
+  unsigned w, h, m, val, bpp;
   char *data;
   ppm_skip(f);
   if (fgetc(f) != 'P' || fgetc(f) != '6')
@@ -400,11 +408,18 @@ int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
     return 0;
   if (w > MAXDIM || h > MAXDIM)
     return 0;
-  data = malloc(w * h * 3);
-  if (fread(data, w * 3, h, f) != h)
+  bpp = (m > 255) ? 6 : 3;
+  data = malloc(w * h * bpp);
+  if (fread(data, w * bpp, h, f) != h)
     return 0;
+  if (!fmt) {
+    fmt = (m > 255) ? hqtexfmt : 3;
+    if (fmt == GL_FLOAT_RGB32_NV && target != GL_TEXTURE_RECTANGLE)
+      fmt = GL_RGB16;
+  }
   glCreateClearTex(target, fmt, filter, w, h, 0);
-  glUploadTex(target, GL_RGB, GL_UNSIGNED_BYTE, data, w * 3, 0, 0, w, h, 0);
+  glUploadTex(target, GL_RGB, (m > 255) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_BYTE,
+              data, w * bpp, 0, 0, w, h, 0);
   free(data);
   if (width) *width = w;
   if (height) *height = h;
@@ -422,6 +437,7 @@ int glCreatePPMTex(GLenum target, GLenum fmt, GLint filter,
  * Does not handle all possible variants, just those used by MPlayer
  */
 int glFmt2bpp(GLenum format, GLenum type) {
+  int component_size = 0;
   switch (type) {
     case GL_UNSIGNED_BYTE_3_3_2:
     case GL_UNSIGNED_BYTE_2_3_3_REV:
@@ -431,19 +447,23 @@ int glFmt2bpp(GLenum format, GLenum type) {
     case GL_UNSIGNED_SHORT_5_6_5:
     case GL_UNSIGNED_SHORT_5_6_5_REV:
       return 2;
+    case GL_UNSIGNED_BYTE:
+      component_size = 1;
+      break;
+    case GL_UNSIGNED_SHORT:
+      component_size = 2;
+      break;
   }
-  if (type != GL_UNSIGNED_BYTE)
-    return 0; //not implemented
   switch (format) {
     case GL_LUMINANCE:
     case GL_ALPHA:
-      return 1;
+      return component_size;
     case GL_RGB:
     case GL_BGR:
-      return 3;
+      return 3 * component_size;
     case GL_RGBA:
     case GL_BGRA:
-      return 4;
+      return 4 * component_size;
   }
   return 0; // unknown
 }
