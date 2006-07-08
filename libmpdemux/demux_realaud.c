@@ -66,8 +66,6 @@ static int ra_check_file(demuxer_t* demuxer)
 
 
 
-void hexdump(char *, unsigned long);
-
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
