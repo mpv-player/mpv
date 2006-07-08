@@ -5394,8 +5394,9 @@ else
 fi
 echores "$_fontconfig"
 
+
 echocheck "SSA/ASS support"
-# libass depends on freetype
+# libass depends on FreeType
 if test "$_freetype" = no ; then
     _ass=no
     _res_comment="FreeType support needed"
@@ -5422,6 +5423,7 @@ else
     _def_ass='#undef USE_ASS'
 fi
 echores "$_ass"
+
 
 echocheck "fribidi with charsets"
 if test "$_fribidi" = auto ; then
