@@ -213,7 +213,7 @@ static LRESULT CALLBACK PrefsWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
                                NULL);
             SendMessage(btn, WM_SETFONT, (WPARAM) GetStockObject(DEFAULT_GUI_FONT), 0);
 
-            btn = CreateWindow("button", "Display videos in the sub window (directx only)",
+            btn = CreateWindow("button", "Display videos in the sub window",
                                WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
                                55, 227, 250, 25,
                                hwnd, (HMENU) ID_SUBWINDOW,

@@ -690,7 +690,7 @@ int guiGetEvent(int type, char *arg)
                     video_out->control(VOCTRL_FULLSCREEN, 0);
 
                     /* no WinID, keep the sub window hidden */
-                    if((video_driver_list && !strstr(video_driver_list[0], "directx")) || !sub_window)
+                    if(!sub_window)
                         break;
 
                     if(vo_fs)
@@ -904,11 +904,7 @@ static int update_subwindow(void)
     RECT rd;
     WINDOWPOS wp;
 
-     /* it's not the best way to check if selected driver is directx,
-        if no driver is specified video_driver_list is null.
-        Right now I don't have a functional way to do this
-        - Sherpya */
-    if((video_driver_list && !strstr(video_driver_list[0], "directx")) || !sub_window)
+    if(!sub_window)
     {
         WinID = -1; // so far only directx supports WinID in windows
 
