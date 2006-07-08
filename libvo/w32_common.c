@@ -232,6 +232,7 @@ static int createRenderingContext(void) {
     PIXELFORMATDESCRIPTOR pfd;
     RECT r;
     int pf;
+  if (WinID < 0) {
     int style = (vo_border && !vo_fs) ?
                 (WS_OVERLAPPEDWINDOW | WS_SIZEBOX) : WS_POPUP;
 
@@ -273,6 +274,7 @@ static int createRenderingContext(void) {
     r.bottom = r.top + vo_dheight;
     AdjustWindowRect(&r, style, 0);
     SetWindowPos(vo_window, layer, r.left, r.top, r.right - r.left, r.bottom - r.top, SWP_SHOWWINDOW);
+  }
 
     memset(&pfd, 0, sizeof pfd);
     pfd.nSize = sizeof pfd;
