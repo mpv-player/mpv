@@ -2623,16 +2623,16 @@ int gui_no_filename=0;
   tv_param_immediate = 1;
 #endif
 
-#if defined(WIN32) && defined(HAVE_NEW_GUI)
-  char *cmdline = GetCommandLine();
-  if(!strstr(cmdline, "-slave"))
-    use_gui=1;
-#else
   if ( argv[0] )
-    if(!strcmp(argv[0],"gmplayer") ||
-      (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )
+  {
+    char *base = strrchr(argv[0], '/');
+    if (!base)
+      base = strrchr(argv[0], '\\');
+    if (!base)
+      base = argv[0];
+    if(strstr(base, "gmplayer"))
           use_gui=1;
-#endif
+  }
 
     mconfig = m_config_new();
     m_config_register_options(mconfig,mplayer_opts);
