@@ -177,7 +177,8 @@ static void update_yuvconv(void) {
       free(prog);
     }
     ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 0,
-               1.0 / texture_width, 1.0 / texture_height, 0, 0);
+               1.0 / texture_width, 1.0 / texture_height,
+               texture_width, texture_height);
   }
   if (custom_tex) {
     FILE *f = fopen(custom_tex, "r");
@@ -191,7 +192,7 @@ static void update_yuvconv(void) {
                      custom_tlin?GL_LINEAR:GL_NEAREST,
                      f, &width, &height, &maxval))
         ProgramEnvParameter4f(GL_FRAGMENT_PROGRAM, 1,
-                   1.0 / width, 1.0 / height, 1.0 / maxval, 0);
+                   1.0 / width, 1.0 / height, width, height);
       else
         mp_msg(MSGT_VO, MSGL_WARN,
                "[gl] Error parsing customtex %s\n", custom_tex);
