@@ -82,12 +82,6 @@ ifeq ($(EXTERNAL_VIDIX),yes)
 VO_LIBS += $(EXTERNAL_VIDIX_LIB)
 endif
 
-ASS_LIB =
-
-ifeq ($(CONFIG_ASS),yes)
-ASS_LIB += libass/libass.a
-endif
-
 AO_LIBS = $(ARTS_LIB) \
           $(ESD_LIB) \
           $(JACK_LIB) \
@@ -119,7 +113,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
-              $(ASS_LIB) \
               libswscale/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
@@ -263,6 +256,7 @@ COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
 ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a
+COMMON_LIBS += libass/libass.a
 PARTS += libass
 endif
 
