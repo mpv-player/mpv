@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r17707 -->
+<!-- synced with r18930 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -147,6 +147,50 @@ a <filename class="directory">/usr/X11</filename> és a
 léteznek-e (ez Mandrake rendszereken lehet probléma).
 </para></answer>
 </qandaentry>
+
+
+<qandaentry>
+<question><para>
+A Mac OS 10.3 alatti fordítás számos szerkesztési hibát okoz</para></question>
+<answer><para>
+A szerkesztési hiba, amit tapasztalhatsz, valószínűleg így néz ki:
+<screen>
+ld: Undefined symbols:
+_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
+</screen>
+A probléma, hogy az Apple fejlesztői 10.4-et használnak a szoftvereik
+fordításához és a 10.3 felhasználók felé történő terjesztéshez a
+Software Update-n keresztül.
+A nem definiált szimbólumok jelen vannak a Mac OS 10.4-ben,
+de nincsenek ott a 10.3-ban.
+Az egyik megoldás a QuickTime 7.0.1-re történő downgrade lehet.
+De van egy jobb is.
+</para><para>
+Szerezz be a <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">framework-ök régebbi másolatát</ulink>.
+Ez egy tömörített fájl, ami tartalmazza a QuickTime
+7.0.1 Framework-öt és a 10.3.9 QuartzCore Framework-öt.
+</para><para>
+Csomagold ki a fájlokat valahova a System könyvtáradon kívülre.
+(vagyis ne telepítsd ezen framework-öket a
+<filename class="directory">/System/Library/Frameworks</filename>
+könyvtáradba! A régebbi másolat csak a szerkesztési hibák ellen kell!)
+<screen>
+gunzip &lt; CompatFrameworks.tgz | tar xvf -
+</screen>
+A config.mak fájlba írd be
+<systemitem>-F/eleresi/ut/ahova/kicsomagoltad</systemitem>
+az <systemitem>OPTFLAGS</systemitem> változóhoz.
+Ha <application>X-Code</application>-ot használsz, egyszerűen kiválaszthatod
+ezeket a framework-öket a rendszer sajátjai helyett.
+</para><para>
+A keletkező <application>MPlayer</application> bináris a rendszeredbe
+telepített framework-öt fogja használni dinamikus link-ek segítségével,
+melyek futási időben kerülnek feloldásra.
+(Ezt leellenőrizheted a <systemitem>otool -l</systemitem> használatával).
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 
 <qandadiv id="faq-general">

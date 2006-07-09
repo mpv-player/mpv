@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18917 -->
+<!-- synced with r18964 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -358,8 +358,8 @@ is vannak, például automatikusan átlépni a videó fájlokban lévő reklámokat.
 </para>
 
 <para>
-Az EDL fájl formátuma eléggé egyszerű. A fájl minden sora megadja, hogy
-mit kell csinálni (skip/mute) és mikor (másodperc alapú mutatóval).
+Az EDL fájl formátuma eléggé egyszerű. Egy sorban egy parancs van, ami megadja,
+hogy mit kell csinálni (skip/mute) és mikor (másodperc alapú mutatóval).
 </para>
 
 <sect2 id="edl_using">
