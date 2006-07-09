@@ -299,7 +299,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 
 #include "libao2/audio_out.h"
 /* FIXME */
-static void mencoder_exit(int level, char *how)
+static void mencoder_exit(int level, const char *how)
 {
     if (how)
 	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ExitingHow, how);

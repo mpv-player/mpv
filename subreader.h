@@ -76,7 +76,7 @@ void subcp_close (void); /* for demux_ogg.c */
 void* guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_language, char *fallback);
 void* guess_cp(struct stream_st *st, char *preferred_language, char *fallback);
 #endif
-char ** sub_filenames(char *path, char *fname);
+char ** sub_filenames(const char *path, char *fname);
 void list_sub_file(sub_data* subd);
 void dump_srt(sub_data* subd, float fps);
 void dump_mpsub(sub_data* subd, float fps);

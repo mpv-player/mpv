@@ -486,7 +486,7 @@ static codecs_t *audio_codecs=NULL;
 static int nr_vcodecs = 0;
 static int nr_acodecs = 0;
 
-int parse_codec_cfg(char *cfgfile)
+int parse_codec_cfg(const char *cfgfile)
 {
 	codecs_t *codec = NULL; // current codec
 	codecs_t **codecsp = NULL;// points to audio_codecs or to video_codecs

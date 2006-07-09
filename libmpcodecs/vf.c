@@ -436,7 +436,7 @@ static int vf_default_query_format(struct vf_instance_s* vf, unsigned int fmt){
   return vf_next_query_format(vf,fmt);
 }
 
-vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char **args){
+vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, const char *name, char **args){
     vf_instance_t* vf;
     int i;
     for(i=0;;i++){
@@ -475,7 +475,7 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
     return NULL;
 }
 
-vf_instance_t* vf_open_filter(vf_instance_t* next, char *name, char **args){
+vf_instance_t* vf_open_filter(vf_instance_t* next, const char *name, char **args){
   if(args && strcmp(args[0],"_oldargs_")) {
     int i,l = 0;
     for(i = 0 ; args && args[2*i] ; i++)

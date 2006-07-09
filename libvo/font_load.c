@@ -49,7 +49,7 @@ err_out:
 
 extern int sub_unicode;
 
-font_desc_t* read_font_desc(char* fname,float factor,int verbose){
+font_desc_t* read_font_desc(const char* fname,float factor,int verbose){
 unsigned char sor[1024];
 unsigned char sor2[1024];
 font_desc_t *desc;

@@ -905,7 +905,7 @@ void free_font_desc(font_desc_t *desc)
     free(desc);
 }
 
-static int load_sub_face(char *name, FT_Face *face)
+static int load_sub_face(const char *name, FT_Face *face)
 {
     int err = -1;
     
@@ -952,7 +952,7 @@ int kerning(font_desc_t *desc, int prevc, int c)
     return f266ToInt(kern.x);
 }
 
-font_desc_t* read_font_desc_ft(char *fname, int movie_width, int movie_height)
+font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_height)
 {
     font_desc_t *desc;
 

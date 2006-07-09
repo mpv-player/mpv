@@ -1832,7 +1832,7 @@ static int compare_sub_priority(const void *a, const void *b)
     }
 }
 
-char** sub_filenames(char* path, char *fname)
+char** sub_filenames(const char* path, char *fname)
 {
     char *f_dir, *f_fname, *f_fname_noext, *f_fname_trim, *tmp, *tmp_sub_id;
     char *tmp_fname_noext, *tmp_fname_trim, *tmp_fname_ext, *tmpresult;

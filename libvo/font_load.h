@@ -80,7 +80,7 @@ extern int force_load_font;
 int init_freetype(void);
 int done_freetype(void);
 
-font_desc_t* read_font_desc_ft(char* fname,int movie_width, int movie_height);
+font_desc_t* read_font_desc_ft(const char* fname,int movie_width, int movie_height);
 void free_font_desc(font_desc_t *desc);
 
 void render_one_glyph(font_desc_t *desc, int c);
@@ -96,6 +96,6 @@ static int kerning(font_desc_t *desc, int prevc, int c) { return 0; }
 #endif
 
 raw_file* load_raw(char *name,int verbose);
-font_desc_t* read_font_desc(char* fname,float factor,int verbose);
+font_desc_t* read_font_desc(const char* fname,float factor,int verbose);
 
 #endif /* ! __MPLAYER_FONT_LOAD_H */
