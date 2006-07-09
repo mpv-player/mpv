@@ -177,7 +177,6 @@ static int analyze_fixed_pattern(struct vf_priv_s *p, mp_image_t *new, mp_image_
 
 static int analyze_aggressive(struct vf_priv_s *p, mp_image_t *new, mp_image_t *old)
 {
-	int i;
 	struct metrics m, pm;
 	
 	if (p->frame >= 0) p->frame = (p->frame+1)%5;

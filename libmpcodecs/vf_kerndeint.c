@@ -91,7 +91,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	int n = vf->priv->frame++;
 	int val, hi, lo, w, h;
 	double valf;
-	unsigned int hint;
 	int plane;
 	int threshold = vf->priv->thresh;
 	int order = vf->priv->order;
@@ -289,8 +288,6 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 static int open(vf_instance_t *vf, char* args){
-        double LumSpac, LumTmp, ChromSpac, ChromTmp;
-        double Param1, Param2, Param3;
 
 	vf->config=config;
 	vf->put_image=put_image;

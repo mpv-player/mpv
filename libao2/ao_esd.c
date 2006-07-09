@@ -298,8 +298,7 @@ static int play(void* data, int len, int flags)
     int offs;
     int nwritten;
     int nsamples;
-    int remainder, n;
-    int saved_fl;
+    int n;
 
     /* round down buffersize to a multiple of ESD_BUF_SIZE bytes */
     len = len / ESD_BUF_SIZE * ESD_BUF_SIZE;

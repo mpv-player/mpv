@@ -18,7 +18,6 @@ struct vf_priv_s {
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts)
 {
 	mp_image_t *dmpi;
-	int ret;
 
 	vf->priv->last_mpi = mpi;
 	

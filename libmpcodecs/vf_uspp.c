@@ -177,7 +177,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], uint8_t *src[3], int ds
     for(i=0; i<count; i++){
         const int x1= offset[i+count-1][0];
         const int y1= offset[i+count-1][1];
-        int offset, out_size, got_picture;
+        int offset, out_size;
         p->frame->data[0]= p->src[0] + x1 + y1 * p->frame->linesize[0];
         p->frame->data[1]= p->src[1] + x1/2 + y1/2 * p->frame->linesize[1];
         p->frame->data[2]= p->src[2] + x1/2 + y1/2 * p->frame->linesize[2];

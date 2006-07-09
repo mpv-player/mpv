@@ -53,9 +53,6 @@ int             i,pot = 0;
 
 void mplMainDraw( void )
 {
- wItem    * item;
- txSample * image = NULL;
- int        i, type;
 
  if ( appMPlayer.mainWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
  

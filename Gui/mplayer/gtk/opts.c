@@ -761,7 +761,6 @@ GtkWidget * create_Preferences( void )
   GtkWidget * hbox1;
   GtkWidget * vbox2;
   GtkWidget * scrolledwindow3;
-  GtkWidget * hbuttonbox2;
   GtkWidget * vbox3;
   GtkWidget * hbox8;
   GtkWidget * hbox2;
@@ -769,7 +768,6 @@ GtkWidget * create_Preferences( void )
   GtkWidget * scrolledwindow2;
   GtkWidget * hbuttonbox3;
   GtkWidget * vbox5;
-  GtkWidget * hbox3;
   GtkWidget * vbox6;
   GtkWidget * vbox600;
   GSList    * OSD_group = NULL;

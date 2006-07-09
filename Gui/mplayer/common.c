@@ -242,7 +242,7 @@ void Render( wsTWindow * window,wItem * Items,int nrItems,char * db,int size )
 {
  wItem    * item;
  txSample * image = NULL;
- int        i, type;
+ int        i;
 
  image_buffer=db;
  image_width=window->Width;

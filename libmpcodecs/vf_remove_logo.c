@@ -535,8 +535,6 @@ void load_pgm_skip(FILE *f) {
  */
 pgm_structure * load_pgm(const char * file_name)
 {
-  unsigned char flags;
-  int x, y;
   int maximum_greyscale_value;
   FILE * input;
   int pnm_number;

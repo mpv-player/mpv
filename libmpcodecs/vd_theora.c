@@ -142,7 +142,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    ogg_packet op;
    yuv_buffer yuv;
    mp_image_t* mpi;
-   int i;
 
    memset (&op, 0, sizeof (op));
    op.bytes = len;

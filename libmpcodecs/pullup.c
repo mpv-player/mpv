@@ -608,7 +608,6 @@ static int decide_frame_length(struct pullup_context *c)
 static void print_aff_and_breaks(struct pullup_context *c, struct pullup_field *f)
 {
 	int i;
-	int max_l, max_r, l;
 	struct pullup_field *f0 = f;
 	const char aff_l[] = "+..", aff_r[] = "..+";
 	printf("\naffinity: ");
@@ -698,7 +697,6 @@ static void copy_field(struct pullup_context *c, struct pullup_buffer *dest,
 void pullup_pack_frame(struct pullup_context *c, struct pullup_frame *fr)
 {
 	int i;
-	int par = fr->parity;
 	if (fr->buffer) return;
 	if (fr->length < 2) return; /* FIXME: deal with this */
 	for (i = 0; i < 2; i++)

@@ -286,7 +286,6 @@ static void fillblock(char *strt, int yoff, int lines, int val)
 static int draw_frame(uint8_t * src[])
 {
 
-    int vp_skip = vo_dga_vp_skip;
     int numlines = vo_dga_lines;
 
     char *s, *d;

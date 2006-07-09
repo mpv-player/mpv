@@ -911,10 +911,6 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
     if(lavc_param_psnr){
         static FILE *fvstats=NULL;
         char filename[20];
-        static long long int all_len=0;
-        static int frame_number=0;
-        static double all_frametime=0.0;
-        AVFrame *pic= lavc_venc_context->coded_frame;
         double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
 	double quality=0.0;
 	int8_t *q;
@@ -970,7 +966,6 @@ static int encode_frame(struct vf_instance_s* vf, AVFrame *pic, double pts){
 }
 
 static void uninit(struct vf_instance_s* vf){
-    const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
     
 #if LIBAVCODEC_BUILD >= 4643
     if(lavc_param_psnr){
