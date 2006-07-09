@@ -6696,6 +6696,8 @@ if test "$_mencoder" = yes ; then
   _mencoder_flag='#define HAVE_MENCODER'
   _def_encoders='#define CONFIG_ENCODERS 1'
   _def_muxers='#define CONFIG_MUXERS 1'
+else
+  _libavcodecs="`echo $_libavcodecs | sed 's/[-_a-zA-Z0-9]*encoder//g'`"
 fi
 echores "$_mencoder"
 
