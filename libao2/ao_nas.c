@@ -132,7 +132,7 @@ static struct ao_nas_data *nas_data;
 
 LIBAO_EXTERN(nas)
 
-static void nas_print_error(AuServer *aud, char *prefix, AuStatus as)
+static void nas_print_error(AuServer *aud, const char *prefix, AuStatus as)
 {
 	char s[100];
 	AuGetErrorText(aud, as, s, 100);
