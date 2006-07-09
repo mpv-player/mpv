@@ -148,8 +148,8 @@ static char *dsp=PATH_DEV_DSP;
 static audio_buf_info zz;
 static int audio_fd=-1;
 
-char *oss_mixer_device = PATH_DEV_MIXER;
-int oss_mixer_channel = SOUND_MIXER_PCM;
+static const char *oss_mixer_device = PATH_DEV_MIXER;
+static int oss_mixer_channel = SOUND_MIXER_PCM;
 
 // to set/get/query special features/parameters
 static int control(int cmd,void *arg){
