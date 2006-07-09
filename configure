@@ -7450,7 +7450,7 @@ X11DIR = $_ld_x11
 HAVE_XVMC_ACCEL = $_xvmc
 
 # for FFmpeg
-SRC_PATH=`pwd`
+SRC_PATH=..
 LIBPREF=lib
 LIBSUF=.a
 LIB=\$(LIBPREF)\$(NAME)\$(LIBSUF)
