@@ -1,6 +1,6 @@
 // Last sync on 2004-10-20 with help_mp-en.h 1.148
-// Translated by:  Carl Fürstenberg &#60;azatoth&#64;gmail&#46;com&#62;
-// Helped by: Jan Knutar &#60;jknutar&#64;nic&#46;fi&#62;
+// Translated by:  Carl Fürstenberg <azatoth AT gmail DOT com>
+// Helped by: Jan Knutar <jknutar AT nic DOT fi>
 // ========================= MPlayer hjälp ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -45,6 +45,7 @@ static char help_text[]=
 "\n";
 #endif
 
+// libmpcodecs/ad_dvdpcm.c:
 #define MSGTR_SamplesWanted "Fler exempel på detta format behövs för att vidare öka support. Var vänlig kontakta utvecklarna.\n"
 
 // ========================= MPlayer messages ===========================
@@ -78,7 +79,7 @@ static char help_text[]=
 #define MSGTR_StartPlaying "Påbörjar uppspelning...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
-    "           ***********************************************************\n"\
+"           ***********************************************************\n"\
 "           **** Ditt system är för slött för att spela upp detta! ****\n"\
 "           ***********************************************************\n\n"\
 "Troliga orsaker, problem, samt sätt att fixa det:\n"\
@@ -124,26 +125,25 @@ static char help_text[]=
 #define MSGTR_Paused "\n  =====  PAUSE  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nOförmögen att ladda spellista %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-    "- MPlayer krachade av en 'Illegal Instruction'.\n"\
+"- MPlayer krachade av en 'Illegal Instruction'.\n"\
 "  Det kan vare en bugg i vår nya \"runtime CPU-detection\" kod...\n"\
 "  Var god läs DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
-    "- MPlayer krashade av en 'Illegal Instruction'.\n"\
+"- MPlayer krashade av en 'Illegal Instruction'.\n"\
 "  Detta händer vanligast om du kör koden på en annan CPU än den var\n"\
 "  kompilerad/optimerad för\n"\
 "  Verifiera detta!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-    "- MPlayer krashade på grund utav dålig användning av CPU/FPU/RAM.\n"\
+"- MPlayer krashade på grund utav dålig användning av CPU/FPU/RAM.\n"\
 "  Omkompilera MPlayer med '--enable-debug' och kör en \"'gdb' backtrace\" och\n"\
 "  deassemblera. Detaljer återfinns i DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
-    "- MPlayer krashade. Detta borde inte inträffa.\n"\
+"- MPlayer krashade. Detta borde inte inträffa.\n"\
 "  Det kan vara en bugg i MPlayers kod, eller i din drivrutin, eller i din\n"\
 "  gcc version. Om du tror det är MPlayers fel, var vänlig läs\n"\
 "  DOCS/HTML/en/bugreports.html och följ instruktionerna där, Vi kan inte och\n"\
 "  kommer inte att hjälpa dig, om du inte kan befodra denna information när \n"\
 "  du rapporterar en trolig bugg.\n"
-
 #define MSGTR_LoadingConfig "Laddar konfiguration '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: lade till textningsfil %d: %s \n"
 #define MSGTR_ErrorOpeningOutputFile "Fel vid öppning av fil [%s] för skrivning!\n"
@@ -162,18 +162,6 @@ static char help_text[]=
 #define MSGTR_AudioFilterChainPreinitError "Fel vid förinitiering av audiofilter!\n"
 #define MSGTR_LinuxRTCReadError "'Linux RTC' läsfel: %s\n"
 #define MSGTR_SoftsleepUnderflow "Varning! Softsleep underflow!\n"
-#define MSGTR_MenuCall "Menyanrop\n"
-#define MSGTR_EdlOutOfMem "Kan inte allokera tillräckligt med minne för att hålla EDL-data.\n"
-#define MSGTR_EdlRecordsNo "Läst %d EDL-funtioner.\n"
-#define MSGTR_EdlQueueEmpty "Det är inga EDL-funktioner att ta hand om.\n"
-#define MSGTR_EdlCantOpenForWrite "Kan inte öppna EDL-fil [%s] för skrivning.\n"
-#define MSGTR_EdlCantOpenForRead "Kan inte öppna EDL-fil [%s] för läsning.\n"
-#define MSGTR_EdlNOsh_video "Kan inte använda EDL utan video, inaktiverar.\n"
-#define MSGTR_EdlNOValidLine "Icke godkänd EDL-rad: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "Dåligt formaterad EDL-rad [%d]. Kastar bort.\n"
-#define MSGTR_EdlBadLineOverlap "Senaste stopposition var [%f] ; nästa start är [%f]. Noteringar måste vara i kronologisk ordning, kan inte lappa över. Kastar bort.\n"
-#define MSGTR_EdlBadLineBadStop "Stopptid måste vara efter starttid.\n"
-
 #define MSGTR_DvdnavNullEvent "DVDNAV-händelse NULL?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "DVDNAV-händelse: Highlight-händelse trasig\n" // FIXME highlight
 #define MSGTR_DvdnavEvent "DVDNAV-händelse Event: %s\n"
@@ -191,6 +179,19 @@ static char help_text[]=
 /*
  * FIXME A lot of shorted words, not translating atm
  */
+#define MSGTR_MenuCall "Menyanrop\n"
+
+#define MSGTR_EdlOutOfMem "Kan inte allokera tillräckligt med minne för att hålla EDL-data.\n"
+#define MSGTR_EdlRecordsNo "Läst %d EDL-funtioner.\n"
+#define MSGTR_EdlQueueEmpty "Det är inga EDL-funktioner att ta hand om.\n"
+#define MSGTR_EdlCantOpenForWrite "Kan inte öppna EDL-fil [%s] för skrivning.\n"
+#define MSGTR_EdlCantOpenForRead "Kan inte öppna EDL-fil [%s] för läsning.\n"
+#define MSGTR_EdlNOsh_video "Kan inte använda EDL utan video, inaktiverar.\n"
+#define MSGTR_EdlNOValidLine "Icke godkänd EDL-rad: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Dåligt formaterad EDL-rad [%d]. Kastar bort.\n"
+#define MSGTR_EdlBadLineOverlap "Senaste stopposition var [%f] ; nästa start är [%f]. Noteringar måste vara i kronologisk ordning, kan inte lappa över. Kastar bort.\n"
+#define MSGTR_EdlBadLineBadStop "Stopptid måste vara efter starttid.\n"
+
 
 // mencoder.c:
 
@@ -224,12 +225,12 @@ static char help_text[]=
 #define MSGTR_CBRAudioByterate "\n\nCBR audio: %d byte/sec, %d byte/block\n"
 #define MSGTR_LameVersion "LAME version %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset "Fel: Angiven bitrate är utanför godkänd rymd för detta val\n"\
-    "\n"\
+"\n"\
 "Vid användning av detta val så måste du ange ett värde mellan \"8\" och \"320\"\n"\
 "\n"\
 "För vidare information testa: \"-lameopts preset=help\"\n"
 #define MSGTR_InvalidLamePresetOptions "Fel: du angav inte en godkänd profil och/eller förinställda val\n"\
-    "\n"\
+"\n"\
 "Tillgängliga profiler är:\n"\
 "\n"\
 "   <fast>        standard\n"\
@@ -341,7 +342,7 @@ static char help_text[]=
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
-    " vbr=<0-4>     variabel bitrate metod\n"\
+" vbr=<0-4>     variabel bitrate metod\n"\
 "                0: cbr\n"\
 "                1: mt\n"\
 "                2: rh(default)\n"\
@@ -389,7 +390,6 @@ static char help_text[]=
 "                 <8-320>: ABR kodning vid i medeltal angiven bitrate (kbps).\n\n"
 
 //codec-cfg.c:
-
 #define MSGTR_DuplicateFourcc "duplicerad FourCC"
 #define MSGTR_TooManyFourccs "för många FourCCs/format..."
 #define MSGTR_ParseError "tolkningsfel"
@@ -416,11 +416,11 @@ static char help_text[]=
 #define MSGTR_AudioVideoCodecTotals "%d audio & %d video codecs\n"
 #define MSGTR_CodecDefinitionIncorrect "Codec är inte definerad korrekt."
 #define MSGTR_OutdatedCodecsConf "Denna codecs.conf är för gammal och inkompatibel med denna MPlayer version!" // release is more like 'släpp', sounds wrong, using version instead
+
 // divx4_vbr.c:
 #define MSGTR_OutOfMemory "slut på minne"
 
-// FIXME chip? chips or kort?
-#define MSGTR_OverridingTooLowBitrate "Specifierad bitrate är för låg för detta chips.\n"\
+#define MSGTR_OverridingTooLowBitrate "Specifierad bitrate är för låg för detta chips.\n" /* FIXME chip? chips or kort? */ \
 "Minimal möjlig bitrate för detta chips är %.0f Kbps. Skriver över\n"\
 "användarspecificerade värden.\n"
 
@@ -462,20 +462,19 @@ static char help_text[]=
 #define MSGTR_DVDopenOk "DVD öppnades problemfritt.\n"
 
 // demuxer.c, demux_*.c:
-
 #define MSGTR_AudioStreamRedefined "VARNING: Audioströmsfilhuvud %d omdefinerad.\n"
 #define MSGTR_VideoStreamRedefined "WARNING: Videoströmsfilhuvud %d omdefinerad.\n"
 #define MSGTR_TooManyAudioInBuffer "\nAllt för många audiopaket i bufferten: (%d i %d byte).\n"
 #define MSGTR_TooManyVideoInBuffer "\nAllt för många videopaket i bufferten: (%d i %d byte).\n"
 #define MSGTR_MaybeNI "Kanske försöker du spela upp en icke-interleaved ström/fil, eller så har decodern falierat?\n" \
-    "För AVI-filer, försök med att forcera icke-interleaved-lägen med -ni argumentet.\n" // FIXME non-interleaved
+                      "För AVI-filer, försök med att forcera icke-interleaved-lägen med -ni argumentet.\n" // FIXME non-interleaved
 #define MSGTR_SwitchToNi "\nSvårt interleaved AVI-fil detekterad, går över till '-ni'-läge...\n"
 #define MSGTR_Detected_XXX_FileFormat "%s filformat detekterat.\n"
 #define MSGTR_DetectedAudiofile "Audiofilformat detekterat.\n"
 #define MSGTR_NotSystemStream "Icke 'MPEG System Stream'-format... (kanske Transport Stream?)\n"
 #define MSGTR_InvalidMPEGES "Icke godkänd 'MPEG-ES'-ström??? Kontakta upphovsmannen, det kanske är en bugg :(\n" //FIXME author???
 #define MSGTR_FormatNotRecognized "================ Tyvärr, detta filformat är inte rekogniserbart/stött ==================\n"\
-    "=== Om denna fil är en AVi, ASF eller MPEG-ström, var vänlig kontakta upphovsmannen! ===\n" //FIXME author???
+                                  "=== Om denna fil är en AVi, ASF eller MPEG-ström, var vänlig kontakta upphovsmannen! ===\n" //FIXME author???
 #define MSGTR_MissingVideoStream "Ingen videoström funnen.\n"
 #define MSGTR_MissingAudioStream "Ingen audioström funnen -> inget ljud.\n"
 #define MSGTR_MissingVideoStreamBug "Saknar videoström!? Kontakta upphovsmannen, det kan vara en bugg :(\n"
@@ -513,7 +512,6 @@ static char help_text[]=
 #define MSGTR_EnterTelecineMode "\ndemux_mpg: '24fps progressive NTSC'-innehåll upptäckt, ändrar framerate.\n" // -''-
 
 // dec_video.c & dec_audio.c:
-
 #define MSGTR_CantOpenCodec "Kunde inte öppna codec.\n"
 #define MSGTR_CantCloseCodec "Kunde inte stänga codec\n"
 
@@ -548,21 +546,18 @@ static char help_text[]=
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allokerar %d + %d = %d byte för utbuffert.\n"
 
 // LIRC:
-
 #define MSGTR_SettingUpLIRC "Aktiverar LIRC-stöd...\n"
 #define MSGTR_LIRCdisabled "Du kommer inte att kunna använda din fjärrkontroll.\n"
 #define MSGTR_LIRCopenfailed "Misslyckades med att aktivera LIRC-stöd.\n"
 #define MSGTR_LIRCcfgerr "Misslyckades med att läsa LIRC-konfigurationsfil %s.\n"
 
 // vf.c
-
 #define MSGTR_CouldNotFindVideoFilter "Kunde inte finna videofilter '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Kunde inte öppna videofilter '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Öppnar videofilter: "
 #define MSGTR_CannotFindColorspace "Kunde inte hitta matchande färgrymder, t.o.m. vid insättning av 'scale' :(\n" // FIXME colorspace
 
 // vd.c
-
 #define MSGTR_CodecDidNotSet "VDec: Codec satt inte sh->disp_w samt sh->disp_h, försöker gå runt problemet.\n"
 #define MSGTR_VoConfigRequest "VDec: vo-konfigurationsbegäran - %d x %d (preferred csp: %s)\n"
 #define MSGTR_CouldNotFindColorspace "Kunde inte finna matchande färgrymder - försöker åter med -vf scale...\n" // -''-
@@ -570,13 +565,11 @@ static char help_text[]=
 #define MSGTR_MovieAspectUndefined "Film-Aspect är ej definerad - ingen prescaling kommer att äga rum.\n"
 
 // vd_dshow.c, vd_dmo.c
-
 #define MSGTR_DownloadCodecPackage "Du måste uppgradera/installera de binära codecspaketen.\nGå till http://www.mplayerhq.hu/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: 'Win32/DShow'-videocodecinitiering: OK.\n"
 #define MSGTR_DMOInitOK "INFO: 'Win32/DMO'-videocodecinitiering: OK.\n"
 
 // x11_common.c
-
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Kunde inte sända EWMH-fullskärmshändelse!\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Ingen hårdvarumixning, lägger till volymfilter.\n"
@@ -594,10 +587,12 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Välj..."
 #define MSGTR_AudioFileSelect "Välj extern audiokanal..."
 #define MSGTR_FontSelect "Välj font..."
+// NOTE: If you change MSGTR_PlayList pleace see if it still fits MSGTR_MENU_PlayList
 #define MSGTR_PlayList "Spellista"
 #define MSGTR_Equalizer "Equalizer" 
 #define MSGTR_SkinBrowser "Skinläsare"
 #define MSGTR_Network "Nätverksströmning..."
+// NOTE: If you change MSGTR_Preferences pleace see if it still fits MSGTR_MENU_Preferences
 #define MSGTR_Preferences "Inställningar"
 #define MSGTR_AudioPreferences "Audiodirvrutinskonfiguration"
 #define MSGTR_NoMediaOpened "Inget media öppnad"
@@ -607,7 +602,6 @@ static char help_text[]=
 #define MSGTR_NoFileLoaded "Ingen fil laddad"
 
 // --- buttons ---
-
 #define MSGTR_Ok "OK"
 #define MSGTR_Cancel "Avbryt"
 #define MSGTR_Add "Lägg till"
@@ -618,14 +612,12 @@ static char help_text[]=
 #define MSGTR_Browse "Bläddra"
 
 // --- error messages ---
-
 #define MSGTR_NEMDB "Tyvärr, inte tillräckligt minne för ritbuffert."
 #define MSGTR_NEMFMR "Tyvärr, inte tillräckligt minne för menyrendering."
 #define MSGTR_IDFGCVD "Tyvärr, jag hittade inte en GUI-kompatibel video-ut-drivrutin."
 #define MSGTR_NEEDLAVCFAME "Tyvärr, du kan inte spela icke-MPEG-filer med ditt DXR3/H+-enhet utan omkodning.\nVar god aktivera lavc eller fame i 'DXR3/H+'-konfigurationsboxen."
 
 // --- skin loader error messages
-
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] fel i skinkonfigureringsfil på rad %d: %s"
 #define MSGTR_SKIN_WARNING1 "[skin] varning i konfigurationsfil på rad %d:\nwidget (%s) funnen, men ingen \"section\" funnen före"
 #define MSGTR_SKIN_WARNING2 "[skin] varning i konfigurationsfil på rad %d:\nwidget (%s) funnen, men ingen \"subsection\" funnen före"
@@ -650,7 +642,6 @@ static char help_text[]=
 #define MSGTR_SKIN_LABEL "Skin:"
 
 // --- gtk menus
-
 #define MSGTR_MENU_AboutMPlayer "Om MPlayer"
 #define MSGTR_MENU_Open "Öppna..."
 #define MSGTR_MENU_PlayFile "Spela fil..."
@@ -691,8 +682,9 @@ static char help_text[]=
 #define MSGTR_MENU_VideoTrack "Videospår"
 
 // --- equalizer
-
+// Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio
 #define MSGTR_EQU_Audio "Audio"
+// Note: If you change MSGTR_EQU_Video please see if it still fits MSGTR_PREFERENCES_Video
 #define MSGTR_EQU_Video "Video"
 #define MSGTR_EQU_Contrast "Kontrast: "
 #define MSGTR_EQU_Brightness "Ljusstyrka: "
@@ -713,16 +705,15 @@ static char help_text[]=
 #define MSGTR_EQU_Channel6 "Kanal 6:"
 
 // --- playlist
-
 #define MSGTR_PLAYLIST_Path "Sökväg"
 #define MSGTR_PLAYLIST_Selected "Valda filer"
 #define MSGTR_PLAYLIST_Files "Filer"
 #define MSGTR_PLAYLIST_DirectoryTree "Katalogträd"
 
 // --- preferences
-
 #define MSGTR_PREFERENCES_SubtitleOSD "Textning & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
+// NOTE: If you change MSGTR_PREFERENCES_Misc see if it still fits MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "Diverse"
 
 #define MSGTR_PREFERENCES_None "Inget"
@@ -773,7 +764,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DXR3_VENC "Videoencoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "ANvänd LAVC (FFmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "Använd FAME"
-
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
 #define MSGTR_PREFERENCES_FontEncoding2 "Västeuropeiska språk (ISO-8859-1)"
 #define MSGTR_PREFERENCES_FontEncoding3 "Västeuropeiska språk med Euro (ISO-8859-15)"
@@ -796,7 +786,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding20 "Thailänsk teckenuppsättning (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Kyrilliska Windown (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Slaviska/Centraleuropeiska Windows (CP1250)"
-
 #define MSGTR_PREFERENCES_FontNoAutoScale "Ingen autoskalning"
 #define MSGTR_PREFERENCES_FontPropWidth "Propotionellt mot filmbredd"
 #define MSGTR_PREFERENCES_FontPropHeight "Propotionellt mot filmhöjd"
@@ -822,7 +811,6 @@ static char help_text[]=
 #define MSGTR_ABOUT_UHU "GUI-utveckling sponstrat av UHU Linux\n"
 
 // --- messagebox
-
 #define MSGTR_MSGBOX_LABEL_FatalError "Oöverkomligt fel!"
 #define MSGTR_MSGBOX_LABEL_Error "Fel!"
 #define MSGTR_MSGBOX_LABEL_Warning "Varning!"
@@ -847,14 +835,12 @@ static char help_text[]=
 #define MSGTR_VO_UnknownSuboptions "Okänd suboption" // -''-
 
 // vo_jpeg.c
-
 #define MSGTR_VO_JPEG_ProgressiveJPEG "'Progressive JPEG' aktiverat."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "'Progressive JPEG' deaktiverat."
 #define MSGTR_VO_JPEG_BaselineJPEG "'Baseline JPEG' aktiverat."
 #define MSGTR_VO_JPEG_NoBaselineJPEG "'Baseline JPEG' deaktiverat."
 
 // vo_pnm.c
-
 #define MSGTR_VO_PNM_ASCIIMode "ASCII-mode aktiverat."
 #define MSGTR_VO_PNM_RawMode "Rått-mode aktiverat." // FIXME Rått sounds strange
 #define MSGTR_VO_PNM_PPMType "Kommer att skriva PPM-filer."
@@ -862,7 +848,6 @@ static char help_text[]=
 #define MSGTR_VO_PNM_PGMYUVType "Kommer att skriva PGMYUV-filer."
 
 // vo_yuv4mpeg.c
-
 #define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "'Interlaced'-mode kräver bildhöjd som är delbar med 4." // FIXME interlaced?
 #define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Oförmögen att allokera linjebufferrt för interlaced-mode."
 #define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "indata är ej i RGB-format, kan inte separera 'chrominance' via fält!" // FIXME chrominance
@@ -887,22 +872,19 @@ static char help_text[]=
 // libao2 
 
 // audio_out.c
-
 #define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9- samt alsa1xmodulerna har blivit borttagna, använd -ao istället.\n"
 
 // ao_oss.c
-
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Kan inte öppna mixernehet %s: %s\n"
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audiokortsmixer har inte kanal '%s' använder standard.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Kan inte öppna audioenhet %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Kan inte få till 'filedescriptor'sblockning: %s\n" // FIXME filedescriptor
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Misslyckades att sätta audioenhet till %d kanaler.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: dirvrutin hanerar ej SNDCTL_DSP_GETOSPACE :-(\n"
-#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Din audiodrivrutin hanterar inte select()  ***\n Komplilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n" // TODO shoud be a better way to do this
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Din audiodrivrutin hanterar inte select()  ***\n Komplilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nFatalt fel: *** CAN INTE BLI ÅTERÖPPNAD / ÅTERSTÄLLER AUDIOENHET *** %s\n"
 
 // ao_arts.c
-
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n" // FIXME nothing?
 #define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Anslutet till ljudserver.\n"
 #define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Oförmögen att öppna en ström.\n" // FIXME 'ström' or 'ljudström'?
@@ -910,18 +892,15 @@ static char help_text[]=
 #define MSGTR_AO_ARTS_BufferSize "[AO ARTS] buffertstorlek: %d\n"
 
 // ao_dxr2.c
-
 #define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Sättning av volym till %d misslyckades.\n"
 #define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz är ej tillgänglig, försök med \"-aop list=resample\"\n"
 
 // ao_esd.c
-
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound misslyckades: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latency: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n" // FIXME translate?
 #define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] misslyckades att öppna uppspelningsström: %s\n" 
 
 // ao_mpegpes.c
-
 #define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB-audio-sättningsmixer misslyckades: %s\n" // set ~= sättning?
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz ej tillgänglig, försöker resampla...\n"
 
@@ -929,13 +908,11 @@ static char help_text[]=
 // This one desn't even have any mp_msg nor printf's?? [CHECK]
 
 // ao_pcm.c
-
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fil: %s (%s)\nPCM: Samplerate: %iHz Kanaler: %s Format %s\n" // FIXME Samplerate?
 #define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: snabbaste dumplning är tillgänglig via -vc dummy -vo null\nPCM: Info: för att skriva WAVE-filer använd -ao pcm:waveheader (standard).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Misslyckades att öppna %s för skrivning!\n"
 
 // ao_sdl.c
-
 #define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Kanaler: %s Format %s\n" // -''-
 #define MSGTR_AO_SDL_DriverInfo "[AO SDL] använder %s som audioenhet.\n"
 #define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Icke tillgängligt audioformat: 0x%x.\n" // support?
@@ -943,7 +920,6 @@ static char help_text[]=
 #define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Oförmögen att öppna audio: %s\n" // audio what?
 
 // ao_sgi.c
-
 #define MSGTR_AO_SGI_INFO "[AO SGI] kontroll.\n"
 #define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Kanaler: %s Format %s\n" // FIXME Samplerate
 #define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: icke godkänd enhet.\n"
@@ -959,16 +935,14 @@ static char help_text[]=
 #define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_resume: ...\n" // -''-
 
 // ao_sun.c
-
 #define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO misslyckades.\n"
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: skrivning misslyckades."
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Kan inte öppna audioenhet %s, %s  -> inget ljud.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: ditt kort hanterar inte %d kanaler, %s, %d Hz samplerate.\n" // FIXME samplerate
-#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Din ljudkortsenhet hanterar inte select()  ***\nKompilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n" // same as for MSGTR_AO_OSS_CantUseSelect
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Din ljudkortsenhet hanterar inte select()  ***\nKompilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n"
 #define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatalt fel: *** KAN INTE ÅTERÖPPNA / ÅTERSTÄLLA AUDIOENHET (%s) ***\n"
 
 // ao_alsa5.c
-
 #define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: önskat format: %d Hz, %d kanaler, %s\n"
 #define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: inga ljudkort funna.\n"
 #define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: icke godkänt format (%s) önskat - ut deaktiverat.\n" // FIXME output -> ut here?
