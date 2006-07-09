@@ -295,7 +295,9 @@ Codecs:
   --disable-amr_nb-fixed disable amr narrowband, fixed point [autodetect]
   --disable-amr_wb       disable amr wideband, floating point [autodetect]
   --disable-codec=CODEC  disable specified codec
-  --enable-codec=CODEC   dnable specified codec
+  --enable-codec=CODEC   enable specified codec
+  --disable-parser=PARSER disable specified parser
+  --enable-parser=PARSER  enable specified parser
   
 Video output:
   --disable-vidix-internal disable internal VIDIX [for x86 *nix]
@@ -1553,6 +1555,7 @@ _amr_nb=auto
 _amr_nb_fixed=auto
 _amr_wb=auto
 _libavcodecs=`grep 'register_avcodec(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
+_libavparsers=`grep 'av_register_codec_parser(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
 _libavcodec_so=auto
 _libavformat=auto
 _libavformat_so=auto
@@ -1912,6 +1915,8 @@ for ac_option do
   --disable-amr_wb)	_amr_wb=no	;;
   --enable-codec=*)	_libavcodecs="$_libavcodecs `echo $ac_option | cut -d '=' -f 2`" ;;
   --disable-codec=*)	_libavcodecs=`echo $_libavcodecs | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-parser=*)	_libavparsers="$_libavparsers `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-parser=*)	_libavparsers=`echo $_libavparsers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-libavformat)	_libavformat=yes;;
   --disable-libavformat)	_libavformat=no	;;
   --enable-libavformat_so)	_libavformat_so=yes	;;
@@ -7591,6 +7596,7 @@ AMR_NB=$_amr_nb
 AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_FAAC=$_faac
 CONFIG_XVID=$_lavc_xvid
 CONFIG_X264=$_x264
