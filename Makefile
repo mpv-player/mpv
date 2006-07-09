@@ -60,10 +60,6 @@ ifeq ($(UNRARLIB),yes)
 SRCS_COMMON += unrarlib.c
 endif
 
-ifeq ($(FREETYPE),yes)
-SRCS_MENCODER += libvo/font_load_ft.c
-endif
-
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
@@ -80,12 +76,6 @@ VO_LIBS = $(AA_LIB) \
 
 ifeq ($(EXTERNAL_VIDIX),yes)
 VO_LIBS += $(EXTERNAL_VIDIX_LIB)
-endif
-
-ASS_LIB =
-
-ifeq ($(CONFIG_ASS),yes)
-ASS_LIB += libass/libass.a
 endif
 
 AO_LIBS = $(ARTS_LIB) \
@@ -119,13 +109,11 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
-              $(ASS_LIB) \
               libswscale/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
               $(DVDNAV_LIB) \
               $(CODEC_LIBS) \
-              $(FREETYPE_LIB) \
               $(TERMCAP_LIB) \
               $(CDPARANOIA_LIB) \
               $(MPLAYER_NETWORK_LIB) \
@@ -263,9 +251,14 @@ COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
 ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a
+COMMON_LIBS += libass/libass.a
 PARTS += libass
 endif
-
+# FreeType needs to come after ASS to avoid link failures on MinGW
+ifeq ($(FREETYPE),yes)
+SRCS_MENCODER += libvo/font_load_ft.c
+COMMON_LIBS += $(FREETYPE_LIB)
+endif
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
 GUI_LIBS = Gui/libgui.a
