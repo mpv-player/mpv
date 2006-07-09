@@ -2097,7 +2097,7 @@ for ac_option do
     _inc_x11=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-x11libdir=*)
-    _x11_paths=`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    _x11_paths=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --with-dxr2incdir=*)
     _inc_dxr2=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
