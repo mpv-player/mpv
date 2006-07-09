@@ -1,4 +1,4 @@
-.\" Synced with r18712
+.\" Synced with r18969
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 05. 11." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 07. 09." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -304,7 +304,7 @@ Felirat késleltetés állítása ± 0.1 másodperccel.
 .IPs "r és t"
 Felirat mozgatása fel/le.
 .IPs "i (csak \-edlout módban)"
-EDL jelzés beállítása.
+Egy EDL kihagyás kezdetének vagy végének bejelölése és a megadott fájlba írása.
 .IPs "s (csak \-vf screenshot mellett)"
 Képernyõmentés készítése.
 .IPs "I"
@@ -727,8 +727,8 @@ A támogatását be kell fordítani a configure --enable-crash-debug kapcsolójával.
 .TP
 .B \-edlout <fájlnév>
 Létrehoz egy új fájlt és az edit decision list (EDL) rekordokat beleírja.
-Lejátszás közben, ha a felhasználó megnyomja az 'i' gombot, egy, az utolsó
-két másodperc átugrását elõíró bejegyzést ír a fájlba.
+Lejátszás közben, a felhasználó az 'i' gomb megnyomásával jelölheti meg egy
+kihagyási rész elejét és végét.
 Ez egy kezdõpont a felhasználónak az EDL bejegyzések késõbbi finomhangolásához.
 Lásd DOCS/\:HTML/\:hu/\:edl.html fájlt a részletekért.
 .
@@ -1397,6 +1397,15 @@ Ez az opció hasznos, ha egy router mögött vagy és továbbítani akarod az
 RTSP folyamot a szerverrõl egy megadott kliensre.
 .
 .TP
+.B \-rtsp-destination
+'rtsp://' URL-ekkel használandó a cél IP címek kötéséhez.
+Ez az opció pár olyan RTSP szerver esetén hasznos, melyek nem a megfelelõ
+interfésznek küldik az RTP csomagokat.
+Ha az RTSP szerverhez sikertelen a kapcsolódás, használd a -v kapcsolót, hogy
+meglásd, melyik IP címhez próbál kapcsolódni az MPlayer és helyette próbálj
+ki inkább egy olyat, ami a számítógépedhez van rendelve.
+.
+.TP
 .B \-rtsp-stream-over-tcp (csak LIVE555)
 rtsp:// URL-ekkel használandó, azt adja meg hogy a bejövõ RTP és RTCP
 csomagok TCP-n keresztül jöjjenek (ugyan azt a TCP kapcsolatot használva,
@@ -1704,6 +1713,12 @@ A fontconfig-gal ez az opció a fontconfig betûtípus nevét határozza meg.
 .TP
 .B \-fontconfig (csak fontconfig)
 A fontconfig-gal karbantartott betûtípusok használatának engedélyezése.
+.
+.TP
+.B \-(no)embeddedfonts (csak FreeType)
+Engedélyezi a matroska beágyazott betûinek kicsomagolását.
+Ezek a betûtípusok használhatóak az SSA/ASS feliratok
+rendereléséhez (-ass kapcsoló).
 .
 .TP
 .B \-forcedsubsonly
@@ -2024,6 +2039,31 @@ a \'.idx', '.ifo', '.sub' elhagyandó.
 .TP
 .B \-vobsubid <0\-31>
 A VobSub felirat ID-je itt adható meg.
+.
+.TP
+.B \-ass (csak FreeType) (FontConfig opcionális)
+Bekapcsolja az SSA/ASS felirat renderelést.
+Ezzel az opcióval a libass lesz használva az SSA/ASS
+külsõ feliratokhoz és matroska sávokhoz.
+Ajánlott még a -embeddedfonts engedélyezése is.
+.
+.TP
+.B \-ass-font-scale <érték>
+Beállítja a betûtípusokhoz használt arány együtthatót az SSA/ASS renderelõben.
+.
+.TP
+.B \-ass-line-spacing <érték>
+Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
+.
+.TP
+.B \-ass-top-margin <érték>
+Egy fekete sávot ad a kocka tetejéhez.
+Az SSA/ASS renderelõ a felsõ feliratokat ide teszi.
+.
+.TP
+.B \-ass-bottom-margin <érték>
+Egy fekete sávot ad a kocka aljához.
+Az SSA/ASS renderelõ a feliratokat ide teszi.
 .
 .
 .
@@ -3124,6 +3164,12 @@ Lásd a TOOLS/edgedect.fp fájl példáért.
 .IPs customtex=<fájlnév>
 Egyéni "gamma ramp" textúrát tölt be a <fájlnév>-bõl.
 A yuv=4 vagy a customprog opcióval együtt használható.
+.IPs (no)customtlin
+Ha engedélyezett (alapértelmezett), GL_LINEAR interpoláció használata,
+különben GL_NEAREST a customtex textúrákhoz.
+.IPs (no)customtrect
+Ha engedélyezve van, texture_rectangle-t használ a customtex textúrákhoz.
+Alapértelmezésben le van tiltva.
 .REss
 .RE
 .PD 1
@@ -3557,6 +3603,8 @@ l3codeca.acm MP3 codec kényszerítése.
 Elsõsorban libmad, aztán mások használata.
 .IPs "\-ac hwac3,a52,"
 Elõször hardveres AC3 áteresztés, majd szoftveres AC3 codec, végül egyéb használata.
+.IPs "\-ac hwdts,"
+Hardveres DTS áteresztés, majd visszalépés másra.
 .IPs "\-ac -ffmp3,"
 Az FFmpeg MP3 dekóderének letiltása.
 .RE
@@ -6227,6 +6275,12 @@ Megengedi képernyõmentések készítését a filmbõl a screenshot paranccsal
 az elsõ szabad szám felhasználásával - egy fájl sem lesz felülírva.
 A szûrõ nem jelent hátrányt, ha nem használod és elfogad minden
 színteret, így nyugodtan beleírható a konfigurációs fájlba.
+.RE
+.
+.TP
+.B ass\ \ \ \ \ 
+Az SSA/ASS felirat renderelõt a videó szûrõ lánc meghatározott pontjára teszi.
+A -ass kapcsolóval együtt hasznos.
 .RE
 .
 .
