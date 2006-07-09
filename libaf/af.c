@@ -72,7 +72,7 @@ int* af_cpu_speed = NULL;
 
 /* Find a filter in the static list of filters using it's name. This
    function is used internally */
-af_info_t* af_find(char*name)
+static af_info_t* af_find(char*name)
 {
   int i=0;
   while(filter_list[i]){
@@ -100,7 +100,7 @@ af_instance_t* af_get(af_stream_t* s, char* name)
 
 /*/ Function for creating a new filter of type name. The name may
   contain the commandline parameters for the filter */
-af_instance_t* af_create(af_stream_t* s, char* name)
+static af_instance_t* af_create(af_stream_t* s, char* name)
 {
   char* cmdline = name;
 
@@ -152,7 +152,7 @@ err_out:
 /* Create and insert a new filter of type name before the filter in the
    argument. This function can be called during runtime, the return
    value is the new filter */
-af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
+static af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
 {
   // Create the new filter and make sure it is OK
   af_instance_t* new=af_create(s,name);
@@ -176,7 +176,7 @@ af_instance_t* af_prepend(af_stream_t* s, af_instance_t* af, char* name)
 /* Create and insert a new filter of type name after the filter in the
    argument. This function can be called during runtime, the return
    value is the new filter */
-af_instance_t* af_append(af_stream_t* s, af_instance_t* af, char* name)
+static af_instance_t* af_append(af_stream_t* s, af_instance_t* af, char* name)
 {
   // Create the new filter and make sure it is OK
   af_instance_t* new=af_create(s,name);
@@ -226,7 +226,7 @@ void af_remove(af_stream_t* s, af_instance_t* af)
 /* Reinitializes all filters downstream from the filter given in the
    argument the return value is AF_OK if success and AF_ERROR if
    failure */
-int af_reinit(af_stream_t* s, af_instance_t* af)
+static int af_reinit(af_stream_t* s, af_instance_t* af)
 {
   do{
     af_data_t in; // Format of the input to current filter

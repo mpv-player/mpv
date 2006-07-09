@@ -74,7 +74,7 @@ static float conv(const int nx, const int nk, float *sx, float *sk,
 }
 
 /* Detect when the impulse response starts (significantly) */
-int pulse_detect(float *sx)
+static int pulse_detect(float *sx)
 {
     /* nmax must be the reference impulse response length (128) minus
        s->hrflen */
@@ -90,7 +90,7 @@ int pulse_detect(float *sx)
 
 /* Fuzzy matrix coefficient transfer function to "lock" the matrix on
    a effectively passive mode if the gain is approximately 1 */
-inline float passive_lock(float x)
+static inline float passive_lock(float x)
 {
    const float x1 = x - 1;
    const float ax1s = fabs(x - 1) * (1.0 / MATAGCLOCK);
@@ -100,7 +100,7 @@ inline float passive_lock(float x)
 
 /* Unified active matrix decoder for 2 channel matrix encoded surround
    sources */
-inline void matrix_decode(short *in, const int k, const int il,
+static inline void matrix_decode(short *in, const int k, const int il,
 			  const int ir, const int decode_rear,
 			  const int dlbuflen,
 			  float l_fwr, float r_fwr,
@@ -207,7 +207,7 @@ inline void matrix_decode(short *in, const int k, const int il,
 #endif
 }
 
-inline void update_ch(af_hrtf_t *s, short *in, const int k)
+static inline void update_ch(af_hrtf_t *s, short *in, const int k)
 {
     const int fwr_pos = (k + FWRDURATION) % s->dlbuflen;
     /* Update the full wave rectified total amplitude */

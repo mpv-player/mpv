@@ -274,7 +274,7 @@ int af_filter_design_pfir(unsigned int n, unsigned int k, _ftype_t* w, _ftype_t*
    Note that a0 is assumed to be 1, so there is no wrapping
    of it.  
 */
-void af_filter_prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
+static void af_filter_prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
 {
   _ftype_t wp;
   wp = 2.0 * fs * tan(M_PI * fc / fs);
@@ -310,7 +310,7 @@ void af_filter_prewarp(_ftype_t* a, _ftype_t fc, _ftype_t fs)
    Return: On return, set coef z-domain coefficients and k to the gain
    required to maintain overall gain = 1.0;
 */
-void af_filter_bilinear(_ftype_t* a, _ftype_t* b, _ftype_t* k, _ftype_t fs, _ftype_t *coef)
+static void af_filter_bilinear(_ftype_t* a, _ftype_t* b, _ftype_t* k, _ftype_t fs, _ftype_t *coef)
 {
   _ftype_t ad, bd;
 
