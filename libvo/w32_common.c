@@ -301,8 +301,8 @@ int vo_w32_config(uint32_t width, uint32_t height, uint32_t flags) {
     o_dwidth = width;
     o_dheight = height;
 
-    prev_width = width;
-    prev_height = height;
+    prev_width = vo_dwidth = width;
+    prev_height = vo_dheight = height;
     prev_x = vo_dx;
     prev_y = vo_dy;
 
