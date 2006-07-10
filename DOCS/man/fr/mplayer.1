@@ -1,4 +1,4 @@
-.\" synced with r18656
+.\" synced with r18928
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1473,8 +1473,13 @@ redistribuer le flux RTSP du serveur vers un client spécifique.
 .
 .TP
 .B \-rtsp-destination
-Utilisé avec les URLs de type 'rtsp://', permet de forcer l'addresse IP de destination qui doit être utilisée.
-Cette option peut s'avérer utile lorsque le serveur RTSP n'envoit pas les paquets RTP vers la bonne interface. Si la connection au serveur RTSP échoue, utilisez l'option -v pour connaître l'adresse IP auto-détectée par MPlayer et tentez de la remplacer par celle d'une de vos interfaces par le biais de cette option.
+Utilisé avec les URLs de type 'rtsp://', permet de forcer l'addresse IP de
+destination qui doit être utilisée.
+Cette option peut s'avérer utile lorsque le serveur RTSP n'envoit pas les
+paquets RTP vers la bonne interface.
+Si la connection au serveur RTSP échoue, utilisez l'option \-v pour connaître
+l'adresse IP auto-détectée par MPlayer et tentez de la remplacer par celle
+d'une de vos interfaces par le biais de cette option.
 .
 .TP
 .B \-rtsp-stream-over-tcp (LIVE555 uniquement)
