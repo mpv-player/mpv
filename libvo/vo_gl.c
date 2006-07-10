@@ -602,7 +602,6 @@ static uint32_t get_image(mp_image_t *mpi) {
                NULL, GL_DYNAMIC_DRAW);
     gl_buffersize = mpi->stride[0] * mpi->h;
   }
-  UnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // HACK, needed for some MPEG4 files??
   mpi->planes[0] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   if (mpi->planes[0] == NULL) {
