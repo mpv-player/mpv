@@ -3283,24 +3283,29 @@ Cette méthode est rapide mais inexacte.
 table de lookup.
 Nécessite l'extension GL_ARB_fragment_program et au moins 4 unités de
 texture.
+Extrèmement lent (émulation logicielle) avec certaines (toutes?) cartes
+ATI puisque cela utilise des textures pour les pixels en bordure.
 Permet le contrôle de la luminosité, du contraste, de la saturation, de
 la teinte et du gamma.
 Le gamma du rouge, vert et bleu peut aussi être ajusté indépendement.
 La vitesse de ce type de conversion dépend plus de la bande passante
 de la carte vidéo que les autres méthodes.
 .RE
-.IPs [l|c]scale=<n>
-Sélection de la fonction de mise à l'échelle à utiliser (pour le luma
-et le chroma séparément).
-Valide uniquement pour les modes yuv 2, 3 et 4.
+.IPs lscale=<n>
+Sélection de la fonction de mise à l'échelle à utiliser pour la luminance.
+Valide uniquement pour les modes yuv 2, 3, 4 et 6.
 .RSss
 0: Utilise un simple fitrage linéraire (par défaut)
 .br
 1: Utilise un fitrage bicubique (meilleure qualité).
+Nécessite une unité de texture supplémentaire.
 Les cartes plus anciennes ne pourront pas gérer le chroma, tout du moins
 pas en mode plein écran.
-Nécessite une unité de texture supplémentaire.
 .RE
+.IPs cscale=<n>
+Sélection de la fonction de mise à l'échelle à utiliser pour la chrominance.
+Pour plus de détails, voir lscale.
+.
 .IPs customprog=<nom_fichier>
 Charge un programme fragment personnalisé depuis <nom_fichier>.
 Voir l'exemple TOOLS/edgedect.fp.
