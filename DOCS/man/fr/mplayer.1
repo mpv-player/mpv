@@ -6216,37 +6216,30 @@ Séparation temporelle des champs \- sépare les champs en trames, doublant le
 débit de sortie.
 Comme le filtre telecine, "tfields" ne fonctionnera correctement qu'avec
 MEncoder, et seulement si \-fps et \-ofps sont définis au débit (double) désiré!
-Les modes disponibles sont:
 .PD 0
 .RSs
-.IPs 0
-Laisse les champs inchangés. (Cela va sauter/\:scintiller.)
-.IPs 1
-Interpole les lignes manquantes. (L'algorithme utilisé peut ne pas être si
+.IPs <mode>
+0: Laisse les champs inchangés. (Cela va sauter/\:scintiller.)
+.br
+1: Interpole les lignes manquantes. (L'algorithme utilisé peut ne pas être si
 bon.)
-.IPs 2
-Fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
+.br
+2: Fait une translation de champs de 1/\:4 pixel avec interpolation linéaire
 (pas de saut).
-.IPs 4
-Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
+.br
+4: Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
 qualité) (par défaut).
-.RE
-.PD 1
-.RS
-Les dominances de champs disponibles sont\ :
-.RE
-.PD 0
-.RSs
-.IPs -1
-auto (par défaut)
+.
+.IPs <dominances de champs>
+-1: auto (par défaut)
 Ne fonctionne que si le décodeur exporte les informations nécessaires
 et que les filtres de la chaîne de filtres appliqués avant tfields
 ne supriment pas cette information, sinon on commence par défaut
 par le champ du haut.
-.IPs 0
-champ du haut d'abord
-.IPs 1
-champ du bas d'abord
+.br
+0: champ du haut d'abord
+.br
+1: champ du bas d'abord
 .RE
 .PD 1
 .
