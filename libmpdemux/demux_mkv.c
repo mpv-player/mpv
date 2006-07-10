@@ -1883,9 +1883,9 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   sh_audio_t *sh_a = new_sh_audio(demuxer, track->tnum);
+  demux_packet_t *dp;
   if(!sh_a) return 1;
   mkv_d->audio_tracks[mkv_d->last_aid] = track->tnum;
-  demux_packet_t *dp;
 
   sh_a->ds = demuxer->audio;
   sh_a->wf = (WAVEFORMATEX *) malloc (sizeof (WAVEFORMATEX));
