@@ -1120,7 +1120,11 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	info->advance.y = info->glyph->advance.y >> 10;
 
 	info->outline_glyph = info->glyph;
-	FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
+	error = FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
+	if (error) {
+		mp_msg(MSGT_GLOBAL, MSGL_WARN, "FT_Glyph_Stroke error %d \n", error);
+		FT_Glyph_Copy(info->glyph, &info->outline_glyph);
+	}
 
 	info->bitmap = 0; // outline glyph
 
