@@ -39,13 +39,13 @@ int strtocolor(char** q, uint32_t* res)
 	char* p = *q;
 	
 	if (*p == '&') ++p; 
-	else mp_msg(MSGT_GLOBAL, MSGL_V, "bad color: \"%s\"\n", p);
+	else mp_msg(MSGT_GLOBAL, MSGL_DBG2, "suspicious color format: \"%s\"\n", p);
 	
-	if (*p == 'H') { 
+	if (*p == 'H' || *p == 'h') { 
 		++p;
 		result = mystrtou32(&p, 16, &color);
 	} else {
-		result = mystrtou32(&p, 10, &color);
+		result = mystrtou32(&p, 0, &color);
 	}
 	
 	{
