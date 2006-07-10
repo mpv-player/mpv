@@ -187,9 +187,10 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
         switch(codec->codec_type){
         case CODEC_TYPE_AUDIO:{
             WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
+            sh_audio_t* sh_audio;
             if(priv->audio_streams >= MAX_A_STREAMS)
                 break;
-            sh_audio_t* sh_audio=new_sh_audio(demuxer, i);
+            sh_audio=new_sh_audio(demuxer, i);
             if(!sh_audio)
                 break;
             priv->astreams[priv->audio_streams] = i;
