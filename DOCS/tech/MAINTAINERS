@@ -113,6 +113,9 @@ demuxers:
 muxers:
     * muxer_lavf.c - Michael Niedermayer
 
+inputs:
+    * stream_pvr.c - Benjamin Zores
+
 codec support:
     * FFmpeg: Michael Niedermayer
     * XviD: Ivan Kalvachev
