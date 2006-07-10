@@ -74,6 +74,9 @@ SRCS += tv.c frequencies.c tvi_dummy.c
   endif
   ifeq ($(TV_V4L2),yes)
   SRCS += tvi_v4l2.c audio_in.c
+    ifeq ($(PVR),yes)
+    SRCS += stream_pvr.c
+    endif
   endif
   ifeq ($(TV_V4L),yes)
   SRCS += tvi_v4l.c audio_in.c

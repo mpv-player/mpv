@@ -135,6 +135,11 @@
 #else
 	{"tv", "MPlayer was compiled without TV interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
+#ifdef HAVE_PVR
+	{"pvr", pvropts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#else
+	{"pvr", "MPlayer was compiled without V4L2/PVR interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#endif
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #ifdef HAS_DVBIN_SUPPORT
 	{"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -414,6 +419,31 @@ m_option_t tvopts_conf[]={
 	{"adevice", &tv_param_adevice, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 	{"audioid", &tv_param_audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+#endif
+
+#ifdef HAVE_PVR
+extern int pvr_param_aspect_ratio;
+extern int pvr_param_sample_rate;
+extern int pvr_param_audio_layer;
+extern int pvr_param_audio_bitrate;
+extern char *pvr_param_audio_mode;
+extern int pvr_param_bitrate;
+extern char *pvr_param_bitrate_mode;
+extern int pvr_param_bitrate_peak;
+extern char *pvr_param_stream_type;
+
+m_option_t pvropts_conf[]={
+	{"aspect", &pvr_param_aspect_ratio, CONF_TYPE_INT, 0, 1, 4, NULL},
+	{"arate", &pvr_param_sample_rate, CONF_TYPE_INT, 0, 32000, 48000, NULL},
+	{"alayer", &pvr_param_audio_layer, CONF_TYPE_INT, 0, 1, 2, NULL},
+	{"abitrate", &pvr_param_audio_bitrate, CONF_TYPE_INT, 0, 32, 448, NULL},
+	{"amode", &pvr_param_audio_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vbitrate", &pvr_param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"vmode", &pvr_param_bitrate_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vpeak", &pvr_param_bitrate_peak, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"fmt", &pvr_param_stream_type, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
