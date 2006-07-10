@@ -42,6 +42,7 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	FcPattern *pat, *rpat;
 	int val_i;
 	FcChar8* val_s;
+	FcBool val_b;
 	char buf[2000];
 	
 	*index = 0;
@@ -60,6 +61,12 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	
 	rpat = FcFontMatch(priv->config, pat, &result);
 	if (!rpat)
+		return 0;
+	
+	result = FcPatternGetBool(rpat, FC_OUTLINE, 0, &val_b);
+	if (result != FcResultMatch)
+		return 0;
+	if (val_b != 1)
 		return 0;
 	
 	result = FcPatternGetInteger(rpat, FC_INDEX, 0, &val_i);
