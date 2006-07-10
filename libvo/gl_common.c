@@ -490,7 +490,7 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
   if (slice <= 0)
     slice = h;
   if (stride < 0) {
-    data += h * stride;
+    data += (h - 1) * stride;
     stride = -stride;
   }
   // this is not always correct, but should work for MPlayer
