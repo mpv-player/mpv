@@ -2574,6 +2574,7 @@ char *tmp;
 
 int gui_no_filename=0;
 
+struct {double pts; vo_functions_t *vo;} vf_vo_data;
 
   srand((int) time(NULL)); 
 
@@ -3590,7 +3591,6 @@ sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
 }
 
-struct {double pts; vo_functions_t *vo;} vf_vo_data;
 vf_vo_data.vo = video_out;
 current_module="init_video_filters";
 {
