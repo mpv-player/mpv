@@ -330,16 +330,15 @@ static int continue_buffered_image(struct vf_instance_s *vf)
 	int i=vf->priv->buffered_i;
 	double pts = vf->priv->buffered_pts;
 	mp_image_t *mpi = vf->priv->buffered_mpi;
-
-	if (i == 0)
-		vf_queue_frame(vf, continue_buffered_image);
-	pts += i * .02;  // XXX not right
-
 	int ret=0;
 	mp_image_t *dmpi;
 	void (*qpel)(unsigned char *, unsigned char *, int, int, int, int, int);
 	int bpp=1;
 	int tff;
+
+	if (i == 0)
+		vf_queue_frame(vf, continue_buffered_image);
+	pts += i * .02;  // XXX not right
 
 	if (!(mpi->flags & MP_IMGFLAG_PLANAR)) bpp = mpi->bpp/8;
 	if (vf->priv->parity < 0) {
