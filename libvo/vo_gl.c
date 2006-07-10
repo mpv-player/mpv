@@ -625,27 +625,31 @@ static uint32_t get_image(mp_image_t *mpi) {
 }
 
 static uint32_t draw_image(mp_image_t *mpi) {
-  unsigned char *data = mpi->planes[0];
   int slice = slice_height;
+  int stride[3] = {mpi->stride[0], mpi->stride[1], mpi->stride[2]};
+  unsigned char *planes[3] = {mpi->planes[0], mpi->planes[1], mpi->planes[2]};
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     return VO_TRUE;
+  mpi_flipped = (stride[0] < 0);
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
-    data = NULL;
+    intptr_t base = (intptr_t)planes[0];
+    if (mpi_flipped)
+      base += (mpi->h - 1) * stride[0];
+    planes[0] -= base;
+    planes[1] -= base;
+    planes[2] -= base;
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     slice = 0; // always "upload" full texture
   }
-  mpi_flipped = (mpi->stride[0] < 0);
-  glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[0],
+  glUploadTex(gl_target, gl_format, gl_type, planes[0], stride[0],
               mpi->x, mpi->y, mpi->w, mpi->h, slice);
   if (mpi->imgfmt == IMGFMT_YV12) {
-    data += mpi->planes[1] - mpi->planes[0];
     ActiveTexture(GL_TEXTURE1);
-    glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[1],
+    glUploadTex(gl_target, gl_format, gl_type, planes[1], stride[1],
                 mpi->x / 2, mpi->y / 2, mpi->w / 2, mpi->h / 2, slice);
-    data += mpi->planes[2] - mpi->planes[1];
     ActiveTexture(GL_TEXTURE2);
-    glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[2],
+    glUploadTex(gl_target, gl_format, gl_type, planes[2], stride[2],
                 mpi->x / 2, mpi->y / 2, mpi->w / 2, mpi->h / 2, slice);
     ActiveTexture(GL_TEXTURE0);
   }
