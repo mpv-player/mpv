@@ -16,6 +16,8 @@ MPlayer (1.0)
     * lavf demuxer now honors -alang
     * new native RTSP demuxer (handles MPEG-TS over RTP) from generic RTSP servers.
 
+    Inputs:
+    * new PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350).
 
   pre8: "NeuTeam strikes back" June 11, 2006
 
