@@ -98,6 +98,7 @@ static int eq_bgamma = 0;
 static int texture_width;
 static int texture_height;
 static int mpi_flipped;
+static int vo_flipped;
 
 static unsigned int slice_height = 1;
 
@@ -317,6 +318,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
 	int_pause = 0;
+	vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
 	panscan_init();
 	aspect_save_orig(width,height);
@@ -525,7 +527,8 @@ flip_page(void)
   glDrawTex(0, 0, image_width, image_height,
             0, 0, image_width, image_height,
             texture_width, texture_height,
-            use_rectangle == 1, image_format == IMGFMT_YV12, mpi_flipped);
+            use_rectangle == 1, image_format == IMGFMT_YV12,
+            mpi_flipped ^ vo_flipped);
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(gl_target, yuvconvtype);
 
@@ -668,6 +671,7 @@ static int
 query_format(uint32_t format)
 {
     int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
+               VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (use_osd)
       caps |= VFCAP_OSD;
