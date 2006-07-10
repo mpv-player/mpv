@@ -313,7 +313,7 @@ libavformat/libavformat.a:
 	$(MAKE) -C libavformat LIBPREF=lib LIBSUF=.a
 
 libswscale/libswscale.a:
-	$(MAKE) -C libswscale
+	$(MAKE) -C libswscale LIBPREF=lib LIBSUF=.a
 
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
