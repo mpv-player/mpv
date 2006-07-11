@@ -237,24 +237,6 @@ wsXDNDInitialize();
 
  wsScreen=DefaultScreen( wsDisplay );
  wsRootWin=RootWindow( wsDisplay,wsScreen );
-#ifdef HAVE_XINERAMA
- if(XineramaIsActive(wsDisplay))
-  {
-  XineramaScreenInfo *screens;
-  int num_screens;
-
-  screens = XineramaQueryScreens(wsDisplay, &num_screens);
-  if(xinerama_screen >= num_screens) xinerama_screen = 0;
-  wsOrgX = screens[xinerama_screen].x_org;
-  wsOrgY = screens[xinerama_screen].y_org;
-  wsMaxX=screens[xinerama_screen].width;
-  wsMaxY=screens[xinerama_screen].height;
-  mp_msg( MSGT_GPLAYER,MSGL_V,"[ws] screens %d Max %d, %d Org %d,%d\n",
-    num_screens, wsMaxX, wsMaxY, wsOrgX, wsOrgY);
-  XFree(screens);
-  }
-  else
-#endif
 #ifdef HAVE_XF86VM
     {
       int clock;
@@ -272,6 +254,11 @@ wsXDNDInitialize();
  if ( !wsMaxY )
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
  }
+  vo_screenwidth = wsMaxX; vo_screenheight = wsMaxY;
+  xinerama_x = wsOrgX; xinerama_y = wsOrgY;
+  update_xinerama_info();
+  wsMaxX = vo_screenwidth; wsMaxY = vo_screenheight;
+  wsOrgX = xinerama_x; wsOrgY = xinerama_y;
 
  wsGetDepthOnScreen();
 #ifdef DEBUG
@@ -794,6 +781,13 @@ void wsFullScreen( wsTWindow * win )
      {
       win->OldX=win->X; win->OldY=win->Y;
       win->OldWidth=win->Width; win->OldHeight=win->Height;
+      vo_dx = win->X; vo_dy = win->Y;
+      vo_dwidth = win->Width; vo_dheight = win->Height;
+      vo_screenwidth = wsMaxX; vo_screenheight = wsMaxY;
+      xinerama_x = wsOrgX; xinerama_y = wsOrgY;
+      update_xinerama_info();
+      wsMaxX = vo_screenwidth; wsMaxY = vo_screenheight;
+      wsOrgX = xinerama_x; wsOrgY = xinerama_y;
       win->X=wsOrgX; win->Y=wsOrgY;
       win->Width=wsMaxX; win->Height=wsMaxY;
      }
