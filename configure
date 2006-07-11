@@ -6717,7 +6717,9 @@ if test "$_mencoder" = yes ; then
   _def_muxers='#define CONFIG_MUXERS 1'
 else
   _libavencoders=""
-  _libavmuxers=""
+  # necessary until libavformat interdependencies are disentangled:
+  _libavmuxers="avi_muxer crc_muxer"
+  _def_muxers='#define CONFIG_MUXERS 1'
 fi
 echores "$_mencoder"
 
