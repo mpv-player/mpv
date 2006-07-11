@@ -1,4 +1,4 @@
-.\" synced with r18942
+.\" synced with r18969
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -3348,6 +3348,11 @@ Voir l'exemple TOOLS/edgedect.fp.
 .IPs customtex=<nom_fichier>
 Charge une texture "gamma ramp" personnalisée depuis <nom_fichier>.
 Peut être utilisé en même temps que yuv=4 ou avec l'option customprog.
+.IPs (no)customtlin
+Utilise l'interpolation GL_LINEAR (par défaut), sinon utilise
+GL_NEAREST comme texture customtex.
+.IPs (no)customtrect
+Utilise texture_rectangle comme texture customtex.
 .REss
 .RE
 .PD 1
@@ -3810,6 +3815,8 @@ Essaie d'abord libmad, puis se rabat sur les autres.
 .IPs "\-ac hwac3,a52,"
 Essaie le transfert matériel AC3 (vers un décodeur externe par ex.\&),
 le codec logiciel AC3, puis les autres.
+.IPs "\-ac hwdts,"
+Essaye le transfert matériel DTS, puis se rabat sur les autres.
 .IPs "\-ac -ffmp3,"
 Essaie tous les codecs excepté le décodeur MP3 de FFmpeg.
 .RE
