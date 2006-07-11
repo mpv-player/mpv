@@ -299,6 +299,10 @@ Codecs:
   --enable-codec=CODEC      enable specified FFmpeg codec
   --disable-parser=PARSER   disable specified FFmpeg parser
   --enable-parser=PARSER    enable specified FFmpeg parser
+  --disable-demuxer=DEMUXER disable specified FFmpeg demuxer
+  --enable-demuxer=DEMUXER  enable specified FFmpeg demuxer
+  --disable-muxer=MUXER     disable specified FFmpeg muxer
+  --enable-muxer=MUXER      enable specified FFmpeg muxer
   
 Video output:
   --disable-vidix-internal disable internal VIDIX [for x86 *nix]
@@ -1557,6 +1561,8 @@ _amr_nb_fixed=auto
 _amr_wb=auto
 _libavcodecs=`grep 'register_avcodec(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
 _libavparsers=`grep 'av_register_codec_parser(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
+_libavdemuxers=`grep 'av_register_input_format(&[a-z]' libavformat/allformats.c  | sed 's/.*&\(.*\)).*/\1/'`
+_libavmuxers=`grep 'av_register_output_format(&[a-z]' libavformat/allformats.c  | sed 's/.*&\(.*\)).*/\1/'`
 _libavcodec_so=auto
 _libavformat=auto
 _libavformat_so=auto
@@ -1921,6 +1927,10 @@ for ac_option do
   --disable-codec=*)	_libavcodecs=`echo $_libavcodecs | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-parser=*)	_libavparsers="$_libavparsers `echo $ac_option | cut -d '=' -f 2`" ;;
   --disable-parser=*)	_libavparsers=`echo $_libavparsers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-demuxer=*)	_libavdemuxers="$_libavdemuxers `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-demuxer=*)	_libavdemuxers=`echo $_libavdemuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
+  --enable-muxer=*)	_libavmuxers="$_libavmuxers `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-muxer=*)	_libavmuxers=`echo $_libavmuxers | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-libavformat)	_libavformat=yes;;
   --disable-libavformat)	_libavformat=no	;;
   --enable-libavformat_so)	_libavformat_so=yes	;;
@@ -7629,6 +7639,8 @@ AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
+`echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 CONFIG_FAAC=$_faac
 CONFIG_XVID=$_lavc_xvid
 CONFIG_X264=$_x264
@@ -8005,6 +8017,8 @@ $_def_amr_wb
 /* Use specific codecs from libavcodec */
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavdemuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavmuxers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
 $_def_lavc_faac
 $_def_lavc_xvid
 $_def_lavc_mp3lame
