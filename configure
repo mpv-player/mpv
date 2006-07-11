@@ -6712,6 +6712,7 @@ if test "$_mencoder" = yes ; then
   _def_muxers='#define CONFIG_MUXERS 1'
 else
   _libavcodecs="`echo $_libavcodecs | sed 's/[-_a-zA-Z0-9]*encoder//g'`"
+  _libavmuxers=""
 fi
 echores "$_mencoder"
 
