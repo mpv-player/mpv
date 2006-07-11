@@ -8004,6 +8004,7 @@ $_def_amr_wb
 
 /* Use specific codecs from libavcodec */
 `echo $_libavcodecs | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
+`echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
 $_def_lavc_faac
 $_def_lavc_xvid
 $_def_lavc_mp3lame
