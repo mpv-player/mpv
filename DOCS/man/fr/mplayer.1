@@ -1,8 +1,7 @@
-.\" synced with r18928
+.\" synced with r18942
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
-.\"             Nicolas Le Gaillart < nicolas AT legaillart.com >
 .
 .\" --------------------------------------------------------------------------
 .\" Définition des macros
@@ -1818,6 +1817,12 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 Active l'utilisation des polices gérées par fontconfig.
 .
 .TP
+.B \-(no)embeddedfonts (FreeType uniquement)
+Active l'extraction des polices embarquées dans les fichiers Matroska.
+Ces polices peuvent être utilisées pour l'affichage des sous-titres
+SSA/ASS (option \-ass).
+.
+.TP
 .B \-forcedsubsonly
 N'affiche que les sous-titres forcés des sous-titres DVD sélectionnés,
 par ex.\& avec \-slang.
@@ -2147,6 +2152,32 @@ sans '.idx', '.ifo' ou '.sub'.
 .TP
 .B \-vobsubid <0\-31>
 Définit le numéro de sous-titre du fichier VOBsub.
+.
+.TP
+.B \-ass (FreeType uniquement) (FontConfig optionnel)
+Active le rendu des sous-titres SSA/ASS.
+Avec cette option, libass sera utilisé pour les fichiers de
+sous-titres et ceux contenus dans les pistes Matroska.
+Fonctionne avec \-embeddedfonts.
+.
+.TP
+.B \-ass-font-scale <valeur>
+Définit le coefficient de mise à l'échelle lors du rendu des polices
+pour les sous-titres SSA/ASS.
+.
+.TP
+.B \-ass-line-spacing <value>
+Définit la tailles des espaces pour le rendu SSA/ASS.
+.
+.TP
+.B \-ass-top-margin <value>
+Ajoute une bande noire en haut de la trame.
+Les titres y seront affichés lors du rendu SSA/ASS.
+.
+.TP
+.B \-ass-bottom-margin <value>
+Adds a black band at the bottom of the frame.
+The SSA/ASS renderer will place subtitles there.
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
@@ -6577,6 +6608,13 @@ disponible - aucun fichier ne sera écrasé.
 Ce filtre ne provoque pas de surcoût lorsqu'il n'est pas utilisé, et accepte
 tous les espaces de couleur, donc ça ne pose pas de problème de l'ajouter par
 défaut dans votre fichier de configuration.
+.RE
+.
+.TP
+.B ass\ \ \ \ \ 
+Déplace le rendu des sous-titres SSA/ASS à une position arbitraire dans
+la chaîne de filtrage.
+Utile uniquement pour l'option \-ass.
 .RE
 .
 .
