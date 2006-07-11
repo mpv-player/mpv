@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.256 (2006. 05. 14.)
+// Sync'ed with help_mp-en.h r18916 (2006. 07. 11.)
 
 // ========================= MPlayer help ===========================
 
@@ -197,6 +197,9 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "Az utolsó megállítási pozíció [%f] volt; a következõ indulási [%f]."\
 "A bejegyzéseknek idõrendben kell lenniük, nem átlapolhatóak. Kihagyva.\n"
 #define MSGTR_EdlBadLineBadStop "A megállítási idõnek a kezdési idõ után kell lennie.\n"
+#define MSGTR_EdloutBadStop "EDL skip visszavonva, az utolsó start > stop\n"
+#define MSGTR_EdloutStartSkip "EDL skip eleje, nyomd meg az 'i'-t a blokk befejezéséhez.\n"
+#define MSGTR_EdloutEndSkip "EDL skip vége, a sor kiírva.\n"
 
 // mplayer.c OSD
 
@@ -582,8 +585,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Nem tudom meghatározni a képkockák számát (abszolut tekeréshez)   \n"
 #define MSGTR_CantSeekRawAVI "Nem tudok nyers .AVI-kban tekerni! (index kell, próbáld az -idx kapcsolóval!)\n"
 #define MSGTR_CantSeekFile "Nem tudok ebben a fájlban tekerni!\n"
-
-#define MSGTR_EncryptedVOB "Titkosítótt VOB fájl! Olvasd el a DOCS/HTML/hu/cd-dvd.html fájlt!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: A tömörített fejlécek támogatásához ZLIB kell!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Vigyázat: változó FourCC detektálva!?\n"
@@ -1579,6 +1580,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Az mga_vid vezérlõd verziója nem kompatibilis ezzel az MPlayer verzióval!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d buffer használata.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Nem nyitható meg: %s\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] A forrás felbontás legalább egy dimenzióban nagyobb, mint 1023x1023. Kérlek méretezd át szoftveresen vagy használd a -lavdopts lowres=1-t\n"
 
 // libvo/vesa_lvo.c
 
