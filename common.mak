@@ -2,22 +2,8 @@
 # common bits used by all libraries
 #
 
-SRC_DIR = $(SRC_PATH)/$(SUBDIR)
+SRC_DIR = $(SRC_PATH)/lib$(NAME)
 VPATH = $(SRC_DIR)
-
-#FIXME: This should be in configure/config.mak
-ifeq ($(CONFIG_WIN32),yes)
-LDFLAGS = -Wl,--output-def,$(@:.dll=.def),--out-implib,lib$(SLIBNAME:$(SLIBSUF)=.dll.a)
-endif
-
-ifeq ($(TARGET_GPROF),yes)
-CFLAGS+=-p
-LDFLAGS+=-p
-endif
-
-ifeq ($(TARGET_ARCH_SPARC64),yes)
-CFLAGS+= -mcpu=ultrasparc -mtune=ultrasparc
-endif
 
 SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S) $(CPPOBJS:.o=.cpp)
 OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
@@ -31,9 +17,12 @@ $(LIB): $(STATIC_OBJS)
 	$(AR) rc $@ $^ $(EXTRAOBJS)
 	$(RANLIB) $@
 
-$(SLIBNAME): $(SHARED_OBJS)
+$(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
+	ln -sf $^ $@
+
+$(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
-ifeq ($(CONFIG_WIN32),yes)
+ifeq ($(CONFIG_MINGW),yes)
 	-lib /machine:i386 /def:$(@:.dll=.def)
 endif
 
@@ -72,7 +61,7 @@ install-libs: $(INSTLIBTARGETS)
 
 install-lib-shared: $(SLIBNAME)
 	install -d "$(libdir)"
-ifeq ($(CONFIG_WIN32),yes)
+ifeq ($(CONFIG_MINGW),yes)
 	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) "$(prefix)"
 else
 	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) \
@@ -92,6 +81,22 @@ install-headers:
 	install -d "$(libdir)/pkgconfig"
 	install -m 644 $(addprefix "$(SRC_DIR)"/,$(HEADERS)) "$(incdir)"
 	install -m 644 $(BUILD_ROOT)/lib$(NAME).pc "$(libdir)/pkgconfig"
+
+uninstall: uninstall-libs uninstall-headers
+
+uninstall-libs:
+ifeq ($(CONFIG_MINGW),yes)
+	-rm -f $(prefix)/$(SLIBNAME)
+else
+	-rm -f $(libdir)/$(SLIBNAME_WITH_MAJOR) \
+	      $(libdir)/$(SLIBNAME)            \
+	      $(libdir)/$(SLIBNAME_WITH_VERSION)
+endif
+	-rm -f $(libdir)/$(LIB)
+
+uninstall-headers:
+	rm -f $(addprefix $(incdir)/,$(HEADERS))
+	rm -f $(libdir)/pkgconfig/lib$(NAME).pc
 
 #
 # include dependency files if they exist
