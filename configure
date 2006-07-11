@@ -295,10 +295,10 @@ Codecs:
   --disable-amr_nb       disable amr narrowband, floating point [autodetect]
   --disable-amr_nb-fixed disable amr narrowband, fixed point [autodetect]
   --disable-amr_wb       disable amr wideband, floating point [autodetect]
-  --disable-codec=CODEC  disable specified codec
-  --enable-codec=CODEC   enable specified codec
-  --disable-parser=PARSER disable specified parser
-  --enable-parser=PARSER  enable specified parser
+  --disable-codec=CODEC     disable specified FFmpeg codec
+  --enable-codec=CODEC      enable specified FFmpeg codec
+  --disable-parser=PARSER   disable specified FFmpeg parser
+  --enable-parser=PARSER    enable specified FFmpeg parser
   
 Video output:
   --disable-vidix-internal disable internal VIDIX [for x86 *nix]
