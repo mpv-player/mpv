@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.13 (deprecated CVS)-->
+<!-- synced with 18552 (svn) -->
+<!-- Opiekun: Boski -->
 <appendix id="bugreports">
 <title>Jak zgłaszać błędy</title>
 <para>
@@ -25,6 +27,85 @@ Ci ludzie z listy
 (tylko w języku angielskim -przyp. tłumacza).
 </para>
 </sect1>
+
+
+<sect1 id="bugreports_regression_test">
+	<title>Jak wykonać test regresji za pomocą CVS</title>
+	<para>
+		Czasami zdarza się problem typu "wcześniej działało, a teraz przestało...".
+		Tutaj znajduje się, opisana krok po kroku, procedura, której celem jest próba
+		znalezienia źródła problemu.
+		<emphasis role="bold">Nie jest</emphasis> ona przeznaczona
+		dla przeciętnego użytkownika.
+	</para>
+	<para>
+		Najpierw należy pobrać źródła MPlayera z CVS-u.
+		Więcej szczegółów na ten temat znajduje się na 
+		<ulink url="http://www.mplayerhq.hu/dload.html">tej stronie</ulink>.
+	</para>
+	<para>
+		W rezultacie w katalogu main/ znajdzie się obraz drzewa CVS, po stronie klienta.
+		Teraz zaktualizuj ten obraz do daty, która Cię interesuje:
+		<screen>
+			cd main/
+			cvs update -PAd -D "2004-08-23"
+		</screen>
+		Format daty to RRRR-MM-DD GG:MM:SS.
+		Używając takiego formatu daty masz pewność, że będziesz w stanie wyciągać łatki
+		zgodnie z datą, gdy zostały dodane, dokładnie tak jak w przypadku
+		<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum logów CVS MPlayera</ulink>.
+	</para>
+	<para>
+		Następnie postępuj tak jak w przypadku normalnej aktualizacji:
+		<screen>
+			./configure
+			make
+		</screen>
+	</para>
+	<para>
+		Jeżeli czytasz ten dokument, a nie jesteś programistą, najszybszym
+		sposobem na dotarcie do miejsca w którym pojawi się problem jest
+		użycie binarnego wyszukiwania &mdash; tzn. szukania daty
+		pojawienia się problemu poprzez dzielenie interwału czasowego na pół
+		przy każdym kolejnym wyszukiwaniu.
+		Przykładowo, jeżeli problem wystąpił w 2003, spróbuj najpierw szukać
+		problemu w wydaniu z połowy roku. Jeżeli będzie obecny, cofnij się
+		do pierwszego kwietnia; jeżeli nie, przejdź do pierwszego października itd.
+	</para>
+	<para>
+		Jeżeli masz dużo wolnego miejsca na twardym dysku (pełna kompilacja
+		zajmuje aktualnie 100 MB albo około 300-350 MB jeżeli uaktywnione
+		jest debuggowanie), skopiuj najstarszą działającą wersję zanim dokonasz
+		aktualizacji; oszczędzi to sporo czasu, jeżeli zajdzie potrzeba powrotu
+		do starszej wersji.
+		(Zazwyczaj konieczne jest uruchomienie 'make distclean' przed
+		rekompilacją wcześniejszej wersji, więc jeżeli nie zrobisz kopii zapasowej
+		oryginalnego drzewa, będziesz musiał wszystko rekompilować, jeśli
+		będziesz chciał wrócić do aktualnej wersji.)
+	</para>
+	<para>
+		Kiedy znajdziesz dzień w którym pojawił się problem, kontynuuj szukanie
+		używając archiwum mplayer-cvslog (uporządkowane wg daty) i bardziej
+		precyzyjnych aktualizacji obejmujących godziny, minuty i sekundy:
+		<screen>
+			cvs update -PAd -D "2004-08-23 15:17:25"
+		</screen>
+		To pomoże ci łatwo znaleźć łatkę, która jest winowajcą.
+	</para>
+	<para>
+		Jeżeli znajdziesz łatkę, która jest źródłem problemu, to znaczy, że już
+		prawie osiągnąłeś sukces; wyślij informację o niej na
+		<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>
+		lub zapisz się na listę 
+		<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+		i tam wyślij raport.
+		Istnieje szansa, że autor łatki zasugeruje w jaki sposób rozwiązać problem.
+		Możesz też wpatrywać się w łatkę tak długo, aż nie będzie mogła wytrzymać
+		i wyjawi ci lokalizację błędu:-).
+	</para>
+</sect1>
+
+
 <sect1 id="bugreports_report">
 <title>Jak zgłaszać błędy</title>
 <para>
@@ -100,12 +181,12 @@ Językiem obowiązującym na tej liście jest
 <ulink url="http://www.ietf.org/rfc/rfc1855.txt">netykiety</ulink>
 (Polską wersję netykiety można przeczytać np.
 <ulink url="http://www.pg.gda.pl/~agatek/netq.html">tutaj</ulink> - przyp. tłum.)
-i <emphasis role="bold">nie wysyłać listów w HTMLu</emphasis> na żadną z naszych
+i <emphasis role="bold">nie wysyłać listów w HTML-u</emphasis> na żadną z naszych
 list. W przeciwnym wypadku zostaniesz zignorowany lub wyrzucony z listy. Jeżeli
-nie wiesz czym jest list w HTMLu albo dlaczego jest on zły, przeczytaj ten
+nie wiesz czym jest list w HTML-u albo dlaczego jest on zły, przeczytaj ten
 <ulink url="http://expita.com/nomime.html">świetny dokument</ulink> (znów tylko
 po angielsku - przyp. tłum.). Wyjaśnia on wszystkie szczegóły i zawiera
-instrukcje wyłączania HTMLu. Zauważ również, że nie wysyłamy kopii listów do
+instrukcje wyłączania HTML-u. Zauważ również, że nie wysyłamy kopii listów do
 użytkowników, więc dobrym pomysłem jest zapisanie się na listę w celu uzyskania
 odpowiedzi.
 </para>
@@ -269,7 +350,7 @@ do pliku w ten sposób:
 <para>
 Jeżeli Twój problem jest specyficzny dla jednego albo wielu plików, załaduj
 winowajcę(ów) na:
-<ulink url="ftp://mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>

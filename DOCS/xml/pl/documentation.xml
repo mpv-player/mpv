@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.28 (deprecated CVS)-->
+<!-- synced with 18427 (svn) -->
+<!-- Opiekun: Torinthiel -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów</title>
@@ -179,16 +181,23 @@ mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 2.
 </para>
 
 &history.xml;
-&install.xml;
 </chapter>
 
+&install.xml;
 
-&features.xml;
 &usage.xml;
-&faq.xml;
 &cd-dvd.xml;
+&faq.xml;
+
+&formats.xml;
+&codecs.xml;
+&video.xml;
+&audio.xml;
+&tvinput.xml;
+
 &ports.xml;
 &mencoder.xml;
+&encoding-guide.xml;
 &mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.16 (deprecated CVS)-->
+<!-- synced with 17322 (svn) -->
+<!-- Opiekun: Cobra -->
+<chapter id="tv">
+<title>TV</title>
+
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Wejście TV</title>
 
@@ -54,12 +59,19 @@ być podzielne przez 16.
 <listitem>
 <para>
 Jeśli nagrywasz obraz video o pionowej rozdzielczości większej niż połowa
-rozdzielczości pełnej (np. 288 dla PAL lub 240 dla NTSC), upewnij się, że
-włączyłeś usuwanie przeplotu (deinterlacing). W przeciwnym wypadku dostaniesz
+rozdzielczości pełnej (np. 288 dla PAL lub 240 dla NTSC), wtedy 'ramki'
+które otrzymasz będą tak naprawdę parami poprzeplatanych (interleaved) pól.
+W zależności od tego, co chcesz zrobić ze strumieniem wideo, możesz go zostawić
+w takiej formie, użyć destrukcyjnego usuwania przeplotu (deinterlacing),
+albo rozdzielić pary na pojedyncze pola.
+</para>
+<para>
+W przeciwnym wypadku dostaniesz
 film, który jest zniekształcony w trakcie scen o dużej dynamice, a wskazana
-szybkość prawdopodobnie nie będzie nawet mogła być utrzymana przez kontroler
-szybkości (bitrate controller), gdyż artefakty przeplotu tworzą duże ilości
-szczegółów, a co za tym idzie, potrzebują dużej przepustowości. Możesz włączyć
+szybkość transmisji (bitrate) prawdopodobnie nie będzie nawet mogła być
+utrzymana przez kontroler szybkości (bitrate controller),
+ponieważ artefakty przeplotu tworzą duże ilości szczegółów,
+a co za tym idzie, potrzebują dużej przepustowości. Możesz włączyć
 usuwanie przeplotu za pomocą opcji <option>-vf pp=TYP_DEINT</option>. Zwykle
 <option>pp=lb</option> spisuje się dobrze, ale to kwestia gustu. Poczytaj o
 innych algorytmach usuwania przeplotu na stronie man i zacznij eksperymentować.
@@ -211,3 +223,5 @@ uśrednianie pikseli jedynie w kierunku poziomym.
 </informalexample>
 </sect2>
 </sect1>
+
+</chapter>

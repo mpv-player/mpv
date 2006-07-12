@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.13 (deprecated CVS)-->
+<!-- synced with 15783 (svn) -->
+<!-- Opiekun: Cobra -->
 <appendix id="bugs">
 <title>Znane błędy</title>
 <sect1 id="bugs-special">

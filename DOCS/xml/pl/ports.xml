@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.70 -->
+<!-- synced with 1.80 (deprecated CVS)-->
+<!-- synced with 17707 (svn) -->
+<!-- Opiekun: brak (spadek po Paszczim) -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -142,8 +144,18 @@ Zobacz rozdział <link linkend="macos">Mac OS</link>.
 </sect2>
 </sect1>
 
-<sect1 id="solaris">
-<title>Sun Solaris</title>
+<sect1 id="unix">
+<title>Komercyjny Unix</title>
+
+<para>
+<application>MPlayer</application> został przeportowany na wiele komercyjnych
+wariantów Uniksa. Jako, że środowiska programistyczne przeważnie różnią się od tych
+znajdowanych w wolnych Uniksach, być może będziesz musiał wprowadzić ręczne
+poprawki, aby program skompilował się poprawnie.
+</para>
+<sect2 id="solaris">
+<title>Solaris</title>
+
 <para>
 <application>MPlayer</application> powinien działać na Solarisie 2.6 lub nowszym.
 Możesz skorzystać ze sterownika dźwięku SUN'a podająć opcję <option>-ao sun</option>.
@@ -244,10 +256,10 @@ Problem może być rozwiązany przy pomocy łatki 109764-04 (sparc) / 109765-04 (x86
 </para></listitem>
 </itemizedlist>
 
-</sect1>
+</sect2>
 
-<sect1 id="irix">
-<title>Silicon Graphics Irix</title>
+<sect2 id="irix">
+<title>IRIX</title>
 <para>
 Możesz albo spróbować zainstalować program GNU install i (jeżeli nie
 umieściłeś go w globalnej ścieżce) wskazać go przez:
@@ -274,9 +286,9 @@ A potem wykonaj (w katalogu źródłowym <application>MPlayera</application>):
 <screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
 i dalej skompiluj i zainstaluj.
 </para>
-</sect1>
+</sect2>
 
-<sect1 id="hp-ux">
+<sect2 id="hp-ux">
 <title>HP-UX</title>
 <para>
 Joe Page umieścił na swojej stronie domowej
@@ -396,21 +408,54 @@ czy nie, zależy wyłącznie od wymagań Twoich aplikacji.)
 </listitem>
 </itemizedlist>
 
-</sect1>
+</sect2>
 
-<sect1 id="qnx">
-<title>QNX</title>
+<sect2 id="aix">
+<title>AIX</title>
 <para>
-Działa. Będziesz musiał ściągnąć bibliotekę SDL dla QNX i zainstalować ją. Wtedy
-uruchom <application>MPlayera</application> a opcją <option>-vo sdl:photon</option>
-i <option>-ao sdl:nto</option>, powinno działać szybko.
+<application>MPlayer</application> kompiluje się z powodzenie na AIX 5.1,
+5.2 i 5.3, korzystając z GCC 3.3 lub wyższego. Budowanie
+<application>MPlayer</application> na AIX 4.3.3 i niższych nie
+było sprawdzane. Zaleca się, abyś budowal <application>MPlayera</application>
+używając GCC 3.4 lub wyższego lub jeżeli kompilujesz na POWER5 - GCC 4.0.
 </para>
 
 <para>
-Wyjście <option>-vo x11</option> będzie nawet wolniejsze niż na Linuksie,
-ponieważ QNX ma tylko <emphasis>emulację</emphasis> Xów, która jest bardzo
-wolna. Używaj SDL.
+Upenij się, że używasz GNU make (<filename>/opt/freeware/bin/gmake</filename>), aby
+kompilować <application>MPlayera</application>, jako że możesz napotkać na problemy
+przy korzystaniu z <filename>/usr/ccs/bin/make</filename>.
 </para>
+<para>
+Wykrywanie CPU jest ciągle dopracowywane.
+Poniższe architektury zostały przetestowane:
+</para>
+
+<itemizedlist>
+<listitem><para>604e</para></listitem>
+<listitem><para>POWER4</para></listitem>
+</itemizedlist>
+
+<para>
+Poniższe architektury nie były testowane, ale i tak powinny działać:
+</para>
+<itemizedlist>
+<listitem><para>POWER</para></listitem>
+<listitem><para>POWER2</para></listitem>
+<listitem><para>POWER3</para></listitem>
+<listitem><para>POWER5</para></listitem>
+</itemizedlist>
+
+<para>
+Dźwięk przez Ultimedia Services nie jest obsługiwany, jako że ta technologia
+została porzucona w AIX 5.1; dlatego też, jedynym wyjściem jest korzystanie
+ze sterowników AIX Open Sound System (OSS) tworzonych przez 4Front Technologies,
+znajdziesz je na
+<ulink url="http://www.opensound.com/aix.html">http://www.opensound.com/aix.html</ulink>.
+4Front Technologies udostępnia swoje sterowniki OSS za darmo do osobistego i niekomercyjnego
+zastosowania.
+</para>
+
+</sect2>
 </sect1>
 
 <sect1 id="windows">
@@ -441,10 +486,9 @@ wolna. Używaj SDL.
 </para>
 
 <para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX
-  (<option>-vo directx</option>) i rdzennym wyjściem dźwiękowym wave Windows
-  (<option>-ao win32</option>). Możesz skorzystać również z OpenGL lub SDL, jednak
+  (<option>-vo directx</option>). Możesz skorzystać również z OpenGL lub SDL, jednak
   wydajność OpenGL w znacznym stopniu zależy od systemu, a SDL może powodować powstanie
-  zakłóceń w dźwięku i obrazie albo wywołać błąd, i zakończyć działanie programu.
+  zakłóceń w obrazie albo wywołać błąd, i zakończyć działanie programu.
   Jeżeli występują zakłócenia obrazu, spróbuj
   wyłączyć sprzętową akcelerację przez opcję <option>-vo directx:noaccel</option>. Ściągnij
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">pliki
@@ -489,7 +533,7 @@ wolna. Używaj SDL.
   zapobiegnie jej używaniu. Możesz to na stałe dodać do Twojego pliku konfiguracyjnego.</para>
 
 <para>Dostępne są specjalne zbiory z kodekami przeznaczone dla systemu Windows, znajdziesz je na
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">stronie kodeków</ulink>.
+  <ulink url="http://mplayerhq.hu/design7/codecs.html">stronie kodeków</ulink>.
   Pozwolą Ci one na odtwarzanie formatów, które nie są jeszcze bezpośrednio obsługiwane w
   <application>MPlayerze</application>. Umieść je, gdzieś w swojej ścieżce (w katalogu podanym w
   zmiennej PATH - przyp. tłumacza) lub przekaż opcję
@@ -516,10 +560,26 @@ wolna. Używaj SDL.
   jest raczej wolna. Zgłoszono, że przekierowywanie wyjścia albo używanie
   opcji <option>-quiet</option> poprawia wydajność na
   niektórych systemach. Bezpośrednie renderowanie (<option>-dr</option>) również
-  może pomóc. Możesz zapobiec migotaniu OSD, włączając podwójne buforowanie
-  opcją <option>-double</option>. Jeżeli odtwarzanie jest nierówne, spróbuj użyć
+  może pomóc. Jeżeli odtwarzanie jest nierówne, spróbuj użyć
   <option>-autosync 100</option>. Jeżeli którakolwiek z tych opcji Ci pomogła,
   może będziesz chciał umieścić ją w swoim pliku konfiguracyjnym.</para>
+
+<note>
+
+<para>Na Windowsie automatyczne wykrywanie typu procesora
+	wyłącza rozszerzenie SSE z powodu okazjonalnych i ciężkich
+	do wyśledzenia błędów powodujących zakończenie aplikacji. Jeżeli
+	nadal chesz mieć obsługę SSE pod Windowsem, będziesz musiał
+	skompilować program bez wykrywania typu CPU w trakcie działania.
+</para>
+
+<para>Jeżeli masz Pentium 4 i program wysypuje Ci się podczas używania
+	kodeków RealPlayer'a, prawdopodobnie będziesz musiał wyłączyć
+	obsługę hyperthreading'u.
+</para>
+</note>
+
+
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
@@ -568,15 +628,15 @@ wolna. Używaj SDL.
 "Surowe" źródła <application>MPlayera</application> obsługują
 tylko Mac OS X w wersjach 10.2 i wyższych. Możesz spróbować umożliwić
 obsługę starszych wersji Mac OS oraz przysłać nam łaty!
-<application>MPlayer</application> powinien skompilować się bez problemu
-na systemie Mac OS X 10.2 i wyższym. Zalecanym kompilatorem jest GCC 3.x w wersji
-Apple, jeżeli masz Mac OS X 10.3.9 lub późniejszy i QuickTime 7, możesz
+<application>MPlayer</application> nie działa na Mac OS w wersjach niższych niż
+10, jednak powinien skompilować się bez problemu na systemie Mac OS X 10.2 i
+wyższym. Zalecanym kompilatorem jest GCC 3.x w wersji Apple, jeżeli masz
+Mac OS X 10.3.9 lub późniejszy i QuickTime 7, możesz
 skorzystać z wyjścia video macosx.
 </para>
 
-<sect2 id="mplayerosx">
-<title>MPlayer OS X</title>
- 
+<sect2 id="osx_gui">
+<title>MPlayer OS X GUI</title>
 <para>
 Możesz pobrać natywne GUI dla <application>MPlayera</application> razem
 z prekompilowanymi binariami <application>MPlayera</application> dla
@@ -676,8 +736,34 @@ stary projekt dla <application>Xcode</application> 1.x już nie działa.
 </sect2>
 </sect1>
 
-<sect1 id="amiga">
-<title>Amiga/MorphOS (zabawki dla zapaleńców)</title>
+<sect1 id="exotic_platforms">
+<title>Egzotyczne Platformy</title>
+
+<para>
+<application>MPlayer</application> dziła na wielu egzotycznych platfromach, ale
+większość zmian dla konkretnych platform nie trafiła do głównego drzewa ze źródłami
+programu.
+Instrukcji co do budowy szukaj w dokumentacji do określonych systemów.
+</para>
+
+<sect2 id="qnx">
+<title>QNX</title>
+<para>
+Będziesz musiał ściągnąć bibliotekę SDL dla QNX i zainstalować ją. Wtedy
+uruchom <application>MPlayera</application> z opcją
+<option>-vo sdl:driver=photon</option>
+i <option>-ao sdl:nto</option>, powinno działać szybko.
+</para>
+		
+<para>
+Wyjście <option>-vo x11</option> będzie nawet wolniejsze niż na Linuksie,
+ponieważ QNX ma tylko <emphasis>emulację</emphasis> X'ów, która jest bardzo
+wolna. 
+</para>
+</sect2>
+
+<sect2 id="amiga">
+<title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
 Ludzie z <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
 tworzą aktualne paczki z <application>MPlayerem</application> i
@@ -706,6 +792,7 @@ pakiet binarny <application>MEncodera</application> 1.0pre3</ulink>
 </para></listitem>
 </itemizedlist>
 </para>
+</sect2>
 </sect1>
 
 </chapter>

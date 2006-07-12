@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.12 (deprecated CVS)-->
+<!-- synced with 14025 (svn) -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Historia</title>

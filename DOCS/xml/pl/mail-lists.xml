@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.16 (deprecated CVS)-->
+<!-- synced with 18606 (svn) -->
+<!-- Opiekun: Torinthiel -->
 <appendix id="mailinglists">
 <title>Listy dyskusyjne</title>
 <para>
@@ -85,14 +87,14 @@ możliwe problemy związane z tą zmianą).
 </para>
 <para>To lista na dyskusje o dokumentacji i stronie domowej
 <application>MPlayera</application>.
-Przesyłane są też na nią logi CVS dotyczące dokumentacji i strony domowej.
+Przesyłane są też na nią logi SVN dotyczące dokumentacji i strony domowej.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>To lista na dyskusje o tłumaczeniu dokumentacji i strony domowej
 <application>MPlayera</application>.
-Przesyłane są też na nią logi CVS dotyczące dokumentacji i strony domowej.
+Przesyłane są też na nią logi Subversion dotyczące dokumentacji i strony domowej.
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
@@ -127,7 +129,8 @@ Lista poświęcona dyskusji o przenoszeniu <application>MPlayera</application> do
 środowiska OS/2.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-qt-codecs-porting"><application>MPlayer</application>-qt-codecs-porting</ulink> (NIEAKTYWNA)
+<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (NIEAKTYWNA)
+
 </para>
 <para>Lista poświęcona dyskusjom o obsłudze kodeków QuickTime.
 </para></listitem>

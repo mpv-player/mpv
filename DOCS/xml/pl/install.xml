@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.58 -->
-<sect1 id="install">
+<!-- synced with 1.62 (deprecated CVS)-->
+<!-- synced with 17975 (svn) -->
+<!-- Opiekun: brak (poprzednio Paszczi) -->
+<chapter id="install">
 <title>Instalacja</title>
 
 <para>
@@ -22,8 +24,7 @@ Zajmie to trochę czasu, ale z pewnością JEST tego warte.
 Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z serii 2.4.x.
 </para>
 
-
-<sect2 id="softreq">
+<sect1 id="softreq">
 <title>Wymagania sprzętowe</title>
 
 <itemizedlist>
@@ -98,7 +99,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   dźwięku OGG Vorbis.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+<emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
   - opcjonalna, wymagana do odtwarzania strumieni RTSP/RTP.
   </para></listitem>
 <listitem><para>
@@ -135,10 +136,10 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   skryptu <filename>./configure</filename>.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="installation_codecs">
 <title>Kodeki</title>
 
 <itemizedlist>
@@ -259,10 +260,10 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   znajdziesz tam instrukcje i kilka informacji.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="video-cards">
+<sect1 id="video-cards">
 <title>Karty graficzne</title>
 
 <para>
@@ -272,7 +273,7 @@ te drugie nie.
 </para>
 
 
-<sect3 id="yuv-cards">
+<sect2 id="yuv-cards">
 <title>Karty YUV</title>
 
 <para>
@@ -354,10 +355,10 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   </para></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Karty nieobsługujące YUV">
+<sect2 id="non-yuv-cards" xreflabel="Karty nieobsługujące YUV">
 <title>Karty nieobsługujące YUV</title>
 
 <para>
@@ -384,10 +385,10 @@ działa ona z następującymi sterownikami:
   </simpara></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic cards">
 <title>Karty Cirrus-Logic</title>
 <itemizedlist>
 <listitem><para>
@@ -419,11 +420,11 @@ działa ona z następującymi sterownikami:
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
-</sect3>
 </sect2>
+</sect1>
 
 
-<sect2 id="sound-cards">
+<sect1 id="sound-cards">
 <title>Karty dźwiękowe</title>
 
 <itemizedlist>
@@ -445,10 +446,9 @@ działa ona z następującymi sterownikami:
   sekcję <link linkend="audio">karty dźwiękowe</link>!</emphasis>
   </simpara></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
-
-<sect2>
+<sect1 id="features">
 <title>Możliwości</title>
 
 <itemizedlist>
@@ -533,7 +533,7 @@ rozdział <link linkend="subosd">Napisy i OSD</link> dla uzyskania bardziej
 szczegółowych informacji.
 </para>
 
-</sect2>
+
 </sect1>
 
 <!-- ********** -->
@@ -542,7 +542,7 @@ szczegółowych informacji.
 <title>A co z GUI?</title>
 
 <para>
-GUI wymaga biblioteki GTK 1.2.x (nie jest w pełni w GTK, ale jego panele są).
+GUI wymaga biblioteki GTK 1.2.x lub GTK 2.0 (nie jest w pełni w GTK, ale jego panele są).
 Skórki przechowywane są w formacie PNG, tak więc GTK, <systemitem class="library">libpng</systemitem>
 (i ich pakiety rozwojowe, zazwyczaj nazwane <systemitem class="library">gtk-dev</systemitem>
 i <systemitem class="library">libpng-dev</systemitem>) muszą być zainstalowane.
@@ -981,3 +981,4 @@ Istnieje możliwość przejęcia praw superużytkownika.
 </para></note>
 </para>
 </sect1>
+</chapter>
