@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18600 -->
+<!-- in sync with r19039 -->
 <appendix id="bugreports">
 <title>Wie Fehler (Bugs) berichtet werden</title>
 <para>
@@ -320,13 +320,6 @@ Bitte füge diese Dateien an:
 <itemizedlist>
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
-</itemizedlist>
-Nur wenn die Compilierung unter einem dieser Verzeichnisse fehlschlägt, füge
-folgende Dateien an:
-<itemizedlist>
-<listitem><para>Gui/config.mak</para></listitem>
-<listitem><para>libvo/config.mak</para></listitem>
-<listitem><para>libao2/config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>
