@@ -67,7 +67,6 @@ VO_LIBS = $(AA_LIB) \
           $(X_LIB) \
           $(SDL_LIB) \
           $(GGI_LIB) \
-          $(MP1E_LIB) \
           $(MLIB_LIB) \
           $(SVGA_LIB) \
           $(DIRECTFB_LIB) \
@@ -210,7 +209,6 @@ ALL_PRG += $(PRG_MENCODER)
 endif
 
 COMMON_DEPS = $(W32_DEP) \
-              $(MP1E_DEP) \
               $(AV_DEP) \
               libmpdemux/libmpdemux.a \
               libmpcodecs/libmpcodecs.a \

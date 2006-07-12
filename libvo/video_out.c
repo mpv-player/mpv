@@ -53,7 +53,7 @@ int vo_border=1;
 int WinID = -1;
 
 int vo_pts=0; // for hw decoding
-float vo_fps=0; // for mp1e rte
+float vo_fps=0;
 
 char *vo_subdevice = NULL;
 int vo_directrendering=0;
