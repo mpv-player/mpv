@@ -6336,10 +6336,10 @@ if test "$_amr_nb" = auto ; then
 fi
 if test "$_amr_nb" = yes ; then
   _amr=yes
-  _def_amr='#define AMR 1'
-  _def_amr_nb='#define AMR_NB 1'
+  _def_amr='#define CONFIG_AMR 1'
+  _def_amr_nb='#define CONFIG_AMR_NB 1'
 else
-  _def_amr_nb='#undef AMR_NB'
+  _def_amr_nb='#undef CONFIG_AMR_NB'
 fi
 echores "$_amr_nb"
 
@@ -6360,10 +6360,10 @@ if test "$_amr_nb_fixed" = auto ; then
 fi
 if test "$_amr_nb_fixed" = yes ; then
   _amr=yes
-  _def_amr='#define AMR 1'
-  _def_amr_nb_fixed='#define AMR_NB_FIXED 1'
+  _def_amr='#define CONFIG_AMR 1'
+  _def_amr_nb_fixed='#define CONFIG_AMR_NB_FIXED 1'
 else
-  _def_amr_nb_fixed='#undef AMR_NB_FIXED'
+  _def_amr_nb_fixed='#undef CONFIG_AMR_NB_FIXED'
 fi
 echores "$_amr_nb_fixed"
 
@@ -6386,11 +6386,11 @@ if test "$_amr_wb" = auto ; then
 fi
 if test "$_amr_wb" = yes ; then
   _amr=yes
-  _def_amr='#define AMR 1'
-  _def_amr_wb='#define AMR_WB 1'
+  _def_amr='#define CONFIG_AMR 1'
+  _def_amr_wb='#define CONFIG_AMR_WB 1'
   _codecmodules="amr_wb $_codecmodules"
 else
-  _def_amr_wb='#undef AMR_WB'
+  _def_amr_wb='#undef CONFIG_AMR_WB'
   _nocodecmodules="amr_wb $_nocodecmodules"
 fi
 echores "$_amr_wb"
@@ -7614,10 +7614,10 @@ TWOLAME_LIB=$_twolame_lib
 MUSEPACK_LIB = $_ld_musepack
 FAAC=$_faac
 FAAC_LIB=$_ld_faac
-AMR=$_amr
-AMR_NB=$_amr_nb
-AMR_NB_FIXED=$_amr_nb_fixed
-AMR_WB=$_amr_wb
+CONFIG_AMR=$_amr
+CONFIG_AMR_NB=$_amr_nb
+CONFIG_AMR_NB_FIXED=$_amr_nb_fixed
+CONFIG_AMR_WB=$_amr_wb
 `echo $_libavdecoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavencoders | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 `echo $_libavparsers | tr '[a-z] ' '[A-Z]\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
