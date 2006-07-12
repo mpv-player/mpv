@@ -1,5 +1,4 @@
 include ../config.mak
-include config.mak
 
 LIBNAME = libgui.a
 

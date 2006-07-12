@@ -1,4 +1,4 @@
-include config.mak
+include ../config.mak
 
 LIBNAME = libaf.a
 
@@ -27,7 +27,7 @@ SRCS=af.c \
      filter.c \
      format.c \
      window.c \
-     $(OPTIONAL_SRCS) \
+     $(AF_SRCS) \
 
 LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)

@@ -1,4 +1,4 @@
-include config.mak
+include ../config.mak
 
 LIBNAME = libao2.a
 
@@ -6,7 +6,7 @@ SRCS=audio_out.c \
      ao_mpegpes.c \
      ao_null.c \
      ao_pcm.c \
-     $(OPTIONAL_SRCS) \
+     $(AO_SRCS) \
 
 OBJS=$(SRCS:.c=.o)
 

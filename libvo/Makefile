@@ -1,5 +1,5 @@
 
-include config.mak
+include ../config.mak
 
 LIBNAME = libvo.a
 
@@ -14,7 +14,7 @@ SRCS=aclib.c \
      vo_mpegpes.c \
      vo_null.c \
      vo_yuv4mpeg.c \
-     $(OPTIONAL_SRCS) \
+     $(VO_SRCS) \
 
 LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)

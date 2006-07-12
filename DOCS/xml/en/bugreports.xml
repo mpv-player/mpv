@@ -311,12 +311,6 @@ Please include these files:
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
 </itemizedlist>
-Only if compilation fails below one of these directories, include these files:
-<itemizedlist>
-<listitem><para>Gui/config.mak</para></listitem>
-<listitem><para>libvo/config.mak</para></listitem>
-<listitem><para>libao2/config.mak</para></listitem>
-</itemizedlist>
 </para>
 </sect2>
 
