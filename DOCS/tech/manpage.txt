@@ -102,7 +102,7 @@ PLAYER OPTIONS (MPLAYER ONLY)
     User interface option descriptions (MPlayer only).
 DEMUXER/STREAM OPTIONS
     Demuxer and stream layer option descriptions.
-OSD/SUB OPTIONS
+OSD/SUBTITLE OPTIONS
     This section is special in that it contains all subtitle and OSD option
     descriptions even if they might belong to one of the other sections. It was
     created because of its size.
