@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r18712
+.\" In sync with r19046
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -314,7 +314,8 @@ Passt die Untertitel-Anzeige um +/- 0.1 Sekunde an.
 .IPs "r und t"
 Bewegt die Untertitel nach oben/unten.
 .IPs "i (nur im Modus \-edlout)"
-Setze EDL-Markierung.
+Setze Beginn oder Ende eines EDL-Sprungs und schreibe es in die angegebene
+Datei.
 .IPs "s (nur bei \-vf screenshot)"
 Mache einen Schnappschuss.
 .IPs "I"
@@ -757,11 +758,11 @@ mit --enable-crash-debug.
 .
 .TP
 .B \-edlout <Dateiname>
-Erstellt eine neue EDL-Datei und schreibt EDL-Markierungen in diese Datei.
-Während der Wiedergabe kann der Benutzer 'i' drücken, und ein Eintrag,
-um an der aktuellen Position zwei Sekunden des Video zu überspringen, wird
-in die Datei geschrieben.
-Damit erhält der Benutzer eine Ausgangsbasis, die er an seine Bedürfnisse
+Erstellt eine neue Datei und schreibt EDL (edit decision list) -Markierungen
+hinein.
+Während der Wiedergabe drückt der Benutzer 'i', um Beginn oder Ende eines
+Blocks, der übersprungen werden soll, zu markieren.
+Damit erhält  er eine Ausgangsbasis, die er an seine Bedürfnisse
 anpassen kann.
 Siehe DOCS/\:HTML/\:en/\:edl.html für Details.
 .
@@ -1466,6 +1467,16 @@ Diese Option kann nützlich sein, wenn du hinter einem Router bist und den
 RTSP-Stream vom Server an einen bestimmten Client weiterleiten möchtest.
 .
 .TP
+.B \-rtsp-destination
+Wird zusammen mit 'rtsp://'-DLLs benutzt, um zu erzwingen, dass die 
+Ziel-IP-Adresse gebunden wird.
+Diese Option kann nützlich sein bei einem RTSP-Server, der RTP-Pakete nicht an
+die richtige Schnittstelle schickt.
+Wenn die Verbindung zu dem RTSP-Server fehlschlägt, benutze \-v, um zu sehen,
+welche IP-Adresse MPlayer zu binden versucht.
+Versuche, die Adresse zu erzwingen, die deinem Computer zugewiesen wurde.
+.
+.TP
 .B \-rtsp-stream-over-tcp (nur bei LIVE555)
 Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
 daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP
@@ -1784,6 +1795,12 @@ Bei fontconfig gibt diese Option den fontconfig-Schriftnamen an.
 .TP
 .B \-fontconfig (nur bei fontconfig)
 Ermöglicht die Benutzung von Schriften, die von fontconfig verwaltet werden.
+.
+.TP
+.B \-(no)embeddedfonts (nur bei FreeType)
+Aktiviert die Extraktion von in Matroska eingebetteten Schriften.
+Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
+(Option \-ass).
 .
 .TP
 .B \-forcedsubsonly
@@ -2115,6 +2132,32 @@ Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 .TP
 .B \-vobsubid <0\-31>
 Gibt die ID für die VOBsub-Untertitel an.
+.
+.TP
+.B \-ass (nur bei FreeType) (FontConfig optional)
+Schaltet das Zeichnen von SSA/ASS-Untertiteln ein.
+Mit dieser Option wird libass für externe SSA/ASS-Untertitel und
+Matroska-Spuren verwendet.
+Du möchtest vielleicht auch \-embeddedfonts verwenden.
+.
+.TP
+.B \-ass-font-scale <Wert>
+Setze den Skalierungskoeffizienten, der für Schriften im
+SSA/ASS-Renderer verwendet werden soll.
+.
+.TP
+.B \-ass-line-spacing <Wert>
+Setzt den Wert für den Zeilenabstand für den SSA/ASS-Renderer.
+.
+.TP
+.B \-ass-top-margin <Wert>
+Fügt einen schwarzen Streifen oben ins Bild hinzu.
+Der SSA/ASS-Renderer wird Obertitel dorthin legen.
+.
+.TP
+.B \-ass-bottom-margin <Wert>
+Fügt einen schwarzen Streifen unten ins Bild hinzu.
+Der SSA/ASS-Renderer wird Untertitel dorthin legen.
 .
 .
 .
@@ -3263,6 +3306,12 @@ Siehe TOOLS/\:edgedetect.fp als Beispiel.
 .IPs customtex=<Dateiname>
 Lädt eine eigene "gamma ramp"-Textur aus <Dateiname>.
 Kann zusammen mit yuv=4 oder mit der customprog-Option benutzt werden.
+.IPs (no)customtlin
+Wenn aktiviert (Standard), benutze für die customtex-Textur
+GL_LINEAR-Interpolation, benutze sonst GL_NEAREST.
+.IPs (no)customtrect
+Wenn aktiviert, benutze für die customtex-Textur texture_rectangle.
+Standardeinstellung ist deaktiviert.
 .REss
 .RE
 .PD 1
@@ -3713,8 +3762,10 @@ Erzwingt den l3codeca.acm-MP3-Codec.
 .IPs "\-ac mad,"
 Probiert zuerst libmad und dann andere Codecs.
 .IPs "\-ac hwac3,a52,"
-Zuerst wird versucht, AC3 unverändert durchzureichen, dann die
+Probiere AC3-Passthrough, dann
 Software-AC3-Decodierung, danach andere Codecs.
+.IPs "\-ac hwdts,"
+Probiere Hardware-DTS-Passthrough, danach anderes.
 .IPs "\-ac -ffmp3,"
 Überspringe den MP3-Decoder von FFmpeg.
 .RE
@@ -6533,6 +6584,13 @@ wird überschrieben.
 Der Filter führt zu keiner Mehrbelastung, solange er nicht benutzt wird und
 akzeptiert beliebige Farbräume, es ist also ungefährlich ihn in die
 Konfigurationsdatei mit aufzunehmen.
+.RE
+.
+.TP
+.B ass\ \ \ \ \
+Verschiebt das Zeichnen der SSA/ASS-Untertitel an einen beliebigen Punkt in der
+Videofilterkette.
+Nur sinnvoll mit der Option \-ass.
 .RE
 .
 .
