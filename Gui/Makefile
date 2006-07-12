@@ -5,9 +5,7 @@ LIBNAME = libgui.a
 
 INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC) $(EXTRA_INC) 
 
-OPTIMIZE =  $(OPTFLAGS)
-
-CFLAGS = $(OPTIMIZE) $(INCDIR) $(DEBUG) 
+CFLAGS = $(OPTFLAGS) $(INCDIR) $(DEBUG)
 
 ifeq ($(TARGET_WIN32),yes)
 SRCS = win32/dialogs.c \
