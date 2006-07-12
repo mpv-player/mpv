@@ -6173,6 +6173,10 @@ EOF
     _res_comment="using libavutil.so, but static libavutil is recommended"
   fi
 fi
+# neither static nor shared libavutil is available, but it is mandatory ...
+if test "$_libavutil_so" = no ; then
+  die "You need static or shared libavutil, MPlayer will not compile without!"
+fi
 echores "$_libavutil_so"
 fi #if test "$_libavutil" != yes ; then
 
