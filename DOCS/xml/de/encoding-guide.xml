@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with r18457 -->
+<!-- In sync with r19043 -->
 <chapter id="encoding-guide">
 <title>Encodieren mit <application>MEncoder</application></title>
 
@@ -1825,10 +1825,9 @@
 <formalpara>
 <title>Was ist telecine?</title>
 <para>
-  Ich schlage vor, du besuchst diese Seite, wenn du nicht viel von dem
-  verstehst, was in diesem Dokument beschrieben wird:
-  <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
-  Diese URL führt zu einer verständlichen und einigermaßen umfassenden
+  Wenn du nicht viel von dem verstehst, was in diesem Dokument beschrieben wird, lies den
+  <ulink url="http://en.wikipedia.org/wiki/Telecine">Wikipedia-Artikel über Telecine</ulink>.
+  Dies ist eine verständliche und einigermaßen umfassende
   Beschreibung dessen, was telecine ist.
 </para></formalpara>
 
