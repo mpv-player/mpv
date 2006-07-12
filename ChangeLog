@@ -2,22 +2,28 @@ MPlayer (1.0)
 
   rc1:
 
-    MEncoder:
-    * support of x264 encoding over lavc
-    
+    DOCS:
+    * German documentation translation almost finished
+
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
     * SSE optimizations for mp3lib
-    
+
     Demuxers:
-    * support for audio stream switching in MPEG-TS
-    * it's possible to switch to any of the available audio tracks in MPEG TS/PS, MKV and streams
-      supported by libavformat
+    * support for audio stream switching in MPEG-TS/PS, Matroska and
+      streams supported by libavformat
     * lavf demuxer now honors -alang
-    * new native RTSP demuxer (handles MPEG-TS over RTP) from generic RTSP servers.
+    * native RTSP demuxer (handles MPEG-TS over RTP) for generic RTSP servers
 
     Inputs:
-    * new PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350).
+    * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350)
+
+    MEncoder:
+    * support of x264 encoding over lavc
+
+    Others:
+    * SSA/ASS subtitle renderer
+
 
   pre8: "NeuTeam strikes back" June 11, 2006
 
