@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18545 $ -->
+<!-- synced with r19043 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1717,10 +1717,9 @@ Ne tedd ezt! Mindig használj fájlt vagy CD/DVD/stb. eszközt forrásként.
 <formalpara>
 <title>Mi az a telecine?</title>
 <para>
-  Gondolom azért kerested meg ezt a részt, mert nem sok mindent értesz abból,
-  ami ebben a dokumentumban le van írva:
-  <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
-  Ez az URL egy érthető és meglehetősen átfogó leírás arról, hogy mi is az
+  Ha nem érted teljesen, ami ebben a dokumentumban le van írva, olvasd el a
+  <ulink url="http://en.wikipedia.org/wiki/Telecine">Wikipedia telecine szócikkét</ulink>.
+  Ez egy érthető és meglehetősen átfogó leírás arról, hogy mi is az
   a telecine.
 </para></formalpara>
 
