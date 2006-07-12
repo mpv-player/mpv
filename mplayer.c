@@ -3925,7 +3925,7 @@ if(!sh_video) {
 	sh_video->pts = vf_vo_data.pts;
 	if (sh_video->pts == MP_NOPTS_VALUE) {
 	    mp_msg(MSGT_CPLAYER, MSGL_ERR, "pts after filters MISSING\n");
-	    sh_video->pts == last_pts;
+	    sh_video->pts = last_pts;
 	}
 	if (last_pts == MP_NOPTS_VALUE)
 	    last_pts = sh_video->pts;
