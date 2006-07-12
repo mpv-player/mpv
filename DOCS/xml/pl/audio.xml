@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.31 -->
-<sect1 id="audio">
+<!-- synced with 1.32 (deprecated CVS)-->
+<!-- synced with 17322 (svn) -->
+<!-- Opiekun: chwilowo nikt (poprzednio Paszczi)-->
+<chapter id="audio">
 <title>Urządzenia wyjściowe audio</title>
-<sect2 id="sync">
+<sect1 id="sync">
 <title>Synchronizacja Audio/Video</title>
 
 <para>
@@ -34,9 +36,9 @@ Jeśli masz kiepski sterownik dźwięku, spróbuj użyć opcji <option>-autosync</opti
 Powinna ona rozwiązać Twój problem. Dokładniejsze informacje znajdziesz na stronie
 man.
 </para>
-</sect2>
+</sect1>
 
-<sect2 id="troubleshooting">
+<sect1 id="troubleshooting">
 <title>Rozwiązywanie problemów</title>
 
 <para>Kilka uwag:</para>
@@ -55,6 +57,5 @@ man.
   włącz odmaskowywanie przerwań, tak jak opisano to w rozdziale dotyczącym
   <link linkend="drives">CD-ROMu</link>.
 </para>
-</sect2>
-
 </sect1>
+</chapter>
