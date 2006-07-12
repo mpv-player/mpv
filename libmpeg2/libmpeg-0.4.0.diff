@@ -1,7 +1,6 @@
-diff -u libmpeg2.orig/attributes.h libmpeg2/attributes.h
---- libmpeg2.orig/attributes.h	2006-06-16 20:12:26.000000000 +0200
+--- include/attributes.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/attributes.h	2006-06-16 20:12:50.000000000 +0200
-@@ -29,7 +29,7 @@
+@@ -25,7 +29,7 @@
  #ifdef ATTRIBUTE_ALIGNED_MAX
  #define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((ATTRIBUTE_ALIGNED_MAX < align) ? ATTRIBUTE_ALIGNED_MAX : align)))
  #else
@@ -10,15 +9,15 @@ diff -u libmpeg2.orig/attributes.h libmpeg2/attributes.h
  #endif
  
  #ifdef HAVE_BUILTIN_EXPECT
-Seulement dans libmpeg2.orig/: attributes.h.orig
-diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
---- libmpeg2.orig/cpu_accel.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/cpu_accel.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/cpu_accel.c	2006-06-16 20:12:50.000000000 +0200
-@@ -22,10 +22,11 @@
-  *
-  * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
-  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-- * $Id$
+@@ -19,9 +19,14 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
++ * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 + * $Id$
   */
  
@@ -27,7 +26,7 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
  
  #include <inttypes.h>
  
-@@ -34,9 +35,17 @@
+@@ -30,9 +35,17 @@
  #include "mpeg2_internal.h"
  
  #ifdef ACCEL_DETECT
@@ -46,7 +45,7 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
      uint32_t eax, ebx, ecx, edx;
      int AMD;
      uint32_t caps;
-@@ -109,10 +118,24 @@
+@@ -105,10 +118,24 @@
  	caps |= MPEG2_ACCEL_X86_MMXEXT;
  
      return caps;
@@ -73,7 +72,7 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
  #include <signal.h>
  #include <setjmp.h>
  
-@@ -199,6 +222,7 @@
+@@ -195,6 +222,7 @@
  #ifdef ARCH_ALPHA
  static inline uint32_t arch_accel (void)
  {
@@ -81,7 +80,7 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
      uint64_t no_mvi;
  
      asm volatile ("amask %1, %0"
-@@ -206,6 +230,9 @@
+@@ -202,6 +230,9 @@
  		  : "rI" (256));	/* AMASK_MVI */
      return no_mvi ? MPEG2_ACCEL_ALPHA : (MPEG2_ACCEL_ALPHA |
  					 MPEG2_ACCEL_ALPHA_MVI);
@@ -91,7 +90,7 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
  }
  #endif /* ARCH_ALPHA */
  #endif /* ACCEL_DETECT */
-@@ -216,7 +243,7 @@
+@@ -212,7 +243,7 @@
  
      accel = 0;
  #ifdef ACCEL_DETECT
@@ -100,11 +99,9 @@ diff -u libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
      accel = arch_accel ();
  #endif
  #endif
-Seulement dans libmpeg2.orig/: cpu_accel.c.orig
-diff -u libmpeg2.orig/cpu_state.c libmpeg2/cpu_state.c
---- libmpeg2.orig/cpu_state.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/cpu_state.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/cpu_state.c	2006-06-16 20:12:50.000000000 +0200
-@@ -33,14 +33,14 @@
+@@ -29,14 +33,14 @@
  #include "mpeg2.h"
  #include "attributes.h"
  #include "mpeg2_internal.h"
@@ -121,7 +118,7 @@ diff -u libmpeg2.orig/cpu_state.c libmpeg2/cpu_state.c
  static void state_restore_mmx (cpu_state_t * state)
  {
      emms ();
-@@ -119,12 +119,12 @@
+@@ -115,12 +119,12 @@
  
  void mpeg2_cpu_state_init (uint32_t accel)
  {
@@ -136,11 +133,9 @@ diff -u libmpeg2.orig/cpu_state.c libmpeg2/cpu_state.c
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
  	mpeg2_cpu_state_save = state_save_altivec;
  	mpeg2_cpu_state_restore = state_restore_altivec;
-Seulement dans libmpeg2.orig/: cpu_state.c.orig
-diff -u libmpeg2.orig/decode.c libmpeg2/decode.c
---- libmpeg2.orig/decode.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/decode.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/decode.c	2006-06-16 20:12:50.000000000 +0200
-@@ -355,6 +355,15 @@
+@@ -351,6 +355,15 @@
      fbuf->buf[1] = buf[1];
      fbuf->buf[2] = buf[2];
      fbuf->id = id;
@@ -156,11 +151,9 @@ diff -u libmpeg2.orig/decode.c libmpeg2/decode.c
  }
  
  void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
-Seulement dans libmpeg2.orig/: decode.c.orig
-diff -u libmpeg2.orig/header.c libmpeg2/header.c
---- libmpeg2.orig/header.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/header.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/header.c	2006-06-16 20:12:50.000000000 +0200
-@@ -104,6 +104,9 @@
+@@ -100,6 +104,9 @@
      mpeg2dec->decoder.convert = NULL;
      mpeg2dec->decoder.convert_id = NULL;
      mpeg2dec->picture = mpeg2dec->pictures;
@@ -170,7 +163,7 @@ diff -u libmpeg2.orig/header.c libmpeg2/header.c
      mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
      mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
      mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
-@@ -555,6 +558,7 @@
+@@ -551,6 +558,7 @@
  	if (!(mpeg2dec->sequence.flags & SEQ_FLAG_PROGRESSIVE_SEQUENCE)) {
  	    picture->nb_fields = (buffer[3] & 2) ? 3 : 2;
  	    flags |= (buffer[3] & 128) ? PIC_FLAG_TOP_FIELD_FIRST : 0;
@@ -178,7 +171,7 @@ diff -u libmpeg2.orig/header.c libmpeg2/header.c
  	} else
  	    picture->nb_fields = (buffer[3]&2) ? ((buffer[3]&128) ? 6 : 4) : 2;
  	break;
-@@ -803,6 +807,7 @@
+@@ -799,6 +807,7 @@
  	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
  	for (i = 0; i < 32; i++) {
  	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
@@ -186,49 +179,9 @@ diff -u libmpeg2.orig/header.c libmpeg2/header.c
  	    for (j = 0; j < 64; j++)
  		decoder->quantizer_prescale[index][i][j] =
  		    k * mpeg2dec->quantizer_matrix[index][j];
-Seulement dans libmpeg2.orig/: header.c.orig
-diff -u libmpeg2.orig/idct_alpha.c libmpeg2/idct_alpha.c
---- libmpeg2.orig/idct_alpha.c	2006-06-16 20:12:26.000000000 +0200
-+++ libmpeg2/idct_alpha.c	2006-06-16 20:12:50.000000000 +0200
-@@ -63,7 +63,7 @@
- } while (0)
- #endif
- 
--static void inline idct_row (int16_t * const block)
-+static inline void idct_row (int16_t * const block)
- {
-     uint64_t l, r;
-     int_fast32_t d0, d1, d2, d3;
-@@ -120,7 +120,7 @@
-     block[7] = (a0 - b0) >> 12;
- }
- 
--static void inline idct_col (int16_t * const block)
-+static inline void idct_col (int16_t * const block)
- {
-     int_fast32_t d0, d1, d2, d3;
-     int_fast32_t a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -161,6 +161,7 @@
-     block[8*7] = (a0 - b0) >> 17;
- }
- 
-+#ifdef CAN_COMPILE_ALPHA_MVI
- void mpeg2_idct_copy_mvi (int16_t * block, uint8_t * dest, const int stride)
- {
-     uint64_t clampmask;
-@@ -293,6 +294,7 @@
- 	stq (p7, dest + 7 * stride);
-     }
- }
-+#endif
- 
- void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, const int stride)
- {
-Seulement dans libmpeg2.orig/: idct_alpha.c.orig
-diff -u libmpeg2.orig/idct.c libmpeg2/idct.c
---- libmpeg2.orig/idct.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/idct.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/idct.c	2006-06-16 20:12:50.000000000 +0200
-@@ -70,7 +70,7 @@
+@@ -66,7 +70,7 @@
  } while (0)
  #endif
  
@@ -237,7 +190,7 @@ diff -u libmpeg2.orig/idct.c libmpeg2/idct.c
  {
      int d0, d1, d2, d3;
      int a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -123,7 +123,7 @@
+@@ -119,7 +123,7 @@
      block[7] = (a0 - b0) >> 12;
  }
  
@@ -246,7 +199,7 @@ diff -u libmpeg2.orig/idct.c libmpeg2/idct.c
  {
      int d0, d1, d2, d3;
      int a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -239,7 +239,7 @@
+@@ -235,7 +239,7 @@
  
  void mpeg2_idct_init (uint32_t accel)
  {
@@ -255,7 +208,7 @@ diff -u libmpeg2.orig/idct.c libmpeg2/idct.c
      if (accel & MPEG2_ACCEL_X86_MMXEXT) {
  	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
  	mpeg2_idct_add = mpeg2_idct_add_mmxext;
-@@ -258,11 +258,14 @@
+@@ -254,11 +258,14 @@
      } else
  #endif
  #ifdef ARCH_ALPHA
@@ -271,11 +224,45 @@ diff -u libmpeg2.orig/idct.c libmpeg2/idct.c
  	int i;
  
  	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
-Seulement dans libmpeg2.orig/: idct.c.orig
-diff -u libmpeg2.orig/idct_mmx.c libmpeg2/idct_mmx.c
---- libmpeg2.orig/idct_mmx.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/idct_alpha.c	2006-06-16 20:12:26.000000000 +0200
++++ libmpeg2/idct_alpha.c	2006-06-16 20:12:50.000000000 +0200
+@@ -59,7 +63,7 @@
+ } while (0)
+ #endif
+ 
+-static void inline idct_row (int16_t * const block)
++static inline void idct_row (int16_t * const block)
+ {
+     uint64_t l, r;
+     int_fast32_t d0, d1, d2, d3;
+@@ -116,7 +120,7 @@
+     block[7] = (a0 - b0) >> 12;
+ }
+ 
+-static void inline idct_col (int16_t * const block)
++static inline void idct_col (int16_t * const block)
+ {
+     int_fast32_t d0, d1, d2, d3;
+     int_fast32_t a0, a1, a2, a3, b0, b1, b2, b3;
+@@ -157,6 +161,7 @@
+     block[8*7] = (a0 - b0) >> 17;
+ }
+ 
++#ifdef CAN_COMPILE_ALPHA_MVI
+ void mpeg2_idct_copy_mvi (int16_t * block, uint8_t * dest, const int stride)
+ {
+     uint64_t clampmask;
+@@ -289,6 +294,7 @@
+ 	stq (p7, dest + 7 * stride);
+     }
+ }
++#endif
+ 
+ void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, const int stride)
+ {
+--- libmpeg2/idct_mmx.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/idct_mmx.c	2006-06-16 20:12:50.000000000 +0200
-@@ -27,7 +27,7 @@
+@@ -23,7 +27,7 @@
  
  #include "config.h"
  
@@ -284,12 +271,9 @@ diff -u libmpeg2.orig/idct_mmx.c libmpeg2/idct_mmx.c
  
  #include <inttypes.h>
  
-Seulement dans libmpeg2.orig/: idct_mmx.c.orig
-Seulement dans libmpeg2.orig/: libmpeg2.a
-diff -u libmpeg2.orig/motion_comp.c libmpeg2/motion_comp.c
---- libmpeg2.orig/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
-@@ -37,7 +37,7 @@
+@@ -33,7 +37,7 @@
  
  void mpeg2_mc_init (uint32_t accel)
  {
@@ -298,7 +282,7 @@ diff -u libmpeg2.orig/motion_comp.c libmpeg2/motion_comp.c
      if (accel & MPEG2_ACCEL_X86_MMXEXT)
  	mpeg2_mc = mpeg2_mc_mmxext;
      else if (accel & MPEG2_ACCEL_X86_3DNOW)
-@@ -46,7 +46,7 @@
+@@ -42,7 +46,7 @@
  	mpeg2_mc = mpeg2_mc_mmx;
      else
  #endif
@@ -307,7 +291,7 @@ diff -u libmpeg2.orig/motion_comp.c libmpeg2/motion_comp.c
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -56,7 +56,7 @@
+@@ -52,7 +56,7 @@
  	mpeg2_mc = mpeg2_mc_alpha;
      else
  #endif
@@ -316,11 +300,9 @@ diff -u libmpeg2.orig/motion_comp.c libmpeg2/motion_comp.c
      if (accel & MPEG2_ACCEL_SPARC_VIS)
  	mpeg2_mc = mpeg2_mc_vis;
      else
-Seulement dans libmpeg2.orig/: motion_comp.c.orig
-diff -u libmpeg2.orig/motion_comp_mmx.c libmpeg2/motion_comp_mmx.c
---- libmpeg2.orig/motion_comp_mmx.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/motion_comp_mmx.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp_mmx.c	2006-06-16 20:12:50.000000000 +0200
-@@ -27,7 +27,7 @@
+@@ -23,7 +27,7 @@
  
  #include "config.h"
  
@@ -329,20 +311,20 @@ diff -u libmpeg2.orig/motion_comp_mmx.c libmpeg2/motion_comp_mmx.c
  
  #include <inttypes.h>
  
-Seulement dans libmpeg2.orig/: motion_comp_mmx.c.orig
-diff -u libmpeg2.orig/mpeg2.h libmpeg2/mpeg2.h
---- libmpeg2.orig/mpeg2.h	2006-06-16 20:12:26.000000000 +0200
+--- include/mpeg2.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2.h	2006-06-16 20:12:50.000000000 +0200
-@@ -22,7 +22,7 @@
-  *
-  * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
-  * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-- * $Id$
+@@ -19,6 +19,10 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
++ * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
 + * $Id$
   */
  
  #ifndef MPEG2_H
-@@ -86,6 +86,7 @@
+@@ -82,6 +86,7 @@
  #define PIC_FLAG_COMPOSITE_DISPLAY 32
  #define PIC_FLAG_SKIP 64
  #define PIC_FLAG_TAGS 128
@@ -350,7 +332,7 @@ diff -u libmpeg2.orig/mpeg2.h libmpeg2/mpeg2.h
  #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
  
  typedef struct mpeg2_picture_s {
-@@ -158,6 +159,7 @@
+@@ -154,6 +159,7 @@
  #define MPEG2_ACCEL_X86_MMX 1
  #define MPEG2_ACCEL_X86_3DNOW 2
  #define MPEG2_ACCEL_X86_MMXEXT 4
@@ -358,11 +340,9 @@ diff -u libmpeg2.orig/mpeg2.h libmpeg2/mpeg2.h
  #define MPEG2_ACCEL_PPC_ALTIVEC 1
  #define MPEG2_ACCEL_ALPHA 1
  #define MPEG2_ACCEL_ALPHA_MVI 2
-Seulement dans libmpeg2.orig/: mpeg2.h.orig
-diff -u libmpeg2.orig/mpeg2_internal.h libmpeg2/mpeg2_internal.h
---- libmpeg2.orig/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/mpeg2_internal.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2_internal.h	2006-06-16 20:12:50.000000000 +0200
-@@ -148,6 +148,12 @@
+@@ -144,6 +148,12 @@
      int second_field;
  
      int mpeg1;
@@ -375,7 +355,7 @@ diff -u libmpeg2.orig/mpeg2_internal.h libmpeg2/mpeg2_internal.h
  };
  
  typedef struct {
-@@ -218,6 +224,10 @@
+@@ -214,6 +224,10 @@
      int8_t q_scale_type, scaled[4];
      uint8_t quantizer_matrix[4][64];
      uint8_t new_quantizer_matrix[4][64];
@@ -386,11 +366,9 @@ diff -u libmpeg2.orig/mpeg2_internal.h libmpeg2/mpeg2_internal.h
  };
  
  typedef struct {
-Seulement dans libmpeg2.orig/: mpeg2_internal.h.orig
-diff -u libmpeg2.orig/slice.c libmpeg2/slice.c
---- libmpeg2.orig/slice.c	2006-06-16 20:12:26.000000000 +0200
+--- libmpeg2/slice.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/slice.c	2006-06-16 20:12:50.000000000 +0200
-@@ -146,6 +146,7 @@
+@@ -142,6 +146,7 @@
  
      quantizer_scale_code = UBITS (bit_buf, 5);
      DUMPBITS (bit_buf, bits, 5);
@@ -398,7 +376,7 @@ diff -u libmpeg2.orig/slice.c libmpeg2/slice.c
  
      decoder->quantizer_matrix[0] =
  	decoder->quantizer_prescale[0][quantizer_scale_code];
-@@ -1568,6 +1569,9 @@
+@@ -1564,6 +1569,9 @@
  
  #define NEXT_MACROBLOCK							\
  do {									\
@@ -408,5 +386,3 @@ diff -u libmpeg2.orig/slice.c libmpeg2/slice.c
      decoder->offset += 16;						\
      if (decoder->offset == decoder->width) {				\
  	do { /* just so we can use the break statement */		\
-Seulement dans libmpeg2.orig/: slice.c.orig
-Les sous-répertoires libmpeg2.orig/.svn et libmpeg2/.svn sont identiques.
