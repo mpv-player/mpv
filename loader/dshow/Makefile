@@ -17,7 +17,7 @@ OBJS = $(SRCS:.c=.o)
 
 # OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
 
-INCLUDE = -I. -I.. $(EXTRA_INC) -DNOAVIFILE_HEADERS
+INCLUDE = -I. -I.. -DNOAVIFILE_HEADERS
 CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
 .SUFFIXES: .c .o

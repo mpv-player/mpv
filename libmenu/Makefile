@@ -19,7 +19,7 @@ EXTRA_INC += $(DVB_INC)
 endif
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs $(EXTRA_INC)
+CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs
 
 .SUFFIXES: .c .o
 

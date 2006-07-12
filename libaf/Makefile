@@ -43,7 +43,7 @@ endif
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(LIBAV_INC) $(EXTRA_INC) -D_GNU_SOURCE
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(LIBAV_INC) -D_GNU_SOURCE
 
 ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_

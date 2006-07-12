@@ -12,7 +12,7 @@ SRCS	= DMO_AudioDecoder.c \
 
 OBJS = $(SRCS:.c=.o)
 
-INCLUDE = -I. -I../dshow -I.. $(EXTRA_INC)
+INCLUDE = -I. -I../dshow -I..
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DNOAVIFILE_HEADERS
 
 .SUFFIXES: .c .o

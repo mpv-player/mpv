@@ -19,7 +19,7 @@ SRCS	= bitwise.c \
           window.c \
 
 OBJS	= $(SRCS:.c=.o)
-INCLUDE = -I. -I.. $(EXTRA_INC)
+INCLUDE = -I. -I..
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) $(TREMOR_FLAGS)
 
 .SUFFIXES: .c .o

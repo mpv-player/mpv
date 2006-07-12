@@ -3,7 +3,7 @@ MPROOT=../..
 
 include $(MPROOT)/config.mak
 
-INCLUDE = -I$(MPROOT) -I$(MPROOT)/loader $(EXTRA_INC)
+INCLUDE = -I$(MPROOT) -I$(MPROOT)/loader
 CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
 .SUFFIXES: .c .cpp .o

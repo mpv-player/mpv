@@ -12,7 +12,6 @@ OBJS=$(SRCS:.c=.o)
 CFLAGS  = $(OPTFLAGS) \
           -I. -I.. \
           -I../libmpcodecs \
-          $(EXTRA_INC) \
           -D_GNU_SOURCE \
           $(FREETYPE_INC) \
           $(FONTCONFIG_INC) \

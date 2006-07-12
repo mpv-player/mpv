@@ -331,7 +331,6 @@ CFLAGS  = $(OPTFLAGS) \
           -I../libmpdemux \
           -I../loader \
           $(LIBAV_INC) \
-          $(EXTRA_INC) \
           $(X264_INC) \
           $(XVID_INC) \
           -D_GNU_SOURCE \

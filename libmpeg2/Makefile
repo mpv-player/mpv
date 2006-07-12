@@ -13,7 +13,7 @@ SRCS	= alloc.c \
 	  slice.c \
 
 OBJS	= $(SRCS:.c=.o)
-INCLUDE = -I. -I../libvo -I.. $(EXTRA_INC)
+INCLUDE = -I. -I../libvo -I..
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
 ifeq ($(TARGET_ARCH_X86),yes)

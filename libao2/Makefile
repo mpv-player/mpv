@@ -15,7 +15,6 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. \
           $(DVB_INC) \
           $(DXR2_INC) \
           $(ESD_INC) \
-          $(EXTRA_INC) \
           $(JACK_INC) \
           $(OPENAL_INC) \
           $(POLYP_INC) \

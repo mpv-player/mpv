@@ -40,7 +40,6 @@ SRCS_COMMON = asxparser.c \
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 $(SRCS_COMMON) \
-                divx4_vbr.c \
                 libvo/aclib.c \
                 libvo/font_load.c \
                 libvo/osd.c \
@@ -129,7 +128,6 @@ CFLAGS = $(OPTFLAGS) -I. \
          $(CACA_INC) \
          $(CDPARANOIA_INC) \
          $(DVB_INC) \
-         $(EXTRA_INC) \
          $(FONTCONFIG_INC) \
          $(FREETYPE_INC) \
          $(FRIBIDI_INC) \

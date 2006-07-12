@@ -2,7 +2,7 @@ include ../config.mak
 
 LIBNAME = libgui.a
 
-INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC) $(EXTRA_INC) 
+INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC)
 
 CFLAGS = $(OPTFLAGS) $(INCDIR) $(DEBUG)
 
