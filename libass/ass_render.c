@@ -653,7 +653,7 @@ static char* parse_tag(char* p, double pwr) {
 		change_border(val);
 	} else if (mystrcmp(&p, "move")) {
 		int x1, x2, y1, y2;
-		long long t1, delta_t, t;
+		long long t1, t2, delta_t, t;
 		int x, y;
 		double k;
 		skip('(');
@@ -664,12 +664,25 @@ static char* parse_tag(char* p, double pwr) {
 		x2 = strtol(p, &p, 10);
 		skip(',');
 		y2 = strtol(p, &p, 10);
-		skip(')'); // FIXME: 2 more optional args
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement: (%d, %d) -> (%d, %d)\n", x1, y1, x2, y2);
-		t1 = render_context.event->Start;
-		delta_t = render_context.event->Duration;
-		t = frame_context.time; // FIXME: move to render_context
-		k = ((double)(t - t1)) / delta_t;
+		if (*p == ',') {
+			skip(',');
+			t1 = strtoll(p, &p, 10);
+			skip(',');
+			t2 = strtoll(p, &p, 10);
+			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%lld .. %lld)\n", x1, y1, x2, y2, t1, t2);
+		} else {
+			t1 = 0;
+			t2 = render_context.event->Duration;
+			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement: (%d, %d) -> (%d, %d)\n", x1, y1, x2, y2);
+		}
+		skip(')');
+		delta_t = t2 - t1;
+		t = frame_context.time - render_context.event->Start;
+		if (t < t1)
+			k = 0.;
+		else if (t > t2)
+			k = 1.;
+		else k = ((double)(t - t1)) / delta_t;
 		x = k * (x2 - x1) + x1;
 		y = k * (y2 - y1) + y1;
 		render_context.pos_x = x;
