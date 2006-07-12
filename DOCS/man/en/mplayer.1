@@ -1615,6 +1615,24 @@ Force audio parameters for the VIVO demuxer (for debugging purposes).
 Also see \-vf expand.
 .
 .TP
+.B \-ass-font-scale <value>
+Set the scale coefficient to be used for fonts in the SSA/ASS renderer.
+.
+.TP
+.B \-ass-line-spacing <value>
+Set line spacing value for SSA/ASS renderer.
+.
+.TP
+.B \-ass-bottom-margin <value>
+Adds a black band at the bottom of the frame.
+The SSA/ASS renderer will place subtitles there.
+.
+.TP
+.B \-ass-top-margin <value>
+Adds a black band at the top of the frame.
+The SSA/ASS renderer will place toptitles there.
+.
+.TP
 .B \-dumpjacosub (MPlayer only)
 Convert the given subtitle (specified with the \-sub option) to the time-based
 JACOsub subtitle format.
@@ -1655,6 +1673,12 @@ endings with DOS/Windows line endings.
 .B \-dumpsub (MPlayer only) (BETA CODE)
 Dumps the subtitle substream from VOB streams.
 Also see the \-dump*sub and \-vobsubout* options.
+.
+.TP
+.B \-embeddedfonts (FreeType only)
+Enables extraction of Matroska embedded fonts.
+These fonts can be used for SSA/ASS subtitle
+rendering (\-ass option).
 .
 .TP
 .B \-ffactor <number> (OSD only)
@@ -1707,12 +1731,6 @@ With fontconfig, this option determines the fontconfig font name.
 .TP
 .B \-fontconfig (fontconfig only)
 Enables the usage of fontconfig managed fonts.
-.
-.TP
-.B \-embeddedfonts (FreeType only)
-Enables extraction of Matroska embedded fonts.
-These fonts can be used for SSA/ASS subtitle
-rendering (\-ass option).
 .
 .TP
 .B \-forcedsubsonly
@@ -2038,24 +2056,6 @@ Turn on SSA/ASS subtitle rendering.
 With this option, libass will be used for SSA/ASS
 external subtitles and Matroska tracks.
 You may also want to use \-embeddedfonts.
-.
-.TP
-.B \-ass-font-scale <value>
-Set the scale coefficient to be used for fonts in the SSA/ASS renderer.
-.
-.TP
-.B \-ass-line-spacing <value>
-Set line spacing value for SSA/ASS renderer.
-.
-.TP
-.B \-ass-top-margin <value>
-Adds a black band at the top of the frame.
-The SSA/ASS renderer will place toptitles there.
-.
-.TP
-.B \-ass-bottom-margin <value>
-Adds a black band at the bottom of the frame.
-The SSA/ASS renderer will place subtitles there.
 .
 .
 .
