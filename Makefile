@@ -396,28 +396,6 @@ $(PRG):	$(MPLAYER_DEP)
     endif
 	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
-mplayer.exe.spec.c: libmpcodecs/libmpcodecs.a
-	winebuild -fPIC -o mplayer.exe.spec.c -exe mplayer.exe -mcui \
-	libmpcodecs/ad_qtaudio.o libmpcodecs/vd_qtvideo.o \
-	-L/usr/local/lib/wine -lkernel32
-
-mplayer.exe.so:	$(MPLAYER_DEP) mplayer.exe.spec.c
-	$(CC) $(CFLAGS) -Wall -shared \
-	-Wl,-rpath,/usr/local/lib -Wl,-Bsymbolic \
-	-o mplayer.exe.so $(OBJS_MPLAYER) mplayer.exe.spec.c \
-	libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) \
-	$(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) \
-	$(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) \
-	$(STATIC_LIB) $(ARCH_LIB) -lwine $(MATH_LIB) \
-
-mplayer_wine.so:	$(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -shared -Wl,-Bsymbolic -o mplayer_wine.so \
-          mplayer_wine.spec.c $(OBJS_MPLAYER) libvo/libvo.a \
-	  libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) \
-	  $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) \
-	  $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) \
-	  -lwine $(ARCH_LIB) $(MATH_LIB) \
-
 ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(ENCORE_LIB) \
