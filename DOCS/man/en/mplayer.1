@@ -1709,7 +1709,7 @@ With fontconfig, this option determines the fontconfig font name.
 Enables the usage of fontconfig managed fonts.
 .
 .TP
-.B \-(no)embeddedfonts (FreeType only)
+.B \-embeddedfonts (FreeType only)
 Enables extraction of Matroska embedded fonts.
 These fonts can be used for SSA/ASS subtitle
 rendering (\-ass option).
@@ -2033,7 +2033,7 @@ the '.idx', '.ifo' or '.sub'.
 Specify the VOBsub subtitle ID.
 .
 .TP
-.B \-ass (FreeType only) (FontConfig optional)
+.B \-ass (FreeType only)
 Turn on SSA/ASS subtitle rendering.
 With this option, libass will be used for SSA/ASS
 external subtitles and Matroska tracks.
@@ -6264,9 +6264,9 @@ colorspace, so it is safe to add it to the configuration file.
 .RE
 .
 .TP
-.B ass\ \ \ \ \ 
-Moves SSA/ASS subtitle rendering to arbitary point in video filter chain.
-Only useful with \-ass option.
+.B ass\ \ \ \ 
+Moves SSA/ASS subtitle rendering to an arbitrary point in the filter chain.
+Only useful with the \-ass option.
 .RE
 .
 .
