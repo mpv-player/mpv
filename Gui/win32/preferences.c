@@ -215,7 +215,7 @@ static LRESULT CALLBACK PrefsWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
 
             btn = CreateWindow("button", "Display videos in the sub window",
                                WS_CHILD | WS_VISIBLE | BS_AUTOCHECKBOX,
-                               55, 227, 250, 25,
+                               85, 227, 250, 25,
                                hwnd, (HMENU) ID_SUBWINDOW,
                                ((LPCREATESTRUCT) lParam) -> hInstance,
                                NULL);
