@@ -11,14 +11,7 @@
  #ifdef HAVE_BUILTIN_EXPECT
 --- libmpeg2/cpu_accel.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/cpu_accel.c	2006-06-16 20:12:50.000000000 +0200
-@@ -19,9 +19,14 @@
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-+ *
-+ * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
-+ * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+ * $Id$
+@@ -22,6 +26,7 @@
   */
  
  #include "config.h"
@@ -313,17 +306,6 @@
  
 --- include/mpeg2.h	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/mpeg2.h	2006-06-16 20:12:50.000000000 +0200
-@@ -19,6 +19,10 @@
-  * You should have received a copy of the GNU General Public License
-  * along with this program; if not, write to the Free Software
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-+ *
-+ * Modified for use with MPlayer, see libmpeg-0.4.0.diff for the exact changes.
-+ * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
-+ * $Id$
-  */
- 
- #ifndef MPEG2_H
 @@ -82,6 +86,7 @@
  #define PIC_FLAG_COMPOSITE_DISPLAY 32
  #define PIC_FLAG_SKIP 64
