@@ -441,7 +441,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
 }
 
 // check if clang has substring from comma separated langlist
-static int demux_ogg_check_lang(char *clang, char *langlist)
+static int demux_ogg_check_lang(const char *clang, char *langlist)
 {
   char *c;
 

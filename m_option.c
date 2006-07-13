@@ -22,7 +22,7 @@
 //#define NO_FREE
 #endif
 
-m_option_t* m_option_list_find(m_option_t* list,char* name) {
+m_option_t* m_option_list_find(m_option_t* list,const char* name) {
   int i;
 
   for(i = 0 ; list[i].name ; i++) {
@@ -1196,7 +1196,7 @@ static int find_obj_desc(char* name,m_obj_list_t* l,m_struct_t** ret) {
   return 0;
 }
 
-static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
+static int get_obj_param(const char* opt_name,const char* obj_name, m_struct_t* desc,
 			 char* str,int* nold,int oldmax,char** dst) {
   char* eq;
   m_option_t* opt;
@@ -1249,7 +1249,7 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
   return 1;
 }
 
-static int get_obj_params(char* opt_name, char* name,char* params,
+static int get_obj_params(const char* opt_name, const char* name,char* params,
 			  m_struct_t* desc,char separator, char*** _ret) {
   int n = 0,nold = 0, nopts,r;
   char* ptr,*last_ptr = params;

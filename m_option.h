@@ -439,7 +439,7 @@ struct m_option {
  *  \param name Name of the option.
  *  \return The matching option or NULL.
  */
-m_option_t* m_option_list_find(m_option_t* list,char* name);
+m_option_t* m_option_list_find(m_option_t* list,const char* name);
 
 /// Helper to parse options, see \ref m_option_type::parse.
 inline static int

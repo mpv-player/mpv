@@ -348,7 +348,7 @@ extern int pts_from_bps;
 
 extern int extension_parsing;
 
-int demux_info_add(demuxer_t *demuxer, char *opt, char *param);
+int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param);
 char* demux_info_get(demuxer_t *demuxer, char *opt);
 int demux_info_print(demuxer_t *demuxer);
 int demux_control(demuxer_t *demuxer, int cmd, void *arg);

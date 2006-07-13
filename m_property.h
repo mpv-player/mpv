@@ -120,7 +120,7 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str);
 // Helpers to use MPlayer's properties
 
 /// Get an MPlayer property.
-m_option_t*  mp_property_find(char* name);
+m_option_t*  mp_property_find(const char* name);
 
 /// Do an action with an MPlayer property.
 int mp_property_do(char* name,int action, void* val);

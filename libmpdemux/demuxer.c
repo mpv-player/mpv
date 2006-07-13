@@ -922,7 +922,7 @@ if (demuxer->desc->seek)
 return 1;
 }
 
-int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
+int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
 {
     char **info = demuxer->info;
     int n = 0;

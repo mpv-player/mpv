@@ -67,7 +67,7 @@ static char posbar[MESSAGE_SIZE];
 static int osdx = 0, osdy = 0;
 static int posbary = 2;
 
-static void osdmessage(int duration, char *fmt, ...)
+static void osdmessage(int duration, const char *fmt, ...)
 {
     /*
      * for outputting a centered string at the bottom
@@ -87,7 +87,7 @@ static void osdmessage(int duration, char *fmt, ...)
     posbar[0] = '\0';
 }
 
-static void osdpercent(int duration, int min, int max, int val, char *desc, char *unit)
+static void osdpercent(int duration, int min, int max, int val, const char *desc, const char *unit)
 {
     /*
      * prints a bar for setting values

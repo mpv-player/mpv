@@ -37,7 +37,7 @@ char*
 asx_get_attrib(char* attrib,char** attribs);
 
 int
-asx_attrib_to_enum(char* val,char** valid_vals);
+asx_attrib_to_enum(const char* val,char** valid_vals);
 
 #define asx_free_attribs(a) asx_list_free((void***)&a,free)
 

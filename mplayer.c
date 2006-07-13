@@ -1112,7 +1112,7 @@ static mp_osd_msg_t* osd_msg_stack = NULL;
  *  
  */
 
-static void set_osd_msg(int id, int level, int time, char* fmt, ...) {
+static void set_osd_msg(int id, int level, int time, const char* fmt, ...) {
     mp_osd_msg_t *msg,*last=NULL;
     va_list va;
     int r;
@@ -1243,7 +1243,7 @@ static mp_osd_msg_t* get_osd_msg(void) {
  *
  */
 
-void set_osd_bar(int type,char* name,double min,double max,double val) {
+void set_osd_bar(int type,const char* name,double min,double max,double val) {
     
     if(osd_level < 1) return;
     
@@ -2254,7 +2254,7 @@ static m_option_t mp_properties[] = {
     { NULL, NULL, NULL, 0, 0, 0, NULL }
 };
 
-m_option_t*  mp_property_find(char* name) {
+m_option_t*  mp_property_find(const char* name) {
     return m_option_list_find(mp_properties,name);
 }
 

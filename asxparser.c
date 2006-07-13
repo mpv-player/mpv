@@ -92,7 +92,7 @@ asx_get_attrib(char* attrib,char** attribs) {
 }
 
 int
-asx_attrib_to_enum(char* val,char** valid_vals) {
+asx_attrib_to_enum(const char* val,char** valid_vals) {
   char** ptr;
   int r = 0;
 
@@ -107,7 +107,7 @@ asx_attrib_to_enum(char* val,char** valid_vals) {
 
 static void
 asx_warning_attrib_invalid(ASX_Parser_t* parser, char* elem, char* attrib,
-			   char** valid_vals,char* val) {
+			   char** valid_vals,const char* val) {
   char *str,*vals,**ptr;
   int len;
 
