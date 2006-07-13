@@ -6,8 +6,6 @@
 
 include config.mak
 
-PRG_CFG = codec-cfg
-
 LIBAV_INC =
 ifeq ($(CONFIG_LIBAVUTIL),yes)
 LIBAV_INC += -I./libavutil
@@ -412,17 +410,16 @@ $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
 endif
 
-codecs.conf.h: $(PRG_CFG) etc/codecs.conf
-	./$(PRG_CFG) ./etc/codecs.conf > $@
+codec-cfg: codec-cfg.c codec-cfg.h help_mp.h
+	$(HOST_CC) -I. -DCODECS2HTML codec-cfg.c -o $@
+
+codecs.conf.h: codec-cfg etc/codecs.conf
+	./codec-cfg ./etc/codecs.conf > $@
 
 codec-cfg.o: codecs.conf.h
 
 codecs2html: mp_msg.o
 	$(CC) -DCODECS2HTML codec-cfg.c mp_msg.o -o $@
-
-$(PRG_CFG): codec-cfg.c codec-cfg.h help_mp.h
-	$(HOST_CC) $(HOST_CFLAGS) -I. codec-cfg.c -o $(PRG_CFG) \
-	-DCODECS2HTML $(EXTRA_LIB) $(EXTRA_INC)
 
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
@@ -490,10 +487,10 @@ endif
 	@echo "Uninstall completed"
 
 clean:
-	-rm -f *.o *.a *~ codecs.conf.h
+	-rm -f *.o *.a *~
 
 distclean: clean doxygen_clean
-	-rm -f *~ $(PRG) $(PRG_MENCODER) $(PRG_CFG)
+	-rm -f *~ $(PRG) $(PRG_MENCODER) codec-cfg codecs2html
 	-rm -f .depend configure.log codecs.conf.h help_mp.h
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
