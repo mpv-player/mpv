@@ -255,7 +255,7 @@ COMMON_LIBS += $(FREETYPE_LIB)
 endif
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
-GUI_LIBS = Gui/libgui.a
+GUI_LIBS = Gui/libgui.a $(GTK_LIBS)
 endif
 
 .SUFFIXES: .cc .c .o
@@ -377,7 +377,6 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(VIDIX_LIBS) \
                $(GUI_LIBS) \
                $(COMMON_LIBS) \
-               $(GTK_LIBS) \
                $(VO_LIBS) \
                $(AO_LIBS) \
                $(EXTRA_LIB)\

@@ -331,6 +331,7 @@ Video output:
   --enable-vm            build with XF86VidMode support for X11 [autodetect]
   --enable-xinerama      build with Xinerama support for X11 [autodetect]
   --enable-x11           build with X11 render support [autodetect]
+  --enable-xshape        build with XShape support [autodetect]
   --enable-fbdev         build with FBDev render support [autodetect]
   --enable-mlib          build with mediaLib support (Solaris only) [disable]
   --enable-3dfx          build with obsolete /dev/3dfx support [disable]
@@ -1573,6 +1574,7 @@ _libpostproc_so=auto
 _libfame=auto
 _mencoder=yes
 _x11=auto
+_xshape=auto
 _dga=auto	# 1 2 no auto
 _xv=auto
 _xvmc=no  #auto when complete
@@ -1738,6 +1740,8 @@ for ac_option do
   --disable-dynamic-plugins) _dynamic_plugins=no ;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
+  --enable-xshape)	_xshape=yes	;;
+  --disable-xshape)	_xshape=no	;;
   --enable-xv)		_xv=yes		;;
   --disable-xv)		_xv=no		;;
   --enable-xvmc)        _xvmc=yes       ;;
@@ -7008,19 +7012,20 @@ else
 fi
 echores "$_gethostbyname2"
 
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
 if test "$_gui" = yes ; then
 
   # Required libraries
-  test "$_png" != yes && die "PNG support required for GUI compilation, please install libpng and libpng-dev packages."
+  test "$_png" != yes && die "The GUI requires PNG support, please install libpng and libpng-dev packages."
 if not win32 ; then
-  test "$_x11" != yes && die "X11 support required for GUI compilation"
+  test "$_x11" != yes && die "X11 support required for GUI compilation."
 
   echocheck "XShape extension"
-  _xshape=no
-  if test "$_x11" = yes ; then
+  if test "$_xshape" = auto ; then
+    _xshape=no
     cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/Xproto.h>
@@ -7065,13 +7070,11 @@ if test "$_gtk1" = no ; then
     if pkg-config glib-2.0 --exists ; then
       echocheck "glib version"
       _glib=`pkg-config glib-2.0 --modversion 2>/dev/null`
-      _inc_glib=`pkg-config glib-2.0 --cflags 2>/dev/null`
       _ld_glib=`pkg-config glib-2.0 --libs 2>/dev/null`
       echores "$_glib"
 
       _def_gui='#define HAVE_NEW_GUI 1'
       _def_gtk2_gui='#define HAVE_GTK2_GUI 1'
-      _ld_gui='$(GTKLIB) $(GLIBLIB)'
     else
       _gtk1=yes
       echo "GLIB-2 devel packages were not found, trying GTK 1.2"
@@ -7107,31 +7110,29 @@ if test "$_gtk1" = yes ; then
     elif ( glib12-config --version ) >/dev/null 2>&1 ; then
       _glibconfig="glib12-config"
     else
-      die "The GUI requires GLib devel packages (which were not found)"
+      die "The GUI requires GLIB devel packages (which were not found)"
     fi
   fi
   _glib=`$_glibconfig --version 2>&1`
-  _inc_glib=`$_glibconfig --cflags 2>&1`
   _ld_glib=`$_glibconfig --libs 2>&1`
   echores "$_glib (using $_glibconfig)"
 
   _def_gui='#define HAVE_NEW_GUI 1'
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
-  _ld_gui='$(GTKLIB) $(GLIBLIB)'
 fi
 
-else
+else #if not win32
   _ld_win32libs="-lcomdlg32 -lcomctl32 -lshell32 -lkernel32 $_ld_win32libs"
   _def_gui='#define HAVE_NEW_GUI 1'
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
-  _ld_gui='$(GTKLIB) $(GLIBLIB)'
-fi
+fi #if not win32
 
-else
+else #if test "$_gui"
   _def_gui='#undef HAVE_NEW_GUI'
   _def_gtk2_gui='#undef HAVE_GTK2_GUI'
-fi
+fi #if test "$_gui"
 # --------------- GUI specific tests end -------------------
+
 
 if test "$_charset" = "noconv" ; then
   _charset=""
@@ -7633,15 +7634,11 @@ TARGET_BUILTIN_VECTOR = $_builtin_vector
 TARGET_BUILTIN_3DNOW  = $_mm3dnow
 
 # --- GUI stuff ---
-GTKINC = $_inc_gtk
-GTKLIB = $_ld_static $_ld_gtk
-GTKLIBS = $_ld_gtk
-GLIBLIB = $_ld_static  $_ld_glib
-GLIBLIBS = $_ld_glib
-GLIBINC = $_inc_glib
-GTK_LIBS =  $_ld_static $_ld_gui
+GTK_INC = $_inc_gtk
+GTKLIB = $_ld_gtk
+GLIBLIB = $_ld_glib
+GTK_LIBS = $_ld_static \$(GTKLIB) \$(GLIBLIB)
 GUI = $_gui
-DEBUG = -DDEBUG
 
 # --- libvo stuff ---
 VO_SRCS = $_vosrc

@@ -2,9 +2,9 @@ include ../config.mak
 
 LIBNAME = libgui.a
 
-INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC)
+INCDIR  = -I. -I.. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTK_INC)
 
-CFLAGS = $(OPTFLAGS) $(INCDIR) $(DEBUG)
+CFLAGS = $(OPTFLAGS) $(INCDIR) -DDEBUG
 
 ifeq ($(TARGET_WIN32),yes)
 SRCS = win32/dialogs.c \
