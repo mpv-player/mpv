@@ -1519,92 +1519,92 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   et le fichier audio <replaceable>entrée_audio.mp2</replaceable> vers un seul fichier AVI 
   <replaceable>sortie_film.avi</replaceable>.
   Cette commande marche avec le MPEG-1 layer I, II, ou III (plus connu sous le nom 
-  de MP3), WAV et quelques autres formats audio.
+  de MP3), WAV et aussi quelques autres formats audio.
 </para>
 
 <para>
   Une des caractéristiques expérimentales de <application>MEncoder</application> 
-  est le support de <systemitem class="library">libavformat</systemitem>, étant 
-  une librairie issue du projet FFmpeg, supportant le multiplexage et dé-multiplexage
+  est le support de <systemitem class="library">libavformat</systemitem>,
+  une bibliothèque issue du projet FFmpeg qui supporte le multiplexage et dé-multiplexage
   vers une grande variété de conteneurs.
   Par exemple : 
-  <screen>mencoder -oac copy -ovc copy  -o <replaceable>sortie_film.avi</replaceable> 
+  <screen>mencoder -oac copy -ovc copy  -o <replaceable>sortie_film.asf</replaceable> 
   -audiofile <replaceable>entrée_audio.mp2</replaceable> <replaceable>entrée_video.avi</replaceable> 
   -of lavf -lavfopts format=asf</screen>
-  Cela fera strictement la même chose que l'exemple d'avant, mais le conteneur 
-  de sortie sera alors de l'ASF. 
-  Prenez note : ce support est à l'état expérimental (mais s'améliore de jour en jour), 
+  Cela fera strictement la même chose que pour l'exemple précédent, sauf que le conteneur 
+  de sortie sera l'ASF.
+  Souvenez-vous que ce support est encore très expérimental (mais il s'améliore de jour en jour), 
   et ne marchera que si vous compilez <application>MPlayer</application> avec l'option 
   activée <systemitem class="library">libavformat</systemitem> (ce qui veut dire que 
-  les binaires en package ne marcheront certainement pas).
+  les packets binaires ne marcheront peut-être pas).
 </para>
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-filter-issues">
-<title>Amélioration de la fiabilité lors du multiplexage A/V</title>
+<title>Améliorer la fiabilité du multiplexage et de la synchronisation Audio/Video</title>
 <para>
-  Vous avez sûrement pu expérimenter des problèmes de désynchronisation A/V
-  quand vous multiplexiez des pistes vidéos et audio A/V, même en ajustant 
-  le délai de décalage du son, il y avait toujours un décalage.
-  Ceci est dû à l'utilisation de filtres qui dupliquent ou ajoutent des images, 
+  Vous avez peut-être fait l'expérience de sérieux problèmes de synchronisation A/V
+  en essayant de multiplexer votre video avec la bande son, où, quelque soit
+  le décalage audio, vous n'arrivez pas à obtenir une synchronisation correcte.
+
+  Ceci peut arriver quand vous utilisez des filtres video qui dupliquent ou enlèvent des images, 
   comme le filtre téléciné inverse. Il est vivement conseillé d'utiliser le 
-  filtre vidéo <option>harddup</option> à la fin des filtres pour éviter 
-  ce problème.
+  filtre vidéo <option>harddup</option> à la fin de votre chaîne de filtres pour éviter 
+  ce type de problème.
 </para>
 
 <para>
   Sans l'option <option>harddup</option>, si <application>MEncoder</application> 
-  veut dupliquer une image, il va demander au multiplexeur de mettre en place 
-  une marque sur le conteneur, ainsi la dernière image sera affichée pour maintenir 
-  la synchronisation sans avoir à écrire une nouvelle image.
-  Avec l'option <option>harddup</option>, <application>MEncoder</application> 
-  affichera encore l'image dans le filtre au lieu de pousser la frame précédente.
-  Ce qui veut dire que l'encodeur recevra <emphasis>exactement</emphasis> les mêmes 
-  frames plusieurs fois, puis les compressera.
-  Cela donnera un fichier légèrement plus grand, mais cela ne posera plus de 
-  problèmes quand vous dé-multiplexerez ou multiplexerez vers un autre conteneur.
+  veut dupliquer une image, il s'en remet au multiplexeur pour mettre une marque
+  dans le conteneur de façon à ce que la dernière image soit affichée 2 fois
+  pour maintenir la synchronisation sans avoir à écrire une nouvelle image.
+  Avec l'option <option>harddup</option>, <application>MEncoder</application>
+  va simplement passer une deuxième fois la dernière image dans la chaîne de filtres.
+  Ce qui veut dire que l'encodeur recevra <emphasis>exactement</emphasis> la même
+  image 2 fois, puis les compressera. Il en résultera un fichier légèrement plus grand, 
+  mais cela ne posera plus de problèmes quand vous démultiplexerez ou remultiplexerez vers un autre conteneur.
 </para>
 
 <para>
-  Vous n'aurez pas d'autre choix que d'utiliser <option>harddup</option> avec certains 
-  formats de conteneur peu liés à <application>MEncoder</application> comme ceux 
-  supportés par <systemitem class="library">libavformat</systemitem>, qui ne supportent
-  pas la duplication de frame au niveau du conteneur.
+  Il se peut aussi que vous n'ayiez pas d'autres choix que d'utiliser l'option <option>harddup</option> 
+  avec certains conteneurs peu liés à <application>MEncoder</application> comme ceux 
+  supportés par <systemitem class="library">libavformat</systemitem>, qui peuvent ne pas supporter
+  la duplication d'image au niveau du conteneur.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-avi-limitations">
 <title>Limitations du conteneur AVI</title>
 <para>
-  Bien que ce soit le format de conteneur le mieux supporté après le MPEG-1, l'AVI a 
-  des inconvénients majeurs.
-  Peut-être que plus évident est le surcoût.
-  Pour chaque morceau du fichier AVI, 24 octets sont utilisés dans les entêtes et dans l'index.
-  Ceci se traduit à environ 5Mo par heure, soit à peu près 1-2,5% de surcoût
-  sur un fichier de 700Mo. Cela peut ne pas sembler être important, mais c'est ce qui
-  fait la différence dans un fichier qui utilise 700 kbits/sec au lieu de 714 kbits/sec:
-  pour la qualité, chaque bit compte.
+  Bien que ce soit le format de conteneur le plus largement supporté après le MPEG-1, l'AVI a 
+  des inconvénients majeurs. Le plus évident d'entre eux est peut-être l'entête.
+  Pour chaque morceau (chunk) du fichier AVI, 24 octets sont gâchés en entête et index.
+  Ce qui se traduit par environ 5Mo par heure, soit entre 1 et 2,5% du volume du fichier pour un film
+  de 700Mo. Cela peut ne pas sembler important, mais cela peut représenter la différence entre 
+  pouvoir utiliser un débit de 700 kbits/sec au lieu de 714 kbits/sec pour une même video.
+  Et pour la qualité, chaque bit compte.
 </para>
 
 <para>
-  En plus de cette grosse inefficacité, l'AVI a aussi d'autres limitations importantes:
+  En plus de cette grosse inefficacité, l'AVI a aussi d'autres limitations majeures:
 </para>
 
 <orderedlist>
 <listitem>
 <para>
-  Seuls les contenus à fps constants peuvent être stockés. Ceci est particulièrement 
+  Seuls les contenus à nombre d'images par seconde constant peuvent être stockés. Ceci est particulièrement 
   limitant si vous voulez stocker des fichiers aux contenus hétérogènes (par
-  exemple un mélange de vidéo NTSC et de films).
-  En fait, il y a des modifications qui permettent de stocker des contenus à fps 
-  variables dans un AVI, mais ils multiplient par au moins 5 la taille des entêtes (déjà grosses).
+  exemple un mélange de vidéo NTSC et de films sur pellicule).
+  En fait, il existe des astuces qui permettent de stocker des contenus à nombre d'images par seconde variable
+  dans un AVI, mais cela multiplie par au moins 5 la taille (déjà énorme) des entêtes et ce n'est donc 
+  pas réellement applicable.
 </para>
 </listitem>
 <listitem>
 <para>
-  L'audio dans un fichier AVI doit aussi avoir un débit constant (CBR) ou une 
-  taille de 'frames' constante (par exemple : toutes les frames décodent le même 
+  L'audio dans un fichier AVI doit soit avoir un débit constant (CBR), soit une 
+  taille de trame constante (i.e. toutes les trames décodent le même 
   nombre d'échantillons).
-  Malheureusement, le meilleur codec, Vorbis, ne rentre pas dans ces critères.
+  Malheureusement, le codec le plus efficace, Vorbis, ne satisfait aucun de ces critères.
   Donc, si vous envisagez de stocker un fichier en AVI, vous devrez utiliser un 
   codec moins performant comme le MP3 ou l'AC3.
 </para>
@@ -1612,49 +1612,49 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 </orderedlist>
 
 <para>
-  Ceci dit, <application>MEncoder</application> ne supporte pas actuellement
-  l'encodage avec des fps variables ou le Vorbis;
-  Donc vous n'allez pas voir de limitation de <application>MEncoder</application> si vous 
-  n'utilisez que cet outil pour produire vos encodages.
+  Ceci dit, <application>MEncoder</application> ne supporte actuellement pas
+  l'encodage à d'images par seconde variable ou le Vorbis;
+  Donc vous n'allez peut-être pas considérer les 2 points précédents commes des limitations
+  si vous n'utilisez que <application>MEncoder</application> pour encoder.
   Pourtant, il est possible d'utiliser <application>MEncoder</application> uniquement pour 
-  l'encodage vidéo, utiliser des outils externes pour l'encodage de l'audio et 
+  l'encodage vidéo, puis d'utiliser des outils externes pour l'encodage de l'audio et 
   multiplexer le tout vers un conteneur différent.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-dvd-mpeg4-muxing-matroska">
-<title>Le multiplexage avec le conteneur Matroska</title>
+<title>Le multiplexage dans le conteneur Matroska</title>
 <para>
-  Matroska est un conteneur libre, ouvert, qui offre de nombreuses options avancées 
-  que, par exemple, l'AVI ne peut pas supporter.
+  Matroska est un conteneur libre, ouvert, qui vise à offrir de nombreuses fonctionnalités avancées 
+  que des conteneurs plus anciens comme l'AVI ne peut gérer.
   Par exemple, le Matroska supporte le débit vidéo variable (VBR), un framerate 
   variable (VFR), chapitres, attachement de fichiers, code de détection d'erreur 
   (EDC) et des codecs A/V modernes comme le "Advanced Audio Coding" (AAC), le 
-  "Vorbis" ou le "MPEG-4 AVC" (H.264) et d'autres choses non supporté par l'AVI.
+  "Vorbis" ou le "MPEG-4 AVC" (H.264), presque tous n'étant pas supportés par l'AVI.
 </para>
 
 <para>
-  Les outils nécessaires à la création de fichier Matroska sont appelés <application>mkvtoolnix</application>, 
-  et sont disponibles dans la plupart des systèmes Unix mais aussi sous <application>Windows</application>.
-  Puisque Matroska est un standard ouvert, vous trouverez sûrement d'autres outils 
-  qui vous conviendront parfaitement, mais comme mkvtoolnix est le plus connu, et 
+  Les outils nécessaires à la création de fichier Matroska sont appelés collectivement <application>mkvtoolnix</application>, 
+  et sont disponibles pour la plupart des systèmes Unix mais aussi pour <application>Windows</application>.
+  Puisque Matroska est un standard ouvert, vous trouverez peut-être d'autres outils 
+  qui vous conviendront mieux, mais comme mkvtoolnix est le plus connu, et 
   qu'il est supporté par Matroska lui même, nous allons parler de son utilisation.
 </para>
 
 <para>
-  La façon la plus simple assurément de démarrer avec Matroska, est d'utiliser
-  <application>MMG</application>, une interface graphique livrée avec <application>mkvtoolnix</application>, 
-  et suivre le guide sur <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">l'interface mkvmerge (mmg)</ulink>.
+  La façon la plus simple de démarrer avec Matroska, c'est probablement d'utiliser
+  <application>MMG</application>, l'interface graphique livrée avec <application>mkvtoolnix</application>, 
+  et de suivre le <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html"> guide de l'interface graphique de mkvmerge (mmg)</ulink>.
 </para>
 
 <para>
-  Vous pouvez multiplexer des fichiers vidéos et audio en utilisant la commande :
+  Vous pouvez aussi multiplexer des fichiers vidéo et audio en utilisant la ligne de commande :
   <screen>mkvmerge -o <replaceable>sortie.mkv</replaceable> <replaceable>entree_video.avi</replaceable> 
-  <replaceable>entre_son1.mp3</replaceable> <replaceable>entree_son2.ac3</replaceable></screen>
+  <replaceable>entree_audio1.mp3</replaceable> <replaceable>entree_audio2.ac3</replaceable></screen>
   Ceci aura pour effet de multiplexer le fichier vidéo <replaceable>entree_video.avi</replaceable> 
-  avec les deux fichiers audio <replaceable>entre_son1.mp3</replaceable> et <replaceable>entree_son2.ac3</replaceable> 
+  avec les deux fichiers audio <replaceable>entre_audio1.mp3</replaceable> et <replaceable>entree_audio2.ac3</replaceable>
   dans un fichier Matroska <replaceable>sortie.mkv</replaceable>.
-  Matroska, comme mentionné plus tôt, est capable de faire bien plus, comme plusieurs 
+  Matroska, comme mentionné ci-dessus, est capable de faire bien plus que ça, comme plusieurs
   pistes audio (avec un réglage précis de la synchronisation audio/video), chapitres, 
   sous titres, coupures, etc... Merci de bien vouloir vous reporter à la documentation 
   de cette application pour plus d'informations.
@@ -1674,39 +1674,36 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <formalpara>
 <title>Qu'est ce que le téléciné ?</title>
 <para>
-  Je vous suggère de visiter la page suivante sous peine de ne rien comprendre 
-  au document suivant :
-  <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
-  Ce lien pointe vers une documentation relativement compréhensible sur le format 
-  téléciné.
+  Si vous ne comprenez pas grand-chose à ce qui est écrit dans le document présent, 
+  je vous suggère de visiter cette page (en anglais):
+  <ulink url="http://en.wikipedia.org/wiki/Telecine">http://en.wikipedia.org/wiki/Telecine</ulink>
+  Ce lien pointe vers une documentation relativement claire et compréhensible sur ce qu'est le téléciné.
 </para></formalpara>
 
 <formalpara>
-<title>Une note à propos des chiffres</title>
+<title>Une note à propos des nombres</title>
 <para>
-  Beaucoup de documents, dont le guide proposé ci-dessus, renvoient à un 
+  Beaucoup de documents renvoient à un 
   nombre de trames par secondes pour la vidéo NTSC de 59.94 ce qui correspond à 
-  29.97 images par secondes (pour le télécine entrelacé) et à 23.976 fps pour 
-  le progressive. Pour des raisons de simplicité, certains documents utilisent les 
-  valeurs arrondies de 60, 30 et 24.
+  29.97 images complètes par secondes (pour le télécine et l'entrelacé) et à 23.976 (pour 
+  le progressif). Pour simplifier, certains documents arrondissent même à 60, 30 et 24.
 </para></formalpara>
 
 <para>
-  En toute rigueur, ces nombres sont des approximations. Les vidéos NTSC en noir et blanc
-  étaient exactement à 60 trames par secondes, mais 60000/1001 a été choisi par la suite
-  pour la couleur tout en conservant la compatibilité avec les téléviseurs noir et blanc.
-  La vidéo numérique NTSC (comme celle d'un DVD) est aussi en 60000/1001 trames 
-  par seconde. A partir de cela, la vidéo entrelacée et télécinée est dérivée vers 
-  30000/1001 images par seconde ou, pour les vidéos progressives en 24000/1001 
-  images par secondes.
+  En toute rigueur, tous ces nombres sont des approximations. Les vidéos NTSC en noir et blanc
+  avaient exactement 60 trames par secondes, mais 60000/1001 a été choisi par la suite
+  pour s'accomoder de la couleur en conservant la compatibilité avec les téléviseurs noir et blanc de l'époque.
+  La vidéo numérique NTSC (par exemple sur un DVD) est aussi en 60000/1001 trames 
+  par seconde. A partir de là, la vidéo entrelacée et télécinée est faite pour être
+  en 30000/1001 images par seconde; les vidéos progressives en 24000/1001 images par secondes.
 </para>
 
 <para>
   De plus anciennes versions de la documentation <application>MEncoder</application> 
-  et plusieurs e-mails archivés provenant de liste de diffusion font encore référence à
+  et plusieurs e-mails archivés de liste de diffusion font référence à
   59.94, 29.97, et 23.976.
   Toute la documentation de <application>MEncoder</application> a été mise à jour
-  pour utiliser les valeurs fractionnelles, et vous devriez aussi les utiliser.
+  pour utiliser les fractions, et vous devriez aussi les utiliser.
 </para>
 
 <para>
@@ -1719,9 +1716,9 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <para>
   Toutes les vidéos qui sont censées être affichées sur des téléviseurs NTSC 
   doivent être en 60000/1001 trames par secondes. Les téléfilms sont souvent 
-  filmés directement à 60000/1001 trames par secondes, alors que la majorité des 
-  films pour le cinéma est en 24000/1001 images par seconde. Quand les séquences 
-  cinéma pour le DVD sont masterisés, la vidéo est alors convertie pour la 
+  filmés directement en 60000/1001 trames par secondes, alors que la majorité des 
+  films pour le cinéma est en 24000/1001 images par seconde. Quand les DVD
+  contenant des films faits pour le cinéma sont masterisés, la vidéo est alors convertie pour la 
   télévision par un processus appelé le téléciné.
 </para></formalpara>
 
@@ -1729,7 +1726,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Sur un DVD, la vidéo n'est jamais vraiment stockée à 60000/1001 trames par seconde. 
   Si la vidéo est d'origine en 60000/1001, chaque paire de trames est alors combinée 
   pour former une image, ce qui donne 30000/1001 images par seconde. Les lecteurs de 
-  DVD de salon lisent alors les drapeaux embarqués sur le flux vidéo pour déterminer 
+  DVD de salon lisent alors les fanions incorporé au flux vidéo pour déterminer 
   si la première ligne à afficher doit être paire ou impaire.
 </para>
 
@@ -1738,137 +1735,138 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   lorsqu'ils sont encodés pour un DVD, et le lecteur DVD doit alors faire 
   la conversion du téléciné à la volée. Parfois, la vidéo est télécinée <emphasis>avant</emphasis> 
   d'être stockée sur le DVD, même si c'était originalement du 24000/1001 images 
-  par seconde, cela devient 60000/1001 trames par seconde. Quand elles sont stockées 
+  par seconde, cela devient du 60000/1001 trames par seconde. Quand elles sont stockées 
   sur le DVD, les trames sont combinées par paires pour former 30000/1001 images 
   par seconde.
 </para>
 
 <para>
-  Quand on regarde les trames formées individuellement à partir de la vidéo en
-  60000/10001 champs par seconde, téléciné ou autre, l'entrelacement est 
-  clairement visible et ce, qu'il y ait un mouvement ou non car l'un des champs (disons 
+  Quand on regarde les images formées individuellement à partir de la vidéo en
+  60000/10001 trames par seconde, téléciné ou autre, l'entrelacement est 
+  clairement visible et ce, qu'il y ait un mouvement ou non car l'une des trames (disons 
   les lignes impaires) représente un moment dans le temps 1/(60000/1001) seconde 
-  plus tard que les autres. Jouer une vidéo entrelacée sur un ordinateur semble 
-  dans les deux cas laid parce que l'écran a une résolution plus élevée et 
-  parce que la vidéo est affichée trame après trame à au lieu de champs après champs.
+  plus tard que les autres. Regarder une vidéo entrelacée sur un ordinateur semble 
+  laid parce que l'écran a une résolution plus élevée et 
+  parce que la vidéo est affichée image après image au lieu de trame après trame.
 </para>
 
 <itemizedlist>
 <title>Notes :</title>
 <listitem><para>
-  Cette section est seulement destinées aux DVDs NTSC, pas au PAL.
+  Cette section ne s'appliquent qu'aux DVDs NTSC, pas au PAL.
   </para></listitem>
 <listitem><para>
-  Les lignes d'exemple de <application>MEncoder</application> présentées dans ce 
-  document ne sont <emphasis role="bold">pas</emphasis> à utiliser tel quelles. 
-  Elles sont juste là pour montrer le minimum à faire en relation avec ce chapitre. 
-  Comment réaliser un bon rip DVD ou procéder à des réglages avancés de
-<systemitem class="library">libavcodec</systemitem>  dont des questions qui
-sortent du contexte de ce guide.
+  Les lignes de commande <application>MEncoder</application> données en exemple au long de ce 
+  document ne sont <emphasis role="bold">pas</emphasis> à utiliser tel quels. 
+  Elles représentent juste le minimum requis pour encoder la vidéo qui s'y rapportent.
+  La meilleure méthode pour faire un bon encodage de DVD ou procéder à des réglages avancés de
+<systemitem class="library">libavcodec</systemitem> pour atteindre une qualité optimum sont des
+  questions en dehors des propos de ce guide.
   </para></listitem>
 <listitem><para>
-  Quelques notes spécifiques à ce guide sont disponibles dans le pied de page,
-  et sont liées comme ceci : <link linkend="menc-feat-telecine-footnotes">[1]</link>
+  Il y a quelques notes en bas de page spécifiques à ce guide, elles sont liées comme ceci : 
+<link linkend="menc-feat-telecine-footnotes">[1]</link>
   </para></listitem>
 </itemizedlist>
 </sect2>
 
 
 <sect2 id="menc-feat-telecine-ident">
-<title>Comment trouver le type de votre vidéo ?</title>
+<title>Comment savoir quel type de vidéo vous avez ?</title>
 
 <sect3 id="menc-feat-telecine-ident-progressive">
 <title>Progressive</title>
 <para>
-  Les vidéos progressives sont filmées initialement à 24000/1001 fps et stockées 
-  sur le DVD telles quelles.
+  Les vidéos progressives ont été filmées initialement à 24000/1001 fps et stockées 
+  sur le DVD sans altération.
 </para>
 
 <para>
-  Quand vous lisez un DVD progressive dans <application>MPlayer</application>, 
-  il affiche la ligne suivante avant de commencer la lecture : 
+  Quand vous lisez un DVD en progressif dans <application>MPlayer</application>, 
+  la ligne suivante sera affichée dès le début de la lecture : 
 
   <screen> demux_mpg: 24000/1001 fps progressive NTSC content detected, switching framerate.</screen>
 
-  Dans l'état actuel des choses, demux_mpg ne devrait jamais être trouvé pour 
-  &quot;une vidéo NTSC à 30000/1001 fps.&quot;
+  Dorénavent, demux_mpg ne devrait jamais dire qu'il trouve
+  &quot;une vidéo NTSC à 30000/1001 images par secondes.&quot;
 </para>
 
 <para>
-  Quand vous regardez une vidéo progressive, vous ne devrez voir aucun entrelacement. 
-  Mais soyez attentif, il arrive parfois que du téléciné se glisse sans prévenir. 
+  Quand vous regardez une vidéo progressive, vous ne devriez jamais voir d'entrelacement. 
+  Mais soyez attentif, il arrive parfois qu'un peu de téléciné se glisse sans prévenir. 
   Il m'est arrivé de tomber sur des émissions de télévisions en DVD avec une 
-  seconde de téléciné à chaque changement de scène, voir de temps en temps à une 
-  zone totalement aléatoire. Une autre fois, la moitié du DVD était en progressif 
-  et l'autre moitié en téléciné. Si vous n'êtes pas <emphasis>vraiment</emphasis> sûr, 
-  vous pouvez toujours scanner le film entier : 
+  seconde de téléciné à chaque changement de scène ou à d'autres emplacements au hasard. 
+  Une autre fois, la première moitié du DVD était en progressif 
+  et la seconde en téléciné. Si vous voulez en être <emphasis>vraiment</emphasis> sûr,
+  vous pouvez scanner le film entier :
 
   <screen>mplayer dvd://1 -nosound -vo null -benchmark</screen>
 
   L'utilisation de l'option <option>-benchmark</option> fait lire <application>MPlayer</application> 
   aussi vite qu'il le peut - en fonction du matériel, cela peut prendre un certain
-  temps. Chaque fois que demux_mpg génère une ligne, celle-ci vous donnera
-  immédiatement la valeur du changement.
+  temps. Chaque fois que demux_mpg signale un changement, la ligne immédiatement au dessus
+  vous donnera le temps auquel ce changement est arrivé.
 </para>
 
 <para>
-  Parfois, la vidéo progressive sur les DVDs considérés comme un &quot;soft-telecine&quot; 
-  car il devrait être téléciné par le lecteur DVD.
+  Parfois, la vidéo progressive sur les DVDs est signalée en tant que &quot;soft-telecine&quot; 
+  parce qu'elle est censée être télécinée par le lecteur DVD.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-ident-telecined">
 <title>Téléciné</title>
 <para>
-  Les vidéos télécinées sont d'abord filmées à 24000/1001 et seront télécinées
-  <emphasis>avant</emphasis> d'être gravé sur DVD.
+  Les vidéos télécinées ont été filmées en 24000/1001 et sont télécinées
+  <emphasis>avant</emphasis> d'être gravées sur DVD.
 </para>
 
 <para>
-  <application>MPlayer</application> ne doit (jamais) détecter une changement de fps 
-  quand une vidéo télécinée est lue.
+  <application>MPlayer</application> ne signale jamais une variation d'images par secondes
+  quand il lit une vidéo télécinée.
 </para>
 
 <para>
   Au visionnage d'une vidéo télécinée, vous verrez des artefacts d'entrelacement 
-  donnant l'impression de &quot;clignotement&quot;: apparaissant et disparaissant 
-  rapidement.
-  Vous pouvez le voir plus précisément avec :
+  qui semblent &quot;clignoter&quot;: ils apparaissent et disparaissent répététivement.
+  Vous pouvez le voir plus précisément en suivant les indications ci-dessous:
   <orderedlist>
   <listitem>
     <screen>mplayer dvd://1</screen>
     </listitem>
   <listitem><para>
-    Chercher une partie en mouvement.
+    Chercher une scène avec beaucoup de mouvements.
     </para></listitem>
   <listitem><para>
     Utiliser la touche <keycap>.</keycap> pour avancer image par image.
     </para></listitem>
   <listitem><para>
-    Observer la forme donnée par l'entrelacement et les images progressives. 
-  Si la forme que vous voyez ressemble à PPPII, PPPII, PPPII,... alors la vidéo est 
-  télécinée. Si ce n'est pas le cas, la vidéo a peut-être été télécinée selon des règles 
-  non standard, <application>MEncoder</application> ne sait pas convertir un téléciné
-  non-standard vers du progressive sans dégradation. Si aucune forme n'est visible, c'est 
+    Observer le schéma de répétition des images entrelacées et progressives. Si vous obtenez
+   PPPII, PPPII, PPPII,... alors la vidéo est 
+  télécinée. Si vous observez d'autres schémas de répétition, alors la vidéo a peut-être été 
+  télécinée avec une méthode non-standard; <application>MEncoder</application> ne sait pas convertir un téléciné
+  non-standard en progressif sans dégradation. Si aucun schéma n'est visible, c'est 
   alors sûrement une vidéo entrelacée.
     </para></listitem>
   </orderedlist>
 </para>
 
 <para>
-  Parfois, les vidéos télécinées sur les DVD sont &quot;hard-teleciné&quot;. Le hard-teleciné
-  étant à 60000/1001 images par seconde, les lecteurs de DVD liront la vidéo sans modification.
+  Parfois, la vidéo progressive sur les DVDs est signalée en tant que &quot;soft-telecine&quot; 
+  parce qu'elle est censée être télécinée par le lecteur DVD.
+  Parfois, la vidéo télécinée sur les DVDs est signalée &quot;hard-telecine&quot;. Le hard-teleciné
+  étant à 60000/1001 images par seconde, le lecteur DVD lit la vidéo sans manipulation.
 </para>
 
 <para>
   Une autre façon de savoir si la source est télécinée ou non, est de la lire avec 
   l'option <option>-vf pullup</option> et <option>-v</option> depuis une ligne de commande 
-  et de voir comment l'option <option>pullup</option> voit d'images. 
-  Si la source est télécinée, vous devriez voir sur la console une forme 3:2 avec des 
+  et de voir comment l'option <option>pullup</option> combine les trames. 
+  Si la source est télécinée, vous devriez voir sur la console un schéma de répétition 3:2 avec des 
   alternances de <systemitem>0+.1.+2</systemitem> et <systemitem>0++1</systemitem>.
-  L'avantage de cette technique et que vous n'avez pas besoin de visionner la 
-  source pour l'identifier, donc utile pour automatiser l'encodage de vidéos, ou 
-  bien effectuer ces procédures à distance même à travers une connexion internet lente.
+  L'avantage de cette technique est que vous n'avez pas besoin de visionner la 
+  source pour l'identifier, ce qui peut être utile pour automatiser la procédure d'encodage, ou 
+  pour effectuer cette procédure à distance à travers une connexion lente.
 </para>
 
 </sect3>
@@ -1876,36 +1874,37 @@ sortent du contexte de ce guide.
 <sect3 id="menc-feat-telecine-ident-interlaced">
 <title>Entrelacée</title>
 <para>
-  Les vidéos entrelacées sont d'abord filmées en 60000/1001 frames par seconde, 
-  puis stockées sur le DVD à 30000/1001 frames par secondes. L'effet d'entrelacement 
-  (souvent appelé &quot;combing&quot; = comme les dents d'un peigne) est le résultat d'une combinaison de paires 
-  de trames dans chaque frames. Chaque frame est supposée être cachée 1/(60000/1001) 
-  d'une seconde, quand elles sont affichées en même temps, la différence devient 
+  Les vidéos entrelacées ont été filmées en 60000/1001 trames par seconde, 
+  puis stockées sur le DVD en tant que 30000/1001 images par seconde. L'effet 
+  est le résultat de la combinaison de paires 
+  de trames dans une image. Chaque trame est censée être décalée de 1/(60000/1001) 
+  de seconde les unes des autres. Quand elles sont affichées simultanément, la différence devient 
   visible.
 </para>
 
 <para>
-  Comme pour la vidéo télécinée, <application>MPlayer</application> ne devrait 
-  jamais signaler un changement de framerate à la lecture de la vidéo entrelacée.
+  Comme pour la vidéo télécinée, <application>MPlayer</application> ne signale
+  jamais une variation d'images par secondes quand il lit une vidéo entrelacée.
 </para>
 
 <para>
-  Si vous regardez une vidéo entrelacée de plus près, image par image avec la 
-  touche <keycap>.</keycap>, vous pourrez voir l'entrelacement de chaque frame.
+  Si vous regardez attentivement une vidéo entrelacée image par image avec la 
+  touche <keycap>.</keycap>, vous verrez l'entrelacement de chaque trame.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-ident-mixedpt">
-<title>Mélange de vidéo progressive et télécinée</title>
+<title>Mélange de progressive et télécinée</title>
 <para>
-  Toutes les vidéos qui &quot;mélangent mode progressif et téléciné&quot; ont été au 
-  départ en 24000/1001 frames par seconde, puis certaines parties ont été converties en téléciné.
+  Toutes les vidéos qui mélangent progressif et téléciné ont été filmées en 24000/1001
+  images par seconde, puis certaines parties ont été converties en téléciné.
 </para>
 
 <para>
-  Quand <application>MPlayer</application> joue ce type de fichier, il doit jongler
-  (souvent rapidement) entre &quot;30000/1001 fps NTSC&quot; et &quot;24000/1001 fps 
-  NTSC progressif&quot;. Regardez la sortie des messages de <application>MPlayer</application>.
+  Quand <application>MPlayer</application> lit ce type de fichier, il doit jongler
+  (souvent répététivement) entre &quot;le 30000/1001 images par seconde NTSC&quot; et 
+  &quot;le 24000/1001 images par secondes NTSC progressif&quot;. 
+  Regardez les messages de <application>MPlayer</application> pour voir ces messages.
 </para>
 
 <para>
@@ -1915,15 +1914,15 @@ sortent du contexte de ce guide.
 </sect3>
 
 <sect3 id="menc-feat-telecine-ident-mixedpi">
-<title>Mélange de progressif et d'entrelacement</title>
+<title>Mélange de vidéo progressive et entrelacée</title>
 <para>
-  Dans les vidéos qui &quot;mélangent modes progressif et téléciné&quot;, les flux vidéos 
-  progressifs et entrelacés sont réunis ensemble.
+  Dans les vidéos qui mélangent le progressif et le téléciné, les flux vidéos 
+  progressifs et entrelacés sont combinés l'un à l'autre.
 </para>
 
 <para>
-  Cette catégorie ressemble à du &quot;mélange progressif et téléciné&quot; jusqu'à 
-  ce que vous examiniez la partie 30000/1001 fps et que vous vous aperceviez
+  Cette catégorie ressemble au &quot;mélange de progressive et télécinée&quot; jusqu'à 
+  ce que vous examiniez la partie en 30000/1001 images par seconde et que vous vous aperceviez
   qu'il n'y a pas de trace de téléciné.
 </para>
 </sect3>
