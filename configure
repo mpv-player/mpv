@@ -1267,7 +1267,7 @@ EOF
 	# gcc 3.2 and up supports 970
 	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3" || test "$_cc_major" -ge "4"; then
 	    case "$proc" in
-		970*) _march='-mcpu=970' _mcpu='-mtune=970'
+		970*|PPC970*) _march='-mcpu=970' _mcpu='-mtune=970'
                       _def_dcbzl='#undef NO_DCBZL' ;;
     		*) ;;
     	    esac
