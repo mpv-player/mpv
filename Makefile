@@ -119,7 +119,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(MACOSX_FRAMEWORKS) \
               $(SMBSUPPORT_LIB) \
               $(FRIBIDI_LIB) \
-              $(FONTCONFIG_LIB) \
               $(ENCA_LIB) \
 
 CFLAGS = $(OPTFLAGS) -I. \
@@ -248,7 +247,8 @@ COMMON_DEPS += libass/libass.a
 COMMON_LIBS += libass/libass.a
 PARTS += libass
 endif
-# FreeType needs to come after ASS to avoid link failures on MinGW
+# FontConfig and FreeType need to come after ASS to avoid link failures on MinGW
+COMMON_LIBS += $(FONTCONFIG_LIB)
 ifeq ($(FREETYPE),yes)
 SRCS_MENCODER += libvo/font_load_ft.c
 COMMON_LIBS += $(FREETYPE_LIB)
