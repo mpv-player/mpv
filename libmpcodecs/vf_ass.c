@@ -69,9 +69,9 @@ static int config(struct vf_instance_s* vf,
 		d_height = d_height * vf->priv->outh / height;
 	} 
 
-	vf->priv->planes[1] = (unsigned char*)malloc(vf->priv->outw * vf->priv->outh);
-	vf->priv->planes[2] = (unsigned char*)malloc(vf->priv->outw * vf->priv->outh);
-	vf->priv->dirty_rows = (unsigned char*)malloc(vf->priv->outh);
+	vf->priv->planes[1] = malloc(vf->priv->outw * vf->priv->outh);
+	vf->priv->planes[2] = malloc(vf->priv->outw * vf->priv->outh);
+	vf->priv->dirty_rows = malloc(vf->priv->outh);
 	
 	if (vf->priv->ass_priv) {
 		settings.frame_width = vf->priv->outw;
