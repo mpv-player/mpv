@@ -1,4 +1,4 @@
-.\" synced with r18969
+.\" synced with r19051
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1716,9 +1716,35 @@ Pour lire un flux MPEG-TS, MPlayer/\:MEncoder utilisera le premier programme
 Force les paramètres audio du démultiplexeur VIVO (pour débogage).
 .
 .
-.SH "OPTIONS OSD/SUB"
+.SH "OPTIONS OSD/SOUS-TITRES"
 .I NOTE:
 Voir également \-vf expand.
+.
+.TP
+.B \-ass (FreeType uniquement)
+Active le rendu des sous-titres SSA/ASS.
+Avec cette option, libass sera utilisé pour les fichiers de
+sous-titres et ceux contenus dans les pistes Matroska.
+Fonctionne avec \-embeddedfonts.
+.
+.TP
+.B \-ass-font-scale <valeur>
+Définit le coefficient de mise à l'échelle lors du rendu des polices
+pour les sous-titres SSA/ASS.
+.
+.TP
+.B \-ass-line-spacing <value>
+Définit la tailles des espaces pour le rendu SSA/ASS.
+.
+.TP
+.B \-ass-top-margin <value>
+Ajoute une bande noire en haut de la trame.
+Les titres y seront affichés lors du rendu SSA/ASS.
+.
+.TP
+.B \-ass-bottom-margin <value>
+Adds a black band at the bottom of the frame.
+The SSA/ASS renderer will place subtitles there.
 .
 .TP
 .B \-dumpjacosub (MPlayer uniquement)
@@ -1755,12 +1781,17 @@ sous-titres SRT dont les fins de ligne sont Unix.
 Si vous avez la malchance de posséder un tel matériel, transformez votre
 sous-titre avec unix2dos ou un programme similaire pour remplacer les fins
 de lignes avec des fins de ligne DOS/Windows.
-
 .
 .TP
 .B \-dumpsub (MPlayer uniquement) (CODE BÉTA)
 Extrait les sous-titres d'un flux VOB.
 Voir également les options \-dump*sub et \-vobsubout*.
+.
+.TP
+.B \-embeddedfonts (FreeType uniquement)
+Active l'extraction des polices embarquées dans les fichiers Matroska.
+Ces polices peuvent être utilisées pour l'affichage des sous-titres
+SSA/ASS (option \-ass).
 .
 .TP
 .B \-ffactor <nombre>
@@ -1815,12 +1846,6 @@ Avec Fontconfig, cette option détermine le nom de police fontconfig.
 .TP
 .B \-fontconfig (fontconfig uniquement)
 Active l'utilisation des polices gérées par fontconfig.
-.
-.TP
-.B \-(no)embeddedfonts (FreeType uniquement)
-Active l'extraction des polices embarquées dans les fichiers Matroska.
-Ces polices peuvent être utilisées pour l'affichage des sous-titres
-SSA/ASS (option \-ass).
 .
 .TP
 .B \-forcedsubsonly
@@ -2152,32 +2177,6 @@ sans '.idx', '.ifo' ou '.sub'.
 .TP
 .B \-vobsubid <0\-31>
 Définit le numéro de sous-titre du fichier VOBsub.
-.
-.TP
-.B \-ass (FreeType uniquement) (FontConfig optionnel)
-Active le rendu des sous-titres SSA/ASS.
-Avec cette option, libass sera utilisé pour les fichiers de
-sous-titres et ceux contenus dans les pistes Matroska.
-Fonctionne avec \-embeddedfonts.
-.
-.TP
-.B \-ass-font-scale <valeur>
-Définit le coefficient de mise à l'échelle lors du rendu des polices
-pour les sous-titres SSA/ASS.
-.
-.TP
-.B \-ass-line-spacing <value>
-Définit la tailles des espaces pour le rendu SSA/ASS.
-.
-.TP
-.B \-ass-top-margin <value>
-Ajoute une bande noire en haut de la trame.
-Les titres y seront affichés lors du rendu SSA/ASS.
-.
-.TP
-.B \-ass-bottom-margin <value>
-Adds a black band at the bottom of the frame.
-The SSA/ASS renderer will place subtitles there.
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
@@ -6618,7 +6617,7 @@ défaut dans votre fichier de configuration.
 .RE
 .
 .TP
-.B ass\ \ \ \ \ 
+.B ass\ \ \ \ 
 Déplace le rendu des sous-titres SSA/ASS à une position arbitraire dans
 la chaîne de filtrage.
 Utile uniquement pour l'option \-ass.
