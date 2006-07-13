@@ -43,16 +43,18 @@ static char* _select_font(fc_instance_t* priv, const char* family, unsigned bold
 	int val_i;
 	FcChar8* val_s;
 	FcBool val_b;
-	char buf[2000];
 	
 	*index = 0;
 
-	snprintf(buf, 2000, "%s:outline=True:slant=%u:weight=%u", family, italic, bold);
-
-	pat = FcNameParse((const FcChar8*)buf);
+	pat = FcPatternCreate();
 	if (!pat)
 		return 0;
 	
+	FcPatternAddString(pat, FC_FAMILY, (const FcChar8*)family);
+	FcPatternAddBool(pat, FC_OUTLINE, FcTrue);
+	FcPatternAddInteger(pat, FC_SLANT, italic);
+	FcPatternAddInteger(pat, FC_WEIGHT, bold);
+
 	FcDefaultSubstitute(pat);
 	
 	rc = FcConfigSubstitute(priv->config, pat, FcMatchPattern);
