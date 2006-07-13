@@ -1,4 +1,4 @@
-.\" Synced with r19046
+.\" Synced with r19052
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -1616,9 +1616,27 @@ A VIVO demuxer audió paramétereinek felülbírálata (hibakeresõ célokra).
 .
 .
 .
-.SH "OSD/SUB OPCIÓK"
+.SH "OSD/FELIRAT OPCIÓK"
 .I MEGJEGYZÉS:
 Lásd még a \-vf expand opciót.
+.
+.TP
+.B \-ass-font-scale <érték>
+Beállítja a betûtípusokhoz használt arány együtthatót az SSA/ASS renderelõben.
+.
+.TP
+.B \-ass-line-spacing <érték>
+Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
+.
+.TP
+.B \-ass-top-margin <érték>
+Egy fekete sávot ad a kocka tetejéhez.
+Az SSA/ASS renderelõ a felsõ feliratokat ide teszi.
+.
+.TP
+.B \-ass-bottom-margin <érték>
+Egy fekete sávot ad a kocka aljához.
+Az SSA/ASS renderelõ a feliratokat ide teszi.
 .
 .TP
 .B \-dumpjacosub (csak MPlayer)
@@ -1661,6 +1679,12 @@ sorvégzõdésekre cseréléséhez.
 .B \-dumpsub (csak MPlayer) (BÉTA KÓD)
 VOB stream-ekbõl a felirat stream kimentése.
 Lásd még a \-dump*sub és \-vobsubout* opciókat is.
+.
+.TP
+.B \-embeddedfonts (csak FreeType)
+Engedélyezi a matroska beágyazott betûinek kicsomagolását.
+Ezek a betûtípusok használhatóak az SSA/ASS feliratok
+rendereléséhez (-ass kapcsoló).
 .
 .TP
 .B \-ffactor <szám> (csak OSD)
@@ -1713,12 +1737,6 @@ A fontconfig-gal ez az opció a fontconfig betûtípus nevét határozza meg.
 .TP
 .B \-fontconfig (csak fontconfig)
 A fontconfig-gal karbantartott betûtípusok használatának engedélyezése.
-.
-.TP
-.B \-(no)embeddedfonts (csak FreeType)
-Engedélyezi a matroska beágyazott betûinek kicsomagolását.
-Ezek a betûtípusok használhatóak az SSA/ASS feliratok
-rendereléséhez (-ass kapcsoló).
 .
 .TP
 .B \-forcedsubsonly
@@ -2041,29 +2059,11 @@ a \'.idx', '.ifo', '.sub' elhagyandó.
 A VobSub felirat ID-je itt adható meg.
 .
 .TP
-.B \-ass (csak FreeType) (FontConfig opcionális)
+.B \-ass (csak FreeType)
 Bekapcsolja az SSA/ASS felirat renderelést.
 Ezzel az opcióval a libass lesz használva az SSA/ASS
 külsõ feliratokhoz és matroska sávokhoz.
 Ajánlott még a -embeddedfonts engedélyezése is.
-.
-.TP
-.B \-ass-font-scale <érték>
-Beállítja a betûtípusokhoz használt arány együtthatót az SSA/ASS renderelõben.
-.
-.TP
-.B \-ass-line-spacing <érték>
-Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
-.
-.TP
-.B \-ass-top-margin <érték>
-Egy fekete sávot ad a kocka tetejéhez.
-Az SSA/ASS renderelõ a felsõ feliratokat ide teszi.
-.
-.TP
-.B \-ass-bottom-margin <érték>
-Egy fekete sávot ad a kocka aljához.
-Az SSA/ASS renderelõ a feliratokat ide teszi.
 .
 .
 .
@@ -6278,9 +6278,9 @@ színteret, így nyugodtan beleírható a konfigurációs fájlba.
 .RE
 .
 .TP
-.B ass\ \ \ \ \ 
-Az SSA/ASS felirat renderelõt a videó szûrõ lánc meghatározott pontjára teszi.
-A \-ass kapcsolóval együtt hasznos.
+.B ass\ \ \ \ 
+Az SSA/ASS felirat renderelõt a videó szûrõ lánc egy meghatározott pontjára teszi.
+Csak a \-ass kapcsolóval együtt hasznos.
 .RE
 .
 .
