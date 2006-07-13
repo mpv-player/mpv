@@ -767,7 +767,7 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   printf("real: Stream description size: %u\n", size);
 #endif
 
-  description=malloc(sizeof(char)*(size+1));
+  description=malloc((size+1));
 
   if( rtsp_read_data(rtsp_session, description, size) <= 0) {
     buf = xbuffer_free(buf);
