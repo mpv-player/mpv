@@ -14,7 +14,8 @@ SRCS = win32/dialogs.c \
        win32/preferences.c \
        win32/skinload.c \
        win32/widgetrender.c \
-       win32/wincfg.c
+       win32/wincfg.c \
+
 else
 SRCS = wm/ws.c \
        wm/wsxdnd.c \
@@ -41,7 +42,8 @@ SRCS = wm/ws.c \
        mplayer/gtk/opts.c \
        mplayer/gtk/url.c \
        mplayer/gtk/eq.c \
-       mplayer/gtk/common.c
+       mplayer/gtk/common.c \
+
 endif
 OBJS = $(SRCS:.c=.o)
 
