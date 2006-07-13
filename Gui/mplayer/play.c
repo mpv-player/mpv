@@ -127,7 +127,7 @@ void mplPause( void )
  if ( !guiIntfStruct.Playing ) return;
  if ( guiIntfStruct.Playing == 1 )
   {
-   mp_cmd_t * cmd = (mp_cmd_t *)calloc( 1,sizeof( *cmd ) );
+   mp_cmd_t * cmd = calloc( 1,sizeof( *cmd ) );
    cmd->id=MP_CMD_PAUSE;
    cmd->name=strdup("pause");
    mp_input_queue_cmd(cmd);
@@ -194,7 +194,7 @@ void ChangeSkin( char * name )
  if ( prev && appMPlayer.menuIsPresent )
   {
    if ( mplMenuDrawBuffer ) free( mplMenuDrawBuffer );
-   if ( ( mplMenuDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
+   if ( ( mplMenuDrawBuffer = calloc( 1,appMPlayer.menuBase.Bitmap.ImageSize ) ) == NULL )
     { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
    wsResizeWindow( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
    wsResizeImage( &appMPlayer.menuWindow,appMPlayer.menuBase.width,appMPlayer.menuBase.height );
@@ -224,7 +224,7 @@ void ChangeSkin( char * name )
 
 // --- reload main window
  if ( mplDrawBuffer ) free( mplDrawBuffer );
- if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
+ if ( ( mplDrawBuffer = calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   { mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_NEMDB ); return; }
 
  wsDestroyWindow( &appMPlayer.mainWindow );

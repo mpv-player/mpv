@@ -241,7 +241,7 @@ void guiInit( void )
    case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
   }
 // --- initialize windows
- if ( ( mplDrawBuffer = (unsigned char *)malloc( appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
+ if ( ( mplDrawBuffer = malloc( appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {
    fprintf( stderr,MSGTR_NEMDB );
    exit( 0 );
@@ -1151,7 +1151,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
    case gtkSetPanscan:
         {
 	 mp_cmd_t * mp_cmd;
-         mp_cmd=(mp_cmd_t *)calloc( 1,sizeof( *mp_cmd ) );
+         mp_cmd=calloc( 1,sizeof( *mp_cmd ) );
          mp_cmd->id=MP_CMD_PANSCAN;    mp_cmd->name=strdup( "panscan" );
 	 mp_cmd->args[0].v.f=fparam;   mp_cmd->args[1].v.i=1;
 	 mp_input_queue_cmd( mp_cmd );

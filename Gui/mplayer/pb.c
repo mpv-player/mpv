@@ -226,7 +226,7 @@ void mplPBInit( void )
 
  gfree( (void**)&mplPBDrawBuffer );
 
- if ( ( mplPBDrawBuffer = (unsigned char *)malloc( appMPlayer.bar.Bitmap.ImageSize ) ) == NULL )
+ if ( ( mplPBDrawBuffer = malloc( appMPlayer.bar.Bitmap.ImageSize ) ) == NULL )
   {
    mp_msg( MSGT_GPLAYER,MSGL_FATAL,MSGTR_NEMDB );
    exit( 0 );

@@ -179,13 +179,13 @@ GtkWidget * create_SkinBrowser( void )
  gtk_signal_connect( GTK_OBJECT( Ok ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void *)1 );
  gtk_signal_connect( GTK_OBJECT( Cancel ),"clicked",GTK_SIGNAL_FUNC( prButton ),(void *)0 );
 
- if ( ( sbMPlayerDirInHome_obsolete=(char *)calloc( 1,strlen( skinDirInHome_obsolete ) + 4 ) ) != NULL )
+ if ( ( sbMPlayerDirInHome_obsolete=calloc( 1,strlen( skinDirInHome_obsolete ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerDirInHome_obsolete,skinDirInHome_obsolete ); strcat( sbMPlayerDirInHome_obsolete,"/*" ); }
- if ( ( sbMPlayerDirInHome=(char *)calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )
+ if ( ( sbMPlayerDirInHome=calloc( 1,strlen( skinDirInHome ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerDirInHome,skinDirInHome ); strcat( sbMPlayerDirInHome,"/*" ); }
- if ( ( sbMPlayerPrefixDir_obsolete=(char *)calloc( 1,strlen( skinMPlayerDir ) + 4 ) ) != NULL )
+ if ( ( sbMPlayerPrefixDir_obsolete=calloc( 1,strlen( skinMPlayerDir ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerPrefixDir_obsolete,skinMPlayerDir ); strcat( sbMPlayerPrefixDir_obsolete,"/*" ); }
- if ( ( sbMPlayerPrefixDir=(char *)calloc( 1,strlen( skinMPlayerDir ) + 4 ) ) != NULL )
+ if ( ( sbMPlayerPrefixDir=calloc( 1,strlen( skinMPlayerDir ) + 4 ) ) != NULL )
   { strcpy( sbMPlayerPrefixDir,skinMPlayerDir ); strcat( sbMPlayerPrefixDir,"/*" ); }
 
  gtk_window_add_accel_group( GTK_WINDOW( SkinBrowser ),accel_group );

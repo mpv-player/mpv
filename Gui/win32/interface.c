@@ -266,7 +266,7 @@ static void guiSetEvent(int event)
         }
         case evMute:
         {
-            mp_cmd_t * cmd = (mp_cmd_t *)calloc(1, sizeof(*cmd));
+            mp_cmd_t * cmd = calloc(1, sizeof(*cmd));
             cmd->id=MP_CMD_MUTE;
             cmd->name=strdup("mute");
             mp_input_queue_cmd(cmd);
@@ -311,7 +311,7 @@ void mplPause( void )
 
    if(guiIntfStruct.Playing == 1)
    {
-       mp_cmd_t * cmd = (mp_cmd_t *)calloc(1, sizeof(*cmd));
+       mp_cmd_t * cmd = calloc(1, sizeof(*cmd));
        cmd->id=MP_CMD_PAUSE;
        cmd->name=strdup("pause");
        mp_input_queue_cmd(cmd);

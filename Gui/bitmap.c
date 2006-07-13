@@ -38,7 +38,7 @@ int pngRead( unsigned char * fname,txSample * bf )
  png_read_info( png,info );
  png_get_IHDR( png,info,&bf->Width,&bf->Height,&bf->BPP,&color,NULL,NULL,NULL );
 
- row_p=(png_bytep *)malloc( sizeof( png_bytep ) * bf->Height );
+ row_p=malloc( sizeof( png_bytep ) * bf->Height );
  if ( !row_p )
   {
    mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[png]  not enough memory for row buffer\n" );
@@ -198,7 +198,7 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  out->BPP=1;
  out->ImageSize=(out->Width * out->Height + 7) / 8;
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
- out->Image=(char *)calloc( 1,out->ImageSize );
+ out->Image=calloc( 1,out->ImageSize );
  if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_NotEnoughMemoryC32To1 );
  {
   int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
@@ -221,7 +221,7 @@ void Convert1to32( txSample * in,txSample * out )
  out->Height=in->Height;
  out->BPP=32;
  out->ImageSize=out->Width * out->Height * 4;
- out->Image=(char *)calloc( 1,out->ImageSize );
+ out->Image=calloc( 1,out->ImageSize );
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c1to32] imagesize: %d\n",out->ImageSize );
  if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_WARN,MSGTR_NotEnoughMemoryC1To32 );
  {
