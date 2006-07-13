@@ -19,23 +19,6 @@
 #include "libavcodec/avcodec.h"
 #endif
 
-#if LIBAVCODEC_BUILD < 4641
-#error we do not support libavcodec prior to build 4641, get the latest libavcodec CVS
-#endif
-
-#if LIBAVCODEC_BUILD < 4645
-#warning your version of libavcodec is old, u might want to get a newer one
-#endif
-
-#if LIBAVCODEC_BUILD < 4645
-#define AVFrame AVVideoFrame
-#define coded_frame coded_picture
-#endif
-
-#if LIBAVCODEC_BUILD < 4684
-#define FF_QP2LAMBDA 1
-#endif
-
 extern int avcodec_inited;
 
 struct vf_priv_s {
@@ -59,39 +42,17 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.width = width;
     lavc_venc_context.height = height;
     
-#if LIBAVCODEC_BUILD >= 4754
     if(!lavc_venc_context.time_base.num || !lavc_venc_context.time_base.den){
-#else
-    if(!lavc_venc_context.frame_rate){
-#endif
 	// guess FPS:
 	switch(height){
 	case 240:
 	case 480:
-#if LIBAVCODEC_BUILD >= 4754
 	    lavc_venc_context.time_base= (AVRational){1001,30000};
-#else
-#if LIBAVCODEC_BUILD >= 4662
-	    lavc_venc_context.frame_rate     = 30000;
-	    lavc_venc_context.frame_rate_base= 1001;
-#else
-	    lavc_venc_context.frame_rate=29.97*FRAME_RATE_BASE; // NTSC
-#endif
-#endif
 	    break;
 	case 576:
 	case 288:
 	default:
-#if LIBAVCODEC_BUILD >= 4754
 	    lavc_venc_context.time_base= (AVRational){1,25};
-#else
-#if LIBAVCODEC_BUILD >= 4662
-	    lavc_venc_context.frame_rate     = 25;
-	    lavc_venc_context.frame_rate_base= 1;
-#else
-	    lavc_venc_context.frame_rate=25*FRAME_RATE_BASE; // PAL
-#endif
-#endif
 	    break;
 //	    lavc_venc_context.frame_rate=vo_fps*FRAME_RATE_BASE; // same as src
 	}
@@ -181,11 +142,7 @@ static int open(vf_instance_t *vf, char* args){
     }
     
     vf->priv->context=avcodec_alloc_context();
-#if LIBAVCODEC_BUILD >= 4645
     vf->priv->pic = avcodec_alloc_frame();
-#else
-    vf->priv->pic = avcodec_alloc_picture();
-#endif
 
     // TODO: parse args ->
     if(args) sscanf(args, "%d:%f", &p_quality, &p_fps);
@@ -193,25 +150,14 @@ static int open(vf_instance_t *vf, char* args){
     if(p_quality<32){
 	// fixed qscale
 	lavc_venc_context.flags = CODEC_FLAG_QSCALE;
-#if LIBAVCODEC_BUILD >= 4668
 	lavc_venc_context.global_quality =
-#endif
 	vf->priv->pic->quality = (int)(FF_QP2LAMBDA * ((p_quality<1) ? 1 : p_quality) + 0.5);
     } else {
 	// fixed bitrate (in kbits)
 	lavc_venc_context.bit_rate = 1000*p_quality;
     }
-#if LIBAVCODEC_BUILD >= 4754
     lavc_venc_context.time_base.num = 1000*1001;
     lavc_venc_context.time_base.den = (p_fps<1.0) ? 1000*1001*25 : (p_fps * lavc_venc_context.time_base.num);
-#else
-#if LIBAVCODEC_BUILD >= 4662
-    lavc_venc_context.frame_rate_base = 1000*1001;
-    lavc_venc_context.frame_rate      = (p_fps<1.0) ? 0 : (p_fps * lavc_venc_context.frame_rate_base);
-#else
-    lavc_venc_context.frame_rate      = (p_fps<1.0) ? 0 : (p_fps * FRAME_RATE_BASE);
-#endif
-#endif
     lavc_venc_context.gop_size = 0; // I-only
     lavc_venc_context.pix_fmt= PIX_FMT_YUV420P;
 

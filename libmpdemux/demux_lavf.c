@@ -178,12 +178,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
 
     for(i=0; i<avfc->nb_streams; i++){
         AVStream *st= avfc->streams[i];
-#if LIBAVFORMAT_BUILD >= 4629
         AVCodecContext *codec= st->codec;
-#else
-        AVCodecContext *codec= &st->codec;
-#endif
-        
+
         switch(codec->codec_type){
         case CODEC_TYPE_AUDIO:{
             WAVEFORMATEX *wf= calloc(sizeof(WAVEFORMATEX) + codec->extradata_size, 1);
@@ -276,13 +272,8 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
                 sh_video->video.dwRate= st->time_base.den;
                 sh_video->video.dwScale= st->time_base.num;
             } else {
-#if LIBAVFORMAT_BUILD >= 4624
             sh_video->video.dwRate= codec->time_base.den;
             sh_video->video.dwScale= codec->time_base.num;
-#else
-            sh_video->video.dwRate= codec->frame_rate;
-            sh_video->video.dwScale= codec->frame_rate_base;
-#endif
             }
             sh_video->fps=av_q2d(st->r_frame_rate);
             sh_video->frametime=1/av_q2d(st->r_frame_rate);
@@ -380,13 +371,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     }
 
     if(pkt.pts != AV_NOPTS_VALUE){
-#if LIBAVFORMAT_BUILD >= 4624
         dp->pts=pkt.pts * av_q2d(priv->avfc->streams[id]->time_base);
         priv->last_pts= dp->pts * AV_TIME_BASE;
-#else
-        priv->last_pts= pkt.pts;
-        dp->pts=pkt.pts / (float)AV_TIME_BASE;
-#endif
     }
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);
@@ -398,12 +384,8 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
 static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags){
     lavf_priv_t *priv = demuxer->priv;
     mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %f, %d)\n", demuxer, rel_seek_secs, audio_delay, flags);
-    
-#if LIBAVFORMAT_BUILD < 4619
-    av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE);
-#else
+
     av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE, rel_seek_secs < 0 ? AVSEEK_FLAG_BACKWARD : 0);
-#endif
 }
 
 static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)

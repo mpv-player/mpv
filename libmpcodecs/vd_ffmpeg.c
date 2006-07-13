@@ -27,28 +27,6 @@ LIBVD_EXTERN(ffmpeg)
 #include "libavcodec/avcodec.h"
 #endif
 
-#if LIBAVCODEC_BUILD < 4641
-#error we do not support libavcodec prior to build 4641, get the latest libavcodec CVS
-#endif
-
-#if LIBAVCODEC_BUILD < 4645
-#warning your version of libavcodec is old, u might want to get a newer one
-#endif
-
-#if LIBAVCODEC_BUILD < 4645
-#define AVFrame AVVideoFrame
-#define coded_frame coded_picture
-#endif
-
-#if LIBAVCODEC_BUILD < 4654
-#define PIX_FMT_RGB24 PIX_FMT_BGR24
-#define PIX_FMT_RGBA32 PIX_FMT_BGRA32
-#endif
-
-#if LIBAVCODEC_BUILD < 4672
-#undef HAVE_XVMC
-#endif
-
 #ifdef HAVE_XVMC
 #include "xvmc_render.h"
 #endif
@@ -105,11 +83,9 @@ static int lavc_param_skip_bottom=0;
 static int lavc_param_fast=0;
 static int lavc_param_lowres=0;
 static char *lavc_param_lowres_str=NULL;
-#if LIBAVCODEC_BUILD >= 4758
 static char *lavc_param_skip_loop_filter_str = NULL;
 static char *lavc_param_skip_idct_str = NULL;
 static char *lavc_param_skip_frame_str = NULL;
-#endif
 static int lavc_param_threads=1;
 static int lavc_param_bitexact=0;
 
@@ -128,17 +104,14 @@ m_option_t lavc_decode_opts_conf[]={
         {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
 #endif
 	{"lowres", &lavc_param_lowres_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#if LIBAVCODEC_BUILD >= 4758
 	{"skiploopfilter", &lavc_param_skip_loop_filter_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
         {"threads", &lavc_param_threads, CONF_TYPE_INT, CONF_RANGE, 1, 8, NULL},
         {"bitexact", &lavc_param_bitexact, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_BITEXACT, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-#if LIBAVCODEC_BUILD >= 4758
 static enum AVDiscard str2AVDiscard(char *str) {
   if (!str)
     return AVDISCARD_DEFAULT;
@@ -157,7 +130,6 @@ static enum AVDiscard str2AVDiscard(char *str) {
   mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
   return AVDISCARD_DEFAULT;
 }
-#endif
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -200,9 +172,7 @@ static int init(sh_video_t *sh){
     AVCodecContext *avctx;
     vd_ffmpeg_ctx *ctx;
     AVCodec *lavc_codec;
-#if LIBAVCODEC_BUILD >= 4722
     int lowres_w=0;
-#endif
     int do_vis_debug= lavc_param_vismv || (lavc_param_debug&(FF_DEBUG_VIS_MB_TYPE|FF_DEBUG_VIS_QP));
 
     if(!avcodec_inited){
@@ -230,18 +200,9 @@ static int init(sh_video_t *sh){
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
     ctx->ip_count= ctx->b_count= 0;
 
-#if LIBAVCODEC_BUILD >= 4645
     ctx->pic = avcodec_alloc_frame();
-#else
-    ctx->pic = avcodec_alloc_picture();
-#endif
     ctx->avctx = avcodec_alloc_context();
     avctx = ctx->avctx;
-
-#if LIBAVCODEC_BUILD >= 4691 && LIBAVCODEC_BUILD <= 4692
-    if(lavc_codec->capabilities&CODEC_CAP_CR)
-        avctx->cr_available = 1;
-#endif
 
 #ifdef HAVE_XVMC
 
@@ -265,9 +226,7 @@ static int init(sh_video_t *sh){
         avctx->flags|= CODEC_FLAG_EMU_EDGE; 
         avctx->get_buffer= get_buffer;
         avctx->release_buffer= release_buffer;
-#if LIBAVCODEC_BUILD >= 4693
         avctx->reget_buffer= get_buffer;
-#endif
     }
 
 #ifdef CODEC_FLAG_NOT_TRUNCATED
@@ -284,24 +243,15 @@ static int init(sh_video_t *sh){
     avctx->flags2|= lavc_param_fast;
 #endif
     avctx->codec_tag= sh->format;
-#if LIBAVCODEC_BUILD >= 4679
     avctx->stream_codec_tag= sh->video.fccHandler;
-#endif
     avctx->idct_algo= lavc_param_idct_algo;
     avctx->error_concealment= lavc_param_error_concealment;
-#if LIBAVCODEC_BUILD >= 4642
     avctx->debug= lavc_param_debug;
     if (lavc_param_debug)
         av_log_set_level(AV_LOG_DEBUG);
-#endif    
-#if LIBAVCODEC_BUILD >= 4698
     avctx->debug_mv= lavc_param_vismv;
-#endif    
-#if LIBAVCODEC_BUILD >= 4717
     avctx->skip_top   = lavc_param_skip_top;
     avctx->skip_bottom= lavc_param_skip_bottom;
-#endif    
-#if LIBAVCODEC_BUILD >= 4722
     if(lavc_param_lowres_str != NULL)
     {
         sscanf(lavc_param_lowres_str, "%d,%d", &lavc_param_lowres, &lowres_w);
@@ -309,12 +259,9 @@ static int init(sh_video_t *sh){
             lavc_param_lowres = 0;
         avctx->lowres = lavc_param_lowres;
     }
-#endif    
-#if LIBAVCODEC_BUILD >= 4758
     avctx->skip_loop_filter = str2AVDiscard(lavc_param_skip_loop_filter_str);
     avctx->skip_idct = str2AVDiscard(lavc_param_skip_idct_str);
     avctx->skip_frame = str2AVDiscard(lavc_param_skip_frame_str);
-#endif
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     switch (sh->format) {
     case mmioFOURCC('A','V','R','n'):
@@ -383,7 +330,6 @@ static int init(sh_video_t *sh){
 	break;
     }
     /* Pass palette to codec */
-#if LIBAVCODEC_BUILD >= 4689
     if (sh->bih && (sh->bih->biBitCount <= 8)) {
         avctx->palctrl = calloc(1,sizeof(AVPaletteControl));
         avctx->palctrl->palette_changed = 1;
@@ -396,15 +342,12 @@ static int init(sh_video_t *sh){
             memcpy(avctx->palctrl->palette, sh->bih+1,
                    min(sh->bih->biClrUsed * 4, AVPALETTE_SIZE));
 	}
-#endif
-    
+
     if(sh->bih)
 	avctx->bits_per_sample= sh->bih->biBitCount;
 
-#if LIBAVCODEC_BUILD >= 4716
     if(lavc_param_threads > 1)
         avcodec_thread_init(avctx, lavc_param_threads);
-#endif
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
@@ -435,9 +378,7 @@ static void uninit(sh_video_t *sh){
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
 
     av_freep(&avctx->extradata);
-#if LIBAVCODEC_BUILD >= 4689
     av_freep(&avctx->palctrl);
-#endif
     av_freep(&avctx->slice_offset);
 
     av_freep(&avctx);
@@ -447,11 +388,7 @@ static void uninit(sh_video_t *sh){
 }
 
 static void draw_slice(struct AVCodecContext *s,
-#if LIBAVCODEC_BUILD >= 4670
                 	AVFrame *src, int offset[4],
-#else
-                        uint8_t **src, int linesize,
-#endif                        
                 	int y, int type, int height){
     sh_video_t * sh = s->opaque;
     int start=0, i;
@@ -459,18 +396,7 @@ static void draw_slice(struct AVCodecContext *s,
     int skip_stride= ((width<<lavc_param_lowres)+15)>>4;
     uint8_t *skip= &s->coded_frame->mbskip_table[(y>>4)*skip_stride];
     int threshold= s->coded_frame->age;
-#if LIBAVCODEC_BUILD >= 4670
     uint8_t *source[3]= {src->data[0] + offset[0], src->data[1] + offset[1], src->data[2] + offset[2]};
-#else
-    int stride[3];
-    
-    stride[0]=linesize;
-    if(s->coded_frame->linesize[1]){
-        stride[1]= s->coded_frame->linesize[1];
-        stride[2]= s->coded_frame->linesize[2];
-    }else
-        stride[1]=stride[2]=stride[0]/2;
-#endif
 #if 0
     if(s->pict_type!=B_TYPE){
         for(i=0; i*16<width+16; i++){ 
@@ -489,11 +415,7 @@ static void draw_slice(struct AVCodecContext *s,
     }else
 #endif
     if (y < sh->disp_h) {
-#if LIBAVCODEC_BUILD >= 4670
         mpcodecs_draw_slice (sh, source, src->linesize, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
-#else
-        mpcodecs_draw_slice (sh,src, stride, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
-#endif
     }
 }
 
@@ -501,11 +423,7 @@ static void draw_slice(struct AVCodecContext *s,
 static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
-#if LIBAVCODEC_BUILD >= 4687
     float aspect= av_q2d(avctx->sample_aspect_ratio) * avctx->width / avctx->height;
-#else
-    float aspect= avctx->aspect_ratio;
-#endif
     int width, height;
 
     width = avctx->width;
@@ -582,7 +500,6 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     if(avctx->pix_fmt == PIX_FMT_YUV410P)
         align=63; //yes seriously, its really needed (16x16 chroma blocks in SVQ1 -> 64x64)
 
-#if LIBAVCODEC_BUILD >= 4691
   if (pic->buffer_hints) {
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2, "Buffer hints: %u\n", pic->buffer_hints);
     type = MP_IMGTYPE_TEMP;
@@ -600,7 +517,6 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
             MP_IMGFLAG_DRAW_CALLBACK:0;
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type == MP_IMGTYPE_STATIC ? "using STATIC\n" : "using TEMP\n");
   } else {
-#endif
     if(!pic->reference){
         ctx->b_count++;
         flags|=(!avctx->hurry_up && ctx->do_slices) ?
@@ -610,19 +526,15 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         flags|= MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE
                 | (ctx->do_slices ? MP_IMGFLAG_DRAW_CALLBACK : 0);
     }
-#if LIBAVCODEC_BUILD >= 4691
   }
-#endif
 
     if(init_vo(sh,avctx->pix_fmt) < 0){
         avctx->release_buffer= avcodec_default_release_buffer;
         avctx->get_buffer= avcodec_default_get_buffer;
         return avctx->get_buffer(avctx, pic);
     }
-    
-#if LIBAVCODEC_BUILD >= 4691
+
   if (!pic->buffer_hints) {
-#endif
     if(ctx->b_count>1 || ctx->ip_count>2){
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, MSGTR_MPCODECS_DRIFailure);
 
@@ -637,9 +549,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
         type= MP_IMGTYPE_IP;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_DBG2, type== MP_IMGTYPE_IPB ? "using IPB\n" : "using IP\n");
-#if LIBAVCODEC_BUILD >= 4691
   }
-#endif
 
     mpi= mpcodecs_get_image(sh,type, flags,
 			(width+align)&(~align), (height+align)&(~align));
@@ -652,11 +562,9 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     } else
 	avctx->draw_horiz_band= NULL;
 
-#if LIBAVCODEC_BUILD >= 4689
 	// Palette support: libavcodec copies palette to *data[1]
 	if (mpi->bpp == 8)
 		mpi->planes[1] = av_malloc(AVPALETTE_SIZE);
-#endif
 
     pic->data[0]= mpi->planes[0];
     pic->data[1]= mpi->planes[1];
@@ -709,9 +617,7 @@ else
         ctx->ip_age[1]++;
         ctx->b_age=1;
     }
-#if LIBAVCODEC_BUILD >= 4644
     pic->type= FF_BUFFER_TYPE_USER;
-#endif
     return 0;
 }
 
@@ -734,12 +640,10 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
 	if ( mpi && (mpi->bpp == 8))
 		av_freep(&mpi->planes[1]);
 
-#if LIBAVCODEC_BUILD >= 4644
     if(pic->type!=FF_BUFFER_TYPE_USER){
         avcodec_default_release_buffer(avctx, pic);
         return;
     }
-#endif
 
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
@@ -770,16 +674,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
     if(len<=0) return NULL; // skipped frame
 
-#if LIBAVCODEC_BUILD < 4707
-
-#ifdef HAVE_XVMC
-    if( !avctx->xvmc_acceleration )
-#endif
-
-#else
 //ffmpeg interlace (mpeg2) bug have been fixed. no need of -noslices
     if (!dr1)
-#endif
     avctx->draw_horiz_band=NULL;
     avctx->opaque=sh;
     if(ctx->vo_inited && !(flags&3) && !dr1){
@@ -825,7 +721,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 //printf("repeat: %d\n", pic->repeat_pict);
 //-- vstats generation
-#if LIBAVCODEC_BUILD >= 4643
     while(lavc_param_vstats){ // always one time loop
         static FILE *fvstats=NULL;
         char filename[20];
@@ -896,7 +791,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         
         break;
     }
-#endif
 //--
 
     if(!got_picture) return NULL;	// skipped image
@@ -937,16 +831,12 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->qscale =pic->qscale_table;
     mpi->qstride=pic->qstride;
     mpi->pict_type=pic->pict_type;
-#if LIBAVCODEC_BUILD >= 4664
     mpi->qscale_type= pic->qscale_type;
-#endif
-#if LIBAVCODEC_BUILD >= 4697
     mpi->fields = MP_IMGFIELD_ORDERED;
     if(pic->interlaced_frame) mpi->fields |= MP_IMGFIELD_INTERLACED;
     if(pic->top_field_first ) mpi->fields |= MP_IMGFIELD_TOP_FIRST;    
     if(pic->repeat_pict == 1) mpi->fields |= MP_IMGFIELD_REPEAT_FIRST;
-#endif
-    
+
     return mpi;
 }
 

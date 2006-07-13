@@ -158,11 +158,7 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 	}
 	spriv->avstream->stream_copy = 1;
 	
-#if LIBAVFORMAT_BUILD >= 4629
 	ctx = spriv->avstream->codec;
-#else
-	ctx = &(spriv->avstream->codec);
-#endif
 	ctx->codec_id = muxer->avih.dwStreams;
 	switch(type) 
 	{
@@ -187,12 +183,8 @@ static void fix_parameters(muxer_stream_t *stream)
 	muxer_stream_priv_t *spriv = (muxer_stream_priv_t *) stream->priv;
 	AVCodecContext *ctx;
 	
-#if LIBAVFORMAT_BUILD >= 4629
 	ctx = spriv->avstream->codec;
-#else
-	ctx = &(spriv->avstream->codec);
-#endif
-	
+
         if(stream->wf && stream->wf->nAvgBytesPerSec)
             ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
         ctx->rc_buffer_size= stream->vbv_size;
@@ -236,13 +228,8 @@ static void fix_parameters(muxer_stream_t *stream)
 		ctx->width = stream->bih->biWidth;
 		ctx->height = stream->bih->biHeight;
 		ctx->bit_rate = 800000;
-#if (LIBAVFORMAT_BUILD >= 4624)
 		ctx->time_base.den = stream->h.dwRate;
 		ctx->time_base.num = stream->h.dwScale;
-#else
-		ctx->frame_rate = stream->h.dwRate;
-		ctx->frame_rate_base = stream->h.dwScale;
-#endif
 		if(stream->bih+1 && (stream->bih->biSize > sizeof(BITMAPINFOHEADER)))
 		{
 			ctx->extradata = av_malloc(stream->bih->biSize - sizeof(BITMAPINFOHEADER));
@@ -279,11 +266,7 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags, 
 	
 	
 	//pkt.pts = AV_NOPTS_VALUE; 
-#if LIBAVFORMAT_BUILD >= 4624
 	pkt.pts = (stream->timer / av_q2d(priv->oc->streams[pkt.stream_index]->time_base) + 0.5);
-#else
-	pkt.pts = AV_TIME_BASE * stream->timer;
-#endif
 //fprintf(stderr, "%Ld %Ld id:%d tb:%f %f\n", pkt.dts, pkt.pts, pkt.stream_index, av_q2d(priv->oc->streams[pkt.stream_index]->time_base), stream->timer);
 	
 	if(av_interleaved_write_frame(priv->oc, &pkt) != 0) //av_write_frame(priv->oc, &pkt)
