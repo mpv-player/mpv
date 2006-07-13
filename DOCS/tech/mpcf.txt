@@ -1,6 +1,6 @@
-========================================
-NUT Open Container Format DRAFT 20060322
-========================================
+==================================
+NUT Open Container Format 20060713
+==================================
 
 
 
@@ -31,6 +31,8 @@ Error resistant
     damaged files can be played back with minimal data loss and fast
     resync times
 
+The spec is frozen. All files following spec will be compatible unless the
+spec is unfrozen.
 
 
 Definitions:
@@ -390,7 +392,7 @@ info_startcode
     0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
 
 version
-    NUT version. The current value is 2.
+    NUT version. The current value is 3. All lower values are pre-freeze
 
 forward_ptr
     size of the packet data (exactly the distance from the first byte
