@@ -78,7 +78,7 @@ static int open_live_sdp(stream_t *stream,int mode, void* opts, int* file_format
     if(len > SIZE_MAX - 1)
       return STREAM_ERROR;
 
-    sdpDescription = (char*)malloc(len+1);
+    sdpDescription = malloc(len+1);
     if(sdpDescription == NULL) return STREAM_ERROR;
     numBytesRead = read(f, sdpDescription, len);
     if(numBytesRead != len) {

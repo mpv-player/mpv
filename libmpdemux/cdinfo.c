@@ -25,7 +25,7 @@ cd_info_t*
 cd_info_new() {
 	cd_info_t *cd_info = NULL;
 	
-	cd_info = (cd_info_t*)malloc(sizeof(cd_info_t));
+	cd_info = malloc(sizeof(cd_info_t));
 	if( cd_info==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		return NULL;
@@ -59,14 +59,14 @@ cd_info_add_track(cd_info_t *cd_info, char *track_name, unsigned int track_nb, u
 	
 	if( cd_info==NULL || track_name==NULL ) return NULL;
 	
-	cd_track = (cd_track_t*)malloc(sizeof(cd_track_t));
+	cd_track = malloc(sizeof(cd_track_t));
 	if( cd_track==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		return NULL;
 	}
 	memset(cd_track, 0, sizeof(cd_track_t));
 	
-	cd_track->name = (char*)malloc(strlen(track_name)+1);
+	cd_track->name = malloc(strlen(track_name)+1);
 	if( cd_track->name==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		free(cd_track);

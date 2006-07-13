@@ -220,7 +220,7 @@ static int demux_xmms_open(demuxer_t* demuxer) {
   
   pthread_mutex_init(&xmms_mutex,NULL);    
 
-  xmms_priv=priv=(xmms_priv_t *)malloc(sizeof(xmms_priv_t));
+  xmms_priv=priv=malloc(sizeof(xmms_priv_t));
   memset(priv,0,sizeof(xmms_priv_t));
   priv->ip=ip;
 
@@ -228,7 +228,7 @@ static int demux_xmms_open(demuxer_t* demuxer) {
 
   xmms_channels=0;
   sh_audio = new_sh_audio(demuxer,0);
-  sh_audio->wf = w = (WAVEFORMATEX*)malloc(sizeof(WAVEFORMATEX));
+  sh_audio->wf = w = malloc(sizeof(WAVEFORMATEX));
   w->wFormatTag = sh_audio->format = format;
       
   demuxer->movi_start = 0;

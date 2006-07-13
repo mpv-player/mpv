@@ -419,7 +419,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
       free_sh_audio(demuxer, 0);
       return 0;
     }
-    sh_audio->wf = w = (WAVEFORMATEX*)malloc(l > sizeof(WAVEFORMATEX) ? l : sizeof(WAVEFORMATEX));
+    sh_audio->wf = w = malloc(l > sizeof(WAVEFORMATEX) ? l : sizeof(WAVEFORMATEX));
     w->wFormatTag = sh_audio->format = stream_read_word_le(s);
     w->nChannels = sh_audio->channels = stream_read_word_le(s);
     w->nSamplesPerSec = sh_audio->samplerate = stream_read_dword_le(s);
@@ -522,7 +522,7 @@ static int demux_audio_open(demuxer_t* demuxer) {
 	    break;
   }
 
-  priv = (da_priv_t*)malloc(sizeof(da_priv_t));
+  priv = malloc(sizeof(da_priv_t));
   priv->frmt = frmt;
   priv->last_pts = -1;
   demuxer->priv = priv;

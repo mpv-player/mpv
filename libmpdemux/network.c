@@ -96,7 +96,7 @@ mime_struct_t mime_type_table[] = {
 streaming_ctrl_t *
 streaming_ctrl_new(void) {
 	streaming_ctrl_t *streaming_ctrl;
-	streaming_ctrl = (streaming_ctrl_t*)malloc(sizeof(streaming_ctrl_t));
+	streaming_ctrl = malloc(sizeof(streaming_ctrl_t));
 	if( streaming_ctrl==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return NULL;
@@ -583,7 +583,7 @@ http_seek( stream_t *stream, off_t pos ) {
 int
 streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size) {
 //printf("streaming_bufferize\n");
-	streaming_ctrl->buffer = (char*)malloc(size);
+	streaming_ctrl->buffer = malloc(size);
 	if( streaming_ctrl->buffer==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return -1;

@@ -410,7 +410,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
         ptr += sizeof(uint16_t);
         if (ptr > &hdr[hdr_len]) goto len_err_out;
         if(stream_count > 0)
-              streams = (uint32_t*)malloc(2*stream_count*sizeof(uint32_t));
+              streams = malloc(2*stream_count*sizeof(uint32_t));
         mp_msg(MSGT_HEADER,MSGL_V," stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count ; i++ ) {
           stream_id = le2me_16(*(uint16_t*)ptr);

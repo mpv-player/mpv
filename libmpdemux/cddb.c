@@ -349,7 +349,7 @@ cddb_read_cache(cddb_data_t *cddb_data) {
 		file_size = stats.st_size;
 	}
 	
-	cddb_data->xmcd_file = (char*)malloc(file_size);
+	cddb_data->xmcd_file = malloc(file_size);
 	if( cddb_data->xmcd_file==NULL ) {
 		mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 		close(file_fd);
@@ -741,7 +741,7 @@ cddb_resolve(const char *dev, char **xmcd_file) {
 	if( home_dir==NULL ) {
 		cddb_data.cache_dir = NULL;
 	} else {
-		cddb_data.cache_dir = (char*)malloc(strlen(home_dir)+strlen(cddb_cache_dir)+1);
+		cddb_data.cache_dir = malloc(strlen(home_dir)+strlen(cddb_cache_dir)+1);
 		if( cddb_data.cache_dir==NULL ) {
 			mp_msg(MSGT_DEMUX, MSGL_ERR, MSGTR_MemAllocFailed);
 			return -1;
@@ -779,14 +779,14 @@ xmcd_parse_dtitle(cd_info_t *cd_info, char *line) {
 		ptr += 7;
 		album = strstr(ptr, "/");
 		if( album==NULL ) return NULL;
-		cd_info->album = (char*)malloc(strlen(album+2)+1);
+		cd_info->album = malloc(strlen(album+2)+1);
 		if( cd_info->album==NULL ) {
 			return NULL;
 		}
 		strcpy( cd_info->album, album+2 );
 		album--;
 		album[0] = '\0';
-		cd_info->artist = (char*)malloc(strlen(ptr)+1);
+		cd_info->artist = malloc(strlen(ptr)+1);
 		if( cd_info->artist==NULL ) {
 			return NULL;
 		}
@@ -801,7 +801,7 @@ xmcd_parse_dgenre(cd_info_t *cd_info, char *line) {
 	ptr = strstr(line, "DGENRE=");
 	if( ptr!=NULL ) {
 		ptr += 7;
-		cd_info->genre = (char*)malloc(strlen(ptr)+1);
+		cd_info->genre = malloc(strlen(ptr)+1);
 		if( cd_info->genre==NULL ) {
 			return NULL;
 		}

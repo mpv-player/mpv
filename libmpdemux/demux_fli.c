@@ -69,7 +69,7 @@ static int demux_fli_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
 
 static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   sh_video_t *sh_video = NULL;
-  fli_frames_t *frames = (fli_frames_t *)malloc(sizeof(fli_frames_t));
+  fli_frames_t *frames = malloc(sizeof(fli_frames_t));
   int frame_number;
   int speed;
   unsigned int frame_size;
@@ -104,8 +104,8 @@ static demuxer_t* demux_open_fli(demuxer_t* demuxer){
 
   // allocate enough entries for the indices
   //   audit: num_frames is 16bit so it is safe against overflow
-  frames->filepos = (off_t *)malloc(frames->num_frames * sizeof(off_t));
-  frames->frame_size = (int *)malloc(frames->num_frames * sizeof(int));
+  frames->filepos = malloc(frames->num_frames * sizeof(off_t));
+  frames->frame_size = malloc(frames->num_frames * sizeof(int));
 
   // create a new video stream header
   sh_video = new_sh_video(demuxer, 0);

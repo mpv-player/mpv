@@ -366,7 +366,7 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
         
     if(0/*pkt.destruct == av_destruct_packet*/){
         //ok kids, dont try this at home :)
-        dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
+        dp=malloc(sizeof(demux_packet_t));
         dp->len=pkt.size;
         dp->next=NULL;
         dp->refcount=1;

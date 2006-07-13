@@ -151,7 +151,7 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 	int i;
 	char *buf;
 
-  if ((ra_priv = (ra_priv_t *)malloc(sizeof(ra_priv_t))) == NULL) {
+  if ((ra_priv = malloc(sizeof(ra_priv_t))) == NULL) {
     mp_msg(MSGT_DEMUX, MSGL_ERR, "[RealAudio] Can't allocate memory for private data.\n");
     return 0;
   }

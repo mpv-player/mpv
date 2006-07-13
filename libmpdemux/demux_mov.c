@@ -732,7 +732,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			  if (len >= 36 + char2int(trak->stdata,52)) {
 			    sh->codecdata_len = char2int(trak->stdata,52+char2int(trak->stdata,52));
 			    mp_msg(MSGT_DEMUX, MSGL_V, "MOV: Found alac atom (%d)!\n", sh->codecdata_len);
-			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
+			    sh->codecdata = malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, &trak->stdata[52+char2int(trak->stdata,52)], sh->codecdata_len);
 			  }
 			  break;
@@ -842,7 +842,7 @@ quit_vorbis_block:
 			    if(!is_vorbis)
 			    {
 			    sh->codecdata_len = esds.decoderConfigLen;
-			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
+			    sh->codecdata = malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, esds.decoderConfig, sh->codecdata_len);
 			    }
 			    }
@@ -860,7 +860,7 @@ quit_vorbis_block:
 			if(atom_len > 8) {
 			    // copy all the atom (not only payload) for lavc alac decoder
 			    sh->codecdata_len = atom_len;
-			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
+			    sh->codecdata = malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, &trak->stdata[28], sh->codecdata_len);
 			}
 		      } break;
@@ -1033,7 +1033,7 @@ quit_vorbis_block:
 
 			  // dump away the codec specific configuration for the AAC decoder
 			  trak->stream_header_len = esds.decoderConfigLen;
-			  trak->stream_header = (unsigned char *)malloc(trak->stream_header_len);
+			  trak->stream_header = malloc(trak->stream_header_len);
 			  memcpy(trak->stream_header, esds.decoderConfig, trak->stream_header_len);
 			}
 			mp4_free_esds(&esds); // freeup esds mem
@@ -1068,7 +1068,7 @@ quit_vorbis_block:
 		        // Copy avcC for the AVC decoder
 		        // This data will be put in extradata below, where BITMAPINFOHEADER is created
 		        trak->stream_header_len = atom_len-8;
-		        trak->stream_header = (unsigned char *)malloc(trak->stream_header_len);
+		        trak->stream_header = malloc(trak->stream_header_len);
 		        memcpy(trak->stream_header, trak->stdata+pos+8, trak->stream_header_len);
 		      }	      
 		      break;

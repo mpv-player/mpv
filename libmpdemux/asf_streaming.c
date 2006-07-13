@@ -267,7 +267,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
       switch(ASF_LOAD_GUID_PREFIX(streamh->type)) {
       case 0xF8699E40 : // audio stream
 	if(asf_ctrl->audio_streams == NULL){
-	  asf_ctrl->audio_streams = (int*)malloc(sizeof(int));
+	  asf_ctrl->audio_streams = malloc(sizeof(int));
 	  asf_ctrl->n_audio = 1;
 	} else {
 	  asf_ctrl->n_audio++;
@@ -278,7 +278,7 @@ static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) 
 	break;
       case 0xBC19EFC0 : // video stream
 	if(asf_ctrl->video_streams == NULL){
-	  asf_ctrl->video_streams = (int*)malloc(sizeof(int));
+	  asf_ctrl->video_streams = malloc(sizeof(int));
 	  asf_ctrl->n_video = 1;
 	} else {
 	  asf_ctrl->n_video++;
@@ -715,7 +715,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 	int done;
 	int auth_retry = 0;
 
-	asf_http_ctrl = (asf_http_streaming_ctrl_t*)malloc(sizeof(asf_http_streaming_ctrl_t));
+	asf_http_ctrl = malloc(sizeof(asf_http_streaming_ctrl_t));
 	if( asf_http_ctrl==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,MSGTR_MemAllocFailed);
 		return -1;

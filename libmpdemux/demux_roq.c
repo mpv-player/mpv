@@ -92,7 +92,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
   sh_video_t *sh_video = NULL;
   sh_audio_t *sh_audio = NULL;
 
-  roq_data_t *roq_data = (roq_data_t *)malloc(sizeof(roq_data_t));
+  roq_data_t *roq_data = malloc(sizeof(roq_data_t));
   int chunk_id;
   int chunk_size;
   int chunk_arg;
@@ -160,7 +160,7 @@ static demuxer_t* demux_open_roq(demuxer_t* demuxer)
         sh_audio->ds = demuxer->audio;
 
         // go through the bother of making a WAVEFORMATEX structure
-        sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+        sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
 
         // custom fourcc for internal MPlayer use
         sh_audio->format = mmioFOURCC('R', 'o', 'Q', 'A');
