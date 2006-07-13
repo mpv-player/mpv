@@ -60,7 +60,7 @@ static m_option_t cfg_fields[] = {
 
 #define mpriv (menu->priv)
 
-m_option_t*  mp_property_find(char* name);
+m_option_t*  mp_property_find(const char* name);
 
 static void entry_set_text(menu_t* menu, list_entry_t* e) {
   char* val = m_property_print(e->opt);
