@@ -159,7 +159,7 @@ find_chip (unsigned chip_id)
  * @note Derived from VIA's V4L driver.
  *       See ddover.c, DDOVER_HQVCalcZoomHeight()
  */
-int
+static int
 uc_ovl_map_vzoom (int sh, int dh, uint32_t * zoom, uint32_t * mini)
 {
   uint32_t sh1, tmp, d;
@@ -223,7 +223,7 @@ uc_ovl_map_vzoom (int sh, int dh, uint32_t * zoom, uint32_t * mini)
  * @note Derived from VIA's V4L driver.
  *       See ddover.c, DDOVER_HQVCalcZoomWidth() and DDOver_GetDisplayCount()
  */
-int
+static int
 uc_ovl_map_hzoom (int sw, int dw, uint32_t * zoom, uint32_t * mini,
 		  int *falign, int *dcount)
 {
@@ -292,7 +292,7 @@ uc_ovl_map_hzoom (int sw, int dw, uint32_t * zoom, uint32_t * mini,
  * @note Derived from VIA's V4L driver. See ddover.c, DDOver_GetFetch()
  * @note Only call after uc_ovl_map_hzoom()
  */
-uint32_t
+static uint32_t
 uc_ovl_map_qwfetch (uint32_t format, int sw)
 {
   uint32_t fetch = 0;
@@ -335,7 +335,7 @@ uc_ovl_map_qwfetch (uint32_t format, int sw)
  *
  * @note Derived from VIA's V4L driver. See ddover.c, DDOver_GetV1Format()
  */
-uint32_t
+static uint32_t
 uc_ovl_map_format (uint32_t format)
 {
   switch (format)
@@ -371,7 +371,7 @@ uc_ovl_map_format (uint32_t format)
  * @param control will hold value for V1_CONTROL.
  * @param fifo will hold value for V1_FIFO_CONTROL.
  */
-void
+static void
 uc_ovl_map_v1_control (uint32_t format, int sw,
 		       int hwrev, int extfifo_on,
 		       uint32_t * control, uint32_t * fifo)
@@ -431,7 +431,7 @@ uc_ovl_map_v1_control (uint32_t format, int sw,
  * @param extfifo_on pointer determining if extended fifo is enable or not.
  * @param dst_w destination width.
  */
-void
+static void
 uc_ovl_setup_fifo (int *extfifo_on, int dst_w)
 {
   if (dst_w <= 1024) /* Disable extended FIFO */
@@ -456,7 +456,7 @@ uc_ovl_setup_fifo (int *extfifo_on, int dst_w)
     }
 }
 
-void
+static void
 uc_ovl_vcmd_wait (volatile uint8_t * vio)
 {
   while ((VIDEO_IN (vio, V_COMPOSE_MODE)

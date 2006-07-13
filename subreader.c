@@ -95,7 +95,7 @@ static char *stristr(const char *haystack, const char *needle) {
     return NULL;
 }
 
-subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
+static subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
     static char line[LINE_LEN+1];
     static char *s = NULL, *slacktime_s;
     char text[LINE_LEN+1], *p=NULL, *q;
@@ -236,7 +236,7 @@ subtitle *sub_read_line_sami(stream_t* st, subtitle *current) {
 }
 
 
-char *sub_readtext(char *source, char **dest) {
+static char *sub_readtext(char *source, char **dest) {
     int len=0;
     char *p=source;
     
@@ -258,7 +258,7 @@ char *sub_readtext(char *source, char **dest) {
     else return NULL;  // last text field
 }
 
-subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char line2[LINE_LEN+1];
     char *p, *next;
@@ -286,7 +286,7 @@ subtitle *sub_read_line_microdvd(stream_t *st,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char line2[LINE_LEN+1];
     char *p, *next;
@@ -312,7 +312,7 @@ subtitle *sub_read_line_mpl2(stream_t *st,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_subrip(stream_t* st, subtitle *current) {
+static subtitle *sub_read_line_subrip(stream_t* st, subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL, *q=NULL;
@@ -342,7 +342,7 @@ subtitle *sub_read_line_subrip(stream_t* st, subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL;
@@ -391,7 +391,7 @@ subtitle *sub_read_line_subviewer(stream_t *st,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_subviewer2(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_subviewer2(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3,a4;
     char *p=NULL;
@@ -424,7 +424,7 @@ subtitle *sub_read_line_subviewer2(stream_t *st,subtitle *current) {
 }
 
 
-subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
 	char line[LINE_LEN+1];
 	int a1,a2,a3;
 	char *p=NULL, *next,separator;
@@ -470,7 +470,7 @@ subtitle *sub_read_line_vplayer(stream_t *st,subtitle *current) {
 	return current;
 }
 
-subtitle *sub_read_line_rt(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_rt(stream_t *st,subtitle *current) {
 	//TODO: This format uses quite rich (sub/super)set of xhtml 
 	// I couldn't check it since DTD is not included.
 	// WARNING: full XML parses can be required for proper parsing 
@@ -520,7 +520,7 @@ subtitle *sub_read_line_rt(stream_t *st,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
 /*
  * Sub Station Alpha v4 (and v2?) scripts have 9 commas before subtitle
  * other Sub Station Alpha scripts have only 8 commas before subtitle
@@ -592,7 +592,7 @@ subtitle *sub_read_line_ssa(stream_t *st,subtitle *current) {
 	return current;
 }
 
-void sub_pp_ssa(subtitle *sub) {
+static void sub_pp_ssa(subtitle *sub) {
 	int l=sub->lines;
 	char *so,*de,*start;
 
@@ -621,7 +621,7 @@ void sub_pp_ssa(subtitle *sub) {
  *
  * by set, based on code by szabi (dunnowhat sub format ;-)
  */
-subtitle *sub_read_line_pjs(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_pjs(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char text[LINE_LEN+1], *s, *d;
 
@@ -659,7 +659,7 @@ subtitle *sub_read_line_pjs(stream_t *st,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current) {
+static subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current) {
 	char line[LINE_LEN+1];
 	float a,b;
 	int num=0;
@@ -704,7 +704,7 @@ subtitle *sub_read_line_mpsub(stream_t *st, subtitle *current) {
 subtitle *previous_aqt_sub = NULL;
 #endif
 
-subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     char *next;
     int i;
@@ -761,7 +761,7 @@ subtitle *sub_read_line_aqt(stream_t *st,subtitle *current) {
 subtitle *previous_subrip09_sub = NULL;
 #endif
 
-subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
+static subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
     char line[LINE_LEN+1];
     int a1,a2,a3;
     char * next=NULL;
@@ -813,7 +813,7 @@ subtitle *sub_read_line_subrip09(stream_t *st,subtitle *current) {
     return current;
 }
 
-subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current)
+static subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current)
 {
     char line1[LINE_LEN], line2[LINE_LEN], directive[LINE_LEN], *p, *q;
     unsigned a1, a2, a3, a4, b1, b2, b3, b4, comment = 0;
@@ -1004,7 +1004,7 @@ subtitle *sub_read_line_jacosub(stream_t* st, subtitle * current)
     return current;
 }
 
-int sub_autodetect (stream_t* st, int *uses_time) {
+static int sub_autodetect (stream_t* st, int *uses_time) {
     char line[LINE_LEN+1];
     int i,j=0;
     char p;
@@ -1118,7 +1118,7 @@ void	subcp_close (void)
 #define ICBUFFSIZE 512
 static char icbuffer[ICBUFFSIZE];
 
-subtitle* subcp_recode (subtitle *sub)
+static subtitle* subcp_recode (subtitle *sub)
 {
 	int l=sub->lines;
 	size_t ileft, oleft;

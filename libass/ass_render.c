@@ -1361,7 +1361,7 @@ static void process_karaoke_effects(void)
 	}
 }
 
-int get_face_ascender(FT_Face face)
+static int get_face_ascender(FT_Face face)
 {
 	int v = face->size->metrics.ascender;
 	if (!v)
@@ -1369,7 +1369,7 @@ int get_face_ascender(FT_Face face)
 	return v;
 }
 
-int get_face_descender(FT_Face face)
+static int get_face_descender(FT_Face face)
 {
 	int v = face->size->metrics.descender;
 	if (!v)

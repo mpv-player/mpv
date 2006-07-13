@@ -323,7 +323,7 @@ static struct savage_cards savage_card_ids[] = {
 	{ PCI_CHIP_PROSAVAGE_DDRK	, 			S3_PROSAVAGE },
 };
 
-void SavageSetColorOld(void)
+static void SavageSetColorOld(void)
 {
 
 
@@ -360,7 +360,7 @@ void SavageSetColorOld(void)
   }
 }
 
-void SavageSetColorKeyOld(void)
+static void SavageSetColorKeyOld(void)
 {
     int red, green, blue;
 
@@ -528,7 +528,7 @@ SavageDisplayVideoOld(void)
 
 }
 
-void SavageInitStreamsOld(void)
+static void SavageInitStreamsOld(void)
 {
     /*unsigned long jDelta;*/
     unsigned long format = 0;
@@ -726,7 +726,7 @@ static void savage_getscreenproperties(struct savage_info *info){
 }
 
 
-void SavageStreamsOff(void)
+static void SavageStreamsOff(void)
 {
     unsigned char jStreamsControl;
     unsigned short vgaCRIndex = 0x3d0 + 4;

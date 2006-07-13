@@ -950,7 +950,7 @@ vidix_capability_t def_cap =
 };
 
 #ifdef HAVE_X11
-void probe_fireGL_driver(void) {
+static void probe_fireGL_driver(void) {
   Display *dp = XOpenDisplay ((void*)0);
   int n = 0;
   char **extlist;

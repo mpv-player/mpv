@@ -174,7 +174,7 @@ typedef struct
  * of how MPlayer works, it cannot safely halt execution, but at least the user
  * will get an error message before the segfault happens.
  */
-void * safe_malloc(int size)
+static void * safe_malloc(int size)
 {
   void * answer = malloc(size);
   if (answer == NULL)
@@ -194,8 +194,7 @@ void * safe_malloc(int size)
  * pixels. The results are returned by reference to posx1, posy1, posx2, and
  * posy2.
  */
-
-void calculate_bounding_rectangle(int * posx1, int * posy1, int * posx2, int * posy2, pgm_structure * filter)
+static void calculate_bounding_rectangle(int * posx1, int * posy1, int * posx2, int * posy2, pgm_structure * filter)
 {
   int x; /* Temporary variables to run  */
   int y; /* through each row or column. */
@@ -264,7 +263,7 @@ void calculate_bounding_rectangle(int * posx1, int * posy1, int * posx2, int * p
  * We call this function when our filter is done. It will free the memory
  * allocated to the masks and leave the variables in a safe state.
  */
-void destroy_masks(vf_instance_t * vf)
+static void destroy_masks(vf_instance_t * vf)
 {
   int a, b;
 
@@ -301,7 +300,7 @@ void destroy_masks(vf_instance_t * vf)
  * values. The values will not change during program execution once this function
  * is done.
  */
-void initialize_masks(vf_instance_t * vf)
+static void initialize_masks(vf_instance_t * vf)
 {
   int a, b, c;
 
@@ -349,7 +348,7 @@ void initialize_masks(vf_instance_t * vf)
  * to implement than a proper pythagorean distance since I'm using a modified
  * erosion algorithm to compute the distances.
  */
-void convert_mask_to_strength_mask(vf_instance_t * vf, pgm_structure * mask)
+static void convert_mask_to_strength_mask(vf_instance_t * vf, pgm_structure * mask)
 {
   int x, y; /* Used by our for loops to go through every single pixel in the picture one at a time. */
   int has_anything_changed = 1; /* Used by the main while() loop to know if anything changed on the last erosion. */
@@ -430,7 +429,7 @@ void convert_mask_to_strength_mask(vf_instance_t * vf, pgm_structure * mask)
  * logo and blurs it. It does so by finding the average of all the pixels within
  * the mask and outside of the logo.
  */
-void get_blur(const vf_instance_t * const vf, unsigned int * const value_out, const pgm_structure * const logo_mask,
+static void get_blur(const vf_instance_t * const vf, unsigned int * const value_out, const pgm_structure * const logo_mask,
               const mp_image_t * const image, const int x, const int y, const int plane)
 {
   int mask_size; /* Mask size tells how large a circle to use. The radius is about (slightly larger than) mask size. */
@@ -486,7 +485,7 @@ void get_blur(const vf_instance_t * const vf, unsigned int * const value_out, co
 /**
  * \brief Free a pgm_structure. Undoes load_pgm(...).
  */
-void destroy_pgm(pgm_structure * to_be_destroyed)
+static void destroy_pgm(pgm_structure * to_be_destroyed)
 {
   if (to_be_destroyed == NULL)
     return; /* Don't do anything if a NULL pointer was passed it. */
@@ -503,7 +502,7 @@ void destroy_pgm(pgm_structure * to_be_destroyed)
 }
 
 /** \brief Helper function for load_pgm(...) to skip whitespace. */
-void load_pgm_skip(FILE *f) {
+static void load_pgm_skip(FILE *f) {
   int c, comment = 0;
   do {
     c = fgetc(f);
@@ -533,7 +532,7 @@ void load_pgm_skip(FILE *f) {
  * guaranteed with ppm is that all zero (R = 0, G = 0, B = 0) pixels will remain
  * zero, and non-zero pixels will remain non-zero.
  */
-pgm_structure * load_pgm(const char * file_name)
+static pgm_structure * load_pgm(const char * file_name)
 {
   int maximum_greyscale_value;
   FILE * input;
@@ -594,7 +593,7 @@ pgm_structure * load_pgm(const char * file_name)
  * rounding error will only cause a minor amount of excess blur in the chroma
  * planes.
  */
-pgm_structure * generate_half_size_image(vf_instance_t * vf, pgm_structure * input_image)
+static pgm_structure * generate_half_size_image(vf_instance_t * vf, pgm_structure * input_image)
 {
   int x, y;
   pgm_structure * new_pgm = (pgm_structure *) safe_malloc (sizeof(pgm_structure));
