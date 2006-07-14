@@ -74,7 +74,7 @@ all_filenames() {
     if [ "$_svn" == "no" ]; then
         find . -type f \
         | grep -v "\.\#\|\~$\|\.depend\|\/\.svn\/\|config.mak\|^\./config\.h" \
-        | grep -v "^\./version\.h\|\.o$\|\.a$"
+        | grep -v "^\./version\.h\|\.o$\|\.a$\|configure.log\|^\./help_mp.h"
     else
         list_svn .
     fi
