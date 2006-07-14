@@ -116,7 +116,7 @@ for i in "$@"; do
         printoption "all       " "enable all tests" "no"
         echo
         printoption "showcont  " "show offending content of file(s)" \
-                                                                    "$_showcont"
+                                                                   "$_showcont"
         echo
         printoption "color     " "colored output" "$_color"
         printoption "head      " "print heading for each test" "$_head"
