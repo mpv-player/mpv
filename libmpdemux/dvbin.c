@@ -601,21 +601,7 @@ int dvb_step_channel(dvb_priv_t *priv, int dir)
 		return 0;
 	}
 
-
-	if(dir == DVB_CHANNEL_HIGHER)
-	{
-		if(list->current == list->NUM_CHANNELS-1)
-			new_current=0;
-		else
-			new_current = list->current + 1;
-	}
-	else
-	{
-		if(list->current == 0)
-			new_current=list->NUM_CHANNELS-1;
-		else
-			new_current = list->current - 1;
-	}
+	new_current = (list->NUM_CHANNELS + list->current + (dir == DVB_CHANNEL_HIGHER ? 1 : -1)) % list->NUM_CHANNELS;
 
 	return dvb_set_channel(priv, priv->card, new_current);
 }
