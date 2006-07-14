@@ -27,7 +27,7 @@ _showcont=no
 
 _color=yes
 _head=yes
-_cvs=yes
+_svn=yes
 _files=
 
 # -----------------------------------------------------------------------------
@@ -71,21 +71,28 @@ printhead() {
 all_filenames() {
     test "$_files" != "" && echo "$_files" && return
 
-    if [ "$_cvs" == "no" ]; then
+    if [ "$_svn" == "no" ]; then
         find . -type f \
-        | grep -v "\.\#\|\~$\|\.depend\|\/CVS\/\|config.mak\|^\./config\.h" \
+        | grep -v "\.\#\|\~$\|\.depend\|\/\.svn\/\|config.mak\|^\./config\.h" \
         | grep -v "^\./version\.h\|\.o$\|\.a$"
     else
-        list_cvs .
+        list_svn .
     fi
 }
 
-list_cvs() {
-    for i in `grep "^/" $1/CVS/Entries | cut -d '/' -f 2`; do
+list_svn() {
+    tmpfiles=`sed '/name/ba; /kind/ba; d; b;
+                   :a; s/^ *....=\"\(.*\)\".*$/\1/;' $1/.svn/entries | \
+              sed '/$/N; s/\n/ /; / dir$/d; s/ file$//;'`
+    tmpdirs=`sed ' /name/ba; /kind/ba; d; b;
+                   :a; s/^ *....=\"\(.*\)\".*$/\1/;' $1/.svn/entries | \
+             sed ' /$/N; s/\n/ /; / file$/d; /^ dir$/d; s/ dir$//;'`
+
+    for i in $tmpfiles; do
         echo $1/$i
     done
-    for j in `grep "^D/" $1/CVS/Entries | cut -d '/' -f 2`; do
-        list_cvs $1/$j
+    for j in $tmpdirs; do
+        list_svn $1/$j
     done
 }
 
@@ -113,10 +120,10 @@ for i in "$@"; do
         echo
         printoption "color     " "colored output" "$_color"
         printoption "head      " "print heading for each test" "$_head"
-        printoption "cvs       " "use CVS/ to determine which files to check" \
-                                                                        "$_cvs"
+        printoption "svn       " "use .svn/ to determine which files to " \
+                                                                "check" "$_svn"
         echo -e "\nIf no files are specified, the whole tree is traversed."
-        echo -e "If there are, -(no)cvs has no effect.\n"
+        echo -e "If there are, -(no)svn has no effect.\n"
         exit
         ;;
     -charset)
@@ -131,11 +138,11 @@ for i in "$@"; do
     -nooll)
         _oll=no
         ;;
-    -cvs)
-        _cvs=yes
+    -svn)
+        _svn=yes
         ;;
-    -nocvs)
-        _cvs=no
+    -nosvn)
+        _svn=no
         ;;
     -head)
         _head=yes
@@ -216,7 +223,7 @@ else
     COLE=""
 fi
 
-# Generate filelist once so -cvs isn't _that_ much slower than -nocvs anymore
+# Generate filelist once so -svn isn't _that_ much slower than -nosvn anymore
 
 filelist=`all_filenames`
 
