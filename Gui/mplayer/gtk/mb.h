@@ -8,6 +8,6 @@ extern GtkWidget * gtkMessageBoxText;
 extern GtkWidget * MessageBox;
 
 extern GtkWidget * create_MessageBox( int type );
-extern void ShowMessageBox( char * msg );
+extern void ShowMessageBox( const char * msg );
 
 #endif

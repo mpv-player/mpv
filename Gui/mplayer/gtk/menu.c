@@ -70,7 +70,7 @@ void ActivateMenuItem( int Item )
  mplEventHandling( Item & 0x0000ffff,Item >> 16 );
 }
 
-GtkWidget * AddMenuCheckItem(GtkWidget *window1, const char * immagine_xpm, GtkWidget* Menu,char* label, gboolean state, int Number)
+static GtkWidget * AddMenuCheckItem(GtkWidget *window1, const char * immagine_xpm, GtkWidget* Menu,const char* label, gboolean state, int Number)
 {
  GtkWidget * Label = NULL;
  GtkWidget * Pixmap = NULL;
@@ -103,7 +103,7 @@ GtkWidget * AddMenuCheckItem(GtkWidget *window1, const char * immagine_xpm, GtkW
    
  return Item;
 }
-GtkWidget * AddMenuItem( GtkWidget *window1, const char * immagine_xpm,  GtkWidget * SubMenu,char * label,int Number )
+GtkWidget * AddMenuItem( GtkWidget *window1, const char * immagine_xpm,  GtkWidget * SubMenu,const char * label,int Number )
 {
  GtkWidget * Label = NULL;
  GtkWidget * Pixmap = NULL;
@@ -136,7 +136,7 @@ GtkWidget * AddMenuItem( GtkWidget *window1, const char * immagine_xpm,  GtkWidg
 }
 
 
-GtkWidget * AddSubMenu( GtkWidget *window1, const char * immagine_xpm, GtkWidget * Menu,char * label )
+GtkWidget * AddSubMenu( GtkWidget *window1, const char * immagine_xpm, GtkWidget * Menu,const char * label )
 {
  GtkWidget * Label = NULL;
  GtkWidget * Pixmap = NULL;

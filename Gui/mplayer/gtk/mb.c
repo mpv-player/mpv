@@ -13,7 +13,7 @@
 GtkWidget * gtkMessageBoxText;
 GtkWidget * MessageBox = NULL;
 
-void ShowMessageBox( char * msg )
+void ShowMessageBox( const char * msg )
 {
  if ( MessageBox ) { gtk_widget_hide( MessageBox ); gtk_widget_destroy( MessageBox ); }
  MessageBox=create_MessageBox( 0 );

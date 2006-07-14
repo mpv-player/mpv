@@ -23,7 +23,7 @@ GtkWidget * AddDialogFrame( GtkWidget * parent )
  return frame;
 }
 
-GtkWidget * AddFrame( char * title,int type,GtkWidget * parent,int add )
+GtkWidget * AddFrame( const char * title,int type,GtkWidget * parent,int add )
 {
  GtkWidget * frame = NULL;
  frame=gtk_frame_new( title );
@@ -36,7 +36,7 @@ GtkWidget * AddFrame( char * title,int type,GtkWidget * parent,int add )
  return frame;
 }
 
-GtkWidget * AddLabel( char * title,GtkWidget * parent )
+GtkWidget * AddLabel( const char * title,GtkWidget * parent )
 {
  GtkWidget * label;
  label=gtk_label_new( title );
@@ -76,7 +76,7 @@ GtkWidget * AddHBox( GtkWidget * parent,int type )
  return hbox;
 }
 
-GtkWidget * AddCheckButton( char * title, GtkWidget * parent )
+GtkWidget * AddCheckButton( const char * title, GtkWidget * parent )
 {
  GtkWidget * CB;
  CB=gtk_check_button_new_with_label( title );
@@ -86,7 +86,7 @@ GtkWidget * AddCheckButton( char * title, GtkWidget * parent )
  return CB;
 }
 
-GtkWidget * AddRadioButton( char * title,GSList ** group,GtkWidget * parent )
+GtkWidget * AddRadioButton( const char * title,GSList ** group,GtkWidget * parent )
 {
  GtkWidget * RB;
  RB=gtk_radio_button_new_with_label( *group,title );
@@ -97,7 +97,7 @@ GtkWidget * AddRadioButton( char * title,GSList ** group,GtkWidget * parent )
  return RB;
 }
 
-GtkWidget * AddButton( char * title,GtkWidget * parent )
+GtkWidget * AddButton( const char * title,GtkWidget * parent )
 {
  GtkWidget * B;
  B=gtk_button_new_with_label( title );

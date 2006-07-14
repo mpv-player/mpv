@@ -54,7 +54,7 @@ extern int  gtkFindCList( GtkWidget * list,char * item );
 extern void gtkEventHandling( void );
 
 extern void gtkShow( int type,char * param );
-extern void gtkMessageBox( int type,gchar * str );
+extern void gtkMessageBox( int type,const gchar * str );
 extern void gtkSetLayer( GtkWidget * wdg );
 extern void gtkActive( GtkWidget * wdg );
 

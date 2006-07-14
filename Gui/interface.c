@@ -54,7 +54,7 @@ extern mixer_t mixer; // mixer from mplayer.c
 guiInterface_t guiIntfStruct;
 int guiWinID=-1;
 
-char * gstrcat( char ** dest,char * src )
+char * gstrcat( char ** dest,const char * src )
 {
  char * tmp = NULL;
 
@@ -75,21 +75,21 @@ char * gstrcat( char ** dest,char * src )
  return tmp;
 }
 
-int gstrcmp( char * a,char * b )
+int gstrcmp( const char * a,const char * b )
 {
  if ( !a && !b ) return 0;
  if ( !a || !b ) return -1;
  return strcmp( a,b );
 }
 
-int gstrncmp( char * a,char * b,int size )
+int gstrncmp( const char * a,const char * b,int size )
 {
  if ( !a && !b ) return 0;
  if ( !a || !b ) return -1;
  return strncmp( a,b,size );
 }
 
-char * gstrdup( char * str )
+char * gstrdup( const char * str )
 {
  if ( !str ) return NULL;
  return strdup( str );
@@ -107,7 +107,7 @@ void gfree( void ** p )
  free( *p ); *p=NULL;
 }
 
-void gset( char ** str,char * what )
+void gset( char ** str, const char * what )
 {
  if ( *str ) { if ( !strstr( *str,what ) ) { gstrcat( str,"," ); gstrcat( str,what ); }}
    else gstrcat( str,what );
@@ -116,7 +116,7 @@ void gset( char ** str,char * what )
 /**
  * \brief this actually creates a new list containing only one element...
  */
-void gaddlist( char *** list,char * entry )
+void gaddlist( char *** list,const char * entry )
 {
  int i;
 
@@ -135,7 +135,7 @@ void gaddlist( char *** list,char * entry )
  * \brief this replaces a string starting with search by replace.
  * If not found, replace is appended.
  */
-void greplace(char ***list, char *search, char *replace)
+void greplace(char ***list, const char *search, const char *replace)
 {
  int i = 0;
  int len = (search) ? strlen(search) : 0;

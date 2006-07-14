@@ -112,7 +112,7 @@ void gtkEventHandling( void )
 
 // --- funcs
 
-void gtkMessageBox( int type,gchar * str )
+void gtkMessageBox( int type,const gchar * str )
 {
  if ( !gtkInited ) return;
  ShowMessageBox( str );
