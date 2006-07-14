@@ -352,17 +352,17 @@ static rmff_mdpr_t *rmff_scan_mdpr(const char *data) {
   mdpr->duration=BE_32(&data[36]);
   
   mdpr->stream_name_size=data[40];
-  mdpr->stream_name=malloc((mdpr->stream_name_size+1));
+  mdpr->stream_name=malloc(mdpr->stream_name_size+1);
   memcpy(mdpr->stream_name, &data[41], mdpr->stream_name_size);
   mdpr->stream_name[mdpr->stream_name_size]=0;
   
   mdpr->mime_type_size=data[41+mdpr->stream_name_size];
-  mdpr->mime_type=malloc((mdpr->mime_type_size+1));
+  mdpr->mime_type=malloc(mdpr->mime_type_size+1);
   memcpy(mdpr->mime_type, &data[42+mdpr->stream_name_size], mdpr->mime_type_size);
   mdpr->mime_type[mdpr->mime_type_size]=0;
   
   mdpr->type_specific_len=BE_32(&data[42+mdpr->stream_name_size+mdpr->mime_type_size]);
-  mdpr->type_specific_data=malloc((mdpr->type_specific_len));
+  mdpr->type_specific_data=malloc(mdpr->type_specific_len);
   memcpy(mdpr->type_specific_data, 
       &data[46+mdpr->stream_name_size+mdpr->mime_type_size], mdpr->type_specific_len);
   
@@ -383,22 +383,22 @@ static rmff_cont_t *rmff_scan_cont(const char *data) {
       cont->object_version);
   }
   cont->title_len=BE_16(&data[10]);
-  cont->title=malloc((cont->title_len+1));
+  cont->title=malloc(cont->title_len+1);
   memcpy(cont->title, &data[12], cont->title_len);
   cont->title[cont->title_len]=0;
   pos=cont->title_len+12;
   cont->author_len=BE_16(&data[pos]);
-  cont->author=malloc((cont->author_len+1));
+  cont->author=malloc(cont->author_len+1);
   memcpy(cont->author, &data[pos+2], cont->author_len);
   cont->author[cont->author_len]=0;
   pos=pos+2+cont->author_len;
   cont->copyright_len=BE_16(&data[pos]);
-  cont->copyright=malloc((cont->copyright_len+1));
+  cont->copyright=malloc(cont->copyright_len+1);
   memcpy(cont->copyright, &data[pos+2], cont->copyright_len);
   cont->copyright[cont->copyright_len]=0;
   pos=pos+2+cont->copyright_len;
   cont->comment_len=BE_16(&data[pos]);
-  cont->comment=malloc((cont->comment_len+1));
+  cont->comment=malloc(cont->comment_len+1);
   memcpy(cont->comment, &data[pos+2], cont->comment_len);
   cont->comment[cont->comment_len]=0;
 

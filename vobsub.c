@@ -1071,7 +1071,7 @@ vobsub_open(const char *const name,const char *const ifo,const int force,void** 
 	vob->spu_streams_current = 0;
 	vob->delay = 0;
 	vob->forced_subs=0;
-	buf = malloc((strlen(name) + 5));
+	buf = malloc(strlen(name) + 5);
 	if (buf) {
 	    rar_stream_t *fd;
 	    mpeg_t *mpg;
