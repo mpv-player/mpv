@@ -8,8 +8,11 @@
 #ifndef DVBIN_H
 #define DVBIN_H
 
-#include "dvb_defaults.h"
 #include "stream.h"
+
+#define SLOF (11700*1000UL)
+#define LOF1 (9750*1000UL)
+#define LOF2 (10600*1000UL)
 
 #ifdef HAVE_DVB_HEAD
 	#include <linux/dvb/dmx.h>
