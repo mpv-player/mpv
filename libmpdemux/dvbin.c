@@ -69,7 +69,7 @@ static struct stream_priv_s
 }
 stream_defaults =
 {
-	"", 1, "", 0, 0, 3, NULL
+	"", 1, "", 0, 0, 30, NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s, f)
