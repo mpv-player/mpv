@@ -316,7 +316,7 @@ static int demux_vivo_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
 #warning "Calculate PTS from picture header!"
       prefix = 1;
       c = stream_read_char(demux->stream);
-      printf("packet 0x82(pos=%u) chunk=%x\n",
+      mp_msg(MSGT_DEMUX, MSGL_V, "packet 0x82(pos=%u) chunk=%x\n",
         (int)stream_tell(demux->stream), c);
   }
   switch(c&0xF0){
@@ -324,7 +324,7 @@ static int demux_vivo_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
   {
       len=stream_read_char(demux->stream);
       if(len>=0x80) len=0x80*(len-0x80)+stream_read_char(demux->stream);
-      printf("vivo extra header: %d bytes\n",len);
+      mp_msg(MSGT_DEMUX, MSGL_V, "vivo extra header: %d bytes\n",len);
 #ifdef TEXTPARSE_ALL
 {
       int pos;
@@ -465,17 +465,17 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
 
     /* picture header */
     if (get_bits(&s->gb, 22) != 0x20){
-	printf("bad picture header\n");
+	mp_msg(MSGT_DEMUX, MSGL_FATAL, "bad picture header\n");
         return -1;
     }
     skip_bits(&s->gb, 8); /* picture timestamp */
 
     if (get_bits1(&s->gb) != 1){
-	printf("bad marker\n");
+	mp_msg(MSGT_DEMUX, MSGL_FATAL, "bad marker\n");
         return -1;	/* marker */
     }
     if (get_bits1(&s->gb) != 0){
-	printf("bad h263 id\n");
+	mp_msg(MSGT_DEMUX, MSGL_FATAL, "bad h263 id\n");
         return -1;	/* h263 id */
     }
     skip_bits1(&s->gb);	/* split screen off */
@@ -485,19 +485,19 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
     format = get_bits(&s->gb, 3);
 
     if (format != 7) {
-        printf("h263_plus = 0  format = %d\n",format);
+        mp_msg(MSGT_DEMUX, MSGL_V, "h263_plus = 0  format = %d\n", format);
         /* H.263v1 */
         width = h263_format[format][0];
         height = h263_format[format][1];
-	printf("%d x %d\n",width,height);
+	mp_msg(MSGT_DEMUX, MSGL_V, "%d x %d\n", width, height);
 //        if (!width) return -1;
 
-	printf("pict_type=%d\n",get_bits1(&s->gb));
-	printf("unrestricted_mv=%d\n",get_bits1(&s->gb));
+	mp_msg(MSGT_DEMUX, MSGL_V, "pict_type=%d\n", get_bits1(&s->gb));
+	mp_msg(MSGT_DEMUX, MSGL_V, "unrestricted_mv=%d\n", get_bits1(&s->gb));
 #if 1
-	printf("SAC: %d\n",get_bits1(&s->gb));
-	printf("advanced prediction mode: %d\n",get_bits1(&s->gb));
-	printf("PB frame: %d\n",get_bits1(&s->gb));
+	mp_msg(MSGT_DEMUX, MSGL_V, "SAC: %d\n", get_bits1(&s->gb));
+	mp_msg(MSGT_DEMUX, MSGL_V, "advanced prediction mode: %d\n", get_bits1(&s->gb));
+	mp_msg(MSGT_DEMUX, MSGL_V, "PB frame: %d\n", get_bits1(&s->gb));
 #else
         if (get_bits1(&s->gb) != 0)
             return -1;	/* SAC: off */
@@ -506,22 +506,22 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
         if (get_bits1(&s->gb) != 0)
             return -1;	/* not PB frame */
 #endif
-	printf("qscale=%d\n",get_bits(&s->gb, 5));
+	mp_msg(MSGT_DEMUX, MSGL_V, "qscale=%d\n", get_bits(&s->gb, 5));
         skip_bits1(&s->gb);	/* Continuous Presence Multipoint mode: off */
     } else {
-        printf("h263_plus = 1\n");
+        mp_msg(MSGT_DEMUX, MSGL_V, "h263_plus = 1\n");
         /* H.263v2 */
         if (get_bits(&s->gb, 3) != 1){
-	    printf("H.263v2 A error\n");
+	    mp_msg(MSGT_DEMUX, MSGL_FATAL, "H.263v2 A error\n");
             return -1;
 	}
         if (get_bits(&s->gb, 3) != 6){ /* custom source format */
-	    printf("custom source format\n");
+	    mp_msg(MSGT_DEMUX, MSGL_FATAL, "custom source format\n");
             return -1;
 	}
         skip_bits(&s->gb, 12);
         skip_bits(&s->gb, 3);
-	printf("pict_type=%d\n",get_bits(&s->gb, 3) + 1);
+	mp_msg(MSGT_DEMUX, MSGL_V, "pict_type=%d\n", get_bits(&s->gb, 3) + 1);
 //        if (s->pict_type != I_TYPE &&
 //            s->pict_type != P_TYPE)
 //            return -1;
@@ -530,10 +530,10 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
         width = (get_bits(&s->gb, 9) + 1) * 4;
         skip_bits1(&s->gb);
         height = get_bits(&s->gb, 9) * 4;
-	printf("%d x %d\n",width,height);
+	mp_msg(MSGT_DEMUX, MSGL_V, "%d x %d\n", width, height);
         //if (height == 0)
         //    return -1;
-	printf("qscale=%d\n",get_bits(&s->gb, 5));
+	mp_msg(MSGT_DEMUX, MSGL_V, "qscale=%d\n", get_bits(&s->gb, 5));
     }
 
     /* PEI */
@@ -627,7 +627,7 @@ static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
 		/* disable seeking */
 		demuxer->seekable = 0;
 
-		mp_msg(MSGT_DEMUX,MSGL_STATUS,"VIVO Video stream %d size: display: %dx%d, codec: %ux%u\n",
+		mp_msg(MSGT_DEMUX,MSGL_V,"VIVO Video stream %d size: display: %dx%d, codec: %ux%u\n",
 		    demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
 		    sh->bih->biHeight);
 }
