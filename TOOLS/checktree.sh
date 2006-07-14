@@ -23,6 +23,7 @@ _trailws=no
 _rcsid=no
 _oll=no
 _charset=no
+_stupid=no
 _showcont=no
 
 _color=yes
@@ -48,6 +49,7 @@ enable_all_tests() {
     _rcsid=yes
     _oll=yes
     _charset=yes
+    _stupid=yes
 }
 
 disable_all_tests() {
@@ -58,6 +60,7 @@ disable_all_tests() {
     _rcsid=no
     _oll=no
     _charset=no
+    _stupid=no
 }
 
 printoption() {
@@ -112,6 +115,7 @@ for i in "$@"; do
         printoption "rcsid     " "test for missing RCS Id's" "$_rcsid"
         printoption "oll       " "test for overly long lines" "$_oll"
         printoption "charset   " "test for wrong charset" "$_charset"
+        printoption "stupid    " "test for stupid code" "$_stupid"
         echo
         printoption "all       " "enable all tests" "no"
         echo
@@ -125,6 +129,12 @@ for i in "$@"; do
         echo -e "\nIf no files are specified, the whole tree is traversed."
         echo -e "If there are, -(no)svn has no effect.\n"
         exit
+        ;;
+    -stupid)
+        _stupid=yes
+        ;;
+    -nostupid)
+        _stupid=no
         ;;
     -charset)
         _charset=yes
@@ -297,6 +307,50 @@ if [ "$_charset" == "yes" ]; then
           ;;
       esac
     done
+fi
+
+# -----------------------------------------------------------------------------
+
+if [ "$_stupid" == "yes" ]; then
+    printhead "checking for stupid code ..."
+
+    # avoid false-positives in xpm files, docs, etc, only check .c and .h files
+    chfilelist=`echo $filelist | tr ' ' '\n' | grep "[\.][ch]$"`
+
+    for i in calloc malloc realloc memalign av_malloc av_mallocz faad_malloc \
+             lzo_malloc safe_malloc mpeg2_malloc _ogg_malloc; do
+        printhead "--> casting of void* $i()"
+        grep $_grepopts "([ 	]*[a-zA-Z_]\+[ 	]*\*.*)[ 	]*$i" $chfilelist
+    done
+
+    for i in "" signed unsigned; do
+        printhead "--> usage of sizeof($i char)"
+        grep $_grepopts "sizeof[ 	]*([ 	]*$i[ 	]*char[ 	]*)" $chfilelist
+    done
+
+    for i in int8_t uint8_t; do
+        printhead "--> usage of sizeof($i)"
+        grep $_grepopts "sizeof[ 	]*([ 	]*$i[ 	]*)" $chfilelist
+    done
+
+    printhead "--> usage of &&1"
+    grep $_grepopts "&&[ 	]*1" $chfilelist
+
+    printhead "--> usage of ||0"
+    grep $_grepopts "||[ 	]*0" $chfilelist
+
+    # added a-fA-F_ to eliminate some false positives
+    printhead "--> usage of *0"
+    grep $_grepopts "[a-zA-Z0-9)]\+[ 	]*\*[ 	]*0[^.0-9xa-fA-F_]" $chfilelist
+
+    printhead "--> usage of *1"
+    grep $_grepopts "[a-zA-Z0-9)]\+[ 	]*\*[ 	]*1[^.0-9ea-fA-F_]" $chfilelist
+
+    printhead "--> usage of +0"
+    grep $_grepopts "[a-zA-Z0-9)]\+[ 	]*+[ 	]*0[^.0-9xa-fA-F_]" $chfilelist
+
+    printhead "--> usage of -0"
+    grep $_grepopts "[a-zA-Z0-9)]\+[ 	]*-[ 	]*0[^.0-9xa-fA-F_]" $chfilelist
 fi
 
 # -----------------------------------------------------------------------------
