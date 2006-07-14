@@ -486,12 +486,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Codec is not defined correctly."
 #define MSGTR_OutdatedCodecsConf "This codecs.conf is too old and incompatible with this MPlayer release!"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "out of memory"
-#define MSGTR_OverridingTooLowBitrate "Specified bitrate is too low for this clip.\n"\
-"Minimum possible bitrate for the clip is %.0f kbps. Overriding\n"\
-"user-specified value.\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Cannot make PIPE!\n"
 

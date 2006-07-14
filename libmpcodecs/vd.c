@@ -34,8 +34,6 @@ extern vd_functions_t mpcodecs_vd_dshow;
 extern vd_functions_t mpcodecs_vd_dmo;
 extern vd_functions_t mpcodecs_vd_vfw;
 extern vd_functions_t mpcodecs_vd_vfwex;
-extern vd_functions_t mpcodecs_vd_odivx;
-extern vd_functions_t mpcodecs_vd_divx4;
 extern vd_functions_t mpcodecs_vd_raw;
 extern vd_functions_t mpcodecs_vd_hmblck;
 extern vd_functions_t mpcodecs_vd_xanim;
@@ -66,12 +64,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_dmo,
         &mpcodecs_vd_vfw,
         &mpcodecs_vd_vfwex,
-#endif
-#ifdef USE_DIVX
-        &mpcodecs_vd_odivx,
-#ifdef NEW_DECORE
-        &mpcodecs_vd_divx4,
-#endif
 #endif
         &mpcodecs_vd_lzo,
         &mpcodecs_vd_raw,

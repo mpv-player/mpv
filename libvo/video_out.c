@@ -79,7 +79,6 @@ extern vo_functions_t video_out_3dfx;
 extern vo_functions_t video_out_tdfxfb;
 extern vo_functions_t video_out_s3fb;
 extern vo_functions_t video_out_null;
-//extern vo_functions_t video_out_odivx;
 extern vo_functions_t video_out_zr;
 extern vo_functions_t video_out_zr2;
 extern vo_functions_t video_out_bl;

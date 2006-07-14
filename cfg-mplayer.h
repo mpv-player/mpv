@@ -89,10 +89,6 @@ extern int enqueue;
 extern int guiWinID;
 #endif
 
-#ifdef HAVE_ODIVX_POSTPROCESS
-extern int use_old_pp;
-#endif
-
 #ifdef HAVE_XINERAMA
 extern int xinerama_screen;
 #endif

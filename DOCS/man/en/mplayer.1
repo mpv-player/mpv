@@ -3870,14 +3870,6 @@ Do not play/\:encode video.
 In many cases this will not work, use \-vc null \-vo null instead.
 .
 .TP
-.B \-oldpp <quality> (OpenDivX only) (OBSOLETE)
-Use the OpenDivX postprocessing code instead of the internal one.
-Superseded by \-pp, the internal postprocessing offers better
-quality and performance.
-The valid range of \-oldpp values varies by codec, it is mostly
-0\-6, where 0=disable, 6=slowest/\:best.
-.
-.TP
 .B \-pp <quality> (also see \-vf pp)
 Set the DLL postprocess level.
 This option is no longer usable with \-vf pp.
@@ -3987,8 +3979,6 @@ See \-vc help for a full list of available codecs.
 .RSs
 .IPs "\-vc divx"
 Force Win32/\:VfW DivX codec, no fallback.
-.IPs "\-vc divx4,"
-Try divx4linux codec first, then fall back on others.
 .IPs "\-vc -divxds,-divx,"
 Skip Win32 DivX codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -6484,8 +6474,6 @@ Use \-ovc help to get a list of available video codecs.
 .RSs
 .IPs "\-ovc copy"
 no encoding, just streamcopy
-.IPs "\-ovc divx4"
-Encode to DivX4/\:DivX5.
 .IPs "\-ovc raw"
 Encode to an arbitrary uncompressed format (use '\-vf format' to select).
 .IPs "\-ovc lavc"
@@ -6528,87 +6516,8 @@ syntax:
 .B \-<codec>opts <option1[=value],option2,...>
 .
 .PP
-Where <codec> may be: lavc, xvidenc, divx4, lame, toolame, twolame,
+Where <codec> may be: lavc, xvidenc, lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
-.
-.
-.SS divx4 (\-divx4opts)
-.
-DivX4 is obsolete and only supported for completeness.
-For details about DivX4 options, read the source, most options are not
-described here.
-.
-.TP
-.B help\ \ \ 
-get help
-.
-.TP
-.B br=<value>
-Specify bitrate.
-.RSs
-.IPs 4\-16000
-(in kbit)
-.IPs 16001\-24000000
-(in bit)
-.RE
-.
-.TP
-.B key=<value>
-maximum keyframe interval (in frames)
-.
-.TP
-.B deinterlace
-Enable deinterlacing (avoid it, DivX4 is buggy).
-.
-.TP
-.B q=<1\-5>
-quality (1\-fastest, 5\-best)
-.
-.TP
-.B min_quant=<1\-31>
-minimum quantizer
-.
-.TP
-.B max_quant=<1\-31>
-maximum quantizer
-.
-.TP
-.B rc_period=<value>
-rate control period
-.
-.TP
-.B rc_reaction_period=<value>
-rate control reaction period
-.
-.TP
-.B rc_reaction_ratio=<value>
-rate control reaction ratio
-.
-.TP
-.B crispness=<0\-100>
-Specify crispness/\:smoothness.
-.
-.TP
-.B pass=<1\-2>
-With this you can encode two pass DivX4 files.
-First encode with pass=1, then do another encode with the
-same parameters and pass=2.
-.
-.TP
-.B vbrpass=<0\-2>
-Override the pass argument and use the XviD VBR library instead of DivX4 VBR.
-Available options are:
-.PD 0
-.RSs
-.IPs 0
-one pass encoding (as in not putting pass on the command line)
-.IPs 1
-Analysis (first) pass of two pass encoding.
-The resulting AVI file can be directed to /dev/\:null.
-.IPs 2
-Final (second) pass of two pass encoding.
-.RE
-.PD 1
 .
 .
 .SS lame (\-lameopts)

@@ -260,8 +260,6 @@ Codecs:
   --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
   --disable-x264         disable H.264 encoder [autodetect]
-  --disable-divx4linux   disable DivX4linux/Divx5linux codec [autodetect]
-  --enable-opendivx      enable _old_ OpenDivx codec [disable]
   --disable-libavutil    disable libavutil [autodetect]
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
@@ -1661,8 +1659,6 @@ _vidix_external=auto
 _joystick=no
 _xvid=auto
 _x264=auto
-_divx4linux=auto
-_opendivx=no
 _lirc=auto
 _lircc=auto
 _gui=no
@@ -1908,10 +1904,6 @@ for ac_option do
   --disable-xvid)	_xvid=no	;;
   --enable-x264)        _x264=yes       ;;
   --disable-x264)       _x264=no        ;;
-  --enable-divx4linux)	_divx4linux=yes	;;
-  --disable-divx4linux)	_divx4linux=no	;;
-  --enable-opendivx)	_opendivx=yes	;;
-  --disable-opendivx)	_opendivx=no	;;
   --enable-libavutil)	_libavutil=yes	;;
   --disable-libavutil)	_libavutil=no	;;
   --enable-libavutil_so)	_libavutil_so=yes	;;
@@ -6559,81 +6551,8 @@ else
 fi
 echores "$_x264"
 
-echocheck "DivX4linux/DivX5linux/OpenDivX decore"
-# DivX5: DEC_OPT_MEMORY_REQS - DivX4: DEC_OPT_FRAME_311
-cat > $TMPC << EOF
-#include <decore.h>
-int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_FRAME_311; }
-EOF
-if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
-  _divx=yes
-  _opendivx=no
-  _ld_decore='-ldivxdecore'
-  _def_decore='#define NEW_DECORE 1'
-  _def_divx='#define USE_DIVX'
-  _def_divx5='#undef DECORE_DIVX5'
-  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
-  _codecmodules="divx4linux $_codecmodules"
-  _res_comment="DivX4linux - with libdivxdecore.so"
-else
-# if test "$_divx4linux" != no ; then 
-# DivX5 check
-# OdivxPP disabled because of:
-# ld: Warning: type of symbol `dering' changed from 1 to 2 in opendivx/postprocess.o
-cat > $TMPC << EOF
-#include <decore.h>
-int main(void) { (void) decore(0, 0, 0, 0);  return DEC_OPT_INIT; }
-EOF
-if test "$_divx4linux" != no && cc_check $_ld_lm -ldivxdecore ; then
-  _divx=yes
-  _opendivx=no
-#  _ld_decore='-ldivxdecore opendivx/postprocess.o'
-  _ld_decore='-ldivxdecore'
-  _def_decore='#define NEW_DECORE 1'
-  _def_divx='#define USE_DIVX'
-  _def_divx5='#define DECORE_DIVX5 1'
-#  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
-  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
-  _codecmodules="divx5linux $_codecmodules"
-  _nocodecmodules="divx4linux $_nocodecmodules"
-  _res_comment="DivX5linux - with libdivxdecore.so"
-elif test "$_opendivx" != no ; then
-  _divx=yes
-  _opendivx=yes
-  _ld_decore='opendivx/libdecore.a'
-  _def_decore='#undef NEW_DECORE'
-  _def_divx='#define USE_DIVX'
-  _def_divx5='#undef DECORE_DIVX5'
-  _def_odivx_postprocess='#define HAVE_ODIVX_POSTPROCESS 1'
-  _codecmodules="opendivx $_codecmodules"
-  _nocodecmodules="divx5linux $_nocodecmodules"
-  _res_comment="OpenDivX"
-elif test "$_xvidcompat" = yes ; then
-  _divx=yes
-  _opendivx=no
-  _ld_decore=''
-  _def_decore='#define NEW_DECORE 1'
-  _def_divx='#define USE_DIVX 1'
-  _def_divx5='#undef DECORE_DIVX5'
-  _def_decore_xvid='#define DECORE_XVID 1'
-  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
-  _nocodecmodules="opendivx divx5linux divx4linux $_nocodecmodules"
-  _res_comment="XviD compat."
-else
-  _divx=no
-  _opendivx=no
-  _ld_decore=''
-  _def_decore='#undef NEW_DECORE'
-  _def_divx='#undef USE_DIVX'
-  _def_divx5='#undef DECORE_DIVX5'
-  _def_odivx_postprocess='#undef HAVE_ODIVX_POSTPROCESS'
-  _nocodecmodules="opendivx $_nocodecmodules"
-fi # DivX5 check
-fi
-echores "$_divx"
 
-
-# mencoder requires (optional) those libs: libmp3lame and divx4linux encore
+# mencoder requires (optional) those libs: libmp3lame
 if test "$_mencoder" != no ; then
 
   echocheck "libmp3lame (for mencoder)"
@@ -6664,29 +6583,6 @@ EOF
     _def_mp3lame='#undef HAVE_MP3LAME'
   fi
   echores "$_mp3lame"
-
-
-  echocheck "DivX4linux encore (for mencoder)"
-  cat > $TMPC << EOF
-#include <encore2.h>
-int main(void) { (void) encore(0, 0, 0, 0); return 0; }
-EOF
-  if test "$_divx4linux" != no && cc_check -ldivxencore $_ld_lm ; then
-    _divx_encore=yes
-    _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore='-ldivxencore'
-    _res_comment="DivX4linux - with libdivxencore.so"
-  elif test "$_xvidcompat" = yes ; then
-    _divx_encore=yes
-    _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore=''
-    _def_encore_xvid='#define ENCORE_XVID 1'
-    _res_comment="XviD compatibility"
-  else
-    _divx_encore=no
-    _def_encore='#undef HAVE_DIVX4ENCORE'
-  fi
-  echores "$_divx_encore"
 
 fi
 
@@ -7435,10 +7331,6 @@ CONFIG_PP = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
 
-DIVX     = $_divx
-OPENDIVX = $_opendivx
-DIVX4ENCORE = $_divx_encore
-
 MP3LIB = $_mp3lib
 LIBA52 = $_liba52
 LIBMPEG2 = $_libmpeg2
@@ -7558,9 +7450,9 @@ X264_INC = $_inc_x264
 X264_LIB = $_ld_x264
 CONFIG_DTS = $_libdts
 DTS_LIB = $_ld_libdts
-DECORE_LIB = $_ld_decore $_ld_mp3lame
+DECORE_LIB = $_ld_mp3lame
 MENCODER = $_mencoder
-ENCORE_LIB =  $_ld_encore $_ld_mp3lame
+ENCORE_LIB = $_ld_mp3lame
 DIRECTFB_INC = $_inc_directfb
 DIRECTFB_LIB = $_ld_directfb
 CDDA = $_cdda
@@ -7743,16 +7635,6 @@ $_def_have_dvd
    -cache <kilobytes> */
 #define USE_STREAM_CACHE 1
 
-/* Define to include support for XviD/Divx4Linux/OpenDivx */
-$_def_divx
-
-/* Define to use the new XviD/DivX4Linux library instead of open source OpenDivX */
-/* You have to change DECORE_LIBS in config.mak, too! */
-$_def_decore
-
-/* Define if you are using DivX5Linux Decore library */
-$_def_divx5
-
 /* Define if you are using XviD library */
 $_def_xvid3
 $_def_xvid4
@@ -7767,10 +7649,6 @@ $_def_libdv
 
 /* If build mencoder */
 $_mencoder_flag
-
-/* Indicates if XviD/Divx4linux encore is available
-   Note: for mencoder */
-$_def_encore
 
 /* Indicates if libmp3lame is available
    Note: for mencoder */
@@ -7940,9 +7818,6 @@ $_def_dvdnav_version
 /* Define this to enable image postprocessing in libavcodec (requires a FAST CPU!) */
 $_def_libpostproc
 $_def_libpostproc_so
-
-/* Define to include support for OpenDivx postprocessing */
-$_def_odivx_postprocess
 
 /* Win32 DLL support */
 $_def_win32

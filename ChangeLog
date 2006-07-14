@@ -8,6 +8,7 @@ MPlayer (1.0)
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
     * SSE optimizations for mp3lib
+    * removed support for obsolete and non-free divx4 libraries
 
     Demuxers:
     * support for audio stream switching in MPEG-TS/PS, Matroska and
@@ -20,6 +21,7 @@ MPlayer (1.0)
 
     MEncoder:
     * support of x264 encoding over lavc
+    * removed support for obsolete and non-free divx4 libraries
 
     Others:
     * SSA/ASS subtitle renderer

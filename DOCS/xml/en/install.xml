@@ -196,28 +196,6 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <link linkend="sorenson">Sorenson video codec</link> section.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">DivX4/DivX5</emphasis>: information about this codec is
-  available in the <link linkend="divx4-5">DivX4/DivX5</link> section. You possibly
-  don't want this codec as
-  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
-  (see above) is much faster and has better quality than this, for both decoding
-  and encoding. Features:
-  <itemizedlist>
-  <listitem><simpara>
-    one pass or two pass encoding with
-    <link linkend="mencoder"><application>MEncoder</application></link>
-    </simpara></listitem>
-  <listitem><simpara>
-    can play old <emphasis role="bold">DivX3</emphasis> movies much faster than
-    the Win32 DLL but slower than
-    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
-    </simpara></listitem>
-  <listitem><simpara>
-    it's closed-source, and only a x86 version is available.
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold">XviD</emphasis>: Open source encoding alternative to
   DivX4Linux. Features:
   <itemizedlist>

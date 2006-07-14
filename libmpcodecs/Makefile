@@ -104,12 +104,6 @@ endif
 ifeq ($(LIBTHEORA),yes)
 VIDEO_SRCS+=vd_theora.c
 endif
-ifeq ($(DIVX),yes)
-VIDEO_SRCS+=vd_odivx.c
-  ifneq ($(OPENDIVX),yes)
-  VIDEO_SRCS+=vd_divx4.c
-  endif
-endif
 ifeq ($(XVID4),yes)
 VIDEO_SRCS+=vd_xvid4.c
 else
@@ -243,9 +237,6 @@ else
   ifeq ($(XVID),yes)
   ENCODER_SRCS+=ve_xvid.c
   endif
-endif
-ifeq ($(DIVX4ENCORE),yes)
-ENCODER_SRCS+=ve_divx4.c
 endif
 ifeq ($(X264),yes)
 ENCODER_SRCS+=ve_x264.c

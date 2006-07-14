@@ -1,7 +1,6 @@
 #define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
 // real codecs:
-#define VCODEC_DIVX4 2
 #define VCODEC_LIBAVCODEC 4
 #define VCODEC_VFW 7
 #define VCODEC_LIBDV 8
@@ -831,8 +830,6 @@ default: {
     static vf_instance_t * ve = NULL;
   if (!ve) {
     switch(mux_v->codec){
-    case VCODEC_DIVX4:
-	sh_video->vfilter=vf_open_encoder(NULL,"divx4",(char *)mux_v); break;
     case VCODEC_LIBAVCODEC:
         sh_video->vfilter=vf_open_encoder(NULL,"lavc",(char *)mux_v); break;
     case VCODEC_RAW:

@@ -202,17 +202,9 @@
 	{"vc", &video_codec_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
 	// postprocessing:
-	{"divxq", "-divxq has been renamed to -pp (postprocessing), use -pp.\n",
-            CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #ifdef USE_LIBAVCODEC
 	{"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
-#ifdef HAVE_ODIVX_POSTPROCESS
-        {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-#else
-        {"oldpp", "MPlayer was compiled without the OpenDivX library.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
-	{"npp", "-npp has been removed, use -vf pp and read the fine manual.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
