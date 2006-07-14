@@ -872,8 +872,8 @@ framebuffer, and don't ask for it, since it's not an
 
 <para>
 This section is about the Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-support, the mga_vid kernel driver. It's actively developed by A'rpi, and
-it has hardware VSYNC support with triple buffering. It works on both
+support, the <systemitem>mga_vid</systemitem> kernel driver.
+It has hardware VSYNC support with triple buffering. It works on both
 framebuffer console and under X.
 </para>
 
@@ -1503,13 +1503,6 @@ to enable driver autodetection.
 </para>
 
 <para>
-VIDIX is new technology and it's extremely possible that on your
-system it won't work. In this case only solution for you
-it's port it (mainly libdha). But there is hope that it will work on those
-systems where X11 does.
-</para>
-
-<para>
 Since VIDIX requires direct hardware access you can either run it as root
 or set the SUID bit on the <application>MPlayer</application> binary
 (<emphasis role="bold">Warning: This is a security risk!</emphasis>).
@@ -1597,43 +1590,15 @@ has tested it, so reports are welcome.
 
 <sect3 id="vidix-nvidia">
 <title>nVidia cards</title>
-<para>
-There's a relatively new nVidia driver out there, it's known to work on Riva
-128, TNT and GeForce2 chipsets, also others have been reported working.
-</para>
-
-<itemizedlist spacing="compact">
-<title>LIMITATIONS</title>
-<listitem><para>
-  It's recommended to use the binary nVidia drivers for X before using this
-  VIDIX driver, because some of the registers which need to be initialized
-  haven't been discovered yet, so it will probably fail with the Open Source
-  XFree86 <filename>nv.o</filename> driver.
-  </para></listitem>
-<listitem><para>
-  Currently only codecs capable of UYVY colorspace output
-  can work in conjunction with this driver. Unfortunately, this excludes
-  every single decoder from the
-  <systemitem class="library">libavcodec</systemitem> family. This leaves
-  us with the following usable popular codecs:
-  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> and some
-  others. Please note that this is only
-  a temporal inconvenience. The usage syntax is as follows:
-  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable> </screen>
-  </para></listitem>
-</itemizedlist>
 
 <para>
   An unique feature of the nvidia_vid driver is its ability to display video on
   <emphasis role="bold">plain, pure, text-only console</emphasis> - with no
   framebuffer or X magic whatsoever. For this purpose, we'll have to use the
   <option>cvidix</option> video output, as the following example shows:
-  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable> </screen>
+  <screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
 
-<para>
-Reports awaited!
-</para>
 </sect3>
 
 <sect3 id="vidix-sis">
