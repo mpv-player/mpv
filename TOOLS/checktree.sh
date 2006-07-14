@@ -257,8 +257,8 @@ fi
 
 if [ "$_crlf" == "yes" ]; then
     printhead "checking for MSDOS line endings ..."
-    grep $_grepopts "
-" $filelist
+    CR=`echo " " | tr ' ' '\015'`
+    grep $_grepopts "$CR" $filelist
 fi
 
 # -----------------------------------------------------------------------------
