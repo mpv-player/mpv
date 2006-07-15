@@ -512,6 +512,19 @@ stream_flags
 
 codec_specific_data
     private global data for a codec (could be huffman tables or ...)
+    if a codec has a global header it SHOULD be placed in here instead of
+    at the start of every keyframe
+    the exact format is specified in the codec spec
+    codecs which dont specify it in their spec are specified below
+    for ogg based codecs (vorbis, theora) the following format shall be used
+        number_of_headers_minus_1       u(8)
+        for(i=0; i<number_of_headers; i++){
+            -1                          u(8*(size[i]/255))
+            size[i] % 255               u(8)
+        }
+        for(i=0; i<number_of_headers; i++)
+            header[i]
+    Note, this is the same format these codecs use in matroska
 
 frame_code
     the meaning of this byte is stored in the main header
