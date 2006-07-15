@@ -780,10 +780,10 @@ Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
 
 Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * improved EDL support
-    * mp_msg transition on unmaintained libao2 drivers
-    * translatables to help_mp on input/libmpdemux
+    * mp_msg transition / translatables to help_mp helper
     * .wpl playlist support hack
     * karaoke audio filter
+    * major code cleanups
     * TOOLS/qepdvcd.sh
 
 Wigren, Per <wigren@home.se>
