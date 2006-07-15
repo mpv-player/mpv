@@ -3,7 +3,7 @@
 #define _XDND_H_
 
 
-void wsXDNDInitialize();
+void wsXDNDInitialize(void);
 Bool wsXDNDProcessSelection(wsTWindow* wnd,XEvent *event);
 Bool wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event);
 void wsXDNDMakeAwareness(wsTWindow* window);
