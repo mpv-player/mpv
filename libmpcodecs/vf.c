@@ -103,6 +103,7 @@ extern vf_info_t vf_info_screenshot;
 extern vf_info_t vf_info_ass;
 extern vf_info_t vf_info_mcdeint;
 extern vf_info_t vf_info_yadif;
+extern vf_info_t vf_info_blackframe;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -199,6 +200,7 @@ static vf_info_t* filter_list[]={
     &vf_info_ass,
 #endif
     &vf_info_yadif,
+    &vf_info_blackframe,
     NULL
 };
 

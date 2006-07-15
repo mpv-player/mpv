@@ -125,6 +125,7 @@ codec support:
 video filters:
     * general: Richard Felker, Michael Niedermayer
     * vf_filmdint.c - Zoltan Hidvegi
+    * vf_blackframe.c - Ivo van Poorten
 
 audio filters:
     * general: Alex Beregszaszi

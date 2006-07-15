@@ -338,6 +338,9 @@ Guyomarch, Rémi (rguyom) <rguyom@pobox.com>
     * unsharp video filter
     * XviD encoding support
 
+Hall, Julian <jules@meridiandigital.co.uk>
+    * black frame detection filter (vf_blackframe)
+
 Hammelmann, Jürgen <juergen.hammelmann@gmx.de>
     * TOOLS/mencvcd author
 
@@ -572,6 +575,9 @@ Mohari, András <mayday@varoshaza.nagyatad.hu>
 Mueller, Steven <diffusor@ugcs.caltech.edu>
     * first implementation of live changing playback speed
 
+Murrel, Brian J. <brian@interlinx.bc.ca>
+    * black frame detection filter (vf_blackframe)
+
 Neundorf, Alexander <neundorf@kde.org>
     * raw DV demuxer
     * demuxer packet refcounting
@@ -642,6 +648,7 @@ van Poorten, Ivo (ivop) <ivop@euronet.nl>
     * vo_pnm video output driver
     * vo_md5sum video output driver
     * af_ladspa LADSPA plugin loader
+    * vf_blackframe cleanup and simplification
 
 Ran, Lu <hephooey@fastmail.fm>
     * Chinese documentation translation

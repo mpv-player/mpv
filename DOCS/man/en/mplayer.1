@@ -6259,6 +6259,17 @@ Moves SSA/ASS subtitle rendering to an arbitrary point in the filter chain.
 Only useful with the \-ass option.
 .RE
 .
+.TP
+.B blackframe[=amount:threshold]
+Detect frames that are (almost) completely black.
+Can be useful to detect chapter transitions or commercials.
+.RSs
+.IPs <amount>
+percentage of the pixels that have to be below the threshold (default: 98)
+.IPs <threshold>
+threshold below which a pixel value is considered black (default: 32)
+.RE
+.
 .
 .
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"

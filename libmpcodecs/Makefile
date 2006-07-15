@@ -120,6 +120,7 @@ VFILTER_SRCS=vf.c \
              pullup.c \
              vf_1bpp.c \
              vf_2xsai.c \
+             vf_blackframe.c \
              vf_bmovl.c \
              vf_boxblur.c \
              vf_crop.c \
