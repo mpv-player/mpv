@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r18916 (2006. 07. 11.)
+// Sync'ed with help_mp-en.h r19087 (2006. 07. 15.)
 
 // ========================= MPlayer help ===========================
 
@@ -484,12 +484,6 @@ static char help_text[]=
 #define MSGTR_AudioVideoCodecTotals "%d audió & %d videó codec\n"
 #define MSGTR_CodecDefinitionIncorrect "A codec nincs megfelelõen definiálva."
 #define MSGTR_OutdatedCodecsConf "Ez a codecs.conf túl régi és nem kompatibilis az MPlayer ezen kiadásával!"
-
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "elfogyott a memória"
-#define MSGTR_OverridingTooLowBitrate "A megadott bitráta túl alacsony ehhez a klipphez.\n"\
-"A minimális lehetséges bitráta ehhez a klipphez %.0f kbps. A felhasználói\n"\
-"érték felülbírálva.\n"
 
 // fifo.c
 #define MSGTR_CannotMakePipe "Nem hozható létre PIPE!\n"
