@@ -369,6 +369,9 @@ Holm, David (dholm, mswitch) <dholm@telia.com>
 Horst, Bohdan (Nexus) <nexus@irc.pl>
     * FreeBSD support
 
+Huehner, Stefan (huehner) <stefan@huehner.org>
+    * Major code cleanup patches
+
 Hug, Hampa <hhug@student.ethz.ch>
     * LUT-based soft eq video filter (vf_eq2)
     * .ogm demuxer endianness fixes
