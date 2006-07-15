@@ -770,7 +770,7 @@ support.
 </para>
 
 <para>
-To check out CVS modules use:
+To check out SVN modules use:
 
 <screen>
 svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
