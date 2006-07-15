@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
 <!-- Synced with 1.101 (deprecated CVS)-->
-<!-- synced with 17595 (svn) -->
+<!-- synced with 18255 (svn) -->
 <!-- Opiekun: Qba -->
 <chapter id="mencoder">
 <title>Podstawy używania <application>MEncodera</application></title>
@@ -364,9 +364,21 @@ mencoder <replaceable>wejscie.avi</replaceable> -of mpeg -mpegopts format=mpeg1:
 </screen>
 </para>
 </informalexample>
+<note><title>Wskazówka:</title>
+	<para>
+		Jeżeli z jakiegoś powodu nie satysfakcjonuje cię jakość wideo
+		z drugiego przebiegu, możesz ponownie uruchomić kodowanie
+		swojego wideo z inną docelową szybkością transmisji (bitrate),
+		zakładając, że zapisałeś statystyki pliku z poprzedniego przebiegu.
+		Jest to możliwe, ponieważ głównym celem pliku ze statystykami jest
+		zapamiętanie złożoności każdej z ramek, co nie zależy zbyt mocno
+		od szybkości transmisji. Weź jednak pod uwagę, że uzyskasz najlepsze
+		wyniki, jeżeli wszystkie przebiegi będą uruchomione z nieróżniącymi
+		się za bardzo docelowymi szybkościami transmisji.
+	</para>
+</note>
 
 </sect1>
-
 
 <sect1 id="menc-feat-rescale">
 <title>Przeskalowywanie filmów</title>
@@ -608,9 +620,9 @@ tej wartości. Przeskalowywanie jest obrzydliwe i czasochłonne, musi być jakiś le
 
 <para>
 MPEG-4 posiada unikalną cechę: strumień video może posiadać swoją wartość proporcji obrazu.
-Tak, dokładnie jak pliki MPEG-1/2 (DVD, SVCD) i H.263. Niestety, nie ma
-<emphasis role="bold">żadnych</emphasis> odtwarzaczy video które by to wykorzystywały,
-oprócz <application>MPlayera</application>.
+Tak, dokładnie jak pliki MPEG-1/2 (DVD, SVCD) i H.263. Niestety, istnieje tylko kilka
+odtwarzaczy wideo, pomijając <application>MPlayera</application>, które
+obsługują tą cechę MPEG-4.
 </para>
 
 <para>
@@ -618,7 +630,7 @@ Możliwość ta może być jedynie używana z kodekiem <systemitem>mpeg4</systemitem>
 z biblioteki <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 Pamiętaj: chociaż <application>MPlayer</application>
 poprawnie odtworzy stworzone pliki, inne odtwarzacze
-użyją złych proporcji obrazu (aspect ratio).
+mogą użyć złych proporcji obrazu (aspect ratio).
 </para>
 
 <para>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
 <!-- synced with 1.75 (deprecated CVS)-->
-<!-- synced with 17433 (svn) -->
+<!-- synced with 19087 (svn) -->
 <!-- Opiekun: Boski -->
 <chapter id="codecs">
 <title>Obsługiwane kodeki</title>
@@ -76,128 +76,6 @@ obsługiwane, zajrzyj do działu <link linkend="codec-importing">importowanie kode
 Win32-HOWTO</link> i pomóż nam dodać ich obsługę.
 </para>
 
-
-<sect2 id="divx4-5">
-<title>DivX4/DivX5</title>
-
-<para>
-Ta sekcja zawiera informacje o kodekach DivX4 i DivX5 z
-<ulink url="http://www.projectmayo.com">Project Mayo</ulink>.
-Ich pierwszą dostępną wersją był OpenDivX 4.0 alpha 47 i 48.
-Wsparcie dla nich zostało włączone do <application>MPlayera</application>
-w przeszłości i było domyślnie budowane podczas kompilacji.
-Używaliśmy także ich kodu postprocessingu do opcjonalnego polepszenia jakości
-filmów zakodowanych w MPEG-1/2. Teraz używamy już naszego własnego kodu dla
-wszystkich typów plików.
-</para>
-
-<para>
-Nowa generacja tych kodeków nazywana jest DivX4 i może nawet dekodować filmy
-zakodowane przy pomocy niesławnych kodeków DivX! Na dodatek są one znacznie
-szybsze od natywnych kodeków Win32 DivX DLLs, ale wolniejsze od
-<systemitem class="library">libavcodec</systemitem>. W związku z tym ich
-używanie do dekodowania jest
-<emphasis role="bold">odradzane</emphasis>. Jednakże przydają się one do
-kodowania. Ich wadą jest fakt, iż nie są udostępnione na wolnej licencji.
-</para>
-
-<para>
-DivX4 pracuje w dwóch trybach:
-<variablelist>
-<varlistentry><term><option>-vc odivx</option></term>
-<listitem><simpara>
-  Używa kodeka w stylu OpenDivX. W tym przypadku tworzy on obraz YV12 we
-  własnym buforze, a <application>MPlayer</application> dokonuje konwersji
-  przestrzeni kolorów poprzez libvo.
-  (<emphasis role="bold">Szybkie, zalecane!</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry><term><option>-vc divx4</option></term>
-<listitem><simpara>
-  Używa konwersji przestrzeni kolorów kodeka. W tym trybie można używać także
-  YUY2/UYVY. (<emphasis role="bold">POWOLNE</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-</para>
-
-<para>
-Metoda <option>-vc odivx</option> jest zazwyczaj szybsza, ponieważ dokonuje ona
-transferu danych obrazu w formacie YV12 (planar YUV 4:2:0), który wymaga
-znacznie mniejszej przepustowości szyny. Dla pakowanych trybów YUV (YUY2, UYVY)
-użyj opcji <option>-vc divx4</option>. Dla trybów RGB prędkość jest właściwie
-taka sama, różniąca się od najlepszej tylko przy zmianie głębi kolorów.
-<note>
-<para>
-Jeżeli twój sterownik <option>-vo</option> obsługuje direct rendering,
-wydajniejszym albo nawet najbardziej wydajnym rozwiązaniem może być użycie
-<option>-vc divx4</option>.
-</para>
-
-<para>
-Binarną bibliotekę kodeków DivX4/5 można ściągnąć z
-<ulink url="http://avifile.sf.net">avifile</ulink> albo z
-<ulink url="http://www.divx.com">divx.com</ulink>
-Należy ją rozpakować, uruchomić jako root <filename>./install.sh</filename>
-i pamiętać o dodaniu
-<filename class="directory">/usr/local/lib</filename> do twojego
-<filename>/etc/ld.so.conf</filename> i uruchomieniu <command>ldconfig</command>.
-</para>
-
-<para>
-Możesz zdobyć CVSową wersję STAREJ biblioteki OpenDivX (core library)
-w następujący sposób:
-</para>
-
-<procedure>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</screen>
-</para></step>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</screen>
-</para></step>
-<step><para>
-
-Biblioteka ta jest podzielona na biblioteki dekodujące i kodujące, które muszą
-być kompilowane osobno. Dla biblioteki dekodującej wpisz po prostu
-<screen>
-cd divxcore/decore/build/linux
-make
-cp libdivxdecore.so /usr/local/lib
-ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
-cp ../../src/decore.h /usr/local/include
-</screen>
-</para></step>
-<step><para>
-Niestety dla biblioteki kodującej, Makefile dla Linuksa nie jest dostępny i
-optymalizacja dla MMX działa tylko pod Windows. Pomimo tych niedogodności,
-możesz ją ciągle skompilować używając tego
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>.
-<screen>
-cd ../../../encore/build
-mkdir linux
-cd linux
-cp path/Makefile .
-make
-cp libdivxencore.so /usr/local/lib
-ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
-cp ../../src/encore.h /usr/local/include
-</screen>
-</para></step>
-</procedure>
-
-<para>
-<application>MPlayer</application> automatycznie wykrywa DivX4/DivX5, jeżeli
-jest on prawidłowo zainstalowany. Po prostu kompiluj tak, jak robisz to zwykle.
-Jeżeli nie zostanie wykryty, znaczy to, że nie zainstalowałeś/skonfigurowałeś
-go w prawidłowy sposób.
-</para>
-
-</note>
-</para>
-</sect2>
-
-
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
@@ -230,57 +108,13 @@ znajdziesz na stronie FFmpeg.
 </para>
 
 <para>
-Jeżeli używasz któregoś z wydań <application>MPlayera</application>
-<systemitem class="library">libavcodec</systemitem> znajduje się już w paczce.
-Po prostu kompiluj tak, jak zazwyczaj. Jeżeli używasz
-<application>MPlayera</application> z CVSu, musisz wyciągnąć
-<systemitem class="library">libavcodec</systemitem> z drzewa CVS FFmpega,
-ponieważ jego wydania ukazują się bardzo rzadko. Wersja z CVSa jest
-w większości przypadków stabilna i oferuje większość funkcji. W celu zdobycia
-libavcodec wykonaj następujące czynności:
+	Zarówno wydania <application>MPlayera</application>, jak i
+	wersje <application>MPlayera</application> z Subversion,
+	zawierają <systemitem class="library">libavcodec</systemitem>,
+	więc nie musisz się martwić o osobne sprawdzanie
+	<systemitem class="library">libavcodec</systemitem>.
+	Po prostu uruchom <filename>configure</filename> i kompiluj.
 </para>
-
-<procedure>
-<step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
-  </para></step>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
-  </para></step>
-<step><para>
-  Przenieś katalogi <filename>libavcodec</filename> i
-  <filename>libavutil</filename> ze źródeł FFmpega
-  do katalogu głównego drzewa CVS <application>MPlayera</application>.
-  Powinno to wyglądać w ten sposób:
-  <filename class="directory">main/libavcodec</filename>
-  <filename class="directory">main/libavutil</filename>
-  </para><para>
-  Utworzenie dowiązań symbolicznych (symlinków)
-  <emphasis role="bold">nie</emphasis> wystarcza. Konieczne jest
-  skopiowowanie/przeniesienie!
-  </para></step>
-<step><para>
-  Jeżeli chcesz uaktualniać <systemitem class="library">libavcodec</systemitem>
-  razem z aktualizacją CVSowej wersji <application>MPlayera</application>,
-  dodaj następujące linie
-  do pliku <filename>main/CVS/Entries</filename>:
-  <screen>D/libavcodec////</screen>
-  <screen>D/libavutil////</screen>
-  </para></step>
-<step><para>
-  Przejdź do kompilowania. <filename>configure</filename> powinien wykryć
-  problemy przed kompilacją.
-  </para></step>
-</procedure>
-
-<note>
-<para>
-<application>MPlayer</application> z CVSu zawiera podkatalog
-<filename>libavcodec</filename>, ale <emphasis role="bold">nie</emphasis>
-zawiera źródeł <systemitem class="library">libavcodec</systemitem>! Żeby
-uzyskać źródła tej biblioteki musisz wykonać powyższe czynności.
-</para>
-</note>
 
 <para>
 Wykorzystując FFmpega i mojego Matroksa G400, mogę oglądać na moim
@@ -526,7 +360,7 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 <procedure>
 <title>KOMPILOWANIE MPLAYERA ZE WSPARCIEM DLA BIBLIOTEK QUICKTIME</title>
 <note><para>Aktualnie obsługiwane są tylko 32-bitowe platformy Intela.</para></note>
-<step><para>ściągnij <application>MPlayera</application> z CVSu</para></step>
+<step><para>ściągnij <application>MPlayera</application> z SVN</para></step>
 <step><para>pobierz pakiet QuickTime DLL z
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -624,13 +458,13 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   do użytku dekoder H.264 od około czerwca 2004, ale od tego czasu wprowadzono
   wiele zmian i poprawek, zarówno pod względem obsługiwanej funkcjonalności
   jak i zużycia CPU.
-  Na wszelki wypadek lepiej jest używać świeżej wersji CVS.
+  Na wszelki wypadek lepiej jest używać najnowszej wersji z Subversion.
 </para>
 <para>
   Jeśli chcesz szybki i łatwy sposób na sprawdzenie czy były ostatnio zmiany
   w obsłudze H.264 w <systemitem class="library">libavcodec</systemitem>,
   możesz patrzeć na
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">interface sieciowy repozytorium CVS FFmpeg</ulink>
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">interfejs sieciowy repozytorium SVN FFmpega</ulink>
 </para>
 </sect3>
 
@@ -642,9 +476,9 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   <screen>
     svn co svn://svn.videolan.org/x264/trunk x264<!--
   --></screen>
-  Źródła <application>MPlayera</application> są aktualizowane gdy tylko
-  zmieni się API <systemitem class="library">x264</systemitem>, więc zalecamy
-  też używanie <application>MPlayera</application> z CVS.
+  Źródła <application>MPlayera</application> są aktualizowane, gdy tylko
+  zmieni się API <systemitem class="library">x264</systemitem>, więc zalecane
+  jest także używanie <application>MPlayera</application> z Subversion.
   Być może sytuacja się zmieni jeśli i gdy nastąpi "wydanie"
   <systemitem class="library">x264</systemitem>.
   W międzyczasie <systemitem class="library">x264</systemitem> powinna być
@@ -718,6 +552,9 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   formaty alaw i ulaw, różne gsm, adpcm i pcm i inne stare, proste kodeki
   audio
   </simpara></listitem>
+ <listitem><simpara>
+	kodeki mowy Adaptive Multi-Rate (AMR)
+ </simpara></listitem>
 </itemizedlist>
 
 
@@ -866,7 +703,7 @@ Instrukcje instalacji znajdują się w dziale
 AAC (Advanced Audio Coding) jest kodekiem audio spotykanym czasami w plikach
 MOV i MP4. Otwarty dekoder nazywany FAAD dostępny jest na stronie
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> zawiera migawkę CVSu z
+<application>MPlayer</application> zawiera migawkę CVS z
 libfaad 2.1beta, więc nie musisz ściągać go oddzielnie.
 </para>
 
@@ -889,11 +726,42 @@ make install
 </screen>
 Wersje binarne nie są dostępne na stronie audiocoding.com, ale możesz
 ściągnąć (apt-getem) Debianowe paczki z
-<ulink url="http://hpisi.nerim.net">domowej strony Christiana Marillata</ulink>,
-RPMy dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>
-a RedHatowe RPMy z
+<ulink url="http://www.debian-multimedia.org/">domowej strony
+	Christiana Marillata</ulink>,
+RPM-y dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>.
+a RedHatowe RPM-y z
 <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
+</sect2>
+
+<sect2 id="amr">
+	<title>kodeki AMR</title>
+	<para>
+		kodeki mowy Adaptive Multi-Rate są używane w telefonii komórkowej
+		trzeciej generacji (3G).
+		Opis implementacji udostępniany jest przez
+		<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+		(za darmo dla osób prywatnych).
+		</para>
+	<para>
+		Żeby uaktywnić obsługę kodeków, pobierz źródła kodeków
+		<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">
+			AMR-NB</ulink> i
+		<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">
+			AMR-WB</ulink>,
+		umieść je w katalogu do którego rozpakowałeś źródła
+		<application>MPlayera</application> i wpisz następujące komendy:
+		<screen>
+			unzip 26104-610.zip
+			unzip 26104-610_ANSI_C_source_code.zip
+			mv c-code libavcodec/amr_float
+			unzip 26204-600.zip
+			unzip 26204-600_ANSI-C_source_code.zip
+			mv c-code libavcodec/amrwb_float
+			</screen>
+			Gdy już to zrobisz, kontynuuj <link linkend="features">budowanie</link>
+			<application>MPlayera</application> tak, jak zwykle.
+		</para>
 </sect2>
 
 </sect1>

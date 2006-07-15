@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.85 (deprecated CVS)-->
-<!-- synced with 17560 (svn) -->
+<!-- synced with 19081 (svn) -->
 <!-- Opiekun: Frogu -->
 <chapter id="video">
 <title>Urządzenia wyjścia video</title>
@@ -193,6 +193,13 @@ nowszego (gdyby występowały problemy z obrazem, spróbuj ustawić głębię ko
 na 16bpp).
 Jeżeli chodzi o S3 Virge: obsługuje ona Xv, ale jest bardzo wolna,
 więc najlepiej ją sprzedaj.
+</para>
+<para>
+	Teraz dostępny jest natywny sterownik bufora ramek (framebuffer) dla
+	kart S3 Virge, podobny do tdfxfb. Ustaw swój bufor ramek (np. dodaj
+	"<option>vga=792 video=vesa:mtrr</option>" do swojego kernela)
+	i używaj <option>-vo s3fb</option> (<option>-vf yuy2</option>
+	i <option>-dr</option> także mogą okazać się przydatne).
 </para>
 
 <note>
@@ -828,7 +835,7 @@ Wyjście FBdev przyjmuje kilka dodatkowych parametrów:
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    Określa urządzanie bufora ramki, którego użyć (<filename>/dev/fb0</filename>)
+    Określa urządzanie bufora ramki, którego użyć (domyślnie: <filename>/dev/fb0</filename>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -840,7 +847,7 @@ Wyjście FBdev przyjmuje kilka dodatkowych parametrów:
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    Plik konfiguracyjny trybów (standardowo <filename>/etc/fb.modes</filename>)
+    Plik konfiguracyjny trybów (domyślnie: <filename>/etc/fb.modes</filename>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -904,9 +911,9 @@ i nie proś o to, ponieważ nie jest to ograniczenie
 
 <para>
 Ta sekcja traktuje o obsłudze układu BES (Back-End Scaler) na kartach
-Matrox G200/G400/G450/G550 przez sterowniku mga_vid w jądrze.
-Jest on aktywnie rozwijany przez A'rpiego i
-ma sprzętowy VSYNC z potrójnym buforowaniem.
+Matrox G200/G400/G450/G550 przez sterownik
+<systemitem>mga_vid</systemitem> z jądra.
+Ma on sprzętowy VSYNC z potrójnym buforowaniem.
 Działa na konsoli framebuffer oraz w X.
 </para>
 
@@ -1087,7 +1094,7 @@ Możesz używać następujących klawiszy w oknie AA, aby zmienić opcje rendero
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    zmiana koloru napisów
+    Zmiana koloru napisów
     </para><para>
     gdzie <replaceable>V</replaceable> jest jednym z:
     <literal>0</literal> (normalny),
@@ -1106,25 +1113,25 @@ kilka ważniejszych:</title>
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    ustawia sugerowany sterownik aa (X11, curses, Linux)
+    Ustawia sugerowany sterownik aa (X11, curses, Linux)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    używa wszystkich 256 znaków.
+    Używa wszystkich 256 znaków.
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
-    używa 8-bitowego ASCII
+    Używa 8-bitowego ASCII
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    wyświetla wszystkie opcje aalib
+    Wyświetla wszystkie opcje aalib
   </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1570,13 +1577,6 @@ bez żadnych argumentów, aby umożliwić automatyczne wykrywanie sterownika.
 </para>
 
 <para>
-VIDIX jest nową technologią i jest bardzo możliwe, że nie będzie działał
-na Twoim systemie. W tym przypadku jedynym rozwiązaniem jest przeportowanie go
-(głównie libdha). Ale jest nadzieja, że będzie działać na tych systemach,
-na których działa X11.
-</para>
-
-<para>
 Ponieważ VIDIX wymaga bezpośredniego dostępu do sprzętu, musisz uruchamiać
 <application>MPlayera</application> jako root lub ustawić bit SUID na binarce
 <application>MPlayera</application>
@@ -1665,34 +1665,6 @@ to nikt go nie testował (sprawozdania są mile widziane)
 
 <sect3 id="vidix-nvidia">
 <title>Karty nVidia</title>
-<para>
-Dostępny jest stosunkowo nowy sterownik nVidia, działa na kartach Riva128, TNT
-i GeForce2. Doniesiono nam, że na innych też działa.
-</para>
-
-<itemizedlist spacing="compact">
-<title>OGRANICZENIA</title>
-<listitem><para>
-  Wskazane jest używanie binarnych sterowników nVidia dla X zanim użyjesz tego
-  sterownika VIDIX. Jest to spowodowane tym, że niektóre rejestry, które muszą
-  być zainicjalizowane, nie zostały jeszcze odkryte, więc prawdopodobnie próba
-  z otwartym sterownikiem XFree86
-  <filename>nv.o</filename> także się nie powiedzie.
-</para></listitem>
-<listitem><para>
-  Obecnie tylko kodeki zdolne do produkowania na wyjściu obrazu w
-  przestrzeni kolorów UYVY mogą współpracować z tym sterownikiem.
-  Niestety, żaden dekoder z rodziny
-  <systemitem class="library">libavcodec</systemitem> się nie nadaje.
-  Pozostają nam następujące popularne kodeki: <systemitem>cvid, divxds, xvid,
-  divx4, wmv7, wmv8</systemitem> i kilka innych. Zauważ, że jest to tylko
-  chwilowa niedogodność.
-  składnia wygląda w ten sposób:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds <replaceable>plik_divx3.avi</replaceable>
-  </screen>
-</para></listitem>
-</itemizedlist>
 
 <para>
 Unikalną cechą sterownika nvidia_vid jest jego zdolność do wyświetlania obrazu
@@ -1700,14 +1672,9 @@ na <emphasis role="bold">zwykłej, czysto tekstowej konsoli</emphasis> - bez
 magicznych X, bufora ramki, czy czegokolwiek.
 W tym celu będziemy musieli użyć wyjścia video <option>cvidix</option>, jak
 w pokazuje poniższy przykład:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>przykład.avi</replaceable>
-  </screen>
+  <screen>mplayer -vo cvidix <replaceable>przyklad.avi</replaceable></screen>
 </para>
 
-<para>
-Czekamy na raporty!
-</para>
 </sect3>
 
 <sect3 id="vidix-sis">
@@ -2053,12 +2020,12 @@ DXR2. Sterowniki i instrukcję instalacji możesz znaleźć na stronie
 <title>ZASTOSOWANIE</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>włącz wyjście TV</para></listitem>
+<listitem><para>Włącz wyjście TV.</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> lub <option>-vo dxr2:xv</option></term>
-<listitem><para>włącz wyjście nakładki w X11</para></listitem>
+<listitem><para>Włącz wyjście nakładki w X11.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2589,7 +2556,6 @@ Section "Device"
         Option          "ConnectedMonitor" "CRT, TV"
         Option          "TVStandard" "PAL-B"
         Option          "TVOutFormat" "Composite"
-
 EndSection
 </programlisting>
 </para>

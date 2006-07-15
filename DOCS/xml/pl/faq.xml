@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.102 (deprecated CVS)-->
-<!-- synced with 17707 (svn) -->
+<!-- synced with 18930 (svn) -->
 <!-- Opiekun: Frogu -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
@@ -150,6 +150,50 @@ dowiązania symboliczne do
 (problem może wystąpić w systemach Mandrake).
 </para></answer>
 </qandaentry>
+
+
+<qandaentry>
+	<question><para>
+		Kompilowanie pod Mac OS 10.3 prowadzi do kilku błędów linkowania</para></question>
+	<answer><para>
+			Błąd linkowania, który się pojawia, wygląda najprawdopodobniej tak:
+			<screen>
+				ld: Undefined symbols:
+				_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+				_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
+				</screen>
+			Problem ten wynika z faktu, że deweloperzy Apple używają MacOS 10.4 do
+			kompilowania swojego oprogramowania i dostarczają binaria
+			użytkownikom 10.3 poprzez Uaktualnienia Oprogramowania.
+			Niezdefiniowane symbole obecne są pod Mac OS 10.4,
+			ale nie pod 10.3.
+			Jednym z rozwiązań jest powrót do QuickTime w wersji 7.0.1.
+			Oto lepsze rozwiązanie.
+			</para><para>
+			Zdobądź <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">
+				starszą wersję szkieletów</ulink> (frameworks; jest lepsze tłumaczenie? - przyp. tłumacz).
+			Otrzymasz skompresowany plik zawierający QuickTime 7.0.1 Framework
+			i 10.3.9 QuartzCore Framework.
+			</para><para>
+				Rozpakuj pliki gdzieś poza swoim katalogiem systemowym.
+				(nie instaluj szkieletów do swojego
+			<filename class="directory">/System/Library/Frameworks</filename>!
+			Używanie tej starszej kopii doprowadzi do otrzymywania błędów dowiązań!)
+			<screen>
+				gunzip &lt; CompatFrameworks.tgz | tar xvf -
+				</screen>
+			W pliku config.mak, dodaj
+			<systemitem>-F/ścieżka/do/rozpakowanego/archiwum</systemitem>
+			do zmiennej <systemitem>OPTFLAGS</systemitem>.
+			Jeżeli używasz <application>X-Code</application>, możesz po prostu
+			zaznaczyć te szkieletey, zamiast systemowych.
+			</para><para>
+			W rezultacie binarka <application>MPlayer</application> będzie
+			w rzeczywistości używać zainstalowanego w twoim systemie szkieletu poprzez
+			dynamiczne dowiązania, rozwiązywane przy uruchamianiu.
+			(Możesz to sprawdzić używając <systemitem>otool -l</systemitem>).
+			</para></answer>
+	</qandaentry>
 
 </qandadiv>
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
 <!-- synced with 1.13 (deprecated CVS)-->
-<!-- synced with 18552 (svn) -->
+<!-- synced with 19039 (svn) -->
 <!-- Opiekun: Boski -->
 <appendix id="bugreports">
 <title>Jak zgłaszać błędy</title>
@@ -30,7 +30,7 @@ Ci ludzie z listy
 
 
 <sect1 id="bugreports_regression_test">
-	<title>Jak wykonać test regresji za pomocą CVS</title>
+	<title>Jak wykonać test regresji za pomocą Subversion</title>
 	<para>
 		Czasami zdarza się problem typu "wcześniej działało, a teraz przestało...".
 		Tutaj znajduje się, opisana krok po kroku, procedura, której celem jest próba
@@ -39,16 +39,16 @@ Ci ludzie z listy
 		dla przeciętnego użytkownika.
 	</para>
 	<para>
-		Najpierw należy pobrać źródła MPlayera z CVS-u.
+		Najpierw należy pobrać źródła MPlayera z SVN.
 		Więcej szczegółów na ten temat znajduje się na 
 		<ulink url="http://www.mplayerhq.hu/dload.html">tej stronie</ulink>.
 	</para>
 	<para>
-		W rezultacie w katalogu main/ znajdzie się obraz drzewa CVS, po stronie klienta.
+		W rezultacie w katalogu mplayer/ znajdzie się obraz drzewa Subversion, po stronie klienta.
 		Teraz zaktualizuj ten obraz do daty, która Cię interesuje:
 		<screen>
-			cd main/
-			cvs update -PAd -D "2004-08-23"
+			cd mplayer/
+			svn update -r {"2004-08-23"}
 		</screen>
 		Format daty to RRRR-MM-DD GG:MM:SS.
 		Używając takiego formatu daty masz pewność, że będziesz w stanie wyciągać łatki
@@ -86,9 +86,9 @@ Ci ludzie z listy
 	<para>
 		Kiedy znajdziesz dzień w którym pojawił się problem, kontynuuj szukanie
 		używając archiwum mplayer-cvslog (uporządkowane wg daty) i bardziej
-		precyzyjnych aktualizacji obejmujących godziny, minuty i sekundy:
+		precyzyjnych aktualizacji svn obejmujących godziny, minuty i sekundy:
 		<screen>
-			cvs update -PAd -D "2004-08-23 15:17:25"
+			svn update -r {"2004-08-23 15:17:25"}
 		</screen>
 		To pomoże ci łatwo znaleźć łatkę, która jest winowajcą.
 	</para>
@@ -109,14 +109,14 @@ Ci ludzie z listy
 <sect1 id="bugreports_report">
 <title>Jak zgłaszać błędy</title>
 <para>
-Po pierwsze sprawdź najnowszą wersję CVS <application>MPlayera</application>,
+Po pierwsze sprawdź najnowszą wersję SVN <application>MPlayera</application>,
 ponieważ dany błąd może być już w niej naprawiony. Rozwój
 <application>MPlayera</application> przebiega naprawdę szybko, większość
 problemów występujących w oficjalnych wydaniach jest zgłaszana w ciągu kilku dni
 albo nawet godzin. Dlatego też prosimy używać <emphasis role="bold">tylko wersji
-z CVSu</emphasis> do zgłaszania błędów. Dotyczy to głównie pakietów binarnych
-<application>MPlayera</application>. Instrukcje dotyczące CVSu znajdują się na
-dole <ulink url="http://www.mplayerhq.hu/dload.html">tej strony</ulink>
+z Subversion</emphasis> do zgłaszania błędów. Dotyczy to głównie pakietów binarnych
+<application>MPlayera</application>. Instrukcje dotyczące Subversion znajdują się
+na dole <ulink url="http://www.mplayerhq.hu/dload.html">tej strony</ulink>
 lub w pliku README. Jeżeli problem dalej występuje prosimy sprawdzić listę
 <link linkend="bugs">znanych błędów</link> i resztę dokumentacji. Jeżeli problem
 nie jest znany lub rozwiązany przez naszą dokumentację prosimy zgłosić błąd.
@@ -324,13 +324,6 @@ Prosimy załączyć następujące pliki:
 <itemizedlist>
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
-</itemizedlist>
-Tylko jeżeli kompilacja się nie powiedzie w którymś z tych katalogów, załącz
-następujące pliki:
-<itemizedlist>
-<listitem><para>Gui/config.mak</para></listitem>
-<listitem><para>libvo/config.mak</para></listitem>
-<listitem><para>libao2/config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>

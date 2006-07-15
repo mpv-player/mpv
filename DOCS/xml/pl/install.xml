@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
 <!-- synced with 1.62 (deprecated CVS)-->
-<!-- synced with 17975 (svn) -->
+<!-- synced with 19087 (svn) -->
 <!-- Opiekun: brak (poprzednio Paszczi) -->
 <chapter id="install">
 <title>Instalacja</title>
@@ -198,28 +198,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   <emphasis role="bold">Kodeki QuickTime</emphasis>: na platformach x86 te kodeki
   mogą być użyte do dekodowania RPZA, innych sekwencji video QuickTime i
   strumieni audio QDesign. Instrukcję instalacji możesz znaleźć w rozdziale
-  <link linkend="sorenson">kodek video Sorenson</link>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">DivX4/DivX5</emphasis>: informacje o tym kodeku są dostępne
-  w rozdziale <link linkend="divx4-5">DivX4/DivX5</link>. Prawdopodobnie, nie chcesz
-  tego kodeka jako, że <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
-  (zobacz powyżej) jest o wiele szybszy i ma lepszą jakość, zarówno dla dekodowania i
-  kodowania. Cechy:
-  <itemizedlist>
-  <listitem><simpara>
-    1 lub 2 przebiegowe kodowanie przy pomocy <link linkend="mencoder">
-    <application>MEncodera</application></link>
-    </simpara></listitem>
-  <listitem><simpara>
-    może odtwarzać stare filmy <emphasis role="bold">DivX3</emphasis> znacznie szybciej
-    niż biblioteki Win32 DLL, ale wolniej niż
-    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
-    </simpara></listitem>
-  <listitem><simpara>
-    ma zamknięte źródło i dostępna jest tylko wersja na x86.
-    </simpara></listitem>
-  </itemizedlist>
+  <link linkend="sorenson">kodeki video Sorenson</link>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XviD</emphasis>: Alternatywa do kodowania dla DivX4Linux

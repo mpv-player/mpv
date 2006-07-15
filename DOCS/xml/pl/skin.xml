@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
 <!-- synced with 1.14 (deprecated CVS)-->
-<!-- synced with 18600 (svn) -->
+<!-- synced with 19081 (svn) -->
 <!-- Opiekun: Flex -->
 <appendix id="skin">
 <title>Format skórki <application>MPlayera</application></title>
@@ -789,10 +789,6 @@ oddzielnych czcionek).
 Tutaj znajdują się sygnały, które mogą być generowane przez przyciski, suwaki
 i elementy menu.
 </para>
-<note><para>
-Niektóre sygnały mogą nie działać w oczekiwany sposób (lub nie działać w ogóle).
-Jak wiadomo, GUI jest jeszcze w fazie rozwoju.
-</para></note>
 
 <variablelist>
 <title>Kontrola odtwarzania :</title>
