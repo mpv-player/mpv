@@ -37,7 +37,7 @@
 #include "vf.h"
 
 struct vf_priv_s {
-    unsigned int bamount, bthresh, frame;
+    unsigned int bamount, bthresh, frame, lastkeyframe;
 };
 
 static int config(struct vf_instance_s* vf, int width, int height, int d_width,
@@ -72,9 +72,11 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
     int nblack=0, pblack=0;
     unsigned char *yplane = mpi->planes[0];
     unsigned int ystride = mpi->stride[0];
+    int pict_type = mpi->pict_type;
     int w = mpi->w, h = mpi->h;
     int bthresh = vf->priv->bthresh;
     int bamount = vf->priv->bamount;
+    static const char *picttypes[4] = { "unknown", "I", "P", "B" };
 
     for (y=1; y<=h; y++) {
 	    for (x=0; x<w; x++)
@@ -84,9 +86,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
         yplane += ystride;
     }
 
+    if (pict_type > 3 || pict_type < 0) pict_type = 0;
+    if (pict_type == 1) vf->priv->lastkeyframe = vf->priv->frame;
+
     if (pblack >= bamount)
-	    mp_msg(MSGT_VFILTER, MSGL_INFO,"\nBlack frame: frame %u (%2d%%)\n",
-                                                vf->priv->frame, pblack);
+	    mp_msg(MSGT_VFILTER, MSGL_INFO,"vf_blackframe: %u, %i%%, %s (I:%u)\n",
+                                vf->priv->frame, pblack, picttypes[pict_type],
+                                vf->priv->lastkeyframe);
 
     vf->priv->frame++;
 
@@ -125,6 +131,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->bamount = 98;
     vf->priv->bthresh = 0x20;
     vf->priv->frame = 0;
+    vf->priv->lastkeyframe = 0;
 
     if (args)
 	    sscanf(args, "%u:%u", &vf->priv->bamount, &vf->priv->bthresh);

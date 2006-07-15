@@ -6263,6 +6263,9 @@ Only useful with the \-ass option.
 .B blackframe[=amount:threshold]
 Detect frames that are (almost) completely black.
 Can be useful to detect chapter transitions or commercials.
+Output lines consist of the frame number of the detected frame, the
+percentage of blackness, the frame type and the frame number of the last
+encountered keyframe.
 .RSs
 .IPs <amount>
 percentage of the pixels that have to be below the threshold (default: 98)
