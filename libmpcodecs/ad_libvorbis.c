@@ -38,7 +38,7 @@ typedef struct ov_struct_st {
 #endif
 } ov_struct_t;
 
-static int read_vorbis_comment( char* ptr, char* comment, char* format, ... ) {
+static int read_vorbis_comment( char* ptr, const char* comment, const char* format, ... ) {
   va_list va;
   int clen, ret;
 

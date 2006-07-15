@@ -475,7 +475,7 @@ static int ty_XDSAddLine = -1;
 static int ty_XDSDisplayCount = -1;
 
 
-static void ty_AddXDSToDisplay( char *format, ... )
+static void ty_AddXDSToDisplay( const char *format, ... )
 {
    char line[ 80 ];
    int  index;

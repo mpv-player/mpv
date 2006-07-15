@@ -34,7 +34,7 @@ asx_parse_attribs(ASX_Parser_t* parser,char* buffer,char*** _attribs);
 /////// Attribs utils
 
 char*
-asx_get_attrib(char* attrib,char** attribs);
+asx_get_attrib(const char* attrib,char** attribs);
 
 int
 asx_attrib_to_enum(const char* val,char** valid_vals);

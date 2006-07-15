@@ -519,7 +519,7 @@ static void uninit_player(unsigned int mask){
   current_module=NULL;
 }
 
-static void exit_player_with_rc(char* how, int rc){
+static void exit_player_with_rc(const char* how, int rc){
 
   uninit_player(INITED_ALL);
 #ifdef HAVE_X11
@@ -554,7 +554,7 @@ static void exit_player_with_rc(char* how, int rc){
   exit(rc);
 }
 
-void exit_player(char* how){
+void exit_player(const char* how){
   exit_player_with_rc(how, 1);
 }
 
@@ -2258,7 +2258,7 @@ m_option_t*  mp_property_find(const char* name) {
     return m_option_list_find(mp_properties,name);
 }
 
-int mp_property_do(char* name,int action, void* val) {
+int mp_property_do(const char* name,int action, void* val) {
     m_option_t* p = mp_property_find(name);
     if(!p) return M_PROPERTY_UNAVAILABLE;
     return m_property_do(p,action,val);

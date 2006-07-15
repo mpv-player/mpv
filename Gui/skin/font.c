@@ -146,7 +146,7 @@ int fntTextHeight( int id,char * str )
  return max;
 }
 
-txSample * fntRender( wItem * item,int px,char * fmt,... )
+txSample * fntRender( wItem * item,int px,const char * fmt,... )
 {
  va_list         ap;
  unsigned char   p[512];

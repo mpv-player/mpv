@@ -12,7 +12,7 @@
 #include "mp_msg.h"
 
 m_option_t*
-m_struct_get_field(m_struct_t* st,char* f) {
+m_struct_get_field(m_struct_t* st,const char* f) {
   int i;
 
   for(i = 0 ; st->fields[i].name ; i++) {
@@ -70,7 +70,7 @@ m_struct_set(m_struct_t* st, void* obj, char* field, char* param) {
 }
 
 void
-m_struct_reset(m_struct_t* st, void* obj, char* field) {
+m_struct_reset(m_struct_t* st, void* obj, const char* field) {
   m_option_t* f;
 
   if(!field) { // Reset all options

@@ -208,7 +208,7 @@ m_option_t x264encopts_conf[] = {
 };
 
 static int parse_cqm(const char *str, uint8_t *cqm, int length,
-                     h264_module_t *mod, char *matrix_name) {
+                     h264_module_t *mod, const char *matrix_name) {
     int i;
     if (!str) return 0;
     for (i = 0; i < length; i++) {

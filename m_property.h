@@ -123,7 +123,7 @@ char* m_properties_expand_string(m_option_t* prop_list,char* str);
 m_option_t*  mp_property_find(const char* name);
 
 /// Do an action with an MPlayer property.
-int mp_property_do(char* name,int action, void* val);
+int mp_property_do(const char* name,int action, void* val);
 
 /// \defgroup PropertyImplHelper Property implementation helpers
 /// \ingroup Properties

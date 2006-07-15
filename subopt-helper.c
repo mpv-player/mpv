@@ -324,7 +324,7 @@ int int_pos( int * i )
 /*** little helpers */
 
 /** \brief compare the stings just as strcmp does */
-int strargcmp(strarg_t *arg, char *str) {
+int strargcmp(strarg_t *arg, const char *str) {
   int res = strncmp(arg->str, str, arg->len);
   if (!res && arg->len != strlen(str))
     res = arg->len - strlen(str);

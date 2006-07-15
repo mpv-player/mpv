@@ -45,7 +45,7 @@
 extern m_obj_settings_t* vo_plugin_args;
 extern vo_functions_t *video_out;
 extern ao_functions_t *audio_out;
-extern void exit_player(char *how);
+extern void exit_player(const char *how);
 extern char *filename;
 extern int abs_seek_pos;
 extern float rel_seek_secs;

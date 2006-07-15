@@ -80,7 +80,7 @@ asx_list_free(void* list_ptr,ASX_FreeFunc free_func) {
 /////// Attribs utils
 
 char*
-asx_get_attrib(char* attrib,char** attribs) {
+asx_get_attrib(const char* attrib,char** attribs) {
   char** ptr;
 
   if(attrib == NULL || attribs == NULL) return NULL;

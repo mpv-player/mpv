@@ -469,7 +469,7 @@ static void compute_string_bbox( text_info_t* info, FT_BBox *abbox ) {
 /**
  * \brief Check if starting part of (*p) matches sample. If true, shift p to the first symbol after the matching part.
  */
-static inline int mystrcmp(char** p, char* sample) {
+static inline int mystrcmp(char** p, const char* sample) {
 	int len = strlen(sample);
 	if (strncmp(*p, sample, len) == 0) {
 		(*p) += len;

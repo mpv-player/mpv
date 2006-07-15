@@ -32,7 +32,7 @@ extern int  fntTextHeight( int id,char * str );
 extern int  fntTextWidth( int id,char * str );
 
 extern int        fntRead( char * path,char * fname );
-extern txSample * fntRender( wItem * item,int px,char * fmt,... );
+extern txSample * fntRender( wItem * item,int px,const char * fmt,... );
 
 #endif
 
