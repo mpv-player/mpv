@@ -1,4 +1,4 @@
-.\" Synced with r19052
+.\" Synced with r19101
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 07. 09." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 07. 15." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -1193,8 +1193,8 @@ olvassa. Az alapértelmezett a ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc}
 (a kártyád típusától függõen) vagy ~/.mplayer/\:channels.conf mint utolsó
 lehetõség.
 .IPs timeout=<1\-30>
-Transponder beállításának sikertelenné nyilvánítása elõtt a
-várakozással töltött másodpercek maximális száma. Alapértelmezett 3.
+Frekvencia beállításának sikertelenné nyilvánítása elõtt a
+várakozással töltött másodpercek maximális száma. Alapértelmezett 30.
 .RE
 .PD 1
 .
@@ -3893,14 +3893,6 @@ Nem játszik le/\:kódol videót.
 Sok esetben ez nem mûködik, használd a \-vc null \-vo null opciókat helyette.
 .
 .TP
-.B \-oldpp <minõség> (csak OpenDivX) (ELAVULT)
-Az OpenDivX utófeldolgozó kódját használja a beépített helyett.
-A \-pp az utódja, a beépített utófeldolgozó jobb minõséget és
-teljesítményt nyújt.
-Az \-oldpp értékek helyes tartománya codec-enként változik, legtöbbször
-0\-6, ahol 0=kikapcsolva, 6=leglassabb/\:legjobb.
-.
-.TP
 .B \-pp <minõség> (lásd még \-vf pp)
 A DLL utófeldolgozó szintjét állítja be.
 Ez az opció nem használható a \-vf pp kapcsolóval.
@@ -4010,8 +4002,6 @@ Lásd a \-vc help -et az elérhetõ codec-ek listájáért.
 .RSs
 .IPs "\-vc divx"
 Win32/\:VfW DivX codec kényszerítése, nincs visszalépés.
-.IPs "\-vc divx4,"
-Elõször divx4linux-ot próbál, majd visszalép másra.
 .IPs "\-vc -divxds,-divx,"
 Kihagyja a Win32 DivX codec-eket.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -6283,6 +6273,19 @@ Az SSA/ASS felirat renderelõt a videó szûrõ lánc egy meghatározott pontjára tesz
 Csak a \-ass kapcsolóval együtt hasznos.
 .RE
 .
+.TP
+.B blackframe[=mennyiség:küszöb]
+Megkeresi azok a képkockákat, melyek (majdnem) teljesen feketék.
+Fejezetváltások vagy reklámok megkeresésére használható.
+A kimeneti sorok a megtalált képkocka számából, a sötétség százalékos
+értékébõl, a kocka típusából és az utolsó kulcskocka számából állnak.
+.RSs
+.IPs <mennyiség>
+a pixelek százalékos aránya, melyeknek a küszöb alatt kell lenniük (alapértelmezett: 98)
+.IPs <küszöb>
+határérték, mely alatt egy pixel feketének minõsül (alapértelmezett: 32)
+.RE
+.
 .
 .
 .SH "ÁLTALÁNOS KÓDOLÁSI OPCIÓK (CSAK MENCODER)"
@@ -6498,8 +6501,6 @@ A használható videó codec-ek listája a \-ovc help opcióval kérhetõ le.
 .RSs
 .IPs "\-ovc copy"
 nincs kódolás, csak a folyam másolás
-.IPs "\-ovc divx4"
-Kódolás DivX4/\:DivX5-be.
 .IPs "\-ovc raw"
 Kódolás sajátos, tömörítetlen formátumba ('\-vf format' segítségével választhatsz).
 .IPs "\-ovc lavc"
@@ -6541,86 +6542,8 @@ A codec specifikus kódolási paramétereket a következõ szintaxissal adhatod meg:
 .B \-<codec>opts <opció1[=érték],opció2,...>
 .
 .PP
-Ahol a <codec> lehet: lavc, xvidenc, divx4, lame, toolame, twolame,
+Ahol a <codec> lehet: lavc, xvidenc, lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
-.
-.
-.SS divx4 (\-divx4opts)
-.
-A DivX4 idejétmúlt és csak a teljesség kedvéért támogatott.
-A DivX4 opcióinak részleteihez nézd meg a forrást, a legtöbb opció nincs itt leírva.
-.
-.TP
-.B help\ \ \ 
-segítség kiírása
-.
-.TP
-.B br=<érték>
-Bitráta megadása.
-.RSs
-.IPs 4\-16000
-(kbit-ben)
-.IPs 16001\-24000000
-(bit-ben)
-.RE
-.
-.TP
-.B key=<érték>
-maximális távolság a kulcs képkockák között (képkockában)
-.
-.TP
-.B deinterlace
-Deinterlace bekapcsolása (ne használd, a DivX4 bugos).
-.
-.TP
-.B q=<1\-5>
-minõség (1\-leggyorsabb, 5\-legjobb)
-.
-.TP
-.B min_quant=<1\-31>
-minimális kvantáló
-.
-.TP
-.B max_quant=<1\-31>
-maximális kvantáló
-.
-.TP
-.B rc_period=<érték>
-rate control periódus
-.
-.TP
-.B rc_reaction_period=<érték>
-rate control reakció periódus
-.
-.TP
-.B rc_reaction_ratio=<érték>
-rate control reakció arány
-.
-.TP
-.B crispness=<0\-100>
-Élesség/\:elmosás mértéke.
-.
-.TP
-.B pass=<1\-2>
-Ezzel tudsz két lépésben kódolni DivX4 fájlokat.
-Elõször kódolj a pass=1-gyel, majd végezz még egy kódolást ugyan azokkal
-a paraméterekkel és pass=2-vel.
-.
-.TP
-.B vbrpass=<0\-2>
-A pass opció felülbírálása és a DivX4 VBR-je helyett az XviD VBR használata.
-A rendelkezésre álló opciók:
-.PD 0
-.RSs
-.IPs 0
-egy menetes kódolás (egyenértékû az opció elhagyásával)
-.IPs 1
-Analizáló (elsõ) lépés két lépéses kódolásban.
-Az eredmény AVI fájl átirányítható a /dev/\:null-ra.
-.IPs 2
-Végsõ (második) lépés a két lépéses kódolásban.
-.RE
-.PD 1
 .
 .
 s.SS lame (\-lameopts)

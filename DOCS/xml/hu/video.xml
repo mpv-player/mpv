@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18650 -->
+<!-- synced with r19081 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -878,8 +878,8 @@ framebufferrel és ne is kérd, hogy működjön, mivel ez nem az
 
 <para>
 Ez a rész a Matrox G200/G400/G450/G550 BES (Back-End Scaler) támogatásról
-szól, az mga_vid kernel vezérlőről. Jelenleg A'rpi fejleszti, van
-benne hardveres VSYNC támogatás tripla buffereléssel. Működik mind
+szól, az <systemitem>mga_vid</systemitem> kernel vezérlőről.
+Van benne hardveres VSYNC támogatás tripla buffereléssel. Működik mind
 framebufferes konzolon, mind X alatt.
 </para>
 
@@ -1507,13 +1507,6 @@ nélküli használata, és így az automatikus detektálás engedélyezése.
 </para>
 
 <para>
-A VIDIX egy új technológia és eléggé elképzelhető, hogy a te rendszereden
-nem fog működni. Ebben az esetben az egyetlen megoldás, ha portolod
-(leginkább a libdha-t). De van remény, hogy működni fog azokon a rendszereken,
-amiken az X11 megy.
-</para>
-
-<para>
 Mivel a VIDIX-nek direkt hardver elérés kell, futtathatod root-ként vagy
 beállíthatod a SUID bit-et az <application>MPlayer</application> binárisán
 (<emphasis role="bold">Figyelem: Ez biztonsági kockázatot jelent!</emphasis>).
@@ -1603,42 +1596,15 @@ tesztelte le, így örömmel fogadjuk a jelentéseket.
 
 <sect3 id="vidix-nvidia">
 <title>nVidia kártya</title>
-<para>
-Van egy eléggé új nVidia vezérlő, tudvalevőleg működik a Riva
-128, TNT és GeForce2 chipset-ekkel, de a többi esetében is jelezték, hogy megy.
-</para>
-
-<itemizedlist spacing="compact">
-<title>KORLÁTOZÁSOK</title>
-<listitem><para>
-  Ajánlatos a bináris nVidia vezérlők használata az X-szel, mielőtt ezen VIDIX
-  vezérlőt használnád, mert néhány regiszter, melyek inicializálása szükséges,
-  még nem lettek teljesen felderítve, így valószínűleg sikertelen lesz a Nyílt
-  Forráskódú XFree86 <filename>nv.o</filename> vezérlőjével.
-  </para></listitem>
-<listitem><para>
-  Jelenleg csak az UYVY színterű kimenetre képes codec-ek működnek együtt ezzel
-  ezzel a vezérlővel. Sajnos ez kizár minden egyes dekódolót a
-  <systemitem class="library">libavcodec</systemitem> családból. Emiatt a
-  következő használható, népszerű codec-ek maradnak:
-  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> és pár
-  egyéb. Kérjük vedd figyelembe, hogy ez csak ideiglenes kényelmetlenség.
-  A használati szintaxis a következő:
-  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable></screen>
-  </para></listitem>
-</itemizedlist>
 
 <para>
   Egy egyedülálló tulajdonsága az nvidia_vid vezérlőnek a
   <emphasis role="bold">sima, egyszerű, csak szöveges konzolon</emphasis> történő
   videó megjelenítés - framebuffer vagy X varázslag és egyebek nélkül. Ehhez a
   <option>cvidix</option> videó kimenetet kell használni, amint az itt látható:
-  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable></screen>
+  <screen>mplayer -vo cvidix <replaceable>pelda.avi</replaceable></screen>
 </para>
 
-<para>
-Várjuk a visszajelzéseket!
-</para>
 </sect3>
 
 <sect3 id="vidix-sis">

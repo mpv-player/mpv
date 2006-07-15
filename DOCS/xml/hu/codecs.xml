@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18824 -->
+<!-- synced with r19087 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -74,78 +74,6 @@ Ha van olyan Win32 codec-ed, ami nincs a listában és még nem támogatott,
 olvasd el a <link linkend="codec-importing">codec importálás HOGYAN</link>-t
 és segítsd a munkánkat.
 </para>
-
-
-<sect2 id="divx4-5">
-<title>DivX4/DivX5</title>
-
-<para>
-Ez a rész a <ulink url="http://www.projectmayo.com">Project Mayo</ulink>
-DivX4 és DivX5 codec-jeiről tartalmaz információkat. AZ első elérhető
-alpha verziójuk az OpenDivX 4.0 alpha 47 és 48 volt. Ezek támogatása
-be volt építve az <application>MPlayer</application>be régen, és
-alapértelmezésként be is lett forgatva. Használtuk az utófeldolgozó kódjukat
-is az MPEG-1/2 filmek képminőségének opcionális javításához. Most már a
-sajátunkat használjuk, minden típushoz.
-</para>
-
-<para>
-Ennek a codec-nek az új generációját DivX4-nek hívják és még a hírhedt
-DivX codec-kel készített filmek dekódolására is képes! Ráadásként sokkal
-gyorsabb, mint a natív Win32 DivX DLL, de lassabb, mint a
-<systemitem class="library">libavcodec</systemitem>.
-Ezért <emphasis role="bold">ellenezzük</emphasis> a dekóderként
-történő használatát. Kódoláshoz viszont hasznos. Az egyetlen hátránya
-ennek a codec-nek, hogy nem elérhető Nyílt Forráskódú licensszel.
-</para>
-
-<para>
-A DivX4 két módban működik:
-<variablelist>
-<varlistentry><term><option>-vc odivx</option></term>
-<listitem><simpara>
-  A codec-et OpenDivX formában használja. Ebben az esetben YV12 képeket készít
-  a saját bufferében, és az <application>MPlayer</application> színtér konverziót
-  végez a libvo-n keresztül. (<emphasis role="bold">Gyors, javasolt!</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry><term><option>-vc divx4</option></term>
-<listitem><simpara>
-  A codec színtér konverzióját használja. Ebben a módban használhatod a
-  YUY2/UYVY-t is. (<emphasis role="bold">LASSÚ</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-</para>
-
-<para>
-A <option>-vc odivx</option> módszer általában gyorsabb, amiatt, hogy a
-kép adatait YU12 (planar YUV 4:2:0) formátumban viszi át, így sokkal
-kisebb sávszélesség kell neki az adatbuszon. A csomagolt YUV módok (YUY2, UYVY)
-a <option>-vc divx4</option> módszert használják. Az RGB módoknál a sebesség
-ugyan akkora, csak az aktuális színmélységedhez történő alkalmazkodásukban
-különböznek.
-Ha a <option>-vo</option> vezérlőd támogatja a direkt renderelést, akkor a
-<option>-vc divx4</option> gyorsabb lehet vagy akár a leggyorsabb is.
-</para>
-
-<para>
-A DivX4/5 bináris codec könyvtár letölthető az
-<ulink url="http://avifile.sf.net">avifile</ulink>-ról vagy
-a <ulink url="http://www.divx.com">divx.com</ulink> címről.
-Csomagold ki, futtasd az <filename>./install.sh</filename> fájlt root-ként és ne
-felejtsd el beírni a <filename class="directory">/usr/local/lib</filename>
-könyvtárat az <filename>/etc/ld.so.conf</filename> fájlba, majd futtatni az
-<command>ldconfig</command> parancsot.
-</para>
-
-<para>
-Az <application>MPlayer</application> automatikusan megtalálja a DivX4/DivX5-öt ha az
-megfelelően van telepítve, csak fordítsd le úgy, mint máskor. Ha nem találja meg,
-nem telepítetted vagy nem állítottad be megfelelően.
-</para>
-
-</sect2>
 
 
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">

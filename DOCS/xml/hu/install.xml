@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r17975 -->
+<!-- synced with r19087 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -189,28 +189,6 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   a codecek az RPZA, egyébb QuickTime videók és QDesign audió folyamok lejátszására
   használható. A telepítéső útmutatók a <link linkend="sorenson">Sorenson video codec</link>
   részben találhatóak.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">DivX4/DivX5</emphasis>: erről a codecről a információkat a
-  <link linkend="divx4-5">DivX4/DivX5</link> részben találhatsz. Valószínűleg nincs
-  szükséged erre a codecre, mert a <emphasis role="bold">
-  <systemitem class="library">libavcodec</systemitem></emphasis> (lásd fent) sokkal
-  gyorsabb és jobb minőséget biztosít, mint ez, mind kódolásban, mind visszakódolásban.
-  Jellemzők:
-  <itemizedlist>
-  <listitem><simpara>
-    egy vagy két menetes kódolás
-    <link linkend="mencoder"><application>MEncoder</application></link>-rel
-    </simpara></listitem>
-  <listitem><simpara>
-    le tudja játszani a régi <emphasis role="bold">DivX3</emphasis> filmeket, sokkal
-    gyorsabban, mint a Win32-es DLL-ekkel, de lassabban, mint a
-    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>-kel!
-    </simpara></listitem>
-  <listitem><simpara>
-    zárt forrású, és csak x86 változata elérhető.
-    </simpara></listitem>
-  </itemizedlist>
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XviD</emphasis>: Nyílt forráskódú, alternatív kódoló a

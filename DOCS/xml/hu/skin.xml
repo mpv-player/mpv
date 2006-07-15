@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18600 -->
+<!-- synced with r19081 -->
 <appendix id="skin">
 <title><application>MPlayer</application> skin formátum</title>
 
@@ -775,10 +775,6 @@ karaktereket tartalmazza.
 <para>
 Az alábbi üzeneteket generálják a gombok, potméterek és menüpontok.
 </para>
-<note><para>
-Néhány üzenet nem úgy működik, mint az elvárható lenne (vagy egyáltalán
-sehogy sem működik). Mint tudod, a GUI még fejlesztés alatt áll.
-</para></note>
 
 <variablelist>
 <title>Lejátszás vezérlése:</title>
