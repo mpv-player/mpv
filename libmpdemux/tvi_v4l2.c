@@ -213,7 +213,7 @@ static int fcc_vl2mp(int fcc)
 ** Translate a video4linux2 fourcc aka pixel format
 ** to a human readable string.
 */
-static char *pixfmt2name(int pixfmt)
+static const char *pixfmt2name(int pixfmt)
 {
     static char unknown[24];
 

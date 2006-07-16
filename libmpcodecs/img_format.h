@@ -114,6 +114,6 @@ typedef struct {
     int timestamp; // pts, 90000 Hz counter based
 } vo_mpegpes_t;
 
-char *vo_format_name(int format);
+const char *vo_format_name(int format);
 
 #endif

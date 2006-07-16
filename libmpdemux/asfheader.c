@@ -77,7 +77,7 @@ void print_asf_string(const char* name, char* string, int length) {
   mp_msg(MSGT_HEADER,MSGL_V,"%s%s\n", name, string);
 }
 
-static char* asf_chunk_type(unsigned char* guid) {
+static const char* asf_chunk_type(unsigned char* guid) {
   static char tmp[60];
   char *p;
   int i;

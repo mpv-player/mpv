@@ -705,7 +705,7 @@ char *rtsp_get_mrl(rtsp_t *s) {
 
 }
 
-char *rtsp_get_param(rtsp_t *s, char *p) {
+char *rtsp_get_param(rtsp_t *s, const char *p) {
   int len;
   char *param;
   if (!s->param)

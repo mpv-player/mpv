@@ -19,7 +19,7 @@
 #include "help_mp.h"
 
 // Convert from string to format
-int af_str2fmt(char* str)
+int af_str2fmt(const char* str)
 {
   int format=0;
   // Scan for endianess
@@ -178,7 +178,7 @@ static struct {
     { NULL, 0 }
 };
 
-char *af_fmt2str_short(int format)
+const char *af_fmt2str_short(int format)
 {
     int i;
 
@@ -189,7 +189,7 @@ char *af_fmt2str_short(int format)
     return "??";
 }
 
-int af_str2fmt_short(char* str)
+int af_str2fmt_short(const char* str)
 {
     int i;
 

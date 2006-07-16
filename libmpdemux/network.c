@@ -117,7 +117,7 @@ streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 
 // Converts an address family constant to a string
 
-char *af2String(int af) {
+const char *af2String(int af) {
 	switch (af) {
 		case AF_INET:	return "AF_INET";
 		

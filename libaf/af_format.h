@@ -84,11 +84,11 @@
 #define AF_FORMAT_FLOAT_NE AF_FORMAT_FLOAT_LE
 #endif
 
-extern int af_str2fmt(char *str);
-extern int af_str2fmt_short(char *str);
+extern int af_str2fmt(const char *str);
+extern int af_str2fmt_short(const char *str);
 extern int af_fmt2bits(int format);
 extern int af_bits2fmt(int bits);
 extern char* af_fmt2str(int format, char* str, int size);
-extern char* af_fmt2str_short(int format);
+extern const char* af_fmt2str_short(int format);
 
 #endif /* __af_format_h__ */
