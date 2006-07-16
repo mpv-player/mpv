@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19087
+.\" In sync with r19101
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1256,8 +1256,8 @@ Standardeinstellung ist ~/\:.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (je
 nach Kartentyp)
 oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit.
 .IPs timeout=<1\-30>
-Maximale Anzahl Sekunden, die benutzt werden, um einen Sender einzustellen,
-bevor aufgegeben wird (Standard: 3).
+Maximale Anzahl Sekunden, die benutzt werden, um eine Frequenz einzustellen,
+bevor aufgegeben wird (Standard: 30).
 .RE
 .PD 1
 .
@@ -6580,6 +6580,22 @@ Konfigurationsdatei mit aufzunehmen.
 Verschiebt das Zeichnen der SSA/ASS-Untertitel an einen beliebigen Punkt in der
 Videofilterkette.
 Nur sinnvoll mit der Option \-ass.
+.RE
+.
+.TP
+.B blackframe[=Menge:Schwellenwert]
+Erkenne Frames, die (fast) komplett schwarz sind.
+Kann nützlich sein, um Kapitelübergänge oder Werbung zu erkennen.
+Ausgabezeilen bestehen aus der Framenummer des erkannten Frames, dem
+prozentualen Schwarzanteil, dem Frametyp und der Framenummer des zuletzt
+vorgekommenen Keyframes.
+.RSs
+.IPs <Menge>
+Prozentaler Anteil der Pixel, die unter dem Schwellenwert liegen müssen
+(Standard: 98).
+.IPs <Schwellenwert>
+Schwellenwert, unter dem ein Pixelwert als schwarz angenommen wird
+(Standard: 32).
 .RE
 .
 .
