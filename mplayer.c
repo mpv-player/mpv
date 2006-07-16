@@ -2290,7 +2290,7 @@ int mp_property_do(const char* name,int action, void* val) {
 /// List of the commands that can be handled by setting a property.
 static struct  {
     /// property name
-    char* name;
+    const char* name;
     /// cmd id
     int cmd;
     /// set/adjust or toggle command
@@ -2300,7 +2300,7 @@ static struct  {
     /// osd msg id if it must be shared
     int osd_id;
     /// osd msg template
-    char* osd_msg;
+    const char* osd_msg;
 } set_prop_cmd[] = {
     // audio
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },

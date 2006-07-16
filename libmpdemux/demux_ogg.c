@@ -463,13 +463,13 @@ static int demux_ogg_sub_reverse_id(demuxer_t *demuxer, int id);
 /// Try to print out comments and also check for LANGUAGE= tag
 static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vorbis_comment *vc)
 {
-  char *hdr, *val;
+  const char *hdr, *val;
   char **cmt = vc->user_comments;
   int index, i;
   ogg_demuxer_t *ogg_d = (ogg_demuxer_t *)d->priv;
   struct table {
-    char *ogg;
-    char *mp;
+    const char *ogg;
+    const char *mp;
   } table[] = {
     { "ENCODED_USING", "Software" },
     { "ENCODER_URL", "Encoder URL" },

@@ -182,7 +182,7 @@ GtkWidget * AddSeparator( GtkWidget * Menu )
 typedef struct
 {
  int id;
- char * name;
+ const char * name;
 } Languages_t;
 
 #define lng( a,b ) ( (int)(a) * 256 + b )
@@ -369,7 +369,7 @@ static char * ChannelNumbers[] =
 	{ "","Stereo","","","","5.1" };
 #endif
 
-char * GetLanguage( int language )
+const char * GetLanguage( int language )
 {
  unsigned int i;
  for ( i=0;i<sizeof( Languages ) / sizeof( Languages_t );i++ )

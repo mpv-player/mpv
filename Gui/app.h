@@ -94,7 +94,7 @@
 typedef struct
 {
  int    msg;
- char * name;
+ const char * name;
 } evName;
 
 extern int evBoxs;

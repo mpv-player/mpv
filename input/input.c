@@ -1671,7 +1671,7 @@ static int mp_input_print_key_list(m_option_t* cfg) {
 static int mp_input_print_cmd_list(m_option_t* cfg) {
   mp_cmd_t *cmd;
   int i,j;
-  char* type;
+  const char* type;
 
   for(i = 0; (cmd = &mp_cmds[i])->name != NULL ; i++) {
     printf("%-20.20s",cmd->name);
