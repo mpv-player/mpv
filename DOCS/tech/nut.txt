@@ -525,6 +525,8 @@ codec_specific_data
         for(i=0; i<number_of_headers; i++)
             header[i]
     Note, this is the same format these codecs use in matroska
+    for H.264 the NAL units MUST be formated as in a bytestream 
+    (with 00 00 01 prefixes)
 
 frame_code
     the meaning of this byte is stored in the main header
