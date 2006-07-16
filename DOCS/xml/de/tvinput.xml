@@ -8,7 +8,7 @@
 		
 		<para>
 			Dieser Abschnitt behandelt das <emphasis role="bold">Anschauen/Grabben von einem
-				V4L-kompatiblen TV-Empfänger</emphasis>.
+			V4L-kompatiblen TV-Empfänger</emphasis>.
 			Siehe Manpage für eine Beschreibung der TV-Optionen und Tastensteuerungen.
 		</para>
 		
@@ -27,8 +27,8 @@
 				</step>
 				<step>
 					<para>
-						Stelle sicher, dass dein Empfänger mit anderer TV-Software unter Linux läuft, zum
-						Beispiel <application>XawTV</application>.
+						Stelle sicher, dass dein Empfänger mit anderer TV-Software wie zum Beispiel
+						<application>XawTV</application> unter Linux läuft.
 					</para>
 				</step>
 			</procedure>
@@ -45,7 +45,7 @@
 					<para>
 						Benutze die Option <option>channels</option>. Ein Beispiel:
 						<screen>-tv channels=26-MTV1,23-TV2</screen>
-						Erklärung: Durch Benutzung dieser Option sind nur die Kanäle 26 und 23 in Gebrauch,
+						Erklärung: Durch Verwendung dieser Option sind nur die Kanäle 26 und 23 in Gebrauch,
 						und es wird beim Kanalwechsel einen netten OSD-Text geben, der den Namen des Kanals
 						anzeigt. Leerzeichen im Kanalnamen müssen durch das Zeichen	&quot;_&quot; ersetzt werden.
 					</para>
@@ -53,7 +53,7 @@
 				
 				<listitem>
 					<para>
-						Wähle gesunde Bildabmessungen. Die Abmessungen des resultierenden Bildes sollten durch
+						Wähle vernünftige Bildabmessungen. Die Abmessungen des resultierenden Bildes sollten durch
 						16 teilbar sein.
 					</para>
 				</listitem>
@@ -82,11 +82,11 @@
 						Schneide tote Bereiche ab. Wenn du Video aufnimmst, sind die Bereiche an den Rändern
 						normalerweise schwarz oder enthalten Rauschen. Diese wiederum verbrauchen unnötige
 						Bandbreite. Genauer gesagt sind es nicht die schwarzen Bereiche selbst, sondern
-						die scharfen Übergänge zwischen dem schwarzen und dem helleren Videobild, die das tun,
-						aber das ist für den Moment nicht so wichtig. Bevor du mit der Aufnahme beginnst,
-						passe alle Argumente der Option <option>crop</option> an, so dass der ganze Müll
+						die scharfen Übergänge zwischen dem schwarzen und dem helleren Videobild, die das tun.
+						Aber das ist für den Moment nicht so wichtig. Bevor du mit der Aufnahme beginnst,
+						passe alle Argumente der Option <option>crop</option> so an, dass der ganze Müll
 						an den Rändern abgeschnitten wird. Nochmal, vergiss nicht, die resultierenden
-						Abmessungen gesund zu halten.
+						Abmessungen vernünftig zu halten.
 					</para>
 				</listitem>
 				
@@ -94,7 +94,7 @@
 					<para>
 						Achte auf CPU-Load. Es sollte die 90%-Grenze die meiste Zeit über nicht überschreiten.
 						Wenn du einen großen Aufnahmepuffer hast, kann <application>MEncoder</application>
-						eine zu hohe Belastung für ein paar Sekunden überstehen, aber nicht mehr.
+						eine Überlastung für ein paar Sekunden überstehen, aber nicht mehr.
 						Es ist besser, 3D-OpenGL-Bildschirmschoner und ähnlichen Kram abzustellen.
 					</para>
 				</listitem>

@@ -11,7 +11,7 @@
 <para>
 Die GCC <emphasis role="bold">2.95</emphasis> Serie ist ein offizielles
 GNU-Release und Version 2.95.3 ist die fehlerfreieste dieser Serie.
-Wir haban niemals Compilier-Probleme beobachten können, die auf den GCC 2.95.3
+Wir haben niemals Compilier-Probleme beobachten können, die auf den GCC 2.95.3
 zurückzuführen gewesen wären.
 Angefangen mit Red Hat Linux 7.0 begann <emphasis role="bold">Red Hat</emphasis>
 eine stark veränderte CVS-Version des GCC mitzuliefern und nannte sie
@@ -36,9 +36,8 @@ verschiedene Projekte, darunter
 <ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>,
 und fingen an, andere Compiler zu empfehlen.
 Weitere interessante Links sind der
-<ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
-Linux kernel news flash about kernel 2.4.17</ulink>
-und das
+<ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">Linux
+kernel news flash about kernel 2.4.17</ulink> und das
 <ulink url="http://www.voy.com/3516/572.html">Voy Forum</ulink>.
 <application>MPlayer</application> litt ebenfalls zeitweilig an Problemen, die
 alle durch den Wechsel zu einer anderen Version von GCC ausgelöst worden waren.
@@ -84,16 +83,16 @@ Lass dieses Thema bitte ruhen.
 Solltest du Probleme mit dem GCC 2.96 haben, bekommst du Pakete für die
 Version 2.96-85 auf
 <ulink url="ftp://updates.redhat.com">Red Hats FTP-Server</ulink>,
-oder benutze einfach die für Version 7.2 und neuer bereitliegenden Pakete
+oder benutze einfach die der Version 7.2 und neuer bereitliegenden Pakete
 für die Version 3.0.4.
 Du kannst auch Pakete für
 <ulink url="ftp://people.redhat.com/jakub/gcc/errata/3.2.3-37/">gcc-3.2.3-37</ulink>
 herunterzuladen (inoffiziell, aber sie funktionieren einwandfrei),
 und du kannst diese analog zu deinem GCC 2.96 installieren.
-<application>MPlayer</application> wird es erkennen und Version 3.2 statt
+<application>MPlayer</application> wird das erkennen und Version 3.2 statt
 2.96 verwenden.
 Wenn du aus irgendeinem Grund die binären Pakete nicht anwenden willst oder kannst,
-lies hier eine kleine Anleitung, wie du GCC 3 von den Quellen compilieren kannst:
+lies hier eine kleine Anleitung, wie du GCC 3 aus den Quellen compilieren kannst:
 </para>
 
 <procedure>
@@ -179,7 +178,7 @@ und deren dürftige Qualität, Instabilität und armseligen User- und
 Experten-Support betreffen.
 Viele dieser Probleme/Sachverhalte treten nach wie vor immer wieder auf.
 nVidia hat letztens Kontakt mit uns aufgenommen und behauptet, diese Fehler
-würden nicht existieren, die Instabilität würden von schlechten AGP-Chips
+würden nicht existieren, die Instabilität würde von schlechten AGP-Chips
 verursacht, und sie hätten keine Fehlerberichte (wie etwa die lila Linien)
 erhalten.
 Wenn du also ein Problem mit deiner nVidia-Karte hast, solltest du du auf
@@ -203,7 +202,7 @@ The project from hell</ulink>.
 Er war der Meinung, <application>MPlayer</application> sei schwer zu installieren und
 kam zu dem Schluß, die Entwickler seinen unfreundlich und die Dokumentation
 unvollständig und beleidigend.
-Entscheide selbst, wie es damit steht.
+Entscheide selbst, wie es darum steht.
 Er fuhr fort, Arpi negativ in seinen
 <ulink url="http://www.linuxworld.com/story/32887.htm">10 Linux predictions for 2002</ulink>
 zu erwähnen.
@@ -225,7 +224,7 @@ ihn nicht zu nutzen.&quot;
 Fast zwei Jahre später im Oktober 2003 schrieb er einen anderen Bericht, genannt
 <ulink url="http://www.newsforge.com/article.pl?sid=03/10/02/0343200">Mplayer revisited</ulink>
 (falsche Rechtschreibung wurde beibehalten).
-Darin kam er zu folgenden Schlußfolgerungen:
+Darin kam er zu folgenden Schlussfolgerungen:
 
 <blockquote><para>
 Ich würde gerne erzählen, es hätte bei der Anzahl der Features, in der Performance

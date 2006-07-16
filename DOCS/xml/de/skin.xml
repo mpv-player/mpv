@@ -50,10 +50,10 @@
 </para>
 
 <para>
-  Im Hauptfenster und in der Abspieleiste (siehe unten) kannst du Bilder
+  Im Hauptfenster und in der Abspielleiste (siehe unten) kannst du Bilder
   mit 'Transparenz' verwenden: Mit der Farbe #FF00FF (Magenta) gefüllte Bereiche
   sind beim Betrachten mit <application>MPlayer</application> voll transparent.
-  Die bedeutet, dass du sogar Formfenster haben kannst, wenn dein X-Server die
+  Dies bedeutet, dass du sogar Formfenster haben kannst, wenn dein X-Server die
   XShape-Extension besitzt.
 </para>
 </sect2>
@@ -79,7 +79,7 @@
   Das <emphasis role="bold">Hauptfenster</emphasis> und/oder die
   <emphasis role="bold">Abspielleiste</emphasis> befindet sich dort, wo du
   <application>MPlayer</application> kontrollieren kannst. Der Hintergrund
-  des Fensters ist ein Grafik.
+  des Fensters ist eine Grafik.
   Ins Fenster können (und müssen) diverse Elemente platziert werden:
   <emphasis>Buttons</emphasis>, <emphasis>Potentiometer</emphasis> (Schieberegler)
   und <emphasis>Labels</emphasis>.
@@ -88,14 +88,14 @@
   Ein <emphasis role="bold">Button</emphasis> besitzt drei Zustände (gedrückt,
   losgelassen, deaktiviert), deshalb muss seine Grafik vertikal in drei Teile
   getrennt werden. Siehe Eintrag <link linkend="skin-button">Button</link>
-  mit mehr Details.
+  für mehr Details.
 </para><para>
   Ein <emphasis role="bold">Potentiometer</emphasis> (hauptsächlich für
-  die Suchleiste und die Lautstärke-/Balance-Regler) kann eine beliebige
-  durch die Aufteilung der Grafik in verschiedene untereinander liegende Teile
+  die Suchleiste und die Lautstärke-/Balance-Regler) kann durch die Aufteilung
+  der Grafik in verschiedene untereinander liegende Teile
   eine beliebige Anzahl von Phasen haben. Siehe
   <link linkend="skin-hpotmeter">hpotmeter</link> und
-  <link linkend="skin-potmeter">Potentiometer</link> für Details.
+  <link linkend="skin-potmeter">potmeter</link> für Details.
 </para><para>
   <emphasis role="bold">Labels</emphasis> sind ein wenig speziell: Die Zeichen,
   die man zu ihrer Darstellung benötigt, werden von einer Grafikdatei und
@@ -248,9 +248,9 @@ end
 <para>
   Innerhalb des Fensterblocks kannst du jedes Element für das Fenster durch eine
   Zeile dieser Form definieren:
-<programlisting>item = Parameter</programlisting>
-  Wobei <literal>item</literal> eine Zeichenkette ist, die den Typ des GUI-Elements
-  identifiziert, <literal>parameter</literal> ist ein numerischer oder textueller
+<programlisting>Element = Parameter</programlisting>
+  Wobei <literal>Element</literal> eine Zeichenkette ist, die den Typ des GUI-Elements
+  identifiziert, <literal>Parameter</literal> ist ein numerischer oder textueller
   Wert (oder eine Liste Komma-getrennter Werte).
 </para>
 
@@ -311,7 +311,7 @@ end
 
 <para>
   Hier ein Beispiel, um es zu verdeutlichen. Angenommen, du hast eine Grafik
-  mit Namen <filename>main.png</filename>, die für das Hauptfenster nutzt:
+  mit Namen <filename>main.png</filename>, die du für das Hauptfenster nutzt:
   <programlisting>base = main, -1, -1</programlisting>
   <application>MPlayer</application> versucht, die Dateien
   <filename>main</filename>,
@@ -431,7 +431,7 @@ end
    <listitem><para><literal>phases</literal> - die für die verschiedenen Phasen
    zu verwendende Grafik des hpotmeter. Ein spezieller Wert von <literal>NULL</literal>
    kann benutzt werden, wenn du keine solche Grafik anwenden willst. Die Grafik muss
-   in vertikal <literal>numphases</literal> Teile wie folgt aufgeteilt werden:
+   vertikal in <literal>numphases</literal> Teile wie folgt aufgeteilt werden:
     </para>
 <informalfigure>
 <screen>
@@ -488,10 +488,10 @@ end
   <listitem><para>
   Definiert eine Schrift. <literal>fontfile</literal> ist der Name der
   Schrift-Beschreibungsdatei mit der Erweiterung <filename>.fnt</filename>
-  (geib hier keine Erweiterung an).
+  (gieb hier keine Erweiterung an).
   <literal>fontid</literal> wird verwendet, um auf die Schrift zu verweisen
   (siehe <link linkend="skin-dlabel">dlabel</link>
-  und <link linkend="skin-slabel">slabel</link>). Bis zu 25 Schrift können
+  und <link linkend="skin-slabel">slabel</link>). Bis zu 25 Schriften können
   definiert werden.
   </para></listitem>
 </varlistentry>
@@ -524,8 +524,8 @@ end
   Wert <literal>length</literal> vorgegeben (seine Höhe ist die der
   Zeichen).
   Wird der anzuzeigende Text breiter als dieser Wert, wird er gescrollt,
-  andernfalls wird er innerhalb des Mittels des Wertes des
-  <literal>align</literal>-Parameters festgelegten Zwischenraums ausgerichtet:
+  andernfalls wird er innerhalb des Mittels des Wertes des vom
+  <literal>align</literal>-Parameter festgelegten Zwischenraums ausgerichtet:
   <literal>0</literal> steht für rechts,
   <literal>1</literal> steht für zentriert,
   <literal>2</literal> steht für links.
@@ -630,7 +630,7 @@ das Zeichen <keycap>p</keycap> enthält)</entry>
 </row>
 <row>
 <entry>$s</entry>
-<entry>Das <keycap>s</keycap>-Zeichen (wenn ein Film angehallten wird und die Schrift
+<entry>Das <keycap>s</keycap>-Zeichen (wenn ein Film angehalten wird und die Schrift
 das Zeichen <keycap>s</keycap> enthält)</entry>
 </row>
 <row>
@@ -1194,9 +1194,9 @@ image = font.png
 </para>
 
 <para>
-  Wir wollen, dass Skins, die wir in unser Repository eingefügt werden,
-  bestimmten Qualitätsstandards entsprechen. Es gibt auch vieles, das
-  du tun kannst, um uns das Leben leichter zu machen.
+  Wir wollen, dass Skins, die wir in unser Repository einfügen,
+  bestimmten Qualitätsstandards entsprechen. Du kannst auch vieles
+  dazutun, uns das Leben leichter zu machen.
 </para>
 
 <para>
@@ -1222,7 +1222,7 @@ image = font.png
 <listitem><para>
   Horizontale und vertikale Regler (wie die für Lautstärke
   oder Position) sollten die Mitte des Knaufs sauber in der Mitte
-  des Regglers zentriert haben. Es sollte möglich sein,  den Knauf
+  des Reglers zentriert haben. Es sollte möglich sein, den Knauf
   an beide Enden des Reglers zu bewegen, jedoch nicht darüber hinaus.
 </para></listitem>
 
