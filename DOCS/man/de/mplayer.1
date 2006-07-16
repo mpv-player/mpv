@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19052
+.\" In sync with r19087
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -4072,14 +4072,6 @@ In vielen Fällen funktioniert dies nicht, benutze stattdessen \-vc null \-vo
 null.
 .
 .TP
-.B \-oldpp <Qualität> (nur bei OpenDivX) (VERALTET)
-Benutze den Postprocessing-Code von opendivx anstelle des internen.
-Ersetzt durch \-pp liefert das interne Postprocessing bessere Qualität und
-Performance.
-Der gültige Wertebereich für \-oldpp variiert je nach Codec, ist meistens
-aber 0\-6, wobei 0=deaktiviert und 6=langsamster/\:bester Modus bedeutet.
-.
-.TP
 .B \-pp <Qualität> (siehe auch \-vf pp)
 Setzt das Postprocessing-Level der DLL.
 Diese Option kann nicht mehr in Verbindung mit \-vf pp verwendet werden,
@@ -4193,9 +4185,6 @@ Mit \-vc help wird eine vollständige Liste der verfügbaren Codecs ausgegben.
 .RSs
 .IPs "\-vc divx"
 Erzwingt den Win32/\:VFW DivX-Codec; andere werden nicht ausprobiert.
-.IPs "\-vc divx4,"
-Probiet zuerst den divx4linux-Codec, danach andere, wenn dieser nicht
-funktioniert.
 .IPs "\-vc -divxds,-divx,"
 Überspringt die Win32-DivX-Codecs.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -6814,8 +6803,6 @@ Mit \-ovc help erhältst du eine Liste verfügbarer Codecs.
 .RSs
 .IPs "\-ovc copy"
 kein Encodieren, sondern nur eine Kopie des Videostreams
-.IPs "\-ovc divx4"
-Encodiere zu DivX4/\:DivX5.
 .IPs "\-ovc raw"
 Encodiere zu einem frei wählbaren Format (benutze '\-vf format', um dieses
 auszuwählen).
@@ -6860,88 +6847,8 @@ folgende Syntax benutzt:
 .B \-<Codec>opts <Option1[=Wert1],Option2,...>
 .
 .PP
-Wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, divx4, lame,
+Wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, lame,
 toolame, twolame, nuv, xvfw, faac, x264enc, mpeg und lavf.
-.
-.
-.SS divx4 (\-divx4opts)
-.
-DivX4 ist überholt und wird nur der Vollständigkeit halber unterstützt.
-Für Details zu den DivX4-Optionen musst du den Quellcode lesen, die meisten
-Optionen werden hier nicht vorgestellt.
-.
-.TP
-.B help\ \ \ 
-Gibt einen Hilfstext aus.
-.
-.TP
-.B br=<Wert>
-Gibt die Bitrate an.
-.RSs
-.IPs 4\-16000
-(in kbit)
-.IPs 16001\-24000000
-(in bit)
-.RE
-.
-.TP
-.B key=<Wert>
-maximale Anzahl der Bilder zwischen zwei Keyframes
-.
-.TP
-.B deinterlace
-Aktiviert Deinterlacing (vermeide dies, DivX4 ist fehleranfällig).
-.
-.TP
-.B q=<1\-5>
-Qualitätslevel (1 \- am schnellsten, 5 \- am besten)
-.
-.TP
-.B min_quant=<1\-31>
-minimaler Quantisierungsparameter
-.
-.TP
-.B max_quant=<1\-31>
-maximaler Quantisierungsparameter
-.
-.TP
-.B rc_period=<Wert>
-Bitratenkontrollzeitrahmen
-.
-.TP
-.B rc_reaction_period=<Wert>
-Reaktionszeitrahmen für die Bitratenkontrolle
-.
-.TP
-.B rc_reaction_ratio=<Wert>
-Reaktionsverhältnis für die Bitratenkontrolle
-.
-.TP
-.B crispness=<0\-100>
-Gibt Schärfe/\:Glätte an.
-.
-.TP
-.B pass=<1\-2>
-Mit dieser Option können DivX4-Dateien in zwei Durchläufen erstellt werden.
-Encodiere zuerst mit pass=1, mache dann einen zweiten Durchlauf mit denselben
-Parametern und pass=2.
-.
-.TP
-.B vbrpass=<0\-2>
-Überschreibt den pass-Parameter und benutzt die VBR-Bibliothek von XviD
-anstelle der von DivX4.
-Verfügbare Optionen sind:
-.PD 0
-.RSs
-.IPs 0
-Encodieren in einem Durchlauf (als ob pass überhaupt nicht verwendet würde)
-.IPs 1
-Analyse bzw. erster Durchlauf im Modus mit zwei Durchläufen.
-Das erstellte AVI kann nach /dev/\:null umgeleitet werden.
-.IPs 2
-Finaler (zweiter) Durchlauf im Modus mit zwei Durchläufen.
-.RE
-.PD 1
 .
 .
 .SS lame (\-lameopts)
