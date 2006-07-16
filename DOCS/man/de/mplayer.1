@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19046
+.\" In sync with r19052
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1698,9 +1698,28 @@ Erzwingt Audioparameter für den VIVO-Demuxer (nur für Debugging-Zwecke).
 .
 .
 .
-.SH "OSD-/\:UNTERTITEL-OPTIONEN"
+.SH "OSD-/UNTERTITEL-OPTIONEN"
 .I ANMERKUNG:
 Siehe auch \-vf expand.
+.
+.TP
+.B \-ass-font-scale <Wert>
+Setze den Skalierungskoeffizienten, der für Schriften im
+SSA/ASS-Renderer verwendet werden soll.
+.
+.TP
+.B \-ass-line-spacing <Wert>
+Setzt den Wert für den Zeilenabstand für den SSA/ASS-Renderer.
+.
+.TP
+.B \-ass-bottom-margin <Wert>
+Fügt einen schwarzen Streifen unten ins Bild hinzu.
+Der SSA/ASS-Renderer wird Untertitel dorthin legen.
+.
+.TP
+.B \-ass-top-margin <Wert>
+Fügt einen schwarzen Streifen oben ins Bild hinzu.
+Der SSA/ASS-Renderer wird Obertitel dorthin legen.
 .
 .TP
 .B \-dumpjacosub (nur bei MPlayer)
@@ -1743,6 +1762,12 @@ um die Unix-Zeilenenden durch DOS/Windows-Zeilenenden zu ersetzen.
 .B \-dumpsub (nur bei MPlayer) (BETA CODE)
 Speichert den Untertitel-Substream eines VOB-Streams.
 Siehe auch die Optionen \-dump*sub und \-vobsubout*.
+.
+.TP
+.B \-embeddedfonts (nur bei FreeType)
+Aktiviert die Extraktion von in Matroska eingebetteten Schriften.
+Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
+(Option \-ass).
 .
 .TP
 .B \-ffactor <Nummer> (nur bei OSD)
@@ -1795,12 +1820,6 @@ Bei fontconfig gibt diese Option den fontconfig-Schriftnamen an.
 .TP
 .B \-fontconfig (nur bei fontconfig)
 Ermöglicht die Benutzung von Schriften, die von fontconfig verwaltet werden.
-.
-.TP
-.B \-(no)embeddedfonts (nur bei FreeType)
-Aktiviert die Extraktion von in Matroska eingebetteten Schriften.
-Diese Schriften können für das Rendern von SSA/ASS-Untertiteln verwendet werden
-(Option \-ass).
 .
 .TP
 .B \-forcedsubsonly
@@ -2134,30 +2153,11 @@ Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 Gibt die ID für die VOBsub-Untertitel an.
 .
 .TP
-.B \-ass (nur bei FreeType) (FontConfig optional)
+.B \-ass (nur bei FreeType)
 Schaltet das Zeichnen von SSA/ASS-Untertiteln ein.
 Mit dieser Option wird libass für externe SSA/ASS-Untertitel und
 Matroska-Spuren verwendet.
 Du möchtest vielleicht auch \-embeddedfonts verwenden.
-.
-.TP
-.B \-ass-font-scale <Wert>
-Setze den Skalierungskoeffizienten, der für Schriften im
-SSA/ASS-Renderer verwendet werden soll.
-.
-.TP
-.B \-ass-line-spacing <Wert>
-Setzt den Wert für den Zeilenabstand für den SSA/ASS-Renderer.
-.
-.TP
-.B \-ass-top-margin <Wert>
-Fügt einen schwarzen Streifen oben ins Bild hinzu.
-Der SSA/ASS-Renderer wird Obertitel dorthin legen.
-.
-.TP
-.B \-ass-bottom-margin <Wert>
-Fügt einen schwarzen Streifen unten ins Bild hinzu.
-Der SSA/ASS-Renderer wird Untertitel dorthin legen.
 .
 .
 .
@@ -6587,7 +6587,7 @@ Konfigurationsdatei mit aufzunehmen.
 .RE
 .
 .TP
-.B ass\ \ \ \ \
+.B ass\ \ \ \ 
 Verschiebt das Zeichnen der SSA/ASS-Untertitel an einen beliebigen Punkt in der
 Videofilterkette.
 Nur sinnvoll mit der Option \-ass.
