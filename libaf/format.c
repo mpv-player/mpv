@@ -184,7 +184,7 @@ const char *af_fmt2str_short(int format)
 
     for (i = 0; af_fmtstr_table[i].name; i++)
 	if (af_fmtstr_table[i].format == format)
-	    return (char*)(af_fmtstr_table[i].name);
+	    return af_fmtstr_table[i].name;
 
     return "??";
 }
