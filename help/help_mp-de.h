@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In sync with r18498
+// In sync with r19087
 
 // ========================= MPlayer help ===========================
 
@@ -201,6 +201,9 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "Letzte Stop-Position war [%f]; nächster Start ist [%f].\n"\
 "Einträge müssen in chronologischer Reihenfolge sein, ohne Überschneidung. Verwerfe.\n"
 #define MSGTR_EdlBadLineBadStop "Zeit des Stopps muss nach der Startzeit sein.\n"
+#define MSGTR_EdloutBadStop "EDL-Sprung abgebrochen, letzter Start > Stop\n"
+#define MSGTR_EdloutStartSkip "EDL-Sprung begonnen, drücke 'i' erneut, um den Block zu beenden.\n"
+#define MSGTR_EdloutEndSkip "EDL-Sprung beendet, Zeile geschrieben.\n"
 
 // mplayer.c OSD
 
@@ -491,12 +494,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Codec ist nicht korrekt definiert."
 #define MSGTR_OutdatedCodecsConf "Diese codecs.conf ist zu alt und inkompatibel mit dieser Version von MPlayer!"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "Kein Speicher mehr verfügbar!"
-#define MSGTR_OverridingTooLowBitrate \
-"Angegebene Bitrate ist zu niedrig für diesen Clip. Minimal mögliche Bitrate \n"\
-"für den Clip ist %.0f kbps. Hebe den vom Benutzer angegebenen Wert auf.\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Kann PIPE nicht anlegen!\n"
 
@@ -596,8 +593,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Konnte die Anzahl der Frames (für absolute Suche) nicht feststellen.\n"
 #define MSGTR_CantSeekRawAVI "Suche in reinen AVI-Streams nicht durchführbar (Index erforderlich, probiere die '-idx'-Option.).\n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen.\n"
-
-#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/HTML/en/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: komprimierte Header benötigen ZLIB-Unterstützung.\n"
 #define MSGTR_MOVvariableFourCC "MOV: Warnung: Variabler FourCC erkannt!?\n"
@@ -1613,10 +1608,10 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Konnte die Helligkeitswerte vom Kernelmodul nicht ermitteln!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Konnte die Helligkeitswerte vom Kernelmodul nicht setzen!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Bildschirmbreite/-höhe unbekannt!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] ungültiges Ausgabeformat %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] Die Treiberversion von mga_vid ist mit dieser MPlayer-Version nicht kompatibel!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Benutze %d Buffer.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Konnte %s nicht öffnen\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] Auflösung der Quelle ist in mindestens einer Dimension größer als 1023x1023. Bitte skaliere in Software um oder verwende -lavdopts lowres=1\n"
 
 // libvo/vesa_lvo.c
 
