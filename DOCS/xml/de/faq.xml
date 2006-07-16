@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r17707 -->
+<!-- in sync with r18930 -->
 <chapter id="faq" xreflabel="FAQ">
 	<title>Häufig gestellte Fragen</title>
 	
@@ -188,7 +188,57 @@
 				</answer>
 			</qandaentry>
 		</qandadiv>
-		
+
+		<qandaentry>
+			<question>
+				<para>
+					Erstellen unter Mac OS 10.3 führt zu vielen Linker-Fehlern
+				</para>
+			</question>
+			<answer>
+				<para>
+					Der Linker-Fehler, den du erfährst, sieht höchstwahrscheinlich etwa so aus:
+<screen>
+ld: Undefined symbols:
+_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
+</screen>
+					Dieses Problem ist das Ergebnis der Tatsache, dass Apple-Entwickler 10.4 benutzen, um ihre
+					Software zu compilieren und gleichzeitig die Binärdateien via Softwareupdate an Benutzer
+					von 10.3 weitergeben.
+					Die undefinierten Symbole sind präsent unter Mac OS 10.4, jedoch nicht unter 10.3.
+					Eine Lösung kann sein, ein Downgrade zu QuickTime 7.0.1 durchzuführen.
+					Hier ist eine bessere Lösung:
+				</para>
+				<para>
+					Besorg dir eine
+					<ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">ältere Kopie des Frameworks</ulik>.
+					Dies liefert dir eine komprimierte Datei, die die Frameworks QuickTime 7.0.1 und
+					QuartzCore 10.3.9 enthält.
+				</para>
+				<para>
+					Extrahiere die Dateien irgendwohin außerhalb deines System-Ordners (installiere diese
+					Frameworks also nicht nach z.B.
+					<filename class="directory">/System/Library/Frameworks</filename>!
+					Die Benutzung dieser älteren Kopie ist nur dazu da, die Linker-Fehler zu umgehen!)
+<screen>
+gunzip &lt; CompatFrameworks.tgz | tar xvf -
+</screen>
+					In der Datei config.mak solltest du 
+					<systemitem>-F/Pfad/in/den/du/entpackt/hast</systemitem> der Variable
+					<systemitem>OPTFLAGS</systemitem> anhängen.
+					Wenn du <application>X-Code</application> verwendest, kannst du dieses Framework an Stelle
+					der systemeigenen auswählen.
+				</para>
+				<para>
+					Die resultierende <application>MPlayer</application>-Binärdatei wird in der Tat das auf deinem
+					System einstallierte Framework verwenden, wobei dynamische Verknüpfungen verwendet werden,
+					die zur Laufzeit aufgelöst werden.
+					(Du kannst das mit <systemitem>otool -l</systemitem> verifizieren).
+				</para>
+			</answer>
+		</qandaentry>
+
 		<qandadiv id="faq-general">
 			<title>Allgemeine Fragen</title>
 			

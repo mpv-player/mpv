@@ -340,9 +340,8 @@ end<!--
 	</para>
 	
 	<para>
-		Das EDL-Dateiformat ist ziemlich simpel. Sobald das EDL-System ein gewisses
-		Reifelevel erreicht hat, wird vermutlich ein XML-basiertes Dateiformat
-		implementiert (welches rückwärtskompatibel zu früheren EDL-Formaten sein wird).
+		Das EDL-Dateiformat ist ziemlich simpel. Es gibt einen Befehl pro Zeile, der
+		angibt, was zu tun ist (überspringen/stumm schalten) und wann es zu tun ist (benutzt pts in Sekunden).
 	</para>
 	
 	<sect2 id="edl_using">
@@ -377,10 +376,11 @@ end<!--
 		<para>
 			Um eine EDL-Datei zu erstellen, die als Arbeitsvorlage benutzt werden kann,
 			benutze die Option <option>-edlout &lt;dateiname&gt;</option>.
-			Drücke dann während der Wiedergabe <keycap>i</keycap>, um die vorangegangen zwei
-			Sekunden zum Überspringen zu markieren. Ein entsprechender Eintrag wird für
+			Drücke dann während der Wiedergabe <keycap>i</keycap>, um den Anfang und as Ende
+			eines zu überspringenden Blocks zu markieren. Ein entsprechender Eintrag wird für
 			diese Zeit in die Datei geschrieben. Danach kannst du Feineinstellungen an
-			der generierten EDL-Datei vornehmen.
+			der generierten EDL-Datei vornehmen und zusätzlich die Standardeinstellung ändern,
+			welche darin besteht, den Block, der in einer Zeile beschrieben ist, zu überspringen.
 		</para>
 	</sect2>
 	
