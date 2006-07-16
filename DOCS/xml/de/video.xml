@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18650 -->
+<!-- in sync with r19081 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -940,8 +940,8 @@ mplayer -vm -fbmode <replaceable>Modusname</replaceable> <replaceable>Dateiname<
 <para>
   Dieser Abschnitt beschäftigt sich mit der Unterstützung für
   den BES (Back-End Scaler, Hardwareskalierungseinheit) bei Karten mit dem
-  Matrox-G200/G400/G450/G550-Chip durch das mga_vid-Kernelmodul. Es wird von
-  A'rpi aktiv entwickelt und bietet Unterstützung für Hardware-
+  Matrox-G200/G400/G450/G550-Chip durch das <systemitem>mga_vid</systemitem>-Kernelmodul.
+  Es bietet Unterstützung für Hardware-
   VSYNC und Dreifachpufferung. Dieser Treiber funktioniert sowohl unter der
   Framebufferconsole als auch unter X.
 </para>
@@ -1613,15 +1613,6 @@ make<!--
 </para>
 
 <para>
-  VIDIX ist eine sehr junge Technologie. Es ist deshalb gut möglich,
-  dass sie auf deinem System nicht funktioniert. In diesem
-  Fall liegt deine einzige Möglichkeit darin, VIDIX auf dein System zu
-  portieren (hauptsächlich die libdha). Aber es gibt immer
-  noch die Hoffnung, dass es auf den Systemen funktioniert, auf denen auch X11
-  funktioniert.
-</para>
-
-<para>
   Da VIDIX direkten Zugriff auf die Hardware benötigt, musst du
   <application>MPlayer</application> entweder als
   <systemitem class="username">root</systemitem> starten oder der
@@ -1719,42 +1710,15 @@ make<!--
 
 <sect3 id="vidix-nvidia">
 <title>nVidia-Karten</title>
-<para>
-  Es gibt einen relativ neuen nVidia-Treiber, der bekanntermaßen mit Riva
-  128, TNT und GeForce2-Chipsets finktioniert, auch andere sollen gehen.
-</para>
-
-<itemizedlist spacing="compact">
-<title>EINSCHRÄNKUNGEN</title>
-<listitem><para>
-  Es wird empfohlen, die binären nVidia-Treiber eher als die VIDIX-Treiber
-  für X zu nutzen, da einige der Register, die initialisiert werden müssen,
-  noch nicht entdeckt wurden, somit es möglicherweise mit dem Open Source
-  XFree86 <filename>nv.o</filename>-Treiber fehlschlagen.
-  </para></listitem>
-<listitem><para>
-  Im Moment können nur zur UYVY-Farbraumausgabe fähige Codecs in Verbindung
-  mit diesen Treibern arbeiten. Unglücklicherweise schließt das durch die Bank jeden
-  Decoder der <systemitem class="library">libavcodec</systemitem>-Familie aus.
-  Dadurch stehen nur folgende verbreitete Codecs zur Wahl:
-  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> und einige
-  weiteren. Beachte bitte, dass dies nur eine temporäre Schwierigkeit darstellt.
-  Dei Gebrauchs-Syntax ist folgende:
-  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable> </screen>
-  </para></listitem>
-</itemizedlist>
 
 <para>
   Ein einmaliges Feature des nvidia_vid-Treibers ist seine Fähigkeit, Video auf
   <emphasis role="bold">einfacher, purer Textkonsole</emphasis> darzustellen - ohne
   Framebuffer oder X magic oder was auch immer. Zu diesem Zweck müssen wir
   die <option>cvidix</option>-Videoausgabe verwenden, wie folgendes Beispiel zeigt:
-  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>example.avi</replaceable> </screen>
+  <screen>mplayer -vo cvidix <replaceable>example.avi</replaceable></screen>
 </para>
 
-<para>
-  Berichte erwartet!
-</para>
 </sect3>
 
 <sect3 id="vidix-sis">
