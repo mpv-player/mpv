@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18824 -->
+<!-- in sync with r19104 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -739,14 +739,59 @@ $ ./configure --charset=noconv
 
 <sect1 id="macos">
 <title>Mac OS</title>
+
 <para>
   <application>MPlayer</application> läuft nicht auf Mac OS Versionen vor
   10, sollte jedoch hervorragend auf Mac OS X 10.2 und darüber compilieren.
   Der vorgezogene Compiler ist die Apple-Version von
-  GCC 3.x oder höher. Besitzt du Mac OS X 10.3.9 oder später und QuickTime 7
-  kannst du den macosx-Video-Ausgabetreiber verwenden.
+  GCC 3.x oder höher.
+  Du kannst die grundlegende Compilierumgebung schaffen, indem du
+  <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
+  von Apple installierst.
+  Besitzt du Mac OS X 10.3.9 oder später und QuickTime 7
+  kannst du den Videoausgabetreiber <option>macosx</option> verwenden.
 </para>
 
+<para>
+  Leider ermöglicht es dir diese grundlegende Umgebung nicht, von allen netten Features
+  von <application>MPlayer</application> Gebrauch zu machen.
+  Beispielsweise müssen die Bibliotheken <systemitem class="library">fontconfig</systemitem>
+  und <systemitem class="library">freetype</systemitem> auf deinem System installiert sein,
+  damit das OSD eincompiliert werden kann.
+  Im Gegensatz zu anderen Unices wie den meisten Linux- und BSD-Varianten besitzt
+  OS X kein Paketsystem, das im System enthalten ist.
+</para>
+
+<para>
+  Es stehen mindestens zwei zur Wahl:
+  <ulink url="http://fink.sourceforge.net/">Fink</ulink> und
+  <ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.
+  Beide bieten in etwa denselben Funktionsumfang (z.B. eine Menge Pakete, von denen
+  gewählt werden kann, Auflösung von Abhängigkeiten, die Möglichkeit, einfach
+  Pakete hinzuzufügen/zu aktualisieren/zu entfernen, etc...).
+  Fink bietet sowohl vorcompilierte Binärpakete als auch das Erstellen aus den
+  Quelldateien, wohingegen DarwinPorts nur das Erstellen aus den Quellen anbietet.
+  Der Autor dieser Anleitung hat DarwinPorts gewählt aus dem Grund, dass das
+  grundlegende Setup etwas leichtgewichtiger war.
+  Folgende Beispiele werden sich auf DarwinPorts beziehen.
+</para>
+
+<para>
+  Um zum Beispiel <application>MPlayer</application> mit OSD-Unterstützung zu compilieren:
+  <screen>sudo port install pkgconfig</screen>
+  Dies wird <application>pkg-config</application> installieren, was ein System für die
+  Handhabung von Compiler-/Link-Flags für Bibliotheken ist.
+  Das <systemitem>configure</systemitem>-Skript von <application>MPlayer</application>
+  benutzt dies, um Bibliotheken angemessen zu erkennen.
+  Dann kannst du <application>fontconfig</application> auf ähnliche Weise installieren:
+  <screen>sudo port install fontconfig</screen>
+  Dann kannst du fortfahren mit der Ausführung von <application>MPlayer</application>s
+  <systemitem>configure</systemitem>-Skript (beachte die Umgebungsvariablen
+  <systemitem>PKG_CONFIG_PATH</systemitem> und <systemitem>PATH</systemitem>,
+  so dass <systemitem>configure</systemitem> die mit DarwinPorts installierten
+  Bibliotheken findet):
+  <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
+</para>
 
 <sect2 id="osx_gui">
 <title>MPlayer OS X GUI</title>
@@ -777,12 +822,11 @@ $ ./configure --charset=noconv
 </para>
 
 <para>
-  Um die CVS-Module zu überprüfen, nimm:
+  Um ein Checkout der SVN-Module durchzuführen, benutze:
 
 <screen>
-cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 </screen>
 </para>
 
@@ -793,11 +837,11 @@ cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
 <screen>
 MPlayer_source_verzeichnis
    |
-   |--->main           (MPlayer CVS-Quelle)
+   |--->main           (MPlayer SVN-Quelldateien)
    |
-   |--->main_noaltivec (MPlayer CVS-Quelle konfiguriert mit --disable-altivec)
+   |--->main_noaltivec (MPlayer SVN-Quelldateien konfiguriert mit --disable-altivec)
    |
-   |--->mplayerosx     (MPlayer OS X CVS-Quelle)
+   |--->mplayerosx     (MPlayer OS X SVN-Quelldateien)
 </screen>
 
   Du musst zuerst main und main_noaltivec erzeugen.
