@@ -230,7 +230,7 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
     goto err_out;
   }
 
-  if ((pos = find_asf_guid(hdr, asf_ext_stream_audio, pos, hdr_len)) >= 0)
+  if ((pos = find_asf_guid(hdr, asf_ext_stream_audio, 0, hdr_len)) >= 0)
   {
     // Special case: found GUID for dvr-ms audio.
     // Now skip back to associated stream header.
