@@ -187,7 +187,6 @@
 					</para>
 				</answer>
 			</qandaentry>
-		</qandadiv>
 
 		<qandaentry>
 			<question>
@@ -238,6 +237,8 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 				</para>
 			</answer>
 		</qandaentry>
+
+		</qandadiv>
 
 		<qandadiv id="faq-general">
 			<title>Allgemeine Fragen</title>
