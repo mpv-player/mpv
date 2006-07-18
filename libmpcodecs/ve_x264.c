@@ -247,7 +247,10 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_deblocking_filter_beta = deblockbeta;
     mod->param.b_cabac = cabac;
 
+    mod->param.rc.i_rc_method = X264_RC_CQP;
     mod->param.rc.i_qp_constant = qp_constant;
+    if(rf_constant > 0)
+        mod->param.rc.i_rc_method = X264_RC_CRF;
     mod->param.rc.i_rf_constant = rf_constant;
     if(qp_min > qp_constant)
         qp_min = qp_constant;
@@ -275,7 +278,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
                    "VBV requires both vbv_maxrate and vbv_bufsize.\n");
             return 0;
         }
-        mod->param.rc.b_cbr = 1;
+        mod->param.rc.i_rc_method = X264_RC_ABR;
         mod->param.rc.i_bitrate = bitrate;
         mod->param.rc.f_rate_tolerance = ratetol;
         mod->param.rc.i_vbv_max_bitrate = vbv_maxrate;
