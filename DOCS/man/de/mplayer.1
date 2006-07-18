@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19131
+.\" In sync with r19134
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1703,6 +1703,13 @@ Erzwingt Audioparameter für den VIVO-Demuxer (nur für Debugging-Zwecke).
 Siehe auch \-vf expand.
 .
 .TP
+.B \-ass (nur bei FreeType)
+Schaltet das Zeichnen von SSA/ASS-Untertiteln ein.
+Mit dieser Option wird libass für externe SSA/ASS-Untertitel und
+Matroska-Spuren verwendet.
+Du möchtest vielleicht auch \-embeddedfonts verwenden.
+.
+.TP
 .B \-ass-font-scale <Wert>
 Setze den Skalierungskoeffizienten, der für Schriften im
 SSA/ASS-Renderer verwendet werden soll.
@@ -2151,13 +2158,6 @@ Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 .TP
 .B \-vobsubid <0\-31>
 Gibt die ID für die VOBsub-Untertitel an.
-.
-.TP
-.B \-ass (nur bei FreeType)
-Schaltet das Zeichnen von SSA/ASS-Untertiteln ein.
-Mit dieser Option wird libass für externe SSA/ASS-Untertitel und
-Matroska-Spuren verwendet.
-Du möchtest vielleicht auch \-embeddedfonts verwenden.
 .
 .
 .
