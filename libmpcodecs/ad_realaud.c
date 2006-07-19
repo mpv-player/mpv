@@ -410,6 +410,8 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
   if(sh->a_in_buffer_len<=0){
       // fill the buffer!
+      if (sh->ds->eof)
+          return 0;
       demux_read_data(sh->ds, sh->a_in_buffer, sh->wf->nBlockAlign);
       sh->a_in_buffer_size=
       sh->a_in_buffer_len=sh->wf->nBlockAlign;
