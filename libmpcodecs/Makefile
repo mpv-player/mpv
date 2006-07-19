@@ -310,7 +310,6 @@ SRCS=$(AUDIO_SRCS) \
      $(VIDEO_SRCS) \
      $(VFILTER_SRCS) \
      $(NATIVE_SRCS) \
-     mpeg_packetizer.c \
      img_format.c \
 
 OBJS=$(SRCS:.c=.o)

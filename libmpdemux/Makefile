@@ -26,6 +26,7 @@ SRCS += cdinfo.c \
         cue_read.c \
         parse_es.c \
         parse_mp4.c \
+        mpeg_packetizer.c \
         yuv4mpeg.c \
         yuv4mpeg_ratio.c \
 
