@@ -16,11 +16,7 @@ OBJS	= $(SRCS:.c=.o)
 INCLUDE = -I. -I../libvo -I..
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
-ifeq ($(TARGET_ARCH_X86),yes)
-SRCS += idct_mmx.c motion_comp_mmx.c
-endif
-
-ifeq ($(TARGET_ARCH_X86_64),yes)
+ifeq ($(TARGET_MMX),yes)
 SRCS += idct_mmx.c motion_comp_mmx.c
 endif
 
