@@ -413,6 +413,7 @@ void MP3_Init(){
 
 #ifdef CAN_COMPILE_X86_ASM
 
+#ifdef HAVE_MMX
     if (gCpuCaps.hasMMX)
     {
 	_has_mmx = 1;
@@ -420,7 +421,9 @@ void MP3_Init(){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: made decode tables with MMX optimization\n");
 	synth_func = synth_1to1_MMX;
     }
+#endif
 
+#ifdef HAVE_3DNOWEX
     if (gCpuCaps.has3DNowExt)
     {
 	dct36_func=dct36_3dnowex;
@@ -428,6 +431,8 @@ void MP3_Init(){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
+#endif
+#ifdef HAVE_3DNOW
     if (gCpuCaps.has3DNow)
     {
 	dct36_func = dct36_3dnow;
@@ -435,18 +440,23 @@ void MP3_Init(){
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow! optimized decore!\n");
     }
     else
+#endif
+#ifdef HAVE_SSE
     if (gCpuCaps.hasSSE)
     {
 	dct64_MMX_func = dct64_sse;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using SSE optimized decore!\n");
     }
     else
+#endif
+#ifdef HAVE_MMX
     if (gCpuCaps.hasMMX)
     {
 	dct64_MMX_func = dct64_MMX;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using MMX optimized decore!\n");
     }
     else
+#endif
     if (gCpuCaps.cpuType >= CPUTYPE_I586)
     {
 	synth_func = synth_1to1_pent;

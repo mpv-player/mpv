@@ -123,7 +123,7 @@ static int synth_1to1_mono2stereo(real *bandPtr,unsigned char *samples,int *pnt)
 
 static synth_func_t synth_func;
 
-#if defined(CAN_COMPILE_X86_ASM)
+#if defined(CAN_COMPILE_X86_ASM) && defined(HAVE_MMX)
 int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
 {
     static short buffs[2][2][0x110];
