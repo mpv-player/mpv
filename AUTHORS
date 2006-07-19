@@ -812,6 +812,7 @@ Zoltán, Márk Vicián (Se7en) <se7en@sch.bme.hu>
 Zores, Benjamin (ben) <ben@geexbox.org>
     * RTSP demuxer in libmpdemux.
     * PVR input layer for IVTV based cards.
+    * IVTV h/w MPEG decoder vo driver.
 
 ________________
 The codecs, libs
