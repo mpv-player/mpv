@@ -151,6 +151,7 @@ libvo drivers:
     * vo_gif89a.c - Joey Parrish
     * vo_gl.c - Reimar Döffinger
     * vo_gl2.c - Reimar Döffinger
+    * vo_ivtv.c - Benjamin Zores
     * vo_jpeg.c - Ivo van Poorten
     * vo_macosx.m - Nicolas Plourde
     * vo_md5sum.c - Ivo van Poorten
