@@ -318,6 +318,7 @@ Video output:
   --enable-directx       build with DirectX support [autodetect]
   --enable-dxr2          build with DXR2 render support [autodetect]
   --enable-dxr3          build with DXR3/H+ render support [autodetect]
+  --enable-ivtv          build with IVTV TV-Out render support [autodetect]
   --enable-dvb           build with support for output via DVB-Card [autodetect]
   --enable-dvbhead       build with DVB support (HEAD version) [autodetect]
   --enable-mga           build with mga_vid (for Matrox G200/G4x0/G550) support
@@ -1597,6 +1598,7 @@ _dvb=auto
 _dvbhead=auto
 _dxr2=auto
 _dxr3=auto
+_ivtv=auto
 _iconv=auto
 _langinfo=auto
 _rtc=auto
@@ -1784,6 +1786,8 @@ for ac_option do
   --disable-dxr2)	_dxr2=no	;;
   --enable-dxr3)	_dxr3=yes	;;
   --disable-dxr3)	_dxr3=no	;;
+  --enable-ivtv)        _ivtv=yes       ;;
+  --disable-ivtv)       _ivtv=no        ;;
   --enable-iconv)	_iconv=yes	;;
   --disable-iconv)	_iconv=no	;;
   --enable-langinfo)	_langinfo=yes	;;
@@ -4695,6 +4699,30 @@ else
   _novomodules="dxr3 $_novomodules"
 fi
 echores "$_dxr3"
+
+
+echocheck "IVTV TV-Out"
+if test "$_ivtv" = auto ; then
+  cat > $TMPC << EOF
+#include <stdlib.h>
+#include <inttypes.h>
+#include <linux/types.h>
+#include <linux/videodev2.h>
+#include <linux/ivtv.h>
+int main(void) { return 0; }
+EOF
+  _ivtv=no
+  cc_check && _ivtv=yes
+fi
+if test "$_ivtv" = yes ; then
+  _def_ivtv='#define HAVE_IVTV 1'
+  _vosrc="$_vosrc vo_ivtv.c"
+  _vomodules="ivtv $_vomodules"
+else
+  _def_ivtv='#undef HAVE_IVTV'
+  _novomodules="ivtv $_novomodules"
+fi
+echores "$_ivtv"
 
 
 echocheck "libfame"
@@ -8207,6 +8235,7 @@ $_def_syncfb
 $_def_fbdev
 $_def_dxr2
 $_def_dxr3
+$_def_ivtv
 $_def_dvb
 $_def_dvb_in
 $_def_svga
