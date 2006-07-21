@@ -198,7 +198,7 @@ DirectFB, Quartz, Mac OS X CoreVideo, mais vous pouvez aussi utiliser
 GGI, SDL (et de cette façon tous leurs drivers), VESA (sur n'importe 
 quelle carte compatible VESA, même sans X11), quelques drivers spécifiques à
 certaines cartes (pour Matrox, 3dfx et ATI) et certaines cartes de
-décompression MPEG, telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
+décompression MPEG, telles que les Siemens DVB, Hauppauge PVR (IVTV), DXR2 et DXR3/\:Hollywood+.
 La plupart d'entre eux gèrent le redimensionnement logiciel ou
 matériel, vous pouvez donc apprécier les films en plein-écran.
 .PP
@@ -3597,6 +3597,23 @@ em8300.
 .PD 1
 .
 .TP
+.B ivtv (IVTV uniquement)
+Pilote de sortie vidéo spécifique pour les chipsets de décodage MPEG
+Conexant CX23415 (iCompression  iTVC15) et Conexant CX23416
+(iCompression  iTVC16) présents sur les cartes
+Hauppauge WinTV PVR-150/250/350/500.
+Voir aussi le filtre vidéo lavc.
+.PD 0
+.RSs
+.IPs device
+Choisit explicitement le périphérique de décodage MPEG à utiliser
+(par défaut\ : /dev/\:video16).
+.IPs output
+Choisit explicitement le type de connecteur signal vidéo à utiliser pour la sortie TV.
+.RE
+.PD 1
+.
+.TP
 .B mpegpes (DVB uniquement)
 Pilote de sortie vidéo pour cartes DVB permettant l'écriture au format
 MPEG-PES dans un fichier si aucune carte DVB n'est installée.
@@ -5530,7 +5547,7 @@ Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .TP
 .B lavc[=qualité:fps]
 Conversion logicielle rapide YV12 vers MPEG-1 avec libavcodec pour utilisation
-avec DVB/\:DXR3.
+avec DVB/\:DXR3/IVTV.
 Plus rapide et de meilleure qualité que \-vf fame.
 .RSs
 .IPs <qualité>
@@ -5547,7 +5564,7 @@ force le nombre de trames par seconde en sortie (nombre flottant)
 .TP
 .B fame\ \ \ 
 Conversion logicielle rapide YV12 vers MPEG-1 avec libfame pour utilisation avec
-DVB/\:DXR3.
+DVB/\:DXR3/IVTV.
 .
 .TP
 .B dvbscale[=aspect]
