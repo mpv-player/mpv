@@ -1,4 +1,4 @@
-.\" synced with r19051
+.\" synced with r19134
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1260,7 +1260,7 @@ Dit à MPlayer de lire les canaux depuis <nom_fichier>.
 type de carte) ou ~/.mplayer/\:channels.conf en dernier recours.
 .IPs timeout=<1\-30>
 Nombre maximal de secondes à attendre lors des tentatives de synthonisation
-du transpondeur avant d'abandonner (par défaut\ : 3).
+à la bonne fréquence avant d'abandonner (par défaut\ : 30).
 .RE
 .PD 1
 .
@@ -1354,9 +1354,9 @@ Les options disponibles sont:
 .PD 0
 .RSs
 .IPs w=<valeur>
-largeur de la sortie (par défaut\ : autodétection)
+largeur de l'entrée (par défaut\ : autodétection)
 .IPs h=<valeur>
-hauteur de la sortie (par défaut autodétection)
+hauteur de l'entrée (par défaut autodétection)
 .IPs fps=<valeur>
 fps de la sortie (par défaut\ : 25)
 .IPs type=<valeur>
@@ -3609,7 +3609,8 @@ Voir aussi le filtre vidéo lavc.
 Choisit explicitement le périphérique de décodage MPEG à utiliser
 (par défaut\ : /dev/\:video16).
 .IPs output
-Choisit explicitement le type de connecteur signal vidéo à utiliser pour la sortie TV.
+Choisit explicitement le type de connecteur signal vidéo à utiliser
+pour la sortie TV.
 .RE
 .PD 1
 .
