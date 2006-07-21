@@ -195,7 +195,7 @@ It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, Mac OS X CoreVideo, but you can also use GGI, SDL (and all their drivers),
 VESA (on every VESA-compatible card, even without X11), some low-level
 card-specific drivers (for Matrox, 3dfx and ATI) and some hardware MPEG decoder
-boards, such as the Siemens DVB, DXR2 and DXR3/\:Hollywood+.
+boards, such as the Siemens DVB, Hauppauge PVR (IVTV), DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
 fullscreen mode.
 .PP
@@ -3371,6 +3371,19 @@ Specifies the device number to use if you have more than one em8300 card.
 .PD 1
 .
 .TP
+.B ivtv (IVTV only)
+Conexant CX23415 (iCompression iTVC15) or Conexant CX23416 (iCompression iTVC16) MPEG decoder chip (Hauppauge WinTV PVR-150/250/350/500) specific video output driver for TV-Out.
+Also see the lavc video filter.
+.PD 0
+.RSs
+.IPs device
+Explicitly choose the mpeg decoder device name to use (default: /dev/video16).
+.IPs output
+Explicitely choose the TV-Out output to be used for video signal.
+.RE
+.PD 1
+.
+.TP
 .B mpegpes (DVB only)
 Video output driver for DVB cards that writes the output to an MPEG-PES file
 if no DVB card is installed.
@@ -5217,7 +5230,7 @@ You should see a red, green and blue stripe from top to bottom.
 .
 .TP
 .B lavc[=quality:fps]
-Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3.
+Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3/IVTV.
 Faster and of better quality than \-vf fame.
 .RSs
 .IPs <quality>
@@ -5232,7 +5245,7 @@ force output fps (float value) (default: 0, autodetect based on height)
 .
 .TP
 .B fame\ \ \ 
-Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3.
+Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3/IVTV.
 .
 .TP
 .B dvbscale[=aspect]
