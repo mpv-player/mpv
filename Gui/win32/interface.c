@@ -89,7 +89,7 @@ int parse_filename(char *file, play_tree_t *playtree, m_config_t *mconfig, int c
 /**
  * \brief this actually creates a new list containing only one element...
  */
-void gaddlist( char ***list, char *entry)
+void gaddlist( char ***list, const char *entry)
 {
     int i;
 
@@ -104,7 +104,7 @@ void gaddlist( char ***list, char *entry)
     (*list)[1] = NULL;
 }
 
-char *gstrdup(char *str)
+char *gstrdup(const char *str)
 {
     if (!str) return NULL;
     return strdup(str);
