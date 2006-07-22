@@ -12,6 +12,7 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "libaf/af_format.h"
+#include "libmpdemux/mpeg_packetizer.h"
 
 
 static ao_info_t info =
@@ -139,8 +140,6 @@ static void audio_resume(void)
 {
 }
 
-extern void dxr2_send_packet(unsigned char* data,int len,int id,int timestamp);
-extern void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,int timestamp,int freq_id);
 extern int vo_pts;
 // return: how many bytes can be played without blocking
 static int get_space(void){
@@ -156,11 +155,14 @@ static int get_space(void){
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
+  extern int write_dxr2(unsigned char *data, int len);
+  extern void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,int timestamp,int freq_id);
+
   // MPEG and AC3 don't work :-(
     if(ao_data.format==AF_FORMAT_MPEG2)
-	dxr2_send_packet(data,len,0xC0,ao_data.pts);
+      send_mpeg_ps_packet (data, len, 0xC0, ao_data.pts, 2, write_dxr2);
     else if(ao_data.format==AF_FORMAT_AC3)
-      	dxr2_send_packet(data,len,0x80,ao_data.pts);
+      send_mpeg_ps_packet (data, len, 0x80, ao_data.pts, 2, write_dxr2);
     else {
 	int i;
 	//unsigned short *s=data;

@@ -18,6 +18,7 @@
 #include "mp_msg.h"
 #include "m_option.h"
 #include "sub.h"
+#include "libmpdemux/mpeg_packetizer.h"
 
 #ifdef X11_FULLSCREEN
 #include "x11_common.h"
@@ -154,9 +155,16 @@ static char *ucodesearchpath[] = {
 static unsigned char dxr2buf[BUF_SIZE];
 static unsigned int  dxr2bufpos = 0;
 
-static void write_dxr2(void *data, int len)
+int write_dxr2(unsigned char *data, int len)
 {
   int w = 0;
+
+  if (dxr2_fd < 0)
+  {
+    mp_msg (MSGT_VO, MSGL_ERR, "DXR2 fd is not valid\n");
+    return 0;
+  }
+  
   while (len>0) if ((dxr2bufpos+len) <= BUF_SIZE) {
     memcpy(dxr2buf+dxr2bufpos, data, len);
     dxr2bufpos+=len;
@@ -169,7 +177,7 @@ static void write_dxr2(void *data, int len)
       data+=copylen;
       len-=copylen;
     }
-    w = write(dxr2_fd, dxr2buf, BUF_SIZE);
+    w += write(dxr2_fd, dxr2buf, BUF_SIZE);
     if(w < 0) {
       mp_msg(MSGT_VO,MSGL_WARN,"DXR2 : write failed : %s \n",strerror(errno));
       dxr2bufpos = 0;
@@ -179,6 +187,8 @@ static void write_dxr2(void *data, int len)
     if(dxr2bufpos)
       memmove(dxr2buf,dxr2buf + w,dxr2bufpos);
   }
+
+  return w;
 }
 
 static void flush_dxr2()
@@ -199,74 +209,13 @@ static void flush_dxr2()
 
 static unsigned char pack[PACK_MAX_SIZE];
 
-static unsigned char mpg_header[]={
-  0x00, 0x00, 0x01, 0xba, 0x44, 0x00, 0x04, 0x00,
-  0x04, 0x01, 0x01, 0x86, 0xa3, 0xf8
-};
-
 static unsigned char mpg_eof[]={
   0x00, 0x00, 0x01, 0xb9
 };
 
-static void dxr2_send_header(void)
-{
-  write_dxr2(&mpg_header, sizeof(mpg_header));
-}
-
 static void dxr2_send_eof(void)
 {
-  write_dxr2(&mpg_eof, sizeof(mpg_eof));
-}
-
-void dxr2_send_packet(unsigned char* data,int len,int id,int timestamp)
-{
-  int ptslen=5;
-
-  if(dxr2_fd < 0) {
-    mp_msg(MSGT_VO,MSGL_ERR,"DXR2 fd is not valid\n");
-    return;
-  }
-
-  mp_msg(MSGT_VO,MSGL_DBG2,"DXR2 packet : 0x%x => %d   \n",id,timestamp);
-  dxr2_send_header();
-
-  // startcode:
-  pack[0]=pack[1]=0;pack[2]=0x01;
-  // stream id
-  pack[3]=id;
-
-  while(len>0){
-    int payload_size=len;  // data + PTS
-    if(9+ptslen+payload_size>PACK_MAX_SIZE) payload_size=PACK_MAX_SIZE-(6+ptslen);
-
-    // construct PES header:  (code from ffmpeg's libav)
-    // packetsize:
-    pack[4]=(3+ptslen+payload_size)>>8;
-    pack[5]=(3+ptslen+payload_size)&255;
-
-    pack[6]=0x81;
-    if(ptslen){
-      int x;
-      pack[7]=0x80;
-      pack[8]=ptslen;
-      // presentation time stamp:
-      x=(0x02 << 4) | (((timestamp >> 30) & 0x07) << 1) | 1;
-      pack[9]=x;
-      x=((((timestamp >> 15) & 0x7fff) << 1) | 1);
-      pack[10]=x>>8; pack[11]=x&255;
-      x=((((timestamp) & 0x7fff) << 1) | 1);
-      pack[12]=x>>8; pack[13]=x&255;
-    } else {
-      pack[7]=0x00;
-      pack[8]=0x00;
-    }
-
-    write_dxr2(pack, 9+ptslen);
-    write_dxr2(data, payload_size);
-
-    len-=payload_size; data+=payload_size;
-    ptslen=0; // store PTS only once, at first packet!
-  }
+  write_dxr2(mpg_eof, sizeof(mpg_eof));
 }
 
 void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,int freq_id)
@@ -882,8 +831,10 @@ static void draw_osd(void)
 static int draw_frame(uint8_t * src[])
 {
   vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
+
   if(p->id == 0x1E0) {// Video
-    dxr2_send_packet(p->data, p->size, p->id, p->timestamp);
+    send_mpeg_ps_packet (p->data, p->size, p->id,
+                         p->timestamp ? p->timestamp : vo_pts, 2, write_dxr2);
   } else if(p->id == 0x20) // Subtitles
     dxr2_send_sub_packet(p->data, p->size, p->id, p->timestamp);
   return 0;
