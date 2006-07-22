@@ -191,10 +191,11 @@ static void draw_osd(void)
 }
 
 
-static void my_write(unsigned char* data,int len){
+static int my_write(unsigned char* data,int len){
 #ifdef HAVE_DVB
 #define NFD   2
     struct pollfd pfd[NFD];
+    int orig_len = len;
 
 //    printf("write %d bytes  \n",len);
 
@@ -222,6 +223,7 @@ static void my_write(unsigned char* data,int len){
 #else
     write(vo_mpegpes_fd,data,len); // write to file
 #endif
+    return orig_len;
 }
 
 static unsigned char pes_header[PES_MAX_SIZE];
