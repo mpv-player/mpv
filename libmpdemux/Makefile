@@ -174,7 +174,7 @@ SRCS += asf_streaming.c \
         asf_mmst_streaming.c \
         pnm.c \
         rtp.c \
-        rtsp.c \
+        stream_rtsp.c \
 
 SRCS += realrtsp/asmrp.c \
         realrtsp/real.c \
