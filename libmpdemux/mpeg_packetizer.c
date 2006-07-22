@@ -33,87 +33,26 @@
 
 static unsigned char pes_header[PES_MAX_SIZE];
 
-static unsigned char ps_header[] = {
+static unsigned char ps2_header[] = {
   0x00, 0x00, 0x01, 0xba, 0x44, 0x00, 0x04, 0x00,
   0x04, 0x01, 0x01, 0x86, 0xa3, 0xf8
 };
 
-/* Send MPEG 1 PES packet */
-int
-send_mpeg1_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
-                       int my_write (unsigned char *data, int len))
-{
-  int ptslen = pts ? 5 : 1;
-  int n = 0;
 
-  mp_msg (MSGT_HEADER, MSGL_DBG2,
-          "MPEG1 PES packet: 0x%x => %lu   \n", id, pts);
-  memset (pes_header, '\0', PES_MAX_SIZE);
-
-  /* startcode */
-  pes_header[0] = 0;
-  pes_header[1] = 0;
-  pes_header[2] = id >> 8;
-  pes_header[3] = id & 255;
-    
-  while (len > 0)
-  {
-    int payload_size = len;  /* data + PTS */
-    if (6 + ptslen + payload_size > PES_MAX_SIZE)
-      payload_size = PES_MAX_SIZE - (6 + ptslen);
-	    
-    /* construct PES header: packetsize */
-    pes_header[4] = (ptslen + payload_size) >> 8;
-    pes_header[5] = (ptslen + payload_size) & 255;
-
-    if (ptslen == 5)
-    {
-      int x;
-      /* presentation time stamp */
-      x = (0x02 << 4) | (((pts >> 30) & 0x07) << 1) | 1;
-      pes_header[6] = x;
-      
-      x = ((((pts >> 15) & 0x7fff) << 1) | 1);
-      pes_header[7] = x >> 8;
-      pes_header[8] = x & 255;
-      
-      x = (((pts & 0x7fff) << 1) | 1);
-      pes_header[9] = x >> 8;
-      pes_header[10] = x & 255;
-    }
-    else
-    {
-      /* stuffing and header bits */
-      pes_header[6] = 0x0f;
-    }
-
-    memcpy (&pes_header[6 + ptslen], data, payload_size);
-    n += my_write (pes_header, 6 + ptslen + payload_size);
-
-    len -= payload_size;
-    data += payload_size;
-    ptslen = 1; /* store PTS only once, at first packet! */
-  }
-
-  return n;
-}
-
-/* Send MPEG 1 PS packet */
-int
-send_mpeg1_ps_packet (unsigned char *data, int len, int id, uint64_t pts,
-                      int my_write (unsigned char *data, int len))
-{
-  my_write (ps_header, sizeof (ps_header));
-  return send_mpeg1_pes_packet (data, len, id, pts, my_write);
-}
+static unsigned char ps1_header[] = {
+  0x00, 0x00, 0x01, 0xba, 0x21, 0x00,
+  0xb9, 0x37, 0x83, 0x80, 0xc3, 0x51,
+};
 
 /* Send MPEG 2 PES packet */
 int
-send_mpeg2_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
+send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts, int type,
                        int my_write (unsigned char *data, int len))
 {
   int ptslen = 5;
   int n = 0;
+  int idx, plen;
+  int hdr;
 
   mp_msg (MSGT_HEADER, MSGL_DBG2,
           "MPEG2 PES packet: 0x%x => %lu   \n", id, pts);
@@ -128,43 +67,59 @@ send_mpeg2_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
   while (len > 0)
   {
     int payload_size = len;  /* data + PTS */
-    if (9 + ptslen + payload_size > PES_MAX_SIZE)
-      payload_size = PES_MAX_SIZE - (6 + ptslen);
+    if(type == 2)
+        hdr = 3;
+    else
+        hdr = (ptslen ? 0 : 1);
+    if (6 + hdr + ptslen + payload_size > PES_MAX_SIZE)
+      payload_size = PES_MAX_SIZE - 6 - hdr - ptslen;
 
     /* construct PES header: packetize */
-    pes_header[4] = (3 + ptslen + payload_size) >> 8;
-    pes_header[5] = (3 + ptslen + payload_size) & 255;
-    pes_header[6] = 0x81;
-
+    plen = payload_size + hdr + ptslen;
+    pes_header[4] = plen >> 8;
+    pes_header[5] = plen & 255;
+    idx = 6;
+    
     if (ptslen)
     {
       int x;
-      pes_header[7] = 0x80;
-      pes_header[8] = ptslen;
+      
+      if(type == 2)
+      {
+        pes_header[idx++] = 0x81;
+        pes_header[idx++] = 0x80;
+        pes_header[idx++] = ptslen;
+      }
       
       /* presentation time stamp */
       x = (0x02 << 4) | (((pts >> 30) & 0x07) << 1) | 1;
-      pes_header[9] = x;
+      pes_header[idx++] = x;
       
       x = ((((pts >> 15) & 0x7fff) << 1) | 1);
-      pes_header[10] = x >>8;
-      pes_header[11] = x & 255;
+      pes_header[idx++] = x >>8;
+      pes_header[idx++] = x & 255;
       
       x = (((pts & 0x7fff) << 1) | 1);
-      pes_header[12] = x >> 8;
-      pes_header[13] = x & 255;
+      pes_header[idx++] = x >> 8;
+      pes_header[idx++] = x & 255;
     }
     else
     {
-      pes_header[7] = 0x00;
-      pes_header[8] = 0x00;
+      if(type == 2)
+      {
+        pes_header[idx++] = 0x81;
+        pes_header[idx++] = 0x00;
+        pes_header[idx++] = 0x00;
+      }
+      else
+        pes_header[idx++] = 0x0f;
     }
+    
+    my_write (pes_header, idx);
+    n = my_write (data, payload_size);
 
-    my_write (pes_header, 9 + ptslen);
-    n += my_write (data, payload_size);
-
-    len -= payload_size;
-    data += payload_size;
+    len -= n;
+    data += n;
     ptslen = 0; /* store PTS only once, at first packet! */
   }
 
@@ -173,11 +128,14 @@ send_mpeg2_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
 
 /* Send MPEG 2 PS packet */
 int
-send_mpeg2_ps_packet (unsigned char *data, int len, int id, uint64_t pts,
+send_mpeg_ps_packet (unsigned char *data, int len, int id, uint64_t pts, int type,
                       int my_write (unsigned char *data, int len))
 {
-  my_write (ps_header, sizeof (ps_header));
-  return send_mpeg2_pes_packet (data, len, id, pts, my_write);
+  if(type == 2)
+    my_write (ps2_header, sizeof (ps2_header));
+  else
+    my_write (ps1_header, sizeof (ps1_header));
+  return send_mpeg_pes_packet (data, len, id, pts, type, my_write);
 }
 
 /* Send MPEG LPCM packet */

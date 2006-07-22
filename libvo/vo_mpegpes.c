@@ -62,6 +62,7 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#include "libmpdemux/mpeg_packetizer.h"
 
 int vo_mpegpes_fd=-1;
 int vo_mpegpes_fd2=-1;
@@ -226,44 +227,7 @@ static void my_write(unsigned char* data,int len){
 static unsigned char pes_header[PES_MAX_SIZE];
 
 void send_pes_packet(unsigned char* data,int len,int id,int timestamp){
-    int ptslen=timestamp?5:1;
-
-	      // startcode:
-	      pes_header[0]=pes_header[1]=0;
-	      pes_header[2]=id>>8; pes_header[3]=id&255;
-    
-    while(len>0){
-	    int payload_size=len;  // data + PTS
-	    if(6+ptslen+payload_size>PES_MAX_SIZE) payload_size=PES_MAX_SIZE-(6+ptslen);
-	    
-    // construct PES header:  (code from ffmpeg's libav)
-	      // packetsize:
-	      pes_header[4]=(ptslen+payload_size)>>8;
-	      pes_header[5]=(ptslen+payload_size)&255;
-
-	if(ptslen==5){
-	      int x;
-	      // presentation time stamp:
-	      x=(0x02 << 4) | (((timestamp >> 30) & 0x07) << 1) | 1;
-	      pes_header[6]=x;
-	      x=((((timestamp >> 15) & 0x7fff) << 1) | 1);
-	      pes_header[7]=x>>8; pes_header[8]=x&255;
-	      x=((((timestamp) & 0x7fff) << 1) | 1);
-	      pes_header[9]=x>>8; pes_header[10]=x&255;
-	} else {
-	      // stuffing and header bits:
-	      pes_header[6]=0x0f;
-	}
-
-	memcpy(&pes_header[6+ptslen],data,payload_size);
-	my_write(pes_header,6+ptslen+payload_size);
-
-	len-=payload_size; data+=payload_size;
-	ptslen=1; // store PTS only once, at first packet!
-    }
-
-//    printf("PES: draw frame!  pts=%d   size=%d  \n",timestamp,len);
-
+    send_mpeg_pes_packet (data, len, id, timestamp, 1, my_write);
 }
 
 void send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,int freq_id){

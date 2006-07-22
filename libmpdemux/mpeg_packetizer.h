@@ -25,19 +25,12 @@
 #ifndef _MPEG_PACKETIZER_H_
 #define _MPEG_PACKETIZER_H_
 
-/* Send MPEG 1 PES packet */
-int send_mpeg1_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
+/* Send MPEG 1/2 PES packet */
+int send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts, int type,
                            int my_write (unsigned char *data, int len));
 
-/* Send MPEG 1 PS packet */
-int send_mpeg1_ps_packet (unsigned char *data, int len, int id, uint64_t pts,
-                          int my_write (unsigned char *data, int len));
-/* Send MPEG 2 PES packet */
-int send_mpeg2_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
-                           int my_write (unsigned char *data, int len));
-
-/* Send MPEG 2 PS packet */
-int send_mpeg2_ps_packet (unsigned char *data, int len, int id, uint64_t pts,
+/* Send MPEG 1/2 PS packet */
+int send_mpeg_ps_packet (unsigned char *data, int len, int id, uint64_t pts, int type,
                           int my_write (unsigned char *data, int len));
 
 /* Send MPEG LPCM packet */

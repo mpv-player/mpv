@@ -236,8 +236,8 @@ flip_page (void)
   if (!pes)
     return;
 
-  send_mpeg2_pes_packet (pes->data, pes->size, pes->id,
-                         pes->timestamp ? pes->timestamp : vo_pts,
+  send_mpeg_pes_packet (pes->data, pes->size, pes->id,
+                         pes->timestamp ? pes->timestamp : vo_pts, 2,
                          ivtv_write);
 
   /* ensure flip_page() won't be called twice */
