@@ -55,7 +55,7 @@ send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
   int hdr;
 
   mp_msg (MSGT_HEADER, MSGL_DBG2,
-          "MPEG2 PES packet: 0x%x => %lu   \n", id, pts);
+          "MPEG%d PES packet: 0x%x => %lu   \n", type, id, pts);
   memset (pes_header, '\0', PES_MAX_SIZE);
   
   /* startcode */
