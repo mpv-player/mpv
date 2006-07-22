@@ -192,10 +192,10 @@ static void draw_osd(void)
 
 
 static int my_write(unsigned char* data,int len){
+    int orig_len = len;
 #ifdef HAVE_DVB
 #define NFD   2
     struct pollfd pfd[NFD];
-    int orig_len = len;
 
 //    printf("write %d bytes  \n",len);
 
