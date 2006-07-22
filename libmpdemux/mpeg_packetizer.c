@@ -44,10 +44,10 @@ static unsigned char ps1_header[] = {
   0xb9, 0x37, 0x83, 0x80, 0xc3, 0x51,
 };
 
-/* Send MPEG 2 PES packet */
+/* Send MPEG <type> PES packet */
 int
-send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts, int type,
-                       int my_write (unsigned char *data, int len))
+send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
+                      int type, int my_write (unsigned char *data, int len))
 {
   int ptslen = 5;
   int n = 0;
@@ -126,7 +126,7 @@ send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts, int ty
   return n;
 }
 
-/* Send MPEG 2 PS packet */
+/* Send MPEG <type> PS packet */
 int
 send_mpeg_ps_packet (unsigned char *data, int len, int id, uint64_t pts, int type,
                       int my_write (unsigned char *data, int len))
@@ -138,7 +138,7 @@ send_mpeg_ps_packet (unsigned char *data, int len, int id, uint64_t pts, int typ
   return send_mpeg_pes_packet (data, len, id, pts, type, my_write);
 }
 
-/* Send MPEG LPCM packet */
+/* Send MPEG 2 LPCM packet */
 int
 send_mpeg_lpcm_packet (unsigned char* data, int len,
                        int id, uint64_t pts, int freq_id,
