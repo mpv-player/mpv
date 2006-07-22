@@ -59,7 +59,7 @@ static int mpa_sync(sh_audio_t *sh, int no_frames, int *n, int *chans, int *srat
 
 static int preinit(sh_audio_t *sh)
 {
-	sh->audio_out_minsize = 48;//check
+	sh->audio_out_minsize = 4608;//check
 	sh->audio_in_minsize = 4608;//check
 	sh->sample_format = AF_FORMAT_MPEG2;
 	return 1;
@@ -85,13 +85,14 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 {
 	int len, start, tot;
 	int chans, srate, spf, mpa_layer, br;
+	int tot2;
 
-	tot = 0;
+	tot = tot2 = 0;
 
-	while(tot < minlen)
+	while(tot2 < maxlen)
 	{
 		start = mpa_sync(sh, 1, &len, &chans, &srate, &spf, &mpa_layer, &br);
-		if(start < 0 || tot + len > maxlen)
+		if(start < 0 || tot2 + spf * 2 * chans > maxlen)
 			break;
 
 		if(start + len > sh->a_in_buffer_len)
@@ -110,9 +111,10 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 
 		sh->a_in_buffer_len -= start + len;
 		memmove(sh->a_in_buffer, &(sh->a_in_buffer[start + len]), sh->a_in_buffer_len);
+		tot2 += spf * 2 * chans;
 	}
 
-	return tot;
+	return tot2;
 }
 
 
