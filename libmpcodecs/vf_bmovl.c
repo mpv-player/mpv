@@ -211,9 +211,9 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi, double pts){
 						MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 						mpi->w, mpi->h);
 
-	memcpy( dmpi->planes[0], mpi->planes[0], mpi->stride[0] * mpi->height);
-	memcpy( dmpi->planes[1], mpi->planes[1], mpi->stride[1] * mpi->chroma_height);
-	memcpy( dmpi->planes[2], mpi->planes[2], mpi->stride[2] * mpi->chroma_height);
+    memcpy_pic( dmpi->planes[0], mpi->planes[0], mpi->width, mpi->height, dmpi->stride[0], mpi->stride[0] );
+    memcpy_pic( dmpi->planes[1], mpi->planes[1], mpi->chroma_width, mpi->chroma_height, dmpi->stride[1], mpi->stride[1] );
+    memcpy_pic( dmpi->planes[2], mpi->planes[2], mpi->chroma_width, mpi->chroma_height, dmpi->stride[2], mpi->stride[2] );
 
     if(vf->priv->stream_fd >= 0) {
 		struct timeval tv;
