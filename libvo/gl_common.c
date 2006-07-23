@@ -759,36 +759,69 @@ static void create_scaler_textures(int scaler, int *texu, char *texs) {
   }
 }
 
+static void gen_gamma_map(unsigned char *map, int size, float gamma);
+
+static void get_yuv2rgb_coeffs(float brightness, float contrast, float uvcos, float uvsin,
+                               float *ry, float *ru, float *rv, float *rc,
+                               float *gy, float *gu, float *gv, float *gc,
+                               float *by, float *bu, float *bv, float *bc) {
+  *ry = 1.164 * contrast;
+  *gy = 1.164 * contrast;
+  *by = 1.164 * contrast;
+  *ru = 0 * uvcos + 1.596 * uvsin;
+  *rv = 0 * uvsin + 1.596 * uvcos;
+  *gu = -0.391 * uvcos + -0.813 * uvsin;
+  *gv = -0.391 * uvsin + -0.813 * uvcos;
+  *bu = 2.018 * uvcos + 0 * uvsin;
+  *bv = 2.018 * uvsin + 0 * uvcos;
+  *rc = (-16 * *ry + (-128) * *ru + (-128) * *rv) / 255.0 + brightness;
+  *gc = (-16 * *gy + (-128) * *gu + (-128) * *gv) / 255.0 + brightness;
+  *bc = (-16 * *by + (-128) * *bu + (-128) * *bv) / 255.0 + brightness;
+  // these "center" contrast control so that e.g. a contrast of 0
+  // leads to a grey image, not a black one
+  *rc += 0.5 - contrast / 2.0;
+  *gc += 0.5 - contrast / 2.0;
+  *bc += 0.5 - contrast / 2.0;
+}
+
+#define GMAP_SIZE (1024)
 static void gen_yuv2rgb_map(unsigned char *map, int size, float brightness,
                             float contrast, float uvcos, float uvsin,
                             float rgamma, float ggamma, float bgamma) {
   int i, j, k;
   float step = 1.0 / size;
-  float y, u, v, u_, v_;
+  float y, u, v;
   float r, g, b;
-  v = -0.5;
+  float ry, ru, rv, rc;
+  float gy, gu, gv, gc;
+  float by, bu, bv, bc;
+  unsigned char gmaps[3][GMAP_SIZE];
+  gen_gamma_map(gmaps[0], GMAP_SIZE, rgamma);
+  gen_gamma_map(gmaps[1], GMAP_SIZE, ggamma);
+  gen_gamma_map(gmaps[2], GMAP_SIZE, bgamma);
+  get_yuv2rgb_coeffs(brightness, contrast, uvcos, uvsin,
+          &ry, &ru, &rv, &rc, &gy, &gu, &gv, &gc, &by, &bu, &bv, &bc);
+  ry *= GMAP_SIZE - 1; ru *= GMAP_SIZE - 1; rv *= GMAP_SIZE - 1; rc *= GMAP_SIZE - 1;
+  gy *= GMAP_SIZE - 1; gu *= GMAP_SIZE - 1; gv *= GMAP_SIZE - 1; gc *= GMAP_SIZE - 1;
+  by *= GMAP_SIZE - 1; bu *= GMAP_SIZE - 1; bv *= GMAP_SIZE - 1; bc *= GMAP_SIZE - 1;
+  v = 0;
   for (i = -1; i <= size; i++) {
-    u = -0.5;
+    u = 0;
     for (j = -1; j <= size; j++) {
-      y = -(16.0 / 255.0);
+      y = 0;
       for (k = -1; k <= size; k++) {
-        u_ = uvcos * u + uvsin * v;
-        v_ = uvcos * v + uvsin * u;
-        r = 1.164 * y              + 1.596 * v_;
-        g = 1.164 * y - 0.391 * u_ - 0.813 * v_;
-        b = 1.164 * y + 2.018 * u_             ;
-        r = pow(contrast * (r - 0.5) + 0.5 + brightness, 1.0 / rgamma);
-        g = pow(contrast * (g - 0.5) + 0.5 + brightness, 1.0 / ggamma);
-        b = pow(contrast * (b - 0.5) + 0.5 + brightness, 1.0 / bgamma);
-        if (r > 1) r = 1;
+        r = ry * y + ru * u + rv * v + rc;
+        g = gy * y + gu * u + gv * v + gc;
+        b = by * y + bu * u + bv * v + bc;
+        if (r > GMAP_SIZE - 1) r = GMAP_SIZE - 1;
         if (r < 0) r = 0;
-        if (g > 1) g = 1;
+        if (g > GMAP_SIZE - 1) g = GMAP_SIZE - 1;
         if (g < 0) g = 0;
-        if (b > 1) b = 1;
+        if (b > GMAP_SIZE - 1) b = GMAP_SIZE - 1;
         if (b < 0) b = 0;
-        *map++ = 255 * r;
-        *map++ = 255 * g;
-        *map++ = 255 * b;
+        *map++ = gmaps[0][(int)r];
+        *map++ = gmaps[1][(int)g];
+        *map++ = gmaps[2][(int)b];
         y += (k == -1 || k == size - 1) ? step / 2 : step;
       }
       u += (j == -1 || j == size - 1) ? step / 2 : step;
@@ -796,8 +829,6 @@ static void gen_yuv2rgb_map(unsigned char *map, int size, float brightness,
     v += (i == -1 || i == size - 1) ? step / 2 : step;
   }
 }
-
-static void gen_gamma_map(unsigned char *map, int size, float gamma);
 
 //! resolution of texture for gamma lookup table
 #define LOOKUP_RES 512
@@ -985,23 +1016,8 @@ static void glSetupYUVFragprog(float brightness, float contrast,
              '1', 'g', rect, texw / 2, texh / 2);
   add_scaler(YUV_CHROM_SCALER(type), &prog_pos, &prog_remain, chrom_scale_texs,
              '2', 'b', rect, texw / 2, texh / 2);
-  ry = 1.164 * contrast;
-  gy = 1.164 * contrast;
-  by = 1.164 * contrast;
-  ru = 0 * uvcos + 1.596 * uvsin;
-  rv = 0 * uvsin + 1.596 * uvcos;
-  gu = -0.391 * uvcos + -0.813 * uvsin;
-  gv = -0.391 * uvsin + -0.813 * uvcos;
-  bu = 2.018 * uvcos + 0 * uvsin;
-  bv = 2.018 * uvsin + 0 * uvcos;
-  rc = (-16 * ry + (-128) * ru + (-128) * rv) / 255.0 + brightness;
-  gc = (-16 * gy + (-128) * gu + (-128) * gv) / 255.0 + brightness;
-  bc = (-16 * by + (-128) * bu + (-128) * bv) / 255.0 + brightness;
-  // these "center" contrast control so that e.g. a contrast of 0
-  // leads to a grey image, not a black one
-  rc += 0.5 - contrast / 2.0;
-  gc += 0.5 - contrast / 2.0;
-  bc += 0.5 - contrast / 2.0;
+  get_yuv2rgb_coeffs(brightness, contrast, uvcos, uvsin,
+          &ry, &ru, &rv, &rc, &gy, &gu, &gv, &gc, &by, &bu, &bv, &bc);
   switch (YUV_CONVERSION(type)) {
     case YUV_CONVERSION_FRAGMENT:
       snprintf(prog_pos, prog_remain, yuv_prog_template,
@@ -1036,6 +1052,11 @@ static void glSetupYUVFragprog(float brightness, float contrast,
  */
 static void gen_gamma_map(unsigned char *map, int size, float gamma) {
   int i;
+  if (gamma == 1.0) {
+    for (i = 0; i < size; i++)
+      map[i] = 255 * i / (size - 1);
+    return;
+  }
   gamma = 1.0 / gamma;
   for (i = 0; i < size; i++) {
     float tmp = (float)i / (size - 1.0);
