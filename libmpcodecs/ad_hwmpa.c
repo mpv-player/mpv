@@ -99,7 +99,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 			l = min(sh->a_in_buffer_size - sh->a_in_buffer_len, start + len);
 			l = demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len], l);
 			if(! l)
-				return tot;
+				break;
 			sh->a_in_buffer_len += l;
 			continue;
 		}
@@ -112,6 +112,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 		tot2 += spf * 2 * chans;
 	}
 
+	memset(&buf[tot], 0, tot2-tot);
 	return tot2;
 }
 
