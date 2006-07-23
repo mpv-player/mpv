@@ -404,7 +404,7 @@ static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 	    if (priv->avfc->duration == 0)
 	        return DEMUXER_CTRL_DONTKNOW;
 	    
-	    *((int *)arg) = (int)(priv->last_pts*100 / priv->avfc->duration);
+	    *((int *)arg) = (int)((priv->last_pts - priv->avfc->start_time)*100 / priv->avfc->duration);
 	    return DEMUXER_CTRL_OK;
 	case DEMUXER_CTRL_SWITCH_AUDIO:
 	{
