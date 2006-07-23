@@ -1,6 +1,3 @@
-// Don't change for DVB card, it must be 2048
-#define PES_MAX_SIZE 2048
-
 /* 
  * Based on:
  *
