@@ -26,6 +26,7 @@ static ao_info_t info =
 LIBAO_EXTERN(dxr2)
 
 static int volume=19;
+static int last_freq_id = -1;
 extern int dxr2_fd;
 
 // to set/get/query special features/parameters
@@ -72,6 +73,8 @@ static int init(int rate,int channels,int format,int flags){
 	if(dxr2_fd <= 0)
 	  return 0;
 
+        last_freq_id = -1;
+        
 	ao_data.outburst=2048;
 	ao_data.samplerate=rate;
 	ao_data.channels=channels;
@@ -151,12 +154,28 @@ static int get_space(void){
     return y;
 }
 
+static void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,int freq_id)
+{
+  extern int write_dxr2(unsigned char *data, int len);
+  
+  if(dxr2_fd < 0) {
+    mp_msg(MSGT_AO,MSGL_ERR,"DXR2 fd is not valid\n");
+    return;
+  }    
+
+  if(last_freq_id != freq_id) {
+    ioctl(dxr2_fd, DXR2_IOC_SET_AUDIO_SAMPLE_FREQUENCY, &freq_id);
+    last_freq_id = freq_id;
+  }
+
+  send_mpeg_lpcm_packet (data, len, id, timestamp, freq_id, write_dxr2);
+}
+
 // plays 'len' bytes of 'data'
 // it should round it down to outburst*n
 // return: number of bytes played
 static int play(void* data,int len,int flags){
   extern int write_dxr2(unsigned char *data, int len);
-  extern void dxr2_send_lpcm_packet(unsigned char* data,int len,int id,int timestamp,int freq_id);
 
   // MPEG and AC3 don't work :-(
     if(ao_data.format==AF_FORMAT_MPEG2)
