@@ -35,8 +35,6 @@ static int mpa_sync(sh_audio_t *sh, int no_frames, int *n, int *chans, int *srat
 	{
 		while(cnt + 4 < sh->a_in_buffer_len)
 		{
-			if(((sh->a_in_buffer[cnt] << 8) | sh->a_in_buffer[cnt+1]) & 0xffe0 != 0xffe0)
-				continue;
 			x = mp_get_mp3_header(&(sh->a_in_buffer[cnt]), chans, srate, spf, mpa_layer, br);
 			if(x > 0)
 			{
