@@ -622,6 +622,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
 
+		// crude audio delay from editlist0 hack ::atm
+		if(trak->editlist_size>=1) {
+		    if(trak->editlist[0].pos == -1) {
+			sh->stream_delay = (float)trak->editlist[0].dur/(float)priv->timescale;
+	    		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Initial Audio-Delay: %.3f sec\n", sh->stream_delay);
+		    }
+		}
+
+
 		switch( sh->format ) {
 		    case 0x726D6173: /* samr */
 			/* amr narrowband */
@@ -928,6 +937,15 @@ quit_vorbis_block:
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
 		int depth;
 		sh->format=trak->fourcc;
+
+		// crude video delay from editlist0 hack ::atm
+		if(trak->editlist_size>=1) {
+		    if(trak->editlist[0].pos == -1) {
+			sh->stream_delay = (float)trak->editlist[0].dur/(float)priv->timescale;
+	    		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Initial Video-Delay: %.3f sec\n", sh->stream_delay);
+		    }
+		}
+
 
 		if (trak->stdata_len < 78) {
 		  mp_msg(MSGT_DEMUXER, MSGL_WARN,
