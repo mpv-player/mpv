@@ -1,4 +1,4 @@
-.\" synced with r19134
+.\" synced with r19161
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -6639,6 +6639,20 @@ défaut dans votre fichier de configuration.
 Déplace le rendu des sous-titres SSA/ASS à une position arbitraire dans
 la chaîne de filtrage.
 Utile uniquement pour l'option \-ass.
+.RE
+.
+.TP
+.B blackframe[=quantité:seuil]
+Détecte les trames qui sont (presque) complètement noires.
+Peut être utilise pour détecter les fins de chapitres ou les pubs.
+Le format de sortie consiste en le numéro de la trame détectée,
+le pourcentage de noir, le type de trame, et le numéro de trame de
+la dernière trame-clée rencontrée.
+.RSs
+.IPs <quantité>
+Pourcentage de pixels qui doivent être sous le seuil (par défaut: 98).
+.IPs <seuil>
+Seuil en dessous duquel un pixel est considéré comme noir (par défaut: 32)
 .RE
 .
 .
