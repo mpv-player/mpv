@@ -28,6 +28,7 @@ static struct vf_priv_s {
     unsigned char* palette;
     int interlaced;
     int noup;
+    int accurate_rnd;
     int query_format_cache[64];
 } vf_priv_dflt = {
   -1,-1,
@@ -219,6 +220,7 @@ static int config(struct vf_instance_s* vf,
     // new swscaler:
     sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
     int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
+    int_sws_flags|= vf->priv->accurate_rnd * SWS_ACCURATE_RND;
     vf->priv->ctx=sws_getContext(width, height >> vf->priv->interlaced,
 	    outfmt,
 		  vf->priv->w, vf->priv->h >> vf->priv->interlaced,
@@ -470,6 +472,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->w=
     vf->priv->h=-1;
     vf->priv->v_chr_drop=0;
+    vf->priv->accurate_rnd=0;
     vf->priv->param[0]=
     vf->priv->param[1]=SWS_PARAM_DEFAULT;
     vf->priv->palette=NULL;
@@ -612,6 +615,7 @@ static m_option_t vf_opts_fields[] = {
   // As we want this option to act on the option struct itself
   {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, &size_preset},
   {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
+  {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 
