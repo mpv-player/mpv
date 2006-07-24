@@ -1,4 +1,4 @@
-.\" Synced with r19101
+.\" Synced with r19161
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -196,9 +196,9 @@ Van X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
 Quartz, Mac OS X CoreVideo támogatás, de használhatod a GGI, SDL (és ennek összes
 vezérlõje), VESA (minden VESA-kompatibilis kártyán, még X11 nélkül is), néhány
 alacsony szintû, kártyaspecifikus vezérlõ (Matroxhoz, 3dfx-hez és ATI-hoz) és
-pár hardveeres MPEG dekódoló lap, mint pl. a Siemens DVB, DXR2 és DXR3/\:Hollywood+
-támogatását is. A legtöbbjük tudja a szoftveres és harderes nagyítást, így a
-filmjeidet teljes képernyõs módban élvezheted.
+pár hardveeres MPEG dekódoló lap, mint pl. a Siemens DVB, Hauppauge PVR (IVTV),
+DXR2 és DXR3/\:Hollywood+ támogatását is. A legtöbbjük tudja a szoftveres és
+harderes nagyítást, így a filmjeidet teljes képernyõs módban élvezheted.
 .PP
 Az MPlayernek van onscreen display (OSD) funkciója is a státuszinformációk
 és a szép, élsímított, árnyékolt feliratok megjelenítéséhez és a billentyûzetrõl
@@ -1286,9 +1286,9 @@ A rendelkezésre álló opciók:
 .PD 0
 .RSs
 .IPs w=<érték>
-a kimenet szélessége (alapértelmezett: automatikus felismerés)
+a bemeneti fájl szélessége (alapértelmezett: automatikus felismerés)
 .IPs h=<érték>
-a kimenet magassága (alapértelmezett: automatikus felismerés)
+a bemeneti fájl magassága (alapértelmezett: automatikus felismerés)
 .IPs fps=<érték>
 kimenet fps-e (alapértelmezett: 25)
 .IPs type=<érték>
@@ -1619,6 +1619,13 @@ A VIVO demuxer audió paramétereinek felülbírálata (hibakeresõ célokra).
 .SH "OSD/FELIRAT OPCIÓK"
 .I MEGJEGYZÉS:
 Lásd még a \-vf expand opciót.
+.
+.TP
+.B \-ass (csak FreeType)
+Bekapcsolja az SSA/ASS felirat renderelést.
+Ezzel az opcióval a libass lesz használva az SSA/ASS
+külsõ feliratokhoz és matroska sávokhoz.
+Ajánlott még a -embeddedfonts engedélyezése is.
 .
 .TP
 .B \-ass-font-scale <érték>
@@ -2057,13 +2064,6 @@ a \'.idx', '.ifo', '.sub' elhagyandó.
 .TP
 .B \-vobsubid <0\-31>
 A VobSub felirat ID-je itt adható meg.
-.
-.TP
-.B \-ass (csak FreeType)
-Bekapcsolja az SSA/ASS felirat renderelést.
-Ezzel az opcióval a libass lesz használva az SSA/ASS
-külsõ feliratokhoz és matroska sávokhoz.
-Ajánlott még a -embeddedfonts engedélyezése is.
 .
 .
 .
@@ -3391,6 +3391,21 @@ Megadja a TV normát.
 .REss
 .IPs <0\-3>
 Megadja a használni kívánt eszköz számát, ha egynél több em8300 kártyád van.
+.RE
+.PD 1
+.
+.TP
+.B ivtv (csak IVTV)
+Conexant CX23415 (iCompression iTVC15) vagy Conexant CX23416 (iCompression
+iTVC16) MPEG dekódoló chipekhez (Hauppauge WinTV PVR-150/250/350/500)
+specifikus videó vezérlõ a TV kimenethez.
+Lásd még a lavc videó szûrõt.
+.PD 0
+.RSs
+.IPs eszköz
+Explicit kiválasztja a használni kívánt MPEG dekódoló eszköz nevét (alapértelmezett: /dev/video16).
+.IPs kimenet
+Explicit kiválasztja a TV kimenet videó jelhez használt kimenetét.
 .RE
 .PD 1
 .
@@ -5236,7 +5251,7 @@ Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
 .
 .TP
 .B lavc[=minõség:fps]
-Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3-hoz.
+Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/IVTV-hez.
 Gyorsabb és jobb minõséget ad, mint a \-vf fame.
 .RSs
 .IPs <minõség>
@@ -5252,7 +5267,7 @@ detektálás a magasság alapján)
 .
 .TP
 .B fame\ \ \ 
-Gyors szoftveres YV12-MPEG-1 konverzió libfame-mel DVB/\:DXR3-hoz.
+Gyors szoftveres YV12-MPEG-1 konverzió libfame-mel DVB/\:DXR3/IVTV-hez.
 .
 .TP
 .B dvbscale[=arány]
@@ -6281,9 +6296,9 @@ A kimeneti sorok a megtalált képkocka számából, a sötétség százalékos
 értékébõl, a kocka típusából és az utolsó kulcskocka számából állnak.
 .RSs
 .IPs <mennyiség>
-a pixelek százalékos aránya, melyeknek a küszöb alatt kell lenniük (alapértelmezett: 98)
+A pixelek százalékos aránya, melyeknek a küszöb alatt kell lenniük (alapértelmezett: 98).
 .IPs <küszöb>
-határérték, mely alatt egy pixel feketének minõsül (alapértelmezett: 32)
+Határérték, mely alatt egy pixel feketének minõsül (alapértelmezett: 32).
 .RE
 .
 .

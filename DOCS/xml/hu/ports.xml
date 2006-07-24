@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18923 -->
+<!-- synced with r19104 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -778,7 +778,7 @@ nélkül.
 </para>
 
 <para>
-A CVS modulok letöltéséhez használt az alábbi parancsokat:
+Az SVN modulok letöltéséhez használt az alábbi parancsokat:
 
 <screen>
 svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
