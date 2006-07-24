@@ -4135,14 +4135,6 @@ Dans bien des cas, cela ne fonctionnera pas, utilisez à la place \-vc null
 \-vo null.
 .
 .TP
-.B \-oldpp <qualité> (OpenDivX uniquement) (OBSOLÈTE)
-Utilise le code de post-traitement d'OpenDivX au lieu de l'interne.
-À ne plus utiliser au profit de \-pp, car le postprocessing interne offre
-une meilleure qualité visuelle et de meilleures performances.
-L'intervalle valide des valeurs de \-oldpp varie suivant le codec, il est
-la plupart du temps 0\-6, où 0=désactive 6=plus lent/\:meilleur.
-.
-.TP
 .B \-pp <qualité> (voir aussi \-vf pp)
 Initialise le niveau de post-traitement de la DLL.
 Cette option n'est plus utilisable avec \-vf pp.
@@ -4257,8 +4249,6 @@ Voir \-vc help pour une liste complète des codecs disponibles.
 .RSs
 .IPs "\-vc divx"
 Force le codec DivX Win32/\:VfW, sans rabattement.
-.IPs "\-vc divx4,"
-Essaie d'abord le codec divx4linux, puis se rabat sur les autres.
 .IPs "\-vc -divxds,-divx,"
 Essaie les autres codecs excepté les codecs DivX Win32.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -6886,8 +6876,6 @@ Pour obtenir la liste complète des codecs disponibles, voir \-ovc help.
 .RSs
 .IPs "\-ovc copy"
 pas d'encodage, juste une copie du flux
-.IPs "\-ovc divx4"
-Encode en DivX4/\:DivX5.
 .IPs "\-ovc raw"
 Encode dans un format non-compressé arbitraire (que vous sélectionnez
 avec '\-vf format').
@@ -6932,87 +6920,8 @@ la syntaxe ci-dessous\ :
 .B \-<codec>opts <option1[=valeur],option2,...>
 .
 .PP
-Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, twolame,
+Où <codec> peut être: lavc, xvidenc, lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
-.
-.
-.SS divx4 (\-divx4opts)
-.
-DivX4 est obsolète et n'est géré que par soucis d'exhaustivité.
-Pour avoir des détails sur les options DivX4, lisez les sources, la plupart
-des options ne sont pas documentées ici.
-.
-.TP
-.B help\ \ \ 
-obtenir l'aide
-.
-.TP
-.B br=<valeur>
-Définit le débit binaire (bitrate)
-.IPs 4\-16000
-(en kbits)
-.IPs 16001\-24000000
-(en bits)
-.RE
-.
-.TP
-.B key=<valeur>
-intervalle maximal entre deux trames-clé (en trames)
-.
-.TP
-.B deinterlace
-Active le désentrelacement (à éviter, DivX4 est boggué).
-.
-.TP
-.B q=<1\-5>
-qualité (1 \- plus rapide, 5 \- meilleur)
-.
-.TP
-.B min_quant=<1\-31>
-quantum minimal
-.
-.TP
-.B max_quant=<1\-31>
-quantum maximal
-.
-.TP
-.B rc_period=<valeur>
-période de contrôle du débit
-.
-.TP
-.B rc_reaction_period=<valeur>
-période de réaction de contrôle du débit
-.
-.TP
-.B rc_reaction_ratio=<valeur>
-rapport de réaction de contrôle du débit
-.
-.TP
-.B crispness=<0\-100>
-Définit la dureté/\:douceur.
-.
-.TP
-.B pass=<1\-2>
-Permet d'encoder des fichiers DivX4 en 2 passes.
-Encodez d'abord avec pass=1, puis encodez avec les mêmes paramètres et pass=2.
-.
-.TP
-.B vbrpass=<0\-2>
-Outrepasse l'argument \-pass et utilise la librairie VBR XviD au lieu
-du VBR DivX4.
-Les options disponibles sont\ :
-.PD 0
-.
-.RSs
-.IPs 0
-encodage une passe (comme en ne mettant pas \-pass en ligne de commande)
-.IPs 1
-(Première) passe d'analyse de l'encodage deux passes.
-Le fichier AVI de destination peut être redirigé vers /dev/\:null.
-.IPs 2
-(Seconde) passe finale de l'encodage deux passes.
-.RE
-.PD 1
 .
 .
 .SS lame (\-lameopts)
