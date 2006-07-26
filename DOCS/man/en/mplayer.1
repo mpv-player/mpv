@@ -4807,7 +4807,7 @@ Rotate by 90 degrees counterclockwise and flip.
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws).
 .RSs
@@ -4889,6 +4889,14 @@ Disallow upscaling past the original dimensions.
 1: Disallow upscaling if one dimension exceeds its original value.
 .br
 2: Disallow upscaling if both dimensions exceed their original values.
+.REss
+.IPs <arnd>
+Accurate rounding for the vertical scaler, which may be faster
+or slower than the default rounding.
+.RSss
+0: Disable accurate rounding (default).
+.br
+1: Enable accurate rounding.
 .REss
 .RE
 .
