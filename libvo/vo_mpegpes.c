@@ -62,7 +62,7 @@
 #include "libmpdemux/mpeg_packetizer.h"
 
 int vo_mpegpes_fd=-1;
-int vo_mpegpes_fd2=-1;
+extern int vo_mpegpes_fd2;
 
 static vo_info_t info = 
 {
@@ -128,10 +128,6 @@ static int preinit(const char *arg){
         	perror("DVB VIDEO DEVICE: ");
         	return -1;
 	}
-	if((vo_mpegpes_fd2 = open(ao_file,O_RDWR|O_NONBLOCK)) < 0){
-        	perror("DVB AUDIO DEVICE: ");
-        	return -1;
-	}
 	if ( (ioctl(vo_mpegpes_fd,VIDEO_SET_BLANK, false) < 0)){
 		perror("DVB VIDEO SET BLANK: ");
 		return -1;
@@ -140,32 +136,8 @@ static int preinit(const char *arg){
 		perror("DVB VIDEO SELECT SOURCE: ");
 		return -1;
 	}
-#if 1
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SELECT_SOURCE, AUDIO_SOURCE_MEMORY) < 0)){
-		perror("DVB AUDIO SELECT SOURCE: ");
-		return -1;
-	}
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_PLAY) < 0)){
-		perror("DVB AUDIO PLAY: ");
-		return -1;
-	}
-#else
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_STOP,0) < 0)){
-		perror("DVB AUDIO STOP: ");
-		return -1;
-	}
-#endif
 	if ( (ioctl(vo_mpegpes_fd,VIDEO_PLAY) < 0)){
 		perror("DVB VIDEO PLAY: ");
-		return -1;
-	}
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, true) < 0)){
-		perror("DVB AUDIO SET AV SYNC: ");
-		return -1;
-	}
-//	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0)){
-	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, true) < 0)){
-		perror("DVB AUDIO SET MUTE: ");
 		return -1;
 	}
 	return 0;
@@ -178,7 +150,6 @@ static int preinit(const char *arg){
 	perror("vo_mpegpes");
 	return -1;
     }
-    vo_mpegpes_fd2=vo_mpegpes_fd;
     return 0;
 }
 
