@@ -576,7 +576,7 @@ static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
       state = state << 8 | buf[pos];
       if (unlikely((state | 3) == 0x1bf))
         pos = find_end(&buf, pos, demux->stream);
-    } while (++pos);
+    } while (++pos < 0);
     demux->priv = (void *)state;
     len = buf - pack->buffer;
   }
