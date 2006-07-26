@@ -2268,6 +2268,17 @@ Creative DXR2 specific output driver
 .B mpegpes (DVB only)
 DVB specific output driver
 .
+.PD 0
+.RSs
+.IPs card=<1\-4>
+card number to use
+.IPs file=<filename>
+Name of the file that will contain the dump of the stream sent to this device.
+If the DVB interface is not available at compile-time and no :file option is 
+specified at run-time the file name will be audiograb.mpg.
+.RE
+.PD 1
+.
 .TP
 .B null\ \ \ 
 Produces no audio output but maintains video playback speed.
