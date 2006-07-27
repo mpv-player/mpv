@@ -1823,12 +1823,12 @@ typedef struct _subfn
 
 static int compare_sub_priority(const void *a, const void *b)
 {
-    if (((subfn*)a)->priority > ((subfn*)b)->priority) {
+    if (((const subfn*)a)->priority > ((const subfn*)b)->priority) {
 	return -1;
-    } else if (((subfn*)a)->priority < ((subfn*)b)->priority) {
+    } else if (((const subfn*)a)->priority < ((const subfn*)b)->priority) {
 	return 1;
     } else {
-	return strcoll(((subfn*)a)->fname, ((subfn*)b)->fname);
+	return strcoll(((const subfn*)a)->fname, ((const subfn*)b)->fname);
     }
 }
 
