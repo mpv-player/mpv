@@ -56,7 +56,7 @@ int tv_param_outfmt = -1;
 float tv_param_fps = -1.0;
 char **tv_param_channels = NULL;
 int tv_param_audio_id = 0;
-#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
+#if defined(HAVE_TV_V4L1) || defined(HAVE_TV_V4L2)
 int tv_param_amode = -1;
 int tv_param_volume = -1;
 int tv_param_bass = -1;
@@ -237,7 +237,7 @@ static int open_tv(tvi_handle_t *tvh)
     }
 #endif
 
-#ifdef HAVE_TV_V4L
+#ifdef HAVE_TV_V4L1
     if ( tv_param_mjpeg )
     {
       /* set width to expected value */
@@ -638,7 +638,7 @@ tvi_handle_t *tv_begin(void)
 {
     if (!strcmp(tv_param_driver, "dummy"))
 	return tvi_init_dummy(tv_param_device);
-#ifdef HAVE_TV_V4L
+#ifdef HAVE_TV_V4L1
     if (!strcmp(tv_param_driver, "v4l"))
 	return tvi_init_v4l(tv_param_device, tv_param_adevice);
 #endif
