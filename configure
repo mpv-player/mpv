@@ -3484,7 +3484,6 @@ _sys_sysinfo=no
 cc_check && _sys_sysinfo=yes
 if test "$_sys_sysinfo" = yes ; then
   _def_sys_sysinfo='#define HAVE_SYS_SYSINFO_H 1'
-  _inc_sysinfo='#include <sys/sysinfo.h>'
 else
   _def_sys_sysinfo='#undef HAVE_SYS_SYSINFO_H'
 fi
