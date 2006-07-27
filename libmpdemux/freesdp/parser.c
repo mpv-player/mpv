@@ -775,7 +775,7 @@ fsdp_parse (const char *text_description, fsdp_description_t * dsc)
             media->a_range = strdup (fsdp_buf[1]);
           }
           else if (!strncmp (fsdp_buf[0], "framerate", 9))
-            media->a_framerate = strtof (longfsdp_buf, NULL);
+            media->a_framerate = strtod (longfsdp_buf, NULL);
           else if (!strncmp (fsdp_buf[0], "fmtp", 4))
           {
             if (NULL == media->a_fmtps)
