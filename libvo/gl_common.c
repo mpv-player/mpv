@@ -89,7 +89,7 @@ void glAdjustAlignment(int stride) {
 
 struct gl_name_map_struct {
   GLint value;
-  char *name;
+  const char *name;
 };
 
 #undef MAP
@@ -253,8 +253,8 @@ static void *setNull(const GLubyte *s) {
 
 typedef struct {
   void **funcptr;
-  char *extstr;
-  char *funcnames[7];
+  const char *extstr;
+  const char *funcnames[7];
 } extfunc_desc_t;
 
 static const extfunc_desc_t extfuncs[] = {
@@ -914,7 +914,7 @@ static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
 }
 
 static const struct {
-  char *name;
+  const char *name;
   GLenum cur;
   GLenum max;
 } progstats[] = {

@@ -23,7 +23,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 		af->data->rate	= ((af_data_t*)arg)->rate;
 		af->data->nch	= ((af_data_t*)arg)->nch;
 		af->data->format= AF_FORMAT_FLOAT_NE;
-		af->data->bps	= 4;
+		af->data->bps	= 8;
 		return af_test_output(af,(af_data_t*)arg);
 	}
 	return AF_UNKNOWN;
@@ -41,7 +41,7 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
 	af_data_t*	c	= data;		 // Current working data
 	float*		a	= c->audio;	 // Audio data
-	int			len	= c->len/4;	 // Number of samples in current audio block 
+	int			len	= c->len/8;	 // Number of samples in current audio block 
 	int			nch	= c->nch;	 // Number of channels
 	register int  i;
 

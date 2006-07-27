@@ -996,7 +996,7 @@ m_option_type_t m_option_type_subconfig = {
 
 /* FIXME: snyc with img_format.h */
 static struct {
-  char* name;
+  const char* name;
   unsigned int fmt;
 } mp_imgfmt_list[] = {
   {"444p", IMGFMT_444P},
@@ -1090,7 +1090,7 @@ m_option_type_t m_option_type_imgfmt = {
 
 /* FIXME: snyc with af_format.h */
 static struct {
-  char* name;
+  const char* name;
   unsigned int fmt;
 } mp_afmt_list[] = {
   // SPECIAL

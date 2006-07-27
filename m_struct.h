@@ -13,7 +13,7 @@ struct m_option;
 /// Struct definition
 typedef struct m_struct_st {
   /// For error messages and debugging
-  char* name;
+  const char* name;
   /// size of the whole struct
   unsigned int size;
   /// Pointer to a struct filled with the default settings
