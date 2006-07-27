@@ -5298,8 +5298,7 @@ EOF
         _libcdio=no
     for _inc_tmp in "$_inc_libcdio" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
         cc_check `pkg-config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
-            && _inc_libcdio="$_inc_tmp" && ( $TMPO >> "$TMPLOG" ) \
-            && _libcdio=yes && break
+            && tmp_run && _libcdio=yes && break
     done
     else
         _libcdio=no
