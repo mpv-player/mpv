@@ -46,7 +46,6 @@
 # _feature     : should have a value of yes/no/auto
 # _def_feature : '#define ... 1' or '#undef ...' for conditional compilation
 # _ld_feature  : '-L/path/dir -lfeature' GCC options
-# _inc_feature : '-I/path/dir/include' extra include paths
 #
 #############################################################################
 
@@ -416,11 +415,8 @@ multiple paths separated by ':'):
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
   --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR  (*)
-  --with-xvidincdir=DIR    XviD header in DIR (*)
   --with-x264libdir=DIR    libx264 in DIR
-  --with-x264incdir=DIR    x264 header in DIR
   --with-libdtslibdir=DIR  libdts library in DIR  (*)
-  --with-libdtsincdir=DIR  libdts header in DIR (*)
   --with-livelibdir=DIR    LIVE555 Streaming Media libraries in DIR
   --with-toolamedir=DIR    path to Toolame library and include file
   --with-xmmsplugindir=DIR XMMS plugins in DIR
@@ -2126,20 +2122,11 @@ for ac_option do
   --with-xvidlibdir=*)
     _ld_xvid=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
-  --with-xvidincdir=*)
-    _inc_xvid=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
   --with-libdtslibdir=*)
     _ld_libdts=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
-  --with-libdtsincdir=*)
-    _inc_libdts=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
   --with-x264libdir=*)
     _ld_x264=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
-  --with-x264incdir=*)
-    _inc_x264=-I`echo $ac_option | cut -d '=' -f 2 |sed 's,:, -I,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -4181,7 +4168,7 @@ EOF
 fi
 if test "$_caca" = yes ; then
   _def_caca='#define HAVE_CACA 1'
-  _inc_caca=`caca-config --cflags`
+  _inc_extra="$inc_extra `caca-config --cflags`"
   _ld_caca=`caca-config --libs`
   _vosrc="$_vosrc vo_caca.c"
   _vomodules="caca $_vomodules"
@@ -4557,13 +4544,13 @@ if test "$_sdl" = yes ; then
   _def_sdl='#define HAVE_SDL 1'
   if cygwin ; then
     _ld_sdl=`$_sdlconfig --libs | cut -d " " -f 1,4,6 | sed s/no-cygwin/cygwin/`
-    _inc_sdl=`$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`
+    _inc_extra="$_inc_extra `$_sdlconfig --cflags | cut -d " " -f 1,5,6 | sed s/no-cygwin/cygwin/`"
   elif mingw32 ; then
     _ld_sdl=`$_sdlconfig --libs | sed s/-mwindows//`
-    _inc_sdl=`$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`
+    _inc_extra="$_inc_extra `$_sdlconfig --cflags | sed s/-Dmain=SDL_main//`"
   else
     _ld_sdl=`$_sdlconfig --libs`
-    _inc_sdl=`$_sdlconfig --cflags`
+    _inc_extra="$_inc_extra `$_sdlconfig --cflags`"
   fi
   _vosrc="$_vosrc vo_sdl.c"
   _vomodules="sdl $_vomodules"
@@ -4818,7 +4805,7 @@ if test "$_arts" = yes ; then
   _aosrc="$_aosrc ao_arts.c"
   _aomodules="arts $_aomodules"
   _ld_arts=`artsc-config --libs`
-  _inc_arts=`artsc-config --cflags`
+  _inc_extra="$_inc_extra `artsc-config --cflags`"
 else
   _noaomodules="arts $_noaomodules"
 fi
@@ -4845,7 +4832,7 @@ if test "$_esd" = yes ; then
   _aosrc="$_aosrc ao_esd.c"
   _aomodules="esd $_aomodules"
   _ld_esd=`esd-config --libs`
-  _inc_esd=`esd-config --cflags`
+  _inc_extra="$_inc_extra `esd-config --cflags`"
 
   echocheck "esd_get_latency()"
   cat > $TMPC << EOF
@@ -4882,7 +4869,7 @@ if test "$_polyp" = yes ; then
   _aosrc="$_aosrc ao_polyp.c"
   _aomodules="polyp $_aomodules"
   _ld_polyp=`pkg-config --libs polyplib polyplib-error polyplib-mainloop`
-  _inc_polyp=`pkg-config --cflags polyplib polyplib-error polyplib-mainloop`
+  _inc_extra="$_inc_extra `pkg-config --cflags polyplib polyplib-error polyplib-mainloop`"
 else
   _def_polyp='#undef USE_POLYP'
   _noaomodules="polyp $_noaomodules"
@@ -4901,7 +4888,7 @@ EOF
     _ld_jack="-ljack"
   elif cc_check `pkg-config --libs --cflags --silence-errors jack` ; then
     _ld_jack="`pkg-config --libs jack`"
-    _inc_jack="`pkg-config --cflags jack`"
+    _inc_extra="$_inc_extra "`pkg-config --cflags jack`""
   else
     _jack=no
   fi
@@ -5074,7 +5061,7 @@ EOF
 fi
 if test "$_mlib" = yes ; then
   _def_mlib='#define HAVE_MLIB 1'
-  _inc_mlib=" -I${_mlibdir}/include "
+  _inc_extra="$_inc_extra -I${_mlibdir}/include"
   _ld_mlib=" -L${_mlibdir}/lib -R${_mlibdir}/lib -lmlib "
 else
   _def_mlib='#undef HAVE_MLIB'
@@ -5296,7 +5283,7 @@ int main()
 }
 EOF
         _libcdio=no
-    for _inc_tmp in "$_inc_libcdio" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
+    for _inc_tmp in "$_inc_extra" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
         cc_check `pkg-config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
             && tmp_run && _libcdio=yes && break
     done
@@ -5310,7 +5297,7 @@ if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _def_cdparanoia='#define HAVE_CDDA'
     _def_havelibcdio='yes'
     _inputmodules="cdda $_inputmodules"
-    _inc_libcdio=`pkg-config --cflags libcdio`
+    _inc_extra="$_inc_extra `pkg-config --cflags libcdio`"
     _ld_libcdio=`pkg-config --libs libcdio_paranoia`
 else
     if test "$_cdparanoia" = yes ; then
@@ -5367,7 +5354,7 @@ EOF
 fi
 if test "$_freetype" = yes ; then
     _def_freetype='#define HAVE_FREETYPE'
-    _inc_freetype=`$_freetypeconfig --cflags`
+    _inc_extra="$_inc_extra `$_freetypeconfig --cflags`"
     _ld_freetype=`$_freetypeconfig --libs`
 else
     _def_freetype='#undef HAVE_FREETYPE'
@@ -5398,7 +5385,7 @@ EOF
   if cc_check -lfontconfig ; then
     _ld_fontconfig="-lfontconfig"
   elif cc_check `pkg-config --silence-errors --cflags --libs fontconfig` ; then
-    _inc_fontconfig=`pkg-config --cflags fontconfig`
+    _inc_extra="$_inc_extra `pkg-config --cflags fontconfig`"
     _ld_fontconfig=`pkg-config --libs fontconfig`
   else
     _fontconfig=no
@@ -5467,7 +5454,7 @@ EOF
 fi
 if test "$_fribidi" = yes ; then
     _def_fribidi='#define USE_FRIBIDI'
-    _inc_fribidi=`$_fribidiconfig --cflags`
+    _inc_extra="$_inc_extra `$_fribidiconfig --cflags`"
     _ld_fribidi=`$_fribidiconfig --libs`
 else
     _def_fribidi='#undef USE_FRIBIDI'
@@ -5781,7 +5768,7 @@ if test "$_libdts" = auto ; then
 #include <dts.h>
 int main(void) { dts_init (0); return 0; }
 EOF
-  cc_check $_inc_libdts $_ld_libdts -ldts $_ld_lm && _libdts=yes
+  cc_check $_ld_libdts -ldts $_ld_lm && _libdts=yes
 fi
 if test "$_libdts" = yes ; then
   _def_libdts='#define CONFIG_DTS 1'
@@ -5868,7 +5855,6 @@ if test "$_faad_internal" = auto ; then
   fi
 elif test "$_faad_external" = auto ; then
   _ld_faad='-lfaad'
-  _inc_faad="$_inc_extra"
   # external faad: check if it's really faad2 :)
   if test "$_faad_external" = auto ; then
     _faad_external=no
@@ -5879,7 +5865,7 @@ elif test "$_faad_external" = auto ; then
 #endif
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
-    cc_check $_inc_faad $_ld_faad $_ld_lm && _faad_external=yes
+    cc_check $_ld_faad $_ld_lm && _faad_external=yes
   fi
 fi
 
@@ -5900,7 +5886,6 @@ else
   _def_faad='#undef HAVE_FAAD'
   _nocodecmodules="faad2 $_nocodecmodules"
   _ld_faad=
-  _inc_faad=
 fi
 echores "$_faad"
 
@@ -6476,7 +6461,7 @@ int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
 _ld_xvid="$_ld_xvid -lxvidcore"
 _xvid4=no
-if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid $_ld_lm ; then
+if test "$_xvid" != no && cc_check $_ld_xvid $_ld_lm ; then
   _xvid=yes
   _def_xvid3='#define HAVE_XVID3 1'
   _def_xvid4='#undef HAVE_XVID4'
@@ -6487,9 +6472,9 @@ cat > $TMPC << EOF
 int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
   if test "$_xvid" != no ;then 
-    if cc_check $_inc_xvid $_ld_xvid $_ld_lm ; then 
+    if cc_check $_ld_xvid $_ld_lm ; then 
     _xvid4=yes 
-    elif cc_check $_inc_xvid $_ld_xvid $_ld_lm $_ld_pthread ; then
+    elif cc_check $_ld_xvid $_ld_lm $_ld_pthread ; then
     _xvid4=yes;
     _ld_xvid="$_ld_xvid $_ld_pthread"
     fi
@@ -6517,7 +6502,7 @@ if test "$_xvid4" = yes ; then
 #include <xvid.h>
 int main(void) { xvid_plugin_2pass2_t s; s.vbv_size=0; return 0; }
 EOF
-  if cc_check $_inc_xvid $_ld_xvid $_ld_lb ; then
+  if cc_check $_ld_xvid $_ld_lb ; then
     _lavc_xvid=yes
     _def_lavc_xvid='#define CONFIG_XVID 1'
   else
@@ -6552,9 +6537,9 @@ EOF
 _ld_x264="$_ld_x264 -lx264 $_ld_pthread"
 if test "$_x264" != no ; then 
   _x264=no
-  if cc_check $_inc_x264 $_ld_x264 $_ld_lm ; then 
+  if cc_check $_ld_x264 $_ld_lm ; then 
     _x264=yes
-  elif  test "$_x11" = yes && cc_check $_inc_x264 $_inc_x11 $_ld_x264 $_ld_x11 $_ld_lm ; then
+  elif  test "$_x11" = yes && cc_check $_inc_x11 $_ld_x264 $_ld_x11 $_ld_lm ; then
     _x264=yes
     _ld_x264="$_ld_x264 $_ld_x11"
   fi
@@ -6985,7 +6970,7 @@ if test "$_gtk1" = no ; then
 
   if pkg-config gtk+-2.0 --exists ; then
     _gtk=`pkg-config gtk+-2.0 --modversion 2>/dev/null`
-    _inc_gtk=`pkg-config gtk+-2.0 --cflags 2>/dev/null`
+    _inc_extra="$_inc_extra `pkg-config gtk+-2.0 --cflags 2>/dev/null`"
     _ld_gtk=`pkg-config gtk+-2.0 --libs 2>/dev/null`
     echores "$_gtk"
 
@@ -7021,7 +7006,7 @@ if test "$_gtk1" = yes ; then
     fi
   fi
   _gtk=`$_gtkconfig --version 2>&1`
-  _inc_gtk=`$_gtkconfig --cflags 2>&1`
+  _inc_extra="$_inc_extra `$_gtkconfig --cflags 2>&1`"
   _ld_gtk=`$_gtkconfig --libs 2>&1`
   echores "$_gtk (using $_gtkconfig)"
 
@@ -7332,11 +7317,8 @@ HOST_CC = $_host_cc
 AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
-# FIXME: Should only be $_inc_extra, time to get rid of all --with-fooincdir.
-EXTRA_INC = $_inc_extra $_inc_libdts $_inc_mlib $_inc_x11 $_inc_dxr2 $_inc_dvb \
-            $_inc_caca $_inc_arts $_inc_esd $_inc_polyp $_inc_jack $_inc_openal\
-            $_inc_sdl $_inc_xvid $_inc_x264 $_inc_directfb $_inc_cdparanoia \
-            $_inc_freetype $_inc_fontconfig $_inc_fribidi $_inc_libcdio $_inc_gtk
+# FIXME: Should only be $_inc_extra eventually.
+EXTRA_INC = $_inc_extra $_inc_x11 $inc_dxr2 $_inc_dvb $_inc_directfb $_inc_cdparanoia
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
