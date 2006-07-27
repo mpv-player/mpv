@@ -3040,7 +3040,7 @@ _sys_soundcard=no
 cc_check && _sys_soundcard=yes
 if test "$_sys_soundcard" = yes ; then
   _def_sys_soundcard='#define HAVE_SYS_SOUNDCARD_H 1'
-  _inc_soundcard='#include <sys/soundcard.h>'
+  _include_soundcard='#include <sys/soundcard.h>'
 else
   _def_sys_soundcard='#undef HAVE_SYS_SOUNDCARD_H'
 fi
@@ -3065,7 +3065,7 @@ else
 fi
 if test "$_soundcard" = yes ; then
   _def_soundcard='#define HAVE_SOUNDCARD_H 1'
-  _inc_soundcard='#include <soundcard.h>'
+  _include_soundcard='#include <soundcard.h>'
 else
   _def_soundcard='#undef HAVE_SOUNDCARD_H'
 fi
@@ -4759,7 +4759,7 @@ echocheck "OSS Audio"
 if test "$_ossaudio" = auto ; then
   cat > $TMPC << EOF
 #include <sys/ioctl.h>
-$_inc_soundcard
+$_include_soundcard
 int main(void) { int arg = SNDCTL_DSP_SETFRAGMENT; return 0; }
 EOF
   _ossaudio=no
@@ -4775,7 +4775,7 @@ if test "$_ossaudio" = yes ; then
   else
      cat > $TMPC << EOF
 #include <sys/ioctl.h>
-$_inc_soundcard
+$_include_soundcard
 #ifdef OPEN_SOUND_SYSTEM
 int main(void) { return 0; }
 #else
