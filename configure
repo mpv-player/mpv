@@ -7338,7 +7338,10 @@ AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
 # FIXME: Should only be $_inc_extra, time to get rid of all --with-fooincdir.
-EXTRA_INC = $_inc_extra $_inc_libdts $_inc_mlib
+EXTRA_INC = $_inc_extra $_inc_libdts $_inc_mlib $_inc_x11 $_inc_dxr2 $_inc_dvb \
+            $_inc_caca $_inc_arts $_inc_esd $_inc_polyp $_inc_jack $_inc_openal\
+            $_inc_sdl $_inc_xvid $_inc_x264 $_inc_directfb $_inc_cdparanoia \
+            $_inc_freetype $_inc_fontconfig $_inc_fribidi $_inc_libcdio $_inc_gtk
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
@@ -7388,7 +7391,6 @@ HAVE_PTHREADS = $_pthreads
 MATH_LIB = $_ld_lm
 LIBC_LIB = $_ld_libC
 
-X11_INC = $_inc_x11
 X11DIR = $_ld_x11
 
 HAVE_XVMC_ACCEL = $_xvmc
@@ -7403,8 +7405,6 @@ LIB=\$(LIBPREF)\$(NAME)\$(LIBSUF)
 X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_sock
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
-DXR2_INC = $_inc_dxr2
-DVB_INC = $_inc_dvb
 PNG_LIB = $_ld_png
 JPEG_LIB = $_ld_jpeg
 GIF_LIB = $_ld_gif
@@ -7412,7 +7412,6 @@ SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
 VESA_LIB = $_ld_vesa
 AA_LIB = $_ld_aa
-CACA_INC = $_inc_caca
 CACA_LIB = $_ld_caca
 
 # audio output
@@ -7424,15 +7423,10 @@ ALSA1X = $_alsa1x
 ALSA_LIB = $_ld_alsa
 NAS_LIB = $_ld_nas
 ARTS_LIB = $_ld_arts
-ARTS_INC = $_inc_arts
 ESD_LIB = $_ld_esd
-ESD_INC = $_inc_esd
 POLYP_LIB = $_ld_polyp
-POLYP_INC = $_inc_polyp
 JACK_LIB = $_ld_jack
-JACK_INC = $_inc_jack
 OPENAL_LIB = $_ld_openal
-OPENAL_INC = $_inc_openal
 SGIAUDIO_LIB = $_ld_sgiaudio
 
 # input/demuxer/codecs
@@ -7452,7 +7446,6 @@ DVDREAD_LIB = $_ld_dvdread
 DVDKIT2 = $_mpdvdkit
 DVDNAV = $_dvdnav
 DVDNAV_LIB = $_ld_dvdnav
-SDL_INC = $_inc_sdl
 WIN32DLL = $_win32
 W32_DEP = $_dep_win32
 W32_LIB = $_ld_win32
@@ -7476,30 +7469,22 @@ LIBDV = $_libdv
 ARCH_LIB =  $_ld_arch $_ld_iconv
 XVID = $_xvid
 XVID4 = $_xvid4
-XVID_INC = $_inc_xvid
 XVID_LIB = $_ld_xvid
 X264 = $_x264
-X264_INC = $_inc_x264
 X264_LIB = $_ld_x264
 CONFIG_DTS = $_libdts
 DTS_LIB = $_ld_libdts
 DECORE_LIB = $_ld_mp3lame
 MENCODER = $_mencoder
 ENCORE_LIB = $_ld_mp3lame
-DIRECTFB_INC = $_inc_directfb
 DIRECTFB_LIB = $_ld_directfb
 CDDA = $_cdda
-CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
 FREETYPE = $_freetype
-FREETYPE_INC = $_inc_freetype
 FREETYPE_LIB = $_ld_freetype
-FONTCONFIG_INC = $_inc_fontconfig
 FONTCONFIG_LIB = $_ld_fontconfig
 CONFIG_ASS = $_ass
-FRIBIDI_INC = $_inc_fribidi
 FRIBIDI_LIB = $_ld_fribidi
-LIBCDIO_INC = $_inc_libcdio
 LIBCDIO_LIB = $_ld_libcdio
 LIBLZO_LIB= $_ld_liblzo
 LIBMAD = $_mad
@@ -7559,7 +7544,6 @@ TARGET_BUILTIN_VECTOR = $_builtin_vector
 TARGET_BUILTIN_3DNOW  = $_mm3dnow
 
 # --- GUI stuff ---
-GTK_INC = $_inc_gtk
 GTKLIB = $_ld_gtk
 GLIBLIB = $_ld_glib
 GTK_LIBS = $_ld_static \$(GTKLIB) \$(GLIBLIB)

@@ -10,16 +10,7 @@ SRCS=audio_out.c \
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. \
-          $(ARTS_INC) \
-          $(DVB_INC) \
-          $(DXR2_INC) \
-          $(ESD_INC) \
-          $(JACK_INC) \
-          $(OPENAL_INC) \
-          $(POLYP_INC) \
-          $(SDL_INC) \
-          $(X11_INC) \
+CFLAGS  = $(OPTFLAGS) -I. -I..
 
 .SUFFIXES: .c .o
 

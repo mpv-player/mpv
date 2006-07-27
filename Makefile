@@ -121,18 +121,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(FRIBIDI_LIB) \
               $(ENCA_LIB) \
 
-CFLAGS = $(OPTFLAGS) -I. \
-         $(CACA_INC) \
-         $(CDPARANOIA_INC) \
-         $(DVB_INC) \
-         $(FONTCONFIG_INC) \
-         $(FREETYPE_INC) \
-         $(FRIBIDI_INC) \
-         $(SDL_INC) \
-         $(X11_INC) \
-         $(XVID_INC) \
-         $(LIBAV_INC) \
-         $(LIBCDIO_INC) \
+CFLAGS = $(OPTFLAGS) -I. $(LIBAV_INC)
 
 #CFLAGS += -Wall
 

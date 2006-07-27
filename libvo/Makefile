@@ -38,11 +38,6 @@ endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep \
           $(LIBAV_INC) \
-          $(FREETYPE_INC) \
-          $(SDL_INC) \
-          $(X11_INC) \
-          $(DXR2_INC) \
-          $(DIRECTFB_INC) \
           -DMPG12PLAY \
 
 #CFLAGS += -Wall
@@ -60,9 +55,6 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep \
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 	$(RANLIB) $(LIBNAME)
-
-vo_mpegpes.o: vo_mpegpes.c
-	$(CC) -c $(CFLAGS) $(DVB_INC) -o $@ $<
 
 all:    $(LIBNAME)
 

@@ -13,8 +13,6 @@ CFLAGS  = $(OPTFLAGS) \
           -I. -I.. \
           -I../libmpcodecs \
           -D_GNU_SOURCE \
-          $(FREETYPE_INC) \
-          $(FONTCONFIG_INC) \
 
 .SUFFIXES: .c .o
 

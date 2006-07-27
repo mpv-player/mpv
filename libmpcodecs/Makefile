@@ -323,8 +323,6 @@ CFLAGS  = $(OPTFLAGS) \
           -I../libmpdemux \
           -I../loader \
           $(LIBAV_INC) \
-          $(X264_INC) \
-          $(XVID_INC) \
           -D_GNU_SOURCE \
 
 .SUFFIXES: .c .o

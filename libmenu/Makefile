@@ -15,11 +15,10 @@ SRCS= menu.c \
 
 ifeq ($(DVBIN),yes)
 SRCS += menu_dvbin.c
-EXTRA_INC += $(DVB_INC)
 endif
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs $(FREETYPE_INC)
+CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs
 
 .SUFFIXES: .c .o
 
