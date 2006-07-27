@@ -6695,6 +6695,8 @@ EOF
  fi
 fi
 if test "$_tv_v4l1" = yes ; then
+  _tv_v4l=yes
+  _def_tv_v4l='#define HAVE_TV_V4L 1'
   _def_tv_v4l1='#define HAVE_TV_V4L1 1'
   _inputmodules="tv-v4l $_inputmodules"
 else
@@ -6718,6 +6720,8 @@ EOF
  fi
 fi
 if test "$_tv_v4l2" = yes ; then
+  _tv_v4l=yes
+  _def_tv_v4l='#define HAVE_TV_V4L 1'
   _def_tv_v4l2='#define HAVE_TV_V4L2 1'
   _inputmodules="tv-v4l2 $_inputmodules"
 else
@@ -7436,6 +7440,7 @@ TERMCAP_LIB = $_ld_termcap
 LIRC_LIB = $_ld_lirc
 LIRCC_LIB = $_ld_lircc
 TV = $_tv
+TV_V4L  = $_tv_v4l
 TV_V4L1 = $_tv_v4l1
 TV_V4L2 = $_tv_v4l2
 TV_BSDBT848 = $_tv_bsdbt848
@@ -7962,6 +7967,9 @@ $_def_nas
 
 /* Enable TV Interface support */
 $_def_tv
+
+/* Enable Video 4 Linux TV interface support */
+$_def_tv_v4l
 
 /* Enable Video 4 Linux 1 TV interface support */
 $_def_tv_v4l1

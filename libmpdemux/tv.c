@@ -56,7 +56,7 @@ int tv_param_outfmt = -1;
 float tv_param_fps = -1.0;
 char **tv_param_channels = NULL;
 int tv_param_audio_id = 0;
-#if defined(HAVE_TV_V4L1) || defined(HAVE_TV_V4L2)
+#if defined(HAVE_TV_V4L)
 int tv_param_amode = -1;
 int tv_param_volume = -1;
 int tv_param_bass = -1;

@@ -82,7 +82,7 @@ SRCS += tv.c frequencies.c tvi_dummy.c
   ifeq ($(TV_V4L1),yes)
   SRCS += tvi_v4l.c audio_in.c
   endif
-  ifneq ($(TV_V4L)$(TV_V4L2),)
+  ifeq ($(TV_V4L),yes)
     ifeq ($(ALSA1X),yes)
      SRCS += ai_alsa1x.c
     endif
