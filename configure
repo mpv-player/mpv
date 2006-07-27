@@ -3686,9 +3686,6 @@ else
   _res_comment="using $_inc_directfb"
   echores "yes"
 fi
-if test "$_inc_directfb" = "-I/usr/include" ; then
-  _inc_directfb=""
-fi
 
 echocheck "DirectFB"
 if test "$_directfb" = auto ; then
