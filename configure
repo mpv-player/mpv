@@ -7317,7 +7317,7 @@ HOST_CC = $_host_cc
 AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
-# FIXME: Should only be $_inc_extra eventually.
+# FIXME: Should only be _inc_extra eventually.
 EXTRA_INC = $_inc_extra $_inc_x11 $inc_dxr2 $_inc_dvb $_inc_directfb $_inc_cdparanoia
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
