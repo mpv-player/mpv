@@ -176,14 +176,14 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
     if (avs_has_video(AVS->video_info))
     {
-    if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
-    
-    curr_frame = AVS->avs_get_frame(AVS->clip, AVS->frameno);
-    if (!curr_frame)
-    {
-        mp_msg(MSGT_DEMUX, MSGL_V, "AVS: error getting frame -- EOF??\n");
-        return 0;
-    }
+        if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
+
+        curr_frame = AVS->avs_get_frame(AVS->clip, AVS->frameno);
+        if (!curr_frame)
+        {
+            mp_msg(MSGT_DEMUX, MSGL_V, "AVS: error getting frame -- EOF??\n");
+            return 0;
+        }
 
         dp = new_demux_packet(curr_frame->vfb->data_size);
         sh_video->num_frames_decoded++;
@@ -194,8 +194,8 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         memcpy(dp->buffer, curr_frame->vfb->data + curr_frame->offset, curr_frame->vfb->data_size);
         ds_add_packet(demuxer->video, dp);
 
-    AVS->frameno++;
-    AVS->avs_release_video_frame(curr_frame);
+        AVS->frameno++;
+        AVS->avs_release_video_frame(curr_frame);
     }
     
 #ifdef ENABLE_AUDIO
