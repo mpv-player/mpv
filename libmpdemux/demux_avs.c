@@ -29,6 +29,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "libvo/fastmemcpy.h"
 
 #include "wine/windef.h"
 
@@ -176,6 +177,8 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
     if (avs_has_video(AVS->video_info))
     {
+        char *dst;
+        int w, h;
         if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
 
         curr_frame = AVS->avs_get_frame(AVS->clip, AVS->frameno);
@@ -184,12 +187,23 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: error getting frame -- EOF??\n");
             return 0;
         }
+        w = curr_frame->row_size;
+        h = curr_frame->height;
 
-        dp = new_demux_packet(curr_frame->vfb->data_size);
+        dp = new_demux_packet(w * h + 2 * (w / 2) * (h / 2));
 
         dp->pts=AVS->frameno / sh_video->fps;
 
-        memcpy(dp->buffer, curr_frame->vfb->data + curr_frame->offset, curr_frame->vfb->data_size);
+        dst = dp->buffer;
+        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offset,
+                   w, h, w, curr_frame->pitch);
+        dst += w * h;
+        w /= 2; h /= 2;
+        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offsetU,
+                   w, h, w, curr_frame->pitchUV);
+        dst += w * h;
+        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offsetV,
+                   w, h, w, curr_frame->pitchUV);
         ds_add_packet(demuxer->video, dp);
 
         AVS->frameno++;
