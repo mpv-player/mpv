@@ -797,7 +797,7 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
     FT_ULong  charcode;
 #endif
     FT_UInt   gindex;
-    int i,j;
+    int i;
 
     if (face->charmap==NULL || face->charmap->encoding!=ft_encoding_unicode) {
 	WARNING("Unicode charmap not available for this font. Very bad!");
@@ -816,6 +816,7 @@ static int prepare_charset_unicode(FT_Face face, FT_ULong *charset, FT_ULong *ch
     }
 #else
     // for FT < 2.1 we have to use brute force enumeration
+    int j;
     i = 0;
     for (j = 33; j < 65536; j++) {
 	gindex = FT_Get_Char_Index(face, j);
