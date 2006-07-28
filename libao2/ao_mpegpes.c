@@ -164,15 +164,7 @@ static int preinit(const char *arg)
 		return init_device(card);
 #else	
 	if(!ao_file)
-	{
-		if(vo_mpegpes_fd >= 0)
-		{
-			vo_mpegpes_fd2 = vo_mpegpes_fd;
-			return vo_mpegpes_fd2;	//video fd
-		}
-		else
-			ao_file = "audiograb.mpg";
-	}
+		return vo_mpegpes_fd;	//video fd
 #endif
 
 	vo_mpegpes_fd2=open(ao_file,O_WRONLY|O_CREAT,0666);
