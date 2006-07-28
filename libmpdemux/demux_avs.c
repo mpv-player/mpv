@@ -174,6 +174,8 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     demux_stream_t *d_video=demuxer->video;
     sh_video_t *sh_video=d_video->sh;
 
+    if (avs_has_video(AVS->video_info))
+    {
     if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
     
     curr_frame = AVS->avs_get_frame(AVS->clip, AVS->frameno);
@@ -183,8 +185,6 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         return 0;
     }
 
-    if (avs_has_video(AVS->video_info))
-    {
         dp = new_demux_packet(curr_frame->vfb->data_size);
         sh_video->num_frames_decoded++;
         sh_video->num_frames++;
@@ -194,6 +194,8 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         memcpy(dp->buffer, curr_frame->vfb->data + curr_frame->offset, curr_frame->vfb->data_size);
         ds_add_packet(demuxer->video, dp);
 
+    AVS->frameno++;
+    AVS->avs_release_video_frame(curr_frame);
     }
     
 #ifdef ENABLE_AUDIO
@@ -214,8 +216,6 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     }
 #endif
     
-    AVS->frameno++;
-    AVS->avs_release_video_frame(curr_frame);
     return 1;
 }
 
