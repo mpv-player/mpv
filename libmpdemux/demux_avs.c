@@ -199,10 +199,10 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
                    w, h, w, curr_frame->pitch);
         dst += w * h;
         w /= 2; h /= 2;
-        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offsetU,
+        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offsetV,
                    w, h, w, curr_frame->pitchUV);
         dst += w * h;
-        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offsetV,
+        memcpy_pic(dst, curr_frame->vfb->data + curr_frame->offsetU,
                    w, h, w, curr_frame->pitchUV);
         ds_add_packet(demuxer->video, dp);
 
