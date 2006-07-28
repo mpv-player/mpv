@@ -174,11 +174,6 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     demux_stream_t *d_video=demuxer->video;
     sh_video_t *sh_video=d_video->sh;
 
-#ifdef ENABLE_AUDIO
-    demux_stream_t *d_audio=demuxer->audio;
-    sh_audio_t *sh_audio=d_audio->sh;
-#endif
-    
     if (AVS->video_info->num_frames < AVS->frameno) return 0; // EOF
     
     curr_frame = AVS->avs_get_frame(AVS->clip, AVS->frameno);
@@ -205,6 +200,8 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
     /* Audio */
     if (avs_has_audio(AVS->video_info))
     {
+        demux_stream_t *d_audio=demuxer->audio;
+        sh_audio_t *sh_audio=d_audio->sh;
         int l = sh_audio->wf->nAvgBytesPerSec;
         dp = new_demux_packet(l);
         
@@ -224,10 +221,6 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 
 static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 {
-    sh_video_t *sh_video = NULL;
-#ifdef ENABLE_AUDIO
-    sh_audio_t *sh_audio = NULL;
-#endif
     int found = 0;
     AVS_T *AVS = (AVS_T *) demuxer->priv;
     AVS->frameno = 0;
@@ -279,8 +272,8 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
     /* Video */  
     if (avs_has_video(AVS->video_info))
     {
+        sh_video_t *sh_video = new_sh_video(demuxer, 0);
         found = 1;
-        sh_video = new_sh_video(demuxer, 0);
         
         demuxer->video->sh = sh_video;
         sh_video->ds = demuxer->video;
@@ -308,10 +301,10 @@ static demuxer_t* demux_open_avs(demuxer_t* demuxer)
     /* Audio */
     if (avs_has_audio(AVS->video_info))
     {
+        sh_audio_t *sh_audio = new_sh_audio(demuxer, 0);
         found = 1;
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Clip has audio -> Channels = %d - Freq = %d\n", AVS->video_info->nchannels, AVS->video_info->audio_samples_per_second);
 
-        sh_audio = new_sh_audio(demuxer, 0);
         demuxer->audio->sh = sh_audio;
         sh_audio->ds = demuxer->audio;
         
