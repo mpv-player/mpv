@@ -2487,12 +2487,12 @@ static double written_audio_pts(sh_audio_t *sh_audio, demux_stream_t *d_audio)
 	// but not accurately known in sh_audio->i_bps.
 
 	a_pts = d_audio->pts;
-	// ds_tell_pts returns gets bytes read after last timestamp from
+	// ds_tell_pts returns bytes read after last timestamp from
 	// demuxing layer, decoder might use sh_audio->a_in_buffer for bytes
 	// it has read but not decoded
 	if (sh_audio->i_bps)
-	a_pts += (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len) /
-	    (double)sh_audio->i_bps;
+	    a_pts += (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len) /
+		(double)sh_audio->i_bps;
     }
     // Now a_pts hopefully holds the pts for end of audio from decoder.
     // Substract data in buffers between decoder and audio out.
