@@ -6,7 +6,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <inttypes.h>
-#include <sys/poll.h>
 
 #include "config.h"
 
@@ -15,6 +14,7 @@
 #endif
 
 #ifdef HAVE_DVB
+#include <sys/poll.h>
 #include <sys/ioctl.h>
 #endif
 
