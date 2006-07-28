@@ -65,16 +65,22 @@ extern ao_functions_t audio_out_dsound;
 #ifdef HAVE_DXR2
 extern ao_functions_t audio_out_dxr2;
 #endif
+#ifdef HAVE_IVTV
+extern ao_functions_t audio_out_ivtv;
+#endif
 extern ao_functions_t audio_out_mpegpes;
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
 
 ao_functions_t* audio_out_drivers[] =
 {
-// vo-related:   will fail unless you also do -vo mpegpes/dxr2
+// vo-related:   will fail unless you also do -vo mpegpes/dxr2/ivtv
 	&audio_out_mpegpes,
 #ifdef HAVE_DXR2
         &audio_out_dxr2,
+#endif
+#ifdef HAVE_IVTV
+        &audio_out_ivtv,
 #endif
 // native:
 #ifdef HAVE_DIRECTX

@@ -4701,9 +4701,12 @@ if test "$_ivtv" = yes ; then
   _def_ivtv='#define HAVE_IVTV 1'
   _vosrc="$_vosrc vo_ivtv.c"
   _vomodules="ivtv $_vomodules"
+  _aosrc="$_aosrc ao_ivtv.c"
+  _aomodules="ivtv $_aomodules"
 else
   _def_ivtv='#undef HAVE_IVTV'
   _novomodules="ivtv $_novomodules"
+  _noaomodules="ivtv $_noaomodules"
 fi
 echores "$_ivtv"
 
