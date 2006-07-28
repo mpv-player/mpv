@@ -49,6 +49,7 @@ typedef WINAPI AVS_ScriptEnvironment* (*imp_avs_create_script_environment)(int v
 typedef WINAPI AVS_Value (*imp_avs_invoke)(AVS_ScriptEnvironment *, const char * name, AVS_Value args, const char** arg_names);
 typedef WINAPI const AVS_VideoInfo *(*imp_avs_get_video_info)(AVS_Clip *);
 typedef WINAPI AVS_Clip* (*imp_avs_take_clip)(AVS_Value, AVS_ScriptEnvironment *);
+typedef WINAPI void (*imp_avs_release_clip)(AVS_Clip *);
 typedef WINAPI AVS_VideoFrame* (*imp_avs_get_frame)(AVS_Clip *, int n);
 typedef WINAPI void (*imp_avs_release_video_frame)(AVS_VideoFrame *);
 #ifdef ENABLE_AUDIO
@@ -78,6 +79,7 @@ typedef struct tagAVS
     imp_avs_invoke avs_invoke;
     imp_avs_get_video_info avs_get_video_info;
     imp_avs_take_clip avs_take_clip;
+    imp_avs_release_clip avs_release_clip;
     imp_avs_get_frame avs_get_frame;
     imp_avs_release_video_frame avs_release_video_frame;
 #ifdef ENABLE_AUDIO
@@ -109,6 +111,7 @@ AVS_T *initAVS(const char *filename)
     IMPORT_FUNC(avs_invoke);
     IMPORT_FUNC(avs_get_video_info);
     IMPORT_FUNC(avs_take_clip);
+    IMPORT_FUNC(avs_release_clip);
     IMPORT_FUNC(avs_get_frame);
     IMPORT_FUNC(avs_release_video_frame);
 #ifdef ENABLE_AUDIO
@@ -360,11 +363,13 @@ static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
 static void demux_close_avs(demuxer_t* demuxer)
 {
     AVS_T *AVS = (AVS_T *) demuxer->priv;
-    // TODO release_clip?
+
     if (AVS)
     {
         if (AVS->dll)
         {
+            if (AVS->clip)
+                AVS->avs_release_clip(AVS->clip);
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Unloading avisynth.dll\n");
             FreeLibrary(AVS->dll);
         }
