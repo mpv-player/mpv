@@ -955,12 +955,12 @@ int kerning(font_desc_t *desc, int prevc, int c)
 
 font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_height)
 {
-    font_desc_t *desc;
+    font_desc_t *desc = NULL;
 
     FT_Face face;
 
-    FT_ULong my_charset[MAX_CHARSET_SIZE]; /* characters we want to render; Unicode */
-    FT_ULong my_charcodes[MAX_CHARSET_SIZE]; /* character codes in 'encoding' */
+    FT_ULong *my_charset = malloc(MAX_CHARSET_SIZE * sizeof(FT_ULong)); /* characters we want to render; Unicode */
+    FT_ULong *my_charcodes = malloc(MAX_CHARSET_SIZE * sizeof(FT_ULong)); /* character codes in 'encoding' */
 
     char *charmap = "ucs-4";
     int err;
@@ -972,6 +972,11 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
 
     float subtitle_font_ppem;
     float osd_font_ppem;
+
+    if (my_charset == NULL || my_charcodes == NULL) {
+	mp_msg(MSGT_OSD, MSGL_ERR, "subtitle font: malloc failed.\n");
+	goto err_out;
+    }
 
     switch (subtitle_autoscale) {
     case 1:
@@ -1005,7 +1010,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
     }
 
     desc = init_font_desc();
-    if(!desc) return NULL;
+    if(!desc) goto err_out;
 
 //    t=GetTimer();
 
@@ -1030,11 +1035,10 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
 
     if (charset_size < 0) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "subtitle font: prepare_charset failed.\n");
-	free_font_desc(desc);
-	return NULL;
+	goto err_out;
     }
 #else
-    return NULL;
+    goto err_out;
 #endif
 
 //    fprintf(stderr, "fg: prepare t = %lf\n", GetTimer()-t);
@@ -1045,8 +1049,7 @@ font_desc_t* read_font_desc_ft(const char *fname, int movie_width, int movie_hei
 
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "Cannot prepare subtitle font.\n");
-	free_font_desc(desc);
-	return NULL;
+	goto err_out;
     }
 
 gen_osd:
@@ -1054,8 +1057,7 @@ gen_osd:
     /* generate the OSD font */
     err = load_osd_face(&face);
     if (err) {
-	free_font_desc(desc);
-	return NULL;
+	goto err_out;
     }
     desc->face_cnt++;
 
@@ -1065,16 +1067,14 @@ gen_osd:
     
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "Cannot prepare OSD font.\n");
-	free_font_desc(desc);
-	return NULL;
+	goto err_out;
     }
 
     err = generate_tables(desc, subtitle_font_thickness, subtitle_font_radius);
     
     if (err) {
 	mp_msg(MSGT_OSD, MSGL_ERR, "Cannot generate tables.\n");
-	free_font_desc(desc);
-	return NULL;
+	goto err_out;
     }
 
     // final cleanup
@@ -1092,7 +1092,16 @@ gen_osd:
 	    desc->font[i] = desc->font[j];
 	}
     }
+    free(my_charset);
+    free(my_charcodes);
     return desc;
+
+err_out:
+    if (desc)
+      free_font_desc(desc);
+    free(my_charset);
+    free(my_charcodes);
+    return NULL;
 }
 
 int init_freetype(void)
