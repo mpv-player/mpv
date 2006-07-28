@@ -140,6 +140,23 @@ static void demux_close_mf(demuxer_t* demuxer) {
   free(mf);  
 }
 
+static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
+  mf_t *mf = (mf_t *)demuxer->priv;
+  sh_video_t *sh_video = demuxer->video->sh;
+
+  switch(cmd) {
+    case DEMUXER_CTRL_GET_TIME_LENGTH:
+      *((double *)arg) = (double)mf->nr_of_files / sh_video->fps;
+      return DEMUXER_CTRL_OK;
+
+    case DEMUXER_CTRL_GET_PERCENT_POS:
+      *((int *)arg) = 100 * mf->curr_frame / (mf->nr_of_files - 1);
+      return DEMUXER_CTRL_OK;
+
+    default:
+      return DEMUXER_CTRL_NOTIMPL;
+  }
+}
 
 demuxer_desc_t demuxer_desc_mf = {
   "mf demuxer",
@@ -154,5 +171,5 @@ demuxer_desc_t demuxer_desc_mf = {
   demux_open_mf,
   demux_close_mf,
   demux_seek_mf,
-  NULL
+  demux_control_mf
 };
