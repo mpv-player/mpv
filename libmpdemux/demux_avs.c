@@ -189,7 +189,7 @@ static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
         sh_video->num_frames_decoded++;
         sh_video->num_frames++;
 
-        d_video->pts=AVS->frameno / sh_video->fps; // OSD
+        dp->pts=AVS->frameno / sh_video->fps;
 
         memcpy(dp->buffer, curr_frame->vfb->data + curr_frame->offset, curr_frame->vfb->data_size);
         ds_add_packet(demuxer->video, dp);
