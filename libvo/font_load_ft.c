@@ -179,8 +179,8 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 	else {
 	    glyph_index = FT_Get_Char_Index(face, uni_charmap ? character:code);
 	    if (glyph_index==0) {
-		WARNING("Glyph for char 0x%02x|U+%04X|%c not found.", code, character,
-			code<' '||code>255 ? '.':code);
+		WARNING("Glyph for char 0x%02lx|U+%04lX|%c not found.", code, character,
+			code<' '||code>255 ? '.':(char)code);
 		desc->font[unicode?character:code] = -1;
 		continue;
 	    }
@@ -737,8 +737,8 @@ static FT_ULong decode_char(iconv_t *cd, char c) {
     FT_ULong o;
     char *inbuf = &c;
     char *outbuf = (char*)&o;
-    int inbytesleft = 1;
-    int outbytesleft = sizeof(FT_ULong);
+    size_t inbytesleft = 1;
+    size_t outbytesleft = sizeof(FT_ULong);
 
     iconv(*cd, &inbuf, &inbytesleft, &outbuf, &outbytesleft);
 
