@@ -194,6 +194,7 @@ libao2 drivers:
     * ao_dsound.c - None
     * ao_dxr2.c - None
     * ao_esd.c - None
+    * ao_ivtv.c - Benjamin Zores
     * ao_jack.c - Reimar Döffinger
     * ao_mpegpes.c - None
     * ao_nas.c - Tobias Diedrich
