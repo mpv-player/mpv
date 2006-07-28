@@ -629,6 +629,14 @@ static void glSetupYUVCombinersATI(float uvcos, float uvsin) {
   EndFragmentShader();
 }
 
+/**
+ * \brief helper function for gen_spline_lookup_tex
+ * \param x subpixel-position ((0,1) range) to calculate weights for
+ * \param dst where to store transformed weights, must provide space for 4 GLfloats
+ *
+ * calculates the weights and stores them after appropriate transformation
+ * for the scaler fragment program.
+ */
 static void store_weights(float x, GLfloat *dst) {
   float w0 = (((-1 * x + 3) * x - 3) * x + 1) / 6;
   float w1 = ((( 3 * x - 6) * x + 0) * x + 4) / 6;
@@ -745,6 +753,12 @@ static const char *yuv_lookup3d_prog_template =
   "TEX result.color, yuv, texture[%c], 3D;"
   "END";
 
+/**
+ * \brief creates and initializes helper textures needed for scaling texture read
+ * \param scaler scaler type to create texture for
+ * \param texu contains next free texture unit number
+ * \param texs texture unit ids for the scaler are stored in this array
+ */
 static void create_scaler_textures(int scaler, int *texu, char *texs) {
   switch (scaler) {
     case YUV_SCALER_BILIN:
@@ -784,7 +798,20 @@ static void get_yuv2rgb_coeffs(float brightness, float contrast, float uvcos, fl
   *bc += 0.5 - contrast / 2.0;
 }
 
+//! size of gamma map use to avoid slow exp function in gen_yuv2rgb_map
 #define GMAP_SIZE (1024)
+/**
+ * \brief generate a 3D YUV -> RGB map
+ * \param map where to store map. Must provide space for (size + 2)^3 elements
+ * \param size size of the map, excluding border
+ * \param brightness desired brightness adjustment for conversion
+ * \param contrast desired contrast adjustment for conversion
+ * \param uvcos desired hue/saturation adjustment for conversion
+ * \param uvsin desired hue/saturation adjustment for conversion
+ * \param rgamma desired red gamma adjustment for conversion
+ * \param ggamma desired green gamma adjustment for conversion
+ * \param bgamma desired blue gamma adjustment for conversion
+ */
 static void gen_yuv2rgb_map(unsigned char *map, int size, float brightness,
                             float contrast, float uvcos, float uvsin,
                             float rgamma, float ggamma, float bgamma) {
@@ -834,6 +861,18 @@ static void gen_yuv2rgb_map(unsigned char *map, int size, float brightness,
 #define LOOKUP_RES 512
 //! resolution for 3D yuv->rgb conversion lookup table
 #define LOOKUP_3DRES 32
+/**
+ * \brief creates and initializes helper textures needed for yuv conversion
+ * \param texu contains next free texture unit number
+ * \param texs texture unit ids for the conversion are stored in this array
+ * \param brightness desired brightness adjustment for conversion
+ * \param contrast desired contrast adjustment for conversion
+ * \param uvcos desired hue/saturation adjustment for conversion
+ * \param uvsin desired hue/saturation adjustment for conversion
+ * \param rgamma desired red gamma adjustment for conversion
+ * \param ggamma desired green gamma adjustment for conversion
+ * \param bgamma desired blue gamma adjustment for conversion
+ */
 static void create_conv_textures(int conv, int *texu, char *texs,
               float brightness, float contrast, float uvcos, float uvsin,
               float rgamma, float ggamma, float bgamma) {
@@ -889,6 +928,18 @@ static void create_conv_textures(int conv, int *texu, char *texs,
     free(lookup_data);
 }
 
+/**
+ * \brief adds a scaling texture read at the current fragment program position
+ * \param scaler type of scaler to insert
+ * \param prog_pos current position in fragment program
+ * \param remain how many bytes remain in the buffer given by prog_pos
+ * \param texs array containing the texture unit identifiers for this scaler
+ * \param in_tex texture unit the scaler should read from
+ * \param out_comp component of the yuv variable the scaler stores the result in
+ * \param rect if rectangular (pixel) adressing should be used for in_tex
+ * \param texw width of the in_tex texture
+ * \param texh height of the in_tex texture
+ */
 static void add_scaler(int scaler, char **prog_pos, int *remain, char *texs,
                     char in_tex, char out_comp, int rect, int texw, int texh) {
   switch (scaler) {
@@ -935,6 +986,12 @@ static const struct {
   {NULL, 0, 0}
 };
 
+/**
+ * \brief load the specified GPU Program
+ * \param target program target to load into, only GL_FRAGMENT_PROGRAM is tested
+ * \param prog program string
+ * \return 1 on success, 0 otherwise
+ */
 int loadGPUProgram(GLenum target, char *prog) {
   int i;
   GLint cur = 0, max = 0, err = 0;
