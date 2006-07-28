@@ -1541,11 +1541,13 @@ static int mp_property_mute(m_option_t* prop,int action,void* arg) {
         if(!arg) return 0;
         if((!!*(int*)arg) != mixer.muted)
             mixer_mute(&mixer);
+        user_muted = mixer.muted;
         return 1;
     case M_PROPERTY_STEP_UP:
     case M_PROPERTY_STEP_DOWN:
         if(edl_muted) return M_PROPERTY_DISABLED;
         mixer_mute(&mixer);
+        user_muted = mixer.muted;
         return 1;
     case M_PROPERTY_PRINT:
         if(!arg) return 0;
