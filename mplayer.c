@@ -1300,9 +1300,7 @@ static void update_osd_msg(void) {
             int len = demuxer_get_time_length(demuxer);
             int percentage = -1;
             char percentage_text[10];
-            static int last_pts = -303;
             int pts = sh_video->pts;
-            if(pts==last_pts-1) ++pts; else last_pts=pts;
             
             if (osd_show_percentage)
                 percentage = demuxer_get_percent_pos(demuxer);
