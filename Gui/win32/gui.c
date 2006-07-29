@@ -64,10 +64,6 @@ DWORD oldtime;
 NOTIFYICONDATA nid;
 int console_state = 0;
 
-/* Sub window stuff */
-static HBRUSH    colorbrush = NULL;           //Handle to colorkey brush
-static COLORREF windowcolor = RGB(0,0,16);    //Windowcolor == colorkey
-
 void console_toggle(void)
 {
     if (console_state)
@@ -560,6 +556,7 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             int tmpheight=0;
             static uint32_t rect_width;
             static uint32_t rect_height;
+            DWORD style, flags;
             RECT rd;
             POINT pt;
             while(ShowCursor(TRUE) <= 0){}
@@ -584,9 +581,18 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             rd.right = rd.left + rect_width;
             rd.bottom = rd.top + rect_height;
 
-            AdjustWindowRect(&rd, WS_OVERLAPPEDWINDOW | WS_SIZEBOX, 0);
-            SetWindowPos(hWnd, HWND_NOTOPMOST, pt.x+rd.left, pt.y+rd.top,
-                         rd.right-rd.left, rd.bottom-rd.top, SWP_NOOWNERZORDER);
+            if(fullscreen)
+            {
+                style = WS_VISIBLE | WS_POPUP;
+                flags = SWP_NOZORDER | SWP_FRAMECHANGED;
+            } else {
+                style = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
+                flags = SWP_NOOWNERZORDER;
+            }
+
+            AdjustWindowRect(&rd, style, 0);
+            SetWindowPos(hWnd, 0, fullscreen?0:pt.x+rd.left, fullscreen?0:pt.y+rd.top,
+                         fullscreen?vo_screenwidth:rd.right-rd.left, fullscreen?vo_screenheight:rd.bottom-rd.top, flags);
             return 0;
         }
         case WM_PAINT:
@@ -1325,6 +1331,7 @@ extern int create_subwindow(gui_t *gui, char *skindir)
     window_priv_t *priv = NULL;
     window *desc = NULL;
     int i, x = -1, y = -1;
+    vo_colorkey = 0xff000000;
 
     for (i=0; i<gui->skin->windowcount; i++)
         if(gui->skin->windows[i]->type == wiSub)
@@ -1336,8 +1343,6 @@ extern int create_subwindow(gui_t *gui, char *skindir)
         return 1;
     }
 
-    windowcolor = vo_colorkey;
-    colorbrush = CreateSolidBrush(windowcolor);
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     wc.lpfnWndProc = SubProc;
     wc.cbClsExtra = 0;
@@ -1345,7 +1350,7 @@ extern int create_subwindow(gui_t *gui, char *skindir)
     wc.hInstance = instance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hIcon = gui->icon;
-    wc.hbrBackground = colorbrush;
+    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.lpszClassName = "MPlayer Sub for Windows";
     wc.lpszMenuName = NULL;
     RegisterClass(&wc);

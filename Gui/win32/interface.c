@@ -67,6 +67,7 @@ char *codecname = NULL;
 int mplGotoTheNext = 1;
 static gui_t *mygui = NULL;
 static int update_subwindow(void);
+static RECT old_rect;
 
 /* test for playlist files, no need to specify -playlist on the commandline.
  * add any conceivable playlist extensions here.
@@ -402,6 +403,7 @@ void mplEnd( void )
     if (mygui->playlist->current == (mygui->playlist->trackcount - 1))
         mygui->playlist->current = 0;
 
+    fullscreen = vo_fs = 0;
     guiGetEvent(guiCEvent, (void *) guiSetStop);
 }
 
@@ -431,6 +433,9 @@ static DWORD WINAPI GuiThread(void)
        gtkAutoSyncOn = 1;
        gtkAutoSync = autosync;
     }
+
+    old_rect.left = gui_sub_pos_x;
+    old_rect.top = gui_sub_pos_y;
 
     while(mygui)
     {
@@ -665,6 +670,9 @@ int guiGetEvent(int type, char *arg)
                 case guiSetPlay:
                 {
                     guiIntfStruct.Playing = 1;
+                    if(guiIntfStruct.sh_video && !IsIconic(mygui->subwindow)
+                       && IsWindowVisible(mygui->subwindow) && !fullscreen)
+                        GetWindowRect(mygui->subwindow, &old_rect);
                     break;
                 }
                 case guiSetStop:
@@ -690,22 +698,33 @@ int guiGetEvent(int type, char *arg)
                 case MP_CMD_GUI_FULLSCREEN:
                 {
                     if(!guiIntfStruct.sh_video) break;
-                    video_out->control(VOCTRL_FULLSCREEN, 0);
 
-                    /* no WinID, keep the sub window hidden */
-                    if(!sub_window)
-                        break;
-
-                    if(vo_fs)
+                    /* FIXME: vo_directx is behaving unexpectedly, this maintains current functionality */
+                    if(!sub_window || (&video_driver_list && strstr(video_driver_list[0], "directx")))
                     {
-                        WinID = -1;
-                        ShowWindow(mygui->subwindow, SW_HIDE);
-                        while(ShowCursor(FALSE) >= 0){}
-                    } else {
-                        WinID = mygui->subwindow;
-                        ShowWindow(mygui->subwindow, SW_SHOW);
-                        while(ShowCursor(TRUE) <= 0){}
+                        video_out->control(VOCTRL_FULLSCREEN, 0);
+                        break;
                     }
+
+                    if(!fullscreen)
+                        GetWindowRect(mygui->subwindow, &old_rect);
+
+                    if(fullscreen)
+                    {
+                        fullscreen = vo_fs = 0;
+                        vo_dwidth = guiIntfStruct.MovieWidth = old_rect.right-old_rect.left;
+                        vo_dheight = guiIntfStruct.MovieHeight = old_rect.bottom-old_rect.top;
+                        vo_dx = old_rect.left;
+                        vo_dy = old_rect.top;
+                    } else {
+                        fullscreen = vo_fs = 1;
+                        vo_dwidth = guiIntfStruct.MovieWidth = vo_screenwidth;
+                        vo_dheight = guiIntfStruct.MovieHeight = vo_screenheight;
+                        vo_dx = 0;
+                        vo_dy = 0;
+                    }
+                    mpcodecs_config_vo(guiIntfStruct.sh_video, guiIntfStruct.MovieWidth,
+                                       guiIntfStruct.MovieHeight, 0);
                     break;
                 }
                 case MP_CMD_QUIT:
@@ -723,24 +742,24 @@ int guiGetEvent(int type, char *arg)
                     guiGetEvent(guiCEvent, (void *) guiSetPlay);
                     break;
                 case MP_CMD_GUI_SKINBROWSER:
-                    if(vo_fs) guiSetEvent(evFullScreen);
+                    if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) ID_SKINBROWSER, 0);
                     break;
                 case MP_CMD_GUI_PLAYLIST:
-                    if(vo_fs) guiSetEvent(evFullScreen);
+                    if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) ID_PLAYLIST, 0);
                     break;
                 case MP_CMD_GUI_PREFERENCES:
-                    if(vo_fs) guiSetEvent(evFullScreen);
+                    if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) ID_PREFS, 0);
                     break;
                 case MP_CMD_GUI_LOADFILE:
-                    if(vo_fs) guiSetEvent(evFullScreen);
+                    if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) IDFILE_OPEN, 0);
                     break;
 #ifdef USE_SUB
                 case MP_CMD_GUI_LOADSUBTITLE:
-                    if(vo_fs) guiSetEvent(evFullScreen);
+                    if(fullscreen) guiSetEvent(evFullScreen);
                     PostMessage(mygui->mainwindow, WM_COMMAND, (WPARAM) IDSUBTITLE_OPEN, 0);
                     break;
 #endif
@@ -926,7 +945,11 @@ static int update_subwindow(void)
         ShowWindow(mygui->subwindow, SW_SHOWNORMAL);
 
     /* get our current window coordinates */
-    GetWindowRect(mygui->subwindow, &rd);
+    if(fullscreen)
+        GetWindowRect(mygui->subwindow, &rd);
+    else
+        CopyRect(&rd, &old_rect);
+
     x = rd.left;
     y = rd.top;
 
@@ -952,8 +975,9 @@ static int update_subwindow(void)
             sub_aspect = movie_aspect;
     }
 
+
     AdjustWindowRect(&rd, WS_OVERLAPPEDWINDOW | WS_SIZEBOX, 0);
-    SetWindowPos(mygui->subwindow, HWND_NOTOPMOST, x, y, rd.right-rd.left, rd.bottom-rd.top, SWP_NOOWNERZORDER);
+    SetWindowPos(mygui->subwindow, 0, x, y, rd.right-rd.left, rd.bottom-rd.top, SWP_NOOWNERZORDER);
 
     wp.hwnd = mygui->subwindow;
     wp.x = rd.left;
