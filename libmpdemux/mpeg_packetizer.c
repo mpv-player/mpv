@@ -49,7 +49,7 @@ int
 send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
                       int type, int my_write (unsigned char *data, int len))
 {
-  int ptslen = 5;
+  int ptslen = (pts ? 5 : 0);
   int n = 0;
   int idx, plen;
   int hdr;
