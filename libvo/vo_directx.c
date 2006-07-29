@@ -1124,11 +1124,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
 	// copy Y
     d=image+dstride*y+x;                
     s=src[0];                           
-    for(i=0;i<h;i++){
-        memcpy(d,s,w);                  
-        s+=stride[0];                  
-        d+=dstride;
-    }
+    mem2agpcpy_pic(d,s,w,h,dstride,stride[0]);
     
 	w/=2;h/=2;x/=2;y/=2;
 	
@@ -1136,21 +1132,13 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y )
     d=image+dstride*image_height + uvstride*y+x;
     if(image_format == IMGFMT_YV12)s=src[2];
 	else s=src[1];
-    for(i=0;i<h;i++){
-        memcpy(d,s,w);
-        s+=stride[1];
-        d+=uvstride;
-    }
+    mem2agpcpy_pic(d,s,w,h,uvstride,stride[1]);
 	
 	// copy V
     d=image+dstride*image_height +uvstride*(image_height/2) + uvstride*y+x;
     if(image_format == IMGFMT_YV12)s=src[1];
 	else s=src[2];
-    for(i=0;i<h;i++){
-        memcpy(d,s,w);
-        s+=stride[2];
-        d+=uvstride;
-    }
+    mem2agpcpy_pic(d,s,w,h,uvstride,stride[2]);
     return 0;
 }
 
@@ -1259,28 +1247,16 @@ static uint32_t put_image(mp_image_t *mpi){
 			// copy Y
             d=image+dstride*y+x;
             s=mpi->planes[0];
-            for(i=0;i<h;i++){
-			  memcpy(d,s,w);
-              s+=mpi->stride[0];
-              d+=dstride;
-			}
+            mem2agpcpy_pic(d,s,w,h,dstride,mpi->stride[0]);
             w/=4;h/=4;x/=4;y/=4;
     	    // copy V
             d=image+dstride*image_height + dstride*y/4+x;
 	        s=mpi->planes[2];
-		    for(i=0;i<h;i++){
-			  memcpy(d,s,w);
-              s+=mpi->stride[1];
-              d+=dstride/4;
-			}
+            mem2agpcpy_pic(d,s,w,h,dstride/4,mpi->stride[1]);
   	        // copy U
             d=image+dstride*image_height + dstride*image_height/16 + dstride/4*y+x;
 		    s=mpi->planes[1];
-            for(i=0;i<h;i++){
-			  memcpy(d,s,w);
-              s+=mpi->stride[2];
-              d+=dstride/4;
-			}
+            mem2agpcpy_pic(d,s,w,h,dstride/4,mpi->stride[2]);
 		}
 	}
 	else //packed
