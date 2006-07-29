@@ -90,6 +90,13 @@ mencoder \- Encodeur vidéo
 .in
 .B mplayer
 'in +\n[.k]u
+.I pvr://
+[options]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
 .I dvb://[numero_de_carte@]canal
 [options]
 .
@@ -1403,6 +1410,75 @@ Utilise IPv4 pour les connections réseau.
 Se rabat automatiquement sur IPv4.
 .
 .TP
+.B \-pvr <option1:option2:...> (carte PVR uniquement)
+Cette option permet le réglage de différentes propriétés d'enregistrement du
+module de capture des cartes PVR (ou IVTV, telles que les
+Hauppauge WinTV PVR\-150/250/350/500).
+Pour procéder à la capture matérielle au format MPEG ainsi qu'à sa
+visualisation via MPlayer/MEncoder, utilisez 'pvr://' comme URL de film.
+.sp 1
+Les options disponibles sont :
+.RSs
+.IPs aspect=<1\-4>
+Spécifie un format visuel pour l'entrée vidéo (la valeur par défaut est 4:3) :
+.RSss
+1: 1:1
+.br
+2: 4:3
+.br
+3: 16:9
+.br
+4: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Spécifie le taux d'échantillonnage de l'encodeur audio (la valeur par défaut
+est de 48000 Hz, et sont disponibles 32000, 44100 et 48000 Hz).
+.IPs alayer=<1\-2>
+Spécifie le niveau d'encodage MPEG audio (par défaut la couche 2).
+.IPs abitrate=<32\-448>
+Spécifie le taux binaire d'encodage audio en kbps (par défaut 384 kbps).
+.IPs amode=<value>
+Spécifie le mode d'encodage audio.
+Les différentes valeurs disponibles sont 'stereo', 'joint_stereo', 'dual'
+et 'mono'.
+La valeur par défaut est le Stéréo.
+.IPs vbitrate=<value>
+Spécifie le taux binaire moyen d'encodage vidéo.
+La valeur par défaut est de 6 Mbps. 
+.IPs vmode=<0\-1>
+Spécifie le mode d'encodage vidéo (par défaut en VBR) :
+.RSss
+0: VBR
+.br
+1: CBR
+.REss
+.IPs vpeak=<value>
+Spécifie le taux binaire maximum d'encodage vidéo (utile uniquement dans le
+cas du mode VBR).
+La valeur par défaut est de 9.6 Mbps. 
+.IPs fmt=<value>
+Détermine le format MPEG utilisé pour l'encodage (MPEG PS par défaut):
+.RSss
+ps:    MPEG PS
+.br
+ts:    MPEG TS (expérimental, peut échouer)
+.br
+mpeg1: MPEG 1
+.br
+vcd:   Video CD
+.br
+svcd:  Super Video CD
+.br
+dvd:   DVD
+.br
+dvds1: DVD Région 1 (NTSC)
+.br
+dvds2: DVD Région 2 (PAL)
+.REss
+.RE
+.PD 1
+.
+.TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
 Vous devez aussi utiliser \-demuxer rawaudio.
@@ -1550,7 +1626,7 @@ présent) vous voulez lire.
 Peut être utilisé avec \-vid et \-aid.
 .
 .TP
-.B \-tv <option1:option2:...> (TV uniquement)
+.B \-tv <option1:option2:...> (TV/PVR uniquement)
 Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
 ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
