@@ -2147,9 +2147,9 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   </listitem>
 
 <listitem><para>
-  Traitez-la comme entrelacée. Certaines frames des parties progressive auront 
-  besoin d'être dupliquées, ce qui entraînera en un sautillement inégal. Encore une 
-  fois, les filtres dés-entrelaçant peuvent passablement dégrader les parties
+  Traitez-le comme entrelacée. Certaines images des parties progressives auront 
+  besoin d'être dupliquées, ce qui entraînera un sautillement irrégulier. Encore une 
+  fois, les filtres désentrelaçant peuvent légèrement dégrader les parties
   progressives.
   </para></listitem>
 
@@ -2159,18 +2159,18 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 </sect2>
 
 <sect2 id="menc-feat-telecine-footnotes">
-<title>Notes de pied</title>
+<title>Notes de bas de pages</title>
 <orderedlist>
 <listitem><formalpara>
-  <title>A propos de découpage:</title>
+  <title>A propos de recadrage:</title>
   <para>
   Les données vidéo d'un DVD sont stockées dans un format appelé YUV 4:2:0. Dans 
-  la vidéo YUV, la luma (&quot;luminosité&quot;) et le chroma (&quot;couleur&quot;)
-  sont stockés séparément. Parce que l'oeil humain est somme toute moins sensible
-  à la couleur qu'il ne l'est à la luminosité, dans une image YUV 4:2:0 il y a 
-  seulement un pixel de chroma pour 4 pixels de luma. Dans une image progressive, 
-  chaque carré de quatre pixels de luma (deux sur chaque coté) ont un pixel de 
-  chroma commun. Vous devez découper un YUV 4:2:0 progressif à des résolutions paires, 
+  la vidéo YUV, la luminance (&quot;luminosité&quot;) et la chrominance (&quot;couleur&quot;)
+  sont stockés séparément. Parce que l'oeil humain est d'une certaine façon moins sensible
+  à la couleur qu'à la luminosité, dans une image YUV 4:2:0 il n'y a 
+  qu'un pixel de chrominance pour 4 pixels de luminance. Dans une image progressive, 
+  chaque carré de quatre pixels de luminance (deux de chaque coté) a un pixel de 
+  chrominance commun. Vous devez recadrer le YUV 4:2:0 progressif à des résolutions paires,
   et utiliser un décalage pair. Par exemple,
   <option>crop=716:380:2:26</option> est correct mais 
   <option>crop=716:380:3:26 </option> ne l'est pas.
@@ -2179,44 +2179,45 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 
   <para>
   Quand vous avez à faire à un YUV 4:2:0 entrelacé, la situation devient un peu plus
-  compliquée. Au lieu que chaque série de quatre pixels de luma partage un pixel 
-  de chroma dans une <emphasis>frame</emphasis>, chaque groupe de quatre pixels de luma 
-  dans chaque <emphasis>champs</emphasis> partage un pixel de chroma. Quand les 
-  champs sont entrelacés pour former une frame, chaque ligne de scan est un 
-  pixel de haut. Maintenant, au lieu que tout les quatre pixels de luma soient 
-  dans un carré, ils sont deux pixels côte à côte, et les deux autres pixels
-  sont côte à côte deux lignes de scan plus bas. Les deux pixels de luma dans la 
-  ligne de scan intermédiaire sont à partir de l'autre champ, et donc partage un 
-  pixel de chroma différent avec deux pixels de luma deux lignes de scan plus loin. 
-  Toute cette confusion rend nécessaire d'avoir des dimensions de découpe verticales 
-  et des décalages en multiple de quatre. Le décalage horizontal peut rester égal.
+  compliquée. Au lieu d'avoir chaque série de quatre pixels de luminance se partager un pixel 
+  de chrominance dans une <emphasis>image</emphasis>, chaque série de quatre pixels de luminance 
+  dans chaque <emphasis>champs</emphasis> se partage un pixel de chrominance. Quand les 
+  trames sont entrelacées pour former une image, chaque ligne de scan fait un 
+  pixel de haut. Maintenant, au lieu d'avoir la série de quatre pixels de luminance 
+  dans un carré, il y a deux pixels côte à côte sur une ligne et les deux autres pixels
+  de la série sont côte à côte deux lignes de scan plus bas. Les deux pixels de luminance dans la 
+  ligne de scan intermédiaire appartiennent à une autre trame, et donc partage un 
+  pixel de chrominance différent avec deux pixels de luminance deux lignes de scan plus loin. 
+  Toute cette confusion rend nécessaire d'avoir des dimensions de recadrage
+  et de décalage verticales multiples de quatre. Dans le sens horizontal, il suffit que les 
+  dimensions restent paires.
   </para>
 
   <para>
-  Pour la vidéo télécinée, je recommande que le découpage prenne place après l'inverse
-  téléciné. Une fois la vidéo progressive vous avez seulement besoin de découper par 
-  nombres pairs. Si vous voulez vraiment gagner la légère accélération que la découpe
-  peut offrir, vous devez découper verticalement par multiples de quatre
-  ou bien le filtre inverse-téléciné n'aura pas les bonnes données.
+  Pour la vidéo télécinée, il est recommandé que le recadrage se fasse après le
+  téléciné-inverse. Une fois que la vidéo est progressive, il vous suffit de recadrer par 
+  nombres pairs. Si vous voulez accélérer légèrement la vitess d'encodage, en jouant sur les
+  dimensions de recadrage, vous devez recadrer verticalement par multiples de quatre
+  ou bien le filtre de téléciné-inverse n'aura pas les données adéquates.
   </para>
 
   <para>
-  Pour la vidéo entrelacée (pas télécinée), vous devez toujours découper verticalement
-  par multiples de quatre à moins que vous n'utilisiez <option>-vf field</option> avant de découper.
+  Pour la vidéo entrelacée (pas télécinée), vous devez toujours recadrer verticalement
+  par multiples de quatre à moins que vous n'utilisiez l'option <option>-vf field</option> avant.
   </para>
   </listitem>
 
 <listitem><formalpara>
   <title>A propos des paramètres d'encodage et de la qualité:</title>
   <para>
-  Juste parce que je recommande <option>mbd=2</option> ici ne veut pas dire
-  que cela ne devrait pas être utilisé autre part. Avec <option>trell</option>,
+  Le fait que l'option <option>mbd=2</option> est recommandée ici ne veut pas dire
+  qu'elle ne devrait pas être utilisée autre part. Avec <option>trell</option>,
   <option>mbd=2</option> est l'une des deux options de <systemitem class="library">libavcodec</systemitem> 
-  qui augmente le mieux la qualité, et vous devriez toujours utiliser au moins 
-  une des deux à moins que la baisse de vitesse d'encodage ne soit prohibitive 
-  (e.g. encodage temps réel). Il y a plusieurs autres options <systemitem class="library">libavcodec</systemitem> 
-  qui augmentent la qualité d'encodage (et réduisent la vitesse d'encodage) mais ceci est au delà
-  de la portée de ce document.
+  qui augmente le plus la qualité, et vous devriez toujours les utiliser
+  à moins que la baisse de vitesse d'encodage ne soit prohibitive 
+  (ex: encodage en temps réel). Il y a bien d'autres options de
+  <systemitem class="library">libavcodec</systemitem> qui augmentent la qualité d'encodage
+  (et réduisent sa rapidité) mais ceci est au delà du propos de ce document.
   </para>
   </formalpara>
   </listitem>
@@ -2224,12 +2225,12 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <listitem><formalpara>
   <title>A propos de la performance de pullup:</title>
   <para>
-  Employer <option>pullup</option> (avec <option>softskip</option>) 
-  sur une vidéo progressive est sûr, et est habituellement une bonne idée à moins qu'il
-  ait été vérifié que la source est entièrement progressive.
-  La perte de performance est petite pour la plupart des cas. Sur un encodage minimal,
-  <option>pullup</option> ralentit <application>MEncoder</application> de 50%. 
-  L'ajout du traitement du son et d'options avancées pour <option>lavcopts</option> masquent cette 
+  Utiliser l'option <option>pullup</option> (avec <option>softskip</option>) 
+  sur une vidéo progressive est sans danger, et c'est généralement une bonne idée à moins qu'il
+  soit certain  que la source est entièrement progressive.
+  La perte de performance est faible dans la plupart des cas. Sur un encodage minimal,
+  <option>pullup</option> ralentit <application>MEncoder</application> de 50%.
+  L'ajout du traitement du son et d'options avancées de <option>lavcopts</option> masquent cette 
   différence, en limitant la perte de performance due à l'utilisation de <option>pullup</option> à 2%.
   </para>
   </formalpara>
@@ -2251,7 +2252,7 @@ Vous pouvez encoder vers les codecs suivant (la liste suivante est plus ou moins
 </para>
 
 <sect2 id="menc-feat-enc-libavcodec-video-codecs">
-<title>codecs vidéo de <systemitem class="library">libavcodec</systemitem></title>
+<title>Codecs vidéo de <systemitem class="library">libavcodec</systemitem></title>
 
 <para>
 <informaltable frame="all">
@@ -2330,8 +2331,8 @@ Vous pouvez encoder vers les codecs suivant (la liste suivante est plus ou moins
 </tgroup>
 </informaltable>
 
-La première colonne contient les noms de codec qui doivent être passés après la
-configuration de <literal>vcodec</literal>, comme ceci: <option>-lavcopts vcodec=msmpeg4</option>
+La première colonne contient les noms de codec qui doivent être donnés après la
+configuration de <literal>vcodec</literal>, par exemple comme ceci: <option>-lavcopts vcodec=msmpeg4</option>
 </para>
 <informalexample>
 <para>
@@ -2370,8 +2371,8 @@ Un exemple avec la compression MJPEG:
 </tgroup>
 </informaltable>
 
-La première colonne contient les noms du codec qui devra être passée après l'option 
-<literal>acodec</literal>, comme ceci: <option>-lavcopts acodec=ac3</option>
+La première colonne contient les noms de codec qui doivent être donnés après l'option 
+<literal>acodec</literal>, par exemple comme ceci: <option>-lavcopts acodec=ac3</option>
 </para>
 
 <informalexample>
@@ -2383,12 +2384,12 @@ Un exemple avec compression AC3:
 
 <para>
   Contrairement aux codecs vidéo de <systemitem class="library">libavcodec</systemitem>, 
-  ces codecs audio ne font pas un usage intelligents des bits qu'on leur donne
-  vu qu'ils ont des modèles psycho-accoustiques minimaux (quand ils en ont)
-  ce que la plupart des autres implémentations de codec comportent.
-  Cependant, notez que tous ces codecs audio sont très rapides et fonctionnent qu'importe
-  leur environnement à partir du moment où <application>MEncoder</application> a été
-  compilée avec <systemitem class="library">libavcodec</systemitem> (ce qui est le
+  ses codecs audio ne font pas un usage avisé des bits qu'ils consomment
+  car ils leur manquent certains modèles psycho-acoustiques minimaux (quand ils en ont)
+  ce que la plupart des autres implémentations de codecs possèdent.
+  Cependant, notez que tous ces codecs audio sont très rapides et sont disponibles
+  à partir du moment où <application>MEncoder</application> a été
+  compilé avec <systemitem class="library">libavcodec</systemitem> (ce qui est le
   cas la plupart du temps), et ne dépend pas de bibliothèques externes.
 </para>
 </sect2>
@@ -2400,17 +2401,17 @@ Un exemple avec compression AC3:
 <para>
   Idéalement, vous voudriez probablement juste dire à mencoder de passer en 
   mode "haute qualité" et passer à autre chose.
-  Ce serait sûrement sympa, mais c'est malheureusement dur à faire vu que les 
-  différentes options d'encodage donnent différents résultats de qualité 
+  Ce serait sûrement sympa, mais c'est malheureusement difficile à implémenter car les 
+  différentes options d'encodage donnent des résultats de qualité différents
   en fonction du matériel source.
-  Ceci vient du fait que la compression dépende des propriétés visuelles
+  Ceci vient du fait que la compression dépend des propriétés visuelles
   de la vidéo en question.
   Par exemple, un film d'animation et un film d'action ont des propriétés très 
   différentes et nécessitent des options différentes pour obtenir un encodage 
   optimal.
-  La bonne nouvelle, c'est que certaines options ne devraient jamais être mise à 
-  part, comme <option>mbd=2</option>, <option>trell</option>, et <option>v4mv</option>.
-  Voir ci-dessous pour une description détaillée des options d'encodage communes.
+  La bonne nouvelle, c'est que certaines options ne devraient jamais être omises,
+  comme <option>mbd=2</option>, <option>trell</option>, et <option>v4mv</option>.
+  Voir ci-dessous pour une description détaillée des options d'encodage les plus communes.
 </para>
 
 
@@ -2419,49 +2420,48 @@ Un exemple avec compression AC3:
 <listitem><para>
   <emphasis role="bold">vmax_b_frames</emphasis>: 1 ou 2 est bon selon
   le film.
-  Notez que si vous avez besoin d'avoir votre encodeur décodable par DivX5, vous
-  aurez besoin d'activer le support closed GOP, en utilisant l'option <option>cgop</option> de
+  Notez que si vous avez besoin d'avoir votre encodage décodable par DivX5, vous
+  aurez besoin d'activer le support "closed GOP", en utilisant l'option <option>cgop</option> de
   <systemitem class="library">libavcodec</systemitem>, mais vous aurez besoin de désactiver 
   la détection de scène, ce qui n'est pas une bonne idée étant donné que cela 
   affectera un peu l'efficacité d'encodage.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vb_strategy=1</emphasis>: aide aux scènes avec de rapides 
-  mouvements.
-  Sur certaines vidéos, vmax_b_frames peut affecter la qualité, mais 
-  vmax_b_frames=2 avec vb_strategy=1 aideront.
+  <emphasis role="bold">vb_strategy=1</emphasis>: aide pour les scènes avec beaucoup de
+  mouvement. Sur certaines vidéos, l'option vmax_b_frames peut affecter la qualité, mais
+  utiliser vmax_b_frames=2 avec vb_strategy=1 aide.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">dia</emphasis>: portée de recherche de mouvement. Le plus large 
-  est l'écart; ce sera mieux, mais aussi plus lent.
-  Des valeurs négatives sont une échelle complètement différente.
+  <emphasis role="bold">dia</emphasis>: portée de de la passe de recherche de mouvement.
+   Plus la valeur de cette option est élevée, meilleure sera la qualité et plus l'encodage sera lent.
+  Les valeurs négatives représentent une échelle complètement différente.
   De bonnes valeurs sont -1 pour un encodage rapide, ou 2-4 pour un plus lent.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">predia</emphasis>: pré-passe de recherche de mouvement.
-  Pas aussi important que dia. De bonnes valeurs sont 1 (par défaut) à 4. Cela 
-  demande preme=2 pour être vraiment utile.
+  <emphasis role="bold">predia</emphasis>: portée de recherche de mouvement en pré-passe.
+  Pas aussi important que dia. De bonnes valeurs vont de 1 (par défaut) à 4. Cela 
+  requière preme=2 pour être réellement utile.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">cmp, subcmp, precmp</emphasis>: Fonction de comparaison 
   pour l'estimation de mouvement.
-  Testez avec des valeurs de 0 (défaut), 2 (hadamard), 3 (dct), et 6 (taux de
+  Testez avec les valeurs 0 (défaut), 2 (hadamard), 3 (dct), et 6 (taux de
   distorsion).
   0 est le plus rapide, et suffisant pour precmp.
   Pour cmp et subcmp, 2 est bon pour les animations, et 3 est bon pour les 
-  actions en direct.
-  6 peut-être ou non un peu mieux, mais c'est lent.
+  films d'action.
+  6 peut être (ou non) un peu meilleur, mais est lent.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">last_pred</emphasis>: Nombre de prédicateurs de mouvement 
-  à prendre depuis la frame précédente.
-  1-3 (ou dans ces eaux) améliore la vitesse de l'encodage quasiment sans contrepartie.
-  De plus hautes valeurs ralentiront sans avoir de gain réel.
+  <emphasis role="bold">last_pred</emphasis>: Nombre de prédicteurs de mouvement 
+  à prendre depuis l'image précédente.
+  1-3 (ou dans ces eaux) améliore la qualité pratiquement sans perte en vitesse.
+  De plus hautes valeurs ralentiront l'encodage sans réel gain.
 </para></listitem>
 
 <listitem><para>
@@ -2471,82 +2471,76 @@ Un exemple avec compression AC3:
 
 <listitem><para>
   <emphasis role="bold">qprd</emphasis>: quantification adaptative basée sur la
-  complexité du macrobloc.
-  Peut aider ou aggraver la situation ceci dépend de la vidéo et des autres options.
-  Cela peut causer des artefacts à moins que vous ne paramétriez vqmax à certaines
+  complexité des macroblocs.
+  Peut aider ou gêner selon la vidéo et les autres options.
+  Cela peut causer des artefacts à moins que vous ne paramétriez vqmax à des
   valeurs raisonnablement petites (6 c'est bien, voire peut-être 4); 
   vqmin=1 devrait aussi aider.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">qns</emphasis>: très lente, spécialement quand combinée
-  avec qprd.
-  Cette option dira l'encodeur à minimiser le bruit dû à la compression
-  d'artefact au lieu de faire strictement ressembler la vidéo encodée à la 
-  source.
-  N'utilisez pas ceci à moins d'avoir déjà bidouillé tout ce qui est possible 
-  et que les résultats ne sont pas encore assez bons.
+  avec qprd. Avec cette option, l'encodeur minimise le bruit dû aux artefacts de compression
+  au lieu de faire correspondre strictement la vidéo encodée à la source.
+  Ne l'utilisez pas à moins d'avoir déjà peaufiné tout le reste et que les
+  résultats ne soient pas encore assez bons.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vqcomp</emphasis>: Bidouille du contrôle de taux.
-  Quelles sont les bonnes valeurs qui dépendent du film?
-  Vous pouvez de manière sûre laisser cela de côté si vous voulez.
+  <emphasis role="bold">vqcomp</emphasis>: mise au point du contrôle de débit.
+  La nature du film définiera quelles sont les bonnes valeurs à appliquer
+  Vous pouvez sans problème laisser cette option de côté si vous voulez.
   Réduire vqcomp met plus de bits sur les scènes de basse complexité, l'augmenter 
-  les met sur les scènes de haute complexité (défaut: 0.5, portée: 0-1. portée 
-  recommandée: 0.5-0.7).
+  les met sur les scènes de haute complexité (défaut: 0.5, portée: 0-1. recommandé: 0.5-0.7).
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">vlelim, vcelim</emphasis>: Paramètre le seuil du seul 
-  coefficient d'élimination pour les plans de luminance et de chroma.
-  Ceux-là sont encodés séparément dans tous les algorithmes de style MPEG.
-  L'idée derrière tout ceci est d'utiliser certaines bonnes heuristiques
+  <emphasis role="bold">vlelim, vcelim</emphasis>: Définit le coefficient du seuil d'élimination pour
+  la luminance et les plans de chrominance.
+  Ils sont encodés séparément dans tous les algorithmes de style MPEG.
+  L'idée derrière tout ceci est d'utiliser de bonnes heuristiques
   pour déterminer quand le changement dans un bloc est inférieur au seuil que 
   vous avez spécifié, et dans ce cas, de simplement encoder le bloc comme étant 
   "sans changement".
-  Cela économisera des bits et accélérera peut-être l'encodage. vlelim=-4 et 
-  vcelim=9 semblent être de bonnes valeurs pour les films en direct, mais 
-  semblent ne pas aider avec les animations; quand vous voudrez encoder une animation, 
-  vous devrez probablement les laisser inchangés.
+  Cela économise des bits et accélére peut-être l'encodage. vlelim=-4 et 
+  vcelim=9 semblent être de bonnes valeurs pour les films de "scènes réelles", mais 
+  semblent ne pas aider avec les films d'animation; quand vous voudrez encoder une animation, 
+  vous devriez probablement les laisser tel quel.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">qpel</emphasis>: Estimation de mouvement de quart de pixel.
-  MPEG-4 utilise la précision de moitié de pixel pour sa recherche de mouvement 
-  par défaut, donc cette option vient avec un surplus car plus d'information seront 
-  stockées dans le fichier encodé.
-  La compression gain/perte dépend du film, mais n'est habituellement pas très 
-  efficace sur les animations.
-  qpel induit toujours un surcoût significatif dans le temps de décodage du CPU 
-  (+25% en pratique).
+  MPEG-4 utilise une précision d'un demi pixel pour sa recherche de mouvement 
+  par défaut, donc cette option augmente la quantité d'information qui est 
+  stockée dans le fichier encodé. Le gain ou la perte en terme de compression 
+  dépend du film, mais ce n'est habituellement pas très efficace pour les animations.
+  qpel induit toujours un surcoût significatif en temps de décodage (+25% en pratique).
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">psnr</emphasis>: n'affecte pas l'encodage courant,
-  mais écrit un fichier journal donnant le type/taille/qualité de chaque frame, et 
-  imprime un résumé du PSNR (rapport maximal du signal sur le bruit) à la fin.
+  <emphasis role="bold">psnr</emphasis>: n'affecte pas l'encodage
+  mais écrit un fichier journal donnant le type/taille/qualité de chaque image, et 
+  imprime un résumé du PSNR (rapport signal sur bruit) à la fin.
 </para></listitem>
 
 </itemizedlist>
 
 <itemizedlist>
-<title>Options à éviter:</title>
+<title>Options qu'il n'est pas recommandé de changer:</title>
 <listitem><para>
-  <emphasis role="bold">vme</emphasis>: La valeur par défaut est la mieux.
+  <emphasis role="bold">vme</emphasis>: La valeur par défaut est la meilleure.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">lumi_mask, dark_mask</emphasis>: Quantification adaptative 
-  pyscho-visuelle.
-  Vous ne voulez pas jouer avec ces options si vous tenez à la qualité.
-  Des valeurs raisonnables peuvent être efficaces dans votre cas, mais soyez prévenu 
-  que ceci reste très subjectif.
+  pyscho-visuelle. Vous ne voulez pas jouer avec ces options si vous tenez à la qualité.
+  Des valeurs raisonnables peuvent être efficaces dans votre cas, mais soyez prévenu,  
+  ceci reste très subjectif.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">scplx_mask</emphasis>: Essaie d'éviter l'apparition d'artefacts 
-  carrés, mais le post-traitement est le mieux.
+  <emphasis role="bold">scplx_mask</emphasis>: Essaie d'empêcher l'apparition d'artefacts 
+  dûs aux blocs, mais le post-traitement est plus efficace.
 </para></listitem>
 </itemizedlist>
 </sect2>
