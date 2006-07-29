@@ -1932,19 +1932,18 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <sect2 id="menc-feat-telecine-encode">
 <title>Comment encoder chaque catégorie ?</title>
 <para>
-  Comme évoqué au départ, ces prochaines lignes de &quot;HowTo&quot; 
-  <application>MEncoder</application> ne sont <emphasis role="bold">pas</emphasis> là pour être strictement 
-  utilisées telles quelles, mais pour fournir des paramètres minimum d'encodages pour 
-  chaque catégorie.
+  Comme évoqué au départ, les exemples de lignes de commande
+  <application>MEncoder</application> ne doivent <emphasis role="bold">pas</emphasis> être utilisés tels quels;  
+  ils fournissent uniquement les paramètres minimum pour encoder chaque catégorie.
 </para>
 
 <sect3 id="menc-feat-telecine-encode-progressive">
-<title>Le progressif</title>
+<title>Progressive</title>
 <para>
-  La vidéo progressive ne nécessite pas de filtre particulier pour l'encodage. 
-  Pourtant, un paramètre ne doit pas être omis : <option>-ofps 24000/1001</option>. Sinon,
-  <application>MEncoder</application> essayera d'encoder à 30000/1001 fps et produira des 
-  images en double.
+  La vidéo progressive ne nécessite pas de filtrage particulier pour l'encodage.
+  Le seul paramètre qui ne doit pas être omis est: <option>-ofps 24000/1001</option>. Sinon,
+  <application>MEncoder</application> essayera d'encoder en 30000/1001 images par seconde
+  et dupliquera certaines images.
 </para>
 
 <para>
@@ -1953,39 +1952,39 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 
 <para>
   Il n'est pas rare de se trouver avec une vidéo qui semble progressive mais qui 
-  contient en fait quelques petites parties en téléciné. A moins d'être vraiment 
-  sûr l'état de la vidéo, il sera préférable de traiter la vidéo comme 
-  <link linkend="menc-feat-telecine-encode-mixedpt"> du progressif et téléciné mélangés</link>.
-  La perte de qualité est négligeable <link linkend="menc-feat-telecine-footnotes">[3]</link>.
+  contient en fait quelques courts passages en téléciné. A moins d'être vraiment
+  sûr l'état de la vidéo, il est préférable de traiter la vidéo comme un
+  <link linkend="menc-feat-telecine-encode-mixedpt">mélange de progressive et télécinée</link>.
+  La perte en performance est faible <link linkend="menc-feat-telecine-footnotes">[3]</link>.
 </para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-telecined">
 <title>Téléciné</title>
 <para>
-  Les vidéos en téléciné peuvent redonner le contenu original à 24000/1001 avec 
-  un processus appelé inverse-téléciné.
-  <application>MPlayer</application> a plusieurs filtres disponibles pour ceci, 
-  mais le meilleur, <option>pullup</option>, est abordé à la section 
-  <link linkend="menc-feat-telecine-encode-mixedpt">mélange de progressif et téléciné</link>. 
+  A partir d'une video télécinée, il est possible de retrouver le format original en 24000/1001 avec
+  un processus appelé téléciné-inverse. Plusieurs filtres de 
+  <application>MPlayer</application> permettent ce processus;
+  le meilleur d'entre eux, <option>pullup</option>, est décrit à la section 
+  <link linkend="menc-feat-telecine-encode-mixedpt">Mélange de progressif et téléciné</link>. 
 </para>
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-interlaced">
-<title>L'entrelacé</title>
+<title>Entrelacée</title>
 <para>
-  Pour des raisons pratiques, il n'est pas possible de retrouver entièrement une 
-  vidéo progressive depuis une entrelacée. La seule manière de faire cela sans 
-  perdre la moitié de la résolution verticale est de doubler le framerate et 
-  d'essayer de &quot;trouver&quot; les lignes correspondantes pour chaque frame 
-  (cela a des inconvénients, voir la méthode 3).
+  Dans la plupart des cas pratiques, il n'est pas possible de récupérer complètement une 
+  vidéo progressive depuis une entrelacée. Pour ce faire, la seule manière sans 
+  perdre la moitié de la résolution verticale est de doubler le nombre d'images par seconde et 
+  d'essayer de &quot;deviner&quot; ce que devraient être les lignes manquantes pour chacune des trames
+  (ce qui a des inconvénients, voir méthode 3).
 </para>
 
 <orderedlist>
 <listitem><para>
-  Encodez la vidéo sous une forme entrelacée. Normalement, l'entrelacement 
-  détériore la capacité de l'encodeur à bien compresser, mais <systemitem class="library">libavcodec</systemitem> 
-  possède deux paramètres spécifiquement faits pour stocker la vidéo entrelacée de manière
+  Encodez la vidéo sous forme entrelacée. Normalement, l'entrelacement
+  ruine la capacité de compression de l'encodeur, mais <systemitem class="library">libavcodec</systemitem>
+  possède deux paramètres spécialement définis pour gérer le stockage de la vidéo entrelacée de manière
   plus satisfaisante: <option> ildct</option> et <option>ilme</option>. Aussi,
   l'utilisation de <option>mbd=2</option> est-elle fortement recommandée <link linkend="menc-feat-telecine-footnotes">[2] </link> 
   car cela encodera les macroblocs non-entrelacés à des endroits où il n'y 
@@ -1994,79 +1993,79 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
 <listitem><para>
-  Utilisez un filtre de dés-entrelacement avant l'encodage. Il y a plusieurs de
-  ces filtres disponibles aux choix, chacun avec ces propres avantages et 
-  désavantages. Consultez <option>mplayer -pphelp</option> pour voir quels sont 
-  ceux disponibles (grep pour &quot;deint&quot;), et cherchez les
+  Utilisez un filtre de désentrelacement avant l'encodage. Plusieurs de
+  ces filtres sont disponibles, chacun avec ses avantages et inconvénients.
+  Consultez <option>mplayer -pphelp</option> pour voir lesquels sont
+  disponibles (selectionnez les lignes contenant &quot;deint&quot; avec grep), et fouillez dans les
   <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
-  listes de diffusion MPlayer</ulink> pour trouver plusieurs discussions sur les 
-  différents filtres. Encore une fois, le framerate ne change pas, donc pas de
-  <option>-ofps</option>. Aussi, le dés-entrelacement devra être fait après
-  découpage <link linkend="menc-feat-telecine-footnotes">[1]</link> et
-  avant dimensionnement.
+  listes de diffusion MPlayer</ulink>, vous trouverez nombres de discussions sur les
+  différents filtres. Encore une fois, le nombre d'images par seconde ne change pas, donc l'option
+  <option>-ofps</option> n'est pas nécessaire. Une dernière chose: le désentrelacement
+  doit être fait après recadrage <link linkend="menc-feat-telecine-footnotes">[1]</link>
+  et avant redimensionnement.
 
   <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
   Malheureusement, cette option est un boguée dans
-  <application>MEncoder</application> : cela devrait bien marcher avec
+  <application>MEncoder</application> ; cela devrait bien marcher avec
   <application>MEncoder G2</application>, mais on n'en est pas encore là. Vous
-  risquez d'avoir des plantages. Cela importe peu car le but de <option> -vf tfields</option> 
-  est de créer une frame complète à partir de chaque champs, ce qui
-  donne le framerate 60000/1001. L'avantage de cette approche est qu'aucune
-  donnée n'est jamais perdue. Cependant, vu que chaque frame vient avec seulement 
-  un champ, les lignes manquantes doivent être interpolées d'une façon ou d'une autre.
+  risquez de subir des plantages. Peu importe, l'option <option>-vf tfields</option> 
+  est de créer une image complète à partir de chaque trame, ce qui
+  donne le débit de 60000/1001 images par seconde. L'avantage de cette approche est qu'aucune
+  donnée n'est jamais perdue. Cependant, vu que chaque image vient avec seulement
+  une trame, les lignes manquantes doivent être interpolées d'une façon ou d'une autre.
   Il n'y a pas de très bonne méthode générant les données manquantes, et donc le
-  résultat sera un peu similaire à celui obtenu quand on utilise certains filtres de dés-entrelacement. 
+  résultat sera un peu similaire à celui obtenu en utilisant des filtres de désentrelacement. 
   Générer les lignes manquantes crée aussi d'autres problèmes,
-  simplement parce que la quantité de données double. Ainsi, de plus haut bitrates 
+  simplement parce que la quantité de données double. Ainsi, de plus haut débit (en kbit/s)
   d'encodage sont nécessaires pour conserver la qualité, et plus de puissance CPU est
-  utilisée pour l'encodage et le décodage. 'tfields' a  plusieurs 
-  options pour gérer la création des lignes manquantes de chaque frame. Si vous
-  utilisez cette méthode, alors regardez le manuel, et prenez n'importe quelle
-  option qui semble la meilleure pour votre matériel. Notez que lors de l'utilisation de
+  utilisée pour l'encodage et le décodage. <option>tfields</option> a  plusieurs 
+  options pour gérer la création des lignes manquantes de chaque image. Si vous
+  utilisez cette méthode, alors regardez le manuel, et prenez
+  l'option qui semble la meilleure pour votre matériel. Notez que lors de l'utilisation de
   <option>tfields</option> vous
-  <emphasis role="bold">devez</emphasis> spécifier les deux options <option>-fps</option> 
-  et <option>-ofps</option> à deux fois le framerate de votre source originale.
+  <emphasis role="bold">devez</emphasis> définir les deux options <option>-fps</option> 
+  et <option>-ofps</option> à deux fois le nombre d'image par seconde de votre source originale.
 
   <screen>mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
-  Si vous avez décidé de réduire la taille de façon dramatique, vous pouvez 
-  extraire et encoder seulement un des deux champs. Bien sûr, vous perdrez la 
-  moitié de la résolution verticale, mais si vous pensez la réduire au plus de 
-  moitié par rapport à l'original, la perte ne sera pas trop grande. Le résultat 
-  sera un fichier progressif à 30000/1001 frames par seconde. La procédure est 
-  d'utiliser <option>-vf field</option>, puis de découper
-  <link linkend="menc-feat-telecine-footnotes">[1]</link> et de dimensionner
+  Si vous avez prévu de beaucoup réduire la taille, vous pouvez 
+  n'extraire et n'encoder qu'une des deux trames. Bien sûr, vous perdrez la 
+  moitié de la résolution verticale, mais si vous avez prévu la réduire au moins de 
+  moitié par rapport à l'original, cette perte n'aura que peu d'importance. Le résultat 
+  sera un fichier progressif à 30000/1001 images par seconde. La procédure est 
+  d'utiliser l'option <option>-vf field</option>, puis de recadrer
+  <link linkend="menc-feat-telecine-footnotes">[1]</link> et de redimensionner
   de manière appropriée. Souvenez-vous que vous devrez ajuster la dimension pour
-  compenser la résolution verticale ayant été réduite de moitié.
+  compenser la réduction de moitié de la résolution verticale.
   <screen>mencoder dvd://1 -oac copy -vf field=0 -ovc lavc</screen>
   </para></listitem>
 </orderedlist>
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-mixedpt">
-<title>Progressif et téléciné mélangé</title>
+<title>Mélange de progressive et télécinée</title>
 <para>
-  Afin de convertir une vidéo composée de progressive et de téléciné en vidéo entièrement
-  progressive, les parties en téléciné doivent être inverse-télécinées. Il y a trois 
-  moyens d'accomplir cela, comme décrit ci-dessous. Notez que vous devrez
-  <emphasis role="bold">toujours</emphasis> inverse-téléciné avant tout 
-  redimensionnement. Sauf si vous savez vraiment ce que vous faites, il faudra 
-  inverse-téléciné avant tout découpage <link linkend="menc-feat-telecine-footnotes">[1]</link>.
-  <option>-ofps 24000/1001</option> est nécessaire ici parce que la sortie vidéo
-  sera de 24000/1001 frames par seconde.
+  Afin de convertir une vidéo composée de passages progressifs et de télécinés en vidéo entièrement
+  progressive, les parties en téléciné doivent être télécinées-inverse. Il y a trois 
+  moyens d'accomplir cela, comme décrit ci-dessous. Notez que vous devez
+  <emphasis role="bold">toujours</emphasis> téléciner-inverse avant tout 
+  redimensionnement et aussi (sauf si vous savez vraiment ce que vous faites) 
+  avant tout découpage <link linkend="menc-feat-telecine-footnotes">[1]</link>.
+  L'option <option>-ofps 24000/1001</option> est nécessaire ici parce que la sortie vidéo
+  sera en 24000/1001 images par seconde.
 </para>
 
 <itemizedlist>
 <listitem><para>
-  <option>-vf pullup</option> est faite pour inverse-téléciné le matériel 
+  L'option <option>-vf pullup</option> est faite pour téléciner-inverse la source vidéo 
   téléciné tandis que les données progressives sont laissées intactes. Afin
-  de bien fonctionner, <option>pullup</option> <emphasis role="bold">doit</emphasis>
-  être suivi par le filtre <option>softskip</option> ou sinon <application>MEncoder</application> plantera.
+  de fonctionner correctement, <option>pullup</option> <emphasis role="bold">doit</emphasis>
+  être suivi par le filtre <option>softskip</option> ou <application>MEncoder</application> plantera.
   <option>pullup</option> est, cependant, la méthode la plus propre et la plus précise
-  disponible pour encoder le téléciné et le &quot;progressif et téléciné mélangés&quot;.
+  disponible pour encoder le téléciné et le &quot;Mélange de progressive et télécinée&quot;.
 
   <screen>mencoder dvd://1 -oac copy -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
   </para>
@@ -2074,13 +2073,13 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 
   </listitem>
   <listitem><para>
-  Une méthode plus ancienne consiste à téléciner les parties non-télécinées
-  et ensuite inverse-téléciner la vidéo tout entière, au lieu de
-  n'inverse-téléciner que les parties en téléciné.
+  Une méthode plus ancienne consiste à, au lieu de téléciner-inverse les passages télécinés, 
+  téléciner les parties non-télécinées
+  et ensuite téléciner-inverse la vidéo entière.
   Cela semble confus? softpulldown est un filtre qui parcours une vidéo
-  et rend téléciné le fichier entier. Si nous faisons suivre softpulldown avec 
+  et rend téléciné le fichier entier. Si nous faisons suivre softpulldown par 
   soit <option>detc</option> ou soit <option>ivtc</option>, le résultat final
-  sera entièrement progressif. <option>-ofps 24000/1001</option> est nécessaire.
+  sera entièrement progressif. L'option <option>-ofps 24000/1001</option> est nécessaire.
 
   <screen>mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
   </para>
@@ -2090,56 +2089,56 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   Je n'ai pas moi-même utilisé <option>-vf filmdint</option>, mais voilà ce que
   D Richard Felker III en dit:
   
-  <blockquote><para>Il est correct, mais AMA il essaie de dés-entrelacer plutôt
-  que de faire l'inverse-téléciné trop souvent (tout comme les lecteurs DVD de salon
+  <blockquote><para>Il est correct, mais à mon avis, il essaie de désentrelacer plutôt
+  que de téléciner-inverse trop souvent (tout comme les lecteurs DVD de salon
    &amp; les TVs progressive) ce qui donne des clignotements affreux et d'autre 
-  artefacts. Si vous penser l'employer, vous devez commencer par passer un peu de temps 
-  pour affiner les options et observer la sortie pour être sûr que cela
-  casse pas tout.</para></blockquote>
+  artefacts. Si vous prévoyer l'utiliser, vous aurez au minimum besoin de passer
+  du temps à affiner les options et à regarder le résultat en sortie pour vous assurer
+  que cela n'esquinte pas tout.</para></blockquote>
   </para></listitem>
 </itemizedlist>
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-mixedpi">
-<title>Progressif et entrelacé mélangés</title>
+<title>Mélange de progressive et d'entrelacée</title>
 <para>
-  Il y a deux options pour s'occuper de cette catégorie, chacune étant un  
-  compromis. Vous devez prendre une décision basée sur la durée/localisation 
+  Il y a deux façons de gérer cette catégorie, chacune étant un  
+  compromis. Vous devez faire votre choix en vous basant sur la durée/localisation 
   de chaque type.
 </para>
 
 <itemizedlist>
 <listitem><para>
-  Traitez-la comme progressive. Les parties entrelacées sembleront entrelacées,
-  et certains des champs entrelacés devront être jetés, ayant pour résultat un 
-  peu de sautillement inégal. Vous pouvez utiliser un filtre post-traitement si
+  Traitez-le comme une vidéo progressive. Les parties entrelacées sembleront entrelacées,
+  et certaines des trames entrelacées devront être jetées, ayant pour résultat un 
+  peu de sautillement irrégulier. Vous pouvez utiliser un filtre de post-traitement si
   vous le voulez, mais cela peut sensiblement dégrader les parties progressives.
   </para>
 
   <para>
-  Cette option ne devrait vraiment pas être utilisée si vous voulez 
-  éventuellement afficher la vidéo sur un appareil entrelacé (avec une carte TV, 
-  par exemple). Si vous avez entrelacé les frames dans une vidéo à 24000/1001 
-  frames par seconde, ils seront télécinés en même temps que les frames progressive. 
-  La moitié des "frames" entrelacées sera affichée pour une durée de trois champs
+  Cette option ne devrait surtout pas être utilisée si vous prévoyez 
+  afficher la vidéo finale sur un appareil entrelacé (avec une carte TV, 
+  par exemple). Si vous avez des images entrelacées dans une vidéo en 24000/1001 
+  images par seconde, elles seront télécinées en même temps que les images progressives.
+  La moitié des "images" entrelacées sera affichée pour une durée de trois trames
   (3/(60000/1001) secondes), ce qui a pour résultat un effet pichenette de 
-  &quot;retour en arrière&quot; ce qui semble tout à fait mauvais. Si vous tentez 
+  &quot;retour en arrière&quot; ce qui est du plus mauvais effet. Si vous tentez 
   quand même ceci, vous <emphasis role="bold">devez</emphasis> utiliser un filtre
-  dés-entrelaçant comme <option>lb</option> ou <option>l5</option>.
+  désentrelaçant comme <option>lb</option> ou <option>l5</option>.
   </para>
 
   <para>
-  Cela peut tout aussi bien être une mauvaise idée pour l'affichage progressive. 
-  Cela laissera tomber les paires consécutives de champs entrelacés, ayant pour 
-  résultat une discontinuité qui peut être plus visible qu'avec la seconde méthode, 
-  ce qui montre certaines frames progressive en double. Une vidéo entrelacée à 
-  30000/1001 frames par seconde est déjà un peu variable parce que cela devrait 
-  vraiment être montré à 60000/1001 champs par seconde, donc les frames dupliquées 
-  ne tiennent pas.
+  Cela peut aussi être une mauvaise idée pour l'affichage progressif. 
+  Cela laissera tomber des paires de de trames entrelacées consécutives,
+  résultant en une discontinuité qui peut être plus visible qu'avec la seconde méthode, 
+  ce qui affichera certaines images progressives en double. Une vidéo entrelacée à 
+  30000/1001 images par seconde est déjà un peu hachée parce qu'elle devrait en
+  réalité être projetée à 60000/1001 trames par seconde, pour que les images dupliquées
+  ne se soient pas trop.
   </para>
 
   <para>
-  Qu'importe la façon, il est recommandé de considérer votre contenu et comment 
+  De toutes façons, il vaut mieux analyser votre contenu et voir comment 
   vous voulez l'afficher. Si votre vidéo est à 90% progressive et que vous ne 
   pensez pas la regarder sur une TV, vous devriez favoriser une approche progressive. 
   Si elle est seulement à moitié progressive, vous voudrez probablement l'encoder
