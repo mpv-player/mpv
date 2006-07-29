@@ -1,4 +1,4 @@
-.\" synced with r19181
+.\" synced with r19233
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -2503,7 +2503,16 @@ Ne fonctionne qu'avec l'option -ac hwmpa.
 .
 .TP
 .B mpegpes (DVB uniquement)
-Pilote de sortie spécifique à DVB.
+Pilote de sortie pour cartes DVB qui re-diriche sa sortie dans un
+fichier MPEG-PES si aucune carte DVB n'est installée.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Carte DVB à utiliser si plus qu'une carte est présente.
+.IPs file=<filename>
+fichier de sortie
+.RE
+.PD 1
 .
 .TP
 .B null\ \ \ 
@@ -3705,7 +3714,7 @@ MPEG-PES dans un fichier si aucune carte DVB n'est installée.
 Défini le numéro de périphérique à utiliser si vous avez plus d'une carte
 DVB (API V3 uniquement, comme la série de pilotes 1.x.y).
 .IPs <nom_fichier>
-Définit le nom du fichier de sortie (par défaut\ : ./grab.mpg).
+nom du fichier de sortie (par défaut\ : ./grab.mpg)
 .RE
 .PD 1
 .
@@ -5161,7 +5170,7 @@ Retourne de 90 degrés dans le sens anti-horaire et retourne.
 .RE
 .
 .TP
-.B scale[=w:h[:entrelacé[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
@@ -5249,6 +5258,14 @@ Interdit le redimensionnement plus grand que les dimensions originales.
 grande que celle d'origine.
 .br
 2: Interdit le redimensionnement plus grand si les deux dimensions deviennent plus grandes que celles d'origine.
+.REss
+.IPs <arnd>
+Arrondi précis pour la mise à l'échelle de l'axe vertical, peut
+être plus rapide ou plus lent que l'arrondi par défaut.
+.RSss
+0: Désactive l'arrondi précis (par défaut).
+.br
+1: Active l'arrondi précis.
 .REss
 .RE
 .
