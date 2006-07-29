@@ -5,6 +5,9 @@ MPlayer (1.0)
     DOCS:
     * German documentation translation almost finished
 
+    Drivers:
+    * IVTV hardware MPEG audio/video decoder output support.
+	
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
     * SSE optimizations for mp3lib
