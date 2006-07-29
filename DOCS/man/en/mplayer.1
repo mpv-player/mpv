@@ -88,6 +88,13 @@ mencoder \- movie encoder
 .in
 .B mplayer
 'in +\n[.k]u
+.I pvr://
+[options]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
 .I dvb://[card_number@]channel
 [options]
 .
@@ -1321,6 +1328,73 @@ Use IPv6 on network connections.
 Falls back on IPv4 automatically.
 .
 .TP
+.B \-pvr <option1:option2:...> (PVR only)
+This option tunes various encoding properties of the PVR capture module.
+The Hauppauge WinTV PVR\-150/250/350/500 and all IVTV based cards are known
+as PVR capture cards.
+For hardware capture of an MPEG stream and watching it with
+MPlayer/MEncoder, use 'pvr://' as a movie URL.
+.sp 1
+Available options are:
+.RSs
+.IPs aspect=<1\-4>
+Specify input aspect ratio (default is 4:3):
+.RSss
+1: 1:1
+.br
+2: 4:3
+.br
+3: 16:9
+.br
+4: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Specify encoding audio rate (default is 48000 Hz, available: 32000, 44100
+and 48000 Hz).
+.IPs alayer=<1\-2>
+Specify MPEG audio layer encoding (default is layer 2).
+.IPs abitrate=<32\-448>
+Specify audio encoding bitrate in kbps (default is 384 kbps).
+.IPs amode=<value>
+Specify audio encoding mode.
+Available preset values are 'stereo', 'joint_stereo', 'dual' and 'mono'.
+Default is Stereo.
+.IPs vbitrate=<value>
+Specify average video bitrate encoding.
+Default is 6 Mbps. 
+.IPs vmode=<0\-1>
+Specify video encoding mode (default is VBR):
+.RSss
+0: VBR
+.br
+1: CBR
+.REss
+.IPs vpeak=<value>
+Specify peak video bitrate encoding (only usefull for VBR encoding).
+Default is 9.6 Mbps. 
+.IPs fmt=<value>
+Choose an MPEG format for encoding (default is MPEG PS):
+.RSss
+ps:    MPEG PS.
+.br
+ts:    MPEG TS (experimental, may fail)
+.br
+mpeg1: MPEG 1
+.br
+vcd:   Video CD
+.br
+svcd:  Super Video CD
+.br
+dvd:   DVD
+.br
+dvds1: DVD Region 1 (NTSC)
+.br
+dvds2: DVD Region 2 (PAL)
+.REss
+.RE
+.PD 1
+.
+.TP
 .B \-rawaudio <option1:option2:...>
 This option lets you play raw audio files.
 You have to use \-demuxer rawaudio as well.
@@ -1463,7 +1537,7 @@ program (if present) you want to play.
 Can be used with \-vid and \-aid.
 .
 .TP
-.B \-tv <option1:option2:...> (TV only)
+.B \-tv <option1:option2:...> (TV/PVR only)
 This option tunes various properties of the TV capture module.
 For watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>'
 or even 'tv://<channel_name> (see option channels for channel_name below)
