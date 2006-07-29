@@ -17,7 +17,7 @@ MPlayer (1.0)
     * native RTSP demuxer (handles MPEG-TS over RTP) for generic RTSP servers
 
     Inputs:
-    * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350)
+    * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350/500)
 
     MEncoder:
     * support of x264 encoding over lavc
