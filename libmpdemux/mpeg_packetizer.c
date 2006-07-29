@@ -164,5 +164,5 @@ send_mpeg_lpcm_packet(unsigned char* data, int len,
                        int my_write (unsigned char *data, int len))
 {
     unsigned char header[7] = {0xA0, 0x07, 0x00, 0x04, 0x0C, 1 | (freq_id << 4), 0x80};
-    send_mpeg_pes_packet_ll(data, len, 0xBD, pts, 2, header, sizeof(header), 1, my_write);
+    return send_mpeg_pes_packet_ll(data, len, 0xBD, pts, 2, header, sizeof(header), 1, my_write);
 }
