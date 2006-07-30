@@ -192,16 +192,25 @@
  {
      int d0, d1, d2, d3;
      int a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -235,7 +239,7 @@
+@@ -239,12 +239,15 @@
  
  void mpeg2_idct_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#ifdef HAVE_MMX2
      if (accel & MPEG2_ACCEL_X86_MMXEXT) {
  	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
  	mpeg2_idct_add = mpeg2_idct_add_mmxext;
-@@ -254,11 +258,14 @@
+ 	mpeg2_idct_mmx_init ();
+-    } else if (accel & MPEG2_ACCEL_X86_MMX) {
++    } else
++#endif
++#ifdef HAVE_MMX
++    if (accel & MPEG2_ACCEL_X86_MMX) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mmx;
+ 	mpeg2_idct_add = mpeg2_idct_add_mmx;
+ 	mpeg2_idct_mmx_init ();
+@@ -254,11 +261,14 @@
      } else
  #endif
  #ifdef ARCH_ALPHA
@@ -266,25 +275,35 @@
  
 --- libmpeg2/motion_comp.c	2006-06-16 20:12:26.000000000 +0200
 +++ libmpeg2/motion_comp.c	2006-06-16 20:12:50.000000000 +0200
-@@ -33,7 +37,7 @@
+@@ -37,16 +37,22 @@
  
  void mpeg2_mc_init (uint32_t accel)
  {
 -#ifdef ARCH_X86
-+#if defined(ARCH_X86) || defined(ARCH_X86_64)
++#ifdef HAVE_MMX2
      if (accel & MPEG2_ACCEL_X86_MMXEXT)
  	mpeg2_mc = mpeg2_mc_mmxext;
-     else if (accel & MPEG2_ACCEL_X86_3DNOW)
-@@ -42,7 +46,7 @@
+-    else if (accel & MPEG2_ACCEL_X86_3DNOW)
++    else
++#endif
++#ifdef HAVE_3DNOW
++    if (accel & MPEG2_ACCEL_X86_3DNOW)
+ 	mpeg2_mc = mpeg2_mc_3dnow;
+-    else if (accel & MPEG2_ACCEL_X86_MMX)
++    else
++#endif
++#ifdef HAVE_MMX
++    if (accel & MPEG2_ACCEL_X86_MMX)
  	mpeg2_mc = mpeg2_mc_mmx;
-     else
+-    elseo
++    else
  #endif
 -#ifdef ARCH_PPC
 +#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
  	mpeg2_mc = mpeg2_mc_altivec;
      else
-@@ -52,7 +56,7 @@
+@@ -52,7 +62,7 @@
  	mpeg2_mc = mpeg2_mc_alpha;
      else
  #endif
