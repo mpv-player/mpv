@@ -62,12 +62,6 @@ Homepage:   http://xiph.org/
 Directory:  tremor
 License:    BSD-like, see tremor/COPYING
 
-Name:       LRMI - Linux Real Mode Interface
-Version:    unknown, taken from svgalib + patches
-Homepage:   http://www.svgalib.org/
-Directory:  osdep/lrmi.[ch]
-License:    permissive, see file header
-
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
 Homepage:   http://avifile.sourceforge.net/
