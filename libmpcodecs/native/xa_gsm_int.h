@@ -4,6 +4,22 @@
  * Universitaet Berlin.  See the accompanying file "COPYRIGHT" for
  * details.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
  *
+ * The contents of the file COPYRIGHT:
+ *
+ * Any use of this software is permitted provided that this notice is not
+ * removed and that neither the authors nor the Technische Universitaet Berlin
+ * are deemed to have made any representations as to the suitability of this
+ * software for any purpose nor are held responsible for any defects of
+ * this software.  THERE IS ABSOLUTELY NO WARRANTY FOR THIS SOFTWARE.
+ *
+ * As a matter of courtesy, the authors request to be informed about uses
+ * this software has found, about bugs in this software, and about any
+ * improvements that may be of general interest.
+ *
+ *     Berlin, 15.09.1992
+ *     Jutta Degener
+ *     Carsten Bormann
+ *
  ********************************************************************/
 
 #include "xa_gsm.h"
