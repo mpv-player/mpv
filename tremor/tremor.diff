@@ -1,6 +1,6 @@
 diff -ur orig/misc.h mod-2004-01-05/misc.h
---- orig/misc.h	2005-01-04 16:29:01.000000000 +0100
-+++ mod-2004-01-05/misc.h	2004-12-30 13:09:20.000000000 +0100
+--- misc.h	2005-01-04 16:29:01.000000000 +0100
++++ misc.h	2004-12-30 13:09:20.000000000 +0100
 @@ -29,8 +29,9 @@
  /* 64 bit multiply */
  
@@ -24,8 +24,8 @@ diff -ur orig/misc.h mod-2004-01-05/misc.h
    struct {
      ogg_int32_t hi;
 diff -ur orig/os_types.h mod-2004-01-05/os_types.h
---- orig/os_types.h	2005-01-04 16:29:02.000000000 +0100
-+++ mod-2004-01-05/os_types.h	2005-01-05 10:39:07.000000000 +0100
+--- os_types.h	2005-01-04 16:29:02.000000000 +0100
++++ os_types.h	2005-01-05 10:39:07.000000000 +0100
 @@ -32,57 +32,11 @@
  #define _ogg_realloc realloc
  #define _ogg_free    free
@@ -96,7 +96,7 @@ retrieving revision 1.1
 diff -u -r1.1 sharedbook.c
 --- sharedbook.c	30 Dec 2004 12:09:20 -0000	1.1
 +++ sharedbook.c	18 Aug 2005 16:13:54 -0000
-@@ -208,7 +208,7 @@
+@@ -208,7 +211,7 @@
  	  int indexdiv=1;
  	  for(k=0;k<b->dim;k++){
  	    int index= (j/indexdiv)%quantvals;
@@ -105,7 +105,7 @@ diff -u -r1.1 sharedbook.c
  	    int val=VFLOAT_MULTI(delta,delpoint,
  				 abs(b->quantlist[index]),&point);
  
-@@ -242,7 +242,7 @@
+@@ -242,7 +245,7 @@
  	  int         lastpoint=0;
  
  	  for(k=0;k<b->dim;k++){
