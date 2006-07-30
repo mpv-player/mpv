@@ -640,11 +640,7 @@ static int dvb_streaming_start(dvb_priv_t *priv, struct stream_priv_s *opts, int
 	dvb_channel_t *channel = NULL;
 	stream_t *stream  = (stream_t*) priv->stream;
 
-
-	mp_msg(MSGT_DEMUX, MSGL_INFO, "code taken from dvbstream for mplayer v0.4pre1 - (C) Dave Chapman 2001\n");
-	mp_msg(MSGT_DEMUX, MSGL_INFO, "Released under the GPL.\n");
-	mp_msg(MSGT_DEMUX, MSGL_INFO, "Latest version available from http://www.linuxstb.org/\n");
-	mp_msg(MSGT_DEMUX, MSGL_V, 	  "PROG: %s, CARD: %d, VID: %d, AID: %d, TYPE: %s, FILE: %s\n",
+	mp_msg(MSGT_DEMUX, MSGL_V, "\r\ndvb_streaming_start(PROG: %s, CARD: %d, VID: %d, AID: %d, TYPE: %s, FILE: %s)\r\n",
 	    opts->prog, opts->card, opts->vid, opts->aid,  opts->type, opts->file);
 
 	priv->is_on = 0;
