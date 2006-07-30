@@ -1,9 +1,3 @@
-/*
- * Modified for use with MPlayer, for details see the changelog at
- * http://svn.mplayerhq.hu/mplayer/trunk/
- * $Id$
- */
-
 /* 
  * Mpeg Layer-1 audio decoder 
  * --------------------------
@@ -12,6 +6,16 @@
  *
  * may have a few bugs after last optimization ... 
  *
+ */
+
+/*
+ * Modified for use with MPlayer, for details see the changelog at
+ * http://svn.mplayerhq.hu/mplayer/trunk/
+ * $Id$
+ *
+ * The above-mentioned README file has the following to say about licensing:
+ *
+ *   COPYING: you may use this source under LGPL terms!
  */
 
 //#include "mpg123.h"
