@@ -1,11 +1,11 @@
 On the origin of the files:
 ==========================
 
-The code is a mixture of Tremor 1.0 code (API, parser, part of math
+The code is a mixture of Tremor SVN Trunk r3989 (API, parser, part of math
 code) and December 2004 Trunk fetched from xiph.org's Subversion
 (mostly math).
 
-1.0 Release:
+SVN Trunk r3989:
 -----------
 backends.h
 block.c
@@ -22,6 +22,7 @@ registry.c
 registry.h
 res012.c
 sharedbook.c
+synthesis.c
 
 Dec 2004 SVN Trunk:
 ------------------
