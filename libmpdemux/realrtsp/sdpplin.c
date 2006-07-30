@@ -27,7 +27,6 @@
  */
  
 #include "config.h"
-#include "rmff.h"
 #include "../librtsp/rtsp.h"
 #include "sdpplin.h"
 #include "xbuffer.h"
