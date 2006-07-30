@@ -47,13 +47,7 @@ struct real_rtsp_session_t {
   int header_read;
 };
 
-/*
- * calculates response and checksum of a given challenge
- * (RealChallenge1 in rtsp). See implementation for details.
- */
-void real_calc_response_and_checksum (char *response, char *chksum, char *challenge);
 int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer);
-rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t bandwidth);
 rmff_header_t *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidth);
 struct real_rtsp_session_t *init_real_rtsp_session (void);
 void free_real_rtsp_session (struct real_rtsp_session_t* real_session);

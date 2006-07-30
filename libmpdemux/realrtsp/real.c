@@ -108,7 +108,7 @@ static void calc_response_string (char *result, char *challenge) {
   }
 }
 
-void real_calc_response_and_checksum (char *response, char *chksum, char *challenge) {
+static void real_calc_response_and_checksum (char *response, char *chksum, char *challenge) {
 
   int   ch_len, table_len, resp_len;
   int   i;
@@ -232,7 +232,7 @@ static int select_mlti_data(const char *mlti_chunk, int mlti_size, int selection
  * looking at stream description.
  */
 
-rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t bandwidth) {
+static rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t bandwidth) {
 
   sdpplin_t *desc;
   rmff_header_t *header;
@@ -415,7 +415,7 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
   return (n <= 0) ? 0 : n+12;
 }
 
-int convert_timestamp(char *str, int *sec, int *msec) {
+static int convert_timestamp(char *str, int *sec, int *msec) {
   int hh, mm, ss, ms = 0;
   if (sscanf(str, "%d:%d:%d.%d", &hh, &mm, &ss, &ms) < 3) {
     hh = 0;
