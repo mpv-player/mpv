@@ -46,7 +46,7 @@
 #define LOG
 */
 
-const unsigned char xor_table[] = {
+static const unsigned char xor_table[] = {
     0x05, 0x18, 0x74, 0xd0, 0x0d, 0x09, 0x02, 0x53,
     0xc0, 0x01, 0x05, 0x05, 0x67, 0x03, 0x19, 0x70,
     0x08, 0x27, 0x66, 0x10, 0x10, 0x72, 0x08, 0x09,
@@ -143,8 +143,6 @@ void real_calc_response_and_checksum (char *response, char *chksum, char *challe
     memcpy(ptr, challenge, ch_len);
   }
   
-  if (xor_table != NULL)
-  {
     table_len = strlen(xor_table);
 
     if (table_len > 56) table_len=56;
@@ -152,7 +150,6 @@ void real_calc_response_and_checksum (char *response, char *chksum, char *challe
     /* xor challenge bytewise with xor_table */
     for (i=0; i<table_len; i++)
       ptr[i] = ptr[i] ^ xor_table[i];
-  }
 
   calc_response_string (response, buf);
 
