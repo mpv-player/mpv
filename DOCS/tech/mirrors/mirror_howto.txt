@@ -152,7 +152,7 @@ Here is an example stanza to paste into your Apache configuration:
 
 <VirtualHost www#.mplayerhq.hu>
         DocumentRoot /path/to/htdocs
-        Options FollowSymLinks
+        Options FollowSymLinks Indexes
         Alias /homepage /path/to/htdocs
         Alias /MPlayer  /path/to/MPlayer
         Alias /DOCS     /path/to/MPlayer/DOCS
