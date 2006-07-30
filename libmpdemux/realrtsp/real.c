@@ -91,7 +91,7 @@ static void hexdump (const char *buf, int length) {
 
 static void calc_response_string (char *result, char *challenge) {
  
-  char zres[20];
+  char zres[16];
   int  i;
       
   av_md5_sum(zres, challenge, 64);
