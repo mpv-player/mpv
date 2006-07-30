@@ -1,0 +1,127 @@
+Title       Embedding xiph codecs like vorbis in containers other then ogg
+Version     2006-07-30 (draft)
+Status      this is not a standard or otherwise accepted by xiph or any other
+            group, one day when we have a fully working implementation, did
+            enough testing and so on we might submit it to IETF? to become an
+            RFC ...
+            furthermore this document has been submitted to vorbis-dev and
+            so far has been ignored, maybe they where too busy maybe xiph
+            wants to prevent their open codecs from being used in containers
+            other then their own?
+Author      Michael Niedermayer (michaelni at gmx dot at)
+License     GPL + GFDL + anything neeeded to turn this into a open standard
+            like a RFC
+
+Minimum container requirments:
+This appendix only explains how to store xiph codecs in containers which 
+support at least one global header per stream, can seperate individual codec
+packets and in principle support the codec, so for example in the case of
+vorbis that would be variable bitrate and variable number of samples/packet
+Storage in other containers is outside the scope of this appendix
+
+
+FIXME non vorbis
+Global header:
+If the container can store 3 headers per stream in an unambiguos and ordered
+way then they shall be stored in that way, if OTOH the container is only
+capable to store a single global header then the 3 codec headers shall be
+concatenated without any additional header, footer or seperator between them
+to recover the 3 headers from such a global header the following procedure
+shall be used:
+
+1) search for the 1st occurance of 01,'v','o','r','b','i','s'
+   the found match and the following 23 bytes are the 1st header packet
+2) search for the 1st occurance of 03,'v','o','r','b','i','s' after here
+  3) read an unsigned integer of 32 bits and skip that many bytes
+  4) [user_comment_list_length] = read an unsigned integer of 32 bits
+  5) iterate [user_comment_list_length] times {
+       6) read an unsigned integer of 32 bits and skip that many bytes
+     }
+  7) skip 1 byte
+8) the match in 2) and what follows until here is the 2nd header packet
+9) search for the 1st occurance of 05,'v','o','r','b','i','s' after here
+   the matching part and what follows is the 3rd header packet
+if the container needs an identifer for the global header, for example a 4cc
+for a global header chunk then glbl shall be used
+
+
+Storing packets:
+Each codec packet shall be stored in exactly one "container packet"
+and one "container packet" must not contain more then one codec packet
+"container packet" here means the smallest seperateable unit of data in the
+container
+
+
+Codec Identifer:
+xiph-codec  4-cc id     long id
+Vorbis      vrbs        vorbis
+Theora      ther        theora
+Tarkin      trkn        tarkin
+Flac        flac        flac
+Speex       spex        speex
+
+if the container uses 4-character codes 4-cc identifer from the table above
+shall be used
+if the container uses arbitrary length strings as identifers then the long
+id from the table above shall be used
+
+
+Examples and Disscussions about specific containers
+What follows are some notes about specific containers, these notes are just
+informative as they just repeat what is written above or in the 
+specification of the specific container
+
+
+Example and Disscussion of the avi container
+avi supports everything needed to store vorbis, this does not mean that all
+application will support vorbis in avi as vorbis is rather different from
+other audio codecs commonly stored in avi ...
+avi supports a single global header like wav does, the 3 vorbis headers
+shall be stored in it and only in it as described above
+dwSampleSize must be set to zero as vorbis is vbr, many applications do
+this incorrectly for other vbr codecs and consequently vbr audio in avi
+becomes problematic
+avi does not have timestamps but each chunk has a constant duration, while
+vorbis packets can have one of 2 durations, if now the avi header is setup
+so that each avi chunk has the same duration as the smaller duration of
+the 2 possibilities in vorbis then simply inserting empty avi chunks will
+allow every avi chunk to have the correct duration, this is of course
+not the most beautifull solution but it is the only way to keep things
+exact, additionally note, that empty chunks have been used since ages
+in avi to lengthen the duration of video chunks
+
+
+Example and Disscussion of the asf container
+asf supports a single global header per stream and has timestamps so
+storing xiph codecs in it should be possible but asf is patented and 
+microsoft has already threatened individuals so we strongly urge you to 
+avoid this container
+
+
+Example and Disscussion of the matroska container
+matroska supports storing 3 headers using a codec specific
+format, which should be used for storing the 3 headers
+Note, the above procedure to split one header into 3 works with the
+vorbis-matroska specific format too
+
+
+Example and Disscussion of the nut container
+nut supports a single global header per stream so the 1<->3 merge/split
+procedure above must be used, except that theres nothing special with 
+storing xiph codecs in nut
+
+
+Example and Disscussion of mpeg-ps / mpeg-ts container
+These containers neither support a global header nor provide the neccessary
+packet seperation / framing, so storing xiph codecs in them is outside the 
+scope of this appendix
+
+
+Example and Disscussion of wav container
+wav does not provide the neccessary packet seperation / framing, so storing 
+xiph codecs in it is outside the scope of this appendix
+
+
+Example and Disscussion of the mov container
+a single glbl atom shall be placed in the stsd atom in which the the global
+header shall be stored
