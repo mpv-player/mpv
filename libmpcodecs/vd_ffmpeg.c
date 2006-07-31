@@ -264,6 +264,18 @@ static int init(sh_video_t *sh){
     avctx->skip_frame = str2AVDiscard(lavc_param_skip_frame_str);
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     switch (sh->format) {
+    case mmioFOURCC('S','V','Q','3'):
+    /* SVQ3 extradata can show up as sh->ImageDesc if demux_mov is used, or
+       in the phony AVI header if demux_lavf is used. The first case is
+       handled here; the second case falls through to the next section. */
+	if (sh->ImageDesc) {
+	    avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
+	    avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
+	    memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
+	    break;
+	}
+	/* fallthrough */
+
     case mmioFOURCC('A','V','R','n'):
     case mmioFOURCC('M','J','P','G'):
     /* AVRn stores huffman table in AVI header */
@@ -311,14 +323,6 @@ static int init(sh_video_t *sh){
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
         break;
-
-    case mmioFOURCC('S','V','Q','3'):
-	if (!sh->ImageDesc)
-	    break;
-	avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
-	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
-	break;
 
     default:
 	if (!sh->bih || sh->bih->biSize <= sizeof(BITMAPINFOHEADER))
