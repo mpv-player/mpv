@@ -492,6 +492,11 @@ Options that work without values can be enabled by setting them to 'yes'
 or '1' or 'true' and disabled by setting them to 'no' or '0' or 'false'.
 Even suboptions can be specified in this way.
 .PP
+You can also write file-specific configuration files.
+If you wish to have a configuration file for a file called 'movie.avi', create a file
+named 'movie.avi.conf' with the file-specific options in it and put it in
+~/.mplayer/ or in the same directory as the file.
+.PP
 .I EXAMPLE MPLAYER CONFIGURATION FILE:
 .sp 1
 .nf
@@ -530,11 +535,6 @@ subalign=2
 subpos=96
 spuaa=20
 .fi
-.PP
-You can also write file-specific configuration files.
-If you wish to have a configuration file for a file called 'movie.avi', create a file
-named 'movie.avi.conf' with the file-specific options in it and put it in
-~/.mplayer/ or in the same directory as the file.
 .
 .\" --------------------------------------------------------------------------
 .\" Profiles
