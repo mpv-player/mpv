@@ -136,12 +136,12 @@ clean:
 	freesdp/*.o freesdp/*.a freesdp/*~
 
 distclean: clean
-	rm -f .depend test
+	rm -f .depend
 
 dep:    depend
 
 depend:
-	$(CC) -MM $(CFLAGS) test.c $(SRCS) 1>.depend
+	$(CC) -MM $(CFLAGS) $(SRCS) 1>.depend
 
 #
 # include dependency files if they exist
