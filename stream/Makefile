@@ -55,7 +55,7 @@ endif
 
 # TV in
 ifeq ($(TV),yes)
-SRCS += tv.c frequencies.c tvi_dummy.c
+SRCS += stream_tv.c tv.c frequencies.c tvi_dummy.c
   ifeq ($(TV_BSDBT848),yes)
   SRCS += tvi_bsdbt848.c
   endif

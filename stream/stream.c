@@ -54,6 +54,9 @@ extern stream_info_t stream_info_http2;
 #ifdef HAS_DVBIN_SUPPORT
 extern stream_info_t stream_info_dvb;
 #endif
+#ifdef USE_TV
+extern stream_info_t stream_info_tv;
+#endif
 #ifdef HAVE_PVR
 extern stream_info_t stream_info_pvr;
 #endif
@@ -103,6 +106,9 @@ stream_info_t* auto_open_streams[] = {
 #endif
 #ifdef HAS_DVBIN_SUPPORT
   &stream_info_dvb,
+#endif
+#ifdef USE_TV
+  &stream_info_tv,
 #endif
 #ifdef HAVE_PVR
   &stream_info_pvr,
