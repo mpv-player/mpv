@@ -36,13 +36,13 @@ extern af_cfg_t af_cfg;
 #include <iconv.h>
 #endif
 
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 #include "libmpcodecs/dec_video.h"
 
 #ifdef USE_DVDREAD
-#include "libmpdemux/stream_dvd.h"
+#include "stream/stream_dvd.h"
 #endif
 
 

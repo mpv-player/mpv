@@ -12,7 +12,7 @@
 
 #include "../../config.h"
 #include "../../help_mp.h"
-#include "../libmpdemux/stream.h"
+#include "../stream/stream.h"
 
 #include "../interface.h"
 #include "../widgets.h"

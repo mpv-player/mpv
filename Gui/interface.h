@@ -9,7 +9,7 @@
 #include "cfg.h"
 
 #ifdef USE_DVDREAD
- #include "libmpdemux/stream.h"
+ #include "stream/stream.h"
 #endif
 
 typedef struct
