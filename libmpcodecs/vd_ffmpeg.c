@@ -274,8 +274,7 @@ static int init(sh_video_t *sh){
 	avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
 	avctx->extradata = av_mallocz(avctx->extradata_size + FF_INPUT_BUFFER_PADDING_SIZE);
-	memcpy(avctx->extradata, sh->bih+sizeof(BITMAPINFOHEADER),
-	    avctx->extradata_size);
+	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
 
 #if 0
 	{
