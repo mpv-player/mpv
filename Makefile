@@ -105,6 +105,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
               libaf/libaf.a \
               libmpdemux/libmpdemux.a \
+              stream/stream.a \
               libswscale/libswscale.a \
               osdep/libosdep.a \
               $(DVDREAD_LIB) \
@@ -139,6 +140,7 @@ CODEC_LIBS += $(FAAC_LIB)
 endif
 
 PARTS = libmpdemux \
+        stream \
         libmpcodecs \
         libavutil \
         libavcodec \
@@ -195,6 +197,7 @@ endif
 COMMON_DEPS = $(W32_DEP) \
               $(AV_DEP) \
               libmpdemux/libmpdemux.a \
+              stream/stream.a \
               libmpcodecs/libmpcodecs.a \
               libao2/libao2.a \
               osdep/libosdep.a \
@@ -273,6 +276,9 @@ libass/libass.a:
 
 libmpdemux/libmpdemux.a:
 	$(MAKE) -C libmpdemux
+
+stream/stream.a:
+	$(MAKE) -C stream
 
 libmpcodecs/libmpcodecs.a:
 	$(MAKE) -C libmpcodecs
@@ -546,6 +552,7 @@ libaf/libaf.a: $(wildcard libaf/*.[ch])
 libmpdvdkit2/libmpdvdkit.a: $(wildcard libmpdvdkit2/*.[ch])
 
 libmpdemux/libmpdemux.a: $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
+stream/stream.a: $(wildcard stream/*.[ch] stream/*/*.[ch])
 libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
 libmpcodecs/libmpencoders.a: $(wildcard libmpcodecs/*.[ch])
 

@@ -24,7 +24,7 @@
 #include "input/input.h"
 #include "osdep/keycodes.h"
 
-#include "libmpdemux/dvbin.h"
+#include "stream/dvbin.h"
 
 
 

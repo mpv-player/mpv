@@ -321,6 +321,7 @@ CFLAGS  = $(OPTFLAGS) \
           -I. -I.. \
           -Inative \
           -I../libmpdemux \
+          -I../stream \
           -I../loader \
           $(LIBAV_INC) \
           -D_GNU_SOURCE \

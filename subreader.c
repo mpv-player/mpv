@@ -18,7 +18,7 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "subreader.h"
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 
 #ifdef HAVE_ENCA
 #include <enca.h>

@@ -17,7 +17,7 @@
 #include "../libvo/x11_common.h"
 #include "../libvo/fastmemcpy.h"
 
-#include "../libmpdemux/stream.h"
+#include "../stream/stream.h"
 #include "../mixer.h"
 #include "../libvo/sub.h"
 #include "../mplayer.h"

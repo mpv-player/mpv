@@ -14,7 +14,7 @@
 #include "../widgets.h"
 #include "app.h"
 
-#include "../../libmpdemux/stream.h"
+#include "../../stream/stream.h"
 #include "../../libmpdemux/demuxer.h"
 
 #include "../pixmaps/ab.xpm"

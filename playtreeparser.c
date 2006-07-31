@@ -18,7 +18,7 @@
 #include "m_config.h"
 #include "playtree.h"
 #include "playtreeparser.h"
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "mp_msg.h"
 

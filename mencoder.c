@@ -48,7 +48,7 @@
 #include "m_config.h"
 #include "parser-mecmd.h"
 
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 #include "libmpdemux/mp3_hdr.h"
@@ -76,7 +76,7 @@
 #include "get_path.c"
 
 #ifdef USE_DVDREAD
-#include "libmpdemux/stream_dvd.h"
+#include "stream/stream_dvd.h"
 #endif
 
 #ifdef USE_LIBAVCODEC

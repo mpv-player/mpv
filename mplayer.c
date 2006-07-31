@@ -106,11 +106,11 @@ char * proc_priority=NULL;
 #endif /* HAVE_RTC */
 
 #ifdef USE_TV
-#include "libmpdemux/tv.h"
+#include "stream/tv.h"
 #endif
 
 #ifdef HAS_DVBIN_SUPPORT
-#include "libmpdemux/dvbin.h"
+#include "stream/dvbin.h"
 static int last_dvb_step = 1;
 static int dvbin_reopen = 0;
 extern void cache_uninit(stream_t *s);
@@ -175,14 +175,14 @@ void xscreensaver_heartbeat(void);
 
 static int max_framesize=0;
 
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 #include "libmpdemux/demuxer.h"
 #include "libmpdemux/stheader.h"
 //#include "parse_es.h"
 #include "libmpdemux/matroska.h"
 
 #ifdef USE_DVDREAD
-#include "libmpdemux/stream_dvd.h"
+#include "stream/stream_dvd.h"
 #endif
 
 #include "libmpcodecs/dec_audio.h"

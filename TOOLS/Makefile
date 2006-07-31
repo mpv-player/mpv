@@ -31,7 +31,7 @@ subrip: subrip.c
           ../libswscale/yuv2rgb.o ../libmpcodecs/img_format.o -lm
 
 vivodump: vivodump.c
-	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a
+	$(CC) $(CFLAGS) -o $@ $< ../mp_msg.o ../libmpdemux/libmpdemux.a ../stream/stream.a
 
 fastmemcpybench: fastmemcpybench.c
 	$(CC) $(CFLAGS) -g $< -o fastmem-mmx  ../libvo/aclib.o -DNAME=\"mmx\"      -DHAVE_MMX

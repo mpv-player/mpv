@@ -366,7 +366,7 @@ extern int ts_prog;
 extern int ts_keep_broken;
 extern off_t ts_probe;
 
-#include "libmpdemux/tv.h"
+#include "stream/tv.h"
 
 extern char* edl_filename;
 extern char* edl_output_filename;
@@ -444,7 +444,7 @@ m_option_t pvropts_conf[]={
 #endif
 
 #ifdef HAS_DVBIN_SUPPORT
-#include "libmpdemux/dvbin.h"
+#include "stream/dvbin.h"
 extern m_config_t dvbin_opts_conf[];
 #endif
 

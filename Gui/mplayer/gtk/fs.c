@@ -16,7 +16,7 @@
 #include "../interface.h"
 #include "../../config.h"
 #include "../../help_mp.h"
-#include "../../libmpdemux/stream.h"
+#include "../../stream/stream.h"
 
 #include "../widgets.h"
 #include "fs.h"

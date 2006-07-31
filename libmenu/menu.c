@@ -13,7 +13,7 @@
 #include "libvo/font_load.h"
 #include "osdep/keycodes.h"
 #include "asxparser.h"
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 
 #include "img_format.h"
 #include "mp_image.h"

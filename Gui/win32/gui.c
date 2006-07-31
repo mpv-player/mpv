@@ -34,7 +34,7 @@
 #include <input/input.h>
 #include <input/mouse.h>
 #include <osdep/keycodes.h>
-#include <libmpdemux/stream.h>
+#include <stream/stream.h>
 #include <libvo/video_out.h>
 #include <interface.h>
 #include "gui.h"

@@ -19,6 +19,7 @@ all: netstream
 # FIXME: linking is a mess that should be fixed properly some day
 # it does not work with either GUI, live.com or libavformat enabled
 DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
+	$(MPROOT)/stream/stream.a \
 	$(MPROOT)/libmpdvdkit2/libmpdvdkit.a \
 	$(MPROOT)/libmpcodecs/native/minilzo.o \
 	$(MPROOT)/libvo/aclib.o \
@@ -45,7 +46,7 @@ ifeq ($(TARGET_WIN32),yes)
 DEPS += $(MPROOT)/osdep/glob-win.o $(WIN32_LIB) -lwsock32
 endif
 
-netstream: $(MPROOT)/libmpdemux/libmpdemux.a netstream.o
+netstream: $(MPROOT)/libmpdemux/libmpdemux.a $(MPROOT)/libmpdemux/stream.a netstream.o
 
 	$(CC) $(CFLAGS) netstream.o -o netstream $(DEPS)
 

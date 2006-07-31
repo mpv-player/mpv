@@ -26,11 +26,11 @@
 #include <mp_msg.h>
 #include <help_mp.h>
 #include <codec-cfg.h>
-#include <libmpdemux/stream.h>
+#include <stream/stream.h>
 #include <libmpdemux/demuxer.h>
 #include <libmpdemux/stheader.h>
 #ifdef USE_DVDREAD
-#include <libmpdemux/stream_dvd.h>
+#include <stream/stream_dvd.h>
 #endif
 #include <input/input.h>
 #include <libvo/video_out.h>

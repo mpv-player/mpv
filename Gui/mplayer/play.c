@@ -28,7 +28,7 @@
 #include "skin/skin.h"
 #include "skin/font.h"
 
-#include "libmpdemux/stream.h"
+#include "stream/stream.h"
 
 extern float rel_seek_secs;
 extern int abs_seek_pos;
