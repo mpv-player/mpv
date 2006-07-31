@@ -17,9 +17,9 @@ SRCS += cdinfo.c \
         cue_read.c \
 
 ifeq ($(CDDA),yes)
-SRCS += cdda.c
+SRCS += stream_cdda.c
   ifeq ($(MPLAYER_NETWORK),yes)
-  SRCS += cddb.c
+  SRCS += stream_cddb.c
   endif
 endif
 
