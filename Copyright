@@ -10,7 +10,7 @@ from several external sources:
 Name:       FFmpeg
 Version:    CVS snapshot
 Homepage:   http://www.ffmpeg.org
-Directory:  libavcodec, libavformat
+Directory:  libavcodec, libavformat, libavutil, libpostproc
 License:    GNU Lesser General Public License, some parts GNU General Public
             License, GNU General Public License when combined
 
