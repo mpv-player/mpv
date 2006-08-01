@@ -541,40 +541,48 @@ $(MPLAYER_DEP) $(MENCODER_DEP): help_mp.h
 # has changed. ideally this will be replaced with a single
 # nonrecursive makefile for the whole project.
 #
+# Now all directories are recursed by default because these rules do not
+# consider dependencies on files in other directories, while the recursively
+# invoked Makefiles do. Conditional recursion only to the directories with
+# changed files can be enabled by creating a file named ".norecurse" and
+# optionally giving it a timestamp in the past. Directories whose .a files
+# are newer than the timestamp and newer than other files in the directory
+# will not be recursed.
+.norecurse:
 
-libvo/libvo.a: $(wildcard libvo/*.[ch])
-libao2/libao2.a: $(wildcard libao2/*.[ch])
-osdep/libosdep.a: $(wildcard osdep/*.[ch])
-input/libinput.a: $(wildcard input/*.[ch])
+libvo/libvo.a: .norecurse $(wildcard libvo/*.[ch])
+libao2/libao2.a: .norecurse $(wildcard libao2/*.[ch])
+osdep/libosdep.a: .norecurse $(wildcard osdep/*.[ch])
+input/libinput.a: .norecurse $(wildcard input/*.[ch])
 
-libmenu/libmenu.a: $(wildcard libmenu/*.[ch])
-libaf/libaf.a: $(wildcard libaf/*.[ch])
-libmpdvdkit2/libmpdvdkit.a: $(wildcard libmpdvdkit2/*.[ch])
+libmenu/libmenu.a: .norecurse $(wildcard libmenu/*.[ch])
+libaf/libaf.a: .norecurse $(wildcard libaf/*.[ch])
+libmpdvdkit2/libmpdvdkit.a: .norecurse $(wildcard libmpdvdkit2/*.[ch])
 
-libmpdemux/libmpdemux.a: $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
-stream/stream.a: $(wildcard stream/*.[ch] stream/*/*.[ch])
-libmpcodecs/libmpcodecs.a: $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
-libmpcodecs/libmpencoders.a: $(wildcard libmpcodecs/*.[ch])
+libmpdemux/libmpdemux.a: .norecurse $(wildcard libmpdemux/*.[ch] libmpdemux/*/*.[ch])
+stream/stream.a: .norecurse $(wildcard stream/*.[ch] stream/*/*.[ch])
+libmpcodecs/libmpcodecs.a: .norecurse $(wildcard libmpcodecs/*.[ch]) $(wildcard libmpcodecs/native/*.[ch])
+libmpcodecs/libmpencoders.a: .norecurse $(wildcard libmpcodecs/*.[ch])
 
-libavutil/libavutil.a: $(wildcard libavutil/*.[ch])
-libavcodec/libavcodec.a: $(wildcard libavcodec/*.[ch] libavcodec/*/*.[chS])
-libavformat/libavformat.a: $(wildcard libavformat/*.[ch])
-libswscale/libswscale.a: $(wildcard libswscale/*.[ch])
+libavutil/libavutil.a: .norecurse $(wildcard libavutil/*.[ch])
+libavcodec/libavcodec.a: .norecurse $(wildcard libavcodec/*.[ch] libavcodec/*/*.[chS])
+libavformat/libavformat.a: .norecurse $(wildcard libavformat/*.[ch])
+libswscale/libswscale.a: .norecurse $(wildcard libswscale/*.[ch])
 
-libmpeg2/libmpeg2.a: $(wildcard libmpeg2/*.[ch])
-liba52/liba52.a: $(wildcard liba52/*.[ch])
-mp3lib/libMP3.a: $(wildcard mp3lib/*.[ch])
-libfaad2/libfaad2.a: $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
+libmpeg2/libmpeg2.a: .norecurse $(wildcard libmpeg2/*.[ch])
+liba52/liba52.a: .norecurse $(wildcard liba52/*.[ch])
+mp3lib/libMP3.a: .norecurse $(wildcard mp3lib/*.[ch])
+libfaad2/libfaad2.a: .norecurse $(wildcard libfaad2/*.[ch] libfaad2/*/*.[ch])
 
-loader/libloader.a: $(wildcard loader/*.[chSs])
-loader/dmo/libDMO_Filter.a: $(wildcard loader/dmo/*.[ch])
-loader/dshow/libDS_Filter.a: $(wildcard loader/dshow/*.[ch])
+loader/libloader.a: .norecurse $(wildcard loader/*.[chSs])
+loader/dmo/libDMO_Filter.a: .norecurse $(wildcard loader/dmo/*.[ch])
+loader/dshow/libDS_Filter.a: .norecurse $(wildcard loader/dshow/*.[ch])
 
-libdha/libdha.so: $(wildcard libdha/*.[ch])
-vidix/libvidix.a: $(wildcard vidix/*.[ch])
-Gui/libgui.a: $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
+libdha/libdha.so: .norecurse $(wildcard libdha/*.[ch])
+vidix/libvidix.a: .norecurse $(wildcard vidix/*.[ch])
+Gui/libgui.a: .norecurse $(wildcard Gui/*.[ch] Gui/*/*.[ch] Gui/*/*/*.[ch])
 
-libass/libass.a: $(wildcard libass/*.[ch])
+libass/libass.a: .norecurse $(wildcard libass/*.[ch])
 
 #
 # include dependency files if they exist
