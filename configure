@@ -6061,35 +6061,22 @@ fi
 if test "$_live" = yes && test "$_network" = yes ; then
   _res_comment="using $_livelibdir"
   _def_live='#define STREAMING_LIVE555 1'
-  _live_libs_def="# LIVE555 Streaming Media libraries:
-LIVE_LIB_DIR = $_livelibdir
-LIVE_LIBS =  \$(LIVE_LIB_DIR)/liveMedia/libliveMedia.a
-LIVE_LIBS += \$(LIVE_LIB_DIR)/groupsock/libgroupsock.a
-LIVE_LIBS += \$(LIVE_LIB_DIR)/UsageEnvironment/libUsageEnvironment.a
-LIVE_LIBS += \$(LIVE_LIB_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
-LIVE_LIBS += -lstdc++
-LIVE_INCLUDES = -I\$(LIVE_LIB_DIR)/liveMedia/include
-LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/UsageEnvironment/include
-LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/BasicUsageEnvironment/include
-LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/groupsock/include"
-  _ld_live='$(LIVE_LIBS)'
+  _ld_live="-lstdc++ $_livelibdir/liveMedia/libliveMedia.a \
+           $_livelibdir/groupsock/libgroupsock.a \
+           $_livelibdir/UsageEnvironment/libUsageEnvironment.a \
+           $_livelibdir/BasicUsageEnvironment/libBasicUsageEnvironment.a"
+  _inc_extra="$_inc_extra -I$_livelibdir/liveMedia/include \
+             -I$_livelibdir/UsageEnvironment/include \
+             -I$_livelibdir/BasicUsageEnvironment/include \
+             -I$_livelibdir/groupsock/include"
  _inputmodules="live555 $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes ; then
   _res_comment="using distribution version"
   _live="yes"
   _def_live='#define STREAMING_LIVE555 1'
-  _live_libs_def="# LIVE555 Streaming Media libraries:
-LIVE_LIB_DIR = $_livelibdir
-LIVE_LIBS =  -lliveMedia
-LIVE_LIBS += -lgroupsock
-LIVE_LIBS += -lUsageEnvironment
-LIVE_LIBS += -lBasicUsageEnvironment
-LIVE_LIBS += -lstdc++
-LIVE_INCLUDES = -I/usr/include/liveMedia
-LIVE_INCLUDES += -I/usr/include/UsageEnvironment                                                                          
-LIVE_INCLUDES += -I/usr/include/BasicUsageEnvironment                                                                     
-LIVE_INCLUDES += -I/usr/include/groupsock"
-  _ld_live='$(LIVE_LIBS)'
+  _ld_live="-lstdc++ -lliveMedia -lgroupsock -lUsageEnvironment -lBasicUsageEnvironment"
+  _inc_extra="$_inc_extra -I/usr/include/liveMedia -I/usr/include/UsageEnvironment \
+             -I/usr/include/BasicUsageEnvironment -I/usr/include/groupsock"
  _inputmodules="live555 $_inputmodules"
 else
   _def_live='#undef STREAMING_LIVE555'
@@ -7329,8 +7316,6 @@ HELP_FILE = $_mp_help
 
 PRG = $_prg
 PRG_MENCODER = $_prg_mencoder
-
-$_live_libs_def
 
 MPLAYER_NETWORK = $_network
 FTP = $_ftp

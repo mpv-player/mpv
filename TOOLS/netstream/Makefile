@@ -37,7 +37,7 @@ DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(Z_LIB) \
 	$(GIF_LIB) \
 	$(SMBSUPPORT_LIB) \
-	$(LIVE_LIBS) \
+	$(MPLAYER_NETWORK_LIB) \
 	$(ARCH_LIB) \
 	$(COMMON_LIBS) \
 	-lm \
