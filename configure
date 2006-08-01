@@ -4168,7 +4168,7 @@ EOF
 fi
 if test "$_caca" = yes ; then
   _def_caca='#define HAVE_CACA 1'
-  _inc_extra="$inc_extra `caca-config --cflags`"
+  _inc_extra="$_inc_extra `caca-config --cflags`"
   _ld_caca=`caca-config --libs`
   _vosrc="$_vosrc vo_caca.c"
   _vomodules="caca $_vomodules"
