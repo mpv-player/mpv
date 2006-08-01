@@ -110,6 +110,9 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 		sh->a_in_buffer_len -= start + len;
 		memmove(sh->a_in_buffer, &(sh->a_in_buffer[start + len]), sh->a_in_buffer_len);
 		tot2 += spf * 2 * chans;
+
+                /* HACK: seems to fix most A/V sync issues */
+                break;
 	}
 
 	memset(&buf[tot], 0, tot2-tot);
