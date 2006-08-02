@@ -6,8 +6,6 @@
 
 #include "config.h"
 
-#if defined(HAVE_CDDA) 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -133,5 +131,3 @@ cd_info_debug(cd_info_t *cd_info) {
 	}
 	printf("================ CD INFO ===  end  =========\n");
 }
-
-#endif

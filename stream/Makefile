@@ -13,11 +13,10 @@ SRCS += cache2.c
 endif
 
 # Miscellaneous
-SRCS += cdinfo.c \
-        cue_read.c \
+SRCS += cue_read.c \
 
 ifeq ($(CDDA),yes)
-SRCS += stream_cdda.c
+SRCS += stream_cdda.c cdinfo.c
   ifeq ($(MPLAYER_NETWORK),yes)
   SRCS += stream_cddb.c
   endif
