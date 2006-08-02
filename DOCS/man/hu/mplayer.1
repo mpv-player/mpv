@@ -1,4 +1,4 @@
-.\" Synced with r19161
+.\" Synced with r19286
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -83,6 +83,13 @@ mencoder \- film kódoló
 .B mplayer
 'in +\n[.k]u
 .I tv://[csatorna]
+[opciók]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I pvr://
 [opciók]
 .
 .br
@@ -482,6 +489,11 @@ Az olyan opciók melyek egyébként érték megadása nélkül használandóak, itt
 a 'true' vagy '1' értékkel engedélyezhetõek, míg a 'false' illetve '0'
 értékkel letilthatóak. Még az al-opciók is paraméterezhetõek ily módon.
 .PP
+File-specifikus konfigurációs file-okat is írhatsz.
+Ha például a 'movie.avi' file-hoz szeretnél konfigurációs file-t,
+hozz létre egy 'movie.avi.conf' nevû file-t az opciókkal, és tedd
+a ~/.mplayer könyvtárba vagy a fájl mellé.
+.PP
 .I PÉLDA AZ MPLAYER KONFIGURÁCIÓS FÁJLJÁRA:
 .sp 1
 .nf
@@ -520,11 +532,6 @@ subalign=2
 subpos=96
 spuaa=20
 .fi
-.PP
-File-specifikus konfigurációs file-okat is írhatsz.
-Ha például a 'movie.avi' file-hoz szeretnél konfigurációs file-t,
-hozz létre egy 'movie.avi.conf' nevû file-t az opciókkal, és tedd
-a ~/.mplayer könyvtárba vagy a fájl mellé.
 .
 .\" --------------------------------------------------------------------------
 .\" Profilok
@@ -1329,6 +1336,70 @@ IPv6 preferálása hálózati lejátszás esetén.
 Automatikusan visszavált IPv4-ra, amennyiben szükséges.
 .
 .TP
+.B \-pvr <opció1:opció2:...> (csak PVR)
+Ez az opció különbözõ kódolási tulajdonságokat állít be a PVR rögzítõ modulban.
+A Hauppauge WinTV PVR\-150/250/350/500 és minden IVTV alapú kártya
+ismertebb neve a PVR rögzítp kártya.
+MPEG folyam hardveres mentéséhez és MPlayerrel/Mencoderrel történõ
+lejátszásához használd a 'pvr://'-t a film URL-jeként.
+.sp 1
+A használható opciók:
+.RSs
+.IPs aspect=<1\-4>
+Megadja a bemenet képarányát (alapértelmezett: 4:3):
+.RSss
+1: 1:1
+.br
+2: 4:3
+.br
+3: 16:9
+.br
+4: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Megadja az audió kódolási rátáját (alapértelmezett: 48000 Hz, használható: 32000, 44100
+és 48000 Hz).
+.IPs alayer=<1\-2>
+Megadja az MPEG audió réteg kódolását (alapértelmezett: layer 2).
+.IPs abitrate=<32\-448>
+Megadja az audió kódolási bitrátáját kbps-ben (alapértelmezett: 384 kbps).
+.IPs amode=<érték>
+Megadja az audió kódolási módot.
+Az elérhetõ elõre beállított értékek a 'stereo', 'joint_stereo', 'dual' és 'mono' (alapértelmezett: stereo).
+.IPs vbitrate=<érték>
+Megadja az átlagos videó kódolási bitrátát (alapértelmezett: 6 Mbps).
+.IPs vmode=<0\-1>
+Megadja a videó kódolás módját (alapértelmezett: VBR):
+.RSss
+0: VBR
+.br
+1: CBR
+.REss
+.IPs vpeak=<érték>
+Megadja a videó kódolási bitrátájának csúcsértékét (csak VBR kódolásnál hasznos, alapértelmezett: 9.6 Mbps). 
+.IPs fmt=<érték>
+Kiválasztja a kódoláshoz használt MPEG formátumot (alapértelmezett: MPEG PS):
+.RSss
+ps:    MPEG PS.
+.br
+ts:    MPEG TS (kísérleti, hibás lehet)
+.br
+mpeg1: MPEG 1
+.br
+vcd:   Video CD
+.br
+svcd:  Super Video CD
+.br
+dvd:   DVD
+.br
+dvds1: DVD 1-es régió (NTSC)
+.br
+dvds2: DVD 2-es régió (PAL)
+.REss
+.RE
+.PD 1
+.
+.TP
 .B \-rawaudio <opció1:opció2:...>
 Ezzel az opcióval le lehet játszani nyers audió fájlokat.
 Használnod kell a \-demuxer rawaudio kapcsolót is.
@@ -1472,7 +1543,7 @@ programot (ha létezik) akarod nézni.
 A \-vid és \-aid kapcsolókkal együtt használható.
 .
 .TP
-.B \-tv <opció1:opció2:...> (csak TV)
+.B \-tv <opció1:opció2:...> (csak TV/PVR)
 Ez az opció bekapcsolja a TV grabbelõ modul különbözõ tulajdonságait.
 Az MPlayerrel történõ TV nézéshez a 'tv://' vagy a 'tv://<csatorna_szám>'
 vagy akár a 'tv://<csatorna_név>' (lásd a csatorna opciókat a csatorna_név-hez
@@ -2274,8 +2345,22 @@ Egy fájl \-v kapcsolóval történõ lejátszásával kilistázza az elérhetõ eszközöket
 Speciális Creative DXR2 kimeneti vezérlõ
 .
 .TP
+.B ivtv (csak IVTV)
+Speciális IVTV MPEG kimeneti audió vezérlõ.
+Csak a \-ac hwmpa kapcsolóval mûködik.
+.
+.TP
 .B mpegpes (csak DVB)
-Speciális DVB kimeneti vezérlõ
+DVB kártyákhoz tartozó kimeneti audió vezérlõ, ami a kimenetet egy MPEG-PES
+fájlba írja ha nincs telepített DVB kártya.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Használandó DVB kártya, ha több, mint egy kártya van.
+.IPs file=<fájlnév>
+kimeneti fájl neve
+.RE
+.PD 1
 .
 .TP
 .B null\ \ \ 
@@ -3419,7 +3504,7 @@ Kimeneti videó vezérlõ a DVB kártyákhoz, ami a kimenetet egy MPEG-PES fájlba
 Megadja a használandó eszköz számát, ha több, mint egy kimeneti DVB kártya van
 (csak V3 API, mint pl. az 1.x.y sorozatú vezérlõk).
 .IPs <fájlnév>
-Engedi a kimeneti fájl nevének megadását (alapértelmezett: ./grab.mpg).
+kimeneti fájl neve (alapértelmezett: ./grab.mpg).
 .RE
 .PD 1
 .
@@ -4389,7 +4474,7 @@ túl nagy.
 .PD 1
 .
 .TP
-.B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+.B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
 Önhatalmúlag összekeveri a csatornákat.
 Alapvetõen a volume és a channels szûrõ kombinációja, ami a csatornák számának
 kevésre történõ lecsökkentésére használható, pl.\& sztereó mono-ra vagy a középsõ
@@ -4403,7 +4488,7 @@ csatornára, a példa részben található a fájl vége felé.
 .RSs
 .IPs <n>\ \ 
 a kimeneti csatornák száma (1\-6)
-.IPs <lij>
+.IPs <Lij>
 A i. bemeneti csatorna mekkora része lesz átmixelve az j. kimeneti csatornára (0\-1).
 Az alapötlet, hogy van n számod, ami megadja, hogy mit kell csinálni az elsõ bemeneti
 csatornával, majd n számod, ami a második bemeneti csatornára vonatkozik, stb.
@@ -4817,7 +4902,7 @@ A 4\-7 közötti értékekre a forgatás csak akkor történik meg, ha a film geometriá
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
 Átméretezi a képet szoftveres méretezõvel (lassú) és végrehajt egy YUV<\->RGB
 színtér konverziót (lásd még \-sws).
 .RSs
@@ -4899,6 +4984,14 @@ Letiltja az eredeti méreteknél nagyobbra történõ méretezést.
 1: Letiltja a méretezést, ha az egyik dimenzió átlépi az eredeti értékét.
 .br
 2: Letiltja a méretezést, ha mindkét dimenzió átlépi az eredeti értékét.
+.REss
+.IPs <arnd>
+Pontos kerekítés használata a függõleges méretezõhöz, ami gyorsabb vagy
+lassabb is lehet az alapértelmezett kerekítésnél.
+.RSss
+0: Letiltja a pontos kerekítést (alapértelmezett).
+.br
+1: Engedélyezi a pontos kerekítést.
 .REss
 .RE
 .
@@ -9451,7 +9544,8 @@ Beállítja a pan and scan videó szélességet és magasságot ha a videó MPEG-2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Beállítja a képarányt az MPEG-1/2 videóhoz.
+Beállítja a képernyõ képarányát az MPEG-1/2 videóhoz.
+Ne használd MPEG-1 videón, mert a keletkezõ képarány teljesen rossz lesz.
 .
 .TP
 .B vbitrate=<int>

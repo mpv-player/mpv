@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18255 -->
+<!-- synced with r18265 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -337,6 +337,50 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 </para>
 </example>
 </sect1>
+
+
+<sect1 id="menc-feat-handheld-psp">
+<title>Kódolás Sony PSP videó formátumba</title>
+
+<para>
+  A <application>MEncoder</application> támogatja a Sony PSP videó formátumába
+  történő kódolást, de a PSP szoftverének változatától függően különböző 
+  korlátok vannak.
+  Nyugodt lehetsz, ha a következő korlátokat figyelembe veszed:
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Bitráta</emphasis>: nem lépheti át az 1500kbps-t,
+  bár az utóbbi verziók elég jól támogatnak bármilyen bitrátát, feltéve, hogy
+  a fejlécben nem túl nagy érték van megadva.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Méretek</emphasis>: a PSP videó szélességének és
+  magasságának 16-tal oszthatónak kell lennie és az eredmény szélesség * magasság
+  értékének &lt;= 64000 kell lennie.
+  Bizonyos körülmények között lehetséges a nagyobb felbontás PSP-vel történő
+  lejátszása is.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Audió</emphasis>: a mintavételezési frekvenciának 24khz-nek
+  kell lennie az MPEG-4 videóknál és 48khz-nek a H.264-nél.
+</para></listitem>
+</itemizedlist>
+</para>
+
+<example>
+<title>Example</title>
+<para>
+<screen>
+mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+-af lavcresample=24000 -vf harddup -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+-ofps 30000/1001 input.video -o output.psp
+</screen>
+  Note that you can set the title of the video with
+  <option>-info name=<replaceable>MovieTitle</replaceable></option>.
+</para>
+</example>
+</sect1>
+
 
 <sect1 id="menc-feat-mpeg">
 <title>Kódolás MPEG formátumba</title>
