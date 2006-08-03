@@ -22,6 +22,7 @@ endif
 SRCS += stream.c \
         stream_cue.c \
         stream_file.c \
+        stream_mf.c \
         stream_null.c \
 
 ifeq ($(HAVE_DVD),yes)
