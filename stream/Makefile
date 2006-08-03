@@ -4,8 +4,7 @@ LIBNAME = stream.a
 include ../config.mak
 
 # Core
-SRCS += mf.c \
-        open.c \
+SRCS += open.c \
         url.c \
 
 ifeq ($(STREAM_CACHE),yes)

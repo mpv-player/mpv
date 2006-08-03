@@ -20,6 +20,7 @@ SRCS += parse_es.c \
         mpeg_packetizer.c \
         yuv4mpeg.c \
         yuv4mpeg_ratio.c \
+        mf.c \
 
 # Demuxers
 SRCS += demuxer.c \
