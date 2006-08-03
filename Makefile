@@ -488,7 +488,7 @@ clean: dirclean
 
 distclean: clean doxygen_clean
 	-rm -f *~ $(PRG) $(PRG_MENCODER) codec-cfg codecs2html
-	-rm -f .depend configure.log codecs.conf.h help_mp.h
+	-rm -f .depend configure.log codecs.conf.h help_mp.h config.h config.mak
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
 strip:
