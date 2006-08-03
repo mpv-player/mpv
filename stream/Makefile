@@ -107,7 +107,7 @@ SRCS += freesdp/common.c \
 endif
 
 ifeq ($(DVBIN),yes)
-SRCS += dvbin.c
+SRCS += stream_dvb.c
 SRCS += dvb_tune.c
 endif
 
