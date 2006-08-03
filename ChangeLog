@@ -6,7 +6,7 @@ MPlayer (1.0)
     * German documentation translation almost finished
 
     Drivers:
-    * IVTV hardware MPEG audio/video decoder output support.
+    * IVTV hardware MPEG audio/video decoder output support
 	
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
@@ -21,6 +21,9 @@ MPlayer (1.0)
 
     Inputs:
     * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350/500)
+
+    FFmpeg/libavcodec:
+    * VC-1/WMV3/WMV9 video decoder
 
     MEncoder:
     * support of x264 encoding over lavc
