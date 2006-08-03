@@ -801,16 +801,8 @@ v4l2_display_settings (struct pvr_t *pvr)
   /* get current audio input */
   if (ioctl (pvr->dev_fd, VIDIOC_G_AUDIO, &vaudio) == 0)
   {
-    vaudio.index = input;
-    if (ioctl (pvr->dev_fd, VIDIOC_ENUMAUDIO, &vaudio) < 0)
-    {
-      mp_msg (MSGT_OPEN, MSGL_ERR,
-              "%s can't get input (%s).\n", LOG_LEVEL_V4L2, strerror (errno));
-      return -1;
-    }
-    else
-      mp_msg (MSGT_OPEN, MSGL_INFO,
-              "%s Audio input: %s\n", LOG_LEVEL_V4L2, vaudio.name);
+    mp_msg (MSGT_OPEN, MSGL_INFO,
+            "%s Audio input: %s\n", LOG_LEVEL_V4L2, vaudio.name);
   }
   else
   {
