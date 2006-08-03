@@ -4220,7 +4220,7 @@ echores "$_fbdev"
 
 
 echocheck "DVB"
-if test "$_dvb" != no ; then
+if test "$_dvb" = auto ; then
   _dvb=no
 cat >$TMPC << EOF
 #include <sys/poll.h>
@@ -4257,9 +4257,9 @@ if test "$_dvb" = yes ; then
   _aomodules="mpegpes(dvb) $_aomodules"
   _vomodules="mpegpes(dvb) $_vomodules"
 fi
-if test "$_dvbhead" != no ; then
+
   echocheck "DVB HEAD"
-  if test "$_dvbhead" != no ; then
+  if test "$_dvbhead" = auto ; then
     _dvbhead=no
 
 cat >$TMPC << EOF
@@ -4296,7 +4296,7 @@ EOF
     _aomodules="mpegpes(dvb) $_aomodules"
     _vomodules="mpegpes(dvb) $_vomodules"
   fi
-fi
+
 if test "$_dvbhead" = no && test "$_dvb" = no ; then
   _def_dvb='#undef HAVE_DVB'
   _def_dvb_in='#undef HAS_DVBIN_SUPPORT '
