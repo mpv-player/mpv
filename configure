@@ -4236,19 +4236,19 @@ cat >$TMPC << EOF
 #include <ost/audio.h>
 int main(void) {return 0;}
 EOF
-    if cc_check ; then
+  if cc_check ; then
+      _dvb=yes
+  else
+    for I in "$_inc_dvb" "-I/usr/src/DVB/ost/include" ; do
+      if cc_check "$I" ; then
         _dvb=yes
-    else
-      for I in "$_inc_dvb" "-I/usr/src/DVB/ost/include" ; do
-        if cc_check "$I" ; then
-          _dvb=yes
-          _inc_dvb="$I"
-          _res_comment="using $_inc_dvb"
-          break
-        fi
-      done
-      test "$_dvb" = no && _res_comment="specify path to DVB/ost/include with --with-dvbincdir=DIR"
-    fi
+        _inc_dvb="$I"
+        _res_comment="using $_inc_dvb"
+        break
+      fi
+    done
+    test "$_dvb" = no && _res_comment="specify path to DVB/ost/include with --with-dvbincdir=DIR"
+  fi
 fi
 echores "$_dvb"
 if test "$_dvb" = yes ; then
