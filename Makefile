@@ -480,8 +480,11 @@ ifeq ($(VIDIX),yes)
 endif
 	@echo "Uninstall completed"
 
-clean:
+dirclean:
 	-rm -f *.o *.a *~
+
+clean: dirclean
+	@for a in $(PARTS); do $(MAKE) -C $$a clean; done
 
 distclean: clean doxygen_clean
 	-rm -f *~ $(PRG) $(PRG_MENCODER) codec-cfg codecs2html
