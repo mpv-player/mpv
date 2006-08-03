@@ -30,6 +30,7 @@ tv_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
   extern char* tv_param_channel;
   
+  stream->type = STREAMTYPE_TV;
   *file_format =  DEMUXER_TYPE_TV;
   if (strlen (stream->url) > 5 && stream->url[5] != '\0')
     tv_param_channel = strdup (stream->url + 5);
