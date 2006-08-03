@@ -29,7 +29,7 @@ ifeq ($(HAVE_DVD),yes)
 SRCS += stream_dvd.c
 endif
 ifeq ($(DVDNAV),yes)
-SRCS += dvdnav_stream.c
+SRCS += stream_dvdnav.c
 endif
 ifeq ($(VCD),yes)
 SRCS += stream_vcd.c

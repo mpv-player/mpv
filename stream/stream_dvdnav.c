@@ -9,7 +9,7 @@
 #include "input/input.h"
 #include "stream.h"
 #include "demuxer.h"
-#include "dvdnav_stream.h"
+#include "stream_dvdnav.h"
 #include "libvo/video_out.h"
 #include "spudec.h"
 #include "m_option.h"
