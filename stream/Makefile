@@ -12,9 +12,6 @@ ifeq ($(STREAM_CACHE),yes)
 SRCS += cache2.c
 endif
 
-# Miscellaneous
-SRCS += cue_read.c \
-
 ifeq ($(CDDA),yes)
 SRCS += stream_cdda.c cdinfo.c
   ifeq ($(MPLAYER_NETWORK),yes)
@@ -24,6 +21,7 @@ endif
 
 # Stream readers/writers
 SRCS += stream.c \
+        stream_cue.c \
         stream_file.c \
         stream_null.c \
 
