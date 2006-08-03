@@ -4258,9 +4258,9 @@ if test "$_dvb" = yes ; then
   _vomodules="mpegpes(dvb) $_vomodules"
 fi
 
-  echocheck "DVB HEAD"
-  if test "$_dvbhead" = auto ; then
-    _dvbhead=no
+echocheck "DVB HEAD"
+if test "$_dvbhead" = auto ; then
+  _dvbhead=no
 
 cat >$TMPC << EOF
 #include <sys/poll.h>
@@ -4275,27 +4275,27 @@ cat >$TMPC << EOF
 #include <linux/dvb/audio.h>
 int main(void) {return 0;}
 EOF
-    if cc_check ; then
-      _dvbhead=yes
-    else
-      for I in "$_inc_dvb" "-I/usr/src/DVB/include" ; do
-        if cc_check "$I" ; then
-          _dvbhead=yes
-          _inc_dvb="$I"
-          _res_comment="using $_inc_dvb"
-          break
-        fi
-      done
-      test "$_dvbhead" = no && _res_comment="specify path to DVB/include (HEAD Version) with --with-dvbincdir=DIR"
-    fi
+  if cc_check ; then
+    _dvbhead=yes
+  else
+    for I in "$_inc_dvb" "-I/usr/src/DVB/include" ; do
+      if cc_check "$I" ; then
+        _dvbhead=yes
+        _inc_dvb="$I"
+        _res_comment="using $_inc_dvb"
+        break
+      fi
+    done
+    test "$_dvbhead" = no && _res_comment="specify path to DVB/include (HEAD Version) with --with-dvbincdir=DIR"
   fi
-  echores "$_dvbhead"
-  if test "$_dvbhead" = yes ; then
-    _def_dvb='#define HAVE_DVB_HEAD 1'
-    _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
-    _aomodules="mpegpes(dvb) $_aomodules"
-    _vomodules="mpegpes(dvb) $_vomodules"
-  fi
+fi
+echores "$_dvbhead"
+if test "$_dvbhead" = yes ; then
+  _def_dvb='#define HAVE_DVB_HEAD 1'
+  _def_dvb_in='#define HAS_DVBIN_SUPPORT 1'
+  _aomodules="mpegpes(dvb) $_aomodules"
+  _vomodules="mpegpes(dvb) $_vomodules"
+fi
 
 if test "$_dvbhead" = no && test "$_dvb" = no ; then
   _def_dvb='#undef HAVE_DVB'
