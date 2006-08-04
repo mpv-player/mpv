@@ -1890,6 +1890,24 @@ static demuxer_t* mov_read_header(demuxer_t* demuxer){
 	}
     }
 
+    if(demuxer->video->id<0 && demuxer->audio->id<0) {
+        /* No AV streams found. Try to find an MPEG stream. */
+        for(t_no=0;t_no<priv->track_db;t_no++){
+            mov_track_t* trak=priv->tracks[t_no];
+            if(trak->media_handler == MOV_FOURCC('M','P','E','G')) {
+                stream_t *s;
+                demuxer_t *od;
+    
+                demuxer->video->id = t_no;
+                s = new_ds_stream(demuxer->video);
+                od = demux_open(s, DEMUXER_TYPE_MPEG_PS, -1, -1, -1, NULL);
+                if(od) return new_demuxers_demuxer(od, od, od);
+                demuxer->video->id = -2;	//new linked demuxer couldn't be allocated
+                break;
+            }
+        }
+    }
+
 #if 0
     if( mp_msg_test(MSGT_DEMUX,MSGL_DBG3) ){
 	for(t_no=0;t_no<priv->track_db;t_no++){
