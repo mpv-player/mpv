@@ -47,7 +47,8 @@ extern stream_info_t stream_info_netstream;
 extern stream_info_t stream_info_pnm;
 extern stream_info_t stream_info_asf;
 extern stream_info_t stream_info_rtsp;
-extern stream_info_t stream_info_rtp_udp;
+extern stream_info_t stream_info_rtp;
+extern stream_info_t stream_info_udp;
 extern stream_info_t stream_info_http1;
 extern stream_info_t stream_info_http2;
 #endif
@@ -102,7 +103,8 @@ stream_info_t* auto_open_streams[] = {
   &stream_info_sdp,
   &stream_info_rtsp_sip,
 #endif
-  &stream_info_rtp_udp,
+  &stream_info_rtp,
+  &stream_info_udp,
   &stream_info_http2,
 #endif
 #ifdef HAS_DVBIN_SUPPORT

@@ -30,7 +30,6 @@
 #define DEBUG        1
 #include "rtp.h"
 
-extern int network_bandwidth;
 
 
 #define DEBUG        1
@@ -205,7 +204,7 @@ int read_rtp_from_server(int fd, char *buffer, int length) {
 }
 
 // Start listening on a UDP port. If multicast, join the group.
-static int rtp_open_socket( URL_t *url ) {
+int rtp_open_socket( URL_t *url ) {
 	int socket_server_fd, rxsockbufsz;
 	int err, err_len;
 	fd_set set;
@@ -315,36 +314,6 @@ err_out:
   return -1;	
 }
 
-static int rtp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
-	return read_rtp_from_server( fd, buffer, size );
-}
-
-static int rtp_streaming_start( stream_t *stream, int raw_udp ) {
-	streaming_ctrl_t *streaming_ctrl;
-	int fd;
-
-	if( stream==NULL ) return -1;
-	streaming_ctrl = stream->streaming_ctrl;
-	fd = stream->fd;
-	
-	if( fd<0 ) {
-		fd = rtp_open_socket( (streaming_ctrl->url) ); 
-		if( fd<0 ) return -1;
-		stream->fd = fd;
-	}
-
-	if(raw_udp)
-		streaming_ctrl->streaming_read = nop_streaming_read;
-	else
-		streaming_ctrl->streaming_read = rtp_streaming_read;
-	streaming_ctrl->streaming_seek = nop_streaming_seek;
-	streaming_ctrl->prebuffer_size = 64*1024;	// 64 KBytes	
-	streaming_ctrl->buffering = 0;
-	streaming_ctrl->status = streaming_playing_e;
-	return 0;
-}
-
-
 static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
   static char buf[1600];
   unsigned int intP;
@@ -382,53 +351,3 @@ static int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData) {
 
   return(0);
 }
-
-
-static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
-  URL_t *url;
-  int udp = 0;
-
-  mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_RTP, URL: %s\n", stream->url);
-  stream->streaming_ctrl = streaming_ctrl_new();
-  if( stream->streaming_ctrl==NULL ) {
-    return STREAM_ERROR;
-  }
-  stream->streaming_ctrl->bandwidth = network_bandwidth;
-  url = url_new(stream->url);
-  stream->streaming_ctrl->url = check4proxies(url);
-
-  if( url->port==0 ) {
-    mp_msg(MSGT_NETWORK,MSGL_ERR,"You must enter a port number for RTP and UDP streams!\n");
-    goto fail;
-  }
-  if(!strncmp(stream->url, "udp", 3))
-    udp = 1;
-
-  if(rtp_streaming_start(stream, udp) < 0) {
-    mp_msg(MSGT_NETWORK,MSGL_ERR,"rtp_streaming_start(rtp) failed\n");
-    goto fail;
-  }
-
-  stream->type = STREAMTYPE_STREAM;
-  fixup_network_stream_cache(stream);
-  return STREAM_OK;
-
-fail:
-  streaming_ctrl_free( stream->streaming_ctrl );
-  stream->streaming_ctrl = NULL;
-  return STREAM_UNSUPORTED;
-}
-
-
-stream_info_t stream_info_rtp_udp = {
-  "mpeg rtp and upd streaming",
-  "rtp and udp",
-  "Dave Chapman",
-  "native rtp support",
-  open_s,
-  {"rtp", "udp", NULL},
-  NULL,
-  0 // Urls are an option string
-};
-
-
