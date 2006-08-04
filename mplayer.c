@@ -3563,8 +3563,6 @@ if (global_sub_size) {
     mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_VIDEO_ASPECT=%1.4f\n", sh_video->aspect);
   }
   if (sh_audio) {
-    if (sh_audio->codec)
-      mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_audio->format >= 0x20202020)
       mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_FORMAT=%.4s\n", (char *)&sh_audio->format);
@@ -3733,6 +3731,8 @@ update_osd_msg();
 
 if(sh_audio){
   reinit_audio_chain();
+  if (sh_audio->codec)
+    mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
 }
 
 current_module="av_init";
