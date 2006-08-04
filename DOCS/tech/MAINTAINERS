@@ -113,7 +113,7 @@ demuxers:
 muxers:
     * muxer_lavf.c - Michael Niedermayer
 
-inputs:
+streams:
     * stream_pvr.c - Benjamin Zores
     * stream_udp.c - Benjamin Zores
     * stream_rtp.c - Benjamin Zores
