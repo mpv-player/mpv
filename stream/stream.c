@@ -26,7 +26,7 @@
 #include "osdep/shmem.h"
 
 #include "stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 
 #include "m_option.h"
 #include "m_struct.h"

@@ -45,7 +45,7 @@
 #endif
 
 #include "stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 #include "help_mp.h"
 #include "osdep/timer.h"
 

@@ -17,8 +17,7 @@
 
 #include "m_option.h"
 #include "stream.h"
-#include "demuxer.h"
-#include "mf.h"
+#include "libmpdemux/demuxer.h"
 
 
 /// We keep these 2 for the gui atm, but they will be removed.

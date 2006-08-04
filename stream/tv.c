@@ -25,8 +25,8 @@ int tv_param_on = 0;
 #include "help_mp.h"
 
 #include "stream.h"
-#include "demuxer.h"
-#include "stheader.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
 
 #include "libaf/af_format.h"
 #include "libvo/img_format.h"

@@ -8,7 +8,7 @@
 #include "osdep/timer.h"
 #include "input/input.h"
 #include "stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 #include "stream_dvdnav.h"
 #include "libvo/video_out.h"
 #include "spudec.h"

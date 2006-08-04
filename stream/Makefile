@@ -110,7 +110,7 @@ SRCS += dvb_tune.c
 endif
 
 OBJS	= $(SRCS:.c=.o)
-INCLUDE = -I.. -I../libmpdemux -I../loader $(LIBAV_INC)
+INCLUDE = -I.. -I../loader $(LIBAV_INC)
 CFLAGS  = $(OPTFLAGS) $(INCLUDE) $(XMMS_CFLAGS)
 
 .SUFFIXES: .c .o

@@ -37,7 +37,7 @@
 #endif
 
 #include "url.h"
-#include "asf.h"
+#include "libmpdemux/asf.h"
 
 #include "stream.h"
 

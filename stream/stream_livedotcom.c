@@ -8,7 +8,7 @@
 
 #include "stream.h"
 #include "network.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 #include "help_mp.h"
 
 extern int network_bandwidth;

@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "stream.h"
-#include "demuxer.h"
 
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->type = STREAMTYPE_DUMMY;

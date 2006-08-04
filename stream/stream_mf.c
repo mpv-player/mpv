@@ -23,7 +23,7 @@
 #include <string.h>
 
 #include "stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 
 static int
 mf_stream_open (stream_t *stream, int mode, void *opts, int *file_format)

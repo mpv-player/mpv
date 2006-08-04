@@ -7,7 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 
 #include "cdd.h"
 

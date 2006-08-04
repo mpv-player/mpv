@@ -17,10 +17,10 @@
 
 #include "url.h"
 #include "http.h"
-#include "asf.h"
+#include "libmpdemux/asf.h"
 
 #include "stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 
 #include "network.h"
 

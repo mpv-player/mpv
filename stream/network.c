@@ -27,7 +27,7 @@
 #endif
 
 #include "stream.h"
-#include "demuxer.h"
+#include "libmpdemux/demuxer.h"
 #include "m_config.h"
 
 #include "network.h"
