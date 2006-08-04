@@ -404,10 +404,7 @@ Use these options if autodetection fails (Options marked with (*) accept
 multiple paths separated by ':'):
   --with-extraincdir=DIR   extra headers (png, mad, sdl, ...) in DIR (*)
   --with-extralibdir=DIR   extra library files (png, mad, sdl, ...) in DIR (*)
-  --with-x11incdir=DIR     X headers in DIR (*)
   --with-x11libdir=DIR     X library files in DIR (*)
-  --with-dxr2incdir=DIR    DXR2 headers in DIR (*)
-  --with-dvbincdir=DIR     DVB headers in DIR (*)
   --with-madlibdir=DIR     libmad (libmad shared library) in DIR (*)
   --with-mlibdir=DIR       libmlib (mediaLib support) in DIR (Solaris only)
   --with-codecsdir=DIR     Binary codec files in DIR
@@ -421,7 +418,6 @@ multiple paths separated by ':'):
   --with-toolamedir=DIR    path to Toolame library and include file
   --with-xmmsplugindir=DIR XMMS plugins in DIR
   --with-xmmslibdir=DIR    libxmms.so.1 in DIR
-  --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR (*)
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR (*)
   --with-xvmclib=NAME      name of adapter-specific library (e.g. XvMCNVIDIA)
   --with-termcaplib=NAME   name of library with termcap functionality
@@ -2104,20 +2100,11 @@ for ac_option do
   --enable-win32) _win32=yes ;;
   --disable-win32) _win32=no ;;
 
-  --with-x11incdir=*)
-    _inc_x11=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
   --with-x11libdir=*)
     _x11libdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-dxr2incdir=*)
-    _inc_dxr2=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
-    ;;
   --with-xvmclib=*)
     _xvmclib=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-dvbincdir=*)
-    _inc_dvb=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-xvidlibdir=*)
     _ld_xvid=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -2148,9 +2135,6 @@ for ac_option do
     ;;
   --with-madlibdir=*)
     _ld_mad=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
-  --with-cdparanoiaincdir=*)
-    _inc_cdparanoia=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-cdparanoialibdir=*)
     _ld_cdparanoia=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -3660,10 +3644,11 @@ if test "$_directfb" = auto ; then
 #include <directfb.h>
 int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
 EOF
-  for _inc_directfb in $_inc_extra -I/usr/local/include/directfb \
+  for _inc_directfb in "" -I/usr/local/include/directfb \
       -I/usr/include/directfb -I/usr/local/include -I/usr/include; do
     cc_check $_inc_directfb -ldirectfb && _directfb=yes && break
   done
+  _inc_extra="$_inc_extra $_inc_directfb"
   fi
 fi
 
@@ -3674,7 +3659,7 @@ int
 dfb_ver = DIRECTFB_MAJOR_VERSION DIRECTFB_MINOR_VERSION DIRECTFB_MICRO_VERSION
 ;
 EOF
-  if $_cc -E $TMPC $_inc_directfb > "$TMPO"; then
+  if $_cc -E $TMPC $_inc_extra > "$TMPO"; then
     _directfb_version=`sed -n 's/^dfb_ver[^1-9]*\(.*\)/\1/p' "$TMPO" | tr -d '() '`
     _def_directfb_version="#define DIRECTFBVERSION $_directfb_version"
     if test "$_directfb_version" -ge 913; then
@@ -3706,32 +3691,25 @@ if test "$_directfb" = yes ; then
 else
   _def_directfb='#undef HAVE_DIRECTFB'
   _novomodules="directfb $_novomodules"
-  _inc_directfb=""
 fi
 
 
 echocheck "X11 headers presence"
-if test -z "$_inc_x11" ; then
-  for I in /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
-    if test -d "$I/X11" && test -f "$I/X11/Xlib.h" ; then
+  for I in $_inc_extra /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
+    if test -f "$I/X11/Xlib.h" ; then
       _inc_x11="-I$I"
       _x11_headers="yes"
       _res_comment="using $I"
       break
     fi
   done
+  #FIXME: This is ugly as it can duplicate a -I parameter..
+  _inc_extra="$_inc_extra $_inc_x11"
   if test -z "$_inc_x11" ; then
     _x11=no
     _x11_headers="no"
     _res_comment="check if the dev(el) packages are installed"
   fi
-else
-  _x11_headers="yes"
-  _res_comment="using $_inc_x11"
-fi
-if test "$_inc_x11" = "-I/usr/include" ; then
-  _inc_x11=""
-fi
 echores "$_x11_headers"
 
 
@@ -3750,7 +3728,7 @@ EOF
     if netbsd; then
       _ld_x11="$_ld_x11 -Wl,-R$I"
     fi
-    if test -d "$I" && cc_check $_inc_x11 $_ld_x11 ; then
+    if test -d "$I" && cc_check $_ld_x11 ; then
       _x11=yes
       break
     fi
@@ -3764,7 +3742,6 @@ if test "$_x11" = yes ; then
 else
   _x11=no
   _def_x11='#undef HAVE_X11'
-  _inc_x11=''
   _ld_x11=''
   _novomodules="x11 $_novomodules"
   _res_comment="check if the dev(el) packages are installed"
@@ -3786,7 +3763,7 @@ int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
 }
 EOF
-  cc_check $_inc_x11 -lXdpms $_ld_x11 && _xdpms3=yes
+  cc_check -lXdpms $_ld_x11 && _xdpms3=yes
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/dpms.h>
@@ -3794,7 +3771,7 @@ int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
 }
 EOF
-  cc_check $_inc_x11 $_ld_x11 && _xdpms4=yes
+  cc_check $_ld_x11 && _xdpms4=yes
 fi
 if test "$_xdpms4" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
@@ -3822,7 +3799,7 @@ int main(void) {
   return 0; }
 EOF
   _xv=no
-  cc_check $_inc_x11 -lXv $_ld_x11 && _xv=yes
+  cc_check -lXv $_ld_x11 && _xv=yes
 else
   _xv=no
 fi
@@ -3836,6 +3813,7 @@ else
   _novomodules="xv $_novomodules"
 fi
 echores "$_xv"
+fi #if test "$_x11" = yes ; then
 
 
 echocheck "XvMC"
@@ -3851,7 +3829,7 @@ int main(void) {
   return 0; }
 EOF
   for _ld_tmp in $_xvmclib XvMCNVIDIA XvMCW I810XvMC ; do
-    cc_check $_inc_x11 -lXvMC -l$_ld_tmp $_ld_xv $_ld_x11 && _xvmc=yes && _xvmclib="$_ld_tmp" && break
+    cc_check -lXvMC -l$_ld_tmp $_ld_xv $_ld_x11 && _xvmc=yes && _xvmclib="$_ld_tmp" && break
   done
 fi
 if test "$_xvmc" = yes ; then
@@ -3875,7 +3853,7 @@ if test "$_x11" = yes && test "$_xinerama" != no ; then
 int main(void) { (void) XineramaIsActive(0); return 0; }
 EOF
   _xinerama=no
-  cc_check $_inc_x11 -lXinerama $_ld_x11 && _xinerama=yes
+  cc_check -lXinerama $_ld_x11 && _xinerama=yes
 else
   _xinerama=no
 fi
@@ -3901,7 +3879,7 @@ if test "$_x11" = yes && test "$_vm" = auto ; then
 int main(void) { (void) XF86VidModeQueryExtension(0, 0, 0); return 0; }
 EOF
   _vm=no
-  cc_check $_inc_x11 -lXxf86vm $_ld_x11 && _vm=yes
+  cc_check -lXxf86vm $_ld_x11 && _vm=yes
 fi
 if test "$_vm" = yes ; then
   _def_vm='#define HAVE_XF86VM 1'
@@ -3924,7 +3902,7 @@ if test "$_xf86keysym" = auto; then
 #include <X11/XF86keysym.h>
 int main(void) { return XF86XK_AudioPause; }
 EOF
-    cc_check $_inc_x11 $_ld_x11 && _xf86keysym=yes
+    cc_check $_ld_x11 && _xf86keysym=yes
   fi
 fi
 if test "$_xf86keysym" = yes ; then
@@ -3946,14 +3924,14 @@ if test "$_dga" = auto ; then
 int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
 EOF
   _dga=no
-  cc_check $_inc_x11 -lXxf86dga -lXxf86vm $_ld_x11 && _dga=1
+  cc_check -lXxf86dga -lXxf86vm $_ld_x11 && _dga=1
 
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 int main (void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check $_inc_x11 -lXxf86dga $_ld_x11 && _dga=2
+  cc_check -lXxf86dga $_ld_x11 && _dga=2
 fi
 
 _def_dga='#undef HAVE_DGA'
@@ -3987,10 +3965,10 @@ if (test "$_x11" = yes || win32) && test "$_gl" != no ; then
 int main(void) { return 0; }
 EOF
   _gl=no
-  if cc_check $_inc_x11 $_ld_x11 -lGL $_ld_lm ; then
+  if cc_check $_ld_x11 -lGL $_ld_lm ; then
     _gl=yes
     _ld_gl="-lGL $_ld_dl"
-  elif cc_check $_inc_x11 $_ld_x11 -lGL $_ld_lm $_ld_pthread ; then
+  elif cc_check $_ld_x11 -lGL $_ld_lm $_ld_pthread ; then
     _gl=yes
     _ld_gl="-lGL $_ld_pthread $_ld_dl"
   elif cc_check -lopengl32 ; then
@@ -4217,19 +4195,10 @@ cat >$TMPC << EOF
 #include <ost/audio.h>
 int main(void) {return 0;}
 EOF
-  if cc_check ; then
-      _dvb=yes
-  else
-    for I in "$_inc_dvb" "-I/usr/src/DVB/ost/include" ; do
-      if cc_check "$I" ; then
-        _dvb=yes
-        _inc_dvb="$I"
-        _res_comment="using $_inc_dvb"
-        break
-      fi
-    done
-    test "$_dvb" = no && _res_comment="specify path to DVB/ost/include with --with-dvbincdir=DIR"
-  fi
+  for _inc_dvb in "" "-I/usr/src/DVB/ost/include" ; do
+    cc_check $_inc_dvb && _dvb=yes && break
+  done
+  _inc_extra="$_inc_extra $_inc_dvb"
 fi
 echores "$_dvb"
 if test "$_dvb" = yes ; then
@@ -4256,19 +4225,10 @@ cat >$TMPC << EOF
 #include <linux/dvb/audio.h>
 int main(void) {return 0;}
 EOF
-  if cc_check ; then
-    _dvbhead=yes
-  else
-    for I in "$_inc_dvb" "-I/usr/src/DVB/include" ; do
-      if cc_check "$I" ; then
-        _dvbhead=yes
-        _inc_dvb="$I"
-        _res_comment="using $_inc_dvb"
-        break
-      fi
-    done
-    test "$_dvbhead" = no && _res_comment="specify path to DVB/include (HEAD Version) with --with-dvbincdir=DIR"
-  fi
+  for _inc_dvb in "" "-I/usr/src/DVB/include" ; do
+    cc_check $_inc_dvb && _dvbhead=yes && break
+  done
+  _inc_extra="$_inc_extra $_inc_dvb"
 fi
 echores "$_dvbhead"
 if test "$_dvbhead" = yes ; then
@@ -4606,7 +4566,7 @@ if test "$_nas" = auto ; then
 int main(void) { return 0; }
 EOF
   _nas=no
-  cc_check -laudio $_inc_x11 -lXt $_ld_x11 $_ld_lm && _nas=yes
+  cc_check -laudio -lXt $_ld_x11 $_ld_lm && _nas=yes
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'
@@ -4626,11 +4586,10 @@ if test "$_dxr2" = auto; then
 #include <dxr2ioctl.h>
 int main(void) { return 0; }
 EOF
-  for _inc_dxr2 in "$_inc_dxr2" \
-		   "-I/usr/local/include/dxr2" \
-		   "-I/usr/include/dxr2"; do
+  for _inc_dxr2 in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
     cc_check $_inc_dxr2 && _dxr2=yes && break
   done
+  _inc_extra="$_inc_extra $_inc_dxr2"
 fi
 if test "$_dxr2" = yes; then
   _def_dxr2='#define HAVE_DXR2 1'
@@ -4638,12 +4597,10 @@ if test "$_dxr2" = yes; then
   _aosrc="$_aosrc ao_dxr2.c"
   _aomodules="dxr2 $_aomodules"
   _vomodules="dxr2 $_vomodules"
-  _res_comment="using $_inc_dxr2"
 else
   _def_dxr2='#undef HAVE_DXR2'
   _noaomodules="dxr2 $_noaomodules"
   _novomodules="dxr2 $_novomodules"
-  _inc_dxr2=""
 fi
 echores "$_dxr2"
 
@@ -5236,9 +5193,10 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    for _inc_tmp in "$_inc_cdparanoia" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
-       cc_check $_inc_tmp $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm && _inc_cdparanoia="$_inc_tmp" && _cdparanoia=yes && break
+    for _inc_cdparanoia in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
+       cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm && _cdparanoia=yes && break
     done
+    _inc_extra="$_inc_extra $_inc_cdparanoia"
 fi
 if test "$_cdparanoia" = yes ; then
     _cdda='yes'
@@ -6513,7 +6471,7 @@ if test "$_x264" != no ; then
   _x264=no
   if cc_check $_ld_x264 $_ld_lm ; then 
     _x264=yes
-  elif  test "$_x11" = yes && cc_check $_inc_x11 $_ld_x264 $_ld_x11 $_ld_lm ; then
+  elif  test "$_x11" = yes && cc_check $_ld_x264 $_ld_x11 $_ld_lm ; then
     _x264=yes
     _ld_x264="$_ld_x264 $_ld_x11"
   fi
@@ -6928,7 +6886,7 @@ int main(void) {
   return exitvar;
 }
 EOF
-    cc_check $_inc_x11 $_ld_x11 && _xshape=yes
+    cc_check $_ld_x11 && _xshape=yes
   fi
   if test "$_xshape" = yes ; then
     _def_xshape='#define HAVE_XSHAPE 1'
@@ -7292,8 +7250,8 @@ AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
 # FIXME: Should only be _inc_extra eventually.
-EXTRA_INC = $_inc_extra $_inc_x11 $inc_dxr2 $_inc_dvb $_inc_directfb $_inc_cdparanoia
-OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
+EXTRA_INC = $_inc_extra
+OPTFLAGS = -I../libvo -I../../libvo $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
 HELP_FILE = $_mp_help
