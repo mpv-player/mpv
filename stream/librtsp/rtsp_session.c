@@ -45,6 +45,7 @@
 #include <inttypes.h>
 
 #include "mp_msg.h"
+#include "../url.h"
 #include "../rtp.h"
 #include "rtsp.h"
 #include "rtsp_rtp.h"
