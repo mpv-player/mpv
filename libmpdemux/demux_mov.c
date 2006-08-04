@@ -540,10 +540,23 @@ static void demux_close_mov(demuxer_t *demuxer) {
   free(priv);
 }
 
+unsigned int store_ughvlc(unsigned char *s, unsigned int v){
+  unsigned int n = 0;
+
+  while(v >= 0xff) {
+    *s++ = 0xff;
+    v -= 0xff;
+    n++;
+  }
+  *s = v;
+  n++;
+
+  return n;
+}
+
 static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
                            off_t pos, off_t len, mov_track_t* trak);
 
-extern unsigned int store_ughvlc(unsigned char *s, unsigned int v);
 static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
     mov_priv_t* priv=demuxer->priv;
 //    printf("lschunks (level=%d,endpos=%x)\n", level, endpos);

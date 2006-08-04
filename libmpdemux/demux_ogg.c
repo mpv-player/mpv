@@ -1,22 +1,6 @@
 
 #include "config.h"
 
-unsigned int store_ughvlc(unsigned char *s, unsigned int v)
-{
-  unsigned int n = 0;
-
-  while(v >= 0xff)
-  {
-    *s++ = 0xff;
-    v -= 0xff;
-    n++;
-  }
-  *s = v;
-  n++;
-
-  return n;
-}
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -729,6 +713,9 @@ void demux_ogg_scan_stream(demuxer_t* demuxer) {
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
 extern void print_video_header(BITMAPINFOHEADER *h, int verbose_level);
+
+/* defined in demux_mov.c */
+extern unsigned int store_ughvlc(unsigned char *s, unsigned int v);
 
 /** \brief Return the number of subtitle tracks in the file.
 
