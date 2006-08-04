@@ -5269,10 +5269,11 @@ int main()
 }
 EOF
         _libcdio=no
-    for _inc_tmp in "$_inc_extra" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
+    for _inc_tmp in "" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
         cc_check `pkg-config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
             && tmp_run && _libcdio=yes && break
     done
+    _inc_extra="$_inc_extra $_inc_tmp"
     else
         _libcdio=no
     fi
