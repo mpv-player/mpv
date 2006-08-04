@@ -115,6 +115,9 @@ muxers:
 
 inputs:
     * stream_pvr.c - Benjamin Zores
+    * stream_udp.c - Benjamin Zores
+    * stream_rtp.c - Benjamin Zores
+    * stream_rtsp.c - Benjamin Zores
 
 codec support:
     * FFmpeg: Michael Niedermayer
