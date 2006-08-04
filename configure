@@ -3652,7 +3652,6 @@ fi
 echores "$_tga"
 
 echocheck "DirectFB headers presence"
-if test -z "$_inc_directfb" ; then
   for I in /usr/include/directfb /usr/local/include/directfb /usr/include \
            /usr/local/include `echo $_inc_extra | sed s/-I//g`; do
     if test -f "$I/directfb.h" ; then
@@ -3666,10 +3665,6 @@ if test -z "$_inc_directfb" ; then
     _directfb=no
     echores "not found"
   fi
-else
-  _res_comment="using $_inc_directfb"
-  echores "yes"
-fi
 
 echocheck "DirectFB"
 if test "$_directfb" = auto ; then
