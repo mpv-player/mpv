@@ -28,12 +28,7 @@
 /* MPEG-2 TS RTP stack */
 
 #define DEBUG        1
-#include "rtp.h"
-
-
-
-#define DEBUG        1
-#include "../mp_msg.h"
+#include "mp_msg.h"
 #include "rtp.h"
 
 // RTP reorder routines
