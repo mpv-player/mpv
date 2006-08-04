@@ -19,6 +19,7 @@ MPlayer (1.0)
     * lavf demuxer now honors -alang
 
     Inputs:
+    * split of stream layer from libmpdemux to new stream library.
     * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350/500)
     * native RTSP input (handles MPEG-TS over RTP) for generic RTSP servers.
 	
