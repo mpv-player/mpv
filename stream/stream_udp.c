@@ -24,7 +24,7 @@
 
 #include "stream.h"
 #include "url.h"
-#include "rtp.h"
+#include "udp.h"
 
 static int
 udp_streaming_start (stream_t *stream)
@@ -40,7 +40,7 @@ udp_streaming_start (stream_t *stream)
 	
   if (fd < 0)
   {
-    fd = rtp_open_socket (streaming_ctrl->url); 
+    fd = udp_open_socket (streaming_ctrl->url); 
     if (fd < 0)
       return -1;
     stream->fd = fd;
