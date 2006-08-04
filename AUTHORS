@@ -810,7 +810,7 @@ Zoltán, Márk Vicián (Se7en) <se7en@sch.bme.hu>
     * SVGAlib support in libvo
 
 Zores, Benjamin (ben) <ben@geexbox.org>
-    * RTSP demuxer in libmpdemux.
+    * RTSP input layer in stream.
     * PVR input layer for IVTV based cards.
     * IVTV h/w MPEG decoder ao/vo driver.
 
