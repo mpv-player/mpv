@@ -3813,7 +3813,6 @@ else
   _novomodules="xv $_novomodules"
 fi
 echores "$_xv"
-fi #if test "$_x11" = yes ; then
 
 
 echocheck "XvMC"
