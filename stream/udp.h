@@ -17,4 +17,9 @@
  *  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
+#ifndef _UDP_H_
+#define _UDP_H_
+
 int udp_open_socket (URL_t *url);
+
+#endif /* _UDP_H_ */
