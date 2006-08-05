@@ -3731,7 +3731,7 @@ update_osd_msg();
 
 if(sh_audio){
   reinit_audio_chain();
-  if (sh_audio->codec)
+  if (sh_audio && sh_audio->codec)
     mp_msg(MSGT_IDENTIFY,MSGL_INFO, "ID_AUDIO_CODEC=%s\n", sh_audio->codec->name);
 }
 
