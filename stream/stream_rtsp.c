@@ -37,6 +37,7 @@
 #include <errno.h>
 
 #include "stream.h"
+#include "tcp.h"
 #include "librtsp/rtsp.h"
 #include "librtsp/rtsp_session.h"
 

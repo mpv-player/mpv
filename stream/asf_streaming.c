@@ -23,6 +23,7 @@
 #include "libmpdemux/demuxer.h"
 
 #include "network.h"
+#include "tcp.h"
 
 #ifdef ARCH_X86
 #define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))

@@ -50,6 +50,7 @@
 #include "osdep/timer.h"
 
 #include "pnm.h"
+#include "tcp.h"
 //#include "libreal/rmff.h"
 
 extern int network_bandwidth;

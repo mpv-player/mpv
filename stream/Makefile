@@ -87,6 +87,7 @@ SRCS += asf_streaming.c \
         pnm.c \
         rtp.c \
         udp.c \
+        tcp.c \
         stream_rtsp.c \
         stream_rtp.c \
         stream_udp.c \

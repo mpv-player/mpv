@@ -42,6 +42,7 @@
 #include "stream.h"
 
 #include "network.h"
+#include "tcp.h"
 
 #define BUF_SIZE 102400
 #define HDR_BUF_SIZE 8192

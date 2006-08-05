@@ -63,6 +63,7 @@
 #include "bswap.h"
 
 #include "netstream.h"
+#include "tcp.h"
 
 static struct stream_priv_s {
   char* host;
