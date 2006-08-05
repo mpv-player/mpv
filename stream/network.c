@@ -137,7 +137,8 @@ const char *af2String(int af) {
 int
 connect2Server_with_af(char *host, int port, int af,int verb) {
 	int socket_server_fd;
-	int err, err_len;
+	int err;
+        socklen_t err_len;
 	int ret,count = 0;
 	fd_set set;
 	struct timeval tv;
