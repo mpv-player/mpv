@@ -47,7 +47,8 @@ int
 udp_open_socket (URL_t *url)
 {
   int socket_server_fd, rxsockbufsz;
-  int err, err_len;
+  int err;
+  socklen_t err_len;
   fd_set set;
   struct sockaddr_in server_address;
   struct ip_mreq mcast;
