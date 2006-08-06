@@ -4807,6 +4807,50 @@ if(step_sec>0) {
     case MP_CMD_KEYDOWN_EVENTS : {
 		mplayer_put_key(cmd->args[0].v.i);
     } break;
+    case MP_CMD_SEEK_CHAPTER : {
+        int seek = cmd->args[0].v.i;
+        int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
+        int total;
+        int current;
+
+        if (!demuxer->num_chapters || !demuxer->chapters) {
+            if (seek > 0) {
+                abs_seek_pos = 0;
+                rel_seek_secs = 1000000000.;
+            } else
+                set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter, 0, MSGTR_Unknown);
+            break;
+        }
+
+        total = demuxer->num_chapters;
+
+        if (abs) {
+            current = seek;
+        } else {
+            uint64_t now;
+            now = (sh_video ? sh_video->pts : (sh_audio ? sh_audio->pts : 0.)) * 1000 + .5;
+
+            for (current = total - 1; current >= 0; --current) {
+                demux_chapter_t* chapter = demuxer->chapters + current;
+                if (chapter->start <= now)
+                    break;
+            }
+            current += seek;
+        }
+        
+        if (current < 0) current = 0;
+        if (current >= total) {
+            current = total - 1;
+            abs_seek_pos = 0;
+            rel_seek_secs = 1000000000.;
+        } else {
+            abs_seek_pos = 1;
+            rel_seek_secs = demuxer->chapters[current].start / 1000.;
+        }
+
+        set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter,
+                current, demuxer->chapters[current].name);
+    } break;
     default : {
 #ifdef HAVE_NEW_GUI
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );

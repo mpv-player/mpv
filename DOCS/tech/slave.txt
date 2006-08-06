@@ -177,6 +177,11 @@ seek <value> [type]
         1 is a seek to <value> % in the movie.
         2 is a seek to an absolute position of <value> seconds.
 
+seek_chapter <value> [type]
+    Seek to the start of a chapter.
+        0 is a relative seek of +/- <value> chapters (default)
+        1 is a seek to a chapter #<value>
+
 set_property <property> <value>
     Set a property.
 

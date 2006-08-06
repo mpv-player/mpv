@@ -172,6 +172,12 @@ typedef struct demuxers_desc_st {
   int (*control)(struct demuxer_st *demuxer, int cmd, void *arg); ///< Optional
 } demuxer_desc_t;
 
+typedef struct demux_chapter_s
+{
+  uint64_t start, end;
+  char* name;
+} demux_chapter_t;
+
 typedef struct demuxer_st {
   demuxer_desc_t *desc;  ///< Demuxer description structure
   off_t filepos; // input stream current pos.
@@ -192,6 +198,9 @@ typedef struct demuxer_st {
   void* a_streams[MAX_A_STREAMS]; // audio streams (sh_audio_t)
   void* v_streams[MAX_V_STREAMS]; // video sterams (sh_video_t)
   char s_streams[32];   // dvd subtitles (flag)
+
+  demux_chapter_t* chapters;
+  int num_chapters;
   
   void* priv;  // fileformat-dependent data
   char** info;
@@ -370,3 +379,6 @@ extern int demuxer_type_by_filename(char* filename);
 
 extern void demuxer_help(void);
 extern int get_demuxer_type_from_name(char *demuxer_name, int *force);
+
+int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
+

@@ -128,6 +128,8 @@
 #define MATROSKA_ID_CHAPTERATOM          0xB6
 #define MATROSKA_ID_CHAPTERTIMESTART     0x91
 #define MATROSKA_ID_CHAPTERTIMEEND       0x92
+#define MATROSKA_ID_CHAPTERDISPLAY       0x80
+#define MATROSKA_ID_CHAPSTRING           0x85
 
 /* IDs in the cluster master */
 #define MATROSKA_ID_CLUSTERTIMECODE      0xE7

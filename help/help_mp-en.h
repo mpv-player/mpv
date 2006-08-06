@@ -210,6 +210,7 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Sub delay: %d ms"
 #define MSGTR_OSDSpeed "Speed: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDChapter "Chapter: (%d) %s"
 
 // property values
 #define MSGTR_Enabled "enabled"

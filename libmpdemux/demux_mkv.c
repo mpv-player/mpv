@@ -141,11 +141,6 @@ typedef struct mkv_index
   uint64_t timecode, filepos;
 } mkv_index_t;
 
-typedef struct mkv_chapter
-{
-  uint64_t start, end;
-} mkv_chapter_t;
-
 typedef struct mkv_attachment
 {
   char* name;
@@ -188,8 +183,6 @@ typedef struct mkv_demuxer
   int64_t skip_to_timecode;
   int v_skip_to_keyframe, a_skip_to_keyframe;
 
-  mkv_chapter_t *chapters;
-  int num_chapters;
   int64_t stop_timecode;
   
   int last_aid;
@@ -1328,7 +1321,7 @@ demux_mkv_read_chapters (demuxer_t *demuxer)
   uint64_t length, l;
   int il;
 
-  if (mkv_d->chapters)
+  if (demuxer->chapters)
     {
       ebml_read_skip (s, NULL);
       return 0;
@@ -1359,17 +1352,12 @@ demux_mkv_read_chapters (demuxer_t *demuxer)
                   case MATROSKA_ID_CHAPTERATOM:
                     {
                       uint64_t len, start=0, end=0;
+                      char* name = 0;
                       int i;
+                      int cid;
 
                       len = ebml_read_length (s, &i);
                       l = len + i;
-
-                      if (mkv_d->chapters == NULL)
-                        mkv_d->chapters = malloc (32*sizeof(*mkv_d->chapters));
-                      else if (!(mkv_d->num_chapters % 32))
-                        mkv_d->chapters = realloc (mkv_d->chapters,
-                                                   (mkv_d->num_chapters + 32)
-                                                   * sizeof(*mkv_d->chapters));
 
                       while (len > 0)
                         {
@@ -1386,6 +1374,32 @@ demux_mkv_read_chapters (demuxer_t *demuxer)
                               end = ebml_read_uint (s, &l) / 1000000;
                               break;
 
+                            case MATROSKA_ID_CHAPTERDISPLAY:
+                              {
+                                uint64_t len;
+                                int i;
+
+                                len = ebml_read_length (s, &i);
+                                l = len + i;
+                                while (len > 0)
+                                  {
+                                    uint64_t l;
+                                    int il;
+
+                                    switch (ebml_read_id (s, &il))
+                                      {
+                                        case MATROSKA_ID_CHAPSTRING:
+                                          name = ebml_read_utf8 (s, &l);
+                                          break;
+                                        default:
+                                          ebml_read_skip (s, &l);
+                                          break;
+                                      }
+                                    len -= l + il;
+                                  }
+                              }
+                              break;
+
                             default:
                               ebml_read_skip (s, &l);
                               break;
@@ -1393,12 +1407,15 @@ demux_mkv_read_chapters (demuxer_t *demuxer)
                           len -= l + il;
                         }
 
-                      mkv_d->chapters[mkv_d->num_chapters].start = start;
-                      mkv_d->chapters[mkv_d->num_chapters].end = end;
+                      if (!name)
+                        name = strdup("(unnamed)");
+                      
+                      cid = demuxer_add_chapter(demuxer, name, start, end);
+                      
                       mp_msg(MSGT_DEMUX, MSGL_V,
                              "[mkv] Chapter %u from %02d:%02d:%02d."
-                             "%03d to %02d:%02d:%02d.%03d\n",
-                             ++mkv_d->num_chapters,
+                             "%03d to %02d:%02d:%02d.%03d, %s\n",
+                             cid,
                              (int) (start / 60 / 60 / 1000),
                              (int) ((start / 60 / 1000) % 60),
                              (int) ((start / 1000) % 60),
@@ -1406,7 +1423,9 @@ demux_mkv_read_chapters (demuxer_t *demuxer)
                              (int) (end / 60 / 60 / 1000),
                              (int) ((end / 60 / 1000) % 60),
                              (int) ((end / 1000) % 60),
-                             (int) (end % 1000));
+                             (int) (end % 1000), name);
+
+                      free(name);
                       break;
                     }
 
@@ -2581,19 +2600,19 @@ demux_mkv_open (demuxer_t *demuxer)
   else
     demuxer->sub->id = -2;
 
-  if (mkv_d->chapters)
+  if (demuxer->chapters)
     {
-      for (i=0; i < (int)mkv_d->num_chapters; i++)
+      for (i=0; i < (int)demuxer->num_chapters; i++)
         {
-          mkv_d->chapters[i].start -= mkv_d->first_tc;
-          mkv_d->chapters[i].end -= mkv_d->first_tc;
+          demuxer->chapters[i].start -= mkv_d->first_tc;
+          demuxer->chapters[i].end -= mkv_d->first_tc;
         }
-      if (dvd_last_chapter > 0 && dvd_last_chapter <= mkv_d->num_chapters)
+      if (dvd_last_chapter > 0 && dvd_last_chapter <= demuxer->num_chapters)
         {
-          if (mkv_d->chapters[dvd_last_chapter-1].end != 0)
-            mkv_d->stop_timecode = mkv_d->chapters[dvd_last_chapter-1].end;
-          else if (dvd_last_chapter + 1 <= mkv_d->num_chapters)
-            mkv_d->stop_timecode = mkv_d->chapters[dvd_last_chapter].start;
+          if (demuxer->chapters[dvd_last_chapter-1].end != 0)
+            mkv_d->stop_timecode = demuxer->chapters[dvd_last_chapter-1].end;
+          else if (dvd_last_chapter + 1 <= demuxer->num_chapters)
+            mkv_d->stop_timecode = demuxer->chapters[dvd_last_chapter].start;
         }
     }
 
@@ -2604,7 +2623,7 @@ demux_mkv_open (demuxer_t *demuxer)
       demuxer->movi_start = s->start_pos;
       demuxer->movi_end = s->end_pos;
       demuxer->seekable = 1;
-      if (mkv_d->chapters && dvd_chapter>1 && dvd_chapter<=mkv_d->num_chapters)
+      if (demuxer->chapters && dvd_chapter>1 && dvd_chapter<=demuxer->num_chapters)
         {
           if (!mkv_d->has_first_tc)
             {
@@ -2612,7 +2631,7 @@ demux_mkv_open (demuxer_t *demuxer)
               mkv_d->has_first_tc = 1;
             }
           demux_mkv_seek (demuxer,
-                          mkv_d->chapters[dvd_chapter-1].start/1000.0, 0.0, 1);
+                          demuxer->chapters[dvd_chapter-1].start/1000.0, 0.0, 1);
         }
     }
 
@@ -2659,8 +2678,6 @@ demux_close_mkv (demuxer_t *demuxer)
         free (mkv_d->indexes);
       if (mkv_d->cluster_positions)
         free (mkv_d->cluster_positions);
-      if (mkv_d->chapters)
-        free (mkv_d->chapters);
       if (mkv_d->parsed_cues)
         free (mkv_d->parsed_cues);
       if (mkv_d->parsed_seekhead)

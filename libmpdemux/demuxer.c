@@ -287,6 +287,12 @@ skip_streamfree:
     }
     if(demuxer->filename)
       free(demuxer->filename);
+    if (demuxer->chapters) {
+      for (i=0; i<demuxer->num_chapters; i++)
+        if (demuxer->chapters[i].name)
+          free(demuxer->chapters[i].name);
+      free(demuxer->chapters);
+    }
     free(demuxer);
 }
 
@@ -1024,3 +1030,17 @@ int demuxer_switch_audio(demuxer_t *demuxer, int index){
       index = demuxer->audio->id;
     return index;
 }
+
+int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end){
+    if (demuxer->chapters == NULL)
+        demuxer->chapters = malloc (32*sizeof(*demuxer->chapters));
+    else if (!(demuxer->num_chapters % 32))
+        demuxer->chapters = realloc (demuxer->chapters, (demuxer->num_chapters + 32) * sizeof(*demuxer->chapters));
+
+    demuxer->chapters[demuxer->num_chapters].start = start;
+    demuxer->chapters[demuxer->num_chapters].end = end;
+    demuxer->chapters[demuxer->num_chapters].name = strdup(name);
+
+    return demuxer->num_chapters ++;
+}
+
