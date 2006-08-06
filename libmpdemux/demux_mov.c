@@ -582,9 +582,13 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	} else { /* not in track */
 	  switch(id) {
 	    case MOV_FOURCC('m','v','h','d'): {
-		stream_skip(demuxer->stream,12);
+		int version = stream_read_char(demuxer->stream);
+		stream_skip(demuxer->stream, (version == 1) ? 19 : 11);
 		priv->timescale=stream_read_dword(demuxer->stream);
-		priv->duration=stream_read_dword(demuxer->stream);
+		if (version == 1)
+		    priv->duration=stream_read_qword(demuxer->stream);
+		else
+		    priv->duration=stream_read_dword(demuxer->stream);
 		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sMovie header (%d bytes): tscale=%d  dur=%d\n",level,"",(int)len,
 		    (int)priv->timescale,(int)priv->duration);
 		break;
@@ -1580,12 +1584,16 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
       break;
     }
     case MOV_FOURCC('m','d','h','d'): {
+      int version = stream_read_char(demuxer->stream);
       mp_msg(MSGT_DEMUX, MSGL_V, "MOV: %*sMedia header!\n", level, "");
-      stream_skip(demuxer->stream, 12);
+      stream_skip(demuxer->stream, (version == 1) ? 19 : 11);
       // read timescale
       trak->timescale = stream_read_dword(demuxer->stream);
       // read length
-      trak->length = stream_read_dword(demuxer->stream);
+      if (version == 1)
+          trak->length = stream_read_qword(demuxer->stream);
+      else
+          trak->length = stream_read_dword(demuxer->stream);
       break;
     }
     case MOV_FOURCC('h','d','l','r'): {
