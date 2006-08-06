@@ -152,6 +152,34 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 		return 0;
 	}
 
+	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
+	{
+		FcFontSet* fcs;
+		FcStrSet* fss;
+		mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Updating font cache\n");
+		fcs = FcFontSetCreate();
+		fss = FcStrSetCreate();
+		rc = FcStrSetAdd(fss, (const FcChar8*)dir);
+		if (!rc) {
+			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcStrSetAdd failed\n");
+			goto ErrorFontCache;
+		}
+
+		rc = FcDirScan(fcs, fss, NULL, FcConfigGetBlanks(priv->config), (const FcChar8 *)dir, FcFalse);
+		if (!rc) {
+			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcDirScan failed\n");
+			goto ErrorFontCache;
+		}
+
+		rc = FcDirSave(fcs, fss, (const FcChar8 *)dir);
+		if (!rc) {
+			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcDirSave failed\n");
+			goto ErrorFontCache;
+		}
+	ErrorFontCache:
+		;
+	}
+
 	rc = FcConfigAppFontAddDir(priv->config, (const FcChar8*)dir);
 	if (!rc) {
 		mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcConfigAppFontAddDir failed\n");
