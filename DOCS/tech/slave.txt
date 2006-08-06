@@ -179,8 +179,8 @@ seek <value> [type]
 
 seek_chapter <value> [type]
     Seek to the start of a chapter.
-        0 is a relative seek of +/- <value> chapters (default)
-        1 is a seek to a chapter #<value>
+        0 is a relative seek of +/- <value> chapters (default).
+        1 is a seek to chapter <value>.
 
 set_property <property> <value>
     Set a property.
