@@ -720,6 +720,7 @@ Sommer, Sascha (Faust3) <saschasommer@freenet.de>
 
 Stepanov, Evgeniy (eugeni, Azzy) <eugeni.stepanov@gmail.com>
     * SSA/ASS subtitle renderer
+    * Matroska chapter seeking
 
 Strasser, Alexander (beastd) <eclipse7@gmx.net>
     * string handling security audit

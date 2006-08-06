@@ -17,6 +17,7 @@ MPlayer (1.0)
     * support for audio stream switching in MPEG-TS/PS, Matroska and
       streams supported by libavformat
     * lavf demuxer now honors -alang
+    * support for chapter seeking in Matroska files
 
     Inputs:
     * split of stream layer from libmpdemux to new stream library.
@@ -32,7 +33,6 @@ MPlayer (1.0)
 
     Others:
     * SSA/ASS subtitle renderer
-
 
   pre8: "NeuTeam strikes back" June 11, 2006
 
