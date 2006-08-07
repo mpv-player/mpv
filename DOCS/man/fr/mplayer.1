@@ -1,4 +1,4 @@
-.\" synced with r19233
+.\" synced with r19348
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -269,7 +269,7 @@ Diminue/accélère la vitesse courante de lecture de 10%.
 .IPs "{ and }"
 Réduit de moitié/double la vitesse courante de lecture.
 .IPs "backspace"
-Reset playback speed to normal.
+Ré-initialise la vitesse de lecture à la normale.
 .IPs "< et >"
 Recule/\:avance dans la liste de lecture (playlist).
 .IPs "ENTER"
@@ -316,7 +316,6 @@ Bascule l'affichage des sous-titres.
 Alterne entre les différents sous-titres disponibles.
 .IPs "y et g"
 Choisit le sous-titre après/avant dans la liste des sous-titres.
-+Step forwards/backwards in the subtitle list.
 .IP F\ \ \ \ 
 Bascule l'affichage des "sous-titres forcés".
 .IPs a\ \ \ \ 
@@ -331,6 +330,8 @@ Créé une marque EDL.
 Réalise une capture d'écran.
 .IPs "I"
 Affiche le nom de fichier dans l'OSD.
+.IPs "! and @"
+Saute au début du chapitre précédant/suivant.
 .RE
 .PD 1
 .PP
@@ -516,6 +517,12 @@ initialisant à 'yes' ou '1' ou désactivées en les initialisant à 'no'
 ou '0'.
 Ceci est même applicable aux sous-options.
 .PP
+Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
+Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
+créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
+fichier et placez-le dans ~/.mplayer/ ou dans le même répertoire que le
+fichier.
+.PP
 .I EXEMPLE DE FICHIER DE CONFIGURATION MPLAYER\ :
 .sp 1
 .nf
@@ -554,12 +561,6 @@ subalign=2
 subpos=96
 spuaa=20
 .fi
-.PP
-Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
-Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
-créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
-fichier et placez-le dans ~/.mplayer/ ou dans le même répertoire que le
-fichier.
 .
 .\" --------------------------------------------------------------------------
 .\" Profils
@@ -10101,7 +10102,8 @@ de MPEG-1/2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Définit le ratio d'aspect pour les vidéos MPEG-1/2.
+Définit le ratio d'aspect pour les vidéos MPEG-2.
+Ne pas utiliser avec les vidéos MPEG-1 ou le ratio d'aspect sera complètement faux.
 .
 .TP
 .B vbitrate=<entier>
