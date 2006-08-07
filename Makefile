@@ -162,7 +162,7 @@ endif
 ifeq ($(LIBMPEG2),yes)
 PARTS += libmpeg2
 endif
-ifeq ($(INTERNAL_FAAD),yes)
+ifeq ($(FAAD_INTERNAL),yes)
 COMMON_LIBS += libfaad2/libfaad2.a 
 PARTS += libfaad2
 endif
@@ -218,7 +218,7 @@ ifeq ($(LIBMPEG2),yes)
 COMMON_DEPS += libmpeg2/libmpeg2.a
 COMMON_LIBS += libmpeg2/libmpeg2.a
 endif
-ifeq ($(INTERNAL_FAAD),yes)
+ifeq ($(FAAD_INTERNAL),yes)
 COMMON_DEPS += libfaad2/libfaad2.a
 endif
 ifeq ($(TREMOR),yes)

@@ -5810,12 +5810,12 @@ EOF
 fi
 
 if test "$_faad_internal" = yes ; then
-  _def_faad_internal="#define USE_INTERNAL_FAAD 1"
+  _def_faad_internal="#define USE_FAAD_INTERNAL 1"
   _faad=yes
 elif test "$_faad_external" = yes ; then
   _faad=yes
 else
-  _def_faad_internal="#undef USE_INTERNAL_FAAD"
+  _def_faad_internal="#undef USE_FAAD_INTERNAL"
   _faad=no
 fi
 
@@ -7398,7 +7398,7 @@ SPEEX_LIB = $_ld_speex
 LIBTHEORA = $_theora
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
-INTERNAL_FAAD = $_faad_internal
+FAAD_INTERNAL = $_faad_internal
 LIBSMBCLIENT = $_smbsupport
 SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
