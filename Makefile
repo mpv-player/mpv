@@ -185,7 +185,7 @@ endif
 ifeq ($(LIBMENU),yes)
 PARTS += libmenu
 endif
-ifeq ($(TREMOR),yes)
+ifeq ($(TREMOR_INTERNAL),yes)
 PARTS += tremor
 endif
 
@@ -221,7 +221,7 @@ endif
 ifeq ($(FAAD_INTERNAL),yes)
 COMMON_DEPS += libfaad2/libfaad2.a
 endif
-ifeq ($(TREMOR),yes)
+ifeq ($(TREMOR_INTERNAL),yes)
 COMMON_DEPS += tremor/libvorbisidec.a
 COMMON_LIBS += tremor/libvorbisidec.a
 endif

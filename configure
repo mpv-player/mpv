@@ -7272,7 +7272,7 @@ LIBMENU = $_menu
 MP3LIB = $_mp3lib
 LIBA52 = $_liba52
 LIBMPEG2 = $_libmpeg2
-TREMOR = $_tremor_internal
+TREMOR_INTERNAL = $_tremor_internal
 TREMOR_FLAGS = $_tremor_flags
 FAAD = $_faad
 
