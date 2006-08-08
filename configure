@@ -270,8 +270,8 @@ Codecs:
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --disable-tremor-internal do not build internal Tremor support [enabled]
   --enable-tremor-low    build with lower accuracy internal Tremor [disabled]
-  --enable-tremor-external build with external Tremor [disabled]
-  --disable-vorbis       disable libvorbis support [autodetect]
+  --enable-tremor-external build with external Tremor [autodetect]
+  --disable-libvorbis    disable libvorbis support [autodetect]
   --disable-speex        disable Speex support [autodetect]
   --enable-theora        build with OggTheora support [autodetect]
   --enable-faad-external build with external FAAD2 (AAC) support [autodetect]
@@ -1607,8 +1607,8 @@ _toolame=auto
 _twolame=auto
 _tremor_internal=yes
 _tremor_low=no
-_tremor_external=no
-_vorbis=auto
+_tremor_external=auto
+_libvorbis=auto
 _speex=auto
 _theora=auto
 _mp3lib=yes
@@ -1810,8 +1810,8 @@ for ac_option do
   --disable-libcdio)	_libcdio=no	;;
   --enable-liblzo)	_liblzo=yes	;;
   --disable-liblzo)	_liblzo=no		;;
-  --enable-vorbis)	_vorbis=yes	;;
-  --disable-vorbis)	_vorbis=no	;;
+  --enable-libvorbis)	_libvorbis=yes	;;
+  --disable-libvorbis)	_libvorbis=no	;;
   --enable-speex)	_speex=yes	;;
   --disable-speex)	_speex=no	;;
   --enable-tremor-internal)	_tremor_internal=yes	;;
@@ -5558,43 +5558,48 @@ echores "$_twolame"
 
 echocheck "OggVorbis support"
 if test "$_tremor_internal" = yes; then
-  _vorbis=yes
-elif test "$_vorbis" = auto; then
-  _vorbis=no
+  _libvorbis=no
+elif test "$_tremor_external" = auto; then
+  _tremor_external=no
+  cat > $TMPC << EOF
+#include <tremor/ivorbiscodec.h>
+int main(void) { vorbis_packet_blocksize(0,0); return 0; }
+EOF
+  cc_check -lvorbisidec -logg $_ld_lm && _tremor_external=yes && _libvorbis=no
+fi
+if test "$_libvorbis" = auto; then
+  _libvorbis=no
   cat > $TMPC << EOF
 #include <vorbis/codec.h>
 int main(void) { vorbis_packet_blocksize(0,0); return 0; }
 EOF
-  cc_check -lvorbis -logg $_ld_lm && _vorbis=yes
+  cc_check -lvorbis -logg $_ld_lm && _libvorbis=yes
 fi
-if test "$_vorbis" = yes ; then
+if test "$_tremor_internal" = yes ; then
+  _vorbis=yes
   _def_vorbis='#define HAVE_OGGVORBIS 1'
-  if test "$_tremor_internal" = yes ; then
-    # do not set _ld_vorbis as it is resolved separately
-    # mp3lame support for vorbis is deprecated so don't care
-    _def_tremor='#define TREMOR 1'
-    _codecmodules="tremor(internal) $_codecmodules"
-    test "$_tremor_low" = yes && _tremor_flags='-D_LOW_ACCURACY_'
-  elif test "$_tremor_external" = yes ; then
-    _def_tremor='#define TREMOR 1'
-    _ld_vorbis='-lvorbisidec'
-    _codecmodules="tremor(external) $_codecmodules"
-  else
-    _def_tremor='#undef TREMOR'
-    _ld_vorbis='-lvorbis -logg'
-    _codecmodules="libvorbis $_codecmodules"
-  fi
-else
-  _def_vorbis='#undef HAVE_OGGVORBIS'
-  _def_tremor='#undef TREMOR'
-  _nocodecmodules="libvorbis $_nocodecmodules"
-fi
-if test "$_vorbis" = yes -a "$_tremor_internal" = yes -a "$_tremor_low" = yes ; then
-  _res_comment="internal low accuracy Tremor"
-elif test "$_vorbis" = yes -a "$_tremor_internal" = yes ; then
+  _def_tremor='#define TREMOR 1'
+  _codecmodules="tremor(internal) $_codecmodules"
   _res_comment="internal Tremor"
-elif test "$_vorbis" = yes -a "$_tremor_external" = yes ; then
+  if test "$_tremor_low" = yes ; then
+    _tremor_flags='-D_LOW_ACCURACY_'
+    _res_comment="internal low accuracy Tremor"
+  fi
+elif test "$_tremor_external" = yes ; then
+  _vorbis=yes
+  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _def_tremor='#define TREMOR 1'
+  _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
+  _ld_vorbis='-lvorbisidec -logg'
+elif test "$_libvorbis" = yes ; then
+  _vorbis=yes
+  _def_vorbis='#define HAVE_OGGVORBIS 1'
+  _codecmodules="libvorbis $_codecmodules"
+  _res_comment="libvorbis"
+  _ld_vorbis='-lvorbis -logg'
+else
+  _nocodecmodules="libvorbis $_nocodecmodules"
 fi
 echores "$_vorbis"
 
@@ -8006,8 +8011,6 @@ $_def_mad
 
 /* enable OggVorbis support */
 $_def_vorbis
-
-/* enable Tremor as vorbis decoder */
 $_def_tremor
 
 /* enable Speex support */
