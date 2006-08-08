@@ -5565,7 +5565,7 @@ elif test "$_tremor_external" = auto; then
 #include <tremor/ivorbiscodec.h>
 int main(void) { vorbis_packet_blocksize(0,0); return 0; }
 EOF
-  cc_check -lvorbisidec -logg $_ld_lm && _tremor_external=yes && _libvorbis=no
+  cc_check -logg -lvorbisidec $_ld_lm && _tremor_external=yes && _libvorbis=no
 fi
 if test "$_libvorbis" = auto; then
   _libvorbis=no
@@ -5591,7 +5591,7 @@ elif test "$_tremor_external" = yes ; then
   _def_tremor='#define TREMOR 1'
   _codecmodules="tremor(external) $_codecmodules"
   _res_comment="external Tremor"
-  _ld_vorbis='-lvorbisidec -logg'
+  _ld_vorbis='-logg -lvorbisidec'
 elif test "$_libvorbis" = yes ; then
   _vorbis=yes
   _def_vorbis='#define HAVE_OGGVORBIS 1'
