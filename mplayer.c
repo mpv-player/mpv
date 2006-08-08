@@ -2625,6 +2625,10 @@ struct {double pts; vo_functions_t *vo;} vf_vo_data;
   tv_param_immediate = 1;
 #endif
 
+  if (argc > 1 && argv[1] &&
+      (!strcmp(argv[1], "-gui") || !strcmp(argv[1], "-nogui"))) {
+    use_gui = !strcmp(argv[1], "-gui");
+  } else
   if ( argv[0] )
   {
     char *base = strrchr(argv[0], '/');
