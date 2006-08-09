@@ -1837,7 +1837,6 @@ static int parse_custom_url(m_option_t* opt,char *name,
   if( ptr2!=NULL ) {
     
     // We got something, at least a username...
-    int len = ptr2-ptr1;
     if(!m_option_list_find(desc->fields,"username")) {
       mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: This URL doesn't have a username part.\n",name);
       // skip
@@ -1845,7 +1844,6 @@ static int parse_custom_url(m_option_t* opt,char *name,
       ptr3 = strstr(ptr1, ":");
       if( ptr3!=NULL && ptr3<ptr2 ) {
 	// We also have a password
-	int len2 = ptr2-ptr3-1;
 	if(!m_option_list_find(desc->fields,"password")) {
 	  mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: This URL doesn't have a password part.\n",name);
 	  // skip
