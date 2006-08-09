@@ -127,13 +127,20 @@ I. BASICS:
   include filenames in log messages, Subversion provides that information.
 
 
-8. Renaming/moving files or contents of files:
+8. Renaming/moving/copying files or contents of files:
 
-  svn move <source> <destination>
+  svn move <source> <destination>    / svn copy <source> <destination>
   svn commit <source> <destination>
 
-  Do not move or rename files before discussing it on the mplayer-dev-eng
-  mailing list first!
+  Do not move, rename or copy files maintained by others than yourself without
+  discussing it on the mplayer-dev-eng mailing list first!
+
+  Always try to preserve the history and minimize the size of svn diff, don't
+  copy or move a file by svn delete and svn add, always use svn move or 
+  svn copy instead
+
+  To split a file in 2 use svn copy and remove the lines which are not needed
+  from each file
 
   Don't do a lot of cut'n'paste from one file to another without a very good
   reason and discuss it on the mplayer-dev-eng mailing list first. It will make
