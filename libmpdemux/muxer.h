@@ -48,6 +48,7 @@ typedef struct {
 
   int vbv_size;
   int max_rate;
+  int avg_rate;
 } muxer_stream_t;
 
 typedef struct {

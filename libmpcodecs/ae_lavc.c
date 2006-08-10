@@ -38,6 +38,7 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 	mux_a->wf->nChannels = lavc_actx->channels;
 	mux_a->wf->nSamplesPerSec = lavc_actx->sample_rate;
 	mux_a->wf->nAvgBytesPerSec = (lavc_actx->bit_rate / 8);
+        mux_a->avg_rate= lavc_actx->bit_rate;
 	mux_a->h.dwRate = mux_a->wf->nAvgBytesPerSec;
 	if(lavc_actx->block_align)
 		mux_a->h.dwSampleSize = mux_a->h.dwScale = lavc_actx->block_align;

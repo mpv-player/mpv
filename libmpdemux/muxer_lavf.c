@@ -185,7 +185,8 @@ static void fix_parameters(muxer_stream_t *stream)
 	
 	ctx = spriv->avstream->codec;
 
-        if(stream->wf && stream->wf->nAvgBytesPerSec)
+        ctx->bit_rate= stream->avg_rate;
+        if(stream->wf && stream->wf->nAvgBytesPerSec && !ctx->bit_rate)
             ctx->bit_rate = stream->wf->nAvgBytesPerSec * 8;
         ctx->rc_buffer_size= stream->vbv_size;
         ctx->rc_max_rate= stream->max_rate;

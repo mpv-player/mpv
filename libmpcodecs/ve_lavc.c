@@ -331,7 +331,7 @@ static int config(struct vf_instance_s* vf,
     else
 	lavc_venc_context->bit_rate = 800000; /* default */
 
-    //mux_v->wf->nAvgBytesPerSec= lavc_venc_context->bit_rate/8;
+    mux_v->avg_rate= lavc_venc_context->bit_rate;
 
     lavc_venc_context->bit_rate_tolerance= lavc_param_vrate_tolerance*1000;
     lavc_venc_context->time_base= (AVRational){mux_v->h.dwScale, mux_v->h.dwRate};
