@@ -6,6 +6,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <inttypes.h>
+#include <errno.h>
 
 #include "config.h"
 
@@ -108,28 +109,28 @@ static int init_device(int card)
 #endif
 	if((vo_mpegpes_fd2 = open(ao_file,O_RDWR|O_NONBLOCK)) < 0)
 	{
-        	perror("DVB AUDIO DEVICE: ");
+        	mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO DEVICE: %s\n", strerror(errno));
         	return -1;
 	}
 	if( (ioctl(vo_mpegpes_fd2,AUDIO_SELECT_SOURCE, AUDIO_SOURCE_MEMORY) < 0))
 	{
-		perror("DVB AUDIO SELECT SOURCE: ");
+		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SELECT SOURCE: %s\n", strerror(errno));
 		return -1;
 	}
 	if((ioctl(vo_mpegpes_fd2,AUDIO_PLAY) < 0))
 	{
-		perror("DVB AUDIO PLAY: ");
+		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO PLAY: %s\n", strerror(errno));
 		return -1;
 	}
 	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_AV_SYNC, true) < 0))
 	{
-		perror("DVB AUDIO SET AV SYNC: ");
+		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET AV SYNC: %s\n", strerror(errno));
 		return -1;
 	}
 	//FIXME: in vo_mpegpes audio was inited as MUTEd
 	if((ioctl(vo_mpegpes_fd2,AUDIO_SET_MUTE, false) < 0))
 	{
-		perror("DVB AUDIO SET MUTE: ");
+		mp_msg(MSGT_VO, MSGL_ERR, "DVB AUDIO SET MUTE: %s\n", strerror(errno));
 		return -1;
 	}
 	return vo_mpegpes_fd2;
@@ -170,7 +171,7 @@ static int preinit(const char *arg)
 	vo_mpegpes_fd2=open(ao_file,O_WRONLY|O_CREAT,0666);
 	if(vo_mpegpes_fd2<0)
 	{
-		perror("ao_mpegpes");
+		mp_msg(MSGT_VO, MSGL_ERR, "ao_mpegpes: %s\n", strerror(errno));
 		return -1;
 	}
 	return vo_mpegpes_fd2;
@@ -190,7 +191,7 @@ static int my_ao_write(unsigned char* data,int len){
             if(pfd[0].revents & POLLOUT){
                 int ret=write(vo_mpegpes_fd2,data,len);
                 if(ret<=0){
-                    perror("write");
+                    mp_msg(MSGT_VO, MSGL_ERR, "ao_mpegpes write: %s\n", strerror(errno));
                     usleep(0);
                 } else {
                     len-=ret;
