@@ -807,7 +807,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			if(atom_len > 8) {
 			  esds_t esds; 				  
 			  if(!mp4_parse_esds(&trak->stdata[36+adjust], atom_len-8, &esds)) {
-			    if(sh->format==0x6134706D && esds.decoderConfigLen > 8)
+			    /* 0xdd is a "user private" id, not an official allocated id (see http://www.mp4ra.org/object.html),
+			       so perform some extra checks to be sure that this is really vorbis audio */
+			    if(esds.objectTypeId==0xdd && esds.streamType==0x15 && sh->format==0x6134706D && esds.decoderConfigLen > 8)
 				{
 					//vorbis audio
 					unsigned char *buf[3];
@@ -860,6 +862,12 @@ quit_vorbis_block:
 //			    printf("######## audio format = %d ########\n",esds.objectTypeId);
 			    if(esds.objectTypeId==MP4OTI_MPEG1Audio || esds.objectTypeId==MP4OTI_MPEG2AudioPart3)
 				sh->format=0x55; // .mp3
+
+			    if(esds.objectTypeId==MP4OTI_13kVoice) { // 13K Voice, defined by 3GPP2
+				sh->format=mmioFOURCC('Q', 'c', 'l', 'p');
+				trak->nchannels=sh->channels=1;
+				trak->samplebytes=sh->samplesize=1;
+			    }
 
 			    // dump away the codec specific configuration for the AAC decoder
 			    if(esds.decoderConfigLen){
