@@ -1170,10 +1170,11 @@ static void wrap_lines_smart(int max_text_width)
 	break_type = 0;
 	s1 = text_info.glyphs; // current line start
 	for (i = 0; i < text_info.length; ++i) {
+		int break_at, s_offset, len;
 		cur = text_info.glyphs + i;
-		int break_at = -1;
-		int s_offset = s1->bbox.xMin + s1->pos.x;
-		int len = (cur->bbox.xMax + cur->pos.x) - s_offset;
+		break_at = -1;
+		s_offset = s1->bbox.xMin + s1->pos.x;
+		len = (cur->bbox.xMax + cur->pos.x) - s_offset;
 
 		if (cur->symbol == '\n') {
 			break_type = 2;
@@ -1533,15 +1534,15 @@ int ass_render_event(ass_event_t* event)
 	last_break = -1;
 	for (i = 1; i < text_info.length + 1; ++i) { // (text_info.length + 1) is the end of the last line
 		if ((i == text_info.length) || text_info.glyphs[i].linebreak) {
-
+			int width, shift;
 			glyph_info_t* first_glyph = text_info.glyphs + last_break + 1;
 			glyph_info_t* last_glyph = text_info.glyphs + i - 1;
 
 			while ((last_glyph >= first_glyph) && ((last_glyph->symbol == '\n') || (last_glyph->symbol == 0)))
 				last_glyph --;
 
-			int width = last_glyph->pos.x + last_glyph->bbox.xMax - first_glyph->pos.x - first_glyph->bbox.xMin;
-			int shift = - first_glyph->bbox.xMin; // now text line starts exactly at 0 (left margin)
+			width = last_glyph->pos.x + last_glyph->bbox.xMax - first_glyph->pos.x - first_glyph->bbox.xMin;
+			shift = - first_glyph->bbox.xMin; // now text line starts exactly at 0 (left margin)
 			if (halign == HALIGN_LEFT) { // left aligned, no action
 			} else if (halign == HALIGN_RIGHT) { // right aligned
 				shift = max_text_width - width;
