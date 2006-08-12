@@ -1698,6 +1698,7 @@ _vstream=auto
 _pthreads=yes
 _ass=auto
 _rpath=no
+_asmalign_pot=auto
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -2217,7 +2218,24 @@ if x86 ; then
     echores "failed"
     die "obsolete binutils version"
   fi
+
+echocheck ".align is a power of two"
+if test "$_asmalign_pot" = auto ; then
+_asmalign_pot=no
+cat > $TMPC << EOF
+asm (".align 3");
+EOF
+cc_check && _asmalign_pot=yes
 fi
+if test "$_asmalign_pot" = "yes" ; then
+  _def_asmalign_pot='#define ASMALIGN(ZEROBITS) ".align " #ZEROBITS "\n\t"'
+else
+  _def_asmalign_pot='#define ASMALIGN(ZEROBITS) ".align 1<<" #ZEROBITS "\n\t"'
+fi
+echores $_asmalign_pot
+
+fi #if x86
+
 
 #FIXME: This should happen before the check for CFLAGS..
 if ppc ; then
@@ -7641,6 +7659,9 @@ $_def_malloc
 $_def_memalign
 $_def_map_memalign
 $_def_memalign_hack
+
+/* assembler handling of .align */
+$_def_asmalign_pot
 
 /* Define this if your system has the "alloca.h" header file */
 $_def_alloca
