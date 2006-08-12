@@ -796,6 +796,13 @@ Les filtres vidéo ne sont pas appliqués sur de telles trames.
 Pour les trames-B même leur décodage est complètement désactivé.
 .
 .TP
+.B \-(no)gui
+Active ou désactive l'interface graphique (le comportement par défaut
+dépend du nom du fichier exécuté).
+Ne fonctionne que si placé en tête de la ligne de commande.
+Ne fonctionne pas en tant qu'option de fichier de configuration.
+.
+.TP
 .B \-h, \-help, \-\-help
 Affiche un court résumé des options.
 .
@@ -6365,7 +6372,7 @@ Génère les trames de taille normale avec un débit réduit de moitié.
 .PD 1
 .
 .TP
-.B "tfields[=mode]"
+.B "tfields[=mode:[dominance de champs]]"
 Séparation temporelle des champs \- sépare les champs en trames, doublant le
 débit de sortie.
 Comme le filtre telecine, "tfields" ne fonctionnera correctement qu'avec
@@ -6384,7 +6391,7 @@ bon.)
 4: Fait une translation de champs de 1/\:4 pixel avec le filtre 4tap (meilleure
 qualité) (par défaut).
 .
-.IPs <dominances de champs>
+.IPs <dominance de champs>
 -1: auto (par défaut)
 Ne fonctionne que si le décodeur exporte les informations nécessaires
 et que les filtres de la chaîne de filtres appliqués avant tfields
