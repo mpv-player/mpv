@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r19087 (2006. 07. 15.)
+// Sync'ed with help_mp-en.h r19348 (2006. 08. 12.)
 
 // ========================= MPlayer help ===========================
 
@@ -209,6 +209,7 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Sub késés: %d ms"
 #define MSGTR_OSDSpeed "Sebesség: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDChapter "Fejezet: (%d) %s"
 
 // property values
 #define MSGTR_Enabled "bekapcsolva"

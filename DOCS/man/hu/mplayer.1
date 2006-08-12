@@ -1,4 +1,4 @@
-.\" Synced with r19286
+.\" Synced with r19361
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 07. 15." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 08. 12." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -316,6 +316,8 @@ Egy EDL kihagyás kezdetének vagy végének bejelölése és a megadott fájlba írása.
 Képernyõmentés készítése.
 .IPs "I"
 Fájlnév megjelenítése az OSD-n.
+.IPs "! és @"
+Ugrás az elõzõ/következõ fejezet elejére.
 .RE
 .PD 1
 .PP
@@ -758,6 +760,12 @@ Néhány képkocka megjelenítésének hanyagolása, hogy lassú rendszereken is
 megfelelõ legyen az A/V szinkron. A videó szûrõk nem vonatkoznak ezekre
 a képkockákra.
 B képkockáknál a dekódolást is átugorja.
+.
+.TP
+.B \-(no)gui
+Engedélyezi vagy letiltja a GUI felületet (alapértelmezésben a bináris nevétõl függ).
+A parancssorban csak a legelsõ kapcsolóként megadva mûködik.
+Nem mûködik konfig-fájl opcióként.
 .
 .TP
 .B \-h, \-help, \-\-help
