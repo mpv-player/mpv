@@ -147,9 +147,9 @@ static char help_text[]=
 "- Az MPlayer összeomlott. Ennek nem lenne szabad megtörténnie. Az ok lehet\n"\
 "  egy hiba az MPlayer kódjában _vagy_ a Te meghajtóidban, _vagy_ a gcc-ben.\n"\
 "  Ha úgy véled hogy ez egy MPlayer hiba, úgy olvasd el a\n"\
-"  DOCS/HTML/hu/bugreports.html fájlt és kövesd az utasításait! Nem tudunk és\n"\
-"  nem fogunk segíteni, amíg nem szolgálsz megfelelõ információkkal a hiba\n"\
-"  bejelentésekor.\n"
+"  DOCS/HTML/hu/bugreports.html fájlt és kövesd az utasításait! Nem tudunk\n"\
+"  és nem fogunk segíteni, amíg nem szolgálsz megfelelõ információkkal a\n"\
+"  hiba bejelentésekor.\n"
 #define MSGTR_LoadingConfig "'%s' konfiguráció betöltése\n"
 #define MSGTR_AddedSubtitleFile "SUB: Felirat fájl (%d) hozzáadva: %s\n"
 #define MSGTR_RemovedSubtitleFile "SUB: Felirat fájl (%d) eltávolítva: %s\n"
