@@ -14,6 +14,7 @@
 #include "font_load.h"
 #include "sub.h"
 #include "spudec.h"
+#include "libavutil/common.h"
 
 #define NEW_SPLITTING
 
@@ -142,23 +143,8 @@ inline static void vo_draw_text_from_buffer(mp_osd_obj_t* obj,void (*draw_alpha)
 
 unsigned utf8_get_char(char **str) {
   uint8_t *strp = (uint8_t *)*str;
-  unsigned c = *strp++;
-  unsigned mask = 0x80;
-  int len = -1;
-  while (c & mask) {
-    mask >>= 1;
-    len++;
-  }
-  if (len <= 0 || len > 4)
-    goto no_utf8;
-  c &= mask - 1;
-  while ((*strp & 0xc0) == 0x80) {
-    if (len-- <= 0)
-      goto no_utf8;
-    c = (c << 6) | (*strp++ & 0x3f);
-  }
-  if (len)
-    goto no_utf8;
+  unsigned c;
+  GET_UTF8(c, *strp++, goto no_utf8;);
   *str = (char *)strp;
   return c;
 
