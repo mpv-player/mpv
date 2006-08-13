@@ -151,11 +151,42 @@ I. BASICS:
 
 9. Reverting broken commits
 
-  There is no Subversion equivalent of the 'cvs admin -o' command. Instead,
-  be very careful about what you commit! If somehow you broke something,
-  revert the changes locally and re-commit with a proper commit message.
-  You may want to use 'svn cat -r<revision> <filename>' to inspect an older
-  revision.
+  There are 2 ways to reverse a change, they differ significantly in what they
+  do to the svn repository
+  The recommit old method:
+    svn merge
+    svn ci <file>
+    This simply changes the file(s) back to their old version localy and then
+    the change is commited as if it is a new change
+  The svn copy method
+    svn rm <file>
+    svn ci <file>
+    svn cp -r<good revision> svn://svn.mplayerhq.hu/mplayer/trunk/[<path>/]<file> <file>
+    svn ci <file>
+    This simply removes the file and then copies the last good version with
+    its history over it, this method can only be used to revert the n last
+    commits but not to revert a bad commit in the middle of its history
+  Neither method will change the history, checking out an old version will
+  always return exactly that revision with all its bugs and features. The
+  difference is that with the svn copy method the broken commit will not be
+  part of the directly vissible history of the revisions after the reversal
+  So if the change was completly broken like reindenting a file against the
+  maintainers decission, or a change which mixed functional and cosmetic
+  changes then its better if its not part of the vissible history as it
+  would make it hard to read, review and would also break svn annotate
+  For the example of a change which mixed functional and cosmetic parts they
+  should of course be commited again after the reversal but seperatly, so one
+  change with the functional stuff and one with the cosmetics
+  OTOH if the change which you want to reverse was simply buggy but not
+  totally broken then it should be reversed with svn merge as otherwise
+  the fact that the change was bad would be hidden
+  One method to decide which reversal method is best is to ask yourself
+  if theres any value in seeing the whole bad change and its removial
+  in svn vs. just seeing a comment that says what has been reversed while
+  the actual change does not clutter the immedeatly vissible history and
+  svn annotate.
+  If you are even just slightly uncertain how to revert something then ask on
+  the mplayer-dev mailinglist.
 
 
 10. Reverting local changes
