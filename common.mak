@@ -22,9 +22,7 @@ $(SLIBNAME): $(SLIBNAME_WITH_MAJOR)
 
 $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 	$(CC) $(SHFLAGS) $(LDFLAGS) -o $@ $^ $(EXTRALIBS) $(EXTRAOBJS)
-ifeq ($(CONFIG_MINGW),yes)
-	-lib /machine:i386 /def:$(@:.dll=.def)
-endif
+	$(SLIB_EXTRA_CMD)
 
 %.o: %.c
 	$(CC) $(CFLAGS) $(LIBOBJFLAGS) -c -o $@ $<
@@ -42,7 +40,7 @@ depend: $(SRCS)
 dep:	depend
 
 clean::
-	rm -f *.o *.d *~ *.a *.lib *.so *.dylib *.dll \
+	rm -f *.o *.d *~ *.a *.lib *.so *.so.* *.dylib *.dll \
 	      *.lib *.def *.dll.a *.exp
 
 distclean: clean
@@ -60,17 +58,13 @@ install: install-libs install-headers
 install-libs: $(INSTLIBTARGETS)
 
 install-lib-shared: $(SLIBNAME)
-	install -d "$(libdir)"
-ifeq ($(CONFIG_MINGW),yes)
-	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) "$(prefix)"
-else
+	install -d "$(shlibdir)"
 	install $(INSTALLSTRIP) -m 755 $(SLIBNAME) \
-		$(libdir)/$(SLIBNAME_WITH_VERSION)
-	ln -sf $(SLIBNAME_WITH_VERSION) \
-		$(libdir)/$(SLIBNAME_WITH_MAJOR)
-	ln -sf $(SLIBNAME_WITH_VERSION) \
-		$(libdir)/$(SLIBNAME)
-endif
+		"$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
+	cd "$(shlibdir)" && \
+		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME_WITH_MAJOR)
+	cd "$(shlibdir)" && \
+		ln -sf $(SLIBNAME_WITH_VERSION) $(SLIBNAME)
 
 install-lib-static: $(LIB)
 	install -d "$(libdir)"
@@ -85,18 +79,14 @@ install-headers:
 uninstall: uninstall-libs uninstall-headers
 
 uninstall-libs:
-ifeq ($(CONFIG_MINGW),yes)
-	-rm -f $(prefix)/$(SLIBNAME)
-else
-	-rm -f $(libdir)/$(SLIBNAME_WITH_MAJOR) \
-	      $(libdir)/$(SLIBNAME)            \
-	      $(libdir)/$(SLIBNAME_WITH_VERSION)
-endif
-	-rm -f $(libdir)/$(LIB)
+	-rm -f "$(shlibdir)/$(SLIBNAME_WITH_MAJOR)" \
+	       "$(shlibdir)/$(SLIBNAME)"            \
+	       "$(shlibdir)/$(SLIBNAME_WITH_VERSION)"
+	-rm -f "$(libdir)/$(LIB)"
 
 uninstall-headers:
-	rm -f $(addprefix $(incdir)/,$(HEADERS))
-	rm -f $(libdir)/pkgconfig/lib$(NAME).pc
+	rm -f "$(addprefix $(incdir)/,$(HEADERS))"
+	rm -f "$(libdir)/pkgconfig/lib$(NAME).pc"
 
 #
 # include dependency files if they exist
