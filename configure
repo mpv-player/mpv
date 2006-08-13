@@ -2219,6 +2219,8 @@ if x86 ; then
     die "obsolete binutils version"
   fi
 
+fi #if x86
+
 echocheck ".align is a power of two"
 if test "$_asmalign_pot" = auto ; then
 _asmalign_pot=no
@@ -2233,8 +2235,6 @@ else
   _def_asmalign_pot='#define ASMALIGN(ZEROBITS) ".align 1<<" #ZEROBITS "\n\t"'
 fi
 echores $_asmalign_pot
-
-fi #if x86
 
 
 #FIXME: This should happen before the check for CFLAGS..
