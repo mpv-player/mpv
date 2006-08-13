@@ -505,7 +505,7 @@ void ass_process_line(ass_track_t* track, char *data, int size, long long timeco
 	str = malloc(size + 1);
 	memcpy(str, data, size);
 	str[size] = '\0';
-	mp_msg(MSGT_GLOBAL, MSGL_V, "event at %" PRId64 ", +%" PRId64 ": %s  \n", (uint64_t)timecode, (uint64_t)duration, str);
+	mp_msg(MSGT_GLOBAL, MSGL_V, "event at %" PRId64 ", +%" PRId64 ": %s  \n", (int64_t)timecode, (int64_t)duration, str);
 
 	eid = ass_alloc_event(track);
 	event = track->events + eid;

@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 #include FT_STROKER_H
@@ -669,7 +670,8 @@ static char* parse_tag(char* p, double pwr) {
 			t1 = strtoll(p, &p, 10);
 			skip(',');
 			t2 = strtoll(p, &p, 10);
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%lld .. %lld)\n", x1, y1, x2, y2, t1, t2);
+			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "movement6: (%d, %d) -> (%d, %d), (%" PRId64 " .. %" PRId64 ")\n", 
+				x1, y1, x2, y2, (int64_t)t1, (int64_t)t2);
 		} else {
 			t1 = 0;
 			t2 = render_context.event->Duration;
