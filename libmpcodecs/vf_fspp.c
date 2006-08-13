@@ -37,7 +37,6 @@
 #include <math.h>
 
 #include "config.h"
-#include "asmalign.h"
 
 #include "mp_msg.h"
 #include "cpudetect.h"
@@ -884,7 +883,7 @@ static void column_fidct_c(int16_t* thr_adr, DCTELEM *data, DCTELEM *output, int
 static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,  int cnt)
 {
     asm volatile(
-	ASMALIGN16
+	ASMALIGN(4)
 	"1:                   \n\t"
 	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm1 \n\t"
 	//

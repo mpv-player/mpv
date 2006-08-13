@@ -5,7 +5,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
-#include "asmalign.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -29,7 +28,7 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 		"pxor %%mm4, %%mm4 \n\t"
 		"pxor %%mm7, %%mm7 \n\t"
 		
-		ASMALIGN16
+		ASMALIGN(4)
 		"1: \n\t"
 		
 		"movq (%%"REG_S"), %%mm0 \n\t"

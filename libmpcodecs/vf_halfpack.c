@@ -6,7 +6,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
-#include "asmalign.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -41,7 +40,7 @@ static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 	for (h/=2; h; h--) {
 		asm (
 			"pxor %%mm0, %%mm0 \n\t"
-			ASMALIGN16
+			ASMALIGN(4)
 			"1: \n\t"
 			"movq (%0), %%mm1 \n\t"
 			"movq (%0), %%mm2 \n\t"

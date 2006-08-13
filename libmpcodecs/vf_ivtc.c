@@ -5,7 +5,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
-#include "asmalign.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -68,7 +67,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"pxor %%mm5, %%mm5 \n\t" // 4 odd difference sums
 		"pxor %%mm7, %%mm7 \n\t" // all zeros
 		
-		ASMALIGN16  
+		ASMALIGN(4)
 		"1: \n\t"
 		
 		// Even difference
@@ -128,7 +127,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"pxor %%mm5, %%mm5 \n\t" // Temporal noise
 		"pxor %%mm6, %%mm6 \n\t" // Current spacial noise
 		
-		ASMALIGN16  
+		ASMALIGN(4)
 		"2: \n\t"
 		
 		"movq (%%"REG_S"), %%mm0 \n\t"
@@ -182,7 +181,7 @@ static void block_diffs_MMX(struct metrics *m, unsigned char *old, unsigned char
 		"pxor %%mm5, %%mm5 \n\t"
 		"pxor %%mm6, %%mm6 \n\t"
 		
-		ASMALIGN16
+		ASMALIGN(4)
 		"3: \n\t"
 		
 		"movq (%%"REG_S"), %%mm0 \n\t"

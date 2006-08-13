@@ -34,7 +34,6 @@
  */
 
 #include "config.h"
-#include "asmalign.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -769,7 +768,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"lea "MANGLE(bit_reverse_512)", %%"REG_a"\n\t"
 		"mov $1008, %%"REG_D"			\n\t"
 		"push %%"REG_BP"			\n\t" //use ebp without telling gcc
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // XXXI
 		"movhps 8(%0, %%"REG_D"), %%xmm0	\n\t" // RXXI
@@ -828,7 +827,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"xorps %%xmm1, %%xmm1	\n\t"
 		"xorps %%xmm2, %%xmm2	\n\t"
 		"mov %0, %%"REG_S"	\n\t"
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:			\n\t"
 		"movlps (%%"REG_S"), %%xmm0\n\t" //buf[p]
 		"movlps 8(%%"REG_S"), %%xmm1\n\t" //buf[q]
@@ -849,7 +848,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	asm volatile(
 		"movaps "MANGLE(ps111_1)", %%xmm7\n\t" // 1,1,1,-1
 		"mov %0, %%"REG_S"		\n\t"
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:				\n\t"
 		"movaps 16(%%"REG_S"), %%xmm2	\n\t" //r2,i2,r3,i3
 		"shufps $0xB4, %%xmm2, %%xmm2	\n\t" //r2,i2,i3,r3
@@ -880,7 +879,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"xorps %%xmm5, %%xmm5		\n\t"
 		"xorps %%xmm2, %%xmm2		\n\t"
 		"mov %0, %%"REG_S"		\n\t"
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:				\n\t"
 		"movaps 32(%%"REG_S"), %%xmm2	\n\t" //r4,i4,r5,i5
 		"movaps 48(%%"REG_S"), %%xmm3	\n\t" //r6,i6,r7,i7
@@ -921,7 +920,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	buf_offset = buf+128;
 	asm volatile(
 		"mov %0, %%"REG_S"			\n\t"
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"xor %%"REG_D", %%"REG_D"		\n\t" // k
 		"lea (%%"REG_S", %3), %%"REG_d"		\n\t"
@@ -953,7 +952,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
 	asm volatile(
 		"mov $-1024, %%"REG_S"			\n\t"
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"movaps (%0, %%"REG_S"), %%xmm0		\n\t"
 		"movaps (%0, %%"REG_S"), %%xmm1		\n\t"
@@ -979,7 +978,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		"movss %3, %%xmm2			\n\t"  // bias
 		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? A ?
 		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?
@@ -1006,7 +1005,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		"movss %3, %%xmm2			\n\t"  // bias
 		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
 		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
@@ -1033,7 +1032,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	asm volatile(
 		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
 		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
@@ -1055,7 +1054,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	asm volatile(
 		"mov $1024, %%"REG_D"			\n\t"  // 1024
 		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
-		ASMALIGN16
+		ASMALIGN(4)
 		"1:					\n\t"
 		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // ? ? A ?
 		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?

@@ -18,7 +18,6 @@
 #include "config.h"
 #include "mp_msg.h"
 #include "cpudetect.h"
-#include "asmalign.h"
 
 #include "img_format.h"
 #include "mp_image.h"
@@ -136,7 +135,7 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
       "movq (%6), %%mm4 \n\t"
       "pxor %%mm0, %%mm0 \n\t"
       "movl %4, %%eax\n\t"
-      ASMALIGN16
+      ASMALIGN(4)
       "1: \n\t"
       "movq (%0), %%mm1 \n\t"
       "movq (%0), %%mm2 \n\t"
