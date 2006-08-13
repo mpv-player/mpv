@@ -31,6 +31,9 @@ MPlayer (1.0)
     * support of x264 encoding over lavc
     * removed support for obsolete and non-free divx4 libraries
 
+    Ports:
+    * MacIntel support
+
     Others:
     * SSA/ASS subtitle renderer
 
