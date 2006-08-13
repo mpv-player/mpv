@@ -129,18 +129,17 @@ I. BASICS:
 
 8. Renaming/moving/copying files or contents of files:
 
-  svn move <source> <destination>
-  svn copy <source> <destination>
+  svn move/copy <source> <destination>
   svn commit <source> <destination>
 
-  Do not move, rename or copy files not maintained by you without discussing
-  it on the mplayer-dev-eng mailing list first!
+  Do not move, rename or copy files of which you are not the maintainer without
+  discussing it on the mplayer-dev-eng mailing list first!
 
-  In order to preserve history and minimize the size of diffs, do not copy or
-  move a file by using 'svn delete' and 'svn add'. Always use 'svn move' or
-  'svn copy' instead.
+  Never copy or move a file by using 'svn delete' and 'svn add'. Always use
+  'svn move' or 'svn copy' instead in order to preserve history and minimize
+  the size of diffs.
 
-  To split a file use 'svn copy' and remove the unneeded lines from each file.
+  To split a file, use 'svn copy' and remove the unneeded lines from each file.
 
   Don't do a lot of cut'n'paste from one file to another without a very good
   reason and discuss it on the mplayer-dev-eng mailing list first. It will make
