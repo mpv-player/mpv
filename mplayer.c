@@ -4374,7 +4374,10 @@ if(step_sec>0) {
         m_option_t* prop;
         void* val;
         prop = mp_property_find(cmd->args[0].v.s);
-        if(!prop) mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
+        if(!prop) {
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Unkown property: '%s'\n",cmd->args[0].v.s);
+            break;
+        }
         /* Use m_option_print directly to get easily parseable values. */
         val = calloc(1,prop->type->size);
         if(m_property_do(prop,M_PROPERTY_GET,val) <= 0) {
