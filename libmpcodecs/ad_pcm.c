@@ -120,7 +120,11 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
   unsigned len = sh_audio->channels*sh_audio->samplesize;
-  len = maxlen - maxlen % len; // sample align
+  len = (minlen + len - 1) / len * len;
+  if (len > maxlen)
+      // if someone needs hundreds of channels adjust audio_out_minsize
+      // based on channels in preinit()
+      return -1;
   len=demux_read_data(sh_audio->ds,buf,len);
   return len;
 }
