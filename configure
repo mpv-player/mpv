@@ -1564,7 +1564,7 @@ _libavformat=auto
 _libavformat_so=auto
 _libpostproc=auto
 _libpostproc_so=auto
-_lavc_mpegaudio_hp=yes
+_libavcodec_mpegaudio_hp=yes
 _libfame=auto
 _mencoder=yes
 _x11=auto
@@ -1936,8 +1936,8 @@ for ac_option do
   --disable-libpostproc)	_libpostproc=no		;;
   --enable-libpostproc_so)	_libpostproc_so=yes	;;
   --disable-libpostproc_so)	_libpostproc_so=no	;;
-  --enable-lavc_mpegaudio_hp)	_lavc_mpegaudio_hp=yes	;;
-  --disable-lavc_mpegaudio_hp)	_lavc_mpegaudio_hp=no	;;
+  --enable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=yes	;;
+  --disable-libavcodec_mpegaudio_hp)	_libavcodec_mpegaudio_hp=no	;;
 
   --enable-libfame)	_libfame=yes	;;
   --disable-libfame)	_libfame=no	;;
@@ -6221,8 +6221,8 @@ fi
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
 _def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
-if test "$_lavc_mpegaudio_hp" = yes ; then
-  _def_lavc_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
+if test "$_libavcodec_mpegaudio_hp" = yes ; then
+  _def_libavcodec_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
 fi
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
@@ -7790,7 +7790,7 @@ $_def_win32_loader
 $_def_libavcodec
 $_def_libavcodec_so
 $_def_lavc_dsputil
-$_def_lavc_mpegaudio_hp
+$_def_libavcodec_mpegaudio_hp
 
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat
