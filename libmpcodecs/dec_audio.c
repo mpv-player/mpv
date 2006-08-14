@@ -441,7 +441,3 @@ void skip_audio_frame(sh_audio_t *sh_audio)
   // default skip code:
   ds_fill_buffer(sh_audio->ds);  // skip block
 }
-
-void adjust_volume(void)
-{
-}
