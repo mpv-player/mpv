@@ -1520,23 +1520,21 @@ if(sh_audio && !demuxer2){
 } // while(!at_eof)
 
 if (!interrupted && filelist[++curfile].name != 0) {
-	if (sh_video && sh_video->vfilter) {
-        // Before uniniting sh_video and the filter chain, break apart the VE.
- 	vf_instance_t * ve; // this will be the filter right before the ve.
-	for (ve = sh_video->vfilter; ve->next && ve->next->next; ve = ve->next);
-	if (ve->next)
-		ve->next = NULL; // I'm telling the last filter, before the VE, there is nothing after it
-	else // There is no chain except the VE.
-		sh_video->vfilter = NULL;
+	if (sh_video && sh_video->vfilter) { // Before uniniting sh_video and the filter chain, break apart the VE.
+ 		vf_instance_t * ve; // this will be the filter right before the ve.
+		for (ve = sh_video->vfilter; ve->next && ve->next->next; ve = ve->next);
+
+		if (ve->next) ve->next = NULL; // I'm telling the last filter, before the VE, there is nothing after it
+		else sh_video->vfilter = NULL; // There is no chain except the VE.
 	}
 
 	if(sh_audio){ uninit_audio(sh_audio);sh_audio=NULL; }
 	if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
 	if(demuxer) free_demuxer(demuxer);
 	if(stream) free_stream(stream); // kill cache thread
-	
+
 	at_eof = 0;
-	
+
 	m_config_pop(mconfig);
 	goto play_next_file;
 }
