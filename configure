@@ -267,6 +267,8 @@ Codecs:
   --disable-libavcodec_so  disable shared libavcodec [autodetect]
   --disable-libavformat_so disable shared libavformat [autodetect]
   --disable-libpostproc_so disable shared libpostproc [autodetect]
+  --disable-libavcodec_mpegaudio_hp disable high precision audio decoding
+                                    in libavcodec [enabled]
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --disable-tremor-internal do not build internal Tremor support [enabled]
   --enable-tremor-low    build with lower accuracy internal Tremor [disabled]
@@ -1562,6 +1564,7 @@ _libavformat=auto
 _libavformat_so=auto
 _libpostproc=auto
 _libpostproc_so=auto
+_lavc_mpegaudio_hp=yes
 _libfame=auto
 _mencoder=yes
 _x11=auto
@@ -1933,6 +1936,9 @@ for ac_option do
   --disable-libpostproc)	_libpostproc=no		;;
   --enable-libpostproc_so)	_libpostproc_so=yes	;;
   --disable-libpostproc_so)	_libpostproc_so=no	;;
+  --enable-lavc_mpegaudio_hp)	_lavc_mpegaudio_hp=yes	;;
+  --disable-lavc_mpegaudio_hp)	_lavc_mpegaudio_hp=no	;;
+
   --enable-libfame)	_libfame=yes	;;
   --disable-libfame)	_libfame=no	;;
   --enable-lirc)	_lirc=yes	;;
@@ -6215,6 +6221,9 @@ fi
 _def_libavcodec='#undef USE_LIBAVCODEC'
 _def_libavcodec_so='#undef USE_LIBAVCODEC_SO'
 _def_lavc_dsputil='#undef USE_LIBAVCODEC_DSPUTIL'
+if test "$_lavc_mpegaudio_hp" = yes ; then
+  _def_lavc_mpegaudio_hp='#define CONFIG_MPEGAUDIO_HP 1'
+fi
 if test "$_libavcodec" = yes ; then
   _def_libavcodec='#define USE_LIBAVCODEC 1'
   _def_lavc_dsputil='#define USE_LIBAVCODEC_DSPUTIL'
@@ -7781,6 +7790,7 @@ $_def_win32_loader
 $_def_libavcodec
 $_def_libavcodec_so
 $_def_lavc_dsputil
+$_def_lavc_mpegaudio_hp
 
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat
@@ -7799,8 +7809,6 @@ $_def_encoders
 #define CONFIG_DEMUXERS 1
 /* Use libavformat's muxers */
 $_def_muxers
-
-#define CONFIG_MPEGAUDIO_HP 1
 
 #define CONFIG_GPL 1
 
