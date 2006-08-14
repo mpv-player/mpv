@@ -160,19 +160,26 @@ while(fgets(sor,1020,f)){
       }
   } else    
 
+#ifdef SYS_AMIGAOS4
+#define FONT_PATH_SEP ""
+#else
+//! path seperator for font paths, may not be more than one character
+#define FONT_PATH_SEP "/"
+#endif
+
   if(strcmp(section,"[files]")==0){
-      char *default_dir=MPLAYER_DATADIR "/font";
+      char *default_dir=MPLAYER_DATADIR FONT_PATH_SEP "font";
       if(pdb==2 && strcmp(p[0],"alpha")==0){
     	  char *cp;
 	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) goto fail_out;
 
-	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s/%s",
+	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s" FONT_PATH_SEP "%s",
 		desc->fpath,p[1]);
           if(!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
 		free(cp);
 		if (!(cp=malloc(strlen(default_dir)+strlen(p[1])+2))) 
 		   goto fail_out;
-		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
+		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s" FONT_PATH_SEP "%s",
 			 default_dir,p[1]);
 		if (!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
 		   mp_msg(MSGT_OSD, MSGL_ERR, "Can't load font bitmap: %s\n",p[1]);
@@ -187,13 +194,13 @@ while(fgets(sor,1020,f)){
     	  char *cp;
 	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) goto fail_out;
 
-	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s/%s",
+	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s" FONT_PATH_SEP "%s",
 		desc->fpath,p[1]);
           if(!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
 		free(cp);
 		if (!(cp=malloc(strlen(default_dir)+strlen(p[1])+2))) 
 		   goto fail_out;
-		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
+		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s" FONT_PATH_SEP "%s",
 			 default_dir,p[1]);
 		if (!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
 		   mp_msg(MSGT_OSD, MSGL_ERR, "Can't load font bitmap: %s\n",p[1]);
