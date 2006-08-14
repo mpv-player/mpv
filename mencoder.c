@@ -1546,9 +1546,9 @@ if (!interrupted && filelist[++curfile].name != 0) {
 if(sh_video && sh_video->vfilter){
 	mp_msg(MSGT_MENCODER, MSGL_INFO, "\nFlushing video frames\n");
 	if (!((vf_instance_t *)sh_video->vfilter)->fmt.have_configured)
-	mp_msg(MSGT_MENCODER, MSGL_WARN, "Filters have not been configured! Empty file?\n");
+		mp_msg(MSGT_MENCODER, MSGL_WARN, "Filters have not been configured! Empty file?\n");
 	else
-	((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
+		((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter,
     	                                              VFCTRL_FLUSH_FRAMES, 0);
 }
 
