@@ -374,7 +374,12 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
       mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"decaudio: decoding %d bytes, max: %d (%d)\n",
         len, maxlen, sh_audio->audio_out_minsize);
 
-      if(maxlen<sh_audio->audio_out_minsize) break; // don't overflow buffer!
+      // When a decoder sets audio_out_minsize that should guarantee it can
+      // write up to audio_out_minsize bytes at a time until total >= minlen
+      // without checking maxlen. Thus maxlen must be at least minlen +
+      // audio_out_minsize. Check that to guard against buffer overflows.
+      if (maxlen < len + sh_audio->audio_out_minsize)
+	  break;
       // not enough decoded data waiting, decode 'len' bytes more:
       len=mpadec->decode_audio(sh_audio,
           sh_audio->a_buffer+sh_audio->a_buffer_len, len, maxlen);
