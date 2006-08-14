@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19087 -->
+<!-- synced with r19387 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -144,7 +144,7 @@ történő felhasználására. Kövesd az utasításokat a bekapcsolásukhoz:
 <procedure>
 <step><para>
   Töltsd le a kívánt codec-eket az
-  <ulink url="http://xanim.va.pubnix.com">XAnim oldaláról</ulink>.
+  <ulink url="http://xanim.polter.net/">XAnim oldaláról</ulink>.
   A <emphasis role="bold">3ivx</emphasis> codec nincs ott, az a
   <ulink url="http://www.3ivx.com">3ivx oldalon</ulink> van.
   </para></step>
