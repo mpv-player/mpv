@@ -433,6 +433,7 @@ multiple paths separated by ':'):
   --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
   --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
+  --with-dvdnav-config=PATH path to dvdnav-config (e.g. /opt/bin/dvdnav-config)
 
 This configure script is NOT autoconf-based, even though its output is similar.
 It will try to autodetect all configuration options. If you --enable an option
@@ -1624,7 +1625,8 @@ _faac=auto
 _ladspa=auto
 _xmms=no
 _have_dvd=no
-_dvdnav=no
+_dvdnav=auto
+_dvdnavconfig=dvdnav-config
 _dvdread=auto
 _mpdvdkit=auto
 _xanim=auto
@@ -2038,9 +2040,6 @@ for ac_option do
     ;;
   --language=*)
     _language=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-dvdnavdir=*)
-    _dvdnavdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
   --with-codecsdir=*)
@@ -5161,45 +5160,25 @@ else
 fi
 
 echocheck "DVD support (libdvdnav)"
-if test "$_dvdnav" = yes ; then
+if test "$_dvdnav" = auto ; then
   cat > $TMPC <<EOF
 #include <dvdnav.h>
 int main(void) { dvdnav_t *dvd=0; return 0; }
 EOF
   _dvdnav=no
-  test -n "$_dvdnavdir" && _legal_dvdnavdir=-L$_dvdnavdir/.libs
-  if test -z "$_dvdnavconfig" ; then
-    if ( dvdnav-config --version ) >/dev/null 2>&1 ; then
-      _dvdnavconfig="dvdnav-config"
-    fi
-  fi
-  test -z "$_dvdnavdir" && test -n "$_dvdnavconfig" && _dvdnavdir=`$_dvdnavconfig --cflags`
+  _dvdnavdir=`$_dvdnavconfig --cflags`
+  _dvdnavlibs=`$_dvdnavconfig --libs`
+  _dvdnavvsn=`$_dvdnavconfig --version | sed "s/\.//g"`
   _used_css=
-  #test "$_mpdvdkit" = no && _used_css=$_ld_css
-  cc_check -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
+  test "$_dvdnavvsn" -ge 0110 && cc_check -I$_dvdnavdir $_dvdnavlibs $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_dvdnav=
-  if test -n "$_legal_dvdnavdir" ; then
-   #_ld_css="$_ld_css $_legal_dvdnavdir -ldvdnav"
-   _ld_dvdnav="$_legal_dvdnavdir -ldvdnav"
-  elif test -n "$_dvdnavconfig" ; then
-   #_ld_css="$_ld_css `$_dvdnavconfig --libs`"
-   _ld_dvdnav="`$_dvdnavconfig --libs`"
-  else
-   #_ld_css="$_ld_css -ldvdnav"
-   _ld_dvdnav="-ldvdnav"
-  fi
-  if test -n "$_dvdnavconfig" ; then
-   _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
-   _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
-   _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-  fi
-  if test -n "$_dvdnavdir" ; then
-   _inc_extra="$_inc_extra -I$_dvdnavdir"
-  fi
+  _ld_dvdnav=`$_dvdnavconfig --libs`
+  _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
+  _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
+  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
   _inputmodules="dvdnav $_inputmodules"
 else
   _def_dvdnav='#undef USE_DVDNAV'
