@@ -771,18 +771,18 @@ static char* parse_tag(char* p, double pwr) {
 			a2 = 0;
 			a3 = 0xFF;
 		} else {
-		// 6-argument version (\fade)
-		// a1 and a2 (and a3) are opacity values
-		skip(',');
-		a3 = strtol(p, &p, 10);
-		skip(',');
-		t1 = strtoll(p, &p, 10);
-		skip(',');
-		t2 = strtoll(p, &p, 10);
-		skip(',');
-		t3 = strtoll(p, &p, 10);
-		skip(',');
-		t4 = strtoll(p, &p, 10);
+			// 6-argument version (\fade)
+			// a1 and a2 (and a3) are opacity values
+			skip(',');
+			a3 = strtol(p, &p, 10);
+			skip(',');
+			t1 = strtoll(p, &p, 10);
+			skip(',');
+			t2 = strtoll(p, &p, 10);
+			skip(',');
+			t3 = strtoll(p, &p, 10);
+			skip(',');
+			t4 = strtoll(p, &p, 10);
 		}
 		skip(')');
 		interpolate_alpha(frame_context.time - render_context.event->Start, t1, t2, t3, t4, a1, a2, a3);
