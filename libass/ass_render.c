@@ -752,38 +752,40 @@ static char* parse_tag(char* p, double pwr) {
 		render_context.detect_collisions = 0;
 		render_context.pos_x = v1;
 		render_context.pos_y = v2;
-	} else if (mystrcmp(&p, "fade")) {
-		int a1, a2, a3, v1, v2, v3, v4;
+	} else if (mystrcmp(&p, "fad")) {
+		int a1, a2, a3;
+		long long t1, t2, t3, t4;
+		if (*p == 'e') ++p; // either \fad or \fade
 		skip('(');
 		a1 = strtol(p, &p, 10);
 		skip(',');
 		a2 = strtol(p, &p, 10);
+		if (*p == ')') {
+			// 2-argument version (\fad, according to specs)
+			// a1 and a2 are fade-in and fade-out durations
+			t1 = 0;
+			t4 = render_context.event->Duration;
+			t2 = a1;
+			t3 = t4 - a2;
+			a1 = 0xFF;
+			a2 = 0;
+			a3 = 0xFF;
+		} else {
+		// 6-argument version (\fade)
+		// a1 and a2 (and a3) are opacity values
 		skip(',');
 		a3 = strtol(p, &p, 10);
 		skip(',');
-		v1 = strtol(p, &p, 10);
+		t1 = strtoll(p, &p, 10);
 		skip(',');
-		v2 = strtol(p, &p, 10);
+		t2 = strtoll(p, &p, 10);
 		skip(',');
-		v3 = strtol(p, &p, 10);
+		t3 = strtoll(p, &p, 10);
 		skip(',');
-		v4 = strtol(p, &p, 10);
+		t4 = strtoll(p, &p, 10);
+		}
 		skip(')');
-		interpolate_alpha(frame_context.time - render_context.event->Start, v1, v2, v3, v4, a1, a2, a3);
-	} else if (mystrcmp(&p, "fad")) {
-		int v1, v2;
-		long long now, t1, t2, t3, t4;
-		skip('(');
-		v1 = strtol(p, &p, 10);
-		skip(',');
-		v2 = strtol(p, &p, 10);
-		skip(')');
-		now = frame_context.time;
-		t1 = render_context.event->Start;
-		t2 = t1 + v1;
-		t4 = render_context.event->Start + render_context.event->Duration;
-		t3 = t4 - v2;
-		interpolate_alpha(now, t1, t2, t3, t4, 0xFF, 0, 0xFF);
+		interpolate_alpha(frame_context.time - render_context.event->Start, t1, t2, t3, t4, a1, a2, a3);
 	} else if (mystrcmp(&p, "org")) {
 		int v1, v2;
 		skip('(');
