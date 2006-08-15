@@ -280,6 +280,7 @@ csp_again:
     if(sh->aspect>0.01){
       int w;
       mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_MovieAspectIsSet,sh->aspect);
+      mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ASPECT=%1.4f\n", sh->aspect);
       w=(int)((float)screen_size_y*sh->aspect); w+=w%2; // round
       // we don't like horizontal downscale || user forced width:
       if(w<screen_size_x || screen_size_xy>8){
