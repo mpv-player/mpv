@@ -1014,7 +1014,7 @@ static int init_render_context(ass_event_t* event)
 	render_context.font_size = render_context.style->FontSize;
 	render_context.evt_type = EVENT_NORMAL;
 	render_context.alignment = 0;
-	render_context.rotation = 0.;
+	render_context.rotation = M_PI * render_context.style->Angle / 180.;
 	render_context.pos_x = 0;
 	render_context.pos_y = 0;
 	render_context.org_x = 0;
