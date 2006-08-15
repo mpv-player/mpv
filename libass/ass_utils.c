@@ -1,7 +1,7 @@
 #include "config.h"
 
 #include <stdlib.h>
-#include <stdint.h>
+#include <inttypes.h>
 #include <sys/time.h>
 #include <time.h>
 

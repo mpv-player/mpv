@@ -2,7 +2,6 @@
 
 #include <assert.h>
 #include <math.h>
-#include <stdint.h>
 #include <inttypes.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
