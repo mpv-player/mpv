@@ -112,6 +112,9 @@ int init_audio_codec(sh_audio_t *sh_audio)
 	af_fmt2str_short(sh_audio->sample_format),
 	sh_audio->i_bps*8*0.001,((float)sh_audio->i_bps/sh_audio->o_bps)*100.0,
         sh_audio->i_bps,sh_audio->o_bps);
+  mp_msg(MSGT_IDENTIFY,MSGL_INFO,"ID_AUDIO_BITRATE=%d\nID_AUDIO_RATE=%d\n"
+    "ID_AUDIO_NCH=%d\n", sh_audio->i_bps, sh_audio->samplerate,
+    sh_audio->channels );
 
   sh_audio->a_out_buffer_size=sh_audio->a_buffer_size;
   sh_audio->a_out_buffer=sh_audio->a_buffer;
