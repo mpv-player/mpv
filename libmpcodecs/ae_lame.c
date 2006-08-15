@@ -96,7 +96,7 @@ static int bind_lame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nFramesPerBlock=1;
     ((MPEGLAYER3WAVEFORMAT*)(mux_a->wf))->nCodecDelay=0;
     
-    encoder->input_format = AF_FORMAT_S16_LE;
+    encoder->input_format = AF_FORMAT_S16_NE;
     encoder->min_buffer_size = 4608;
     encoder->max_buffer_size = mux_a->h.dwRate * mux_a->wf->nChannels * 2;
     
