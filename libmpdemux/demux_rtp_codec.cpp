@@ -42,6 +42,10 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','3');
     needVideoFrameRate(demuxer, subsession);
+  } else if (strcmp(subsession->codecName(), "H264") == 0) {
+    bih->biCompression = sh_video->format
+      = mmioFOURCC('H','2','6','4');
+    needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','1');
