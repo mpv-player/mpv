@@ -595,7 +595,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Failed to open audio demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Failed to open subtitle demuxer: %s\n"
 #define MSGTR_TVInputNotSeekable "TV input is not seekable! (Seeking will probably be for changing channels ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
+#define MSGTR_DemuxerInfoChanged "Demuxer info %s changed to %s\n"
 #define MSGTR_ClipInfo "Clip info:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC content detected, switching framerate.\n"
