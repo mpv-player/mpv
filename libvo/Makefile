@@ -36,9 +36,8 @@ ifeq ($(EXTERNAL_VIDIX),yes)
 SRCS += vosub_vidix.c
 endif
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep \
-          $(LIBAV_INC) \
-          -DMPG12PLAY \
+INCLUDE = -I. -I.. -I../osdep $(LIBAV_INC)
+CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
 
 #CFLAGS += -Wall
 
