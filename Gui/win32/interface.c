@@ -403,7 +403,7 @@ void mplEnd( void )
     if (mygui->playlist->current == (mygui->playlist->trackcount - 1))
         mygui->playlist->current = 0;
 
-    fullscreen = vo_fs = 0;
+    fullscreen = 0;
     guiGetEvent(guiCEvent, (void *) guiSetStop);
 }
 
@@ -697,32 +697,31 @@ int guiGetEvent(int type, char *arg)
             {
                 case MP_CMD_GUI_FULLSCREEN:
                 {
+                    DWORD style;
+                    /* vo_directx's fullscreen window */
+                    HWND hWndFS = FindWindow(NULL, "MPlayer Fullscreen");
+
                     if(!guiIntfStruct.sh_video) break;
 
-                    /* FIXME: vo_directx is behaving unexpectedly, this maintains current functionality */
-                    if(!sub_window || (&video_driver_list && strstr(video_driver_list[0], "directx")))
+                    if(!sub_window)
                     {
                         video_out->control(VOCTRL_FULLSCREEN, 0);
                         break;
                     }
 
-                    if(!fullscreen)
+                    if(!fullscreen && IsWindowVisible(mygui->subwindow) && !IsIconic(mygui->subwindow))
                         GetWindowRect(mygui->subwindow, &old_rect);
 
                     if(fullscreen)
                     {
-                        fullscreen = vo_fs = 0;
-                        vo_dwidth = guiIntfStruct.MovieWidth = old_rect.right-old_rect.left;
-                        vo_dheight = guiIntfStruct.MovieHeight = old_rect.bottom-old_rect.top;
-                        vo_dx = old_rect.left;
-                        vo_dy = old_rect.top;
+                        fullscreen = 0;
+                        style = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
                     } else {
-                        fullscreen = vo_fs = 1;
-                        vo_dwidth = guiIntfStruct.MovieWidth = vo_screenwidth;
-                        vo_dheight = guiIntfStruct.MovieHeight = vo_screenheight;
-                        vo_dx = 0;
-                        vo_dy = 0;
+                        fullscreen = 1;
+                        style = WS_VISIBLE | WS_POPUP;
+                        if(hWndFS) DestroyWindow(hWndFS);
                     }
+                    SetWindowLong(mygui->subwindow, GWL_STYLE, style);
                     mpcodecs_config_vo(guiIntfStruct.sh_video, guiIntfStruct.MovieWidth,
                                        guiIntfStruct.MovieHeight, 0);
                     break;

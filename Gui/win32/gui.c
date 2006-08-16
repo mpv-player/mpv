@@ -556,7 +556,6 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             int tmpheight=0;
             static uint32_t rect_width;
             static uint32_t rect_height;
-            DWORD style, flags;
             RECT rd;
             POINT pt;
             while(ShowCursor(TRUE) <= 0){}
@@ -581,18 +580,10 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             rd.right = rd.left + rect_width;
             rd.bottom = rd.top + rect_height;
 
-            if(fullscreen)
-            {
-                style = WS_VISIBLE | WS_POPUP;
-                flags = SWP_NOZORDER | SWP_FRAMECHANGED;
-            } else {
-                style = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
-                flags = SWP_NOOWNERZORDER;
-            }
-
-            AdjustWindowRect(&rd, style, 0);
+            AdjustWindowRect(&rd, WS_OVERLAPPEDWINDOW | WS_SIZEBOX, 0);
             SetWindowPos(hWnd, 0, fullscreen?0:pt.x+rd.left, fullscreen?0:pt.y+rd.top,
-                         fullscreen?vo_screenwidth:rd.right-rd.left, fullscreen?vo_screenheight:rd.bottom-rd.top, flags);
+                         fullscreen?vo_screenwidth:rd.right-rd.left, fullscreen?vo_screenheight:rd.bottom-rd.top, SWP_NOOWNERZORDER);
+            SetForegroundWindow(hWnd);
             return 0;
         }
         case WM_PAINT:
