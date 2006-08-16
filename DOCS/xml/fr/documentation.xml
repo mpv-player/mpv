@@ -114,10 +114,10 @@ audio <emphasis role="bold">PCM/MP3/MP3 VBR</emphasis>.
 
 <itemizedlist>
 <title>Fonctionnalités de <application>MEncoder</application></title>
-<listitem><simpara>Encodage à partir de la grande variété de formats de fichiers 
+<listitem><simpara>Encodage à partir de la grande variété de formats de fichiers
 et de décodeurs de <application>MPlayer</application></simpara></listitem>
 <listitem><simpara>
-  Encodage dans tous les codecs 
+  Encodage dans tous les codecs
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de ffmpeg
 </simpara></listitem>
 <listitem><simpara>
@@ -145,15 +145,15 @@ et de décodeurs de <application>MPlayer</application></simpara></listitem>
   Copie de flux (stream)
 </simpara></listitem>
 <listitem><simpara>
-  Synchronisation A/V de la source (basé sur PTS, peut être désactivé avec l'option 
+  Synchronisation A/V de la source (basé sur PTS, peut être désactivé avec l'option
   <option>-mc 0</option>)
 </simpara></listitem>
 <listitem><simpara>
-  Correction FPS avec l'option <option>-ofps</option> (utile 
+  Correction FPS avec l'option <option>-ofps</option> (utile
   pour l'encodage d'un VOB 29.97fps en AVI 24fps)
 </simpara></listitem>
 <listitem><simpara>
-  Utilise notre très puissant système de plugins (crop, expand, 
+  Utilise notre très puissant système de plugins (crop, expand,
   flip, postprocess, rotate, scale, conversion rgb/yuv)
 </simpara></listitem>
 <listitem><simpara>
@@ -187,7 +187,7 @@ peuvent être distribués selon les termes de la GNU General Public License Versio
 &usage.xml;
 &cd-dvd.xml;
 &faq.xml;
- 	 
+
 &formats.xml;
 &codecs.xml;
 &video.xml;

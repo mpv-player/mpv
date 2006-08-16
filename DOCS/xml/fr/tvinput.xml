@@ -63,8 +63,8 @@ Si vous capturez la vidéo avec une résolution verticale supérieure à la
 moitié de la pleine résolution (c-a-d. 288 pour PAL ou 240 pour NTSC),
 alors les trames que vous obtenez seront en réalité des paires de champs
 entrelacées.
-En fonction de ce que vous voulez faire avec la vidéo, vous pourriez la laisser 
-sous cette forme, malheureusement désentrelacé, ou séparer les paires en champs 
+En fonction de ce que vous voulez faire avec la vidéo, vous pourriez la laisser
+sous cette forme, malheureusement désentrelacé, ou séparer les paires en champs
 individuels.
 </para>
 <para>

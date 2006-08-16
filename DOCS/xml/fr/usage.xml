@@ -44,8 +44,8 @@ Autre façon de lire un fichier:
 --> <replaceable>file:///chemin-uri-escaped</replaceable>
 </synopsis>
 </para>
- 	 
- 	 <para>
+
+	 <para>
 Lecture de plusieurs fichiers:
 <synopsis>
 <command>mplayer</command><!--
@@ -406,10 +406,10 @@ et affiner le fichier EDL généré.
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
 <title>Audio Avancé</title>
- 	 
+
 <sect2 id="advaudio-surround">
 <title>Lecture Surround/Multi-canal</title>
- 	 
+
 <sect3 id="advaudio-surround-DVD">
 <title>DVDs</title>
 <para>
@@ -424,7 +424,7 @@ Par exemple, pour jouer un DVD avec l'audio 5.1:
 
 Notez que en dépit du nom "5.1" il y a couramment six canaux discret.
 Si vous avez l'équipement pour le son surround il est de précaution de mettre
-l'option <option>channels</option> dans votre fichier de configuration de 
+l'option <option>channels</option> dans votre fichier de configuration de
 <application>MPlayer</application> <filename>~/.mplayer/config</filename>.
 Par exemple, pour faire une lecture quadriphonique par défaut, ajoutez cette
 ligne:
@@ -486,7 +486,7 @@ Pour l'ensemble AC3 et DTS, utilisez <option>-afm hwac3</option>
 </itemizedlist>
 
 <itemizedlist>
-<title>Pour activer le passthrough dans le fichier de configuration 
+<title>Pour activer le passthrough dans le fichier de configuration
 de <application>MPlayer</application>: </title>
 <listitem><para>
 Pour l'AC3 seul, utilisez <option>ac=hwac3,</option>
@@ -516,14 +516,14 @@ d'audio est spécifiée.
 <title>PasseBande audio MPEG</title>
 
 <para>
-Les transmissions TV numérique (comme DVB et ATSC) et certains DVD ont 
+Les transmissions TV numérique (comme DVB et ATSC) et certains DVD ont
 habituellement des flux audio MPEG (en particulier MP2).
-Certains décodeurs matériels MPEG comme les cartes DVB complètes et les 
+Certains décodeurs matériels MPEG comme les cartes DVB complètes et les
 adaptateurs DXR2 peuvent décoder nativement ce format.
-<application>MPlayer</application> peut être configuré pour relayer les 
+<application>MPlayer</application> peut être configuré pour relayer les
 données audio sans les décoder.
 </para>
- 	 
+
 <para>
 Pour utiliser ce codec:
 <screen> mplayer -ac hwmpa </screen>
@@ -537,11 +537,11 @@ Pour utiliser ce codec:
 <emphasis>***TODO***</emphasis>
 </para>
 <para>
-Cette section doit encore être écrite et ne peut être complétée tant que personne ne nous 
+Cette section doit encore être écrite et ne peut être complétée tant que personne ne nous
 a fourni des fichiers d'exemple à tester. Si vous avez quelconques fichiers audio à
-encodage matriciel en votre possession,que savez où en trouver, ou avez quelconques informations 
+encodage matriciel en votre possession,que savez où en trouver, ou avez quelconques informations
 qui pourraient être utiles, veuillez envoyer un message à la liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>. 
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
 Mettez "[matrix-encoded audio]" en sujet du mail.
 </para>
 <para>
@@ -575,7 +575,7 @@ où des mesures ont été prises depuis des microphones montés sur une tête humaine
 
 <para>
 Bien que il ne soit pas possible de reproduire exactement un système surround,
-le filtre HRTF de <application>MPlayer</application> fourni une immersion audio 
+le filtre HRTF de <application>MPlayer</application> fourni une immersion audio
 plus spatiale avec les systèmes d'écoute stéréo.
 La plupart des techniques de mixage consistent à simplement fusionner tous les
 canaux en deux; En plus de cette fusion, <option>hrtf</option> génére de
@@ -720,9 +720,9 @@ même audio est le filtre <option>extrastereo</option>:
 
 <para>
 Ceci fait la moyenne des deux canaux, ayant pour résultat que les deux canaux ont
-leur volume réduit de moitié par rapport à l'original. Les sections suivantes ont 
-des exemples sur les autres manières de faire ceci sans une diminution du volume, 
-mais ils sont plus compliqués et requièrent différentes options dépendemment du canal 
+leur volume réduit de moitié par rapport à l'original. Les sections suivantes ont
+des exemples sur les autres manières de faire ceci sans une diminution du volume,
+mais ils sont plus compliqués et requièrent différentes options dépendemment du canal
 à garder. Si vous voulez réellement maintenir le volume,
 il est peut être plus facile de tester avec le filtre <option>volume</option> et
 trouver la bonne valeur. Par exemple:
@@ -762,8 +762,8 @@ canal 2 --> canal 2
 </programlisting>
 </para></listitem>
 <listitem><para>
-Écrivez les copies de canal comme paires de sous-options. Notez que  le premier 
-canal est 0, le second est 1, etc. L'ordre de ces sous-options n'importe pas aussi 
+Écrivez les copies de canal comme paires de sous-options. Notez que  le premier
+canal est 0, le second est 1, etc. L'ordre de ces sous-options n'importe pas aussi
 longtemps qu'ils sont correctement groupés en
 <replaceable>source:destination</replaceable> paires.
 </para></listitem>
@@ -776,7 +776,7 @@ longtemps qu'ils sont correctement groupés en
 
 <para>
 Ici un exemple d'une autre manière de jouer un canal sur les deux enceintes. On suppose
-pour cette exemple que le canal de gauche devra être joué et le canal de droite annulé. 
+pour cette exemple que le canal de gauche devra être joué et le canal de droite annulé.
 En suivant les étapes ci-dessus:
 <orderedlist>
 <listitem><para>
@@ -852,34 +852,34 @@ Combinez toutes les sous-options pour obtenir:
 <title>Mixage de canal</title>
 
 <para>
-Le filtre <option>pan</option> peut mixer les canaux selon des proportions spécifiées 
-par l'utilisateur. Ceci tient compte de tout que le filtre de <option>channels</option> 
+Le filtre <option>pan</option> peut mixer les canaux selon des proportions spécifiées
+par l'utilisateur. Ceci tient compte de tout que le filtre de <option>channels</option>
 peut faire et plus. Malheureusement, les sous-options sont beaucoup plus complexes.
 <orderedlist>
 <listitem><para>
-Décidez avec combien de canaux vous voulez travailler. Vous aurez peut-être besoin 
-de spécifier cela avec <option>-channels</option> et/ou <option>-af channels</option>. 
+Décidez avec combien de canaux vous voulez travailler. Vous aurez peut-être besoin
+de spécifier cela avec <option>-channels</option> et/ou <option>-af channels</option>.
 Des exemples plus loin montreront quand et laquelle il faut utiliser.
 </para></listitem>
 <listitem><para>
 Décidez combien de canaux à introduire dans <option>pan</option> (les canaux suplémentaires
-décodés sont rejetés). Ceci est la première sous-option, et elle contrôle aussi combien de 
+décodés sont rejetés). Ceci est la première sous-option, et elle contrôle aussi combien de
 canaux à employer pour la sortie.
 </para></listitem>
 <listitem><para>
-Les sous-options restantes spécifient quelle quantité de chaque canal sont mixés l'un 
+Les sous-options restantes spécifient quelle quantité de chaque canal sont mixés l'un
 dans l'autre. Ceci est la partie compliquée. Pour décomposer la tâche, découpez les
 sous-options en plusieurs ensembles, un ensemlbe pour chaque canal de sortie. Chaque sous-option
 d'un ensemble correspond à un canal d'entrée. Le nombre que vous spécifiez sera le pourcentage
 de canal d'entrée qui sont mixés dans le canal de sortie.
 </para>
 <para>
-<option>pan</option> accepte des valeurs de 0 à 512, rendement de 0% à 51200% du volume 
-original. Faites attention quand en utilisant des valeurs plus grande que 1. Non seulement 
-cela peut vous donner un volume tres haut, mais si vous dépassez la marge d'échantillon de 
-votre carte son vous pourriez entendre des pops et clics désagréables. Si vous le voulez vous 
-pouvez faire suivre <option>pan</option> avec <option>,volume</option> pour activer la coupure, 
-mais c'est mieux de garder les valeurs de <option>pan</option> suffisamment basses pour que la 
+<option>pan</option> accepte des valeurs de 0 à 512, rendement de 0% à 51200% du volume
+original. Faites attention quand en utilisant des valeurs plus grande que 1. Non seulement
+cela peut vous donner un volume tres haut, mais si vous dépassez la marge d'échantillon de
+votre carte son vous pourriez entendre des pops et clics désagréables. Si vous le voulez vous
+pouvez faire suivre <option>pan</option> avec <option>,volume</option> pour activer la coupure,
+mais c'est mieux de garder les valeurs de <option>pan</option> suffisamment basses pour que la
 coupure ne soit pas nécessaire.
 </para></listitem>
 </orderedlist>
@@ -892,14 +892,14 @@ Voici encore un autre exemple pour jouer le canal gauche dans deux enceintes. Su
 les étapes ci-dessus:
 <orderedlist>
 <listitem><para>
-<option>pan</option> devrait sortir deux canaux, donc la première 
+<option>pan</option> devrait sortir deux canaux, donc la première
 sous-option est "2".
 </para></listitem>
 <listitem><para>
 Puisque nous avons deux canaux d'entrée, il y aura deux ensembles de sous-options.
-Puisqu'il y a également deux canaux de sortie, 
+Puisqu'il y a également deux canaux de sortie,
 il y aura deux sous-options par ensemble.
-Le canal gauche à partir du fichier devrait aller au volume maxi aux 
+Le canal gauche à partir du fichier devrait aller au volume maxi aux
 les nouveaux canaux gauche et droite.
 Ainsi le premier ensemble de sous-options est "1:1".
 Le canal de droite devrait être rejeté, donc le second serait "0:0".
@@ -940,10 +940,10 @@ Le nombre de canaux de sortie est 2, donc la première sous-option est "2".
 </para></listitem>
 <listitem><para>
 Avec six canaux d'entrée il y aura six ensembles d'options. Heureusement,
-puisque nous nous inquiétons seulement de la sortir des deux premiers canaux, 
-nous devons seulement faire deux ensembles; les quatres ensembles restants peuvent 
-être omis. Prenez garde que tous les fichiers audio multi-canaux n'aient le même 
-ordre de canaux! Cette exemple démontre le mixage (downmixing) d'un fichier avec les 
+puisque nous nous inquiétons seulement de la sortir des deux premiers canaux,
+nous devons seulement faire deux ensembles; les quatres ensembles restants peuvent
+être omis. Prenez garde que tous les fichiers audio multi-canaux n'aient le même
+ordre de canaux! Cette exemple démontre le mixage (downmixing) d'un fichier avec les
 même canaux que l'AC3 5.1:
 <programlisting>
 0 - avant gauche
@@ -953,7 +953,7 @@ même canaux que l'AC3 5.1:
 4 - avant centre
 5 - caisson de basse (subwoofer)
 </programlisting>
-Le premier ensemble de sous-options liste les pourcentages du volume original, dans 
+Le premier ensemble de sous-options liste les pourcentages du volume original, dans
 l'ordre, de ce que chaque canal de sortie devrait recevoir du canal gauche avant: "1:0".
 Le canal avant droit devrait aller vers la bonne sortie: "0:1".
 De même pour les canaux arrières: "1:0" et "0:1".
@@ -1034,10 +1034,10 @@ Combinez toutes ces options pour obtenir:
 <title>Ajustement Logiciel du Volume</title>
 
 <para>
-Certaines pistes audio sont trop silencieuses pour être entendues confortablement 
-sans amplification. Cela devient un problème quand votre équipement audio ne peut 
+Certaines pistes audio sont trop silencieuses pour être entendues confortablement
+sans amplification. Cela devient un problème quand votre équipement audio ne peut
 amplifier le signal à votre place. L'option <option>-softvol</option> oblige
-<application>MPlayer</application> à utiliser un mixeur interne. Vous pouvez alors 
+<application>MPlayer</application> à utiliser un mixeur interne. Vous pouvez alors
 utiliser les touches d'ajustement du volume (par défaut <keycap>9</keycap> et
 <keycap>0</keycap>) pour atteindre des niveaux de volume plus important.
 Notez que cela ne dévie pas votre mixeur de carte son; <application>MPlayer</application>
@@ -1047,17 +1047,17 @@ L'exemple suivant est un bien pour débuter:
 
 <screen>mplayer <replaceable>quiet-file</replaceable> -softvol -softvol-max 300</screen>
 
-L'option <option>-softvol-max</option> spécifie le volume maximum 
-de sortie permis en tant que pourcentage du volume original. 
-Par exemple, <option>-softvol-max 200</option> devra permettre 
+L'option <option>-softvol-max</option> spécifie le volume maximum
+de sortie permis en tant que pourcentage du volume original.
+Par exemple, <option>-softvol-max 200</option> devra permettre
 l'ajustement du volume jusqu'à deux fois son niveau d'origine.
-Il est sûr d'indiquer une valeur importante avec <option>-softvol-max</option>; 
+Il est sûr d'indiquer une valeur importante avec <option>-softvol-max</option>;
 un volume plus important ne sera utilisé qu'à partir du moment où
-les touches d'ajustement du volume sont utilisées. Le seul désavantage 
-d'une valeur large est que, puisque <application>MPlayer</application> ajuste 
-le volume par un pourcentage du maximum, vous n'aurez pas un contrôle aussi précis 
-en utilisant les touches d'ajustement du volume. Utilisez une valeur plus basse avec 
-<option>-softvol-max</option> et/ou indiquez <option>-volstep 1</option> si vous désirez 
+les touches d'ajustement du volume sont utilisées. Le seul désavantage
+d'une valeur large est que, puisque <application>MPlayer</application> ajuste
+le volume par un pourcentage du maximum, vous n'aurez pas un contrôle aussi précis
+en utilisant les touches d'ajustement du volume. Utilisez une valeur plus basse avec
+<option>-softvol-max</option> et/ou indiquez <option>-volstep 1</option> si vous désirez
 une précision plus importante.
 </para>
 
@@ -1068,18 +1068,18 @@ depuis le début vous pouvez spécifier <option>volume</option> manuellement:
 
 <screen>mplayer <replaceable>fichier-tranquil</replaceable> -af volume=10</screen>
 
-Cela jouera le fichier avec un gain de 10 décibel. Soyez prudent lors de 
-l'utilisation du filtre <option>volume</option> - vous pourriez facilement 
-abimer votre appareil auditif si vous utilisez un valeur trop grande. 
-Commencez bas et travaillez de façon graduelle vers le haut jusqu'à être à même 
-d'apprécier de combien il est nécessaire d'ajuster le volume. Aussi, si vous 
-indiquez des valeurs excessivement haute, <option>volume</option> pourra avoir 
-besoin de couper le signal pour éviter d'envoyer vos données de carte son qui 
+Cela jouera le fichier avec un gain de 10 décibel. Soyez prudent lors de
+l'utilisation du filtre <option>volume</option> - vous pourriez facilement
+abimer votre appareil auditif si vous utilisez un valeur trop grande.
+Commencez bas et travaillez de façon graduelle vers le haut jusqu'à être à même
+d'apprécier de combien il est nécessaire d'ajuster le volume. Aussi, si vous
+indiquez des valeurs excessivement haute, <option>volume</option> pourra avoir
+besoin de couper le signal pour éviter d'envoyer vos données de carte son qui
 sont en dehors de la bande permise; cela résultera en une distorsion de l'audio.
 </para>
 
 </sect2>
 
 </sect1>
- 	 
+
 </chapter>

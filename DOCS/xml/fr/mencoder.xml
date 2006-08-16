@@ -305,7 +305,7 @@ généralement disponible sur les systèmes), et que vous souhaitez
 encoder depuis cette copie, vous devrez quand même utiliser la
 syntaxe <option>dvd://</option>, avec l'option
 <option>-dvd-device</option> pointant vers la racine du répertoire
-où se trouve le DVD copié 
+où se trouve le DVD copié
 Les options <option>-dvd-device</option> et
 <option>-cdrom-device</option>
 peuvent être aussi utilisées pour forcer le chemin vers le

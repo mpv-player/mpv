@@ -118,13 +118,13 @@ recommandés.
   <emphasis role="bold">libsmb</emphasis> - optionnel, pour le support Samba.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">ALSA</emphasis> - optionnel, pour le support de sortie audio ALSA. 
+  <emphasis role="bold">ALSA</emphasis> - optionnel, pour le support de sortie audio ALSA.
   Au moins 0.9.0rc4 est requis.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - optionnel, pour le support de la
   sortie audio JACK, requis seulement au moment de la compilation. Vous pouvez
-  l'obtenir depuis 
+  l'obtenir depuis
   <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Il n'a pas
   d'options d'installation donc vous devez placer manuellement le fichier
   <filename>libbio2jack.a</filename> quelque part dans votre chemin de librairies
@@ -262,7 +262,7 @@ recommandés.
 <title>Cartes graphiques</title>
 
 <para>
-Il y a généralement deux types de cartes graphiques. Les premières (les cartes les plus récentes) ont 
+Il y a généralement deux types de cartes graphiques. Les premières (les cartes les plus récentes) ont
 <emphasis role="bold">un zoom matériel et l'accélération YUV</emphasis>, les autres n'en ont pas.
 </para>
 
@@ -274,14 +274,14 @@ Il y a généralement deux types de cartes graphiques. Les premières (les cartes l
 Vous pouvez afficher et redimensionner (zoom) l'image dans n'importe quelle
 taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation processeur</emphasis>
 (même en zoomant), ainsi la lecture plein-écran est agréable et très rapide.
-  
+
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Cartes Matrox G200/G400/G450/G550</emphasis>: bien qu'un
   <link linkend="vidix">pilote Vidix</link> soit fourni, il est recommandé
   d'utiliser le module noyau mga_vid à la place, il fonctionne bien mieux.
   Voir la section <link linkend="mga_vid">mga_vid</link> pour son
-  installation et son utilisation. Il est important de faire cela 
+  installation et son utilisation. Il est important de faire cela
   <emphasis>avant</emphasis> la compilation de <application>MPlayer</application>,
   sinon aucun support mga_vid ne sera construit. Voir aussi la section
   <link linkend="tvout-mga-g400">Matrox TV-out</link>.
@@ -305,9 +305,9 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
   pour savoir si la sortie TV de votre carte est supportée sous Linux/<application>MPlayer</application>.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Cartes S3</emphasis>: les chipsets Savage et Virge/DX possèdent 
-  l'accélération matérielle. Utilisez la plus récente version de XFree86 possible, les 
-  anciens pilotes sont bogués. Les chipsets Savage ont des problèmes avec l'affichage YV12, 
+  <emphasis role="bold">Cartes S3</emphasis>: les chipsets Savage et Virge/DX possèdent
+  l'accélération matérielle. Utilisez la plus récente version de XFree86 possible, les
+  anciens pilotes sont bogués. Les chipsets Savage ont des problèmes avec l'affichage YV12,
   voir la section <link linkend="s3">Xv S3</link>. Plus anciennes, les cartes Trio n'ont pas
   ou peu d'accélération matérielle.
   </para></listitem>
@@ -354,7 +354,7 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
 L'affichage en plein-écran peut être obtenu soit en activant le <emphasis role="bold">
 redimensionnement logiciel</emphasis> (utilisez <option>-zoom</option> ou <option>-vf</option>,
 mais je vous préviens: c'est lent), ou passez dans une résolution plus basse, par exemple 352x288. Si vous
-n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le changement de mode vidéo peut 
+n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le changement de mode vidéo peut
 être activé en utilisant l'option <option>-vm</option> et fonctionne avec les pilotes suivants:
 <itemizedlist>
 <listitem><simpara>
@@ -380,16 +380,16 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
   GD 7548: intégré aux cartes mères et testé sur la gamme de portables Compaq Armada 41xx.
   <itemizedlist>
   <listitem><simpara>
-    XFree86 3: fonctionne dans les modes 8/16bpp. Cependant, le pilote est dramatiquement 
+    XFree86 3: fonctionne dans les modes 8/16bpp. Cependant, le pilote est dramatiquement
     lent et bogué en 800x600@16bpp. <emphasis role="bold">Recommandé: 640x480@16bpp</emphasis>
    </simpara></listitem>
   <listitem><simpara>
-    XFree86 4: le serveur X se gèle peu après le lancement à moins de désactiver l'accélération 
+    XFree86 4: le serveur X se gèle peu après le lancement à moins de désactiver l'accélération
     matérielle, mais dans ce cas l'ensemble devient plus lent que XFree86 3. Pas de XVideo.
    </simpara></listitem>
   <listitem><simpara>
     FBdev: le framebuffer peut être activé avec le pilote <systemitem>clgenfb</systemitem>
-    dans le noyau, bien que pour moi cela n'est fonctionné qu'en 8bpp, donc inutilisable. 
+    dans le noyau, bien que pour moi cela n'est fonctionné qu'en 8bpp, donc inutilisable.
     L'ID 7548 doit être précisé dans le source clgenfb avant la compilation.
    </simpara></listitem>
   <listitem><simpara>
@@ -414,7 +414,7 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
 <listitem><simpara>
   <emphasis role="bold">Soundblaster Live!</emphasis>: avec cette carte vous pouvez utiliser 4 ou 6
     canaux AC3 (<emphasis role="bold">5.1</emphasis>) au lieu de 2. Voir la section
-  <link linkend="swac3">Décodage AC3 logiciel</link>. Pour le transfert AC3 matériel vous 
+  <link linkend="swac3">Décodage AC3 logiciel</link>. Pour le transfert AC3 matériel vous
   <emphasis role="bold">devez</emphasis> utiliser ALSA 0.9 avec l'émulation OSS!
   </simpara></listitem>
 <listitem><simpara>
@@ -505,9 +505,9 @@ d'en-tête (généralement les paquets -dev) et que leur version correspond. Le fic
 </para>
 
 <para>
-Bien que n'étant pas indispensables, les polices peuvent être installées pour 
-l'affichage de l'OSD, et le support des sous-titres. La méthode recommandée est 
-d'installer un fichier de police TTF et de dire à <application>MPlayer</application> de l'utiliser. Voir la 
+Bien que n'étant pas indispensables, les polices peuvent être installées pour
+l'affichage de l'OSD, et le support des sous-titres. La méthode recommandée est
+d'installer un fichier de police TTF et de dire à <application>MPlayer</application> de l'utiliser. Voir la
 section <link linkend="subosd">Sous-titres et OSD</link> pour les détails.
 </para>
 
@@ -519,11 +519,11 @@ section <link linkend="subosd">Sous-titres et OSD</link> pour les détails.
 <title>À propos de l'interface graphique?</title>
 
 <para>
-La GUI à besoin de GTK 1.2.x ou GTK 2.0 (elle n'est pas entièrement basée dessus, mais les 
-menus le sont). Les skins sont stockées au format PNG, donc GTK, 
+La GUI à besoin de GTK 1.2.x ou GTK 2.0 (elle n'est pas entièrement basée dessus, mais les
+menus le sont). Les skins sont stockées au format PNG, donc GTK,
 <systemitem class="library">libpng</systemitem> (ainsi que leurs paquets de dev,
 généralement nommés <systemitem class="library">gtk-dev</systemitem> et <systemitem class="library">libpng-dev</systemitem>)
-doivent être installés. Vous pouver la compiler en spécifiant l'option 
+doivent être installés. Vous pouver la compiler en spécifiant l'option
 <option>--enable-gui</option> durant l'étape
 <filename>./configure</filename>. Ensuite, pour l'activer vous devrez exécuter
 le binaire <command>gmplayer</command>.
@@ -541,10 +541,10 @@ url="http://www.mplayerhq.hu/dload.html">page des téléchargements</ulink>.
 Elles pourront se placer dans le répertoire commun (<filename class="directory">
 $PREFIX/share/mplayer/skins</filename>), ou dans <filename class="directory">
 $HOME/.mplayer/skins</filename>.
-Par défaut, <application>MPlayer</application> consulte ces répertoires à la 
-recherche d'un répertoire nommé <filename class="directory">default</filename>, 
-mais vous pouvez utiliser l'option <option>-skin <replaceable>nouvelleskin</replaceable></option>, 
-ou placer <literal>skin=nouvelleskin</literal> dans votre fichier de configuration 
+Par défaut, <application>MPlayer</application> consulte ces répertoires à la
+recherche d'un répertoire nommé <filename class="directory">default</filename>,
+mais vous pouvez utiliser l'option <option>-skin <replaceable>nouvelleskin</replaceable></option>,
+ou placer <literal>skin=nouvelleskin</literal> dans votre fichier de configuration
 pour utiliser la skin dans le répertoire <filename class="directory">*/skins/newskin</filename>.
 </para>
 </sect1>
@@ -555,7 +555,7 @@ pour utiliser la skin dans le répertoire <filename class="directory">*/skins/new
 <title>Sous-titres et OSD</title>
 
 <para>
- <application>MPlayer</application> peut afficher des sous-titres durant le film. 
+ <application>MPlayer</application> peut afficher des sous-titres durant le film.
  Les formats suivants sont supportés:
 <itemizedlist>
 <listitem><para>VobSub</para></listitem>
@@ -608,10 +608,10 @@ Si vous avez des fichiers tels que
 vous devrez passer à <application>MPlayer</application> l'option
 <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option>
 (éventuellement avec le chemin complet). L'option <option>-vobsubid</option> est comme l'option
-<option>-sid</option> pour les DVDs, vous pouvez choisir les pistes de sous-titres (langues) avec. 
+<option>-sid</option> pour les DVDs, vous pouvez choisir les pistes de sous-titres (langues) avec.
 Au cas où <option>-vobsubid</option> est omis, <application>MPLayer</application> essaiera
-d'utiliser les langues indiqués par l'option <option>-slang</option> et se rabattra sur l'objet 
-<systemitem>langidx</systemitem> du fichier <filename>.IDX</filename> pour définir la langue 
+d'utiliser les langues indiqués par l'option <option>-slang</option> et se rabattra sur l'objet
+<systemitem>langidx</systemitem> du fichier <filename>.IDX</filename> pour définir la langue
 de sous-titres. Si cela échoue, il n'y aura pas de sous-titres.
 </para>
 </formalpara>
@@ -654,13 +654,13 @@ Si vous constatez un décalage progressif entre le film et les sous-titres en
 utilisant un fichier de sous-titres MicroDVD, il est probable que la vitesse
 du film et celle des sous-titres soient différentes. Veuillez noter que le format
 de sous-titres MicroDVD utilise des numéros de trames absolus pour sa synchronisation,
-mais il ne contient pas d'information sur les fps et de ce fait l'option <option>-subfps</option> devrait être utilisée avec ce format. 
-Si vous voulez résoudre ce problème de manière permanente, 
+mais il ne contient pas d'information sur les fps et de ce fait l'option <option>-subfps</option> devrait être utilisée avec ce format.
+Si vous voulez résoudre ce problème de manière permanente,
 vous devez convertir manuellement le débit des trames du fichier de sous-titres.
 <application>MPlayer</application> peut faire cette conversion pour vous:
 
 <screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps
- <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> 
+ <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable>
  <replaceable>dummy.avi</replaceable></screen>
 </para>
 
@@ -674,8 +674,8 @@ A propos des sous-titres DVD, voir la section <link linkend="dvd">DVD</link>.
 
 <para>
 <application>MPlayer</application> introduit un nouveau format de sous-titres appelé
-<emphasis role="bold">MPsub</emphasis>. Il a été conçu par Gabucino. Son principal 
-avantage est de se baser <emphasis>dynamiquement</emphasis> sur la durée (bien qu'il 
+<emphasis role="bold">MPsub</emphasis>. Il a été conçu par Gabucino. Son principal
+avantage est de se baser <emphasis>dynamiquement</emphasis> sur la durée (bien qu'il
 possède également un mode basé sur les frames). Exemple (de <ulink url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
 <programlisting>
 FORMAT=TIME
@@ -695,17 +695,17 @@ Naboo was under an attack.<!--
 
 <para>
 Comme vous pouvez le constater, l'objectif ici est de <emphasis role="bold">
-faciliter l'édition/synchronisation/jointure/découpage</emphasis>. 
-Si vous avez un sous-titre SSA mal synchronisé avec votre version de la vidéo, 
+faciliter l'édition/synchronisation/jointure/découpage</emphasis>.
+Si vous avez un sous-titre SSA mal synchronisé avec votre version de la vidéo,
 faites simplement un <screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>
-Un fichier <filename>dump.mpsub</filename> sera créé dans le répertoire courant, 
-contenant le texte du sous-titre au format <emphasis role="bold">MPsub</emphasis>. 
+Un fichier <filename>dump.mpsub</filename> sera créé dans le répertoire courant,
+contenant le texte du sous-titre au format <emphasis role="bold">MPsub</emphasis>.
 Vous pourrez alors aisément ajouter/soustraire du temps entre les sous-titres.
 </para>
 
 <para>
 Les sous-titres sont affichés par une technique nommée <emphasis role="bold">'OSD',
-On Screen Display</emphasis> (Affichage sur l'écran). L'OSD est utilisé pour afficher 
+On Screen Display</emphasis> (Affichage sur l'écran). L'OSD est utilisé pour afficher
 le temps de lecture, la barre de volume, d'avance/retour rapide, le contraste, etc.
 </para>
 </sect2>
@@ -762,13 +762,13 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir:
   <!-- FIXME: this para should be before the list -->
   Les polices devront disposer du fichier <filename>font.desc</filename>
   approprié qui associe les positions maps unicode au code actuel du texte
-  sous-titré. Une autre solution est d'avoir des sous-titres encodés en UTF8 
-  et d'utiliser l'option <option>-utf8</option> ou de renommer le fichier 
+  sous-titré. Une autre solution est d'avoir des sous-titres encodés en UTF8
+  et d'utiliser l'option <option>-utf8</option> ou de renommer le fichier
   des sous-titres en <filename>&lt;nom_video&gt;.utf</filename>. Enregistrer
   de codepages différents en UTF-8 peut se faire en utilisant les programmes
   <command>konwert</command> ou <command>iconv</command>.
   </para><para>
-  
+
   <table>
   <title>Quelques liens:</title>
   <tgroup cols="2">
@@ -804,7 +804,7 @@ ou faites un lien symbolique de l'un d'eux sur <filename class="directory">font<
 
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> <replaceable>~/.mplayer/font</replaceable></screen>
 
-Vous pouvez maintenant voir un compteur dans le coin supérieur gauche du film. (Faites les apparaître/disparaître 
+Vous pouvez maintenant voir un compteur dans le coin supérieur gauche du film. (Faites les apparaître/disparaître
 avec la touche <keycap>o</keycap>).
 </para>
 
@@ -859,11 +859,11 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant!
   </simpara></listitem>
 <listitem><simpara>
   copiez <filename>etc/menu.conf</filename> dans votre répertoire
-  <filename class="directory">.mplayer</filename> 
+  <filename class="directory">.mplayer</filename>
   </simpara></listitem>
 <listitem><simpara>
   copiez <filename>etc/input.conf</filename> dans votre répertoire
-  <filename class="directory">.mplayer</filename>, ou dans le fichier de config globale de 
+  <filename class="directory">.mplayer</filename>, ou dans le fichier de config globale de
   <application>MPlayer</application> (par défaut: <filename class="directory">/usr/local/etc/mplayer</filename>)
   </simpara></listitem>
 <listitem><simpara>
@@ -891,21 +891,21 @@ Il y a trois méthodes de synchro dans <application>MPlayer</application>.
 
 <itemizedlist>
 <listitem><simpara>
-<emphasis role="bold">Pour utiliser l'ancienne méthode</emphasis>, vous n'avez 
-rien à faire. Elle utilise <systemitem>usleep()</systemitem> pour régler la 
-synchro A/V, avec une précision de +/- 10ms. Cependant parfois la synchro doit être 
+<emphasis role="bold">Pour utiliser l'ancienne méthode</emphasis>, vous n'avez
+rien à faire. Elle utilise <systemitem>usleep()</systemitem> pour régler la
+synchro A/V, avec une précision de +/- 10ms. Cependant parfois la synchro doit être
 réglé encore plus finement.
   </simpara></listitem>
 <listitem><para>
-<emphasis role="bold">Le nouveau code de synchro</emphasis> utilise la RTC 
-(Real Time Clock) du PC pour cette tâche, car elle à des timers précis à 1ms près. 
-Il est automatiquement activé si disponible, mais requiert des droits root, un binaire 
-<application>MPlayer</application> <emphasis>setuid root</emphasis> ou un noyau 
-configuré dans ce but. Si vous utilisez un noyau 2.4.19pre8 ou plus récent, vous 
-pouvez ajouter la fréquence maxi de la RTC pour les utilisateurs normaux au travers 
+<emphasis role="bold">Le nouveau code de synchro</emphasis> utilise la RTC
+(Real Time Clock) du PC pour cette tâche, car elle à des timers précis à 1ms près.
+Il est automatiquement activé si disponible, mais requiert des droits root, un binaire
+<application>MPlayer</application> <emphasis>setuid root</emphasis> ou un noyau
+configuré dans ce but. Si vous utilisez un noyau 2.4.19pre8 ou plus récent, vous
+pouvez ajouter la fréquence maxi de la RTC pour les utilisateurs normaux au travers
 du système de fichier /proc. Utilisez cette commande pour activer la RTC pour les utilisateurs normaux:
 <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
-Si vous n'avez pas un noyau si récent, vous pouvez aussi changer une ligne du fichier 
+Si vous n'avez pas un noyau si récent, vous pouvez aussi changer une ligne du fichier
 <filename>drivers/char/rtc.c</filename> et recompiler votre noyau. Trouvez la section suivante
   <programlisting>
        * We don't really want Joe User enabling more
@@ -918,19 +918,19 @@ Si vous n'avez pas un noyau si récent, vous pouvez aussi changer une ligne du fi
    Les fonctions d'économie d'énergie du BIOS de certains portables qui contrôlent
    la vitesse des processeurs interfèrent avec la RTC. L'audio et la vidéo peuvent alors
    se désynchroniser. Brancher l'alimentation sur secteur avant de démarrer le portable
-   semble aider. Vous pouvez toujours désactiver le support RTC avec l'option 
-   <option>-nortc</option>. Dans certaines configurations matérielles (confirmées durant 
-   l'utilisation d'un lecteur DVD sans DMA sur une carte ALi1541), l'utilisation de la RTC 
-   peut causer une image qui saute. Dans ce cas, il est recommandé d'utiliser 
+   semble aider. Vous pouvez toujours désactiver le support RTC avec l'option
+   <option>-nortc</option>. Dans certaines configurations matérielles (confirmées durant
+   l'utilisation d'un lecteur DVD sans DMA sur une carte ALi1541), l'utilisation de la RTC
+   peut causer une image qui saute. Dans ce cas, il est recommandé d'utiliser
    la troisième méthode.
   </para></listitem>
 <listitem><simpara>
-  <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option 
-  <option>-softsleep</option>. Il à la précision de la RTC, mais n'utilise pas la RTC. 
+  <emphasis role="bold">La troisième méthode de synchro</emphasis> est activée par l'option
+  <option>-softsleep</option>. Il à la précision de la RTC, mais n'utilise pas la RTC.
   D'un autre côté, il nécessite plus de CPU.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">Ne JAMAIS installer un binaire 
+<note><para><emphasis role="bold">Ne JAMAIS installer un binaire
 <application>MPlayer</application> setuid root sur un système multi-utilisateur !</emphasis>
 C'est une manière facile pour n'importe qui de devenir root.
 </para></note>

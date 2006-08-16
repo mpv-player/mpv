@@ -45,7 +45,7 @@ vous assisterons si vous avez des questions.
 Un problème qui peut survenir quelque fois est 'cela marchait avant, et
 plus maintenant...'.
 Voici une procédure étape-par-étape pour tenter d'indiquer quand exactement
-le problème s'est produit. Ceci n'est <emphasis role="bold">pas</emphasis> pour les utilisateurs 
+le problème s'est produit. Ceci n'est <emphasis role="bold">pas</emphasis> pour les utilisateurs
 occasionnels.
 </para>
 <para>
@@ -55,7 +55,7 @@ Les instructions peuvent être trouvé au bas de
 <ulink url="http://www.mplayerhq.hu/dload.html">cette page</ulink>.
 </para>
 <para>
-Vous aurez donc dans le repertoire mplayer/ une image de l'arbre Subversion, du coté 
+Vous aurez donc dans le repertoire mplayer/ une image de l'arbre Subversion, du coté
 client.
 Maintenant mettez à jour cette image à la date voulue:
 <screen>
@@ -77,7 +77,7 @@ make
 <para>
 Pour un non-informaticien qui lit ceci, la méthode la plus rapide d'arriver au point
 où le problème se produit est d'utiliser une recherche dichotomique &mdash; qui est,
-chercher la date où est survenu le problème en divisant à plusieurs reprises l'intervalle 
+chercher la date où est survenu le problème en divisant à plusieurs reprises l'intervalle
 de recherche par moitié.
 Par exemple, si le problème se produit en 2003, commencez en milieu d'année, puis demandez-vous
 "Le problème est-il déjà présent à ce moment?".
@@ -90,7 +90,7 @@ Si vous avez beaucoup d'espace libre sur le disque dur (une compilation complète
 plus vieille version fonctionnelle connue avant de la mettre à jour; cela sauvera du temps si
 vous devez y revenir.
 (Il est habituellement nécessaire de lancer 'make distclean' avant de recompiller une
-version plus récente, donc si vous ne faites pas une copie de sauvegarde de votre arbre 
+version plus récente, donc si vous ne faites pas une copie de sauvegarde de votre arbre
 source original, vous devrez tout recompiler dedans quand vous reviendrez
 à la version présente.)
 </para>
@@ -178,7 +178,7 @@ votre problème ou même une réponse.
 <para>
 Souscrivez à la liste de diffusion mplayer-users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-et envoyez votre rapport à 
+et envoyez votre rapport à
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> où vous pourrez en discuter.
 </para>
 <para>

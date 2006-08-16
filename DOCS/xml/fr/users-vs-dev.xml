@@ -17,8 +17,8 @@ a inclus une version CVS lourdement patchée de GCC dans sa distribution et l'a n
 <emphasis role="bold">2.96</emphasis>. Red Hat a inclus cette version parce que GCC
 3.0 n'était pas terminé à ce moment là, et ils avaient besoin d'un compilateur
 fonctionnant sur toutes leurs plateformes supportées, incluant IA64 et s390. Le
-distributeur Linux <emphasis role="bold">Mandrake</emphasis> (maintenant Mandriva) 
-a également suivi l'exemple de Red Hat et a lancé la diffusion de GCC 2.96 avec 
+distributeur Linux <emphasis role="bold">Mandrake</emphasis> (maintenant Mandriva)
+a également suivi l'exemple de Red Hat et a lancé la diffusion de GCC 2.96 avec
 sa série Linux-Mandrake 8.0.
 </para>
 </formalpara>
@@ -63,9 +63,9 @@ disparaissent avec un compilateur différent. Dans tous les cas cela ne peut plus
 Normalement un GCC 3.x mature résoudra les problèmes. Si vous voulez compiler avec 2.96
 passez l'option <option>--disable-gcc-checking</option> à <filename>configure</filename>.
 Rappelez-vous que vous êtes seul et donc <emphasis role="bold">de ne pas rapporter de bogues</emphasis>.
-Si vous le faites quand même, préparez-vous au pire comme vous faire 
-insulter, voir banni de nos listes de diffusions car nous en avons par 
-dessus la tête des problèmes relatifs à GCC-2.96 ; alors s'il vous 
+Si vous le faites quand même, préparez-vous au pire comme vous faire
+insulter, voir banni de nos listes de diffusions car nous en avons par
+dessus la tête des problèmes relatifs à GCC-2.96 ; alors s'il vous
 plaît, abstenez-vous.
 
 </para>

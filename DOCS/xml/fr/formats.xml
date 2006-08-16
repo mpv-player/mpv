@@ -14,13 +14,13 @@ tel fichier <emphasis>peut</emphasis> contenir de la vidéo MPEG-1.
 <para>
 Vous voyez, un <emphasis role="bold">codec</emphasis> n'est pas la même chose qu'un
 <emphasis role="bold">format de conteneur</emphasis>.
-Exemples de <emphasis role="bold">codecs</emphasis> vidéo: MPEG-1, MPEG-2, 
+Exemples de <emphasis role="bold">codecs</emphasis> vidéo: MPEG-1, MPEG-2,
 MPEG-4 (DivX), Indeo5, 3ivx.
 Exemples de <emphasis role="bold">formats</emphasis> de conteneur: MPG, AVI, ASF.
 </para>
 
 <para>
-En théorie, vous pouvez placer une vidéo OpenDivX et de l'audio MP3 dans un 
+En théorie, vous pouvez placer une vidéo OpenDivX et de l'audio MP3 dans un
 <emphasis role="bold">conteneur MPG</emphasis>. Par contre, la plupart des lecteurs
 ne pourrons pas lire ce fichier car ils attendent de la vidéo MPEG-1 et de l'audio
 MP2 (contrairement à l'<emphasis role="bold">AVI</emphasis>, le
@@ -257,7 +257,7 @@ sera brouillée pendant un court instant après le déplacement.
 
 <para>
 Oui, <application>MPlayer</application> peut lire (démuxer) les fichiers RealMedia
-(<filename>.rm</filename>). 
+(<filename>.rm</filename>).
 Voici une liste des codecs <link linkend="realvideo">RealVideo</link> et <link
 linkend="realaudio">RealAudio</link> supportés.
 </para>
@@ -273,7 +273,7 @@ peut lire ses fichiers <filename>.NUV</filename> (NuppelVideo 5.0 uniquement).
 Ces fichiers peuvent contenir des trames YV12 non-compressées, YV12+RTJpeg compressées,
 YV12 RTJpeg+lzo compressées, et YV12+lzo compressées.
 <application>MPlayer</application> les décode tous (et les <emphasis role="bold">encode</emphasis>
-également avec <application>MEncoder</application> en MPEG-4 (DivX)/etc!). 
+également avec <application>MEncoder</application> en MPEG-4 (DivX)/etc!).
 Le déplacement fonctionne.
 </para>
 </sect2>
@@ -344,15 +344,15 @@ sous Windows.)
 <sect2 id="nsv">
 <title>Fichiers NSV</title>
 <para>
-NSV (NullSoft Video) est un format utilisé par le lecteur 
+NSV (NullSoft Video) est un format utilisé par le lecteur
 <application>Winamp</application> pour faire du stream audio et vidéo.
 La vidéo est en VP3, VP5 ou VP6, l'audio en MP3, AAC ou VLB.
 La version audio uniquement de NSV a une extension <filename>.nsa</filename>.
 <application>MPlayer</application> peut lire les deux types de flux et fichiers NSV.
-Veuillez noter que la plupart des fichiers du 
+Veuillez noter que la plupart des fichiers du
 <ulink url="http://www.winamp.com">site de Winamp</ulink> utilisent de l'audio VLB,
 qui ne peut être décodé pour l'instant. De plus les flux de ce site nécessitent
-une couche suplémentaire de dépaquetage qui doit encore être implémentée (ces 
+une couche suplémentaire de dépaquetage qui doit encore être implémentée (ces
 fichiers sont de toute façon illisibles car ils utilisent de l'audio VLB).
 </para>
 </sect2>

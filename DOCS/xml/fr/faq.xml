@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!--synced with 1.102 -->
-<chapter id="faq" xreflabel="FAQ">   
+<chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
 <qandaset defaultlabel="qanda">
@@ -24,7 +24,7 @@ Comment puis-je traduire <application>MPlayer</application> dans une nouvelle la
 </para></question>
 <answer><para>
 Lisez le <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
-il devrait tout expliquer. Vous pouvez obtenir de l'aide supplémentaire sur la liste de diffusion 
+il devrait tout expliquer. Vous pouvez obtenir de l'aide supplémentaire sur la liste de diffusion
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 </para></answer>
 </qandaentry>
@@ -49,7 +49,7 @@ Nous accueillons toujours des codeurs et des &quot;documenteurs&quot;. Lisez la
 <ulink url="../../tech/">documentation technique</ulink>
 pour avoir un premier aperçu. Ensuite vous devriez vous inscrire à la liste de diffusion
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-et commencer à coder. Si vous souhaitez apporter votre aide à la documentation, joignez la 
+et commencer à coder. Si vous souhaitez apporter votre aide à la documentation, joignez la
 liste de diffusion <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
@@ -81,12 +81,12 @@ Vous êtes tombé sur un bogue de <application>gcc</application>. S'il vous plait
 <ulink url="http://gcc.gnu.org/bugs.html">faites en part à l'équipe de gcc</ulink>
 mais pas à nous. Pour une quelconque raison <application>MPlayer</application> semble
 déclencher des bogues du compilateur de manière fréquente. Néanmoins nous ne pouvons les réparer et
-n'ajoutons pas du boulot en plus à nos sources pour les bogues de compilateur. Pour éviter ce problème, 
+n'ajoutons pas du boulot en plus à nos sources pour les bogues de compilateur. Pour éviter ce problème,
 restez avec une version de compilateur reconnu pour être disponible et
 stable, ou mettez à niveau fréquemment.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Y'a-t-il des paquets binaires (RPM/Debian) de <application>MPlayer</application>?
@@ -108,7 +108,7 @@ Essayer les options de configuration suivantes:
 </screen>
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Configure se termine par ce texte, et <application>MPlayer</application> ne compile pas !
@@ -196,12 +196,12 @@ code de timing. Pour les détails voir la section <link linkend="rtc">RTC</link> 
 Comment puis-je faire une copie d'écran ?
 </para></question>
 <answer><para>
-Vous devez utiliser un pilote de sortie vidéo qui n'utilise pas d'overlay pour 
+Vous devez utiliser un pilote de sortie vidéo qui n'utilise pas d'overlay pour
 pouvoir faire une copie d'écran. Sous X11, <option>-vo x11</option> peut le faire,
 sous Windows <option>-vo directx:noaccel</option> fonctionne.
 </para>
 <para>
-Alternativement vous pouvez lancer <application>MPlayer</application> avec le 
+Alternativement vous pouvez lancer <application>MPlayer</application> avec le
 filtre vidéo <systemitem>screenshot</systemitem> (<option>-vf screenshot</option>),
 et pressez la touche <keycap>s</keycap> pour faire une capture d'écran.
 </para></answer>
@@ -234,7 +234,7 @@ Exemple:
 <listitem><para>utilisation CPU du codec vidéo en pourcents (pour les tranches et
 le rendu direct (Direct Rendering) ceci inclus video_out)</para></listitem>
 </varlistentry>
-<varlistentry><term><systemitem>0%</systemitem></term>	 
+<varlistentry><term><systemitem>0%</systemitem></term>
 <listitem><para>utilisation CPU de video_out</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>2.6%</systemitem></term>
@@ -254,7 +254,7 @@ le rendu direct (Direct Rendering) ceci inclus video_out)</para></listitem>
 <listitem><para>vitesse de lecture en tant que facteur de la vitesse originale</para></listitem>
 </varlistentry>
 </variablelist>
-La plupart d'entre eux sont là pour des raisons de déboggage, utilisez l'option 
+La plupart d'entre eux sont là pour des raisons de déboggage, utilisez l'option
 <option>-quiet</option> pour les faire disparaitre.
 Vous remarquerez que l'utilisation CPU de video_out est à zéro (0%) pour certains fichiers.
 C'est parcequ'il est appelé directement depuis le codec et donc ne peux pas être
@@ -276,7 +276,7 @@ Téléchargez et installez les codecs binaires depuis notre
 
 <qandaentry>
 <question><para>
-Comment puis-je faire en sorte que <application>MPlayer</application> se souvienne des options que 
+Comment puis-je faire en sorte que <application>MPlayer</application> se souvienne des options que
 j'ai utilisé pour un fichier en particulier, c'est à dire <filename>movie.avi</filename>?
 </para></question>
 <answer><para>
@@ -344,7 +344,7 @@ pour un désastre de telle facon qu'il est aléatoire et très dur à localiser des 
 de lecture. Si vous l'avez encore quelque part sur votre système, vous devriez le supprimer immédiatement.
 </para></answer>
 </qandaentry>
-	 
+
 <qandaentry>
 <question><para>
 Comment puis-je faire apparaitre les sous-titres sur les bandes noires autour d'un film?
@@ -387,14 +387,14 @@ J'essaie de lire un flux aléatoire depuis l'internet mais cela échoue.
 Essayez de lire le flux avec l'option <option>-playlist</option>.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 J'ai téléchargé un film sur un réseau P2P mais il ne fonctionne pas !
 </para></question>
 <answer><para>
 Votre fichier est probablement endommagé ou faux. Si vous l'avez obtenu par un
-ami, et qu'il dit qu'il fonctionne, essayez de comparer les sommes 
+ami, et qu'il dit qu'il fonctionne, essayez de comparer les sommes
 <application>md5sum</application>.
 </para></answer>
 </qandaentry>
@@ -422,7 +422,7 @@ Il y a une mauvaise intéraction sur Fedora entre exec-shield, prelink, et toute
 application utilisant les DLLs Windows (comme <application>MPlayer</application>).
 </para>
 <para>
-Le problème est que exec-shield rend les adresses de chargement de toutes les 
+Le problème est que exec-shield rend les adresses de chargement de toutes les
 librairies système aléatoires. Cela se produit durant la phase de prelink (une
 fois toutes les deux semaines).
 </para>
@@ -431,13 +431,13 @@ Quand <application>MPlayer</application> essaie de charger une DLL Windows
 il veut la placer à une adresse spécifique (0x400000). Si une librairie système
 importante s'y trouve déjà, <application>MPlayer</application> plantera
 (Un symptôme typique est un segmentation fault en essayant de lire des fichiers
-Windows Media 9). 
+Windows Media 9).
 </para>
 <para>
 Si vous avez ce problème vous avez deux options:
 <itemizedlist>
 <listitem><para>Attendez deux semaines. Cela peut fonctionner de nouveau.</para></listitem>
-<listitem><para>Relinkez toutes les binaires du système avec des options de 
+<listitem><para>Relinkez toutes les binaires du système avec des options de
 prelink différentes. Voici les étapes à suivre:</para>
 <para>
 <orderedlist>
@@ -476,26 +476,26 @@ PRELINK_OPTS="-mR --no-exec-shield"
 </para></question>
 <answer><para>
 N'utilisez pas MPlayer sur un CPU différent de celui sur lequel il a été compilé ou
-recompilez avec &quot;runtime CPU detection&quot; 
+recompilez avec &quot;runtime CPU detection&quot;
 (<command>./configure --enable-runtime-cpudetection</command>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Quand j'essaye de faire une capture depuis mon tuner, cela fonctionne, 
+Quand j'essaye de faire une capture depuis mon tuner, cela fonctionne,
 mais les couleurs sont étranges. C'est BON avec d'autres applications.
 </para></question>
 <answer><para>
-Votre carte probablement rapporte certains espaces de couleurs comme étant 
-supportés alors qu'en fait elle ne les supporte pas. Essayez avec YUY2 
+Votre carte probablement rapporte certains espaces de couleurs comme étant
+supportés alors qu'en fait elle ne les supporte pas. Essayez avec YUY2
 à la place de YV12 par défaut (voir la section <link linkend="tv-input">TV</link>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-J'ai des valeurs en pourcentage très étrange (vraiment trop grande) 
+J'ai des valeurs en pourcentage très étrange (vraiment trop grande)
 lors de la lecture de fichiers sur mon portable.
 </para></question>
 <answer><para>
@@ -530,7 +530,7 @@ Essayez <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
- 	 
+
 <qandadiv id="faq-driver">
 <title>Problèmes de pilote vidéo/audio (vo/ao)</title>
 <qandaentry>
@@ -540,16 +540,16 @@ et pas de réel agrandissement en mode plein écran.
 </para></question>
 <answer><para>
 Votre pilote de sortie vidéo ne supporte pas l'agrandissement en hardware et à partir du
-moment où l'agrandissement logiciel peut être incroyablement lent, <application>MPlayer</application> 
+moment où l'agrandissement logiciel peut être incroyablement lent, <application>MPlayer</application>
 ne le fait pas automatiquement. Il est plus que probable que vous utilisez le pilote de sortie vidéo
-<systemitem>x11</systemitem> à la place de <systemitem>xv</systemitem>. 
-Essayez d'ajouter <option>-vo xv</option> à la ligne de commande ou lisez la 
+<systemitem>x11</systemitem> à la place de <systemitem>xv</systemitem>.
+Essayez d'ajouter <option>-vo xv</option> à la ligne de commande ou lisez la
 <link linkend="video">section vidéo</link> pour trouver
 les pilotes de sortie vidéo alternatif. L'option <option>-zoom</option>
 explicitement permet l'agrandissement logiciel.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Je viens juste d'installer <application>MPlayer</application>. Quand je veux
@@ -576,8 +576,8 @@ vo_driver = <replaceable>vo_sélectionné</replaceable>
 </programlisting>
 dans <filename>~/.mplayer/gui.conf</filename>.
 </para></answer>
-</qandaentry>	
- 
+</qandaentry>
+
 <qandaentry>
 <question><para>
 J'ai des problèmes avec <replaceable>[votre gestionnaire de fenêtre]</replaceable>
@@ -595,13 +595,13 @@ Essayez aussi de tester avec l'option <option>-fstype</option>.
 L'audio va en désync lors de la lecture d'un fichier AVI.
 </para></question>
 <answer><para>
-Essayez l'option <option>-bps</option> ou <option>-nobps</option>. Si cela ne 
+Essayez l'option <option>-bps</option> ou <option>-nobps</option>. Si cela ne
 s'améliore pas, lisez
 <link linkend="bugreports">comment rapporter un bogue</link>
 et téléchargez le fichier par FTP.
 </para></answer>
 </qandaentry>
- 
+
 <qandaentry>
 <question><para>
 Mon ordinateur joue les AVI DivX MS dans des résolutions ~ 640x300 et un son MP3 stéréo
@@ -612,14 +612,14 @@ Votre machine est trop lente ou votre pilote de carte son ne marche pas. Consult
 documentation pour voir si vous pouvez améliorer les performances.
 </para></answer>
 </qandaentry>
- 
+
 <qandaentry>
 <question><para>
 Comment puis-je utiliser <application>dmix</application> avec
 <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Après avoir configuré votre 
+Après avoir configuré votre
 <ulink url="http://alsa.opensrc.org/index.php?page=DmixPlugin">asoundrc</ulink>
 vous devez utiliser <option>-ao alsa:device=dmix</option>.
 </para></answer>
@@ -660,7 +660,7 @@ utiliser le son aRts, spécifiez la sortie audio via notre pilote aRts audio nati
 option est de lancer <application>MPlayer</application> avec artsdsp.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 J'ai des problèmes de synchro A/V. Certains de mes AVIs sont lus correctement, mais
@@ -672,7 +672,7 @@ vous essayez de lire un fichier qui a de l'audio à 22050Hz.
 Essayez le filtre audio <systemitem>resample</systemitem>.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Quand je lis ce film j'obtiens des désynchro vidéo-audio et/ou <application>MPlayer</application>
@@ -683,12 +683,12 @@ plante avec le message suivant:
 Il peut y avoir plusieurs raisons.
 <itemizedlist>
 <listitem><para>
-Votre CPU <emphasis role="bold">et/ou</emphasis> votre carte graphique <emphasis role="bold">et/ou</emphasis> 
-votre bus est trop lent. <application>MPlayer</application> affiche un message si 
+Votre CPU <emphasis role="bold">et/ou</emphasis> votre carte graphique <emphasis role="bold">et/ou</emphasis>
+votre bus est trop lent. <application>MPlayer</application> affiche un message si
 c'est le cas (et le compteur de trames sautées augmente vite).
 </para></listitem>
 <listitem><para>
-Si c'est un AVI, peut-être qu'il a un mauvais entrelacement. Essayez 
+Si c'est un AVI, peut-être qu'il a un mauvais entrelacement. Essayez
 l'option <option>-ni</option> pour trouver une solution.
 Ou il a peut-être un mauvais entête, dans ce cas <option>-nobps</option>
 et/ou <option>-mc 0</option> peut aider.
@@ -698,7 +698,7 @@ Votre pilote son est bogué. Voir la <link linkend="audio">section audio</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
-</qandaentry> 
+</qandaentry>
 
 <qandaentry>
 <question><para>
@@ -760,12 +760,12 @@ Je ne peux pas jouer un DVD, MPlayer décroche ou affiche des erreurs
 "Encrypted VOB file!".
 </para></question>
 <answer><para>
-Le code de décryptage CSS ne marche pas avec certains lecteurs DVD à moins que 
-vous ne paramètriez le code de région de façon approprié. Voir la réponse à la 
+Le code de décryptage CSS ne marche pas avec certains lecteurs DVD à moins que
+vous ne paramètriez le code de région de façon approprié. Voir la réponse à la
 question précédente.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Dois-je être en (setuid) root pour pouvoir lire un DVD ?
@@ -795,7 +795,7 @@ d'activer le DMA pour le lecteur DVD avec l'outil <command>hdparm</command> (déc
 dans le <link linkend="drives">chapitre CD</link>).
 </para></answer>
 </qandaentry>
- 
+
 <qandaentry>
 <question><para>
 J'ai copié un DVD en utilisant vobcopy. Comment puis-je le lire/l'encoder depuis
@@ -864,7 +864,7 @@ déchargera le 5ème titre du DVD dans un fichier
 <replaceable>dvd_dump.vob</replaceable>
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Comment puis-je créer des (S)VCDs automatiquement?
@@ -884,31 +884,31 @@ Comment puis-je créer des (S)VCDs?
 Des versions plus récentes de <application>MEncoder</application> peuvent directement
 générer des fichiers MPEG-2 qui peuvent être utilisés comme une base pour créer un (S)SVCD et
 sont plus à même d'être joués sans modification sur n'importe quelle plateformes (par exemple
-pour partager une vidéo depuis une caméra numérique pour des amis qui n'y connaisse rien en 
+pour partager une vidéo depuis une caméra numérique pour des amis qui n'y connaisse rien en
 informatique).
 <!--Veuillez lire
 <link linkend="menc-feat-vcd-dvd">Utilisé MEncoder pour créer des fichiers compatible VCD/SVCD/DVD</link>
 pour plus de détails.!-->
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Comment puis-je joindre deux fichiers vidéos ?
 </para></question>
 <answer><para>
 Les fichiers MPEG peuvent être mis bout à bout en un seul fichier avec de la chance.
-Pour les fichiers AVI, vous pouvez utiliser le support de fichier multiple de 
+Pour les fichiers AVI, vous pouvez utiliser le support de fichier multiple de
 <application>MEncoder</application> comme cela:
 <screen>
 mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>file1.avi</replaceable> <replaceable>file2.avi</replaceable>
 </screen>
-Cela ne marchera que si les fichiers sont de la même résolution 
+Cela ne marchera que si les fichiers sont de la même résolution
 et utilisent le même codec.
 Vous pouvez aussi essayer
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> et
 <application>avimerge</application> (font partie du panel d'outil de
-<ulink url="http://www.transcoding.org/">transcode</ulink>). 	 
+<ulink url="http://www.transcoding.org/">transcode</ulink>).
 </para></answer>
 </qandaentry>
 
@@ -928,13 +928,13 @@ régénére l'index et entrelace correctement les données.
 Bien sûr cela ne peut pas réparer les possibles bogues présents dans les flux vidéo et/ou audio.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Comment puis-je réparer le rapport d'aspect d'un fichier AVI?
 </para></question>
 <answer><para>
-Vous pouvez faire cela et on remercie l'option <option>-force-avi-aspect</option> 
+Vous pouvez faire cela et on remercie l'option <option>-force-avi-aspect</option>
 de <application>MEncoder</application>, ce qui prend le pas sur l'aspect stocké
 dans l'option vprp de l'en-tête du AVI OpenDML. Par exemple:
 <screen>
@@ -942,7 +942,7 @@ mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceabl
 </screen>
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Je ne peux pas encoder les sous-titres en AVI!
@@ -984,7 +984,7 @@ Parce que le bitrate avec lequel vous avez encodé l'audio est trop grand pour fa
 Je ne peux pas convertir un fichier ASF en AVI/MPEG-4 (DivX) car il utilise 1000 fps?
 </para></question>
 <answer><para>
-Vous devrez fixer le débit à la main avec l'option <option>-ofps</option>, 
+Vous devrez fixer le débit à la main avec l'option <option>-ofps</option>,
 depuis que ASF utilise un débit variable alors que AVI en utilise un fixe.
 </para></answer>
 </qandaentry>
@@ -1004,7 +1004,7 @@ respectivement) à <application>MEncoder</application>.
 Comment puis-je encoder uniquement le son d'une vidéo musicale ?
 </para></question>
 <answer><para>
-Cela n'est pas possible directement, mais vous pouvez essayer ça (notez le 
+Cela n'est pas possible directement, mais vous pouvez essayer ça (notez le
 <emphasis role="bold">&amp;</emphasis> à la fin de la commande
 <command>mplayer</command>):
 <screen>
@@ -1024,33 +1024,33 @@ commande ci-dessus.
 Pourquoi est-ce que les lecteurs de tiers partie n'arrivent pas à jouer des films MPEG-4 encodé par
 des versions plus tardives que 1.0pre7 de <application>MEncoder</application>?
 </para></question>
- 	 
+
 <answer><para>
-<systemitem class="library">libavcodec</systemitem>, la librairie d'encodage 
+<systemitem class="library">libavcodec</systemitem>, la librairie d'encodage
 native MPEG-4 normalement incluse avec <application>MEncoder</application>,
 avait pour habitude de règler le FourCC à 'DIVX' quand il encode des vidéos MPEG-4
-(le FourCC est un tag AVI pour identifier le logiciel utilisé pour encoder et 
-le logiciel destiné à être utilisé pour le décodage de la vidéo) 
+(le FourCC est un tag AVI pour identifier le logiciel utilisé pour encoder et
+le logiciel destiné à être utilisé pour le décodage de la vidéo)
 Cela amène les gens à penser que
 <systemitem class="library">libavcodec</systemitem>
-était une librairie d'encodage pour DivX, alors qu'en fait c'est une librairie 
-d'encodage pour MPEG-4 complètement différente qui implémente beaucoup mieux 
+était une librairie d'encodage pour DivX, alors qu'en fait c'est une librairie
+d'encodage pour MPEG-4 complètement différente qui implémente beaucoup mieux
 le standard MPEG-4 que DivX ne le fait.
 Ainsi, le nouveau FourCC par défaut utilisé par
 <systemitem class="library">libavcodec</systemitem> est 'FMP4', mais vous
-pouvez surpasser cette action en utilisant l'option <option>-ffourcc</option> de 
+pouvez surpasser cette action en utilisant l'option <option>-ffourcc</option> de
 <application>MEncoder</application>.
 Vous pouvez aussi changer le FourCC des fichiers existant de la même façon:
 <screen>
   mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
 Notez que cela règlera le FourCC à XVID plutôt que DIVX.
-Ceci est recommandé étant donné que DIVX FourCC signifie DivX4, ce qui est un codec MPEG-4 
+Ceci est recommandé étant donné que DIVX FourCC signifie DivX4, ce qui est un codec MPEG-4
 très basic, alorsque DX50 et XVID tout deux signifie MPEG-4 complèt (ASP).
 Donc, si vous changez le FourCC à DIVX, de mauvais logiciels ou lecteurs hardware
 peuvent cafouiller sur quelques fonctionalités avançées que
 <systemitem class="library">libavcodec</systemitem> supporte, mais que DivX
-ne supporte pas; d'autre part <systemitem class="library">XviD</systemitem> est plus proche 
+ne supporte pas; d'autre part <systemitem class="library">XviD</systemitem> est plus proche
 de <systemitem class="library">libavcodec</systemitem> en terme de
 fonctionalitiés, et il est supporté par tous les lecteurs digne de ce nom.
 </para></answer>
@@ -1066,7 +1066,7 @@ Utilisez <filename>aconvert</filename> du sous-répertoire
 qui se situe dans l'arbre source de MPlayer.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
 Comment puis-je jouer les sous-titres inclus dans AVI?
@@ -1074,11 +1074,11 @@ Comment puis-je jouer les sous-titres inclus dans AVI?
 <answer><para>
 Utilisez <filename>avisubdump.c</filename> du sous-répertoire
 <filename class="directory">TOOLS</filename> ou lisez
-<ulink url="http://xlife.zuavra.net/curse/0012/">ce document sur l'extraction/demultiplexage 
+<ulink url="http://xlife.zuavra.net/curse/0012/">ce document sur l'extraction/demultiplexage
 des sous-titres inclus dans les fichiers AVI OpenDML</ulink>.
 </para></answer>
 </qandaentry>
- 	 
+
 <qandaentry>
 <question><para>
  MPlayer n'ira pas...

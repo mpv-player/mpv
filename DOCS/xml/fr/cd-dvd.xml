@@ -7,7 +7,7 @@
 <title>Lecteurs CD/DVD</title>
 
 <para>
-Les lecteurs modernes de CD-ROM peuvent atteindre de très hautes vitesses de lecture, 
+Les lecteurs modernes de CD-ROM peuvent atteindre de très hautes vitesses de lecture,
 bien que certains soient capables de fonctionner à des vitesses réduites.
 Il y a plusieurs raisons possibles pour vouloir changer cette vitesse:
 </para>
@@ -15,7 +15,7 @@ Il y a plusieurs raisons possibles pour vouloir changer cette vitesse:
 <itemizedlist>
 <listitem><para>
 Il a été signalé que des lecteurs peuvent commettre des erreurs de lecture à
-haute vitesse, surtout avec des CD-ROM mal pressés. Diminuer la vitesse peut alors 
+haute vitesse, surtout avec des CD-ROM mal pressés. Diminuer la vitesse peut alors
 empêcher la perte de données dans ces circonstances.
 </para></listitem>
 
@@ -80,7 +80,7 @@ cdcontrol [-f <replaceable>périphérique</replaceable>] speed <replaceable>[vites
 </screen>
 </para>
 
-<para>DMA: 
+<para>DMA:
 <screen>
 sysctl hw.ata.atapi_dma=1
 </screen>
@@ -116,8 +116,8 @@ correct en ligne de commande avec l'option <option>-dvd-device</option>.
 <systemitem>libdvdcss</systemitem> pour le décryptage et la lecture de DVD.
 Ces deux bibliothèques sont contenues dans le sous-répertoire
 <filename class="directory">libmpdvdkit2/</filename> du répertoire
-source de <application>MPlayer</application>, vous n'avez donc pas besoin de les 
-installer séparément. Nous avons opté pour cette solution car nous devions corriger 
+source de <application>MPlayer</application>, vous n'avez donc pas besoin de les
+installer séparément. Nous avons opté pour cette solution car nous devions corriger
 un bug de <systemitem>libdvdread</systemitem>, et appliquer un patch qui ajoute
 <emphasis role="bold">un cache pour les clés CSS cassées</emphasis> à
 <systemitem>libdvdcss</systemitem>. Le résultat est bien plus rapide car les clés
@@ -134,7 +134,7 @@ bogues, des incompatibilités de librairies, et une vitesse moins importante.
 </para>
 
 <note><para>
-En cas de problème de décodage de DVD, essayez de désactiver supermount, ou 
+En cas de problème de décodage de DVD, essayez de désactiver supermount, ou
 tous les outils de ce genre. Certains lecteurs RPC-2 peuvent aussi avoir
 besoin que leur code de région soit bien paramétré.
 </para></note>
@@ -322,7 +322,7 @@ Il existe également certains disques VCD sans la première piste (une seule piste
 fichier du tout). Ils sont quand même lisibles, mais ne peuvent pas être montés.
 </para></listitem>
 
-<listitem><para> La définition d'un Video CD standard est appelée le 
+<listitem><para> La définition d'un Video CD standard est appelée le
 Philips "White Book" et n'est généralement disponible qu'en ligne étant donné
 qu'il doit être acheter chez Philips. Plus information détailé sur le Video
 CD peut être trouvé sur <ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">vcdimager documentation</ulink>.
