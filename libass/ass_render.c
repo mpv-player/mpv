@@ -570,6 +570,17 @@ static void change_alpha(uint32_t* var, uint32_t new, double pwr)
 	*var = (_r(*var) << 24) + (_g(*var) << 16) + (_b(*var) << 8) + (_a(*var) * (1 - pwr) + _a(new) * pwr);
 }
 
+/**
+ * \brief Multiply two alpha values
+ * \param a first value
+ * \param b second value
+ * \return result of multiplication
+ * Parameters and result are limited by 0xFF.
+ */
+static uint32_t mult_alpha(uint32_t a, uint32_t b)
+{
+	return 0xFF - (0xFF - a) * (0xFF - b) / 0xFF;
+}
 
 /**
  * \brief Calculate alpha value by piecewise linear function
@@ -596,10 +607,10 @@ static void interpolate_alpha(long long now,
 	}
 
 
-	change_alpha(&render_context.c1, a, 1.);
-	change_alpha(&render_context.c2, a, 1.);
-	change_alpha(&render_context.c3, a, 1.);
-	change_alpha(&render_context.c4, a, 1.);
+	change_alpha(&render_context.c1, mult_alpha(_a(render_context.c1), a), 1.);
+	change_alpha(&render_context.c2, mult_alpha(_a(render_context.c2), a), 1.);
+	change_alpha(&render_context.c3, mult_alpha(_a(render_context.c3), a), 1.);
+	change_alpha(&render_context.c4, mult_alpha(_a(render_context.c4), a), 1.);
 }
 
 /**
