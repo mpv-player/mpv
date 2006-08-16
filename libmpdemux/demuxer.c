@@ -938,7 +938,9 @@ int demux_info_add(demuxer_t *demuxer, const char *opt, const char *param)
       {
 	if(!strcasecmp(opt,info[2*n]))
 	  {
-	    mp_msg(MSGT_DEMUX, MSGL_WARN,MSGTR_DemuxerInfoAlreadyPresent,opt);
+	    mp_msg(MSGT_DEMUX, MSGL_INFO,MSGTR_DemuxerInfoChanged,opt,param);
+	    free(info[2*n+1]);
+	    info[2*n+1] = strdup(param);
 	    return 0;
 	  }
       }
