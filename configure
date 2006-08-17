@@ -7086,6 +7086,10 @@ else
   echores "no"
 fi
 
+if cc_check -Wdeclaration-after-statement ; then
+  CFLAGS="-Wdeclaration-after-statement $CFLAGS"
+fi
+
 echocheck "ftello()"
 # if we don't have ftello use the osdep/ compatibility module
 cat > $TMPC << EOF
