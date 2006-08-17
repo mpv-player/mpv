@@ -18,7 +18,7 @@ SRCS += menu_dvbin.c
 endif
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs
+CFLAGS  = -I. -I.. -I../libmpcodecs $(OPTFLAGS)
 
 .SUFFIXES: .c .o
 

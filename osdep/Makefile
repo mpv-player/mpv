@@ -35,7 +35,7 @@ SRCS += $(getch)
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I..
+CFLAGS  = -I. -I.. $(OPTFLAGS)
 # -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o

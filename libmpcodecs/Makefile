@@ -317,13 +317,13 @@ OBJS=$(SRCS:.c=.o)
 SRCS2=$(ENCODER_SRCS)
 OBJS2=$(SRCS2:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) \
-          -I. -I.. \
+CFLAGS  = -I. -I.. \
           -Inative \
           -I../libmpdemux \
           -I../stream \
           -I../loader \
           $(LIBAV_INC) \
+          $(OPTFLAGS) \
           -D_GNU_SOURCE \
 
 .SUFFIXES: .c .o

@@ -14,7 +14,7 @@ SRCS	= alloc.c \
 
 OBJS	= $(SRCS:.c=.o)
 INCLUDE = -I. -I../libvo -I..
-CFLAGS  = $(OPTFLAGS) $(INCLUDE) -DMPG12PLAY
+CFLAGS  = $(INCLUDE) $(OPTFLAGS) -DMPG12PLAY
 
 ifeq ($(TARGET_MMX),yes)
 SRCS += idct_mmx.c motion_comp_mmx.c

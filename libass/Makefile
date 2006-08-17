@@ -9,9 +9,9 @@ SRCS=ass.c ass_cache.c ass_fontconfig.c ass_render.c ass_utils.c ass_mp.c
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) \
-          -I. -I.. \
+CFLAGS  = -I. -I.. \
           -I../libmpcodecs \
+          $(OPTFLAGS) \
           -D_GNU_SOURCE \
 
 .SUFFIXES: .c .o

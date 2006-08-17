@@ -10,7 +10,7 @@ SRCS=audio_out.c \
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -I..
+CFLAGS  = -I. -I.. $(OPTFLAGS)
 
 .SUFFIXES: .c .o
 

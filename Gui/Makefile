@@ -4,7 +4,7 @@ LIBNAME = libgui.a
 
 INCDIR  = -I. -I.. -I../loader -I./wm -I./skin
 
-CFLAGS = $(OPTFLAGS) $(INCDIR) -DDEBUG
+CFLAGS = $(INCDIR) $(OPTFLAGS) -DDEBUG
 
 ifeq ($(TARGET_WIN32),yes)
 SRCS = win32/dialogs.c \

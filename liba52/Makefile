@@ -13,7 +13,7 @@ SRCS    = crc.c \
 
 OBJS	= $(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I..
+CFLAGS  = -I.. $(OPTFLAGS)
 
 .SUFFIXES: .c .o
 
