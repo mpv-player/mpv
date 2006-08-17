@@ -711,7 +711,7 @@ that comes with the system.
 <para>
 There are at least two to choose from:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
-<ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.
+<ulink url="http://www.macports.org/">DarwinPorts</ulink>.
 Both of them provide about the same service (i.e. a lot of packages to
 choose from, dependency resolution, the ability to simply add/update/remove
 packages, etc...).
