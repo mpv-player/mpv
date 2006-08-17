@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19134
+.\" In sync with r19361
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -84,6 +84,13 @@ mencoder \- Movie Encoder
 .B mplayer
 'in +\n[.k]u
 .I tv://[Kanal]
+[Optionen]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I pvr://
 [Optionen]
 .
 .br
@@ -198,8 +205,8 @@ DirectFB, Quartz und Mac OS X CoreVideo, du kannst ihn aber auch mit GGI, SDL
 (und damit allen von SDL unterstützen Treiber), VESA (mit jeder VESA-kompatiblen
 Grafikkarte, auch ohne X11) sowie mit einigen kartenspezifischen
 Low-Level-Treibern (für Matrox, 3Dfx und ATI) und ein paar
-Hardware-MPEG-Decoderkarten wie der Siemens DVB, DXR2 und DXR3/\:Hollywood+
-benutzen.
+Hardware-MPEG-Decoderkarten wie der Siemens DVB, Hauppauge PVR (IVTV), DXR2
+und DXR3/\:Hollywood+ benutzen.
 Die meisten von ihnen unterstützen Software- oder Hardwareskalierung,
 so dass die Vollbildwiedergabe kein Problem ist.
 .PP
@@ -320,6 +327,8 @@ Datei.
 Mache einen Schnappschuss.
 .IPs "I"
 Zeige den Dateinamen im OSD.
+.IPs "! und @"
+Spult zum Anfang des vorigen/nächsten Kapitels
 .RE
 .PD 1
 .PP
@@ -499,6 +508,13 @@ du ihnen den Wert 'yes' oder '1' oder 'true' zuweist, deaktiviert werden sie
 mit 'no' oder '0' oder 'false'.
 Auch Suboptionen können in dieser Art angegeben werden.
 .PP
+.PP
+Du kannst auch dateispezifische Konfigurationsdateien schreiben.
+Wenn du für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben
+möchtest, dann nenne diese Datei 'movie.avi.conf' mit den für
+diesen Film relevanten Optionen und speichere die Datei in ~/\:.mplayer/
+oder im Verzeichnis der Datei.
+.PP
 .I BEISPIEL FÜR DIE MPLAYER-KONFIGURATIONSDATEI:
 .sp 1
 .nf
@@ -539,12 +555,6 @@ subalign=2
 subpos=96
 spuaa=20
 .fi
-.PP
-Du kannst auch dateispezifische Konfigurationsdateien schreiben.
-Wenn du für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben
-möchtest, dann nenne diese Datei 'movie.avi.conf' mit den für
-diesen Film relevanten Optionen und speichere die Datei in ~/\:.mplayer/
-oder im Verzeichnis der Datei.
 .
 .\" --------------------------------------------------------------------------
 .\" Profile
@@ -785,6 +795,13 @@ Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
 die A/\:V-Synchronisation beizubehalten.
 Videofilter werden auf diese Frames nicht angewendet.
 B-Frames werden überhaupt nicht decodiert.
+.
+.TP
+.B \-(no)gui
+(De)aktiviert die GUI-Schnittstelle (Standard hängt vom Namen der Binärdatei
+ab).
+Funktioniert nur als erstes Argument auf der Kommandozeile.
+Funktioniert nicht als Option in einer Konfigurationsdatei.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -1401,6 +1418,74 @@ Benutzt IPv6 bei Netzwerkverbindungen.
 Greift automatisch auf IPv4-Verbindungen zurück.
 .
 .TP
+.B \-pvr <Option1:Option2:...> (nur bei PVR)
+Diese Option nimmt verschiedene Feineinstellungen der Eigenschaften für die
+Encodierung des PVR-Capture-Moduls vor.
+Die Hauppauge WinTV PVR\-150/250/350/500 und alle IVTV-basierten Karten sind
+als PVR-Capture-Karten bekannt.
+Für das Einfangen eines MPEG-Streams und um diesen mit MPlayer/Mencoder
+anzuschauen, verwende 'pvr://' als Film-URL.
+.sp 1
+Verfügbare Optionen sind folgende:
+.RSs
+.IPs aspect=<1\-4>
+Gib den Aspekt der Eingabe an (Standard: 4:3):
+.RSss
+1: 1:1
+.br
+2: 4:3
+.br
+3: 16:9
+.br
+4: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Gib die Audio-Rate für die Encodierung an (Standard: 48000 Hz, verfügbar:
+32000, 44100 und 48000 Hz).
+.IPs alayer=<1\-2>
+Gib die Encodierung des MPEG-Audio-Layers an (Standard: Layer 2).
+.IPs abitrate=<32\-448>
+Gib die Bitrate für die Audioencodierung in kbps an (Standard: 384 kbps).
+.IPs amode=<Wert>
+Gib den Modus für die Audioencodierung an.
+Verfügbare Preset-Werte sind 'stereo', 'joint_stereo', 'dual' und 'mono'
+(Standard: stereo).
+.IPs vbitrate=<Wert>
+Gib die durchschnittliche Bitrate für die Videoencodierung an (Standard:
+6 Mbps).
+.IPs vmode=<0\-1>
+Gib den Modus für die Videoencodierung an (Standard: VBR):
+.RSss
+0: VBR
+.br
+1: CBR
+.REss
+.IPs vpeak=<Wert>
+Gib den Höchstwert für die Bitrate der Videoencodierung an (nur nützlich für
+VBR-Encodierung, Standard: 9.6 Mbps).
+.IPs fmt=<Wert>
+Wähle ein MPEG-Format für die Encodierung (Standard: MPEG PS):
+.RSss
+ps:    MPEG PS.
+.br
+ts:    MPEG TS (experimentell, kann fehlschlagen)
+.br
+mpeg1: MPEG 1
+.br
+vcd:   Video CD
+.br
+svcd:  Super Video CD
+.br
+dvd:   DVD
+.br
+dvds1: DVD Region 1 (NTSC)
+.br
+dvds2: DVD Region 2 (PAL)
+.REss
+.RE
+.PD 1
+.
+.TP
 .B \-rawaudio <Option1:Option2:...>
 Mit dieser Option können raw-Audiodateien abgespielt werden.
 Sie kann auch verwendet werden, um Audio-CDs abzuspielen, die nicht mit 44KHz
@@ -1548,7 +1633,7 @@ welches Programm (falls vorhanden) abgespielt werden soll.
 Kann in Verbindung mit \-vid und \-aid benutzt werden.
 .
 .TP
-.B \-tv <Option1:Option2:...> (nur bei TV)
+.B \-tv <Option1:Option2:...> (nur bei TV/PVR)
 Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
 Um mit MPlayer fernzusehen, benutze die Optionen 'tv://'
 oder 'tv://<Kanalnummer>' oder sogar 'tv://<Kanalname>' (siehe unten die
@@ -2373,7 +2458,16 @@ DXR2-spezifischer Ausgabetreiber von Creative.
 .
 .TP
 .B mpegpes (nur bei DVB)
-DVB-spezifischer Ausgabetreiber.
+Audioausgabetreiber für DVB-Karten, der die Ausgabe in eine MPEG-PES-Datei
+schreibt, wenn keine DVB-Karte installiert ist.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+DVB-Karte, die benutzt werden soll, wenn mehr als eine Karte verfügbar ist.
+.IPs file=<Dateiname>
+Ausgabedateiname
+.RE
+.PD 1
 .
 .TP
 .B null\ \ \ 
@@ -3542,6 +3636,21 @@ Gibt die Gerätenummer an, wenn mehr als eine em8300-Karte vorhanden ist.
 .PD 1
 .
 .TP
+.B ivtv (nur bei IVTV)
+Videoausgabetreiber für TV-Out speziell für den Conexant CX23415 (iCompression
+iTVC15) oder Conexant CX23416 (iCompression iTVC16) MPEG Decoder-Chip
+(Hauppauge WinTV PVR-150/250/350/500).
+Siehe auch den Videofilter lavc.
+.PD 0
+.RSs
+.IPs Gerät
+Wählt den zu verwendenden MPEG-Decoder explizit (Standard: /dev/video16).
+.IPs Ausgabe
+Wählt die für das Videosignal zu verwendende TV-Out-Ausgabe.
+.RE
+.PD 1
+.
+.TP
 .B mpegpes (nur bei DVB)
 Videoausgabetreiber für DVB-Karten, der die Ausgabe in eine MPEG-PES-Datei
 schreibt, falls keine DVB-Karte installiert ist.
@@ -3552,7 +3661,7 @@ Gibt die Gerätenummer an, wenn mehr als eine DVB-Ausgabekarte vorhanden ist
 (nur bei
 V3 API, wie bei den Treibern der 1.x.y-Serie).
 .IPs <Dateiname>
-Erlaubt die genaue Angabe des Ausgabedateinamens (Standard: ./grab.mpg).
+Ausgabedateiname (Standard: ./grab.mpg).
 .RE
 .PD 1
 .
@@ -4575,7 +4684,7 @@ hoch ist.
 .PD 1
 .
 .TP
-.B pan=n[:l01:l02:...l0n:l10:l12:...l1n:lm0:lm1:...lmn]
+.B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...] 
 Mischt Kanäle beliebig.
 Im Prinzip eine Kombination der Filter volume und channels, der benutzt werden
 kann, viele Kanäle auf nur wenige herunterzumischen, z.B.\& Stereo nach Mono
@@ -4592,7 +4701,7 @@ der Manpage.
 .RSs
 .IPs <n>\ \ 
 Anzahl der Ausgabekanäle (1\-6).
-.IPs <lij>
+.IPs <Lij>
 Gibt an, wieviel vom Eingabekanal i in den Ausgabekanal j gemischt wird (0\-1).
 Prinzipiell geben die ersten n Zahlen an, was mit dem ersten Eingabekanal
 gemacht wird, dann n Zahlen, die den zweiten Eingabekanal betreffen, usw.
@@ -5027,7 +5136,7 @@ Drehe um 90 Grad gegen den Uhrzeigersinn und stelle es auf den Kopf.
 .RE
 .
 .TP
-.B scale[=b:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
+.B scale[=b:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
 Skaliert das Bild mit dem Softwareskalierer (langsam) und führt eine
 Farbraumkonvertierung zwischen YUV und RGB durch (siehe auch \-sws).
 .RSs
@@ -5115,6 +5224,14 @@ Verbietet Hochskalierung über die ursprünglichen Abmessungen hinaus.
 .br
 2: Verbietet Hochskalierung, falls beide Abmessungen ihre ursprünglichen Werte
 überschreiten.
+.REss
+.IPs <arnd>
+Genaues Runden für den vertikalen Skalierer, der schneller oder langsamer als
+das Standardrunden ist.
+.RSss
+0: Deaktiviert genaues Runden (Standard).
+.br
+1: Aktiviert genaues Runden.
 .REss
 .RE
 .
@@ -5472,7 +5589,7 @@ Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .TP
 .B lavc[=Qualität:fps]
 Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
-für die Benutzung mit DVB/\:DXR3.
+für die Benutzung mit DVB/\:DXR3/IVTV.
 Schneller und von besserer Qualität als mit \-vf fame.
 .RSs
 .IPs <Qualität>
@@ -5488,7 +5605,8 @@ Erkennung basierend auf Höhe)
 .
 .TP
 .B fame\ \ \ 
-Schnelle Softwarekonvertierung mit libfame für die Benutzung mit DVB/\:DXR3.
+Schnelle Softwarekonvertierung mit libfame für die Benutzung mit
+DVB/\:DXR3/IVTV.
 .
 .TP
 .B dvbscale[=Aspekt]
@@ -9895,7 +10013,8 @@ Setzt Videobreite und -höhe bei Pan-und-Scan-Video bei MPEG-2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Setzt den Aspekt für MPEG-1/2-Video.
+Setzt den Display-Aspekt für MPEG-1/2-Video.
+Verwende diese Option nicht mit MPEG-1, oder der Aspekt wird völlig falsch sein.
 .
 .
 .TP
