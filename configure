@@ -462,6 +462,7 @@ _install=install
 _ranlib=ranlib
 _cc=cc
 test "$CC" && _cc="$CC"
+_gcc_check=yes
 _as=auto
 _runtime_cpudetection=no
 _cross_compile=auto
@@ -480,10 +481,10 @@ for ac_option do
     _as=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --enable-gcc-checking)
-    _gcc_checking=yes
+    _gcc_check=yes
     ;;
   --disable-gcc-checking)
-    _gcc_checking=no
+    _gcc_check=no
     ;;
   --enable-static)
     _ld_static='-static'
@@ -673,7 +674,7 @@ else
 fi
 
 # Checking CC version...
-if test "$_gcc_checking" != no ; then
+if test "$_gcc_check" = yes ; then
  # Intel C++ Compilers (no autoselect, use CC=/some/binary ./configure)
  if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   echocheck "$_cc version"
