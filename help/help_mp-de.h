@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In sync with r19087
+// In sync with r19402
 
 // ========================= MPlayer help ===========================
 
@@ -213,6 +213,7 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
 #define MSGTR_OSDSpeed "Geschwindigkeit: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDChapter "Kapitel: (%d) %s"
 
 // property values
 #define MSGTR_Enabled "aktiviert"
@@ -607,7 +608,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Öffnen des Audio-Demuxers fehlgeschlagen: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Öffnen des Untertitel-Demuxers fehlgeschlagen: %s\n"
 #define MSGTR_TVInputNotSeekable "TV-Input ist nicht durchsuchbar (Suche des Kanals?).\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s schon vorhanden.\n"
+#define MSGTR_DemuxerInfoChanged "Demuxerinfo %s geändert zu %s.\n"
 #define MSGTR_ClipInfo "Clip-Info:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
