@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19104 -->
+<!-- in sync with r19424 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -765,7 +765,7 @@ $ ./configure --charset=noconv
 <para>
   Es stehen mindestens zwei zur Wahl:
   <ulink url="http://fink.sourceforge.net/">Fink</ulink> und
-  <ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.
+  <ulink url="http://www.macports.org/">DarwinPorts</ulink>.
   Beide bieten in etwa denselben Funktionsumfang (z.B. eine Menge Pakete, von denen
   gewählt werden kann, Auflösung von Abhängigkeiten, die Möglichkeit, einfach
   Pakete hinzuzufügen/zu aktualisieren/zu entfernen, etc...).
