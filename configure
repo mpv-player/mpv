@@ -480,10 +480,10 @@ for ac_option do
   --as=*)
     _as=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --enable-gcc-checking)
+  --enable-gcc-check)
     _gcc_check=yes
     ;;
-  --disable-gcc-checking)
+  --disable-gcc-check)
     _gcc_check=no
     ;;
   --enable-static)
