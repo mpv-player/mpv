@@ -2549,18 +2549,17 @@ Un exemple avec compression AC3:
 <title>Exemples de paramètres d'encodage</title>
 
 <para>
-  Les paramètres suivant sont des exemples de combinaisons d'option de différents
-  encodages qui affectent la vitesse et la qualité pour un bitrate donné.
+  Les paramètrages suivants sont des exemples de différentes combinaisons d'options
+  d'encodage qui affectent le compromis vitesse / qualité pour un débit donné.
 </para>
 
 <para>
-  Tous les paramètres d'encodage sont testés sur un échantillon de vidéo de
-  720x448 @30000/1001 fps, le bitrate cible était 900kbps, et la machine était un
+  Tous les paramètrages d'encodage ont été testés sur un échantillon vidéo de résolution
+  720x448 à 30000/1001 images par seconde, le débit cible était de 900kbit/s, et la machine était un
   AMD-64 3400+ à 2400 Mhz en mode 64 bits.
-  Chaque paramètre d'encodage comporte la mesure de vitesse d'encodage (en
-  frames par seconde) et la perte PSNR (en dB) comparé au paramètre de "très
-  haute qualité".
-  Sachez que selon votre source, votre machine et les derniers développements,
+  Chaque exemple d'encodage est donné avec la vitesse d'encodage mesurée (en
+  images par seconde) et la perte en PSNR (en dB) par rapport au réglage de "très
+  haute qualité". Sachez que selon votre video source, votre machine et les derniers développements,
   vous pourrez obtenir des résultats très différents.
 </para>
 
@@ -2568,31 +2567,31 @@ Un exemple avec compression AC3:
 <informaltable frame="all">
 <tgroup cols="4">
 <thead>
-<row><entry>Description</entry><entry>Options d'encodage</entry><entry>vitesse (en fps)</entry><entry>perte PSNR relative (en dB)</entry></row>
+<row><entry>Description</entry><entry>Options d'encodage</entry><entry>vitesse (en images/s)</entry><entry>perte relative de PSNR (en dB)</entry></row>
 </thead>
 <tbody>
 <row>
   <entry>Très haute qualité</entry>
   <entry><option>vcodec=mpeg4:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:vmax_b_frames=2:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:qns=2</option></entry>
-  <entry>6fps</entry>
+  <entry>6im/s</entry>
   <entry>0dB</entry>
 </row>
 <row>
   <entry>Haute qualité</entry>
   <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:last_pred=2:dia=-1:vmax_b_frames=2:vb_strategy=1:cmp=3:subcmp=3:precmp=0:vqcomp=0.6:turbo</option></entry>
-  <entry>15fps</entry>
+  <entry>15im/s</entry>
   <entry>-0.5dB</entry>
 </row>
 <row>
   <entry>Rapide</entry>
   <entry><option>vcodec=mpeg4:mbd=2:trell:v4mv:turbo</option></entry>
-  <entry>42fps</entry>
+  <entry>42im/s</entry>
   <entry>-0.74dB</entry>
 </row>
 <row>
   <entry>Temps réel</entry>
   <entry><option>vcodec=mpeg4:mbd=2:turbo</option></entry>
-  <entry>54fps</entry>
+  <entry>54im/s</entry>
   <entry>-1.21dB</entry>
 </row>
 </tbody>
@@ -2604,10 +2603,10 @@ Un exemple avec compression AC3:
 <sect2 id="custommatrices"><title>Matrices inter/intra personnalisées</title>
 
 <para>
-Avec cette fonctionnalité de
+Grâce à cette fonctionnalité de
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-vous pouvez rentrer des matrices personnalisées inter (I-frames/frames clé) et intra
-(P-frames/frames prévu). La plupart des codecs supporte ceci - on rapporte que
+vous pouvez rentrer des matrices personnalisées inter (image I ou images clé) et intra
+(image P ou image prédite). De nombreux codecs le supportent - on rapporte que
 <systemitem>mpeg1video</systemitem> et <systemitem>mpeg2video</systemitem> fonctionnent avec.
 </para>
 
@@ -2649,7 +2648,7 @@ Inter:
 <para>
 Utilisation:
 <screen>
-$ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
+$ mencoder <replaceable>entree.avi</replaceable> -o <replaceable>sortie.avi</replaceable> -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
 </screen>
 </para>
 
@@ -2672,38 +2671,38 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Voilà, vous venez tout juste d'acheter votre exemplaire de 'Harry Potter et la
-  Chambre des Secrets' (édition écran large, bien sûr), et vous voulez ripper ce
-  DVD ceci afin de pouvoir l'ajouter à votre PC Home Cinéma. C'est un DVD de
+  Chambre des Secrets' (édition panoramique, bien sûr), et vous voulez copier ce
+  DVD afin de pouvoir l'ajouter à votre PC Home Cinéma. C'est un DVD de
   région 1, donc en NTSC. L'exemple ci-dessous peut quand même être adapté au PAL,
-  si ce n'est que vous devrez retirer <option>-ofps 24000/1001</option> (parce que le
-  framerate de sortie est le même que celui en entrée), et bien sûr les dimensions
-  de découpage seront différentes.
+  si ce n'est que vous devrez retirer l'option <option>-ofps 24000/1001</option> (parce que le
+  le nombre d'images par seconde en sortie est le même que celui en entrée), et bien sûr les dimensions
+  de recadrage seront différentes.
 </para>
 
 <para>
   Après avoir lancé <option>mplayer dvd://1</option>, nous suivons le processus
-  détaillé dans la section <link linkend="menc-feat-telecine">Comment traiter le
-  téléciné et l'entrelacement dans les DVDs NTSC</link> et découvrir que c'est une
-  vidéo progressive en 24000/1001 fps, ce qui signifie que nous n'aurons pas besoin
-  d'utiliser un filtre inverse téléciné, comme <option>pullup</option> ou <option>filmdint</option>.
+  détaillé dans la section <link linkend="menc-feat-telecine">Comment gérer le
+  téléciné et l'entrelacement dans les DVDs NTSC</link> et découvrons que c'est une
+  vidéo progressive à 24000/1001 images par seconde, ce qui signifie que nous n'avons pas besoin
+  d'utiliser de filtre téléciné-inverse, comme <option>pullup</option> ou <option>filmdint</option>.
 </para>
 
 <para>
   Ensuite, nous voulons déterminer le rectangle de recadrage approprié, donc
-  nous utilisons le filtre cropdetect:
+  nous utilisons le filtre <option>cropdetect</option>:
 
   <screen>mplayer dvd://1 -vf cropdetect</screen>
 
-  Cherchez une frame complètement remplie (comme une scène
+  Assurez-vous que vous visualisez une image complètement remplie (comme une scène
   lumineuse), et vous verrez dans la console de sortie de <application>MPlayer</application>:
 
   <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 
-  Rejouons ensuite le film avec le filtre pour tester le résultat:
+  Revisionnons ensuite le film avec le filtre pour tester le résultat:
 
   <screen>mplayer dvd://1 -vf crop=720:362:0:58</screen>
 
-  Et nous nous apercevons que tout est parfait. Ensuite, nous nous assurons que
+  Et nous nous apercevons que tout a l'air parfait. Ensuite, nous nous assurons que
   la hauteur et la largeur sont des multiples de 16. La largeur est bonne,
   cependant la hauteur ne l'est pas. Vu que nous avons quelques notions minimales
   de maths, nous savons que le plus proche multiple de 16 inférieur à 362
@@ -2713,47 +2712,48 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Nous pourrions juste utiliser <option>crop=720:352:0:58</option>, mais il
   serait mieux d'enlever un peu du haut et un peu du bas afin de garder
-  le centre. Nous avons rétréci la hauteur de 10 pixels, mais nous ne voulons
+  la partie centrale. Nous avons rétréci la hauteur de 10 pixels, mais nous ne voulons
   pas augmenter le décalage de 5 pixels vu que c'est un nombre impair et que
-  cela affectera défavorablement la qualité. A la place, nous augmenterons le
-  décalage y de 4 pixels:
+  cela affectera défavorablement la qualité. A la place, nous augmentons le
+  décalage vertical de 4 pixels:
 
   <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
 
   Une autre raison pour retirer les pixels du haut et du bas est que nous nous
   assurons que nous avons éliminé tous les pixels à moitié noir s'ils
-  existent. Notez que si votre vidéo est télécinée, assurez-vous que le filtre
-  <option>pullup</option> (ou quelque soit le filtre inverse téléciné que vous
-  avez décidé d'utiliser) apparaissent dans la chaîne de filtres avant que vous
-  découpiez. Si il est entrelacé, dés-entrelacez-le avant découpage.
-  (Si vous choisissez de préserver la vidéo entrelacée, alors soyez certain que
-  votre décalage de découpage vertical est un multiple de 4.)
+  existent. Si votre vidéo est télécinée, assurez-vous que le filtre
+  <option>pullup</option> (ou n'importe quel autre filtre téléciné-inverse que vous
+  avez décidé d'utiliser) apparaissent dans la chaîne de filtres avant que vous ne
+  recadriez. Si il est entrelacé, désentrelacez-le avant le recadrage.
+  (Si vous choisissez de préserver la vidéo entrelacée, alors assurez-vous que
+  votre décalage vertical de recadrage est un multiple de 4.)
 </para>
 
 <para>
-  Si la perte de ces 10 pixels vous peine, vous pouvez, au lieu de réduire
-  les dimensions, prendre le plus proche multiple de 16.
+  Si la perte de ces 10 pixels vous peine réellement, vous pouvez préférez réduire
+  les dimensions au plus proche multiple de 16.
   La chaîne de filtres ressemblerait à ceci:
 
   <screen>-vf crop=720:362:0:58,scale=720:352</screen>
 
-  Réduire la vidéo comme cela signifie qu'une petite quantité de détails est perdu
+  Réduire la taille de la vidéo comme cela signifie qu'une petite quantité de détails est perdu
   bien que cela ne soit probablement pas perceptible. Augmenter la taille
-  entraînera une qualité inférieure (à moins que vous n'augmentiez le bitrate).
-  Le redimensionnement sauvera l'ensemble de ces pixels. C'est une différence que vous
-  voudrez prendre en compte à chaque circonstance. Par exemple, si le DVD vidéo 
-  était fait pour la télévision, vous pourriez avoir intérêt à éviter le
-  redimensionnement vertical, étant donné que la ligne d'échantillons correspond
-  à la manière d'origine avec laquelle le contenu a été enregistré.
+  entraînera une qualité inférieure (à moins que vous n'augmentiez le débit).
+  Le recadrage enlève quand à lui complétement les pixels à l'extérieur du
+  nouveau cadrage. C'est un compromis dont vous devrez tenir compte
+  selon les circonstances. Par exemple, si une vidéo DVD a été 
+  faite pour la télévision, vous pourriez vouloir éviter le
+  redimensionnement vertical, étant donné que l'échantillon de lignes correspond
+  à la manière avec laquelle le contenu a été enregistré.
 </para>
 
 <para>
-  Après vérification, nous voyons que notre film a un peu d'action et beaucoup de
-  détails, donc nous prenons 2400Kbit pour notre bitrate.
+  En inspectant le film, nous voyons qu'il contient une bonne quantité d'action et beaucoup de
+  détails, donc nous choisissons un débit de 2400Kb/s.
 </para>
 
 <para>
-  Nous sommes maintenant prêts à faire les deux passes d'encodage. Première passe:
+  Nous sommes maintenant prêts à faire l'encodage deux passes. Première passe:
 
   <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
@@ -2768,38 +2768,39 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Les options <option>v4mv:mbd=2:trell</option> augmenteront considérablement la
-  qualité au dépend de la durée d'encodage. Il y a peu de raison de ne pas
-  prendre en compte ces options quand le but premier est la qualité. Les options
-  <option>cmp=3:subcmp=3:mbcmp=3</option> choisissent une fonction de comparaison
-  qui rend une plus haute qualité que celle par défaut. Vous pouvez tenter d'expérimenter
-  avec ces paramètres (reportez-vous à la page man pour les valeurs possibles)
-  étant donné que différentes fonctions peuvent avoir un large impact sur la
+  qualité au prix d'une plus longue durée d'encodage. Il y a peu de raison de ne pas
+  utiliser ces options quand le but premier est la qualité. Les options
+  <option>cmp=3:subcmp=3:mbcmp=3</option> sélectionne une fonction de comparaison
+  qui donne une meilleure qualité que celle par défaut. Vous pouvez essayer de faire varier
+  ces paramètres (reportez-vous à la page man pour les valeurs possibles)
+  étant donné que différentes fonctions peuvent avoir un impact important sur la
   qualité selon le matériel source. Par exemple, si vous trouvez que
   <systemitem class="library">libavcodec</systemitem> produit trop d'artefacts
-  carrés, vous pouvez essayer de choisir le NSSE expérimental comme fonction
-  de comparaison via <option>*cmp=10</option>.
+  de blocs, vous pouvez essayer de choisir la fonction de comparaison expérimentale NSSE
+  via <option>*cmp=10</option>.
 </para>
 
 <para>
   Pour ce film, le AVI résultant durera 138 minutes et pèsera à peu près 3GB.
-  Si vous disiez que la taille du fichier n'était pas importante, cette taille
-  est parfaitement acceptable. Cependant, si vous la souhaitez plus petite,
-  vous pouvez essayer un bitrate inférieur. Les augmentations de bitrates ont des
-  effets amoindris, tandis que nous pourrons clairement voir une
-  amélioration à partir de 1800Kbit jusqu'à 2000Kbit, cela ne semblera pas
-  tellement rentable notablement au-dessus de 2000Kbit. Libre à vous
-  d'expérimenter jusqu'à totale satisfaction.
+  Et puisque vous disiez que la taille du fichier ne comptait pas, cette taille
+  est parfaitement acceptable. Cependant, si vous l'aviez voulu plus petite,
+  vous pourriez essayer un débit inférieur. L'augmentation du débit améliore la qualité,
+  mais de moins en moins, ainsi, tandis que nous pourrions clairement voir une
+  amélioration de 1800Kb/s à 2000Kb/s, cela peut ne pas être notable
+  au-dessus de 2000Kb/s. Libre à vous d'expérimenter jusqu'à totale satisfaction.
 </para>
 
 <para>
   Parce que nous avons passé la source vidéo au travers d'un filtre antibruit,
-  vous aimerez en rajouter un peu pendant la lecture. Ceci, avec le filtre de
+  vous pourriez vouloir en rajouter un peu pendant la lecture. Ceci, avec le filtre de
   post-traitement <option>spp</option>, améliore de façon radicale la perception
-  de qualité et aide à éliminer les artefacts carrés de la vidéo.
+  de qualité et aide à éliminer les artefacts de bloc de la vidéo.
   Avec l'option <option>autoq</option> de <application>MPlayer</application>,
-  vous pouvez faire varier le montant de post-traitement achevé par le filtre spp
-  selon le CPU disponible. Aussi, à ce point, pourriez-vous vouloir demander
-  une correction gamma et/ou couleur qui convient mieux à l'affichage. Par exemple:
+  vous pouvez faire varier le montant de post-traitement effectué par le filtre spp
+  en fonction de la disponibilté de votre processeur. Aussi, arrivé à ce point, vous pourriez
+  vouloir appliquer une correction gamma et/ou couleur pour convenir au mieux à
+  votre écran.
+  Par exemple:
 
   <screen>mplayer Harry_Potter_2.avi -vf spp,noise=9ah:5ah,eq2=1.2 -autoq 3</screen>
 
@@ -2809,17 +2810,16 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 
 <sect1 id="menc-feat-xvid">
-<title>Encodé avec le codec <systemitem class="library">XviD</systemitem></title>
+<title>Encodage avec le codec <systemitem class="library">XviD</systemitem></title>
 <para>
  <systemitem class="library">XviD</systemitem> est une bibliothèque libre pour
- encoder les flux vidéo de MPEG-4 ASP.
+ encoder les flux vidéo MPEG-4 ASP.
  Avant de commencer à encoder, vous avez besoin de <link linkend="xvid">
- paramétrer <application>MEncoder</application> pour son support</link>.
+ paramétrer <application>MEncoder</application> pour qu'il la supporte.</link>.
 </para>
 <para>
  Ce guide a pour principal objectif de fournir le même genre d'information que
- le guide d'encodage de x264.
- Par conséquent, commencez par lire
+ le guide d'encodage avec x264. Par conséquent, commencez par lire
  <link linkend="menc-feat-x264-encoding-options-intro">la première partie</link>
  de ce guide.
 </para>
@@ -2829,13 +2829,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Quelles options devrais-je utiliser pour avoir les meilleurs résultats?</title>
 
 <para>
- Commencez par passer en revue la page man de la section
- <systemitem class="library">XviD</systemitem> de <application>MPlayer</application>.
- Cette section est prévue pour être un supplément à la page man.
+ Commencez par passer en revue la section <systemitem class="library">XviD</systemitem>
+ de la page man de <application>MPlayer</application>.
+ Cette section est prévue pour être un supplément de la page man.
 </para>
 <para>
- Les paramètres XviD par défaut font déjà une bonne distinction entre la
- vitesse et la qualité, donc vous pouvez sans risque vous en tenir à eux
+ Les paramètrages par défaut de XviD donnent déjà un bon compromis entre
+ vitesse et qualité, vous pouvez donc sans risque vous en contenter
  si la section suivante vous laisse perplexe.
 </para>
 </sect2>
@@ -2846,158 +2846,151 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <itemizedlist>
 <listitem><para>
  <emphasis role="bold">vhq</emphasis>
-  Ce paramètre affecte l'algorithme de choix de macrobloc, où plus la valeur
+  Ce paramètre affecte l'algorithme de choix de macrobloc, plus la valeur
   du paramètre est élevée, meilleure sera la décision.
-  Le paramètre par défaut peut être utilisé de façon sûre pour tous les encodages,
-  alors que des paramètres plus élevés aident toujours le PSNR mais sont significativement
-  plus lents.
+  Le paramètrage par défaut peut être utilisé de façon sûre pour tous les encodages,
+  alors que des valeurs plus élevées améliorent toujours le PSNR mais rendent l'encodage significativement
+  plus lent.
   Veuillez noter qu'un meilleur PSNR ne veut pas forcément dire que l'image
-  sera mieux, mais vous informe de la proximité par rapport à l'image originale.
-  Désactiver l'option accélérera de façon notable l'encodage; si la vitesse est un point
-  critique pour vous, la différence peut valoir le coup.
+  sera meilleure, mais vous informe qu'elle est plus proche de l'originale.
+  Désactiver l'option accélére de façon notable l'encodage; si la vitesse est un point
+  critique pour vous, cela peut valoir le coup.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">bvhq</emphasis>
-  C'est pareil que vhq, mais cela agit sur les B-frames.
-  L'impact sur la vitesse est négatives, et la qualité est un peu améliorée
+  Cela a le même effet que vhq, mais agit sur les images B.
+  L'impact sur la vitesse est négligeable et la qualité est légèrement améliorée
   (environ +0.1dB PSNR).
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">max_bframes</emphasis>
-  Un plus grand nombre de B-frames consécutives permis améliore habituellement
-  la compressibilité, bien qu'il puisse également entraîner plus d'artefacts carrés.
+  Permettre un plus grand nombre d'images B consécutives améliore habituellement
+  la compressibilité bien que cela puisse également entraîner plus d'artefacts de blocs.
   Le paramétrage par défaut est un bon compromis entre compressibilité et qualité,
-  mais vous pouvez l'augmenter jusqu'à 3 si vous êtes obnubilé par le bitrate.
-  Vous pouvez aussi le réduire à 1 ou 0 si vous avez pour seul but la qualité
-  parfaite, cependant dans votre cas vous devriez vous assurer que le bitrate
-  cible est assez élevé pour que l'encodeur n'ait pas à augmenter le
-  quantificateur pour l'atteindre.
+  mais vous pouvez l'augmenter jusqu'à 3 si vous êtes obnubilé par le débit.
+  Vous pouvez aussi le réduire à 1 ou 0 si vous aspirez à la perfection, même si dans
+  ce cas vous deviez vous assurer que le débit cible est suffisament élevé pour que
+  l'encodeur n'ait pas à augmenter les quantificateurs pour l'atteindre.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">bf_threshold</emphasis>
-  Ceci contrôle la sensibilité de l'encodeur pour les B-frames, où une plus haute
-  valeur amène à ce que plus de B-frames soit utilisé (et vice versa).
-  Ce paramètre doit être utilisé avec <option>max_bframes</option>;
-  si vous êtes obnubilé par le bitrate, vous devrez augmenter <option>max_bframes</option>
-  et <option>bf_threshold</option>, tandis que vous devriez augmenter <option>max_bframes</option>
-  et réduire <option>bf_threshold</option> ainsi donc l'encodeur peut utiliser plus de B-frames
-  aux seuls endroits qui les nécessitent <emphasis role="bold">vraiment</emphasis>.
-  Un nombre bas de <option>max_bframes</option> et une valeur élevée de <option>bf_threshold</option>
+  Ceci contrôle la sensibilité de l'encodeur pour les images B, où une plus haute
+  valeur amène à ce que plus d'images B soient utilisées (et vice versa).
+  Ce paramètre est fait pour être utilisé avec <option>max_bframes</option>;
+  si vous êtes obnubilé par le débit, vous devez augmenter à la fois <option>max_bframes</option>
+  et <option>bf_threshold</option>, tandis que vous pouvez augmenter <option>max_bframes</option>
+  et baisser <option>bf_threshold</option> de façon à ce que l'encodeur puisse utiliser plus d'images B
+  uniquement aux endroits qui en ont <emphasis role="bold">vraiment</emphasis> besoin.
+  Un faible nombre de <option>max_bframes</option> et une valeur élevée de <option>bf_threshold</option>
   n'est probablement pas un choix avisé vu qu'il obligera l'encodeur à mettre
-  des B-frames en des endroits qui n'en tireront pas de bénéfice, mais en plus
-  réduiront la qualité visuelle.
+  des images B en des endroits qui n'en tireront pas de bénéfice et donc réduiront la qualité visuelle.
   Cependant, si vous avez besoin d'être compatible avec des lecteurs qui
-  supportent seulement de vieilles versions DivX (ce qui revient à supporter jusqu'à
-  1 B-frame consécutive), ceci sera votre seul espoir d'augmenter la
-  compressibilité en utilisant les B-frames.
+  supportent seulement de vieilles versions DivX (qui ne supportent pas plusieurs images B consécutives),
+  ce serait votre seul possibilité pour augmenter la compressibilité en utilisant les images B.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">trellis</emphasis>
   Optimise la procédure de quantification pour obtenir un compromis optimal
-  entre le PSNR et le bitrate, ce qui permet de sauver de manière significative
-  des bits.
-  Ces bits seront en retour utilisés autre part sur la vidéo, augmentant l'ensemble
-  de la qualité visuelle.
-  Vous devriez toujours l'utiliser étant donné qu'il impacte énormément sur la
-  qualité.
-  Même si vous recherchez de la vitesse, ne le désactivez pas jusqu'à ce que
-  vous réduisiez <option>vhq</option> et toutes les autres options plus gourmandes
-  en CPU à leur minimum.
+  entre le PSNR et le débit, ce qui permet une économie significative de bits.
+  Ces bits seront en retour utilisés autre part dans la vidéo, augmentant
+  la qualité visuelle globale.
+  Vous devriez toujours l'utiliser étant donné son énorme impact sur la qualité.
+  Même si vous recherchez de la vitesse, ne le désactivez pas avant d'avoir
+  réduit <option>vhq</option> et toutes les autres options plus gourmandes
+  en ressource à leur minimum.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">hq_ac</emphasis>
-  Active une meilleure méthode d'estimation du coût en coefficient, ce qui réduit
-  passablement la taille de fichier par environ 0.15 à 0.19% (ce qui correspond
+  Active une meilleure méthode d'estimation des coefficients AC, ce qui réduit
+  légèrement la taille de fichier d'environ 0.15 à 0.19% (ce qui correspond
   à moins de 0.01dB PSNR d'augmentation), tandis qu'elle a un impact négligeable
-  sur la vitesse.
-  Il est néanmoins recommandé de toujours la laisser activée.
+  sur la vitesse. Il est donc recommandé de toujours la laisser activée.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">cartoon</emphasis>
-  Faite pour un meilleur encodage de contenu dessin animé, et n'a pas d'impact
-  sur la vitesse étant donné qu'il modifie juste les heuristiques
+  Faite pour un meilleur encodage des dessins animés, n'a pas d'impact
+  sur la vitesse étant donné qu'elle règle juste les heuristiques de décision
   pour ce type de contenu.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">me_quality</emphasis>
   Ce paramètre contrôle la précision de l'estimation de mouvement.
-  Le plus élevé <option>me_quality</option> est, le plus précis
-  l'estimation du mouvement d'origine sera, et mieux le clip résultant
-  capturera le mouvement d'origine.
+  Plus <option>me_quality</option> est élevé, plus
+  l'estimation du mouvement d'origine est précise et donc mieux l'encodage final
+  rendra le mouvement d'origine.
  </para>
  <para>
-  Le paramètre par défaut est le mieux dans tous les cas; bien qu'il ne
-  soit pas recommandé de le désactiver à moins que vous recherchiez vraiment
-  la rapidité, vu que tout les bits sauvés par une bonne estimation du
-  mouvement seront dépensés autre part, augmentant la qualité générale.
-  Cependant, n'allez pas plus bas que 5, et même ceci doit être utilisé
-  en dernier recours.
+  Le paramètrage par défaut est le meilleur dans tous les cas; ainsi il est
+  recommandé de ne pas le désactiver à moins que vous ne recherchiez vraiment
+  la rapidité, vu que tout les bits économisés par une bonne estimation du
+  mouvement seraient dépensés autre part, augmentant la qualité générale.
+  Donc, n'allez pas plus bas que 5, et encore, seulement en dernier recours.
 </para></listitem>
 
 <listitem><para>
  <emphasis role="bold">chroma_me</emphasis>
   Améliore l'estimation de mouvement en prenant aussi en compte l'information
-  de la chroma (couleur), alors que <option>me_quality</option> toute seule
-  utilise seulement la luma (niveau de gris).
-  Cela ralenti l'encodage de 5-10% mais améliore pas mal la qualité visuelle
-  en réduisant les effets de bloc et réduit la taille de fichier d'environ 1.3%.
+  de la chrominance (couleur), alors que <option>me_quality</option> seule
+  utilise uniquement la luminance (niveaux de gris).
+  Cela ralentit l'encodage de 5-10% mais améliore sensiblement la qualité visuelle
+  en réduisant les effets de bloc et cela réduit aussi la taille des fichiers d'environ 1.3%.
   Si vous cherchez de la vitesse, vous devriez désactiver cette option avant de
-  commencer à considérer à la réduction de <option>me_quality</option>.
+  penser à la réduction de <option>me_quality</option>.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">chroma_opt</emphasis>
-    A pour objectif d'augmenter la qualité  du chroma de l'image vers des
-    bords blanc/noirs pures, plutôt que d'améliorer la compression.
-    Ceci peut aider à réduire l'effet "red stairs".
+    A pour objectif d'améliorer la qualité de la chrominance de l'image à proximité
+    des bords totalement blancs ou noirs, plutôt que d'améliorer la compression.
+    Ceci peut aider à réduire l'effet "d'escalier rouge".
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">lumi_mask</emphasis>
-    Tente de donner moins de bitrate à une partie de l'image que l'oeil humain
+    Tente de donner moins de débit à une partie de l'image que l'oeil humain
     ne peut pas très bien voir, ce qui devrait permettre à l'encodeur de dépenser
-    les bits sauvés sur des parties plus importantes de l'image.
+    les bits économisés sur des parties plus importantes de l'image.
     La qualité de l'encodage liée à cette option dépend grandement des
-    préférences personnelles et des paramètres de type et moniteurs utilisés pour
-    le regarder (typiquement, cela ne semblera pas aussi bon si c'est plus
-    lumineux ou si c'est un moniteur TFT).
+    préférences personnelles et du type de moniteur ainsi que de son réglage
+    (typiquement, cela ne semblera pas si bien si le réglage est lumineux
+    ou si c'est un moniteur TFT).
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">qpel</emphasis>
-    Élève le nombre de vecteurs de mouvement candidats en augmentant la
+    Augmente le nombre de vecteurs de mouvement candidats en augmentant la
     précision de l'estimation de mouvement de halfpel (demi-pixel) à quarterpel (quart de pixel).
     L'idée est de trouver de meilleurs vecteurs de mouvement pour
-    réduire le bitrate (ou augmenter la qualité à bitrate constant).
+    réduire le débit (donc augmenter la qualité à débit constant).
     Cependant, les vecteurs de mouvement avec une précision quarterpel requièrent
-    quelques bits en plus à coder, mais les vecteurs candidats ne donnent pas
-    toujours des résultats vraiment meilleurs.
-    Assez souvent, le codec gaspille encore des bits sur la précision en plus,
-    mais en retour il n'y aura que peu ou pas de qualité supplémentaire.
-    Malheureusement, il n'y a aucune façon de prévoir les avantages possible de
-    <option>qpel</option>, donc vous avez précisément besoin de l'encoder avec
+    quelques bits en plus à coder et les vecteurs candidats ne donnent pas
+    toujours de résultats (vraiment) meilleurs.
+    Assez souvent, le codec dépense des bits pour une plus grande précision,
+    mais en retour il n'y a que peu ou pas d'amélioration de la qualité.
+    Malheureusement, il n'y a aucun moyen de prédire les possibles avantages de
+    <option>qpel</option>, donc en fait, vous devez l'encoder avec
     et sans pour en être sûr.
   </para><para>
-    <option>qpel</option> peut quasiment doubler la durée d'encodage, et ne
-    requiert pas moins de 25% de puissance processeur en plus pour décoder.
-    Cela n'est pas supporté par tous les lecteurs.
+    <option>qpel</option> peut quasiment doubler la durée d'encodage, et
+    nécessiter jusqu'à 25% de puissance processeur en plus pour le décodage.
+    Il n'est pas supporté par tous les lecteurs.
 </para></listitem>
 
 <listitem><para>
   <emphasis role="bold">gmc</emphasis>
-    Essaie de sauver des bits sur des scènes panoramiques en employant un
-    vecteur simple de mouvement pour la frame entière.
-    Cela augmente à peu près toujours le PSNR, mais ralentit l'encodage
-    de façon significative (et aussi le décodage).
+    Essaye d'économiser des bits sur des scènes panoramiques en employant un
+    unique vecteur de mouvement pour l'image entière.
+    Cela augmente presque toujours le PSNR, mais ralentit l'encodage
+    significativement (ainsi que le décodage).
     Par conséquent, vous devriez seulement l'employer si vous avez
-    augmenté <option>vhq</option> au maximum.
+    réglé <option>vhq</option> au maximum.
     Le GMC de <systemitem class="library">XviD</systemitem> est plus sophistiqué
     que celui de DivX, mais il est seulement supporté par quelques lecteurs.
 </para></listitem>
@@ -3012,7 +3005,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   ce qui est utilisé pour imposer des restrictions sur les propriétés du flux
   vidéo XviD pour qu'il puisse être relu sur tout ce qui supporte le profil
   choisi.
-  Les restrictions relient les résolutions, les bitrates et certaines
+  Les restrictions sont en rapport avec les résolutions, les débits et certaines
   fonctionnalités MPEG-4.
   La table suivante montre ce que chaque profil supporte.
 </para>
@@ -3057,7 +3050,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       <entry>3</entry>
       <entry>4</entry>
       <entry>5</entry>
-      <entry>Handheld</entry>
+      <entry>De poche</entry>
       <entry>NTSC Portable</entry>
       <entry>PAL Portable</entry>
       <entry>NTSC Home Cinéma</entry>
@@ -3103,7 +3096,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       <entry>720</entry>
     </row>
     <row>
-      <entry>Frame rate [fps]</entry>
+      <entry>Images par seconde</entry>
       <entry>15</entry>
       <entry>15</entry>
       <entry>15</entry>
@@ -3122,7 +3115,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       <entry>30</entry>
     </row>
     <row>
-      <entry>Bitrate moyen maxi [kbps]</entry>
+      <entry>Débit moyen max [kbit/s]</entry>
       <entry>64</entry>
       <entry>64</entry>
       <entry>128</entry>
@@ -3141,7 +3134,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       <entry>9708.4</entry>
     </row>
     <row>
-      <entry>Bitrate moyen maximal plus de 3 secs [kbps]</entry>
+      <entry>Débit moyen maximal au delà de 3 secs [kbit/s]</entry>
       <entry></entry>
       <entry></entry>
       <entry></entry>
@@ -3160,7 +3153,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       <entry>16000</entry>
     </row>
     <row>
-      <entry>B-frames maxi</entry>
+      <entry>Images B maxi</entry>
       <entry>0</entry>
       <entry>0</entry>
       <entry>0</entry>
@@ -3283,20 +3276,18 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Les paramètres suivant sont des exemples de différentes combinaisons
-  d'option d'encodage qui affectent la compensation entre la vitesse et
-  la qualité pour le même bitrate cible.
+  d'option d'encodage qui affectent le compromis entre la vitesse et
+  la qualité pour le même débit cible.
 </para>
 
 <para>
-  Tous les paramètres d'encodage ont été testés sur un échantillon vidéo à
-  720x448 @30000/1001 fps, le bitrate cible était à 900kbps, et la machine
-  était un AMD-64 3400+ à 2400 Mhz en mode 64 bits.
-  Chaque paramètre d'encodage exploite la vitesse d'encodage mesuré (en
-  frames par seconde) et la perte PSNR (en dB) en la comparant au paramètre
-  de "très haute qualité".
-  Veuillez comprendre que selon votre source vidéo, votre type de machine
-  les développements logiciels, vous pouvez obtenir des résultats très
-  différents.
+  Tous les paramètrages d'encodage ont été testés sur un échantillon vidéo en
+  720x448 à 30000/1001 images par seconde, le débit cible était de 900kbit/s, et la machine était un
+  AMD-64 3400+ à 2400 Mhz en mode 64 bits.
+  Chaque exemple d'encodage est donné avec la vitesse d'encodage mesurée (en
+  images par seconde) et la perte en PSNR (en dB) par rapport au réglage de "très
+  haute qualité". Sachez que selon votre video source, votre machine et les derniers développements,
+  vous pourrez obtenir des résultats très différents.
 </para>
 
 <para>
