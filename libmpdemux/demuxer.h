@@ -381,4 +381,5 @@ extern void demuxer_help(void);
 extern int get_demuxer_type_from_name(char *demuxer_name, int *force);
 
 int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, uint64_t end);
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts);
 

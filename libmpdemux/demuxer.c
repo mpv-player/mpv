@@ -1046,3 +1046,69 @@ int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, ui
     return demuxer->num_chapters ++;
 }
 
+/**
+ * \brief demuxer_seek_chapter() seeks to a chapter in two possible ways: 
+ *        either using the demuxer->chapters structure set by the demuxer
+ *        or asking help to the stream layer (e.g. dvd)
+ * \param chapter - chapter number wished
+ * \param mode 0: relative to current main pts, 1: absolute
+ * \param seek_pts set by the function to the pts to seek to (if demuxer->chapters is set)
+ * \return -1 on error, current chapter if successful
+ */
+
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts) {
+    int ris;
+    int current, total;
+    sh_video_t *sh_video = demuxer->video->sh;
+    sh_audio_t *sh_audio = demuxer->audio->sh;
+
+    if (!demuxer->num_chapters || !demuxer->chapters) {
+        if(demuxer->video->sh)
+            ds_free_packs(demuxer->video);
+
+        if(demuxer->audio->sh)
+            ds_free_packs(demuxer->audio);
+
+        if(demuxer->sub->id >= 0)
+            ds_free_packs(demuxer->sub);
+
+        ris = stream_control(demuxer->stream, STREAM_CTRL_SEEK_TO_CHAPTER, &chapter);
+        if(sh_video) {
+            ds_fill_buffer(demuxer->video);
+            resync_video_stream(sh_video);
+        }
+
+        if(sh_audio) {
+            ds_fill_buffer(demuxer->audio);
+            resync_audio_stream(sh_audio);
+        }
+
+        //exit status may be ok, but main() doesn't have to seek itself (because e.g. dvds depend on sectors, not on pts)
+        *seek_pts = -1.0;
+        return (ris != STREAM_UNSUPORTED ? chapter : -1);
+    } else {  //chapters structure is set in the demuxer
+        total = demuxer->num_chapters;
+
+        if (mode==1) {    //absolute seeking
+            current = chapter;
+        } else {         //relative seeking
+            uint64_t now;
+            now = (sh_video ? sh_video->pts : (sh_audio ? sh_audio->pts : 0.)) * 1000 + .5;
+
+            for (current = total - 1; current >= 0; --current) {
+                demux_chapter_t* chapter = demuxer->chapters + current;
+                if (chapter->start <= now)
+                    break;
+            }
+            current += chapter;
+        }
+
+        if (current >= total)
+           return -1;
+        if (current < 0) current = 0;
+
+        *seek_pts = demuxer->chapters[current].start / 1000.0;
+
+        return current;
+    }
+}
