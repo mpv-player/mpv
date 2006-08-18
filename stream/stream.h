@@ -52,6 +52,7 @@
 
 #define STREAM_CTRL_RESET 0
 #define STREAM_CTRL_GET_TIME_LENGTH 1
+#define STREAM_CTRL_SEEK_TO_CHAPTER 2
 
 #ifdef MPLAYER_NETWORK
 #include "network.h"
