@@ -1063,6 +1063,12 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
     sh_audio_t *sh_audio = demuxer->audio->sh;
 
     if (!demuxer->num_chapters || !demuxer->chapters) {
+        if(!mode) {
+            ris = stream_control(demuxer->stream, STREAM_CTRL_GET_CURRENT_CHAPTER, &current);
+            if(ris == STREAM_UNSUPORTED && !mode) return -1;
+            chapter += current;
+        }
+
         if(demuxer->video->sh)
             ds_free_packs(demuxer->video);
 
