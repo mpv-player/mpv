@@ -4820,46 +4820,27 @@ if(step_sec>0) {
     case MP_CMD_SEEK_CHAPTER : {
         int seek = cmd->args[0].v.i;
         int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
-        int total;
-        int current;
+        int chap;
+        float next_pts = 0;
 
-        if (!demuxer->num_chapters || !demuxer->chapters) {
-            if (seek > 0) {
-                abs_seek_pos = 0;
-                rel_seek_secs = 1000000000.;
-            } else
-                set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter, 0, MSGTR_Unknown);
-            break;
-        }
-
-        total = demuxer->num_chapters;
-
-        if (abs) {
-            current = seek;
-        } else {
-            uint64_t now;
-            now = (sh_video ? sh_video->pts : (sh_audio ? sh_audio->pts : 0.)) * 1000 + .5;
-
-            for (current = total - 1; current >= 0; --current) {
-                demux_chapter_t* chapter = demuxer->chapters + current;
-                if (chapter->start <= now)
-                    break;
+        rel_seek_secs = 0;
+        abs_seek_pos = 0;
+        chap = demuxer_seek_chapter(demuxer, seek, abs, &next_pts);
+        if(chap != -1) {
+            if(next_pts > -1.0) {
+                abs_seek_pos = 1;
+                rel_seek_secs = next_pts;
             }
-            current += seek;
-        }
-        
-        if (current < 0) current = 0;
-        if (current >= total) {
-            current = total - 1;
-            abs_seek_pos = 0;
-            rel_seek_secs = 1000000000.;
+            if(demuxer->num_chapters > chap)
+                set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter,
+                chap, demuxer->chapters[chap].name);
         } else {
-            abs_seek_pos = 1;
-            rel_seek_secs = demuxer->chapters[current].start / 1000.;
+            if (seek > 0)
+                rel_seek_secs = 1000000000.;
+            else
+                set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter, 0, MSGTR_Unknown);
         }
-
-        set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter,
-                current, demuxer->chapters[current].name);
+        break;
     } break;
     default : {
 #ifdef HAVE_NEW_GUI
