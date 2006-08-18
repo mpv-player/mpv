@@ -63,7 +63,7 @@
 #endif
 
 #include "libaf/af_format.h"
-#include "libvo/img_format.h"
+#include "libmpcodecs/img_format.h"
 #include "tv.h"
 
 /* information about this file */

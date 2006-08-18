@@ -7264,7 +7264,7 @@ RANLIB = $_ranlib
 INSTALL = $_install
 # FIXME: Should only be _inc_extra eventually.
 EXTRA_INC = $_inc_extra
-OPTFLAGS = -I../libvo -I../../libvo $CFLAGS \$(EXTRA_INC)
+OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
 HELP_FILE = $_mp_help

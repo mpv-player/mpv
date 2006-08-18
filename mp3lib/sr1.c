@@ -29,7 +29,7 @@
 //#include "liba52/mm_accel.h"
 #include "mp_msg.h"
 
-#include "fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 #ifdef ARCH_X86
 #define CAN_COMPILE_X86_ASM

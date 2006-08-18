@@ -8,8 +8,8 @@
 #include "mp_msg.h"
 #include "help_mp.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "libmpcodecs/img_format.h"
+#include "libmpcodecs/mp_image.h"
 
 #include "m_struct.h"
 #include "m_option.h"

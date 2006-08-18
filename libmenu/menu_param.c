@@ -18,8 +18,8 @@
 #include "m_property.h"
 #include "asxparser.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "libmpcodecs/img_format.h"
+#include "libmpcodecs/mp_image.h"
 
 #include "menu.h"
 #include "menu_list.h"

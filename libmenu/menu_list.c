@@ -6,8 +6,8 @@
 
 #include "config.h"
 
-#include "img_format.h"
-#include "mp_image.h"
+#include "libmpcodecs/img_format.h"
+#include "libmpcodecs/mp_image.h"
 
 #include "m_struct.h"
 #include "menu.h"

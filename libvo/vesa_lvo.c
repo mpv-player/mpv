@@ -24,7 +24,7 @@
 #include "help_mp.h"
 
 #include "vesa_lvo.h"
-#include "img_format.h"
+#include "libmpcodecs/img_format.h"
 #include "drivers/mga_vid.h" /* <- should be changed to "linux/'something'.h" */
 #include "fastmemcpy.h"
 #include "osd.h"
