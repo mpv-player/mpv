@@ -75,6 +75,7 @@ typedef struct ao_macosx_s
   /* AudioUnit */
   AudioUnit theOutputUnit;
   int packetSize;
+  int paused;
 
   /* Ring-buffer */
   /* does not need explicit synchronization, but needs to allocate
@@ -311,17 +312,19 @@ int aoIsCreated = ao != NULL;
 	}
 
 	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
-	ao_msg(MSGT_AO,MSGL_V, "%5d chunk size\n", (int)ao->chunk_size);
     
-	ao->num_chunks = NUM_BUFS;
+	ao_data.samplerate = inDesc.mSampleRate;
+	ao_data.channels = inDesc.mChannelsPerFrame;
+    ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
+    ao_data.outburst = ao->chunk_size;
+	ao_data.buffersize = ao_data.bps;
+
+	ao->num_chunks = (ao_data.bps+ao->chunk_size-1)/ao->chunk_size;
     ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
     ao->buffer = aoIsCreated ? realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
 							: calloc(ao->num_chunks + 1, ao->chunk_size);
 	
-	ao_data.samplerate = inDesc.mSampleRate;
-	ao_data.channels = inDesc.mChannelsPerFrame;
-    ao_data.outburst = ao_data.buffersize = ao->chunk_size;
-    ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
+	ao_msg(MSGT_AO,MSGL_V, "using %5d chunks of %d bytes (buffer len %d bytes)\n", (int)ao->num_chunks, (int)ao->chunk_size, (int)ao->buffer_len);
 
     renderCallback.inputProc = theRenderProc;
     renderCallback.inputProcRefCon = 0;
@@ -331,9 +334,7 @@ int aoIsCreated = ao != NULL;
 		return CONTROL_FALSE;
 	}
 
-	audio_pause();
-	ao->buf_read_pos=0;
-	ao->buf_write_pos=0;
+	reset();
     
     return CONTROL_OK;
 }
@@ -341,8 +342,10 @@ int aoIsCreated = ao != NULL;
 
 static int play(void* output_samples,int num_bytes,int flags)
 {  
+int wrote=write_buffer(output_samples, num_bytes);
+
 	audio_resume();
-  return write_buffer(output_samples, num_bytes);
+  return wrote;
 }
 
 /* set variables and buffer to initial state */
@@ -352,7 +355,6 @@ static void reset(void)
   /* reset ring-buffer state */
   ao->buf_read_pos=0;
   ao->buf_write_pos=0;
-  audio_resume();
   
   return;
 }
@@ -380,7 +382,11 @@ static void uninit(int immed)
   int i;
   OSErr status;
 
-  reset();
+  if (!immed) {
+    long long timeleft=(1000000LL*buf_used())/ao_data.bps;
+    ao_msg(MSGT_AO,MSGL_DBG2, "%d bytes left @%d bps (%ld usec)\n", buf_used(), ao_data.bps, (int)timeleft);
+    usec_sleep((int)timeleft);
+  }
 
   AudioOutputUnitStop(ao->theOutputUnit);
   AudioUnitUninitialize(ao->theOutputUnit);
@@ -402,16 +408,20 @@ static void audio_pause(void)
   if (status)
     ao_msg(MSGT_AO,MSGL_WARN, "AudioOutputUnitStop returned %d\n",
 	   (int)status);
+  ao->paused=1;
 }
 
 
 /* resume playing, after audio_pause() */
 static void audio_resume(void)
 {
+  if(ao->paused) {
   OSErr status=noErr;
-  
+	  /* start callback */
   status=AudioOutputUnitStart(ao->theOutputUnit);
   if (status)
     ao_msg(MSGT_AO,MSGL_WARN, "AudioOutputUnitStart returned %d\n",
 	   (int)status);
+	  ao->paused=0;
+  }
 }
