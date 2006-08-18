@@ -3606,7 +3606,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int 
           for (i=0; i < mkv_d->num_indexes; i++)
             if (mkv_d->indexes[i].tnum == demuxer->video->id)
               {
-                diff = target_timecode - (int64_t) mkv_d->indexes[i].timecode;
+                diff = target_timecode + mkv_d->first_tc - (int64_t) mkv_d->indexes[i].timecode;
 
                 if ((flags & 1 || target_timecode <= mkv_d->last_pts*1000)
                     && diff >= 0 && diff < min_diff)
