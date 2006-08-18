@@ -1701,7 +1701,7 @@ _gethostbyname2=auto
 _ftp=yes
 _musepack=auto
 _vstream=auto
-_pthreads=yes
+_pthreads=auto
 _ass=auto
 _rpath=no
 _asmalign_pot=auto
@@ -2738,7 +2738,7 @@ EOF
 fi
 
 _def_use_aton='#undef USE_ATON'
-if test "$_use_aton" != no; then
+if test "$_use_aton" = yes; then
   _def_use_aton='#define USE_ATON 1'
 fi
 
@@ -2943,7 +2943,7 @@ echores "$_dynamic_plugins"
 _def_threads='#undef HAVE_THREADS'
 
 echocheck "pthread"
-if test "$_pthreads" != no ; then
+if test "$_pthreads" = auto ; then
 cat > $TMPC << EOF
 #include <pthread.h>
 void* func(void *arg) { return arg; }
@@ -3814,7 +3814,7 @@ fi
 
 
 echocheck "Xv"
-if test "$_x11" = yes && test "$_xv" != no ; then
+if test "$_x11" = yes && test "$_xv" = auto ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/Xvlib.h>
@@ -3870,7 +3870,7 @@ echores "$_xvmc"
 
 
 echocheck "Xinerama"
-if test "$_x11" = yes && test "$_xinerama" != no ; then
+if test "$_x11" = yes && test "$_xinerama" = auto ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/Xinerama.h>
@@ -5868,7 +5868,7 @@ echores "$_ladspa"
 
 if x86 && not qnx; then
 
-if test "$_win32" != no ; then
+if test "$_win32" = auto ; then
     if test -z "$_win32libdir" ; then
       for I in "$_libdir/codecs" "$_libdir/win32" /usr/local/lib/codecs /usr/lib/codecs /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
@@ -6468,7 +6468,8 @@ EOF
 fi
 
 echocheck "x264"
-cat > $TMPC << EOF
+if test "$_x264" = auto ; then
+  cat > $TMPC << EOF
 #include <inttypes.h>
 #include <x264.h>
 #if X264_BUILD < 48
@@ -6476,8 +6477,7 @@ cat > $TMPC << EOF
 #endif
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
-_ld_x264="$_ld_x264 -lx264 $_ld_pthread"
-if test "$_x264" != no ; then 
+  _ld_x264="$_ld_x264 -lx264 $_ld_pthread"
   _x264=no
   if cc_check $_ld_x264 $_ld_lm ; then 
     _x264=yes
@@ -6689,7 +6689,7 @@ echores "$_select"
 
 echocheck "network"
 # FIXME network check
-if test "$_network" != no ; then
+if test "$_network" = yes ; then
   _def_network='#define MPLAYER_NETWORK 1'
   _ld_network="$_ld_sock"
   _inputmodules="network $_inputmodules"
@@ -6701,7 +6701,7 @@ fi
 echores "$_network"
 
 echocheck "ftp"
-if not beos && test "$_ftp" != no ; then
+if not beos && test "$_ftp" = yes ; then
   _def_ftp='#define HAVE_FTP 1'
   _inputmodules="ftp $_inputmodules"
 else
