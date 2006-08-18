@@ -479,14 +479,51 @@ static int mp_describe_titleset(dvd_reader_t *dvd, tt_srpt_t *tt_srpt, int vts_n
     return 1;
 }
 
+static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *tt_srpt, int title_no, int chapter)
+{
+    int cell;
+    ptt_info_t ptt;
+    pgc_t *pgc;
+    off_t pos;
+
+    if(!vts_file || !tt_srpt)
+       return 0;
+
+    if(chapter < 0 || chapter > vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts) //no such chapter
+       return 0;
+
+    ptt = vts_file->vts_ptt_srpt->title[title_no].ptt[chapter];
+    pgc = vts_file->vts_pgcit->pgci_srp[ptt.pgcn-1].pgc;
+
+    cell = pgc->program_map[ptt.pgn - 1] - 1;
+    pos = (off_t) pgc->cell_playback[cell].first_sector * 2048;
+    mp_msg(MSGT_OPEN,MSGL_V,"\r\nSTREAM_DVD, seeked to chapter: %d, cell: %u, pos: %"PRIu64"\n",
+        chapter, pgc->cell_playback[cell].first_sector, pos);
+    stream_seek(stream, pos);
+
+    return chapter;
+}
+
 static int control(stream_t *stream,int cmd,void* arg) 
 {
+    dvd_priv_t *d = stream->priv;
     switch(cmd) 
     {
         case STREAM_CTRL_GET_TIME_LENGTH:
         {
-            dvd_priv_t *d = stream->priv;
             *((unsigned int *)arg) = mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1);
+            return 1;
+        }
+        case STREAM_CTRL_SEEK_TO_CHAPTER:
+        {
+            int r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
+            if(! r) return STREAM_UNSUPORTED;
+
+            return 1;
+        }
+        case STREAM_CTRL_GET_CURRENT_CHAPTER:
+        {
+            *((unsigned int *)arg) = dvd_chapter_from_cell(d, d->cur_title-1, d->cur_cell);
             return 1;
         }
     }
