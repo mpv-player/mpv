@@ -446,7 +446,7 @@ static int sdl_open (void *plugin, void *name)
 		//}	
 	#endif	
 
-#ifndef AMIGA
+#if !defined( AMIGA ) && !defined( MACOSX ) 
 	priv->sdlfullflags |= SDL_DOUBLEBUF;	
 	if (vo_doublebuffering)
 	    priv->sdlflags |= SDL_DOUBLEBUF;
