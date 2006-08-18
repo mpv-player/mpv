@@ -1050,7 +1050,7 @@ int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, ui
  * \brief demuxer_seek_chapter() seeks to a chapter in two possible ways: 
  *        either using the demuxer->chapters structure set by the demuxer
  *        or asking help to the stream layer (e.g. dvd)
- * \param chapter - chapter number wished
+ * \param chapter - chapter number wished - 0-based
  * \param mode 0: relative to current main pts, 1: absolute
  * \param seek_pts set by the function to the pts to seek to (if demuxer->chapters is set)
  * \return -1 on error, current chapter if successful
