@@ -18,6 +18,7 @@ typedef struct {
   int              started;             /* Has mplayer initialization finished? */
   unsigned char    prebuf[STREAM_BUFFER_SIZE]; /* prefill buffer */
   int              prelen;              /* length of prefill buffer */
+  unsigned int     duration;            /* in milliseconds */
 } dvdnav_priv_t;
 
 extern int dvd_nav_still;

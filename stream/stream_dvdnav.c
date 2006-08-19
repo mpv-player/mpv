@@ -216,6 +216,12 @@ int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len
 
       break;
     }
+    case DVDNAV_CELL_CHANGE: {
+        dvdnav_cell_change_event_t *ev =  (dvdnav_cell_change_event_t*)buf;
+        if(ev->pgc_length)
+          dvdnav_priv->duration = ev->pgc_length/90;
+        break;
+    }
     case DVDNAV_WAIT:
         dvdnav_wait_skip(dvdnav_priv->dvdnav);
         break;
@@ -356,6 +362,14 @@ static int control(stream_t *stream, int cmd, void* arg) {
         break;
       *((unsigned int *)arg) = part - 1;
       return 1;
+    }
+    case STREAM_CTRL_GET_TIME_LENGTH:
+    {
+        if(dvdnav_priv->duration)
+        {
+          *((unsigned int *)arg) = dvdnav_priv->duration;
+          return 1;
+        }
     }
   }
 
