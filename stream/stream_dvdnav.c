@@ -86,7 +86,7 @@ dvdnav_priv_t * new_dvdnav_stream(char * filename) {
     dvdnav_get_next_block(dvdnav_priv->dvdnav,buf,&event,&len);
   }
   
-  /* turn on dvdnav caching */
+  /* turn off dvdnav caching */
   dvdnav_set_readahead_flag(dvdnav_priv->dvdnav, 0);
   if(dvdnav_set_PGC_positioning_flag(dvdnav_priv->dvdnav, 1) != DVDNAV_STATUS_OK)
     mp_msg(MSGT_OPEN,MSGL_ERR,"stream_dvdnav, failed to set PGC positioning\n");
