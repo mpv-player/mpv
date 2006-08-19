@@ -522,8 +522,9 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
 
 #define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
+
+// stream_dvd.c
 #define MSGTR_NoDVDSupport "MPlayer was compiled without DVD support, exiting.\n"
-#define MSGTR_DVDwait "Reading disc structure, please wait...\n"
 #define MSGTR_DVDnumTitles "There are %d titles on this DVD.\n"
 #define MSGTR_DVDinvalidTitle "Invalid DVD title number: %d\n"
 #define MSGTR_DVDnumChapters "There are %d chapters in this DVD title.\n"
@@ -537,9 +538,12 @@ static char help_text[]=
 #define MSGTR_DVDnoVOBs "Cannot open title VOBS (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDnoMatchingAudio "No matching DVD audio language found!\n"
 #define MSGTR_DVDaudioChannel "Selected DVD audio channel: %d language: %c%c\n"
+#define MSGTR_DVDaudioStreamInfo "audio stream: %d format: %s (%s) language: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "number of audio channels on disk: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "No matching DVD subtitle language found!\n"
 #define MSGTR_DVDsubtitleChannel "Selected DVD subtitle channel: %d language: %c%c\n"
-#define MSGTR_DVDopenOk "DVD successfully opened.\n"
+#define MSGTR_DVDsubtitleLanguage "subtitle ( sid ): %d language: %s\n"
+#define MSGTR_DVDnumSubtitles "number of subtitles on disk: %d\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Too many streams!"
