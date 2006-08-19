@@ -7,7 +7,7 @@ MPlayer (1.0)
 
     Drivers:
     * IVTV hardware MPEG audio/video decoder output support
-	
+
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
     * SSE optimizations for mp3lib
@@ -23,8 +23,8 @@ MPlayer (1.0)
     * split of stream layer from libmpdemux to new stream library.
     * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350/500)
     * native RTSP input (handles MPEG-TS over RTP) for generic RTSP servers.
-    * support for chapters seeking in dvd:// and dvdnav:// streams 
-	
+    * support for chapters seeking in dvd:// and dvdnav:// streams
+
     FFmpeg/libavcodec:
     * VC-1/WMV3/WMV9 video decoder
     * Vorbis decoding speedup, now default Vorbis decoder
