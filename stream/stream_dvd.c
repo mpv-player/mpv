@@ -489,7 +489,7 @@ static int seek_to_chapter(stream_t *stream, ifo_handle_t *vts_file, tt_srpt_t *
     if(!vts_file || !tt_srpt)
        return 0;
 
-    if(chapter < 0 || chapter > vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts) //no such chapter
+    if(chapter < 0 || chapter > vts_file->vts_ptt_srpt->title[title_no].nr_of_ptts-1) //no such chapter
        return 0;
 
     ptt = vts_file->vts_ptt_srpt->title[title_no].ptt[chapter];
