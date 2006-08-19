@@ -245,17 +245,6 @@ unsigned int * dvdnav_stream_get_palette(dvdnav_priv_t * dvdnav_priv) {
     mp_msg(MSGT_OPEN,MSGL_V, "%s: NULL dvdnav_priv->dvdnav\n",__FUNCTION__);
     return NULL;
   }
-  #if 0
-  if (!dvdnav_priv->dvdnav->vm) {
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: NULL dvdnav_priv->dvdnav->vm\n",__FUNCTION__);
-    return NULL;
-  }
-  if (!dvdnav_priv->dvdnav->vm->state.pgc) {
-    printf("%s: NULL dvdnav_priv->dvdnav->vm->state.pgc\n",__FUNCTION__);
-    return NULL;
-  }
-  return dvdnav_priv->dvdnav->vm->state.pgc->palette;
-  #endif
 }
 
 static void update_title_len(stream_t *stream) {
