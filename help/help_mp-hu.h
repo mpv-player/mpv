@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r19348 (2006. 08. 12.)
+// Sync'ed with help_mp-en.h r19420 (2006. 08. 19.)
 
 // ========================= MPlayer help ===========================
 
@@ -594,7 +594,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Audio demuxer meghívása sikertelen: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Felirat demuxer meghívása sikertelen: %s\n"
 #define MSGTR_TVInputNotSeekable "TV bemenet nem tekerhetõ! (Meg kéne csinálni hogy most váltson csatornát ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "%s demuxer info már jelen van!\n"
+#define MSGTR_DemuxerInfoChanged "%s demuxer infó megváltozott erre: %s\n"
 #define MSGTR_ClipInfo "Klipp info: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC formátumot találtam, frameráta váltás.\n"

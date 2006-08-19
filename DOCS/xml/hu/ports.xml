@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19104 -->
+<!-- synced with r19424 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -720,7 +720,7 @@ kezelővel, ami az operációs rendszerhez tartozna.
 <para>
 Két független közül választhatsz:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> és
-<ulink url="http://darwinports.opendarwin.org/">DarwinPorts</ulink>.
+<ulink url="http://www.macports.org/">DarwinPorts</ulink>.
 Mindkettő nagyjából ugyan azt a szolgáltatást nyújtja (pl. rengeteg választható
 csomag, függőségek kezelése, csomagok egyszerű telepítése/frissítése/eltávolítása,
 stb...).
