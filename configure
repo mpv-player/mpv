@@ -3825,15 +3825,15 @@ int main(void) {
 EOF
   _xv=no
   cc_check -lXv $_ld_x11 && _xv=yes
-else
-  _xv=no
 fi
+
 if test "$_xv" = yes ; then
   _def_xv='#define HAVE_XV 1'
   _ld_xv='-lXv'
   _vosrc="$_vosrc vo_xv.c"
   _vomodules="xv $_vomodules"
 else
+  _xv=no
   _def_xv='#undef HAVE_XV'
   _novomodules="xv $_novomodules"
 fi
@@ -3878,13 +3878,13 @@ int main(void) { (void) XineramaIsActive(0); return 0; }
 EOF
   _xinerama=no
   cc_check -lXinerama $_ld_x11 && _xinerama=yes
-else
-  _xinerama=no
 fi
+
 if test "$_xinerama" = yes ; then
   _def_xinerama='#define HAVE_XINERAMA 1'
   _ld_xinerama='-lXinerama'
 else
+  _xinerama=no
   _def_xinerama='#undef HAVE_XINERAMA'
 fi
 echores "$_xinerama"
