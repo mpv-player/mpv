@@ -472,7 +472,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer no fue compilado con soporte de lectura de SMB.\n"
 
 #define MSGTR_CantOpenDVD "No se puede abrir el dispositivo de DVD: %s\n"
-#define MSGTR_DVDwait "Leyendo la estructura del disco, espere por favor...\n"
 #define MSGTR_DVDnumTitles "Hay %d títulos en este DVD.\n"
 #define MSGTR_DVDinvalidTitle "Número de título de DVD inválido: %d\n"
 #define MSGTR_DVDnumChapters "Hay %d capítulos en este título de DVD.\n"
@@ -486,7 +485,6 @@ static char help_text[]=
 #define MSGTR_DVDaudioChannel "DVD, canal de audio seleccionado: %d idioma: %c%c\n"
 #define MSGTR_DVDnoMatchingSubtitle "DVD, no se encontró un idioma de subtitulo coincidente!\n"
 #define MSGTR_DVDsubtitleChannel "DVD, canal de subtitulos seleccionado: %d idioma: %c%c\n"
-#define MSGTR_DVDopenOk "DVD abierto satisfactoriamente.\n"
 
 // muxer_*.c:
 #define MSGTR_TooManyStreams "Demaciados streams!"

@@ -517,7 +517,6 @@ static char help_text[]=
 
 #define MSGTR_CantOpenDVD "Nelze otevøít DVD zaøízení: %s\n"
 #define MSGTR_NoDVDSupport "MPlayer byl zkompilován bez podpory DVD, konèím.\n"
-#define MSGTR_DVDwait "Naèítám strukturu disku, èekejte prosím...\n"
 #define MSGTR_DVDnumTitles "Na tomto DVD je %d titul(ù).\n"
 #define MSGTR_DVDinvalidTitle "Neplatné èíslo DVD titulu: %d\n"
 #define MSGTR_DVDnumChapters "V tomto DVD titulu je %d kapitol.\n"
@@ -533,7 +532,6 @@ static char help_text[]=
 #define MSGTR_DVDaudioChannel "Vybrán DVD zvukový kanál: %d jazyk: %c%c\n"
 #define MSGTR_DVDnoMatchingSubtitle "DVD titulky v po¾adovaném jazyce nebyly nalezeny!\n"
 #define MSGTR_DVDsubtitleChannel "Vybrán DVD titulkový kanál: %d jazyk: %c%c\n"
-#define MSGTR_DVDopenOk "DVD úspì¹nì otevøeno.\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Pøíli¹ mnoho datových proudù!"

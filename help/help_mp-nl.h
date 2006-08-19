@@ -436,7 +436,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer werd niet gecompileerd met SMB leesondersteuning\n"
 
 #define MSGTR_CantOpenDVD "Kon DVD device niet openen: %s\n"
-#define MSGTR_DVDwait "Bezig met het lezen van de schijf structuur, gelieve te wachten...\n"
 #define MSGTR_DVDnumTitles "Er zijn %d titels op deze DVD.\n"
 #define MSGTR_DVDinvalidTitle "Foutieve DVD titelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Er zijn %d hoofdstukken in deze DVD titel.\n"
@@ -445,7 +444,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Foutief DVD gezichtspuntnummer: %d\n"
 #define MSGTR_DVDnoIFO "Kan het IFO bestand voor DVD titel %d niet openen.\n"
 #define MSGTR_DVDnoVOBs "Kan titel VOBS niet openen (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD openen geslaagd!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Waarschuwing! Audio stream header %d geherdefinieerd!\n"

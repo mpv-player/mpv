@@ -450,7 +450,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer var inte kompilerad med SMB-lässtöd.\n"
 
 #define MSGTR_CantOpenDVD "Kunde inte öppna DVD-enhet: %s\n"
-#define MSGTR_DVDwait "Läser diskstruktur, var god dröj...\n"
 #define MSGTR_DVDnumTitles "Det är %d titlar på denna DVD.\n"
 #define MSGTR_DVDinvalidTitle "Icke godkänt DVD-titelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Der är %d kapitel på denna DVD-titel.\n"
@@ -459,7 +458,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Ej godkänd DVD-vinkelsnummer: %d\n"
 #define MSGTR_DVDnoIFO "Kan inte öppna IFO-fil för DVD-titel %d.\n"
 #define MSGTR_DVDnoVOBs "Kunde inte öppna titel VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD öppnades problemfritt.\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "VARNING: Audioströmsfilhuvud %d omdefinerad.\n"

@@ -103,7 +103,6 @@ static char help_text[]=
 #define MSGTR_FileNotFound "Finner ikke filen: '%s'\n"
 
 #define MSGTR_CantOpenDVD "Kan ikke åpne DVD enhet: %s\n"
-#define MSGTR_DVDwait "Leser disk-struktur, vennligst vent...\n"
 #define MSGTR_DVDnumTitles "Det er %d titler på denne DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ugyldig DVD tittelnummer: %d\n"
 #define MSGTR_DVDnumChapters "Det er %d kapitler i denne DVD tittelen.\n"
@@ -112,7 +111,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Ugyldig DVD vinkel nummer: %d\n"
 #define MSGTR_DVDnoIFO "Kan ikke åpne IFO filen for DVD tittel %d.\n"
 #define MSGTR_DVDnoVOBs "Kan ikke åpne VOBS tittel (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD åpnet ok!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Advarsel! lyd stream header %d redefinert!\n"

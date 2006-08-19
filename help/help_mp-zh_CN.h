@@ -512,7 +512,6 @@ static char help_text[]=
 
 #define MSGTR_CantOpenDVD "无法打开DVD 设备: %s\n"
 #define MSGTR_NoDVDSupport "MPlayer 是被编译成不带DVD支持的，退出\n"
-#define MSGTR_DVDwait "读取光盘结构, 请等待...\n"
 #define MSGTR_DVDnumTitles "这张DVD有 %d 个titles.\n"
 #define MSGTR_DVDinvalidTitle "无效的DVD title号: %d\n"
 #define MSGTR_DVDnumChapters "这个 DVD title有 %d chapters.\n"
@@ -528,7 +527,6 @@ static char help_text[]=
 #define MSGTR_DVDaudioChannel "选定 DVD 音频通道: %d 语言: %c%c\n"
 #define MSGTR_DVDnoMatchingSubtitle "没有找到匹配的 DVD 字幕语言!\n"
 #define MSGTR_DVDsubtitleChannel "选定 DVD 字幕通道: %d 语言: %c%c\n"
-#define MSGTR_DVDopenOk "DVD成功打开!\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "太多的流!"

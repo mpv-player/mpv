@@ -225,7 +225,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer er ikke blevet kompileret med SMB læse-understøttelse\n"
 
 #define MSGTR_CantOpenDVD "Kunne ikke åbne DVD drev: %s\n"
-#define MSGTR_DVDwait "Indlæser diskstruktur, vent venligst...\n"
 #define MSGTR_DVDnumTitles "Der er %d titler på denne DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ugyldig DVD-titel: %d\n"
 #define MSGTR_DVDnumChapters "Der er %d kapitler i denne DVD-titel.\n"
@@ -234,7 +233,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Ugyldig DVD-vinkel: %d\n"
 #define MSGTR_DVDnoIFO "Kunne ikke finde IFO filen for DVD-titel %d.\n"
 #define MSGTR_DVDnoVOBs "Kunne ikke åbne titlen VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD indlæst!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Advarsel! Lydfilens header %d er blevet omdefineret!\n"

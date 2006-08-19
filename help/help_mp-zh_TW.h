@@ -225,7 +225,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer 編譯並無讀取 SMB 支援。\n"
 
 #define MSGTR_CantOpenDVD "無法開啟 DVD 裝置: %s\n"
-#define MSGTR_DVDwait "正在讀取光碟架構，請稍候...\n"
 #define MSGTR_DVDnumTitles "這片 DVD 內有 %d 個 titles。\n"
 #define MSGTR_DVDinvalidTitle "無效的 DVD title 號數: %d\n"
 #define MSGTR_DVDnumChapters "這個 DVD title 內有 %d 個 chapters。\n"
@@ -234,7 +233,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "無效的 DVD 角度號碼: %d\n"
 #define MSGTR_DVDnoIFO "無法為 DVD title %d 開啟 IFO 檔。\n"
 #define MSGTR_DVDnoVOBs "無法開啟 title VOBS (VTS_%02d_1.VOB)。\n"
-#define MSGTR_DVDopenOk "成功開啟 DVD。\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "警告: 音效串流標頭 %d 從新定義。\n"

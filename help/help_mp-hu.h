@@ -522,7 +522,6 @@ static char help_text[]=
 
 #define MSGTR_CantOpenDVD "Nem tudom megnyitni a DVD eszközt: %s\n"
 #define MSGTR_NoDVDSupport "Az MPlayer DVD támogatás nélkül lett lefordítva, kilépés.\n"
-#define MSGTR_DVDwait "A lemez struktúrájának olvasása, kérlek várj...\n"
 #define MSGTR_DVDnumTitles "%d sáv van a DVD-n.\n"
 #define MSGTR_DVDinvalidTitle "Helytelen DVD sáv: %d\n"
 #define MSGTR_DVDnumChapters "Az adott DVD sávban %d fejezet van.\n"
@@ -538,7 +537,6 @@ static char help_text[]=
 #define MSGTR_DVDaudioChannel "Kiválasztott DVD audió csatorna: %d nyelv: %c%c\n"
 #define MSGTR_DVDnoMatchingSubtitle "Nincs megfelelõ nyelvû DVD felirat fájl!\n"
 #define MSGTR_DVDsubtitleChannel "Kiválasztott DVD felirat csatorna: %d nyelv: %c%c\n"
-#define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Túl sok stream!"

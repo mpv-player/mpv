@@ -459,7 +459,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer nie zosta³ skompilowany z obs³ug± SMB.\n"
 
 #define MSGTR_CantOpenDVD "Nie mogê otworzyæ DVD: %s\n"
-#define MSGTR_DVDwait "Odczytujê strukturê dysku, proszê czekaæ...\n"
 #define MSGTR_DVDnumTitles "Na tym DVD jest %d tytu³ów.\n"
 #define MSGTR_DVDinvalidTitle "Nieprawid³owy numer tytu³u: %d\n"
 #define MSGTR_DVDnumChapters "W tym tytule DVD jest %d rozdzia³ów.\n"
@@ -468,7 +467,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Nieprawid³owy numer ustawienia kamery: %d\n"
 #define MSGTR_DVDnoIFO "Nie mogê otworzyæ pliku IFO dla tytu³u DVD %d.\n"
 #define MSGTR_DVDnoVOBs "Nie mogê otworzyæ tytu³u VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD otwarte prawid³owo.\n"
 
 // muxer_*.c:
 #define MSGTR_TooManyStreams "Za du¿o strumieni!"

@@ -525,7 +525,6 @@ static char help_text[]=
 
 #define MSGTR_CantOpenDVD "Impossibile aprire il dispositivo DVD: %s\n"
 #define MSGTR_NoDVDSupport "MPlayer è stato compilato senza il supporto per DVD, esco\n" 
-#define MSGTR_DVDwait "Leggo la struttura del disco, per favore aspetta...\n"
 #define MSGTR_DVDnumTitles "Ci sono %d titolo/i su questo DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numero del titolo del DVD non valido: %d\n"
 #define MSGTR_DVDnumChapters "Ci sono %d capitolo/i in questo titolo del DVD.\n"
@@ -541,7 +540,6 @@ static char help_text[]=
 #define MSGTR_DVDaudioChannel "Scelto canale audio DVD: %d lingua: %c%c\n" 
 #define MSGTR_DVDnoMatchingSubtitle "Non trovata la lingua dei sottotitoli DVD corrispondente!\n"
 #define MSGTR_DVDsubtitleChannel "Scelto canale sottotitoli DVD: %d lingua: %c%c\n"
-#define MSGTR_DVDopenOk "DVD aperto con successo.\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Troppi flussi!"

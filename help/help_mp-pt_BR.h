@@ -230,7 +230,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer não foi compilado com suporte a leitura de SMB\n"
 
 #define MSGTR_CantOpenDVD "Impossível abrir dispositivo de DVD: %s\n"
-#define MSGTR_DVDwait "Lendo estrutura do disco, por favor aguarde...\n"
 #define MSGTR_DVDnumTitles "Existem %d títulos neste DVD.\n"
 #define MSGTR_DVDinvalidTitle "Número do título do DVD inválido: %d\n"
 #define MSGTR_DVDnumChapters "Existem %d capítulos neste título de DVD.\n"
@@ -239,7 +238,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Número do anglo do DVD inválido: %d\n"
 #define MSGTR_DVDnoIFO "Impossível abrir o arquivo IFO para o título de DVD %d.\n"
 #define MSGTR_DVDnoVOBs "Impossível abrir título VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD aberto com êxito!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "AVISO! Cabeçalho %d da trilha de audio redefinido!\n"

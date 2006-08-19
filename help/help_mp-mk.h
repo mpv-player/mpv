@@ -224,7 +224,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer не е компајлиран со подршка за SMB читање\n"
 
 #define MSGTR_CantOpenDVD "Не можеше да се отвори DVD уредот: %s\n"
-#define MSGTR_DVDwait "Се чита структурата на дискот, ве молиме почекајте...\n"
 #define MSGTR_DVDnumTitles "Има %d наслови на ова DVD.\n"
 #define MSGTR_DVDinvalidTitle "Невалиден DVD број на насловот: %d\n"
 #define MSGTR_DVDnumChapters "Има %d поглавја на овој DVD наслов.\n"
@@ -233,7 +232,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Невалиден DVD број на аголот: %d\n"
 #define MSGTR_DVDnoIFO "Не може да ја отвори IFO датотеката за DVD насловот %d.\n"
 #define MSGTR_DVDnoVOBs "Не може да ги отвори насловите на VOB датотеките (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD-то е успешно отворено.\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "ПРЕДУПРЕДУВАЊЕ: Предефиниран е хедерот на аудио протокот %d.\n"

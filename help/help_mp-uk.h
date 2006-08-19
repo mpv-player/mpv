@@ -217,7 +217,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer не ма╓ вкомп╕льовано╖ п╕дтримки SMB\n"
 
 #define MSGTR_CantOpenDVD "Не зм╕г в╕дкрити DVD: %s\n"
-#define MSGTR_DVDwait "Читання структури диска, почекайте будь ласка...\n"
 #define MSGTR_DVDnumTitles "╢ %d дор╕жок з титрами на цьому DVD.\n"
 #define MSGTR_DVDinvalidTitle "Неприпустимий номер дор╕жки титр╕в на DVD: %d\n"
 #define MSGTR_DVDnumChapters "╢ %d розд╕л╕в на ц╕й дор╕жц╕ з DVD титрами.\n"
@@ -226,7 +225,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Неприпустимий номер DVD кута: %d\n"
 #define MSGTR_DVDnoIFO "Не можу в╕дкрити IFO файл для DVD титр╕в %d.\n"
 #define MSGTR_DVDnoVOBs "Не можу в╕дкрити титри VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD усп╕шно в╕дкритий!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Попередження! Заголовок ауд╕о потоку %d перевизначений!\n"

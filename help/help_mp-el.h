@@ -224,7 +224,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer δεν μεταφράστηκε με υποστήριξη ανάγνωσης SMB\n"
 
 #define MSGTR_CantOpenDVD "Δεν μπόρεσα να ανοίξω την συσκευή DVD: %s\n"
-#define MSGTR_DVDwait "Ανάγνωση δομής του δίσκου, παρακαλώ περιμένετε...\n"
 #define MSGTR_DVDnumTitles "Υπάρχουν %d τίτλοι στο DVD.\n"
 #define MSGTR_DVDinvalidTitle "Άκυρος αριθμός για τον τίτλο του DVD: %d\n"
 #define MSGTR_DVDnumChapters "Υπάρχουν %d κεφάλαια σε αυτόν τον τίτλο του DVD.\n"
@@ -233,7 +232,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Λάθος αριθμός των γωνιών του DVD: %d\n"
 #define MSGTR_DVDnoIFO "Δεν είναι δυνατό το άνοιγμα του IFO αρχείο για τον τίτλο του DVD %d.\n"
 #define MSGTR_DVDnoVOBs "Δεν είναι δυνατό το άνοιγμα των VOB (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "Το DVD άνοιξε με επιτυχία!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Προειδοποίηση! Η επικεφαλίδα του καναλιού ήχου %d ορίζεται ξανά!\n"

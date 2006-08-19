@@ -518,7 +518,6 @@ static char help_text[]=
 
 #define MSGTR_CantOpenDVD "DVD sürücüsü açılamadı: %s\n"
 #define MSGTR_NoDVDSupport "Mplayer DVD desteği olmadan derlendi, çık\n"
-#define MSGTR_DVDwait "Disk yapısı okunuyor, lütfen bekleyiniz...\n"
 #define MSGTR_DVDnumTitles "Bu DVD üzerinde %d başlıkları var.\n"
 #define MSGTR_DVDinvalidTitle "Geçersiz DVD başlık numarası: %d\n"
 #define MSGTR_DVDnumChapters "Bu DVD başlığında %d bölüm var.\n"
@@ -534,7 +533,6 @@ static char help_text[]=
 #define MSGTR_DVDaudioChannel "Seçili DVD ses kanalı: %d dil: %c%c\n"
 #define MSGTR_DVDnoMatchingSubtitle "DVD altyazı dil eşlemi bulunamadı!\n"
 #define MSGTR_DVDsubtitleChannel "Seçili DVD altyazı kanalı: %dil: %c%c\n"
-#define MSGTR_DVDopenOk "DVD başarıyla açıldı!\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Çok sayıda yayın!"

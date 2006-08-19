@@ -223,7 +223,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer가 SMB읽기를 할 수 있도록 컴파일되지 않았습니다.\n"
 
 #define MSGTR_CantOpenDVD "DVD 장치를 열 수 없습니다.: %s\n"
-#define MSGTR_DVDwait "디스크 구조를 읽고있습니다. 잠시만 기다려 주세요...\n"
 #define MSGTR_DVDnumTitles "이 DVD에는 %d개의 타이틀이 있습니다.\n"
 #define MSGTR_DVDinvalidTitle "유효하지 않은 DVD 타이틀 번호입니다.: %d\n"
 #define MSGTR_DVDnumChapters "이 DVD 타이틀에는 %d개의 챕터가 있습니다.\n"
@@ -232,7 +231,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "유효하지 않은 DVD 앵글 번호입니다.: %d\n"
 #define MSGTR_DVDnoIFO "DVD 타이틀 %d를 위한 IFO파일을 열 수 없습니다.\n"
 #define MSGTR_DVDnoVOBs "타이틀 VOBS (VTS_%02d_1.VOB)를 열 수 없습니다.\n"
-#define MSGTR_DVDopenOk "성공적으로 DVD를 열었습니다.\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "경고: 오디오 스트림 헤더 %d가 재정의되었습니다.\n"

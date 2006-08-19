@@ -212,7 +212,6 @@ static char help_text[]=
 #define MSGTR_SMBFileNotFound "Nu pot deschide de pe LAN: '%s'\n"
 
 #define MSGTR_CantOpenDVD "Nu pot deschide DVD-ul: %s\n"
-#define MSGTR_DVDwait "Citesc structura discului, te rog aºteaptã...\n"
 #define MSGTR_DVDnumTitles "Sunt %d titluri pe acest DVD.\n"
 #define MSGTR_DVDinvalidTitle "Numãrul titlului DVD greºit: %d\n"
 #define MSGTR_DVDnumChapters "Sunt %d capitole în acest titlu.\n"
@@ -221,7 +220,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "Numãrul unghiului greºit: %d\n"
 #define MSGTR_DVDnoIFO "Nu pot deschide fiºierul IFO pentru titlul %d.\n"
 #define MSGTR_DVDnoVOBs "Nu pot deschide VOB-ul pentru titlu (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD deschis OK.\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_FormatNotRecognized \

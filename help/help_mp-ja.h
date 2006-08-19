@@ -170,7 +170,6 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer はSMB reading support を無効にしてコンパイルされています\n"
 
 #define MSGTR_CantOpenDVD "DVDデバイスを開くことが出来ませんでした: %s\n"
-#define MSGTR_DVDwait "ディスクを読み取ってます、お待ち下さい...\n"
 #define MSGTR_DVDnumTitles "このDVDには %d タイトル記録されています.\n"
 #define MSGTR_DVDinvalidTitle "不正な DVD タイトル番号です: %d\n"
 #define MSGTR_DVDnumChapters "このDVDは %d キャプターあります.\n"
@@ -179,7 +178,6 @@ static char help_text[]=
 #define MSGTR_DVDinvalidAngle "不正なDVDアングル番号です: %d\n"
 #define MSGTR_DVDnoIFO "Cannot open the IFO file for DVD title %d.\n"
 #define MSGTR_DVDnoVOBs "Cannot open title VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVDを開くことに成功しました.\n"
 
 // muxer_*.c:
 #define MSGTR_TooManyStreams "ストリームが多過ぎる!"
