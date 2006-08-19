@@ -27,6 +27,10 @@ MPlayer (1.0)
 	
     FFmpeg/libavcodec:
     * VC-1/WMV3/WMV9 video decoder
+    * Vorbis decoding speedup, now default Vorbis decoder
+
+    GUI:
+    * Windows version added
 
     MEncoder:
     * support of x264 encoding over lavc
