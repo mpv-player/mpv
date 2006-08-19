@@ -345,6 +345,34 @@ static int fill_buffer(stream_t *s, char *but, int len)
   return len;
 }
 
+static int control(stream_t *stream, int cmd, void* arg) {
+  dvdnav_priv_t* dvdnav_priv=stream->priv;
+  int tit, part;
+
+  switch(cmd) 
+  {
+    case STREAM_CTRL_SEEK_TO_CHAPTER:
+    {
+      int chap = *((unsigned int *)arg)+1;
+
+      if(chap < 1 || dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
+        break;
+      if(dvdnav_part_play(dvdnav_priv->dvdnav, tit, chap) != DVDNAV_STATUS_OK)
+        break;
+      return 1;
+    }
+    case STREAM_CTRL_GET_CURRENT_CHAPTER:
+    {
+      if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
+        break;
+      *((unsigned int *)arg) = part - 1;
+      return 1;
+    }
+  }
+
+  return STREAM_UNSUPORTED;
+}
+
 static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
   char *filename;
@@ -372,6 +400,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   stream->flags = STREAM_READ | STREAM_SEEK;
   stream->fill_buffer = fill_buffer;
   stream->seek = seek;
+  stream->control = control;
   stream->close = stream_dvdnav_close;
   stream->type = STREAMTYPE_DVDNAV;
   stream->priv=(void*)dvdnav_priv;
