@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r19420 (2006. 08. 19.)
+// Sync'ed with help_mp-en.h r19454 (2006. 08. 20.)
 
 // ========================= MPlayer help ===========================
 
@@ -521,6 +521,8 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "Nincs befordítva az MPlayerbe az SMB támogatás\n"
 
 #define MSGTR_CantOpenDVD "Nem tudom megnyitni a DVD eszközt: %s\n"
+
+// stream_dvd.c
 #define MSGTR_NoDVDSupport "Az MPlayer DVD támogatás nélkül lett lefordítva, kilépés.\n"
 #define MSGTR_DVDnumTitles "%d sáv van a DVD-n.\n"
 #define MSGTR_DVDinvalidTitle "Helytelen DVD sáv: %d\n"
@@ -535,8 +537,12 @@ static char help_text[]=
 #define MSGTR_DVDnoVOBs "Nem tudom megnyitni a VOBS sávokat (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDnoMatchingAudio "Nem található megfelelõ nyelvû DVD audió!\n"
 #define MSGTR_DVDaudioChannel "Kiválasztott DVD audió csatorna: %d nyelv: %c%c\n"
+#define MSGTR_DVDaudioStreamInfo "audió folyam: %d formátum: %s (%s) nyelv: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "audió csatornák száma a lemezen: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "Nincs megfelelõ nyelvû DVD felirat fájl!\n"
 #define MSGTR_DVDsubtitleChannel "Kiválasztott DVD felirat csatorna: %d nyelv: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "felirat ( sid ): %d nyelv: %s\n"
+#define MSGTR_DVDnumSubtitles "feliratok szám a lemezen: %d\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Túl sok stream!"
