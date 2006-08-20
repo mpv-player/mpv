@@ -3720,7 +3720,7 @@ fi
 
 
 echocheck "X11 headers presence"
-  for I in $_inc_extra /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
+  for I in `echo $_inc_extra | sed s/-I//g` /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
     if test -f "$I/X11/Xlib.h" ; then
       _inc_x11="-I$I"
       _x11_headers="yes"
