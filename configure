@@ -5163,6 +5163,9 @@ fi
 
 echocheck "DVD support (libdvdnav)"
 if test "$_dvdnav" = auto ; then
+  $_dvdnavconfig --version >> $TMPLOG 2>&1 || _dvdnav=no
+fi
+if test "$_dvdnav" = auto ; then
   cat > $TMPC <<EOF
 #include <dvdnav.h>
 int main(void) { dvdnav_t *dvd=0; return 0; }
