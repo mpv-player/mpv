@@ -546,13 +546,20 @@ GtkWidget * create_PopUpMenu( void )
     
     if ( c > 1 )
      {
+      int basedec = 0;
+      int setdec = 0;
       SubMenu=AddSubMenu( window1, (const char*)empty_xpm, Menu,MSGTR_MENU_AudioTrack );
       for ( i=0;i < MAX_A_STREAMS;i++ )
        if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] )
         {
          char tmp[32];
-         snprintf( tmp,32,MSGTR_MENU_Track,i );
-         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( i << 16 ) + evSetAudio );
+         if (!(setdec) )
+           {
+           basedec = (i > 1 ? i : 1);
+           setdec = 1;
+           }
+         snprintf( tmp,32,MSGTR_MENU_Track,(i-(basedec-1)) );
+         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( (i-basedec) << 16 ) + evSetAudio );
         }
      }
 
