@@ -224,6 +224,7 @@ static int nop_streaming_start( stream_t *stream ) {
 			// Redirect
 			case 301: // Permanently
 			case 302: // Temporarily
+			case 303: // See Other
 				ret=-1;
 				next_url = http_get_field( http_hdr, "Location" );
 
@@ -829,6 +830,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 			// Redirect
 			case 301: // Permanently
 			case 302: // Temporarily
+			case 303: // See Other
 				// TODO: RFC 2616, recommand to detect infinite redirection loops
 				next_url = http_get_field( http_hdr, "Location" );
 				if( next_url!=NULL ) {
