@@ -73,7 +73,9 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 		mp_msg(MSGT_CFGPARSER,MSGL_FATAL,"\ncan't get memory for 'line': %s", strerror(errno));
 		ret = -1;
 		goto out;
-	}
+	} else
+
+	mp_msg(MSGT_CFGPARSER,MSGL_V,"\n");
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
 	  mp_msg(MSGT_CFGPARSER,MSGL_V,": %s\n", strerror(errno));
@@ -81,7 +83,6 @@ int m_config_parse_config_file(m_config_t* config, char *conffile)
 		ret = 0;
 		goto out;
 	}
-	mp_msg(MSGT_CFGPARSER,MSGL_INFO,"\n");
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		if (errors >= 16) {
