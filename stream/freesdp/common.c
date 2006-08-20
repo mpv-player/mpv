@@ -166,6 +166,7 @@ fsdp_description_recycle (fsdp_description_t * dsc)
 
   for (i = 0; i < dsc->media_announcements_count; i++)
   {
+    if (!dsc->media_announcements[i]) continue;
     for (j = 0; j < dsc->media_announcements[i]->formats_count; j++)
       safe_free (dsc->media_announcements[i]->formats[j]);
     safe_free (dsc->media_announcements[i]->formats);
