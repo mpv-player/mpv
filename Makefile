@@ -111,6 +111,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               stream/stream.a \
               libswscale/libswscale.a \
               osdep/libosdep.a \
+              $(EXTRA_LIB)\
               $(DVDREAD_LIB) \
               $(DVDNAV_LIB) \
               $(CODEC_LIBS) \
@@ -124,6 +125,11 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(SMBSUPPORT_LIB) \
               $(FRIBIDI_LIB) \
               $(ENCA_LIB) \
+              $(LIRC_LIB) \
+              $(LIRCC_LIB) \
+              $(ARCH_LIB) \
+              $(MATH_LIB) \
+              $(LIBC_LIB) \
 
 CFLAGS = $(OPTFLAGS) -I. $(LIBAV_INC)
 
@@ -370,13 +376,7 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(COMMON_LIBS) \
                $(VO_LIBS) \
                $(AO_LIBS) \
-               $(EXTRA_LIB)\
-               $(LIRC_LIB) \
-               $(LIRCC_LIB) \
                $(STATIC_LIB) \
-               $(ARCH_LIB) \
-               $(MATH_LIB) \
-               $(LIBC_LIB) \
 
 $(PRG):	$(MPLAYER_DEP)
     ifeq ($(TARGET_WIN32),yes)
@@ -388,13 +388,7 @@ ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(ENCORE_LIB) \
                 $(COMMON_LIBS) \
-                $(EXTRA_LIB) \
                 $(MLIB_LIB) \
-                $(LIRC_LIB) \
-                $(LIRCC_LIB) \
-                $(ARCH_LIB) \
-                $(MATH_LIB) \
-                $(LIBC_LIB) \
 
 $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
