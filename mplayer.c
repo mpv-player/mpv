@@ -4822,18 +4822,22 @@ if(step_sec>0) {
         int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
         int chap;
         float next_pts = 0;
+        int num_chapters;
+        char *chapter_name;
 
         rel_seek_secs = 0;
         abs_seek_pos = 0;
-        chap = demuxer_seek_chapter(demuxer, seek, abs, &next_pts);
+        chap = demuxer_seek_chapter(demuxer, seek, abs, &next_pts, &num_chapters, &chapter_name);
         if(chap != -1) {
             if(next_pts > -1.0) {
                 abs_seek_pos = 1;
                 rel_seek_secs = next_pts;
             }
-            if(demuxer->num_chapters > chap)
+            if(chapter_name) {
                 set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter,
-                chap, demuxer->chapters[chap].name);
+                chap, chapter_name);
+                free(chapter_name);
+            }
         } else {
             if (seek > 0)
                 rel_seek_secs = 1000000000.;

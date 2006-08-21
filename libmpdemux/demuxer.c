@@ -1053,10 +1053,12 @@ int demuxer_add_chapter(demuxer_t* demuxer, const char* name, uint64_t start, ui
  * \param chapter - chapter number wished - 0-based
  * \param mode 0: relative to current main pts, 1: absolute
  * \param seek_pts set by the function to the pts to seek to (if demuxer->chapters is set)
+ * \param num_chapters number of chapters present (set by this function is param is not null)
+ * \param chapter_name name of chapter found (set by this function is param is not null)
  * \return -1 on error, current chapter if successful
  */
 
-int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts) {
+int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_pts, int *num_chapters, char **chapter_name) {
     int ris;
     int current, total;
     sh_video_t *sh_video = demuxer->video->sh;
@@ -1091,6 +1093,21 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
 
         //exit status may be ok, but main() doesn't have to seek itself (because e.g. dvds depend on sectors, not on pts)
         *seek_pts = -1.0;
+
+        if(num_chapters) {
+            if(stream_control(demuxer->stream, STREAM_CTRL_GET_NUM_CHAPTERS, num_chapters) == STREAM_UNSUPORTED)
+                *num_chapters = 0;
+        }
+
+        if(chapter_name) {
+            char *tmp = malloc(16);
+            *chapter_name = NULL;
+            if(num_chapters  && *num_chapters && tmp) {
+                sprintf(tmp, " of %3d", *num_chapters);
+                *chapter_name = tmp;
+            }
+        }
+
         return (ris != STREAM_UNSUPORTED ? chapter : -1);
     } else {  //chapters structure is set in the demuxer
         total = demuxer->num_chapters;
@@ -1114,6 +1131,12 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
         if (current < 0) current = 0;
 
         *seek_pts = demuxer->chapters[current].start / 1000.0;
+
+        if(num_chapters)
+            *num_chapters = demuxer->num_chapters;
+
+        if(chapter_name)
+            *chapter_name = demuxer->chapters[current].name;
 
         return current;
     }
