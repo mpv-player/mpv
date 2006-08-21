@@ -228,6 +228,7 @@ Optional features:
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit2 support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
+  --disable-bitmap-font  Disable bitmap font support [enable]
   --disable-freetype     Disable freetype2 font rendering support [autodetect]
   --disable-fontconfig   Disable fontconfig font lookup support [autodetect]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
@@ -1684,6 +1685,7 @@ _sighandler=yes
 _libdv=auto
 _cdparanoia=auto
 _big_endian=auto
+_bitmap_font=yes
 _freetype=auto
 _fontconfig=auto
 _menu=no
@@ -1987,6 +1989,8 @@ for ac_option do
   --disable-cdparanoia)	_cdparanoia=no	;;
   --enable-big-endian)  _big_endian=yes ;;
   --disable-big-endian) _big_endian=no  ;;
+  --enable-bitmap-font)    _bitmap_font=yes   ;;
+  --disable-bitmap-font)   _bitmap_font=no    ;;
   --enable-freetype)    _freetype=yes   ;;
   --disable-freetype)   _freetype=no    ;;
   --enable-fontconfig)  _fontconfig=yes ;;
@@ -5256,6 +5260,15 @@ fi
 echores "$_libcdio"
 
 
+echocheck "bitmap font support"
+if test "$_bitmap_font" = yes ; then
+  _def_bitmap_font="#define HAVE_BITMAP_FONT 1"
+else
+  _def_bitmap_font="#undef HAVE_BITMAP_FONT"
+fi
+echores "$_bitmap_font"
+
+
 echocheck "freetype >= 2.0.9"
 
 # freetype depends on iconv
@@ -7394,6 +7407,7 @@ ENCORE_LIB = $_ld_mp3lame
 DIRECTFB_LIB = $_ld_directfb
 CDDA = $_cdda
 CDPARANOIA_LIB = $_ld_cdparanoia
+BITMAP_FONT = $_bitmap_font 
 FREETYPE = $_freetype
 FREETYPE_LIB = $_ld_freetype
 FONTCONFIG_LIB = $_ld_fontconfig
@@ -7992,6 +8006,9 @@ $_def_md5sum
 $_def_gif
 $_def_gif_4
 $_def_gif_tvt_hack
+
+/* enable bitmap font support */
+$_def_bitmap_font
 
 /* enable FreeType support */
 $_def_freetype

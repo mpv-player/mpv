@@ -5,7 +5,6 @@ LIBNAME = libvo.a
 
 SRCS=aclib.c \
      aspect.c \
-     font_load.c \
      geometry.c \
      osd.c \
      spuenc.c \
@@ -23,6 +22,10 @@ endif
 
 OBJS_TEMP=$(basename $(SRCS))
 OBJS=$(OBJS_TEMP:%=%.o)
+
+ifeq ($(BITMAP_FONT),yes)
+SRCS += font_load.c
+endif
 
 ifeq ($(FREETYPE),yes)
 SRCS += font_load_ft.c
