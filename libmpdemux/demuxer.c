@@ -1135,8 +1135,11 @@ int demuxer_seek_chapter(demuxer_t *demuxer, int chapter, int mode, float *seek_
         if(num_chapters)
             *num_chapters = demuxer->num_chapters;
 
-        if(chapter_name)
-            *chapter_name = demuxer->chapters[current].name;
+        if(chapter_name) {
+            if(demuxer->chapters[current].name)
+                *chapter_name = strdup(demuxer->chapters[current].name);
+            else *chapter_name = NULL;
+        }
 
         return current;
     }
