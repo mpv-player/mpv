@@ -514,6 +514,12 @@ static int control(stream_t *stream,int cmd,void* arg)
             *((unsigned int *)arg) = mp_get_titleset_length(d->vts_file, d->tt_srpt, d->cur_title-1);
             return 1;
         }
+        case STREAM_CTRL_GET_NUM_CHAPTERS:
+        {
+            if(! d->cur_pgc->nr_of_programs) return STREAM_UNSUPORTED;
+            *((unsigned int *)arg) = d->cur_pgc->nr_of_programs; 
+            return 1;
+        }
         case STREAM_CTRL_SEEK_TO_CHAPTER:
         {
             int r = seek_to_chapter(stream, d->vts_file, d->tt_srpt, d->cur_title-1, *((unsigned int *)arg));
