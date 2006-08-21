@@ -70,6 +70,9 @@ VO_LIBS = $(AA_LIB) \
           $(CACA_LIB) \
 	  $(VESA_LIB) \
 
+ifeq ($(VIDIX),yes)
+VO_LIBS += vidix/libvidix.a
+endif
 ifeq ($(EXTERNAL_VIDIX),yes)
 VO_LIBS += $(EXTERNAL_VIDIX_LIB)
 endif
@@ -355,12 +358,6 @@ endif
 
 MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
 
-ifeq ($(VIDIX),yes)
-VIDIX_LIBS = vidix/libvidix.a
-else
-VIDIX_LIBS =
-endif
-
 ifeq ($(TARGET_WIN32),yes)
 OBJS_MPLAYER += osdep/mplayer-rc.o
 endif
@@ -369,7 +366,6 @@ LIBS_MPLAYER = libvo/libvo.a \
                libao2/libao2.a \
                input/libinput.a \
                $(MENU_LIBS) \
-               $(VIDIX_LIBS) \
                $(GUI_LIBS) \
                $(COMMON_LIBS) \
                $(VO_LIBS) \
