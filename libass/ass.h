@@ -110,6 +110,22 @@ int ass_alloc_style(ass_track_t* track);
 int ass_alloc_event(ass_track_t* track);
 
 /**
+ * \brief delete a style
+ * \param track track
+ * \param sid style id
+ * Deallocates style data. Does not modify track->n_styles.
+ */
+void ass_free_style(ass_track_t* track, int sid);
+
+/**
+ * \brief delete an event
+ * \param track track
+ * \param eid event id
+ * Deallocates event data. Does not modify track->n_events.
+ */
+void ass_free_event(ass_track_t* track, int eid);
+
+/**
  * \brief Process Codec Private section of subtitle stream
  * \param track target track
  * \param data string to parse

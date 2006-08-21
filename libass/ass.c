@@ -37,25 +37,13 @@ void ass_free_track(ass_track_t* track) {
 	if (track->event_format)
 		free(track->event_format);
 	if (track->styles) {
-		for (i = 0; i < track->n_styles; ++i) {
-			ass_style_t* style = track->styles + i;
-			if (style->Name)
-				free(style->Name);
-			if (style->FontName)
-				free(style->FontName);
-		}
+		for (i = 0; i < track->n_styles; ++i)
+			ass_free_style(track, i);
 		free(track->styles);
 	}
 	if (track->events) {
-		for (i = 0; i < track->n_events; ++i) {
-			ass_event_t* event = track->events + i;
-			if (event->Name)
-				free(event->Name);
-			if (event->Effect)
-				free(event->Effect);
-			if (event->Text)
-				free(event->Text);
-		}
+		for (i = 0; i < track->n_events; ++i)
+			ass_free_event(track, i);
 		free(track->events);
 	}
 }
@@ -96,10 +84,22 @@ int ass_alloc_event(ass_track_t* track) {
 	return eid;
 }
 
-static void free_event(ass_track_t* track, int eid) {
-	if (track->n_events > eid + 1) // not last event
-		memcpy(track->events + eid, track->events + eid + 1, sizeof(ass_event_t) * (track->n_events - eid - 1));
-	track->n_events--;
+void ass_free_event(ass_track_t* track, int eid) {
+	ass_event_t* event = track->events + eid;
+	if (event->Name)
+		free(event->Name);
+	if (event->Effect)
+		free(event->Effect);
+	if (event->Text)
+		free(event->Text);
+}
+
+void ass_free_style(ass_track_t* track, int sid) {
+	ass_style_t* style = track->styles + sid;
+	if (style->Name)
+		free(style->Name);
+	if (style->FontName)
+		free(style->FontName);
 }
 
 static int events_compare_f(const void* a_, const void* b_) {
@@ -530,7 +530,8 @@ void ass_process_line(ass_track_t* track, char *data, int size, long long timeco
 //		dump_events(tid);
 	} while (0);
 	// some error
-	free_event(track, eid);
+	ass_free_event(track, eid);
+	track->n_events--;
 	free(str);
 }
 
