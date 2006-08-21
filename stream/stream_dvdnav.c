@@ -356,6 +356,17 @@ static int control(stream_t *stream, int cmd, void* arg) {
         break;
       return 1;
     }
+    case STREAM_CTRL_GET_NUM_CHAPTERS:
+    {
+      if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
+        break;
+      if(dvdnav_get_number_of_parts(dvdnav_priv->dvdnav, tit, &part) != DVDNAV_STATUS_OK)
+        break;
+      if(!part)
+        break;
+      *((unsigned int *)arg) = part;
+      return 1;
+    }
     case STREAM_CTRL_GET_CURRENT_CHAPTER:
     {
       if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) != DVDNAV_STATUS_OK)
