@@ -5807,7 +5807,7 @@ if test "$_faad_internal" = auto ; then
   else
     _faad_internal=yes
   fi
-elif test "$_faad_external" = auto ; then
+elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
   _ld_faad='-lfaad'
   # external faad: check if it's really faad2 :)
   if test "$_faad_external" = auto ; then
