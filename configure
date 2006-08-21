@@ -3920,12 +3920,12 @@ echores "$_vm"
 echocheck "XF86keysym"
 if test "$_xf86keysym" = auto; then
   _xf86keysym=no
-    cat > $TMPC <<EOF
+  cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/XF86keysym.h>
 int main(void) { return XF86XK_AudioPause; }
 EOF
-    cc_check $_ld_x11 && _xf86keysym=yes
+  cc_check $_ld_x11 && _xf86keysym=yes
 fi
 if test "$_xf86keysym" = yes ; then
   _def_xf86keysym='#define HAVE_XF86XK 1'
