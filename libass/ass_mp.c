@@ -1,5 +1,6 @@
 #include <inttypes.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "ass.h"
 #include "ass_mp.h"
