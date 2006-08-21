@@ -7307,8 +7307,6 @@ HAVE_PTHREADS = $_pthreads
 MATH_LIB = $_ld_lm
 LIBC_LIB = $_ld_libC
 
-X11DIR = $_ld_x11
-
 HAVE_XVMC_ACCEL = $_xvmc
 
 # for FFmpeg
