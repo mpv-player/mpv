@@ -3833,7 +3833,6 @@ if test "$_xv" = yes ; then
   _vosrc="$_vosrc vo_xv.c"
   _vomodules="xv $_vomodules"
 else
-  _xv=no
   _def_xv='#undef HAVE_XV'
   _novomodules="xv $_novomodules"
 fi
@@ -3884,7 +3883,6 @@ if test "$_xinerama" = yes ; then
   _def_xinerama='#define HAVE_XINERAMA 1'
   _ld_xinerama='-lXinerama'
 else
-  _xinerama=no
   _def_xinerama='#undef HAVE_XINERAMA'
 fi
 echores "$_xinerama"
