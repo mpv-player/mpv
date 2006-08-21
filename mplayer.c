@@ -814,7 +814,7 @@ void add_subtitles(char *filename, float fps, int silent)
 #ifdef USE_ASS
     if (ass_enabled)
         asst = ass_read_file(filename);
-    if (ass_enabled && !asst)
+    if (ass_enabled && subd && !asst)
         asst = ass_read_subdata(subd, fps);
 
     if (!asst && !subd && !silent)
