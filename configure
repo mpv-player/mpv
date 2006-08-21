@@ -5809,15 +5809,15 @@ if test "$_faad_internal" = auto ; then
   fi
 elif test "$_faad_internal" = no && test "$_faad_external" = auto ; then
   _ld_faad='-lfaad'
-    _faad_external=no
-    cat > $TMPC << EOF
+  _faad_external=no
+  cat > $TMPC << EOF
 #include <faad.h>
 #ifndef FAAD_MIN_STREAMSIZE
 #error Too old version
 #endif
 int main(void) { faacDecHandle testhand; faacDecFrameInfo testinfo; testhand = faacDecOpen(); faacDecInit(0, 0, 0, 0, 0); return 0; }
 EOF
-    cc_check $_ld_faad $_ld_lm && _faad_external=yes
+  cc_check $_ld_faad $_ld_lm && _faad_external=yes
 fi
 
 if test "$_faad_internal" = yes ; then
