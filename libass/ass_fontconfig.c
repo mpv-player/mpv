@@ -207,9 +207,11 @@ char* fontconfig_select(fc_instance_t* priv, const char* family, unsigned bold, 
 
 fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* path)
 {
+	fc_instance_t* priv;
+
 	mp_msg(MSGT_GLOBAL, MSGL_WARN, "Fontconfig disabled, only default font will be used\n");
 	
-	fc_instance_t* priv = calloc(1, sizeof(fc_instance_t));
+	priv = calloc(1, sizeof(fc_instance_t));
 	
 	priv->path_default = strdup(path);
 	priv->index_default = 0;
