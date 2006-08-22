@@ -305,6 +305,7 @@
 	{"ass-bottom-margin", &ass_bottom_margin, CONF_TYPE_INT, CONF_RANGE, 0, 2000, NULL},
 	{"embeddedfonts", &extract_embedded_fonts, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noembeddedfonts", &extract_embedded_fonts, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"ass-force-style", &ass_force_style_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 #endif
 #ifdef HAVE_FONTCONFIG
 	{"fontconfig", &font_fontconfig, CONF_TYPE_FLAG, 0, 0, 1, NULL},

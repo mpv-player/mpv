@@ -9,6 +9,7 @@ extern float ass_line_spacing;
 extern int ass_top_margin;
 extern int ass_bottom_margin;
 extern int extract_embedded_fonts;
+extern char **ass_force_style_list;
 
 ass_track_t* ass_read_subdata(sub_data* subdata, double fps);
 

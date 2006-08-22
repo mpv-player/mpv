@@ -19,6 +19,7 @@
 extern char *sub_cp;
 #endif
 extern int extract_embedded_fonts;
+extern char** ass_force_style_list;
 
 #include "mp_msg.h"
 #include "ass.h"
@@ -209,7 +210,13 @@ static int numpad2align(int val) {
 	} else if (strcasecmp(tname, #name) == 0) { \
 		target->name = func(token); \
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "%s = %s\n", #name, token);
-#define STRVAL(name) ANYVAL(name,strdup)
+
+#define STRVAL(name) \
+	} else if (strcasecmp(tname, #name) == 0) { \
+		if (target->name != NULL) free(target->name); \
+		target->name = strdup(token); \
+		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "%s = %s\n", #name, token);
+		
 #define COLORVAL(name) ANYVAL(name,string2color)
 #define INTVAL(name) ANYVAL(name,atoi)
 #define FPVAL(name) ANYVAL(name,atof)
@@ -298,6 +305,68 @@ static int process_event_tail(ass_track_t* track, ass_event_t* event, char* str,
 	}
 	free(format);
 	return 1;
+}
+
+/**
+ * \brief Parse command line style overrides (--ass-force-style option)
+ * \param track track to apply overrides to
+ * The format for overrides is [StyleName.]Field=Value
+ */
+static void process_force_style(ass_track_t* track) {
+	char **fs, *eq, *dt, *style, *tname, *token;
+	ass_style_t* target;
+	int sid;
+	
+	if (!ass_force_style_list) return;
+	
+	for (fs = ass_force_style_list; *fs; ++fs) {
+		eq = strchr(*fs, '=');
+		if (!eq)
+			continue;
+		*eq = '\0';
+		token = eq + 1;
+
+		dt = strchr(*fs, '.');
+		if (dt) {
+			*dt = '\0';
+			style = *fs;
+			tname = dt + 1;
+		} else {
+			style = NULL;
+			tname = *fs;
+		}
+		for (sid = 0; sid < track->n_styles; ++sid) {
+			if (style == NULL || strcasecmp(track->styles[sid].Name, style) == 0) {
+				target = track->styles + sid;
+				if (0) {
+					STRVAL(FontName)
+					COLORVAL(PrimaryColour)
+					COLORVAL(SecondaryColour)
+					COLORVAL(OutlineColour)
+					COLORVAL(BackColour)
+					INTVAL(FontSize)
+					INTVAL(Bold)
+					INTVAL(Italic)
+					INTVAL(Underline)
+					INTVAL(StrikeOut)
+					INTVAL(Spacing)
+					INTVAL(Angle)
+					INTVAL(BorderStyle)
+					INTVAL(Alignment)
+					INTVAL(MarginL)
+					INTVAL(MarginR)
+					INTVAL(MarginV)
+					INTVAL(Encoding)
+					FPVAL(ScaleX)
+					FPVAL(ScaleY)
+					FPVAL(Outline)
+					FPVAL(Shadow)
+				}
+			}
+		}
+		*eq = '=';
+		if (dt) *dt = '.';
+	}
 }
 
 /**
@@ -645,6 +714,8 @@ void ass_process_codec_private(ass_track_t* track, char *data, int size)
 		else
 			track->event_format = strdup("Format: Layer, Start, End, Style, Actor, MarginL, MarginR, MarginV, Effect, Text");
 	}
+
+	process_force_style(track);
 }
 
 static int check_duplicate_event(ass_track_t* track, int ReadOrder)
@@ -861,6 +932,8 @@ ass_track_t* ass_read_file(char* fname)
 		ass_free_track(track);
 		return 0;
 	}
+
+	process_force_style(track);
 
 	mp_msg(MSGT_GLOBAL, MSGL_INFO, "LIBASS: added subtitle file: %s (%d styles, %d events)\n", fname, track->n_styles, track->n_events);
 	
