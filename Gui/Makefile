@@ -67,7 +67,7 @@ clean:
               mplayer/gtk/*.o mplayer/gtk/*~ \
               skin/*.o skin/*~ \
               wm/*.o wm/*~ \
-              win32/*.o
+              win32/*.o win32/*~ \
 
 #dep:	depend
 #
