@@ -53,6 +53,8 @@ typedef struct ass_event_s {
 	char* Text;
 } ass_event_t;
 
+typedef struct parser_priv_s parser_priv_t;
+
 /// ass track represent either an external script or a matroska subtitle stream (no real difference between them)
 /// it can be used in rendering after the headers are parsed (i.e. events format line read)
 typedef struct ass_track_s {
@@ -66,7 +68,7 @@ typedef struct ass_track_s {
 	char* style_format; // style format line (everything after "Format: ")
 	char* event_format; // event format line
 
-	enum {TRACK_TYPE_ASS, TRACK_TYPE_SSA} track_type;
+	enum {TRACK_TYPE_UNKNOWN = 0, TRACK_TYPE_ASS, TRACK_TYPE_SSA} track_type;
 	
 	// script header fields
 	int PlayResX;
@@ -77,6 +79,8 @@ typedef struct ass_track_s {
 	
 	int default_style; // index of default style
 	char* name; // file name in case of external subs, 0 for streams
+
+	parser_priv_t* parser_priv;
 } ass_track_t;
 
 #endif

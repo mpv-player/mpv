@@ -2309,7 +2309,7 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
         }
       track->sh_sub.type = 'a';
       track->sh_sub.ass_track = ass_new_track();
-      ass_process_chunk(track->sh_sub.ass_track, track->private_data, track->private_size);
+      ass_process_codec_private(track->sh_sub.ass_track, track->private_data, track->private_size);
     }
 }
 #endif
@@ -2800,7 +2800,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
 
 #ifdef USE_ASS
   if (ass_enabled && track->subtitle_type == MATROSKA_SUBTYPE_SSA) {
-    ass_process_line(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
+    ass_process_chunk(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
     return;
   }
 #endif

@@ -131,7 +131,7 @@ void ass_free_event(ass_track_t* track, int eid);
  * \param data string to parse
  * \param size length of data
  */
-void ass_process_chunk(ass_track_t* track, char *data, int size);
+void ass_process_codec_private(ass_track_t* track, char *data, int size);
 
 /**
  * \brief Process a chunk of subtitle stream data. In matroska, this containes exactly 1 event (or a commentary)
@@ -141,7 +141,7 @@ void ass_process_chunk(ass_track_t* track, char *data, int size);
  * \param timecode starting time of the event (milliseconds)
  * \param duration duration of the event (milliseconds)
 */
-void ass_process_line(ass_track_t* track, char *data, int size, long long timecode, long long duration);
+void ass_process_chunk(ass_track_t* track, char *data, int size, long long timecode, long long duration);
 
 /**
  * \brief Read subtitles from file.

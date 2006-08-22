@@ -18,6 +18,7 @@
 #include <iconv.h>
 extern char *sub_cp;
 #endif
+extern int extract_embedded_fonts;
 
 #include "mp_msg.h"
 #include "ass.h"
@@ -26,12 +27,27 @@ extern char *sub_cp;
 
 char *get_path(char *);
 
+struct parser_priv_s {
+	enum {PST_UNKNOWN = 0, PST_INFO, PST_STYLES, PST_EVENTS, PST_FONTS} state;
+	char* fontname;
+	char* fontdata;
+	int fontdata_size;
+	int fontdata_used;
+};
+
 #define ASS_STYLES_ALLOC 20
 #define ASS_EVENTS_ALLOC 200
 
 void ass_free_track(ass_track_t* track) {
 	int i;
 	
+	if (track->parser_priv) {
+		if (track->parser_priv->fontname)
+			free(track->parser_priv->fontname);
+		if (track->parser_priv->fontdata)
+			free(track->parser_priv->fontdata);
+		free(track->parser_priv);
+	}
 	if (track->style_format)
 		free(track->style_format);
 	if (track->event_format)
@@ -379,46 +395,219 @@ static int process_style(ass_track_t* track, char *str)
 	
 }
 
+static int process_styles_line(ass_track_t* track, char *str)
+{
+	if (!strncmp(str,"Format:", 7)) {
+		char* p = str + 7;
+		skip_spaces(&p);
+		track->style_format = strdup(p);
+		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "Style format: %s\n", track->style_format);
+	} else if (!strncmp(str,"Style:", 6)) {
+		char* p = str + 6;
+		skip_spaces(&p);
+		process_style(track, p);
+	}
+	return 0;
+}
+
+static int process_info_line(ass_track_t* track, char *str)
+{
+	if (!strncmp(str, "PlayResX:", 9)) {
+		track->PlayResX = atoi(str + 9);
+	} else if (!strncmp(str,"PlayResY:", 9)) {
+		track->PlayResY = atoi(str + 9);
+	} else if (!strncmp(str,"Timer:", 6)) {
+		track->Timer = atof(str + 6);
+	} else if (!strncmp(str,"WrapStyle:", 10)) {
+		track->WrapStyle = atoi(str + 10);
+	}
+	return 0;
+}
+
+static int process_events_line(ass_track_t* track, char *str)
+{
+	if (!strncmp(str, "Format:", 7)) {
+		char* p = str + 7;
+		skip_spaces(&p);
+		track->event_format = strdup(p);
+		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "Event format: %s\n", track->event_format);
+	} else if (!strncmp(str, "Dialogue:", 9)) {
+		// This should never be reached for embedded subtitles.
+		// They have slightly different format and are parsed in ass_process_chunk,
+		// called directly from demuxer
+		int eid;
+		ass_event_t* event;
+		
+		str += 9;
+		skip_spaces(&str);
+
+		eid = ass_alloc_event(track);
+		event = track->events + eid;
+
+		process_event_tail(track, event, str, 0);
+	} else {
+		mp_msg(MSGT_GLOBAL, MSGL_V, "Not understood: %s  \n", str);
+	}
+	return 0;
+}
+
+// Copied from mkvtoolnix
+static unsigned char* decode_chars(unsigned char c1, unsigned char c2,
+		unsigned char c3, unsigned char c4, unsigned char* dst, int cnt)
+{
+	uint32_t value;
+	unsigned char bytes[3];
+	int i;
+
+	value = ((c1 - 33) << 18) + ((c2 - 33) << 12) + ((c3 - 33) << 6) + (c4 - 33);
+	bytes[2] = value & 0xff;
+	bytes[1] = (value & 0xff00) >> 8;
+	bytes[0] = (value & 0xff0000) >> 16;
+
+	for (i = 0; i < cnt; ++i)
+		*dst++ = bytes[i];
+	return dst;
+}
+
+static int decode_font(ass_track_t* track)
+{
+	unsigned char* p;
+	unsigned char* q;
+	int i;
+	int size; // original size
+	int dsize; // decoded size
+	unsigned char* buf = 0;
+
+	mp_msg(MSGT_GLOBAL, MSGL_V, "font: %d bytes encoded data \n", track->parser_priv->fontdata_used);
+	size = track->parser_priv->fontdata_used;
+	if (size % 4 == 1) {
+		mp_msg(MSGT_GLOBAL, MSGL_ERR, "bad encoded data size\n");
+		goto error_decode_font;
+	}
+	buf = malloc(size / 4 * 3 + 2);
+	q = buf;
+	for (i = 0, p = (unsigned char*)track->parser_priv->fontdata; i < size / 4; i++, p+=4) {
+		q = decode_chars(p[0], p[1], p[2], p[3], q, 3);
+	}
+	if (size % 4 == 2) {
+		q = decode_chars(p[0], p[1], 0, 0, q, 1);
+	} else if (size % 4 == 3) {
+		q = decode_chars(p[0], p[1], p[2], 0, q, 2);
+	}
+	dsize = q - buf;
+	assert(dsize <= size / 4 * 3 + 2);
+	
+	if (extract_embedded_fonts)
+		ass_process_font(track->parser_priv->fontname, (char*)buf, dsize);
+
+error_decode_font:
+	if (buf) free(buf);
+	free(track->parser_priv->fontname);
+	free(track->parser_priv->fontdata);
+	track->parser_priv->fontname = 0;
+	track->parser_priv->fontdata = 0;
+	track->parser_priv->fontdata_size = 0;
+	track->parser_priv->fontdata_used = 0;
+	return 0;
+}
+
+static char* validate_fname(char* name);
+
+static int process_fonts_line(ass_track_t* track, char *str)
+{
+	int len;
+
+	if (!strncmp(str, "fontname:", 9)) {
+		char* p = str + 9;
+		skip_spaces(&p);
+		if (track->parser_priv->fontname) {
+			decode_font(track);
+		}
+		track->parser_priv->fontname = validate_fname(p);
+		mp_msg(MSGT_GLOBAL, MSGL_V, "fontname: %s\n", track->parser_priv->fontname);
+		return 0;
+	}
+	
+	if (!track->parser_priv->fontname) {
+		mp_msg(MSGT_GLOBAL, MSGL_V, "Not understood: %s  \n", str);
+		return 0;
+	}
+
+	len = strlen(str);
+	if (len > 80) {
+		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Font line too long: %d, %s\n", len, str);
+		return 0;
+	}
+	if (track->parser_priv->fontdata_used + len > track->parser_priv->fontdata_size) {
+		track->parser_priv->fontdata_size += 100 * 1024;
+		track->parser_priv->fontdata = realloc(track->parser_priv->fontdata, track->parser_priv->fontdata_size);
+	}
+	memcpy(track->parser_priv->fontdata + track->parser_priv->fontdata_used, str, len);
+	track->parser_priv->fontdata_used += len;
+	
+	return 0;
+}
+
 /**
  * \brief Parse a header line
  * \param track track
  * \param str string to parse, zero-terminated
 */ 
-static int process_header_line(ass_track_t* track, char *str)
+static int process_line(ass_track_t* track, char *str)
 {
-	static int events_section_started = 0;
-	
-	mp_msg(MSGT_GLOBAL, MSGL_DBG2, "=== Header: %s\n", str);
-	if (strncmp(str, "PlayResX:", 9)==0) {
-		track->PlayResX = atoi(str + 9);
-	} else if (strncmp(str,"PlayResY:", 9)==0) {
-		track->PlayResY = atoi(str + 9);
-	} else if (strncmp(str,"Timer:", 6)==0) {
-		track->Timer = atof(str + 6);
-	} else if (strstr(str,"Styles]")) {
-		events_section_started = 0;
-		if (strchr(str, '+'))
-			track->track_type = TRACK_TYPE_ASS;
-		else
-			track->track_type = TRACK_TYPE_SSA;
-	} else if (strncmp(str,"[Events]", 8)==0) {
-		events_section_started = 1;
-	} else if (strncmp(str,"Format:", 7)==0) {
-		char* p = str + 7;
-		skip_spaces(&p);
-		if (events_section_started) {
-			track->event_format = strdup(p);
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "Event format: %s\n", track->event_format);
-		} else {
-			track->style_format = strdup(p);
-			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "Style format: %s\n", track->style_format);
+	if (strstr(str, "[Script Info]")) { // FIXME: strstr to skip possible BOM at the beginning of the script
+		track->parser_priv->state = PST_INFO;
+	} else if (!strncmp(str, "[V4 Styles]", 11)) {
+		track->parser_priv->state = PST_STYLES;
+		track->track_type = TRACK_TYPE_SSA;
+	} else if (!strncmp(str, "[V4+ Styles]", 12)) {
+		track->parser_priv->state = PST_STYLES;
+		track->track_type = TRACK_TYPE_ASS;
+	} else if (!strncmp(str, "[Events]", 8)) {
+		track->parser_priv->state = PST_EVENTS;
+	} else if (!strncmp(str, "[Fonts]", 7)) {
+		track->parser_priv->state = PST_FONTS;
+	} else {
+		switch (track->parser_priv->state) {
+		case PST_INFO:
+			process_info_line(track, str);
+			break;
+		case PST_STYLES:
+			process_styles_line(track, str);
+			break;
+		case PST_EVENTS:
+			process_events_line(track, str);
+			break;
+		case PST_FONTS:
+			process_fonts_line(track, str);
+			break;
+		default:
+			break;
 		}
-	} else if (strncmp(str,"Style:", 6)==0) {
-		char* p = str + 6;
-		skip_spaces(&p);
-		process_style(track, p);
-	} else if (strncmp(str,"WrapStyle:", 10)==0) {
-		track->WrapStyle = atoi(str + 10);
+	}
+
+	// there is no explicit end-of-font marker in ssa/ass
+	if ((track->parser_priv->state != PST_FONTS) && (track->parser_priv->fontname))
+		decode_font(track);
+
+	return 0;
+}
+
+static int process_text(ass_track_t* track, char* str)
+{
+	char* p = str;
+	while(1) {
+		char* q;
+		for (;((*p=='\r')||(*p=='\n'));++p) {}
+		for (q=p; ((*q!='\0')&&(*q!='\r')&&(*q!='\n')); ++q) {};
+		if (q==p)
+			break;
+		if (*q != '\0')
+			*(q++) = '\0';
+		process_line(track, p);
+		if (*q == '\0')
+			break;
+		p = q;
 	}
 	return 0;
 }
@@ -428,31 +617,17 @@ static int process_header_line(ass_track_t* track, char *str)
  * \param track track
  * \param data string to parse
  * \param size length of data
- CodecPrivate section contains [Stream Info] and [V4+ Styles] sections
+ CodecPrivate section contains [Stream Info] and [V4+ Styles] ([V4 Styles] for SSA) sections
 */ 
-void ass_process_chunk(ass_track_t* track, char *data, int size)
+void ass_process_codec_private(ass_track_t* track, char *data, int size)
 {
 	char* str = malloc(size + 1);
-	char* p;
 	int sid;
 
 	memcpy(str, data, size);
 	str[size] = '\0';
 
-	p = str;
-	while(1) {
-		char* q;
-		for (;((*p=='\r')||(*p=='\n'));++p) {}
-		for (q=p; ((*q!='\0')&&(*q!='\r')&&(*q!='\n')); ++q) {};
-		if (q==p)
-			break;
-		if (*q != '\0')
-			*(q++) = '\0';
-		process_header_line(track, p);
-		if (*q == '\0')
-			break;
-		p = q;
-	}
+	process_text(track, str);
 	free(str);
 
 	// add "Default" style to the end
@@ -464,6 +639,7 @@ void ass_process_chunk(ass_track_t* track, char *data, int size)
 	if (!track->event_format) {
 		// probably an mkv produced by ancient mkvtoolnix
 		// such files don't have [Events] and Format: headers
+		track->parser_priv->state = PST_EVENTS;
 		if (track->track_type == TRACK_TYPE_SSA)
 			track->event_format = strdup("Format: Marked, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text");
 		else
@@ -488,7 +664,7 @@ static int check_duplicate_event(ass_track_t* track, int ReadOrder)
  * \param timecode starting time of the event (milliseconds)
  * \param duration duration of the event (milliseconds)
 */ 
-void ass_process_line(ass_track_t* track, char *data, int size, long long timecode, long long duration)
+void ass_process_chunk(ass_track_t* track, char *data, int size, long long timecode, long long duration)
 {
 	char* str;
 	int eid;
@@ -533,29 +709,6 @@ void ass_process_line(ass_track_t* track, char *data, int size, long long timeco
 	ass_free_event(track, eid);
 	track->n_events--;
 	free(str);
-}
-
-/**
- * \brief Process a line from external file.
- * \param track track
- * \param str string to parse
- * \param size length of data
-*/ 
-static void ass_process_external_line(ass_track_t* track, char *str, int size)
-{
-	int eid;
-	ass_event_t* event;
-
-	eid = ass_alloc_event(track);
-	event = track->events + eid;
-
-	if (strncmp("Dialogue:", str, 9) != 0)
-		return;
-
-	str += 9;
-	while (*str == ' ') {++str;}
-	
-	process_event_tail(track, event, str, 0);
 }
 
 #ifdef USE_ICONV
@@ -641,8 +794,6 @@ ass_track_t* ass_read_file(char* fname)
 	long sz;
 	long bytes_read;
 	char* buf;
-	char* p;
-	int events_reached;
 	ass_track_t* track;
 	
 	FILE* fp = fopen(fname, "rb");
@@ -698,49 +849,15 @@ ass_track_t* ass_read_file(char* fname)
 	track->name = strdup(fname);
 	
 	// process header
-	events_reached = 0;
-	p = buf;
-	while (p && (*p)) {
-		while (*p == '\n') {++p;}
-		if (strncmp(p, "[Events]", 8) == 0) {
-			events_reached = 1;
-		} else if ((strncmp(p, "Format:", 7) == 0) && (events_reached)) {
-			p = strchr(p, '\n');
-			if (p == 0) {
-				mp_msg(MSGT_GLOBAL, MSGL_WARN, "Incomplete subtitles\n");
-				free(buf);
-				return 0;
-			}
-			ass_process_chunk(track, buf, p - buf + 1);
-			++p;
-			break;
-		}
-		p = strchr(p, '\n');
-	}
-	// process events
-	while (p && (*p)) {
-		char* next;
-		int len;
-		while (*p == '\n') {++p;}
-		next = strchr(p, '\n');
-		len = 0;
-		if (next) {
-			len = next - p;
-			*next = 0;
-		} else {
-			len = strlen(p);
-		}
-		ass_process_external_line(track, p, len);
-		if (next) {
-			p = next + 1;
-			continue;
-		} else
-			break;
-	}
-	
+	process_text(track, buf);
+
+	// there is no explicit end-of-font marker in ssa/ass
+	if (track->parser_priv->fontname)
+		decode_font(track);
+
 	free(buf);
 
-	if (!events_reached) {
+	if (track->track_type == TRACK_TYPE_UNKNOWN) {
 		ass_free_track(track);
 		return 0;
 	}
@@ -853,6 +970,7 @@ long long ass_step_sub(ass_track_t* track, long long now, int movement) {
 
 ass_track_t* ass_new_track(void) {
 	ass_track_t* track = calloc(1, sizeof(ass_track_t));
+	track->parser_priv = calloc(1, sizeof(parser_priv_t));
 	return track;
 }
 
