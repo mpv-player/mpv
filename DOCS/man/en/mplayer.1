@@ -269,7 +269,7 @@ next/\:previous playtree entry in the parent list
 next/\:previous alternative source.
 .IPs "p / SPACE"
 Pause (pressing again unpauses).
-.IPs .\ \ \ \ 
+.IPs ".\ \ \ \ "
 Step forward.
 Pressing once will pause movie, every consecutive press will play one frame
 and then go into pause mode again (any other key unpauses).
@@ -281,30 +281,30 @@ Adjust audio delay by +/- 0.1 seconds.
 Decrease/\:increase volume.
 .IPs "9 and 0"
 Decrease/\:increase volume.
-.IPs m\ \ \ \ 
+.IPs "m\ \ \ \ "
 Mute sound.
 .IPs "# (MPEG and Matroska only)"
 Cycle through the available audio tracks.
-.IPs f\ \ \ \ 
+.IPs "f\ \ \ \ "
 Toggle fullscreen (also see \-fs).
-.IPs T\ \ \ \ 
+.IPs "T\ \ \ \ "
 Toggle stay-on-top (also see \-ontop).
 .IPs "w and e"
 Decrease/\:increase pan-and-scan range.
-.IPs o\ \ \ \ 
+.IPs "o\ \ \ \ "
 Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
-.IPs d\ \ \ \ 
+.IPs "d\ \ \ \ "
 Toggle frame dropping states: none / skip display / skip decoding
 (see \-framedrop and \-hardframedrop).
-.IPs v\ \ \ \ 
+.IPs "v\ \ \ \ "
 Toggle subtitle visibility.
 .IPs "b / j"
 Cycle through the available subtitles.
 .IPs "y and g"
 Step forward/backward in the subtitle list.
-.IP F\ \ \ \ 
+.IP "F\ \ \ \ "
 Toggle displaying "forced subtitles".
-.IPs a\ \ \ \ 
+.IPs "a\ \ \ \ "
 Toggle subtitle alignment: top / middle / bottom.
 .IPs "x and z"
 Adjust subtitle delay by +/- 0.1 seconds.
@@ -369,7 +369,7 @@ with multimedia keys.)
 .RS
 .IPs PAUSE
 Pause.
-.IPs STOP\ 
+.IPs "STOP\ "
 Stop playing and quit.
 .IPs "PREVIOUS and NEXT"
 Seek backward/\:forward 1 minute.
@@ -385,17 +385,17 @@ and will take precedence over the keys defined above.)
 .RS
 .IPs ENTER
 Start playing.
-.IPs ESC\ \ 
+.IPs "ESC\ \ "
 Stop playing.
-.IPs l\ \ \ \ 
+.IPs "l\ \ \ \ "
 Load file.
-.IPs t\ \ \ \ 
+.IPs "t\ \ \ \ "
 Load subtitle.
-.IPs c\ \ \ \ 
+.IPs "c\ \ \ \ "
 Open skin browser.
-.IPs p\ \ \ \ 
+.IPs "p\ \ \ \ "
 Open playlist.
-.IPs r\ \ \ \ 
+.IPs "r\ \ \ \ "
 Open preferences.
 .RE
 .PD 1
@@ -409,9 +409,9 @@ and will take precedence over the keys defined above.)
 .RS
 .IPs "h and k"
 Select previous/\:next channel.
-.IPs n\ \ \ \ 
+.IPs "n\ \ \ \ "
 Change norm.
-.IPs u\ \ \ \ 
+.IPs "u\ \ \ \ "
 Change channel list.
 .RE
 .PD 1
@@ -638,7 +638,7 @@ debug level 4
 .PD 1
 .
 .TP
-.B \-quiet\ 
+.B "\-quiet\ "
 Make console output less verbose; in particular, prevents the status line
 (i.e.\& A:   0.7 V:   0.6 A-V:  0.068 ...) from being displayed.
 Particularly useful on slow terminals or broken ones which do not properly
@@ -671,7 +671,7 @@ Display even less output and status messages than with \-quiet.
 Show the description and content of a profile.
 .
 .TP
-.B \-v\ \ \ \ \ 
+.B "\-v\ \ \ \ \ "
 Increment verbosity level, one level for each \-v
 found on the command line.
 .
@@ -1606,7 +1606,7 @@ Set the image equalizer on the card.
 Set audio capture bitrate.
 .IPs forceaudio
 Capture audio even if there are no audio sources reported by v4l.
-.IPs alsa\ 
+.IPs "alsa\ "
 Capture from ALSA.
 .IPs amode=<0\-3>
 Choose an audio mode:
@@ -1992,7 +1992,7 @@ Align subtitle bottom edge (default).
 .PD 1
 .
 .TP
-.B \-subcc \ 
+.B "\-subcc \ "
 Display DVD Closed Caption (CC) subtitles.
 These are
 .B not
@@ -2123,7 +2123,7 @@ used for the OSD and clear it (default: ^[[A\\r^[[K).
 Tells MPlayer to handle the subtitle file as unicode.
 .
 .TP
-.B \-utf8 \ \ 
+.B "\-utf8 \ \ "
 Tells MPlayer to handle the subtitle file as UTF-8.
 .
 .TP
@@ -2221,7 +2221,7 @@ Sets noblock-mode and the device-name as first card, fourth device.
 Available audio output drivers are:
 .
 .TP
-.B alsa\ \ \ 
+.B "alsa\ \ \ "
 ALSA 0.9/1.x audio output driver
 .PD 0
 .RSs
@@ -2236,11 +2236,11 @@ you really know how to set it correctly.
 .PD 1
 .
 .TP
-.B alsa5\ \ 
+.B "alsa5\ \ "
 ALSA 0.5 audio output driver
 .
 .TP
-.B oss\ \ \ \ 
+.B "oss\ \ \ \ "
 OSS audio output driver
 .PD 0
 .RSs
@@ -2254,7 +2254,7 @@ Sets the audio mixer channel (default: pcm).
 .PD 1
 .
 .TP
-.B sdl\ \ \ \ 
+.B "sdl\ \ \ \ "
 highly platform independent SDL (Simple Directmedia Layer) library
 audio output driver
 .PD 0
@@ -2265,11 +2265,11 @@ Explicitly choose the SDL audio driver to use (default: let SDL choose).
 .PD 1
 .
 .TP
-.B arts\ \ \ 
+.B "arts\ \ \ "
 audio output through the aRts daemon
 .
 .TP
-.B esd\ \ \ \ 
+.B "esd\ \ \ \ "
 audio output through the ESD daemon
 .PD 0
 .RSs
@@ -2279,7 +2279,7 @@ Explicitly choose the ESD server to use (default: localhost).
 .PD 1
 .
 .TP
-.B jack\ \ \ \ 
+.B "jack\ \ \ \ "
 audio output through JACK (Jack Audio Connection Kit)
 .PD 0
 .RSs
@@ -2295,7 +2295,7 @@ Estimate the audio delay, supposed to make the video playback smoother
 .PD 1
 .
 .TP
-.B nas\ \ \ \ 
+.B "nas\ \ \ \ "
 audio output through NAS
 .
 .TP
@@ -2362,12 +2362,12 @@ output filename
 .PD 1
 .
 .TP
-.B null\ \ \ 
+.B "null\ \ \ "
 Produces no audio output but maintains video playback speed.
 Use \-nosound for benchmarking.
 .
 .TP
-.B pcm\ \ \ \ 
+.B "pcm\ \ \ \ "
 raw PCM/wave file writer audio output
 .PD 0
 .RSs
@@ -2378,7 +2378,7 @@ When not included, raw PCM will be generated.
 Write the sound to <filename> instead of the default
 audiodump.wav.
 If nowaveheader is specified, the default is audiodump.pcm.
-.IPs fast\ 
+.IPs "fast\ "
 Try to dump faster than realtime.
 Make sure the output does not get truncated (usually with
 "Too many video packets in buffer" message).
@@ -2387,7 +2387,7 @@ It is normal that you get a "Your system is too SLOW to play this!" message.
 .PD 1
 .
 .TP
-.B plugin\ \ 
+.B "plugin\ \ "
 plugin audio output driver
 .
 .
@@ -2435,7 +2435,7 @@ on.
 .PD 1
 .
 .TP
-.B \-dr \ \ \ 
+.B "\-dr \ \ \ "
 Turns on direct rendering (not supported by all codecs and video outputs)
 .br
 .I WARNING:
@@ -2454,7 +2454,7 @@ Set iec958 output mode to decoded (default).
 .IPs macrovision=<value>
 macrovision mode (0 = off (default), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
-.IPs mute\ 
+.IPs "mute\ "
 mute sound output
 .IPs unmute
 unmute sound output
@@ -2470,7 +2470,7 @@ path to the microcode
 enable 7.5 IRE output mode
 .IPs no75ire
 disable 7.5 IRE output mode (default)
-.IPs bw\ \ \ 
+.IPs "bw\ \ \ "
 b/w TV output
 .IPs color
 color TV output (default)
@@ -2570,7 +2570,7 @@ Use the _WIN_LAYER hint with the default layer.
 Use the _WIN_LAYER hint with the given layer number.
 .IPs netwm
 Force NETWM style.
-.IPs none\ 
+.IPs "none\ "
 Do not set fullscreen window layer.
 .IPs stays_on_top
 Use _NETWM_STATE_STAYS_ON_TOP hint if available.
@@ -2612,7 +2612,7 @@ gl, gl2, directx and tdfxfb video output drivers.
 Places the window at x=50, y=40.
 .IPs 50%:50%
 Places the window in the middle of the screen.
-.IPs 100%\ 
+.IPs "100%\ "
 Places the window at the middle of the right edge of the screen.
 .IPs 100%:100%
 Places the window at the bottom right corner of the screen.
@@ -2682,7 +2682,7 @@ Only works with the x11, xv, xmga, xvidix, directx video output drivers.
 Furthermore under X11 your window manager has to honor window aspect hints.
 .
 .TP
-.B \-ontop\ 
+.B "\-ontop\ "
 Makes the player window stay on top of other windows.
 Supported by video output drivers which use X11, except SDL,
 as well as directx, macosx, quartz, ggi and gl2.
@@ -2736,7 +2736,7 @@ do not know the screen resolution like fbdev, x11 and TVout.
 Turns off xscreensaver at startup and turns it on again on exit.
 .
 .TP
-.B \-vm \ \ \ 
+.B "\-vm \ \ \ "
 Try to change to a different video mode.
 Supported by the dga, x11, xv, sdl and directx video output drivers.
 If used with the directx video output driver the \-screenw,
@@ -2744,7 +2744,7 @@ If used with the directx video output driver the \-screenw,
 the new display mode.
 .
 .TP
-.B \-vsync \ \ 
+.B "\-vsync \ \ "
 Enables VBI for the vesa, dfbmga and svga video output drivers.
 .
 .TP
@@ -2955,7 +2955,7 @@ Use hardware accelerated scaler (default: hwaccel).
 .PD 1
 .
 .TP
-.B vidix\ \ 
+.B "vidix\ \ "
 VIDIX (VIDeo Interface for *niX) is an interface to the
 video acceleration features of different graphics cards.
 Very fast video output driver on cards that support it.
@@ -2980,7 +2980,7 @@ same as vidix
 .PD 1
 .
 .TP
-.B cvidix\ 
+.B "cvidix\ "
 Generic and platform independent VIDIX frontend, can even run in a
 text console with nVidia cards.
 .PD 0
@@ -3059,12 +3059,12 @@ Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
 .PD 1
 .
 .TP
-.B vesa\ \ \ 
+.B "vesa\ \ \ "
 Very general video output driver that should work on any VESA VBE 2.0
 compatible card.
 .PD 0
 .RSs
-.IPs dga\ \ 
+.IPs "dga\ \ "
 Turns on DGA mode.
 .IPs nodga
 Turns off DGA mode.
@@ -3074,13 +3074,13 @@ Activate the NeoMagic TV out and set it to PAL norm.
 Activate the NeoMagic TV out and set it to NTSC norm.
 .IPs vidix
 Use the VIDIX driver.
-.IPs lvo:\ \ \ 
+.IPs "lvo:\ \ \ "
 Activate the Linux Video Overlay on top of VESA mode.
 .RE
 .PD 1
 .
 .TP
-.B svga\ \ \ 
+.B "svga\ \ \ "
 Play video using the SVGA library.
 .PD 0
 .RSs
@@ -3097,7 +3097,7 @@ This avoids direct rendering, OSD and hardware acceleration.
 Force frame switch on vertical retrace.
 Usable only with \-double.
 It has the same effect as the \-vsync option.
-.IPs sq\ \ \ 
+.IPs "sq\ \ \ "
 Try to select a video mode with square pixels.
 .IPs vidix
 Use svga with VIDIX.
@@ -3105,7 +3105,7 @@ Use svga with VIDIX.
 .PD 1
 .
 .TP
-.B gl\ \ \ \ \ 
+.B "gl\ \ \ \ \ "
 OpenGL video output driver, simple version.
 Video size must be smaller than
 the maximum texture size of your OpenGL implementation.
@@ -3247,7 +3247,7 @@ Default is disabled.
 .PD 1
 .
 .TP
-.B gl2\ \ \ \ 
+.B "gl2\ \ \ \ "
 OpenGL video output driver, second generation.
 Supports OSD and videos larger than the maximum texture size.
 .PD 0
@@ -3262,22 +3262,22 @@ Apart from this the values have the same meaning as for \-vo gl.
 .REss
 .
 .TP
-.B null\ \ \ 
+.B "null\ \ \ "
 Produces no video output.
 Useful for benchmarking.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B "aa\ \ \ \ \ "
 ASCII art video output driver that works on a text console.
 You can get a list and an explanation of available suboptions executing
 .I mplayer \-vo aa:help
 .
 .TP
-.B caca\ \ \ 
+.B "caca\ \ \ "
 Color ASCII art video output driver that works on a text console.
 .
 .TP
-.B bl\ \ \ \ \ 
+.B "bl\ \ \ \ \ "
 Video playback using the Blinkenlights UDP protocol.
 This driver is highly hardware specific.
 .PD 0
@@ -3291,7 +3291,7 @@ You must specify a subdevice.
 .PD 1
 .
 .TP
-.B ggi\ \ \ \ 
+.B "ggi\ \ \ \ "
 GGI graphics system video output driver
 .PD 0
 .RSs
@@ -3328,7 +3328,7 @@ Specify a parameter list for DirectFB.
 .PD 1
 .
 .TP
-.B dfbmga\ 
+.B "dfbmga\ "
 Matrox G400/\:G450/\:G550 specific video output driver that uses the
 DirectFB library to make use of special hardware features.
 Enables CRTC2 (second head), displaying video independently of the first head.
@@ -3383,7 +3383,7 @@ Explicitly choose the Matrox device name to use (default: /dev/\:mga_vid).
 .PD 1
 .
 .TP
-.B syncfb\ 
+.B "syncfb\ "
 Video output driver for the SyncFB kernel module, which provides
 special hardware features of Matrox Gxxx cards like hardware
 deinterlacing, scaling and synchronizing your video output to
@@ -3441,7 +3441,7 @@ Also see the lavc video filter.
 Activates the overlay instead of TVOut.
 .IPs prebuf
 Turns on prebuffering.
-.IPs sync\ 
+.IPs "sync\ "
 Will turn on the new sync-engine.
 .IPs norm=<norm>
 Specifies the TV norm.
@@ -3512,7 +3512,7 @@ Specifies the video norm to use (default: auto).
 .PD 1
 .
 .TP
-.B md5sum\ 
+.B "md5sum\ "
 Calculate MD5 sums of each frame and write them to a file.
 Supports RGB24 and YV12 colorspaces.
 Useful for debugging.
@@ -3550,7 +3550,7 @@ If you do not specify any option the output is progressive
 .RE
 .
 .TP
-.B gif89a\ 
+.B "gif89a\ "
 Output each frame into a single animated GIF file in the current directory.
 It supports only RGB format with 24 bpp and the output is converted to 256
 colors.
@@ -3577,7 +3577,7 @@ mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
 .PD 1
 .
 .TP
-.B jpeg\ \ \ 
+.B "jpeg\ \ \ "
 Output each frame into a JPEG file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 .PD 0
@@ -3604,22 +3604,22 @@ Must be equal to or larger than 1 (default: 1000).
 .PD 1
 .
 .TP
-.B pnm\ \ \ \ 
+.B "pnm\ \ \ \ "
 Output each frame into a PNM file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 It supports PPM, PGM and PGMYUV files in both raw and ASCII mode.
 Also see pnm(5), ppm(5) and pgm(5).
 .PD 0
 .RSs
-.IPs ppm\ \ 
+.IPs "ppm\ \ "
 Write PPM files (default).
-.IPs pgm\ \ 
+.IPs "pgm\ \ "
 Write PGM files.
 .IPs pgmyuv
 Write PGMYUV files.
 PGMYUV is like PGM, but it also contains the U and V plane, appended at the
 bottom of the picture.
-.IPs raw\ \ 
+.IPs "raw\ \ "
 Write PNM files in raw mode (default).
 .IPs ascii
 Write PNM files in ASCII mode.
@@ -3635,7 +3635,7 @@ Must be equal to or larger than 1 (default: 1000).
 .PD 1
 .
 .TP
-.B png\ \ \ \ 
+.B "png\ \ \ \ "
 Output each frame into a PNG file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 24bpp RGB and BGR formats are supported.
@@ -3648,7 +3648,7 @@ Specifies the compression level.
 .PD 1
 .
 .TP
-.B tga\ \ \ \ 
+.B "tga\ \ \ \ "
 Output each frame into a Targa file in the current directory.
 Each file takes the frame number padded with leading zeros as name.
 The purpose of this video output driver is to have a simple lossless
@@ -3770,7 +3770,7 @@ incorrect or missing in the file being played.
 Disable automatic movie aspect ratio compensation.
 .
 .TP
-.B \-flip \ 
+.B "\-flip \ "
 Flip image upside-down.
 .
 .TP
@@ -3882,7 +3882,7 @@ Enable optimizations which do not comply to the specification and might
 potentially cause problems, like simpler dequantization, assuming use
 of the default quantization matrix, assuming YUV 4:2:0 and skipping a few
 checks to detect damaged bitstreams.
-.IPs gray\ 
+.IPs "gray\ "
 grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same IDCT algorithm for decoding and encoding.
@@ -4148,7 +4148,7 @@ rendering methods:
 .RE
 .PD 0
 .RSs
-.IPs dr2\ \ 
+.IPs "dr2\ \ "
 Activate direct rendering method 2.
 .IPs nodr2
 Deactivate direct rendering method 2.
@@ -4172,7 +4172,7 @@ Scale image to height <y> (if software/\:hardware scaling is available).
 Disables aspect calculations.
 .
 .TP
-.B \-zoom\ \ 
+.B "\-zoom\ \ "
 Allow software scaling, where available.
 This will allow scaling with output drivers (like x11, fbdev) that
 do not support hardware scaling where MPlayer disables scaling by
@@ -4366,7 +4366,7 @@ of input channels the exceeding channels are truncated.
 .RSs
 .IPs <nch>
 number of output channels (1\-6)
-.IPs <nr>\ 
+.IPs "<nr>\ "
 number of routes (1\-6)
 .IPs <from1:to1:from2:to2:from3:to3:...>
 Pairs of numbers between 0 and 5 that define where to route each channel.
@@ -4431,11 +4431,11 @@ This filter is not reentrant and can therefore only be enabled
 once for every audio stream.
 .PD 0
 .RSs
-.IPs <v>\ \ 
+.IPs "<v>\ \ "
 Sets the desired gain in dB for all channels in the stream
 from -200dB to +60dB, where -200dB mutes the sound
 completely and +60dB equals a gain of 1000 (default: 0).
-.IPs <sc>\ 
+.IPs "<sc>\ "
 Turns soft clipping on (1) or off (0).
 Soft-clipping can make the sound more smooth if very
 high volume levels are used.
@@ -4471,7 +4471,7 @@ An example how to downmix a six-channel file to two channels with
 this filter can be found in the examples section near the end.
 .PD 0
 .RSs
-.IPs <n>\ \ 
+.IPs "<n>\ \ "
 number of output channels (1\-6)
 .IPs <Lij>
 How much of input channel i is mixed into output channel j (0\-1).
@@ -4509,11 +4509,11 @@ Digital 5.1 sound, otherwise this filter will disrupt
 the sound to the subwoofer.
 .PD 0
 .RSs
-.IPs <fc>\ 
+.IPs "<fc>\ "
 cutoff frequency in Hz for the low-pass filter (20Hz to 300Hz) (default: 60Hz)
 For the best result try setting the cutoff frequency as low as possible.
 This will improve the stereo or surround sound experience.
-.IPs <ch>\ 
+.IPs "<ch>\ "
 Determines the channel number in which to insert the sub-channel audio.
 Channel number can be between 0 and 5 (default: 5).
 Observe that the number of channels will automatically
@@ -4531,14 +4531,14 @@ Would add a sub-woofer channel with a cutoff frequency of
 .PD 1
 .
 .TP
-.B center\ 
+.B "center\ "
 Creates a center channel from the front channels.
 May currently be low quality as it does not implement a
 high-pass filter for proper extraction yet, but averages and
 halves the channels instead.
 .PD 0
 .RSs
-.IPs <ch>\ 
+.IPs "<ch>\ "
 Determines the channel number in which to insert the center channel.
 Channel number can be between 0 and 5 (default: 5).
 Observe that the number of channels will automatically
@@ -4698,14 +4698,14 @@ This eliminates the use of 'analyseplugin' from the LADSPA SDK.
 .PD 1
 .
 .TP
-.B comp\ \ \ 
+.B "comp\ \ \ "
 Compressor/expander filter usable for microphone input.
 Prevents artifacts on very loud sound and raises the volume on
 very low sound.
 This filter is untested, maybe even unusable.
 .
 .TP
-.B gate\ \ \ 
+.B "gate\ \ \ "
 Noise gate filter similar to the comp audio filter.
 This filter is untested, maybe even unusable.
 .
@@ -4842,14 +4842,14 @@ Adds a 50 pixel border to the bottom of the picture.
 .PD 1
 .IPs <x>,<y>
 position of original image on the expanded image (default: center)
-.IPs <o>\ \ 
+.IPs "<o>\ \ "
 OSD/\:subtitle rendering
 .RSss
 0: disable (default)
 .br
 1: enable
 .REss
-.IPs <a>\ \ 
+.IPs "<a>\ \ "
 Expands to fit an aspect instead of a resolution (default: 0).
 .sp 1
 .I EXAMPLE:
@@ -4860,7 +4860,7 @@ Expands to 800x600, unless the source is higher resolution, in which
 case it expands to fill a 4/3 aspect.
 .RE
 .PD 1
-.IPs <r>\ \ 
+.IPs "<r>\ \ "
 Rounds up to make both width and height divisible by <r> (default: 1).
 .RE
 .
@@ -4869,7 +4869,7 @@ Rounds up to make both width and height divisible by <r> (default: 1).
 Flips the image upside down.
 .
 .TP
-.B mirror\ 
+.B "mirror\ "
 Mirrors the image on the Y axis.
 .
 .TP
@@ -5044,22 +5044,22 @@ Specifies a display resolution of at most 800x600, or smaller, in order
 to keep aspect.
 .RE
 .PD 1
-.IPs <r>\ \ 
+.IPs "<r>\ \ "
 Rounds up to make both width and height divisible by <r> (default: 1).
 .RE
 .
 .TP
-.B yuy2\ \ \ 
+.B "yuy2\ \ \ "
 Forces software YV12/\:I420/\:422P to YUY2 conversion.
 Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
 .
 .TP
-.B yvu9\ \ \ 
+.B "yvu9\ \ \ "
 Forces software YVU9 to YV12 colorspace conversion.
 Deprecated in favor of the software scaler.
 .
 .TP
-.B yuvcsp\ 
+.B "yuvcsp\ "
 Clamps YUV color values to the CCIR 601 range without doing real conversion.
 .
 .TP
@@ -5067,7 +5067,7 @@ Clamps YUV color values to the CCIR 601 range without doing real conversion.
 RGB 24/32 <\-> BGR 24/32 colorspace conversion.
 .PD 0
 .RSs
-.IPs swap\ 
+.IPs "swap\ "
 Also perform  R <-> B swapping.
 .RE
 .PD 1
@@ -5224,7 +5224,7 @@ quantizer you specify.
 default pp filter combination (hb:a,vb:a,dr:a)
 .IPs fa/fast
 fast pp filter combination (h1:a,v1:a,dr:a)
-.IPs ac\ \ \ 
+.IPs "ac\ \ \ "
 high quality pp filter combination (ha:a:128:7,va:a,dr:a)
 .RE
 .RS
@@ -5254,7 +5254,7 @@ shifts and averages the results.
 .RSs
 .IPs <quality>
 0\-6 (default: 3)
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Force quantization parameter (default: 0, use QP from video).
 .IPs <mode>
 0: hard thresholding (default)
@@ -5277,7 +5277,7 @@ a simplified intra only 8x8 DCT similar to MJPEG.
 .RSs
 .IPs <quality>
 0\-8 (default: 3)
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Force quantization parameter (default: 0, use QP from video).
 .RE
 .
@@ -5287,7 +5287,7 @@ faster version of the simple postprocessing filter
 .RSs
 .IPs <quality>
 4\-5 (equivalent to spp; default: 4)
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Force quantization parameter (default: 0, use QP from video).
 .IPs <-15\-32>
 Filter strength, lower values mean more details but also more artifacts,
@@ -5323,7 +5323,7 @@ some equation like "2+2*sin(PI*qp)"
 .RE
 .
 .TP
-.B test\ \ \ 
+.B "test\ \ \ "
 Generate various test patterns.
 .
 .TP
@@ -5347,7 +5347,7 @@ force output fps (float value) (default: 0, autodetect based on height)
 .RE
 .
 .TP
-.B fame\ \ \ 
+.B "fame\ \ \ "
 Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3/IVTV.
 .
 .TP
@@ -5489,7 +5489,7 @@ Can also be used as a primitive luma-only deinterlacer with very low CPU
 usage.
 .PD 0
 .RSs
-.IPs <f>\ \ 
+.IPs "<f>\ \ "
 By default, halfpack averages pairs of lines when downsampling.
 Any value different from 0 or 1 gives the default (averaging) behavior.
 .RSss
@@ -5622,9 +5622,9 @@ threshold (default: 10)
 .B unsharp[=l|cWxH:amount[:l|cWxH:amount]]
 unsharp mask / gaussian blur
 .RSs
-.IPs l\ \ \ \ 
+.IPs "l\ \ \ \ "
 Apply effect on luma component.
-.IPs c\ \ \ \ 
+.IPs "c\ \ \ \ "
 Apply effect on chroma components.
 .IPs <width>x<height>
 width and height of the matrix, odd sized in both directions
@@ -5640,7 +5640,7 @@ Relative amount of sharpness/\:blur to add to the image
 .RE
 .
 .TP
-.B swapuv\ 
+.B "swapuv\ "
 Swap U & V plane.
 .
 .TP
@@ -5705,7 +5705,7 @@ and filmdint are better for most applications.
 The following arguments (see syntax above) may be used to control
 detc's behavior:
 .RSs
-.IPs <dr>\ 
+.IPs "<dr>\ "
 Set the frame dropping mode.
 .RSss
 0: Do not drop frames to maintain fixed output framerate (default).
@@ -5718,14 +5718,14 @@ merges in the past 5 frames.
 .I NOTE:
 Use mode 1 or 2 with MEncoder.
 .REss
-.IPs <am>\ 
+.IPs "<am>\ "
 Analysis mode.
 .RSss
 0: Fixed pattern with initial frame number specified by <fr>.
 .br
 1: aggressive search for telecine pattern (default)
 .REss
-.IPs <fr>\ 
+.IPs "<fr>\ "
 Set initial frame number in sequence.
 0\-2 are the three clean progressive frames; 3 and 4 are the two
 interlaced frames.
@@ -6091,7 +6091,7 @@ with tfields=1 or yadif=1/3 or equivalent.
 3: extra slow, like 2 plus multiple reference frames
 .IPs <parity>
 0 or 1 selects which field to use (note: no autodetection yet!).
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Higher values should result in a smoother motion vector
 field but less optimal individual vectors.
 .RE
@@ -6116,7 +6116,7 @@ shape adaptive blur
 .RSs
 .IPs <radius>
 blur filter strength (~0.1\-4.0) (slower if larger)
-.IPs <pf>\ 
+.IPs "<pf>\ "
 prefilter strength (~0.1\-2.0)
 .IPs <colorDiff>
 maximum difference between pixels to still be considered (~0.1\-100.0)
@@ -6144,17 +6144,17 @@ Correct the perspective of movies not filmed perpendicular to the screen.
 .RSs
 .IPs <x0>,<y0>,...
 coordinates of the top left, top right, bottom left, bottom right corners
-.IPs <t>\ \ 
+.IPs "<t>\ \ "
 linear (0) or cubic resampling (1)
 .RE
 .PD 1
 .
 .TP
-.B 2xsai\ \ 
+.B "2xsai\ \ "
 Scale and smooth the image with the 2x scale and interpolate algorithm.
 .
 .TP
-.B 1bpp\ \ \ 
+.B "1bpp\ \ \ "
 1bpp bitmap to YUV/\:BGR 8/\:15/\:16/\:32 conversion
 .
 .TP
@@ -6206,9 +6206,9 @@ Clear area.
 .IPs OPAQUE
 Disable all alpha transparency.
 Send "ALPHA 0 0 0 0 0" to enable it again.
-.IPs HIDE\ 
+.IPs "HIDE\ "
 Hide bitmap.
-.IPs SHOW\ 
+.IPs "SHOW\ "
 Show bitmap.
 .RE
 .PD 1
@@ -6370,7 +6370,7 @@ colorspace, so it is safe to add it to the configuration file.
 .RE
 .
 .TP
-.B ass\ \ \ \ 
+.B "ass\ \ \ \ "
 Moves SSA/ASS subtitle rendering to an arbitrary point in the filter chain.
 Only useful with the \-ass option.
 .RE
@@ -6494,7 +6494,7 @@ Specify the info header of the resulting AVI file.
 .sp 1
 Available options are:
 .RSs
-.IPs help\ 
+.IPs "help\ "
 Show this description.
 .IPs name=<value>
 title of the work
@@ -6653,7 +6653,7 @@ nuv, xvfw, faac, x264enc, mpeg, lavf.
 .SS lame (\-lameopts)
 .
 .TP
-.B help\ \ \ 
+.B "help\ \ \ "
 get help
 .
 .TP
@@ -6675,11 +6675,11 @@ mtrh
 .PD 1
 .
 .TP
-.B abr\ \ \ \ 
+.B "abr\ \ \ \ "
 average bitrate
 .
 .TP
-.B cbr\ \ \ \ 
+.B "cbr\ \ \ \ "
 constant bitrate
 Also forces CBR mode encoding on subsequent ABR presets modes.
 .
@@ -6733,7 +6733,7 @@ adjust
 .PD 1
 .
 .TP
-.B fast\ \ \ 
+.B "fast\ \ \ "
 Switch on faster encoding on subsequent VBR presets modes.
 This results in slightly lower quality and higher bitrates.
 .
@@ -6755,7 +6755,7 @@ will let LAME choose values automatically.
 .B preset=<value>
 preset values
 .RSs
-.IPs help\ 
+.IPs "help\ "
 Print additional options and information about presets settings.
 .IPs medium
 VBR encoding, good quality, 150\-180 kbps bitrate range
@@ -6854,7 +6854,7 @@ LTP (extremely slow)
 MPEG version (default: 4)
 .
 .TP
-.B tns\ \ \ \ 
+.B "tns\ \ \ \ "
 Enables temporal noise shaping.
 .
 .TP
@@ -6862,7 +6862,7 @@ Enables temporal noise shaping.
 cutoff frequency (default: sampling_rate/2)
 .
 .TP
-.B raw\ \ \ \ 
+.B "raw\ \ \ \ "
 Stores the bitstream as raw payload with extradata in the container header
 (default: 0, corresponds to ADTS).
 Do not set this flag if not explicitly required or you will not be able to
@@ -6888,15 +6888,15 @@ Read the source for full details.
 audio codec (default: mp2)
 .PD 0
 .RSs
-.IPs mp2\ \ 
+.IPs "mp2\ \ "
 MPEG Layer 2
-.IPs mp3\ \ 
+.IPs "mp3\ \ "
 MPEG Layer 3
-.IPs ac3\ \ 
+.IPs "ac3\ \ "
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits per sample, 4:1 compression)
-.IPs sonic\ 
+.IPs "sonic\ "
 Experimental lossy/lossless codec
 .RE
 .PD 1
@@ -6933,9 +6933,9 @@ Employ the specified codec (default: mpeg4).
 Motion JPEG
 .IPs ljpeg
 Lossless JPEG
-.IPs h261\ 
+.IPs "h261\ "
 H.261
-.IPs h263\ 
+.IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
@@ -6945,11 +6945,11 @@ MPEG-4 (DivX 4/5)
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
-.IPs wmv1\ 
+.IPs "wmv1\ "
 Windows Media Video, version 1 (AKA WMV7)
-.IPs wmv2\ 
+.IPs "wmv2\ "
 Windows Media Video, version 2 (AKA WMV8)
-.IPs rv10\ 
+.IPs "rv10\ "
 an old RealVideo codec
 .IPs mpeg1video
 MPEG-1 video
@@ -6959,17 +6959,17 @@ MPEG-2 video
 HuffYUV
 .IPs ffvhuff (also see: vstrict)
 nonstandard 20% smaller HuffYUV using YV12
-.IPs asv1\ 
+.IPs "asv1\ "
 ASUS Video v1
-.IPs asv2\ 
+.IPs "asv2\ "
 ASUS Video v2
 .IPs "ffv1 (also see: vstrict)"
 FFmpeg's lossless video codec
-.IPs flv\ \ 
+.IPs "flv\ \ "
 Sorenson H.263 used in Flash Video
 .IPs dvvideo
 Sony Digital Video
-.IPs svq1\ 
+.IPs "svq1\ "
 Apple Sorenson Video 1
 .IPs "snow (also see: vstrict)"
 FFmpeg's experimental wavelet-based codec
@@ -7094,20 +7094,20 @@ Select the MB mode which has the best rate distortion.
 .PD 1
 .
 .TP
-.B vhq\ \ \ \ 
+.B "vhq\ \ \ \ "
 Same as mbd=1, kept for compatibility reasons.
 .
 .TP
-.B v4mv\ \ \ 
+.B "v4mv\ \ \ "
 Allow 4 motion vectors per macroblock (slightly better quality).
 Works better if used with mbd>0.
 .
 .TP
-.B obmc\ \ \ 
+.B "obmc\ \ \ "
 overlapped block motion compensation (H.263+)
 .
 .TP
-.B loop\ \ \ 
+.B "loop\ \ \ "
 loop filter (H.263+)
 note, this is broken
 .
@@ -7412,9 +7412,9 @@ Perceptual quality will be optimal somewhere in between these two extremes.
 main ratecontrol equation (pass 1/2)
 .RE
 .RSs
-.IPs 1\ \ \ \ 
+.IPs "1\ \ \ \ "
 constant bitrate
-.IPs tex\ \ 
+.IPs "tex\ \ "
 constant quality
 .IPs 1+(tex/\:avgTex-1)*qComp
 approximately the equation of the old ratecontrol code
@@ -7433,7 +7433,7 @@ infix operators:
 variables:
 .RE
 .RSs
-.IPs tex\ \ 
+.IPs "tex\ \ "
 texture complexity
 .IPs iTex,pTex
 intra, non-intra texture complexity
@@ -7447,13 +7447,13 @@ average intra texture complexity in P-frames
 average non-intra texture complexity in P-frames
 .IPs avgBPTex
 average non-intra texture complexity in B-frames
-.IPs mv\ \ \ 
+.IPs "mv\ \ \ "
 bits used for motion vectors
 .IPs fCode
 maximum length of motion vector in log2 scale
 .IPs iCount
 number of intra macroblocks / number of macroblocks
-.IPs var\ \ 
+.IPs "var\ \ "
 spatial complexity
 .IPs mcVar
 temporal complexity
@@ -7461,7 +7461,7 @@ temporal complexity
 qcomp from the command line
 .IPs "isI, isP, isB"
 Is 1 if picture type is I/P/B else 0.
-.IPs Pi,E\ 
+.IPs "Pi,E\ "
 See your favorite math book.
 .RE
 .PP
@@ -7561,7 +7561,7 @@ with future MPlayer versions (snow, ffvhuff, ffv1).
 .PD 1
 .
 .TP
-.B vdpart\ 
+.B "vdpart\ "
 Data partitioning.
 Adds 2 Bytes per video packet, improves error-resistance when transferring over
 unreliable channels (e.g.\& streaming over the internet).
@@ -7590,7 +7590,7 @@ as without partitioning an error will trash AC/\:DC/\:MV equally.
 Video packet size, improves error-resistance.
 .PD 0
 .RSs
-.IPs 0\ \ \ \ 
+.IPs "0\ \ \ \ "
 disabled (default)
 .IPs 100\-1000
 good choice
@@ -7598,11 +7598,11 @@ good choice
 .PD 1
 .
 .TP
-.B ss\ \ \ \ \ 
+.B "ss\ \ \ \ \ "
 slice structured mode for H.263+
 .
 .TP
-.B gray\ \ \ 
+.B "gray\ \ \ "
 grayscale only encoding (faster)
 .
 .TP
@@ -7675,7 +7675,7 @@ Large values might look good on some monitors but may look horrible
 on other monitors.
 .PD 0
 .RSs
-.IPs 0.0\ \ 
+.IPs "0.0\ \ "
 disabled (default)
 .IPs 0.0\-0.3
 sane range
@@ -7699,7 +7699,7 @@ Large values might look good on some monitors but may look horrible
 on other monitors / TV / TFT.
 .PD 0
 .RSs
-.IPs 0.0\ \ 
+.IPs "0.0\ \ "
 disabled (default)
 .IPs 0.0\-0.3
 sane range
@@ -7735,7 +7735,7 @@ Crop any black borders completely as they will reduce the quality
 of the macroblocks (also applies without scplx_mask).
 .PD 0
 .RSs
-.IPs 0.0\ \ 
+.IPs "0.0\ \ "
 disabled (default)
 .IPs 0.0\-0.5
 sane range
@@ -7766,7 +7766,7 @@ than 1/5th of the frame width/height away from the frame border,
 since they are often visually less important.
 .
 .TP
-.B naq\ \ \ \ 
+.B "naq\ \ \ \ "
 Normalize adaptive quantization (experimental).
 When using adaptive quantization (*_mask), the average per-MB quantizer may no
 longer match the requested frame-level quantizer.
@@ -7774,19 +7774,19 @@ Naq will attempt to adjust the per-MB quantizers to maintain the proper
 average.
 .
 .TP
-.B ildct\ \ 
+.B "ildct\ \ "
 Use interlaced DCT.
 .
 .TP
-.B ilme\ \ \ 
+.B "ilme\ \ \ "
 Use interlaced motion estimation (mutually exclusive with qpel).
 .
 .TP
-.B alt\ \ \ \ 
+.B "alt\ \ \ \ "
 Use alternative scantable.
 .
 .TP
-.B top=<-1\-1>\ \ \ 
+.B "top=<-1\-1>\ \ \ "
 .PD 0
 .RSs
 .IPs -1
@@ -7802,11 +7802,11 @@ top field first
 .B format=<value>
 .PD 0
 .RSs
-.IPs YV12\ 
+.IPs "YV12\ "
 default
-.IPs 444P\ 
+.IPs "444P\ "
 for ffv1
-.IPs 422P\ 
+.IPs "422P\ "
 for HuffYUV, lossless JPEG and ffv1
 .IPs 411P,YVU9
 for lossless JPEG and ffv1
@@ -7816,7 +7816,7 @@ for lossless JPEG and ffv1
 .PD 1
 .
 .TP
-.B pred\ \ \ 
+.B "pred\ \ \ "
 (for HuffYUV)
 .PD 0
 .RSs
@@ -7830,7 +7830,7 @@ median prediction
 .PD 1
 .
 .TP
-.B pred\ \ \ 
+.B "pred\ \ \ "
 (for lossless JPEG)
 .PD 0
 .RSs
@@ -7848,7 +7848,7 @@ mean prediction
 .PD 1
 .
 .TP
-.B coder\ \ 
+.B "coder\ \ "
 (for ffv1)
 .PD 0
 .RSs
@@ -7884,7 +7884,7 @@ adaptive Huffman tables
 .PD 1
 .
 .TP
-.B qpel\ \ \ 
+.B "qpel\ \ \ "
 Use quarter pel motion compensation (mutually exclusive with ilme).
 .br
 .I HINT:
@@ -7921,7 +7921,7 @@ noise preserving sum of squared differences
 5/3 wavelet, only used in snow
 .IPs "12 (W97)"
 9/7 wavelet, only used in snow
-.IPs +256\ 
+.IPs "+256\ "
 Also use chroma, currently does not work (correctly) with B-frames.
 .RE
 .PD 1
@@ -8004,7 +8004,7 @@ normal size=2 diamond
 .RE
 .
 .TP
-.B trell\ \ 
+.B "trell\ \ "
 Trellis searched quantization.
 This will find the optimal encoding for each 8x8 block.
 Trellis searched quantization is quite simply an optimal quantization in
@@ -8015,7 +8015,7 @@ It simply finds a block for the minimum of error and lambda*bits.
 .RSs
 .IPs lambda
 quantization parameter (QP) dependent constant
-.IPs bits\ 
+.IPs "bits\ "
 amount of bits needed to encode the block
 .IPs error
 sum of squared errors of the quantization
@@ -8023,13 +8023,13 @@ sum of squared errors of the quantization
 .PD 1
 .
 .TP
-.B cbp\ \ \ \ 
+.B "cbp\ \ \ \ "
 Rate distorted optimal coded block pattern.
 Will select the coded block pattern which minimizes distortion + lambda*rate.
 This can only be used together with trellis quantization.
 .
 .TP
-.B mv0\ \ \ \ 
+.B "mv0\ \ \ \ "
 Try to encode each MB with MV=<0,0> and choose the better one.
 This has no effect if mbd=0.
 .
@@ -8093,7 +8093,7 @@ number of reference frames to consider for motion compensation
 (Snow only) (default: 1)
 .
 .TP
-.B psnr\ \ \ 
+.B "psnr\ \ \ "
 print the PSNR (peak signal to noise ratio) for the whole video after encoding
 and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log'.
 Returned values are in dB (decibel), the higher the better.
@@ -8103,7 +8103,7 @@ Returned values are in dB (decibel), the higher the better.
 Use MPEG quantizers instead of H.263.
 .
 .TP
-.B aic\ \ \ \ 
+.B "aic\ \ \ \ "
 Enable AC prediction for MPEG-4 or advanced intra prediction for H.263+.
 This will improve quality very slightly (around 0.02 dB PSNR) and slow
 down encoding very slightly (about 1%).
@@ -8112,11 +8112,11 @@ down encoding very slightly (about 1%).
 vqmin should be 8 or larger for H.263+ AIC.
 .
 .TP
-.B aiv\ \ \ \ 
+.B "aiv\ \ \ \ "
 alternative inter vlc for H.263+
 .
 .TP
-.B umv\ \ \ \ 
+.B "umv\ \ \ \ "
 unlimited MVs (H.263+ only)
 Allows encoding of arbitrarily long MVs.
 .
@@ -8191,7 +8191,7 @@ experimental quantizer modulation
 experimental quantizer modulation
 .
 .TP
-.B dc\ \ \ \ \ 
+.B "dc\ \ \ \ \ "
 intra DC precision in bits (default: 8).
 If you specify vcodec=mpeg2video this value can be 8, 9, 10 or 11.
 .
@@ -8243,11 +8243,11 @@ chrominance threshold (default: 1)
 luminance threshold (default: 1)
 .
 .TP
-.B lzo\ \ \ \ 
+.B "lzo\ \ \ \ "
 Enable LZO compression (default).
 .
 .TP
-.B nolzo\ \ 
+.B "nolzo\ \ "
 Disable LZO compression.
 .
 .TP
@@ -8255,11 +8255,11 @@ Disable LZO compression.
 quality level (default: 255)
 .
 .TP
-.B raw \ \ \ 
+.B "raw \ \ \ "
 Disable RTJPEG encoding.
 .
 .TP
-.B rtjpeg\ 
+.B "rtjpeg\ "
 Enable RTJPEG encoding (default).
 .
 .
@@ -8340,7 +8340,7 @@ Should you rescale the video, you would need an interlace-aware resizer,
 which you can activate with -vf scale=<width>:<height>:1.
 .
 .TP
-.B 4mv\ \ \ \ 
+.B "4mv\ \ \ \ "
 Use 4 motion vectors per macroblock.
 This might give better compression, but slows down encoding.
 .br
@@ -8448,7 +8448,7 @@ Note that this does not speed up encoding, it just prevents chroma data
 from being written in the last stage of encoding.
 .
 .TP
-.B debug\ \ 
+.B "debug\ \ "
 Save per-frame statistics in ./xvid.dbg. (This is not the two pass control
 file.)
 .RE
@@ -8726,25 +8726,25 @@ profile specifications.
 .RSs
 .IPs unrestricted
 no restrictions (default)
-.IPs sp0\ \ 
+.IPs "sp0\ \ "
 simple profile at level 0
-.IPs sp1\ \ 
+.IPs "sp1\ \ "
 simple profile at level 1
-.IPs sp2\ \ 
+.IPs "sp2\ \ "
 simple profile at level 2
-.IPs sp3\ \ 
+.IPs "sp3\ \ "
 simple profile at level 3
-.IPs asp0\ 
+.IPs "asp0\ "
 advanced simple profile at level 0
-.IPs asp1\ 
+.IPs "asp1\ "
 advanced simple profile at level 1
-.IPs asp2\ 
+.IPs "asp2\ "
 advanced simple profile at level 2
-.IPs asp3\ 
+.IPs "asp3\ "
 advanced simple profile at level 3
-.IPs asp4\ 
+.IPs "asp4\ "
 advanced simple profile at level 4
-.IPs asp5\ 
+.IPs "asp5\ "
 advanced simple profile at level 5
 .IPs dxnhandheld
 DXN handheld profile
@@ -8792,7 +8792,7 @@ same as above
 same as above
 .IPs ntsc169
 same as above (Do not forget to give the exact ratio.)
-.IPs ext\ \ 
+.IPs "ext\ \ "
 Allows you to specify your own pixel aspect ratio with par_width and
 par_height.
 .RE
@@ -8825,7 +8825,7 @@ into account all the adjustments (crop/\:expand/\:scale/\:etc.) made in the
 filter chain.
 .
 .TP
-.B psnr\ \ \ 
+.B "psnr\ \ \ "
 Print the PSNR (peak signal to noise ratio) for the whole video after encoding
 and store the per frame PSNR in a file with a name like 'psnr_hhmmss.log' in
 the current directory.
@@ -9345,9 +9345,9 @@ Either uses a predefined custom quantization matrix or loads a JM format
 matrix file.
 .PD 0
 .RSs
-.IPs flat\ 
+.IPs "flat\ "
 Use the predefined flat 16 matrix (default).
-.IPs jvt\ \ 
+.IPs "jvt\ \ "
 Use the predefined JVT matrix.
 .IPs <filename>
 Use the provided JM format matrix file.
@@ -9448,7 +9448,7 @@ Each block type on the visualized movie will be colored as follows:
 .RSs
 .IPs red/pink
 intra block
-.IPs blue\ 
+.IPs "blue\ "
 inter block
 .IPs green
 skip block
@@ -9505,7 +9505,7 @@ Nominal muxrate in kbit/s used in the pack headers (default: 1800 kb/s).
 Will be updated as necessary in the case of 'format=mpeg1' or 'mpeg2'.
 .
 .TP
-.B tsaf\ \ \ 
+.B "tsaf\ \ \ "
 Sets timestamps on all frames, if possible.
 .
 .TP
@@ -9522,7 +9522,7 @@ Initial video delay time, in milliseconds (default: 0),
 use it if you want to delay video with respect to audio.
 .
 .TP
-.B drop\ \ \ 
+.B "drop\ \ \ "
 When used with init_adelay the muxer drops the part of audio that was
 anticipated.
 .
@@ -9582,29 +9582,29 @@ Override which container format to mux into
 (default: autodetect from output file extension).
 .PD 0
 .RSs
-.IPs mpg\ \ 
+.IPs "mpg\ \ "
 MPEG-1 systems and MPEG-2 PS
-.IPs asf\ \ 
+.IPs "asf\ \ "
 Advanced Streaming Format
-.IPs avi\ \ 
+.IPs "avi\ \ "
 Audio Video Interleave file
-.IPs wav\ \ 
+.IPs "wav\ \ "
 Waveform Audio
-.IPs swf\ \ 
+.IPs "swf\ \ "
 Macromedia Flash
-.IPs flv\ \ 
+.IPs "flv\ \ "
 Macromedia Flash video files
-.IPs rm\ \ \ 
+.IPs "rm\ \ \ "
 RealAudio and RealVideo
-.IPs au\ \ \ 
+.IPs "au\ \ \ "
 SUN AU format
-.IPs nut\ \ 
+.IPs "nut\ \ "
 NUT open container format (experimental)
-.IPs mov\ \ 
+.IPs "mov\ \ "
 QuickTime
-.IPs mp4\ \ 
+.IPs "mp4\ \ "
 MPEG-4 format
-.IPs dv\ \ \ 
+.IPs "dv\ \ \ "
 Sony Digital Video container
 .RE
 .PD 1
@@ -9688,11 +9688,11 @@ libdvdcss will use to read scrambled discs.
 Can be one of title, key or disc.
 .PD 0
 .RSs
-.IPs key\ \ 
+.IPs "key\ \ "
 is the default method.
 libdvdcss will use a set of calculated player keys to try and get the disc key.
 This can fail if the drive does not recognize any of the player keys.
-.IPs disc\ 
+.IPs "disc\ "
 is a fallback method when key has failed.
 Instead of using player keys, libdvdcss will crack the disc key using
 a brute force algorithm.

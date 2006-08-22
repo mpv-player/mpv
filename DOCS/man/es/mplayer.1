@@ -273,34 +273,34 @@ Ajusta el retardo de audio por +/\:- 0.1 segundos.
 Decrementa/\:incrementa el volumen.
 .IPs "9 and 0"
 Decrementa/\:incrementa el volumen.
-.IPs m\ \ \ \ 
+.IPs "m\ \ \ \ "
 Silencia el sonido.
-.IPs f\ \ \ \ 
+.IPs "f\ \ \ \ "
 Cambia el modo de pantalla completa.
-.IPs T\ \ \ \ 
+.IPs "T\ \ \ \ "
 Cambia el modo siempre-visible.
 .IPs "w y e"
 Decrementa/\:incrementa el rango de pan y scan.
-.IPs o\ \ \ \ 
+.IPs "o\ \ \ \ "
 Cambia entre los estados de OSD: nada / posición / posición + tiempo /
 posición + tiempo + tiempo total.
-.IPs d\ \ \ \ 
+.IPs "d\ \ \ \ "
 Cambia el saltarse imágenes.
 cambia entre los estados del salto de imágenes: nada / saltar el mostrar
 en pantalla / saltar decodificación (vea \-framedrop y \-hardframedrop).
-.IPs v\ \ \ \ 
+.IPs "v\ \ \ \ "
 Cambia la visibilidad de los subtítulos.
 .IPs "b/j"
 Cicla a través de los subtítulos disponibles.
-.IP F\ \ \ \ 
+.IP "F\ \ \ \ "
 Cambia la visibilidad de "subtítulos forzados".
-.IPs a\ \ \ \ 
+.IPs "a\ \ \ \ "
 Cambia la alineación de los subtítulos: arriba/\:enmedio/\:abajo.
 .IPs "z y x"
 Ajusta el retardo de subtítulos por +/\:- 0.1 segundos.
 .IPs "r y t"
 Mueve los subtítulos arriba/\:abajo.
-.IPs i\ \ \ \ 
+.IPs "i\ \ \ \ "
 Establece una marca EDL.
 .RE
 .PD 1
@@ -329,13 +329,13 @@ Ajusta la saturación.
 .RSs
 .IPs ENTER
 Inicia la reproducción.
-.IPs s\ \ \ \ 
+.IPs "s\ \ \ \ "
 Detiene la reproducción.
-.IPs l\ \ \ \ 
+.IPs "l\ \ \ \ "
 Darga un archivo.
-.IPs c\ \ \ \ 
+.IPs "c\ \ \ \ "
 Navegador de pieles.
-.IPs p\ \ \ \ 
+.IPs "p\ \ \ \ "
 Cambia a lista de reproducción.
 .RE
 .PD 1
@@ -346,9 +346,9 @@ Cambia a lista de reproducción.
 .RSs
 .IPs "h y k"
 Selecciona canal previo/\:siguiente.
-.IPs n\ \ \ \ 
+.IPs "n\ \ \ \ "
 Cambia la norma.
-.IPs u\ \ \ \ 
+.IPs "u\ \ \ \ "
 Cambia la lista de canales.
 .RE
 .PD 1
@@ -413,7 +413,7 @@ Archivo de configuración específico que se consultará después del que haya por
 defecto.
 .
 .TP
-.B \-quiet\ \ 
+.B "\-quiet\ \ "
 Hace que MPlayer muestre menos información; en particular oculta la línea de
 estado (i.e.\& A:  0.7 V:  0.6 A-V: 0.068 ...) que no será mostrada.
 Es particularmente útil en terminales lentos o donde no funciona bien el manejo
@@ -571,7 +571,7 @@ Muestra todas las órdenes para las que pueden asignarse teclas.
 .IPs js-dev
 Especifica el dispositivo de palanca de juegos a usar (por defecto:
 /dev/\:input/\:js0).
-.IPs archivo\ 
+.IPs "archivo\ "
 Lee comandos desde el archivo dado.
 Esto es más útil con un fifo.
 .br
@@ -1034,7 +1034,7 @@ Las opciones disponibles son:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
+.IPs "on\ \ \ "
 Usa demuxer de audio raw.
 .IPs channels=<valor>
 número de canales
@@ -1057,7 +1057,7 @@ Las opciones disponibles son:
 .sp 1
 .PD 0
 .RSs
-.IPs on\ \ \ 
+.IPs "on\ \ \ "
 Usa demuxer de video raw.
 .IPs fps=<valor>
 razón en imágenes por segundo (por defecto: 25.0)
@@ -1199,7 +1199,7 @@ Establece la ecualización de imagen para la tarjeta.
 Establece la razón de captura de audio.
 .IPs forceaudio
 Captura audio incluso si no hay origen de audio reportado por v4l.
-.IPs alsa\ 
+.IPs "alsa\ "
 Captura desde ALSA.
 .IPs amode=<0\-3>
 Selecciona un modo de audio:
@@ -1535,7 +1535,7 @@ alinea abajo
 .PD 1
 .
 .TP
-.B \-subcc \ 
+.B "\-subcc \ "
 Muestra subtículos de DVD Closed Caption (CC).
 Esto no es los subtítulos VOB, son subtítulos especiales ASCII codificados
 para el que no oye bien en el flujo de datos de usuario VOB en la mayoría de los
@@ -1654,7 +1654,7 @@ El valor es la anchura de los subtítulos en % del ancho de la pantalla.
 Le dice a MPlayer que maneje los archivos de subtítulos como unicode.
 .
 .TP
-.B \-utf8 \ \ 
+.B "\-utf8 \ \ "
 Le dice a MPlayer que maneje los archivos de subtítulos como UTF-8.
 .
 .TP
@@ -1803,11 +1803,11 @@ sun, dxr2, mpegpes, null, pcm, plugin.
 Los controladores de audio disponibles son:
 .
 .TP
-.B alsa\ \ \ 
+.B "alsa\ \ \ "
 Controlador de salida de audio ALSA 0.9/\:1.x.
 .PD 0
 .RSs
-.IPs mmap\ \ \ 
+.IPs "mmap\ \ \ "
 Establece el modo experimental mmap (no funciona para más de dos canales).
 .IPs noblock
 Establece el modo noblock.
@@ -1819,11 +1819,11 @@ dispositivo ALSA.
 .PD 1
 .
 .TP
-.B alsa5\ \ 
+.B "alsa5\ \ "
 Controlador de salida de audio ALSA 0.5.
 .
 .TP
-.B oss\ \ \ \ 
+.B "oss\ \ \ \ "
 Controlador de salida de audio OSS.
 .PD 0
 .RSs
@@ -1832,20 +1832,20 @@ Establece el dispositivo de salida de autio (por defecto: /dev/\:dsp).
 .RE
 .PD 1
 .TP
-.B sdl\ \ \ \ 
+.B "sdl\ \ \ \ "
 Biblioteca de controlador de salida de audio SDL (Simple Directmedia Layer)
 altamente independiente de la plataforma.
 .TP
-.B arts\ \ \ 
+.B "arts\ \ \ "
 Salida de audio a través del demonio Arts.
 .TP
-.B esd\ \ \ \ 
+.B "esd\ \ \ \ "
 Salida de audio a través del demonio ESD.
 .TP
-.B jack\ \ \ \ 
+.B "jack\ \ \ \ "
 Salida de audio a través de JACK (Jack Audio Connection Kit).
 .TP
-.B nas\ \ \ \ 
+.B "nas\ \ \ \ "
 Salida de audio a través de NAS.
 .TP
 .B macosx (Mac OS X solamente)
@@ -1866,7 +1866,7 @@ Controlador de salida específico de Creative DXR2.
 .B mpegpes (DVB solamente)
 Controlador de salida específico de DVB.
 .TP
-.B null\ \ \ 
+.B "null\ \ \ "
 No produce salida de audio pero mantiene la velocidad de reproducción
 del video.
 Use \-nosound para pruebas de rendimiento.
@@ -1875,7 +1875,7 @@ Use \-nosound para pruebas de rendimiento.
 Salida de audio escrita a un archivo Raw PCM/\:wave.
 Escribe el sonido a ./audiodump.wav.
 .TP
-.B plugin\ \ 
+.B "plugin\ \ "
 Controlador de salida de audio con plugin.
 .
 .
@@ -1935,7 +1935,7 @@ Necesita el doble de memoria que con buffer simple, por lo que puede no
 funcionar en tarjetas que tenga muy poca memoria.
 .
 .TP
-.B \-dr \ \ \ 
+.B "\-dr \ \ \ "
 Activa el renderizado directo (no soportado por todos los codecs y salidas
 de video)
 .br
@@ -1957,7 +1957,7 @@ Establece modo de salida iec958 al decodificador (por defecto).
 .IPs macrovision=<valor>
 modo macrovisión (0 = desactivado (por defecto), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
-.IPs mute\ 
+.IPs "mute\ "
 silencia la salida de audio
 .IPs unmute
 reactiva la salida de audio
@@ -2084,7 +2084,7 @@ Usa _WIN_LAYER con la capa por defecto.
 Usa _WIN_LAYER con el número de capa indicado.
 .IPs netwm
 Fuerza estilo NETWM.
-.IPs none\ 
+.IPs "none\ "
 No establece una capa de ventana de pantalla completa.
 .IPs stays_on_top
 Usa _NETWM_STATE_STAYS_ON_TOP si está disponible.
@@ -2122,7 +2122,7 @@ x11, xmga, xv, xvmc, xvidix, directx y tdfxfb.
 Coloca la ventana en x=50, y=40.
 .IPs 50%:50%
 Coloca la ventana en la mitad de la pantalla.
-.IPs 100%\ 
+.IPs "100%\ "
 Coloca la ventana en la esquina superior izquierda de la pantalla.
 .IPs 100%:100%
 Coloca la ventana en la esquina inferior izquierda de la pantalla.
@@ -2267,7 +2267,7 @@ Desactiva el protector de pantalla al comienzo y lo vuelve a activar
 al finalizar.
 .
 .TP
-.B \-vm \ \ \ 
+.B "\-vm \ \ \ "
 Intenta cambiar a un modo de video mejor.
 Soportado por los controladores de salida de video dga, x11, xv, sdl y
 directx.
@@ -2276,7 +2276,7 @@ Si se usa con el controlador de salida de video de directx las opciones
 un nuevo modo de pantalla.
 .
 .TP
-.B \-vsync \ \ 
+.B "\-vsync \ \ "
 Activa VBI para los controladores de salida de video vesa, dfbmga y svga.
 .
 .TP
@@ -2438,7 +2438,7 @@ Puede añadir una pequeña (no notable) desincronización de A/\:V.
 .IPs sleep
 Usa la función sleep mientras espera a que termine el renderizado (no
 recomendado en Linux).
-.IPs wait\ 
+.IPs "wait\ "
 No usa la función sleep mientras espera que el renderizado termine (por
 defecto).
 .RE
@@ -2452,7 +2452,7 @@ Considerado obsoleto.
 Biblioteca de controlador de salida de video SDL (Simple Directmedia Layer)
 altamente independiente de la plataforma.
 .TP
-.B vidix\ \ 
+.B "vidix\ \ "
 VIDIX (VIDeo Interface for *niX) es una interfaz para las características
 de aceleración de video de las diferentes tarjetas gráficas.
 Controlador de salida de video muy rápido en tarjetas que lo soporten.
@@ -2475,7 +2475,7 @@ lo mismo que vidix
 .RE
 .PD 1
 .TP
-.B cvidix\ 
+.B "cvidix\ "
 Frontend genérico e independiente de plataforma para VIDIX, puede incluso
 funcionar en una consola de texto con tarjetas nVidia.
 .PD 0
@@ -2524,23 +2524,23 @@ Usa el framebuffer del kernel para reproducir video,
 implementación alternativa.
 .
 .TP
-.B vesa\ \ \ 
+.B "vesa\ \ \ "
 Controlador de salida de video muy general que debe funcionar en cualquier
 tarjeta compatible con VESA VBE 2.0.
 .PD 0
 .RSs
-.IPs dga\ \ 
+.IPs "dga\ \ "
 Activa el modo DGA.
 .IPs nodga
 Desactiva el modo DGA.
 .IPs vidix
 FIXME: documentar esto.
-.IPs lvo\ \ 
+.IPs "lvo\ \ "
 FIXME: documentar esto.
 .RE
 .PD 1
 .TP
-.B svga\ \ \ 
+.B "svga\ \ \ "
 Reproduce video usando la biblioteca SVGA.
 .PD 0
 .RSs
@@ -2557,14 +2557,14 @@ Evita renderizado directo, OSD y aceleración hardware.
 Fuerza el cambio de imagen en el repintado vertical.
 Usable solo con \-double.
 Tiene el mismo efecto que la opción \-vsync.
-.IPs sq\ \ \ 
+.IPs "sq\ \ \ "
 Prueba el modo de video con pixels cuadrados.
 .IPs vidix
 Usa svga con VIDIX.
 .RE
 .PD 1
 .TP
-.B gl\ \ \ \ \ 
+.B "gl\ \ \ \ \ "
 Controlador de salida de video OpenGL.
 Versión muy simple, sin soporte OSD y el tamaño del video debe ser menor
 que el tamaño máximo de la textura de su implementación OpenGL.
@@ -2580,31 +2580,31 @@ Número de líneas copiadas a la textura en una pieza (por defecto: 4).
 .RE
 .PD 1
 .TP
-.B gl2\ \ \ \ 
+.B "gl2\ \ \ \ "
 Controlador de salida de video de OpenGL, segunda generación.
 Soporta OSD y videos más grandes que el tamaño máximo de la textura.
 .
 .TP
-.B null\ \ \ 
+.B "null\ \ \ "
 No produce salida de video.
 Útil para pruebas de rendimiento.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B "aa\ \ \ \ \ "
 Controlador de salida de video ASCII art que funciona en una consola de texto.
 .
 .TP
-.B caca\ \ \ 
+.B "caca\ \ \ "
 Controlador de salida de video ASCII art coloreado que funciona en una
 consola de texto.
 .
 .TP
-.B bl\ \ \ \ \ 
+.B "bl\ \ \ \ \ "
 Reproducción de video usando el protocolo UDP Blinkenlights.
 Este controlador es altamente para hardware específico.
 .
 .TP
-.B ggi\ \ \ \ 
+.B "ggi\ \ \ \ "
 Controlador de salida de video del sistema gráfico GGI.
 .
 .TP
@@ -2634,7 +2634,7 @@ Forzará la capa con id N para la reproducción (por defecto: -1 - auto).
 .RE
 .PD 1
 .TP
-.B dfbmga\ 
+.B "dfbmga\ "
 Controlador específico de salida de video de Matrox G400/\:G450/\:G550 que usa
 la biblioteca DirectFB para poder usar las características especiales de
 hardware.
@@ -2687,7 +2687,7 @@ Si tiene una tarjeta Matrox, esta es la opción más rápida.
 .B xmga (solamente Linux, X11)
 El controlador de salida de video mga, funcionando en una ventana X11.
 .TP
-.B syncfb\ 
+.B "syncfb\ "
 Controlador de salida de video para el módulo del kernel SyncFB, que provee
 características de hardware especiales para las tarjetas Matrox Gxxx como
 desentrelazado por hardware, escalado y sincronización de la salida de video
@@ -2770,13 +2770,13 @@ Controlador de salida de video para unas cuantas tarjetas
 capturadoras/\:reproductoras de MJPEG.
 .
 .TP
-.B zr2\ \ \ \ 
+.B "zr2\ \ \ \ "
 Controlador de salida de video para unas cuantas tarjetas
 capturadoras/\:reproductoras de MJPEG, segunda generación.
 Vea también el filtro de video zrmjpeg.
 .
 .TP
-.B md5\ \ \ \ 
+.B "md5\ \ \ \ "
 Genera imágenes de cada marco con la ayuda de \-vo pgm y escribe su suma
 MD5 en un archivo.
 Útil para debug.
@@ -2795,27 +2795,27 @@ El formato es el mismo que el empleado por mjpegtools, por lo que le será
 útil si quiere procesar el video con la suite de mjpegtools.
 .
 .TP
-.B gif89a\ 
+.B "gif89a\ "
 Saca cada marco de imagen en un archivo GIF en el diretorio actual.
 Cada archivo toma el número de marco rellenado con ceros como nombre.
 .
 .TP
-.B jpeg\ \ \ 
+.B "jpeg\ \ \ "
 Saca cada marco de imagen en un archivo JPEG en el directorio actual.
 Cada archivo toma el número de marco rellenado con ceros como nombre.
 .
 .TP
-.B pgm\ \ \ \ 
+.B "pgm\ \ \ \ "
 Saca cada marco de imagen en un archivo PGM en el directorio actual.
 Cada archivo toma el número de marco rellenado con ceros como nombre.
 .
 .TP
-.B png\ \ \ \ 
+.B "png\ \ \ \ "
 Saca cada marco de imagen en un archivo PNG en el directorio actual.
 Cada archivo toma el número de marco rellenado con ceros como nombre.
 .
 .TP
-.B tga\ \ \ \ 
+.B "tga\ \ \ \ "
 Saca cada marco de imagen en un archivo Targa en el directorio actual.
 Cada archivo toma el número de marco rellenado con ceros como nombre.
 .
@@ -2987,7 +2987,7 @@ Desactiva la compensación automática de la relación de aspecto de la
 película.
 .
 .TP
-.B \-flip \ 
+.B "\-flip \ "
 Voltea la imagen arriba-abajo.
 .
 .TP
@@ -3009,7 +3009,7 @@ Las opciones disponibles son:
 .RE
 .
 .RSs
-.IPs ec\ \ \ 
+.IPs "ec\ \ \ "
 ocultación de errores:
 .RSss
 1: usa un filtro debloqueador fuerte para MBs dañados
@@ -3111,7 +3111,7 @@ corrige manualmente errores en el codificador:
 Para una mejor calidad de la decodificación usa el mismo algoritmo para
 decodificar y codificar. Esto, sin embargo, hace que se pague un precio
 en precisión.
-.IPs gray\ 
+.IPs "gray\ "
 decodificación solo en escala de grises (un poco más rápida que con color)
 .IPs "sb=<número> (solo MPEG2)"
 Salta el número de filas de macrobloque especificadas en la parte de abajo.
@@ -3309,7 +3309,7 @@ Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
 .IPs deblock-luma
 Activa el filtro de postprocesado interno de XviD: filtro de debloque de luminancia.
 Vea también \-vf pp, que es más rápido que el propio filtro de XviD.
-.IPs dr2\ \ 
+.IPs "dr2\ \ "
 Activa el método 2 de renderizado directo.
 .IPs nodr2
 Desactiva el método 2 de renderizado directo.
@@ -3338,7 +3338,7 @@ de aspecto correcta.
 Escala la imagen a altura y (si hay escalado sw/\:hw disponible).
 Deshabilita cálculos de aspecto.
 .TP
-.B \-zoom \ 
+.B "\-zoom \ "
 Permite escalar por software, cuando esté disponible.
 Puede ser usado para forzar escalado con \-vf scale.
 .br
@@ -3462,12 +3462,12 @@ renderizado de OSD/\:subtítulos
 .REss
 .RE
 .TP
-.B flip\ \ \ 
+.B "flip\ \ \ "
 Voltea la imagen de arriba a abajo.
 Vea también la opción \-flip.
 .
 .TP
-.B mirror\ 
+.B "mirror\ "
 Hace espejo de la imagen en el eje Y.
 .
 .TP
@@ -3481,7 +3481,7 @@ película es en vertical y no en horizontal.
 Escala la imagen con el escalador de software (lento) y realiza una
 conversión en el espacio de color YUV<\->RGB (vea también \-sws).
 .RSs
-.IPs w,h\ \ 
+.IPs "w,h\ \ "
 Escala a ancho/\:alto (por defecto: ancho/\:alto original)
 .I NOTA:
 Si se usa \-zoom, y filtros de capas (incluyendo libvo) no es
@@ -3545,18 +3545,18 @@ Note que este filtro NO escala por sí mismo; solo afecta cuando se está
 escalando (software o hardware) o cuando se auto-escala para corregir
 aspecto.
 .TP
-.B yuy2\ \ \ 
+.B "yuy2\ \ \ "
 Fuerza conversión software YV12/\:I420 o 422P a YUY2.
 Útil para tarjetas de video/\:controladores con soporte YV12 lento pero
 soporte YUY2 rápido.
 .
 .TP
-.B yvu9\ \ \ 
+.B "yvu9\ \ \ "
 Fuerza la conversión en el espacio de color YVU9 a YV12.
 Ya no se usa en favor del escalador de software.
 .
 .TP
-.B yuvcsp\ 
+.B "yuvcsp\ "
 Mantiene los valores de color YUV en el rango CCIR 601 sin hacer una conversión real.
 .
 .TP
@@ -3564,7 +3564,7 @@ Mantiene los valores de color YUV en el rango CCIR 601 sin hacer una conversión 
 Conversión en el espacio de color RGB 24/\:32 <\-> BGR 24/\:32.
 .PD 0
 .RSs
-.IPs swap\ 
+.IPs "swap\ "
 También realiza intercambio R <\-> B.
 .RE
 .PD 1
@@ -3649,9 +3649,9 @@ filtro de postprocesado simple
 .RSs
 .IPs quality
 0\-6 (por defecto: 3)
-.OPs qp\ \ \ 
+.OPs "qp\ \ \ "
 parámetro para forzar la cuantización (por defecto: 0, usa qp del video)
-.IPs modo\ \ \ 
+.IPs "modo\ \ \ "
 0: umbral fuerte (por defecto)
 .br
 1: umbral suave (mejor deringing, peor difuminado de imagen)
@@ -3664,7 +3664,7 @@ filtro de cambio qp
 una ecualización como "2+2*sen(PI*qp)"
 .RE
 .TP
-.B test\ \ \ 
+.B "test\ \ \ "
 Genera varios patrones de test.
 .TP
 .B rgbtest
@@ -3682,11 +3682,11 @@ Más rápido y mejor calidad que con \-vf fame.
 .br
 32\-:  bitrate fijo en kBits
 .REss
-.IPs fps\ \ 
+.IPs "fps\ \ "
 fuerza los fps de salida (valor real) (por defecto: 0, autodetección basada en la altura)
 .RE
 .TP
-.B fame\ \ \ 
+.B "fame\ \ \ "
 Conversión software YV12 a MPEG1 con libfame para usar con DVB/\:DXR3.
 .TP
 .B dvbscale[=aspect]
@@ -3731,11 +3731,11 @@ Puede tener de 0 a 3 parámetros.
 Si omite un parámetros, se usará un valor razonable.
 .PD 0
 .RSs
-.IPs luma\ 
+.IPs "luma\ "
 dureza de la luminancia espacial (por defecto = 4)
 .IPs chroma
 dureza de crominancia espacial (por defecto = 3)
-.IPs time\ 
+.IPs "time\ "
 dureza temporal (por defecto = 6)
 .RE
 .PD 1
@@ -3885,7 +3885,7 @@ Cantidad relativa de perfilado/\:difuminado a añadir a la imagen
 .REss
 .RE
 .TP
-.B swapuv\ 
+.B "swapuv\ "
 Intercambia el plano U y V.
 .TP
 .B il=[d|i][s][:[d|i][s]]
@@ -4270,9 +4270,9 @@ Hasta donde debe ser aplicado el filtro.
 difuminado de forma adaptativo
 .PD 0
 .RSs
-.IPs rad\ \ \ 
+.IPs "rad\ \ \ "
 dureza del filtro de difuminado (~0.1\-4.0) (más lento cuanto mayor sea)
-.IPs pf\ \ \ 
+.IPs "pf\ \ \ "
 dureza del prefiltrado (~0.1\-2.0)
 .IPs colorDiff
 Cuánto se pueden considerar de diferentes los pixels.
@@ -4284,7 +4284,7 @@ Cuánto se pueden considerar de diferentes los pixels.
 difuminado inteligente
 .PD 0
 .RSs
-.IPs rad\ \ 
+.IPs "rad\ \ "
 dureza del filtro de difuminado (~0.1\-5.0) (más lento cuanto mayor sea)
 .IPs strength
 difuminado (0.0\-1.0) o perfilado (-1.0\-0.0)
@@ -4300,15 +4300,15 @@ corrección de perspectiva
 .IPs x0,y0,...
 coordenadas de las esquinas de arriba a la izquierda, arriba a la derecha,
 abajo a la izquierda y abajo a la derecha
-.IPs t\ \ \ \ 
+.IPs "t\ \ \ \ "
 muestreo lineal (0) o cúbico (1)
 .RE
 .PD 1
 .TP
-.B 2xsai\ \ 
+.B "2xsai\ \ "
 Usa escala 2x y algoritmo de interpolación para escalar y suavizar imágenes.
 .TP
-.B 1bpp\ \ \ 
+.B "1bpp\ \ \ "
 conversión de mapa de bits de 1bpp a YUV/\:BGR 8/\:15/\:16/\:32
 .TP
 .B down3dright[=líneas]
@@ -4331,7 +4331,7 @@ Lee mapas de bits de un FIFO y los muestra en una ventana.
 Establece el valor por defecto de la bandera 'oculto' (booleano)
 .IPs opaque
 bandera que cambia entre modos alphablended (tranparente) y opaco (rápido)
-.IPs fifo\ 
+.IPs "fifo\ "
 ruta/\:nombrearchivo para el FIFO (nombre de tubería conectando con mplayer
 \-vf bmovl a la aplicación que lo controla)
 .RE
@@ -4357,9 +4357,9 @@ limpia área
 .IPs OPAQUE
 desactiva toda transparencia alpha.
 Envíe "ALPHA 0 0 0 0 0" para activarla de nuevo.
-.IPs HIDE\ 
+.IPs "HIDE\ "
 oculta mapas de bits
-.IPs SHOW\ 
+.IPs "SHOW\ "
 muestra mapas de bits
 .RE
 .PD 1
@@ -4557,7 +4557,7 @@ Especifica la información de cabecera del archivo AVI resultante.
 Las opciones disponibles son:
 .
 .RSs
-.IPs help\ 
+.IPs "help\ "
 muestra esta descripción
 .IPs name=<valor>
 título del trabajo
@@ -4690,7 +4690,7 @@ DivX4 está obsoleto y solo tiene soporte por completitud.
 Para detalles acerca de las opciones para divx4, lea el código, la
 mayoría de las opciones no se describen aquí.
 .TP
-.B help\ \ \ 
+.B "help\ \ \ "
 obtener ayuda
 .TP
 .B br=<valor>
@@ -4752,7 +4752,7 @@ Pasada (segunda) final de la codificación en dos pasadas.
 .SS lame (\-lameopts)
 .
 .TP
-.B help\ \ \ 
+.B "help\ \ \ "
 obtiene ayuda
 .TP
 .B vbr=<0\-4>
@@ -4772,7 +4772,7 @@ mtrh
 .RE
 .PD 1
 .TP
-.B abr\ \ \ \ 
+.B "abr\ \ \ \ "
 bitrate medio
 .TP
 .B cbr\ \ \ \  
@@ -4823,7 +4823,7 @@ ajustar
 .RE
 .PD 1
 .TP
-.B fast\ \ \ 
+.B "fast\ \ \ "
 cambia en codificación rápida en modos preestablecidos VBR siguientes,
 calidad ligeramente inferior y bitrates altos.
 .TP
@@ -4925,7 +4925,7 @@ Usa el codec especificado (por defecto: mpeg4):
 .RSs
 .IPs mjpeg
 Motion JPEG
-.IPs h263\ 
+.IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
@@ -5048,16 +5048,16 @@ selecciona el modo MB que tiene la mejor razón de distorsión
 .RE
 .PD 1
 .TP
-.B vhq\ \ \ \ 
+.B "vhq\ \ \ \ "
 Lo mismo que mbd=1, se mantiene por razones de compatibilidad.
 .TP
-.B v4mv\ \ \ 
+.B "v4mv\ \ \ "
 Permite 4 vectores de movimiento por macrobloque (calidad ligeramente superior).
 .TP
-.B obmc\ \ \ 
+.B "obmc\ \ \ "
 Compensación de movimiento por bloque superpuesto (H.263+).
 .TP
-.B loop\ \ \ 
+.B "loop\ \ \ "
 Filtro de bucle (H.263+).
 nota, no funciona
 .TP
@@ -5201,7 +5201,7 @@ si no
 haz ratecontrol normal (no bloquear al siguiente cuantizador de marco P) y
 establecer q= -q * v{b|i}_qfactor + v{b|i}_qoffset
 .TP
-.B \ 
+.B "\ "
 Consejo: Para realizar una codificación con cuantización constante con
 diferentes cuantizadores para marcos I/\:P y B puede usar:
 lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>
@@ -5229,9 +5229,9 @@ cuantizador de compresión, depende de vrc_eq (pasada\ 1/\:2) (por defecto: 0.5)
 ecuación principal de control de tasa (pasada\ 1/\:2):
 .RE
 .RSs
-.IPs 1\ \ \ \ 
+.IPs "1\ \ \ \ "
 tasa de bits constante
-.IPs tex\ \ 
+.IPs "tex\ \ "
 calidad constante
 .IPs 1+(tex/\:avgTex-1)*qComp
 aproximadamente la ecuación del códido antiguo de ratecontrol
@@ -5247,7 +5247,7 @@ infijos de operadores: +,-,*,/,^
 variables:
 .RE
 .RSs
-.IPs tex\ \ 
+.IPs "tex\ \ "
 complejidad de textura
 .IPs iTex,pTex
 complejidad de textura intra, no intra
@@ -5261,13 +5261,13 @@ complejidad de intra textura media en marcos P
 complejidad de no intra textura media en marcos P
 .IPs avgBPTex
 complejidad de no intra textura media en marcos B
-.IPs mv\ \ \ 
+.IPs "mv\ \ \ "
 Bits usados para vectores de movimiento
 .IPs fCode
 longitud máxima del vector de movimiento en escala log2
 .IPs iCount
 número de intra macro bloques / número de macro bloques
-.IPs var\ \ 
+.IPs "var\ \ "
 complejidad espacial
 .IPs mcVar
 complejidad temporal
@@ -5275,7 +5275,7 @@ complejidad temporal
 qcomp desde la línea de órdenes 
 .IPs isI, isP, isB
 es 1 si el tipo de imagen es I/\:P/\:B si no 0
-.IPs Pi,E\ 
+.IPs "Pi,E\ "
 vea su libro de matemáticas favorito
 .RE
 .PP
@@ -5360,7 +5360,7 @@ pueden ser reproducidos con el codec huffyuv oficial)
 .RE
 .PD 1
 .TP
-.B vdpart\ 
+.B "vdpart\ "
 particionamiento de datos.
 Añade 2 Bytes por paquete de video, mejora resistencia-al-error cuando se
 transfiere a través de canales no fiables (ej.\& streaming sobre internet)
@@ -5376,7 +5376,7 @@ Cada paquete de video debe ser codificado en 3 particiones diferentes:
 .RE
 .PD 1
 .TP
-.B \ 
+.B "\ "
 MV & DC son los más importantes, su pérdida hace que se vea mucho peor la
 imagen que si se perdiese AC y las particiones 1. & 2. (MV&DC) son mucho
 menores que la partición 3. (AC) lo cual significa que errores que afecten
@@ -5394,10 +5394,10 @@ desactivado (por defecto)
 buena elección
 .RE
 .TP
-.B ss\ \ \ \ \ 
+.B "ss\ \ \ \ \ "
 modo estructurado slice para H.263+
 .TP
-.B gray\ \ \ 
+.B "gray\ \ \ "
 codificación solo en escala de grises (rápida)
 .TP
 .B vfdct=<0\-10>
@@ -5511,20 +5511,20 @@ Cuando se usa cuantización adaptativa (*_mask), la media por-MB del cuantizador
 puede no volver a coincidir con el nivel de marco del cuantizador requerido.
 Naq intentará ajustar los cuantizadores por-MB para mantener la media correcta.
 .TP
-.B ildct\ \ 
+.B "ildct\ \ "
 Usa dct entrelazado
 .TP
-.B ilme\ \ \ 
+.B "ilme\ \ \ "
 Usa estimación de movimiento entrelazada (mutuamente excluyente con qpel).
 .TP
-.B alt\ \ \ \ 
+.B "alt\ \ \ \ "
 Usa scantable alternativa.
 .TP
 .B format=<valor>
 .RSs
-.IPs YV12\ 
+.IPs "YV12\ "
 por defecto
-.IPs 422P\ \ 
+.IPs "422P\ \ "
 para huffyuv or jpeg sin pérdida
 .IPs 411P,410P,BGR32
 para jpeg sin pérdidas
@@ -5534,7 +5534,7 @@ para jpeg sin pérdidas y ffv1
 para jpeg sin pérdidas y ffv1
 .RE
 .TP
-.B pred\ \ \ 
+.B "pred\ \ \ "
 (para huffyuv)
 .PD 0
 .RSs
@@ -5564,7 +5564,7 @@ significado de predicción
 .RE
 .PD 1
 .TP
-.B coder\ \ 
+.B "coder\ \ "
 (para ffv1)
 .PD 0
 .RSs
@@ -5586,7 +5586,7 @@ modelo de contexto grande
 .RE
 .PD 1
 .TP
-.B qpel\ \ \ 
+.B "qpel\ \ \ "
 Usa compensación de movimiento quarter pel (mutamente excluyente con ilme).
 Sugerencia: Esto es útil solamente para codificaciones con tasa de bits alta.
 .TP
@@ -5628,7 +5628,7 @@ suma de las diferencias verticales absolutas
 suma de las diferencias verticales al cuadrado
 .IPs "10 (NSSE)"
 preservación del ruido sumando las diferencias cuadradas
-.IPs +256\ 
+.IPs "+256\ "
 usar también crominancia, no funciona (correctamente) actualmente con marcos B
 .RE
 .PD 1
@@ -5673,7 +5673,7 @@ tamaño normal=2 diamantes
 .fi
 .RE
 .TP
-.B trell\ \ 
+.B "trell\ \ "
 Cuantización de búsqueda Trellis.
 Esto encuentra la codificación óptima para cada bloque de 8x8.
 La cuantización de búsqueda Trelllis es bastante simple como cuantización
@@ -5684,23 +5684,23 @@ símplemente encuentras un bloque para el error mínimo y lambda*bits.
 .RSs
 .IPs lambda
 constante de la que depende qp
-.IPs bits\ 
+.IPs "bits\ "
 cantidad de bits necesarios para codificar el bloque
 .IPs error
 suma de errores cuadráticos de la cuantización
 .RE
 .PD 1
 .TP
-.B cbp\ \ \ \ 
+.B "cbp\ \ \ \ "
 Tasa el patrón de distorsión de código de bloque óptimo.
 Seleccionará el patrón de bloque codificado que minimize + lambda*tasa
 solo puede ser usado junto con cuantización trellis.
 .TP
-.B mv0\ \ \ \ 
+.B "mv0\ \ \ \ "
 Intenta codificar cada MB con MV=<0,0> y elije el mejor
 esto no tiene ningún efecto si mbd=0.
 .TP
-.B qprd\ \ \ 
+.B "qprd\ \ \ "
 QP de tasa de distorsión óptimo para un lambda dado de cada macrobloque,
 note que esto necesita mbd=2
 .TP
@@ -5735,7 +5735,7 @@ Redefinimiento de calidad de subpel (para qpel) (por defecto: 8).
 .I NOTA:
 Esto tiene un efecto significativo en la velocidad.
 .TP
-.B psnr\ \ \ 
+.B "psnr\ \ \ "
 Imprime la psnr (pico de relación señal ruido) para el video entero después de
 la codificación y almacena la psnr por marco en un archivo con un nombre
 como 'psnr_hhmmss.log'.
@@ -5744,13 +5744,13 @@ Los valores devueltos están en dB (decibelios), cuanto más alto mejor.
 .B mpeg_quant
 Usa cuantizadores MPEG en lugar de H.263.
 .TP
-.B aic\ \ \ \ 
+.B "aic\ \ \ \ "
 Predicción ac (=predicción interna avanzada para H.263+)
 .br
 .I NOTA:
 vqmin debe ser 8 o superior para AIC H.263+.
 .TP
-.B umv\ \ \ \ 
+.B "umv\ \ \ \ "
 MVs ilimitados (H.263+ solamente)
 Permite codificación de MVs de longitud arbitraria.
 .TP
@@ -5809,11 +5809,11 @@ Necesita una cadena separada por comas de 64 enteros.
 .B vqmod_freq
 modulación cuantizada experimental
 .TP
-.B dc\ \ \ \ \ 
+.B "dc\ \ \ \ \ "
 precisión intra DC en bits (por defecto: 8).
 Si especifica vcodec=mpeg2video este valor puede ser 8, 9, 10 u 11.
 .TP
-.B cgop\ \ \ 
+.B "cgop\ \ \ "
 Cierra todos los GOPs.
 Actualmente no funciona (todavía).
 .
@@ -5836,16 +5836,16 @@ Umbral de crominancia
 .B l=<0\-20>
 Umbral de luminancia
 .TP
-.B nolzo \ 
+.B "nolzo \ "
 Desactiva la compresión lzo
 .TP
 .B q=<3\-255>
 Establece el nivel de calidad
 .TP
-.B raw \ \ \ 
+.B "raw \ \ \ "
 Desactiva la codificación rtjpeg
 .TP
-.B rtjpeg\ 
+.B "rtjpeg\ "
 Activa codificación rtjpeg.
 .
 .
@@ -5941,7 +5941,7 @@ escala de grises.
 Note que esto no acelera la codificación, solo previene que los datos de
 crominancia sean escritos en la última etapa de la codificación.
 .TP
-.B debug\ \ 
+.B "debug\ \ "
 Guarda estadísticas por marco en ./xvid.dbg.
 .TP
 .B keyframe_boost=<0\-1000>
@@ -5964,7 +5964,7 @@ El último marco tipo i se tratará de manera normal.
 Las siguientes opciones solo están disponibles en la última versión
 estable de XviD 1.0.x (api4).
 .TP
-.B packed\ 
+.B "packed\ "
 Crea un flujo de bits que pueden ser decodificados sin retardos.
 .br
 .I ADVERTENCIA:
@@ -5979,7 +5979,7 @@ verse confundida.
 .B divx5bvop
 genera marcos-B compatibles con DivX5 (por defecto: activado)
 .TP
-.B qpel\ \ \ 
+.B "qpel\ \ \ "
 MPEG4 usa precisión de mitad de pixel para su búsqueda de movimiento por
 defecto.
 El estándar propone un modo donde los codificacores tienen permitido usar
@@ -6057,7 +6057,7 @@ Esta configuración permite favorecer o no el uso de marcos tipo B.
 Cuanto mayor sea el valor, mayor será la probabilidad de usar marcos tipo B.
 (por defecto: 0)
 .TP
-.B hq_ac\ \ 
+.B "hq_ac\ \ "
 Activa la predicción del coeficiente de alta calidad AC para entornos de
 bloque.
 .TP
@@ -6097,7 +6097,7 @@ Lo mismo que la opción aspect, pero el aspecto es calculado automáticamente,
 teniendo en cuenta todos los ajustes (recortado/\:expansión/\:escalado/etc.)
 hechos en la cadena de filtros.
 .TP
-.B psnr\ \ \ 
+.B "psnr\ \ \ "
 imprime la psnr (pico de relación señal ruido) para el video completo después
 de codificar y almacenar la psnr por marco en un archivo con un nombre
 como 'psnr_hhmmss.log' en el directorio actual.

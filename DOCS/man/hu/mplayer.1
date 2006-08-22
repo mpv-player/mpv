@@ -269,7 +269,7 @@ következõ/\:elõzõ szülõi playtree bejegyzésre ugrás
 Következõ/\:elõzõ alternatív forrás.
 .IPs "p / SPACE"
 Szünet (újra megnyomva indít).
-.IPs .\ \ \ \ 
+.IPs ".\ \ \ \ "
 Elõre lépés.
 Egyszer megnyomva megállítja a filmet, majd minden egyes megnyomásra egy
 képkockát lejátszik és újra megáll (bármelyik másik gombbal elindul újra).
@@ -281,30 +281,30 @@ Audió késleltetés állítása ± 0.1 másodperccel.
 Hangerõ csökkentése/\:növelése.
 .IPs "9 és 0"
 Hangerõ csökkentése/\:növelése.
-.IPs m\ \ \ \ 
+.IPs "m\ \ \ \ "
 Hang elnémítása.
 .IPs "# (csak MPEG és Matroska)"
 Váltás az elérhetõ audió sávok között.
-.IPs f\ \ \ \ 
+.IPs "f\ \ \ \ "
 Teljes képernyõs lejátszás (lásd a \-fs\-t).
-.IPs T\ \ \ \ 
+.IPs "T\ \ \ \ "
 Az ablak mindig látható (lásd a \-ontop\-t).
 .IPs "w és e"
 Pan-scan tartomány csökkentése/\:növelése.
-.IPs o\ \ \ \ 
+.IPs "o\ \ \ \ "
 Váltás az OSD állapotok között: nincs / keresés / keresés + idõ / keresés + idõ + össz idõ.
-.IPs d\ \ \ \ 
+.IPs "d\ \ \ \ "
 Váltás a Képkocka eldobási módok között: nincs / megjelenítés kihagyása / dekódolás kihagyása
 (lásd a \-framedrop és \-hardframedrop kapcsolókat).
-.IPs v\ \ \ \ 
+.IPs "v\ \ \ \ "
 Feliratok láthatóságának ki-/bekapcsolása.
 .IPs "b / j"
 Lépegetés az elérhetõ feliratok között.
 .IPs "y és g"
 Elõre/hátra lépés a felirat listában.
-.IP F\ \ \ \ 
+.IP "F\ \ \ \ "
 "Kényszerített felirat" megjelenítése.
-.IPs a\ \ \ \ 
+.IPs "a\ \ \ \ "
 Felirat igazítás állítása: fent / középen / lent.
 .IPs "x és z"
 Felirat késleltetés állítása ± 0.1 másodperccel.
@@ -367,7 +367,7 @@ Film ablak alpha-jának beállítása.
 .RS
 .IPs PAUSE
 Szünet.
-.IPs STOP\ 
+.IPs "STOP\ "
 Lejátszás megállítása és kilépés.
 .IPs "PREVIOUS és NEXT"
 Lépés hátra/\:elõre 1 perccel.
@@ -383,17 +383,17 @@ Lépés hátra/\:elõre 1 perccel.
 .RS
 .IPs ENTER
 Lejátszás elindítása.
-.IPs ESC\ \ 
+.IPs "ESC\ \ "
 Lejátszás megállítása.
-.IPs l\ \ \ \ 
+.IPs "l\ \ \ \ "
 Fájl betöltése.
-.IPs t\ \ \ \ 
+.IPs "t\ \ \ \ "
 Felirat betöltése.
-.IPs c\ \ \ \ 
+.IPs "c\ \ \ \ "
 Skin böngészõ megnyitása.
-.IPs p\ \ \ \ 
+.IPs "p\ \ \ \ "
 Lejátszási lista megnyitása.
-.IPs r\ \ \ \ 
+.IPs "r\ \ \ \ "
 Beállítások megnyitása.
 .RE
 .PD 1
@@ -407,9 +407,9 @@ Beállítások megnyitása.
 .RS
 .IPs "h és k"
 Elõzõ/\:következõ csatorna kiválasztása.
-.IPs n\ \ \ \ 
+.IPs "n\ \ \ \ "
 Normaváltás.
-.IPs u\ \ \ \ 
+.IPs "u\ \ \ \ "
 Csatornalista átváltása.
 .RE
 .PD 1
@@ -636,7 +636,7 @@ bõbeszédû üzenetek
 .PD 1
 .
 .TP
-.B \-quiet\ 
+.B "\-quiet\ "
 Hatására a konzoli kimeneti sorok kevésbé lesznek beszédesek;
 alaphelyzetben megakadályozza, hogy a státuszsor
 (pl.\& A:   0.7 V:   0.6 A-V:  0.068 ...) megjelenjen.
@@ -670,7 +670,7 @@ Még kevesebb kimenet és státusz üzenet kiírása, mint a \-quiet esetén.
 Megmutatja egy profil leírását és tartalmát.
 .
 .TP
-.B \-v\ \ \ \ \ 
+.B "\-v\ \ \ \ \ "
 Növeli a beszédességet egy szinttel minden parancssorban található
 \-v esetén.
 .
@@ -1615,7 +1615,7 @@ A kártya kép equalizerjének beállítása.
 Az audió mentési bitrátájának beállítása.
 .IPs forceaudio
 Audió mentése akkor is, ha a v4l szerint nincs audió forrás.
-.IPs alsa\ 
+.IPs "alsa\ "
 Mentés ALSA-ról.
 .IPs amode=<0\-3>
 Audió mód választása:
@@ -1998,7 +1998,7 @@ Felirat alsó sarkának igazítása (alapértelmezett).
 .PD 1
 .
 .TP
-.B \-subcc \ 
+.B "\-subcc \ "
 DVD Closed Caption (CC) feliratok megjelenítése.
 Ezek
 .B nem
@@ -2131,7 +2131,7 @@ le kell törölnie (alapértelmezett: ^[[A\\r^[[K).
 Megadja az MPlayernek, hogy a feliratot UNICODE-ként kezelje.
 .
 .TP
-.B \-utf8 \ \ 
+.B "\-utf8 \ \ "
 Megadja az MPlayernek, hogy a feliratot UTF8-ként kezelje.
 .
 .TP
@@ -2229,7 +2229,7 @@ Beállítja a noblock-módot és az eszköz nevet mint elsõ kártya, negyedik eszköz.
 Használható kimeneti audió eszközök:
 .
 .TP
-.B alsa\ \ \ 
+.B "alsa\ \ \ "
 ALSA 0.9/1.x audió kimeneti vezérlõ
 .PD 0
 .RSs
@@ -2244,11 +2244,11 @@ tényleg tudod, hogy hogy kell jól beállítani.
 .PD 1
 .
 .TP
-.B alsa5\ \ 
+.B "alsa5\ \ "
 ALSA 0.5 audió kimeneti meghajtó
 .
 .TP
-.B oss\ \ \ \ 
+.B "oss\ \ \ \ "
 OSS audió kimeneti meghajtó
 .PD 0
 .RSs
@@ -2262,7 +2262,7 @@ Beállítja a mixer csatornát (alapértelmezett: pcm).
 .PD 1
 .
 .TP
-.B sdl\ \ \ \ 
+.B "sdl\ \ \ \ "
 platform független SDL (Simple Directmedia Layer) függvénykönyvtár
 audió kimeneti vezérlõje
 .PD 0
@@ -2274,11 +2274,11 @@ SDL választja).
 .PD 1
 .
 .TP
-.B arts\ \ \ 
+.B "arts\ \ \ "
 aRts démonon keresztüli audió kimenet
 .
 .TP
-.B esd\ \ \ \ 
+.B "esd\ \ \ \ "
 ESD démonon keresztüli audió kimenet
 .PD 0
 .RSs
@@ -2288,7 +2288,7 @@ Explicit kiválasztja a használni kívánt ESD szervert (alapértelmezett: localhost
 .PD 1
 .
 .TP
-.B jack\ \ \ \ 
+.B "jack\ \ \ \ "
 JACK-en (Jack Audio Connection Kit) keresztüli audió kimenet
 .PD 0
 .RSs
@@ -2304,7 +2304,7 @@ teszi a videó lejátszást (alapértelmezett: engedélyezve).
 .PD 1
 .
 .TP
-.B nas\ \ \ \ 
+.B "nas\ \ \ \ "
 NAS-on keresztüli audió kimenet
 .
 .TP
@@ -2371,12 +2371,12 @@ kimeneti fájl neve
 .PD 1
 .
 .TP
-.B null\ \ \ 
+.B "null\ \ \ "
 Letiltja az audió kimenetet de megtartja a videó lejátszási sebességét.
 használd a \-nosound kapcsolót a sebességméréshez.
 .
 .TP
-.B pcm\ \ \ \ 
+.B "pcm\ \ \ \ "
 nyers PCM/wave fájl író kimeneti vezérlõ
 .PD 0
 .RSs
@@ -2387,7 +2387,7 @@ Ha nem írja bele, nyers PCM generálódik.
 A <fájlnév> nevû fájlba írja ki a hangot az alapértelmezett audiodump.wav
 helyett.
 Ha a nowaveheader meg van adva, az alapértelmezett az audiodump.pcm.
-.IPs fast\ 
+.IPs "fast\ "
 A valós idejûnél gyorsabban próbál dump-olni.
 Gyõzõdj meg róla, hogy a kimenet nem lett levágva (általában egy
 "Túl sok videó csomag a bufferban" üzenettel).
@@ -2396,7 +2396,7 @@ Az normális, hogy egy "A rendszered TÚL lassú ehhez!" üzenetet kapsz.
 .PD 1
 .
 .TP
-.B plugin\ \ 
+.B "plugin\ \ "
 plugin audió kimeneti vezérlõ
 .
 .
@@ -2445,7 +2445,7 @@ amin a megjelenítésnek történnie kell.
 .PD 1
 .
 .TP
-.B \-dr \ \ \ 
+.B "\-dr \ \ \ "
 Bekapcsolja a direkt renderelést (nem minden codec és videó kimenet támogatja)
 .br
 .I FIGYELMEZTETÉS:
@@ -2464,7 +2464,7 @@ Az iec958 kimenetet dekódoltra állítja be (alapértelmezett).
 .IPs macrovision=<érték>
 macrovision mód (0 = ki (alapértelmezett), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
-.IPs mute\ 
+.IPs "mute\ "
 hang elnémítása
 .IPs unmute
 hang megszólaltatása
@@ -2480,7 +2480,7 @@ hang megszólaltatása
 7.5 IRE mód bekapcsolása
 .IPs no75ire
 7.5 IRE mód kikapcsolása (alapértelmezett)
-.IPs bw\ \ \ 
+.IPs "bw\ \ \ "
 fekete-fehér TV kimenet
 .IPs color
 színes TV kimenet (alapértelmezett)
@@ -2580,7 +2580,7 @@ A _WIN_LAYER hint-et használja az alapértelmezett réteggel.
 A _WIN_LAYER hint-et használja a megadott rétegszámmal.
 .IPs netwm
 NETWM stílus kényszerítése.
-.IPs none\ 
+.IPs "none\ "
 Ne állítsa be a teljes képernyõs ablak rétegét.
 .IPs stays_on_top
 A _NETWM_STATE_STAYS_ON_TOP hint-et használja, ha elérhetõ.
@@ -2620,7 +2620,7 @@ tdfxfb videó kimeneti vezérlõk támogatják.
 Ablak elhelyezése az x=50, y=40 koordinátákra.
 .IPs 50%:50%
 Ablak elhelyezése a képernyõ közepére.
-.IPs 100%\ 
+.IPs "100%\ "
 Ablak elhelyezése a képernyõ jobb oldalán, középen.
 .IPs 100%:100%
 Ablak elhelyezése a képernyõ jobb alsó sarkába.
@@ -2689,7 +2689,7 @@ x11, xv, xmga, xvidix, directx videó kimenetekkel mûködik.
 Továbbá X11 alatt az ablakkezelõdnek is támogatnia kell.
 .
 .TP
-.B \-ontop\ 
+.B "\-ontop\ "
 A lejátszási ablak folyamatosan a többi ablak elõtt lesz látható.
 Azok a videó kimeneti vezérlõk támogatják, amelyek X11-et használnak,
 kivéve az SDL-t, valamint a directx, macosx, quartz, ggi és gl2.
@@ -2744,7 +2744,7 @@ ami nem tudja a képernyõ felbontását, mint az fbdev, x11 és TVout.
 Kikapcsolja az xscreensaver-t a lejátszás indításakor, kilépéskor újraindítja.
 .
 .TP
-.B \-vm \ \ \ 
+.B "\-vm \ \ \ "
 Megpróbál átváltani egy másik videó módba. A dga, x11, xv, sdl és
 directx videó kimeneti meghajtók támogatják.
 Ha a directx videó kimeneti vezérlõvel használod, a \-screenw,
@@ -2752,7 +2752,7 @@ Ha a directx videó kimeneti vezérlõvel használod, a \-screenw,
 képernyõ módot.
 .
 .TP
-.B \-vsync \ \ 
+.B "\-vsync \ \ "
 VBI bekapcsolása a vesa, dfbmga és az svga videó kimeneti meghajtóhoz.
 .
 .TP
@@ -2966,7 +2966,7 @@ Hardveres gyorsítású méretezõ használata (alapértelmezett: hwaccel).
 .PD 1
 .
 .TP
-.B vidix\ \ 
+.B "vidix\ \ "
 A VIDIX (VIDeo Interface for *niX) egy interfész a különbözõ
 grafikus kártyák videó gyorsítási képességeihez.
 Nagyon gyors kimeneti videó vezérlõ az olyan kártyákon, amik támogatják.
@@ -2991,7 +2991,7 @@ Ugyan az, mint a vidix-nél.
 .PD 1
 .
 .TP
-.B cvidix\ 
+.B "cvidix\ "
 Általános és platform független VIDIX frontend, akár szöveges konzolon
 is futhat nVidia kártyákkal.
 .PD 0
@@ -3070,12 +3070,12 @@ A használni kívánt fbdev eszköz explicit megadása (alapértelmezett: /dev/\:fb0).
 .PD 1
 .
 .TP
-.B vesa\ \ \ 
+.B "vesa\ \ \ "
 Nagyon általános kimeneti videó vezérlõ, aminek mûködnie kell bármilyen VESA VBE 2.0
 kompatibilis kártyán.
 .PD 0
 .RSs
-.IPs dga\ \ 
+.IPs "dga\ \ "
 Bekapcsolja a DGA módot.
 .IPs nodga
 Kikapcsolja a DGA módot.
@@ -3085,13 +3085,13 @@ Aktiválja a NeoMagic TV kimenetet és beállítja PAL normára.
 Aktiválja a NeoMagic TV kimenetet és beállítja NTSC normára.
 .IPs vidix
 VIDIX vezérlõ használata.
-.IPs lvo:\ \ \ 
+.IPs "lvo:\ \ \ "
 A Linux Video Overlay aktiválása a VESA mód felett.
 .RE
 .PD 1
 .
 .TP
-.B svga\ \ \ 
+.B "svga\ \ \ "
 Videó lejátszása az SVGA függvénykönyvtár használatával.
 .PD 0
 .RSs
@@ -3108,7 +3108,7 @@ Ez kikapcsolja a direkt renderelést, az OSD-t és a hardveres gyorsítást.
 Képkocka váltás kényszerítése függõleges visszatérésnél.
 Csak a \-double-lel használható.
 Ugyan az a hatása, mint a \-vsync opciónak.
-.IPs sq\ \ \ 
+.IPs "sq\ \ \ "
 Videó mód kiválasztása négyzet pixelekkel.
 .IPs vidix
 svga használata VIDIX-szel.
@@ -3116,7 +3116,7 @@ svga használata VIDIX-szel.
 .PD 1
 .
 .TP
-.B gl\ \ \ \ \ 
+.B "gl\ \ \ \ \ "
 OpenGL kimeneti videó vezérlõ, egyszerû verzió.
 A videó méretének kisebbnek kell lennie, mint az OpenGL implementációd maximum
 textúra mérete.
@@ -3268,7 +3268,7 @@ Alapértelmezésben le van tiltva.
 .PD 1
 .
 .TP
-.B gl2\ \ \ \ 
+.B "gl2\ \ \ \ "
 OpenGL kimeneti videó vezérlõ, második generáció.
 Támogatja az OSD-t és a maximum textúra méretnél nagyobb videókat.
 .PD 0
@@ -3284,23 +3284,23 @@ Ettõl eltekintve az értékeknek ugyan az a jelentésük, mint a \-vo gl esetén.
 .REss
 .
 .TP
-.B null\ \ \ 
+.B "null\ \ \ "
 Letiltja a videó kimenetet.
 Haszos sebességméréshez.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B "aa\ \ \ \ \ "
 ASCII art kimeneti videó vezérlõ, ami mûködik szöveges konzolon.
 Az elérhetõ alopciók listáját és azok leírását megkaphatod egy
 .I mplayer \-vo aa:help
 paranccsal.
 .
 .TP
-.B caca\ \ \ 
+.B "caca\ \ \ "
 Színes ASCII art kimeneti videó vezérlõ, ami mûködik szöveges konzolon.
 .
 .TP
-.B bl\ \ \ \ \ 
+.B "bl\ \ \ \ \ "
 Videó lejátszás a Blinkenlights UDP protokol segítségével.
 Ez a vezérlõ nagyon hardver specifikus.
 .PD 0
@@ -3314,7 +3314,7 @@ Meg kell adnod az aleszközt.
 .PD 1
 .
 .TP
-.B ggi\ \ \ \ 
+.B "ggi\ \ \ \ "
 GGI grafikus rendszer kimeneti videó vezérlõje
 .PD 0
 .RSs
@@ -3352,7 +3352,7 @@ Paraméterlista megadása a DirectFB-nek.
 .PD 1
 .
 .TP
-.B dfbmga\ 
+.B "dfbmga\ "
 Matrox G400/\:G450/\:G550 specifikus kimeneti videó vezérlõ, ami a
 DirectFB függvénykönyvtárat használja a speciális hardver képességek kihasználásához.
 Engedélyezi a CRTC2-t (második fej), az elsõ fejtõl független videó megjelenítést.
@@ -3407,7 +3407,7 @@ Explicit megadja a használandó Matrox eszköz nevét (alapértelmezett: /dev/\:mga_
 .PD 1
 .
 .TP
-.B syncfb\ 
+.B "syncfb\ "
 Kimeneti videó vezérlõ a SyncFB kernel modulhoz, ami a Matrox Gxxx
 kártyák speciális hardveres képességeinek használhatóságát biztosítja,
 mint pl. hardveres deinterlacing, méretezés és videó kimenet szinkronizálása
@@ -3465,7 +3465,7 @@ Lásd még a lavc videó szûrõt.
 Aktiválja a overlay-t a TVOut helyett.
 .IPs prebuf
 Bekapcsolja az elõbufferelést.
-.IPs sync\ 
+.IPs "sync\ "
 Bekapcsolja az új szinkronizáló-motort.
 .IPs norm=<norm>
 Megadja a TV normát.
@@ -3536,7 +3536,7 @@ Megadja a használni kívánt videó normát (alapértelmezett: auto).
 .PD 1
 .
 .TP
-.B md5sum\ 
+.B "md5sum\ "
 Minden egyes képkocka MD5 öszegét kiszámítja és kiírja egy fájlba.
 Támogatja az RGB24 és a YV12 színtereket.
 Hasznos hibakereséskor.
@@ -3574,7 +3574,7 @@ Ha nem adsz meg semmilyen kapcsolót, a kimenet progresszív lesz
 .RE
 .
 .TP
-.B gif89a\ 
+.B "gif89a\ "
 Minden egyes képkockát egy egyszerû animált GIF fájlba ír az aktuális
 könyvtárban. Csak az RGB formátumot támogatja 24 bpp-vel és a kimenet 256
 színûre lesz konvertálva.
@@ -3600,7 +3600,7 @@ mplayer video.nut \-vo gif89a:fps=15.0:filename=test.gif
 .PD 1
 .
 .TP
-.B jpeg\ \ \ 
+.B "jpeg\ \ \ "
 Minden egyes képkockát egy JPEG fájlba ír az aktuális könyvtárban.
 Minden fájl neve a képkocka sorszáma lesz vezetõ nullákkal.
 .PD 0
@@ -3627,21 +3627,21 @@ Nagyobb vagy egyenlõ mint 1 (alapértelmezett: 1000).
 .PD 1
 .
 .TP
-.B pnm\ \ \ \ 
+.B "pnm\ \ \ \ "
 Minden egyes képkockát egy PNM fájlba ír az aktuális könyvtárban.
 Minden fájl neve a képkocka sorszáma lesz vezetõ nullákkal.
 Támogatja a PPM, PGM és PGMYUV fájlokat mind nyers mind ASCII módban.
 Lásd még pnm(5), ppm(5) és pgm(5).
 .PD 0
 .RSs
-.IPs ppm\ \ 
+.IPs "ppm\ \ "
 PPM fájl írása (alapértelmezett).
-.IPs pgm\ \ 
+.IPs "pgm\ \ "
 PGM fájl írása.
 .IPs pgmyuv
 PGMYUV fájl írása.
 A PGMYUV olyan, mint a PGM, de tartalmazza az U és V plane-t is, a kép aljához fûzve.
-.IPs raw\ \ 
+.IPs "raw\ \ "
 PNM fájl írása nyers módban (alapértelmezett).
 .IPs ascii
 PNM fájl írása ASCII módban.
@@ -3657,7 +3657,7 @@ Nagyobb vagy egyenlõ mint 1 (alapértelmezett: 1000).
 .PD 1
 .
 .TP
-.B png\ \ \ \ 
+.B "png\ \ \ \ "
 Minden egyes képkockát PNG fájlba ír az aktuális könyvtárban.
 Minden fájl neve a képkocka sorszáma lesz vezetõ nullákkal.
 24bpp-s RGB és BGR formátumokat támogat.
@@ -3670,7 +3670,7 @@ Megadja a tömörítési szintet.
 .PD 1
 .
 .TP
-.B tga\ \ \ \ 
+.B "tga\ \ \ \ "
 Minden egyes képkockát Targa fájlba ír az aktuális könyvtárban.
 Minden fájl neve a képkocka sorszáma lesz vezetõ nullákkal.
 Ezen kimeneti videó vezérlõ célja, hogy legyen egy egyszerû, veszteségmentes
@@ -3792,7 +3792,7 @@ információ hibás vagy hiányzik a lejátszandó fájlban.
 Kikapcsolja az automatikus film képarány kompenzációt.
 .
 .TP
-.B \-flip \ 
+.B "\-flip \ "
 Tükrözi a képet vízszintesen.
 .
 .TP
@@ -3905,7 +3905,7 @@ Optimalizálás engedélyezése, ami nem felel meg a specifikációnak és esetlegesen
 hibát okozhat, mint például az egyszerûbb dekvantizáció, az alapértelmezett
 kvantálási mátrix feltételezett használata, YUV 4:2:0 feltételezése és még néhány
 ellenõrzés kihagyása a hibás bitfolyamok megtalálására.
-.IPs gray\ 
+.IPs "gray\ "
 Csak fekete-fehér dekódolás (egy kicsit gyorsabb, mint a színes)
 .IPs "idct=<0\-99> (lásd \-lavcopts)"
 A legjobb dekódolási minõségért használd ugyan azt az IDCT algoritmust a
@@ -4171,7 +4171,7 @@ renderelõ metódusok:
 .RE
 .PD 0
 .RSs
-.IPs dr2\ \ 
+.IPs "dr2\ \ "
 Bekapcsolja a 2-es direkt renderelést.
 .IPs nodr2
 Kikapcsolja a 2-es módú direkt renderelést.
@@ -4195,7 +4195,7 @@ Kép átméretezése <y> magasságúra (ha a szoftveres/\:hardveres méretezés használh
 Kikapcsolja a képarány számításokat.
 .
 .TP
-.B \-zoom\ \ 
+.B "\-zoom\ \ "
 A szoftveres méretezést engedélyezi, ha használható.
 Ez olyan kimeneti vezérlõkkel (mint pl. x11, fbdev) is engedélyezi a méretezést,
 melyekben nincs támogatás a hardveres méretezéshez, vagy az MPlayer letiltja a
@@ -4390,7 +4390,7 @@ csatornák el lesznek hagyva.
 .RSs
 .IPs <nch>
 kimeneti csatornák száma (1\-6)
-.IPs <nr>\ 
+.IPs "<nr>\ "
 útvonalak száma (1\-6)
 .IPs <honnan1:hova1:honnan2:hova2:honnan3:hova3:...>
 Számpárok 0 és 5 között, amik megadják az egyes csatornák irányítását.
@@ -4456,11 +4456,11 @@ Ez a szûrõ nem újrahívható és ezért egy audió folyamra csak egyszer
 engedélyezhetõ.
 .PD 0
 .RSs
-.IPs <v>\ \ 
+.IPs "<v>\ \ "
 A kívánt eltérés dB-ben a folyam összes csatornájára vonatkozóan,
 -200dB-tõl +60dB-ig, ahol a -200dB teljesen elnémítja a hangot,
 míg a +60dB 1000-szeres növelést jelent (alapértelmezett: 0).
-.IPs <sc>\ 
+.IPs "<sc>\ "
 Soft clipping be (1) vagy kikapcsolása (0).
 A Soft-clipping a hangot még egyenletesebbé teheti, ha nagyon nagy
 hangerõt használsz.
@@ -4494,7 +4494,7 @@ Egy példa arra, hogy hogyan lehet lemixelni egy hat csatornás fájlt két
 csatornára, a példa részben található a fájl vége felé.
 .PD 0
 .RSs
-.IPs <n>\ \ 
+.IPs "<n>\ \ "
 a kimeneti csatornák száma (1\-6)
 .IPs <Lij>
 A i. bemeneti csatorna mekkora része lesz átmixelve az j. kimeneti csatornára (0\-1).
@@ -4531,11 +4531,11 @@ Tiltsd le ezt a szûrõt ha DVD-t játszol le DOlby Digital 5.1-es
 hanggal, különben ez a szûrõ széttördeli a mélynyomó hangját.
 .PD 0
 .RSs
-.IPs <fc>\ 
+.IPs "<fc>\ "
 Vágási frekvencia Hz-ben a low-pass szûrõhöz (20Hz-300Hz) (alapértelmezett: 60Hz)
 A legjobb eredményhez próbáld meg a vágási frekvenciát a lehetõ legalacsonyabbra
 állítani. Ez növeli a sztereó és térhatású hangélményt.
-.IPs <ch>\ 
+.IPs "<ch>\ "
 Meghatározza a csatorna számot, amibe az al-csatorna audiót be kell tenni.
 A csatorna szám 0 és 5 között lehet (alapértelmezett: 5).
 Figyeld meg, hogy a csatornák száma automatikusan megnõ <ch>-ra,
@@ -4553,14 +4553,14 @@ kimeneti csatornán.
 .PD 1
 .
 .TP
-.B center\ 
+.B "center\ "
 Létrehoz egy középsõ csatornát az elülsõ csatornákból.
 Jelenleg gyenge minõségû, mivel nem implementálja a high-pass
 szûrõt a megfelelõ adat kinyeréshez, hanem inkább átlagolja és
 felezi a csatornákat.
 .PD 0
 .RSs
-.IPs <ch>\ 
+.IPs "<ch>\ "
 Meghatározza a csatorna számát, ahova a középsõ csatornát be kell illeszteni.
 A csatorna száma 0 és 5 közötti lehet (alapértelmezett: 5).
 Figyeld meg, hogy a csatornák száma automatikusan megnõ <ch>-ra,
@@ -4719,14 +4719,14 @@ Ez szükségtelenné teszi az 'analyseplugin' használatát a LADSPA SDK-bón.
 .PD 1
 .
 .TP
-.B comp\ \ \ 
+.B "comp\ \ \ "
 Tömörítõ/kicsomagoló szûrõ a mikrofon bemenethez.
 Megelõzi a mellékhatásokat nagyon hangos hangnál és növeli a hangerõt
 nagyon halk hang esetén.
 Ez a szûrõ még nincs tesztelve, lehet, hogy használhatatlan.
 .
 .TP
-.B gate\ \ \ 
+.B "gate\ \ \ "
 Zaj kapu szûrõ, hasonló a comp audió szûrõhöz.
 Ez a szûrõ nem tesztelt, lehet, hogy használhatatlan.
 .
@@ -4862,14 +4862,14 @@ Egy 50 pixel-es határt ad a kép aljához.
 .PD 1
 .IPs <x>,<y>
 az eredeti kép pozíciója a nagyított képen (alapértelmezett: center)
-.IPs <o>\ \ 
+.IPs "<o>\ \ "
 OSD/\:felirat renderelés
 .RSss
 0: kikapcsolva (alapértelmezett)
 .br
 1: bekapcsolva
 .REss
-.IPs <a>\ \ 
+.IPs "<a>\ \ "
 Felbontás helyett egy aránynak megfelelõen nagyít (alapértelmezett: 0).
 .sp 1
 .I PÉLDA:
@@ -4890,7 +4890,7 @@ legyen (alapértelmezett: 1).
 Fejtetõre állítja a képet.
 .
 .TP
-.B mirror\ 
+.B "mirror\ "
 Tükrözi a képet az Y tengelyre.
 .
 .TP
@@ -5066,18 +5066,18 @@ legyen <r>-rel (alapértelmezett: 1).
 .RE
 .
 .TP
-.B yuy2\ \ \ 
+.B "yuy2\ \ \ "
 Szoftveres YV12/\:I420/\:422P-bõl YUY2-be konvertálást kényszerít ki.
 Hasznos lassú YV12, de gyors YUY2 támogatással rendelkezõ videó kártyák/\:vezérlõk
 esetén.
 .
 .TP
-.B yvu9\ \ \ 
+.B "yvu9\ \ \ "
 Szoftveres YVU9-YV12 színtér konvertálást kényszerít ki.
 Idejétmúlt a szoftveres méretezõ miatt.
 .
 .TP
-.B yuvcsp\ 
+.B "yuvcsp\ "
 A YUV színértékeket a CCIR 601 tartományba szorítja valódi konverzió nélkül.
 .
 .TP
@@ -5085,7 +5085,7 @@ A YUV színértékeket a CCIR 601 tartományba szorítja valódi konverzió nélkül.
 RGB 24/32 <\-> BGR 24/32 színtér konvertálás.
 .PD 0
 .RSs
-.IPs swap\ 
+.IPs "swap\ "
 R <-> B cserét is végrehajt.
 .RE
 .PD 1
@@ -5243,7 +5243,7 @@ amit megadsz.
 alapértelmezett pp szûrõ kombináció (hb:a,vb:a,dr:a)
 .IPs fa/fast
 gyors pp szûrõ kombináció (h1:a,v1:a,dr:a)
-.IPs ac\ \ \ 
+.IPs "ac\ \ \ "
 jó minõségû pp szûrõ kombináció (ha:a:128:7,va:a,dr:a)
 .RE
 .RS
@@ -5273,7 +5273,7 @@ változtatásnál és átlagolja az eredményeket.
 .RSs
 .IPs <minõség>
 0\-6 (alapértelmezett: 3)
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Kvantálási paraméter kényszerítése (alapértelmezett: 0, a videó QP-jét használja).
 .IPs <mód>
 0: erõs korlát (alapértelmezett)
@@ -5296,7 +5296,7 @@ egyszerûsített csak intra 8x8 DCT-t használ.
 .RSs
 .IPs <minõség>
 0\-8 (alapértelmezett: 3)
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Kvantálási paraméter kényszerítése (alapértelmezett: 0, a videó QP-jének használata).
 .RE
 .
@@ -5306,7 +5306,7 @@ az egyszerû utófeldolgozó szûrõ gyorsabb változata
 .RSs
 .IPs <minõség>
 4\-5 (azonos az spp-vel; alapértelmezett: 4)
-.IPs <qp>\ 
+.IPs "<qp>\ "
 Kvantálási paraméterek kényszerítése (alapértelmezett: 0, a videó QP-jét használja).
 .IPs <-15\-32>
 Szûrõ erõssége, az alacsonyabb érték nagyobb részletességet jelent, de több mellékhatást is,
@@ -5342,7 +5342,7 @@ valamilyen egyenlet, pl. "2+2*sin(PI*qp)"
 .RE
 .
 .TP
-.B test\ \ \ 
+.B "test\ \ \ "
 Különbözõ teszt minták generálása.
 .
 .TP
@@ -5367,7 +5367,7 @@ detektálás a magasság alapján)
 .RE
 .
 .TP
-.B fame\ \ \ 
+.B "fame\ \ \ "
 Gyors szoftveres YV12-MPEG-1 konverzió libfame-mel DVB/\:DXR3/IVTV-hez.
 .
 .TP
@@ -5509,7 +5509,7 @@ lemintázás gyenge minõséget ad vagy nem használható.
 Használható mint primitív csak luma deinterlacer nagyon alacsony CPU használattal.
 .PD 0
 .RSs
-.IPs <f>\ \ 
+.IPs "<f>\ \ "
 Alapértelmezésben a halfpack a lemintázásnál sorpárokat átlagol.
 Bármilyen 0-tól és 1-tõl különbözõ érték az alapértelmezett (átlagoló)
 mûködést váltja ki.
@@ -5641,9 +5641,9 @@ küszöb (alapértelmezett: 10)
 .B unsharp[=l|cWxH:mennyiség[:l|cWxH:mennyiség]]
 homályosító maszk / gauss elmosás
 .RSs
-.IPs l\ \ \ \ 
+.IPs "l\ \ \ \ "
 Az effektus érvényesítése a luma komponensen.
-.IPs c\ \ \ \ 
+.IPs "c\ \ \ \ "
 Az effektus érvényesítése a chroma komponensen.
 .IPs <width>x<height>
 a mátrix szélessége és magassága, páratlan számú mintkét irányban
@@ -5659,7 +5659,7 @@ A képhez hozzáadott élesség/\:elmosás relatív értéke
 .RE
 .
 .TP
-.B swapuv\ 
+.B "swapuv\ "
 U & V sík felcserélése.
 .
 .TP
@@ -5723,7 +5723,7 @@ filmdint jobbak a legtöbb esetben.
 A következõ argumentumokkal (lásd a szintaktikát feljebb) a detc mûködése
 befolyásolható:
 .RSs
-.IPs <dr>\ 
+.IPs "<dr>\ "
 Beállítja a képkocka eldobás módját.
 .RSss
 0: Ne dobjon el képkockát a fix kimeneti frameráta megtartásához (alapértelmezett).
@@ -5736,14 +5736,14 @@ Beállítja a képkocka eldobás módját.
 .I MEGJEGYZÉS:
 A MEncoder-rel használd az 1-es vagy 2-es módot.
 .REss
-.IPs <am>\ 
+.IPs "<am>\ "
 Analízis mód.
 .RSss
 0: Fix minta, megadott <fr> kezdeti képszámmal.
 .br
 1: agresszív keresés a telecine minta után (alapértelmezett)
 .REss
-.IPs <fr>\ 
+.IPs "<fr>\ "
 A sorban kezdõ képkocka beállítása.
 0\-2 a tiszta progresszív kockák; 3 és 4 a két átlapolt kocka.
 Az alapértelmezett -1 azt jelenti, hogy 'nincs telecine sorrendben'.
@@ -6107,7 +6107,7 @@ yadif=1/3 vagy azonos kapcsolóval együtt kell használni.
 3: nagyon lassú, mint a 2 plusz többszörös referencia kockák
 .IPs <paritás>
 0 vagy 1 válaszja ki a használandó mezõt (figyelj, még nincs automatikus detektálás!).
-.IPs <qp>\ 
+.IPs "<qp>\ "
 A nagyobb értékek simább mozgásvektort eredményeznek,
 de kevésbé optimális egyéni vektort adnak.
 .RE
@@ -6132,7 +6132,7 @@ shape adaptív blur
 .RSs
 .IPs <hatáskör>
 blur szûrõ erõssége (~0.1\-4.0) (lassabb ha nagyobb)
-.IPs <pf>\ 
+.IPs "<pf>\ "
 elõszûrõ erõssége (~0.1\-2.0)
 .IPs <colorDiff>
 maximális eltérés a pixel-ek között, amit még figyelembe kell venni (~0.1\-100.0)
@@ -6160,17 +6160,17 @@ Azon filmek perspektívájának javítása, melyeket nem a képernyõre merõlegesen vet
 .RSs
 .IPs <x0>,<y0>,...
 a bal felsõ, jobb felsõ, bal alsó, jobb alsó sarkok
-.IPs <t>\ \ 
+.IPs "<t>\ \ "
 lineáris (0) vagy köbös resampling (1)
 .RE
 .PD 1
 .
 .TP
-.B 2xsai\ \ 
+.B "2xsai\ \ "
 A kép méretezése és finomítása a 2x méretezõ és interpoláló algoritmussal.
 .
 .TP
-.B 1bpp\ \ \ 
+.B "1bpp\ \ \ "
 1bpp bitkép YUV/\:BGR 8/\:15/\:16/\:32 konvertálása
 .
 .TP
@@ -6222,9 +6222,9 @@ Terület törlése.
 .IPs OPAQUE
 Az alfa átlátszóság kikapcsolása.
 "ALPHA 0 0 0 0 0" kiküldésével engedélyezhetõ újra.
-.IPs HIDE\ 
+.IPs "HIDE\ "
 Bittérkép elrejtése.
-.IPs SHOW\ 
+.IPs "SHOW\ "
 Bittérkép megjelenítése.
 .RE
 .PD 1
@@ -6384,7 +6384,7 @@ színteret, így nyugodtan beleírható a konfigurációs fájlba.
 .RE
 .
 .TP
-.B ass\ \ \ \ 
+.B "ass\ \ \ \ "
 Az SSA/ASS felirat renderelõt a videó szûrõ lánc egy meghatározott pontjára teszi.
 Csak a \-ass kapcsolóval együtt hasznos.
 .RE
@@ -6508,7 +6508,7 @@ Megadja az eredmény AVI fájl infó fejlécét.
 .sp 1
 A rendelkezésre álló opciók:
 .RSs
-.IPs help\ 
+.IPs "help\ "
 Megmutatja ezt a leírást.
 .IPs name=<érték>
 a munka címe
@@ -6665,7 +6665,7 @@ nuv, xvfw, faac, x264enc, mpeg, lavf.
 s.SS lame (\-lameopts)
 .
 .TP
-.B help\ \ \ 
+.B "help\ \ \ "
 segítség kiírása
 .
 .TP
@@ -6687,11 +6687,11 @@ mtrh
 .PD 1
 .
 .TP
-.B abr\ \ \ \ 
+.B "abr\ \ \ \ "
 átlagos bitráta
 .
 .TP
-.B cbr\ \ \ \ 
+.B "cbr\ \ \ \ "
 konstans bitráta
 A CBR módú kódolást kényszeríti a késõbbi ABR preset módokra is.
 .
@@ -6745,7 +6745,7 @@ beállítás
 .PD 1
 .
 .TP
-.B fast\ \ \ 
+.B "fast\ \ \ "
 Az elkövetkezõ VBR preset módokban gyorsabb kódolásra kapcsol.
 Az eredmény kicsit rosszabb minõség és nagyobb bitráta lesz.
 .
@@ -6767,7 +6767,7 @@ hagyja az érték automatikus megválasztását.
 .B preset=<érték>
 elõre beállított értékek
 .RSs
-.IPs help\ 
+.IPs "help\ "
 Az elõre beállított értékekhez ad további opciókat és információt.
 .IPs medium
 VBR kódolás, tûrhetõ minõség, 150\-180 kbps bitráta tartomány
@@ -6866,7 +6866,7 @@ LTP (hihetetlenül lassú)
 MPEG verzió (alapértelmezett: 4)
 .
 .TP
-.B tns\ \ \ \ 
+.B "tns\ \ \ \ "
 Ideiglenes zajszûrés bekapcsolása.
 .
 .TP
@@ -6874,7 +6874,7 @@ Ideiglenes zajszûrés bekapcsolása.
 levágási frekvencia (alapértelmezett: mintavételi_ráta/2)
 .
 .TP
-.B raw\ \ \ \ 
+.B "raw\ \ \ \ "
 A bitfolyamot nyers payload-ként tárolja extra adatként a konténer fejlécben
 (alapértelmezett: 0, megfelel az ADTS-nek).
 Ne állítsd be ezt a flag-et, ha nincs kifejezetten szükség rá vagy késõbb
@@ -6900,15 +6900,15 @@ Nézd meg a forrást a részletekért.
 audió codec (alapértelmezett: mp2)
 .PD 0
 .RSs
-.IPs mp2\ \ 
+.IPs "mp2\ \ "
 MPEG Layer 2
-.IPs mp3\ \ 
+.IPs "mp3\ \ "
 MPEG Layer 3
-.IPs ac3\ \ 
+.IPs "ac3\ \ "
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4 bit mintánként, 4:1-es tömörítés)
-.IPs sonic\ 
+.IPs "sonic\ "
 Kísérleti veszteséges/veszteség mentes codec
 .RE
 .PD 1
@@ -6945,9 +6945,9 @@ A megadott codec-et alkalmazza (alapértelmezett: mpeg4).
 Motion JPEG
 .IPs ljpeg
 Veszteségmentes JPEG
-.IPs h261\ 
+.IPs "h261\ "
 H.261
-.IPs h263\ 
+.IPs "h263\ "
 H.263
 .IPs h263p
 H.263+
@@ -6957,11 +6957,11 @@ MPEG-4 (DivX 4/5)
 DivX 3
 .IPs msmpeg4v2
 MS MPEG4v2
-.IPs wmv1\ 
+.IPs "wmv1\ "
 Windows Media Video, 1-es verzió (WMV7)
-.IPs wmv2\ 
+.IPs "wmv2\ "
 Windows Media Video, 2-es verzió (WMV8)
-.IPs rv10\ 
+.IPs "rv10\ "
 egy régi RealVideo codec
 .IPs mpeg1video
 MPEG-1 videó
@@ -6971,17 +6971,17 @@ MPEG-2 videó
 HuffYUV
 .IPs ffvhuff (lásd még: vstrict)
 nem szabványos 20%-kal kisebb HuffYUV YV12 használattal
-.IPs asv1\ 
+.IPs "asv1\ "
 ASUS Video v1
-.IPs asv2\ 
+.IPs "asv2\ "
 ASUS Video v2
 .IPs "ffv1 (lásd még: vstrict)"
 FFmpeg veszteségmentes videó codec-je
-.IPs flv\ \ 
+.IPs "flv\ \ "
 Flash videókban használt Sorenson H.263
 .IPs dvvideo
 Sony Digital Video
-.IPs svq1\ 
+.IPs "svq1\ "
 Apple Sorenson Video 1
 .IPs "snow (lásd még: vstrict)"
 FFmpeg kísérleti wavelet-alapú codec-je
@@ -7106,20 +7106,20 @@ MB mód kiválasztása, ami a legjobb aránytorzítással rendelkezik.
 .PD 1
 .
 .TP
-.B vhq\ \ \ \ 
+.B "vhq\ \ \ \ "
 Ugyan az, mint az mbd=1, csak kompatibilítási okokból maradt meg.
 .
 .TP
-.B v4mv\ \ \ 
+.B "v4mv\ \ \ "
 4 mozgásvektort engedélyez makroblokkonként (kicsit jobb minõség).
 Jobb eredményt ad, ha mbd>0-val használod.
 .
 .TP
-.B obmc\ \ \ 
+.B "obmc\ \ \ "
 átlapolt blokk mozgás kompenzáció (H.263+)
 .
 .TP
-.B loop\ \ \ 
+.B "loop\ \ \ "
 loop szûrõ (H.263+)
 figyelj, ez hibás
 .
@@ -7424,9 +7424,9 @@ A látható minõség valahol ezen két szélsõséges eset között lesz optimális.
 fõ ratecontrol egyenlet (1/2. lépés)
 .RE
 .RSs
-.IPs 1\ \ \ \ 
+.IPs "1\ \ \ \ "
 konstans bitráta
-.IPs tex\ \ 
+.IPs "tex\ \ "
 konstans minõség
 .IPs 1+(tex/\:avgTex-1)*qComp
 körülbelül a régi ratecontrol kódjának megfelelõ egyenlet
@@ -7445,7 +7445,7 @@ infix operátorok:
 változók:
 .RE
 .RSs
-.IPs tex\ \ 
+.IPs "tex\ \ "
 textúra komplexitása
 .IPs iTex,pTex
 intra, nem intra textúra komplexitása
@@ -7459,13 +7459,13 @@ intra textúra komplexitása P kockákban
 nem-intra textúra komplexitása P kockákban
 .IPs avgBPTex
 nem-intra textúra komplexitása B kockákban
-.IPs mv\ \ \ 
+.IPs "mv\ \ \ "
 mozgásvektorokhoz használt bitek száma
 .IPs fCode
 log2 scale esetén a mozgásvektorok maximális hossza
 .IPs iCount
 intra makroblokkok száma / makroblokkok száma
-.IPs var\ \ 
+.IPs "var\ \ "
 térbeli komplexitás
 .IPs mcVar
 idõbeli komplexitás
@@ -7473,7 +7473,7 @@ idõbeli komplexitás
 qcomp a parancssorból
 .IPs "isI, isP, isB"
 1 ha a kép típusa I/P/B különben 0.
-.IPs Pi,E\ 
+.IPs "Pi,E\ "
 Lásd a kedvenc matekkönyvedben.
 .RE
 .PP
@@ -7573,7 +7573,7 @@ lejátszhatóak lesznek a jövõbeli MPlayer verziókkal (snow, ffvhuff, ffv1).
 .PD 1
 .
 .TP
-.B vdpart\ 
+.B "vdpart\ "
 Adat partícionálás.
 Minden videó csomaghoz 2 bájtot ad, növeli a hibatûrést a megbízhatatlan
 csatornákon történõ átvitelkor (pl.\& stream-elés Interneten).
@@ -7602,7 +7602,7 @@ nélkül a hiba egyformán rontja az AC/\:DC/\:MV-t.
 Videó csomag mérete, növeli a hibatûrést.
 .PD 0
 .RSs
-.IPs 0\ \ \ \ 
+.IPs "0\ \ \ \ "
 letiltva (alapértelmezett)
 .IPs 100\-1000
 jó választás
@@ -7610,11 +7610,11 @@ jó választás
 .PD 1
 .
 .TP
-.B ss\ \ \ \ \ 
+.B "ss\ \ \ \ \ "
 darabolt, struktúrált mód H.263+-hoz
 .
 .TP
-.B gray\ \ \ 
+.B "gray\ \ \ "
 csak szürkeárnyalatos kódolás (gyorsabb)
 .
 .TP
@@ -7687,7 +7687,7 @@ A nagy értékek egyes monitorokon jól néznek ki, míg más monitorokon
 szörnyûen.
 .PD 0
 .RSs
-.IPs 0.0\ \ 
+.IPs "0.0\ \ "
 letiltva (alapértelmezett)
 .IPs 0.0\-0.3
 ésszerû értékek
@@ -7711,7 +7711,7 @@ A nagy értékek egyes monitorokon jól néznek ki, míg más monitorokon, TV-n,
 TFT-n szörnyûen.
 .PD 0
 .RSs
-.IPs 0.0\ \ 
+.IPs "0.0\ \ "
 letiltva (alapértelmezett)
 .IPs 0.0\-0.3
 ésszerû értékek
@@ -7746,7 +7746,7 @@ Vágj le teljesen minden fekete határt, mivel azok csökkentik a makroblokkok
 minõségét (ez scplx_mask nélkül is érvényes).
 .PD 0
 .RSs
-.IPs 0.0\ \ 
+.IPs "0.0\ \ "
 letiltva (alapértelmezett)
 .IPs 0.0\-0.5
 ésszerû értékek
@@ -7777,7 +7777,7 @@ szélesség/magasságánál kisebb, mint 1/5-del van távolabb a kocka határától,
 mivel ezek vizuálisan már kevésbé fontosak.
 .
 .TP
-.B naq\ \ \ \ 
+.B "naq\ \ \ \ "
 Normalizált adaptív kvantálás (kísérleti).
 Ha adaptív kvantálást használsz (*_mask), az átlagos MB-onkénti kvantálás
 nem biztos, hogy eléri a kívánt kocka-szintû kvantálást.
@@ -7785,19 +7785,19 @@ A naq megpróbálja beállítani a MB-onkénti kvantálókat úgy, hogy a
 megfelelõ átlag megmaradjon.
 .
 .TP
-.B ildct\ \ 
+.B "ildct\ \ "
 Átlapolt DCT használata.
 .
 .TP
-.B ilme\ \ \ 
+.B "ilme\ \ \ "
 Átlapolt mozgás becslés (kölcsönösen kizárják egymást a qpel-lel).
 .
 .TP
-.B alt\ \ \ \ 
+.B "alt\ \ \ \ "
 Alternatív scantable használata.
 .
 .TP
-.B top=<-1\-1>\ \ \ 
+.B "top=<-1\-1>\ \ \ "
 .PD 0
 .RSs
 .IPs -1
@@ -7813,11 +7813,11 @@ felsõ mezõ elõször
 .B format=<érték>
 .PD 0
 .RSs
-.IPs YV12\ 
+.IPs "YV12\ "
 alapértelmezett
-.IPs 444P\ 
+.IPs "444P\ "
 ffv1-hez
-.IPs 422P\ 
+.IPs "422P\ "
 HuffYUV-hoz, veszteségmentes JPEG-hez és ffv1-hez
 .IPs 411P,YVU9
 veszteségmentes JPEG-hez és ffv1-hez
@@ -7827,7 +7827,7 @@ veszteségmentes JPEG-hez és ffv1-hez
 .PD 1
 .
 .TP
-.B pred\ \ \ 
+.B "pred\ \ \ "
 (HuffYUV-hoz)
 .PD 0
 .RSs
@@ -7841,7 +7841,7 @@ közép becslés
 .PD 1
 .
 .TP
-.B pred\ \ \ 
+.B "pred\ \ \ "
 (veszteségmentes JPEG-hez)
 .PD 0
 .RSs
@@ -7859,7 +7859,7 @@ közép becslés
 .PD 1
 .
 .TP
-.B coder\ \ 
+.B "coder\ \ "
 (ffv1-hez)
 .PD 0
 .RSs
@@ -7895,7 +7895,7 @@ adaptív Huffman táblák
 .PD 1
 .
 .TP
-.B qpel\ \ \ 
+.B "qpel\ \ \ "
 Quarter pel mozgás kompenzáció (kölcsönösen kizárják egymást az ilme-vel).
 .br
 .I TANÁCS:
@@ -7933,7 +7933,7 @@ négyzetes különbségek zajtartó összege
 5/3 wavelet, csak a snow-ban használják
 .IPs "12 (W97)"
 9/7 wavelet, csak a snow-ban használják
-.IPs +256\ 
+.IPs "+256\ "
 A színtelítettséget is használja, jelenleg nem mûködik (helyesen) a B-kockákkal.
 .RE
 .PD 1
@@ -8015,7 +8015,7 @@ kissé különleges: lassabb lehet és/vagy jobb, mint a dia=-2.
 .RE
 .
 .TP
-.B trell\ \ 
+.B "trell\ \ "
 Rácsos keresésû kvantálás.
 Ez megkeresi az optimális kódolást minden egyes 8x8-as blokkhoz.
 A rácsos keresésû kvantálás elég egyszerû optimális kvantálás a
@@ -8026,7 +8026,7 @@ Egyszerûen  keres egy blokkot a minimális hibával és lambda*bit-tel.
 .RSs
 .IPs lambda
 kvantálási paramétertõl (quantization parameter, QP) függõ konstans
-.IPs bits\ 
+.IPs "bits\ "
 a blokk elkódolásához szükséges bitek száma
 .IPs error
 a kvantálás négyzetes hibaösszege
@@ -8034,13 +8034,13 @@ a kvantálás négyzetes hibaösszege
 .PD 1
 .
 .TP
-.B cbp\ \ \ \ 
+.B "cbp\ \ \ \ "
 Ráta torzított optimálisan kódolt blokkminta.
 Megkeresi azt a kódolt blokkmintát, ami minimalizálja a torzítást + lambda*rate-t.
 Ez csak a rácsos kvantálással együtt használható.
 .
 .TP
-.B mv0\ \ \ \ 
+.B "mv0\ \ \ \ "
 Megpróbál elkódolni minden MB-t a MV=<0,0>-lal és kiválasztja a legjobbat.
 Nincs hatása, ha mbd=0.
 .
@@ -8105,7 +8105,7 @@ a figyelembe vett referencia képkockák száma mozgás kompenzációnál
 (csak Snow) (alapértelmezett: 1)
 .
 .TP
-.B psnr\ \ \ 
+.B "psnr\ \ \ "
 kiírja a PSNR-t (peak signal to noise ratio, csúcsjel aránya a zajhoz) a teljes
 videóra a kódolás után és eltárolja a kockánkénti PSNR-t egy fájlba, melynek
 neve 'psnr_hhmmss.log' alakú.
@@ -8116,7 +8116,7 @@ A visszatérési értékek dB-ben (decibel) értendõek, a nagyobb a jobb.
 MPEG kvanálók használata H.263 helyett.
 .
 .TP
-.B aic\ \ \ \ 
+.B "aic\ \ \ \ "
 Engedélyezi az AC elõrejelzést MPEG-4 vagy fejlett intra elõrejelzést H.263+ esetén.
 Ez kicsit javít a minõségen (0.02 dB PSNR körül) és nagyon kicsit csökkenti
 a kódolást (1% körül).
@@ -8125,11 +8125,11 @@ a kódolást (1% körül).
 A vqmin-nek 8-nak vagy nagyobbnak kell lennie a H.263+ AIC-hez.
 .
 .TP
-.B aiv\ \ \ \ 
+.B "aiv\ \ \ \ "
 alternatív inter vlc H.263+-hoz
 .
 .TP
-.B umv\ \ \ \ 
+.B "umv\ \ \ \ "
 határtalan MV-k (csak H.263+)
 Önkényesen nagy MV-kkel enged kódolni.
 .
@@ -8204,7 +8204,7 @@ kísérleti kvantálás moduláló
 kísérleti kvantálás moduláló
 .
 .TP
-.B dc\ \ \ \ \ 
+.B "dc\ \ \ \ \ "
 intra DC pontosság bitekben (alapértelmezett: 8).
 Ha megadod a vcodec=mpeg2video-t, az értéke 8, 9, 10 vagy 11 lehet.
 .
@@ -8256,11 +8256,11 @@ színességi küszöb (alapértelmezett: 1)
 fényerõsség küszöb (alapértelmezett: 1)
 .
 .TP
-.B lzo\ \ \ \ 
+.B "lzo\ \ \ \ "
 LZO tömörítés engedélyezése (alapértelmezett).
 .
 .TP
-.B nolzo\ \ 
+.B "nolzo\ \ "
 LZO tömörítés letiltása.
 .
 .TP
@@ -8268,11 +8268,11 @@ LZO tömörítés letiltása.
 minõségi szint (alapértelmezett: 255)
 .
 .TP
-.B raw \ \ \ 
+.B "raw \ \ \ "
 RTJPEG kódolás letiltása.
 .
 .TP
-.B rtjpeg\ 
+.B "rtjpeg\ "
 RTJPEG kódolás engedélyezése (alapértelmezett).
 .
 .
@@ -8352,7 +8352,7 @@ Ha át kell méretezned a videót, egy átlapolást figyelmbe vevõ méretezõt
 kell használnod, amit a -vf scale=<width>:<height>:1 opcióval aktiválhatsz.
 .
 .TP
-.B 4mv\ \ \ \ 
+.B "4mv\ \ \ \ "
 4 mozgás vektor használata makroblokkonként.
 Jobb tömörítést ad, de lelassítja a kódolást.
 .br
@@ -8457,7 +8457,7 @@ kódolást, csak megakadályozza, hogy a színtelítettségi adatok kiíródjanak
 a kódolás utolsó szakaszában.
 .
 .TP
-.B debug\ \ 
+.B "debug\ \ "
 Kockánkénti statisztikát ment el a ./xvid.dbg fájlba. (Ez nem a két lépéses
 control fájl.)
 .RE
@@ -8732,25 +8732,25 @@ kell lenniük az asztali lejátszókkal is.
 .RSs
 .IPs unrestricted
 nincs korlátozás (alapértelmezett)
-.IPs sp0\ \ 
+.IPs "sp0\ \ "
 egyszerû profil a 0. szinten
-.IPs sp1\ \ 
+.IPs "sp1\ \ "
 egyszerû profil az 1. szinten
-.IPs sp2\ \ 
+.IPs "sp2\ \ "
 egyszerû profil a 2. szinten
-.IPs sp3\ \ 
+.IPs "sp3\ \ "
 egyszerû profil a 3. szinten
-.IPs asp0\ 
+.IPs "asp0\ "
 haladó egyszerû profil a 0. szinten
-.IPs asp1\ 
+.IPs "asp1\ "
 haladó egyszerû profil az 1. szinten
-.IPs asp2\ 
+.IPs "asp2\ "
 haladó egyszerû profil a 2. szinten
-.IPs asp3\ 
+.IPs "asp3\ "
 haladó egyszerû profil a 3. szinten
-.IPs asp4\ 
+.IPs "asp4\ "
 haladó egyszerû profil a 4. szinten
-.IPs asp5\ 
+.IPs "asp5\ "
 haladó egyszerû profil az 5. szinten
 .IPs dxnhandheld
 DXN handheld profil
@@ -8797,7 +8797,7 @@ mint az elõzõ
 mint az elõzõ
 .IPs ntsc169
 mint az elõzõ (Ne felejtsd el megadni a pontos arányt.)
-.IPs ext\ \ 
+.IPs "ext\ \ "
 Megengedi a felhasználónak, hogy saját pixel méretarányt adjon meg a par_widthé
 és par_height segítségével.
 .RE
@@ -8830,7 +8830,7 @@ figyelembe véve a beállításokat (vágás/\:nagytás/\:méretezés/\:stb.), melyek
 a szûrõláncban történtek.
 .
 .TP
-.B psnr\ \ \ 
+.B "psnr\ \ \ "
 Kiírja a PSNR-t (peak signal to noise ratio) a teljes videóra a kódolás után
 és eltárolja a kockánkénti PSNR-t egy fájlba 'psnr_hhmmss.log' formátumú
 fájlnévvel az aktuális könyvtárba.
@@ -9358,9 +9358,9 @@ Vagy egy elõre definiált saját kvantálást használ vagy betölt egy JM formátumú
 mátrix fájlt.
 .PD 0
 .RSs
-.IPs flat\ 
+.IPs "flat\ "
 Elõredefiniált sík 16 mátrix használata (alapértelmezett).
-.IPs jvt\ \ 
+.IPs "jvt\ \ "
 Elõredefiniált JVT mátrix használata.
 .IPs <fájlnév>
 A megadott JM formátumú mátrix fájl használata.
@@ -9463,7 +9463,7 @@ Minden blokk típus a megjelenített filmben színezve lesz az alábbiak szerint:
 .RSs
 .IPs vörös/rózsaszín
 intra blokk
-.IPs kék\ 
+.IPs "kék\ "
 inter blokk
 .IPs zöld
 kihagyott blokk
@@ -9521,7 +9521,7 @@ Névleges muxrate kbit/s-ben, mely a csomag fejlécében lesz felhasználva
 Akkor lesz frissítve, ha szükséges, 'format=mpeg1' vagy 'mpeg2' esetén.
 .
 .TP
-.B tsaf\ \ \ 
+.B "tsaf\ \ \ "
 Beállítja az idõbélyeget minden képkockán, ha lehetséges.
 .
 .TP
@@ -9538,7 +9538,7 @@ Initial video delay time, in milliseconds (alapértelmezett: 0),
 use it if you want to delay video with respect to audio.
 .
 .TP
-.B drop\ \ \ 
+.B "drop\ \ \ "
 Ha az init_adelay opcióval együtt használod, a muxer eldobja az
 audiónak azt a részét, ami megelõzi a videót.
 .
@@ -9597,29 +9597,29 @@ Felülírja, hogy milyen konténer formátumba kell mux-olni
 (alapértelmezett: automatikus detektálás a kimeneti fájl kiterjesztése alapján).
 .PD 0
 .RSs
-.IPs mpg\ \ 
+.IPs "mpg\ \ "
 MPEG-1 rendszerek és MPEG-2 PS
-.IPs asf\ \ 
+.IPs "asf\ \ "
 Advanced Streaming Format
-.IPs avi\ \ 
+.IPs "avi\ \ "
 Audio Video Interleave fájl
-.IPs wav\ \ 
+.IPs "wav\ \ "
 Waveform Audio
-.IPs swf\ \ 
+.IPs "swf\ \ "
 Macromedia Flash
-.IPs flv\ \ 
+.IPs "flv\ \ "
 Macromedia Flash videó fájlok
-.IPs rm\ \ \ 
+.IPs "rm\ \ \ "
 RealAudio és RealVideo
-.IPs au\ \ \ 
+.IPs "au\ \ \ "
 SUN AU format
-.IPs nut\ \ 
+.IPs "nut\ \ "
 NUT nyílt konténer formátum (kísérleti)
-.IPs mov\ \ 
+.IPs "mov\ \ "
 QuickTime
-.IPs mp4\ \ 
+.IPs "mp4\ \ "
 MPEG-4 formátum
-.IPs dv\ \ \ 
+.IPs "dv\ \ \ "
 Sony Digital Video konténer
 .RE
 .PD 1
@@ -9701,12 +9701,12 @@ használni fog a titkosított lemezeknél.
 Lehet title, key vagy disc.
 .PD 0
 .RSs
-.IPs key\ \ 
+.IPs "key\ \ "
 az alapértelmezett módszer.
 A libdvdcss kiszámított lejátszó kulcsok halmazát fogja használni a lemez
 kulcsának megállapításához.
 Ez sikertelen lehet, ha a meghajtó nem ismeri fel a lejátszó kulcsokat.
-.IPs disc\ 
+.IPs "disc\ "
 egy módszer, amire visszalép ha a key sikertelen.
 Lejátszó kulcsok helyett a libdvdcss egy brute force algoritmussal feltöri
 a lemez kulcsát.
