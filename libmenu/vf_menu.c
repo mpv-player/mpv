@@ -101,7 +101,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
   case MP_CMD_MENU : {  // Convert txt cmd from the users into libmenu stuff
     char* arg = cmd->args[0].v.s;
     
-    if(!priv->current->show)
+    if(!priv->current->show && !(strcmp(arg,"hide") == 0) )
       priv->current->show = 1;
     else if(strcmp(arg,"up") == 0)
       menu_read_cmd(priv->current,MENU_CMD_UP);
@@ -115,7 +115,7 @@ static int cmd_filter(mp_cmd_t* cmd, int paused, struct vf_priv_s * priv) {
       menu_read_cmd(priv->current,MENU_CMD_OK);
     else if(strcmp(arg,"cancel") == 0)
       menu_read_cmd(priv->current,MENU_CMD_CANCEL);
-    else if(strcmp(arg,"hide") == 0)
+    else if(strcmp(arg,"hide") == 0 || strcmp(arg,"toggle") == 0)
       priv->current->show = 0;
     else
       mp_msg(MSGT_GLOBAL,MSGL_WARN,MSGTR_LIBMENU_UnknownMenuCommand,arg);
