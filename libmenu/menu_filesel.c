@@ -41,6 +41,7 @@ struct menu_priv_s {
   char* dir_action;
   int auto_close;
   char** actions;
+  char* filter; 
 };
 
 static struct menu_priv_s cfg_dflt = {
@@ -52,6 +53,7 @@ static struct menu_priv_s cfg_dflt = {
   "loadfile '%p'",
   NULL,
   0,
+  NULL,
   NULL
 };
 
@@ -65,6 +67,7 @@ static m_option_t cfg_fields[] = {
   { "dir-action", ST_OFF(dir_action),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "auto-close", ST_OFF(auto_close), CONF_TYPE_FLAG, 0, 0, 1, NULL },
   { "actions", ST_OFF(actions), CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+  { "filter", ST_OFF(filter), CONF_TYPE_STRING, 0, 0, 0, NULL},
   { NULL, NULL, NULL, 0,0,0,NULL }
 };
 
@@ -126,6 +129,51 @@ static int compare(char **a, char **b){
   }
 }
 
+static char **get_extensions(menu_t *menu){
+  char **extensions, ext[32];
+  FILE *fp;
+  int n = 1;
+
+  if (!mpriv->filter)
+    return NULL;
+
+  fp = fopen(mpriv->filter, "r");
+  if(!fp)
+    return NULL;
+
+  extensions = (char **) malloc(sizeof(*extensions));
+  *extensions = NULL;
+
+  while(fgets(ext,sizeof(ext),fp)) {
+    char **l, *e;
+    int s = strlen (ext);
+
+    if(ext[s-1] == '\n') {
+      ext[s-1] = '\0';
+      s--;
+    }
+    e = (char *) malloc(s+1);
+    extensions = (char **) realloc(extensions, ++n * sizeof(*extensions));
+    extensions = (char **) realloc(extensions, ++n * sizeof(*extensions));
+    strcpy (e, ext);
+    for (l=extensions; *l; l++);
+    *l++ = e;
+    *l = NULL;
+  }
+
+  fclose (fp);
+  return extensions;
+}
+
+static void free_extensions(char **extensions){
+  if (extensions) {
+    char **l = extensions;
+    while (*l)
+      free (*l++);
+    free (extensions);
+  }
+}
+
 static int open_dir(menu_t* menu,char* args) {
   char **namelist, **tp;
   struct dirent *dp;
@@ -134,6 +182,8 @@ static int open_dir(menu_t* menu,char* args) {
   char* p = NULL;
   list_entry_t* e;
   DIR* dirp;
+  extern int file_filter;
+  char **extensions, **elem, *ext;
 
   menu_list_init(menu);
 
@@ -152,11 +202,25 @@ static int open_dir(menu_t* menu,char* args) {
   }
 
   namelist = (char **) malloc(sizeof(char *));
+  extensions = get_extensions(menu);
 
   n=0;
   while ((dp = readdir(dirp)) != NULL) {
     if(dp->d_name[0] == '.' && strcmp(dp->d_name,"..") != 0)
       continue;
+    mylstat(args,dp->d_name,&st);
+    if (file_filter && extensions && !S_ISDIR(st.st_mode)) {
+      if((ext = strrchr(dp->d_name,'.')) == NULL)
+        continue;
+      ext++;
+      elem = extensions;
+      do {
+        if (!strcasecmp(ext, *elem))
+          break;
+      } while (*++elem);
+      if (*elem == NULL)
+        continue;
+    }
     if(n%20 == 0){ // Get some more mem
       if((tp = (char **) realloc(namelist, (n+20) * sizeof (char *)))
          == NULL) {
@@ -175,13 +239,13 @@ static int open_dir(menu_t* menu,char* args) {
     }
      
     strcpy(namelist[n], dp->d_name);
-    mylstat(args,namelist[n],&st); 
     if(S_ISDIR(st.st_mode))
       strcat(namelist[n], "/");
     n++;
   }
 
 bailout:
+  free_extensions (extensions);
   closedir(dirp);
 
   qsort(namelist, n, sizeof(char *), (kill_warn)compare);

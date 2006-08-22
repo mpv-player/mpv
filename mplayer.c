@@ -279,6 +279,7 @@ char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 char* filename=NULL; //"MI2-Trailer.avi";
 int forced_subs_only=0;
+int file_filter=1;
 
 // cache2:
        int stream_cache_size=-1;
@@ -4450,6 +4451,10 @@ if(step_sec>0) {
       cmd->pausing = 1;
       brk_cmd = 1;
     } break;
+    case MP_CMD_FILE_FILTER : {
+      file_filter = cmd->args[0].v.i;
+      break;
+    }
     case MP_CMD_QUIT : {
       exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
     }
