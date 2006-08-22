@@ -183,7 +183,6 @@ PARTS += libfame
 endif
 ifeq ($(DVDKIT2),yes)
 PARTS += libmpdvdkit2
-else
 endif
 ifeq ($(GUI),yes)
 PARTS += Gui
@@ -358,8 +357,6 @@ ifeq ($(LIBMENU),yes)
 MPLAYER_DEP += libmenu/libmenu.a
 MENU_LIBS = libmenu/libmenu.a
 PARTS += libmenu
-else
-MENU_LIBS =
 endif
 
 MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
