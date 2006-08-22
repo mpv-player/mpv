@@ -26,7 +26,7 @@ $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
 
 test:   test.c $(LIBNAME)
-	$(CC) test.c $(CFLAGS) -o test ./libDMO_Filter.a ../libloader.a $(ARCH_LIBS) -lstdc++
+	$(CC) test.c $(CFLAGS) -o test ./libDMO_Filter.a ../libloader.a -lstdc++
 
 all:	$(LIBNAME)
 
