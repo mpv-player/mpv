@@ -65,7 +65,7 @@ endif
 ifeq ($(XMMS_PLUGINS),yes)
 SRCS += demux_xmms.c
 endif
-ifneq ($(W32_LIB),)
+ifeq ($(WIN32DLL),yes)
 SRCS += demux_avs.c
 endif
 
