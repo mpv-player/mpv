@@ -40,6 +40,7 @@ struct menu_priv_s {
   char* file_action;
   char* dir_action;
   int auto_close;
+  char** actions;
 };
 
 static struct menu_priv_s cfg_dflt = {
@@ -50,7 +51,8 @@ static struct menu_priv_s cfg_dflt = {
   "Select a file: %p",
   "loadfile '%p'",
   NULL,
-  0
+  0,
+  NULL
 };
 
 #define ST_OFF(m) M_ST_OFF(struct menu_priv_s,m)
@@ -62,6 +64,7 @@ static m_option_t cfg_fields[] = {
   { "file-action", ST_OFF(file_action),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "dir-action", ST_OFF(dir_action),  CONF_TYPE_STRING, 0, 0, 0, NULL },
   { "auto-close", ST_OFF(auto_close), CONF_TYPE_FLAG, 0, 0, 1, NULL },
+  { "actions", ST_OFF(actions), CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
   { NULL, NULL, NULL, 0,0,0,NULL }
 };
 
@@ -205,6 +208,8 @@ bailout:
 }
     
 
+static char *action;
+
 static void read_cmd(menu_t* menu,int cmd) {
   mp_cmd_t* c = NULL;
   switch(cmd) {
@@ -260,6 +265,16 @@ static void read_cmd(menu_t* menu,int cmd) {
 	menu->cl = 1;
     }
   } break;
+  case MENU_CMD_ACTION: {
+    int fname_len = strlen(mpriv->dir) + strlen(mpriv->p.current->p.txt) + 1;
+    char filename[fname_len];
+    char *str;
+    sprintf(filename,"%s%s",mpriv->dir,mpriv->p.current->p.txt);
+    str = replace_path(action, filename);
+    mp_input_queue_cmd(mp_input_parse_cmd(str));
+    if(str != action)
+      free(str);
+  } break;
   default:
     menu_list_read_cmd(menu,cmd);
   }
@@ -268,8 +283,17 @@ static void read_cmd(menu_t* menu,int cmd) {
 static void read_key(menu_t* menu,int c){
   if(c == KEY_BS)
     read_cmd(menu,MENU_CMD_LEFT);
-  else
-    menu_list_read_key(menu,c,1);
+  else {
+    char **str;
+    for (str=mpriv->actions; str && *str; str++)
+      if (c == (*str)[0]) {
+        action = &(*str)[2];
+        read_cmd(menu,MENU_CMD_ACTION);
+        break;
+      }
+    if (!str || !*str)
+      menu_list_read_key(menu,c,1);
+  }
 }
 
 static void clos(menu_t* menu) {
