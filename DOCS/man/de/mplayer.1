@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19361
+.\" In sync with r19507
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1812,6 +1812,17 @@ Der SSA/ASS-Renderer wird Untertitel dorthin legen.
 .B \-ass-top-margin <Wert>
 Fügt einen schwarzen Streifen oben ins Bild hinzu.
 Der SSA/ASS-Renderer wird Obertitel dorthin legen.
+.
+.TP
+.B \-ass-force-style <[Style.]Param=Wert[,...]>
+Überschreibe eine Stilparameter.
+.sp
+.I EXAMPLE:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
 .
 .TP
 .B \-dumpjacosub (nur bei MPlayer)
