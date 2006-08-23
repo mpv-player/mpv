@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19507
+.\" In sync with r19508
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1795,23 +1795,14 @@ Matroska-Spuren verwendet.
 Du möchtest vielleicht auch \-embeddedfonts verwenden.
 .
 .TP
-.B \-ass-font-scale <Wert>
-Setze den Skalierungskoeffizienten, der für Schriften im
-SSA/ASS-Renderer verwendet werden soll.
-.
-.TP
-.B \-ass-line-spacing <Wert>
-Setzt den Wert für den Zeilenabstand für den SSA/ASS-Renderer.
-.
-.TP
 .B \-ass-bottom-margin <Wert>
 Fügt einen schwarzen Streifen unten ins Bild hinzu.
 Der SSA/ASS-Renderer wird Untertitel dorthin legen.
 .
 .TP
-.B \-ass-top-margin <Wert>
-Fügt einen schwarzen Streifen oben ins Bild hinzu.
-Der SSA/ASS-Renderer wird Obertitel dorthin legen.
+.B \-ass-font-scale <Wert>
+Setze den Skalierungskoeffizienten, der für Schriften im
+SSA/ASS-Renderer verwendet werden soll.
 .
 .TP
 .B \-ass-force-style <[Style.]Param=Wert[,...]>
@@ -1823,6 +1814,15 @@ Der SSA/ASS-Renderer wird Obertitel dorthin legen.
 \-ass-force-style FontName=Arial,Default.Bold=1
 .RE
 .PD 1
+.
+.TP
+.B \-ass-line-spacing <Wert>
+Setzt den Wert für den Zeilenabstand für den SSA/ASS-Renderer.
+.
+.TP
+.B \-ass-top-margin <Wert>
+Fügt einen schwarzen Streifen oben ins Bild hinzu.
+Der SSA/ASS-Renderer wird Obertitel dorthin legen.
 .
 .TP
 .B \-dumpjacosub (nur bei MPlayer)
