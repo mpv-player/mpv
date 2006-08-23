@@ -427,7 +427,7 @@ void MP3_Init(){
     if (gCpuCaps.has3DNowExt)
     {
 	dct36_func=dct36_3dnowex;
-	dct64_MMX_func= (gCpuCaps.hasMMX2) ? dct64_MMX_3dnowex : dct64_MMX_3dnow;
+	dct64_MMX_func= dct64_MMX_3dnowex;
 	mp_msg(MSGT_DECAUDIO,MSGL_V,"mp3lib: using 3DNow!Ex optimized decore!\n");
     }
     else
