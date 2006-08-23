@@ -32,7 +32,7 @@ MACH64_VID=mach64_vid.so
 MACH64_SRCS=mach64_vid.c
 MACH64_OBJS=mach64_vid.o
 MACH64_LIBS=-L../../libdha -ldha
-MACH64_CFLAGS=-fPIC -I. -I.. -DRAGE128 $(OPTFLAGS)
+MACH64_CFLAGS=-fPIC -I. -I.. $(OPTFLAGS)
 
 MGA_VID=mga_vid.so
 MGA_SRCS=mga_vid.c
