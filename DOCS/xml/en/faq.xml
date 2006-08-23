@@ -989,6 +989,30 @@ mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceabl
 
 <qandaentry>
 <question><para>
+How can I backup and encode a VOB file with a broken beginning?
+</para></question>
+<answer><para>
+The main problem when you want to encode a VOB file which is corrupted
+<footnote id='fn-corrupted-files-or-copy-protection'><para>
+To some extent, some forms of copy protection used in DVDs can be
+assumed to be content corruption.
+</para></footnote>
+is that it will be hard to get an encode with perfect A/V sync.
+One workaround is to just shave off the corrupted part and encode just the
+clean part.
+First you need to find where the clean part starts:
+<screen>
+mplayer <replaceable>input.vob</replaceable> -sb <replaceable>nb_of_bytes_to_skip</replaceable>
+</screen>
+Then you can create a new file which contains just the clean part:
+<screen>
+dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</replaceable> skip=1 ibs=<replaceable>nb_of_bytes_to_skip</replaceable>
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I can't encode DVD subtitles into the AVI!
 </para></question>
 <answer><para>
