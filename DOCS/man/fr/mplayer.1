@@ -1,4 +1,4 @@
-.\" synced with r19348
+.\" synced with r19503
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1829,6 +1829,12 @@ Les titres y seront affichés lors du rendu SSA/ASS.
 .B \-ass-bottom-margin <value>
 Adds a black band at the bottom of the frame.
 The SSA/ASS renderer will place subtitles there.
+.
+.TP
+.B \-ass-force-style <[Style.]Param=Valeur[,...]>
+Force les paramètres de style.
+Exemple:
+-ass-force-style FontName=Arial,Default.Bold=1
 .
 .TP
 .B \-dumpjacosub (MPlayer uniquement)
