@@ -81,67 +81,67 @@ $(CYBERBLADE_OBJS):    $(CYBERBLADE_SRCS)
 	$(CC) -c $(CYBERBLADE_CFLAGS) -o $@ $<
 
 $(CYBERBLADE_VID):     $(CYBERBLADE_OBJS)
-	$(CC) -shared $(CYBERBLADE_OBJS) $(CYBERBLADE_LIBS) -Wl,-soname,$(CYBERBLADE_VID) -o $(CYBERBLADE_VID)
+	$(CC) -shared $< $(CYBERBLADE_LIBS) -Wl,-soname,$@ -o $@
 
 $(PM3_OBJS):    $(PM3_SRCS)
 	$(CC) -c $(PM3_CFLAGS) -o $@ $<
 
 $(PM3_VID):     $(PM3_OBJS)
-	$(CC) -shared $(PM3_OBJS) $(PM3_LIBS) -Wl,-soname,$(PM3_VID) -o $(PM3_VID)
+	$(CC) -shared $< $(PM3_LIBS) -Wl,-soname,$@ -o $@
 
 $(RADEON_OBJS):    $(RADEON_SRCS)
 	$(CC) -c $(RADEON_CFLAGS) -o $@ $<
 
 $(RADEON_VID):     $(RADEON_OBJS)
-	$(CC) -shared $(RADEON_OBJS) $(RADEON_LIBS) -Wl,-soname,$(RADEON_VID) -o $(RADEON_VID)
+	$(CC) -shared $< $(RADEON_LIBS) -Wl,-soname,$@ -o $@
 
 $(RAGE128_OBJS):    $(RAGE128_SRCS)
 	$(CC) -c $(RAGE128_CFLAGS) -o $@ $<
 
 $(RAGE128_VID):     $(RAGE128_OBJS)
-	$(CC) -shared $(RAGE128_OBJS) $(RAGE128_LIBS) -Wl,-soname,$(RAGE128_VID) -o $(RAGE128_VID)
+	$(CC) -shared $< $(RAGE128_LIBS) -Wl,-soname,$@ -o $@
 
 $(MACH64_OBJS):    $(MACH64_SRCS)
 	$(CC) -c $(MACH64_CFLAGS) -o $@ $<
 
 $(MACH64_VID):     $(MACH64_OBJS)
-	$(CC) -shared $(MACH64_OBJS) $(MACH64_LIBS) -Wl,-soname,$(MACH64_VID) -o $(MACH64_VID)
+	$(CC) -shared $< $(MACH64_LIBS) -Wl,-soname,$@ -o $@
 
 $(NVIDIA_OBJS):    $(NVIDIA_SRCS)
 	$(CC) -c $(NVIDIA_CFLAGS) -o $@ $<
 
 $(NVIDIA_VID):     $(NVIDIA_OBJS)
-	$(CC) -shared $(NVIDIA_OBJS) $(NVIDIA_LIBS) -Wl,-soname,$(NVIDIA_VID) -o $(NVIDIA_VID)
+	$(CC) -shared $< $(NVIDIA_LIBS) -Wl,-soname,$@ -o $@
 
 $(MGA_OBJS):    $(MGA_SRCS)
 	$(CC) -c $(MGA_CFLAGS) -o $@ $<
 
 $(MGA_VID):     $(MGA_OBJS)
-	$(CC) -shared $(MGA_OBJS) $(MGA_LIBS) -Wl,-soname,$(MGA_VID) -o $(MGA_VID)
+	$(CC) -shared $< $(MGA_LIBS) -Wl,-soname,$@ -o $@
 
 $(MGA_CRTC2_OBJS):    $(MGA_CRTC2_SRCS)
 	$(CC) -c $(MGA_CRTC2_CFLAGS) -o $@ $<
 
 $(MGA_CRTC2_VID):     $(MGA_CRTC2_OBJS)
-	$(CC) -shared $(MGA_CRTC2_OBJS) $(MGA_CRTC2_LIBS) -Wl,-soname,$(MGA_CRTC2_VID) -o $(MGA_CRTC2_VID)
+	$(CC) -shared $< $(MGA_CRTC2_LIBS) -Wl,-soname,$@ -o $@
 
 $(SIS_OBJS):    $(SIS_SRCS)
 	$(CC) -c $(SIS_CFLAGS) -o $@ $(basename $@).c
 
 $(SIS_VID):     $(SIS_OBJS)
-	$(CC) -shared $(SIS_OBJS) $(SIS_LIBS) -Wl,-soname,$(SIS_VID) -o $(SIS_VID) 
+	$(CC) -shared $< $(SIS_LIBS) -Wl,-soname,$@ -o $@
 
 $(UNICHROME_OBJS):    $(UNICHROME_SRCS)
 	$(CC) -c $(UNICHROME_CFLAGS) -o $@ $<
 
 $(UNICHROME_VID):     $(UNICHROME_OBJS)
-	$(CC) -shared $(UNICHROME_OBJS) $(UNICHROME_LIBS) -Wl,-soname,$(UNICHROME_VID) -o $(UNICHROME_VID)
+	$(CC) -shared $< $(UNICHROME_LIBS) -Wl,-soname,$@ -o $@
 
 $(SAVAGE_OBJS):    $(SAVAGE_SRCS)
 	$(CC) -c $(SAVAGE_CFLAGS) -o $@ $<
 
 $(SAVAGE_VID):     $(SAVAGE_OBJS)
-	$(CC) -shared $(SAVAGE_OBJS) $(SAVAGE_LIBS) -Wl,-soname,$(SAVAGE_VID) -o $(SAVAGE_VID)
+	$(CC) -shared $< $(SAVAGE_LIBS) -Wl,-soname,$@ -o $@
 
 clean:
 	rm -f *.o *.so *~
