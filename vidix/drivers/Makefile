@@ -1,4 +1,3 @@
-# makefile
 
 include ../../config.mak
 
