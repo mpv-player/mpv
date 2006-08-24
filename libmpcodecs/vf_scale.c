@@ -614,7 +614,7 @@ static m_option_t vf_opts_fields[] = {
   // Note that here the 2 field is NULL (ie 0)
   // As we want this option to act on the option struct itself
   {"presize", 0, CONF_TYPE_OBJ_PRESETS, 0, 0, 0, &size_preset},
-  {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
+  {"noup", ST_OFF(noup), CONF_TYPE_INT, M_OPT_RANGE, 0, 2, NULL},
   {"arnd", ST_OFF(accurate_rnd), CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
