@@ -25,7 +25,7 @@ all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
 %.so: %.o
-	$(CC) -shared $< $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
+	$(CC) -shared $^ $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
 cyberblade_vid.so: cyberblade_vid.o
 	$(CC) -shared $< $(VIDIX_LIBS_M) -Wl,-soname,$@ -o $@
@@ -52,7 +52,6 @@ mga_crtc2_vid.so: mga_crtc2_vid.o
 	$(CC) -shared $< $(VIDIX_LIBS_M) -Wl,-soname,$@ -o $@
 
 sis_vid.so: sis_vid.o sis_bridge.o
-	$(CC) -shared $^ $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
 unichrome_vid.so: unichrome_vid.o
 	$(CC) -shared $< $(VIDIX_LIBS_M) -Wl,-soname,$@ -o $@
