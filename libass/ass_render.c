@@ -178,20 +178,20 @@ ass_instance_t* ass_init(void)
 	if (family) free(family);
 
 	if (!fc_priv)
-		return 0;
+		goto ass_init_exit;
 	
 	error = FT_Init_FreeType( &ft );
 	if ( error ) { 
 		mp_msg(MSGT_GLOBAL, MSGL_FATAL, "FT_Init_FreeType failed\n");
 		fontconfig_done(fc_priv);
-		return 0;
+		goto ass_init_exit;
 	}
 
 	priv = calloc(1, sizeof(ass_instance_t));
 	if (!priv) {
 		FT_Done_FreeType(ft);
 		fontconfig_done(fc_priv);
-		return 0;
+		goto ass_init_exit;
 	}
 	priv->library = ft;
 	priv->fontconfig_priv = fc_priv;
@@ -202,6 +202,10 @@ ass_instance_t* ass_init(void)
 
 	text_info.glyphs = calloc(MAX_GLYPHS, sizeof(glyph_info_t));
 	
+ass_init_exit:
+	if (priv) mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Init\n");
+	else mp_msg(MSGT_GLOBAL, MSGL_ERR, "[ass] Init failed\n");
+
 	return priv;
 }
 

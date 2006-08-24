@@ -357,12 +357,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 {
 	if (request == VFCTRL_EOSD) {
 		vf->priv->ass_priv = ass_init();
-		if (!vf->priv->ass_priv) {
-			mp_msg(MSGT_VFILTER, MSGL_ERR, "[ass] Init failed\n");
-			return 0;
-		} else
-			mp_msg(MSGT_VFILTER, MSGL_INFO, "[ass] Init\n");
-		return CONTROL_TRUE;
+		return vf->priv->ass_priv ? CONTROL_TRUE : CONTROL_FALSE;
 	}
 	return vf_next_control(vf, request, data);
 }
