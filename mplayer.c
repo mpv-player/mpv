@@ -3644,7 +3644,7 @@ sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
 
 #ifdef USE_ASS
 if (ass_enabled)
-  ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_EOSD, 0);
+  ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, 0);
 #endif
 
 current_module="init_video_codec";

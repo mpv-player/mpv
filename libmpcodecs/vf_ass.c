@@ -355,9 +355,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 
 static int control(vf_instance_t *vf, int request, void *data)
 {
-	if (request == VFCTRL_EOSD) {
+	switch (request) {
+	case VFCTRL_INIT_EOSD:
 		vf->priv->ass_priv = ass_init();
 		return vf->priv->ass_priv ? CONTROL_TRUE : CONTROL_FALSE;
+	case VFCTRL_DRAW_EOSD:
+		if (vf->priv->ass_priv) return CONTROL_TRUE;
+		break;
 	}
 	return vf_next_control(vf, request, data);
 }
