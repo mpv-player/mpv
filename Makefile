@@ -39,7 +39,6 @@ SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 $(SRCS_COMMON) \
                 libvo/aclib.c \
-                libvo/font_load.c \
                 libvo/osd.c \
                 libvo/sub.c \
                 parser-mecmd.c \
@@ -246,6 +245,9 @@ ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a
 COMMON_LIBS += libass/libass.a
 PARTS += libass
+endif
+ifeq ($(BITMAP_FONT),yes)
+SRCS_MENCODER += libvo/font_load.c
 endif
 # FontConfig and FreeType need to come after ASS to avoid link failures on MinGW
 COMMON_LIBS += $(FONTCONFIG_LIB)
