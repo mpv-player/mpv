@@ -159,7 +159,7 @@ ass_instance_t* ass_init(void)
 	int error;
 	fc_instance_t* fc_priv;
 	FT_Library ft;
-	ass_instance_t* priv;
+	ass_instance_t* priv = 0;
 	
 	if (font_fontconfig && font_name)
 		family = strdup(font_name);
