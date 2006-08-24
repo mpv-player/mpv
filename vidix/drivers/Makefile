@@ -73,7 +73,7 @@ sis_vid.o sis_bridge.o: sis_vid.c sis_bridge.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $(basename $@).c
 
 sis_vid.so: sis_vid.o sis_bridge.o
-	$(CC) -shared $< $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
+	$(CC) -shared $^ $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
 unichrome_vid.o: unichrome_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
