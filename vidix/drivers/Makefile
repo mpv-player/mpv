@@ -7,131 +7,97 @@ BINDIR = $(LIBDIR)/mplayer/vidix
 VIDIX_LIBS = -L../../libdha -ldha
 VIDIX_CFLAGS=-fPIC -I. -I.. $(OPTFLAGS)
 
-CYBERBLADE_VID=cyberblade_vid.so
-CYBERBLADE_SRCS=cyberblade_vid.c
-CYBERBLADE_OBJS=cyberblade_vid.o
 CYBERBLADE_LIBS=$(VIDIX_LIBS) -lm
 
-RADEON_VID=radeon_vid.so
-RADEON_SRCS=radeon_vid.c
-RADEON_OBJS=radeon_vid.o
 RADEON_LIBS=$(VIDIX_LIBS) -lm $(X_LIB)
 
-RAGE128_VID=rage128_vid.so
-RAGE128_SRCS=radeon_vid.c
-RAGE128_OBJS=rage128_vid.o
 RAGE128_LIBS=$(VIDIX_LIBS) -lm $(X_LIB)
 RAGE128_CFLAGS=$(VIDIX_CFLAGS) -DRAGE128
 
-PM3_VID=pm3_vid.so
-PM3_SRCS=pm3_vid.c
-PM3_OBJS=pm3_vid.o
-
-MACH64_VID=mach64_vid.so
-MACH64_SRCS=mach64_vid.c
-MACH64_OBJS=mach64_vid.o
-
-MGA_VID=mga_vid.so
-MGA_SRCS=mga_vid.c
-MGA_OBJS=mga_vid.o
 MGA_LIBS=$(VIDIX_LIBS) -lm
 
-MGA_CRTC2_VID=mga_crtc2_vid.so
-MGA_CRTC2_SRCS=mga_vid.c
-MGA_CRTC2_OBJS=mga_crtc2_vid.o
 MGA_CRTC2_LIBS=$(VIDIX_LIBS) -lm
 MGA_CRTC2_CFLAGS=$(VIDIX_CFLAGS) -DCRTC2
 
-NVIDIA_VID=nvidia_vid.so
-NVIDIA_SRCS=nvidia_vid.c
-NVIDIA_OBJS=nvidia_vid.o
 NVIDIA_LIBS=$(VIDIX_LIBS) -lm
 
-SIS_VID=sis_vid.so
-SIS_SRCS=sis_vid.c sis_bridge.c
-SIS_OBJS=sis_vid.o sis_bridge.o
-
-UNICHROME_VID=unichrome_vid.so
-UNICHROME_SRCS=unichrome_vid.c
-UNICHROME_OBJS=unichrome_vid.o
 UNICHROME_LIBS=$(VIDIX_LIBS) -lm
 
-SAVAGE_VID=savage_vid.so
-SAVAGE_SRCS=savage_vid.c
-SAVAGE_OBJS=savage_vid.o
 SAVAGE_LIBS=$(VIDIX_LIBS) -lm
 
-all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID) $(SIS_VID) $(UNICHROME_VID) $(SAVAGE_VID)
+all:    cyberblade_vid.so radeon_vid.so rage128_vid.so mach64_vid.so \
+        nvidia_vid.so mga_vid.so mga_crtc2_vid.so pm3_vid.so \
+        sis_vid.so unichrome_vid.so savage_vid.so
 
 
 .SUFFIXES: .c .o
 
 # .PHONY: all clean
 
-$(CYBERBLADE_OBJS):    $(CYBERBLADE_SRCS)
+cyberblade_vid.o: cyberblade_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(CYBERBLADE_VID):     $(CYBERBLADE_OBJS)
+cyberblade_vid.so: cyberblade_vid.o
 	$(CC) -shared $< $(CYBERBLADE_LIBS) -Wl,-soname,$@ -o $@
 
-$(PM3_OBJS):    $(PM3_SRCS)
+pm3_vid.o: pm3_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(PM3_VID):     $(PM3_OBJS)
+pm3_vid.so: pm3_vid.o
 	$(CC) -shared $< $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
-$(RADEON_OBJS):    $(RADEON_SRCS)
+radeon_vid.o: radeon_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(RADEON_VID):     $(RADEON_OBJS)
+radeon_vid.so: radeon_vid.o
 	$(CC) -shared $< $(RADEON_LIBS) -Wl,-soname,$@ -o $@
 
-$(RAGE128_OBJS):    $(RAGE128_SRCS)
+rage128_vid.o: radeon_vid.c
 	$(CC) -c $(RAGE128_CFLAGS) -o $@ $<
 
-$(RAGE128_VID):     $(RAGE128_OBJS)
+rage128_vid.so: rage128_vid.o
 	$(CC) -shared $< $(RAGE128_LIBS) -Wl,-soname,$@ -o $@
 
-$(MACH64_OBJS):    $(MACH64_SRCS)
+mach64_vid.o: mach64_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(MACH64_VID):     $(MACH64_OBJS)
+mach64_vid.so: mach64_vid.o
 	$(CC) -shared $< $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
-$(NVIDIA_OBJS):    $(NVIDIA_SRCS)
+nvidia_vid.o: nvidia_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(NVIDIA_VID):     $(NVIDIA_OBJS)
+nvidia_vid.so: nvidia_vid.o
 	$(CC) -shared $< $(NVIDIA_LIBS) -Wl,-soname,$@ -o $@
 
-$(MGA_OBJS):    $(MGA_SRCS)
+mga_vid.o: mga_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(MGA_VID):     $(MGA_OBJS)
+mga_vid.so: mga_vid.o
 	$(CC) -shared $< $(MGA_LIBS) -Wl,-soname,$@ -o $@
 
-$(MGA_CRTC2_OBJS):    $(MGA_CRTC2_SRCS)
+mga_crtc2_vid.o: mga_vid.c
 	$(CC) -c $(MGA_CRTC2_CFLAGS) -o $@ $<
 
-$(MGA_CRTC2_VID):     $(MGA_CRTC2_OBJS)
+mga_crtc2_vid.so: mga_crtc2_vid.o
 	$(CC) -shared $< $(MGA_CRTC2_LIBS) -Wl,-soname,$@ -o $@
 
-$(SIS_OBJS):    $(SIS_SRCS)
+sis_vid.o sis_bridge.o: sis_vid.c sis_bridge.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $(basename $@).c
 
-$(SIS_VID):     $(SIS_OBJS)
+sis_vid.so: sis_vid.o sis_bridge.o
 	$(CC) -shared $< $(VIDIX_LIBS) -Wl,-soname,$@ -o $@
 
-$(UNICHROME_OBJS):    $(UNICHROME_SRCS)
+unichrome_vid.o: unichrome_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(UNICHROME_VID):     $(UNICHROME_OBJS)
+unichrome_vid.so: unichrome_vid.o
 	$(CC) -shared $< $(UNICHROME_LIBS) -Wl,-soname,$@ -o $@
 
-$(SAVAGE_OBJS):    $(SAVAGE_SRCS)
+savage_vid.o: savage_vid.c
 	$(CC) -c $(VIDIX_CFLAGS) -o $@ $<
 
-$(SAVAGE_VID):     $(SAVAGE_OBJS)
+savage_vid.so: savage_vid.o
 	$(CC) -shared $< $(SAVAGE_LIBS) -Wl,-soname,$@ -o $@
 
 clean:
