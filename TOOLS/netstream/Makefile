@@ -32,13 +32,6 @@ DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/osdep/shmem.o \
 	$(MPROOT)/osdep/timer-*.o \
 	$(MPROOT)/osdep/strl.o \
-	$(VORBIS_LIB) \
-	$(CDPARANOIA_LIB) \
-	$(Z_LIB) \
-	$(GIF_LIB) \
-	$(SMBSUPPORT_LIB) \
-	$(MPLAYER_NETWORK_LIB) \
-	$(ARCH_LIB) \
 	$(COMMON_LIBS) \
 	-lm \
 
