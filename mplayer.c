@@ -424,8 +424,166 @@ static unsigned int inited_flags=0;
 #define INITED_VCODEC  2048
 #define INITED_ALL 0xFFFF
 
-demuxer_t *get_current_demuxer (void) {
-  return demuxer;
+#include "metadata.h"
+
+#define mp_basename2(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
+
+static int is_valid_metadata_type (metadata_t type) {
+  switch (type)
+  {
+  /* check for valid video stream */
+  case META_VIDEO_CODEC:
+  case META_VIDEO_BITRATE:
+  case META_VIDEO_RESOLUTION:
+  {
+    if (!sh_video)
+      return 0;
+    break;
+  }
+
+  /* check for valid audio stream */
+  case META_AUDIO_CODEC:
+  case META_AUDIO_BITRATE:
+  case META_AUDIO_SAMPLES:
+  {
+    if (!sh_audio)
+      return 0;
+    break;
+  }
+
+  /* check for valid demuxer */
+  case META_INFO_TITLE:
+  case META_INFO_ARTIST:
+  case META_INFO_ALBUM:
+  case META_INFO_YEAR:
+  case META_INFO_COMMENT:
+  case META_INFO_TRACK:
+  case META_INFO_GENRE:
+  {
+    if (!demuxer)
+      return 0;
+    break;
+  }
+
+  default:
+    break;
+  }
+
+  return 1;
+}
+
+static char *get_demuxer_info (char *tag) {
+  char **info = demuxer->info;
+  int n;
+
+  if (!info || !tag)
+    return NULL;
+
+  for (n = 0; info[2*n] != NULL ; n++)
+    if (!strcmp (info[2*n], tag))
+      break;
+
+  return info[2*n+1] ? strdup (info[2*n+1]) : NULL;
+}
+
+char *get_metadata (metadata_t type) {
+  char *meta = NULL;
+
+  if (!is_valid_metadata_type (type))
+    return NULL;
+  
+  switch (type)
+  {
+  case META_NAME:
+  {
+    return strdup (mp_basename2 (filename));
+  }
+    
+  case META_VIDEO_CODEC:
+  {
+    if (sh_video->format == 0x10000001)
+      meta = strdup ("mpeg1");
+    else if (sh_video->format == 0x10000002)
+      meta = strdup ("mpeg2");
+    else if (sh_video->format == 0x10000004)
+      meta = strdup ("mpeg4");
+    else if (sh_video->format == 0x10000005)
+      meta = strdup ("h264");
+    else if (sh_video->format >= 0x20202020)
+    {
+      meta = (char *) malloc (8);
+      sprintf (meta, "%.4s", (char *) &sh_video->format);
+    }
+    else
+    {
+      meta = (char *) malloc (8);
+      sprintf (meta, "0x%08X", sh_video->format);
+    }
+    return meta;
+  }
+  
+  case META_VIDEO_BITRATE:
+  {
+    meta = (char *) malloc (16);
+    sprintf (meta, "%d kbps", (int) (sh_video->i_bps * 8 / 1024));
+    return meta;
+  }
+  
+  case META_VIDEO_RESOLUTION:
+  {
+    meta = (char *) malloc (16);
+    sprintf (meta, "%d x %d", sh_video->disp_w, sh_video->disp_h);
+    return meta;
+  }
+
+  case META_AUDIO_CODEC:
+  {
+    if (sh_audio->codec && sh_audio->codec->name)
+      meta = strdup (sh_audio->codec->name);
+    return meta;
+  }
+  
+  case META_AUDIO_BITRATE:
+  {
+    meta = (char *) malloc (16);
+    sprintf (meta, "%d kbps", (int) (sh_audio->i_bps * 8/1000));
+    return meta;
+  }
+  
+  case META_AUDIO_SAMPLES:
+  {
+    meta = (char *) malloc (16);
+    sprintf (meta, "%d Hz, %d ch.", sh_audio->samplerate, sh_audio->channels);
+    return meta;
+  }
+
+  /* check for valid demuxer */
+  case META_INFO_TITLE:
+    return get_demuxer_info ("Title");
+  
+  case META_INFO_ARTIST:
+    return get_demuxer_info ("Artist");
+
+  case META_INFO_ALBUM:
+    return get_demuxer_info ("Album");
+
+  case META_INFO_YEAR:
+    return get_demuxer_info ("Year");
+
+  case META_INFO_COMMENT:
+    return get_demuxer_info ("Comment");
+
+  case META_INFO_TRACK:
+    return get_demuxer_info ("Track");
+
+  case META_INFO_GENRE:
+    return get_demuxer_info ("Genre");
+
+  default:
+    break;
+  }
+
+  return meta;
 }
 
 static void uninit_player(unsigned int mask){
@@ -744,7 +902,6 @@ static int libmpdemux_was_interrupted(int eof) {
   return eof;
 }
 
-#define mp_basename2(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
 #define mp_basename(s) (strrchr(s,'\\')==NULL?(mp_basename2(s)):(strrchr(s,'\\')+1))
 
 int playtree_add_playlist(play_tree_t* entry)
