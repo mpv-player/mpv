@@ -26,6 +26,13 @@
 #include "input/input.h"
 #include "osdep/keycodes.h"
 
+#include "codec-cfg.h"
+#include "stream/stream.h"
+#include "libmpdemux/demuxer.h"
+#include "libmpdemux/stheader.h"
+
+extern demuxer_t *get_current_demuxer (void);
+
 struct list_entry_s {
   struct list_entry p;
   char* name;
@@ -60,6 +67,23 @@ static m_option_t cfg_fields[] = {
 
 #define mpriv (menu->priv)
 
+#define OPT_NAME "name"
+#define OPT_VCODEC "vcodec"
+#define OPT_VBITRATE "vbitrate"
+#define OPT_RESOLUTION "resolution"
+#define OPT_ACODEC "acodec"
+#define OPT_ABITRATE "abitrate"
+#define OPT_SAMPLES "asamples"
+#define OPT_INFO_TITLE "title"
+#define OPT_INFO_ARTIST "artist"
+#define OPT_INFO_ALBUM "album"
+#define OPT_INFO_YEAR "year"
+#define OPT_INFO_COMMENT "comment"
+#define OPT_INFO_TRACK "track"
+#define OPT_INFO_GENRE "genre"
+
+#define mp_basename(s) (strrchr(s,'/')==NULL?(char*)s:(strrchr(s,'/')+1))
+
 m_option_t*  mp_property_find(const char* name);
 
 static void entry_set_text(menu_t* menu, list_entry_t* e) {
@@ -86,8 +110,71 @@ static void update_entries(menu_t* menu) {
     if(e->opt) entry_set_text(menu,e);
 }
 
+static int is_valid_video_property(char *prop) {
+  demuxer_t *demuxer = get_current_demuxer ();
+  sh_video_t *video = (sh_video_t *) demuxer->video->sh;
+
+  if (!prop || !video)
+    return 0;
+
+  if (strcmp (prop, OPT_VCODEC) != 0 &&
+      strcmp (prop, OPT_VBITRATE) != 0 &&
+      strcmp (prop, OPT_RESOLUTION) != 0)
+    return 0;
+  
+  return 1;
+}
+
+static int is_valid_audio_property(char *prop) {
+  demuxer_t *demuxer = get_current_demuxer ();
+  sh_audio_t *audio = (sh_audio_t *) demuxer->audio->sh;
+  
+  if (!prop || !audio)
+    return 0;
+
+  if (strcmp (prop, OPT_ACODEC) != 0 &&
+      strcmp (prop, OPT_ABITRATE) != 0 &&
+      strcmp (prop, OPT_SAMPLES) != 0)
+    return 0;
+  
+  return 1;
+}
+
+static int is_valid_info_property(char *prop) {
+  demuxer_t *demuxer = get_current_demuxer ();
+  
+  if (!prop || !demuxer)
+    return 0;
+
+  if (strcmp (prop, OPT_INFO_TITLE) != 0 &&
+      strcmp (prop, OPT_INFO_ARTIST) != 0 &&
+      strcmp (prop, OPT_INFO_ALBUM) != 0 &&
+      strcmp (prop, OPT_INFO_YEAR) != 0 &&
+      strcmp (prop, OPT_INFO_COMMENT) != 0 &&
+      strcmp (prop, OPT_INFO_TRACK) != 0 &&
+      strcmp (prop, OPT_INFO_GENRE) != 0)
+    return 0;
+  
+  return 1;
+}
+
+static char *grab_demuxer_info(char *tag) {
+  demuxer_t *demuxer = get_current_demuxer ();
+  char **info = demuxer->info;
+  int n;
+
+  if (!info || !tag)
+    return strdup ("");
+
+  for (n = 0; info[2*n] != NULL ; n++)
+    if (!strcmp (info[2*n], tag))
+      break;
+
+  return info[2*n+1] ? strdup (info[2*n+1]) : strdup ("");
+}
+
 static int parse_args(menu_t* menu,char* args) {
-  char *element,*body, **attribs, *name;
+  char *element,*body, **attribs, *name, *meta, *val;
   list_entry_t* m = NULL;
   int r;
   m_option_t* opt;
@@ -124,6 +211,74 @@ static int parse_args(menu_t* menu,char* args) {
       goto next_element;
     }
 
+    meta = asx_get_attrib("meta",attribs);
+    val = NULL;
+    if(meta) {
+      demuxer_t *demuxer = get_current_demuxer ();
+      sh_video_t *video = (sh_video_t *) demuxer->video->sh;
+      sh_audio_t *audio = (sh_audio_t *) demuxer->audio->sh;
+      if (!strcmp (meta, OPT_NAME)) {
+        extern char *filename;
+        val = strdup (mp_basename (filename));
+      } else if(!strcmp (meta, OPT_VCODEC) && is_valid_video_property(meta)) {
+        val = (char *) malloc (8);
+        if (video->format == 0x10000001)
+          sprintf (val, "mpeg1");
+        else if (video->format == 0x10000002)
+          sprintf (val, "mpeg2");
+        else if (video->format == 0x10000004)
+          sprintf (val, "mpeg4");
+        else if (video->format == 0x10000005)
+          sprintf (val, "h264");
+        else if (video->format >= 0x20202020)
+          sprintf (val, "%.4s", (char *) &video->format);
+        else
+          sprintf (val, "0x%08X", video->format);
+      } else if (!strcmp(meta, OPT_VBITRATE)&& is_valid_video_property(meta)){
+        val = (char *) malloc (16);
+        sprintf (val, "%d kbps", (int)(video->i_bps * 8 / 1024));
+      } else if(!strcmp(meta, OPT_RESOLUTION)
+                && is_valid_video_property(meta)) {
+        val = (char *) malloc (16);
+        sprintf(val, "%d x %d", video->disp_w, video->disp_h);
+      } else if (!strcmp(meta, OPT_ACODEC) && is_valid_audio_property(meta)) {
+        val = strdup (audio->codec->name);
+      } else if(!strcmp(meta, OPT_ABITRATE) && is_valid_audio_property(meta)){
+        val = (char *) malloc (16);
+        sprintf (val, "%d kbps", (int) (audio->i_bps * 8/1000));
+      } else if(!strcmp(meta, OPT_SAMPLES) && is_valid_audio_property(meta)) {
+        val = (char *) malloc (16);
+        sprintf (val, "%d Hz, %d ch.", audio->samplerate, audio->channels);
+      } else if ((!strcmp (meta, OPT_INFO_TITLE) ||
+                 !strcmp (meta, OPT_INFO_ARTIST) ||
+                 !strcmp (meta, OPT_INFO_ALBUM) ||
+                 !strcmp (meta, OPT_INFO_YEAR) ||
+                 !strcmp (meta, OPT_INFO_COMMENT) ||
+                 !strcmp (meta, OPT_INFO_TRACK) ||
+                 !strcmp (meta, OPT_INFO_GENRE)) &&
+                 is_valid_info_property(meta) &&
+                 strcmp(grab_demuxer_info(meta), "") ) {
+        val = grab_demuxer_info (meta);
+      }
+    }
+    if (val) {
+      char *item = asx_get_attrib("name",attribs);
+      int l;
+
+      if (!item)
+        item = strdup (meta);
+      l = strlen(item) + 2 + strlen(val) + 1;
+      m = calloc(1,sizeof(struct list_entry_s));
+      m->p.txt = malloc(l);
+      sprintf(m->p.txt,"%s: %s",item,val);
+      free(val);
+      free(item);
+      menu_list_add_entry(menu,m);
+      goto next_element;
+    }
+    if (meta)
+      goto next_element;
+    
     name = asx_get_attrib("property",attribs);
     opt = name ? mp_property_find(name) : NULL;
     if(!opt) {

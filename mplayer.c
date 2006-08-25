@@ -424,6 +424,10 @@ static unsigned int inited_flags=0;
 #define INITED_VCODEC  2048
 #define INITED_ALL 0xFFFF
 
+demuxer_t *get_current_demuxer (void) {
+  return demuxer;
+}
+
 static void uninit_player(unsigned int mask){
   mask=inited_flags&mask;
 
