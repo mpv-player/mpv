@@ -14,6 +14,10 @@ ifeq ($(CONFIG_LIBAVCODEC),yes)
 LIBAV_INC += -I./libavcodec
 endif
 
+CFLAGS = $(OPTFLAGS) -I. $(LIBAV_INC)
+
+#CFLAGS += -Wall
+
 # Do not strip the binaries at installation
 ifeq ($(STRIPBINARIES),yes)
 INSTALLSTRIP = -s
@@ -35,6 +39,10 @@ SRCS_COMMON = asxparser.c \
               subreader.c \
               vobsub.c \
 
+ifeq ($(UNRARLIB),yes)
+SRCS_COMMON += unrarlib.c
+endif
+
 SRCS_MENCODER = mencoder.c \
                 mp_msg-mencoder.c \
                 $(SRCS_COMMON) \
@@ -44,6 +52,10 @@ SRCS_MENCODER = mencoder.c \
                 parser-mecmd.c \
                 xvid_vbr.c \
 
+ifeq ($(BITMAP_FONT),yes)
+SRCS_MENCODER += libvo/font_load.c
+endif
+
 SRCS_MPLAYER = mplayer.c \
                m_property.c \
                mp_msg.c \
@@ -51,10 +63,6 @@ SRCS_MPLAYER = mplayer.c \
                mixer.c \
                parser-mpcmd.c \
                subopt-helper.c \
-
-ifeq ($(UNRARLIB),yes)
-SRCS_COMMON += unrarlib.c
-endif
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
@@ -103,6 +111,19 @@ CODEC_LIBS = $(AV_LIB) \
              $(MUSEPACK_LIB) \
              $(SPEEX_LIB) \
 
+ifeq ($(TOOLAME),yes)
+CFLAGS += $(TOOLAME_EXTRAFLAGS)
+CODEC_LIBS += $(TOOLAME_LIB)
+endif
+
+ifeq ($(TWOLAME),yes)
+CODEC_LIBS += $(TWOLAME_LIB)
+endif
+
+ifeq ($(FAAC),yes)
+CODEC_LIBS += $(FAAC_LIB)
+endif
+
 COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(W32_LIB) \
               libaf/libaf.a \
@@ -129,23 +150,6 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(ARCH_LIB) \
               $(MATH_LIB) \
               $(LIBC_LIB) \
-
-CFLAGS = $(OPTFLAGS) -I. $(LIBAV_INC)
-
-#CFLAGS += -Wall
-
-ifeq ($(TOOLAME),yes)
-CFLAGS += $(TOOLAME_EXTRAFLAGS) 
-CODEC_LIBS += $(TOOLAME_LIB)
-endif
-
-ifeq ($(TWOLAME),yes)
-CODEC_LIBS += $(TWOLAME_LIB)
-endif
-
-ifeq ($(FAAC),yes)
-CODEC_LIBS += $(FAAC_LIB)
-endif
 
 PARTS = libmpdemux \
         stream \
@@ -245,9 +249,6 @@ ifeq ($(CONFIG_ASS),yes)
 COMMON_DEPS += libass/libass.a
 COMMON_LIBS += libass/libass.a
 PARTS += libass
-endif
-ifeq ($(BITMAP_FONT),yes)
-SRCS_MENCODER += libvo/font_load.c
 endif
 # FontConfig and FreeType need to come after ASS to avoid link failures on MinGW
 COMMON_LIBS += $(FONTCONFIG_LIB)
