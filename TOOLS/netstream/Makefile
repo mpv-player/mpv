@@ -46,7 +46,7 @@ ifeq ($(TARGET_WIN32),yes)
 DEPS += $(MPROOT)/osdep/glob-win.o $(WIN32_LIB) -lwsock32
 endif
 
-netstream: $(MPROOT)/libmpdemux/libmpdemux.a $(MPROOT)/libmpdemux/stream.a netstream.o
+netstream: $(MPROOT)/libmpdemux/libmpdemux.a $(MPROOT)/stream/stream.a netstream.o
 
 	$(CC) $(CFLAGS) netstream.o -o netstream $(DEPS)
 
