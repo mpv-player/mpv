@@ -95,6 +95,7 @@ AO_LIBS = $(ARTS_LIB) \
 CODEC_LIBS = $(AV_LIB) \
              $(FAME_LIB) \
              $(MAD_LIB) \
+             $(LIBDV_LIB) \
              $(VORBIS_LIB) \
              $(THEORA_LIB) \
              $(FAAD_LIB) \
