@@ -113,7 +113,6 @@ CODEC_LIBS = $(AV_LIB) \
              $(SPEEX_LIB) \
 
 ifeq ($(TOOLAME),yes)
-CFLAGS += $(TOOLAME_EXTRAFLAGS)
 CODEC_LIBS += $(TOOLAME_LIB)
 endif
 

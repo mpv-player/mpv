@@ -418,7 +418,7 @@ multiple paths separated by ':'):
   --with-x264libdir=DIR    libx264 in DIR
   --with-libdtslibdir=DIR  libdts library in DIR  (*)
   --with-livelibdir=DIR    LIVE555 Streaming Media libraries in DIR
-  --with-toolamedir=DIR    path to Toolame library and include file
+  --with-toolamelibdir=DIR Toolame library in DIR
   --with-xmmsplugindir=DIR XMMS plugins in DIR
   --with-xmmslibdir=DIR    libxmms.so.1 in DIR
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR (*)
@@ -2064,9 +2064,6 @@ for ac_option do
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-toolamedir=*)
-    _toolamedir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
   --with-mlibdir=*)
     _mlibdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
@@ -2149,6 +2146,9 @@ for ac_option do
     ;;
   --with-cdparanoialibdir=*)
     _ld_cdparanoia=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-toolamelibdir=*)
+    _ld_toolame=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-termcaplib=*)
     _ld_termcap=-l`echo $ac_option | cut -d '=' -f 2`
@@ -5532,19 +5532,14 @@ if test "$_toolame" = auto ; then
 int main(void) { toolame_init(); return 0; }
 EOF
   _toolame=no
-  _toolame_extraflags=""
-  _toolame_lib="-ltoolame"
-  if test -n "$_toolamedir"; then
-    _toolame_extraflags="-I$_toolamedir -L$_toolamedir"
-  fi
-  cc_check $_toolame_extraflags $_toolame_lib $_ld_lm && _toolame=yes
+  cc_check $_ld_toolame -ltoolame $_ld_lm && _toolame=yes
 fi
 if test "$_toolame" = yes ; then
   _def_toolame='#define HAVE_TOOLAME 1'
+  _toolame_lib="-ltoolame"
   _codecmodules="$_codecmodules toolame"
 else
   _def_toolame='#undef HAVE_TOOLAME'
-  _toolame_lib=""
   _nocodecmodules="toolame $_nocodecmodules"
 fi
 if test "$_toolamedir" ; then
@@ -7435,7 +7430,6 @@ MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FRAMEWORKS = $_macosx_frameworks
 MACOSX_COREVIDEO = $_macosx_corevideo
 TOOLAME=$_toolame
-TOOLAME_EXTRAFLAGS=$_toolame_extraflags
 TOOLAME_LIB=$_toolame_lib
 TWOLAME=$_twolame
 TWOLAME_LIB=$_twolame_lib
