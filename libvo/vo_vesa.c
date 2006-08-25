@@ -1022,7 +1022,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	}
 	if(HAS_DGA() && vo_doublebuffering)
 	{
-	    for(i=0;i<MAX_BUFFERS;i++)
+            if (VBE_OK != vbeSetDisplayStart(0, vo_vsync))
+            {
+              mp_msg(MSGT_VO,MSGL_WARN, "[VO_VESA] Can't use double buffering: changing displays failed.\n");
+              multi_size = 1;
+            }
+	    for(i=0;i<multi_size;i++)
 	    {
 		win.ptr = dga_buffer = video_base + multi_buff[i];
                 clear_screen();	/* Clear screen for stupid BIOSes */
