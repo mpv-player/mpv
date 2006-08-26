@@ -408,7 +408,6 @@ multiple paths separated by ':'):
   --with-extraincdir=DIR   extra headers (png, mad, sdl, ...) in DIR (*)
   --with-extralibdir=DIR   extra library files (png, mad, sdl, ...) in DIR (*)
   --with-x11libdir=DIR     X library files in DIR (*)
-  --with-madlibdir=DIR     libmad (libmad shared library) in DIR (*)
   --with-mlibdir=DIR       libmlib (mediaLib support) in DIR (Solaris only)
   --with-codecsdir=DIR     Binary codec files in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
@@ -2140,9 +2139,6 @@ for ac_option do
     ;;
   --with-dvdnav-config=*)
     _dvdnavconfig=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-  --with-madlibdir=*)
-    _ld_mad=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-cdparanoialibdir=*)
     _ld_cdparanoia=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -5513,7 +5509,7 @@ if test "$_mad" = auto ; then
 #include <mad.h>
 int main(void) { return 0; }
 EOF
-  cc_check $_madlibdir -lmad && _mad=yes
+  cc_check -lmad && _mad=yes
 fi
 if test "$_mad" = yes ; then
   _def_mad='#define USE_LIBMAD 1'
