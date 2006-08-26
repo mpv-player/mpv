@@ -423,10 +423,7 @@ multiple paths separated by ':'):
   --with-xmmslibdir=DIR    libxmms.so.1 in DIR
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR (*)
   --with-xvmclib=NAME      name of adapter-specific library (e.g. XvMCNVIDIA)
-  --with-termcaplib=NAME   name of library with termcap functionality
-                           name should be given without leading "lib"
-                           checks for "termcap" and "tinfo"
-  
+
   --with-freetype-config=PATH path to freetype-config
                               (e.g. /opt/bin/freetype-config)
   --with-fribidi-config=PATH  path to fribidi-config
@@ -2150,9 +2147,6 @@ for ac_option do
     ;;
   --with-toolamelibdir=*)
     _ld_toolame=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-    ;;
-  --with-termcaplib=*)
-    _ld_termcap=-l`echo $ac_option | cut -d '=' -f 2`
     ;;
   --prefix=*)
     _prefix=`echo $ac_option | cut -d '=' -f 2`
