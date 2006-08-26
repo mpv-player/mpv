@@ -1425,26 +1425,11 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 	}
 	else if ((stream_id & 0xe0) == 0xc0)
 	{
-		int profile = 0, srate = 0, channels = 0;
-		uint32_t hdr, l = 0;
-
-		hdr = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-		if(pes_is_aligned && ((hdr & 0xfff00000) == 0xfff00000))
-		{
-			// ADTS AAC shows with MPA layer 4 (00 in the layer bitstream)
-			l = 4 - ((hdr & 0x00060000) >> 17);
-			profile = ((hdr & 0x0000C000) >> 14);
-			srate = ((hdr & 0x00003c00) >> 10);
-			channels = ((hdr & 0x000001E0) >> 5);
-		}
-		mp_msg(MSGT_DEMUX, MSGL_DBG2, "\n\naudio header: %2X %2X %2X %2X\nLAYER: %d, PROFILE: %d, SRATE=%d, CHANNELS=%d\n\n", p[0], p[1], p[3], p[4], l, profile, srate, channels);
-
 		es->start   = p;
 		es->size    = packet_len;
 
-
-		if((type_from_pmt == AUDIO_AAC) || (l == 4)) //see in parse_pmt()
-			es->type    = AUDIO_AAC;
+		if(type_from_pmt != UNKNOWN)
+			es->type = type_from_pmt;
 		else
 			es->type    = AUDIO_MP2;
 
