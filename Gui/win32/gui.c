@@ -309,6 +309,17 @@ static void updatedisplay(gui_t *gui, HWND hwnd)
     if((time - oldtime) < 100) return;
     oldtime=time;
 
+    /* suppress directx's fullscreen window when using the sub window */
+    if(sub_window && &video_driver_list[0] && strstr("directx", video_driver_list[0]))
+    {
+        HWND hWndFS = NULL; //handle to directx's fullscreen window
+        if(hWndFS == NULL)
+        {
+            hWndFS = FindWindow(NULL, "MPlayer Fullscreen");
+            if(hWndFS != NULL) DestroyWindow(hWndFS); //sub window handles fullscreen
+        }
+    }
+
     for (i=0; i<gui->window_priv_count; i++)
     {
         if(gui->window_priv[i]->hwnd == hwnd)

@@ -68,6 +68,7 @@ int mplGotoTheNext = 1;
 static gui_t *mygui = NULL;
 static int update_subwindow(void);
 static RECT old_rect;
+static DWORD style;
 
 /* test for playlist files, no need to specify -playlist on the commandline.
  * add any conceivable playlist extensions here.
@@ -404,6 +405,11 @@ void mplEnd( void )
         mygui->playlist->current = 0;
 
     fullscreen = 0;
+    if(style == WS_VISIBLE | WS_POPUP)
+    {
+        style = WS_OVERLAPPEDWINDOW | WS_SIZEBOX;
+        SetWindowLong(mygui->subwindow, GWL_STYLE, style);
+    }
     guiGetEvent(guiCEvent, (void *) guiSetStop);
 }
 
@@ -433,9 +439,6 @@ static DWORD WINAPI GuiThread(void)
        gtkAutoSyncOn = 1;
        gtkAutoSync = autosync;
     }
-
-    old_rect.left = gui_sub_pos_x;
-    old_rect.top = gui_sub_pos_y;
 
     while(mygui)
     {
@@ -670,9 +673,6 @@ int guiGetEvent(int type, char *arg)
                 case guiSetPlay:
                 {
                     guiIntfStruct.Playing = 1;
-                    if(guiIntfStruct.sh_video && !IsIconic(mygui->subwindow)
-                       && IsWindowVisible(mygui->subwindow) && !fullscreen)
-                        GetWindowRect(mygui->subwindow, &old_rect);
                     break;
                 }
                 case guiSetStop:
@@ -697,10 +697,6 @@ int guiGetEvent(int type, char *arg)
             {
                 case MP_CMD_GUI_FULLSCREEN:
                 {
-                    DWORD style;
-                    /* vo_directx's fullscreen window */
-                    HWND hWndFS = FindWindow(NULL, "MPlayer Fullscreen");
-
                     if(!guiIntfStruct.sh_video) break;
 
                     if(!sub_window)
@@ -719,7 +715,6 @@ int guiGetEvent(int type, char *arg)
                     } else {
                         fullscreen = 1;
                         style = WS_VISIBLE | WS_POPUP;
-                        if(hWndFS) DestroyWindow(hWndFS);
                     }
                     SetWindowLong(mygui->subwindow, GWL_STYLE, style);
                     mpcodecs_config_vo(guiIntfStruct.sh_video, guiIntfStruct.MovieWidth,
@@ -944,13 +939,14 @@ static int update_subwindow(void)
         ShowWindow(mygui->subwindow, SW_SHOWNORMAL);
 
     /* get our current window coordinates */
-    if(fullscreen)
-        GetWindowRect(mygui->subwindow, &rd);
-    else
-        CopyRect(&rd, &old_rect);
+    GetWindowRect(mygui->subwindow, &rd);
 
     x = rd.left;
     y = rd.top;
+
+    /* restore sub window position when coming out of fullscreen */
+    if(x <= 0) x = old_rect.left;
+    if(y <= 0) y = old_rect.top;
 
     if(!guiIntfStruct.Playing)
     {
