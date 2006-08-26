@@ -27,9 +27,9 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <ctype.h>
-#include <netdb.h>
 
 #ifndef HAVE_WINSOCK2
+#include <netdb.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
