@@ -1737,7 +1737,13 @@ int ass_render_event(ass_event_t* event)
 
 void ass_configure(ass_instance_t* priv, const ass_settings_t* config)
 {
-	memcpy(&priv->settings, config, sizeof(ass_settings_t));
+	if (memcmp(&priv->settings, config, sizeof(ass_settings_t)) != 0) {
+		mp_msg(MSGT_GLOBAL, MSGL_V, "ass_configure: %d x %d; margins: l: %d, r: %d, t: %d, b: %d  \n",
+				config->frame_width, config->frame_height,
+				config->left_margin, config->right_margin, config->top_margin, config->bottom_margin);
+		memcpy(&priv->settings, config, sizeof(ass_settings_t));
+		ass_glyph_cache_reset();
+	}
 }
 
 /**

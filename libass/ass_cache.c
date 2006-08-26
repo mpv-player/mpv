@@ -190,7 +190,7 @@ void ass_glyph_cache_init(void)
 	glyph_hash_size = 0;
 }
 
-void ass_glyph_cache_done(void)
+void ass_glyph_cache_reset(void)
 {
 	int i;
 	for (i = 0; i < GLYPH_HASH_SIZE; ++i) {
@@ -203,7 +203,12 @@ void ass_glyph_cache_done(void)
 			item = next;
 		}
 	}
-	free(glyph_hash_root);
 	glyph_hash_size = 0;
+}
+
+void ass_glyph_cache_done(void)
+{
+	ass_glyph_cache_reset();
+	free(glyph_hash_root);
 }
 

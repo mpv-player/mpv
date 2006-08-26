@@ -44,6 +44,7 @@ typedef struct glyph_hash_val_s {
 void ass_glyph_cache_init(void);
 void cache_add_glyph(glyph_hash_key_t* key, glyph_hash_val_t* val);
 glyph_hash_val_t* cache_find_glyph(glyph_hash_key_t* key);
+void ass_glyph_cache_reset(void);
 void ass_glyph_cache_done(void);
 
 #endif
