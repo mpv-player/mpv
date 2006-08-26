@@ -7,6 +7,7 @@
 // Stream headers:
 
 typedef struct {
+  int aid;
   demux_stream_t *ds;
   struct codecs_st *codec;
   unsigned int format;
@@ -52,6 +53,7 @@ typedef struct {
 } sh_audio_t;
 
 typedef struct {
+  int vid;
   demux_stream_t *ds;
   struct codecs_st *codec;
   unsigned int format;
@@ -89,8 +91,10 @@ typedef struct {
 } sh_video_t;
 
 // demuxer.c:
-sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id);
-sh_video_t* new_sh_video(demuxer_t *demuxer,int id);
+#define new_sh_audio(d, i) new_sh_audio_aid(d, i, i)
+sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid);
+#define new_sh_video(d, i) new_sh_video_vid(d, i, i)
+sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid);
 void free_sh_audio(demuxer_t *demuxer, int id);
 void free_sh_video(sh_video_t *sh);
 

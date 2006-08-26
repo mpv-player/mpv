@@ -126,10 +126,6 @@ demuxer_desc_t* demuxer_list[] = {
   NULL
 };
 
-// Should be set to 1 by demux module if ids it passes to new_sh_audio and
-// new_sh_video don't match aids and vids it accepts from the command line
-int demux_aid_vid_mismatch = 0;
-
 void free_demuxer_stream(demux_stream_t *ds){
     ds_free_packs(ds);
     free(ds);
@@ -203,7 +199,7 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char
   return d;
 }
 
-sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
+sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
     if(id > MAX_A_STREAMS-1 || id < 0)
     {
 	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
@@ -223,9 +219,9 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
         sh->sample_format=AF_FORMAT_S16_NE;
         sh->audio_out_minsize=8192;/* default size, maybe not enough for Win32/ACM*/
         sh->pts=MP_NOPTS_VALUE;
-        if (!demux_aid_vid_mismatch)
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", id);
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
     }
+    ((sh_audio_t *)demuxer->a_streams[id])->aid = aid;
     return demuxer->a_streams[id];
 }
 
@@ -237,7 +233,7 @@ void free_sh_audio(demuxer_t *demuxer, int id) {
     free(sh);
 }
 
-sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
+sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
     if(id > MAX_V_STREAMS-1 || id < 0)
     {
 	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
@@ -250,9 +246,9 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
-        if (!demux_aid_vid_mismatch)
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", id);
+          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
+    ((sh_video_t *)demuxer->v_streams[id])->vid = vid;
     return demuxer->v_streams[id];
 }
 
@@ -813,8 +809,6 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   int audio_demuxer_type = 0, sub_demuxer_type = 0;
   int demuxer_force = 0, audio_demuxer_force = 0,
       sub_demuxer_force = 0;
-
-  demux_aid_vid_mismatch = 0;
 
   if ((demuxer_type = get_demuxer_type_from_name(demuxer_name, &demuxer_force)) < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_ERR,"-demuxer %s does not exist.\n",demuxer_name);

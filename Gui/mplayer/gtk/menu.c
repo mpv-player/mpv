@@ -16,6 +16,7 @@
 
 #include "../../stream/stream.h"
 #include "../../libmpdemux/demuxer.h"
+#include "../../libmpdemux/stheader.h"
 
 #include "../pixmaps/ab.xpm"
 #include "../pixmaps/half.xpm"
@@ -546,20 +547,14 @@ GtkWidget * create_PopUpMenu( void )
     
     if ( c > 1 )
      {
-      int basedec = 0;
-      int setdec = 0;
       SubMenu=AddSubMenu( window1, (const char*)empty_xpm, Menu,MSGTR_MENU_AudioTrack );
       for ( i=0;i < MAX_A_STREAMS;i++ )
        if ( ((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i] )
         {
+         int aid = ((sh_audio_t *)((demuxer_t *)guiIntfStruct.demuxer)->a_streams[i])->aid;
          char tmp[32];
-         if (!(setdec) )
-           {
-           basedec = (i > 1 ? i : 1);
-           setdec = 1;
-           }
-         snprintf( tmp,32,MSGTR_MENU_Track,(i-(basedec-1)) );
-         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( (i-basedec) << 16 ) + evSetAudio );
+         snprintf( tmp,32,MSGTR_MENU_Track,aid );
+         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( aid << 16 ) + evSetAudio );
         }
      }
 
@@ -572,9 +567,10 @@ GtkWidget * create_PopUpMenu( void )
       for ( i=0;i < MAX_V_STREAMS;i++ )
        if ( ((demuxer_t *)guiIntfStruct.demuxer)->v_streams[i] )
         {
+         int vid = ((sh_video_t *)((demuxer_t *)guiIntfStruct.demuxer)->v_streams[i])->vid;
          char tmp[32];
-         snprintf( tmp,32,MSGTR_MENU_Track,i );
-         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( i << 16 ) + evSetVideo );
+         snprintf( tmp,32,MSGTR_MENU_Track,vid );
+         AddMenuItem( window1, (const char*)empty_xpm, SubMenu,tmp,( vid << 16 ) + evSetVideo );
         }
      }
    }

@@ -271,7 +271,6 @@ typedef struct __attribute__((__packed__))
 extern char *dvdsub_lang;
 extern char *audio_lang;
 extern int dvdsub_id;
-extern int demux_aid_vid_mismatch;
 
 
 static mkv_track_t *
@@ -1687,9 +1686,15 @@ demux_mkv_read_seekhead (demuxer_t *demuxer)
   return res;
 }
 
+static int
+demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid);
+static int
+demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid);
+
 static void
-display_tracks (mkv_demuxer_t *mkv_d)
+display_create_tracks (demuxer_t *demuxer)
 {
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *)demuxer->priv;
   int i, vid=0, aid=0, sid=0;
 
   for (i=0; i<mkv_d->num_tracks; i++)
@@ -1700,12 +1705,12 @@ display_tracks (mkv_demuxer_t *mkv_d)
         {
         case MATROSKA_TRACK_VIDEO:
           type = "video";
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
+          demux_mkv_open_video(demuxer, mkv_d->tracks[i], vid);
           sprintf (str, "-vid %u", vid++);
           break;
         case MATROSKA_TRACK_AUDIO:
           type = "audio";
-          mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_ID=%d\n", aid);
+          demux_mkv_open_audio(demuxer, mkv_d->tracks[i], aid);
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", aid, mkv_d->tracks[i]->language);
           sprintf (str, "-aid %u, -alang %.5s",aid++,mkv_d->tracks[i]->language);
           break;
@@ -1722,7 +1727,7 @@ display_tracks (mkv_demuxer_t *mkv_d)
 }
 
 static int
-demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
+demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
 {
   BITMAPINFOHEADER *bih;
   void *ImageDesc = NULL;
@@ -1878,7 +1883,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
         }
     }
 
-  sh_v = new_sh_video (demuxer, track->tnum);
+  sh_v = new_sh_video_vid (demuxer, track->tnum, vid);
   sh_v->bih = bih;
   sh_v->format = sh_v->bih->biCompression;
   if (track->v_frate == 0.0)
@@ -1911,10 +1916,10 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track)
 }
 
 static int
-demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
+demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track, int aid)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  sh_audio_t *sh_a = new_sh_audio(demuxer, track->tnum);
+  sh_audio_t *sh_a = new_sh_audio_aid(demuxer, track->tnum, aid);
   demux_packet_t *dp;
   if(!sh_a) return 1;
   mkv_d->audio_tracks[mkv_d->last_aid] = track->tnum;
@@ -2394,8 +2399,6 @@ demux_mkv_open (demuxer_t *demuxer)
 
   mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
 
-  demux_aid_vid_mismatch = 1; // don't identify in new_sh_* since ids don't match
-
   mkv_d = (mkv_demuxer_t *) malloc (sizeof (mkv_demuxer_t));
   memset (mkv_d, 0, sizeof(mkv_demuxer_t));
   demuxer->priv = mkv_d;
@@ -2476,7 +2479,7 @@ demux_mkv_open (demuxer_t *demuxer)
         }
     }
 
-  display_tracks (mkv_d);
+  display_create_tracks (demuxer);
 
   /* select video track */
   track = NULL;
@@ -2505,7 +2508,7 @@ demux_mkv_open (demuxer_t *demuxer)
     track = demux_mkv_find_track_by_num (mkv_d, demuxer->video->id,
                                          MATROSKA_TRACK_VIDEO);
 
-  if (track && !demux_mkv_open_video (demuxer, track))
+  if (track && demuxer->v_streams[track->tnum])
               {
                 mp_msg (MSGT_DEMUX, MSGL_INFO,
                         "[mkv] Will play video track %u\n", track->tnum);
@@ -2562,7 +2565,7 @@ demux_mkv_open (demuxer_t *demuxer)
     {
       if(mkv_d->tracks[i]->type != MATROSKA_TRACK_AUDIO)
           continue;
-      if(!demux_mkv_open_audio (demuxer, mkv_d->tracks[i]))
+      if(demuxer->a_streams[track->tnum])
         {
           if(track && mkv_d->tracks[i] == track)
             {

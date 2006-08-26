@@ -62,7 +62,6 @@ int ts_prog;
 int ts_keep_broken=0;
 off_t ts_probe = TS_MAX_PROBE_SIZE;
 extern char *dvdsub_lang, *audio_lang;	//for -alang
-extern int demux_aid_vid_mismatch;
 
 typedef enum
 {
@@ -935,12 +934,10 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	demuxer->sub->id = params.spid;
 	priv->prog = params.prog;
 
-	demux_aid_vid_mismatch = 1; // don't identify in new_sh_* since ids don't match
-
 	if(params.vtype != UNKNOWN)
 	{
 		ES_stream_t *es = priv->ts.pids[params.vpid];
-		sh_video = new_sh_video(demuxer, 0);
+		sh_video = new_sh_video_vid(demuxer, 0, es->pid);
 		if(params.vtype == VIDEO_AVC && es->extradata && es->extradata_len)
 		{
 			int w = 0, h = 0;
@@ -966,7 +963,7 @@ static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	if(params.atype != UNKNOWN)
 	{
 		ES_stream_t *es = priv->ts.pids[params.apid];
-		sh_audio = new_sh_audio(demuxer, 0);
+		sh_audio = new_sh_audio_aid(demuxer, 0, es->pid);
 		priv->ts.streams[params.apid].id = 0;
 		priv->ts.streams[params.apid].sh = sh_audio;
 		priv->ts.streams[params.apid].type = TYPE_AUDIO;
@@ -2756,7 +2753,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		{
 			if((IS_AUDIO(tss->type) || IS_AUDIO(tss->subtype)) && is_start && !priv->ts.streams[pid].sh && priv->last_aid+1 < MAX_A_STREAMS)
 			{
-				sh_audio_t *sh = new_sh_audio(demuxer, priv->last_aid+1);
+				sh_audio_t *sh = new_sh_audio_aid(demuxer, priv->last_aid+1, pid);
 				if(sh)
 				{
 					sh->format = IS_AUDIO(tss->type) ? tss->type : tss->subtype;
