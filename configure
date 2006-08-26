@@ -409,7 +409,7 @@ multiple paths separated by ':'):
   --with-extralibdir=DIR   extra linker search paths in DIR (*)
   --extra-libs=FLAGS       extra linker flags
   --with-x11libdir=DIR     X library files in DIR (*)
-  --with-mlibdir=DIR       libmlib (mediaLib support) in DIR (Solaris only)
+  --with-mliblibdir=DIR    libmlib (mediaLib support) in DIR (Solaris only)
   --with-codecsdir=DIR     Binary codec files in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
@@ -2065,9 +2065,6 @@ for ac_option do
   --with-livelibdir=*)
     _livelibdir=`echo $ac_option | cut -d '=' -f 2`
     ;;
-  --with-mlibdir=*)
-    _mlibdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
 
   --with-xmmslibdir=*)
     _xmmslibdir=`echo $ac_option | cut -d '=' -f 2`
@@ -2110,7 +2107,7 @@ for ac_option do
   --disable-win32) _win32=no ;;
 
   --with-x11libdir=*)
-    _x11libdir=`echo $ac_option | cut -d '=' -f 2`
+    _ld_x11=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-xvmclib=*)
     _xvmclib=`echo $ac_option | cut -d '=' -f 2`
@@ -2123,6 +2120,9 @@ for ac_option do
     ;;
   --with-x264libdir=*)
     _ld_x264=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-mliblibdir=*)
+    _ld_mlib=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -2181,7 +2181,6 @@ test -z "$_datadir" && _datadir="$_prefix/share/mplayer"
 test -z "$_mandir" && _mandir="$_prefix/man"
 test -z "$_confdir" && _confdir="$_prefix/etc/mplayer"
 test -z "$_libdir" && _libdir="$_prefix/lib"
-test -z "$_mlibdir" && _mlibdir="$MLIBHOME"
 
 if x86 ; then
   # Checking assembler (_as) compatibility...
@@ -3744,25 +3743,19 @@ if test "$_x11" != no ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  if test -z "$_x11libdir" ; then
-    _x11libdir="/usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 /usr/lib"
-  fi
-  for I in $_x11libdir ; do
-    _ld_x11="-L$I -lXext -lX11 $_ld_sock $_ld_pthread"
+  for I in $_ld_x11 "" -L/usr/X11R6/lib -L/usr/lib/X11R6 -L/usr/X11/lib \
+           -L/usr/lib32 -L/usr/openwin/lib -L/usr/X11R6/lib64 -L/usr/lib ; do
+    _ld_x11="$I -lXext -lX11 $_ld_sock $_ld_pthread"
     if netbsd; then
-      _ld_x11="$_ld_x11 -Wl,-R$I"
+      _ld_x11="$_ld_x11 -Wl,-R`echo $I | sed s/^-L//`"
     fi
-    if test -d "$I" && cc_check $_ld_x11 ; then
-      _x11=yes
-      break
-    fi
+    cc_check $_ld_x11 && _x11=yes && break
   done
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
   _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
-  _res_comment="using $I"
 else
   _x11=no
   _def_x11='#undef HAVE_X11'
@@ -5013,17 +5006,15 @@ if sunos; then
 echocheck "Sun mediaLib"
 if test "$_mlib" = auto ; then
   _mlib=no
-  test -z "$_mlibdir" && _mlibdir=/opt/SUNWmlib
   cat > $TMPC << EOF
 #include <mlib.h>
 int main(void) { mlib_VideoColorYUV2ABGR420(0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  cc_check  -I${_mlibdir}/include -L${_mlibdir}/lib -lmlib && _mlib=yes
+  cc_check $_ld_mlib -lmlib && _mlib=yes
 fi
 if test "$_mlib" = yes ; then
   _def_mlib='#define HAVE_MLIB 1'
-  _inc_extra="$_inc_extra -I${_mlibdir}/include"
-  _ld_mlib=" -L${_mlibdir}/lib -R${_mlibdir}/lib -lmlib "
+  _ld_mlib="$_ld_mlib `echo $_ld_mlib | sed s/^-L/-R/` -lmlib"
 else
   _def_mlib='#undef HAVE_MLIB'
 fi
