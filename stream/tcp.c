@@ -83,7 +83,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	
 	if( socket_server_fd==-1 ) {
 //		mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to create %s socket:\n", af2String(af));
-		return -2;
+		return TCP_ERROR_FATAL;
 	}
 
 	switch (af) {
@@ -93,7 +93,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #endif
 		default:
 			mp_msg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
-			return -2;
+			return TCP_ERROR_FATAL;
 	}
 	
 	
@@ -118,7 +118,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #endif
 		if( hp==NULL ) {
 			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantResolv, af2String(af), host);
-			return -2;
+			return TCP_ERROR_FATAL;
 		}
 		
 		memcpy( our_s_addr, (void*)hp->h_addr_list[0], hp->h_length );
@@ -145,7 +145,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #endif
 		default:
 			mp_msg(MSGT_NETWORK,MSGL_ERR, MSGTR_MPDEMUX_NW_UnknownAF, af);
-			return -2;
+			return TCP_ERROR_FATAL;
 	}
 
 #if defined(USE_ATON) || defined(HAVE_WINSOCK2)
@@ -170,7 +170,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 #endif
 			if(verb) mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_CantConnect2Server, af2String(af));
 			closesocket(socket_server_fd);
-			return -1;
+			return TCP_ERROR_PORT;
 		}
 	}
 	tv.tv_sec = 0;
@@ -186,7 +186,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnTimeout);
 		else
 		  mp_msg(MSGT_NETWORK,MSGL_V,"Connection interuppted by user\n");
-		return -3;
+		return TCP_ERROR_TIMEOUT;
 	      }
 	      count++;
 	      FD_ZERO( &set );
@@ -207,11 +207,11 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	ret =  getsockopt(socket_server_fd,SOL_SOCKET,SO_ERROR,&err,&err_len);
 	if(ret < 0) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_GetSockOptFailed,strerror(errno));
-		return -2;
+		return TCP_ERROR_FATAL;
 	}
 	if(err > 0) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_NW_ConnectError,strerror(err));
-		return -1;
+		return TCP_ERROR_PORT;
 	}
 	
 	return socket_server_fd;
@@ -226,13 +226,13 @@ int
 connect2Server(char *host, int  port, int verb) {
 #ifdef HAVE_AF_INET6
 	int r;
-	int s = -2;
+	int s = TCP_ERROR_FATAL;
 
 	r = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET:AF_INET6,verb);	
-	if (r > -1) return r;
+	if (r >= 0) return r;
 
 	s = connect2Server_with_af(host, port, network_prefer_ipv4 ? AF_INET6:AF_INET,verb);
-	if (s == -2) return r;
+	if (s == TCP_ERROR_FATAL) return r;
 	return s;
 #else	
 	return connect2Server_with_af(host, port, AF_INET,verb);
