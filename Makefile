@@ -150,6 +150,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(ARCH_LIB) \
               $(MATH_LIB) \
               $(LIBC_LIB) \
+              $(EXTRALIBS) \
 
 PARTS = libmpdemux \
         stream \

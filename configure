@@ -406,7 +406,8 @@ Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
 Use these options if autodetection fails (Options marked with (*) accept
 multiple paths separated by ':'):
   --with-extraincdir=DIR   extra headers (png, mad, sdl, ...) in DIR (*)
-  --with-extralibdir=DIR   extra library files (png, mad, sdl, ...) in DIR (*)
+  --with-extralibdir=DIR   extra linker search paths in DIR (*)
+  --extra-libs=FLAGS       extra linker flags
   --with-x11libdir=DIR     X library files in DIR (*)
   --with-mlibdir=DIR       libmlib (mediaLib support) in DIR (Solaris only)
   --with-codecsdir=DIR     Binary codec files in DIR
@@ -500,6 +501,9 @@ for ac_option do
     ;;
   --with-extralibdir=*)
     _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --extra-libs=*)
+    _extra_libs=`echo $ac_option | cut -d '=' -f 2`
     ;;
   --enable-runtime-cpudetection)
     _runtime_cpudetection=yes
@@ -1719,6 +1723,7 @@ for ac_option do
   --disable-static*) ;;
   --with-extraincdir=*) ;;
   --with-extralibdir=*) ;;
+  --extra-libs=*) ;;
   --enable-runtime-cpudetection) ;;
   --disable-runtime-cpudetection) ;;
   --enable-cross-compile) ;;
@@ -7301,6 +7306,7 @@ PNG = $_png
 JPEG = $_jpeg
 GIF = $_gif
 
+EXTRALIBS = $_extra_libs
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib
 HAVE_MLIB = $_mlib
