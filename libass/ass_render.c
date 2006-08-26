@@ -117,6 +117,7 @@ typedef struct frame_context_s {
 	ass_instance_t* ass_priv;
 	int width, height; // screen dimensions
 	int orig_height; // frame height ( = screen height - margins )
+	int orig_width; // frame width ( = screen width - margins )
 	ass_track_t* track;
 	int add_bottom_margin; // additional margin, used to shift subtitles in case of collision
 	int add_top_margin;
@@ -140,7 +141,8 @@ static void ass_lazy_track_init(void)
 		track->PlayResX = 384;
 		track->PlayResY = 288;
 	} else {
-		double orig_aspect = (global_settings->aspect * frame_context.height) / frame_context.orig_height;
+		double orig_aspect = (global_settings->aspect * frame_context.height * frame_context.orig_width) /
+			frame_context.orig_height / frame_context.width;
 		if (!track->PlayResY) {
 			track->PlayResY = track->PlayResX / orig_aspect + .5;
 			mp_msg(MSGT_GLOBAL, MSGL_WARN, "PlayResY undefined, setting %d  \n", track->PlayResY);
@@ -410,7 +412,7 @@ static int render_text(text_info_t* text_info, int dst_x, int dst_y)
  * \brief Mapping between script and screen coordinates
  */
 static int x2scr(int x) {
-	return x*frame_context.width / frame_context.track->PlayResX;
+	return x*frame_context.width / frame_context.track->PlayResX + global_settings->left_margin;
 }
 /**
  * \brief Mapping between script and screen coordinates
@@ -420,11 +422,18 @@ static int y2scr(int y) {
 }
 // the same for toptitles
 static int y2scr_top(int y) {
-	return y * frame_context.orig_height / frame_context.track->PlayResY;
+	if (global_settings->use_margins)
+		return y * frame_context.orig_height / frame_context.track->PlayResY;
+	else
+		return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin;
 }
 // the same for subtitles
 static int y2scr_sub(int y) {
-	return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin + global_settings->bottom_margin;
+	if (global_settings->use_margins)
+		return y * frame_context.orig_height / frame_context.track->PlayResY +
+		       global_settings->top_margin + global_settings->bottom_margin;
+	else
+		return y * frame_context.orig_height / frame_context.track->PlayResY + global_settings->top_margin;
 }
 
 static void vmirror_bbox(FT_BBox* orig, FT_BBox* pbbox) {
@@ -1745,6 +1754,7 @@ int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
 	frame_context.ass_priv = priv;
 	frame_context.width = global_settings->frame_width;
 	frame_context.height = global_settings->frame_height;
+	frame_context.orig_width = global_settings->frame_width - global_settings->left_margin - global_settings->right_margin;
 	frame_context.orig_height = global_settings->frame_height - global_settings->top_margin - global_settings->bottom_margin;
 	frame_context.track = track;
 	frame_context.add_bottom_margin = 0;

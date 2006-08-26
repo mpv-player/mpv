@@ -14,6 +14,10 @@ typedef struct ass_settings_s {
 	double line_spacing; // additional line spacing (in frame pixels)
 	int top_margin; // height of top margin. Everything except toptitles is shifted down by top_margin.
 	int bottom_margin; // height of bottom margin. (frame_height - top_margin - bottom_margin) is original video height.
+	int left_margin;
+	int right_margin;
+	int use_margins; // 0 - place all subtitles inside original frame
+	                 // 1 - use margins for placing toptitles and subtitles
 	double aspect; // frame aspect ratio, d_width / d_height.
 } ass_settings_t;
 
