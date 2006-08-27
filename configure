@@ -3667,11 +3667,11 @@ if test "$_directfb" = auto ; then
 #include <directfb.h>
 int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
 EOF
-  for _inc_directfb in "" -I/usr/local/include/directfb \
+  for _inc_tmp in "" -I/usr/local/include/directfb \
       -I/usr/include/directfb -I/usr/local/include -I/usr/include; do
-    cc_check $_inc_directfb -ldirectfb && _directfb=yes && break
+    cc_check $_inc_tmp -ldirectfb && _directfb=yes && \
+      _inc_extra="$_inc_extra $_inc_tmp" && break
   done
-  _inc_extra="$_inc_extra $_inc_directfb"
   fi
 fi
 
@@ -4206,10 +4206,10 @@ cat >$TMPC << EOF
 #include <ost/audio.h>
 int main(void) {return 0;}
 EOF
-  for _inc_dvb in "" "-I/usr/src/DVB/ost/include" ; do
-    cc_check $_inc_dvb && _dvb=yes && break
+  for _inc_tmp in "" "-I/usr/src/DVB/ost/include" ; do
+    cc_check $_inc_tmp && _dvb=yes && \
+     _inc_extra="$_inc_extra $_inc_tmp" && break
   done
-  _inc_extra="$_inc_extra $_inc_dvb"
 fi
 echores "$_dvb"
 if test "$_dvb" = yes ; then
@@ -4236,10 +4236,10 @@ cat >$TMPC << EOF
 #include <linux/dvb/audio.h>
 int main(void) {return 0;}
 EOF
-  for _inc_dvb in "" "-I/usr/src/DVB/include" ; do
-    cc_check $_inc_dvb && _dvbhead=yes && break
+  for _inc_tmp in "" "-I/usr/src/DVB/include" ; do
+    cc_check $_inc_tmp && _dvbhead=yes && \
+      _inc_extra="$_inc_extra $_inc_tmp" && break
   done
-  _inc_extra="$_inc_extra $_inc_dvb"
 fi
 echores "$_dvbhead"
 if test "$_dvbhead" = yes ; then
@@ -4597,10 +4597,10 @@ if test "$_dxr2" = auto; then
 #include <dxr2ioctl.h>
 int main(void) { return 0; }
 EOF
-  for _inc_dxr2 in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
-    cc_check $_inc_dxr2 && _dxr2=yes && break
+  for _inc_tmp in "" -I/usr/local/include/dxr2 -I/usr/include/dxr2; do
+    cc_check $_inc_tmp && _dxr2=yes && \
+     _inc_extra="$_inc_extra $_inc_tmp" && break
   done
-  _inc_extra="$_inc_extra $_inc_dxr2"
 fi
 if test "$_dxr2" = yes; then
   _def_dxr2='#define HAVE_DXR2 1'
@@ -5185,10 +5185,10 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    for _inc_cdparanoia in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
-       cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm && _cdparanoia=yes && break
+    for _inc_tmp in "" "-I/usr/include/cdda" "-I/usr/local/include/cdda" ; do
+      cc_check $_inc_tmp $_ld_cdparanoia -lcdda_interface -lcdda_paranoia $_ld_lm && \
+        _cdparanoia=yes && _inc_extra="$_inc_extra $_inc_tmp" && break
     done
-    _inc_extra="$_inc_extra $_inc_cdparanoia"
 fi
 if test "$_cdparanoia" = yes ; then
     _cdda='yes'
@@ -5221,9 +5221,8 @@ EOF
         _libcdio=no
     for _inc_tmp in "" "-I/usr/include/cdio" "-I/usr/local/include/cdio" ; do
         cc_check `pkg-config --cflags --libs libcdio_paranoia` $_inc_tmp $_ld_lm \
-            && tmp_run && _libcdio=yes && break
+          && tmp_run && _libcdio=yes && _inc_extra="$_inc_extra $_inc_tmp" && break
     done
-    _inc_extra="$_inc_extra $_inc_tmp"
     else
         _libcdio=no
     fi
