@@ -104,7 +104,7 @@ while(fgets(sor,1020,f)){
   
   if (first) {
     if (!sor[0] || sor[1] == 1 || (sor[0] == 'M' && sor[1] == 'Z') || (sor[0] == 0x1f && sor[1] == 0x8b) || (sor[0] == 1 && sor[1] == 0x66)) {
-      mp_msg(MSGT_OSD, MSGL_ERR, "%s doesn't look like a font description, ignoring.\n", fname);
+      mp_msg(MSGT_OSD, MSGL_ERR, "%s doesn't look like a bitmap font description, ignoring.\n", fname);
       goto fail_out;
     }
     first = 0;
@@ -322,7 +322,7 @@ for(i=0;i<65536;i++)
 desc->font[' ']=-1;
 desc->width[' ']=desc->spacewidth;
 
-mp_msg(MSGT_OSD, MSGL_V, "Font %s loaded successfully! (%d chars)\n",fname,chardb);
+mp_msg(MSGT_OSD, MSGL_V, "Bitmap font %s loaded successfully! (%d chars)\n",fname,chardb);
 
 return desc;
 
