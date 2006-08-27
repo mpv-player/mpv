@@ -74,6 +74,7 @@ static int config(struct vf_instance_s* vf,
 	vf->priv->dirty_rows = malloc(vf->priv->outh);
 	
 	if (vf->priv->ass_priv) {
+		memset(&settings, 0, sizeof(ass_settings_t));
 		settings.frame_width = vf->priv->outw;
 		settings.frame_height = vf->priv->outh;
 		settings.font_size_coeff = ass_font_scale;
