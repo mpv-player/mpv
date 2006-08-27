@@ -71,7 +71,7 @@ static char help_text[]=
 #define MSGTR_CreatingCfgFile "Creating config file: %s\n"
 #define MSGTR_CopyCodecsConf "(Copy/link etc/codecs.conf from the MPlayer sources to ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Using built-in default codecs.conf.\n"
-#define MSGTR_CantLoadFont "Cannot load font: %s\n"
+#define MSGTR_CantLoadFont "Cannot load bitmap font: %s\n"
 #define MSGTR_CantLoadSub "Cannot load subtitles: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Selected stream missing!\n"
 #define MSGTR_CantOpenDumpfile "Cannot open dump file.\n"
