@@ -71,7 +71,6 @@ VO_LIBS = $(AA_LIB) \
           $(X_LIB) \
           $(SDL_LIB) \
           $(GGI_LIB) \
-          $(MLIB_LIB) \
           $(SVGA_LIB) \
           $(DIRECTFB_LIB) \
           $(CACA_LIB) \
@@ -140,6 +139,7 @@ COMMON_LIBS = libmpcodecs/libmpcodecs.a \
               $(MPLAYER_NETWORK_LIB) \
               $(LIBCDIO_LIB) \
               $(WIN32_LIB) \
+              $(MLIB_LIB) \
               $(GIF_LIB) \
               $(MACOSX_FRAMEWORKS) \
               $(SMBSUPPORT_LIB) \
@@ -389,7 +389,6 @@ ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
                 $(ENCORE_LIB) \
                 $(COMMON_LIBS) \
-                $(MLIB_LIB) \
 
 $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
