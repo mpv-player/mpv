@@ -1628,37 +1628,37 @@ int ass_render_event(ass_event_t* event)
 	MarginV = (event->MarginV) ? event->MarginV : style->MarginV;
 
 	if (render_context.evt_type != EVENT_HSCROLL) {
-	// calculate max length of a line
-	max_text_width = x2scr(frame_context.track->PlayResX - MarginR) - x2scr(MarginL);
+		// calculate max length of a line
+		max_text_width = x2scr(frame_context.track->PlayResX - MarginR) - x2scr(MarginL);
 
-	// rearrange text in several lines
-	wrap_lines_smart(max_text_width);
+		// rearrange text in several lines
+		wrap_lines_smart(max_text_width);
 
-	// align text
-	last_break = -1;
-	for (i = 1; i < text_info.length + 1; ++i) { // (text_info.length + 1) is the end of the last line
-		if ((i == text_info.length) || text_info.glyphs[i].linebreak) {
-			int width, shift;
-			glyph_info_t* first_glyph = text_info.glyphs + last_break + 1;
-			glyph_info_t* last_glyph = text_info.glyphs + i - 1;
+		// align text
+		last_break = -1;
+		for (i = 1; i < text_info.length + 1; ++i) { // (text_info.length + 1) is the end of the last line
+			if ((i == text_info.length) || text_info.glyphs[i].linebreak) {
+				int width, shift;
+				glyph_info_t* first_glyph = text_info.glyphs + last_break + 1;
+				glyph_info_t* last_glyph = text_info.glyphs + i - 1;
 
-			while ((last_glyph >= first_glyph) && ((last_glyph->symbol == '\n') || (last_glyph->symbol == 0)))
-				last_glyph --;
+				while ((last_glyph >= first_glyph) && ((last_glyph->symbol == '\n') || (last_glyph->symbol == 0)))
+					last_glyph --;
 
-			width = last_glyph->pos.x + last_glyph->bbox.xMax - first_glyph->pos.x - first_glyph->bbox.xMin;
-			shift = - first_glyph->bbox.xMin; // now text line starts exactly at 0 (left margin)
-			if (halign == HALIGN_LEFT) { // left aligned, no action
-			} else if (halign == HALIGN_RIGHT) { // right aligned
-				shift = max_text_width - width;
-			} else if (halign == HALIGN_CENTER) { // centered
-				shift = (max_text_width - width) / 2;
+				width = last_glyph->pos.x + last_glyph->bbox.xMax - first_glyph->pos.x - first_glyph->bbox.xMin;
+				shift = - first_glyph->bbox.xMin; // now text line starts exactly at 0 (left margin)
+				if (halign == HALIGN_LEFT) { // left aligned, no action
+				} else if (halign == HALIGN_RIGHT) { // right aligned
+					shift = max_text_width - width;
+				} else if (halign == HALIGN_CENTER) { // centered
+					shift = (max_text_width - width) / 2;
+				}
+				for (j = last_break + 1; j < i; ++j) {
+					text_info.glyphs[j].pos.x += shift;
+				}
+				last_break = i - 1;
 			}
-			for (j = last_break + 1; j < i; ++j) {
-				text_info.glyphs[j].pos.x += shift;
-			}
-			last_break = i - 1;
 		}
-	}
 	}
 	
 	// determing text bounding box
