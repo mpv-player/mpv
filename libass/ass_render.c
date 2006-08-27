@@ -91,7 +91,9 @@ typedef struct render_context_s {
 	int alignment; // alignment overrides go here; if zero, style value will be used
 	double rotation;
 	enum {	EVENT_NORMAL, // "normal" top-, sub- or mid- title
-		EVENT_POSITIONED // happens after pos(,), margins are ignored
+		EVENT_POSITIONED, // happens after pos(,), margins are ignored
+		EVENT_HSCROLL, // "Banner" transition effect, text_width is unlimited
+		EVENT_VSCROLL // "Scroll up", "Scroll down" transition effects
 		} evt_type;
 	int pos_x, pos_y; // position
 	int org_x, org_y; // origin
@@ -104,6 +106,13 @@ typedef struct render_context_s {
 
 	effect_t effect_type;
 	int effect_timing;
+
+	enum { SCROLL_LR, // left-to-right
+	       SCROLL_RL,
+	       SCROLL_TB, // top-to-bottom
+	       SCROLL_BT
+	       } scroll_direction; // for EVENT_HSCROLL, EVENT_VSCROLL
+	int scroll_shift;
 
 	// face properties
 	char* family;
@@ -1023,6 +1032,70 @@ static unsigned get_next_char(char** str)
 	return chr;
 }
 
+static void apply_transition_effects(ass_event_t* event)
+{
+	int v[4];
+	int cnt;
+	char* p = event->Effect;
+
+	if (!p || !*p) return;
+
+	cnt = 0;
+	while (cnt < 4 && (p = strchr(p, ';'))) {
+		v[cnt++] = atoi(++p);
+	}
+	
+	if (strncmp(event->Effect, "Banner;", 7) == 0) {
+		int delay;
+		if (cnt < 1) {
+			mp_msg(MSGT_GLOBAL, MSGL_V, "Error parsing effect: %s \n", event->Effect);
+			return;
+		}
+		if (cnt >= 2 && v[1] == 0) // right-to-left
+			render_context.scroll_direction = SCROLL_RL;
+		else // left-to-right
+			render_context.scroll_direction = SCROLL_LR;
+
+		delay = v[0];
+		if (delay == 0) delay = 1; // ?
+		render_context.scroll_shift = (frame_context.time - render_context.event->Start) / delay;
+		render_context.evt_type = EVENT_HSCROLL;
+		return;
+	}
+
+	if (strncmp(event->Effect, "Scroll up;", 10) == 0) {
+		render_context.scroll_direction = SCROLL_BT;
+	} else if (strncmp(event->Effect, "Scroll down;", 12) == 0) {
+		render_context.scroll_direction = SCROLL_TB;
+	} else {
+		mp_msg(MSGT_GLOBAL, MSGL_V, "Unknown transition effect: %s \n", event->Effect);
+		return;
+	}
+	// parse scroll up/down parameters
+	{
+		int delay;
+		int y0, y1;
+		if (cnt < 3) {
+			mp_msg(MSGT_GLOBAL, MSGL_V, "Error parsing effect: %s \n", event->Effect);
+			return;
+		}
+		delay = v[2];
+		if (delay == 0) delay = 1; // ?
+		render_context.scroll_shift = (frame_context.time - render_context.event->Start) / delay;
+		if (v[0] < v[1]) {
+			y0 = v[0]; y1 = v[1];
+		} else {
+			y0 = v[1]; y1 = v[0];
+		}
+		if (y1 == 0)
+			y1 = frame_context.track->PlayResY; // y0=y1=0 means fullscreen scrolling
+		render_context.clip_y0 = y0;
+		render_context.clip_y1 = y1;
+		render_context.evt_type = EVENT_VSCROLL;
+	}
+
+}
+
 /**
  * \brief Start new event. Reset render_context.
  */
@@ -1078,6 +1151,8 @@ static int init_render_context(ass_event_t* event)
 			change_border(border);
 		}
 	}
+
+	apply_transition_effects(event);
 	
 	return 0;
 }
@@ -1430,7 +1505,7 @@ int ass_render_event(ass_event_t* event)
 	ass_style_t* style = frame_context.track->styles + event->Style;
 	int last_break;
 	int alignment, halign, valign;
-	int device_x, device_y;
+	int device_x = 0, device_y = 0;
 
 	init_render_context(event);
 
@@ -1541,23 +1616,23 @@ int ass_render_event(ass_event_t* event)
 	// depends on glyph x coordinates being monotonous, so it should be done before line wrap
 	process_karaoke_effects();
 	
-	// calculate max length of a line
-	MarginL = (event->MarginL) ? event->MarginL : style->MarginL; 
-	MarginR = (event->MarginR) ? event->MarginR : style->MarginR; 
-	MarginV = (event->MarginV) ? event->MarginV : style->MarginV;
-
-	max_text_width = x2scr(frame_context.track->PlayResX - MarginR) - x2scr(MarginL);
-	mp_msg(MSGT_GLOBAL, MSGL_DBG2, "normal text width: %d\n", max_text_width);
-
-	// rearrange text in several lines
-	wrap_lines_smart(max_text_width);
-	
 	// alignments
 	alignment = render_context.alignment;
 	if (!alignment)
 		alignment = render_context.style->Alignment;
 	halign = alignment & 3;
 	valign = alignment & 12;
+
+	MarginL = (event->MarginL) ? event->MarginL : style->MarginL; 
+	MarginR = (event->MarginR) ? event->MarginR : style->MarginR; 
+	MarginV = (event->MarginV) ? event->MarginV : style->MarginV;
+
+	if (render_context.evt_type != EVENT_HSCROLL) {
+	// calculate max length of a line
+	max_text_width = x2scr(frame_context.track->PlayResX - MarginR) - x2scr(MarginL);
+
+	// rearrange text in several lines
+	wrap_lines_smart(max_text_width);
 
 	// align text
 	last_break = -1;
@@ -1584,17 +1659,27 @@ int ass_render_event(ass_event_t* event)
 			last_break = i - 1;
 		}
 	}
+	}
 	
 	// determing text bounding box
 	compute_string_bbox(&text_info, &bbox);
 	
 	// determine device coordinates for text
-
-	// FIXME: using current font descender, ascender and height here is wrong.
-	// correct way is using max(descender) over all the fonts used in a line
-	// the same for height and ascender
-	if (render_context.evt_type == EVENT_NORMAL) {
+	
+	// x coordinate for everything except positioned events
+	if (render_context.evt_type == EVENT_NORMAL ||
+	    render_context.evt_type == EVENT_VSCROLL) {
 		device_x = x2scr(MarginL);
+	} else if (render_context.evt_type == EVENT_HSCROLL) {
+		if (render_context.scroll_direction == SCROLL_RL)
+			device_x = x2scr(frame_context.track->PlayResX - render_context.scroll_shift);
+		else if (render_context.scroll_direction == SCROLL_LR)
+			device_x = x2scr(render_context.scroll_shift) - (bbox.xMax - bbox.xMin);
+	}
+
+	// y coordinate for everything except positioned events
+	if (render_context.evt_type == EVENT_NORMAL ||
+	    render_context.evt_type == EVENT_HSCROLL) {
 		if (valign == VALIGN_TOP) { // toptitle
 			device_y = y2scr_top(MarginV) + (text_info.lines[0].asc >> 6);
 			if (render_context.detect_collisions) {
@@ -1617,7 +1702,15 @@ int ass_render_event(ass_event_t* event)
 				frame_context.add_bottom_margin += (text_info.height >> 6);
 			}
 		}
-	} else if (render_context.evt_type == EVENT_POSITIONED) {
+	} else if (render_context.evt_type == EVENT_VSCROLL) {
+		if (render_context.scroll_direction == SCROLL_TB)
+			device_y = y2scr(render_context.clip_y0 + render_context.scroll_shift) - (bbox.yMax - bbox.yMin);
+		else if (render_context.scroll_direction == SCROLL_BT)
+			device_y = y2scr(render_context.clip_y1 - render_context.scroll_shift);
+	}
+
+	// positioned events are totally different
+	if (render_context.evt_type == EVENT_POSITIONED) {
 		int align_shift_x = 0;
 		int align_shift_y = 0;
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "positioned event at %d, %d\n", render_context.pos_x, render_context.pos_y);
@@ -1645,16 +1738,14 @@ int ass_render_event(ass_event_t* event)
 		}
 		device_x = x2scr(render_context.pos_x) + align_shift_x;
 		device_y = y2scr(render_context.pos_y) + align_shift_y;
-	} else {
-		mp_msg(MSGT_GLOBAL, MSGL_V, "unknown evt_type\n");
-		device_x = 10;
-		device_y = 10;
 	}
 	
 	// fix clip coordinates (they depend on alignment)
 	render_context.clip_x0 = x2scr(render_context.clip_x0);
 	render_context.clip_x1 = x2scr(render_context.clip_x1);
-	if (render_context.evt_type == EVENT_NORMAL) {
+	if (render_context.evt_type == EVENT_NORMAL ||
+	    render_context.evt_type == EVENT_HSCROLL ||
+	    render_context.evt_type == EVENT_VSCROLL) {
 		if (valign == VALIGN_TOP) {
 			render_context.clip_y0 = y2scr_top(render_context.clip_y0);
 			render_context.clip_y1 = y2scr_top(render_context.clip_y1);
