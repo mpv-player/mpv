@@ -93,7 +93,7 @@ void mp_msg(int mod, int lev, const char *format, ... ){
       }
       if (msgiconv == (iconv_t)(-1)) {
         fprintf(stderr,"iconv: conversion from %s to %s unsupported\n"
-               ,mp_msg_charset,MSG_CHARSET);
+               ,MSG_CHARSET,mp_msg_charset);
       }else{
       memset(tmp2, 0, MSGSIZE_MAX);
       while (iconv(msgiconv, &in, &inlen, &out, &outlen) == -1) {
