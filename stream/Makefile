@@ -115,7 +115,7 @@ endif
 
 OBJS	= $(SRCS:.c=.o)
 INCLUDE = -I.. -I../loader $(LIBAV_INC)
-CFLAGS  = $(INCLUDE) $(OPTFLAGS) $(XMMS_CFLAGS)
+CFLAGS  = $(INCLUDE) $(OPTFLAGS)
 
 .SUFFIXES: .c .o
 
