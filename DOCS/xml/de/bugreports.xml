@@ -196,7 +196,7 @@ gute Sache, sich anzumelden, um auch wirklich eine Antwort zu erhalten.
 Du wirst wahrscheinlich Logdateien, Konfigurationsinformationen und Beispieldateien
 in deinen Fehlerbericht aufnehmen müssen. Werden einige von ihnen ziemlich groß,
 ist es besser, wenn du sie auf unseren
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/">FTP-Server</ulink> hochlädst,
+<ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">FTP-Server</ulink> hochlädst,
 und zwar in komprimierter Form (gzip und bzip2 bevorzugt). Gib dann in deinem
 Fehlerbericht nur den Pfad- und den Dateinamen an. Unsere Mailinglisten haben ein
 Nachrichten-Größenlimit von 80k, wenn du etwas größeres hast, musst du es
@@ -336,7 +336,7 @@ angemessen zu untersuchen. Du kannst die Ausgabe folgendermaßen in eine Datei au
 
 <para>
 Wenn dein Problem speziell mit einer oder mehreren Dateien zu tun hat, lade diese bitte hoch nach:
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>

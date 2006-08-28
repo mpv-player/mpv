@@ -807,7 +807,7 @@ Jest to kodek MP3. Teraz powiniene¶ mieæ wszystkie niezbêdne informacje
 dla kodeka za pomoc± poczty elektronicznej i wy¶lij ww. pliki na poni¿szy
 serwer FTP:
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
@@ -921,7 +921,7 @@ bêdziesz mia³ szczê¶cie...
 Teraz, kiedy masz ju¿ wszystkie niezbêdne informacje (fourcc, GUID, plik
 z kodekiem, przyk³adowy plik AVI), umie¶æ swoj± pro¶bê o wsparcie dla kodeka
 za pomoc± poczty elektronicznej i wy¶lij ww. pliki na poni¿szy serwer FTP:
-<systemitem role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 

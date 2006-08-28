@@ -194,7 +194,7 @@ a választ.
 <para>
 A hibajelentésedhez csatolnod kell a log-ot, konfigurációs vagy minta fájlokat.
 Ha ezek közül valamelyik nagy, jobb ha feltöltöd az
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/">FTP szerverünkre</ulink> tömörített
+<ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">FTP szerverünkre</ulink> tömörített
 formátumban (gzip és bzip2 a javasolt) és csak az elérési utat és a fájl nevet írod
 bele a hiba jelentésedbe. A levelezési listáinkon az üzenet mérete maximum 80k lehet,
 ha ennél nagyobb fájlod van, tömörítened kell, vagy feltöltened.
@@ -333,7 +333,7 @@ diagnosztizálják a problémát. A kimenetet átirányíthatod fájlba így:
 
 <para>
 Ha a probléma egy vagy több fájl esetén specifikus, kérlek töltsd fel ide:
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/incoming/"/>
+<ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>

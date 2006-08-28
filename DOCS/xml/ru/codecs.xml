@@ -942,7 +942,7 @@ AVI с такого рода сообщением:
 кодеком, пример AVI), представьте на рассмотрение запрос о поддержке Вашего
 кодека по почте и загрузите эти файлы на FTP сайт:
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
@@ -1053,7 +1053,7 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
 пример AVI), представьте на рассмотрение запрос о поддержке Вашего кодека по
 почте и загрузите эти файлы на FTP сайт:
 <systemitem
-role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 </sect3>

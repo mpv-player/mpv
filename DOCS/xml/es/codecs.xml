@@ -801,7 +801,7 @@ audio son especificados por el prefijo MSACM:
 (fourcc, archivo de codec, AVI ejemplo), envíe su petición de soporte
 de codec por correo, y suba esos archivos al sitio FTP:
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nombrecodec]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[nombrecodec]/
 </systemitem>
 </para>
 
@@ -914,7 +914,7 @@ Ahora que tiene toda la información necesaria (fourcc, GUID, archivo de codec,
 y AVI de ejemplo), envíe la petición de soporte del codec por correo, y suba los
 archivos al sitio FTP:
 <systemitem
-role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nombrecodec]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[nombrecodec]/
 </systemitem>
 </para>
 </sect3>

@@ -792,7 +792,7 @@ Ez az MP3 codec. Most már minden szükséges információval rendelkezel
 (fourcc, codec fájl, példa AVI), küldd be a codec támogatási kérésedet egy
 levélben és töltsd fel ezket a fájlokat az FTP-re:
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecneve]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
 </systemitem>
 </para>
 
@@ -904,7 +904,7 @@ Most, hogy már megvan minden szükséges információ (fourcc, GUID, codec fájl,
 példa AVI), küldd el a codec támogatási kérelmedet levélben és töltsd fel a fájlokat
 az FTP-re:
 <systemitem
-role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecneve]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecneve]/
 </systemitem>
 </para>
 

@@ -940,7 +940,7 @@ C'est le codec MP3. Nous avons désormais toutes les informations nécessaires
 (fourcc, fichier codec, fichier AVI). Demandez le support de votre codec par
 mail, et envoyez ces fichiers sur le FTP :
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nomcodec]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[nomcodec]/
 </systemitem>
 </para>
 
@@ -1055,7 +1055,7 @@ Nous avons désormais toutes les informations nécessaires (fourcc, GUID, fichier
 codec, fichier AVI), demandez le support de votre codec par mail, et envoyez
 ces fichiers sur le FTP :
 <systemitem
-role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[nomcodec]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[nomcodec]/
 </systemitem>
 </para>
 

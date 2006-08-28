@@ -795,7 +795,7 @@ This is the MP3 codec.  Now that you have all the necessary information
 (fourcc, codec file, sample AVI), submit your codec support request by
 mail, and upload these files to the FTP site:
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
@@ -907,7 +907,7 @@ Now that you have all the necessary information (fourcc, GUID, codec file,
 sample AVI), submit your codec support request by mail, and upload these files
 to the FTP site:
 <systemitem
-role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 

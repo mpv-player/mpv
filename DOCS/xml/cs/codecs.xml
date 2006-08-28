@@ -803,7 +803,7 @@ To je kodek MP3. Nyní ji¾ máte v¹echny potøebné informace
 (fourcc, soubor kodeku, vzorek AVI). Po¹lete po¾adavek na podporu va¹eho
 kodeku mailem a nahrajte tyto soubory na FTP server:
 <systemitem role="url">
-ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
@@ -919,7 +919,7 @@ dostanete nesprávné výsledky, ale mù¾ete mít ¹tìstí...
 Nyní kdy¾ máte v¹echny potøebné informace (fourcc, GUID, soubor kodeku,
 vzorek AVI), po¹lete po¾adavek na podporu svého kodeku mailem a nahrajte
 tyto soubory na FTP server:
-<systemitem role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/
+<systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
