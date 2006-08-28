@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.cz
 //                 Jiri Heryan
-// Synced to 18818
+// Synced with revision 19454
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -191,6 +191,9 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "Poslední stop znaèka byla [%f]; dal¹í start je [%f].\n"\
 "Vstupy musí být v chronologickém poøadí a nesmí se pøekrývat. Zahazuji.\n"
 #define MSGTR_EdlBadLineBadStop "Èasová znaèka stop má být za znaèkou start.\n"
+#define MSGTR_EdloutBadStop "EDL: Vynechání zru¹eno, poslední start > stop\n"
+#define MSGTR_EdloutStartSkip "EDL: Zaèátek vynechaného bloku, stisknìte znovu 'i' pro ukonèení bloku.\n"
+#define MSGTR_EdloutEndSkip "EDL: Konec vynechaného bloku, øádek zapsán.\n"
 
 // mplayer.c OSD
 
@@ -200,6 +203,7 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Zpo¾dìní tit: %d ms"
 #define MSGTR_OSDSpeed "Rychlost: x %6.2f"
 #define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDChapter "Kapitola: (%d) %s"
 
 // property values
 #define MSGTR_Enabled "zapnuto"
@@ -475,12 +479,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Kodek není správnì definován."
 #define MSGTR_OutdatedCodecsConf "Tento codecs.conf je pøíli¹ starý a nekompatibilní s tímto sestavením  MPlayeru!"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "nedostatek pamìti"
-#define MSGTR_OverridingTooLowBitrate "Nastavený datový tok je pøíli¹ malý pro tento klip.\n"\
-"Minimální mo¾ný datový tok pro tento klip  je %.0f kbps. Pøepisuji\n"\
-"u¾ivatelem nastavenou hodnotu.\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Nelze vytvoøit ROURU!\n"
 
@@ -516,6 +514,8 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer nebyl pøelo¾en s podporou ètení SMB.\n"
 
 #define MSGTR_CantOpenDVD "Nelze otevøít DVD zaøízení: %s\n"
+
+// stream_dvd.c
 #define MSGTR_NoDVDSupport "MPlayer byl zkompilován bez podpory DVD, konèím.\n"
 #define MSGTR_DVDnumTitles "Na tomto DVD je %d titul(ù).\n"
 #define MSGTR_DVDinvalidTitle "Neplatné èíslo DVD titulu: %d\n"
@@ -530,8 +530,12 @@ static char help_text[]=
 #define MSGTR_DVDnoVOBs "Nelze otevøít VOBy titulu (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDnoMatchingAudio "DVD zvuk v po¾adovaném jazyce nebyl nalezen!\n"
 #define MSGTR_DVDaudioChannel "Vybrán DVD zvukový kanál: %d jazyk: %c%c\n"
+#define MSGTR_DVDaudioStreamInfo "audio proud: %d formát: %s (%s) jazyk: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "poèet zvukových kanálù na disku: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "DVD titulky v po¾adovaném jazyce nebyly nalezeny!\n"
 #define MSGTR_DVDsubtitleChannel "Vybrán DVD titulkový kanál: %d jazyk: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "titulky ( sid ): %d jazyk: %s\n"
+#define MSGTR_DVDnumSubtitles "poèet sad titulkù na disku: %d\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Pøíli¹ mnoho datových proudù!"
@@ -587,7 +591,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Nepovedlo se otevøít audio demuxer: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Nepovedlo se otevøít demuxer pro titulky: %s\n"
 #define MSGTR_TVInputNotSeekable "TV vstup neumo¾òuje posun! (\"Posun\" bude pravdìpodobnì pou¾it pro zmìnu kanálù ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Informace o demuxeru %s je ji¾ pøítomna!\n"
+#define MSGTR_DemuxerInfoChanged "Info demuxeru %s zmìnìno na %s\n"
 #define MSGTR_ClipInfo "Informace o klipu:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: detekováno 30000/1001 fps NTSC, pøepínám frekvenci snímkù.\n"
@@ -1424,6 +1428,23 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Server vrátil %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Vyrovnávací pamì» nastavena na %d KBajtù\n"
 
+// demux_audio.c
+
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: neznámý formát %d.\n"
+
+// demux_demuxers.c
+
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer chyba: ¹patný demuxer: ani vd, ad nebo sd.\n"
+
+// demux_nuv.c
+
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "V souboru nejsou ¾ádné bloky videa.\n"
+
+// demux_xmms.c
+
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Nalezen plugin: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Uzavírám plugin: %s.\n"
+
 // ========================== LIBMPMENU ===================================
 
 // common
@@ -1539,13 +1560,7 @@ static char help_text[]=
 // libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
 #define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s není dal¹ím filtrem/vo podporován :(\n"
 
-
-
-#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Audio demuxer: neznámý formát %d.\n"
-#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "fill_buffer chyba: ¹patný demuxer: ani vd, ad nebo sd.\n"
-#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "V souboru nejsou ¾ádné bloky videa.\n"
-#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Nalezen plugin: %s (%s).\n"
-#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Uzavírám plugin: %s.\n"
+// ================================== LIBMPVO ====================================
 
 // mga_common.c
 
@@ -1575,6 +1590,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_3DFX_CouldntMapMemoryArea "[VO_3DFX] Nemohu namapovat oblasti pamìti 3dfx: %p,%p,%d.\n"
 #define MSGTR_LIBVO_3DFX_DisplayInitialized "[VO_3DFX] Inicialozováno: %p.\n"
 #define MSGTR_LIBVO_3DFX_UnknownSubdevice "[VO_3DFX] Neznámé podzaøízení: %s.\n"
+
+// libvo/vo_dxr3.c
+
 #define MSGTR_LIBVO_DXR3_UnableToLoadNewSPUPalette "[VO_DXR3] Nemohu nahrát novou SPU paletu!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetPlaymode "[VO_DXR3] Nemohu nastavit re¾im pøehrávání!\n"
 #define MSGTR_LIBVO_DXR3_UnableToSetSubpictureMode "[VO_DXR3] Nemohu nastavit re¾im titulkù!\n"
@@ -1636,6 +1654,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_PNG_Warning3 "[VO_PNG] Info: (0 = ¾ádná komprese, 1 = nejrychlej¹í, nejni¾¹í - 9 nejvy¹¹í, ale nejpomalej¹í komprese)\n"
 #define MSGTR_LIBVO_PNG_ErrorOpeningForWriting "\n[VO_PNG] Nemohu otevøít '%s' pro zápis!\n"
 #define MSGTR_LIBVO_PNG_ErrorInCreatePng "[VO_PNG] Chyba pøi create_png.\n"
+
+// libvo/vo_sdl.c
+
 #define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Nemohu získat ¾ádný akceptovatelný re¾im SDL pro výstup.\n"
 #define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode selhalo: %s.\n"
 #define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode selhalo: %s.\n"
@@ -1669,6 +1690,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_SUB_VIDIX_CouldntGetCapability "[VO_SUB_VIDIX] Nemohu zjistit schopnosti: %s.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_Description "[VO_SUB_VIDIX] Popis: %s.\n"
 #define MSGTR_LIBVO_SUB_VIDIX_Author "[VO_SUB_VIDIX] Autor: %s.\n"
+
+// libvo/vo_svga.c
+
 #define MSGTR_LIBVO_SVGA_ForcedVidmodeNotAvailable "[VO_SVGA] Vynucený vid_mode %d (%s) není k dispozici.\n"
 #define MSGTR_LIBVO_SVGA_ForcedVidmodeTooSmall "[VO_SVGA] Vynucený vid_mode %d (%s) je pøíli¹ malý.\n"
 #define MSGTR_LIBVO_SVGA_Vidmode "[VO_SVGA] Vid_mode: %d, %dx%d %dbpp.\n"
@@ -1705,6 +1729,9 @@ static char help_text[]=
 #define MSGTR_LIBVO_TDFXFB_SomethingIsWrongWithControl "[VO_TDFXFB] Echt! Nìco není v poøádku s control().\n"
 #define MSGTR_LIBVO_TDFXFB_NotEnoughVideoMemoryToPlay "[VO_TDFXFB] Pro pøehrávání filmu není dostatek video pamìti. Zkuste ni¾¹í rozli¹ení.\n"
 #define MSGTR_LIBVO_TDFXFB_ScreenIs "[VO_TDFXFB] Obrazovka je %dx%d pøi %d bpp, vstup je %dx%d pøi %d bpp, norma je %dx%d.\n"
+
+// libvo/vo_tdfx_vid.c
+
 #define MSGTR_LIBVO_TDFXVID_Move "[VO_TDXVID] Pøesun %d(%d) x %d => %d.\n"
 #define MSGTR_LIBVO_TDFXVID_AGPMoveFailedToClearTheScreen "[VO_TDFXVID] AGP pøesunu se nepodaøilo vyèistit obrazovku.\n"
 #define MSGTR_LIBVO_TDFXVID_BlitFailed "[VO_TDFXVID] Blit selhal.\n"
@@ -1770,7 +1797,11 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_UsingVidix "[VO_VESA] Pou¾ívám VIDIX.\n"
 #define MSGTR_LIBVO_VESA_CantFindModeFor "[VO_VESA] Nemohu najít re¾im pro: %ux%u@%u.\n"
 #define MSGTR_LIBVO_VESA_InitializationComplete "[VO_VESA] Inicializace VESA je dokonèena.\n"
+
+// libvo/vo_x11.c
+
 #define MSGTR_LIBVO_X11_DrawFrameCalled "[VO_X11] Zavoláno draw_frame()!!!\n"
+
+// libvo/vo_xv.c
+
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] Zavoláno draw_frame()!!!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "mga: ©patný výstupní formát %0X\n"
-#define MSGTR_LIBVO_SDL_InitializationFailed "[VO_SDL] Nepodaøilo se inicializovat SDL: %s.\n"
