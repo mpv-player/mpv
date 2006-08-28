@@ -16,6 +16,7 @@
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 #endif
+#include "libass/ass.h"
 
 static vo_info_t info = 
 {
@@ -51,13 +52,16 @@ static GLuint osdtex[MAX_OSD_PARTS];
 //! Alpha textures for OSD
 static GLuint osdatex[MAX_OSD_PARTS];
 #endif
+static GLuint *eosdtex;
 //! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
 #ifndef FAST_OSD
 static GLuint osdaDispList[MAX_OSD_PARTS];
 #endif
+static GLuint eosdDispList;
 //! How many parts the OSD currently consists of
 static int osdtexCnt;
+static int eosdtexCnt;
 static int osd_color;
 
 static int use_aspect;
@@ -223,6 +227,61 @@ static void clearOSD(void) {
 }
 
 /**
+ * \brief remove textures, display list and free memory used by EOSD
+ */
+static void clearEOSD(void) {
+  if (!eosdtexCnt)
+    return;
+  glDeleteTextures(eosdtexCnt, eosdtex);
+  free(eosdtex);
+  eosdtex = NULL;
+  glDeleteLists(eosdDispList, 1);
+  eosdtexCnt = 0;
+}
+
+/**
+ * \brief construct display list from ass image list
+ * \param img image list to create OSD from.
+ *            A value of NULL has the same effect as clearEOSD()
+ */
+static void genEOSD(ass_image_t *img) {
+  int sx, sy;
+  GLuint *curtex;
+  GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
+  ass_image_t *i;
+  clearEOSD();
+  for (i = img; i; i = i->next)
+    eosdtexCnt++;
+  if (!eosdtexCnt)
+    return;
+  eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
+  glGenTextures(eosdtexCnt, eosdtex);
+  for (i = img, curtex = eosdtex; i; i = i->next, curtex++) {
+    if (i->w <= 0 || i->h <= 0 || i->stride < i->w) {
+      mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
+      continue;
+    }
+    texSize(i->w, i->h, &sx, &sy);
+    BindTexture(gl_target, *curtex);
+    glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
+    glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, i->bitmap, i->stride,
+                0, 0, i->w, i->h, 0);
+  }
+  eosdDispList = glGenLists(1);
+  glNewList(eosdDispList, GL_COMPILE);
+  for (i = img, curtex = eosdtex; i; i = i->next, curtex++) {
+    if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
+      continue;
+    glColor4ub(i->color >> 24, (i->color >> 16) & 0xff, (i->color >> 8) & 0xff, 255 - (i->color & 0xff));
+    texSize(i->w, i->h, &sx, &sy);
+    BindTexture(gl_target, *curtex);
+    glDrawTex(i->dst_x, i->dst_y, i->w, i->h, 0, 0, i->w, i->h, sx, sy, use_rectangle == 1, 0, 0);
+  }
+  glEndList();
+  BindTexture(gl_target, 0);
+}
+
+/**
  * \brief uninitialize OpenGL context, freeing textures, buffers etc.
  */
 static void uninitGl(void) {
@@ -236,6 +295,7 @@ static void uninitGl(void) {
     glDeleteTextures(i, default_texs);
   default_texs[0] = 0;
   clearOSD();
+  clearEOSD();
   if (DeleteBuffers && gl_buffer)
     DeleteBuffers(1, &gl_buffer);
   gl_buffer = 0; gl_buffersize = 0;
@@ -248,6 +308,7 @@ static void uninitGl(void) {
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
   osdtexCnt = 0; gl_buffer = 0; gl_buffersize = 0; err_shown = 0;
+  eosdtexCnt = 0;
   fragprog = 0;
   texSize(image_width, image_height, &texture_width, &texture_height);
 
@@ -532,7 +593,7 @@ flip_page(void)
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(gl_target, yuvconvtype);
 
-  if (osdtexCnt > 0) {
+  if (osdtexCnt > 0 || eosdtexCnt > 0) {
     // set special rendering parameters
     if (!scaled_osd) {
     glMatrixMode(GL_PROJECTION);
@@ -541,6 +602,11 @@ flip_page(void)
     glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
     }
     glEnable(GL_BLEND);
+    if (eosdtexCnt > 0) {
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+      glCallList(eosdDispList);
+    }
+  if (osdtexCnt > 0) {
     glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff);
     // draw OSD
 #ifndef FAST_OSD
@@ -549,6 +615,7 @@ flip_page(void)
 #endif
     glBlendFunc(GL_ONE, GL_ONE);
     glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
+  }
     // set rendering parameters back to defaults
     glDisable (GL_BLEND);
     if (!scaled_osd)
@@ -674,7 +741,7 @@ query_format(uint32_t format)
                VFCAP_FLIP |
                VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (use_osd)
-      caps |= VFCAP_OSD;
+      caps |= VFCAP_OSD | VFCAP_EOSD;
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
         return caps;
     if (use_yuv && format == IMGFMT_YV12)
@@ -818,6 +885,25 @@ static int control(uint32_t request, void *data, ...)
     return get_image(data);
   case VOCTRL_DRAW_IMAGE:
     return draw_image(data);
+  case VOCTRL_DRAW_EOSD:
+    genEOSD(data);
+    return VO_TRUE;
+  case VOCTRL_GET_EOSD_RES:
+    {
+      mp_eosd_res_t *r = data;
+      r->mt = r->mb = r->ml = r->mr = 0;
+      if (scaled_osd) {r->w = image_width; r->h = image_height;}
+      else if (vo_fs) {
+        int aw, ah;
+        aspect(&aw, &ah, A_ZOOM);
+        r->w = vo_screenwidth; r->h = vo_screenheight;
+        r->ml = r->mr = (vo_screenwidth - aw) / 2;
+        r->mt = r->mb = (vo_screenheight - ah) / 2;
+      } else {
+        r->w = vo_dwidth; r->h = vo_dheight;
+      }
+    }
+    return VO_TRUE;
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
