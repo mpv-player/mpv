@@ -193,8 +193,10 @@ static void draw_slice(struct vf_instance_s* vf,
 static void uninit(struct vf_instance_s* vf)
 {
     if (vf->priv) {
+#ifdef USE_ASS
         if (vf->priv->ass_priv)
             ass_done(vf->priv->ass_priv);
+#endif
         free(vf->priv);
     }
 }
