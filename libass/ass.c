@@ -162,6 +162,7 @@ static void rskip_spaces(char** str, char* limit) {
  */
 static int lookup_style(ass_track_t* track, char* name) {
 	int i;
+	if (*name == '*') ++name; // FIXME: what does '*' really mean ?
 	for (i=0; i<track->n_styles; ++i) {
 		// FIXME: mb strcasecmp ?
 		if (strcmp(track->styles[i].Name, name) == 0)
