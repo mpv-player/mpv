@@ -102,6 +102,13 @@ I. BASICS:
   It's very easy for stray debug output or cosmetic modifications to slip in,
   please avoid problems through this extra level of scrutiny.
 
+  Also check the output of
+
+    svn status
+
+  to make sure you did not forget to svn add some files (those will be marked
+  with '?').
+
   Once you have made sure everything is fine
 
     svn commit <filename(s)>
