@@ -787,6 +787,9 @@ Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * major code cleanups
     * TOOLS/qepdvcd.sh
 
+Voroshilov, Vladimir <voroshil@gmail.com>
+    * Radio support
+
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter
 
@@ -1045,9 +1048,6 @@ Vesko, Radic <rvesko@EUnet.yu>
 
 Vigvary, Balasz (Toky)
     * avifile
-
-Voroshilov, Vladimir <voroshil@gmail.com>
-    * Radio support
 
 Weber, Andrew (Webby) <webbypssht@gmail.com>
     * webby, smoothwebby
