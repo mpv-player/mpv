@@ -1375,7 +1375,7 @@ extern int create_subwindow(gui_t *gui, char *skindir)
     /* our window aspect */
     sub_aspect = (float)(rect.right-rect.left)/(rect.bottom-rect.top);
 
-    style = WS_OVERLAPPEDWINDOW | WS_SYSMENU | WS_MINIMIZEBOX;
+    style = fullscreen?WS_VISIBLE | WS_POPUP:WS_OVERLAPPEDWINDOW | WS_SYSMENU | WS_MINIMIZEBOX;
     AdjustWindowRect(&rect, style, 0);
 
     if (gui_sub_pos_x >= 0)
