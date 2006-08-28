@@ -64,6 +64,9 @@ DWORD oldtime;
 NOTIFYICONDATA nid;
 int console_state = 0;
 
+static HBRUSH    colorbrush = NULL;           //Handle to colorkey brush
+static COLORREF windowcolor = RGB(255,0,255); //Windowcolor == colorkey
+
 void console_toggle(void)
 {
     if (console_state)
@@ -603,6 +606,7 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             RECT rect;
             HDC hdc = BeginPaint(hWnd, &ps);
             HDC hMemDC = CreateCompatibleDC(hdc);
+            HBRUSH blackbrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
             int width, height;
             GetClientRect(hWnd, &rect);
             width = rect.right - rect.left;
@@ -619,6 +623,8 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 SelectObject(hMemDC, get_bitmap(hWnd));
                 StretchBlt(hdc, 0, 0, width, height, hMemDC, 0, 0, desc->base->bitmap[0]->width,
                            desc->base->bitmap[0]->height, SRCCOPY);
+            } else {
+                FillRect(GetDC(hWnd), &rect, fullscreen?blackbrush:colorbrush);
             }
             DeleteDC(hMemDC);
             EndPaint(hWnd, &ps);
@@ -1333,7 +1339,7 @@ extern int create_subwindow(gui_t *gui, char *skindir)
     window_priv_t *priv = NULL;
     window *desc = NULL;
     int i, x = -1, y = -1;
-    vo_colorkey = 0xff000000;
+    vo_colorkey = 0xff00ff;
 
     for (i=0; i<gui->skin->windowcount; i++)
         if(gui->skin->windows[i]->type == wiSub)
@@ -1345,6 +1351,8 @@ extern int create_subwindow(gui_t *gui, char *skindir)
         return 1;
     }
 
+    windowcolor = vo_colorkey;
+    colorbrush = CreateSolidBrush(windowcolor);
     wc.style = CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
     wc.lpfnWndProc = SubProc;
     wc.cbClsExtra = 0;
@@ -1352,7 +1360,7 @@ extern int create_subwindow(gui_t *gui, char *skindir)
     wc.hInstance = instance;
     wc.hCursor = LoadCursor(NULL, IDC_ARROW);
     wc.hIcon = gui->icon;
-    wc.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+    wc.hbrBackground = NULL; //WM_PAINT will handle background color switching;
     wc.lpszClassName = "MPlayer Sub for Windows";
     wc.lpszMenuName = NULL;
     RegisterClass(&wc);
