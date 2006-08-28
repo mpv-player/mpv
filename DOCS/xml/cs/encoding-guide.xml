@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 18545 -->
+<!-- Synced with revision 19043 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -1668,10 +1668,10 @@ Nedělejte to! Vždy použijte jako zdroj soubor nebo CD/DVD/atd zařízení.
 <formalpara>
 <title>Co je to telecine?</title>
 <para>
-  Pokud moc nerozumíte tomu, co je napsáno v tomto dokumentu, doporučujeme
-  navštívit tuto stránku:
-  <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
-  Na této adrese je srozumitelný a rozumně vyčerpávající popis co je to
+  Pokud moc nerozumíte tomu, co je napsáno v tomto dokumentu,
+  přečtěte si
+  <ulink url="http://en.wikipedia.org/wiki/Telecine">článek na Wikipedii</ulink>.
+  Je to srozumitelný a rozumně vyčerpávající popis co je to
   telecine.
 </para></formalpara>
 

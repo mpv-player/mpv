@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 17707  -->
+<!-- Synced with revision 19504  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -148,6 +148,50 @@ v Debianu Sarge je to <filename>libx11-dev</filename>. Také se přesvědčte,
 problém v systémech Mandrake).
 </para></answer>
 </qandaentry>
+
+
+<qandaentry>
+<question><para>
+Kompilace na Mac OS 10.3 vede k několika linkovacím chybám</para></question>
+<answer><para>
+Chyba linkování, kterou zakoušíte vypadá nejspíš takto:
+<screen>
+ld: Undefined symbols:
+_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
+</screen>
+Tento problém působí vývojáři Apple, kteří používají 10.4 pro kompilaci
+svého software a distribuují binárky uživatelům 10.3 přes
+Software Update.
+Nedefinované symboly jsou přítomny v Mac OS 10.4,
+ale nikoli 10.3.
+Jedním z řešení může být downgrade na QuickTime 7.0.1.
+Následující řešení je však lepší.
+</para><para>
+Stáhněte si <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">starší verzi framevorků</ulink>.
+Získáte zde komprimovaný soubor obsahující QuickTime
+7.0.1 Framework a 10.3.9 QuartzCore Framework.
+</para><para>
+Rozbalte soubory někde mimo adresář System.
+(čili neinstalujte tyto frameworky do svého
+<filename class="directory">/System/Library/Frameworks</filename>!
+Použití těchto starších verzí slouží jen k obejití linkovacích chyb!)
+<screen>
+gunzip &lt; CompatFrameworks.tgz | tar xvf -
+</screen>
+V config.mak byste měli přidat
+<systemitem>-F/cesta/kam/jste/to/rozbalili</systemitem>
+do proměnné <systemitem>OPTFLAGS</systemitem>.
+Pokud používáte <application>X-Code</application>, můžete prostě zvolit tyto
+frameworky místo systémových.
+</para><para>
+Výsledná binárka <application>MPlayer</application>u bude využívat
+framework nainstalovaný na vašem systému přes dynamické linkování
+prováděné za běhu.
+(Můžete si to ověřit pomocí <systemitem>otool -l</systemitem>).
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 
 <qandadiv id="faq-general">
@@ -954,6 +998,30 @@ Poměr stran lze opravit díky volbě <application>MEncoder</application>u
 v AVI OpenDML vprp hlavičce. Například:
 <screen>
 mencoder <replaceable>vstupní.avi</replaceable> -ovc copy -oac copy -o <replaceable>výstupní.avi</replaceable> -force-avi-aspect 4/3
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu zálohovat a enkódovat VOB soubor s poškozeným začátkem?
+</para></question>
+<answer><para>
+Hlavní problém, když chcete enkódovat VOB soubor, který je poškozen
+<footnote id='fn-corrupted-files-or-copy-protection'><para>
+Navíc některé formy ochrany proti kopírování používané na DVD mohou
+být považovány za poškození obsahu.
+</para></footnote>,
+je to, že bude velmi těžké získat enkódovaný soubor s perfektní A/V synchronizací.
+Jedna z možností je vystřihnout poškozenou část a enkódovat jen
+čistou část.
+Nejdřív musíte zjistit, kde čistá část začíná:
+<screen>
+mplayer <replaceable>input.vob</replaceable> -sb <replaceable>nb_of_bytes_to_skip</replaceable>
+</screen>
+Pak můžete vytvořit nový soubor obsahující pouze bezchybnou část:
+<screen>
+dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</replaceable> skip=1 ibs=<replaceable>nb_of_bytes_to_skip</replaceable>
 </screen>
 </para></answer>
 </qandaentry>

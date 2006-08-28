@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 17865  -->
+<!-- Synced with: 18964  -->
 <chapter id="usage">
 <title>Použití</title>
 
@@ -358,9 +358,9 @@ jako je automatické vystřihávání reklam z videa které sleduješ.
 </para>
 
 <para>
-Formát EDL souboru je poměrně kostrbatý. Jakmile dospěje EDL systém do určité
-úrovně, pravděpodobně bude implementován formát založený na XML
-(ponecháme zpětnou kompatibilitu s předchozími EDL formáty).
+Formát EDL souboru je poměrně kostrbatý. Každý příkaz je na samostatném
+řádku a označuje co dělat (vystřihnout/ztišit) a kdy to dělat
+(pomocí ukazatelů v sekundách).
 </para>
 
 <sect2 id="edl_using">
@@ -395,10 +395,11 @@ v souboru.
 
 <para>
 Pro vytvoření EDL souboru se kterým budete moci začít, použijte volbu
-<option>-edlout &lt;soubor&gt;</option>. Během přehrávání, když budete chtít
-označit předchozí 2 sekundy pro vynechání, stiskněte <keycap>i</keycap>.
-Odpovídající značka bude zapsána do souboru pro tento čas. Můžete se k němu pak
-vrátit a doladit vytvořený EDL soubor.
+<option>-edlout &lt;soubor&gt;</option>. Během přehrávání jen stiskněte
+<keycap>i</keycap> pro označení začátku a konce bloku. Pro vyznačený čas
+bude do souboru zapsán odpovídající záznam. Můžete se pak vrátit a doladit
+vygenerovaný EDL soubor, stejně jako změnit výchozí akci, což je vystřižení
+vyznačených bloků.
 </para>
 </sect2>
 

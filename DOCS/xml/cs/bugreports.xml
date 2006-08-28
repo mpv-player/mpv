@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 18600 -->
+<!-- Synced with revision 19039 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
 <para>
@@ -315,12 +315,6 @@ Zahrňte prosím tyto soubory:
 <itemizedlist>
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
-</itemizedlist>
-Pouze pokud selže kompilace pod jedním z těchto adresářů, zahrňte tyto soubory:
-<itemizedlist>
-<listitem><para>Gui/config.mak</para></listitem>
-<listitem><para>libvo/config.mak</para></listitem>
-<listitem><para>libao2/config.mak</para></listitem>
 </itemizedlist>
 </para>
 </sect2>

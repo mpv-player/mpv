@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 18255 -->
+<!-- Synced with: 19265 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -342,6 +342,49 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 </para>
 </example>
 </sect1>
+
+
+<sect1 id="menc-feat-handheld-psp">
+<title>Enkódovánído video formátu Sony PSP</title>
+
+<para>
+  <application>MEncoder</application> podporuje enkódování do Sony PSP video
+  formátu, ale mohou se lišit, v závislosti na revizi PSP softwaru, s tím
+  spojená omezení.
+  Budete-li respektovat následující omezení, neměli byste narazit na potíže:
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Datový tok</emphasis>: by neměl překročit 1500kbps,
+  ale poslední verze podporovaly prakticky jakýkoli datový tok pokud hlavička
+  tvrdí, že není příliš vysoký.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Rozměry</emphasis>: šířka a výška PSP videa
+  by měly být násobky 16 a výsledek šířka * výška musí
+  být &lt;= 64000.
+  Za určitých okolností může být možné, aby PSP hrál i ve vyšším rozlišení.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Audio</emphasis>: jeho vzorkovací kmitočet by měl být 24khz
+  pro videa MPEG-4 a 48khz pro H.264.
+</para></listitem>
+</itemizedlist>
+</para>
+
+<example>
+<title>Příklad</title>
+<para>
+<screen>
+mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+-af lavcresample=24000 -vf harddup -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+-ofps 30000/1001 vstup.video -o výstup.psp
+</screen>
+  Poznamenejme, že můžete nastavit jméno videa pomocí
+  <option>-info name=<replaceable>JménoFilmu</replaceable></option>.
+</para>
+</example>
+</sect1>
+
 
 <sect1 id="menc-feat-mpeg">
 <title>Enkódování do MPEG formátu</title>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced to: 17975 -->
+<!-- Synced with revision 19087 -->
 <chapter id="install">
 <title>Instalace</title>
 
@@ -204,29 +204,6 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   i QDesign audio proudů.
   Návod na instalaci naleznete v části
   <link linkend="sorenson">Sorensonův video kodek</link>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">DivX4/DivX5</emphasis>: informace o tomto kodeku jsou
-  dostupné v části <link linkend="divx4-5">DivX4/DivX5</link>. Pravděpodobně
-  tento kodek nebudete
-  vůbec potřebovat, protože
-  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
-  (viz výš) je mnohem rychlejší a dosahuje lepší kvality než on jak při dekódování,
-  tak při enkódování. Vlastnosti:
-  <itemizedlist>
-  <listitem><simpara>
-    jedno nebo dvouprůchodové enkódování pomocí
-    <link linkend="mencoder"><application>MEncoder</application>u</link>
-    </simpara></listitem>
-  <listitem><simpara>
-    umí přehrávat staré <emphasis role="bold">DivX3</emphasis> filmy mnohem
-    rychleji než Win32 DLL ale pomaleji než
-    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
-    </simpara></listitem>
-  <listitem><simpara>
-    jeho kód je uzavřený a je k dispozici pouze x86 verze.
-    </simpara></listitem>
-  </itemizedlist>
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XviD</emphasis>: Open source enkódovací alternativa

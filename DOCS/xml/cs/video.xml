@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 18650 -->
+<!-- Synced with revision 19081 -->
 <chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -878,8 +878,9 @@ framebufferu a nechtějte to po nás, jelikož to není omezení
 
 <para>
 Tato sekce je o podpoře Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-jaderného modulu mga_vid. Aktivně je vyvíjena A'rpim a má hardwarovou
-podporu VSYNC s trojitou vyrovnávací pamětí. Pracuje jak v konzoli, tak pod X.
+jaderného modulu <systemitem>mga_vid</systemitem>.
+Má hardwarovou podporu VSYNC s trojitou vyrovnávací pamětí.
+Pracuje jak v konzoli, tak pod X.
 </para>
 
 <warning>
@@ -1499,12 +1500,6 @@ autodetekce.
 </para>
 
 <para>
-VIDIX je nová technologie a je extrémně možné, že na vašem systému nebude
-pracovat. V tom případě je jediným řešením ji portovat (hlavně libdha).
-Ale je šance, že bude pracovat na systémech, kde funguje X11.
-</para>
-
-<para>
 Jelikož VIDIX vyžaduje přímý přístup k hardware, můžete jej buď spustit jako
 root, nebo nastavit SETUID bit binárce <application>MPlayer</application>u
 (<emphasis role="bold">Varování: Toto je bezpečnostní risk!</emphasis>).
@@ -1595,43 +1590,14 @@ netestoval, takže hlášení vítáme.
 <sect3 id="vidix-nvidia">
 <title>Karty nVidia</title>
 <para>
-Existuje relativně nová ovladač pro nVidie o kterém je známo, že pracuje
-s čipsety Riva 128, TNT a GeForce2 a některé další byly rovněž hlášeny jako
-funkční.
-</para>
-
-<itemizedlist spacing="compact">
-<title>OMEZENÍ</title>
-<listitem><para>
-  Doporučujeme použití binárních nVidia ovladačů pro X přednostně před tímto
-  VIDIX ovladačem, protože některé registry, které je nutné nastavit nebyly
-  dosud oběveny, takže pravděpodobně selže s Open Source XFree86
-  ovladačem <filename>nv.o</filename>.
-  </para></listitem>
-<listitem><para>
-  V současnosti mohou s tímto ovladačem pracovat pouze kodeky schopné výstupu
-  v barevném prostoru UYVY. Naneštěstí to vylučuje všechny dekodéry z rodiny
-  <systemitem class="library">libavcodec</systemitem>. Takže zůstávají
-  následující použitelné populární kodeky:
-  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> a některé
-  další. Mějte však prosím na paměti, že to je pouze dočasná obtíž.
-  Syntaxe pro použití je následující:
-  <screen>mplayer -vf format=uyvy -vc divxds <replaceable>divx3file.avi</replaceable> </screen>
-  </para></listitem>
-</itemizedlist>
-
-<para>
   Unikátní vlastností ovladače nvidia_vid je jeho schopnost zobrazit video na
   <emphasis role="bold">jednoduché, čisté, pouze textové konzoli</emphasis>
   &ndash; bez framebufferu nebo nějaké X magie. Pro tento účel budete muset
   použít video rozhraní <option>cvidix</option>, jak to ukazuje následující
   příklad:
-  <screen>mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>příklad.avi</replaceable> </screen>
+  <screen>mplayer -vo cvidix <replaceable>příklad.avi</replaceable></screen>
 </para>
 
-<para>
-Hlášení očekávána!
-</para>
 </sect3>
 
 <sect3 id="vidix-sis">

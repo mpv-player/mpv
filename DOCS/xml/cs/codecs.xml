@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 18824 -->
+<!-- Synced with revision 19387 -->
 <chapter id="codecs">
 <title>Kodeky</title>
 
@@ -80,80 +80,6 @@ a pomozte nám přidat pro něj podporu.
 </para>
 
 
-<sect2 id="divx4-5">
-<title>DivX4/DivX5</title>
-
-<para>
-Tato sekce obsahuje informace o kodecích DivX4 a DivX5 z
-<ulink url="http://www.projectmayo.com">Projektu Mayo</ulink>.
-Jejich první dostupná alfa verze byl OpenDivX 4.0 alpha 47 a 48.
-Jejich podpora byla v minulosti přidána do
-<application>MPlayer</application>u a zakompilovává se automaticky.
-Rovněž jsme používali jejich postprocesní kód pro volitelné vylepšování
-kvality MPEG-1/2 filmů. Nyní již používáme naše vlastní pro všechny typy
-souborů.
-</para>
-
-<para>
-Nová generace tohoto kodeku se nazývala DivX4 a byla schopna dokonce dekódovat
-filmy vytvořené pomocí nechvalně známého DivX kodeku!
-Navíc je mnohem rychlejší než nativní Win32 DivX DLL, ale pomalejší než
-<systemitem class="library">libavcodec</systemitem>.
-Proto jeho použití jako dekodéru
-<emphasis role="bold">nedoporučujeme</emphasis>. Nicméně jej lze s úspěchem
-používat pro enkódování. Jediná nevýhoda tohoto kodeku je, že není k dispozici
-pod Open Source licencí.
-</para>
-
-<para>
-DivX4 pracuje ve dvou režimech:
-<variablelist>
-<varlistentry><term><option>-vc odivx</option></term>
-<listitem><simpara>
-  Používá kodek ve stylu OpenDivX. V tomto režimu vytváří kodek YV12 obrázky
-  ve vlastní vyrovnávací paměti a <application>MPlayer</application> provádí
-  konverzi barevného prostoru přes libvo.
- (<emphasis role="bold">Rychlé, doporučujeme!</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry><term><option>-vc divx4</option></term>
-<listitem><simpara>
-  Používá konverzi barevného prostoru zabudovanou v kodeku. V tomto režimu
-  můžete rovněž použít YUY2/UYVY. (<emphasis role="bold">POMALÉ</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-</para>
-
-<para>
-Režim <option>-vc odivx</option> bývá rychlejší, protože přenáší obrazová data
-ve formátu YV12 (rovinný YUV 4:2:0), který vyžaduje mnohem menší propustnost
-sběrnice. Pro režimy zhuštěného YUV (YUY2, UYVY) použijte režim
-<option>-vc divx4</option>. Rychlost RGB režimů je stejná, mírně se odlišuje
-v závislosti na vaší akuální barevné hloubce.
-Pokud vaše výstupní video rozhraní podporuje direct rendering, pak může
-být <option>-vc divx4</option> rychlejší, nebo dokonce nejrychlejší volbou.
-</para>
-
-<para>
-Binární knihovny kodeků DivX4/5 si můžete stáhnout z
-<ulink url="http://avifile.sf.net">avifile</ulink> nebo
-<ulink url="http://www.divx.com">divx.com</ulink>
-Rozbalte je, spusťte <filename>./install.sh</filename> jako root a nezapomeňte
-přidat <filename class="directory">/usr/local/lib</filename> do svého
-<filename>/etc/ld.so.conf</filename> a spušťte <command>ldconfig</command>.
-</para>
-
-<para>
-<application>MPlayer</application> automaticky detekuje DivX4/DivX5, pokud
-jsou zprávně nainstalovány, stačí jej jen zkompilovat jako obvykle.
-Pokud je nedetekuje, pak jste je nenainstalovali nebo nenakonfigurovali
-správně.
-</para>
-
-</sect2>
-
-
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
@@ -223,7 +149,7 @@ dekódování. Následující postup vám to umožní:
 <procedure>
 <step><para>
   Stáhněte si kodeky, které chcete použít, ze stránek
-  <ulink url="http://xanim.va.pubnix.com">XAnim</ulink>.
+  <ulink url="http://xanim.polter.net/">XAnim</ulink>.
   Kodek <emphasis role="bold">3ivx</emphasis> není zde, ale na stránce
   <ulink url="http://www.3ivx.com">3ivx</ulink>.
   </para></step>

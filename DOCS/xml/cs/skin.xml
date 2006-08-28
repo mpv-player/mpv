@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 18600 -->
+<!-- Synced with revision 19081 -->
 <appendix id="skin">
 <title>Formát skinů <application>MPlayer</application>u</title>
 
@@ -769,10 +769,6 @@ symbolů (a tudíž vyžadují odlišný font).
 Tyto zprávy mohou být generovány tlačítky, potenciometry a položkami
 nabídky.
 </para>
-<note><para>
-Některé zpráva nemusí pracovat podle očekávání (nebo vůbec).
-Jak víte, GUI je ve vývoji.
-</para></note>
 
 <variablelist>
 <title>Ovládání přehrávání:</title>
