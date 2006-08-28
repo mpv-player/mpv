@@ -119,6 +119,7 @@ static char *cqm4py = NULL;
 static char *cqm4pc = NULL;
 static char *cqm8iy = NULL;
 static char *cqm8py = NULL;
+static int globalheader=0;
 
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -204,6 +205,7 @@ m_option_t x264encopts_conf[] = {
     {"turbo", &turbo, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {"visualize", &visualize, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"novisualize", &visualize, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"global", &globalheader, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -222,6 +224,20 @@ static int parse_cqm(const char *str, uint8_t *cqm, int length,
     }
     mod->param.i_cqm_preset = X264_CQM_CUSTOM;
     return 0;
+}
+
+static int encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal){
+    uint8_t *p = buf;
+    int i;
+
+    for(i = 0; i < nnal; i++){
+        int s = x264_nal_encode(p, &size, 1, nals + i);
+        if(s < 0)
+            return -1;
+        p += s;
+    }
+
+    return p - buf;
 }
 
 static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts);
@@ -324,6 +340,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.vui.i_sar_width = d_width*height;
     mod->param.vui.i_sar_height = d_height*width;
     mod->param.i_threads = threads;
+    if(globalheader) mod->param.b_repeat_headers = 0;
 
     if(cqm != NULL)
     {
@@ -440,6 +457,25 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     if(!mod->x264) {
         mp_msg(MSGT_MENCODER, MSGL_ERR, "x264_encoder_open failed.\n");
         return 0;
+    }
+
+    if(globalheader){
+        uint8_t *extradata;
+        x264_nal_t *nal;
+        int extradata_size, nnal, i, s = 0;
+
+        x264_encoder_headers(mod->x264, &nal, &nnal);
+
+        /* 5 bytes NAL header + worst case escaping */
+        for(i = 0; i < nnal; i++)
+            s += 5 + nal[i].i_payload * 4 / 3;
+
+        extradata = malloc(s);
+        extradata_size = encode_nals(extradata, s, nal, nnal);
+
+        mod->mux->bih= realloc(mod->mux->bih, sizeof(BITMAPINFOHEADER) + extradata_size);
+        memcpy(mod->mux->bih + 1, extradata, extradata_size);
+        mod->mux->bih->biSize= sizeof(BITMAPINFOHEADER) + extradata_size;
     }
     
     if (mod->param.i_bframe > 1 && mod->param.b_bframe_pyramid)
