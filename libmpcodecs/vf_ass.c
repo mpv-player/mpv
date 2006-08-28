@@ -81,6 +81,7 @@ static int config(struct vf_instance_s* vf,
 		settings.line_spacing = ass_line_spacing;
 		settings.top_margin = ass_top_margin;
 		settings.bottom_margin = ass_bottom_margin;
+		settings.use_margins = ass_use_margins;
 		settings.aspect = ((double)d_width) / d_height;
 		
 		ass_configure(vf->priv->ass_priv, &settings);
