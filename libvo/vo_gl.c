@@ -606,16 +606,16 @@ flip_page(void)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glCallList(eosdDispList);
     }
-  if (osdtexCnt > 0) {
-    glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff);
-    // draw OSD
+    if (osdtexCnt > 0) {
+      glColor4ub((osd_color >> 16) & 0xff, (osd_color >> 8) & 0xff, osd_color & 0xff, 0xff);
+      // draw OSD
 #ifndef FAST_OSD
-    glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
-    glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdaDispList);
+      glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
+      glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdaDispList);
 #endif
-    glBlendFunc(GL_ONE, GL_ONE);
-    glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
-  }
+      glBlendFunc(GL_ONE, GL_ONE);
+      glCallLists(osdtexCnt, GL_UNSIGNED_INT, osdDispList);
+    }
     // set rendering parameters back to defaults
     glDisable (GL_BLEND);
     if (!scaled_osd)
