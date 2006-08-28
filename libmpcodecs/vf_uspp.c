@@ -21,6 +21,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <math.h>
+#include <assert.h>
 
 #include "config.h"
 
@@ -240,9 +241,10 @@ static int config(struct vf_instance_s* vf,
             avctx_enc->pix_fmt = PIX_FMT_YUV420P;
             avctx_enc->flags = CODEC_FLAG_QSCALE | CODEC_FLAG_LOW_DELAY;
             avctx_enc->strict_std_compliance = FF_COMPLIANCE_EXPERIMENTAL;
+            avctx_enc->global_quality= 123;
             avcodec_open(avctx_enc, enc);
             avcodec_open(vf->priv->avctx_dec[i], dec);
-
+            assert(avctx_enc->codec);
         }
         vf->priv->frame= avcodec_alloc_frame();
         vf->priv->frame_dec= avcodec_alloc_frame();
