@@ -434,6 +434,11 @@ it works with the following drivers:
   read the <link linkend="tv-input">TV input</link> section.
   </para></listitem>
 <listitem><para>
+  If you have a V4L compatible <emphasis role="bold">Radio tuner</emphasis> card,
+  and wish to listen and capture sound with <application>MPlayer</application>,
+  read the <link linkend="radio">Radio</link> section.
+  </para></listitem>
+<listitem><para>
   There is a neat <emphasis role="bold">OSD Menu</emphasis> support ready to be
   used. Check the <link linkend="subosd">OSD menu</link> section.
   </para></listitem>

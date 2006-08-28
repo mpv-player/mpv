@@ -78,6 +78,23 @@ SRCS += stream_tv.c tv.c frequencies.c tvi_dummy.c
   endif
 endif
 
+# Radio in
+ifeq ($(RADIO),yes)
+SRCS += stream_radio.c  
+  ifeq ($(RADIO_CAPTURE),yes)
+    SRCS += audio_in.c
+    ifeq ($(ALSA1X),yes)
+     SRCS += ai_alsa1x.c
+    endif
+    ifeq ($(ALSA9),yes)
+     SRCS += ai_alsa.c
+    endif
+    ifeq ($(OSS),yes)
+     SRCS += ai_oss.c
+    endif
+ endif  
+endif
+
 ifeq ($(MPLAYER_NETWORK),yes)
 SRCS += asf_streaming.c \
         http.c \

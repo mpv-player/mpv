@@ -133,6 +133,11 @@
 	{ "noextbased", &extension_parsing, CONF_TYPE_FLAG, 0, 1, 0, NULL },
 
         {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
+#ifdef USE_RADIO
+	{"radio", radioopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#else
+	{"radio", "MPlayer was compiled without Radio interface support.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+#endif
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #else
@@ -370,9 +375,24 @@ extern int ts_keep_broken;
 extern off_t ts_probe;
 
 #include "stream/tv.h"
+#include "stream/stream_radio.h"
 
 extern char* edl_filename;
 extern char* edl_output_filename;
+
+
+#ifdef USE_RADIO
+m_option_t radioopts_conf[]={
+    {"device", &radio_param_device, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"driver", &radio_param_driver, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"channels", &radio_param_channels, CONF_TYPE_STRING_LIST, 0, 0 ,0, NULL},
+    {"volume", &radio_param_volume, CONF_TYPE_INT, CONF_RANGE, 0 ,100, NULL},
+    {"adevice", &radio_param_adevice, CONF_TYPE_STRING, 0, 0 ,0, NULL},
+    {"arate", &radio_param_arate, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
+    {"achannels", &radio_param_achannels, CONF_TYPE_INT, CONF_MIN, 0 ,0, NULL},
+    {NULL, NULL, 0, 0, 0, 0, NULL}
+};
+#endif
 
 #ifdef USE_TV
 m_option_t tvopts_conf[]={
@@ -561,6 +581,7 @@ m_option_t msgl_config[]={
 	{ "mencoder", &mp_msg_levels[MSGT_MENCODER], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "xacodec", &mp_msg_levels[MSGT_XACODEC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "tv", &mp_msg_levels[MSGT_TV], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
+	{ "radio", &mp_msg_levels[MSGT_RADIO], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "osdep", &mp_msg_levels[MSGT_OSDEP], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "spudec", &mp_msg_levels[MSGT_SPUDEC], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },
 	{ "playtree", &mp_msg_levels[MSGT_PLAYTREE], CONF_TYPE_INT, CONF_RANGE, -1, 9, NULL },

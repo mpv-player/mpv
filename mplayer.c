@@ -108,6 +108,9 @@ char * proc_priority=NULL;
 #ifdef USE_TV
 #include "stream/tv.h"
 #endif
+#ifdef USE_RADIO
+#include "stream/stream_radio.h"
+#endif
 
 #ifdef HAS_DVBIN_SUPPORT
 #include "stream/dvbin.h"
@@ -1251,6 +1254,7 @@ static void log_sub(void){
 #define OSD_MSG_OSD_STATUS              4
 #define OSD_MSG_BAR                     5
 #define OSD_MSG_PAUSE                   6
+#define OSD_MSG_RADIO_CHANNEL           7
 /// Base id for messages generated from the commmand to property bridge.
 #define OSD_MSG_PROPERTY                0x100
 
@@ -4760,6 +4764,34 @@ if(step_sec>0) {
       }
       brk_cmd = 1;
     } break;
+#ifdef USE_RADIO
+    case MP_CMD_RADIO_STEP_CHANNEL :  {
+      if (demuxer->stream->type==STREAMTYPE_RADIO) {
+          int v = cmd->args[0].v.i;
+          if(v > 0)
+              radio_step_channel(demuxer->stream, RADIO_CHANNEL_HIGHER);
+          else
+              radio_step_channel(demuxer->stream, RADIO_CHANNEL_LOWER);
+          if (radio_get_channel_name(demuxer->stream)) {
+              set_osd_msg(OSD_MSG_RADIO_CHANNEL,1,osd_duration,
+                      MSGTR_OSDChannel, radio_get_channel_name(demuxer->stream));
+          }
+      }
+    } break;
+    case MP_CMD_RADIO_SET_CHANNEL :  {
+        if (demuxer->stream->type== STREAMTYPE_RADIO) {
+            radio_set_channel(demuxer->stream, cmd->args[0].v.s);
+            if (radio_get_channel_name(demuxer->stream)) {
+                set_osd_msg(OSD_MSG_RADIO_CHANNEL,1,osd_duration,
+                      MSGTR_OSDChannel, radio_get_channel_name(demuxer->stream));
+            }
+        }
+    } break;
+    case MP_CMD_RADIO_SET_FREQ :  {
+      if (demuxer->stream->type==  STREAMTYPE_RADIO)
+        radio_set_freq(demuxer->stream, cmd->args[0].v.f);
+    } break;
+#endif
 #ifdef USE_TV
     case MP_CMD_TV_SET_FREQ :  {
       if (file_format == DEMUXER_TYPE_TV)

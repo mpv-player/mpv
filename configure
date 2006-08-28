@@ -215,6 +215,9 @@ Optional features:
   --enable-joystick      enable joystick support [disable]
   --disable-vm           disable support X video mode extensions [autodetect]
   --disable-xf86keysym   disable support for 'multimedia' keys [autodetect]
+  --enable-radio         enable Radio Interface [disable]
+  --enable-radio-capture enable Capture for Radio Interface (through pci/line-in) [disable]
+  --disable-radio-v4l2   disable Video4Linux2 Radio Interface support [autodetect]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l1      disable Video4Linux TV Interface support [autodetect]
   --disable-tv-v4l2      disable Video4Linux2 TV Interface support [autodetect]
@@ -1647,6 +1650,10 @@ _fastmemcpy=yes
 _unrarlib=yes
 _win32=auto
 _select=yes
+_radio=no
+_radio_capture=no
+_radio_v4l=auto
+_radio_v4l2=auto
 _tv=yes
 _tv_v4l1=auto
 _tv_v4l2=auto
@@ -1890,6 +1897,14 @@ for ac_option do
   --disable-tv-v4l1)	_tv_v4l1=no	;;
   --enable-tv-v4l2)	_tv_v4l2=yes	;;
   --disable-tv-v4l2)	_tv_v4l2=no	;;
+  --enable-radio)       _radio=yes	;;
+  --enable-radio-capture)       _radio_capture=yes	;;
+  --disable-radio-capture)       _radio_capture=no	;;
+  --disable-radio)	_radio=no	;;
+  --enable-radio-v4l)	_radio_v4l=yes	;;
+  --disable-radio-v4l)	_radio_v4l=no	;;
+  --enable-radio-v4l2)	_radio_v4l2=yes	;;
+  --disable-radio-v4l2)	_radio_v4l2=no	;;
   --enable-pvr)  	_pvr=yes	;;
   --disable-pvr)	_pvr=no 	;;
   --enable-fastmemcpy)	_fastmemcpy=yes	;;
@@ -6641,6 +6656,68 @@ fi
 echores "$_tv_v4l2"
 
 
+echocheck "Radio interface"
+if test "$_radio" = yes ; then
+  _def_radio='#define USE_RADIO 1'
+  _inputmodules="radio $_inputmodules"
+  if test "$_alsa9" != yes -a "$_alsa1x" != yes -a "$_ossaudio" != yes ; then
+    _radio_capture=no
+  fi
+  if test "$_radio_capture" = yes ; then
+    _def_radio_capture="#define USE_RADIO_CAPTURE 1"
+  else
+    _def_radio_capture="#undef USE_RADIO_CAPTURE"
+  fi
+else
+  _noinputmodules="radio $_noinputmodules"
+  _def_radio='#undef USE_RADIO'
+  _def_radio_capture="#undef USE_RADIO_CAPTURE"
+  _radio_capture=no
+fi
+echores "$_radio"
+echocheck "Capture for Radio interface"
+echores "$_radio_capture"
+
+echocheck "Video 4 Linux 2 Radio interface"
+if test "$_radio_v4l2" = auto ; then
+ _radio_v4l2=no
+ if test "$_radio" = yes && linux ; then
+  cat > $TMPC <<EOF
+#include <stdlib.h>
+#include <linux/types.h>
+#include <linux/videodev2.h>
+int main(void) { return 0; }
+EOF
+  cc_check && _radio_v4l2=yes
+ fi
+fi
+if test "$_radio_v4l2" = yes ; then
+  _def_radio_v4l2='#define HAVE_RADIO_V4L2 1'
+else
+  _def_radio_v4l2='#undef HAVE_RADIO_V4L2'
+fi
+echores "$_radio_v4l2"
+
+echocheck "Video 4 Linux Radio interface"
+if test "$_radio_v4l" = auto ; then
+ _radio_v4l=no
+ if test "$_radio" = yes && linux ; then
+  cat > $TMPC <<EOF
+#include <stdlib.h>
+#include <linux/videodev.h>
+int main(void) { return 0; }
+EOF
+  cc_check && _radio_v4l=yes
+ fi
+fi
+if test "$_radio_v4l" = yes ; then
+  _def_radio_v4l='#define HAVE_RADIO_V4L 1'
+else
+  _def_radio_v4l='#undef HAVE_RADIO_V4L'
+fi
+echores "$_radio_v4l"
+
+
 echocheck "Video 4 Linux 2/IVTV PVR interface"
 if test "$_pvr" = auto ; then
  _pvr=no
@@ -7437,6 +7514,8 @@ CONFIG_X264=$_x264
 CONFIG_GPL=yes
 CONFIG_ENCODERS=$_mencoder
 CONFIG_MUXERS=$_mencoder
+RADIO=$_radio
+RADIO_CAPTURE=$_radio_capture
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -7872,6 +7951,18 @@ $_def_tv_v4l2
 
 /* Enable *BSD BrookTree TV interface support */
 $_def_tv_bsdbt848
+
+/* Enable Radio Interface support */
+$_def_radio
+
+/* Enable Capture for Radio Interface support */
+$_def_radio_capture
+
+/* Enable Video 4 Linux Radio interface support */
+$_def_radio_v4l
+
+/* Enable Video 4 Linux 2 Radio interface support */
+$_def_radio_v4l2
 
 /* Enable Video 4 Linux 2/IVTV PVR support */
 $_def_pvr

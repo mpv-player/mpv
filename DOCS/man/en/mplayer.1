@@ -88,6 +88,13 @@ mencoder \- movie encoder
 .in
 .B mplayer
 'in +\n[.k]u
+.I radio://[channel or frequency][/capture]
+[options]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
 .I pvr://
 [options]
 .
@@ -1540,6 +1547,55 @@ audio and video IDs.
 When playing an MPEG-TS stream, you can specify with this option which
 program (if present) you want to play.
 Can be used with \-vid and \-aid.
+.
+.TP
+.B \-radio <option1:option2:...> (Radio only)
+This options set variaous parameters of radio capture module
+For listening radio with MPlayer use 'radio://<frequency>' 
+(if channels option is not given) or
+'radio://<channel_number>' (if channels option is given) as
+a movie URL. To start grabbing subsystem, please use 
+radio://<frequency or channel>/capture. If capture keyword is not given
+your can listen radio using line-in cable only. Using capture
+to listening is not recommended due to synchronization problems, which
+makes this process uncomfortable.
+.sp 1
+Available options are:
+.RSs
+.IPs device=<value>
+radio device to use (default /dev/radio0)
+.IPs driver=<value>
+radio driver to use (default v4l2 if available, otherwise v4l). Currently supported
+v4l and v4l2 drivers.
+.IPs volume=<0..100>
+sound volume for radio device (default 100)
+.IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
+Set channel list.
+Use _ for spaces in names (or play with quoting ;-).
+The channel names will then be written using OSD, and the slave commands
+radio_step_channel and radio_set_channel will be usable for
+a remote control (see LIRC).
+If given, number in movie URL will be treated as channel position in
+channel list.
+.br
+.I EXAMPLE:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<value> (with radio capture enabled)
+Name of device to capture sound from. If not given capture will be
+disabled, even if capture keyword in URL used. For alsa devices use it 
+in form hw=<card>.<device>. If device
+name contain '=' module will use ALSA to capture, otherwise - OSS.
+.IPs arate=<value> (with radio capture enabled)
+Rate in samples per second (default 44100).
+.br
+.I NOTE:
+When using audio capture set also 
+-rawaudio rate=<value> option with the same value as arate. If
+you have problems with sound speed (too quickl) try to play with 
+different values of rate (e.g. 48000,44100,32000,...).
+.IPs achannels=<value> (with radio capture enabled)
+number of audio channels to capture
+.RE
 .
 .TP
 .B \-tv <option1:option2:...> (TV/PVR only)

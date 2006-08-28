@@ -24,6 +24,7 @@ MPlayer (1.0)
     * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350/500)
     * native RTSP input (handles MPEG-TS over RTP) for generic RTSP servers.
     * support for chapters seeking in dvd:// and dvdnav:// streams
+    * Radio support (radio://)
 
     FFmpeg/libavcodec:
     * VC-1/WMV3/WMV9 video decoder

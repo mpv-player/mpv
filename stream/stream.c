@@ -58,6 +58,9 @@ extern stream_info_t stream_info_dvb;
 #ifdef USE_TV
 extern stream_info_t stream_info_tv;
 #endif
+#ifdef USE_RADIO
+extern stream_info_t stream_info_radio;
+#endif
 #ifdef HAVE_PVR
 extern stream_info_t stream_info_pvr;
 #endif
@@ -112,6 +115,9 @@ stream_info_t* auto_open_streams[] = {
 #endif
 #ifdef USE_TV
   &stream_info_tv,
+#endif
+#ifdef USE_RADIO
+  &stream_info_radio,
 #endif
 #ifdef HAVE_PVR
   &stream_info_pvr,

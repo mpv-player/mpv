@@ -449,6 +449,15 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 и кодировать MPlayer'ом фильмы, читайте секцию <link linkend="tv-input">TV вход</link>.
   </para></listitem>
 <listitem><para>
+  Если у вас есть V4L совместимый <emphasis role="bold">Radio тюнер</emphasis>,
+  и вы хотите слушать/записывать MPlayer'ом радиопередачи, читайте секцию 
+  <link linkend="radio">Радио</link>.
+  </para></listitem>
+<listitem><para>
+  There is a neat <emphasis role="bold">OSD Menu</emphasis> support ready to be
+  used. Check the <link linkend="subosd">OSD menu</link> section.
+  </para></listitem>
+<listitem><para>
   Существует изящное <emphasis role="bold">OSD Меню</emphasis> готовое для использования. Проверьте секцию
 <link linkend="subosd">OSD Меню</link>.
   </para></listitem>
