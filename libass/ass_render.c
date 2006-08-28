@@ -1863,7 +1863,7 @@ int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
 	if (frame_context.width * track->PlayResY == frame_context.height * track->PlayResX)
 		frame_context.font_scale_x = 1.;
 	else
-		frame_context.font_scale_x = ((double)(frame_context.width * track->PlayResY)) / (frame_context.height * track->PlayResX);
+		frame_context.font_scale_x = ((double)(frame_context.orig_width * track->PlayResY)) / (frame_context.orig_height * track->PlayResX);
 
 	priv->n_images = 0;
 
