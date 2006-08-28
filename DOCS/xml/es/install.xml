@@ -93,7 +93,7 @@ núcleo 2.4.x es recomendado.
   <emphasis role="bold">libvorbis</emphasis> - opcional, necesario para reproducir archivos de audio OGG Vorbis.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><ulink url="http://www.live.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
   - opcional, necesario para reproducir flujos RTSP/RTP.
   </para></listitem>
 <listitem><para>

@@ -17,7 +17,7 @@ all: netstream
 
 
 # FIXME: linking is a mess that should be fixed properly some day
-# it does not work with either GUI, live.com or libavformat enabled
+# it does not work with either GUI, LIVE555 or libavformat enabled
 DEPS = $(MPROOT)/libmpdemux/libmpdemux.a \
 	$(MPROOT)/stream/stream.a \
 	$(MPROOT)/libmpdvdkit2/libmpdvdkit.a \

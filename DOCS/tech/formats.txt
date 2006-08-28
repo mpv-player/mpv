@@ -7,7 +7,7 @@
   - DVD titles using menu navigation (experimental/alpha, not yet finished!!!)
   - CDDA - raw audio from audio CD-ROM discs (using cdparanoia libs)
   - RTP streaming (mpeg-ps over multicast only)
-  - Live.com streaming - support SDP/RTSP (using the live.com libs)
+  - LIVE555 streaming - support SDP/RTSP (using the LIVE555 libs)
   - SMB - file access over samba (experimental)
 
 2. Demuxer/parser layer, supported file/media formats:
