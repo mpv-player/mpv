@@ -10,10 +10,30 @@
 
 #include "libvo/video_out.h"
 
+#ifdef USE_ASS
+#include "libass/ass.h"
+#include "libass/ass_mp.h"
+extern ass_track_t* ass_track;
+#endif
+
 //===========================================================================//
 
-struct vf_priv_s {double pts; vo_functions_t *vo;};
-#define video_out (vf->priv->vo)
+extern int sub_visibility;
+extern double sub_delay;
+
+typedef struct vf_vo_data_s {
+    double pts;
+    vo_functions_t *vo;
+} vf_vo_data_t;
+
+struct vf_priv_s {
+    vf_vo_data_t* vf_vo_data;
+#ifdef USE_ASS
+    ass_instance_t* ass_priv;
+    ass_settings_t ass_settings;
+#endif
+};
+#define video_out (vf->priv->vf_vo_data->vo)
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt); /* forward declaration */
 
@@ -49,6 +69,14 @@ static int config(struct vf_instance_s* vf,
     if(video_out->config(width,height,d_width,d_height,flags,"MPlayer",outfmt))
 	return 0;
 
+#ifdef USE_ASS
+    if (vf->priv->ass_priv) {
+        vf->priv->ass_settings.font_size_coeff = ass_font_scale;
+        vf->priv->ass_settings.line_spacing = ass_line_spacing;
+        vf->priv->ass_settings.use_margins = ass_use_margins;
+    }
+#endif
+
     ++vo_config_count;
     return 1;
 }
@@ -80,6 +108,37 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	return((video_out->control(VOCTRL_GET_EQUALIZER, eq->item, &eq->value) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE);
     }
+#ifdef USE_ASS
+    case VFCTRL_INIT_EOSD:
+    {
+        vf->priv->ass_priv = ass_init();
+        return vf->priv->ass_priv ? CONTROL_TRUE : CONTROL_FALSE;
+    }
+    case VFCTRL_DRAW_EOSD:
+    {
+        ass_image_t* images = 0;
+        double pts = vf->priv->vf_vo_data->pts;
+        if (!vo_config_count || !vf->priv->ass_priv) return CONTROL_FALSE;
+        if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
+            mp_eosd_res_t res;
+            ass_settings_t* const settings = &vf->priv->ass_settings;
+            memset(&res, 0, sizeof(res));
+            if (video_out->control(VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
+                settings->frame_width = res.w;
+                settings->frame_height = res.h;
+                settings->top_margin = res.mt;
+                settings->bottom_margin = res.mb;
+                settings->left_margin = res.ml;
+                settings->right_margin = res.mr;
+                settings->aspect = ((double)res.w) / res.h;
+            }
+            ass_configure(vf->priv->ass_priv, settings);
+
+            images = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5);
+        }
+        return (video_out->control(VOCTRL_DRAW_EOSD, images) == VO_TRUE) ? CONTROL_TRUE : CONTROL_FALSE;
+    }
+#endif
     }
     // return video_out->control(request,data);
     return CONTROL_UNKNOWN;
@@ -104,7 +163,7 @@ static int put_image(struct vf_instance_s* vf,
         mp_image_t *mpi, double pts){
   if(!vo_config_count) return 0; // vo not configured?
   // record pts (potentially modified by filters) for main loop
-  vf->priv->pts = pts;
+  vf->priv->vf_vo_data->pts = pts;
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
   if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.
   // nope, fallback to old draw_frame/draw_slice:
@@ -131,6 +190,14 @@ static void draw_slice(struct vf_instance_s* vf,
     video_out->draw_slice(src,stride,w,h,x,y);
 }
 
+static void uninit(struct vf_instance_s* vf)
+{
+    if (vf->priv) {
+        if (vf->priv->ass_priv)
+            ass_done(vf->priv->ass_priv);
+        free(vf->priv);
+    }
+}
 //===========================================================================//
 
 static int open(vf_instance_t *vf, char* args){
@@ -141,7 +208,9 @@ static int open(vf_instance_t *vf, char* args){
     vf->put_image=put_image;
     vf->draw_slice=draw_slice;
     vf->start_slice=start_slice;
-    vf->priv=(void*)args; // video_out
+    vf->uninit=uninit;
+    vf->priv=calloc(1, sizeof(struct vf_priv_s));
+    vf->priv->vf_vo_data=(vf_vo_data_t*)args;
     if(!video_out) return 0; // no vo ?
 //    if(video_out->preinit(args)) return 0; // preinit failed
     return 1;

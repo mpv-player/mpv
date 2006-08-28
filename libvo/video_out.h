@@ -58,6 +58,12 @@
 #define VOCTRL_ONTOP 25
 #define VOCTRL_ROOTWIN 26
 #define VOCTRL_BORDER 27
+#define VOCTRL_DRAW_EOSD 28
+#define VOCTRL_GET_EOSD_RES 29
+typedef struct {
+  int w, h; // screen dimensions, including black borders
+  int mt, mb, ml, mr; // borders (top, bottom, left, right)
+} mp_eosd_res_t;
 
 // Vo can be used by xover
 #define VOCTRL_XOVERLAY_SUPPORT 22
