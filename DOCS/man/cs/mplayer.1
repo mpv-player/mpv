@@ -1,4 +1,4 @@
-.\" Synced with 18835
+.\" Synced with revision 19508
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -85,6 +85,13 @@ mencoder \- filmový enkodér
 .B mplayer
 'in +\n[.k]u
 .I tv://[kanál]
+[volby]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I pvr://
 [volby]
 .
 .br
@@ -199,7 +206,7 @@ Quartz, Mac OS X CoreVideo, také mù¾ete pou¾ít GGI, SDL (a v¹echny její
 ovladaèe), VESA (na v¹ech VESA-kompatibilních kartách, dokonce bez X11),
 nìkteré nízkoúrovòové ovladaèe
 (pro Matrox, 3dfx a ATI) a nìkteré hardwarové MPEG dekódovací karty, jako je
-Siemens DVB, DXR2 a DXR3/\:Hollywood+.
+Siemens DVB, Hauppauge PVR (IVTV), DXR2 a DXR3/\:Hollywood+.
 Mnoho z nich podporuje hardwarové nebo softwarové ¹kálování, tak¾e si mù¾ete
 u¾ít film na celé obrazovce.
 .PP
@@ -310,11 +317,13 @@ Nastavení zpo¾dìní titulkù po +/- 0.1 sekundy.
 .IPs "r a t"
 Posun titulkù nahoru/dolù.
 .IPs "i (pouze re¾im \-edlout)"
-Nastavení EDL znaèky.
+Nastaví zaèátek a konec EDL bloku k vynechání a zapí¹e jej do daného souboru.
 .IPs s (pouze \-vf screenshot)
 Poøídí snímek obrazovky.
 .IPs "I"
 Zobrazí jméno souboru na OSD.
+.IPs "! a @"
+Pøevine na zaèátek pøedchozí/následující kapitoly.
 .RE
 .PD 1
 .PP
@@ -364,7 +373,7 @@ s multimediálními tlaèítky.)
 .PP
 .PD 0
 .RS
-.IPs PAUSE
+.IPs "PAUSE"
 Pauza.
 .IPs "STOP\ "
 Ukonèení pøehrávání a skonèí.
@@ -380,7 +389,7 @@ a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
 .PP
 .PD 0
 .RS
-.IPs ENTER
+.IPs "ENTER"
 Start pøehrávání.
 .IPs "ESC\ \ "
 Stop pøehrávání.
@@ -491,6 +500,11 @@ Volby které nemají hodnoty jsou povoleny nastavením na 'yes' nebo '1' nebo
  'true' a zakázány nastavením na 'no' nebo '0' nebo 'false'.
 I podvolby mohou být takto nastavovány.
 .PP
+Rovnì¾ mù¾ete napsat konfiguraèní soubory k jednotlivým filmùm.
+Pokud chcete mít konfiguraèní soubor pro film s názvem 'film.avi', vytvoøte
+soubor s názvem 'film.avi.conf' s volbami pro tento film a umístìte jej do
+~/.mplayer/ nebo do adresáøe s filmem.
+.PP
 .I PØÍKLAD KONFIGURAÈNÍHO SOUBORU MPLAYERU:
 .sp 1
 .nf
@@ -529,11 +543,6 @@ subalign=2
 subpos=96
 spuaa=20
 .fi
-.PP
-Rovnì¾ mù¾ete napsat konfiguraèní soubory k jednotlivým filmùm.
-Pokud chcete mít konfiguraèní soubor pro film s názvem 'film.avi', vytvoøte
-soubor s názvem 'film.avi.conf' s volbami pro tento film a umístìte jej do
-~/.mplayer/ nebo do adresáøe s filmem.
 .
 .\" --------------------------------------------------------------------------
 .\" Profily
@@ -731,8 +740,8 @@ Podpora musí být zakompilována pomocí konfiguraèní volby --enable-crash-debug.
 .TP
 .B \-edlout <soubor>
 Vytvoøí nový soubor a zapí¹e do nìj editaèní (EDL) záznamy.
-Kdykoli bìhem pøehrávání stiskne u¾ivatel 'i', zapí¹e se do souboru záznam pro
-vynechání pøedchozích dvou sekund z pøehrávání.
+Bìhem pøehrávání stiskne u¾ivatel 'i' pro oznaèení zaèátku a konce vystøi¾eného
+bloku.
 Takto získáte základ pro pozdìj¹í jemné doladìní editaèního souboru (EDL).
 Detaily viz DOCS/\:HTML/\:cs/\:edl.html.
 .
@@ -756,6 +765,12 @@ xmga, xv, xvidix a dfbmga.
 Nezobrazí nìkteré snímky, aby zachoval A/V synchronizaci na pomalých strojích.
 Na zahozené snímky nejsou pou¾ity video filtry.
 B-snímky se ani nedekódují.
+.
+.TP
+.B \-(no)gui
+Zapne nebo vypne grafické rozhraní (výchozí závisí na názvu binárky).
+Pracuje pouze jako první argument na pøíkazové øádce.
+Nepracuje jako volby konfiguraèního souboru.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -1193,7 +1208,7 @@ Výchozím je ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (podle typu va¹í karty
 nebo ~/.mplayer/\:channels.conf jako poslední záchrana.
 .IPs timeout=<1\-30>
 Maximální poèet sekund po který se bude MPlayer pokou¹et vyladit
-transpondér, ne¾ to vzdá (výchozí: 3).
+frekvenci, ne¾ to vzdá (výchozí: 30).
 .RE
 .PD 1
 .
@@ -1284,9 +1299,9 @@ Dostupné volby jsou:
 .PD 0
 .RSs
 .IPs w=<hodnota>
-výstupní ¹íøka (výchozí: autodetekce)
+¹íøka vstupního souboru (výchozí: autodetekce)
 .IPs h=<hodnota>
-výstupní vý¹ka (výchozí: autodetekce)
+vý¹ka vstupního souboru (výchozí: autodetekce)
 .IPs fps=<hodnota>
 snímková rychlost výstupu (výchozí: 25)
 .IPs type=<hodnota>
@@ -1325,6 +1340,72 @@ Pøi selhání pou¾ije automaticky IPv6.
 .B \-prefer-ipv6 (pouze IPv6 sí»)
 Pou¾ije se IPv6 protokol pro sí»ové spojení.
 Pøi selhání pou¾ije automaticky IPv4.
+.TP
+.B \-pvr <volba1:volba2:...> (Pouze PVR)
+Tato volba dolaïuje rùzné parametry enkódování zachytávacího modulu PVR.
+Hauppauge WinTV PVR\-150/250/350/500 a ostatní karty zalo¾ené na IVTV
+jsou známé jako zachytávací PVR karty.
+Pro hardwarové zachytávání MPEG proudu a jeho sledování pomocí
+MPlayeru/MEncoderu, pou¾ijte 'pvr://' jako URL filmu.
+.sp 1
+Dostupné volby jsou:
+.RSs
+.IPs aspect=<1\-4>
+Nastavuje pomìr stran vstupu (výchozí: 4:3):
+.RSss
+1: 1:1
+.br
+2: 4:3
+.br
+3: 16:9
+.br
+4: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Nastavuje vzorkovací kmitoèet enkódovaného zvuku (výchozí: 48000 Hz, dostupné: 32000, 44100
+a 48000 Hz).
+.IPs alayer=<1\-2>
+Nastavuje kódování zvuku (MPEG audio layer)(výchozí: layer 2).
+.IPs abitrate=<32\-448>
+Nastavuje datový tok zvuku v kbps (výchozí: 384 kbps).
+.IPs amode=<hodnota>
+Nastavuje zvukový re¾im.
+Dostupné pøednastavené re¾imy jsou 'stereo', 'joint_stereo', 'dual' a 'mono'
+(výchozí: stereo).
+.IPs vbitrate=<hodnota>
+Nastaví prùmìrný datový tok pro enk=odování videa (výchozí: 6 Mbps).
+.IPs vmode=<0\-1>
+Nastaví re¾im enkódování videa (výchozí: VBR):
+.RSss
+0: VBR
+.br
+1: CBR
+.REss
+.IPs vpeak=<hodnota>
+Nastavuje horní mez datového toku videa (pou¾itelné pouze pro VBR enkódování,
+výchozí: 9.6 Mbps). 
+.IPs fmt=<hodnota>
+Vybere MPEG formét pro enkódování (výchozí: MPEG PS):
+.RSss
+ps:    MPEG PS.
+.br
+ts:    MPEG TS (experimentální, mù¾e selhat)
+.br
+mpeg1: MPEG 1
+.br
+vcd:   Video CD
+.br
+svcd:  Super Video CD
+.br
+dvd:   DVD
+.br
+dvds1: DVD Region 1 (NTSC)
+.br
+dvds2: DVD Region 2 (PAL)
+.REss
+.RE
+.PD 1
+.
 .TP
 .B \-rawaudio <volba1:volba2:...>
 Tato volba umo¾ní pøehrát surový (raw) zvukový soubor.
@@ -1394,6 +1475,15 @@ To se mù¾e hodit, pokud jste pøipojeni za routerem a chcete pøeposílat RTSP
 datový proud ze serveru konkrétnímu klientu.
 .
 .TP
+.B \-rtsp-destination
+Pou¾ívá se v kombinaci s 'rtsp://' adresami URL pro vynucení cílové IP adresy
+pro spojení. Tato volba se mù¾e hodit s nìkterými RTSP servery, které
+neposílají RTP pakety do správného rozhraní.
+Pokud spojení s RTSP serverem sel¾e, pou¾ijte \-v pro zji¹tìní,
+pøes kterou IP adresu se navazuje spojení a zkuste místo ní vynutit
+nìkterou z adres va¹eho poèítaèe.
+.
+.TP
 .B \-rtsp-stream-over-tcp (pouze LIVE555)
 Pou¾ívá se v kombinaci s 'rtsp://' URL pro urèení ¾e pakety odpovìdi
 protokolu RTP a RTCP budou tunelovány pøes TCP (pro TCP i RTSP se pou¾ije stejné spojení).
@@ -1460,7 +1550,7 @@ program (pokud je) chcete sledovat.
 Lze pou¾ít s \-vid a \-aid.
 .
 .TP
-.B \-tv <volba1:volba2:...> (pouze TV)
+.B \-tv <volba1:volba2:...> (pouze TV/PVR)
 Touto volbou nastavíte rùzné volby pro TV zachytávací kartu.
 K\ pøehrávání TV pomocí MPlayeru, pou¾ijte 'tv://' nebo 'tv://<èíslo_kanálu>'
 pøípadnì 'tv://<jméno_kanálu> (viz ní¾ volbu channels pro jméno_kanálu)
@@ -1611,6 +1701,42 @@ Vynutí audio parametry pro VIVO demuxer (pro úèely ladìní).
 Viz také volbu \-vf expand.
 .
 .TP
+.B \-ass (pouze FreeType)
+Zapne SSA/ASS renderování titulkù.
+S touto volbou se pou¾ije libass pro SSA/ASS
+externí titulky a Matroska stopy.
+Také mù¾ete pou¾ít \-embeddedfonts.
+.
+.TP
+.B \-ass-bottom-margin <hodnota>
+Pøidá èerný pruh na spodek snímku.
+SSA/ASS renderovaè pak umístí titulky tam.
+.
+.TP
+.B \-ass-font-scale <hodnota>
+Nastaví ¹kálovací koeficient pro fonty v SSA/ASS renderovaèi.
+.
+.TP
+.B \-ass-force-style <[Styl.]Param=Hodnota[,...]>
+Pøepí¹e nìkteré nastavení stylu.
+.sp
+.I PØÍKLAD:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.
+.TP
+.B \-ass-line-spacing <hodnota>
+Nastaví odsazení øádkù pro SSA/ASS renderovaè.
+.
+.TP
+.B \-ass-top-margin <hodnota>
+Pøidá èerný pruh na vrch snímku.
+SSA/ASS renderovaè pak umístí horní titulky tam.
+.
+.TP
 .B \-dumpjacosub (pouze MPlayer)
 Pøevede zvolené titulky (urèené volbou \-sub) do èasovì orientovaného
 JACOsub formátu.
@@ -1650,6 +1776,12 @@ koncù øádkù za DOS/Windows konce øádkù.
 .B \-dumpsub (pouze MPlayer) (BETA KÓD)
 Vydestiluje datový proud titulkù z VOB proudù.
 Viz také volby \-dump*sub a \-vobsubout*.
+.
+.TP
+.B \-embeddedfonts (Pouze FreeType)
+Zapíná extrakci vlo¾ených fontù z Matrosky.
+Tyto fonty mohou pak být pou¾ity pro SSA/ASS renderování
+titulkù (volba \-ass).
 .
 .TP
 .B \-ffactor <èíslo> (pouze OSD)
@@ -2227,8 +2359,22 @@ Pøehání souboru s \-v vypí¹e seznam dostupných zaøízení.
 Vlastní ovladaè pro Creative DXR2.
 .
 .TP
+.B ivtv (pouze IVTV)
+Zvukové výstupní MPEG rozhraní zvuku speciálnì pro IVTV.
+Pracuje pouze s \-ac hwmpa.
+.
+.TP
 .B mpegpes (pouze DVB)
-Vlastní ovladaè pro DVB.
+Výstupní audio rozhraní pro DVB karty, které zapisuje výstup do MPEG-PES
+souboru, pokud není instalována ¾ádná DVB karta.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+DVB karta k pou¾ití, pokud je jich instalováno víc.
+.IPs file=<soubor>
+jméno výstupního souboru
+.RE
+.PD 1
 .
 .TP
 .B "null\ \ \ "
@@ -2548,7 +2694,7 @@ Pracuje pouze s video rozhraními x11, xv, xmga, xvidix, directx.
 Navíc pod X11 vá¹ okenní mana¾er musí rozumìt pokynùm pro pomìr stran okna.
 .
 .TP
-.B \-ontop
+.B "\-ontop\ "
 Umístí okno pøehrávaèe trvale nad ostatní okna.
 Podporováno video rozhraními pou¾ívajícími X11, kromì SDL,
 stejnì jako directx, macosx, quartz, ggi a gl2.
@@ -2939,7 +3085,7 @@ Aktivuje TV out na neomagicu a nastaví jej na normu PAL.
 Aktivuje TV out na neomagicu a nastaví jej na normu NTSC.
 .IPs vidix
 Pou¾ije VIDIX ovladaè.
-.IPs "lvo\ \ \ "
+.IPs "lvo:\ \ \ "
 Aktivuje Linuxové pøekrývání videa (Linux Video Overlay) v re¾imu vesa.
 .RE
 .PD 1
@@ -3106,6 +3252,12 @@ Jako pøíklad viz TOOLS/edgedect.fp.
 .IPs customtex=<soubor>
 Nahraje u¾ivatelskou "gamma ramp" texturu ze <souboru>.
 To mù¾e být pou¾ito v kombinaci s yuv=4 nebo s volbou customprog.
+.IPs (no)customtlin
+Je-li zapnuta (výchozí), pou¾ije se pro customtex texturu GL_LINEAR interpolace,
+jinak GL_NEAREST.
+.IPs (no)customtrect
+Je-li zapnuta, pou¾ije se texture_rectangle pro customtex texturu.
+Výchozí je vypnuta.
 .REss
 .RE
 .PD 1
@@ -3328,6 +3480,21 @@ Urèuje èíslo zaøízení které se má pou¾ít pokud máte více ne¾ jednu em8300 kartu.
 .PD 1
 .
 .TP
+.B ivtv (pouze IVTV)
+Výstupní video rozhraní pro TV-Out speciálnì pro MPEG dekodéry
+(Hauppauge WinTV PVR-150/250/350/500) s èipy Conexant CX23415
+(iCompression iTVC15) nebo Conexant CX23416 (iCompression iTVC16).
+Viz také lavc video filtr.
+.PD 0
+.RSs
+.IPs device
+Explicitnì vybere zaøízení MPEG dekodéru k pou¾ití (výchozí: /dev/video16).
+.IPs output
+Explicitnì vybere TV-Out výstup vyu¾itý pro videsignál.
+.RE
+.PD 1
+.
+.TP
 .B mpegpes (pouze DVB)
 Výstupní video rozhraní pro DVB, které zapisuje do souboru ve formátu MPEG-PES,
 pokud není nainstalována DVB karta.
@@ -3337,7 +3504,7 @@ pokud není nainstalována DVB karta.
 Urèí èíslo zaøízení k pou¾ití, pokud máte více ne¾ jednu výstupní DVB kartu.
 (pouze V3 API, takové jaké mají ovladaèe øady 1.x.y).
 .IPs <soubor>
-Umo¾òuje zadat jméno výstupního souboru (výchozí: ./grab.mpg).
+jméno výstupního souboru (výchozí: ./grab.mpg).
 .RE
 .PD 1
 .
@@ -3537,6 +3704,8 @@ Vynutí MP3 kodek l3codeca.acm.
 Nejdøíve zkusí libmad a pokud sel¾e, zkou¹í ostatní.
 .IPs "\-ac hwac3,a52,"
 Zkusí hardwarový AC3 kanál, pak softwarový AC3 kodek, nakonec ostatní.
+.IPs "\-ac hwdts,"
+Zkusí hardwarový DTS kanál, pøi selhání ostatní.
 .IPs "\-ac -ffmp3,"
 Pøeskoèí FFmpeg MP3 dekodér.
 .RE
@@ -3828,13 +3997,6 @@ Nepøehrávat/\:enkódovat video.
 V mnoha pøípadech to nebude fungovat, místo toho pou¾ijte \-vc null \-vo null.
 .
 .TP
-.B \-oldpp <kvalita> (pouze OpenDivX) (ZASTARALÉ)
-Pou¾ije se OpenDivX kód pro postprocesing místo vestavìného.
-Pøekonáno volbou \-pp, vestavìný postprocesing nabízí lep¹í kvalitu i výkon.
-Platný rozsah \-oldpp hodnot závisí na kodeku, zpravidla 0\-6,
-kde 0=vypnuto, 6=nejpomalej¹í/\:nejlep¹í.
-.
-.TP
 .B \-pp <kvalita> (viz také volbu \-vf pp)
 Nastaví úroveò postprocesingu DLL.
 Tuto volbu ji¾ není mo¾né pou¾ít s \-vf pp.
@@ -3943,8 +4105,6 @@ Pomocí \-vc help dostanete seznam dostupných kodekù.
 .RSs
 .IPs "\-vc divx"
 Vynutí Win32/\:VfW DivX kodek, pøi selhání skonèí.
-.IPs "\-vc divx4,"
-Nejprve zkusí divx4linux kodek, potom ostatní.
 .IPs "\-vc -divxds,-divx,"
 Pøeskoèí Win32 DivX kodeky.
 .IPs "\-vc ffmpeg12,mpeg12,"
@@ -4315,7 +4475,7 @@ Zesílí zvuk o 10.1dB a tvrdì jej omezí, pokud je jeho úroveò pøíli¹ vysoká.
 .PD 1
 .
 .TP
-.B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+.B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
 Volná mixá¾ kanálù.
 Jednodu¹e kombinuje filtry volume a chanels, co¾ mù¾ete pou¾ít
 k namixování mnoha zvukových kanálù do jen nìkolika, napø.\& stereo
@@ -4330,7 +4490,7 @@ naleznete v sekci pøíklady poblí¾ konce.
 .RSs
 .IPs "<n>\ \ "
 Poèet výstupních kanálù (1\-6).
-.IPs <lij>
+.IPs <Lij>
 Jak velká èást hlasitosti vstupního kanálu i je mixována do výstupního kanálu j
 (0\-1).
 Princip nastavení spoèívá v tom, ¾e nejdøív zadáte n èísel udávajících co dìlat
@@ -4738,7 +4898,7 @@ Otoèí obraz o 90 stupòù proti smìru hodinových ruèièek a pøevrátí jej.
 .RE
 .
 .TP
-.B scale[=¹:v[:prokládané[:zru¹ení_barev[:param[param2[:pøednast[:noup]]]]]]]
+.B scale[=¹:v[:prokládané[:zru¹ení_barev[:param[param2[:pøednast[:noup[:arnd]]]]]]]]
 ©káluje obraz pomocí (pomalého) softwarového ¹kálovaèe a provádí konverzi
 barevného prostoru YUV<\->RGB (viz také volbu \-sws).
 .RSs
@@ -4820,6 +4980,14 @@ Znemo¾ní zvìt¹ení pøesahující pùvodní rozmìry.
 1: Znemo¾ní zvìt¹ení, pokud jedna ze stran pøesáhne pùvodní hodnotu.
 .br
 2: Znemo¾ní zvìt¹ení, pokud obì ze stran pøesáhnou svou pùvodní hodnotu.
+.REss
+.IPs <arnd>
+Pøesné zaokrouhlování vertikálního ¹kálovaèe, co¾ mù¾e být rychlej¹í
+nebo pomalej¹í ne¾ výchozí zaokrouhlení.
+.RSss
+0: Vypnuto pøesné zaokrouhlování (výchozí).
+.br
+1: Zapnuto pøesné zaokrouhlování.
 .REss
 .RE
 .
@@ -5167,7 +5335,7 @@ Budete vidìt èervený, zelený a modrý svislý pruh.
 .
 .TP
 .B lavc[=quality:fps]
-Rychlá softwarová konverze YV12 do MPEG-1 pomocí libavcodec pro pou¾ití s DVB/\:DXR3.
+Rychlá softwarová konverze YV12 do MPEG-1 pomocí libavcodec pro pou¾ití s DVB/\:DXR3/IVTV.
 Je rychlej¹í a má lep¹í kvalitu ne¾ \-vf fame.
 .RSs
 .IPs <quality>
@@ -5182,7 +5350,7 @@ vynutí výstupní fps (desetinné èíslo) (výchozí: 0, autodetekce zalo¾ena na vý¹ce
 .
 .TP
 .B "fame\ \ \ "
-Rychlá softwarová konverze YV12 do MPEG-1 pomocí libfame pro pou¾ití s DVB/\:DXR3.
+Rychlá softwarová konverze YV12 do MPEG-1 pomocí libfame pro pou¾ití s DVB/\:DXR3/IVTV.
 .
 .TP
 .B dvbscale[=pomìr_stran]
@@ -6177,6 +6345,25 @@ Filtr nemá ¾ádné nároky pokud není pou¾íván a pøijímá libovolný barevný
 prostor, tak¾e jej bezpeènì mù¾ete pøidat do konfiguraèního souboru.
 .RE
 .
+.TP
+.B "ass\ \ \ \ "
+Pøesune renderování SSA/ASS titulkù do daného místa øetìzce filtrù.
+Pou¾itelné pouze s volbou \-ass.
+.RE
+ .
+.TP
+.B blackframe[=suma:práh]
+Detekuje snímky, které jsou (témìø) úplnì èerné.
+Mù¾e se hodit pro detekci pøechodù kapitol nebo reklam.
+Výstupní øádky zahrnují èíslo detekovaného snímku, procento temnoty,
+typ snímku a èíslo posledního zaznamenaného klíèového snímku.
+.RSs
+.IPs <suma>
+Procento pixelù, které musí být pod úrovní prahu (výchozí: 98).
+.IPs <práh>
+Práh pod kterým jsou pixely pova¾ovány za èerné (výchozí: 32).
+.RE
+.
 .
 .
 .SH "OBECNÉ ENKÓDOVACÍ VOLBY (POUZE MENCODER)"
@@ -6391,8 +6578,6 @@ Pou¾ijte \-ovc help pro informaci o dostupných kodecích.
 .RSs
 .IPs "\-ovc copy"
 ¾ádné enkódování, jen proudové kopírování
-.IPs "\-ovc divx4"
-Enkóduje do DivX4/\:DivX5.
 .IPs "\-ovc raw"
 Enkóduje do libovolného nekomprimovaného formátu (pou¾ijte '\-vf format' pro
 nastavení).
@@ -6435,87 +6620,8 @@ Enkódovací volby pro kodeky mù¾ete pøedat pomocí následující syntaxe:
 .B \-<kodek>opts <volba1[=hodnota],volba2,...>
 .
 .PP
-Kde <kodek> mù¾e být: lavc, xvidenc, divx4, lame, toolame, twolame,
+Kde <kodek> mù¾e být: lavc, xvidenc, lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
-.
-.
-.SS divx4 (\-divx4opts)
-.
-DivX4 je zastaralý a je podporován pouze pro úplnost.
-Detaily ohlednì DivX4 voleb naleznete ve zdrojových souborech, zde není mnoho
-voleb vùbec zmínìno.
-.
-.TP
-.B "help\ \ \ "
-nápovìda
-.
-.TP
-.B br=<hodnota>
-Nastaví datový tok (bitrate).
-.RSs
-.IPs 4\-16000
-(v kilobitech)
-.IPs 16001\-24000000
-(v bitech)
-.RE
-.
-.TP
-.B key=<hodnota>
-maximální interval mezi klíèovými snímky (ve snímcích)
-.
-.TP
-.B deinterlace
-Zapne odstraòování prokladu (zapomeòte na to, DivX4 je chybné).
-.
-.TP
-.B q=<1\-5>
-kvalita (1\-nejrychlej¹í, 5\-nejlep¹í)
-.
-.TP
-.B min_quant=<1\-31>
-minimální kvantizer
-.
-.TP
-.B max_quant=<1\-31>
-maximální kvantizer
-.
-.TP
-.B rc_period=<hodnota>
-perioda kontroléru rychlosti
-.
-.TP
-.B rc_reaction_period=<hodnota>
-perioda reakce kontroléru rychlosti
-.
-.TP
-.B rc_reaction_ratio=<hodnota>
-rozsah reakce kontroléru rychlosti
-.
-.TP
-.B crispness=<0\-100>
-Nastaví ostrost/\:vyhlazení.
-.
-.TP
-.B pass=<1\-2>
-Takto mù¾ete enkódovat dvouprùchodovì DivX4 soubory.
-Nejdøíve enkódujte s pass=1, pak proveïte dal¹í enkódování se stejnými parametry
-ale pass=2.
-.
-.TP
-.B vbrpass=<0\-2>
-Pøepí¹e volbu pass a pou¾ije XviD VBR Library namísto DivX4 VBR.
-Dostupné volby jsou:
-.PD 0
-.RSs
-.IPs 0
-jednoprùchodové enkódování (stejné jako byste pass vùbec nezadali)
-.IPs 1
-Analytický (první) prùchod dvouprùchodového enkódování.
-Výsledný AVI soubor mù¾e být pøesmìrován do /dev/\:null.
-.IPs 2
-Koneèný (druhý) prùchod dvouprùchodového enkódování.
-.RE
-.PD 1
 .
 .
 .SS lame (\-lameopts)
@@ -9382,7 +9488,8 @@ Nastaví "pan and scan" ¹íøku a vý¹ku pokud je video MPEG-2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Nastavuje pomìr stran pro MPEG-1/2 video.
+Nastavuje zobrazovaný pomìr stran pro MPEG-2 video.
+Nepou¾ívejte pro MPEG-1, jinak bude výsledný pomìr stran zcela ¹patný.
 .
 .TP
 .B vbitrate=<int>
