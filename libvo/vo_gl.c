@@ -20,10 +20,10 @@
 
 static vo_info_t info = 
 {
-	"X11 (OpenGL)",
-	"gl",
-	"Arpad Gereoffy <arpi@esp-team.scene.hu>",
-	""
+  "X11 (OpenGL)",
+  "gl",
+  "Arpad Gereoffy <arpi@esp-team.scene.hu>",
+  ""
 };
 
 LIBVO_EXTERN(gl)
@@ -373,26 +373,26 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 static int 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
-	image_height = height;
-	image_width = width;
-	image_format = format;
-	glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
+  image_height = height;
+  image_width = width;
+  image_format = format;
+  glFindFormat(format, NULL, &gl_texfmt, &gl_format, &gl_type);
 
-	int_pause = 0;
-	vo_flipped = !!(flags & VOFLAG_FLIPPING);
+  int_pause = 0;
+  vo_flipped = !!(flags & VOFLAG_FLIPPING);
 
-	panscan_init();
-	aspect_save_orig(width,height);
-	aspect_save_prescale(d_width,d_height);
-	update_xinerama_info();
+  panscan_init();
+  aspect_save_orig(width,height);
+  aspect_save_prescale(d_width,d_height);
+  update_xinerama_info();
 
-	aspect(&d_width,&d_height,A_NOZOOM);
-	vo_dx = (int)(vo_screenwidth - d_width) / 2;
-	vo_dy = (int)(vo_screenheight - d_height) / 2;
-	geometry(&vo_dx, &vo_dy, &d_width, &d_height,
-	          vo_screenwidth, vo_screenheight);
-	vo_dx += xinerama_x;
-	vo_dy += xinerama_y;
+  aspect(&d_width,&d_height,A_NOZOOM);
+  vo_dx = (int)(vo_screenwidth - d_width) / 2;
+  vo_dy = (int)(vo_screenheight - d_height) / 2;
+  geometry(&vo_dx, &vo_dy, &d_width, &d_height,
+           vo_screenwidth, vo_screenheight);
+  vo_dx += xinerama_x;
+  vo_dy += xinerama_y;
 #ifdef HAVE_NEW_GUI
   if (use_gui) {
     // GUI creates and manages window for us
@@ -416,63 +416,58 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     goto glconfig;
   }
   if ( vo_window == None ) {
-	unsigned int fg, bg;
-	XSizeHints hint;
-	XVisualInfo *vinfo;
-	XEvent xev;
+    unsigned int fg, bg;
+    XSizeHints hint;
+    XVisualInfo *vinfo;
+    XEvent xev;
 
-	vo_fs = VO_FALSE;
+    vo_fs = VO_FALSE;
 
-	hint.x = vo_dx;
-	hint.y = vo_dy;
-	hint.width = d_width;
-	hint.height = d_height;
-	hint.flags = PPosition | PSize;
+    hint.x = vo_dx;
+    hint.y = vo_dy;
+    hint.width = d_width;
+    hint.height = d_height;
+    hint.flags = PPosition | PSize;
 
-	/* Get some colors */
+    /* Get some colors */
+    bg = WhitePixel(mDisplay, mScreen);
+    fg = BlackPixel(mDisplay, mScreen);
 
-	bg = WhitePixel(mDisplay, mScreen);
-	fg = BlackPixel(mDisplay, mScreen);
+    /* Make the window */
+    vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
+    if (vinfo == NULL)
+    {
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
+      return -1;
+    }
 
-	/* Make the window */
+    vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vinfo->visual,
+                  hint.x, hint.y, hint.width, hint.height, vinfo->depth,
+                  XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone));
 
-  vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
-  if (vinfo == NULL)
-  {
-    mp_msg(MSGT_VO, MSGL_ERR, "[gl] no GLX support present\n");
-    return -1;
+    vo_x11_classhint( mDisplay,vo_window,"gl" );
+    vo_hidecursor(mDisplay,vo_window);
+
+    XSelectInput(mDisplay, vo_window, StructureNotifyMask);
+    /* Tell other applications about this window */
+    XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
+    /* Map window. */
+    XMapWindow(mDisplay, vo_window);
+
+    /* Wait for map. */
+    do {
+      XNextEvent(mDisplay, &xev);
+    } while (xev.type != MapNotify || xev.xmap.event != vo_window);
+
+    XSelectInput(mDisplay, vo_window, NoEventMask);
+
+    XSync(mDisplay, False);
+
+    vo_x11_selectinput_witherr(mDisplay, vo_window,
+        StructureNotifyMask | KeyPressMask | PointerMotionMask |
+        ButtonPressMask | ButtonReleaseMask | ExposureMask);
   }
-
-
-
-          vo_window = vo_x11_create_smooth_window(mDisplay, mRootWin, vinfo->visual, hint.x, hint.y, hint.width, hint.height,
-			                          vinfo->depth, XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone));
-
-      vo_x11_classhint( mDisplay,vo_window,"gl" );
-      vo_hidecursor(mDisplay,vo_window);
-
-	  XSelectInput(mDisplay, vo_window, StructureNotifyMask);
-	  /* Tell other applications about this window */
-	  XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);
-	  /* Map window. */
-	  XMapWindow(mDisplay, vo_window);
-
-	  /* Wait for map. */
-	  do 
-	  {
-		XNextEvent(mDisplay, &xev);
-	  }
-	  while (xev.type != MapNotify || xev.xmap.event != vo_window);
-
-	  XSelectInput(mDisplay, vo_window, NoEventMask);
-
-	XSync(mDisplay, False);
-
-	vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PointerMotionMask
-		     | ButtonPressMask | ButtonReleaseMask | ExposureMask
-        );
-  }
-      if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
+  if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
   vo_x11_nofs_sizepos(vo_dx, vo_dy, d_width, d_height);
   if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
@@ -485,7 +480,7 @@ glconfig:
   setGlWindow(&gl_vinfo, &gl_context, vo_window);
   initGl(vo_dwidth, vo_dheight);
 
-	return 0;
+  return 0;
 }
 
 static void check_events(void)
@@ -649,7 +644,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
                 x / 2, y / 2, w / 2, h / 2, slice_height);
     ActiveTexture(GL_TEXTURE0);
   }
-	return 0;
+  return 0;
 }
 
 static uint32_t get_image(mp_image_t *mpi) {
