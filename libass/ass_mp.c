@@ -48,7 +48,7 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 	sid = ass_alloc_style(track);
 	style = track->styles + sid;
 	style->Name = strdup("Default");
-	style->FontName = (font_fontconfig && font_name) ? strdup(font_name) : strdup("Tahoma");
+	style->FontName = (font_fontconfig && font_name) ? strdup(font_name) : strdup("Sans");
 
 	fs = track->PlayResY * text_font_scale_factor / 100. / ass_internal_font_size_coeff;
 	// approximate autoscale coefficients
@@ -58,9 +58,9 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 		fs *= 1.4;
 	style->FontSize = fs;
 
-	style->PrimaryColour = 0xC0E9FE00;
-	style->SecondaryColour = 0x1B429E00;
-	style->OutlineColour = 0x1B429E00;
+	style->PrimaryColour = 0xFFFF0000;
+	style->SecondaryColour = 0xFFFF0000;
+	style->OutlineColour = 0x00000000;
 	style->BackColour = 0x00000000;
 	style->BorderStyle = 1;
 	style->Alignment = 2;
