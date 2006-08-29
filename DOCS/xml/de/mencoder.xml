@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18255 -->
+<!-- in sync with r19265 -->
 <chapter id="mencoder">
 <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
 
@@ -305,6 +305,50 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
   Aufnahmeeinstellungen.
   Der DVB-Input funktioniert ähnlich.
 </para>
+</sect1>
+
+<sect1 id="menc-feat-handheld-psp">
+<title>Encodieren ins Sony PSP Video Format</title>
+
+<para>
+  <application>MEncoder</application> unterstützt das Encodieren in das
+  Sony PSP Video Format, allerdings gibt es, abhängig von der Version der PSP
+  Software, unterschiedliche Beschränkungen.
+  Wer sicher gehen möchte, sollte folgende Beschränkungen beachten:
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Bitrate</emphasis>: sollte 1500kbps
+  nicht überschreiten, frühere Versionen unterstützten allerdings fast jede
+  beliebige Bitrate, so lange der Header sagte, sie sei nicht zu hoch.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Dimensionen</emphasis>: die Breite und Höhe des
+  PSP videos sollte ein Vielfaches von 16 sein, und das Produkt Breite
+  * Höhe muss &lt;= 64000 sein.
+  Unter gewissen Umständen kann es der PSP möglich sein, höhere
+  Auflösungen abzuspielen.
+</para></listitem>
+<listitem><para>
+<emphasis role="bold">Audio</emphasis>: die Samplerate sollte für
+MPEG-4 Videos 24khz, und für H.264 48khz betragen.
+</para></listitem>
+</itemizedlist>
+</para>
+
+<example>
+<title>Beispiel</title>
+<para>
+<screen>
+mencoder -oac lavc -ovc lavc -of lavf -lavcopts
+aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+-af lavcresample=24000 -vf harddup -lavfopts
+format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+-ofps 30000/1001 input.video -o output.psp
+</screen>
+Der Titel des Videos kann folgendermaßen angepasst werden:
+<option>-info name=<replaceable>MovieTitle</replaceable></option>.
+</para>
+</example>
 </sect1>
 
 
