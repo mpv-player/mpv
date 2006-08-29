@@ -1549,16 +1549,16 @@ program (if present) you want to play.
 Can be used with \-vid and \-aid.
 .
 .TP
-.B \-radio <option1:option2:...> (Radio only)
+.B \-radio <option1:option2:...> (radio only)
 These options set various parameters of the radio capture module.
-For listening radio with MPlayer use 'radio://<frequency>' 
-(if channels option is not given) or
-'radio://<channel_number>' (if channels option is given) as
-a movie URL.
-To start grabbing subsystem, please use radio://<frequency or channel>/capture.
-If capture keyword is not given you can listen radio using line-in cable only.
-Using capture for listening is not recommended due to synchronization problems,
-which makes this process uncomfortable.
+For listening to radio with MPlayer use 'radio://<frequency>'
+(if channels option is not given) or 'radio://<channel_number>'
+(if channels option is given) as a movie URL.
+To start the grabbing subsystem, use radio://<frequency or channel>/capture.
+If the capture keyword is not given you can listen to radio
+using the line-in cable only.
+Using capture to listen is not recommended due to synchronization
+problems, which makes this process uncomfortable.
 .sp 1
 Available options are:
 .RSs
@@ -1582,17 +1582,19 @@ channel list.
 radio://1, radio://104.4, radio_set_channel 1
 .IPs adevice=<value> (with radio capture enabled)
 Name of device to capture sound from.
-If not given capture will be disabled, even if capture keyword in URL used.
-For alsa devices use it in form hw=<card>.<device>.
-If device name contains '=' the module will use ALSA to capture, OSS otherwise.
+Without such a name capture will be disabled,
+even if the capture keyword appears in the URL.
+For ALSA devices use it in the form hw=<card>.<device>.
+If the device name contains a '=', the module will use
+ALSA to capture, otherwise OSS.
 .IPs arate=<value> (with radio capture enabled)
-Rate in samples per second (default 44100).
+Rate in samples per second (default: 44100).
 .br
 .I NOTE:
-When using audio capture set also 
--rawaudio rate=<value> option with the same value as arate. If
-you have problems with sound speed (runs too quickly) try to play with 
-different values of rate (e.g. 48000,44100,32000,...).
+When using audio capture set also \-rawaudio rate=<value> option
+with the same value as arate.
+If you have problems with sound speed (runs too quickly), try to play
+with different rate values (e.g.\& 48000,44100,32000,...).
 .IPs achannels=<value> (with radio capture enabled)
 Number of audio channels to capture.
 .RE
