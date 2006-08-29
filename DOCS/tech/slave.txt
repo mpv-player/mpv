@@ -213,6 +213,15 @@ quit [value]
     Quit MPlayer. The optional integer [value] is used as the return code
     for the mplayer process (default: 0).
 
+radio_step_channel <channel>
+    Select next/previous radio channel.
+
+radio_set_channel <channel>
+    Set the current radio channel.
+
+radio_set_freq <frequency in MHz>
+    Set the radio tuner frequency.
+
 seek <value> [type]
     Seek to some place in the movie.
         0 is a relative seek of +/- <value> seconds (default).
