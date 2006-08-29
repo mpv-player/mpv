@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision: 17322 $ -->
-<chapter id="tv">
+<chapter id="radio">
 <title>Radio</title>
 
-<sect1 id="radio" xreflabel="Radio">
-<title>Radio</title>
+<sect1 id="radio-input" xreflabel="Radio input">
+<title>Radio input</title>
 
 <para>
 This section is about how to enable <emphasis role="bold">listening
