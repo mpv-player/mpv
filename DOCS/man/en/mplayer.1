@@ -1550,29 +1550,29 @@ Can be used with \-vid and \-aid.
 .
 .TP
 .B \-radio <option1:option2:...> (Radio only)
-This options set variaous parameters of radio capture module
+These options set various parameters of the radio capture module.
 For listening radio with MPlayer use 'radio://<frequency>' 
 (if channels option is not given) or
 'radio://<channel_number>' (if channels option is given) as
-a movie URL. To start grabbing subsystem, please use 
-radio://<frequency or channel>/capture. If capture keyword is not given
-your can listen radio using line-in cable only. Using capture
-to listening is not recommended due to synchronization problems, which
-makes this process uncomfortable.
+a movie URL.
+To start grabbing subsystem, please use radio://<frequency or channel>/capture.
+If capture keyword is not given you can listen radio using line-in cable only.
+Using capture for listening is not recommended due to synchronization problems,
+which makes this process uncomfortable.
 .sp 1
 Available options are:
 .RSs
 .IPs device=<value>
-radio device to use (default /dev/radio0)
+Radio device to use (default: /dev/radio0).
 .IPs driver=<value>
-radio driver to use (default v4l2 if available, otherwise v4l). Currently supported
-v4l and v4l2 drivers.
+Radio driver to use (default: v4l2 if available, otherwise v4l).
+Currently, v4l and v4l2 drivers are supported.
 .IPs volume=<0..100>
 sound volume for radio device (default 100)
 .IPs channels=<frequency>\-<name>,<frequency>\-<name>,...
 Set channel list.
 Use _ for spaces in names (or play with quoting ;-).
-The channel names will then be written using OSD, and the slave commands
+The channel names will then be written using OSD and the slave commands
 radio_step_channel and radio_set_channel will be usable for
 a remote control (see LIRC).
 If given, number in movie URL will be treated as channel position in
@@ -1581,20 +1581,20 @@ channel list.
 .I EXAMPLE:
 radio://1, radio://104.4, radio_set_channel 1
 .IPs adevice=<value> (with radio capture enabled)
-Name of device to capture sound from. If not given capture will be
-disabled, even if capture keyword in URL used. For alsa devices use it 
-in form hw=<card>.<device>. If device
-name contain '=' module will use ALSA to capture, otherwise - OSS.
+Name of device to capture sound from.
+If not given capture will be disabled, even if capture keyword in URL used.
+For alsa devices use it in form hw=<card>.<device>.
+If device name contains '=' the module will use ALSA to capture, OSS otherwise.
 .IPs arate=<value> (with radio capture enabled)
 Rate in samples per second (default 44100).
 .br
 .I NOTE:
 When using audio capture set also 
 -rawaudio rate=<value> option with the same value as arate. If
-you have problems with sound speed (too quickl) try to play with 
+you have problems with sound speed (runs too quickly) try to play with 
 different values of rate (e.g. 48000,44100,32000,...).
 .IPs achannels=<value> (with radio capture enabled)
-number of audio channels to capture
+Number of audio channels to capture.
 .RE
 .
 .TP
