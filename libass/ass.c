@@ -313,7 +313,7 @@ static int process_event_tail(ass_track_t* track, ass_event_t* event, char* str,
  * \param track track to apply overrides to
  * The format for overrides is [StyleName.]Field=Value
  */
-static void process_force_style(ass_track_t* track) {
+void process_force_style(ass_track_t* track) {
 	char **fs, *eq, *dt, *style, *tname, *token;
 	ass_style_t* target;
 	int sid;

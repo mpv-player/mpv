@@ -21,6 +21,7 @@ extern float text_font_scale_factor;
 extern int subtitle_autoscale;
 
 extern double ass_internal_font_size_coeff; 
+extern void process_force_style(ass_track_t* track);
 
 /**
  * \brief Convert subdata to ass_track
@@ -107,6 +108,7 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 		p--; // remove last ' '
 		*p = 0;
 	}
+	process_force_style(track);
 	return track;
 }
 
