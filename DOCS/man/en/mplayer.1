@@ -9639,6 +9639,16 @@ converted with \-ofps, is either 24000/1001 or 24 fps.
 Any other framerate is incompatible with this option.
 .
 .
+.SS FFmpeg libavformat demuxers (\-lavfdopts)
+.
+.TP
+.B probesize=<value>
+Maximum amount of data to probe during the detection phase.
+In the case of MPEG-TS this value identifies the maximum number
+of TS packets to scan.
+.
+.
+.
 .SS FFmpeg libavformat muxers (\-lavfopts) (also see \-of lavf)
 .
 .TP
