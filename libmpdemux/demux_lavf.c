@@ -27,17 +27,27 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "stheader.h"
+#include "m_option.h"
 
 #ifdef USE_LIBAVFORMAT_SO
 #include <ffmpeg/avformat.h>
+#include <ffmpeg/opt.h>
 #else
 #include "avformat.h"
 #include "avi.h"
+#include "opt.h"
 #endif
 
 #define PROBE_BUF_SIZE 2048
 
 extern char *audio_lang;
+static unsigned int opt_probesize = 0;
+
+m_option_t lavfdopts_conf[] = {
+	{"probesize", &(opt_probesize), CONF_TYPE_INT, CONF_RANGE, 32, INT_MAX, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 
 typedef struct lavf_priv_t{
     AVInputFormat *avif;
@@ -136,6 +146,7 @@ static int lavf_check_file(demuxer_t *demuxer){
 static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
+    AVOption *opt;
     lavf_priv_t *priv= demuxer->priv;
     int i,g;
     char mp_filename[256]="mp:";
@@ -145,6 +156,14 @@ static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     stream_seek(demuxer->stream, 0);
 
     register_protocol(&mp_protocol);
+
+    avfc = av_alloc_format_context();
+    ap.prealloced_context = 1;
+    if(opt_probesize) {
+        double d = (double) opt_probesize;
+        opt = av_set_double(avfc, "probesize", opt_probesize);
+        if(!opt) mp_msg(MSGT_HEADER,MSGL_ERR, "demux_lavf, couldn't set option probesize to %.3f\r\n", d);
+    }
 
     if(demuxer->stream->url)
         strncpy(mp_filename + 3, demuxer->stream->url, sizeof(mp_filename)-3);

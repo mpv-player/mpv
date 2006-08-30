@@ -239,6 +239,9 @@
 #ifdef USE_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
+#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+        {"lavfdopts",  lavfdopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+#endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
 	{"xvidopts", xvid_dec_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
@@ -469,6 +472,10 @@ m_option_t pvropts_conf[]={
 #ifdef HAS_DVBIN_SUPPORT
 #include "stream/dvbin.h"
 extern m_config_t dvbin_opts_conf[];
+#endif
+
+#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
+extern m_option_t lavfdopts_conf[];
 #endif
 
 #ifdef  USE_FRIBIDI
