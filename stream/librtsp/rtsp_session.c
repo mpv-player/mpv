@@ -155,9 +155,7 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
     char *public = NULL;
 
     /* look for the Public: field in response to RTSP OPTIONS */
-    public = strdup (rtsp_search_answers (rtsp_session->s,
-                                          RTSP_OPTIONS_PUBLIC));
-    if (!public)
+    if (!(public = rtsp_search_answers (rtsp_session->s, RTSP_OPTIONS_PUBLIC)))
     {
       rtsp_close (rtsp_session->s);
       free (server);
@@ -172,7 +170,6 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
         || !strstr (public, RTSP_METHOD_PLAY)
         || !strstr (public, RTSP_METHOD_TEARDOWN))
     {
-      free (public);
       mp_msg (MSGT_OPEN, MSGL_ERR,
               "Remote server does not meet minimal RTSP 1.0 compliance.\n");
       rtsp_close (rtsp_session->s);
@@ -182,7 +179,6 @@ rtsp_session_t *rtsp_session_start(int fd, char **mrl, char *path, char *host, i
       return NULL;
     }
 
-    free (public);
     rtsp_session->rtp_session = rtp_setup_and_play (rtsp_session->s);
 
     /* neither a Real or an RTP server */
