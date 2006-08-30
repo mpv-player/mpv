@@ -6159,6 +6159,7 @@ if test "$_libavformat_so" = auto ; then
   _libavformat_so=no
   cat > $TMPC <<EOF
   #include <ffmpeg/avformat.h>
+  #include <ffmpeg/opt.h>
   int main(void) { av_alloc_format_context(); return 0; }
 EOF
   if pkg-config --exists libavformat ; then
