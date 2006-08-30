@@ -1835,6 +1835,13 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   Other possible uses are: televideo pid, second audio track, etc.
 </para>
 
+<para>
+  If <application>MPlayer</application> complains frequently about
+  "Too many video/audio packets in the buffer" or if you notice a
+  growing loss of synchrony between audio and video try to use
+  the MPEG-TS demuxer present in libavformat
+  (adding -demuxer lavf -lavfdopts   probesize=128 to your command line).
+</para>
 
 <para>
   To show the first of the channels present in your list, run
