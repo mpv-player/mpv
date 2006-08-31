@@ -219,7 +219,6 @@ radio_set_channel <channel>
 radio_set_freq <frequency in MHz>
     Set the radio tuner frequency.
 
-    Select next/previous radio channel.
 radio_step_channel <-1|1>
     Step forwards (1) or backwards (-1) in channel list. Works only when the
     'channels' radio parameter was set.
