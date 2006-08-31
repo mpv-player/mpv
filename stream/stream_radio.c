@@ -178,7 +178,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
         channels =radio_param_channels;
 
         mp_msg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_ChannelNamesDetected);
-        priv->radio_channel_list = (radio_channels_t*)malloc(sizeof(radio_channels_t));
+        priv->radio_channel_list = malloc(sizeof(radio_channels_t));
         priv->radio_channel_list->index=1;
         priv->radio_channel_list->next=NULL;
         priv->radio_channel_list->prev=NULL;
@@ -200,7 +200,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
 
             while ((sep=strchr(priv->radio_channel_current->name, '_'))) sep[0] = ' ';
 
-            priv->radio_channel_current->next = (radio_channels_t*)malloc(sizeof(radio_channels_t));
+            priv->radio_channel_current->next = malloc(sizeof(radio_channels_t));
             priv->radio_channel_current->next->index = priv->radio_channel_current->index + 1;
             priv->radio_channel_current->next->prev = priv->radio_channel_current;
             priv->radio_channel_current->next->next = NULL;
@@ -232,7 +232,7 @@ static int parse_channels(radio_priv_t* priv,float freq_channel,float* pfreq){
     }else{
         if (freq_channel){
             mp_msg(MSGT_RADIO, MSGL_INFO, MSGTR_RADIO_FreqParameterDetected);
-            priv->radio_channel_list=(radio_channels_t*)malloc(sizeof(radio_channels_t));
+            priv->radio_channel_list=malloc(sizeof(radio_channels_t));
             priv->radio_channel_list->next=NULL;
             priv->radio_channel_list->prev=NULL;
             priv->radio_channel_list->index=1;
@@ -779,7 +779,7 @@ static int init_audio(radio_priv_t *priv)
     mp_msg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_AudioBuffer,
         priv->audio_buffer_size,priv->audio_in.blocksize);
     /* start capture */
-    priv->audio_ringbuffer = (unsigned char*)calloc(1, priv->audio_buffer_size);
+    priv->audio_ringbuffer = calloc(1, priv->audio_buffer_size);
     if (!priv->audio_ringbuffer) {
         mp_msg(MSGT_RADIO, MSGL_ERR, MSGTR_RADIO_AllocateBufferFailed,priv->audio_in.blocksize, priv->audio_buffer_size, strerror(errno));
         return STREAM_ERROR;
@@ -941,7 +941,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     if(mode != STREAM_READ)
         return STREAM_UNSUPORTED;
 
-    priv=(radio_priv_t*)malloc(sizeof(radio_priv_t));
+    priv=malloc(sizeof(radio_priv_t));
 
     if (!priv)
         return STREAM_ERROR;
