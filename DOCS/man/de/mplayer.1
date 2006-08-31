@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19599
+.\" In sync with r19606
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -10123,6 +10123,16 @@ sorgen, dass der Videostream wie mit 25 fps encodiert aussieht.
 Das funktioniert nur mit MPEG-2-Video, wenn die Framerate der Ausgabe,
 konvertiert mit \-ofps, entweder 24000/\:1001 oder 24 fps beträgt.
 Jede andere Framerate ist mit dieser Option inkompatibel.
+.
+.
+.SS FFmpeg-libavformat-Demuxer (\-lavfdopts)
+.
+.TP
+.B probesize=<Wert>
+Maximale Datenmenge, die während der Erkennungsphase untersucht wird.
+Im Falle von MPEG-TS gibt dieser Wert die maximale Anzahl der zu scannenden
+TS-Pakete an.
+.
 .
 .
 .SS FFmpeg-libavformat-Muxer (\-lavfopts) (siehe auch \-of lavf)
