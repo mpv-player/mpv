@@ -6720,6 +6720,9 @@ else
 fi
 echores "$_radio_v4l"
 
+if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && test "$_radio" = yes ; then
+    die "Radio driver requires V4L or V4L2!"
+fi
 
 echocheck "Video 4 Linux 2/IVTV PVR interface"
 if test "$_pvr" = auto ; then

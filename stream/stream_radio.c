@@ -1,5 +1,3 @@
-
-#include "config.h"
 /*
  *     Radio support
  * 
@@ -32,9 +30,7 @@
 #undef USE_RADIO_CAPTURE
 #endif
 
-#if !defined(HAVE_RADIO_V4L) && !defined(HAVE_RADIO_V4L2)
-#error "This driver requires V4L1 or V4L2!"
-#endif
+#include "config.h"
 
 #include <stdlib.h>
 #include <stdio.h>
