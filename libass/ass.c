@@ -282,9 +282,11 @@ static int process_event_tail(ass_track_t* track, ass_event_t* event, char* str,
 		if (strcasecmp(tname, "Text") == 0) {
 			char* last;
 			event->Text = strdup(p);
-			last = event->Text + strlen(event->Text) - 1;
-			if (*last == '\r')
-				*last = 0;
+			if (*event->Text != 0) {
+				last = event->Text + strlen(event->Text) - 1;
+				if (last >= event->Text && *last == '\r')
+					*last = 0;
+			}
 			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "Text = %s\n", event->Text);
 			event->Duration -= event->Start;
 			free(format);
