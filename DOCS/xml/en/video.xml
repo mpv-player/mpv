@@ -1837,10 +1837,11 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   If <application>MPlayer</application> complains frequently about
-  "Too many video/audio packets in the buffer" or if you notice a
-  growing loss of synchrony between audio and video try to use
-  the MPEG-TS demuxer present in libavformat
-  (adding -demuxer lavf -lavfdopts   probesize=128 to your command line).
+  <screen>Too many video/audio packets in the buffer</screen> or
+  if you notice a growing desynchronization between audio and
+  video try to use the libavformat MPEG-TS demuxer by adding
+  <option>-demuxer lavf -lavfdopts probesize=128</option>
+  to your command line.
 </para>
 
 <para>
