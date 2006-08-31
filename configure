@@ -6683,16 +6683,16 @@ echores "$_radio_capture"
 
 echocheck "Video 4 Linux 2 Radio interface"
 if test "$_radio_v4l2" = auto ; then
- _radio_v4l2=no
- if test "$_radio" = yes && linux ; then
-  cat > $TMPC <<EOF
+  _radio_v4l2=no
+  if test "$_radio" = yes && linux ; then
+    cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <linux/types.h>
 #include <linux/videodev2.h>
 int main(void) { return 0; }
 EOF
-  cc_check && _radio_v4l2=yes
- fi
+    cc_check && _radio_v4l2=yes
+  fi
 fi
 if test "$_radio_v4l2" = yes ; then
   _def_radio_v4l2='#define HAVE_RADIO_V4L2 1'
@@ -6703,15 +6703,15 @@ echores "$_radio_v4l2"
 
 echocheck "Video 4 Linux Radio interface"
 if test "$_radio_v4l" = auto ; then
- _radio_v4l=no
- if test "$_radio" = yes && linux ; then
-  cat > $TMPC <<EOF
+  _radio_v4l=no
+  if test "$_radio" = yes && linux ; then
+    cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <linux/videodev.h>
 int main(void) { return 0; }
 EOF
-  cc_check && _radio_v4l=yes
- fi
+    cc_check && _radio_v4l=yes
+  fi
 fi
 if test "$_radio_v4l" = yes ; then
   _def_radio_v4l='#define HAVE_RADIO_V4L 1'
