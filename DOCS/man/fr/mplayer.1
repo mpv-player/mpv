@@ -1,4 +1,4 @@
-.\" synced with r19503
+.\" synced with r19569
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -1812,29 +1812,40 @@ sous-titres et ceux contenus dans les pistes Matroska.
 Fonctionne avec \-embeddedfonts.
 .
 .TP
+.B \-ass-bottom-margin <valeue>
+Ajoute une bande noire en bas de la trame.
+Les titres pourront y être affichés lors du rendu SSA/ASS
+(avec \-ass-use-margins).
+.
+.TP
 .B \-ass-font-scale <valeur>
 Définit le coefficient de mise à l'échelle lors du rendu des polices
 pour les sous-titres SSA/ASS.
 .
 .TP
-.B \-ass-line-spacing <value>
+.B \-ass-force-style <[Style.]Param=Valeur[,...]>
+Force les paramètres de style.
+.sp
+.I EXAMPLE:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.
+.TP
+.B \-ass-line-spacing <valeur>
 Définit la tailles des espaces pour le rendu SSA/ASS.
 .
 .TP
-.B \-ass-top-margin <value>
+.B \-ass-top-margin <valeur>
 Ajoute une bande noire en haut de la trame.
-Les titres y seront affichés lors du rendu SSA/ASS.
-.
+Les titres pourront y être affichés lors du rendu SSA/ASS
+(avec \-ass-use-margins).
 .TP
-.B \-ass-bottom-margin <value>
-Adds a black band at the bottom of the frame.
-The SSA/ASS renderer will place subtitles there.
-.
-.TP
-.B \-ass-force-style <[Style.]Param=Valeur[,...]>
-Force les paramètres de style.
-Exemple:
--ass-force-style FontName=Arial,Default.Bold=1
+.B \-(no)ass-use-margins
+Active/désactive le placement des sous-titres et sur-titres dans
+les bandes noires quand elles sont disponibles (par défaut\ : non).
 .
 .TP
 .B \-dumpjacosub (MPlayer uniquement)
