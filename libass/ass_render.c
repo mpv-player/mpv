@@ -505,7 +505,7 @@ double ass_internal_font_size_coeff = 0.8;
 static void change_font_size(int sz)
 {
 	double size = (double)sz * global_settings->font_size_coeff * ass_internal_font_size_coeff;
-	size *= frame_context.height;
+	size *= frame_context.orig_height;
 	size /= frame_context.track->PlayResY;
 
 	if (size < 1)
