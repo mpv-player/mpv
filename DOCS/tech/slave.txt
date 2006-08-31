@@ -213,14 +213,16 @@ quit [value]
     Quit MPlayer. The optional integer [value] is used as the return code
     for the mplayer process (default: 0).
 
-radio_step_channel <channel>
-    Select next/previous radio channel.
-
 radio_set_channel <channel>
-    Set the current radio channel.
+    Switch to <channel>. The 'channels' radio parameter needs to be set.
 
 radio_set_freq <frequency in MHz>
     Set the radio tuner frequency.
+
+    Select next/previous radio channel.
+radio_step_channel <-1|1>
+    Step forwards (1) or backwards (-1) in channel list. Works only when the
+    'channels' radio parameter was set.
 
 seek <value> [type]
     Seek to some place in the movie.
