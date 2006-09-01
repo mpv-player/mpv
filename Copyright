@@ -26,6 +26,12 @@ Homepage:   http://kbs.cs.tu-berlin.de/~jutta/toast.html
 Directory:  libmpcodecs/native/
 License:    permissive, see libmpcodecs/native/xa_gsm.c
 
+Name:       miniLZO
+Version:    1.07
+Homepage:   http://www.oberhumer.com/opensource/lzo/#minilzo
+Directory:  libmpcodecs/native/
+License:    GNU General Public License
+
 Name:       liba52
 Version:    0.7.4 + patches
 Homepage:   http://liba52.sourceforge.net/
@@ -72,6 +78,12 @@ Name:       dvbstream
 Version:    0.4.3-pre3 (cvs checkout)
 Homepage:   http://www.linuxstb.org/dvbstream/
 Directory:  stream
+License:    GNU General Public License
+
+Name:       librtsp
+Version:    xine CVS 2003/04/10 + patches
+Homepage:   http://www.xinehq.de
+Directory:  stream/librtsp/
 License:    GNU General Public License
 
 Name:       realrtsp
