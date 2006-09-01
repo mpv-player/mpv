@@ -32,6 +32,7 @@
 #include <sys/fcntl.h>
 #include <inttypes.h>
 #include <sys/poll.h>
+#include <linux/types.h>
 #include <linux/videodev2.h>
 #include <linux/ivtv.h>
 
