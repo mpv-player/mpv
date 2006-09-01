@@ -25,11 +25,6 @@
  *     * Grabbing audio data using -ao pcm or -dumpaudio
  *       (must be compiled with --enable-radio-capture).
  */
-#if !defined(HAVE_ALSA9) && !defined(HAVE_ALSA1X) && !defined(USE_OSS_AUDIO) && defined(USE_RADIO_CAPTURE)
-#warning "Neither alsa1x, alsa9 nor oss found. Radio capture disabled"
-#undef USE_RADIO_CAPTURE
-#endif
-
 #include "config.h"
 
 #include <stdlib.h>
