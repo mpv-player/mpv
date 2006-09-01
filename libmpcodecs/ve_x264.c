@@ -206,6 +206,7 @@ m_option_t x264encopts_conf[] = {
     {"visualize", &visualize, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"novisualize", &visualize, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"global", &globalheader, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"noglobal", &globalheader, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
