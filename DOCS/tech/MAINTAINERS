@@ -23,7 +23,7 @@ Administration:
 
 Homepage:
     * Design: Diego Biurrun
-    * Content: Diego Biurrun, Alex Beregszaszi
+    * Content: Diego Biurrun
     * Codec packages: Roberto Togni
 
 English documentation:
@@ -72,13 +72,14 @@ Platforms/ports:
 MPlayer code:
     * build system: Diego Biurrun
     * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
-    * libmpdemux, libmpcodecs: Alex Beregszaszi
+    * libmpdemux: Roberto Togni, Nico Sabbi
+    * libmpcodecs: Roberto Togni
     * TV input/capture: Jindrich Makovicka
-    * network streaming: None
+    * network streaming: Roberto Togni, Nico Sabbi, Benjamin Zores
     * DVD/VOB subtitles: None
     * config files & commandline parser: Alban Bedel, Alex Beregszaszi
     * playtree, input layer: Alban Bedel
-    * postproc, colorspace converters: Michael Niedermayer
+    * libswscale: Michael Niedermayer, Luca Abeni
     * DVB support: Nico Sabbi
     * GUI: None
     * GUI skins: Diego Biurrun
