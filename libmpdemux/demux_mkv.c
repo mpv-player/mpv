@@ -1552,7 +1552,8 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                      name, mime, data_size);
 #ifdef USE_ASS
               if (extract_embedded_fonts && name && data && data_size &&
-                  mime && (strcmp(mime, "application/x-truetype-font") == 0))
+                  mime && (strcmp(mime, "application/x-truetype-font") == 0 ||
+                  strcmp(mime, "application/x-font") == 0))
                 ass_process_font(name, data, data_size);
 #endif
               break;
