@@ -726,13 +726,13 @@ static char* parse_tag(char* p, double pwr) {
 		render_context.detect_collisions = 0;
 		render_context.evt_type = EVENT_POSITIONED;
 	} else if (mystrcmp(&p, "frx") || mystrcmp(&p, "fry")) {
-		int val;
-		mystrtoi(&p, 10, &val);
+		double val;
+		mystrtod(&p, &val);
 		mp_msg(MSGT_GLOBAL, MSGL_V, "frx/fry unimplemented \n");
 	} else if (mystrcmp(&p, "frz") || mystrcmp(&p, "fr")) {
 		double angle;
-		int val;
-		val = strtol(p, &p, 10);
+		double val;
+		mystrtod(&p, &val);
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "setting rotation to %.2f\n", val * pwr);
 		angle = M_PI * val / 180;
 		render_context.rotation = angle * pwr;
