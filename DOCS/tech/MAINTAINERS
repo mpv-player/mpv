@@ -130,6 +130,7 @@ video filters:
     * general: Richard Felker, Michael Niedermayer
     * vf_filmdint.c - Zoltan Hidvegi
     * vf_blackframe.c - Ivo van Poorten
+    * vf_zrmjpeg.c - Rik Snel
 
 audio filters:
     * general: Alex Beregszaszi
@@ -179,6 +180,7 @@ libvo drivers:
     * vo_xvmc.c - Ivan Kalvachev
     * vo_yuv4mpeg.c - Robert Kesterson
     * vo_zr.c - Rik Snel
+    * vo_zr2.c - Rik Snel
 
     * x11_common.c - Alexander Strasser
     * w32_common.c - Reimar Döffinger

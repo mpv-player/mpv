@@ -707,6 +707,8 @@ Simon, Peter <simon.peter@linuxuser.hu>
 
 Snel, Rik <rsnel@cube.dyndns.org>
     * zr video output driver
+    * zr2 video output driver
+    * zrmjpeg video filter
 
 Sommer, Sascha (Faust3) <saschasommer@freenet.de>
     * DirectX VO driver
