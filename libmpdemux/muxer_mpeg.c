@@ -638,7 +638,7 @@ static int write_mpeg_psm(muxer_t *muxer, char *buff)
 	
 	*(uint16_t *)(&buff[4]) = be2me_16(len - 6 + 4);	// length field fixed, including size of CRC32
 	
-	*(uint32_t *)(&buff[len]) = CalcCRC32(buff, len);
+	*(uint32_t *)(&buff[len]) = be2me_32(CalcCRC32(buff, len));
 	
 	len += 4;	//for crc
 	
