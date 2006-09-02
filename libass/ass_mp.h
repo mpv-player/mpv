@@ -12,6 +12,8 @@ extern int extract_embedded_fonts;
 extern char **ass_force_style_list;
 extern int ass_use_margins;
 
+ass_track_t* ass_default_track();
+int ass_process_subtitle(ass_track_t* track, subtitle* sub);
 ass_track_t* ass_read_subdata(sub_data* subdata, double fps);
 
 #endif

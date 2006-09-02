@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "mp_msg.h"
+
 #include "ass.h"
 #include "ass_mp.h"
 
@@ -23,23 +25,13 @@ extern int subtitle_autoscale;
 extern double ass_internal_font_size_coeff; 
 extern void process_force_style(ass_track_t* track);
 
-/**
- * \brief Convert subdata to ass_track
- * \param subdata subtitles struct from subreader
- * \param fps video framerate
- * \return newly allocated ass_track, filled with subtitles from subdata
- */
-ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
+ass_track_t* ass_default_track() {
 	ass_track_t* track = ass_new_track();
 	ass_style_t* style;
-	ass_event_t* event;
-	subtitle* sub;
-	int sid, eid;
-	int i;
+	int sid;
 	double fs;
 
 	track->track_type = TRACK_TYPE_ASS;
-	track->name = subdata->filename ? strdup(subdata->filename) : 0;
 	track->Timer = 100.;
 	track->PlayResX = 384;
 	track->PlayResY = 288;
@@ -71,22 +63,44 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 	style->ScaleX = 1.;
 	style->ScaleY = 1.;
 
-	for (i = 0; i < subdata->sub_num; ++i) {
-		int len = 0, j;
-		char* p;
-		char* end;
-		sub = subdata->subtitles + i;
-		eid = ass_alloc_event(track);
-		event = track->events + eid;
+	return track;
+}
 
-		event->Start = sub->start * 10;
-		event->Duration = (sub->end - sub->start) * 10;
-		if (!subdata->sub_uses_time) {
-			event->Start *= 100. / fps;
-			event->Duration *= 100. / fps;
-		}
+static int check_duplicate_plaintext_event(ass_track_t* track)
+{
+	int i;
+	ass_event_t* evt = track->events + track->n_events - 1;
 
-		event->Style = sid;
+	for (i = 0; i<track->n_events - 1; ++i) // ignoring last event, it is the one we are comparing with
+		if (track->events[i].Start == evt->Start &&
+		    track->events[i].Duration == evt->Duration &&
+		    strcmp(track->events[i].Text, evt->Text) == 0)
+			return 1;
+	return 0;
+}
+
+/**
+ * \brief Convert subtitle to ass_event_t for the given track
+ * \param ass_track_t track
+ * \param sub subtitle to convert
+ * \return event id
+ * note: assumes that subtitle is _not_ fps-based; caller must manually correct
+ *   Start and Duration in other case.
+ **/
+int ass_process_subtitle(ass_track_t* track, subtitle* sub)
+{
+        int eid;
+        ass_event_t* event;
+	int len = 0, j;
+	char* p;
+	char* end;
+
+	eid = ass_alloc_event(track);
+	event = track->events + eid;
+
+	event->Start = sub->start * 10;
+	event->Duration = (sub->end - sub->start) * 10;
+	event->Style = 0;
 
 		for (j = 0; j < sub->lines; ++j)
 			len += sub->text[j] ? strlen(sub->text[j]) : 0;
@@ -107,6 +121,41 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 
 		p--; // remove last ' '
 		*p = 0;
+
+	if (check_duplicate_plaintext_event(track)) {
+		ass_free_event(track, eid);
+		track->n_events--;
+		return -1;
+	}
+
+	mp_msg(MSGT_GLOBAL, MSGL_V, "plaintext event at %" PRId64 ", +%" PRId64 ": %s  \n",
+			(int64_t)event->Start, (int64_t)event->Duration, event->Text);
+	
+	return eid;
+}
+
+
+/**
+ * \brief Convert subdata to ass_track
+ * \param subdata subtitles struct from subreader
+ * \param fps video framerate
+ * \return newly allocated ass_track, filled with subtitles from subdata
+ */
+ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
+	ass_track_t* track;
+	int i;
+
+	track = ass_default_track();
+	track->name = subdata->filename ? strdup(subdata->filename) : 0;
+
+	for (i = 0; i < subdata->sub_num; ++i) {
+		int eid = ass_process_subtitle(track, subdata->subtitles + i);
+		if (eid < 0)
+			continue;
+		if (!subdata->sub_uses_time) {
+			track->events[eid].Start *= 100. / fps;
+			track->events[eid].Duration *= 100. / fps;
+		}
 	}
 	process_force_style(track);
 	return track;

@@ -2323,10 +2323,14 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
   for (i = 0; i < mkv_d->num_tracks; i++)
     {
       track = mkv_d->tracks[i];
-      if ((track->type != MATROSKA_TRACK_SUBTITLE) ||
-          (track->subtitle_type != MATROSKA_SUBTYPE_SSA))
+      if (track->type != MATROSKA_TRACK_SUBTITLE)
         continue;
 
+      track->sh_sub.type = 'a';
+
+      if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
+        {
+      track->sh_sub.ass_track = ass_new_track();
       size = track->private_size;
       m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
       if (buffer && m)
@@ -2335,9 +2339,12 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
           track->private_data = buffer;
           track->private_size = size;
         }
-      track->sh_sub.type = 'a';
-      track->sh_sub.ass_track = ass_new_track();
       ass_process_codec_private(track->sh_sub.ass_track, track->private_data, track->private_size);
+        }
+      else
+        {
+          track->sh_sub.ass_track = ass_default_track();
+        }
     }
 }
 #endif
@@ -2812,6 +2819,9 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
 }
 
 static void
+clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all);
+
+static void
 handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
                  int64_t size, uint64_t block_duration, uint64_t timecode)
 {
@@ -2831,6 +2841,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     ass_process_chunk(track->sh_sub.ass_track, block, size, (long long)timecode, (long long)block_duration);
     return;
   }
+  clear_subtitles(demuxer, timecode, 1);
 #endif
 
   ptr1 = block;
@@ -2942,6 +2953,13 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
   mkv_d->clear_subs_at[mkv_d->subs.lines++] = timecode + block_duration;
 
   sub_utf8 = 1;
+#ifdef USE_ASS
+  if (ass_enabled) {
+    mkv_d->subs.start = timecode / 10;
+    mkv_d->subs.end = (timecode + block_duration) / 10;
+    ass_process_subtitle(track->sh_sub.ass_track, &mkv_d->subs);
+  } else
+#endif
   vo_sub = &mkv_d->subs;
   vo_osd_changed (OSDTYPE_SUBTITLE);
 }
@@ -2958,6 +2976,9 @@ clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all)
     {
       lines_cut = mkv_d->subs.lines;
       mkv_d->subs.lines = 0;
+#ifdef USE_ASS
+      if (!ass_enabled)
+#endif
       if (lines_cut)
         {
           vo_sub = &mkv_d->subs;
@@ -2981,6 +3002,9 @@ clear_subtitles(demuxer_t *demuxer, uint64_t timecode, int clear_all)
           lines_cut = 1;
         }
     }
+#ifdef USE_ASS
+  if (!ass_enabled)
+#endif
   if (lines_cut)
     {
       vo_sub = &mkv_d->subs;
