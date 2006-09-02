@@ -121,23 +121,6 @@ void ass_free_style(ass_track_t* track, int sid) {
 		free(style->FontName);
 }
 
-static int events_compare_f(const void* a_, const void* b_) {
-	ass_event_t* a = (ass_event_t*)a_;
-	ass_event_t* b = (ass_event_t*)b_;
-	if (a->Start < b->Start)
-		return -1;
-	else if (a->Start > b->Start)
-		return 1;
-	else
-		return 0;
-}
-
-/// \brief Sort events by start time
-/// \param tid track id
-static void sort_events(ass_track_t* track) {
-	qsort(track->events, track->n_events, sizeof(ass_event_t), events_compare_f);
-}
-
 // ==============================================================================================
 
 static void skip_spaces(char** str) {
@@ -943,8 +926,6 @@ ass_track_t* ass_read_file(char* fname)
 
 	mp_msg(MSGT_GLOBAL, MSGL_INFO, "LIBASS: added subtitle file: %s (%d styles, %d events)\n", fname, track->n_styles, track->n_events);
 	
-	sort_events(track);
-		
 //	dump_events(forced_tid);
 	return track;
 }
