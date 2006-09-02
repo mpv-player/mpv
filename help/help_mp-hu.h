@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h r19454 (2006. 08. 20.)
+// Sync'ed with help_mp-en.h r19574 (2006. 09. 02.)
 
 // ========================= MPlayer help ===========================
 
@@ -67,7 +67,7 @@ static char help_text[]=
 #define MSGTR_CreatingCfgFile "Konfigurációs fájl létrehozása: %s\n"
 #define MSGTR_CopyCodecsConf "(másold/linkeld az etc/codecs.conf fájlt ~/.mplayer/codecs.conf-ba)\n"
 #define MSGTR_BuiltinCodecsConf "Befordított codecs.conf használata.\n"
-#define MSGTR_CantLoadFont "Nem tudom betölteni a következõ fontot: %s\n"
+#define MSGTR_CantLoadFont "Nem tudom betölteni a következõ bittérképes betût: %s\n"
 #define MSGTR_CantLoadSub "Nem tudom betölteni a feliratot: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: VÉGZETES HIBA: a kért stream nem található!\n"
 #define MSGTR_CantOpenDumpfile "Nem tudom megnyitni a dump fájlt!\n"
@@ -1813,3 +1813,46 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() meghívva!!!!!!\n"
+
+// stream/stream_radio.c
+
+#define MSGTR_RADIO_ChannelNamesDetected "[radio] Rádió csatornák neve megtalálva.\n"
+#define MSGTR_RADIO_WrongFreqForChannel "[radio] Hibás frekvencia a(z) %s csatornának\n"
+#define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Hibás csatorna szám: %.2f\n"
+#define MSGTR_RADIO_WrongChannelNumberInt "[radio] Hibás csatorna szám: %d\n"
+#define MSGTR_RADIO_FreqParameterDetected "[radio] Rádió frekvencia paramétere megtalálva.\n"
+#define MSGTR_RADIO_DoneParsingChannels "[radio] Csatornák értelmezése kész\n"
+#define MSGTR_RADIO_GetTunerFailed "[radio] Figyelmeztetés:ioctl get tuner sikertelen: %s. Frac beállítása: %d\n"
+#define MSGTR_RADIO_NotRadioDevice "[radio] %s nem rádiós eszköz!\n"
+#define MSGTR_RADIO_TunerCapLowYes "[radio] a tuner low:yes frac=%d\n"
+#define MSGTR_RADIO_TunerCapLowNo "[radio] a tuner low:no frac=%d\n"
+#define MSGTR_RADIO_SetFreqFailed "[radio] ioctl set frequency 0x%x (%.2f) sikertelen: %s\n"
+#define MSGTR_RADIO_GetFreqFailed "[radio] ioctl get frequency sikertelen: %s\n"
+#define MSGTR_RADIO_SetMuteFailed "[radio] ioctl set mute sikertelen: %s\n"
+#define MSGTR_RADIO_QueryControlFailed "[radio] ioctl query control sikertelen: %s\n"
+#define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl get volume sikertelen: %s\n"
+#define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl set volume sikertelen: %s\n"
+#define MSGTR_RADIO_DroppingFrame "\n[radio] túl rossz - audió keret eldobása (%d bájt)!\n"
+#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: üres a buffer, várakozás %d adat bájtra\n"
+#define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init sikertelen: %s\n"
+#define MSGTR_RADIO_AudioBuffer "[radio] Audió rögzítés - buffer=%d bájt (blokk=%d bájt).\n"
+#define MSGTR_RADIO_AllocateBufferFailed "[radio] az audió buffer nem foglalható le (block=%d,buf=%d): %s\n"
+#define MSGTR_RADIO_CurrentFreq "[radio] Jelenlegi frekvencia: %.2f\n"
+#define MSGTR_RADIO_SelectedChannel "[radio] Kiválasztott csatorna: %d - %s (freq: %.2f)\n"
+#define MSGTR_RADIO_ChangeChannelNoChannelList "[radio] Nem lehet csatornát választani: nincs csatornalista megadva\n"
+#define MSGTR_RADIO_UnableOpenDevice "[radio] '%s' nem nyitható meg: %s\n"
+#define MSGTR_RADIO_RadioDevice "[radio] Radio fd: %d, %s\n"
+#define MSGTR_RADIO_InitFracFailed "[radio] init_frac sikertelen\n"
+#define MSGTR_RADIO_WrongFreq "[radio] Hibás frekvencia: %.2f\n"
+#define MSGTR_RADIO_UsingFreq "[radio] Használt frekvencia: %.2f.\n"
+#define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init sikertelen\n"
+#define MSGTR_RADIO_BufferString "[radio] %s: in buffer=%d dropped=%d\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[radio] audio_in_setup hívás sikertelen: %s\n"
+#define MSGTR_RADIO_CaptureStarting "[radio] Mentés kezdése\n"
+#define MSGTR_RADIO_ClearBufferFailed "[radio] Buffer kiürítése sikertelen: %s\n"
+#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] stream_enable_cache hívás sikertelen: %s\n"
+#define MSGTR_RADIO_DriverUnknownId "[radio] Ismeretlen eszköz id: %d\n"
+#define MSGTR_RADIO_DriverUnknownStr "[radio] Ismeretlen vezérlõ név: %s\n"
+#define MSGTR_RADIO_DriverV4L2 "[radio] V4Lv2 rádió interfész használata\n"
+#define MSGTR_RADIO_DriverV4L "[radio] V4Lv1 rádió interfész használata\n"
+
