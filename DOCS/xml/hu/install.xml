@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19087 -->
+<!-- synced with r19589 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -424,6 +424,11 @@ vezérlőkkel működik:
   Ha V4L kompatibilis <emphasis role="bold">TV tuner</emphasis> kártyád van,
   és nézni/grabbelni vagy kódolni szeretnél filmeket az <application>MPlayer</application>rel,
   olvasd el a <link linkend="tv-input">TV bemenet</link> fejezetet.
+  </para></listitem>
+<listitem><para>
+  Ha van V4L kompatibilis <emphasis role="bold">rádió tuner</emphasis> kártyád
+  és <application>MPlayer</application>rel szeretnél hallgatni vagy lementeni,
+  olvasd el a <link linkend="radio">rádió</link> részt.
   </para></listitem>
 <listitem><para>
   Roppant jól sikerült <emphasis role="bold">OSD Menü</emphasis> támogatás vár használatra.

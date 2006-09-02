@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19081 -->
+<!-- synced with r19609 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1841,6 +1841,16 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   Egyéb lehetőségek: televideo pid, második audió sáv, stb.
 </para>
 
+<para>
+  Ha az <application>MPlayer</application> rendszeren panaszkodik
+  <screen>"Túl sok videó/audió csomag a bufferben"</screen>
+  <screen>"Too many video/audio packets in the buffer")</screen>
+  üzenettel vagy az audió és videó közötti szinkronizáció
+  növekvő eltérését tapasztalod, próbáld meg használni a libavformat-ban
+  lévő MPEG-TS demuxer-t a
+  <option>-demuxer lavf -lavfdopts probesize=128</option>
+  opció parancssorhoz történő hozzáadásával.
+</para>
 
 <para>
   A csatornák beállításainak kilistázásához futtast ezt:
