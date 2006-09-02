@@ -185,6 +185,7 @@ a GNU General Public License v2 értelmében terjeszthetõ.
 &video.xml;
 &audio.xml;
 &tvinput.xml;
+&radio.xml;
 
 &ports.xml;
 &mencoder.xml;
