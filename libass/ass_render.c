@@ -1331,7 +1331,6 @@ static void wrap_lines_smart(int max_text_width)
 				s1 = s2;
 				s2 = s3;
 				s3 = cur;
-//				printf("line: %d, %d, %d  \n", s1 - text_info.glyphs, s2 - text_info.glyphs, s3 - text_info.glyphs);
 				if (s1 && (s2->linebreak == 1)) { // have at least 2 lines, and linebreak is 'soft'
 					int l1, l2, l1_new, l2_new;
 
@@ -1341,9 +1340,6 @@ static void wrap_lines_smart(int max_text_width)
 					e1 = w;
 					do { --e1; } while ((e1 > s1) && (e1->symbol == ' '));
 					if (w->symbol == ' ') ++w;
-
-//					printf("check: %d, %d, %d, w: %d, e: %d  \n", s1 - text_info.glyphs, s2 - text_info.glyphs, s3 - text_info.glyphs,
-//							w - text_info.glyphs, e1 - text_info.glyphs);
 
 					l1 = ((s2-1)->bbox.xMax + (s2-1)->pos.x) - (s1->bbox.xMin + s1->pos.x);
 					l2 = ((s3-1)->bbox.xMax + (s3-1)->pos.x) - (s2->bbox.xMin + s2->pos.x);
@@ -1400,7 +1396,6 @@ static void wrap_lines_smart(int max_text_width)
 		cur->pos.x += pen_shift_x;
 		cur->pos.y += pen_shift_y;
 	}
-//	printf("=============  \n");
 }
 
 /**
