@@ -296,6 +296,7 @@ static int process_event_tail(ass_track_t* track, ass_event_t* event, char* str,
 
 		ALIAS(End,Duration) // temporarily store end timecode in event->Duration
 		if (0) { // cool ;)
+			INTVAL(Layer)
 			STYLEVAL(Style)
 			STRVAL(Name)
 			STRVAL(Effect)
