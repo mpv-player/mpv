@@ -76,6 +76,7 @@ typedef struct
 typedef struct mkv_track
 {
   int tnum;
+  char *name;
   
   char *codec_id;
   int ms_compat;
@@ -1006,6 +1007,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
   memset(track, 0, sizeof(*track));
   /* set default values */
   track->default_track = 1;
+  track->name = 0;
   track->language = strdup("eng");
 
   len = length = ebml_read_length (s, &il);
@@ -1025,6 +1027,16 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
             break;
           }
 
+        case MATROSKA_ID_TRACKNAME:
+          {
+            track->name = ebml_read_utf8 (s, &l);
+            if (track->name == NULL)
+              return 0;
+            mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Name: %s\n",
+                    track->name);
+            break;
+          }
+          
         case MATROSKA_ID_TRACKTYPE:
           {
             uint64_t num = ebml_read_uint (s, &l);
@@ -1707,22 +1719,32 @@ display_create_tracks (demuxer_t *demuxer)
         case MATROSKA_TRACK_VIDEO:
           type = "video";
           demux_mkv_open_video(demuxer, mkv_d->tracks[i], vid);
+          if (mkv_d->tracks[i]->name)
+            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VID_%d_NAME=%s\n", vid, mkv_d->tracks[i]->name);
           sprintf (str, "-vid %u", vid++);
           break;
         case MATROSKA_TRACK_AUDIO:
           type = "audio";
           demux_mkv_open_audio(demuxer, mkv_d->tracks[i], aid);
+          if (mkv_d->tracks[i]->name)
+            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_NAME=%s\n", aid, mkv_d->tracks[i]->name);
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AID_%d_LANG=%s\n", aid, mkv_d->tracks[i]->language);
           sprintf (str, "-aid %u, -alang %.5s",aid++,mkv_d->tracks[i]->language);
           break;
         case MATROSKA_TRACK_SUBTITLE:
           type = "subtitles";
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SUBTITLE_ID=%d\n", sid);
+          if (mkv_d->tracks[i]->name)
+            mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_NAME=%s\n", sid, mkv_d->tracks[i]->name);
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_SID_%d_LANG=%s\n", sid, mkv_d->tracks[i]->language);
           sprintf (str, "-sid %u, -slang %.5s",sid++,mkv_d->tracks[i]->language);
           break;
         }
-      mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s), %s\n",
+      if (mkv_d->tracks[i]->name)
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s) \"%s\", %s\n",
+             mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id, mkv_d->tracks[i]->name, str);
+      else
+        mp_msg(MSGT_DEMUX, MSGL_INFO, "[mkv] Track ID %u: %s (%s), %s\n",
              mkv_d->tracks[i]->tnum, type, mkv_d->tracks[i]->codec_id, str);
     }
 }
@@ -2658,6 +2680,8 @@ demux_close_mkv (demuxer_t *demuxer)
         {
           for (i=0; i<mkv_d->num_tracks; i++)
             {
+              if (mkv_d->tracks[i]->name)
+                free (mkv_d->tracks[i]->name);
               if (mkv_d->tracks[i]->codec_id)
                 free (mkv_d->tracks[i]->codec_id);
               if (mkv_d->tracks[i]->language)
