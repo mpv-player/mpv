@@ -2878,7 +2878,7 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
           ptr1++;
       
           /* Newline */
-          while (*ptr1 == '\\' && ptr1+1-block < size && (*(ptr1+1)|0x20) == 'n')
+          while (ptr1+1-block < size && *ptr1 == '\\' && (*(ptr1+1)|0x20) == 'n')
             {
               mkv_d->clear_subs_at[mkv_d->subs.lines++]
                 = timecode + block_duration;
