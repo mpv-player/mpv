@@ -109,6 +109,8 @@ void ass_free_event(ass_track_t* track, int eid) {
 		free(event->Effect);
 	if (event->Text)
 		free(event->Text);
+	if (event->render_priv)
+		free(event->render_priv);
 }
 
 void ass_free_style(ass_track_t* track, int sid) {

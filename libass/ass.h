@@ -52,35 +52,10 @@ void ass_done(ass_instance_t* priv);
 void ass_configure(ass_instance_t* priv, const ass_settings_t* config);
 
 /**
- * \brief start rendering a frame
- * \param priv library
- * \param track subtitle track
- * \param now video timestamp in milliseconds
- */
-int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now);
-
-/**
- * \brief render a single event
- * uses library, track and timestamp from the previous call to ass_start_frame
- */
-int ass_render_event(ass_event_t* event);
-
-/**
- * \brief done rendering frame, give out the results
- * \return a list of images for blending
- */
-ass_image_t* ass_end_frame(void); // returns linked list of images to render
-
-/**
  * \brief render a frame, producing a list of ass_image_t
  * \param priv library
  * \param track subtitle track
  * \param now video timestamp in milliseconds
- * This function is equivalent to 
- *   ass_start_frame()
- *   for events: start <= now < end:
- *     ass_render_event()
- *   ass_end_frame()
  */
 ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long long now);
 

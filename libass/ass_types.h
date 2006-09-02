@@ -36,6 +36,8 @@ typedef struct ass_style_s {
 	int Encoding;
 } ass_style_t;
 
+typedef struct render_priv_s render_priv_t;
+
 /// ass_event_t corresponds to a single Dialogue line
 /// Text is stored as-is, style overrides will be parsed later
 typedef struct ass_event_s {
@@ -51,6 +53,8 @@ typedef struct ass_event_s {
 	int MarginV;
 	char* Effect;
 	char* Text;
+
+	render_priv_t* render_priv;
 } ass_event_t;
 
 typedef struct parser_priv_s parser_priv_t;

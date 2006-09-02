@@ -30,14 +30,15 @@ extern int font_fontconfig;
 static int font_fontconfig = 0;
 #endif
 
+static int last_render_id = 0;
+
 struct ass_instance_s {
 	FT_Library library;
 	fc_instance_t* fontconfig_priv;
 	ass_settings_t settings;
+	int render_id;
 
 	ass_image_t* images_root; // rendering result is stored here
-	int n_images;
-	int max_images;
 };
 
 int no_more_font_messages = 0;  // don't print font warnings
@@ -128,8 +129,6 @@ typedef struct frame_context_s {
 	int orig_height; // frame height ( = screen height - margins )
 	int orig_width; // frame width ( = screen width - margins )
 	ass_track_t* track;
-	int add_bottom_margin; // additional margin, used to shift subtitles in case of collision
-	int add_top_margin;
 	long long time; // frame's timestamp, ms
 	double font_scale_x; // x scale applied to all glyphs to preserve text aspect ratio
 } frame_context_t;
@@ -139,6 +138,20 @@ static ass_settings_t* global_settings;
 static text_info_t text_info;
 static render_context_t render_context;
 static frame_context_t frame_context;
+
+// a rendered event
+typedef struct event_images_s {
+	ass_image_t* imgs;
+	int top, height;
+	int detect_collisions;
+	int shift_direction;
+	ass_event_t* event;
+} event_images_t;
+
+struct render_priv_s {
+	int top, height;
+	int render_id;
+};
 
 static void ass_lazy_track_init(void)
 {
@@ -231,23 +244,13 @@ void ass_done(ass_instance_t* priv)
 }
 
 /**
- * \brief Create a new ass_image_t and append it to images_root
+ * \brief Create a new ass_image_t
  * Parameters are the same as ass_image_t fields.
  */
-static void my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitmap_h, int stride, int dst_x, int dst_y, uint32_t color)
+static ass_image_t* my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitmap_h, int stride, int dst_x, int dst_y, uint32_t color)
 {
-	ass_instance_t* priv = ass_instance;
-	ass_image_t* img;
+	ass_image_t* img = calloc(1, sizeof(ass_image_t));
 	
-	assert(priv->n_images <= priv->max_images);
-	if (priv->n_images == priv->max_images) {
-		if (!priv->max_images) priv->max_images = 100;
-		else priv->max_images *= 2;
-		priv->images_root = (ass_image_t*)realloc(priv->images_root, priv->max_images * sizeof(ass_image_t));
-	}
-	assert(priv->images_root);
-	img = priv->images_root + priv->n_images;
-
 	img->w = bitmap_w;
 	img->h = bitmap_h;
 	img->stride = stride;
@@ -255,8 +258,8 @@ static void my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitmap_h, in
 	img->color = color;
 	img->dst_x = dst_x;
 	img->dst_y = dst_y;
-	
-	priv->n_images++;
+
+	return img;
 }
 
 /**
@@ -267,9 +270,11 @@ static void my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitmap_h, in
  * \param color first color, RGBA
  * \param color2 second color, RGBA
  * \param brk x coordinate relative to glyph origin, color is used to the left of brk, color2 - to the right
+ * \param tail pointer to the last image's next field, head of the generated list should be stored here
+ * \return pointer to the new list tail
  * Performs clipping. Uses my_draw_bitmap for actual bitmap convertion.
  */
-static int render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint32_t color, uint32_t color2, int brk)
+static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint32_t color, uint32_t color2, int brk, ass_image_t** tail)
 {
 	// brk is relative to dst_x
 	// color = color left of brk
@@ -278,6 +283,7 @@ static int render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint32_t color
 	int clip_x0, clip_y0, clip_x1, clip_y1;
 	int tmp;
 	FT_Bitmap* bitmap;
+	ass_image_t* img;
 
 	bitmap = &(bit->bitmap);
 	dst_x += bit->left;
@@ -286,7 +292,7 @@ static int render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint32_t color
 	
 	if (bitmap->pixel_mode != FT_PIXEL_MODE_GRAY) {
 		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Unsupported pixel mode: %d\n", (int)(bitmap->pixel_mode));
-		return 1;
+		return tail;
 	}
 
 	// clipping
@@ -321,29 +327,32 @@ static int render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint32_t color
 	}
 	
 	if ((b_y0 >= b_y1) || (b_x0 >= b_x1))
-		return 0;
+		return tail;
 
 	if (brk > b_x0) { // draw left part
 		if (brk > b_x1) brk = b_x1;
-		my_draw_bitmap(bitmap->buffer + bitmap->pitch * b_y0 + b_x0, 
+		img = my_draw_bitmap(bitmap->buffer + bitmap->pitch * b_y0 + b_x0, 
 			brk - b_x0, b_y1 - b_y0, bitmap->pitch,
 			dst_x + b_x0, dst_y + b_y0, color);
+		*tail = img;
+		tail = &img->next;
 	}
 	if (brk < b_x1) { // draw right part
 		if (brk < b_x0) brk = b_x0;
-		my_draw_bitmap(bitmap->buffer + bitmap->pitch * b_y0 + brk, 
+		img = my_draw_bitmap(bitmap->buffer + bitmap->pitch * b_y0 + brk, 
 			b_x1 - brk, b_y1 - b_y0, bitmap->pitch,
 			dst_x + brk, dst_y + b_y0, color2);
-		
+		*tail = img;
+		tail = &img->next;
 	}
-	return 0;
+	return tail;
 }
 
 /**
  * \brief Render text_info_t struct into ass_images_t list
  * Rasterize glyphs and put them in glyph cache.
  */
-static int render_text(text_info_t* text_info, int dst_x, int dst_y)
+static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 {
 	int pen_x, pen_y;
 	int error, error2;
@@ -351,6 +360,8 @@ static int render_text(text_info_t* text_info, int dst_x, int dst_y)
 	FT_Glyph image;
 	FT_BitmapGlyph bit;
 	glyph_hash_val_t hash_val;
+	ass_image_t* head;
+	ass_image_t** tail = &head;
 
 	for (i = 0; i < text_info->length; ++i) {
 		if (text_info->glyphs[i].bitmap != 1) {
@@ -391,7 +402,7 @@ static int render_text(text_info_t* text_info, int dst_x, int dst_y)
 		if ((info->effect_type == EF_KARAOKE_KO) && (info->effect_timing <= info->bbox.xMax)) {
 			// do nothing
 		} else
-			render_glyph(bit, pen_x, pen_y, info->c3, 0, 1000000);
+			tail = render_glyph(bit, pen_x, pen_y, info->c3, 0, 1000000, tail);
 	}
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
@@ -405,16 +416,17 @@ static int render_text(text_info_t* text_info, int dst_x, int dst_y)
 
 		if ((info->effect_type == EF_KARAOKE) || (info->effect_type == EF_KARAOKE_KO)) {
 			if (info->effect_timing > info->bbox.xMax)
-				render_glyph(bit, pen_x, pen_y, info->c1, 0, 1000000);
+				tail = render_glyph(bit, pen_x, pen_y, info->c1, 0, 1000000, tail);
 			else
-				render_glyph(bit, pen_x, pen_y, info->c2, 0, 1000000);
+				tail = render_glyph(bit, pen_x, pen_y, info->c2, 0, 1000000, tail);
 		} else if (info->effect_type == EF_KARAOKE_KF) {
-			render_glyph(bit, pen_x, pen_y, info->c1, info->c2, info->effect_timing);
+			tail = render_glyph(bit, pen_x, pen_y, info->c1, info->c2, info->effect_timing, tail);
 		} else
-			render_glyph(bit, pen_x, pen_y, info->c1, 0, 1000000);
+			tail = render_glyph(bit, pen_x, pen_y, info->c1, 0, 1000000, tail);
 	}
 
-	return 0;
+	*tail = 0;
+	return head;
 }
 
 /**
@@ -1092,6 +1104,7 @@ static void apply_transition_effects(ass_event_t* event)
 		render_context.clip_y0 = y0;
 		render_context.clip_y1 = y1;
 		render_context.evt_type = EVENT_VSCROLL;
+		render_context.detect_collisions = 0;
 	}
 
 }
@@ -1482,7 +1495,7 @@ static int get_face_descender(FT_Face face)
  * \param event event to render
  * Process event, appending resulting ass_image_t's to images_root.
  */
-int ass_render_event(ass_event_t* event)
+static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 {
 	char* p;
 	FT_UInt glyph_index; 
@@ -1514,7 +1527,7 @@ int ass_render_event(ass_event_t* event)
 	p = event->Text;
 	if (!p) {
 		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Empty event!\n");
-		return 0;
+		return 1;
 	}
 
 	// Event parsing.
@@ -1528,7 +1541,7 @@ int ass_render_event(ass_event_t* event)
 		// face could have been changed in get_next_char
 		if (!render_context.face) {
 			free_render_context();
-			return 0;
+			return 1;
 		}
 
 		if (code == 0)
@@ -1605,7 +1618,7 @@ int ass_render_event(ass_event_t* event)
 	if (text_info.length == 0) {
 		// no valid symbols in the event; this can be smth like {comment}
 		free_render_context();
-		return 0;
+		return 1;
 	}
 	
 	// depends on glyph x coordinates being monotonous, so it should be done before line wrap
@@ -1677,10 +1690,6 @@ int ass_render_event(ass_event_t* event)
 	    render_context.evt_type == EVENT_HSCROLL) {
 		if (valign == VALIGN_TOP) { // toptitle
 			device_y = y2scr_top(MarginV) + (text_info.lines[0].asc >> 6);
-			if (render_context.detect_collisions) {
-				device_y += frame_context.add_top_margin;
-				frame_context.add_top_margin += (text_info.height >> 6);
-			}
 		} else if (valign == VALIGN_CENTER) { // midtitle
 			int scr_y = y2scr(frame_context.track->PlayResY / 2);
 			device_y = scr_y - (bbox.yMax - bbox.yMin) / 2;
@@ -1692,10 +1701,6 @@ int ass_render_event(ass_event_t* event)
 			device_y = scr_y;
 			device_y -= (text_info.height >> 6);
 			device_y += (text_info.lines[0].asc >> 6);
-			if (render_context.detect_collisions) {
-				device_y -= frame_context.add_bottom_margin;
-				frame_context.add_bottom_margin += (text_info.height >> 6);
-			}
 		}
 	} else if (render_context.evt_type == EVENT_VSCROLL) {
 		if (render_context.scroll_direction == SCROLL_TB)
@@ -1813,8 +1818,12 @@ int ass_render_event(ass_event_t* event)
 		}
 	}
 
-	// render
-	render_text(&text_info, device_x, device_y);
+	event_images->top = device_y - (text_info.lines[0].asc >> 6);
+	event_images->height = text_info.height >> 6;
+	event_images->detect_collisions = render_context.detect_collisions;
+	event_images->shift_direction = (valign == VALIGN_TOP) ? 1 : -1;
+	event_images->event = event;
+	event_images->imgs = render_text(&text_info, device_x, device_y);
 
 	free_render_context();
 	
@@ -1827,6 +1836,8 @@ void ass_configure(ass_instance_t* priv, const ass_settings_t* config)
 		mp_msg(MSGT_GLOBAL, MSGL_V, "ass_configure: %d x %d; margins: l: %d, r: %d, t: %d, b: %d  \n",
 				config->frame_width, config->frame_height,
 				config->left_margin, config->right_margin, config->top_margin, config->bottom_margin);
+
+		priv->render_id = ++last_render_id;
 		memcpy(&priv->settings, config, sizeof(ass_settings_t));
 		ass_glyph_cache_reset();
 	}
@@ -1835,8 +1846,10 @@ void ass_configure(ass_instance_t* priv, const ass_settings_t* config)
 /**
  * \brief Start a new frame
  */
-int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
+static int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
 {
+	ass_image_t* img;
+
 	ass_instance = priv;
 	global_settings = &priv->settings;
 
@@ -1849,8 +1862,6 @@ int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
 	frame_context.orig_width = global_settings->frame_width - global_settings->left_margin - global_settings->right_margin;
 	frame_context.orig_height = global_settings->frame_height - global_settings->top_margin - global_settings->bottom_margin;
 	frame_context.track = track;
-	frame_context.add_bottom_margin = 0;
-	frame_context.add_top_margin = 0;
 	frame_context.time = now;
 
 	ass_lazy_track_init();
@@ -1860,28 +1871,175 @@ int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
 	else
 		frame_context.font_scale_x = ((double)(frame_context.orig_width * track->PlayResY)) / (frame_context.orig_height * track->PlayResX);
 
-	priv->n_images = 0;
+	img = priv->images_root;
+	while (img) {
+		ass_image_t* next = img->next;
+		free(img);
+		img = next;
+	}
+	priv->images_root = 0;
 
 	return 0;
 }
 
-/**
- * \brief End a frame, give out rendering results
- * \return list of ass_image_t
- */
-ass_image_t* ass_end_frame(void)
+static ass_image_t** find_list_tail(ass_image_t** phead)
 {
-	ass_instance_t* priv = ass_instance;
-	if (priv->n_images) {
-		int i;
-		for (i = 0; i < priv->n_images - 1; ++i)
-			priv->images_root[i].next = priv->images_root + i + 1;
-		priv->images_root[priv->n_images - 1].next = 0;
-		return priv->images_root;
-	} else {
+	ass_image_t* img = *phead;
+	if (!img)
+		return phead;
+	while (img->next)
+		img = img->next;
+	return &img->next;
+}
+
+static int cmp_event_layer(const void* p1, const void* p2)
+{
+	ass_event_t* e1 = ((event_images_t*)p1)->event;
+	ass_event_t* e2 = ((event_images_t*)p2)->event;
+	if (e1->Layer < e2->Layer)
+		return -1;
+	if (e1->Layer > e2->Layer)
+		return 1;
+	if (e1->Start < e2->Start)
+		return -1;
+	if (e1->Start > e2->Start)
+		return 1;
+	return 0;
+}
+
+#define MAX_EVENTS 100
+
+static render_priv_t* get_render_priv(ass_event_t* event)
+{
+	if (!event->render_priv)
+		event->render_priv = calloc(1, sizeof(render_priv_t));
+	// FIXME: check render_id
+	if (ass_instance->render_id != event->render_priv->render_id) {
+		memset(event->render_priv, 0, sizeof(render_priv_t));
+		event->render_priv->render_id = ass_instance->render_id;
+	}
+	return event->render_priv;
+}
+
+typedef struct segment_s {
+	int a, b; // top and height
+} segment_t;
+
+static int overlap(segment_t* s1, segment_t* s2)
+{
+	if (s1->a >= s2->b || s2->a >= s1->b)
+		return 0;
+	return 1;
+}
+
+static int cmp_segment(const void* p1, const void* p2)
+{
+	return ((segment_t*)p1)->a - ((segment_t*)p1)->b;
+}
+
+static void shift_event(event_images_t* ei, int shift)
+{
+	ass_image_t* cur = ei->imgs;
+	while (cur) {
+		cur->dst_y += shift;
+		cur = cur->next;
+	}
+	ei->top += shift;
+}
+
+// dir: 1 - move down
+//      -1 - move up
+static int fit_segment(segment_t* s, segment_t* fixed, int* cnt, int dir)
+{
+	int i;
+	int shift;
+
+	if (*cnt == 0) {
+		*cnt = 1;
+		fixed[0].a = s->a;
+		fixed[0].b = s->b;
 		return 0;
 	}
+
+	if (dir == 1) { // move down
+		if (s->b <= fixed[0].a) // all ok
+			return 0;
+		for (i = 0; i < *cnt; ++i) {
+			shift = fixed[i].b - s->a;
+			if (i == *cnt - 1 || fixed[i+1].a >= shift + s->b) { // here is a good place
+				fixed[i].b += s->b - s->a;
+				return shift;
+			}
+		}
+	} else { // dir == -1, move up
+		if (s->a >= fixed[*cnt-1].b) // all ok
+			return 0;
+		for (i = *cnt-1; i >= 0; --i) {
+			shift = fixed[i].a - s->b;
+			if (i == 0 || fixed[i-1].b <= shift + s->a) { // here is a good place
+				fixed[i].a -= s->b - s->a;
+				return shift;
+			}
+		}
+	}
+	assert(0); // unreachable
 }
+
+static void fix_collisions(event_images_t* imgs, int cnt)
+{
+	segment_t used[MAX_EVENTS];
+	int cnt_used = 0;
+	int i, j;
+
+	// fill used[] with fixed events
+	for (i = 0; i < cnt; ++i) {
+		render_priv_t* priv;
+		if (!imgs[i].detect_collisions) break;
+		priv = get_render_priv(imgs[i].event);
+		if (priv->height > 0) { // it's a fixed event
+			segment_t s;
+			s.a = priv->top;
+			s.b = priv->top + priv->height;
+			if (priv->height != imgs[i].height) { // no, it's not
+				mp_msg(MSGT_GLOBAL, MSGL_WARN, "Achtung! Event height has changed!  \n");
+				priv->top = 0;
+				priv->height = 0;
+			}
+			for (j = 0; j < cnt_used; ++j)
+				if (overlap(&s, used + j)) { // no, it's not
+					priv->top = 0;
+					priv->height = 0;
+				}
+			if (priv->height > 0) { // still a fixed event
+				used[cnt_used].a = priv->top;
+				used[cnt_used].b = priv->top + priv->height;
+				cnt_used ++;
+				shift_event(imgs + i, priv->top - imgs[i].top);
+			}
+		}
+	}
+	qsort(used, cnt_used, sizeof(segment_t), cmp_segment);
+
+	// try to fit other events in free spaces
+	for (i = 0; i < cnt; ++i) {
+		render_priv_t* priv;
+		if (!imgs[i].detect_collisions) break;
+		priv = get_render_priv(imgs[i].event);
+		if (priv->height == 0) { // not a fixed event
+			int shift;
+			segment_t s;
+			s.a = imgs[i].top;
+			s.b = imgs[i].top + imgs[i].height;
+			shift = fit_segment(&s, used, &cnt_used, imgs[i].shift_direction);
+			if (shift) shift_event(imgs + i, shift);
+			// make it fixed
+			priv->top = imgs[i].top;
+			priv->height = imgs[i].height;
+		}
+		
+	}
+}
+
 /**
  * \brief render a frame
  * \param priv library handle
@@ -1890,17 +2048,54 @@ ass_image_t* ass_end_frame(void)
  */
 ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long long now)
 {
-	int i, rc;
+	int i, cnt, rc;
+	event_images_t eimg[MAX_EVENTS];
+	event_images_t* last;
+	ass_image_t* head = 0;
+	ass_image_t** tail = &head;
 	
+	// init frame
 	rc = ass_start_frame(priv, track, now);
-	if (rc != 0) // some error
+	if (rc != 0)
 		return 0;
+
+	// render events separately
+	cnt = 0;
 	for (i = 0; i < track->n_events; ++i) {
 		ass_event_t* event = track->events + i;
 		if ( (event->Start <= now) && (now < (event->Start + event->Duration)) ) {
-			ass_render_event(event);
+			if (cnt < MAX_EVENTS) {
+				rc = ass_render_event(event, eimg + cnt);
+				if (!rc) ++cnt;
+			} else {
+				mp_msg(MSGT_GLOBAL, MSGL_WARN, "Too many simultaneous events  \n");
+				break;
+			}
 		}
 	}
-	return ass_end_frame();
+
+	// sort by layer
+	qsort(eimg, cnt, sizeof(event_images_t), cmp_event_layer);
+
+	// call fix_collisions for each group of events with the same layer
+	last = eimg;
+	for (i = 1; i < cnt; ++i)
+		if (last->event->Layer != eimg[i].event->Layer) {
+			fix_collisions(last, eimg + i - last);
+			last = eimg + i;
+		}
+	if (cnt > 0)
+		fix_collisions(last, eimg + cnt - last);
+
+	// concat lists
+	head = cnt ? eimg[0].imgs : 0;
+	tail = find_list_tail(&head);
+	for (i = 1; i < cnt; ++i) {
+		*tail = eimg[i].imgs;
+		tail = find_list_tail(&eimg[i].imgs);
+	}
+	
+	ass_instance->images_root = head;
+	return ass_instance->images_root;
 }
 
