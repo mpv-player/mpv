@@ -1,4 +1,4 @@
-.\" Synced with r19361
+.\" Synced with r19630
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -83,6 +83,13 @@ mencoder \- film kódoló
 .B mplayer
 'in +\n[.k]u
 .I tv://[csatorna]
+[opciók]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I radio://[csatorna vagy frekvencia][/capture]
 [opciók]
 .
 .br
@@ -1551,6 +1558,58 @@ programot (ha létezik) akarod nézni.
 A \-vid és \-aid kapcsolókkal együtt használható.
 .
 .TP
+.B \-radio <opció1:opció2:...> (csak rádió)
+Ezek az opciók a rádió adás rögzítõ modul különbözõ paramétereit állítják be.
+MPlayerrel történõ rádióhallgatáshoz használd a 'radio://<frekvencia>'
+(ha a channels opció nincs megadva) vagy a 'radio://<csatorna_szám>'
+(ha a channels meg vannak adva) formát film URL-ként.
+A rögzítõ alrendszer elindításához használd a
+radio://<frekvencia vagy csatorna>/capture formát.
+Ha a capture kulcsszó nincs megadva, csak a line-in kábelen keresztül
+tudsz rádiót hallgatni.
+A capture-rel történõ hallgatás nem javasolt szinkronizációs problémák
+miatt, ami élvezhetetlenné teszi az adést.
+.sp 1
+A használható opciók:
+.RSs
+.IPs device=<érték>
+A használandó rádiós eszköz (alapértelmezett: /dev/radio0).
+.IPs driver=<érték>
+A használandó rádió vezérlõ (alapértelmezett: v4l2 ha van, különben v4l).
+Jelenleg a v4l és v4l2 vezérlõk támogatottak.
+.IPs volume=<0..100>
+A rádiós eszköz hangereje (alapértelmezett: 100)
+.IPs channels=<frekvencia>\-<név>,<frekvencia>\-<név>,...
+Beállítja a csatorna listát.
+Használj _ jelent a szóköz helyett a nevekben (vagy idézõjeleket ;-).
+A csatorna nevek az OSD segítségével lesznek kiírva és a
+radio_step_channel és radio_set_channel szolga módú parancsok használhatóak
+a távoli vezérlésre (lásd LIRC).
+Ha meg van adva, az URL-ben szereplõ szám a csatorna pozícióját adja meg
+a csatorna listában.
+.br
+.I PÉLDA:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<érték> (a rádió rögzítés bekapcsolásával)
+Annak az eszköznek a neve, melyrõl rögzíteni kell.
+Ezen mentési név megadása nélkül a mentés akkor is le lesz tiltva,
+ha a capture kulcsszó szerepel az URL-ben.
+ALSA eszközökhöz használd a hw=<kártya>.<eszköz> formát.
+Ha az eszköz neve '=' jelet tartalmaz, a modul az ALSA-t
+használja a rögzítésre, különben az OSS-t.
+.IPs arate=<érték> (a rádió rögzítés bekapcsolásával)
+Mintavételi ráta (alapértelmezett: 44100).
+.br
+.I MEGJEGYZÉS:
+Ha audió mentést végzel, állítsd be a \-rawaudio rate=<érték> opciót
+is ugyan arra az értékre, mint az arate-t.
+Ha problémád van a hang sebességével (túl gyors), próbáld meg
+lejátszani más ráta értékekkel (pl.\& 48000,44100,32000,...).
+.IPs achannels=<érték> (a rádió rögzítés bekapcsolásával)
+A rögzítendõ audió csatornák száma.
+.RE
+.
+.TP
 .B \-tv <opció1:opció2:...> (csak TV/PVR)
 Ez az opció bekapcsolja a TV grabbelõ modul különbözõ tulajdonságait.
 Az MPlayerrel történõ TV nézéshez a 'tv://' vagy a 'tv://<csatorna_szám>'
@@ -1707,8 +1766,24 @@ külsõ feliratokhoz és matroska sávokhoz.
 Ajánlott még a -embeddedfonts engedélyezése is.
 .
 .TP
+.B \-ass-bottom-margin <érték>
+Egy fekete sávot ad a kocka aljához.
+Az SSA/ASS renderelõ a feliratokat ide tudja tenni (a \-ass-use-margins kapcsolóval).
+.
+.TP
 .B \-ass-font-scale <érték>
 Beállítja a betûtípusokhoz használt arány együtthatót az SSA/ASS renderelõben.
+.
+.TP
+.B \-ass-force-style <[Stílus.]Param=Érték[,...]>
+Felülír pár stílus paramétert.
+.sp
+.I PÉLDA:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
 .
 .TP
 .B \-ass-line-spacing <érték>
@@ -1717,12 +1792,12 @@ Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
 .TP
 .B \-ass-top-margin <érték>
 Egy fekete sávot ad a kocka tetejéhez.
-Az SSA/ASS renderelõ a felsõ feliratokat ide teszi.
+Az SSA/ASS renderelõ a felsõ feliratokat ide tudja tenni (a \-ass-use-margins kapcsolóval).
 .
 .TP
-.B \-ass-bottom-margin <érték>
-Egy fekete sávot ad a kocka aljához.
-Az SSA/ASS renderelõ a feliratokat ide teszi.
+.B \-(no)ass-use-margins
+Engedélyezi/letiltja a felsõ feliratok és a feliratok fekete határokra történõ
+kiírását, ha engedélyezve vannak (alapértelmezett: nem).
 .
 .TP
 .B \-dumpjacosub (csak MPlayer)
@@ -9424,6 +9499,13 @@ akkor ez az opció egy figyelmeztetést ad és engedélyezi a szeletelést, de
 letiltja a többszálúsítást.
 .
 .TP
+.B (no)globalheader
+Az SPS és a PPS csak egyszer fog megjelenni, a bitfolyam elején
+(alapértelmezett: letiltva).
+Néhány lejátszó, mint pl. a Sony PSP, igényli ezt az opciót.
+Alapértelmezésként az SPS és a PPS minden IDR kocka elõtt ismétlõdik.
+.
+.TP
 .B log=<-1\-3>
 Beállítja a képernyõre kiírt log info mértékét.
 .PD 0
@@ -9579,6 +9661,16 @@ a videó folyammal, hogy 25 fps-en kódoltnak fog tûnni; csak MPEG-2 videóval
 mûködik, ha a kimeneti frameráta, melyet a \-ofps állít be, vagy 24000/1001
 vagy 24 fps.
 Bármelyik más frameráta inkompatibilis ezzel az opcióval.
+.
+.
+.SS FFmpeg libavformat demuxer-ek (\-lavfdopts)
+.
+.TP
+.B probesize=<érték>
+A detektálási folyamatban használt adat maximális mennyisége.
+MPEG-TS esetén ez az érték az átvizsgálandó TS csomagok számát
+adja meg.
+.
 .
 .
 .SS FFmpeg libavformat muxer-ek (\-lavfopts) (lásd még \-of lavf)
