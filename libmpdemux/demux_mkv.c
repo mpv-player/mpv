@@ -2941,9 +2941,6 @@ handle_subtitles(demuxer_t *demuxer, mkv_track_t *track, char *block,
     }
   mkv_d->clear_subs_at[mkv_d->subs.lines++] = timecode + block_duration;
 
-#ifdef USE_ICONV
-  subcp_recode1 (&mkv_d->subs);
-#endif
   sub_utf8 = 1;
   vo_sub = &mkv_d->subs;
   vo_osd_changed (OSDTYPE_SUBTITLE);
