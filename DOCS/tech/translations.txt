@@ -11,9 +11,9 @@ maintain a new documentation translation.
 Documentation related discussions happen on the MPlayer-DOCS mailing list,
 while documentation translation related discussions happen on the
 MPlayer-translations mailing list. If you want to maintain a translation
-you should subscribe to both, as the English documentation CVS changelogs,
-which you need to keep the translation up to date, are sent to MPlayer-DOCS.
-You can subscribe here:
+you should subscribe to both, as the English documentation Subversion
+changelogs, which you need to keep the translation up to date, are sent
+to MPlayer-DOCS. You can subscribe here:
 
 http://mplayerhq.hu/mailman/listinfo/mplayer-docs
 http://mplayerhq.hu/mailman/listinfo/mplayer-translations
@@ -30,7 +30,7 @@ order of importance:
 
 Please note that only doing 1) or 1) + 2) is perfectly fine.
 
-You can find the latest versions of the help_mp-XX.h files in CVS or
+You can find the latest versions of the help_mp-XX.h files in Subversion or
 here:
 
 http://svn.mplayerhq.hu/mplayer/trunk/help/
@@ -76,7 +76,8 @@ incomplete, please let us know, we'll fix it. Patches are more than welcome,
 of course. Do not, however, change the translation first, please get your
 update into the English version first.
 
-If you have CVS access and commit a translation update file, use something like
-"synced with 1.XXX" as first line of the commit message so that it is possible
-to tell with a glance at the cvs log or viewcvs if the translation is outdated
-and which revision of the English master file it is equivalent to.
+If you have Subversion write access and commit a translation update file,
+use something like "synced with 1.XXX" as first line of the commit message
+so that it is possible to tell with a glance at the cvs log or viewcvs if
+the translation is outdated and which revision of the English master file
+it is equivalent to.
