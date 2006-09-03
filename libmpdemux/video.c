@@ -610,7 +610,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           float next_pts = ds_get_next_pts(d_video);
           float d = next_pts > 0 ? next_pts - d_video->pts : d_video->pts - pts1;
 
-          frame_time = (d >= 0) ? d : 0.001;
+          frame_time = (d >= 0 && pts1 > 0) ? d : 0.001;
         }
       break;
     }
