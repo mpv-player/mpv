@@ -130,6 +130,12 @@ void ass_process_chunk(ass_track_t* track, char *data, int size, long long timec
 ass_track_t* ass_read_file(char* fname);
 
 /**
+ * \brief read styles from file into already initialized track
+ * \return 0 on success
+ */
+int ass_read_styles(ass_track_t* track, char* fname);
+
+/**
  * \brief Process embedded matroska font. Saves it to ~/.mplayer/fonts.
  * \param name attachment name
  * \param data binary font data

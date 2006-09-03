@@ -28,8 +28,10 @@ extern char** ass_force_style_list;
 
 char *get_path(char *);
 
+typedef enum {PST_UNKNOWN = 0, PST_INFO, PST_STYLES, PST_EVENTS, PST_FONTS} parser_state_t;
+
 struct parser_priv_s {
-	enum {PST_UNKNOWN = 0, PST_INFO, PST_STYLES, PST_EVENTS, PST_FONTS} state;
+	parser_state_t state;
 	char* fontname;
 	char* fontdata;
 	int fontdata_size;
@@ -844,18 +846,15 @@ static char* sub_recode(char* data, size_t size)
 #endif // ICONV
 
 /**
- * \brief Read subtitles from file.
- * \param fname file name
- * \return newly allocated track
-*/ 
-ass_track_t* ass_read_file(char* fname)
+ * \brief read file contents into newly allocated buffer, recoding to utf-8
+ */
+static char* read_file(char* fname)
 {
 	int res;
 	long sz;
 	long bytes_read;
 	char* buf;
-	ass_track_t* track;
-	
+
 	FILE* fp = fopen(fname, "rb");
 	if (!fp) {
 		mp_msg(MSGT_GLOBAL, MSGL_WARN, "ass_read_file(%s): fopen failed\n", fname);
@@ -899,11 +898,25 @@ ass_track_t* ass_read_file(char* fname)
 	if (sub_cp) {
 		char* tmpbuf = sub_recode(buf, sz);
 		free(buf);
-		if (!tmpbuf)
-			return 0;
 		buf = tmpbuf;
 	}
 #endif
+	return buf;
+}
+
+/**
+ * \brief Read subtitles from file.
+ * \param fname file name
+ * \return newly allocated track
+*/ 
+ass_track_t* ass_read_file(char* fname)
+{
+	char* buf;
+	ass_track_t* track;
+	
+	buf = read_file(fname);
+	if (!buf)
+		return 0;
 	
 	track = ass_new_track();
 	track->name = strdup(fname);
@@ -928,6 +941,26 @@ ass_track_t* ass_read_file(char* fname)
 	
 //	dump_events(forced_tid);
 	return track;
+}
+
+/**
+ * \brief read styles from file into already initialized track
+ */
+int ass_read_styles(ass_track_t* track, char* fname)
+{
+	char* buf;
+	parser_state_t old_state;
+
+	buf = read_file(fname);
+	if (!buf)
+		return 1;
+
+	old_state = track->parser_priv->state;
+	track->parser_priv->state = PST_STYLES;
+	process_text(track, buf);
+	track->parser_priv->state = old_state;
+
+	return 0;
 }
 
 static char* validate_fname(char* name)

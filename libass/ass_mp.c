@@ -19,6 +19,7 @@ char **ass_force_style_list = NULL;
 int ass_use_margins = 0;
 char* ass_color = NULL;
 char* ass_border_color = NULL;
+char* ass_styles_file = NULL;
 
 extern int font_fontconfig;
 extern char* font_name;
@@ -30,16 +31,21 @@ extern void process_force_style(ass_track_t* track);
 
 ass_track_t* ass_default_track() {
 	ass_track_t* track = ass_new_track();
-	ass_style_t* style;
-	int sid;
-	double fs;
-	uint32_t c1, c2;
 
 	track->track_type = TRACK_TYPE_ASS;
 	track->Timer = 100.;
 	track->PlayResX = 384;
 	track->PlayResY = 288;
 	track->WrapStyle = 0;
+
+	if (ass_styles_file)
+		ass_read_styles(track, ass_styles_file);
+
+	if (track->n_styles == 0) {
+	ass_style_t* style;
+	int sid;
+	double fs;
+	uint32_t c1, c2;
 
 	sid = ass_alloc_style(track);
 	style = track->styles + sid;
@@ -71,6 +77,7 @@ ass_track_t* ass_default_track() {
 	style->MarginV = 20;
 	style->ScaleX = 1.;
 	style->ScaleY = 1.;
+	}
 
 	return track;
 }
