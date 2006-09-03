@@ -32,7 +32,7 @@ English documentation:
     * man page: Diego Biurrun
     * console messages: Reynaldo H. Verdejo Pinochet
     * input layer, LIRC, slave mode docs: Alban Bedel
-    * tech/* docs: Alex Beregszaszi
+    * tech/* docs: None
     * tech/* documentation docs: Diego Biurrun
 
 man pages:
@@ -71,13 +71,13 @@ Platforms/ports:
 
 MPlayer code:
     * build system: Diego Biurrun
-    * A-V sync code, MPlayer/MEncoder core: Alex Beregszaszi
+    * A-V sync code, MPlayer/MEncoder core: None
     * libmpdemux: Roberto Togni, Nico Sabbi
     * libmpcodecs: Roberto Togni
     * TV input/capture: Jindrich Makovicka
     * network streaming: Roberto Togni, Nico Sabbi, Benjamin Zores
     * DVD/VOB subtitles: None
-    * config files & commandline parser: Alban Bedel, Alex Beregszaszi
+    * config files & commandline parser: Alban Bedel
     * playtree, input layer: Alban Bedel
     * libswscale: Michael Niedermayer, Luca Abeni
     * DVB support: Nico Sabbi
@@ -88,12 +88,12 @@ MPlayer code:
 Imported libs/projects:
     * libavcodec, libavformat: Michael Niedermayer
     * VIDIX core, libdha: Sascha Sommer
-    * mp3lib: Alex Beregszaszi
-    * loader, dshow: Alex Beregszaszi
-    * liba52: Alex Beregszaszi
+    * mp3lib: None
+    * loader: Alex Beregszaszi
+    * liba52: None
     * libmpeg2: None
     * libmpdvdkit2: None
-    * libfaad2: Alex Beregszaszi
+    * libfaad2: None
     * realrtsp: Roberto Togni
     * librtsp: Benjamin Zores
     * freesdp: Benjamin Zores
