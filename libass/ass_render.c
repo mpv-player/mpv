@@ -1510,7 +1510,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	FT_Vector shift;
 	int MarginL, MarginR, MarginV;
 	int max_text_width;
-	ass_style_t* style = frame_context.track->styles + event->Style;
 	int last_break;
 	int alignment, halign, valign;
 	int device_x = 0, device_y = 0;
@@ -1631,9 +1630,9 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	halign = alignment & 3;
 	valign = alignment & 12;
 
-	MarginL = (event->MarginL) ? event->MarginL : style->MarginL; 
-	MarginR = (event->MarginR) ? event->MarginR : style->MarginR; 
-	MarginV = (event->MarginV) ? event->MarginV : style->MarginV;
+	MarginL = (event->MarginL) ? event->MarginL : render_context.style->MarginL; 
+	MarginR = (event->MarginR) ? event->MarginR : render_context.style->MarginR; 
+	MarginV = (event->MarginV) ? event->MarginV : render_context.style->MarginV;
 
 	if (render_context.evt_type != EVENT_HSCROLL) {
 		// calculate max length of a line
