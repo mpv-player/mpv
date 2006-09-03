@@ -679,7 +679,7 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Konnte EWMH-Fullscreen-Event nicht senden!\n"
-#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Konnte das XScreeSaver-Fenster nicht finden.\n"
+#define MSGTR_CouldNotFindXScreenSaver "xscreensaver_disable: Konnte das XScreenSaver-Fenster nicht finden.\n"
 #define MSGTR_SelectedVideoMode "XF86VM: Ausgewählter Videomodus %dx%d für Bildgröße %dx%d.\n"
 
 #define MSGTR_InsertingAfVolume "[Mixer] Kein Hardware-Mixing, füge Lautstärkefilter ein.\n"
