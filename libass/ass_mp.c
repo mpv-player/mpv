@@ -42,41 +42,41 @@ ass_track_t* ass_default_track() {
 		ass_read_styles(track, ass_styles_file);
 
 	if (track->n_styles == 0) {
-	ass_style_t* style;
-	int sid;
-	double fs;
-	uint32_t c1, c2;
+		ass_style_t* style;
+		int sid;
+		double fs;
+		uint32_t c1, c2;
 
-	sid = ass_alloc_style(track);
-	style = track->styles + sid;
-	style->Name = strdup("Default");
-	style->FontName = (font_fontconfig && font_name) ? strdup(font_name) : strdup("Sans");
+		sid = ass_alloc_style(track);
+		style = track->styles + sid;
+		style->Name = strdup("Default");
+		style->FontName = (font_fontconfig && font_name) ? strdup(font_name) : strdup("Sans");
 
-	fs = track->PlayResY * text_font_scale_factor / 100. / ass_internal_font_size_coeff;
-	// approximate autoscale coefficients
-	if (subtitle_autoscale == 2)
-		fs *= 1.3;
-	else if (subtitle_autoscale == 3)
-		fs *= 1.4;
-	style->FontSize = fs;
+		fs = track->PlayResY * text_font_scale_factor / 100. / ass_internal_font_size_coeff;
+		// approximate autoscale coefficients
+		if (subtitle_autoscale == 2)
+			fs *= 1.3;
+		else if (subtitle_autoscale == 3)
+			fs *= 1.4;
+		style->FontSize = fs;
 
-	if (ass_color) c1 = strtoll(ass_color, NULL, 16);
-	else c1 = 0xFFFF0000;
-	if (ass_border_color) c2 = strtoll(ass_border_color, NULL, 16);
-	else c2 = 0x00000000;
+		if (ass_color) c1 = strtoll(ass_color, NULL, 16);
+		else c1 = 0xFFFF0000;
+		if (ass_border_color) c2 = strtoll(ass_border_color, NULL, 16);
+		else c2 = 0x00000000;
 
-	style->PrimaryColour = c1;
-	style->SecondaryColour = c1;
-	style->OutlineColour = c2;
-	style->BackColour = 0x00000000;
-	style->BorderStyle = 1;
-	style->Alignment = 2;
-	style->Outline = 2;
-	style->MarginL = 30;
-	style->MarginR = 30;
-	style->MarginV = 20;
-	style->ScaleX = 1.;
-	style->ScaleY = 1.;
+		style->PrimaryColour = c1;
+		style->SecondaryColour = c1;
+		style->OutlineColour = c2;
+		style->BackColour = 0x00000000;
+		style->BorderStyle = 1;
+		style->Alignment = 2;
+		style->Outline = 2;
+		style->MarginL = 30;
+		style->MarginR = 30;
+		style->MarginV = 20;
+		style->ScaleX = 1.;
+		style->ScaleY = 1.;
 	}
 
 	return track;
@@ -118,25 +118,25 @@ int ass_process_subtitle(ass_track_t* track, subtitle* sub)
 	event->Duration = (sub->end - sub->start) * 10;
 	event->Style = 0;
 
-		for (j = 0; j < sub->lines; ++j)
-			len += sub->text[j] ? strlen(sub->text[j]) : 0;
+	for (j = 0; j < sub->lines; ++j)
+		len += sub->text[j] ? strlen(sub->text[j]) : 0;
 
-		len += 2 * sub->lines; // '\N', including the one after the last line
-		len += 6; // {\anX}
-		len += 1; // '\0'
+	len += 2 * sub->lines; // '\N', including the one after the last line
+	len += 6; // {\anX}
+	len += 1; // '\0'
 
-		event->Text = malloc(len);
-		end = event->Text + len;
-		p = event->Text;
+	event->Text = malloc(len);
+	end = event->Text + len;
+	p = event->Text;
 
-		if (sub->alignment)
-			p += snprintf(p, end - p, "{\\an%d}", sub->alignment);
+	if (sub->alignment)
+		p += snprintf(p, end - p, "{\\an%d}", sub->alignment);
 
-		for (j = 0; j < sub->lines; ++j)
-			p += snprintf(p, end - p, "%s ", sub->text[j]);
+	for (j = 0; j < sub->lines; ++j)
+		p += snprintf(p, end - p, "%s ", sub->text[j]);
 
-		p--; // remove last ' '
-		*p = 0;
+	p--; // remove last ' '
+	*p = 0;
 
 	if (check_duplicate_plaintext_event(track)) {
 		ass_free_event(track, eid);
