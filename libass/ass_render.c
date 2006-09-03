@@ -1514,7 +1514,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	int alignment, halign, valign;
 	int device_x = 0, device_y = 0;
 
-	if (!event->Style) {
+	if (event->Style >= frame_context.track->n_styles) {
 		mp_msg(MSGT_GLOBAL, MSGL_WARN, "No style found!\n");
 		return 1;
 	}
