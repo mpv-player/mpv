@@ -21,6 +21,16 @@ http://mplayerhq.hu/mailman/listinfo/mplayer-translations
 Send updates and patches to this mailing list or directly to the documentation
 or console message maintainers, see DOCS/tech/MAINTAINERS for details.
 
+Experience shows that translations work best when done by teams. Not only
+can the workload be shared, but there is also the chance to review the
+translation. So if possible try to find more people to help out with
+translating.
+
+Furthermore, if you take over an unmaintained translation, bring the existing
+parts up-to-date before translating new ones.  Outdated information is worse
+than missing information and for the XML documentation missing parts are
+automatically replaced by the English master files.
+
 Translations of MPlayer documentation consist of 3 parts in descending
 order of importance:
 
