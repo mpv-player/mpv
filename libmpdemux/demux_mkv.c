@@ -3759,32 +3759,21 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
 
     case DEMUXER_CTRL_SWITCH_AUDIO:
       if (demuxer->audio && demuxer->audio->sh) {
-        int i;
-        demux_stream_t *d_audio = demuxer->audio;
-        int idx = d_audio->id - 1; // track ids are 1 based
-        mkv_track_t *otrack = mkv_d->tracks[idx];
-        mkv_track_t *track = 0;
-        if (*((int*)arg) < 0)
-        for(i = 0; i < mkv_d->last_aid; i++) {
-          if(mkv_d->audio_tracks[i] == d_audio->id) {
-            idx = mkv_d->audio_tracks[(i+1) % mkv_d->last_aid] - 1;
-            track = mkv_d->tracks[idx];
-            if(! track)
-              continue;
-            if (track->type == MATROSKA_TRACK_AUDIO) break;
-	  }
-	}
-        else {
-          track = demux_mkv_find_track_by_num (mkv_d, *((int*)arg), MATROSKA_TRACK_AUDIO);
-          if (track == NULL)
-            track = otrack;
+        sh_audio_t *sh = demuxer->a_streams[demuxer->audio->id];
+        int aid = *(int*)arg;
+        if (aid < 0)
+          aid = (sh->aid + 1) % mkv_d->last_aid;
+        if (aid != sh->aid) {
+          mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, aid, MATROSKA_TRACK_AUDIO);
+          if (track) {
+            demuxer->audio->id = track->tnum;
+            sh = demuxer->a_streams[demuxer->audio->id];
+            ds_free_packs(demuxer->audio);
+          }
         }
-        if (track != otrack) {
-          d_audio->id = track->tnum;
-          ds_free_packs(d_audio);
-        }
-      }
-      *((int*)arg) = demuxer->audio->id;
+        *(int*)arg = sh->aid;
+      } else
+        *(int*)arg = -2;
       return DEMUXER_CTRL_OK;
 
     default:
