@@ -11,6 +11,8 @@ extern int ass_bottom_margin;
 extern int extract_embedded_fonts;
 extern char **ass_force_style_list;
 extern int ass_use_margins;
+extern char* ass_color;
+extern char* ass_border_color;
 
 ass_track_t* ass_default_track();
 int ass_process_subtitle(ass_track_t* track, subtitle* sub);

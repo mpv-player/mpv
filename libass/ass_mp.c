@@ -5,6 +5,7 @@
 #include "mp_msg.h"
 
 #include "ass.h"
+#include "ass_utils.h"
 #include "ass_mp.h"
 
 // libass-related command line options
@@ -16,6 +17,8 @@ int ass_bottom_margin = 0;
 int extract_embedded_fonts = 0;
 char **ass_force_style_list = NULL;
 int ass_use_margins = 0;
+char* ass_color = NULL;
+char* ass_border_color = NULL;
 
 extern int font_fontconfig;
 extern char* font_name;
@@ -30,6 +33,7 @@ ass_track_t* ass_default_track() {
 	ass_style_t* style;
 	int sid;
 	double fs;
+	uint32_t c1, c2;
 
 	track->track_type = TRACK_TYPE_ASS;
 	track->Timer = 100.;
@@ -50,9 +54,14 @@ ass_track_t* ass_default_track() {
 		fs *= 1.4;
 	style->FontSize = fs;
 
-	style->PrimaryColour = 0xFFFF0000;
-	style->SecondaryColour = 0xFFFF0000;
-	style->OutlineColour = 0x00000000;
+	if (ass_color) c1 = strtoll(ass_color, NULL, 16);
+	else c1 = 0xFFFF0000;
+	if (ass_border_color) c2 = strtoll(ass_border_color, NULL, 16);
+	else c2 = 0x00000000;
+
+	style->PrimaryColour = c1;
+	style->SecondaryColour = c1;
+	style->OutlineColour = c2;
 	style->BackColour = 0x00000000;
 	style->BorderStyle = 1;
 	style->Alignment = 2;
