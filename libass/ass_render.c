@@ -1514,6 +1514,15 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	int alignment, halign, valign;
 	int device_x = 0, device_y = 0;
 
+	if (!event->Style) {
+		mp_msg(MSGT_GLOBAL, MSGL_WARN, "No style found!\n");
+		return 1;
+	}
+	if (!event->Text) {
+		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Empty event!\n");
+		return 1;
+	}
+
 	init_render_context(event);
 
 	text_info.length = 0;
@@ -1521,14 +1530,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	pen.y = 0;
 	previous = 0;
 	num_glyphs = 0;
-
-	
 	p = event->Text;
-	if (!p) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Empty event!\n");
-		return 1;
-	}
-
 	// Event parsing.
 	while (1) {
 		render_context.effect_type = EF_NONE;
