@@ -79,6 +79,7 @@ ass_track_t* ass_default_track() {
 		style->ScaleY = 1.;
 	}
 
+	process_force_style(track);
 	return track;
 }
 
@@ -173,7 +174,6 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 			track->events[eid].Duration *= 100. / fps;
 		}
 	}
-	process_force_style(track);
 	return track;
 }
 
