@@ -74,12 +74,12 @@ _______________________________
 STEP1: Installing Binary Codecs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-MPlayer has builtin support for the most common audio and video
-formats, but some formats require external codecs. Examples include Real, Indeo
-and QuickTime audio formats. Support for Windows Media formats except WMV9
-exists but still has some bugs, your mileage may vary. This step is not
-mandatory, but recommended for getting MPlayer to play a broader range of
-formats. Please note that most codecs only work on Intel x86 compatible PCs.
+MPlayer has builtin support for the most common audio and video formats, but
+for some external binary codecs are required. Examples include newer RealVideo
+variants and a couple of uncommon formats. This step is not mandatory, but
+recommended for getting MPlayer to play a broader range of formats. Please
+note that binary codecs only work on the platform they were compiled for.
+We provide packages for x86 and PowerPC.
 
 Unpack the codecs archives and put the contents in a directory where MPlayer
 will find them. The default directory is /usr/local/lib/codecs/ (it used to be
