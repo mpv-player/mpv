@@ -14,14 +14,14 @@ If you do not know them please read
 <ulink url="http://www.river.com/users/share/etiquette/edit.html">HOWTO Edit Messages</ulink>.
 <itemizedlist>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
 </para>
 <para>
 List for <application>MPlayer</application> announcements.
 Subscribe here if you want to get security and release announcements.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
 </para>
 <para>General support mailing list for questions related to
 <application>MPlayer</application>.
@@ -32,25 +32,25 @@ list as well, but read the <link linkend="bugs">known bugs</link> and
 <link linkend="bugreports">bug reporting</link> section first.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (Hungarian)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (Hungarian)
 </para>
 <para>Hungarian language list. Topic? We'll see about it... mostly flame and
 RTFM questions up to now :(
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
 </para>
 <para>List for questions related to Matrox graphics cards, like
 <link linkend="mga_vid">mga_vid</link>, Matrox's official beta drivers (for
 XFree86 4.x.x), matroxfb-TVout stuff.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
 </para>
 <para>Things related to the hardware decoder card called DVB (not <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
 </para>
 <para>General support mailing list for questions related to
 <application>MEncoder</application>.
@@ -61,7 +61,7 @@ list as well, but read the <link linkend="bugs">known bugs</link> and
 <link linkend="bugreports">bug reporting</link> section first.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
 </para>
 <para>This list is about <application>MPlayer</application> development!
 Talking about interface/API changes, new libraries, code optimization,
@@ -69,7 +69,7 @@ configure changes is ontopic here. Send patches but not bug reports,
 user questions, feature requests or flames here to keep the list traffic low.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
 </para>
 <para>All changes in <application>MPlayer</application> code are automatically
 sent to this list. Only questions about these changes belong here
@@ -77,57 +77,59 @@ sent to this list. Only questions about these changes belong here
 fix or you have noticed a possible bug/problem in the commit).
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
 </para>
 <para>This list is about <application>MPlayer</application> documentation
 and homepage discussions.
 Documentation and homepage related SVN logs are also sent here.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>This list is about <application>MPlayer</application> documentation
 and homepage translation discussions.
 Documentation and homepage translation Subversion logs are also sent here.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
 </para>
 <para>List for discussion about <application>MPlayer</application>'s
 <application>Cygwin</application> and <application>MinGW</application> port.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
 </para>
 <para>List for discussion about <application>MPlayer</application> G2, the
 next generation video player.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
 </para>
 <para>List for discussion about <application>MPlayer</application> mirror
 server infrastructure.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (INACTIVE)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (INACTIVE)
 </para>
 <para>List for discussion about the <application>MPlayer</application> Weekly
 News releases.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (INACTIVE)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (INACTIVE)
 </para>
 <para>List for discussion about <application>MPlayer</application>'s OS/2 port.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INACTIVE)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INACTIVE)
 </para>
 <para>List for discussion about QuickTime codec support.
 </para></listitem>
 </itemizedlist>
+<!-- Commented out until mailing list search is restored.
 <note><para>
 You can reach the searchable mailing list archives at
-<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
+<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
+-->
 </para>
 </appendix>
