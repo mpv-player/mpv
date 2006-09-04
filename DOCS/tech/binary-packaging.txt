@@ -106,6 +106,9 @@ for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 You MUSTN'T include the codecs.conf file in your package. It is useful
 only for development purposes and often causes obscure problems for users.
 
+Please avoid using the deprecated paths for binary codecs (/usr/lib/win32/)
+and skins (/usr/share/mplayer/Skin/).
+
 
 One package or many packages?
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
