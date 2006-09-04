@@ -1349,9 +1349,9 @@ static void wrap_lines_smart(int max_text_width)
 
 					w = s2;
 					do { --w; } while ((w > s1) && (w->symbol == ' '));
-					do { --w; } while ((w > s1) && (w->symbol != ' '));
+					while ((w > s1) && (w->symbol != ' ')) { --w; }
 					e1 = w;
-					do { --e1; } while ((e1 > s1) && (e1->symbol == ' '));
+					while ((e1 > s1) && (e1->symbol == ' ')) { --e1; }
 					if (w->symbol == ' ') ++w;
 
 					l1 = ((s2-1)->bbox.xMax + (s2-1)->pos.x) - (s1->bbox.xMin + s1->pos.x);
