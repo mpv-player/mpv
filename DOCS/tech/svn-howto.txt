@@ -106,7 +106,7 @@ I. BASICS:
 
     svn status
 
-  to make sure you did not forget to svn add some files (those will be marked
+  to make sure you did not forget to 'svn add' some files (they will be marked
   with '?').
 
   Once you have made sure everything is fine
