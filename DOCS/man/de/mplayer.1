@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19606
+.\" In sync with r19688
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1856,9 +1856,19 @@ Matroska-Spuren verwendet.
 Du möchtest vielleicht auch \-embeddedfonts verwenden.
 .
 .TP
+.B \-ass-border-color <Wert>
+Setzt die Rahmen(rand)farbe für Untertitel, die aus einfachem Text bestehen.
+Das Farbformat ist RRGGBBAA.
+.
+.TP
 .B \-ass-bottom-margin <Wert>
 Fügt einen schwarzen Streifen unten ins Bild hinzu.
 Der SSA/ASS-Renderer kann Untertitel dorthin legen (mit \-ass-use-margins).
+.
+.TP
+.B \-ass-color <Wert>
+Setzt die Farbe für Untertitel, die aus einfachem Text bestehen.
+Das Farbformat ist RRGGBBAA.
 .
 .TP
 .B \-ass-font-scale <Wert>
@@ -1879,6 +1889,13 @@ SSA/ASS-Renderer verwendet werden soll.
 .TP
 .B \-ass-line-spacing <Wert>
 Setzt den Wert für den Zeilenabstand für den SSA/ASS-Renderer.
+.
+.TP
+.B \-ass-styles <Dateiname>
+Lade alle SSA/ASS-Styles, die in der angegebenen Datei gefunden wurden, und
+verwende sie für das Zeichnen der aus einfachem Text bestehenden Untertitel.
+Der Syntax der Datei ist genau wie der Abschnitt [V4 Styles] / [V4+ Styles]
+von SSA/ASS.
 .
 .TP
 .B \-ass-top-margin <Wert>
@@ -9954,6 +9971,14 @@ Das geht leicht zu Lasten der Komprimierung.
 Um diese Funktion nutzen zu können, muss libx264 mit Unterstützung für pthread
 kompiliert worden sein; falls das nicht der Fall ist, wird diese Option eine
 Warnung ausgeben und aktiviert Scheiben, jedoch nicht Multithreading.
+.
+.TP
+.B (no)globalheader
+Bewirkt, dass SPS und PPS nur einmal bei Beginn des Bitstreams erscheinen
+(Standard: deaktiviert).
+Manche Wiedergabegeräte, wie die PSP, benötigen diese Option.
+Das Standardverhalten veranlasst, dass SPS und PPS vor jedem IDR-Frame 
+wiederholt werden.
 .
 .TP
 .B log=<-1\-3>
