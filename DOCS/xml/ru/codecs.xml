@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.44 -->
+<!-- synced with r19587 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -24,7 +24,7 @@
   </simpara></listitem>
 <listitem><simpara>
   "родные" декодеры для <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX (Pro), 3ivX, M$ MPEG4</emphasis> v1, v2 и других вариантов MPEG4.
+  DivX 5 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 и других вариантов MPEG-4.
   </simpara></listitem>
 <listitem><simpara>
   "родной" декодер для <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -76,122 +76,6 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 </para>
 
 
-<sect3 id="divx4-5">
-<title>DivX4/DivX5</title>
-
-<para>
-Эта секция содержит информацию о DivX4 b DivX5 кодеках от
-<ulink url="http://www.projectmayo.com">Project Mayo</ulink>.
-Их первыми доступными альфа версиями были OpenDivX alpha 47 и 48.
-В прошлом поддержка для них была включена в <application>MPlayer</application>
-и собиралась по умолчанию. Также мы использовали их код постобработки
-для факультативного улучшения качества изображения в MPEG1/2 фильмах.
-Сейчас мы используем наш собственный фильтр для файлов всех типов.
-</para>
-
-<para>
-Новое поколение этого кодека называется DivX4 и даже может декодировать фильмы,
-сделанные пресловутым DivX кодеком! В дополнение к этому, он значительно
-быстрее, чем Win32 DivX DLL'и, но медленнее, чем
-<systemitem class="library">libavcodec</systemitem>.
-Поэтому, использовать его в качестве декодера
-<emphasis role="bold">НЕ РЕКОМЕНДУЕТСЯ</emphasis>. Хотя, он полезен
-для кодирования. Единственным недостатком этого кодека является то, что он
-не доступен по лицензии с Открытым исходным кодом[Open Source license]
-</para>
-
-<para>
-DivX4 работает в двух режимах:
-<variablelist>
-<varlistentry><term><option>-vc odivx</option></term>
-<listitem><simpara>
-  Использовать кодек в манере OpenDivX. В этом случае, он выдаёт YV12
-  изображения в своём собственном буфере, и <application>MPlayer</application>
-  сам изменяет пространство цветов через libvo. (<emphasis role="bold">Быстро,
-  рекомендуется!</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry><term><option>-vc divx4</option></term>
-<listitem><simpara>
-  Используется изменение пространства цветов в кодеке. В этом режиме Вы также
-  можете использовать YUY2/UYVY. (<emphasis role="bold">МЕДЛЕННО</emphasis>)
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-</para>
-
-<para>
-Метод <option>-vc odivx</option> обычно быстрее, поскольку при этом изображение
-передаётся в YV12 формате (линейный YUV 4:2:0), и поэтому требуется много
-меньшая пропускная способность шины. Для упакованных YUV режимов (YUY2, UYVY)
-используйте метод <option>-vc divx4</option>. В RGB режимах скорость - такая же,
-различаясь в лучшем случае из-за текущей глубины цвета.
-<note>
-<para>
-Если Ваш <option>-vo</option> драйвер поддерживает прямой вывод, то <option>-vc
-divx4</option> может быть более быстрым, или даже наибыстрейшим решением.
-</para>
-
-<para>
-Двоичная библиотека DivX4/5 кодека может быть скачена с сайтов
-<ulink url="http://avifile.sourceforge.net">avifile</ulink> или
-<ulink url="http://www.divx.com">divx.com</ulink>
-Распакуйте его, запустите как администратор <filename>./install.sh</filename>,
-и не забудьте добавить 
-<filename class="directory">/usr/local/lib</filename> в Ваш
-<filename>/etc/ld.so.conf</filename> и запустить <command>ldconfig</command>.
-</para>
-
-<para>
-Так можно получить CVS версию СТАРОЙ библиотеки OpenDivX core:
-</para>
-
-<procedure>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</screen>
-</para></step>
-<step><para>
-<screen>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</screen>
-</para></step>
-<step><para>
-Основная библиотека разделена на decore[декодер] и encore[кодер] библиотеки,
-которые должны компилироваться по-отдельности. Для библиотеки decore, просто наберите
-<screen>
-cd divxcore/decore/build/linux
-make
-cp libdivxdecore.so /usr/local/lib
-ln -s libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
-cp ../../src/decore.h /usr/local/include
-</screen>
-</para></step>
-<step><para>
-К сожалению, для библиотеки encore Linux'ового Makefile нет, и MMX оптимизированный
-код работает только под Windows. Вы всё же можете скомпилировать её, используя этот
-<ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</ulink>.
-<screen>
-cd ../../../encore/build
-mkdir linux
-cd linux
-cp path/Makefile .
-make
-cp libdivxencore.so /usr/local/lib
-ln -s libdivxencore.so /usr/local/lib/libdivxencore.so.0
-cp ../../src/encore.h /usr/local/include
-</screen>
-</para></step>
-</procedure>
-
-<para>
-<application>MPlayer</application> автоматически находит DivX4/DivX5 если они были
-правильно установлен, просто компилируйте как обычно. Если он не находит этот
-кодек, то Вы неправильно установили или сконфигурировали DivX4/DivX5.
-</para>
-
-</note>
-</para>
-</sect3>
-
-
 <sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
@@ -223,53 +107,21 @@ cp ../../src/encore.h /usr/local/include
 и <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">аудио</ulink> кодеки.
 </para>
 
+
 <para>
-Если вы используете релиз <application>MPlayer</application>'а, то у Вас в пакете
-уже есть <systemitem class="library">libavcodec</systemitem>,
-просто компилируйте как обычно. Если Вы используете MPlayer
-из CVS, Вы должны извлечь <systemitem class="library">libavcodec</systemitem>
-из CVS дерева FFmpeg, поскольку релизы FFmpeg очень редки. Как правило, CVS
-достаточно стабилен и предоставляет больше возможностей. Чтобы это сделать:
+Both <application>MPlayer</application> releases and
+<application>MPlayer</application> from Subversion contain
+<systemitem class="library">libavcodec</systemitem> so you don't have
+to care about making a separate <systemitem class="library">libavcodec</systemitem> checkout.
+Just run <filename>configure</filename> and compile.
 </para>
 
-<procedure>
-<step><para>
-  <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
-  </para></step>
-<step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg</screen>
-  </para></step>
-<step><para>
-  Переместите каталог <filename>libavcodec</filename> из исходного кода FFmpeg
-  в корень <application>MPlayer</application>'овского CVS дерева.
-  Это должно выглядеть так:
-  <filename class="directory">main/libavcodec</filename>
-  </para><para>
-  Символической ссылки <emphasis role="bold">не</emphasis> достаточно, Вы должны
-  скопировать/переместить его!
-  </para></step>
-<step><para>
-  Если Вы хотите, чтобы <systemitem class="library">libavcodec</systemitem>
-  обновлялась каждый раз, когда Вы обновляете
-  <application>MPlayer</application>'овский CVS, добавьте такую строчку:
-  <filename>main/CVS/Entries</filename>
-  в файл <screen>D/libavcodec////</screen>
-  </para></step>
-<step><para>
-  Скомпилируйте. <filename>configure</filename> должен определить проблемы до
-  компиляции.
-  </para></step>
-</procedure>
-
-<note>
 <para>
-<application>MPlayer</application> из CVS содержит подкаталог
-<filename>libavcodec</filename>, но он <emphasis role="bold">не</emphasis>
-содержит исходный код для <systemitem class="library">libavcodec</systemitem>!
-Вы должны следовать указаниям,
-приведённым выше, чтобы получить исходный код этой библиотеки.
+Как релиз <application>MPlayer</application>'а, так и его версия из Subversion 
+содержат <systemitem class="library">libavcodec</systemitem>. Поэтому нет надобности 
+беспокоиться о ее отдельной сборке. Просто запустите 
+<filename>configure</filename> и компилируйте как обычно.
 </para>
-</note>
 
 <para>
 С FFmpeg и моей Matrox G400, я даже могу смотреть DivX фильмы с высочайшим
@@ -289,23 +141,28 @@ cp ../../src/encore.h /usr/local/include
 <!--- XXX Find a better translation: However, the XAnim
 author has yet to bring legal action against anyone for codec-related issues.
 -->
-Тем не менее, автор XAnim'а ещё должен ещё произвести юридические действия по
+Тем не менее, автор XAnim'а ещё должен произвести юридические действия по
 относящимся к кодекам вопросам.
+<!-- 
+Probably, this is better, but i do not sure:
+Тем не менее автор еще должен выиграть судебный иск против кого-либо по относящимся 
+к кодеку вопросам.
+-->
 </para>
 </note>
 
 <formalpara>
 <title>УСТАНОВКА И ИСПОЛЬЗОВАНИЕ</title>
 <para>
-<application>MPlayer</application> способе использовать XAnim'овские кодеки
+<application>MPlayer</application> способен использовать XAnim'овские кодеки
 для декодирования. Чтобы включить их, следуйте инструкциям:
 </para>
 </formalpara>
 
 <procedure>
 <step><para>
-  Скачайте кодеки, которые Вы хотите использовать, с сайта
-  <ulink url="http://xanim.va.pubnix.com">XAnim site</ulink>.
+  Скачайте кодеки, которые Вы хотите использовать, с 
+  <ulink url="http://xanim.va.pubnix.com">сайта XAnim</ulink>.
   <emphasis role="bold">3ivx</emphasis> кодека там нет, но его можно найти на
   <ulink url="http://www.3ivx.com">сайте 3ivx</ulink>.
   </para></step>
@@ -326,7 +183,7 @@ author has yet to bring legal action against anyone for codec-related issues.
   </para></step>
 <step><para>
   Переименуйте/создайте символические ссылки, убрав части, относящиеся к
-  архитектуре так, чтобы файлы назывались так: <filename>vid_cvid.xa</filename>,
+  архитектуре так, чтобы файлы назывались: <filename>vid_cvid.xa</filename>,
   <filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
   </para></step>
 </procedure>
@@ -338,7 +195,7 @@ XAnim - это семейство видео кодеков <systemitem>xanim</systemitem>, поэтому Вы
 </para>
 
 <para>
-Тестированные кодеки это: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
+Протестированные кодеки: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
 h263.</emphasis>
 </para>
 </sect3>
@@ -411,16 +268,6 @@ Cкачайте Real кодеки на
 опцию <option>--with-reallibdir</option>.
 </para>
 
-<para>
-На Mac OS X Вы должны убедиться, что <filename>pncrt.Shlb</filename> (включая его
-resource fork!) находится в том же каталоге, что и Real кодеки. Скопируйте их,
-например, так: 
-<screen>ditto -rsrcFork "RealOne Player.app/Contents/MacOS/pncrt.Shlb" "RealOne Player.app/Contents/MacOS/Library/Codecs"</screen>
-Если Вы этого не сделаете, или забудете скопировать resource fork, Вы будете
-получать такие ошибки:
-<screen>GetDiskFragment() failed with error -2804: &lt;&lt;Unknown disk fragment&gt;&gt;&lt;&lt;Unknown disk fragment&gt;&gt;&lt;pncrt.Shlb&gt;&lt;&gt;</screen>
-</para>
-
 
 <note><para>
 <application>RealPlayer</application>'овские библиотеки в настоящий момент
@@ -435,46 +282,38 @@ resource fork!) находится в том же каталоге, что и Real кодеки. Скопируйте их,
 <title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> - это разработка, отпочковавшаяся от
-OpenDivX кодека. Это произошло, когда ProjectMayo сделал исходный код OpenDivX
+<ulink url="http://www.xvid.org">XviD</ulink> свободный, MPEG-4 ASP совместимый
+видел кодек, особенностями которого яявляются двухпроходное кодирование и
+полная поддержка MPEG-4 ASP, делающая его намного более эеффективным, чем
+хорошо известный DivX. Он обладает видео отменного качества и хорошей
+производительностью, в силу оптимизаций под большинство современных процессоров.
+</para>
+
+<para>
+Он начался как ответвление OpenDivX кодека. Это произошло, когда ProjectMayo 
+сделал исходный код OpenDivX
 закрытым (DivX4, теперь DivX5), и разработчики OpenDivX не из ProjectMayo
 разозлились, и взялись за XviD. Поэтому у обоих проектов общие корни.
-
-<itemizedlist>
-<title>ПРЕИМУЩЕСТВА</title>
-<listitem><simpara>
-  открытый исходный код
-  </simpara></listitem>
-<listitem><simpara>
-  API совместимы с DivX4, поэтому просто добавить для него поддержку
-  </simpara></listitem>
-<listitem><simpara>
-  поддержка кодирования в 2 прохода
-  </simpara></listitem>
-<listitem><simpara>
-  хорошее качество кодирования, более высокая скорость, по сравнению с DivX4
-  (вы можете его оптимизировать под Вашу машину во время компиляции)
-  </simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>НЕДОСТАТКИ</title>
-<listitem><simpara>
-  в настоящий момент не все DivX/DivX4 файлы <emphasis role="bold">декодируются
-  </emphasis> (не проблема, поскольку их может воспроизвести
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-<listitem><simpara>
-  разработка продолжается и в настоящий момент
-  </simpara></listitem>
-</itemizedlist>
 </para>
 
 <procedure>
-<title>УСТАНОВКА XVID CVS</title>
+<title>Установка <systemitem class="library">XviD</systemitem></title>
+
 <para>
-  В настоящий момент он доступен только по CVS. Вот как его скачать и поставить
-  (Вам потребуется autoconf не старее 2.50, automake и libtool):
+  Как и большинство ПО с открытым исходным кодом, он доступен как в виде 
+  <ulink url="http://www.xvid.org/downloads.html">официальных релизов</ulink>,
+  так и в виде CVS версии. 
+<!-- FIXME need good translation 
+  The CVS version is usually stable enough to use, as most of the time it
+  features fixes for bugs that exist in releases.
+-->
+  Как правило CVS версия достаточно стабильна для использования, т.к. в большинстве
+  случаев ее особенностью является отсутствие ошибок, присутствующих в релизах.
+  Далее описывается как заставить  работать
+  <systemitem class="library">XviD</systemitem> CVS с <application>MEncoder</application>'ом
+  (необходимы, как минимум,
+  <application>autoconf</application> 2.50,
+  <application>automake</application> и <application>libtool</application>):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -522,13 +361,13 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 
 <itemizedlist>
 <listitem><simpara>
-  Sorenson 1 (fourcc <emphasis>SVQ1</emphasis>) - декодирование поддерживается
+  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - декодирование поддерживается
   <emphasis role="bold">родным кодеком</emphasis>
   (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
-  Sorenson 3 (fourcc <emphasis>SVQ3</emphasis>) - декодирование поддерживается,
-  используя <emphasis role="bold">"родной" кодек</emphasis>
+  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - декодирование поддерживается
+  <emphasis role="bold">родным кодеком</emphasis>
   (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 </itemizedlist>
@@ -537,7 +376,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <title>КОМПИЛЯЦИЯ MPLAYER'А С ПОДДЕРЖКОЙ БИБЛИОТЕК QUICKTIME</title>
 <note><para>в настоящий момент поддерживаются только 32битные Intel'евские
 платформы.</para></note>
-<step><para>скачайте <application>MPlayer</application>'овский CVS</para></step>
+<step><para>скачайте <application>MPlayer</application>'овский Subversion</para></step>
 <step><para>скачайте пакет QuickTime DLL с
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -553,141 +392,133 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <title>x264</title>
 
 <sect4 id="codec-x264-whatis">
-<title>What is x264?</title>
+<title>Что такое x264?</title>
 <para>
-  <systemitem class="library">x264</systemitem> is a library for
-  creating H.264 video streams.
-  It is not 100% complete, but currently it has at least some kind
-  of support for most of the H.264 features which impact quality.
+  <systemitem class="library">x264</systemitem> это библиотека для создания
+  видеопотоков H.264. Она не завершена на 100%, но она имеет приемлемого
+  качества поддержку большинства возможностей H.264.
+<!-- FIXME need better translation 
   There are also many advanced features in the H.264 specification
   which have nothing to do with video quality per se; many of these
-  are not yet implemented in
-  <systemitem class="library">x264</systemitem>.
+-->
+  В спецификации H.264 присутствует множество дополнительных возможностей,
+  которые никак не влиябт на качество видео и до сих в 
+  <systemitem class="library">x264</systemitem> не реализованы.
 </para>
 
 <itemizedlist>
-<title>Encoder features</title>
+<title>возможности кодера</title>
+<!-- FIXME i can't translate this -->
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Multi-references</para></listitem>
-  <listitem><para>Intra: all macroblock types (16x16 and 4x4 with
+  <listitem><para>Intra: all macroblock types (16x16, 8x8, and 4x4 with
     all predictions)</para></listitem>
   <listitem><para>Inter P: all partitions (from 16x16 down to
     4x4)</para></listitem>
   <listitem><para>Inter B: partitions from 16x16 down to 8x8
     (including SKIP/DIRECT)</para></listitem>
   <listitem><para>Ratecontrol: constant quantizer, constant bitrate,
-    or multipass ABR</para></listitem>
+    single or multipass ABR, optional VBV</para></listitem>
   <listitem><para>Scene cut detection</para></listitem>
   <listitem><para>Adaptive B-frame placement</para></listitem>
   <listitem><para>B-frames as references / arbitrary frame
     order</para></listitem>
+  <listitem><para>8x8 and 4x4 adaptive spatial transform</para></listitem>
+  <listitem><para>Lossless mode</para></listitem>
+  <listitem><para>Custom quantization matrices</para></listitem>
+  <listitem><para>Parallel encoding of multiple slices</para></listitem>
 </itemizedlist>
-
-<itemizedlist>
-<title>Encoder limitations</title>
-  <listitem><para>No real RD</para></listitem>
-</itemizedlist>
-
 
 </sect4>
 
 <sect4 id="codec-h264-whatis">
-<title>What is H.264?</title>
+<title>Что такое H.264?</title>
 <para>
-  H.264 is one name for a new digital video codec jointly developed
-  by the ITU and MPEG.
-  It can also be correctly referred to by the cumbersome names of
-  "ISO/IEC 14496-10" or "MPEG-4 Part 10".
-  More frequently, it is referred to as "MPEG-4 AVC" or just "AVC".
+  
+  H.264 это одно из названий нового цифрового кодека совместно 
+  разрабатываемого ITU и MPEG. Названия "ISO/IEC 14496-10" или
+  "MPEG-4 Part 10" тоже являются корректными, но чаще его
+  называют  "MPEG-4 AVC" или просто "AVC".
 </para>
 <para>
-  Whatever you call it, H.264 may be worth trying because it can
-  typically match the quality of MPEG-4 ASP with 5%-30% less
-  bitrate.
-  Actual results will depend on both the source material and the
-  encoder.
-  The gains from using H.264 do not come for free: decoding H.264
-  streams seems to have steep CPU and memory requirements.
-  For instance, on a 1733 MHz Athlon, a 1500kbps H.264 video uses
-  around 50% CPU to decode.
-  By comparison, decoding a 1500kbps MPEG4-ASP stream requires
-  around 10% CPU.
-  This means that decoding high-definition streams is almost out of
-  the question for most users.
-  It also means that even a decent DVD rip may sometimes stutter on
-  processors slower than 2.0 GHz or so.
+  Как его ни называй, но H.264 стоит попробовать, поскольку он 
+  дает то же качество, что и MPEG-4 ASP, но при битрейте меньшем 
+  на 5%-30%. Конкретный результат зависит как от исходного
+  материала, так и от кодировщика. Выигрыш не дается просто так:
+  декодирование потока H.264, похоже, имеет повышенные требования
+  к CPU и памяти. В частности, на 1733 MHz Athlon декодирование
+  H.264 потока в 1500кбит/с с DVD-разрешением  использует около 50% CPU.
+  Для сравнения, декодирование 1500кбит/с потока MPEG4-ASP с 
+  DVD-разрешением требует около 10% CPU. Это значит, что вопрос декодирования 
+  потоков высокого разрешения не стоит перед большинством пользователей.
+  Также это значит, что даже скромный DVD рип может время от времени
+  заикаться на процессорах слабее 2.0 GHz или около того.
 </para>
 <para>
-  At least with <systemitem class="library">x264</systemitem>,
-  encoding requirements are not much worse than what you are used to
-  with MPEG4-ASP.
-  For instance, on a 1733 MHz Athlon a typical DVD encode would run
-  at 5-15fps.
+  Как минимум с <systemitem class="library">x264</systemitem>,
+  требования для кодирования не слишком велики по сравнению с MPEG4-ASP.
+  В частности, на 1733 MHz Athlon кодирование обичного DVD будет идти со
+  скоростью 5-15 fps.
 </para>
 <para>
-  This document is not intended to explain the details of H.264,
-  but if you are interested in a brief overview, you may want to read
+  Объяснять все тонкости H.264 не является целью этого документа, но если
+  вас интересует краткий обзор, вы можете прочесть 
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
 </sect4>
 
 <sect4 id="codec-x264-playback">
-<title>How can I play H.264 videos with <application>MPlayer</application>?</title>
+<title>Как мне посмотреть H.264 при помощи <application>MPlayer</application>?</title>
 <para>
-  <application>MPlayer</application> uses
-  <systemitem class="library">libavcodec</systemitem>'s H.264
-  decoder.
-  <systemitem class="library">libavcodec</systemitem> has had at
-  least minimally usable H.264 decoding since around July 2004,
-  however major changes and improvements have been implemented since
-  that time, both in terms of more functionalities supported and in
-  terms of improved CPU usage.
-  Just to be certain, it is always a good idea to use a recent CVS
-  checkout.
+  <application>MPlayer</application> использует H.264 декодер библиотеки
+  <systemitem class="library">libavcodec</systemitem>.
+  <systemitem class="library">libavcodec</systemitem> полиуила мало-мальски
+  пригодную для использования возможность декодирования H.264 где-то в Июле 2004,
+  конечно с того времени было внесено можество серъезных изменений и улучшений,
+  как с точки зрения поддерживаемых функцианальных возможностей, так и улучшенного
+  использования CPU.
+  Для определенности: использование свежего среза CVS - всегда хорошая идея.
 </para>
 <para>
-  If you want a quick and easy way to know whether there have been
-  recent changes to <systemitem class="library">libavcodec</systemitem>'s
-  H.264 decoding, you might keep an eye on 
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS repository's web interface</ulink>.
+  Если нужен быстрый и простой способ какие свежие изменения, относящиеся к H.264,
+  были сделаны в <systemitem class="library">libavcodec</systemitem>, Вам следует
+  иметь ввиду
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS repository's web interface (Веб-интерфейс к репозиторию FFmpegCVS)</ulink>.
 </para>
 </sect4>
 
 <sect4 id="codec-x264-encode">
-<title>How can I encode videos using <application>MEncoder</application> and <systemitem class="library">x264</systemitem>?</title>
+<title>Как кодировать видео, используя <application>MEncoder</application> и <systemitem class="library">x264</systemitem>?</title>
 <para>
-  If you have the subversion client installed, the latest x264
-  sources can be gotten with this command:
+  Если у вас установлен клиент subversion, последнюю версию x264 
+  можно загрузить следующей командой:
   <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264
-  </screen>
-  <application>MPlayer</application> sources are updated whenever
-  an <systemitem class="library">x264</systemitem> API change
-  occurs, so it is always suggested to use CVS
-  <application>MPlayer</application> as well.
-  Perhaps this situation will change when and if an
-  <systemitem class="library">x264</systemitem> "release" occurs.
-  Meanwhile, <systemitem class="library">x264</systemitem> should
-  be considered very unstable, in the sense that its programming
-  interface is subject to change.
+    svn co svn://svn.videolan.org/x264/trunk x264<!--
+--></screen>
+  Исходный код <application>MPlayer</application> обновляется 
+  свякий раз при изменении API <systemitem class="library">x264</systemitem>, 
+  так что предлагается использовать Subversion версию
+  <application>MPlayer</application>'а.
+  возможно, ситуация изменится с выходом "релиза" 
+  <systemitem class="library">x264</systemitem> (если он будет).
+  В данный момент <systemitem class="library">x264</systemitem> следует
+  рассматривать как очень нестабильный, в свете постоянного изменения
+  интерфейса программирования.
 </para>
 <para>
-  <systemitem class="library">x264</systemitem> is built and
-  installed in the standard way:
+  <systemitem class="library">x264</systemitem> собирается и устанавливается
+  как обычно:
   <screen>
     ./configure &amp;&amp; make &amp;&amp; sudo make install
   </screen>
-  This installs libx264.a in /usr/local/lib and x264.h is placed in
-  /usr/local/include.
-
-  With the <systemitem class="library">x264</systemitem> library
-  and header placed in the standard locations, building
-  <application>MPlayer</application> with
-  <systemitem class="library">x264</systemitem> support is easy.
-  Just run the standard:
+  Это установит libx264.a в /usr/local/lib, а x264.h - в /usr/local/include.
+  Сборка <application>MPlayer</application>'а при установленных в стандартные
+  каталоги библиотеке и заголовочного файла <systemitem class="library">x264</systemitem>
+  очень проста.
+  Просто запустите станартное:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  The configure script will autodetect that you have satisfied the
-  requirements for <systemitem class="library">x264</systemitem>.
+  Скрипт configure сам определит, выполнены ли необходимые требования для
+  <systemitem class="library">x264</systemitem>.
 </para>
 </sect4>
 </sect3>
@@ -739,6 +570,9 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <listitem><simpara>
   alaw и ulaw, различные gsm, adpcm и pcm форматы и другие простые старые аудио
   кодеки
+  </simpara></listitem>
+<listitem><simpara>
+  Adaptive Multi-Rate (AMR) речевые кодеки
   </simpara></listitem>
 </itemizedlist>
 
@@ -803,7 +637,9 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 <ulink url="http://mad.sourceforge.net">libmad</ulink> - это многоплатформенная,
 целочисленная (внутренне 24'битный PCM)
 библиотека декодирования MPEG аудио. Она не очень хорошо обрабатывает битые
-файлы и иногда у неё бывают проблемы с перемещением по файлу.
+файлы и иногда у неё бывают проблемы с перемещением по файлу, она 
+может быть производительнее mp3lib на платформах без FPU
+(таких как <link linkend="arm">ARM</link>).
 </para>
 
 <para>
@@ -813,11 +649,22 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 </sect3>
 
 
+<sect3 id="hwmpa">
+<title>Аппаратный MPEG аудио кодек</title>
+
+<para>
+Этот кодек (выбираемый по -ac hwmpa) передает все аудио пакеты MPEG аппаратным
+декодерам, такие, как установленные в полнофункциональных DVB картах и DXR2 адаптерах.
+Не используйте его с другими драйверами вывода звука (такими как OSS и ALSA), которые
+не способны аппаратно декодировать (вы усышите только белый шум).
+</para>
+</sect3>
+
 <sect3 id="vivo-audio">
 <title>VIVO аудио</title>
 <para>
-Аудио кодек, используемый в VIVI файлах зависит от того, это VIVI/1.0 или
-VIVI/2.0 файл. В VIVO/1.0 файлах <emphasis role="bold">g.723</emphasis> аудио,
+Аудио кодек, используемый в VIVO файлах зависит от того, это VIVO/1.0 или
+VIVO/2.0 файл. В VIVO/1.0 файлах <emphasis role="bold">g.723</emphasis> аудио,
 а в VIVO/2.0 файлах - <emphasis role="bold">Vivo Siren</emphasis> аудио. Оба
 типа поддерживаются.
 </para>
@@ -875,7 +722,7 @@ QuickTime. Инструкции по установке см. в секции
 AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 файлах. Декодер с открытым исходным кодом, называемый FAAD, доступен с
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> включает в себя libfaad 2.0RC1, поэтому
+<application>MPlayer</application> включает в себя CVS срез libfaad 2.1 beta, поэтому
 Вам ничего не нужно дополнительно скачивать.
 </para>
 
@@ -888,17 +735,46 @@ AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 Вот как Вы можете её собрать:
 <screen>
 cd faad2/
-chmod +x bootstrap
-./bootstrap
+sh bootstrap
 ./configure
 cd libfaad
 make
 make install
 </screen>
-Бинарии отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
+Бинарники отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
 пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian Marillat</ulink>,
 Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
 с <ulink url="http://greysector.rangers.eu.org/">Grey Sector[Серый Сектор]</ulink>.
+</para>
+</sect3>
+
+<sect3 id="amr">
+<title>AMR кодеки</title>
+<para>
+Adaptive Multi-Rate речевой кодек используется в мобильных телефонах третьего поколения (3G).
+
+Референсная реализвация (reference implementation) доступна с 
+<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
+(бесплатна для лчного использования).
+</para>
+<para>
+чтобы включить поддержку, скачайте исходники для
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
+и
+<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
+кодеков, поместите их в каталог, где распакованы исходники 
+<application>MPlayer</application> и выполните следующие команды:
+<screen>
+unzip 26104-610.zip
+unzip 26104-610_ANSI_C_source_code.zip
+mv c-code libavcodec/amr_float
+unzip 26204-600.zip
+unzip 26204-600_ANSI-C_source_code.zip
+mv c-code libavcodec/amrwb_float
+</screen>
+После этого следуйте обычной <link linkend="features">процедуре сборки</link>
+<application>MPlayer</application>.
+
 </para>
 </sect3>
 
@@ -1012,7 +888,7 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
 <procedure>
 <title>Старый метод:</title>
 <para>
-Сделайте глубокий вдох и начните искать в регистре...
+Сделайте глубокий вдох и начните искать в реестре...
 </para>
 <step><para>
   Запустите <command>regedit</command>.
@@ -1055,6 +931,10 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
 <systemitem
 role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
+</para>
+<para>
+Если вы хотите добавить кодек самостоятельно, прочтите
+<ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink>.
 </para>
 </sect3>
 </sect2>
