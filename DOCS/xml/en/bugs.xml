@@ -24,23 +24,6 @@ disable particular CPU instruction sets with more specific options (like
 </para>
 </listitem>
 <listitem>
-<para>&quot;Internal buffer inconsistency&quot; during <application>MEncoder</application> run:</para>
-<para>Problem: known problem when lame &lt; 3.90 was compiled with gcc 2.96 or 3.x.</para>
-<para>Solution: use lame &gt;=3.90.</para>
-<para>Workaround: compile lame with gcc 2.95.x and remove any already installed
-lame packages, they may have been compiled with gcc 2.96.</para>
-</listitem>
-<listitem>
-<para>Messed up MP2/MP3 sound on PPC:</para>
-<para>Problem: known GCC miscompilation bug on PPC platforms, no fix yet.</para>
-<para>Workaround: use FFmpeg's (slow) MP1/MP2/MP3 decoder (<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (signal 11) in libmpeg2, when scaling+encoding:</para>
-<para>Problem: known GCC 2.95.2 MMX bug</para>
-<para>Solution: upgrade to 2.95.3</para>
-</listitem>
-<listitem>
 <para>Crashes when dumping streams:</para>
 <para>Problem: core dump</para>
 <para>Solution: Don't panic. Make sure you know where your towel is.</para>
@@ -55,7 +38,7 @@ lame packages, they may have been compiled with gcc 2.96.</para>
 <title>General audio delay or jerky sound (exists with all or many files)</title>
 <itemizedlist>
 <listitem><para>
-most common: buggy audio driver! - try to use different drivers, try ALSA 0.9 OSS
+most common: buggy audio driver! - try to use different drivers, try ALSA OSS
 emulation with <option>-ao oss</option>, also try <option>-ao sdl</option>,
 sometimes it helps. If your file plays fine with <option>-nosound</option>, then you can be sure
 it's sound card (driver) problem.
@@ -147,22 +130,15 @@ auto-selected codec can't decode the file, try to select another using
 <option>-vc</option> or <option>-vfm</option> options
 </para>
 </listitem>
-<listitem>
-<para>
-you try to play DivX 3.x file with OpenDivX decoder or XviD
-(<option>-vc odivx</option>) - install DivX4Linux and recompile player
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
 <title>Video-out problems</title>
 <para>
-First note: options <option>-fs -vm</option> and <option>-zoom</option> are just
-recommendations, not (yet) supported by all drivers. So it isn't a bug if it
-doesn't work. Only a few driver supports scaling/zooming, don't expect this from
-x11 or dga.
+First note that the options <option>-fs</option>, <option>-vm</option> and
+<option>-zoom</option> are not supported by all drivers. Plus, not all
+drivers support scaling/zooming in hardware.
 </para>
 
 <formalpara>
