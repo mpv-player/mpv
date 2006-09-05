@@ -151,7 +151,7 @@ compatible CPU family.
 We dislike the fact that <ulink url="http://www.nvidia.com">nVidia</ulink>
 only provides binary drivers (for use with XFree86), which are often buggy.
 We have had many reports on
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 about problems related to these closed-source drivers
 and their poor quality, instability and poor user and expert support.
 Many of these problems/issues keep appearing repeatedly.

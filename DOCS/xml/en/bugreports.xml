@@ -60,7 +60,7 @@ svn update -r {"2004-08-23"}
 The date format is YYYY-MM-DD HH:MM:SS.
 Using this date format ensure that you will be able to extract patches
 according to the date at which they were committed, as in the
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archive</ulink>.
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archive</ulink>.
 </para>
 <para>
 Now proceed as for a normal update:

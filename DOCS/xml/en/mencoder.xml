@@ -9,7 +9,7 @@ and examples, please see the man page. For a series of hands-on examples and
 detailed guides on using several encoding parameters, read the
 <ulink url="../../tech/encoding-tips.txt">encoding-tips</ulink> that were
 collected from several mailing list threads on MPlayer-users. Search the
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archives</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">archives</ulink>
 for a wealth of discussions about all aspects of and problems related to
 encoding with <application>MEncoder</application>.
 </para>
