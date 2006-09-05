@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r19561
+// In sync with r19693
 
 // ========================= MPlayer help ===========================
 
@@ -1871,3 +1871,46 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() aufgerufen!!!!!!\n"
+
+// stream/stream_radio.c
+
+#define MSGTR_RADIO_ChannelNamesDetected "[Radio] Radiokanalnamen erkannt.\n"
+#define MSGTR_RADIO_WrongFreqForChannel "[Radio] Falsche Frequenz für Kanal %s\n"
+#define MSGTR_RADIO_WrongChannelNumberFloat "[Radio] Falsche Kanalnummer: %.2f\n"
+#define MSGTR_RADIO_WrongChannelNumberInt "[Radio] Falsche Kanalnummer: %d\n"
+#define MSGTR_RADIO_FreqParameterDetected "[Radio] Radiofrequenzparameter erkannt.\n"
+#define MSGTR_RADIO_DoneParsingChannels "[Radio] Einlesen der Kanäle erledigt.\n"
+#define MSGTR_RADIO_GetTunerFailed "[Radio] Warnung: ioctl \"get tuner\" fehlgeschlagen: %s. Setze frac auf %d.\n"
+#define MSGTR_RADIO_NotRadioDevice "[Radio] %s ist kein Radiogerät!\n"
+#define MSGTR_RADIO_TunerCapLowYes "[Radio] Empfänger ist niedrig:ja frac=%d\n"
+#define MSGTR_RADIO_TunerCapLowNo "[Radio] Empfänger ist niedrig:nein frac=%d\n"
+#define MSGTR_RADIO_SetFreqFailed "[Radio] ioctl \"set frequency 0x%x (%.2f)\" fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_GetFreqFailed "[Radio] ioctl \"get frequency\" fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_SetMuteFailed "[Radio] ioctl \"set mute\" fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_QueryControlFailed "[Radio] ioctl \"query control\" fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_GetVolumeFailed "[Radio] ioctl \"get volume\" fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_SetVolumeFailed "[Radio] ioctl \"set volume\" fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_DroppingFrame "\n[Radio] zu schlecht - Audio-Frame ausgelassen (%d bytes)!\n"
+#define MSGTR_RADIO_BufferEmpty "[Radio] grab_audio_frame: Puffer leer, warte auf %d Daten-Bytes.\n"
+#define MSGTR_RADIO_AudioInitFailed "[Radio] audio_in_init fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_AudioBuffer "[Radio] Audio-Capture - Puffer=%d Bytes (Block=%d Bytes).\n"
+#define MSGTR_RADIO_AllocateBufferFailed "[Radio] Kann Audiopuffer nicht allozieren (Block=%d,buf=%d): %s\n"
+#define MSGTR_RADIO_CurrentFreq "[Radio] Momentane Frequenz: %.2f\n"
+#define MSGTR_RADIO_SelectedChannel "[Radio] Gewählter Kanal: %d - %s (Freq: %.2f)\n"
+#define MSGTR_RADIO_ChangeChannelNoChannelList "[Radio] Kann Kanal nicht wechseln: Keine Kanalliste angegeben.\n"
+#define MSGTR_RADIO_UnableOpenDevice "[Radio] Kann '%s' nicht öffnen: %s\n"
+#define MSGTR_RADIO_RadioDevice "[Radio] Radio fd: %d, %s\n"
+#define MSGTR_RADIO_InitFracFailed "[Radio] init_frac fehlgeschlagen.\n"
+#define MSGTR_RADIO_WrongFreq "[Radio] Falsche Frequenz: %.2f\n"
+#define MSGTR_RADIO_UsingFreq "[Radio] Verwende Frequenz: %.2f\n"
+#define MSGTR_RADIO_AudioInInitFailed "[Radio] audio_in_init fehlgeschlagen.\n"
+#define MSGTR_RADIO_BufferString "[Radio] %s: im Puffer=%d ausgelassen=%d\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[Radio] Aufruf audio_in_setup fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_CaptureStarting "[Radio] Starte Capture-Kram.\n"
+#define MSGTR_RADIO_ClearBufferFailed "[Radio] Klärung des Puffers fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_StreamEnableCacheFailed "[Radio] Aufruf zu stream_enable_cache fehlgeschlagen: %s\n"
+#define MSGTR_RADIO_DriverUnknownId "[Radio] Unbekannte Treiber-ID: %d\n"
+#define MSGTR_RADIO_DriverUnknownStr "[Radio] Unbekannter Treibername: %s\n"
+#define MSGTR_RADIO_DriverV4L2 "[Radio] Benutze V4Lv2-Radioschnittstelle.\n"
+#define MSGTR_RADIO_DriverV4L "[Radio] Benutze V4Lv1-Radioschnittstelle.\n"
+
