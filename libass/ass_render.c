@@ -104,6 +104,7 @@ typedef struct render_context_s {
 	uint32_t c[4]; // colors(Primary, Secondary, so on) in RGBA
 	int clip_x0, clip_y0, clip_x1, clip_y1;
 	char detect_collisions;
+	uint32_t fade; // alpha from \fad
 
 	effect_t effect_type;
 	int effect_timing;
@@ -620,13 +621,12 @@ static uint32_t mult_alpha(uint32_t a, uint32_t b)
  * \brief Calculate alpha value by piecewise linear function
  * Used for \fad, \fade implementation.
  */
-static void interpolate_alpha(long long now, 
+static unsigned interpolate_alpha(long long now, 
 		long long t1, long long t2, long long t3, long long t4,
 		unsigned a1, unsigned a2, unsigned a3)
 {
 	unsigned a;
 	double cf;
-	int i;
 	if (now <= t1) {
 		a = a1;
 	} else if (now >= t4) {
@@ -641,8 +641,7 @@ static void interpolate_alpha(long long now,
 		a = a2;
 	}
 
-	for (i = 0; i < 4; ++i)
-		change_alpha(&render_context.c[i], mult_alpha(_a(render_context.c[i]), a), 1.);
+	return a;
 }
 
 /**
@@ -828,7 +827,7 @@ static char* parse_tag(char* p, double pwr) {
 			t4 = strtoll(p, &p, 10);
 		}
 		skip(')');
-		interpolate_alpha(frame_context.time - render_context.event->Start, t1, t2, t3, t4, a1, a2, a3);
+		render_context.fade = interpolate_alpha(frame_context.time - render_context.event->Start, t1, t2, t3, t4, a1, a2, a3);
 	} else if (mystrcmp(&p, "org")) {
 		int v1, v2;
 		skip('(');
@@ -1130,6 +1129,7 @@ static int init_render_context(ass_event_t* event)
 	render_context.clip_x1 = frame_context.track->PlayResX;
 	render_context.clip_y1 = frame_context.track->PlayResY;
 	render_context.detect_collisions = 1;
+	render_context.fade = 0;
 	
 	if (render_context.family)
 		free(render_context.family);
@@ -1594,10 +1594,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		
 		text_info.glyphs[text_info.length].symbol = code;
 		text_info.glyphs[text_info.length].linebreak = 0;
-		text_info.glyphs[text_info.length].c[0] = render_context.c[0];
-		text_info.glyphs[text_info.length].c[1] = render_context.c[1];
-		text_info.glyphs[text_info.length].c[2] = render_context.c[2];
-		text_info.glyphs[text_info.length].c[3] = render_context.c[3];
+		for (i = 0; i < 4; ++i) {
+			uint32_t clr = render_context.c[i];
+			change_alpha(&clr, mult_alpha(_a(clr), render_context.fade), 1.);
+			text_info.glyphs[text_info.length].c[i] = clr;
+		}
 		text_info.glyphs[text_info.length].effect_type = render_context.effect_type;
 		text_info.glyphs[text_info.length].effect_timing = render_context.effect_timing;
 		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.face);
