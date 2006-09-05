@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r19402
+// In sync with r19561
 
 // ========================= MPlayer help ===========================
 
@@ -68,7 +68,7 @@ static char help_text[]=
 #define MSGTR_CreatingCfgFile "Erstelle Konfigurationsdatei: %s\n"
 #define MSGTR_CopyCodecsConf "(Kopiere/linke etc/codecs.conf aus dem MPlayer-Quelltext nach ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Benutze eingebaute Standardwerte für codecs.conf.\n"
-#define MSGTR_CantLoadFont "Kann Schriftdatei nicht laden: %s\n"
+#define MSGTR_CantLoadFont "Kann Bitmap-Schriftdatei nicht laden: %s\n"
 #define MSGTR_CantLoadSub "Kann Untertitel nicht laden: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Ausgewählter Stream fehlt!\n"
 #define MSGTR_CantOpenDumpfile "Kann dump-Datei nicht öffnen!\n"
@@ -530,6 +530,8 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer wurde ohne SMB-Unterstützung kompiliert.\n"
 
 #define MSGTR_CantOpenDVD "Kann DVD-Laufwerk nicht öffnen: %s\n"
+
+// stream_dvd.c
 #define MSGTR_NoDVDSupport "MPlayer wurde ohne DVD-Unterstützung übersetzt, beende.\n"
 #define MSGTR_DVDnumTitles "Es sind %d Titel auf dieser DVD.\n"
 #define MSGTR_DVDinvalidTitle "Ungültige DVD-Titelnummer: %d\n"
@@ -543,9 +545,13 @@ static char help_text[]=
 #define MSGTR_DVDnoVMG "Kann VMG-Informationen nicht öffnen!\n"
 #define MSGTR_DVDnoVOBs "Kann VOB-Dateien des Titels  (VTS_%02d_1.VOB) nicht öffnen.\n"
 #define MSGTR_DVDnoMatchingAudio "Keine passende DVD-Tonspur gefunden!\n"
+#define MSGTR_DVDaudioStreamInfo "Audio-Stream: %d Format: %s (%s) Sprache: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "Anzahl der Audiokanäle auf der Disc: %d.\n"
 #define MSGTR_DVDaudioChannel "Ausgewählte DVD-Audiospur: %d Sprache: %c%c\n"
 #define MSGTR_DVDnoMatchingSubtitle "Keine passende Untertitelspur gefunden!\n"
 #define MSGTR_DVDsubtitleChannel "Ausgewählte DVD-Untertitelspur: %d Sprache: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "Untertitel ( sid ): %d Sprache: %s\n"
+#define MSGTR_DVDnumSubtitles "Anzahl der Untertitel auf der Disc: %d\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Zu viele Streams!"
