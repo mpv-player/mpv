@@ -816,13 +816,22 @@ static void fixup_vorbis_wf(sh_audio_t *sh, ogg_demuxer_t *od)
   sh->wf = (WAVEFORMATEX*)realloc(sh->wf, sizeof(WAVEFORMATEX) + sh->wf->cbSize);
 
   if(op[0].bytes >= 29) {
-    unsigned int br, nombr, minbr, maxbr;
+    unsigned int br;
+    int nombr, minbr, maxbr;
     ptr = buf[0];
     sh->channels = ptr[11];
     sh->samplerate = sh->wf->nSamplesPerSec = get_uint32(&ptr[12]);
     maxbr = get_uint32(&ptr[16]);  //max
     nombr = get_uint32(&ptr[20]);  //nominal
     minbr = get_uint32(&ptr[24]);  //minimum
+
+    if(maxbr == -1)
+        maxbr = 0;
+    if(nombr == -1)
+        nombr = 0;
+    if(minbr == -1)
+        minbr = 0;
+    
     br = maxbr / 8;
     if(!br)
       br = nombr / 8;
