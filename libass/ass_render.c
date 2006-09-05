@@ -54,7 +54,7 @@ typedef struct glyph_info_s {
 	FT_BBox bbox;
 	FT_Vector pos;
 	char linebreak; // the first (leading) glyph of some line ?
-	uint32_t c1, c2, c3, c4; // colors
+	uint32_t c[4]; // colors
 	char bitmap; // bool
 	FT_Vector advance; // 26.6
 	effect_t effect_type;
@@ -101,7 +101,7 @@ typedef struct render_context_s {
 	double scale_x, scale_y;
 	int hspacing; // distance between letters, in pixels
 	double border; // outline width
-	uint32_t c1, c2, c3, c4; // colors(Primary, Secondary, so on) in RGBA
+	uint32_t c[4]; // colors(Primary, Secondary, so on) in RGBA
 	int clip_x0, clip_y0, clip_x1, clip_y1;
 	char detect_collisions;
 
@@ -402,7 +402,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		if ((info->effect_type == EF_KARAOKE_KO) && (info->effect_timing <= info->bbox.xMax)) {
 			// do nothing
 		} else
-			tail = render_glyph(bit, pen_x, pen_y, info->c3, 0, 1000000, tail);
+			tail = render_glyph(bit, pen_x, pen_y, info->c[2], 0, 1000000, tail);
 	}
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
@@ -416,13 +416,13 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 
 		if ((info->effect_type == EF_KARAOKE) || (info->effect_type == EF_KARAOKE_KO)) {
 			if (info->effect_timing > info->bbox.xMax)
-				tail = render_glyph(bit, pen_x, pen_y, info->c1, 0, 1000000, tail);
+				tail = render_glyph(bit, pen_x, pen_y, info->c[0], 0, 1000000, tail);
 			else
-				tail = render_glyph(bit, pen_x, pen_y, info->c2, 0, 1000000, tail);
+				tail = render_glyph(bit, pen_x, pen_y, info->c[1], 0, 1000000, tail);
 		} else if (info->effect_type == EF_KARAOKE_KF) {
-			tail = render_glyph(bit, pen_x, pen_y, info->c1, info->c2, info->effect_timing, tail);
+			tail = render_glyph(bit, pen_x, pen_y, info->c[0], info->c[1], info->effect_timing, tail);
 		} else
-			tail = render_glyph(bit, pen_x, pen_y, info->c1, 0, 1000000, tail);
+			tail = render_glyph(bit, pen_x, pen_y, info->c[0], 0, 1000000, tail);
 	}
 
 	*tail = 0;
@@ -626,6 +626,7 @@ static void interpolate_alpha(long long now,
 {
 	unsigned a;
 	double cf;
+	int i;
 	if (now <= t1) {
 		a = a1;
 	} else if (now >= t4) {
@@ -640,11 +641,8 @@ static void interpolate_alpha(long long now,
 		a = a2;
 	}
 
-
-	change_alpha(&render_context.c1, mult_alpha(_a(render_context.c1), a), 1.);
-	change_alpha(&render_context.c2, mult_alpha(_a(render_context.c2), a), 1.);
-	change_alpha(&render_context.c3, mult_alpha(_a(render_context.c3), a), 1.);
-	change_alpha(&render_context.c4, mult_alpha(_a(render_context.c4), a), 1.);
+	for (i = 0; i < 4; ++i)
+		change_alpha(&render_context.c[i], mult_alpha(_a(render_context.c[i]), a), 1.);
 }
 
 /**
@@ -761,17 +759,16 @@ static char* parse_tag(char* p, double pwr) {
 		update_font();
 	} else if (mystrcmp(&p, "alpha")) {
 		uint32_t val;
+		int i;
 		if (strtocolor(&p, &val)) {
 			unsigned char a = val >> 24;
-			change_alpha(&render_context.c1, a, pwr);
-			change_alpha(&render_context.c2, a, pwr);
-			change_alpha(&render_context.c3, a, pwr);
-			change_alpha(&render_context.c4, a, pwr);
+			for (i = 0; i < 4; ++i)
+				change_alpha(&render_context.c[i], a, pwr);
 		} else {
-			change_alpha(&render_context.c1, render_context.style->PrimaryColour, pwr);
-			change_alpha(&render_context.c2, render_context.style->SecondaryColour, pwr);
-			change_alpha(&render_context.c3, render_context.style->OutlineColour, pwr);
-			change_alpha(&render_context.c4, render_context.style->BackColour, pwr);
+			change_alpha(&render_context.c[0], render_context.style->PrimaryColour, pwr);
+			change_alpha(&render_context.c[1], render_context.style->SecondaryColour, pwr);
+			change_alpha(&render_context.c[2], render_context.style->OutlineColour, pwr);
+			change_alpha(&render_context.c[3], render_context.style->BackColour, pwr);
 		}
 		// FIXME: simplify
 	} else if (mystrcmp(&p, "an")) {
@@ -907,11 +904,11 @@ static char* parse_tag(char* p, double pwr) {
 		if (!strtocolor(&p, &val))
 			val = render_context.style->PrimaryColour;
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "color: %X\n", val);
-		change_color(&render_context.c1, val, pwr);
+		change_color(&render_context.c[0], val, pwr);
 	} else if ((*p >= '1') && (*p <= '4') && (++p) && (mystrcmp(&p, "c") || mystrcmp(&p, "a"))) {
 		char n = *(p-2);
+		int cidx = n - '1';
 		char cmd = *(p-1);
-		uint32_t* pcolor;
 		uint32_t val;
 		assert((n >= '1') && (n <= '4'));
 		if (!strtocolor(&p, &val))
@@ -922,24 +919,17 @@ static char* parse_tag(char* p, double pwr) {
 				case '4': val = render_context.style->BackColour; break;
 				default : val = 0; break; // impossible due to assert; avoid compilation warning
 			}
-		switch (n) {
-			case '1': pcolor = &render_context.c1; break;
-			case '2': pcolor = &render_context.c2; break;
-			case '3': pcolor = &render_context.c3; break;
-			case '4': pcolor = &render_context.c4; break;
-			default : pcolor = 0; break;
-		}
 		switch (cmd) {
-			case 'c': change_color(pcolor, val, pwr); break;
-			case 'a': change_alpha(pcolor, val >> 24, pwr); break;
+			case 'c': change_color(render_context.c + cidx, val, pwr); break;
+			case 'a': change_alpha(render_context.c + cidx, val >> 24, pwr); break;
 			default: mp_msg(MSGT_GLOBAL, MSGL_WARN, "Bad command: %c%c\n", n, cmd); break;
 		}
-		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "single c/a at %f: %c%c = %X   \n", pwr, n, cmd, *pcolor);
+		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "single c/a at %f: %c%c = %X   \n", pwr, n, cmd, render_context.c[cidx]);
 	} else if (mystrcmp(&p, "r")) {
-		render_context.c1 = render_context.style->PrimaryColour;
-		render_context.c2 = render_context.style->SecondaryColour;
-		render_context.c3 = render_context.style->OutlineColour;
-		render_context.c4 = render_context.style->BackColour;
+		render_context.c[0] = render_context.style->PrimaryColour;
+		render_context.c[1] = render_context.style->SecondaryColour;
+		render_context.c[2] = render_context.style->OutlineColour;
+		render_context.c[3] = render_context.style->BackColour;
 		render_context.font_size = render_context.style->FontSize;
 
 		if (render_context.family)
@@ -1131,10 +1121,10 @@ static int init_render_context(ass_event_t* event)
 	render_context.scale_x = render_context.style->ScaleX;
 	render_context.scale_y = render_context.style->ScaleY;
 	render_context.hspacing = 0;
-	render_context.c1 = render_context.style->PrimaryColour;
-	render_context.c2 = render_context.style->SecondaryColour;
-	render_context.c3 = render_context.style->OutlineColour;
-	render_context.c4 = render_context.style->BackColour;
+	render_context.c[0] = render_context.style->PrimaryColour;
+	render_context.c[1] = render_context.style->SecondaryColour;
+	render_context.c[2] = render_context.style->OutlineColour;
+	render_context.c[3] = render_context.style->BackColour;
 	render_context.clip_x0 = 0;
 	render_context.clip_y0 = 0;
 	render_context.clip_x1 = frame_context.track->PlayResX;
@@ -1604,10 +1594,10 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		
 		text_info.glyphs[text_info.length].symbol = code;
 		text_info.glyphs[text_info.length].linebreak = 0;
-		text_info.glyphs[text_info.length].c1 = render_context.c1;
-		text_info.glyphs[text_info.length].c2 = render_context.c2;
-		text_info.glyphs[text_info.length].c3 = render_context.c3;
-		text_info.glyphs[text_info.length].c4 = render_context.c4;
+		text_info.glyphs[text_info.length].c[0] = render_context.c[0];
+		text_info.glyphs[text_info.length].c[1] = render_context.c[1];
+		text_info.glyphs[text_info.length].c[2] = render_context.c[2];
+		text_info.glyphs[text_info.length].c[3] = render_context.c[3];
 		text_info.glyphs[text_info.length].effect_type = render_context.effect_type;
 		text_info.glyphs[text_info.length].effect_timing = render_context.effect_timing;
 		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.face);
