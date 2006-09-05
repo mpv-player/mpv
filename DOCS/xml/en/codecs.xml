@@ -7,10 +7,11 @@
 <title>Video codecs</title>
 
 <para>
-See the <ulink url="../../codecs-status.html">codec status table</ulink>
-for the complete, daily generated list. Quite a few codecs are available for
-download from our homepage. Grab them from our
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</ulink>.
+The <ulink url="../../codecs-status.html">codec status table</ulink> is a
+complete list of all supported codecs, regenerated daily.
+Some binary codecs for use with MPlayer are available in the
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">download section</ulink>
+of our homepage.
 </para>
 
 <para>
