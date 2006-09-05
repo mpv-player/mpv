@@ -190,29 +190,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
 <link linkend="sorenson">Sorenson видео кодек</link>.
   </para></listitem>
-<listitem><para>
-  <emphasis role="bold">DivX4/DivX5</emphasis>: информация об этом кодеке расположена в 
-секции <link linkend="divx4-5">DivX4/DivX5</link>. Вам, вероятно, не потребуется
-этот кодек, поскольку
-  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
-(см. выше)
-гораздо быстрее и выше качеством, чем этот кодек, как для кодирования, так и для
-декодирования. Особенности:
-<itemizedlist>
-<listitem><simpara>
-  кодирование в 1 или 2 прохода
-  <link linkend="mencoder"><application>MEncoder</application>'ом</link>
-  </simpara></listitem>
-<listitem><simpara>
-  может проигрывать старые <emphasis role="bold">DivX3</emphasis> фильмы гораздо быстрее, чем Win32 DLL,
-но медленнее, чем
-    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
-  </simpara></listitem>
-<listitem><simpara>
-  у него закрытые исходники, и доступна только x86 версия.
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
+
 <listitem><para>
   <emphasis role="bold">XviD</emphasis>: кодирующая альтернатива
   для DivX4Linux с открытым исходным кодом. Особенности:
