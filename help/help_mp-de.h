@@ -2,7 +2,7 @@
 // Reworked by Klaus Umbach <klaus.umbach@gmx.net>
 // Moritz Bunkus <moritz@bunkus.org>
 // Alexander Strasser <eclipse7@gmx.net>
-// Sebastian Krämer <mplayer@skraemer.de>
+// Sebastian Krämer <mail@kraymer.de>
 
 // In sync with r19402
 
