@@ -1467,17 +1467,21 @@ static void process_karaoke_effects(void)
 static int get_face_ascender(FT_Face face)
 {
 	int v = face->size->metrics.ascender;
-	if (!v)
-		v = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
-	return v;
+	int v2 = FT_MulFix(face->bbox.yMax, face->size->metrics.y_scale);
+	if (v > v2 * 0.9)
+		return v;
+	else
+		return v2;
 }
 
 static int get_face_descender(FT_Face face)
 {
-	int v = face->size->metrics.descender;
-	if (!v)
-		v = FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
-	return -v;
+	int v = - face->size->metrics.descender;
+	int v2 = - FT_MulFix(face->bbox.yMin, face->size->metrics.y_scale);
+	if (v > v2 * 0.9)
+		return v;
+	else
+		return v2;
 }
 
 /**
