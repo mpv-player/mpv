@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r18606 -->
+<!-- synced with r19677 -->
 <appendix id="mailinglists">
 <title>Почтовые рассылки</title>
 <para>
@@ -14,7 +14,7 @@
 <ulink url="http://www.river.com/users/share/etiquette/edit.html">HOWTO Edit Messages[Как редактировать сообщения]</ulink>.
 <itemizedlist>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce">
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-announce">
 <application>MPlayer</application>-announce</ulink>
 </para>
 <para>
@@ -22,7 +22,7 @@
 Подпишитесь, если Вы хотите получать объявления о новых заплатах и релизах.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
 </para>
 <para>Основной список поддержки по вопросам, касающимся
 <application>MPlayer</application>'а.
@@ -33,14 +33,14 @@
 <link linkend="bugreports">сообщение об ошибке</link>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (венгерский)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (венгерский)
 </para>
 <para>
 Рассылка на венгерском языке.
 Тема? Там видно будет... пока по большей части &mdash; флейм[flame] и RTFM вопросы :(
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
 </para>
 <para>
 Вопросы относящиеся к Matrox'ам, такие как 
@@ -48,13 +48,13 @@
 (для 4.x.x), matroxfb-TVout.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
 </para>
 <para>Вещи связанные с аппаратно декодирующей картами, называемыми DVB (не
   <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
 </para>
 <para>Основной список поддержки по вопросам, касающимся
 <application>MEncoder</application>'а.
@@ -66,7 +66,7 @@
 <link linkend="bugreports">сообщение об ошибке</link>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
 </para>
 <para>
 Это рассылка о разработке <application>MPlayer</application>'а!
@@ -76,7 +76,7 @@
 новых возможностей или флейм.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
 </para>
 <para>Все изменения в коде <application>MPlayer</application>'а
 автоматически отсылаются в эту рассылку. Сюда
@@ -85,57 +85,57 @@
 заметили потенциальную ошибку/проблему в этом изменении).
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
 </para>
 <para>Эта рассылка для дискуссий по <application>MPlayer</application>'овской 
 документации. Также, сюда отсылаются логи SVN, относящиеся к
 документации и домашней странице.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>Рассылка для обсуждения переводов домашней страницы и документации 
 <application>MPlayer</application>'а.
 Логи subversion, относящиеся к переводу домашней страницы и документации также отсылаются сюда.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
 </para>
 <para>Рассылка для обсуждения переноса <application>MPlayer</application> под
 <application>Cygwin</application> и <application>MinGW</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
 </para>
 <para>Рассылка для обсуждения, посвящённого <application>MPlayer</application> G2,
 видеоплееру следующего поколения.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
 </para>
 <para>Рассылка для дискуссий, посвящённых инфраструктуре зеркал сервера
 <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (БЕЗДЕЙСТВУЕТ)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (БЕЗДЕЙСТВУЕТ)
 </para>
 <para>Рассылка для дискуссий о новых выпусках <application>MPlayer</application>
 Weekly News.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (БЕЗДЕЙСТВУЕТ)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (БЕЗДЕЙСТВУЕТ)
 </para>
 <para>Рассылка для обсуждения переноса <application>MPlayer</application> под OS/2.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (БЕЗДЕЙСТВУЕТ)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (БЕЗДЕЙСТВУЕТ)
 </para>
 <para>Рассылка для дискуссий по поддержке QuickTime кодеков.
 </para></listitem>
 </itemizedlist>
 <note><para>
 Здесь находится архив рассылок с возможностью поиска:
-<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
+<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
 </para>
 </appendix>
