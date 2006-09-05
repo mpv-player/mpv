@@ -7,7 +7,7 @@
 <title>Radio Input</title>
 
 <para>
-Dieser Abschnitt behandelt das Hï¿½en von Radio mittels eines V4L-kompatiblen Radioempfï¿½gers. Siehe Manpage fr eine Beschreibung der Radio-Optionen und Tastensteuerungen.
+Dieser Abschnitt behandelt das Hören von Radio mittels eines V4L-kompatiblen Radioempfängers. Siehe Manpage für eine Beschreibung der Radio-Optionen und Tastensteuerungen.
 </para>
 
 
@@ -21,7 +21,7 @@ Dieser Abschnitt behandelt das Hï¿½en von Radio mittels eines V4L-kompatiblen Ra
   <option>--enable-radio-capture</option>.
   </para></step>
 <step><para>
-  Stelle sicher daï¿½dein Empfï¿½ger mit anderer Radio Software fr Linux    lï¿½ft, wie z.B. <application>XawTV</application>.
+  Stelle sicher, dass dein Empfänger mit anderer Radio Software für Linux läuft, wie z.B. <application>XawTV</application>.
 </para></step>
 </procedure>
 </sect2>
@@ -29,7 +29,7 @@ Dieser Abschnitt behandelt das Hï¿½en von Radio mittels eines V4L-kompatiblen Ra
 <sect2 id="radio-tips">
 <title>Tips zum Gebrauch</title>
 <para>
-Eine vollstï¿½dige Liste aller Optionen ist in der Manpage.
+Eine vollständige Liste aller Optionen ist in der Manpage.
 Hier sind nur ein paar Tips:
 </para>
 <itemizedlist>
@@ -37,23 +37,23 @@ Hier sind nur ein paar Tips:
 <para>
 Benutze die Option <option>channels</option>. Ein Beispiel:
 <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-Erklï¿½ung: Mit dieser Option sind nur die Frequenzen 104.4 und 103.9 in Gebrauch. Ein netter OSD-Text wird beim Kanalwechsel den Namen des Kanals angeben. Leerzeichen im Kanalnamen mssen ersetzt werden durch das Zeichen &quot;_&quot;.
+Erklärung: Mit dieser Option sind nur die Frequenzen 104.4 und 103.9 in Gebrauch. Ein netter OSD-Text wird beim Kanalwechsel den Namen des Kanals angeben. Leerzeichen im Kanalnamen müssen ersetzt werden durch das Zeichen &quot;_&quot;.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Es gibt mehrere Mï¿½lichkeiten Radio aufzuzeichnen. Das Sound-Signal kann entweder mit der Soundkarte und einer externen Kabelverbindung zwischen dem Line-In der Soundkarte und der TV-Karte erfasst werden,
-oder mittels des eingebauten ADC im saa7134-Chip. In letzterem Falle ist es nï¿½ig, den Treiber <systemitem>saa7134-alsa</systemitem> oder
+Es gibt mehrere Möglichkeiten, Radio aufzuzeichnen. Das Sound-Signal kann entweder mit der Soundkarte und einer externen Kabelverbindung zwischen dem Line-In der Soundkarte und der TV-Karte erfasst werden,
+oder mittels des eingebauten ADC im saa7134-Chip. In letzterem Falle ist es nötig, den Treiber <systemitem>saa7134-alsa</systemitem> oder
 <systemitem>saa7134-oss</systemitem> zu laden.
 </para>
 </listitem>
 
 <listitem>
 <para>
-<application>MEncoder</application> ist zum Aufzeichnen von Radio ungeeignet, da es einen Video Stream benï¿½igt. Daher kannst du entweder
+<application>MEncoder</application> ist zum Aufzeichnen von Radio ungeeignet, da es einen Video Stream benötigt. Daher kannst du entweder
 <application>arecord</application> vom ALSA Projekt benutzen, oder die
-Option <option>-ao pcm:file=file.wav</option>. In letzterem Falle wirst du keinen Sound hï¿½en kï¿½nen (es sei denn du hast ein Line-In Kabel und hast den Line-In Kanal nicht stumm geschaltet).
+Option <option>-ao pcm:file=file.wav</option>. In letzterem Falle wirst du keinen Sound hören können (es sei denn, du hast ein Line-In Kabel und hast den Line-In Kanal nicht stumm geschaltet).
 </para>
 </listitem>
 </itemizedlist>
@@ -67,9 +67,7 @@ Option <option>-ao pcm:file=file.wav</option>. In letzterem Falle wirst du keine
 <informalexample>
 <para>
 Input von Standard-V4L (mittels Line-In Kabel, keine Aufzeichnung):
-<screen>
-mplayer radio://104.4<!--
---></screen>
+<screen>mplayer radio://104.4</screen>
 </para>
 </informalexample>
 
@@ -77,30 +75,24 @@ mplayer radio://104.4<!--
 <para>
 Input von Standard-V4L (mittels Line-In Kabel, keine Aufzeichnung,
 V4Lv1 Interface):
-<screen>
-mplayer -radio driver=v4l radio://104.4<!--
---></screen>
+<screen>mplayer -radio driver=v4l radio://104.4</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
 Abspielen des zweiten Kanals aus der Kanalliste:
-<screen>
-mplayer -radio channels=104.4=Sibir,103.9=Maximm  radio://2<!--
---></screen>
+<screen>mplayer -radio channels=104.4=Sibir,103.9=Maximm  radio://2</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Leiten des Sounds ber den PCI-Bus vom internen ADC des Radio-Empfï¿½gers.
-In diesem Beispiel wird der Empfï¿½ger als zweite Soundkarte genutzt (ALSA device hw:1,0). Fr saa7134-basierte Karten muss entweder das
-saa7134-alsa oder saa7134-oss Modul geladen werden.
-<note><para>Werden ALSA device Namen benutzt, so mssen Doppelpunkte durch Gleichheitszeichen und Kommata durch Punkte ersetzt werden.
-<screen>
-mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture<!--
---></screen>
+Leiten des Sounds über den PCI-Bus vom internen ADC des Radio-Empfängers.
+In diesem Beispiel wird der Empfänger als zweite Soundkarte genutzt (ALSA device hw:1,0). Für saa7134-basierte Karten muss entweder das
+Modul  saa7134-alsa oder saa7134-oss geladen werden.
+<note><para>Werden ALSA-Gerätenamen benutzt, so müssen Doppelpunkte durch Gleichheitszeichen und Kommata durch Punkte ersetzt werden.
+<screen>mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture</screen>
 </para></note>
 </para>
 </informalexample>
