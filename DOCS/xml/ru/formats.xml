@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.12 -->
+<!-- synced with r18247 -->
 <sect1 id="formats">
 <title>Поддерживаемые форматы</title>
 
@@ -13,7 +13,7 @@
 <para>
 Как видите, <emphasis role="bold">кодек</emphasis> &mdash; это не то же самое,
 что и <emphasis role="bold">формат файла</emphasis>.
-Примеры видео <emphasis role="bold">кодеков</emphasis>: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
+Примеры видео <emphasis role="bold">кодеков</emphasis>: MPEG1, MPEG2, MPEG4 (DivX), Indeo5, 3ivx.
 Примеры видео <emphasis role="bold">форматов</emphasis>: MPG, AVI, ASF.
 </para>
 
@@ -54,11 +54,19 @@ MPEG файлы бывают различных разновидностей:
   использовать <option>vcd://</option>.
   </simpara></listitem>
 <listitem><simpara>
-  VOB: Это формат MPEG фалов на <emphasis role="bold">DVD'шниках</emphasis>.
+  VOB: Это формат MPEG файлов на <emphasis role="bold">DVD'шниках</emphasis>.
   Это такой же формат, как и MPG, плюс возможность содержать субтитры и
   не-MPEG (AC3) аудио. Он содержит кодированное MPEG2 видео и обычно AC3
   аудио, но DTS, MP2 и не запакованный LPCM тоже возможны. <emphasis role="bold">
   Читайте секцию <link linkend="dvd">DVD</link></emphasis>!
+  </simpara></listitem>
+<listitem><simpara>
+  TY: Это TiVo MPEG поток. Он содержит как MPEG PES данные аудио и видео потоков,
+  так и дополнительную информацию вроде субтитров. Формат файла - 
+  это не программный поток MPEG (MPEG program stream), а некий закрытый формат,
+  созданный TiVo. Более побдробно о формате TiVo можно прочитать 
+  на <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
+  странице TyStudio</ulink>.
   </simpara></listitem>
 </itemizedlist>
 
@@ -85,7 +93,7 @@ MPEG файлы бывают различных разновидностей:
 <para>
 Разработанный Microsoft'ом <emphasis role="bold">AVI (Audio Video Interleaved
 [Аудио Видео 'Слоёные'])</emphasis> - это широко распространённый многоцелевой
-формат, в настоящий момент чаще всего применяемый для DivX и DivX4 видео.
+формат, в настоящий момент чаще всего применяемый для MPEG4 (DivX и DivX4) видео.
 У него много известных недостатков и недочётов (например в потоках). Он
 поддерживает 1 видео поток и от 0 до 99 аудио потоков и может быть не более
 2 Гб, хотя существует расширение<emphasis role="bold">OpenDML</emphasis>,
@@ -118,7 +126,7 @@ DV камеры создают сырые DV потоки, которые средства DV захвата превращают
 <listitem><simpara>
   <emphasis role="bold">'Слоёные'[Interleaved]:</emphasis> Аудио и видео
   содержимое 'переплетается'. Это стандартное применение. Рекомендовано и
-  используется чаще всего. некоторые программы создают слоёные AVI'шники
+  используется чаще всего. Некоторые программы создают слоёные AVI'шники
   с плохой синхронизацией. <application>MPlayer</application>
   определяет это как слоёный файл, и затем теряет A/V синхронизацию,
   вероятно при перемещении по файлу. Такие файлы должны проигрываться как
@@ -141,7 +149,7 @@ AVI файлов:
   битпотоке/потоке сэмплов для видео/аудио потоков. Этот метод применяется
   большинством плееров, включая
   <ulink url="http://avifile.sourceforge.net">avifile</ulink> и
-  <application>Windows Media Player</application>. Файлы со сломанными
+  <application>Windows Media Player</application>. Файлы с испорченными
   заголовками и файлы созданные с VBR аудио в не VBR-совместимом кодировщике
   приведут к A/V десинхронизации при использовании этого метода (по большей
   части при перемещении по фильму).
@@ -149,8 +157,8 @@ AVI файлов:
 <listitem><simpara>
   <emphasis role="bold">основанный на слоёности:</emphasis> Он не использует
   значение битпотока из заголовка, вместо этого используется относительная
-  позиция слоёных кусков аудио и видео, что делает плохо закодированные
-  проигрываемыми файлы с VBR аудио.
+  позиция слоёных кусков аудио и видео, что делает воспроизводимыми 
+  плохо закодированные с VBR аудио.
   </simpara></listitem>
 </itemizedlist>
 </para>
@@ -189,8 +197,8 @@ Media Player</application> и <application>Windows Media Encoder</application>)
 <para>
 Эти форматы файлов были разработаны в Apple и могут содержать любой кодек,
 CBR или VBR. Обычно у них расширение <filename>.QT</filename> или
-<filename>.MOV</filename>. Заметьте, что поскольку MPEG4 группы выбрала
-QuickTime в качестве рекомендованного формата для MPEG4, из MOV файлы
+<filename>.MOV</filename>. Заметьте, что поскольку MPEG4 Group выбрала
+QuickTime в качестве рекомендованного формата для MPEG4, их MOV файлы
 идут с расширением <filename>.MPG</filename> или <filename>.MP4</filename>
 (Интересно, что видео и аудио потоки в этих файлах - настоящие
 MPG и AAC файлы. Вы даже можете извлечь их, используя опции
@@ -239,10 +247,10 @@ MPG и AAC файлы. Вы даже можете извлечь их, используя опции
 <title>FLI файлы</title>
 <para>
 <emphasis role="bold">FLI</emphasis> это очень старый формат, используемый
-Autodesk Animator, но это типичный формат для коротких операций в сети.
+Autodesk Animator, но это типичный формат для коротких анимационных роликов в сети.
 <application>MPlayer</application> демультиплексирует и декодирует FLI фильмы
 и даже способен перемещаться в этих файлах (полезно при цикличном проигрывании
-с опцией <option>-loop</option>). Во FLI файлах нет основных кадров[keyframes],
+с опцией <option>-loop</option>). Во FLI файлах нет ключевых кадров[keyframes],
 поэтому некоторое время после перемещения картинка будет "грязной".
 </para>
 </sect3>
@@ -269,8 +277,8 @@ linkend="realaudio">RealAudio</link> кодеков.
 читать его <filename>.NUV</filename> файлы (только NuppelVideo 5.0). Эти файлы
 могут содержать несжатые YV12, YV12+сжатые RTJpeg, YV12 сжатые RTJpeg+lzo и
 YV12 + сжатые lzo кадры. <application>MPlayer</application> декодирует (и также
-<emphasis role="bold">кодирует</emphasis> их <application>MEncoder
-</application>'ом в DivX/и т. д.!) все это. Перемещение работает.
+<emphasis role="bold">кодирует</emphasis> <application>MEncoder
+</application>'ом в MPEG4 (DivX) и т. д.!) все это. Перемещение работает.
 </para>
 </sect3>
 
@@ -322,7 +330,7 @@ RoQ файлы - это мультимедийные файлы используемые в некоторых ID играх,
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> - это
 IETF стандартный формат для описания видео и аудио RTP потоков.
-(требуется &quot;<ulink url="http://www.live555.com/mplayer/">LIVE.COM Streaming Media</ulink>&quot;.)
+(требуется &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;.)
 </para>
 </sect3>
 
@@ -332,11 +340,6 @@ IETF стандартный формат для описания видео и аудио RTP потоков.
 <para>
 PVA - это похожий на MPEG формат, используемый в программах DVB TV карт (например:
 <application>MultiDec</application>, <application>WinTV</application> под Windows.
-</para>
-
-<para>
-Спецификации PVA могут быть скачены по следующему адресу:
-<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
 </para>
 </sect3>
 
@@ -350,9 +353,27 @@ NSV (NullSoft Video) &mdash; это формат файла, используемый
 <application>MPlayer</application> воспроизводит как NSV потоки,
 так и файлы. Пожалуйста, заметьте, что большая часть файлов с
 <ulink url="http://www.winamp.com">сайта Winamp</ulink> использует VLB аудио,
-которое ещё не модет декодироваться. Более того, для потоков с этого сайта
+которое ещё не может декодироваться. Более того, для потоков с этого сайта
 необходим ещё один уровень депакетизации, который ещё нужно написать (эти
 файлы всё равно невозможно проиграть, поскольку они используют VLB аудио).
+</para>
+</sect3>
+
+<sect3 id="matroska">
+<title>Файлы Matroska</title>
+<para>
+Matroska это открытый формат файла.
+подробнее читайте на <ulink url="http://www.matroska.org/">официальном сайте</ulink>.
+</para>
+</sect3>
+
+
+<sect3 id="nut">
+<title>NUT файлы</title>
+<para>
+NUT это формат файла, разработанный ребятами из <application>MPlayer</application> и 
+<application>FFmpeg</application>. Оба проекта поддерживают его.
+Подробности читайте на <ulink url="http://www.nut.hu/">официальном сайте</ulink>.
 </para>
 </sect3>
 
@@ -360,7 +381,7 @@ NSV (NullSoft Video) &mdash; это формат файла, используемый
 <sect3 id="gif">
 <title>GIF файлы</title>
 <para>
-<emphasis role="bold">GIF</emphasis> формат - это типичный формат для сетевой
+<emphasis role="bold">GIF</emphasis> формат - это типичный формат для веб
 графики. Существуют 2 версии спецификаций GIF, GIF87a и GIF89a. Основная
 разница заключается в том, что GIF89a допускает анимацию. <application>MPlayer</application> поддерживает
 оба формата, используя <systemitem class="library">libungif</systemitem> или
@@ -417,14 +438,8 @@ url="http://www.xmms.org">XMMS</ulink>.
 <application>MPlayer</application> будет неверно определять, как MPEG'и и
 проигрывать неправильно или вообще никак. Это не может быть исправлено без
 потери поддержки некоторых плохих MPEG файлов и поэтому всё останется как есть
-обозримом будущем. Опция <option>-demuxer</option>, описанная на man странице,
+в обозримом будущем. Опция <option>-demuxer</option>, описанная на man странице,
 может Вам помочь в этом случае.
-</para>
-</sect3>
-
-<sect3 id="wav">
-<title>WAV файлы</title>
-<para>
 </para>
 </sect3>
 
@@ -435,17 +450,6 @@ url="http://www.xmms.org">XMMS</ulink>.
 <systemitem class="library">libogg</systemitem> и
 <systemitem class="library">libvorbis</systemitem>.
 </para>
-</sect3>
-
-<sect3 id="wma-asf">
-<title>WMA/ASF файлы</title>
-<para>
-</para>
-</sect3>
-
-<sect3 id="mp4">
-<title>MP4 файлы</title>
-<para></para>
 </sect3>
 
 <sect3 id="cdda">
@@ -479,7 +483,7 @@ url="http://www.xmms.org">XMMS</ulink>.
 
 <para>
 Для использования этих возможностей Вам нужно установить <application>XMMS
-</application> и скомпилировать <application>MPlayer</application> с опцией
+</application> и скомпилировать <application>MPlayer</application> c соответствующей опцией:
 <filename>./configure --enable-xmms</filename>. Если это не работает, Вам
 может понадобиться настроить пути к библиотеке и расширениям непосредственно,
 используя опции <option>--with-xmmsplugindir</option> и <option>
