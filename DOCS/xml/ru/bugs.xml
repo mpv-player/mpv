@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19587 -->
+<!-- synced with r19686 -->
 <appendix id="bugs">
 <title>Известные проблемы</title>
 <sect1 id="bugs-special">
@@ -23,24 +23,6 @@
 <option>--disable-mmx</option>, <option>--disable-3dnow</option> и т.п..</para>
 </listitem>
 <listitem>
-<para>&quot;Internal buffer inconsistency&quot; (внутренняя несогласованность буфера) 
-во время выполнения <application>MEncoder</application>:</para>
-<para>Проблема: известная проблема, когда lame &lt; 3.90 компилировался, используя gcc 2.96 или 3.x.</para>
-<para>Решение: используйте lame &ge; 3.90.</para>
-<para>Обход: скомпилируйте lame, используя gcc 2.95.x, и удалите все уже установленные
-пакеты lame, они могли быть скомпилированы, используя gcc 2.96.</para>
-</listitem>
-<listitem>
-<para>Испорченный MP2/MP3 звук на PPC:</para>
-<para>Проблема: известная ошибка компиляции в GCC на PPC платформах, пока нет решения.</para>
-<para>Обход: используйте FFmpeg'овский (медленный) MP1/MP2/MP3 декодер (<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (сигнал 11) в libmpeg2, при масштабировании+кодировании:</para>
-<para>Проблема: известная ошибка в MMX у GCC 2.95.2</para>
-<para>Решение: обновите до 2.95.3.</para>
-</listitem>
-<listitem>
 <para>Фатальные ошибки при дампе потоков:</para>
 <para>Проблема: дамп ядра</para>
 <para>Решение: Не паникуйте. Убедитесь, что знаете где Ваше полотенце.</para>
@@ -57,7 +39,7 @@
 <itemizedlist>
 <listitem><para>
 наиболее общее: плохой аудио драйвер! - попробуйте использовать другой драйвер,
-попробуйте ALSA 0.9 OSS эмуляцию, используя <option>-ao oss</option>, также
+попробуйте ALSA OSS эмуляцию, используя <option>-ao oss</option>, также
 попробуйте <option>-ao sdl</option>, иногда это помогает. Если Ваш файл хорошо
 проигрывается с <option>-nosound</option>, Вы можете быть уверены: это проблема
 Вашей звуковой карты (драйвера).
@@ -153,22 +135,15 @@
 другой, используя опции <option>-vc</option> или <option>-vfm</option>
 </para>
 </listitem>
-<listitem>
-<para>
-Вы пытаетесь проиграть DivX 3.x файл, используя декодер OpenDivX или XviD
-(<option>-vc odivx</option>) - установите DivX4Linux и перекомпилируйте плеер
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
 <title>Проблемы вывода видео</title>
 <para>
-Первое замечание: опции <option>-fs</option>, <option>-vm</option> и <option>-zoom</option> - это
-только рекомендации, (пока) не поддерживаемые всеми драйверами. Так что это не
-ошибка если они не работают. Только некоторые драйвера поддерживают
-масштабирование, не ожидайте этого от dga.
+Во-первых, заметьте, что опции <option>-fs</option>, <option>-vm</option> и <option>-zoom</option>
+не всеми драйверами поддерживаются. Вдобавок, не все драйвера поддерживают аппаратное
+масштабирование.
 </para>
 
 <formalpara>
