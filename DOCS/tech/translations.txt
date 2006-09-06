@@ -73,7 +73,7 @@ missing messages, which eases further translation.
 
 If no messages are missing, please add a line similar to
 
-  /* Synced with help_mp-en.h 1.XXX */
+  /* Synced with help_mp-en.h rXXX */
 
 to the file header, replacing XXX with the revision of help_mp-en.h that your
 translation is in sync with. This way we can easily tell if the translation
@@ -87,7 +87,11 @@ of course. Do not, however, change the translation first, please get your
 update into the English version first.
 
 If you have Subversion write access and commit a translation update file,
-use something like "synced with 1.XXX" as first line of the commit message
-so that it is possible to tell with a glance at the cvs log or viewcvs if
-the translation is outdated and which revision of the English master file
+use something like "synced with rXXX" as first line of the commit message
+so that it is possible to tell with a glance at the Subversion log or ViewVC
+if the translation is outdated and which revision of the English master file
 it is equivalent to.
+
+If you make (spelling/wording/consistency/etc) changes to a file without
+adapting parts that changed in the English master file, leave the sync
+tag as it is.
