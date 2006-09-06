@@ -58,7 +58,10 @@ typedef struct glyph_info_s {
 	char bitmap; // bool
 	FT_Vector advance; // 26.6
 	effect_t effect_type;
-	int effect_timing;
+	int effect_timing; // time duration of current karaoke word
+	                   // after process_karaoke_effects: distance in pixels from the glyph origin.
+	                   // part of the glyph to the left of it is displayed in a different color.
+	int effect_skip_timing; // delay after the end of last karaoke word
 	int asc, desc; // font max ascender and descender
 //	int height;
 	
@@ -108,6 +111,7 @@ typedef struct render_context_s {
 
 	effect_t effect_type;
 	int effect_timing;
+	int effect_skip_timing;
 
 	enum { SCROLL_LR, // left-to-right
 	       SCROLL_RL,
@@ -968,14 +972,20 @@ static char* parse_tag(char* p, double pwr) {
 	} else if (mystrcmp(&p, "kf") || mystrcmp(&p, "K")) {
 		int val = strtol(p, &p, 10);
 		render_context.effect_type = EF_KARAOKE_KF;
+		if (render_context.effect_timing)
+			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "ko")) {
 		int val = strtol(p, &p, 10);
 		render_context.effect_type = EF_KARAOKE_KO;
+		if (render_context.effect_timing)
+			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	} else if (mystrcmp(&p, "k")) {
 		int val = strtol(p, &p, 10);
 		render_context.effect_type = EF_KARAOKE;
+		if (render_context.effect_timing)
+			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
 	}
 
@@ -1130,6 +1140,9 @@ static int init_render_context(ass_event_t* event)
 	render_context.clip_y1 = frame_context.track->PlayResY;
 	render_context.detect_collisions = 1;
 	render_context.fade = 0;
+	render_context.effect_type = EF_NONE;
+	render_context.effect_timing = 0;
+	render_context.effect_skip_timing = 0;
 	
 	if (render_context.family)
 		free(render_context.family);
@@ -1435,8 +1448,8 @@ static void process_karaoke_effects(void)
 			s2 = cur;
 			if (s1) {
 				e1 = s2 - 1;
-				tm_start = timing;
-				tm_end = timing + s1->effect_timing;
+				tm_start = timing + s1->effect_skip_timing;
+				tm_end = tm_start + s1->effect_timing;
 				timing = tm_end;
 				x_start = s1->bbox.xMin + s1->pos.x;
 				x_end = e1->bbox.xMax + e1->pos.x;
@@ -1527,8 +1540,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	p = event->Text;
 	// Event parsing.
 	while (1) {
-		render_context.effect_type = EF_NONE;
-	
 		// get next char, executing style override
 		// this affects render_context
 		code = get_next_char(&p);
@@ -1605,10 +1616,15 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		}
 		text_info.glyphs[text_info.length].effect_type = render_context.effect_type;
 		text_info.glyphs[text_info.length].effect_timing = render_context.effect_timing;
+		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
 		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.face);
 		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.face);
 
 		text_info.length++;
+
+		render_context.effect_type = EF_NONE;
+		render_context.effect_timing = 0;
+		render_context.effect_skip_timing = 0;
 	}
 	
 	if (text_info.length == 0) {
