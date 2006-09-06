@@ -542,7 +542,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 Это эффект системы управления энергопотреблением ноутбука (BIOS, не ядра).
 Подсоедините разъем внешнего питания <emphasis role="bold">до</emphasis> 
 включения ноутбука. Также можно попробовать 
-<ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink> (SpeedStep интерфейс для Linux),
+<ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html/">cpufreq</ulink> (SpeedStep интерфейс для Linux),
 возможно это поможет.
 </para></answer>
 </qandaentry>
