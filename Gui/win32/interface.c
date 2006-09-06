@@ -550,12 +550,11 @@ static void remove_vop(char * str)
 /* this function gets called by mplayer to update the gui */
 int guiGetEvent(int type, char *arg)
 {
-    if(!mygui || !mygui->skin) return 0;
-
     stream_t *stream = (stream_t *) arg;
 #ifdef USE_DVDREAD
     dvd_priv_t *dvdp = (dvd_priv_t *) arg;
 #endif
+    if(!mygui || !mygui->skin) return 0;
 
     switch (type)
     {

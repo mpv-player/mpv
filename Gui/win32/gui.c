@@ -269,10 +269,11 @@ static widget *clickedinsidewidget(gui_t *gui, int window, int x, int y)
 /* updates sliders and the display */
 static void updatedisplay(gui_t *gui, HWND hwnd)
 {
-    if(!hwnd) return;
-
     unsigned int i;
     window_priv_t *priv = NULL;
+    DWORD time = timeGetTime();
+
+    if(!hwnd) return;
 
     /* load all potmeters hpotmeters */
     for(i=0; i<gui->skin->widgetcount; i++)
@@ -308,7 +309,6 @@ static void updatedisplay(gui_t *gui, HWND hwnd)
     }
 
     /* updating the display once a 100.second is enough imo */
-    DWORD time = timeGetTime();
     if((time - oldtime) < 100) return;
     oldtime=time;
 
@@ -410,9 +410,10 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 {
                     static char path[MAX_PATH];
                     BROWSEINFO bi;
+                    LPITEMIDLIST pidl;
                     memset(&bi, 0, sizeof(BROWSEINFO));
                     bi.lpszTitle = "Choose a Directory...";
-                    LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+                    pidl = SHBrowseForFolder(&bi);
                     if (SHGetPathFromIDList(pidl, path))
                     {
                         gui->playlist->clear_playlist(gui->playlist);
@@ -536,9 +537,9 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         }
         case WM_MOUSEWHEEL:
         {
+            int x = GET_WHEEL_DELTA_WPARAM(wParam);
             if(vo_nomouse_input)
                 break;
-            int x = GET_WHEEL_DELTA_WPARAM(wParam);
             if (x > 0)
                 mplayer_put_key(MOUSE_BTN3);
             else
@@ -920,9 +921,10 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                 {
                     static char path[MAX_PATH];
                     BROWSEINFO bi;
+                    LPITEMIDLIST pidl;
                     memset(&bi, 0, sizeof(BROWSEINFO));
                     bi.lpszTitle = "Choose a Directory...";
-                    LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
+                    pidl = SHBrowseForFolder(&bi);
                     if (SHGetPathFromIDList(pidl, path))
                     {
                         gui->playlist->clear_playlist(gui->playlist);
@@ -1421,6 +1423,7 @@ extern int create_window(gui_t *gui, char *skindir)
     window *desc = NULL;
     char dir[MAX_PATH];
     unsigned int i;
+    int x = -1, y = -1;
 
     /* destroy the current main window */
     if(gui->skin) destroy_window(gui);
@@ -1457,7 +1460,6 @@ extern int create_window(gui_t *gui, char *skindir)
     /* load the icon from the executable */
     GetModuleFileName(NULL, dir, MAX_PATH);
     gui->icon = ExtractIcon(instance, dir, 0);
-    int x = -1, y = -1;
 
     /* create the window class */
     wc.style = CS_HREDRAW | CS_VREDRAW;
@@ -1539,8 +1541,9 @@ extern int create_window(gui_t *gui, char *skindir)
 gui_t *create_gui(char *skindir, char *skinName, void (*playercontrol)(int event))
 {
     gui_t *gui = calloc(1, sizeof(gui_t));
-
+    char temp[MAX_PATH];
     HWND runningmplayer = FindWindow("MPlayer GUI for Windows", "MPlayer for Windows");
+
     if(runningmplayer)
     {
         free(gui);
@@ -1556,7 +1559,6 @@ gui_t *create_gui(char *skindir, char *skinName, void (*playercontrol)(int event
     gui->playlist = create_playlist();
 
     if(!skinName) skinName = strdup("Blue");
-    char temp[MAX_PATH];
     sprintf(temp, "%s\\%s", skindir, skinName);
     if(create_window(gui, temp)) return NULL;
     if(create_subwindow(gui, temp)) return NULL;

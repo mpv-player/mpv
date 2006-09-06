@@ -374,11 +374,12 @@ LRESULT CALLBACK SubUrlWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lPara
 
 void display_openurlwindow(gui_t *gui, int add)
 {
-    if(add) addurl = 1;
     HWND hWnd;
     HINSTANCE hInstance = GetModuleHandle(NULL);
     WNDCLASS wc;
     int x, y;
+
+    if(add) addurl = 1;
     if(FindWindow(NULL, "MPlayer - Open URL...")) return;
     wc.style         = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = OpenUrlWndProc;
@@ -632,15 +633,15 @@ void update_playlistwindow(void)
 void display_playlistwindow(gui_t *gui)
 {
     HWND hWnd = FindWindow(NULL, "MPlayer Playlist");
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    WNDCLASS wc;
+    int x, y;
+
     if (hWnd)
     {
         SendMessage(hWnd, WM_CLOSE, 0, 0);
         return;
     }
-
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    WNDCLASS wc;
-    int x, y;
 
     wc.style         = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = PlayListWndProc;
@@ -683,6 +684,9 @@ static LRESULT CALLBACK SkinBrowserWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, 
     {
         case WM_CREATE:
         {
+            HANDLE skinHandle = INVALID_HANDLE_VALUE;
+            WIN32_FIND_DATA finddata;
+
             listbox = CreateWindow("listbox", NULL,
                                    WS_CHILD | WS_VISIBLE | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT |
                                    LBS_DISABLENOSCROLL | WS_VSCROLL | WS_TABSTOP,
@@ -694,9 +698,6 @@ static LRESULT CALLBACK SkinBrowserWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, 
 
             /* This opens the skins directory, lists the directory names, and adds them to the listbox */
             sprintf(skinspath, "%s/*.", get_path("skins"));
-
-            HANDLE skinHandle = INVALID_HANDLE_VALUE;
-            WIN32_FIND_DATA finddata;
 
             skinHandle = FindFirstFile(skinspath, &finddata);
             if (skinHandle != INVALID_HANDLE_VALUE)
@@ -753,15 +754,15 @@ static LRESULT CALLBACK SkinBrowserWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, 
 void display_skinbrowser(gui_t* gui)
 {
     HWND hWnd = FindWindow(NULL, "Skin Browser");
+    HINSTANCE hInstance = GetModuleHandle(NULL);
+    WNDCLASS wc;
+    int x, y;
+
     if (hWnd)
     {
         SendMessage(hWnd, WM_CLOSE, 0, 0);
         return;
     }
-
-    HINSTANCE hInstance = GetModuleHandle(NULL);
-    WNDCLASS wc;
-    int x, y;
 
     wc.style         = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = SkinBrowserWndProc;
@@ -1106,12 +1107,12 @@ static LRESULT CALLBACK EqWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lP
 
 void display_eqwindow(gui_t *gui)
 {
-    if(!guiIntfStruct.sh_video) return;
-
     HWND hWnd;
     HINSTANCE hInstance = GetModuleHandle(NULL);
     WNDCLASS wc;
     int x, y;
+
+    if(!guiIntfStruct.sh_video) return;
     if(FindWindow(NULL, "MPlayer - Equalizer")) return;
     wc.style         = CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   = EqWndProc;

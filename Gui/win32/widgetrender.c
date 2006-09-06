@@ -306,10 +306,11 @@ void renderinfobox(skin_t *skin, window_priv_t *priv)
 
 void renderwidget(skin_t *skin, image *dest, widget *item, int state)
 {
-    if(!dest) return;
     image *img = NULL;
     int height;
     int y;
+
+    if(!dest) return;
     if((item->type == tyButton) || (item->type == tyHpotmeter) || (item->type == tyPotmeter))
         img = item->bitmap[0];
 
