@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19713 -->
+<!-- in sync with r19715 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -547,7 +547,7 @@ $ ./configure --charset=noconv
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
   Es besitzt noch kein offizielles GUI, aber die Befehlszeilen-Version
   ist voll funktionstüchtig. Du solltest die
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
+  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   Mailing-Liste für Hilfe und für neueste Informationen hernehmen.
   Offizielle Windows-Binaries können auf der
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">Download-Seite</ulink>

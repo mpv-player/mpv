@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r17865 -->
+<!-- in sync with r19715 -->
 <chapter id="usage">
 <title>Gebrauch</title>
 
@@ -521,7 +521,7 @@ end<!--
 				bis uns jemand mit Beispieldateien zum Testen versorgt. Wenn du irgendwelche
 				Matrix-encodierten Audiodateien hast, weißt, wo man welche finden kann oder andere
 				hilfreiche Informationen hast, schicke bitte eine Nachricht auf die 
-				<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>-Mailing-Liste.
+				<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>-Mailing-Liste.
 				Benutzt "[matrix-encoded audio]" in der Betreffzeile.
 			</para>
 			<para>

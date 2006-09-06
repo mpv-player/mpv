@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19081 -->
+<!-- in sync with r19715 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -2075,7 +2075,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <para>
   Wenn du Fragen hast oder an der Diskussion über zukünftige
   Features teilnehmen willst, dann melde dich bei unserer
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
+  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
   Mailingliste an. Denk bitte daran, dass dort Englisch gesprochen wird.
 </para>
 </formalpara>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19685 -->
+<!-- in sync with r19715 -->
 <appendix id="bugreports">
 <title>Wie Fehler (Bugs) berichtet werden</title>
 <para>
@@ -106,7 +106,7 @@ Hast du den Patch gefunden, der Ursache des Problems ist, hast du fast gewonnen;
 Berichte darüber im
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>-System oder melde
 dich bei
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-Users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-Users</ulink>
 an und mach es dort bekannt.
 Es besteht die Chance, dass der Autor einspringt und eine Lösung vorschlägt.
 Du kannst auch solange einen genauen Blick auf den Patch werfen, bis er genötigt ist,
@@ -168,7 +168,7 @@ deinem Problem erhältst.
 <title>Wo Fehler berichtet werden sollen</title>
 <para>
 Melde dich bei der Mailingliste MPlayer-users an:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 und sende deinen Fehlerbericht an
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>, wo dieser diskutiert werden kann.
 </para>
