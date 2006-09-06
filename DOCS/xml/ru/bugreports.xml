@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19587 -->
+<!-- synced with r19685 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 <para>
@@ -59,7 +59,7 @@ svn update -r {"2004-08-23"}
 Формат даты: YYYY-MM-DD HH:MM:SS.
 Использование этого формата, гарантирует, что вы сможете извлечь патчи по дате их
 внесения, которые указаны в 
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">архиве MPlayer-cvslog</ulink>.
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">архиве MPlayer-cvslog</ulink>.
 </para>
 <para>
 Далее выполняйте как при обычном обновлении:
