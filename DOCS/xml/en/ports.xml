@@ -531,7 +531,7 @@ $ ./configure --charset=noconv
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
   It does not have an official GUI yet, but the command line version
   is completely functional. You should check out the
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
+  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   mailing list for help and latest information.
   Official Windows binaries can be found on the
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>.

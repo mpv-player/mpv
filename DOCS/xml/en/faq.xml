@@ -25,7 +25,7 @@ How do I translate <application>MPlayer</application> to a new language?
 <answer><para>
 Read the <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
 it should explain everything. You can get further help on the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>
 mailing list.
 </para></answer>
 </qandaentry>
@@ -49,10 +49,10 @@ How can I become an <application>MPlayer</application> developer?
 We always welcome coders and documenters. Read the
 <ulink url="../../tech/">technical documentation</ulink>
 to get a first grasp. Then you should subscribe to the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 mailing list and start coding. If you want to help out with the documentation,
 join the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
 mailing list.
 </para></answer>
 </qandaentry>

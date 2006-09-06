@@ -32,7 +32,7 @@ If you feel have the necessary skills you are invited to have a go at fixing the
 bug yourself. Or maybe you already did that? Please read
 <ulink url="../../tech/patches.txt">this short document</ulink> to find out how to
 get your code included in <application>MPlayer</application>. The people on the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 mailing list will assist you if you have questions.
 </para>
 </sect1>
@@ -103,7 +103,7 @@ If you find the patch that is the cause of the problem, you have almost won;
 report about it to the
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink> or
 subscribe to 
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
 and post it there.
 There is a chance that the author will jump in to suggest a fix.
 You may also look hard at the patch until it is coerced to reveal where
@@ -162,7 +162,7 @@ or even an answer.
 <title>Where to report bugs</title>
 <para>
 Subscribe to the MPlayer-users mailing list:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 and send your bug report to
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> where you can discuss it.
 </para>

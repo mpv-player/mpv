@@ -1913,7 +1913,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <para>
 If you have questions or want to hear feature announcements and take part in
 discussions on this subject, join our
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
 mailing list. Please remember that the list language is English.
 </para>
 </formalpara>
