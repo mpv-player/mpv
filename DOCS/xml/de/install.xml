@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19087 -->
+<!-- in sync with r19589 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -460,6 +460,11 @@ und funktioniert mit folgenden Treibern:
   Wenn du eine V4L-kompatible <emphasis role="bold">TV-Tuner</emphasis>-Karte hast
   und Filme mit <application>MPlayer</application> anschauen/grabben und encodieren
   möchtest, lies den Abschnitt <link linkend="tv-input">TV-Input</link>.
+  </para></listitem>
+<listitem><para>
+  Wenn du eine V4L-kompatible <emphasis role="bold">Radioempfänger</emphasis>karte hast
+  und mit <application>MPlayer</application> Radio hören oder aufnehmen möchtest,
+  lies den Abschnitt <link linkend="radio">radio</link>.
   </para></listitem>
 <listitem><para>
   Es gibt Unterstützung für ein schickes <emphasis role="bold">OSD-Menü</emphasis>,

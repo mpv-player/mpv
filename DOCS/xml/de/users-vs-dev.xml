@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r15895 -->
+<!-- in sync with r19685 -->
 <appendix id="users-vs-dev">
 <title>Aufschrei der Entwickler</title>
 
@@ -172,7 +172,7 @@ Uns misfällt die Tatsache, dass <ulink url="http://www.nvidia.com">nVidia</ulink
 nur binäre Treiber (zur Verwendung mit XFree86) bereitstellt, die oft genug auch
 noch einige Fehler enthalten.
 Wir bekamen auf
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 viele Berichte über Probleme, die diese Closed-Source-Treiber
 und deren dürftige Qualität, Instabilität und armseligen User- und
 Experten-Support betreffen.

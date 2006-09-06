@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r15783 -->
+<!-- in sync with r19686 -->
 <appendix id="bugs">
 <title>Bekannte Fehler</title>
 <sect1 id="bugs-special">
@@ -24,23 +24,6 @@ deaktivierst.
 </para>
 </listitem>
 <listitem>
-<para>&quot;Interne Buffer-Inkonsistenz&quot; während <application>MEncoder</application> läuft:</para>
-<para>Problem: Bekanntest Problem, falls lame &lt; 3.90 mit gcc 2.96 oder 3.x compiliert wurde.</para>
-<para>Lösung: Benutze lame &gt;=3.90.</para>
-<para>Workaround: Compiliere lame mit gcc 2.95.x und entferne alle schon installierten lame-Pakete,
-sie könnten mit gcc 2.96 compiliert worden sein.</para>
-</listitem>
-<listitem>
-<para>Gestörter MP2/MP3-Sound auf PPC:</para>
-<para>Problem: Bekannte GCC-Fehlcompilierung auf PPC-Plattform, bisher keine Lösung.</para>
-<para>Workaround: Benutze FFmpegs (langsamen) MP1/MP2/MP3-Decoder (<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (Signal 11) in libmpeg2, bei Skalierung + Encodierung:</para>
-<para>Problem: Bekannter MMX-Fehler in GCC 2.95.2</para>
-<para>Lösung: Upgrade auf 2.95.3</para>
-</listitem>
-<listitem>
 <para>Abstürze bei Ausgabe (Dump) von Streams:</para>
 <para>Problem: Core Dump</para>
 <para>Lösung: Keine Panik. Stelle sicher, dass du weißt, wo dein Handtuch liegt.</para>
@@ -55,8 +38,8 @@ sie könnten mit gcc 2.96 compiliert worden sein.</para>
 <title>Allgemeine Audioverzögerung oder mieser Ton (existiert bei allen oder vielen Videodateien)</title>
 <itemizedlist>
 <listitem><para>
-meistens fehlerhafter Audiotreiber! - Versuche, verschiedene Treiber zu verwenden, probiere
-ALSA 0.9 OSS-Emulation mit der Option <option>-ao oss</option> und auch <option>-ao sdl</option>,
+Meistens fehlerhafter Audiotreiber! - Versuche, verschiedene Treiber zu verwenden, probiere
+OSS-Emulation von ALSA mit der Option <option>-ao oss</option> und auch <option>-ao sdl</option>,
 das hilft manchmal. Wenn deine Datei mit der Option <option>-nosound</option> gut abspielbar ist,
 handelt es sich sicher um ein Problem mit der Soundkarte (dem Treiber).
 </para></listitem>
@@ -146,22 +129,15 @@ automatisch ausgewählter Codec kann die Datei nicht decodieren - probier, mit
 den Optionen <option>-vc</option> oder <option>-vfm</option> einen anderen auszuwählen
 </para>
 </listitem>
-<listitem>
-<para>
-du versuchst, eine DivX 3.x Datei mit dem OpenDivX-Decoder oder XviD (<option>-vc odivx</option>)
-abzuspielen - installiere DivX4Linux und compiliere den Player neu
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
 <title>Video-out-Probleme</title>
 <para>
-Erste Anmerkung: Die Optionen <option>-fs -vm</option> und <option>-zoom</option> sind
-nur Empfehlungen, (noch) nicht von allen Treibern unterstützt. Es ist daher kein Bug,
-wenn es nicht funktioniert. Nur ein paar Treiber unterstützten Skalierung/Zoom,
-erwarte dies nicht von x11 oder dga.
+Beachte zuerst, dass die Optionen <option>-fs</option>, <option>-vm</option> und
+<option>-zoom</option> nicht von allen Treibern unterstützt werden.
+Außerdem unterstützen nicht alle Treiber Skalierung/Zoomen in Hardware.
 </para>
 
 <formalpara>

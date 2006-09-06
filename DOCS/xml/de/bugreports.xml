@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19039 -->
+<!-- in sync with r19685 -->
 <appendix id="bugreports">
 <title>Wie Fehler (Bugs) berichtet werden</title>
 <para>
@@ -36,7 +36,7 @@ Bitte lies
 <ulink url="../../tech/patches.txt">dieses kurze Dokument</ulink>, um herauszufinden,
 wie dein Code Teil von <application>MPlayer</application> werden kann. Die Leute der
 Mailing-Liste
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 werden dir zur Seite stehen, wenn du Fragen hast.
 </para>
 </sect1>

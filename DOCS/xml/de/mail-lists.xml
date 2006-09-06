@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18606 -->
+<!-- in sync with r19677 -->
 <appendix id="mailinglists">
 <title>Mailing-Listen</title>
 <para>
@@ -15,14 +15,14 @@ Wenn du sie nicht kennst, lies bitte
 <ulink url="http://www.river.com/users/share/etiquette/edit.html">HOWTO Edit Messages</ulink>.
 <itemizedlist>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
 </para>
 <para>
 Liste für <application>MPlayer</application>-Ankündigungen.
 Melde dich hier an, wenn du Ankündigungen zur Sicherheit und zu Releases bekommen möchtest.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
 </para>
 <para>Allgemeine Support-Mailing-Liste für Fragen, die mit <application>MPlayer</application>
 zu tun haben. Bitte lies die <emphasis role="bold">gesamte Dokumentation</emphasis>, bevor
@@ -32,25 +32,25 @@ lies aber bitte zuerst die Abschnitte <link linkend="bugs">Bekannte Fehler</link
 <link linkend="bugreports">Wie Fehler (Bugs) berichtet werden</link>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (Ungarisch)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (Ungarisch)
 </para>
 <para>Ungarisch-sprachige Liste. Thema? Wir werden sehen... Bisher hauptsächlich Flames und RTFM-Fragen :(
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
 </para>
 <para>Liste für Fragen, die mit Matrox-Grafikkarten zu tun haben, wie etwa
 <link linkend="mga_vid">mga_vid</link>, die offiziellen Beta-Treiber von Matrox (für
 XFree86 4.x.x), matroxfb-TVout-Kram.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
 </para>
 <para>Dinge, die mit der DVB genannten Hardware-Decoder-Karte zu tun haben
 (nicht <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
 </para>
 <para>Allgemeine Support-Mailing-Liste für Fragen, die mit <application>MEncoder</application>
 zu tun haben. Bitte lies die <emphasis role="bold">gesamte Dokumentation</emphasis>, bevor
@@ -60,7 +60,7 @@ lies aber bitte zuerst die Abschnitte <link linkend="bugs">Bekannte Fehler</link
 <link linkend="bugreports">Wie Fehler (Bugs) berichtet werden</link>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
 </para>
 <para>Diese Liste behandelt die <application>MPlayer</application>-Entwicklung!
 Gespräche über Interface/API-Änderungen, neue Bibliotheken, Code-Optimierungen,
@@ -70,7 +70,7 @@ Flames, um den Listen-Traffic gering zu halten.
 </para></listitem>
 <listitem>
 <para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
 </para>
 <para>Alle Änderungen am Code von <application>MPlayer</application> werden automatisch
 an diese Liste geschickt. Hierhin gehören nur Fragen zu diesen Änderungen (wenn du nicht
@@ -78,54 +78,56 @@ verstehst, warum eine Änderung nötig war oder du eine bessere Lösung hast oder d
 möglichen Fehler/Problem im Commit bemerkt hast).
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
 </para>
 <para>Diese Liste behandelt die Dokumentation von <application>MPlayer</application>
 und Homepage-Diskussionen. Auch Subversion-Logs, die Dokumentation und Homepage betreffen,
 werden hierhin geschickt.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations"><application>MPlayer</application>-translations</ulink>
 </para>
 <para>Diese Liste behandelt die Übersetzung der Dokumentation von <application>MPlayer</application>
 und der Homepage. Auch Subversion-Logs, die die Übersetzung von Dokumentation und Homepage betreffen,
 werden hierhin geschickt.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
 </para>
 <para>Liste für die Diskussionen über die <application>Cygwin</application>- und
 <application>MinGW</application>-Portierungen von <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
 </para>
 <para>Liste für die Diskussionen über <application>MPlayer</application> G2, den Next-Generation-Videoplayer.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
 </para>
 <para>Liste für die Diskussionen über die Mirror-Server-Infrastruktur von <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (INAKTIV)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (INAKTIV)
 </para>
 <para>Liste für die Diskussionen über die "Weekly News Releases" von <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (INAKTIV)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (INAKTIV)
 </para>
 <para>Liste für die Diskussionen über die OS/2-Portierung von <application>MPlayer</application>.
 </para></listitem>
 <listitem><para>
-<ulink url="http://mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INAKTIV)
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/qt-codecs-porting">qt-codecs-porting</ulink> (INAKTIV)
 </para>
 <para>Liste für die Diskussionen über QuickTime-Codec-Unterstützung.
 </para></listitem>
 </itemizedlist>
+<!-- Auskommentiert, bis die Mailing-List-Suche wiederhergestellt ist.
 <note><para>
 Das Mailing-Listen-Archiv, das auch durchsucht werden kann, findest du unter
 <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
+-->
 </para>
 </appendix>

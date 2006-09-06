@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19265 -->
+<!-- in sync with r19685 -->
 <chapter id="mencoder">
 <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
 
@@ -12,7 +12,7 @@ findet du in den
 die aus verschiedenen Mailing-Listen-Threads von MPlayer-Nutzern
 zusammengestellt wurden.
 Durchsuche die
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">Archive</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">Archive</ulink>
 nach einer Fülle von Diskussionen über alle Aspekte und Probleme mit
 der Encodierung mittels <application>MEncoder</application>.
 </para>
