@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.9 -->
+<!-- synced with r19685 -->
 <appendix id="users-vs-dev">
 <title>Плач разработчиков</title>
 
@@ -27,19 +27,18 @@ GCC 2.96 с Linux-Mandrake серии 8.0.
 <para>
 Команда GCC отрицает все связи с GCC 2.96 и даже выпустила 
 <ulink url="http://gcc.gnu.org/gcc-2.96.html">официальный ответ</ulink>
-на GCC 2.96. У многих разработчики со всему мира возникали проблемы с
-GCC 2.96, и они рекомендовали другие компиляторы. Примеры &mdash; это
-<ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink>
-и
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
+на GCC 2.96. У многих разработчиков по всему миру возникали проблемы с
+GCC 2.96, и некоторые проекты, среди них 
+<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>,
+начали рекомендовать другие компиляторы.
 Прочие интересные ссылки &mdash; это 
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash о ядре 2.4.17</ulink>
 и
 <ulink url="http://www.voy.com/3516/572.html">Voy Forum</ulink>.
 <application>MPlayer</application> также претерпевал различные проблемы,
-которые разрешались переходом на другую версию GCC. Некоторые проекты начали
-осуществлять обходы для некоторых проблем 2.96, но мы отказались исправлять
+которые разрешались переходом на другую версию GCC. Часть проектов начала
+реализовывать обходы для некоторых проблем 2.96, но мы отказались исправлять
 ошибки других людей, в том числе поскольку некоторые такие обходы привели бы
 к потере производительности.
 </para>
@@ -74,7 +73,7 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
 <ulink url="ftp://updates.redhat.com">ftp сервере</ulink>RedHat, или просто
 перейти на 3.0.4 пакеты, предлагаемые начиная с версии 7.2. Вы также можете
 использовать
-<ulink url="ftp://people.redhat.com/jakub/gcc/3.2.3-11/">gcc-3.2.3-11 пакеты</ulink>
+<ulink url="ftp://people.redhat.com/jakub/gcc/errata/3.2.3-11/">gcc-3.2.3-11 пакеты</ulink>
 (неофициальные, но работают нормально) и поставить их совместно с gcc-2.96,
 который у Вас стоит. <application>MPlayer</application> их обнаружит,
 и будет использовать 3.2 вместо 2.96. Если Вы не хотите или не можете
@@ -140,7 +139,7 @@ OpenDivX, который не разрешал распространение в скомпилированном виде. Этот код
 <command>configure</command>
 опцию <option>--enable-runtime-cpudetection</option>). Это по умолчанию
 выключено, поскольку это вызывает небольшую потерю в скорости, но зато теперь
-возможно создавать бинарии, которые будут работать на разных CPU из семейства
+возможно создавать бинарники, которые будут работать на разных CPU из семейства
 Intel-совместимых.
 </para>
 </sect1>
@@ -153,7 +152,7 @@ Intel-совместимых.
 Нам не нравится то, что <ulink url="http://www.nvidia.com">nVidia</ulink>
 предоставляет только двоичные драйверы (для использования с XFree86), которые
 часто бывают глючными. У нас было много сообщений в 
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 о проблемах, связанных с этими драйверами с закрытым исходным кодом, их плохим
 качеством, нестабильностью и плохой поддержкой пользователей и специалистов.
 Многие из этих проблем продолжают появляться снова и снова. Мы всегда
