@@ -1,4 +1,4 @@
-.\" synced with r19569
+.\" synced with r19688
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -84,6 +84,13 @@ mencoder \- Encodeur vidéo
 .B mplayer
 'in +\n[.k]u
 .I tv://[canal]
+[options]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I radio://[canal ou fréquence][/capture]
 [options]
 .
 .br
@@ -1634,6 +1641,59 @@ présent) vous voulez lire.
 Peut être utilisé avec \-vid et \-aid.
 .
 .TP
+.B \-radio <option1:option2:...> (radio uniquement)
+Les options suivantes permettent de paramétrer le module de capture
+radio.
+Pour écouter la radio avec MPlayer, utilisez une URL de type
+'radio://<fréquence>' (si l'option 'channels' n'est pas donnée),
+ou 'radio://<numéro de canal>' (si l'option 'channels' est donnée).
+Pour commencer l'enregistrement, faites radio://<fréquence ou canal>/capture.
+Si le mot-clef capture n'est pas donné vous pouvez uniquement écouter
+la radio par la sortie line-in.
+Utiliser 'capture' pour écouter n'est pas recommandé à cause des
+problèmes de synchronisation, ce qui rend l'écoute désagréable.
+.sp 1
+Les options disponibles sont:
+.RSs
+.IPs device=<valeur>
+Le périphérique radio à utiliser (par défaut\ : /dev/radio0).
+.IPs driver=<valeur>
+Le pilote radio à utiliser (par défaut\ : v4l2 si disponible,
+v4l sinon).
+.IPs volume=<0..100>
+volume du périphérique radio (par défaut\ : 100)
+sound volume for radio device (default 100)
+.IPs channels=<fréquence>\-<nom>,<fréquence>\-<nom>,...
+Défini la liste des canaux.
+Utilisez _ pour les espaces (ou jouez avec les guillements).
+Les noms des canaux seront alors affichées en utilisant l'OSD et les
+commandes esclaves radio_step_channel et radio_set_channel seront
+utilisables par télécommande (voir LIRC).
+Si un numéro est donné dans l'URL, il sera compris comme la position
+du canal dans la liste des canaux.
+.br
+.I EXEMPLE:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<valeur> (avec la capture radio activée)
+Nom du périphérique depuis lequel enregistrer le son.
+Faute d'être spécifié, la capture sera désactivée, même
+si le mot-clef capture apparaît dans l'URL.
+Donnez les périphériques ALSA sous la forme hw=<card>.<device>.
+Si le nom contient un '=', la capture se fera avec ALSA, sinon
+avec OSS.
+.IPs arate=<value> (avec la capture radio activée)
+Nombre d'échantillons par seconde (par défaut: 44100).
+.br
+.I NOTE:
+Pendant les capture, utilisez aussi l'option \-rawaudio rate=<valeur>
+avec la même valeur que arate.
+Si vous avez des problèmes de vitesse du son (trop rapide), essayez
+différents taux d'échantillonnage (c-à-d 48000,44100,32000,...).
+.IPs achannels=<value> (avec la capture radio activée)
+Nombre de canaux audios à enregistrer.
+.RE
+.
+.TP
 .B \-tv <option1:option2:...> (TV/PVR uniquement)
 Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
@@ -1812,10 +1872,19 @@ sous-titres et ceux contenus dans les pistes Matroska.
 Fonctionne avec \-embeddedfonts.
 .
 .TP
+.B \-ass-border-color <valeur>
+Défini la couleur du bord des sous-titre en simple texte.
+Le format de la couleur est RRVVBBAA.
+.
+.TP
 .B \-ass-bottom-margin <valeue>
 Ajoute une bande noire en bas de la trame.
 Les titres pourront y être affichés lors du rendu SSA/ASS
 (avec \-ass-use-margins).
+.
+.B \-ass-color <valeur>
+Défini la couleur des sous-titres en simple texte.
+Le format de la couleur est RRVVBBAA.
 .
 .TP
 .B \-ass-font-scale <valeur>
@@ -1836,6 +1905,13 @@ Force les paramètres de style.
 .TP
 .B \-ass-line-spacing <valeur>
 Définit la tailles des espaces pour le rendu SSA/ASS.
+.
+.TP
+.B \-ass-styles <fichier>
+Charge le style SSA/ASS du fichier donné et l'utilise pour l'affichage
+des sous-titres.
+La syntaxe de ce fichier est la même que celle définie dans la section
+[V4 Styles] / [V4+ Styles] de SSA/ASS.
 .
 .TP
 .B \-ass-top-margin <valeur>
@@ -9981,6 +10057,14 @@ Si ce n'est pas le cas, cette option affichera un avertissement et
 activera le découpage en tranches, sans le multithreading.
 .
 .TP
+.B (no)globalheader
+Fait que les SPS et PPS n'apparaissent qu'une seule fois, au début et
+à la fin du flux de bits.
+Certains lecteurs, comme la PSP de Sony, requièrent cette option.
+Le comportement par défaut fait que les SPS et PPS se répètent avant
+chaque trame IDR.
+.
+.TP
 .B log=<-1\-3>
 Ajuste la quantité d'informations de log à afficher à l'écran.
 .PD 0
@@ -10160,7 +10244,16 @@ Tout autre nombre de trames par seconde est incompatible avec cette
 option.
 .
 .
-.SS FFmpeg multiplexeurs de libavformat (\-lavfopts) (voir aussi \-of lavf)
+.SS Démultiplexeurs de libavformat de FFmpeg (\-lavfdopts)
+.
+.TP
+.B probesize=<valeur>
+Quantité maximal de données à lire lors de la phase de détection.
+Dans le cas de MPEG-TS, cette valeur correspond au nombre maximal
+de paquets TS à scanner.
+.
+.
+.SS Multiplexeurs de libavformat de FFmpeg (\-lavfopts) (voir aussi \-of lavf)
 .
 .TP
 .B format=<format_de_container>
