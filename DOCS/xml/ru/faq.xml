@@ -23,8 +23,8 @@
 Как перевести <application>MPlayer</application> на новый язык?
 </para></question>
 <answer><para>
-Прочитайте <ulink url="../../tech/translations.txt">HOWTO по переводу</ulink>(англ.),
-Там все описано. За дополнительной помощью вы можете обратиться в рассылку 
+Прочитайте <ulink url="../../tech/translations.txt">HOWTO по переводу</ulink> (англ.),
+там все описано. За дополнительной помощью вы можете обратиться в рассылку 
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 </para></answer>
 </qandaentry>
@@ -47,10 +47,10 @@
 </para></question>
 <answer><para>
 Мы всегда рады приветствовать людей, занимающихся написанием кода и документации.
-Для начала прочтите <ulink url="../../tech/">техническую документацию</ulink>(англ.).
+Для начала прочтите <ulink url="../../tech/">техническую документацию</ulink> (англ.).
 Затем вам следует подписаться на список рассылки 
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-а начать написание кода. Если вы хотите помочь с документацией, то подпишитесь на
+и начать написание кода. Если вы хотите помочь с документацией, то подпишитесь на
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
@@ -60,7 +60,7 @@
 Почему вы не используете autoconf/automake?
 </para></question>
 <answer><para>
-У нас есть модульная, самописная система сборки. Она хорошо справляется 
+У нас есть модульная, написанная вручную система сборки. Она хорошо справляется 
 со своей работой, зачем же ее менять? Кроме того, нам, как и 
 <ulink url="http://freshmeat.net/articles/view/889/">некоторым другим</ulink>, не нравятся 
 auto* утилиты.
@@ -139,7 +139,7 @@ Configure завершается с указанным сообщением, и <application>MPlayer</applicatio
 <answer><para>
 ... но вы не имеете установленных пакетов разработки X11. Либо они установлены
 некорректно. Они называются  <filename>XFree86-devel*</filename> в Red Hat, 
-<filename>xlibs-dev</filename> в Debian Woody, и 
+<filename>xlibs-dev</filename> в Debian Woody и 
 <filename>libx11-dev</filename> в Debian Sarge. Также проверьте существуют ли
 символические ссылки <filename class="directory">/usr/X11</filename> и
 <filename class="directory">/usr/include/X11</filename> (это может быть 
@@ -152,7 +152,7 @@ Configure завершается с указанным сообщением, и <application>MPlayer</applicatio
 <question><para>
 Сборка в Mac OS 10.3 приводит к нескольким ошибкам линковки</para></question>
 <answer><para>
-Как правило ошибка линковки выглядит так:
+Как правило, ошибка линковки выглядит так:
 <screen>
 ld: Undefined symbols:
 _LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
@@ -160,7 +160,7 @@ _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be define
 </screen>
 Эта проблема - результат разработчиков Apple, использующих 10.4 для компиляции их программ и
 распространяющих бинарники пользователям 10.3 через Software Update.
-Объекты неразрешенных ссылок присутствуют в 10.4, но их нет в 10.3.
+Неопределённые символы присутствуют в 10.4, но их нет в 10.3.
 Одно из решений - откат QuickTime до версии 7.0.1, но есть и лучшее.
 </para><para>
 Загрузите <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">более старую версию фреймворка</ulink>.
@@ -180,7 +180,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </para><para>
 Получившийся бинарный <application>MPlayer</application> будет использовать фреймворк,
 установленный в вашей системе, используя динамические ссылки времени исполнения.
-Это можно проверить, запустив <systemitem>otool -l</systemitem>).
+(Это можно проверить, запустив <systemitem>otool -l</systemitem>).
 </para></answer>
 </qandaentry>
 
@@ -278,7 +278,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </varlistentry>
 <varlistentry><term><systemitem>41%</systemitem></term>
 <listitem><para>время CPU в процентах, используемое видео кодеком
-  (для послойного и прямого рендеринга сюда включается и video_out)</para></listitem>
+  (для поблочного и прямого рендеринга сюда включается и video_out)</para></listitem>
 </varlistentry>
 <varlistentry><term><systemitem>0%</systemitem></term>
 <listitem><para>время CPU, используемое video_out</para></listitem>
@@ -332,8 +332,8 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 
 <qandaentry>
 <question><para>
-Субтитры великолепные, лучшие из виденные когда-либо, но они замедляют 
-воспроизведение! 
+Субтитры великолепные, лучшие из виденных когда-либо, но они замедляют 
+воспроизведение! Я знаю, это необычно...
 </para></question>
 <answer><para>
 После запуска <filename>./configure</filename>, отредактируйте <filename>config.h</filename>
@@ -373,7 +373,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 
 <qandaentry>
 <question><para>
-Не могу локализовать причину серьезной проблемы произведения.
+Не могу локализовать причину некоторой странной проблемы произведения.
 </para></question>
 <answer><para>
 Завалялся файл <filename>codecs.conf</filename> в 
@@ -408,7 +408,7 @@ mplayer -vf expand=0:-100:0:0 -slang de dvd://1
 </para></question>
 <answer><para>
 Нужно использовать опцию <option>-aid</option> (аудио ID) или <option>-alang</option>
-(язык аудио), <option>-sid</option>(ID субтитров) или <option>-slang</option>
+(язык аудио), <option>-sid</option> (ID субтитров) или <option>-slang</option>
 (язык субтитров), например:
 <screen>
 mplayer -alang eng -slang eng <replaceable>example.mkv</replaceable>
@@ -562,12 +562,12 @@ PRELINK_OPTS="-mR --no-exec-shield"
 
 <qandaentry>
 <question><para>
-При воспроизвежении фильмо изображение вдруг начинает дергаться и появляется
+При воспроизведении фильма изображение вдруг начинает дергаться и появляется
 следующее сообщение:
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
 </para></question>
 <answer><para>
-Файлы с некорретным чередованием (badly interleaved) и опция
+Файлы с некорретным чередованием и опция
 <option>-cache</option> вместе работают не очень хорошо..
 Попробуйте <option>-nocache</option>.
 </para></answer>
@@ -584,13 +584,13 @@ PRELINK_OPTS="-mR --no-exec-shield"
 </para></question>
 <answer><para>
 Ваш дайвер вывода видео аппаратно не поддерживает масштабирование, и, поскольку
-программное масштабирование может быть ужасно медленным, 
+поблочное программное масштабирование может быть ужасно медленным, 
 <application>MPlayer</application> не задействует его автоматически.
 Скорее всего вы используете драйвер вывода <systemitem>x11</systemitem> вместо
 <systemitem>xv</systemitem>.
 Попробуйте указать <option>-vo xv</option> в командной строке или
 прочтите <link linkend="video">раздел видео</link>, чтобы узнать о других
-драйверах вывода видео. Опция <option>-zoom</option> точно задействует
+драйверах вывода видео. Опция <option>-zoom</option> явно задействует
 программное масштабирование.
 </para></answer>
 </qandaentry>
@@ -680,7 +680,7 @@ vo_driver = <replaceable>выбранный_драйвер</replaceable>
 </screen>
 </para></question>
 <answer><para>
-Используете KDE или GNOME и звуковыми службами aRts или ESD?
+Используете KDE или GNOME со звуковыми службами aRts или ESD?
 Попроуйте отключить службу звука или используйте <option>-ao arts</option> или
 <option>-ao esd</option> опции, для указания <application>MPlayer</application> 
 использовать aRts или ESD. Также возможно, что вы используете ALSA без
@@ -701,7 +701,7 @@ aRts блокирует звуковое устройство. Либо подождите старта видео, либо
 (<option>-ao arts</option>). Если он не работает, либо 
 <application>MPlayer</application> собран без него, попробуйте SDL
 (<option>-ao sdl</option>) и убедитесь, что SDL может работать со
-звуком aRts. Другой вариант - запуск <application>MPlayer</application>
+звуком aRts. Ещё один вариант - запуск <application>MPlayer</application>
 с artsdsp.
 </para></answer>
 </qandaentry>
@@ -712,7 +712,7 @@ aRts блокирует звуковое устройство. Либо подождите старта видео, либо
 некоторые - с двойной скоростью!
 </para></question>
 <answer><para>
-У вас неверно работающая звуковая карта/драйвер. Скорее всего поддерживается работа
+У вас неверно работающая звуковая карта/драйвер. Скорее всего, поддерживается работа
 только с 44100Hz, а вы пытаетесь проиграть файл с 22050Hz звуком. Попробуйте
 звуковой фильтр <systemitem>resample</systemitem>.
 </para></answer>
@@ -734,7 +734,7 @@ aRts блокирует звуковое устройство. Либо подождите старта видео, либо
 увеличивается).
 </para></listitem>
 <listitem><para>
-Если это AVI возможно у него проблемы с чередованием (interleaving) звука/видео,
+Если это AVI, возможно, у него проблемы с чередованием звука/видео,
 попробуйте опцию <option>-ni</option> для обхода проблемы. Или файл имеет
 неверный заголовок. В этом случае могут помочь опции <option>-nobps</option>
 и/или <option>-mc 0</option>.
@@ -807,14 +807,14 @@ DVD не проигрываются, MPlayer зависает или выводит ошибку "Encrypted VOB file!".
 Нужны ли права root (setuid) для воспроизведения DVD?
 </para></question>
 <answer><para>
-Нет. Конечно вы дожны иметь необходимые права на файл DVD устройства 
+Нет. Конечно, вы дожны иметь необходимые права на файл DVD устройства 
 (в <filename class="directory">/dev/</filename>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Возможно ли проигрывать/кодировать только выбранные эпизоды?
+Возможно ли проигрывать/кодировать только выбранные разделы?
 </para></question>
 <answer><para>
 Да, попробуйте опцию <option>-chapter</option>.
@@ -847,7 +847,7 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replaceable>
 </qandadiv>
 
 <qandadiv id="faq-features">
-<title>Просьбы о новых вожможностях</title>
+<title>Просьбы о новых возможностях</title>
 <qandaentry>
 <question><para>
 Если <application>MPlayer</application> приостановлен, и я пытаюсь перемотать фильм или нажимаю
@@ -867,7 +867,7 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replaceable>
 <answer><para>
 Вы можете перемещаться на 1 кадр вперед, нажимая клавишу 
 <keycap>.</keycap>. После этого вопроизведение будет приостановлено
-(смотрите старину руководства man для подробностей).
+(смотрите страницу руководства man для подробностей).
 Перемещение назад вряд ли будет реализовано в ближайщем будущем.
 </para></answer>
 </qandaentry>
@@ -887,17 +887,17 @@ mplayer dvd://1 -dvd-device <replaceable>/путь/к/каталогу</replaceable>
 
 <qandaentry>
 <question><para>
-Как сохранить весь заголовок DVD в файл?
+Как сохранить весь ролик DVD в файл?
 </para></question>
 <answer><para>
-Как только определитесь с выбором заголовка и проверите, что он проигрывается в 
+Как только определитесь с выбором ролика и проверите, что он проигрывается в 
 <application>MPlayer</application>, воспользуйтесь опцией 
 <option>-dumpstream</option>.
 Например:
 <screen>
 mplayer dvd://5 -dumpstream -dumpfile <replaceable>dvd_dump.vob</replaceable>
 </screen>
-сохранит 5-й заголовок в файл 
+сохранит 5-й ролик в файл 
 <replaceable>dvd_dump.vob</replaceable>
 </para></answer>
 </qandaentry>
@@ -921,7 +921,7 @@ DVD или другие фильмы в VCD или SVCD формат и даже записывать их на CD.
 Новые версии  <application>MEncoder</application> могут самостоятельно создавать
 MPEG-2 файлы, которые можно использовать в качестве основы для VCD или SVCD,
 воспроизводящиеся "из коробки" на всех платформах (например, чтобы поделиться 
-фильмом снятым на видеокамеру с компьютерно-неграмотными друзями).
+фильмом, снятым на видеокамеру, с компьютерно-неграмотными друзями).
 Прочтите
 <link linkend="menc-feat-vcd-dvd">Использование MEncoder для создания VCD/SVCD/DVD-совместимых файлов</link>.
 </para></answer>
@@ -932,16 +932,16 @@ MPEG-2 файлы, которые можно использовать в качестве основы для VCD или SVCD,
 Как склеить два файла?
 </para></question>
 <answer><para>
-MPEG файлы могут быть объединены в один при помощи luck.
-Для файлов AVI, можете воспользоваться встроеной возможность <application>MEncoder</application>'а
-работать в несколькими файлами сразу:
+MPEG файлы могут быть объединены в один, если сильно повезет.
+Для файлов AVI, можете воспользоваться встроеной возможностью <application>MEncoder</application>'а
+работать с несколькими файлами сразу:
 <screen>
 mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>file1.avi</replaceable> <replaceable>file2.avi</replaceable>
 </screen>
-Это бутет работать только если файлы имеют одинаковое разрешение и сжаты одинаковым
+Это будет работать только если файлы имеют одинаковое разрешение и сжаты одинаковым
 кодеком. Также попробуйте 
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> и
-<application>avimerge</application> (чать набора утилит 
+<application>avimerge</application> (часть набора утилит 
 <ulink url="http://www.transcoding.org/">transcode</ulink>
 ).
 </para></answer>
@@ -949,17 +949,17 @@ mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>
 
 <qandaentry>
 <question><para>
-Как исправить AVI файлы с испорченным индексом или неверным чередованием (bad interleaving)?
+Как исправить AVI файлы с испорченным индексом или неверным чередованием?
 </para></question>
 <answer><para>
 Избежать использования <option>-idx</option> и иметь возможность перемотки в
 AVI файлах с испорченным индексом, либо избежать <option>-ni</option> для воспроизведения файлов 
-с неверным чередованием (bad interleaving) поможет команда
+с неверным чередованием поможет команда
 <screen>
 mencoder <replaceable>input.avi</replaceable> -idx -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
-Она скопирует видео и аудио в новый файл, генерируя новый индекс и исправляя чередование
-(interleaving). Конечно, это не может исправить ошибки в видео и/или аудио потоке.
+Она скопирует видео и аудио в новый файл, генерируя новый индекс и исправляя чередование. 
+Конечно, это не поможет исправить ошибки в видео и/или аудио потоке.
 </para></answer>
 </qandaentry>
 
@@ -1043,8 +1043,8 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 Не могу перекодировать ASF файл в AVI/MPEG-4, потому что используется 1000fps.
 </para></question>
 <answer><para>
-Поскольку ASF использует переменный framerate, а AVI - фиксированный,
-необходимо его установить вручную опцией <option>-ofps</option>.
+Поскольку ASF использует переменную частоту кадров, а AVI - фиксированную,
+необходимо её установить вручную опцией <option>-ofps</option>.
 </para></answer>
 </qandaentry>
 
@@ -1054,7 +1054,7 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 Как поместить субтитры в выходной файл?
 </para></question>
 <answer><para>
-Просто укажите <application>MEncoder</application>'у опцию <option>-sub &lt;имя_файла&gt;</option> 
+Просто укажите <application>MEncoder</application> опцию <option>-sub &lt;имя_файла&gt;</option> 
 (или <option>-sid</option>, соответственно).
 </para></answer>
 </qandaentry>
@@ -1088,13 +1088,13 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, родная библиотека 
-кодирования MPEG-4 обычно поставляемая с <application>MEncoder</application>,
+кодирования MPEG-4, обычно поставляемая с <application>MEncoder</application>,
 устанавливала FourCC в 'DIVX' при сжатии MPEG-4 видео (FourCC -
-это тэг AVI, указывающий нужную программу сжатия и ведодирования видео,
+это тэг AVI, указывающий нужную программу сжатия и декодирования видео,
 т.е. кодек). Поэтому многие люди считают, что 
 <systemitem class="library">libavcodec</systemitem> была библиотекой
 кодирования DivX, когда на самом деле это совершенно другая библиотека
-кодирования MPEG-4, реализующая MPEG-4 стандарт значительно превосходящий DivX.
+кодирования MPEG-4, реализующая стандарт MPEG-4 значительно лучше, чем DivX.
 Поэтому новый FourCC, по умолчанию используемый 
 <systemitem class="library">libavcodec</systemitem> -это 'FMP4', но вы 
 можете переопределить это поведение, используя опцию 
@@ -1145,7 +1145,7 @@ MPlayer не хочет...
 </para></question>
 <answer><para>
 Посмотрите коллекцию всевозможных скриптов и хаков в подкаталоге
-<filename class="directory">TOOLS</filename>
+<filename class="directory">TOOLS</filename>.
 <filename>TOOLS/README</filename> содержит документацию.
 </para></answer>
 </qandaentry>
