@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19685 -->
+<!-- synced with r19715 -->
 <appendix id="bugreports">
 <title>Как сообщать об ошибках</title>
 <para>
@@ -33,7 +33,7 @@
 Пожалуйста, прочитайте <ulink url="../../tech/patches.txt">этот короткий
 документ</ulink>, чтобы узнать, как сделать так, чтобы Ваш код включили
 в <application>MPlayer</application>.  Люди из рассылки
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
 помогут Вас, если у Вас есть вопросы.
 </para>
 </sect1>
@@ -99,7 +99,7 @@ svn update -r {"2004-08-23 15:17:25"}
 Если вы нашли нужный патч, то вы практически победили; сообщите о нем в
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink> или
 подпишитесь на 
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
 и отправте сообщение туда.
 Есть шанс, что автор исправит ошибку.
 Вы также можете долго и пристально вглядываться в патч, пока сами не увидите ошибку :).
@@ -164,7 +164,7 @@ url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
 <title>Куда сообщать об ошибках</title>
 <para>
 Подпишитесь на рассылку mplayer-users:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 и отошлите Ваше сообщение на:
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>,
 где Вы сможете его обсудить.

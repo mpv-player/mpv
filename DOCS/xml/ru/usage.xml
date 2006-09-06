@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r18964 -->
+<!-- synced with r19715 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -529,7 +529,7 @@ DVD, как правило, имеют окружающий звук, кодированный в AC3 (Dolby Digital) или 
 предоставить нам образцы файлов для тестирования. Если у вас есть
 matrix-кодированные файлы, знаете где их можно достать или имеете информацию,
 которая может быть полезна, отошлите сообщение в рассылку 
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
 Укажите в теме письма [matrix-encoded audio].
 </para>
 <para>

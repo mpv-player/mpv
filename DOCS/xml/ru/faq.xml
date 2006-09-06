@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19504  -->
+<!-- synced with  r19715  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -25,7 +25,7 @@
 <answer><para>
 Прочитайте <ulink url="../../tech/translations.txt">HOWTO по переводу</ulink> (англ.),
 там все описано. За дополнительной помощью вы можете обратиться в рассылку 
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -49,9 +49,9 @@
 Мы всегда рады приветствовать людей, занимающихся написанием кода и документации.
 Для начала прочтите <ulink url="../../tech/">техническую документацию</ulink> (англ.).
 Затем вам следует подписаться на список рассылки 
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 и начать написание кода. Если вы хотите помочь с документацией, то подпишитесь на
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
