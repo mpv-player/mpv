@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19424 -->
+<!-- in sync with r19713 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -924,7 +924,7 @@ make dist
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-  Die Leute drüben auf <ulink url="www.amigasoft.net"/>
+  Die Leute drüben auf <ulink url="http://www.amigasoft.net"/>
   machen aktuelle <application>MPlayer</application>- und
   <application>MEncoder</application>-Packages.
 </para>
