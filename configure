@@ -1281,7 +1281,7 @@ EOF
 	# gcc 4.0 and up supports POWER5
 	if test "$_cc_major" -ge "4"; then
 	    case "$proc" in
-		POWER5) _march='-mcpu=power5' _mcpu='-mtune=power5' ;;
+		POWER5*) _march='-mcpu=power5' _mcpu='-mtune=power5' ;;
 		*) ;;
 	    esac
 	fi
