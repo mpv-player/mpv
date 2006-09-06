@@ -869,7 +869,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is very slow.
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-The people over at <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
+The people over at <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
 make current <application>MPlayer</application> and
 <application>MEncoder</application> packages.
 </para>
