@@ -274,7 +274,7 @@ zooming), thus fullscreen is nice and very fast.
   <link linkend="tdfxfb">tdfxfb</link> section in order to gain big speedup.
   It is important to do these steps <emphasis role="bold">before</emphasis>
   compiling <application>MPlayer</application>, otherwise no 3Dfx support will be
-  built. Also see the <link linkend="tvout-voodoo">3dfx TV-out</link> section.
+  built.
   If you use X, use at least <emphasis role="bold">4.2.0</emphasis>, as 3dfx Xv
   driver was broken in 4.1.0, and earlier releases.
   </para></listitem>

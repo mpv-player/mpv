@@ -2425,13 +2425,6 @@ itself only once during POST procedure.
 </sect2>
 
 
-<sect2 id="tvout-voodoo">
-<title>Voodoo 3</title>
-<para>
-Check <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</ulink>.
-</para>
-</sect2>
-
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
 <para>
