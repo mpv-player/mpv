@@ -42,10 +42,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   programs may need it) or don't up/downgrade at all (but in this case, be
   prepared for runtime problems). If you vote for 3.x, try to use the
   latest version, early releases had various bugs, so be sure you use at
-  least 3.1, it's tested and working. For detailed information about gcc 2.96's
-  bugs (that are still NOT fixed, they have been WORKED AROUND in
-  <application>MPlayer</application>!),see the <link linkend="gcc-296">gcc 2.96</link>
-  section and the <xref linkend="faq"/>.
+  least 3.1, it's tested and working.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - suggested version is <emphasis role="bold">always the
