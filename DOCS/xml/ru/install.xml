@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.45 -->
+<!-- synced with r19589 -->
 <sect1 id="install">
 <title>Установка</title>
 
@@ -96,12 +96,13 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   <emphasis role="bold">libvorbis</emphasis> - необязательно, необходимо для проигрывания OGG Vorbis аудио.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
 - необязательно, необходимо для проигрывания RTSP/RTP потоков.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">directfb</emphasis> - необязательно, на
-<ulink url="http://www.directfb.org">http://www.directfb.org</ulink>
+<ulink url="http://www.directfb.org">http://www.directfb.org</ulink>. 
+Требуется минимум 0.9.13.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - необязательно, для поддержки CDDA
@@ -116,6 +117,10 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - необязательно, для поддержки Samba.
+  </para></listitem>
+<listitem><para>
+ <emphasis role="bold">ALSA</emphasis> - необязательно, для поддержки вывода звука через ALSA
+Требуется минимум  0.9.0rc4.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - необязательно, для поддержки
@@ -158,7 +163,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 <listitem><para>
   <emphasis role="bold">Win32 кодеки</emphasis>: Если Вы планируете использовать MPlayer на x86 архитектуре,
 они вам вероятно потребуются. Скачайте Win32 кодеки с нашей 
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>
+<ulink url="http://www.mplayerhq.hu/design7/codecs.html">страницы кодеков</ulink>
 и установите их в <filename class="directory">/usr/local/lib/codecs</filename> <emphasis role="bold">ДО</emphasis> компиляции <application>MPlayer'а</application>,
 иначе поддержка Win32 будет отключена!
 <note><para>У проекта avifile похожий набор кодеков, но он отличается от нашего,
@@ -209,23 +214,23 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
 </itemizedlist>
 </para></listitem>
 <listitem><para>
-  <link linkend="xanim">XAnim'овские кодеки</link> - лучшие (полный экран,
+  <emphasis role="bold"><link linkend="xanim">XAnim'овские кодеки</link></emphasis> - лучшие (полный экран,
 аппаратное YUV масштабирование) для декодирования <emphasis role="bold">3ivx</emphasis>, Indeo 3/4/5 фильмов,
 и некоторых старых форматов. И они многоплатформенные, поэтому это единственный
 способ проигрывать Indeo на не-x86 платформах (ну, кроме как использовать
 Xanim:). Но, к примеру, Cinepak фильмы лучше проигрываются с оригинальным
-MPlayer'овским декодером!
+<application>MPlayer</application>'овским декодером!
   </para></listitem>
 <listitem><para>
   Для декодирования <emphasis role="bold">Ogg Vorbis</emphasis> аудио, Вам нужно правильно установить
-<systemitem class="library">libvorbis</systemitem>. Используйте по возможности deb/rpm пакеты, или скомпилируйте
-из <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">исходников</ulink>
-(это еженощно обновляемый архив с Vorbis CVS).
+<systemitem class="library">libvorbis</systemitem>. 
+  Скачать бинарные пакеты и исходный код можно с 
+  <ulink url="http://www.vorbis.com/download.psp">сайта Ogg Vorbis</ulink>.
   </para></listitem>
 <listitem><para>
-  MPlayer может использовать библиотеки из RealPlayer 8 или RealONE, чтобы
+  <application>MPlayer</application> может использовать библиотеки из RealPlayer 8 или RealONE, чтобы
 проигрывать файлы с <emphasis role="bold">RealVideo 3.0 и 4.0</emphasis> видео, и Sipro/Cook аудио. См.
-секцию <link linkend="realmedia">RealMedia файлы</link> для инструкций по установке
+секцию <link linkend="realmedia">формат файлов RealMedia</link> для инструкций по установке
 и дополнительной информации.
   </para></listitem>
 </itemizedlist>
@@ -246,7 +251,7 @@ MPlayer'овским декодером!
 <para>
 Они могут показывать и масштабировать изображение до любого размера, помещающегося
 в их память, с <emphasis role="bold">малой загрузкой CPU</emphasis> (даже при масштабировании), поэтому
-полноэкранный просмотр точен и быстр.
+полноэкранный просмотр приятный и очень быстрый.
 
 <itemizedlist>
 <listitem><para>
@@ -273,7 +278,7 @@ mga_vid не будет собрана. Также см. секцию <link linkend="tvout-voodoo">3dfx TV-
 для следующих карт: <emphasis role="bold">Radeon, Rage128, Mach64</emphasis>
 (Rage XL/Mobility, Xpert98).Также см. секцию <link linkend="tvout-ati">
 ATI карт</link> в документации TV-вывода, чтобы узнать, поддерживается ли TV-out
-Вашей карты под Linux/MPlayer.
+Вашей карты под Linux/<application>MPlayer</application>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">S3 карты</emphasis>: у Savage и Virge/DX чипов есть аппаратная акселерация.
@@ -432,10 +437,6 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
   <link linkend="radio">Радио</link>.
   </para></listitem>
 <listitem><para>
-  There is a neat <emphasis role="bold">OSD Menu</emphasis> support ready to be
-  used. Check the <link linkend="subosd">OSD menu</link> section.
-  </para></listitem>
-<listitem><para>
   Существует изящное <emphasis role="bold">OSD Меню</emphasis> готовое для использования. Проверьте секцию
 <link linkend="subosd">OSD Меню</link>.
   </para></listitem>
@@ -465,7 +466,7 @@ make install</screen>
 Обратите внимание на то, что если у Вас в <filename>~/.mplayer/</filename> есть 
 файл <filename>codecs.conf</filename>, то встроенный и системный файлы
 <filename>codecs.conf</filename> будут полностью игнорированы. Не делайте
-этого, если только Вы не собираетесь развлекаться в внутренностями <application>MPlayer</application>'а,
+этого, если только Вы не собираетесь развлекаться со внутренностями <application>MPlayer</application>'а,
 поскольку это может вызвать множество проблем. Если Вы хотите поменять порядок
 подбора кодеков, используйте опции <option>-vc</option>, <option>-ac</option>,
 <option>-vfm</option>, и <option>-afm</option> либо в командной строке, либо
@@ -509,7 +510,7 @@ make install</screen>
 <title>Как насчёт GUI?</title>
 
 <para>
-Для GUI требуется GTK 1.2.x (он не целиком GTK'шный, но панельки - да). Шкуры хранятся
+Для GUI требуется GTK 1.2.x или GTK 2.0 (он не целиком GTK'шный, но панельки - да). Шкуры хранятся
 в PNG формате, поэтому GTK, <systemitem class="library">libpng</systemitem> (и их части для разработчиков, обычно они
 называются <systemitem class="library">gtk-dev</systemitem> и <systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
 Вы можете собрать GUI, указав <option>--enable-gui</option> в <option>./configure</option>.
@@ -639,12 +640,13 @@ VOBsub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filenam
 Если Вы наблюдаете увеличивающуюся задержку между фильмом и субтитрами, используя
 файл субтитров в формате MicroDVD, наиболее вероятно, что частота кадров у фильма и файла
 субтитров не совпадают. Пожалуйста, обратите внимание, что формат MicroDVD
-использует абсолютные номера кадров для синхронизации, и поэтому опция
-<option>-subfps</option> не может использоваться с этим форматом. Поскольку
-<application>MPlayer</application>
-не может угадать частоту кадров для субтитров, Вы должны вручную конвертировать
-частоту кадров. В каталоге <filename class="directory">contrib</filename> <application>MPlayer</application>'овского FTP сайта есть
-специальный Perl'овый скрипт для такой конверсии.
+использует абсолютные номера кадров для синхронизации, но в нем нет информациио частоте кадров 
+и поэтому опция
+<option>-subfps</option> не может использоваться с этим форматом. 
+Вы должны, если хотите навсегда решить эту проблему, вручную конвертировать
+частоту кадров файла субтитров.
+<application>MPlayer</application> может сделать для вас это преобразование: 
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
 </para>
 
 <para>
@@ -715,7 +717,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
 <listitem><para>
     используйте <application>GIMP</application>'овый плагин генерации шрифтов из <filename
 	class="directory">TOOLS/subfont-GIMP</filename> (замечание: также, у Вас
-	должен быть установлен HSI RAW плагин, см. <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" /> ).
+	должен быть установлен HSI RAW плагин, см. <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" /> ).
   </para></listitem>
 <listitem><para>
     используйте TrueType (TTF) шрифт, через библиотеку <emphasis role="bold">freetype</emphasis>.
@@ -773,7 +775,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
     различные шрифты, сделанные пользователями
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
     </entry><entry>
     корейские шрифты и RAW плагин
     </entry></row>
@@ -786,7 +788,7 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
 Если Вы решите использовать не-TTF шрифты, UNZIP'ните скаченный файл в
 <filename class="directory">~/.mplayer</filename> или <filename
 class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
-или слинкуйте (создайте ссылку) один из каталогов в
+или создайте символическую ссылку на один из каталогов в
 <filename class="directory">font</filename> (напр.:
 
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>).
@@ -851,8 +853,8 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 <listitem><simpara>
   скопируйте <filename>etc/input.conf</filename> в Ваш каталог <filename
   class="directory">.mplayer</filename>, или в системный конфигурационный
-  каталог <application>MPlayer</application>'а (по умолчанию: <filename class="directory">
-  /usr/local/etc/mplayer</filename>)
+  каталог <application>MPlayer</application>'а (по умолчанию: 
+  <filename class="directory">/usr/local/etc/mplayer</filename>)
    </simpara></listitem>
 <listitem><simpara>
   проверьте и отредактируйте <filename>input.conf</filename>, чтобы включить
@@ -888,7 +890,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 <emphasis role="bold">Новый таймер</emphasis> использует RTC (Real Time
   Clock[часы истинного времени]) для этой задачи потому, что это таймер
   точностью 1ms. Это автоматически включается, когда доступно, но требует
-  привилегий root'а, <emphasis>съюднутого по root'у</emphasis> исполняемого
+  привилегий root'а, <emphasis>setuid root</emphasis> исполняемого
   файла <application>MPlayer</application>'а, или правильно настроенного ядра.
   Если Вы работаете с ядром 2.4.19pre8 или более поздним, Вы можете настроить
   максимальную частоту RTC для обычных пользователей через файловую систему
@@ -922,8 +924,8 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
   RTC. С другой стороны, он сильнее использует CPU.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">НИКОГДА не устанавливайте съюднутый
-по root'у исполняемый файл <application>MPlayer</application>'а на
+<note><para><emphasis role="bold">НИКОГДА не устанавливайте setuid root
+исполняемый файл <application>MPlayer</application>'а на
 многопользовательской системе!</emphasis>
 Это прямой путь к тому, что каждый будет root'ом.
 </para></note>
