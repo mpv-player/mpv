@@ -212,8 +212,7 @@ on the MPlayer-users mailing list for an MMX/3DNow! enabled driver.
 <title>nVidia cards</title>
 
 <para>
-nVidia isn't always a very good choice under Linux (according to nVidia, this
-is <link linkend="nvidia-opinions">not true</link>)... XFree86's
+nVidia isn't always a very good choice under Linux ... XFree86's
 open-source driver supports most of these cards, but for some cases, you'll
 have to use the binary closed-source nVidia driver, available at
 <ulink url="http://www.nvidia.com/object/linux.html">nVidia's web site</ulink>.
