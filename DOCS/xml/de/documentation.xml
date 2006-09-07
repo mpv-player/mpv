@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18427 -->
+<!-- in sync with r19733 -->
 
 <bookinfo id="toc">
 	<title><application>MPlayer</application> - Movie Player</title>
@@ -45,9 +45,13 @@
 			 bleiben, gehe zurück zum <link linkend="toc">Inhaltsverzeichnis</link> und suche nach
 			 dem Thema, lies die <xref linkend="faq"/> oder versuche, die Dateien zu greppen.
 			 Die meisten Fragen sollten irgendwo hier beantwortet werden, und nach dem Rest wurde
-			 vermutlich auf den <link linkend="mailinglists">Mailing-Listen</link> gefragt.
-			 Checke die <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">Archive</ulink>,
-			 dort gibt es viele wertvolle Informationen.
+			 vermutlich auf den
+          <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">Mailing-Listen</ulink> gefragt.
+          <!-- FIXME: This refers to nonexistent links
+               Checke die
+               <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">Archive</ulink>,
+               dort gibt es viele wertvolle Informationen.
+          -->
 		 </para>
 	 </preface>
 	 
@@ -190,7 +194,6 @@
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
-&mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;

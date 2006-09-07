@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19715 -->
+<!-- in sync with r19732 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -251,7 +251,9 @@
         </question>
         <answer>
           <para>
-            Ja. Siehe Abschnitt <link linkend="mailinglists">Mailing-Listen</link>.
+            Ja. Siehe den
+            <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">Abschnitt Mailing-Listen</ulink>
+            unserer Homepage.
           </para>
         </answer>
       </qandaentry>
