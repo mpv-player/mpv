@@ -718,17 +718,6 @@ OSD/SUB feature. There are many ways to get it:
 
 <itemizedlist>
 <listitem><para>
-  Use the font generator tool at <filename
-  class="directory">TOOLS/subfont-c</filename>. It's a complete tool to
-  convert from TTF/Type1/etc font to mplayer font pkg (read
-  <filename>TOOLS/subfont-c/README</filename> for details).
-  </para></listitem>
-<listitem><para>
-  Use the font generator <application>GIMP</application> plugin at <filename
-  class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
-  RAW plugin too, see <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
- </para></listitem>
-<listitem><para>
   using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
   library. Version 2.0.9 or greater is mandatory! Then you have two methods:
   <itemizedlist>
@@ -782,11 +771,6 @@ OSD/SUB feature. There are many ways to get it:
     <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
     </entry><entry>
     various fonts by users
-    </entry></row>
-  <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
-    </entry><entry>
-    Korean fonts and RAW plugin
     </entry></row>
   </tbody>
   </tgroup>
