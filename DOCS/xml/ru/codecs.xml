@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19587 -->
+<!-- synced with r19687 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -7,10 +7,11 @@
 <title>Видео кодеки</title>
 
 <para>
-См. <ulink url="../../codecs-status.html">таблицу статуса кодеков</ulink>
-для полного, ежедневно генерируемого списка. Несколько кодеков доступны для
-скачивания на нашей странице. Получите их со 
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>.
+<ulink url="../../codecs-status.html">Таблица статуса кодеков</ulink> содержит
+полный, ежедневно обновляющийся список всех поддерживаемых кодеков. Некоторые
+бинарные кодеки, которые можно использовать в MPlayer, доступны 
+в <ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">разделе закачки</ulink>
+нашего сайта.
 </para>
 
 <para>
