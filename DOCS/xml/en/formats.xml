@@ -263,7 +263,7 @@ linkend="realaudio">RealAudio</link> codecs.
 <sect2 id="nuppelvideo">
 <title>NuppelVideo files</title>
 <para>
-<ulink url="http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/">NuppelVideo</ulink>
+NuppelVideo
 is a TV grabber tool (AFAIK:). <application>MPlayer</application> can read
 its <filename>.NUV</filename> files (only NuppelVideo 5.0). Those files can
 contain uncompressed YV12, YV12+RTJpeg compressed, YV12 RTJpeg+lzo
