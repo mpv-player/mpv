@@ -295,7 +295,7 @@ implement generic SCSI support for VCDs.
 
 <para>
 In the meantime you can extract data from VCDs with
-<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
+<ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
 and play the resulting file with <application>MPlayer</application>.
 </para>
 
