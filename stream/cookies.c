@@ -13,6 +13,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <inttypes.h>
+#include <limits.h>
 
 #include "cookies.h"
 #include "http.h"
