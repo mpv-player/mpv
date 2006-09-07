@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19719  -->
+<!-- synced with  r19732  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -194,7 +194,8 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 Есть ли списки рассылки, посвященные <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Да. Смотрите раздел <link linkend="mailinglists">списки рассылки</link>.
+Да. Смотрите раздел <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">списки рассылки</ulink>
+нашего сайта.
 </para></answer>
 </qandaentry>
 

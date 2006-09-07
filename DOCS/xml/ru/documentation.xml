@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19620 -->
+<!-- synced with r19733 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -46,9 +46,13 @@
 вопросы, вернитесь к <link linkend="toc">Оглавлению</link> и поищите там, 
 прочтите <xref linkend="faq"/>, или попытайтесь про'grep'пить файлы.
 На большую часть вопросов Вы найдёте ответы здесь, а остальные, наверное, уже
-спрашивались в наших <link linkend="mailinglists">рассылках</link>. Проверьте
-<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">по архивам</ulink>, в
+спрашивались в наших 
+<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">рассылках</ulink>. 
+<!-- FIXME: This refers to nonexistent links
+Проверьте
+<ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">по архивам</ulink>, в
 которых можно найти много ценной информации.
+-->
 </para>
 </preface>
 
@@ -194,7 +198,6 @@ Public License Version 2.
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
-&mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
