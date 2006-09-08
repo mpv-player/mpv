@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.4 -->
+<!-- synced with r19738 -->
+<!-- this file included from documentation.xml and have no 
+     equivalent in english docs, so sync tag will be syncronized with 
+     documentation.xml if changes will be made in appropriate part of
+     parent file.
+-->
 <chapter id="features">
 <title>Возможности</title>
 
-&formats.xml;
+&containers.xml;
 &codecs.xml;
 
 &tvinput.xml;
