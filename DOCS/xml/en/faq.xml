@@ -556,7 +556,7 @@ I get very strange percentage values (way too big) while playing files on my not
 It's an effect of the power management / power saving system of your notebook
 (BIOS, not kernel). Plug the external power connector in
 <emphasis role="bold">before</emphasis> you power on your notebook. You can also
-try whether <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html/">cpufreq</ulink>
+try whether <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
 (a SpeedStep interface for Linux) helps you.
 </para></answer>
 </qandaentry>
