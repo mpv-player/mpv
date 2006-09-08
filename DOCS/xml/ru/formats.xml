@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r18247 -->
+<!-- synced with r19737 -->
 <sect1 id="formats">
 <title>Поддерживаемые форматы</title>
 
@@ -272,7 +272,7 @@ linkend="realaudio">RealAudio</link> кодеков.
 <sect3 id="nuppelvideo">
 <title>NuppelVideo файлы</title>
 <para>
-<ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink> -
+NuppelVideo -
 это средство захвата с ТВ (AFAIK:). <application>MPlayer</application> может
 читать его <filename>.NUV</filename> файлы (только NuppelVideo 5.0). Эти файлы
 могут содержать несжатые YV12, YV12+сжатые RTJpeg, YV12 сжатые RTJpeg+lzo и
