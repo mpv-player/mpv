@@ -93,10 +93,6 @@ extern int guiWinID;
 extern int xinerama_screen;
 #endif
 
-#ifdef HAVE_RTC
-extern int nortc;
-#endif
-
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 extern float monitor_pixel_aspect;
