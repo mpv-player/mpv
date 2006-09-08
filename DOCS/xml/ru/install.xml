@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19589 -->
+<!-- synced with r19741 -->
 <sect1 id="install">
 <title>Установка</title>
 
@@ -44,10 +44,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 не меняйте (но в этом случае приготовьтесь к проблемам во время работы).
 Если Вы решите использовать 3.x, попробуйте использовать последнюю версию,
 в ранних релизах были различные ошибки/проблемы, так что используйте минимум 3.1, это
-протестированно и работает. Для детальной информации о багах в gcc 2.96
-(которые все ещё НЕ исправлены, а "ОБОЙДЕНЫ"[WORKED AROUND] в <application>MPlayer'е</application>!),
-см. <link linkend="gcc-296">gcc 2.96</link> и 
-  <xref linkend="faq"/>.
+протестированно и работает. 
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая (4.3)</emphasis>.
@@ -269,7 +266,7 @@ Xanim:). Но, к примеру, Cinepak фильмы лучше проигрываются с оригинальным
   <emphasis role="bold">3Dfx Voodoo3/Banshee карты</emphasis>: читайте секцию
 <link linkend="tdfxfb">tdfxfb</link>, чтобы получить значительное ускорение.
 Важно проделать эти операции <emphasis>до</emphasis> компиляции MPlayer'а, иначе поддержка
-mga_vid не будет собрана. Также см. секцию <link linkend="tvout-voodoo">3dfx TV-вывод</link>. Если Вы используете X,
+mga_vid не будет собрана. Если Вы используете X,
 используйте <emphasis role="bold">минимум 4.2.0</emphasis>, поскольку 3dfx Xv драйвер был сломан в 4.1.0
 и более ранних версиях.
   </para></listitem>
@@ -709,17 +706,6 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
 
 <itemizedlist>
 <listitem><para>
-  Использовать средство генерации шрифтов в <filename class="directory">
-  TOOLS/subfont-c</filename>. Это законченное средство для преобразования
-  из TTF/Type1/и т. п. шрифтов в mplayer'овские шрифтовые пакеты. 
-  (подробности читайте в <filename>TOOLS/subfont-c/README</filename>)
-  </para></listitem>
-<listitem><para>
-    используйте <application>GIMP</application>'овый плагин генерации шрифтов из <filename
-	class="directory">TOOLS/subfont-GIMP</filename> (замечание: также, у Вас
-	должен быть установлен HSI RAW плагин, см. <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" /> ).
-  </para></listitem>
-<listitem><para>
     используйте TrueType (TTF) шрифт, через библиотеку <emphasis role="bold">freetype</emphasis>.
     Обязательна версия 2.0.9 или выше! Тогда у Вас есть два метода:
   <itemizedlist>
@@ -773,11 +759,6 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
     <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
     </entry><entry>
     различные шрифты, сделанные пользователями
-    </entry></row>
-  <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
-    </entry><entry>
-    корейские шрифты и RAW плагин
     </entry></row>
   </tbody>
   </tgroup>
