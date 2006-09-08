@@ -784,6 +784,20 @@ undertaking.
 
 <qandaentry>
 <question><para>
+I can't watch any recent DVDs from Sony Pictures/BMG?
+</para></question>
+<answer><para>
+It's normal, you've ripped off and sold an intentionally defective disk.
+The only way to play these DVDs is to circumvent the bad blocs of the disk
+by using DVDnav instead of mpdvdkit2.
+You can do so by replacing dvd:// by dvdnav:// on the command line.
+DVDnav is so far mutually exclusive with mpdvdkit2, so make you you pass
+<option>--disable-mpdvdkit</option> to configure script.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 What about subtitles? Can <application>MPlayer</application> display them?
 </para></question>
 <answer><para>

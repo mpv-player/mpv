@@ -107,6 +107,11 @@ Example:
 </para>
 
 <para>
+If you have compiled <application>MPlayer</application> with dvdnav support, the
+syntax is the same, except that you need to use dvdnav:// instead of dvd://.
+</para>
+
+<para>
 The default DVD device is <filename>/dev/dvd</filename>. If your setup
 differs, make a symlink or specify the correct device on the command
 line with the <option>-dvd-device</option> option.
