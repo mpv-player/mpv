@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r15895 -->
+<!-- synced with r19685 -->
 <appendix id="users-vs-dev">
 <title>Fejlesztői panaszok</title>
 
@@ -156,7 +156,7 @@ Nem igazán örülünk annak a ténynek, hogy az
 <ulink url="http://www.nvidia.com">nVidia</ulink> csak bináris vezérlőt
 biztosít (az XFree86-tal történő használathoz), ami gyakran hibás.
 Rengeteg jelentést kaptunk az
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
 listán olyan problémákról, amik ezekhez a zárt forráskódú vezérlőkhöz
 kapcslódtak és ezek gyenge minőségéhez, instabilitásához és a felhasználói
 tapasztalatlansághoz.

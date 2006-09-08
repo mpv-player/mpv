@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18964 -->
+<!-- synced with r19715 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -536,7 +536,7 @@ Ezt a részt még el kell készíteni, de addig nem lehet befejezni, amíg valaki nem
 ad nekünk hozzá példafájlokat teszteléshez. Ha van mátrix-kódolású audió fájlod,
 tudod, hogy hol lehet találni ilyet vagy van bármilyen információd, hálásak lennénk
 ha üzennél nekünk az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
 levelezési listára. Írj egy "[matrix-encoded audio]"-t a tárgy sorba.
 </para>
 <para>

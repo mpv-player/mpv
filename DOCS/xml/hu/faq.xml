@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19504 -->
+<!-- synced with r19752 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -25,7 +25,7 @@ Hogyan fordíthatom le az <application>MPlayer</application>t egy új nyelvre?
 <answer><para>
 Olvasd el a <ulink url="../../tech/translations.txt">fordítás HOGYAN</ulink>-t,
 az elmagyaráz mindent. További segítséget kaphatsz az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>
 levelezési listán.
 </para></answer>
 </qandaentry>
@@ -49,9 +49,9 @@ Hogyan lehetek én is <application>MPlayer</application> fejlesztő?
 Mindig örömmel várjuk a programozókat és a dokumentáció készítőket. Olvasd el a
 <ulink url="../../tech/">technikai dokumentációt</ulink>
 hogy egy kicsit megértsd a dolgokat. Majd fel kell iratkoznod az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 levelezési listára és elkezdeni kódolni. Ha a dokumentáció készítésében szeretnél segíteni,
-csatlakozz az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
+csatlakozz az <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
 levelezési listához!
 </para></answer>
 </qandaentry>
@@ -201,7 +201,8 @@ melyek futási időben kerülnek feloldásra.
 Van <application>MPlayer</application>rel foglalkozó levelezési lista?
 </para></question>
 <answer><para>
-Igen. Lásd a <link linkend="mailinglists">levelezési listák</link> részt!
+Igen. Lásd a weboldal
+<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">levelezési lista részét</ulink>!
 </para></answer>
 </qandaentry>
 
@@ -553,7 +554,7 @@ fájlokat.
 <answer><para>
 A notebookod energia menedzselő / energia takarékoskodó rendszerének (BIOS, nem kernel)
 hatása. Dugd be a külső áramkábelt <emphasis role="bold">mielőtt</emphasis> bekapcsolod
-a notebookodat. Megnézheted, hogy a <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+a notebookodat. Megnézheted, hogy a <ulink url="http://www.kernel.org/pub/linux/utils/kernel/cpufreq/cpufreq.html">cpufreq</ulink>
 (SpeedStep interfész Linuxra) segít-e neked.
 </para></answer>
 </qandaentry>
@@ -777,6 +778,20 @@ használnod, mint pl. a <application>xine</application>,
 a <application>vlc</application> vagy az <application>Ogle</application>.
 Ha DVD navigációt akarsz látni az <application>MPlayer</application>ben,
 neked magadnak kell megcsinálnod, de vigyázz, nagy fába vágod a fejszédet.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Nem tudok egyetlen újabb DVD-t sem megnézni a Sony Pictures/BMG-től?
+</para></question>
+<answer><para>
+Ez normális, átvertek, egy szándékosan elrontott lemezt adtak el neked.
+Az egyetlen módszer ezen DVD-k lejátszására a hibás blokkok kikerülése
+az mpdvdkit2 helyett a DVDnav használatával.
+Ezt megteheted a parancssori dvd:// dvdnav://-ra történő lecserélésével.
+A DVDnav nagyon nagy mértékben kizárja az mpdvdkit2-et, győződj meg róla, hogy
+a <option>--disable-mpdvdkit</option> opciót megadtad a configure-nak.
 </para></answer>
 </qandaentry>
 

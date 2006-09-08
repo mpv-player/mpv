@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19609 -->
+<!-- synced with r19742 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -215,8 +215,7 @@ vagy udvariasan kérj az MPlayer-users levelezési listán egy MMX/3DNow! támogatás
 <title>nVidia kártyák</title>
 
 <para>
-Az nVidia soha nem volt egy jó választás Linux alatt (az nVidia szerint ez
-<link linkend="nvidia-opinions">nem igaz</link>)... Az XFree86
+Az nVidia nem mindig a legjobb választás Linux alatt... Az XFree86
 nyílt forráskódú vezérlője támogatja a legtöbb kártyát, de a legtöbb esetben a
 bináris, zárt forrású nVidia vezérlőt kell használnod, ami elérhető
 az <ulink url="http://www.nvidia.com/object/linux.html">nVidia weboldalán</ulink>.
@@ -1920,7 +1919,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <para>
 Ha kérdésed van vagy további bejelentésekről szeretnél tudomást szerezni és
 részt venni a beszélgetéseinkben, csatlakozz az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
 levelezési listához. Kérjük vedd figyelembe, hogy a lista nyelve az angol.
 </para>
 </formalpara>
@@ -2436,13 +2435,6 @@ csak egyszer, a POST folyamat során inicializálja magát.
 </para>
 </sect2>
 
-
-<sect2 id="tvout-voodoo">
-<title>Voodoo 3</title>
-<para>
-Nézd meg <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">ezt az URL-t</ulink>.
-</para>
-</sect2>
 
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>

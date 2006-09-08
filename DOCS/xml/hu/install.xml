@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19589 -->
+<!-- synced with r19741 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -43,10 +43,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   más programoknak szükségük lehet rá) vagy ne frissíts/tegyél vissza semmit (de ebben az
   esetben készülj fel futási problémákra). Ha a 3.x-re szavazol, próbáld a legújabb
   verziót használni, a korai kiadásoknak számtalan hibájuk volt, így győződj meg róla,
-  hogy legalább 3.1-eset használsz, ami ki lett próbálva és működik. Ha további infókat
-  szeretnél a 2.96-os gcc hibáiról (amik még mindig NEM lettek kijavítva, csak meg lettek
-  kerülve az <application>MPlayer</application>ben!), nézd meg a <xref linkend="faq"/>
-  <link linkend="gcc-296">2.96-os gcc</link>-re vonatkozó részét!
+  hogy legalább 3.1-eset használsz, ami ki lett próbálva és működik.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - javasolt verzió: <emphasis role="bold">mindig a
@@ -267,8 +264,8 @@ ami belefér a memóriájukba, <emphasis role="bold">kevés CPU használattal</emphas
   <link linkend="tdfxfb">tdfxfb</link> részt, ha nagy sebességnövekedést akarsz
   elérni! Fontos, hogy az ott leírtakat az <application>MPlayer</application>
   fordítása <emphasis role="bold">előtt</emphasis> végezd el, különben nem lesz
-  beépített 3Dfx támogatásod. Szintén nézd meg a <link linkend="tvout-voodoo">3dfx TV-kimenet</link>
-  részt! Ha X-et használsz, legalább <emphasis role="bold">4.2.0</emphasis>-est
+  beépített 3Dfx támogatásod.
+  Ha X-et használsz, legalább <emphasis role="bold">4.2.0</emphasis>-est
   használj, mert a 3dfx Xv vezérlő a 4.1.0 és korábbi verziókban hibás volt.
   </para></listitem>
 <listitem><para>
@@ -709,17 +706,6 @@ az OSD/SUB jellemzőket. Sok helyről beszerezheted:
 
 <itemizedlist>
 <listitem><para>
-  Használhatod a betű generátort, a <filename
-  class="directory">TOOLS/subfont-c</filename>-t. Ez egy program, ami
-  TTF/Type1/stb. formátumú betűket átkonvertálja mplayer betű csomaggá (olvasd el a
-  <filename>TOOLS/subfont-c/README</filename> fájt a részletekért).
-  </para></listitem>
-<listitem><para>
-  A <application>GIMP</application> betű generátor plugin-jét használod, amit
-  <filename class="directory">TOOLS/subfont-GIMP</filename> néven találsz
-  (megjegyzés: HSI RAW plugin is kell, lásd <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
- </para></listitem>
-<listitem><para>
   TrueType (TTF) betűket használsz, amik megfelelnek a <systemitem class="library">freetype</systemitem>
   függvénykönyvtárnak. 2.0.9 vagy újabb verzió kötelező! Így két lehetőséged van:
   <itemizedlist>
@@ -774,11 +760,6 @@ az OSD/SUB jellemzőket. Sok helyről beszerezheted:
     <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
     </entry><entry>
     felhasználók által készített különböző betűtípusok
-    </entry></row>
-  <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
-    </entry><entry>
-    koreai betűk és RAW plugin
     </entry></row>
   </tbody>
   </tgroup>

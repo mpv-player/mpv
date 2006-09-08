@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19424 -->
+<!-- synced with r19715 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -535,7 +535,7 @@ $ ./configure --charset=noconv
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink> alatt.
   Még nincs hivatalos GUI-ja, de a parancssoros verzió
   teljes mértékben használható. Ajánlott megnézni az
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
+  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   levelezési listát is segítéségért és a legfrissebb információkért.
   A hivatalos Windows-os binárisok megtalálhatóak a
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalon</ulink>.
@@ -876,7 +876,7 @@ mivel a QNX-nek csak X <emphasis>emulációja</emphasis> van, ami nagyon lassú.
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-Az emberek a <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>-nél
+Az emberek a <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>-nél
 készítettek csomagokat az aktuális <application>MPlayer</application>ből
 és <application>MEncoder</application>ből.
 </para>

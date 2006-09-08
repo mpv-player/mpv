@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r15783 -->
+<!-- synced with r19686 -->
 <appendix id="bugs">
 <title>Ismert hibák</title>
 <sect1 id="bugs-special">
@@ -23,23 +23,6 @@ vagy az egyes CPU utasítás készleteket letilthatod külön-külön a megfelelő
 kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).</para>
 </listitem>
 <listitem>
-<para>&quot;Internal buffer inconsistency&quot; (Belső buffer inkonzisztencia) a <application>MEncoder</application> futása közben:</para>
-<para>Probléma: ismert hiba, mely akkor fordul elő, ha a lame &lt; 3.90 gcc 2.96 vagy 3.x-val lett fordítva.</para>
-<para>Megoldás: lame &gt;=3.90 használata.</para>
-<para>Tüneti kezelés: fordítsd le a lame-t a 2.95.x-es gcc-vel és távolíts el minden
-már telepített lame csomagot, valószínűleg gcc 2.96-tal fordították őket.</para>
-</listitem>
-<listitem>
-<para>Elrontott MP2/MP3 hang PPC-n:</para>
-<para>Probléma: ismert GCC fordítási hiba a PPC platformon, nincs még javítás.</para>
-<para>Tüneti kezelés: használd az FFmpeg (lassú) MP1/MP2/MP3 dekóderét (<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (signal 11) a libmpeg2-ben, scaling+kódolásnál:</para>
-<para>Probléma: ismert GCC 2.95.2 MMX hiba</para>
-<para>Megoldás: frissíts 2.95.3-ra</para>
-</listitem>
-<listitem>
 <para>Összeomlás stream-ek mentésekor:</para>
 <para>Probléma: core dump</para>
 <para>Tüneti kezelés: Ne pánikolj. Keresd meg a törülköződet!</para>
@@ -54,8 +37,8 @@ már telepített lame csomagot, valószínűleg gcc 2.96-tal fordították őket.</para>
 <title>Általánosan előforduló audió késés vagy szaggatott hang (kilép az összes, vagy legalábbis sok fájlnál)</title>
 <itemizedlist>
 <listitem><para>
-Leggyakrabban: hibás audió vezérlő! - próbálj meg más vezérlőt használni, nézd meg az ALSA 0.9-et
-OSS emulációval a <option>-ao oss</option> kapcsolóval, próbáld ki a <option>-ao sdl</option>-t is,
+Leggyakrabban: hibás audió vezérlő! - próbálj meg más vezérlőt használni, próbáld ki az ALSA
+OSS emulációját a <option>-ao oss</option> kapcsolóval, valamint a <option>-ao sdl</option>-t is,
 néha segít. Ha a fájl lejátszása jó a <option>-nosound</option> kapcsolóval, akkor biztos lehetsz
 benne, hogy a hangkártya (vezérlő) a hibás.
 </para></listitem>
@@ -146,22 +129,15 @@ az automatikusan kiválasztott codec nem tudja dekódolni a fájlt, próbálj meg más
 codec-et kiválasztani a <option>-vc</option> vagy <option>-vfm</option> kapcsolókkal
 </para>
 </listitem>
-<listitem>
-<para>
-DivX 3.x fájlt akarsz lejátszani az OpenDivX dekódolóval vagy az XviD-del
-(<option>-vc odivx</option>) - telepítsd fel a DivX4Linux-ot és fordítsd újra a lejátszót
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
 <title>Videó-kimeneti problémák</title>
 <para>
-Első megjegyzés: a <option>-fs -vm</option> és <option>-zoom</option> kapcsolók
-csak ajánlások, (még) nem támogatja őket minden vezérlő. Tehát az nem hiba, ha
-ezek nem működnek. Csak egy pár vezérlő támogatja a scaling-et/nagyítást, ne várd
-ezt el az x11-től vagy a dga-tól.
+Vedd figyelembe, hogy a <option>-fs -vm</option> és <option>-zoom</option> kapcsolókat
+nem mindegyik vezérlő támogatja. Ráadásul csak pár vezérlő támogatja a hardveres
+méretezést/nagyítást.
 </para>
 
 <formalpara>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19587 -->
+<!-- synced with r19687 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -7,10 +7,10 @@
 <title>Videó codec-ek</title>
 
 <para>
-Nézd meg a <ulink url="../../codecs-status.html">codec státusz táblázatot</ulink>
-a teljes, naponta generált listáért. Elég sok codec elérhető letöltésként a
-weboldalunkon. Szedd le őket a
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codec oldalról</ulink>.
+A <ulink url="../../codecs-status.html">codec státusz táblázat</ulink>
+tartalmazza az összes támogatott codec-et, napi frissítéssel.
+Néhány MPlayerrel használható bináris codec elérhető a weboldalunk
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">letöltési részében</ulink>.
 </para>
 
 <para>

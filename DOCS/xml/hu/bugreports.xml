@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19587 -->
+<!-- synced with r19715 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 <para>
@@ -33,7 +33,7 @@ miatt, azt később is elküldheted egy másik levélben.
 Ha úgy érzed, hogy képes vagy rá, bátran állj neki és javítsd ki a hibát magad.
 Vagy talán már meg is tetted? Kérlek olvasd el <ulink url="../../tech/patches.txt">ezt a rövid dokumentumot</ulink>,
 hogy megtudd, hogyan kerülhet be a kódod az <application>MPlayer</application>be.
-Az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+Az <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 levelezési listán lévő emberkék segítenek neked, ha kérdésed van.
 </para>
 </sect1>
@@ -61,7 +61,7 @@ svn update -r {"2004-08-23"}
 A dátum formátum YYYY-MM-DD HH:MM:SS.
 Ezen dátum formátum használata biztosítja, hogy benne legyen minden olyan
 javítás, ami az adott dátumig commit-olva lett és bekerült az
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archívumába</ulink>.
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">MPlayer-cvslog archívumába</ulink>.
 </para>
 <para>
 Majd folytasd, mint egy normális frissítést:
@@ -103,7 +103,7 @@ Ha megvan a javítás, ami a problémát okozta, majdnem győztél is;
 jelentsd az
 <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>-n vagy
 iratkozz fel az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
 listára és küldd el oda.
 Valószínűleg a szerző jelentkezni fog javítási ötlettel.
 Addig azonban a javításra is gyanakodva tekint, amíg nem tiszta, hogy hol
@@ -165,7 +165,7 @@ tudjuk garantálni, hogy kapsz megoldást vagy egyáltalán választ a problémádra.
 <title>Hol kell jelezni a hibákat</title>
 <para>
 Iratkozz fel az MPlayer-users levelezési listára:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 (vagy a magyar nyelvűre itt: <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>)
 és küldd el a hibajelentéseidet a
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> (illetve
