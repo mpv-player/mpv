@@ -1,4 +1,4 @@
-.\" Synced with r19630
+.\" Synced with r19751
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -69,7 +69,7 @@ mencoder \- film kódoló
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[sáv | [kezdõ_sáv]\-vég_sáv ]
+.I [dvd|dvdnav]://[sáv | [kezdõ_sáv]\-vég_sáv ]
 [opciók]
 .
 .br
@@ -1766,9 +1766,19 @@ külsõ feliratokhoz és matroska sávokhoz.
 Ajánlott még a -embeddedfonts engedélyezése is.
 .
 .TP
+.B \-ass-border-color <érték>
+Beállítja a határok (körvonal) színét az egyszerû szöveges feliratokhoz.
+A színformátum RRGGBBAA.
+.
+.TP
 .B \-ass-bottom-margin <érték>
 Egy fekete sávot ad a kocka aljához.
 Az SSA/ASS renderelõ a feliratokat ide tudja tenni (a \-ass-use-margins kapcsolóval).
+.
+.TP
+.B \-ass-color <érték>
+Beállítja az egyszerû szöveges feliratok színét.
+A színformátum RRGGBBAA.
 .
 .TP
 .B \-ass-font-scale <érték>
@@ -1788,6 +1798,13 @@ Felülír pár stílus paramétert.
 .TP
 .B \-ass-line-spacing <érték>
 Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
+.
+.TP
+.B \-ass-styles <fájl név>
+Betölti az összes, adott fájlban található SSA/ASS stílust és
+felhasználja az egyszerû szöveges feliratoknál.
+A fájl szintaxisa ugyan olyan, mint az SSA/ASS
+[V4 Styles] / [V4+ Styles] része.
 .
 .TP
 .B \-ass-top-margin <érték>
