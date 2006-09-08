@@ -182,24 +182,19 @@ Public License Version 2.
 </para>
 
 &history.xml;
-&install.xml;
 </chapter>
 
+&install.xml;
 
 &usage.xml;
 &cd-dvd.xml;
 &faq.xml;
-
-<chapter id="features">
-<title>Возможности</title>
 
 &containers.xml;
 &codecs.xml;
 
 &tvinput.xml;
 &radio.xml;
-
-</chapter>
 
 &video.xml;
 &audio.xml;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="koi8-r"?>
 <!-- synced with r19738 -->
-<sect1 id="formats">
+<chapter id="containers">
 <title>Поддерживаемые форматы</title>
 
 <para>
@@ -30,10 +30,10 @@ MP2 аудио (в отличие от
 </para>
 
 
-<sect2 id="video-formats">
+<sect1 id="video-formats">
 <title>Видео форматы</title>
 
-<sect3 id="mpg-vob-dat">
+<sect2 id="mpg-vob-dat">
 <title>MPEG файлы</title>
 
 <para>
@@ -84,10 +84,10 @@ MPEG файлы бывают различных разновидностей:
 быть масштабированы при кодировании или проигрываться с опцией
 <option>-aspect</option>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="avi">
+<sect2 id="avi">
 <title>AVI файлы</title>
 
 <para>
@@ -173,10 +173,10 @@ AVI файлов:
 только два исключения: <application>NanDub</application> и
 <link linkend="mencoder"><application>MEncoder</application></link>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="asf-wmv">
+<sect2 id="asf-wmv">
 <title>ASF/WMV файлы</title>
 <para>
 ASF (Active Streaming Format) исходит от Microsoft. Они разработали два варианта
@@ -188,10 +188,10 @@ Media Player</application> и <application>Windows Media Encoder</application>)
 никогда не видел v2.0 файлов :). Заметьте, что ASF файлы теперь появляются
 с расширениями <filename>.WMA</filename> или <filename>.WMV</filename>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="qt-mov">
+<sect2 id="qt-mov">
 <title>QuickTime/MOV файлы</title>
 
 <para>
@@ -212,10 +212,10 @@ MPG и AAC файлы. Вы даже можете извлечь их, используя опции
 секцию, посвящённую <link linkend="sorenson">Sorenson</link> кодеку.
 </para>
 </note>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo">
+<sect2 id="vivo">
 <title>VIVO файлы</title>
 
 <para>
@@ -240,10 +240,10 @@ MPG и AAC файлы. Вы даже можете извлечь их, используя опции
 <link linkend="vivo-audio">VIVO аудио кодек</link>
 для инструкций по установке.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="fli">
+<sect2 id="fli">
 <title>FLI файлы</title>
 <para>
 <emphasis role="bold">FLI</emphasis> это очень старый формат, используемый
@@ -253,10 +253,10 @@ Autodesk Animator, но это типичный формат для коротких анимационных роликов в се
 с опцией <option>-loop</option>). Во FLI файлах нет ключевых кадров[keyframes],
 поэтому некоторое время после перемещения картинка будет "грязной".
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realmedia">
+<sect2 id="realmedia">
 <title>RealMedia (RM) файлы</title>
 
 <para>
@@ -266,10 +266,10 @@ RealMedia (<filename>.rm</filename>) файлы.
 linkend="realvideo">RealVideo</link> и <link
 linkend="realaudio">RealAudio</link> кодеков.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="nuppelvideo">
+<sect2 id="nuppelvideo">
 <title>NuppelVideo файлы</title>
 <para>
 NuppelVideo -
@@ -280,10 +280,10 @@ YV12 + сжатые lzo кадры. <application>MPlayer</application> декодирует (и также
 <emphasis role="bold">кодирует</emphasis> <application>MEncoder
 </application>'ом в MPEG4 (DivX) и т. д.!) все это. Перемещение работает.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="yuv4mpeg">
+<sect2 id="yuv4mpeg">
 <title>yuv4mpeg файлы</title>
 <para>
 <ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
@@ -293,27 +293,27 @@ YV12 + сжатые lzo кадры. <application>MPlayer</application> декодирует (и также
 формат, используя эти средства. В действительности формат файла -
 последовательность несжатых YUV 4:2:0 кадров.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="film">
+<sect2 id="film">
 <title>FILM фильмы</title>
 <para>
 Этот формат используется в старых Sega Saturn CD-ROM играх.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="roq">
+<sect2 id="roq">
 <title>RoQ файлы</title>
 <para>
 RoQ файлы - это мультимедийные файлы используемые в некоторых ID играх,
 например Quake III и Return to Castle Wolfenstein.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="ogg">
+<sect2 id="ogg">
 <title>OGG/OGM файлы</title>
 <para>
 Это новый формат файлов от <ulink url="http://www.xiph.org">Xiphophorus</ulink>.
@@ -322,28 +322,28 @@ RoQ файлы - это мультимедийные файлы используемые в некоторых ID играх,
 <systemitem class="library">libvorbis</systemitem> были установлены до компиляции 
 <application>MPlayer</application>'а, чтобы  иметь возможность проигрывать эти файлы.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="sdp">
+<sect2 id="sdp">
 <title>SDP файлы</title>
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink> - это
 IETF стандартный формат для описания видео и аудио RTP потоков.
 (требуется &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;.)
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="pva">
+<sect2 id="pva">
 <title>PVA файлы</title>
 <para>
 PVA - это похожий на MPEG формат, используемый в программах DVB TV карт (например:
 <application>MultiDec</application>, <application>WinTV</application> под Windows.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="nsv">
+<sect2 id="nsv">
 <title>NSV files</title>
 <para>
 NSV (NullSoft Video) &mdash; это формат файла, используемый
@@ -357,28 +357,28 @@ NSV (NullSoft Video) &mdash; это формат файла, используемый
 необходим ещё один уровень депакетизации, который ещё нужно написать (эти
 файлы всё равно невозможно проиграть, поскольку они используют VLB аудио).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="matroska">
+<sect2 id="matroska">
 <title>Файлы Matroska</title>
 <para>
 Matroska это открытый формат файла.
 подробнее читайте на <ulink url="http://www.matroska.org/">официальном сайте</ulink>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="nut">
+<sect2 id="nut">
 <title>NUT файлы</title>
 <para>
 NUT это формат файла, разработанный ребятами из <application>MPlayer</application> и 
 <application>FFmpeg</application>. Оба проекта поддерживают его.
 Подробности читайте на <ulink url="http://www.nut.hu/">официальном сайте</ulink>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="gif">
+<sect2 id="gif">
 <title>GIF файлы</title>
 <para>
 <emphasis role="bold">GIF</emphasis> формат - это типичный формат для веб
@@ -414,12 +414,12 @@ LZW сжатие.
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a
 спецификациях</ulink>.
 </para>
-</sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="audio-formats">
+<sect1 id="audio-formats">
 <title>Аудио форматы</title>
 
 <para>
@@ -431,7 +431,7 @@ LZW сжатие.
 url="http://www.xmms.org">XMMS</ulink>.
 </para>
 
-<sect3 id="mp3">
+<sect2 id="mp3">
 <title>MP3 файлы</title>
 <para>
 У Вас могут возникнуть проблемы при проигрывании некоторых MP3 файлов, которые
@@ -441,18 +441,18 @@ url="http://www.xmms.org">XMMS</ulink>.
 в обозримом будущем. Опция <option>-demuxer</option>, описанная на man странице,
 может Вам помочь в этом случае.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="ogg-vorbis">
+<sect2 id="ogg-vorbis">
 <title>OGG/OGM файлы (Vorbis)</title>
 <para>
 Требуются правильно установленные 
 <systemitem class="library">libogg</systemitem> и
 <systemitem class="library">libvorbis</systemitem>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="cdda">
+<sect2 id="cdda">
 <title>CD аудио</title>
 <para>
 <application>MPlayer</application> может использовать <application>cdparanoia
@@ -466,9 +466,9 @@ url="http://www.xmms.org">XMMS</ulink>.
 использоваться для передачи параметров в библиотеку 
 <application>cdparanoia</application>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="xmms">
+<sect2 id="xmms">
 <title>XMMS</title>
 <para>
 <application>MPlayer</application> может использовать
@@ -489,6 +489,6 @@ url="http://www.xmms.org">XMMS</ulink>.
 используя опции <option>--with-xmmsplugindir</option> и <option>
 --with-xmmslibdir</option>.
 </para>
-</sect3>
 </sect2>
 </sect1>
+</chapter>

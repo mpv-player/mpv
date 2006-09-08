@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="koi8-r"?>
 <!-- synced with r19687 -->
-<sect1 id="codecs">
+<chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
-<sect2 id="video-codecs">
+<sect1 id="video-codecs">
 <title>Видео кодеки</title>
 
 <para>
@@ -77,7 +77,7 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 </para>
 
 
-<sect3 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
+<sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
 <title>FFmpeg/libavcodec</title>
 
 <para>
@@ -128,10 +128,10 @@ Just run <filename>configure</filename> and compile.
 С FFmpeg и моей Matrox G400, я даже могу смотреть DivX фильмы с высочайшим
 разрешением без пропускаемых кадров на моем K6-2 500.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="xanim">
+<sect2 id="xanim">
 <title>XAnim'овские кодеки</title>
 
 <note>
@@ -199,10 +199,10 @@ XAnim - это семейство видео кодеков <systemitem>xanim</systemitem>, поэтому Вы
 Протестированные кодеки: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
 h263.</emphasis>
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="vivo-video">
+<sect2 id="vivo-video">
 <title>VIVO видео</title>
 <para>
 <application>MPlayer</application> может проигрывать Vivo (1.0 and 2.0) фильмы.
@@ -212,10 +212,10 @@ h263.</emphasis>
 укажете опцию в командной строке, <application>MPlayer</application>
 автоматически выберет лучший доступный кодек.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="mpeg12">
+<sect2 id="mpeg12">
 <title>MPEG 1/2 видео</title>
 <para>
 MPEG1 и MPEG2 декодируются многоплатформенной "родной" библиотекой <systemitem
@@ -226,10 +226,10 @@ class="library">libmpeg2</systemitem>, исходный код которой включён в
 реинициализируя кодек, продолжая точно с места ошибки. Такая технология
 восстановления не имеет значимых временных задержек.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="avicodecs">
+<sect2 id="avicodecs">
 <title>MS Video1, Cinepak CVID, и другие старые кодеки</title>
 <para>
 MPlayer может воспроизводить большую часть старых кодеков, использовавшихся
@@ -238,10 +238,10 @@ MPlayer может воспроизводить большую часть старых кодеков, использовавшихся
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>,
 для большинства из них у нас есть <emphasis role="bold">родные кодеки</emphasis>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realvideo">
+<sect2 id="realvideo">
 <title>RealVideo</title>
 
 <para>
@@ -276,10 +276,10 @@ Cкачайте Real кодеки на
 на x86, Alpha и PowerPC (тестировались Linux/Alpha и Linux/PowerPC)
 платформах и с Mac OS X</emphasis>.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="xvid">
+<sect2 id="xvid">
 <title>XviD</title>
 
 <para>
@@ -347,10 +347,10 @@ Cкачайте Real кодеки на
   <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
   </para></step>
 </procedure>
-</sect3>
+</sect2>
 
 
-<sect3 id="sorenson">
+<sect2 id="sorenson">
 <title>Sorenson</title>
 
 <para>
@@ -387,12 +387,12 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <step><para>скомпилируйте <application>MPlayer</application></para></step>
 </procedure>
 
-</sect3>
+</sect2>
 
-<sect3 id="codec-x264">
+<sect2 id="codec-x264">
 <title>x264</title>
 
-<sect4 id="codec-x264-whatis">
+<sect3 id="codec-x264-whatis">
 <title>Что такое x264?</title>
 <para>
   <systemitem class="library">x264</systemitem> это библиотека для создания
@@ -430,9 +430,9 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   <listitem><para>Parallel encoding of multiple slices</para></listitem>
 </itemizedlist>
 
-</sect4>
+</sect3>
 
-<sect4 id="codec-h264-whatis">
+<sect3 id="codec-h264-whatis">
 <title>Что такое H.264?</title>
 <para>
   
@@ -466,9 +466,9 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   вас интересует краткий обзор, вы можете прочесть 
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-playback">
+<sect3 id="codec-x264-playback">
 <title>Как мне посмотреть H.264 при помощи <application>MPlayer</application>?</title>
 <para>
   <application>MPlayer</application> использует H.264 декодер библиотеки
@@ -486,9 +486,9 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   иметь ввиду
   <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS repository's web interface (Веб-интерфейс к репозиторию FFmpegCVS)</ulink>.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="codec-x264-encode">
+<sect3 id="codec-x264-encode">
 <title>Как кодировать видео, используя <application>MEncoder</application> и <systemitem class="library">x264</systemitem>?</title>
 <para>
   Если у вас установлен клиент subversion, последнюю версию x264 
@@ -521,13 +521,13 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   Скрипт configure сам определит, выполнены ли необходимые требования для
   <systemitem class="library">x264</systemitem>.
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>
 
 <!-- ********** -->
 
-<sect2 id="audio-codecs">
+<sect1 id="audio-codecs">
 <title>Аудио кодеки</title>
 
 <itemizedlist>
@@ -578,7 +578,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 </itemizedlist>
 
 
-<sect3 id="swac3">
+<sect2 id="swac3">
 <title>Программное декодирование AC3</title>
 
 <para>
@@ -615,10 +615,10 @@ SNDCTL_DSP_CHANNELS.  Примером подходящего драйвера является emu10k1
 (используется для Soundblaster Live! карточек) августа 2001'ого или новее
 (ALSA CVS тоже должен работать).
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="hwac3">
+<sect2 id="hwac3">
 <title>Аппаратное декодирование AC3</title>
 <para>
 Вам нужна AC3-совместимая карта с цифровым (S/PDIF) выводом. Драйвер карты
@@ -628,10 +628,10 @@ hwac3</option>. Это экспериментальная возможность, но известно, что это работает
 C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 картами MPEG декодирования DXR3/Hollywood+.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="libmad">
+<sect2 id="libmad">
 <title>Поддержка libmad</title>
 
 <para>
@@ -647,10 +647,10 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 Чтобы включить её поддержку, компилируйте с опцией configure
 <option>--enable-mad</option>.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="hwmpa">
+<sect2 id="hwmpa">
 <title>Аппаратный MPEG аудио кодек</title>
 
 <para>
@@ -659,9 +659,9 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 Не используйте его с другими драйверами вывода звука (такими как OSS и ALSA), которые
 не способны аппаратно декодировать (вы усышите только белый шум).
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="vivo-audio">
+<sect2 id="vivo-audio">
 <title>VIVO аудио</title>
 <para>
 Аудио кодек, используемый в VIVO файлах зависит от того, это VIVO/1.0 или
@@ -669,10 +669,10 @@ VIVO/2.0 файл. В VIVO/1.0 файлах <emphasis role="bold">g.723</emphasis> аудио,
 а в VIVO/2.0 файлах - <emphasis role="bold">Vivo Siren</emphasis> аудио. Оба
 типа поддерживаются.
 </para>
-</sect3>
+</sect2>
 
 
-<sect3 id="realaudio">
+<sect2 id="realaudio">
 <title>RealAudio</title>
 
 <para>
@@ -695,9 +695,9 @@ RealAudio:
 Инструкции по установке RealPlayer'овские библиотек находятся в секции
 <link linkend="realvideo">RealVideo</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qdesign">
+<sect2 id="qdesign">
 <title>QDesign кодеки</title>
 <para>
 Аудио потоки QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) обнаруживаются
@@ -705,9 +705,9 @@ RealAudio:
 QuickTime. Инструкции по установке см. в секции
 <link linkend="sorenson">Sorenson video codec</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="qualcomm">
+<sect2 id="qualcomm">
 <title>Qualcomm кодеки</title>
 <para>
 Аудио потоки Qualcomm (fourcc:<emphasis>Qclp</emphasis>) обнаруживаются
@@ -715,9 +715,9 @@ QuickTime. Инструкции по установке см. в секции
 Инструкций по установке см. в секции
 <link linkend="sorenson">Sorenson video codec</link>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="aac">
+<sect2 id="aac">
 <title>AAC кодек</title>
 <para>
 AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
@@ -747,9 +747,9 @@ make install
 Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
 с <ulink url="http://greysector.rangers.eu.org/">Grey Sector[Серый Сектор]</ulink>.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="amr">
+<sect2 id="amr">
 <title>AMR кодеки</title>
 <para>
 Adaptive Multi-Rate речевой кодек используется в мобильных телефонах третьего поколения (3G).
@@ -777,18 +777,18 @@ mv c-code libavcodec/amrwb_float
 <application>MPlayer</application>.
 
 </para>
-</sect3>
 
 </sect2>
 
+</sect1>
 <!-- ********** -->
 
-<sect2 id="codec-importing">
+<sect1 id="codec-importing">
 <title>КАК извлечь кодек из Win32</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
 
-<sect3 id="vfw-codecs">
+<sect2 id="vfw-codecs">
 <title>VFW кодеки</title>
 
 <para>
@@ -827,10 +827,10 @@ ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 ищите &quot;VIDC.HFYU&quot;. Чтобы узнать, как это делать, см. ниже старый
 DirectShow метод.
 </para></note>
-</sect3>
+</sect2>
 
 
-<sect3 id="dshow-codecs">
+<sect2 id="dshow-codecs">
 <title>DirectShow кодеки</title>
 
 <para>
@@ -937,6 +937,6 @@ role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 Если вы хотите добавить кодек самостоятельно, прочтите
 <ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink>.
 </para>
-</sect3>
 </sect2>
 </sect1>
+</chapter>

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="koi8-r"?>
 <!-- synced with r17322 -->
+<chapter id="tv">
+<title>TV</title>
+
 <sect1 id="tv-input" xreflabel="TV вход">
 <title>TV вход</title>
 
@@ -218,3 +221,4 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 </informalexample>
 </sect2>
 </sect1>
+</chapter>

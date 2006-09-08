@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="KOI8-R"?>
 <!-- synced with r19741 -->
-<sect1 id="install">
+<chapter id="install">
 <title>Установка</title>
 
 <para>
@@ -23,7 +23,7 @@
 </para>
 
 
-<sect2 id="softreq">
+<sect1 id="softreq">
 <title>Требуемые программы:</title>
 
 <itemizedlist>
@@ -130,10 +130,10 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   <filename>./configure</filename> где искать этот файл.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="installation_codecs">
 <title>Кодеки:</title>
 
 <itemizedlist>
@@ -231,10 +231,10 @@ Xanim:). Но, к примеру, Cinepak фильмы лучше проигрываются с оригинальным
 и дополнительной информации.
   </para></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2 id="video-cards">
+<sect1 id="video-cards">
 <title>Видео карты</title>
 
 <para>
@@ -242,7 +242,7 @@ Xanim:). Но, к примеру, Cinepak фильмы лучше проигрываются с оригинальным
 <emphasis role="bold">аппаратное масштабирование и YUV акселерацию</emphasis>, другие карты - нет.
 </para>
 
-<sect3 id="yuv-cards">
+<sect2 id="yuv-cards">
 <title>YUV карты</title>
 
 <para>
@@ -319,10 +319,10 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 </itemizedlist>
 </para>
 
-</sect3>
+</sect2>
 
 
-<sect3 id="non-yuv-cards" xreflabel="Не-YUV карты">
+<sect2 id="non-yuv-cards" xreflabel="Не-YUV карты">
 <title>Не-YUV карты</title>
 
 <para>
@@ -348,10 +348,10 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
   </simpara></listitem>
 </itemizedlist>
 </para>
-</sect3>
+</sect2>
 
 <!-- FIXME: find a more logical organization for this section -->
-<sect3 id="cirrus-logic-cards" xreflabel="Cirrus-Logic карты">
+<sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic карты">
 <title>Cirrus Logic карты</title>
 <itemizedlist>
 <listitem><para>
@@ -384,11 +384,11 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 </itemizedlist>
 </para></listitem>
 </itemizedlist>
-</sect3>
 </sect2>
+</sect1>
 
 
-<sect2 id="sound-cards">
+<sect1 id="sound-cards">
 <title>Звуковые карты:</title>
 
 <itemizedlist>
@@ -409,10 +409,10 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
   Очень рекомендуется прочитать секцию <link linkend="audio">звуковые карты</link>!
   </simpara></listitem>
 </itemizedlist>
-</sect2>
+</sect1>
 
 
-<sect2>
+<sect1 id="features">
 <title>Возможности:</title>
 
 <itemizedlist>
@@ -498,7 +498,6 @@ make install</screen>
 <link linkend="subosd">Субтитры и OSD</link>.
 </para>
 
-</sect2>
 </sect1>
 
 <!-- ********** -->
@@ -912,3 +911,4 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 </para></note>
 </para>
 </sect1>
+</chapter>

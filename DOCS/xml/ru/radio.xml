@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="koi8-r"?>
 <!-- synced with r19634 -->
+<chapter id="radio">
+<title>Радио</title>
 
-<sect1 id="radio" xreflabel="Radio input">
-<title>Radio input</title>
+
+<sect1 id="radio-input" xreflabel="Radio input">
+<title>Радио вход</title>
 
 <para>
 В этой секции описывается как включить <emphasis role="bold">прослушивание 
@@ -113,3 +116,4 @@ mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Si
 </informalexample>
 </sect2>
 </sect1>
+</chapter>
