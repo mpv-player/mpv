@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19732  -->
+<!-- synced with  r19752  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -772,6 +772,19 @@ aRts блокирует звуковое устройство. Либо подождите старта видео, либо
 <application>vlc</application> или <application>Ogle</application>.
 Если вы хотите получить DVD навигацию в <application>MPlayer</application>,
 реализуйте ее самостоятельно, но имейте ввиду, что это нелегкое и ответственное дело.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Я не могу посмотреть некоторые новые DVD от Sony Pictures/BMG ?
+</para></question>
+<answer><para>
+Это нормально. Вас ободрали и продали намеренно испорченный диск. Единственный способ 
+просмотреть его - избежать воспроизведения плохих блоков, воспользовавшись DVDnav 
+вместо mpdvdkit2. Это можно сделать, заменив dvd:// на dvdnav:// в командной строке.
+DVDnav пока что настолько несовместим с mpdvdkit, что вам придется указать опцию
+<option>--disable-mpdvdkit</option> скрипту configure.
 </para></answer>
 </qandaentry>
 
