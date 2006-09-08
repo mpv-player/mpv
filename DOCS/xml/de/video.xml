@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19715 -->
+<!-- in sync with r19742 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -235,8 +235,7 @@ screen #0
 <title>nVidia-Karten</title>
 
 <para>
-  nVidia ist für Linux keine optimale Wahl (auch wenn das laut nVidia
-  <link linkend="nvidia-opinions">nicht stimmt</link>)...
+  nVidia ist für Linux keine optimale Wahll.
   XFree86's Open-Source-Treiber unterstützt die meisten dieser Karten, jedoch
   musst du in einigen Fällen die binären Closed-Source-Treiber von nVidia
   verwenden, verfügbar auf der
@@ -2648,13 +2647,6 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
 </para>
 </sect2>
 
-
-<sect2 id="tvout-voodoo">
-<title>Voodoo 3</title>
-<para>
-  Lies <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">diese URL</ulink>.
-</para>
-</sect2>
 
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
