@@ -5141,12 +5141,13 @@ if(step_sec>0) {
     } break;
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV: {
+      int button = 0;
       if(stream->type != STREAMTYPE_DVDNAV) break;
 
-      if(mp_dvdnav_handle_input(stream, cmd->args[0].v.i)) {
+      if(mp_dvdnav_handle_input(stream, cmd->args[0].v.i, &button)) {
           uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
           goto goto_enable_cache;
-      }
+      } else if(button) set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, "Selected button number %d", button);
       break;
     }
 #endif

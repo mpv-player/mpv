@@ -431,7 +431,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 }
 
 
-int mp_dvdnav_handle_input(stream_t *stream, int cmd) {
+int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
   dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
   dvdnav_t *nav = dvdnav_priv->dvdnav;
   dvdnav_status_t status;
@@ -466,6 +466,8 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd) {
       mp_msg(MSGT_CPLAYER, MSGL_V, "Unknown DVDNAV cmd %d\n", cmd);
       break;
   }
+
+  dvdnav_get_current_highlight(nav, button);
 
   return reset;
 }

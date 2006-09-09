@@ -43,6 +43,6 @@ int dvdnav_stream_sleeping(dvdnav_priv_t * dvdnav_priv);
 
 void dvdnav_stream_fullstart(dvdnav_priv_t *dvdnav_priv);
 unsigned int * dvdnav_stream_get_palette(dvdnav_priv_t * dvdnav_priv);
-int mp_dvdnav_handle_input(stream_t *stream, int cmd);
+int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button);
 
 #endif
