@@ -880,8 +880,8 @@ There are three timing methods in <application>MPlayer</application>.
   </simpara></listitem>
 <listitem><para>
 <emphasis role="bold">The new timer</emphasis> code uses the RTC (RealTime Clock)
-  for this task, because it has precise 1ms timers. It is automagically enabled
-  when available, but requires a properly set up kernel.
+  for this task, because it has precise 1ms timers. The <option>-rtc</option>
+  option enables it, but a properly set up kernel is required.
   If you are running kernel 2.4.19pre8 or later you can adjust the maximum RTC
   frequency for normal users through the <systemitem class="systemname">/proc
   </systemitem> filesystem. Use this command to
@@ -891,7 +891,6 @@ There are three timing methods in <application>MPlayer</application>.
    The power management functions of some notebook BIOSes with speedstep CPUs
    interact badly with RTC. Audio and video may get out of sync. Plugging the
    external power connector in before you power up your notebook seems to help.
-   You can always turn off RTC support with the <option>-nortc</option> option.
    In some hardware combinations (confirmed during usage of non-DMA DVD drive
    on an ALi1541 board) usage of the RTC timer causes skippy playback. It's
    recommended to use the third method in these cases.

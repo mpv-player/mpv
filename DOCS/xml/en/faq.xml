@@ -236,7 +236,7 @@ When I start playing, I get this message but everything seems fine:
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-You need root privileges or a specially set up kernel to use the new timing
+You need a specially set up kernel to use the RTC timing
 code. For details see the <link linkend="rtc">RTC</link> section of the documentation.
 </para></answer>
 </qandaentry>
