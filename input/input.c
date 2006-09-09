@@ -311,12 +311,12 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { {  MOUSE_BTN6, 0 }, "volume -1" },
   
 #ifdef USE_DVDNAV
-  { { 'K', 0 }, "dvdnav 1" },   // up
-  { { 'J', 0 }, "dvdnav 2" },   // down
-  { { 'H', 0 }, "dvdnav 3" },   // left
-  { { 'L', 0 }, "dvdnav 4" },   // right
-  { { 'M', 0 }, "dvdnav 5" },   // menu
-  { { 'S', 0 }, "dvdnav 6" },   // select
+  { { KEY_KP8, 0 }, "dvdnav 1" },   // up
+  { { KEY_KP2, 0 }, "dvdnav 2" },   // down
+  { { KEY_KP4, 0 }, "dvdnav 3" },   // left
+  { { KEY_KP6, 0 }, "dvdnav 4" },   // right
+  { { KEY_KP5, 0 }, "dvdnav 5" },   // menu
+  { { KEY_KPENTER, 0 }, "dvdnav 6" },   // select
 #endif
 
   { { KEY_RIGHT, 0 }, "seek 10" },
