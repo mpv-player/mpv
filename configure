@@ -5074,6 +5074,41 @@ else
 fi
 echores "$_vcd"
 
+echocheck "DVD support (libdvdnav)"
+if test "$_dvdnav" = auto ; then
+  $_dvdnavconfig --version >> $TMPLOG 2>&1 || _dvdnav=no
+fi
+if test "$_dvdnav" = auto ; then
+  cat > $TMPC <<EOF
+#include <dvdnav.h>
+int main(void) { dvdnav_t *dvd=0; return 0; }
+EOF
+  _dvdnav=no
+  _dvdnavdir=`$_dvdnavconfig --cflags`
+  _dvdnavlibs=`$_dvdnavconfig --libs`
+  _dvdnavvsn=`$_dvdnavconfig --version | sed "s/\.//g"`
+  _used_css=
+  _dvdnavmajor=`echo $_dvdnavvsn | cut -d. -f2`
+  test "$_dvdnavmajor" -ge 2 -o "$_dvdnavvsn" -ge 0110 && \
+       cc_check -I$_dvdnavdir $_dvdnavlibs $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
+fi
+if test "$_dvdnav" = yes ; then
+  _largefiles=yes
+  _def_dvdnav='#define USE_DVDNAV 1'
+  _ld_dvdnav=`$_dvdnavconfig --libs`
+  _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
+  _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
+  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
+  _inputmodules="dvdnav $_inputmodules"
+  
+  #disable mpdvdkit and dvdread checks: dvdread will be enabled using dvdnav's version of dvdread
+  _mpdvdkit=no
+  _dvdread=yes
+else
+  _def_dvdnav='#undef USE_DVDNAV'
+  _noinputmodules="dvdnav $_noinputmodules"
+fi
+echores "$_dvdnav"
 
 echocheck "DVD support (libmpdvdkit2)"
 if test "$_mpdvdkit" = auto ; then
@@ -5134,7 +5169,9 @@ case "$_dvdread" in
   yes)
 	_largefiles=yes
 	_def_dvdread='#define USE_DVDREAD 1'
-	_ld_dvdread='-ldvdread'
+        if test "$_dvdnav" != yes ; then
+          _ld_dvdread='-ldvdread'
+        fi
 	_inputmodules="dvdread $_inputmodules"
 	_have_dvd=yes
 	;;
@@ -5161,37 +5198,6 @@ else
   _def_have_dvd='#undef HAVE_DVD'
 fi
 
-echocheck "DVD support (libdvdnav)"
-if test "$_dvdnav" = auto ; then
-  $_dvdnavconfig --version >> $TMPLOG 2>&1 || _dvdnav=no
-fi
-if test "$_dvdnav" = auto ; then
-  cat > $TMPC <<EOF
-#include <dvdnav.h>
-int main(void) { dvdnav_t *dvd=0; return 0; }
-EOF
-  _dvdnav=no
-  _dvdnavdir=`$_dvdnavconfig --cflags`
-  _dvdnavlibs=`$_dvdnavconfig --libs`
-  _dvdnavvsn=`$_dvdnavconfig --version | sed "s/\.//g"`
-  _used_css=
-  _dvdnavmajor=`echo $_dvdnavvsn | cut -d. -f2`
-  test "$_dvdnavmajor" -ge 2 -o "$_dvdnavvsn" -ge 0110 && \
-       cc_check -I$_dvdnavdir $_dvdnavlibs $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
-fi
-if test "$_dvdnav" = yes ; then
-  _largefiles=yes
-  _def_dvdnav='#define USE_DVDNAV 1'
-  _ld_dvdnav=`$_dvdnavconfig --libs`
-  _dvdnav_version=`$_dvdnavconfig --version | sed "s/\.//g"`
-  _def_dvdnav_version="#define DVDNAVVERSION $_dvdnav_version"
-  _inc_extra="$_inc_extra `$_dvdnavconfig --cflags`"
-  _inputmodules="dvdnav $_inputmodules"
-else
-  _def_dvdnav='#undef USE_DVDNAV'
-  _noinputmodules="dvdnav $_noinputmodules"
-fi
-echores "$_dvdnav"
 
 echocheck "cdparanoia"
 if test "$_cdparanoia" = auto ; then

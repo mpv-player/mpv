@@ -6,6 +6,11 @@
 #include "libmpdvdkit2/ifo_types.h"
 #include "libmpdvdkit2/ifo_read.h"
 #include "libmpdvdkit2/nav_read.h"
+#elif defined(USE_DVDNAV)
+#include <dvd_reader.h>
+#include <ifo_types.h>
+#include <ifo_read.h>
+#include <nav_read.h>
 #else
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_types.h>
