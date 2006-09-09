@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19741 -->
+<!-- synced with r19767 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -870,24 +870,13 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 <emphasis role="bold">Новый таймер</emphasis> использует RTC (Real Time
   Clock[часы истинного времени]) для этой задачи потому, что это таймер
   точностью 1ms. Это автоматически включается, когда доступно, но требует
-  привилегий root'а, <emphasis>setuid root</emphasis> исполняемого
-  файла <application>MPlayer</application>'а, или правильно настроенного ядра.
+  правильно настроенного ядра.
   Если Вы работаете с ядром 2.4.19pre8 или более поздним, Вы можете настроить
   максимальную частоту RTC для обычных пользователей через файловую систему
   <systemitem class="systemname">/proc</systemitem>.
   Используйте эту команду, чтобы сделать RTC доступным для обычных
   пользователей:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
-  Если у Вас не такое свежее ядро, Вы также можете поменять одну строчку в 
-  <filename>drivers/char/rtc.c</filename> и перекомпилировать ядро.
-  Найдите место, которое выглядит как 
-  <programlisting>
-       * We don't really want Joe User enabling more
-       * than 64Hz of interrupts on a multi-user machine.
-       */
-      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
-   </programlisting>
-   и замените 64 на 1024. Хотя Вы должны знать, что Вы делаете.
    Вы увидите эффективность нового кода таймера по строке состояния.
    Функции управления потребляемой мощностью[power management] у некоторых
    ноутбуковских BIOS'ов со speedstep-CPU плохо взаимодействуют с RTC. Аудио и
@@ -904,11 +893,6 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
   RTC. С другой стороны, он сильнее использует CPU.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">НИКОГДА не устанавливайте setuid root
-исполняемый файл <application>MPlayer</application>'а на
-многопользовательской системе!</emphasis>
-Это прямой путь к тому, что каждый будет root'ом.
-</para></note>
 </para>
 </sect1>
 </chapter>
