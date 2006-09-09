@@ -23,7 +23,7 @@ static struct stream_priv_s {
   int track;
   char* device;
 } stream_priv_dflts = {
-  1,
+  0,
   NULL
 };
 
@@ -405,10 +405,13 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_UNSUPORTED;
   }
 
+  if(p->track > 0) {
   if(dvdnav_title_play(dvdnav_priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
     mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(dvdnav_priv->dvdnav));
     return STREAM_UNSUPORTED;
   }
+  } else 
+    mp_msg(MSGT_OPEN,MSGL_INFO,"dvdnav_stream, you didn't specify a track number (as in dvdnav://1), playing whole disc\n");
 
   stream->sector_size = 2048;
   stream->flags = STREAM_READ | STREAM_SEEK;
