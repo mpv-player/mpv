@@ -5139,6 +5139,17 @@ if(step_sec>0) {
         }
         break;
     } break;
+#ifdef USE_DVDNAV
+    case MP_CMD_DVDNAV: {
+      if(stream->type != STREAMTYPE_DVDNAV) break;
+
+      if(mp_dvdnav_handle_input(stream, cmd->args[0].v.i)) {
+          uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
+          goto goto_enable_cache;
+      }
+      break;
+    }
+#endif
     default : {
 #ifdef HAVE_NEW_GUI
       if ( ( use_gui )&&( cmd->id > MP_CMD_GUI_EVENTS ) ) guiGetEvent( guiIEvent,(char *)cmd->id );
