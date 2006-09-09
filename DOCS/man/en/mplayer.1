@@ -901,9 +901,12 @@ Disable mouse button press/\:release input (mozplayerxp's context menu relies
 on this option).
 .
 .TP
-.B \-nortc (RTC only)
-Turns off usage of the Linux RTC (realtime clock \- /dev/\:rtc) as timing
+.B \-rtc (RTC only)
+Turns on usage of the Linux RTC (realtime clock \- /dev/\:rtc) as timing
 mechanism.
+This wakes up the process every 1/1024 seconds to check the current time.
+Useless with modern Linux kernels configured for desktop use as they already
+wake up the process with similar accuracy when using normal timed sleep.
 .
 .TP
 .B \-playing-msg <string>
@@ -961,8 +964,9 @@ for their description.
 .
 .TP
 .B \-softsleep
-Use high-quality software timers instead of the RTC.
-As precise as the RTC without requiring special privileges.
+Time frames by repeatedly checking the current time instead of asking the
+kernel to wake up MPlayer at the correct time.
+Useful if your kernel timing is imprecise and you cannot use the RTC either.
 Comes at the price of higher CPU consumption.
 .
 .TP
