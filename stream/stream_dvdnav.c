@@ -430,6 +430,46 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   return STREAM_OK;
 }
 
+
+int mp_dvdnav_handle_input(stream_t *stream, int cmd) {
+  dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_t *nav = dvdnav_priv->dvdnav;
+  dvdnav_status_t status;
+  pci_t *pci = dvdnav_get_current_nav_pci(nav);
+  int reset = 0;
+
+  if(cmd != MP_CMD_DVDNAV_SELECT && !pci)
+    return 0;
+
+  switch(cmd) {
+    case MP_CMD_DVDNAV_UP:
+      status = dvdnav_upper_button_select(nav, pci);
+      break;
+    case MP_CMD_DVDNAV_DOWN:
+      status = dvdnav_lower_button_select(nav, pci);
+      break;
+    case MP_CMD_DVDNAV_LEFT:
+      status = dvdnav_left_button_select(nav, pci);
+      break;
+    case MP_CMD_DVDNAV_RIGHT:
+      status = dvdnav_right_button_select(nav, pci);
+      break;
+    case MP_CMD_DVDNAV_MENU:
+      status = dvdnav_menu_call(nav,DVD_MENU_Root);
+      reset = 1;
+      break;
+    case MP_CMD_DVDNAV_SELECT:
+      status = dvdnav_button_activate(nav, pci);
+      reset = 1;
+      break;
+    default:
+      mp_msg(MSGT_CPLAYER, MSGL_V, "Unknown DVDNAV cmd %d\n", cmd);
+      break;
+  }
+
+  return reset;
+}
+
 stream_info_t stream_info_dvdnav = {
   "DVDNAV stream",
   "null",
