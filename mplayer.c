@@ -401,7 +401,7 @@ static char* menu_root = "main";
 
 
 #ifdef HAVE_RTC
-static int nortc;
+static int nortc = 1;
 static char* rtc_device;
 #endif
 
