@@ -1457,7 +1457,7 @@ static void update_osd_msg(void) {
 #ifdef USE_OSD
             if(sh_video) vo_osd_changed(OSDTYPE_OSD); else 
 #endif
-            if(term_osd) printf("%s%s\n",term_osd_esc,msg->msg);
+            if(term_osd) mp_msg(MSGT_CPLAYER,MSGL_STATUS,"%s%s\n",term_osd_esc,msg->msg);
         }
         return;
     }
