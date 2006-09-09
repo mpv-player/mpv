@@ -881,23 +881,12 @@ There are three timing methods in <application>MPlayer</application>.
 <listitem><para>
 <emphasis role="bold">The new timer</emphasis> code uses the RTC (RealTime Clock)
   for this task, because it has precise 1ms timers. It is automagically enabled
-  when available, but requires root privileges, a <emphasis>setuid root</emphasis>
-  <application>MPlayer</application> binary or a properly set up kernel.
+  when available, but requires a properly set up kernel.
   If you are running kernel 2.4.19pre8 or later you can adjust the maximum RTC
   frequency for normal users through the <systemitem class="systemname">/proc
   </systemitem> filesystem. Use this command to
   enable RTC for normal users:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
-  If you do not have such a new kernel, you can also change one line in
-  <filename>drivers/char/rtc.c</filename> and recompile your kernel.
-  Find the section that reads
-  <programlisting>
-       * We don't really want Joe User enabling more
-       * than 64Hz of interrupts on a multi-user machine.
-       */
-      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
-   </programlisting>
-   and change the 64 to 1024. You should really know what you are doing, though.
    You can see the new timer's efficiency in the status line.
    The power management functions of some notebook BIOSes with speedstep CPUs
    interact badly with RTC. Audio and video may get out of sync. Plugging the
@@ -913,10 +902,6 @@ There are three timing methods in <application>MPlayer</application>.
   doesn't use RTC. On the other hand, it requires more CPU.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">NEVER install a setuid root
-<application>MPlayer</application> binary on a multiuser system!</emphasis>
-It's a clear way for everyone to become root.
-</para></note>
 </para>
 </sect1>
 
