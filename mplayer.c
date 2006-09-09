@@ -3399,9 +3399,7 @@ if(stream->type==STREAMTYPE_DVD){
 #endif
 
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
-#ifdef HAS_DVBIN_SUPPORT
 goto_enable_cache:
-#endif
 if(stream_cache_size>0){
   current_module="enable_cache";
   if(!stream_enable_cache(stream,stream_cache_size*1024,
