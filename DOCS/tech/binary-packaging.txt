@@ -188,9 +188,9 @@ If you patch MPlayer, send your patches to us! We will try to integrate them.
 Furthermore, we're often able to come up with a cleaner or more general
 solution to your problem.
 
-If you should modified configuration files or similar, please patch the
-official one instead of copying it into your package. This way you will
-automatically pick up changes we make to it.
+If you have modified configuration files or similar, please patch the official
+one instead of copying it into your package. This way you will automatically
+pick up changes we make to it.
 
 
 Tips and tricks
