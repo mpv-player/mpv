@@ -84,6 +84,7 @@ dvdnav_priv_t * new_dvdnav_stream(char * filename) {
     char buf[2048];
     
     dvdnav_get_next_block(dvdnav_priv->dvdnav,buf,&event,&len);
+    dvdnav_sector_search(dvdnav_priv->dvdnav, 0, SEEK_SET);
   }
   
   /* turn off dvdnav caching */
