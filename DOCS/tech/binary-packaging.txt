@@ -43,7 +43,7 @@ the following features MUST be included in any official binary package:
   - X11/Xvideo
 
 * codecs
-  - FAAD
+  - FAAD(internal)
   - libavcodec(internal)
   - native codecs (libmpeg2/liba52/mp3lib)
   - Vorbis Tremor codec(internal)
@@ -88,6 +88,13 @@ packages containing a shared libavcodec library, they are often based on the
 last "release" version of FFmpeg, which is quite old and will usually not
 function correctly with MPlayer.
 
+Support for binary codecs MUST be present but it MUST NOT result in a hard
+dependency on a binary codecs package. MPlayer is fully functional without
+external binary codecs. If you package binary codecs yourself, package the
+essential codecs package, not the all codecs package.
+
+Bitmap fonts are deprecated, don't package them. Use TrueType fonts instead.
+
 
 File locations
 ~~~~~~~~~~~~~~
@@ -103,7 +110,7 @@ for Red Hat and Fedora RPMs I am using FHS-compliant paths:
 /usr/share/mplayer/font/        fonts
 /usr/share/mplayer/skins/       GUI skins
 
-You MUSTN'T include the codecs.conf file in your package. It is useful
+You MUST NOT include the codecs.conf file in your package. It is useful
 only for development purposes and often causes obscure problems for users.
 
 Please avoid using the deprecated paths for binary codecs (/usr/lib/win32/)
@@ -176,6 +183,14 @@ modified:
  MPlayer 1.0pre5-Fedora-GS-3.3.2 (C) 2000-2004 MPlayer Team
  MPlayer 1.0pre5-Mandrake-PLF-3.2.3 (C) 2000-2004 MPlayer Team
  MPlayer 1.0pre5-Solaris-3.4.0 (C) 2000-2004 MPlayer Team
+
+If you patch MPlayer, send your patches to us! We will try to integrate them.
+Furthermore, we're often able to come up with a cleaner or more general
+solution to your problem.
+
+If you should modified configuration files or similar, please patch the
+official one instead of copying it into your package. This way you will
+automatically pick up changes we make to it.
 
 
 Tips and tricks
