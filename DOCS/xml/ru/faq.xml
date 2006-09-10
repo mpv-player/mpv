@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19760  -->
+<!-- synced with  r19779  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -230,8 +230,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Чтобы использовать новый код тайминга, вам необходимы привилегии root 
-либо специально настроенное ядро, 
+Чтобы использовать RTC тайминг, вам необходимо специально настроенное ядро.
 Подробности ищите в разделе <link linkend="rtc">RTC</link>.
 </para></answer>
 </qandaentry>
