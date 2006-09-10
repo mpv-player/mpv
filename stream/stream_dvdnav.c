@@ -458,6 +458,21 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
       status = dvdnav_menu_call(nav,DVD_MENU_Root);
       reset = 1;
       break;
+    case MP_CMD_DVDNAV_PREVMENU: {
+      int title=0, part=0;
+
+      dvdnav_current_title_info(nav, &title, &part);
+      if(title) {
+        if(dvdnav_menu_call(nav, DVD_MENU_Part) == DVDNAV_STATUS_OK
+           || dvdnav_menu_call(nav, DVD_MENU_Title) == DVDNAV_STATUS_OK) {
+          reset = 1;
+          break;
+        }
+      }
+      if(dvdnav_menu_call(nav, DVD_MENU_Root) == DVDNAV_STATUS_OK)
+        reset = 1;
+      }
+      break;
     case MP_CMD_DVDNAV_SELECT:
       status = dvdnav_button_activate(nav, pci);
       reset = 1;

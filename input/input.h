@@ -113,6 +113,7 @@
 #define MP_CMD_DVDNAV_RIGHT     4
 #define MP_CMD_DVDNAV_MENU      5
 #define MP_CMD_DVDNAV_SELECT    6
+#define MP_CMD_DVDNAV_PREVMENU  7
 
 /// Console commands
 #define MP_CMD_CHELP 7000
