@@ -410,7 +410,9 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
     mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(dvdnav_priv->dvdnav));
     return STREAM_UNSUPORTED;
   }
-  } else 
+  } else if(p->track == -1)
+      dvdnav_menu_call(dvdnav_priv->dvdnav, DVD_MENU_Root);
+    else
     mp_msg(MSGT_OPEN,MSGL_INFO,"dvdnav_stream, you didn't specify a track number (as in dvdnav://1), playing whole disc\n");
 
   stream->sector_size = 2048;
