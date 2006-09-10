@@ -1,4 +1,4 @@
-.\" Synced with r19751
+.\" Synced with r19788
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -406,8 +406,8 @@ Beállítások megnyitása.
 .PD 1
 .PP
 .RS
-(A következõ gombok csak akkor mûködnek, ha TV bemenet támogatással fordítottál
-és elsõbbséget élveznek a fenti gomb-definíciókkal szemben.)
+(A következõ gombok csak akkor mûködnek, ha TV vagy DVB bemenet támogatással
+fordítottál és elsõbbséget élveznek a fenti gomb-definíciókkal szemben.)
 .RE
 .PP
 .PD 0
@@ -420,6 +420,32 @@ Normaváltás.
 Csatornalista átváltása.
 .RE
 .PD 1
+.PP
+.RS
+(A következõ gombok csak akkor mûködnek, ha dvdnav támogatással fordítottál:
+a menüben való navigációra használatosak)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "keypad 8"
+Kiválasztás fel.
+.IPs "keypad 2"
+Kiválasztás le.
+.IPs "keypad 4"
+Kiválasztás balra.
+.IPs "keypad 6"
+Kiválasztás jobbra.
+.IPs "keypad 5"
+Visszatérés a fõmenübe.
+.IPs "keypad 7"
+Visszatérés a legközelebbi menübe (a sorrend: fejezet->cím->fõmenü).
+.IPs "keypad enter"
+Választás jóváhagyása.
+.RE
+.PD 1
+.PP
+.RS
 .
 .TP
 .B irányítás egérrel
@@ -900,9 +926,14 @@ Kikapcsolja az egérgomb nyomás/\:felengedés input-ot (a mozplayerxp
 helyzetérzékeny menüje igényli ezt a kapcsolót).
 .
 .TP
-.B \-nortc (csak RTC)
-Kikapcsolja a Linux RTC (realtime clock \- /dev/\:rtc) idõzítõ
+.B \-rtc (csak RTC)
+Bekapcsolja a Linux RTC (realtime clock \- /dev/\:rtc) idõzítõ
 mechanizmusként való használatát.
+Ez felébreszti a folyamatot minden 1/1024 másodpercben, hogy ellenõrizze az
+aktuális idõt.
+Hasztalan a modern, asztali használatra beállított Linux kernelekkel, mivel
+azok már hasonló pontossággal ébresztik fel a folyamatot normálisan idõzített
+sleep használatta mellett.
 .
 .TP
 .B \-playing-msg <karakterlánc>
@@ -961,8 +992,9 @@ a DOCS/tech/slave.txt fájlban megtalálod a leírásukat.
 .
 .TP
 .B \-softsleep
-Jó minõségû szoftveres idõzítõl használata az RTC helyett.
-Olyan precíz, mint az RTC, de nem igényel különleges jogosultságot.
+Idõkeretek használata az aktuális idõ ellenõrzéséhez az MPlayer megfelelõ
+idõpontban kernel által történõ felébresztése helyett.
+Hasznos, ha a kerneled idõzítése nem precíz és nem tudod használni az RTC-t sem.
 Nagyobb CPU használat az ára.
 .
 .TP
@@ -1767,7 +1799,7 @@ Ajánlott még a -embeddedfonts engedélyezése is.
 .
 .TP
 .B \-ass-border-color <érték>
-Beállítja a határok (körvonal) színét az egyszerû szöveges feliratokhoz.
+Beállítja a határok (körvonal) színét a szöveges feliratokhoz.
 A színformátum RRGGBBAA.
 .
 .TP
@@ -1777,7 +1809,7 @@ Az SSA/ASS renderelõ a feliratokat ide tudja tenni (a \-ass-use-margins kapcsoló
 .
 .TP
 .B \-ass-color <érték>
-Beállítja az egyszerû szöveges feliratok színét.
+Beállítja a szöveges feliratok színét.
 A színformátum RRGGBBAA.
 .
 .TP
@@ -1800,9 +1832,9 @@ Felülír pár stílus paramétert.
 Beállítja a sor kihagyás értékét az SSA/ASS renderelõben.
 .
 .TP
-.B \-ass-styles <fájl név>
+.B \-ass-styles <fájlnév>
 Betölti az összes, adott fájlban található SSA/ASS stílust és
-felhasználja az egyszerû szöveges feliratoknál.
+felhasználja a szöveges feliratoknál.
 A fájl szintaxisa ugyan olyan, mint az SSA/ASS
 [V4 Styles] / [V4+ Styles] része.
 .

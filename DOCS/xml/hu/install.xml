@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19741 -->
+<!-- synced with r19779 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -874,29 +874,18 @@ Három fajta időzítési eljárás van az <application>MPlayer</application>ben.
   </simpara></listitem>
 <listitem><para>
 <emphasis role="bold">Az új időzítő</emphasis> kód az RTC-t (RealTime Clock)
-  használja, mert ennek pontos, 1 ms-es időzítői vannak. Automatikusan engedélyezett
-  lesz, ha elérhető, de root jogok vagy <emphasis>setuid root</emphasis> beállítása
-  az <application>MPlayer</application> binárisán vagy megfelelően beállított kernel
-  kell hozzá. Ha 2.4.19pre8 vagy későbbi kernelt használsz, beállíthatod a maximum
+  használja, mert ennek pontos, 1 ms-es időzítői vannak. A <option>-rtc</option>
+  kapcsoló engedélyezi, de megfelelően beállított kernel kell hozzá.
+  Ha 2.4.19pre8 vagy későbbi kernelt használsz, beállíthatod a maximum
   RTC frekvenciát a sima felhasználóknak a <systemitem class="systemname">/proc
   </systemitem> fájlrendszer segítségével. Használd ez a parancsot az RTC normál
   felhasználók számára történő engedélyezéséhez:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
-  Ha nincs ilyen új kerneled, egy sort kell megváltoztatnod a
-  <filename>drivers/char/rtc.c</filename> fájlban és újrafordítani a kernelt.
-  Keresd meg ezt a részt:
-   <programlisting>
-       * We don't really want Joe User enabling more
-       * than 64Hz of interrupts on a multi-user machine.
-       */
-      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
-   </programlisting>
-   és írd át a 64-et 1024-re! Tudd, hogy mit csinálsz! Az új időzítő eredményét
-   a státusz sorban láthatod. Néhány sebesség-léptetéses (speedstep) CPU-val rendelkező
+   Az új időzítő eredményét a státusz sorban láthatod.
+   Néhány sebesség-léptetéses (speedstep) CPU-val rendelkező
    notebook BIOS-ának energia takarékossági funkciói rosszul működnek együtt az
    RTC-vel. Elromolhat az audió és a videó szinkronizációja. Úgy tűnik, ha bedugod
    a hálózati csatlakozót, mielőtt bekapcsolnád a notebookot, az segít.
-   Az RTC támogatást bármikor kikapcsolhatod a <option>-nortc</option> kapcsolóval.
    Néhány hardver összeállításban (ALi1541-es alaplapokkal használt nem DMA-s DVD
    meghajtók esetén erősítették meg) az RTC időzítő használata kihagyásokat okoz
    lejátszás közben. Ebben az esetben a harmadik módszer használata javasolt.
@@ -907,10 +896,6 @@ Három fajta időzítési eljárás van az <application>MPlayer</application>ben.
   azt. Másrészről viszont jobban eszi a procit.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">SOHA ne telepíts egy setuid root-os
-<application>MPlayer</application> binárist egy több-felhasználós rendszerben!</emphasis>
-Azzal bárki simán root lehet.
-</para></note>
 </para>
 </sect1>
 
