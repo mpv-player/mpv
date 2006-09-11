@@ -862,10 +862,24 @@ int radio_set_channel(struct stream_st *stream, char *channel) {
     radio_priv_t* priv=(radio_priv_t*)stream->priv;
     int i, channel_int;
     radio_channels_t* tmp;
+    char* endptr;
 
+    if (*channel=='\0')
+        mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongChannelName,channel);
+    
     if (priv->radio_channel_list) {
-        channel_int = atoi(channel);
+        channel_int = strtol(channel,&endptr,10);
         tmp = priv->radio_channel_list;
+        if (*endptr!='\0'){
+            //channel is not a number, so it contains channel name
+            for ( ; tmp; tmp=tmp->next)
+                if (!strncmp(channel,tmp->name,sizeof(tmp->name)-1))
+                    break;
+                if (!tmp){
+                mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongChannelName,channel);
+                return 0;
+            }
+        }else{
         for (i = 1; i < channel_int; i++)
             if (tmp->next)
                 tmp = tmp->next;
@@ -874,6 +888,7 @@ int radio_set_channel(struct stream_st *stream, char *channel) {
         if (tmp->index!=channel_int){
             mp_msg(MSGT_RADIO,MSGL_ERR,MSGTR_RADIO_WrongChannelNumberInt,channel_int);
             return 0;
+        }
         }
         priv->radio_channel_current=tmp;
         mp_msg(MSGT_RADIO, MSGL_V, MSGTR_RADIO_SelectedChannel, priv->radio_channel_current->index,

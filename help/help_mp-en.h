@@ -1821,6 +1821,7 @@ static char help_text[]=
 #define MSGTR_RADIO_WrongFreqForChannel "[radio] Wrong frequency for channel %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Wrong channel number: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[radio] Wrong channel number: %d\n"
+#define MSGTR_RADIO_WrongChannelName "[radio] Wrong channel name: %s\n"
 #define MSGTR_RADIO_FreqParameterDetected "[radio] Radio frequency parameter detected.\n"
 #define MSGTR_RADIO_DoneParsingChannels "[radio] Done parsing channels.\n"
 #define MSGTR_RADIO_GetTunerFailed "[radio] Warning: ioctl get tuner failed: %s. Setting frac to %d.\n"

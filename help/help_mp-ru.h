@@ -1180,6 +1180,7 @@ static char help_text[]=
 #define MSGTR_RADIO_WrongFreqForChannel "[radio] Неверная частота для станции %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Неверный номер станции: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[radio] Неверный номер станции: %d\n"
+#define MSGTR_RADIO_WrongChannelName "[radio] Неверное название станции: %s\n"
 #define MSGTR_RADIO_FreqParameterDetected "[radio] В параметрах обнаружена частота.\n"
 #define MSGTR_RADIO_DoneParsingChannels "[radio] Разбор имен радиостанций завершен.\n"
 #define MSGTR_RADIO_GetTunerFailed "[radio] Предупреждение: сбой вызова ioctl get tuner : %s. frac установлен в %d.\n"
