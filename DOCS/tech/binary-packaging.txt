@@ -88,8 +88,9 @@ packages containing a shared libavcodec library, they are often based on the
 last "release" version of FFmpeg, which is quite old and will usually not
 function correctly with MPlayer.
 
-Support for binary codecs MUST be present but it MUST NOT result in a hard
-dependency on a binary codecs package. MPlayer is fully functional without
+Support for binary codecs SHOULD be present to the extent that the combination
+of operating system and CPU architecture permits, but it MUST NOT result in a
+hard dependency on a binary codecs package. MPlayer is fully functional without
 external binary codecs. If you package binary codecs yourself, package the
 essential codecs package, not the all codecs package.
 
