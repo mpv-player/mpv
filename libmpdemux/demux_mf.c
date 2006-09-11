@@ -150,6 +150,8 @@ static int demux_control_mf(demuxer_t *demuxer, int cmd, void *arg) {
       return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_GET_PERCENT_POS:
+      if (mf->nr_of_files <= 1)
+        return DEMUXER_CTRL_DONTKNOW;
       *((int *)arg) = 100 * mf->curr_frame / (mf->nr_of_files - 1);
       return DEMUXER_CTRL_OK;
 
