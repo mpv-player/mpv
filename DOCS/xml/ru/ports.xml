@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
 <!-- synced with r19715 -->
-<!-- 
-This page may need additinal check of some phrases
-to decide is translation correct or not.
-Please, make attantion on FIXME tags below -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -18,7 +14,7 @@ Please, make attantion on FIXME tags below -->
 </para>
 
 <sect2 id="debian">
-<title>Упаковка под Debian</title>
+<title>Debian пакеты</title>
 <para>
 Чтобы создать Debian пакет, выполните следующие команды в каталоге с исходным
 кодом <application>MPlayer</application>'а:
@@ -26,7 +22,7 @@ Please, make attantion on FIXME tags below -->
 
 Если  вы хотите передать дополнительные опции configure, установите 
 соответствующее значение переменной окружения <envar>DEB_BUILD_OPTIONS</envar>.
-В частности, если хотите поддердку GUI и OSD укажите:
+В частности, если хотите поддердку GUI и OSD, укажите:
 
 <screen>DEB_BUILD_OPTIONS="--enable-gui --enable-menu" fakeroot debian/rules binary</screen>
 
@@ -35,11 +31,11 @@ Please, make attantion on FIXME tags below -->
 
 <screen>CC=gcc-3.4 DEB_BUILD_OPTIONS="--enable-gui" fakeroot debian/rules binary</screen>
 
-Для очистки дерева исходныз текстов воспользуйтес командой:
+Для очистки дерева исходных текстов воспользуйтесь командой:
 
 <screen>fakeroot debian/rules clean</screen>
 
-В качестве root'а Вы, как обычно, Вы можете установить <filename>.deb
+В качестве root'а Вы затем можете установить <filename>.deb
 </filename> пакет:
 <screen>dpkg -i ../mplayer_<replaceable>версия</replaceable>.deb</screen>
 </para>
@@ -47,8 +43,8 @@ Please, make attantion on FIXME tags below -->
 <para>
 Какое-то время Christian Marillat собирал неофициальные Debian пакеты с
 <application>MPlayer</application>'ом, <application>MEncoder</application>'ом
-и шрифтами, так что вы можете их скачать (apt-get'нуть)
-их с его <ulink url="http://www.debian-multimedia.org/">сайта</ulink>.
+и шрифтами, так что вы можете их скачать (выполнить apt-get)
+с его <ulink url="http://www.debian-multimedia.org/">сайта</ulink>.
 </para>
 </sect2>
 
@@ -62,10 +58,10 @@ Dominik Mierzejewski собирает и поддерживает официальные Red Hat и Fedora Core R
 </para>
 
 <para>
-Mandrake RPM пакеты доступны с <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
+Mandrake/Mandriva RPM пакеты доступны с <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
 SuSE включала искалеченную версию <application>MPlayer</application>'а в дистрибутив.
 Из последних релизов они убрали эти пакеты. Вы можете взять
-работающие RPM'ники с
+работающие RPM с
 <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
@@ -76,16 +72,16 @@ SuSE включала искалеченную версию <application>MPlayer</application>'а в дистриб
 <application>MPlayer</application> работает на Linux PDA с ARM процессором,
 например Sharp Zaurus, Compaq Ipaq. Простейший способ получить <application>
 MPlayer</application> &mdash; это скачать его с
-пакетных пастбищ[feeds]
+пакетных репозиториев
 <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Если Вы хотите
 скомпилировать его самостоятельно, обратите внимание на каталоги
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
 и
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
-в корне сборки[buildroot] дистрибутива OpenZaurus. Там всегда найдутся
+в корне сборки дистрибутива OpenZaurus. Там всегда найдутся
 свежий Makefile и патчи, используемые для сборки CVS <application>MPlayer</application>'а вместе с
 <systemitem class="library">libavcodec</systemitem>.
-Если Вам нужен GUI, используйте xmms-embedded.
+Если Вам нужен GUI, используйте встроенный в xmms
 </para>
 </sect2>
 </sect1>
@@ -93,10 +89,9 @@ MPlayer</application> &mdash; это скачать его с
 <sect1 id="bsd">
 <title>*BSD</title>
 <para>
-<!-- FIXME "flavors" is not "клонах" -->
-<application>MPlayer</application> работает на всех известных клонах[on all known BSD flavors]. 
+<application>MPlayer</application> работает на всех известных семействах BSD. 
 Существуют портированные[ports]/пакеты сорцов[pkgsrcs]/fink/
-и т. п. версии <application>MPlayer</application>'а, которые наверное проще использовать, чем просто
+и т.п. версии <application>MPlayer</application>, которые, наверное, проще использовать, чем просто
 исходный код.
 </para>
 
@@ -130,14 +125,14 @@ MPlayer</application> &mdash; это скачать его с
 <sect2 id="openbsd">
 <title>OpenBSD</title>
 <para>
-В связи с ограничениями в различных версиях gas'а (переносы[relocation] и MMX),
+В связи с ограничениями в различных версиях gas (конфликт настройки адресов и MMX),
 Вы должны будете компилировать в два шага: сначала убедитесь, что не родной as
 &mdash; первый в Вашем <envar>$PATH</envar> и выполните <command>gmake -k
 </command>, затем убедитесь, что будет использоваться родная версия и запустите
 <command>gmake</command>.
 </para>
 <para>
-Начиная с OpenBSD 3.4 подобный хак[hack] больше не нужен.
+Начиная с OpenBSD 3.4 подобный хак больше не нужен.
 </para>
 </sect2>
 
@@ -154,7 +149,7 @@ MPlayer</application> &mdash; это скачать его с
 
 <para>
 <application>MPlayer</application> был портирован на некоторые коммерческие варианты Unix.
-Поскольку окружения разработки этих систем отличается от свободных Unix'ов,
+Поскольку окружения разработки этих систем отличаются от свободных Unix'ов,
 вам придется самостоятельно произвести некоторые действия, чтобы сборка заработала.
 </para>
 
@@ -168,7 +163,7 @@ MPlayer</application> &mdash; это скачать его с
 
 <para>
 На <emphasis role="bold">UltraSPARC</emphasis>'ах, <application>MPlayer</application>
-использует их расширение <emphasis role="bold">VIS</emphasis> (эквивалент MMX), но (в настоящий
+использует преимущество их расширения <emphasis role="bold">VIS</emphasis> (эквивалент MMX), но (в настоящий
 момент) только в
 <systemitem class="library">libmpeg2</systemitem>,
 <systemitem class="library">libvo</systemitem>
@@ -181,14 +176,10 @@ and <systemitem class="library">libavcodec</systemitem>, но не в
 <para><emphasis role="bold">Предостережение:</emphasis></para>
 <itemizedlist>
 <listitem><para><emphasis role="bold">mediaLib</emphasis> в данный
-момент отключены по-омрлчанию в 
-<!-- FIXME brokenness vs поломанность -->
-<application>MPlayer</application>'е из-за поломанности[brokenness].
+момент отключена по умолчанию в 
+<application>MPlayer</application> из-за поломанности.
 Пользователи SPARC, компилировавшие MPlayer с mediaLib 
-<!-- FIXME need correct translation
-reported a thick, green-tint on video encoded and decoded with libavcodec.
--->
-сообщали о зеленом пятне на видео[reported a thick, green-tint on video], кодируемом и 
+сообщали об изобилии зелёного оттенка в видео, кодируемом и 
 декодируемом libavcodec.
 Если хотите, можете включить ее:
 <screen>
@@ -203,8 +194,8 @@ $ ./configure --enable-mlib
 <para>
 Чтобы собрать программу, Вам потребуется GNU <application>make</application>
 (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), родной
-Solaris'овый make не будет работать. Типичная ошибка которую Вы будете
-получать при использовании Solaris'огово make, вместо GNU'шного:
+Solaris make не будет работать. Типичная ошибка которую Вы будете
+получать при использовании Solaris make, вместо GNU make:
 <screen>
    % /usr/ccs/bin/make
    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
@@ -262,7 +253,7 @@ Solaris'овый make не будет работать. Типичная ошибка которую Вы будете
 </para>
 </listitem>
 
-<listitem><para><application>MPlayer</application> может сообщить о segfault при
+<listitem><para><application>MPlayer</application> может сообщить о нарушении сегментации при
 кодировании и декодировании видео, использующего  win32codecs:
 <screen>
 ...
@@ -278,7 +269,7 @@ MPlayer interrupted by signal 11 in module: init_audio_codec
 Это из-за изменений в sysi86() в Solaris 10 и пре-Solaris
 Nevada b31 релизах. Исправлено в Solaris Nevada b32; тем не менее
 Sun еще следует портировать исправление обратно на Solaris 10. Проект MPlayer
-избавил Sun от этой проблемы и патч в данный момент готовится для
+осведомил Sun об этой проблеме и патч в данный момент готовится для
 Solaris 10. Больше информаци об этой ошибке ищите 
 на:
 <ulink
@@ -296,7 +287,7 @@ url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
 Под Solaris 8 x86 драйвер sd(7D) содержит ошибку, проявляющуюся при доступе
 к дискам, размером > 4 Гб на устройствах с логическим размером блока !=
 DEV_BSIZE (например CD-ROM и DVD диски).
-Из-за целочисленного 32битного переполнения, происходит доступ к дисковому адресу
+Из-за целочисленного 32-х битного переполнения, происходит доступ к дисковому адресу
 по модулю 4 Гб
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
 Проблема отсутствует в SPARC версиях Solaris 8.
@@ -319,12 +310,12 @@ hsfs может не поддерживать разделы/диски больше 4 Гб, доступ к данным
 <title>IRIX</title>
 <para>
 Вы либо можете попробовать установить программу GNU install, и (если Вы
-не поместили её в Ваш глобальный путь), то укажите на её местонахождение:
+не поместили её в Ваш глобальный путь), укажите на её местонахождение:
 <screen>./configure --with-install=<replaceable>/путь/к/и/имя/установки</replaceable></screen>
 </para>
 
 <para>
-Или Вы можете использовать стандартную программу install, поставляемую вместе
+Либо Вы можете использовать стандартную программу install, поставляемую вместе
 с IRIX 6.5, но в этом случае Вы должны будете вручную немножко подправить
 <filename>Makefile</filename>.
 Поменяйте следующие две строки:
@@ -351,9 +342,9 @@ hsfs может не поддерживать разделы/диски больше 4 Гб, доступ к данным
 
 Joe Page на своей домашней странице держит подробное 
 <ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOWTO</ulink>
-по <application>MPlayer</application>на HP-UX, написанное Martin Gansser.
+по <application>MPlayer</application> на HP-UX, написанное Martin Gansser.
 С этими инструкциями сборка должна работать "прямо из коробки".
-следующая информация взята оттуда.
+Следующая информация взята оттуда.
 </para>
 
 <para>
@@ -361,7 +352,7 @@ Joe Page на своей домашней странице держит подробное
 или новее и SDL 1.2.7 или более новый. HP cc не может создать работоспособную
 программу, предыдущие версии GCC глючат. Для функционирования OpenGL
 необходимо установить Mesa, после чего должны заработать драйвера вывода видео
-gl и gl2, хотя, в зависимости от скорости CPU, скорость может быть ужасной.
+gl и gl2, хотя, в зависимости от быстродействия CPU, скорость может быть ужасной.
 GNU esound является хорошей заменой довольно бедной звуковой системе HP-UX.
 </para>
 
@@ -390,17 +381,12 @@ ctl     <emphasis role="bold">1</emphasis>    8/16/5.7.0  sctl  CLAIMED DEVICE  
 </screen>
 
 <para>
-<!-- FIXME is translation correct? 
-The screen output shows a Pioneer DVD-ROM at SCSI address 2.
-The card instance for hardware path 8/16 is 1.
--->
 Вывод показывает, что по адресу 2 шины SCSI находится Pioneer DVD-ROM.
-Экземпляр карты для оборудования 8/16 равен 1.
-[The card instance for hardware path 8/16 is 1.]
+Экземпляр карты для аппаратного пути 8/16 равен 1.
 </para>
 
 <para>
-Создайте ссылку от сырого[raw] устройства к DVD устройству.
+Создайте ссылку от сырого устройства к DVD устройству.
 </para>
 
 <screen>
@@ -422,7 +408,7 @@ The card instance for hardware path 8/16 is 1.
 <itemizedlist>
 <listitem>
 <para>
-крах при запуске с тким сообщением об ошибке:
+Крах при запуске с таким сообщением об ошибке:
 <screen>
 /usr/lib/dld.sl: Unresolved symbol: finite (code) from /usr/local/lib/gcc-lib/hppa2.0n-hp-hpux11.00/3.2/../../../libGL.sl
 </screen>
@@ -430,12 +416,9 @@ The card instance for hardware path 8/16 is 1.
 
 <para>
 Это значит, что функция <systemitem>.finite().</systemitem> недоступна в стандартной
-математической библиотеки HP-UX.
+математической библиотеке HP-UX.
 Вместо этого используйте <systemitem>.isfinite().</systemitem>.
-<!-- FIXME need correct translation 
-Use the latest Mesa depot file.
--->
-Решение: Используйте последнюю версию depot-файла Mesa[Use the latest Mesa depot file].
+Решение: Используйте последнюю версию Mesa из репозитория.
 </para>
 </listitem>
 
@@ -448,14 +431,14 @@ Use the latest Mesa depot file.
 </para>
 
 <para>
-Решения: Используйте опцию extralibdir программы configure
+Решение: Используйте опцию extralibdir программы configure
 <option>--with-extralibdir="/usr/lib -lrt"</option>
 </para>
 </listitem>
 
 <listitem>
 <para>
-MPlayer вылетает с segfault и сообщением вроде этого:
+MPlayer вылетает с нарушением сегментации и сообщением вроде этого:
 <screen>
 Pid 10166 received a SIGSEGV for stack growth failure.
 Possible causes: insufficient memory or swap space, or stack size exceeded maxssiz.
@@ -466,16 +449,12 @@ Segmentation fault
 <para>
 Решение:
 Ядро HP-UX по-умолчанию для каждого процесса имеет размер стека равный 8MB(?).
-<!-- FIXME is translation correct ? 
-11.0 and
-newer 10.20 patches let you increase 
--->
-(патчи 11.0 и более новый 10.20[11.0 and newer 10.20 patches] позволяют вам увеличить <systemitem>maxssiz</systemitem> 
+(11.0 и новые патчи для 10.20 позволяют вам увеличить <systemitem>maxssiz</systemitem> 
 вплоть до 350MB для 32-х битных программ). Вы должны расширить <systemitem>maxssiz</systemitem>
 и перекомпилировать ядро (и перезагрузиться). Чтобы сделать это, можно использовать SAM. 
-(Находсяь в нем проверьте параметр <systemitem>maxdsiz</systemitem> на предмет 
-максимального количества данных, которые может использоваться программами.
-Зависит от типа используемых приложений, достаточно будет 64Мб по-умолчанию или нет.)
+(Находясь в нем, проверьте параметр <systemitem>maxdsiz</systemitem> на предмет 
+максимального количества данных, которые могут использоваться программами.
+64 Мб по умолчанию может хватить или не хватить в зависимости от Ваших приложений.)
 </para>
 </listitem>
 </itemizedlist>
@@ -573,7 +552,7 @@ $ ./configure --charset=noconv
   за помошью и дополнительной информацией. 
   Официальные бинарники под Windows могут быть найдены на 
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">странице закачки</ulink>.
-  Пакеты установки и простые GUI фронтенды[frontends] доступны из внешних
+  Пакеты установки и простые GUI фронтенды доступны из внешних
   источников, мы собрали их в разделе Windows 
   <ulink url="http://www.mplayerhq.hu/design7/projects.html#windows">страницы нашего проекта</ulink>.
 </para>
@@ -589,12 +568,12 @@ $ ./configure --charset=noconv
 <para>Лучшие результаты получаются при использовании родного DirectX видео
   вывода (<option>-vo directx</option>). Альтернативой является использование OpenGL или
   SDL, но производительность OpenGL сильно зависит от машины, а SDL на некоторых
-  системах искажает звук и видео или вылетает на некоторых системах. 
+  системах искажает видео или вылетает. 
   Если изображение искажено, попробуйте отключить аппаратное ускорение, указав
   <option>-vo directx:noaccel</option>. Скачайте
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">файлы заголовков 
   DirectX 7</ulink>, чтобы скомпилировать видео драйвер DirectX. Кроме того,
-  выам потребуется установленных DirectX 7, чтобы работал DirectX выдио драйвер.
+  вам потребуется установленный DirectX 7, чтобы работал DirectX видеодрайвер.
 </para>
 
 <para><link linkend="vidix">VIDIX</link> теперь доступен и под Windows, как
@@ -613,7 +592,7 @@ $ ./configure --charset=noconv
 
   <screen>dhasetup.exe install</screen>
 
-  под Администратором[Administrator]. Теперь Вам нужно перезагрузить машину.
+  под Администратором. Теперь Вам нужно перезагрузить машину.
   Когда всё будет закончено, скопируйте файлы
   <systemitem class="library">.so</systemitem> из каталога
 	<filename class="directory">vidix/drivers</filename> в каталог
@@ -632,21 +611,21 @@ $ ./configure --charset=noconv
   цветов из вывода опции <option>-vf format=fmt=help</option>. Если Вы найдёте
   пространство цветов, которое Ваша карта особенно плохо поддерживает,
   опция <option>-vf noformat=<replaceable>colorspace</replaceable></option>
-  помешает его использовани. Добавьте это в ваш конфигурационный файл, чтобы
+  помешает его использованию. Добавьте это в ваш конфигурационный файл, чтобы
   это пространство цветов больше никогда не использовалось.</para>
 
-<para>Существуют специальные пакеты кодеков для Windows доступные на нашей
+<para>Существуют специальные пакеты кодеков для Windows, доступные на нашей
   <ulink url="http://www.mplayerhq.hu/design7/codecs.html">странице кодеков</ulink>,
-  позволяющие воспроизведить форматы, для которых пока нет родной поддержки.
+  позволяющие воспроизводить форматы, для которых пока нет родной поддержки.
   Поместите их куда-нибудь в пути или укажите
   <filename>configure</filename> опцию
   <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>
   (или <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option>, но
   только под <application>Cygwin</application>). 
   У нас были сообщения о том,
-  что Real DLL'и должны быть доступны пользователю, запускающему
+  что Real DLL должны быть доступны пользователю, запускающему
   <application>MPlayer</application>, для записи, но только на
-  некоторых системах(NT4). Если у Вас проблемы с ними, попробуйте сделать их
+  некоторых системах (NT4). Если у Вас проблемы с ними, попробуйте сделать их
   доступными на запись. 
 </para>
 
@@ -662,22 +641,22 @@ $ ./configure --charset=noconv
 <screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
 
 <para>Консоль <application>Cygwin</application>/<application>MinGW</application>
-  слегка медленная. Перенаправление вывода или
+  весьма медленная. Перенаправление вывода или
   использование опции <option>-quiet</option> улучшает производительность на
-  некоторых системах. Прямой рендеринг (<option>-dr
-  </option>) также может помочь.  Если воспроизведение
+  некоторых системах. Прямой рендеринг (<option>-dr</option>)
+  также может помочь.  Если воспроизведение
   прерывисто, попробуйте <option>-autosync 100</option>. Если какие-то из этих
   опций Вам помогут, стоит поместить их в конфигурационный файл.</para>
 
 <note>
 
 <para>Под Windows автоматическое определение CPU отключает поддержку SSE,
-  по причине повторяющихся, трудно отслеживаемый крахов, по вине SSE.
+  по причине повторяющихся, трудно отслеживаемых крахов, связанных с SSE.
   Если вы желаете иметь поддержку SSE под Windows, придется отключить 
   автоопределение CPU.
 </para>
 
-<para>Если у вас Pentiym 4 и заметили крахи при использовании кодеков RealPlayer,
+<para>Если у Вас Pentium 4 и Вы заметили крахи при использовании кодеков RealPlayer,
   попробуйте отключить hyperthreading.
 </para>
 
@@ -689,7 +668,7 @@ $ ./configure --charset=noconv
 <para>Для компиляции <application>MPlayer</application> требуется 
   <application>Cygwin</application> версии 1.5.0 или старше.</para>
 
-<para>Файлы заголовков DirectX надо распаковать в <filename class="directory">
+<para>Файлы заголовков DirectX надо распаковать в<filename class="directory">
   /usr/include/</filename> или <filename class="directory">/usr/local/include/
   </filename>.</para>
 
@@ -707,7 +686,7 @@ $ ./configure --charset=noconv
   способной скомпилировать <application>MPlayer</application>, была
   сложновата, но сейчас все работает с самого начала. Просто установите
   <application>MinGW</application> 3.1.0 или более новый и MSYS 1.0.9 или старше и
-  укажите MSYS постустановщику, что <application>MinGW</application>
+  укажите постустановщику MSYS, что <application>MinGW</application>
   установлен.</para>
 
 <para>Распакуйте файлы заголовков DirectX в <filename class="directory">/mingw/include/</filename>.</para>
@@ -719,7 +698,7 @@ $ ./configure --charset=noconv
   её до компиляции <application>MPlayer</application>'а.</para>
 
 <para>Полные инструкции по сборке <application>MPlayer</application> и необходимых 
-  иблиотеках могут быть найдены на странице
+  библиотек могут быть найдены на странице
   <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
 
 </sect2>
@@ -732,11 +711,11 @@ $ ./configure --charset=noconv
 <para>
 <application>MPlayer</application> не работает на Mac OS версий меньше 10, 
 но компилируется "из коробки" на Mac OS X 10.2 и старше. Предпочитаемым компилятором
-является Apple версия GCC 3.x или более позднего. Вы можете получить начальное окружение
+является версия Apple GCC 3.x или более позднего. Вы можете получить начальное окружение
 для компиляции, установив Apple'овский
 <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>.
 Если у вас Mac OS X 10.3.9 или выше и QuickTime 7, можете использовать 
-видео драйвер <option>macosx</option>.
+драйвер видео вывода <option>macosx</option>.
 </para>
 
 <para>
@@ -756,12 +735,12 @@ $ ./configure --charset=noconv
 Они оба предоставляют одинаковый сервис (т.е. огромное количество пакетов 
 для установки, разрешение зависимостей, возможность простой
 установки/обновления/удаления пакетов и т.д.).
-Fink предлагает как прекомпилированные бинарные пакеты, так и сборку
+Fink предлагает как предкомпилированные бинарные пакеты, так и сборку
 всего из исходников, в то время как DarwinPorts предлагает только собирать из
 исходных текстов.
-The author of this guide chose DarwinPorts for the simple fact that its basic
-setup was more lightweight.
-Later examples will be based on DarwinPorts.
+Автор данного руководства выбрал DarwinPorts исходя из того простого соображения, 
+что его базовая установка легче.
+Последующие примеры будут основаны на DarwinPorts.
 </para>
 
 <para>
@@ -774,8 +753,8 @@ Later examples will be based on DarwinPorts.
 Тем же способом можно установить <application>fontconfig</application>:
 <screen>sudo port install fontconfig</screen>
 Затем можно продолжить, запустив <application>MPlayer</application>'овский 
-<systemitem>configure</systemitem> скрипт (не забудьте переменные окружения
-<systemitem>PKG_CONFIG_PATH</systemitem> и <systemitem>PATH</systemitem>,
+<systemitem>configure</systemitem> скрипт (задайте переменные окружения
+<systemitem>PKG_CONFIG_PATH</systemitem> и <systemitem>PATH</systemitem> так,
 чтобы <systemitem>configure</systemitem> мог найти библиотеки, установленные 
 при помощи DarwinPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
@@ -785,8 +764,8 @@ Later examples will be based on DarwinPorts.
 <title>MPlayer OS X GUI</title>
 <para>
 Вы можете получить родной GUI для <application>MPlayer</application> вместе с
-прекомпилированными бинарниками <application>MPlayer</application> для Mac OS X 
-можно получить у проекта 
+предкомпилированными бинарниками <application>MPlayer</application> для Mac OS X 
+из проекта 
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>, но предупреждаем: 
 этот проект давно не развивается.
 </para>
@@ -805,7 +784,7 @@ Later examples will be based on DarwinPorts.
 <systemitem>main</systemitem> и копию 
 <systemitem>main</systemitem> CVS модуля, называющегося 
 <systemitem>main_noaltivec</systemitem>.
-<systemitem>mplayerosx</systemitem> это GUI frontend,
+<systemitem>mplayerosx</systemitem> - это GUI frontend,
 <systemitem>main</systemitem> - это MPlayer, а
 <systemitem>main_noaltivec</systemitem> - это MPlayer собранный без поддержки AltiVec.
 </para>
@@ -827,7 +806,7 @@ MPlayer_source_directory
    |
    |--->main           (MPlayer Subversion исходники)
    |
-   |--->main_noaltivec (MPlayer Subversion исходники, сконфигурированный с --disable-altivec)
+   |--->main_noaltivec (MPlayer Subversion исходники, сконфигурированные с --disable-altivec)
    |
    |--->mplayerosx     (MPlayer OS X Subversion исходники)
 </screen>
@@ -851,7 +830,7 @@ MPlayer_source_directory
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 </screen>
-Если конфигурируете для машины c G3 без AltiVec, используете:
+Если конфигурируете для машины c G3 без AltiVec, используйте:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 --disable-altivec
@@ -887,7 +866,7 @@ make dist
 
 <para>
 <application>MPlayer</application> работает на некоторых экзотических платформах,
-но большинство платформно-специфичных изменений не были внесены обратно в основное
+но большинство платформно-специфичных изменений для этих систем не были внесены обратно в основное
 дерево исходных кодов. За инструкциями по сборке придется обратиться к 
 документации, специфичной для системы.
 </para>
@@ -909,10 +888,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно.
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-<!--FIXME need correct translation 
-People over at 
--->
-Люди с[People over at] <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
+Люди с <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
 сделали пакеты текущих <application>MPlayer</application> и
 <application>MEncoder</application>.
 </para>
