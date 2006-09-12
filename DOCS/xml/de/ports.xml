@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19715 -->
+<!-- in sync with r19809 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -623,7 +623,7 @@ $ ./configure --charset=noconv
 
 <para>
   Es stehen spezielle Codec-Packs für Windows auf unserer
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">Codec-Seite</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">Codec-Seite</ulink>
   zu Verfügung, die das Abspielen von Formaten zu ermöglichen, für die es noch
   keinen nativen Support gibt.
   Leg die Codecs irgendwo in deinem Pfad ab oder übergib

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19805 -->
+<!-- in sync with r19809 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -174,7 +174,7 @@ class="library">libavcodec</systemitem></emphasis>:
   <emphasis role="bold">Win32-Codecs</emphasis>: Wenn du vorhast,
   <application>MPlayer</application> auf der x86-Architektur zu benutzen,
   wirst du sie vermutlich brauchen. Lade ein Codecpaket von unserer
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">Codec-Seite</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">Codec-Seite</ulink>
   herunter und packe es in <filename class="directory">/usr/local/lib/codecs</filename>,
   bevor du <application>MPlayer</application> compilierst, sonst wird keine
   Unterstützung für Win32 mitcompiliert!

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19805 -->
+<!-- in sync with r19809 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -401,7 +401,7 @@
         <answer>
           <para>
             Lade die Binärcodecs von unserer
-            <ulink url="http://www.mplayerhq.hu/design7/codecs.html">Codecs-Seite</ulink>
+            <ulink url="http://www.mplayerhq.hu/design7/dload.html">Codecs-Seite</ulink>
             herunter und installiere sie.
           </para>
         </answer>
