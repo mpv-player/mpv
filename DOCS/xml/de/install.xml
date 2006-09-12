@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19809 -->
+<!-- in sync with r19810 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -139,115 +139,6 @@ role="bold">2.11.x</emphasis>.
   <filename>libbio2jack.a</filename> manuell in deinen Bibliothekspfad
   kopieren, oder benutze die Option <option>--with-bio2jack=DIR</option>, damit
   <filename>./configure</filename> weiß, wo sich die Datei befindet.
-  </para></listitem>
-</itemizedlist>
-</sect1>
-
-
-<sect1 id="installation_codecs">
-<title>Codecs</title>
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold"><systemitem
-class="library">libavcodec</systemitem></emphasis>:
-  Dies ist ein Codec, der in der Lage ist,
-  H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-encodierte
-  Videostreams und WMA (Windows Media Audio) v1/v2-Streams auf mehreren
-  Plattformen zu decodieren. Er ist außerdem dafür bekannt, der schnellste
-  dafür zu sein. Siehe <link linkend="ffmpeg">FFmpeg</link> für Details.
-  Features:
-  <itemizedlist>
-  <listitem><simpara>
-    ermöglicht Decodierung von oben genannten Videos auf nicht-x86-Rechnern
-    </simpara></listitem>
-  <listitem><simpara>
-    Encodierung mit den meisten der genannten Codecs
-    </simpara></listitem>
-  <listitem><simpara>
-    Dieser Codec ist der <emphasis role="bold">schnellste verfügbare
-    Codec</emphasis> für DivX/3/4/5 und andere MPEG-4-Typen. Empfohlen!
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">Win32-Codecs</emphasis>: Wenn du vorhast,
-  <application>MPlayer</application> auf der x86-Architektur zu benutzen,
-  wirst du sie vermutlich brauchen. Lade ein Codecpaket von unserer
-  <ulink url="http://www.mplayerhq.hu/design7/dload.html">Codec-Seite</ulink>
-  herunter und packe es in <filename class="directory">/usr/local/lib/codecs</filename>,
-  bevor du <application>MPlayer</application> compilierst, sonst wird keine
-  Unterstützung für Win32 mitcompiliert!
-  <note><para>Das avifile-Projekt hat ein ähnliches Codecs-Paket, das sich
-  jedoch von unserem unterscheidet. Wenn du also alle unterstützten Codecs
-  benutzen möchtest, verwende unser Paket (und mach dir keine Sorgen, avifile
-  funktioniert ohne Probleme damit).</para>
-  </note>
-  Features:
-  <itemizedlist>
-  <listitem><simpara>
-    du brauchst es, wenn du z.B. Filme abspielen oder encodieren möchtest,
-    die mit verschiedenartigen Kompressoren, wie Tuner-Karten oder
-    Digitalkameras aufgenommen wurden (Beispiel: DV, ATI VCR, MJPEG)
-    </simpara></listitem>
-  <listitem><simpara>
-    benötigt, wenn du <emphasis role="bold">WMV9/WMA9-Filme</emphasis> abspielen
-    möchtest.
-   </simpara></listitem>
-  <listitem><simpara>
-    Nicht nötig für alte ASFs mit MP41- oder MP42-Video (obwohl VoxWare-Audio bei
-    diesen Dateien recht häufig vorkommt - wird erledigt vom Win32-Codec), oder WMV7.
-    Wird für WMA (Windows Media Audio) also nicht benötigt,
-    <systemitem class="library">libavcodec</systemitem> hat einen Open-Source-Decoder dafür.
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">QuickTime-Codecs</emphasis>: Auf der x86-Plattform
-  können diese Codecs benutzt werden, um RPZA und anderes QuickTime-Video sowie
-  QDesign-Audiostreams zu decodieren. Installationsanleitungen können in der
-  Sektion <link linkend="sorenson">Sorenson Video-Codec</link> gefunden werden.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">XviD</emphasis>: Open-Source-Encodierungsalternative zu
-  DivX4Linux.
-  Features:
-  <itemizedlist>
-  <listitem><simpara>
-    Encodierung in ein oder zwei Durchläufen mit
-    <link linkend="mencoder"><application>MEncoder</application></link>
-    </simpara></listitem>
-  <listitem><simpara>
-    ist Open Source, daher multiplatform
-    </simpara></listitem>
-  <listitem><simpara>
-    ist bei der Encodierung ungefähr doppelt so schnell wie DivX4 - bei
-    ungefähr gleicher Qualität
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  Die <emphasis role="bold"><link linkend="xanim">XAnim-Codecs</link></emphasis>
-  sind die besten (Vollbild, Hardware YUV-Zoom) für die Decodierung von
-  <emphasis role="bold">3ivx</emphasis> und Indeo 3/4/5-Filmen und manchen alten
-  Formaten. Und sie laufen auf mehreren Plattformen, sind daher die einzige
-  Möglichkeit, Indeo auf nicht-x86-Plattformen anzuschauen (naja, außer XAnim:).
-  Cinepak-Filme sind aber zum Beispiel am besten mit <application>MPlayer</application>s
-  eigenem Cinepak-Decoder anzuschauen!
-  </para></listitem>
-<listitem><para>
-  Für <emphasis role="bold">Ogg Vorbis</emphasis>-Audiodecodierung musst du
-  <systemitem class="library">libvorbis</systemitem> richtig installieren.
-  Binärpakete und Sourcecode können von der
-  <ulink url="http://www.vorbis.com/download.psp">Ogg Vorbis Seite</ulink>
-  heruntergeladen werden.
-  </para></listitem>
-<listitem><para>
-  <application>MPlayer</application> kann die Bibliotheken von RealPlayer 8 und
-  RealONE verwenden, um Dateien mit
-  <emphasis role="bold">RealVideo 3.0 und 4.0</emphasis>-Video und Sipro/Cook-Audio
-  abzuspielen. Siehe Installationsanweisungen
-  und weitere Informationen im Abschnitt <link linkend="realmedia">RealMedia Dateiformat</link>.
   </para></listitem>
 </itemizedlist>
 </sect1>
