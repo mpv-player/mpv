@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19801  -->
+<!-- synced with  r19809  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -314,7 +314,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 </para></question>
 <answer><para>
 Загрузите и установите бинарные кодеки с нашей 
-<ulink url="http://www.mplayerhq.hu/design7/codecs.html">страницы кодеков</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">страницы загрузки</ulink>.
 </para></answer>
 </qandaentry>
 

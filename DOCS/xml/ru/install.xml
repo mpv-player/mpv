@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19779 -->
+<!-- synced with r19810 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -128,107 +128,6 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   библиотечный путь (e.g. <filename>/usr/local/lib</filename>) или используйте
   опцию <option>--with-bio2jack=DIR</option>, чтобы указать
   <filename>./configure</filename> где искать этот файл.
-  </para></listitem>
-</itemizedlist>
-</sect1>
-
-
-<sect1 id="installation_codecs">
-<title>Кодеки:</title>
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
-  Этот пакет кодеков способен декодировать 
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-кодированные видео потоки и
-  WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
-  Он также известен как быстрейший кодек для этих задач.
-  Подробности см. в разделе <link linkend="ffmpeg">FFmpeg</link>. Особенности:
-  <itemizedlist>
-  <listitem><simpara>
-    декодирование упомянутых выше видеокодеков на не-x86 платформах
-	</simpara></listitem>
-  <listitem><simpara>
-    кодирование большинством упомянутых кодеков
-	</simpara></listitem>
-  <listitem><simpara>
-    этот кодек - это <emphasis role="bold">быстрейший доступный кодек</emphasis>
-	для DivX/3/4/5 и прочих типов MPEG4. Рекомендуется!
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">Win32 кодеки</emphasis>: Если Вы планируете использовать MPlayer на x86 архитектуре,
-они вам вероятно потребуются. Скачайте Win32 кодеки с нашей 
-<ulink url="http://www.mplayerhq.hu/design7/codecs.html">страницы кодеков</ulink>
-и установите их в <filename class="directory">/usr/local/lib/codecs</filename> <emphasis role="bold">ДО</emphasis> компиляции <application>MPlayer'а</application>,
-иначе поддержка Win32 будет отключена!
-<note><para>У проекта avifile похожий набор кодеков, но он отличается от нашего,
-  поэтому, если Вы хотите использовать все поддерживаемые кодеки, тогда поставьте наш
-  пакет (не беспокойтесь, avifile работает с ними без проблем).</para>
-  </note>
-Особенности:
-<itemizedlist>
-<listitem><simpara>
-  Вам это понадобится, если Вы хотите проигрывать, например, фильмы,
-записанные с различных аппаратных компрессоров, таких, как тюнеры,
-	цифровые камеры (например: DV, ATI VCR, MJPEG)
-  </simpara></listitem>
-<listitem><simpara>
-  необходимо, если Вы хотите проигрывать <emphasis role="bold">WMV9/WMA9 фильмы</emphasis>.
-  </simpara></listitem>
-<listitem><simpara>
-  Не нужно для старых ASF'ок с MP41 или MP42 видео (хотя в этих файлах часто
-встречается VoxWare аудио - декодируется Win32 кодеками), или WMV7. Также
-	не нужно для WMA (Windows Media Audio), в
-	<systemitem class="library">libavcodec</systemitem>
-	для этого есть декодер с открытыми исходниками.
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold">QuickTime кодеки</emphasis>: на x86 платформах эти кодеки могут использоваться
-для декодирования RPZA, и прочих QuickTime'овских видео, и
-QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
-<link linkend="sorenson">Sorenson видео кодек</link>.
-  </para></listitem>
-
-<listitem><para>
-  <emphasis role="bold">XviD</emphasis>: кодирующая альтернатива
-  для DivX4Linux с открытым исходным кодом. Особенности:
-<itemizedlist>
-<listitem><simpara>
-  кодирование в 1 или 2 прохода
-  <link linkend="mencoder"><application>MEncoder</application>'ом</link>
-  </simpara></listitem>
-<listitem><simpara>
-  его исходный код открыт, поэтому он многоплатформенен.
-  </simpara></listitem>
-<listitem><simpara>
-  он где-то раза в 2 быстрее, чем DivX4 при кодировании, при примерно таком же
-качестве
-  </simpara></listitem>
-</itemizedlist>
-</para></listitem>
-<listitem><para>
-  <emphasis role="bold"><link linkend="xanim">XAnim'овские кодеки</link></emphasis> - лучшие (полный экран,
-аппаратное YUV масштабирование) для декодирования <emphasis role="bold">3ivx</emphasis>, Indeo 3/4/5 фильмов,
-и некоторых старых форматов. И они многоплатформенные, поэтому это единственный
-способ проигрывать Indeo на не-x86 платформах (ну, кроме как использовать
-Xanim:). Но, к примеру, Cinepak фильмы лучше проигрываются с оригинальным
-<application>MPlayer</application>'овским декодером!
-  </para></listitem>
-<listitem><para>
-  Для декодирования <emphasis role="bold">Ogg Vorbis</emphasis> аудио, Вам нужно правильно установить
-<systemitem class="library">libvorbis</systemitem>. 
-  Скачать бинарные пакеты и исходный код можно с 
-  <ulink url="http://www.vorbis.com/download.psp">сайта Ogg Vorbis</ulink>.
-  </para></listitem>
-<listitem><para>
-  <application>MPlayer</application> может использовать библиотеки из RealPlayer 8 или RealONE, чтобы
-проигрывать файлы с <emphasis role="bold">RealVideo 3.0 и 4.0</emphasis> видео, и Sipro/Cook аудио. См.
-секцию <link linkend="realmedia">формат файлов RealMedia</link> для инструкций по установке
-и дополнительной информации.
   </para></listitem>
 </itemizedlist>
 </sect1>
