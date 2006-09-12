@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19741 -->
+<!-- in sync with r19805 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -910,29 +910,19 @@ Es gibt drei Zeitgebermethoden in <application>MPlayer</application>.
   </simpara></listitem>
 <listitem><para>
 <emphasis role="bold">Der neue Zeitgeber</emphasis>-Code benutzt RTC (RealTime Clock, Echtzeituhr)
-  für diese Aufgabe, da dieser präzise 1ms-Timer besitzt. Falls er verfügbar ist, wird
-  er automagisch aktiviert, benötigt jedoch root-Rechte, eine <emphasis>setuid root</emphasis>
-  <application>MPlayer</application>-Binärdatei oder einen korrekt aufgesetzten Kernel.
+  für diese Aufgabe, da dieser präzise 1ms-Timer besitzt.
+  Die Option <option>-rtc</option> aktivert diesen, es ist jedoch ein hierfür speziell konfigurierter
+  Kernel erforderlich.
   Wenn du Kernel 2.4.19pre8 oder neuer laufen hast, kannst du die maximale RTC-Frequenz
   für normale Benutzer durch das <systemitem class="systemname">/proc</systemitem>-Dateisystem
   festlegen. Benutze folgenden Befehl, um RTC für normale Benutzer zu aktivieren
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
-  Wenn du keinen so neuen Kernel hast, kannst du auch eine Zeile in
-  <filename>drivers/char/rtc.c</filename> ändern und deinen Kernel neu compilieren.
-  Finde den Abschnitt, der folgendermaßen lautet:
-  <programlisting>
-       * We don't really want Joe User enabling more
-       * than 64Hz of interrupts on a multi-user machine.
-       */
-      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
-   </programlisting>
-   und ändere die 64 auf 1024. Du solltest jedoch wirklich wissen, was du tust.
    Du kannst die Effizienz des neuen Zeitgebers in der Statuszeile sehen.
    Die Power Management-Funktionen der BIOSse mancher Notebooks mit speedstep-CPUs
    vertragen sich nicht gut mit RTC. Audio und Video könnten Synchronisation verlieren.
    Die externe Stromversorgung anzuschließen, bevor du dein Notebook einschaltest,
-   scheint zu helfen. Du kannst RTC-Unterstützung jederzeit mit der Option
-   <option>-nortc</option> abschalten. Bei manchen Hardwarekombinationen (bestätigt
+   scheint zu helfen.
+   Bei manchen Hardwarekombinationen (bestätigt
    während des Gebrauchs eines Nicht-DMA-DVD-Laufwerks auf einem ALi1541-Board)
    führt der Gebrauch des RTC-Zeitgebers zu sprunghafter Wiedergabe. Es wird empfohlen,
    in solchen Fällen die dritte Methode zu verwenden.
@@ -943,10 +933,6 @@ Es gibt drei Zeitgebermethoden in <application>MPlayer</application>.
   Auf der anderen Seite benötigt er mehr CPU.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">Installiere NIEMALS eine setuid root
-<application>MPlayer</application>-Binärdatei auf einem Multiuser-System!</emphasis>
-Es ist eine Einladung für jeden, root zu werden.
-</para></note>
 </para>
 </sect1>
 

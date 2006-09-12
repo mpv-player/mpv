@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19732 -->
+<!-- in sync with r19805 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -252,7 +252,7 @@
         <answer>
           <para>
             Ja. Siehe den
-            <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">Abschnitt Mailing-Listen</ulink>
+            <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">Abschnitt Mailing-Listen</ulink>
             unserer Homepage.
           </para>
         </answer>
@@ -298,7 +298,7 @@
         </question>
         <answer>
           <para>
-            Du benötigst root-Rechte oder einen speziell konfigurierten Kernel, um den neuen
+            Du benötigst einen speziell konfigurierten Kernel, um den neuen
             Zeitgebercode benützen zu können. Für Details siehe Abschnitt
             <link linkend="rtc">RTC</link> der Dokumentation.
           </para>
@@ -698,7 +698,7 @@
             Das ist ein Effekt des Power Managements / Energiesparmodus deines Notebooks (BIOS,
             nicht Kernel). Stecke die externe Stromversorgung ein,
             <emphasis role="bold">bevor</emphasis> du dein Notebook anschaltest.
-            Du kannst auch probieren, ob dir <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+            Du kannst auch probieren, ob dir <ulink url="http://www.brodo.de/cpufreq">cpufreq</ulink>
             (eine SpeedStep-Schnittstelle für Linux) weiterhilft.
           </para>
         </answer>
@@ -975,6 +975,25 @@
             <application>xine</application>, <application>vlc</application> oder <application>Ogle</application>
             verwenden. Willst du DVD-Navigation in <application>MPlayer</application> sehen, musst du diese
             selbst implementieren, sei dir aber dessen bewusst, dass dies eine größere Aufgabe ist.
+          </para>
+        </answer>
+      </qandaentry>
+
+      <qandaentry>
+        <question>
+          <para>
+            Ich kann aktuelle DVDs von Sony Picutures/BMG nicht anschauen.
+          </para>
+        </question>
+        <answer>
+          <para>
+            Das ist normal; du bist betrogen worden, dir ist eine absichtlich fehlerhafte Scheibe verkauft worden.
+            Die einzige Möglichkeite, diese DVDs anzuschauen, ist, die fehlerhaften Blöcke dieser Disc zu umgeben,
+            indem du DVDnav anstelle von mpdvdkit2 verwendest.
+            Dies kannst du erreichen, indem du MPlayer mit DVDnav-Unterstützung compilierst und dann auf der
+            Kommandozeile dvd:// durch dvdnav:// ersetzst.
+            DVDnav schließt bisher die Verwendung von mpdvdkit2 aus, stelle daher sicher, dass du dem configure-Skript
+            <option>--disable-mpdvdkit</option> übergibst.
           </para>
         </answer>
       </qandaentry>
