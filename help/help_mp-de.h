@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r19693
+// In sync with r19799
 
 // ========================= MPlayer help ===========================
 
@@ -1878,6 +1878,7 @@ static char help_text[]=
 #define MSGTR_RADIO_WrongFreqForChannel "[Radio] Falsche Frequenz für Kanal %s\n"
 #define MSGTR_RADIO_WrongChannelNumberFloat "[Radio] Falsche Kanalnummer: %.2f\n"
 #define MSGTR_RADIO_WrongChannelNumberInt "[Radio] Falsche Kanalnummer: %d\n"
+#define MSGTR_RADIO_WrongChannelName "[Radio] Falscher Kanalname: %s\n"
 #define MSGTR_RADIO_FreqParameterDetected "[Radio] Radiofrequenzparameter erkannt.\n"
 #define MSGTR_RADIO_DoneParsingChannels "[Radio] Einlesen der Kanäle erledigt.\n"
 #define MSGTR_RADIO_GetTunerFailed "[Radio] Warnung: ioctl \"get tuner\" fehlgeschlagen: %s. Setze frac auf %d.\n"
