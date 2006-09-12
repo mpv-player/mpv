@@ -3488,6 +3488,7 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                     block_duration = ebml_read_uint (s, &l);
                     if (block_duration == EBML_UINT_INVALID)
                       return 0;
+                    block_duration *= mkv_d->tc_scale / 1000000.0;
                     break;
                   }
 
