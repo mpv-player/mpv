@@ -1434,6 +1434,7 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
   float pts;
   int is_keyframe;
   int samplesize=1;
+  ogg_int64_t granulepos_orig;
 
   if(demuxer->video->id >= 0) {
     ds = demuxer->video;
@@ -1552,6 +1553,7 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
         break;
       }
       is_gp_valid = (op.granulepos >= 0);
+      granulepos_orig=op.granulepos;
       demux_ogg_read_packet(os,&op,context,&pts,&is_keyframe,samplesize);
       if (precision && is_gp_valid) {
         precision--;
@@ -1581,6 +1583,7 @@ static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,float audio_de
         vo_sub = &ogg_sub;
         vo_osd_changed(OSDTYPE_SUBTITLE);
         clear_sub = -1;
+	op.granulepos=granulepos_orig;
 	demux_ogg_add_packet(ds,os,ds->id,&op);
 	return;
       }

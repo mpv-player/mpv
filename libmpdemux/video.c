@@ -579,6 +579,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
       case DEMUXER_TYPE_MOV:
       case DEMUXER_TYPE_FILM:
       case DEMUXER_TYPE_VIVO:
+      case DEMUXER_TYPE_OGG:
       case DEMUXER_TYPE_ASF: {
         float next_pts = ds_get_next_pts(d_video);
         float d= next_pts > 0 ? next_pts - d_video->pts : d_video->pts-pts1;
