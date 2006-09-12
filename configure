@@ -7428,6 +7428,8 @@ SGIAUDIO_LIB = $_ld_sgiaudio
 
 # input/demuxer/codecs
 TERMCAP_LIB = $_ld_termcap
+JOYSTICK = $_joystick
+LIRC = $_lirc
 LIRC_LIB = $_ld_lirc
 LIRCC_LIB = $_ld_lircc
 TV = $_tv

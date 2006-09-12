@@ -1,8 +1,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_JOYSTICK
-
 #include "joystick.h"
 #include "input.h"
 
@@ -161,7 +159,5 @@ int mp_input_joystick_read(int fd) {
   
   return MP_INPUT_NOTHING;
 }
-
-#endif
 
 #endif

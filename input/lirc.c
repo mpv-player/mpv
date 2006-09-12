@@ -1,8 +1,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_LIRC
-
 #include <lirc/lirc_client.h>
 #include <errno.h>
 #include <stdio.h>
@@ -115,5 +113,3 @@ mp_input_lirc_close(int fd) {
   lirc_freeconfig(lirc_config);
   lirc_deinit();
 }
-
-#endif
