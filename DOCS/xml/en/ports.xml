@@ -596,7 +596,7 @@ $ ./configure --charset=noconv
   keep it from being used.</para>
 
 <para>There are special codec packages for Windows available on our
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>
   to allow playing formats for which there is no native support yet.
   Put the codecs somewhere in your path or pass
   <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option>

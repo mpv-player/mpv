@@ -159,7 +159,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">Win32 codecs</emphasis>: If you plan to use
   <application>MPlayer</application> on x86 architecture, you will possibly need
   them. Download a codec package from our
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>
   and put the codecs in <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">BEFORE</emphasis> compiling <application>MPlayer</application>,
   otherwise no Win32 support will be compiled!

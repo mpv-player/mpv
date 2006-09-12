@@ -322,7 +322,7 @@ There are error messages about file not found <filename>/usr/local/lib/codecs/</
 </para></question>
 <answer><para>
 Download and install the binary codecs from our
-<ulink url="http://www.mplayerhq.hu/design7/codecs.html">codecs page</ulink>.
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">download page</ulink>.
 </para></answer>
 </qandaentry>
 
