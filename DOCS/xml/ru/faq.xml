@@ -194,7 +194,7 @@ gunzip &lt; CompatFrameworks.tgz | tar xvf -
 Есть ли списки рассылки, посвященные <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Да. Смотрите раздел <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">списки рассылки</ulink>
+Да. Смотрите раздел <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">списки рассылки</ulink>
 нашего сайта.
 </para></answer>
 </qandaentry>
