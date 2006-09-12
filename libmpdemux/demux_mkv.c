@@ -663,6 +663,8 @@ demux_mkv_read_info (demuxer_t *demuxer)
   stream_t *s = demuxer->stream;
   uint64_t length, l;
   int il;
+  uint64_t tc_scale = 1000000;
+  long double duration;
 
   length = ebml_read_length (s, NULL);
   while (length > 0)
@@ -674,9 +676,9 @@ demux_mkv_read_info (demuxer_t *demuxer)
             uint64_t num = ebml_read_uint (s, &l);
             if (num == EBML_UINT_INVALID)
               return 1;
-            mkv_d->tc_scale = num;
+            tc_scale = num;
             mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + timecode scale: %"PRIu64"\n",
-                    mkv_d->tc_scale);
+                    tc_scale);
             break;
           }
 
@@ -685,9 +687,9 @@ demux_mkv_read_info (demuxer_t *demuxer)
             long double num = ebml_read_float (s, &l);
             if (num == EBML_FLOAT_INVALID)
               return 1;
-            mkv_d->duration = num * mkv_d->tc_scale / 1000000000.0;
-            mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + duration: %.3fs\n",
-                    mkv_d->duration);
+            duration = num;
+            mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + duration: %.3Lfs\n",
+                    duration * tc_scale / 1000000000.0);
             break;
           }
 
@@ -697,6 +699,8 @@ demux_mkv_read_info (demuxer_t *demuxer)
         }
       length -= l + il;
     }
+  mkv_d->tc_scale = tc_scale;
+  mkv_d->duration = duration * tc_scale / 1000000000.0;
   return 0;
 }
 
