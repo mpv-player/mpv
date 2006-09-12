@@ -31,8 +31,7 @@
 #include "m_option.h"
 #include "m_struct.h"
 
-
-void cache_uninit(stream_t *s); // defined in cache2.c
+#include "cache2.h"
 
 //#include "vcd_read_bincue.h"
 

@@ -85,7 +85,6 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 
 int slave_mode=0;
 int player_idle_mode=0;
-extern int verbose;
 int quiet=0;
 
 #ifdef WIN32
@@ -116,7 +115,7 @@ char * proc_priority=NULL;
 #include "stream/dvbin.h"
 static int last_dvb_step = 1;
 static int dvbin_reopen = 0;
-extern void cache_uninit(stream_t *s);
+#include "stream/cache2.h"
 #endif
 
 //**************************************************************************//
@@ -144,12 +143,10 @@ static int play_tree_step = 1;
 //**************************************************************************//
 //             Config
 //**************************************************************************//
-m_config_t* mconfig;
+#include "parser-cfg.h"
+#include "parser-mpcmd.h"
 
-extern play_tree_t*
-m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv);
-extern int
-m_config_parse_config_file(m_config_t* config, char *conffile);
+m_config_t* mconfig;
 
 //**************************************************************************//
 //             Config file
@@ -193,8 +190,6 @@ static int max_framesize=0;
 #include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/vf.h"
 #include "libmpcodecs/vd.h"
-
-extern void vf_list_plugins(void);
 
 //**************************************************************************//
 //**************************************************************************//
@@ -804,8 +799,6 @@ static void exit_sighandler(int x){
   }
   exit_player(NULL);
 }
-
-//extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 
 extern void mp_input_register_options(m_config_t* cfg);
 
