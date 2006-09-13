@@ -45,16 +45,15 @@ ______________________
 STEP0: Getting MPlayer
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Official releases and Subversion snapshots, as well as fonts for the OSD, codec
-packages and a number of different skins for the GUI are available from the
-download section of our homepage at
+Official releases and Subversion snapshots, as well as binary codec packages
+and a number of different skins for the GUI are available from the download
+section of our homepage at
 
   http://www.mplayerhq.hu/dload.html
 
-A set of fonts is necessary for the OSD and subtitles unless you are using
-TrueType fonts, the GUI needs at least one skin and codec packages add support
-for some more video and audio formats. MPlayer does not come with any of these
-by default, you have to download and install them separately.
+The GUI needs at least one skin and codec packages add support for some more
+video and audio formats. MPlayer does not come with any of these by default,
+you have to download and install them separately.
 
 You can also get MPlayer via Subversion. Issue the following commands to get
 the latest sources:
@@ -156,17 +155,15 @@ To clean up the source tree run the following command:
 
   fakeroot debian/rules clean
 
-____________________________________________
-STEP4: Installing the onscreen display fonts
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+______________________________________
+STEP4: Choose an onscreen display font
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Unpack the archive and choose one of the available font sizes. Then copy the
-font files of the corresponding size into /usr/local/share/mplayer/font/ or
-~/.mplayer/font/ (or whatever you set with './configure --datadir=DIR').
-
-Alternatively you can use a TrueType font installed on your system. Just
-make a symbolic link from either /usr/local/share/mplayer/subfont.ttf or
-~/.mplayer/subfont.ttf to your TrueType font.
+You can use any TrueType font installed on your system. Look at the manual page
+to see how to pass the -font option to MPlayer on the command line and/or how to
+fix this in your configuration file. Alternatively you can create a symbolic
+link from either /usr/local/share/mplayer/subfont.ttf or ~/.mplayer/subfont.ttf
+to your TrueType font.
 
 
 ____________________________
