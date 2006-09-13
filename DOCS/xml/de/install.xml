@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19823 -->
+<!-- in sync with r19827 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -67,6 +67,10 @@ role="bold">2.11.x</emphasis>.
   ist normalerweise nicht so wichtig.
   </para></listitem>
 <listitem><para>
+  <emphasis role="bold">FreeType</emphasis> in der Version 2.0.9 oder neuer wird
+  benötigt, um Schriften für OSD und Untertitel zu erhalten.
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">SDL</emphasis> - ist nicht zwingend notwendig, kann
   in manchen Fällen aber helfen (schlechter Klang, Grafikkarten, die zusammen
   mit dem xv-Treiber komischerweise hinterherhingen).
@@ -114,10 +118,6 @@ role="bold">2.11.x</emphasis>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optional, für CDDA-Unterstützung
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">libfreetype</emphasis> - optional, für Unterstützung
-  von TTF-Schriftarten. Version 2.0.9 ist mindestens erforderlich.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - optional, für Unterstützung des
@@ -578,119 +578,73 @@ Ausführungen über DVD-Untertitel findest du im Abschnitt <link linkend="dvd">DVD
 </para>
 
 
-<sect2 id="mpsub-install">
-<title>OSD und Untertitel installieren</title>
+<sect2 id="truetype-fonts">
+<title>TrueType-Schriften</title>
 
 <para>
-Du benötigst das <application>MPlayer</application>-Schriftenpaket, um das OSD/SUB-Feature
-nutzen zu können. Es gibt mehrere Möglichkeiten, dies zu erreichen:
-</para>
-
+Du musst <application>MPlayer</application> mitteilen, welche Schriftart verwendet 
+werden soll, um in den Genuß von OSD und Untertiteln zu kommen.
+Jede TrueType-Schriftart oder spezielle Bitmap-Schriftarten werden funktionieren.
+TrueType-Schriftarten werden jedoch empfohlen, da sie weit besser aussehen,
+entsprechend der Filmgröße skaliert werden können und mit verschiedenen Zeichensätzen
+besser umgehen.
 <itemizedlist>
-<listitem><para>
-  Die Verwendung eines TrueType-Fonts (TTF) nach Maßstäben der
-  <systemitem class="library">freetype</systemitem>-Bibliothek. Version 2.0.9 oder höher
-  ist unbedingt notwendig! Dann hast du zwei Möglichkeiten:
-  <itemizedlist>
-    <listitem><para>
-      benutze die Option <option>-font <replaceable>/pfad/zu/beispiel_font.ttf</replaceable></option>,
-      um bei jeder Gelegenheit eine TrueType-Font-Datei anzugeben
+  <listitem><para>
+      Benutze die Option <option>-font <replaceable>/pfad/zu/beispiel_font.ttf</replaceable></option>
+      auf der Kommandozeile, um eine TrueType-Font-Datei anzugeben.
       </para></listitem>
     <listitem><para>
-      erstelle einen Symlink:
+      Erstelle einen Symlink
       <screen>ln -s <replaceable>/pfad/zu/beispiel_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+      individuell für jeden Benutzer oder systemweit:
+      <screen>ln -s <replaceable>/pfad/zu/beispiel_font.ttf</replaceable> /usr/local/share/mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
   Wenn <application>MPlayer</application> mit
   <systemitem class="library">fontconfig</systemitem>-Unterstützung compiliert wurde,
-  werden die oben genannten Methoden nicht funktionieren, statt dessen erwartet die Option
+  werden die oben genannten Methoden nicht funktionieren, statt dessen erwartet 
   <option>-font</option> einen <systemitem class="library">fontconfig</systemitem>-Fontnamen,
   und der Standard ist die Schriftart Sans-serif. Um eine Liste der
   <systemitem class="library">fontconfig</systemitem> bekannten Dateien zu erhalten,
-  benutze <command>fc-list</command>. Beispiel: <option>-font
-  <replaceable>'Bitstream Vera Sans'</replaceable></option>
-  </para></listitem>
-<listitem><para>
-  Lade gebrauchsfertige Schriftartenpakete von der <application>MPlayer</application>-Seite
-  herunter. Beachte: Momentan sind die verfügbaren Schriftarten
-  auf ISO 8859-1/2-Unterstützung begrenzt, es gibt jedoch andere, von Benutzern
-  erstellte Schriftarten (inklusive Koreanisch, Russisch, ISO 8859-8 usw.) im
-  FTP-Verzeichnis contrib/font.
-  </para><para>
-  <!-- FIXME: dieser Abschnitt sollte vor der Liste kommen -->
-  Du solltest eine passende <filename>font.desc</filename>-Datei haben, die
-  Schriftpositionen eines Unicode-Fonts auf die aktuelle Codepage des Untertiteltextes
-  abbildet. Eine andere Möglichkeit ist, die Untertitel in UTF-8 codiert zu haben
-  und die Option <option>-utf8</option> zu verwenden oder die Untertiteldatei einfach
-  <filename>&lt;video_name&gt;.utf</filename> zu nennen und sie in dasselbe Verzeichnis
-  wie das Video zu legen. Recodierung unterschiedlicher Codepages nach UTF-8 kann mit
-  den Programmen <command>konwert</command> oder <command>iconv</command> gemacht werden.
-  </para><para>
+  benutze <command>fc-list</command>. Beispiel:
 
-  <table>
-  <title>Ein paar URLs</title>
-  <tgroup cols="2">
-  <thead>
-    <row><entry>URL</entry><entry>Kommentar</entry></row>
-  </thead>
-  <tbody>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
-    </entry><entry>
-    ISO-Fonts
-    </entry></row>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
-    </entry><entry>
-    verschiedene Fonts von Benutzern
-    </entry></row>
-  </tbody>
-  </tgroup>
-  </table>
+<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
+</para>
 
-  </para></listitem>
-</itemizedlist>
+</sect2>
+
+
+<sect2 id="bitmap-fonts">
+<title>Bitmap-Schriften</title>
+
 <para>
-Solltest du Nicht-TTF-Schriften gewählt haben, entpacke die heruntergeladene Datei
-mit UNZIP nach <filename class="directory">~/.mplayer</filename> oder
+Wenn du aus einem bestimmten Grund Bitmap-Schriftwarten verwenden möchtest, lade dir einen Satz
+von unserer Homepage herunter. Du kannst zwischen verschiedenen
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO-Schriftarten</ulink>
+und ein paar Sätzen von Schriftarten, die
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">von Benutzern beigetragen</ulink> wurden,
+in verschiedenen Zeichensätzen wählen.
+</para>
+
+<para>
+Entpacke die Datei, die du heruntergeladen hast nach
+<filename class="directory">~/.mplayer</filename> oder
 <filename class="directory">$PREFIX/share/mplayer</filename>.
-Benenne dann eins der entpackten Verzeichnisse um, oder erstell einen Symlink mit
-dem Namen <filename class="directory">font</filename>, zum Beispiel:
-
+Benenne dann eins der extrahierten Verzeichnisse um zu
+<filename class="directory">font</filename>, oder erstelle einen Symlink dorthin, zum Beispiel:
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-
-Du müsstest jetzt eine Zeitanzeige in der oberen linken Ecke des Films sehen
-(schalte sie mit der Taste <keycap>o</keycap> aus).
+<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
 </para>
-
+ 
 <para>
-(Untertitel sind <emphasis>immer aktiviert</emphasis>, lies bitte die Manpage,
-wenn du wissen möchtest, wie man sie deaktiviert)
+Schriftarten sollten eine entsprechende <filename>font.desc</filename>-Datei haben,
+die Positionen von Unicode-Schriften auf die aktuelle Codeseite des Untertiteltexts abbildet.
+Eine andere Möglichkeit besteht darin, in UTF-8 codierte Untertitel zu verwenden und die Option
+<option>-utf8</option> zu verwenden. Noch eine Möglichkeit besteht darin, die Untertiteldatei
+umzubenennen zu <filename>&lt;video_name&gt;.utf</filename> und sie im selben Verzeichnis wie
+die Videodatei abzulegen.
 </para>
 
-<para>
-Das OSD hat 4 Zustände (wechsle mit <keycap>o</keycap>):
-
-<orderedlist>
-<listitem><simpara>
-  Lautstärkeleiste + Positionsanzeige (Standard)
-  </simpara></listitem>
-<listitem><simpara>
-  Lautstärkeleiste + Positionsanzeige + Zeitangabe + prozentuale Dateiposition
-  </simpara></listitem>
-<listitem><simpara>
-  Lautstärkeleiste + Positionsanzeige + Zeitangabe + prozentuale Dateiposition + Gesamtzeit des Mediums
-  </simpara></listitem>
-<listitem><simpara>
-  nur Untertitel
-  </simpara></listitem>
-</orderedlist>
-
-Du kannst das Standardverhalten ändern, indem du die Variable <varname>osdlevel</varname>
-in der Konfigurationsdatei setzt oder die Kommandozeilenoption <option>-osdlevel</option>
-verwendest.
-
-</para>
 </sect2>
 
 

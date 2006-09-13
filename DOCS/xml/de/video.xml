@@ -40,7 +40,7 @@ reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
 --></screen>
   </para></listitem>
 <listitem><para>
-  für (verwende<filename>/proc/pci</filename> (verwende den Befehl
+  von <filename>/proc/pci</filename> (verwende den Befehl
 <command>lspci -v</command>):
   <screen>
 01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
