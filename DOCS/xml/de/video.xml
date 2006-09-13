@@ -48,7 +48,7 @@ Memory at d8000000 (32-bit, prefetchable)<!--
 --></screen>
   </para></listitem>
 <listitem><para>
-  von mga_vid kernel Kerneltreiber-Meldungen (verwende <command>dmesg</command>):
+  von den mga_vid Kerneltreiber-Meldungen (verwende <command>dmesg</command>):
   <screen>mga_mem_base = d8000000</screen>
   </para></listitem>
 </orderedlist>
@@ -73,10 +73,10 @@ Memory at d8000000 (32-bit, prefetchable)<!--
 </para>
 
 <para>
-  Du weißt die Basisadresse und die Speichergröße? Lass uns
-  die MTRR Register einstellen! Für die Matrox Karte von oben
+  Du kennst die Basisadresse und die Speichergröße? Lass uns
+  die MTRR Register einstellen! Für die Matrox-Karte von oben
   (<literal>base=0xd8000000</literal>) mit 32MB RAM (<literal>size=0x2000000</literal>)
-  führst du einfach das Folgende aus:
+  führst du einfach folgendes aus:
 <screen>
 echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt;| /proc/mtrr
 </screen>
@@ -84,7 +84,7 @@ echo &quot;base=0xd8000000 size=0x2000000 type=write-combining&quot; &gt;| /proc
 
 <para>
   Nicht alle CPUs unterstützen MTRRs. Zum Beispiel ältere K6-2s
-  [die bei ca. 266MHz, stepping 0] unterstützen kein MTRR, aber Stepping-12-CPUs
+  [bei ca. 266MHz, stepping 0] unterstützen kein MTRR, aber Stepping-12-CPUs
   tun es (<command>cat /proc/cpuinfo</command> gibt Aufschluss).
 </para>
 </sect1>
@@ -167,10 +167,10 @@ screen #0
   Pixelformate YUY2 packed und YV12 planar unterstützt werden.
   </para></listitem>
   <listitem><para>
-  Stell als letztes sicher, dass <application>MPlayer</application> mit
+  Stelle als letztes sicher, dass <application>MPlayer</application> mit
   Unterstützung für Xv compiliert wurde. <command>configure</command> gibt eine
   entsprechende Meldung aus.
-  Führ den Befehl <command>mplayer -vo help | grep xv </command> aus.
+  Führe den Befehl <command>mplayer -vo help | grep xv </command> aus.
   Wurde Unterstützung für Xv eingebaut, sollte eine ähnliche Meldung
   wie diese erscheinen:
   <screen>xv      X11/Xv</screen>
@@ -184,19 +184,19 @@ screen #0
 <para>
   Ältere 3dfx-Treiber hatten bekanntermaßen Probleme mit der
   XVideo-Beschleuningung, die entweder YUY2 oder YV12 nicht unterstützte.
-  Stell sicher, dass du XFree86 Version 4.2.0 oder neuer verwendest, da diese
+  Stelle sicher, dass du XFree86 Version 4.2.0 oder neuer verwendest, da diese
   Versionen mit YV12 und YUY2 keine Probleme haben. Vorherige Versionen, auch
   4.1.0, sind <emphasis role="bold">bei Verwendung von YV12 abgestürzt</emphasis>.
   Wenn du merkwürdige Effekte bei der Verwendung von <option>-vo xv</option>
-  bemerkst, dann probier aus, ob mit SDL, das ebenfalls XVideo benutzen kann,
+  bemerkst, dann probier aus, ob mit SDL, das ebenfalls XVideo nutzen kann,
   diese Effekte verschwinden. In der <link linkend="sdl">SDL</link> stehen
   Details darüber.
 </para>
 
 <para>
   <emphasis role="bold">Alternativ</emphasis> kannst du auch den NEUEN
-  tdfxfb-Treiber mit <option>-vo tdfxfb</option>verwenden!
-  Lies dazu die <link linkend="tdfxfb">tdfxfb</link>-Sektion
+  tdfxfb-Treiber mit <option>-vo tdfxfb</option> verwenden!
+  Lies dazu die <link linkend="tdfxfb">tdfxfb</link>-Sektion.
 </para>
 </sect3>
 
@@ -223,7 +223,7 @@ screen #0
 <para>
   Momentan ist nicht ganz klar, welche Savage-Modelle keine Unterstützung
   für YV12 in Hardware haben, sodass bei ihnen der Treiber diese Konvertierung
-  sehr langsam vornimmt. Wenn du deine Karte deswegen verdächtigst, dann
+  sehr langsam vornimmt. Hast du deine Karte in Verdacht, dann
   besorg dir einen neueren Treiber, oder frag auf der MPlayer-Users-Mailingliste
   freundlich nach einem Treiber, der MMX/3DNow unterstützt.
 </para>
@@ -296,7 +296,7 @@ screen #0
 </para>
 
 <para>
-  XFree86 4.3.0 beinhaltet die Unterstützung für Xv, jetzt schickte Bohdan Horst
+  XFree86 4.3.0 beinhaltet die Unterstützung für Xv, Bohdan Horst schickte jetzt
   einen kleinen
   <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">Patch</ulink>
   auf die XFree86-Quellen, der Framebuffer-Operationen (daher XVideo)
@@ -428,7 +428,7 @@ EndSection<!--
   Werde <systemitem class="username">root</systemitem>.
   DGA braucht <systemitem class="username">root</systemitem>-Privilegien,
   um direkt in den Grafikspeicher zu schreiben. Wenn du MPlayer als
-  normaler Benutzer starten möchtest, dann installiere
+  normaler Nutzer starten möchtest, dann installiere
   <application>MPlayer</application> mit dem SUID-Bit:
 
 <screen>
@@ -502,7 +502,7 @@ EndSection
 <para>
   DGA wird bei <application>MPlayer</application> an zwei Stellen benutzt:
   beim SDL-Treiber mit (<option>-vo sdl:driver=dga</option>) oder beim
-  DGA-Treiber selber (<option>-vo dga</option>).
+  DGA-Treiber selbst (<option>-vo dga</option>).
   Das oben gesagte gilt für beide Treiber. In den folgenden Abschnitten
   erkläre ich, wie der DGA-Treiber von <application>MPlayer</application>
   selber arbeitet.
@@ -520,7 +520,7 @@ EndSection
   die Optionen <option>-vm</option> (Videomodusumschaltung aktivieren) und
   <option>-fs</option> (Vollbildmodus erzwingen) - er versucht immer, so viel
   Bildfläche wie möglich durch eine Änderung der Auflösung zu bedecken.
-  Dadurch wird nicht ein einziger weitere CPU-Takt für die Skalierung des
+  Dadurch wird nicht ein einziger weiterer CPU-Takt für die Skalierung des
   Bildes verwendet. Wenn du mit dem Modus nicht zufrieden bist, den der Treiber
   gewählt hat, dann kannst du ihn zwingen, denjenigen Modus zu
   wählen, der am besten zu dem mit den Optionen <option>-x</option> und
@@ -537,7 +537,7 @@ EndSection
 <para>
   Wenn du Glück hast und dir genug unbenutzter Grafikspeicher zur
   Verfügung steht, um ein komplettes Bild aufzunehmen, dann wird der
-  DGA-Treiber Doppelpufferung verwenden, was zu regelmäßigerer
+  DGA-Treiber Doppelpufferung verwenden, was zu einer regelmäßigeren
   Wiedergabe führt. Der DGA-Treiber wird dir mitteilen, ob Doppelpufferung
   angeschaltet ist oder nicht.
 </para>
@@ -545,7 +545,7 @@ EndSection
 <para>
   Doppelpufferung bedeutet, dass das nächste Bild deines Videos bereits
   an einer anderen Stelle im Grafikspeicher aufgebaut wird, während das
-  aktuelle Bild angezeigt wird. Wenn das nächste Bild fertig ist, so wird
+  aktuelle Bild angezeigt wird. Ist das nächste Bild fertig, so wird
   dem Grafikchip nur noch mitgeteilt, wo er das neue Bild im Speicher finden
   kann. Somit holt sich der Chip seine Daten einfach von dort. In der
   Zwischenzeit wird der andere, jetzt unbenutze Puffer wieder mit neuen
@@ -555,17 +555,17 @@ EndSection
 <para>
   Doppelpufferung kann mit der Option <option>-double</option> aktiviert und mit
   <option>-nodouble</option> deaktiviert werden. Momentan ist die Doppelpufferung
-  per Voreinstellung deaktiviert. Wenn der DGA-Treiber verwendet wird,
+  per Voreinstellung deaktiviert. Wird der DGA-Treiber verwendet,
   dann funktioniert das Onscreen-Display (ODS) nur dann, wenn auch die
   Doppelpufferung aktiviert ist. Andererseits kann die Doppelpufferung auch
-  einen großen Einbruch bei der Geschwindigkeit hervorrufen, was sehr von
+  einen großen Geschwindigkeitseinbruch hervorrufen, was stark von
   der DGA-Implementierung der Treiber für deine Hardware abhängt (auf
   meinem K6-II+ 525 benötigt Doppelpufferung weitere 20% CPU-Zeit!).
 </para>
 
 
 <formalpara>
-<title>PUNKTE BEZÜGLICH. DER GESCHWINDIGKEIT</title>
+<title>PUNKTE BEZÜGLICH DER GESCHWINDIGKEIT</title>
 
 <para>
   Generell gesehen sollte der Zugriff auf den DGA-Framebuffer genauso
@@ -592,7 +592,7 @@ EndSection
 </para>
 
 <para>
-  Einge gute Idee ist auch die Verwendung von 24bit Farbtiefe selbst dann,
+  Einge gute Idee ist auch die Verwendung von 24bit Farbtiefe, selbst dann,
   wenn deine Grafikkarte nativ nur 32bit unterstützt, da bei 24bit 25%
   weniger Daten im Vergleich zum 32/32-Modus über den Bus transferiert
   werden müssen.
@@ -629,15 +629,15 @@ EndSection
 <listitem><simpara>
   Einige Treiber schaffen es manchmal einfach nicht, in die vorherige
   Auflösung zurückzuschalten. Benutze in solch einem Fall
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> und
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>,
+  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad +</keycap> und
+  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>Keypad -</keycap>,
   um manuell die Auflösung zu ändern.
 </simpara></listitem>
 <listitem><simpara>
   Einige Treiber zeigen einfach nur merkwürdige Farben an.
 </simpara></listitem>
 <listitem><simpara>
-  Einige Treiber lügen, was die von ihnen in den Prozessorspeicher
+  Manche Treiber lügen, was die von ihnen in den Prozessorspeicher
   eingeblendete Menge Grafikspeicher anbelangt, weswegen vo_dga
   nicht die Doppelpufferung verwendet (SIS?).
 </simpara></listitem>
@@ -662,13 +662,13 @@ EndSection
 <title>SDL</title>
 
 <para>
-  <acronym>SDL</acronym>  (Simple Directmedia Layer, einfacher Layer für
+  <acronym>SDL</acronym> (Simple Directmedia Layer, einfacher Layer für
   den direkten Zugriff auf Mediengeräte) bietet grundsätzlich eine einheitliche
   Schnittstelle zu Audio- und Videogeräten. Programme, die SDL
-  benutzen, kennen nur SDL und brauchen kein Wissen darüber, welche
+  benutzen, kennen nur SDL und brauchen nichts darüber zu wissen, welche
   Video- oder Audiotreiber SDL tatsächlich benutzt. So kann z.B. eine
   Doom-Portierung mit SDL die Svgalib, aalib, X11, fbdev und andere Treiber
-  benutzen. Dazu musst du z.B. nur den Videotreiber angeben, indem du die
+  nutzen. Dazu musst du z.B. nur den Videotreiber angeben, indem du die
   Umgebungsvariable <envar>SDL_VIDEODRIVER</envar> setzt.
   So lautet zumindest die Theorie.
 </para>
@@ -677,7 +677,7 @@ EndSection
   Bei <application>MPlayer</application> benutzten wir damals die
   Softwareskalierungsroutinen der X11-Treiber von SDL bei Grafikkarten/-treibern,
   die keine Unterstützung für XVideo hatten, bis wir unsere eigenen schrieben,
-  die schneller und hübscher waren. Wir benutzten damals ausßerdem SDLs
+  die schneller und hübscher waren. Wir benutzten damals außerdem SDLs
   aalib-Ausgabe. Jetzt haben wir unsere eigenen, was wesentlich komfortabler
   ist. Auch davon haben wir selber eine komfortablere Version geschrieben.
   SDLs DGA-Code war besser als unserer - zumindest bis vor kurzem.
@@ -746,7 +746,7 @@ EndSection
 <title>BEKANNTE FEHLER</title>
 <listitem><simpara>
   Tasten, die bei sdl:driver=aalib einmal gedrückt werden, bleiben aus
-  Sicht des Programmes gedrückt (benutz also <option>-vo aa</option>!).
+  Sicht des Programms gedrückt (benutze also <option>-vo aa</option>!).
   Das ist ein Fehler in SDL, den ich nicht beheben kann (mit SDL 1.2.1
   getestet).
 </simpara></listitem>
@@ -766,7 +766,7 @@ EndSection
 <para>
   Du musst zuerst die svgalib und die dazugehörigen Entwicklerpakete
   installieren, bevor du <application>MPlayer</application> compilierst,
-  da es die Svgalib sonst nicht automatisch findet und den Treiber dazu
+  da er sonst die Svgalib nicht automatisch findet und den Treiber dazu
   nicht compiliert (das kann aber trotzdem erzwungen werden). Vergiss auch
   nicht, in <filename>/etc/vga/libvga.config</filename> richtige Werte
   für deine Grafikkarte und deinen Monitor anzugeben.
@@ -820,14 +820,14 @@ EndSection
 
 <para>
   Eventuell muss die automatische Anpassung des
-  Höhen-/Breitenverältnisses ausgeschaltet werden:
+  Höhen-/Breitenverhältnisses ausgeschaltet werden:
   <screen>-noaspect</screen>
 </para>
 
 <note><para>
   Die besten Ergebnisse bei EGA-Bildschirmen erhält man meiner Erfahrung nach,
   wenn man die Helligkeit ein wenig verringert:
-  <option>-vf eq=-20:0</option>. Ich musste auch die Audiosamplerate erniedrigen,
+  <option>-vf eq=-20:0</option>. Ich musste auch die Audiosamplerate reduzieren,
   weil bei 44KHz der Sound nicht richtig funktionierte:
   <option>-srate 22050</option>.
 </para></note>
@@ -854,19 +854,19 @@ EndSection
   ältere ISA-/PCI-Karten wie die S3 Trio64) oder nur VBE 1.2 und
   älter unterstützt: Tja, dann kannst du immer noch VESAfb benutzen,
   benötigst aber den SciTech Display Doctor (ehemals UniVBE), der vor dem
-  Booten von Linux geladen werden muss. Benutze dazu eine DOS-Bootdiskette oder
+  Booten von Linux geladen werden muss. Nimm dazu eine DOS-Bootdiskette oder
   was auch immer. Vergiss nicht, deine Kopie von UniVBE zu registrieren ;).
 </para>
 
 <para>
-  Die Fbdev-Ausgabe kenn neben den üblichen Parametern noch einige andere:
+  Die Fbdev-Ausgabe kennt neben den üblichen Parametern noch einige andere:
 </para>
 
 <variablelist>
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-  Gibt das zu benutzende Framebuffergerät an (Standard: <filename>/dev/fb0</filename>)
+  Gibt das zu verwendende Framebuffergerät an (Standard: <filename>/dev/fb0</filename>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -964,7 +964,7 @@ make<!--
 --></screen>
   </para></step>
 <step><para>
-  Jetzt erstelle das Device <filename>/dev/mga_vid</filename>:
+  Jetzt erstelle das Gerät <filename>/dev/mga_vid</filename>:
   <screen>mknod /dev/mga_vid c 178 0</screen>
   und lade das Kernelmodul:
   <screen>insmod mga_vid.o</screen>
@@ -985,7 +985,7 @@ make<!--
   <programlisting>alias char-major-178 mga_vid</programlisting>
 
   Jetzt kopiere <filename>mga_vid.o</filename> in das entsprechende Verzeichnis
-  unterhalt von
+  unterhalb von
   <filename>/lib/modules/<replaceable>kernel_version</replaceable>/<replaceable>/irgendwo</replaceable></filename>.
   </para><para>
   Jetzt gib ein:
@@ -1006,7 +1006,7 @@ make<!--
 </para>
 
 <para>
-  Das <filename>/dev/mga_vid</filename>-Gerät kann z.B. mit
+  Das Gerät <filename>/dev/mga_vid</filename> kann z.B. mit
   <screen>cat /dev/mga_vid</screen>
   ausgelesen werden, um ein paar Informationen über
   den aktuellen Zustand zu erhalten. Die Helligkeit kann zusätzlich mit z.B.
@@ -1019,7 +1019,7 @@ make<!--
 <sect2 id="tdfxfb" xreflabel="3Dfx YUV support (tdfxfb)">
 <title>3dfx-YUV-Unterstützung (tdfxfb)</title>
 <para>
-  Dieser Treiber benutzt den tdfx-Framebuffertreiber des Kernels, um Filme
+  Dieser Treiber verwendet den tdfx-Framebuffertreiber des Kernels, um Filme
   mit YUV-Beschleunigung abzuspielen. Deswegen benötigst du einen Kernel
   mit tdfxfb-Unterstütztung. Danach musst du MPlayer compilieren mit
   <screen>./configure --enable-tdfxfb</screen>
@@ -1040,7 +1040,7 @@ make<!--
 </para>
 
 <para>
-  Leider unterstützden nicht alle Treiber die erforderlichen Features.
+  Leider unterstützen nicht alle Treiber die erforderlichen Features.
   Die Utah-GLX-Treiber (für XFree86 3.3.6) unterstützen sie für
   alle Karten. Auf <ulink url="http://utah-glx.sf.net"/>
   findest du Details zur Installation.
@@ -1048,7 +1048,7 @@ make<!--
 
 <para>
   XFree86(DRI) 4.0.3 oder neuer unterstützt OpenGL mit Matrox- und
-  Radeon-Karten, 4.2.0 und neuer unterstützen zustätzlich Rage128.
+  Radeon-Karten, 4.2.0 und neuer unterstützen zusätzlich Rage128.
   Auf <ulink url="http://dri.sf.net"/> findest du Details zur Installation.
 </para>
 
@@ -1070,7 +1070,7 @@ make<!--
 
 <para>
   AAlib ist eine Bilbiothek, mit der Grafiken im Textmodus angezeigt
-  werden, wobei ein mächtiger Textmodusrenderer benutzt wird. Es gibt SEHR
+  werden, wobei ein mächtiger Textmodusrenderer angewandt wird. Es gibt SEHR
   viele Programme, die das bereits unterstützen, wie z.B. Doom, Quake etc.
   <application>MPlayer</application> enthält einen sehr gut brauchbaren
   Treiber für AAlib. Wenn <filename>./configure</filename> feststellt,
@@ -1183,7 +1183,7 @@ make<!--
 
 <para>
   Wenn dein Computer nicht schnell genug ist, um alle Frames anzuzeigen,
-  dann benutz die Option <option>-framedrop</option>.
+  dann benutze die Option <option>-framedrop</option>.
 </para>
 
 <para>
@@ -1191,7 +1191,7 @@ make<!--
   Treiber (<option>-aadriver linux</option>) bessere Ergebnisse als mit dem curses-
   Treiber. Allerdings benötigst du dafür auch Schreibrechte auf
   <filename>/dev/vcsa<replaceable>&lt;Terminal&gt;</replaceable></filename>.
-  Das wird nicht automatisch von aalib festgestellt, aber vo_aa versucht, den
+  Das wird von aalib nicht automatisch festgestellt, aber vo_aa versucht, den
   besten Modus herauszufinden. Lies
   <ulink url="http://aa-project.sf.net/tune"/> für weitere Tuningtipps.
 </para>
@@ -1275,15 +1275,15 @@ make<!--
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>CACA_GEOMETRY (X11 only)</option></term>
+  <term><option>CACA_GEOMETRY (nur bei X11)</option></term>
   <listitem><simpara>
-  Spezifiziere die Anzahl der Spalten und Zeeilen. Z.B. 128x50.
+  Spezifiziere die Anzahl der Spalten und Zeilen, z.B. 128x50.
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>CACA_FONT (X11 only)</option></term>
+  <term><option>CACA_FONT (nur bei X11)</option></term>
   <listitem><simpara>
-  Legt die zu verwendende Schrift fest. Z.B. fixed, nexus.
+  Legt die zu verwendende Schrift fest, z.B. fixed, nexus.
   </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1349,17 +1349,17 @@ make<!--
 </simpara></listitem>
 <listitem><simpara>
   Die Chancen stehen gut, dass der <emphasis role="bold">TV-Ausgang funktioniert</emphasis>.
-  (Es funktioniert nachweislich zumindest auf ATI-Karten.)
+  (Es läuft nachweislich zumindest auf ATI-Karten.)
 </simpara></listitem>
 <listitem><simpara>
-  Dieser Treiber ruft wirklich die <function>int 10h</function>-Routine auf und ist
+  Dieser Treiber ruft die <function>int 10h</function>-Routine wirklich auf und ist
   dementsprechend kein Emulator - er ruft <emphasis role="bold">echte</emphasis>
   Funktionen des <emphasis>echten</emphasis> BIOS im <emphasis>Real</emphasis>-Modus
   auf (bzw. im vm68-Modus).
 </simpara></listitem>
 <listitem><simpara>
-  Du kannst den Treiber zusammen mit VIDIX benutzen und erhälst
-  dadurch gleichzeitig hardwarebeschleunigte Grafikanzeige
+  Du kannst den Treiber zusammen mit VIDIX verwenden und erhältst
+  dadurch gleichzeitig eine hardwarebeschleunigte Grafikanzeige
   <emphasis role="bold">und</emphasis> den TV-Ausgang! (für ATI-Karten empfohlen)
 </simpara></listitem>
 <listitem><simpara>
@@ -1398,7 +1398,7 @@ make<!--
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
   <listitem><simpara>
-  momentan erkannt: <literal>dga</literal>, um den DGA-Modus zu erzwingen
+  Momentan erkannt: <literal>dga</literal>, um den DGA-Modus zu erzwingen
   und <literal>nodga</literal>, um ihn zu deaktivieren. Im DGA-Modus kannst du den
   Doppelpuffermodus mit <option>-double</option> aktivieren. Anmerkung: Du
   kannst diese Parameter auch weglassen, um die <emphasis role="bold">automatische
@@ -1416,13 +1416,13 @@ make<!--
   <emphasis role="bold">ROM-Schrift</emphasis> anstelle der nationalen
   geladen sein. Du kannst die nationale Schriftart erneut mit
   <command>setsysfont</command> laden, das z.B. bei Mandrake zur
-  Distribution gehört. (<emphasis role="bold">Tipp:</emphasis> Das
+  Distribution gehört. (<emphasis role="bold">Tip:</emphasis> Das
   gleiche Tool wird für die Lokalisation von fbdev verwendet.)
 </simpara></listitem>
 <listitem><simpara>
   Manche <emphasis role="bold">Linux-Grafiktreiber</emphasis> aktualisieren
   nicht den aktiven <emphasis role="bold">BIOS-Modus</emphasis> im DOS-Speicher.
-  Wenn du also so ein Problem hast, dann benutze den VESA-Treiber nur aus dem
+  Wenn du also so ein Problem hast, dann verwende den VESA-Treiber nur aus dem
   <emphasis role="bold">Textmodus</emphasis> heraus. Andernfalls
   wird immer der Textmodus (#03) aktiviert werden, und du wirst den
   Computer neustarten müssen.
@@ -1434,7 +1434,7 @@ make<!--
   <keycap>Alt</keycap>+<keycap>F&lt;x&gt;</keycap>) und wieder zurück.
 </simpara></listitem>
 <listitem><simpara>
-  Um eine <emphasis role="bold">funktionierenden TV-Ausgabe</emphasis> zu erhalten,
+  Um eine <emphasis role="bold">funktionierende TV-Ausgabe</emphasis> zu erhalten,
   musst du das TV-Kabel eingesteckt haben, bevor du deinen PC bootest, da das BIOS
   nur einmal während der POST-Phase initialisiert wird.
 </simpara></listitem>
@@ -1451,7 +1451,7 @@ make<!--
   MMX-/3DNow/SSE-beschleunigte Softwareskalierung mit den Optionen
   <option>-fs -zoom</option>, aber die ist trotzdem langsam. Die meisten
   Karten bieten Unterstützung für Hardwareskalierung. Benutze also
-  <option>-vo xv</option> in den meisten fällen bzw. <option>-vo xmga</option>
+  <option>-vo xv</option> in den meisten Fällen bzw. <option>-vo xmga</option>
   bei Matrox-Karten.
 </para>
 
@@ -1479,9 +1479,9 @@ make<!--
 </simpara></listitem>
 <listitem><simpara>
   Unter XFree86 3.x.x musst du mit
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
+  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>plus</keycap>
   und
-  <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>
+  <keycap>Strg</keycap>+<keycap>Alt</keycap>+<keycap>minus</keycap>
   die Auflösung ändern.
 </simpara></listitem>
 </itemizedlist>
@@ -1633,7 +1633,7 @@ make<!--
 </para></step>
 <step><para>
   Compiliere das Modul im <filename class="directory">svgalib_helper</filename>-Verzeichnis
-  (das im <filename class="directory">svgalib-1.9.17/kernel/</filename>-Verzeichnis
+  (das im Verzeichnis <filename class="directory">svgalib-1.9.17/kernel/</filename>
   gefunden werden kann, wenn du die Sourcen von der svgalib-Seite heruntergeladen hast),
   und lade es mit insmod.
 </para></step>
@@ -1770,7 +1770,7 @@ make<!--
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
   Bitte lies die
-  <link linkend="directfb">DirectFB-Sektion</link> für generelle
+  <link linkend="directfb">DirectFB-Sektion</link> zu generellen
   Informationen über DiretcFB.
 </para>
 
@@ -1789,7 +1789,7 @@ make<!--
 </para>
 
 <note><para>
-  Die erste DirectFB-Version, mir der wir das zum Laufen gebracht haben, war
+  Die erste DirectFB-Version, mit der wir das zum Laufen gebracht haben, war
   0.9.17 (sie ist fehlerhaft, benötigt den <systemitem>surfacemanager</systemitem> von
   oben erwähnter URL). Wie auch immer, eine Portierung des CRTC2-Codes für
   <link linkend="mga_vid">mga_vid</link> ist bereits in Arbeit.
@@ -1862,9 +1862,9 @@ mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>DateieDatei.ext</replace
   <emphasis role="bold">musst</emphasis> das Bild vorher skalieren, wenn
   die Höhe nicht einer der oben erwähnten entspricht:
   <option>-vf scale=width:height</option>. DVB-Karten
-  unterstützen eine Vielzahl von horizontalen Auflösungen wie z.B.
-  720, 704, 640, 512, 480, 352 etc. Sie skalieren horizontal selber in
-  Hardware, sodass du meistens nicht in horizontaler Richtung skalieren musst.
+  unterstützen eine Vielzahl horizontaler Auflösungen wie z.B.
+  720, 704, 640, 512, 480, 352 etc. Sie machen Hardwareskalierung in horizontaler
+  Richtung, sodass du meist nicht in horizontaler Richtung skalieren musst.
   Bei einem 512x384-MPEG4 (DivX) (Verhältnis 4:3) kannst du folgendes probieren:
 </para>
 
@@ -1874,7 +1874,7 @@ mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>DateieDatei.ext</replace
 </para>
 
 <para>
-  Wenn du einen Widescreen-Film hast und du ihn nicht auf die volle
+  Wenn du einen Breitwandfilm hast und du ihn nicht auf die volle
   Höhe skalieren möchtest, dann kannst du den <option>expand=w:h</option>-Filter
   benutzen, um schwarze Balken hinzuzufügen.
   Um ein 640x384-MPEG4 (DivX) anzuschauen:
@@ -1913,7 +1913,7 @@ mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>DateieDatei.ext</replace
   schaltet die OSD-Anzeige an). Eventuell willst du das Bild ein wenig nach
   oben schieben, um unten mehr Platz für die Untertitel zu haben.
   Vielleicht willst du auch die Untertitel hochschieben, wenn sie ansonsten
-  außerhalb des Sichtbereiches des Fernsehers liegen. Das kannst du mit
+  außerhalb des sichtbaren Bereiches des Fernsehers liegen. Das kannst du mit
   <option>-subpos &lt;0-100&gt;</option> erreichen, wobei
   <option>-subpos 80</option> meistens eine gute Wahl darstellt.
 </para>
@@ -1988,10 +1988,10 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   anwenden:
   <option>...:pid[+pid]:...</option> (für ein Maximum von 6 pids bei
   jedem); in diesem Fall wird <application>MPlayer</application>
-  alle gezeigt pids enbinden, plus pid 0 (welche das PAT enthält).
-  Bindet ruhig in jede Spalte die PMT pid für den
+  alle gezeigten pids enbinden, plus pid 0 (welche das PAT enthält).
+  Binde ruhig in jede Spalte die PMT pid für den
   korrespondierenden Kanal ein (falls du ihn kennst).
-  Ander mögliche Anwendungen sind: televideo pid, zweiter Audio-Track, etc.
+  Andere mögliche Anwendungen sind: televideo pid, zweiter Audio-Track, etc.
 </para>
 
 <para>
@@ -2095,7 +2095,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   Wiedergabe mit der Creative DXR2-Karte.</para>
 <para>
   Zuerst brauchst du einen richtig installierten DXR2-Treiber. Du kannst
-  die Treiber und Installationshinweise auf der Seite
+  die Treiber und Installationshinweise im
   <ulink url="http://dxr2.sf.net/">DXR2 Resource Center</ulink> finden.
 </para>
 
@@ -2125,7 +2125,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   colorkey bekommst du evtl. unterschiedliche Ergebnisse, gewöhnlich wirst du den
   colorkey rund um die Zeichen sehen oder einige anderen lustigen Effekte.
   Aber wenn du die colorkey-Einstellungen korrekt anpasst, solltest du in der
-  Lage sein, akzeptable Resultate zu bekommen.
+  Lage sein, akzeptable Resultate zu erzielen.
 </para>
 
 <para>Lies bitte in der Manpage über die vorhandenen Optionen.</para>
@@ -2160,10 +2160,10 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   konfigurierst du das Overlay mit dem Tool <filename>autocal</filename>.
   Starte danach <application>MPlayer</application> mit dxr3-Ausgabe und
   ohne Overlay anzuschalten. Starte <filename>dxr3view</filename>. Mit dxr3view
-  kannst du die Overlayeinstellungen verändern und siehst die
+  kannst du die Overlay-Einstellungen verändern und siehst die
   Auswirkungen sofort. Eventuell wird dieses Feature irgendwann vom
   <application>MPlayer</application>-GUI unterstützt. Wenn du das Overlay richtig
-  eingestellt hast, dann brauchst du dxr3view nicht mehr laufen zu lassen.
+  eingestellt hast, brauchst du dxr3view nicht mehr laufen zu lassen.
 </para>
 <para>
   <option>prebuf</option> schaltet Prebuffering ein. Das ist ein Feature des
@@ -2223,7 +2223,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <varlistentry>
 <term><option>-ao oss:/dev/em8300_ma-<replaceable>X</replaceable></option></term>
 <listitem><para>
-  Audioausgabe, wobei <replaceable>X</replaceable>  die Gerätenummer ist
+  Audioausgabe, wobei <replaceable>X</replaceable> die Gerätenummer ist
   (0 bei nur einer Karte).
 </para></listitem>
 </varlistentry>
@@ -2243,7 +2243,7 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <varlistentry>
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
-  Wenn du nicht-MPEG-Filme mit dem em8300 ansehen möchtest (z.B.
+  Wenn du Nicht-MPEG-Filme mit dem em8300 ansehen möchtest (z.B.
   DivX oder RealVideo), dann musst du einen MPEG1-Videofilter wie
   <systemitem class="library">libavcodec</systemitem> (lavc) oder
   <systemitem class="library">libfame</systemitem> (fame) verwenden.
@@ -2345,9 +2345,9 @@ mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>movie.avi</replaceable>
 
 <para>
   Das Beschneiden des Bildes kann mit dem <option>crop</option>-Filter geschehen
-  oder vom Treiber selber vorgenommen werden. Angenommen, der Film ist zu breit
+  oder vom Treiber selbst vorgenommen werden. Angenommen, der Film ist zu breit
   für die Anzeige deiner Buz, und du möchtest <option>-zrcrop</option>
-  benutzen, um den Film schmaler zu machen. Dann benutzt du folgendes
+  benutzen, um den Film schmaler zu machen. Dann verwendest du folgendes
   Kommando:
 <screen>
 mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable>
@@ -2362,7 +2362,7 @@ mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 </para>
 
 <para>
-  Mehrfache Verwendung von <option>-zrcrop</option> aktiviert den
+  Mehrfache Anwendung von <option>-zrcrop</option> aktiviert den
   <emphasis>cinerama</emphasis>-Modus. Das heißt, du kannst das Bild über
   mehrere Fernseher oder Beamer verteilen, um eine größere
   Anzeigefläche zu erreichen. Angenommen, du hast zwei Beamer. Der linke
@@ -2438,7 +2438,7 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
   <term>XFree86</term>
   <listitem><para>
   Mit dem alten Treiber und dem HAL-Modul, welches es
-  auf der<ulink url="http://www.matrox.com">Matrox-Seite</ulink> gibt. Damit
+  auf der <ulink url="http://www.matrox.com">Matrox-Seite</ulink> gibt. Damit
   bekommst du X auf dem Fernseher, aber <emphasis role="bold">keine
   Hardwarebeschleunigung</emphasis> wie unter Windows!
 </para>
@@ -2529,12 +2529,12 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
    --></screen>
 
   (Wenn du X benutzt, dann wechsle jetzt auf den matroxfb mit z.B.
-  <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>!)
+  <keycap>STRG</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap>!)
   Ändere die <literal>640</literal> und <literal>512</literal>, wenn
   du eine andere Auflösung verwendest.
 </para></step>
 <step><para>
-  <emphasis role="bold">Genieß die ultra-schnelle und featurereiche Wiedergabe
+  <emphasis role="bold">Genieße die ultra-schnelle und featurereiche Wiedergabe
   mit dem Matrox-TV-Ausgang (sogar noch besser als Xv)!</emphasis>
       </para></step>
     </procedure>
@@ -2622,7 +2622,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
   Von <ulink url="http://gatos.sf.net">GATOS</ulink> unterstützt.
 </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">Radeon</emphasis> and <emphasis role="bold">Rage128</emphasis>:
+  <emphasis role="bold">Radeon</emphasis> und <emphasis role="bold">Rage128</emphasis>:
   Von <application>MPlayer</application> unterstützt!
   Lies die <link linkend="vesa">VESA-Treiber-</link> und
   <link linkend="vidix">VIDIX</link>-Sektionen.
@@ -2635,7 +2635,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
 </itemizedlist>
 
 <para>
-  Benutze bei anderen Karten einfach den
+  Verwende bei anderen Karten einfach den
   <link linkend="vesa">VESA-Treiber</link>
   ohne VIDIX. Dafür brauchst du aber eine schnelle CPU.
 </para>
@@ -2653,11 +2653,11 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>Dateiname</replaceabl
 <para>
   Zuerst musst du die Closed-Soure-Treiber von <ulink url="http://nvidia.com"/>
   herunterladen. Ich werde Installation und Konfiguration nicht im Detail
-  beschreiben, da diese außerhalb der Aufgabe dieses Dokuments liegt.
+  beschreiben, da dies außerhalb der Aufgabe dieses Dokuments liegt.
 </para>
 
 <para>
-  Nachdem du sichergegangen bist, dass XFree86, XVideo und die
+  Nachdem du sichergestellt hast, dass XFree86, XVideo und die
   3D-Beschleunigung funktionieren, ändere die <filename>XF86Config</filename>,
   und passe das folgende Beispiel deiner Karte an:
 
@@ -2703,11 +2703,11 @@ EndSection
   <option>append=&quot;video=vesafb:ywrap,mtrr&quot; vga=791</option>.
   Du solltest <application>X</application> starten, dann in den
   Consolen-Modus z.B. mit
-  <keycap>CTRL</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap> wechseln.
+  <keycap>STRG</keycap>+<keycap>ALT</keycap>+<keycap>F1</keycap> wechseln.
   Misslingt der Start von <application>X</application> vor dem von
   <application>MPlayer</application> in der Console, wird das Video
   langsam und abgehackt (Erklärungen sind willkommen).
-  Logge dich auf deiner Konsole sein und initialisiere dann folgenden Befehl:
+  Logge dich auf deiner Konsole ein und initialisiere dann folgenden Befehl:
 
   <screen>clear; mplayer -vo fbdev -zoom -cache 8192 dvd://</screen>
 
