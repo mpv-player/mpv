@@ -664,7 +664,7 @@ demux_mkv_read_info (demuxer_t *demuxer)
   uint64_t length, l;
   int il;
   uint64_t tc_scale = 1000000;
-  long double duration;
+  long double duration = 0.;
 
   length = ebml_read_length (s, NULL);
   while (length > 0)
