@@ -1870,8 +1870,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   To change channels press the <keycap>h</keycap> (next) and
-  <keycap>k</keycap> (previous) keys, or use the OSD menu (requires
-  a working <link linkend="subosd">OSD subsystem</link>).
+  <keycap>k</keycap> (previous) keys, or use the
+  <link linkend="osdmenu">OSD menu</link>).
 </para>
 
 <para>

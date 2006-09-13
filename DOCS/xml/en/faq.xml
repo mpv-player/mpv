@@ -457,7 +457,7 @@ I'm having trouble getting my subtitles to display, help!!
 </para></question>
 <answer><para>
 Make sure you have installed fonts properly. Run through the steps in the
-<link linkend="subosd">OSD and subtitle</link> part of the installation
+<link linkend="fonts-osd">Fonts and OSD</link> part of the installation
 section again. If you are using TrueType fonts, verify that you have the
 <systemitem class="library">FreeType</systemitem> library installed.
 Other things include checking your subtitles in a text editor or with other
