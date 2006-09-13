@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19827 -->
+<!-- in sync with r19828 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -580,7 +580,7 @@
         <answer>
           <para>
             Stelle sicher, dass du die Schriften ordnungsgemäß installiert hast. Gehe nochmal die
-            Schritte im Teil <link linkend="subosd">Untertitel und OSD</link> des
+            Schritte im Teil <link linkend="fonts-osd">Schriften und OSD</link> des
             Installationsabschnitts durch. Wenn du TrueType-Schriften verwendest, stelle sicher,
             dass die <systemitem class="library">FreeType</systemitem>-Bibliothek installiert ist.
             Andere Dinge schließen die Überprüfung deiner Untertitel in einem Texteditor oder mit

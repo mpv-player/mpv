@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19742 -->
+<!-- in sync with r19832 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -2032,8 +2032,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Um Kanäle zu wechseln, drücke die Tasten <keycap>h</keycap> (nächster)
-  und <keycap>k</keycap> (vorheriger) oder verwende das OSD-Menü (erfordert
-  ein funktionierendes <link linkend="subosd">OSD-Subsystem</link>).
+  und <keycap>k</keycap> (vorheriger) oder verwende das
+  <link linkend="osdmenu">OSD-Menü</link>.
 </para>
 
 <para>
