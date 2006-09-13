@@ -556,8 +556,8 @@ About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 </para>
 
 
-<sect2 id="mpsub-install">
-<title>Installing OSD and subtitles</title>
+<sect2 id="truetype-fonts">
+<title>TrueType fonts</title>
 
 <para>
 You need to tell <application>MPlayer</application> which font to use to
@@ -588,6 +588,12 @@ encodings.
 
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
+
+</sect2>
+
+
+<sect2 id="bitmap-fonts">
+<title>bitmap fonts</title>
 
 <para>
 If for some reason you wish or need to employ bitmap fonts, download a set
