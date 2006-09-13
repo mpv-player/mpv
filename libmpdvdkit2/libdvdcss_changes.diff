@@ -12,28 +12,8 @@
  #       if !defined( _OFF_T_ )
  typedef long long _off_t;
  typedef _off_t off_t;
---- css.c	2005-07-11 14:24:09.000000000 +0200
-+++ css.c	2005-10-01 20:14:37.000000000 +0200
-@@ -53,7 +56,7 @@
- #   include <limits.h>
- #endif
- 
--#include "dvdcss/dvdcss.h"
-+#include "dvdcss.h"
- 
- #include "common.h"
- #include "css.h"
 --- device.c	2005-07-11 13:33:34.000000000 +0200
 +++ device.c	2005-10-01 19:08:07.000000000 +0200
-@@ -55,7 +44,7 @@
- #   include <sys/uio.h>                                      /* struct iovec */
- #endif
- 
--#include "dvdcss/dvdcss.h"
-+#include "dvdcss.h"
- 
- #include "common.h"
- #include "css.h"
 @@ -143,8 +132,11 @@
      print_debug( dvdcss, "opening target `%s'", psz_device );
  
@@ -48,28 +28,8 @@
  
      /* Initialize readv temporary buffer */
      dvdcss->p_readv_buffer   = NULL;
---- error.c	2004-02-24 16:46:49.000000000 +0100
-+++ error.c	2005-10-01 20:15:46.000000000 +0200
-@@ -34,7 +37,7 @@
- #   include <limits.h>
- #endif
- 
--#include "dvdcss/dvdcss.h"
-+#include "dvdcss.h"
- 
- #include "common.h"
- #include "css.h"
 --- libdvdcss.c	2004-08-13 15:40:18.000000000 +0200
 +++ libdvdcss.c	2005-10-01 19:11:27.000000000 +0200
-@@ -124,7 +127,7 @@
- #   include <direct.h>
- #endif
- 
--#include "dvdcss/dvdcss.h"
-+#include "dvdcss.h"
- 
- #include "common.h"
- #include "css.h"
 @@ -301,6 +301,10 @@
          {
              psz_home = getenv( "HOME" );

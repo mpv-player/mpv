@@ -56,7 +56,7 @@
 #   include <limits.h>
 #endif
 
-#include "dvdcss.h"
+#include "dvdcss/dvdcss.h"
 
 #include "common.h"
 #include "css.h"

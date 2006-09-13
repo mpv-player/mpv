@@ -34,7 +34,7 @@ css.h
 csstables.h
 device.c
 device.h
-dvdcss.h
+dvdcss/dvdcss.h
 error.c
 ioctl.c
 ioctl.h
