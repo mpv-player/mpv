@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19809 -->
+<!-- in sync with r19820 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portierungen</title>
 
@@ -45,8 +45,9 @@
 <para>
   Christian Marillat hatte eine Weile lang inoffizielle Debian-Packages von
   <application>MPlayer</application>, <application>MEncoder</application> und
-  unseren Bitmap-Fonts erstellt, du kannst sie auf
-  <ulink url="http://www.debian-multimedia.org/">seiner Homepage</ulink> (passend) bekommen.
+  unseren Binärcodecpaketen erstellt, du kannst sie von
+  <ulink url="http://www.debian-multimedia.org/">seiner Homepage</ulink>
+  mit apt-get herunterladen.
 </para>
 </sect2>
 
