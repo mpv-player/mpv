@@ -61,6 +61,10 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   usually isn't important.
   </para></listitem>
 <listitem><para>
+  <emphasis role="bold">FreeType</emphasis> 2.0.9 or later is required
+  to have a font for the OSD and subtitles.
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">SDL</emphasis> - it's not mandatory, but can help in
   some cases (bad audio, video cards that lag strangely with the xv driver).
   Always use the newest (beginning from 1.2.x).
@@ -101,10 +105,6 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - optional, for CDDA support
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">libfreetype</emphasis> - optional, for TTF fonts
-  support. At least 2.0.9 is required.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - optional, for XMMS input plugin
@@ -560,112 +560,63 @@ About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 <title>Installing OSD and subtitles</title>
 
 <para>
-You need an <application>MPlayer</application> font package to be able to use
-OSD/SUB feature. There are many ways to get it:
-</para>
+You need to tell <application>MPlayer</application> which font to use to
+enjoy OSD and subtitles. Any TrueType font or special bitmap fonts will
+work. However, TrueType fonts are recommended as they look far better,
+can be properly scaled to the movie size and cope better with different
+encodings.
 
-<itemizedlist>
-<listitem><para>
-  using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
-  library. Version 2.0.9 or greater is mandatory! Then you have two methods:
   <itemizedlist>
     <listitem><para>
-      use the <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>
-      option to specify a TrueType font file on every occasion
+      Use the <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>
+      option to specify a TrueType font file on the command line.
       </para></listitem>
     <listitem><para>
-      create a symlink:
+      Create a symlink
       <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+      for each user individually or a system-wide one:
+      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> /usr/local/share/mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
   If <application>MPlayer</application> was compiled with
   <systemitem class="library">fontconfig</systemitem> support, the above methods
-  won't work, instead the <option>-font</option> expects a
+  won't work, instead <option>-font</option> expects a
   <systemitem class="library">fontconfig</systemitem> font name
   and defaults to the sans-serif font. To get a list of fonts known to
   <systemitem class="library">fontconfig</systemitem>,
-  use <command>fc-list</command>. Example: <option>-font
-  <replaceable>'Bitstream Vera Sans'</replaceable></option>
-  </para></listitem>
-<listitem><para>
-  Download ready-to-use font packages from <application>MPlayer</application>
-  site. Note: currently available fonts are limited for ISO 8859-1/2 support,
-  but there are some other (including Korean, Russian, ISO 8859-8 etc) fonts at
-  contrib/font section of FTP, made by users.
-  </para><para>
-  <!-- FIXME: this para should be before the list -->
-  Font should have appropriate <filename>font.desc</filename> file which
-  maps unicode font positions to the actual code page of the subtitles
-  text. Other solution is to have subtitles encoded in UTF-8 encoding and
-  use <option>-utf8</option> option or just name the subtitles file
-  <filename>&lt;video_name&gt;.utf</filename> and have it in the same dir
-  as the video file. Recoding from different codepages to UTF-8 could be
-  done by using <command>konwert</command> or <command>iconv</command> programs.
-  </para><para>
+  use <command>fc-list</command>. Example:
 
-  <table>
-  <title>Some URLs</title>
-  <tgroup cols="2">
-  <thead>
-    <row><entry>URL</entry><entry>Comment</entry></row>
-  </thead>
-  <tbody>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
-    </entry><entry>
-    ISO fonts
-    </entry></row>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
-    </entry><entry>
-    various fonts by users
-    </entry></row>
-  </tbody>
-  </tgroup>
-  </table>
+<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
+</para>
 
-  </para></listitem>
-</itemizedlist>
 <para>
-If you chose non-TTF fonts, UNZIP the file you downloaded to <filename
-class="directory">~/.mplayer</filename> or <filename
-class="directory">$PREFIX/share/mplayer</filename>. Then rename or symlink
-one of the extracted directories to <filename class="directory">font</filename>,
-for example:
+If for some reason you wish or need to employ bitmap fonts, download a set
+from our homepage. You can choose between various
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO fonts</ulink>
+and some sets of fonts
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">contributed by users</ulink>
+in various encodings.
+</para>
 
+<para>
+Uncompress the file you downloaded to
+<filename class="directory">~/.mplayer</filename> or
+<filename class="directory">$PREFIX/share/mplayer</filename>.
+Then rename or symlink one of the extracted directories to
+<filename class="directory">font</filename>, for example:
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-
-Now you have to see a timer at the upper left corner of the movie (switch
-it off with the <keycap>o</keycap> key).
+<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
 </para>
 
 <para>
-(subtitles are <emphasis>always enabled</emphasis>, for disabling them please
-read the man page)
+Fonts should have an appropriate <filename>font.desc</filename> file
+which maps unicode font positions to the actual code page of the
+subtitle text. Another solution is to have UTF-8-encoded subtitles
+and use the <option>-utf8</option> option or just name the subtitles
+file <filename>&lt;video_name&gt;.utf</filename> and have it in the
+same directory as the video file.
 </para>
 
-<para>
-OSD has 4 states (switch with <keycap>o</keycap>):
-
-<orderedlist>
-<listitem><simpara>
-  volume bar + seek bar (default)
-  </simpara></listitem>
-<listitem><simpara>
-  volume bar + seek bar + timer + file position percentage on seeking
-  </simpara></listitem>
-<listitem><simpara>
-  volume bar + seek bar + timer + total duration of the media
-  </simpara></listitem>
-<listitem><simpara>
-  subtitles only
-  </simpara></listitem>
-</orderedlist>
-
-You can change default behaviour by setting <varname>osdlevel</varname>
-variable in config file, or the <option>-osdlevel</option> command line option.
-
-</para>
 </sect2>
 
 
