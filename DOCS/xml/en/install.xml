@@ -454,7 +454,7 @@ Currently the following formats are supported:
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
 <listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
+<listitem><para>MPsub</para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
 </itemizedlist>
@@ -554,51 +554,6 @@ conversion for you:
 <para>
 About DVD subtitles, read the <link linkend="dvd">DVD</link> section.
 </para>
-
-
-<sect2 id="mpsub">
-<title><application>MPlayer</application>'s own subtitle format (MPsub)</title>
-
-<para>
-<application>MPlayer</application> introduces a new subtitle format called
-<emphasis role="bold">MPsub</emphasis>. It was designed by Gabucino. Basically
-its main feature is being <emphasis>dynamically</emphasis> time-based (although
-it has frame-based mode too).  Example (from <ulink
-url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
-<programlisting>
-FORMAT=TIME
-# first number  : wait this much after previous subtitle disappeared
-# second number : display the current subtitle for this many seconds
-
-15 3
-A long long, time ago...
-
-0 3
-in a galaxy far away...
-
-0 3
-Naboo was under an attack.<!--
---></programlisting>
-</para>
-
-<para>
-So you see, the main goal was to <emphasis role="bold">make subtitle
-editing/timing/joining/cutting easy</emphasis>. And, if you - say - get an
-SSA subtitle but it's badly timed/delayed to your version of the movie, you
-simply do a
-<screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>
-A <filename>dump.mpsub</filename> file will be created in the
-current directory, which will contain the source subtitle's text, but in
-<emphasis role="bold">MPsub</emphasis> format. Then you can freely add/subtract
-seconds to/from the subtitle.
-</para>
-
-<para>
-Subtitles are displayed with a technique called <emphasis role="bold">'OSD',
-On Screen Display</emphasis>. OSD is used to display current time, volume bar,
-seek bar etc.
-</para>
-</sect2>
 
 
 <sect2 id="mpsub-install">
