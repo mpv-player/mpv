@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19810 -->
+<!-- in sync with r19823 -->
 <chapter id="install">
 <title>Installation</title>
 
@@ -476,7 +476,7 @@ Momentan werden die folgenden Formate unterstützt:
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
 <listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
+<listitem><para>MPsub</para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
 </itemizedlist>
@@ -576,51 +576,6 @@ musst du die Framerate manuell konvertieren.
 <para>
 Ausführungen über DVD-Untertitel findest du im Abschnitt <link linkend="dvd">DVD</link>.
 </para>
-
-
-<sect2 id="mpsub">
-<title><application>MPlayer</application>s eigenes Untertitelformat (MPsub)</title>
-
-<para>
-<application>MPlayer</application> führt ein eigenes Untertitelformat, genannt
-<emphasis role="bold">MPsub</emphasis> ein, welches von Gabucino entworfen wurde.
-Im Grunde ist dessen Hauptfeature, dass es <emphasis>dynamisch</emphasis>
-zeitbasiert funktioniert (obwohl es auch einen Frame-basierten Modus hat).
-Beispiel (von
-<ulink url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
-<programlisting>
-FORMAT=TIME
-# erste Zahl  : warte solang, bis der vorige Untertitel verschwunden ist
-# zweite Zahl : stelle den aktuellen Untertitel soundsolange dar
-
-15 3
-Es war einmal...
-
-0 3
-in einer weit entfernten Galaxie...
-
-0 3
-Naboo wurde angegriffen.<!--
---></programlisting>
-</para>
-
-<para>
-Du siehst, das Hauptziel war, <emphasis role="bold">die Bearbeitung/Timing/Zusammenfügen/Schneiden
-von Untertiteln leicht zu machen</emphasis>. Und angenommen, du bekommst einen
-SSA-Untertitel, der aber hinsichtlich der Version deines Films schlecht getimet/verzögert ist,
-dann machst du einfach
-<screen>mplayer <replaceable>dummy.avi</replaceable> -sub quelle.ssa -dumpmpsub</screen>
-Eine <filename>dump.mpsub</filename>-Datei wird dann im aktuellen Verzeichnis erstellt, die
-den Text der Untertitelquelle enthält aber im <emphasis role="bold">MPsub</emphasis>-Format
-ist. Dann kannst du leicht Sekunden vom/zum Untertitel hinzufügen.
-</para>
-
-<para>
-Untertitel werden mit einer Technik namens <emphasis role="bold">'OSD',
-On Screen Display</emphasis> dargestellt. OSD wird benutzt, um die aktuelle Zeit, den Lautstärke-
-und Spulbalken darzustellen.
-</para>
-</sect2>
 
 
 <sect2 id="mpsub-install">
