@@ -447,29 +447,30 @@ can be properly scaled to the movie size and cope better with different
 encodings.
 </para>
 
+
 <sect2 id="truetype-fonts">
 <title>TrueType fonts</title>
 
 <para>
-  <itemizedlist>
-    <listitem><para>
-      Use the <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>
-      option to specify a TrueType font file on the command line.
-      </para></listitem>
-    <listitem><para>
-      Create a symlink
-      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-      for each user individually or a system-wide one:
-      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> /usr/local/share/mplayer/subfont.ttf</screen>
-      </para></listitem>
-      </itemizedlist>
-  If <application>MPlayer</application> was compiled with
-  <systemitem class="library">fontconfig</systemitem> support, the above methods
-  won't work, instead <option>-font</option> expects a
-  <systemitem class="library">fontconfig</systemitem> font name
-  and defaults to the sans-serif font. To get a list of fonts known to
-  <systemitem class="library">fontconfig</systemitem>,
-  use <command>fc-list</command>. Example:
+There are two ways to get TrueType fonts to work. The first is to pass
+the <option>-font</option> option to specify a TrueType font file on
+the command line. This option will be a good candidate to put in your
+configuration file (see the manual page for details).
+The second is to create a symlink called <filename>subfont.ttf</filename>
+to the font file of your choice. Either
+<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+for each user individually or a system-wide one:
+<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
+</para>
+
+<para>
+If <application>MPlayer</application> was compiled with
+<systemitem class="library">fontconfig</systemitem> support, the above methods
+won't work, instead <option>-font</option> expects a
+<systemitem class="library">fontconfig</systemitem> font name
+and defaults to the sans-serif font. To get a list of fonts known to
+<systemitem class="library">fontconfig</systemitem>,
+use <command>fc-list</command>. Example:
 
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
