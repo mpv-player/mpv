@@ -68,24 +68,11 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
     }
 }
 
-static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int width, int height, int parity, int tff){
-    int x, y, i;
-
-    for(i=0; i<3; i++){
-        int is_chroma= !!i;
-        int w= width >>is_chroma;
-        int h= height>>is_chroma;
-        int refs= p->stride[i];
-
-        for(y=0; y<h; y++){
-            if((y ^ parity) & 1){
+static void filter_line(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint8_t *cur, uint8_t *next, int w, int refs, int parity){
+    int x;
+    uint8_t *prev2= parity ? prev : cur ;
+    uint8_t *next2= parity ? cur  : next;
                 for(x=0; x<w; x++){
-                        uint8_t *prev= &p->ref[0][i][x + y*refs];
-                        uint8_t *cur = &p->ref[1][i][x + y*refs];
-                        uint8_t *next= &p->ref[2][i][x + y*refs];
-                        uint8_t *prev2= (tff ^ parity) ? prev : cur ;
-                        uint8_t *next2= (tff ^ parity) ? cur  : next;
-
                         int c= cur[-refs];
                         int d= (prev2[0] + next2[0])>>1;
                         int e= cur[+refs];
@@ -124,11 +111,38 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
                             diff= MAX3(diff, min, -max);
                         }
 
-                        if(d < spatial_pred) d= MIN(d + diff, spatial_pred);
-                        else                 d= MAX(d - diff, spatial_pred);
+                        if(spatial_pred > d + diff)
+                           spatial_pred = d + diff;
+                        else if(spatial_pred < d - diff)
+                           spatial_pred = d - diff;
 
-                        dst[i][x + y*dst_stride[i]]= d;
+                        dst[0] = spatial_pred;
+
+                        dst++;
+                        cur++;
+                        prev++;
+                        next++;
+                        prev2++;
+                        next2++;
                 }
+}
+
+static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int width, int height, int parity, int tff){
+    int x, y, i;
+
+    for(i=0; i<3; i++){
+        int is_chroma= !!i;
+        int w= width >>is_chroma;
+        int h= height>>is_chroma;
+        int refs= p->stride[i];
+
+        for(y=0; y<h; y++){
+            if((y ^ parity) & 1){
+                uint8_t *prev= &p->ref[0][i][y*refs];
+                uint8_t *cur = &p->ref[1][i][y*refs];
+                uint8_t *next= &p->ref[2][i][y*refs];
+                uint8_t *dst2= &dst[i][y*dst_stride[i]];
+                filter_line(p, dst2, prev, cur, next, w, refs, parity ^ tff);
             }else{
                 memcpy(&dst[i][y*dst_stride[i]], &p->ref[1][i][y*refs], w);
             }
