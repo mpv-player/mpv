@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19809  -->
+<!-- synced with  r19828  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -447,7 +447,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>имя_файла</replaceable> | gr
 </para></question>
 <answer><para>
 Убедитесь, что шрифты установлены правильно. Снова пройдите все шаги части 
-<link linkend="mpsub-install">OSD и субтитры</link> раздела, посвященного установке.
+<link linkend="fonts-osd">Шрифты и OSD</link> раздела, посвященного установке.
 Если используете TrueType шрифты, проверьте, что установлена 
 библиотека <systemitem class="library">FreeType</systemitem>.
 Стоит также проверить ваши субтитры при помощи текстового редактора или

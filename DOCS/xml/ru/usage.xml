@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19715 -->
+<!-- synced with r19828 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -101,6 +101,122 @@ mplayer -afm 3 <replaceable>/mnt/DVDtrailers/alien4.vob</replaceable>
 mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
 mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceable><!--
 --></screen>
+</para>
+</sect1>
+
+<sect1 id="subosd">
+<title>Субтитры и OSD</title>
+
+<para>
+Вместе с фильмом <application>MPlayer</application> может показывать и субтитры. В настоящий момент
+поддерживаются следующие форматы:
+<itemizedlist>
+<listitem><para>VOBsub</para></listitem>
+<listitem><para>OGM</para></listitem>
+<listitem><para>CC (closed caption[скрытые титры])</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
+<listitem><para>SubRip</para></listitem>
+<listitem><para>SubViewer</para></listitem>
+<listitem><para>Sami</para></listitem>
+<listitem><para>VPlayer</para></listitem>
+<listitem><para>RT</para></listitem>
+<listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+<listitem><para>>MPsub</para></listitem>
+<listitem><para>AQTitle</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> может конвертировать вышеперечисленные форматы субтитров (<emphasis role="bold">кроме первых
+трёх</emphasis>) в следующие форматы с помощью соответствующих опций:
+<itemizedlist>
+<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MEncoder</application> может выдавать DVD субтитры в <link linkend="menc-feat-extractsub">VOBsub</link> формате.
+</para>
+
+<para>
+Опции значительно различаются для различных форматов:
+</para>
+
+<formalpara>
+<title>VOBsub субтитры</title>
+<para>
+VOBsub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filename> файла, и необязательных
+<filename>.IDX</filename> и/или <filename>.IFO</filename> файлов.
+Использование: если у Вас, например, есть файлы
+<filename><replaceable>sample.sub</replaceable></filename>,
+<filename><replaceable>sample.ifo</replaceable></filename> (необязательно), 
+<filename><replaceable>sample.idx</replaceable></filename> - Вы должны указать
+<application>MPlayer</application>'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (можно указать полный путь).
+Опция <option>-vobsubid</option> похожа на <option>-sid</option>
+для DVD, с её помощью, Вы можете выбирать между дорожками субтитров (языками).
+В случае, если <option>-vobsubid</option> пропущена, MPlayer попытается использовать
+языки, полученные через опцию <option>-slang</option> и перейти к пункту 
+<systemitem>langidx</systemitem> в <filename>.IDX</filename> файле, чтобы выбрать язык субтитров. Если и это
+не удаётся, то субтитров не будет.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Другие субтитры</title>
+<para>
+Прочие форматы субтитров состоят из единого текстового файла, содержащего информацию
+о синхронизации, местоположении и тексте субтитра.
+Использование: Если у Вас есть, например, файл
+<filename><replaceable>sample.txt</replaceable></filename>, 
+Вы должны указать опцию <option>-sub <replaceable>sample.txt</replaceable></option>
+(можно указать полный путь).
+</para>
+</formalpara>
+
+<variablelist>
+<title>Регулировка синхронизации и местоположения субтитров:</title>
+<varlistentry>
+  <term><option>-subdelay <replaceable>sec</replaceable></option></term>
+  <listitem><simpara>
+    Задерживает субтитры на <option><replaceable>sec</replaceable></option>
+	секунд. Это значение может быть отрицательным.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subfps <replaceable>RATE</replaceable></option></term>
+  <listitem><simpara>
+    Указывает количество кадров/сек для файла субтитров (вещественное число)
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
+  <listitem><simpara>
+    Указывает позицию субтитров.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Если Вы наблюдаете увеличивающуюся задержку между фильмом и субтитрами, используя
+файл субтитров в формате MicroDVD, наиболее вероятно, что частота кадров у фильма и файла
+субтитров не совпадают. Пожалуйста, обратите внимание, что формат MicroDVD
+использует абсолютные номера кадров для синхронизации, но в нем нет информациио частоте кадров 
+и поэтому опция
+<option>-subfps</option> не может использоваться с этим форматом. 
+Вы должны, если хотите навсегда решить эту проблему, вручную конвертировать
+частоту кадров файла субтитров.
+<application>MPlayer</application> может сделать для вас это преобразование: 
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
+</para>
+
+<para>
+О DVD субтитрах, читайте в секции <link linkend="dvd">DVD</link>.
 </para>
 </sect1>
 

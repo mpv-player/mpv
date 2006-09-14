@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19810 -->
+<!-- synced with r19829 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -63,6 +63,10 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 3.79.x). Обычно это не очень важно.
   </para></listitem>
 <listitem><para>
+  <emphasis role="bold">FreeType</emphasis> - требуется версия 2.0.9 или новее, чтобы иметь 
+  шрифт для OSD и  субтитров.
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">SDL</emphasis> - это не обязательно, но может помочь в некоторых случаях
 (плохие аудио, видео карты, которые странно лагуют с xv драйвером).
 Всегда используйте новейшую версию (начиная с 1.2.x).
@@ -103,10 +107,6 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - необязательно, для поддержки CDDA
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">libfreetype</emphasis> - необязательно, для поддержки TTF шрифтов.
-Требуется минимум 2.0.9.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - необязательно, для поддержки входных плагинов XMMS.
@@ -433,275 +433,71 @@ make install</screen>
 
 <!-- ********** -->
 
-<sect1 id="subosd">
-<title>Субтитры и OSD</title>
+
+<sect1 id="fonts-osd">
+<title>Шрифты и OSD</title>
 
 <para>
-Вместе с фильмом <application>MPlayer</application> может показывать и субтитры. В настоящий момент
-поддерживаются следующие форматы:
-<itemizedlist>
-<listitem><para>VOBsub</para></listitem>
-<listitem><para>OGM</para></listitem>
-<listitem><para>CC (closed caption[скрытые титры])</para></listitem>
-<listitem><para>MicroDVD</para></listitem>
-<listitem><para>SubRip</para></listitem>
-<listitem><para>SubViewer</para></listitem>
-<listitem><para>Sami</para></listitem>
-<listitem><para>VPlayer</para></listitem>
-<listitem><para>RT</para></listitem>
-<listitem><para>SSA</para></listitem>
-<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
-<listitem><para>AQTitle</para></listitem>
-<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
-</itemizedlist>
+Чтобы насладиться OSD и субтитрами, надо указать <application>MPlayer</application> какой
+шрифт использовать. Подойдет любой TrueType или специальный растровый шрифт. Тем не менее,
+рекомендуется использовать TrueType шрифты, поскольку они лучше выглядят, корректно 
+масштабируются до размера фильма, у лучше справляются с различными кодировками.
+</para>
+
+<sect2 id="truetype-fonts">
+<title>TrueType шрифты</title>
+
+<para>
+Есть два способа заставить работать TrueType шрифты. Первый - указать опцию <option>-font</option>,
+чтобы указать путь к TrueType шрифту из команднов строки. Эта опция будет хорошим кандидатом на
+помещение в файл конфигурации (для подробностей смотрите страницу man руководства).
+Второй - создание символической ссылки с именем <filename>subfont.ttf</filename> на выбранный 
+файл шрифта. Либо 
+<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+индивидуально для каждого пользователя, либо одну общесистемную
+<screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
 </para>
 
 <para>
-<application>MPlayer</application> может конвертировать вышеперечисленные форматы субтитров (<emphasis role="bold">кроме первых
-трёх</emphasis>) в следующие форматы с помощью соответствующих опций:
-<itemizedlist>
-<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
-<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
-<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
-<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
-<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
-</itemizedlist>
-</para>
-
-<para>
-<application>MEncoder</application> может выдавать DVD субтитры в <link linkend="menc-feat-extractsub">VOBsub</link> формате.
-</para>
-
-<para>
-Опции значительно различаются для различных форматов:
-</para>
-
-<formalpara>
-<title>VOBsub субтитры</title>
-<para>
-VOBsub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filename> файла, и необязательных
-<filename>.IDX</filename> и/или <filename>.IFO</filename> файлов.
-Использование: если у Вас, например, есть файлы
-<filename><replaceable>sample.sub</replaceable></filename>,
-<filename><replaceable>sample.ifo</replaceable></filename> (необязательно), 
-<filename><replaceable>sample.idx</replaceable></filename> - Вы должны указать
-<application>MPlayer</application>'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (можно указать полный путь).
-Опция <option>-vobsubid</option> похожа на <option>-sid</option>
-для DVD, с её помощью, Вы можете выбирать между дорожками субтитров (языками).
-В случае, если <option>-vobsubid</option> пропущена, MPlayer попытается использовать
-языки, полученные через опцию <option>-slang</option> и перейти к пункту 
-<systemitem>langidx</systemitem> в <filename>.IDX</filename> файле, чтобы выбрать язык субтитров. Если и это
-не удаётся, то субтитров не будет.
-</para>
-</formalpara>
-
-<formalpara>
-<title>Другие субтитры</title>
-<para>
-Прочие форматы субтитров состоят из единого текстового файла, содержащего информацию
-о синхронизации, местоположении и тексте субтитра.
-Использование: Если у Вас есть, например, файл
-<filename><replaceable>sample.txt</replaceable></filename>, 
-Вы должны указать опцию <option>-sub <replaceable>sample.txt</replaceable></option>
-(можно указать полный путь).
-</para>
-</formalpara>
-
-<variablelist>
-<title>Регулировка синхронизации и местоположения субтитров:</title>
-<varlistentry>
-  <term><option>-subdelay <replaceable>sec</replaceable></option></term>
-  <listitem><simpara>
-    Задерживает субтитры на <option><replaceable>sec</replaceable></option>
-	секунд. Это значение может быть отрицательным.
-    </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-subfps <replaceable>RATE</replaceable></option></term>
-  <listitem><simpara>
-    Указывает количество кадров/сек для файла субтитров (вещественное число)
-    </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
-    Указывает позицию субтитров.
-    </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<para>
-Если Вы наблюдаете увеличивающуюся задержку между фильмом и субтитрами, используя
-файл субтитров в формате MicroDVD, наиболее вероятно, что частота кадров у фильма и файла
-субтитров не совпадают. Пожалуйста, обратите внимание, что формат MicroDVD
-использует абсолютные номера кадров для синхронизации, но в нем нет информациио частоте кадров 
-и поэтому опция
-<option>-subfps</option> не может использоваться с этим форматом. 
-Вы должны, если хотите навсегда решить эту проблему, вручную конвертировать
-частоту кадров файла субтитров.
-<application>MPlayer</application> может сделать для вас это преобразование: 
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
-</para>
-
-<para>
-О DVD субтитрах, читайте в секции <link linkend="dvd">DVD</link>.
-</para>
-
-
-<sect2 id="mpsub">
-<title>Собственный формат субтитров <application>MPlayer</application>'а (MPsub)</title>
-
-<para>
-<application>MPlayer</application> ввёл в употребление новый формат субтитров,
-называемый <emphasis role="bold">MPsub</emphasis>. Он был
-разработан Gabucino. По существу, его основная особенность - это
-использование <emphasis>динамической</emphasis> временной привязки (хотя существует и режим
-покадровой привязки). Пример (из 
-<ulink url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
-<programlisting>
-FORMAT=TIME
-# первый номер : столько  прождать после того, как исчез предыдущий субтитр
-# второй номер : столько секунд показывать текущий субтитр
-
-15 3
-A long long, time ago...
-
-0 3
-in a galaxy far away...
-
-0 3
-Naboo was under an attack.<!--
---></programlisting>
-</para>
-
-<para>
-Как видите, основной целью было <emphasis role="bold">сделать простым редактирование/синхронизацию/
-объединение/разрезание простым</emphasis>. И, если Вы, например, получили SSA
-субтитры но они плохо синхронизированы с Вашей версией фильма,
-Вы просто запускаете
-<screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>.
-В текущем каталоге будет создан файл <filename>dump.mpsub</filename>, содержащий
-исходный текст субтитров, но в <emphasis role="bold">MPsub</emphasis> формате. После этого, Вы можете
-свободно добавлять/вычитать секунды к/от субтитра.
-</para>
-
-<para>
-Субтитры выводятся, используя технику <emphasis role="bold">'OSD', On Screen
-Display</emphasis>.  OSD используется для вывода текущего времени, полос громкости и
-перемещения, и т. п.
-</para>
+Если <application>MPlayer</application> был скомпилирован с поддержкой 
+<systemitem class="library">fontconfig</systemitem>, эти методы не будут работать,
+вместо этого, опция <option>-font</option> ожидает
+<systemitem class="library">fontconfig</systemitem>'овское название
+шрифта, и по умолчанию это фонт без засечек (sans-serif). Чтобы получить список
+шрифтов известных <systemitem class="library">fontconfig</systemitem>'у,
+используйте <command>fc-list</command>.  Пример: 
+<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable>
+  <replaceable>anime.mkv</replaceable></screen>
+   </para>
 </sect2>
 
 
-<sect2 id="mpsub-install">
-<title>Установка OSD и субтитров</title>
-
+<sect2 id="bitmap-fonts">
+<title>Растровые шрифты</title>
 <para>
-Чтобы использовать возможности OSD/SUB, Вам нужен пакет шрифтов <application>MPlayer</application>'а.
-Есть много способов их получить:
-</para>
-
-<itemizedlist>
-<listitem><para>
-    используйте TrueType (TTF) шрифт, через библиотеку <emphasis role="bold">freetype</emphasis>.
-    Обязательна версия 2.0.9 или выше! Тогда у Вас есть два метода:
-  <itemizedlist>
-    <listitem><para>
-	  используйте опцию <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>,
-	  чтобы указывать каждый раз путь к TrueType шрифту
-      </para></listitem>
-    <listitem><para>
-	  создайте ссылку:
-      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-      </itemizedlist>
-  Если <application>MPlayer</application> был скомпилирован с поддержкой 
-  <systemitem class="library">fontconfig</systemitem>, эти методы не будут работать,
-  вместо этого, опция <option>-font</option> ожидает
-  <systemitem class="library">fontconfig</systemitem>'овское название
-  шрифта, и по умолчанию это фонт без засечек (sans-serif). Чтобы получить список
-  шрифтов известных <systemitem class="library">fontconfig</systemitem>'у,
-  используйте <command>fc-list</command>.
-  Пример: <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
-  </para></listitem>
-<listitem><para>
-  Скачать готовый к употреблению пакет шрифтов с сайта MPlayer'а.
-  Замечание: Доступные в настоящий момент шрифты ограничены до поддержки
-  ISO 8859-1/2, но существуют другие (включая корейские, русские, ISO 8859-8
-  и др.) сделанные пользователями шрифты в contrib/font секции FTP.
-  </para><para>
-  <!-- FIXME: this para should be before the list -->
-  Шрифт должен содержать соответствующий <filename>font.desc</filename> файл,
-  который создаёт соответствия между Unicode позицией в шрифте и кодовой
-  страницей субтитра. Другим решением является наличие субтитра в UTF-8 кодировке
-  и использование опции <option>-utf8</option>, или просто обозвать файл
-  субтитра <filename>&lt;video_name&gt;.utf</filename> и разместить его
-  в каталоге с фильмом. Перекодировка из различных кодировок в UTF-8 может быть
-  осуществлена с помощью программ <command>konwert</command> или <command>iconv</command>.
-  </para><para>
-  
-  <table>
-  <title>Некоторые URL'ы</title>
-  <tgroup cols="2">
-  <thead>
-    <row><entry>URL</entry><entry>Comment</entry></row>
-  </thead>
-  <tbody>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
-    </entry><entry>
-    ISO шрифты
-    </entry></row>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
-    </entry><entry>
-    различные шрифты, сделанные пользователями
-    </entry></row>
-  </tbody>
-  </tgroup>
-  </table>
-  </para></listitem>
-</itemizedlist>
-<para>
-Если Вы решите использовать не-TTF шрифты, UNZIP'ните скаченный файл в
-<filename class="directory">~/.mplayer</filename> или <filename
-class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
-или создайте символическую ссылку на один из каталогов в
-<filename class="directory">font</filename> (напр.:
-
-<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>).
-Теперь Вы должны увидеть таймер в левом верхнем углу фильма (выключите его кнопкой <keycap>o</keycap>).
+Если по каким-то причинам вам необходимо использовать растровый шрифт, скачайте набор таковых с
+нашего сайта. Вы можете выбирать между различными 
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO шрифтами</ulink> и 
+набором шрифтов
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">созданных пользователями</ulink>
+в различных кодировках.
 </para>
 
 <para>
-(субтитры <emphasis>всегда включены</emphasis>, чтобы узнать, как их отключить,
-читайте страницу man)
+Распакуйте скачанный файл в <filename class="directory">~/.mplayer</filename> или
+<filename class="directory">$PREFIX/share/mplayer</filename>.
+После этого переименуйте каталог или создайте символическую ссылку на него с именем
+<filename class="directory">font</filename>, например:
+<screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
+<screen>ln -s <replaceable>$PREFIX/mplayer/arial-24</replaceable> $PREFIX/mplayer/font</screen>
 </para>
 
 <para>
-У OSD 4 состояния: (переключаются кнопкой <keycap>o</keycap>):
-
-<orderedlist>
-<listitem><simpara>
-  полосы громкости + перемещения (по умолчанию)
-  </simpara></listitem>
-<listitem><simpara>
-  полосы громкости + перемещения + таймер + позиция в файле в процентах при перемещении
-  </simpara></listitem>
-<listitem><simpara>
-  полосы громкости + перемещения + таймер + длина всего фильма
-  </simpara></listitem>
-<listitem><simpara>
-  только субтитры
-  </simpara></listitem>
-</orderedlist>
-
-Вы можете изменить действия по умолчанию, установив в нужное значение переменную
-<option>osdlevel</option> в конфигурационном файле, или используя опцию
-<option>-osdlevel</option> командной строки.
-
-</para>
+Шрифты должны имет соответствующий им <filename>font.desc</filename> файл, отображающий
+позиции юникод шрифта в кодовую страницу текста субтитров. Другое решение - иметь субтитры,
+кодированные в UTF-8 и использовать опцию <option>-utf8</option> или просто назвать файл 
+с субтитрами <filename>&lt;имя_видео&gt;.utf</filename>, положив его в один каталог с фильмом.
+ </para>
 </sect2>
 
 
