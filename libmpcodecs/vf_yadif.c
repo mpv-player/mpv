@@ -72,17 +72,17 @@ static void filter_line(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint8_
     int x;
     uint8_t *prev2= parity ? prev : cur ;
     uint8_t *next2= parity ? cur  : next;
-                for(x=0; x<w; x++){
-                        int c= cur[-refs];
-                        int d= (prev2[0] + next2[0])>>1;
-                        int e= cur[+refs];
-                        int temporal_diff0= ABS(prev2[0] - next2[0]);
-                        int temporal_diff1=( ABS(prev[-refs] - c) + ABS(prev[+refs] - e) )>>1;
-                        int temporal_diff2=( ABS(next[-refs] - c) + ABS(next[+refs] - e) )>>1;
-                        int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
-                        int spatial_pred= (c+e)>>1;
-                        int spatial_score= ABS(cur[-refs-1] - cur[+refs-1]) + ABS(c-e)
-                                         + ABS(cur[-refs+1] - cur[+refs+1]) - 1;
+    for(x=0; x<w; x++){
+        int c= cur[-refs];
+        int d= (prev2[0] + next2[0])>>1;
+        int e= cur[+refs];
+        int temporal_diff0= ABS(prev2[0] - next2[0]);
+        int temporal_diff1=( ABS(prev[-refs] - c) + ABS(prev[+refs] - e) )>>1;
+        int temporal_diff2=( ABS(next[-refs] - c) + ABS(next[+refs] - e) )>>1;
+        int diff= MAX3(temporal_diff0>>1, temporal_diff1, temporal_diff2);
+        int spatial_pred= (c+e)>>1;
+        int spatial_score= ABS(cur[-refs-1] - cur[+refs-1]) + ABS(c-e)
+                         + ABS(cur[-refs+1] - cur[+refs+1]) - 1;
 
 #define CHECK(j)\
     {   int score= ABS(cur[-refs-1+j] - cur[+refs-1-j])\
@@ -92,39 +92,39 @@ static void filter_line(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint8_
             spatial_score= score;\
             spatial_pred= (cur[-refs  +j] + cur[+refs  -j])>>1;\
 
-                        CHECK(-1) CHECK(-2) }} }}
-                        CHECK( 1) CHECK( 2) }} }}
+        CHECK(-1) CHECK(-2) }} }}
+        CHECK( 1) CHECK( 2) }} }}
 
-                        if(p->mode<2){
-                            int b= (prev2[-2*refs] + next2[-2*refs])>>1;
-                            int f= (prev2[+2*refs] + next2[+2*refs])>>1;
+        if(p->mode<2){
+            int b= (prev2[-2*refs] + next2[-2*refs])>>1;
+            int f= (prev2[+2*refs] + next2[+2*refs])>>1;
 #if 0
-                            int a= cur[-3*refs];
-                            int g= cur[+3*refs];
-                            int max= MAX3(d-e, d-c, MIN3(MAX(b-c,f-e),MAX(b-c,b-a),MAX(f-g,f-e)) );
-                            int min= MIN3(d-e, d-c, MAX3(MIN(b-c,f-e),MIN(b-c,b-a),MIN(f-g,f-e)) );
+            int a= cur[-3*refs];
+            int g= cur[+3*refs];
+            int max= MAX3(d-e, d-c, MIN3(MAX(b-c,f-e),MAX(b-c,b-a),MAX(f-g,f-e)) );
+            int min= MIN3(d-e, d-c, MAX3(MIN(b-c,f-e),MIN(b-c,b-a),MIN(f-g,f-e)) );
 #else
-                            int max= MAX3(d-e, d-c, MIN(b-c, f-e));
-                            int min= MIN3(d-e, d-c, MAX(b-c, f-e));
+            int max= MAX3(d-e, d-c, MIN(b-c, f-e));
+            int min= MIN3(d-e, d-c, MAX(b-c, f-e));
 #endif
 
-                            diff= MAX3(diff, min, -max);
-                        }
+            diff= MAX3(diff, min, -max);
+        }
 
-                        if(spatial_pred > d + diff)
-                           spatial_pred = d + diff;
-                        else if(spatial_pred < d - diff)
-                           spatial_pred = d - diff;
+        if(spatial_pred > d + diff)
+           spatial_pred = d + diff;
+        else if(spatial_pred < d - diff)
+           spatial_pred = d - diff;
 
-                        dst[0] = spatial_pred;
+        dst[0] = spatial_pred;
 
-                        dst++;
-                        cur++;
-                        prev++;
-                        next++;
-                        prev2++;
-                        next2++;
-                }
+        dst++;
+        cur++;
+        prev++;
+        next++;
+        prev2++;
+        next2++;
+    }
 }
 
 static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int width, int height, int parity, int tff){
