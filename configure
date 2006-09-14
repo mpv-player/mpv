@@ -1367,6 +1367,10 @@ EOF
 	    R5000) _march='-mips4' _mcpu='-mtune=r5000' ;;
 	    R8000|R10000|R12000|R14000|R16000) _march='-mips4' _mcpu='-mtune=r8000' ;;
 	esac
+	# gcc < 3.x does not support -mtune.
+	if test "$cc_vendor" = "gnu" && test "$_cc_major" -lt 3 ; then
+	    _mcpu=''
+	fi
         echores "$proc"
     fi
 
