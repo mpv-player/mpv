@@ -159,6 +159,11 @@ static int init(int rate,int channels,int format,int flags)
 			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str_short(format));
 			format=AF_FORMAT_S16_LE;
 	}   
+
+	// FIXME multichannel mode is buggy
+	if(channels > 2)
+		channels = 2;
+   
 	//fill global ao_data 
 	ao_data.channels=channels;
 	ao_data.samplerate=rate;
