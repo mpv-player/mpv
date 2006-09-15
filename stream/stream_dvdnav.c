@@ -478,7 +478,7 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
       break;
     case MP_CMD_DVDNAV_SELECT:
       status = dvdnav_button_activate(nav, pci);
-      reset = 1;
+      if(status == DVDNAV_STATUS_OK) reset = 1;
       break;
     default:
       mp_msg(MSGT_CPLAYER, MSGL_V, "Unknown DVDNAV cmd %d\n", cmd);
