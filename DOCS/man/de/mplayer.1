@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19788
+.\" In sync with r19839
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -332,6 +332,8 @@ Setze Beginn oder Ende eines EDL-Sprungs und schreibe es in die angegebene
 Datei.
 .IPs "s (nur bei \-vf screenshot)"
 Mache einen Schnappschuss.
+.IPs "S (nur bei \-vf screenshot)"
+Beginne/beende die Aufnahme von Schnappschüssen.
 .IPs "I"
 Zeige den Dateinamen im OSD.
 .IPs "! und @"
@@ -6810,7 +6812,9 @@ Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
 .TP
 .B screenshot
 Erlaubt das Erstellen von Schnappschüssen des Videos mit Hilfe
-des 'screenshot'-Kommandos (Standardmässig an die Taste 's' gebunden).
+des Kommandos "screenshot 0" (in der Voreinstellung an die Taste 's' gebunden).
+"screenshot 1" (die 'S'-Taste) beginnt/beendet die Aufnahme von 
+Schnappschüssen von jedem Frame.
 Es werden Dateien mit dem Namen 'shotNNNN.png' im aktuellen Verzeichnis
 abgelegt, NNNN entspricht hierbei der ersten verfügbaren Nummer \- keine Datei
 wird überschrieben.
