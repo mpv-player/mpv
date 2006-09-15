@@ -473,7 +473,8 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
       break;
   }
 
-  dvdnav_get_current_highlight(nav, button);
+  if(status == DVDNAV_STATUS_OK)
+      dvdnav_get_current_highlight(nav, button);
 
   return reset;
 }
