@@ -4953,7 +4953,7 @@ if(step_sec>0) {
     case MP_CMD_SCREENSHOT :
       if(vo_config_count){
 	mp_msg(MSGT_CPLAYER,MSGL_INFO,"sending VFCTRL_SCREENSHOT!\n");
-	if(CONTROL_OK!=((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SCREENSHOT, 0))
+	if(CONTROL_OK!=((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SCREENSHOT, &cmd->args[0].v.i))
 	video_out->control(VOCTRL_SCREENSHOT, NULL);
       }
       break;

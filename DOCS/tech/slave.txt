@@ -142,8 +142,10 @@ get_video_resolution
 grab_frames
     Currently unimplemented.
 
-screenshot
+screenshot <value>
     Take a screenshot. Requires the screenshot filter to be loaded.
+        0 take a single screenshot
+        1 start/stop taking screenshots with each frame
 
 gui_[about|loadfile|loadsubtitle|play|playlist|preferences|skinbrowser|stop]
     GUI actions
