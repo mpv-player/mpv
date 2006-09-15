@@ -76,7 +76,7 @@ mime_struct_t mime_type_table[] = {
 	{ "video/x-ms-wma", DEMUXER_TYPE_ASF },
 	{ "application/x-mms-framed", DEMUXER_TYPE_ASF },
 	{ "application/vnd.ms.wms-hdr.asfv1", DEMUXER_TYPE_ASF },
-	{ "application/octet-stream", DEMUXER_TYPE_ASF },
+	{ "application/octet-stream", DEMUXER_TYPE_UNKNOWN },
 	// Playlists
 	{ "video/x-ms-wmx", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-scpls", DEMUXER_TYPE_PLAYLIST },
