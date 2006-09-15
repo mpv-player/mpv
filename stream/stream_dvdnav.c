@@ -162,7 +162,6 @@ void dvdnav_stream_add_event(dvdnav_priv_t* dvdnav_priv, int event, unsigned cha
   //printf("%s: %d\n",__FUNCTION__,event);
 
   dvdnav_event_t * dvdnav_event;
-  mp_cmd_t * cmd;
 
   if (!dvdnav_priv->started) return;
 
@@ -174,17 +173,6 @@ void dvdnav_stream_add_event(dvdnav_priv_t* dvdnav_priv, int event, unsigned cha
   dvdnav_event->details=calloc(1,len);
   memcpy(dvdnav_event->details,buf,len);
   dvdnav_event->len=len;
-
-  if (!(cmd = calloc(1,sizeof(*cmd)))) {
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: mp_cmd_t: out of memory!\n",__FUNCTION__);
-    free(dvdnav_event->details);
-    free(dvdnav_event);
-    return;
-  }
-  cmd->id=MP_CMD_DVDNAV_EVENT; // S+event;
-  cmd->name=strdup("dvdnav_event"); // FIXME: do I really need a 'name'?
-  cmd->nargs=1;
-  cmd->args[0].v.v=dvdnav_event;
 }
 
 int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len) {
