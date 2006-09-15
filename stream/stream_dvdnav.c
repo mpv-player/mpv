@@ -226,7 +226,7 @@ int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len
 
 void dvdnav_stream_fullstart(dvdnav_priv_t * dvdnav_priv) {
   if (dvdnav_priv && !dvdnav_priv->started) {
-    dvdnav_stream_reset(dvdnav_priv);
+    dvdnav_stream_reset(dvdnav_priv->dvdnav);
     dvdnav_priv->started=1;
   }
 }
