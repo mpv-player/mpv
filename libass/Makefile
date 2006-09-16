@@ -5,7 +5,7 @@ LIBNAME=libass.a
 
 LIBS=$(LIBNAME)
 
-SRCS=ass.c ass_cache.c ass_fontconfig.c ass_render.c ass_utils.c ass_mp.c
+SRCS=ass.c ass_cache.c ass_fontconfig.c ass_render.c ass_utils.c ass_mp.c ass_bitmap.c
 
 OBJS=$(SRCS:.c=.o)
 

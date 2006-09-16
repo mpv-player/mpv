@@ -12,6 +12,7 @@
 #include "mp_msg.h"
 
 #include "ass.h"
+#include "ass_bitmap.h"
 #include "ass_cache.h"
 #include "ass_utils.h"
 #include "ass_fontconfig.h"
@@ -51,11 +52,12 @@ typedef struct glyph_info_s {
 	unsigned symbol;
 	FT_Glyph glyph;
 	FT_Glyph outline_glyph;
+	bitmap_t* bm;
+	bitmap_t* bm_o;
 	FT_BBox bbox;
 	FT_Vector pos;
 	char linebreak; // the first (leading) glyph of some line ?
 	uint32_t c[4]; // colors
-	char bitmap; // bool
 	FT_Vector advance; // 26.6
 	effect_t effect_type;
 	int effect_timing; // time duration of current karaoke word
@@ -223,6 +225,7 @@ ass_instance_t* ass_init(void)
 		fontconfig_done(fc_priv);
 		goto ass_init_exit;
 	}
+
 	priv->library = ft;
 	priv->fontconfig_priv = fc_priv;
 	// images_root and related stuff is zero-filled in calloc
@@ -280,7 +283,7 @@ static ass_image_t* my_draw_bitmap(unsigned char* bitmap, int bitmap_w, int bitm
  * \return pointer to the new list tail
  * Performs clipping. Uses my_draw_bitmap for actual bitmap convertion.
  */
-static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint32_t color, uint32_t color2, int brk, ass_image_t** tail)
+static ass_image_t** render_glyph(bitmap_t* bm, int dst_x, int dst_y, uint32_t color, uint32_t color2, int brk, ass_image_t** tail)
 {
 	// brk is relative to dst_x
 	// color = color left of brk
@@ -288,19 +291,12 @@ static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint
 	int b_x0, b_y0, b_x1, b_y1; // visible part of the bitmap
 	int clip_x0, clip_y0, clip_x1, clip_y1;
 	int tmp;
-	FT_Bitmap* bitmap;
 	ass_image_t* img;
 
-	bitmap = &(bit->bitmap);
-	dst_x += bit->left;
-	dst_y -= bit->top;
-	brk -= bit->left;
+	dst_x += bm->left;
+	dst_y += bm->top;
+	brk -= bm->left;
 	
-	if (bitmap->pixel_mode != FT_PIXEL_MODE_GRAY) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "Unsupported pixel mode: %d\n", (int)(bitmap->pixel_mode));
-		return tail;
-	}
-
 	// clipping
 	clip_x0 = render_context.clip_x0;
 	clip_y0 = render_context.clip_y0;
@@ -308,8 +304,8 @@ static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint
 	clip_y1 = render_context.clip_y1;
 	b_x0 = 0;
 	b_y0 = 0;
-	b_x1 = bitmap->width;
-	b_y1 = bitmap->rows;
+	b_x1 = bm->w;
+	b_y1 = bm->h;
 	
 	tmp = dst_x - clip_x0;
 	if (tmp < 0) {
@@ -321,15 +317,15 @@ static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip top\n");
 		b_y0 = - tmp;
 	}
-	tmp = clip_x1 - dst_x - bitmap->width;
+	tmp = clip_x1 - dst_x - bm->w;
 	if (tmp < 0) {
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip right\n");
-		b_x1 = bitmap->width + tmp;
+		b_x1 = bm->w + tmp;
 	}
-	tmp = clip_y1 - dst_y - bitmap->rows;
+	tmp = clip_y1 - dst_y - bm->h;
 	if (tmp < 0) {
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "clip bottom\n");
-		b_y1 = bitmap->rows + tmp;
+		b_y1 = bm->h + tmp;
 	}
 	
 	if ((b_y0 >= b_y1) || (b_x0 >= b_x1))
@@ -337,16 +333,16 @@ static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint
 
 	if (brk > b_x0) { // draw left part
 		if (brk > b_x1) brk = b_x1;
-		img = my_draw_bitmap(bitmap->buffer + bitmap->pitch * b_y0 + b_x0, 
-			brk - b_x0, b_y1 - b_y0, bitmap->pitch,
+		img = my_draw_bitmap(bm->buffer + bm->w * b_y0 + b_x0, 
+			brk - b_x0, b_y1 - b_y0, bm->w,
 			dst_x + b_x0, dst_y + b_y0, color);
 		*tail = img;
 		tail = &img->next;
 	}
 	if (brk < b_x1) { // draw right part
 		if (brk < b_x0) brk = b_x0;
-		img = my_draw_bitmap(bitmap->buffer + bitmap->pitch * b_y0 + brk, 
-			b_x1 - brk, b_y1 - b_y0, bitmap->pitch,
+		img = my_draw_bitmap(bm->buffer + bm->w * b_y0 + brk, 
+			b_x1 - brk, b_y1 - b_y0, bm->w,
 			dst_x + brk, dst_y + b_y0, color2);
 		*tail = img;
 		tail = &img->next;
@@ -361,37 +357,31 @@ static ass_image_t** render_glyph(FT_BitmapGlyph bit, int dst_x, int dst_y, uint
 static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 {
 	int pen_x, pen_y;
-	int error, error2;
-	int i;
-	FT_Glyph image;
-	FT_BitmapGlyph bit;
+	int i, error;
+	bitmap_t* bm;
 	glyph_hash_val_t hash_val;
 	ass_image_t* head;
 	ass_image_t** tail = &head;
 
 	for (i = 0; i < text_info->length; ++i) {
-		if (text_info->glyphs[i].bitmap != 1) {
+		if (text_info->glyphs[i].glyph) {
 			if ((text_info->glyphs[i].symbol == '\n') || (text_info->glyphs[i].symbol == 0))
 				continue;
-			error = FT_Glyph_To_Bitmap( &(text_info->glyphs[i].outline_glyph), FT_RENDER_MODE_NORMAL, 0, 1);
-			error2 = FT_Glyph_To_Bitmap( &(text_info->glyphs[i].glyph), FT_RENDER_MODE_NORMAL, 0, 1);
+			error = glyph_to_bitmap(text_info->glyphs[i].glyph, text_info->glyphs[i].outline_glyph,
+					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o);
+			if (error)
+				text_info->glyphs[i].symbol = 0;
+			FT_Done_Glyph(text_info->glyphs[i].glyph);
+			FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
 
-			if (error || error2) {
-				FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
-				FT_Done_Glyph(text_info->glyphs[i].glyph);
-				mp_msg(MSGT_GLOBAL, MSGL_WARN, "FT_Glyph_To_Bitmap error %d %d, symbol %d, index %d\n", 
-						error, error2, text_info->glyphs[i].symbol, text_info->glyphs[i].hash_key.index);
-				text_info->glyphs[i].symbol = 0; // do not render
-				continue;
-			}
 			// cache
-			text_info->glyphs[i].hash_key.bitmap = 1; // other hash_key fields were set in get_glyph()
 			hash_val.bbox_scaled = text_info->glyphs[i].bbox;
-			hash_val.outline_glyph = text_info->glyphs[i].outline_glyph;
-			hash_val.glyph = text_info->glyphs[i].glyph;
+			hash_val.bm_o = text_info->glyphs[i].bm_o;
+			hash_val.bm = text_info->glyphs[i].bm;
 			hash_val.advance.x = text_info->glyphs[i].advance.x;
 			hash_val.advance.y = text_info->glyphs[i].advance.y;
 			cache_add_glyph(&(text_info->glyphs[i].hash_key), &hash_val);
+
 		}
 	}
 
@@ -402,13 +392,12 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 
 		pen_x = dst_x + info->pos.x;
 		pen_y = dst_y + info->pos.y;
-		image = info->outline_glyph;
-		bit = (FT_BitmapGlyph)image;
+		bm = info->bm_o;
 		
 		if ((info->effect_type == EF_KARAOKE_KO) && (info->effect_timing <= info->bbox.xMax)) {
 			// do nothing
 		} else
-			tail = render_glyph(bit, pen_x, pen_y, info->c[2], 0, 1000000, tail);
+			tail = render_glyph(bm, pen_x, pen_y, info->c[2], 0, 1000000, tail);
 	}
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
@@ -417,18 +406,17 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 
 		pen_x = dst_x + info->pos.x;
 		pen_y = dst_y + info->pos.y;
-		image = info->glyph;
-		bit = (FT_BitmapGlyph)image;
+		bm = info->bm;
 
 		if ((info->effect_type == EF_KARAOKE) || (info->effect_type == EF_KARAOKE_KO)) {
 			if (info->effect_timing > info->bbox.xMax)
-				tail = render_glyph(bit, pen_x, pen_y, info->c[0], 0, 1000000, tail);
+				tail = render_glyph(bm, pen_x, pen_y, info->c[0], 0, 1000000, tail);
 			else
-				tail = render_glyph(bit, pen_x, pen_y, info->c[1], 0, 1000000, tail);
+				tail = render_glyph(bm, pen_x, pen_y, info->c[1], 0, 1000000, tail);
 		} else if (info->effect_type == EF_KARAOKE_KF) {
-			tail = render_glyph(bit, pen_x, pen_y, info->c[0], info->c[1], info->effect_timing, tail);
+			tail = render_glyph(bm, pen_x, pen_y, info->c[0], info->c[1], info->effect_timing, tail);
 		} else
-			tail = render_glyph(bit, pen_x, pen_y, info->c[0], 0, 1000000, tail);
+			tail = render_glyph(bm, pen_x, pen_y, info->c[0], 0, 1000000, tail);
 	}
 
 	*tail = 0;
@@ -1206,20 +1194,16 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	key->bold = render_context.bold;
 	key->italic = render_context.italic;
 
-	key->bitmap = 1; // looking for bitmap glyph
-
-	
 	val = cache_find_glyph(key);
 //	val = 0;
 	
 	if (val) {
-		// bitmap glyph found, no need for FT_Glyph_Copy
-		info->glyph = val->glyph;
-		info->outline_glyph = val->outline_glyph;
+		info->glyph = info->outline_glyph = 0;
+		info->bm = val->bm;
+		info->bm_o = val->bm_o;
 		info->bbox = val->bbox_scaled;
 		info->advance.x = val->advance.x;
 		info->advance.y = val->advance.y;
-		info->bitmap = 1; // bitmap glyph
 
 		return 0;
 	}
@@ -1258,7 +1242,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 		FT_Glyph_Copy(info->glyph, &info->outline_glyph);
 	}
 
-	info->bitmap = 0; // outline glyph
+	info->bm = info->bm_o = 0;
 
 	return 0;
 }
@@ -1599,7 +1583,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		pen.y += text_info.glyphs[text_info.length].advance.y;
 		
 		// if it's an outline glyph, we still need to fill the bbox
-		if (text_info.glyphs[text_info.length].bitmap != 1) {
+		if (text_info.glyphs[text_info.length].glyph) {
 			FT_Glyph_Get_CBox( text_info.glyphs[text_info.length].glyph, FT_GLYPH_BBOX_PIXELS, &(text_info.glyphs[text_info.length].bbox) );
 		}
 
@@ -1822,7 +1806,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			info->pos.y -= start.y >> 6;
 
 //			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "shift: %d, %d\n", start.x / 64, start.y / 64);
-			if (info->bitmap != 1) {
+			if (info->glyph) {
 				FT_Glyph_Transform( info->glyph, &matrix_rotate, 0 );
 				FT_Glyph_Transform( info->outline_glyph, &matrix_rotate, 0 );
 			}

@@ -2,11 +2,13 @@
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include FT_GLYPH_H
 
 #include <assert.h>
 
 #include "mp_msg.h"
 #include "ass_fontconfig.h"
+#include "ass_bitmap.h"
 #include "ass_cache.h"
 
 
@@ -197,8 +199,8 @@ void ass_glyph_cache_done(void)
 		glyph_hash_item_t* item = glyph_hash_root[i];
 		while (item) {
 			glyph_hash_item_t* next = item->next;
-			if (item->val.glyph) FT_Done_Glyph(item->val.glyph);
-			if (item->val.outline_glyph) FT_Done_Glyph(item->val.outline_glyph);
+			if (item->val.bm) ass_free_bitmap(item->val.bm);
+			if (item->val.bm_o) ass_free_bitmap(item->val.bm_o);
 			free(item);
 			item = next;
 		}
