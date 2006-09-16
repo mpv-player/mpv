@@ -88,6 +88,9 @@ int kerning(font_desc_t *desc, int prevc, int c);
 
 void load_font_ft(int width, int height);
 
+void blur(unsigned char *buffer, unsigned short *tmp2, int width, int height,
+          int stride, int *m2, int r, int mwidth);
+
 #else
 
 static void render_one_glyph(font_desc_t *desc, int c) {}

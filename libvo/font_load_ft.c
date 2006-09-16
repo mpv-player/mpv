@@ -330,7 +330,7 @@ static void outline0(
 }
 
 // gaussian blur
-static void blur(
+void blur(
 	unsigned char *buffer,
 	unsigned short *tmp2,
 	int width,
