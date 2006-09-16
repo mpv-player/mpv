@@ -569,8 +569,8 @@ static char help_text[]=
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Warnung! Audiostream-Header %d neu definiert!\n"
 #define MSGTR_VideoStreamRedefined "Warnung! Videostream-Header %d neu definiert!\n"
-#define MSGTR_TooManyAudioInBuffer "\nZu viele Audiopakete im Puffer: (%d in %d bytes).\n"
-#define MSGTR_TooManyVideoInBuffer "\nZu viele Videopakete im Puffer: (%d in %d bytes).\n"
+#define MSGTR_TooManyAudioInBuffer "\nZu viele Audiopakete im Puffer: (%d in %d Bytes).\n"
+#define MSGTR_TooManyVideoInBuffer "\nZu viele Videopakete im Puffer: (%d in %d Bytes).\n"
 #define MSGTR_MaybeNI \
 "Vielleicht spielst du eine(n) nicht-interleaved Stream/Datei, oder der \n"\
 "Codec funktioniert nicht. Versuche bei AVI-Dateien, den nicht-interleaved \n"\
@@ -1891,7 +1891,7 @@ static char help_text[]=
 #define MSGTR_RADIO_QueryControlFailed "[Radio] ioctl \"query control\" fehlgeschlagen: %s\n"
 #define MSGTR_RADIO_GetVolumeFailed "[Radio] ioctl \"get volume\" fehlgeschlagen: %s\n"
 #define MSGTR_RADIO_SetVolumeFailed "[Radio] ioctl \"set volume\" fehlgeschlagen: %s\n"
-#define MSGTR_RADIO_DroppingFrame "\n[Radio] zu schlecht - Audio-Frame ausgelassen (%d bytes)!\n"
+#define MSGTR_RADIO_DroppingFrame "\n[Radio] zu schlecht - Audio-Frame ausgelassen (%d Bytes)!\n"
 #define MSGTR_RADIO_BufferEmpty "[Radio] grab_audio_frame: Puffer leer, warte auf %d Daten-Bytes.\n"
 #define MSGTR_RADIO_AudioInitFailed "[Radio] audio_in_init fehlgeschlagen: %s\n"
 #define MSGTR_RADIO_AudioBuffer "[Radio] Audio-Capture - Puffer=%d Bytes (Block=%d Bytes).\n"
