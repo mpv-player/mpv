@@ -404,7 +404,7 @@ Advanced options:
   --enable-dynamic-plugins  Enable support for dynamic a/v plugins [disable]
 
 Hazardous options a.k.a. "DO NOT REPORT ANY BUGS!"
-  --disable-gcc-checking   disable gcc version checking [enable]
+  --disable-gcc-check   disable gcc version checking [enable]
 
 Use these options if autodetection fails (Options marked with (*) accept
 multiple paths separated by ':'):
@@ -743,7 +743,7 @@ if test "$_gcc_check" = yes ; then
 
 You are not using a supported compiler. We do not have the time to make sure
 everything works with compilers other than the ones we use.  Use either the
-same compiler as we do, or use --disable-gcc-checking but DO *NOT* REPORT BUGS
+same compiler as we do, or use --disable-gcc-check but DO *NOT* REPORT BUGS
 unless you can reproduce them after recompiling with a 2.95.x or 3.x version!
 
 Note for gcc 2.96 users: Some versions of this compiler are known to miscompile
@@ -1725,8 +1725,8 @@ for ac_option do
   --cc=*) ;;
   --host-cc=*) ;;
   --as=*) ;;
-  --enable-gcc-checking) ;;
-  --disable-gcc-checking) ;;
+  --enable-gcc-check) ;;
+  --disable-gcc-check) ;;
   --enable-static*) ;;
   --disable-static*) ;;
   --with-extraincdir=*) ;;
