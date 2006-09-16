@@ -131,6 +131,7 @@ static unsigned glyph_hash(glyph_hash_key_t* key) {
 	val <<= 21;
 	
 	if (key->bitmap)   val &= 0x80000000;
+	if (key->be) val &= 0x40000000;
 	val += key->index;
 	val += key->size << 8;
 	val += key->outline << 3;

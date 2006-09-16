@@ -26,6 +26,7 @@ typedef struct glyph_hash_key_s {
 	int index; // glyph index in the face
 	unsigned outline; // border width, 16.16 fixed point value
 	int bold, italic;
+	char be; // blur edges
 
 	// the following affects bitmap glyphs only
 	unsigned scale_x, scale_y; // 16.16

@@ -38,6 +38,7 @@ struct ass_instance_s {
 	fc_instance_t* fontconfig_priv;
 	ass_settings_t settings;
 	int render_id;
+	ass_synth_priv_t* synth_priv;
 
 	ass_image_t* images_root; // rendering result is stored here
 };
@@ -66,6 +67,7 @@ typedef struct glyph_info_s {
 	int effect_skip_timing; // delay after the end of last karaoke word
 	int asc, desc; // font max ascender and descender
 //	int height;
+	int be; // blur edges
 	
 	glyph_hash_key_t hash_key;
 } glyph_info_t;
@@ -110,6 +112,7 @@ typedef struct render_context_s {
 	int clip_x0, clip_y0, clip_x1, clip_y1;
 	char detect_collisions;
 	uint32_t fade; // alpha from \fad
+	char be; // blur edges
 
 	effect_t effect_type;
 	int effect_timing;
@@ -226,6 +229,8 @@ ass_instance_t* ass_init(void)
 		goto ass_init_exit;
 	}
 
+	priv->synth_priv = ass_synth_init();
+
 	priv->library = ft;
 	priv->fontconfig_priv = fc_priv;
 	// images_root and related stuff is zero-filled in calloc
@@ -248,6 +253,7 @@ void ass_done(ass_instance_t* priv)
 	ass_glyph_cache_done();
 	if (priv && priv->library) FT_Done_FreeType(priv->library);
 	if (priv && priv->fontconfig_priv) fontconfig_done(priv->fontconfig_priv);
+	if (priv && priv->synth_priv) ass_synth_done(priv->synth_priv);
 	if (priv) free(priv);
 	if (text_info.glyphs) free(text_info.glyphs);
 }
@@ -367,8 +373,9 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		if (text_info->glyphs[i].glyph) {
 			if ((text_info->glyphs[i].symbol == '\n') || (text_info->glyphs[i].symbol == 0))
 				continue;
-			error = glyph_to_bitmap(text_info->glyphs[i].glyph, text_info->glyphs[i].outline_glyph,
-					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o);
+			error = glyph_to_bitmap(ass_instance->synth_priv,
+					text_info->glyphs[i].glyph, text_info->glyphs[i].outline_glyph,
+					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o, text_info->glyphs[i].be);
 			if (error)
 				text_info->glyphs[i].symbol = 0;
 			FT_Done_Glyph(text_info->glyphs[i].glyph);
@@ -940,7 +947,10 @@ static char* parse_tag(char* p, double pwr) {
 		// FIXME: does not reset unsupported attributes.
 	} else if (mystrcmp(&p, "be")) {
 		int val;
-		mystrtoi(&p, 10, &val);
+		if (mystrtoi(&p, 10, &val))
+			render_context.be = val ? 1 : 0;
+		else
+			render_context.be = 0;
 		mp_msg(MSGT_GLOBAL, MSGL_V, "be unimplemented \n");
 	} else if (mystrcmp(&p, "b")) {
 		int b;
@@ -1130,6 +1140,7 @@ static int init_render_context(ass_event_t* event)
 	render_context.effect_type = EF_NONE;
 	render_context.effect_timing = 0;
 	render_context.effect_skip_timing = 0;
+	render_context.be = 0;
 	
 	if (render_context.family)
 		free(render_context.family);
@@ -1193,6 +1204,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	key->advance = *advance;
 	key->bold = render_context.bold;
 	key->italic = render_context.italic;
+	key->be = render_context.be;
 
 	val = cache_find_glyph(key);
 //	val = 0;
@@ -1602,6 +1614,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].effect_skip_timing = render_context.effect_skip_timing;
 		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.face);
 		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.face);
+		text_info.glyphs[text_info.length].be = render_context.be;
 
 		text_info.length++;
 
