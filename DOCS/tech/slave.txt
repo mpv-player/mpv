@@ -236,6 +236,9 @@ seek_chapter <value> [type]
         0 is a relative seek of +/- <value> chapters (default).
         1 is a seek to chapter <value>.
 
+set_mouse_pos <x> <y>
+    Sets the coordinates of the mouse on the screen.
+
 set_property <property> <value>
     Set a property.
 
