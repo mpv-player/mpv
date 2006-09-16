@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r19693
+// Synced with help_mp-en.h: r19799
 
 // ========================= MPlayer help ===========================
 
