@@ -5094,7 +5094,7 @@ EOF
   _used_css=
   _dvdnavmajor=`echo $_dvdnavvsn | cut -d. -f2`
   test "$_dvdnavmajor" -ge 2 -o "$_dvdnavvsn" -ge 0110 && \
-       cc_check -I$_dvdnavdir $_dvdnavlibs $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
+       cc_check $_dvdnavdir $_dvdnavlibs $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
   _largefiles=yes
