@@ -481,6 +481,20 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
   return reset;
 }
 
+void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* button) {
+  dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
+  dvdnav_t *nav = dvdnav_priv->dvdnav;
+  dvdnav_status_t status;
+  pci_t *pci = dvdnav_get_current_nav_pci(nav);
+
+  if(!pci) return;
+
+  status = dvdnav_mouse_select(nav, pci, x, y);
+  if(status == DVDNAV_STATUS_OK) dvdnav_get_current_highlight(nav, button);
+  else *button = -1;
+}
+
+
 stream_info_t stream_info_dvdnav = {
   "DVDNAV stream",
   "null",
