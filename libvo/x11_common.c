@@ -63,6 +63,7 @@
 #define WIN_LAYER_ONTOP                  6
 #define WIN_LAYER_ABOVE_DOCK             10
 
+extern int enable_mouse_movements;
 int fs_layer = WIN_LAYER_ABOVE_DOCK;
 static int orig_layer = 0;
 static int old_gravity = NorthWestGravity;
@@ -1084,6 +1085,13 @@ int vo_x11_check_events(Display * mydisplay)
                 }
                 break;
             case MotionNotify:
+                if(enable_mouse_movements)
+                {
+                    char cmd_str[40];
+                    sprintf(cmd_str,"set_mouse_pos %i %i",Event.xmotion.x, Event.xmotion.y);
+                    mp_input_queue_cmd(mp_input_parse_cmd(cmd_str));
+                }
+
                 if (vo_mouse_autohide)
                 {
                     vo_showcursor(mydisplay, vo_window);

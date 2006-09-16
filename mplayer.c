@@ -86,6 +86,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 int slave_mode=0;
 int player_idle_mode=0;
 int quiet=0;
+int enable_mouse_movements=0;
 
 #ifdef WIN32
 char * proc_priority=NULL;
@@ -2713,6 +2714,24 @@ static int generate_video_frame(sh_video_t *sh_video, demux_stream_t *d_video)
     return 1;
 }
 
+static void rescale_input_coordinates(int ix, int iy, double *dx, double *dy) {
+    //remove the borders, if any, and rescale to the range [0,1],[0,1]
+    if(vo_fs) {  //we are in full-screen mode
+        if(vo_screenwidth > vo_dwidth) //there are borders along the x axis
+            ix -= (vo_screenwidth - vo_dwidth) / 2;
+        if(vo_screenheight > vo_dheight) //there are borders along the y axis (usual way)
+            iy -= (vo_screenheight - vo_dheight) / 2;
+
+        if(ix < 0 || ix > vo_dwidth)  {*dx = *dy = -1.0; return; }  //we are on one of the borders
+        if(iy < 0 || iy > vo_dheight) {*dx = *dy = -1.0; return; } //we are on one of the borders
+    }
+
+    *dx = (double) ix / (double) vo_dwidth;
+    *dy = (double) iy / (double) vo_dheight;
+
+    mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nrescaled coordinates: %.3lf, %.3lf, screen (%d x %d), vodisplay: (%d, %d), fullscreen: %d\r\n",
+        *dx, *dy, vo_screenwidth, vo_screenheight,  vo_dwidth, vo_dheight, vo_fs);
+}
 
 int main(int argc,char* argv[]){
 
@@ -5132,6 +5151,14 @@ if(step_sec>0) {
         }
         break;
     } break;
+    case MP_CMD_SET_MOUSE_POS: {
+        int button = 0, pointer_x, pointer_y;
+        double dx, dy;
+        pointer_x = cmd->args[0].v.i;
+        pointer_y = cmd->args[1].v.i;
+        rescale_input_coordinates(pointer_x, pointer_y, &dx, &dy);
+        break;
+    }
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV: {
       int button = 0;

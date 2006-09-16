@@ -101,6 +101,7 @@ extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
 extern char* pp_help;
+extern int enable_mouse_movements;
 
 m_option_t vd_conf[]={
 	{"help", "Use MPlayer with an appropriate video file instead of live partners to avoid vd.\n", CONF_TYPE_PRINT, CONF_NOCFG|CONF_GLOBAL, 0, 0, NULL},
@@ -366,6 +367,8 @@ m_option_t mplayer_opts[]={
 	{"key-fifo-size", &key_fifo_size, CONF_TYPE_INT, CONF_RANGE, 2, 65000, NULL},
 	{"noconsolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"consolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 0, NULL},
+        {"mouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+        {"nomouse-movements", &enable_mouse_movements, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 0, NULL},
 
 #define MAIN_CONF
 #include "cfg-common.h"
