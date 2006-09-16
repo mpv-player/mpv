@@ -159,6 +159,25 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 	return bm;
 }
 
+static void fix_outline(bitmap_t* bm_g, bitmap_t* bm_o)
+{
+	int x, y;
+	int sx = bm_g->left - bm_o->left;
+	int sy = bm_g->top - bm_o->top;
+	if (sx < 0 || sy < 0) {
+		mp_msg(MSGT_GLOBAL, MSGL_WARN, "fix_outline failed  \n");
+		return;
+	}
+	for (y = 0; y < bm_g->h; ++y)
+		for (x = 0; x < bm_g->w; ++x) {
+			unsigned char c_g, c_o;
+			c_o = bm_o->buffer[(y + sy) * bm_o->w + (x + sx)];
+			c_g = bm_g->buffer[y * bm_g->w + x];
+			bm_o->buffer[(y + sy) * bm_o->w + (x + sx)] = (c_o > c_g) ? c_o - c_g : 0;
+		}
+	
+}
+
 int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g, bitmap_t** bm_o, int be)
 {
 	const int bord = ceil(blur_radius);
@@ -186,6 +205,9 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_gly
 		if (bm_o)
 			blur((*bm_o)->buffer, priv->tmp, (*bm_o)->w, (*bm_o)->h, (*bm_o)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
 	}
+
+	if (bm_o)
+		fix_outline(*bm_g, *bm_o);
 
 	return 0;
 }
