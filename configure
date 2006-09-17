@@ -263,6 +263,7 @@ Codecs:
   --disable-real         disable RealPlayer DLL support [autodetect]
   --disable-xvid         disable XviD codec [autodetect]
   --disable-x264         disable H.264 encoder [autodetect]
+  --disable-nut          disable libnut demuxer [autodetect]
   --disable-libavutil    disable libavutil [autodetect]
   --disable-libavcodec   disable libavcodec [autodetect]
   --disable-libavformat  disable libavformat [autodetect]
@@ -1671,6 +1672,7 @@ _vidix_external=auto
 _joystick=no
 _xvid=auto
 _x264=auto
+_nut=auto
 _lirc=auto
 _lircc=auto
 _gui=no
@@ -1929,6 +1931,8 @@ for ac_option do
   --disable-xvid)	_xvid=no	;;
   --enable-x264)        _x264=yes       ;;
   --disable-x264)       _x264=no        ;;
+  --enable-nut)		_nut=yes	;;
+  --disable-nut)	_nut=no		;;
   --enable-libavutil)	_libavutil=yes	;;
   --disable-libavutil)	_libavutil=no	;;
   --enable-libavutil_so)	_libavutil_so=yes	;;
@@ -6518,6 +6522,29 @@ fi
 echores "$_x264"
 
 
+echocheck "nut"
+if test "$_nut" = auto ; then
+  cat > $TMPC << EOF
+#include <stdio.h>
+#include <stdlib.h>
+#include <inttypes.h>
+#include <nut.h>
+int main(void) { (void)nut_error(0); return 0; }
+EOF
+  _ld_nut="-lnut"
+  _nut=no
+   cc_check $_ld_nut && _nut=yes
+fi
+
+if test "$_nut" = yes ; then
+  _def_nut='#define HAVE_LIBNUT 1'
+else
+  _ld_nut=''
+  _def_nut='#undef HAVE_LIBNUT'
+fi
+echores "$_nut"
+
+
 # mencoder requires (optional) those libs: libmp3lame
 if test "$_mencoder" != no ; then
 
@@ -7476,6 +7503,8 @@ XVID4 = $_xvid4
 XVID_LIB = $_ld_xvid
 X264 = $_x264
 X264_LIB = $_ld_x264
+LIBNUT = $_nut
+NUT_LIB = $_ld_nut
 CONFIG_DTS = $_libdts
 DTS_LIB = $_ld_libdts
 DECORE_LIB = $_ld_mp3lame
@@ -7666,6 +7695,9 @@ $_def_encore_xvid
 
 /* Define if you are using the X.264 library */
 $_def_x264
+
+/* Define if you are using libnut */
+$_def_nut
 
 /* Define to include support for libdv-0.9.5 */
 $_def_libdv

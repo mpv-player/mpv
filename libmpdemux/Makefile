@@ -53,6 +53,9 @@ SRCS += demuxer.c \
         demux_y4m.c \
         demux_mkv.c ebml.c \
 
+ifeq ($(LIBNUT),yes)
+SRCS += demux_nut.c
+endif
 ifeq ($(LIBVORBIS),yes)
 SRCS += demux_ogg.c
 endif

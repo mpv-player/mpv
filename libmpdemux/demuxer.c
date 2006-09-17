@@ -66,6 +66,7 @@ extern demuxer_desc_t demuxer_desc_rtp;
 extern demuxer_desc_t demuxer_desc_lavf;
 #endif
 extern demuxer_desc_t demuxer_desc_aac;
+extern demuxer_desc_t demuxer_desc_nut;
 
 demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_rawaudio,
@@ -120,6 +121,9 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_rawdv,
 #endif
   &demuxer_desc_aac,
+#ifdef HAVE_LIBNUT
+  &demuxer_desc_nut,
+#endif
 #ifdef HAVE_XMMS
   &demuxer_desc_xmms,
 #endif

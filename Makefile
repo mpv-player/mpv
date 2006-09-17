@@ -110,6 +110,7 @@ CODEC_LIBS = $(AV_LIB) \
              $(X264_LIB) \
              $(MUSEPACK_LIB) \
              $(SPEEX_LIB) \
+             $(NUT_LIB) \
 
 ifeq ($(TOOLAME),yes)
 CODEC_LIBS += $(TOOLAME_LIB)
