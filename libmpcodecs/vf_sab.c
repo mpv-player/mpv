@@ -29,6 +29,7 @@
 #include <malloc.h>
 #endif
 
+#include "avutil.h"
 #include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
@@ -100,7 +101,7 @@ static int allocStuff(FilterParam *f, int width, int height){
 	swsF.lumH= swsF.lumV= vec;
 	swsF.chrH= swsF.chrV= NULL;
 	f->preFilterContext= sws_getContext(
-		width, height, IMGFMT_Y8, width, height, IMGFMT_Y8, get_sws_cpuflags(), &swsF, NULL, NULL);
+		width, height, PIX_FMT_GRAY8, width, height, PIX_FMT_GRAY8, get_sws_cpuflags(), &swsF, NULL, NULL);
 	
 	sws_freeVec(vec);
 	vec = sws_getGaussianVec(f->strength, 5.0);
