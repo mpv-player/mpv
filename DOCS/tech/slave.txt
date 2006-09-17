@@ -237,7 +237,8 @@ seek_chapter <value> [type]
         1 is a seek to chapter <value>.
 
 set_mouse_pos <x> <y>
-    Set the coordinates of the mouse on the screen.
+    Tells MPlayer the coordinates of the mouse in the window.
+    This command doesn't move the mouse!
 
 set_property <property> <value>
     Set a property.
