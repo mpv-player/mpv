@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19839
+.\" In sync with r19870
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -952,6 +952,12 @@ Gib das Hauptmenü an.
 .TP
 .B \-menu-startup (nur bei OSD)
 Zeige das Hauptmenü beim Start von MPlayer.
+.
+.TP
+.B \-mouse-movements
+Erlaube MPlayer, Mauszeiger-Events zu empfangen, die vom Videoausgabetreiber
+gesendet werden (momentan werden nur die Derivate von X11 unterstützt).
+Nötig, um in DVD-Menüs Schaltflächen auszuwählen.
 .
 .TP
 .B \-noconsolecontrols
@@ -6812,9 +6818,9 @@ Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
 .TP
 .B screenshot
 Erlaubt das Erstellen von Schnappschüssen des Videos mit Hilfe
-des Kommandos "screenshot 0" (in der Voreinstellung an die Taste 's' gebunden).
-"screenshot 1" (die 'S'-Taste) beginnt/beendet die Aufnahme von 
-Schnappschüssen von jedem Frame.
+von Slave-Kommandos, die an Tasten gebunden werden können.
+Siehe Dokumentation des Slave-Modus und den Abschnitt TASTATURSTEUERUNG
+für Details.
 Es werden Dateien mit dem Namen 'shotNNNN.png' im aktuellen Verzeichnis
 abgelegt, NNNN entspricht hierbei der ersten verfügbaren Nummer \- keine Datei
 wird überschrieben.
