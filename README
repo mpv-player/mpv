@@ -159,11 +159,11 @@ ______________________________________
 STEP4: Choose an onscreen display font
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can use any TrueType font installed on your system. Look at the manual page
-to see how to pass the -font option to MPlayer on the command line and/or how to
-fix this in your configuration file. Alternatively you can create a symbolic
-link from either /usr/local/share/mplayer/subfont.ttf or ~/.mplayer/subfont.ttf
-to your TrueType font.
+You can use any TrueType font installed on your system. Just pass '-font
+/path/to/font.ttf' on the command line or add 'font=/path/to/font.ttf' to
+your configuration file. The manual page has more details. Alternatively
+you can create a symbolic link from either ~/.mplayer/subfont.ttf or
+/usr/local/share/mplayer/subfont.ttf to your TrueType font.
 
 
 ____________________________
