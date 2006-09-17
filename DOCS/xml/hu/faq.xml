@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19779 -->
+<!-- synced with r19828 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -202,7 +202,7 @@ Van <application>MPlayer</application>rel foglalkozó levelezési lista?
 </para></question>
 <answer><para>
 Igen. Lásd a weboldal
-<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">levelezési lista részét</ulink>!
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">levelezési lista részét</ulink>!
 </para></answer>
 </qandaentry>
 
@@ -319,7 +319,7 @@ történő lejátszás értékeit.
 </para></question>
 <answer><para>
 Töltsd le a bináris codeceket a
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codec oldalunkról</ulink>
+<ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalunkról</ulink>
 és telepítsd.
 </para></answer>
 </qandaentry>
@@ -455,7 +455,7 @@ Gondjaim vannak a feliratok megjelenítésével, segítsetek!!
 </para></question>
 <answer><para>
 Győződj meg róla, hogy helyesen telepítetted a betűtípusokat. Fuss át a lépésein újra
-a <link linkend="mpsub-install">OSD és felirat</link> részben a telepítési fejezetben.
+a <link linkend="fonts-osd">OSD és felirat</link> részben a telepítési fejezetben.
 Ha TrueType betűtípusokat használsz, ellenőrizd, hogy van
 <systemitem class="library">FreeType</systemitem> függvénykönyvtárad telepítve.
 Ellenőrizheted még a feliratodat egy szövegszerkesztőben vagy másik lejátszóval.
@@ -782,13 +782,14 @@ neked magadnak kell megcsinálnod, de vigyázz, nagy fába vágod a fejszédet.
 
 <qandaentry>
 <question><para>
-Nem tudok egyetlen újabb DVD-t sem megnézni a Sony Pictures/BMG-től?
+Nem tudok egyetlen újabb DVD-t sem megnézni a Sony Pictures/BMG-től.
 </para></question>
 <answer><para>
-Ez normális, átvertek, egy szándékosan elrontott lemezt adtak el neked.
+Ez normális; átvertek, egy szándékosan elrontott lemezt adtak el neked.
 Az egyetlen módszer ezen DVD-k lejátszására a hibás blokkok kikerülése
 az mpdvdkit2 helyett a DVDnav használatával.
-Ezt megteheted a parancssori dvd:// dvdnav://-ra történő lecserélésével.
+Ezt úgy teheted meg, hogy az MPlayert DVDnav támogatással fordítod le, majd
+a parancssori dvd:// dvdnav://-ra cseréled.
 A DVDnav nagyon nagy mértékben kizárja az mpdvdkit2-et, győződj meg róla, hogy
 a <option>--disable-mpdvdkit</option> opciót megadtad a configure-nak.
 </para></answer>

@@ -1,4 +1,4 @@
-.\" Synced with r19788
+.\" Synced with r19865
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 08. 12." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 09. 17." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -321,6 +321,8 @@ Felirat mozgatása fel/le.
 Egy EDL kihagyás kezdetének vagy végének bejelölése és a megadott fájlba írása.
 .IPs "s (csak \-vf screenshot mellett)"
 Képernyõmentés készítése.
+.IPs "S (csak \-vf screenshot mellett)"
+Képernyõmentések készítésének elindítása/leállítása.
 .IPs "I"
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
@@ -901,6 +903,13 @@ Fõmenû megadása.
 .TP
 .B \-menu-startup (csak OSD menü)
 A fõmenü megjelenítése az MPlayer indításakor.
+.
+.TP
+.B \-mouse-movements
+Engedélyezi az MPlayernek a pozícionáló eszköz eseményeinek fogadását,
+melyeket a videó kimeneti eszköz küld (jelenleg csak az X11 leszármazottak
+támogatottak).
+Szükséges a dvd menükben a gombok kiválasztásához.
 .
 .TP
 .B \-noconsolecontrols
@@ -6499,8 +6508,10 @@ Az fd opció utasítja a szûrõt, hogy a kért tizedelést mindig végezze el (csúnya)
 .
 .TP
 .B screenshot
-Megengedi képernyõmentések készítését a filmbõl a screenshot paranccsal
-(alapértelmezésben az 's' betûhöz van kötve).
+Megengedi képernyõmentések készítését a filmbõl szolga módú
+parancsokkal, melyek billentyû lenyomásokhoz köthetõek.
+Lásd a szolga mód dokumentációját és az INTERAKTÍV VEZÉRLÉS
+fejezetet a részletekért.
 'shotNNNN.png' nevû fájlok fognak létrejönni a munkakönyvtárban,
 az elsõ szabad szám felhasználásával - egy fájl sem lesz felülírva.
 A szûrõ nem jelent hátrányt, ha nem használod és elfogad minden

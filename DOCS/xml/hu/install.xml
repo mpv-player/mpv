@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19779 -->
+<!-- synced with r19829 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -61,6 +61,10 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   legtöbbször nem olyan fontos.
   </para></listitem>
 <listitem><para>
+  <emphasis role="bold">FreeType</emphasis> 2.0.9 vagy későbbi szükséges,
+  hogy legyen betűtípus az OSD-nek és a feliratoknak.
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">SDL</emphasis> - nem feltétlenül szükséges, de segíthet
   pár esetben (hibás audió, videó kártya, ami késik az xv vezérlővel).
   Mindig használd a legújabbat (1.2.x-től kezdve).
@@ -101,10 +105,6 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   <emphasis role="bold">cdparanoia</emphasis> - választható, szükséges a CDDA támogatáshoz
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">libfreetype</emphasis> - választható, TTF betűtípusok támogatásához kell.
-  Legalább 2.0.9-es szükséges.
-  </para></listitem>
-<listitem><para>
   <emphasis role="bold">libxmms</emphasis> - választható, XMMS input plugin támogatáshoz kell.
   Legalább 1.2.7-es szükséges.
   </para></listitem>
@@ -122,108 +122,6 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   valahova a függvénykönyvtárakat tartalmazó könyvtáradba (pl. <filename>/usr/local/lib</filename>) vagy
   használnod kell a <option>--with-bio2jack=DIR</option> kapcsolót, hogy megmondd a
   <filename>./configure</filename> scriptnek, hol van a fájl.
-  </para></listitem>
-</itemizedlist>
-</sect1>
-
-
-<sect1 id="installation_codecs">
-<title>Codecek</title>
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
-  Ez a codec csomag a H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 kódolású videó
-  folyamokat és a WMA (Windows Media Audio) v1/v2 audió folyamokat tudja visszakódolni több platformon.
-  Mindezt az elérhető programok közül ő végzi a leggyorsabban is. Lásd az
-  <link linkend="ffmpeg">FFmpeg</link> bekezdést a részletekért. Jellemzők:
-  <itemizedlist>
-  <listitem><simpara>
-    lehetővé teszi a fent említett formátumok dekódolását nem x86 gépeken
-    </simpara></listitem>
-  <listitem><simpara>
-    a legtöbb megemlített codec-kel kódolni is tud
-    </simpara></listitem>
-  <listitem><simpara>
-    ez a codec <emphasis role="bold">az elérhető leggyorsabb</emphasis> a
-    DivX/3/4/5 és egyébb MPEG-4 típusú formátumoknál. Javasolt!
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">Win32 codecek</emphasis>: Ha x86-os gépen akarod használni
-  az <application>MPlayer</application>t, valószínűleg szükséged lesz rájuk.
-  Töltsd le egy codec csomagot a
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codec oldalunkról</ulink>
-  és tedd be a codec-eket a <filename class="directory">/usr/local/lib/codecs</filename> könyvtárba
-  az <application>MPlayer</application> fordítása <emphasis role="bold">ELŐTT</emphasis>,
-  különben nem lesz befordított Win32 támogatásod!
-  <note><para>Az avifile projektnek hasonló codec csomagja van, de az különbözik
-  a mienkétől, így ha minden támogatott codecet használni akarsz, akkor a mi
-  csomagunkra van szükséged (ne aggódj, az avifile-é is probléma nélkül működik).</para>
-  </note>
-  Jellemzők:
-  <itemizedlist>
-  <listitem><simpara>
-    szükséged van erre, ha különböző hardveres tömörítőkkel, például tuner kártyákkal,
-    digitális kamerákkal rögzített filmeket akarod lejátszani vagy átkódolni
-    (például: DV, ATI VCR, MJPEG)
-    </simpara></listitem>
-  <listitem><simpara>
-    szükséges ha <emphasis role="bold">WMV9/WMA9 filmeket</emphasis> akarsz lejátszani.
-   </simpara></listitem>
-  <listitem><simpara>
-    Nem kell a régi ASF-ekhez MP41 vagy MP42 videóval (ezek gyakran VoxWare audiójú
-    fájlok - ezt a Win32 codec elintézi), és az WMV7-hez. Szintén szükségtelen
-    a WMA-hoz (Windows Media Audio), a
-    <systemitem class="library">libavcodec</systemitem>nek van nyílt forrású dekódolója
-    ehhez.
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">QuickTime codecek</emphasis>: x86-os platformokon ezek
-  a codecek az RPZA, egyébb QuickTime videók és QDesign audió folyamok lejátszására
-  használható. A telepítéső útmutatók a <link linkend="sorenson">Sorenson video codec</link>
-  részben találhatóak.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">XviD</emphasis>: Nyílt forráskódú, alternatív kódoló a
-  DivX4Linux mellett. Jellemzők:
-  <itemizedlist>
-  <listitem><simpara>
-    egy vagy két menetes kódolás
-    <link linkend="mencoder"><application>MEncoder</application></link>-rel
-    </simpara></listitem>
-  <listitem><simpara>
-    nyílt forráskódú, így multiplatformos.
-    </simpara></listitem>
-  <listitem><simpara>
-    kódolásban kb. kétszer gyorsabb, mint a divX4 - majdnem ugyan azzal a minőséggel
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  Az <emphasis role="bold"><link linkend="xanim">XAnim codecek</link></emphasis>
-  a legjobbak (teljes képernyő, hardveres YUV nagyítás) a
-  <emphasis role="bold">3ivx</emphasis> és Indeo 3/4/5 filmek dekódolásához, és
-  néhány régi formátumhoz. Ráadásul multiplatformos, így ez az egyetlen lehetőség
-  az Indeo fájlok lejátszására nem-x86-os platformokon (nos, legalábbis az XAnim
-  használatán kívül :). De például a Cinepak filmeket legjobb az
-  <application>MPlayer</application> saját Cinepak dekódolójával lejátszani!
-  </para></listitem>
-<listitem><para>
-  Az <emphasis role="bold">Ogg Vorbis</emphasis> audió dekódoláshoz helyesen
-  telepített <systemitem class="library">libvorbis</systemitem> kell.
-  A bináris csomagokat és a forráskódot beszerezheted az
-  <ulink url="http://www.vorbis.com/download.psp">Ogg Vorbis oldaláról</ulink>
-  </para></listitem>
-<listitem><para>
-  <application>MPlayer</application> tudja használni a RealPlayer 8 vagy a
-  RealONE függvénykönyvtárait a <emphasis role="bold">RealVideo 3.0 és 4.0</emphasis>
-  videók lejátszásához, és a Sipro/Cook audióhoz. Lásd a
-  <link linkend="realmedia">RealMedia fájl formátumok</link>
-  részt a telepítési útmutatóért és egyébb információkért.
   </para></listitem>
 </itemizedlist>
 </sect1>
@@ -532,282 +430,80 @@ használatban.
 
 <!-- ********** -->
 
-<sect1 id="subosd">
-<title>Feliratok és OSD</title>
+<sect1 id="fonts-osd">
+<title>Betűtípusok és OSD</title>
 
 <para>
-Az <application>MPlayer</application> feliratokat is meg tud jeleníteni a filmekkel
-együtt. Jelenleg a következő formátumok támogatottak:
-<itemizedlist>
-<listitem><para>VOBsub</para></listitem>
-<listitem><para>OGM</para></listitem>
-<listitem><para>CC (closed caption)</para></listitem>
-<listitem><para>MicroDVD</para></listitem>
-<listitem><para>SubRip</para></listitem>
-<listitem><para>SubViewer</para></listitem>
-<listitem><para>Sami</para></listitem>
-<listitem><para>VPlayer</para></listitem>
-<listitem><para>RT</para></listitem>
-<listitem><para>SSA</para></listitem>
-<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
-<listitem><para>AQTitle</para></listitem>
-<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
-</itemizedlist>
-</para>
-
-<para>
-Az <application>MPlayer</application> az előzőleg felsorolt felirat formátumokat
-(<emphasis role="bold">az első három kivételével</emphasis>) át is tudja konvertálni
-az alábbi formátumokba, a megadott kapcsolókkal:
-<itemizedlist>
-<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
-<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
-<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
-<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
-<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
-</itemizedlist>
-</para>
-
-<para>
-A <application>MEncoder</application> el tudja menteni a DVD feliratokat
-<link linkend="menc-feat-extractsub">VOBsub</link> formában.
-</para>
-
-<para>
-A parancssori kapcsolók eléggé különböznek az az egyes formátumoknál:
-</para>
-
-<formalpara>
-<title>VOBsub feliratok</title>
-<para>
-A VOBsub feliratok egy nagy (néhány megabájtos) <filename>.SUB</filename> fájlból
-és opcionálisan egy <filename>.IDX</filename> és/vagy <filename>.IFO</filename>
-fájlból állnak.  Ha olyan fájlaid vannak, hogy
-<filename><replaceable>sample.sub</replaceable></filename>,
-<filename><replaceable>sample.ifo</replaceable></filename> (opcionális),
-<filename><replaceable>sample.idx</replaceable></filename> - meg kell adnod az
-<application>MPlayer</application>nek a <option>-vobsub sample
-[-vobsubid <replaceable>id</replaceable>]</option> kapcsolót
-(teljes elérési út is megadható). A <option>-vobsubid</option> kapcsoló olyan,
-mint a <option>-sid</option> a DVD-knél, segítségével felirat sávok (nyelvek)
-közül választhatsz. Abban az esetben, ha elfelejted a <option>-vobsubid</option>
-kapcsolót, az <application>MPLayer</application> a <option>-slang</option> kapcsolóval
-megadott nyelveket próbálja használni, és a <systemitem>langidx</systemitem>-re ugrik
-az <filename>.IDX</filename> fájlban, hogy beállítsa a felirat nyelvét. Ha ez nem
-sikerül, nem lesz felirat.
-</para>
-</formalpara>
-
-<formalpara>
-<title>Egyéb feliratok</title>
-<para>
-A többi formátum egy sima szöveges fájlból áll, mely tartalmazza az időzítést,
-a pozícionálást és a szöveget. Használata: ha van egy olyan fájlod, mint pl.
-<filename><replaceable>sample.txt</replaceable></filename>,
-akkor a <option>-sub <replaceable>sample.txt</replaceable></option> kapcsolóval
-tudod megadni (teljes elérési út is megadható).
-</para>
-</formalpara>
-
-<variablelist>
-<title>Felirat időzítés és pozícionálás beállítása:</title>
-<varlistentry>
-  <term><option>-subdelay <replaceable>mp</replaceable></option></term>
-  <listitem><simpara>
-    Késlelteti a feliratot <option><replaceable>mp</replaceable></option> másodperccel.
-    Lehet negatív is. Az érték a film időpozíciójának számlálójához adódik hozzá.
-    </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-subfps <replaceable>RÁTA</replaceable></option></term>
-  <listitem><simpara>
-    Megadhatod a felirat fájl képkocka/mp rátáját (lebegőpontos szám).
-    </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
-    A felirat pozícióját adhatod meg.
-    </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<para>
-Ha MicroDVD felirat fájl használa közben egyre növekvő csúszást tapasztalsz a
-film és a felirat között, akkor a legvalószínűbb, hogy a film és a felirat frame
-rátája különböző. Jegyezd meg, hogy a MicroDVD felirat formátum abszolút képkocka
-számokat használ az időzítéshez, és nincs benne fps információ, emiatt a
-<option>-subfps</option> kapcsoló használata javasolt ezzel a formátummal. Ha
-végleg meg akarod oldani ezt a problémát, kézzel kell átkonvertálnod a felirat
-fájl frame rátáját.
-Az <application>MPlayer</application> el tudja végezni ezt a konverziót neked:
-<screen>mplayer <replaceable>dummy.avi</replaceable> -fps subtitles_fps -subfps avi_fps [-subdelay sec] [-sub subtitle_filename] <replaceable>-dumpmicrodvdsub</replaceable></screen>
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable> <replaceable>dummy.avi</replaceable></screen>
-</para>
-
-<para>
-A DVD feliratokról a <link linkend="dvd">DVD</link> fejezetben olvashatsz bővebben.
+Meg kell mondanod az <application>MPlayer</application>nek, hogy melyik
+betűtípust szeretnéd használni az OSD-hez és a feliratokhoz. Bármilyen
+TrueType betűtípus vagy speciális bittérképes betű működni fog.
+Azonban ajánlott a TrueType használata, mivel sokkal jobban néz ki,
+megfelelően méretezhető a film méretéhez és jobban együttműködik a
+különböző kódolásokkal.
 </para>
 
 
-<sect2 id="mpsub">
-<title>Az <application>MPlayer</application> saját felirat formátuma (MPsub)</title>
+<sect2 id="truetype-fonts">
+<title>TrueType betűk</title>
 
 <para>
-Az <application>MPlayer</application> egy új felirat formátumot is bevezetett, amit
-<emphasis role="bold">MPsub</emphasis>nak hívnak. Gabucino tervezte. A legfontosabb
-tulajdonsága, hogy <emphasis>dinamikus</emphasis> idő-alapú (habár használható
-képkocka-alapú módban is). Példa (<ulink
-url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink>):
-<programlisting>
-FORMAT=TIME
-# első szám    : ennyi másodpercet várjon az előző felirat eltűnése után
-# második szám : ennyi másodpercig mutassa az aktuális feliratot
-
-15 3
-Réges régen...
-
-0 3
-egy nagyon távoli galaxisban...
-
-0 3
-Naboo támadás alatt állt.<!--
---></programlisting>
+A TrueType betűtípusok kétféle módon használhatóak. Az egyik a
+<option>-font</option> opcióval egy TrueType betűtípus fájl megadása
+a parancssorban. Ez az opció jó eséllyel pályázik arra, hogy bekerüljön
+a konfigurációs fájlodba (lásd a man oldalt a részletekért).
+A másik, hogy készítesz egy <filename>subfont.ttf</filename> nevű symlink-et
+a választott betűtípus fájlhoz. Vagy
+<screen>ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+külön minden egyes felhasználóhoz, vagy az egész rendszerre vonatkozóan:
+<screen>ln -s <replaceable>/eleresi/ut/pelda_betu.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
 </para>
 
 <para>
-Amint látod, a fő cél a <emphasis role="bold">felirat
-szerkesztésének/időzítésének/összeillesztésének/vágásának könnyítése</emphasis>
-volt. És ha - mondjuk - kapsz egy SSA feliratot, de rosszul van időzítve/késleltetve
-a te filmedhez képest, egyszerűen csak kiadod a következő parancsot:
-<screen>mplayer <replaceable>dummy.avi</replaceable> -sub source.ssa -dumpmpsub</screen>
-Ekkor egy <filename>dump.mpsub</filename> fájl jön létre az aktuális könyvtárban,
-ami a forrás felirat szövegét tartalmazza, de
-<emphasis role="bold">MPsub</emphasis> formátumban. Ezután szabadon
-hozzáadhatsz/kivonhatsz másodperceket a feliratoknál.
+Ha az <application>MPlayer</application> <systemitem class="library">fontconfig</systemitem>
+támogatással lett lefordítva, a fenti módszerek nem fognak működni,
+helyettük a <option>-font</option> egy <systemitem class="library">fontconfig</systemitem>
+betűtípus nevet vár és alapértelmezetté teszi a sans-serif betűt.
+A <systemitem class="library">fontconfig</systemitem> által ismert
+betűtípusok listáját az <command>fc-list</command> paranccsal nézheted meg.
+Például:
+
+<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
-<para>
-A feliratok egy <emphasis role="bold">'OSD', On Screen Display</emphasis> nevű
-technológia segítségével jelennek meg. OSD segítségével jelenik meg az idő,
-a hangerő sáv, a kereső sáv, stb.
-</para>
 </sect2>
 
 
-<sect2 id="mpsub-install">
-<title>Az OSD és a feliratok telepítése</title>
+<sect2 id="bitmap-fonts">
+<title>bittérképes betűk</title>
 
 <para>
-Kell egy <application>MPlayer</application> betű csomag, hogy használni tudd
-az OSD/SUB jellemzőket. Sok helyről beszerezheted:
+Ha valamilyen okból kifolyólag bittérképes betűtípusokat szeretnél vagy kell
+használnod, tölts le egy készletet a weboldalunkról. Választhatsz a különböző
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO betűk</ulink>
+és néhány
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">felhasználói készlet</ulink>
+közül, különböző kódolásokban.
 </para>
 
-<itemizedlist>
-<listitem><para>
-  TrueType (TTF) betűket használsz, amik megfelelnek a <systemitem class="library">freetype</systemitem>
-  függvénykönyvtárnak. 2.0.9 vagy újabb verzió kötelező! Így két lehetőséged van:
-  <itemizedlist>
-    <listitem><para>
-      használod a <option>-font <replaceable>/path/to/sample_font.ttf</replaceable></option>
-      kapcsolót és megadod a TrueType betűtípust minden alkalommal
-      </para></listitem>
-    <listitem><para>
-      készítesz egy szimlinket:
-      <screen>ln -s <replaceable>/path/to/sample_font.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-      </itemizedlist>
-  Ha az <application>MPlayer</application>t <systemitem class="library">fontconfig</systemitem>
-  támogatással fordítottad, a fenti módszerek nem fognak működni, helyettük
-  a <option>-font</option> egy <systemitem class="library">fontconfig</systemitem>
-  betű nevet vár, alapértelmezett pedig a sans-serif betű lesz. Ha a
-  <systemitem class="library">fontconfig</systemitem> által ismert betűtípusok
-  listája érdekel, használd az <command>fc-list</command> parancsot! Például:
-  <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
-  </para></listitem>
-<listitem><para>
-  Letölthetsz használatra kész betű csomagokat az <application>MPlayer</application>
-  oldaláról. Megjegyzés: a jelenleg elérhető betűtípusok csak az ISO 8859-1/2
-  kódolást támogatják, de van néhány más (beleértve a koreai, orosz, ISO 8859-8 stb.)
-  betűtípusokat a contrib/font könyvtárban az FTP szerveren, amit felhasználók
-  készítettek.
-  </para><para>
-  <!-- FIXME: this para should be before the list -->
-  A betű csomagoknak tartalmazniuk kell egy <filename>font.desc</filename> fájlt,
-  ami leírja a Unicode betűk pozícióját a felirat szövegének aktuális kódlapján.
-  A másik megoldás, ha a feliratok UTF-8 kódolást használnak, ekkor az
-  <option>-utf8</option> kapcsoló használata vagy a felirat fájl átnevezése
-  <filename>&lt;video_name&gt;.utf</filename> formátumra és a film mellé másolása
-  elegendő. A különböző kódlapokról UTF-8-ra történő kódolás a
-  <command>konwert</command> vagy az <command>iconv</command> programok
-  segítségével végezhető el.
-  </para><para>
-
-  <table>
-  <title>Néhány URL</title>
-  <tgroup cols="2">
-  <thead>
-    <row><entry>URL</entry><entry>Megjegyzés</entry></row>
-  </thead>
-  <tbody>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
-    </entry><entry>
-    ISO betűtípusok
-    </entry></row>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
-    </entry><entry>
-    felhasználók által készített különböző betűtípusok
-    </entry></row>
-  </tbody>
-  </tgroup>
-  </table>
-
-  </para></listitem>
-</itemizedlist>
 <para>
-Ha nem-TTF betűtípust választasz, csomagold ki a letöltött fájlt a <filename
-class="directory">~/.mplayer</filename> vagy a <filename
-class="directory">$PREFIX/share/mplayer</filename> könyvtárba. Ezután nevezd át
-vagy szimlinkeld az egyik kicsomagolt könyvtárat <filename class="directory">font</filename>,
-névre, például:
-
+Csomagold ki a letöltött fájlokat a
+<filename class="directory">~/.mplayer</filename> vagy a
+<filename class="directory">$PREFIX/share/mplayer</filename> könyvtárba.
+Ezután nevezd át vagy készíts egy symlink-et valamelyik kicsomagolt könyvtárra
+<filename class="directory">font</filename> néven, például:
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-
-Ez után egy órát kell látnod a film bal felső sarkában (kikapcsolhatod az
-<keycap>o</keycap> billentyűvel).
+<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
 </para>
 
 <para>
-(a feliratok <emphasis>mindig engedélyezettek</emphasis>, kikapcsolásukhoz olvasd
-el a man oldalt)
+A betűtípusoknak rendelkezniük kell egy megfelelő <filename>font.desc</filename>
+fájllal, ami leképezi a unicode betűpozíciókat az aktuális felirat szöveg
+kódlapjára. A másik megoldás UTF-8 kódolású feliratok használata és a
+<option>-utf8</option> kapcsoló megadása vagy egyszerűen használd a
+<filename>&lt;videófájl_neve&gt;.utf</filename> fájlnév formát a felirat
+fájl esetén és tedd a videóval azonos könyvtárba.
 </para>
 
-<para>
-Az OSD-nek 4 állapota van (<keycap>o</keycap> billentyűvel válthatsz):
-
-<orderedlist>
-<listitem><simpara>
-  hangerő sáv + kereső sáv (alapértelmezett)
-  </simpara></listitem>
-<listitem><simpara>
-  hangerő sáv + kereső sáv + idő + keresésnél a fájl pozíció százalékban
-  </simpara></listitem>
-<listitem><simpara>
-  hangerő sáv + kereső sáv + idő + a teljes lejátszási idő
-  </simpara></listitem>
-<listitem><simpara>
-  csak feliratok
-  </simpara></listitem>
-</orderedlist>
-
-Az alapértelmezett viselkedést az <varname>osdlevel</varname> változó átállításával
-állíthatod be a konfigurációs fájlban, vagy a <option>-osdlevel</option> kapcsolóval
-a parancssorban.
-
-</para>
 </sect2>
 
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19742 -->
+<!-- synced with r19832 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -1878,8 +1878,8 @@ for a 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   A csatornaváltáshoz nyomd meg a <keycap>h</keycap> (következő) vagy a
-  <keycap>k</keycap> (előző) gombot vagy használd az OSD menüt (működő
-  <link linkend="subosd">OSD alrendszer</link> kell hozzá).
+  <keycap>k</keycap> (előző) gombot vagy használd az
+  <link linkend="osdmenu">OSD menü</link>t.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19715 -->
+<!-- synced with r19820 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -45,7 +45,7 @@ Rendszergazdaként a szokásos módszerrel telepíthető a <filename>.deb</filename> 
 <para>
 Christian Marillat már régóta készít nem-hivatalos Debian csomagokat
 az <application>MPlayerből</application>, <application>MEncoderből</application> és
-a betűtípusokból, melyek akár az apt-get segítségével is telepíthetők
+a bináris codec csomagokból, melyek akár az apt-get segítségével is telepíthetők
 <ulink url="http://www.debian-multimedia.org/">a weboldaláról</ulink>.
 </para>
 </sect2>
@@ -599,7 +599,7 @@ $ ./configure --charset=noconv
   hogy véglegesen kimaradjon a használatból.</para>
 
 <para>Vannak speciálisan Windowsra készített codec csomagok a
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">codec oldalunkon</ulink>,
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">letöltési oldalunkon</ulink>,
   melyek segítségével azokat a formátumokat is lejátszhatod, amikhez még
   nincs natív támogatás.
   Tedd be a codec-eket valahova az elérési útvonaladba vagy add meg a
