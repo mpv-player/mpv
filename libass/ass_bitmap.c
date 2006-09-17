@@ -182,31 +182,34 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_gly
 {
 	const int bord = ceil(blur_radius);
 
-	assert(bm_g);
+	assert(bm_g && bm_o);
 
 	if (glyph)
 		*bm_g = glyph_to_bitmap_internal(glyph, bord);
+	else
+		*bm_g = 0;
 	if (!*bm_g)
 		return 1;
-	if (outline_glyph && bm_o) {
+	if (outline_glyph) {
 		*bm_o = glyph_to_bitmap_internal(outline_glyph, bord);
 		if (!*bm_o) {
 			ass_free_bitmap(*bm_g);
 			return 1;
 		}
-	}
+	} else
+		*bm_o = 0;
 
-	if (bm_o)
+	if (*bm_o)
 		resize_tmp(priv, (*bm_o)->w, (*bm_o)->h);
 	resize_tmp(priv, (*bm_g)->w, (*bm_g)->h);
 	
 	if (be) {
 		blur((*bm_g)->buffer, priv->tmp, (*bm_g)->w, (*bm_g)->h, (*bm_g)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
-		if (bm_o)
+		if (*bm_o)
 			blur((*bm_o)->buffer, priv->tmp, (*bm_o)->w, (*bm_o)->h, (*bm_o)->w, (int*)priv->gt2, priv->g_r, priv->g_w);
 	}
 
-	if (bm_o)
+	if (*bm_o)
 		fix_outline(*bm_g, *bm_o);
 
 	return 0;

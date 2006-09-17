@@ -379,7 +379,8 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 			if (error)
 				text_info->glyphs[i].symbol = 0;
 			FT_Done_Glyph(text_info->glyphs[i].glyph);
-			FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
+			if (text_info->glyphs[i].outline_glyph)
+				FT_Done_Glyph(text_info->glyphs[i].outline_glyph);
 
 			// cache
 			hash_val.bbox_scaled = text_info->glyphs[i].bbox;
@@ -394,7 +395,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
-		if ((info->symbol == 0) || (info->symbol == '\n'))
+		if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_o)
 			continue;
 
 		pen_x = dst_x + info->pos.x;
@@ -408,7 +409,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 	}
 	for (i = 0; i < text_info->length; ++i) {
 		glyph_info_t* info = text_info->glyphs + i;
-		if ((info->symbol == 0) || (info->symbol == '\n'))
+		if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm)
 			continue;
 
 		pen_x = dst_x + info->pos.x;
@@ -559,11 +560,26 @@ static void update_font(void)
 	if (render_context.face)
 	{
 		change_font_size(render_context.font_size);
+
+		if (render_context.stroker != 0) {
+			FT_Stroker_Done(render_context.stroker);
+			render_context.stroker = 0;
+		}
+#if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
+		error = FT_Stroker_New( ass_instance->library, &render_context.stroker );
+#else // < 2.2
+		error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
+#endif
+		if ( error ) {
+			mp_msg(MSGT_GLOBAL, MSGL_V, "failed to get stroker\n");
+			render_context.stroker = 0;
+		}
 	}
 }
 
 /**
  * \brief Change border width
+ * negative value resets border to style value
  */
 static void change_border(double border)
 {
@@ -571,12 +587,28 @@ static void change_border(double border)
 		if (!no_more_font_messages)
 			mp_msg(MSGT_GLOBAL, MSGL_WARN, "No stroker!\n");
 	} else {
+		int b;
+		if (border < 0) {
+			if (render_context.style->BorderStyle == 1) {
+				if (render_context.style->Outline == 0 && render_context.style->Shadow > 0)
+					border = 1.;
+				else
+					border = render_context.style->Outline;
+			} else
+				border = 1.;
+		}
 		render_context.border = border;
-		FT_Stroker_Set( render_context.stroker,
-				(int)(64 * border * frame_context.font_scale),
+
+		b = 64 * border * frame_context.font_scale;
+		if (b > 0)
+			FT_Stroker_Set( render_context.stroker, b,
 				FT_STROKER_LINECAP_ROUND,
 				FT_STROKER_LINEJOIN_ROUND,
 				0 );
+		else {
+			FT_Stroker_Done(render_context.stroker);
+			render_context.stroker = 0;
+		}
 	}
 }
 
@@ -642,6 +674,8 @@ static unsigned interpolate_alpha(long long now,
 	return a;
 }
 
+static void reset_render_context();
+
 /**
  * \brief Parse style override tag.
  * \param p string to parse
@@ -691,7 +725,7 @@ static char* parse_tag(char* p, double pwr) {
 		if (mystrtod(&p, &val))
 			val = render_context.border * ( 1 - pwr ) + val * pwr;
 		else
-			val = (render_context.style->BorderStyle == 1) ? render_context.style->Outline : 1.;
+			val = -1.; // reset to default
 		change_border(val);
 	} else if (mystrcmp(&p, "move")) {
 		int x1, x2, y1, y2;
@@ -923,28 +957,7 @@ static char* parse_tag(char* p, double pwr) {
 		}
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "single c/a at %f: %c%c = %X   \n", pwr, n, cmd, render_context.c[cidx]);
 	} else if (mystrcmp(&p, "r")) {
-		render_context.c[0] = render_context.style->PrimaryColour;
-		render_context.c[1] = render_context.style->SecondaryColour;
-		render_context.c[2] = render_context.style->OutlineColour;
-		render_context.c[3] = render_context.style->BackColour;
-		render_context.font_size = render_context.style->FontSize;
-
-		if (render_context.family)
-			free(render_context.family);
-		render_context.family = strdup(render_context.style->FontName);
-		render_context.bold = - render_context.style->Bold;
-		render_context.italic = - render_context.style->Italic;
-		update_font();
-
-		if (render_context.stroker) {
-			double border = (render_context.style->BorderStyle == 1) ? render_context.style->Outline : 1.;
-			change_border(border);
-		}
-		render_context.scale_x = render_context.style->ScaleX;
-		render_context.scale_y = render_context.style->ScaleY;
-		render_context.hspacing = 0; // FIXME
-		
-		// FIXME: does not reset unsupported attributes.
+		reset_render_context();
 	} else if (mystrcmp(&p, "be")) {
 		int val;
 		if (mystrtoi(&p, 10, &val))
@@ -1106,17 +1119,43 @@ static void apply_transition_effects(ass_event_t* event)
 }
 
 /**
+ * \brief partially reset render_context to style values
+ * Works like {\r}: resets some style overrides
+ */
+static void reset_render_context(void)
+{
+	render_context.c[0] = render_context.style->PrimaryColour;
+	render_context.c[1] = render_context.style->SecondaryColour;
+	render_context.c[2] = render_context.style->OutlineColour;
+	render_context.c[3] = render_context.style->BackColour;
+	render_context.font_size = render_context.style->FontSize;
+
+	if (render_context.family)
+		free(render_context.family);
+	render_context.family = strdup(render_context.style->FontName);
+	render_context.bold = - render_context.style->Bold;
+	render_context.italic = - render_context.style->Italic;
+	update_font();
+
+	change_border(-1.);
+	render_context.scale_x = render_context.style->ScaleX;
+	render_context.scale_y = render_context.style->ScaleY;
+	render_context.hspacing = 0; // FIXME
+	render_context.be = 0;
+
+	// FIXME: does not reset unsupported attributes.
+}
+
+/**
  * \brief Start new event. Reset render_context.
  */
-static int init_render_context(ass_event_t* event)
+static void init_render_context(ass_event_t* event)
 {
-	int error;
-
-// init render_context
 	render_context.event = event;
 	render_context.style = frame_context.track->styles + event->Style;
-	
-	render_context.font_size = render_context.style->FontSize;
+
+	reset_render_context();
+
 	render_context.evt_type = EVENT_NORMAL;
 	render_context.alignment = 0;
 	render_context.rotation = M_PI * render_context.style->Angle / 180.;
@@ -1124,13 +1163,6 @@ static int init_render_context(ass_event_t* event)
 	render_context.pos_y = 0;
 	render_context.org_x = 0;
 	render_context.org_y = 0;
-	render_context.scale_x = render_context.style->ScaleX;
-	render_context.scale_y = render_context.style->ScaleY;
-	render_context.hspacing = 0;
-	render_context.c[0] = render_context.style->PrimaryColour;
-	render_context.c[1] = render_context.style->SecondaryColour;
-	render_context.c[2] = render_context.style->OutlineColour;
-	render_context.c[3] = render_context.style->BackColour;
 	render_context.clip_x0 = 0;
 	render_context.clip_y0 = 0;
 	render_context.clip_x1 = frame_context.track->PlayResX;
@@ -1140,44 +1172,16 @@ static int init_render_context(ass_event_t* event)
 	render_context.effect_type = EF_NONE;
 	render_context.effect_timing = 0;
 	render_context.effect_skip_timing = 0;
-	render_context.be = 0;
 	
-	if (render_context.family)
-		free(render_context.family);
-	render_context.family = strdup(render_context.style->FontName);
-	render_context.bold = - render_context.style->Bold; // style value for bold text is -1
-	render_context.italic = - render_context.style->Italic;
-	
-	update_font();
-
-	if (render_context.face) {
-#if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
-		error = FT_Stroker_New( ass_instance->library, &render_context.stroker );
-#else // < 2.2
-		error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
-#endif
-		if ( error ) {
-			mp_msg(MSGT_GLOBAL, MSGL_V, "failed to get stroker\n");
-			render_context.stroker = 0;
-		} else {
-			// FIXME: probably wrong when render_context.Border == 3
-			double border = (render_context.style->BorderStyle == 1) ? render_context.style->Outline : 1.;
-			change_border(border);
-		}
-	}
-
 	apply_transition_effects(event);
-	
-	return 0;
 }
 
-static int free_render_context(void)
+static void free_render_context(void)
 {
 	if (render_context.stroker != 0) {
 		FT_Stroker_Done(render_context.stroker);
 		render_context.stroker = 0;
 	}
-	return 0;
 }
 
 /**
@@ -1247,11 +1251,14 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 	info->advance.x = info->glyph->advance.x >> 10;
 	info->advance.y = info->glyph->advance.y >> 10;
 
-	info->outline_glyph = info->glyph;
-	error = FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
-	if (error) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "FT_Glyph_Stroke error %d \n", error);
-		FT_Glyph_Copy(info->glyph, &info->outline_glyph);
+	if (render_context.stroker) {
+		info->outline_glyph = info->glyph;
+		error = FT_Glyph_Stroke( &(info->outline_glyph), render_context.stroker, 0 ); // don't destroy original
+		if (error) {
+			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FT_Glyph_Stroke error %d \n", error);
+		}
+	} else {
+		info->outline_glyph = 0;
 	}
 
 	info->bm = info->bm_o = 0;
@@ -1819,10 +1826,10 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			info->pos.y -= start.y >> 6;
 
 //			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "shift: %d, %d\n", start.x / 64, start.y / 64);
-			if (info->glyph) {
+			if (info->glyph)
 				FT_Glyph_Transform( info->glyph, &matrix_rotate, 0 );
+			if (info->outline_glyph)
 				FT_Glyph_Transform( info->outline_glyph, &matrix_rotate, 0 );
-			}
 		}
 	}
 
