@@ -62,9 +62,7 @@ extern demuxer_desc_t demuxer_desc_audio;
 extern demuxer_desc_t demuxer_desc_xmms;
 extern demuxer_desc_t demuxer_desc_mpeg_ty;
 extern demuxer_desc_t demuxer_desc_rtp;
-#if defined(USE_LIBAVFORMAT) ||  defined(USE_LIBAVFORMAT_SO)
 extern demuxer_desc_t demuxer_desc_lavf;
-#endif
 extern demuxer_desc_t demuxer_desc_aac;
 extern demuxer_desc_t demuxer_desc_nut;
 
