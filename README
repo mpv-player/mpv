@@ -21,7 +21,7 @@ Requirements:
   package(s) installed.
 - To compile MPlayer with X11 support, you need to have the X Window System
   development packages (like for XFree86 or X.Org) installed.
-- For the GUI you need the libpng and GTK 1.2 development packages.
+- For the GUI you need the libpng and GTK development packages.
 
 
 Before you start...
@@ -29,14 +29,6 @@ Unless you know what are you doing, consult DOCS/HTML/en/video.html to see
 which driver to use with your video card to get the best quality and
 performance. Most cards require special drivers not included with XFree86 to
 drive their 2-D video acceleration features like YUV and scaling.
-
-A quick and incomplete list of recommendations:
-- ATI cards: Get the GATOS drivers for X11/Xv or use VIDIX.
-- Matrox G200/G4x0/G550: Compile and use mga_vid for Linux, on BSD use VIDIX.
-- 3dfx Voodoo3/Banshee: Get XFree86 4.2.0+ for Xv or use the tdfxfb driver.
-- nVidia cards: Get the X11 driver from www.nvidia.com for Xv support.
-- NeoMagic cards: Get an Xv capable driver from our homepage as described in
-  DOCS/HTML/en/video.html.
 
 Without accelerated video even an 800MHz P3 may be too slow to play DVDs.
 
