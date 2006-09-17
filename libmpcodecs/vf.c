@@ -25,18 +25,12 @@
 
 extern vf_info_t vf_info_vo;
 extern vf_info_t vf_info_rectangle;
-#ifndef HAVE_NO_POSIX_SELECT
 extern vf_info_t vf_info_bmovl;
-#endif
 extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
-#if defined(USE_LIBPOSTPROC) || defined(USE_LIBPOSTPROC_SO)
 extern vf_info_t vf_info_pp;
-#endif
 extern vf_info_t vf_info_scale;
-#ifdef USE_LIBFAME
 extern vf_info_t vf_info_fame;
-#endif
 extern vf_info_t vf_info_format;
 extern vf_info_t vf_info_noformat;
 extern vf_info_t vf_info_yuy2;
