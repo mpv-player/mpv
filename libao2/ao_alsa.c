@@ -265,6 +265,50 @@ static int str_maxlen(strarg_t *str) {
   return 1;
 }
 
+/* change a PCM definition for correct AC-3 playback */
+static void set_non_audio(snd_config_t *root, const char *name_with_args)
+{
+  char *name, *colon, *old_value_str;
+  snd_config_t *config, *args, *aes0, *old_def, *def;
+  int value, err;
+
+  /* strip the parameters from the PCM name */
+  if ((name = strdup(name_with_args)) != NULL) {
+    if ((colon = strchr(name, ':')) != NULL)
+      *colon = '\0';
+    /* search the PCM definition that we'll later use */
+    if (snd_config_search_alias_hooks(root, strchr(name, '.') ? NULL : "pcm",
+				      name, &config) >= 0) {
+      /* does this definition have an "AES0" parameter? */
+      if (snd_config_search(config, "@args", &args) >= 0 &&
+	  snd_config_search(args, "AES0", &aes0) >= 0) {
+	/* read the old default value */
+	value = IEC958_AES0_CON_NOT_COPYRIGHT |
+		IEC958_AES0_CON_EMPHASIS_NONE;
+	if (snd_config_search(aes0, "default", &old_def) >= 0) {
+	  /* don't use snd_config_get_integer() because alsa-lib <= 1.0.12
+	   * parses hex numbers as strings */
+	  if (snd_config_get_ascii(old_def, &old_value_str) >= 0) {
+	    sscanf(old_value_str, "%i", &value);
+	    free(old_value_str);
+	  }
+	} else
+	  old_def = NULL;
+	/* set the non-audio bit */
+	value |= IEC958_AES0_NONAUDIO;
+	/* set the new default value */
+	if (snd_config_imake_integer(&def, "default", value) >= 0) {
+	  if (old_def)
+	    snd_config_substitute(old_def, def);
+	  else
+	    snd_config_add(aes0, def);
+	}
+      }
+    }
+    free(name);
+  }
+}
+
 /*
     open & setup audio device
     return: 1=success 0=fail
@@ -274,6 +318,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     int err;
     int block;
     strarg_t device;
+    snd_config_t *my_config;
     snd_pcm_uframes_t bufsize;
     snd_pcm_uframes_t boundary;
     opt_t subopts[] = {
@@ -367,20 +412,7 @@ static int init(int rate_hz, int channels, int format, int flags)
      * 'iec958'
      */
     if (format == AF_FORMAT_AC3) {
-      unsigned char s[4];
-
-	s[0] = IEC958_AES0_NONAUDIO | 
-	  IEC958_AES0_CON_EMPHASIS_NONE;
-	s[1] = IEC958_AES1_CON_ORIGINAL | 
-	  IEC958_AES1_CON_PCM_CODER;
-	s[2] = 0;
-	s[3] = IEC958_AES3_CON_FS_48000;
-
-	snprintf(alsa_device, ALSA_DEVICE_SIZE,
-		"iec958:{CARD 0 AES0 0x%02x AES1 0x%02x AES2 0x%02x AES3 0x%02x}", 
- 		s[0], s[1], s[2], s[3]);
-	device.str = alsa_device;
-
+	device.str = "iec958";
 	mp_msg(MSGT_AO,MSGL_V,"alsa-spdif-init: playing AC3, %i channels\n", channels);
     }
   else
@@ -466,12 +498,24 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     if (!alsa_handler) {
+      if ((err = snd_config_update()) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: cannot read ALSA configuration: %s\n", snd_strerror(err));
+	return 0;
+      }
+      if ((err = snd_config_copy(&my_config, snd_config)) < 0) {
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: cannot copy configuration: %s\n", snd_strerror(err));
+	return 0;
+      }
+      if (format == AF_FORMAT_AC3)
+	set_non_audio(my_config, alsa_device);
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
-      if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, open_mode)) < 0)
+      if ((err = snd_pcm_open_lconf(&alsa_handler, alsa_device,
+				    SND_PCM_STREAM_PLAYBACK, open_mode, my_config)) < 0)
 	{
 	  if (err != -EBUSY && ao_noblock) {
 	    mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: open in nonblock-mode failed, trying to open in block-mode\n");
-	    if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, 0)) < 0) {
+	    if ((err = snd_pcm_open_lconf(&alsa_handler, alsa_device,
+					  SND_PCM_STREAM_PLAYBACK, 0, my_config)) < 0) {
 	      mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: playback open error: %s\n", snd_strerror(err));
 	      return(0);
 	    }
@@ -480,6 +524,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    return(0);
 	  }
 	}
+      snd_config_delete(my_config);
 
       if ((err = snd_pcm_nonblock(alsa_handler, 0)) < 0) {
          mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: error set block-mode %s\n", snd_strerror(err));

@@ -7,6 +7,8 @@ MPlayer (1.0)
 
     Drivers:
     * IVTV hardware MPEG audio/video decoder output
+    * ALSA audio output: AC3 passthrough now works even when the device name
+      of the digital output port has been set by the user
 
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
