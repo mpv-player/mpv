@@ -312,6 +312,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
             case DVDNAV_STOP: return len;
 	    case DVDNAV_BLOCK_OK: return len;
             case DVDNAV_VTS_CHANGE: {
+                s->end_pos = 0;
                 update_title_len(s);
                 break;
             }
