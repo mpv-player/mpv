@@ -650,11 +650,9 @@ af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
  * \brief calculate greatest common divisior of a and b.
  * \ingroup af_filter
  *
- *   Extended for negative and 0 values. If both are 0 the result is 1.
- *   The sign of the result will be so that it has the same sign as b.
+ *   If both are 0 the result is 1.
  */
 int af_gcd(register int a, register int b) {
-  int b_org = b;
   while (b != 0) {
     a %= b;
     if (a == 0)
@@ -665,8 +663,6 @@ int af_gcd(register int a, register int b) {
   a += b;
   if (!a)
     return 1;
-  if (a * b_org < 0)
-    return -a;
   return a;
 }
 
