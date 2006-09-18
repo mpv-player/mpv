@@ -577,6 +577,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set period time: %s\n",
 		   snd_strerror(err));
+	    return 0;
 	  }
 	mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: buffer_time: %d, period_time :%d\n",
 	       alsa_buffer_time, err);
@@ -591,6 +592,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	  {
 	    mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periodsize(%ld): %s\n",
 			    chunk_size, snd_strerror(err));
+	    return 0;
 	  }
 	else {
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: chunksize set to %li\n", chunk_size);
@@ -599,6 +601,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 						      &alsa_fragcount, NULL)) < 0) {
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set periods: %s\n", 
 		 snd_strerror(err));
+	  return 0;
 	}
 	else {
 	  mp_msg(MSGT_AO,MSGL_V,"alsa-init: fragcount=%i\n", alsa_fragcount);
@@ -611,6 +614,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set hw-parameters: %s\n",
 		 snd_strerror(err));
+	  return 0;
 	}
       // end setting hw-params
 
@@ -619,6 +623,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       if ((err = snd_pcm_hw_params_get_buffer_size(alsa_hwparams, &bufsize)) < 0)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get buffersize: %s\n", snd_strerror(err));
+	  return 0;
 	}
       else {
 	ao_data.buffersize = bufsize * bytes_per_sample;
@@ -627,6 +632,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
       if ((err = snd_pcm_hw_params_get_period_size(alsa_hwparams, &chunk_size, NULL)) < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to get period size: %s\n", snd_strerror(err));
+	return 0;
       } else {
 	mp_msg(MSGT_AO,MSGL_V,"alsa-init: got period size %li\n", chunk_size);
       }
