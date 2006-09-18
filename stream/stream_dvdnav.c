@@ -51,6 +51,8 @@ int osd_show_dvd_nav_sy;
 int osd_show_dvd_nav_ey;
 int dvd_nav_still=0;            /* are we on a still picture? */
 
+static int seek(stream_t *s, off_t newpos);
+
 dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   char * title_str;
   dvdnav_priv_t *dvdnav_priv;
@@ -248,8 +250,13 @@ static void update_title_len(stream_t *stream) {
   uint32_t pos = 0, len = 0;
 
   status = dvdnav_get_position(priv->dvdnav, &pos, &len);
-  if(status == DVDNAV_STATUS_OK && len)
+  if(status == DVDNAV_STATUS_OK && len) {
     stream->end_pos = (off_t) len * 2048;
+    stream->seek = seek;
+  } else {
+    stream->seek = NULL;
+    stream->end_pos = 0;
+  }
 }
   
 
