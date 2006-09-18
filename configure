@@ -1536,6 +1536,18 @@ int main(void) { return 0; }
 EOF
 cc_check -pipe && _pipe="-pipe" && echores "yes" || echores "no"
 
+
+echocheck "compiler support of named assembler arguments"
+_named_asm_args=yes
+_def_named_asm_args="#define NAMED_ASM_ARGS 1"
+if test "$cc_vendor" = "gnu" && test "$_cc_major" -lt 3 \
+     -o "$_cc_major" -eq 3 -a "$_cc_minor" = 0 ; then
+  _named_asm_args=no
+  _def_named_asm_args="#undef NAMED_ASM_ARGS"
+fi
+echores $_named_asm_args
+
+
 # Checking for CFLAGS
 _stripbinaries=yes
 if test "$_profile" != "" || test "$_debug" != "" ; then
@@ -7640,6 +7652,9 @@ $_def_builtin_expect
 #else
 # define attribute_used
 #endif
+
+/* compiler support for named assembler arguments */
+$_def_named_asm_args
 
 #define PREFIX "$_prefix"
 

@@ -71,11 +71,7 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
     }
 }
 
-#if __GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ == 0)
-#undef HAVE_MMX
-#endif
-
-#ifdef HAVE_MMX
+#if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
 
 #define LOAD4(mem,dst) \
             "movd      "mem", "#dst" \n\t"\
@@ -288,7 +284,7 @@ static void filter_line_mmx2(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, u
 #undef CHECK2
 #undef FILTER
 
-#endif // HAVE_MMX
+#endif /* defined(HAVE_MMX) && defined(NAMED_ASM_ARGS) */
 
 static void filter_line_c(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, uint8_t *cur, uint8_t *next, int w, int refs, int parity){
     int x;
