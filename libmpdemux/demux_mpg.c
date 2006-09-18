@@ -106,11 +106,12 @@ static int parse_psm(demuxer_t *demux, int len) {
 static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
   stream_t *s = demuxer->stream;
   off_t pos = stream_tell(s);
-  off_t end_seq_start = demuxer->movi_end-TIMESTAMP_PROBE_LEN;
+  off_t end_seq_start;
   float half_pts = 0.0;
   mpg_demuxer_t* mpg_d;
 
   if (!ds_fill_buffer(demuxer->video)) return 0;
+  end_seq_start = demuxer->movi_end-TIMESTAMP_PROBE_LEN;
   mpg_d = calloc(1,sizeof(mpg_demuxer_t));
   demuxer->priv = mpg_d;
   mpg_d->final_pts = 0.0;
