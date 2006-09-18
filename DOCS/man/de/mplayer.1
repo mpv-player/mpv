@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19870
+.\" In sync with r19881
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -5270,7 +5270,7 @@ Drehe um 90 Grad gegen den Uhrzeigersinn und stelle es auf den Kopf.
 .RE
 .
 .TP
-.B scale[=b:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=b:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 Skaliert das Bild mit dem Softwareskalierer (langsam) und führt eine
 Farbraumkonvertierung zwischen YUV und RGB durch (siehe auch \-sws).
 .RSs
@@ -5295,7 +5295,7 @@ originalen Breiten-/Höhenverhältnis.
 -(n+8): wie -n oben, rundet aber die Abmessung auf das nächste Vielfache von
 16.
 .REss
-.IPs <interlaced>
+.IPs <ilaced>
 Schalte Interlaced-Skalierung an/\:aus.
 .RSss
 0: aus (Standard)
@@ -5313,7 +5313,7 @@ Chroma-Skipping, Auslassen von Chrominanz-Berechnungen
 .br
 3: Benutze nur jede achte Eingabezeile für Chrominanz-Berechnungen.
 .REss
-.IPs "<param>:[:<param2>] (siehe auch \-sws)"
+.IPs "<par>:[:<par2>] (siehe auch \-sws)"
 Setzt einige Skalierungsparameter abhängig vom Skalierer, der mit \-sws
 gewählt wurde.
 .RSss
