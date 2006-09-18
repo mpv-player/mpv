@@ -1900,16 +1900,6 @@ static int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long n
 	return 0;
 }
 
-static ass_image_t** find_list_tail(ass_image_t** phead)
-{
-	ass_image_t* img = *phead;
-	if (!img)
-		return phead;
-	while (img->next)
-		img = img->next;
-	return &img->next;
-}
-
 static int cmp_event_layer(const void* p1, const void* p2)
 {
 	ass_event_t* e1 = ((event_images_t*)p1)->event;
@@ -2084,8 +2074,7 @@ ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long lon
 	int i, cnt, rc;
 	event_images_t eimg[MAX_EVENTS];
 	event_images_t* last;
-	ass_image_t* head = 0;
-	ass_image_t** tail = &head;
+	ass_image_t** tail;
 	
 	// init frame
 	rc = ass_start_frame(priv, track, now);
@@ -2121,14 +2110,16 @@ ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long lon
 		fix_collisions(last, eimg + cnt - last);
 
 	// concat lists
-	head = cnt ? eimg[0].imgs : 0;
-	tail = find_list_tail(&head);
-	for (i = 1; i < cnt; ++i) {
-		*tail = eimg[i].imgs;
-		tail = find_list_tail(&eimg[i].imgs);
+	tail = &ass_instance->images_root;
+	for (i = 0; i < cnt; ++i) {
+		ass_image_t* cur = eimg[i].imgs;
+		while (cur) {
+			*tail = cur;
+			tail = &cur->next;
+			cur = cur->next;
+		}
 	}
 	
-	ass_instance->images_root = head;
 	return ass_instance->images_root;
 }
 
