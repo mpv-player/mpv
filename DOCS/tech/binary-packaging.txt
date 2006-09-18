@@ -47,9 +47,9 @@ the following features MUST be included in any official binary package:
   - libavcodec(internal)
   - native codecs (libmpeg2/liba52/mp3lib)
   - Vorbis Tremor codec(internal)
-  - RealPlayer codecs support
-  - Win32/VfW/DShow/QT codecs support
-  - XAnim codecs support
+  - RealPlayer codecs support (*)
+  - Win32/VfW/DShow/QT codecs support (*)
+  - XAnim codecs support (*)
 
 * general:
   - default font
@@ -64,6 +64,8 @@ the following features MUST be included in any official binary package:
   - Matroska(internal)
   - (S)VCD
   - tv(v4l/v4l2)
+
+(*) if available for your OS/hardware
 
 There is great demand for the GUI, so it SHOULD be included, but it MUST
 come as a separate package (see Tips and Tricks for details).
@@ -94,7 +96,8 @@ hard dependency on a binary codecs package. MPlayer is fully functional without
 external binary codecs. If you package binary codecs yourself, package the
 essential codecs package, not the all codecs package.
 
-Bitmap fonts are deprecated, don't package them. Use TrueType fonts instead.
+Bitmap fonts are deprecated, don't package them. Use scalable (Type1/TrueType)
+fonts instead.
 
 
 File locations
@@ -193,6 +196,11 @@ If you have modified configuration files or similar, please patch the official
 one instead of copying it into your package. This way you will automatically
 pick up changes we make to it.
 
+Do not override video and audio output selection in the system-wide config
+file. MPlayer will try to pick the best VO and AO itself and fall back
+gracefully. If you want to give priority to some AO, add a comma at the end
+of the line so that MPlayer can still fall back on others, for example:
+ao=alsa,
 
 Tips and tricks
 ~~~~~~~~~~~~~~~
