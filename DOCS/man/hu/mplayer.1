@@ -1,4 +1,4 @@
-.\" Synced with r19865
+.\" Synced with r19895
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -2371,8 +2371,8 @@ Beállítja a noblock-módot.
 .IPs device=<eszköz>
 Beállítja az eszköz nevét.
 Minden ','-t cserélj le '.'-tal és minden ':'-ot '='-lel az ALSA eszköz névben.
-Ne állítsd be ha hwac3 kimenetet akarsz S/PDIF-en keresztül, csak ha
-tényleg tudod, hogy hogy kell jól beállítani.
+Az S/PDIF-en keresztüli hwac3 kimenethez használj egy "iec958" vagy "spdif"
+eszközt, feltéve, hogy tényleg tudod, hogyan kell jól beállítani.
 .RE
 .PD 1
 .
@@ -5043,7 +5043,7 @@ A 4\-7 közötti értékekre a forgatás csak akkor történik meg, ha a film geometriá
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=w:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 Átméretezi a képet szoftveres méretezõvel (lassú) és végrehajt egy YUV<\->RGB
 színtér konverziót (lásd még \-sws).
 .RSs
@@ -5064,7 +5064,7 @@ méretezni, alapértelmezett lesz a d_width/\:d_height!
 .br
 -(n+8): Mint a -n fent, csak a dimenziót 16 legközelebbi többszörösére kerekíti.
 .REss
-.IPs <interlaced>
+.IPs <ilaced>
 Beállítja az átlapolt méretezést.
 .RSss
 0: ki (alapértelmezett)
@@ -5082,7 +5082,7 @@ színtelítettség figyelmen kívül hagyása
 .br
 3: Csak minden 8. bejövõ sor használata a telítettséghez.
 .REss
-.IPs "<param>[:<param2>] (lásd még \-sws)"
+.IPs "<par>[:<par2>] (lásd még \-sws)"
 Beállít pár méretezési paramétert a \-sws kapcsolóval kiválasztott méretezõ
 típusától függõen.
 .RSss
