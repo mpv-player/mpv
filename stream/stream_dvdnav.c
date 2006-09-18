@@ -264,11 +264,9 @@ static int seek(stream_t *s, off_t newpos) {
 uint32_t pos = 0, len = 0, sector = 0;
 dvdnav_priv_t *priv = s->priv;
 
-  if(newpos==0) {
-    if(dvdnav_stream_reset(priv->dvdnav))
-      s->pos=0;
-  }
-  else {
+  if(newpos==0)
+    dvdnav_stream_reset(priv->dvdnav);
+
     if(s->end_pos && newpos > s->end_pos) 
        newpos = s->end_pos;
     sector = newpos / 2048ULL;
@@ -276,7 +274,6 @@ dvdnav_priv_t *priv = s->priv;
       goto fail;
 
     s->pos = newpos;
-  }
   
   return 1;
   
