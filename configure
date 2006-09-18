@@ -228,6 +228,7 @@ Optional features:
   --enable-winsock2      enable winsock2 usage [autodetect]
   --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE555 Streaming Media support [autodetect]
+  --disable-dvdnav       disable libdvdnav support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit2 support [autodetect]
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
