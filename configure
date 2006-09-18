@@ -1010,6 +1010,9 @@ EOF
 	fi
       fi
     fi
+    if test "$proc" = "nocona" || test "$proc" = "prescott" ; then
+      cc_check -march=$proc $cpuopt=$proc || proc=pentium4
+    fi
     if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2"; then
       cc_check -march=$proc $cpuopt=$proc  || proc=i686
     fi
