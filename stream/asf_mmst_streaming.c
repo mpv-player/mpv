@@ -1,10 +1,30 @@
-// mmst implementation taken from the xine-mms plugin made by majormms (http://geocities.com/majormms/)
-// 
-// ported to mplayer by Abhijeet Phatak <abhijeetphatak@yahoo.com>
-// date : 16 April 2002
-//
-// information about the mms protocol can be find at http://get.to/sdp
-//
+/*
+ * MMST implementation taken from the xine-mms plugin made by
+ * Major MMS (http://geocities.com/majormms/).
+ * Ported to MPlayer by Abhijeet Phatak <abhijeetphatak@yahoo.com>.
+ *
+ * Information about the MMS protocol can be found at http://get.to/sdp
+ *
+ * copyright (C) 2002 Abhijeet Phatak <abhijeetphatak@yahoo.com>
+ * copyright (C) 2002 the xine project
+ * copyright (C) 2000-2001 major mms
+ *
+ * This file is part of MPlayer.
+ *
+ * MPlayer is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * MPlayer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
+ */
 
 
 #include <stdio.h>
