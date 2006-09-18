@@ -601,6 +601,17 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             SetForegroundWindow(hWnd);
             return 0;
         }
+        case WM_SYSCOMMAND:
+        {
+            switch(wParam)
+            {
+                case SC_SCREENSAVE:
+                case SC_MONITORPOWER:
+                    mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>killing screensaver\n" );
+                    return 0;
+            }
+            break;
+        }
         case WM_PAINT:
         {
             PAINTSTRUCT ps;
@@ -722,17 +733,6 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
         case WM_CHAR:
             mplayer_put_key(wParam);
             break;
-        case WM_SYSCOMMAND:
-        {
-            switch(wParam)
-            {
-                case SC_SCREENSAVE:
-                case SC_MONITORPOWER:
-                    mp_msg(MSGT_VO, MSGL_V ,"<vo_directx><INFO>killing screensaver\n" );
-                    return 0;
-            }
-            break;
-        }
         case WM_COPYDATA:
         {
             if(lParam)
