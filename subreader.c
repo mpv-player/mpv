@@ -1091,7 +1091,8 @@ void	subcp_open (stream_t *st)
 		    free_cp_tmp = 1;
 		  } else {
 		    cp_tmp = enca_fallback;
-		    mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca faild, stream must be seakable.\n"); 
+		    if (st)
+		      mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: enca failed, stream must be seakable.\n"); 
 		  }
 		}
 #endif
