@@ -157,29 +157,29 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Updating font cache\n");
 		// FontConfig >= 2.4.0 updates cache automatically in FcConfigAppFontAddDir()
 		if (FcGetVersion() < 20400) {
-		FcFontSet* fcs;
-		FcStrSet* fss;
-		fcs = FcFontSetCreate();
-		fss = FcStrSetCreate();
-		rc = FcStrSetAdd(fss, (const FcChar8*)dir);
-		if (!rc) {
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcStrSetAdd failed\n");
-			goto ErrorFontCache;
-		}
+			FcFontSet* fcs;
+			FcStrSet* fss;
+			fcs = FcFontSetCreate();
+			fss = FcStrSetCreate();
+			rc = FcStrSetAdd(fss, (const FcChar8*)dir);
+			if (!rc) {
+				mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcStrSetAdd failed\n");
+				goto ErrorFontCache;
+			}
 
-		rc = FcDirScan(fcs, fss, NULL, FcConfigGetBlanks(priv->config), (const FcChar8 *)dir, FcFalse);
-		if (!rc) {
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcDirScan failed\n");
-			goto ErrorFontCache;
-		}
+			rc = FcDirScan(fcs, fss, NULL, FcConfigGetBlanks(priv->config), (const FcChar8 *)dir, FcFalse);
+			if (!rc) {
+				mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcDirScan failed\n");
+				goto ErrorFontCache;
+			}
 
-		rc = FcDirSave(fcs, fss, (const FcChar8 *)dir);
-		if (!rc) {
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcDirSave failed\n");
-			goto ErrorFontCache;
-		}
-	ErrorFontCache:
-		;
+			rc = FcDirSave(fcs, fss, (const FcChar8 *)dir);
+			if (!rc) {
+				mp_msg(MSGT_GLOBAL, MSGL_WARN, "FcDirSave failed\n");
+				goto ErrorFontCache;
+			}
+		ErrorFontCache:
+			;
 		}
 	}
 
