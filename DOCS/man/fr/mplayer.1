@@ -1,4 +1,4 @@
-.\" synced with r19688
+.\" synced with r19881
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -69,7 +69,7 @@ mencoder \- Encodeur vidéo
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[titre | [titre_de_début]\-titre_de_fin ]
+.I [dvd|dvdnav]://[titre | [titre_de_début]\-titre_de_fin ]
 [options]
 .
 .br
@@ -335,6 +335,8 @@ Translate les sous-titres vers le haut/bas.
 Créé une marque EDL.
 .IPs "s (\-vf screenshot uniquement)"
 Réalise une capture d'écran.
+.IPs "S (\-vf screenshot uniquement)"
+Amorce/arrête la capture d'écran.
 .IPs "I"
 Affiche le nom de fichier dans l'OSD.
 .IPs "! and @"
@@ -424,9 +426,9 @@ Ouvre la fenêtre de préférences.
 .
 .PP
 .RS
-(Les touches suivantes ne sont valides uniquement si MPlayer a été
-compilé avec le support de l'entrée TV et ont une priorité supérieure à
-celles définies plus haut dans ce document.)
+(Les touches suivantes ne sont valides que si MPlayer a été
+compilé avec le support de l'entrée TV ou DVB et ont une priorité
+supérieure à celles définies plus haut dans ce document.)
 .RE
 .PP
 .PD 0
@@ -439,6 +441,33 @@ Change de norme.
 Change la liste des canaux.
 .RE
 .PD 1
+.PP
+.RS
+(Les touches suivantes ne sont valides que si MPlayer a été
+compilé avec le support dvdnav: elles sont utilisées pour la
+navigation dans les menus).
+.RE
+.PP
+.PD 0
+.RS
+.IPs "touche 8"
+Bouton haut.
+.IPs "touche 2"
+Bouton du bas.
+.IPs "touche 4"
+Bouton gauche.
+.IPs "touche 6"
+Bouton droit.
+.IPs "touche 5"
+Retourne au menu principal.
+.IPs "touche 7"
+Retourne au menu le plus près (dans l'ordre: chapitre->titre->racine).
+.IPs "touche Entrée"
+Confirme le choix.
+.RE
+.PD 1
+.PP
+.RS
 .
 .
 .TP
@@ -923,6 +952,13 @@ Spécifie le menu principal.
 Affiche le menu principal au lancement de MPlayer.
 .
 .TP
+.B \-mouse-movements
+Permet MPlayer de recevoir des évènements souris envoyés
+par le pilote de sortie vidéo (seuls ceux dérivés de X11 sont gérés
+pour le moment).
+Utilisé pour sélectioner les boutons des menus DVDs.
+.
+.TP
 .B \-noconsolecontrols
 Empêche MPlayer de réagir aux commandes clavier depuis l'entrée
 standard.
@@ -950,9 +986,13 @@ Désactive l'interprétation des boutons de la souris (le menu contextuel
 de mozplayerxp dépend de cette option).
 .
 .TP
-.B \-nortc (RTC uniquement)
-Désactive l'utilisation du RTC Linux (real-time clock \- /dev/\:rtc)
+.B \-rtc (RTC uniquement)
+Active l'utilisation du RTC Linux (real-time clock \- /dev/\:rtc)
 comme mécanisme de synchro.
+Cela réveillera le processus tous les 1/1024 de secondes pour récupérer
+l'heure courante.
+Inutile avec un noyau Linux récent configuré pour une utilisation de
+bureau, puisqu'ils réveillent suffisament souvent les processus .
 .
 .TP
 .B \-playing-msg <chaîne_de_caractères>
@@ -1014,9 +1054,10 @@ DOCS/tech/slave.txt pour leur description.
 .
 .TP
 .B \-softsleep
-Utilise des timers logiciels de haute qualité au lieu de RTC.
-Aussi précis que le RTC sans nécessiter de privilèges spéciaux,
-au prix toutefois d'une charge CPU accrue.
+Assure la syncho en vérifiant périodiquement l'horloge courante
+au lieu de demander au noyau de réveiller MPlayer à un moment précis.
+Utile si votre noyau ne dispose pas de timer précis et que vous ne
+pouvez pas non plus utiliser la RTC.
 .
 .TP
 .B \-sstep <sec>
@@ -1873,7 +1914,7 @@ Fonctionne avec \-embeddedfonts.
 .
 .TP
 .B \-ass-border-color <valeur>
-Défini la couleur du bord des sous-titre en simple texte.
+Défini la couleur du bord des sous-titre texte.
 Le format de la couleur est RRVVBBAA.
 .
 .TP
@@ -1883,7 +1924,7 @@ Les titres pourront y être affichés lors du rendu SSA/ASS
 (avec \-ass-use-margins).
 .
 .B \-ass-color <valeur>
-Défini la couleur des sous-titres en simple texte.
+Défini la couleur des sous-titres texte.
 Le format de la couleur est RRVVBBAA.
 .
 .TP
@@ -1909,7 +1950,7 @@ Définit la tailles des espaces pour le rendu SSA/ASS.
 .TP
 .B \-ass-styles <fichier>
 Charge le style SSA/ASS du fichier donné et l'utilise pour l'affichage
-des sous-titres.
+des sous-titres texte.
 La syntaxe de ce fichier est la même que celle définie dans la section
 [V4 Styles] / [V4+ Styles] de SSA/ASS.
 .
@@ -5271,7 +5312,7 @@ Retourne de 90 degrés dans le sens anti-horaire et retourne.
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=w:h[:entrel[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
@@ -5296,7 +5337,7 @@ hauteur/\:largeur original.
 -(n+8): Comment \-n ci-dessus, mais en arrondissant les dimensions au plus
 proche multiple de 16.
 .REss
-.IPs <entrelacé>
+.IPs <entrel>
 Bascule le redimmensionnement entrelacé.
 .RSss
 0: désactivé (par défaut)
@@ -5314,7 +5355,7 @@ saute le chroma
 .br
 3: N'utilise qu'une ligne d'entrée sur 8 pour le chroma.
 .REss
-.IPs "<param>[:<param2>] (voir aussi \-sws)"
+.IPs "<par>[:<par2>] (voir aussi \-sws)"
 Définit quelques paramètres dépendants du type de zoom sélectionné
 avec \-sws
 .RSss
@@ -6813,8 +6854,10 @@ L'option fd dit au filtre de toujours appliquer la décimation demandée
 .
 .TP
 .B screenshot
-Permet de réaliser des captures d'écran à chaque utilisation de la
-commande "screenshot" (correspond à la touche 's' par defaut).
+Permet de réaliser des captures d'écran en utilisant des commandes du
+mode slave, qui peuvent être associés à des appuis de touches.
+Voir la documentation du mode slave et la section CONTRÔLE
+INTERACTIF pour plus de détails.
 Chaque capture sera sauvegardée dans le répertoire de travail, et chaque
 fichier aura un nom de type 'shotNNNN.png' en utilisant le premier nombre
 disponible - aucun fichier ne sera écrasé.
