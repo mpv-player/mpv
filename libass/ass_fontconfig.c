@@ -154,9 +154,11 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 
 	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
 	{
+		mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Updating font cache\n");
+		// FontConfig >= 2.4.0 updates cache automatically in FcConfigAppFontAddDir()
+		if (FcGetVersion() < 20400) {
 		FcFontSet* fcs;
 		FcStrSet* fss;
-		mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Updating font cache\n");
 		fcs = FcFontSetCreate();
 		fss = FcStrSetCreate();
 		rc = FcStrSetAdd(fss, (const FcChar8*)dir);
@@ -178,6 +180,7 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 		}
 	ErrorFontCache:
 		;
+		}
 	}
 
 	rc = FcConfigAppFontAddDir(priv->config, (const FcChar8*)dir);
