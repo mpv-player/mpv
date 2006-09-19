@@ -913,6 +913,7 @@ ass_track_t* ass_read_file(char* fname)
 {
 	char* buf;
 	ass_track_t* track;
+	int i;
 	
 	buf = read_file(fname);
 	if (!buf)
@@ -923,6 +924,10 @@ ass_track_t* ass_read_file(char* fname)
 	
 	// process header
 	process_text(track, buf);
+
+	// external SSA/ASS subs does not have ReadOrder field
+	for (i = 0; i < track->n_events; ++i)
+		track->events[i].ReadOrder = i;
 
 	// there is no explicit end-of-font marker in ssa/ass
 	if (track->parser_priv->fontname)
