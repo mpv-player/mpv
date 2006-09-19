@@ -19,6 +19,7 @@ typedef struct {
   unsigned char    prebuf[STREAM_BUFFER_SIZE]; /* prefill buffer */
   int              prelen;              /* length of prefill buffer */
   unsigned int     duration;            /* in milliseconds */
+  int              mousex, mousey;
 } dvdnav_priv_t;
 
 extern int dvd_nav_still;

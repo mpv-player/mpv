@@ -362,6 +362,16 @@ int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
       status = dvdnav_button_activate(nav, pci);
       if(status == DVDNAV_STATUS_OK) reset = 1;
       break;
+    case MP_CMD_DVDNAV_MOUSECLICK:
+      /*
+        this is a workaround: in theory the simple dvdnav_lower_button_select()+dvdnav_button_activate()
+        should be enough (and generally it is), but there are cases when the calls to dvdnav_lower_button_select()
+        and friends fail! Hence we have to call dvdnav_mouse_activate(priv->mousex, priv->mousey) with
+        the coodinates saved by mp_dvdnav_update_mouse_pos().
+        This last call always works well
+      */
+      status = dvdnav_mouse_activate(nav, pci, dvdnav_priv->mousex, dvdnav_priv->mousey);
+      break;
     default:
       mp_msg(MSGT_CPLAYER, MSGL_V, "Unknown DVDNAV cmd %d\n", cmd);
       break;
@@ -384,6 +394,8 @@ void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* but
   status = dvdnav_mouse_select(nav, pci, x, y);
   if(status == DVDNAV_STATUS_OK) dvdnav_get_current_highlight(nav, button);
   else *button = -1;
+  dvdnav_priv->mousex = x;
+  dvdnav_priv->mousey = y;
 }
 
 

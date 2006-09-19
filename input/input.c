@@ -317,7 +317,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_KP6, 0 }, "dvdnav 4" },   // right
   { { KEY_KP5, 0 }, "dvdnav 5" },   // menu
   { { KEY_KPENTER, 0 }, "dvdnav 6" },   // select
-  { { MOUSE_BTN0, 0 }, "dvdnav 6" },   //select
+  { { MOUSE_BTN0, 0 }, "dvdnav 8" },   //select
   { { KEY_KP7, 0 }, "dvdnav 7" },   // previous menu
 #endif
 
