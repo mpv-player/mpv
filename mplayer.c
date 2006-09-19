@@ -5152,7 +5152,7 @@ if(step_sec>0) {
         break;
     } break;
     case MP_CMD_SET_MOUSE_POS: {
-        int button = 0, pointer_x, pointer_y;
+        int button = -1, pointer_x, pointer_y;
         double dx, dy;
         pointer_x = cmd->args[0].v.i;
         pointer_y = cmd->args[1].v.i;
@@ -5168,13 +5168,13 @@ if(step_sec>0) {
     }
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV: {
-      int button = 0;
+      int button = -1;
       if(stream->type != STREAMTYPE_DVDNAV) break;
 
       if(mp_dvdnav_handle_input(stream, cmd->args[0].v.i, &button)) {
           uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT|(fixed_vo ? INITED_VO : 0)));
           goto goto_enable_cache;
-      } else if(button) set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, "Selected button number %d", button);
+      } else if(button>0) set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, "Selected button number %d", button);
       break;
     }
 #endif

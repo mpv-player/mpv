@@ -436,7 +436,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
 int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button) {
   dvdnav_priv_t * dvdnav_priv=(dvdnav_priv_t*)stream->priv;
   dvdnav_t *nav = dvdnav_priv->dvdnav;
-  dvdnav_status_t status;
+  dvdnav_status_t status=DVDNAV_STATUS_ERR;
   pci_t *pci = dvdnav_get_current_nav_pci(nav);
   int reset = 0;
 
