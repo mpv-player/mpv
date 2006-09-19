@@ -83,12 +83,12 @@ documentation. Translated versions SHOULD be included, even if your
 package management system does not provide specific support for
 internationalization.
 
-Libavcodec MUST always be in the latest development version and it MUST
+Libavcodec MUST always be in the latest development version and it SHOULD
 be linked statically into the mplayer binary, because MPlayer requires a
-recent libavcodec snapshot. While some distributions provide FFmpeg
-packages containing a shared libavcodec library, they are often based on the
-last "release" version of FFmpeg, which is quite old and will usually not
-function correctly with MPlayer.
+recent libavcodec snapshot. It is acceptable to use a shared (again, recent)
+version of libavcodec, but you must be aware that this disables some of
+MPlayer's functions (for example, some postprocessing filters) and sacrifices
+speed.
 
 Support for binary codecs SHOULD be present to the extent that the combination
 of operating system and CPU architecture permits, but it MUST NOT result in a
