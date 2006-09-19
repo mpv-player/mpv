@@ -105,78 +105,6 @@ dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   return dvdnav_priv;
 }
 
-int dvdnav_stream_reset(dvdnav_priv_t * dvdnav_priv) {
-  if (!dvdnav_priv) return 0;
-
-//  if (dvdnav_reset(dvdnav_priv->dvdnav)!=DVDNAV_STATUS_OK)
-    return 0;
-
-  dvdnav_priv->started=0;
-
-  return 1;
-}
-
-int dvdnav_stream_sleeping(dvdnav_priv_t * dvdnav_priv) {
-    unsigned int now;
-
-    if (!dvdnav_priv) return 0;
-
-    if(dvdnav_priv->sleeping)
-    {
-      now=GetTimer();
-      while(dvdnav_priv->sleeping>1 || now<dvdnav_priv->sleep_until) {
-//        printf("%s %u<%u\n",__FUNCTION__,now,dvdnav_priv->sleep_until);
-//        usec_sleep(1000); /* 1ms granularity */
-        return 1; 
-      }
-      dvdnav_still_skip(dvdnav_priv->dvdnav); // continue past...
-      dvdnav_priv->sleeping=0;
-      mp_msg(MSGT_OPEN,MSGL_V, "%s: woke up!\n",__FUNCTION__);
-    }
-    dvd_nav_still=0;
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: active\n",__FUNCTION__);
-    return 0;
-}
-
-void dvdnav_stream_sleep(dvdnav_priv_t * dvdnav_priv, int seconds) {
-    if (!dvdnav_priv) return;
-
-    if (!dvdnav_priv->started) return;
-
-    dvdnav_priv->sleeping=0;
-    switch (seconds) {
-    case 0:
-            return;
-    case 0xff:
-            mp_msg(MSGT_OPEN,MSGL_V, "Sleeping indefinately\n" );
-            dvdnav_priv->sleeping=2;
-            break;
-    default:
-            mp_msg(MSGT_OPEN,MSGL_V, "Sleeping %d sec(s)\n", seconds );
-            dvdnav_priv->sleep_until = GetTimer();// + seconds*1000000;
-            dvdnav_priv->sleeping=1;
-            break;
-    }
-    //if (dvdnav_priv->started) dvd_nav_still=1;
-}
-
-void dvdnav_stream_add_event(dvdnav_priv_t* dvdnav_priv, int event, unsigned char *buf, int len) {
-  //printf("%s: %d\n",__FUNCTION__,event);
-
-  dvdnav_event_t * dvdnav_event;
-
-  if (!dvdnav_priv->started) return;
-
-  if (!(dvdnav_event=calloc(1,sizeof(*dvdnav_event)))) {
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: dvdnav_event: out of memory!\n",__FUNCTION__);
-    return;
-  }
-  dvdnav_event->event=event;
-  dvdnav_event->details=calloc(1,len);
-  memcpy(dvdnav_event->details,buf,len);
-  dvdnav_event->len=len;
-}
-
 int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len) {
   int event = DVDNAV_NOP;
 
@@ -218,30 +146,9 @@ int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len
         break;
     }
 
-    // got an event, repeat the read
-    dvdnav_stream_add_event(dvdnav_priv,event,buf,*len);
     *len=0;
   }
-//  printf("%s: got %d\n",__FUNCTION__,*len);
   return event;
-}
-
-void dvdnav_stream_fullstart(dvdnav_priv_t * dvdnav_priv) {
-  if (dvdnav_priv && !dvdnav_priv->started) {
-    dvdnav_stream_reset(dvdnav_priv->dvdnav);
-    dvdnav_priv->started=1;
-  }
-}
-
-unsigned int * dvdnav_stream_get_palette(dvdnav_priv_t * dvdnav_priv) {
-  if (!dvdnav_priv) {
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: NULL dvdnav_priv\n",__FUNCTION__);
-    return NULL;
-  }
-  if (!dvdnav_priv->dvdnav) {
-    mp_msg(MSGT_OPEN,MSGL_V, "%s: NULL dvdnav_priv->dvdnav\n",__FUNCTION__);
-    return NULL;
-  }
 }
 
 static void update_title_len(stream_t *stream) {
@@ -263,9 +170,6 @@ static void update_title_len(stream_t *stream) {
 static int seek(stream_t *s, off_t newpos) {
 uint32_t pos = 0, len = 0, sector = 0;
 dvdnav_priv_t *priv = s->priv;
-
-  if(newpos==0)
-    dvdnav_stream_reset(priv->dvdnav);
 
     if(s->end_pos && newpos > s->end_pos) 
        newpos = s->end_pos;
@@ -313,26 +217,7 @@ static int fill_buffer(stream_t *s, char *but, int len)
                 update_title_len(s);
                 break;
             }
-#if 0
-            case DVDNAV_STILL_FRAME: {
-                if(!dvdnav_priv->stillok) dvdnav_priv->stillcounter++;
-                dvdnav_priv->lockstillcounter++;
-                return len;
-                break; 
-            }
-	    
-            case DVDNAV_WAIT: {
-                if(dvdnav_priv->waitcounter>=DVDNAV_MAX_WAIT_FRAME) return len;
-                break;
-            }
-#endif
         }
-#if 0
-        if(dvdnav_priv->event.cell_really_change &&
-            dvdnav_priv->started &&
-	    !dvdnav_priv->vts_domain) 
-	        return len;
-#endif
   }
   mp_msg(MSGT_STREAM,MSGL_DBG2,"DVDNAV fill_buffer len: %d\n",len);
   return len;
@@ -393,8 +278,6 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   dvdnav_priv_t *dvdnav_priv;
   dvdnav_status_t status;
 
-  //mp_msg(MSGT_OPEN,MSGL_INFO,"URL: %s\n", filename);
-  
   if(p->device) filename = p->device; 
   else if(dvd_device) filename= dvd_device; 
   else filename = DEFAULT_DVD_DEVICE;
