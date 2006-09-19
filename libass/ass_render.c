@@ -1686,6 +1686,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	
 	// determing text bounding box
 	compute_string_bbox(&text_info, &bbox);
+	bbox.yMin = - (text_info.lines[0].asc >> 6);
+	bbox.yMax = (text_info.height - text_info.lines[0].asc) >> 6;
 	
 	// determine device coordinates for text
 	
