@@ -70,9 +70,6 @@ dvdnav <button>
         5 menu
         6 select
 
-dvdnav_event <value>
-    Send <value> as DVDNAV event. DVDNAV support in MPlayer is disabled.
-
 edl_mark
     Write the current position into the EDL file.
 
