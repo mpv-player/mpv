@@ -149,7 +149,6 @@ static mp_cmd_t mp_cmds[] = {
 
 #ifdef USE_DVDNAV
   { MP_CMD_DVDNAV, "dvdnav", 1, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
-  { MP_CMD_DVDNAV_EVENT, "dvdnav_event", 1, { { MP_CMD_ARG_VOID, {0}}, {-1, {0}} } },
 #endif
 
 #ifdef HAVE_MENU

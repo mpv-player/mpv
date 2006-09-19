@@ -106,8 +106,6 @@
 #define MP_CMD_DVB_SET_CHANNEL 5101
 #endif
 
-#define MP_CMD_DVDNAV_EVENT     6000
-
 #define MP_CMD_DVDNAV_UP        1
 #define MP_CMD_DVDNAV_DOWN      2
 #define MP_CMD_DVDNAV_LEFT      3
