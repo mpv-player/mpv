@@ -10,4 +10,4 @@ TARGETS = $(SRCS:.c=.so.6.0)
 all: $(TARGETS)
 
 clean:
-	rm -f *.so.6.0
+	rm -f $(TARGETS)
