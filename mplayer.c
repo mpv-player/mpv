@@ -5162,6 +5162,7 @@ if(step_sec>0) {
             pointer_x = (int) (dx * (double) sh_video->disp_w);
             pointer_y = (int) (dy * (double) sh_video->disp_h);
             mp_dvdnav_update_mouse_pos(stream, pointer_x, pointer_y, &button);
+            if(button>0) set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, "Selected button number %d", button);
         }
 #endif
         break;
