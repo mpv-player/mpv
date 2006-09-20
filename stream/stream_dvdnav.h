@@ -32,18 +32,6 @@ extern int osd_show_dvd_nav_ex;
 extern int osd_show_dvd_nav_sy;
 extern int osd_show_dvd_nav_ey;
 
-dvdnav_priv_t * new_dvdnav_stream(char * filename);
-int dvdnav_stream_reset(dvdnav_priv_t * dvdnav_priv);
-void free_dvdnav_stream(dvdnav_priv_t * dvdnav_priv);
-
-void dvdnav_stream_ignore_timers(dvdnav_priv_t * dvdnav_priv, int ignore);
-int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len);
-
-void dvdnav_stream_sleep(dvdnav_priv_t *dvdnav_priv, int seconds);
-int dvdnav_stream_sleeping(dvdnav_priv_t * dvdnav_priv);
-
-void dvdnav_stream_fullstart(dvdnav_priv_t *dvdnav_priv);
-unsigned int * dvdnav_stream_get_palette(dvdnav_priv_t * dvdnav_priv);
 int mp_dvdnav_handle_input(stream_t *stream, int cmd, int *button);
 void mp_dvdnav_update_mouse_pos(stream_t *stream, int32_t x, int32_t y, int* button);
 
