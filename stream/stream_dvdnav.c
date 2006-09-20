@@ -53,7 +53,7 @@ int dvd_nav_still=0;            /* are we on a still picture? */
 
 static int seek(stream_t *s, off_t newpos);
 
-dvdnav_priv_t * new_dvdnav_stream(char * filename) {
+static dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   char * title_str;
   dvdnav_priv_t *dvdnav_priv;
 
@@ -105,7 +105,7 @@ dvdnav_priv_t * new_dvdnav_stream(char * filename) {
   return dvdnav_priv;
 }
 
-int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len) {
+static int dvdnav_stream_read(dvdnav_priv_t * dvdnav_priv, unsigned char *buf, int *len) {
   int event = DVDNAV_NOP;
 
   if (!len) return -1;
