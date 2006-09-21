@@ -559,23 +559,7 @@ static void update_font(void)
 	}
 	
 	if (render_context.face)
-	{
 		change_font_size(render_context.font_size);
-
-		if (render_context.stroker != 0) {
-			FT_Stroker_Done(render_context.stroker);
-			render_context.stroker = 0;
-		}
-#if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
-		error = FT_Stroker_New( ass_instance->library, &render_context.stroker );
-#else // < 2.2
-		error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
-#endif
-		if ( error ) {
-			mp_msg(MSGT_GLOBAL, MSGL_V, "failed to get stroker\n");
-			render_context.stroker = 0;
-		}
-	}
 }
 
 /**
@@ -584,11 +568,9 @@ static void update_font(void)
  */
 static void change_border(double border)
 {
-	if (!render_context.stroker) {
-		if (!no_more_font_messages)
-			mp_msg(MSGT_GLOBAL, MSGL_WARN, "No stroker!\n");
-	} else {
-		int b;
+	int b;
+	if (!render_context.face) return;
+
 		if (border < 0) {
 			if (render_context.style->BorderStyle == 1) {
 				if (render_context.style->Outline == 0 && render_context.style->Shadow > 0)
@@ -601,16 +583,28 @@ static void change_border(double border)
 		render_context.border = border;
 
 		b = 64 * border * frame_context.border_scale;
-		if (b > 0)
+		if (b > 0) {
+		if (!render_context.stroker) {
+			int error;
+#if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
+			error = FT_Stroker_New( ass_instance->library, &render_context.stroker );
+#else // < 2.2
+			error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
+#endif
+			if (error) {
+				mp_msg(MSGT_GLOBAL, MSGL_V, "failed to get stroker\n");
+				render_context.stroker = 0;
+			}
+		}
+		if (render_context.stroker)
 			FT_Stroker_Set( render_context.stroker, b,
 				FT_STROKER_LINECAP_ROUND,
 				FT_STROKER_LINEJOIN_ROUND,
 				0 );
-		else {
+		} else {
 			FT_Stroker_Done(render_context.stroker);
 			render_context.stroker = 0;
 		}
-	}
 }
 
 #define _r(c)  ((c)>>24)
@@ -1179,10 +1173,6 @@ static void init_render_context(ass_event_t* event)
 
 static void free_render_context(void)
 {
-	if (render_context.stroker != 0) {
-		FT_Stroker_Done(render_context.stroker);
-		render_context.stroker = 0;
-	}
 }
 
 /**
