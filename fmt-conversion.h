@@ -44,6 +44,7 @@ enum PixelFormat imgfmt2pixfmt(int fmt)
         case IMGFMT_NV21:
             return PIX_FMT_NV21;
         case IMGFMT_Y800:
+        case IMGFMT_Y8:
             return PIX_FMT_GRAY8;
         case IMGFMT_IF09:
         case IMGFMT_YVU9:
