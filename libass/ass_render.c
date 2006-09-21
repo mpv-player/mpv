@@ -571,19 +571,19 @@ static void change_border(double border)
 	int b;
 	if (!render_context.face) return;
 
-		if (border < 0) {
-			if (render_context.style->BorderStyle == 1) {
-				if (render_context.style->Outline == 0 && render_context.style->Shadow > 0)
-					border = 1.;
-				else
-					border = render_context.style->Outline;
-			} else
+	if (border < 0) {
+		if (render_context.style->BorderStyle == 1) {
+			if (render_context.style->Outline == 0 && render_context.style->Shadow > 0)
 				border = 1.;
-		}
-		render_context.border = border;
+			else
+				border = render_context.style->Outline;
+		} else
+			border = 1.;
+	}
+	render_context.border = border;
 
-		b = 64 * border * frame_context.border_scale;
-		if (b > 0) {
+	b = 64 * border * frame_context.border_scale;
+	if (b > 0) {
 		if (!render_context.stroker) {
 			int error;
 #if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
@@ -598,13 +598,13 @@ static void change_border(double border)
 		}
 		if (render_context.stroker)
 			FT_Stroker_Set( render_context.stroker, b,
-				FT_STROKER_LINECAP_ROUND,
-				FT_STROKER_LINEJOIN_ROUND,
-				0 );
-		} else {
-			FT_Stroker_Done(render_context.stroker);
-			render_context.stroker = 0;
-		}
+					FT_STROKER_LINECAP_ROUND,
+					FT_STROKER_LINEJOIN_ROUND,
+					0 );
+	} else {
+		FT_Stroker_Done(render_context.stroker);
+		render_context.stroker = 0;
+	}
 }
 
 #define _r(c)  ((c)>>24)
