@@ -142,6 +142,7 @@ typedef struct frame_context_s {
 	long long time; // frame's timestamp, ms
 	double font_scale;
 	double font_scale_x; // x scale applied to all glyphs to preserve text aspect ratio
+	double border_scale;
 } frame_context_t;
 
 static ass_instance_t* ass_instance;
@@ -599,7 +600,7 @@ static void change_border(double border)
 		}
 		render_context.border = border;
 
-		b = 64 * border * frame_context.font_scale;
+		b = 64 * border * frame_context.border_scale;
 		if (b > 0)
 			FT_Stroker_Set( render_context.stroker, b,
 				FT_STROKER_LINECAP_ROUND,
@@ -1885,6 +1886,7 @@ static int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long n
 	
 	frame_context.font_scale = global_settings->font_size_coeff * ass_internal_font_size_coeff *
 	                           frame_context.orig_height / frame_context.track->PlayResY;
+	frame_context.border_scale = ((double)frame_context.orig_height) / frame_context.track->PlayResY;
 
 	if (frame_context.width * track->PlayResY == frame_context.height * track->PlayResX)
 		frame_context.font_scale_x = 1.;
