@@ -1258,6 +1258,38 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 }
 
 /**
+ * This function goes through text_info and calculates text parameters.
+ * The following text_info fields are filled:
+ *   n_lines
+ *   height
+ *   lines[].height
+ *   lines[].asc
+ *   lines[].desc
+ */
+static void measure_text()
+{
+	int cur_line = 0, max_asc = 0, max_desc = 0;
+	int i;
+	text_info.height = 0;
+	for (i = 0; i < text_info.length + 1; ++i) {
+		if ((i == text_info.length) || text_info.glyphs[i].linebreak) {
+			text_info.lines[cur_line].asc = max_asc;
+			text_info.lines[cur_line].desc = max_desc;
+			text_info.height += max_asc + max_desc;
+			cur_line ++;
+			max_asc = max_desc = 0;
+		}
+		if (i < text_info.length) {
+			glyph_info_t* cur = text_info.glyphs + i;
+			if (cur->asc > max_asc)
+				max_asc = cur->asc * render_context.scale_y;
+			if (cur->desc > max_desc)
+				max_desc = cur->desc * render_context.scale_y;
+		}
+	}
+}
+
+/**
  * \brief rearrange text between lines
  * \param max_text_width maximal text line width in pixels
  * The algo is similar to the one in libvo/sub.c:
@@ -1275,7 +1307,6 @@ static void wrap_lines_smart(int max_text_width)
 	int exit;
 	int pen_shift_x;
 	int pen_shift_y;
-	int max_asc, max_desc;
 	int cur_line;
 
 	last_space = -1;
@@ -1370,26 +1401,8 @@ static void wrap_lines_smart(int max_text_width)
 	assert(text_info.n_lines >= 1);
 #undef DIFF
 	
-	text_info.height = 0;
-	max_asc = max_desc = 0;
-	cur_line = 0;
-	for (i = 0; i < text_info.length + 1; ++i) {
-		if ((i == text_info.length) || text_info.glyphs[i].linebreak) {
-			text_info.lines[cur_line].asc = max_asc;
-			text_info.lines[cur_line].desc = max_desc;
-			text_info.height += max_asc + max_desc;
-			cur_line ++;
-			max_asc = max_desc = 0;
-		}
-		if (i < text_info.length) {
-			cur = text_info.glyphs + i;
-			if (cur->asc > max_asc)
-				max_asc = cur->asc * render_context.scale_y;
-			if (cur->desc > max_desc)
-				max_desc = cur->desc * render_context.scale_y;
-		}
-	}
-	
+	measure_text();
+
 	pen_shift_x = 0;
 	pen_shift_y = 0;
 	cur_line = 1;
@@ -1674,6 +1687,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				last_break = i - 1;
 			}
 		}
+	} else { // render_context.evt_type == EVENT_HSCROLL
+		measure_text();
 	}
 	
 	// determing text bounding box
