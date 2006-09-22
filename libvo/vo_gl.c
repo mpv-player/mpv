@@ -230,13 +230,14 @@ static void clearOSD(void) {
  * \brief remove textures, display list and free memory used by EOSD
  */
 static void clearEOSD(void) {
-  if (!eosdtexCnt)
-    return;
-  glDeleteTextures(eosdtexCnt, eosdtex);
+  if (eosdDispList)
+    glDeleteLists(eosdDispList, 1);
+  eosdDispList = 0;
+  if (eosdtexCnt)
+    glDeleteTextures(eosdtexCnt, eosdtex);
+  eosdtexCnt = 0;
   free(eosdtex);
   eosdtex = NULL;
-  glDeleteLists(eosdDispList, 1);
-  eosdtexCnt = 0;
 }
 
 /**
