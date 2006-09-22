@@ -288,11 +288,11 @@ static void avifile_write_header(muxer_t *muxer){
   for (i = 0; muxer->streams[i] && i < MUXER_MAX_STREAMS; ++i) {
       muxer_stream_t *s = muxer->streams[i];
       if (s->type == MUXER_TYPE_AUDIO && muxer->audio_delay_fix > 0.0) {
-          s->h.dwStart = muxer->audio_delay_fix * s->h.dwRate/s->h.dwScale;
+          s->h.dwStart = muxer->audio_delay_fix * s->h.dwRate/s->h.dwScale + 0.5;
           mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingAudioDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
       }
       if (s->type == MUXER_TYPE_VIDEO && muxer->audio_delay_fix < 0.0) {
-          s->h.dwStart = -muxer->audio_delay_fix * s->h.dwRate/s->h.dwScale;
+          s->h.dwStart = -muxer->audio_delay_fix * s->h.dwRate/s->h.dwScale + 0.5;
           mp_msg(MSGT_MUXER, MSGL_INFO, MSGTR_SettingVideoDelay, (float)s->h.dwStart * s->h.dwScale/s->h.dwRate);
       }
   }
