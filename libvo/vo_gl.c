@@ -251,10 +251,10 @@ static void genEOSD(ass_image_t *img) {
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
   ass_image_t *i;
   clearEOSD();
+  if (!img)
+    return;
   for (i = img; i; i = i->next)
     eosdtexCnt++;
-  if (!eosdtexCnt)
-    return;
   eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
   glGenTextures(eosdtexCnt, eosdtex);
   for (i = img, curtex = eosdtex; i; i = i->next, curtex++) {
