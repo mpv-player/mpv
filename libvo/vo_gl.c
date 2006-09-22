@@ -273,11 +273,11 @@ static void genEOSD(ass_image_t *img) {
     else if (i->w < 32 && i->h < 32 && smalltexcur < 256)
       smalltexcur++;
     else
-    eosdtexCnt++;
+      eosdtexCnt++;
   }
   if (eosdtexCnt) {
-  eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
-  glGenTextures(eosdtexCnt, eosdtex);
+    eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
+    glGenTextures(eosdtexCnt, eosdtex);
   }
   tinytexcur = smalltexcur = 0;
   for (i = img, curtex = eosdtex; i; i = i->next) {
@@ -297,9 +297,9 @@ static void genEOSD(ass_image_t *img) {
       BindTexture(gl_target, largeeosdtex[1]);
       smalltexcur++;
     } else {
-    texSize(i->w, i->h, &sx, &sy);
-    BindTexture(gl_target, *curtex++);
-    glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
+      texSize(i->w, i->h, &sx, &sy);
+      BindTexture(gl_target, *curtex++);
+      glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
     }
     glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, i->bitmap, i->stride,
                 x, y, i->w, i->h, 0);
@@ -325,8 +325,8 @@ static void genEOSD(ass_image_t *img) {
       BindTexture(gl_target, largeeosdtex[1]);
       smalltexcur++;
     } else {
-    texSize(i->w, i->h, &sx, &sy);
-    BindTexture(gl_target, *curtex++);
+      texSize(i->w, i->h, &sx, &sy);
+      BindTexture(gl_target, *curtex++);
     }
     glDrawTex(i->dst_x, i->dst_y, i->w, i->h, x, y, i->w, i->h, sx, sy, use_rectangle == 1, 0, 0);
   }
@@ -644,10 +644,10 @@ flip_page(void)
   if (osdtexCnt > 0 || eosdDispList) {
     // set special rendering parameters
     if (!scaled_osd) {
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
+      glMatrixMode(GL_PROJECTION);
+      glPushMatrix();
+      glLoadIdentity();
+      glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
     }
     glEnable(GL_BLEND);
     if (eosdDispList) {
@@ -667,7 +667,7 @@ flip_page(void)
     // set rendering parameters back to defaults
     glDisable (GL_BLEND);
     if (!scaled_osd)
-    glPopMatrix();
+      glPopMatrix();
     BindTexture(gl_target, 0);
   }
 
