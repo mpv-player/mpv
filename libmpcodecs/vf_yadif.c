@@ -481,7 +481,7 @@ static int open(vf_instance_t *vf, char* args){
     if (args) sscanf(args, "%d:%d", &vf->priv->mode, &vf->priv->parity);
 
     filter_line = filter_line_c;
-#ifdef HAVE_MMX
+#if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
     if(gCpuCaps.hasMMX2) filter_line = filter_line_mmx2;
 #endif
 
