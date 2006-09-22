@@ -1,4 +1,4 @@
-.\" synced with 1.1234
+.\" synced with 1.1260
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -8,8 +8,6 @@
 .\" Definizione Macro
 .\" --------------------------------------------------------------------------
 .
-.\" l'indentazione di default è 7, non cambiarla!
-.nr IN 7
 .\" definisci l'indentazione per le sotto opzioni
 .nr SS 5
 .\" aggiungi una nuova sotto opzione
@@ -18,7 +16,7 @@
 ..
 .\" inizio di una sotto opzione di primo livello, finire con .RE
 .de RSs
-.RS \n(IN+3
+.RS 10
 ..
 .\" inizio di una sotto opzione di secondo livello
 .de RSss
@@ -321,10 +319,16 @@ Cambia l'allineamento dei sottotitoli: in alto / al centro / in basso.
 Regola il ritardo dei sottotitoli di +/- 0.1 secondi.
 .IPs "r e t"
 Regola la posizione dei sottotitoli più su/più giù.
-.IPs "i\ \ \ \ "
-Imposta un punto EDL.
-.IPs "s (va caricato il filtro screenshot)"
+.IPs "i (solo modalità \-edlout)"
+Imposta l'inizio o la fine di un punto di salto EDL e lo scrive sul file dato.
+.IPs "s (solo \-vf screenshot)"
 Salva un'istantanea ("screenshot").
+.IPs "S (solo \-vf screenshot)"
+Inizia/smette di salvare istantanee.
+.IPs "I\ \ \ \ "
+Mostra il nome del file sull'OSD.
+.IPs "! and @"
+Va all'inizio del precedente/\:prossimo capitolo.
 .RE
 .PD 1
 .PP
@@ -740,8 +744,7 @@ xmga, xvidix, xover, xv (vedi \-vo xv:ck), xvmc (vedi -vo xv:ck) e directx.
 .B \-crash-debug (CODICE DI DEBUG)
 Attiva automaticamente gdb dopo un crash oppure SIGTRAP.
 Il supporto deve essere compilato all'interno del programma, configurandolo
-con --enable-crash-debug oppure nel caso si abbia il file .developer all'interno
-nell'albero dei sorgenti.
+con --enable-crash-debug.
 .
 .TP
 .B \-edlout <nomefile> (solo EDL)
@@ -853,6 +856,10 @@ di questa opzione devi impostarla a 2 per Linux e a 1024 per Windows.
 Specifica un file di configurazione per LIRC (default: ~/.lircrc).
 .
 .TP
+.B \-list-properties
+Stampa una lista delle proprietà disponibili.
+.
+.TP
 .B \-loop <numero>
 Ripete la riproduzione del film <numero> volte.
 0 significa per sempre.
@@ -901,6 +908,17 @@ del mouse (i menu del contesto di mozplayerxp si basano su questa opzione).
 .B \-nortc (solo RTC)
 Disabilita l'utilizzo di Linux RTC (realtime clock, orologio in tempo reale \- /dev/\:rtc)
 per la gestione delle temporizzazioni.
+.
+.TP
+.B \-playing-msg <stringa>
+Stampa una stringa prima di inziare la riproduzione.
+Sono supportate le seguenti espansioni:
+.RSs
+.IPs ${NOME}
+Espande al valore della proprietà NOME.
+.IPs $(NOME:TESTO)
+Espande a TESTO solo se la proprietà NOME è disponibile.
+.RE
 .
 .TP
 .B \-playlist <nomefile>
@@ -2314,6 +2332,12 @@ Se non inclusa verrà generato un file grezzo PCM.
 Scrive il suono su <nomefile> invece che sul default
 audiodump.wav.
 Se viene specificato nowaveheader il default è invece audiodump.pcm.
+.IPs "fast\ "
+Prova a fare un dump più veloce che in realtime.
+Assicurati che l'uscita non venga troncata (solitamente con un messaggio
+"Troppi pacchetti video nel buffer!").
+E' normale che tu ottenga un messaggio
+"Il tuo sistema è troppo LENTO per questa riproduzione!".
 .RE
 .PD 1
 .
@@ -2331,7 +2355,6 @@ driver di uscita audio plugin
 .TP
 .B \-adapter <valore>
 Seleziona la scheda grafica che riceverà l'immagine.
-Serve anche l'opzione \-vm perché funzioni.
 Puoi avere una lista delle schede disponibili se utilizzi questa
 opzione insieme con \-v.
 Attualmente funziona solo con il driver di uscita video directx.
@@ -2598,6 +2621,14 @@ o dello schermo TV.
 .PD 1
 .
 .TP
+.B \-monitorpixelaspect <rapporto> (vedi anche \-aspect)
+Seleziona l'aspetto di un singolo pixel del tuo monitor o della TV.
+(default: disabled).
+Sovrascrive l'opzione \-monitoraspect.
+Un valore di 0 lo disabilita, un valore di 1 significa pixel quadrati
+(valore corretto per (quasi?) tutti gli schermi LCD).
+.
+.TP
 .B \-nodouble
 Disabilita il doppio buffering, fondamentalmente usato a scopi di
 debug.
@@ -2695,10 +2726,16 @@ Utile per 'incastrare' MPlayer in un browser (p.es.\& con l'estensione
 plugger).
 .
 .TP
-.B \-xineramascreen <0\-...>
+.B \-xineramascreen <\-2\-...> (solo X11)
 In configurazioni con Xinerama (p.es.\& un singolo desktop che si espande su
 monitor multipli) questa opzione indica a MPlayer su quale schermo deve visualizzare
 il filmato.
+Un valore di \-2 significa a schermo intero attraverso tutto lo schermo
+virtuale, \-1 significa a schermo intero sullo schermo su cui è attualmente
+posizionata la finestra.
+La posizione iniziale selezionata con l'opzione \-geometry è relativa allo
+schermo specificato.
+Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
 .
 .TP
 .B \-zrbw (solo \-vo zr)
@@ -3109,6 +3146,8 @@ Se abilitato si comporta più come gli altri driver di uscita video,
 il che è migliore per font di dimensione fissa.
 Se disabilitato appare molto meglio con i font FreeType ed utilizza
 i bordi nella modalità a schermo intero.
+.IPs osdcolor=<0xRRGGBB>
+Colore per l'OSD (default: 0xffffff, che corrisponde al bianco).
 .IPs (no)aspect
 Abilita o disabilita la scalatura dell'aspetto ed il supporto per il
 pan-and-scan (default: abilitato).
@@ -3716,11 +3755,12 @@ Ribalta l'immagine alto / basso.
 .TP
 .B \-lavdopts <opzione1:opzione2:...> (CODICE DI DEBUG)
 Specifica i parametri di decodifica di libavcodec.
+Opzioni multiple vanno separate con i due punti.
 .sp 1
 .I ESEMPIO:
 .PD 0
 .RSs
-\-lavdopts bug=1
+\-lavdopts gray:skiploopfilter=all:skipframe=nonref
 .RE
 .PD 1
 .sp 1
@@ -3818,7 +3858,7 @@ Seleziona la strategia di recupero degli errori.
 .br
 4: molto aggressivo
 .REss
-.IPs "fast\ "
+.IPs "fast (MPEG-2 only)"
 Abilita ottimizzazioni che non rispettano completamente le specifiche
 e potrebbero potenzialmente causare problemi, come una dequantizzazione
 più semplice, presumere l'utilizzo della matrice di quantizzazione di
@@ -3826,7 +3866,7 @@ default, presumere YUV 4:2:0 ed evitare qualche controllo per riconoscere
 flussi danneggiati.
 .IPs "gray\ "
 decodifica a scala di grigi (un poco più veloce che a colori).
-.IPs idct=<0\-99> (vedi anche \-lavcopts)
+.IPs "idct=<0\-99> (vedi anche \-lavcopts)"
 Per la miglior qualità di decodifica utilizza lo stesso algoritmo di IDCT sia per la
 decodifica che per la codifica.
 Questo può però portare a qualche inaccuratezza.
@@ -4246,6 +4286,24 @@ Produce uno 'sweep' sinusoidale.
 .IPs <0.0\-1.0>
 Delta della funzione sinusoidale, utilizza valori molto bassi per sentire lo
 sweep.
+.RE
+.PD 1
+.
+.TP
+.B sinesuppress[=frequenza:decadimento]
+Rimuove un seno alla frequenza indicata.
+Utile per eliminare il rumore a 50/60Hz su strumentazioni audio di bassa
+qualità.
+Probabilmente funziona solo su entrate mono.
+.PD 0
+.RSs
+.IPs <frequenza>
+La frequenza del seno che dovrebbe essere rimosso (in Hz) (default: 50)
+.IPs <decadimento>
+Controlla l'adattività (un valore più grande farà in modo che il filtro si
+adatti più velocemente a cambi di ampiezza e fase, uno più piccolo
+renderà l'adattamento più lento) (default: 0.0001).
+Valori ragionevoli sono intorno a 0.001.
 .RE
 .PD 1
 .
@@ -5663,7 +5721,7 @@ non funziona con la tua combinazione di filtri.
 .IPs d
 De-interleave dei campi, sistemandoli fianco a fianco.
 .IPs i
-Re-Interleave di nuovo dei campi (annullando l'effetto di
+Re-interleave di nuovo dei campi (annullando l'effetto di
 fil=d).
 .RE
 .PD 1
@@ -6037,6 +6095,10 @@ altezza non cambiata.
 .IPs 3
 Espande ogni fotogramma ad altezza completa, ma riempie le linee alternate
 con il colore nero. Il framerate non viene cambiato.
+.IPs 4
+Produce l'interleave di linee pari da fotogrammi pari con linee dispari da
+fotogrammi dispari.
+Genera un fotogramma ad altezza completa a metà della frequenza (framerate).
 .RE
 .PD 1
 .
@@ -7427,7 +7489,19 @@ attualmente inutile
 .
 .TP
 .B vrc_strategy
-Fasulllo, riservato per utilizzi futuri.
+Metodo di controllo della frequenza.
+Nota che alcune delle opzioni che influenzano il controllo della frequenza
+non avranno effetto se vrc_strategy non è impostato a 0.
+.PD 0
+.RSs
+.IPs 0
+Usa il controllo della frequenza interno di lavc (default).
+.IPs 1
+Usa il controllo della frequenza di XviD (sperimentale; richiede che
+MEncoder sia compilato con il supporto per XviD con versione maggiore o
+uguale a 1.1).
+.RE
+.PD 1
 .
 .TP
 .B vb_qfactor=<-31.0\-31.0>
@@ -8915,8 +8989,7 @@ I valori di ritorno sono in dB (decibel), più alto è migliore.
 .
 .PP
 .sp 1
-Le opzioni che seguono sono disponibili solo nella versione di sviluppo
-di XviD 1.1.x.
+L'opzione che segue è disponibile solo in XviD 1.1.x.
 .
 .TP
 .B bvhq=<0|1>
@@ -8925,6 +8998,16 @@ tipo B utilizzando un operatore ottimizzato sull'indice della distorsione,
 che è quello che viene fatto per i fotogrammi P con l'opzione vhq.
 Questo produce dei fotogrammi B di bell'aspetto e contemporaneamente non
 riduce quasi per niente le prestazioni (default: 1).
+.
+.PP
+.sp 1
+L'opzione che segue è disponibile solo nella versione CVS di XviD.
+.
+.TP
+.B threads=<0\-n>
+Crea n thread per eseguire la stima del movimento (default: 0).
+Il numero massimo di thread che possono essere usati è l'altezza
+dell'immagine diviso per 16.
 .
 .
 .SS x264enc (\-x264encopts)
@@ -9229,24 +9312,28 @@ comunque soggetta alla compensazione dell'overflow ed a qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-2>
+.B direct_pred=<0\-3>
 Determina il tipo di previsione del movimento usato per i macroblocchi
 diretti nei fotogrammi di tipo B.
 .PD 0
 .RSs
 .IPs 0
-Nessuno: i macroblocchi diretti non vengono usati.
+Nessuno: I macroblocchi diretti non vengono usati.
 .IPs 1
-Spaziale: i vettori di movimento sono estrapolati dai blocchi vicini.
+Spaziale: I vettori di movimento sono estrapolati dai blocchi vicini.
+(default)
 .IPs 2
-Temporale: i vettori di movimento vengono interpolati dai fotogrammi di tipo
-P che seguono. (default)
+Temporale: I vettori di movimento vengono interpolati dai fotogrammi di tipo
+P che seguono.
+.IPs 3
+Automatica: Il codec sceglie tra la spaziale e la temporale per ciascun frame.
 .RE
 .PD 1
 .RS
 Le due previsioni spaziali e temporali hanno approssimativamente la
-stessa velocità e qualità (PSNR) ma normalmente quella temporale sembra
-migliore.
+stessa velocità e qualità (PSNR), la scelta tra una o l'altra dipende dal
+contenuto video.
+Quella automatica è leggermente migliore, ma più lenta.
 Utilizzare direct_pred=0 è contemporaneamente più lento e genera una qualità
 peggiore.
 .RE
@@ -9391,7 +9478,7 @@ Richiede frameref>1.
 .B (no)brdo
 Abilita l'ottimizzazione della rate-distorsion per i tipi di macroblocco
 nei fotogrammi B.
-Richiede subq=6.
+Richiede subq>=6.
 .
 .TP
 .B (no)bime
@@ -9409,7 +9496,7 @@ disabilitata
 .IPs 1
 abilitata solo per la codifica finale (default)
 .IPs 2
-abilitata durante ogni decisione di modalità (lento, richiede subq=6)
+abilitata durante ogni decisione di modalità (lento, richiede subq>=6)
 .RE
 .PD 1
 .
@@ -9572,6 +9659,13 @@ di parametri di default ragionevoli che l'utente può modificare.
 Generalmente quando si generano dei file MPEG è consigliato disabilitare il
 codice di MEncoder che si occupa di scartare i fotogrammi (vedi \-noskip, \-mc
 così come anche i filtri video harddup e softskip).
+.PP
+.I ESEMPIO:
+.PD 0
+.RSs
+.IPs format=mpeg2:tsaf:vbitrate=8000
+.RE
+.PD 1
 .
 .TP
 .B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
@@ -9989,8 +10083,6 @@ file sub (sottotitoli) in questo ordine:
 /percorso/\:del/\:filmato.sub
 .br
 ~/.mplayer/\:sub/\:filmato.sub
-.br
-~/.mplayer/\:default.sub
 .RE
 .PD 1
 .
