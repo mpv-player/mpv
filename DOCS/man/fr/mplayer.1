@@ -4639,7 +4639,7 @@ en réalisant une changement de fréquence et une interpolation linéaire.
 .PD 1
 .
 .TP
-.B lavcresample[=srate[:longueur[:linéaire[:nombre[:freq_coup]]]]]
+.B lavcresample[=srate[:lg[:linéaire[:nb[:freq_coup]]]]]
 Change le taux d'échantillonnage du flux audio en un entier <srate> en Hz.
 Ne gère que le format 16-bit en boutisme (endianness) natif.
 .br
@@ -4649,13 +4649,13 @@ Avec MEncoder, vous devez aussi utiliser \-srate <srate>.
 .RSs
 .IPs <srate>
 le taux d'échantillonnage de sortie
-.IPs <longueur>
+.IPs <lg>
 longueur du filtre par rapport au taux d'échantillonnage le plus faible
 (par défaut\ : 16)
 .IPs <linéaire>
 si à 1 alors les filtres seront interpolés linéairement entre les entrées
 polyphase
-.IPs <nombre>
+.IPs <nb>
 le log2 du nombre d'entrées polyphase
 (..., 10->1024, 11->2048, 12->4096, ...) (par défaut\ : 10->1024)
 .IPs <freq_coup>
@@ -5193,7 +5193,7 @@ Affiche les noms des paramètres et leur intervalle de valeur pour un filtre
 particulier.
 .
 .TP
-.B \-vf <filtre=paramètre_nommé=valeur1[:paramètre_nommé2=valeur2:...]>
+.B \-vf <filtre=param_nommé=val1[:param_nommé2=val2:...]>
 Fait correspondre un paramètre nommé à une valeur donnée.
 Utilisez on et off ou yes et no pour positionner les drapeaux des paramètres.
 .PP
@@ -5314,7 +5314,7 @@ Retourne de 90 degrés dans le sens anti-horaire et retourne.
 .RE
 .
 .TP
-.B scale[=w:h[:entrel[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=l:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
@@ -5339,7 +5339,7 @@ hauteur/\:largeur original.
 -(n+8): Comment \-n ci-dessus, mais en arrondissant les dimensions au plus
 proche multiple de 16.
 .REss
-.IPs <entrel>
+.IPs <ilaced>
 Bascule le redimmensionnement entrelacé.
 .RSss
 0: désactivé (par défaut)
@@ -5543,7 +5543,7 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 .PD 1
 .
 .TP
-.B pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi \-pphelp)
+.B pp[=filtre1[:opt1[:opt2...]]/[-]filtre2...] (c.f. \-pphelp)
 Construit la chaîne de filtres qui est spécifiée.
 Les sous-filtres doivent être séparés avec '/', peuvent être désactivés
 en les préfixant de '-'.
@@ -6812,7 +6812,7 @@ simplifier la recherche des paramètres x,y,l,h.
 .PD 1
 .
 .TP
-.B remove-logo=/chemin/vers/nom_fichier_bitmap_du_logo.pgm
+.B remove-logo=/chemin/vers/fichier_bitmap_du_logo.pgm
 Supprime un logo de station TV, en utilisant un fichier
 d'image PGM ou PPM pour déterminer quels sont les pixels
 se compose le logo.
