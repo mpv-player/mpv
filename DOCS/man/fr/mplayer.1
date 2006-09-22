@@ -1,4 +1,4 @@
-.\" synced with r19881
+.\" synced with r19927
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -2519,11 +2519,11 @@ Pilote de sortie audio ALSA 0.9/1.x
 .RSs
 .IPs noblock
 Active le mode non-bloquant.
-.IPs device=<device>
+.IPs device=<périphérique>
 Défini le nom de périphérique.
 Remplacez les ',' par '.' et ':' par '=' dans les noms de périphériques ALSA.
-Assurez-vous bien de ne pas activer ceci lorsque vous voulez sortir
-directement hwac3 via S/PDIF, à moins que vous sachiez vraiment comment bien
+Pour la sortie sonore hwac3 S/PDIF, choisissez un périphérique "iec958" ou
+"spdif" device, à moins que vous sachiez vraiment comment bien
 le configurer.
 .RE
 .PD 1
@@ -4677,17 +4677,19 @@ entrendre le balayage.
 .PD 1
 .
 .TP
-.B sinesuppress[=freq:decay]
+.B sinesuppress[=freq:amortissement]
 Enlève un sinosoïde à la fréquence spécifiée.
-Utile pour supprimer le bruit à 50/60hz que l'on trouve dans les équipements
+Utile pour supprimer le bruit à 50/60Hz que l'on trouve dans les équipements
 audios bon marchés.
 Ceci ne fonctionne probablement qu'avec une entrée mono.
 .PD 0
 .RSs
 .IPs <freq>
 La fréquence (en Hz) de la sinusoïde à enlever (par défaut\ : 50).
-.IPs <decay>
-Contrôle l'adaptivité (une plus grande valeur rend le filtre plus rapide à réagir à des changements de phase et d'amplitude, une plus petite valueur rendra l'adaptation plus lente (par défaut\ : 0.0001).
+.IPs <amortissement>
+Contrôle l'adaptivité (une plus grande valeur rend le filtre plus rapide à
+réagir à des changements de phase et d'amplitude, une plus petite valueur
+rendra l'adaptation plus lente (par défaut\ : 0.0001).
 Les valeurs utiles sont autour de 0.001.
 .RE
 .PD 1
