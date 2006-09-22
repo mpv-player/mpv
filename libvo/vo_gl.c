@@ -586,7 +586,7 @@ flip_page(void)
   if (image_format == IMGFMT_YV12)
     glDisableYUVConversion(gl_target, yuvconvtype);
 
-  if (osdtexCnt > 0 || eosdtexCnt > 0) {
+  if (osdtexCnt > 0 || eosdDispList) {
     // set special rendering parameters
     if (!scaled_osd) {
     glMatrixMode(GL_PROJECTION);
@@ -595,7 +595,7 @@ flip_page(void)
     glOrtho(0, vo_dwidth, vo_dheight, 0, -1, 1);
     }
     glEnable(GL_BLEND);
-    if (eosdtexCnt > 0) {
+    if (eosdDispList) {
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glCallList(eosdDispList);
     }
