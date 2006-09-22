@@ -257,25 +257,25 @@ static void genEOSD(ass_image_t *img) {
     eosdtexCnt++;
   eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
   glGenTextures(eosdtexCnt, eosdtex);
-  for (i = img, curtex = eosdtex; i; i = i->next, curtex++) {
+  for (i = img, curtex = eosdtex; i; i = i->next) {
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w) {
       mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
       continue;
     }
     texSize(i->w, i->h, &sx, &sy);
-    BindTexture(gl_target, *curtex);
+    BindTexture(gl_target, *curtex++);
     glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
     glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, i->bitmap, i->stride,
                 0, 0, i->w, i->h, 0);
   }
   eosdDispList = glGenLists(1);
   glNewList(eosdDispList, GL_COMPILE);
-  for (i = img, curtex = eosdtex; i; i = i->next, curtex++) {
+  for (i = img, curtex = eosdtex; i; i = i->next) {
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
       continue;
     glColor4ub(i->color >> 24, (i->color >> 16) & 0xff, (i->color >> 8) & 0xff, 255 - (i->color & 0xff));
     texSize(i->w, i->h, &sx, &sy);
-    BindTexture(gl_target, *curtex);
+    BindTexture(gl_target, *curtex++);
     glDrawTex(i->dst_x, i->dst_y, i->w, i->h, 0, 0, i->w, i->h, sx, sy, use_rectangle == 1, 0, 0);
   }
   glEndList();
