@@ -16,18 +16,18 @@ uniform man page.
 What belongs in the man page?
 -----------------------------
 
-    - option descriptions (all)
-    - usage (options, configuration files, controls)
-    - basic examples
+  - option descriptions (all)
+  - usage (options, configuration files, controls)
+  - basic examples
 
 
 
 What doesn't belong in the man page?
 ------------------------------------
 
-    - instructions for installation, encoding and similar processes
-    - detailed evaluations or hints
-    - tutorials, guides
+  - instructions for installation, encoding and similar processes
+  - detailed evaluations or hints
+  - tutorials, guides
 
 
 
@@ -37,10 +37,10 @@ How should patches look like?
 Follow the rules in patches.txt, they apply to the man page, too.
 Exceptions are:
 
-    - Cosmetic patches are allowed but should be done separately from the real
-      changes, be marked as cosmetic changes and shouldn't change the general
-      style without reasons/permissions.
-    - The same applies to spell checking.
+  - Cosmetic patches are allowed but should be done separately from the real
+    changes, be marked as cosmetic changes and shouldn't change the general
+    style without reasons/permissions.
+  - The same applies to spell checking.
 
 
 
@@ -53,24 +53,24 @@ Additionally, the SS variable should be set to either very low or very high
 values to produce a better groff HTML output (Due to a bug of groff2html?).
 A setting of 4 should look readable. Here's an overview again:
 
-    - groff:     Groff is the "official" tool to convert man pages.
-                 To get good results you need a recent version (1.18.2).
-                 groff -m man -T html mplayer.1 > mplayer.1.html
-                 groff -m man -T latin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
-                 The groff man page lists other output formats to use with -T.
+  - groff:    groff is the "official" tool to convert man pages.
+              To get good results you need a recent version (1.18.2).
+              groff -mman -Thtml mplayer.1 > mplayer.1.html
+              groff -mman -Tlatin1 -rLL=78n mplayer.1 | col -bx > mplayer.1.txt
+              The groff man page lists other output formats to use with -T.
 
-    - man2html:  You can view it through a CGI script:
-                 http://localhost/cgi-bin/man2html?mplayer
-                 The output is unusable as the script doesn't seem to support
-                 the macro definitions. Maybe manually changing all leads to
-                 acceptable results.
+  - man2html: You can view it through a CGI script:
+              http://localhost/cgi-bin/man2html?mplayer
+              The output is unusable as the script doesn't seem to support
+              the macro definitions. Maybe manually changing all leads to
+              acceptable results.
 
-    - rman:      rman -f html mplayer.1 > man_page.rman.html
-                 The output is ugly as rman doesn't understand many of the
-                 macros used.
+  - rman:     rman -f html mplayer.1 > man_page.rman.html
+              The output is ugly as rman doesn't understand many of the
+              macros used.
 
-    - troffcvt:  troff2html -man mplayer.1 > man_page.tcvt.html
-                 The (good) output is similar to groff but simplified...
+  - troffcvt: troff2html -man mplayer.1 > man_page.tcvt.html
+              The (good) output is similar to groff but simplified...
 
 
 
@@ -81,53 +81,53 @@ The option descriptions are divided into sections. Inside a section options are
 alphabetically sorted. The sections are:
 
 (Header)
-    Not visible, copyright and author information.
+    not visible, copyright and author information
 (Macro definitions)
-    Not visible, some macro definitions.
+    not visible, some macro definitions
 NAME
     The man page is used for both mplayer and mencoder.
 SYNOPSIS
-    A description of MPlayer's playtree.
+    a description of MPlayer's playtree
 DESCRIPTION
-    A general description of MPlayer, MEncoder, GMPlayer and its features.
+    a general description of MPlayer, MEncoder, GMPlayer and their features
 INTERACTIVE CONTROL
-    A description of MPlayer's input system and the interactive controls.
+    description of MPlayer's input system and interactive controls
 USAGE
-    Some general notes about usage.
+    some general notes about usage
 CONFIGURATION FILES
-    A description of the configuration file format.
+    description of the configuration file format
 GENERAL OPTIONS
     General options that are common to both MPlayer and MEncoder.
 PLAYER OPTIONS (MPLAYER ONLY)
-    User interface option descriptions (MPlayer only).
+    user interface option descriptions (MPlayer only)
 DEMUXER/STREAM OPTIONS
-    Demuxer and stream layer option descriptions.
+    demuxer and stream layer option descriptions
 OSD/SUBTITLE OPTIONS
     This section is special in that it contains all subtitle and OSD option
-    descriptions even if they might belong to one of the other sections. It was
-    created because of its size.
+    descriptions even if they might belong to one of the other sections. It
+    was created because of its size.
 AUDIO OUTPUT OPTIONS (MPLAYER ONLY)
-    Audio output layer (ao) option descriptions (MPlayer only).
+    audio output layer (ao) option descriptions (MPlayer only)
 AUDIO OUTPUT DRIVERS (MPLAYER ONLY)
-    Audio output driver description (ao)
+    audio output driver description (ao)
 VIDEO OUTPUT OPTIONS (MPLAYER ONLY)
-    Video output layer (vo) option descriptions (MPlayer only).
+    video output layer (vo) option descriptions (MPlayer only)
 VIDEO OUTPUT DRIVERS (MPLAYER ONLY)
-    Video output driver description (vo)
+    video output driver description (vo)
 DECODING/FILTERING OPTIONS
-    Decoding/Filtering layer options (ad, vd, pl).
+    decoding/filtering layer options (ad, vd, pl)
 VIDEO FILTERS
-    Video filter description (vf)
+    video filter description (vf)
 GENERAL ENCODING OPTIONS (MENCODER ONLY)
     Encoding option descriptions (ve) (MEncoder only).
 CODEC SPECIFIC ENCODING OPTIONS (MENCODER ONLY)
     Codec specific option descriptions (lavc,divx4,xvid,lame) (MEncoder only).
 FILES
-    A list and description of all installed/used files/directories.
+    a list and description of all installed/used files/directories
 EXAMPLES OF MPLAYER USAGE
-    Basic examples. Again: no long descriptions/processes.
+    basic examples, again: no long descriptions/processes
 EXAMPLES OF MENCODER USAGE
-    Basic examples. Again: no long descriptions/processes.
+    basic examples, again: no long descriptions/processes
 BUGS
 AUTHORS
 
@@ -155,7 +155,7 @@ uniform man page. The best way is to read (and understand) the source.
 General:
 
     - No line should contain more than 79 characters.
-    - Used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .na,
+    - used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .na,
                      .nh, .ad, .hy, macro definitions, comments and some more
     - Don't forget the quotation marks around expressions, etc...
     - Each new sentence should start on a line of its own.
@@ -167,6 +167,7 @@ General:
     - To quickly check a manual page for markup errors, just run
         man DOCS/man/XX/mplayer.1 > /dev/null
 
+
 Option descriptions:
 
     - Options should be in alphabetical order.
@@ -177,7 +178,7 @@ Option descriptions:
     - Optional things should be put in square brackets ([]).
     - Obsolete options are followed by (OBSOLETE), beta options by
       (BETA CODE), etc.
-    - MPlayer only options in a section which isn't marked this way
+    - MPlayer-only options in a section which isn't marked this way
       are followed by (MPlayer only).
     - Add references to other options if they belong to each other, e.g.
       '(\-vo zr only)' or '(also see \-alang)' or are commonly used together.
@@ -192,12 +193,12 @@ Option descriptions:
 
 Macro definitions (see beginning of man page):
 
-    - .SS     Starting value of the suboption column
+    - .SS     starting value of the suboption column
     - .IPs    Add new suboption (we use .TP for normal options and .IP for
-              the rest)
-    - .RSs    Begin of suboptions, end with .RE
-    - .RSss   Begin of suboptions in a suboption
-    - .REss   End of suboptions in a suboption
+              the rest).
+    - .RSs    begin of suboptions, end with .RE
+    - .RSss   begin of suboptions in a suboption
+    - .REss   end of suboptions in a suboption
 
 
 Options, suboptions, examples structure:
