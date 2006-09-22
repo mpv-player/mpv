@@ -21,6 +21,7 @@ static struct {
         { "vob", DEMUXER_TYPE_MPEG_PS },
         { "m2v", DEMUXER_TYPE_MPEG_PS },
         { "gxf", DEMUXER_TYPE_LAVF },
+        { "mxf", DEMUXER_TYPE_LAVF },
         { "avi", DEMUXER_TYPE_AVI },
         { "mp4", DEMUXER_TYPE_MOV },
         { "mov", DEMUXER_TYPE_MOV },
