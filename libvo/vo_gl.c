@@ -307,9 +307,6 @@ static void uninitGl(void) {
  * set global gl-related variables to their default values
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
-  osdtexCnt = 0; gl_buffer = 0; gl_buffersize = 0; err_shown = 0;
-  eosdtexCnt = 0;
-  fragprog = 0;
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
