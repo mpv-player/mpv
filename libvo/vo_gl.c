@@ -53,6 +53,7 @@ static GLuint osdtex[MAX_OSD_PARTS];
 static GLuint osdatex[MAX_OSD_PARTS];
 #endif
 static GLuint *eosdtex;
+static GLuint largeeosdtex[2];
 //! Display lists that draw the OSD parts
 static GLuint osdDispList[MAX_OSD_PARTS];
 #ifndef FAST_OSD
@@ -247,36 +248,87 @@ static void clearEOSD(void) {
  */
 static void genEOSD(ass_image_t *img) {
   int sx, sy;
+  int tinytexcur = 0;
+  int smalltexcur = 0;
   GLuint *curtex;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
   ass_image_t *i;
+  int cnt;
   clearEOSD();
   if (!img)
     return;
+  if (!largeeosdtex[0]) {
+    glGenTextures(2, largeeosdtex);
+    BindTexture(gl_target, largeeosdtex[0]);
+    glCreateClearTex(gl_target, GL_ALPHA, scale_type, 512, 512, 0);
+    BindTexture(gl_target, largeeosdtex[1]);
+    glCreateClearTex(gl_target, GL_ALPHA, scale_type, 512, 512, 0);
+  }
   for (i = img; i; i = i->next)
+  {
+    if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
+      continue;
+    if (i->w < 16 && i->h < 16 && tinytexcur < 1024)
+      tinytexcur++;
+    else if (i->w < 32 && i->h < 32 && smalltexcur < 256)
+      smalltexcur++;
+    else
     eosdtexCnt++;
+  }
+  if (eosdtexCnt) {
   eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
   glGenTextures(eosdtexCnt, eosdtex);
+  }
+  tinytexcur = smalltexcur = 0;
   for (i = img, curtex = eosdtex; i; i = i->next) {
+    int x = 0, y = 0;
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w) {
       mp_msg(MSGT_VO, MSGL_V, "Invalid dimensions OSD for part!\n");
       continue;
     }
+    if (i->w < 16 && i->h < 16 && tinytexcur < 1024) {
+      x = (tinytexcur & 31) << 4;
+      y = (tinytexcur >> 5) << 4;
+      BindTexture(gl_target, largeeosdtex[0]);
+      tinytexcur++;
+    } else if (i->w < 32 && i->h < 32 && smalltexcur < 256) {
+      x = (smalltexcur & 15) << 5;
+      y = (smalltexcur >> 4) << 5;
+      BindTexture(gl_target, largeeosdtex[1]);
+      smalltexcur++;
+    } else {
     texSize(i->w, i->h, &sx, &sy);
     BindTexture(gl_target, *curtex++);
     glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
+    }
     glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, i->bitmap, i->stride,
-                0, 0, i->w, i->h, 0);
+                x, y, i->w, i->h, 0);
   }
   eosdDispList = glGenLists(1);
   glNewList(eosdDispList, GL_COMPILE);
+  tinytexcur = smalltexcur = 0;
   for (i = img, curtex = eosdtex; i; i = i->next) {
+    int x = 0, y = 0;
     if (i->w <= 0 || i->h <= 0 || i->stride < i->w)
       continue;
     glColor4ub(i->color >> 24, (i->color >> 16) & 0xff, (i->color >> 8) & 0xff, 255 - (i->color & 0xff));
+    if (i->w < 16 && i->h < 16 && tinytexcur < 1024) {
+      x = (tinytexcur & 31) << 4;
+      y = (tinytexcur >> 5) << 4;
+      sx = sy = 512;
+      BindTexture(gl_target, largeeosdtex[0]);
+      tinytexcur++;
+    } else if (i->w < 32 && i->h < 32 && smalltexcur < 256) {
+      x = (smalltexcur & 15) << 5;
+      y = (smalltexcur >> 4) << 5;
+      sx = sy = 512;
+      BindTexture(gl_target, largeeosdtex[1]);
+      smalltexcur++;
+    } else {
     texSize(i->w, i->h, &sx, &sy);
     BindTexture(gl_target, *curtex++);
-    glDrawTex(i->dst_x, i->dst_y, i->w, i->h, 0, 0, i->w, i->h, sx, sy, use_rectangle == 1, 0, 0);
+    }
+    glDrawTex(i->dst_x, i->dst_y, i->w, i->h, x, y, i->w, i->h, sx, sy, use_rectangle == 1, 0, 0);
   }
   glEndList();
   BindTexture(gl_target, 0);
@@ -297,6 +349,9 @@ static void uninitGl(void) {
   default_texs[0] = 0;
   clearOSD();
   clearEOSD();
+  if (largeeosdtex[0])
+    glDeleteTextures(2, largeeosdtex);
+  largeeosdtex[0] = 0;
   if (DeleteBuffers && gl_buffer)
     DeleteBuffers(1, &gl_buffer);
   gl_buffer = 0; gl_buffersize = 0;
