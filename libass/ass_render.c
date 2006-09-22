@@ -436,7 +436,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
  * \brief Mapping between script and screen coordinates
  */
 static int x2scr(int x) {
-	return x*frame_context.width / frame_context.track->PlayResX + global_settings->left_margin;
+	return x*frame_context.orig_width / frame_context.track->PlayResX + global_settings->left_margin;
 }
 /**
  * \brief Mapping between script and screen coordinates
