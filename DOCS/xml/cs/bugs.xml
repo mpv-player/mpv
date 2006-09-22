@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 15783 -->
+<!-- Synced with: 19686 -->
 <appendix id="bugs">
 <title>Známé chyby</title>
 <sect1 id="bugs-special">
@@ -25,27 +25,6 @@ vyřadit určité sady CPU instrukcí pomocí mnohem konkrétnějších voleb (jako
 </para>
 </listitem>
 <listitem>
-<para>&quot;Vnitřní nekonzistence bufferu&quot; během běhu
-<application>MEncoder</application>u:</para>
-<para>Problém: známý problém když bylo lame &lt; 3.90 kompilováno gcc 2.96 nebo
-3.x.</para>
-<para>Řešení: používejte lame &gt;=3.90.</para>
-<para>Obejití: zkompilujte lame pomocí gcc 2.95.x a odstraňte jakékoli již
-nainstalované lame balíčky &ndash; mohly být zkompilovány s gcc 2.96.</para>
-</listitem>
-<listitem>
-<para>Źničený MP2/MP3 zvuk na PPC:</para>
-<para>Problém: známá GCC kompilační chyba na PPC platformách, dosud není
-opravena.</para>
-<para>Obejití: použijte (pomalý) FFmpeg MP1/MP2/MP3 dekodér
-(<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (signal 11) v libmpeg2, při škálování+enkódování:</para>
-<para>Problém: známá GCC 2.95.2 MMX chyba</para>
-<para>Řešení: upgrade na 2.95.3</para>
-</listitem>
-<listitem>
 <para>Havaruje při ukládání datových proudů (dump):</para>
 <para>Problém: vylití jádra (core dump)</para>
 <para>Řešení: Nepanikařte. Zjistěte, kde máte ručník.</para>
@@ -61,7 +40,7 @@ opravena.</para>
 <itemizedlist>
 <listitem><para>
 nejčastěji: vadný ovládač zvukové karty! &ndash; zkuste použít jiné ovladače,
-Zkuste OSS emulaci z ALSA 0.9 pomocí <option>-ao oss</option>, také zkuste
+Zkuste OSS emulaci z ALSA pomocí <option>-ao oss</option>, také zkuste
 <option>-ao sdl</option>, občas to pomůže. Pokud se váš soubor přehrává dobře
 s <option>-nosound</option>, pak si můžete být jisti, že je to problém zvukové
 karty (ovladače).
@@ -155,23 +134,15 @@ automaticky vybraný kodek neumí dekódovat soubor &ndash; zkuste vybrat jiný
 pomocí volby <option>-vc</option> nebo <option>-vfm</option>
 </para>
 </listitem>
-<listitem>
-<para>
-zkoušíte přehrávat DivX 3.x soubor OpenDivX dekodérem nebo XviD
-(<option>-vc odivx</option>) &ndash; nainstalujte DivX4Linux a rekompilujte
-přehrávač
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
 <title>Problémy s výstupem videa</title>
 <para>
-První poznámka: volby <option>-fs -vm</option> a <option>-zoom</option> jsou
-pouze doporučené a nejsou (zatím) podporované všemi rozhraními. Není tedy
-chybou, jestliže to nefunguje. Pouze několik rozhraní podporuje
-škálování/zvětšování, neočekávejte je od x11 nebo dga.
+Nejprve poznamenejme, že volby <option>-fs -vm</option> a
+<option>-zoom</option> nejsou podporované všemi rozhraními. Navíc
+ne všechna rozhraní podporují škálování/zvětšování v hardwaru.
 </para>
 
 <formalpara>

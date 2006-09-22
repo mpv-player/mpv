@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with revision 19387 -->
+<!-- Synced with revision 19687 -->
 <chapter id="codecs">
 <title>Kodeky</title>
 
@@ -7,11 +7,11 @@
 <title>Video kodeky</title>
 
 <para>
-Kompletní denně aktualizovaný seznam naleznete v naší stránce
-<ulink url="../../codecs-status.html">tabulce statutu kodeku</ulink>.
-Docela dost kodeků si můžete stáhnout z naší domovské stránky.
-Odkaz najdete na
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">stránce kodeků</ulink>.
+Kompletní denně aktualizovaný seznam naleznete v naší
+<ulink url="../../codecs-status.html">tabulce statusů kodeků</ulink>.
+Některé binární kodeky pro použití MPlayerem jsou dostupné
+<ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">sekci download</ulink>
+naší domácí stránky.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 18426 -->
+<!-- Synced with: 19751 -->
 <chapter id="cd-dvd">
 <title>Použití CD/DVD</title>
 
@@ -103,6 +103,11 @@ Syntaxe pro standardní Digital Versatile Disc (DVD) je následující:
 <para>
 Příklad:
 <screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+</para>
+
+<para>
+Pokud jste kompilovali <application>MPlayer</application> s podporou dvdnav,
+je syntaxe stejná až na to, že musíte používat dvdnav:// místo dvd://.
 </para>
 
 <para>
@@ -300,7 +305,7 @@ implementovat obecnou SCSI podporu pro VCD.
 
 <para>
 Mezitím můžete extrahovat data z VCD pomocí
-<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
+<ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
 a výsledný soubor přehrát v <application>MPlayer</application>u.
 </para>
 

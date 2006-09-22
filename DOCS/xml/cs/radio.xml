@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- Synced with revision 19634 -->
+<chapter id="radio">
+<title>Rádio</title>
+
+<sect1 id="radio-input" xreflabel="Radio input">
+<title>Rádio vstup</title>
+
+<para>
+Tato sekce se zabývá tím, jak zprovoznit poslech rozhlasu
+z&nbsp;V4L-kompatibilního rozhlasového tuneru.
+Popis voleb a ovládání z klávesnice naleznete v man stránce.
+</para>
+
+
+<sect2 id="radio-compilation">
+<title>Kompilace</title>
+
+<procedure>
+<step><para>
+  Nejprve musíte spustit <filename>./configure</filename>
+  s <option>--enable-radio</option> a (pokud chcete i nahrávat)
+  <option>--enable-radio-capture</option> a znovupřeložit MPlayer.
+  </para></step>
+<step><para>
+  Ujistěte se, že váš tuner pracuje s jiným softwarem v Linuxu, například
+  <application>XawTV</application>.
+  </para></step>
+</procedure>
+</sect2>
+
+<sect2 id="radio-tips">
+<title>Uživatelské tipy</title>
+<para>
+Plný výčet voleb je v manuálové stránce.
+Zde uvádíme jen několik tipů:
+</para>
+<itemizedlist>
+<listitem>
+<para>
+Použití volby <option>channels</option>. Příklad:
+<screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
+Vysvětlení: Pomocí této volby budou k dispozici pouze stanice 104.4
+a 103.9. Budete mít krásný OSD text během přepínání kanálů,
+který zobrazí jméno kanálu. Mezery v názvech kanálů musí být
+nahrazeny znakem &quot;_&quot;.
+</para>
+</listitem>
+
+<listitem>
+<para>
+Je mnoho způsobů, jak zachytávat (nahrávat) zvuk. Můžete buď zachytávat pomocí
+vstupu line-in zvukové karty propojeného vnější linkou s videokartou,
+nebo použitím vestavěného ADC v čipu saa7134. V druhém případě musíte
+zavést ovladač <systemitem>saa7134-alsa</systemitem> nebo
+<systemitem>saa7134-oss</systemitem>.
+</para>
+</listitem>
+
+<listitem>
+<para>
+<application>MEncoder</application> nelze použít pro zachytávání zvuku, jelikož
+vyžaduje videoproud, aby fungoval. Takže buď použijete
+<application>arecord</application> z projektu ALSA, nebo
+volbu <option>-ao pcm:file=file.wav</option>. V druhém případě neuslyšíte nic
+(pokud ovšem nemáte propojku s line-in a vypnuté mute na kanále line-in).
+</para>
+</listitem>
+</itemizedlist>
+</sect2>
+
+
+<sect2 id="radio-examples">
+<title>Příklady</title>
+
+
+<informalexample>
+<para>
+Vstup ze standardního V4L (pomocí line-in kablu, zachytávání vypnuto):
+<screen>
+mplayer radio://104.4<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Vstup ze standardního V4L (pomocí line-in kablu, zachytávání vypnuto,
+rozhraní V4Lv1):
+<screen>
+mplayer -radio driver=v4l radio://104.4<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Přehrávání druhé stanice ze seznamu:
+<screen>
+mplayer -radio channels=104.4=Sibir,103.9=Maximm  radio://2<!--
+--></screen>
+</para>
+</informalexample>
+
+<informalexample>
+<para>
+Průchod zvuku přes PCI sběrnici z interního ADC rádio karty.
+V tomto příkladu se tuner používá jako druhá zvuková karta
+(ALSA zařízení hw:1,0). Pro zařízení založené na saa7134 musí
+být zaveden buď modul saa7134-alsa nebo modul saa7134-oss.
+<note><para>Když používáte názvy zařízení ALSA, dvojtečky musí být
+nahrazeny zkaky rovnáse, čárky tečkami.
+<screen>
+mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture<!--
+--></screen>
+</para></note>
+</para>
+</informalexample>
+</sect2>
+</sect1>
+
+</chapter>
