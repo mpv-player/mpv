@@ -1509,7 +1509,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	int i, j;
 	FT_Vector shift;
 	int MarginL, MarginR, MarginV;
-	int max_text_width;
 	int last_break;
 	int alignment, halign, valign;
 	int device_x = 0, device_y = 0;
@@ -1642,6 +1641,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	MarginV = (event->MarginV) ? event->MarginV : render_context.style->MarginV;
 
 	if (render_context.evt_type != EVENT_HSCROLL) {
+		int max_text_width;
+
 		// calculate max length of a line
 		max_text_width = x2scr(frame_context.track->PlayResX - MarginR) - x2scr(MarginL);
 
