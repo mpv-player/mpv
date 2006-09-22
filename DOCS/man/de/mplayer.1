@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19881
+.\" In sync with r19927
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -2474,7 +2474,7 @@ Setzt den noblock-Modus.
 .IPs device=<Gerät>
 Setzt den Gerätenamen.
 Ersetze jedes ',' mit '.' und jeden ':' mit '=' im ALSA-Gerätenamen.
-Setze diese Option nicht, wenn du hwac3-Ausgabe über S/\:PDIF wünschst, es sei
+Benutze für hwac3-Ausgabe via S/PDIF ein "iec958"- oder "spdif"-Gerät, es sei
 denn, du weißt wirklich, wie sie gesetzt werden muß.
 .RE
 .PD 1
@@ -4628,7 +4628,7 @@ Sinusfunktions-Delta, benutze sehr geringe Werte, um die Schwingung zu hören.
 .TP
 .B sinesuppress[=Frequenz:Abfall]
 Entfernt einen Sinus an der angegebenen Frequenz.
-Nützlich, um bei Audiogeräten niedriger Qualität das 50/60hz-Rauschen
+Nützlich, um bei Audiogeräten niedriger Qualität das 50/60Hz-Rauschen
 loszuwerden.
 Funktioniert wahrscheinlich nur bei Mono-Input.
 .PD 0
