@@ -372,8 +372,9 @@ static LRESULT CALLBACK PrefsWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
                 const ao_info_t *info = audio_out_drivers[j++]->info;
                 if(!audio_driver_list)
                 {
-                    gaddlist(&audio_driver_list, (char *)info->short_name);
-                    audio_driver_list[0] = "win32";
+                    // FIXME: default priority (i.e. order in audio_out_drivers) should be fixed instead
+                    // if win32 as default is really desirable
+                    gaddlist(&audio_driver_list, "win32"/*(char *)info->short_name*/);
                 }
                 SendDlgItemMessage(hwnd, ID_AO_DRIVER, CB_ADDSTRING, 0, (LPARAM) info->short_name);
             }
