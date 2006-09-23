@@ -162,20 +162,23 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 static void fix_outline(bitmap_t* bm_g, bitmap_t* bm_o)
 {
 	int x, y;
-	int sx = bm_g->left - bm_o->left;
-	int sy = bm_g->top - bm_o->top;
-	if (sx < 0 || sy < 0) {
-		mp_msg(MSGT_GLOBAL, MSGL_WARN, "fix_outline failed  \n");
-		return;
-	}
-	for (y = 0; y < bm_g->h; ++y)
-		for (x = 0; x < bm_g->w; ++x) {
-			unsigned char c_g, c_o;
-			c_o = bm_o->buffer[(y + sy) * bm_o->w + (x + sx)];
-			c_g = bm_g->buffer[y * bm_g->w + x];
-			bm_o->buffer[(y + sy) * bm_o->w + (x + sx)] = (c_o > c_g) ? c_o - c_g : 0;
-		}
+	const int l = bm_o->left > bm_g->left ? bm_o->left : bm_g->left;
+	const int t = bm_o->top > bm_g->top ? bm_o->top : bm_g->top;
+	const int r = bm_o->left + bm_o->w < bm_g->left + bm_g->w ? bm_o->left + bm_o->w : bm_g->left + bm_g->w;
+	const int b = bm_o->top + bm_o->h < bm_g->top + bm_g->h ? bm_o->top + bm_o->h : bm_g->top + bm_g->h;
+	unsigned char* g = bm_g->buffer + (t - bm_g->top) * bm_g->w + (l - bm_g->left);
+	unsigned char* o = bm_o->buffer + (t - bm_o->top) * bm_o->w + (l - bm_o->left);
 	
+	for (y = 0; y < b - t; ++y) {
+		for (x = 0; x < r - l; ++x) {
+			unsigned char c_g, c_o;
+			c_g = g[x];
+			c_o = o[x];
+			o[x] = (c_o > c_g) ? c_o - c_g : 0;
+		}
+		g += bm_g->w;
+		o += bm_o->w;
+	}
 }
 
 int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g, bitmap_t** bm_o, int be)
