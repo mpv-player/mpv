@@ -840,7 +840,7 @@ got_video:
 	    // frames are stored fragmented in the video chunks :(
 	    sh_video_t *sh_video = ds->sh;
 	    demux_packet_t *dp;
-	    int vpkg_header, vpkg_length, vpkg_offset;
+	    unsigned vpkg_header, vpkg_length, vpkg_offset;
 	    int vpkg_seqnum=-1;
 	    int vpkg_subseq=0;
 
