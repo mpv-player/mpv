@@ -366,6 +366,9 @@ static void filter(struct vf_priv_s *p, uint8_t *dst[3], int dst_stride[3], int 
             }
         }
     }
+#if defined(HAVE_MMX) && defined(NAMED_ASM_ARGS)
+    if(gCpuCaps.hasMMX2) asm volatile("emms \n\t" : : : "memory");
+#endif
 }
 
 static int config(struct vf_instance_s* vf,
