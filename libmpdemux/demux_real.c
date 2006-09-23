@@ -882,7 +882,7 @@ got_video:
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l: %02X %02X ",vpkg_length>>8,vpkg_length&0xff);
 		    if (!(vpkg_length&0xC000)) {
 			vpkg_length<<=16;
-		        vpkg_length|=stream_read_word(demuxer->stream);
+		        vpkg_length|=(uint16_t)stream_read_word(demuxer->stream);
 		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "l+: %02X %02X ",(vpkg_length>>8)&0xff,vpkg_length&0xff);
 	    	        len-=2;
 		    } else
@@ -896,7 +896,7 @@ got_video:
 		    mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o: %02X %02X ",vpkg_offset>>8,vpkg_offset&0xff);
 		    if (!(vpkg_offset&0xC000)) {
 			vpkg_offset<<=16;
-		        vpkg_offset|=stream_read_word(demuxer->stream);
+		        vpkg_offset|=(uint16_t)stream_read_word(demuxer->stream);
 		        mp_dbg(MSGT_DEMUX,MSGL_DBG2, "o+: %02X %02X ",(vpkg_offset>>8)&0xff,vpkg_offset&0xff);
 	    	        len-=2;
 		    } else
