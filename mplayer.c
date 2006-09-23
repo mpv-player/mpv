@@ -5099,10 +5099,10 @@ if(step_sec>0) {
     case MP_CMD_SWITCH_AUDIO : {
         int current_id = demuxer->audio->id;
         int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
-        if(v > -1 && v < MAX_A_STREAMS && v != current_id) {
+        if(v > -1 && demuxer->audio->id != current_id) {
           sh_audio_t *sh2;
           uninit_player(INITED_AO | INITED_ACODEC);
-          sh2 = demuxer->a_streams[v];
+          sh2 = demuxer->a_streams[demuxer->audio->id];
           if(sh2) {
             sh2->ds = demuxer->audio;
             sh_audio = sh2;
