@@ -3875,17 +3875,6 @@ current_module="main";
 if(verbose) term_osd = 0;
 fflush(stdout);
 
-#ifdef HAVE_NEW_GUI
-   if ( use_gui )
-    {
-     if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
-     if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
-     guiGetEvent( guiSetFileFormat,(char *)demuxer->file_format );
-     if ( guiGetEvent( guiSetValues,(char *)sh_video ) ) goto goto_next_file;
-     guiGetEvent( guiSetDemuxer,(char *)demuxer );
-    }
-#endif
-
 {
 //int frame_corr_num=0;   //
 //float v_frame=0;    // Video
@@ -3957,6 +3946,16 @@ if(force_fps && sh_video){
   sh_video->frametime=1.0f/sh_video->fps;
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_FPSforced,sh_video->fps,sh_video->frametime);
 }
+
+#ifdef HAVE_NEW_GUI
+if ( use_gui ) {
+    if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
+    if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
+    guiGetEvent( guiSetFileFormat,(char *)demuxer->file_format );
+    if ( guiGetEvent( guiSetValues,(char *)sh_video ) ) goto goto_next_file;
+    guiGetEvent( guiSetDemuxer,(char *)demuxer );
+}
+#endif
 
 //==================== START PLAYING =======================
 
