@@ -1166,13 +1166,14 @@ int vixInit( void )
       radeon_ram_size = 8192*1024;
   }
 #endif
+  printf(RADEON_MSG" Video memory = %uMb\n",radeon_ram_size/0x100000);
 #ifdef WIN32
+  //mapping large areas of video ram will fail on windows
   if(radeon_ram_size > 16*1024*1024)radeon_ram_size=16*1024*1024;
 #endif
   if((radeon_mem_base = map_phys_mem(pci_info.base0,radeon_ram_size))==(void *)-1) return ENOMEM;
   memset(&besr,0,sizeof(bes_registers_t));
   radeon_vid_make_default();
-  printf(RADEON_MSG" Video memory = %uMb\n",radeon_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,radeon_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf(RADEON_MSG" Set write-combining type of video memory\n");
 
