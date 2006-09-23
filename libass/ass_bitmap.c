@@ -26,48 +26,48 @@ static const double blur_radius = 1.5;
 
 static int generate_tables(ass_synth_priv_t* priv, double radius)
 {
-    double A = log(1.0/base)/(radius*radius*2);
-    int mx, i;
-    double volume_diff, volume_factor = 0;
-    unsigned volume;
-    
-    priv->g_r = ceil(radius);
-    priv->g_w = 2*priv->g_r+1;
+	double A = log(1.0/base)/(radius*radius*2);
+	int mx, i;
+	double volume_diff, volume_factor = 0;
+	unsigned volume;
 
-    if (priv->g_r) {
-	priv->g = malloc(priv->g_w * sizeof(unsigned));
-	priv->gt2 = malloc(256 * priv->g_w * sizeof(unsigned));
-	if (priv->g==NULL || priv->gt2==NULL) {
-	    return -1;
-	}
-    }
+	priv->g_r = ceil(radius);
+	priv->g_w = 2*priv->g_r+1;
 
-    if (priv->g_r) {
-	// gaussian curve with volume = 256
-	for (volume_diff=10000000; volume_diff>0.0000001; volume_diff*=0.5){
-	    volume_factor+= volume_diff;
-	    volume=0;
-	    for (i = 0; i<priv->g_w; ++i) {
-		priv->g[i] = (unsigned)(exp(A * (i-priv->g_r)*(i-priv->g_r)) * volume_factor + .5);
-		volume+= priv->g[i];
-	    }
-	    if(volume>256) volume_factor-= volume_diff;
-	}
-	volume=0;
-	for (i = 0; i<priv->g_w; ++i) {
-	    priv->g[i] = (unsigned)(exp(A * (i-priv->g_r)*(i-priv->g_r)) * volume_factor + .5);
-	    volume+= priv->g[i];
+	if (priv->g_r) {
+		priv->g = malloc(priv->g_w * sizeof(unsigned));
+		priv->gt2 = malloc(256 * priv->g_w * sizeof(unsigned));
+		if (priv->g==NULL || priv->gt2==NULL) {
+			return -1;
+		}
 	}
 
-	// gauss table:
-	for(mx=0;mx<priv->g_w;mx++){
-	    for(i=0;i<256;i++){
-		priv->gt2[mx+i*priv->g_w] = i*priv->g[mx];
-	    }
+	if (priv->g_r) {
+		// gaussian curve with volume = 256
+		for (volume_diff=10000000; volume_diff>0.0000001; volume_diff*=0.5){
+			volume_factor+= volume_diff;
+			volume=0;
+			for (i = 0; i<priv->g_w; ++i) {
+				priv->g[i] = (unsigned)(exp(A * (i-priv->g_r)*(i-priv->g_r)) * volume_factor + .5);
+				volume+= priv->g[i];
+			}
+			if(volume>256) volume_factor-= volume_diff;
+		}
+		volume=0;
+		for (i = 0; i<priv->g_w; ++i) {
+			priv->g[i] = (unsigned)(exp(A * (i-priv->g_r)*(i-priv->g_r)) * volume_factor + .5);
+			volume+= priv->g[i];
+		}
+
+		// gauss table:
+		for(mx=0;mx<priv->g_w;mx++){
+			for(i=0;i<256;i++){
+				priv->gt2[mx+i*priv->g_w] = i*priv->g[mx];
+			}
+		}
 	}
-    }
-    
-    return 0;
+
+	return 0;
 }
 
 static void resize_tmp(ass_synth_priv_t* priv, int w, int h)
