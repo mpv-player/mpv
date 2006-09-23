@@ -107,7 +107,7 @@ int channels=0;
     case A52_CHANNEL2: mode="channel2"; channels=2; break;
     case A52_DOLBY: mode="dolby"; channels=2; break;
   }
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AC3: %d.%d (%s%s)  %d Hz  %3.1f kbit/s\n",
+  mp_msg(MSGT_DECAUDIO,MSGL_V,"AC3: %d.%d (%s%s)  %d Hz  %3.1f kbit/s\n",
 	channels, (flags&A52_LFE)?1:0,
 	mode, (flags&A52_LFE)?"+lfe":"",
 	sample_rate, bit_rate*0.001f);
