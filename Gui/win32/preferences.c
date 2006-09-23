@@ -562,14 +562,21 @@ static LRESULT CALLBACK PrefsWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM
                     return 0;
                 case ID_APPLY:
                 {
+                    int strl;
                     if(guiIntfStruct.Playing) guiGetEvent(guiCEvent, (void *)guiSetStop);
 
                     /* Set the video driver */
-                    SendMessage(vo_driver, CB_GETLBTEXT, (WPARAM)SendMessage(vo_driver, CB_GETCURSEL, 0, 0),
+                    gfree(video_driver_list[0]);
+                    strl = SendMessage(vo_driver, CB_GETCURSEL, 0, 0);
+                    video_driver_list[0] = malloc(strl);
+                    SendMessage(vo_driver, CB_GETLBTEXT, (WPARAM)strl,
                                 (LPARAM)video_driver_list[0]);
 
                     /* Set the audio driver */
-                    SendMessage(ao_driver, CB_GETLBTEXT, (WPARAM)SendMessage(ao_driver, CB_GETCURSEL, 0, 0),
+                    gfree(audio_driver_list[0]);
+                    strl = SendMessage(ao_driver, CB_GETCURSEL, 0, 0);
+                    audio_driver_list[0] = malloc(strl);
+                    SendMessage(ao_driver, CB_GETLBTEXT, (WPARAM)strl,
                                 (LPARAM)audio_driver_list[0]);
 
                     /* Set the priority level */
