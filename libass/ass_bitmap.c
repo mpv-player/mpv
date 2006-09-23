@@ -183,7 +183,7 @@ static void fix_outline(bitmap_t* bm_g, bitmap_t* bm_o)
 
 int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g, bitmap_t** bm_o, int be)
 {
-	const int bord = ceil(blur_radius);
+	const int bord = be ? ceil(blur_radius) : 0;
 
 	assert(bm_g && bm_o);
 
