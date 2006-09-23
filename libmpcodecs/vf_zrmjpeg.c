@@ -1,6 +1,12 @@
+/**
+ * \file vf_zrmjpeg.c
+ *
+ * \brief Does mjpeg encoding as required by the zrmjpeg filter as well
+ * as by the zr video driver.
+ */
 /*
  * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2
- * - based on vd_lavc.c by A'rpi (C) 2002-2003 
+ * - based on vd_lavc.c by A'rpi (C) 2002-2003
  * - parts from ffmpeg Copyright (c) 2000-2003 Fabrice Bellard
  *
  * This files includes a straightforward (to be) optimized JPEG encoder for
@@ -25,7 +31,7 @@
 #include "libvo/fastmemcpy.h"
 #endif
 
-/* We need this #define because we need ../libavcodec/common.h to #define 
+/* We need this #define because we need ../libavcodec/common.h to #define
  * be2me_32, otherwise the linker will complain that it doesn't exist */
 #define HAVE_AV_CONFIG_H
 #include "libavcodec/avcodec.h"
@@ -40,15 +46,20 @@
 extern int avcodec_inited;
 
 /* some convenient #define's, is this portable enough? */
+/// Printout  with vf_zrmjpeg: prefix at VERBOSE level
 #define VERBOSE(...) mp_msg(MSGT_DECVIDEO, MSGL_V, "vf_zrmjpeg: " __VA_ARGS__)
+/// Printout with vf_zrmjpeg: prefix at ERROR level
 #define ERROR(...) mp_msg(MSGT_DECVIDEO, MSGL_ERR, "vf_zrmjpeg: " __VA_ARGS__)
+/// Printout with vf_zrmjpeg: prefix at WARNING level
 #define WARNING(...) mp_msg(MSGT_DECVIDEO, MSGL_WARN, \
 		"vf_zrmjpeg: " __VA_ARGS__)
 
-
+// "local" flag in vd_ffmpeg.c. If not set, avcodec_init() et. al. need to be called
+// set when init is done, so that initialization is not done twice.
 extern int avcodec_inited;
 
-/* zrmjpeg_encode_mb needs access to these tables for the black & white 
+/// structure copied from mjpeg.c
+/* zrmjpeg_encode_mb needs access to these tables for the black & white
  * option */
 typedef struct MJpegContext {
 	uint8_t huff_size_dc_luminance[12];
@@ -62,14 +73,15 @@ typedef struct MJpegContext {
 	uint16_t huff_code_ac_chrominance[256];
 } MJpegContext;
 
-// The get_pixels routine to use. The real routine comes from dsputil
+/// The get_pixels() routine to use. The real routine comes from dsputil
 static void (*get_pixels)(DCTELEM *restrict block, const uint8_t *pixels, int line_size);
 
 /* Begin excessive code duplication ************************************/
 /* Code coming from mpegvideo.c and mjpeg.c in ../libavcodec ***********/
 
+/// copy of the table in mpegvideo.c
 static const unsigned short aanscales[64] = {
-	/* precomputed values scaled up by 14 bits */
+	/**< precomputed values scaled up by 14 bits */
 	16384, 22725, 21407, 19266, 16384, 12873,  8867,  4520,
 	22725, 31521, 29692, 26722, 22725, 17855, 12299,  6270,
 	21407, 29692, 27969, 25172, 21407, 16819, 11585,  5906,
@@ -80,69 +92,94 @@ static const unsigned short aanscales[64] = {
 	4520,   6270,  5906,  5315,  4520,  3552,  2446,  1247
 };
 
-/*
- * This routine is like the routine with the same name in mjpeg.c,
- * except for some coefficient changes.
+/// Precompute DCT quantizing matrix
+/**
+ * This routine will precompute the combined DCT matrix with qscale
+ * and DCT renorm needed by the MPEG encoder here. It is basically the
+ * same as the routine with the same name in mpegvideo.c, except for
+ * some coefficient changes. The matrix will be computed in two variations,
+ * depending on the DCT version used. The second used by the MMX version of DCT.
+ *
+ * \param s MpegEncContext pointer
+ * \param qmat[OUT] pointer to where the matrix is stored
+ * \param qmat16[OUT] pointer to where matrix for MMX is stored.
+ *		  This matrix is not permutated
+ *                and second 64 entries are bias
+ * \param quant_matrix[IN] the quantizion matrix to use
+ * \param bias bias for the quantizer
+ * \param qmin minimum qscale value to set up for
+ * \param qmax maximum qscale value to set up for
+ *
+ * Only rows between qmin and qmax will be populated in the matrix.
+ * In this MJPEG encoder, only the value 8 for qscale is used.
  */
-static void convert_matrix(MpegEncContext *s, int (*qmat)[64], 
+static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 		uint16_t (*qmat16)[2][64], const uint16_t *quant_matrix,
 		int bias, int qmin, int qmax) {
-	int qscale; 
+	int qscale;
 
 	for(qscale = qmin; qscale <= qmax; qscale++) {
-        	int i;
+		int i;
 		if (s->dsp.fdct == ff_jpeg_fdct_islow) {
 			for (i = 0; i < 64; i++) {
 				const int j = s->dsp.idct_permutation[i];
-/* 16 <= qscale * quant_matrix[i] <= 7905 
- * 19952         <= aanscales[i] * qscale * quant_matrix[i]      <= 249205026 
- * (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) 
+/* 16 <= qscale * quant_matrix[i] <= 7905
+ * 19952         <= aanscales[i] * qscale * quant_matrix[i]      <= 249205026
+ * (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i])
  *                                                       >= (1<<36)/249205026
  * 3444240       >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i])  >= 275 */
-				qmat[qscale][i] = (int)((UINT64_C(1) << 
+				qmat[qscale][i] = (int)((UINT64_C(1) <<
 					(QMAT_SHIFT-3))/
 					(qscale*quant_matrix[j]));
 			}
 		} else if (s->dsp.fdct == fdct_ifast) {
-            		for (i = 0; i < 64; i++) {
-                		const int j = s->dsp.idct_permutation[i];
-/* 16 <= qscale * quant_matrix[i] <= 7905 
- * 19952         <= aanscales[i] * qscale * quant_matrix[i]      <= 249205026 
- * (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) 
+			for (i = 0; i < 64; i++) {
+				const int j = s->dsp.idct_permutation[i];
+/* 16 <= qscale * quant_matrix[i] <= 7905
+ * 19952         <= aanscales[i] * qscale * quant_matrix[i]      <= 249205026
+ * (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i])
  *                                                       >= (1<<36)/249205026
  * 3444240       >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i])  >= 275 */
-                		qmat[qscale][i] = (int)((UINT64_C(1) << 
+				qmat[qscale][i] = (int)((UINT64_C(1) <<
 					(QMAT_SHIFT + 11))/(aanscales[i]
 					*qscale * quant_matrix[j]));
-            		}
-        	} else {
-            		for (i = 0; i < 64; i++) {
+			}
+		} else {
+			for (i = 0; i < 64; i++) {
 				const int j = s->dsp.idct_permutation[i];
 /* We can safely assume that 16 <= quant_matrix[i] <= 255
  * So 16           <= qscale * quant_matrix[i]             <= 7905
  * so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
  * so 32768        >= (1<<19) / (qscale * quant_matrix[i]) >= 67 */
-                		qmat[qscale][i] = (int)((uint64_t_C(1) << 
-						QMAT_SHIFT_MMX) / (qscale 
+				qmat[qscale][i] = (int)((uint64_t_C(1) <<
+						QMAT_SHIFT_MMX) / (qscale
 							*quant_matrix[j]));
-                		qmat16[qscale][0][i] = (1 << QMAT_SHIFT_MMX)
+				qmat16[qscale][0][i] = (1 << QMAT_SHIFT_MMX)
 						/(qscale * quant_matrix[j]);
 
-                		if (qmat16[qscale][0][i] == 0 || 
+				if (qmat16[qscale][0][i] == 0 ||
 						qmat16[qscale][0][i] == 128*256)
 					qmat16[qscale][0][i]=128*256-1;
-                		qmat16[qscale][1][i]=ROUNDED_DIV(bias
-						<<(16-QUANT_BIAS_SHIFT), 
+				qmat16[qscale][1][i]=ROUNDED_DIV(bias
+						<<(16-QUANT_BIAS_SHIFT),
 						qmat16[qscale][0][i]);
-            		}
-        	}
-    	}
+			}
+		}
+	}
 }
 
-/*
+/// Emit the DC value into a MJPEG code sream
+/**
+ * This routine is only intended to be used from encode_block
+ *
+ * \param s pointer to MpegEncContext structure
+ * \param val the DC value to emit
+ * \param huff_size pointer to huffman code size array
+ * \param huff_code pointer to the code array corresponding to \a huff_size
+ *
  * This routine is a clone of mjpeg_encode_dc
  */
-static inline void encode_dc(MpegEncContext *s, int val, 
+static inline void encode_dc(MpegEncContext *s, int val,
 		uint8_t *huff_size, uint16_t *huff_code) {
 	int mant, nbits;
 
@@ -160,7 +197,12 @@ static inline void encode_dc(MpegEncContext *s, int val,
 	}
 }
 
-/*
+/// Huffman encode and emit one DCT block into the MJPEG code stream
+/**
+ * \param s pointer to MpegEncContext structure
+ * \param block pointer to the DCT block to emit
+ * \param n
+ *
  * This routine is a duplicate of encode_block in mjpeg.c
  */
 static void encode_block(MpegEncContext *s, DCTELEM *block, int n) {
@@ -169,60 +211,72 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n) {
 	MJpegContext *m = s->mjpeg_ctx;
 	uint8_t *huff_size_ac;
 	uint16_t *huff_code_ac;
-    
+
 	/* DC coef */
 	component = (n <= 3 ? 0 : n - 4 + 1);
 	dc = block[0]; /* overflow is impossible */
 	val = dc - s->last_dc[component];
- 	if (n < 4) {
-		encode_dc(s, val, m->huff_size_dc_luminance, 
+	if (n < 4) {
+		encode_dc(s, val, m->huff_size_dc_luminance,
 				m->huff_code_dc_luminance);
 		huff_size_ac = m->huff_size_ac_luminance;
 		huff_code_ac = m->huff_code_ac_luminance;
 	} else {
-        	encode_dc(s, val, m->huff_size_dc_chrominance, 
+		encode_dc(s, val, m->huff_size_dc_chrominance,
 				m->huff_code_dc_chrominance);
 		huff_size_ac = m->huff_size_ac_chrominance;
 		huff_code_ac = m->huff_code_ac_chrominance;
 	}
 	s->last_dc[component] = dc;
-    
+
 	/* AC coefs */
-    
+
 	run = 0;
 	last_index = s->block_last_index[n];
 	for (i = 1; i <= last_index; i++) {
 		j = s->intra_scantable.permutated[i];
 		val = block[j];
 		if (val == 0) run++;
-        	else {
+		else {
 			while (run >= 16) {
-				put_bits(&s->pb, huff_size_ac[0xf0], 
+				put_bits(&s->pb, huff_size_ac[0xf0],
 						huff_code_ac[0xf0]);
 				run -= 16;
 			}
-            		mant = val;
+			mant = val;
 			if (val < 0) {
 				val = -val;
-                		mant--;
-            		}
-            
+				mant--;
+			}
+
 			nbits= av_log2_16bit(val) + 1;
 			code = (run << 4) | nbits;
 
-			put_bits(&s->pb, huff_size_ac[code], 
+			put_bits(&s->pb, huff_size_ac[code],
 					huff_code_ac[code]);
-            		put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
-            		run = 0;
-        	}
-    	}
+			put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
+			run = 0;
+		}
+	}
 
-	/* output EOB only if not already 64 values */ 
+	/* output EOB only if not already 64 values */
 	if (last_index < 63 || run != 0)
 		put_bits(&s->pb, huff_size_ac[0], huff_code_ac[0]);
 }
 
-static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block, 
+/// clip overflowing DCT coefficients
+/**
+ * If the computed DCT coefficients in a block overflow, this routine
+ * will go through them and clip them to be in the valid range.
+ *
+ * \param s pointer to MpegEncContext
+ * \param block pointer to DCT block to process
+ * \param last_index index of the last non-zero coefficient in block
+ *
+ * The max and min level, which are clipped to, are stored in
+ * s->min_qcoeff and s->max_qcoeff respectively.
+ */
+static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block,
 		int last_index) {
 	int i;
 	const int maxlevel= s->max_qcoeff;
@@ -231,7 +285,7 @@ static inline void clip_coeffs(MpegEncContext *s, DCTELEM *block,
 	for (i = 0; i <= last_index; i++) {
 		const int j = s->intra_scantable.permutated[i];
 		int level = block[j];
-       
+
 		if (level > maxlevel) level=maxlevel;
 		else if(level < minlevel) level=minlevel;
 		block[j]= level;
@@ -249,10 +303,18 @@ typedef struct {
 	int v_rs;
 } jpeg_enc_t;
 
-/* this function is a reproduction of the one in mjpeg, it includes two
+// Huffman encode and emit one MCU of MJPEG code
+/**
+ * \param j pointer to jpeg_enc_t structure
+ *
+ * This function huffman encodes one MCU, and emits the
+ * resulting bitstream into the MJPEG code that is currently worked on.
+ *
+ * this function is a reproduction of the one in mjpeg, it includes two
  * changes, it allows for black&white encoding (it skips the U and V
  * macroblocks and it outputs the huffman code for 'no change' (dc) and
- * 'all zero' (ac)) and it takes 4 macroblocks (422) instead of 6 (420) */
+ * 'all zero' (ac)) and it takes 4 macroblocks (422) instead of 6 (420)
+ */
 static always_inline void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 
 	MJpegContext *m = j->s->mjpeg_ctx;
@@ -270,18 +332,27 @@ static always_inline void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 				m->huff_code_dc_chrominance[0]);
 		put_bits(&j->s->pb, m->huff_size_ac_chrominance[0],
 				m->huff_code_ac_chrominance[0]);
-    	} else {
+	} else {
 		/* we trick encode_block here so that it uses
-		 * chrominance huffman tables instead of luminance ones 
+		 * chrominance huffman tables instead of luminance ones
 		 * (see the effect of second argument of encode_block) */
-		encode_block(j->s, j->s->block[2], 4); 
+		encode_block(j->s, j->s->block[2], 4);
 		encode_block(j->s, j->s->block[3], 5);
-    	}
+	}
 }
 
-/*
- * Taking one MCU (YUYV) from 8-bit pixel planar storage and
- * filling it into four 16-bit pixel DCT macroblocks.
+/// Fill one DCT MCU from planar storage
+/**
+ * This routine will convert one MCU from YUYV planar storage into 4
+ * DCT macro blocks, converting from 8-bit format in the planar
+ * storage to 16-bit format used in the DCT.
+ *
+ * \param j pointer to jpeg_enc structure, and also storage for DCT macro blocks
+ * \param x pixel x-coordinate for the first pixel
+ * \param y pixel y-coordinate for the first pixel
+ * \param y_data pointer to the Y plane
+ * \param u_data pointer to the U plane
+ * \param v_data pointer to the V plane
  */
 static always_inline void fill_block(jpeg_enc_t *j, int x, int y,
 		unsigned char *y_data, unsigned char *u_data,
@@ -326,29 +397,37 @@ static always_inline void fill_block(jpeg_enc_t *j, int x, int y,
 	}
 }
 
-/* this function can take all kinds of YUV colorspaces
- * YV12, YVYU, UYVY. The necesary parameters must be set up by the caller
- * y_rs means "y row size".
- * For YUYV, for example, is u_buf = y_buf + 1, v_buf = y_buf + 3, 
- * y_rs = u_rs = v_rs.
+/**
+ * \brief initialize mjpeg encoder
  *
- *  The actual buffers must be passed with mjpeg_encode_frame, this is
- *  to make it possible to call encode on the buffer provided by the
- *  codec in draw_frame.
- *  
- * The data is straightened out at the moment it is put in DCT
- * blocks, there are therefore no spurious memcopies involved */
-/* Notice that w must be a multiple of 16 and h must be a multiple of 8 */
-/* We produce YUV422 jpegs, the colors must be subsampled horizontally,
- * if the colors are also subsampled vertically, then this function
- * performs cheap upsampling (better solution will be: a DCT that is
- * optimized in the case that every two rows are the same) */
-/* cu = 0 means 'No cheap upsampling'
- * cu = 1 means 'perform cheap upsampling' */
-/* The encoder doesn't know anything about interlacing, the halve height
+ * This routine is to set up the parameters and initialize the mjpeg encoder.
+ * It does all the initializations needed of lower level routines.
+ * The formats accepted by this encoder is YUV422P and YUV420
+ *
+ * \param w width in pixels of the image to encode, must be a multiple of 16
+ * \param h height in pixels of the image to encode, must be a multiple of 8
+ * \param y_rsize size of each plane row Y component
+ * \param y_rsize size of each plane row U component
+ * \param v_rsize size of each plane row V component
+ * \param cu "cheap upsample". Set to 0 for YUV422 format, 1 for YUV420 format
+ *           when set to 1, the encoder will assume that there is only half th
+ *           number of rows of chroma information, and every chroma row is
+ *           duplicated.
+ * \param q quality parameter for the mjpeg encode. Between 1 and 20 where 1
+ *	    is best quality and 20 is the worst quality.
+ * \param b monochrome flag. When set to 1, the mjpeg output is monochrome.
+ *          In that case, the colour information is omitted, and actually the
+ *          colour planes are not touched.
+ *
+ * \returns an appropriately set up jpeg_enc_t structure
+ *
+ * The actual plane buffer addreses are passed by jpeg_enc_frame().
+ *
+ * The encoder doesn't know anything about interlacing, the halve height
  * needs to be passed and the double rowstride. Which field gets encoded
- * is decided by what buffers are passed to mjpeg_encode_frame */
-static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize, 
+ * is decided by what buffers are passed to mjpeg_encode_frame()
+ */
+static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 			  int u_rsize, int v_rsize,
 		int cu, int q, int b) {
 	jpeg_enc_t *j;
@@ -366,8 +445,8 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	}
 
 	/* info on how to access the pixels */
-	j->y_rs = y_rsize; 
-	j->u_rs = u_rsize; 
+	j->y_rs = y_rsize;
+	j->u_rs = u_rsize;
 	j->v_rs = v_rsize;
 
 	j->s->width = w;		// image width and height
@@ -382,13 +461,21 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	j->s->y_dc_scale = 8;
 	j->s->c_dc_scale = 8;
 
+	/*
+	 * This sets up the MCU (Minimal Code Unit) number
+	 * of appearances of the various component
+	 * for the SOF0 table in the generated MJPEG.
+	 * The values are not used for anything else.
+	 * The current setup is simply YUV422, with two horizontal Y components
+	 * for every UV component.
+	 */
 	j->s->mjpeg_write_tables = 1;	// setup to write tables
-	j->s->mjpeg_vsample[0] = 1;
-	j->s->mjpeg_vsample[1] = 1;
-	j->s->mjpeg_vsample[2] = 1;
-	j->s->mjpeg_hsample[0] = 2;
-	j->s->mjpeg_hsample[1] = 1;
-	j->s->mjpeg_hsample[2] = 1;
+	j->s->mjpeg_vsample[0] = 1;	// 1 appearance of Y vertically
+	j->s->mjpeg_vsample[1] = 1;	// 1 appearance of U vertically
+	j->s->mjpeg_vsample[2] = 1;	// 1 appearance of V vertically
+	j->s->mjpeg_hsample[0] = 2;	// 2 appearances of Y horizontally
+	j->s->mjpeg_hsample[1] = 1;	// 1 appearance of U horizontally
+	j->s->mjpeg_hsample[2] = 1;	// 1 appearance of V horizontally
 
 	j->cheap_upsample = cu;
 	j->bw = b;
@@ -403,6 +490,7 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 		avcodec_inited=1;
 	}
 
+	// Build mjpeg huffman code tables, setting up j->s->mjpeg_ctx
 	if (mjpeg_init(j->s) < 0) {
 		av_free(j->s);
 		av_free(j);
@@ -418,36 +506,67 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize,
 	}
 
 	// Set some a minimum amount of default values that are needed
+	// Indicates that we should generated normal MJPEG
 	j->s->avctx->codec_id = CODEC_ID_MJPEG;
+	// Which DCT method to use. AUTO will select the fastest one
 	j->s->avctx->dct_algo = FF_DCT_AUTO;
 	j->s->intra_quant_bias= 1<<(QUANT_BIAS_SHIFT-1); //(a + x/2)/x
+
 	j->s->avctx->thread_count = 1;
 
-	/* make MPV_common_init allocate important buffers, like s->block */
+	/* make MPV_common_init allocate important buffers, like s->block
+	 * Also initializes dsputil */
 	if (MPV_common_init(j->s) < 0) {
 		av_free(j->s);
 		av_free(j);
 		return NULL;
 	}
 
-	/* correct the value for sc->mb_height */
+	/* correct the value for sc->mb_height. MPV_common_init put other
+	 * values there */
 	j->s->mb_height = j->s->height/8;
 	j->s->mb_intra = 1;
 
 	// Init q matrix
 	j->s->intra_matrix[0] = ff_mpeg1_default_intra_matrix[0];
-	for (i = 1; i < 64; i++) 
+	for (i = 1; i < 64; i++)
 		j->s->intra_matrix[i] = clip_uint8(
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
+
 	// precompute matrix
-	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
+	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16,
 			j->s->intra_matrix, j->s->intra_quant_bias, 8, 8);
 
+	/* Pick up the selection of the optimal get_pixels() routine
+	 * to use, which was done in  MPV_common_init() */
 	get_pixels = j->s->dsp.get_pixels;
 
 	return j;
-}	
+}
 
+/**
+ * \brief mjpeg encode an image
+ *
+ * This routine will take a 3-plane YUV422 image and encoded it with MJPEG
+ * base line format, as suitable as input for the Zoran hardare MJPEG chips.
+ *
+ * It requires that the \a j parameter points the structure set up by the
+ * jpeg_enc_init() routine.
+ *
+ * \param j pointer to jpeg_enc_t structure as created by jpeg_enc_init()
+ * \param y_data pointer to Y component plane, packed one byte/pixel
+ * \param u_data pointer to U component plane, packed one byte per every
+ *		 other pixel
+ * \param v_data pointer to V component plane, packed one byte per every
+ *		 other pixel
+ * \param bufr pointer to the buffer where the mjpeg encoded code is stored
+ *
+ * \returns the number of bytes stored into \a bufr
+ *
+ * If \a j->s->mjpeg_write_tables is set, it will also emit the mjpeg tables,
+ * otherwise it will just emit the data. The \a j->s->mjpeg_write_tables
+ * variable will be reset to 0 by the routine.
+ */
 static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 		   uint8_t *u_data, uint8_t *v_data, uint8_t *bufr) {
 	int mb_x, mb_y, overflow;
@@ -460,8 +579,8 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 
 	j->s->header_bits = put_bits_count(&j->s->pb);
 
-	j->s->last_dc[0] = 128; 
-	j->s->last_dc[1] = 128; 
+	j->s->last_dc[0] = 128;
+	j->s->last_dc[1] = 128;
 	j->s->last_dc[2] = 128;
 
 	for (mb_y = 0; mb_y < j->s->mb_height; mb_y++) {
@@ -473,27 +592,27 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 			fill_block(j, mb_x, mb_y, y_data, u_data, v_data);
 			emms_c(); /* is this really needed? */
 
-			j->s->block_last_index[0] = 
-				j->s->dct_quantize(j->s, j->s->block[0], 
+			j->s->block_last_index[0] =
+				j->s->dct_quantize(j->s, j->s->block[0],
 						0, 8, &overflow);
-			if (overflow) clip_coeffs(j->s, j->s->block[0], 
+			if (overflow) clip_coeffs(j->s, j->s->block[0],
 					j->s->block_last_index[0]);
-			j->s->block_last_index[1] = 
-				j->s->dct_quantize(j->s, j->s->block[1], 
+			j->s->block_last_index[1] =
+				j->s->dct_quantize(j->s, j->s->block[1],
 						1, 8, &overflow);
-			if (overflow) clip_coeffs(j->s, j->s->block[1], 
+			if (overflow) clip_coeffs(j->s, j->s->block[1],
 					j->s->block_last_index[1]);
 
 			if (!j->bw) {
 				j->s->block_last_index[4] =
 					j->s->dct_quantize(j->s, j->s->block[2],
 							4, 8, &overflow);
-				if (overflow) clip_coeffs(j->s, j->s->block[2], 
+				if (overflow) clip_coeffs(j->s, j->s->block[2],
 						j->s->block_last_index[2]);
 				j->s->block_last_index[5] =
 					j->s->dct_quantize(j->s, j->s->block[3],
 							5, 8, &overflow);
-				if (overflow) clip_coeffs(j->s, j->s->block[3], 
+				if (overflow) clip_coeffs(j->s, j->s->block[3],
 						j->s->block_last_index[3]);
 			}
 			zr_mjpeg_encode_mb(j);
@@ -501,20 +620,27 @@ static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
 	}
 	emms_c();
 	mjpeg_picture_trailer(j->s);
-	flush_put_bits(&j->s->pb);	
+	flush_put_bits(&j->s->pb);
 
 	if (j->s->mjpeg_write_tables == 1)
 		j->s->mjpeg_write_tables = 0;
-	
+
 	return pbBufPtr(&(j->s->pb)) - j->s->pb.buf;
 }
 
+/// the real uninit routine
+/**
+ * This is the real routine that does the uninit of the ZRMJPEG filter
+ *
+ * \param j pointer to jpeg_enc structure
+ */
 static void jpeg_enc_uninit(jpeg_enc_t *j) {
 	mjpeg_close(j->s);
 	av_free(j->s);
 	av_free(j);
 }
 
+/// Private structure for ZRMJPEG filter
 struct vf_priv_s {
 	jpeg_enc_t *j;
 	unsigned char buf[256*1024];
@@ -527,6 +653,24 @@ struct vf_priv_s {
 	int maxheight;
 };
 
+/// vf CONFIGURE entry point for the ZRMJPEG filter
+/**
+ * \param vf video filter instance pointer
+ * \param width image source width in pixels
+ * \param height image source height in pixels
+ * \param d_width width of requested window, just a hint
+ * \param d_height height of requested window, just a hint
+ * \param flags vf filter flags
+ * \param outfmt
+ *
+ * \returns returns 0 on error
+ *
+ * This routine will make the necessary hardware-related decisions for
+ * the ZRMJPEG filter, do the initialization of the MJPEG encoder, and
+ * then select one of the ZRJMJPEGIT or ZRMJPEGNI filters and then
+ * arrange to dispatch to the config() entry pointer for the one
+ * selected.
+ */
 static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 		int d_height, unsigned int flags, unsigned int outfmt){
 	struct vf_priv_s *priv = vf->priv;
@@ -541,10 +685,10 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 		jpeg_enc_uninit(priv->j);
 		priv->j = NULL;
 	}
-	
+
 	aspect_decision = ((float)d_width/(float)d_height)/
 		((float)width/(float)height);
-	
+
 	if (aspect_decision > 1.8 && aspect_decision < 2.2) {
 		VERBOSE("should correct aspect by stretching x times 2, %d %d\n", 2*width, priv->maxwidth);
 		if (2*width <= priv->maxwidth) {
@@ -565,9 +709,9 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 	/* make the scaling decision
 	 * we are capable of stretching the image in the horizontal
 	 * direction by factors 1, 2 and 4
-	 * we can stretch the image in the vertical direction by a 
+	 * we can stretch the image in the vertical direction by a
 	 * factor of 1 and 2 AND we must decide about interlacing */
-	if (d_width > priv->maxwidth/2 || height > priv->maxheight/2 
+	if (d_width > priv->maxwidth/2 || height > priv->maxheight/2
 			|| maxstretchx == 1) {
 		stretchx = 1;
 		stretchy = 1;
@@ -580,7 +724,10 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 		}
 		if (priv->hdec > maxstretchx) {
 			if (priv->fd) {
-				WARNING("horizontal decimation too high, changing to %d (use fd to keep hdec=%d)\n", maxstretchx, priv->hdec);
+				WARNING("horizontal decimation too high, "
+						"changing to %d (use fd to keep"
+						" hdec=%d)\n",
+						maxstretchx, priv->hdec);
 				priv->hdec = maxstretchx;
 			}
 		}
@@ -595,7 +742,9 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 			stretchy = 2;
 		} else if (priv->vdec == 4) {
 			if (!priv->fd) {
-				WARNING("vertical decimation too high, changing to 2 (use fd to keep vdec=4)\n");
+				WARNING("vertical decimation too high, "
+						"changing to 2 (use fd to keep "
+						"vdec=4)\n");
 				priv->vdec = 2;
 			}
 			stretchy = 2;
@@ -604,7 +753,9 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 			stretchx = 4;
 		} else if (priv->hdec == 4) {
 			if (priv->fd) {
-				WARNING("horizontal decimation too high, changing to 2 (use fd to keep hdec=4)\n");
+				WARNING("horizontal decimation too high, "
+						"changing to 2 (use fd to keep "
+						"hdec=4)\n");
 				priv->hdec = 2;
 			}
 			stretchx = 4;
@@ -615,7 +766,9 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 		stretchy = 2;
 		priv->fields = 1;
 		if (priv->vdec != 1 && !priv->fd) {
-			WARNING("vertical decimation too high, changing to 1 (use fd to keep vdec=%d)\n", priv->vdec);
+			WARNING("vertical decimation too high, changing to 1 "
+					"(use fd to keep vdec=%d)\n",
+					priv->vdec);
 			priv->vdec = 1;
 		}
 		if (priv->hdec != 1 && !priv->fd) {
@@ -623,9 +776,9 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 			priv->hdec = 1;
 		}
 	}
-	
-	VERBOSE("generated JPEG's %dx%s%d%s, stretched to %dx%d\n", 
-			width/priv->hdec, (priv->fields == 2) ? "(" : "", 
+
+	VERBOSE("generated JPEG's %dx%s%d%s, stretched to %dx%d\n",
+			width/priv->hdec, (priv->fields == 2) ? "(" : "",
 			height/(priv->vdec*priv->fields),
 			(priv->fields == 2) ? "x2)" : "",
 			(width/priv->hdec)*stretchx,
@@ -633,15 +786,20 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 			stretchy*priv->fields);
 
 
-	if ((width/priv->hdec)*stretchx > priv->maxwidth || 
+	if ((width/priv->hdec)*stretchx > priv->maxwidth ||
 			(height/(priv->vdec*priv->fields))*
 			 stretchy*priv->fields  > priv->maxheight) {
-		ERROR("output dimensions too large (%dx%d), max (%dx%d) insert crop to fix\n", (width/priv->hdec)*stretchx, (height/(priv->vdec*priv->fields))*stretchy*priv->fields, priv->maxwidth, priv->maxheight);
+		ERROR("output dimensions too large (%dx%d), max (%dx%d) "
+				"insert crop to fix\n",
+				(width/priv->hdec)*stretchx,
+				(height/(priv->vdec*priv->fields))*
+				stretchy*priv->fields,
+				priv->maxwidth, priv->maxheight);
 		err = 1;
 	}
 
 	if (width%(16*priv->hdec) != 0) {
-		ERROR("width must be a multiple of 16*hdec (%d), use expand\n", 
+		ERROR("width must be a multiple of 16*hdec (%d), use expand\n",
 				priv->hdec*16);
 		err = 1;
 	}
@@ -663,33 +821,49 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 				1, priv->quality, priv->bw);
 
 	if (!priv->j) return 0;
-	return vf_next_config(vf, width, height, d_width, d_height, flags, 
-		(priv->fields == 2) ? IMGFMT_ZRMJPEGIT : IMGFMT_ZRMJPEGNI); 
+	return vf_next_config(vf, width, height, d_width, d_height, flags,
+		(priv->fields == 2) ? IMGFMT_ZRMJPEGIT : IMGFMT_ZRMJPEGNI);
 }
 
+/// put_image entrypoint for the ZRMJPEG vf filter
+/***
+ * \param vf pointer to vf_instance
+ * \param mpi pointer to mp_image_t structure
+ * \param pts
+ */
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	struct vf_priv_s *priv = vf->priv;
 	int size = 0;
 	int i;
-	mp_image_t* dmpi; 
-	for (i = 0; i < priv->fields; i++) 
-		size += jpeg_enc_frame(priv->j, 
+	mp_image_t* dmpi;
+	for (i = 0; i < priv->fields; i++)
+		size += jpeg_enc_frame(priv->j,
 				mpi->planes[0] + i*priv->y_stride,
-				mpi->planes[1] + i*priv->c_stride, 
-				mpi->planes[2] + i*priv->c_stride, 
+				mpi->planes[1] + i*priv->c_stride,
+				mpi->planes[2] + i*priv->c_stride,
 				priv->buf + size);
 
 	dmpi = vf_get_image(vf->next, IMGFMT_ZRMJPEGNI,
 			MP_IMGTYPE_EXPORT, 0, mpi->w, mpi->h);
 	dmpi->planes[0] = (uint8_t*)priv->buf;
 	dmpi->planes[1] = (uint8_t*)size;
-	return vf_next_put_image(vf,dmpi, pts); 
+	return vf_next_put_image(vf,dmpi, pts);
 }
 
+/// query_format entrypoint for the ZRMJPEG vf filter
+/***
+ * \param vf pointer to vf_instance
+ * \param fmt image format to query for
+ *
+ * \returns 0 if image format in fmt is not supported
+ *
+ * Given the image format specified by \a fmt, this routine is called
+ * to ask if the format is supported or not.
+ */
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 	VERBOSE("query_format() called\n");
 
-	switch (fmt) { 
+	switch (fmt) {
 		case IMGFMT_YV12:
 		case IMGFMT_YUY2:
 			/* strictly speaking the output format of
@@ -702,6 +876,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 	return 0;
 }
 
+/// vf UNINIT entry point for the ZRMJPEG filter
+/**
+ * \param vf pointer to the vf instance structure
+ */
 static void uninit(vf_instance_t *vf) {
 	struct vf_priv_s *priv = vf->priv;
 	VERBOSE("uninit() called\n");
@@ -709,6 +887,16 @@ static void uninit(vf_instance_t *vf) {
 	free(priv);
 }
 
+/// vf OPEN entry point for the ZRMJPEG filter
+/**
+ * \param vf pointer to the vf instance structure
+ * \param args the argument list string for the -vf zrmjpeg command
+ *
+ * \returns 0 for error, 1 for success
+ *
+ * This routine will do some basic initialization of local structures etc.,
+ * and then parse the command line arguments specific for the ZRMJPEG filter.
+ */
 static int open(vf_instance_t *vf, char* args){
 	struct vf_priv_s *priv;
 	VERBOSE("open() called: args=\"%s\"\n", args);
@@ -724,7 +912,7 @@ static int open(vf_instance_t *vf, char* args){
 		return 0;
 	}
 
-	/* maximum displayable size by zoran card, these defaults 
+	/* maximum displayable size by zoran card, these defaults
 	 * are for my own zoran card in PAL mode, these can be changed
 	 * by filter options. But... in an ideal world these values would
 	 * be queried from the vo device itself... */
@@ -735,7 +923,7 @@ static int open(vf_instance_t *vf, char* args){
 	priv->hdec = 1;
 	priv->vdec = 1;
 
-	/* if libavcodec is already initialized, we must not initialize it 
+	/* if libavcodec is already initialized, we must not initialize it
 	 * again, but if it is not initialized then we mustinitialize it now. */
 	if (!avcodec_inited) {
 		/* we need to initialize libavcodec */
@@ -743,7 +931,7 @@ static int open(vf_instance_t *vf, char* args){
 		avcodec_register_all();
 		avcodec_inited=1;
 	}
-	
+
 	if (args) {
 		char *arg, *tmp, *ptr, junk;
 		int last = 0, input;
@@ -766,7 +954,7 @@ static int open(vf_instance_t *vf, char* args){
 			 * be queried from the vo device, but it is currently
 			 * too difficult, so the user should tell the filter */
 			if (!strncmp("maxheight=", ptr, 10)) {
-				if (sscanf(ptr+10, "%d%c", &input, &junk) != 1) 
+				if (sscanf(ptr+10, "%d%c", &input, &junk) != 1)
 						ERROR(
 		"error parsing parameter to \"maxheight=\", \"%s\", ignoring\n"
 								, ptr + 10);
@@ -789,7 +977,7 @@ static int open(vf_instance_t *vf, char* args){
 							priv->quality);
 				}
 			} else if (!strncmp("maxwidth=", ptr, 9)) {
-				if (sscanf(ptr+9, "%d%c", &input, &junk) != 1) 
+				if (sscanf(ptr+9, "%d%c", &input, &junk) != 1)
 					ERROR(
 		"error parsing parameter to \"maxwidth=\", \"%s\", ignoring\n"
 								, ptr + 9);
@@ -799,13 +987,13 @@ static int open(vf_instance_t *vf, char* args){
 							priv->maxwidth);
 				}
 			} else if (!strncmp("hdec=", ptr, 5)) {
-				if (sscanf(ptr+5, "%d%c", &input, &junk) != 1) 
+				if (sscanf(ptr+5, "%d%c", &input, &junk) != 1)
 					ERROR(
 		"error parsing parameter to \"hdec=\", \"%s\", ignoring\n"
 								, ptr + 9);
 				else if (input != 1 && input != 2 && input != 4)
 					ERROR(
-		"illegal parameter to \"hdec=\", %d, should be 1, 2 or 4", 
+		"illegal parameter to \"hdec=\", %d, should be 1, 2 or 4",
 								input);
 				else {
 					priv->hdec = input;
@@ -813,13 +1001,13 @@ static int open(vf_instance_t *vf, char* args){
 		"setting horizontal decimation to %d\n", priv->maxwidth);
 				}
 			} else if (!strncmp("vdec=", ptr, 5)) {
-				if (sscanf(ptr+5, "%d%c", &input, &junk) != 1) 
+				if (sscanf(ptr+5, "%d%c", &input, &junk) != 1)
 					ERROR(
 		"error parsing parameter to \"vdec=\", \"%s\", ignoring\n"
 								, ptr + 9);
 				else if (input != 1 && input != 2 && input != 4)
 					ERROR(
-		"illegal parameter to \"vdec=\", %d, should be 1, 2 or 4", 
+		"illegal parameter to \"vdec=\", %d, should be 1, 2 or 4",
 								input);
 				else {
 					priv->vdec = input;
@@ -859,7 +1047,7 @@ static int open(vf_instance_t *vf, char* args){
 				priv->maxheight = 480;
 				VERBOSE("setting buz/lml33 NTSC profile\n");
 			} else {
-				WARNING("ignoring unknown filter option " 
+				WARNING("ignoring unknown filter option "
 						"\"%s\", or missing argument\n",
 						ptr);
 			}
