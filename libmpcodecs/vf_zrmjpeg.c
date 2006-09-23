@@ -31,11 +31,13 @@
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
 #include "libavcodec/mpegvideo.h"
+//#include "jpeg_enc.h" /* this file is not present yet */
 
 #undef malloc
 #undef free
 #undef realloc
 
+extern int avcodec_inited;
 
 /* some convenient #define's, is this portable enough? */
 #define VERBOSE(...) mp_msg(MSGT_DECVIDEO, MSGL_V, "vf_zrmjpeg: " __VA_ARGS__)
@@ -60,6 +62,9 @@ typedef struct MJpegContext {
 	uint16_t huff_code_ac_chrominance[256];
 } MJpegContext;
 
+// The get_pixels routine to use. The real routine comes from dsputil
+static void (*get_pixels)(DCTELEM *restrict block, const uint8_t *pixels, int line_size);
+
 /* Begin excessive code duplication ************************************/
 /* Code coming from mpegvideo.c and mjpeg.c in ../libavcodec ***********/
 
@@ -75,6 +80,10 @@ static const unsigned short aanscales[64] = {
 	4520,   6270,  5906,  5315,  4520,  3552,  2446,  1247
 };
 
+/*
+ * This routine is like the routine with the same name in mjpeg.c,
+ * except for some coefficient changes.
+ */
 static void convert_matrix(MpegEncContext *s, int (*qmat)[64], 
 		uint16_t (*qmat16)[2][64], const uint16_t *quant_matrix,
 		int bias, int qmin, int qmax) {
@@ -130,6 +139,9 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
     	}
 }
 
+/*
+ * This routine is a clone of mjpeg_encode_dc
+ */
 static inline void encode_dc(MpegEncContext *s, int val, 
 		uint8_t *huff_size, uint16_t *huff_code) {
 	int mant, nbits;
@@ -142,19 +154,15 @@ static inline void encode_dc(MpegEncContext *s, int val,
 			val = -val;
 			mant--;
 		}
-        
-		/* compute the log (XXX: optimize) */
-		nbits = 0;
-		while (val != 0) {
-			val = val >> 1;
-			nbits++;
-		}
-            
+		nbits= av_log2_16bit(val) + 1;
 		put_bits(&s->pb, huff_size[nbits], huff_code[nbits]);
 		put_bits(&s->pb, nbits, mant & ((1 << nbits) - 1));
 	}
 }
 
+/*
+ * This routine is a duplicate of encode_block in mjpeg.c
+ */
 static void encode_block(MpegEncContext *s, DCTELEM *block, int n) {
 	int mant, nbits, code, i, j;
 	int component, dc, run, last_index, val;
@@ -199,12 +207,7 @@ static void encode_block(MpegEncContext *s, DCTELEM *block, int n) {
                 		mant--;
             		}
             
-            		/* compute the log (XXX: optimize) */
-            		nbits = 0;
-			while (val != 0) {
-				val = val >> 1;
-				nbits++; 
-			}
+			nbits= av_log2_16bit(val) + 1;
 			code = (run << 4) | nbits;
 
 			put_bits(&s->pb, huff_size_ac[code], 
@@ -241,9 +244,6 @@ typedef struct {
 	struct MpegEncContext *s;
 	int cheap_upsample;
 	int bw;
-	int y_ps;
-	int u_ps;
-	int v_ps;
 	int y_rs;
 	int u_rs;
 	int v_rs;
@@ -253,7 +253,7 @@ typedef struct {
  * changes, it allows for black&white encoding (it skips the U and V
  * macroblocks and it outputs the huffman code for 'no change' (dc) and
  * 'all zero' (ac)) and it takes 4 macroblocks (422) instead of 6 (420) */
-static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
+static always_inline void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 
 	MJpegContext *m = j->s->mjpeg_ctx;
 
@@ -279,11 +279,58 @@ static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
     	}
 }
 
+/*
+ * Taking one MCU (YUYV) from 8-bit pixel planar storage and
+ * filling it into four 16-bit pixel DCT macroblocks.
+ */
+static always_inline void fill_block(jpeg_enc_t *j, int x, int y,
+		unsigned char *y_data, unsigned char *u_data,
+		unsigned char *v_data)
+{
+	int i, k;
+	short int *dest;
+	unsigned char *source;
+
+	// The first Y, Y0
+	get_pixels(j->s->block[0], y*8*j->y_rs + 16*x + y_data, j->y_rs);
+	// The second Y, Y1
+	get_pixels(j->s->block[1], y*8*j->y_rs + 16*x + 8 + y_data, j->y_rs);
+
+	if (!j->bw && j->cheap_upsample) {
+		source = y * 4 * j->u_rs + 8*x + u_data;
+		dest = j->s->block[2];
+		for (i = 0; i < 4; i++) {
+			for (k = 0; k < 8; k++) {
+				dest[k] = source[k];   // First row
+				dest[k+8] = source[k]; // Duplicate to next row
+
+			}
+			dest += 16;
+			source += j->u_rs;
+		}
+		source = y * 4 * j->v_rs + 8*x + v_data;
+		dest = j->s->block[3];
+		for (i = 0; i < 4; i++) {
+			for (k = 0; k < 8; k++) {
+				dest[k] = source[k];
+				dest[k+8] = source[k];
+			}
+			dest += 16;
+			source += j->u_rs;
+		}
+	} else if (!j->bw && !j->cheap_upsample) {
+		// U
+		get_pixels(j->s->block[2], y*8*j->u_rs + 8*x + u_data, j->u_rs);
+		// V
+		get_pixels(j->s->block[3], y*8*j->v_rs + 8*x + v_data, j->v_rs);
+	}
+}
+
 /* this function can take all kinds of YUV colorspaces
  * YV12, YVYU, UYVY. The necesary parameters must be set up by the caller
- * y_ps means "y pixel size", y_rs means "y row size".
+ * y_rs means "y row size".
  * For YUYV, for example, is u_buf = y_buf + 1, v_buf = y_buf + 3, 
- * y_ps = 2, u_ps = 4, v_ps = 4, y_rs = u_rs = v_rs.
+ * y_rs = u_rs = v_rs.
  *
  *  The actual buffers must be passed with mjpeg_encode_frame, this is
  *  to make it possible to call encode on the buffer provided by the
@@ -301,46 +348,41 @@ static void zr_mjpeg_encode_mb(jpeg_enc_t *j) {
 /* The encoder doesn't know anything about interlacing, the halve height
  * needs to be passed and the double rowstride. Which field gets encoded
  * is decided by what buffers are passed to mjpeg_encode_frame */
-static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize, 
-		int u_psize, int u_rsize, int v_psize, int v_rsize,
+static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_rsize, 
+			  int u_rsize, int v_rsize,
 		int cu, int q, int b) {
 	jpeg_enc_t *j;
 	int i = 0;
-	VERBOSE("JPEG encoder init: %dx%d %d %d %d %d %d %d\n",
-			w, h, y_psize, y_rsize, u_psize, 
-			u_rsize, v_psize, v_rsize);
+	VERBOSE("JPEG encoder init: %dx%d %d %d %d cu=%d q=%d bw=%d\n",
+			w, h, y_rsize, u_rsize, v_rsize, cu, q, b);
 
-	j = malloc(sizeof(jpeg_enc_t));
+	j = av_mallocz(sizeof(jpeg_enc_t));
 	if (j == NULL) return NULL;
 
-	j->s = malloc(sizeof(MpegEncContext));
-	memset(j->s,0x00,sizeof(MpegEncContext));
+	j->s = av_mallocz(sizeof(MpegEncContext));
 	if (j->s == NULL) {
-		free(j);
+		av_free(j);
 		return NULL;
 	}
 
 	/* info on how to access the pixels */
-	j->y_ps = y_psize; 
-	j->u_ps = u_psize; 
-	j->v_ps = v_psize;
 	j->y_rs = y_rsize; 
 	j->u_rs = u_rsize; 
 	j->v_rs = v_rsize;
 
-	j->s->width = w;
+	j->s->width = w;		// image width and height
 	j->s->height = h;
-	j->s->qscale = q;
+	j->s->qscale = q;		// Encoding quality
 
 	j->s->mjpeg_data_only_frames = 0;
 	j->s->out_format = FMT_MJPEG;
-	j->s->intra_only = 1;
-	j->s->encoding = 1;
+	j->s->intra_only = 1;		// Generate only intra pictures for jpeg
+	j->s->encoding = 1;		// Set mode to encode
 	j->s->pict_type = I_TYPE;
 	j->s->y_dc_scale = 8;
 	j->s->c_dc_scale = 8;
 
-	j->s->mjpeg_write_tables = 1;
+	j->s->mjpeg_write_tables = 1;	// setup to write tables
 	j->s->mjpeg_vsample[0] = 1;
 	j->s->mjpeg_vsample[1] = 1;
 	j->s->mjpeg_vsample[2] = 1;
@@ -351,23 +393,40 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->cheap_upsample = cu;
 	j->bw = b;
 
+	// Is this needed?
+	/* if libavcodec is used by the decoder then we must not
+	 * initialize again, but if it is not initialized then we must
+	 * initialize it here. */
+	if (!avcodec_inited) {
+		avcodec_init();
+		avcodec_register_all();
+		avcodec_inited=1;
+	}
+
 	if (mjpeg_init(j->s) < 0) {
-		free(j->s);
-		free(j);
+		av_free(j->s);
+		av_free(j);
 		return NULL;
 	}
 
 	/* alloc bogus avctx to keep MPV_common_init from segfaulting */
-	j->s->avctx = calloc(sizeof(*j->s->avctx), 1);
-	/* Set up to encode mjpeg */
-	j->s->avctx->codec_id = CODEC_ID_MJPEG;
+	j->s->avctx = avcodec_alloc_context();
+	if (j->s->avctx == NULL) {
+		av_free(j->s);
+		av_free(j);
+		return NULL;
+	}
 
-	/* make MPV_common_init allocate important buffers, like s->block */
+	// Set some a minimum amount of default values that are needed
+	j->s->avctx->codec_id = CODEC_ID_MJPEG;
+	j->s->avctx->dct_algo = FF_DCT_AUTO;
+	j->s->intra_quant_bias= 1<<(QUANT_BIAS_SHIFT-1); //(a + x/2)/x
 	j->s->avctx->thread_count = 1;
 
+	/* make MPV_common_init allocate important buffers, like s->block */
 	if (MPV_common_init(j->s) < 0) {
-		free(j->s);
-		free(j);
+		av_free(j->s);
+		av_free(j);
 		return NULL;
 	}
 
@@ -375,24 +434,28 @@ static jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->mb_height = j->s->height/8;
 	j->s->mb_intra = 1;
 
+	// Init q matrix
 	j->s->intra_matrix[0] = ff_mpeg1_default_intra_matrix[0];
 	for (i = 1; i < 64; i++) 
 		j->s->intra_matrix[i] = clip_uint8(
 			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3);
+	// precompute matrix
 	convert_matrix(j->s, j->s->q_intra_matrix, j->s->q_intra_matrix16, 
 			j->s->intra_matrix, j->s->intra_quant_bias, 8, 8);
+
+	get_pixels = j->s->dsp.get_pixels;
+
 	return j;
 }	
 
-static int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data, 
-		unsigned char *u_data, unsigned char *v_data, char *bufr) {
-	int i, k, mb_x, mb_y, overflow;
-	short int *dest;
-	unsigned char *source;
+static int jpeg_enc_frame(jpeg_enc_t *j, uint8_t *y_data,
+		   uint8_t *u_data, uint8_t *v_data, uint8_t *bufr) {
+	int mb_x, mb_y, overflow;
 	/* initialize the buffer */
 
 	init_put_bits(&j->s->pb, bufr, 1024*256);
 
+	// Emit the mjpeg header blocks
 	mjpeg_picture_header(j->s);
 
 	j->s->header_bits = put_bits_count(&j->s->pb);
@@ -403,72 +466,11 @@ static int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 	for (mb_y = 0; mb_y < j->s->mb_height; mb_y++) {
 		for (mb_x = 0; mb_x < j->s->mb_width; mb_x++) {
-			/* conversion 8 to 16 bit and filling of blocks
-			 * must be mmx optimized */
-			/* fill 2 Y macroblocks and one U and one V */
-			source = mb_y * 8 * j->y_rs + 
-				16 * j->y_ps * mb_x + y_data;
-			dest = j->s->block[0];
-			for (i = 0; i < 8; i++) {
-				for (k = 0; k < 8; k++) {
-					dest[k] = source[k*j->y_ps];
-				}
-				dest += 8;
-				source += j->y_rs;
-			}
-			source = mb_y * 8 * j->y_rs + 
-				(16*mb_x + 8)*j->y_ps + y_data;
-			dest = j->s->block[1];
-			for (i = 0; i < 8; i++) {
-				for (k = 0; k < 8; k++) {
-					dest[k] = source[k*j->y_ps];
-				}
-				dest += 8;
-				source += j->y_rs;
-			}
-			if (!j->bw && j->cheap_upsample) {
-				source = mb_y*4*j->u_rs + 
-					8*mb_x*j->u_ps + u_data;
-				dest = j->s->block[2];
-				for (i = 0; i < 4; i++) {
-					for (k = 0; k < 8; k++) {
-						dest[k] = source[k*j->u_ps];
-						dest[k+8] = source[k*j->u_ps];
-					}
-					dest += 16;
-					source += j->u_rs;
-				}
-				source = mb_y*4*j->v_rs + 
-					8*mb_x*j->v_ps + v_data;
-				dest = j->s->block[3];
-				for (i = 0; i < 4; i++) {
-					for (k = 0; k < 8; k++) {
-						dest[k] = source[k*j->v_ps];
-						dest[k+8] = source[k*j->v_ps];
-					}
-					dest += 16;
-					source += j->u_rs;
-				}
-			} else if (!j->bw && !j->cheap_upsample) {
-				source = mb_y*8*j->u_rs + 
-					8*mb_x*j->u_ps + u_data;
-				dest = j->s->block[2];
-				for (i = 0; i < 8; i++) {
-					for (k = 0; k < 8; k++) 
-						dest[k] = source[k*j->u_ps];
-					dest += 8;
-					source += j->u_rs;
-				}
-				source = mb_y*8*j->v_rs + 
-					8*mb_x*j->v_ps + v_data;
-				dest = j->s->block[3];
-				for (i = 0; i < 8; i++) {
-					for (k = 0; k < 8; k++) 
-						dest[k] = source[k*j->v_ps];
-					dest += 8;
-					source += j->u_rs;
-				}
-			}
+			/*
+			 * Fill one DCT block (8x8 pixels) from
+			 * 2 Y macroblocks and one U and one V
+			 */
+			fill_block(j, mb_x, mb_y, y_data, u_data, v_data);
 			emms_c(); /* is this really needed? */
 
 			j->s->block_last_index[0] = 
@@ -509,8 +511,8 @@ static int jpeg_enc_frame(jpeg_enc_t *j, unsigned char *y_data,
 
 static void jpeg_enc_uninit(jpeg_enc_t *j) {
 	mjpeg_close(j->s);
-	free(j->s);
-	free(j);
+	av_free(j->s);
+	av_free(j);
 }
 
 struct vf_priv_s {
@@ -654,11 +656,11 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width,
 
 	priv->y_stride = width;
 	priv->c_stride = width/2;
-	priv->j = jpeg_enc_init(width, height/priv->fields, 1, 
-			priv->fields*priv->y_stride, 1, 
-			priv->fields*priv->c_stride, 1, 
-			priv->fields*priv->c_stride, 1, 
-			priv->quality, priv->bw);
+	priv->j = jpeg_enc_init(width, height/priv->fields,
+				priv->fields*priv->y_stride,
+				priv->fields*priv->c_stride,
+				priv->fields*priv->c_stride,
+				1, priv->quality, priv->bw);
 
 	if (!priv->j) return 0;
 	return vf_next_config(vf, width, height, d_width, d_height, flags, 
