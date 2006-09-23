@@ -180,25 +180,12 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	demuxer->filepos = stream_tell(demuxer->stream);
 	if (stream_eof(demuxer->stream)) return 0;
 
-	while (1) {
-		ret = nut_read_next_packet(nut, &pd);
-		if (ret < 0) {
-			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
-			                               nut_error(-ret));
-			continue;
-		}
-		if (ret == 1) return 0; // EOF
-		if (pd.type == e_frame) break;
-		// else, skip this packet
-		while ((ret = nut_skip_packet(nut, &pd.len))) {
-			if (ret < 0) {
-				mp_msg(MSGT_HEADER, MSGL_ERR,
-				           "NUT error: %s\n", nut_error(-ret));
-				break;
-			}
-			if (ret == 1) return 0; // EOF
-		}
+	ret = nut_read_next_packet(nut, &pd);
+	if (ret < 0) {
+		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
+		                               nut_error(-ret));
 	}
+	if (ret) return 0; // fatal error
 
 	pts = (double)pd.pts * priv->s[pd.stream].time_base.nom /
 	                       priv->s[pd.stream].time_base.den;
@@ -213,14 +200,12 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 		ds = demuxer->video;
 	}
 	else {
-		while ((ret = nut_skip_packet(nut, &pd.len))) {
-			if (ret < 0) {
-				mp_msg(MSGT_HEADER, MSGL_ERR,
-				            "NUT error: %s\n", nut_error(-ret));
-				break;
-			}
-			if (ret == 1) return 0; // EOF
+		ret = nut_skip_packet(nut, &pd.len);
+		if (ret < 0) {
+			mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
+			                               nut_error(-ret));
 		}
+		if (ret) return 0; // fatal error
 		return 1;
 	}
 
@@ -233,14 +218,13 @@ static int demux_nut_fill_buffer(demuxer_t * demuxer, demux_stream_t * dsds) {
 	dp->pos = demuxer->filepos;
 	dp->flags= (pd.flags & NUT_FLAG_KEY) ? 0x10 : 0;
 
-	while ((ret = nut_read_frame(nut, &pd.len, dp->buffer))) {
-		if (ret < 0) {
-			mp_msg(MSGT_HEADER, MSGL_ERR,
-			                  "NUT error: %s\n", nut_error(-ret));
-			break;
-		}
-		if (ret == 1) return 0; // EOF
+	ret = nut_read_frame(nut, &pd.len, dp->buffer);
+	if (ret < 0) {
+		mp_msg(MSGT_HEADER, MSGL_ERR, "NUT error: %s\n",
+		                               nut_error(-ret));
 	}
+	if (ret) return 0; // fatal error
+
 	ds_add_packet(ds, dp); // append packet to DS stream
 	return 1;
 }
