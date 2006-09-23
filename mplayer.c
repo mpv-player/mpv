@@ -5140,7 +5140,7 @@ if(step_sec>0) {
             }
             if(chapter_name) {
                 set_osd_msg(OSD_MSG_TEXT, 1, osd_duration, MSGTR_OSDChapter,
-                chap, chapter_name);
+                chap+1, chapter_name);
                 free(chapter_name);
             }
         } else {
