@@ -123,7 +123,7 @@ Author:       Felix Bünemann
 
 Description:  Helper script to ease MEncoder two pass encoding. Give it all
               the encoding parameters you would pass to mencoder, but leave
-						  out the (v)pass=<n> suboption.
+              out the (v)pass=<n> suboption.
 
 Usage:        menc2pass <options>
 
