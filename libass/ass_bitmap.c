@@ -174,6 +174,12 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 	return bm;
 }
 
+/**
+ * \brief fix outline bitmap and generate shadow bitmap
+ * Two things are done here:
+ * 1. Glyph bitmap is subtracted from outline bitmap. This way looks much better in some cases.
+ * 2. Shadow bitmap is created as a sum of glyph and outline bitmaps.
+ */
 static bitmap_t* fix_outline_and_shadow(bitmap_t* bm_g, bitmap_t* bm_o)
 {
 	int x, y;
