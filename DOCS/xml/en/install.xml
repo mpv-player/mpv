@@ -27,25 +27,17 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - suggested version is <emphasis role="bold">2.11.x</emphasis>.
+  <emphasis role="bold">binutils</emphasis> - Recommended version is <emphasis role="bold">2.11.x</emphasis>.
   This program is responsible for generating MMX/ 3DNow!/etc instructions,
   thus very important.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - suggested versions are: <emphasis role="bold">2.95.3</emphasis>
-  (maybe <emphasis role="bold">2.95.4</emphasis>) and <emphasis role="bold">3.2+</emphasis>.
-  <emphasis role="bold">Never</emphasis> use 2.96 or 3.0.x! They generate faulty code for
-  <application>MPlayer</application>. If you decide to change gcc from
-  2.96, then don't decide in favor of 3.x just because it's newer! Early
-  releases of 3.x were even more buggy than 2.96. So downgrade to 2.95.x
-  (downgrade <systemitem class="library">libstdc++</systemitem> too, other
-  programs may need it) or don't up/downgrade at all (but in this case, be
-  prepared for runtime problems). If you vote for 3.x, try to use the
-  latest version, early releases had various bugs, so be sure you use at
-  least 3.1, it's tested and working.
+  <emphasis role="bold">gcc</emphasis> - Recommended versions are 2.95
+  and 3.3+. 2.96 and 3.0.x are known to generate faulty code, 3.1 and
+  3.2 also had problems.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - suggested version is <emphasis role="bold">always the
+  <emphasis role="bold">XFree86</emphasis> - Recommended version is <emphasis role="bold">always the
   newest</emphasis> (4.3). Normally, everyone wants this, as starting
   with XFree86 4.0.2, it contains the <link linkend="xv">XVideo</link>
   extension (somewhere referred to as <emphasis role="bold">Xv</emphasis>)
@@ -56,7 +48,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   For some video cards you don't need XFree86. See list below.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - suggested version is
+  <emphasis role="bold">make</emphasis> - Recommended version is
   <emphasis role="bold">always the newest</emphasis> (at least 3.79.x). This
   usually isn't important.
   </para></listitem>
@@ -82,7 +74,7 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - recommended, needed for encoding MP3 audio with
-  <application>MEncoder</application>, suggested version is
+  <application>MEncoder</application>, recommended version is
   <emphasis>always the newest</emphasis> (at least 3.90).
   </para></listitem>
 <listitem><para>
