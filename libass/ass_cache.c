@@ -202,6 +202,7 @@ void ass_glyph_cache_done(void)
 			glyph_hash_item_t* next = item->next;
 			if (item->val.bm) ass_free_bitmap(item->val.bm);
 			if (item->val.bm_o) ass_free_bitmap(item->val.bm_o);
+			if (item->val.bm_s) ass_free_bitmap(item->val.bm_s);
 			free(item);
 			item = next;
 		}

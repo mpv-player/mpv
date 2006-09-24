@@ -122,6 +122,15 @@ void ass_free_bitmap(bitmap_t* bm)
 	}
 }
 
+static bitmap_t* copy_bitmap(const bitmap_t* src)
+{
+	bitmap_t* dst = alloc_bitmap(src->w, src->h);
+	dst->left = src->left;
+	dst->top = src->top;
+	memcpy(dst->buffer, src->buffer, src->w * src->h);
+	return dst;
+}
+
 static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 {
 	FT_BitmapGlyph bg;
@@ -165,15 +174,19 @@ static bitmap_t* glyph_to_bitmap_internal(FT_Glyph glyph, int bord)
 	return bm;
 }
 
-static void fix_outline(bitmap_t* bm_g, bitmap_t* bm_o)
+static bitmap_t* fix_outline_and_shadow(bitmap_t* bm_g, bitmap_t* bm_o)
 {
 	int x, y;
 	const int l = bm_o->left > bm_g->left ? bm_o->left : bm_g->left;
 	const int t = bm_o->top > bm_g->top ? bm_o->top : bm_g->top;
 	const int r = bm_o->left + bm_o->w < bm_g->left + bm_g->w ? bm_o->left + bm_o->w : bm_g->left + bm_g->w;
 	const int b = bm_o->top + bm_o->h < bm_g->top + bm_g->h ? bm_o->top + bm_o->h : bm_g->top + bm_g->h;
+
+	bitmap_t* bm_s = copy_bitmap(bm_o);
+
 	unsigned char* g = bm_g->buffer + (t - bm_g->top) * bm_g->w + (l - bm_g->left);
 	unsigned char* o = bm_o->buffer + (t - bm_o->top) * bm_o->w + (l - bm_o->left);
+	unsigned char* s = bm_s->buffer + (t - bm_s->top) * bm_s->w + (l - bm_s->left);
 	
 	for (y = 0; y < b - t; ++y) {
 		for (x = 0; x < r - l; ++x) {
@@ -181,33 +194,38 @@ static void fix_outline(bitmap_t* bm_g, bitmap_t* bm_o)
 			c_g = g[x];
 			c_o = o[x];
 			o[x] = (c_o > c_g) ? c_o - c_g : 0;
+			s[x] = (c_o < 0xFF - c_g) ? c_o + c_g : 0xFF;
 		}
 		g += bm_g->w;
 		o += bm_o->w;
+		s += bm_s->w;
 	}
+
+	assert(bm_s);
+	return bm_s;
 }
 
-int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g, bitmap_t** bm_o, int be)
+int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph,
+		bitmap_t** bm_g, bitmap_t** bm_o, bitmap_t** bm_s, int be)
 {
 	const int bord = be ? ceil(blur_radius) : 0;
 
-	assert(bm_g && bm_o);
+	assert(bm_g && bm_o && bm_s);
+
+	*bm_g = *bm_o = *bm_s = 0;
 
 	if (glyph)
 		*bm_g = glyph_to_bitmap_internal(glyph, bord);
-	else
-		*bm_g = 0;
 	if (!*bm_g)
 		return 1;
+
 	if (outline_glyph) {
 		*bm_o = glyph_to_bitmap_internal(outline_glyph, bord);
 		if (!*bm_o) {
 			ass_free_bitmap(*bm_g);
 			return 1;
 		}
-	} else
-		*bm_o = 0;
-
+	}
 	if (*bm_o)
 		resize_tmp(priv, (*bm_o)->w, (*bm_o)->h);
 	resize_tmp(priv, (*bm_g)->w, (*bm_g)->h);
@@ -219,8 +237,11 @@ int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_gly
 	}
 
 	if (*bm_o)
-		fix_outline(*bm_g, *bm_o);
+		*bm_s = fix_outline_and_shadow(*bm_g, *bm_o);
+	else
+		*bm_s = copy_bitmap(*bm_g);
 
+	assert(bm_s);
 	return 0;
 }
 

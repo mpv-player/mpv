@@ -53,8 +53,9 @@ typedef struct glyph_info_s {
 	unsigned symbol;
 	FT_Glyph glyph;
 	FT_Glyph outline_glyph;
-	bitmap_t* bm;
-	bitmap_t* bm_o;
+	bitmap_t* bm; // glyph bitmap
+	bitmap_t* bm_o; // outline bitmap
+	bitmap_t* bm_s; // shadow bitmap
 	FT_BBox bbox;
 	FT_Vector pos;
 	char linebreak; // the first (leading) glyph of some line ?
@@ -68,6 +69,7 @@ typedef struct glyph_info_s {
 	int asc, desc; // font max ascender and descender
 //	int height;
 	int be; // blur edges
+	int shadow;
 	
 	glyph_hash_key_t hash_key;
 } glyph_info_t;
@@ -113,6 +115,7 @@ typedef struct render_context_s {
 	char detect_collisions;
 	uint32_t fade; // alpha from \fad
 	char be; // blur edges
+	int shadow;
 
 	effect_t effect_type;
 	int effect_timing;
@@ -376,7 +379,8 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 				continue;
 			error = glyph_to_bitmap(ass_instance->synth_priv,
 					text_info->glyphs[i].glyph, text_info->glyphs[i].outline_glyph,
-					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o, text_info->glyphs[i].be);
+					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o,
+					&text_info->glyphs[i].bm_s, text_info->glyphs[i].be);
 			if (error)
 				text_info->glyphs[i].symbol = 0;
 			FT_Done_Glyph(text_info->glyphs[i].glyph);
@@ -387,11 +391,24 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 			hash_val.bbox_scaled = text_info->glyphs[i].bbox;
 			hash_val.bm_o = text_info->glyphs[i].bm_o;
 			hash_val.bm = text_info->glyphs[i].bm;
+			hash_val.bm_s = text_info->glyphs[i].bm_s;
 			hash_val.advance.x = text_info->glyphs[i].advance.x;
 			hash_val.advance.y = text_info->glyphs[i].advance.y;
 			cache_add_glyph(&(text_info->glyphs[i].hash_key), &hash_val);
 
 		}
+	}
+
+	for (i = 0; i < text_info->length; ++i) {
+		glyph_info_t* info = text_info->glyphs + i;
+		if ((info->symbol == 0) || (info->symbol == '\n') || !info->bm_s || (info->shadow == 0))
+			continue;
+
+		pen_x = dst_x + info->pos.x + info->shadow;
+		pen_y = dst_y + info->pos.y + info->shadow;
+		bm = info->bm_s;
+
+		tail = render_glyph(bm, pen_x, pen_y, info->c[3], 0, 1000000, tail);
 	}
 
 	for (i = 0; i < text_info->length; ++i) {
@@ -992,6 +1009,12 @@ static char* parse_tag(char* p, double pwr) {
 		if (render_context.effect_timing)
 			render_context.effect_skip_timing += render_context.effect_timing;
 		render_context.effect_timing = val * 10;
+	} else if (mystrcmp(&p, "shad")) {
+		int val;
+		if (mystrtoi(&p, 10, &val))
+			render_context.shadow = val;
+		else
+			render_context.shadow = render_context.style->Shadow;
 	}
 
 	return p;
@@ -1137,6 +1160,7 @@ static void reset_render_context(void)
 	render_context.scale_y = render_context.style->ScaleY;
 	render_context.hspacing = 0; // FIXME
 	render_context.be = 0;
+	render_context.shadow = render_context.style->Shadow;
 
 	// FIXME: does not reset unsupported attributes.
 }
@@ -1208,6 +1232,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 		info->glyph = info->outline_glyph = 0;
 		info->bm = val->bm;
 		info->bm_o = val->bm_o;
+		info->bm_s = val->bm_s;
 		info->bbox = val->bbox_scaled;
 		info->advance.x = val->advance.x;
 		info->advance.y = val->advance.y;
@@ -1252,7 +1277,7 @@ static int get_glyph(int index, int symbol, glyph_info_t* info, FT_Vector* advan
 		info->outline_glyph = 0;
 	}
 
-	info->bm = info->bm_o = 0;
+	info->bm = info->bm_o = info->bm_s = 0;
 
 	return 0;
 }
@@ -1625,6 +1650,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].asc = get_face_ascender(render_context.face);
 		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.face);
 		text_info.glyphs[text_info.length].be = render_context.be;
+		text_info.glyphs[text_info.length].shadow = render_context.shadow;
 
 		text_info.length++;
 

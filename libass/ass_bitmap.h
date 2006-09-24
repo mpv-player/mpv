@@ -12,7 +12,7 @@ typedef struct bitmap_s {
 	unsigned char* buffer; // w x h buffer
 } bitmap_t;
 
-int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g, bitmap_t** bm_o, int be);
+int glyph_to_bitmap(ass_synth_priv_t* priv, FT_Glyph glyph, FT_Glyph outline_glyph, bitmap_t** bm_g, bitmap_t** bm_o, bitmap_t** bm_s, int be);
 void ass_free_bitmap(bitmap_t* bm);
 
 #endif

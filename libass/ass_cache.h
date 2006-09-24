@@ -38,6 +38,7 @@ typedef struct glyph_hash_key_s {
 typedef struct glyph_hash_val_s {
 	bitmap_t* bm; // the actual glyph bitmaps
 	bitmap_t* bm_o;
+	bitmap_t* bm_s;
 	FT_BBox bbox_scaled; // bbox after scaling, but before rotation
 	FT_Vector advance; // 26.6, advance distance to the next glyph in line
 } glyph_hash_val_t;
