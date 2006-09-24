@@ -569,7 +569,7 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
     int x, sps, cfs, sph, spc, w;
     int audioreorder_getnextpk = 0;
 
-  while(1){
+  while(!stream_eof(demuxer->stream)){
 
     /* Handle audio/video demxing switch for multirate files (non-interleaved) */
     if (priv->is_multirate && priv->stream_switch) {
@@ -1075,6 +1075,7 @@ if((unsigned)stream_id<MAX_STREAMS){
 discard:
     stream_skip(demuxer->stream, len);
   }//    goto loop;
+  return 0;
 }
 
 extern void print_wave_header(WAVEFORMATEX *h, int verbose_level);
