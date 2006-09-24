@@ -94,6 +94,12 @@ ass_synth_priv_t* ass_synth_init()
 
 void ass_synth_done(ass_synth_priv_t* priv)
 {
+	if (priv->tmp)
+		free(priv->tmp);
+	if (priv->g)
+		free(priv->g);
+	if (priv->gt2)
+		free(priv->gt2);
 	free(priv);
 }
 
