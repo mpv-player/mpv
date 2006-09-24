@@ -570,9 +570,14 @@ There are three timing methods in <application>MPlayer</application>.
   option enables it, but a properly set up kernel is required.
   If you are running kernel 2.4.19pre8 or later you can adjust the maximum RTC
   frequency for normal users through the <systemitem class="systemname">/proc
-  </systemitem> filesystem. Use this command to
+  </systemitem> filesystem. Use one of the following two commands to
   enable RTC for normal users:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
+  <screen>sysctl dev/rtc/max-user-freq=1024</screen>
+  You can make this setting permanent by adding the latter to
+  <filename>/etc/sysctl.conf</filename>.
+  </para>
+  <para>
    You can see the new timer's efficiency in the status line.
    The power management functions of some notebook BIOSes with speedstep CPUs
    interact badly with RTC. Audio and video may get out of sync. Plugging the
