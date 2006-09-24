@@ -166,6 +166,43 @@ static int find_backwards_asf_guid(char *buf, const char *guid, int cur_pos)
   return -1;
 }
 
+static int get_ext_stream_properties(char *buf, int buf_len, int stream_num, double* avg_frame_time)
+{
+  // this function currently only gets the average frame time if available
+
+  int pos=0;
+  uint8_t *buffer = &buf[0];
+  uint64_t avg_ft;
+
+  while ((pos = find_asf_guid(buf, asf_ext_stream_header, pos, buf_len)) >= 0) {
+    int this_stream_num, stnamect, payct, i, objlen;
+    buffer = &buf[pos];
+
+    // the following info is available
+    // some of it may be useful but we're skipping it for now
+    // starttime(8 bytes), endtime(8),
+    // leak-datarate(4), bucket-datasize(4), init-bucket-fullness(4),
+    // alt-leak-datarate(4), alt-bucket-datasize(4), alt-init-bucket-fullness(4),
+    // max-object-size(4),
+    // flags(4) (reliable,seekable,no_cleanpoints?,resend-live-cleanpoints, rest of bits reserved)
+
+    buffer +=8+8+4+4+4+4+4+4+4+4;
+    this_stream_num=le2me_16(*(uint16_t*)buffer);buffer+=2;
+
+    if (this_stream_num == stream_num) {
+      buffer+=2; //skip stream-language-id-index
+      avg_ft = le2me_64(*(uint64_t*)buffer); // provided in 100ns units
+      *avg_frame_time = avg_ft/10000000.0f;
+
+      // after this are values for stream-name-count and
+      // payload-extension-system-count
+      // followed by associated info for each
+      return 1;
+    }
+  }
+  return 0;
+}
+
 static int asf_init_audio_stream(demuxer_t *demuxer,struct asf_priv* asf, sh_audio_t* sh_audio, ASF_stream_header_t *streamh, int *ppos, uint8_t** buf, char *hdr, unsigned int hdr_len)
 {
   uint8_t *buffer = *buf;
@@ -305,7 +342,17 @@ int read_asf_header(demuxer_t *demuxer,struct asf_priv* asf){
           asf->asf_frame_state=-1;
           asf->asf_frame_start_found=0;
           asf->asf_is_dvr_ms=1;
+          asf->dvr_last_vid_pts=0.0;
         } else asf->asf_is_dvr_ms=0;
+        if (get_ext_stream_properties(hdr, hdr_len, streamh->stream_no, &asf->avg_vid_frame_time)) {
+	  sh_video->frametime=(float)asf->avg_vid_frame_time;
+	  sh_video->fps=1.0f/sh_video->frametime; 
+        } else {
+	  asf->avg_vid_frame_time=0.0; // only used for dvr-ms when > 0.0
+	  sh_video->fps=1000.0f;
+	  sh_video->frametime=0.001f;
+        }
+
         if( mp_msg_test(MSGT_DEMUX,MSGL_V) ) print_video_header(sh_video->bih, MSGL_V);
         //asf_video_id=streamh.stream_no & 0x7F;
 	//if(demuxer->video->id==-1) demuxer->video->id=streamh.stream_no & 0x7F;

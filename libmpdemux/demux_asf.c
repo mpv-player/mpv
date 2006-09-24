@@ -197,6 +197,15 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
             len -= frame_end_pos;
           }
           close_seg = 1;
+          if (asf->avg_vid_frame_time > 0.0 ) {
+            // correct the pts for the packet
+            // because dvr-ms files do not contain accurate
+            // pts values but we can deduce them using
+            // the average frame time
+            if (asf->dvr_last_vid_pts > 0.0)
+              dp->pts=asf->dvr_last_vid_pts+asf->avg_vid_frame_time;
+            asf->dvr_last_vid_pts = dp->pts;
+          }
         } else seq = ds->asf_seq;
       } else close_seg = ds->asf_seq!=seq;
 
@@ -487,6 +496,8 @@ static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,float audio_de
 //    printf("\r -- asf: newpos=%d -- \n",newpos);
     stream_seek(demuxer->stream,newpos);
 
+    if (asf->asf_is_dvr_ms) asf->dvr_last_vid_pts = 0.0f;
+
     if (d_video->id >= 0)
     ds_fill_buffer(d_video);
     if(sh_audio){
@@ -556,7 +567,7 @@ static demuxer_t* demux_open_asf(demuxer_t* demuxer)
             //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
         } else {
             sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
-            sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
+            //sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms  - now set when reading asf header
             //sh_video->i_bps=10*asf->packetsize; // FIXME!
         }
     }
