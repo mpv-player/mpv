@@ -47,7 +47,7 @@
 /* logging mechanisms */
 #define LOG_LEVEL_PVR  "[pvr]"
 #define LOG_LEVEL_V4L2 "[v4l2]"
-#define LOG_LEVEL_IVTV "[ivtv]"
+#define LOG_LEVEL_ENCODER "[encoder]"
 
 /* IVTV driver settings (see http://ivtvdriver.org/index.php/Ivtvctl ) */
 
@@ -148,7 +148,7 @@ struct pvr_t {
   int height;
   char *freq;
 
-  /* ivtv params */
+  /* encoder params */
   int aspect;
   int samplerate;
   int layer;
@@ -181,7 +181,7 @@ pvr_init (void)
   pvr->height = -1;
   pvr->freq = NULL;
 
-  /* ivtv params */
+  /* encoder params */
   pvr->aspect = -1;
   pvr->samplerate = -1;
   pvr->layer = -1;
@@ -215,7 +215,7 @@ pvr_uninit (struct pvr_t *pvr)
 /* IVTV layer */
 
 static void
-parse_ivtv_options (struct pvr_t *pvr)
+parse_encoder_options (struct pvr_t *pvr)
 {
   if (!pvr)
     return;
@@ -382,7 +382,7 @@ parse_ivtv_options (struct pvr_t *pvr)
 }
 
 static int
-set_ivtv_settings (struct pvr_t *pvr)
+set_encoder_settings (struct pvr_t *pvr)
 {
   struct ivtv_ioctl_codec codec;
 
@@ -396,7 +396,7 @@ set_ivtv_settings (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, IVTV_IOC_G_CODEC, &codec) < 0)
   {
     mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s can't get codec (%s).\n", LOG_LEVEL_IVTV, strerror (errno));
+            "%s can't get codec (%s).\n", LOG_LEVEL_ENCODER, strerror (errno));
     return -1;
   }
   
@@ -458,7 +458,7 @@ set_ivtv_settings (struct pvr_t *pvr)
   if (ioctl (pvr->dev_fd, IVTV_IOC_S_CODEC, &codec) < 0)
   {
     mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s can't set codec (%s).\n", LOG_LEVEL_IVTV, strerror (errno));
+            "%s can't set codec (%s).\n", LOG_LEVEL_ENCODER, strerror (errno));
     return -1;
   }
 
@@ -913,7 +913,7 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
   pvr = pvr_init ();
 
   parse_v4l2_tv_options (pvr);
-  parse_ivtv_options (pvr);
+  parse_encoder_options (pvr);
   
   /* open device */
   pvr->dev_fd = open (pvr->video_dev, O_RDWR);
@@ -981,11 +981,11 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     return STREAM_ERROR;
   }
 
-  /* apply IVTV settings */
-  if (set_ivtv_settings (pvr) == -1)
+  /* apply encoder settings */
+  if (set_encoder_settings (pvr) == -1)
   {
     mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s can't set ivtv settings\n", LOG_LEVEL_PVR);
+            "%s can't set encoder settings\n", LOG_LEVEL_PVR);
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
