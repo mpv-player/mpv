@@ -138,6 +138,7 @@
 /* IDs in the blockgroup master */
 #define MATROSKA_ID_BLOCKDURATION        0x9B
 #define MATROSKA_ID_BLOCK                0xA1
+#define MATROSKA_ID_SIMPLEBLOCK          0xA3
 #define MATROSKA_ID_REFERENCEBLOCK       0xFB
 
 /* IDs in the attachments master */

@@ -2415,7 +2415,7 @@ demux_mkv_open (demuxer_t *demuxer)
 
   stream_seek(s, s->start_pos);
   str = ebml_read_header (s, &version);
-  if (str == NULL || strcmp (str, "matroska") || version > 1)
+  if (str == NULL || strcmp (str, "matroska") || version > 2)
     {
       mp_msg (MSGT_DEMUX, MSGL_DBG2, "[mkv] no head found\n");
       return 0;
@@ -3314,7 +3314,7 @@ handle_video_bframes (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
 
 static int
 handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
-              uint64_t block_duration, int64_t block_bref, int64_t block_fref)
+              uint64_t block_duration, int64_t block_bref, int64_t block_fref, uint8_t simpleblock)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   mkv_track_t *track = NULL;
@@ -3322,7 +3322,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   uint64_t old_length;
   int64_t tc;
   uint32_t *lace_size;
-  uint8_t laces;
+  uint8_t laces, flags;
   int i, num, tmp, use_this_block = 1;
   float current_pts;
   int16_t time;
@@ -3335,6 +3335,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   block += 2;
   length -= tmp + 2;
   old_length = length;
+  flags = block[0];
   if (demux_mkv_read_block_lacing (block, &length, &laces, &lace_size))
     return 0;
   block += old_length - length;
@@ -3364,8 +3365,16 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
     {
       ds = demuxer->audio;
 
-      if (mkv_d->a_skip_to_keyframe && block_bref != 0)
-        use_this_block = 0;
+      if (mkv_d->a_skip_to_keyframe) 
+        {
+          if (simpleblock) 
+            {
+               if (!(flags&0x80))   /*current frame isn't a keyframe*/
+                 use_this_block = 0;
+            }
+          else if (block_bref != 0)
+            use_this_block = 0;
+        }
       else if (mkv_d->v_skip_to_keyframe)
         use_this_block = 0;
 
@@ -3392,8 +3401,16 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   else if (num == demuxer->video->id)
     {
       ds = demuxer->video;
-      if (mkv_d->v_skip_to_keyframe && (block_bref != 0 || block_fref != 0))
-        use_this_block = 0;
+      if (mkv_d->v_skip_to_keyframe)
+        {
+          if (simpleblock)
+            {
+              if (!(flags&0x80))   /*current frame isn't a keyframe*/
+                use_this_block = 0;
+            }
+          else if (block_bref != 0 || block_fref != 0)
+            use_this_block = 0;
+        }
     }
   else if (num == demuxer->sub->id)
     {
@@ -3527,7 +3544,7 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
           if (block)
             {
               int res = handle_block (demuxer, block, block_length,
-                                      block_duration, block_bref, block_fref);
+                                      block_duration, block_bref, block_fref, 0);
               free (block);
               if (res < 0)
                 return 0;
@@ -3558,6 +3575,26 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                   l = tmp;
                   break;
 
+                case MATROSKA_ID_SIMPLEBLOCK:
+                  {
+                    int res;
+                    block_length = ebml_read_length (s, &tmp);
+                    block = (uint8_t *) malloc (block_length);
+                    demuxer->filepos = stream_tell (s);
+                    if (stream_read (s,block,block_length) != (int) block_length)
+                      return 0;
+                    l = tmp + block_length;
+                    res = handle_block (demuxer, block, block_length,
+                                        block_duration, block_bref, block_fref, 1);
+                    free (block);
+                    mkv_d->cluster_size -= l + il;
+                    if (res < 0)
+                      return 0;
+                    else if (res)
+                      return 1;
+                    else mkv_d->cluster_size += l + il;
+                    break;
+                  }
                 case EBML_ID_INVALID:
                   return 0;
 
