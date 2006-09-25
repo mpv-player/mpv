@@ -1175,6 +1175,78 @@ m_option_type_t m_option_type_afmt = {
 };
 
 
+// Time or size (-endpos)
+
+static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, int src) {
+
+  if (dst == NULL)
+    return 0;
+
+  m_time_size_t* ts = dst;
+  ts->pos=0;
+
+  char unit[4];
+  int a,b;
+  float d;
+  double end_at;
+
+  if (param == NULL || strlen(param) == 0)
+    return M_OPT_MISSING_PARAM;
+  
+  /* End at size parsing */
+  if(sscanf(param, "%lf%3s", &end_at, unit) == 2) {
+    ts->type = END_AT_SIZE;
+    if(!strcasecmp(unit, "b"))
+      ;
+    else if(!strcasecmp(unit, "kb"))
+      end_at *= 1024;
+    else if(!strcasecmp(unit, "mb"))
+      end_at *= 1024*1024;
+    else if(!strcasecmp(unit, "gb"))
+      end_at *= 1024*1024*1024;
+    else
+      ts->type = END_AT_NONE;
+
+    if (ts->type == END_AT_SIZE) {
+      ts->pos  = end_at;
+      return 1;
+    }
+  }
+
+  /* End at time parsing. This has to be last because of
+   * sscanf("%f", ...) below */
+  if (sscanf(param, "%d:%d:%f", &a, &b, &d) == 3)
+    end_at = 3600*a + 60*b + d;
+  else if (sscanf(param, "%d:%f", &a, &d) == 2)
+    end_at = 60*a + d;
+  else if (sscanf(param, "%f", &d) == 1)
+    end_at = d;
+  else {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid time or size: '%s'\n",
+           name,param);
+    return M_OPT_INVALID;
+  }
+  
+  ts->type = END_AT_TIME;
+  ts->pos  = end_at;
+
+  return 1;
+}
+
+m_option_type_t m_option_type_time_size = {
+  "Time or size",
+  "",
+  sizeof(m_time_size_t),
+  0,
+  parse_time_size,
+  NULL,
+  copy_opt,
+  copy_opt,
+  NULL,
+  NULL
+};
+
+ 
 //// Objects (i.e. filters, etc) settings
 
 #include "m_struct.h"

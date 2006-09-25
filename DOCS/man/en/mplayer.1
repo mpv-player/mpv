@@ -1273,6 +1273,30 @@ the entries in the given file.
 See DOCS/\:HTML/\:en/\:edl.html for details on how to use this.
 .
 .TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (also see \-ss and \-sb)
+Stop at given time or byte position.
+.br
+.I NOTE:
+Byte position is enabled only for MEncoder and will not be accurate, as it can
+only stop at a frame boundary.
+When used in conjunction with \-ss option, \-endpos time will shift forward by
+seconds specified with \-ss.
+.sp 1
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+Stop at 56 seconds.
+.IPs "\-endpos 01:10:00"
+Stop at 1 hour 10 minutes.
+.IPs "\-ss 10 \-endpos 56"
+Stop at 1 minute 6 seconds.
+.IPs "\-endpos 100mb"
+Encode only 100 MB.
+.RE
+.PD 1
+.
+.TP
 .B \-forceidx
 Force index rebuilding.
 Useful for files with broken index (A/V desync, etc).
@@ -6548,26 +6572,6 @@ CBR only, VBR ignores this as it puts each packet in a new chunk.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Sets up the audio buffering time interval (default: 0.5s).
-.
-.TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (also see \-ss and \-sb)
-Stop encoding at the given time or byte position.
-.br
-.I NOTE:
-Byte position will not be accurate, as it can only stop at
-a frame boundary.
-.sp 1
-.I EXAMPLE:
-.PD 0
-.RSs
-.IPs "\-endpos 56"
-Encode only 56 seconds.
-.IPs "\-endpos 01:10:00"
-Encode only 1 hour 10 minutes.
-.IPs "\-endpos 100mb"
-Encode only 100 MB.
-.RE
-.PD 1
 .
 .TP
 .B \-fafmttag <format>

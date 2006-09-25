@@ -252,10 +252,10 @@ static int cfg_include(m_option_t *conf, char *filename){
 static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
 
+static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
+
 static char * frameno_filename=NULL;
 
-static void parse_end_at(void);
-static char * end_at_string=0;
 //static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
 
 typedef struct {
@@ -354,10 +354,6 @@ static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v);
 
 static int at_eof=0;
 static int interrupted=0;
-
-enum end_at_type_t {END_AT_NONE, END_AT_TIME, END_AT_SIZE};
-static enum end_at_type_t end_at_type = END_AT_NONE;
-static double end_at;
 
 static void exit_sighandler(int x){
     at_eof=1;
@@ -1040,8 +1036,6 @@ else {
 	}
 }
 
-parse_end_at();
-
 if (seek_to_sec) {
     int a,b; float d;
 
@@ -1080,7 +1074,7 @@ if(file_format == DEMUXER_TYPE_TV)
 	}
 
 play_n_frames=play_n_frames_mf;
-if (curfile && end_at_type == END_AT_TIME) end_at += mux_v->timer;
+if (curfile && end_at.type == END_AT_TIME) end_at.pos += mux_v->timer;
 
 if (edl_records) free_edl(edl_records);
 next_edl_record = edl_records = NULL;
@@ -1099,8 +1093,8 @@ while(!at_eof){
     float v_pts=0;
     int skip_flag=0; // 1=skip  -1=duplicate
 
-    if((end_at_type == END_AT_SIZE && end_at <= ftello(muxer_f))  ||
-       (end_at_type == END_AT_TIME && end_at < mux_v->timer))
+    if((end_at.type == END_AT_SIZE && end_at.pos <= ftello(muxer_f))  ||
+       (end_at.type == END_AT_TIME && end_at.pos < mux_v->timer))
         break;
 
     if(play_n_frames>=0){
@@ -1590,50 +1584,6 @@ if(stream) free_stream(stream); // kill cache thread
 return interrupted;
 }
 
-static void parse_end_at(void)
-{
-
-    end_at_type = END_AT_NONE;
-    if (!end_at_string) return;
-    
-    /* End at size parsing */
-    {
-        char unit[4];
-        
-        end_at_type = END_AT_SIZE;
-
-        if(sscanf(end_at_string, "%lf%3s", &end_at, unit) == 2) {
-            if(!strcasecmp(unit, "b"))
-                ;
-            else if(!strcasecmp(unit, "kb"))
-                end_at *= 1024;
-            else if(!strcasecmp(unit, "mb"))
-                end_at *= 1024*1024;
-            else
-                end_at_type = END_AT_NONE;
-        }
-        else
-            end_at_type = END_AT_NONE;
-    }
-
-    /* End at time parsing. This has to be last because of
-     * sscanf("%f", ...) below */
-    if(end_at_type == END_AT_NONE)
-    {
-        int a,b; float d;
-
-        end_at_type = END_AT_TIME;
-        
-        if (sscanf(end_at_string, "%d:%d:%f", &a, &b, &d) == 3)
-            end_at = 3600*a + 60*b + d;
-        else if (sscanf(end_at_string, "%d:%f", &a, &d) == 2)
-            end_at = 60*a + d;
-        else if (sscanf(end_at_string, "%f", &d) == 1)
-            end_at = d;
-        else
-            end_at_type = END_AT_NONE;
-    }
-}
 
 #if 0
 /* Flip the image in src and store the result in dst. src and dst may overlap.
@@ -1659,7 +1609,7 @@ static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width,
 static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
 	float timeleft = -1;
 	if (play_n_frames >= 0) timeleft = mux_v->timer + play_n_frames * (double)(mux_v->h.dwScale) / mux_v->h.dwRate;
-	if (end_at_type == END_AT_TIME && (timeleft > end_at || timeleft == -1)) timeleft = end_at;
+	if (end_at.type == END_AT_TIME && (timeleft > end_at.pos || timeleft == -1)) timeleft = end_at.pos;
 	if (next_edl_record && demuxer && demuxer->video) { // everything is OK to be checked
 		float tmp = mux_v->timer + next_edl_record->start_sec - demuxer->video->pts;
 		if (timeleft == -1 || timeleft > tmp) {

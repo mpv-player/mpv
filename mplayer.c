@@ -250,6 +250,8 @@ static off_t step_sec=0;
 static int loop_times=-1;
 static int loop_seek=0;
 
+static m_time_size_t end_at = { .type = END_AT_NONE, .pos = 0 };
+
 // A/V sync:
        int autosync=0; // 30 might be a good default value.
 
@@ -4050,10 +4052,16 @@ while(sh_audio){
 
 if(!sh_video) {
   // handle audio-only case:
-  if(!quiet) {
-    double a_pos = playing_audio_pts(sh_audio, d_audio, audio_out);
+  double a_pos=0;
+  if(!quiet || end_at.type == END_AT_TIME )
+    a_pos = playing_audio_pts(sh_audio, d_audio, audio_out);
+
+  if(!quiet)
     print_status(a_pos, 0, 0);
-  }
+
+  if(end_at.type == END_AT_TIME && end_at.pos < a_pos)
+    eof = PT_NEXT_ENTRY;
+
 } else {
 
 /*========================== PLAY VIDEO ============================*/
@@ -4295,6 +4303,10 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	   else if (j > frame_time + frame_time * FRAME_LAG_WARN)
 		too_slow_frame_cnt++;
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
+
+           // FIXME: add size based support for -endpos
+           if ( end_at.type == END_AT_TIME && end_at.pos < sh_video->pts )
+                eof = PT_NEXT_ENTRY;
 
 	   if(vo_config_count) video_out->flip_page();
 	   if (play_n_frames >= 0) {
@@ -5214,6 +5226,15 @@ if(step_sec>0) {
      seek_to_sec = NULL;
   }
   
+  if (end_at.type != END_AT_NONE) {
+    if(end_at.type == END_AT_SIZE) {
+      mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_MPEndposNoSizeBased);
+      end_at.type = END_AT_NONE;
+    } else {
+      end_at.pos += rel_seek_secs;
+    }
+  }
+
   /* Looping. */
   if(eof==1 && loop_times>=0) {
     int l = loop_times;

@@ -185,8 +185,6 @@ extern int write_odml; /* defined in libmpdemux/muxer_avi.c */
 m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 
-	{"endpos", &end_at_string, CONF_TYPE_STRING, 0, 0, 0, NULL},
-
 	{"frameno-file", &frameno_filename, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 
         {"hr-edl-seek", &edl_seek_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
