@@ -1,4 +1,4 @@
-.\" synced with r18570
+.\" synced with r19134
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -765,8 +765,8 @@ con --enable-crash-debug.
 .B \-edlout <nomefile>
 Crea un nuovo file e scrive comandi della lista di decisione di modifica (EDL)
 in questo file.
-Durante la riproduzione, quando l'utente preme 'i', un'azione per saltare gli
-ultimi due secondi di filmato viene scritta nel file.
+Durante la riproduzione, l'utente preme 'i' per impostare l'inizio o la fine di
+un blocco da saltare.
 Questo fornisce un punto di partenza dal quale l'utente può successivamente
 ottimizzare tali comandi EDL.
 Vedi DOCS/\:HTML/\:en/\:edl.html per dettagli.
@@ -1347,9 +1347,9 @@ Le opzioni disponibili sono:
 .PD 0
 .RSs
 .IPs w=<valore>
-larghezza del video di uscita (default: calcolata automaticamente)
+larghezza del video in entrata (default: calcolata automaticamente)
 .IPs h=<valore>
-altezza del video di uscita (default: calcolata automaticamente)
+altezza del video in entrata (default: calcolata automaticamente)
 .IPs fps=<valore>
 fps (frame per second, fotogrammi al secondo) del video di uscita (default: 25)
 .IPs type=<valore>
@@ -1458,6 +1458,16 @@ Utilizzato con URL del tipo 'rtsp://' per forzare il numero di porta del client.
 Questa opzione può essere utile se sei dietro a un router e vuoi inoltrare il
 flusso RTSP dal server verso un client specifico.
 .
+.TP
+.B \-rtsp-destination
+Utilizzato con URL del tipo 'rtsp://' per forzare l'IP di destinazione da usare.
+Questa opzione può essere utile con alcuni server RTSP che non inviano
+pacchetti RTP all'interfaccia corretta.
+Se la connessione al server RTSP fallisce, utilizza \-v per vedere quale
+indirizzo IP MPlayer cerca di usare e prova piuttosto a forzarne uno
+assegnato al tuo computer.
+.
+.TP
 .B \-rtsp-stream-over-tcp (solo LIVE555)
 Utilizzato con URL del tipo 'rtsp://' per specificare che i pacchetti RTP o RTCP
 devono essere fatti passare su TCP (utilizzando la stessa connessione di RTSP).
@@ -1686,6 +1696,65 @@ Forza i parametri audio per il demuxer VIVO (per scopi di debug).
 Vedi anche \-vf expand.
 .
 .TP
+.B \-ass (solo FreeType)
+Abilita la renderizzazione dei sottotitoli SSA/ASS.
+Con questa opzione, verrà usata libass per i sottotitoli SSA/ASS esterni e per
+le tracce Matroska.
+Potresti voler utilizzare anche \-embeddedfonts.
+.
+.TP
+.B \-ass-border-color <valore>
+Imposta il colore del bordo (outline) per i sottotitoli testuali.
+Il colore è nel formato RRGGBBAA.
+.
+.TP
+.B \-ass-bottom-margin <valore>
+Aggiunge un bordo nero nella parte bassa del fotogramma.
+Il renderizzatore SSA/ASS può metter lì i sottotitoli (con \-ass-use-margins).
+.
+.TP
+.B \-ass-color <valore>
+Imposta il colore per i sottotitoli testuali.
+Il colore è nel formato RRGGBBAA.
+.
+.TP
+.B \-ass-font-scale <valore>
+Imposta il coefficiente di ridimensionamento da usare per i font nel
+renderizzatore SSA/ASS.
+.
+.TP
+.B \-ass-force-style <[Style.]Param=Value[,...]>
+Sovrascrive alcuni parametri dello stile.
+.sp
+.I ESEMPIO:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.
+.TP
+.B \-ass-line-spacing <valore>
+Imposta la spaziatura di linea per il renderizzatore SSA/ASS.
+.
+.TP
+.B \-ass-styles <nomefile>
+Carica tutti gli stili SSA/ASS trovati nel file indicato e li usa per
+renderizzare i sottotitoli testuali.
+La sintassi del file è esattamente come le sezioni [V4 Styles] / [V4+ Styles]
+di SSA/ASS.
+.
+.TP
+.B \-ass-top-margin <valore>
+Aggiunge un bordo nero nella parte alta del fotogramma.
+Il renderizzatore SSA/ASS può metter lì i sottotitoli (con \-ass-use-margins).
+.
+.TP
+.B \-(no)ass-use-margins
+Abilita/disabilita il posizionamento dei sottotitoli nei bordi neri, quando
+disponibili (default: no).
+.
+.TP
 .B \-dumpjacosub (solo MPlayer)
 Converti i sottotitoli (specificati con l'opzione \-sub) nel formato
 dei sottotitoli basato sul tempo JACOsub.
@@ -1728,6 +1797,11 @@ Estrae il flusso dei sottotitoli dai file VOB.
 Vedi anche le opzioni \-dump*sub e \-vobsubout* .
 .
 .TP
+.B \-embeddedfonts (solo FreeType)
+Abilita l'estrazione di font embedded in file Matroska.
+Questi font possono essere usati per renderizzare sottotitoli SSA/ASS
+(opzione \-ass).
+.
 .B \-ffactor <numero> (solo OSD)
 Ricampionamento della mappatura alpha del font.
 Può essere:
@@ -3212,6 +3286,7 @@ Questa modalità utilizza un'estensione particolare nVidia
 (GL_NV_register_combiners).
 Servono almeno tre unità di texture.
 Fornisce controllo di saturazione e tonalità.
+Questo metodo è veloce ma impreciso.
 .br
 2: Usa un programma di frammentazione.
 Richiede l'estensione GL_ARB_fragment_program e almeno tre unità di texture.
@@ -3233,13 +3308,44 @@ Questa modalità usa un'estensione specifica ATI (GL_ATI_fragment_shader - non
 GL_ARB_fragment_shader!).
 Servono almeno tre unità di texture.
 Fornisce controllo di saturazione e tonalità.
+Questo metodo è veloce ma impreciso.
+.br
+6: Usa una texture 3D per effettuare la conversione attraverso lookup.
+Richiede l'estensione GL_ARB_fragment_program ed almeno 4 unità di texture.
+Estremamente lento (emulazione software) su alcune (tutte?) schede ATI, visto
+che usa una texture con pixel sul bordo.
+Fornisce controllo di luminosità, contrasto, saturazione, tonalità e gamma.
+La gamma può essere impostata indipendentemente per rosso, verde e blu.
+La velocità dipende più dall'ampiezza di memoria della GPU rispetto agli altri
+metodi.
 .RE
+.IPs lscale=<n>
+Seleziona la funzione di ridimensionamento da usare per il ridimensionamento
+della luminanza.
+Valida solo per modalità yuv 2, 3, 4 e 6.
+.RSss
+0: Usa un filtraggio lineare semplice (default).
+.br
+1: Usa un filtraggio bicubico (migliore qualità).
+Richiede un'unità supplementare di texture.
+Schede video vecchie non saranno in grado di gestire questo per la crominanza,
+perlomeno in modalità a schermo intero.
+.RE
+.IPs cscale=<n>
+Seleziona la funzione di ridimensionamento da usare per il ridimensionamento
+della crominanza.
 .IPs customprog=<nomefile>
 Carica un programma personalizzato di frammentazione da <nomefile>.
 Vedi TOOLS/edgedect.fp come esempio.
 .IPs customtex=<nomefile>
 Carica una texture "gamma ramp" personalizzata da <nomefile>.
 Questo può essere usato insieme con yuv=4 oppure con l'opzione customprog.
+.IPs (no)customtlin
+Se abilitata (default) usa l'interpolazione GL_LINEAR, se no usa quella
+GL_NEAREST per la texture 'customtex'.
+.IPs (no)customtrect
+Se abilitata, usa texture_rectangle per la texture 'customtex'.
+Disabilitata di default.
 .REss
 .RE
 .PD 1
@@ -3691,6 +3797,8 @@ Prova libmad prima, poi passa agli altri.
 .IPs "\-ac hwac3,a52,"
 Prova prima il decodificatore hardware AC3 (AC3 passthrough), poi il
 codec software AC3, poi gli altri.
+.IPs "\-ac hwdts,"
+Prova prima il decodificatore hardware DTS (DTS passthrough), poi gli altri.
 .IPs "\-ac -ffmp3,"
 Salta (ignora) il decoder MP3 di FFmpeg.
 .RE
@@ -6140,35 +6248,69 @@ raddoppiando il framerate di uscita.
 Come il filtro telecine, tfield lavorerà correttamente solo con
 MEncoder, e solo se entrambe le opzioni \-fps e \-ofps sono
 caricate al valore desiderato (doppio) del framerate.
-I modi disponibili sono:
 .PD 0
 .RSs
-.IPs 0
-Lascia i campi invariati (questo salterà/\:sfarfallerà).
-.IPs 1
-Interpola le linee mancanti (l'algoritmo usato potrebbe non essere
+.IPs <modo>
+0: Lascia i campi invariati (questo salterà/\:sfarfallerà).
+.br
+1: Interpola le linee mancanti (l'algoritmo usato potrebbe non essere
 così buono).
-.IPs 2
-Trasla i campi di 1/4 di pixel con interpolazione lineare (niente salti).
-.IPs 4
-Trasla i campi di 1/4 di pixel con un filtro 4tap (qualità più alta). (default)
-.RE
-.PD 1
-.sp 1
-.RS
-I valori di posizione_campo sono:
-.RE
-.PD 0
-.RSs
-.IPs -1
-automatica (default)
+.br
+2: Trasla i campi di 1/4 di pixel con interpolazione lineare (niente salti).
+.br
+4: Trasla i campi di 1/4 di pixel con un filtro 4tap (qualità più alta). (default)
+.IPs <posizione_campo>
+-1: automatica (default)
 Funziona solo se il decodificatore esporta le informazioni appropriate e
 nessun altro filtro che scarti queste informazioni viene prima di tfields
 nella catena dei filtri, in caso contrario passa a 0 (top-first).
-.IPs 0
-top-first (prima il campo superiore)
-.IPs 1
-bottom-first (prima il campo inferiore)
+.br
+0: prima il campo superiore
+.br
+1: prima il campo inferiore
+.RE
+.PD 1
+.
+.TP
+.B yadif=[modo[:posizione_campo]]
+Ancora un filtro di deinterlacciamento
+.PD 0
+.RSs
+.IPs <modo>
+0: Produce 1 fotogramma per ciascun fotogramma.
+.br
+1: Produce 1 fotogramma per ciascun campo.
+.br
+2: Come 0, ma salta il controllo di interlacciamento spaziale.
+.br
+3: Come 1, ma salta il controllo di interlacciamento spaziale.
+.IPs <posizione_campo>
+Funziona come in tfields.
+.RE
+.PD 1
+.
+.TP
+.B mcdeint=[modalità[:parità[:qp]]]
+Deinterlacciatore che compensa il movimento.
+Richiede un campo per fotogramma in entrata e deve perciò essere usato insieme
+con tfields=1 oppure yadif=1/3 o equivalente.
+Motion compensating deinterlacer.
+.PD 0
+.RSs
+.IPs <modalità>
+0: veloce
+.br
+1: medio
+.br
+2: lento, stima di movimento iterativa
+.br
+3: molto lento, come 2, con in più fotogrammi di riferimento multipli
+.IPs <parità>
+0 oppure 1 decidono quale campo utilizzare
+(nota: ancora nessun rilevamento automatico!).
+.IPs "<qp>\ "
+Valori più alti dovrebbero portare un campo del vettore di movimento più fluido
+ma vettori singoli meno ottimizzati.
 .RE
 .PD 1
 .
@@ -6453,6 +6595,28 @@ usando il primo numero disponibile - nessun file sarà sovrascritto.
 Il filtro se non viene usato non appesantisce il programma e accetta uno spazio
 colore arbitrario, quindi può esser impostato senza problemi nel file di
 configurazione.
+.RE
+.
+.TP
+.B "ass\ \ \ \ "
+Sposta la renderizzazione dei sottotitoli SSA/ASS verso un punto arbitrario
+nella catena dei filtri.
+Utile solo con l'opzione \-ass.
+.RE
+.
+.TP
+.B blackframe[=percentuale:soglia]
+Rileva i fotogrammi che sono (quasi) completamente neri.
+Può essere utile per rilevare i passaggi tra capitoli o le pubblicità.
+Le linee stampate sono composte dal numero di fotogramma del fotogramma
+rilevato, la percentuale di nero, il tipo di fotogramma e il numero di
+fotogramma dell'ultimo fotogramma chiave.
+.RSs
+.IPs <percentuale>
+Percentuale di pixel che devono essere sotto la soglia (default: 98).
+.IPs <soglia>
+La soglia sotto la quale un valore di un pixel viene considerato nero
+(default: 32).
 .RE
 .
 .
@@ -7182,11 +7346,14 @@ valore massimo del moltiplicatore di Lagrange (default: 31.0)
 .RE
 .
 .TP
-.B vqscale=<1\-31>
+.B vqscale=<0\-31>
 Quantizzazione costante /\: codifica a qualità costante (seleziona una modalità
 di quantizzazione fissa).
 Valori minori indicano migliore qualità ma file di dimensioni maggiori
-(default: 0 (disabilitato)).
+(default: 0).
+Nel caso del codec snow, un valore 0 indica codifica senza perdita.
+Visto che gli altri codec non lo supportano, vqscale=0 sarà ignorato e verranno
+utilizzati quantizzatori variabili, che è il default.
 1 non è raccomandato (controlla vqmin per i dettagli).
 .
 .TP
@@ -7343,6 +7510,7 @@ strategia per la scelta tra fotogrammi I/P/B:
 Usa sempre il numero massimo di fotogrammi di tipo B (default).
 .IPs 1
 Evita fotogrammi B in scene ad alto movimento.
+Vedi l'opzione b_sensitivity per impostare meglio questa strategia.
 .IPs 2
 Posiziona più o meno ottimamente i fotogrammi B per ottenere massima qualità
 (più lento).
@@ -7350,6 +7518,17 @@ Vorresti probabilmente ridurre l'impatto sulla velocità configurando l'opzione
 brd_scale.
 .RE
 .PD 1
+.
+.TP
+.B b_sensitivity=<un qualsiasi intero maggiore di 0>
+Specifica quanto sensibilmente vb_strategy=1 rilevi il movimento ed eviti di
+utilizzare fotogrammi B (default: 40).
+Sensibilità più basse porteranno più fotogrammi B.
+Utilizzare più fotogrammi B solitamente aumenta il PSNR, ma averne troppi può
+peggiorare la qualità in scene ad alto movimento.
+A meno che non ci sia un alta concentrazione di movimento, b_sensivity può
+tranquillamente essere abbassata sotto al default; 10 è un valore ragionevole
+nella maggior parte dei casi.
 .
 .TP
 .B brd_scale=<0\-10>
@@ -8308,6 +8487,9 @@ Utilizza il quantizzatore MPEG invece di quello H.263.
 .TP
 .B "aic\ \ \ \ "
 previsione ac (previsione intra avanzata per H.263+)
+Abilita la previsione AC per MPEG-4 o la previsione intra avanzata per H.263+.
+Questo aumenterà un pochino la qualità (di circa 0.02 dB PSNR) e rallenterà un
+pochino la codifica (di circa l'1%).
 .br
 .I NOTA:
 vqmin deve essere 8 o più per H.263+ AIC.
