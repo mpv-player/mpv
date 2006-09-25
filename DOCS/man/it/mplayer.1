@@ -1,4 +1,4 @@
-.\" synced with 1.1260
+.\" synced with 1.1289
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -34,7 +34,7 @@
 .\" Titolo
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006-01-04" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2006-04-29" "The MPlayer Project" "The Movie Player"
 .
 .SH NOME
 mplayer  \- visualizzatore di film
@@ -604,6 +604,21 @@ Specifica un file di configurazione da interpretare dopo quelli di default.
 Stampa tutte le opzioni disponibili.
 .
 .TP
+.B \-msgcharset <set_caratteri>
+Converte i messaggi della console nel set di caratteri specificato (default:
+autodetect).
+Il testo verrà mostrato con la codifica specificata con l'opzione di
+configurazione --charset.
+Impostalo a "noconv" per disabilitare la conversione (per es.\& se hai
+problemi con iconv).
+.br
+.I NOTA:
+L'opzione ha effetto dopo che l'interpretazione della linea di comando è
+terminata.
+La variabile di ambiente MPLAYER_CHARSET può aiutarti per evitare sporcizia
+nelle prime linee stampate.
+.
+.TP
 .B \-msglevel <all=<livello>:<modulo>=<livello>:...>
 Controlla direttamente la verbosità per ogni modulo.
 Il modulo 'all' cambia la verbosità di tutti i moduli non esplicitamente
@@ -747,7 +762,7 @@ Il supporto deve essere compilato all'interno del programma, configurandolo
 con --enable-crash-debug.
 .
 .TP
-.B \-edlout <nomefile> (solo EDL)
+.B \-edlout <nomefile>
 Crea un nuovo file e scrive comandi della lista di decisione di modifica (EDL)
 in questo file.
 Durante la riproduzione, quando l'utente preme 'i', un'azione per saltare gli
@@ -788,11 +803,15 @@ Porta a distorsioni delle immagini!
 .
 .TP
 .B \-identify
+Scorciatoia per \-msglevel identify=4.
 Visualizza i parametri del file in un formato facile da interpretare.
 Stampa anche informazioni dettagliate sui sottotitoli, le tracce audio ed i
 vari ID.
-Lo script di appoggio TOOLS/\:midentify toglie il resto delle stampe di MPlayer e
-(si spera) corregge per la shell (shellescapes) i nomi dei file.
+In alcuni casi puoi avere più informazioni utilizzando \-msglevel identify=6.
+Per esempio, per un DVD verrà indicata la lunghezza di ogni titolo, così come
+l'ID del disco.
+Lo script di appoggio TOOLS/\:midentify toglie il resto delle stampe di MPlayer
+e (si spera) corregge per la shell (shellescapes) i nomi dei file.
 .
 .TP
 .B \-idle (vedi anche \-slave)
@@ -1247,7 +1266,7 @@ da angolazioni diverse.
 Qui puoi dire a MPlayer quale angolo usare (default: 1)
 .
 .TP
-.B \-edl <nomefile> (solo EDL)
+.B \-edl <nomefile>
 Abilita le azioni della lista di decisione di modifica (edit decision list, EDL)
 durante la riproduzione.
 Il video viene saltato e l'audio viene riprodotto o meno in maniera dipendente dai valori presenti nel
@@ -2333,7 +2352,7 @@ Scrive il suono su <nomefile> invece che sul default
 audiodump.wav.
 Se viene specificato nowaveheader il default è invece audiodump.pcm.
 .IPs "fast\ "
-Prova a fare un dump più veloce che in realtime.
+Prova a scrivere il file più velocemente che in tempo reale (realtime).
 Assicurati che l'uscita non venga troncata (solitamente con un messaggio
 "Troppi pacchetti video nel buffer!").
 E' normale che tu ottenga un messaggio
@@ -2623,7 +2642,7 @@ o dello schermo TV.
 .TP
 .B \-monitorpixelaspect <rapporto> (vedi anche \-aspect)
 Seleziona l'aspetto di un singolo pixel del tuo monitor o della TV.
-(default: disabled).
+(default: disabilitato).
 Sovrascrive l'opzione \-monitoraspect.
 Un valore di 0 lo disabilita, un valore di 1 significa pixel quadrati
 (valore corretto per (quasi?) tutti gli schermi LCD).
@@ -2730,9 +2749,9 @@ plugger).
 In configurazioni con Xinerama (p.es.\& un singolo desktop che si espande su
 monitor multipli) questa opzione indica a MPlayer su quale schermo deve visualizzare
 il filmato.
-Un valore di \-2 significa a schermo intero attraverso tutto lo schermo
-virtuale, \-1 significa a schermo intero sullo schermo su cui è attualmente
-posizionata la finestra.
+Un valore di \-2 significa a schermo intero su tutto lo schermo virtuale,
+\-1 significa a schermo intero sullo schermo su cui è attualmente posizionata
+la finestra.
 La posizione iniziale selezionata con l'opzione \-geometry è relativa allo
 schermo specificato.
 Funzionerà solitamente solo con "\-fstype \-fullscreen" o "\-fstype none".
@@ -4294,7 +4313,7 @@ sweep.
 Rimuove un seno alla frequenza indicata.
 Utile per eliminare il rumore a 50/60Hz su strumentazioni audio di bassa
 qualità.
-Probabilmente funziona solo su entrate mono.
+Probabilmente funziona solo su un segnale mono.
 .PD 0
 .RSs
 .IPs <frequenza>
@@ -4742,6 +4761,15 @@ Questo filtro non è testato, forse anche inutilizzabile.
 .B "gate\ \ \ "
 Filtro noise gate (limite rumore) simile al filtro audio comp.
 Questo filtro non è testato, forse anche inutilizzabile.
+.TP
+.B karaoke
+Semplice filtro di rimozione della voce che sfrutta il fatto che la voce sia
+generalmente registrata in mono e poi miscelata al 'centro' nel flusso audio
+finale.
+Attenti che questo filtro convertirà il vostro segnale in mono.
+Funziona bene con tracce a due canali, non perder tempo ad usarlo
+su qualcosa che non sia stereo a due canali.
+.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -6096,7 +6124,7 @@ altezza non cambiata.
 Espande ogni fotogramma ad altezza completa, ma riempie le linee alternate
 con il colore nero. Il framerate non viene cambiato.
 .IPs 4
-Produce l'interleave di linee pari da fotogrammi pari con linee dispari da
+Inframezza le linee pari di ogni fotogramma pari con le linee dispari dei
 fotogrammi dispari.
 Genera un fotogramma ad altezza completa a metà della frequenza (framerate).
 .RE
@@ -6432,7 +6460,7 @@ configurazione.
 .SH "OPZIONI GENERALI DI CODIFICA (SOLO MENCODER)"
 .
 .TP
-.B \-audio-delay <0.0\-...>
+.B \-audio-delay <valore a virgola mobile>
 Ritarda l'audio oppure il video riempiendo il campo del ritardo
 nell'intestazione (default: 0.0).
 Questo non ritarda uno dei flussi durante la codifica ma il riproduttore vedrà
@@ -6523,7 +6551,7 @@ E' mantenuta solo per retrocompatibilità e possibilmente verrà rimossa
 in una delle prossime versioni.
 .
 .TP
-.B \-hr-edl-seek (solo EDL)
+.B \-hr-edl-seek
 Utilizza un metodo più preciso ma molto più lento per saltare le aree.
 Le aree marcate come da saltare non vengono saltate, invece tutti i fotogrammi
 vengono comunque decodificati, ma solo quelli necessari vengono scritti sul
@@ -6702,7 +6730,7 @@ sintassi seguente:
 .
 .PP
 Dove <codec> può essere: lavc, xvidenc, divx4, lame, toolame, twolame,
-nuv, vfw, faac, x264enc, mpeg, lavf.
+nuv, xvfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6772,6 +6800,7 @@ gli stessi parametri e pass=2.
 Sovrascrive l'argomento pass e utilizza la libreria VBR (Variable
 Bit Rate, bitrate variabile) di XviD invece di quella di DivX4.
 Le opzioni disponibili sono:
+.PD 0
 .RSs
 .IPs 0
 codifica a singolo passo (uguale a non mettere pass=x sulla linea di comando)
@@ -6781,6 +6810,7 @@ Il file AVI ottenuto può essere mandato a /dev/\:null.
 .IPs 2
 Secondo passo (finale) della codifica a due passi.
 .RE
+.PD 1
 .
 .
 .SS lame (\-lameopts)
@@ -8202,6 +8232,22 @@ Cerca di codificare ogni MB con MV=<0,0> e seleziona il migliore.
 Non ha effetto se mbd=0.
 .
 .TP
+.B mv0_threshold=<qualsiasi numero positivo>
+Quando i vettori di movimento circostanti sono <0,0> e il punteggio della
+stima del movimento del blocco corrente è minore di mv0_threshold, allora
+viene utilizzato <0,0> come vettore ed i successivi controlli sulla stima
+del movimento vengono ignorati (default:256).
+Abbassare mv0_threshold a 0 può dare un leggero (0.01dB) incremento del
+PSNR e migliorare l'aspetto del video codificato.
+Aumentare mv0_threshold oltre 320 causerà un abbassamento del PSNR e
+della qualità visiva.
+Valori più alti velocizzano leggermente la codifica (normalmente meno
+dell'1%, a seconda delle altre opzioni utilizzate).
+.br
+.I NOTA:
+Questa opzione non richiede l'abilitazione di mv0.
+.
+.TP
 .B qprd (solo per mbd=2) 
 rapporto di distorsione del parametro di quantizzazione (QP) ottimale per il
 dato lambda per ogni macroblock.
@@ -8350,8 +8396,24 @@ Attualmente funziona solo se la rilevazione del cambio scena è disattivata
 (sc_threshold=1000000000).
 .
 .TP
-.B vglobal
-FIXME: Da documentare.
+.B vglobal=<0\-3>
+Controlla la scrittura dell'intestazione video globale.
+.PD 0
+.RSs
+.IPs 0
+Il codec decide quando deve scrivere l'intestazione globale (default).
+.IPs 1
+Scrive l'intestazione globale solo in extradata (necessario per .mp4/MOV/NUT).
+.IPs 2
+Scrive l'intestazione globale solo prima dei fotogrammi chiave.
+.IPs 3
+Combina 1 e 2.
+.RE
+.PD 1
+.
+.TP
+.B aglobal=<0\-3>
+Analogo a vglobal ma per l'intestazione audio.
 .
 .
 .SS nuv (\-nuvopts)
@@ -9326,7 +9388,7 @@ Spaziale: I vettori di movimento sono estrapolati dai blocchi vicini.
 Temporale: I vettori di movimento vengono interpolati dai fotogrammi di tipo
 P che seguono.
 .IPs 3
-Automatica: Il codec sceglie tra la spaziale e la temporale per ciascun frame.
+Automatica: Il codec sceglie tra spaziale e temporale per ciascun fotogramma.
 .RE
 .PD 1
 .RS
@@ -9451,7 +9513,7 @@ Abilita l'ottimizzazione rate-distorsion (?) dei tipi di macroblocchi nei
 fotogrammi I e P.
 .IPs 7
 Abilita l'ottimizzazione rate-distortion dei vettori di movimento e delle
-modalità intra. (la migliore)
+modalità intra. (qualità migliore)
 .RE
 .PD 1
 .RS
@@ -9507,6 +9569,16 @@ Esegue una rilevazione anticipata dello scarto nei fotogrammi P (default:
 abilitato).
 Questo solitamente aumenta la velocità senza dare problemi, ma alcune volte può
 portare artefatti in zone con nessun dettaglio, come il cielo.
+.
+.TP
+.B (no)dct_decimate
+Elimina i blocchi dct nei fotogrammi P che contengono solo un singolo
+coefficente piccolo (default: abilitato).
+Verranno eliminati alcuni dettagli ma verranno salvati bit che potranno
+essere usati in altri fotogrammi, sperando in questo modo di migliorare la
+qualità percepita globale.
+Se stai codificando filmati (non anime) con un bitrate alto puoi voler
+disabilitare questa opzione per mantenere il massimo dettaglio possibile.
 .
 .TP
 .B nr=<0\-100000>
@@ -9652,6 +9724,16 @@ prima di continuare con il fotogramma successivo.
 .RE
 .
 .
+.SS xvfw (\-xvfwopts)
+.
+La codifica con i codec Video for Windows è fondamentalmente obsoleta a meno
+che non si voglia codificare con un qualche oscuro codec di frontiera.
+.
+.TP
+.B codec=<nome>
+Il nome del file del codec binario che si vuole utilizzare.
+.
+.
 .SS MPEG muxer (\-mpegopts)
 .
 Il muxer MPEG può generare 5 tipi di flusso, ognuno dei quali ha una serie
@@ -9746,8 +9828,13 @@ Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .SS FFmpeg libavformat muxer (\-lavfopts) (vedi anche \-of lavf)
 .
 .TP
-.B "delay\ \ "
-FIXME: Da documentare.
+.B delay=<valore>
+Attualmente significativo solo per MPEG[12]: Distanza massima permessa,
+in secondi, tra il timer di riferimento del flusso di uscita (SCR) e
+il timer di decodifica (DTS) per ogni flusso presente (ritardo tra
+demux e decodifica).
+Il default è 0.7 (come richiesto dallo standard definito da MPEG).
+Valori più alti richiedono buffer più grandi e non devono essere usati.
 .
 .TP
 .B format=<formato_contenitore>
@@ -9783,19 +9870,28 @@ Formato contenitore Sony Digital Video
 .PD 1
 .TP
 .B i_certify_that_my_video_stream_does_not_use_b_frames
-FIXME: Da documentare.
+MEncoder non può assegnare valori corretti di timestamps (marcatori di tempo)
+quando ci sono dei fotogrammi di tipo B nel flusso video, ottenendo così
+delle codifiche errate.
 .
 .TP
-.B muxrate
-FIXME: Da documentare.
+.B muxrate=<velocità>
+Valore nominale del flusso multiplexato, in bit per secondo;
+attualmente significativo solo per MPEG[12].
+A volte è necessario aumentarlo per evitare errori di 'buffer underflows'.
 .
 .TP
-.B packetsize
-FIXME: Da documentare.
+.B packetsize=<dimensione>
+Dimensione, in byte, del pacchetto unitario del formato selezionato.
+Quando si scrivono file in formato MPEG[12] i valori di default sono:
+2324 per S[VCD], 2048 in tutti gli altri formati.
 .
 .TP
-.B preload
-FIXME: Da documentare.
+.B preload=<distanza>
+Attualmente significativo solo per MPEG[12]: Distanza iniziale,
+in secondi, tra il timer di riferimento del flusso di uscita (SCR) e
+il timer di decodifica (DTS) per ogni flusso presente (ritardo tra
+demux e decodifica).
 .
 .
 .
@@ -9807,6 +9903,12 @@ FIXME: Da documentare.
 .
 Ci sono alcuni variabili d'ambiente che possono essere usate per controllare il
 comportamento di MPlayer e MEncoder.
+.
+.TP
+.B MPLAYER_CHARSET (vedi anche \-msgcharset)
+Converte i messaggi della console nel set di caratteri specificato (default:
+autodetect).
+Il valore "noconv" significa nessuna conversione.
 .
 .TP
 .B MPLAYER_HOME
