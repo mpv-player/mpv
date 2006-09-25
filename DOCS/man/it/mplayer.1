@@ -1,4 +1,4 @@
-.\" synced with 1.1289
+.\" synced with 18570
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -1248,6 +1248,9 @@ Dice a MPlayer di leggere la lista dei canali da <nomefile>.
 Il default è ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (basato
 sul tipo di scheda) oppure ~/.mplayer/\:channels.conf come
 ultima risorsa.
+.IPs timeout=<1\-30>
+Massimo numero di secondi da aspettare durante il tentativo di sintonizzare
+una frequenza, prima di abbandonare (default:30).
 .RE
 .PD 1
 .
@@ -7005,13 +7008,13 @@ esclusivo con br)
 complessità del tipo di oggetto
 .PD 0
 .RSs
-.IPs 0
-MAIN (default)
 .IPs 1
-LOW
+MAIN (default)
 .IPs 2
-SSR
+LOW
 .IPs 3
+SSR
+.IPs 4
 LTP (estremamente lento)
 .RE
 .PD 1
@@ -8285,6 +8288,11 @@ rifinitura della qualità del subpel (per qpel) (default: 8 (alta qualità))
 .br
 .I NOTA:
 Questo ha un significativo effetto sulla velocità.
+.
+.TP
+.B refs=<1\-8>
+numero di fotogrammi di riferimento da considerare per la compensazione di
+movimento (solo snow) (default: 1)
 .
 .TP
 .B "psnr\ \ \ "
