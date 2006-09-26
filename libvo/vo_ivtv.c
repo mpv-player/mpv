@@ -82,7 +82,7 @@ ivtv_reset (int blank_screen)
   sd.hide_last = blank_screen;
   sd.pts_stop = 0;
  
-  if (ioctl (ivtv_fd, IVTV_IOC_S_STOP_DECODE, &sd) < 0)
+  if (ioctl (ivtv_fd, IVTV_IOC_STOP_DECODE, &sd) < 0)
   {
     mp_msg (MSGT_VO, MSGL_ERR,
             "IVTV_IOC_STOP_DECODE: %s\n", strerror (errno));
@@ -92,7 +92,7 @@ ivtv_reset (int blank_screen)
   sd1.gop_offset = 0;
   sd1.muted_audio_frames = 0;
   
-  if (ioctl (ivtv_fd, IVTV_IOC_S_START_DECODE, &sd1) < 0)
+  if (ioctl (ivtv_fd, IVTV_IOC_START_DECODE, &sd1) < 0)
   {
     mp_msg (MSGT_VO, MSGL_ERR,
             "IVTV_IOC_START_DECODE: %s\n", strerror (errno));
