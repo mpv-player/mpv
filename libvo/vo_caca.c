@@ -28,6 +28,14 @@
 #include "mp_msg.h"
 
 #include <caca.h>
+#ifdef CACA_API_VERSION_1
+  /* Include the pre-1.x compatibility header.
+   * Once libcaca 1.x is widespread, vo_caca should be fully
+   * converted to the new API. A patch exists:
+   * http://lists.mplayerhq.hu/pipermail/mplayer-dev-eng/2006-July/044674.html
+   */
+  #include <caca0.h>
+#endif
 
 static vo_info_t info = {
   "libcaca",

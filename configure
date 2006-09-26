@@ -4172,6 +4172,9 @@ if test "$_caca" = auto ; then
   if ( caca-config --version ) >> "$TMPLOG" 2>&1 ; then
   cat > $TMPC << EOF
 #include <caca.h>
+#ifdef CACA_API_VERSION_1
+  #include <caca0.h>
+#endif
 int main(void) { (void) caca_init(); return 0; }
 EOF
   cc_check `caca-config --libs` && _caca=yes
