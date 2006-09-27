@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19738 -->
+<!-- synced with r19973 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -205,4 +205,3 @@ Public License Version 2.
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
-&users-vs-dev.xml;
