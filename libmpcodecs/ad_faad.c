@@ -243,6 +243,10 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     if(faac_finfo.error > 0) {
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: error: %s, trying to resync!\n",
               faacDecGetErrorMessage(faac_finfo.error));
+      if (sh->a_in_buffer_len <= 0) {
+        errors = MAX_FAAD_ERRORS;
+        break;
+      }
       sh->a_in_buffer_len--;
       memmove(sh->a_in_buffer,&sh->a_in_buffer[1],sh->a_in_buffer_len);
       aac_sync(sh);
