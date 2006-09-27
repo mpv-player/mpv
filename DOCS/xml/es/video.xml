@@ -210,8 +210,7 @@ mplayer-users por un controlador con soporte para MMX/3DNow.
 <title>Tarjetas nVidia</title>
 
 <para>
-nVidia no es siempre una buena elección bajo Linux (de acuerdo con nVidia esto
-<link linkend="nvidia-opinions">no es verdad</link>)... El controlador de
+nVidia no es siempre una buena elección bajo Linux ... El controlador de
 código abierto de XFree86 tiene soporte en la mayoría de los casos, pero para
 algunas tarjetas, tiene que usar un controlador de código-cerrado de nVidia,
 disponible en

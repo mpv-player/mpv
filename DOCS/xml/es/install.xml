@@ -34,21 +34,9 @@ núcleo 2.4.x es recomendado.
   por lo tanto muy importante.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - versiones sugeridas: <emphasis role="bold">2.95.3</emphasis>
-  (quizá <emphasis role="bold">2.95.4</emphasis>) y <emphasis role="bold">3.2+</emphasis>.
-  <emphasis role="bold">Nunca</emphasis> use las versiones 2.96 o 3.0.x! Ellas generan código con fallas para
-  <application>MPlayer</application>. Si decide cambiar su gcc de versión 2.96, 
-  entonces no se decida en favor de 3.x simplemente por que es más nuevo!
-  Las primeras versiones de 3.x fueron quizá hasta más defectuosas que 2.96.
-  Entonces, vuelva a la versión 2.95.x (baje la versión también para 
-  <systemitem class="library">libstdc++</systemitem>, otros programas
-  podrían necesitarla) o no cambie las versiones para nada (pero en ese caso,
-  este preparado para problemas en tiempo de ejecución). Si se decide por 
-  3.x, trate de usar la última versión, las primeras tuvieron muchos problemas,
-  y asegúrese de usar por lo menos 3.1, está probado y funciona. Para información
-  detallada sobre los problemas de gcc 2.96 (que todavía NO están arreglados, ¡pero
-  han sido SOLUCIONADOS en <application>MPlayer</application>!), vea la sección
-  <link linkend="gcc-296">gcc 2.96</link> y la <xref linkend="faq"/>.
+  <emphasis role="bold">gcc</emphasis> - versiones recomendadas son
+  2.95 y 3.3+. 2.96 y 3.0.x generan código con fallas, 3.1 y 3.2
+  tambien tuvieron sus problemas.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - versión sugerida <emphasis role="bold">siempre la 

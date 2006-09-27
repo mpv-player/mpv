@@ -101,8 +101,7 @@ La compilación se detiene con un mensaje de error similar a este:
 </para></question>
 <answer><para>
 Este es un problema conocido de <application>gcc</application> 3.2, actualice
-a 3.3 para solucionar el problema. Cómo instalar gcc está descrito en la
-sección <link linkend="gcc-296">gcc 2.96</link>. Alternativamente puede usar
+a 3.3 para solucionar el problema. Alternativamente puede usar
 una biblioteca FAAD externa como se describe en la sección <link linkend="aac">AAC</link>.
 </para></answer>
 </qandaentry>
@@ -120,8 +119,7 @@ La compilación se detiene con un mensaje de error similar a este:
 </para></question>
 <answer><para>
 Este es un problema conocido de <application>gcc</application> 3.0.4, actualice
-a 3.1 para solucionar el problema. Cómo instalar gcc está descrito en la
-sección <link linkend="gcc-296">gcc 2.96</link>.
+a 3.1 para solucionar el problema.
 </para></answer>
 </qandaentry>
 
@@ -134,86 +132,6 @@ Configure termina con este texto, y ¡<application>MPlayer</application> no compi
 <answer><para>
 Si su gcc no está instalado correctamente, compruebe el archivo
 <filename>configure.log</filename> para más detalles.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-¿Cuál es el problema con gcc 2.96?
-</para></question>
-<answer><para>
-<emphasis role="bold">¡Desaconsejamos en gran medida el uso de gcc 2.96!</emphasis>
-Léa <link linkend="gcc-296">este</link> documento para detalles acerca de por qué
-Red Hat liberó gcc 2.96 y qué problemas hay acerca de eso. Si realmente sigue
-queriendo usarlo, asegúrese de obtener la última liberación y proporcione la
-opción <option>--disable-gcc-checking</option> a configure. Recuerde que lo que
-pueda ocurrir será culpa suya a partir de este punto. <emphasis role="bold">No</emphasis>
-informe de errores, <emphasis role="bold">no</emphasis> pida ayuda en las listas
-de correo. <emphasis role="bold">No</emphasis> le ayudaremos en el caso de que
-tenga problemas.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Muy bien, yo tengo gcc 3.0.1 de Red Hat/Mandrake, ¡entonces estoy bien!
-</para></question>
-<answer><para>
-No, porque también hay problemas con esos compiladores.
-Para comprobar el estado del soporte de compiladores de
-<application>MPlayer</application>, vea la sección de
-<link linkend="install">Instalación</link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-.. gcc 2.96 ... (Sí, ¡alguna gente SIGUE molestándonos con gcc 2.96!)
-</para></question>
-<answer><para>
-Citado de un <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">correo</ulink>
-A'rpi envió a la lista <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
-(la palabra 'ideg' se describe más abajo):
-<blockquote>
-<para>
-Y tenemos idegs. Y nuestro contador de idegs se desborda una y otra vez.
-</para>
-<para>
-Desafortunadamente <application>MPlayer</application> está fuera de
-nuestro control. Es usado por lamers, usuarios de Linux que no quieren
-seguri usando Windows, y nunca han intentado
-compilar un kernel. Ellos instalan (con las opciones por defecto) Mandrake o
-Red Hat o SuSE, y sin RTFM'ear envían mensajes diciendo '¡no funciona! ¡ayúdame!
-¡por favor! ¡soy nuevo en Linux! ¡ayuda! ¡oh! ¡ayúdame!'. No podemos parar esto,
-pero por lo menos podemos forzarlos a RTFM y a leer los mensajes del ./configure
-y <application>MPlayer</application>
-(Nota del traductor: RTFM son las siglas de Read The Fucking Manual en inglés, que
-viene a ser 'Lea el jodido manual' y es muy usado en la jerga de Linux.)
-</para>
-<para>
-Y usted chico sabelotodo venga a molestarnos con gcc 2.96 y paquetes binarios.
-En lugar de ser usuarios que ayuden o hagan parches para resolver problemas.
-</para>
-<para>
-La mitad de nuestro tiempo libre/de sobra es dedicado a seguir respondiendo
-correos y hacer nuevos trucos y comprobar el configure para evitar este
-tipo de correos.
-</para>
-<para>
-Y aquí hay una balanza. En un lado está usted, chico sabelotodo, diciendonos
-que somos muy malos porque no nos gusta el gcc 2.96 que falla tanto, y en el
-otro lado están los 'novatos en Linux' chicos que nos cuentan que gcc 2.96 falla.
-</para>
-<para>
-Conclusión: No podemos ser buenos. La mitad de la gente siempre dirá que somos malos.
-</para>
-<para>
-Quizá deberíamos cerrar el proyecto, hacerlo de código cerrado, comercial, y
-proveer soporte de instalación para él. Entonces podríamos dejar el trabajo
-actual, y podríamos desarrollar más rápido, y podríamos ganar mucho dinero con
-él y comprar una gran casa, etc etc. ¿Realmente quiere eso? Lo parece.
-</para>
-</blockquote>
 </para></answer>
 </qandaentry>
 
@@ -351,7 +269,9 @@ A mí también. :)
 ¿Hay alguna lista de correo en <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Sí. Vea la sección <link linkend="mailinglists">listas de correo</link>.
+Sí. Vea la sección
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">listas de correo</ulink>
+de nuestro homepage.
 </para></answer>
 </qandaentry>
 
