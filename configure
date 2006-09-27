@@ -222,7 +222,7 @@ Optional features:
   --disable-tv-v4l1      disable Video4Linux TV Interface support [autodetect]
   --disable-tv-v4l2      disable Video4Linux2 TV Interface support [autodetect]
   --disable-tv-bsdbt848  disable BSD BT848 Interface support [autodetect]
-  --disable-pvr          disable Video4Linux2/IVTV PVR support [autodetect]
+  --disable-pvr          disable Video4Linux2 MPEG PVR support [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-network      disable network support (for: http/mms/rtp) [enable]
   --enable-winsock2      enable winsock2 usage [autodetect]
@@ -6780,7 +6780,7 @@ if test "$_radio_v4l" = no && test "$_radio_v4l2" = no && test "$_radio" = yes ;
     die "Radio driver requires V4L or V4L2!"
 fi
 
-echocheck "Video 4 Linux 2/IVTV PVR interface"
+echocheck "Video 4 Linux 2 MPEG PVR interface"
 if test "$_pvr" = auto ; then
  _pvr=no
  if test "$_tv_v4l2" = yes && linux ; then
@@ -6789,8 +6789,7 @@ if test "$_pvr" = auto ; then
 #include <inttypes.h>
 #include <linux/types.h>
 #include <linux/videodev2.h>
-#include <linux/ivtv.h>
-int main(void) { return 0; }
+int main(void) { struct v4l2_ext_controls ext; return 0; }
 EOF
   cc_check && _pvr=yes
  fi
@@ -8036,7 +8035,7 @@ $_def_radio_v4l
 /* Enable Video 4 Linux 2 Radio interface support */
 $_def_radio_v4l2
 
-/* Enable Video 4 Linux 2/IVTV PVR support */
+/* Enable Video 4 Linux 2 MPEG PVR support */
 $_def_pvr
 
 /* Define if your processor stores words with the most significant

@@ -1,6 +1,7 @@
 /*
  *  Copyright (C) 2006 Benjamin Zores
- *   Stream layer for WinTV PVR-150/250/350 (a.k.a IVTV) PVR cards.
+ *   Stream layer for hardware MPEG 1/2/4 encoders a.k.a PVR
+ *    (such as WinTV PVR-150/250/350/500 (a.k.a IVTV), pvrusb2 and cx88).
  *   See http://ivtvdriver.org/index.php/Main_Page for more details on the
  *    cards supported by the ivtv driver.
  *
@@ -34,7 +35,6 @@
 #include <sys/poll.h>
 #include <linux/types.h>
 #include <linux/videodev2.h>
-#include <linux/ivtv.h>
 
 #include "mp_msg.h"
 #include "help_mp.h"
@@ -43,73 +43,22 @@
 #include "tv.h"
 
 #define PVR_DEFAULT_DEVICE "/dev/video0"
+#define PVR_MAX_CONTROLS 10
 
 /* logging mechanisms */
 #define LOG_LEVEL_PVR  "[pvr]"
 #define LOG_LEVEL_V4L2 "[v4l2]"
 #define LOG_LEVEL_ENCODER "[encoder]"
 
-/* IVTV driver settings (see http://ivtvdriver.org/index.php/Ivtvctl ) */
-
-/* codec aspect ratio (1:1, 4:3, 16:9, 2.21:1) */
-#define PVR_ASPECT_RATIO_1_1                                   1
-#define PVR_ASPECT_RATIO_4_3                                   2
-#define PVR_ASPECT_RATIO_16_9                                  3
-#define PVR_ASPECT_RATIO_2_21_1                                4
-
-/* audio codec sample rate (32KHz, CD 44.1 KHz, AC97 48 KHz) */
-#define PVR_AUDIO_SAMPLE_RATE_44_1_KHZ                         0x0000
-#define PVR_AUDIO_SAMPLE_RATE_48_KHZ                           0x0001
-#define PVR_AUDIO_SAMPLE_RATE_32_KHZ                           0x0002
-
-/* audio codec layer (1 or 2) */
-#define PVR_AUDIO_LAYER_1                                      0x0004
-#define PVR_AUDIO_LAYER_2                                      0x0008
-
-/* audio codec bitrate */
-#define PVR_AUDIO_BITRATE_32                                   0x0010
-#define PVR_AUDIO_BITRATE_L1_64                                0x0020
-#define PVR_AUDIO_BITRATE_L1_96                                0x0030
-#define PVR_AUDIO_BITRATE_L1_128                               0x0040
-#define PVR_AUDIO_BITRATE_L1_160                               0x0050
-#define PVR_AUDIO_BITRATE_L1_192                               0x0060
-#define PVR_AUDIO_BITRATE_L1_224                               0x0070
-#define PVR_AUDIO_BITRATE_L1_256                               0x0080
-#define PVR_AUDIO_BITRATE_L1_288                               0x0090
-#define PVR_AUDIO_BITRATE_L1_320                               0x00A0
-#define PVR_AUDIO_BITRATE_L1_352                               0x00B0
-#define PVR_AUDIO_BITRATE_L1_384                               0x00C0
-#define PVR_AUDIO_BITRATE_L1_416                               0x00D0
-#define PVR_AUDIO_BITRATE_L1_448                               0x00E0
-#define PVR_AUDIO_BITRATE_L2_48                                0x0020
-#define PVR_AUDIO_BITRATE_L2_56                                0x0030
-#define PVR_AUDIO_BITRATE_L2_64                                0x0040
-#define PVR_AUDIO_BITRATE_L2_80                                0x0050
-#define PVR_AUDIO_BITRATE_L2_96                                0x0060
-#define PVR_AUDIO_BITRATE_L2_112                               0x0070
-#define PVR_AUDIO_BITRATE_L2_128                               0x0080
-#define PVR_AUDIO_BITRATE_L2_160                               0x0090
-#define PVR_AUDIO_BITRATE_L2_192                               0x00A0
-#define PVR_AUDIO_BITRATE_L2_224                               0x00B0
-#define PVR_AUDIO_BITRATE_L2_256                               0x00C0
-#define PVR_AUDIO_BITRATE_L2_320                               0x00D0
-#define PVR_AUDIO_BITRATE_L2_384                               0x00E0
-
 /* audio codec mode */
 #define PVR_AUDIO_MODE_ARG_STEREO                              "stereo"
 #define PVR_AUDIO_MODE_ARG_JOINT_STEREO                        "joint_stereo"
 #define PVR_AUDIO_MODE_ARG_DUAL                                "dual"
 #define PVR_AUDIO_MODE_ARG_MONO                                "mono"
-#define PVR_AUDIO_MODE_STEREO                                  0x0000
-#define PVR_AUDIO_MODE_JOINT_STEREO                            0x0100
-#define PVR_AUDIO_MODE_DUAL                                    0x0200
-#define PVR_AUDIO_MODE_MONO                                    0x0300
 
 /* video codec bitrate mode */
 #define PVR_VIDEO_BITRATE_MODE_ARG_VBR                         "vbr"
 #define PVR_VIDEO_BITRATE_MODE_ARG_CBR                         "cbr"
-#define PVR_VIDEO_BITRATE_MODE_VBR                             0
-#define PVR_VIDEO_BITRATE_MODE_CBR                             1
 
 /* video codec stream type */
 #define PVR_VIDEO_STREAM_TYPE_PS                               "ps"
@@ -118,8 +67,6 @@
 #define PVR_VIDEO_STREAM_TYPE_DVD                              "dvd"
 #define PVR_VIDEO_STREAM_TYPE_VCD                              "vcd"
 #define PVR_VIDEO_STREAM_TYPE_SVCD                             "svcd"
-#define PVR_VIDEO_STREAM_TYPE_DVD_S1                           "dvds1"
-#define PVR_VIDEO_STREAM_TYPE_DVD_S2                           "dvds2"
 
 /* command line arguments */
 int pvr_param_aspect_ratio = 0;
@@ -181,16 +128,20 @@ pvr_init (void)
   pvr->height = -1;
   pvr->freq = NULL;
 
-  /* encoder params */
-  pvr->aspect = -1;
-  pvr->samplerate = -1;
-  pvr->layer = -1;
-  pvr->audio_rate = -1;
-  pvr->audio_mode = -1;
-  pvr->bitrate = -1;
-  pvr->bitrate_mode = -1;
-  pvr->bitrate_peak = -1;
-  pvr->stream_type = -1;
+  /* set default encoding settings
+   * may be overlapped by user parameters
+   * Use VBR MPEG_PS encoding at 6 Mbps (peak at 9.6 Mbps)
+   * with 48 KHz L2 384 kbps audio.
+   */
+  pvr->aspect = V4L2_MPEG_VIDEO_ASPECT_4x3;
+  pvr->samplerate = V4L2_MPEG_AUDIO_SAMPLING_FREQ_48000;
+  pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_2;
+  pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_384K;
+  pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_STEREO;
+  pvr->bitrate = 6000000;
+  pvr->bitrate_mode = V4L2_MPEG_VIDEO_BITRATE_MODE_VBR;
+  pvr->bitrate_peak = 9600000;
+  pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_PS;
   
   return pvr;
 }
@@ -212,8 +163,6 @@ pvr_uninit (struct pvr_t *pvr)
   free (pvr);
 }
 
-/* IVTV layer */
-
 static void
 parse_encoder_options (struct pvr_t *pvr)
 {
@@ -221,7 +170,7 @@ parse_encoder_options (struct pvr_t *pvr)
     return;
 
   /* -pvr aspect=digit */
-  if (pvr_param_aspect_ratio >= 1 && pvr_param_aspect_ratio <= 4)
+  if (pvr_param_aspect_ratio >= 0 && pvr_param_aspect_ratio <= 3)
     pvr->aspect = pvr_param_aspect_ratio;
 
   /* -pvr arate=x */
@@ -230,13 +179,13 @@ parse_encoder_options (struct pvr_t *pvr)
     switch (pvr_param_sample_rate)
     {
     case 32000:
-      pvr->samplerate = PVR_AUDIO_SAMPLE_RATE_32_KHZ;
+      pvr->samplerate = V4L2_MPEG_AUDIO_SAMPLING_FREQ_32000;
       break;
     case 44100:
-      pvr->samplerate = PVR_AUDIO_SAMPLE_RATE_44_1_KHZ;
+      pvr->samplerate = V4L2_MPEG_AUDIO_SAMPLING_FREQ_44100;
       break;
     case 48000:
-      pvr->samplerate = PVR_AUDIO_SAMPLE_RATE_48_KHZ;
+      pvr->samplerate = V4L2_MPEG_AUDIO_SAMPLING_FREQ_48000;
       break;
     default:
       break;
@@ -245,81 +194,166 @@ parse_encoder_options (struct pvr_t *pvr)
 
   /* -pvr alayer=x */
   if (pvr_param_audio_layer == 1)
-    pvr->layer = PVR_AUDIO_LAYER_1;
+    pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_1;
   else if (pvr_param_audio_layer == 2)
-    pvr->layer = PVR_AUDIO_LAYER_2;
+    pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_2;
+  else if (pvr_param_audio_layer == 3)
+    pvr->layer = V4L2_MPEG_AUDIO_ENCODING_LAYER_3;
 
   /* -pvr abitrate=x */
   if (pvr_param_audio_bitrate != 0)
   {
-    /* set according to layer or use layer 1 by default if not specified */
-    switch (pvr_param_audio_bitrate)
+    if (pvr->layer == V4L2_MPEG_AUDIO_ENCODING_LAYER_1)
     {
-    case 32:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_32;
-      break;
-    case 48:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L2_48;
-      break;
-    case 56:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L2_56;
-      break;
-    case 64:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_64 : PVR_AUDIO_BITRATE_L1_64;
-      break;
-    case 80:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L2_80;
-      break;
-    case 96:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_96 : PVR_AUDIO_BITRATE_L1_96;
-      break;
-    case 112:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L2_112;
-      break;
-    case 128:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_128 : PVR_AUDIO_BITRATE_L1_128;
-      break;
-    case 160:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_160 : PVR_AUDIO_BITRATE_L1_160;
-      break;
-    case 192:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_192 : PVR_AUDIO_BITRATE_L1_192;
-      break;
-    case 224:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_224 : PVR_AUDIO_BITRATE_L1_224;
-      break;
-    case 256:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_256 : PVR_AUDIO_BITRATE_L1_256;
-      break;
-    case 288:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L1_288;
-      break;
-    case 320:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_320 : PVR_AUDIO_BITRATE_L1_320;
-      break;
-    case 352:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L1_352;
-      break;
-    case 384:
-      pvr->audio_rate = (pvr_param_audio_layer == 2) ?
-        PVR_AUDIO_BITRATE_L2_384 : PVR_AUDIO_BITRATE_L1_384;
-      break;
-    case 416:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L1_416;
-      break;
-    case 448:
-      pvr->audio_rate = PVR_AUDIO_BITRATE_L1_448;
-      break;
-    default:
-      break;
+      switch (pvr_param_audio_bitrate)
+      {
+      case 32:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_32K;
+        break;
+      case 64:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_64K;
+        break;
+      case 96:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_96K;
+        break;
+      case 128:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_128K;
+        break;
+      case 160:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_160K;
+        break;
+      case 192:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_192K;
+        break;
+      case 224:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_224K;
+        break;
+      case 256:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_256K;
+        break;
+      case 288:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_288K;
+        break;
+      case 320:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_320K;
+        break;
+      case 352:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_352K;
+        break;
+      case 384:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_384K;
+        break;
+      case 416:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_416K;
+        break;
+      case 448:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L1_BITRATE_448K;
+        break;
+      default:
+        break;
+      }
+    }
+    
+    else if (pvr->layer == V4L2_MPEG_AUDIO_ENCODING_LAYER_2)
+    {
+      switch (pvr_param_audio_bitrate)
+      {
+      case 32:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_32K;
+        break;
+      case 48:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_48K;
+        break;
+      case 56:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_56K;
+        break;
+      case 64:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_64K;
+        break;
+      case 80:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_80K;
+        break;
+      case 96:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_96K;
+        break;
+      case 112:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_112K;
+        break;
+      case 128:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_128K;
+        break;
+      case 160:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_160K;
+        break;
+      case 192:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_192K;
+        break;
+      case 224:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_224K;
+        break;
+      case 256:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_256K;
+        break;
+      case 320:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_320K;
+        break;
+      case 384:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L2_BITRATE_384K;
+        break;
+      default:
+        break;
+      }
+    }
+
+    else if (pvr->layer == V4L2_MPEG_AUDIO_ENCODING_LAYER_3)
+    {
+      switch (pvr_param_audio_bitrate)
+      {
+      case 32:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_32K;
+        break;
+      case 40:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_40K;
+        break;
+      case 48:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_48K;
+        break;
+      case 56:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_56K;
+        break;
+      case 64:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_64K;
+        break;
+      case 80:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_80K;
+        break;
+      case 96:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_96K;
+        break;
+      case 112:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_112K;
+        break;
+      case 128:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_128K;
+        break;
+      case 160:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_160K;
+        break;
+      case 192:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_192K;
+        break;
+      case 224:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_224K;
+        break;
+      case 256:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_256K;
+        break;
+      case 320:
+        pvr->audio_rate = V4L2_MPEG_AUDIO_L3_BITRATE_320K;
+        break;
+      default:
+        break;
+      }
     }
   }
   
@@ -327,15 +361,13 @@ parse_encoder_options (struct pvr_t *pvr)
   if (pvr_param_audio_mode)
   {
     if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_STEREO))
-      pvr->audio_mode = PVR_AUDIO_MODE_STEREO;
+      pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_STEREO;
     else if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_JOINT_STEREO))
-      pvr->audio_mode = PVR_AUDIO_MODE_JOINT_STEREO;
+      pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_JOINT_STEREO;
     else if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_DUAL))
-      pvr->audio_mode = PVR_AUDIO_MODE_DUAL;
+      pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_DUAL;
     else if (!strcmp (pvr_param_audio_mode, PVR_AUDIO_MODE_ARG_MONO))
-      pvr->audio_mode = PVR_AUDIO_MODE_MONO;
-    else /* for anything else, set to stereo */
-      pvr->audio_mode = PVR_AUDIO_MODE_STEREO;
+      pvr->audio_mode = V4L2_MPEG_AUDIO_MODE_MONO;
   }
 
   /* -pvr vbitrate=x */
@@ -346,11 +378,9 @@ parse_encoder_options (struct pvr_t *pvr)
   if (pvr_param_bitrate_mode)
   {
     if (!strcmp (pvr_param_bitrate_mode, PVR_VIDEO_BITRATE_MODE_ARG_VBR))
-      pvr->bitrate_mode = PVR_VIDEO_BITRATE_MODE_VBR;
+      pvr->bitrate_mode = V4L2_MPEG_VIDEO_BITRATE_MODE_VBR;
     else if (!strcmp (pvr_param_bitrate_mode, PVR_VIDEO_BITRATE_MODE_ARG_CBR))
-      pvr->bitrate_mode = PVR_VIDEO_BITRATE_MODE_CBR;
-    else /* for anything else, set to VBR */
-      pvr->bitrate_mode = PVR_VIDEO_BITRATE_MODE_VBR;
+      pvr->bitrate_mode = V4L2_MPEG_VIDEO_BITRATE_MODE_CBR;
   }
 
   /* -pvr vpeak=x */
@@ -361,106 +391,100 @@ parse_encoder_options (struct pvr_t *pvr)
   if (pvr_param_stream_type)
   {
     if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_PS))
-      pvr->stream_type = IVTV_STREAM_PS;
+      pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_PS;
     else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_TS))
-      pvr->stream_type = IVTV_STREAM_TS;
+      pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_TS;
     else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_MPEG1))
-      pvr->stream_type = IVTV_STREAM_MPEG1;
+      pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG1_SS;
     else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_DVD))
-      pvr->stream_type = IVTV_STREAM_DVD;
+      pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_DVD;
     else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_VCD))
-      pvr->stream_type = IVTV_STREAM_VCD;
+      pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG1_VCD;
     else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_SVCD))
-      pvr->stream_type = IVTV_STREAM_SVCD;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_DVD_S1))
-      pvr->stream_type = IVTV_STREAM_DVD_S1;
-    else if (!strcmp (pvr_param_stream_type, PVR_VIDEO_STREAM_TYPE_DVD_S2))
-      pvr->stream_type = IVTV_STREAM_DVD_S2;
-    else /* for anything else, set to MPEG PS */
-      pvr->stream_type = IVTV_STREAM_PS;
+      pvr->stream_type = V4L2_MPEG_STREAM_TYPE_MPEG2_SVCD;
   }
+}
+
+static void
+add_v4l2_ext_control (struct v4l2_ext_control *ctrl,
+                      uint32_t id, int32_t value)
+{
+  ctrl->id = id; 
+  ctrl->value = value;
 }
 
 static int
 set_encoder_settings (struct pvr_t *pvr)
 {
-  struct ivtv_ioctl_codec codec;
-
+  struct v4l2_ext_control *ext_ctrl = NULL;
+  struct v4l2_ext_controls ctrls;
+  uint32_t count = 0;
+  
   if (!pvr)
     return -1;
   
   if (pvr->dev_fd < 0)
     return -1;
 
-  /* get current settings */
-  if (ioctl (pvr->dev_fd, IVTV_IOC_G_CODEC, &codec) < 0)
+  ext_ctrl = (struct v4l2_ext_control *)
+    malloc (PVR_MAX_CONTROLS * sizeof (struct v4l2_ext_control)); 
+
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_VIDEO_ASPECT,
+                        pvr->aspect);
+
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_AUDIO_SAMPLING_FREQ,
+                        pvr->samplerate);
+
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_AUDIO_ENCODING,
+                        pvr->layer);
+
+  switch (pvr->layer)
   {
-    mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s can't get codec (%s).\n", LOG_LEVEL_ENCODER, strerror (errno));
-    return -1;
+  case V4L2_MPEG_AUDIO_ENCODING_LAYER_1:
+    add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_AUDIO_L1_BITRATE,
+                          pvr->audio_rate);
+    break;
+  case V4L2_MPEG_AUDIO_ENCODING_LAYER_2:
+    add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_AUDIO_L2_BITRATE,
+                          pvr->audio_rate);
+    break;
+  case V4L2_MPEG_AUDIO_ENCODING_LAYER_3:
+    add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_AUDIO_L3_BITRATE,
+                          pvr->audio_rate);
+    break;
+  default:
+    break;
   }
-  
-  /* set default encoding settings
-   * may be overlapped by user parameters
-   * Use VBR MPEG_PS encoding at 6 Mbps (peak at 9.6 Mbps)
-   * with 48 KHz L2 384 kbps audio.
-   */
-  codec.aspect = PVR_ASPECT_RATIO_4_3;
-  codec.bitrate_mode = PVR_VIDEO_BITRATE_MODE_VBR;
-  codec.bitrate = 6000000;
-  codec.bitrate_peak = 9600000;
-  codec.stream_type = IVTV_STREAM_PS;
-  codec.audio_bitmask = PVR_AUDIO_LAYER_2
-    | PVR_AUDIO_BITRATE_L2_384 | PVR_AUDIO_SAMPLE_RATE_48_KHZ;
 
-  /* set aspect ratio */
-  if (pvr->aspect != -1)
-    codec.aspect = pvr->aspect;
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_AUDIO_MODE,
+                        pvr->audio_mode);
 
-  /* if user value is given, we need to reset audio bitmask */
-  if ((pvr->samplerate != -1) || (pvr->layer != -1)
-      || (pvr->audio_rate != -1) || (pvr->audio_mode != -1))
-    codec.audio_bitmask = 0;
-  
-  /* set audio samplerate */
-  if (pvr->samplerate != -1)
-    codec.audio_bitmask |= pvr->samplerate;
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_VIDEO_BITRATE,
+                        pvr->bitrate);
 
-  /* set audio layer */
-  if (pvr->layer != -1)
-    codec.audio_bitmask |= pvr->layer;
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_VIDEO_BITRATE_PEAK,
+                        pvr->bitrate_peak);
 
-  /* set audio bitrate */
-  if (pvr->audio_rate != -1)
-    codec.audio_bitmask |= pvr->audio_rate;
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_VIDEO_BITRATE_MODE,
+                        pvr->bitrate_mode);
 
-  /* set audio mode */
-  if (pvr->audio_mode != -1)
-    codec.audio_bitmask |= pvr->audio_mode;
-
-  /* set video bitrate */
-  if (pvr->bitrate != -1)
-    codec.bitrate = pvr->bitrate;
-
-  /* set video bitrate mode */
-  if (pvr->bitrate_mode != -1)
-    codec.bitrate_mode = pvr->bitrate_mode;
-
-  /* set video bitrate peak */
-  if (pvr->bitrate != -1)
-    codec.bitrate_peak = pvr->bitrate_peak;
-
-  /* set video stream type */
-  if (pvr->stream_type != -1)
-    codec.stream_type = pvr->stream_type;
+  add_v4l2_ext_control (&ext_ctrl[count++], V4L2_CID_MPEG_STREAM_TYPE,
+                        pvr->stream_type);
 
   /* set new encoding settings */
-  if (ioctl (pvr->dev_fd, IVTV_IOC_S_CODEC, &codec) < 0)
+  ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG; 
+  ctrls.count = count; 
+  ctrls.controls = ext_ctrl;
+  
+  if (ioctl (pvr->dev_fd, VIDIOC_S_EXT_CTRLS, &ctrls) < 0)
   {
-    mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s can't set codec (%s).\n", LOG_LEVEL_ENCODER, strerror (errno));
+    mp_msg (MSGT_OPEN, MSGL_ERR, "%s Error setting MPEG controls (%s).\n",
+            LOG_LEVEL_ENCODER, strerror (errno));
+    free (ext_ctrl); 
     return -1;
   }
+
+  free (ext_ctrl); 
 
   return 0;
 }
@@ -902,9 +926,8 @@ pvr_stream_read (stream_t *stream, char *buffer, int size)
 static int
 pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 {
-  struct ivtv_ioctl_codec codec;
-  struct ivtv_driver_info info;
   struct v4l2_capability vcap;
+  struct v4l2_ext_controls ctrls;
   struct pvr_t *pvr = NULL;
   
   if (mode != STREAM_READ)
@@ -940,28 +963,27 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
     mp_msg (MSGT_OPEN, MSGL_INFO,
             "%s Detected %s\n", LOG_LEVEL_PVR, vcap.card);
 
-  /* get codec and initialize card (i.e test IVTV support) */
-  if (ioctl (pvr->dev_fd, IVTV_IOC_G_CODEC, &codec) < 0)
+  /* check for a valid V4L2 capture device */
+  if (!(vcap.capabilities & V4L2_CAP_VIDEO_CAPTURE))
   {
     mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s device is not IVTV compliant (%s).\n",
-            LOG_LEVEL_PVR, strerror (errno));
+            "%s device is not a valid V4L2 capture device.\n",
+            LOG_LEVEL_PVR);
     pvr_uninit (pvr);
     return STREAM_ERROR;
   }
+
+  /* check for device hardware MPEG encoding capability */
+  ctrls.ctrl_class = V4L2_CTRL_CLASS_MPEG; 
+  ctrls.count = 0; 
+  ctrls.controls = NULL;
   
-  /* get ivtv driver info */
-  if (ioctl (pvr->dev_fd, IVTV_IOC_G_DRIVER_INFO, &info) < 0)
+  if (ioctl (pvr->dev_fd, VIDIOC_G_EXT_CTRLS, &ctrls) < 0)
   {
     mp_msg (MSGT_OPEN, MSGL_ERR,
-            "%s device is not IVTV compliant (%s).\n",
-            LOG_LEVEL_PVR, strerror (errno));
-    pvr_uninit (pvr);
+            "%s device do not support MPEG input.\n", LOG_LEVEL_ENCODER);
     return STREAM_ERROR;
   }
-  else
-    mp_msg (MSGT_OPEN, MSGL_INFO,
-            "%s Detected ivtv driver: %s\n", LOG_LEVEL_PVR, info.comment);
 
   /* list V4L2 capabilities */
   if (v4l2_list_capabilities (pvr) == -1)
@@ -1008,7 +1030,7 @@ pvr_stream_open (stream_t *stream, int mode, void *opts, int *file_format)
 }
 
 stream_info_t stream_info_pvr = {
-  "PVR (V4L2/IVTV) Input",
+  "V4L2 MPEG Input (a.k.a PVR)",
   "pvr",
   "Benjamin Zores",
   "",
