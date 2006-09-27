@@ -1468,68 +1468,69 @@ Se rabat automatiquement sur IPv4.
 .TP
 .B \-pvr <option1:option2:...> (carte PVR uniquement)
 Cette option permet le réglage de différentes propriétés d'enregistrement du
-module de capture des cartes PVR (ou IVTV, telles que les
-Hauppauge WinTV PVR\-150/250/350/500).
+module de capture des cartes PVR.
+Son utilisation est restreinte aux cartes disposant d'un encodeur MPEG
+matériel et supportées par le driver V4L2.
+Les cartes basées sur le pilote IVTV, telles que les Hauppauge
+WinTV PVR\-150/250/350/500 en sont un bon exemple.
+Soyiez attentif au fait qu'un noyau Linux 2.6.18 ou supérieur est requis
+pour la capture de flux MPEG par le biais du pilote V4L2.
 Pour procéder à la capture matérielle au format MPEG ainsi qu'à sa
 visualisation via MPlayer/MEncoder, utilisez 'pvr://' comme URL de film.
 .sp 1
 Les options disponibles sont :
 .RSs
-.IPs aspect=<1\-4>
+.IPs aspect=<0\-3>
 Spécifie un format visuel pour l'entrée vidéo (la valeur par défaut est 4:3) :
 .RSss
-1: 1:1
+0: 1:1
 .br
-2: 4:3
+1: 4:3
 .br
-3: 16:9
+2: 16:9
 .br
-4: 2.21:1
+3: 2.21:1
 .REss
 .IPs arate=<32000\-48000>
 Spécifie le taux d'échantillonnage de l'encodeur audio (la valeur par défaut
 est de 48000 Hz, et sont disponibles 32000, 44100 et 48000 Hz).
-.IPs alayer=<1\-2>
+.IPs alayer=<1\-3>
 Spécifie le niveau d'encodage MPEG audio (par défaut la couche 2).
 .IPs abitrate=<32\-448>
 Spécifie le taux binaire d'encodage audio en kbps (par défaut 384 kbps).
-.IPs amode=<value>
+.IPs amode=<valeur>
 Spécifie le mode d'encodage audio.
 Les différentes valeurs disponibles sont 'stereo', 'joint_stereo', 'dual'
 et 'mono'.
 La valeur par défaut est le Stéréo.
-.IPs vbitrate=<value>
+.IPs vbitrate=<valeur>
 Spécifie le taux binaire moyen d'encodage vidéo.
 La valeur par défaut est de 6 Mbps. 
-.IPs vmode=<0\-1>
+.IPs vmode=<valeur>
 Spécifie le mode d'encodage vidéo (par défaut en VBR) :
 .RSss
-0: VBR
+vbr: Taux binaire variable.
 .br
-1: CBR
+cbr: Taux binaire constant.
 .REss
-.IPs vpeak=<value>
+.IPs vpeak=<valeur>
 Spécifie le taux binaire maximum d'encodage vidéo (utile uniquement dans le
 cas du mode VBR).
 La valeur par défaut est de 9.6 Mbps. 
-.IPs fmt=<value>
-Détermine le format MPEG utilisé pour l'encodage (MPEG PS par défaut):
+.IPs fmt=<valeur>
+Détermine le format MPEG utilisé pour l'encodage (ps par défaut):
 .RSss
-ps:    MPEG PS
+ps:    Flux compatible MPEG 2 Program Stream.
 .br
-ts:    MPEG TS (expérimental, peut échouer)
+ts:    Flux compatible MPEG 2 Transport Stream.
 .br
-mpeg1: MPEG 1
+mpeg1: Flux compatible MPEG 1 System Stream.
 .br
-vcd:   Video CD
+vcd:   Flux compatible Video CD.
 .br
-svcd:  Super Video CD
+svcd:  Flux compatible Super Video CD.
 .br
-dvd:   DVD
-.br
-dvds1: DVD Région 1 (NTSC)
-.br
-dvds2: DVD Région 2 (PAL)
+dvd:   Flux compatible DVD.
 .REss
 .RE
 .PD 1
