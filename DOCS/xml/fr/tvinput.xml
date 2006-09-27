@@ -8,7 +8,7 @@
 
 <para>
 Cette section concerne l'activation de la <emphasis role="bold">lecture/enregistrement
-à partir d'un tuner TV compatible V4L.</emphasis>. Voir la page de man pour une
+à partir d'un tuner TV compatible V4L.</emphasis> Voir la page de man pour une
 description des options TV et des contrôles clavier.
 
 </para>
@@ -34,7 +34,7 @@ description des options TV et des contrôles clavier.
 <sect2 id="tv-tips">
 <title>Astuces d'utilisation</title>
 <para>
-La liste complète des options est disponible sur la page de man. Voci juste
+La liste complète des options est disponible sur la page de man. Voici juste
 quelques astuces:
 </para>
 <itemizedlist>
@@ -43,10 +43,10 @@ quelques astuces:
 Utilisez l'option <option>channels</option>. Un exemple:
 <screen>-tv channels=26-MTV1,23-TV2</screen>
 Explication: en utilisant cette option, seuls les canaux 26 et 23 seront
-utilisables, et il y a un joli texte OSD lors des changements de canal
+utilisables, et il y a un joli texte OSD lors des changements de canaux
 affichant le nom du nouveau.
 Les espaces dans le nom du canal doivent être remplacés par le caractère
-"_";.
+"_".
 </para>
 </listitem>
 
@@ -151,9 +151,9 @@ fourcc avec un codec vidéo Intel Indeo.
 <listitem>
 <para>
 Il y a plusieurs façons de capturer l'audio.
-Vous pouvez attraper le son soit avec votre carte son via un cable externe
+Vous pouvez attraper le son soit avec votre carte son via un câble externe
 entre la carte vidéo et l'entrée ligne, soit en utilisant le DAC intégré
-au chip bt878.
+à la puce bt878.
 Dans ce dernier cas, vous devrez charger le pilote
 <emphasis role="bold">btaudio</emphasis>.
 Lisez le fichier <filename>linux/Documentation/sound/btaudio</filename>
