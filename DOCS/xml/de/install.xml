@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19829 -->
+<!-- in sync with r19975 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -31,32 +31,21 @@
     <itemizedlist>
       <listitem>
         <para>
-          <emphasis role="bold">binutils</emphasis> - empfohlene Version ist <emphasis role="bold">2.11.x</emphasis>.
+          <emphasis role="bold">binutils</emphasis> - Empfohlene Version ist <emphasis role="bold">2.11.x</emphasis>.
           Dieses Programm ist verantwortlich für die Generierung von Instruktionen für
           MMX/3DNow!/usw. und daher sehr wichtig.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">gcc</emphasis> - empfohlene Versionen sind:
-          <emphasis role="bold">2.95.3</emphasis> (vielleicht
-          <emphasis role="bold">2.95.4</emphasis>) und <emphasis role="bold">3.2+</emphasis>.
-          Benutze <emphasis role="bold">niemals</emphasis> 2.96 oder 3.0.x! Diese
-          generieren im Falle von <application>MPlayer</application> fehlerhaften Code.
-          Solltest du dich dafür entscheiden, die von gcc-Version 2.96 zu wechseln,
-          dann entscheide dich nicht zu Gunsten von 3.x, nur weil es neuer ist. Frühe
-          Veröffentlichungen von 3.x waren fehlerhafter als 2.96. Downgrade also zu
-          2.95.x (downgrade auch <systemitem class="library">libstdc++</systemitem>,
-          andere Programme könnten dies benötigen) oder wechsle die Version überhaupt
-          nicht (in diesem Falle sei jedoch gewarnt, dass es zur Laufzeit Probleme
-          geben kann). Solltest du dich für 3.x entscheiden, versuche die neueste
-          Version zu bekommen, frühe Versionen hatten verschiedenartige Fehler, benutze
-          also mindestens Version 3.1, diese ist getestet und funktioniert.
+          <emphasis role="bold">gcc</emphasis> - Empfohlene Versionen sind 2.95
+          und 3.3+. 2.96 und 3.0.x generieren bekannterweise fehlerhaften Code, 3.1 und
+          3.2 hatten auch Probleme.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">XFree86</emphasis> - empfohlene Version ist
+          <emphasis role="bold">XFree86</emphasis> - Empfohlene Version ist
           <emphasis role="bold">immer die neueste</emphasis> (4.3). Normalerweise
           möchte das jeder. Mit XFree86 4.0.2 beginnend enthält es die
           <link linkend="xv">XVideo</link>-Erweiterung (irgendwo als
@@ -69,7 +58,7 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">make</emphasis> - empfohlene Version ist
+          <emphasis role="bold">make</emphasis> - Empfohlene Version ist
           <emphasis role="bold">immer die neueste</emphasis> (mindestens 3.79.x). Dies
           ist normalerweise nicht so wichtig.
         </para>
@@ -704,8 +693,14 @@ make install</screen>
             Kernel erforderlich.
             Wenn du Kernel 2.4.19pre8 oder neuer laufen hast, kannst du die maximale RTC-Frequenz
             für normale Benutzer durch das <systemitem class="systemname">/proc</systemitem>-Dateisystem
-            festlegen. Benutze folgenden Befehl, um RTC für normale Benutzer zu aktivieren
+            festlegen.
+            Benutze einen der folgenden Befehle, um RTC für normale Benutzer zu aktivieren:
             <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
+            <screen>sysctl dev/rtc/max-user-freq=1024</screen>
+            Die kannst diese Einstellung permanent machen, indem du letzteren Befehl der Datei
+            <filename>/etc/sysctl.conf</filename> hinzufügst.
+          </para>
+          <para>
             Du kannst die Effizienz des neuen Zeitgebers in der Statuszeile sehen.
             Die Power Management-Funktionen der BIOSse mancher Notebooks mit speedstep-CPUs
             vertragen sich nicht gut mit RTC. Audio und Video könnten Synchronisation verlieren.
