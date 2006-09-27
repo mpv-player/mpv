@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19927
+.\" In sync with r19979
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1347,6 +1347,28 @@ Teile des Videos werden entsprechend den Einträgen der angegebenen
 Datei übersprungen und Teile des Audios stummgeschaltet.
 Siehe DOCS/\:HTML/\:en/\:edl.html für Details, wie du dieses
 Feature benutzen kannst.
+.
+.TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|Größe[b|kb|mb]> (siehe auch \-ss und \-sb)
+Beende zu angegebener Zeit oder Byteposition.
+.br
+.I ANMERKUNG:
+Byteposition ist nur für MEncoder aktiviert und wird nicht genau sein, da
+MEncoder nur an Bildgrenzen anhalten kann.
+In Verbindung mit der Option \-ss wird die Zeit für \-endpos um die mit \-ss
+angegebenen Sekunden nach hinten verschoben.
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+Encodiere nur 56 Sekunden.
+.IPs "\-endpos 01:10:00"
+Encodiere nur 1 Stunde 10 Minuten.
+.IPs "\-endpos 100mb"
+Encodiere nur 100 MBytes.
+.RE
+.PD 1
 .
 .TP
 .B \-forceidx
@@ -6881,26 +6903,6 @@ diese Einstellung, da jedes Paket in einen eigenen Block kommt.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Setzt das Audiopuffer-Zeitintervall (Standard: 0.5s).
-.
-.TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|Größe[b|kb|mb]> (siehe auch \-ss und \-sb)
-Beende das Encodieren nach der angegeben Zeit oder Byteposition.
-.br
-.I ANMERKUNG:
-Die Byteposition ist nicht exakt, da MEncoder nur an Bildgrenzen mit dem
-Encodieren aufhören kann.
-.sp 1
-.I BEISPIEL:
-.PD 0
-.RSs
-.IPs "\-endpos 56"
-Encodiere nur 56 Sekunden.
-.IPs "\-endpos 01:10:00"
-Encodiere nur 1 Stunde 10 Minuten.
-.IPs "\-endpos 100mb"
-Encodiere nur 100 MBytes.
-.RE
-.PD 1
 .
 .TP
 .B \-fafmttag <format>
