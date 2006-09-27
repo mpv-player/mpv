@@ -23,7 +23,9 @@ MPlayer (1.0)
 
     Inputs:
     * split of stream layer from libmpdemux to new stream library
-    * PVR input for IVTV based cards (Hauppauge WinTV PVR-150/250/350/500)
+    * PVR input for hardware MPEG encoder based cards, such as Hauppauge
+      WinTV PVR-150/250/350/500 a.k.a. IVTV but also pvrusb2 and cx88
+      (requires Linux >= 2.6.18 kernel, featuring native V4L2 MPEG API).
     * native RTSP input (handles MPEG-TS over RTP) for generic RTSP servers
     * support for chapters seeking in dvd:// and dvdnav:// streams
     * radio support (radio://)
