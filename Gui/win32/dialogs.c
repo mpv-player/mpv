@@ -531,8 +531,9 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
                 case ID_TRACKLIST:
                     if(HIWORD(wParam) == LBN_DBLCLK)
                     {
-                        if(selected) pl->current = selected - 1;
-                        mplGotoTheNext = 0;
+                        if(guiIntfStruct.Playing && selected)
+                            pl->current = selected - 2;
+                        else if(selected) pl->current = selected - 1;
                         gui->startplay(gui);
                     }
                     return 0;
