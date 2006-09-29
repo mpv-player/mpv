@@ -1178,13 +1178,7 @@ m_option_type_t m_option_type_afmt = {
 // Time or size (-endpos)
 
 static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, int src) {
-
-  if (dst == NULL)
-    return 0;
-
-  m_time_size_t* ts = dst;
-  ts->pos=0;
-
+  m_time_size_t ts;
   char unit[4];
   int a,b;
   float d;
@@ -1193,9 +1187,10 @@ static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, i
   if (param == NULL || strlen(param) == 0)
     return M_OPT_MISSING_PARAM;
   
+  ts.pos=0;
   /* End at size parsing */
   if(sscanf(param, "%lf%3s", &end_at, unit) == 2) {
-    ts->type = END_AT_SIZE;
+    ts.type = END_AT_SIZE;
     if(!strcasecmp(unit, "b"))
       ;
     else if(!strcasecmp(unit, "kb"))
@@ -1205,11 +1200,11 @@ static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, i
     else if(!strcasecmp(unit, "gb"))
       end_at *= 1024*1024*1024;
     else
-      ts->type = END_AT_NONE;
+      ts.type = END_AT_NONE;
 
-    if (ts->type == END_AT_SIZE) {
-      ts->pos  = end_at;
-      return 1;
+    if (ts.type == END_AT_SIZE) {
+      ts.pos  = end_at;
+      goto out;
     }
   }
 
@@ -1227,9 +1222,11 @@ static int parse_time_size(m_option_t* opt,char *name, char *param, void* dst, i
     return M_OPT_INVALID;
   }
   
-  ts->type = END_AT_TIME;
-  ts->pos  = end_at;
-
+  ts.type = END_AT_TIME;
+  ts.pos  = end_at;
+out:
+  if(dst)
+    *(m_time_size_t *)dst = ts;
   return 1;
 }
 
