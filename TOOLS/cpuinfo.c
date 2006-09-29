@@ -203,7 +203,7 @@ main(int argc, char **argv)
     };
     static struct {
       int bit;
-      char *desc;;
+      char *desc;
     } cap_amd[] = {
       CPUID_FEATURE_DEF(11, "syscall", "SYSCALL and SYSRET"),
       CPUID_FEATURE_DEF(19, "mp", "MP Capable"),
