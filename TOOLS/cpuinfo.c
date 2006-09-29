@@ -33,6 +33,8 @@ typedef long long int64_t;
 #include <inttypes.h>
 #endif
 
+#define CPUID_FEATURE_DEF(bit, desc, description) \
+  { bit, desc }
 
 typedef struct cpuid_regs {
   unsigned int eax;
@@ -151,81 +153,77 @@ main(int argc, char **argv)
     static struct {
       int bit;
       char *desc;;
-      char *description;
     } cap[] = {
-      { 0,  "fpu",   "Floating-point unit on-chip" },
-      { 1,  "vme",   "Virtual Mode Enhancements" },
-      { 2,  "de",    "Debugging Extension" },
-      { 3,  "pse",   "Page Size Extension" },
-      { 4,  "tsc",   "Time Stamp Counter" },
-      { 5,  "msr",   "Pentium Processor MSR" },
-      { 6,  "pae",   "Physical Address Extension" },
-      { 7,  "mce",   "Machine Check Exception" },
-      { 8,  "cx8",   "CMPXCHG8B Instruction Supported" },
-      { 9,  "apic",  "On-chip APIC Hardware Enabled" },
-      { 11, "sep",   "SYSENTER and SYSEXIT" },
-      { 12, "mtrr",  "Memory Type Range Registers" },
-      { 13, "pge",   "PTE Global Bit" },
-      { 14, "mca",   "Machine Check Architecture" },
-      { 15, "cmov",  "Conditional Move/Compare Instruction" },
-      { 16, "pat",   "Page Attribute Table" },
-      { 17, "pse36", "Page Size Extension 36-bit" },
-      { 18, "pn",    "Processor Serial Number" },
-      { 19, "cflsh", "CFLUSH instruction" },
-      { 21, "dts",   "Debug Store" },
-      { 22, "acpi",  "Thermal Monitor and Clock Ctrl" },
-      { 23, "mmx",   "MMX Technology" },
-      { 24, "fxsr",  "FXSAVE/FXRSTOR" },
-      { 25, "sse",   "SSE Extensions" },
-      { 26, "sse2",  "SSE2 Extensions" },
-      { 27, "ss",    "Self Snoop" },
-      { 28, "ht",    "Multi-threading" },
-      { 29, "tm",    "Therm. Monitor" },
-      { 30, "ia64",  "IA-64 Processor" },
-      { 31, "pbe",   "Pend. Brk. EN." },
+      CPUID_FEATURE_DEF(0, "fpu", "Floating-point unit on-chip"),
+      CPUID_FEATURE_DEF(1, "vme", "Virtual Mode Enhancements"),
+      CPUID_FEATURE_DEF(2, "de", "Debugging Extension"),
+      CPUID_FEATURE_DEF(3, "pse", "Page Size Extension"),
+      CPUID_FEATURE_DEF(4, "tsc", "Time Stamp Counter"),
+      CPUID_FEATURE_DEF(5, "msr", "Pentium Processor MSR"),
+      CPUID_FEATURE_DEF(6, "pae", "Physical Address Extension"),
+      CPUID_FEATURE_DEF(7, "mce", "Machine Check Exception"),
+      CPUID_FEATURE_DEF(8, "cx8", "CMPXCHG8B Instruction Supported"),
+      CPUID_FEATURE_DEF(9, "apic", "On-chip APIC Hardware Enabled"),
+      CPUID_FEATURE_DEF(11, "sep", "SYSENTER and SYSEXIT"),
+      CPUID_FEATURE_DEF(12, "mtrr", "Memory Type Range Registers"),
+      CPUID_FEATURE_DEF(13, "pge", "PTE Global Bit"),
+      CPUID_FEATURE_DEF(14, "mca", "Machine Check Architecture"),
+      CPUID_FEATURE_DEF(15, "cmov", "Conditional Move/Compare Instruction"),
+      CPUID_FEATURE_DEF(16, "pat", "Page Attribute Table"),
+      CPUID_FEATURE_DEF(17, "pse36", "Page Size Extension 36-bit"),
+      CPUID_FEATURE_DEF(18, "pn", "Processor Serial Number"),
+      CPUID_FEATURE_DEF(19, "cflsh", "CFLUSH instruction"),
+      CPUID_FEATURE_DEF(21, "dts", "Debug Store"),
+      CPUID_FEATURE_DEF(22, "acpi", "Thermal Monitor and Clock Ctrl"),
+      CPUID_FEATURE_DEF(23, "mmx", "MMX Technology"),
+      CPUID_FEATURE_DEF(24, "fxsr", "FXSAVE/FXRSTOR"),
+      CPUID_FEATURE_DEF(25, "sse", "SSE Extensions"),
+      CPUID_FEATURE_DEF(26, "sse2", "SSE2 Extensions"),
+      CPUID_FEATURE_DEF(27, "ss", "Self Snoop"),
+      CPUID_FEATURE_DEF(28, "ht", "Multi-threading"),
+      CPUID_FEATURE_DEF(29, "tm", "Therm. Monitor"),
+      CPUID_FEATURE_DEF(30, "ia64", "IA-64 Processor"),
+      CPUID_FEATURE_DEF(31, "pbe", "Pend. Brk. EN."),
       { -1 }
     };
     static struct {
       int bit;
       char *desc;
-      char *description;
     } cap2[] = {
-      { 0, "pni", "SSE3 Extensions" },
-      { 3, "monitor", "MONITOR/MWAIT" },
-      { 4, "ds_cpl", "CPL Qualified Debug Store" },
-      { 5, "vmx", "Virtual Machine Extensions" },
-      { 7, "est", "Enhanced Intel SpeedStep Technology" },
-      { 8, "tm2", "Thermal Monitor 2" },
-      { 10, "cid", "L1 Context ID" },
-      { 13, "cx16", "CMPXCHG16B Available" },
-      { 14, "xtpr", "xTPR Disable" }, 
+      CPUID_FEATURE_DEF(0, "pni", "SSE3 Extensions"),
+      CPUID_FEATURE_DEF(3, "monitor", "MONITOR/MWAIT"),
+      CPUID_FEATURE_DEF(4, "ds_cpl", "CPL Qualified Debug Store"),
+      CPUID_FEATURE_DEF(5, "vmx", "Virtual Machine Extensions"),
+      CPUID_FEATURE_DEF(7, "est", "Enhanced Intel SpeedStep Technology"),
+      CPUID_FEATURE_DEF(8, "tm2", "Thermal Monitor 2"),
+      CPUID_FEATURE_DEF(10, "cid", "L1 Context ID"),
+      CPUID_FEATURE_DEF(13, "cx16", "CMPXCHG16B Available"),
+      CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"), 
       { -1 }
     };
     static struct {
       int bit;
       char *desc;;
-      char *description;
     } cap_amd[] = {
-      { 11, "syscall", "SYSCALL and SYSRET" },
-      { 19, "mp", "MP Capable" },
-      { 20, "nx", "No-Execute Page Protection" },
-      { 22, "mmxext","MMX Technology (AMD Extensions)" },
-      { 25, "fxsr_opt", "Fast FXSAVE/FXRSTOR" },
-      { 27, "rdtscp", "RDTSCP Instruction" },
-      { 29, "lm", "Long Mode Capable" },
-      { 30, "3dnowext","3DNow! Extensions" },
-      { 31, "3dnow", "3DNow!" },
+      CPUID_FEATURE_DEF(11, "syscall", "SYSCALL and SYSRET"),
+      CPUID_FEATURE_DEF(19, "mp", "MP Capable"),
+      CPUID_FEATURE_DEF(20, "nx", "No-Execute Page Protection"),
+      CPUID_FEATURE_DEF(22, "mmxext","MMX Technology (AMD Extensions)"),
+      CPUID_FEATURE_DEF(25, "fxsr_opt", "Fast FXSAVE/FXRSTOR"),
+      CPUID_FEATURE_DEF(27, "rdtscp", "RDTSCP Instruction"),
+      CPUID_FEATURE_DEF(29, "lm", "Long Mode Capable"),
+      CPUID_FEATURE_DEF(30, "3dnowext", "3DNow! Extensions"),
+      CPUID_FEATURE_DEF(31, "3dnow", "3DNow!"),
       { -1 }
     };
     static struct {
       int bit;
       char *desc;
-      char *description;
     } cap_amd2[] = {
-      { 0, "lahf_lm", "LAHF/SAHF Supported in 64-bit Mode" },
-      { 1, "cmp_legacy", "Chip Multi-Core" },
-      { 2, "svm", "Secure Virtual Machine" },
-      { 4, "cr8legacy", "CR8 Available in Legacy Mode" },
+      CPUID_FEATURE_DEF(0, "lahf_lm", "LAHF/SAHF Supported in 64-bit Mode"),
+      CPUID_FEATURE_DEF(1, "cmp_legacy", "Chip Multi-Core"),
+      CPUID_FEATURE_DEF(2, "svm", "Secure Virtual Machine"),
+      CPUID_FEATURE_DEF(4, "cr8legacy", "CR8 Available in Legacy Mode"),
       { -1 }
     };
     unsigned int family, model, stepping;
