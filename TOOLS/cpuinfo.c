@@ -152,7 +152,7 @@ main(int argc, char **argv)
   if (max_cpuid >= 1) {
     static struct {
       int bit;
-      char *desc;;
+      char *desc;
     } cap[] = {
       CPUID_FEATURE_DEF(0, "fpu", "Floating-point unit on-chip"),
       CPUID_FEATURE_DEF(1, "vme", "Virtual Mode Enhancements"),
