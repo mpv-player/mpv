@@ -286,11 +286,11 @@ void guiInit( void )
  wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
  wsXDNDMakeAwareness(&appMPlayer.mainWindow);
 
- #ifdef DEBUG
+#ifdef DEBUG
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] depth on screen: %d\n",wsDepthOnScreen );
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] parent: 0x%x\n",(int)appMPlayer.mainWindow.WindowID );
   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] sub: 0x%x\n",(int)appMPlayer.subWindow.WindowID );
- #endif
+#endif
 
  appMPlayer.mainWindow.ReDraw=(void *)mplMainDraw;
  appMPlayer.mainWindow.MouseHandler=mplMainMouseHandle;
