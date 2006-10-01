@@ -429,9 +429,9 @@ ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
 	for i in $(MAN_LANG); do \
 		if test "$$i" = en ; then \
-			ln -sf mplayer.1 $(MANDIR)/man1/mencoder.1 ; \
+			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		else \
-			ln -sf mplayer.1 $(MANDIR)/$$i/man1/mencoder.1 ; \
+			cd $(MANDIR)/man1/$$i && ln -sf mplayer.1 mencoder.1 ; \
 		fi ; \
 	done
 endif
