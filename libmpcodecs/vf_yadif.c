@@ -83,8 +83,8 @@ static void store_ref(struct vf_priv_s *p, uint8_t *src[3], int src_stride[3], i
             "pmaxsw   "#tmp", "#dst" \n\t"
 
 #define CHECK(pj,mj) \
-            "movq "#pj"-1(%[cur],%[mrefs]), %%mm2 \n\t" /* cur[x-refs-1+j] */\
-            "movq "#mj"-1(%[cur],%[prefs]), %%mm3 \n\t" /* cur[x+refs-1-j] */\
+            "movq "#pj"(%[cur],%[mrefs]), %%mm2 \n\t" /* cur[x-refs-1+j] */\
+            "movq "#mj"(%[cur],%[prefs]), %%mm3 \n\t" /* cur[x+refs-1-j] */\
             "movq      %%mm2, %%mm4 \n\t"\
             "movq      %%mm2, %%mm5 \n\t"\
             "pxor      %%mm3, %%mm4 \n\t"\
@@ -193,13 +193,13 @@ static void filter_line_mmx2(struct vf_priv_s *p, uint8_t *dst, uint8_t *prev, u
             "paddw     %%mm3, %%mm0 \n\t"\
             "psubw    %[pw1], %%mm0 \n\t" /* spatial_score */\
 \
-            CHECK(-1,1)\
+            CHECK(-2,0)\
             CHECK1\
-            CHECK(-2,2)\
+            CHECK(-3,1)\
             CHECK2\
-            CHECK(1,-1)\
+            CHECK(0,-2)\
             CHECK1\
-            CHECK(2,-2)\
+            CHECK(1,-3)\
             CHECK2\
 \
             /* if(p->mode<2) ... */\
