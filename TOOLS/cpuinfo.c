@@ -194,11 +194,14 @@ main(int argc, char **argv)
       CPUID_FEATURE_DEF(3, "monitor", "MONITOR/MWAIT"),
       CPUID_FEATURE_DEF(4, "ds_cpl", "CPL Qualified Debug Store"),
       CPUID_FEATURE_DEF(5, "vmx", "Virtual Machine Extensions"),
+      CPUID_FEATURE_DEF(6, "smx", "Safer Mode Extensions"),
       CPUID_FEATURE_DEF(7, "est", "Enhanced Intel SpeedStep Technology"),
       CPUID_FEATURE_DEF(8, "tm2", "Thermal Monitor 2"),
+      CPUID_FEATURE_DEF(9, "ssse3", "Supplemental SSE3"),
       CPUID_FEATURE_DEF(10, "cid", "L1 Context ID"),
       CPUID_FEATURE_DEF(13, "cx16", "CMPXCHG16B Available"),
       CPUID_FEATURE_DEF(14, "xtpr", "xTPR Disable"), 
+      CPUID_FEATURE_DEF(18, "dca", "Direct Cache Access"), 
       { -1 }
     };
     static struct {
