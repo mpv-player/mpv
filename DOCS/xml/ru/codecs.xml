@@ -66,14 +66,14 @@
   "родной" декодер для HuffYUV
   </simpara></listitem>
 <listitem><simpara>
-  Различные старые, похожие на RLE форматы
+  Различные старые, простые, похожие на RLE форматы
   </simpara></listitem>
 </itemizedlist>
 
 <para>
 Если у Вас есть не упомянутый здесь Win32 кодек, который ещё не поддерживается,
-пожалуйста, прочтите <link linkend="codec-importing">Как добавить кодек [codec
-importing HOWTO]</link> и помогите нам добавить для него поддержку.
+пожалуйста, прочтите <link linkend="codec-importing">Как добавить кодек</link>
+и помогите нам добавить для него поддержку.
 </para>
 
 
@@ -91,13 +91,13 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 
 <para>
 Он содержит множество хороших кодеков, из которых наиболее важными являются
-варианты MPEG4: DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Также весьма
+разновидности MPEG4: DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Также весьма
 интересен декодер WMA.
 </para>
 
 <para>
-Наконец, последний кодеком, заслуживающий внимания &mdash; это
-<emphasis role="bold">Sorenson 3</emphasis>(SVQ3) кодек. Это первая реализация
+Наконец, последний кодек, заслуживающий внимания &mdash; это
+<emphasis role="bold">Sorenson 3</emphasis> (SVQ3) кодек. Это первая реализация
 этого кодека с полностью открытым исходным кодом. Она даже быстрее оригинала.
 Используйте её, вместо двоичного кодека!
 </para>
@@ -106,15 +106,6 @@ importing HOWTO]</link> и помогите нам добавить для него поддержку.
 Полный список доступных кодеков доступен на странице FFmpeg.
 Поддерживаемые <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">видео</ulink>
 и <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">аудио</ulink> кодеки.
-</para>
-
-
-<para>
-Both <application>MPlayer</application> releases and
-<application>MPlayer</application> from Subversion contain
-<systemitem class="library">libavcodec</systemitem> so you don't have
-to care about making a separate <systemitem class="library">libavcodec</systemitem> checkout.
-Just run <filename>configure</filename> and compile.
 </para>
 
 <para>
@@ -137,18 +128,10 @@ Just run <filename>configure</filename> and compile.
 <note>
 <para>
 Обратите внимание, что XAnim'овские бинарные кодеки распространяются с небольшим
-текстом, утверждающим, что это лицензия и помимо прочих запретов, запрещающим
-использование этих кодеков с любой программой кроме <application>XAnim</application>'а.
-<!--- XXX Find a better translation: However, the XAnim
-author has yet to bring legal action against anyone for codec-related issues.
--->
-Тем не менее, автор XAnim'а ещё должен произвести юридические действия по
-относящимся к кодекам вопросам.
-<!-- 
-Probably, this is better, but i do not sure:
-Тем не менее автор еще должен выиграть судебный иск против кого-либо по относящимся 
+текстом, утверждающим, что это лицензия и, помимо прочих запретов, запрещающим
+использование этих кодеков с любой программой кроме <application>XAnim</application>.
+Тем не менее, автор XAnim еще должен возбудить судебный иск против кого-либо по относящимся 
 к кодеку вопросам.
--->
 </para>
 </note>
 
@@ -165,11 +148,11 @@ Probably, this is better, but i do not sure:
   Скачайте кодеки, которые Вы хотите использовать, с 
   <ulink url="http://xanim.va.pubnix.com">сайта XAnim</ulink>.
   <emphasis role="bold">3ivx</emphasis> кодека там нет, но его можно найти на
-  <ulink url="http://www.3ivx.com">сайте 3ivx</ulink>.
+  <ulink url="http://www.3ivx.com">сайте 3ivx</ulink>
   </para></step>
 <step><para>
   <emphasis role="bold">ИЛИ</emphasis> скачайте пакет кодеков с нашей
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>.
   </para></step>
 <step><para>
   Используйте опцию <option>--with-xanimlibdir</option>, чтобы сообщить
@@ -177,7 +160,7 @@ Probably, this is better, but i do not sure:
   По умолчанию, он их ищет в
   <filename class="directory">/usr/local/lib/codecs</filename>,
   <filename class="directory">/usr/local/lib/xanim/mods</filename>,
-  <filename class="directory">/usr/lib/xanim/mods</filename>и
+  <filename class="directory">/usr/lib/xanim/mods</filename> и
   <filename class="directory">/usr/lib/xanim</filename>.
   Вместо этого, Вы можете установить значением переменной среды окружения
   <envar>XANIM_MOD_DIR</envar> каталог с XAnim'овскими кодеками.
@@ -218,11 +201,11 @@ h263.</emphasis>
 <sect2 id="mpeg12">
 <title>MPEG 1/2 видео</title>
 <para>
-MPEG1 и MPEG2 декодируются многоплатформенной "родной" библиотекой <systemitem
+MPEG1 и MPEG2 декодируются многоплатформенной родной библиотекой <systemitem
 class="library">libmpeg2</systemitem>, исходный код которой включён в
 <application>MPlayer</application>.  Мы обрабатываем плохое MPEG 1/2 видео,
 перехватывая <systemitem>Сигнал 11</systemitem>
-(<systemitem>segmentation fault[ошибка сегментации]</systemitem>), и быстро
+(<systemitem>нарушение сегментации</systemitem>), и быстро
 реинициализируя кодек, продолжая точно с места ошибки. Такая технология
 восстановления не имеет значимых временных задержек.
 </para>
@@ -284,10 +267,10 @@ Cкачайте Real кодеки на
 
 <para>
 <ulink url="http://www.xvid.org">XviD</ulink> свободный, MPEG-4 ASP совместимый
-видел кодек, особенностями которого яявляются двухпроходное кодирование и
+видео кодек, особенностями которого являются двухпроходное кодирование и
 полная поддержка MPEG-4 ASP, делающая его намного более эеффективным, чем
-хорошо известный DivX. Он обладает видео отменного качества и хорошей
-производительностью, в силу оптимизаций под большинство современных процессоров.
+хорошо известный DivX. Он предоставляет видео отменного качества и хорошую
+производительность, в силу оптимизаций под большинство современных процессоров.
 </para>
 
 <para>
@@ -304,11 +287,7 @@ Cкачайте Real кодеки на
   Как и большинство ПО с открытым исходным кодом, он доступен как в виде 
   <ulink url="http://www.xvid.org/downloads.html">официальных релизов</ulink>,
   так и в виде CVS версии. 
-<!-- FIXME need good translation 
-  The CVS version is usually stable enough to use, as most of the time it
-  features fixes for bugs that exist in releases.
--->
-  Как правило CVS версия достаточно стабильна для использования, т.к. в большинстве
+  Как правило, CVS версия достаточно стабильна для использования, т.к. в большинстве
   случаев ее особенностью является отсутствие ошибок, присутствующих в релизах.
   Далее описывается как заставить  работать
   <systemitem class="library">XviD</systemitem> CVS с <application>MEncoder</application>'ом
@@ -331,7 +310,7 @@ Cкачайте Real кодеки на
 <step><para>
   <screen>./configure</screen>
   Вам может потребоваться добавить некоторые опции (посмотрите вывод
-  <screen>./configure --help</screen>).
+  <command>./configure --help</command>).
   </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
@@ -395,39 +374,33 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <sect3 id="codec-x264-whatis">
 <title>Что такое x264?</title>
 <para>
-  <systemitem class="library">x264</systemitem> это библиотека для создания
-  видеопотоков H.264. Она не завершена на 100%, но она имеет приемлемого
-  качества поддержку большинства возможностей H.264.
-<!-- FIXME need better translation 
-  There are also many advanced features in the H.264 specification
-  which have nothing to do with video quality per se; many of these
--->
+  <systemitem class="library">x264</systemitem> - это библиотека для создания
+  видеопотоков H.264. Она не завершена на 100%, но, по крайней мере, имеет 
+  поддержку большинства возможностей H.264, влияющих на качество.
   В спецификации H.264 присутствует множество дополнительных возможностей,
-  которые никак не влиябт на качество видео и до сих в 
+  которые сами по себе никак не влияют на качество видео и до сих в 
   <systemitem class="library">x264</systemitem> не реализованы.
 </para>
 
 <itemizedlist>
 <title>возможности кодера</title>
-<!-- FIXME i can't translate this -->
-  <listitem><para>CAVLC/CABAC</para></listitem>
-  <listitem><para>Multi-references</para></listitem>
-  <listitem><para>Intra: all macroblock types (16x16, 8x8, and 4x4 with
-    all predictions)</para></listitem>
-  <listitem><para>Inter P: all partitions (from 16x16 down to
-    4x4)</para></listitem>
-  <listitem><para>Inter B: partitions from 16x16 down to 8x8
-    (including SKIP/DIRECT)</para></listitem>
-  <listitem><para>Ratecontrol: constant quantizer, constant bitrate,
-    single or multipass ABR, optional VBV</para></listitem>
-  <listitem><para>Scene cut detection</para></listitem>
-  <listitem><para>Adaptive B-frame placement</para></listitem>
-  <listitem><para>B-frames as references / arbitrary frame
-    order</para></listitem>
-  <listitem><para>8x8 and 4x4 adaptive spatial transform</para></listitem>
-  <listitem><para>Lossless mode</para></listitem>
-  <listitem><para>Custom quantization matrices</para></listitem>
-  <listitem><para>Parallel encoding of multiple slices</para></listitem>
+  <listitem><para>CAVLC/CABAC (Контекстнозависимое адаптивное бинарное арифметическое
+                  кодирование / Контестнозависимое адаптивное кодирование с переменной длиной)</para></listitem>
+  <listitem><para>Кадры с несколькими ссылками</para></listitem>
+  <listitem><para>Базовые (I-) кадры: все типы макроблоков (16x16, 8x8 и 4x4 со всеми
+    видами предсказания)</para></listitem>
+  <listitem><para>Предсказуемые (P-) кадры: все дробления (от 16x16 до 4x4)</para></listitem>
+  <listitem><para>Двунаправленные (B-) кадры: дробления от 16x16 до 8x8
+    (включая SKIP/DIRECT)</para></listitem>
+  <listitem><para>Управление потоком: постоянный квантователь, постоянный битпоток,
+    одинарный или многопроходный ABR, опциональный VBV</para></listitem>
+  <listitem><para>Обнаружение усечения изображения</para></listitem>
+  <listitem><para>Адаптивное расположение B-кадров</para></listitem>
+  <listitem><para>B-кадры как ссылки или в произвольном расположении кадров</para></listitem>
+  <listitem><para>Адаптивные пространственные преобразования 8x8 и 4x4</para></listitem>
+  <listitem><para>Режим кодирования без потерь</para></listitem>
+  <listitem><para>Возможность задания пользовательских матриц квантования</para></listitem>
+  <listitem><para>Параллельное кодирование разных блоков</para></listitem>
 </itemizedlist>
 
 </sect3>
@@ -436,7 +409,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <title>Что такое H.264?</title>
 <para>
   
-  H.264 это одно из названий нового цифрового кодека совместно 
+  H.264 - это одно из названий нового цифрового кодека, совместно 
   разрабатываемого ITU и MPEG. Названия "ISO/IEC 14496-10" или
   "MPEG-4 Part 10" тоже являются корректными, но чаще его
   называют  "MPEG-4 AVC" или просто "AVC".
@@ -446,17 +419,18 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   дает то же качество, что и MPEG-4 ASP, но при битрейте меньшем 
   на 5%-30%. Конкретный результат зависит как от исходного
   материала, так и от кодировщика. Выигрыш не дается просто так:
-  декодирование потока H.264, похоже, имеет повышенные требования
+  декодирование потока H.264, похоже, имеет существенно повышенные требования
   к CPU и памяти. В частности, на 1733 MHz Athlon декодирование
-  H.264 потока в 1500кбит/с с DVD-разрешением  использует около 50% CPU.
+  H.264 потока в 1500кбит/с с DVD-разрешением  использует около 35% CPU.
   Для сравнения, декодирование 1500кбит/с потока MPEG4-ASP с 
-  DVD-разрешением требует около 10% CPU. Это значит, что вопрос декодирования 
-  потоков высокого разрешения не стоит перед большинством пользователей.
+  DVD-разрешением требует около 10% CPU. Это означает, что для 
+  большинства пользователей практически не может быть и речи о декодировании 
+  потоков высокого разрешения.
   Также это значит, что даже скромный DVD рип может время от времени
   заикаться на процессорах слабее 2.0 GHz или около того.
 </para>
 <para>
-  Как минимум с <systemitem class="library">x264</systemitem>,
+  По крайней мере, с <systemitem class="library">x264</systemitem>
   требования для кодирования не слишком велики по сравнению с MPEG4-ASP.
   В частности, на 1733 MHz Athlon кодирование обичного DVD будет идти со
   скоростью 5-15 fps.
@@ -473,18 +447,18 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <para>
   <application>MPlayer</application> использует H.264 декодер библиотеки
   <systemitem class="library">libavcodec</systemitem>.
-  <systemitem class="library">libavcodec</systemitem> полиуила мало-мальски
-  пригодную для использования возможность декодирования H.264 где-то в Июле 2004,
-  конечно с того времени было внесено можество серъезных изменений и улучшений,
-  как с точки зрения поддерживаемых функцианальных возможностей, так и улучшенного
+  <systemitem class="library">libavcodec</systemitem> получила мало-мальски
+  пригодную для использования возможность декодирования H.264 где-то в июле 2004,
+  однако, с того времени было внесено можество серъезных изменений и улучшений,
+  как с точки зрения поддерживаемых функциональных возможностей, так и улучшенного
   использования CPU.
-  Для определенности: использование свежего среза CVS - всегда хорошая идея.
+  Для определенности: использование свежей версии Subversion - всегда хорошая идея.
 </para>
 <para>
-  Если нужен быстрый и простой способ какие свежие изменения, относящиеся к H.264,
+  Если нужен быстрый и простой способ узнать какие свежие изменения, относящиеся к H.264,
   были сделаны в <systemitem class="library">libavcodec</systemitem>, Вам следует
   иметь ввиду
-  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS repository's web interface (Веб-интерфейс к репозиторию FFmpegCVS)</ulink>.
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">Веб-интерфейс к репозиторию FFmpeg Subversion</ulink>.
 </para>
 </sect3>
 
@@ -497,7 +471,7 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
     svn co svn://svn.videolan.org/x264/trunk x264<!--
 --></screen>
   Исходный код <application>MPlayer</application> обновляется 
-  свякий раз при изменении API <systemitem class="library">x264</systemitem>, 
+  всякий раз при изменении API <systemitem class="library">x264</systemitem>, 
   так что предлагается использовать Subversion версию
   <application>MPlayer</application>'а.
   возможно, ситуация изменится с выходом "релиза" 
@@ -513,8 +487,8 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
     ./configure &amp;&amp; make &amp;&amp; sudo make install
   </screen>
   Это установит libx264.a в /usr/local/lib, а x264.h - в /usr/local/include.
-  Сборка <application>MPlayer</application>'а при установленных в стандартные
-  каталоги библиотеке и заголовочного файла <systemitem class="library">x264</systemitem>
+  Сборка <application>MPlayer</application> при установленных в стандартные
+  каталоги библиотеке и заголовочном файле <systemitem class="library">x264</systemitem>
   очень проста.
   Просто запустите станартное:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
@@ -533,22 +507,22 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <itemizedlist>
 <title>Наиболее важными аудио кодеками среди всех являются:</title>
 <listitem><simpara>
-  MPEG layer 1/2/3 (MP1/2/3) аудио (<emphasis role="bold">"родной"</emphasis>
+  MPEG layer 1/2/3 (MP1/2/3) аудио (<emphasis role="bold">родной</emphasis>
   код, с MMX/SSE/3DNow! оптимизацией)
   </simpara></listitem>
 <listitem><simpara>
-  Windows Media Audio 7 и 8 (aka WMAv1 и WMAv2) (<emphasis role="bold">"родной"</emphasis> код, с
+  Windows Media Audio 7 и 8 (они же WMAv1 и WMAv2) (<emphasis role="bold">родной</emphasis> код, с
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (используя DMO DLL)
   </simpara></listitem>
 <listitem><simpara>
-  AC3 Dolby аудио (<emphasis role="bold">"родной"</emphasis> код, с
+  AC3 Dolby аудио (<emphasis role="bold">родной</emphasis> код, с
   MMX/SSE/3DNow! оптимизацией)
   </simpara></listitem>
 <listitem><simpara>
-  AC3 проходящий через звуковое оборудование
+  AC3 пропускаемый через звуковое оборудование
   </simpara></listitem>
 <listitem><simpara>
   AAC
@@ -595,13 +569,12 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <para>
 Используйте опцию <option>-channels</option>, чтобы выбрать количество каналов
 при выводе. Используйте <option>-channels 2</option> для микширования до стерео.
-Для микширования до 4 каналов (выводы Left Front[Левый Передний], Right Front
-[Правый передний], Left Surround[Левый Задний] и Right Surround[Правый Задний]),
+Для микширования до 4 каналов (Левый Передний, Правый Передний, Левый Задний и
+Правый Задний выводы),
 используйте <option>-channels 4</option>. В этом случае все центральные каналы
-будут смикшированы до уровня передних каналов. <option>-channels 6</option> будет
+будут равномерно смикшированы до уровня передних каналов. <option>-channels 6</option> будет
 выводить все AC3 каналы так, как они закодированы - по порядку:
-Left[Левый], Right[Правый], Left Surround[Левый Задний], Right Surround[Правый
-Задний], Center[Центральный] и LFE.
+Левый, Правый, Левый Задний, Правый Задний, Центральный и Сабвуфер.
 </para>
 
 <para>
@@ -612,7 +585,7 @@ Left[Левый], Right[Правый], Left Surround[Левый Задний], Right Surround[Правый
 Чтобы использовать более 2 каналов, Вам нужно использовать OSS, и обладать
 карточкой, поддерживающей необходимое количество каналов через ioctl
 SNDCTL_DSP_CHANNELS.  Примером подходящего драйвера является emu10k1
-(используется для Soundblaster Live! карточек) августа 2001'ого или новее
+(используется для Soundblaster Live! карточек) августа 2001'го или новее
 (ALSA CVS тоже должен работать).
 </para>
 </sect2>
@@ -638,7 +611,7 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 <ulink url="http://mad.sourceforge.net">libmad</ulink> - это многоплатформенная,
 целочисленная (внутренне 24'битный PCM)
 библиотека декодирования MPEG аудио. Она не очень хорошо обрабатывает битые
-файлы и иногда у неё бывают проблемы с перемещением по файлу, она 
+файлы и иногда у неё бывают проблемы с перемещением по файлу, но она 
 может быть производительнее mp3lib на платформах без FPU
 (таких как <link linkend="arm">ARM</link>).
 </para>
@@ -655,7 +628,7 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 
 <para>
 Этот кодек (выбираемый по -ac hwmpa) передает все аудио пакеты MPEG аппаратным
-декодерам, такие, как установленные в полнофункциональных DVB картах и DXR2 адаптерах.
+декодерам, таким как установленные в полнофункциональных DVB картах и DXR2 адаптерах.
 Не используйте его с другими драйверами вывода звука (такими как OSS и ALSA), которые
 не способны аппаратно декодировать (вы усышите только белый шум).
 </para>
@@ -664,7 +637,7 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 <sect2 id="vivo-audio">
 <title>VIVO аудио</title>
 <para>
-Аудио кодек, используемый в VIVO файлах зависит от того, это VIVO/1.0 или
+Аудио кодек, используемый в VIVO файлах зависит от того, является ли это VIVO/1.0 или
 VIVO/2.0 файл. В VIVO/1.0 файлах <emphasis role="bold">g.723</emphasis> аудио,
 а в VIVO/2.0 файлах - <emphasis role="bold">Vivo Siren</emphasis> аудио. Оба
 типа поддерживаются.
@@ -692,7 +665,7 @@ RealAudio:
 </itemizedlist>
 
 <para>
-Инструкции по установке RealPlayer'овские библиотек находятся в секции
+Инструкции по установке RealPlayer'овских библиотек находятся в разделе
 <link linkend="realvideo">RealVideo</link>.
 </para>
 </sect2>
@@ -712,7 +685,7 @@ QuickTime. Инструкции по установке см. в секции
 <para>
 Аудио потоки Qualcomm (fourcc:<emphasis>Qclp</emphasis>) обнаруживаются
 в MOV/QT файлах. Они могут декодироваться библиотеками QuickTime.
-Инструкций по установке см. в секции
+Инструкции по установке см. в секции
 <link linkend="sorenson">Sorenson video codec</link>.
 </para>
 </sect2>
@@ -723,14 +696,14 @@ QuickTime. Инструкции по установке см. в секции
 AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 файлах. Декодер с открытым исходным кодом, называемый FAAD, доступен с
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> включает в себя CVS срез libfaad 2.1 beta, поэтому
+<application>MPlayer</application> включает в себя CVS версию libfaad 2.1 beta, поэтому
 Вам ничего не нужно дополнительно скачивать.
 </para>
 
 <para>
 Если Вы используете gcc 3.2, который не может скомпилировать встроенный FAAD,
 или просто хотите использовать внешнюю библиотеку, скачаете её с 
-<ulink url="http://www.audiocoding.com/download.php">страницы скачивания</ulink>
+<ulink url="http://www.audiocoding.com/download.php">страницы загрузок</ulink>
 и укажите <filename>configure</filename> <option>--enable-external-faad</option>.
 Вам не нужен весь faad2, чтобы декодировать AAC файлы, достаточно libfaad.
 Вот как Вы можете её собрать:
@@ -745,21 +718,21 @@ make install
 Бинарники отсутствуют на audiocoding.com, но вы можете скачать (apt-get) Debian
 пакеты с <ulink url="http://marillat.free.fr">домашней страницы Christian Marillat</ulink>,
 Mandrake RPM'ники с <ulink url="http://plf.zarb.org">P.L.F</ulink> и RedHat RPM'ники
-с <ulink url="http://greysector.rangers.eu.org/">Grey Sector[Серый Сектор]</ulink>.
+с <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
 </sect2>
 
 <sect2 id="amr">
 <title>AMR кодеки</title>
 <para>
-Adaptive Multi-Rate речевой кодек используется в мобильных телефонах третьего поколения (3G).
+Речевой кодек Adaptive Multi-Rate используется в мобильных телефонах третьего поколения (3G).
 
-Референсная реализвация (reference implementation) доступна с 
+Исходная реализация доступна с 
 <ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
-(бесплатна для лчного использования).
+(бесплатна для личного использования).
 </para>
 <para>
-чтобы включить поддержку, скачайте исходники для
+Чтобы включить поддержку, скачайте исходники для
 <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">AMR-NB</ulink>
 и
 <ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">AMR-WB</ulink>
@@ -793,15 +766,15 @@ mv c-code libavcodec/amrwb_float
 
 <para>
 VFW (Video for Windows[Видео для Windows]) - это старые Видео API для Windows.
-У этих кодеков расширения <filename>.DLL</filename> или (реже) <filename>.DRV
-</filename>. Если <application>MPlayer</application> не может проигрывать Ваш
+У этих кодеков расширения <filename>.DLL</filename> или (реже) <filename>.DRV</filename>.
+Если <application>MPlayer</application> не может проигрывать Ваш
 AVI с такого рода сообщением:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
 </para>
 
 <para>
-Это значит, что Ваш AVI закодирован кодеком с fourcc[кодом из 4 символов] HFYU
-(HFYU = HuffYUV кодек, DIV3 = DivX Low Motion, и т. п.). Теперь, когда Вы это
+Это значит, что Ваш AVI закодирован кодеком с fourcc HFYU
+(HFYU = HuffYUV кодек, DIV3 = DivX Low Motion, и т.п.). Теперь, когда Вы это
 знаете, Вы должны найти DLL, которую Windows загружает для проигрывания этого
 файла. В нашем случае, в файле <filename>system.ini</filename> есть эта
 информация, в этой строке:
@@ -825,7 +798,7 @@ ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 
 <note><para>Под Windows NT/2000/XP ищите эту информацию в реестре, например,
 ищите &quot;VIDC.HFYU&quot;. Чтобы узнать, как это делать, см. ниже старый
-DirectShow метод.
+метод DirectShow.
 </para></note>
 </sect2>
 
