@@ -137,6 +137,7 @@ static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
     }
     ds_free_packs(demuxer->audio);
     ds_free_packs(demuxer->video);
+    ds_free_packs(demuxer->sub);
     demuxer->stream->eof=0; // clear eof flag
     demuxer->video->eof=0;
     demuxer->audio->eof=0;
@@ -791,6 +792,7 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,float audio_delay, in
         newpos += (newpts - mpg_d->last_pts) * (newpos - oldpos) / (mpg_d->last_pts - oldpts);
         ds_free_packs(d_audio);
         ds_free_packs(d_video);
+        ds_free_packs(demuxer->sub);
         demuxer->stream->eof=0; // clear eof flag
         d_video->eof=0;
         d_audio->eof=0;
