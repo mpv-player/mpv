@@ -431,7 +431,7 @@ ifeq ($(MENCODER),yes)
 		if test "$$i" = en ; then \
 			cd $(MANDIR)/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		else \
-			cd $(MANDIR)/man1/$$i && ln -sf mplayer.1 mencoder.1 ; \
+			cd $(MANDIR)/$$i/man1 && ln -sf mplayer.1 mencoder.1 ; \
 		fi ; \
 	done
 endif
