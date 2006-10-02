@@ -296,44 +296,25 @@ static void my_draw_bitmap(struct vf_instance_s* vf, unsigned char* bitmap, int 
 	unsigned char u = rgba2u(color);
 	unsigned char v = rgba2v(color);
 	unsigned char opacity = 255 - _a(color);
-	unsigned char* src;
-	unsigned char* dst;
+	unsigned char *src, *dsty, *dstu, *dstv;
 	int i, j;
 	mp_image_t* dmpi = vf->dmpi;
 
-	
 	src = bitmap;
-	dst = dmpi->planes[0] + dst_x + dst_y * dmpi->stride[0];
-	for(i = 0; i < bitmap_h; ++i)
-	{
-		for (j = 0; j < bitmap_w; ++j) {
-		//	unsigned k = *(src+j);
-			unsigned k = ((unsigned)*(bitmap + stride * i + j)) * opacity / 255;
-			unsigned char orig_color = *(dst+j);
-			*(dst+j) = (k*y + (255-k)*orig_color) / 255;
-		}
-		src += stride;
-		dst += dmpi->stride[0];
-	}
-
+	dsty = dmpi->planes[0] + dst_x + dst_y * dmpi->stride[0];
+	dstu = vf->priv->planes[1] + dst_x + dst_y * 2 * dmpi->chroma_width;
+	dstv = vf->priv->planes[2] + dst_x + dst_y * 2 * dmpi->chroma_width;
 	for (i = 0; i < bitmap_h; ++i) {
 		for (j = 0; j < bitmap_w; ++j) {
-			int x = dst_x + j;
-			int y = dst_y + i;
-			unsigned k;
-			unsigned char orig_u, orig_v;
-			unsigned char new_u, new_v;
-
-			k = ((unsigned)*(bitmap + stride * i + j)) * opacity / 255;
-
-			orig_u = *(vf->priv->planes[1] + x + y * 2 * dmpi->chroma_width);
-			new_u = (k*u + (255-k)*orig_u) / 255;
-			*(vf->priv->planes[1] + x + y * 2 * dmpi->chroma_width) = new_u;
-
-			orig_v = *(vf->priv->planes[2] + x + y * 2 * dmpi->chroma_width);
-			new_v = (k*v + (255-k)*orig_v) / 255;
-			*(vf->priv->planes[2] + x + y * 2 * dmpi->chroma_width) = new_v;
+			unsigned k = ((unsigned)src[j]) * opacity / 255;
+			dsty[j] = (k*y + (255-k)*dsty[j]) / 255;
+			dstu[j] = (k*u + (255-k)*dstu[j]) / 255;
+			dstv[j] = (k*v + (255-k)*dstv[j]) / 255;
 		}
+		src += stride;
+		dsty += dmpi->stride[0];
+		dstu += 2 * dmpi->chroma_width;
+		dstv += 2 * dmpi->chroma_width;
 	} 
 }
 
