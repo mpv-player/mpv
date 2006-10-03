@@ -1454,22 +1454,25 @@ print_stats(xvid_mplayer_module_t *mod)
 				"The value 99.99dB is a special value and represents "
 				"the upper range limit\n");
 		mp_msg(MSGT_MENCODER, MSGL_INFO,
-				"xvid:     Min PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB, in frame %d\n",
+				"xvid:     Min PSNR Y:%.2f, Cb:%.2f, Cr:%.2f, All:%.2f in frame %d\n",
 				SSE2PSNR(mod->max_sse_y, mod->pixels),
 				SSE2PSNR(mod->max_sse_u, mod->pixels/4),
 				SSE2PSNR(mod->max_sse_v, mod->pixels/4),
+				SSE2PSNR(mod->max_sse_y + mod->max_sse_u + mod->max_sse_v, mod->pixels*1.5),
 				mod->max_framenum);
 		mp_msg(MSGT_MENCODER, MSGL_INFO,
-				"xvid: Average PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB, for %d frames\n",
+				"xvid: Average PSNR Y:%.2f, Cb:%.2f, Cr:%.2f, All:%.2f for %d frames\n",
 				SSE2PSNR(mod->sse_y, mod->pixels),
 				SSE2PSNR(mod->sse_u, mod->pixels/4),
 				SSE2PSNR(mod->sse_v, mod->pixels/4),
+				SSE2PSNR(mod->sse_y + mod->sse_u + mod->sse_v, mod->pixels*1.5),
 				mod->frames);
 		mp_msg(MSGT_MENCODER, MSGL_INFO,
-				"xvid:     Max PSNR y : %.2f dB, u : %.2f dB, v : %.2f dB, in frame %d\n",
+				"xvid:     Max PSNR Y:%.2f, Cb:%.2f, Cr:%.2f, All:%.2f in frame %d\n",
 				SSE2PSNR(mod->min_sse_y, mod->pixels),
 				SSE2PSNR(mod->min_sse_u, mod->pixels/4),
 				SSE2PSNR(mod->min_sse_v, mod->pixels/4),
+				SSE2PSNR(mod->min_sse_y + mod->min_sse_u + mod->min_sse_v, mod->pixels*1.5),
 				mod->min_framenum);
 	}
 }
