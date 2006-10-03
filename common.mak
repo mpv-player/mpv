@@ -34,10 +34,8 @@ $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 %.o: %.cpp
 	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
 
-depend: $(SRCS)
+depend dep: $(SRCS)
 	$(CC) -MM $(CFLAGS) $^ 1>.depend
-
-dep:	depend
 
 clean::
 	rm -f *.o *.d *~ *.a *.lib *.so *.so.* *.dylib *.dll \
@@ -69,6 +67,7 @@ install-lib-shared: $(SLIBNAME)
 install-lib-static: $(LIB)
 	install -d "$(libdir)"
 	install -m 644 $(LIB) "$(libdir)"
+	$(LIB_INSTALL_EXTRA_CMD)
 
 install-headers:
 	install -d "$(incdir)"
@@ -87,6 +86,8 @@ uninstall-libs:
 uninstall-headers:
 	rm -f "$(addprefix $(incdir)/,$(HEADERS))"
 	rm -f "$(libdir)/pkgconfig/lib$(NAME).pc"
+
+.PHONY: all depend dep clean distclean install* uninstall*
 
 #
 # include dependency files if they exist
