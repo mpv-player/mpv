@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r19979
+.\" In sync with r20008
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -1490,28 +1490,32 @@ Greift automatisch auf IPv4-Verbindungen zurück.
 .B \-pvr <Option1:Option2:...> (nur bei PVR)
 Diese Option nimmt verschiedene Feineinstellungen der Eigenschaften für die
 Encodierung des PVR-Capture-Moduls vor.
+Es muss mit irgendeiner auf einem Hardware-MPEG-Encoder basierenden Karte
+verwendet werden, die vom V4L2-Treiber unterstützt wird.
 Die Hauppauge WinTV PVR\-150/250/350/500 und alle IVTV-basierten Karten sind
 als PVR-Capture-Karten bekannt.
+Beachte, dass nur Linuxkernel Version 2.6.18 oder höher in der Lage sind,
+MPEG-Layer durch die V4L2-Schicht zu verarbeiten.
 Für das Einfangen eines MPEG-Streams und um diesen mit MPlayer/Mencoder
 anzuschauen, verwende 'pvr://' als Film-URL.
 .sp 1
 Verfügbare Optionen sind folgende:
 .RSs
-.IPs aspect=<1\-4>
+.IPs aspect=<0\-3>
 Gib den Aspekt der Eingabe an (Standard: 4:3):
 .RSss
-1: 1:1
+0: 1:1
 .br
-2: 4:3
+1: 4:3
 .br
-3: 16:9
+2: 16:9
 .br
-4: 2.21:1
+3: 2.21:1
 .REss
 .IPs arate=<32000\-48000>
 Gib die Audio-Rate für die Encodierung an (Standard: 48000 Hz, verfügbar:
 32000, 44100 und 48000 Hz).
-.IPs alayer=<1\-2>
+.IPs alayer=<1\-3>
 Gib die Encodierung des MPEG-Audio-Layers an (Standard: Layer 2).
 .IPs abitrate=<32\-448>
 Gib die Bitrate für die Audioencodierung in kbps an (Standard: 384 kbps).
@@ -1522,34 +1526,30 @@ Verfügbare Preset-Werte sind 'stereo', 'joint_stereo', 'dual' und 'mono'
 .IPs vbitrate=<Wert>
 Gib die durchschnittliche Bitrate für die Videoencodierung an (Standard:
 6 Mbps).
-.IPs vmode=<0\-1>
-Gib den Modus für die Videoencodierung an (Standard: VBR):
+.IPs vmode=<Wert>
+Gib den Modus für die Videoencodierung an (Standard: vbr):
 .RSss
-0: VBR
+vbr: variable Bitrate
 .br
-1: CBR
+cbr: konstante Bitrate
 .REss
 .IPs vpeak=<Wert>
 Gib den Höchstwert für die Bitrate der Videoencodierung an (nur nützlich für
 VBR-Encodierung, Standard: 9.6 Mbps).
 .IPs fmt=<Wert>
-Wähle ein MPEG-Format für die Encodierung (Standard: MPEG PS):
+Wähle ein MPEG-Format für die Encodierung (Standard: ps):
 .RSss
-ps:    MPEG PS.
+ps:    MPEG 2 Program Stream.
 .br
-ts:    MPEG TS (experimentell, kann fehlschlagen)
+ts:    MPEG 2 Transport Stream.
 .br
-mpeg1: MPEG 1
+mpeg1: MPEG 1 System Stream.
 .br
-vcd:   Video CD
+vcd:   Video CD-kompatibler Stream.
 .br
-svcd:  Super Video CD
+svcd:  Super Video CD-kompatibler Stream.
 .br
-dvd:   DVD
-.br
-dvds1: DVD Region 1 (NTSC)
-.br
-dvds2: DVD Region 2 (PAL)
+dvd:   DVD-kompatibler Stream.
 .REss
 .RE
 .PD 1
