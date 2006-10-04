@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19832 -->
+<!-- synced with r20041 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -100,7 +100,7 @@ codec, which supports it everywhere), see the man page.
 -->
 К тому же этот драйвер поддерживает управление 
 яркостью/контрастностью/цветностью/и т.д. (кроме случая использования старого ,медленного
-DivX кодека DirectShow, котороый везде это поддерживает), смотрите страницу man.
+DivX кодека DirectShow, который везде это поддерживает), смотрите страницу man.
 
 </para>
 
@@ -681,7 +681,7 @@ SDL видео вывод поддерживает отображения субтитров внизу, на черной полосе (если
 </varlistentry>
 </variablelist>
 
-<table>
+<table id="sdl_only_keys">
 <title>клавиши управления SDL</title>
 <tgroup cols="2">
 <thead>

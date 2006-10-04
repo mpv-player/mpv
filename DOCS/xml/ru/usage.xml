@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19828 -->
+<!-- synced with r20041 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -246,7 +246,7 @@ VOBsub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filenam
 (относительный путь указывается относительно <filename>$HOME/.mplayer</filename>).
 </para>
 
-<example>
+<example id="input_control_file">
 <title>Простой файл конфигурации ввода</title>
 <programlisting>
 ##

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19685 -->
+<!-- synced with r20043 -->
 <chapter id="mencoder">
 <title>Основы использования <application>MEncoder</application></title>
 
@@ -7,8 +7,7 @@
 Полный список доступных опций <application>MEncoder</application> и примеры
 смотрите на странице руководства man. 
 
-<!-- FIXME is translation correct? -->
-Ряд наглядных[hands-on] примеров и подробные руководства по использованию отдельных
+Ряд наглядных примеров и подробные руководства по использованию отдельных
 параметров кодирования, можно узнать прочтя 
 <ulink url="../../tech/encoding-tips.txt">советы по кодированию</ulink>, которые мы
 собрали из отдельных нитей[threads] рассылки MPlayer-users. В
@@ -310,7 +309,7 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 обратитесь к руководствам, которые можно найти в интернет.
 </para>
 
-<example>
+<example id="copy_audio_track">
 <title>копирование звуковой дорожки</title>
 <para>
 Кодирование (двухпроходное) второй дорожки DVD в MPEG-4 (&quot;DivX&quot;) AVI с
@@ -322,10 +321,10 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy 
 </para>
 </example>
 
-<example>
+<example id="encode_audio_track">
 <title>кодирование звуковой дорожки</title>
 <para>
-кодирование (в два прохода) DVD в MPEG-4 (&quot;DivX&quot;) AVI с кодированием 
+Кодирование (в два прохода) DVD в MPEG-4 (&quot;DivX&quot;) AVI с кодированием 
 звуковой дорожки в MP3. Будьте аккуратны, используя этот метод, так как в некоторых случаях
 это может привести к рассинхронизации аудио/видео.
 <screen>
@@ -357,14 +356,13 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
   В некоторых случаях возможно воспроизведение видео большего размера.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Звук</emphasis>: частота сэмплирования[samplerate] должна быть
+  <emphasis role="bold">Звук</emphasis>: частота дискретизации должна быть
   24кГц для MPEG-4, и 48кГц для H.264.
 </para></listitem>
 </itemizedlist>
 </para>
 
-<example>
-<title>Пример:</title>
+<example id="encode_for_psp">
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
@@ -632,8 +630,8 @@ VOBsub. Они состоят из пары файлов, оканчивающихся на
 Так что вам следует удалять их перед началом.
 </para>
 
-<example>
-<title>копирование двух субтитров из DVD при выполнении двух проходного кодирования</title>
+<example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
+<title>копирование двух субтитров из DVD при выполнении двухпроходного кодирования</title>
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
@@ -641,7 +639,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 --></screen>
 </example>
 
-<example>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Копирование французских субтитров из MPEG файла</title>
 <screen>
 rm subtitles.idx subtitles.sub
