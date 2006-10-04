@@ -95,3 +95,6 @@ it is equivalent to.
 If you make (spelling/wording/consistency/etc) changes to a file without
 adapting parts that changed in the English master file, leave the sync
 tag as it is.
+
+If you make changes to the XML documentation, doublecheck that the
+documentation still builds by running make.
