@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19832 -->
+<!-- in sync with r20041 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -725,7 +725,7 @@ EndSection
 </varlistentry>
 </variablelist>
 
-<table>
+<table id="sdl_only_keys">
 <title>SDL-Tasten</title>
 <tgroup cols="2">
 <thead>

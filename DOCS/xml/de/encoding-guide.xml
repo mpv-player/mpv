@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with r19043 -->
+<!-- In sync with r20043 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -1475,7 +1475,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
             <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
               <para>Sei trotzdem vorsichtig: MPEG-4 AVC-Videos in DVD-Auflösung zu
                 decodieren erfordert einen schnellen Rechner (z.B. einen Pentium 4
-                über 1.5Ghz oder einen Pentium M über 1Ghz).
+                über 1.5GHz oder einen Pentium M über 1GHz).
               </para>
             </footnote>
             wenn du MPEG-4 AVC-Codecs wie
@@ -2890,7 +2890,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
       <para>
         Alle Encodierungseinstellungen wurden auf einem Beispielvideo
         mit 720x448 @30000/1001 fps getestet, die Zielbitrate war 900kbps und
-        der Rechner war ein AMD-64 3400+ mit 2400 Mhz im 64bit-Modus.
+        der Rechner war ein AMD-64 3400+ mit 2400 MHz im 64bit-Modus.
         Jede Encodiereinstellung zeichnet sich aus durch die gemessene
         Encodiergeschwindigkeit (in Frames pro Sekunde) und den PSNR-Verlust
         (in dB) im Vergleich zu Einstellungen für &quot;sehr hohe Qualität&quot;.
@@ -3684,7 +3684,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         Alle Encodierungseinstellungen wurden auf einem Beispielvideo
         mit 720x448 @30000/1001 fps getestet, die Zielbitrate war 900kbps,
         und der Rechner war ein
-        AMD-64 3400+ mit 2400 Mhz im 64bit-Modus.
+        AMD-64 3400+ mit 2400 MHz im 64bit-Modus.
         Jede Encodierungseinstellung zeichnet sich aus durch die gemessene
         Encodiergeschwindigkeit (in Frames pro Sekunde) und den PSNR-Verlust
         (in dB) im Vergleich zu Einstellungen für &quot;sehr hohe Qualität&quot;.
@@ -4284,7 +4284,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         All diese Encodier-Einstellungen wurden an einem Beispielvideo
         mit 720x448 @30000/1001 fps getestet, die Zielbitrate war 900kbps,
         und der Rechner war ein
-        AMD-64 3400+ mit 2400 Mhz im 64bit-Modus.
+        AMD-64 3400+ mit 2400 MHz im 64bit-Modus.
         Jede Encodier-Einstellung zeichnet sich durch eine gemessene
         Encodiergeschwindigkeit (in Frames pro Sekunde) und dem
         PSNR-Verlust (in dB) im Vergleich zu den &quot;sehr
