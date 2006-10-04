@@ -363,6 +363,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 </para>
 
 <example id="encode_for_psp">
+<title>Кодирование для PSP</title>
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
