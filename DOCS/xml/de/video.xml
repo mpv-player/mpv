@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r20041 -->
+<!-- in sync with r20054 -->
 <chapter id="video">
 <title>Videoausgabegeräte</title>
 
@@ -695,66 +695,6 @@ EndSection
   des Films auf den schwarzen Balken (sofern diese vorhanden sind).
 </para>
 
-<variablelist>
-<title>Es gibt einige Komanndozeilenparameter bezüglich SDL:</title>
-<varlistentry>
-  <term><option>-vo sdl:driver=<replaceable>Name</replaceable></option></term>
-  <listitem><simpara>
-  Gibt den Namen des SDL-Videotreibers an (z.B. <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>).
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:<replaceable>Name</replaceable></option></term>
-  <listitem><simpara>
-  Gibt den Namen des SDL-Audiotreibers an (z.B. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>artsc</literal>).
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-  Deaktiviert die XVideo-Hardwarebeschleunigung.
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-  Versucht, die Verwendung der XVideo-Beschleunigung zu erzwingen.
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table id="sdl_only_keys">
-<title>SDL-Tasten</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Taste</entry><entry>Aktion</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-  Wechselt zwischen den vorhandenen Vollbildmodi
-    </entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-  Wechselt zurück zum normalen Fenstermodus
-    </entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>BEKANNTE FEHLER</title>
-<listitem><simpara>
-  Tasten, die bei sdl:driver=aalib einmal gedrückt werden, bleiben aus
-  Sicht des Programms gedrückt (benutze also <option>-vo aa</option>!).
-  Das ist ein Fehler in SDL, den ich nicht beheben kann (mit SDL 1.2.1
-  getestet).
-</simpara></listitem>
-<listitem><simpara>
-  Benutze AUF KEINEN FALL SDL mit dem GUI! Das funktioniert nicht so,
-  wie es sollte.
-</simpara></listitem>
-</itemizedlist>
 </sect2>
 
 
