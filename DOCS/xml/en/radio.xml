@@ -79,8 +79,8 @@ have switched line-in mute off).
 <para>
 Input from standard V4L (using line-in cable, capture switched off):
 <screen>
-mplayer radio://104.4<!--
---></screen>
+mplayer radio://104.4
+</screen>
 </para>
 </informalexample>
 
@@ -89,8 +89,8 @@ mplayer radio://104.4<!--
 Input from standard V4L (using line-in cable, capture switched off,
 V4Lv1 interface):
 <screen>
-mplayer -radio driver=v4l radio://104.4<!--
---></screen>
+mplayer -radio driver=v4l radio://104.4
+</screen>
 </para>
 </informalexample>
 
@@ -98,8 +98,8 @@ mplayer -radio driver=v4l radio://104.4<!--
 <para>
 Playing second channel from channel list:
 <screen>
-mplayer -radio channels=104.4=Sibir,103.9=Maximm  radio://2<!--
---></screen>
+mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
+</screen>
 </para>
 </informalexample>
 
@@ -109,11 +109,11 @@ Passing sound over the PCI bus from the radio card's internal ADC.
 In this example the tuner is used as a second sound card
 (ALSA device hw:1,0). For saa7134-based cards either the
 saa7134-alsa or saa7134-oss module must be loaded.
+<screen>
+mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm radio://2/capture
+</screen>
 <note><para>When using ALSA device names colons must be replaced
 by equal signs, commas by periods.
-<screen>
-mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture<!--
---></screen>
 </para></note>
 </para>
 </informalexample>
