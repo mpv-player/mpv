@@ -662,7 +662,7 @@ present) black bar.
 </varlistentry>
 </variablelist>
 
-<table>
+<table id="sdl_only_keys">
 <title>SDL only keys</title>
 <tgroup cols="2">
 <thead>

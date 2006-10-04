@@ -256,7 +256,7 @@ and a full list of available commands by running
 <command>mplayer -input cmdlist</command>.
 </para>
 
-<example>
+<example id="input_control_file">
 <title>A simple input control file</title>
 <programlisting>
 ##

@@ -314,7 +314,7 @@ time you heard about this, you should consult some guides available on the
 net.
 </para>
 
-<example>
+<example id="copy_audio_track">
 <title>copy audio track</title>
 <para>
 Two pass encode of the second track a DVD to an MPEG-4 (&quot;DivX&quot;)
@@ -326,7 +326,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy 
 </para>
 </example>
 
-<example>
+<example id="encode_audio_track">
 <title>encode audio track</title>
 <para>
 Two pass encode of a DVD to an MPEG-4 (&quot;DivX&quot;) AVI while encoding
@@ -370,8 +370,8 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 </itemizedlist>
 </para>
 
-<example>
-<title>Example</title>
+<example id="encode_for_psp">
+<title>encode for PSP</title>
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
@@ -648,7 +648,7 @@ and <filename>.sub</filename> files already exist. So you should remove any
 before starting.
 </para>
 
-<example>
+<example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>Copying two subtitles from a DVD while doing two pass encoding</title>
 <screen>
 rm subtitles.idx subtitles.sub
@@ -657,7 +657,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 --></screen>
 </example>
 
-<example>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Copying a french subtitle from an MPEG file</title>
 <screen>
 rm subtitles.idx subtitles.sub
