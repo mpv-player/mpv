@@ -1373,8 +1373,8 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   you cannot go wrong
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Be careful, however: Decoding DVD-resolution MPEG-4 AVC videos
-  requires a fast machine (i.e. a Pentium 4 over 1.5Ghz or a Pentium M
-  over 1Ghz).
+  requires a fast machine (i.e. a Pentium 4 over 1.5GHz or a Pentium M
+  over 1GHz).
   </para></footnote>
   when choosing MPEG-4 AVC codecs like
   <systemitem class="library">x264</systemitem> instead of MPEG-4 ASP codecs
@@ -2661,7 +2661,7 @@ An example with AC3 compression:
 <para>
   All the encoding settings were tested on a 720x448 @30000/1001 fps
   video sample, the target bitrate was 900kbps, and the machine was an
-  AMD-64 3400+ at 2400 Mhz in 64 bits mode.
+  AMD-64 3400+ at 2400 MHz in 64 bits mode.
   Each encoding setting features the measured encoding speed (in
   frames per second) and the PSNR loss (in dB) compared to the "very
   high quality" setting.
@@ -3397,7 +3397,7 @@ codec</title>
 <para>
   All the encoding settings were tested on a 720x448 @30000/1001 fps
   video sample, the target bitrate was 900kbps, and the machine was an
-  AMD-64 3400+ at 2400 Mhz in 64 bits mode.
+  AMD-64 3400+ at 2400 MHz in 64 bits mode.
   Each encoding setting features the measured encoding speed (in
   frames per second) and the PSNR loss (in dB) compared to the "very
   high quality" setting.
@@ -3919,7 +3919,7 @@ codec</title>
 <para>
   All the encoding settings were tested on a 720x448 @30000/1001 fps
   video sample, the target bitrate was 900kbps, and the machine was an
-  AMD-64 3400+ at 2400 Mhz in 64 bits mode.
+  AMD-64 3400+ at 2400 MHz in 64 bits mode.
   Each encoding setting features the measured encoding speed (in
   frames per second) and the PSNR loss (in dB) compared to the "very
   high quality" setting.

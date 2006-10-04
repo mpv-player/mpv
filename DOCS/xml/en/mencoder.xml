@@ -364,8 +364,8 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
   resolutions.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Audio</emphasis>: its samplerate should be 24khz
-  for MPEG-4 videos, and 48khz for H.264.
+  <emphasis role="bold">Audio</emphasis>: its samplerate should be 24kHz
+  for MPEG-4 videos, and 48kHz for H.264.
 </para></listitem>
 </itemizedlist>
 </para>
