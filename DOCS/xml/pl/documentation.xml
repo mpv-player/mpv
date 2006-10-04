@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18427 -->
+<!-- synced with r20024 -->
 <!-- Opiekun: Torinthiel -->
 
 <bookinfo id="toc">
@@ -47,9 +47,12 @@ Jeśli masz jeszcze jakieś pytania, wróć do <link linkend="toc">Spisu
 treści</link> i w nim poszukaj odpowiedniego tematu, przeczytaj
 <xref linkend="faq"/> albo spróbuj przegrepować zbiory. Odpowiedź na większość
 pytań powinna być zawarta w niniejszej dokumentacji, a pozostałe prawdopodobnie zostały
-już zadane na naszych <link linkend="mailinglists">listach dyskusyjnych</link>.
+już zadane na naszych <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">listach dyskusyjnych</ulink>.
+<!-- TODO: Jak będzie przetłumaczona strona to zmienić link -->
+<!-- FIXME: Nieistniejące łącza
 Sprawdź <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archiwa</ulink>,
 można tam znaleźć wiele interesujących informacji.
+-->
 </para>
 </preface>
 
@@ -64,10 +67,10 @@ można tam znaleźć wiele interesujących informacji.
 porty</link>). Odtwarza większość zbiorów w formatach MPEG, VOB, AVI, OGG/OGM,
 VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA,
 zbiory Matroska, obsługiwanych przez wiele rdzennych kodeków, XAnim,
-RealPlayer, i Win32 DLL. Możesz w nim także oglądać filmy
+RealPlayer i Win32 DLL. Możesz w nim także oglądać filmy
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson,
 Theora</emphasis> i <emphasis role="bold">MPEG-4 (DivX)</emphasis>
-Inną wielką zaletą MPlayera jest
+Inną wielką zaletą <application>MPlayera</application> jest
 szeroki zakres obsługiwanych sterowników wyjściowych. Działa on z X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ale możesz też używać GGI
 i SDL (i dzięki temu wszystkich ich sterowników) i niektórych specyficznych dla
@@ -188,17 +191,16 @@ mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 2.
 &cd-dvd.xml;
 &faq.xml;
 
-&formats.xml;
+&containers.xml;
 &codecs.xml;
 &video.xml;
 &audio.xml;
 &tvinput.xml;
+&radio.xml;
 
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
-&mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
-&users-vs-dev.xml;

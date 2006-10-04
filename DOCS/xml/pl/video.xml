@@ -216,8 +216,7 @@ MMX/3DNow! na liście dyskusyjnej MPlayer-users.
 <title>Karty nVidia</title>
 
 <para>
-nVidia nie zawsze jest dobrym wyborem dla Linuksa (wg nVidii to
-<link linkend="nvidia-opinions">nieprawda</link>)...
+nVidia nie zawsze jest dobrym wyborem dla Linuksa ...
 Sterownik XFree86 o otwartych źródłach obsługuje większość tych kart, lecz
 w niektórych wypadkach będziesz zmuszony używać binarnych sterowników
 o zamkniętych źródłach (do pobrania ze

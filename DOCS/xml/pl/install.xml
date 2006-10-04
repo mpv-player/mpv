@@ -33,20 +33,8 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   dlatego te¿ jest bardzo wa¿ny.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - zalecanymi wersjami s±: <emphasis role="bold">2.95.3</emphasis>
-  (mo¿e <emphasis role="bold">2.95.4</emphasis>) i <emphasis role="bold">3.2+</emphasis>.
-  <emphasis role="bold">Nigdy</emphasis> nie u¿ywaj 2.96 lub 3.0.x! Generuj± one
-  wadliwy kod <application>MPlayera</application>. Je¿eli zdecydujesz siê
-  na zmianê gcc z 2.96, nie rób tego na korzy¶æ 3.x tylko dlatego, ¿e jest nowsze! Wczesne
-  wydania 3.x mia³y jeszcze wiêcej b³êdów ni¿ 2.96. Spróbuj obni¿yæ wersjê do 2.95.x
-  (obni¿ równie¿ wersjê <systemitem class="library">libstdc++</systemitem>, inne
-  programy mog± jej potrzebowaæ) lub nie zmieniaj wersji w ogóle (w tym wypadku b±d¼
-  jednak przygotowany na b³êdy podczas uruchamiania). Je¿eli jednak dalej obstajesz
-  przy 3.x, spróbuj u¿yæ najnowszej wersji, wczesne wydania mia³y liczne b³êdy,
-  wiêc b±d¼ pewny, ¿e u¿ywasz przynajmniej 3.1, by³a ona sprawdzana i dzia³a.
-  W rozdzia³ach <link linkend="gcc-296">gcc 2.96</link> i <xref linkend="faq"/> s± bardziej szczegó³owe
-  informacje o b³êdach gcc 2.96 (które ci±gle NIE s± naprawione, zastosowano
-  jedynie ich obej¶cia w <application>MPlayerze</application>!).
+  <emphasis role="bold">gcc</emphasis> - zalecanymi wersjami s± 2.95 i 3.3+.
+  Wiadomo, ¿e 2.96 i 3.0.x generuj± wadliwy kod, 3.1 i 3.2 równie¿ mia³y problemy.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - sugerowan± wersj± jest <emphasis role="bold">
