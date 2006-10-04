@@ -632,64 +632,6 @@ SDL video output supports displaying subtitles under the movie, on the (if
 present) black bar.
 </para>
 
-<variablelist>
-<title>There are several command line switches for SDL:</title>
-<varlistentry>
-  <term><option>-vo sdl:driver=<replaceable>name</replaceable></option></term>
-  <listitem><simpara>
-    specifies SDL video driver to use (i.e. <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:<replaceable>name</replaceable></option></term>
-  <listitem><simpara>
-    specifies SDL audio driver to use (i.e. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>artsc</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-    disables XVideo hardware acceleration
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-    tries to force XVideo acceleration
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table id="sdl_only_keys">
-<title>SDL only keys</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Key</entry><entry>Action</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-    cycles available fullscreen modes
-    </entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-    changes back to normal mode
-    </entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>Known bugs:</title>
-<listitem><simpara>
-  Keys pressed under sdl:driver=aalib console driver repeat forever. (use
-  <option>-vo aa</option>!) It's bug in SDL, I can't change it (tested with
-  SDL 1.2.1).
-  </simpara></listitem>
-<listitem><simpara>
-  DO NOT USE SDL with GUI! It won't work as it should.
-  </simpara></listitem>
-</itemizedlist>
 </sect2>
 
 
