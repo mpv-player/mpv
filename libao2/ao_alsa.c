@@ -98,7 +98,6 @@ static int control(int cmd, void *arg)
   switch(cmd) {
   case AOCONTROL_QUERY_FORMAT:
     return CONTROL_TRUE;
-#ifndef WORDS_BIGENDIAN 
   case AOCONTROL_GET_VOLUME:
   case AOCONTROL_SET_VOLUME:
     {
@@ -229,7 +228,6 @@ static int control(int cmd, void *arg)
       snd_mixer_close(handle);
       return CONTROL_OK;
     }
-#endif
     
   } //end switch
   return(CONTROL_UNKNOWN);
