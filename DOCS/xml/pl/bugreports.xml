@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19039 -->
+<!-- synced with r20024 -->
 <!-- Opiekun: Boski -->
 <appendix id="bugreports">
 <title>Jak zgłaszać błędy</title>
@@ -13,6 +13,20 @@ rozwoju <application>MPlayera</application>. Należy jednak pamiętać, że
 trzeba dostarczyć <emphasis role="bold">wszystkie</emphasis> informacje o które
 poprosimy i postępować dokładnie według instrukcji zawartej w tym dokumencie.
 </para>
+<sect1 id="bugreports_security">
+<title>Report security releated bugs</title>
+<para>
+Jeśli znalazłeś lukę, którą można wykorzystać, i chcesz zrobić dobry uczynek
+i pozwolić nam ją naprawić zanim ją ujawnisz, chętnie przyjmiemy zgłoszenie
+bezpieczeństwa pod adresem
+<ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>.
+Proszę pisać w języku angielskim i dodać [SECURITY] albo [ADVISORY] w temacie.
+Upewnij się że Twoje zgłoszenie zawiera całkowity i dokładny opis błędu.
+Jeśli wyślesz też poprawkę będziemy bardzo szczęśliwi.
+Proszę, nie opóźniaj zgłoszenia żeby stworzyć exploit wykorzystujący lukę,
+możesz go wysłać w następnym liście.
+</para>
+</sect1>
 <sect1 id="bugreports_fix">
 <title>Jak poprawiać błędy</title>
 <para>
@@ -22,7 +36,7 @@ samodzielnego poprawiania błędów. A może już to zrobiłeś? Przeczytaj
 się w jaki sposób dodać swoją łatę do źródeł
 <application>MPlayera</application>. Jeżeli będziesz miał jakieś pytania, pomogą
 Ci ludzie z listy
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 (tylko w języku angielskim -przyp. tłumacza).
 </para>
 </sect1>
@@ -52,7 +66,7 @@ Ci ludzie z listy
 		Format daty to RRRR-MM-DD GG:MM:SS.
 		Używając takiego formatu daty masz pewność, że będziesz w stanie wyciągać łatki
 		zgodnie z datą, gdy zostały dodane, dokładnie tak jak w przypadku
-		<ulink url="http://mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum logów CVS MPlayera</ulink>.
+		<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum logów CVS MPlayera</ulink>.
 	</para>
 	<para>
 		Następnie postępuj tak jak w przypadku normalnej aktualizacji:
@@ -96,7 +110,7 @@ Ci ludzie z listy
 		prawie osiągnąłeś sukces; wyślij informację o niej na
 		<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>
 		lub zapisz się na listę 
-		<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
+		<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
 		i tam wyślij raport.
 		Istnieje szansa, że autor łatki zasugeruje w jaki sposób rozwiązać problem.
 		Możesz też wpatrywać się w łatkę tak długo, aż nie będzie mogła wytrzymać
@@ -166,7 +180,7 @@ odpowiemy na Twoje zgłoszenie.
 <title>Gdzie zgłaszać błędy</title>
 <para>
 Zapisz się na listę MPlayer-users:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 i wyślij swoje zgłoszenie błędu na
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>, gdzie będzie można je omówić.
 </para>
@@ -316,7 +330,7 @@ zapomniałeś zainstalować pakietów rozwojowych (tych z przyrostkiem -dev albo
 </para>
 </sect2>
 
-<sect2 id="bugreports_conpilation">
+<sect2 id="bugreports_compilation">
 <title>Problemy z kompilacją</title>
 <para>
 Prosimy załączyć następujące pliki:
