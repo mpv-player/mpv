@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r19799
+// In sync with r19979
 
 // ========================= MPlayer help ===========================
 
@@ -204,6 +204,7 @@ static char help_text[]=
 #define MSGTR_EdloutBadStop "EDL-Sprung abgebrochen, letzter Start > Stop\n"
 #define MSGTR_EdloutStartSkip "EDL-Sprung begonnen, drücke 'i' erneut, um den Block zu beenden.\n"
 #define MSGTR_EdloutEndSkip "EDL-Sprung beendet, Zeile geschrieben.\n"
+#define MSGTR_MPEndposNoSizeBased "Die Option -endpos unterstützt für MPlayer noch keine Größenangaben.\n"
 
 // mplayer.c OSD
 
