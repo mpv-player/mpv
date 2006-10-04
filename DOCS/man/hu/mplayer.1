@@ -1,4 +1,4 @@
-.\" Synced with r19895
+.\" Synced with r20028
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -1279,7 +1279,29 @@ Itt adhatod meg az MPlayernek, hogy mely szögeket jelenítse meg
 Engedélyezi az edit decision list (EDL) akciókat lejátszás közben.
 A videóból részek maradnak ki és az audió elnémul illetve újra megszólal
 a megadott fájl bejegyzéseinek megfelelõen.
-Lásd a DOCS/\:HTML/\:hu/\:edl.html fájlben a használati útmutatót.
+Lásd a DOCS/\:HTML/\:hu/\:edl.html fájlban a használati útmutatót.
+.
+.TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|méret[b|kb|mb]> (lásd még \-ss és \-sb)
+Film megállítása a megadott idõ illetve méret elérésekor.
+.br
+.I MEGJEGYZÉS:
+A bájtpozíció csak a MEncoder-ben engedélyezett és nem lesz pontos, mivel csak
+képkocka határon lehet megállni.
+Ha a \-ss opcióval együtt használod, a \-endpos idõ tolódik a \-ss kapcsolónál
+megadott másodpercekkel.
+.sp 1
+.I PÉLDA:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+Megállítás 56 másodpercnél.
+.IPs "\-endpos 01:10:00"
+Megállítás 1 óra 10 percnél.
+.IPs "\-endpos 100mb"
+Csak 100 MB elkódolása.
+.RE
+.PD 1
 .
 .TP
 .B \-forceidx
@@ -1394,28 +1416,32 @@ Automatikusan visszavált IPv4-ra, amennyiben szükséges.
 .TP
 .B \-pvr <opció1:opció2:...> (csak PVR)
 Ez az opció különbözõ kódolási tulajdonságokat állít be a PVR rögzítõ modulban.
-A Hauppauge WinTV PVR\-150/250/350/500 és minden IVTV alapú kártya
-ismertebb neve a PVR rögzítp kártya.
+Bármilyen, a V4L2 vezérlõ által támogatott hardveres MPEG kódolóval rendelkezõ
+kártyával kell használni.
+A Hauppauge WinTV PVR\-150/250/350/500 és minden IVTV
+alapú kártya ismertebb neve a PVR rögzítõ kártya.
+Ügyelj rá, hogy csak a 2.6.18-as és késõbbi Linux kernelek képesek
+az MPEG folyamok V4L2 rétegen keresztüli kezelésére.
 MPEG folyam hardveres mentéséhez és MPlayerrel/Mencoderrel történõ
 lejátszásához használd a 'pvr://'-t a film URL-jeként.
 .sp 1
 A használható opciók:
 .RSs
-.IPs aspect=<1\-4>
+.IPs aspect=<0\-3>
 Megadja a bemenet képarányát (alapértelmezett: 4:3):
 .RSss
-1: 1:1
+0: 1:1
 .br
-2: 4:3
+1: 4:3
 .br
-3: 16:9
+2: 16:9
 .br
-4: 2.21:1
+3: 2.21:1
 .REss
 .IPs arate=<32000\-48000>
 Megadja az audió kódolási rátáját (alapértelmezett: 48000 Hz, használható: 32000, 44100
 és 48000 Hz).
-.IPs alayer=<1\-2>
+.IPs alayer=<1\-3>
 Megadja az MPEG audió réteg kódolását (alapértelmezett: layer 2).
 .IPs abitrate=<32\-448>
 Megadja az audió kódolási bitrátáját kbps-ben (alapértelmezett: 384 kbps).
@@ -1424,33 +1450,29 @@ Megadja az audió kódolási módot.
 Az elérhetõ elõre beállított értékek a 'stereo', 'joint_stereo', 'dual' és 'mono' (alapértelmezett: stereo).
 .IPs vbitrate=<érték>
 Megadja az átlagos videó kódolási bitrátát (alapértelmezett: 6 Mbps).
-.IPs vmode=<0\-1>
-Megadja a videó kódolás módját (alapértelmezett: VBR):
+.IPs vmode=<value>
+Megadja a videó kódolás módját (alapértelmezett: vbr):
 .RSss
-0: VBR
+vbr: Változó BitRáta
 .br
-1: CBR
+cbr: Konstans BitRáta
 .REss
 .IPs vpeak=<érték>
 Megadja a videó kódolási bitrátájának csúcsértékét (csak VBR kódolásnál hasznos, alapértelmezett: 9.6 Mbps). 
 .IPs fmt=<érték>
-Kiválasztja a kódoláshoz használt MPEG formátumot (alapértelmezett: MPEG PS):
+Kiválasztja a kódoláshoz használt MPEG formátumot (alapértelmezett: ps):
 .RSss
-ps:    MPEG PS.
+ps:    MPEG-2 Program Stream
 .br
-ts:    MPEG TS (kísérleti, hibás lehet)
+ts:    MPEG-2 Transport Stream
 .br
-mpeg1: MPEG 1
+mpeg1: MPEG-1 System Stream
 .br
-vcd:   Video CD
+vcd:   Video CD kompatibilis folyam
 .br
-svcd:  Super Video CD
+svcd:  Super Video CD kompatibilis folyam
 .br
-dvd:   DVD
-.br
-dvds1: DVD 1-es régió (NTSC)
-.br
-dvds2: DVD 2-es régió (PAL)
+dvd:   DVD kompatibilis folyam
 .REss
 .RE
 .PD 1
@@ -4431,7 +4453,7 @@ Sine függvény deltája, használj kicsi értékeket ahhoz, hogy meghalld a sweep-et.
 .PD 1
 .
 .TP
-.B sinesuppress[=frek:késleltetés]
+.B sinesuppress[=frek:csillapítás]
 Eltávolít egy szinuszgörbét a megadott frekvencián.
 Hasznos az 50/60 Hz-es zaj eltávolításához gyenge minõségû audió berendezésnél.
 Valószínûleg csak mono bemeneten mûködik.
@@ -4439,7 +4461,7 @@ Valószínûleg csak mono bemeneten mûködik.
 .RSs
 .IPs <frekv>
 A szinuszgörbe frekvenciája, amit el kell távolítani (Hz-ben) (alapértelmezett: 50)
-.IPs <késleltetés>
+.IPs <csillapítás>
 Az alkalmazhatóságot szabályozza (a nagyobb érték hatására a szûrõ az amplitudó és
 fázisváltásokra gyorsabban reagál, kisebb értéknél az átállás lassabb lesz)
 (alapértelmeztett: 0.0001).
@@ -6568,26 +6590,6 @@ Csak CBR, a VBR minden egyes csomagot másik chunk-ba tesz.
 Az audio bufferelés intervallumának beállítása (alapértelmezett: 0.5s).
 .
 .TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (also see \-ss and \-sb)
-A kódolás megállítása a megadott idõ illetve méret elérésekor.
-.br
-.I MEGJEGYZÉS:
-A bájtban megadott pozíció nem lesz teljesen pontos, mivel csak képkocka
-határon lehet megállni.
-.sp 1
-.I PÉLDA:
-.PD 0
-.RSs
-.IPs "\-endpos 56"
-56 másodperc elkódolása.
-.IPs "\-endpos 01:10:00"
-1 óra 10 perc elkódolása.
-.IPs "\-endpos 100mb"
-100 MB elkódolása.
-.RE
-.PD 1
-.
-.TP
 .B \-fafmttag <formátum>
 A kimeneti fájl audió formátumának felülbírálása.
 .sp 1
@@ -6981,7 +6983,7 @@ debug szint
 minõség módja, a nagyobb a jobb (a br-rel összeegyeztethetetlen)
 .
 .TP
-.B object=<0\-3>
+.B object=<1\-4>
 objektum típus komplexitása
 .PD 0
 .RSs
