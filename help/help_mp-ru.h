@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r19799
+// Synced with help_mp-en.h: r19979
 
 // ========================= MPlayer help ===========================
 
@@ -196,6 +196,7 @@ static char help_text[]=
 #define MSGTR_EdloutBadStop "EDL пропуск отменён, последний start > stop\n"
 #define MSGTR_EdloutStartSkip "Начало EDL пропуска, нажмите 'i' ещё раз для завершения блока.\n"
 #define MSGTR_EdloutEndSkip "Конец EDL пропуска, строка записана.\n"
+#define MSGTR_MPEndposNoSizeBased "В MPlayer опция -endpos пока не поддерживает единицы размера.\n"
 
 // mplayer.c OSD
 
