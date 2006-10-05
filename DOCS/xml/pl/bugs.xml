@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20074 -->
+<!-- synced with r20083 -->
 <!-- Opiekun: Cobra -->
+
 <appendix id="bugs">
 <title>Znane błędy</title>
+
+
 <sect1 id="bugs-special">
 <title>Specjalne systemowe/specyficzne dla procesora błędy/problemy</title>
 <itemizedlist>
@@ -12,6 +15,7 @@
 <para>Rozwiązanie: aktualizacja jądra do 2.4.x</para>
 <para>Obejście: <command>./configure --disable-sse</command></para>
 </listitem>
+
 <listitem>
 <para>Ogólny SIGILL (sygnał 4):</para>
 <para>Problem: skompilowałeś i próbowałeś uruchomić
@@ -26,6 +30,7 @@ pewnie zestawy instrukcji procesora za pomocą odpowiednich opcji (np.
 <option>--disable-mmx</option>, <option>--disable-3dnow</option>, itd.).
 </para>
 </listitem>
+
 <listitem>
 <para>Zwisy podczas zapisywania strumieni:</para>
 <para>Problem: zrzut pamięci</para>
@@ -33,6 +38,7 @@ pewnie zestawy instrukcji procesora za pomocą odpowiednich opcji (np.
 </listitem>
 </itemizedlist>
 </sect1>
+
 
 <sect1 id="bugs-audio">
 <title>Różne problemy z synchronizacją A-V i dźwiękiem</title>
@@ -47,21 +53,18 @@ emulacji OSS ALSA za pomocą opcji <option>-ao oss</option>. Spróbuj także
 bez problemów z opcją <option>-nosound</option>, to możesz być pewien, że to
 wina karty dźwiękowej lub jej sterownika.
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>problemy z buforem audio (źle wykryty rozmiar bufora)</para>
 <para>Obejście: opcja <application>MPlayera</application> <option>-abs</option></para>
 </listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>
 problemy z częstotliwością próbkowania - być może Twoja karta nie obsługuje
 częstotliwości próbkowania użytych w Twoich plikach - spróbuj filtru resample
 (<option>-af resample=...</option>)
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>powolna maszyna (procesor lub karta graficzna)</para>
 <para>spróbuj opcji <option>-vo null</option>, jeśli odtwarza dobrze, oznacza
@@ -72,6 +75,7 @@ jak przyspieszyć odtwarzanie</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-delay-specific">
 <title>Opóźnienia/desynchronizacja dźwięku specyficzne dla jednego lub kilku plików</title>
@@ -100,12 +104,14 @@ Jeśli żadne z wymienionych rozwiązań nie przynoszą efektu, przyślij nam pl
 my to sprawdzimy (i naprawimy).
 </para>
 </listitem>
+
 <listitem>
 <para>Twoja karta dźwiękowa nie obsługuje próbkowania 48kHz</para>
 <para>Obejście: kup lepszą kartę... lub spróbuj zmniejszyć liczbę klatek na
 sekundę o 10% (używając opcji <option>-fps 27</option> dla filmu o 30 klatkach
 na sekundę) lub użyj filtru resample</para>
 </listitem>
+
 <listitem>
 <para>powolna maszyna (jeśli A-V nie jest w okolicach 0 i ostatnia liczba w
 statusie zwiększa się)</para>
@@ -114,23 +120,26 @@ statusie zwiększa się)</para>
 </itemizedlist>
 </sect2>
 
+
 <sect2 id="bugs-nosound">
 <title>Zupełny brak dźwięku</title>
 <itemizedlist>
 <listitem>
 <para>Twój plik używa nieobsługiwanego kodeka audio</para>
-<para>Obejście: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
+<para>Rozwiązanie: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-nopicture">
 <title>Zupełny brak obrazu (jedynie puste, szare lub zielone okno)</title>
 <itemizedlist>
 <listitem>
 <para>Twój plik używa nieobsługiwanego kodeka video</para>
-<para>Obejście: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
+<para>Rozwiązanie: poczytaj dokumentację i pomóż nam dodać jego obsługę</para>
 </listitem>
+
 <listitem>
 <para>
 automatycznie wybrany kodek nie potrafi dekodować pliku, spróbuj użyć innego
@@ -139,6 +148,7 @@ za pomocą opcji <option>-vc</option> lub <option>-vfm</option>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-video">
 <title>Problemy z wyjściem video</title>
