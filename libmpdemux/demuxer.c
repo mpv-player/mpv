@@ -213,8 +213,7 @@ sh_audio_t* new_sh_audio_aid(demuxer_t *demuxer,int id,int aid){
     } else {
         sh_audio_t *sh;
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundAudioStream,id);
-        demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
-        memset(demuxer->a_streams[id],0,sizeof(sh_audio_t));
+        demuxer->a_streams[id]=calloc(1, sizeof(sh_audio_t));
         sh = demuxer->a_streams[id];
         // set some defaults
         sh->samplesize=2;
@@ -246,8 +245,7 @@ sh_video_t* new_sh_video_vid(demuxer_t *demuxer,int id,int vid){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
     } else {
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
-        demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
-        memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
+        demuxer->v_streams[id]=calloc(1, sizeof(sh_video_t));
           mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_VIDEO_ID=%d\n", vid);
     }
     ((sh_video_t *)demuxer->v_streams[id])->vid = vid;
