@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r15783 -->
+<!-- synced with r20074 -->
 <!-- Opiekun: Cobra -->
 <appendix id="bugs">
 <title>Znane błędy</title>
@@ -19,31 +19,12 @@
 (np. skompilowałeś na P3, a próbowałeś uruchomić na Celeronie)</para>
 <para>Rozwiązanie: kompiluj <application>MPlayera</application> na tej samej
 maszynie, na której chcesz go używać!</para>
-<para>Obejście: Możesz o tym wszystkim zapomnieć, jeśli skonfugurujesz
+<para>Obejście: Możesz o tym wszystkim zapomnieć, jeśli skonfigurujesz
 <application>MPlayera</application> z opcją
 <option>--enable-runtime-cpudetection</option> lub możesz wyłączyć
 pewnie zestawy instrukcji procesora za pomocą odpowiednich opcji (np.
 <option>--disable-mmx</option>, <option>--disable-3dnow</option>, itd.).
 </para>
-</listitem>
-<listitem>
-<para>&quot;Niespójność wewnętrznego bufora&quot; (&quot;Internal buffer
-inconsistency&quot;) w trakcie działania
-<application>MEncodera</application>:</para>
-<para>Problem: znany problem przy lame &lt; 3.90 skompilowanym za pomocą GCC 2.96 lub 3.x.</para>
-<para>Rozwiązanie: używaj lame'a &gt;=3.90.</para>
-<para>Obejście: skompiluj lame za pomocą GCC 2.95.x i usuń już zainstalowane
-pakiety lame'a, gdyż mogły one zostać skompilowane za pomocą GCC 2.96.</para>
-</listitem>
-<listitem>
-<para>Zepsuty dźwięk MP2/MP3 na PPC:</para>
-<para>Problem: znany błąd złej kompilacji kodu przez GCC dla platformy PPC, na razie bez rozwiązania.</para>
-<para>Obejście: użyj (powolnego) dekodera MP1/MP2/MP3 z FFmpeg (<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (sygnał 11) w libmpeg2, przy skalowaniu i kodowaniu:</para>
-<para>Problem: znany błąd MMX w GCC 2.95.2 MMX.</para>
-<para>Rozwiązanie: aktualizacja GCC do 2.95.3.</para>
 </listitem>
 <listitem>
 <para>Zwisy podczas zapisywania strumieni:</para>
@@ -61,7 +42,7 @@ pakiety lame'a, gdyż mogły one zostać skompilowane za pomocą GCC 2.96.</para
 <itemizedlist>
 <listitem><para>
 najczęściej: zepsuty sterownik dźwięku! - spróbuj użyć innych sterowników, np.
-emulacji OSS ALSY 0.9 za pomocą opcji <option>-ao oss</option>. Spróbuj także
+emulacji OSS ALSA za pomocą opcji <option>-ao oss</option>. Spróbuj także
 <option>-ao sdl</option>. Opcje te czasem pomagają. Jeśli Twój plik odtwarza się
 bez problemów z opcją <option>-nosound</option>, to możesz być pewien, że to
 wina karty dźwiękowej lub jej sterownika.
@@ -156,22 +137,15 @@ automatycznie wybrany kodek nie potrafi dekodować pliku, spróbuj użyć innego
 za pomocą opcji <option>-vc</option> lub <option>-vfm</option>
 </para>
 </listitem>
-<listitem>
-<para>
-próbujesz odtwarzać plik DivX 3.x za pomocą kodeka OpenDivX lub XviD (opcja
-<option>-vc odivx</option>) - zainstaluj DivX4Linux i przekompiluj odtwarzacz
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
 
 <sect2 id="bugs-video">
 <title>Problemy z wyjściem video</title>
 <para>
-Pierwsza uwaga: opcje <option>-fs -vm</option> i <option>-zoom</option> są
-jedynie zaleceniami, nieobsługiwanymi (jeszcze) przez wszystkie sterowniki. Nie
-jest to więc błąd, jeśli nie działają. Tylko niektóre sterowniki obsługują
-skalowanie/powiększanie i nie oczekuj tego od x11 lub dga.
+Pierwsza uwaga: opcje <option>-fs -vm</option> i <option>-zoom</option> nie są
+obsługiwane przez wszystkie sterowniki. Dodatkowo, nie wszystkie sterowniki
+obsługują sprzętowe skalowanie/powiększanie.
 </para>
 
 <formalpara>
