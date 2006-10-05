@@ -39,6 +39,8 @@ MPlayer (1.0)
 
     MEncoder:
     * support of x264 encoding over libavcodec
+    * rewrite -x264encopts options parser to use libx264's options parser
+      likely breaks 3rd party tools as the syntax of some options have changed
     * removed support for obsolete and non-free divx4 libraries
 
     Ports:
