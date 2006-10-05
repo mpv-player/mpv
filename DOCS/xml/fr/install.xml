@@ -45,8 +45,8 @@ recommandés.
   pour un 3.x, essayez toujours la dernière version, les plus anciennes avaient des
   bogues variés, donc assurez-vous d'utiliser au moins 3.1, il est testé et
   fonctionnel. Pour de plus amples informations sur les bogues de gcc 2.96 (qui ne
-  sont toujours PAS fixés, ils ont été CONTOURNÉS dans MPlayer!), voir la section
-  <link linkend="gcc-296">gcc 2.96</link> et la <xref linkend="faq"/>.
+  sont toujours PAS corrigés, ils ont été CONTOURNÉS dans MPlayer!).
+  et la <xref linkend="faq"/>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - version conseillée :
