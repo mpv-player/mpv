@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r20041 -->
+<!-- synced with r20054 -->
 <chapter id="video">
 <title>Устройства вывода видео</title>
 
@@ -651,64 +651,6 @@ SDL'вских X11 драйверов, пока не написали наш собственный (более быстрый и изящн
 SDL видео вывод поддерживает отображения субтитров внизу, на черной полосе (если она есть).
 </para>
 
-<variablelist>
-<title>Есть несколько параметров командной строки для SDL:</title>
-<varlistentry>
-  <term><option>-vo sdl:driver=<replaceable>название</replaceable></option></term>
-  <listitem><simpara>
-    указывает исользуемый SDL видео драйвер (например, <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:<replaceable>название</replaceable></option></term>
-  <listitem><simpara>
-    указывает используемый SDL аудио драйвер (например, <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>artsc</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-    отключает ускорение XVideo
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-    пытается включить ускорение XVideo принудительно
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table id="sdl_only_keys">
-<title>клавиши управления SDL</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Клавиша</entry><entry>Действие</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-    циклическое переключение доступных полноэкранных режимов 
-    </entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-    возврат в нормальный режим
-    </entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>Известные ошибки:</title>
-<listitem><simpara>
-  Клавиша ,нажатая при использовании sdl:driver=aalib, бесконечно повторяется.
-  (используйте <option>-vo aa</option>!). Это оишбка SDL, я не могу ее исправить
-  (проверено с SDL 1.2.1).
-  </simpara></listitem>
-<listitem><simpara>
-  НЕ ИСПОЛЬЗУЙТЕ SDL с GUI! Это не работает так как должно.
-  </simpara></listitem>
-</itemizedlist>
 </sect2>
 
 
