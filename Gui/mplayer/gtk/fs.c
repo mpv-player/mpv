@@ -72,9 +72,10 @@ char * fsSubtitleFilterNames[][2] =
            { "SMI (*.smi)",   						   "*.smi" },
            { "RT  (*.rt) ",   						   "*.rt"  },
            { "TXT (*.txt)",   						   "*.txt" },
+           { "ASS (*.ass)",   						   "*.ass" },
            { "SSA (*.ssa)",   						   "*.ssa" },
            { "AQT (*.aqt)",   						   "*.aqt" },
-	   { "Subtitles",						   "*.utf,*.sub,*.srt,*.smi,*.rt,*.txt,*.ssa,*.aqt" },
+	   { "Subtitles",						   "*.utf,*.sub,*.srt,*.smi,*.rt,*.txt,*.ass,*.ssa,*.aqt" },
            { "All files",	 					   "*" },
 	   { NULL,NULL }
 	 };
