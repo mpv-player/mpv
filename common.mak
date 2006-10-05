@@ -10,6 +10,8 @@ OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
 STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
 SHARED_OBJS := $(OBJS) $(SHARED_OBJS)
 
+EXTRALIBS := -L$(BUILD_ROOT)/libavutil -lavutil$(BUILDSUF) $(EXTRALIBS)
+
 all: $(EXTRADEPS) $(LIB) $(SLIBNAME)
 
 $(LIB): $(STATIC_OBJS)
@@ -33,6 +35,9 @@ $(SLIBNAME_WITH_MAJOR): $(SHARED_OBJS)
 # BeOS: remove -Wall to get rid of all the "multibyte constant" warnings
 %.o: %.cpp
 	g++ $(subst -Wall,,$(CFLAGS)) -c -o $@ $<
+
+%: %.o $(LIB)
+	$(CC) $(LDFLAGS) -o $@ $^ $(EXTRALIBS)
 
 depend dep: $(SRCS)
 	$(CC) -MM $(CFLAGS) $^ 1>.depend
