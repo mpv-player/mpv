@@ -9263,8 +9263,7 @@ higher values force it to vary more smoothly.
 .
 .TP
 .B zones=<zone0>[/<zone1>[/...]]
-User specified quality for specific parts (ending, credits, ...)
-(ABR or two pass).
+User specified quality for specific parts (ending, credits, ...).
 Each zone is <start-frame>,<end-frame>,<option> where option may be
 .PD 0
 .RSs
@@ -9453,6 +9452,16 @@ enabled during all mode decisions (slow, requires subq>=6)
 .PD 1
 .
 .TP
+.B deadzone_inter=<0\-32>
+Set the size of the inter luma quantization deadzone for non-trellis
+quantization (default: 21).
+.
+.TP
+.B deadzone_intra=<0\-32>
+Set the size of the intra luma quantization deadzone for non-trellis
+quantization (default: 11).
+.
+.TP
 .B (no)fast_pskip
 Performs early skip detection in P-frames (default: enabled).
 This usually improves speed at no cost, but it can sometimes produce
@@ -9557,6 +9566,10 @@ Some players, such as the Sony PSP, require the use of this option.
 The default behavior causes SPS and PPS to repeat prior to each IDR frame.
 .
 .TP
+.B (no)interlaced
+Treat the video content as interlaced.
+.
+.TP
 .B log=<-1\-3>
 Adjust the amount of logging info printed to the screen.
 .PD 0
@@ -9584,6 +9597,12 @@ mathematically sound (they are simply the average of per-frame PSNRs).
 They are kept only for comparison to the JM reference codec.
 For all other purposes, please use either the 'Global' PSNR, or the per-frame
 PSNRs printed by log=3.
+.
+.TP
+.B (no)ssim
+Print the Structural Similarity Metric results.
+This is an alternative to PSNR, and may be better correlated with the
+perceived quality of the compressed video.
 .
 .TP
 .B (no)visualize
