@@ -71,6 +71,11 @@ static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,float aud
   demux_seek(priv->vd,rel_seek_secs,audio_delay,flags);
   // Get the new pos
   pos = demuxer->video->pts;
+  if (!pos) {
+    demux_fill_buffer(priv->vd, demuxer->video);
+    if (demuxer->video->first)
+      pos = demuxer->video->first->pts;
+  }
 
   if(priv->ad != priv->vd) {
     sh_audio_t* sh = (sh_audio_t*)demuxer->audio->sh;
