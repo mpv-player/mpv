@@ -85,7 +85,7 @@ Workaround:
     <para>and/or</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option>(required for files with badly
+    <para><option>-mc 0</option> (required for files with badly
     interleaved VBR audio)</para>
     <para>and/or</para>
   </listitem>
@@ -105,7 +105,7 @@ If none of these help, please upload the file, we'll check (and fix).
 </listitem>
 
 <listitem>
-<para>slow machine(if A-V is not around 0, and the last number in the status
+<para>slow machine (if A-V is not around 0, and the last number in the status
 line increasing)</para>
 <para>Workaround: <option>-framedrop</option></para>
 </listitem>
