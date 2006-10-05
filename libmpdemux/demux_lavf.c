@@ -403,9 +403,20 @@ static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
 
 static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, float audio_delay, int flags){
     lavf_priv_t *priv = demuxer->priv;
+    int avsflags = 0;
     mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %f, %d)\n", demuxer, rel_seek_secs, audio_delay, flags);
 
-    av_seek_frame(priv->avfc, -1, priv->last_pts + rel_seek_secs*AV_TIME_BASE, rel_seek_secs < 0 ? AVSEEK_FLAG_BACKWARD : 0);
+    if (flags & 1) // absolute seek
+      priv->last_pts = priv->avfc->start_time;
+    if (flags & 2) { // percent seek
+      if (priv->avfc->duration == 0 || priv->avfc->duration == AV_NOPTS_VALUE)
+        return;
+      priv->last_pts += rel_seek_secs * priv->avfc->duration;
+    } else {
+      priv->last_pts += rel_seek_secs * AV_TIME_BASE;
+      if (rel_seek_secs < 0) avsflags = AVSEEK_FLAG_BACKWARD;
+    }
+    av_seek_frame(priv->avfc, -1, priv->last_pts, avsflags);
 }
 
 static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
