@@ -118,7 +118,7 @@ line increasing)</para>
 <itemizedlist>
 <listitem>
 <para>your file uses an unsupported audio codec</para>
-<para>read the documentation and help us adding support for it</para>
+<para>Solution: read the documentation and help us adding support for it</para>
 </listitem>
 </itemizedlist>
 </sect2>
@@ -129,7 +129,7 @@ line increasing)</para>
 <itemizedlist>
 <listitem>
 <para>your file uses an unsupported video codec</para>
-<para>Workaround: read the documentation and help us adding support for it</para>
+<para>Solution: read the documentation and help us adding support for it</para>
 </listitem>
 
 <listitem>
