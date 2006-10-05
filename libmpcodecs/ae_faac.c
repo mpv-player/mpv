@@ -19,7 +19,7 @@ static faacEncConfigurationPtr config = NULL;
 static int 
 	param_bitrate = 128,
 	param_quality = 0,
-	param_object_type = MAIN,
+	param_object_type = 1,
 	param_mpeg = 2,
 	param_tns = 0,
 	param_raw = 0,
@@ -35,7 +35,7 @@ static unsigned long decoder_specific_len = 0;
 m_option_t faacopts_conf[] = {
 	{"br", &param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"quality", &param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
-	{"object", &param_object_type, CONF_TYPE_INT, CONF_RANGE, MAIN, LTP, NULL},
+	{"object", &param_object_type, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
 	{"mpeg", &param_mpeg, CONF_TYPE_INT, CONF_RANGE, 2, 4, NULL},
 	{"tns", &param_tns, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"cutoff", &param_cutoff, CONF_TYPE_INT, 0, 0, 0, NULL},
@@ -153,6 +153,7 @@ int mpae_init_faac(audio_encoder_t *encoder)
 	}
 	config->outputFormat = param_raw ? 0 : 1; // 1 is ADTS
 	config->aacObjectType = param_object_type;
+	if(MAIN==0) config->aacObjectType--;
 	config->mpegVersion = (param_mpeg == 4 ? MPEG4 : MPEG2);
 	config->useTns = param_tns;
 	config->allowMidside = 1;
