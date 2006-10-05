@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20028
+.\" In sync with r20061
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -378,6 +378,19 @@ quartz und macosx.)
 Ändert Vollbild-Wiedergabe (ein/\:aus, siehe auch \-fs).
 .IPs "Apfel + [ und Apfel + ]"
 Setze Alphawert des Abspielfensters.
+.RE
+.PD 1
+.PP
+.RS
+(Die folgenden Tasten sind nur gültig bei Benutzung des Videoausgabetreibers
+sdl.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "c\ \ \ \ "
+Wechsle durch verfügbare Vollbildmodi.
+Stelle ursprünglichen Modus wieder her.
 .RE
 .PD 1
 .PP
@@ -2520,8 +2533,7 @@ Setzt den Audiomixerkanal (Standard: pcm).
 .PD 1
 .
 .TP
-.B "sdl\ \ \ \ "
-Audioausgabetreiber der größtenteils plattformunabhängigen SDL (Simple
+.B sdl (nur bei SDL) (nur bei SDL) (nur bei SDL) (nur bei SDL) (nur bei SDL) (nur bei SDL) (nur bei SDL) (nur bei SDL) (Simple
 Directmedia Layer) Bibliothek.
 .PD 0
 .RSs
@@ -9443,7 +9455,7 @@ Konstante Bitraten können erreicht werden, indem man diese Option mit
 vbv_maxrate kombiniert, allerdings vermindert das die Qualität signifikant.
 .
 .TP
-.B qp_constant=<0\-51>
+.B qp=<0\-51>
 Diese Option wählt den Quantizer für P-Frames.
 Intra- und B-Frames werden mit diesem Wert jeweils durch ip_factor und
 pb_factor verrechnet.
@@ -9619,8 +9631,8 @@ Da diese Option sehr wenig Zeit im Vergleich zum Qualitätsgewinn benötigt,
 sollte sie nicht deaktiviert werden.
 .
 .TP
-.B deblockalpha=<-6\-6>
-AlphaC0-Parameter des Deblocking-Filters (Standard: 0).
+.B deblock=<-6\-6>,<-6\-6>
+Der erste Parameter ist AlphaC0 (Standard: 0).
 Dieser regelt Schwellenwerte für den H.264-Inloop-Deblocking-Filter.
 Zunächst legt dieser Parameter den Höchstwert für die Änderung fest, den der
 Filter auf jeden einzelnen Pixel anwenden darf.
@@ -9629,17 +9641,15 @@ der über die Kante hinaus gefiltert wird.
 Positive Werte reduzieren blockförmige Strukturen, verwischen aber auch
 Details.
 .br
+Der zweite Parameter ist Beta (Standard: 0).
+Beeinflusst den Schwellwert für Details.
+Sehr detailreiche Blöcke werden nicht gefiltert, da das Glätten durch den
+Filter stärker auffallen würde als die ursprünglichen Blöcke.
+.br
 Die Standardeinstellung des Filters erreicht fast immer optimale Qualität,
 daher ist es am besten, keine oder nur geringe Änderungen vorzunehmen.
 Falls allerdings dein Quellmaterial schon Blöcke oder Rauschen aufweist und Du
 diese entfernen möchtest, kannst Du den Wert etwas erhöhen.
-.
-.TP
-.B deblockbeta=<-6\-6>
-Beta-Parameter des Deblocking-Filters (Standard: 0).
-Beeinflusst den Schwellwert für Details.
-Sehr detailreiche Blöcke werden nicht gefiltert, da das Glätten durch den
-Filter stärker auffallen würde als die ursprünglichen Blöcke.
 .
 .TP
 .B (no)cabac
@@ -9661,7 +9671,7 @@ Maximaler Quantisierungsparameter (Standard: 51)
 .TP
 .B qp_step=<1\-50> (ABR oder Modus mit zwei Durchläufen)
 Maximaler Wert um den der Quantisierungsparameter zwischen Frames
-erhöht/gesenkt werden kann (Standard: 2).
+erhöht/gesenkt werden kann (Standard: 4).
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR oder Modus mit zwei Durchläufen)
@@ -9717,8 +9727,7 @@ höhere Werte forcieren sanftere Schwankungen.
 .TP
 .B zones=<Zone0>[/<Zone1>[/...]]
 Vom Benutzer festgelegte Qualität für besondere Abschnitte (Ende, Abspann,
-...)
-(ABR oder Modus mit zwei Durchläufen).
+...).
 Jede Zone ist <Start-Frame>,<End-Frame>,<Option>, wobei Option die folgenden
 Werte annehmen kann:
 .PD 0
@@ -9737,28 +9746,28 @@ Sie betrifft nur die Planungsphase von ratecontrol und unterliegt der
 .RE
 .
 .TP
-.B direct_pred=<0\-3>
+.B direct_pred=<Name>
 Legt den Typ der Bewegungsvorhersage fest, der für direkte Markoblöcke in
 B-Frames verwendet wird.
 .PD 0
 .RSs
-.IPs 0
-Keiner: Direkte Makroblöcke werden nicht genutzt.
-.IPs 1
-Räumlich: Bewegungsvektoren werden über benachbarte Blöcke extrapoliert.
+.IPs none
+Direkte Makroblöcke werden nicht genutzt.
+.IPs spatial
+Bewegungsvektoren werden über benachbarte Blöcke extrapoliert.
 (Standard)
-.IPs 2
-Zeitlich: Bewegungsvektoren werden über den nachfolgenden P-Frame extrapoliert.
-.IPs 3
-Auto: Der Codec wählt für jeden Frame zwischen räumlicher und zeitlicher
-Vorhersage.
+.IPs temporal
+Bewegungsvektoren werden über den nachfolgenden P-Frame extrapoliert.
+.IPs auto
+Der Codec wählt für jeden Frame zwischen räumlicher und zeitlicher Vorhersage.
 .RE
 .PD 1
 .RS
 Zeitlich und räumlich haben in etwa die gleiche Geschwindigkeit und PSNR,
 die Wahl zwischen beiden hängt vom Videoinhalt ab.
 Auto ist etwas besser, jedoch langsamer.
-direct_pred=0 ist sowohl langsamer als auch von schlechterer Qualität.
+Auto eignet sich vor allem bei Encodierung mit mehreren Durchläufen.
+direct_pred=none ist sowohl langsamer als auch von schlechterer Qualität.
 .RE
 .
 .TP
@@ -9771,50 +9780,38 @@ B-Frames im Verhältnis zu den Referenzen bestimmt.
 Benötigt bframes > 1.
 .
 .TP
-.B (no)i4x4
-Zusätzlichen Makroblock-Typ i4x4 verwenden (Standard: aktiviert).
-Ohne diese Option nutzen P- und B-Frames nur i16x16 und die unten angegebenen
-Inter-Typen.
-.
-.TP
-.B (no)i8x8
-Zusätzlichen Makroblock-Typ i8x8 verwenden (Standard: aktiviert).
-Use additional macroblock type i8x8 (Standard: aktiviert).
-Diese Option ist wirkungslos, solange 8x8dct nicht aktiviert ist.
-.
-.TP
-.B (no)b8x8mv
-Zusätzliche Makroblock-Typen b16x8, b8x16, b8x8 verwenden (Standard:
-aktiviert).
-Ohne diese Option verwenden B-Frames nur die Typen i16x16, i8x8, i4x4, b16x16,
-skip, direct.
-Siehe auch 4x4mv für Details.
-.
-.TP
-.B (no)8x8mv
-Zusätzliche Makroblock-Typen p16x8, p8x16, p8x8 verwenden (Standard:
-aktiviert).
-Ohne diese Option verwenden P-Frames nur die Typen i16x16, i8x8, i4x4, p16x16,
-skip.
-Diese Option ist nur zum Experimentieren gedacht. Es wird nicht empfohlen,
-8x8mv
-bei richtiger Encodierung zu deaktivieren.
-.
-.TP
-.B (no)4x4mv
-Zusätzlichen Makroblock-Typen p8x4, p4x8, p4x4 verwenden (Standard:
-deaktiviert).
-Ohne diese Option verwenden P-Frames nur die Typen i16x16, i8x8, i4x4, p16x16,
-p16x8, p8x16, p8x8, skip.
-Benötigt 8x8mv.
+.B partitions=<Liste>
+Aktiviere einige optionale Makroblock-Typen (Standard: p8x8,b8x8,i8x8,i4x4).
+.PD 0
+.RSs
+.IPs p8x8
+Aktiviere die Typen p16x8, p8x16, p8x8.
+.IPs p4x4
+Aktiviere die Typen p8x4, p4x8, p4x4.
+p4x4 wird nur bei subq >= 5 empfohlen, und auch nur bei niedrigen Auflösungen.
+.IPs b8x8
+Aktiviere die Typen b16x8, b8x16, b8x8.
+.IPs i8x8
+Aktiviere Typ i8x8.
+i8x8 hat keinen Einfluß, wenn 8x8dct nicht aktiviert ist.
+.IPs i4x4
+Aktiviere Typ i4x4.
+.IPs all
+Aktivere alle der oben gelisteten Typen.
+.IPs none
+Deaktiviere alle der oben gelisteten Typen.
+.RE
+.PD 1
+.RS
+Unabhängig von dieser Option werden die Makroblock-Typen p16x16, b16x16 und
+i16x16 immer aktiviert.
 .br
 Die Kunst besteht darin, Typen und Größen zu finden, die einen
 bestimmten Bereich des Bildes am besten beschreiben.
 So wird ein weiter Kameraschwenk bei 16x16 Blöcken besser dargestellt,
 während kleine, bewegliche Objekte besser mit kleinen Blöcken dargestellt
 werden.
-.br
-4x4mv ist nur mit subq >= 3 empfehlenswert.
+.RE
 .
 .TP
 .B (no)8x8dct
@@ -9824,18 +9821,18 @@ Erlaubt außerdem den Makroblock-Typ i8x8.
 Ohne diese Option wird nur 4x4 DCT verwendet.
 .
 .TP
-.B me=<1\-4>
+.B me=<Name>
 Wählt den Vollpixel-Bewegungsschätzungs-Algorithmus.
 .PD 0
 .RSs
-.IPs 1
+.IPs dia
 Diamant-Suche, Radius 1 (schnell)
-.IPs 2
+.IPs hex
 Hexagon-Suche, Radius 2 (Standard)
-.IPs 3
+.IPs umh
 Ungerade Multi-Hexagon-Suche (langsam)
-.IPs 4
-Gründliche Suche (sehr langsam und nicht besser als 3)
+.IPs esa
+Gründliche Suche (sehr langsam und nicht besser als umh)
 .RE
 .PD 1
 .
@@ -9912,13 +9909,23 @@ Optimale Quantisierung der Rate-Distortion
 .PD 0
 .RSs
 .IPs 0
-deaktiviert
+deaktiviert (Standard)
 .IPs 1
-nur bei abschließender Encodierung aktiviert (Standard)
+nur bei abschließender Encodierung aktiviert
 .IPs 2
 während allen Modus-Entscheidungen aktiviert (langsam, benötigt subq>=6)
 .RE
 .PD 1
+.
+.TP
+.B deadzone_inter=<0\-32>
+Setzt die Größe der Inter-Luma-Quantisierungs-Deadzone für
+nicht-Trellis-Quantisierung (Standard: 21).
+.
+.TP
+.B deadzone_intra=<0\-32>
+Setzt die Größe der Intra-Luma-Quantisierungs-Deadzone für
+nicht-Trellis-Quantisierung (Standard: 11).
 .
 .TP
 .B (no)fast_pskip
@@ -10017,12 +10024,16 @@ kompiliert worden sein; falls das nicht der Fall ist, wird diese Option eine
 Warnung ausgeben und aktiviert Scheiben, jedoch nicht Multithreading.
 .
 .TP
-.B (no)globalheader
+.B (no)global_header
 Bewirkt, dass SPS und PPS nur einmal bei Beginn des Bitstreams erscheinen
 (Standard: deaktiviert).
 Manche Wiedergabegeräte, wie die PSP, benötigen diese Option.
 Das Standardverhalten veranlasst, dass SPS und PPS vor jedem IDR-Frame 
 wiederholt werden.
+.
+.TP
+.B (no)interlaced
+Behandle den Videoinhalt als interlaced.
 .
 .TP
 .B log=<-1\-3>
@@ -10052,6 +10063,12 @@ mathematisch exakt, sondern einfach die durchschnittliche PSNR pro Frame.
 Sie werden nur zum Vergleich mit dem JM-Referenz-Codec beibehalten.
 Für alle anderen Zwecke benutze bitte den PSNR 'Global' oder aber die
 PSNRs pro Frame, die von log=3 ausgegeben werden.
+.
+.TP
+.B (no)ssim
+Gib die Ergebnisse der Structural Similarity Metric aus.
+Dies ist eine Alternative zu PSNR, die unter Umständen besser mit der
+wahrgenommenen Qualität des komprimierten Videos korrelliert.
 .
 .TP
 .B (no)visualize
