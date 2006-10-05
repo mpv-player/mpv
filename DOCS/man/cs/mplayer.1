@@ -1,4 +1,4 @@
-.\" Synced with revision 19508
+.\" Synced with revision 20008
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -71,7 +71,7 @@ mencoder \- filmový enkodér
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[Titul | [první_titul]\-poslední_titul ]
+.I [dvd|dvdnav]://[titul | [první_titul]\-poslední_titul ]
 [volby]
 .
 .br
@@ -85,6 +85,13 @@ mencoder \- filmový enkodér
 .B mplayer
 'in +\n[.k]u
 .I tv://[kanál]
+[volby]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I radio://[kanál nebo frekvence][/capture]
 [volby]
 .
 .br
@@ -320,6 +327,8 @@ Posun titulkù nahoru/dolù.
 Nastaví zaèátek a konec EDL bloku k vynechání a zapí¹e jej do daného souboru.
 .IPs s (pouze \-vf screenshot)
 Poøídí snímek obrazovky.
+.IPs "S (pouze \-vf screenshot)"
+Start/stop snímání screenshotù.
 .IPs "I"
 Zobrazí jméno souboru na OSD.
 .IPs "! a @"
@@ -408,7 +417,7 @@ Otevøe pøedvolby.
 .PP
 .RS
 (Následující klávesy jsou platné, pokud jste zakompilovali podporu vstupu z TV
-a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
+nebo DVB a dostanou pøednost pøed vý¹e uvedenými definicemi tlaèítek.)
 .RE
 .PP
 .PD 0
@@ -421,6 +430,32 @@ Zmìna normy.
 Zmìna seznamu kanálù.
 .RE
 .PD 1
+.PP
+.RS
+(Následující klávesy jsou platné pouze pokud jste zakompilovali podporu
+dvdnav: pou¾ívají se pro navigaci v nabídkách)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "keypad 8"
+Tlaèítko nahoru.
+.IPs "keypad 2"
+Tlaèítko dolù.
+.IPs "keypad 4"
+Tlaèítko doleva.
+.IPs "keypad 6"
+Tlaèítko doprava.
+.IPs "keypad 5"
+Návrat do hlavní nabídky.
+.IPs "keypad 7"
+Návrat do nejbli¾¹í nabídky (øazení pøednosti je: kapitola->titul->hlavní).
+.IPs "keypad enter"
+Potvrzení volby.
+.RE
+.PD 1
+.PP
+.RS
 .
 .TP
 .B Ovládání my¹í
@@ -876,6 +911,12 @@ Urèí hlavní menu.
 Zobrazí hlavní menu pøi startu MPlayeru.
 .
 .TP
+.B \-mouse-movements
+Povolí MPlayeru dostávat události ukazatele hlá¹ené výstupním
+video rozhraním (zatím jsou podporovány pouze odvozeniny X11).
+Nutné pro volbu tlaèítek v DVD nabídkách.
+.
+.TP
 .B \-noconsolecontrols
 Zamezí MPlayeru èíst stisky kláves ze standardního vstupu.
 Pou¾itelné pokud naèítáte data ze standardního vstupu.
@@ -899,9 +940,13 @@ Vypne ovládání pomocí my¹i (kontextové menu mozplayerxp spoléhá na
 tuto volbu).
 .
 .TP
-.B \-nortc (pouze RTC)
-Vypne pou¾ití Linuxového RTC (hodiny reálného èasu \- /dev/\:rtc) jako
+.B \-rtc (pouze RTC)
+Zapne pou¾ití Linuxového RTC (hodiny reálného èasu \- /dev/\:rtc) jako
 èasové základny.
+Toto vzbudí proces ka¾dou 1/1024 sekundy pro zji¹tìní aktuálního èasu.
+Nepotøebné s moderními Linuxovými jádry konfigurovanými pro pou¾ití na
+desktopech, jeliko¾ ty ji¾ budí proces s podobnou pøesností pøi pou¾ití
+normálnì èasovaného spánku.
 .
 .TP
 .B \-playing-msg <øetìzec>
@@ -960,9 +1005,10 @@ pro jejich popis.
 .
 .TP
 .B \-softsleep
-Pou¾ije kvalitní softwarové èasovaèe místo hodin reálného èasu (RTC).
-Za cenu vìt¹í zátì¾e CPU poskytují stejnì precizní èasování jako RTC bez nárokù na
-zvlá¹tní pøístupová práva.
+Èasové rámce jsou získávány opakovaným zji¹»ováním pøesného èasu namísto
+po¾adavku na jádro o vèasné probuzení MPlayeru.
+To je u¾iteèné, pokud je èasování jádrem nepøesné a nemù¾ete ani pou¾ít RTC.
+Cenou je vìt¹í zátì¾ CPU.
 .
 .TP
 .B \-sstep <sek>
@@ -1233,6 +1279,30 @@ souboru.
 Detaily jak EDL pou¾ít naleznete v DOCS/\:HTML/\:en/\:edl.html.
 .
 .TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|velikost[b|kb|mb]> (viz také \-ss a \-sb)
+Stop na zadané èasové znaèce nebo bajtové pozici.
+.br
+.I POZNÁMKA:
+Bajtová pozice je dostupná pouze pro MEncoder a nebude pøesná, jeliko¾
+doká¾e zastavit pouze na kraji snímku.
+Pou¾ije-li se v kombinaci s volbou \-ss, posune se \-endpos o poèet sekund
+zadaných pomocí \-ss.
+.sp 1
+.I PØÍKLAD:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+Stop na 56 sekundách.
+.IPs "\-endpos 01:10:00"
+Stop na 1 hodinì a 10 minutách.
+.IPs "\-ss 10 \-endpos 56"
+Stop na 1 minutì a 6 sekundách.
+.IPs "\-endpos 100mb"
+Enkóduje pouze 100 MB.
+.RE
+.PD 1
+.
+.TP
 .B \-forceidx
 Vynutí obnovu indexu.
 Pou¾itelné pro soubory s vadným indexem (video se rozchází se zvukem, apod.\&).
@@ -1343,28 +1413,32 @@ Pøi selhání pou¾ije automaticky IPv4.
 .TP
 .B \-pvr <volba1:volba2:...> (Pouze PVR)
 Tato volba dolaïuje rùzné parametry enkódování zachytávacího modulu PVR.
-Hauppauge WinTV PVR\-150/250/350/500 a ostatní karty zalo¾ené na IVTV
-jsou známé jako zachytávací PVR karty.
+Volba by mìla být pou¾itelná s jakoukoli kartou postavenou na  hardwarovém MPEG
+enkodéru podporovaném V4L2 ovladaèi.
+Hauppauge WinTV PVR\-150/250/350/500 a v¹echny karty zalo¾ené na IVTV
+jsou známy jako PVR zachytávací karty.
+Upozoròujeme, ¾e pouze jádro Linux 2.6.18 a vy¹¹í
+ je schopno obsluhovat MPEG proud pøes vrstvu V4L2.
 Pro hardwarové zachytávání MPEG proudu a jeho sledování pomocí
 MPlayeru/MEncoderu, pou¾ijte 'pvr://' jako URL filmu.
 .sp 1
 Dostupné volby jsou:
 .RSs
-.IPs aspect=<1\-4>
+.IPs aspect=<0\-3>
 Nastavuje pomìr stran vstupu (výchozí: 4:3):
 .RSss
-1: 1:1
+0: 1:1
 .br
-2: 4:3
+1: 4:3
 .br
-3: 16:9
+2: 16:9
 .br
-4: 2.21:1
+3: 2.21:1
 .REss
 .IPs arate=<32000\-48000>
 Nastavuje vzorkovací kmitoèet enkódovaného zvuku (výchozí: 48000 Hz, dostupné: 32000, 44100
 a 48000 Hz).
-.IPs alayer=<1\-2>
+.IPs alayer=<1\-3>
 Nastavuje kódování zvuku (MPEG audio layer)(výchozí: layer 2).
 .IPs abitrate=<32\-448>
 Nastavuje datový tok zvuku v kbps (výchozí: 384 kbps).
@@ -1374,34 +1448,30 @@ Dostupné pøednastavené re¾imy jsou 'stereo', 'joint_stereo', 'dual' a 'mono'
 (výchozí: stereo).
 .IPs vbitrate=<hodnota>
 Nastaví prùmìrný datový tok pro enk=odování videa (výchozí: 6 Mbps).
-.IPs vmode=<0\-1>
-Nastaví re¾im enkódování videa (výchozí: VBR):
+.IPs vmode=<hodnota>
+Nastaví re¾im enkódování videa (výchozí: vbr):
 .RSss
-0: VBR
+vbr: promìnný datový tok
 .br
-1: CBR
+cbr: konstantní datový tok
 .REss
 .IPs vpeak=<hodnota>
 Nastavuje horní mez datového toku videa (pou¾itelné pouze pro VBR enkódování,
 výchozí: 9.6 Mbps). 
 .IPs fmt=<hodnota>
-Vybere MPEG formét pro enkódování (výchozí: MPEG PS):
+Vybere MPEG formét pro enkódování (výchozí: ps):
 .RSss
-ps:    MPEG PS.
+ps:    MPEG 2 Program Stream.
 .br
-ts:    MPEG TS (experimentální, mù¾e selhat)
+ts:    MPEG 2 Transport Stream.
 .br
-mpeg1: MPEG 1
+mpeg1: MPEG 1 System Stream.
 .br
-vcd:   Video CD
+vcd:   Video CD compatible stream.
 .br
-svcd:  Super Video CD
+svcd:  Super Video CD compatible stream.
 .br
-dvd:   DVD
-.br
-dvds1: DVD Region 1 (NTSC)
-.br
-dvds2: DVD Region 2 (PAL)
+dvd:   DVD compatible stream.
 .REss
 .RE
 .PD 1
@@ -1548,6 +1618,57 @@ audio a video ID.
 Kdy¾ pøehráváte MPEG-TS proud, mù¾ete touto volbou urèit který
 program (pokud je) chcete sledovat.
 Lze pou¾ít s \-vid a \-aid.
+.
+.TP
+.B \-radio <volba1:volba2:...> (pouze radio)
+Tato sada voleb nastavuje rùzné parametry modulu zachytávajícího rádio.
+Pro poslech rádia MPlayerem pou¾ijte 'radio://<frekvence>'
+(pokud není zadána volba channels) nebo 'radio://<èíslo_kanálu>'
+(pokud byla zadána volba channels) jako URL filmu.
+Pro start zachytávání (záznamu) pou¾ijte radio://<frekvence nebo kanál>/capture.
+Pokud klíèové slovo capture není zadáno, mù¾ete poslouchat rádio pouze pomocí
+propojky s line-in.
+Pou¾ití  capture pro poslech nedoporuèujeme pro potí¾e se synchronizací,
+co¾ èiní tento proces nepohodlným.
+.sp 1
+Dostupné volby jsou:
+.RSs
+.IPs device=<hodnota>
+Radio zaøízení k pou¾ití (výchozí: /dev/radio0).
+.IPs driver=<hodnota>
+Radio zaøízení k pou¾ití (výchozí: v4l2 je-li, jinak v4l).
+Zatím jsou podporována rozhraní v4l a v4l2.
+.IPs volume=<0..100>
+hlasitost zvuku radio zaøízení (výchozí 100)
+.IPs channels=<frekvence>\-<název>,<frekvence>\-<název>,...
+Nastaví seznam kanálù.
+Pou¾ijte _ místo mezer v názvech (nebo si pohrajte s uvozovkami ;-).
+Jména kanálù pak budou zobrazovány pomocí OSD a pøíkazy závislého re¾imu
+radio_step_channel a radio_set_channel bude lze pou¾ít pro
+dálkové ovládání (viz LIRC).
+Je-li zadáno, je èíslo v URL filmu pova¾ováno za pozici kanálu
+v seznamu kanálù.
+.br
+.I PØÍKLAD:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<hodnota> (se zapnutým radio zachytáváním)
+Název zaøízení ze kterého se bude zachytávat zvuk.
+Bez zadání tohoto názvu bude zachytávání vypnuto
+i v pøípadì, ¾e bude v URL klíèové slovo capture.
+Pro ALSA zaøízení pou¾ijte formu hw=<karta>.<zaøízení>.
+Pokud název zaøízení obsahuje '=', modul pou¾ije k zachytávání
+ALSA, jinak OSS.
+.IPs arate=<hodnota> (se zapnutým zachytáváním rádia)
+Tok ve vzorcích za sekundu (výchozí: 44100).
+.br
+.I POZNÁMKA:
+Pøi pou¾ití zachytávání zvuku nastavte také volbu \-rawaudio rate=<hodnota>
+se stejnou hodnotou jako arate.
+Máte-li potí¾e s rychlostí zvuku (pøíli¹ rychle), pohrajte si
+s rùznými hodnotami toku (napø.\& 48000,44100,32000,...).
+.IPs achannels=<hodnota> (se zapnutým zachytáváním rádia)
+Poèet zachytávaných zvukových kanálù.
+.RE
 .
 .TP
 .B \-tv <volba1:volba2:...> (pouze TV/PVR)
@@ -1708,9 +1829,19 @@ externí titulky a Matroska stopy.
 Také mù¾ete pou¾ít \-embeddedfonts.
 .
 .TP
+.B \-ass-border-color <hodnota>
+Nastaví barvu okraje (linky) pro textové titulky.
+Barevný formát je RRGGBBAA.
+.
+.TP
 .B \-ass-bottom-margin <hodnota>
 Pøidá èerný pruh na spodek snímku.
-SSA/ASS renderovaè pak umístí titulky tam.
+SSA/ASS renderovaè pak umístí titulky tam (s \-ass-use-margins).
+.
+.TP
+.B \-ass-color <hodnota>
+Nastaví barvu textových titulkù.
+Barevný formát je RRGGBBAA.
 .
 .TP
 .B \-ass-font-scale <hodnota>
@@ -1732,9 +1863,21 @@ Pøepí¹e nìkteré nastavení stylu.
 Nastaví odsazení øádkù pro SSA/ASS renderovaè.
 .
 .TP
+.B \-ass-styles <soubor>
+Nahraje v¹echny SSA/ASS styly nalezené v daném souboru a pou¾ije je pro
+renderování textových titulkù.
+Syntaxe souboru je shodná se sekcí
+[V4 Styles] / [V4+ Styles] SSA/ASS.
+.
+.TP
 .B \-ass-top-margin <hodnota>
 Pøidá èerný pruh na vrch snímku.
-SSA/ASS renderovaè pak umístí horní titulky tam.
+SSA/ASS renderovaè pak umístí horní titulky tam (s \-ass-use-margins).
+.
+.TP
+.B \-(no)ass-use-margins
+Zapne/vypne umis»ování horních a dolních titulkù do èerných okrajù, jsou-li
+dostupné (výchozí: ne).
 .
 .TP
 .B \-dumpjacosub (pouze MPlayer)
@@ -2246,7 +2389,7 @@ Nastaví noblock re¾im.
 .IPs device=<zaøízení>
 Nastaví jméno zvukového zaøízení.
 Nahraïte jakékoli ',' za '.' a jakékoli ':' za '=' ve jménì ALSA zaøízení.
-Ujistìte se ¾e toto nemáte nastaveno, pokud chcete hwac3 výstup pøes S/PDIF,
+Pro hwac3 výstup pøes S/PDIF, pou¾ijte zaøízení "iec958" nebo "spdif",
 pokud pøesnì nevíte jak to nastavit správnì.
 .RE
 .
@@ -4298,7 +4441,7 @@ Sinusová funkce delta, pou¾ívejte velmi malé hodnoty, abyste sly¹eli vyhlazení.
 .PD 1
 .
 .TP
-.B sinesuppress[=frekv:zpo¾dìní]
+.B sinesuppress[=frekv:útlum]
 Odstaní sinusovku zadaného kmitoètu.
 Vhodné pro odstranìní 50/60Hz ru¹ení na nekvalitním audio zaøízení.
 Pravdìpodobnì pracuje pouze na mono vstupu.
@@ -4898,7 +5041,7 @@ Otoèí obraz o 90 stupòù proti smìru hodinových ruèièek a pøevrátí jej.
 .RE
 .
 .TP
-.B scale[=¹:v[:prokládané[:zru¹ení_barev[:param[param2[:pøednast[:noup[:arnd]]]]]]]]
+.B scale[=¹:v[:proklad[:odbar[:par[par2[:pevná[:noup[:arnd]]]]]]]]
 ©káluje obraz pomocí (pomalého) softwarového ¹kálovaèe a provádí konverzi
 barevného prostoru YUV<\->RGB (viz také volbu \-sws).
 .RSs
@@ -4919,14 +5062,14 @@ Pou¾ijete-li \-zoom, a podkladové filtry (vèetnì libvo) nejsou schopny
 .br
 -(n+8): Jako vý¹e uvedené -n, ale zaokrouhlí rozmìr na nejbli¾¹í násobek 16.
 .REss
-.IPs <prokládané>
+.IPs <proklad>
 Pøepíná prokládané ¹kálování.
 .RSss
 0: vypnuto (výchozí)
 .br
 1: zapnuto
 .REss
-.IPs <zru¹ení_barev>
+.IPs <odbar>
 ignorování barevné informace
 .RSss
 0: Pou¾ívat barvy ze v¹ech øádkù.
@@ -4937,7 +5080,7 @@ ignorování barevné informace
 .br
 3: Pou¾ívat barvy pouze z ka¾dého 8. øádku.
 .REss
-.IPs "<param>[:<param2>] (viz také volbu \-sws)"
+.IPs "<par>[:<par2>] (viz také volbu \-sws)"
 Nastavení nìkterých parametrù v závislosti na typu ¹kálovaèe nastaveném
 pomocí \-sws.
 .RSss
@@ -4957,7 +5100,7 @@ pomocí \-sws.
 .br
 \-sws 9 (lanczos):  délka filtru (1\-10)
 .REss
-.IPs <pøednast>
+.IPs <pevná>
 ©káluje na pøednastavený rozmìr.
 .RSss
 qntsc:   352x240 (NTSC ètvrtina obrazu)
@@ -6337,8 +6480,10 @@ Volba fd naøídí filtru provést zvolené dìlení v¾dy (¹karedé).
 .
 .TP
 .B screenshot
-Umo¾òuje poøizovat snímky z filmu pomocí pøíkazu screenshot
-(ve výchozím stavu pøidru¾enému klávese 's').
+Umo¾òuje poøizovat snímky z filmu pomocí pøíkazù závislého re¾imu,
+které mohou být mapovány na tlaèítka.
+Detaily viz dokumentace závislého re¾imu (slave mode) a sekce
+INTERAKTIVNÍ OVLÁDÁNÍ.
 Do pracovního adresáøe budou ukládány soubory pojmenované 'shotNNNN.png',
 kdy za NNNN bude pou¾ito první volné èíslo - ¾ádné soubory nebudou pøepsány.
 Filtr nemá ¾ádné nároky pokud není pou¾íván a pøijímá libovolný barevný
@@ -6392,26 +6537,6 @@ Pouze CBR, VBR toto ignoruje a ukládá ka¾dý paket do nového chunku.
 .TP
 .B \-audio-preload <0.0\-2.0>
 Nastaví jak daleko napøed se má naèítat zvuk do vyrovnávací pamìti (výchozí: 0.5s).
-.
-.TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|velikost[b|kb|mb]> (viz té¾ volby \-ss a \-sb)
-Zastaví enkódování na zadané èasové nebo bajtové pozici.
-Mù¾e být nastaveno mnoha zpùsoby:
-.br
-.I POZNÁMKA:
-Bajtová pozice nebude pøesná, proto¾e se mù¾e skonèit pouze na hranici snímku.
-.sp 1
-.I PØÍKLAD:
-.PD 0
-.RSs
-.IPs "\-endpos 56"
-Enkóduje pouze 56 sekund.
-.IPs "\-endpos 01:10:00"
-Enkóduje pouze 1 hodinu a 10 minut.
-.IPs "\-endpos 100mb"
-Enkóduje pouze 100 megabajtù.
-.RE
-.PD 1
 .
 .TP
 .B \-fafmttag <formát>
@@ -9361,6 +9486,13 @@ Vy¾aduje aby libx264 byla kompilována s podporou pthread; pokud ne, vypí¹e tato
 volba varování a zapne èásti, ale nikoli vícevláknové zpracování.
 .
 .TP
+.B (no)globalheader
+Zpùsobí ¾e se SPS a PPS objeví pouze jednou, na zaèátku bitového proudu
+(výchozí: vypnuto).
+Nìkteré pøehrávaèe, jako Sony PSP, vy¾adují pou¾ití této volby.
+Výchozím chováním je opakování SPS a PPS pøed ka¾dým IDR snímkem.
+.
+.TP
 .B log=<-1\-3>
 Nastavení mno¾ství logovacích informací vypisovaných na obrazovku.
 .PD 0
@@ -9516,6 +9648,16 @@ aby vypadal jako enkódovaný se snímkovou rychlostí 25 fps.
 Pracuje pouze s MPEG-2 videem, pokud výstupní snímková rychlost,
 konvertovaná pomocí volby \-ofps, je buï 24000/1001 anebo 24 fps.
 Jakákoli jiná snímková rychlost je nekompatibilní s touto volbou.
+.
+.
+.SS FFmpeg libavformat demuxery (\-lavfdopts)
+.
+.TP
+.B probesize=<hodnota>
+Maximální mno¾ství skoumaných dat ve fázi detekce.
+V pøípadì MPEG-TS tato hodnota udává maximální poèet TS
+paketù, které se budou skenovat.
+.
 .
 .
 .SS FFmpeg libavformat muxery (\-lavfopts) (viz také \-of lavf)
