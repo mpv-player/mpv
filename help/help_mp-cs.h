@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.cz
 //                 Jiri Heryan
-// Synced with revision 19454
+// Synced with r19979
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -65,7 +65,7 @@ static char help_text[]=
 #define MSGTR_CreatingCfgFile "Vytváøím konfiguraèní soubor: %s\n"
 #define MSGTR_CopyCodecsConf "(Zkopírujte/nalinkujte etc/codecs.conf ze zdrojových kódù MPlayeru do ~/.mplayer/codecs.conf)\n"
 #define MSGTR_BuiltinCodecsConf "Pou¾ívám zabudovaný výchozí codecs.conf.\n"
-#define MSGTR_CantLoadFont "Nemohu naèíst font: %s\n"
+#define MSGTR_CantLoadFont "Nemohu naèíst bitmapový font: %s\n"
 #define MSGTR_CantLoadSub "Nemohu naèíst titulky: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: Kritická chyba: Chybí po¾adovaný datový proud!\n"
 #define MSGTR_CantOpenDumpfile "Nelze otevøít soubor pro dump.\n"
@@ -194,6 +194,7 @@ static char help_text[]=
 #define MSGTR_EdloutBadStop "EDL: Vynechání zru¹eno, poslední start > stop\n"
 #define MSGTR_EdloutStartSkip "EDL: Zaèátek vynechaného bloku, stisknìte znovu 'i' pro ukonèení bloku.\n"
 #define MSGTR_EdloutEndSkip "EDL: Konec vynechaného bloku, øádek zapsán.\n"
+#define MSGTR_MPEndposNoSizeBased "Volba -endpos v MPlayeru zatím nepodporuje rozmìrové jednotky.\n"
 
 // mplayer.c OSD
 
@@ -1805,3 +1806,46 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] Zavoláno draw_frame()!!!\n"
+
+// stream/stream_radio.c
+
+#define MSGTR_RADIO_ChannelNamesDetected "[radio] Detekovány názvy stanic.\n"
+#define MSGTR_RADIO_WrongFreqForChannel "[radio] Nesprávná frekvence pro stanici %s\n"
+#define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Nesprávné èíslo kanálu: %.2f\n"
+#define MSGTR_RADIO_WrongChannelNumberInt "[radio] Nesprávné èíslo kanálu: %d\n"
+#define MSGTR_RADIO_WrongChannelName "[radio] Nesprávné jméno kanálu: %s\n"
+#define MSGTR_RADIO_FreqParameterDetected "[radio] Radio parametr detekován jako frekvence.\n"
+#define MSGTR_RADIO_DoneParsingChannels "[radio] Parsování stanic dokonèeno.\n"
+#define MSGTR_RADIO_GetTunerFailed "[radio] Varování: ioctl get tuner selhala: %s. Nastavuji frac na %d.\n"
+#define MSGTR_RADIO_NotRadioDevice "[radio] %s není rádiovým zaøízením!\n"
+#define MSGTR_RADIO_TunerCapLowYes "[radio] tuner je low:yes frac=%d\n"
+#define MSGTR_RADIO_TunerCapLowNo "[radio] tuner je low:no frac=%d\n"
+#define MSGTR_RADIO_SetFreqFailed "[radio] ioctl set frequency 0x%x (%.2f) selhala: %s\n"
+#define MSGTR_RADIO_GetFreqFailed "[radio] ioctl get frequency selhala: %s\n"
+#define MSGTR_RADIO_SetMuteFailed "[radio] ioctl set mute selhala: %s\n"
+#define MSGTR_RADIO_QueryControlFailed "[radio] ioctl query control selhala: %s\n"
+#define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl get volume selhala: %s\n"
+#define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl set volume selhala: %s\n"
+#define MSGTR_RADIO_DroppingFrame "\n[radio] pøíli¹ ¹patné - zahazuji audio rámec (%d bajtù)!\n"
+#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: prázdná vyrovnávací pamì», èekám na %d bajtù dat.\n"
+#define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init selhala: %s\n"
+#define MSGTR_RADIO_AudioBuffer "[radio] Zachytávání zvuku - vyrovnávací pamì»=%d bajtù (blok=%d bajtù).\n"
+#define MSGTR_RADIO_AllocateBufferFailed "[radio] nemohu alokovat vyrovnávací pamì» zvuku (blok=%d,buf=%d): %s\n"
+#define MSGTR_RADIO_CurrentFreq "[radio] Souèasná frekvence: %.2f\n"
+#define MSGTR_RADIO_SelectedChannel "[radio] Zvolený kanál: %d - %s (frekv: %.2f)\n"
+#define MSGTR_RADIO_ChangeChannelNoChannelList "[radio] Nelze zmìnit kanál: nezadán seznam kanálù.\n"
+#define MSGTR_RADIO_UnableOpenDevice "[radio] Nelze otevøít '%s': %s\n"
+#define MSGTR_RADIO_RadioDevice "[radio] Radio fd: %d, %s\n"
+#define MSGTR_RADIO_InitFracFailed "[radio] init_frac selhala.\n"
+#define MSGTR_RADIO_WrongFreq "[radio] ©patná frekvence: %.2f\n"
+#define MSGTR_RADIO_UsingFreq "[radio] Pou¾ívám frekvuenci: %.2f.\n"
+#define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init selhala.\n"
+#define MSGTR_RADIO_BufferString "[radio] %s: ve vyrovnávací pamìti=%d zahozeno=%d\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[radio] volání audio_in_setup selhalo: %s\n"
+#define MSGTR_RADIO_CaptureStarting "[radio] Zahajuji zachytávání obsahu.\n"
+#define MSGTR_RADIO_ClearBufferFailed "[radio] Vypráznìní vyrovnávací pamìti selhalo: %s\n"
+#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Volání do stream_enable_cache selhalo: %s\n"
+#define MSGTR_RADIO_DriverUnknownId "[radio] Neznámé ID ovladaèe: %d\n"
+#define MSGTR_RADIO_DriverUnknownStr "[radio] Neznámé jméno ovladaèe: %s\n"
+#define MSGTR_RADIO_DriverV4L2 "[radio] Pou¾ívám V4Lv2 rádio rozhraní.\n"
+#define MSGTR_RADIO_DriverV4L "[radio] Pou¾ívám V4Lv1 rádio rozhraní.\n"
