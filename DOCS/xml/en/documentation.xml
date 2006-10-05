@@ -174,7 +174,6 @@ audio.
 can be distributed under the terms of the GNU General Public License Version 2.
 </para>
 
-&history.xml;
 </chapter>
 
 &install.xml;
@@ -196,3 +195,4 @@ can be distributed under the terms of the GNU General Public License Version 2.
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
+&history.xml;

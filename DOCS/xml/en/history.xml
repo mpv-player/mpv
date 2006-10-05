@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- $Revision$ -->
-<!-- FIXME: history really should be in the appendix -->
-<sect1 id="history">
+<appendix id="history">
 <title>History</title>
 
 <blockquote><para>
@@ -112,4 +111,4 @@ problems too. So I've decided to write/modify one...
   </para></listitem>
 </itemizedlist>
 </para>
-</sect1>
+</appendix>
