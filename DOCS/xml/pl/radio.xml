@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20024 -->
+<!-- synced with r20051 -->
 <chapter id="radio">
 <title>Radio</title>
 
@@ -79,8 +79,8 @@ słyszał dźwięku (chyba że masz kabelek do line-in i wyłączyłeś jego wyciszenie).
 <para>
 Wejście ze standardowego V4L (przy użyciu kabelka line-in, bez przechwytywania):
 <screen>
-mplayer radio://104.4<!--
---></screen>
+mplayer radio://104.4
+</screen>
 </para>
 </informalexample>
 
@@ -89,8 +89,8 @@ mplayer radio://104.4<!--
 Wejście ze standardowego V4L (przy użyciu kabelka line-in, bez przechwytywania,
 interface V4Lv1):
 <screen>
-mplayer -radio driver=v4l radio://104.4<!--
---></screen>
+mplayer -radio driver=v4l radio://104.4
+</screen>
 </para>
 </informalexample>
 
@@ -98,8 +98,8 @@ mplayer -radio driver=v4l radio://104.4<!--
 <para>
 Odtwarzanie drugiego kanału z listy:
 <screen>
-mplayer -radio channels=104.4=Sibir,103.9=Maximm  radio://2<!--
---></screen>
+mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
+</screen>
 </para>
 </informalexample>
 
@@ -109,12 +109,12 @@ Przesyłanie dźwięku szyną PCI z wewnętrznego konwertera ADC na karcie radiowej.
 W tym przykładzie tuner jest używany jako druga karta dźwiękowa (urządzenia alsa
 hw:1,0). Dla kart opartych na saa7134 musi być załadowany moduł saa7134-alsa
 lub saa7134-oss.
+<screen>
+mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture
+</screen>
 <note><para>Jeśli używasz nazw urządzeń ALSA dwukropki muszą być zastąpione
 znakami równości a przecinki kropkami.
 </para></note>
-<screen>
-mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture<!--
---></screen>
 </para>
 </informalexample>
 </sect2>
