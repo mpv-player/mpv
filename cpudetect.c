@@ -182,7 +182,7 @@ void GetCpuCaps( CpuCaps *caps)
 #endif
 
 		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__CYGWIN__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__CYGWIN__) || defined(__OpenBSD__) || defined(__DragonFly__) || defined(__APPLE__)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
@@ -345,16 +345,23 @@ LONG CALLBACK win32_sig_handler_sse(EXCEPTION_POINTERS* ep)
  * and RedHat patched 2.2 kernels that have broken exception handling
  * support for user space apps that do SSE.
  */
+ 
+#if defined(__FreeBSD__) || defined(__DragonFly__)
+#define SSE_SYSCTL_NAME "hw.instruction_sse"
+#elif defined(__APPLE__)
+#define SSE_SYSCTL_NAME "hw.optional.sse"
+#endif
+
 static void check_os_katmai_support( void )
 {
 #ifdef ARCH_X86_64
    gCpuCaps.hasSSE=1;
    gCpuCaps.hasSSE2=1;
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__) || defined(__APPLE__)
    int has_sse=0, ret;
    size_t len=sizeof(has_sse);
 
-   ret = sysctlbyname("hw.instruction_sse", &has_sse, &len, NULL, 0);
+   ret = sysctlbyname(SSE_SYSCTL_NAME, &has_sse, &len, NULL, 0);
    if (ret || !has_sse)
       gCpuCaps.hasSSE=0;
 
