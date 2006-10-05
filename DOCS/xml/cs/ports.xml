@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18824 -->
+<!-- Synced with r19820 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -45,7 +45,7 @@ způsobem:
 <para>
 Christian Marillat vytvářel jistou dobu neoficiální Debianí balíčky
 <application>MPlayer</application>u, <application>MEncoder</application>u a
-našich bitmapových fontů, můžete si je stáhnout (apt-get) z
+našich binárních balíků s kodeky, můžete si je stáhnout (apt-get) z
 <ulink url="http://www.debian-multimedia.org/">jeho domácí stránky</ulink>.
 </para>
 </sect2>
@@ -538,7 +538,7 @@ $ ./configure --charset=noconv
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
   Nemá zatím oficiální GUI, ale verze pro příkazový řádek je plně funkční.
   Měli byste navštívit konferenci
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
+  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   pro pomoc a poslední informace.
   Oficiální Windows binárky naleznete na
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">download stránce</ulink>.
@@ -609,7 +609,7 @@ $ ./configure --charset=noconv
   zakázán natrvalo.</para>
 
 <para>Pro Windows máme k dispozici speciální balíčky kodeků na naší
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">stránce kodeků</ulink>,
+  <ulink url="http://www.mplayerhq.hu/design7/dload.html">download stránce</ulink>,
   abyste mohli přehrávat formáty, pro které zatím není nativní podpora.
   Umístěte kodeky někde do cesty (path), nebo přidejte
   <option>--with-codecsdir=<replaceable>c:/cesta/ke/kodekům</replaceable></option>
@@ -673,7 +673,7 @@ $ ./configure --charset=noconv
 <title><application>MinGW</application></title>
 
 <para>Instalace takové verze <application>MinGW</application>, aby bylo lze
-  kompilovat <application>MPlayer</application>, byla obtížná, ale nyní
+  kompilovat <application>MPlayer</application> byla obtížná, ale nyní
   pracuje bez dalších úprav. Jen nainstalujte <application>MinGW</application>
   3.1.0 nebo vyšší a MSYS 1.0.9 nebo vyšší a zvolte v MSYS postinstall, že je
   <application>MinGW</application> nainstalováno.</para>
@@ -697,157 +697,203 @@ $ ./configure --charset=noconv
 
 <sect1 id="macos">
 <title>Mac OS</title>
+
 <para>
 <application>MPlayer</application> nepracuje na Mac OS verzích pod
 10, ale měl by být bez úprav kompilovatelný na Mac OS X 10.2 a vyšších.
 Preferovaná verze kompileru je Apple verze
-GCC 3.x a vyšších. Máte-li Mac OS X 10.3.9 nebo vyšší a QuickTime 7,
-můžete použít výstupní video rozhraní macosx.
+GCC 3.x a vyšších.
+Základní prostředí pro kompilaci můžete získat instalací
+<ulink url="http://developer.apple.com/tools/download/">Xcode</ulink>
+od Apple. Máte-li Mac OS X 10.3.9 nebo pozdější a QuickTime 7
+můžete použít výstupní video rozhraní <option>macosx</option>.
+</para>
+
+<para>
+Naneštěstí toto základní prostředí neumožňuje využít všechny
+pěkné vlastnosti <application>MPlayer</application>u.
+Například, budete-li chtít mít zakompilovánu podporu OSD, budete
+muset mít na svém stroji nainstalovány knihovny
+<systemitem class="library">fontconfig</systemitem>
+a <systemitem class="library">freetype</systemitem>.
+ Narozdíl od jiných Unixů, jako je většina variant Linuxu a BSD, OS X
+ nemá balíčkovací systém distribuovaný se systémem.
+</para>
+
+<para>
+Můžete vybírat minimálně ze dvou:
+<ulink url="http://fink.sourceforge.net/">Fink</ulink>u a
+<ulink url="http://www.macports.org/">DarwinPorts</ulink>.
+Oba poskytují zhruba stejné služby (např. mnoho dostupných balíčků,
+řešení závislostí, schopnost jednoduše přidávat/aktualizovat/odebírat
+balíčky, atp...).
+Fink nabízí jak předkompilované binární balíčky, tak možnost kompilovat
+všechno ze zdrojového kódu, zatímco DarwinPorts nabízí pouze možnost
+kompilace ze zdrojového kódu.
+Autor této příručky zvolil DarwinPorts z jednoduchého důvodu, že jeho
+základní nastavení je mnohem lehčí.
+Pozdější příklady budou založeny na DarwinPorts.
+</para>
+
+<para>
+Například pro kompilaci <application>MPlayer</application> s podporou OSD:
+<screen>sudo port install pkgconfig</screen>
+Takto nainstalujete <application>pkg-config</application>, což je systém pro správu
+knihovních příznaků compile/link.
+<application>MPlayer</application>ův skript <systemitem>configure</systemitem> jej
+používá pro správnou detekci knihoven.
+Pak můžete nainstalovat <application>fontconfig</application>
+podobným způsobem:
+<screen>sudo port install fontconfig</screen>
+Následně můžete pokračovat spuštěním <application>MPlayer</application>ova
+<systemitem>configure</systemitem> skriptu (ověřte proměnné prostředí
+<systemitem>PKG_CONFIG_PATH</systemitem> a <systemitem>PATH</systemitem>,
+aby <systemitem>configure</systemitem> našel knihovny instalované pomocí
+DarwinPorts):
+<screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
 
 <sect2 id="osx_gui">
 <title>MPlayer OS X GUI</title>
 
 <para>
-You can get a native GUI for <application>MPlayer</application> together with
-precompiled <application>MPlayer</application> binaries for Mac OS X from the
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project, but be
-warned: that project is not active anymore.
+Můžete si stáhnout nativní GUI pro <application>MPlayer</application> spolu
+s předkompilovanými binárkami <application>MPlayer</application>u pro Mac OS X
+z <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> projektu, ale upozorňujeme:
+tento projekt již není aktivní.
 </para>
 
 <para>
-Fortunately, <application>MPlayerOSX</application> has been taken over
-by a member of the <application>MPlayer</application> team.
-Preview releases are available from our
-<ulink url="http://mplayerhq.hu/dload.html">download page</ulink>
-and an official release should arrive soon.
+Naštěstí byl <application>MPlayerOSX</application> převzat členem
+<application>MPlayer</application> týmu.
+Předváděcí verze lze stáhnout z naší
+<ulink url="http://mplayerhq.hu/dload.html">download stránky</ulink>
+a oficiální verze by měla přijít již brzy.
 </para>
 
 <para>
-In order to build <application>MPlayerOSX</application> from source
-yourself, you need the <systemitem>mplayerosx</systemitem>, the
-<systemitem>main</systemitem> and a copy of the
-<systemitem>main</systemitem> CVS module named
+Abyste mohli skompilovat <application>MPlayerOSX</application> ze zdrojového
+kódu sami, budete potřebovat <systemitem>mplayerosx</systemitem>,
+<systemitem>main</systemitem> a kopii
+<systemitem>main</systemitem> CVS modulu jménem
 <systemitem>main_noaltivec</systemitem>.
-<systemitem>mplayerosx</systemitem> is the GUI frontend,
-<systemitem>main</systemitem> is MPlayer and
-<systemitem>main_noaltivec</systemitem> is MPlayer built without AltiVec
-support.
+<systemitem>mplayerosx</systemitem> je GUI nadstavba,
+<systemitem>main</systemitem> je MPlayer a
+<systemitem>main_noaltivec</systemitem> je MPlayer přeložený bez podpory AltiVec.
 </para>
 
 <para>
-To check out CVS modules use:
+Pro stažení SVN modulů použijte:
 
 <screen>
-cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 </screen>
 </para>
 
 <para>
-In order to build <application>MPlayerOSX</application> you will need to
-set up something like this:
+Abyste skompilovali <application>MPlayerOSX</application> budete muset setavit
+asi toto:
 
 <screen>
-MPlayer_source_directory
+Adresář_se_zdrojáky_MPlayeru
    |
-   |--->main           (MPlayer CVS source)
+   |--->main           (Zdrojový kód MPlayeru ze Subversion)
    |
-   |--->main_noaltivec (MPlayer CVS source configured with --disable-altivec)
+   |--->main_noaltivec (Zdrojový kód MPlayeru ze Subversion konfigurován s --disable-altivec)
    |
-   |--->mplayerosx     (MPlayer OS X CVS source)
+   |--->mplayerosx     (Zdrojový kód MPlayer OS X ze Subversion)
 </screen>
 
-You first need to build main and main_noaltivec.
+Nejdřív musíte skompilovat main a main_noaltivec.
 </para>
 
 <para>
-Next, set a global variable:
+Pak nastavte globální proměnnou:
 
 <screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
 </para>
 
 <para>
-Then, configure:
+Pak konfigurujte:
 </para>
 
 <para>
-If you configure for a G4 or later CPU with AltiVec support, do as follows:
+Pokud konfigurujete pro G4 nebo pozdější CPU s podporou AltiVec, proveďte následující:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 </screen>
-If you configure for a G3-powered machine without AltiVec, use:
+Pokud konfigurujete pro stroj s G3 bez AltiVec, použijte:
 <screen>
 ./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
 --disable-altivec
 </screen>
-You may need to edit <filename>config.mak</filename> and change
-<systemitem>-mcpu</systemitem> and <systemitem>-mtune</systemitem>
-from <systemitem>74XX</systemitem> to <systemitem>G3</systemitem>.
+Možná budete muset editovat <filename>config.mak</filename> a změnit
+<systemitem>-mcpu</systemitem> a <systemitem>-mtune</systemitem>
+z <systemitem>74XX</systemitem> na <systemitem>G3</systemitem>.
 </para>
 
 <para>
-Continue with
+Pokračujte s
 <screen>
 make
 </screen>
-then go to the mplayerosx directory and type
+pak jděte do adresáře mplayerosx a napište
 
 <screen>
 make dist
 </screen>
-This will create a compressed <systemitem>.dmg</systemitem> archive
-with the ready to use binary.
+To vytvoří komprimovaný <systemitem>.dmg</systemitem> archiv
+s binárkou připravenou k použití.
 </para>
 
 <para>
-You can also use the <application>Xcode</application> 2.1 project;
-the old project for <application>Xcode</application> 1.x does
-not work anymore.
+Také lze použít projekt <application>Xcode</application> 2.1;
+starý projekt pro <application>Xcode</application> 1.x
+již nepracuje.
 </para>
 </sect2>
 </sect1>
 
 <sect1 id="exotic_platforms">
-<title>Exotic Platforms</title>
+<title>Exotické platformy</title>
 
 <para>
-<application>MPlayer</application> runs on a number of exotic platforms,
-but most of the platform-specific changes from those systems have not been
-merged back into the main source tree.
-For build instructions you should refer to the system-specific documentation.
+<application>MPlayer</application> běží na mnoha exotických platformách,
+ale většina platformně závislých změn z těchto systémů nebyla přidána zpět
+do hlavního zdrojového stromu.
+Pokyny k sestavení byste měli najít v dokumentaci pro daný systém.
 </para>
 
 <sect2 id="qnx">
 <title>QNX</title>
 <para>
-You'll need to download and install SDL for QNX. Then run
-<application>MPlayer</application> with <option>-vo sdl:driver=photon</option>
-and <option>-ao sdl:nto</option> options, it should be fast.
+Musíte si stáhnout a nainstalovat SDL pro QNX. Pak spusťte
+<application>MPlayer</application> s volbami <option>-vo sdl:driver=photon</option>
+a <option>-ao sdl:nto</option>, mělo by to být rychlé.
 </para>
 
 <para>
-The <option>-vo x11</option> output will be even slower than on Linux,
-since QNX has only X <emphasis>emulation</emphasis> which is very slow.
+Výstup <option>-vo x11</option> bude ještě pomalejší než na Linuxu,
+jelikož QNX má pouze X <emphasis>emulaci</emphasis>, která je velmi pomalá.
 </para>
 </sect2>
 
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-The people over at <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
-make current <application>MPlayer</application> and
-<application>MEncoder</application> packages.
+Lidé z okruhu <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
+tvoří současné balíčky <application>MPlayer</application> a
+<application>MEncoder</application>.
 </para>
 
 <para>
-Nicholas Det at Genesi has done a big and powerful port of <application>MPlayer
-</application> for MorphOS. Sadly it's based on the 0.90 series.
+Nicholas Det at Genesi vytvořil velký a výkonný port <application>MPlayer
+</application>u pro MorphOS. Naneštěstí je založen na verzi 0.90.
 </para>
 
 <para>
-Get if from <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+Stáhněte si ji z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
 <itemizedlist>
 <listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">

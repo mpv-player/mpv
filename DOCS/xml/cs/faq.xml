@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19828  -->
-<!-- Commented out sections need fixing -->
+<!-- Synced with r19828  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -50,9 +49,9 @@ Vždy uvítáme nové kodéry i dokumentaristy. Přečtěte si
 <ulink url="../../tech/">technickou dokumentaci</ulink>
 abyste dostali obecnou představu. Pak byste se měli přihlásit do
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-mailing listu a začít psát kód. Pokud chcete pomoci s dokumentací, připojte se do
-<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
-mailing listu.
+e-mailové konference a začít psát kód. Pokud chcete pomoci s dokumentací, připojte se do
+konference
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -197,17 +196,16 @@ prováděné za běhu.
 <qandadiv id="faq-general">
 <title>Obecné dotazy</title>
 
-<!-- Commented out until the link is fixed.
 <qandaentry>
 <question><para>
-Existují nějaké mailing listy pro <application>MPlayer</application>?
+Existují nějaké e-mailové konference pro <application>MPlayer</application>?
 </para></question>
 <answer><para>
-Ano. Podívejte se do sekce <link linkend="mailinglists">e-mailových konferencí</link>
+Ano. Podívejte se do sekce
+<ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">e-mailových konferencí</ulink>
 naší domácí stránky.
 </para></answer>
 </qandaentry>
--->
 
 <qandaentry>
 <question><para>
@@ -456,7 +454,6 @@ zkuste si porovnat
 </para></answer>
 </qandaentry>
 
-<!-- Commented out until the broken link is fixed.
 <qandaentry>
 <question><para>
 Nedaří se mi přimět titulky, aby se zobrazovaly, pomoc!!
@@ -470,7 +467,6 @@ Další postup zahrnuje prověření vašich titulků v textovém editoru nebo v jiných
 přehrávačích. Také je zkuste převézt do jiného formátu.
 </para></answer>
 </qandaentry>
--->
 
 <qandaentry>
 <question><para>

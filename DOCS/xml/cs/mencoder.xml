@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19265 -->
+<!-- Synced with r19685 -->
 <chapter id="mencoder">
 <title>Základní použití <application>MEncoder</application>u</title>
 
@@ -9,7 +9,7 @@ naleznete v man stránce. Řadu užitečných příkladů a podrobných návodů pro
 použití mnoha enkódovacích voleb naleznete v
 <ulink url="../../tech/encoding-tips.txt">tipech pro enkódování</ulink>, které
 byly získány z několika diskusí v konferenci MPlayer-users. Prohledejte
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archivy</ulink>,
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">archivy</ulink>,
 chcete-li bohatost diskusí o všech aspektech a problémech vztažených
 k enkódování <application>MEncoder</application>em.
 </para>

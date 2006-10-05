@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19081 -->
+<!-- Synced with r19832 -->
 <chapter id="video">
 <title>Výstupní video zařízení/rozhraní</title>
 
@@ -213,8 +213,7 @@ slušně požádejte v konferenci MPlayer-users o ovladač s MMX/3DNow!.
 <title>Karty nVidia</title>
 
 <para>
-nVidia není vždy pod Linuxem nejlepší volbou (podle nVidie to
-<link linkend="nvidia-opinions">není pravda</link>)... Open-source ovladač
+nVidia není vždy pod Linuxem nejlepší volbou... Open-source ovladač
 v XFree86 podporuje většinu těchto karet, ale v některých případech musíte
 použít binární closed-source ovladač od nVidie, který je k dispozici na
 <ulink url="http://www.nvidia.com/object/linux.html">serveru nVidia</ulink>.
@@ -1838,6 +1837,14 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
   Další možná použití jsou: televideo pid, druhá audio stopa, atd.
 </para>
 
+<para>
+  Pokud <application>MPlayer</application> často protestuje o
+  <screen>Příliš mnoha video/audio paketech ve vyrovnávací paměti</screen> nebo
+  pokud si povšimnete rostoucí desynchronizace mezi zvukem a
+  videem, zkuste použít MPEG-TS demuxer z libavformat přidáím
+  <option>-demuxer lavf -lavfdopts probesize=128</option>
+  na příkazovém řádku.
+</para>
 
 <para>
   Pro zobrazení prvního z kanálů uvedeného v seznamu, spusťte
@@ -1866,8 +1873,8 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Pro změnu kanálu stiskněte klávesu <keycap>h</keycap> (další) a
-  <keycap>k</keycap> (předchozí), nebo použijte OSD menu (vyžaduje funkční
-  <link linkend="subosd">OSD subsystém</link>).
+  <keycap>k</keycap> (předchozí), nebo použijte
+  <link linkend="osdmenu">OSD menu</link>.
 </para>
 
 <para>
@@ -1907,7 +1914,7 @@ pro 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <para>
 Máte-li otázky, nebo chcete dostávat oznámení o nových vlastnostech a zapojit
 se do diskuse o těchto věcech, připojte se k naší
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>
 e-mailové konferenci. Pamatujte prosím, že jazykem konference je angličtina.
 </para>
 </formalpara>
@@ -2416,13 +2423,6 @@ jednou během POST procedury.
 </para>
 </sect2>
 
-
-<sect2 id="tvout-voodoo">
-<title>Voodoo 3</title>
-<para>
-Shlédněte <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">tuto URL</ulink>.
-</para>
-</sect2>
 
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>

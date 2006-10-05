@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18964  -->
+<!-- Synced with r19828  -->
 <chapter id="usage">
 <title>Použití</title>
 
@@ -101,6 +101,126 @@ mplayer -afm 3 <replaceable>/mnt/DVDtrailery/alien4.vob</replaceable>
 mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable>
 mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/filmy/test.avi</replaceable><!--
 --></screen>
+</para>
+</sect1>
+
+
+<sect1 id="subosd">
+<title>Titulky a OSD</title>
+
+<para>
+<application>MPlayer</application> umí zobrazovat titulky spolu s filmem.
+V současnosti podporuje tyto formáty:
+<itemizedlist>
+<listitem><para>VOBsub</para></listitem>
+<listitem><para>OGM</para></listitem>
+<listitem><para>CC (closed caption)</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
+<listitem><para>SubRip</para></listitem>
+<listitem><para>SubViewer</para></listitem>
+<listitem><para>Sami</para></listitem>
+<listitem><para>VPlayer</para></listitem>
+<listitem><para>RT</para></listitem>
+<listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+<listitem><para>MPsub</para></listitem>
+<listitem><para>AQTitle</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> umí vyextrahovat výše uvedené formáty titulků
+(<emphasis role="bold">s výjimkou prvních třech</emphasis>) do následujících
+cílových formátů zadáním příslušných voleb:
+<itemizedlist>
+<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MEncoder</application> umí vyextrahovat DVD titulky do formátu
+<link linkend="menc-feat-extractsub">VOBsub</link>.
+</para>
+
+<para>
+Volby příkazového řádku se pro různé formáty mírně liší:
+</para>
+
+<formalpara>
+<title>VOBsub titulky</title>
+<para>
+VOBsub titulky se skládají z velkého (řádově megabajty) <filename>.SUB</filename>
+souboru a volitelného <filename>.IDX</filename> a/nebo <filename>.IFO</filename>
+souboru. Pokud máte soubory jako
+<filename><replaceable>sample.sub</replaceable></filename>,
+<filename><replaceable>sample.ifo</replaceable></filename> (volitelný),
+<filename><replaceable>sample.idx</replaceable></filename> &ndash; musíte předat
+<application>MPlayer</application>u volby <option>-vobsub sample
+[-vobsubid <replaceable>id</replaceable>]</option>
+(volitelně s plnou cestou). Volba <option>-vobsubid</option> je jako
+<option>-sid</option> pro DVD, můžete jí vybírat mezi titulkovými stopami
+(jazyky). Je-li <option>-vobsubid</option> vynechána, pak se
+<application>MPLayer</application> pokusí použít jazyky zadané volbou
+<option>-slang</option> a při selhání použije <systemitem>langidx</systemitem>
+v <filename>.IDX</filename> souboru. Pokud selže i zde, nebudou titulky.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Ostatní titulky</title>
+<para>
+Ostatní formáty tvoří jediný textový soubor obsahující časování,
+umístění a textovou část. Použití: máte-li soubor jako
+<filename><replaceable>sample.txt</replaceable></filename>,
+musíte předat volbu <option>-sub
+<replaceable>sample.txt</replaceable></option> (volitelně s plnou cestou).
+</para>
+</formalpara>
+
+<variablelist>
+<title>Úpravy časování a umístění titulků:</title>
+<varlistentry>
+  <term><option>-subdelay <replaceable>sec</replaceable></option></term>
+  <listitem><simpara>
+    Opozdí titulky o <option><replaceable>sec</replaceable></option> sekund.
+    Může být i záporné. Hodnota je přidána k čítači pozice ve filmu.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subfps <replaceable>RYCHLOST</replaceable></option></term>
+  <listitem><simpara>
+    Nastavuje rychlost ve snímcích/sek titulkového souboru (desetinné číslo).
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
+  <listitem><simpara>
+    Nastavuje pozici titulků.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Pokud se vám zvětšuje rozdíl mezi filmem a titulky, při použití
+titulkového souboru formátu MicroDVD, nejspíš se snímková rychlost
+titulků a filmu liší. Poznamenejme, že MicroDVD formát používá
+pro časování absolutní čísla snímků, ale není v něm informace
+o snímkové rychlosti, a proto byste měli s tímto formátem používat volbu
+<option>-subfps</option>. Chcete-li tento problém vyřešit trvale,
+musíte manuálně převést snímkovou rychlost souboru s titulky.
+<application>MPlayer</application> může převod udělat za
+vás:
+
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_titulků</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>soubor_titulků</replaceable> <replaceable>dummy.avi</replaceable></screen>
+</para>
+
+<para>
+O DVD titulcích si přečtěte v sekci <link linkend="dvd">DVD</link>.
 </para>
 </sect1>
 
@@ -523,7 +643,7 @@ Tato sekce musí být teprve napsaná a nemůže být dokončena dokud nám někdo
 nepošle vzorkové soubory pro testování. Pokud máte nějaké maticově enkódované
 zvukové soubory, víte, kde je lze najít, nebo máte jakoukoli informaci, která
 by mohla pomoci, pošlete prosím zprávu do konference
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
 Do předmětu vložte "[matrix-encoded audio]".
 </para>
 <para>
