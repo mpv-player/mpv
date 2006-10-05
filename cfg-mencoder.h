@@ -43,7 +43,7 @@ extern m_option_t xvidencopts_conf[];
 #endif
 
 #if defined(HAVE_X264)
-extern m_option_t x264encopts_conf[];
+extern char *x264encopts;
 #endif
 
 extern m_option_t nuvopts_conf[];
@@ -271,7 +271,7 @@ m_option_t mencoder_opts[]={
 	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_X264)
-	{"x264encopts", x264encopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"x264encopts", &x264encopts, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
 	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},

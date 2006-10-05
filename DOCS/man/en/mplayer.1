@@ -9014,7 +9014,7 @@ Constant bitrate can be achieved by combining this with vbv_maxrate,
 at significant reduction in quality.
 .
 .TP
-.B qp_constant=<0\-51>
+.B qp=<0\-51>
 This selects the quantizer to use for P-frames.
 I- and B-frames are offset from this value by ip_factor and pb_factor, respectively.
 20\-40 is a useful range (default: 26).
@@ -9175,8 +9175,8 @@ As it takes very little time compared to its quality gain, it is not
 recommended to disable it.
 .
 .TP
-.B deblockalpha=<-6\-6>
-AlphaC0 parameter of deblocking filter (default: 0).
+.B deblock=<-6\-6>,<-6\-6>
+The first parameter is AlphaC0 (default: 0).
 This adjusts thresholds for the H.264 in-loop deblocking filter.
 First, this parameter adjusts the maximum amount of change that the filter is
 allowed to cause on any one pixel.
@@ -9184,17 +9184,15 @@ Secondly, this parameter affects the threshold for difference across the
 edge being filtered.
 A positive value reduces blocking artifacts more, but will also smear details.
 .br
+The second parameter is Beta (default: 0).
+This affects the detail threshold.
+Very detailed blocks are not filtered, since the smoothing caused by the
+filter would be more noticeable than the original blocking.
+.br
 The default behavior of the filter almost always achieves optimal quality,
 so it is best to either leave it alone, or make only small adjustments.
 However, if your source material already has some blocking or noise which
 you would like to remove, it may be a good idea to turn it up a little bit.
-.
-.TP
-.B deblockbeta=<-6\-6>
-Beta parameter of deblocking filter (default: 0).
-Affects the detail threshold.
-Very detailed blocks are not filtered, since the smoothing caused by the
-filter would be more noticeable than the original blocking.
 .
 .TP
 .B (no)cabac
@@ -9213,7 +9211,7 @@ maximum quantizer (default: 51)
 .TP
 .B qp_step=<1\-50> (ABR or two pass)
 maximum value by which the quantizer may be incremented/decremented between
-frames (default: 2)
+frames (default: 4)
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR or two pass)
@@ -9284,27 +9282,28 @@ to overflow compensation and qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-3>
+.B direct_pred=<name>
 Determines the type of motion prediction used for direct macroblocks
 in B-frames.
 .PD 0
 .RSs
-.IPs 0
-None: Direct macroblocks are not used.
-.IPs 1
-Spatial: Motion vectors are extrapolated from neighboring blocks.
+.IPs none
+Direct macroblocks are not used.
+.IPs spatial
+Motion vectors are extrapolated from neighboring blocks.
 (default)
-.IPs 2
-Temporal: Motion vectors are interpolated from the following P-frame.
-.IPs 3
-Auto: The codec selects between spatial and temporal for each frame.
+.IPs temporal
+Motion vectors are interpolated from the following P-frame.
+.IPs auto
+The codec selects between spatial and temporal for each frame.
 .RE
 .PD 1
 .RS
 Spatial and temporal are approximately the same speed and PSNR,
 the choice between them depends on the video content.
 Auto is slightly better, but slower.
-direct_pred=0 is both slower and lower quality.
+Auto is most effective when combined with multipass.
+direct_pred=none is both slower and lower quality.
 .RE
 .
 .TP
@@ -9317,44 +9316,37 @@ of the B-frame relative to the references.
 Requires bframes > 1.
 .
 .TP
-.B (no)i4x4
-Use additional macroblock type i4x4 (default: enabled).
-Without this option, P- and B-frames will use only
-i16x16 and the inter types specified below.
-.
-.TP
-.B (no)i8x8
-Use additional macroblock type i8x8 (default: enabled).
-This option has no effect unless 8x8dct is enabled.
-.
-.TP
-.B (no)b8x8mv
-Use additional macroblock types b16x8, b8x16, b8x8 (default: enabled).
-Without this option, B-frames will use only types
-i16x16, i8x8, i4x4, b16x16, skip, direct.
-See 4x4mv for details.
-.
-.TP
-.B (no)8x8mv
-Use additional macroblock types p16x8, p8x16, p8x8 (default: enabled).
-Without this option, P-frames will use only types
-i16x16, i8x8, i4x4, p16x16, skip.
-This option is provided for experimentation only.
-It is not recommended to disable 8x8mv in a real encode.
-.
-.TP
-.B (no)4x4mv
-Use additional macroblock types p8x4, p4x8, p4x4 (default: disabled).
-Without this option, P-frames will use only types
-i16x16, i8x8, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
-Requires 8x8mv.
+.B partitions=<list>
+Enable some optional macroblock types (default: p8x8,b8x8,i8x8,i4x4).
+.PD 0
+.RSs
+.IPs p8x8
+Enable types p16x8, p8x16, p8x8.
+.IPs p4x4
+Enable types p8x4, p4x8, p4x4.
+p4x4 is recommended only with subq >= 5, and only at low resolutions.
+.IPs b8x8
+Enable types b16x8, b8x16, b8x8.
+.IPs i8x8
+Enable type i8x8.
+i8x8 has no effect unless 8x8dct is enabled.
+.IPs i4x4
+Enable type i4x4.
+.IPs all
+Enable all of the above types.
+.IPs none
+Disable all of the above types.
+.RE
+.PD 1
+.RS
+Regardless of this option, macroblock types p16x16, b16x16, and i16x16
+are always enabled.
 .br
 The idea is to find the type and size that best describe a certain area
 of the picture.
 For example, a global pan is better represented by 16x16 blocks, while
 small moving objects are better represented by smaller blocks.
-.br
-4x4mv is recommended only with subq >= 3.
+.RE
 .
 .TP
 .B (no)8x8dct
@@ -9364,18 +9356,18 @@ Also allows the i8x8 macroblock type.
 Without this option, only 4x4 DCT is used.
 .
 .TP
-.B me=<1\-4>
+.B me=<name>
 Select fullpixel motion estimation algorithm.
 .PD 0
 .RSs
-.IPs 1
+.IPs dia
 diamond search, radius 1 (fast)
-.IPs 2
+.IPs hex
 hexagon search, radius 2 (default)
-.IPs 3
+.IPs umh
 uneven multi-hexagon search (slow)
-.IPs 4
-exhaustive search (very slow, and no better than 3)
+.IPs esa
+exhaustive search (very slow, and no better than umh)
 .RE
 .PD 1
 .
@@ -9452,9 +9444,9 @@ rate-distortion optimal quantization
 .PD 0
 .RSs
 .IPs 0
-disabled
+disabled (default)
 .IPs 1
-enabled only for the final encode (default)
+enabled only for the final encode
 .IPs 2
 enabled during all mode decisions (slow, requires subq>=6)
 .RE
@@ -9558,7 +9550,7 @@ Requires that libx264 was compiled with pthread support; if not, this
 option will produce a warning and enables slices but not multithreading.
 .
 .TP
-.B (no)globalheader
+.B (no)global_header
 Causes SPS and PPS to appear only once, at the beginning of the bitstream
 (default: disabled).
 Some players, such as the Sony PSP, require the use of this option.
