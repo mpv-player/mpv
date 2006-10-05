@@ -48,23 +48,17 @@ emulation with <option>-ao oss</option>, also try <option>-ao sdl</option>,
 sometimes it helps. If your file plays fine with <option>-nosound</option>, then you can be sure
 it's sound card (driver) problem.
 </para></listitem>
-</itemizedlist>
 
-<itemizedlist>
 <listitem>
 <para>audio buffer problems (buffer size badly detected)</para>
 <para>Workaround: <application>MPlayer</application>'s <option>-abs</option> option</para>
 </listitem>
-</itemizedlist>
 
-<itemizedlist>
 <listitem><para>
 samplerate problems - maybe your card doesn't support the samplerate used in your
 files - try the resampling filter (<option>-af resample=...</option>)
 </para></listitem>
-</itemizedlist>
 
-<itemizedlist>
 <listitem>
 <para>slow machine (CPU or VGA)</para>
 <para>try with <option>-vo null</option>, if it plays well, then you have slow
