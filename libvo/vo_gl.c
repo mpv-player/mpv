@@ -275,6 +275,8 @@ static void genEOSD(ass_image_t *img) {
     else
       eosdtexCnt++;
   }
+  mp_msg(MSGT_VO, MSGL_DBG2, "EOSD counts (tiny, small, all): %i, %i, %i\n",
+         tinytexcur, smalltexcur, eosdtexCnt);
   if (eosdtexCnt) {
     eosdtex = calloc(eosdtexCnt, sizeof(GLuint));
     glGenTextures(eosdtexCnt, eosdtex);
