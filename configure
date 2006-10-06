@@ -741,12 +741,12 @@ if test "$_gcc_check" = yes ; then
   if test "$cc_verc_fail" = yes ; then
     cat <<EOF
 
-*** Please downgrade/upgrade C compiler to version gcc-2.95.x or gcc-3.x! ***
+*** Please downgrade/upgrade C compiler to version gcc-2.95, 3.x or 4.x! ***
 
 You are not using a supported compiler. We do not have the time to make sure
 everything works with compilers other than the ones we use.  Use either the
 same compiler as we do, or use --disable-gcc-check but DO *NOT* REPORT BUGS
-unless you can reproduce them after recompiling with a 2.95.x or 3.x version!
+unless you can reproduce them after recompiling with a 2.95.x or 3/4.x version!
 
 Note for gcc 2.96 users: Some versions of this compiler are known to miscompile
 mplayer and lame (which is used for mencoder).  If you get compile errors,
