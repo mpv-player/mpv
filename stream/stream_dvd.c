@@ -649,6 +649,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
       m_struct_free(&stream_opts,opts);
       return STREAM_UNSUPORTED;
     }
+    mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_DVD_CURRENT_TITLE=%d\n", dvd_title);
     --dvd_title; // remap 1.. -> 0..
     /**
      * Make sure the chapter number is valid for this title.
