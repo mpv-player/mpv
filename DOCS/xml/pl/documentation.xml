@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20024 -->
+<!-- synced with r20085 -->
 <!-- Opiekun: Torinthiel -->
 
 <bookinfo id="toc">
@@ -182,7 +182,6 @@ oraz audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
 mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 2.
 </para>
 
-&history.xml;
 </chapter>
 
 &install.xml;
@@ -204,3 +203,4 @@ mogą być rozprowadzane zgodnie z warunkami GNU General Public License Version 2.
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
+&history.xml;

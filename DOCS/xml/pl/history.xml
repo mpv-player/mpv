@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r14025 -->
-<!-- FIXME: history really should be in the appendix -->
-<sect1 id="history">
+<!-- synced with r20085 -->
+<appendix id="history">
 <title>Historia</title>
  
 <blockquote><para>
@@ -119,4 +118,4 @@ z istniejących lub napisać własny odtwarzacz...
   </para></listitem>
 </itemizedlist>
 </para>
-</sect1>
+</appendix>
