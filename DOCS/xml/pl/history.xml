@@ -33,8 +33,8 @@ z istniej±cych lub napisaæ w³asny odtwarzacz...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 21 pa¼dziernika - 2 listopada, 2000
-  </para><para>Kodekiem MPEG zosta³ libmpeg2(mpeg2dec) autorstwa Aarona
-  Holtzmana i Michela Lespinasse. Jest to znakomity, bardzo szybki
+  </para><para>Kodekiem MPEG zosta³ libmpeg2 (mpeg2dec) autorstwa Aarona
+  Holtzmana i Michela Lespinasse'a. Jest to znakomity, bardzo szybki
   zoptymalizowany kod w C z perfekcyjn± jako¶ci± obrazu i 100% zgodno¶ci±
   ze standardem MPEG.
   </para></listitem>
@@ -58,7 +58,6 @@ z istniej±cych lub napisaæ w³asny odtwarzacz...
   <emphasis role="bold"><application>MPlayer</application> v0.17a "The IdegCounter"</emphasis> 27 kwietnia 2001
   </para><para>Po 4 miesi±cach burzliwego rozwoju z 0.11pre powsta³a stabilna
   wersja! Wypróbuj j± i b±d¼ zadziwiony! Dodano tysi±ce
-  <!-- Torinthiel: Coby klimat orygina³u utrzymaæ -->
   nowych funkcji... oraz oczywi¶cie ulepszono stary kod, usuniêto b³êdy, itp.
   </para></listitem>
 <listitem><para>
