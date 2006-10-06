@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19686 -->
+<!-- synced with r20083 -->
 <appendix id="bugs">
 <title>Известные проблемы</title>
+
+
 <sect1 id="bugs-special">
 <title>Особые системно/CPU-специфичные ошибки/проблемы</title>
 <itemizedlist>
@@ -11,6 +13,7 @@
 <para>Решение: обновите ядро до версий 2.4.x</para>
 <para>Обход: <command>./configure --disable-sse</command></para>
 </listitem>
+
 <listitem>
 <para>Повсеместный SIGILL (сигнал 4):</para>
 <para>Проблема: Вы скомпилировали и запустили <application>MPlayer</application> на разных машинах
@@ -22,6 +25,7 @@
 инструкций процессора с помощью более специфических опций, например, 
 <option>--disable-mmx</option>, <option>--disable-3dnow</option> и т.п..</para>
 </listitem>
+
 <listitem>
 <para>Фатальные ошибки при дампе потоков:</para>
 <para>Проблема: дамп ядра</para>
@@ -29,6 +33,7 @@
 </listitem>
 </itemizedlist>
 </sect1>
+
 
 <sect1 id="bugs-audio">
 <title>Различные проблемы A-V синхронизации и прочие аудио проблемы</title>
@@ -44,21 +49,18 @@
 проигрывается с <option>-nosound</option>, Вы можете быть уверены: это проблема
 Вашей звуковой карты (драйвера).
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>проблемы аудио буфера (размер буфера определяется неправильно)</para>
 <para>Обход: опция <application>MPlayer</application> <option>-abs</option></para>
 </listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>
 проблема частоты дискретизации - может быть Ваша карта не поддерживает частоту
 дискретизации, используемую в Ваших файлах - попробуйте фильтр для изменения
 частоты дискретизации (<option>-af resample=...</option>)
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>медленная машина (CPU или VGA)</para>
 <para>попробуйте с <option>-vo null</option>, если так проигрывается хорошо, то
@@ -69,6 +71,7 @@
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-delay-specific">
 <title>Аудио задержка/десинхронизация, специфичная для одного или нескольких
@@ -84,11 +87,13 @@
     неслоёных или плохих файлов)</para>
     <para>и/или</para>
   </listitem>
+
   <listitem>
     <para><option>-mc 0</option> (требуется для файлов с плохо слоёным VBR
 	аудио)</para>
     <para>и/или</para>
   </listitem>
+
   <listitem>
     <para><option>-delay</option> или кнопки <keycap>+</keycap>/<keycap>-</keycap>
     во время выполнения для подстройки задержки</para>
@@ -104,6 +109,7 @@
 10% (используйте <option>-fps 27</option> для 30 fps фильмов), или используйте
 фильтр для изменения частоты дискретизации</para>
 </listitem>
+
 <listitem>
 <para>медленная машина (если A-V не около 0, и последнее число в строке статуса
 увеличивается)</para>
@@ -112,23 +118,26 @@
 </itemizedlist>
 </sect2>
 
+
 <sect2 id="bugs-nosound">
 <title>Вообще нет звука</title>
 <itemizedlist>
 <listitem>
 <para>Ваш файл использует неподдерживаемый аудиокодек</para>
-<para>прочтите документацию и помогите нам добавить поддержку для него</para>
+<para>Решение: прочтите документацию и помогите нам добавить поддержку для него</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-nopicture">
 <title>Вообще нет изображения (только простое серое/зелёное окно)</title>
 <itemizedlist>
 <listitem>
 <para>Ваш файл использует неподдерживаемый видеокодек</para>
-<para>J,[jl^ прочтите документацию и помогите нам добавить поддержку для него</para>
+<para>Решение: прочтите документацию и помогите нам добавить поддержку для него</para>
 </listitem>
+
 <listitem>
 <para>
 автоматически выбранный кодек не может декодировать файл, попробуйте выбрать

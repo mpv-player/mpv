@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r14025 -->
+<!-- synced with r20085 -->
 <!-- FIXME: history really should be in the appendix -->
-<sect1 id="history">
+<appendix id="history">
 <title>История</title>
  
 <blockquote><para>
@@ -134,4 +134,4 @@ Windows Media 9, <application>MPlayer</application> - это первый в мире плеер, п
   </para></listitem>
 </itemizedlist>
 </para>
-</sect1>
+</appendix>
