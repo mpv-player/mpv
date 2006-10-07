@@ -5572,7 +5572,7 @@ fi
 if test "$_toolame" = yes ; then
   _def_toolame='#define HAVE_TOOLAME 1'
   _toolame_lib="-ltoolame"
-  _codecmodules="$_codecmodules toolame"
+  _codecmodules="toolame $_codecmodules"
 else
   _def_toolame='#undef HAVE_TOOLAME'
   _nocodecmodules="toolame $_nocodecmodules"
@@ -5594,7 +5594,7 @@ EOF
 fi
 if test "$_twolame" = yes ; then
   _def_twolame='#define HAVE_TWOLAME 1'
-  _codecmodules="$_codecmodules twolame"
+  _codecmodules="twolame $_codecmodules"
 else
   _def_twolame='#undef HAVE_TWOLAME'
   _twolame_lib=""
