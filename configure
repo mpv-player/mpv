@@ -7443,6 +7443,7 @@ HAVE_XVMC_ACCEL = $_xvmc
 
 # for FFmpeg
 SRC_PATH=..
+BUILD_ROOT=..
 LIBPREF=lib
 LIBSUF=.a
 LIB=\$(LIBPREF)\$(NAME)\$(LIBSUF)
