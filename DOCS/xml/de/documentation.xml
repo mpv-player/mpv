@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19973 -->
+<!-- in sync with r20085 -->
 
 <bookinfo id="toc">
   <title><application>MPlayer</application> - Movie Player</title>
@@ -207,7 +207,6 @@
         weitergegeben werden unter den Bedingungen der GNU General Public License Version 2.
       </para>
 
-      &history.xml;
     </chapter>
 
 &install.xml;
@@ -229,3 +228,4 @@
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
+&history.xml;
