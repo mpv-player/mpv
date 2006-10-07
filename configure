@@ -8423,14 +8423,6 @@ If you suspect a bug, please read DOCS/HTML/$_doc_lang/bugreports.html.
 
 EOF
 
-if test "$_vidix" = no ; then
-cat <<EOF
-You've disabled VIDIX. Although it would be better to PORT it instead.
-Have a look at the documentation for supported cards!
-
-EOF
-fi
-
 if test "$_warn_CFLAGS" = yes; then
   cat <<EOF
 
