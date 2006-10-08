@@ -175,8 +175,12 @@ fc_instance_t* fontconfig_init(const char* dir, const char* family, const char* 
 	if (FcDirCacheValid((const FcChar8 *)dir) == FcFalse)
 	{
 		mp_msg(MSGT_GLOBAL, MSGL_INFO, "[ass] Updating font cache\n");
+		if (FcGetVersion() >= 20390 && FcGetVersion() < 20400)
+			mp_msg(MSGT_GLOBAL, MSGL_WARN,
+			       "[ass] beta versions of fontconfig are not supported\n"
+			       "      update before reporting any bugs\n");
 		// FontConfig >= 2.4.0 updates cache automatically in FcConfigAppFontAddDir()
-		if (FcGetVersion() < 20400) {
+		if (FcGetVersion() < 20390) {
 			FcFontSet* fcs;
 			FcStrSet* fss;
 			fcs = FcFontSetCreate();
