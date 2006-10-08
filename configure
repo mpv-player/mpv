@@ -3759,17 +3759,25 @@ EOF
   fi
 fi
 
+dfb_version() {
+	expr $1 \* 65536 + $2 \* 256 + $3
+}
+
 if test "$_directfb" = yes; then
   cat > $TMPC << EOF
 #include <directfb_version.h>
 int
-dfb_ver = DIRECTFB_MAJOR_VERSION DIRECTFB_MINOR_VERSION DIRECTFB_MICRO_VERSION
+dfb_ver = DIRECTFB_MAJOR_VERSION.DIRECTFB_MINOR_VERSION.DIRECTFB_MICRO_VERSION
 ;
 EOF
   if $_cc -E $TMPC $_inc_extra > "$TMPO"; then
-    _directfb_version=`sed -n 's/^dfb_ver[^1-9]*\(.*\)/\1/p' "$TMPO" | tr -d '() '`
-    _def_directfb_version="#define DIRECTFBVERSION $_directfb_version"
-    if test "$_directfb_version" -ge 913; then
+    _directfb_version=`sed -n 's/^dfb_ver[^0-9]*\(.*\)/\1/p' "$TMPO" | tr -d '()'`
+    _dfb_major=`echo $_directfb_version | cut -d . -f 1`
+    _dfb_minor=`echo $_directfb_version | cut -d . -f 2`
+    _dfb_micro=`echo $_directfb_version | cut -d . -f 3`
+    _dfb_version=$(dfb_version $_dfb_major $_dfb_minor $_dfb_micro)
+    if test "$_dfb_version" -ge $(dfb_version 0 9 13); then
+	_def_directfb_version="#define DIRECTFBVERSION $_dfb_version"
 	_res_comment="$_directfb_version"
     else
         _def_directfb_version='#undef DIRECTFBVERSION'
@@ -3785,13 +3793,13 @@ echores "$_directfb"
 
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
-  if test "$_directfb_version" -ge 913; then
+  if test "$_dfb_version" -ge $(dfb_version 0 9 13); then
     _vosrc="$_vosrc vo_directfb2.c"
     _vomodules="directfb $_vomodules"
     _ld_directfb='-ldirectfb'
   fi
 
-  if test "$_directfb_version" -ge 915; then
+  if test "$_dfb_version" -ge $(dfb_version 0 9 15); then
     _vosrc="$_vosrc vo_dfbmga.c"
     _vomodules="dfbmga $_vomodules"
   fi

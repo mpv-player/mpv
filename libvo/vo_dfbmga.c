@@ -25,6 +25,8 @@
 /* directfb includes */
 #include <directfb.h>
 
+#define DFB_VERSION(a,b,c) (((a)<<16)|((b)<<8)|(c))
+
 /* other things */
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,13 +110,13 @@ static int is_g200;
 *	    vo_dfbmga         *
 ******************************/
 
-#if DIRECTFBVERSION < 918
+#if DIRECTFBVERSION < DFB_VERSION(0,9,18)
  #define DSPF_ALUT44 DSPF_LUT8
  #define DLBM_TRIPLE ~0
  #define DSFLIP_ONSYNC 0
 #endif
 
-#if DIRECTFBVERSION < 916
+#if DIRECTFBVERSION < DFB_VERSION(0,9,16)
  #define DSPF_ARGB1555 DSPF_RGB15
 #endif
 
@@ -149,7 +151,7 @@ pixelformat_name( DFBSurfacePixelFormat format )
 	  return "I420";
      case DSPF_ALUT44:
 	  return "ALUT44";
-#if DIRECTFBVERSION > 921
+#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case DSPF_NV12:
           return "NV12";
      case DSPF_NV21:
@@ -181,7 +183,7 @@ imgfmt_to_pixelformat( uint32_t format )
      case IMGFMT_I420:
      case IMGFMT_IYUV:
           return DSPF_I420;
-#if DIRECTFBVERSION > 921
+#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case IMGFMT_NV12:
           return DSPF_NV12;
      case IMGFMT_NV21:
@@ -206,7 +208,7 @@ get_layer_by_name( DFBDisplayLayerID id,
 {
      struct layer_enum *l = (struct layer_enum *) data;
 
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
      /* We have desc.name so use it */
      if (!strcmp( l->name, desc.name ))
           if ((l->res = dfb->GetDisplayLayer( dfb, id, l->layer )) == DFB_OK)
@@ -237,7 +239,7 @@ preinit( const char *arg )
      use_crtc2 = 1;
      use_spic = 1;
      field_parity = -1;
-#if DIRECTFBVERSION > 917
+#if DIRECTFBVERSION > DFB_VERSION(0,9,17)
      buffermode = DLBM_TRIPLE;
      osd_max = 4;
 #else
@@ -479,7 +481,7 @@ preinit( const char *arg )
 
      if (use_crtc2) {
           struct layer_enum l = {
-#if DIRECTFBVERSION > 920
+#if DIRECTFBVERSION > DFB_VERSION(0,9,20)
                "Matrox CRTC2 Layer",
 #else
                "Matrox CRTC2",
@@ -694,7 +696,7 @@ config( uint32_t width, uint32_t height,
           dlc.buffermode = buffermode;
           dlc.options    = DLOP_NONE;
 
-#if DIRECTFBVERSION > 916
+#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
           if (field_parity != -1) {
                dlc.options |= DLOP_FIELD_PARITY;
           }
@@ -742,7 +744,7 @@ config( uint32_t width, uint32_t height,
                return -1;
           }
 
-#if DIRECTFBVERSION > 916
+#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
           if (field_parity != -1)
                crtc2->SetFieldParity( crtc2, field_parity );
 #endif
@@ -822,7 +824,7 @@ config( uint32_t width, uint32_t height,
           dlc.pixelformat = DSPF_ALUT44;
           dlc.buffermode  = buffermode;
 
-#if DIRECTFBVERSION > 916
+#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
           dlc.flags      |= DLCONF_OPTIONS;
           dlc.options     = DLOP_ALPHACHANNEL;
 #endif
@@ -903,7 +905,7 @@ query_format( uint32_t format )
                     return 0;
           case IMGFMT_YUY2:
                break;
-#if DIRECTFBVERSION > 921
+#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
           case IMGFMT_NV12:
           case IMGFMT_NV21:
                if (!use_bes || use_crtc2)
@@ -1012,7 +1014,7 @@ draw_alpha( int x0, int y0,
 			      ((uint8_t *) dst) + pitch * y0 + 2 * x0 + 1,
                               pitch );
 	  break;
-#if DIRECTFBVERSION > 921
+#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      case DSPF_NV12:
      case DSPF_NV21:
 #endif
@@ -1050,7 +1052,7 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
      y /= 2;
      h /= 2;
 
-#if DIRECTFBVERSION > 921
+#if DIRECTFBVERSION > DFB_VERSION(0,9,21)
      if (frame_format == DSPF_NV12 || frame_format == DSPF_NV21) {
           memcpy_pic( dst + pitch * y + x, src[1],
                       w, h, pitch, stride[1] );
@@ -1090,7 +1092,7 @@ blit_to_screen( void )
      DFBRectangle *srect = NULL;
 
      if (use_bes) {
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping && !use_crtc2)
                bes->WaitForSync( bes );
 #endif
@@ -1101,7 +1103,7 @@ blit_to_screen( void )
      }
 
      if (use_crtc2) {
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
           if (vo_vsync && !flipping)
                crtc2->WaitForSync( crtc2 );
 #endif

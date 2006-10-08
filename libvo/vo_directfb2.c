@@ -25,6 +25,8 @@
 
 #include <directfb.h>
 
+#define DFB_VERSION(a,b,c) (((a)<<16)|((b)<<8)|(c))
+
 // other things
 
 #include <stdio.h>
@@ -50,7 +52,7 @@
 #define min(x,y) (((x)<(y))?(x):(y))
 #endif
 
-#if DIRECTFBVERSION > 917
+#if DIRECTFBVERSION > DFB_VERSION(0,9,17)
 // triple buffering
 #define TRIPLE 1
 #endif
@@ -273,7 +275,7 @@ static int preinit(const char *arg)
 
         DFBCHECK (DirectFBCreate (&dfb));
 
-#if DIRECTFBVERSION < 917
+#if DIRECTFBVERSION < DFB_VERSION(0,9,17)
         if (DFB_OK != dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN)) {
             mp_msg(MSGT_VO, MSGL_WARN,"DirectFB: Warning - cannot swith to fullscreen mode");
         };
@@ -318,7 +320,7 @@ DFBSurfacePixelFormat convformat(uint32_t format)
 	    case IMGFMT_BGR24: return  DSPF_RGB24; break;
             case IMGFMT_RGB16: return  DSPF_RGB16; break;
             case IMGFMT_BGR16: return  DSPF_RGB16; break;
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
             case IMGFMT_RGB15: return  DSPF_ARGB1555; break;
             case IMGFMT_BGR15: return  DSPF_ARGB1555; break;
 #else
@@ -568,7 +570,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	} // vm end
 
 // just for sure clear primary layer
-#if DIRECTFBVERSION > 913
+#if DIRECTFBVERSION > DFB_VERSION(0,9,13)
         ret = dfb->GetDisplayLayer( dfb, DLID_PRIMARY, &layer);
 	if (ret==DFB_OK) {
 	    ret = layer->GetSurface(layer,&primary);
@@ -609,7 +611,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
         DFBCHECK (dfb->GetDisplayLayer( dfb, params.id, &layer));
 	
-#if DIRECTFBVERSION > 916
+#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
         mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Config - switching layer to exclusive mode\n");
 	ret = layer->SetCooperativeLevel (layer, DLSCL_EXCLUSIVE);
 
@@ -667,7 +669,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		    case DSPF_RGB32: bpp=32;break;
     		    case DSPF_RGB24: bpp=24;break;
 	            case DSPF_RGB16: bpp=16;break;
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
     		    case DSPF_ARGB1555: bpp=15;break;
 #else
         	    case DSPF_RGB15: bpp=15;break;
@@ -680,7 +682,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		    case DSPF_RGB32:
     		    case DSPF_RGB24:
 	            case DSPF_RGB16:
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
     		    case DSPF_ARGB1555:
 #else
         	    case DSPF_RGB15:
@@ -751,7 +753,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	}
 #endif
 
-#if DIRECTFBVERSION > 916
+#if DIRECTFBVERSION > DFB_VERSION(0,9,16)
         if (field_parity != -1) {
 	    dlc.flags = DLCONF_OPTIONS;
 	    ret = layer->GetConfiguration( layer, &dlc );
@@ -790,7 +792,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 // test surface for flipping	
 	DFBCHECK(primary->GetCapabilities(primary,&caps));
-#if DIRECTFBVERSION > 913
+#if DIRECTFBVERSION > DFB_VERSION(0,9,13)
 	primary->Clear(primary,0,0,0,0xff);
 #endif	
         flipping = 0;
@@ -802,7 +804,7 @@ static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	    ret = primary->Flip(primary,NULL,0);
 	    if (ret==DFB_OK) { 
 		flipping = 1; 
-#if DIRECTFBVERSION > 913
+#if DIRECTFBVERSION > DFB_VERSION(0,9,13)
 		primary->Clear(primary,0,0,0,0xff);
 #ifdef TRIPLE
 // if we have 3 buffers clean once more
@@ -1487,7 +1489,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
                 case DSPF_RGB16:
                         vo_draw_alpha_rgb16(w,h,src,srca,stride,((uint8_t *) dst)+pitch*y0 + 2*x0,pitch);
                         break;
-#if DIRECTFBVERSION > 915
+#if DIRECTFBVERSION > DFB_VERSION(0,9,15)
                 case DSPF_ARGB1555:
 #else
                 case DSPF_RGB15:
