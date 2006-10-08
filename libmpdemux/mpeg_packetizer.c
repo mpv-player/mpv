@@ -141,7 +141,7 @@ int
 send_mpeg_pes_packet (unsigned char *data, int len, int id, uint64_t pts,
                       int type, int my_write (unsigned char *data, int len))
 {
-    send_mpeg_pes_packet_ll(data, len, id, pts, type, NULL, 0, 0, my_write);
+    return send_mpeg_pes_packet_ll(data, len, id, pts, type, NULL, 0, 0, my_write);
 }
 
 
