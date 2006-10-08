@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "libmpdemux/mpeg_hdr.h"
 
 #include "vd_internal.h"
 
@@ -39,6 +40,22 @@ static void uninit(sh_video_t *sh){
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi;
     static vo_mpegpes_t packet;
+    mp_mpeg_header_t picture;
+    const unsigned char *d = data;
+
+    if(len>10 && !d[0] && !d[1] && d[2]==1 && d[3]==0xB3) {
+        float old_aspect = sh->aspect;
+        int oldw = sh->disp_w, oldh = sh->disp_h;
+        mp_header_process_sequence_header(&picture, &d[4]);
+        sh->aspect = mpeg12_aspect_info(&picture);
+        sh->disp_w = picture.display_picture_width;
+        sh->disp_h = picture.display_picture_height;
+        if(sh->aspect != old_aspect || sh->disp_w != oldw || sh->disp_h != oldh) {
+            if(!mpcodecs_config_vo(sh, sh->disp_w,sh->disp_h,IMGFMT_MPEGPES))
+                return 0;
+        }
+    }
+    
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, 0, sh->disp_w, sh->disp_h);
     packet.data=data;
     packet.size=len;
