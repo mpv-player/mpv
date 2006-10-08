@@ -172,7 +172,7 @@ static int control(uint32_t request, void *data, ...){
       va_start(ap, data);
       value = va_arg(ap, int);
       va_end(ap);
-      return vidix_control(request, data, (int *) value);
+      return vidix_control(request, data, value);
     }
   case VOCTRL_GET_EQUALIZER:
     {
