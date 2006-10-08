@@ -745,6 +745,7 @@ static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 			int r = send( fd, http_hdr->buffer+i, http_hdr->buffer_size-i, 0 );
 			if(r <0) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,MSGTR_MPDEMUX_ASF_SocketWriteError,strerror(errno));
+				http_free( http_hdr );
 				return -1;
 			}
 			i += r;
