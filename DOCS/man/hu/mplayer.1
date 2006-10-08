@@ -1,4 +1,4 @@
-.\" Synced with r20028
+.\" Synced with r20061
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 09. 17." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 10. 09." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -365,6 +365,19 @@ Film ablak eredeti méretének duplájára állítása.
 Teljes képernyõs lejátszás (lásd még a \-fs\-t).
 .IPs "command + [ és command + ]"
 Film ablak alpha-jának beállítása.
+.RE
+.PD 1
+.PP
+.RS
+(A következõ billentyûk csak az sdl kimeneti videó vezérlõvel mûködnek.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "c\ \ \ \ "
+Léptetés a használható teljes képernyõs módok között.
+.IPs "n\ \ \ \ "
+Eredeti mód visszaállítása.
 .RE
 .PD 1
 .PP
@@ -2417,7 +2430,7 @@ Beállítja a mixer csatornát (alapértelmezett: pcm).
 .PD 1
 .
 .TP
-.B "sdl\ \ \ \ "
+.B sdl (csak SDL)
 platform független SDL (Simple Directmedia Layer) függvénykönyvtár
 audió kimeneti vezérlõje
 .PD 0
@@ -9006,7 +9019,7 @@ A konstans bitráta ezen opció és a vbv_maxrate kombinálásával érhetõ el,
 jelentõs minõségromlás árán.
 .
 .TP
-.B qp_constant=<0\-51>
+.B qp=<0\-51>
 Ez kiválasztja a P-kockákhoz használt kvantálót.
 Az I- és B-kockák gyakran ebbõl az értékbõl számítódnak az ip_factor és
 pb_factor segítségével.
@@ -9170,8 +9183,8 @@ Nagyon kevés idõt igényel összehasonlítva a minõségjavító hatásával,
 ezért nem javasolt kikapcsolni.
 .
 .TP
-.B deblockalpha=<-6\-6>
-A deblocking szûrõ AlphaC0 paramétere (alapértelmezett: 0).
+.B deblock=<-6\-6>,<-6\-6>
+Az elsõ paraméter az AlphaC0 (alapértelmezett: 0).
 Ez beállítja a H.264 deblocking szûrõjének in-loop küszöbértékeit.
 Elsõsorban ez a paraméter szabályozza a változtatás maximális mértékét,
 amit a szûrõ egy pixel-en okozhat.
@@ -9180,17 +9193,15 @@ sarkok között.
 A pozitív értékek csökkentik a blokkosodási mellékhatásokat, de
 elmaszatolják a részleteket.
 .br
+A második paraméter a Beta (alapértelmezett: 0).
+Ez a részletességi korlátot befolyásolja.
+A nagyon nagy részletességû blokkok nem lesznek szûrve, mivel a szûrõ
+okozta elmosás jobban észrevehetõbb lenne, mint az eredeti blokkosodás.
+.br
 A szûrõ alapértelmezett viselkedése majdnem mindig optimális minõséget
 biztosít, így a legjobb vagy magára hagyni vagy apró változtatásokat
 eszközölni. Azonban ha a forrás anyag már tartalmaz némi blokkosodást
 vagy zajt, ami el szeretnél távolítani, jobb egy kicsit feltolni.
-.
-.TP
-.B deblockbeta=<-6\-6>
-A deblocking szûrõ béta paramétere (alapértelmezett: 0).
-A részletességi küszöböt érinti.
-Nagyon részletes blokkok nem lesznek kiszûrve, mivel a szûrõ által
-végzett elmosás sokkal észrevehetõbb, mint az eredeti blokkosodás.
 .
 .TP
 .B (no)cabac
@@ -9209,7 +9220,7 @@ maximális kvantáló (alapértelmezett: 51)
 .TP
 .B qp_step=<1\-50> (ABR vagy két lépéses)
 maximális érték, amennyivel a kvantáló növekedhet/csökkenhet a
-kockák között (alapértelmezett: 2)
+kockák között (alapértelmezett: 4)
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR vagy két lépéses)
@@ -9261,8 +9272,7 @@ a nagyobbak finomabb váltásokra kényszerítik.
 .
 .TP
 .B zones=<zóna0>[/<zóna1>[/...]]
-Felhasználó által megadott minõség az egyes részekhez (vége, feliratok, ...)
-(ABR vagy két lépéses).
+Felhasználó által megadott minõség az egyes részekhez (vége, feliratok, ...).
 Minden zóna egy <kezdõ-kocka>,<záró-kocka>,<opció> hármas, ahol az opció
 .PD 0
 .RSs
@@ -9280,28 +9290,27 @@ túlcsordulás kompenzáció és a qp_min/qp_max is.
 .RE
 .
 .TP
-.B direct_pred=<0\-3>
+.B direct_pred=<név>
 Megállapítja a B-kockákban lévõ direkt makroblokkok mozgás becslésének
 típusát.
 .PD 0
 .RSs
-.IPs 0
-Nincs: Nem lesznek felhasználva a direkt makroblokkok.
-.IPs 1
-Térbeli: A mozgásvektorok a szomszédos blokkokból lesznek extrapolálva.
+.IPs none
+Nem lesznek felhasználva a direkt makroblokkok.
+.IPs spatial
+A mozgásvektorok a szomszédos blokkokból lesznek extrapolálva.
 (alapértelmezett)
-.IPs 2
-Idõbeli: A mozgásvektorok a következõ P-kockából lesznek interpolálva.
-.IPs 3
-Auto: A codec minden egyes kockánál választ a térbeli és az idõbeli közül.
-
+.IPs temporal
+A mozgásvektorok a következõ P-kockából lesznek interpolálva.
+.IPs auto
+A codec minden egyes kockánál választ a térbeli és az idõbeli közül.
 .RE
 .PD 1
 .RS
 A térbeli és idõbeli nagyjából ugyan olyan sebességûek és PSNR-rel
 járnak, a választás a videó tartalmától függ.
-Az auto kicsit jobb, de lassabb.
-A direct_pred=0 mindkettõnél lassabb és rosszabb minõségû.
+Az auto a leghatásosabb ha több lépésben használják.
+A direct_pred=none lassabb is és rosszabb minõségû.
 .RE
 .
 .TP
@@ -9314,44 +9323,37 @@ ideiglenes helyzetébõl számítódnak ki.
 bframes > 1 szükséges.
 .
 .TP
-.B (no)i4x4
-További i4x4 típusú makroblokkok használata (alapértelmezett: engedélyezve).
-Ezen opció nélkül a P- és B-kockák csak i16x16 és a
-lentebb megadott inter típusú blokkokat fogják használni.
-.
-.TP
-.B (no)i8x8
-További i8x8 típusú makroblokkok használata (alapértelmezett: engedélyezve).
-Ennek az opciónak nincs hatása, hacsak a 8x8dct nincs engedélyezve.
-.
-.TP
-.B (no)b8x8mv
-További b16x8, b8x16, b8x8 típusú makroblokkok használata (alapértelmezett: engedélyezve).
-Ezen opció nélkül a B-kockák csak i16x16, i8x8, i4x4,
-b16x16, skip és direct típusúak lehetnek.
-Lásd a 4x4mv-t a részletekért.
-.
-.TP
-.B (no)8x8mv
-További p16x8, p8x16, p8x8 típusú makroblokkok használata (alapértelmezett: engedélyezve).
-Ezen opció nélkül a P-kockák csak i16x16, i8x8, i4x4,
-p16x16 és skip típusúak lehetnek.
-Ez az opció csak a kísérletezés miatt van biztosítva.
-Nem javasolt a 8x8mv letiltása valós kódolásban.
-.
-.TP
-.B (no)4x4mv
-További p8x4, p4x8, p4x4 típusú makroblokkok használata (alapértelmezett: letiltva).
-Ezen opció nélkül a P-kockák csak i16x16, i8x8, i4x4,
-p16x16, p16x8, p8x16, p8x8 és skip típusúak lehetnek.
-8x8mv szükséges.
+.B partitions=<list>
+Engedélyez néhány opcionális makroblokk típust (alapértelmezett: p8x8,b8x8,i8x8,i4x4).
+.PD 0
+.RSs
+.IPs p8x8
+Engedélyezi a p16x8, p8x16, p8x8 típusokat.
+.IPs p4x4
+Engedélyezi a p8x4, p4x8, p4x4 típusokat.
+A p4x4 csak subq >= 5 mellett javasolt és csak alacsony felbontásnál.
+.IPs b8x8
+Engedélyezi a b16x8, b8x16, b8x8 típusokat.
+.IPs i8x8
+Engedélyezi az i8x8 típust.
+Az i8x8-nak nincs hatása, csak ha a 8x8dct engedélyezett.
+.IPs i4x4
+Engedélyezi az i4x4 típust.
+.IPs all
+Engedélyezi az összes felsorolt típust.
+.IPs none
+Letiltja az összes felsorolt típust.
+.RE
+.PD 1
+.RS
+Ettõl az opciótól függetlenül a p16x16, b16x16 és i16x16 makroblokk típusok
+mindig engedélyezettek.
 .br
 Az ötlet az, hogy megtaláljuk a kép egy bizonyos területét legjobban
 leíró típust és méretet.
 Például egy globális pan-t jobban reprezentál egy 16x16-os blokk, míg
 az apró, mozgó objektumokat a kisebb blokkok ábrázolják jól.
-.br
-Az 4x4mv csak subq >= 3 mellett javasolt.
+.RE
 .
 .TP
 .B (no)8x8dct
@@ -9361,18 +9363,18 @@ Emelett engedélyezi az i8x8 makroblokk típust is.
 Ezen opció nélkül 4x4 DCT lesz használva.
 .
 .TP
-.B me=<1\-4>
+.B me=<név>
 Teljes pixeles mozgás becslési algoritmus kiválasztása.
 .PD 0
 .RSs
-.IPs 1
+.IPs dia
 rombusz keresés, 1-es sugár (gyors)
-.IPs 2
+.IPs hex
 hatszög keresés, 2-es sugár (alapértelmezett)
-.IPs 3
+.IPs umh
 páratlan többszörös-hatszög keresés (lassú)
-.IPs 4
-alapos keresés (nagyon lassú és nem jobb, mint a 3)
+.IPs esa
+alapos keresés (nagyon lassú és nem jobb, mint az umh)
 .RE
 .PD 1
 .
@@ -9452,13 +9454,23 @@ ráta-torzító optimális kvantálás
 .PD 0
 .RSs
 .IPs 0
-letiltva
+letiltva (alapértelmezett)
 .IPs 1
-csak a végsõ kódoláshoz engedélyezi (alapértelmezett)
+csak a végsõ kódoláshoz engedélyezi
 .IPs 2
 minden mód döntésnél engedélyezi (lassú, subq>=6 szükséges)
 .RE
 .PD 1
+.
+.TP
+.B deadzone_inter=<0\-32>
+Beállítja az inter luma kvantálás holtterét a nem-rácsos kvantáláshoz
+(alapértelmezett: 21).
+.
+.TP
+.B deadzone_intra=<0\-32>
+Beállítja az intra luma kvantálás holtterét a nem-rácsos kvantáláshoz
+(alapértelmezett: 11).
 .
 .TP
 .B (no)fast_pskip
@@ -9561,11 +9573,15 @@ akkor ez az opció egy figyelmeztetést ad és engedélyezi a szeletelést, de
 letiltja a többszálúsítást.
 .
 .TP
-.B (no)globalheader
+.B (no)global_header
 Az SPS és a PPS csak egyszer fog megjelenni, a bitfolyam elején
 (alapértelmezett: letiltva).
 Néhány lejátszó, mint pl. a Sony PSP, igényli ezt az opciót.
 Alapértelmezésként az SPS és a PPS minden IDR kocka elõtt ismétlõdik.
+.
+.TP
+.B (no)interlaced
+Videó tartalmának átlapoltként történõ kezelése.
 .
 .TP
 .B log=<-1\-3>
@@ -9595,6 +9611,12 @@ A 'Y', 'U', 'V', és 'Avg' PSNR mezõk az összegzésben nem matematikaiak
 Csak a JM referencia codec-kel való összehasonlítás kedvéért lettek megtartva.
 Bármilyen más célra kérjük használd vagy a 'Global' PSNR-t vagy a kockánkénti
 PSNR-eket, melyeket a log=3 ír ki.
+.
+.TP
+.B (no)ssim
+Kiírja a Structural Similarity Metric eredményeket.
+Ez a PSNR egyik alternatívája, ami esetlegesen jobban összefügg a tömörített
+videó észrevehetõ minõségével.
 .
 .TP
 .B (no)visualize
