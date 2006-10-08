@@ -1353,9 +1353,6 @@ vobsub_out_open(const char *basename, const unsigned int *palette,
     filename = malloc(strlen(basename) + 5);
     if (filename) {
 	result = malloc(sizeof(vobsub_out_t));
-	result->fsub = NULL;
-	result->fidx = NULL;
-	result->aid = 0;
 	if (result) {
 	    result->aid = index;
 	    strcpy(filename, basename);
