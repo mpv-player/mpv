@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19738 -->
+<!-- synced with r20085 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -175,7 +175,6 @@ Az <application>MPlayer</application> és <application>MEncoder</application>
 a GNU General Public License v2 értelmében terjeszthető.
 </para>
 
-&history.xml;
 </chapter>
 
 &install.xml;
@@ -197,4 +196,4 @@ a GNU General Public License v2 értelmében terjeszthető.
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
-&users-vs-dev.xml;
+&history.xml;

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19829 -->
+<!-- synced with r19975 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -28,25 +28,17 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - javasolt verzió: <emphasis role="bold">2.11.x</emphasis>.
+  <emphasis role="bold">binutils</emphasis> - A javasolt verzió a <emphasis role="bold">2.11.x</emphasis>.
   Ez a program felelős az MMX/ 3DNow!/stb utasítások generálásáért,
   így nagyon fontos!
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">gcc</emphasis> - javasolt verziók: <emphasis role="bold">2.95.3</emphasis>
-  (esetleg <emphasis role="bold">2.95.4</emphasis>) és <emphasis role="bold">3.2+</emphasis>.
-  <emphasis role="bold">SOHA</emphasis> ne használd a 2.96-ot vagy a 3.0.x-et! Hibás
-  <application>MPlayer</application> kódot generálnak. Ha úgy döntesz, hogy lecseréled
-  a 2.96-os gcc-det, csak azért ne tegyél fel 3.x-est, mert újabb! A 3.x korai kiadásai
-  még több hibát tartalmaztak, mint a 2.96. Tehát vagy állj vissza 2.95.x-re
-  (és cseréld le a <systemitem class="library">libstdc++</systemitem>-t is,
-  más programoknak szükségük lehet rá) vagy ne frissíts/tegyél vissza semmit (de ebben az
-  esetben készülj fel futási problémákra). Ha a 3.x-re szavazol, próbáld a legújabb
-  verziót használni, a korai kiadásoknak számtalan hibájuk volt, így győződj meg róla,
-  hogy legalább 3.1-eset használsz, ami ki lett próbálva és működik.
+  <emphasis role="bold">gcc</emphasis> - A javasolt verziók a <emphasis role="bold">2.95</emphasis>
+  és 3.3+. A 2.96 és 3.0.x hibás kódot generálnak, valamint a 3.1-nek és a 3.2-nek is
+  vannak problémái.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XFree86</emphasis> - javasolt verzió: <emphasis role="bold">mindig a
+  <emphasis role="bold">XFree86</emphasis> - A javasolt verzió <emphasis role="bold">mindig a
   legújabb</emphasis> (4.3). Mindenki ezt akarja, mivel a 4.0.2-es XFree86-tól benne van az
   <link linkend="xv">XVideo</link> kiterjesztés (néhol <emphasis role="bold">Xv</emphasis>-ként
   hivatkoznak rá), ami szükséges a hardveres YUV gyorsítás engedélyezéséhez (gyors képmegjelenítés)
@@ -56,7 +48,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   Néhány videó kártyához nem kell XFree86. A listát lásd lejjebb.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">make</emphasis> - javasolt verzió:
+  <emphasis role="bold">make</emphasis> - A javasolt verzió
   <emphasis role="bold">mindig a legújabb</emphasis> (legalább 3.79.x-es). Ez
   legtöbbször nem olyan fontos.
   </para></listitem>
@@ -81,7 +73,7 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">lame</emphasis> - javasolt, szükséges MP3 audió <application>MEncoder</application>rel
-  történő kódolásához, a javasolt verzió <emphasis>mindig a legújabb</emphasis> (de legalább 3.90).
+  történő kódolásához, az ajánlott verzió <emphasis>mindig a legújabb</emphasis> (de legalább 3.90).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">zlib</emphasis> - javasolt, szükséges a tömörített MOV fejlécekhez és a
@@ -574,9 +566,14 @@ Három fajta időzítési eljárás van az <application>MPlayer</application>ben.
   kapcsoló engedélyezi, de megfelelően beállított kernel kell hozzá.
   Ha 2.4.19pre8 vagy későbbi kernelt használsz, beállíthatod a maximum
   RTC frekvenciát a sima felhasználóknak a <systemitem class="systemname">/proc
-  </systemitem> fájlrendszer segítségével. Használd ez a parancsot az RTC normál
-  felhasználók számára történő engedélyezéséhez:
+  </systemitem> fájlrendszer segítségével. Használd az alábbi két parancs
+  valamelyikét az RTC normál felhasználók számára történő engedélyezéséhez:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
+  <screen>sysctl dev/rtc/max-user-freq=1024</screen>
+  Ezt a beállítást állandósíthatod az utóbbi <filename>/etc/sysctl.conf</filename> fájba
+  történő írásával.
+  </para>
+  <para>
    Az új időzítő eredményét a státusz sorban láthatod.
    Néhány sebesség-léptetéses (speedstep) CPU-val rendelkező
    notebook BIOS-ának energia takarékossági funkciói rosszul működnek együtt az

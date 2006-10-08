@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19685 -->
+<!-- synced with r20041 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -311,7 +311,7 @@ Az eredmény fájlnak sokkal jobb lesz a képminősége. Ha most hallasz erről előszö
 nézz meg pár a neten elérhető leírást.
 </para>
 
-<example>
+<example id="copy_audio_track">
 <title>audió sáv másolása</title>
 <para>
 Egy DVD második sávjának két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az
@@ -323,7 +323,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy 
 </para>
 </example>
 
-<example>
+<example id="encode_audio_track">
 <title>audió sáv kódolása</title>
 <para>
 Egy DVD második sávjának két menetes kódolása MPEG-4 (&quot;DivX&quot;) AVI-ba az
@@ -361,14 +361,14 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
   lejátszása is.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Audió</emphasis>: a mintavételezési frekvenciának 24khz-nek
-  kell lennie az MPEG-4 videóknál és 48khz-nek a H.264-nél.
+  <emphasis role="bold">Audió</emphasis>: a mintavételezési frekvenciának 24kHz-nek
+  kell lennie az MPEG-4 videóknál és 48kHz-nek a H.264-nél.
 </para></listitem>
 </itemizedlist>
 </para>
 
-<example>
-<title>Example</title>
+<example id="encode_for_psp">
+<title>kódolás PSP-be</title>
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
@@ -643,7 +643,7 @@ Mindkét esetben az éppen futó felirat hozzáíródik a <filename>.idx</filename>
 ezeket le kell törölnöd, mielőtt nekiállnál.
 </para>
 
-<example>
+<example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
 <title>Két felirat másolása egy DVD-ről két menetes kódolás közben</title>
 <screen>
 rm subtitles.idx subtitles.sub
@@ -652,7 +652,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 --></screen>
 </example>
 
-<example>
+<example id="copying_a_french_subtitle_from_an_mpeg_file">
 <title>Francia felirat másolása egy MPEG fájlból</title>
 <screen>
 rm subtitles.idx subtitles.sub

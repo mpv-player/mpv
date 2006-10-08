@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19043 -->
+<!-- synced with r20043 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2616,7 +2616,7 @@ Egy példa AC3 tömörítéssel:
 <para>
   Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es példa videón
   teszteltük, a cél bitráta 900kbps volt, a gép pedig egy
-  AMD-64 3400+ 2400 Mhz-en 64 bites módban.
+  AMD-64 3400+ 2400 MHz-en 64 bites módban.
   Mindegyik kódolási beállítás tartalmazza a kódolási sebességet (képkocka per
   másodpercben) és a PSNR veszteséget (dB-ben) a "nagyon jó minőséghez"
   viszonyítva.
@@ -3341,7 +3341,7 @@ codec-kal</title>
 <para>
   Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es példa videón
   teszteltük, a cél bitráta 900kbps volt, a gép pedig egy
-  AMD-64 3400+ 2400 Mhz-en 64 bites módban.
+  AMD-64 3400+ 2400 MHz-en 64 bites módban.
   Mindegyik kódolási beállítás tartalmazza a kódolási sebességet (képkocka per
   másodpercben) és a PSNR veszteséget (dB-ben) a "nagyon jó minőséghez"
   viszonyítva.
@@ -3855,7 +3855,7 @@ codec-kal</title>
 <para>
   Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es minta
   videón teszteltük, a cél bitráta 900kbps volt, a gép pedig egy AMD-64 3400+
-  2400 Mhz-en, 64 bit-es módban.
+  2400 MHz-en, 64 bit-es módban.
   Mindegyik kódolási beállítás tartalmazza a kódolási sebességet (képkocka per
   másodpercben) és a PSNR veszteséget (dB-ben) a "nagyon jó minőséghez"
   viszonyítva.

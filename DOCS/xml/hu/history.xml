@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r14025 -->
-<!-- FIXME: history really should be in the appendix -->
-<sect1 id="history">
+<!-- synced with r20085 -->
+<appendix id="history">
 <title>Történelem</title>
  
 <blockquote><para>
@@ -110,4 +109,4 @@ a képminőséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...
   </para></listitem>
 </itemizedlist>
 </para>
-</sect1>
+</appendix>

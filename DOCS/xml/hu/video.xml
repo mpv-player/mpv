@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19832 -->
+<!-- synced with r20054 -->
 <chapter id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -638,64 +638,6 @@ Az SDL videó kimenet támogatja a feliratok megjelenítését a film alatt, a
 (ha van) fekete soron.
 </para>
 
-<variablelist>
-<title>Számos parancssori kapcsoló van az SDL-hez:</title>
-<varlistentry>
-  <term><option>-vo sdl:driver=<replaceable>név</replaceable></option></term>
-  <listitem><simpara>
-    előírja a használni kívánt SDL videó vezérlőt (pl. <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:<replaceable>name</replaceable></option></term>
-  <listitem><simpara>
-    előírja a használni kívánt SDL audió vezérlőt (pl. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>artsc</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-    letiltja a XVideo hardveres gyorsítását
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-    megpróbálja kikényszeríteni az XVideo gyorsítást
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table>
-<title>Csak SDL alatt használható billentyűk</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Gomb</entry><entry>Tevékenység</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-    váltás az elérhető teljes képernyős módok között
-    </entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-    váltás normál módra
-    </entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>Ismert hibák:</title>
-<listitem><simpara>
-  Az sdl:driver=aalib konzol vezérlő alatt leütött billentyűk a végtelenségig
-  ismétlődnek. (Használd a <option>-vo aa</option>-t!) Ez egy SDL hiba, nem
-  tudunk segíteni rajta (tesztelve SDL 1.2.1-el).
-  </simpara></listitem>
-<listitem><simpara>
-  NE HASZNÁLD AZ SDL-T GUI-VAL! Nem úgy működik, ahogy kellene neki.
-  </simpara></listitem>
-</itemizedlist>
 </sect2>
 
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19634 -->
+<!-- synced with r20051 -->
 <chapter id="radio">
 <title>Rádió</title>
 
@@ -78,8 +78,8 @@ egy line-in kábelt és nem kapcsolod ki a line-in némítást).
 <para>
 Bemenet szabványos V4L-ről (line-in kábellel, mentés kikapcsolva):
 <screen>
-mplayer radio://104.4<!--
---></screen>
+mplayer radio://104.4
+</screen>
 </para>
 </informalexample>
 
@@ -88,8 +88,8 @@ mplayer radio://104.4<!--
 Bemenet szabványos V4L-ről (line-in kábellel, mentés kikapcsolva,
 V4Lv1 interfész):
 <screen>
-mplayer -radio driver=v4l radio://104.4<!--
---></screen>
+mplayer -radio driver=v4l radio://104.4
+</screen>
 </para>
 </informalexample>
 
@@ -97,8 +97,8 @@ mplayer -radio driver=v4l radio://104.4<!--
 <para>
 A csatorna listán második csatorna lejátszása:
 <screen>
-mplayer -radio channels=104.4=Sibir,103.9=Maximm  radio://2<!--
---></screen>
+mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
+</screen>
 </para>
 </informalexample>
 
@@ -108,12 +108,11 @@ Hang átadása a PCI buszon a rádió kártya belső ADC-jéből.
 Ebben a példában a tuner második hangkártyaként szerepel
 (ALSA device hw:1,0). Az saa7134-alapú kártyákhoz vagy az
 saa7134-alsa vagy az saa7134-oss modult be kell tölteni.
-<note><para>Ha ALSA eszköz neveket használsz, a kettőspontokat
-egyenlőség jelekkel kell helyettesíteni, a periódusokat vesszők
-választják el.
 <screen>
-mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm  radio://2/capture<!--
---></screen>
+mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm radio://2/capture
+</screen>
+<note><para>Ha ALSA eszköz neveket használsz, a kettőspontokat egyenlőség
+jelekkel kell helyettesíteni, a periódusokat vesszők választják el.
 </para></note>
 </para>
 </informalexample>

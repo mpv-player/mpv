@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19828 -->
+<!-- synced with r20041 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -256,7 +256,7 @@ parancs írja ki, az elérhető parancsok listáját pedig az
 <command>mplayer -input cmdlist</command> paranccsal kapod meg.
 </para>
 
-<example>
+<example id="input_control_file">
 <title>Egy példa bemeneti vezérlő fájl</title>
 <programlisting>
 ##
