@@ -1428,7 +1428,7 @@ static int parse_obj_params(m_option_t* opt,char *name,
     return M_OPT_INVALID;
   
   desc = p->desc;
-  r = get_obj_params(name,desc->name,cpy,desc,p->separator,&opts);
+  r = get_obj_params(name,desc->name,cpy,desc,p->separator,dst ? &opts : NULL);
   free(cpy);
   if(r < 0)
     return r;
