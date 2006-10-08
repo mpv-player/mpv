@@ -148,7 +148,7 @@ gui_[about|loadfile|loadsubtitle|play|playlist|preferences|skinbrowser|stop]
     GUI actions
 
 key_down_event <value>
-	Inject <value> key code event into MPlayer.
+    Inject <value> key code event into MPlayer.
 
 loadfile <file|url> <append>
     Load the given file/URL, stopping playback of the current file/URL.
