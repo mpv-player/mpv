@@ -99,7 +99,6 @@ CODEC_LIBS = $(AV_LIB) \
              $(THEORA_LIB) \
              $(FAAD_LIB) \
              $(LIBLZO_LIB) \
-             $(DECORE_LIB) \
              $(XVID_LIB) \
              $(DTS_LIB) \
              $(PNG_LIB) \
@@ -111,6 +110,10 @@ CODEC_LIBS = $(AV_LIB) \
              $(MUSEPACK_LIB) \
              $(SPEEX_LIB) \
              $(NUT_LIB) \
+
+ifeq ($(LAVC_MP3LAME),yes)
+CODEC_LIBS += $(MP3LAME_LIB)
+endif
 
 ifeq ($(TOOLAME),yes)
 CODEC_LIBS += $(TOOLAME_LIB)
@@ -388,7 +391,7 @@ $(PRG):	$(MPLAYER_DEP)
 
 ifeq ($(MENCODER),yes)
 LIBS_MENCODER = libmpcodecs/libmpencoders.a \
-                $(ENCORE_LIB) \
+                $(MP3LAME_LIB) \
                 $(COMMON_LIBS) \
 
 $(PRG_MENCODER): $(MENCODER_DEP)

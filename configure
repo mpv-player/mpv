@@ -6636,6 +6636,7 @@ EOF
 int main(void) { int p = MEDIUM_FAST; return 0; }
 EOF
     cc_check $_ld_mp3lame $_ld_lm && _def_mp3lame_preset_medium="#define HAVE_MP3LAME_PRESET_MEDIUM"
+    echo $_libavencoders | grep -q mp3lame && _lavc_mp3lame=yes || _lavc_mp3lame=no
   else
     _def_mp3lame='#undef HAVE_MP3LAME'
   fi
@@ -7571,9 +7572,9 @@ LIBNUT = $_nut
 NUT_LIB = $_ld_nut
 CONFIG_DTS = $_libdts
 DTS_LIB = $_ld_libdts
-DECORE_LIB = $_ld_mp3lame
 MENCODER = $_mencoder
-ENCORE_LIB = $_ld_mp3lame
+MP3LAME_LIB = $_ld_mp3lame
+LAVC_MP3LAME = $_lavc_mp3lame
 DIRECTFB_LIB = $_ld_directfb
 CDDA = $_cdda
 CDPARANOIA_LIB = $_ld_cdparanoia
