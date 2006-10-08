@@ -1787,7 +1787,7 @@ static int parse_obj_presets(m_option_t* opt,char *name,
   m_obj_presets_t* obj_p = (m_obj_presets_t*)opt->priv;
   m_struct_t *in_desc,*out_desc;
   int s,i;
-  unsigned char* pre = obj_p->presets;
+  unsigned char* pre;
   char* pre_name = NULL;
 
   if(!obj_p) {
@@ -1798,6 +1798,7 @@ static int parse_obj_presets(m_option_t* opt,char *name,
   if(!param)
     return M_OPT_MISSING_PARAM;
 
+  pre = obj_p->presets;
   in_desc = obj_p->in_desc;
   out_desc = obj_p->out_desc ? obj_p->out_desc : obj_p->in_desc;
   s = in_desc->size;
