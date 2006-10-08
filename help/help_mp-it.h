@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.231
+// Updated to help_mp-en.h v1.243
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -69,7 +69,7 @@ static char help_text[]=
 #define MSGTR_BuiltinCodecsConf "Utilizzo la versione interna predefinita di codecs.conf\n"
 #define MSGTR_CantLoadFont "Impossibile caricare i font: %s\n"
 #define MSGTR_CantLoadSub "Impossibile caricare i sottotitoli: %s\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: manca il flusso selezionato!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATALE: manca il flusso selezionato!\n"
 #define MSGTR_CantOpenDumpfile "Impossibile aprire il file di dump!!!\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell'intestazione! Usa l'opzione -fps!\n"
@@ -106,7 +106,7 @@ static char help_text[]=
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
 #define MSGTR_GuiNeedsX "La GUI di MPlayer richiede X11!\n"
-#define MSGTR_Playing "Riproduco %s\n"
+#define MSGTR_Playing "\nRiproduco %s.\n"
 #define MSGTR_NoSound "Audio: nessun suono!!!\n"
 #define MSGTR_FPSforced "FPS forzato a %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Compilato con riconoscimento CPU in esecuzione.\n"
@@ -144,7 +144,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer è andato in crash. Questo non dovrebbe accadere.\n"\
 "  Può essere un errore nel codice di MPlayer _o_ nei tuoi driver _o_ nella tua\n"\
-"  versione di gcc. Se ritieni sia colpa di MPlayer, perfavore leggi\n"\
+"  versione di gcc. Se ritieni sia colpa di MPlayer, per favore leggi\n"\
 "  DOCS/HTML/en/bugreports.html e segui quelle istruzioni. Non possiamo\n"\
 "  aiutarti, e non lo faremo, se non ci dai queste informazioni quando segnali\n"\
 "  un possibile problema.\n"
@@ -691,6 +691,7 @@ static char help_text[]=
 #define MSGTR_FontSelect "Seleziona il carattere..."
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizzatore"			 
+#define MSGTR_ConfigureEqualizer "Configurazione Equalizzatore"
 #define MSGTR_SkinBrowser "Gestore Skin"
 #define MSGTR_Network "Flusso dati dalla rete..."
 #define MSGTR_Preferences "Preferenze"
@@ -787,6 +788,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Traccia audio"
 #define MSGTR_MENU_Track "Traccia %d"
 #define MSGTR_MENU_VideoTrack "Traccia video"
+#define MSGTR_MENU_Subtitles "Sottotitoli"
 
 // --- equalizer
 // Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio
@@ -1071,6 +1073,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: il driver non supporta SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Il tuo driver audio NON supporta select()  ***\n Ricompila MPlayer con #undef HAVE_AUDIO_SELECT in config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nErrore fatale: *** NON POSSO RIAPRIRE / RESETTARE IL DEVICE AUDIO *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Formato OSS sconosciuto/non supportato: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
@@ -1094,7 +1097,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Canali: %s Formato %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Un dump più veloce si ottiene con -vc null -vo null\n[AO PCM] Info: Per scrivere file WAVE usa -ao pcm:waveheader (default).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: Un dump più veloce si ottiene con -vc null -vo null -ao pcm:fast\n[AO PCM] Info: Per scrivere file WAVE usa -ao pcm:waveheader (default).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Non posso aprire %s in scrittura!\n"
 
 // ao_sdl.c
@@ -1430,4 +1433,137 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_NoPasswdProvidedTryingBlank "Nessuna password fornita, provo senza.\n"
 #define MSGTR_MPDEMUX_NW_ErrServerReturned "Risposta del server %d: %s\n"
 #define MSGTR_MPDEMUX_NW_CacheSizeSetTo "Dimensione cache impostata a %d KByte\n"
+
+// demux_audio.c
+
+#define MSGTR_MPDEMUX_AUDIO_UnknownFormat "Demuxer audio: formato %d sconosciuto.\n"
+
+// demux_demuxers.c
+
+#define MSGTR_MPDEMUX_DEMUXERS_FillBufferError "Errore in fill_buffer: cattivo demuxer: non vd, ad o sd.\n"
+
+// demux_nuv.c
+
+#define MSGTR_MPDEMUX_NUV_NoVideoBlocksInFile "Nessun blocco video nel file.\n"
+
+// demux_xmms.c
+
+#define MSGTR_MPDEMUX_XMMS_FoundPlugin "Trovato plugin: %s (%s).\n"
+#define MSGTR_MPDEMUX_XMMS_ClosingPlugin "Chiudo plugin: %s.\n"
+
+// ========================== LIBMPMENU ===================================
+
+// common
+
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] Nessuna voce trovata nella definizione del menu.\n"
+
+// libmenu/menu.c
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] errore di sintassi alla riga: %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] per le definizioni di Menu serve un nome (riga %d).\n"
+#define MSGTR_LIBMENU_BadAttrib "[MENU] attributo %s=%s invalido nel menu '%s' alla riga %d\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] tipo di menu '%s' invalido alla riga %d\n"
+#define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] Impossibile aprire il file di configurazione menu: %s\n"
+#define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] Il file di configurazione è troppo grande (> %d KB)\n"
+#define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] Il file di configurazione è vuoto.\n"
+#define MSGTR_LIBMENU_MenuNotFound "[MENU] Menu %s non trovato.\n"
+#define MSGTR_LIBMENU_MenuInitFailed "[MENU] Menu '%s': Inizializzazione fallita.\n"
+#define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] Formato di uscita non supportato!!!!\n"
+
+// libmenu/menu_cmdlist.c
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] per le definizioni dei Menu Lista serve un nome (riga %d).\n"
+#define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] per i Menu Lista serve un argomento.\n"
+
+// libmenu/menu_console.c
+#define MSGTR_LIBMENU_WaitPidError "[MENU] Errore di attesa pid: %s.\n"
+#define MSGTR_LIBMENU_SelectError "[MENU] Errore di selezione.\n"
+#define MSGTR_LIBMENU_ReadErrorOnChilds "[MENU] Errore di lettura sul descrittore file del processo figlio: %s.\n"
+#define MSGTR_LIBMENU_ConsoleRun "[MENU] Esecuzione in console: %s ...\n"
+#define MSGTR_LIBMENU_AChildIsAlreadyRunning "[MENU] Un processo figlio è già in esecuzione.\n"
+#define MSGTR_LIBMENU_ForkFailed "[MENU] Fork fallito !!!\n"
+#define MSGTR_LIBMENU_WriteError "[MENU] errore di scrittura\n"
+
+// libmenu/menu_filesel.c
+#define MSGTR_LIBMENU_OpendirError "[MENU] Errore in opendir: %s\n"
+#define MSGTR_LIBMENU_ReallocError "[MENU] Errore in realloc: %s\n"
+#define MSGTR_LIBMENU_MallocError "[MENU] Errore in allocazione di memoria: %s\n"
+#define MSGTR_LIBMENU_ReaddirError "[MENU] Errore in readdir: %s\n"
+#define MSGTR_LIBMENU_CantOpenDirectory "[MENU] Impossibile aprire la directory %s.\n"
+
+// libmenu/menu_param.c
+#define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] per le definizioni di Submenu serve un attributo 'menu'.\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] per le definizioni di Menu Pref serve un attributo 'property' valido (riga %d).\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] per i Menu Pref serve un argomento.\n"
+
+// libmenu/menu_pt.c
+#define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] Impossibile trovare l'oggetto di destinazione ????\n"
+#define MSGTR_LIBMENU_FailedToBuildCommand "[MENU] Fallimento nella creazione comando: %s.\n"
+
+// libmenu/menu_txt.c
+#define MSGTR_LIBMENU_MenuTxtNeedATxtFileName "[MENU] per i Menu Text serve il nome di un file di testo (parametro file).\n"
+#define MSGTR_LIBMENU_MenuTxtCantOpen "[MENU] Impossibile aprire %s.\n"
+#define MSGTR_LIBMENU_WarningTooLongLineSplitting "[MENU] Attenzione, riga troppo lunga. La spezzo.\n"
+#define MSGTR_LIBMENU_ParsedLines "[MENU] Lette %d righe.\n"
+
+// libmenu/vf_menu.c
+#define MSGTR_LIBMENU_UnknownMenuCommand "[MENU] Comando sconosciuto: '%s'.\n"
+#define MSGTR_LIBMENU_FailedToOpenMenu "[MENU] Impossibile aprire il menu: '%s'.\n"
+
+// ========================== LIBMPCODECS ===================================
+
+// libmpcodecs/ad_libdv.c
+#define MSGTR_MPCODECS_AudioFramesizeDiffers "[AD_LIBDV] Attenzione! Dimensione frame audio diversa! letta=%d  hdr=%d.\n"
+
+// libmpcodecs/vd_dmo.c vd_dshow.c vd_vfw.c
+#define MSGTR_MPCODECS_CouldntAllocateImageForCinepakCodec "[VD_DMO] Impossibile allocare l'immagine per il codec cinepak.\n"
+
+// libmpcodecs/vd_ffmpeg.c
+#define MSGTR_MPCODECS_XVMCAcceleratedCodec "[VD_FFMPEG] Codec XVMC accellerato.\n"
+// TODO: translate better this:
+#define MSGTR_MPCODECS_ArithmeticMeanOfQP "[VD_FFMPEG] Arithmetic mean of QP: %2.4f, Harmonic mean of QP: %2.4f\n"
+#define MSGTR_MPCODECS_DRIFailure "[VD_FFMPEG] Errore DRI.\n"
+#define MSGTR_MPCODECS_CouldntAllocateImageForCodec "[VD_FFMPEG] Impossibile allocare l'immagine per il codec.\n"
+#define MSGTR_MPCODECS_XVMCAcceleratedMPEG2 "[VD_FFMPEG] XVMC accellerato MPEG-2.\n"
+#define MSGTR_MPCODECS_TryingPixfmt "[VD_FFMPEG] Provo pixfmt=%d.\n"
+#define MSGTR_MPCODECS_McGetBufferShouldWorkOnlyWithXVMC "[VD_FFMPEG] mc_get_buffer dovrebbe funzionare solo con accelerazione XVMC!!"
+#define MSGTR_MPCODECS_UnexpectedInitVoError "[VD_FFMPEG] Errore inatteso in init_vo.\n"
+#define MSGTR_MPCODECS_UnrecoverableErrorRenderBuffersNotTaken "[VD_FFMPEG] Errore irrecuperabile, buffer di renderizzazione non occupati.\n"
+#define MSGTR_MPCODECS_OnlyBuffersAllocatedByVoXvmcAllowed "[VD_FFMPEG] Sono permessi solo i buffer allocati da vo_xvmc.\n"
+
+// libmpcodecs/ve_lavc.c
+#define MSGTR_MPCODECS_HighQualityEncodingSelected "[VE_LAVC] Scelta codifica ad alta qualità (non-realtime)!\n"
+#define MSGTR_MPCODECS_UsingConstantQscale "[VE_LAVC] Uso qscale costante = %f (VBR).\n"
+
+// libmpcodecs/ve_raw.c
+#define MSGTR_MPCODECS_OutputWithFourccNotSupported "[VE_RAW] Output grezzo con FourCC [%x] non supportato!\n"
+#define MSGTR_MPCODECS_NoVfwCodecSpecified "[VE_RAW] Il codec VfW richiesto non è specificato!!\n"
+
+// libmpcodecs/vf_crop.c
+#define MSGTR_MPCODECS_CropBadPositionWidthHeight "[CROP] Posizione/larghezza/altezza invalide - area ritagliata al di fuori dell'originaria!\n"
+
+// libmpcodecs/vf_cropdetect.c
+#define MSGTR_MPCODECS_CropArea "[CROP] Area ritaglio: X: %d..%d  Y: %d..%d  (-vf crop=%d:%d:%d:%d).\n"
+
+// libmpcodecs/vf_format.c, vf_palette.c, vf_noformat.c
+#define MSGTR_MPCODECS_UnknownFormatName "[VF_FORMAT] Nome formato sconosciuto: '%s'.\n"
+
+// libmpcodecs/vf_framestep.c vf_noformat.c vf_palette.c vf_tile.c
+#define MSGTR_MPCODECS_ErrorParsingArgument "[VF_FRAMESTEP] Errorie interpretando l'argumento.\n"
+
+// libmpcodecs/ve_vfw.c
+#define MSGTR_MPCODECS_CompressorType "Tipo compressore: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorSubtype "Sottotipo compressore: %.4lx\n"
+#define MSGTR_MPCODECS_CompressorFlags "Flag del compressore: %lu, versione %lu, versione ICM: %lu\n"
+#define MSGTR_MPCODECS_Flags "Flag:"
+#define MSGTR_MPCODECS_Quality " qualità"
+
+// libmpcodecs/vf_expand.c
+#define MSGTR_MPCODECS_FullDRNotPossible "DR completo non possibile, provo invece gli SLICES!\n"
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupportSlices  "ATTENZIONE! Il filtro successivo non supporta gli SLICES, aspettati un sig11...\n"
+#define MSGTR_MPCODECS_FunWhydowegetNULL "Perché abbiamo avuto un NULL??\n"
+
+// libmpcodecs/vf_fame.c
+#define MSGTR_MPCODECS_FatalCantOpenlibFAME "FATALE: Impossibile aprire libFAME!\n"
+
+// libmpcodecs/vf_test.c, vf_yuy2.c, vf_yvu9.c
+#define MSGTR_MPCODECS_WarnNextFilterDoesntSupport "%s non supportato dal filtro/vo successivo :(\n"
 
