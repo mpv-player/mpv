@@ -145,6 +145,13 @@ alpha() {
   esac
 }
 
+arm() {
+  case "$host_arch" in
+    arm) return 0;;
+    *) return 1;;
+  esac
+}
+
 # not boolean test: implement the posix shell "!" operator for a
 # non-posix /bin/sh.
 #   usage:  not {command}
@@ -397,6 +404,8 @@ Advanced options:
   --enable-sse2          build with SSE2 support [autodetect]
   --enable-shm           build with shm support [autodetect]
   --enable-altivec       build with Altivec support (PowerPC) [autodetect]
+  --enable-armv5te       build with DSP extensions support (ARM) [autodetect]
+  --enable-iwmmxt        build with iWMMXt support (ARM) [autodetect]
   --disable-fastmemcpy   disable 3DNow!/SSE/MMX optimized memcpy() [enable]
   --enable-big-endian    Force byte order to big-endian [autodetect]
   --enable-debug[=1-3]   compile debugging information into mplayer [disable]
@@ -460,6 +469,8 @@ _3dnowext=auto
 _mmxext=auto
 _sse=auto
 _sse2=auto
+_armv5te=auto
+_iwmmxt=auto
 _mtrr=auto
 _install=install
 _ranlib=ranlib
@@ -2138,6 +2149,10 @@ for ac_option do
   --disable-3dnowext) _3dnowext=no ;;
   --enable-altivec) _altivec=yes ;;
   --disable-altivec) _altivec=no ;;
+  --enable-armv5te) _armv5te=yes ;;
+  --disable-armv5te) _armv5te=no ;;
+  --enable-iwmmxt) _iwmmxt=yes ;;
+  --disable-iwmmxt) _iwmmxt=no ;;
   --enable-mmx)	_mmx=yes ;;
   --disable-mmx) # 3Dnow! and MMX2 require MMX
         _3dnow=no _3dnowext=no _mmx=no _mmxext=no ;;
@@ -2374,6 +2389,32 @@ EOF
     fi
 fi
 
+if arm ; then
+  echocheck "ARMv5TE (Enhanced DSP Extensions)"
+  if test $_armv5te = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) {
+    __asm__ __volatile__ ("qadd r0, r0, r0");
+}
+EOF
+    _armv5te=no
+    cc_check && _armv5te=yes
+  fi
+  echores "$_armv5te"
+
+  echocheck "iWMMXt (Intel XScale SIMD instructions)"
+  if test $_iwmmxt = "auto" ; then
+    cat > $TMPC << EOF
+int main(void) {
+    __asm__ __volatile__ ("wunpckelub wr6, wr4");
+}
+EOF
+    _iwmmxt=no
+    cc_check && _iwmmxt=yes
+  fi
+  echores "$_iwmmxt"
+fi
+
 _def_mmx='#undef HAVE_MMX'
 test "$_mmx" = yes && _def_mmx='#define HAVE_MMX 1'
 _def_mmxext='#undef HAVE_MMX2'
@@ -2386,6 +2427,10 @@ _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
 _def_sse2='#undef HAVE_SSE2'
 test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
+_def_armv5te='#undef HAVE_ARMV5TE'
+test "$_armv5te" = yes && _def_armv5te='#define HAVE_ARMV5TE 1'
+_def_iwmmxt='#undef HAVE_IWMMXT'
+test "$_iwmmxt" = yes && _def_iwmmxt='#define HAVE_IWMMXT 1'
 
 # Checking kernel version...
 if x86 && linux ; then
@@ -7593,6 +7638,8 @@ TARGET_3DNOW = $_3dnow
 TARGET_3DNOWEX = $_3dnowext
 TARGET_SSE = $_sse
 TARGET_ALTIVEC = $_altivec
+TARGET_ARMV5TE = $_armv5te
+TARGET_IWMMXT = $_iwmmxt
 TARGET_VIS = $_vis
 TARGET_BUILTIN_VECTOR = $_builtin_vector
 TARGET_BUILTIN_3DNOW  = $_mm3dnow
@@ -8253,6 +8300,8 @@ $_def_mmxext	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
 $_def_altivec	// only define if you have Altivec (G4)
+$_def_armv5te	// only define if you have Enhanced DSP Extensions (ARM)
+$_def_iwmmxt	// only define if you have XScale IWMMX (ARM)
 
 $_def_altivec_h	// enables usage of altivec.h
 
