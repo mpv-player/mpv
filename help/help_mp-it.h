@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.256
+// Updated to help_mp-en.h r19979
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -198,6 +198,10 @@ static char help_text[]=
 #define MSGTR_EdlBadLineOverlap "L'ultimo stop era a [%f]; lo start successivo a [%f].\n"\
 "Le indicazioni devono essere in ordine, non posso sovrapporle. Ignoro.\n"
 #define MSGTR_EdlBadLineBadStop "Lo stop deve essere dopo il tempo di start.\n"
+#define MSGTR_EdloutBadStop "Salto EDL ingnorato, ultimo start > stop\n"
+#define MSGTR_EdloutStartSkip "Tempo di start EDL impostato, ripremere 'i' per impostare lo stop.\n"
+#define MSGTR_EdloutEndSkip "Fine del blocco EDL, riga scritta.\n"
+#define MSGTR_MPEndposNoSizeBased "L'opzione -endpos in MPlayer non supporta ancora unità di mis. di dimensione.\n"
 
 // mplayer.c OSD
 
@@ -207,6 +211,7 @@ static char help_text[]=
 #define MSGTR_OSDSubDelay "Ritardo sottotitoli: %d ms"
 #define MSGTR_OSDSpeed "Velocità: x %6.2f"
 #define MSGTR_OSDosd "OSD: %so"
+#define MSGTR_OSDChapter "Capitolo: (%d) %s"
 
 // property values
 #define MSGTR_Enabled "abilitat"
@@ -539,8 +544,12 @@ static char help_text[]=
 #define MSGTR_DVDnoVOBs "Impossibile aprire il VOB del titolo (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDnoMatchingAudio "Non trovata la lingua dell'audio DVD corrispondente!\n"
 #define MSGTR_DVDaudioChannel "Scelto canale audio DVD: %d lingua: %c%c\n" 
+#define MSGTR_DVDaudioStreamInfo "flusso audio: %d formato: %s (%s) lingua: %s aid: %d.\n"
+#define MSGTR_DVDnumAudioChannels "numero di canali audio sl disco: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "Non trovata la lingua dei sottotitoli DVD corrispondente!\n"
 #define MSGTR_DVDsubtitleChannel "Scelto canale sottotitoli DVD: %d lingua: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "sottotitoli ( sid ): %d lingua: %s\n"
+#define MSGTR_DVDnumSubtitles "numero di sottotitoli sul disco: %d\n"
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Troppi flussi!"
@@ -600,7 +609,7 @@ static char help_text[]=
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Errore nell'apertura del demuxer dei sottotitoli: %s\n"
 #define MSGTR_TVInputNotSeekable "Impossibile spostarsi in un programma TV!\n"\
 "(Probabilmente lo spostamento sarà usato per cambiare canale ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Info demuxer %s già presente!\n"
+#define MSGTR_DemuxerInfoChanged "Info demuxer %s cambiate a %s\n"
 #define MSGTR_ClipInfo "Informazioni filmato: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Rilevato formato NTSC 30000/1001fps, cambio framerate.\n"
@@ -1665,6 +1674,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_CouldntGetAnyAcceptableSDLModeForOutput "[VO_SDL] Impossibile ottenere una modalità SDL accettabile per l'output.\n"
 #define MSGTR_LIBVO_SDL_SetVideoModeFailed "[VO_SDL] set_video_mode: SDL_SetVideoMode fallito: %s.\n"
 #define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode fallito: %s.\n"
+#define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] Mappo I420 su IYUV.\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] Formato immagine non supportato (0x%X).\n"
 #define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Info - per favore usa -vm or -zoom per passare alla risoluzione migliore.\n"
 #define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] Impossibile impostare la modalità video: %s.\n"
@@ -1802,4 +1812,46 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] chiamata a draw_frame()!!!!!!\n"
+
+// stream/stream_radio.c
+
+#define MSGTR_RADIO_ChannelNamesDetected "[radio] Rilevati i nomi dei canali radio.\n"
+#define MSGTR_RADIO_WrongFreqForChannel "[radio] Frequenza errata per il canale %s\n"
+#define MSGTR_RADIO_WrongChannelNumberFloat "[radio] Numero canale errato: %.2f\n"
+#define MSGTR_RADIO_WrongChannelNumberInt "[radio] Numero canale errato: %d\n"
+#define MSGTR_RADIO_WrongChannelName "[radio] Nome canale errato: %s\n"
+#define MSGTR_RADIO_FreqParameterDetected "[radio] Rilevato parametro frequenza radio.\n"
+#define MSGTR_RADIO_DoneParsingChannels "[radio] Lettura canali terminata.\n"
+#define MSGTR_RADIO_GetTunerFailed "[radio] Attenzione: ioctl tuner fallito: %s. Imposto frac a %d.\n"
+#define MSGTR_RADIO_NotRadioDevice "[radio] %s non è un dispositivo radio!\n"
+#define MSGTR_RADIO_TunerCapLowYes "[radio] il tuner è low:yes frac=%d\n"
+#define MSGTR_RADIO_TunerCapLowNo "[radio] il tuner è low:no frac=%d\n"
+#define MSGTR_RADIO_SetFreqFailed "[radio] ioctl impostazione frequenza 0x%x (%.2f) fallito: %s\n"
+#define MSGTR_RADIO_GetFreqFailed "[radio] ioctl rilevazione frequenza fallito: %s\n"
+#define MSGTR_RADIO_SetMuteFailed "[radio] ioctl impostazione muto fallito: %s\n"
+#define MSGTR_RADIO_QueryControlFailed "[radio] ioctl query control fallito: %s\n"
+#define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl irilevazione volume fallito: %s\n"
+#define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl impostazione volume fallito: %s\n"
+#define MSGTR_RADIO_DroppingFrame "\n[radio] too bad - dropping audio frame (%d byte)!\n"
+#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: buffer vuoto, aspetto %d byte di dati.\n"
+#define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init fallito: %s\n"
+#define MSGTR_RADIO_AudioBuffer "[radio] Cattura audio - buffer=%d byte (blocco=%d byte).\n"
+#define MSGTR_RADIO_AllocateBufferFailed "[radio] impossibile allocare il buffer audio (blocco=%d,buf=%d): %s\n"
+#define MSGTR_RADIO_CurrentFreq "[radio] Frequenza attuale: %.2f\n"
+#define MSGTR_RADIO_SelectedChannel "[radio] Canale selezionato: %d - %s (freq: %.2f)\n"
+#define MSGTR_RADIO_ChangeChannelNoChannelList "[radio] Impossibile cambiare canale: nessuna lista canali fornita.\n"
+#define MSGTR_RADIO_UnableOpenDevice "[radio] Impossibile aprire '%s': %s\n"
+#define MSGTR_RADIO_InitFracFailed "[radio] init_frac fallito.\n"
+#define MSGTR_RADIO_WrongFreq "[radio] Frequenza errata: %.2f\n"
+#define MSGTR_RADIO_UsingFreq "[radio] Uso la frequenza: %.2f.\n"
+#define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init fallito.\n"
+#define MSGTR_RADIO_BufferString "[radio] %s: in buffer=%d scartati=%d\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[radio] chiamata a audio_in_setup fallita: %s\n"
+#define MSGTR_RADIO_CaptureStarting "[radio] Inizio la parte di cattura.\n"
+#define MSGTR_RADIO_ClearBufferFailed "[radio] Pulizia buffer fallita: %s\n"
+#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] Chiamata a stream_enable_cache fallito: %s\n"
+#define MSGTR_RADIO_DriverUnknownId "[radio] Id driver sconosciuto: %d\n"
+#define MSGTR_RADIO_DriverUnknownStr "[radio] Nome driver sconosciuto: %s\n"
+#define MSGTR_RADIO_DriverV4L2 "[radio] Uso l'interfaccia radio V4Lv2.\n"
+#define MSGTR_RADIO_DriverV4L "[radio] Uso l'interfaccia radio V4Lv1.\n"
 
