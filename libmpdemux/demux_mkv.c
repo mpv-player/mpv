@@ -1015,6 +1015,31 @@ demux_mkv_read_trackvideo (demuxer_t *demuxer, mkv_track_t *track)
   return len;
 }
 
+/**
+ * \brief free any data associated with given track
+ * \param track track of which to free data
+ */
+static void
+demux_mkv_free_trackentry(mkv_track_t *track) {
+  if (track->name)
+    free (track->name);
+  if (track->codec_id)
+    free (track->codec_id);
+  if (track->language)
+    free (track->language);
+  if (track->private_data)
+    free (track->private_data);
+  if (track->audio_buf)
+    free (track->audio_buf);
+  if (track->audio_timestamp)
+    free (track->audio_timestamp);
+#ifdef USE_ASS
+  if (track->sh_sub.ass_track)
+    ass_free_track (track->sh_sub.ass_track);
+#endif
+  demux_mkv_free_encodings(track->encodings, track->num_encodings);
+}
+
 static int
 demux_mkv_read_trackentry (demuxer_t *demuxer)
 {
@@ -1040,7 +1065,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           {
             uint64_t num = ebml_read_uint (s, &l);
             if (num == EBML_UINT_INVALID)
-              return 0;
+              goto err_out;
             track->tnum = num;
             mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Track number: %u\n",
                     track->tnum);
@@ -1051,7 +1076,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           {
             track->name = ebml_read_utf8 (s, &l);
             if (track->name == NULL)
-              return 0;
+              goto err_out;
             mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Name: %s\n",
                     track->name);
             break;
@@ -1086,20 +1111,20 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Audio track\n");
           l = demux_mkv_read_trackaudio (demuxer, track);
           if (l == 0)
-            return 0;
+            goto err_out;
           break;
 
         case MATROSKA_ID_TRACKVIDEO:
           mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Video track\n");
           l = demux_mkv_read_trackvideo (demuxer, track);
           if (l == 0)
-            return 0;
+            goto err_out;
           break;
 
         case MATROSKA_ID_CODECID:
           track->codec_id = ebml_read_ascii (s, &l);
           if (track->codec_id == NULL)
-            return 0;
+            goto err_out;
           if (!strcmp (track->codec_id, MKV_V_MSCOMP) ||
               !strcmp (track->codec_id, MKV_A_ACM))
             track->ms_compat = 1;
@@ -1131,7 +1156,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
             l = x + num;
             track->private_data = malloc (num);
             if (stream_read(s, track->private_data, num) != (int) num)
-              return 0;
+              goto err_out;
             track->private_size = num;
             mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + CodecPrivate, length "
                     "%u\n", track->private_size);
@@ -1141,7 +1166,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
         case MATROSKA_ID_TRACKLANGUAGE:
           track->language = ebml_read_utf8 (s, &l);
           if (track->language == NULL)
-            return 0;
+            goto err_out;
           mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Language: %s\n",
                   track->language);
           break;
@@ -1150,7 +1175,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           {
             uint64_t num = ebml_read_uint (s, &l);
             if (num == EBML_UINT_INVALID)
-              return 0;
+              goto err_out;
             track->default_track = num;
             mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Default flag: %u\n",
                     track->default_track);
@@ -1161,7 +1186,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           {
             uint64_t num = ebml_read_uint (s, &l);
             if (num == EBML_UINT_INVALID)
-              return 0;
+              goto err_out;
             if (num == 0)
               mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + Default duration: 0");
             else
@@ -1177,7 +1202,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
         case MATROSKA_ID_TRACKENCODINGS:
           l = demux_mkv_read_trackencodings (demuxer, track);
           if (l == 0)
-            return 0;
+            goto err_out;
           break;
 
         default:
@@ -1189,6 +1214,11 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
 
   mkv_d->tracks[mkv_d->num_tracks++] = track;
   return len;
+
+err_out:
+  demux_mkv_free_trackentry(track);
+  free(track);
+  return 0;
 }
 
 static int
@@ -2702,26 +2732,7 @@ demux_close_mkv (demuxer_t *demuxer)
       if (mkv_d->tracks)
         {
           for (i=0; i<mkv_d->num_tracks; i++)
-            {
-              if (mkv_d->tracks[i]->name)
-                free (mkv_d->tracks[i]->name);
-              if (mkv_d->tracks[i]->codec_id)
-                free (mkv_d->tracks[i]->codec_id);
-              if (mkv_d->tracks[i]->language)
-                free (mkv_d->tracks[i]->language);
-              if (mkv_d->tracks[i]->private_data)
-                free (mkv_d->tracks[i]->private_data);
-              if (mkv_d->tracks[i]->audio_buf)
-                free (mkv_d->tracks[i]->audio_buf);
-              if (mkv_d->tracks[i]->audio_timestamp)
-                free (mkv_d->tracks[i]->audio_timestamp);
-#ifdef USE_ASS
-              if (mkv_d->tracks[i]->sh_sub.ass_track)
-                ass_free_track (mkv_d->tracks[i]->sh_sub.ass_track);
-#endif
-              demux_mkv_free_encodings(mkv_d->tracks[i]->encodings,
-                                       mkv_d->tracks[i]->num_encodings);
-            }
+            demux_mkv_free_trackentry(mkv_d->tracks[i]);
           for (i=0; i < SUB_MAX_TEXT; i++)
             if (mkv_d->subs.text[i])
               free (mkv_d->subs.text[i]);
