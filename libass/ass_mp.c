@@ -92,9 +92,9 @@ ass_track_t* ass_default_track() {
 		style->BorderStyle = 1;
 		style->Alignment = 2;
 		style->Outline = 2;
-		style->MarginL = 30;
-		style->MarginR = 30;
-		style->MarginV = 20;
+		style->MarginL = 10;
+		style->MarginR = 10;
+		style->MarginV = 5;
 		style->ScaleX = 1.;
 		style->ScaleY = 1.;
 	}
