@@ -1038,6 +1038,7 @@ demux_mkv_free_trackentry(mkv_track_t *track) {
     ass_free_track (track->sh_sub.ass_track);
 #endif
   demux_mkv_free_encodings(track->encodings, track->num_encodings);
+  free(track);
 }
 
 static int
@@ -1217,7 +1218,6 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
 
 err_out:
   demux_mkv_free_trackentry(track);
-  free(track);
   return 0;
 }
 
