@@ -704,6 +704,19 @@ demux_mkv_read_info (demuxer_t *demuxer)
   return 0;
 }
 
+/**
+ * \brief free array of kv_content_encoding_t
+ * \param encodings pointer to array
+ * \param numencodings number of encodings in array
+ */
+static void
+demux_mkv_free_encodings(mkv_content_encoding_t *encodings, int numencodings)
+{
+  while (numencodings-- > 0)
+    free(encodings[numencodings].comp_settings);
+  free(encodings);
+}
+
 static int
 demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
 {
@@ -742,21 +755,21 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
                   case MATROSKA_ID_CONTENTENCODINGORDER:
                     num = ebml_read_uint (s, &l);
                     if (num == EBML_UINT_INVALID)
-                      return 0;
+                      goto err_out;
                     e.order = num;
                     break;
 
                   case MATROSKA_ID_CONTENTENCODINGSCOPE:
                     num = ebml_read_uint (s, &l);
                     if (num == EBML_UINT_INVALID)
-                      return 0;
+                      goto err_out;
                     e.scope = num;
                     break;
 
                   case MATROSKA_ID_CONTENTENCODINGTYPE:
                     num = ebml_read_uint (s, &l);
                     if (num == EBML_UINT_INVALID)
-                      return 0;
+                      goto err_out;
                     e.type = num;
                     break;
 
@@ -777,7 +790,7 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
                             case MATROSKA_ID_CONTENTCOMPALGO:
                               num = ebml_read_uint (s, &l);
                               if (num == EBML_UINT_INVALID)
-                                return 0;
+                                goto err_out;
                               e.comp_algo = num;
                               break;
 
@@ -859,6 +872,10 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
   track->encodings = ce;
   track->num_encodings = n;
   return len;
+
+err_out:
+  demux_mkv_free_encodings(ce, n);
+  return 0;
 }
 
 static int
@@ -2702,6 +2719,8 @@ demux_close_mkv (demuxer_t *demuxer)
               if (mkv_d->tracks[i]->sh_sub.ass_track)
                 ass_free_track (mkv_d->tracks[i]->sh_sub.ass_track);
 #endif
+              demux_mkv_free_encodings(mkv_d->tracks[i]->encodings,
+                                       mkv_d->tracks[i]->num_encodings);
             }
           for (i=0; i < SUB_MAX_TEXT; i++)
             if (mkv_d->subs.text[i])
