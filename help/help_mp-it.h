@@ -490,11 +490,6 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Il codec non è correttamente definito."
 #define MSGTR_OutdatedCodecsConf "Il codecs.conf è troppo vecchio/incompatibile con questa versione di MPlayer!"
 
-// divx4_vbr.c:
-#define MSGTR_OutOfMemory "Memoria esaurita"
-#define MSGTR_OverridingTooLowBitrate "Il bitrate specificato è troppo basso per questo filmato.\n"\
-"Il bitrate minimo possibile è %.0f kbps. Ignoro il valore dato dall'utente\n"
-
 // fifo.c
 #define MSGTR_CannotMakePipe "Non posso costruire una PIPE!\n"
 
@@ -592,8 +587,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Impossibile determinare il numero di fotogrammi (per lo spostamento assoluto).\n"
 #define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi. (richiesto un indice, prova con l'opzione -idx.)\n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
-
-#define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/HTML/en/cd-dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Il supporto delle intestazioni compresse richiede ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Avvertimento! Rilevato FourCC variabile!?\n"
