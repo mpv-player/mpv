@@ -48,6 +48,7 @@ MPlayer (1.0)
 
     Others:
     * SSA/ASS subtitle renderer
+    * -endpos option
 
 
   pre8: "NeuTeam strikes back" June 11, 2006
