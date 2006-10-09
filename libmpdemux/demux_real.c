@@ -55,7 +55,7 @@ static unsigned char sipr_swaps[38][2]={
     {77,80} };
 
 typedef struct {
-    int		timestamp;
+    unsigned int	timestamp;
     int		offset;
 //    int		packetno;
 //    int		len; /* only filled by our index generator */
@@ -82,10 +82,10 @@ typedef struct {
     int		current_vpacket;
     
     // timestamp correction:
-    int		kf_base;// timestamp of the prev. video keyframe
-    int		kf_pts;	// timestamp of next video keyframe
-    int		a_pts;	// previous audio timestamp
-    float	v_pts;  // previous video timestamp
+    unsigned int	kf_base;// timestamp of the prev. video keyframe
+    unsigned int	kf_pts;	// timestamp of next video keyframe
+    unsigned int	a_pts;	// previous audio timestamp
+    double	v_pts;  // previous video timestamp
     unsigned long	duration;
     
     /* stream id table */
@@ -117,7 +117,7 @@ typedef struct {
     int coded_framesize[MAX_STREAMS]; ///< coded frame size, per stream
     int audiopk_size[MAX_STREAMS]; ///< audio packet size
     unsigned char *audio_buf; ///< place to store reordered audio data
-    float *audio_timestamp; ///< timestamp for each audio packet
+    double *audio_timestamp; ///< timestamp for each audio packet
     int sub_packet_cnt; ///< number of subpacket already received
     int audio_filepos; ///< file position of first audio packet in block
 } real_priv_t;
@@ -175,7 +175,7 @@ static void dump_index(demuxer_t *demuxer, int stream_id)
     for (i = 0; i < entries; i++)
     {
 #if 1
-	mp_msg(MSGT_DEMUX, MSGL_V,"i: %d, pos: %d, timestamp: %d\n", i, index[i].offset, index[i].timestamp);
+	mp_msg(MSGT_DEMUX, MSGL_V,"i: %d, pos: %d, timestamp: %u\n", i, index[i].offset, index[i].timestamp);
 #else
 	mp_msg(MSGT_DEMUX, MSGL_V,"packetno: %x pos: %x len: %x timestamp: %x flags: %x\n",
 	    index[i].packetno, index[i].offset, index[i].len, index[i].timestamp,
@@ -264,7 +264,7 @@ end:
 
 #if 1
 
-static void add_index_item(demuxer_t *demuxer, int stream_id, int timestamp, int offset)
+static void add_index_item(demuxer_t *demuxer, int stream_id, unsigned int timestamp, int offset)
 {
   if ((unsigned)stream_id < MAX_STREAMS)
   {
@@ -299,9 +299,10 @@ static void add_index_item(demuxer_t *demuxer, int stream_id, int timestamp, int
   }
 }
 
-static void add_index_segment(demuxer_t *demuxer, int seek_stream_id, int seek_timestamp)
+static void add_index_segment(demuxer_t *demuxer, int seek_stream_id, int64_t seek_timestamp)
 {
-  int tag, len, stream_id, timestamp, flags;
+  int tag, len, stream_id, flags;
+  unsigned int timestamp;
   if (seek_timestamp != -1 && (unsigned)seek_stream_id >= MAX_STREAMS)
     return;
   while (1)
@@ -336,7 +337,7 @@ static void add_index_segment(demuxer_t *demuxer, int seek_stream_id, int seek_t
 	return;
       }
     }
-    // printf("Index: stream=%d packet=%d timestamp=%d len=%d flags=0x%x datapos=0x%x\n", stream_id, entries, timestamp, len, flags, index->offset);
+    // printf("Index: stream=%d packet=%d timestamp=%u len=%d flags=0x%x datapos=0x%x\n", stream_id, entries, timestamp, len, flags, index->offset);
     /* skip data */
     stream_skip(demuxer->stream, len-12);
   }
@@ -382,7 +383,8 @@ static int generate_index(demuxer_t *demuxer)
     int data_pos = priv->data_chunk_offset-10;
     int num_of_packets = 0;
     int i, entries = 0;
-    int len, stream_id = 0, timestamp, flags;
+    int len, stream_id = 0, flags;
+    unsigned int timestamp;
     int tab_pos = 0;
 
 read_index:
@@ -493,12 +495,12 @@ void hexdump(char *, unsigned long);
 #define SKIP_BITS(n) buffer<<=n
 #define SHOW_BITS(n) ((buffer)>>(32-(n)))
 
-static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timestamp, float frametime, unsigned int format){
-  float v_pts;
+static double real_fix_timestamp(real_priv_t* priv, unsigned char* s, unsigned int timestamp, double frametime, unsigned int format){
+  double v_pts;
   uint32_t buffer= (s[0]<<24) + (s[1]<<16) + (s[2]<<8) + s[3];
-  int kf=timestamp;
+  unsigned int kf=timestamp;
   int pict_type;
-  int orig_kf;
+  unsigned int orig_kf;
 
 #if 1
   if(format==mmioFOURCC('R','V','3','0') || format==mmioFOURCC('R','V','4','0')){
@@ -521,19 +523,19 @@ static float real_fix_timestamp(real_priv_t* priv, unsigned char* s, int timesta
       kf=timestamp;
     } else {
       // P/B frame, merge timestamps:
-      int tmp=timestamp-priv->kf_base;
+      int64_t tmp=(int64_t)timestamp-priv->kf_base;
       kf|=tmp&(~0x1fff);	// combine with packet timestamp
       if(kf<tmp-4096) kf+=8192; else // workaround wrap-around problems
       if(kf>tmp+4096) kf-=8192;
       kf+=priv->kf_base;
     }
     if(pict_type != 3){ // P || I  frame -> swap timestamps
-	int tmp=kf;
+	unsigned int tmp=kf;
 	kf=priv->kf_pts;
 	priv->kf_pts=tmp;
 //	if(kf<=tmp) kf=0;
     }
-    mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5d\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(int)(1000.0*priv->v_pts));
+    mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: %08X -> %08X (%04X) %d %02X %02X %02X %02X %5u\n",timestamp,kf,orig_kf,pict_type,s[0],s[1],s[2],s[3],kf-(unsigned int)(1000.0*priv->v_pts));
   }
 #endif
     v_pts=kf*0.001f;
@@ -557,7 +559,7 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *ds = NULL;
     int len;
-    int timestamp;
+    unsigned int timestamp;
     int stream_id;
 #ifdef CRACK_MATRIX
     int i;
@@ -642,7 +644,7 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 //	(int)demuxer->filepos,(int)version,(int)len, stream_id,
 //	(int) timestamp, reserved, flags);
 
-    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "\npacket#%d: pos: 0x%0x, len: %d, id: %d, pts: %d, flags: %x rvd:%d\n",
+    mp_dbg(MSGT_DEMUX,MSGL_DBG2,  "\npacket#%d: pos: 0x%0x, len: %d, id: %d, pts: %u, flags: %x rvd:%d\n",
 	priv->current_packet, (int)demuxer->filepos, len, stream_id, timestamp, flags, reserved);
 
     priv->current_packet++;
@@ -1055,7 +1057,7 @@ if((unsigned)stream_id<MAX_STREAMS){
 	sh->ds=demuxer->audio;
 	demuxer->audio->sh=sh;
 	priv->audio_buf = calloc(priv->sub_packet_h[demuxer->audio->id], priv->audiopk_size[demuxer->audio->id]);
-	priv->audio_timestamp = calloc(priv->sub_packet_h[demuxer->audio->id], sizeof(float));
+	priv->audio_timestamp = calloc(priv->sub_packet_h[demuxer->audio->id], sizeof(double));
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM audio ID = %d\n",stream_id);
 	goto got_audio;
     }
@@ -1477,7 +1479,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			sh->ds=demuxer->audio;
 			demuxer->audio->sh=sh;
         	priv->audio_buf = calloc(priv->sub_packet_h[demuxer->audio->id], priv->audiopk_size[demuxer->audio->id]);
-        	priv->audio_timestamp = calloc(priv->sub_packet_h[demuxer->audio->id], sizeof(float));
+        	priv->audio_timestamp = calloc(priv->sub_packet_h[demuxer->audio->id], sizeof(double));
 		    }
 		    
 		    ++a_streams;
@@ -1847,7 +1849,7 @@ static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio
     sh_video_t *sh_video = d_video->sh;
     int vid = d_video->id, aid = d_audio->id;
     int next_offset = 0;
-    int cur_timestamp = 0;
+    int64_t cur_timestamp = 0;
     int streams = 0;
     int retried = 0;
 
@@ -1932,7 +1934,7 @@ static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio
 static int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     real_priv_t *priv = demuxer->priv;
-    int lastpts = priv->v_pts ? priv->v_pts : priv->a_pts;
+    unsigned int lastpts = priv->v_pts ? priv->v_pts : priv->a_pts;
     
     switch (cmd) {
         case DEMUXER_CTRL_GET_TIME_LENGTH:
