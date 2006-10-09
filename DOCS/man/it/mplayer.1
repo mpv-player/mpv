@@ -1,4 +1,4 @@
-.\" synced with r19361
+.\" synced with r20061
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -72,7 +72,7 @@ mencoder \- codificatore di film
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[titolo | [titolo_iniziale]\-titolo_finale ]
+.I [dvd|dvdnav]://[titolo | [titolo_iniziale]\-titolo_finale ]
 [opzioni]
 .
 .br
@@ -86,6 +86,13 @@ mencoder \- codificatore di film
 .B mplayer
 'in +\n[.k]u
 .I tv://[canale]
+[opzioni]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I radio://[canale o frequenza][/capture]
 [opzioni]
 .
 .br
@@ -381,6 +388,19 @@ Regola il canale alpha della finestra del video.
 .PD 1
 .PP
 .RS
+(I seguenti tasti sono validi solo se utilizzi il driver di uscita video sdl.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "c\ \ \ \ "
+Passa attraverso le modalità a schermo pieno disponibili.
+.IPs "n\ \ \ \ "
+Ripristina la modalità di default.
+.RE
+.PD 1
+.PP
+.RS
 (I seguenti tasti sono validi solo se utilizzi una tastiera con tasti
 multimediali.)
 .RE
@@ -422,7 +442,7 @@ Apre le preferenze.
 .PP
 .RS
 (I seguenti tasti sono validi solo se MPlayer è stato compilato col supporto
-di ingresso TV e hanno precedenza su quelli definiti precedentemente.)
+di ingresso TV o DVB e hanno precedenza su quelli definiti precedentemente.)
 .RE
 .PP
 .PD 0
@@ -435,6 +455,33 @@ Cambia la norma (PAL/NTSC).
 Cambia la lista dei canali.
 .RE
 .PD 1
+.PP
+.RS
+(I seguenti tasti sono validi solo se MPlayer è stato compilato col supporto
+dvdnav: vengono usati per navigare nei menu)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "8 tastierino numerico"
+Sceglie il pulsante su.
+.IPs "2 tastierino numerico"
+Sceglie il pulsante giù.
+.IPs "4 tastierino numerico"
+Sceglie il pulsante sinistra.
+.IPs "6 tastierino numerico"
+Sceglie il pulsante destra.
+.IPs "5 tastierino numerico"
+Ritorna al menu principale.
+.IPs "7 tastierino numerico"
+Ritorna al menu più prossimo (l'ordine di preferenza è:
+capitolo->titolo->principale).
+.IPs "enter tastierino numerico"
+Conferma la scelta.
+.RE
+.PD 1
+.PP
+.RS
 .
 .TP
 .B controlli da mouse
@@ -913,6 +960,21 @@ Specifica il menu principale.
 Visualizza il menu principale alla partenza di MPlayer.
 .
 .TP
+.B \-mouse-movements
+Permette ad MPlayer di ricevere eventi del puntatore riportati dal driver di
+uscita video (attualmente sono supportati solo derivati diu X11).
+Necessario per selezionare i bottoni nei menu dei DVD.
+.
+.TP
+.B \-noconsolecontrols
+Impedisce ad MPlayer di leggere gli eventi dei tasti dallo stanrd input.
+Utile quando si leggono dati direttamente dallo standard input.
+Questa opzione viene abilitata automaticamente quando viene trovato \- sulla
+riga comando.
+Ci sono situazioni in cui devi impostarlo manualmente, per es.\& se apri
+/dev/\:stdin (o l'equivalente sul tuo sistema), usi stdin in una playlist o
+vuoi leggere da stdin più avanti attraverso i comandi slave loadfile o loadlist.
+.
 .B \-noconsolecontrols
 Evita che MPlayer legga gli eventi della tastiera dall'input standard.
 Utile quando si leggono dati dall'input standard (stdin).
@@ -937,9 +999,14 @@ Disabilita la gestione dell'ingresso della pressione/\:rilascio dei bottoni
 del mouse (i menu del contesto di mozplayerxp si basano su questa opzione).
 .
 .TP
-.B \-nortc (solo RTC)
-Disabilita l'utilizzo di Linux RTC (realtime clock, orologio in tempo reale \- /dev/\:rtc)
+.B \-rtc (solo RTC)
+Abilita l'utilizzo di Linux RTC (realtime clock, orologio in tempo reale \- /dev/\:rtc)
 per la gestione delle temporizzazioni.
+Questo risveglia il processo ogni 1/1024 di secondo per controllare il tempo
+corrente.
+Inutile con kernel Linux moderni configurati come desktop, visto che essi
+risvegliano già il processo con una precisione simile usando lo sleep normale
+di sistema.
 .
 .TP
 .B \-playing-msg <stringa>
@@ -1000,8 +1067,9 @@ DOCS/tech/slave.txt per la loro descrizione.
 .
 .TP
 .B \-softsleep
-Usa temporizzazioni software di alta qualità al posto di RTC.
-Preciso come l'utilizzo di RTC senza richiedere privilegi speciali.
+Controlla la temporizzazione verificando continuamente il tempo corrente invece
+di chiedere al kernel di risvegliare MPlayer al momento giusto.
+Utile se la temporizzazione del tuo kernel è imprecisa e non puoi usare RTC.
 Utilizza però maggiormente la CPU.
 .
 .TP
@@ -1617,6 +1685,56 @@ specificare in quanti Bytes vuoi che MPlayer cerchi gli ID audio e video
 desiderati.
 .
 .TP
+.B \-radio <opzione1:opzione2:...> (solo radio)
+Queste opzioni impostano svariati parametri per il modulo di cattura radio.
+Per ascoltare la radio con MPlayer usa 'radio://<frequenza>' (se non viene
+fornita l'opzione channels) o 'radio://<numero_canale>' (se viene fornita
+l'opzione channels) come URL del filmato.
+Per avviare il sottosistema di cattura, usa 'radio://<frequenza o canale>/capture'.
+Se la parola chiave capture non viene fornita, puoi ascoltare la radio usando
+solo l'entrata line-in.
+Usare capture per ascoltare non è consigliato, a causa di problemi di
+sincronizzazione, che rendono spiacevole l'attività.
+.sp 1
+Le opzioni disponibili sono:
+.RSs
+.IPs device=<valore>
+Dispositivo radio da usare (default: /dev/radio0).
+.IPs driver=<valore>
+Driver radio da usare (default: v4l2 se disponibile, altrimenti v4l).
+Attualmente sono supportati i driver v4l e v4l2.
+.IPs volume=<0..100>
+volume audio del dispositivo radio (default: 100)
+.IPs channels=<frequenza>\-<nome>,<frequenza>\-<nome>,...
+Imposta la lista dei canali.
+Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
+I nomi dei canali verranno scritti usando l'OSD e i comandi slave
+radio_step_channel e radio_set_channel saranno utilizzabili da un controllo
+remoto (dai un'occhiata a LIRC).
+Quando fornito, un numero nell'URL del filmato sarà trattato come la posizione
+del canale nella lista dei canali.
+.br
+.I ESEMPIO:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<valore> (con cattura (capture) radio abilitata)
+Nome del dispositivo da cui catturare l'audio.
+Senza tale nome la cattura sarà disabilitata anche se la parola
+chiave 'capture' appare nell'URL.
+Per i dispositivi ALSA deve essere usato nella forma hw=<scheda>.<dispositivo>.
+Se il nome contiene un '=', il modulo userà ALSA per la cattura, se no OSS.
+.IPs arate=<valore> (con cattura radio abilitata)
+Frequenza in campioni per secondo (default: 44100).
+.br
+.I NOTA:
+Quando usi la cattura audio, imposta anche l'opzione \-rawaudio rate=<valore>
+con lo stesso valore di arate.
+Se hai problemi colla velocità audio (va troppo veloce), prova la riproduzione
+con valori di frequenza differenti (per es.\& 48000,44100,32000,...).
+.IPs achannels=<valore> (con cattura radio abilitata)
+Numero di canali audio da catturare.
+.RE
+.
+.TP
 .B \-tsprog <1\-65534>
 Nella riproduzione di un flusso MPEG-TS puoi specificare con questa opzione
 quale programma (se presente) vuoi usare.
@@ -1669,7 +1787,7 @@ Regola il sintonizzatore sul canale <valore>.
 .IPs chanlist=<valore>
 disponibili: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<canale>\-<nomecanale>,<canale>\-<nomecanale>,...
-Indica i nomi dei canali.
+Imposta la lista dei canali.
 Usa _ per gli spazi nei nomi (o divertiti con il quoting ;-).
 I nomi dei canali verranno scritti usando l'OSD e i comandi slave tv_step_channel,
 tv_set_channel e tv_last_channel saranno utilizzabili da un controllo
@@ -2379,8 +2497,8 @@ Seleziona la modalità noblock (non bloccante).
 .IPs device=<dispositivo)
 Seleziona il nome del dispositivo.
 Sostituisci ogni ',' con '.' ed ogni ':' con '=' nel nome del dispositivo ALSA.
-Devi essere sicuro di non attivare questa opzione se vuoi l'uscita hwac3 attraverso
-S/PDIF, a meno che tu non sappia veramente come attivarla correttamente.
+Se vuoi l'uscita video hwac3 attraverso S/PDIF, usa "iec958" o "spdif" come
+dispositivo, a meno che tu non sappia davvero come attivarla correttamente.
 .RE
 .PD 1
 .
@@ -2403,7 +2521,7 @@ Seleziona il canale del mixer audio (default: pcm).
 .PD 1
 .
 .TP
-.B "sdl\ \ \ \ "
+.B sdl (solo SDL)
 driver di uscita audio molto indipendente dalla piattaforma, che utilizza la
 libreria SDL (Simple Directmedia Layer)
 .PD 0
@@ -5181,7 +5299,7 @@ Ruota di 90 gradi in senso antiorario e ribalta.
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
+.B scale[=w:h[:ilaced[:chr_drop[:par[:par2[:presize[:noup[:arnd]]]]]]]]
 Scala l'immagine con la modalità software (lento) ed esegue una conversione
 dello spazio colore YUV<\->RGB (vedi anche \-sws).
 .RSs
@@ -5203,7 +5321,7 @@ d_width/\:d_height (d_larghezza / d_altezza)!
 .br
 -(n+8): Come -n sopra ma arrotonda la dimensione al più vicino multiplo di 16.
 .REss
-.IPs <interlaced>
+.IPs <ilaced>
 Attiva la scalatura interlacciata.
 .RSss
 0: non attiva (default)
@@ -5221,7 +5339,7 @@ eliminazione crominanza
 .br
 3: Utilizza solo l'ottava ogni 8 linee di ingresso per la crominanza.
 .REss
-.IPs "<param>[:<param2>] (vedi anche \-sws)"
+.IPs "<par>[:<par2>] (vedi anche \-sws)"
 Seleziona alcuni parametri di scalatura a seconda dell'algoritmo di scalatura
 selezionato con \-sws.
 .RSss
@@ -6713,8 +6831,10 @@ richiesta (brutto).
 .
 .TP
 .B screenshot
-Permette l'acquisizione di istantanee del filmato usando il comando di input
-screenshot (collegato di default al tasto 's').
+Permette l'acquisizione di istantanee del filmato usando comandi slave che
+possono venir collegati a comandi di input.
+Vedi la documentazione per la modalità slave e la sezione CONTROLLI INTERATTIVI
+per i dettagli.
 Verranno salvati dei file con nome 'shotNNNN.png' nella directory corrente,
 usando il primo numero disponibile - nessun file sarà sovrascritto.
 Il filtro se non viene usato non appesantisce il programma e accetta uno spazio
@@ -7293,7 +7413,7 @@ modo qualità, valori alti rappresentano una qualità migliore (mutualmente
 esclusivo con br)
 .
 .TP
-.B object=<0\-3>
+.B object=<1\-4>
 complessità del tipo di oggetto
 .PD 0
 .RSs
@@ -8712,15 +8832,15 @@ Attualmente funziona solo se la rilevazione del cambio scena è disattivata
 .
 .TP
 .B vglobal=<0\-3>
-Controlla la scrittura dell'intestazione video globale.
+Controlla la scrittura delle intestazioni video globali.
 .PD 0
 .RSs
 .IPs 0
-Il codec decide quando deve scrivere l'intestazione globale (default).
+Il codec decide quando deve scrivere le intestazioni globali (default).
 .IPs 1
-Scrive l'intestazione globale solo in extradata (necessario per .mp4/MOV/NUT).
+Scrive le intestazioni globali solo in extradata (necessario per .mp4/MOV/NUT).
 .IPs 2
-Scrive l'intestazione globale solo prima dei fotogrammi chiave.
+Scrive le intestazioni globali solo prima dei fotogrammi chiave.
 .IPs 3
 Combina 1 e 2.
 .RE
@@ -9398,7 +9518,7 @@ Un bitrate costante può essere ottenuto combinando questa opzione con
 vbv_maxrate ottenendo però una significativa riduzione della qualità.
 .
 .TP
-.B qp_constant=<0\-51>
+.B qp=<0\-51>
 Questo seleziona il quantizzatore da usare.
 I fotogrammi I e B sono spostati di questo valore rispettivamente da ip_factor
 e pb_factor.
@@ -9572,8 +9692,8 @@ Visto che utilizza molto poco tempo rispetto al guadagno in qualità che si
 ottiene, non è molto consigliato disabilitarlo.
 .
 .TP
-.B deblockalpha=<-6\-6>
-Parametro AlphaC0 del filtro di de-block (default: 0).
+.B deblock=<-6\-6>,<-6\-6>
+Il primo parametro è l'AlphaC0 (default: 0).
 Controlla la soglia per il filtro di de-block in-loop di H.264.
 Per prima cosa, questo parametro controlla la massima quantità di cambiamento
 che il filtro può causare su ogni pixel.
@@ -9582,18 +9702,16 @@ spigoli che vengono filtrati.
 Un valore positivo riduce di molto gli artefatti dei blocchi ma rovina anche
 i dettagli.
 .br
+Il secondo parametro è il Beta (default: 0).
+Influenza la soglia del dettaglio.
+Blocchi molto dettagliati non vengono filtrati, visto che lo smussamento
+causato dal filtro sarebbe più visibile del blocco originario.
+.br
 Il comportamento di default del filtro praticamente ottiene sempre una qualità
 ottimale perciò è meglio lasciarlo stare oppure fare solo piccoli
 aggiustamenti.
 Però, se il materiale originale ha già un po' di effetti a blocchi o del
 disturbo che vorresti eliminare può essere una buona idea alzarlo un poco.
-.
-.TP
-.B deblockbeta=<-6\-6>
-Parametro beta del filtro di de-block (default: 0).
-Influenza la soglia di dettaglio.
-Blocchi molto dettagliati non vengono filtrati visto che la smussatura creata
-dal filtro verrebbe notata di più rispetto ai blocchi originali.
 .
 .TP
 .B (no)cabac
@@ -9615,7 +9733,7 @@ Valore massimo di quantizzazione (default: 51).
 .TP
 .B qp_step=<1\-50> (ABR o modalità a due passi)
 Valore massimo di incremento / decremento del valore di quantizzazione tra
-fotogrammi (default: 2).
+fotogrammi (default: 4).
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR o modalità a due passi)
@@ -9640,7 +9758,7 @@ occupazione iniziale del buffer, come frazione di vbv_bufsize (default: 0.9)
 Fattore di quantizzazione tra i fotogrammi I e P (default: 1.4)
 .
 .TP
-.B pb_factor=<value>
+.B pb_factor=<valore>
 Fattore di quantizzazione tra i fotogrammi P e B (default: 1.3)
 .
 .TP
@@ -9669,8 +9787,7 @@ forzano a variazioni più dolci.
 .
 .TP
 .B zones=<zona0>[/<zona1>[/...]]
-Qualità specificata dall'utente per parti specifiche (finale, crediti, ...)
-(ABR oppure modalità a due passi).
+Qualità specificata dall'utente per parti specifiche (finale, crediti, ...).
 Ogni zona è <fotogramma-iniziale>,<fotogramma-finale>,<opzione> dove opzione
 può essere
 .PD 0
@@ -9689,20 +9806,20 @@ comunque soggetta alla compensazione dell'overflow ed a qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-3>
+.B direct_pred=<nome>
 Determina il tipo di previsione del movimento usato per i macroblocchi
 diretti nei fotogrammi di tipo B.
 .PD 0
 .RSs
-.IPs 0
+.IPs none
 Nessuno: I macroblocchi diretti non vengono usati.
-.IPs 1
+.IPs spatial
 Spaziale: I vettori di movimento sono estrapolati dai blocchi vicini.
 (default)
-.IPs 2
+.IPs temporal
 Temporale: I vettori di movimento vengono interpolati dai fotogrammi di tipo
 P che seguono.
-.IPs 3
+.IPs auto
 Automatica: Il codec sceglie tra spaziale e temporale per ciascun fotogramma.
 .RE
 .PD 1
@@ -9711,7 +9828,8 @@ Le due previsioni spaziali e temporali hanno approssimativamente la
 stessa velocità e qualità (PSNR), la scelta tra una o l'altra dipende dal
 contenuto video.
 Quella automatica è leggermente migliore, ma più lenta.
-Utilizzare direct_pred=0 è contemporaneamente più lento e genera una qualità
+Quella automatica è la migliore se combinata con modalità a più passi.
+Utilizzare direct_pred=none è contemporaneamente più lento e genera una qualità
 peggiore.
 .RE
 .
@@ -9725,46 +9843,38 @@ fotogramma B rispetto ai riferimenti.
 Necessita di bframes > 1.
 .
 .TP
-.B (no)i4x4
-Utillizza anche il macroblocco di tipo i4x4 (default: abilitato).
-Senza questa opzione i fotogrammi di tipo P e B usaranno solo i16x16 e i tipi
-inter specificati sotto.
-.
-.TP
-.B (no)i8x8
-Utillizza anche il macroblocco di tipo i8x8 (default: abilitato).
-Questa opzione non ha effetto a meno che non sia abilitato 8x8dct.
-.
-.TP
-.B (no)b8x8mv
-Utilizza, per i fotogrammi di tipo B, anche i tipi di macroblocchi b16x8,
-b8x16, b8x8 (default: abilitato).
-Senza questa opzione i fotogrammi di tipo B utilizzeranno solo i tipi
-i16x16, i8x8, i4x4, b16x16, skip, direct.
-Vedi 4x4mv per i dettagli.
-.
-.TP
-.B (no)8x8mv
-Utilizza anche i tipi di macroblocchi p16x8, p8x16, p8x8 (default: enabled).
-Senza questa opzione i fotogrammi di tipo P useranno solo i tipi
-i16x16, i8x8, i4x4, p16x16, skip.
-Questa opzione è fornita solo per effettuare esperimenti.
-Non si raccomanda di disabilitare 8x8mv in codifiche reali.
-.
-.TP
-.B (no)4x4mv
-Utilizza anche i macroblocchi di tipo p8x4, p4x8, p4x4 (default: disabilitato).
-Senza questa opzione i fotogrammi di tipo P utilizzeranno solo i tipi
-i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
-Necessita di 8x8mv.
+.B partitions=<lista>
+Abilita alcuni tipi di macroblocco opzionali (p8x8, b8x8, i8x8, i4x4).
+.PD 0
+.RSs
+.IPs p8x8 (default)
+Abilita i tipi p16x8, p8x16, p8x8.
+.IPs p4x4
+Abilita i tipi p8x4, p4x8, p4x4.
+p4x4 è consigliato solo con subq >= 5, e solo a basse risoluzioni.
+.IPs b8x8
+Abilita i tipi b16x8, b8x16, b8x8.
+.IPs i8x8
+Abilita i tipi i8x8.
+i8x8 non ha alcun effetto se 8x8dct non è abilitato.
+.IPs i4x4
+Abilita il tipo i4x4.
+.IPs all
+Abilita tutti i tipi suddetti.
+.IPs none
+Disabilita tutti i tipi suddetti.
+.RE
+.PD 1
+.RS
+A dispetto di questa opzione, i tipi di macroblocco p16x16, b16x16, e i16x16
+sono sempre abilitati.
 .br
 L'idea è quella di trovare il tipo e la dimensione che descrive meglio una
 certa area dell'immagine.
 Ad esempio una carrellata su tutta la scena viene descritta meglio da blocchi
 16x16, mentre piccoli oggetti in movimento sono rappresentati meglio da blocchi
 più piccoli.
-.br
-4x4mv è raccomandato solo con subq >= 3.
+.RE
 .
 .TP
 .B (no)8x8dct
@@ -9774,18 +9884,18 @@ Permette anche il tipo di macroblocco i8x8.
 Senza questa opzione viene utilizzata solo la DCT 4x4.
 .
 .TP
-.B me=<1\-4>
+.B me=<nome>
 Seleziona l'algoritmo di stima del movimento a pixel intero.
 .PD 0
 .RSs
-.IPs 1
+.IPs dia
 ricerca a diamante, raggio 1 (veloce)
-.IPs 2
+.IPs hex
 ricerca ad esagono, raggio 2 (default)
-.IPs 3
+.IPs umh
 ricerca multi-esagono mutevole (lenta)
-.IPs 4
-ricerca esaustiva (molto lenta, e non migliore di 3)
+.IPs esa
+ricerca esaustiva (molto lenta, e non migliore di umh)
 .RE
 .PD 1
 .
@@ -9869,13 +9979,23 @@ quantizzazione ottimale della rate-distortion
 .PD 0
 .RSs
 .IPs 0
-disabilitata
+disabilitata (default)
 .IPs 1
-abilitata solo per la codifica finale (default)
+abilitata solo per la codifica finale
 .IPs 2
 abilitata durante ogni decisione di modalità (lento, richiede subq>=6)
 .RE
 .PD 1
+.
+.TP
+.B deadzone_inter=<0\-32>
+Imposta la dimensione della zona morta di quantizzazione di luminanza inter
+per quantizzazione non trellis (default: 21).
+.
+.TP
+.B deadzone_intra=<0\-32>
+Imposta la dimensione della zona morta di quantizzazione di luminanza intra
+per quantizzazione non trellis (default: 21).
 .
 .TP
 .\" "early skip detection": is it right "rilevazione anticipata dello scarto"??
@@ -9981,6 +10101,18 @@ Richiede che libx264 sia compilata con il supporto per i pthread; se non lo
 multithreading.
 .
 .TP
+.B (no)global_header
+Fa in modo che SPS e PPS appaiano solo una volta, all'inizio del flusso di bit
+(default: disabilitato).
+Alcuni lettori, come la Sony PSP, richiedono l'uso di questa opzione.
+Il comportamento di default fa in modo che SPS e PPS vengano ripetuti prima di
+ogni fotogramma IDR.
+.
+.TP
+.B (no)interlaced
+Tratta il contenuto video come se fosse interlacciato.
+.
+.TP
 .B log=<-1\-3>
 Seleziona la quantità di informazioni di log stampate a video.
 .PD 0
@@ -10009,6 +10141,13 @@ perfetti (sono semplicemente la media dei valori di PSNR di ogni fotogramma).
 Sono mantenuti solo per compararli con il codec di riferimento JM.
 Per tutto il resto, utilizza perfavore sia il PSNR 'Global' oppure il valore per
 ogni fotogramma, ottenuto con log=3.
+.
+.TP
+.B (no)ssim
+Stampa i risultati della metrica strutturale di similarità
+(Structural Similarity Metric).
+Questa è un'alternativa a PSNR, e può esser meglio correlata con la qualità
+percepita del video compresso.
 .
 .TP
 .B (no)visualize
@@ -10139,6 +10278,16 @@ modificherà il flusso video in modo da farlo sembrare codificato a 25 fps.
 Funziona solo  con video in formato MPEG-2 quando il framerate di uscita,
 eventualmente convertito con \-ofps, è 24000/1001 oppure 24 fps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
+.
+.
+.SS FFmpeg libavformat demuxer (\-lavfdopts)
+.
+.TP
+.B probesize=<valore>
+Massima dimensione dei dati da testare durante la fase di rilevazione.
+Nel caso di MPEG-TS questo valore indentifica il massimo numero di pacchetti
+TS da scansionare.
+.
 .
 .
 .SS FFmpeg libavformat muxer (\-lavfopts) (vedi anche \-of lavf)
