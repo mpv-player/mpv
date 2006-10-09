@@ -841,7 +841,7 @@ demux_mkv_read_trackencodings (demuxer_t *demuxer, mkv_track_t *track)
             for (i=0; i<n; i++)
               if (e.order <= ce[i].order)
                 break;
-            ce = (mkv_content_encoding_t *) realloc (ce, (n+1) *sizeof (*ce));
+            ce = realloc (ce, (n+1) *sizeof (*ce));
             memmove (ce+i+1, ce+i, (n-i) * sizeof (*ce));
             memcpy (ce+i, &e, sizeof (e));
             n++;
