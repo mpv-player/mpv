@@ -119,6 +119,7 @@
 #define ID_ASPECT3           85
 #define ID_ASPECT4           86
 #define ID_SUBWINDOW         87
+#define ID_TIMER             88
 
 /* gtk emulation */
 #define GTK_MB_FATAL         0x1

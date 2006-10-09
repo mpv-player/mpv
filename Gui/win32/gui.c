@@ -566,6 +566,18 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 mplayer_put_key(MOUSE_BTN6_DBL);
             break;
         }
+        case WM_TIMER:
+        {
+            if(fullscreen) while(ShowCursor(FALSE) >= 0){}
+            KillTimer(hWnd, ID_TIMER);
+            return 0;
+        }
+        case WM_MOUSEMOVE:
+        {
+            ShowCursor(TRUE);
+            SetTimer(hWnd, ID_TIMER, 3000, (TIMERPROC) NULL);
+            break;
+        }
         case WM_WINDOWPOSCHANGED:
         {
             int tmpheight=0;
@@ -573,7 +585,6 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             static uint32_t rect_height;
             RECT rd;
             POINT pt;
-            while(ShowCursor(TRUE) <= 0){}
             pt.x = 0;
             pt.y = 0;
             GetClientRect(hWnd, &rd);
