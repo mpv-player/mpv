@@ -531,9 +531,9 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
                 case ID_TRACKLIST:
                     if(HIWORD(wParam) == LBN_DBLCLK)
                     {
-                        if(guiIntfStruct.Playing && selected)
-                            pl->current = selected - 2;
-                        else if(selected) pl->current = selected - 1;
+                        if(selected) pl->current = selected - 1;
+                            mplSetFileName(NULL, pl->tracks[pl->current]->filename, STREAMTYPE_STREAM);
+                        mplGotoTheNext = 0;
                         gui->startplay(gui);
                     }
                     return 0;
@@ -552,6 +552,7 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
                 case ID_PLAY:
                 {
                     if(selected) pl->current = selected - 1;
+                        mplSetFileName(NULL, pl->tracks[pl->current]->filename, STREAMTYPE_STREAM);
                     mplGotoTheNext = 0;
                     gui->startplay(gui);
                     break;
