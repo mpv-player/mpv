@@ -1,4 +1,4 @@
-.\" synced with r19134
+.\" synced with r19361
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -86,6 +86,13 @@ mencoder \- codificatore di film
 .B mplayer
 'in +\n[.k]u
 .I tv://[canale]
+[opzioni]
+.
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I pvr://
 [opzioni]
 .
 .br
@@ -194,12 +201,13 @@ yuv4mpeg, FILM e RoQ, supportato da molti codec nativi o binari.
 Puoi guardare Video CD, SVCD, DVD, 3ivx, DivX 3/4/5 ed addirittura film in
 formato WMV.
 .PP
-MPlayer supporta un ampia gamma di driver di uscita video ed audio.
+MPlayer supporta un'ampia gamma di driver di uscita video ed audio.
 Funziona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
-Quartz, Mac OS X CoreVideo, ma puoi anche usare GGI, SDL (e tutti i loro driver), VESA (su ogni
-scheda compatibile VESA, anche senza X11), qualche driver a basso livello
-specifico per alcune schede video (per Matrox, 3dfx e ATI) e qualche scheda
-di decodifica MPEG hardware come la Siemens DVB, DXR2 e DXR3/\:Hollywood+.
+Quartz, Mac OS X CoreVideo, ma puoi anche usare GGI, SDL (e tutti i loro driver),
+VESA (su ogni scheda compatibile VESA, anche senza X11), qualche driver a basso
+livello specifico per alcune schede video (per Matrox, 3dfx e ATI) e qualche
+scheda di decodifica MPEG hardware come la Siemens DVB, Hauppauge PVR (IVTV),
+DXR2 e DXR3/\:Hollywood+.
 La maggior parte supporta la scalatura via software o hardware così puoi
 gustarti i filmati a schermo intero.
 .PP
@@ -508,6 +516,11 @@ Le opzioni che si attivano senza valori possono essere abilitate impostandole
 a 'yes', '1' oppure 'true' e disabilitate impostandole a 'no', '0' oppure 'false'.
 Anche le sotto-opzioni possono essere specificate in questo modo.
 .PP
+Puoi anche scrivere configurazioni specifiche per i singoli file.
+Se desideri avere un file di configurazione per un film che si chiama 'movie.avi',
+crea un file di nome 'movie.avi.conf' con le opzioni specifiche dentro di esso
+e salvalo in ~/.mplayer/ oppure nella stessa directory del file del film.
+.PP
 .I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MPLAYER:
 .sp 1
 .nf
@@ -546,12 +559,6 @@ subalign=2
 subpos=96
 spuaa=20
 .fi
-.PP
-Puoi anche scrivere configurazioni specifiche per i singoli file.
-Se desideri avere un file di configurazione per un film che si chiama 'movie.avi',
-crea un file di nome 'movie.avi.conf' con le opzioni specifiche dentro di esso
-e salvalo in ~/.mplayer/ oppure nella stessa directory del file del film.
-.
 .
 .\" --------------------------------------------------------------------------
 .\" Profili
@@ -788,9 +795,15 @@ xmga, xv, xvidix e dfbmga.
 .B \-framedrop (vedi anche \-hardframedrop)
 Elimina la visualizzazione di alcuni fotogrammi per mantenere il sincronismo
 A/V con sistemi lenti.
-I filtri video non sono applicati a questi fotogrammi.
-Nel caso di fotogrammi di tipo B (B-frames) anche la decodifica viene completamente
-saltata.
+I filtri video non vengono applicati a questi fotogrammi.
+Nel caso di fotogrammi di tipo B (B-frames) viene saltata completamente anche
+la decodifica.
+.
+.TP
+.B \-(no)gui
+Abilita o disabilita l'interfaccia GUI (il default dipende dal nome dell'eseguibile).
+Funziona solo come primo argomento sulla riga comando.
+Non funziona come opzione nel file di configurazione.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -1390,6 +1403,80 @@ Utilizza IPv6 per le connessioni di rete.
 Passa automaticamente a IPv4 se necessario.
 .
 .TP
+.B \-pvr <opzione1:opzione2:...> (solo PVR)
+Questa opzione imposta varie proprietà di codifica per il modulo di cattura PVR.
+Deve essere usata con schede di codifica MPEG via hardware suppportate dal
+driver V4L2.
+Le schede Hauppauge WinTV PVR\-150/250/350/500 e tutte quelle basate su IVTV
+sono conosciute come schede di cattura PVR.
+Attenzione che solamente il kernel Linux 2.6.18 o maggiore è capace di gestire
+il flusso MPEG attraverso lo strato V4L2.
+Per la cattura hardware di un flusso MPEG e la visione attraverso
+MPlayer/MEncoder, usa 'pvr://' come URL del filmato.
+.sp 1
+Le opzioni disponibili sono:
+.RSs
+.IPs aspect=<0\-3>
+Specifica il rapporto di aspetto:
+.RSss
+0: 1:1
+.br
+1: 4:3 (default)
+.br
+2: 16:9
+.br
+3: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+Specifica la frequenza audio di codifica (default: 48000 Hz, disponibili:
+32000, 44100 e 48000 Hz).
+.IPs alayer=<1\-3>
+Specifica lo strato (layer) di codifica audio (default: strato 2).
+.IPs abitrate=<32\-448>
+Specifica la frequenza di codifica audio in kpbs (default: 384 kbps).
+.IPs amode=<valore>
+Specifica la modalità di codifica audio.
+I Preset disponibili sono:
+.RSss
+stereo (default)
+.br
+joint_stereo
+.br
+dual
+.br
+mono
+.REss
+.IPs vbitrate=<valore>
+Specify average video bitrate encoding (default: 6 Mbps).
+.IPs vmode=<valore>
+Specifica la modalità di codifica video:
+.RSss
+vbr: Variable BitRate (frequenza variabile) (default)
+.br
+cbr: Constant BitRate (frequenza costante)
+.REss
+.IPs vpeak=<valore>
+Specifica il picco di frequenza dell codifica video (utile solo per codifica
+VBR, default: 9.6 Mbps).)
+.IPs fmt=<valore>
+Seleziona un formato MPEG per la codifica:
+.RSss
+ps:    MPEG-2 Program Stream (default)
+.br
+ts:    MPEG-2 Transport Stream
+.br
+mpeg1: MPEG-1 System Stream
+.br
+vcd:   flusso compatibile Video CD
+.br
+svcd:  flusso compatibile Super Video CD
+.br
+dvd:   flusso compatibile DVD
+.REss
+.RE
+.PD 1
+.
+.TP
 .B \-rawaudio <opzione1:opzione2:...>
 Questa opzione ti permette di riprodurre file audio grezzi.
 Devi usare anche l'opzione \-demuxer rawaudio.
@@ -1536,7 +1623,7 @@ quale programma (se presente) vuoi usare.
 Può essere usato con \-vid e \-aid.
 .
 .TP
-.B \-tv <opzione1:opzione2:...> (solo TV)
+.B \-tv <opzione1:opzione2:...> (solo TV/\:PVR)
 Questa opzione regola varie proprietà del modulo di cattura TV.
 Per guardare la TV con MPlayer usa 'tv://' o 'tv://<numero_canale>'
 o anche 'tv://<nome_canale> (cerca channel_name sotto l'opzione channels più giù)
@@ -2303,7 +2390,7 @@ driver di uscita audio ALSA 0.5
 .
 .TP
 .B "oss\ \ \ \ "
-Driver di uscita audio OSS
+driver di uscita audio OSS
 .PD 0
 .RSs
 .IPs <dispositivo-dsp>
@@ -2393,7 +2480,7 @@ driver di uscita audio nativo waveout di Windows
 .
 .TP
 .B dsound (solo Windows)
-driver di uscita audio DirectX DirectSound
+Driver di uscita audio DirectX DirectSound
 .PD 0
 .RSs
 .IPs device=<devicenum>
@@ -2405,11 +2492,25 @@ dispositivi disponibili.
 .
 .TP
 .B dxr2 (vedi anche \-dxr2) (solo DXR2 only)
-driver di uscita audio specifico per la scheda Creative DXR2
+Driver di uscita audio specifico per la scheda Creative DXR2
+.
+.TP
+.B ivtv (solo IVTV)
+Driver di uscita audio specifico MPEG per schede IVTV.
+Funziona solo con \-ac hwmpa.
 .
 .TP
 .B mpegpes (solo DVB)
-driver di uscita audio specifico per DVB
+Driver di uscita audio per schede DVB che scrive l'uscita su un file MPEG-PES
+se non c'è alcuna scheda DVB presente.
+.PD 0
+.RSs
+.IPs card=<1\-4>
+Scheda DVB da usare se più di una presenti.
+.IPs file=<nomefile>
+nome file di uscita
+.RE
+.PD 1
 .
 .TP
 .B "null\ \ \ "
@@ -2418,7 +2519,7 @@ Utilizza \-noosund per i test di velocità (benchmarking).
 .
 .TP
 .B "pcm\ \ \ \ "
-driver di uscita audio grezzo per scrittura di file PCM/\:wave
+Driver di uscita audio grezzo per scrittura di file PCM/\:wave
 .PD 0
 .RSs
 .IPs (no)waveheader
@@ -3578,6 +3679,22 @@ Specifica il numero di dispositivo se hai più di una scheda em8300.
 .PD 1
 .
 .TP
+.B ivtv (solo IVTV)
+Driver di uscita video specifico per uscita TV-Out con chip di decodifica MPEG
+Conexant CX23415 (iCompression iTVC15) o Conexant CX23416 (iCompression iTVC16)
+(Hauppauge WinTV PVR-150/250/350/500)
+Vedi anche il filtro video lavc.
+.PD 0
+.RSs
+.IPs device
+Seleziona esplicitamente il dispositivo del decodificatore MPEG da usare
+(default: /dev/video16).
+.IPs output
+Seleziona esplicitamente l'uscita TV-Out da usare per il segnale video.
+.RE
+.PD 1
+.
+.TP
 .B mpegpes (solo DVB)
 Driver di uscita video specifico per schede DVB, che scrive i dati su un file
 in formato MPEG-PES se non è presente nessuna scheda DVB.
@@ -4612,7 +4729,7 @@ hard-clip se il livello è troppo elevato.
 .PD 1
 .
 .TP
-.B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+.B pan=n[:L00:L01:L02:...L10:L11:L12:...Ln0:Ln1:Ln2:...]
 Miscela i canali arbitrariamente.
 Fondamentalmente è una combinazione dei filtri volume e channels
 che può essere utilizzato per sotto-miscelare molti canali in pochi,
@@ -4628,7 +4745,7 @@ con questo filtro si trova nella sezione degli esempi verso la fine.
 .RSs
 .IPs "<n>\ \ "
 numero di canali di uscita (1\-6)
-.IPs <lij>
+.IPs <Lij>
 Quanta parte del canale di ingresso i è miscelata nel canale di uscita j (0\-1).
 Così all'inizio hai n numeri che dicono cosa fare col primo canale di ingresso,
 poi n numeri che agiscono sul secondo canale di ingresso, etc.
@@ -5064,7 +5181,7 @@ Ruota di 90 gradi in senso antiorario e ribalta.
 .RE
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup]]]]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize[:noup[:arnd]]]]]]]]
 Scala l'immagine con la modalità software (lento) ed esegue una conversione
 dello spazio colore YUV<\->RGB (vedi anche \-sws).
 .RSs
@@ -5149,6 +5266,14 @@ suo valore originario.
 .br
 2: Impedisce il ridimensionamento se entrambe le dimensioni oltrepassano il
 loro valore originario.
+.REss
+.IPs <arnd>
+Arrotondamento preciso per il ridimensionamento verticale, che può essere
+più veloce o più lento rispetto all'arrotondamento di default.
+.RSss
+0: Disabilita l'arrotondamento accurato (default).
+.br
+1: Abilita l'arrotondamento accurato.
 .REss
 .RE
 .
@@ -5507,8 +5632,8 @@ Dovresti vedere delle strisce rosse, verdi e blu dall'alto al basso.
 .
 .TP
 .B lavc[=qualità:fps]
-Conversione software veloce da YV12 a MPEG-1 da usare con DVB/\:DXR3.
-Veloce e di migliore qualità che \-vf fame.
+Conversione software veloce da YV12 a MPEG-1 da usare con DVB/\:DXR3/\:IVTV.
+Veloce e di migliore qualità rispetto a \-vf fame.
 .RSs
 .IPs <qualità>
 .RSss
@@ -5523,7 +5648,7 @@ decimale) (default: 0, trovato automaticamente basandosi sull'altezza)
 .
 .TP
 .B "fame\ \ \ "
-Conversione software veloce da YV12 a MPEG-1 fatta con libfame da usare con DVB/\:DXR3.
+Conversione software veloce da YV12 a MPEG-1 con libfame da usare con DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=aspetto]
@@ -9986,7 +10111,8 @@ Seleziona la larghezza e l'altezza del pan e scan se il video è MPEG-2.
 .
 .TP
 .B vaspect=<1 | 4/3 | 16/9 | 221/100>
-Seleziona il rapporto di aspetto per i video MPEG-1/2.
+Seleziona il rapporto di aspetto per i video MPEG-2.
+Da non usare per MPEG-1, se no l'aspetto risultante sarà decisamente errato.
 .
 .TP
 .B vbitrate=<intero>
