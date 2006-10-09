@@ -384,9 +384,6 @@ LIBS_MPLAYER = libvo/libvo.a \
                $(STATIC_LIB) \
 
 $(PRG):	$(MPLAYER_DEP)
-    ifeq ($(TARGET_WIN32),yes)
-	windres -o osdep/mplayer-rc.o osdep/mplayer.rc
-    endif
 	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
 ifeq ($(MENCODER),yes)
@@ -397,6 +394,9 @@ LIBS_MENCODER = libmpcodecs/libmpencoders.a \
 $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
 endif
+
+osdep/mplayer-rc.o: osdep/mplayer.rc
+	windres -o $@ osdep/mplayer.rc
 
 codec-cfg: codec-cfg.c codec-cfg.h help_mp.h
 	$(HOST_CC) -I. -DCODECS2HTML codec-cfg.c -o $@
