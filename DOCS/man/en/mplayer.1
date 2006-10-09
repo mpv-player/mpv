@@ -309,7 +309,7 @@ Toggle subtitle visibility.
 Cycle through the available subtitles.
 .IPs "y and g"
 Step forward/backward in the subtitle list.
-.IP "F\ \ \ \ "
+.IPs "F\ \ \ \ "
 Toggle displaying "forced subtitles".
 .IPs "a\ \ \ \ "
 Toggle subtitle alignment: top / middle / bottom.
@@ -1630,7 +1630,7 @@ These options set various parameters of the radio capture module.
 For listening to radio with MPlayer use 'radio://<frequency>'
 (if channels option is not given) or 'radio://<channel_number>'
 (if channels option is given) as a movie URL.
-To start the grabbing subsystem, use radio://<frequency or channel>/capture.
+To start the grabbing subsystem, use 'radio://<frequency or channel>/capture'.
 If the capture keyword is not given you can listen to radio
 using the line-in cable only.
 Using capture to listen is not recommended due to synchronization
@@ -1676,7 +1676,7 @@ Number of audio channels to capture.
 .RE
 .
 .TP
-.B \-tv <option1:option2:...> (TV/PVR only)
+.B \-tv <option1:option2:...> (TV/\:PVR only)
 This option tunes various properties of the TV capture module.
 For watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>'
 or even 'tv://<channel_name> (see option channels for channel_name below)
@@ -5500,7 +5500,7 @@ You should see a red, green and blue stripe from top to bottom.
 .
 .TP
 .B lavc[=quality:fps]
-Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3/IVTV.
+Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3/\:IVTV.
 Faster and of better quality than \-vf fame.
 .RSs
 .IPs <quality>
@@ -5515,7 +5515,7 @@ force output fps (float value) (default: 0, autodetect based on height)
 .
 .TP
 .B "fame\ \ \ "
-Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3/IVTV.
+Fast software YV12 to MPEG-1 conversion with libfame for use with DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=aspect]
