@@ -1165,6 +1165,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
           }
 
         case MATROSKA_ID_TRACKLANGUAGE:
+          free(track->language);
           track->language = ebml_read_utf8 (s, &l);
           if (track->language == NULL)
             goto err_out;
