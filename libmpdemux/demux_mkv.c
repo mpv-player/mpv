@@ -1007,8 +1007,7 @@ demux_mkv_read_trackentry (demuxer_t *demuxer)
   uint64_t len, length, l;
   int il;
 
-  track = malloc (sizeof (*track));
-  memset(track, 0, sizeof(*track));
+  track = calloc (1, sizeof (*track));
   /* set default values */
   track->default_track = 1;
   track->name = 0;
@@ -1769,8 +1768,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
         return 1;
 
       src = (BITMAPINFOHEADER *) track->private_data;
-      bih = malloc (track->private_size);
-      memset (bih, 0, track->private_size);
+      bih = calloc (1, track->private_size);
       bih->biSize = le2me_32 (src->biSize);
       bih->biWidth = le2me_32 (src->biWidth);
       bih->biHeight = le2me_32 (src->biHeight);
@@ -1793,8 +1791,7 @@ demux_mkv_open_video (demuxer_t *demuxer, mkv_track_t *track, int vid)
     }
   else
     {
-      bih = malloc (sizeof (BITMAPINFOHEADER));
-      memset (bih, 0, sizeof (BITMAPINFOHEADER));
+      bih = calloc (1, sizeof (BITMAPINFOHEADER));
       bih->biSize = sizeof (BITMAPINFOHEADER);
       bih->biWidth = track->v_width;
       bih->biHeight = track->v_height;
@@ -2432,8 +2429,7 @@ demux_mkv_open (demuxer_t *demuxer)
 
   mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] + a segment...\n");
 
-  mkv_d = malloc (sizeof (mkv_demuxer_t));
-  memset (mkv_d, 0, sizeof(mkv_demuxer_t));
+  mkv_d = calloc (1, sizeof (mkv_demuxer_t));
   demuxer->priv = mkv_d;
   mkv_d->tc_scale = 1000000;
   mkv_d->segment_start = stream_tell (s);
