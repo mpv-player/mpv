@@ -1101,7 +1101,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
     	i = stream_read_dword(demuxer->stream);
     mp_msg(MSGT_DEMUX,MSGL_V, "real: File version: %d\n", i);
     num_of_headers = stream_read_dword(demuxer->stream);
-//    stream_skip(demuxer->stream, 4); /* number of headers */
 
     /* parse chunks */
     for (i = 1; i <= num_of_headers; i++)
@@ -1134,7 +1133,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 4); /* avg packet size */
 		stream_skip(demuxer->stream, 4); /* nb packets */
 		priv->duration = stream_read_dword(demuxer->stream)/1000; /* duration */
-		//stream_skip(demuxer->stream, 4); /* duration */
 		stream_skip(demuxer->stream, 4); /* preroll */
 		priv->index_chunk_offset = stream_read_dword(demuxer->stream);
 		mp_msg(MSGT_DEMUX,MSGL_V,"First index chunk offset: 0x%x\n", priv->index_chunk_offset);
@@ -1230,7 +1228,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 4); /* preroll */
 		stream_skip(demuxer->stream, 4); /* duration */
 		
-//		skip_str(1, demuxer);	/* stream description (name) */
 		if ((len = stream_read_char(demuxer->stream)) > 0) {
 		    descr = malloc(len+1);
 	    	stream_read(demuxer->stream, descr, len);
@@ -1238,7 +1235,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    mp_msg(MSGT_DEMUX, MSGL_INFO,"Stream description: %s\n", descr);
 		    free(descr);
 		}
-//		skip_str(1, demuxer);	/* mimetype */
 		if ((len = stream_read_char(demuxer->stream)) > 0) {
 		    mimet = malloc(len+1);
 	    	stream_read(demuxer->stream, mimet, len);
@@ -1286,7 +1282,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"version: %d\n", version);
-//		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
                    if (version == 3) {
                     stream_skip(demuxer->stream, 2);
                     stream_skip(demuxer->stream, 10);
@@ -1337,20 +1332,16 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
 		    stream_skip(demuxer->stream, 4); // ???
 		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
-//		    stream_skip(demuxer->stream, 4); // header size == 0x4E
 		    hdr_size = stream_read_dword(demuxer->stream); // header size
 		    mp_msg(MSGT_DEMUX,MSGL_V,"header size: %d\n", hdr_size);
 		    flavor = stream_read_word(demuxer->stream);/* codec flavor id */
 		    coded_frame_size = stream_read_dword(demuxer->stream);/* needed by codec */
 		    mp_msg(MSGT_DEMUX,MSGL_V,"coded_frame_size: %d\n", coded_frame_size);
-		    //stream_skip(demuxer->stream, 4); /* coded frame size */
 		    stream_skip(demuxer->stream, 4); // big number
 		    stream_skip(demuxer->stream, 4); // bigger number
 		    stream_skip(demuxer->stream, 4); // 2 || -''-
-//		    stream_skip(demuxer->stream, 2); // 0x10
 		    sub_packet_h = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"sub_packet_h: %d\n", sub_packet_h);
-//		    stream_skip(demuxer->stream, 2); /* coded frame size */
 		    frame_size = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"frame_size: %d\n", frame_size);
 		    sub_packet_size = stream_read_word(demuxer->stream);
@@ -1738,7 +1729,6 @@ header_end:
   if(!priv->is_multirate) {
 //    printf("i=%d num_of_headers=%d   \n",i,num_of_headers);
     priv->num_of_packets = stream_read_dword(demuxer->stream);
-//    stream_skip(demuxer->stream, 4); /* number of packets */
     stream_skip(demuxer->stream, 4); /* next data header */
 
     mp_msg(MSGT_DEMUX,MSGL_V,"Packets in file: %d\n", priv->num_of_packets);
