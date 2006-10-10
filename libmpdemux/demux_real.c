@@ -1608,6 +1608,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			        }
 			        for (ii = 0; ii < cnt; ii++)
 			            ((unsigned char*)(sh->bih+1))[8+ii]=(unsigned short)stream_read_char(demuxer->stream);
+			        sh->bih->biSize += cnt;
 			    }
 		    } 
 		    
