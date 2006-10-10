@@ -193,13 +193,13 @@ static int control(priv_t *priv, int cmd, void *arg)
             return(TVI_CONTROL_FALSE);
             }
 
-        (int)*(void **)arg = priv->tunerfreq;
+        *(int *)arg = priv->tunerfreq;
         return(TVI_CONTROL_TRUE);
         }
     
     case TVI_CONTROL_TUN_SET_FREQ:
         {
-        priv->tunerfreq = (int)*(void **)arg;
+        priv->tunerfreq = *(int *)arg;
 
         if(ioctl(priv->tunerfd, TVTUNER_SETFREQ, &priv->tunerfreq) < 0) 
             {
@@ -223,13 +223,13 @@ static int control(priv_t *priv, int cmd, void *arg)
             return(TVI_CONTROL_FALSE);
             }
 
-        (int)*(void **)arg = priv->input;
+        *(int *)arg = priv->input;
         return(TVI_CONTROL_TRUE);
         }
     
     case TVI_CONTROL_SPC_SET_INPUT:
         {
-        priv->input = getinput((int)*(void **)arg);
+        priv->input = getinput(*(int *)arg);
 
         if(ioctl(priv->btfd, METEORSINPUT, &priv->input) < 0) 
             {
@@ -248,17 +248,17 @@ static int control(priv_t *priv, int cmd, void *arg)
 
     case TVI_CONTROL_AUD_GET_FORMAT:
         {
-        (int)*(void **)arg = AF_FORMAT_S16_LE;
+        *(int *)arg = AF_FORMAT_S16_LE;
         return(TVI_CONTROL_TRUE);
         }
     case TVI_CONTROL_AUD_GET_CHANNELS:
         {
-        (int)*(void **)arg = 2;
+        *(int *)arg = 2;
         return(TVI_CONTROL_TRUE);
         }
     case TVI_CONTROL_AUD_SET_SAMPLERATE:
         {
-        int dspspeed = (int)*(void **)arg;
+        int dspspeed = *(int *)arg;
 
            if(ioctl(priv->dspfd, SNDCTL_DSP_SPEED, &dspspeed) == -1) 
             {
@@ -277,12 +277,12 @@ static int control(priv_t *priv, int cmd, void *arg)
         }
     case TVI_CONTROL_AUD_GET_SAMPLERATE:
         {
-        (int)*(void **)arg = priv->dspspeed;
+        *(int *)arg = priv->dspspeed;
         return(TVI_CONTROL_TRUE);
         }
     case TVI_CONTROL_AUD_GET_SAMPLESIZE:
         {
-        (int)*(void **)arg = priv->dspsamplesize/8;
+        *(int *)arg = priv->dspsamplesize/8;
         return(TVI_CONTROL_TRUE);
         }
 
@@ -294,7 +294,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
     case TVI_CONTROL_TUN_SET_NORM:
         {
-        int req_mode = (int)*(void **)arg;
+        int req_mode = *(int *)arg;
 	u_short tmp_fps;
 
         priv->iformat = METEOR_FMT_AUTOMODE;
@@ -379,19 +379,19 @@ static int control(priv_t *priv, int cmd, void *arg)
         }
     
     case TVI_CONTROL_VID_GET_FORMAT:
-        (int)*(void **)arg = IMGFMT_UYVY;
+        *(int *)arg = IMGFMT_UYVY;
         return(TVI_CONTROL_TRUE);
 
     case TVI_CONTROL_VID_SET_FORMAT:
         {
-        int req_fmt = (int)*(void **)arg;
+        int req_fmt = *(int *)arg;
 
         if(req_fmt != IMGFMT_UYVY) return(TVI_CONTROL_FALSE);
 
         return(TVI_CONTROL_TRUE);
         }
     case TVI_CONTROL_VID_SET_WIDTH:
-        priv->geom.columns = (int)*(void **)arg;
+        priv->geom.columns = *(int *)arg;
 
         if(priv->geom.columns > priv->maxwidth) 
             {
@@ -407,11 +407,11 @@ static int control(priv_t *priv, int cmd, void *arg)
         return(TVI_CONTROL_TRUE);
 
     case TVI_CONTROL_VID_GET_WIDTH:
-        (int)*(void **)arg = priv->geom.columns;
+        *(int *)arg = priv->geom.columns;
         return(TVI_CONTROL_TRUE);
 
     case TVI_CONTROL_VID_SET_HEIGHT:
-        priv->geom.rows = (int)*(void **)arg;
+        priv->geom.rows = *(int *)arg;
 
         if(priv->geom.rows > priv->maxheight) 
             {
@@ -432,7 +432,7 @@ static int control(priv_t *priv, int cmd, void *arg)
         return(TVI_CONTROL_TRUE);        
 
     case TVI_CONTROL_VID_GET_HEIGHT:
-        (int)*(void **)arg = priv->geom.rows;
+        *(int *)arg = priv->geom.rows;
         return(TVI_CONTROL_TRUE);        
 
     case TVI_CONTROL_VID_GET_FPS:
@@ -441,7 +441,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 
 /*
     case TVI_CONTROL_VID_SET_FPS:
-        priv->fps = (int)*(void **)arg;
+        priv->fps = *(int *)arg;
 
         if(priv->fps > priv->maxfps) priv->fps = priv->maxfps;
 
