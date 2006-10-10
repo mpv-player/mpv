@@ -6206,7 +6206,7 @@ EOF
   elif cc_check -lavutil $_ld_lm ; then
     _libavutil_so=yes
   fi
-  if test "$_libavutil_so" == yes ; then
+  if test "$_libavutil_so" = yes ; then
     _res_comment="using libavutil.so, but static libavutil is recommended"
   fi
 fi
@@ -6237,7 +6237,7 @@ EOF
   elif cc_check -lavcodec $_ld_lm ; then
     _libavcodec_so=yes
   fi
-  if test "$_libavcodec_so" == yes ; then
+  if test "$_libavcodec_so" = yes ; then
     _res_comment="using libavcodec.so, but static libavcodec is recommended"
   fi
 fi
@@ -6260,7 +6260,7 @@ EOF
   elif cc_check $_ld_lm -lavformat ; then
     _libavformat_so=yes  
   fi
-  if test "$_libavformat_so" == yes ; then
+  if test "$_libavformat_so" = yes ; then
     _res_comment="using libavformat.so, but static libavformat is recommended"
   fi
 fi
