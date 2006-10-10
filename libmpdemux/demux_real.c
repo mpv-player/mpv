@@ -1602,9 +1602,9 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 			        mp_msg(MSGT_DEMUX, MSGL_ERR,"realvid: cmsg24 data too short (size %u)\n", cnt);
 			    } else  {
 			        int ii;
-			        if (cnt > 6) {
+			        if (cnt > 8) {
 			            mp_msg(MSGT_DEMUX, MSGL_WARN,"realvid: cmsg24 data too big, please report (size %u)\n", cnt);
-			            cnt = 6;
+			            cnt = 8;
 			        }
 			        for (ii = 0; ii < cnt; ii++)
 			            ((unsigned char*)(sh->bih+1))[8+ii]=(unsigned short)stream_read_char(demuxer->stream);
