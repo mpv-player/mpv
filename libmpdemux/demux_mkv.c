@@ -273,6 +273,16 @@ extern char *dvdsub_lang;
 extern char *audio_lang;
 extern int dvdsub_id;
 
+/**
+ * \brief ensures there is space for at least one additional element
+ * \param array array to grow
+ * \param nelem current number of elements in array
+ * \param elsize size of one array element
+ */
+static void grow_array(void **array, int nelem, size_t elsize) {
+  if (!(nelem & 31))
+    *array = realloc(*array, (nelem + 32) * elsize);
+}
 
 static mkv_track_t *
 demux_mkv_find_track_by_num (mkv_demuxer_t *d, int n, int type)
@@ -316,12 +326,8 @@ add_cluster_position (mkv_demuxer_t *mkv_d, uint64_t position)
     if (mkv_d->cluster_positions[i] == position)
       return;
 
-  if (!mkv_d->cluster_positions)
-    mkv_d->cluster_positions = malloc (32 * sizeof (uint64_t));
-  else if (!(mkv_d->num_cluster_pos % 32))
-    mkv_d->cluster_positions = realloc(mkv_d->cluster_positions,
-                                       (mkv_d->num_cluster_pos+32)
-                                       * sizeof (uint64_t));
+  grow_array(&mkv_d->cluster_positions, mkv_d->num_cluster_pos,
+             sizeof(uint64_t));
   mkv_d->cluster_positions[mkv_d->num_cluster_pos++] = position;
 }
 
@@ -1355,12 +1361,7 @@ demux_mkv_read_cues (demuxer_t *demuxer)
       if (time != EBML_UINT_INVALID && track != EBML_UINT_INVALID
           && pos != EBML_UINT_INVALID)
         {
-          if (mkv_d->indexes == NULL)
-            mkv_d->indexes = malloc (32*sizeof (mkv_index_t));
-          else if (mkv_d->num_indexes % 32 == 0)
-            mkv_d->indexes = realloc (mkv_d->indexes,
-                                      (mkv_d->num_indexes+32)
-                                      *sizeof (mkv_index_t));
+          grow_array(&mkv_d->indexes, mkv_d->num_indexes, sizeof(mkv_index_t));
           mkv_d->indexes[mkv_d->num_indexes].tnum = track;
           mkv_d->indexes[mkv_d->num_indexes].timecode = time;
           mkv_d->indexes[mkv_d->num_indexes].filepos =mkv_d->segment_start+pos;
@@ -1549,12 +1550,8 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
 
               mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] | + an attachment...\n");
 
-              if (mkv_d->attachments == NULL)
-                mkv_d->attachments = malloc (32*sizeof(*mkv_d->attachments));
-              else if (!(mkv_d->num_attachments % 32))
-                mkv_d->attachments = realloc (mkv_d->attachments,
-                                           (mkv_d->num_attachments + 32)
-                                           * sizeof(*mkv_d->attachments));
+              grow_array(&mkv_d->attachments, mkv_d->num_attachments,
+                         sizeof(*mkv_d->attachments));
 
               while (len > 0)
                 {
