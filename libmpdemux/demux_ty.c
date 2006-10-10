@@ -1211,11 +1211,11 @@ static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
      recPtr += 16;
    }
 
-   if ( errorHeader > 0 )
+   if ( errorHeader > 0 || invalidType > 0 )
    {
       mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-         "ty:Error Check - Records %d, Parsed %d, Errors %d\n",
-         numberRecs, recordsDecoded, errorHeader );
+         "ty:Error Check - Records %d, Parsed %d, Errors %d + %d\n",
+         numberRecs, recordsDecoded, errorHeader, invalidType );
 
       // Invalid MPEG ES Size Check
       if ( errorHeader > ( numberRecs / 2 ) )
