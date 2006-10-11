@@ -842,7 +842,7 @@ elif darwin && not x86 ; then
 elif aix; then
   # use 'lsattr' on AIX
   _cpuinfo="lsattr -E -l proc0 -a type"
-elif x86; then
+elif x86 || x86_64; then
   # all other OSes try to extract CPU information from a small helper
   # program TOOLS/cpuinfo instead
   $_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
