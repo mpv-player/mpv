@@ -2743,8 +2743,9 @@ cat > $TMPC << EOF
 #include <sys/socket.h>
 int main(void) { (void) gethostbyname(0); (void) socket(AF_INET, SOCK_STREAM, 0); return 0; }
 EOF
+_socklib=no
 for _ld_tmp in "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
-  cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && break
+  cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
 done
 if test $_winsock2 = auto && not cygwin ; then
   _winsock2=no
@@ -2754,12 +2755,8 @@ int main(void) { (void) gethostbyname(0); return 0; }
 EOF
   cc_check -lws2_32 && _ld_sock="-lws2_32" && _winsock2=yes
 fi
-if test "$_ld_sock" ; then
-  _res_comment="using $_ld_sock"
-  echores "yes"
-else
-  echores "no"
-fi
+test "$_ld_sock" && _res_comment="using $_ld_sock"
+echores "$_socklib"
 
 
 if test $_winsock2 = yes ; then
