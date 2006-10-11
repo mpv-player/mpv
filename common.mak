@@ -5,6 +5,9 @@
 SRC_DIR = $(SRC_PATH)/lib$(NAME)
 VPATH = $(SRC_DIR)
 
+CFLAGS += -DHAVE_AV_CONFIG_H -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE \
+          -D_ISOC9X_SOURCE -I$(BUILD_ROOT) -I$(SRC_PATH) \
+          -I$(SRC_PATH)/libavutil $(OPTFLAGS)
 SRCS := $(OBJS:.o=.c) $(ASM_OBJS:.o=.S) $(CPPOBJS:.o=.cpp)
 OBJS := $(OBJS) $(ASM_OBJS) $(CPPOBJS)
 STATIC_OBJS := $(OBJS) $(STATIC_OBJS)
@@ -89,7 +92,7 @@ uninstall-libs:
 	-rm -f "$(libdir)/$(LIB)"
 
 uninstall-headers:
-	rm -f "$(addprefix $(incdir)/,$(HEADERS))"
+	rm -f $(addprefix "$(incdir)/",$(HEADERS))
 	rm -f "$(libdir)/pkgconfig/lib$(NAME).pc"
 
 .PHONY: all depend dep clean distclean install* uninstall*
