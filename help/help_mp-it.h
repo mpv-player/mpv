@@ -217,7 +217,7 @@ static char help_text[]=
 #define MSGTR_Enabled "abilitat"
 #define MSGTR_EnabledEdl "abilitato (EDL)"
 #define MSGTR_Disabled "disabilitat"
-#define MSGTR_HardFrameDrop "hard"
+#define MSGTR_HardFrameDrop "hard - intens"
 #define MSGTR_Unknown "sconosciuto"
 #define MSGTR_Bottom "in basso"
 #define MSGTR_Center "al centro"
@@ -233,12 +233,12 @@ static char help_text[]=
 #define MSGTR_Hue "Tonalità"
 
 // property state
-#define MSGTR_MuteStatus "Muto: %s"
+#define MSGTR_MuteStatus "Muto: %so"
 #define MSGTR_AVDelayStatus "Ritardo A-V: %s"
 #define MSGTR_OnTopStatus "Resta in primo piano: %so"
 #define MSGTR_RootwinStatus "Rootwin: %so"
 #define MSGTR_BorderStatus "Bordo: %s"
-#define MSGTR_FramedroppingStatus "Scarto fotogrammi: %s"
+#define MSGTR_FramedroppingStatus "Scarto fotogrammi: %so"
 #define MSGTR_VSyncStatus "VSync: %s"
 #define MSGTR_SubSelectStatus "Sottotitoli: %s"
 #define MSGTR_SubPosStatus "Posizione sottotitoli: %s/100"
