@@ -193,6 +193,10 @@ static int max_framesize=0;
 #include "libmpcodecs/vd.h"
 
 //**************************************************************************//
+
+static void reinit_audio_chain(void);
+
+//**************************************************************************//
 //**************************************************************************//
 
 // Common FIFO functions, and keyboard/event FIFO code
@@ -1781,6 +1785,68 @@ static int mp_property_channels(m_option_t* prop,int action,void* arg) {
     return m_property_int_ro(prop,action,arg,sh_audio->channels);
 }
 
+/// Selected audio id (RW)
+static int mp_property_audio(m_option_t* prop,int action,void* arg) {
+    int current_id = -1;
+
+    if(!sh_audio) return M_PROPERTY_UNAVAILABLE;
+
+    switch(action) {
+    case M_PROPERTY_GET:
+        if(!arg) return 0;
+        *(int*)arg = audio_id;
+        return 1;
+    case M_PROPERTY_PRINT:
+        if(!arg) return 0;
+        *(char**)arg = malloc(64);
+        (*(char**)arg)[63] = 0;
+
+        if (demuxer->type == DEMUXER_TYPE_MATROSKA && audio_id >= 0) {
+            char lang[40] = MSGTR_Unknown;
+            demux_mkv_get_audio_lang(demuxer, audio_id, lang, 9);
+            lang[39] = 0;
+            snprintf(*(char**)arg, 63, "(%d) %s", audio_id, lang);
+            return 1;
+        }
+#ifdef USE_DVDREAD
+        if (audio_id >= 0) {
+            char lang[3] = "\0\0\0";
+            int code = 0;
+            code = dvd_lang_from_aid(stream, audio_id);
+            if (code) {
+                lang[0] = code >> 8;
+                lang[1] = code;
+            }
+            snprintf(*(char**)arg, 63, "(%d) %s", audio_id, code ? lang : MSGTR_Unknown);
+            return 1;
+        }
+#endif
+        snprintf(*(char**)arg, 63, MSGTR_Disabled);
+        return 1;
+
+    case M_PROPERTY_STEP_UP:
+        current_id = demuxer->audio->id;
+        audio_id = demuxer_switch_audio(demuxer, -1);
+        if(audio_id > -1 && demuxer->audio->id != current_id) {
+          sh_audio_t *sh2;
+          uninit_player(INITED_AO | INITED_ACODEC);
+          sh2 = demuxer->a_streams[demuxer->audio->id];
+          if(sh2) {
+            sh2->ds = demuxer->audio;
+            sh_audio = sh2;
+            reinit_audio_chain();
+          }
+        }
+        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", audio_id);
+
+        break;
+    default:
+        return M_PROPERTY_NOT_IMPLEMENTED;
+    }
+
+    return 1;
+}
+
 ///@}
 
 /// \defgroup VideoProperties Video properties
@@ -2352,6 +2418,8 @@ static m_option_t mp_properties[] = {
       0, 0, 0, NULL },
     { "channels", mp_property_channels, CONF_TYPE_INT,
       0, 0, 0, NULL },
+    { "switch_audio", mp_property_audio, CONF_TYPE_INT,
+      -1, -1, 0, NULL },
 
     // Video
     { "fullscreen", mp_property_fullscreen, CONF_TYPE_FLAG,
@@ -2471,6 +2539,7 @@ static struct  {
     { "volume", MP_CMD_VOLUME, 0, OSD_VOLUME, -1, MSGTR_Volume },
     { "mute", MP_CMD_MUTE, 1, 0, -1, MSGTR_MuteStatus },
     { "audio_delay", MP_CMD_AUDIO_DELAY, 0, 0, -1, MSGTR_AVDelayStatus },
+    { "switch_audio", MP_CMD_SWITCH_AUDIO, 1, 0, -1, MSGTR_OSDAudio },
     // video
     { "fullscreen", MP_CMD_VO_FULLSCREEN, 1, 0, -1, NULL },
     { "panscan", MP_CMD_PANSCAN, 0, OSD_PANSCAN, -1, MSGTR_Panscan },
@@ -5106,21 +5175,6 @@ if(step_sec>0) {
       if (sh_audio && audio_out)
         pos = playing_audio_pts(sh_audio, d_audio, audio_out);
       mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_TIME_POSITION=%.1f\n", pos);
-    } break;
-    case MP_CMD_SWITCH_AUDIO : {
-        int current_id = demuxer->audio->id;
-        int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
-        if(v > -1 && demuxer->audio->id != current_id) {
-          sh_audio_t *sh2;
-          uninit_player(INITED_AO | INITED_ACODEC);
-          sh2 = demuxer->a_streams[demuxer->audio->id];
-          if(sh2) {
-            sh2->ds = demuxer->audio;
-            sh_audio = sh2;
-            reinit_audio_chain();
-          }
-        }
-        mp_msg(MSGT_IDENTIFY, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", v);
     } break;
     case MP_CMD_RUN : {
 #ifndef __MINGW32__

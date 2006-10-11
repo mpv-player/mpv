@@ -45,6 +45,7 @@ typedef struct {
 } dvd_priv_t;
 
 int dvd_number_of_subs(stream_t *stream);
+int dvd_lang_from_aid(stream_t *stream, int id);
 int dvd_lang_from_sid(stream_t *stream, int id);
 int dvd_aid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang);
