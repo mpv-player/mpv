@@ -142,10 +142,10 @@ int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
 
 int dvd_lang_from_aid(stream_t *stream, int id) {
   dvd_priv_t *d;
+  int i;
   if (!stream) return 0;
   d = stream->priv;
   if (!d) return 0;
-  int i;
   for(i=0;i<d->nr_of_channels;i++) {
     if(d->audio_streams[i].id==id)
       return d->audio_streams[i].language;
