@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r19979
+// In sync with r20162
 
 // ========================= MPlayer help ===========================
 
@@ -210,6 +210,7 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "aktiviert"
 #define MSGTR_OSDdisabled "deaktiviert"
+#define MSGTR_OSDAudio "Ton: %
 #define MSGTR_OSDChannel "Kanal: %s"
 #define MSGTR_OSDSubDelay "Untertitelverzögerung: %dms"
 #define MSGTR_OSDSpeed "Geschwindigkeit: x %6.2f"

@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r19979
+// Synced with help_mp-en.h r20162
 // Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2@yahoo.com>
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
@@ -11,7 +11,7 @@
 static char help_text[]=
 "用法:   mplayer [选项] [URL|路径/]文件名\n"
 "\n"
-"基本选项: (完整列表参见manpage)\n"
+"基本选项: (完整列表参见手册页)\n"
 " -vo <drv>        选择视频输出驱动 (查看驱动列表用“-vo help”)\n"
 " -ao <drv>        选择音频输出驱动 (查看驱动列表用“-ao help”)\n"
 #ifdef HAVE_VCD
@@ -203,6 +203,7 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "已启用"
 #define MSGTR_OSDdisabled "已停用"
+#define MSGTR_OSDAudio "音频: %s"
 #define MSGTR_OSDChannel "频道: %s"
 #define MSGTR_OSDSubDelay "字幕延迟: %d 毫秒"
 #define MSGTR_OSDSpeed "速度: x %6.2f"
