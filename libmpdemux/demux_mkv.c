@@ -3538,10 +3538,14 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
 
                 case MATROSKA_ID_BLOCK:
                   block_length = ebml_read_length (s, &tmp);
+                  free(block);
                   block = malloc (block_length);
                   demuxer->filepos = stream_tell (s);
                   if (stream_read (s,block,block_length) != (int) block_length)
+                  {
+                    free(block);
                     return 0;
+                  }
                   l = tmp + block_length;
                   break;
 
@@ -3609,7 +3613,10 @@ demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
                     block = malloc (block_length);
                     demuxer->filepos = stream_tell (s);
                     if (stream_read (s,block,block_length) != (int) block_length)
+                    {
+                      free(block);
                       return 0;
+                    }
                     l = tmp + block_length;
                     res = handle_block (demuxer, block, block_length,
                                         block_duration, block_bref, block_fref, 1);
