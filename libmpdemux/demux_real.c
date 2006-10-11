@@ -1252,15 +1252,7 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 
 	if (!strncmp(mimet,"audio/",6)) {
 	  if (strstr(mimet,"x-pn-realaudio") || strstr(mimet,"x-pn-multirate-realaudio")) {
-		// skip unknown shit - FIXME: find a better/cleaner way!
-		len=codec_data_size;
 		tmp = stream_read_dword(demuxer->stream);
-//		mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_real: type_spec: len=%d  fpos=0x%X  first_dword=0x%X (%.4s)  \n",
-//		    (int)codec_data_size,(int)codec_pos,tmp,&tmp);
-		while(--len>=8){
-			if(tmp==MKTAG(0xfd, 'a', 'r', '.')) break; // audio
-			tmp=(tmp<<8)|stream_read_char(demuxer->stream);
-		}
 		if (tmp != MKTAG(0xfd, 'a', 'r', '.'))
 		{
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: can't find .ra in codec data\n");
@@ -1506,15 +1498,8 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		}
 	} else if (!strncmp(mimet,"video/",6)) {
 	  if (strstr(mimet,"x-pn-realvideo") || strstr(mimet,"x-pn-multirate-realvideo")) {
+		stream_skip(demuxer->stream, 4);  // VIDO length, same as codec_data_size
 		tmp = stream_read_dword(demuxer->stream);
-//		mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_real: type_spec: len=%d  fpos=0x%X  first_dword=0x%X (%.4s)  \n",
-//		    (int)codec_data_size,(int)codec_pos,tmp,&tmp);
-		// skip unknown shit - FIXME: find a better/cleaner way!
-		len=codec_data_size;
-		while(--len>=8){
-			if(tmp==MKTAG('O', 'D', 'I', 'V')) break;  // video
-			tmp=(tmp<<8)|stream_read_char(demuxer->stream);
-		}
 		if(tmp != MKTAG('O', 'D', 'I', 'V'))
 		{
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Video: can't find VIDO in codec data\n");
