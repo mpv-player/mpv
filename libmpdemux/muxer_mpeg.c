@@ -1335,10 +1335,6 @@ static void patch_panscan(muxer_priv_t *priv, unsigned char *buf)
 }
 
 
-#define max(a, b) ((a) >= (b) ? (a) : (b))
-#define min(a, b) ((a) <= (b) ? (a) : (b))
-
-
 static void update_scr(muxer_t *muxer)
 {
 	muxer_priv_t *priv = muxer->priv;
