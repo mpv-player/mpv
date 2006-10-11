@@ -1585,9 +1585,13 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
                         int x;
                         uint64_t num = ebml_read_length (s, &x);
                         l = x + num;
+                        free(data);
                         data = malloc (num);
                         if (stream_read(s, data, num) != (int) num)
+                        {
+                          free(data);
                           return 0;
+                        }
                         data_size = num;
                         mp_msg (MSGT_DEMUX, MSGL_V, "[mkv] |  + FileData, length "
                                 "%u\n", data_size);
