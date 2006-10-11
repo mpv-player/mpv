@@ -2744,7 +2744,7 @@ cat > $TMPC << EOF
 int main(void) { (void) gethostbyname(0); (void) socket(AF_INET, SOCK_STREAM, 0); return 0; }
 EOF
 _socklib=no
-for _ld_tmp in "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
+for _ld_tmp in "" "-lsocket -lbind" "-lsocket -ldnet" "-lsocket -lnsl" "-lnsl" "-lsocket" ; do
   cc_check $_ld_tmp && _ld_sock="$_ld_tmp" && _socklib=yes && break
 done
 if test $_winsock2 = auto && not cygwin ; then
