@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h r19979
+// Updated to help_mp-en.h r20191
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -651,9 +651,8 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Configurazione del supporto per LIRC...\n"
-#define MSGTR_LIRCdisabled "Non potrai usare il tuo telecomando\n"
-#define MSGTR_LIRCopenfailed "Apertura del supporto per LIRC fallita!\n"
-#define MSGTR_LIRCcfgerr "Fallimento nella lettura del file di configurazione di LIRC %s!\n"
+#define MSGTR_LIRCopenfailed "Apertura del supporto per LIRC fallita. Non potrai usare il tuo telecomando.\n"
+#define MSGTR_LIRCcfgerr "Fallimento nella lettura del file di configurazione di LIRC %s.\n"
 
 // vf.c
 #define MSGTR_CouldNotFindVideoFilter "Impossibile trovare il filtro video '%s'\n"
