@@ -140,7 +140,7 @@ rtsp_streaming_open (stream_t *stream, int mode, void *opts, int *file_format)
   URL_t *url;
   extern int index_mode;
   
-  mp_msg (MSGT_OPEN, MSGL_INFO, "STREAM_RTSP, URL: %s\n", stream->url);
+  mp_msg (MSGT_OPEN, MSGL_V, "STREAM_RTSP, URL: %s\n", stream->url);
   stream->streaming_ctrl = streaming_ctrl_new ();
   if (!stream->streaming_ctrl)
     return STREAM_ERROR;

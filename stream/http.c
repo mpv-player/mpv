@@ -891,7 +891,7 @@ static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
 	
-	mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_HTTP(1), URL: %s\n", stream->url);
+	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(1), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
 	if((seekable < 0) || (*file_format == DEMUXER_TYPE_ASF)) {
 		streaming_ctrl_free(stream->streaming_ctrl);
@@ -915,7 +915,7 @@ static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
 	stream->streaming_ctrl->url = check4proxies(url);
 	url_free(url);
 	
-	mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_HTTP(2), URL: %s\n", stream->url);
+	mp_msg(MSGT_OPEN, MSGL_V, "STREAM_HTTP(2), URL: %s\n", stream->url);
 	seekable = http_streaming_start(stream, file_format);
 	if(seekable < 0) {
 		streaming_ctrl_free(stream->streaming_ctrl);

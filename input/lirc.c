@@ -23,9 +23,9 @@ int
 mp_input_lirc_init(void) {
   int lirc_sock;
 
-  mp_msg(MSGT_LIRC,MSGL_INFO,MSGTR_SettingUpLIRC);
+  mp_msg(MSGT_LIRC,MSGL_V,MSGTR_SettingUpLIRC);
   if((lirc_sock=lirc_init("mplayer",1))==-1){
-    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed MSGTR_LIRCdisabled);
+    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCopenfailed);
     return -1;
   }
 

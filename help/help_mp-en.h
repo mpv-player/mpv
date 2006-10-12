@@ -650,8 +650,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Setting up LIRC support...\n"
-#define MSGTR_LIRCdisabled "You will not be able to use your remote control.\n"
-#define MSGTR_LIRCopenfailed "Failed to open LIRC support.\n"
+#define MSGTR_LIRCopenfailed "Failed to open LIRC support. You will not be able to use your remote control.\n"
 #define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s.\n"
 
 // vf.c

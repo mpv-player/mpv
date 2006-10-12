@@ -450,7 +450,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     ao_noblock = !block;
     parse_device(alsa_device, device.str, device.len);
 
-    mp_msg(MSGT_AO,MSGL_INFO,"alsa-init: using device %s\n", alsa_device);
+    mp_msg(MSGT_AO,MSGL_V,"alsa-init: using device %s\n", alsa_device);
 
     //setting modes for block or nonblock-mode
     if (ao_noblock) {
@@ -723,7 +723,7 @@ static int init(int rate_hz, int channels, int format, int flags)
       }
       /* end setting sw-params */
 
-      mp_msg(MSGT_AO,MSGL_INFO,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
+      mp_msg(MSGT_AO,MSGL_V,"alsa: %d Hz/%d channels/%d bpf/%d bytes buffer/%s\n",
 	     ao_data.samplerate, ao_data.channels, bytes_per_sample, ao_data.buffersize,
 	     snd_pcm_format_description(alsa_format));
 
@@ -750,7 +750,7 @@ static void uninit(int immed)
       }
     else {
       alsa_handler = NULL;
-      mp_msg(MSGT_AO,MSGL_INFO,"alsa-uninit: pcm closed\n");
+      mp_msg(MSGT_AO,MSGL_V,"alsa-uninit: pcm closed\n");
     }
   }
   else {
