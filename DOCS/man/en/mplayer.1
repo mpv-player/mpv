@@ -257,9 +257,9 @@ See the \-input option for ways to customize it.
 .IPs "<\- and \->"
 Seek backward/\:forward 10 seconds.
 .IPs "up and down"
-Seek backward/\:forward 1 minute.
+Seek forward/\:backward 1 minute.
 .IPs "pgup and pgdown"
-Seek backward/\:forward 10 minutes.
+Seek forward/\:backward 10 minutes.
 .IPs "[ and ]"
 Decrease/increase current playback speed by 10%.
 .IPs "{ and }"
@@ -323,7 +323,7 @@ Set start or end of an EDL skip and write it out to the given file.
 Take a screenshot.
 .IPs "S (\-vf screenshot only)"
 Start/stop taking screenshots.
-.IPs "I"
+.IPs "I\ \ \ \ "
 Show filename on the OSD.
 .IPs "! and @"
 Seek to the beginning of the previous/next chapter.
@@ -333,7 +333,7 @@ Seek to the beginning of the previous/next chapter.
 .RS
 (The following keys are valid only when using a hardware accelerated video
 output (xv, (x)vidix, (x)mga, etc), the software equalizer
-(\-vf eq or \-vf eq2) or hue filter (\-vf hue).
+(\-vf eq or \-vf eq2) or hue filter (\-vf hue).)
 .RE
 .PP
 .PD 0
@@ -458,7 +458,7 @@ Select button right.
 Return to main menu.
 .IPs "keypad 7"
 Return to nearest menu (the order of preference is: chapter->title->root).
-.IPs "keypad enter"
+.IPs "keypad ENTER"
 Confirm choice.
 .RE
 .PD 1
@@ -483,9 +483,9 @@ Decrease/\:increase volume.
 .IPs "left and right"
 Seek backward/\:forward 10 seconds.
 .IPs "up and down"
-Seek backward/\:forward 1 minute.
+Seek forward/\:backward 1 minute.
 .IPs "button 1"
-pause
+Pause.
 .IPs "button 2"
 Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
 .IPs "button 3 and button 4"
