@@ -59,7 +59,7 @@ man page for a detailed explanation).
 </para>
 
 <para>
-Please refer to &quot;<filename>/proc/ide/<replaceable>cdrom device</replaceable>/settings&quot;</filename>
+Please refer to &quot;<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>&quot;
 for fine-tuning your CD-ROM.
 </para>
 
