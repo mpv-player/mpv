@@ -3960,7 +3960,6 @@ demux_mkv_get_audio_lang(demuxer_t *demuxer, int track_num, char *lang,
   if ((track->language != NULL) &&
       strcmp(track->language, "und"))
     strlcpy(lang, track->language, maxlen);
-  return;
 }
 
 
