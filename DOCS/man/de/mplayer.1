@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20061
+.\" In sync with r20132
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -319,7 +319,7 @@ Display / überspringe Decodierung (siehe auch \-framedrop und \-hardframedrop).
 Ändert Sichtbarkeit der Untertitel (aus/\:ein).
 .IPs "b / j"
 Wechselt durch die verfügbaren Untertitel.
-.IP "F\ \ \ \ "
+.IPs "F\ \ \ \ "
 Ändert die Anzeige der "erzwungenen Untertitel".
 .IPs "a\ \ \ \ "
 Ändert die Positionierung der Untertitel: oben / mitte / unten.
@@ -1721,7 +1721,7 @@ Für das Radiohören mit MPlayer benutze 'radio://<Frequenz>'
 (wenn die Option channels nicht gegeben ist) oder 'radio://<Kanal_Nummer>'
 (wenn die Option channels angegeben wurde) als Film-URL.
 Um das Aufnahme-Subsystem zu starten, benutze
-radio://<Frequenz oder Kanal>/capture.
+\'radio://<Frequenz oder Kanal>/capture'.
 Wenn das Schlüsselwort capture nicht gegeben ist, kannst du nur mit einem
 Line-In-Kabel Radio hören.
 Capture zu verwenden für das Anhören wird nicht empfohlen wegen
@@ -1769,7 +1769,7 @@ Anzahl der aufzunehmenden Audiokanäle.
 .RE
 .
 .TP
-.B \-tv <Option1:Option2:...> (nur bei TV/PVR)
+.B \-tv <Option1:Option2:...> (nur bei TV/\:PVR)
 Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
 Um mit MPlayer fernzusehen, benutze die Optionen 'tv://'
 oder 'tv://<Kanalnummer>' oder sogar 'tv://<Kanalname>' (siehe unten die
@@ -5757,7 +5757,7 @@ Du solltest einen roten, grünen und blauen Streifen von oben nach unten sehen.
 .TP
 .B lavc[=Qualität:fps]
 Schnelle Softwarekonvertierung von YV12 nach MPEG-1 mit libavcodec
-für die Benutzung mit DVB/\:DXR3/IVTV.
+für die Benutzung mit DVB/\:DXR3/\:IVTV.
 Schneller und von besserer Qualität als mit \-vf fame.
 .RSs
 .IPs <Qualität>
@@ -5774,7 +5774,7 @@ Erkennung basierend auf Höhe)
 .TP
 .B "fame\ \ \ "
 Schnelle Softwarekonvertierung mit libfame für die Benutzung mit
-DVB/\:DXR3/IVTV.
+DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=Aspekt]
