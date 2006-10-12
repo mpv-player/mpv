@@ -122,13 +122,8 @@ line with the <option>-dvd-device</option> option.
 <systemitem>libdvdcss</systemitem> for DVD decryption and playback. These two
 libraries are contained in the <filename class="directory">libmpdvdkit2</filename>
 subdirectory of the <application>MPlayer</application> source tree, you do not have
-to install them separately.
-</para>
-
-<para>
-<application>MPlayer</application> can also use system-wide <systemitem>libdvdread</systemitem>
-and <systemitem>libdvdcss</systemitem> libraries, but this solution is
-<emphasis role="bold">not</emphasis> recommended, as it can result in bugs,
+to install them separately. You can also use system-wide versions of the two
+libraries, but this solution is not recommended, as it can result in bugs,
 library incompatibilities and slower speed.
 </para>
 
