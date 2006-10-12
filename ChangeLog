@@ -4,6 +4,7 @@ MPlayer (1.0)
 
     DOCS:
     * German documentation translation almost finished
+    * Russian documentation translation synced and almost finished
 
     Drivers:
     * IVTV hardware MPEG audio/video decoder output
@@ -21,7 +22,7 @@ MPlayer (1.0)
     Demuxers:
     * audio stream switching in MPEG-TS/PS, Matroska and
       streams supported by libavformat
-    * audio stream switching between stream with different codecs
+    * audio stream switching between streams with different codecs
     * libavformat demuxer now honors -alang
     * chapter seeking in Matroska files
     * fixed seeking to absolute and percent position for libavformat demuxer
@@ -32,7 +33,7 @@ MPlayer (1.0)
     * split of stream layer from libmpdemux to new stream library
     * PVR input for hardware MPEG encoder based cards, such as Hauppauge
       WinTV PVR-150/250/350/500 a.k.a. IVTV but also pvrusb2 and cx88
-      (requires Linux >= 2.6.18 kernel, featuring native V4L2 MPEG API).
+      (requires Linux >= 2.6.18 kernel, featuring native V4L2 MPEG API)
     * native RTSP input (handles MPEG-TS over RTP) for generic RTSP servers
     * support for chapters seeking in dvd:// and dvdnav:// streams
     * radio support (radio://)
@@ -51,31 +52,31 @@ MPlayer (1.0)
       -lavdopts fast
     * Theora decoder fixes
     * preliminary Vorbis encoder
-    * mtv demuxer
+    * MTV demuxer
 
     GUI:
     * Windows version added
-    * Drag-and-Drop ignored last file
-    * Save and load cache setting correctly
-    * Working audio stream selection for ogg and mkv files
-    * Executable names like gmplayer_old etc. will now start Gui as well
+    * drag-and-drop ignored last file
+    * save and load cache setting correctly
+    * working audio stream selection for Ogg and Matroska files
+    * executable names like gmplayer_old etc. will now start GUI as well
     * -gui/-nogui options
-    * xinerama fixes, behaves similar to mplayer without Gui
+    * xinerama fixes, behaves similar to MPlayer without GUI
 
     Filters:
     * MMX-optimizations for -vf yadif
     * MMX-optimizations for -vf zrmjpeg
 
     MEncoder:
-    * support of x264 encoding over libavcodec
-    * rewrite -x264encopts options parser to use libx264's options parser
-      likely breaks 3rd party tools as the syntax of some options have changed
+    * support of x264 encoding via libavcodec
+    * rewrite -x264encopts options parser to use libx264's options parser;
+      likely breaks 3rd party tools as the syntax of some options has changed
     * removed support for obsolete and non-free divx4 libraries
 
     Ports:
-    * partial MacIntel support, --disable-loader --disable-mp3lib is needed
+    * partial Intel Mac support, --disable-loader --disable-mp3lib is needed
     * OpenGL can create windows > screen size under Windows
-    * Allow filenames starting with \\ for remote paths on Windows
+    * allow filenames starting with \\ for remote paths on Windows
 
     Others:
     * SSA/ASS subtitle renderer
