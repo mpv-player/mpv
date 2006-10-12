@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r18426 -->
+<!-- synced with r20176 -->
 <chapter id="cd-dvd">
   <title>CD/DVD Nutzung</title>
 
@@ -72,7 +72,7 @@
 
       <para>
         Wir verweisen hier auf
-        &quot;<filename>/proc/ide/<replaceable>CD-ROM-Gerät</replaceable>/settings&quot;</filename>
+        &quot;<filename>/proc/ide/<replaceable>[CD-ROM-Gerät]</replaceable>/settings</filename>&quot;
         für Feineinstellungen an deinem CD-ROM.
       </para>
 
@@ -124,29 +124,17 @@
       der Kommandozeile an mit der Option <option>-dvd-device</option>.
     </para>
 
-    <formalpara>
-      <title>DVD-Unterstützung der neuen Art (mpdvdkit2)</title>
       <para>
         <application>MPlayer</application> verwendet <systemitem>libdvdread</systemitem> und
         <systemitem>libdvdcss</systemitem> zur DVD-Entschuüsselung und -Wiedergabe.
         Diese beiden Bibliotheken sind im Unterverzeichnis
-        <filename class="directory">libmpdvdkit2/</filename> des
+        <filename class="directory">libmpdvdkit2</filename> des
         <application>MPlayer</application>-Quelltextbaums.
-        Du brauchst sie nicht seperat zu installieren. Wir haben uns für diese
-        Lösung entschieden, weil wir einen Fehler in <systemitem>libdvdread</systemitem>
-        beheben und ein Patch anwenden mussten, um
-        <emphasis role="bold">das Zwischenspeichern von geknackten CSS-Schlüsseln zu ermöglichen</emphasis>.
-        Dies führt zu großen Geschwindigkeitssteigerungen, da die Schlüssel
-        nicht mehr jedes mal erneut geknackt werden müssen.
+        Du brauchst sie nicht separat zu installieren. Du kannst auch systemweite
+        Versionen der beiden Bibliotheken verwenden, diese wird jedoch
+        <emphasis role="bold">nicht</emphasis> empfohlen, da dies zu Bugs,
+        Bibliotheksinkompatibilitäten und geringerer Geschwindigkeit führen kann.
       </para>
-    </formalpara>
-
-    <para>
-      <application>MPlayer</application> kann auch systemweit installierte Bibliotheken von
-      <systemitem>libdvdread</systemitem> und <systemitem>libdvdcss</systemitem> verwenden,
-      diese Lösung wird jedoch <emphasis role="bold">nicht</emphasis> empfohlen, da dies zu Bugs,
-      Bibliotheksinkompatibilitäten und geringerer Geschwindigkeit führen kann.
-    </para>
 
     <note>
       <para>
@@ -203,6 +191,11 @@
       <filename>/proc/mounts</filename>, um den Gerätenamen herauszufinden.
       Es wurde für Solaris entwickelt, wo Gerätenamen dynamisch
       zugewiesen werden.
+    </para>
+
+    <para>
+      Wenn du <application>MPlayer</application> mit dvdnav-Unterstützung compiliert hast,
+      bleibt der Syntax derselbe, ausgenommen die Verwendung von dvdnav:// an Stelle von dvd://.
     </para>
 
     <para>
@@ -351,7 +344,7 @@
 
     <para>
       Inzwischen kannst du die Daten von VCDs mit
-      <ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
+      <ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
       extrahieren und die ausgegebene Datei mit <application>MPlayer</application>
       abspielen.
     </para>
