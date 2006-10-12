@@ -1816,7 +1816,7 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
             }
 #endif
             *(char**)arg = malloc(64);
-            snprintf(*(char**)arg, 64, "(%d) %s", audio_id, MSGTR_Unknown);
+            snprintf(*(char**)arg, 64, "(%d) %s", audio_id, lang);
         }
         return 1;
 
