@@ -9,6 +9,9 @@ MPlayer (1.0)
     * IVTV hardware MPEG audio/video decoder output
     * ALSA audio output: AC3 passthrough now works even when the device name
       of the digital output port has been set by the user
+    * bicubic OpenGL scaling works with ATI cards
+    * md5sum switched to use libavutil md5 implementation
+    * support for libcaca 1.0 via compatibility layer
 
     Decoders:
     * liba52 updated to 0.7.4 (slightly faster)
@@ -18,8 +21,12 @@ MPlayer (1.0)
     Demuxers:
     * audio stream switching in MPEG-TS/PS, Matroska and
       streams supported by libavformat
+    * audio stream switching between stream with different codecs
     * libavformat demuxer now honors -alang
     * chapter seeking in Matroska files
+    * fixed seeking to absolute and percent position for libavformat demuxer
+    * NUT demuxer using libnut
+    * Matroska SimpleBlock support
 
     Inputs:
     * split of stream layer from libmpdemux to new stream library
@@ -33,9 +40,31 @@ MPlayer (1.0)
     FFmpeg/libavcodec:
     * VC-1/WMV3/WMV9 video decoder
     * Vorbis decoding speedup, now default Vorbis decoder
+    * VMware Video decoder
+    * VP50 and VP62 decoder
+    * lossless audio decoders: WavPack, TTA
+    * CAVS decoder
+    * GXF muxer/demuxer
+    * MXF demuxer
+    * much improved flac encoder
+    * more H.264 decoding speed improvements, including support for
+      -lavdopts fast
+    * Theora decoder fixes
+    * preliminary Vorbis encoder
+    * mtv demuxer
 
     GUI:
     * Windows version added
+    * Drag-and-Drop ignored last file
+    * Save and load cache setting correctly
+    * Working audio stream selection for ogg and mkv files
+    * Executable names like gmplayer_old etc. will now start Gui as well
+    * -gui/-nogui options
+    * xinerama fixes, behaves similar to mplayer without Gui
+
+    Filters:
+    * MMX-optimizations for -vf yadif
+    * MMX-optimizations for -vf zrmjpeg
 
     MEncoder:
     * support of x264 encoding over libavcodec
@@ -44,14 +73,25 @@ MPlayer (1.0)
     * removed support for obsolete and non-free divx4 libraries
 
     Ports:
-    * MacIntel support
+    * partial MacIntel support, --disable-loader --disable-mp3lib is needed
+    * OpenGL can create windows > screen size under Windows
+    * Allow filenames starting with \\ for remote paths on Windows
 
     Others:
     * SSA/ASS subtitle renderer
     * -endpos option
+    * -correct-pts option
+    * UTF-8 used for OSD and subtitles, some bitmap fonts will no longer work
+      correctly and -subcp must be set for all non-UTF-8 subtitles
+    * more audio-truncation fixes
+    * libavutil mandatory for MPlayer compilation
+    * more intuitive -edlout behaviour
+    * -nortc is now default since -rtc has only disadvantages with recent
+      kernels
 
 
   pre8: "NeuTeam strikes back" June 11, 2006
+  (SVN revisions: MPlayer r18681, FFmpeg r5466)
 
     Security:
     * support for compilation with non-executable stack
