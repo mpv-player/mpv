@@ -1433,11 +1433,11 @@ MPlayer/MEncoder, use 'pvr://' as a movie URL.
 Available options are:
 .RSs
 .IPs aspect=<0\-3>
-Specify input aspect ratio (default: 4:3):
+Specify input aspect ratio:
 .RSss
 0: 1:1
 .br
-1: 4:3
+1: 4:3 (default)
 .br
 2: 16:9
 .br
@@ -1447,27 +1447,28 @@ Specify input aspect ratio (default: 4:3):
 Specify encoding audio rate (default: 48000 Hz, available: 32000, 44100
 and 48000 Hz).
 .IPs alayer=<1\-3>
-Specify MPEG audio layer encoding (default: layer 2).
+Specify MPEG audio layer encoding (default: 2).
 .IPs abitrate=<32\-448>
-Specify audio encoding bitrate in kbps (default: 384 kbps).
+Specify audio encoding bitrate in kbps (default: 384).
 .IPs amode=<value>
 Specify audio encoding mode.
 Available preset values are 'stereo', 'joint_stereo', 'dual' and 'mono' (default: stereo).
 .IPs vbitrate=<value>
-Specify average video bitrate encoding (default: 6 Mbps).
+Specify average video bitrate encoding in Mbps (default: 6).
 .IPs vmode=<value>
-Specify video encoding mode (default: vbr):
+Specify video encoding mode:
 .RSss
-vbr: Variable BitRate
+vbr: Variable BitRate (default)
 .br
 cbr: Constant BitRate
 .REss
 .IPs vpeak=<value>
-Specify peak video bitrate encoding (only useful for VBR encoding, default: 9.6 Mbps). 
+Specify peak video bitrate encoding in Mbps
+(only useful for VBR encoding, default: 9.6).
 .IPs fmt=<value>
-Choose an MPEG format for encoding (default: ps):
+Choose an MPEG format for encoding:
 .RSss
-ps:    MPEG-2 Program Stream
+ps:    MPEG-2 Program Stream (default)
 .br
 ts:    MPEG-2 Transport Stream
 .br
@@ -4080,7 +4081,7 @@ Skip the given number of macroblock rows at the top.
 .IPs skiploopfilter=<skipvalue> (H.264 only)
 Skips the loop filter (AKA deblocking) during H.264 decoding.
 Since the filtered frame is supposed to be used as reference
-for decoding dependant frames this has a worse effect on quality
+for decoding dependent frames this has a worse effect on quality
 than not doing deblocking on e.g.\& MPEG-2 video.
 But at least for high bitrate HDTV this provides a big speedup with
 no visible quality loss.
