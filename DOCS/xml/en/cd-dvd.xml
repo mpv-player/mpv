@@ -117,20 +117,13 @@ differs, make a symlink or specify the correct device on the command
 line with the <option>-dvd-device</option> option.
 </para>
 
-<formalpara>
-<title>New-style DVD support (mpdvdkit2)</title>
 <para>
 <application>MPlayer</application> uses <systemitem>libdvdread</systemitem> and
 <systemitem>libdvdcss</systemitem> for DVD decryption and playback. These two
-libraries are contained in the <filename class="directory">libmpdvdkit2/</filename>
+libraries are contained in the <filename class="directory">libmpdvdkit2</filename>
 subdirectory of the <application>MPlayer</application> source tree, you do not have
-to install them separately. We opted for this solution because we had to fix a
-<systemitem>libdvdread</systemitem> bug and apply a patch which adds
-<emphasis role="bold">cracked CSS keys caching support</emphasis> to
-<systemitem>libdvdcss</systemitem>. This results in a large speed increase because the
-keys do not have to be cracked every time before playing.
+to install them separately.
 </para>
-</formalpara>
 
 <para>
 <application>MPlayer</application> can also use system-wide <systemitem>libdvdread</systemitem>
