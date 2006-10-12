@@ -1798,19 +1798,15 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
         return 1;
     case M_PROPERTY_PRINT:
         if(!arg) return 0;
-        *(char**)arg = malloc(64);
-        (*(char**)arg)[63] = 0;
 
-        if (demuxer->type == DEMUXER_TYPE_MATROSKA && audio_id >= 0) {
+        if (audio_id < 0)
+          *(char**)arg = strdup(MSGTR_Disabled);
+        else {
             char lang[40] = MSGTR_Unknown;
+        if (demuxer->type == DEMUXER_TYPE_MATROSKA)
             demux_mkv_get_audio_lang(demuxer, audio_id, lang, 9);
-            lang[39] = 0;
-            snprintf(*(char**)arg, 63, "(%d) %s", audio_id, lang);
-            return 1;
-        }
 #ifdef USE_DVDREAD
-        if (audio_id >= 0) {
-            char lang[3] = "\0\0\0";
+        else {
             int code = 0;
             code = dvd_lang_from_aid(stream, audio_id);
             if (code) {
@@ -1818,11 +1814,11 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
                 lang[1] = code;
                 lang[2] = 0;
             }
-            snprintf(*(char**)arg, 63, "(%d) %s", audio_id, code ? lang : MSGTR_Unknown);
-            return 1;
         }
 #endif
-        snprintf(*(char**)arg, 63, MSGTR_Disabled);
+        *(char**)arg = malloc(64);
+        snprintf(*(char**)arg, 64, "(%d) %s", audio_id, MSGTR_Unknown);
+        }
         return 1;
 
     case M_PROPERTY_STEP_UP:
