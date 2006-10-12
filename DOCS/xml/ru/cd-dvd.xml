@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19751 -->
+<!-- synced with r20176 -->
 <chapter id="cd-dvd">
 <title>Использование CD/DVD</title>
 
@@ -62,7 +62,7 @@
 </para>
 
 <para>
-Обратитесь к &quot;<filename>/proc/ide/<replaceable>cdrom device</replaceable>/settings</filename>&quot;
+Обратитесь к &quot;<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>&quot;
 для подстройки Вашего CD-ROM привода.
 </para>
 
@@ -106,26 +106,13 @@
 устройство в командной строке, используя опцию <option>-dvd-device</option>.
 </para>
 
-<formalpara>
-<title>Новая поддержка DVD (mpdvdkit2)</title>
 <para>
 <application>MPlayer</application> использует библиотеки <systemitem>libdvdread
 </systemitem> и <systemitem>libdvdcss</systemitem> для DVD расшифровки и
 воспроизведения. Эти две библиотеки содержатся в подкаталоге
-<filename class="directory">libmpdvdkit2/</filename> дерева исходного кода
+<filename class="directory">libmpdvdkit2</filename> дерева исходного кода
 <application>MPlayer</application>'а, так что отдельно устанавливать их не нужно.
-Мы выбрали такое решение потому, что нам пришлось исправить ошибку
-в <systemitem>libdvdread</systemitem>
-и добавить патч к <systemitem>libdvdcss</systemitem>, включающий поддержку
-<emphasis role="bold">сохранения взломанных ключей CSS</emphasis>. Это
-предотвращает повторный взлом ключа при каждом просмотре, существенно увеличивая
-скорость.
-</para>
-</formalpara>
-
-<para>
-<application>MPlayer</application> способен использовать системные библиотеки
-<systemitem>libdvdread</systemitem> и <systemitem>libdvdcss</systemitem>, но это
+Вы также можете использовать уже установленные в системе версии библиотек, но это
 <emphasis role="bold">не рекомендуется</emphasis>, так как может приводить к
 ошибкам, несовместимости и потере скорости.
 </para>
