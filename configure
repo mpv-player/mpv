@@ -248,6 +248,7 @@ Optional features:
   --enable-fribidi       Enable using the FriBiDi libs [autodetect]
   --disable-enca         Disable using ENCA charset oracle library [autodetect]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
+  --disable-maemo        Disable maemo specific features [autodetect]
   --enable-macosx-finder-support  Enable Mac OS X Finder invocation parameter parsing [disabled]
   --enable-macosx-bundle Enable Mac OS X bundle file locations [autodetect]
   --disable-inet6        Disable IPv6 support [autodetect]
@@ -1731,6 +1732,7 @@ _fontconfig=auto
 _menu=no
 _qtx=auto
 _macosx=auto
+_maemo=auto
 _macosx_finder_support=no
 _macosx_bundle=auto
 _sortsub=yes
@@ -2087,6 +2089,9 @@ for ac_option do
   --disable-macosx-finder-support) _macosx_finder_support=no ;;
   --enable-macosx-bundle) _macosx_bundle=yes;;
   --disable-macosx-bundle) _macosx_bundle=no;;  
+
+  --enable-maemo) _maemo=yes ;;
+  --disable-maemo) _maemo=no ;;
 
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
@@ -7421,6 +7426,28 @@ else
 fi
 echores "$_lircc"
 
+if arm; then
+# Detect maemo development platform libraries availability (http://www.maemo.org),
+# they are used when run on Nokia 770
+echocheck "maemo (Nokia 770)"
+if test "$_maemo" = auto ; then
+  _maemo=no
+  cat > $TMPC << EOF
+#include <libosso.h>
+int main(void) { (void) osso_initialize("", "", 0, NULL); return 0; }
+EOF
+  cc_check `pkg-config --cflags --libs libosso 2>/dev/null` && _maemo=yes
+fi
+if test "$_maemo" = yes ; then
+  _def_maemo='#define HAVE_MAEMO 1'
+  _inc_extra="$_inc_extra `pkg-config --cflags libosso`"
+  _ld_extra="$_ld_extra `pkg-config --libs libosso` -lXsp"
+else
+  _def_maemo='#undef HAVE_MAEMO'
+fi
+echores "$_maemo"
+fi
+
 #############################################################################
 echo "Creating config.mak"
 cat > config.mak << EOF
@@ -7936,6 +7963,9 @@ $_def_threads
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_def_lirc
+
+/* Support for maemo (http://www.maemo.org) */
+$_def_maemo
 
 /*
  * LIRCCD (LIRC client daemon)
