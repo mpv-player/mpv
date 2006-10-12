@@ -1,4 +1,4 @@
-.\" synced with r20061
+.\" synced with r20194
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -287,8 +287,8 @@ Va indietro/\:avanti nella playlist.
 Va avanti nella playlist, anche oltre la fine.
 .IPs "HOME e FINE"
 Passa alla voce successiva/\:precedente nella playlist.
-.IPs "INS e CANC"
-Va alla successiva/\:precedente sorgente alternativa (solo playlist ASX).
+.IPs "INS e CANC (solo playlist ASX)"
+Va alla successiva/\:precedente sorgente alternativa.
 .IPs "p / SPAZIO"
 Pausa film (un'altra pressione la toglie).
 .IPs ".\ \ \ \ "
@@ -450,7 +450,7 @@ di ingresso TV o DVB e hanno precedenza su quelli definiti precedentemente.)
 .IPs "h e k"
 Seleziona il canale precedente/\:successivo.
 .IPs "n\ \ \ \ "
-Cambia la norma (PAL/NTSC).
+Cambia la norma.
 .IPs "u\ \ \ \ "
 Cambia la lista dei canali.
 .RE
@@ -476,7 +476,7 @@ Ritorna al menu principale.
 .IPs "7 tastierino numerico"
 Ritorna al menu più prossimo (l'ordine di preferenza è:
 capitolo->titolo->principale).
-.IPs "enter tastierino numerico"
+.IPs "ENTER tastierino numerico"
 Conferma la scelta.
 .RE
 .PD 1
@@ -503,7 +503,7 @@ Ricerca indietro/\:avanti di 10 secondi.
 .IPs "su e giù"
 Ricerca avanti/\:indietro di 1 minuto.
 .IPs "pulsante 1"
-Pause.
+Pausa.
 .IPs "pulsante 2"
 Cambia lo stato dell'OSD: nessuno / posizione / posizione + tempo / posizione +
 tempo + tempo totale.
@@ -967,23 +967,13 @@ Necessario per selezionare i bottoni nei menu dei DVD.
 .
 .TP
 .B \-noconsolecontrols
-Impedisce ad MPlayer di leggere gli eventi dei tasti dallo stanrd input.
+Impedisce ad MPlayer di leggere gli eventi dei tasti dallo standard input.
 Utile quando si leggono dati direttamente dallo standard input.
 Questa opzione viene abilitata automaticamente quando viene trovato \- sulla
 riga comando.
 Ci sono situazioni in cui devi impostarlo manualmente, per es.\& se apri
 /dev/\:stdin (o l'equivalente sul tuo sistema), usi stdin in una playlist o
 vuoi leggere da stdin più avanti attraverso i comandi slave loadfile o loadlist.
-.
-.B \-noconsolecontrols
-Evita che MPlayer legga gli eventi della tastiera dall'input standard.
-Utile quando si leggono dati dall'input standard (stdin).
-Questa opzione è automaticamente abilitata quando \- viene trovato sulla
-linea di comando.
-Ci sono situazioni in cui devi abilitarlo manualmente, p.es.\&
-se apri /dev/\:stdin (oppure l'equivalente nel tuo sistema), utilizzi stdin
-in una playlist oppure intendi leggere da stdin successivamente
-attraverso i comandi slave loadfile o loadlist.
 .
 .TP
 .B \-nojoystick
@@ -1284,6 +1274,7 @@ Nota che MEncoder alcune volte rettifica automaticamente i tempi di avvio per
 compensare ritardi di decodifica anticipata, perciò non usare questa opzione
 per la codifica senza prima provarla.
 .
+.TP
 .B \-demuxer <[+]nome>
 Forza il nome del demuxer audio, come indicato da \-demuxer help.
 Usa un '+' prima del nome per forzarlo, il che eviterà alcuni controlli!
@@ -1356,6 +1347,30 @@ durante la riproduzione.
 Il video viene saltato e l'audio viene riprodotto o meno in maniera dipendente dai valori presenti nel
 file specificato.
 Vedi DOCS/\:HTML/\:en/\:edl.html per dettagli su come usare le EDL.
+.
+.TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|dimensione[b|kb|mb]> (vedi anche \-ss e \-sb)
+Si ferma al tempo oppure alla posizione in byte specificata.
+.br
+.I NOTA:
+La posizione in byte è abilitata solo per MEncoder e non sarà precisa, in quanto
+ci si può fermare solo alla fine di un fotogramma.
+Se usata insieme con l'opzione \-ss, il tempo indicato da \-endpos sarà spostato
+in avanti il numero secondi specificati da \-ss.
+.sp 1
+.I ESEMPIO:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+Si ferma a 56 secondi.
+.IPs "\-endpos 01:10:00"
+Si ferma a 1 ora e 10 minuti.
+.IPs "\-ss 10 \-endpos 56"
+Si ferma a 1 minuto e 6 secondi.
+.IPs "\-endpos 100mb"
+Codifica solo 100 MB.
+.RE
+.PD 1
 .
 .TP
 .B \-forceidx
@@ -1499,9 +1514,9 @@ Specifica il rapporto di aspetto:
 Specifica la frequenza audio di codifica (default: 48000 Hz, disponibili:
 32000, 44100 e 48000 Hz).
 .IPs alayer=<1\-3>
-Specifica lo strato (layer) di codifica audio (default: strato 2).
+Specifica lo strato (layer) di codifica audio (default: 2).
 .IPs abitrate=<32\-448>
-Specifica la frequenza di codifica audio in kpbs (default: 384 kbps).
+Specifica la frequenza di codifica audio in kpbs (default: 384).
 .IPs amode=<valore>
 Specifica la modalità di codifica audio.
 I Preset disponibili sono:
@@ -1515,7 +1530,7 @@ dual
 mono
 .REss
 .IPs vbitrate=<valore>
-Specify average video bitrate encoding (default: 6 Mbps).
+Specify average video bitrate encoding in Mbps (default: 6).
 .IPs vmode=<valore>
 Specifica la modalità di codifica video:
 .RSss
@@ -1524,8 +1539,8 @@ vbr: Variable BitRate (frequenza variabile) (default)
 cbr: Constant BitRate (frequenza costante)
 .REss
 .IPs vpeak=<valore>
-Specifica il picco di frequenza dell codifica video (utile solo per codifica
-VBR, default: 9.6 Mbps).)
+Specifica il picco di frequenza dell codifica video in Mbps
+(utile solo per codifica VBR, default: 9.6).
 .IPs fmt=<valore>
 Seleziona un formato MPEG per la codifica:
 .RSss
@@ -1587,12 +1602,12 @@ Seleziona una dimensione standard per il video
 larghezza immagine in pixel
 .IPs h=<valore>
 altezza immagine in pixel
-.IPs y420|yv12|yuy2|y8
+.IPs i420|yv12|yuy2|y8
 seleziona lo spazio colore
 .IPs format=<valore>
 spazio colore (fourcc) in esadecimale
 .IPs size=<valore>
-dimensione di un fotogramma in Bytes
+dimensione di un fotogramma in Byte
 .REss
 .sp 1
 .RS
@@ -1685,6 +1700,12 @@ specificare in quanti Bytes vuoi che MPlayer cerchi gli ID audio e video
 desiderati.
 .
 .TP
+.B \-tsprog <1\-65534>
+Nella riproduzione di un flusso MPEG-TS puoi specificare con questa opzione
+quale programma (se presente) vuoi usare.
+Può essere usato con \-vid e \-aid.
+.
+.TP
 .B \-radio <opzione1:opzione2:...> (solo radio)
 Queste opzioni impostano svariati parametri per il modulo di cattura radio.
 Per ascoltare la radio con MPlayer usa 'radio://<frequenza>' (se non viene
@@ -1733,12 +1754,6 @@ con valori di frequenza differenti (per es.\& 48000,44100,32000,...).
 .IPs achannels=<valore> (con cattura radio abilitata)
 Numero di canali audio da catturare.
 .RE
-.
-.TP
-.B \-tsprog <1\-65534>
-Nella riproduzione di un flusso MPEG-TS puoi specificare con questa opzione
-quale programma (se presente) vuoi usare.
-Può essere usato con \-vid e \-aid.
 .
 .TP
 .B \-tv <opzione1:opzione2:...> (solo TV/\:PVR)
@@ -1869,8 +1884,7 @@ di compressione MJPEG.
 .REss
 .IPs quality=<0\-100>
 Seleziona la qualità della compressione JPEG
-.br
-(per la dimensione completa è raccomandato un valore < 60)
+(per la dimensione completa è raccomandato un valore < 60).
 .RE
 .
 .TP
@@ -2007,6 +2021,7 @@ Abilita l'estrazione di font embedded in file Matroska.
 Questi font possono essere usati per renderizzare sottotitoli SSA/ASS
 (opzione \-ass).
 .
+.TP
 .B \-ffactor <numero> (solo OSD)
 Ricampionamento della mappatura alpha del font.
 Può essere:
@@ -2070,7 +2085,7 @@ Specifica il charset che sarà passato a FriBiDi quando si decodifica un
 sottotitolo non-UTF8 (default: ISO8859-8).
 .
 .TP
-.B \-ifo <file ifo VOBsub>
+.B \-ifo <file IFO VOBsub>
 Indica il file che verrà usato per caricare la palette e la dimensione
 del fotogramma per i sottotitoli VOBsub.
 .
@@ -2399,10 +2414,6 @@ Specifica l'ID del sottotitolo VOBsub.
 .TP
 .B \-abs <valore> (solo \-ao oss) (OBSOLETO)
 Sovrascrive la ricerca della dimensione del buffer del driver/\:scheda.
-.
-.TP
-.B \-delay <secondi>
-Ritardo audio in secondi (valore decimale positivo o negativo)
 .
 .TP
 .B \-format <formato> (vedi anche il filtro audio format)
@@ -4329,14 +4340,6 @@ Non riproduce/\:codifica il video.
 Im molti casi questo non funziona, usa \-vc null \-vo null al suo posto
 .
 .TP
-.B \-oldpp <qualità> (solo OpenDivX) (OBSOLETO)
-Usa il codice di post elaborazione di OpenDivX invece di quello interno.
-Soppiantato da \-pp, le routine di post elaborazione interne offrono
-miglior qualità e prestazioni.
-La gamma valida del valore di \-oldpp varia da codec a codec, generalmente
-deve essere 0\-6, dove 0=disabilitato 6=più lento/\:migliore.
-.
-.TP
 .B \-pp <qualità> (vedi anche \-vf pp)
 Regola il livello di post elaborazione della DLL.
 Questa opzione non è più utilizzabile con \-vf pp.
@@ -5011,11 +5014,11 @@ della memoria (mmap()).
 Le aree mappate contengono una intestazione:
 .sp 1
 .nf
-int nch				/* numero di canali */
-int size			/* dimensione del buffer */
-unsigned long long counter	/* Usato per mantenere la sincronizzazione,
-				   aggiornato ogni volta che vengono
-                                   esportati nuovi dati */
+int nch                      /* numero di canali */
+int size                     /* dimensione del buffer */
+unsigned long long counter   /* Usato per mantenere la sincronizzazione,
+                                aggiornato ogni volta che vengono
+                                esportati nuovi dati */
 .fi
 .sp 1
 Il resto sono i dati a 16 bit (non-interlacciati).
@@ -5096,7 +5099,7 @@ Questo elimina l'utilizzo di 'analyseplugin' dall'SDK di LADSPA.
 .RE
 .PD 1
 .
-TP
+.TP
 .B "comp\ \ \ "
 Filtro di compressione/espansione utilizzabile per l'ingresso da microfono.
 Previene gli artefatti su suoni molto alti ed aumenta il volume sui suoni
@@ -6900,26 +6903,6 @@ quanto ogni pacchetto viene scritto in un nuovo blocco.
 Imposta l'intervallo di buffering audio (default: 0.5 sec).
 .
 .TP
-.B \-endpos <[[hh:]mm:]ss[.ms]|dimensione[b|kb|mb]> (vedi anche \-ss e \-sb)
-Ferma la codifica al tempo oppure alla posizione in byte specificata.
-.br
-.I NOTA:
-La posizione in byte non sarà precisa in quanto ci si può fermare
-solo alla fine di un fotogramma.
-.sp 1
-.I ESEMPIO:
-.PD 0
-.RSs
-.IPs "\-endpos 56"
-Codifica solo 56 secondi.
-.IPs "\-endpos 01:10:00"
-Codifica solo 1 ora e 10 minuti.
-.IPs "\-endpos 100mb"
-Codifica solo 100 MB.
-.RE
-.PD 1
-.
-.TP
 .B \-fafmttag <formato>
 Può essere usato per sovrascrivere il valore del tag del formato audio del
 file di uscita.
@@ -7092,8 +7075,6 @@ Utilizza \-ovc help per avere una lista dei codec video disponibili.
 .RSs
 .IPs "\-ovc copy"
 niente codifica, solo copia del flusso
-.IPs "\-ovc divx4"
-Codifica in formato DivX4/\:DivX5
 .IPs "\-ovc raw"
 Codifica su un formato grezzo non compresso arbitrario (usa '\-fv format' per
 selezionare come).
@@ -7143,86 +7124,6 @@ sintassi seguente:
 .PP
 Dove <codec> può essere: lavc, xvidenc, divx4, lame, toolame, twolame,
 nuv, xvfw, faac, x264enc, mpeg, lavf.
-.
-.
-.SS divx4 (\-divx4opts)
-.
-DivX4 è obsoleto ed è supportato solo per completezza.
-Per dettagli riguardanti le opzioni DivX4 dai un'occhiata ai sorgenti,
-molte opzioni non sono descritte qua.
-.
-.TP
-.B "help\ \ \ "
-ottieni l'aiuto
-.
-.TP
-.B br=<valore>
-Specifica il bitrate.
-.RSs
-.IPs 4\-16000
-(in kbit)
-.IPs 16001\-24000000
-(in bit)
-.RE
-.
-.TP
-.B key=<valore>
-valore massimo dell'intervallo tra due fotogrammi chiave (in fotogrammi)
-.
-.TP
-.B deinterlace
-Abilita il deinterlacciamento (evitalo, DivX4 non lo gestisce in modo corretto).
-.
-.TP
-.B q=<1\-5>
-qualità (1\-più veloce, 5\-migliore)
-.
-.TP
-.B min_quant=<1\-31>
-valore minimo di quantizzazione
-.
-.TP
-.B max_quant=<1\-31>
-valore massimo di quantizzazione
-.
-.TP
-.B rc_period=<valore>
-periodo per il controllo del bitrate
-.
-.TP
-.B rc_reaction_period=<valore>
-periodo di reazione per il controllo del bitrate
-.
-.TP
-.B rc_reaction_ratio=<valore>
-rapporto di reazione per il controllo del bitrate
-.
-.TP
-.B crispness=<0\-100>
-Specifica l'increspatura/\:appiattimento.
-.
-.TP
-.B pass=<1\-2>
-Con questa opzione puoi codificare file DivX4 in due passi.
-Prima effettua una codifica con pass=1, poi esegui un'altra codifica con
-gli stessi parametri e pass=2.
-.
-.TP
-.B vbrpass=<0\-2>
-Sovrascrive l'argomento pass e utilizza la libreria VBR (Variable
-Bit Rate, bitrate variabile) di XviD invece di quella di DivX4.
-Le opzioni disponibili sono:
-.PD 0
-.RSs
-.IPs 0
-codifica a singolo passo (uguale a non mettere pass=x sulla linea di comando)
-.IPs 1
-Primo passo (analisi) della codifica a due passi.
-Il file AVI ottenuto può essere mandato a /dev/\:null.
-.IPs 2
-Secondo passo (finale) della codifica a due passi.
-.RE
-.PD 1
 .
 .
 .SS lame (\-lameopts)
