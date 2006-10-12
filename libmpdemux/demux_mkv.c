@@ -3938,7 +3938,7 @@ demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
   mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, track_num, MATROSKA_TRACK_SUBTITLE);
           if ((track->language != NULL) &&
               strcmp(track->language, "und"))
-            strncpy(lang, track->language, maxlen);
+            strlcpy(lang, track->language, maxlen);
 }
 
 /** \brief Get the language code for an audio track.
