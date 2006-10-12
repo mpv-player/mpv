@@ -1816,6 +1816,7 @@ static int mp_property_audio(m_option_t* prop,int action,void* arg) {
             if (code) {
                 lang[0] = code >> 8;
                 lang[1] = code;
+                lang[2] = 0;
             }
             snprintf(*(char**)arg, 63, "(%d) %s", audio_id, code ? lang : MSGTR_Unknown);
             return 1;

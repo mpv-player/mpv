@@ -3969,23 +3969,11 @@ demux_mkv_get_audio_lang(demuxer_t *demuxer, int track_num, char *lang,
                        int maxlen)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
-  mkv_track_t *track;
-  int i, num;
-
-  num = 0;
-  for (i = 0; i < mkv_d->num_tracks; i++)
-    {
-      track = mkv_d->tracks[i];
-      if (track->type == MATROSKA_TRACK_AUDIO)
-        num++;
-      if (num == (track_num + 1))
-        {
-          if ((track->language != NULL) &&
-              strcmp(track->language, "und"))
-            strlcpy(lang, track->language, maxlen);
-          return;
-        }
-    }
+  mkv_track_t *track = demux_mkv_find_track_by_num (mkv_d, track_num, MATROSKA_TRACK_AUDIO);
+  if ((track->language != NULL) &&
+      strcmp(track->language, "und"))
+    strlcpy(lang, track->language, maxlen);
+  return;
 }
 
 
