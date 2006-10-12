@@ -2107,7 +2107,6 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         if (demuxer->type == DEMUXER_TYPE_MATROSKA && dvdsub_id >= 0) {
             char lang[40] = MSGTR_Unknown;
             demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
-            lang[39] = 0;
             snprintf(*(char**)arg, 63, "(%d) %s", dvdsub_id, lang);
             return 1;
         }
@@ -2129,14 +2128,11 @@ static int mp_property_sub(m_option_t* prop,int action,void* arg) {
         }
 #ifdef USE_DVDREAD
         if (vo_spudec && dvdsub_id >= 0) {
-            char lang[3] = "\0\0\0";
-            int code = 0;
-            code = dvd_lang_from_sid(stream, dvdsub_id);
-            if (code) {
+            char lang[3];
+            int code = dvd_lang_from_sid(stream, dvdsub_id);
                 lang[0] = code >> 8;
                 lang[1] = code;
                 lang[2] = 0;
-            }
             snprintf(*(char**)arg, 63, "(%d) %s",
                      dvdsub_id, lang);
             return 1;
