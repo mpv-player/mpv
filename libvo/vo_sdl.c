@@ -1190,15 +1190,15 @@ static void check_events (void)
 				if(vo_nomouse_input)
 				    break;
 				if(event.button.button == 4 || event.button.button == 5)
-					mplayer_put_key(MOUSE_BASE+event.button.button-1);
+					mplayer_put_key(MOUSE_BTN0+event.button.button-1);
 				else
-					mplayer_put_key((MOUSE_BASE+event.button.button-1) | MP_KEY_DOWN);
+					mplayer_put_key((MOUSE_BTN0+event.button.button-1) | MP_KEY_DOWN);
 				break;			    
 		
 			case SDL_MOUSEBUTTONUP:
 				if(vo_nomouse_input)
 				    break;
-				mplayer_put_key(MOUSE_BASE+event.button.button-1);
+				mplayer_put_key(MOUSE_BTN0+event.button.button-1);
 				break;
 	
 			/* graphics mode selection shortcuts */
