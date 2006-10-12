@@ -30,7 +30,7 @@ mp_input_lirc_init(void) {
   }
 
   if(lirc_readconfig( lirc_configfile,&lirc_config,NULL )!=0 ){
-    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCcfgerr MSGTR_LIRCdisabled,
+    mp_msg(MSGT_LIRC,MSGL_ERR,MSGTR_LIRCcfgerr,
 		    lirc_configfile == NULL ? "~/.lircrc" : lirc_configfile);
     lirc_deinit();
     return -1;
