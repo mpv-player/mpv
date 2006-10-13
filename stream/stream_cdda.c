@@ -289,6 +289,8 @@ static int fill_buffer(stream_t* s, char* buffer, int max_len) {
   int i;
   
   buf = paranoia_read(p->cdp,cdparanoia_callback);
+  if (!buf)
+    return 0;
 
 #ifdef WORDS_BIGENDIAN 
   for(i=0;i<CD_FRAMESIZE_RAW/2;i++)
