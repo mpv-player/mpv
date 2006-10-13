@@ -171,8 +171,6 @@ static void getMyXImage(void)
                             &Shminfo[0], image_width, image_height);
         if (myximage == NULL)
         {
-            if (myximage != NULL)
-                XDestroyImage(myximage);
             mp_msg(MSGT_VO, MSGL_WARN,
                    "Shared memory error,disabling ( Ximage error )\n");
             goto shmemerror;
