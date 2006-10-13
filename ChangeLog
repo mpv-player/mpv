@@ -43,7 +43,7 @@ MPlayer (1.0)
     * Vorbis decoding speedup, now default Vorbis decoder
     * VMware Video decoder
     * VP50 and VP62 decoder
-    * lossless audio decoders: WavPack, TTA
+    * lossless audio decoders: WavPack, TTA, Shorten
     * CAVS decoder
     * GXF muxer/demuxer
     * MXF demuxer
