@@ -426,14 +426,13 @@ static void updatetracklist(HWND hwnd)
 {
     int i=0;
     gui_t *gui = (gui_t *) GetWindowLongPtr(hwnd, GWLP_USERDATA);
-    HWND tracklist = GetDlgItem(hwnd, ID_TRACKLIST);
     /* clear listbox */
-    SendMessage(tracklist, LB_RESETCONTENT, 0, 0);
+    SendDlgItemMessage(hwnd, ID_TRACKLIST, LB_RESETCONTENT, 0, 0);
     for (i=0; i < gui->playlist->trackcount; i++)
         if (gui->playlist->tracks[i]->title)
-            SendMessage(tracklist, LB_ADDSTRING, 0, (LPARAM)gui->playlist->tracks[i]->title);
+            SendDlgItemMessage(hwnd, ID_TRACKLIST, LB_ADDSTRING, 0, (LPARAM)gui->playlist->tracks[i]->title);
         else
-            SendMessage(tracklist, LB_ADDSTRING, 0, (LPARAM)gui->playlist->tracks[i]->filename);
+            SendDlgItemMessage(hwnd, ID_TRACKLIST, LB_ADDSTRING, 0, (LPARAM)gui->playlist->tracks[i]->filename);
 }
 
 static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
@@ -518,11 +517,10 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
         }
         case WM_COMMAND:
         {
-            HWND tracklist = GetDlgItem(hwnd, ID_TRACKLIST);
             int selected = 0;
             int i;
             for (i=0; i<pl->trackcount; i++)
-                if(0 < SendMessage(tracklist, LB_GETSEL, i, 0)) selected = i + 1;
+                if(0 < SendDlgItemMessage(hwnd, ID_TRACKLIST, LB_GETSEL, i, 0)) selected = i + 1;
             switch (LOWORD(wParam))
             {
                 case ID_CLOSE:
@@ -531,9 +529,10 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
                 case ID_TRACKLIST:
                     if(HIWORD(wParam) == LBN_DBLCLK)
                     {
+                case ID_PLAY:
                         if(selected) pl->current = selected - 1;
                         mplSetFileName(NULL, pl->tracks[pl->current]->filename, STREAMTYPE_STREAM);
-                        mplGotoTheNext = 0;
+                        mplGotoTheNext = guiIntfStruct.Playing? 0 : 1;
                         gui->startplay(gui);
                     }
                     return 0;
@@ -547,14 +546,6 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
                 {
                     if(selected) pl->movedown_track(pl, selected);
                     selected++;
-                    break;
-                }
-                case ID_PLAY:
-                {
-                    if(selected) pl->current = selected - 1;
-                    mplSetFileName(NULL, pl->tracks[pl->current]->filename, STREAMTYPE_STREAM);
-                    mplGotoTheNext = 0;
-                    gui->startplay(gui);
                     break;
                 }
                 case ID_REMOVE:
@@ -601,7 +592,7 @@ static LRESULT CALLBACK PlayListWndProc(HWND hwnd, UINT iMsg, WPARAM wParam, LPA
             updatetracklist(hwnd);
             if(selected < 1) selected = 1;
             else if(selected>pl->trackcount) selected = pl->trackcount;
-            SendMessage(tracklist, LB_SETCURSEL, selected - 1, 0);
+            SendDlgItemMessage(hwnd, ID_TRACKLIST, LB_SETCURSEL, selected - 1, 0);
             return 0;
         }
         case WM_DROPFILES:
