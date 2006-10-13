@@ -19,7 +19,7 @@ extern ass_track_t* ass_track;
 //===========================================================================//
 
 extern int sub_visibility;
-extern double sub_delay;
+extern float sub_delay;
 
 typedef struct vf_vo_data_s {
     double pts;
