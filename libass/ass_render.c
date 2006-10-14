@@ -275,6 +275,10 @@ void ass_done(ass_instance_t* priv)
 {
 	ass_face_cache_done();
 	ass_glyph_cache_done();
+	if (render_context.stroker) {
+		FT_Stroker_Done(render_context.stroker);
+		render_context.stroker = 0;
+	}
 	if (priv && priv->library) FT_Done_FreeType(priv->library);
 	if (priv && priv->fontconfig_priv) fontconfig_done(priv->fontconfig_priv);
 	if (priv && priv->synth_priv) ass_synth_done(priv->synth_priv);
