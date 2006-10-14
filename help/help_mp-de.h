@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20162
+// In sync with r20191
 
 // ========================= MPlayer help ===========================
 
@@ -663,8 +663,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Initialisiere LIRC-Unterstützung...\n"
-#define MSGTR_LIRCdisabled "Verwendung der Fernbedienung nicht möglich.\n"
-#define MSGTR_LIRCopenfailed "Fehler beim Öffnen der LIRC-Unterstützung.\n"
+#define MSGTR_LIRCopenfailed "Fehler beim Öffnen der LIRC-Unterstützung.\nVerwendung der Fernbedienung nicht möglich.\n"
 #define MSGTR_LIRCcfgerr "Kann LIRC-Konfigurationsdatei %s nicht lesen.\n"
 
 // vf.c

@@ -1,4 +1,4 @@
-// Synced with help_mp-en.h r20162
+// Synced with help_mp-en.h r20191
 // Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2@yahoo.com>
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
@@ -636,8 +636,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "起动红外遥控支持...\n"
-#define MSGTR_LIRCdisabled "你将无法使用遥控器。\n"
-#define MSGTR_LIRCopenfailed "红外遥控支持起动失败。\n"
+#define MSGTR_LIRCopenfailed "打开红外遥控支持失败。你将无法使用遥控器。\n"
 #define MSGTR_LIRCcfgerr "读取 LIRC 配置文件 %s 失败。\n"
 
 // vf.c
