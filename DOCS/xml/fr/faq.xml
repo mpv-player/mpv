@@ -405,7 +405,7 @@ J'ai des problèmes pour afficher mes sous-titres, à l'aide!!
 </para></question>
 <answer><para>
 Assurez-vous d'avoir installé les polices correctement. Suivez les étapes de la
-partie <link linkend="mpsub-install">OSD et sous-titres</link> de la section
+partie <link linkend="fonts-osd">polices et OSD</link> de la section
 installation. Si vous utilisez des polices TrueType, vérifiez que la librairie
 <systemitem class="library">FreeType</systemitem> est installée.
 Vous pouvez aussi essayer de vérifier vos sous-titres dans un éditeur de texte

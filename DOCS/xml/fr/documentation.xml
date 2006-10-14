@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r17322 -->
+<!-- synced with r20085 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Le Lecteur Vidéo</title>
@@ -48,7 +48,7 @@ ou faites une recherche dans ces fichiers.
 La plupart des questions devraient trouver leur réponse ici et le
 reste a probablement déjà été demandé sur nos
 <link linkend="mailinglists">listes de diffusion</link>.
-Regardez leurs <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archives</ulink>,
+Regardez leurs <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archives</ulink>,
 il y a beaucoup d'informations intéressantes à y trouver.
 </para>
 
@@ -179,7 +179,6 @@ et de décodeurs de <application>MPlayer</application></simpara></listitem>
 peuvent être distribués selon les termes de la GNU General Public License Version 2.
 </para>
 
-&history.xml;
 </chapter>
 
 &install.xml;
@@ -193,6 +192,7 @@ peuvent être distribués selon les termes de la GNU General Public License Versio
 &video.xml;
 &audio.xml;
 &tvinput.xml;
+&radio.xml;
 
 &ports.xml;
 &mencoder.xml;
@@ -201,3 +201,4 @@ peuvent être distribués selon les termes de la GNU General Public License Versio
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
+&history.xml;

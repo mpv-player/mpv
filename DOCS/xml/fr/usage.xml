@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r17865 -->
+<!-- synced with r20041 -->
 <chapter id="usage">
 <title>Utilisation</title>
 
@@ -105,6 +105,125 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/films/test.avi</replaceable
 </sect1>
 
 
+<sect1 id="subosd">
+<title>Sous-titres et OSD</title>
+
+<para>
+ <application>MPlayer</application> peut afficher des sous-titres durant le film.
+ Les formats suivants sont supportés:
+<itemizedlist>
+<listitem><para>VobSub</para></listitem>
+<listitem><para>OGM</para></listitem>
+<listitem><para>CC (closed caption)</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
+<listitem><para>SubRip</para></listitem>
+<listitem><para>SubViewer</para></listitem>
+<listitem><para>Sami</para></listitem>
+<listitem><para>VPlayer</para></listitem>
+<listitem><para>RT</para></listitem>
+<listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+<listitem><para>MPsub</para></listitem>
+<listitem><para>AQTitle</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+</itemizedlist>
+</para>
+
+<para>
+<application>MPlayer</application> peut convertir les formats précédemment listés
+(<emphasis role="bold">excepté les trois premiers</emphasis>)
+dans dans les formats de destinations suivants, en utilisant ces options:
+<itemizedlist>
+<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+</itemizedlist>
+</para>
+
+
+<para>
+<application>MEncoder</application> peut convertir les sous-titres DVD au format <link linkend="menc-feat-extractsub">VOBSub</link>.
+</para>
+
+<para>
+Les options en ligne de commande diffèrent légèrement suivant les différents formats:
+</para>
+
+<formalpara>
+<title>Sous-titres VOBSub</title>
+<para>
+Les sous-titres VOBSub consistent en un gros (plusieurs méga-octets) fichier <filename>.SUB</filename>,
+et d'éventuels fichiers <filename>.IDX</filename> et/ou <filename>.IFO</filename>.
+Si vous avez des fichiers tels que
+<filename><replaceable>sample.sub</replaceable></filename>,
+<filename><replaceable>sample.ifo</replaceable></filename> (optionnel),
+<filename><replaceable>sample.idx</replaceable></filename> -
+vous devrez passer à <application>MPlayer</application> l'option
+<option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option>
+(éventuellement avec le chemin complet). L'option <option>-vobsubid</option> est comme l'option
+<option>-sid</option> pour les DVDs, vous pouvez choisir les pistes de sous-titres (langues) avec.
+Au cas où <option>-vobsubid</option> est omis, <application>MPLayer</application> essaiera
+d'utiliser les langues indiqués par l'option <option>-slang</option> et se rabattra sur l'objet
+<systemitem>langidx</systemitem> du fichier <filename>.IDX</filename> pour définir la langue
+de sous-titres. Si cela échoue, il n'y aura pas de sous-titres.
+</para>
+</formalpara>
+
+<formalpara>
+<title>Autres sous-titres</title>
+<para>
+Les autres formats consistent en un seul fichier texte contenant le timing,
+  l'emplacement et autres infos du texte. Utilisation: si vous avez un fichier tel que
+<filename><replaceable>exemple.txt</replaceable></filename>, vous devrez passer l'option <option>-sub
+exemple.txt</option> (éventuellement avec le chemin complet).
+</para>
+</formalpara>
+
+<variablelist>
+<title>Réglage du timing et de l'emplacement des sous-titres:</title>
+<varlistentry>
+  <term><option>-subdelay <replaceable>sec</replaceable></option></term>
+  <listitem><simpara>
+    Décale les sous-titres de <option><replaceable>sec</replaceable></option> secondes.
+    Peut être négatif. La valeur est ajouté au compteur d'avancement du film (movie's time position counter).
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subfps <replaceable>DÉBIT</replaceable></option></term>
+  <listitem><simpara>
+    Spécifie le rapport trame/sec du fichier de sous-titres (nombre à virgule).
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
+  <listitem><simpara>
+    Spécifie la position des sous-titres sur l'écran.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Si vous constatez un décalage progressif entre le film et les sous-titres en
+utilisant un fichier de sous-titres MicroDVD, il est probable que la vitesse
+du film et celle des sous-titres soient différentes. Veuillez noter que le format
+de sous-titres MicroDVD utilise des numéros de trames absolus pour sa synchronisation,
+mais il ne contient pas d'information sur les fps et de ce fait l'option <option>-subfps</option> devrait être utilisée avec ce format.
+Si vous voulez résoudre ce problème de manière permanente,
+vous devez convertir manuellement le débit des trames du fichier de sous-titres.
+<application>MPlayer</application> peut faire cette conversion pour vous:
+
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>subtitles_fps</replaceable> -subfps
+ <replaceable>avi_fps</replaceable> -sub <replaceable>subtitle_filename</replaceable>
+ <replaceable>dummy.avi</replaceable></screen>
+</para>
+
+<para>
+A propos des sous-titres DVD, voir la section <link linkend="dvd">DVD</link>.
+</para>
+</sect1>
+
 <sect1 id="control">
 <title>Contrôles</title>
 
@@ -136,7 +255,7 @@ et une liste complète des commandes disponibles en tapant
 <command>mplayer -input cmdlist</command>.
 </para>
 
-<example>
+<example id="input_control_file">
 <title>Un simple fichier de contrôles</title>
 <programlisting>
 ##
@@ -357,10 +476,8 @@ que vous regardez.
 </para>
 
 <para>
-Le format de fichier EDL est plutôt rudimentaire. Une fois que le système EDL
-aura atteint un certain niveau de maturité, un format de fichier basé sur XML
-sera probablement implémenté (en gardant une compatibilité descendante avec les
-précédents formats EDL).
+Le format de fichier EDL est plutôt rudimentaire. Il y a une commande par ligne
+qui défini ce qui doit être fait (couper ou rétablir le son) et quand il faut le faire.
 </para>
 
 <sect2 id="edl_using">
@@ -395,10 +512,11 @@ lecture aura atteint le temps indiqué dans le fichier.
 
 <para>
 Pour créer un fichier EDL à partir duquel travailler, utilisez l'option
-<option>-edlout &lt;nomfichier&gt;</option>. Durant la lecture, quand vous
-voulez marquer les deux secondes précédentes à sauter, tapez sur <keycap>i</keycap>.
-Une entrée correspondante sera écrite dans le fichier. Vous pouvez ensuite revenir
-et affiner le fichier EDL généré.
+<option>-edlout &lt;nomfichier&gt;</option>. Durant la lecture, pressez
+la touche <keycap>i</keycap> pour marquer le début et la fin du passage à sauter.
+Une entrée correspondante sera ajoutée au fichier pour cette fois-ci. Vous pouvez
+ensuite ajuster de manière plus précise le fichier EDL ainsi que changer l'opération
+par défaut qui est de sauter le passage décrit par chaque ligne.
 </para>
 </sect2>
 
@@ -541,7 +659,7 @@ Cette section doit encore être écrite et ne peut être complétée tant que personn
 a fourni des fichiers d'exemple à tester. Si vous avez quelconques fichiers audio à
 encodage matriciel en votre possession,que savez où en trouver, ou avez quelconques informations
 qui pourraient être utiles, veuillez envoyer un message à la liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>.
 Mettez "[matrix-encoded audio]" en sujet du mail.
 </para>
 <para>
