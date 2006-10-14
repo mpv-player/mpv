@@ -120,6 +120,8 @@
 #define ID_ASPECT4           86
 #define ID_SUBWINDOW         87
 #define ID_TIMER             88
+#define ID_MUTE              89
+#define ID_FULLSCREEN        90
 
 /* gtk emulation */
 #define GTK_MB_FATAL         0x1

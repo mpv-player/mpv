@@ -445,6 +445,12 @@ static LRESULT CALLBACK SubProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                     display_chapterselwindow(gui);
                     break;
 #endif
+                case ID_FULLSCREEN:
+                    mp_input_queue_cmd(mp_input_parse_cmd("vo_fullscreen"));
+                    break;
+                case ID_MUTE:
+                    mp_input_queue_cmd(mp_input_parse_cmd("mute"));
+                    break;
                 case ID_ASPECT1:
                     mp_input_queue_cmd(mp_input_parse_cmd("switch_ratio 1.777777"));
                     break;
@@ -950,6 +956,9 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                 case IDURL_OPEN:
                     display_openurlwindow(gui, 0);
                     break;
+                case ID_MUTE:
+                    mp_input_queue_cmd(mp_input_parse_cmd("mute"));
+                    break;
 #ifdef USE_SUB
                 case IDSUBTITLE_OPEN:
                     display_opensubtitlewindow(gui);
@@ -1208,6 +1217,8 @@ static void create_traymenu(gui_t *gui)
     AppendMenu(gui->trayplaybackmenu, MF_STRING, ID_NTRACK, "Next Track");
     AppendMenu(gui->trayplaybackmenu, MF_STRING, ID_SEEKF, "Seek Forwards");
     AppendMenu(gui->traymenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(gui->traymenu, MF_STRING, ID_MUTE, "Toggle Mute");
+    AppendMenu(gui->traymenu, MF_SEPARATOR, 0, 0);
 #ifdef USE_SUB
     AppendMenu(gui->traymenu, MF_STRING, IDSUBTITLE_OPEN, "Open Subtitle");
 #endif
@@ -1236,6 +1247,9 @@ static void create_submenu(gui_t *gui)
     AppendMenu(gui->submenu, MF_STRING, ID_STOP, "Stop");
     AppendMenu(gui->submenu, MF_STRING, ID_NTRACK, "Next Track");
     AppendMenu(gui->submenu, MF_STRING, ID_SEEKF, "Seek Forwards");
+    AppendMenu(gui->submenu, MF_SEPARATOR, 0, 0);
+    AppendMenu(gui->submenu, MF_STRING, ID_FULLSCREEN, "Toggle Fullscreen");
+    AppendMenu(gui->submenu, MF_STRING, ID_MUTE, "Toggle Mute");
     AppendMenu(gui->submenu, MF_SEPARATOR, 0, 0);
     AppendMenu(gui->submenu, MF_STRING | MF_POPUP, (UINT) gui->aspectmenu, "Aspect Ratio");
     AppendMenu(gui->submenu, MF_STRING | MF_POPUP, (UINT) gui->subtitlemenu, "Subtitle Options");
