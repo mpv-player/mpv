@@ -3772,8 +3772,10 @@ if test "$_directfb" = yes ; then
   if test "$_dfb_version" -ge $(dfb_version 0 9 15); then
     _vosrc="$_vosrc vo_dfbmga.c"
     _vomodules="dfbmga $_vomodules"
+    _def_dfbmga='#define HAVE_DFBMGA 1'
   else
     _novomodules="dfbmga $_novomodules"
+    _def_dfbmga='#undef HAVE_DFBMGA'
   fi
 else
   _def_directfb='#undef HAVE_DIRECTFB'
@@ -8344,6 +8346,7 @@ $_def_tdfxfb
 $_def_tdfxvid
 $_def_directfb
 $_def_directfb_version
+$_def_dfbmga
 $_def_zr
 $_def_bl
 $_def_mga

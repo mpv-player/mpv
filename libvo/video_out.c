@@ -113,7 +113,7 @@ extern vo_functions_t video_out_vesa;
 #endif
 #ifdef HAVE_DIRECTFB
 extern vo_functions_t video_out_directfb;
-#if DIRECTFBVERSION >= 915
+#ifdef HAVE_DFBMGA
 extern vo_functions_t video_out_dfbmga;
 #endif
 #endif
@@ -228,7 +228,7 @@ vo_functions_t* video_out_drivers[] =
 #endif
 #ifdef HAVE_DIRECTFB
 	&video_out_directfb,
-#if DIRECTFBVERSION >= 915
+#ifdef HAVE_DFBMGA
         &video_out_dfbmga,
 #endif
 #endif
