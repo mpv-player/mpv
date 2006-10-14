@@ -74,7 +74,7 @@ printhead() {
 all_filenames() {
     test "$_files" != "" && echo "$_files" && return
 
-    if [ "$_svn" == "no" ]; then
+    if [ "$_svn" = "no" ]; then
         find . -type f \
         | grep -v "\.\#\|\~$\|\.depend\|\/\.svn\/\|config.mak\|^\./config\.h" \
         | grep -v "^\./version\.h\|\.o$\|\.a$\|configure.log\|^\./help_mp.h"
@@ -225,7 +225,7 @@ done
 
 # Set heading color
 
-if [ "$_color" == "yes" ]; then
+if [ "$_color" = "yes" ]; then
     COLB="\e[36m"
     COLE="\e[m"
 else
@@ -237,7 +237,7 @@ fi
 
 filelist=`all_filenames`
 
-if [ "$_showcont" == "yes" ]; then
+if [ "$_showcont" = "yes" ]; then
   _diffopts="-u"
   _grepopts="-n -I"
 else
@@ -251,21 +251,21 @@ fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_spaces" == "yes" ]; then
+if [ "$_spaces" = "yes" ]; then
     printhead "checking for spaces in filenames ..."
     find . | grep " "
 fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_extensions" == "yes" ]; then
+if [ "$_extensions" = "yes" ]; then
     printhead "checking for uppercase extensions ..."
     echo $filelist | grep "\.[[:upper:]]\+$" | grep -v "\.S$"
 fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_crlf" == "yes" ]; then
+if [ "$_crlf" = "yes" ]; then
     printhead "checking for MSDOS line endings ..."
     CR=`echo " " | tr ' ' '\015'`
     grep $_grepopts "$CR" $filelist
@@ -273,28 +273,28 @@ fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_trailws" == "yes" ]; then
+if [ "$_trailws" = "yes" ]; then
     printhead "checking for trailing whitespace ..."
     grep $_grepopts "[[:space:]]\+$" $filelist
 fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_rcsid" == "yes" ]; then
+if [ "$_rcsid" = "yes" ]; then
     printhead "checking for missing RCS \$Id\$ or \$Revision\$ tags ..."
     grep -L -I "\$\(Id\|Revision\)[[:print:]]\+\$" $filelist
 fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_oll" == "yes" ]; then
+if [ "$_oll" = "yes" ]; then
     printhead "checking for overly long lines (over 79 characters) ..."
     grep $_grepopts "^[[:print:]]\{80,\}$" $filelist
 fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_charset" == "yes" ]; then
+if [ "$_charset" = "yes" ]; then
     printhead "checking bad charsets ..."
     for I in $filelist ; do
       case "$I" in
@@ -311,7 +311,7 @@ fi
 
 # -----------------------------------------------------------------------------
 
-if [ "$_stupid" == "yes" ]; then
+if [ "$_stupid" = "yes" ]; then
     printhead "checking for stupid code ..."
 
     # avoid false-positives in xpm files, docs, etc, only check .c and .h files
