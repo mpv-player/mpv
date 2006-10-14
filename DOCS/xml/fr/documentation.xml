@@ -47,7 +47,7 @@ pourrez trouver. Si vous avez d'autres questions, retournez à la
 ou faites une recherche dans ces fichiers.
 La plupart des questions devraient trouver leur réponse ici et le
 reste a probablement déjà été demandé sur nos
-<link linkend="mailinglists">listes de diffusion</link>.
+<ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">listes de diffusion</ulink>.
 Regardez leurs <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archives</ulink>,
 il y a beaucoup d'informations intéressantes à y trouver.
 </para>
@@ -197,7 +197,6 @@ peuvent être distribués selon les termes de la GNU General Public License Versio
 &ports.xml;
 &mencoder.xml;
 &encoding-guide.xml;
-&mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;
 &skin.xml;
