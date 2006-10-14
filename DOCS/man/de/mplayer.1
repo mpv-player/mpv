@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20132
+.\" In sync with r20194
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -265,10 +265,10 @@ anpassen kann.
 .RSs
 .IPs "<\- und \->"
 Springe 10 Sekunden zurück/\:vor.
-.IPs "HOCH und RUNTER"
-Springe 1 Minute zurück/\:vor.
+.IPs "hoch und runter"
+Springe 1 Minute vor/\:zurück.
 .IPs "BildHoch und BildRunter (bzw.\& PGUP/\:PGDOWN)"
-Springe 10 Minuten zurück/\:vor.
+Springe 10 Minuten vor/\:zurück.
 .IPs "[ und ]"
 Verringert/erhöht die Abspielgeschwindigkeit um 10%.
 .IPs "{ und }"
@@ -334,7 +334,7 @@ Datei.
 Mache einen Schnappschuss.
 .IPs "S (nur bei \-vf screenshot)"
 Beginne/beende die Aufnahme von Schnappschüssen.
-.IPs "I"
+.IPs "I\ \ \ \ "
 Zeige den Dateinamen im OSD.
 .IPs "! und @"
 Spult zum Anfang des vorigen/nächsten Kapitels
@@ -345,7 +345,7 @@ Spult zum Anfang des vorigen/nächsten Kapitels
 (Die folgenden Tasten funktionieren nur in Verbindung mit
 hardwarebeschleunigter
 Videoausgabe (xv, (x)vidix, (x)mga, etc.\&), dem Softwareequalizer-
-(\-vf eq oder \-vf eq2) oder dem Farbtonfilter (\-vf hue).
+(\-vf eq oder \-vf eq2) oder dem Farbtonfilter (\-vf hue).)
 .RE
 .PP
 .PD 0
@@ -470,7 +470,7 @@ Kehre zum Hauptmenü zurück.
 .IPs "Tastenfeld 7"
 Kehre zum nächsten Menü zurück (Vorzug erhält Kapitel->Titel->Ursprung, in
 dieser Reihenfolge).
-.IPs "Tastenfeld Enter"
+.IPs "Tastenfeld ENTER"
 Bestätige die Auswahl.
 .RE
 .PD 1
@@ -492,10 +492,10 @@ Verringert/\:erhöht die Lautstärke.
 .B Joysticksteuerung
 .PD 0
 .RS
-.IPs "Links und Rechts"
+.IPs "links und rechts"
 Spule 10 Sekunden zurück/\:vor.
-.IPs "Hoch und Runter"
-Spule 1 Minute zurück/\:vor.
+.IPs "hoch und runter"
+Spule 1 Minute vor/\:zurück.
 .IPs "Knopf 1"
 Pause.
 .IPs "Knopf 2"
@@ -1515,11 +1515,11 @@ anzuschauen, verwende 'pvr://' als Film-URL.
 Verfügbare Optionen sind folgende:
 .RSs
 .IPs aspect=<0\-3>
-Gib den Aspekt der Eingabe an (Standard: 4:3):
+Gib den Aspekt der Eingabe an:
 .RSss
 0: 1:1
 .br
-1: 4:3
+1: 4:3 (Standard)
 .br
 2: 16:9
 .br
@@ -1529,30 +1529,30 @@ Gib den Aspekt der Eingabe an (Standard: 4:3):
 Gib die Audio-Rate für die Encodierung an (Standard: 48000 Hz, verfügbar:
 32000, 44100 und 48000 Hz).
 .IPs alayer=<1\-3>
-Gib die Encodierung des MPEG-Audio-Layers an (Standard: Layer 2).
+Gib die Encodierung des MPEG-Audio-Layers an (Standard: 2).
 .IPs abitrate=<32\-448>
-Gib die Bitrate für die Audioencodierung in kbps an (Standard: 384 kbps).
+Gib die Bitrate für die Audioencodierung in kbps an (Standard: 384).
 .IPs amode=<Wert>
 Gib den Modus für die Audioencodierung an.
 Verfügbare Preset-Werte sind 'stereo', 'joint_stereo', 'dual' und 'mono'
 (Standard: stereo).
 .IPs vbitrate=<Wert>
 Gib die durchschnittliche Bitrate für die Videoencodierung an (Standard:
-6 Mbps).
+6).
 .IPs vmode=<Wert>
-Gib den Modus für die Videoencodierung an (Standard: vbr):
+Gib den Modus für die Videoencodierung an:
 .RSss
-vbr: variable Bitrate
+vbr: variable Bitrate (Standard)
 .br
 cbr: konstante Bitrate
 .REss
 .IPs vpeak=<Wert>
-Gib den Höchstwert für die Bitrate der Videoencodierung an (nur nützlich für
-VBR-Encodierung, Standard: 9.6 Mbps).
+Gib den Höchstwert für die Bitrate der Videoencodierung an
+(nur nützlich für VBR-Encodierung, Standard: 9.6).
 .IPs fmt=<Wert>
-Wähle ein MPEG-Format für die Encodierung (Standard: ps):
+Wähle ein MPEG-Format für die Encodierung:
 .RSss
-ps:    MPEG-2 Program Stream
+ps:    MPEG-2 Program Stream (Standard)
 .br
 ts:    MPEG-2 Transport Stream
 .br
