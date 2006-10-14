@@ -220,6 +220,10 @@ ass_instance_t* ass_init(void)
 	FT_Library ft;
 	ass_instance_t* priv = 0;
 	
+	memset(&render_context, 0, sizeof(render_context));
+	memset(&frame_context, 0, sizeof(frame_context));
+	memset(&text_info, 0, sizeof(text_info));
+
 	if (font_fontconfig && font_name)
 		family = strdup(font_name);
 	
