@@ -1458,7 +1458,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    }
 
 		    if(demuxer->audio->id==stream_id){
-			demuxer->audio->id=stream_id;
 			sh->ds=demuxer->audio;
 			demuxer->audio->sh=sh;
         	priv->audio_buf = calloc(priv->sub_packet_h[demuxer->audio->id], priv->audiopk_size[demuxer->audio->id]);
@@ -1606,7 +1605,6 @@ static demuxer_t* demux_open_real(demuxer_t* demuxer)
 		    }
 
 		    if(demuxer->video->id==stream_id){
-			demuxer->video->id=stream_id;
 			sh->ds=demuxer->video;
 			demuxer->video->sh=sh;
 		    }
