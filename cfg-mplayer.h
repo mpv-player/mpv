@@ -17,9 +17,7 @@ extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
 #endif
 #ifdef HAVE_DIRECTFB
-#if DIRECTFBVERSION > 912
 extern char *dfb_params;
-#endif
 #endif
 #ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
