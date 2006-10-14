@@ -330,7 +330,7 @@ done
 
 # some configs
 mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
-if [ "$vnorm" == "SVCD" ]; then
+if [ "$vnorm" = "SVCD" ]; then
    [ $vbrset -eq 0 ] && vbr=2500
    mplexnorm="-f $SVCDMODE -m 2 -V -b 230"
    mpegnorm="-f $SVCDMODE -b $vbr -B 260 -V 230"
