@@ -92,7 +92,6 @@ int enable_mouse_movements=0;
 char * proc_priority=NULL;
 #endif
 
-#define ABS(x) (((x)>=0)?(x):(-(x)))
 #define ROUND(x) ((int)((x)<0 ? (x)-0.5 : (x)+0.5))
 
 #ifdef HAVE_RTC
