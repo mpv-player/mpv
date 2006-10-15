@@ -1,25 +1,26 @@
 // MPlayer Turkish Translation
-// Translated by: Tuncer Altay, tunceraltay (at) yahoo.com
-// synced with help_mp-en.h r18498
+// Synced with help_mp-en.h r20191
+// Translated by: Tuncer Altay, tunceraltay (at) yahoo.com and Kadir T. İri, centurium (at) gmx.net
+// Tuncer Altay did a great job! Eline sağlık! 
 
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
-"Kullanım: mplayer [seçenekler] [url|yol/]dosya_adı\n"
+"Kullanım: mplayer [seçenekler] [url|yol/]dosya adı\n"
 "\n"
 "Genel seçenekler: (Tüm seçenekler için man sayfalarına bakınız)\n"
-" -vo <drv>          video çıkış sürücüsü ve aygıtını seçer ('-vo help' ile listeyi görebilirsiniz)\n"
-" -ao <drv>          ses çıkış sürücüsü ve aygıtını seçer ('-ao help' ile listeyi görebilirsiniz)\n"
+" -vo <drv>          video çıkış sürücüsünü seçer ('-vo help' ile listeyi görebilirsiniz)\n"
+" -ao <drv>          ses çıkış sürücüsü seçer ('-ao help' ile listeyi görebilirsiniz)\n"
 #ifdef HAVE_VCD
-" vcd://<parçano>    (S) VCD oynatır (Süper Video CD) VCD parça(track) numarasını girebilirsiniz\n"
+" vcd://<parçano>    (S)VCD (Süper Video CD) parça numarasını oynatır (sade aygıtı kullan, sisteme takma\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<başlıkno>   Dosya yerine aygıttan DVD başlığını oynatır. Başlık numarasını girebilirsiniz.\n"
-" -alang/-slang      DVD ses/altyazı dili seçilir (2 karakterli ülke kodu ile)\n"
+" dvd://<başlıkno>   Dosya yerine aygıttan DVD başlığını oynatır.\n"
+" -alang/-slang      DVD ses/altyazı dili seçer (2 karakterli ülke kodu ile)\n"
 #endif
-" -ss <zamankon>     Verilen konumu arar (saniye veya hh:mm:ss ;saat-dakika-saniye olarak)\n"
-" -nosound           Sesleri çalmaz\n"
+" -ss <zamankon>     Verilen konumu arar (saniye veya hh:mm:ss ;saat:dakika:saniye olarak)\n"
+" -nosound           Sesi çalmaz\n"
 " -fs -vm -zoom      Tam ekran çalıştırma seçenekleri (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>      Ekran çözünürlüğünü ayarlar (-vm veya -zoom kullanımı için)\n"
 " -sub <dosya>       Kullanılacak altyazı dosyasını seçer (-subfps, -subdelay seçeneklerine bakınız)\n"
@@ -517,6 +518,8 @@ static char help_text[]=
 #define MSGTR_SMBNotCompiled "MPlayer SMB okuma desteği ile derlenilmedi.\n"
 
 #define MSGTR_CantOpenDVD "DVD sürücüsü açılamadı: %s\n"
+
+// stream_dvd.c
 #define MSGTR_NoDVDSupport "Mplayer DVD desteği olmadan derlendi, çık\n"
 #define MSGTR_DVDnumTitles "Bu DVD üzerinde %d başlıkları var.\n"
 #define MSGTR_DVDinvalidTitle "Geçersiz DVD başlık numarası: %d\n"
@@ -531,8 +534,13 @@ static char help_text[]=
 #define MSGTR_DVDnoVOBs "VOBS Başlığı açılamıyor (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDnoMatchingAudio "DVD seslendirme dil eşlemi bulunamadı!\n"
 #define MSGTR_DVDaudioChannel "Seçili DVD ses kanalı: %d dil: %c%c\n"
+#define MSGTR_DVDaudioStreamInfo "Ses akımı: %d biçim: %s (%s) dil: %s yardım: %d.\n"
+#define MSGTR_DVDnumAudioChannels "DVD'de bulunan ses kanalları: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "DVD altyazı dil eşlemi bulunamadı!\n"
 #define MSGTR_DVDsubtitleChannel "Seçili DVD altyazı kanalı: %dil: %c%c\n"
+#define MSGTR_DVDsubtitleLanguage "Altyazı ( sid ): %d dil: %s\n"
+#define MSGTR_DVDnumSubtitles "DVD'de bulunan altyazılaır: %d\n"
+
 
 // muxer.c, muxer_*.c:
 #define MSGTR_TooManyStreams "Çok sayıda yayın!"
@@ -574,8 +582,6 @@ static char help_text[]=
 #define MSGTR_CouldntDetFNo "Kare(Frame) numaraları saptanamadı (sadece arama için)  \n"
 #define MSGTR_CantSeekRawAVI "Raw AVI yayınında aranamıyor! (İndeks zorunlu, -idx  komutuyla deneyiniz!)  \n"
 #define MSGTR_CantSeekFile "Bu dosyada aranamıyor!  \n"
-
-#define MSGTR_EncryptedVOB "Şifreli VOB dosyası! DOCS/HTML/en/cd-dvd.html sayfasını okuyunuz.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Sıkıştırılmış başlık desteği ZLIB gerektiriyor!\n"
 #define MSGTR_MOVvariableFourCC "MOV: UYARI: Değişken FOURCC bulundu!?\n"
@@ -639,7 +645,6 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "LIRC desteği ayarlanıyor...\n"
-#define MSGTR_LIRCdisabled "Uzaktan kumandanızı kullanamayacaksınız\n"
 #define MSGTR_LIRCopenfailed "LIRC desteği açılamadı!\n"
 #define MSGTR_LIRCcfgerr "%s LIRC ayar dosyası okunamadı!\n"
 
@@ -916,7 +921,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ArtsBroken "Daha yeni aRts sürümleri GTK 1.x ile bağdaşmıyor. "\
            "Gmplayer bu durumda çalışmaz!!"
 
-#define MSGTR_ABOUT_UHU " Grafik Arabirim'in geliştirilmesine UHU Linux\n"                                                              " sponsor olmaktadır.\n"
+#define MSGTR_ABOUT_UHU " Görüntü Arabirim'in geliştirilmesine UHU Linux katkıda bulunmuştur.\n"
 #define MSGTR_ABOUT_Contributors " Kod ve belgelemeye katkıda bulunanlar\n"
 #define MSGTR_ABOUT_Codecs_libs_contributions " Kodekler ve üçüncü parti kütüphaneleri\n"
 #define MSGTR_ABOUT_Translations " Çeviriler\n"
@@ -1567,10 +1572,11 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_CouldNotGetLumaValuesFromTheKernelModule "[MGA] Kernel modülünden luma değerlerine ulaşılamadı!\n"
 #define MSGTR_LIBVO_MGA_CouldNotSetLumaValuesFromTheKernelModule "[MGA] Kernel modülünden luma değerleri ayarlanamadı!\n"
 #define MSGTR_LIBVO_MGA_ScreenWidthHeightUnknown "[MGA] Ekran genişliği/yüksekliği bilinmiyor!\n"
-#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Geçersiz çıktı biçimi %0X\n"
+#define MSGTR_LIBVO_MGA_InvalidOutputFormat "[MGA] Geçersiz çıkış biçimi %0X\n"
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] mga_video sürücünüzün sürümü bu MPlayer sürümüyle bağdaşmıyor!\n"
-#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d tampon kullanılıyor.\n"
+#define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] %d arabellek kullanılıyor.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] Açılamadı: %s\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] kaynak çözünürlüğün en azιndan bir boyutu 1023x1023'ten daha büyükütür. Yazılımla düzteliniz ya da -lavopts lowres=1 kulanınız\n"
 
 // libvo/vesa_lvo.c
 
@@ -1804,3 +1810,46 @@ static char help_text[]=
 // libvo/vo_xv.c
 
 #define MSGTR_LIBVO_XV_DrawFrameCalled "[VO_XV] draw_frame() çağrıldı!!!!!!\n"
+
+// stream/stream_radio.c
+
+#define MSGTR_RADIO_ChannelNamesDetected "[radio] Radyo kanal adları bulundu.\n"
+#define MSGTR_RADIO_WrongFreqForChannel "[radio] %s kanalı için yanlış frekans.\n"
+#define MSGTR_RADIO_WrongChannelNumberFloat "[radio] %.2f yanlış kanal numarası.\n"
+#define MSGTR_RADIO_WrongChannelNumberInt "[radio] %d yanlış kanal numarası.\n"
+#define MSGTR_RADIO_WrongChannelName "[radio] %s yanlış kanal adı.\n"
+#define MSGTR_RADIO_FreqParameterDetected "[radio] Radyo frekans değiştirgesi bulundu.\n"
+#define MSGTR_RADIO_DoneParsingChannels "[radio] Kanallar ayrıştırıldı.\n"
+#define MSGTR_RADIO_GetTunerFailed "[radio] Uyarı: ioctl ayarlayıcsı alınamadı: %s. frac %d olarak ayarlanıyor\n"
+#define MSGTR_RADIO_NotRadioDevice "[radio] %s bir radyo aygıtı değildir!\n"
+#define MSGTR_RADIO_TunerCapLowYes "[radio] ayarlayıcı düşük:evet frac=%d\n"
+#define MSGTR_RADIO_TunerCapLowNo "[radio] ayarlayıcı düşük:hayır frac=%d\n"
+#define MSGTR_RADIO_SetFreqFailed "[radio] ioctl frekansı 0x%x (%.2f) göre ayarlanamamıştır, %s başarısız.\n"
+#define MSGTR_RADIO_GetFreqFailed "[radio] ioctl frekansı al, %s başarısız.\n"
+#define MSGTR_RADIO_SetMuteFailed "[radio] ioctl sesi kes, %s başarısız.\n"
+#define MSGTR_RADIO_QueryControlFailed "[radio] ioctl sorgu kontrolü, %s başarısız\n"
+#define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl sesi al, %s\n başarısız."
+#define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl sesi ayarla, %s\n başarısız."
+#define MSGTR_RADIO_DroppingFrame "\n[radio] çok kötü - ses çerçevesinden (%d bytes) atılıyor!\n"
+#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: ara bellek boş, %d bilgi bytes için bekleniyor.\n"
+#define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init: %s\n başarısız."
+#define MSGTR_RADIO_AudioBuffer "[radio] Ses kaydet - ara bellek=%d bytes (blok=%d bytes).\n"
+#define MSGTR_RADIO_AllocateBufferFailed "[radio] ses için ara bellek bulanamadı (blok=%d,arabel=%d): %s\n"
+#define MSGTR_RADIO_CurrentFreq "[radio] Mevcut frekans: %.2f\n"
+#define MSGTR_RADIO_SelectedChannel "[radio] Seçilen kanal: %d - %s (frek: %.2f)\n"
+#define MSGTR_RADIO_ChangeChannelNoChannelList "[radio] Kanal değiştirelemez: Kanal listesine kanal verilmedi.\n"
+#define MSGTR_RADIO_UnableOpenDevice "[radio] '%s': %s açılamadı.\n"
+#define MSGTR_RADIO_RadioDevice "[radio] Radyo fd: %d, %s\n"
+#define MSGTR_RADIO_InitFracFailed "[radio] init_frac başarılamadı.\n"
+#define MSGTR_RADIO_WrongFreq "[radio] %.2f : Frekansı yanlış.\n"
+#define MSGTR_RADIO_UsingFreq "[radio] %.2f: Frekansı kullanılıyor\n"
+#define MSGTR_RADIO_AudioInInitFailed "[radio] audio_in_init başarılamadı.\n"
+#define MSGTR_RADIO_BufferString "[radio] %s: ara bellek=%d'ten/'den atılan=%d\n"
+#define MSGTR_RADIO_AudioInSetupFailed "[radio] audio_in_setup %s\n: çağrısı başarılamadı."
+#define MSGTR_RADIO_CaptureStarting "[radio] Ivır zıvırı kayıtetme başlıyor.\n"
+#define MSGTR_RADIO_ClearBufferFailed "[radio] %s: Ara belleği temizleme başarılamadı."
+#define MSGTR_RADIO_StreamEnableCacheFailed "[radio] %s: stream_enable_cache çağrısı başarılamadı."
+#define MSGTR_RADIO_DriverUnknownId "[radio] Bilinmeyen sürücü kimliği: %d\n"
+#define MSGTR_RADIO_DriverUnknownStr "[radio] Bilinmeyen sürücü adı: %s\n"
+#define MSGTR_RADIO_DriverV4L2 "[radio] V4Lv2 radyo görünümü kullanılıyor.\n"
+#define MSGTR_RADIO_DriverV4L "[radio] V4Lv1 radyo görünümü kullanılıyor.\n"
