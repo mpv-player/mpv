@@ -440,10 +440,6 @@ ifeq ($(MENCODER),yes)
 endif
 	@$(INSTALL) -d $(DATADIR)
 	@$(INSTALL) -d $(DATADIR)/font
-	@if test ! -f $(DATADIR)/font/font.desc ; then \
-	echo "*** Download font at http://www.mplayerhq.hu/dload.html" ; \
-	echo "*** for OSD/Subtitles support and extract to $(DATADIR)/font/" ; \
-	fi
 ifeq ($(GUI),yes)
 	@$(INSTALL) -d $(DATADIR)/skins
 	@echo "*** Download skin(s) at http://www.mplayerhq.hu/dload.html"
