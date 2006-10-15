@@ -28,8 +28,8 @@ translating.
 
 Furthermore, if you take over an unmaintained translation, bring the existing
 parts up-to-date before translating new ones.  Outdated information is worse
-than missing information and for the XML documentation missing parts are
-automatically replaced by the English master files.
+than missing information. For console messages and the XML documentation 
+missing parts are automatically replaced by the English versions.
 
 Translations of MPlayer documentation consist of 3 parts in descending
 order of importance:
