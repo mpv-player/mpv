@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20194
+.\" In sync with r20237
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -529,11 +529,11 @@ Das Format ist folgendermaßen:
 .br
 .I BEISPIELE:
 .br
-mplayer -ao pcm:file=%10%C:test.wav test.avi
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
 .br
 Oder in einem Skript:
 .br
-mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
+mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
 .
 .\" --------------------------------------------------------------------------
@@ -661,7 +661,7 @@ Gibt alle verfügbaren Optionen aus.
 Konvertiere Konsolenausgaben in den angegebenen Zeichensatz (Standard:
 automatische Erkennung).
 Der Text wird diejenige Codierung haben, die mit der configure-Option
---charset angegeben wurde.
+\-\-charset angegeben wurde.
 Setze dies auf "noconv", um jegliche Konvertierung zu deaktivieren (z.B.\& bei
 Problemen mit iconv).
 .br
@@ -813,7 +813,7 @@ svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
 .B \-crash-debug (DEBUG-CODE)
 Führt bei einem Absturz oder SIGTRAP automatisch gdb aus.
 Unterstützung hierfür muß einkompiliert sein durch Ausführung von 'configure'
-mit --enable-crash-debug.
+mit \-\-enable-crash-debug.
 .
 .TP
 .B \-edlout <Dateiname>
@@ -8901,8 +8901,8 @@ Schalte diese Option bei interlaced Inhalten ein.
 .br
 .I ANMERKUNG:
 Solltest du das Video anders skalieren, brauchst du einen Skalierer, der
-interlaced Material bemerkt; du kannst einen solchen mit '-vf
-scale=<Breite>:<Höhe>:1' aktivieren.
+interlaced Material bemerkt; du kannst einen solchen mit \-vf
+scale=<Breite>:<Höhe>:1 aktivieren.
 .
 .TP
 .B "4mv\ \ \ \ "
@@ -10712,7 +10712,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .PP
 .B Konvertiere Untertitel in das MPsub-Format, ohne dabei das Video anzuschauen:
 .nf
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null
+mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null \-vo null
 \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
 .fi
 .
