@@ -1,4 +1,4 @@
-.\" Synced with r20194
+.\" Synced with r20237
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -502,7 +502,7 @@ Ha egy opciónak (csak XXX) jelölése van, csak az XXX-szel együtt használva,
 vagy befordított XXX mellett mûködik.
 .PP
 .I MEGJEGYZÉS:
-Az alopció értelmezõ (amit például a -ao pcm alopcióinál használunk) támogat
+Az alopció értelmezõ (amit például a \-ao pcm alopcióinál használunk) támogat
 egy speciális típusú string-escaping-et, ami a külsõ GUI-khoz lett kitalálva.
 .br
 Formátuma az alábbi:
@@ -511,11 +511,11 @@ Formátuma az alábbi:
 .br
 .I PÉLDÁK:
 .br
-mplayer -ao pcm:file=%10%C:test.wav test.avi
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
 .br
 Vagy script-ben:
 .br
-mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
+mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
 .
 .\" --------------------------------------------------------------------------
@@ -635,7 +635,7 @@ Kiírja az összes elérhetõ opciót.
 .B \-msgcharset <kódlap>
 A konzol üzeneteket a megadott kódlapra konvertálja (alapértelmezett: automatikus
 felismerés).
-A szöveg a a configure --charset opciójával megadott kódolású lesz.
+A szöveg a a configure \-\-charset opciójával megadott kódolású lesz.
 Beállíthatod "noconv"-ra is a konvertálás teljes letiltásához (pl. ha
 problémáid vannak az iconv-val).
 .br
@@ -779,7 +779,7 @@ meghajtók támogatják.
 .TP
 .B \-crash-debug (DEBUG KÓD)
 Automatikusan kapcsolódik a gdb-hez összeomlásnál vagy SIGTRAP-nál.
-A támogatását be kell fordítani a configure --enable-crash-debug kapcsolójával.
+A támogatását be kell fordítani a configure \-\-enable-crash-debug kapcsolójával.
 .
 .TP
 .B \-edlout <fájlnév>
@@ -8500,7 +8500,7 @@ Kapcsold be egy átlapolt tartalomhoz.
 .br
 .I MEGJEGYZÉS:
 Ha át kell méretezned a videót, egy átlapolást figyelmbe vevõ méretezõt
-kell használnod, amit a -vf scale=<width>:<height>:1 opcióval aktiválhatsz.
+kell használnod, amit a \-vf scale=<width>:<height>:1 opcióval aktiválhatsz.
 .
 .TP
 .B "4mv\ \ \ \ "
@@ -10196,7 +10196,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .PP
 .B Felirat konvertálása MPsub formátumba a film megtekintése nélkül:
 .nf
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
 .fi
 .
 .PP
