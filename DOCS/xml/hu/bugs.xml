@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19686 -->
+<!-- synced with r20083 -->
 <appendix id="bugs">
 <title>Ismert hibák</title>
+
+
 <sect1 id="bugs-special">
 <title>Speciális rendszer/CPU-specifikus hibák/problémák</title>
 <itemizedlist>
@@ -11,6 +13,7 @@
 <para>Megoldás: frissítsd a kernelt 2.4.x-re</para>
 <para>Tüneti kezelés: <command>./configure --disable-sse</command></para>
 </listitem>
+
 <listitem>
 <para>Általános SIGILL (signal 4):</para>
 <para>Probléma: az <application>MPlayer</application> nem ugyan azon a gépen
@@ -20,8 +23,10 @@ amelyiken futtatni fogod!</para>
 <para>Tüneti kezelés: Ezt az egészet elfelejtheted, ha a
 <option>--enable-runtime-cpudetection</option> kapcsolót használod a konfigurálásnál
 vagy az egyes CPU utasítás készleteket letilthatod külön-külön a megfelelő
-kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).</para>
+kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).
+</para>
 </listitem>
+
 <listitem>
 <para>Összeomlás stream-ek mentésekor:</para>
 <para>Probléma: core dump</para>
@@ -29,6 +34,7 @@ kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</
 </listitem>
 </itemizedlist>
 </sect1>
+
 
 <sect1 id="bugs-audio">
 <title>Különböző A-V szinkron és egyéb audió problémán</title>
@@ -42,20 +48,17 @@ OSS emulációját a <option>-ao oss</option> kapcsolóval, valamint a <option>-ao s
 néha segít. Ha a fájl lejátszása jó a <option>-nosound</option> kapcsolóval, akkor biztos lehetsz
 benne, hogy a hangkártya (vezérlő) a hibás.
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>audió buffer problémák (a buffer méretét rosszul detektálja)</para>
 <para>Tüneti kezelés: az <application>MPlayer</application> <option>-abs</option> kapcsolója</para>
 </listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem><para>
 mintaráta problémák - talán a kártyád nem támogatja a fájlban használt mintarátát -
 próbáld ki a resampling szűrőt (<option>-af resample=...</option>)
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
+
 <listitem>
 <para>lassú gép (CPU vagy VGA)</para>
 <para>próbáld ki a <option>-vo null</option> kapcsolót, ha úgy jól működik, akkor lassú
@@ -64,7 +67,9 @@ a VGA kártyád/vezérlőd</para>
 <para>Megpróbálhatod még a <option>-framedrop</option>-ot is</para>
 </listitem>
 </itemizedlist>
+
 </sect2>
+
 
 <sect2 id="bugs-delay-specific">
 <title>Audió késés/szinkronizáció elvesztése egy vagy néhány fájl esetén</title>
@@ -80,7 +85,7 @@ Tüneti kezelés:
     <para>and/or</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option>(szükséges a rosszul átlapolt VBS audiós
+    <para><option>-mc 0</option> (szükséges a rosszul átlapolt VBS audiós
     fájlokhoz)</para>
     <para>és/vagy</para>
   </listitem>
@@ -92,12 +97,14 @@ Tüneti kezelés:
 Ha egyik sem segít, légy szíves töltsd fel a fájlt, és megnézzük (és javítjuk).
 </para>
 </listitem>
+
 <listitem>
 <para>a hangkártyád nem támogatja a 48kHz-es lejátszást</para>
 <para>Tüneti kezelés: vegyél egy jobb hangkártyát... vagy próbáld meg csökkenteni az
 fps-t 10%-kal (<option>-fps 27</option> kapcsoló egy 30fps-es filmnél) vagy használd a
 resample szűrőt</para>
 </listitem>
+
 <listitem>
 <para>lassú gép (ha az A-V nem 0 körüli és a státusz sorban lévő utolsó szám
 emelkedik)</para>
@@ -106,23 +113,26 @@ emelkedik)</para>
 </itemizedlist>
 </sect2>
 
+
 <sect2 id="bugs-nosound">
 <title>Egyáltalán nincs hang</title>
 <itemizedlist>
 <listitem>
 <para>a fájlod nem támogatott audió codec-et használ</para>
-<para>olvasd el a dokumentációt és segíts a támogatás elkészítésében</para>
+<para>Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-nopicture">
 <title>Egyáltalán nincs kép (csak üres szürke/zöld ablak)</title>
 <itemizedlist>
 <listitem>
 <para>a fájlod egy nem támogatott videó codec-et használ</para>
-<para>olvasd el a dokumentációt és segíts nekünk a támogatás elkészítésében</para>
+<para>Megoldás: olvasd el a dokumentációt és segíts a támogatás elkészítésében</para>
 </listitem>
+
 <listitem>
 <para>
 az automatikusan kiválasztott codec nem tudja dekódolni a fájlt, próbálj meg másik
@@ -131,6 +141,7 @@ codec-et kiválasztani a <option>-vc</option> vagy <option>-vfm</option> kapcsoló
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-video">
 <title>Videó-kimeneti problémák</title>
