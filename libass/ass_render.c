@@ -1724,7 +1724,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 				glyph_info_t* first_glyph = text_info.glyphs + last_break + 1;
 				glyph_info_t* last_glyph = text_info.glyphs + i - 1;
 
-				while ((last_glyph >= first_glyph) && ((last_glyph->symbol == '\n') || (last_glyph->symbol == 0)))
+				while ((last_glyph > first_glyph) && ((last_glyph->symbol == '\n') || (last_glyph->symbol == 0)))
 					last_glyph --;
 
 				width = last_glyph->pos.x + last_glyph->bbox.xMax - first_glyph->pos.x - first_glyph->bbox.xMin;
