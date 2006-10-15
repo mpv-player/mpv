@@ -843,11 +843,16 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
             point.y = GET_Y_LPARAM(lParam);
             ClientToScreen(hWnd, &point);
             errmode = SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
+            while (GetMenuItemCount(gui->diskmenu) > 0)
+                DeleteMenu(gui->diskmenu, 0, MF_BYPOSITION);
             len = GetLogicalDriveStrings(MAX_PATH, device);
             while(pos < len)
             {
                 if(GetDriveType(device + pos) == DRIVE_CDROM)
                 {
+                    char volname[MAX_PATH];
+                    char menuitem[MAX_PATH];
+                    int flags = MF_STRING;
                     mp_msg(MSGT_GPLAYER, MSGL_V, "[GUI] checking %s for CD/VCD/SVCD/DVDs\n", device + pos);
                     sprintf(searchpath, "%sVIDEO_TS", device + pos);
                     sprintf(searchpath2, "%sMpegav", device + pos);
@@ -855,14 +860,26 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                     sprintf(searchpath3, "%sTrack01.cda", device + pos);
 #endif
                     if(GetFileAttributes(searchpath) != INVALID_FILE_ATTRIBUTES)
-                        EnableMenuItem(gui->diskmenu, IDPLAYDISK + cdromdrive, MF_BYCOMMAND | MF_ENABLED);
+                        flags |= MF_ENABLED;
                     else if(GetFileAttributes(searchpath2) != INVALID_FILE_ATTRIBUTES)
-                        EnableMenuItem(gui->diskmenu, IDPLAYDISK + cdromdrive, MF_BYCOMMAND | MF_ENABLED);
+                        flags |= MF_ENABLED;
 #ifdef HAVE_LIBCDIO
                     else if(GetFileAttributes(searchpath3) != INVALID_FILE_ATTRIBUTES)
-                        EnableMenuItem(gui->diskmenu, IDPLAYDISK + cdromdrive, MF_BYCOMMAND | MF_ENABLED);
+                        flags |= MF_ENABLED;
 #endif
-                    else EnableMenuItem(gui->diskmenu, IDPLAYDISK + cdromdrive, MF_BYCOMMAND | MF_GRAYED);
+                    else
+                        flags |= MF_GRAYED;
+                    volname[0] = 0;
+                    strcpy(menuitem, device + pos);
+                    menuitem[strlen(menuitem) - 1]=0;
+                    GetVolumeInformation(device + pos, volname, MAX_PATH, NULL, NULL, NULL, NULL, 0);
+                    if (strlen(volname))
+                    {
+                        capitalize(volname);
+                        strcat(menuitem, " - ");
+                        strcat(menuitem, volname);
+                    }
+                    AppendMenu(gui->diskmenu, flags, IDPLAYDISK + cdromdrive, menuitem);
                         cdromdrive++;
                 }
                 pos += strlen(device + pos) + 1;
@@ -1159,31 +1176,7 @@ extern int destroy_window(gui_t *gui)
 
 static void create_menu(gui_t *gui)
 {
-    char device[MAX_PATH];
-    char volname[MAX_PATH];
-    char menuitem[MAX_PATH];
-    int len, pos = 0, cdromdrive = 0;
     gui->diskmenu = CreatePopupMenu();
-    len = GetLogicalDriveStrings(MAX_PATH, device);
-    while(pos < len)
-    {
-        if(GetDriveType(device + pos) == DRIVE_CDROM)
-        {
-            volname[0] = 0;
-            strcpy(menuitem, device + pos);
-            menuitem[strlen(menuitem) - 1]=0;
-            GetVolumeInformation(device + pos, volname, MAX_PATH, NULL, NULL, NULL, NULL, 0);
-            if (strlen(volname))
-            {
-                capitalize(volname);
-                strcat(menuitem, " - ");
-                strcat(menuitem, volname);
-            }
-            AppendMenu(gui->diskmenu, MF_STRING, IDPLAYDISK + cdromdrive, menuitem);
-            cdromdrive++;
-        }
-        pos += strlen(device + pos) + 1;
-    }
     gui->menu=CreatePopupMenu();
     gui->trayplaymenu = CreatePopupMenu();
     AppendMenu(gui->menu, MF_STRING | MF_POPUP, (UINT) gui->trayplaymenu, "Open...");
