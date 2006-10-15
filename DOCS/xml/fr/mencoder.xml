@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r18030 -->
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- synced with r20043 -->
 <chapter id="mencoder">
 <title>Utilisation basique de <application>MEncoder</application></title>
 
@@ -13,7 +13,7 @@ paramètres d'encodage, lisez les
 anglais) qui ont été collectés d'après de nombreux sujets de la
 liste de diffusion mplayer-users.
 Cherchez dans les
-<ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archives</ulink>
+<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">archives</ulink>
 pour trouver les discussions à propos de tous les aspects et
 problèmes relatifs à l'encodage avec <application>MEncoder</application>.
 </para>
@@ -47,8 +47,7 @@ Audio</entry><entry>Description</entry></row>
 </row>
 <row>
 <entry>lavc</entry>
-<entry>Utilise un des <link
-linkend="menc-feat-enc-libavcodec-audio-codecs">codecs audio
+<entry>Utilise un des <link linkend="menc-feat-enc-libavcodec-audio-codecs">codecs audio
 <systemitem class="library">libavcodec</systemitem></link>.
 </entry>
 </row>
@@ -184,21 +183,18 @@ vous risquez d'avoir certains problèmes à les utiliser.
 Containers <systemitem class="library">libavformat</systemitem> :
 </para>
 <para>
-Si vous avez sélectionné If you selected <systemitem
-class="library">libavformat</systemitem>
+Si vous avez sélectionné If you selected <systemitem class="library">libavformat</systemitem>
 pour le multiplexage du fichier de sortie (en utilisant l'option
 <option>-of lavf</option>),
 le choix du format du container sera déterminé en fonction de
 l'extention du fichier de sortie.
 Mais vous pouvez toujours forcer le format du container avec les
-options du <option>format</option> de <systemitem
-class="library">libavformat</systemitem>.
+options du <option>format</option> de <systemitem class="library">libavformat</systemitem>.
 
 <informaltable frame="all">
 <tgroup cols="2">
 <thead>
-<row><entry>Container <systemitem
-class="library">libavformat</systemitem>
+<row><entry>Container <systemitem class="library">libavformat</systemitem>
 name</entry><entry>Description</entry></row>
 </thead>
 <tbody>
@@ -255,8 +251,7 @@ pas encore les spécifications)</entry>
 </tbody>
 </tgroup>
 </informaltable>
-Comme vous pouvez le voir, le <systemitem
-class="library">libavformat</systemitem>
+Comme vous pouvez le voir, le <systemitem class="library">libavformat</systemitem>
 permet à <application>MEncoder</application> de multiplexer un
 grand
 nombre de
@@ -338,7 +333,7 @@ Les entrés DVB marchent sur le même principe.
 </sect1>
 
 <sect1 id="menc-feat-mpeg4">
-<title>Encodage MPEG-4 deux passes (&quot;DivX&quot;)</title>
+<title>Encodage MPEG-4 deux passes ("DivX")</title>
 
 <para>
 Le nom vient du fait que cette méthode encode le fichier
@@ -356,11 +351,11 @@ parler de ça, vous devriez consulter les guides disponibles
 sur Internet.
 </para>
 
-<example>
+<example id="copy_audio_track">
 <title>Copie de la piste audio</title>
 <para>
 Encodage deux passes de second chapitre d'un DVD vers de l'AVI
-MPEG-4 (&quot;DivX&quot;) avec la simple copie de la piste audio.
+MPEG-4 ("DivX") avec la simple copie de la piste audio.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
 <replaceable>film.avi</replaceable>
@@ -370,7 +365,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
 </para>
 </example>
 
-<example>
+<example id="encode_audio_track">
 <title>Encodage de la piste audio</title>
 <para>
 Encodage deux passes d'un DVD en AVI MPEG-4 ("DivX") avec la
@@ -386,6 +381,51 @@ mp3lame
 </screen>
 </para>
 </example>
+</sect1>
+
+<sect1 id="menc-feat-handheld-psp">
+<title>Encodage au format Sony PSP</title>
+
+ <para>
+   <application>MEncoder</application> supporte l'encodage au format
+   Sony PSP.
+   Cependant les contraintes peuvent différer suivant la version
+   actuelle du logiciel PSP.
+   Le respect des contraintes suivantes devrait vous permettre
+   d'encoder sans problème :
+ <itemizedlist>
+ <listitem><para>
+   <emphasis role="bold">Taux d'encodage</emphasis>: il ne devrait pas être
+   supérieur à 1500kbps. Cependant, les dernières versions supportent
+   presque tous les taux d'encodage tant que l'en-tête donne une
+   valeur raisonable.
+ </para></listitem>
+ <listitem><para>
+   <emphasis role="bold">Dimensions</emphasis>: la largeur et la
+   hauteur de la video PSP doivent être multiples de 16 et le produit
+   largeur * hauteur doit être &lt;= 64000.
+   Dans certaines circonstances, la PSP est capable de lire des
+   résolutions supérieures.
+ </para></listitem>
+ <listitem><para>
+   <emphasis role="bold">Audio</emphasis>: le taux d'échantillonage
+   doit être fixé à 24kHz pour les vidéos MPEG-4 et à 48kHz pour les H.264.
+ </para></listitem>
+ </itemizedlist>
+ </para>
+ 
+ <example>
+ <title>Exemple</title>
+ <para>
+ <screen>
+ mencoder -oac lavc -ovc lavc -of lavf -lavcopts aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
+ -af lavcresample=24000 -vf harddup -lavfopts format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
+ -ofps 30000/1001 input.video -o output.psp
+ </screen>
+   Vous pouvez définir le titre de la vidéo avec
+   <option>-info name=<replaceable>TitreDuFilm</replaceable></option>.
+ </para>
+ </example>
 </sect1>
 
 <sect1 id="menc-feat-mpeg">
@@ -469,8 +509,7 @@ vcodec=mpeg4 -vf scale=640:480 -o
 <para>
 <application>MEncoder</application> peut gérer les flux entrant de
 deux façons: les
-<emphasis role="bold">encoder</emphasis> ou les <emphasis
-role="bold">copier</emphasis>
+<emphasis role="bold">encoder</emphasis> ou les <emphasis role="bold">copier</emphasis>
 Cette section parle de la <emphasis role="bold">copie</emphasis>.
 </para>
 
@@ -542,8 +581,7 @@ des fichiers MJPEG (Motion JPEG), MPNG (Motion PNG) ou MTGA
 <emphasis>décode</emphasis> le(s) image(s)
 d'origine(s) avec <systemitem class="library">libjpeg</systemitem>
 (pour décoder
-des PNGs, il utilisera <systemitem
-class="library">libpng</systemitem>).
+des PNGs, il utilisera <systemitem class="library">libpng</systemitem>).
 </para></listitem>
 <listitem><para>
 <application>MEncoder</application> envoie alors l'image
@@ -729,21 +767,18 @@ temps, il doit y avoir une meilleur solution !
 MPEG-4 a une fonction spécifique: le flux vidéo peut contenir
 le ratio d'aspect requis.
 Oui, tout comme les fichiers MPEG-1/2 (DVD, SVCD) et H.263.
-Malheureusement, il n'y a
-<emphasis role="bold">aucun</emphasis> lecteur vidéo qui
-supporte cet attribut.
+Malheureusement, très peu de lecteurs vidéos
+en dehors de <application>MPlayer</application> supportent cet attribut MPEG-4.
 Excepté <application>MPlayer</application>.
 </para>
 
 <para>
 Cette fonction ne peut être utilisée qu'avec le codec
 <systemitem>mpeg4</systemitem> de
-<emphasis role="bold"><systemitem
-class="library">libavcodec</systemitem></emphasis>.
+<emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>.
 Gardez bien à l'esprit que même si
 <application>MPlayer</application>
-lit correctement le fichier créé, les autres lecteurs utiliseront
-un mauvais ratio.
+lit correctement le fichier créé, les autres lecteurs sont susceptibles d'utiliser un mauvais ratio.
 </para>
 
 <para>
