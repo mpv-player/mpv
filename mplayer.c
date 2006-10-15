@@ -413,6 +413,7 @@ short edl_muted  = 0; ///< Stores whether EDL is currently in muted mode.
 short edl_decision = 0; ///< 1 when an EDL operation has been made.
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode.
 float begin_skip = MP_NOPTS_VALUE; ///< start time of the current skip while on edlout mode
+int use_filedir_conf;
 
 static unsigned int inited_flags=0;
 #define INITED_VO 1
@@ -854,7 +855,7 @@ void load_per_file_config (m_config_t* conf, const char *const file)
 
     sprintf (cfg, "%s.conf", file);
     
-    if (!stat (cfg, &st))
+    if (use_filedir_conf && !stat (cfg, &st))
     {
 	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_LoadingConfig, cfg);
 	m_config_parse_config_file (conf, cfg);
