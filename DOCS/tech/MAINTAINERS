@@ -26,16 +26,17 @@ Homepage:
     * Content: Diego Biurrun
     * Codec packages: Roberto Togni
 
-English documentation:
-    * MPlayer docs: Diego Biurrun
-    * MEncoder docs: Guillaume Poirier
+Documentation:
+    * MPlayer: Diego Biurrun
+    * MEncoder: Guillaume Poirier
     * man page: Diego Biurrun
     * console messages: Reynaldo H. Verdejo Pinochet
+    * translation coordination: Sebastian Krämer
     * input layer, LIRC, slave mode docs: Alban Bedel
     * tech/* docs: None
     * tech/* documentation docs: Diego Biurrun
 
-man pages:
+Man page translations:
     * Czech: Jiri Heryan
     * French: Guillaume Poirier
     * German: Sebastian Krämer
