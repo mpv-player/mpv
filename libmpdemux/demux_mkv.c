@@ -1263,6 +1263,8 @@ demux_mkv_read_tracks (demuxer_t *demuxer)
   return 0;
 }
 
+extern int index_mode;
+
 static int
 demux_mkv_read_cues (demuxer_t *demuxer)
 {
@@ -1272,6 +1274,10 @@ demux_mkv_read_cues (demuxer_t *demuxer)
   off_t off;
   int i, il;
 
+  if (index_mode == 0) {
+    ebml_read_skip (s, NULL);
+    return 0;
+  }
   off = stream_tell (s);
   for (i=0; i<mkv_d->parsed_cues_num; i++)
     if (mkv_d->parsed_cues[i] == off)
