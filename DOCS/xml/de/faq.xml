@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19828 -->
+<!-- synced with r19828 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -198,10 +198,10 @@
           <para>
             Der Linker-Fehler, den du erfährst, sieht höchstwahrscheinlich etwa so aus:
             <screen>
-              ld: Undefined symbols:
-              _LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
-              _LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
-            </screen>
+ld: Undefined symbols:
+_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
+_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices<!--
+            --></screen>
             Dieses Problem ist das Ergebnis der Tatsache, dass Apple-Entwickler 10.4 benutzen, um ihre
             Software zu compilieren und gleichzeitig die Binärdateien via Softwareupdate an Benutzer
             von 10.3 weitergeben.
@@ -220,9 +220,9 @@
             Frameworks also nicht nach z.B.
             <filename class="directory">/System/Library/Frameworks</filename>!
             Die Benutzung dieser älteren Kopie ist nur dazu da, die Linker-Fehler zu umgehen!)
-            <screen>
-              gunzip &lt; CompatFrameworks.tgz | tar xvf -
-            </screen>
+
+            <screen>gunzip &lt; CompatFrameworks.tgz | tar xvf - </screen>
+
             In der Datei config.mak solltest du
             <systemitem>-F/Pfad/in/den/du/entpackt/hast</systemitem> der Variable
             <systemitem>OPTFLAGS</systemitem> anhängen.
@@ -353,9 +353,9 @@
                 <listitem><para>wiedergegebene/decodierte Frames (zählend vom letzten Spulen)</para></listitem>
               </varlistentry>
               <varlistentry><term><systemitem>41%</systemitem></term>
-                <listitem><para>CPU-Auslastung durch Videocodec
-                    (für Rendern in Scheiben und direktes Rendern
-                    schließt dies video_out mit ein)</para></listitem>
+                <listitem>
+                  <para>CPU-Auslastung durch Videocodec (für Rendern in Scheiben und direktes Rendern schließt dies video_out mit ein)</para>
+                </listitem>
               </varlistentry>
               <varlistentry><term><systemitem>0%</systemitem></term>
                 <listitem><para>CPU-Auslastung durch video_out</para></listitem>
@@ -364,19 +364,24 @@
                 <listitem><para>CPU-Auslastung durch Audiocodec in Prozent</para></listitem>
               </varlistentry>
               <varlistentry><term><systemitem>0</systemitem></term>
-                <listitem><para>wieviele Frames ausgelassen wurden,
-                    um die A/V-Synchronisation beizubehalten</para></listitem>
+                <listitem>
+                  <para>wieviele Frames ausgelassen wurden, um die A/V-Synchronisation beizubehalten</para>
+                </listitem>
               </varlistentry>
               <varlistentry><term><systemitem>4</systemitem></term>
-                <listitem><para>aktuelles Postprocessing-Level
-                    (bei Benutzung der Option <option>-autoq</option>)</para></listitem>
+                <listitem>
+                  <para>aktuelles Postprocessing-Level (bei Benutzung der Option <option>-autoq</option>)</para>
+                </listitem>
               </varlistentry>
               <varlistentry><term><systemitem>49%</systemitem></term>
-                <listitem><para>aktuell benutzte Cachegröße (um die 50% ist normal)</para></listitem>
+                <listitem>
+                  <para>aktuell benutzte Cachegröße (um die 50% ist normal)</para>
+                </listitem>
               </varlistentry>
               <varlistentry><term><systemitem>1.00x</systemitem></term>
-                <listitem><para>Wiedergabegeschwindigkeit als Faktor der
-                    originalen Geschwindigkeit</para></listitem>
+                <listitem>
+                  <para>Wiedergabegeschwindigkeit als Faktor der originalen Geschwindigkeit</para>
+                </listitem>
               </varlistentry>
             </variablelist>
             Die meisten davon existieren zu Debugzwecken, benutze die Option
@@ -410,10 +415,8 @@
       <qandaentry>
         <question>
           <para>
-            Wie kann ich dafür sorgen, dass sich
-            <application>MPlayer</application> die Optionen merkt,
-            die ich für eine bestimmte Datei
-            wie zum Beispiel <filename>movie.avi</filename> verwende?
+            Wie kann ich dafür sorgen, dass sich <application>MPlayer</application> die Optionen merkt,
+            die ich für eine bestimmte Datei wie zum Beispiel <filename>movie.avi</filename> verwende?
           </para>
         </question>
         <answer>
@@ -429,7 +432,7 @@
       <qandaentry>
         <question>
           <para>
-            Untertitel sind sind sehr schick, die schönsten, die ich je gesehen haben, aber
+            Untertitel sind sehr schick, die schönsten, die ich je gesehen haben, aber
             sie verlangsamen die Wiedergabe! Ich weiß, es ist unwahrscheinlich...
           </para>
         </question>
@@ -456,8 +459,9 @@
             Benutzt du FVWM? Versuche folgendes:
             <orderedlist>
               <listitem><para>Start -> Einstellungen -> Konfiguration -> Basiskonfiguration</para></listitem>
-              <listitem><para>Setze <systemitem>Use Applications position hints</systemitem>
-                  auf <systemitem>Ja</systemitem></para></listitem>
+              <listitem>
+                <para>Setze <systemitem>Use Applications position hints</systemitem> auf <systemitem>Ja</systemitem></para>
+              </listitem>
             </orderedlist>
           </para>
         </answer>
@@ -531,14 +535,14 @@
             (Audiosprache), <option>-sid</option> (Untertitel-ID) oder <option>-slang</option>
             (Untertitelsprache) verwenden, zum Beispiel:
             <screen>
-              <!--					-->mplayer -alang ger -slang ger <replaceable>beispiel.mkv</replaceable>
-              <!--					-->mplayer -aid 1 -sid 1 <replaceable>beispiel.mkv</replaceable>
-              <!--				--></screen>
+mplayer -alang ger -slang ger <replaceable>beispiel.mkv</replaceable>
+mplayer -aid 1 -sid 1 <replaceable>beispiel.mkv</replaceable><!--
+            --></screen>
             Um zu sehen, welche verfügbar sind:
             <screen>
-              <!--					-->mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | grep sid
-              <!--					-->mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | grep aid
-              <!--				--></screen>
+mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | grep sid
+mplayer -vo null -ao null -frames 0 -v <replaceable>dateiname</replaceable> | grep aid<!--
+          --></screen>
           </para>
         </answer>
       </qandaentry>
@@ -852,12 +856,12 @@
           <para>
             Ich habe keinen Ton, wenn ich ein Video abspielen möchte, und bekomme Fehlermeldungen wie diese:
             <screen>
-              AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
-              audio_setup: Can't open audio device /dev/dsp: Device or resource busy
-              couldn't open/init audio device -> NOSOUND
-              Audio: kein Ton!!!
-              Starte Wiedergabe...<!--
-                                      --></screen>
+AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+couldn't open/init audio device -> NOSOUND
+Audio: kein Ton!!!
+Starte Wiedergabe...<!--
+            --></screen>
           </para>
         </question>
         <answer>
@@ -1369,12 +1373,12 @@
             Dies ist nicht direkt möglich, du kannst aber folgendes probieren (beachte das
             <emphasis role="bold">&amp;</emphasis> am Ende des
             <command>mplayer</command>-Befehls):
-            <screen><!--
-                        -->mkfifo encode
-              mplayer -ao pcm -aofile encode dvd://1 &amp;
-              lame <replaceable>deine Optionen</replaceable> encode music.mp3
-              rm encode<!--
-                           --></screen>
+            <screen>
+mkfifo encode
+mplayer -ao pcm -aofile encode dvd://1 &amp;
+lame <replaceable>deine Optionen</replaceable> encode music.mp3
+rm encode<!--
+            --></screen>
             Dies erlaubt dir, jeden Encoder zu verwenden, nicht nur <application>LAME</application>.
             Ersetze im obigen Befehl einfach <command>lame</command> durch den Audioencoder deiner Wahl.
           </para>

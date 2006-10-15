@@ -1,118 +1,182 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
 <!-- in sync with r20085 -->
 <appendix id="history">
-<title>Geschichte</title>
+  <title>Geschichte</title>
 
-<blockquote><para>
-Dies begann vor einem Jahr...  Ich hatte jede Menge Player unter Linux
-ausprobiert (<application>mtv</application>, <application>xmps</application>,
-<application>dvdview</application>, <application>livid/oms</application>,
-<application>videolan</application>, <application>xine</application>,
-<application>xanim</application>, <application>avifile</application>,
-<application>xmmp</application>) aber sie haben alle irgendwelche Probleme,
-meist mit speziellen Dateien oder mit der Audio-/Video-Synchronisation.
-Die meisten von ihnen sind nicht fähig, beides, MPEG-1, MPEG-2 und AVI-(DivX)-Dateien,
-abzuspielen. Viele Player haben auch Probleme mit der Bildqualität oder mit der
-Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
-</para></blockquote><para>A'rpi, 2001</para>
+  <blockquote>
+    <para>
+      Dies begann vor einem Jahr...  Ich hatte jede Menge Player unter Linux
+      ausprobiert (<application>mtv</application>, <application>xmps</application>,
+      <application>dvdview</application>, <application>livid/oms</application>,
+      <application>videolan</application>, <application>xine</application>,
+      <application>xanim</application>, <application>avifile</application>,
+      <application>xmmp</application>) aber sie haben alle irgendwelche Probleme,
+      meist mit speziellen Dateien oder mit der Audio-/Video-Synchronisation.
+      Die meisten von ihnen sind nicht fähig, beides, MPEG-1, MPEG-2 und AVI-(DivX)-Dateien,
+      abzuspielen. Viele Player haben auch Probleme mit der Bildqualität oder mit der
+      Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
+    </para>
+  </blockquote>
+  <para>A'rpi, 2001</para>
 
-<para>
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3</emphasis>: 22.-25. Sep. 2000
+  <para>
+    <itemizedlist>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3</emphasis>: 22.-25. Sep. 2000
+        </para>
+        <para>
+          Der erste Versuch, zusammengehackt in einer halben Stunde!  Ich hatte
+          libmpeg3 von <ulink url="http://www.heroinewarrior.com"/> bis zur Version 0.3
+          verwendet, aber es gab Probleme mit Bildqualität und Geschwindigkeit.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 28. Sep. - 20 Okt. 2000
+        </para>
+        <para>
+          MPEG-Codec ersetzt durch DVDview von Dirk Farin, es war großartiger
+          Stoff, aber er war langsam und in C++ geschrieben (A'rpi hasst C++!!!)
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 21. Okt. - 2. Nov. 2000
+        </para>
+        <para>
+          MPEG-Codec war libmpeg2 (mpeg2dec) von Aaron Holtzman und
+          Michel Lespinasse. Er ist super, optimierter, sehr schneller C-Code mit perfekter
+          Bildqualität und 100% MPEG-Standard-Konformität.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9</emphasis>: 18 Nov. - 4. Dez., 2000
+        </para>
+        <para>
+          Es war ein Paket von zwei Programmen: mpg12play v0.95pre6 und mein
+          neuer, einfach gestrickter AVI-Player 'avip' basiernd auf dem Win32 DLL-Loader
+          von avifile.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>: 1. Jan. 2001
+        </para>
+        <para>
+          Der MPEG- und AVI-Player in einer einzigen Binary!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> v0.11pre series</emphasis>:
+        </para>
+        <para>
+          Einige neue Entwickler kamen dazu, und seit 0.11 ist das <application>MPlayer</application>-Projekt
+          eine Gemeischaftsarbeit! Unterstützung für ASF-Dateien hinzugefügt sowie OpenDivX-En-/Decodierung
+          (siehe <ulink url="http://www.projectmayo.com"/>).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> v0.17a "The IdegCounter"</emphasis> 27. Apr. 2001
+        </para>
+        <para>
+          Die Release-Version der 0.11pre nach 4 Monaten harter Entwicklungsarbeit!
+          Probiere sie aus und sei verblüfft! Tausende neuer Features hinzugefügt...
+          Und natürlich wurde alter Code auch verbessert, Fehler entfernt usw.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.18 "The BugCounter"</emphasis> 9. Jul. 2001
+        </para>
+        <para>
+          2 Monate seit 0.17, und hier ist ein neues Release.. ASF-Unterstützung
+          vervollständigt, mehr Untertitelformate, libao (ähnlich wie libvo aber für Audio)
+          eingeführt, stabiler als je zuvor, und so weiter. Es ist ein MUSS!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.50 "The Faszom(C)ounter"</emphasis> 8. Okt. 2001
+        </para>
+        <para>
+          Hmm. Wieder ein Release. Tonnen neuer Features, Beta-GUI-Version,
+          Bugs gefixt, neue vo- und ao-Treiber, auf viele Systeme portiert, einschließlich
+          Opensource-DivX-Codecs und vieles mehr. Probiers aus!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> 3. Jan. 2002
+        </para>
+        <para>
+          MOV/VIVO/RM/FLI/NUV-Dateiformat werden unterstützt, native CRAM-, Cinepak-,
+          ADPCM-Codecs und Unterstützung für XAnim's Binary-Codecs; Support für DVD-Untertitel,
+          erstes Release von <application>MEncoder</application>, TV-Grabbing, Cache,
+          liba52, unzählige Fixes.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The BirthdayCounter"</emphasis> 11. Nov. 2002
+        </para>
+        <para>
+          Obwohl dies kein Release ist, erwähne ich es, denn es kam
+          2 Jahre nach <application>MPlayer</application> v0.01 heraus.
+          Happy birthday, <application>MPlayer</application>!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.90rc1 "The CodecCounter"</emphasis> 7. Dez. 2002
+        </para>
+        <para>
+          Wieder kein Release, aber nachdem Unterstützung für Sorenson 3 (QuickTime)
+          und Windows Media 9 hinzugefügt wurde, ist <application>MPlayer</application> weltweit
+          der erste Movie-Player mit Support für alle bekannten Video-Formate!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.90 "The CounterCounter"</emphasis> 6. Apr. 2003
+        </para>
+        <para>
+          Nach mehr als einem Jahr kamen wir letztendlich zu dem Entschluß, dass
+          der Code tatsächlich wieder stabil und bereit zur Veröffentlichung als
+          Release ist. Leider vergaßen wir, die Versionsnummer zu erhöhen, und weitere
+          widerliche Bugs flossen ein, also sei darauf vorbebereitet...
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 13. Aug. 2003
+        </para>
+        <para>
+          Die oben erwähnten und viele weitere Bugs wurden gefixt.
+          Dies ist die aktuelltste stabile Version.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 1.0pre1 "Development on the beach"</emphasis> 1. Sep. 2003
+        </para>
+        <para>
+          Obwohl dies kein stabiles Release ist, werde ich es aufführen, weil
+          es die erste Vorabversion der 1.0-Serie des <application>MPlayer</application>
+          und dazu ausersehen ist, die <emphasis>großen Fehlerjagdparty</emphasis>
+          zu unterstützen.
+          Dies ist ein großer Schritt vorwärts!
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> Datum noch unbekannt
+        </para>
+      </listitem>
+    </itemizedlist>
   </para>
-  <para>Der erste Versuch, zusammengehackt in einer halben Stunde!  Ich hatte
-  libmpeg3 von <ulink url="http://www.heroinewarrior.com"/> bis zur Version 0.3
-  verwendet, aber es gab Probleme mit Bildqualität und Geschwindigkeit.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 28. Sep. - 20 Okt. 2000
-  </para><para>MPEG-Codec ersetzt durch DVDview von Dirk Farin, es war großartiger
-  Stoff, aber er war langsam und in C++ geschrieben (A'rpi hasst C++!!!)
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 21. Okt. - 2. Nov. 2000
-  </para><para>MPEG-Codec war libmpeg2 (mpeg2dec) von Aaron Holtzman und
-  Michel Lespinasse. Er ist super, optimierter, sehr schneller C-Code mit perfekter
-  Bildqualität und 100% MPEG-Standard-Konformität.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9</emphasis>: 18 Nov. - 4. Dez., 2000
-  </para><para>Es war ein Paket von zwei Programmen: mpg12play v0.95pre6 und mein
-  neuer, einfach gestrickter AVI-Player 'avip' basiernd auf dem Win32 DLL-Loader
-  von avifile.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>: 1. Jan. 2001
-  </para><para>Der MPEG- und AVI-Player in einer einzigen Binary!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> v0.11pre series</emphasis>:
-  </para><para>Einige neue Entwickler kamen dazu, und seit 0.11 ist das
-  <application>MPlayer</application>-Projekt eine Gemeischaftsarbeit! Unterstützung für
-  ASF-Dateien hinzugefügt sowie OpenDivX-En-/Decodierung
-  (siehe <ulink url="http://www.projectmayo.com"/>).
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> v0.17a "The IdegCounter"</emphasis> 27. Apr. 2001
-  </para><para>Die Release-Version der 0.11pre nach 4 Monaten harter Entwicklungsarbeit!
-  Probiere sie aus und sei verblüfft! Tausende neuer Features hinzugefügt...
-  Und natürlich wurde alter Code auch verbessert, Fehler entfernt usw.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.18 "The BugCounter"</emphasis> 9. Jul. 2001
-  </para><para>2 Monate seit 0.17, und hier ist ein neues Release.. ASF-Unterstützung
-  vervollständigt, mehr Untertitelformate, libao (ähnlich wie libvo aber für Audio)
-  eingeführt, stabiler als je zuvor, und so weiter. Es ist ein MUSS!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.50 "The Faszom(C)ounter"</emphasis> 8. Okt. 2001
-  </para><para>Hmm. Wieder ein Release. Tonnen neuer Features, Beta-GUI-Version,
-  Bugs gefixt, neue vo- und ao-Treiber, auf viele Systeme portiert, einschließlich
-  Opensource-DivX-Codecs und vieles mehr. Probiers aus!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> 3. Jan. 2002
-  </para><para>MOV/VIVO/RM/FLI/NUV-Dateiformat werden unterstützt, native CRAM-, Cinepak-,
-  ADPCM-Codecs und Unterstützung für XAnim's Binary-Codecs; Support für DVD-Untertitel,
-  erstes Release von <application>MEncoder</application>, TV-Grabbing, Cache,
-  liba52, unzählige Fixes.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The BirthdayCounter"</emphasis> 11. Nov. 2002
-  </para><para>Obwohl dies kein Release ist, erwähne ich es, denn es kam
-  2 Jahre nach <application>MPlayer</application> v0.01 heraus.
-  Happy birthday, <application>MPlayer</application>!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.90rc1 "The CodecCounter"</emphasis> 7. Dez. 2002
-  </para><para>Wieder kein Release, aber nachdem Unterstützung für Sorenson 3 (QuickTime)
-  und Windows Media 9 hinzugefügt wurde, ist <application>MPlayer</application> weltweit
-  der erste Movie-Player mit Support für alle bekannten Video-Formate!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.90 "The CounterCounter"</emphasis> 6. Apr. 2003
-  </para><para>Nach mehr als einem Jahr kamen wir letztendlich zu dem Entschluß, dass
-  der Code tatsächlich wieder stabil und bereit zur Veröffentlichung als
-  Release ist. Leider vergaßen wir, die Versionsnummer zu erhöhen, und weitere
-  widerliche Bugs flossen ein, also sei darauf vorbebereitet...
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 13. Aug. 2003
-  </para><para>Die oben erwähnten und viele weitere Bugs wurden gefixt.
-    Dies ist die aktuelltste stabile Version.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 1.0pre1 "Development on the beach"</emphasis> 1. Sep. 2003
-  </para><para>Obwohl dies kein stabiles Release ist, werde ich es aufführen, weil
-    es die erste Vorabversion der 1.0-Serie des <application>MPlayer</application>
-    und dazu ausersehen ist, die <emphasis>großen Fehlerjagdparty</emphasis>
-    zu unterstützen.
-    Dies ist ein großer Schritt vorwärts!
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> Datum noch unbekannt
-  </para></listitem>
-</itemizedlist>
-</para>
+
 </appendix>
