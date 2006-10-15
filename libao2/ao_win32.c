@@ -322,6 +322,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
 // return: number of bytes played
 static int play(void* data,int len,int flags)
 {
+	if (!(flags & AOPLAY_FINAL_CHUNK))
 	len = (len/ao_data.outburst)*ao_data.outburst;
 	return write_waveOutBuffer(data,len);
 }

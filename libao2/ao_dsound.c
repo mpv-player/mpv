@@ -605,6 +605,7 @@ static int play(void* data, int len, int flags)
 	if(space > buffer_size)space -= buffer_size; // write_offset < play_offset
 	if(space < len) len = space;
 
+	if (!(flags & AOPLAY_FINAL_CHUNK))
 	len = (len / ao_data.outburst) * ao_data.outburst;
 	return write_buffer(data, len);
 }
