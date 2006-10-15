@@ -737,12 +737,6 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 			if(audio_found && (param->apid == es.pid) && (! video_found))
 				num_packets++;
 
-			if((req_apid == -2) && video_found)
-			{
-				param->atype = 0;
-				break;
-			}
-
 			if((has_tables==0) && (video_found && audio_found) && (pos >= 1000000))
 				break;
 		}
