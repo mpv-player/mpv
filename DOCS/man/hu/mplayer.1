@@ -1,4 +1,4 @@
-.\" Synced with r20061
+.\" Synced with r20194
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -32,7 +32,7 @@
 .\" Név
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006. 10. 09." "MPlayer Project" "A film lejátszó"
+.TH MPlayer 1 "2006. 10. 15." "MPlayer Project" "A film lejátszó"
 .
 .SH NÉV
 mplayer  \- film lejátszó
@@ -257,9 +257,9 @@ Lásd a \-input kapcsolót a testreszabásához.
 .IPs "<\- és \->"
 Lépés vissza/\:elõre 10 másodperccel.
 .IPs "fel és le"
-Lépés vissza/\:elõre 1 perccel.
+Lépés elõre/\:hátra 1 perccel.
 .IPs "pgup és pgdown"
-Lépés vissza/\:elõre 10 perccel.
+Lépés elõre/\:hátra 10 perccel.
 .IPs "[ és ]"
 Csökkenti/növeli az aktuális lejátszási sebességet 10%-kal.
 .IPs "{ és }"
@@ -309,7 +309,7 @@ Feliratok láthatóságának ki-/bekapcsolása.
 Lépegetés az elérhetõ feliratok között.
 .IPs "y és g"
 Elõre/hátra lépés a felirat listában.
-.IP "F\ \ \ \ "
+.IPs "F\ \ \ \ "
 "Kényszerített felirat" megjelenítése.
 .IPs "a\ \ \ \ "
 Felirat igazítás állítása: fent / középen / lent.
@@ -323,7 +323,7 @@ Egy EDL kihagyás kezdetének vagy végének bejelölése és a megadott fájlba írása.
 Képernyõmentés készítése.
 .IPs "S (csak \-vf screenshot mellett)"
 Képernyõmentések készítésének elindítása/leállítása.
-.IPs "I"
+.IPs "I\ \ \ \ "
 Fájlnév megjelenítése az OSD-n.
 .IPs "! és @"
 Ugrás az elõzõ/következõ fejezet elejére.
@@ -333,7 +333,7 @@ Ugrás az elõzõ/következõ fejezet elejére.
 .RS
 (A következõ billentyûk csak hardveres támogatású videó kimeneteken
 (xv, (x)vidix, (x)mga, stb.), a szoftveres equalizer
-(\-vf eq vagy \-vf eq2) vagy hue szûrõ (\-vf hue) használatakor mûködnek.
+(\-vf eq vagy \-vf eq2) vagy hue szûrõ (\-vf hue) használatakor mûködnek.)
 .RE
 .PP
 .PD 0
@@ -455,7 +455,7 @@ Kiválasztás jobbra.
 Visszatérés a fõmenübe.
 .IPs "keypad 7"
 Visszatérés a legközelebbi menübe (a sorrend: fejezet->cím->fõmenü).
-.IPs "keypad enter"
+.IPs "keypad ENTER"
 Választás jóváhagyása.
 .RE
 .PD 1
@@ -480,9 +480,9 @@ Hangerõ csökkentése/\:növelése.
 .IPs "balra és jobbra"
 Lépés hátra/\:elõre 10 másodperccel.
 .IPs "fel és le"
-Lépés hátra/\:elõre 1 perccel.
+Lépés elõre/\:hátra 1 perccel.
 .IPs "1. gomb"
-szünet
+Szünet.
 .IPs "2. gomb"
 OSD állapotok váltása: nincs / léptetés / léptetés + idõzítõ / léptetõ + idõzítõ + össz idõ.
 .IPs "3. gomb és 4. gomb"
@@ -1441,11 +1441,11 @@ lejátszásához használd a 'pvr://'-t a film URL-jeként.
 A használható opciók:
 .RSs
 .IPs aspect=<0\-3>
-Megadja a bemenet képarányát (alapértelmezett: 4:3):
+Megadja a bemenet képarányát:
 .RSss
 0: 1:1
 .br
-1: 4:3
+1: 4:3 (alapértelmezett)
 .br
 2: 16:9
 .br
@@ -1455,27 +1455,28 @@ Megadja a bemenet képarányát (alapértelmezett: 4:3):
 Megadja az audió kódolási rátáját (alapértelmezett: 48000 Hz, használható: 32000, 44100
 és 48000 Hz).
 .IPs alayer=<1\-3>
-Megadja az MPEG audió réteg kódolását (alapértelmezett: layer 2).
+Megadja az MPEG audió réteg kódolását (alapértelmezett: 2).
 .IPs abitrate=<32\-448>
-Megadja az audió kódolási bitrátáját kbps-ben (alapértelmezett: 384 kbps).
+Megadja az audió kódolási bitrátáját kbps-ben (alapértelmezett: 384).
 .IPs amode=<érték>
 Megadja az audió kódolási módot.
 Az elérhetõ elõre beállított értékek a 'stereo', 'joint_stereo', 'dual' és 'mono' (alapértelmezett: stereo).
 .IPs vbitrate=<érték>
-Megadja az átlagos videó kódolási bitrátát (alapértelmezett: 6 Mbps).
+Megadja az átlagos videó kódolási bitrátát Mbps-ben (alapértelmezett: 6).
 .IPs vmode=<value>
-Megadja a videó kódolás módját (alapértelmezett: vbr):
+Megadja a videó kódolás módját:
 .RSss
-vbr: Változó BitRáta
+vbr: Változó BitRáta (alapértelmezett)
 .br
 cbr: Konstans BitRáta
 .REss
 .IPs vpeak=<érték>
-Megadja a videó kódolási bitrátájának csúcsértékét (csak VBR kódolásnál hasznos, alapértelmezett: 9.6 Mbps). 
+Megadja a videó kódolási bitrátájának csúcsértékét Mbps-ben
+(csak VBR kódolásnál hasznos, alapértelmezett: 9.6). 
 .IPs fmt=<érték>
-Kiválasztja a kódoláshoz használt MPEG formátumot (alapértelmezett: ps):
+Kiválasztja a kódoláshoz használt MPEG formátumot:
 .RSss
-ps:    MPEG-2 Program Stream
+ps:    MPEG-2 Program Stream (alapértelmezett)
 .br
 ts:    MPEG-2 Transport Stream
 .br
@@ -1639,8 +1640,8 @@ Ezek az opciók a rádió adás rögzítõ modul különbözõ paramétereit állítják be.
 MPlayerrel történõ rádióhallgatáshoz használd a 'radio://<frekvencia>'
 (ha a channels opció nincs megadva) vagy a 'radio://<csatorna_szám>'
 (ha a channels meg vannak adva) formát film URL-ként.
-A rögzítõ alrendszer elindításához használd a
-radio://<frekvencia vagy csatorna>/capture formát.
+A rögzítõ alrendszer elindításához használd
+a 'radio://<frekvencia vagy csatorna>/capture' formát.
 Ha a capture kulcsszó nincs megadva, csak a line-in kábelen keresztül
 tudsz rádiót hallgatni.
 A capture-rel történõ hallgatás nem javasolt szinkronizációs problémák
@@ -1686,7 +1687,7 @@ A rögzítendõ audió csatornák száma.
 .RE
 .
 .TP
-.B \-tv <opció1:opció2:...> (csak TV/PVR)
+.B \-tv <opció1:opció2:...> (csak TV/\:PVR)
 Ez az opció bekapcsolja a TV grabbelõ modul különbözõ tulajdonságait.
 Az MPlayerrel történõ TV nézéshez a 'tv://' vagy a 'tv://<csatorna_szám>'
 vagy akár a 'tv://<csatorna_név>' (lásd a csatorna opciókat a csatorna_név-hez
@@ -5520,7 +5521,7 @@ Egy vörös, zöld és kék csíkot kell látnod fentrõl lefelé.
 .
 .TP
 .B lavc[=minõség:fps]
-Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/IVTV-hez.
+Gyors szoftveres YV12-MPEG-1 konverzió libavcodec-kel DVB/\:DXR3/\:IVTV-hez.
 Gyorsabb és jobb minõséget ad, mint a \-vf fame.
 .RSs
 .IPs <minõség>
@@ -5536,7 +5537,7 @@ detektálás a magasság alapján)
 .
 .TP
 .B "fame\ \ \ "
-Gyors szoftveres YV12-MPEG-1 konverzió libfame-mel DVB/\:DXR3/IVTV-hez.
+Gyors szoftveres YV12-MPEG-1 konverzió libfame-mel DVB/\:DXR3/\:IVTV-hez.
 .
 .TP
 .B dvbscale[=arány]
