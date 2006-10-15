@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r19979
+// Synced with help_mp-en.h: r20191
 
 // ========================= MPlayer help ===========================
 
@@ -202,6 +202,7 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "включено"
 #define MSGTR_OSDdisabled "выключено"
+#define MSGTR_OSDAudio "Аудио: %s"
 #define MSGTR_OSDChannel "Канал: %s"
 #define MSGTR_OSDSubDelay "Задержка субтитров: %d мс"
 #define MSGTR_OSDSpeed "Скорость: x %6.2f"
@@ -644,8 +645,7 @@ static char help_text[]=
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Установка поддержки LIRC...\n"
-#define MSGTR_LIRCdisabled "Вы не сможете использовать Ваш пульт управления.\n"
-#define MSGTR_LIRCopenfailed "Неудачное открытие поддержки LIRC!\n"
+#define MSGTR_LIRCopenfailed "Неудачное открытие поддержки LIRC.\nВы не сможете использовать Ваш пульт управления.\n"
 #define MSGTR_LIRCcfgerr "Неудачная попытка чтения файла конфигурации LIRC '%s'!\n"
 
 // vf.c
@@ -1092,7 +1092,7 @@ static char help_text[]=
 
 // ao_pcm.c
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Файл: %s (%s)\nPCM: Частота дискретизации: %i Гц Каналы: %s Формат %s\n"
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Информация: наиболее быстрый дампинг достигается с -vc dummy -vo null\nPCM: Информация: для записи WAVE файлов используйте -ao pcm:waveheader (по умолчанию).\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Информация: наиболее быстрый дампинг достигается с -vc null -vo null\n[AO PCM]: Информация: -ao pcm:fast. Для записи WAVE файлов используйте\n[AO PCM]: Информация: -ao pcm:waveheader (по умолчанию).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Не могу открыть %s для записи!\n"
 
 // ao_sdl.c
