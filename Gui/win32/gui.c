@@ -838,9 +838,11 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
             char searchpath3[MAX_PATH];
 #endif
             int len, pos = 0, cdromdrive = 0;
+            UINT errmode;
             point.x = GET_X_LPARAM(lParam);
             point.y = GET_Y_LPARAM(lParam);
             ClientToScreen(hWnd, &point);
+            errmode = SetErrorMode(SEM_FAILCRITICALERRORS | SEM_NOOPENFILEERRORBOX);
             len = GetLogicalDriveStrings(MAX_PATH, device);
             while(pos < len)
             {
@@ -865,6 +867,7 @@ static LRESULT CALLBACK EventProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM
                 }
                 pos += strlen(device + pos) + 1;
             }
+            SetErrorMode(errmode);
             TrackPopupMenu(gui->menu, 0, point.x, point.y, 0, hWnd, NULL);
             return 0;
         }
