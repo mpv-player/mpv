@@ -82,7 +82,7 @@ typedef struct {
     int		current_vpacket;
     
     // timestamp correction:
-    unsigned int	kf_base;// timestamp of the prev. video keyframe
+    int64_t		kf_base;// timestamp of the prev. video keyframe
     unsigned int	kf_pts;	// timestamp of next video keyframe
     unsigned int	a_pts;	// previous audio timestamp
     double	v_pts;  // previous video timestamp
@@ -518,7 +518,7 @@ static double real_fix_timestamp(real_priv_t* priv, unsigned char* s, unsigned i
 //    if(pict_type==0)
     if(pict_type<=1){
       // I frame, sync timestamps:
-      priv->kf_base=timestamp-kf;
+      priv->kf_base=(int64_t)timestamp-kf;
       mp_msg(MSGT_DEMUX, MSGL_DBG2,"\nTS: base=%08X\n",priv->kf_base);
       kf=timestamp;
     } else {
