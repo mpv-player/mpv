@@ -506,7 +506,7 @@ If an option is marked as (XXX only), it will only work in combination with
 the XXX option or if XXX is compiled in.
 .PP
 .I NOTE:
-The suboption parser (used for example for -ao pcm suboptions) supports
+The suboption parser (used for example for \-ao pcm suboptions) supports
 a special kind of string-escaping intended for use with external GUIs.
 .br
 It has the following format:
@@ -515,11 +515,11 @@ It has the following format:
 .br
 .I EXAMPLES:
 .br
-mplayer -ao pcm:file=%10%C:test.wav test.avi
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
 .br
 Or in a script:
 .br
-mplayer -ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
+mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
 .PP
 .
 .\" --------------------------------------------------------------------------
@@ -639,7 +639,7 @@ Prints all available options.
 .TP
 .B \-msgcharset <charset>
 Convert console messages to the specified character set (default: autodetect).
-Text will be in the encoding specified with the --charset configure option.
+Text will be in the encoding specified with the \-\-charset configure option.
 Set this to "noconv" to disable conversion (for e.g.\& iconv problems).
 .br
 .I NOTE:
@@ -781,7 +781,7 @@ drivers.
 .TP
 .B \-crash-debug (DEBUG CODE)
 Automatically attaches gdb upon crash or SIGTRAP.
-Support must be compiled in by configuring with --enable-crash-debug.
+Support must be compiled in by configuring with \-\-enable-crash-debug.
 .
 .TP
 .B \-edlout <filename>
@@ -8487,7 +8487,7 @@ Turn this option on for interlaced content.
 .br
 .I NOTE:
 Should you rescale the video, you would need an interlace-aware resizer,
-which you can activate with -vf scale=<width>:<height>:1.
+which you can activate with \-vf scale=<width>:<height>:1.
 .
 .TP
 .B "4mv\ \ \ \ "
@@ -10182,7 +10182,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .PP
 .B Convert subtitles to MPsub format without watching the movie:
 .nf
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
 .fi
 .
 .PP
