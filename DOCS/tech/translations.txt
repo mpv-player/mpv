@@ -15,8 +15,8 @@ you should subscribe to both, as the English documentation Subversion
 changelogs, which you need to keep the translation up to date, are sent
 to MPlayer-DOCS. You can subscribe here:
 
-http://mplayerhq.hu/mailman/listinfo/mplayer-docs
-http://mplayerhq.hu/mailman/listinfo/mplayer-translations
+http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs
+http://lists.mplayerhq.hu/mailman/listinfo/mplayer-translations
 
 Send updates and patches to this mailing list or directly to the documentation
 or console message maintainers, see DOCS/tech/MAINTAINERS for details.
