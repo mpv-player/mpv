@@ -51,6 +51,8 @@ static int use_sleep;
 static int first_frame;//draw colorkey on first frame
 static int use_queue;
 static int xv_port_request = 0;
+static int bob_deinterlace;
+static int top_field_first;
 
 static int image_width,image_height;
 static uint32_t  drwX,drwY;
@@ -345,6 +347,7 @@ xvmc_render_state_t * rndr;
 // the surface have passed vf system without been skiped, it will be displayed
    rndr->state |= MP_XVMC_STATE_DISPLAY_PENDING;
    p_render_surface_to_show = rndr;
+   top_field_first = mpi->fields & MP_IMGFIELD_TOP_FIRST;
    return VO_TRUE;
 }
 
@@ -363,6 +366,7 @@ opt_t subopts [] =
   {  "benchmark", OPT_ARG_BOOL, &benchmark,       NULL },
   {  "sleep",     OPT_ARG_BOOL, &use_sleep,       NULL },
   {  "queue",     OPT_ARG_BOOL, &use_queue,       NULL },
+  {  "bobdeint",  OPT_ARG_BOOL, &bob_deinterlace, NULL },
   {  NULL }
 };
 
@@ -400,6 +404,7 @@ opt_t subopts [] =
    benchmark = 0; //disable PutImageto allow faster display than screen refresh
    use_sleep = 0;
    use_queue = 0;
+   bob_deinterlace = 0;
 
    /* parse suboptions */
    if ( subopt_parse( arg, subopts ) != 0 )
@@ -1014,6 +1019,7 @@ int status,rez;
 static void put_xvmc_image(xvmc_render_state_t * p_render_surface, int draw_ck){
 int rez;
 int clipX,clipY,clipW,clipH;
+int i;
 
    if(p_render_surface == NULL)
       return;
@@ -1029,14 +1035,18 @@ int clipX,clipY,clipW,clipH;
    if(benchmark)
       return;
 
+   for (i = 1; i <= bob_deinterlace + 1; i++) {
+   int field = top_field_first ? i : i ^ 3;
    rez = XvMCPutSurface(mDisplay, p_render_surface->p_surface, 
                         vo_window,
                         0, 0, image_width, image_height,
                         clipX, clipY, clipW, clipH,
-                        3);//p_render_surface_to_show->display_flags);
+                        bob_deinterlace ? field : 3);
+                        //p_render_surface_to_show->display_flags);
    if(rez != Success){
       printf("vo_xvmc: PutSurface failer, critical error %d!\n",rez);
       assert(0);
+   }
    }
    XFlush(mDisplay);
 }

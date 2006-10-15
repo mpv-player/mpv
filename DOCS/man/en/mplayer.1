@@ -3087,6 +3087,10 @@ Disables image display.
 Necessary for proper benchmarking of drivers that change
 image buffers on monitor retrace only (nVidia).
 Default is not to disable image display (nobenchmark).
+.IPs (no)bobdeint
+Very simple deinterlacer.
+Might not look better than -vf tfields=1,
+but it's the only deinterlacer for xvmc (default: nobobdeint).
 .IPs (no)queue
 Queue frames for display to allow more parallel work of the video hardware.
 May add a small (not noticeable) constant A/V desync (default: noqueue).
