@@ -49,14 +49,13 @@
 
 typedef struct _h264_module_t {
     muxer_stream_t *mux;
-    x264_param_t    param;
     x264_t *    x264;
     x264_picture_t  pic;
 } h264_module_t;
 
 extern char* passtmpfile;
 static int turbo = 0;
-char *x264encopts = "";
+static x264_param_t param;
 
 static int encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal){
     uint8_t *p = buf;
@@ -75,32 +74,25 @@ static int encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal){
 static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts);
 static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in);
 
-static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
-    h264_module_t *mod=(h264_module_t*)vf->priv;
-    mod->mux->bih->biWidth = width;
-    mod->mux->bih->biHeight = height;
-    mod->mux->aspect = (float)d_width/d_height;
-    
-    x264_param_default(&mod->param);
+int x264enc_set_param(m_option_t* opt, char* arg)
+{
+    static int initted = 0;
+    if(!initted) {
+        x264_param_default(&param);
+        x264_param_parse(&param, "psnr", "no");
+        x264_param_parse(&param, "ssim", "no");
+        initted = 1;
+    }
 
-    mod->param.i_width = width;
-    mod->param.i_height = height;
-    mod->param.i_fps_num = mod->mux->h.dwRate;
-    mod->param.i_fps_den = mod->mux->h.dwScale;
-    mod->param.vui.i_sar_width = d_width*height;
-    mod->param.vui.i_sar_height = d_height*width;
-    x264_param_parse(&mod->param, "psnr", "no");
-    x264_param_parse(&mod->param, "ssim", "no");
-
-    while(*x264encopts) {
-        char *name = x264encopts;
+    while(*arg) {
+        char *name = arg;
         char *value;
         int ret;
 
-        x264encopts += strcspn(x264encopts, ":");
-        if(*x264encopts) {
-            *x264encopts = 0;
-            x264encopts++;
+        arg += strcspn(arg, ":");
+        if(*arg) {
+            *arg = 0;
+            arg++;
         }
 
         value = strchr( name, '=' );
@@ -114,68 +106,88 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
             continue;
         }
 
-        ret = x264_param_parse(&mod->param, name, value);
+        ret = x264_param_parse(&param, name, value);
         if(ret == X264_PARAM_BAD_NAME)
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option x264encopts: Unknown suboption %s\n", name);
         if(ret == X264_PARAM_BAD_VALUE)
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option x264encopts: Bad argument %s=%s\n", name, value ? value : "(null)");
+
+        /* mark this option as done, so it's not reparsed if there's another -x264encopts */
+        *name = 0;
+
         if(ret)
             return 0;
     }
 
-    if(mod->param.rc.b_stat_write) {
+    x264_param_parse(&param, "stats", passtmpfile);
+
+    if(param.rc.b_stat_write) {
         /* Adjust or disable some flags to gain speed in the first pass */
         if(turbo == 1)
         {
-            mod->param.i_frame_reference = ( mod->param.i_frame_reference + 1 ) >> 1;
-            mod->param.analyse.i_subpel_refine = max( min( 3, mod->param.analyse.i_subpel_refine - 1 ), 1 );
-            mod->param.analyse.inter &= ( ~X264_ANALYSE_PSUB8x8 );
-            mod->param.analyse.inter &= ( ~X264_ANALYSE_BSUB16x16 );
-            mod->param.analyse.i_trellis = 0;
+            param.i_frame_reference = ( param.i_frame_reference + 1 ) >> 1;
+            param.analyse.i_subpel_refine = max( min( 3, param.analyse.i_subpel_refine - 1 ), 1 );
+            param.analyse.inter &= ( ~X264_ANALYSE_PSUB8x8 );
+            param.analyse.inter &= ( ~X264_ANALYSE_BSUB16x16 );
+            param.analyse.i_trellis = 0;
         }
         else if(turbo >= 2)
         {
-            mod->param.i_frame_reference = 1;
-            mod->param.analyse.i_subpel_refine = 1;
-            mod->param.analyse.i_me_method = X264_ME_DIA;
-            mod->param.analyse.inter = 0;
-            mod->param.analyse.b_transform_8x8 = 0;
-            mod->param.analyse.b_weighted_bipred = 0;
-            mod->param.analyse.i_trellis = 0;
+            param.i_frame_reference = 1;
+            param.analyse.i_subpel_refine = 1;
+            param.analyse.i_me_method = X264_ME_DIA;
+            param.analyse.inter = 0;
+            param.analyse.b_transform_8x8 = 0;
+            param.analyse.b_weighted_bipred = 0;
+            param.analyse.i_trellis = 0;
         }
     }
+}
+
+static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
+    h264_module_t *mod=(h264_module_t*)vf->priv;
+    mod->mux->bih->biWidth = width;
+    mod->mux->bih->biHeight = height;
+    mod->mux->aspect = (float)d_width/d_height;
+    
+    param.i_width = width;
+    param.i_height = height;
+    param.i_fps_num = mod->mux->h.dwRate;
+    param.i_fps_den = mod->mux->h.dwScale;
+    param.vui.i_sar_width = d_width*height;
+    param.vui.i_sar_height = d_height*width;
 
     switch(outfmt) {
     case IMGFMT_I420:
-        mod->param.i_csp = X264_CSP_I420;
+        param.i_csp = X264_CSP_I420;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_YV12:
-        mod->param.i_csp = X264_CSP_YV12;
+        param.i_csp = X264_CSP_YV12;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_422P:
-        mod->param.i_csp = X264_CSP_I422;
+        param.i_csp = X264_CSP_I422;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_444P:
-        mod->param.i_csp = X264_CSP_I444;
+        param.i_csp = X264_CSP_I444;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_YVYU:
-        mod->param.i_csp = X264_CSP_YUYV;
+        param.i_csp = X264_CSP_YUYV;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_RGB:
-        mod->param.i_csp = X264_CSP_RGB;
+        param.i_csp = X264_CSP_RGB;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_BGR:
-        mod->param.i_csp = X264_CSP_BGR;
+        param.i_csp = X264_CSP_BGR;
         mod->mux->bih->biSizeImage = width * height * 3;
         break;
     case IMGFMT_BGR32:
-        mod->param.i_csp = X264_CSP_BGRA;
+        param.i_csp = X264_CSP_BGRA;
         mod->mux->bih->biSizeImage = width * height * 4;
         break;
     default:
@@ -183,13 +195,13 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         return 0;
     }
     
-    mod->x264 = x264_encoder_open(&mod->param);
+    mod->x264 = x264_encoder_open(&param);
     if(!mod->x264) {
         mp_msg(MSGT_MENCODER, MSGL_ERR, "x264_encoder_open failed.\n");
         return 0;
     }
 
-    if(!mod->param.b_repeat_headers){
+    if(!param.b_repeat_headers){
         uint8_t *extradata;
         x264_nal_t *nal;
         int extradata_size, nnal, i, s = 0;
@@ -208,10 +220,10 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         mod->mux->bih->biSize= sizeof(BITMAPINFOHEADER) + extradata_size;
     }
     
-    if (mod->param.i_bframe > 1 && mod->param.b_bframe_pyramid)
+    if (param.i_bframe > 1 && param.b_bframe_pyramid)
         mod->mux->decoder_delay = 2;
     else
-        mod->mux->decoder_delay = mod->param.i_bframe ? 1 : 0;
+        mod->mux->decoder_delay = param.i_bframe ? 1 : 0;
     
     return 1;
 }
@@ -221,7 +233,7 @@ static int control(struct vf_instance_s* vf, int request, void *data)
     h264_module_t *mod=(h264_module_t*)vf->priv;
     switch(request){
         case VFCTRL_FLUSH_FRAMES:
-            if(mod->param.i_bframe)
+            if(param.i_bframe)
                 while(encode_frame(vf, NULL) > 0);
             return CONTROL_TRUE;
         default:
@@ -254,7 +266,7 @@ static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts)
     int i;
     
     memset(&mod->pic, 0, sizeof(x264_picture_t));
-    mod->pic.img.i_csp=mod->param.i_csp;
+    mod->pic.img.i_csp=param.i_csp;
     mod->pic.img.i_plane=3;
     for(i=0; i<4; i++) {
         mod->pic.img.plane[i] = mpi->planes[i];
@@ -287,8 +299,8 @@ static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in)
     if(i_size>0) {
         int keyframe = (pic_out.i_type == X264_TYPE_IDR) ||
                        (pic_out.i_type == X264_TYPE_I
-                        && mod->param.i_frame_reference == 1
-                        && !mod->param.i_bframe);
+                        && param.i_frame_reference == 1
+                        && !param.i_bframe);
         muxer_write_chunk(mod->mux, i_size, keyframe?0x10:0, MP_NOPTS_VALUE, MP_NOPTS_VALUE);
     }
     else
