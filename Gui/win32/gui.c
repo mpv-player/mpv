@@ -1170,8 +1170,7 @@ static void create_menu(gui_t *gui)
         if(GetDriveType(device + pos) == DRIVE_CDROM)
         {
             volname[0] = 0;
-            menuitem[0] = 0;
-            strcat(menuitem, device + pos);
+            strcpy(menuitem, device + pos);
             menuitem[strlen(menuitem) - 1]=0;
             GetVolumeInformation(device + pos, volname, MAX_PATH, NULL, NULL, NULL, NULL, 0);
             if (strlen(volname))
