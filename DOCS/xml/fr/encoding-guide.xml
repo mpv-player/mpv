@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.47 -->
+<!-- synced with r17594 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -1314,7 +1314,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   <footnote id='fn-menc-feat-dvd-mpeg4-codec-cpu'>
   <para>Attention tout de même: décoder une video MPEG-4 AVC de la
     resolution d'un DVD nécessite une machine puissante (i.e. un
-    Pentium 4 à plus de 1.5Ghz ou un Pentium M à plus de 1Ghz).
+    Pentium 4 à plus de 1.5GHz ou un Pentium M à plus de 1GHz).
   </para></footnote>
   si vous choisissez un codec MPEG-4 AVC comme le
   <systemitem class="library">x264</systemitem> au lieu de codecs MPEG-4 ASP
@@ -2561,7 +2561,7 @@ Un exemple avec compression AC3:
 <para>
   Tous les paramètrages d'encodage ont été testés sur un échantillon vidéo de résolution
   720x448 à 30000/1001 images par seconde, le débit cible était de 900kbit/s, et la machine était un
-  AMD-64 3400+ à 2400 Mhz en mode 64 bits.
+  AMD-64 3400+ à 2400 MHz en mode 64 bits.
   Chaque exemple d'encodage est donné avec la vitesse d'encodage mesurée (en
   images par seconde) et la perte en PSNR (en dB) par rapport au réglage de "très
   haute qualité". Sachez que selon votre video source, votre machine et les derniers développements,
@@ -3288,7 +3288,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Tous les paramètrages d'encodage ont été testés sur un échantillon vidéo en
   720x448 à 30000/1001 images par seconde, le débit cible était de 900kbit/s, et la machine était un
-  AMD-64 3400+ à 2400 Mhz en mode 64 bits.
+  AMD-64 3400+ à 2400 MHz en mode 64 bits.
   Chaque exemple d'encodage est donné avec la vitesse d'encodage mesurée (en
   images par seconde) et la perte en PSNR (en dB) par rapport au réglage de "très
   haute qualité". Sachez que selon votre video source, votre machine et les derniers développements,
@@ -3803,7 +3803,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Tous les paramètres d'encodage sont testés sur un échantillon vidéo à
   720x448 à30000/1001 images par seconde, le débit cible est à 900kbit/s, et la machine
-  est un AMD-64 3400+ à 2400 Mhz en mode 64 bits.
+  est un AMD-64 3400+ à 2400 MHz en mode 64 bits.
   Chaque paramètre d'encodage exploite la vitesse de compression mesurée (en
   images par seconde) et la perte de PSNR (en dB) en la comparant au paramètre
   de "très haute qualité".
