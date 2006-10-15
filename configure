@@ -3714,7 +3714,7 @@ echores "$_tga"
 echocheck "DirectFB"
 if test "$_directfb" = auto ; then
   _directfb=no
-  if linux && test -c /dev/fb0; then
+  if linux; then
     cat > $TMPC <<EOF
 #include <directfb.h>
 int main(void) { IDirectFB *foo; DirectFBInit(0,0); return 0; }
