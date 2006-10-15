@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19751 -->
+<!-- synced with r20176 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -59,7 +59,7 @@ man oldalát a bővebb magyarázatért).
 </para>
 
 <para>
-Nézd meg a &quot;<filename>/proc/ide/<replaceable>cdrom eszköz</replaceable>/settings&quot;</filename>
+Nézd meg a &quot;<filename>/proc/ide/<replaceable>[cdrom eszköz]</replaceable>/settings</filename>&quot;
 fájlt a CD-ROM tuningolásához.
 </para>
 
@@ -117,26 +117,14 @@ beállításod különböző, készíts egy szimbolikus linket vagy add meg a megfelelő
 eszközt a parancssorban a <option>-dvd-device</option> kapcsolóval.
 </para>
 
-<formalpara>
-<title>A DVD támogatás új formája (mpdvdkit2)</title>
 <para>
 Az <application>MPlayer</application> fel tudja használni a <systemitem>libdvdread</systemitem>-ot
-és a <systemitem>libdvdcss</systemitem>-t is a DVD-k dekódolásához és lejátszásához. Ez
-a két függvény könyvtár a <filename class="directory">libmpdvdkit2/</filename> alkönyvtárban
-található az <application>MPlayer</application> forrás fájéban, nem kell őket
-külön telepítened. Ezt a megoldást választottuk, mert javítanunk kellett egy
-<systemitem>libdvdread</systemitem> hibát és beletennünk egy másik javítást
-a <emphasis role="bold">feltört CSS kulcsok cache-elésének támogatásához</emphasis> a
-<systemitem>libdvdcss</systemitem>-be. Ez nagy sebességnövekedést eredményezett,
-mivel a kulcsokat nem kell mindig feltörni lejátszás előtt.
-</para>
-</formalpara>
-
-<para>
-Az <application>MPlayer</application> a rendszer <systemitem>libdvdread</systemitem>
-és <systemitem>libdvdcss</systemitem> függvénykönyvtárait is tudja használni, de ez
-<emphasis role="bold">nem</emphasis> javasolt, mivel hibák forrása lehet,
-könyvtár inkompatibilítást és sebességcsökkenést okozhat.
+és a <systemitem>libdvdcss</systemitem>-t is a DVD-k dekódolásához és lejátszásához.
+Ez a két függvénykönyvtár a <filename class="directory">libmpdvdkit2</filename>
+alkönyvtárban található az <application>MPlayer</application> forrás fájában,
+nem kell őket külön telepítened. Használhatod a két függvénykönyvtár rendszer-szintű
+verzióját is, de ez <emphasis role="bold">nem</emphasis> javasolt, mivel hibák forrása
+lehet, a függvénykönyvtárak közötti inkompatibilítást és sebességcsökkenést okozhat.
 </para>
 
 <note><para>
