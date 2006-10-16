@@ -1,4 +1,4 @@
-.\" synced with r20132
+.\" synced with r20237
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -268,9 +268,9 @@ sortie vidéo.
 .IPs "<\- et \->"
 Recule/\:avance de 10 secondes.
 .IPs "haut et bas"
-Recule/\:avance d'1 minute.
+Avance/\:recule/ d'1 minute.
 .IPs "PG.PRÉC. et PG.SUIV."
-recule/\:avance de 10 minutes
+Avance/\:recule de 10 minutes
 .IPs "[ et ]"
 Diminue/accélère la vitesse courante de lecture de 10%.
 .IPs "{ and }"
@@ -337,7 +337,7 @@ Créé une marque EDL.
 Réalise une capture d'écran.
 .IPs "S (\-vf screenshot uniquement)"
 Amorce/arrête la capture d'écran.
-.IPs "I"
+.IPs "I\ \ \ \ "
 Affiche le nom de fichier dans l'OSD.
 .IPs "! and @"
 Saute au début du chapitre précédant/suivant.
@@ -347,7 +347,7 @@ Saute au début du chapitre précédant/suivant.
 .RS
 (Les touches suivantes ne sont valides qu'en utilisant une sortie vidéo
 accélérée matériellement (xv, (x)vidix, (x)mga, etc), l'égaliseur
-logiciel (\-vf eq ou \-vf eq2) ou le filtre de teinte (\-vf hue).
+logiciel (\-vf eq ou \-vf eq2) ou le filtre de teinte (\-vf hue).)
 .RE
 .PP
 .PD 0
@@ -476,7 +476,7 @@ Bouton droit.
 Retourne au menu principal.
 .IPs "touche 7"
 Retourne au menu le plus près (dans l'ordre: chapitre->titre->racine).
-.IPs "touche Entrée"
+.IPs "touche ENTRÉE"
 Confirme le choix.
 .RE
 .PD 1
@@ -502,7 +502,7 @@ Diminue/\:augmente le volume.
 .IPs "gauche et droite"
 Navigue en arrière/\:avant de 10 secondes.
 .IPs "haut et bas"
-Navigue en arrière/\:avant d'une minute.
+Navigue en avant/\:arrière d'une minute.
 .IPs "bouton 1"
 pause
 .IPs "bouton 2"
@@ -536,11 +536,11 @@ Il suit le format suivant\ :
 .br
 .I EXEMPLES\ :
 .br
-mplayer -ao pcm:file=%10%C:test.wav test.avi
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
 .br
 Ou dans un script\ :
 .br
-mplayer -ao pcm:file=%`longueur expr "$NOM"`%"$NOM" test.avi
+mplayer \-ao pcm:file=%`longueur expr "$NOM"`%"$NOM" test.avi
 .PP
 .
 .\" --------------------------------------------------------------------------
@@ -666,7 +666,7 @@ Affiche toutes les options disponibles.
 Convertit les messages consoles à la l'ensemble de caractères spécifié
 (par défaut\ : auto-détection).
 Le texte sera alors dans l'encodage défini par l'option du script configure
---charset.
+\-\-charset.
 La valeur "noconv" permet de désactiver toute conversion (par ex. en
 cas de problèmes avec iconv)\ ;
 .br
@@ -814,7 +814,7 @@ uniquement.
 .B \-crash-debug (CODE DE DÉBOGAGE)
 Attache gdb automatiquement lors d'un crash ou d'un SIGTRAP.
 N'est géré que si MPlayer a été compilé avec l'option de
-configuration \--enable-crash-debug.
+configuration \-\-enable-crash-debug.
 .
 .TP
 .B \-edlout <nomfichier>
@@ -1495,11 +1495,11 @@ visualisation via MPlayer/MEncoder, utilisez 'pvr://' comme URL de film.
 Les options disponibles sont :
 .RSs
 .IPs aspect=<0\-3>
-Spécifie un format visuel pour l'entrée vidéo (la valeur par défaut est 4:3) :
+Spécifie un format visuel pour l'entrée vidéo\ :
 .RSss
 0: 1:1
 .br
-1: 4:3
+1: 4:3 (par défaut)
 .br
 2: 16:9
 .br
@@ -1509,21 +1509,20 @@ Spécifie un format visuel pour l'entrée vidéo (la valeur par défaut est 4:3) :
 Spécifie le taux d'échantillonnage de l'encodeur audio (la valeur par défaut
 est de 48000 Hz, et sont disponibles 32000, 44100 et 48000 Hz).
 .IPs alayer=<1\-3>
-Spécifie le niveau d'encodage MPEG audio (par défaut la couche 2).
+Spécifie le niveau d'encodage MPEG audio (par défaut\ : 2).
 .IPs abitrate=<32\-448>
-Spécifie le taux binaire d'encodage audio en kbps (par défaut 384 kbps).
+Spécifie le taux binaire d'encodage audio en kbps (par défaut\ : 384).
 .IPs amode=<valeur>
 Spécifie le mode d'encodage audio.
 Les différentes valeurs disponibles sont 'stereo', 'joint_stereo', 'dual'
 et 'mono'.
 La valeur par défaut est le Stéréo.
 .IPs vbitrate=<valeur>
-Spécifie le taux binaire moyen d'encodage vidéo.
-La valeur par défaut est de 6 Mbps. 
+Spécifie le taux binaire moyen d'encodage vidéo (par défaut\ : 6 Mbps).
 .IPs vmode=<valeur>
-Spécifie le mode d'encodage vidéo (par défaut en vbr) :
+Spécifie le mode d'encodage vidéo\ :
 .RSss
-vbr: Taux binaire variable.
+vbr: Taux binaire variable (par défaut).
 .br
 cbr: Taux binaire constant.
 .REss
@@ -1532,9 +1531,9 @@ Spécifie le taux binaire maximum d'encodage vidéo (utile uniquement dans le
 cas du mode VBR).
 La valeur par défaut est de 9.6 Mbps. 
 .IPs fmt=<valeur>
-Détermine le format MPEG utilisé pour l'encodage (ps par défaut):
+Détermine le format MPEG utilisé pour l'encodage\ :
 .RSss
-ps:    Flux compatible MPEG 2 Program Stream.
+ps:    Flux compatible MPEG 2 Program Stream (par défaut).
 .br
 ts:    Flux compatible MPEG 2 Transport Stream.
 .br
@@ -8950,7 +8949,7 @@ L'encodage se fera en tenant compte des champs de la vidéo entrelacée.
 .I NOTE\ :
 Si vous redimmensionnez la vidéo, vous devriez utiliser un filtre de
 redimentionnement adapté à ce genre de vidéo, ce qui se fait avec
--vf scale=<largeur>:<hauteur>:1.
+\-vf scale=<largeur>:<hauteur>:1.
 .
 .TP
 .B "4mv\ \ \ \ "
