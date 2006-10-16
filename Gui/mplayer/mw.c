@@ -79,7 +79,6 @@ static unsigned last_redraw_time = 0;
 
 void mplEventHandling( int msg,float param )
 {
- int j;
  int iparam = (int)param;
 
  switch( msg )
