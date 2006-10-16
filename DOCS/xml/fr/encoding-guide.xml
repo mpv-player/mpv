@@ -39,7 +39,7 @@
 <para>
   Si vous ne vous sentez pas de taille, vous devriez utiliser une des
   interfaces graphiques listées sur la page de notre projet dans 
-  <ulink url="http://mplayerhq.hu/homepage/design7/projects.html#mencoder_frontends">Section
+  <ulink url="http://www.mplayerhq.hu/design7/projects.html#mencoder_frontends">Section
   MEncoder</ulink>.
   Ainsi, vous devriez être capable de faire de encodages de DVD de haute qualité
   sans trop réfléchir, ces outils sont faits pour prendre les bonnes décisions à votre place.
@@ -348,7 +348,7 @@
   sont ensuite utilisées pendant la seconde passe de façon à choisir intelligemment
   quels quantificateurs utiliser. Lors des scènes d'action rapide ou celles ayant
   beaucoup de détails, des quantificateurs plus élevés seront probablement utilisés.
-  Pendant les scènes avec peu de mouvements ou avec peu de détails, ce sera
+  Pendant les scènes avec peu de mouvements ou avec peu de détails, ce seront
   des quantificateurs plus bas. Normalement, la quantité de mouvement est bien plus
   importante que la quantité de détail.
 </para>
@@ -1320,7 +1320,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   <systemitem class="library">x264</systemitem> au lieu de codecs MPEG-4 ASP
   tels que le <systemitem class="library">libavcodec</systemitem> MPEG-4 ou le
   <systemitem class="library">XviD</systemitem>.
-  (Les développeurs de codec peuvent être intéressés par la leture de l'avis
+  (Les développeurs de codec peuvent être intéressés par la lecture de l'avis
   de Michael Niedermayer's sur
   "<ulink url="http://guru.multimedia.cx/?p=10">why MPEG4-ASP sucks</ulink>".)
   De la même manière, vous devriez obtenir une meilleure qualité en utilisant
@@ -1367,7 +1367,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
 <para>
   Si vous recherchez la vitesse, vous devriez conserver à peu près les
   réglages par défaut du codec vidéo (bien que vous deviez quand même essayer
-  les autres options qui sont mentionnées dans d'autres sections de ce guide)
+  les autres options qui sont mentionnées dans d'autres sections de ce guide).
 </para>
 <para>
   Vous pouvez aussi vouloir choisir un codec multi-threadé, bien que ce
@@ -1396,7 +1396,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   par rapport à <systemitem class="library">x264</systemitem>.
 </para>
 <para>
-  Vous devriez vous faire votre propre optinion.
+  Vous devriez vous faire votre propre opinion.
   Ne croyez pas ceux qui ne jurent que par un seul codec.
   Prenez quelques échantillons de sources brutes et comparez les
   différentes options et codecs pour en trouver un qui vous convienne
@@ -2002,7 +2002,7 @@ Notez l'usage des options <option>ilme</option> et <option>ildct</option>.
   ces filtres sont disponibles, chacun avec ses avantages et inconvénients.
   Consultez <option>mplayer -pphelp</option> pour voir lesquels sont
   disponibles (selectionnez les lignes contenant &quot;deint&quot; avec grep), et fouillez dans les
-  <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
+  <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">
   listes de diffusion MPlayer</ulink>, vous trouverez nombres de discussions sur les
   différents filtres. Encore une fois, le nombre d'images par seconde ne change pas, donc l'option
   <option>-ofps</option> n'est pas nécessaire. Une dernière chose: le désentrelacement
@@ -2760,13 +2760,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Nous sommes maintenant prêts à faire l'encodage deux passes. Première passe:
 
-  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
--lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+-lvcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
   La seconde passe est la même, si ce n'est que nous spécifions <option>vpass=2</option>:
 
-  <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+ <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf pullup,softskip,crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
 -o Harry_Potter_2.avi</screen>
 </para>
@@ -3509,24 +3509,24 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">me</emphasis>:
   Cette option sert pour le choix de la méthode de recherche d'estimation de mouvement.
   Cette option modifie de manière directe le compromis entre qualité et vitesse.
-  <option>me=1</option> n'est plus rapide que de quelques pourcents par rapport à
+  <option>me=dia</option> n'est plus rapide que de quelques pourcents par rapport à
   la recherche par défaut et entraîne une diminution du PSNR global inférieure à 0.1dB. Le
-  paramètre par défaut (<option>me=2</option>) est un compromis raisonnable
-  entre vitesse et qualité. <option>me=3</option> améliore de moins de 0.1dB le
+  paramètre par défaut (<option>me=hex</option>) est un compromis raisonnable
+  entre vitesse et qualité. <option>me=umh</option> améliore de moins de 0.1dB le
   PSNR global avec une pénalité sur la vitesse variant en fonction
   de <option>frameref</option>.  Pour de hautes valeurs de <option>frameref</option>
-  (par exemple 12 ou plus), <option>me=3</option> est environ 40% plus lent que le
+  (par exemple 12 ou plus), <option>me=umh</option> est environ 40% plus lent que le
   <option>me=2</option> par défaut. Avec <option>frameref=3</option>,
   la pénalité sur la vitesse chute à 25%-30%.
 </para>
 <para>
-  <option>me=4</option> utilise une recherche exhaustive qui est trop lente pour
+  <option>me=esa</option> utilise une recherche exhaustive qui est trop lente pour
   une utilisation pratique.
 </para>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">4x4mv</emphasis>:
+  <emphasis role="bold">partitions=p4x4</emphasis>:
   Cette option autorise l'utilisation des sous-partitions 8x4, 4x8 et 4x4 dans
   les macroblocs prédits. L'autoriser résulte en une perte de vitesse raisonnablement
   consistente de 10%-15%. Cette option est plutôt inutile pour les videos sources contenant
@@ -3673,7 +3673,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   d'ajouter <option>subq=1:frameref=1</option> à la première passe <option>x264encopts</option>.
   Ensuite, sur la seconde passe, utilisez des options plus lentes pour avoir une
   meilleure qualité:
-  <option>subq=6:frameref=15:4x4mv:me=3</option>
+  <option>subq=6:frameref=15:partitions=p4x4:me=umh</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Encodage en trois passes</emphasis> ?
@@ -3727,7 +3727,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   de scène.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  <emphasis role="bold">deblock</emphasis>:
   Ce sujet risque d'être une source de controverses.
 </para>
 <para>
@@ -3739,7 +3739,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Les forces pré-réglées définies par les standards sont bien choisies et
   il y a de grandes chances pour qu'elles soient optimales du point de vue du PSNR
   quel que soit la vidéo que vous encodez.
-  Les paramètres <option>deblockalpha</option> et <option>deblockbeta</option>
+  Les paramètres de <option>deblock</option>
   vous permettent de spécifier des décalages par rapport aux seuils de déblocage pré-définis.
 </para>
 <para>
@@ -3821,13 +3821,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <tbody>
 <row>
   <entry>Très haute qualité</entry>
-  <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=p4x4:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6</entry>
   <entry>0dB</entry>
 </row>
 <row>
   <entry>Haute qualité</entry>
-  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=5:partitions=p4x4:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13</entry>
   <entry>-0.89dB</entry>
 </row>
@@ -3843,6 +3843,170 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 </sect2>
 
+</sect1>
+
+<sect1 id="menc-feat-video-for-windows">
+<title>Encoder avec la famille de codecs <systemitem class="library">Video For Windows</systemitem></title>
+
+<para>
+Video for Windows offre la possibilité d'encoder en utiliser les codecs vidéo binaires.
+Il est possible d'encoder avec les codecs suivants (si vous en connaissez d'autres, dites-le nous!)
+</para>
+<para>
+Notez que le support est très expériemental que que certains codecs peuvent
+ne pas fonctionner correctement.
+Certains codecs ne fonctionnent qu'avec certains espaces de couleur ;
+essayez les options <option>-vf format=bgr24</option> et <option>-vf format=yuy2</option>
+si un codec se plante ou donne un résulat étrange.
+</para>
+
+<sect2 id="menc-feat-enc-vfw-video-codecs">
+<title>Les codecs Video for Windows supportés</title>
+
+<para>
+<informaltable frame="all">
+<tgroup cols="4">
+<thead>
+<row>
+<entry>Nom de fichier du codec Video</entry>
+<entry>Description (FourCC)</entry>
+<entry>md5sum</entry>
+<entry>Commentaire</entry>
+</row>
+</thead>
+<tbody>
+<row>
+  <entry>aslcodec_vfw.dll</entry>
+  <entry>Alparysoft lossless codec vfw (ASLC)</entry>
+  <entry>608af234a6ea4d90cdc7246af5f3f29a</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>avimszh.dll</entry>
+  <entry>AVImszh (MSZH)</entry>
+  <entry>253118fe1eedea04a95ed6e5f4c28878</entry>
+  <entry>nécessite <option>-vf format</option></entry>
+</row>
+<row>
+  <entry>avizlib.dll</entry>
+  <entry>AVIzlib (ZLIB)</entry>
+  <entry>2f1cc76bbcf6d77d40d0e23392fa8eda</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>divx.dll</entry>
+  <entry>DivX4Windows-VFW</entry>
+  <entry>acf35b2fc004a89c829531555d73f1e6</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>huffyuv.dll</entry>
+  <entry>HuffYUV (lossless) (HFYU)</entry>
+  <entry>b74695b50230be4a6ef2c4293a58ac3b</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>iccvid.dll</entry>
+  <entry>Cinepak Video (cvid)</entry>
+  <entry>cb3b7ee47ba7dbb3d23d34e274895133</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>icmw_32.dll</entry>
+  <entry>Motion Wavelets (MWV1)</entry>
+  <entry>c9618a8fc73ce219ba918e3e09e227f2</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>jp2avi.dll</entry>
+  <entry>ImagePower MJPEG2000 (IPJ2)</entry>
+  <entry>d860a11766da0d0ea064672c6833768b</entry>
+  <entry><option>-vf flip</option></entry>
+</row>
+<row>
+  <entry>m3jp2k32.dll</entry>
+  <entry>Morgan MJPEG2000 (MJ2C)</entry>
+  <entry>f3c174edcbaef7cb947d6357cdfde7ff</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>m3jpeg32.dll</entry>
+  <entry>Morgan Motion JPEG Codec (MJPG)</entry>
+  <entry>1cd13fff5960aa2aae43790242c323b1</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>mpg4c32.dll</entry>
+  <entry>Microsoft MPEG-4 v1/v2</entry>
+  <entry>b5791ea23f33010d37ab8314681f1256</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>tsccvid.dll</entry>
+  <entry>TechSmith Camtasia Screen Codec (TSCC)</entry>
+  <entry>8230d8560c41d444f249802a2700d1d5</entry>
+  <entry>erreur shareware sous windows</entry>
+</row>
+<row>
+  <entry>vp31vfw.dll</entry>
+  <entry>On2 Open Source VP3 Codec (VP31)</entry>
+  <entry>845f3590ea489e2e45e876ab107ee7d2</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>vp4vfw.dll</entry>
+  <entry>On2 VP4 Personal Codec (VP40)</entry>
+  <entry>fc5480a482ccc594c2898dcc4188b58f</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>vp6vfw.dll</entry>
+  <entry>On2 VP6 Personal Codec (VP60)</entry>
+  <entry>04d635a364243013898fd09484f913fb</entry>
+  <entry>crash sous Linux</entry>
+</row>
+<row>
+  <entry>vp7vfw.dll</entry>
+  <entry>On2 VP7 Personal Codec (VP70)</entry>
+  <entry>cb4cc3d4ea7c94a35f1d81c3d750bc8d</entry>
+  <entry>mauvais FourCC ?</entry>
+</row>
+<row>
+  <entry>ViVD2.dll</entry>
+  <entry>SoftMedia ViVD V2 codec VfW (GXVE)</entry>
+  <entry>a7b4bf5cac630bb9262c3f80d8a773a1</entry>
+  <entry></entry>
+</row>
+<row>
+  <entry>msulvc06.DLL</entry>
+  <entry>MSU Lossless codec (MSUD)</entry>
+  <entry>294bf9288f2f127bb86f00bfcc9ccdda</entry>
+  <entry>
+    Décodable par <application>Window Media Player</application>,
+    mais pas <application>MPlayer</application> (pour le moment).
+  </entry>
+</row>
+<row>
+  <entry>camcodec.dll</entry>
+  <entry>CamStudio lossless video codec (CSCD)</entry>
+  <entry>0efe97ce08bb0e40162ab15ef3b45615</entry>
+  <entry>sf.net/projects/camstudio</entry>
+</row>
+</tbody>
+</tgroup>
+</informaltable>
+
+La première colonne contient le nom du codec qui soit être donné après le
+paramètre <literal>codec</literal>, comme ceci: <option>-xvfwopts codec=divx.dll</option>.
+Le code FourCC utilisé par chaque codec est donné entre parenthèse.
+</para>
+<informalexample>
+<para>
+Exemple de compression VP3:
+<screen>mencoder dvd://2 -o title2.avi -ovc vfw -xvfwopts codec=vp31vfw.dll -oac copy</screen>
+</para>
+</informalexample>
+</sect2>
 </sect1>
 
 <sect1 id="menc-feat-vcd-dvd">
