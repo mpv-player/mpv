@@ -1,4 +1,4 @@
-.\" synced with r19927
+.\" synced with r20132
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -323,7 +323,7 @@ Bascule l'affichage des sous-titres.
 Alterne entre les différents sous-titres disponibles.
 .IPs "y et g"
 Choisit le sous-titre après/avant dans la liste des sous-titres.
-.IP "F\ \ \ \ "
+.IPs "F\ \ \ \ "
 Bascule l'affichage des "sous-titres forcés".
 .IPs "a\ \ \ \ "
 Bascule l'alignement des sous-titres: haut/milieu/bas.
@@ -380,6 +380,20 @@ Double la taille de la fenêtre vidéo.
 Bascule en mode plein-écran (voir aussi \-fs).
 .IPs "command + [ et command + ]"
 Change l'alpha (transparence) de la fenêtre vidéo.
+.RE
+.PD 1
+.PP
+.RS
+(Les touches suivantes ne sont valides que lorsque le pilote de sortie
+vidéo sdl est utilisé.)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "c\ \ \ \ "
+Bascule entre les différents modes plein écran.
+.IPs "n\ \ \ \ "
+Restore le mode d'origine.
 .RE
 .PD 1
 .PP
@@ -1689,7 +1703,7 @@ radio.
 Pour écouter la radio avec MPlayer, utilisez une URL de
 type 'radio://<fréquence>' (si l'option 'channels' n'est pas donnée),
 ou 'radio://<numéro de canal>' (si l'option 'channels' est donnée).
-Pour commencer l'enregistrement, faites radio://<fréquence ou canal>/capture.
+Pour commencer l'enregistrement, faites 'radio://<fréquence ou canal>/capture'.
 Si le mot-clef capture n'est pas donné vous pouvez uniquement écouter
 la radio par la sortie line-in.
 Utiliser 'capture' pour écouter n'est pas recommandé à cause des
@@ -1736,7 +1750,7 @@ Nombre de canaux audios à enregistrer.
 .RE
 .
 .TP
-.B \-tv <option1:option2:...> (TV/PVR uniquement)
+.B \-tv <option1:option2:...> (TV/\:PVR uniquement)
 Cette option active les facultés de capture TV de MPlayer.
 Pour regarder la TV avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>'
 ou même 'tv://<nom_canal>' (voir l'option channels pour numéro_canal
@@ -2547,7 +2561,7 @@ Définit le canal de mixage (par défaut\ : pcm).
 .PD 1
 .
 .TP
-.B "sdl\ \ \ \ "
+.B sdl (SDL uniquement)
 Pilote de sortie audio de la librairie SDL.
 SDL (Simple Directmedia Layer) est une librairie très indépendante de la
 plateforme.
@@ -5781,7 +5795,7 @@ Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .TP
 .B lavc[=qualité:fps]
 Conversion logicielle rapide YV12 vers MPEG-1 avec libavcodec pour utilisation
-avec DVB/\:DXR3/IVTV.
+avec DVB/\:DXR3/\:IVTV.
 Plus rapide et de meilleure qualité que \-vf fame.
 .RSs
 .IPs <qualité>
@@ -5798,7 +5812,7 @@ force le nombre de trames par seconde en sortie (nombre flottant)
 .TP
 .B "fame\ \ \ "
 Conversion logicielle rapide YV12 vers MPEG-1 avec libfame pour utilisation avec
-DVB/\:DXR3/IVTV.
+DVB/\:DXR3/\:IVTV.
 .
 .TP
 .B dvbscale[=aspect]
@@ -7360,7 +7374,7 @@ mode qualité, plus la valeur est grande, plus la qualité est bonne
 (mutuellement exclusif avec br)
 .
 .TP
-.B object=<0\-3>
+.B object=<1\-4>
 complexité du type d'objet
 .PD 0
 .RSs
@@ -9485,7 +9499,7 @@ cette option accompagnée de vbv_maxrate, pour une qualité finale
 significativement moins bonne.
 .
 .TP
-.B qp_constant=<0\-51>
+.B qp=<0\-51>
 Définit le quantum à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
@@ -9668,9 +9682,8 @@ Utilise le filtre intégré (inloop) atténuant l'effet de blocs
 visuelle qu'il procure, il est déconseillé de le désactiver.
 .
 .TP
-.B deblockalpha=<-6\-6>
-Paramètre alphaC0 du filtre de deblocking intégré (inloop)
-(par défaut\ : 0).
+.B deblock=<-6\-6>,<-6\-6>
+Le premier paramètre est alphaC0 (par défaut\ : 0).
 Il détermine les seuils du filtre de deblocking de H.264.
 Tout d'abord, cette option détermine à quel point le filtre peut modifier
 l'apparence de chacun des pixels de l'image.
@@ -9679,18 +9692,17 @@ filtrés.
 Une valeur positive réduit les artefacts de blocking, mais enlève du détail
 à l'image.
 .br
+Le deuxième paramètre est Beta (par défaut\ : 0).
+Paramètre beta du filtre de deblocking (par défaut\ : 0).
+Affecte seuil de détail.
+Les blocs très détaillés ne sont pas filtrés, puisque l'effet de lissage
+dû au filtre seraient plus visibles que l'effet de bloc original.
+.br
 Le paramétrage par défaut de ce filtre permet généralement d'atteindre
 une qualité optimale, il est donc conseillé de laisser la valeur par
 défaut ou de ne la changer qu'un peu.
 Par contre, si la vidéo source souffre déjà d'artefacts de blocking
 ou de bruit que vous voulez atténuer, vous devriez l'augmenter un peu.
-.
-.TP
-.B deblockbeta=<-6\-6>
-Paramètre beta du filtre de deblocking (par défaut\ : 0).
-Affecte seuil de détail.
-Les blocs très détaillés ne sont pas filtrés, puisque l'effet de lissage
-dû au filtre seraient plus visibles que l'effet de bloc original.
 .
 .TP
 .B (no)cabac
@@ -9715,7 +9727,7 @@ quanta maximum (par défaut\ : 51)
 .TP
 .B qp_step=<1\-50> (ABR ou deux passes)
 différence de quanta maximale autorisée d'une trame à l'autre
-(par défaut\ : 2)
+(par défaut\ : 4)
 .
 .TP
 .B ratetol=<0.1\-100.0> (ABR ou deux passes)
@@ -9770,7 +9782,7 @@ d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
 progressive.
 .
 .TP
-.B zones=<zone0>[/<zone1>[/...]] (ABR ou deux passes)
+.B zones=<zone0>[/<zone1>[/...]]
 Redéfinition de la qualité de certaines parties du film
 (crédits, générique de fin, ...).
 Chaque zone est définie par le triplet
@@ -9792,28 +9804,28 @@ de débordement et à qp_min/qp_max.
 .RE
 .
 .TP
-.B direct_pred=<0\-3>
+.B direct_pred=<nom>
 Détermine le type de prédicteur de mouvement utilisé pour les macro-blocs
 directs dans les trames-B.
 .PD 0
 .RSs
-.IPs 0
-Aucun\ : les macro-blocs directs ne sont pas utilisés.
-.IPs 1
-Spatial\ : Les vecteurs de mouvements sont extrapolés d'après les blocs
-adjacents (par défaut).
-.IPs 2
-Temporel\ : Les vecteurs de mouvements sont interpolés d'après la trame-P
-suivante.
-.IPs 3
-Auto: Le codec choisit entre Spatial et Temporel à chaque trame.
+.IPs none
+Aucun macro-bloc direct n'est utilisé.
+.IPs spatial
+Les vecteurs de mouvements sont extrapolés d'après les blocs adjacents
+(par défaut).
+.IPs temporal
+Les vecteurs de mouvements sont interpolés d'après la trame-P suivante.
+.IPs auto
+Le codec choisit entre spatial et temporel à chaque trame.
 .RE
 .PD 1
 Les prédicteurs spatiaux et temporels sont approximativement de la même
 vitesse, produisent un PSNR similaire, et le choix entre les deux dépend
 du type de vidéo.
 Auto est légèrement mieux, mais est plus lent.
-direct_pred=0 est lent et de qualité médiocre.
+Auto est plus efficace en mode multipasses.
+direct_pred=none est lent et de qualité médiocre.
 .
 .TP
 .B (no)weight_b
@@ -9825,46 +9837,38 @@ temporelle de la trame-B par rapport à celles de référence.
 Requière bframes > 1.
 .
 .TP
-.B (no)i4x4
-Utilise en plus le type de macro-blocs i4x4 (par défaut\ : activé).
-Sans cette option, les trames-P et B n'utilisent que les types
-i16x16 et inter définies plus bas.
-.
-.TP
-.B (no)i8x8
-Utilise en plus le type de macro-bloc i8x8 (par défaut\ : activé).
-Cette option n'a d'effet que si 8x8dct est activé.
-.
-.TP
-.B (no)b8x8mv
-Utilise en plus les types de macro-blocs b16x8, b8x16, b8x8
-(par défaut\: activé).
-Sans cette option, les trames-B n'utiliseront que les types 
-i16x16, i4x4, b16x16, skip, direct.
-Voir 4x4mv pour plus de détails.
-.
-.TP
-.B (no)8x8mv
-Utilise en plus les types de macro-blocs p16x8, p8x16, p8x8
-(par défaut\ : activé).
-Sans cette option, les trames-P n'utiliseront que les types
-i16x16, i8x8, i4x4, p16x16, skip.
-Cette option est fournie à titre expérimental.
-Il n'est guère recommandé de désactiver 8x8mv lors d'un vrai encodage.
-.
-.TP
-.B (no)4x4mv
-Utilise en plus les types de macro-blocs p8x4, p4x8, p4x4.
-Sans cette option, les trames-P n'utiliseront que les types
-i16x16, i8x8, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
-Requière 8x8mv.
+.B partitions=<liste>
+Autorise certain types de macro-blocs optionnels (par défaut\ :
+p8x8,b8x8,i8x8,i4x4).
+.PD 0
+.RSs
+.IPs p8x8
+Autorise les types p16x8, p8x16, p8x8.
+.IPs p4x4
+Autorise les types p8x4, p4x8, p4x4.
+p4x4 n'est recommandé que si subq >= 5, et uniquement à faible résolutions.
+.IPs b8x8
+Autorise les types b16x8, b8x16, b8x8.
+.IPs i8x8
+Autorise le type i8x8.
+i8x8 n'a pas d'effet à moins que 8x8dct soit autorisé aussi.
+.IPs i4x4
+Autorise le type i4x4.
+.IPs all
+Autorise tous les types ci-dessus.
+.IPs none
+N'autorise aucun des types ci-dessus.
+.RE
+.PD 1
+.RS
+Quelles que soient cet option, les types de macro-blocs p16x16, b16x16,
+et i16x16 sont toujours utilisés.
 .br
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
 Par exemple, un travelling est mieux représenté par des blocs 16x16, tandis
 qu'un petit objet en mouvement sera mieux codé par des petits blocs.
-.br
-4x4mv n'est recommandé que si subq >=3.
+.RE
 .
 .TP
 .B (no)8x8dct
@@ -9874,28 +9878,18 @@ Sans cette option, uniquement le type 4x4 DCT est utilisé.
 Appartient au "High Profile" de la norme h264.
 .
 .TP
-.B me=<1\-4>
+.B me=<nom>
 Définit l'algorithme d'estimation du mouvement fullpixel.
-Suivant chaque itérations, les macroblocs sont parcourus pour
-déterminer les vecteurs de mouvement des blocs de pixels.
-On retient celui qui donne la distorsion la plus faible.
-A partir de là, on teste les vecteurs de mouvement voisins.
-La méthode qui est utilisée ici permet donc de définir le nombre
-de vecteurs voisins qui seront testés.
-Pour ceux qui la recherche en "diamant", la méthode consiste à
-tester les 4 vecteurs de mouvements voisins.
-Pour la recherche hexagonale, c'est les 6 vecteurs de mouvement
-voisins. 
 .PD 0
 .RSs
-.IPs 1
+.IPs dia
 recherche diamant, de rayon 1 (rapide)
-.IPs 2
+.IPs hex
 recherche hexagonale, de rayon 2 (par défaut)
-.IPs 3
+.IPs umh
 recherche multi-hexagonale irrégulière (lent)
-.IPs 4
-recherche exhaustive (très lent, et pas meilleur que 3).
+.IPs esa
+recherche exhaustive (très lent, et pas meilleur que umh).
 .RE
 .PD 1
 .
@@ -9981,14 +9975,24 @@ quatification optimale du point de vue du taux de distortion
 .PD 0
 .RSs
 .IPs 0
-désactivé
+désactivé (par défaut)
 .IPs 1
-activé uniquement lors de l'encodage final (par défaut)
+activé uniquement lors de l'encodage final
 .IPs 2
 activé pour toutes les décisions de modes de macroblocs (lent, requiert
 subq>=6)
 .RE
 .PD 1
+.
+.TP
+.B deadzone_inter=<0\-32>
+Défini la taille de la zone morte de quantification luma inter pour
+la quantification non-tellis (par défaut\ : 21).
+.
+.TP
+.B deadzone_intra=<0\-32>
+Défini la taille de la zone morte de quantification luma intra pour
+la quantification non-tellis (par défaut\ : 11).
 .
 .TP
 .B (no)fast_pskip
@@ -10103,12 +10107,16 @@ Si ce n'est pas le cas, cette option affichera un avertissement et
 activera le découpage en tranches, sans le multithreading.
 .
 .TP
-.B (no)globalheader
+.B (no)global_header
 Fait que les SPS et PPS n'apparaissent qu'une seule fois, au début et
 à la fin du flux de bits.
 Certains lecteurs, comme la PSP de Sony, requièrent cette option.
 Le comportement par défaut fait que les SPS et PPS se répètent avant
 chaque trame IDR.
+.
+.TP
+.B (no)interlaced
+Traite la vidéo en tant qu'entrelacée.
 .
 .TP
 .B log=<-1\-3>
@@ -10141,6 +10149,12 @@ Ils sont affichés uniquement pour pouvoir les comparer à ceux du codec de
 référence JM.
 Dans les autres cas, préférez donc utiliser ou bien le PSNR 'Global', ou bien
 les PSNR de chaque trame affichés par l'option log=3.
+.
+.TP
+.B (no)ssim
+Affiche la mesure Structural Similarity Metric.
+C'est une alternative à PSNR, qui devrait être mieux corrélée à la
+qualité visuelle perçue de la vidéo compressé.
 .
 .TP
 i.B (no)visualize
