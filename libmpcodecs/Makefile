@@ -188,6 +188,7 @@ VFILTER_LAVC_SRCS += vf_lavc.c \
 VFILTER_LAVC_DSPUTIL_SRCS += vf_uspp.c \
                              vf_fspp.c \
                              vf_qp.c \
+                             vf_geq.c \
                              vf_spp.c \
                              vf_mcdeint.c \
 

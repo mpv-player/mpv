@@ -98,6 +98,7 @@ extern vf_info_t vf_info_ass;
 extern vf_info_t vf_info_mcdeint;
 extern vf_info_t vf_info_yadif;
 extern vf_info_t vf_info_blackframe;
+extern vf_info_t vf_info_geq;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -195,6 +196,9 @@ static vf_info_t* filter_list[]={
 #endif
     &vf_info_yadif,
     &vf_info_blackframe,
+#ifdef USE_LIBAVCODEC_DSPUTIL
+    &vf_info_geq,
+#endif
     NULL
 };
 
