@@ -331,7 +331,8 @@ m_option_t xvidencopts_conf[] =
 	{"nohq_ac", &xvidenc_hqacpred, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"frame_drop_ratio", &xvidenc_frame_drop_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 	{"max_key_interval", &xvidenc_max_key_interval, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-	{"greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL}, /* kept for backward compatibility */
+	{"grayscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},		
 	{"nogreyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"lumi_mask", &xvidenc_luminance_masking, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nolumi_mask", &xvidenc_luminance_masking, CONF_TYPE_FLAG, 0, 1, 0, NULL},

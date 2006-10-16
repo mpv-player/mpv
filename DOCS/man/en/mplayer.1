@@ -8601,8 +8601,8 @@ This seems to be mandatory only for old versions of DivX's decoder.
 As of XviD-1.0.x, this option is replaced by the closed_gop option.
 .
 .TP
-.B (no)greyscale
-Make XviD discard chroma planes so the encoded video is greyscale only.
+.B (no)grayscale
+Make XviD discard chroma planes so the encoded video is grayscale only.
 Note that this does not speed up encoding, it just prevents chroma data
 from being written in the last stage of encoding.
 .
@@ -8737,7 +8737,7 @@ It will improve quality at the cost of encoding speed.
 It reduces PSNR by nature, as the mathematical deviation to the original
 picture will get bigger, but the subjective image quality will raise.
 Since it works with color information, you might want to turn it off when
-encoding in greyscale.
+encoding in grayscale.
 .
 .TP
 .B (no)hq_ac
