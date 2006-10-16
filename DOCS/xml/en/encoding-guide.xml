@@ -3642,9 +3642,10 @@ codec</title>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">partitions=p4x4</emphasis>:
+  <emphasis role="bold">partitions=all</emphasis>:
   This option enables the use of 8x4, 4x8 and 4x4 subpartitions in
-  predicted macroblocks. Enabling it results in a fairly consistent
+  predicted macroblocks (in addition to the default partitions).
+  Enabling it results in a fairly consistent
   10%-15% loss of speed. This option is rather useless in source
   containing only low motion, however in some high-motion source,
   particularly source with lots of small moving objects, gains of
@@ -3786,7 +3787,7 @@ codec</title>
   <option>subq=1:frameref=1</option> to the first pass
   <option>x264encopts</option>. Then, on the second pass, use slower,
   higher-quality options:
-  <option>subq=6:frameref=15:partitions=p4x4:me=umh</option>
+  <option>subq=6:frameref=15:partitions=all:me=umh</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Three pass encoding</emphasis>?
@@ -3935,13 +3936,13 @@ codec</title>
 <tbody>
 <row>
   <entry>Very high quality</entry>
-  <entry><option>subq=6:partitions=p4x4:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=all:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
 <row>
   <entry>High quality</entry>
-  <entry><option>subq=5:partitions=p4x4:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=5:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13fps</entry>
   <entry>-0.89dB</entry>
 </row>
