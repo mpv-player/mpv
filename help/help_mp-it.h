@@ -207,6 +207,7 @@ static char help_text[]=
 
 #define MSGTR_OSDenabled "abilitat"
 #define MSGTR_OSDdisabled "disabilitat"
+#define MSGTR_OSDAudio "Audio: %s"
 #define MSGTR_OSDChannel "Canale: %s"
 #define MSGTR_OSDSubDelay "Ritardo sottotitoli: %d ms"
 #define MSGTR_OSDSpeed "Velocità: x %6.2f"
