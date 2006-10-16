@@ -1,4 +1,4 @@
-.\" synced with r20237
+.\" synced with r20257
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -32,7 +32,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "30 Avril 2006" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "16 Octobre 2006" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -747,6 +747,10 @@ Affiche encore moins de messages d'état que \-quiet.
 .
 .B \-show-profile <profile>
 Affiche la description et le contenu du profil donné..
+.
+.B \-use-filedir-conf
+Recherche un fichier de configuration spécifique au fichier joué
+dans le même répertoire que ce dernier.
 .
 .TP
 .B "\-v\ \ \ \ \ "
@@ -3262,6 +3266,10 @@ Nécessaire pour évaluer les performances (benchmarking) des pilotes qui
 mettent à jour leurs tampons d'affichage uniquement lors du rafraîchissement
 de l'écran (nVidia).
 Par défaut les images sont affichées (nobenchmark).
+.IPs (no)bobdeint
+Dé-entrelaceur très simple.
+Peut ne pas donner un résultat plus joli que \-vf tfields=1, mais c'est
+le seul désentrelaceur disponible pour xvmc (par défaut\ : nobobdeint).
 .IPs (no)queue
 Met plusieurs trames dans queue d'affichage pour permettre aux circuits
 matériels de les traiter en parallèle.
