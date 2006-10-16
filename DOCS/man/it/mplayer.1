@@ -1,4 +1,4 @@
-.\" synced with r20194
+.\" synced with r20265
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -34,7 +34,7 @@
 .\" Titolo
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2006-04-29" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2006-10-15" "The MPlayer Project" "The Movie Player"
 .
 .SH NOME
 mplayer  \- visualizzatore di film
@@ -525,9 +525,9 @@ combinazione con l'opzione XXX oppure se XXX è stato compilato nell'eseguibile
 che stai usando.
 .PP
 .I NOTA:
-L'interprete delle sotto-opzioni (usato ad esempio per le sotto-opzioni di -ao pcm)
-supporta un modo speciale di interpretare le stringhe, da usare principalmente
-con GUI esterne.
+L'interprete delle sotto-opzioni (usato ad esempio per le sotto-opzioni
+di \-ao pcm) supporta un modo speciale di interpretare le stringhe, da usare
+principalmente con GUI esterne.
 .br
 Ha il seguente formato:
 .br
@@ -535,11 +535,11 @@ Ha il seguente formato:
 .br
 .I ESEMPI:
 .br
-mplayer -ao pcm:file=%10%C:test.wav test.avi
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
 .br
 Oppure in uno script:
 .br
-mplayer -ao pcm:file=%`expr length "$NOME"`%"$NOME" test.avi
+mplayer \-ao pcm:file=%`expr length "$NOME"`%"$NOME" test.avi
 .PP
 .
 .\" --------------------------------------------------------------------------
@@ -662,7 +662,7 @@ Stampa tutte le opzioni disponibili.
 Converte i messaggi della console nel set di caratteri specificato (default:
 autodetect).
 Il testo verrà mostrato con la codifica specificata con l'opzione di
-configurazione --charset.
+configurazione \-\-charset.
 Impostalo a "noconv" per disabilitare la conversione (per es.\& se hai
 problemi con iconv).
 .br
@@ -746,6 +746,11 @@ Emette ancora meno messaggi di output e di stato che con \-quiet.
 Mostra la descrizione ed il contenuto di un profilo.
 .
 .TP
+.B \-use-filedir-conf
+Cerca una configurazione specifica per il file nella stessa directory da cui
+il file stesso viene riprodotto.
+.
+.TP
 .B "\-v\ \ \ \ \ "
 Aumenta il livello di verbosità, di un livello per ogni \-v trovata sulla
 riga comando.
@@ -813,7 +818,7 @@ xmga, xvidix, xover, xv (vedi \-vo xv:ck), xvmc (vedi -vo xv:ck) e directx.
 .B \-crash-debug (CODICE DI DEBUG)
 Attiva automaticamente gdb dopo un crash oppure SIGTRAP.
 Il supporto deve essere compilato all'interno del programma, configurandolo
-con --enable-crash-debug.
+con \-\-enable-crash-debug.
 .
 .TP
 .B \-edlout <nomefile>
@@ -3235,6 +3240,10 @@ Necessario per effettuare dei test corretti con quei driver che
 cambiano i buffer delle immagini solo sul ritracciamento verticale del
 monitor (nVidia).
 Il default non disabilita la visualizzazione dell'immagine (nobenchmark).
+.IPs (no)bobdeint
+Deinterlacciatore molto semplice.
+Potrebbe non risultare migliore di \-vf tfields=1, ma è l'unico
+deinterlacciatore per xvmc (default: nobobdeint).
 .IPs (no)queue
 Mette in coda i fotogrammi da visualizzare per permettere un miglior lavoro
 in parallelo dell'hardware video.
@@ -6540,7 +6549,6 @@ Funziona come in tfields.
 Deinterlacciatore che compensa il movimento.
 Richiede un campo per fotogramma in entrata e deve perciò essere usato insieme
 con tfields=1 oppure yadif=1/3 o equivalente.
-Motion compensating deinterlacer.
 .PD 0
 .RSs
 .IPs <modalità>
@@ -8870,7 +8878,7 @@ Attiva questa opzione se hai dei contenuti interlacciati.
 .br
 .I NOTA:
 Se devi scalare il video hai bisogno di un filtro di scalatura che capisca
-l'interlacciamento, ad esempio -vf scale=<larghezza>:<altezza>:1.
+l'interlacciamento, ad esempio \-vf scale=<larghezza>:<altezza>:1.
 .
 .TP
 .B "4mv\ \ \ \ "
@@ -8977,11 +8985,11 @@ Questo sembra essere necessario solo per vecchie versioni del decoder DivX.
 Da XviD-1.0.x questa opzione è sostituita dall'opzione closed_gop.
 .
 .TP
-.B (no)greyscale
-Lascia che XviD ignori i piani di crominanza in modo da ottenere un video
-solo in bianco e nero.
-Nota che questa opzione non velocizza la codifica, salta solo e non esegue la scrittura dei
-dati di crominanza nell'ultimo stadio della codifica.
+.B (no)grayscale
+Lascia che XviD ignori i piani di crominanza in modo da ottenere un video solo
+in scala di grigi (bianco e nero).
+Nota che questa opzione non velocizza la codifica, salta solo e non esegue la
+scrittura dei dati di crominanza nell'ultimo stadio della codifica.
 .
 .TP
 .B "debug\ \ "
@@ -10630,7 +10638,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .PP
 .B Converte i sottotitoli in MPsub senza guardare il filmato:
 .nf
-mplayer /dev/\:zero \-rawvideo pal:fps=xx -demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
+mplayer /dev/\:zero \-rawvideo pal:fps=xx \-demuxer rawvideo \-vc null \-vo null \-noframedrop \-benchmark \-sub source.sub \-dumpmpsub
 .fi
 .
 .PP
