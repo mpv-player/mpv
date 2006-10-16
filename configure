@@ -6411,7 +6411,7 @@ if test "$_libdv" = auto ; then
 #include <libdv/dv.h>
 int main(void) { dv_encoder_t* enc=dv_encoder_new(1,1,1); return 0; }
 EOF
-  cc_check -ldv $_ld_lm && _libdv=yes
+  cc_check -ldv $_ld_pthread $_ld_lm && _libdv=yes
 fi
 if test "$_libdv" = yes ; then
   _def_libdv='#define HAVE_LIBDV095 1'
