@@ -87,27 +87,34 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-//FIXME spatial interpolate
+static double inline getpix(struct vf_instance_s* vf, double x, double y, int plane){
+    int xi, yi;
+    mp_image_t *mpi= vf->priv->mpi;
+    int stride= mpi->stride[plane];
+    uint8_t *src=  mpi->planes[plane];
+    xi=x= FFMIN(FFMAX(x, 0), (mpi->w >> (plane ? mpi->chroma_x_shift : 0))-1);
+    yi=y= FFMIN(FFMAX(y, 0), (mpi->h >> (plane ? mpi->chroma_y_shift : 0))-1);
+
+    x-=xi;
+    y-=yi;
+
+    return
+     (1-y)*((1-x)*src[xi +  yi    * stride] + x*src[xi + 1 +  yi    * stride])
+    +   y *((1-x)*src[xi + (yi+1) * stride] + x*src[xi + 1 + (yi+1) * stride]);
+}
+
+//FIXME cubic interpolate
 //FIXME keep the last few frames
 static double lum(struct vf_instance_s* vf, double x, double y){
-    mp_image_t *mpi= vf->priv->mpi;
-    x= clip(x, 0, vf->priv->mpi->w-1);
-    y= clip(y, 0, vf->priv->mpi->h-1);
-    return mpi->planes[0][(int)x + (int)y * mpi->stride[0]];
+    return getpix(vf, x, y, 0);
 }
 
 static double cb(struct vf_instance_s* vf, double x, double y){
-    mp_image_t *mpi= vf->priv->mpi;
-    x= clip(x, 0, (vf->priv->mpi->w >> mpi->chroma_x_shift)-1);
-    y= clip(y, 0, (vf->priv->mpi->h >> mpi->chroma_y_shift)-1);
-    return mpi->planes[1][(int)x + (int)y * mpi->stride[1]];
+    return getpix(vf, x, y, 1);
 }
 
 static double cr(struct vf_instance_s* vf, double x, double y){
-    mp_image_t *mpi= vf->priv->mpi;
-    x= clip(x, 0, (vf->priv->mpi->w >> mpi->chroma_x_shift)-1);
-    y= clip(y, 0, (vf->priv->mpi->h >> mpi->chroma_y_shift)-1);
-    return mpi->planes[2][(int)x + (int)y * mpi->stride[2]];
+    return getpix(vf, x, y, 2);
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
