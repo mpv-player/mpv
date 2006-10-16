@@ -1004,10 +1004,10 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   if test "$_runtime_cpudetection" = no ; then
-    if test "$proc" = "k8" -o "$proc" = "opteron" -o "$proc" = "athlon64" -o "$proc" = "athlon-fx" ; then
+    if test "$proc" = "k8"; then
       cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
     fi
-    if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" || test "$proc" = "athlon-tbird"; then
+    if test "$proc" = "athlon-xp"; then
       cc_check -march=$proc $cpuopt=$proc || proc=athlon
     fi
     if test "$proc" = "k6-3" || test "$proc" = "k6-2"; then
@@ -1022,7 +1022,7 @@ EOF
 	fi
       fi
     fi
-    if test "$proc" = "nocona" || test "$proc" = "prescott" ; then
+    if test "$proc" = "prescott" ; then
       cc_check -march=$proc $cpuopt=$proc || proc=pentium4
     fi
     if test "$proc" = "pentium4" || test "$proc" = "pentium-m" || test "$proc" = "pentium3" || test "$proc" = "pentium2" || test "$proc" = "athlon" || test "$proc" = "c3-2"; then
@@ -1128,20 +1128,20 @@ EOF
     # This is a stripped-down version of the i386 fallback.
     if test "$_runtime_cpudetection" = no ; then
       # --- AMD processors ---
-      if test "$proc" = "k8" -o "$proc" = "opteron" -o "$proc" = "athlon64" -o "$proc" = "athlon-fx" ; then
+      if test "$proc" = "k8"; then
         cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
       fi
       # This will fail if gcc version < 3.3, which is ok because earlier
       # versions don't really support 64-bit on amd64.
       # Is this a valid assumption? -Corey
-      if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" ; then
+      if test "$proc" = "athlon-xp"; then
         cc_check -march=$proc $cpuopt=$proc || proc=error
       fi
       # --- Intel processors ---
-      if test "$proc" = "nocona" || test "$proc" = "prescott" ; then
+      if test "$proc" = "nocona"; then
         cc_check -march=$proc $cpuopt=$proc || proc=pentium4
       fi
-      if test "$proc" = "pentium4" || test "$proc" = "pentium4m" ; then
+      if test "$proc" = "pentium4"; then
         cc_check -march=$proc $cpuopt=$proc || proc=error
       fi
 
