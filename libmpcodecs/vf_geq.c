@@ -57,7 +57,7 @@ double ff_eval(char *s, double *const_value, const char **const_name,
 
 
 struct vf_priv_s {
-	char eq[3][200];
+	char eq[3][2000];
         int framenum;
         mp_image_t *mpi;
 };
@@ -199,10 +199,10 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv=av_malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-    if (args) sscanf(args, "%199s:%199s:%199s", vf->priv->eq[0], vf->priv->eq[1], vf->priv->eq[2]);
+    if (args) sscanf(args, "%1999s:%1999s:%1999s", vf->priv->eq[0], vf->priv->eq[1], vf->priv->eq[2]);
 
-    if(!vf->priv->eq[1][0]) strncpy(vf->priv->eq[1], vf->priv->eq[0], 199);
-    if(!vf->priv->eq[2][0]) strncpy(vf->priv->eq[2], vf->priv->eq[1], 199);
+    if(!vf->priv->eq[1][0]) strncpy(vf->priv->eq[1], vf->priv->eq[0], sizeof(vf->priv->eq[0])-1);
+    if(!vf->priv->eq[2][0]) strncpy(vf->priv->eq[2], vf->priv->eq[1], sizeof(vf->priv->eq[0])-1);
 
     return 1;
 }
