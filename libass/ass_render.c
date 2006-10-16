@@ -1004,7 +1004,6 @@ static char* parse_tag(char* p, double pwr) {
 			render_context.be = val ? 1 : 0;
 		else
 			render_context.be = 0;
-		mp_msg(MSGT_GLOBAL, MSGL_V, "be unimplemented \n");
 	} else if (mystrcmp(&p, "b")) {
 		int b;
 		if (mystrtoi(&p, 10, &b))
