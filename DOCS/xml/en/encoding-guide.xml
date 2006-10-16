@@ -3624,25 +3624,25 @@ codec</title>
   <emphasis role="bold">me</emphasis>:
   This option is for choosing the motion estimation search method.
   Altering this option provides a straightforward quality-vs-speed
-  tradeoff. <option>me=1</option> is only a few percent faster than
+  tradeoff. <option>me=dia</option> is only a few percent faster than
   the default search, at a cost of under 0.1dB global PSNR. The 
-  default setting (<option>me=2</option>) is a reasonable tradeoff
-  between speed and quality. <option>me=3</option> gains a little under
+  default setting (<option>me=hex</option>) is a reasonable tradeoff
+  between speed and quality. <option>me=umh</option> gains a little under
   0.1dB global PSNR, with a speed penalty that varies depending on
   <option>frameref</option>.  At high values of
-  <option>frameref</option> (e.g. 12 or so), <option>me=3</option>
-  is about 40% slower than the default <option> me=2</option>. With
+  <option>frameref</option> (e.g. 12 or so), <option>me=umh</option>
+  is about 40% slower than the default <option> me=hex</option>. With
   <option>frameref=3</option>, the speed penalty incurred drops to
   25%-30%.
 </para>
 <para>
-  <option>me=4</option> uses an exhaustive search that is too slow for
+  <option>me=esa</option> uses an exhaustive search that is too slow for
   practical use.
 </para>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">4x4mv</emphasis>:
+  <emphasis role="bold">partitions=p4x4</emphasis>:
   This option enables the use of 8x4, 4x8 and 4x4 subpartitions in
   predicted macroblocks. Enabling it results in a fairly consistent
   10%-15% loss of speed. This option is rather useless in source
@@ -3786,7 +3786,7 @@ codec</title>
   <option>subq=1:frameref=1</option> to the first pass
   <option>x264encopts</option>. Then, on the second pass, use slower,
   higher-quality options:
-  <option>subq=6:frameref=15:4x4mv:me=3</option>
+  <option>subq=6:frameref=15:partitions=p4x4:me=umh</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Three pass encoding</emphasis>?
@@ -3839,7 +3839,7 @@ codec</title>
   points as long as there are some scene changes.
 </para></listitem> 
 <listitem><para>
-  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  <emphasis role="bold">deblock</emphasis>:
   This topic is going to be a bit controversial.
 </para>
 <para>
@@ -3851,8 +3851,7 @@ codec</title>
   The pre-set strengths defined by the standard are well-chosen and
   the odds are very good that they are PSNR-optimal for whatever
   video you are trying to encode.
-  The <option>deblockalpha</option> and <option>deblockbeta</option>
-  parameters allow you to specify offsets to the preset deblocking
+  The <option>deblock</option> allow you to specify offsets to the preset deblocking
   thresholds.
 </para>
 <para>
@@ -3936,13 +3935,13 @@ codec</title>
 <tbody>
 <row>
   <entry>Very high quality</entry>
-  <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=p4x4:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
 <row>
   <entry>High quality</entry>
-  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=5:partitions=p4x4:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13fps</entry>
   <entry>-0.89dB</entry>
 </row>
