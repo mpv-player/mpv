@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20260 -->
+<!-- synced with r20277 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -3526,8 +3526,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">partitions=p4x4</emphasis>:
-  Cette option autorise l'utilisation des sous-partitions 8x4, 4x8 et 4x4 dans
+  <emphasis role="bold">partitions=all</emphasis>:
+  Cette option autorise l'utilisation des sous-partitions 8x4, 4x8 et 4x4
+  (en plus de celles présentes par défaut) dans
   les macroblocs prédits. L'autoriser résulte en une perte de vitesse raisonnablement
   consistente de 10%-15%. Cette option est plutôt inutile pour les videos sources contenant
   uniquements de faibles mouvements, particulièrement pour les sources avec
@@ -3673,7 +3674,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   d'ajouter <option>subq=1:frameref=1</option> à la première passe <option>x264encopts</option>.
   Ensuite, sur la seconde passe, utilisez des options plus lentes pour avoir une
   meilleure qualité:
-  <option>subq=6:frameref=15:partitions=p4x4:me=umh</option>
+  <option>subq=6:frameref=15:partitions=all:me=umh</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Encodage en trois passes</emphasis> ?
@@ -3821,13 +3822,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <tbody>
 <row>
   <entry>Très haute qualité</entry>
-  <entry><option>subq=6:partitions=p4x4:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=all:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6</entry>
   <entry>0dB</entry>
 </row>
 <row>
   <entry>Haute qualité</entry>
-  <entry><option>subq=5:partitions=p4x4:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=5:partitions=all:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13</entry>
   <entry>-0.89dB</entry>
 </row>
