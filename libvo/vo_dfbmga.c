@@ -950,7 +950,7 @@ static void
 clear_alpha( int x0, int y0,
              int w, int h )
 {
-     if (use_spic && !flipping && vo_osd_changed)
+     if (use_spic && !flipping && vo_osd_changed_flag)
           subframe->FillRectangle( subframe, x0, y0, w, h );
 }
 
@@ -965,7 +965,7 @@ draw_alpha( int x0, int y0,
      int pitch;
 
      if (use_spic) {
-          if (!osd_changed || (!flipping && !vo_osd_changed))
+          if (!osd_changed || (!flipping && !vo_osd_changed_flag))
                return;
           osd_dirty |= osd_current;
      } else {
