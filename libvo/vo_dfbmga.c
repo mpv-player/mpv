@@ -122,6 +122,7 @@ static int is_g200;
 
 static uint32_t in_width;
 static uint32_t in_height;
+static uint32_t buf_height;
 static uint32_t screen_width;
 static uint32_t screen_height;
 static uint32_t sub_width;
@@ -608,8 +609,8 @@ config( uint32_t width, uint32_t height,
 
           dsc.flags       = DSDESC_WIDTH | DSDESC_HEIGHT |
                             DSDESC_PIXELFORMAT;
-          dsc.width       = in_width;
-          dsc.height      = in_height;
+          dsc.width       = (in_width + 15) & ~15;
+          dsc.height      = (in_height + 15) & ~15;
           dsc.pixelformat = dlc.pixelformat;
 
           /* Don't waste video memory since we don't need direct stretchblit */
@@ -632,6 +633,7 @@ config( uint32_t width, uint32_t height,
           frame = bufs[0];
           current_buf = 0;
           current_ip_buf = 0;
+          buf_height = dsc.height;
      }
      frame->GetPixelFormat( frame, &frame_format );
      mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Video surface %dx%d %s\n",
@@ -1047,7 +1049,7 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
      memcpy_pic( dst + pitch * y + x, src[0],
                  w, h, pitch, stride[0] );
 
-     dst += pitch * in_height;
+     dst += pitch * buf_height;
 
      y /= 2;
      h /= 2;
@@ -1070,7 +1072,7 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
           memcpy_pic( dst + pitch * y + x, src[2],
                       w, h, pitch, stride[2] );
 
-     dst += pitch * in_height / 2;
+     dst += pitch * buf_height / 2;
 
      if (frame_format == DSPF_I420 )
           memcpy_pic( dst + pitch * y + x, src[2],
@@ -1253,17 +1255,17 @@ get_image( mp_image_t *mpi )
 
                if (mpi->flags & MP_IMGFLAG_SWAPPED) {
                     /* I420 */
-                    mpi->planes[1] = dst + in_height * pitch;
-                    mpi->planes[2] = mpi->planes[1] + in_height * pitch / 4;
+                    mpi->planes[1] = dst + buf_height * pitch;
+                    mpi->planes[2] = mpi->planes[1] + buf_height * pitch / 4;
                } else {
                     /* YV12 */
-                    mpi->planes[2] = dst + in_height * pitch;
-                    mpi->planes[1] = mpi->planes[2] + in_height * pitch / 4;
+                    mpi->planes[2] = dst + buf_height * pitch;
+                    mpi->planes[1] = mpi->planes[2] + buf_height * pitch / 4;
                }
                } else {
                     /* NV12/NV21 */
                     mpi->stride[1] = pitch;
-                    mpi->planes[1] = dst + in_height * pitch;
+                    mpi->planes[1] = dst + buf_height * pitch;
                }
           }
 
