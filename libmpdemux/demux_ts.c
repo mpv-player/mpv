@@ -580,7 +580,7 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 		{
 			//Non PES-aligned A52 audio may escape detection if PMT is not present;
 			//in this case we try to find at least 3 A52 syncwords
-			if((es.type == PES_PRIVATE1) && (! audio_found))
+			if((es.type == PES_PRIVATE1) && (! audio_found) && req_apid > -2)
 			{
 				pptr = &pes_priv1[es.pid];
 				if(pptr->pos < 64*1024)
@@ -607,6 +607,8 @@ static off_t ts_detect_streams(demuxer_t *demuxer, tsdemux_init_t *param)
 
 
 			if((! is_audio) && (! is_video) && (! is_sub))
+				continue;
+			if(is_audio && req_apid==-2)
 				continue;
 
 			if(is_video)
