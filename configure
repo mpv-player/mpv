@@ -292,6 +292,7 @@ Codecs:
   --enable-theora        build with OggTheora support [autodetect]
   --enable-faad-external build with external FAAD2 (AAC) support [autodetect]
   --disable-faad-internal disable internal FAAD2 (AAC) support [autodetect]
+  --enable-faad-fixed    enable fixed-point mode in internal FAAD2 [disabled]
   --disable-faac         disable support for FAAC (AAC encoder) [autodetect]
   --disable-ladspa       disable LADSPA plugin support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
@@ -1625,6 +1626,7 @@ _libdts=auto
 _libmpeg2=yes
 _faad_internal=auto
 _faad_external=auto
+_faad_fixed=no
 _faac=auto
 _ladspa=auto
 _xmms=no
@@ -1854,6 +1856,8 @@ for ac_option do
   --disable-faad-internal)	_faad_internal=no	;;
   --enable-faad-external)	_faad_external=yes	;;
   --disable-faad-external)	_faad_external=no	;;
+  --enable-faad-fixed)	_faad_fixed=yes	;;
+  --disable-faad-fixed)	_faad_fixed=no	;;
   --enable-faac)	_faac=yes	;;
   --disable-faac)	_faac=no	;;
   --enable-ladspa)	_ladspa=yes	;;
@@ -5886,6 +5890,8 @@ fi
 if test "$_faad_internal" = yes ; then
   _def_faad_internal="#define USE_FAAD_INTERNAL 1"
   _faad=yes
+  _res_comment="internal floating-point"
+  test "$_faad_fixed" = yes && _res_comment="internal fixed-point"
 elif test "$_faad_external" = yes ; then
   _faad=yes
 else
@@ -7597,6 +7603,7 @@ LIBTHEORA = $_theora
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
 FAAD_INTERNAL = $_faad_internal
+FAAD_FIXED = $_faad_fixed
 LIBSMBCLIENT = $_smbsupport
 SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
