@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with r20043 -->
+<!-- In sync with r20280 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -3942,28 +3942,29 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               Diese Option dient der Wahl der Suchmethode der Bewegungseinschätzung.
               Diese Option zu verändern stellt einen überschaubaren Kompromiss
               zwischen Qualität und Geschwindigkeit dar.
-              <option>me=1</option> ist nur ein paar Prozent schneller als
+              <option>me=dia</option> ist nur ein paar Prozent schneller als
               die Standardsuche, auf Kosten von unter 0.1dB globalem PSNR. Die
-              Standardeinstellung (<option>me=2</option>) ist ein angemessener
+              Standardeinstellung (<option>me=hex</option>) ist ein angemessener
               Kompromiss zwischen Qualität und Geschwindigkeit.
-              <option>me=3</option> bringt ein wenig unter 0.1dB globalem PSNR,
+              <option>me=umh</option> bringt ein wenig unter 0.1dB globalem PSNR,
               mit Geschwindigkeitsnachteil, der abhängig von <option>frameref</option>
               variiert. Bei hohen <option>frameref</option>-Werten (z.B. 12 oder so)
-              ist <option>me=3</option> etwa 40% langsamer als die Standardeinstellung
-              <option>me=2</option>. Mit <option>frameref=3</option> fällt der
+              ist <option>me=umh</option> etwa 40% langsamer als die Standardeinstellung
+              <option>me=hex</option>. Mit <option>frameref=3</option> fällt der
               Geschwindigkeitsnachteil auf 25%-30%.
             </para>
             <para>
-              <option>me=4</option> verwendet eine gründliche, für die praktische
+              <option>me=esa</option> verwendet eine gründliche, für die praktische
               Anwendung zu langsame Suche.
             </para>
           </listitem>
 
           <listitem>
             <para>
-              <emphasis role="bold">4x4mv</emphasis>:
+              <emphasis role="bold">partitions=all</emphasis>:
               Diese Option aktiviert die Verwendung von 8x4, 4x8 und 4x4 Unterteilungen
-              in den vorhergesagten Macroblöcken. Sie zu aktivieren führt zu einem
+              in den vorhergesagten Macroblöcken (zusätzlich zu den Standardunterteilungen).
+	      Sie zu aktivieren führt zu einem
               recht beständigen Geschwindigkeitsverlust von 10%-15%. Sie ist
               ziemlich nutzlos bei Quellen, die nur langsame Bewegungen enthalten,
               obwohl in manchen Quellen mit sehr viel Bewegung und vielen kleinen,
@@ -4127,7 +4128,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               Versuche zum Beispiel <option>subq=1:frameref=1</option> zu
               <option>x264encopts</option> des ersten Durchgangs hinzuzufügen.
               Verwende dann im zweiten Durchgang langsamere, hochwertigere Optionen:
-              <option>subq=6:frameref=15:4x4mv:me=3</option>
+              <option>subq=6:frameref=15:partitions=all:me=umh</option>
             </para>
           </listitem>
           <listitem>
@@ -4195,7 +4196,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
           </listitem>
           <listitem>
             <para>
-              <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+              <emphasis role="bold">deblock</emphasis>:
               Dieses Thema ist im Begriff etwas kontrovers zu geraten.
             </para>
             <para>
@@ -4208,8 +4209,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
               Bedacht gewählt und die Chancen stehen sehr gut, dass sie
               PSNR-optimal sind, egal welches Video auch immer du zu encodieren
               versuchst.
-              Die <option>deblockalpha</option>- und
-              <option>deblockbeta</option>-Parameter erlauben dir, Offsets festzulegen,
+              Der Parameter <option>deblock</option> erlaubt dir, Offsets festzulegen,
               um Deblocking-Schwellen voreinzustellen.
             </para>
             <para>
@@ -4303,13 +4303,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
             <tbody>
               <row>
                 <entry>Sehr hohe Qualität</entry>
-                <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+                <entry><option>subq=6:partitions=all:8x8dct:me=umh:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
                 <entry>6fps</entry>
                 <entry>0dB</entry>
               </row>
               <row>
                 <entry>Hohe Qualität</entry>
-                <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+                <entry><option>subq=5:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
                 <entry>13fps</entry>
                 <entry>-0.89dB</entry>
               </row>

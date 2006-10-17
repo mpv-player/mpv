@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20254
+.\" In sync with r20279
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -559,10 +559,13 @@ Auch Suboptionen können in dieser Art angegeben werden.
 .PP
 .PP
 Du kannst auch dateispezifische Konfigurationsdateien schreiben.
-Wenn du für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben
+Wenn du für eine Datei namens 'movie.avi' eine Konfigurationsdatei schreiben
 möchtest, dann nenne diese Datei 'movie.avi.conf' mit den für
-diesen Film relevanten Optionen und speichere die Datei in ~/\:.mplayer/
-oder im Verzeichnis der Datei.
+diesen Film relevanten Optionen und speichere die Datei in ~/\:.mplayer/.
+Du kannst die Konfigurationsdatei auch im selben Verzeichnis wie die Datei
+ablegen.
+Um diese dann aber tatsächlich zu nutzen, wird die Option \-use-filedir-conf
+benötigt.
 .PP
 .I BEISPIEL FÜR DIE MPLAYER-KONFIGURATIONSDATEI:
 .sp 1
@@ -743,6 +746,11 @@ Zeige noch weniger Ausgaben und Statusmeldungen an als mit \-quiet.
 .TP
 .B \-show-profile <Profil>
 Zeige eine Beschreibung und den Inhalt eines Profils an.
+.
+.TP
+.B \-use-filedir-conf
+Schaue nach einer dateispezifischen Konfigurationsdatei im selben Verzeichnis
+wie die Datei, die abgespielt wird.
 .
 .TP
 .B "\-v\ \ \ \ \ "
@@ -9014,7 +9022,7 @@ Dies scheint nur für alte Versionen des DivX-Decoders notwendig zu sein.
 Seit XviD 1.0.x ist diese Option durch die Option closed_gop ersetzt.
 .
 .TP
-.B (no)greyscale
+.B (no)grayscale
 Sorge dafür, dass XviD die Chrominanzebenen verwirft, so dass das encodierte
 Video schwarz/weiß wird.
 Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
