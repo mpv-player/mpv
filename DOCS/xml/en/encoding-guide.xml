@@ -3936,7 +3936,7 @@ codec</title>
 <tbody>
 <row>
   <entry>Very high quality</entry>
-  <entry><option>subq=6:partitions=all:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=all:8x8dct:me=umh:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
