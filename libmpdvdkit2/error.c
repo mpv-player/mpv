@@ -2,9 +2,6 @@
  * error.c: error management functions
  *****************************************************************************
  * Copyright (C) 1998-2002 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  * $Id$
  *
  * Author: Samuel Hocevar <sam@zoy.org>
