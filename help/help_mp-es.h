@@ -678,7 +678,7 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "No hay suficiente memoria.\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "Demasiadas fuentes declaradas.\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "Archivo de fuentes no encontrado.\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "Archivo de imagen de fuente noi encontrado.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "Archivo de imagen de fuente no encontrado.\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "identificador de fuente no existente (%s).\n"
 #define MSGTR_SKIN_UnknownParameter "parámetro desconocido (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin no encontrado (%s).\n"
@@ -1171,7 +1171,7 @@ static char help_text[]=
 
 // asfheader.c
 
-#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: más de 1 MB de tamaño del header (%d)!\nPorfavor contacte a los autores de MPlayer y suba/envie este archivo.\n"
+#define MSGTR_MPDEMUX_ASFHDR_HeaderSizeOver1MB "FATAL: más de 1 MB de tamaño del header (%d)!\nPor favor contacte a los autores de MPlayer y suba/envie este archivo.\n"
 #define MSGTR_MPDEMUX_ASFHDR_HeaderMallocFailed "Imposible obtener %d bytes para la cabecera\n"
 #define MSGTR_MPDEMUX_ASFHDR_EOFWhileReadingHeader "EOF Mientras leia la cabecera ASF, archivo dañado o incompleto?\n"
 #define MSGTR_MPDEMUX_ASFHDR_DVRWantsLibavformat "DVR quizas solo funcione con libavformat, intente con -demuxer 35 si tiene problemas\n"
@@ -1332,7 +1332,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_NW_ErrSendingHTTPRequest "Error enviando la solicitud HTTP: no alcancé a enviarla completamente.\n"
 #define MSGTR_MPDEMUX_NW_ReadFailed "Falló la lectura.\n"
 #define MSGTR_MPDEMUX_NW_Read0CouldBeEOF "http_read_response leí 0 (ej. EOF)\n"
-#define MSGTR_MPDEMUX_NW_AuthFailed "Fallo la autentificación, porfavor usa las opciones -user y -passwd con tus respectivos nombre de usuario y contraseña\n"\
+#define MSGTR_MPDEMUX_NW_AuthFailed "Fallo la autentificación, por favor usa las opciones -user y -passwd con tus respectivos nombre de usuario y contraseña\n"\
 "para una lista de URLs o construye unu URL con la siguiente forma:\n"\
 "http://usuario:contraseña@servidor/archivo\n"
 #define MSGTR_MPDEMUX_NW_AuthRequiredFor "Se requiere autentificación para %s\n"
@@ -1485,11 +1485,11 @@ static char help_text[]=
 #define MSGTR_LIBVO_MGA_IncompatibleDriverVersion "[MGA] La versión de tu driver mga_vid no es compatible con esta versión de MPlayer!\n"
 #define MSGTR_LIBVO_MGA_UsingBuffers "[MGA] Utilizando %d buffers.\n"
 #define MSGTR_LIBVO_MGA_CouldntOpen "[MGA] No pude abrir: %s\n"
-#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La resolución del fuente es en por lo menos una dimensión mas grande que 1023x1023. Porfavor escale en software o use -lavdopts lowres=1\n"
+#define MGSTR_LIBVO_MGA_ResolutionTooHigh "[MGA] La resolución de la fuente es en por lo menos una dimensión mas grande que 1023x1023. Por favor escale en software o use -lavdopts lowres=1\n"
 
 // libvo/vesa_lvo.c
 
-#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Este branch ya no esta soportado.\n[VESA_LVO] Porfavor utiliza -vo vesa:vidix en su lugar.\n"
+#define MSGTR_LIBVO_VESA_ThisBranchIsNoLongerSupported "[VESA_LVO] Este branch ya no esta soportado.\n[VESA_LVO] Por favor utiliza -vo vesa:vidix en su lugar.\n"
 #define MSGTR_LIBVO_VESA_CouldntOpen "[VESA_LVO] No pude abrir: '%s'\n"
 #define MSGTR_LIBVO_VESA_InvalidOutputFormat "[VESA_LVI] Formato de salida inválido: %s(%0X)\n"
 #define MSGTR_LIBVO_VESA_IncompatibleDriverVersion "[VESA_LVO] La version de tu driver fb_vid no es compatible con esta versión de MPlayer!\n"
@@ -1560,7 +1560,7 @@ static char help_text[]=
 // libvo/vo_null.c
 
 #define MSGTR_LIBVO_NULL_UnknownSubdevice "[VO_NULL] Sub-dispositivo desconocido: %s.\n"
-															
+
 // libvo/vo_png.c
 
 #define MSGTR_LIBVO_PNG_Warning1 "[VO_PNG] Advertencia: nivel de compresión seteado a 0, compresión desabilitada!\n"
@@ -1576,7 +1576,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_SDL_SetVideoModeFailedFull "[VO_SDL] Set_fullmode: SDL_SetVideoMode fallido: %s.\n"
 #define MSGTR_LIBVO_SDL_MappingI420ToIYUV "[VO_SDL] Mapeando I420 a IYUV.\n"
 #define MSGTR_LIBVO_SDL_UnsupportedImageFormat "[VO_SDL] Formato de imagen no soportado (0x%X).\n"
-#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Info - porfavor utiliza -vm ó -zoom para cambiar a la mejor resolución.\n"
+#define MSGTR_LIBVO_SDL_InfoPleaseUseVmOrZoom "[VO_SDL] Info - por favor utiliza -vm ó -zoom para cambiar a la mejor resolución.\n"
 #define MSGTR_LIBVO_SDL_FailedToSetVideoMode "[VO_SDL] Fallè tratando de setear el modo de video: %s.\n"
 #define MSGTR_LIBVO_SDL_CouldntCreateAYUVOverlay "[VO_SDL] No pude crear un overlay YUV: %s.\n"
 #define MSGTR_LIBVO_SDL_CouldntCreateARGBSurface "[VO_SDL] No pude crear una superficie RGB: %s.\n"
