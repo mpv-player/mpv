@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20277 -->
+<!-- synced with r20280 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -3822,7 +3822,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <tbody>
 <row>
   <entry>Très haute qualité</entry>
-  <entry><option>subq=6:partitions=all:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=all:8x8dct:me=umh:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6</entry>
   <entry>0dB</entry>
 </row>
