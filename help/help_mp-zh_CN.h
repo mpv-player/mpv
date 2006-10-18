@@ -33,9 +33,9 @@ static char help_text[]=
 " -framedrop       使用丢帧(用于慢机器)\n"
 "\n"
 "基本控制键: (完整的列表参见于手册页, 同时也请核查 input.conf)\n"
-" <-  or  ->       快进/后退 10 秒\n"
-" down or up       快进/后退 1 分钟\n"
-" pgdown or pgup   快进/后退 10 分钟\n"
+" <-  or  ->       后退/快进 10 秒\n"
+" down or up       后退/快进 1 分钟\n"
+" pgdown or pgup   后退/快进 10 分钟\n"
 " < or >           跳到播放列表中的前一个/后一个\n"
 " p or SPACE       暂停播放(按任意键继续)\n"
 " q or ESC         停止播放并退出程序\n"
@@ -214,7 +214,7 @@ static char help_text[]=
 #define MSGTR_Enabled "已启用"
 #define MSGTR_EnabledEdl "已启用 EDL"
 #define MSGTR_Disabled "已停用"
-#define MSGTR_HardFrameDrop "强制"
+#define MSGTR_HardFrameDrop "强丢帧"
 #define MSGTR_Unknown "未知"
 #define MSGTR_Bottom "底部"
 #define MSGTR_Center "中部"
@@ -293,7 +293,7 @@ static char help_text[]=
 "更多信息，请试试: \"-lameopts preset=help\"\n"
 #define MSGTR_InvalidLamePresetOptions "错误: 你没有给定一个有效的配置和/或预设值选项。\n"\
 "\n"\
-"可用的配置(profile)包括:\n"\
+"可用的配置轮廓(profile)包括:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
@@ -487,11 +487,11 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "错误: 选项 '%s' 必须要有一个参数!\n"
 #define MSGTR_OptionListHeader "\n 名字                 类型            最小       最大     全局  命令行 配置文件\n\n"
 #define MSGTR_TotalOptions "\n总共: %d 个选项\n"
-#define MSGTR_ProfileInclusionTooDeep "警告: 配置文件(Profile)引用太深。\n"
-#define MSGTR_NoProfileDefined "没有定义配置文件(Profile)。\n"
-#define MSGTR_AvailableProfiles "可用的配置文件(Profile):\n"
-#define MSGTR_UnknownProfile "未知的配置文件(Profile) '%s'。\n"
-#define MSGTR_Profile "配置文件(Profile) %s: %s\n"
+#define MSGTR_ProfileInclusionTooDeep "警告: 配置轮廓(Profile)引用太深。\n"
+#define MSGTR_NoProfileDefined "没有定义配置轮廓(Profile)。\n"
+#define MSGTR_AvailableProfiles "可用的配置轮廓(Profile):\n"
+#define MSGTR_UnknownProfile "未知的配置轮廓(Profile) '%s'。\n"
+#define MSGTR_Profile "配置轮廓(Profile) %s: %s\n"
 
 // m_property.c
 #define MSGTR_PropertyListHeader "\n 名称                 类型            最小        最大\n\n"
@@ -1444,13 +1444,13 @@ static char help_text[]=
 
 // common
 
-#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有内容。\n"
+#define MSGTR_LIBMENU_NoEntryFoundInTheMenuDefinition "[MENU] 菜单定义中没有找到条目。\n"
 
 // libmenu/menu.c
-#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] 语法错误: %d 行\n"
-#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] 菜单定义需要名称属性 (%d 行)。\n"
+#define MSGTR_LIBMENU_SyntaxErrorAtLine "[MENU] 语法错误: 行 %d\n"
+#define MSGTR_LIBMENU_MenuDefinitionsNeedANameAttrib "[MENU] 菜单定义需要名称属性 (行 %d)。\n"
 #define MSGTR_LIBMENU_BadAttrib "[MENU] 错误属性 %s=%s，在菜单 '%s' 的 %d 行\n"
-#define MSGTR_LIBMENU_UnknownMenuType "[MENU] 未知菜单类型 '%s': %d 行\n"
+#define MSGTR_LIBMENU_UnknownMenuType "[MENU] 未知菜单类型 '%s' (行 %d)\n"
 #define MSGTR_LIBMENU_CantOpenConfigFile "[MENU] 打不开菜单配置文件: %s\n"
 #define MSGTR_LIBMENU_ConfigFileIsTooBig "[MENU] 配置文件过长 (> %d KB)\n"
 #define MSGTR_LIBMENU_ConfigFileIsEmpty "[MENU] 配置文件为空。\n"
@@ -1459,7 +1459,7 @@ static char help_text[]=
 #define MSGTR_LIBMENU_UnsupportedOutformat "[MENU] 输出格式不支持!!!!\n"
 
 // libmenu/menu_cmdlist.c
-#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] 列表菜单的定义需要名称 (%d 行)。\n"
+#define MSGTR_LIBMENU_ListMenuEntryDefinitionsNeedAName "[MENU] 列表菜单条目的定义需要名称 (行 %d)。\n"
 #define MSGTR_LIBMENU_ListMenuNeedsAnArgument "[MENU] 列表菜单需要参数。\n"
 
 // libmenu/menu_console.c
@@ -1480,8 +1480,8 @@ static char help_text[]=
 
 // libmenu/menu_param.c
 #define MSGTR_LIBMENU_SubmenuDefinitionNeedAMenuAttribut "[MENU] 子菜单定义需要 'menu' 属性。\n"
-#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] Pref 菜单选项的定义需要有效的 'property' 属性 (%d 行)。\n"
-#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] Pref 菜单需要参数。\n"
+#define MSGTR_LIBMENU_PrefMenuEntryDefinitionsNeed "[MENU] 首选项菜单条目的定义需要有效的 'property' 属性 (行 %d)。\n"
+#define MSGTR_LIBMENU_PrefMenuNeedsAnArgument "[MENU] 首选项菜单需要参数。\n"
 
 // libmenu/menu_pt.c
 #define MSGTR_LIBMENU_CantfindTheTargetItem "[MENU] 找不到目标项 ????\n"
