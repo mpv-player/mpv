@@ -293,7 +293,7 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   mp_msg(MSGT_DEMUX,MSGL_DBG2,"Ogg sub lines: %d  first: '%s'\n",
       ogg_sub.lines, ogg_sub.text[0]);
 #ifdef USE_ICONV
-  subcp_recode1(&ogg_sub);
+  subcp_recode(&ogg_sub);
 #endif
   vo_sub = &ogg_sub;
   vo_osd_changed(OSDTYPE_SUBTITLE);

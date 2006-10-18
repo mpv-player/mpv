@@ -1116,68 +1116,34 @@ void	subcp_close (void)
 	}
 }
 
-#define ICBUFFSIZE 512
-static char icbuffer[ICBUFFSIZE];
-
-static subtitle* subcp_recode (subtitle *sub)
+subtitle* subcp_recode (subtitle *sub)
 {
 	int l=sub->lines;
 	size_t ileft, oleft;
 	char *op, *ip, *ot;
+	if(icdsc == (iconv_t)(-1)) return sub;
 
 	while (l){
-		op = icbuffer;
 		ip = sub->text[--l];
 		ileft = strlen(ip);
-		oleft = ICBUFFSIZE - 1;
+		oleft = 4 * ileft;
 
+		if (!(ot = malloc(oleft + 1))){
+			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
+		   	continue;
+		}
+		op = ot;
 		if (iconv(icdsc, &ip, &ileft,
 			  &op, &oleft) == (size_t)(-1)) {
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line (1).\n");
-			l++;
-			break;
-		}
-		if (!(ot = malloc(op - icbuffer + 1))){
-			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
-			l++;
-		   	break;
+			mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error recoding line.\n");
+			free(ot);
+			continue;
 		}
 		*op='\0' ;
-		strcpy (ot, icbuffer);
 		free (sub->text[l]);
 		sub->text[l] = ot;
 	}
-	if (l){
-		for (l = sub->lines; l;)
-			free (sub->text[--l]);
-		return ERR;
-	}
 	return sub;
-}
-
-// for demux_ogg.c:
-subtitle* subcp_recode1 (subtitle *sub)
-{
-  int l=sub->lines;
-  size_t ileft, oleft;
-  
-  if(icdsc == (iconv_t)(-1)) return sub;
-
-  while (l){
-     char *ip = icbuffer;
-     char *op = sub->text[--l];
-     strlcpy(ip, op, ICBUFFSIZE);
-     ileft = strlen(ip);
-     oleft = ICBUFFSIZE - 1;
-		
-     if (iconv(icdsc, &ip, &ileft,
-	      &op, &oleft) == (size_t)(-1)) {
-	mp_msg(MSGT_SUBREADER,MSGL_V,"SUB: error recoding line (2).\n");
-	return sub;
-     }
-     *op='\0' ;
-  }
-  return sub;
 }
 #endif
 
