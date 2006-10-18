@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r15783 -->
+<!-- synced with r20083 -->
 <appendix id="bugs">
+
 <title>Bogues connus</title>
 <sect1 id="bugs-special">
 <title>Bogues/Problèmes spécifiques à certains systèmes ou à certains CPU</title>
@@ -11,6 +12,7 @@
 <para>Solution: mettez à jour le noyau en 2.4.x</para>
 <para>Contournement: <command>./configure --disable-sse</command></para>
 </listitem>
+
 <listitem>
 <para>SIGILL (signal 4) Général:</para>
 <para>Problème: vous avez compilé et utilisé <application>MPlayer</application> sur des machines différentes
@@ -20,25 +22,9 @@
 ou en désactivant les instructions spécifiques au CPU (comme <option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc)
 lors de l'étape de configuration.</para>
 </listitem>
-<listitem>
-<para>&quot;Internal buffer inconsistency&quot; pendant l'exécution de <application>MEncoder</application>:</para>
-<para>Problème: problème connu quand lame &lt; 3.90 à été compilé avec gcc 2.96 ou 3.x</para>
-<para>Solution: utilisez lame &gt;=3.90.</para>
-<para>Contournement: compilez lame avec gcc 2.95.x et retirez tous les paquetages lame éventuellement
-installés, ils peuvent avoir été compilés avec gcc 2.96.</para>
-</listitem>
-<listitem>
-<para>Son MP2/MP3 altéré sur PPC:</para>
-<para>Problème: bogue de GCC sur les plateformes PPC, pas encore de solution de réparation.</para>
-<para>Contournement: utilisez le décodeur MP1/MP2/MP3 de FFmpeg (lent) (<option>-ac ffmpeg</option>)</para>
-</listitem>
-<listitem>
-<para>SIGSEGV (signal 11) dans libmpeg2, pendant le redimensionnement+encodage:</para>
-<para>Problème: bogue MMX connu du GCC 2.95.2</para>
-<para>Solution: mettez à jour en 2.95.3.</para>
-</listitem>
 </itemizedlist>
 </sect1>
+
 
 <sect1 id="bugs-audio">
 <title>Problèmes de synchro A-V et autres problèmes audio</title>
@@ -47,24 +33,18 @@ installés, ils peuvent avoir été compilés avec gcc 2.96.</para>
 <title>Décalage audio général ou son saccadé (existe avec tous ou de nombreux fichiers)</title>
 <itemizedlist>
 <listitem><para>Le plus courant: pilote audio bogué ! - Essayez d'utiliser d'autres pilotes, essayez
-l'émulation OSS ALSA 0.9 avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
+l'émulation OSS ALSA avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
 des fois ça aide. Si votre fichier est lu correctement avec <option>-nosound</option>,
 alors vous pouvez être certain qu'il s'agit d'un problème de carte son (pilote).
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
 <listitem>
 <para>Problèmes de buffer audio (taille de buffer mal détectée)</para>
 <para>Contournement: option <option>-abs</option> de <application>MPlayer</application></para>
 </listitem>
-</itemizedlist>
-<itemizedlist>
 <listitem><para>
 Problèmes de taux d'échantillonnage - peut-être que votre carte ne supporte pas le taux
 d'échantillonnage utilisé dans vos fichiers - essayez le filtre de réechantillonnage (<option>-af resample=...</option>)
 </para></listitem>
-</itemizedlist>
-<itemizedlist>
 <listitem>
 <para>Machine lente (CPU ou VGA)</para>
 <para>Essayez avec <option>-vo null</option>, si la lecture fonctionne bien, alors vous
@@ -75,6 +55,7 @@ augmenter la vitesse.</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-delay-specific">
 <title>Décalage audio/désynchro spécifique à un ou quelques fichiers</title>
@@ -101,12 +82,14 @@ Contournement:
 Si rien de tout ça n'aide, uploadez le fichier SVP, nous le contrôlerons (et réparerons).
 </para>
 </listitem>
+
 <listitem>
 <para>Votre carte son ne supporte pas la lecture à 48kHz</para>
 <para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter le
 nombre de trames par seconde (fps) de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
 filtre de réechantillonnage (resample)</para>
 </listitem>
+
 <listitem>
 <para>Machine lente (si A-V n'est pas proche de 0, et que le dernier nombre de la ligne
 d'état augmente)</para>
@@ -115,22 +98,25 @@ d'état augmente)</para>
 </itemizedlist>
 </sect2>
 
+
 <sect2 id="bugs-nosound">
 <title>Pas de son du tout</title>
 <itemizedlist>
 <listitem>
 <para>Votre fichier utilise un codec audio non-supporté</para>
-<para>Lisez la documentation et aidez-nous à en ajouter le support</para>
+<para>Solution: lisez la documentation et aidez-nous à en ajouter
+le support</para>
 </listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-nopicture">
 <title>Pas d'image du tout (juste une fenêtre complètement grise/verte)</title>
 <itemizedlist>
 <listitem>
 <para>votre fichier utilise un codec vidéo non-supporté</para>
-<para>Contournement: lisez la documentation et aidez-nous à en ajouter le support</para>
+<para>Solution: lisez la documentation et aidez-nous à en ajouter le support</para>
 </listitem>
 <listitem>
 <para>
@@ -138,22 +124,17 @@ le codec auto-sélectionné ne peut décoder le fichier, essayez avec un autre en
 utilisant les options <option>-vc</option> ou <option>-vfm</option>
 </para>
 </listitem>
-<listitem>
-<para>
-Vous essayez de lire un fichier DivX 3.x avec le décodeur OpenDivX ou XviD
-(<option>-vc odivx</option>) - installez DivX4Linux et recompilez
-</para>
-</listitem>
 </itemizedlist>
 </sect2>
+
 
 <sect2 id="bugs-video">
 <title>Problèmes de sortie vidéo</title>
 <para>
-Première note: les options <option>-fs -vm</option> et <option>-zoom</option> sont
-juste des recommandations, non supportées (encore) par tous les pilotes. Donc ce n'est
-pas un bogue si ça ne marche pas. Seuls quelques pilotes supportent le
-redimensionnement/zoom, ne l'espérez pas de x11 ou dga.
+Premièrement notez que les options <option>-fs -vm</option> et
+<option>-zoom</option> ne sont pas non supportées par tous les pilotes.
+De plus, seuls quelques pilotes supportent le redimensionnement/zoom
+matériel.
 </para>
 
 <formalpara>
