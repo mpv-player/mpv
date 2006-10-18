@@ -2009,7 +2009,7 @@ static int overlap(segment_t* s1, segment_t* s2)
 
 static int cmp_segment(const void* p1, const void* p2)
 {
-	return ((segment_t*)p1)->a - ((segment_t*)p1)->b;
+	return ((segment_t*)p1)->a - ((segment_t*)p2)->a;
 }
 
 static void shift_event(event_images_t* ei, int shift)
