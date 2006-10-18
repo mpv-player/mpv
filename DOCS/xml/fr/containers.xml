@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r17463 -->
+<!-- synced with r19738 -->
 <chapter id="containers">
 <title>Conteneurs</title>
 
@@ -83,7 +83,7 @@ restera parfaitement lisible.
 Une fonction importante des MPGs est qu'ils ont un champ décrivant le rapport
 d'aspect du flux vidéo à l'interieur du flux. Par exemple les SVCDs ont une résolution
 de 480x480, et dans l'entête ce champ est fixé à 4:3, il est donc
-lu en 640x480. Les fichiers AVI n'ont pas ce champ, ils doivent donc être
+lu en 640x480. Les fichiers AVI n'ont souvent pas ce champ, ils doivent donc être
 redimensionnés durant l'encodage ou joués avec l'option <option>-aspect</option>.
 </para>
 </sect2>
@@ -267,7 +267,7 @@ linkend="realaudio">RealAudio</link> supportés.
 <sect2 id="nuppelvideo">
 <title>Fichiers NuppelVideo</title>
 <para>
-<ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink>
+NuppelVideo
 est un outil de capture TV (d'après ce que j'en sais:). <application>MPlayer</application>
 peut lire ses fichiers <filename>.NUV</filename> (NuppelVideo 5.0 uniquement).
 Ces fichiers peuvent contenir des trames YV12 non-compressées, YV12+RTJpeg compressées,
