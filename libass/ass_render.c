@@ -90,6 +90,7 @@ typedef struct glyph_info_s {
 //	int height;
 	int be; // blur edges
 	int shadow;
+	double frz; // z-axis rotation
 	
 	glyph_hash_key_t hash_key;
 } glyph_info_t;
@@ -1714,6 +1715,7 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		text_info.glyphs[text_info.length].desc = get_face_descender(render_context.face);
 		text_info.glyphs[text_info.length].be = render_context.be;
 		text_info.glyphs[text_info.length].shadow = render_context.shadow;
+		text_info.glyphs[text_info.length].frz = render_context.rotation;
 
 		text_info.length++;
 
@@ -1854,15 +1856,10 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	}
 
 	// rotate glyphs if needed
-	if (render_context.rotation != 0.) {
-		double angle = render_context.rotation;
+	{
+		double angle = 0.;
 		FT_Vector center;
 		FT_Matrix matrix_rotate;
-		
-		matrix_rotate.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
-		matrix_rotate.xy = (FT_Fixed)( -sin( angle ) * 0x10000L );
-		matrix_rotate.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
-		matrix_rotate.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
 		
 		if (((render_context.org_x != 0) || (render_context.org_y != 0)) && (render_context.evt_type == EVENT_POSITIONED)) {
 			center.x = render_context.org_x;
@@ -1879,13 +1876,23 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		}
 
 		for (i = 0; i < text_info.length; ++i) {
+			FT_Vector start;
+			FT_Vector start_old;
 			glyph_info_t* info = text_info.glyphs + i;
+
+			if (info->frz < 0.00001 && info->frz > -0.00001)
+				continue;
+			
+			if (info->frz != angle) {
+				angle = info->frz;
+				matrix_rotate.xx = (FT_Fixed)( cos( angle ) * 0x10000L );
+				matrix_rotate.xy = (FT_Fixed)( -sin( angle ) * 0x10000L );
+				matrix_rotate.yx = (FT_Fixed)( sin( angle ) * 0x10000L );
+				matrix_rotate.yy = (FT_Fixed)( cos( angle ) * 0x10000L );
+			}
 
 			// calculating shift vector
 			// shift = (position - center)*M - (position - center)
-			FT_Vector start;
-			FT_Vector start_old;
-
 			start.x = (info->pos.x + device_x - center.x) << 6;
 			start.y = - (info->pos.y + device_y - center.y) << 6;
 			start_old.x = start.x;
