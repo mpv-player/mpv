@@ -541,7 +541,7 @@ static char help_text[]=
 #define MSGTR_DVDnoMatchingAudio "Non trovata la lingua dell'audio DVD corrispondente!\n"
 #define MSGTR_DVDaudioChannel "Scelto canale audio DVD: %d lingua: %c%c\n" 
 #define MSGTR_DVDaudioStreamInfo "flusso audio: %d formato: %s (%s) lingua: %s aid: %d.\n"
-#define MSGTR_DVDnumAudioChannels "numero di canali audio sl disco: %d.\n"
+#define MSGTR_DVDnumAudioChannels "numero di canali audio sul disco: %d.\n"
 #define MSGTR_DVDnoMatchingSubtitle "Non trovata la lingua dei sottotitoli DVD corrispondente!\n"
 #define MSGTR_DVDsubtitleChannel "Scelto canale sottotitoli DVD: %d lingua: %c%c\n"
 #define MSGTR_DVDsubtitleLanguage "sottotitoli ( sid ): %d lingua: %s\n"
