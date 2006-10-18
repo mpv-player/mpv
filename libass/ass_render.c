@@ -1556,6 +1556,42 @@ static int get_face_descender(FT_Face face)
 }
 
 /**
+ * \brief Calculate base point for positioning and rotation
+ * \param bbox text bbox
+ * \param alignment alignment
+ * \param bx, by out: base point coordinates
+ */
+static void get_base_point(FT_BBox bbox, int alignment, int* bx, int* by)
+{
+	const int halign = alignment & 3;
+	const int valign = alignment & 12;
+	if (bx)
+		switch(halign) {
+		case HALIGN_LEFT:
+			*bx = bbox.xMin;
+			break;
+		case HALIGN_CENTER:
+			*bx = (bbox.xMax + bbox.xMin) / 2;
+			break;
+		case HALIGN_RIGHT:
+			*bx = bbox.xMax;
+			break;
+		}
+	if (by)
+		switch(valign) {
+		case VALIGN_TOP:
+			*by = bbox.yMin;
+			break;
+		case VALIGN_CENTER:
+			*by = (bbox.yMax + bbox.yMin) / 2;
+			break;
+		case VALIGN_SUB:
+			*by = bbox.yMax;
+			break;
+		}
+}
+
+/**
  * \brief Main ass rendering function, glues everything together
  * \param event event to render
  * Process event, appending resulting ass_image_t's to images_root.
@@ -1788,33 +1824,12 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 
 	// positioned events are totally different
 	if (render_context.evt_type == EVENT_POSITIONED) {
-		int align_shift_x = 0;
-		int align_shift_y = 0;
+		int base_x = 0;
+		int base_y = 0;
 		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "positioned event at %d, %d\n", render_context.pos_x, render_context.pos_y);
-		switch(halign) {
-			case HALIGN_LEFT:
-				align_shift_x = - bbox.xMin;
-				break;
-			case HALIGN_CENTER:
-				align_shift_x = - (bbox.xMax + bbox.xMin) /2;
-				break;
-			case HALIGN_RIGHT:
-				align_shift_x = - bbox.xMax;
-				break;
-		}
-		switch(valign) {
-			case VALIGN_TOP:
-				align_shift_y = - bbox.yMin;
-				break;
-			case VALIGN_CENTER:
-				align_shift_y = - (bbox.yMax + bbox.yMin) /2;
-				break;
-			case VALIGN_SUB:
-				align_shift_y = - bbox.yMax;
-				break;
-		}
-		device_x = x2scr(render_context.pos_x) + align_shift_x;
-		device_y = y2scr(render_context.pos_y) + align_shift_y;
+		get_base_point(bbox, alignment, &base_x, &base_y);
+		device_x = x2scr(render_context.pos_x) - base_x;
+		device_y = y2scr(render_context.pos_y) - base_y;
 	}
 	
 	// fix clip coordinates (they depend on alignment)
