@@ -1,4 +1,4 @@
-.\" synced with r20265
+.\" synced with r20288
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -564,9 +564,12 @@ a 'yes', '1' oppure 'true' e disabilitate impostandole a 'no', '0' oppure 'false
 Anche le sotto-opzioni possono essere specificate in questo modo.
 .PP
 Puoi anche scrivere configurazioni specifiche per i singoli file.
-Se desideri avere un file di configurazione per un film che si chiama 'movie.avi',
+Se desideri avere un file di configurazione per un file che si chiama 'movie.avi',
 crea un file di nome 'movie.avi.conf' con le opzioni specifiche dentro di esso
-e salvalo in ~/.mplayer/ oppure nella stessa directory del file del film.
+e salvalo in ~/.mplayer/.
+Puoi anche mettere tale file di configurazione nella stessa directory in cui si
+trova il file relativo, sempre che tu imposti poi l'opzione \-use-filedir-conf
+(dalla riga comando oppure nel tuo file di configurazione globale).
 .PP
 .I ESEMPIO DI UN FILE DI CONFIGURAZIONE PER MPLAYER:
 .sp 1
@@ -5699,7 +5702,7 @@ Filtro di post elaborazione ultrasemplice & lento che comprime e decomprime
 l'immagine a parecchi (o \- nel caso del livello di qualità 8 \- tutti) 'shifts'
 (spostamenti) e media i risultati.
 La differenza da spp è che uspp codifica & decodifica effettivamente ogni caso
-con libavcodec MPEG-4, mentre spp usa una una DCT 8x8 solo intra semplificata simile
+con libavcodec Snow, mentre spp usa una una DCT 8x8 solo intra semplificata simile
 a MJPEG.
 .RSs
 .IPs <qualità>
