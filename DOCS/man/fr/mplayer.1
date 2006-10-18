@@ -1,4 +1,4 @@
-.\" synced with r20257
+.\" synced with r20288
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -570,8 +570,12 @@ Ceci est même applicable aux sous-options.
 Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
 Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
-fichier et placez-le dans ~/.mplayer/ ou dans le même répertoire que le
-fichier.
+fichier et placez-le dans ~/.mplayer/.
+Vous pouvez aussi mettre le fichier de configuration dans le même répertoire
+que le fichier à jouer, pour autant que vous spécifiez l'option
+\-use-filedir-conf (soit depuis la ligne de commande, soit dans le fichier
+de configuration global).
+
 .PP
 .I EXEMPLE DE FICHIER DE CONFIGURATION MPLAYER\ :
 .sp 1
@@ -5734,7 +5738,7 @@ Filtre de post-traitement ultra simple & lent qui compresse et décompresse
 l'image avec différents décalages (ou \- dans le cas du niveau de qualité 8
 \- tous) et fait la moyenne des résultats.
 La différence avec spp est que chaque étape d'encodage & décodage est faite
-avec libavcodec-MPEG-4, tandis que spp utilise uniquement une DCT 8x8 intra,
+avec libavcodec Snow, tandis que spp utilise uniquement une DCT 8x8 intra,
 comme MJPEG.
 .RSs
 .IPs <qualité>
