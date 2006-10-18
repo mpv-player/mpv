@@ -1866,13 +1866,15 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			center.y = render_context.org_y;
 		} else {
 			FT_BBox str_bbox;
+			int bx, by;
 
 			center.x = text_info.glyphs[0].pos.x + device_x;
 			center.y = text_info.glyphs[0].pos.y + device_y;
 
 			compute_string_bbox(&text_info, &str_bbox);
-			center.x += (str_bbox.xMax - str_bbox.xMin) / 2;
-			center.y += (str_bbox.yMax - str_bbox.yMin) / 2;
+			get_base_point(str_bbox, alignment, &bx, &by);
+			center.x += bx - str_bbox.xMin;
+			center.y += by - str_bbox.yMin;
 		}
 
 		for (i = 0; i < text_info.length; ++i) {
