@@ -1862,7 +1862,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			center.x += (str_bbox.xMax - str_bbox.xMin) / 2;
 			center.y += (str_bbox.yMax - str_bbox.yMin) / 2;
 		}
-//		mp_msg(MSGT_GLOBAL, MSGL_DBG2, "\ncenter: %d, %d\n", center.x, center.y);
 
 		for (i = 0; i < text_info.length; ++i) {
 			glyph_info_t* info = text_info.glyphs + i;
@@ -1871,13 +1870,11 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			// shift = (position - center)*M - (position - center)
 			FT_Vector start;
 			FT_Vector start_old;
-//			mp_msg(MSGT_GLOBAL, MSGL_INFO, "start: (%d, %d) + (%d, %d) - (%d, %d) = (%d, %d)\n", info->pos.x, info->pos.y, device_x, device_y, center.x, center.y,
-//					info->pos.x + device_x - center.x, info->pos.y + device_y - center.y);
+
 			start.x = (info->pos.x + device_x - center.x) << 6;
 			start.y = - (info->pos.y + device_y - center.y) << 6;
 			start_old.x = start.x;
 			start_old.y = start.y;
-//			mp_msg(MSGT_GLOBAL, MSGL_INFO, "start: %d, %d\n", start.x / 64, start.y / 64);
 
 			FT_Vector_Transform(&start, &matrix_rotate);
 			
@@ -1887,7 +1884,6 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 			info->pos.x += start.x >> 6;
 			info->pos.y -= start.y >> 6;
 
-//			mp_msg(MSGT_GLOBAL, MSGL_DBG2, "shift: %d, %d\n", start.x / 64, start.y / 64);
 			if (info->glyph)
 				FT_Glyph_Transform( info->glyph, &matrix_rotate, 0 );
 			if (info->outline_glyph)
