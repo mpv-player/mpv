@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with r19975 -->
+<!-- synced with r20183 -->
 <chapter id="install">
 <title>Установка</title>
 
@@ -35,7 +35,7 @@
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - рекомендуемые версии:
   2.95 и 3.3+.  Известно, что 2.96 и 3.0.x генерируют испорченный код. 
-  С 3.1 и 3.2 тоже были проблемы.
+  С 3.1 и 3.2 тоже были проблемы. На PowerPC используйте 4.x+.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - рекомендуемая версия - это <emphasis role="bold">всегда новейшая (4.3)</emphasis>.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with  r19828  -->
+<!-- synced with  r20304  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Часто Задаваемые вопросы</title>
 
@@ -1039,6 +1039,42 @@ dd if=<replaceable>input.vob</replaceable> of=<replaceable>output_cut.vob</repla
 </para></question>
 <answer><para>
 Нет. VFAT не поддерживает файлы более 2Гб.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Что означают числа в статусной строке в процессе кодировании?
+</para></question>
+<answer><para>
+Пример:
+<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb A-V:0.065 [2156:192]</screen>
+<variablelist>
+<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
+<listitem><para>временная позиция в кодируемом потоке</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>6612f</systemitem></term>
+<listitem><para>количество закодированных кадров</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2%</systemitem></term>
+<listitem><para>размер закодированной части входного потока</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>7.12fps</systemitem></term>
+<listitem><para>скорость кодирования</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
+<listitem><para>оценка времени, оставшегося до конца кодирования</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2856mb</systemitem></term>
+<listitem><para>оценка окончательного размера перекодированного файла</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
+<listitem><para>текушая задержка между аудио и видео потоками</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>[2156:192]</systemitem></term>
+<listitem><para>средний видео битпоток (в Мбит/с) и средний аудио битпоток (в Мбит/с)</para></listitem>
+</varlistentry>
+</variablelist>
 </para></answer>
 </qandaentry>
 
