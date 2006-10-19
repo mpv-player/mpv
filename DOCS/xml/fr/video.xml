@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r17560 -->
+<!-- synced with r20054 -->
 <chapter id="video">
 <title>Sorties vidéo</title>
 
@@ -200,6 +200,13 @@ utilisez XFree86 version 4.0.3 ou plus (en cas de problèmes d'image, essayez 16b
 Comme pour les S3 Virge: il y a un support xv, mais la carte elle-même est très lente,
 donc vous feriez mieux de la vendre.
 </para>
+<para>
+Il y a maintenant un pilote framebuffer natif pour les cartes S3 Virge 
+ou similaires à tdfxfb. Activez votre framebuffer (c-à-d ajoutez
+"<option>vga=792 video=vesa:mtrr</option>" en paramètre à votre noyau) et utilisez
+<option>-vo s3fb</option> (<option>-vf yuy2</option> et <option>-dr</option>
+peuvent aider aussi).
+</para>
 
 <note>
 <para>
@@ -216,8 +223,7 @@ poliment un pilote qui gère MMX/3DNow sur la liste de diffusion MPlayer-users.
 <title>Cartes nVidia</title>
 
 <para>
-nVidia n'est pas un très bon choix sous Linux (d'après nVidia, ce n'est
-pas vrai)... Les pilotes open-source de
+nVidia n'est pas un très bon choix sous Linux ... Les pilotes open-source de
 XFree86 supportent la plupart de ces cartes, mais dans certains cas, vous devrez
 utiliser les pilotes binaires closed-source de nVidia, disponibles sur le
 <ulink url="http://www.nvidia.com/object/linux.html">site web de nVidia</ulink>.
@@ -639,64 +645,6 @@ La sortie vidéo de SDL supporte l'affichage des sous-titres sous le film, dans l
 bandes noires (si elles sont présentes).
 </para>
 
-<variablelist>
-<title>Il existe plusieurs options en ligne de commande pour SDL:</title>
-<varlistentry>
-  <term><option>-vo sdl:driver=<replaceable>nom</replaceable></option></term>
-  <listitem><simpara>
-    spécifie le driver vidéo SDL a utiliser (par ex. <literal>aalib</literal>,
-    <literal>dga</literal>, <literal>x11</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-ao sdl:<replaceable>nom</replaceable></option></term>
-  <listitem><simpara>
-    spécifie le driver audio SDL a utiliser (par ex. <literal>dsp</literal>,
-    <literal>esd</literal>, <literal>arts</literal>)
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-noxv</option></term>
-  <listitem><simpara>
-    désactive l'accélération Xvideo matérielle
-  </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-forcexv</option></term>
-  <listitem><simpara>
-    tente de forcer l'accélération Xvideo
-  </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<table>
-<title>Touches SDL</title>
-<tgroup cols="2">
-<thead>
-<row><entry>Touche</entry><entry>Action</entry></row>
-</thead>
-<tbody>
-<row><entry><keycap>c</keycap></entry><entry>
-    passe par tous les modes plein écran valides
-    </entry></row>
-<row><entry><keycap>n</keycap></entry><entry>
-    revient en mode normal
-    </entry></row>
-</tbody>
-</tgroup>
-</table>
-
-<itemizedlist>
-<title>Bogues connus:</title>
-<listitem><simpara>
-  Les touches pressées avec le driver sdl:driver=aalib se répètent en continu (utiliser
-  <option>-vo aa</option> !). C'est un bogue dans la SDL, je ne peux pas le changer
-  (testé avec SDL 1.2.1).
-  </simpara></listitem>
-<listitem><simpara>
-  NE PAS UTILISER SDL avec la GUI! Cela ne fonctionnera pas comme il devrait.
-  </simpara></listitem>
-</itemizedlist>
 </sect2>
 
 
@@ -802,7 +750,7 @@ La sortie FBdev accepte certains paramètres additionnels:
 <varlistentry>
   <term><option>-fb</option></term>
   <listitem><simpara>
-    spécifie le device framebuffer a utiliser (<filename>/dev/fb0</filename>)
+    spécifie le device framebuffer a utiliser (par défaut : <filename>/dev/fb0</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -814,7 +762,7 @@ La sortie FBdev accepte certains paramètres additionnels:
 <varlistentry>
   <term><option>-fbmodeconfig</option></term>
   <listitem><simpara>
-    fichier de configuration des modes (<filename>/etc/fb.modes</filename> par défaut)
+    fichier de configuration des modes (par défaut : <filename>/etc/fb.modes</filename>)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -876,8 +824,8 @@ limitation de <application>MPlayer</application>.
 
 <para>
 Cette section concerne le support BES (Back-End Scaler) sur les cartes Matrox
-G200/G400/G450/G550, le driver noyau de mga_vid. Il est activement développé
-par A'rpi, et supporte le VSYNC matériel avec triple buffering.
+G200/G400/G450/G550, le driver noyau de <systemitem>mga_vid</systemitem>.
+Il supporte le VSYNC matériel avec triple buffering.
 Cela fonctionne aussi bien en console framebuffer que sous X.
 </para>
 
@@ -1057,7 +1005,7 @@ options de rendu:
 <varlistentry>
   <term><option>-aasubcolor=<replaceable>V</replaceable></option></term>
   <listitem><para>
-    change la couleur des sous-titres
+    Change la couleur des sous-titres
     </para><para>
     where <replaceable>V</replaceable> peut être:
     <literal>0</literal> (normal),
@@ -1075,25 +1023,25 @@ options de rendu:
 <varlistentry>
   <term><option>-aadriver</option></term>
   <listitem><simpara>
-    choisit le pilote aa (X11, curses, Linux)
+    Choisit le pilote aa (X11, curses, Linux)
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaextended</option></term>
   <listitem><simpara>
-    utilise les 256 caractères
+    Utilise les 256 caractères
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aaeight</option></term>
   <listitem><simpara>
-   utilise l'ASCII 8 bits
+   Utilise l'ASCII 8 bits
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-aahelp</option></term>
   <listitem><simpara>
-    affiche toutes les options de AAlib
+    Affiche toutes les options de AAlib
     </simpara></listitem>
 </varlistentry>
 </variablelist>
@@ -1514,13 +1462,6 @@ sans argument pour activer l'autodétection du pilote.
 </para>
 
 <para>
-VIDIX est une nouvelle technologie et il est fortement possible que sur votre
-système elle ne fonctionne pas. Dans ce cas votre seule solution est
-de le porter (principalement libdha). Mais il y a de bons espoirs qu'il fonctionne sur
-les systèmes où X11 fonctionne.
-</para>
-
-<para>
 Comme VIDIX requiert l'accès direct au matériel, vous avez le choix entre le lançer
 en tant que root ou définir le bit SUID du binaire <application>MPlayer</application>
 (<emphasis role="bold">Attention: c'est une faille de sécurité !</emphasis>). Sinon,
@@ -1610,32 +1551,6 @@ personne ne l'a testé, donc les rapports sont les bienvenus.
 
 <sect3 id="vidix-nvidia">
 <title>Cartes nVidia</title>
-<para>
-Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Riva
-128, TNT et GeForce2, d'autres doivent normalement fonctionner.
-</para>
-
-<itemizedlist spacing="compact">
-<title>LIMITATIONS</title>
-<listitem><para>
-  Il est recommandé d'utiliser les pilotes nVidia binaires pour X avant d'utiliser
-  ce pilote VIDIX, car certains registres qui doivent être initialisés n'ont pas
-  encore été découverts, donc cela échouera avec le pilote Open Source
-  <filename>nv.o</filename> de XFree86.
-  </para></listitem>
-<listitem><para>
-  Actuellement seuls les codecs capables d'afficher une palette UYVY peuvent
-  fonctionner en conjonction avec ce pilote. Malheureusement, cela exclu tous
-  les décodeurs de la famille <systemitem class="library">libavcodec</systemitem>.
-  Cela nous laisse les codecs utilisables suivants :
-  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem>
-  et quelques autres. Veuillez noter que ce n'est qu'un inconfort provisoire.
-  La syntaxe est la suivante:
-  <screen>
-    mplayer -vf format=uyvy -vc divxds <replaceable>fichierdivx3.avi</replaceable>
-  </screen>
-  </para></listitem>
-</itemizedlist>
 
 <para>
   Une fonction unique du pilote nvidia_vid est la capacité d'afficher de la
@@ -1643,13 +1558,10 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
   - avec aucun framebuffer ou X. Pour ce faire, nous aurons besoin d'utiliser
   la sortie <option>cvidix</option>, comme le montre l'exemple suivant:
   <screen>
-    mplayer -vf format=uyvy -vc divxds -vo cvidix <replaceable>exemple.avi</replaceable>
+    mplayer -vo cvidix <replaceable>exemple.avi</replaceable>
   </screen>
 </para>
 
-<para>
-Rapports attendus !
-</para>
 </sect3>
 
 <sect3 id="vidix-sis">
@@ -1892,6 +1804,15 @@ pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <para>
+  Si <application>MPlayer</application> se plain souvent avec le message suivant:
+  <screen>Too many video/audio packets in the buffer</screen> ou si vous remarquez
+  une désynchronisation grandissante entre le son et la vidéo, essayez d'utiliser
+  le démultiplexeur MPEG-TS de libavformat en ajoutant à votre ligne de commande:
+  <option>-demuxer lavf -lavfdopts probesize=128</option> .
+</para>
+
+
+<para>
   Pour afficher le premier des canaux présents dans votre liste, tapez
 </para>
 
@@ -1918,8 +1839,8 @@ pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Pour changer de canal tapez sur les touches <keycap>h</keycap> (suivant) et
-  <keycap>k</keycap> (précédent), ou utilisez le menu OSD (requiert un
-  <link linkend="subosd">sous-système OSD</link> fonctionnel).
+  <keycap>k</keycap> (précédent), ou utilisez le
+  <link linkend="subosd">menu OSD</link>.
 </para>
 
 <para>
@@ -1959,7 +1880,7 @@ pour une TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 <para>
 Si vous avez des questions ou voulez entendre les annonces de fonctionnalités et
 participer aux discussions sur ce sujet, rejoignez notre liste de diffusion
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>.
+<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</ulink>.
 SVP, rappelez-vous que la langue de la liste est l'anglais.
 </para>
 </formalpara>
@@ -1985,12 +1906,12 @@ les pilotes et les instructions d'installation sur le site
 <title>UTILISATION</title>
 <varlistentry>
 <term><option>-vo dxr2</option></term>
-<listitem><para>active la sortie TV</para></listitem>
+<listitem><para>Active la sortie TV</para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> ou <option>-vo dxr2:xv</option></term>
-<listitem><para>active la sortie Overlay sous X11</para></listitem>
+<listitem><para>Active la sortie Overlay sous X11</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2469,13 +2390,6 @@ uniquement durant cette phase.
 </para>
 </sect2>
 
-
-<sect2 id="tvout-voodoo">
-<title>Voodoo 3</title>
-<para>
-Reportez-vous à <ulink url="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">cette URL</ulink>.
-</para>
-</sect2>
 
 <sect2 id="tvout-nvidia">
 <title>nVidia</title>
