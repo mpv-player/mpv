@@ -119,8 +119,6 @@ int x264enc_set_param(m_option_t* opt, char* arg)
             return 0;
     }
 
-    x264_param_parse(&param, "stats", passtmpfile);
-
     if(param.rc.b_stat_write) {
         /* Adjust or disable some flags to gain speed in the first pass */
         if(turbo == 1)
@@ -156,6 +154,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     param.i_fps_den = mod->mux->h.dwScale;
     param.vui.i_sar_width = d_width*height;
     param.vui.i_sar_height = d_height*width;
+
+    x264_param_parse(&param, "stats", passtmpfile);
 
     switch(outfmt) {
     case IMGFMT_I420:
