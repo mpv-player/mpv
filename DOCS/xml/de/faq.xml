@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r19828 -->
+<!-- synced with r20304 -->
 <chapter id="faq" xreflabel="FAQ">
   <title>Häufig gestellte Fragen</title>
 
@@ -1323,7 +1323,46 @@ Starte Wiedergabe...<!--
       <qandaentry>
         <question>
           <para>
-            Warum ist die von <application>MEncoder</application> ausgegebene empfohlene Bitrate negativ?
+            Was bedeuten die Zahlen der Statuszeile während der Encodierung?
+          </para>
+        </question>
+        <answer>
+          <para>
+            Beispiel:
+            <screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+            <variablelist>
+              <varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
+                <listitem><para>Zeitposition im encodieren Stream</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>6612f</systemitem></term>
+                <listitem><para>Anzahl der encodieren Frames</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>( 2%)</systemitem></term>
+                <listitem><para>Teil des Eingabestreams, der encodiert wurde</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>7.12fps</systemitem></term>
+                <listitem><para>Encodiergeschwindigkeit</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>Trem: 576min</systemitem></term>
+                <listitem><para>geschätzte verbleibende Encodierzeit</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>2856mb</systemitem></term>
+                <listitem><para>geschätzte Größe der endgültigen Encodierung</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>A-V:0.065</systemitem></term>
+                <listitem><para>momentane Verzögerung zwischen Audio- und Videostreams</para></listitem>
+              </varlistentry>
+              <varlistentry><term><systemitem>[2126:192]</systemitem></term>
+                <listitem><para>durchschnittliche Videobitrate (in Mb/s) und durchschnittliche Audiobitrate (in Mb/s)</para></listitem>
+                </varlistentry>
+              </variablelist>
+            </para></answer>
+        </qandaentry>
+
+        <qandaentry>
+          <question>
+            <para>
+              Warum ist die von <application>MEncoder</application> ausgegebene empfohlene Bitrate negativ?
           </para>
         </question>
         <answer>

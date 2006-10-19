@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20282
+.\" In sync with r20288
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -5704,11 +5704,10 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .B uspp[=Qualität[:qp]]
 Ultra-einfacher und -langsamer Nachbearbeitungsfilter, der das Bild
 mit mehreren (bzw.\& \- im Falle von Qualitätslevel 8 \- alle) Verschiebungen
-rekomprimiert und daraus den Mittelwert
-bildet.
+rekomprimiert und daraus den Mittelwert bildet.
 Dies unterscheidet sich im Verhalten zu spp insofern, dass uspp tatsächlich
-jeden Fall encodiert und decodiert, wohingegen spp eine vereinfachte nur-Intra
-8x8 DCT ähnlich der bei MJPEG benutzten verwendet.
+jeden Fall mit libavcodec Snow encodiert und decodiert, wohingegen spp eine
+vereinfachte nur-Intra 8x8 DCT ähnlich der bei MJPEG benutzten verwendet.
 .RSs
 .IPs <Qualität>
 0\-8 (Standard: 3)
