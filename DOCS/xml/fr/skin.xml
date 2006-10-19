@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r17975 -->
+<!-- synced with 20310 -->
 <appendix id="skin">
 <title>Format de skins <application>MPlayer</application></title>
 
@@ -779,10 +779,6 @@ nécessitent donc une police différente).
 Ce sont les messages qui peuvent être générés par les boutons, podomètres et
 entrées du menu.
 </para>
-<note><para>
-Certains messages peuvent ne pas fonctionner comme prévu (ou ne pas fonctionner du
-tout). Comme vous le savez, la GUI est en cours de développement.
-</para></note>
 
 <variablelist>
 <title>Contrôle de lecture:</title>
