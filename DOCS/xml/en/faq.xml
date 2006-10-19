@@ -1056,6 +1056,43 @@ No, VFAT doesn't support 2GB+ files.
 
 <qandaentry>
 <question><para>
+What is the meaning of the numbers on the status line during the encoding process?
+</para></question>
+<answer><para>
+Example:
+<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<variablelist>
+<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
+<listitem><para>time position in the encoded stream</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>6612f</systemitem></term>
+<listitem><para>number of video frames encoded</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>( 2%)</systemitem></term>
+<listitem><para>portion of the input stream encoded</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>7.12fps</systemitem></term>
+<listitem><para>encoding speed</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
+<listitem><para>estimated remaining encoding time</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2856mb</systemitem></term>
+<listitem><para>estimated size of the final encode</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
+<listitem><para>current delay between audio and video streams</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>[2126:192]</systemitem></term>
+<listitem>
+<para>average video bitrate (in Mb/s) and average audio bitrate (in Mb/s)</para></listitem>
+</varlistentry>
+</variablelist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Why is the recommended bitrate printed by <application>MEncoder</application> negative?
 </para></question>
 <answer><para>
