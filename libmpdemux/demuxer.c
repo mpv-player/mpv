@@ -664,28 +664,28 @@ if (file_format) {
     demuxer = new_demuxer(stream,demuxer_desc->type,audio_id,video_id,dvdsub_id,filename);
     if (demuxer_desc->check_file)
       fformat = demuxer_desc->check_file(demuxer);
-      if (force || !demuxer_desc->check_file)
-        fformat = demuxer_desc->type;
-      if (fformat != 0) {
-        if (fformat == demuxer_desc->type) {
-          demuxer_t *demux2 = demuxer;
-          // Move messages to demuxer detection code?
-          mp_msg(MSGT_DEMUXER, MSGL_INFO, MSGTR_Detected_XXX_FileFormat, demuxer_desc->shortdesc);
-          file_format = demuxer_desc->type = fformat;
-          if (!demuxer->desc->open || (demux2 = demuxer->desc->open(demuxer))) {
-            demuxer = demux2;
-            goto dmx_open;
-          }
-        } else {
-          // Format changed after check, recurse
-          free_demuxer(demuxer);
-          return demux_open_stream(stream, fformat, force,
-                   audio_id, video_id, dvdsub_id, filename);
+    if (force || !demuxer_desc->check_file)
+      fformat = demuxer_desc->type;
+    if (fformat != 0) {
+      if (fformat == demuxer_desc->type) {
+        demuxer_t *demux2 = demuxer;
+        // Move messages to demuxer detection code?
+        mp_msg(MSGT_DEMUXER, MSGL_INFO, MSGTR_Detected_XXX_FileFormat, demuxer_desc->shortdesc);
+        file_format = demuxer_desc->type = fformat;
+        if (!demuxer->desc->open || (demux2 = demuxer->desc->open(demuxer))) {
+          demuxer = demux2;
+          goto dmx_open;
         }
-      }
-        // Check failed for forced demuxer, quit
+      } else {
+        // Format changed after check, recurse
         free_demuxer(demuxer);
-        return NULL;
+        return demux_open_stream(stream, fformat, force,
+                 audio_id, video_id, dvdsub_id, filename);
+      }
+    }
+    // Check failed for forced demuxer, quit
+    free_demuxer(demuxer);
+    return NULL;
   }
 }
 
@@ -713,8 +713,8 @@ for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
         file_format = DEMUXER_TYPE_UNKNOWN;
       }
     }
-      free_demuxer(demuxer);
-      demuxer = NULL;
+    free_demuxer(demuxer);
+    demuxer = NULL;
   }
 }
 
@@ -758,12 +758,12 @@ for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
         file_format = DEMUXER_TYPE_UNKNOWN;
       }
     }
-      free_demuxer(demuxer);
-      demuxer = NULL;
+    free_demuxer(demuxer);
+    demuxer = NULL;
   }
 }
 
-  return NULL;
+return NULL;
 //====== File format recognized, set up these for compatibility: =========
 dmx_open:
 
