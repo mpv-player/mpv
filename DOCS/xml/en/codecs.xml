@@ -620,8 +620,9 @@ sometimes has problems with seeking, but it may perform better on FPU-less
 </para>
 
 <para>
-To enable support, compile with the <option>--enable-mad</option> configure
-option.
+If you have a proper installation of libmad, <filename>configure</filename>
+will notice and support for MPEG audio decoding via
+<systemitem class="library">libmad</systemitem> will be built automatically.
 </para>
 </sect2>
 
@@ -709,7 +710,7 @@ beta, so you do not need to get it separately.
 If you use gcc 3.2 which fails to compile our internal FAAD or want to use
 the external library for some other reason, download the library from the
 <ulink url="http://www.audiocoding.com/modules/mydownloads/">download page</ulink>
-and pass <option>--enable-external-faad</option> to <filename>configure</filename>.
+and pass <option>--enable-faad-external</option> to <filename>configure</filename>.
 You do not need all of faad2 to decode AAC files, libfaad is enough. Build
 it like this:
 <screen>
