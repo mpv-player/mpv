@@ -1660,8 +1660,8 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 		if ( use_kerning && previous && glyph_index ) {
 			FT_Vector delta;
 			FT_Get_Kerning( render_context.face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-			pen.x += delta.x;
-			pen.y += delta.y;
+			pen.x += delta.x * render_context.scale_x;
+			pen.y += delta.y * render_context.scale_y;
 		}
 
 		shift.x = pen.x & 63;
