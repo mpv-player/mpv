@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20318 -->
+<!-- synced with r20321 -->
 <chapter id="codecs">
 <title>Codecs Supportés</title>
 
@@ -765,8 +765,9 @@ plateformes sans FPU (tel que <link linkend="arm">ARM</link>).
 </para>
 
 <para>
-Pour en activer le support, compilez avec l'option de configuration
-<option>--enable-mad</option>
+Si vous avez une installation fonctionnelle de libmad, <filename>configure</filename>
+va trouver et compiler le support du dÃcodage du son MPEG audio via
+<systemitem class="library">libmad</systemitem>.
 </para>
 </sect2>
 
@@ -854,7 +855,7 @@ Si vous utilisez gcc 3.2 qui ne peut pas compiler notre FAAD interne, ou si vous
 voulez utiliser une librairie externe pour d'autres raisons, téléchargez la
 librairie dpuis la
 <ulink url="http://www.audiocoding.com/download.php">page de téléchargements</ulink>
-et passez <option>--enable-external-faad</option> à <filename>configure</filename>.
+et passez <option>--enable-faad-external</option> à <filename>configure</filename>.
 Vous n'avez pas besoin de tout faad2 pour décoder les fichiers AAC, libfaad suffit.
 Construisez comme ceci:
 <screen>
