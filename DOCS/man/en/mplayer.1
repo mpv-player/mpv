@@ -46,146 +46,95 @@ mencoder \- movie encoder
 .na
 .nh
 .B mplayer
-.RI [options]\ [ \ file\  | \ URL\  | \ playlist\  | \ \-\  ]
+[options] [file|URL|playlist|\-]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[global options]
-.I file1
+[options] file1
 [specific options] [file2] [specific options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[global options]
-.RI { "group of files and options" }
-[group specific options]
+[options]
+{group of files and options}
+[group-specific options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [dvd|dvdnav]://[title | [start_title]\-end_title ]
+[dvd|dvdnav]://[title|[start_title]\-end_title]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I vcd://track[/device]
+vcd://track[/device]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tv://[channel]
+tv://[channel]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I radio://[channel or frequency][/capture]
+radio://[channel|frequency][/capture]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I pvr://
+pvr://
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I dvb://[card_number@]channel
+dvb://[card_number@]channel
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mf://filemask
+mf://filemask
 [-mf options] [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [cdda|cddb]://track[-endtrack][:speed][/device]
+[cdda|cddb]://track[-endtrack][:speed][/device]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I cue://file[:track]
+cue://file[:track]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv] ://
-[user:passwd@]\fIURL\fP[:port] [options]
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[user:pass@]URL[:port] [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I sdp://file
+sdp://file
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mpst://host[:port]/URL
+mpst://host[:port]/URL
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tivo://host/list
+tivo://host/[list|llist|fsid]
 [options]
 .br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://host/llist
-[options]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://host/fsid
-[options]
-.br
-.in
 .B gmplayer
-'in +\n[.k]u
 [options]
 [\-skin\ skin]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[options]
-.RI [ \ file\  | \ URL\  | \ \-\  ]
-[\-o\ file]
+[options] file
+[file|URL|\-] [\-o file]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[global options]
-.I file1
+[options] file1
 [specific options] [file2] [specific options]
 .ad
 .hy
