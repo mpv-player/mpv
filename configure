@@ -1153,9 +1153,12 @@ EOF
         _mcpu=""
         _march=""
       fi
-    else
-      _march=""
-      _mcpu=""
+    else # if test "$_runtime_cpudetection" = no
+      # x86-64 is an undocumented option, an intersection of k8 and nocona.
+      _march="-march=x86-64"
+      _mcpu="$cpuopt=x86-64"
+      cc_check $_mcpu || _mcpu=""
+      cc_check $_march $_mcpu || _march=""
     fi
     
     _optimizing=""
