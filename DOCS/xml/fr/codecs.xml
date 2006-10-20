@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r18602 -->
+<!-- synced with r20318 -->
 <chapter id="codecs">
 <title>Codecs Supportés</title>
 
@@ -464,7 +464,7 @@ Les deux projets ont donc la même origine.
 <step><para>
   Recompilez <application>MPlayer</application> avec
   <option>--with-xvidlibdir=<replaceable>/chemin/vers/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/chemin/vers/</replaceable>xvid.h</option>
+  <option>--with-xvidincdir=<replaceable>/chemin/vers/</replaceable>xvid.h</option>.
   </para></step>
 </procedure>
 </sect2>
@@ -496,14 +496,14 @@ décodeurs suivants:
 <procedure>
 <title>COMPILATION DE MPLAYER AVEC LE SUPPORT DES LIBRAIRIES QUICKTIME</title>
 <note><para>actuellement seules les plateformes Intel 32-bit sont supportées.</para></note>
-<step><para>téléchargez la version Subversion de <application>MPlayer</application></para></step>
-<step><para>téléchargez le pack de DLL QuickTime depuis
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
+<step><para>Téléchargez la version Subversion de <application>MPlayer</application></para></step>
+<step><para>Téléchargez le pack de DLL QuickTime depuis
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>.
 </para></step>
-<step><para>décompressez le pack de DLL QuickTime dans votre répertoire de codecs Win32
+<step><para>Décompressez le pack de DLL QuickTime dans votre répertoire de codecs Win32
 (par défaut: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
-<step><para>compilez <application>MPlayer</application></para></step>
+<step><para>Compilez <application>MPlayer</application></para></step>
 </procedure>
 
 </sect2>
