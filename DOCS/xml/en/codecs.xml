@@ -317,7 +317,7 @@ then started XviD. So both projects have the same origin.
 <step><para>
   Recompile <application>MPlayer</application> with
   <option>--with-xvidlibdir=<replaceable>/path/to/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
+  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>.
   </para></step>
 </procedure>
 </sect2>
@@ -349,14 +349,14 @@ decoders:
 <procedure>
 <title>COMPILING MPLAYER WITH QUICKTIME LIBRARIES SUPPORT</title>
 <note><para>Currently only 32-bit Intel platforms are supported.</para></note>
-<step><para>download <application>MPlayer</application> Subversion</para></step>
-<step><para>download QuickTime DLL pack from
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
+<step><para>Download <application>MPlayer</application> Subversion.</para></step>
+<step><para>Download QuickTime DLL pack from
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>.
 </para></step>
-<step><para>extract QuickTime DLL pack to your Win32 codecs directory
+<step><para>Extract QuickTime DLL pack to your Win32 codecs directory.
 (default: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
-<step><para>compile <application>MPlayer</application></para></step>
+<step><para>Compile <application>MPlayer</application>.</para></step>
 </procedure>
 
 </sect2>
