@@ -1672,7 +1672,14 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
 
   while(ptr[0] != '\0') {
     last_ptr = ptr;
-    ptr = strchr(ptr,LIST_SEPARATOR);
+    for(;;){
+        ptr = strchr(ptr,LIST_SEPARATOR);
+        if(ptr && ptr>last_ptr && ptr[-1]=='\\'){
+            memmove(ptr-1, ptr, strlen(ptr)+1);
+        }else
+            break;
+    }
+
     if(!ptr) {
       r = parse_obj_settings(name,last_ptr,opt->priv,dst ? &res : NULL,n);
       if(r < 0) {
