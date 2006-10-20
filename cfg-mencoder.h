@@ -43,7 +43,7 @@ extern m_option_t xvidencopts_conf[];
 #endif
 
 #if defined(HAVE_X264)
-extern int x264enc_set_param(m_option_t* opt, char* arg);
+extern void x264enc_set_param(m_option_t* opt, char* arg);
 #endif
 
 extern m_option_t nuvopts_conf[];

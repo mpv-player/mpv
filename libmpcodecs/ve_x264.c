@@ -56,6 +56,7 @@ typedef struct _h264_module_t {
 extern char* passtmpfile;
 static int turbo = 0;
 static x264_param_t param;
+static int parse_error = 0;
 
 static int encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal){
     uint8_t *p = buf;
@@ -74,7 +75,7 @@ static int encode_nals(uint8_t *buf, int size, x264_nal_t *nals, int nnal){
 static int put_image(struct vf_instance_s *vf, mp_image_t *mpi, double pts);
 static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in);
 
-int x264enc_set_param(m_option_t* opt, char* arg)
+void x264enc_set_param(m_option_t* opt, char* arg)
 {
     static int initted = 0;
     if(!initted) {
@@ -115,8 +116,7 @@ int x264enc_set_param(m_option_t* opt, char* arg)
         /* mark this option as done, so it's not reparsed if there's another -x264encopts */
         *name = 0;
 
-        if(ret)
-            return 0;
+        parse_error |= ret;
     }
 
     if(param.rc.b_stat_write) {
@@ -144,6 +144,10 @@ int x264enc_set_param(m_option_t* opt, char* arg)
 
 static int config(struct vf_instance_s* vf, int width, int height, int d_width, int d_height, unsigned int flags, unsigned int outfmt) {
     h264_module_t *mod=(h264_module_t*)vf->priv;
+
+    if(parse_error)
+        return 0;
+
     mod->mux->bih->biWidth = width;
     mod->mux->bih->biHeight = height;
     mod->mux->aspect = (float)d_width/d_height;
