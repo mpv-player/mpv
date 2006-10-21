@@ -76,7 +76,7 @@ static char help_text[]=
 #define MSGTR_FPSnotspecified "FPS ist im Header nicht angegeben (oder ungültig)! Benutze die Option -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Versuche Audiocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
-#define MSGTR_RTFMCodecs "Lies DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_RTFMCodecs "Lies DOCS/HTML/de/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Versuche Videocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindVideoCodec "Kann keinen Codec finden, der zu gewählter Option -vo und Videoformat 0x%X passt!\n"
 #define MSGTR_CannotInitVO "FATAL: Kann Videoausgabetreiber nicht initialisieren!\n"
@@ -104,9 +104,9 @@ static char help_text[]=
 "  - Versuche -cache 8192.\n"\
 "- Benutzt du -cache zusammen mit einer nicht-interleavten AVI-Datei?\n"\
 "  - Versuche -nocache.\n"\
-"Lies DOCS/HTML/en/video.html; dort stehen Tipps für optimale Einstellungen.\n"\
+"Lies DOCS/HTML/de/video.html; dort stehen Tipps für optimale Einstellungen.\n"\
 "(Schau evtl. auch bei den entsprechenden englischen Seiten.)\n"\
-"Wenn dies nicht hilft, lies DOCS/HTML/en/bugreports.html!\n\n"
+"Wenn dies nicht hilft, lies DOCS/HTML/de/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI erfordert X11.\n"
@@ -136,7 +136,7 @@ static char help_text[]=
 "- MPlayer stürzte aufgrund einer 'ungültigen Anweisung' ab.\n"\
 "  Es kann sich um einen Fehler im unserem neuen Code für\n"\
 "  die CPU-Erkennung zur Laufzeit handeln...\n"\
-"  Bitte lies DOCS/HTML/en/bugreports.html.\n"
+"  Bitte lies DOCS/HTML/de/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer stürzte aufgrund einer 'ungültigen Anweisung' ab.\n"\
 "  Das passiert normalerweise, wenn du MPlayer auf einer anderen CPU\n"\
@@ -146,12 +146,12 @@ static char help_text[]=
 "- MPlayer stürzte wegen falscher Benutzung der CPU/FPU/des RAMs ab.\n"\
 "  Kompiliere MPlayer erneut mit --enable-debug und erstelle mit 'gdb'\n"\
 "  einen Backtrace und eine Disassemblierung. Details dazu findest du\n"\
-"  in DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
+"  in DOCS/HTML/de/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer ist abgestürzt. Das sollte nicht passieren.\n"\
 "  Es kann sich um einen Fehler im MPlayer-Code _oder_ in deinen Treibern\n"\
 "  _oder_ in deinem gcc handeln. Wenn du meinst, es sei MPlayers Fehler, dann\n"\
-"  lies DOCS/HTML/en/bugreports.html und folge den dortigen Anweisungen.\n"\
+"  lies DOCS/HTML/de/bugreports.html und folge den dortigen Anweisungen.\n"\
 "  Wir können und werden dir nicht helfen, wenn du nicht alle dort aufgeführten\n"\
 "  Informationen zur Verfügung stellst.\n"
 #define MSGTR_LoadingConfig "Lade Konfiguration '%s'\n"
@@ -371,7 +371,7 @@ static char help_text[]=
 "                 und benutzt 185 als durchschnittliche kbps.\n"\
 "\n"\
 "   \"fast\" - Aktiviert die neue schnelle VBR für ein bestimmtes Profil. Der\n"\
-"            Nachteil des fast-Schalters ist, daß die Bitrate oft leicht höher\n"\
+"            Nachteil des fast-Schalters ist, dass die Bitrate oft leicht höher\n"\
 "            als im normalen Modus ist, außerdem kann die Qualität auch leicht\n"\
 "            geringer ausfallen.\n"\
 "   Warnung: In der aktuellen Version können fast-Presets im Vergleich zu\n"\
@@ -1327,7 +1327,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_UnknownObject "unbekannter Objekt\n"
 #define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Konnte Mediendaten nicht lesen.\n"
 #define MSGTR_MPDEMUX_MMST_MissingSignature "fehlende Signatur\n"
-#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, daß Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
+#define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, dass Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"
 #define MSGTR_MPDEMUX_MMST_UnknownCmd "Unbekanntes Kommando %02x\n"
 #define MSGTR_MPDEMUX_MMST_GetMediaPacketErr "get_media_packet lieferte Fehler zurück: %s\n"
 #define MSGTR_MPDEMUX_MMST_Connected "Verbunden.\n"
