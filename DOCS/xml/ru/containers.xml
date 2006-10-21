@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19738 -->
+<!-- synced with r20341 -->
 <chapter id="containers">
 <title>Поддерживаемые форматы</title>
 
@@ -205,13 +205,6 @@ MPG и AAC файлы. Вы даже можете извлечь их, используя опции
 <option>-dumpvideo</option> и <option>-dumpaudio</option>.).
 </para>
 
-<note>
-<para>
-Большинство новых QuickTime файлов использует
-<emphasis role="bold">Sorenson</emphasis> видео и QDesign Music аудио. См.
-секцию, посвящённую <link linkend="sorenson">Sorenson</link> кодеку.
-</para>
-</note>
 </sect2>
 
 
@@ -234,12 +227,6 @@ MPG и AAC файлы. Вы даже можете извлечь их, используя опции
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
 
-<para>
-См. секции
-<link linkend="vivo-video">VIVO видео кодек</link> и
-<link linkend="vivo-audio">VIVO аудио кодек</link>
-для инструкций по установке.
-</para>
 </sect2>
 
 
@@ -262,9 +249,6 @@ Autodesk Animator, но это типичный формат для коротких анимационных роликов в се
 <para>
 Да, <application>MPlayer</application> может читать (демультиплексировать)
 RealMedia (<filename>.rm</filename>) файлы. 
-Здесь есть списки поддерживаемых <link
-linkend="realvideo">RealVideo</link> и <link
-linkend="realaudio">RealAudio</link> кодеков.
 </para>
 </sect2>
 

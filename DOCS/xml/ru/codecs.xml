@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19687 -->
+<!-- synced with r20341 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -81,25 +81,13 @@
 <title>FFmpeg/libavcodec</title>
 
 <para>
-<ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> содержит пакет кодеков
-с <emphasis role="bold">открытым исходным кодом</emphasis>, который способен
-декодировать потоки, закодированные различными видео и  аудио кодеками.
-Кроме того, этот пакет предоставляет потрясающие кодирующие возможности,
-причём производительность выше, чем у Win32 кодеков или DivX.com DivX4/5
-библиотеки!
-</para>
-
-<para>
-Он содержит множество хороших кодеков, из которых наиболее важными являются
-разновидности MPEG4: DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Также весьма
-интересен декодер WMA.
-</para>
-
-<para>
-Наконец, последний кодек, заслуживающий внимания &mdash; это
-<emphasis role="bold">Sorenson 3</emphasis> (SVQ3) кодек. Это первая реализация
-этого кодека с полностью открытым исходным кодом. Она даже быстрее оригинала.
-Используйте её, вместо двоичного кодека!
+<ulink url="http://ffmpeg.sourceforge.net">FFmpeg</ulink> содержит
+<systemitem class="library">libavcodec</systemitem> - ведущую библиотеку аудио
+и видео кодеков с открытым исходным кодом. Она способна декодировать 
+большинство мультимедиа форматов, обычно быстрее альтернатив, and aim support for the rest
+of them eventually. Это декодер по-умолчанию для большинства кодеков, поддерживаемых 
+<application>MPlayer</application>. Кодирование также возможно для некоторых форматов и
+поддерживается в <application>Mencoder</application>.
 </para>
 
 <para>
@@ -109,156 +97,11 @@
 </para>
 
 <para>
-Как релиз <application>MPlayer</application>'а, так и его версия из Subversion 
-содержат <systemitem class="library">libavcodec</systemitem>. Поэтому нет надобности 
-беспокоиться о ее отдельной сборке. Просто запустите 
-<filename>configure</filename> и компилируйте как обычно.
+<application>MPlayer</application> 
+содержит <systemitem class="library">libavcodec</systemitem>. 
+Просто запустите <filename>configure</filename> и компилируйте как обычно.
 </para>
 
-<para>
-С FFmpeg и моей Matrox G400, я даже могу смотреть DivX фильмы с высочайшим
-разрешением без пропускаемых кадров на моем K6-2 500.
-</para>
-</sect2>
-
-
-<sect2 id="xanim">
-<title>XAnim'овские кодеки</title>
-
-<note>
-<para>
-Обратите внимание, что XAnim'овские бинарные кодеки распространяются с небольшим
-текстом, утверждающим, что это лицензия и, помимо прочих запретов, запрещающим
-использование этих кодеков с любой программой кроме <application>XAnim</application>.
-Тем не менее, автор XAnim еще должен возбудить судебный иск против кого-либо по относящимся 
-к кодеку вопросам.
-</para>
-</note>
-
-<formalpara>
-<title>УСТАНОВКА И ИСПОЛЬЗОВАНИЕ</title>
-<para>
-<application>MPlayer</application> способен использовать XAnim'овские кодеки
-для декодирования. Чтобы включить их, следуйте инструкциям:
-</para>
-</formalpara>
-
-<procedure>
-<step><para>
-  Скачайте кодеки, которые Вы хотите использовать, с 
-  <ulink url="http://xanim.va.pubnix.com">сайта XAnim</ulink>.
-  <emphasis role="bold">3ivx</emphasis> кодека там нет, но его можно найти на
-  <ulink url="http://www.3ivx.com">сайте 3ivx</ulink>
-  </para></step>
-<step><para>
-  <emphasis role="bold">ИЛИ</emphasis> скачайте пакет кодеков с нашей
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>.
-  </para></step>
-<step><para>
-  Используйте опцию <option>--with-xanimlibdir</option>, чтобы сообщить
-  <filename>configure</filename>, где находятся XAnim'овские кодеки.
-  По умолчанию, он их ищет в
-  <filename class="directory">/usr/local/lib/codecs</filename>,
-  <filename class="directory">/usr/local/lib/xanim/mods</filename>,
-  <filename class="directory">/usr/lib/xanim/mods</filename> и
-  <filename class="directory">/usr/lib/xanim</filename>.
-  Вместо этого, Вы можете установить значением переменной среды окружения
-  <envar>XANIM_MOD_DIR</envar> каталог с XAnim'овскими кодеками.
-  </para></step>
-<step><para>
-  Переименуйте/создайте символические ссылки, убрав части, относящиеся к
-  архитектуре так, чтобы файлы назывались: <filename>vid_cvid.xa</filename>,
-  <filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
-  </para></step>
-</procedure>
-
-<para>
-XAnim - это семейство видео кодеков <systemitem>xanim</systemitem>, поэтому Вы
-можете использовать опцию <option>-vfm xanim</option>, чтобы заставить
-<application>MPlayer</application> использовать их, если возможно.
-</para>
-
-<para>
-Протестированные кодеки: <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX,
-h263.</emphasis>
-</para>
-</sect2>
-
-
-<sect2 id="vivo-video">
-<title>VIVO видео</title>
-<para>
-<application>MPlayer</application> может проигрывать Vivo (1.0 and 2.0) фильмы.
-Наиболее подходящий кодек для 1.0 файлов - это FFmpeg'овский H263 декодер, Вы
-можете включить его использование опцией <option>-vc ffh263</option>. Для 2.0
-файлов используйте Win32 DLL (опция <option>-vc vivo</option>). Если Вы не
-укажете опцию в командной строке, <application>MPlayer</application>
-автоматически выберет лучший доступный кодек.
-</para>
-</sect2>
-
-
-<sect2 id="mpeg12">
-<title>MPEG 1/2 видео</title>
-<para>
-MPEG1 и MPEG2 декодируются многоплатформенной родной библиотекой <systemitem
-class="library">libmpeg2</systemitem>, исходный код которой включён в
-<application>MPlayer</application>.  Мы обрабатываем плохое MPEG 1/2 видео,
-перехватывая <systemitem>Сигнал 11</systemitem>
-(<systemitem>нарушение сегментации</systemitem>), и быстро
-реинициализируя кодек, продолжая точно с места ошибки. Такая технология
-восстановления не имеет значимых временных задержек.
-</para>
-</sect2>
-
-
-<sect2 id="avicodecs">
-<title>MS Video1, Cinepak CVID, и другие старые кодеки</title>
-<para>
-MPlayer может воспроизводить большую часть старых кодеков, использовавшихся
-в AVI и MOV файлах. Прежде они декодировались бинарными Win32 кодеками,
-а теперь, используя 
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>,
-для большинства из них у нас есть <emphasis role="bold">родные кодеки</emphasis>.
-</para>
-</sect2>
-
-
-<sect2 id="realvideo">
-<title>RealVideo</title>
-
-<para>
-<application>MPlayer</application> поддерживает декодирование всех версий
-RealVideo:
-
-<itemizedlist>
-<listitem><simpara>
-  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - (де)кодирование поддерживается, используя
-  <systemitem class="library">libavcodec</systemitem>
-  </simpara></listitem>
-<listitem><simpara>
-  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - декодирование
-  поддерживается, используя <emphasis role="bold">библиотеки RealPlayer'а</emphasis>
-  </simpara></listitem>
-</itemizedlist>
-</para>
-
-<para>
-Cкачайте Real кодеки на
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
-и распакуйте их в каталог
-<filename class="directory">/usr/local/lib/codecs</filename>.
-Если Вы хотите хранить их в другом месте, укажите <command>configure</command>
-опцию <option>--with-reallibdir</option>.
-</para>
-
-
-<note><para>
-<application>RealPlayer</application>'овские библиотеки в настоящий момент
-<emphasis role="bold">работают только под Linux, FreeBSD, NetBSD и Cygwin
-на x86, Alpha и PowerPC (тестировались Linux/Alpha и Linux/PowerPC)
-платформах и с Mac OS X</emphasis>.
-</para></note>
 </sect2>
 
 
@@ -278,6 +121,12 @@ Cкачайте Real кодеки на
 сделал исходный код OpenDivX
 закрытым (DivX4, теперь DivX5), и разработчики OpenDivX не из ProjectMayo
 разозлились, и взялись за XviD. Поэтому у обоих проектов общие корни.
+</para>
+
+<para>
+Имейте в виду, что Xvid не нужен для декодирования Xvid-кодиированного видео.
+<systemitem class="library">libavcodec</systemitem> используется по-умолчанию,
+т.к. обеспечивает более высокую скорость.
 </para>
 
 <procedure>
@@ -323,50 +172,11 @@ Cкачайте Real кодеки на
 <step><para>
   Перекомпилируйте <application>MPlayer</application> с
   <option>--with-xvidlibdir=<replaceable>/path/to/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>
+  <option>--with-xvidincdir=<replaceable>/path/to/</replaceable>xvid.h</option>.
   </para></step>
 </procedure>
 </sect2>
 
-
-<sect2 id="sorenson">
-<title>Sorenson</title>
-
-<para>
-Sorenson - это видео кодек, разработанный в Sorenson Media и лицензированный
-Apple, которые распространяют его с <application>QuickTime Player</application>.
-В настоящий момент мы способны декодировать все версии Sorenson видео файлов
-следующими декодерами:
-</para>
-
-<itemizedlist>
-<listitem><simpara>
-  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - декодирование поддерживается
-  <emphasis role="bold">родным кодеком</emphasis>
-  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-<listitem><simpara>
-  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - декодирование поддерживается
-  <emphasis role="bold">родным кодеком</emphasis>
-  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-  </simpara></listitem>
-</itemizedlist>
-
-<procedure>
-<title>КОМПИЛЯЦИЯ MPLAYER'А С ПОДДЕРЖКОЙ БИБЛИОТЕК QUICKTIME</title>
-<note><para>в настоящий момент поддерживаются только 32битные Intel'евские
-платформы.</para></note>
-<step><para>скачайте <application>MPlayer</application>'овский Subversion</para></step>
-<step><para>скачайте пакет QuickTime DLL с
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
-</para></step>
-<step><para>распакуйте пакет QuickTime DLL в Ваш каталог Win32 кодеков
-(по умолчанию: <filename class="directory">/usr/local/lib/codecs</filename>)
-</para></step>
-<step><para>скомпилируйте <application>MPlayer</application></para></step>
-</procedure>
-
-</sect2>
 
 <sect2 id="codec-x264">
 <title>x264</title>
@@ -374,7 +184,8 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <sect3 id="codec-x264-whatis">
 <title>Что такое x264?</title>
 <para>
-  <systemitem class="library">x264</systemitem> - это библиотека для создания
+  <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink> - 
+  это библиотека для создания
   видеопотоков H.264. Она не завершена на 100%, но, по крайней мере, имеет 
   поддержку большинства возможностей H.264, влияющих на качество.
   В спецификации H.264 присутствует множество дополнительных возможностей,
@@ -617,8 +428,9 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 </para>
 
 <para>
-Чтобы включить её поддержку, компилируйте с опцией configure
-<option>--enable-mad</option>.
+Если libmad у вас установлена, <filename>configure</filename> сообщит об этом,
+и поддержка декодирования MPEG аудио с помощью <systemitem class="library">libmad</systemitem>
+будет включена автоматически.
 </para>
 </sect2>
 
@@ -631,62 +443,6 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 декодерам, таким как установленные в полнофункциональных DVB картах и DXR2 адаптерах.
 Не используйте его с другими драйверами вывода звука (такими как OSS и ALSA), которые
 не способны аппаратно декодировать (вы усышите только белый шум).
-</para>
-</sect2>
-
-<sect2 id="vivo-audio">
-<title>VIVO аудио</title>
-<para>
-Аудио кодек, используемый в VIVO файлах зависит от того, является ли это VIVO/1.0 или
-VIVO/2.0 файл. В VIVO/1.0 файлах <emphasis role="bold">g.723</emphasis> аудио,
-а в VIVO/2.0 файлах - <emphasis role="bold">Vivo Siren</emphasis> аудио. Оба
-типа поддерживаются.
-</para>
-</sect2>
-
-
-<sect2 id="realaudio">
-<title>RealAudio</title>
-
-<para>
-<application>MPlayer</application> поддерживает декодирование почти всех версий
-RealAudio:
-</para>
-
-<itemizedlist>
-<listitem><simpara>
-  RealAudio DNET - декодирование поддерживается в
-  <systemitem class="library">liba52</systemitem>
-  </simpara></listitem>
-<listitem><simpara>
-  RealAudio Cook/Sipro/ATRAC3 - декодирование поддерживается использованием
-  <emphasis role="bold">библиотек из RealPlayer'а</emphasis>
-  </simpara></listitem>
-</itemizedlist>
-
-<para>
-Инструкции по установке RealPlayer'овских библиотек находятся в разделе
-<link linkend="realvideo">RealVideo</link>.
-</para>
-</sect2>
-
-<sect2 id="qdesign">
-<title>QDesign кодеки</title>
-<para>
-Аудио потоки QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) обнаруживаются
-в MOV/QT файлах. Обе версии этого кодека могут декодироваться библиотеками
-QuickTime. Инструкции по установке см. в секции
-<link linkend="sorenson">Sorenson video codec</link>.
-</para>
-</sect2>
-
-<sect2 id="qualcomm">
-<title>Qualcomm кодеки</title>
-<para>
-Аудио потоки Qualcomm (fourcc:<emphasis>Qclp</emphasis>) обнаруживаются
-в MOV/QT файлах. Они могут декодироваться библиотеками QuickTime.
-Инструкции по установке см. в секции
-<link linkend="sorenson">Sorenson video codec</link>.
 </para>
 </sect2>
 
@@ -704,7 +460,7 @@ AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 Если Вы используете gcc 3.2, который не может скомпилировать встроенный FAAD,
 или просто хотите использовать внешнюю библиотеку, скачаете её с 
 <ulink url="http://www.audiocoding.com/download.php">страницы загрузок</ulink>
-и укажите <filename>configure</filename> <option>--enable-external-faad</option>.
+и укажите <filename>configure</filename> <option>--enable-faad-external</option>.
 Вам не нужен весь faad2, чтобы декодировать AAC файлы, достаточно libfaad.
 Вот как Вы можете её собрать:
 <screen>
@@ -827,7 +583,7 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
 </para>
 <step><para>
   Получите <application>GraphEdit</application> или из DirectX SDK или
-  <ulink url="http://doom9.net">doom9</ulink>
+  <ulink url="http://doom9.net">doom9</ulink>.
   </para></step>
 <step><para>
   Запустите <command>graphedit.exe</command>.
@@ -836,7 +592,7 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
   В меню выберите Graph -> Insert Filters.
   </para></step>
 <step><para>
-  Щёлкните <systemitem>DirectShow Filters</systemitem>
+  Щёлкните <systemitem>DirectShow Filters</systemitem>.
   </para></step>
 <step><para>
   Выберите нужное имя кодека и щёлкните по нему.
