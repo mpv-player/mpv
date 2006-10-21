@@ -411,13 +411,11 @@ static int demux_audio_open(demuxer_t* demuxer) {
     l = stream_read_dword_le(s);
     if(l < 16) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too short (%d)!!!\n",l);
-      free_sh_audio(demuxer, 0);
-      return 0;
+      l = 16;
     }
     if(l > MAX_WAVHDR_LEN) {
       mp_msg(MSGT_DEMUX,MSGL_ERR,"[demux_audio] Bad wav header length: too long (%d)!!!\n",l);
-      free_sh_audio(demuxer, 0);
-      return 0;
+      l = 16;
     }
     sh_audio->wf = w = malloc(l > sizeof(WAVEFORMATEX) ? l : sizeof(WAVEFORMATEX));
     w->wFormatTag = sh_audio->format = stream_read_word_le(s);
