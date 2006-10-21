@@ -1,4 +1,4 @@
-.\" synced with r20288
+.\" synced with r20336
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT gmail.com >,
@@ -47,146 +47,96 @@ mencoder \- Encodeur vidéo
 .na
 .nh
 .B mplayer
-.RI [options]\ [ \ fichier\  | \ URL\  | \ playlist\  | \ \-\  ]
+[options] [fichier||liste de lecture |\-]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[options globales]
-.I fichier1
+[options] fichier1
 [options spécifiques] [fichier2] [options spécifiques]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[options globales]
-.RI { "groupe de fichiers et d'options" }
+[options]
+{ "groupe de fichiers et d'options" }
 [options spécifiques au groupe]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [dvd|dvdnav]://[titre | [titre_de_début]\-titre_de_fin ]
+[dvd|dvdnav]://[titre|[titre_de_début]\-titre_de_fin ]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I vcd://piste[/périphérique]
+vcd://piste[/périphérique]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tv://[canal]
+tv://[canal]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I radio://[canal ou fréquence][/capture]
+radio://[canal|fréquence][/capture]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I pvr://
+pvr://
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I dvb://[numero_de_carte@]canal
+dvb://[numero_de_carte@]canal
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mf://filemask
+mf://filemask
 [options \-mf] [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [cdda|cddb]://piste[-piste_de_fin][:vitesse][/périphérique]
+[cdda|cddb]://piste[-piste_de_fin][:vitesse][/périphérique]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I cue://fichier[:piste]
+cue://fichier[:piste]
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv] ://
-[utilisateur:mdp@]\fIURL\fP[:port] [options]
+[file mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv] ://
+[utilisateur:motdepasse@]URL[:port] [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I sdp://fichier
+sdp://fichier
 [options]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mpst://hôte[:port]/URL
+mpst://hôte[:port]/URL
 [options]
 .
 .br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://hôte/list
+tivo://hôte/[list|llist|fsid]
 [options]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://hôte/llist
-[options]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://hôte/fsid
-[options]
+.
 .br
 .B gmplayer
-'in +\n[.k]u
 [options]
 [\-skin\ skin]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[options]
-.RI [ \ fichier\  | \ URL\  | \ \-\  ]
-[\-o\ fichier]
+[options] fichier
+[fichier|URL|\-] [\-o\ fichier]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[options globales]
-.I file1
+[options] fichier1
 [options spécifiques] [fichier2] [options spécifiques]
 .ad
 .hy
