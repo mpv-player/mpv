@@ -5532,12 +5532,12 @@ uninit_player(INITED_ALL-(INITED_GUI+INITED_INPUT+(fixed_vo?INITED_VO:0)));
 #endif
     }
     set_of_sub_size = 0;
+   }
     vo_sub_last = vo_sub=NULL;
     subdata=NULL;
 #ifdef USE_ASS
     ass_track = NULL;
 #endif
-   }
 #endif
 
 if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
