@@ -391,10 +391,8 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
 	*pts = (double)os->lastpos / (double)os->samplerate;
      }
 #endif /* HAVE_OGGTHEORA */
-# ifdef HAVE_FLAC
   } else if (os->flac) {
      /* we pass complete packets to flac, mustn't strip the header! */
-#endif /* HAVE_FLAC */
   } else {
     if(*pack->packet & PACKET_TYPE_HEADER)
       os->hdr_packets++;
@@ -1003,7 +1001,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	    if( mp_msg_test(MSGT_HEADER,MSGL_V) ) print_video_header(sh_v->bih,MSGL_V);
 	}
 #   endif /* HAVE_OGGTHEORA */
-#   ifdef HAVE_FLAC
     } else if (pack.bytes >= 4 && !strncmp (&pack.packet[0], "fLaC", 4)) {
 	sh_a = new_sh_audio_aid(demuxer,ogg_d->num_sub, n_audio);
 	sh_a->format =  mmioFOURCC('f', 'L', 'a', 'C');
@@ -1012,7 +1009,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].flac = 1;
 	sh_a->wf = NULL;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (FLAC), -aid %d\n",ogg_d->num_sub,n_audio-1);
-#   endif /* HAVE_FLAC */
 
       /// Check for old header
     } else if(pack.bytes >= 142 && ! strncmp(&pack.packet[1],"Direct Show Samples embedded in Ogg",35) ) {
