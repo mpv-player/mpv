@@ -4351,6 +4351,11 @@ if(time_frame>0.001 && !(vo_flags&256)){
 
         current_module="flip_page";
         if (!frame_time_remaining) {
+
+         // FIXME: add size based support for -endpos
+         if ( end_at.type == END_AT_TIME && end_at.pos < sh_video->pts )
+              eof = PT_NEXT_ENTRY;
+
          if(blit_frame){
 	   unsigned int t2=GetTimer();
 	   double tt;
@@ -4364,10 +4369,6 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	   else if (j > frame_time + frame_time * FRAME_LAG_WARN)
 		too_slow_frame_cnt++;
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
-
-           // FIXME: add size based support for -endpos
-           if ( end_at.type == END_AT_TIME && end_at.pos < sh_video->pts )
-                eof = PT_NEXT_ENTRY;
 
 	   if(vo_config_count) video_out->flip_page();
 	   if (play_n_frames >= 0) {
