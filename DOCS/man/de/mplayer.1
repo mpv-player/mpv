@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20288
+.\" In sync with r20322
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -48,145 +48,96 @@ mencoder \- Movie Encoder
 .na
 .nh
 .B mplayer
-.RI [Optionen]\ [ \ Datei\  | \ URL\  | \ Playlist\  | \ \-\  ]
+[Optionen] [Datei|URL|Playlist|\-]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[globale Optionen]
-.I Datei1
+[Optionen] Datei1
 [spezielle Optionen] [Datei2] [spezielle Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[globale Optionen]
-.RI { "Liste von Dateien und Optionen" }
-[Liste von Dateien und Optionen]
+[Optionen]
+{Liste von Dateien und Optionen}
+[spezifische Optionen für die Optionen der Liste]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [dvd|dvdnav]://[Titel | [Starttitel]\-Endtitel ]
+[dvd|dvdnav]://[Titel|[Starttitel]\-Endtitel]
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I vcd://Titel[/Gerät]
+vcd://Titel[/Gerät]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tv://[Kanal]
+tv://[Kanal]
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I radio://[Kanal oder Frequenz][/capture]
+radio://[Kanal oder Frequenz][/capture]
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I pvr://
+pvr://
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I dvb://[Kartennummer@]Kanal
+dvb://[Kartennummer@]Kanal
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mf://Dateimaske
-[-mf Optionen] [Optionen]
+mf://Dateimaske
+[Optionen für \-mf] [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [cdda|cddb]://Titel[-Endtitel][:Geschwindigkeit][/Gerät]
+[cdda|cddb]://Titel[-Endtitel][:Geschwindigkeit][/Gerät]
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I cue://Datei[:Titel]
+cue://Datei[:Titel]
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv] ://
-[Benutzer:Passwort@]\fIURL\fP[:Port] [Optionen]
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[Benutzer:Passwort@]URL[:Port] [Optionen]
+.
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I sdp://Datei
+sdp://Datei
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mpst://Rechnername[:Port]/URL
+mpst://Rechnername[:Port]/URL
 [Optionen]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tivo://Rechnername/list
+tivo://Rechnername/[list|llist|fsid]
 [Optionen]
+.
 .br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://Rechnername/llist
-[Optionen]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://Rechnername/fsid
-[Optionen]
-.br
-.in
 .B gmplayer
-'in +\n[.k]u
 [Optionen]
 [\-skin\ Skin]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[Optionen]
-.RI [ \ Datei\  | \ URL\  | \ \-\  ]
-[\-o\ Datei]
+[Optionen] Datei
+[Datei|URL|\-] [\-o Datei]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[globale Optionen]
-.I Datei1
+Optionen Datei1
 [spezielle Optionen] [Datei2] [spezielle Optionen]
 .ad
 .hy
