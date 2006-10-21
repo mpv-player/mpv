@@ -470,7 +470,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       }
       if(a_pos==-1){
         mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI_NI: " MSGTR_MissingAudioStream);
-        sh_audio=NULL;
+        d_audio->sh=sh_audio=NULL;
       } else {
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
           mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_NI_Message,force_ni?MSGTR_NI_Forced:MSGTR_NI_Detected);
@@ -500,7 +500,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_V,"AVI: Searching for audio stream (id:%d)\n",d_audio->id);
     if(!priv->audio_streams || !ds_fill_buffer(d_audio)){
       mp_msg(MSGT_DEMUX,MSGL_INFO,"AVI: " MSGTR_MissingAudioStream);
-      sh_audio=NULL;
+      d_audio->sh=sh_audio=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
       sh_audio->format=sh_audio->wf->wFormatTag;
