@@ -198,12 +198,6 @@ streams in these files are real MPG and AAC files. You can even extract them wit
 <option>-dumpvideo</option> and <option>-dumpaudio</option> options.).
 </para>
 
-<note>
-<para>
-Most new QuickTime files use <emphasis role="bold">Sorenson</emphasis> video and
-QDesign Music audio. See our <link linkend="sorenson">Sorenson</link> codec section.
-</para>
-</note>
 </sect2>
 
 
@@ -225,12 +219,6 @@ The video codec of VIVO/2.0 files is a modified, nonstandard
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
 
-<para>
-See the
-<link linkend="vivo-video">VIVO video codec</link> and
-<link linkend="vivo-audio">VIVO audio codec</link>
-sections for installation instructions.
-</para>
 </sect2>
 
 
@@ -253,9 +241,6 @@ picture will be messy for a short time after seeking.
 <para>
 Yes, <application>MPlayer</application> can read (demux) RealMedia
 (<filename>.rm</filename>) files.
-Here are the lists of the supported <link
-linkend="realvideo">RealVideo</link> and <link
-linkend="realaudio">RealAudio</link> codecs.
 </para>
 </sect2>
 
