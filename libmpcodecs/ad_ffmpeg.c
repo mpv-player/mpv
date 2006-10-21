@@ -115,7 +115,9 @@ static int init(sh_audio_t *sh_audio)
   if(sh_audio->wf){
       // If the decoder uses the wrong number of channels all is lost anyway.
       // sh_audio->channels=sh_audio->wf->nChannels;
+      if (sh_audio->wf->nSamplesPerSec)
       sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
+      if (sh_audio->wf->nAvgBytesPerSec)
       sh_audio->i_bps=sh_audio->wf->nAvgBytesPerSec;
   }
   sh_audio->samplesize=2;
