@@ -119,7 +119,7 @@ void x264enc_set_param(m_option_t* opt, char* arg)
         parse_error |= ret;
     }
 
-    if(param.rc.b_stat_write) {
+    if(param.rc.b_stat_write && !param.rc.b_stat_read) {
         /* Adjust or disable some flags to gain speed in the first pass */
         if(turbo == 1)
         {
