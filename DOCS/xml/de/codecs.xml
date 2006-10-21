@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20321 -->
+<!-- synced with r20328 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -107,7 +107,7 @@
       Sowohl die offiziellen <application>MPlayer</application>-Releases als auch <application>MPlayer</application>
       aus dem Subversion-Repository enthalten <systemitem class="library">libavcodec</systemitem>.
       Es ist also nicht nötig, hier eigens einen <systemitem class="library">libavcodec</systemitem>-Checkout zu
-      machen. Es genügt, <filename>configure</filename> laufen zu lassen und zu kompilieren.
+      machen. Es genügt, <filename>configure</filename> laufen zu lassen und zu compilieren.
     </para>
 
     <para>
@@ -206,7 +206,7 @@
 
 
   <sect2 id="avicodecs">
-    <title>MS Video1, Cinepak CVID und andere ätere Codecs</title>
+    <title>MS Video1, Cinepak CVID und andere ältere Codecs</title>
     <para>
       <application>MPlayer</application> ist in der Lage, die meisten der älteren in
       AVI- und MOV-Dateien verwendeten Codecs abzuspielen.
@@ -267,7 +267,7 @@
       Es begann als Fork der Entwicklung des OpenDivX-Codecs.
       Dies geschah, als ProjectMayo OpenDivX zu Closed Source DivX4 (inzwischen DivX5)
       machte und die Leute, die an OpenDivX arbeiteten aber nicht zu ProjectMayo gehörten,
-      verärgerten. Diese riefen dann XviD ins Leben. Beide Projekte haben daher denselben Ursprung.
+      verärgerte. Diese riefen dann XviD ins Leben. Beide Projekte haben daher denselben Ursprung.
     </para>
 
     <procedure>
@@ -321,7 +321,7 @@
     <title>Sorenson</title>
 
     <para>
-      Sorenson ist ein Videocodec, der von Sorenson Media entwickelt an Apple
+      Sorenson ist ein Videocodec, der von Sorenson Media entwickelt und an Apple
       lizensiert wurde, welcher ihn mit ihrem <application>QuickTime Player</application>
       vertreibt. Wir sind momentan in der Lage, alle Versionen von Sorenson-Videodateien
       mit Hilfe der folgenden Decoder zu decodieren:
@@ -409,7 +409,7 @@
       </para>
       <para>
         Wie auch immer du ihn nennst, H.264 ist es eventuell wert, ausprobiert
-        zu werden, da er typischerweise die Qualität von MPEG-4 ASP mit 5%-30%
+        zu werden, da er typischerweise die Qualität von MPEG-4 ASP bei 5%-30%
         Einsparung der Bitrate erreicht.
         Tatsächliche Ergebnisse werden sowohl vom Quellmaterial als auch dem
         Encoder abhängen.
@@ -576,7 +576,7 @@
 
     <para>
       Um mehr als zwei Ausgabekanäle verwenden zu können, muss OSS verwendet werden,
-      und die Soundkarte muß die entsprechende Anzahl an Kanälen mittels ioctl
+      und die Soundkarte muss die entsprechende Anzahl an Kanälen mittels ioctl
       SNDCTL_DSP_CHANNELS unterstützen. Ein funktionierender Treiber ist emu10k1
       (wird für Soundblaster Live! Karten benutzt) seit August 2001
       (Neuere ALSA-Versionen sollten auch funktionieren).
@@ -588,7 +588,7 @@
     <title>Hardware-AC3-Decoder</title>
     <para>
       Benötigt wird eine AC3 fähige Soundkarte mit einem Digitalausgang (S/PDIF).
-      Der Treiber der Karte muß das AFMT_AC3 Format korrekt unterstützen (wie
+      Der Treiber der Karte muss das AFMT_AC3 Format korrekt unterstützen (wie
       z.B. C-Media). Verbinde dann den Hardware AC3 Decoder mit dem S/PDIF Ausgang
       und benutze <option>-ac hwac3</option>. Die Unterstützung ist experimentell,
       funktioniert aber z.B. mit C-Media Karten und Soundblaster Live! mit ALSA
@@ -612,7 +612,7 @@
     <para>
       Wenn libman bei dir korrekt installiert ist, wird <filename>configure</filename>
       dies bemerken, und Unterstützung für MPEG-Audiodecodierung via
-      <systemitem class="library">libmad</systemitem> automatisch eingebaut.
+      <systemitem class="library">libmad</systemitem> wird automatisch eingebaut.
     </para>
   </sect2>
 
@@ -680,7 +680,7 @@
       Qualcomm Audio (fourcc:<emphasis>Qclp</emphasis>) wird in
       MOV/QT-Dateien verwendet. Es kann mit den QuickTime-Bibliotheken
       decodiert werden. Instruktionen zur Installation finden sich im
-      <link linkend="sorenson">Sorenson Videocodec</link> Absatz.
+      Abschnitt <link linkend="sorenson">Sorenson Videocodec</link>.
     </para>
   </sect2>
 
@@ -692,7 +692,7 @@
       FAAD ist auf <ulink url="http://www.audiocoding.com"/>
       verfügbar. <application>MPlayer</application> enthält
       eine CVS Version von libfaad 2.1 beta, so dass es nicht extra
-      installiert werden muß.
+      installiert werden muss.
     </para>
 
     <para>
@@ -745,10 +745,11 @@ unzip 26204-600.zip
 unzip 26204-600_ANSI-C_source_code.zip
 mv c-code libavcodec/amrwb_float<!--
       --></screen>
-      Nun werden die beiden Codecs von configure automatisch erkannt.
+      Befolge danach einfach das <link linkend="features">Standardvorgehen für die Compilierung</link> von
+      <application>MPlayer</application>.
     </para>
   </sect2>
-  
+
 </sect1>
 
 <!-- ********** -->
@@ -765,12 +766,12 @@ mv c-code libavcodec/amrwb_float<!--
       VFW (Video for Windows) ist die alte Video-API von Windows. Deren Codecs hat die
       Dateinamenerweiterung <filename>.DLL</filename> oder (selten) <filename>.DRV</filename>.
       Wenn <application>MPlayer</application> bei der Wiedergabe deines AVIs fehlschlägt
-      mit einer Meldung wie.
+      mit einer Meldung wie:
       <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
     </para>
 
     <para>
-      Dies bedeutet, dass dein AVI mit einem Codec encodiert ist, der den fourcc HFYU
+      ..bedeutet dies, dass dein AVI mit einem Codec encodiert ist, der den fourcc HFYU
       (HFYU = HuffYUV-Codec, DIV3 = DivX Low Motion, etc.) hat. Da du dies jetzt weißt,
       musst du herausfinden, welche DLL Windows lädt, um diese Datei abzuspielen. In
       unserem Fall enthält die <filename>system.ini</filename> diese Information in einer
@@ -796,7 +797,7 @@ mv c-code libavcodec/amrwb_float<!--
     <note><para>
         Suche nach dieser Information unter Windows NT/2000/XP in der Registry,
         suche also z.B. nach &quot;VIDC.HFYU&quot;. Um herauszufinden, wie man das
-        macht, schaue dir die folgende Methode zu DirectShow unten an.
+        macht, schaue dir die folgende Methode zu DirectShow an.
       </para></note>
   </sect2>
 
@@ -825,7 +826,7 @@ mv c-code libavcodec/amrwb_float<!--
       </para>
       <step><para>
           Beziehe <application>GraphEdit</application> entweder aus dem DirectX-SDK
-          oder von <ulink url="http://doom9.net">doom9</ulink>
+          oder von <ulink url="http://doom9.net">doom9</ulink>.
         </para></step>
       <step><para>
           Starte <command>graphedit.exe</command>.
@@ -834,7 +835,7 @@ mv c-code libavcodec/amrwb_float<!--
           Wähle aus dem Menü Graph -> Insert Filters.
         </para></step>
       <step><para>
-          Klappe den Eintrag <systemitem>DirectShow Filters</systemitem> aus
+          Klappe den Eintrag <systemitem>DirectShow Filters</systemitem> aus.
         </para></step>
       <step><para>
           Wähle den richtigen Codecnamen und klappe den Eintrag aus.
