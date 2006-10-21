@@ -152,6 +152,8 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->mux->bih->biHeight = height;
     mod->mux->aspect = (float)d_width/d_height;
     
+    // make sure param is initialized
+    x264enc_set_param(NULL, "");
     param.i_width = width;
     param.i_height = height;
     param.i_fps_num = mod->mux->h.dwRate;
