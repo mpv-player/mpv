@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19738 -->
+<!-- in sync with r20341 -->
 
 <chapter id="containers">
   <title>Containerformate</title>
@@ -239,13 +239,6 @@
         und <option>-dumpaudio</option> kannst du sie sogar extrahieren.).
       </para>
 
-      <note>
-        <para>
-          Die meisten QuickTime-Dateien benutzen
-          <emphasis role="bold">Sorenson</emphasis>-Video und QDesign-Audio. Lies dazu die
-          <link linkend="sorenson">Sorenson</link>-Codec-Sektion.
-        </para>
-      </note>
     </sect2>
 
 
@@ -267,11 +260,6 @@
         oder <emphasis role="bold">Vivo Siren</emphasis>.
       </para>
 
-      <para>
-        In den <link linkend="vivo-video">VIVO-Videocodec</link>- und
-        <link linkend="vivo-audio">VIVO-Audiocodec</link>-Sektionen findest
-        du Installationsanweisungen.
-      </para>
     </sect2>
 
 
@@ -296,9 +284,6 @@
       <para>
         Ja, <application>MPlayer</application> kann RealMedia-Dateien
         (<filename>.rm</filename>) lesen (demuxen).
-        Hier ist die Liste der unterstützten
-        <link linkend="realvideo">RealVideo</link>- und
-        <link linkend="realaudio">RealAudio</link>-Codecs.
       </para>
     </sect2>
 

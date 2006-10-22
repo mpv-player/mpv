@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20328 -->
+<!-- synced with r20341 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -79,10 +79,13 @@
       <title>FFmpeg/libavcodec</title>
 
       <para>
-        <ulink url="http://ffmpeg.org">FFmpeg</ulink> enthält ein
-        <emphasis role="bold">Open Source</emphasis> Codec Paket, welches in der Lage ist, Streams mit einer Reihe
-        verschiedener Audio- und Videocodecs zu decodieren. Es bietet auch beeindruckende Codierfähigkeiten und
-        höhere Geschwindigkeit als die Win32-Codecs oder die DivX.com DivX4/5 Bibliotheken!
+        <ulink url="http://ffmpeg.org">FFmpeg</ulink> enthält <systemitem class="library">libavcodec</systemitem>,
+        die führende Open-Source-Bibliothek für Video und Audio. Sie ist in der Lage, die meisten
+        Multimedia-Formate zu decodieren, normalerweise schneller als die Alternativen;
+        möglicherweise wird auch noch Unterstützung für die anderen Formate hinzugefügt.
+        Es ist der Standarddecoder für den Großteil der Codecs, die <application>MPlayer</application>
+        unterstützt. Für manche Formate ist außerdem auch Encodierung mit Hilfe von
+        <application>MEncoder</application> möglich.
       </para>
 
       <para>
@@ -104,152 +107,10 @@
     </para>
 
     <para>
-      Sowohl die offiziellen <application>MPlayer</application>-Releases als auch <application>MPlayer</application>
-      aus dem Subversion-Repository enthalten <systemitem class="library">libavcodec</systemitem>.
-      Es ist also nicht nötig, hier eigens einen <systemitem class="library">libavcodec</systemitem>-Checkout zu
-      machen. Es genügt, <filename>configure</filename> laufen zu lassen und zu compilieren.
+      <application>MPlayer</application> enthält <systemitem class="library">libavcodec</systemitem>.
+      Es genügt, <filename>configure</filename> laufen zu lassen und zu compilieren.
     </para>
 
-    <para>
-      Mit FFmpeg und meiner Matrox G400 kann ich auf meinem K6-2 500 DivX Filme selbst mit
-      höchster Auflösung sehen, ohne dabei Frames zu verlieren.
-    </para>
-  </sect2>
-
-
-  <sect2 id="xanim">
-    <title>XAnim Codecs</title>
-
-    <note>
-      <para>
-        Es soll darauf hingewiesen werden, dass die XAnim-Binärcodecs zusammen mit einem Text veröffentlicht werden,
-        der behauptet, eine rechtlich verbindliche Software Lizenz zu sein, und dem Anwender verbietet, den Codec in
-        Verbindung mit einem anderen Programm als <application>XAnim</application> zu benutzen. Von seiten des Autors
-        von XAnim steht ein rechtliches Vorgehen gegen irgendwen im Zusammenhang mit dem Codec jedoch noch aus.
-      </para>
-    </note>
-
-    <formalpara>
-      <title>INSTALLATION UND GEBRAUCH</title>
-      <para>
-        <application>MPlayer</application> ermöglicht es, die XAnim-Codecs zur Decodierung zu benutzen.
-        Folge diesen Anweisungen:
-      </para>
-    </formalpara>
-
-    <procedure>
-      <step><para>
-          Lade die Codecs, die du nutzen möchtest, von der
-          <ulink url="http://xanim.polter.net/">XAnim Seite</ulink> herunter.
-          Der <emphasis role="bold">3ivx</emphasis>-Codec ist nicht dort, sondern auf der
-          <ulink url="http://www.3ivx.com">3ivx Seite</ulink>.
-        </para></step>
-      <step><para>
-          <emphasis role="bold">ODER</emphasis> lade das Codecpaket von unserer
-          <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">Codecs-Seite</ulink> herunter.
-        </para></step>
-      <step><para>
-          Nutze die Option <option>--with-xanimlibdir</option>, um
-          <filename>configure</filename> mitzuteilen, wo sich die XAnim-Codecs befinden.
-          Als Voreinstellung sucht es in
-          <filename class="directory">/usr/local/lib/codecs</filename>,
-          <filename class="directory">/usr/local/lib/xanim/mods</filename>,
-          <filename class="directory">/usr/lib/xanim/mods</filename> and
-          <filename class="directory">/usr/lib/xanim</filename>.
-          Alternativ kann man auch die Umgebungsvariable <envar>XANIM_MOD_DIR</envar> auf das
-          entsprechende Verzeichnis zeigen lassen.
-        </para></step>
-      <step><para>
-          Benenne die Dateien um oder verwende Symlinks, so dass alle Namen wie folgt heißen
-          (die Architektur wird dabei, wie man sieht, weggelassen):
-          <filename>vid_cvid.xa</filename>,<filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
-        </para></step>
-    </procedure>
-
-    <para>
-      XAnim ist in der Videocodecfamilie <systemitem>xanim</systemitem>, daher kannst du die Option
-      <option>-vfm xanim</option> verwenden, um <application>MPlayer</application> anzuweisen,
-      diese zu verwenden, falls es möglich ist.
-    </para>
-
-    <para>
-      Getestete Codecs sind unter anderem:
-      <emphasis role="bold">Indeo 3.2, 4.1, 5.0, CVID, 3ivX, H.263.</emphasis>
-    </para>
-  </sect2>
-
-
-  <sect2 id="vivo-video">
-    <title>VIVO Video</title>
-    <para>
-      <application>MPlayer</application> kann Vivo (1.0 und 2.0) Videos abspielen.
-      Der passendste Codec für 1.0-Dateien ist FFmpeg's H.263-Decoder, du kannst in mit der
-      Option <option>-vc ffh263</option> verwenden. Benutze für 2.0-Dateien die Win32-DLL mit
-      Hilfe der Option <option>-vc vivo</option>. Wenn du keine Kommandozeilenoptionen angibst,
-      wählt <application>MPlayer</application> automatisch den besten Codec.
-    </para>
-  </sect2>
-
-
-  <sect2 id="mpeg12">
-    <title>MPEG-1/2-Video</title>
-    <para>
-      MPEG-1 und MPEG-2 werden mit der nativen, plattformunabhängigen
-      <systemitem class="library">libmpeg2</systemitem>-Bibliothek decodiert, deren Sourcecode
-      in <application>MPlayer</application> enthalten ist.
-      Wir behandeln fehlerhafte MPEG-1/2-Videodateien, indem wir <systemitem>Signal 11</systemitem>
-      (<systemitem>Speicherzugriffsfehler</systemitem>) abfangen und den Codec schnell
-      reinitialisieren, wobei genau dort fortgesetzt wird, wo der Fehler aufgetreten ist.
-      Diese Art der Fehlerbehandlung hat keine messbaren Geschwindigkeitsnachteile.
-    </para>
-  </sect2>
-
-
-  <sect2 id="avicodecs">
-    <title>MS Video1, Cinepak CVID und andere ältere Codecs</title>
-    <para>
-      <application>MPlayer</application> ist in der Lage, die meisten der älteren in
-      AVI- und MOV-Dateien verwendeten Codecs abzuspielen.
-      In der Vergangenheit wurden sie mit binären Win32-Codecs decodiert, inzwischen haben
-      wir aber durch
-      <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-      für die meisten <emphasis role="bold">native Codecs</emphasis>.
-    </para>
-  </sect2>
-
-
-  <sect2 id="realvideo">
-    <title>RealVideo</title>
-
-    <para>
-      <application>MPlayer</application> unterstützt Decodierung aller Versionen von RealVideo:
-
-      <itemizedlist>
-        <listitem><simpara>
-            RealVideo 1.0, 2.0 (fourcc RV10, RV20) - En-/Decodierung unterstützt durch
-            <systemitem class="library">libavcodec</systemitem>
-          </simpara></listitem>
-        <listitem><simpara>
-            RealVideo 3.0, 4.0 (fourcc RV30, RV40) - En-/Decodierung unterstützt durch
-            <emphasis role="bold">RealPlayer-Bibliotheken</emphasis>
-          </simpara></listitem>
-      </itemizedlist>
-    </para>
-
-    <para>
-      Lade die Real-Codecs von
-      <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
-      herunter und extrahiere sie in das Verzeichnis
-      <filename class="directory">/usr/local/lib/codecs</filename>.
-      Wenn du sie woanders speichern möchtest, übergib die Option
-      <option>--with-reallibdir</option> an <command>configure</command>.
-    </para>
-
-    <note><para>
-        <application>RealPlayer</application>-Bibliotheken funktionieren momentan
-        <emphasis role="bold">nur unter Linux, FreeBSD, NetBSD und Cygwin auf der x86-Plattform,
-          Alpha- und PowerPC- (Linux/Alpha und Linux/PowerPC wurden getestet) Plattformen und mit Mac OS X</emphasis>.
-      </para></note>
   </sect2>
 
 
@@ -268,6 +129,12 @@
       Dies geschah, als ProjectMayo OpenDivX zu Closed Source DivX4 (inzwischen DivX5)
       machte und die Leute, die an OpenDivX arbeiteten aber nicht zu ProjectMayo gehörten,
       verärgerte. Diese riefen dann XviD ins Leben. Beide Projekte haben daher denselben Ursprung.
+    </para>
+
+    <para>
+      Beachte, dass Xvid nicht benötigt wird, um mit Xvid encodiertes Video zu decodieren.
+      In der Standardkonfiguration wird dafür <systemitem class="library">libavcodec</systemitem>
+      benutzt, da er höhere Geschwindigkeit bietet.
     </para>
 
     <procedure>
@@ -317,52 +184,14 @@
   </sect2>
 
 
-  <sect2 id="sorenson">
-    <title>Sorenson</title>
-
-    <para>
-      Sorenson ist ein Videocodec, der von Sorenson Media entwickelt und an Apple
-      lizensiert wurde, welcher ihn mit ihrem <application>QuickTime Player</application>
-      vertreibt. Wir sind momentan in der Lage, alle Versionen von Sorenson-Videodateien
-      mit Hilfe der folgenden Decoder zu decodieren:
-    </para>
-
-    <itemizedlist>
-      <listitem><simpara>
-          Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - Decodierung unterstützt durch
-          <emphasis role="bold">nativen Codec</emphasis>
-          (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-        </simpara></listitem>
-      <listitem><simpara>
-          Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - Decodierung unterstützt durch
-          <emphasis role="bold">nativen Codec</emphasis>
-          (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
-        </simpara></listitem>
-    </itemizedlist>
-
-    <procedure>
-      <title>COMPILIERUNG VON MPLAYER MIT UNTERSTÜTZUNG FÜR QUICKTIME-BIBLIOTHEKEN</title>
-      <note><para>Momentan werden nur die 32-Bit-Intel-Plattformen unterstützt.</para></note>
-      <step><para>Lade <application>MPlayer</application> aus dem Subversion-Repository herunter.</para></step>
-      <step><para>Lade das QuickTime-DLL-Pack von
-          <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
-          herunter.
-        </para></step>
-      <step><para>Extrahiere das QuickTime-DLL-Pack in dein Win32-Codecs-Verzeichnis.
-          (Standard: <filename class="directory">/usr/local/lib/codecs/</filename>)
-        </para></step>
-      <step><para>Compiliere <application>MPlayer</application>.</para></step>
-    </procedure>
-
-  </sect2>
-
   <sect2 id="codec-x264">
     <title>x264</title>
 
     <sect3 id="codec-x264-whatis">
       <title>Was ist x264?</title>
       <para>
-        <systemitem class="library">x264</systemitem> ist eine Bibliothek für die
+        <ulink url="http://developers.videolan.org/x264.html"><systemitem class="library">x264</systemitem></ulink>
+        ist eine Bibliothek für die
         Erstellung von H.264-Videostreams.
         Es ist nicht 100% vollständig, hat momentan aber zumindest eine Art
         Unterstützung für die meisten H.264-Features, die Einfluß auf die Qualität haben.
@@ -628,61 +457,6 @@
     </para>
   </sect2>
 
-  <sect2 id="vivo-audio">
-    <title>VIVO Audio</title>
-    <para>
-      Der Audiocodec in VIVO-Dateien hängt von der Version ab:
-      VIVO/1.0-Dateien verwenden <emphasis role="bold">g.723</emphasis>,
-      VIVO/2.0 Dateien <emphasis role="bold">Vivo Siren</emphasis> Audio.
-      Beide werden unterstützt.
-    </para>
-  </sect2>
-
-  <sect2 id="realaudio">
-    <title>RealAudio</title>
-
-    <para>
-      <application>MPlayer</application> unterstützt die
-      Decodierung von fast allen Versionen von RealAudio:
-    </para>
-
-    <itemizedlist>
-      <listitem><simpara>
-          RealAudio DNET - Decodierung unterstützt durch
-          <systemitem class="library">liba52</systemitem>
-        </simpara></listitem>
-      <listitem><simpara>
-          RealAudio Cook/Sipro/ATRAC3 - Decodierung unterstützt durch
-          <emphasis role="bold">RealPlayer-Bibliotheken</emphasis>
-        </simpara></listitem>
-    </itemizedlist>
-
-    <para>
-      Instruktionen zur Installation der RealPlayer-Bibliotheken finden sich im
-      Anschnitt <link linkend="realvideo">RealVideo</link>.
-    </para>
-  </sect2>
-
-  <sect2 id="qdesign">
-    <title>QDesign Codecs</title>
-    <para>
-      QDesign Audio (fourcc:<emphasis>QDMC, QDM2</emphasis>) wird in
-      MOV/QT-Dateien verwendet. Beide Versionen dieses Codecs können mit
-      den QuickTime-Bibliotheken decodiert werden.
-      Instruktionen zur Installation finden sich im
-      Anschnitt <link linkend="sorenson">Sorenson Videocodec</link>.
-    </para>
-  </sect2>
-
-  <sect2 id="qualcomm">
-    <title>Qualcomm Codecs</title>
-    <para>
-      Qualcomm Audio (fourcc:<emphasis>Qclp</emphasis>) wird in
-      MOV/QT-Dateien verwendet. Es kann mit den QuickTime-Bibliotheken
-      decodiert werden. Instruktionen zur Installation finden sich im
-      Abschnitt <link linkend="sorenson">Sorenson Videocodec</link>.
-    </para>
-  </sect2>
 
   <sect2 id="aac">
     <title>AAC Codec</title>
