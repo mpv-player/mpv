@@ -3749,8 +3749,8 @@ EOF
     _dfb_major=`echo $_directfb_version | cut -d . -f 1`
     _dfb_minor=`echo $_directfb_version | cut -d . -f 2`
     _dfb_micro=`echo $_directfb_version | cut -d . -f 3`
-    _dfb_version=$(dfb_version $_dfb_major $_dfb_minor $_dfb_micro)
-    if test "$_dfb_version" -ge $(dfb_version 0 9 13); then
+    _dfb_version=`dfb_version $_dfb_major $_dfb_minor $_dfb_micro`
+    if test "$_dfb_version" -ge `dfb_version 0 9 13`; then
 	_def_directfb_version="#define DIRECTFBVERSION $_dfb_version"
 	_res_comment="$_directfb_version"
     else
@@ -3767,7 +3767,7 @@ echores "$_directfb"
 
 if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
-  if test "$_dfb_version" -ge $(dfb_version 0 9 13); then
+  if test "$_dfb_version" -ge `dfb_version 0 9 13`; then
     _vosrc="$_vosrc vo_directfb2.c"
     _vomodules="directfb $_vomodules"
     _ld_directfb='-ldirectfb'
@@ -3775,7 +3775,7 @@ if test "$_directfb" = yes ; then
     _novomodules="directfb $_novomodules"
   fi
 
-  if test "$_dfb_version" -ge $(dfb_version 0 9 15); then
+  if test "$_dfb_version" -ge `dfb_version 0 9 15`; then
     _vosrc="$_vosrc vo_dfbmga.c"
     _vomodules="dfbmga $_vomodules"
     _def_dfbmga='#define HAVE_DFBMGA 1'
