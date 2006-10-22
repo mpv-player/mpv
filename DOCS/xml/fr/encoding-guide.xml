@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20280 -->
+<!-- synced with r20361 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -2282,7 +2282,7 @@ Vous pouvez encoder vers les codecs suivant (la liste suivante est plus ou moins
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG-4 (DivX 5, compatible XviD)
+  ISO standard MPEG-4 (DivX, compatible XviD)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   pre-standard MPEG-4 variant par MS, v3 (AKA DivX3)
