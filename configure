@@ -6988,7 +6988,8 @@ if test "$_inet6" = auto ; then
   cat > $TMPC << EOF
 #include <sys/types.h>
 #include <sys/socket.h>
-int main(void) { socket(AF_INET6, SOCK_STREAM, AF_INET6); }
+#include <netinet/in.h>
+int main(void) { struct sockaddr_in6 six; socket(AF_INET6, SOCK_STREAM, AF_INET6); }
 EOF
   _inet6=no
   if cc_check ; then
