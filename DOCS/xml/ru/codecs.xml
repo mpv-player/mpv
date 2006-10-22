@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r20341 -->
+<!-- synced with r20361 -->
 <chapter id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -24,8 +24,8 @@
   <emphasis role="bold">MPEG2</emphasis> (<emphasis role="bold">DVD</emphasis>) видео
   </simpara></listitem>
 <listitem><simpara>
-  "родные" декодеры для <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 и других вариантов MPEG-4.
+  "родные" декодеры для <emphasis role="bold">всех вариантов DivX,
+  3ivX, M$ MPEG-4</emphasis> v1, v2 и других вариантов MPEG-4.
   </simpara></listitem>
 <listitem><simpara>
   "родной" декодер для <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -119,12 +119,12 @@ of them eventually. Это декодер по-умолчанию для большинства кодеков, поддержива
 <para>
 Он начался как ответвление OpenDivX кодека. Это произошло, когда ProjectMayo 
 сделал исходный код OpenDivX
-закрытым (DivX4, теперь DivX5), и разработчики OpenDivX не из ProjectMayo
+закрытым DivX4, и разработчики OpenDivX не из ProjectMayo
 разозлились, и взялись за XviD. Поэтому у обоих проектов общие корни.
 </para>
 
 <para>
-Имейте в виду, что Xvid не нужен для декодирования Xvid-кодиированного видео.
+Имейте в виду, что XviD не нужен для декодирования XviD-кодированного видео.
 <systemitem class="library">libavcodec</systemitem> используется по-умолчанию,
 т.к. обеспечивает более высокую скорость.
 </para>
