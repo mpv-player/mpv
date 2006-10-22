@@ -7368,13 +7368,11 @@ echores "$_joystick"
 echocheck "lirc"
 if test "$_lirc" = auto ; then
   _lirc=no
-  if test -c /dev/lirc -o -c /dev/lirc/0 ; then
       cat > $TMPC <<EOF
 #include <lirc/lirc_client.h>
 int main(void) { return 0; }
 EOF
       cc_check -llirc_client && _lirc=yes
-  fi
 fi
 if test "$_lirc" = yes ; then
   _def_lirc='#define HAVE_LIRC 1'
