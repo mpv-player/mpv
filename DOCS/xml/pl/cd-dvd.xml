@@ -332,12 +332,12 @@ może zawierać inne pliki bądź programy, niekonieczne dla eksploatacji VCD.
 </para></listitem>
 
 <listitem><para>
-Druga i pozostałe ścieżki są zwykle ścieżkami video MGEG typu raw o gęstości 
+Druga i pozostałe ścieżki są zwykle ścieżkami video MPEG typu raw o gęstości 
 2324 bajtów/sektor, zawierającymi jeden pakiet danych MGEG PS na sektor.
 Ścieżki te są w formacje mode 2 form 1, więc przechowują one więcej danych 
 na sektor, w zamian za słabszą korekcję błędów. Możliwe są też ścieżki 
 CD-DA na VCD poza pierwszą ścieżką.
-Niektóre systemy operacyjne używają pewnych trików aby ścieżki nie zawięrające 
+Niektóre systemy operacyjne używają pewnych trików aby ścieżki nie zawierające 
 systemu plików ISO-9660 były widoczne w systemie plików. W pozostałych systemach, 
 jak na przykład w systemie GNU/Linux, nie ma takiej możliwości (jeszcze). W takim 
 przypadku dane MPEG <emphasis role="bold">nie mogą być montowane</emphasis>. 
