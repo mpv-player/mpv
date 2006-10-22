@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20176 -->
+<!-- synced with r20379 -->
 <chapter id="cd-dvd">
   <title>CD/DVD Nutzung</title>
 
@@ -196,12 +196,6 @@
     <para>
       Wenn du <application>MPlayer</application> mit dvdnav-Unterstützung compiliert hast,
       bleibt der Syntax derselbe, ausgenommen die Verwendung von dvdnav:// an Stelle von dvd://.
-    </para>
-
-    <para>
-      Das Standard-DVD-Laufwerk ist <filename>/dev/dvd</filename>. Wenn deine
-      Installation abweicht, erstelle einen Symlink oder gib das genaue Gerät auf
-      der Kommandozeile an mit der Option <option>-dvd-device</option>.
     </para>
 
     <formalpara>
