@@ -1,4 +1,4 @@
-.\" Synced with r20237
+.\" Synced with r20336
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -47,147 +47,97 @@ mencoder \- film kódoló
 .na
 .nh
 .B mplayer
-.RI [opciók]\ [ \ fájl\  | \ URL\  | \ lejátszáslista \  | \ \-\  ]
+[opciók] [fájl|URL|lejátszáslista|\-]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[globális opciók]
-.I fájl1
+[opciók] fájl1
 [specifikus opciók] [fájl2] [specifikus opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[globális opciók]
-.RI { "fájlok csoportja és opcióik" }
+[opciók]
+{fájlok csoportja és opcióik}
 [csoport specifikus opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [dvd|dvdnav]://[sáv | [kezdõ_sáv]\-vég_sáv ]
+[dvd|dvdnav]://[sáv|[kezdõ_sáv]\-vég_sáv]
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I vcd://sáv[/eszköznév]
+vcd://sáv[/eszköznév]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tv://[csatorna]
+tv://[csatorna]
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I radio://[csatorna vagy frekvencia][/capture]
+radio://[csatorna vagy frekvencia][/capture]
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I pvr://
+pvr://
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I dvb://[kártya_szám@]csatorna
+dvb://[kártya_szám@]csatorna
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mf://fájlmaszk
-[-mf opciók] [opciók]
+mf://fájlmaszk
+[\-mf opciók] [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I [cdda|cddb]://sáv[-végsáv][:sebesség][/eszköznév]
+[cdda|cddb]://sáv[-végsáv][:sebesség][/eszköznév]
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I cue://fájl[:sáv]
+cue://fájl[:sáv]
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.RI [ fájl | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv] ://
-[felhasználó:jelszó@]\fIURL\fP[:port] [opciók]
+[fájl|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[felhasználó:jelszó@]URL[:port] [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I sdp://fájl
+sdp://fájl
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I mpst://gépnév[:port]/URL
+mpst://gépnév[:port]/URL
 [opciók]
 .
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.I tivo://gépnév/lista
+tivo://host/[lista|llist|fsid]
 [opciók]
+.
 .br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://gépnév/llist
-[opciók]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.I tivo://gépnév/fsid
-[opciók]
-.br
-.in
 .B gmplayer
-'in +\n[.k]u
 [opciók]
 [\-skin\ skin]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[opciók]
-.RI [ \ fájl\  | \ URL\  | \ \-\  ]
-[\-o\ fájl]
+[opciók] fájl
+[fájl|URL|\-] [\-o\ fájl]
 .
 .br
-.in
 .B mencoder
-'in +\n[.k]u
-[globális opciók]
-.I fájl1
-[speciális opciók] [fájl2] [speciális opciók]
+[opciók] fájl1
+[specifikus opciók] [fájl2] [specifikus opciók]
 .ad
 .hy
 .
@@ -533,16 +483,19 @@ van (pl.\& /etc/\:mplayer vagy /usr/\:local/\:etc/\:mplayer), a felhasználói
 szintû pedig a '~/\:.mplayer/\:mencoder.conf.
 A felhasználóspecifikus opciók felülbírálják a rendszerszintûeket, a
 parancssorban megadottak pedig mindkettõt.
-A konfigurációs file szintaxisa 'opció=<érték>', \'#' jeltõl számitva
+A konfigurációs fájl szintaxisa 'opció=<érték>', \'#' jeltõl számitva
 minden kommentként van kezelve.
 Az olyan opciók melyek egyébként érték megadása nélkül használandóak, itt
 a 'true' vagy '1' értékkel engedélyezhetõek, míg a 'false' illetve '0'
 értékkel letilthatóak. Még az al-opciók is paraméterezhetõek ily módon.
 .PP
-File-specifikus konfigurációs file-okat is írhatsz.
-Ha például a 'movie.avi' file-hoz szeretnél konfigurációs file-t,
-hozz létre egy 'movie.avi.conf' nevû file-t az opciókkal, és tedd
-a ~/.mplayer könyvtárba vagy a fájl mellé.
+Fájl-specifikus konfigurációs fájlokat is írhatsz.
+Ha például a 'movie.avi' fájlhoz szeretnél konfigurációs fájlt,
+hozz létre egy 'movie.avi.conf' nevû fájlt az opciókkal, és tedd
+a ~/.mplayer/ könyvtárba.
+A konfigurációs fájlt teheted ugyanabba a könyvtárba is, mint ahol a
+lejátszandó fájl van, feltéve hogy megadod a \-use-filedir-conf kapcsolót (vagy
+a parancssorban vagy a globális konfigurációs fájlban).
 .PP
 .I PÉLDA AZ MPLAYER KONFIGURÁCIÓS FÁJLJÁRA:
 .sp 1
@@ -718,6 +671,11 @@ Még kevesebb kimenet és státusz üzenet kiírása, mint a \-quiet esetén.
 Megmutatja egy profil leírását és tartalmát.
 .
 .TP
+.B \-use-filedir-conf
+Egy fájl-specifikus konfigurációs fájlt keres ugyan abban a könyvtárban,
+amelyikben a lejátszandó fájl van.
+.
+.TP
 .B "\-v\ \ \ \ \ "
 Növeli a beszédességet egy szinttel minden parancssorban található
 \-v esetén.
@@ -827,13 +785,13 @@ Torz képekhez vezet!
 .TP
 .B \-identify
 A \-msglevel identify=4 rövidítése.
-A file paramétereinek kiírása emészthetõ formában.
+A fájl paramétereinek kiírása emészthetõ formában.
 Bõvebb információt kínál a feliratról, az audiósávok nyelvérõl és ID-irõl is.
 Néhány esetben több információt kapsz a \-msglevel identify=6 kapcsolóval.
 Például egy DVD esetén kiírja minden egyes fejezet idõbeli hosszát
 és a lemez ID-t is.
 A TOOLS/midentify wrapper script eltünteti a maradék kimenetet, és
-(remélhetõleg) shell escape-eli a fileneveket.
+(remélhetõleg) shell escape-eli a fájlneveket.
 .
 .TP
 .B \-idle (lásd még \-slave)
@@ -866,7 +824,7 @@ Az összes használható parancs kiírása.
 .IPs js-dev
 Használandó joystick megadása (alapállapot: /dev/\:input/\:js0).
 .IPs file=<fájlnév>
-Parancsok beolvasása a megadott file-ból. Leginkább FIFO megadása
+Parancsok beolvasása a megadott fájlból. Leginkább FIFO megadása
 esetén hasznos.
 .br
 .I MEGJEGYZÉS:
@@ -907,7 +865,7 @@ OSD menu támogatás bekapcsolása.
 .
 .TP
 .B \-menu-cfg <fájlnév> (csak OSD menü)
-Alternatív menu.conf file használata.
+Alternatív menu.conf fájl használata.
 .
 .TP
 .B \-menu-root <érték> (csak OSD menü)
@@ -1586,7 +1544,7 @@ Ez a kapcsoló már idejétmúlt, mivel az MPlayerben van OpenDML támogatás.
 .TP
 .B \-sb <bájt pozíció> (lásd még \-ss)
 Bájt pozícióra tekerés.
-CDROM image-ek, vagy olyan VOB file-ok lejátszásánál hasznos, melyek elején
+CDROM image-ek, vagy olyan VOB fájlok lejátszásánál hasznos, melyek elején
 szemét van.
 .
 .TP
@@ -3098,6 +3056,10 @@ Letiltja a kép megjelenítését.
 Szükséges az olyan vezérlõk megfelelõ sebességméréséhez, amik a kép
 buffert a monitorokon csak retrace-re állítják (nVidia).
 Alapértelmezett a képek megjelenítése (nobenchmark).
+.IPs (no)bobdeint
+Nagyon egyszerû deinterlacer.
+Nem néz ki jobban, mint a \-vf tfields=1,
+de ez az egyetlen deinterlacer az xvmc-hez (alapértelmezett: nobobdeint).
 .IPs (no)queue
 A megjelenítendõ képkockák sorba állítása a videó hardver párhuzamos
 mûködtetéséhez. Egy kicsi (nem észrevehetõ) konstans A/V deszinkronizációt
@@ -5459,8 +5421,8 @@ Kvantálási paraméter kényszerítése (alapértelmezett: 0, a videó QP-jét használja
 Ultra egyszerû & lassú utófeldolgozó szûrõ, ami tömöríti és kibontja a
 képet több (vagy \- 8-as minõségi szint esetén \- az összes)
 lépésben és átlagolja az eredményeket.
-Annyiban különbözik az spp-tõl, hogy az uspp minden esetben a lavc-mpeg4-gyel
-végzi a kódolást & dekódolást, míg az spp egy MJPEG-hez hasonló
+Annyiban különbözik az spp-tõl, hogy az uspp minden esetben a libavcodec
+Snow-val végzi a kódolást és dekódolást, míg az spp egy MJPEG-hez hasonló
 egyszerûsített csak intra 8x8 DCT-t használ.
 .RSs
 .IPs <minõség>
@@ -6701,7 +6663,7 @@ Ne ugorjon át képkockákat.
 .
 .TP
 .B \-o <fájlnév>
-Megadott nevû file használata kimenetként.
+Megadott nevû fájl használata kimenetként.
 .br
 Ha egy alapértelmezett fájlnevet szeretnél, beleírhatod ezt az opciót a
 MEncoder konfigurációs fájljába is.
@@ -7426,10 +7388,10 @@ megváltoztatja az egyedi kocka típusokat és PSNR-t egy kicsit (0.03dB-ig).
 .
 .TP
 .B aspect=<x/y>
-Film képarányának eltárolása, mint az MPEG file-okban.
+Film képarányának eltárolása, mint az MPEG fájlokban.
 Sokkal normálisabb ez a megoldás mint a film átméretezése, mivel ilyenkor
 nem fog a minõség az átméretezés miatt leromlani.
-Csak az MPlayer lesz képes az így elkészült file-ok lejátszására, más
+Csak az MPlayer lesz képes az így elkészült fájlok lejátszására, más
 lejátszók rossz képarányt fognak használni.
 A paraméter megadható arányként vagy lebegõpontos számként.
 .sp 1
@@ -8601,7 +8563,7 @@ Ez csak a DivX dekódolók régebbi verzióinál szükséges.
 Az XviD-1.0.x-tõl ezt az opciót a closed_gop opció váltotta fel.
 .
 .TP
-.B (no)greyscale
+.B (no)grayscale
 Az XviD figyelmen kívül hagyja a színtelítettségi síkot, így a kódolt videó
 szürkeárnyalatos lesz. Vedd figyelembe, hogy ez nem gyorsítja fel a
 kódolást, csak megakadályozza, hogy a színtelítettségi adatok kiíródjanak
@@ -8803,12 +8765,12 @@ minimális B-kocka kvantáló (alapértelmezett: 2)
 maximális B-kocka kvantáló (alapértelmezett: 31)
 .
 .TP
-.B quant_intra_matrix=<filename>
+.B quant_intra_matrix=<fájlnév>
 Betölti a saját intra mátrixot tartalmazó fájlt.
 Ilyen fájlt az xvid4conf mátrix szerkesztõjével készíthetsz.
 .
 .TP
-.B quant_inter_matrix=<filename>
+.B quant_inter_matrix=<fájlnév>
 Betölti a saját inter mátrixot tartalmazó fájlt.
 Ilyen fájlt az xvid4conf mátrix szerkesztõjével készíthetsz.
 .
