@@ -3,7 +3,7 @@ MPlayer (1.0)
   rc1: "Codename intentionally left blank" October 22, 2006
 
     DOCS:
-    * German documentation translation almost finished
+    * German documentation translation finished
     * Russian documentation translation synced and almost finished
 
     Drivers:
@@ -11,7 +11,7 @@ MPlayer (1.0)
     * ALSA audio output: AC3 passthrough now works even when the device name
       of the digital output port has been set by the user
     * bicubic OpenGL scaling works with ATI cards
-    * md5sum switched to use libavutil md5 implementation
+    * md5sum switched to the libavutil MD5 implementation
     * support for libcaca 1.0 via compatibility layer
 
     Decoders:
@@ -32,24 +32,23 @@ MPlayer (1.0)
     Inputs:
     * split of stream layer from libmpdemux to new stream library
     * PVR input for hardware MPEG encoder based cards, such as Hauppauge
-      WinTV PVR-150/250/350/500 a.k.a. IVTV but also pvrusb2 and cx88
+      WinTV PVR-150/250/350/500 AKA IVTV but also pvrusb2 and cx88
       (requires Linux >= 2.6.18 kernel, featuring native V4L2 MPEG API)
     * native RTSP input (handles MPEG-TS over RTP) for generic RTSP servers
-    * support for chapters seeking in dvd:// and dvdnav:// streams
+    * support for seeking to chapters in dvd:// and dvdnav:// streams
     * radio support (radio://)
 
     FFmpeg/libavcodec:
     * VC-1/WMV3/WMV9 video decoder
     * Vorbis decoding speedup, now default Vorbis decoder
     * VMware Video decoder
-    * VP50 and VP62 decoder
+    * On2 VP50 and VP62 decoder
     * lossless audio decoders: WavPack, TTA, Shorten
     * CAVS decoder
     * GXF muxer/demuxer
     * MXF demuxer
-    * much improved flac encoder
-    * more H.264 decoding speed improvements, including support for
-      -lavdopts fast
+    * much improved FLAC encoder
+    * more H.264 decoding speed improvements, plus support for -lavdopts fast
     * Theora decoder fixes
     * preliminary Vorbis encoder
     * MTV demuxer
@@ -61,7 +60,7 @@ MPlayer (1.0)
     * working audio stream selection for Ogg and Matroska files
     * executable names like gmplayer_old etc. will now start GUI as well
     * -gui/-nogui options
-    * xinerama fixes, behaves similar to MPlayer without GUI
+    * xinerama fixes, now behaves similar to MPlayer without GUI
 
     Filters:
     * MMX-optimizations for -vf yadif
@@ -69,26 +68,25 @@ MPlayer (1.0)
 
     MEncoder:
     * support of x264 encoding via libavcodec
-    * rewrite -x264encopts options parser to use libx264's options parser;
+    * rewrite -x264encopts option parser to use the 264 option parser;
       likely breaks 3rd party tools as the syntax of some options has changed
     * removed support for obsolete and non-free divx4 libraries
 
     Ports:
     * partial Intel Mac support, --disable-loader --disable-mp3lib is needed
-    * OpenGL can create windows > screen size under Windows
+    * OpenGL can now create windows > screen size under Windows
     * allow filenames starting with \\ for remote paths on Windows
 
     Others:
     * SSA/ASS subtitle renderer
-    * -endpos option
+    * -endpos option for MPlayer
     * -correct-pts option
     * UTF-8 used for OSD and subtitles, some bitmap fonts will no longer work
       correctly and -subcp must be set for all non-UTF-8 subtitles
     * more audio-truncation fixes
     * libavutil mandatory for MPlayer compilation
     * more intuitive -edlout behaviour
-    * -nortc is now default since -rtc has only disadvantages with recent
-      kernels
+    * -nortc is now default since -rtc has disadvantages with recent kernels
 
 
   pre8: "NeuTeam strikes back" June 11, 2006
