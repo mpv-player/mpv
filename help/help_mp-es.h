@@ -212,6 +212,51 @@ static char help_text[]=
 #define MSGTR_EdloutEndSkip "EDL skip terminado, operación guardada.\n"
 #define MSGTR_MPEndposNoSizeBased "La opción -endpos en MPlayer aun no soporta unidades de tamaño.\n"
 
+// mplayer.c OSD
+
+#define MSGTR_OSDenabled "habilitado"
+#define MSGTR_OSDdisabled "deshabilitado"
+#define MSGTR_OSDAudio "Audio: %s"
+#define MSGTR_OSDChannel "Canal: %s"
+#define MSGTR_OSDSubDelay "Sub delay: %d ms"
+#define MSGTR_OSDSpeed "Velocidad: x %6.2f"
+#define MSGTR_OSDosd "OSD: %s"
+#define MSGTR_OSDChapter "Capítulo: (%d) %s"
+
+// property values
+#define MSGTR_Enabled "habilitado"
+#define MSGTR_EnabledEdl "deshabilitado (EDL)"
+#define MSGTR_Disabled "desabilitado"
+#define MSGTR_HardFrameDrop "hard"
+#define MSGTR_Unknown "desconocido"
+#define MSGTR_Bottom "abajo"
+#define MSGTR_Center "centro"
+#define MSGTR_Top "arriba"
+
+// osd bar names
+#define MSGTR_Volume "Volumen"
+#define MSGTR_Panscan "Panscan"
+#define MSGTR_Gamma "Gamma"
+#define MSGTR_Brightness "Brillo"
+#define MSGTR_Contrast "Contraste"
+#define MSGTR_Saturation "Saturación"
+#define MSGTR_Hue "Hue"
+
+// property state
+#define MSGTR_MuteStatus "Mudo: %s"
+#define MSGTR_AVDelayStatus "A-V delay: %s"
+#define MSGTR_OnTopStatus "Quedarse arriba: %s"
+#define MSGTR_RootwinStatus "Rootwin: %s"
+#define MSGTR_BorderStatus "Borde: %s"
+#define MSGTR_FramedroppingStatus "Framedropping: %s"
+#define MSGTR_VSyncStatus "VSync: %s"
+#define MSGTR_SubSelectStatus "Subtítulos: %s"
+#define MSGTR_SubPosStatus "Posición sub: %s/100"
+#define MSGTR_SubAlignStatus "Alineación sub: %s"
+#define MSGTR_SubDelayStatus "Sub delay: %s"
+#define MSGTR_SubVisibleStatus "Subtítulos: %s"
+#define MSGTR_SubForcedOnlyStatus "Sólo subtítulos forzados: %s"
+ 
 // mencoder.c:
 
 #define MSGTR_UsingPass3ControlFile "Usando el archivo de control pass3: %s\n"
@@ -460,6 +505,15 @@ static char help_text[]=
 #define MSGTR_MissingOptionParameter "Error: ¡opcion '%s' debe tener un parámetro!\n"
 #define MSGTR_OptionListHeader "\n Nombre               Tipo            Min        Max      Global  LC    Cfg\n\n"
 #define MSGTR_TotalOptions "\nTotal: %d opciones\n"
+#define MSGTR_ProfileInclusionTooDeep "ADVERTENCIA: Inclusion de perfil demaciado profunda.\n"
+#define MSGTR_NoProfileDefined "No se han definido perfiles.\n"
+#define MSGTR_AvailableProfiles "Perfiles disponibles:\n"
+#define MSGTR_UnknownProfile "Perfil desconocido '%s'.\n"
+#define MSGTR_Profile "Perfil %s: %s\n"
+
+// m_property.c
+#define MSGTR_PropertyListHeader "\n Nombre                 Tipo            Min      Max\n\n"
+#define MSGTR_TotalProperties "\nTotal: %d propiedades\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "Dispositivo de CD-ROM '%s' no encontrado.\n"
@@ -982,10 +1036,12 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: El mezclador de la tarjeta de audio no tiene el canal '%s' usando valor por omisión.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Imposible abrir dispositivo de audio %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Imposible crear descriptor de archivo, bloqueando: %s\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] No puedo configurar el dispositivo de audio %s para salida %s, tratando %s...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Imposible configurar dispositivo de audio a %d channels.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: El controlador no soporta SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Su controlador de audio no soporta select()  ***\n Recompile MPlayer con #undef HAVE_AUDIO_SELECT en config.h !\n\n"
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\n Error fatal: *** Imposible RE-ABRIR / RESETEAR DISPOSITIVO DE AUDIO *** %s\n"
+#define MSGTR_AO_OSS_UnknownUnsupportedFormat "[AO OSS] Formato OSS Desconocido/No-soportado: %x.\n"
 
 // ao_arts.c
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
