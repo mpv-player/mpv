@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19738 -->
+<!-- synced with r20341 -->
 <chapter id="containers">
 <title>Konténerek</title>
 
@@ -200,12 +200,6 @@ fájlokban igazi MPG és AAC fájlok. Még ki is tudod őket csomagolni a
 <option>-dumpvideo</option> és <option>-dumpaudio</option> kapcsolókkal.).
 </para>
 
-<note>
-<para>
-A legtöbb új QuickTime fájl <emphasis role="bold">Sorenson</emphasis> videót és
-QDesign Music audiót használ. Lásd a <link linkend="sorenson">Sorenson</link> codec részt.
-</para>
-</note>
 </sect2>
 
 
@@ -227,12 +221,6 @@ A VIVO/2.0 fájlok videó codec-je módosult, nem szabványos
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
 
-<para>
-Lásd a
-<link linkend="vivo-video">VIVO video codec</link> és
-<link linkend="vivo-audio">VIVO audio codec</link>
-részeket a telepítési útmutatókért.
-</para>
 </sect2>
 
 
@@ -255,9 +243,6 @@ egy rövid időre zavaros lesz a keresés után.
 <para>
 Igen, az <application>MPlayer</application> tudja olvasni (demuxálni) a RealMedia
 (<filename>.rm</filename>) fájlokat.
-Itt vannak támogatott <link
-linkend="realvideo">RealVideo</link> és <link
-linkend="realaudio">RealAudio</link> codec-ek.
 </para>
 </sect2>
 

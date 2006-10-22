@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20043 -->
+<!-- synced with r20280 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -3562,30 +3562,30 @@ codec-kal</title>
   <emphasis role="bold">me</emphasis>:
   Ez az opció a mozgásbecsléshez használt keresés módszerét választja ki.
   Ezen opció megváltoztatása természetesen magával hozza a
-  minőség-vs-sebesség arány változását. A <option>me=1</option> csak kis
+  minőség-vs-sebesség arány változását. A <option>me=dia</option> csak kis
   mértékben gyorsabb, mint az alapértelmezett keresés, kevesebb, mint
-  0.1dB globális PSNR árán. Az alapértelmezett beállítás (<option>me=2</option>)
-  egy ésszerű kompromisszum a sebesség és a minőség között. A <option>me=3</option>
+  0.1dB globális PSNR árán. Az alapértelmezett beállítás (<option>me=hex</option>)
+  egy ésszerű kompromisszum a sebesség és a minőség között. A <option>me=umh</option>
   kicsivel kevesebb, mint 0.1dB globális PSNR-t jelent, amiért változó
   árat kell fizetni a sebességben a <option>frameref</option>-től függően.
   Ha a <option>frameref</option> értéke nagy (pl. 12 vagy hasonló), a
-  <option>me=3</option> kb. 40%-kal lassabb, mint az alapértelmezett
-  <option> me=2</option>. <option>frameref=3</option>-mal a sebességbeli
+  <option>me=umh</option> kb. 40%-kal lassabb, mint az alapértelmezett
+  <option> me=hex</option>. <option>frameref=3</option>-mal a sebességbeli
   veszteség visszaesik 25%-30%-ra.
 </para>
 <para>
-  A <option>me=4</option> egy nagyon alapos keresést használ, ami túl
+  A <option>me=esa</option> egy nagyon alapos keresést használ, ami túl
   lassú a gyakorlati alkalmazáshoz.
 </para>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">4x4mv</emphasis>:
+  <emphasis role="bold">partitions=all</emphasis>:
   Ez az opció engedélyezi a 8x4-es, 4x8-as és 4x4-es alpartíciók
-  használatát a megjósolt makroblokkokban. A bekapcsolása viszonylag
-  egyenletes 10%-15%-os sebességveszteséget jelent. Ez az opció eléggé
-  hasztalan a kevés mozgást tartalmazó videókban, bár néhány gyors
-  mozgású forrás, tipikusan a sok apró mozgó objektumot tartalmazó,
+  használatát a megjósolt makroblokkokban (az alapértelmezett partíciók mellett).
+  A bekapcsolása viszonylag egyenletes 10%-15%-os sebességveszteséget jelent.
+  Ez az opció eléggé hasztalan a kevés mozgást tartalmazó videókban, bár néhány
+  gyors mozgású forrás, tipikusan a sok apró mozgó objektumot tartalmazó,
   várhatóan kb. 0.1dB-t javul.
 </para>
 </listitem>
@@ -3723,7 +3723,7 @@ codec-kal</title>
   <option>subq=1:frameref=1</option> opció hozzáadását a
   <option>x264encopts</option> első lépéséhez. Majd, a második lépésben
   használj lassabb, jobb minőséget biztosító opciókat:
-  <option>subq=6:frameref=15:4x4mv:me=3</option>
+  <option>subq=6:frameref=15:partitions=all:me=umh</option>
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Három lépéses kódolás</emphasis>?
@@ -3775,7 +3775,7 @@ codec-kal</title>
   kereshető pontokat, amíg van benne jelenet váltás.
 </para></listitem> 
 <listitem><para>
-  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  <emphasis role="bold">deblock</emphasis>:
   Ez a rész egy kicsit vitatható lesz.
 </para>
 <para>
@@ -3787,9 +3787,8 @@ codec-kal</title>
   Az alapértelmezett értékek szerint előre beállított erősség jól
   megválasztott és jó eséllyel PSNR-optimális bármilyen videóhoz,
   amit csak próbálsz elkódolni.
-  A <option>deblockalpha</option> és a <option>deblockbeta</option>
-  paraméterekkel megadhatod az előre beállított deblocking áteresztés
-  eltolását.
+  A <option>deblock</option> paraméterrel megadhatod az előre beállított
+  deblocking áteresztés eltolását.
 </para>
 <para>
   Sokan úgy gondolják, hogy jó ötlet nagy mértékben csökkenteni a
@@ -3872,13 +3871,13 @@ codec-kal</title>
 <tbody>
 <row>
   <entry>Nagyon jó minőség</entry>
-  <entry><option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=6:partitions=all:8x8dct:me=umh:frameref=5:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>6fps</entry>
   <entry>0dB</entry>
 </row>
 <row>
   <entry>Jó minőség</entry>
-  <entry><option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
+  <entry><option>subq=5:partitions=all:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b</option></entry>
   <entry>13fps</entry>
   <entry>-0.89dB</entry>
 </row>

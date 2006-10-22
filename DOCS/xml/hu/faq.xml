@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19828 -->
+<!-- synced with r20304 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1049,6 +1049,43 @@ Használd a <option>-chapter</option> kapcsolót pontosan, például: <option>-chapt
 </para></question>
 <answer><para>
 Nem, a VFAT nem támogatja a 2GB+ fájlokat.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Mit jelentenek a státusz sorban lévő számok a kódolási folyamat közben?
+</para></question>
+<answer><para>
+Példa:
+<screen>Pos: 264.5s   6612f ( 2%)  7.12fps Trem: 576min 2856mb  A-V:0.065 [2126:192]</screen>
+<variablelist>
+<varlistentry><term><systemitem>Pos: 264.5s</systemitem></term>
+<listitem><para>időbeli pozíció a kódolt folyamban</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>6612f</systemitem></term>
+<listitem><para>az elkódolt videó kockák száma</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>( 2%)</systemitem></term>
+<listitem><para>a bemeneti folyam már elkódolt része</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>7.12fps</systemitem></term>
+<listitem><para>kódolási sebesség</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>Trem: 576min</systemitem></term>
+<listitem><para>becsült hátralévő kódolási idő</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2856mb</systemitem></term>
+<listitem><para>a kódolt fájl becsült végső fájlmérete</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V:0.065</systemitem></term>
+<listitem><para>aktuális késleltetés az audió és a videó folyam között</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>[2126:192]</systemitem></term>
+<listitem>
+<para>átlagos videó bitráta (Mb/s-ben) és átlagos audió bitráta (Mb/s-ben)</para></listitem>
+</varlistentry>
+</variablelist>
 </para></answer>
 </qandaentry>
 
