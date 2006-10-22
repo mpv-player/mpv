@@ -176,12 +176,6 @@ to get the device name. It was developed for Solaris, where device names
 are dynamically allocated.
 </para>
 
-<para>
-The default DVD device is <filename>/dev/dvd</filename>. If your setup differs,
-make a symlink, or specify the correct device on the command line with the
-<option>-dvd-device</option> option.
-</para>
-
 <formalpara>
 <title>DVD authentication</title>
 <para>
