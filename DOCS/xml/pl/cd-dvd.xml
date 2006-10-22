@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r18426 -->
+<!-- synced with r20379 -->
 <!-- Opiekun: Emdej -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
@@ -68,8 +68,7 @@ odmaskowanie IRQ (IRQ unmasking) (więcej przeczytasz na stronach man do
 </para>
 
 <para>
-Proszę sprawdzić &quot;<filename>/proc/ide/<replaceable>urządzenie
-cdrom</replaceable>/settings&quot;</filename>
+Proszę sprawdzić &quot;<filename>/proc/ide/<replaceable>[urządzenie cdrom]</replaceable>/settings&quot;</filename>
 dla dostrojenia swojego napędu CD-ROM.
 </para>
 
@@ -81,11 +80,11 @@ Dla napędów SCSI nie istnieje jednolity sposób ustawiawiania tych parametrów
 </sect2>
 
 <sect2 id="drives_freebsd">
-<title>FreeBSD:</title>
+<title>FreeBSD</title>
 
 <para>Prędkość:
 <screen>
-cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>[speed]</replaceable>
+cdcontrol [-f <replaceable>urządzenie</replaceable>] speed <replaceable>[prędkość]</replaceable>
 </screen>
 </para>
 
@@ -111,7 +110,11 @@ man. Składnia dla standardowego DVD (Digital Versatile Disc) jest następująca
 <para>
 Przykład:
 <screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+</para>
 
+<para>
+Jeśli skompilowałeś <application>MPlayera</application> z obsługą dvdnav,
+składnia jest taka sama, tylko musisz użyć dvdnav:// zamiast dvd://.
 </para>
 
 <para>
@@ -121,38 +124,21 @@ urządzenie (device) w linii polecenia korzystając z opcji
 <option>-dvd-device</option>.
 </para>
 
-<formalpara>
-<title>Obsługa DVD - nowy sposób (mpdvdkit2)</title>
 <para>
 <application>MPlayer</application> używa <systemitem>libdvdread</systemitem>
 oraz <systemitem>libdvdcss</systemitem> do dekodowania i odtwarzania DVD. Te
-dwie biblioteki są zawarte w podkatalogu <filename class="directory">libmpdvdkit2/</filename>
+dwie biblioteki są zawarte w podkatalogu <filename class="directory">libmpdvdkit2</filename>
 w głównym drzewie katalogów <application>MPlayera</application>, nie trzeba
-instalować ich osobno. Wybraliśmy tę opcję ponieważ musieliśmy poprawić błąd
-<systemitem>libdvdread</systemitem> i zastosować łatkę (patch), która dodaje
-obsługę <emphasis role="bold">buforowania złamanych kluczy CSS</emphasis> do
-<systemitem>libdvdcss</systemitem>. Skutkuje to dużym wzrostem szybkości
-ponieważ klucze nie muszą być łamane za każdym razem przed odtwarzaniem.
+instalować ich osobno.
+Możesz też użyć systemowych wersji tych bibliotek, ale nie jest to zalecane,
+ponieważ może spowodować błędy, niekompatybilności bibliotek oraz zmniejszenie
+prędkości.
 </para>
-</formalpara>
 
 <note><para>
 Jeśli występują problemy z dekodowaniem DVD, spróbuj wyłączyć supermount lub
 inne tego typu usługi. Niektóre napędy RPC-2 mogą również wymagać ustawienia
 kodu regionu DVD.
-</para></note>
-
-<para>
-<application>MPlayer</application> potrafi także używać bibliotek systemowych
-<systemitem>libdvdread</systemitem>
-oraz <systemitem>libdvdcss</systemitem>, ale to rozwiązanie jest
-<emphasis role="bold">nie</emphasis> zalecane, gdyż może powodować błędy,
-niekompatybilności bibliotek oraz zmniejszenie prędkości.
-</para>
-
-<note><para>
-W przypadku problemów z dekodowaniem DVD, spróbuj wyłączyć supermount, bądź
-inne tego typu udogodnienia.
 </para></note>
 
 <formalpara>
@@ -167,52 +153,36 @@ systemu plików niezakodowanego DVD.
 </formalpara>
 
 <para>
-Pliki .IFO zawierają informacje nawigacyjne filmu (rozdział/tytuł/mapa
-zaczepów/tablica języków, itp) i są konieczne do odczytu i interpretacji
-zawartości pliku .VOB (filmu). Pliki .BUK są kopiami zapasowymi plików .IFO.
+Pliki .IFO zawierają informacje nawigacyjne filmu (mapa
+rozdziałów/tytułów/kątów kamery, tablica języków, itp) i są konieczne do
+odczytu i interpretacji zawartości pliku .VOB (filmu).
+Pliki .BUK są kopiami zapasowymi plików .IFO.
 Używają <emphasis role="bold">sektorów</emphasis> wszędzie, więc aby
 zaimplementować nawigację na DVD lub rozszyfrować zawartość, należy używać
 adresowania sektorów dysku w trybie raw.
 </para>
 
 <para>
-Z tego powodu obsługa DVD w starym stylu z użyciem
-<systemitem>libcss</systemitem> wymaga podmontowanego systemu plików DVD oraz
+Z tego powodu obsługa DVD wymaga
 dostępu do urządzenia w trybie raw bazującym na sektorach. Niestety wymagane
 jest (pod Linuksem) posiadanie uprawnień roota aby móc korzystać z sektorowego
-adresowania pliku. Wybór jest następujący:
-
-<itemizedlist>
-<listitem><para>
-Posiadać uprawnienia roota lub używać programu wykonywalnego
-<application>MPlayera</application> posiadającego prawa suid-root.
-</para></listitem>
-
-<listitem><para>
-Pozwolić <application>MPlayerowi</application> na uruchamianie owijacza
-(wrapper) fibmap_mplayer w trybie suid-root w celu uzyskania dostępu do DVD
-(używane przy odtwarzaniu DVD starą metodą poprzez
-<systemitem>libcss</systemitem>).
-</para></listitem>
-
-<listitem><para>
-Wcale nie używać sterownika systemu plików zawartego w jądrze lecz korzystać
-jedynie z narzędzi działających w przestrzeni użytkownika. Zajmują się tym
+adresowania pliku.
+Dlatego też nie w ogóle używamy sterownika systemu plików pochodzącego
+z jądra, ale reimplementujemy to w przestrzeni użytkownika.
+Zajmują się tym
 biblioteki <systemitem>libdvdread</systemitem> 0.9.x i
-<systemitem>libmpdvdkit</systemitem> (obsługa DVD nowym sposobem). Sterownik
+<systemitem>libmpdvdkit</systemitem>. Sterownik
 systemu plików UDF zawarty w jądrze nie jest wymagany ponieważ wspomniane
 biblioteki zawierają własny, wbudowany sterownik systemu plików UDF. DVD nie
 musi być podmontowany, bowiem używany jest jedynie dostęp w trybie raw.
-</para></listitem>
-</itemizedlist>
 </para>
 
 <para>
 Czasami <filename>/dev/dvd</filename> nie może być czytany przez użytkowników,
-zatem autorzy <systemitem>libdvdread</systemitem> zaimplementowali emulację
-warstwy, która przenosi adresowanie sektorowe na nazwy plików i offsety, aby już
-u źródeł podmontowanego systemu plików emulować dostęp w trybie raw, na równi z
-dostępem do dysku twardego.
+zatem autorzy <systemitem>libdvdread</systemitem> zaimplementowali warstwę
+emulacji, która tłumaczy adresowanie sektorowe na nazwy plików i offsety, aby
+emulować dostęp w trybie raw na podmontowanym systemie plików albo nawet na
+twardym dysku.
 </para>
 
 <para>
@@ -221,12 +191,6 @@ podmontowania (mountpoint) jak i nazwę urządzenia przy dostępie w trybie raw 
 sprawdza <filename>/proc/mounts</filename> w celu odnalezienia odpowiedniej
 nazwy urządzenia (device). Zostało to napisane z myślą o systemie Solaris, gdzie
 nazwy urządzeń są przydzielane automatycznie.
-</para>
-
-<para>
-Domyślnym urządzeniem (device) DVD jest <filename>/dev/dvd</filename>. Jeżeli
-Twoje ustawienia są inne, stwórz odpowiedni symlink lub ustaw odpowiednie
-urządzenie w linii polecenia korzystając z opcji <option>-dvd-device</option>.
 </para>
 
 <formalpara>
@@ -250,45 +214,45 @@ Jeżeli żadna wartość nie jest ustawiona, próbowane są następujące metody
 <emphasis role="bold">bus key</emphasis>: Ten klucz jest ustalany podczas
 autoryzacji (długa mieszanina ioctl'i i rozmaite wymiany kluczy, bajery
 kryptograficzne) oraz jest używany do szyfrowania tytułu i kluczy dyskowych
-przed wysłaniem ich nieszyfrowaną magistralą (by zapobiec podsłuchiwaniu). Bus
-key jest wymagany do pobrania i wstępnego rozszyfrowania zaszyfrowanego klucza
-dyskowego (disk key).
+przed wysłaniem ich nieszyfrowaną magistralą (by zapobiec podsłuchiwaniu).
+Klucz magistrali (bus key) jest wymagany do pobrania i wstępnego
+rozszyfrowania zaszyfrowanego klucza dysku (disk key).
 </para></listitem>
 
 <listitem><para>
 <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
 wyszukuje już złamane klucze tytułów, które są przechowywane w katalogu
-<filename class="directory">~/.mplayer/DVDKeys</filename> (szybkie ;) ).
+<filename class="directory">~/.mplayer/DVDKeys</filename> (szybkie ;).
 </para></listitem>
 
 <listitem><para>
 <emphasis role="bold">key</emphasis>: Jeżeli żaden zbuforowany klucz nie jest
-dostępny, <application>MPlayer</application> próbuje rozszyfrować klucz dyskowy
+dostępny, <application>MPlayer</application> próbuje rozszyfrować klucz dysku
 korzystając z garści kluczy zaszytych w odtwarzaczu.
 </para></listitem>
 
 <listitem><para>
 <emphasis role="bold">disk</emphasis>: Jeżeli metoda "key" zawodzi (np. brak
 kluczy zaszytych w odtwarzaczu), <application>MPlayer</application> złamie klucz
-dyskowy używając algorytmu ataku brutalnego. Proces ten jest bardzo
-procesorochłonny i wymaga 64 MB pamięci (16777216 (16*2^20) 32-bitowych pól
+dysku używając algorytmu ataku brutalnego. Proces ten jest bardzo
+procesorochłonny i wymaga 64 MB pamięci (16M 32-bitowych pól
 tabeli hash) do przechowywania tymczasowych danych. Ta metoda powinna zadziałać
-zawsze (niestety jest wolna).
+zawsze (powolne).
 </para></listitem>
 
 <listitem><para>
-<emphasis role="bold">title request</emphasis>: Mając klucz dyskowy
-<application>MPlayer</application> pobiera zaszyfrowane klucze tytułowe (title
+<emphasis role="bold">title request</emphasis>: Mając klucz dysku
+<application>MPlayer</application> pobiera zaszyfrowane klucze tytułów (title
 key), które są zawarte w <emphasis>ukrytych sektorach (hidden
 sectors)</emphasis> używając <systemitem>ioctl()</systemitem>. Ochrona
 regionalna w napędach RPC-2 jest realizowana w tym kroku i może się nie udać na
 tych napędach. Jeśli jednak się uda, klucze tytułowe zostają rozszyfrowane przy
-użyciu magistrali i klucza dyskowego.
+użyciu kluczy magistrali i dysku.
 </para></listitem>
 
 <listitem><para>
 <emphasis role="bold">title</emphasis>: Ta metoda jest używana jeżeli zapytanie
-o tytuł zakończyło się niepowodzeniem i nie można polegać na żadnej wymianie
+o tytuł zakończyło się niepowodzeniem i nie polega na żadnej wymianie
 kluczy z napędem DVD. Używa ona ataku kryptograficznego w celu odgadnięcia
 klucza tytułowego (title key) wprost (poprzez szukanie powtarzającego się ciągu
 znaków (wzoru) w rozszyfrowanej zawartości pliku VOB oraz poprzez zgadywanie, że
@@ -319,6 +283,8 @@ ustawić region tylko 5 razy.
 </para>
 </sect1>
 
+
+
 <sect1 id="vcd">
 <title>Odtwarzanie VCD</title>
 <para>
@@ -344,15 +310,15 @@ obsługę SCSI dla VCD.
 
 <para>
 W międzyczasie możesz wyciągać dane z VCD za pomocą
-<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
+<ulink url="http://ftp.ntut.edu.tw/ftp/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
 i odtwarzać plik wynikowy za pomocą <application>MPlayera</application>
 </para>
 
 <formalpara>
 <title>Struktura VCD</title>
 <para>
-Video CD (VCD) składa się z sektorów CD-ROM XA, tzn. CD-ROM 
-mode 2 form 1 i form 2 posiada ścieżki:</para>
+Video CD (VCD) składa się z sektorów CD-ROM XA, tzn. ścieżek CD-ROM 
+mode 2 form 1 i form 2:</para>
 </formalpara>
 
 <itemizedlist>
