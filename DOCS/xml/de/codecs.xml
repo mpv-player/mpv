@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20352 -->
+<!-- synced with r20361 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -25,7 +25,7 @@
         </simpara></listitem>
       <listitem><simpara>
           Native Decoder für
-          <emphasis role="bold">DivX ;-), OpenDivX (DivX4), DivX6, M$ MPEG-4</emphasis>
+          <emphasis role="bold">alle DivX-Varianten, 3ivX, M$ MPEG-4</emphasis>
           v1, v2 und andere MPEG-4 Varianten
         </simpara></listitem>
       <listitem><simpara>
@@ -88,18 +88,6 @@
         <application>MEncoder</application> möglich.
       </para>
 
-      <para>
-        Es enthält eine Reihe netter Codecs, besonders wichtig sind hierbei die MPEG-4 Varianten:
-        DivX3, DivX4, DivX6, Windows Media Video 7/8 (WMV1/WMV2). Weiterhin sehr interessant ist der WMA-Decoder.
-      </para>
-
-      <para>
-        Der neueste Codec, dem hier Beachtung geschenkt werden soll, ist der
-        <emphasis role="bold">Sorenson 3</emphasis> (SVQ3) Codec. Dies ist die erste vollständig
-        quelloffene Implementation. Und sie ist sogar schneller als das Original. Ihr sollte
-        gegenüber dem Binärcodec auf jeden Fall Vorzug gegeben werden.
-    </para>
-
     <para>
       Für eine vollständige Liste unterstützter Codecs besuche bitte die FFmpeg Homepage.
       Unterstützte <ulink url="http://ffmpeg.org/ffmpeg-doc.html#SEC19">Video-</ulink>
@@ -126,7 +114,7 @@
     </para>
     <para>
       Es begann als Fork der Entwicklung des OpenDivX-Codecs.
-      Dies geschah, als ProjectMayo OpenDivX zu Closed Source DivX4 (inzwischen DivX5)
+      Dies geschah, als ProjectMayo OpenDivX zu Closed Source DivX4
       machte und die Leute, die an OpenDivX arbeiteten aber nicht zu ProjectMayo gehörten,
       verärgerte. Diese riefen dann XviD ins Leben. Beide Projekte haben daher denselben Ursprung.
     </para>
