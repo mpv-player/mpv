@@ -1324,7 +1324,7 @@ static char help_text[]=
 #define MSGTR_MPDEMUX_MMST_FileObjectPacketLen "Dateiobjekt, Paketgröße = %d (%d).\n"
 #define MSGTR_MPDEMUX_MMST_StreamObjectStreamID "Datenstromobjekt, ID: %d\n"
 #define MSGTR_MPDEMUX_MMST_2ManyStreamID "Zu viele IDs, Datenstrom übersprungen."
-#define MSGTR_MPDEMUX_MMST_UnknownObject "unbekannter Objekt\n"
+#define MSGTR_MPDEMUX_MMST_UnknownObject "unbekanntes Objekt\n"
 #define MSGTR_MPDEMUX_MMST_MediaDataReadFailed "Konnte Mediendaten nicht lesen.\n"
 #define MSGTR_MPDEMUX_MMST_MissingSignature "fehlende Signatur\n"
 #define MSGTR_MPDEMUX_MMST_PatentedTechnologyJoke "Alles fertig. Vielen dank, dass Du eine prorietäre und patentierte Technologie beinhaltende Mediendatei heruntergeladen hast.\n"

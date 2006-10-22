@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20379 -->
+<!-- synced with r20392 -->
 <chapter id="cd-dvd">
   <title>CD/DVD Nutzung</title>
 
@@ -109,13 +109,13 @@
     <title>DVD-Wiedergabe</title>
     <para>
       Für eine komplette Liste der verfügbaren Optionen lies bitte die Manpage.
-      Der Syntax für eine Standard Digital Versatile Disc (DVD) lautet wie folgt:
+      Der Syntax für das Abspielen einer Standard-DVD lautet wie folgt:
       <screen>mplayer dvd://<replaceable>&lt;Track&gt;</replaceable> [-dvd-device <replaceable>&lt;Gerät&gt;</replaceable>]</screen>
     </para>
 
     <para>
       Beispiel:
-      <screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+      <screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
     </para>
 
     <para>
@@ -126,7 +126,7 @@
 
       <para>
         <application>MPlayer</application> verwendet <systemitem>libdvdread</systemitem> und
-        <systemitem>libdvdcss</systemitem> zur DVD-Entschuüsselung und -Wiedergabe.
+        <systemitem>libdvdcss</systemitem> zur DVD-Wiedergabe und -Entschlüsselung.
         Diese beiden Bibliotheken sind im Unterverzeichnis
         <filename class="directory">libmpdvdkit2</filename> des
         <application>MPlayer</application>-Quelltextbaums.
@@ -199,13 +199,11 @@
     </para>
 
     <formalpara>
-      <title>DVD-Authentifizierung</title>
+      <title>DVD-Entschlüsselung</title>
       <para>
-        Die Authentifizierung und Entschlüsslungsmethode der neuen DVD-Unterstützung
-        wird von einer gepatchten <systemitem>libdvdcss</systemitem>-Bibliothek vorgenommen
-        (siehe oben). Die Methode kann festgelegt werden durch die Umgebungsvariable
-        <envar>DVDCSS_METHOD</envar>, welche auf key, disk oder title gesetzt werden
-        kann.
+        DVD-Entschlüsselung geschieht durch <systemitem>libdvdcss</systemitem>. Die dafür
+	verwendete Methode kann durch Umgebungsvariable <envar>DVDCSS_METHOD</envar> festgelegt werden,
+	indem sie auf key, disk oder title gesetzt wird.
       </para>
     </formalpara>
 
@@ -232,8 +230,8 @@
         <para>
           <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
           sucht nach bereits geknackten Titel-Schüsseln, welche im
-          <filename class="directory">~/.mplayer/DVDKeys</filename> Verzeichnis
-          gespeichert werden (schnell ;).
+          <filename class="directory">~/.dvdcss</filename> Verzeichnis
+          gespeichert werden (schnell).
         </para>
       </listitem>
 
