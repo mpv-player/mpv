@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<!-- synced with r20295 -->
+<!-- synced with r20379 -->
 <chapter id="cd-dvd">
 <title>Utilisation des CD/DVD</title>
 
@@ -108,12 +108,6 @@ Exemple :
 <para>
 Si vous avez compilé <application>MPlayer</application> avec la gestion de dvdnav, la
 syntaxe est la même, sauf que que vous devrez utiliser dvdnav:// au lieu de dvd://.
-</para>
-
-<para>
-Le périphérique DVD par défaut est <filename>/dev/dvd</filename>. Si votre
-installation diffère, faites un lien symbolique ou spécifiez le périphérique
-correct en ligne de commande avec l'option <option>-dvd-device</option>.
 </para>
 
 <para>
