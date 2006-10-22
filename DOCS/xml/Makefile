@@ -36,12 +36,12 @@ help:
 .PHONY: html-chunked chunked-dir
 html-chunked: xsltproc.sh xmllint.sh chunked-dir $(addprefix html-chunked-,$(SUBDIRS))
 chunked-dir:
-	-mkdir $(HTML_CHUNKED)
+	-mkdir -p $(HTML_CHUNKED)
 
 .PHONY: html-single single-dir
 html-single: xsltproc.sh xmllint.sh single-dir $(addprefix html-single-,$(SUBDIRS))
 single-dir:
-	-mkdir $(HTML_SINGLE)
+	-mkdir -p $(HTML_SINGLE)
 
 .PHONY: xmllint
 xmllint: xmllint.sh $(addprefix xmllint-,$(SUBDIRS))
@@ -69,11 +69,11 @@ define lang-def
 .PHONY: html-chunked-$(1) html-single-$(1) xmllint-$(1) \
   distclean-$(1) releaseclean-$(1) clean-$(1)
 html-chunked-$(1): xsltproc.sh xmllint.sh chunked-dir
-	-(mkdir $(HTML_CHUNKED)/$(1))
+	-(mkdir -p $(HTML_CHUNKED)/$(1))
 	$(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$(1) -C $(1) html-chunked
 
 html-single-$(1): xsltproc.sh xmllint.sh single-dir
-	-(mkdir $(HTML_SINGLE)/$(1))
+	-(mkdir -p $(HTML_SINGLE)/$(1))
 	$(MAKE) HTMLFILE=../$(HTML_SINGLE)/$(1)/MPlayer.html -C $(1) html-single
 
 xmllint-$(1): xmllint.sh
