@@ -161,7 +161,7 @@ taille qui tient dans leur mémoire, avec <emphasis role="bold">peu d'utilisation
   <link linkend="tdfxfb">tdfxfb</link> pour obtenir une grande accélération.
   Il est important de faire cela <emphasis role="bold">avant</emphasis>
   la compilation de <application>MPlayer</application>, sinon
-  aucun support 3Dfx ne sera disponible. Voir aussi la section <link linkend="tvout-voodoo">3dfx TV-out</link>.
+  aucun support 3Dfx ne sera disponible. 
   Si vous utilisez X, utilisez au moins la version <emphasis role="bold">4.2.0</emphasis>, car les pilotes
   Xv 3dfx sont endommagés dans 4.1.0 et les versions plus anciennes.
   </para></listitem>
