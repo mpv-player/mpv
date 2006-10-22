@@ -97,13 +97,13 @@ sysctl hw.ata.atapi_dma=1
 <title>DVD playback</title>
 <para>
 For the complete list of available options, please read the man page.
-The Syntax for a standard Digital Versatile Disc (DVD) is as follows:
+The syntax to play a standard DVD is as follows:
 <screen>mplayer dvd://<replaceable>&lt;track&gt;</replaceable> [-dvd-device <replaceable>&lt;device&gt;</replaceable>]</screen>
 </para>
 
 <para>
 Example:
-<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -119,7 +119,7 @@ line with the <option>-dvd-device</option> option.
 
 <para>
 <application>MPlayer</application> uses <systemitem>libdvdread</systemitem> and
-<systemitem>libdvdcss</systemitem> for DVD decryption and playback. These two
+<systemitem>libdvdcss</systemitem> for DVD playback and decryption. These two
 libraries are contained in the <filename class="directory">libmpdvdkit2</filename>
 subdirectory of the <application>MPlayer</application> source tree, you do not have
 to install them separately. You can also use system-wide versions of the two
@@ -177,12 +177,11 @@ are dynamically allocated.
 </para>
 
 <formalpara>
-<title>DVD authentication</title>
+<title>DVD decryption</title>
 <para>
-The authentication and decryption method of the new-style DVD support is done
-using a patched <systemitem>libdvdcss</systemitem> (see above). The method can
-be specified through the environment variable <envar>DVDCSS_METHOD</envar>,
-which can be set to key, disk or title.
+DVD decryption is done by <systemitem>libdvdcss</systemitem>. The method
+can be specified through the <envar>DVDCSS_METHOD</envar> environment
+variable, which can be set to key, disk or title.
 </para>
 </formalpara>
 
@@ -203,7 +202,7 @@ to get and predecrypt the crypted disk key.
 <listitem><para>
 <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
 looks for already cracked title keys which are stored in the
-<filename class="directory">~/.mplayer/DVDKeys</filename> directory (fast ;).
+<filename class="directory">~/.dvdcss</filename> directory (fast).
 </para></listitem>
 
 <listitem><para>
