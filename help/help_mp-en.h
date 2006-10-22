@@ -1836,7 +1836,7 @@ static char help_text[]=
 #define MSGTR_RADIO_GetVolumeFailed "[radio] ioctl get volume failed: %s\n"
 #define MSGTR_RADIO_SetVolumeFailed "[radio] ioctl set volume failed: %s\n"
 #define MSGTR_RADIO_DroppingFrame "\n[radio] too bad - dropping audio frame (%d bytes)!\n"
-#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: buffer empty, wating for %d data bytes.\n"
+#define MSGTR_RADIO_BufferEmpty "[radio] grab_audio_frame: buffer empty, waiting for %d data bytes.\n"
 #define MSGTR_RADIO_AudioInitFailed "[radio] audio_in_init failed: %s\n"
 #define MSGTR_RADIO_AudioBuffer "[radio] Audio capture - buffer=%d bytes (block=%d bytes).\n"
 #define MSGTR_RADIO_AllocateBufferFailed "[radio] cannot allocate audio buffer (block=%d,buf=%d): %s\n"
