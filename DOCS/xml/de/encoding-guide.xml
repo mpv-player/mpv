@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with r20280 -->
+<!-- In sync with r20352 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -2571,7 +2571,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
                   H.263+
                 </entry></row>
               <row><entry>mpeg4</entry><entry>
-                  ISO Standard MPEG-4 (DivX 5, XviD-kompatibel)
+                  ISO Standard MPEG-4 (DivX6, XviD-kompatibel)
                 </entry></row>
               <row><entry>msmpeg4</entry><entry>
                   Pre-Standard MPEG-4 Variante von MS, v3 (AKA DivX3)

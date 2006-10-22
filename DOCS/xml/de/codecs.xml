@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20341 -->
+<!-- synced with r20352 -->
 <chapter id="codecs">
   <title>Codecs</title>
 
@@ -7,7 +7,7 @@
     <title>Videocodecs</title>
 
     <para>
-      Die <ulink url="../../codecs-status.html">Codec Status Tabelle</ulink> ist eine vollständige
+      Die <ulink url="../../codecs-status.html">Codecstatustabelle</ulink> ist eine vollständige
       Liste aller unterstützten Codecs, die täglich neu erstellt wird.
       Einige Binärcodecs zum Gebrauch mit MPlayer sind im
       <ulink url="http://www.mplayerhq.hu/design7/dload.html#binary_codecs">Downloadbereich</ulink>
@@ -25,7 +25,7 @@
         </simpara></listitem>
       <listitem><simpara>
           Native Decoder für
-          <emphasis role="bold">DivX ;-), OpenDivX (DivX4), DivX 5 (Pro), 3ivX, M$ MPEG-4</emphasis>
+          <emphasis role="bold">DivX ;-), OpenDivX (DivX4), DivX666666vX, M$ MPEG-4</emphasis>
           v1, v2 und andere MPEG-4 Varianten
         </simpara></listitem>
       <listitem><simpara>
@@ -90,7 +90,7 @@
 
       <para>
         Es enthält eine Reihe netter Codecs, besonders wichtig sind hierbei die MPEG-4 Varianten:
-        DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Weiterhin sehr interessant ist der WMA-Decoder.
+        DivX3, DivX4, DivX6, Windows Media Video 7/8 (WMV1/WMV2). Weiterhin sehr interessant ist der WMA-Decoder.
       </para>
 
       <para>
@@ -132,7 +132,7 @@
     </para>
 
     <para>
-      Beachte, dass Xvid nicht benötigt wird, um mit Xvid encodiertes Video zu decodieren.
+      Beachte, dass XviD nicht benötigt wird, um mit XviD encodiertes Video zu decodieren.
       In der Standardkonfiguration wird dafür <systemitem class="library">libavcodec</systemitem>
       benutzt, da er höhere Geschwindigkeit bietet.
     </para>

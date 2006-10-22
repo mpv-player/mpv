@@ -2382,7 +2382,7 @@ You can encode to the following codecs (more or less up to date):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO standard MPEG-4 (DivX 5, XviD compatible)
+  ISO standard MPEG-4 (DivX6, XviD compatible)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   pre-standard MPEG-4 variant by MS, v3 (AKA DivX3)

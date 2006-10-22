@@ -25,7 +25,7 @@ The most important ones above all:
   </simpara></listitem>
 <listitem><simpara>
   native decoders for <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 and other MPEG-4 variants
+  DivX6 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 and other MPEG-4 variants
   </simpara></listitem>
 <listitem><simpara>
   native decoder for <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -120,12 +120,12 @@ optimizations for most modern processors.
 <para>
 It began as a forked development of the OpenDivX codec.
 This happened when ProjectMayo changed OpenDivX to closed source
-DivX4 (now DivX5), and the non-ProjectMayo people working on OpenDivX got angry,
+DivX4 (now DivX6), and the non-ProjectMayo people working on OpenDivX got angry,
 then started XviD. So both projects have the same origin.
 </para>
 
 <para>
-Note that Xvid is not necessary to decode Xvid-encoded video.
+Note that XviD is not necessary to decode XviD-encoded video.
 <systemitem class="library">libavcodec</systemitem> is used by
 default as it offers better speed.
 </para>
