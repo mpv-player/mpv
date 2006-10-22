@@ -1522,7 +1522,10 @@ static int flush_buffers(muxer_t *muxer, int finalize)
 				skip_cnt++;
 
 			if(skip_cnt == muxer->avih.dwStreams)
+			{
+				found = 0;
 				break;
+			}
 		}
 	}
 		
