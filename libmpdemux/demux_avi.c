@@ -80,14 +80,11 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
 }
 
 static int valid_fourcc(unsigned int id){
+    static const char valid[] = "0123456789abcdefghijklmnopqrstuvwxyz"
+                                "ABCDEFGHIJKLMNOPQRSTUVWXYZ_";
     unsigned char* fcc=(unsigned char*)(&id);
-#define FCC_CHR_CHECK(x) (x<48 || x>=96)
-    if(FCC_CHR_CHECK(fcc[0])) return 0;
-    if(FCC_CHR_CHECK(fcc[1])) return 0;
-    if(FCC_CHR_CHECK(fcc[2])) return 0;
-    if(FCC_CHR_CHECK(fcc[3])) return 0;
-    return 1;
-#undef FCC_CHR_CHECK
+    return strchr(valid, fcc[0]) && strchr(valid, fcc[1]) &&
+           strchr(valid, fcc[2]) && strchr(valid, fcc[3]);
 }
 
 static int choose_chunk_len(unsigned int len1,unsigned int len2){
