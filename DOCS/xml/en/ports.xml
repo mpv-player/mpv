@@ -711,15 +711,15 @@ that comes with the system.
 <para>
 There are at least two to choose from:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> and
-<ulink url="http://www.macports.org/">DarwinPorts</ulink>.
+<ulink url="http://www.macports.org/">MacPorts</ulink>.
 Both of them provide about the same service (i.e. a lot of packages to
 choose from, dependency resolution, the ability to simply add/update/remove
 packages, etc...).
 Fink offers both precompiled binary packages or building everything from
-source, whereas DarwinPorts only offers building from source.
-The author of this guide chose DarwinPorts for the simple fact that its basic
+source, whereas MacPorts only offers building from source.
+The author of this guide chose MacPorts for the simple fact that its basic
 setup was more lightweight.
-Later examples will be based on DarwinPorts.
+Later examples will be based on MacPorts.
 </para>
 
 <para>
@@ -736,7 +736,7 @@ Then you can proceed with launching <application>MPlayer</application>'s
 <systemitem>configure</systemitem> script (note the
 <systemitem>PKG_CONFIG_PATH</systemitem> and <systemitem>PATH</systemitem>
 environment variables so that <systemitem>configure</systemitem> finds the
-libraries installed with DarwinPorts):
+libraries installed with MacPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
 
