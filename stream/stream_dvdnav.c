@@ -320,7 +320,7 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   if(!stream->pos)
     mp_msg(MSGT_OPEN,MSGL_ERR, "INIT ERROR: %d, couldn't get init pos %s\r\n", status, dvdnav_err_to_string(dvdnav_priv->dvdnav));
   
-  mp_msg(MSGT_OPEN,MSGL_INFO, "Remember to disable MPlayer's cache when playing dvdnav:// streams (adding -nocache to your command like)\r\n");
+  mp_msg(MSGT_OPEN,MSGL_INFO, "Remember to disable MPlayer's cache when playing dvdnav:// streams (adding -nocache to your command line)\r\n");
 
   return STREAM_OK;
 }
