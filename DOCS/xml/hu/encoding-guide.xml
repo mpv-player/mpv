@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20361 -->
+<!-- synced with r20408 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -135,8 +135,8 @@
   megjelenítésre készítenek elő (beleértve a DVD-t is), átkonvertálják
   mező-alapú formába.
   A különböző módszereket, amikkel ez végrehajtható, gyűjtőnéven
-  "pulldown"-nak hívjuk, ennek egyik változata a hírhedt NTSC-s
-  "3:2 telecine".
+  "telecine"-nek hívjuk, ennek egyik változata a hírhedt NTSC-s
+  "3:2 pulldown".
   Hacsak nem volt az eredeti anyag is mező-alapú (és megegyező
   mező rátájú), más formátumbú lesz a filmed, mint az eredeti.
 </para>

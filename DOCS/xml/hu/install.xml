@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20399 -->
+<!-- synced with r20412 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -447,13 +447,15 @@ Ha az <application>MPlayer</application> <systemitem class="library">fontconfig<
 támogatással lett lefordítva, a fenti módszerek nem fognak működni,
 helyettük a <option>-font</option> egy <systemitem class="library">fontconfig</systemitem>
 betűtípus nevet vár és alapértelmezetté teszi a sans-serif betűt.
-A <systemitem class="library">fontconfig</systemitem> által ismert
-betűtípusok listáját az <command>fc-list</command> paranccsal nézheted meg.
 Például:
 
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
+<para>
+A <systemitem class="library">fontconfig</systemitem> által ismert
+betűtípusok listáját az <command>fc-list</command> paranccsal nézheted meg.
+</para>
 </sect2>
 
 
@@ -483,9 +485,9 @@ Ezután nevezd át vagy készíts egy symlink-et valamelyik kicsomagolt könyvtárra
 A betűtípusoknak rendelkezniük kell egy megfelelő <filename>font.desc</filename>
 fájllal, ami leképezi a unicode betűpozíciókat az aktuális felirat szöveg
 kódlapjára. A másik megoldás UTF-8 kódolású feliratok használata és a
-<option>-utf8</option> kapcsoló megadása vagy egyszerűen használd a
-<filename>&lt;videófájl_neve&gt;.utf</filename> fájlnév formát a felirat
-fájl esetén és tedd a videóval azonos könyvtárba.
+<option>-utf8</option> kapcsoló megadása vagy add meg a felirat
+fájl neveként ugyan azt a nevet, mint a videó fájlé, de <filename>.utf</filename>
+kiterjesztéssel és tedd a videóval azonos könyvtárba.
 </para>
 
 </sect2>
