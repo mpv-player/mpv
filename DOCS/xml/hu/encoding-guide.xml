@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20352 -->
+<!-- synced with r20361 -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2339,7 +2339,7 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   H.263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  ISO szabvány MPEG-4 (DivX6, XviD kompatibilis)
+  ISO szabvány MPEG-4 (DivX, XviD kompatibilis)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
   Szabvány előtti MPEG-4 variáns az MS-től, v3 (AKA DivX3)

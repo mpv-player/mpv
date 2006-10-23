@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20183 -->
+<!-- synced with r20399 -->
 <chapter id="install">
 <title>Telepítés</title>
 
@@ -106,14 +106,6 @@ Nem árt, ha vmi újabb rendszered van. Linuxon a 2.4.x-es kernel javasolt.
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - választható, az ALSA audió kimenet
   támogatásához. Legalább 0.9.0rc4 szükséges.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">bio2jack</emphasis> - választható, a JACK audió kimenet támogatásához kell,
-  de csak a fordítás alatt. Beszerezheted a <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>
-  címről. Mivel nincs install opciója, kézzel kell bemásolnod a <filename>libbio2jack.a</filename> fájlt
-  valahova a függvénykönyvtárakat tartalmazó könyvtáradba (pl. <filename>/usr/local/lib</filename>) vagy
-  használnod kell a <option>--with-bio2jack=DIR</option> kapcsolót, hogy megmondd a
-  <filename>./configure</filename> scriptnek, hol van a fájl.
   </para></listitem>
 </itemizedlist>
 </sect1>

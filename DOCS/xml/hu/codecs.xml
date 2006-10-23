@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20352 -->
+<!-- synced with r20361 -->
 <chapter id="codecs">
 <title>Codec-ek</title>
 
@@ -23,8 +23,8 @@ A legfontosabb dolgok:
   <emphasis role="bold">MPEG-2</emphasis> (<emphasis role="bold">DVD</emphasis>) videó
   </simpara></listitem>
 <listitem><simpara>
-  natív dekódolók <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX6 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 és más MPEG4 variánsokhoz
+  natív dekódolók <emphasis role="bold">az összes DivX variánshoz,
+  3ivX-hez, M$ MPEG-4</emphasis> v1, v2 és más MPEG4 variánsokhoz
   </simpara></listitem>
 <listitem><simpara>
   natív dekódoló <emphasis role="bold">Windows Media Video 7/8</emphasis>
@@ -118,7 +118,7 @@ modern processzoron a teljesítménye is jó.
 <para>
 Az OpenDivX codec forkolt fejlesztésként indult annak idején.
 A fork akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá
-tette DivX4 (most DivX6) néven, felbosszantva így a nem-ProjectMayo-s fejlesztőket,
+tette DivX4 néven, felbosszantva így a nem-ProjectMayo-s fejlesztőket,
 akik az OpenDivX-en dolgoztak, s akik így elindították az XviD-et. Így mindkét
 projektnek azonosak a gyökereik.
 </para>

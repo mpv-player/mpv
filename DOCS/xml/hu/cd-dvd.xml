@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20176 -->
+<!-- synced with r20401 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -97,13 +97,13 @@ sysctl hw.ata.atapi_dma=1
 <title>DVD lejátszás</title>
 <para>
 A használható kapcsolók teljes listájáért olvasd el a man oldalt.
-A szintaxis egy szabványos Digital Versatile Disc (DVD)-hez a következő:
+A szintaxis egy szabványos DVD lejátszásához a következő:
 <screen>mplayer dvd://<replaceable>&lt;sáv&gt;</replaceable> [-dvd-device <replaceable>&lt;eszköz&gt;</replaceable>]</screen>
 </para>
 
 <para>
 Például:
-<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -119,7 +119,7 @@ eszközt a parancssorban a <option>-dvd-device</option> kapcsolóval.
 
 <para>
 Az <application>MPlayer</application> fel tudja használni a <systemitem>libdvdread</systemitem>-ot
-és a <systemitem>libdvdcss</systemitem>-t is a DVD-k dekódolásához és lejátszásához.
+és a <systemitem>libdvdcss</systemitem>-t is a DVD-k lejátszásához és dekódolásához.
 Ez a két függvénykönyvtár a <filename class="directory">libmpdvdkit2</filename>
 alkönyvtárban található az <application>MPlayer</application> forrás fájában,
 nem kell őket külön telepítened. Használhatod a két függvénykönyvtár rendszer-szintű
@@ -175,19 +175,12 @@ fájlból olvassa ki. Solaris-ra lett kifejlesztve, ahol az eszköz nevek dinamikus
 vannak lefoglalva.
 </para>
 
-<para>
-Az alapértelmezett DVD eszköz a <filename>/dev/dvd</filename>. Ha a te beállításaid
-különbözőek, készíts egy szimbolikus linket vagy add meg a megfelelő eszközt a
-parancssorban a <option>-dvd-device</option> kapcsolóval.
-</para>
-
 <formalpara>
-<title>DVD hitelesítés</title>
+<title>DVD dekódolás</title>
 <para>
-A hitelesítés és az új formájú DVD támogatás dekódolási metódusának támogatását a
-patchelt <systemitem>libdvdcss</systemitem> biztosítja (lásd feljebb). A módszert
-a <envar>DVDCSS_METHOD</envar> környezeti változó segítségével előírhatod, beállítható
-kulcsra, lemezre vagy sávra.
+A DVD dekódolást a <systemitem>libdvdcss</systemitem> végzi. A módszer
+megadható a <envar>DVDCSS_METHOD</envar> környezeti változó segítségével,
+mely beállítható kulcsra, lemezre vagy címre.
 </para>
 </formalpara>
 
@@ -207,7 +200,7 @@ a titkosított lemez kulcs megszerzéséhez és visszakódolásához.
 
 <listitem><para>
 <emphasis role="bold">cache-elt kulcs</emphasis>: Az <application>MPlayer</application>
-végignézi a már cache-elt sáv kulcsokat, amik a <filename class="directory">~/.mplayer/DVDKeys</filename>
+végignézi a már cache-elt sáv kulcsokat, amik a <filename class="directory">~/.dvdcss</filename>
 könyvtárban tárolódnak (gyors ;).
 </para></listitem>
 
@@ -272,7 +265,7 @@ A használható kapcsolók teljes listájáért olvasd el a man oldalt. Egy szabványos
 Video CD (VCD) szintaxisa a következő:
 <screen>mplayer vcd://<replaceable>&lt;sáv&gt;</replaceable> [-cdrom-device <replaceable>&lt;eszköz&gt;</replaceable>]</screen>
 Például:
-<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 Az alapértelmezett VCD eszköz a <filename>/dev/cdrom</filename>. Ha a te beállításaid
 különbözőek, készíts egy szimbolikus linket vagy add meg a megfelelő eszközt a
 parancssorban a <option>-cdrom-device</option> kapcsolóval.
