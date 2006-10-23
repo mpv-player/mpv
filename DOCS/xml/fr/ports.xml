@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r17707 -->
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- synced with r20417 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Ports</title>
 
@@ -47,7 +47,7 @@ En tant que root installez le paquet <filename>.deb</filename> comme d'habitude:
 Christian Marillat a construit des paquets Debian non-officiels pour
 <application>MPlayer</application>, <application>MEncoder</application>
 et les polices depuis un certain temps, vous pouvez les obtenir (apt-get)
-depuis sa <ulink url="http://hpisi.nerim.net/">page web</ulink>.
+depuis sa <ulink url="http://www.debian-multimedia.org/">page web</ulink>.
 </para>
 </sect2>
 
@@ -85,7 +85,7 @@ et
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 du répertoire raçine de la distribution OpenZaurus.
 Ils ont toujours les derniers Makefile et patchs utilisés pour contruire
-un <application>MPlayer</application> CVS avec
+la version SVN de <application>MPlayer</application> avec
 <systemitem class="library">libavcodec</systemitem>.
 Si vous avez besoin d'une GUI, vous pouvez utiliser xmms-embedded.
 </para>
@@ -187,6 +187,24 @@ un fichier VOB sur un CPU à 400MHz. Vous aurez besoin d'avoir
 installé.
 </para>
 
+<para><emphasis role="bold">Attention :</emphasis></para>
+ <itemizedlist>
+ <listitem><para><emphasis role="bold">mediaLib</emphasis> est
+ <emphasis role="bold">actuellement désactivé</emphasis> par défaut dans
+ <application>MPlayer</application>. Les utilisateurs SPARC
+ qui ont construit MPlayer avec le support mediaLib ont reporté une
+ forte coloration verte sur les vidéo encodées et décodées avec
+ libavcodec.
+ Si vous le désirez, vous pouver activer mediaLib avec:
+ <screen>
+ $ ./configure --enable-mlib
+ </screen>
+ Ceci est à vos risques et périls. Les utilisateurs x86 ne doivent
+ <emphasis role="bold">pas</emphasis> utiliser mediaLib, cela
+ déteriorerait les performances de MPlayer de manière importante.
+ </para></listitem>
+ </itemizedlist>
+
 <para>
 Pour construire ce paquetage vous aurez besoin de GNU <application>make</application>
 (<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), le
@@ -221,8 +239,9 @@ l'autodétection échoue, utilisez l'option
 pour indiquer au script <filename>configure</filename> où il peut trouver
 GNU "as" sur votre système).
 </para>
-
-<para>
+<para>Solutions aux problèmes courants :</para>
+<itemizedlist>
+<listitem><para>
 Message d'erreur de <filename>configure</filename> sur un système Solaris
 x86 en utilisant GCC sans assembleur GNU:
 <screen>
@@ -248,8 +267,35 @@ pas GNU as:
    ... more "Illegal mnemonic" and "Syntax error" errors ...
 </screen>
 </para>
+</listitem>
 
-<para>
+<listitem><para>
+<application>MPlayer</application> est susceptible de renvoyer une
+erreur de segmentation (segfault) à l'encodage ou au décodage de vidéos utilisant
+win32codecs :
+<screen>
+...
+Trying to force audio codec driver family acm...
+Opening audio decoder: [acm] Win32/ACM decoders
+sysi86(SI86DSCR): Invalid argument
+Couldn't install fs segment, expect segfault
+
+ 
+MPlayer interrupted by signal 11 in module: init_audio_codec
+...
+</screen>
+Ceci est du à une modification de sysi86() dans Solaris 10 et dans les versions
+antérieures à Solaris Nevada b31. Ceci a été réparé par Sun pour
+Solaris Nevada b32 mais pas encore pour Solaris 10. Le Projet MPlayer
+a averti Sun de ce problème. Un patch pour Solaris 10 est actuellement en
+développement. Plus d'information sont disponibles à l'adresse
+suivante :
+<ulink
+url="http://bugs.opensolaris.org/bugdatabase/view_bug.do?bug_id=6308413"/>.
+ </para>
+</listitem>
+
+<listitem><para>
 A cause de bogues dans Solaris 8, il se peut que vous ne pouviez pas lire
 de disques DVD plus gros que 4 Go:
 </para>
@@ -274,6 +320,8 @@ toutes les données sont accédées modulo 4Go.
 Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc)
 / 109765-04 (x86).
 </para></listitem>
+</itemizedlist>
+</listitem>
 </itemizedlist>
 </sect2>
 
@@ -462,6 +510,7 @@ Les architectures suivantes ont été testé:
 
 <itemizedlist>
 <listitem><para>604e</para></listitem>
+<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER4</para></listitem>
 </itemizedlist>
 
@@ -472,7 +521,6 @@ même marcher:
 <itemizedlist>
 <listitem><para>POWER</para></listitem>
 <listitem><para>POWER2</para></listitem>
-<listitem><para>POWER3</para></listitem>
 <listitem><para>POWER5</para></listitem>
 </itemizedlist>
 
@@ -481,10 +529,35 @@ Le son à travers les Services Ultimedia n'est pas supporté, comme Ultimedia a
 été abondonné dans AIX 5.1; , la seule option est d'utiliser les pilotes AIX OSS
 de 4Front Technologies depuis
 <ulink url="http://www.opensound.com/aix.html">http://www/opensound.com/aix/html</ulink>.
-4Front Technologies fourni librement les pilotes OSS pour un usage personnel
-et non-commercial.
+4Front Technologies fourni librement les pilotes OSS pour AIX 5.1 pour
+un usage personnel et non-commercial. Cependant, il n'y a actuellement
+pas de pilote de son pour AIX 5.2 ou 5.3. Cela signifie qu'à l'heure actuelle <emphasis
+role="bold">MPlayer ne produit pas de son sous AIX 5.2 et 5.3.</emphasis>
 </para>
-
+<para>Solutions aux problèmes courants :</para>
+<itemizedlist>
+<listitem>
+<para>
+Si vous rencontrez ce message d'erreur de
+<filename>configure</filename> :
+<screen>
+$./configure
+...
+Checking for iconv program ... no
+No working iconv program found, use
+--charset=US-ASCII to continue anyway.
+Messages in the GTK-2 interface will be broken then.
+</screen>
+Ceci est du au fait que AIX utilise un jeu de caractÃ¨re (charset) non
+standards. En conséquence, la conversion d'une sortie MPlayer en un
+autre character set et n'est pas suporté pour l'instant. La solution
+est d'utiliser:
+<screen>
+$ ./configure --charset=noconv
+</screen>
+</para>
+</listitem>
+</itemizedlist>
 </sect2>
 </sect1>
 
@@ -496,7 +569,7 @@ et non-commercial.
   <ulink url="http://www.mingw.org/">MinGW</ulink>.
   Il n'a pas encore de GUI, mais la version en ligne de commande est
   complètement opérationnelle. Vous devriez jeter un oeil à la liste de diffusion
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">Mplayer-cygwin</ulink>
+  <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">Mplayer-cygwin</ulink>
   pour obtenir de l'aide et les dernières informations.
   Les binaires officiels de Windows peuvent être récupérés sur la
   <ulink url="http://www.mplayerhq.hu/design7/dload.html">page de téléchargement</ulink>.
@@ -681,14 +754,62 @@ MinGW HOWTO</ulink>.</para>
 
 <sect1 id="macos">
 <title>Mac OS</title>
+
 <para>
 <application>MPlayer</application> ne fonctionne pas sur des versions ultérieures
 à Mac OS 10, mais devrait compiler sans changement sur Mac OS X 10.2 et supérieur.
 Le compilateur préféré étant la version Apple de GCC 3.x ou supérieure.
+Vous pouvez obtenir l'environement de compilation de base en
+installant <ulink url="http://developer.apple.com/tools/download/">Xcode</ulink> de Apple.
 Si vous avez Mac OS X 10.3.9 ou supérieur et QuickTime 7
 vous pouvez utiliser le pilote macosx de sortie vidéo.
 </para>
-
+<para>
+Malheureusement, cet environement de base ne vous autorise pas à
+profiter de toute les fonctionalités de
+<application>MPlayer</application>.
+Par exemple, pour compiler le support OSD, vous devez avoir les
+librairies fontconfig
+et freetype installées sur votre machine.
+Contrairement à d'autres Unix comme la plupart des Linux et des BSDs,
+OSX n'a pas un seul système de package installé par défault.
+</para>
+<para>
+Il y en a au moins deux au choix :
+<ulink url="http://fink.sourceforge.net/">Fink</ulink> et
+<ulink url="http://www.macports.org/">MacPorts</ulink>.
+Les deux fournissent approximativement les même services
+(i.e. beaucoup de packages au choix, la résolution des dépendances, la
+possibilité d'ajouter/mêtre à jour/supprimer simplement des packages,
+etc...).
+Fink offre à la fois des packages binaires précompilés ou la
+possibilité de compiler tout à partir des sources, alors que
+MacPorts offre seulement la possibilité de compilé les sources.
+L'auteur de ce guide a choisi MacPorts pour la simple raison que
+son installation minimale occupe moins d'espace disque.
+Les exemples à suivre sont basés sur MacPorts.
+</para>
+<para>
+Par exemple, pour compiler <application>MPlayer</application> avec le
+support OSD:
+<screen>sudo port install pkgconfig</screen>
+Ceci va installer <application>pkg-config</application>, le système de
+gestion des flags de compilation/linking des librairies.
+Le script <systemitem>configure</systemitem> de
+<application>MPlayer</application> l'utilise pour détecter les
+librairies proprement.
+Vous pouvez ensuite installer <application>fontconfig</application> de
+la même manière:
+<screen>sudo port install fontconfig</screen>
+Vous pouvez ensuite lancer le script
+<systemitem>configure</systemitem> de
+<application>MPlayer</application> (notez les variables d'environement
+<systemitem>PKG_CONFIG_PATH</systemitem> et
+<systemitem>PATH</systemitem> pour que
+<systemitem>configure</systemitem> trouve les librairies installées
+avec MacPorts):
+<screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
+</para>
 <sect2 id="osx_gui">
 <title>MPlayer OS X GUI</title>
 <para>
@@ -709,7 +830,7 @@ et une version officielle ne devrait pas tarder.
 <para>
 Afin de compiler <application>MPlayerOSX</application> depuis le source
 vous-même, vous avez besoin du module <systemitem>mplayerosx</systemitem>,
-du module <systemitem>main</systemitem> et d'une copie du module CVS
+du module <systemitem>main</systemitem> et d'une copie du module SVN
 <systemitem>main</systemitem> renommé en <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> est le frontend GUI,
 <systemitem>main</systemitem> est un MPlayer et
@@ -718,11 +839,10 @@ AltiVec.
 </para>
 
 <para>
-Pour récupérer les modules CVS utilisez:
+Pour récupérer les modules SVN utilisez:
 <screen>
-cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P main
+svn checkout svn://svn.mplayerhq.hu/mplayerosx/trunk/ mplayerosx
+svn checkout svn://svn.mplayerhq.hu/mplayer/trunk/ main
 </screen>
 </para>
 
@@ -733,11 +853,11 @@ mettre en place quelque chose comme ceci:
 <screen>
 MPlayer_repertoire_source
    |
-   |--->main           (MPlayer CVS source)
+   |---&gt;main           (source SVN de MPlayer)
    |
-   |--->main_noaltivec (MPlayer CVS source configuré avec --disable-altivec)
+   |---&gt;main_noaltivec (source SVN de MPlayer configuré avec --disable-altivec)
    |
-   |--->mplayerosx     (MPlayerOSX CVS source)
+   |---&gt;mplayerosx     (source SVN MPlayerOSX)
 </screen>
 
 Premièrement vous avez besoin de compiler main et main_noaltivec.
@@ -822,7 +942,7 @@ très lente.
 <sect2 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
 <para>
-Les gens de chez <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>
+Les gens de chez <ulink url="http://www.amigasoft.net">www.amigasoft.net</ulink>
 font des paquetages actualisés pour <application>MPlayer</application> et
 <application>MEncoder</application>.
 </para>
