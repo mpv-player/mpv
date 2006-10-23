@@ -1015,9 +1015,10 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		}
         case WM_MOUSEWHEEL:
 		{
+			int x;
 			if (vo_nomouse_input)
 				break;
-			int x = GET_WHEEL_DELTA_WPARAM(wParam);
+			x = GET_WHEEL_DELTA_WPARAM(wParam);
 			if (x > 0)
 				mplayer_put_key(MOUSE_BTN3);
 			else
