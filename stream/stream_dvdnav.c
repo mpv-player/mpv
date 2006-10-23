@@ -214,11 +214,10 @@ static int fill_buffer(stream_t *s, char *but, int len)
 	    case DVDNAV_BLOCK_OK: return len;
             case DVDNAV_VTS_CHANGE: {
                 int tit = 0, part = 0;
-                dvdnav_vts_change_event_t *evt = (dvdnav_vts_change_event_t*)but;
                 s->end_pos = 0;
                 update_title_len(s);
                 if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK) {
-                  mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW VTS event: VTS %d, title %d\r\n", evt->new_vtsN, tit);
+                  mp_msg(MSGT_CPLAYER,MSGL_V, "\r\nDVDNAV, NEW TITLE %d\r\n", tit);
                   if(dvdnav_priv->title > 0 && tit != dvdnav_priv->title)
                     return 0;
                 }
