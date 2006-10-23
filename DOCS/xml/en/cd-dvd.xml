@@ -265,7 +265,7 @@ For the complete list of available options, please read the man page. The Syntax
 standard Video CD (VCD) is as follows:
 <screen>mplayer vcd://<replaceable>&lt;track&gt;</replaceable> [-cdrom-device <replaceable>&lt;device&gt;</replaceable>]</screen>
 Example:
-<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 The default VCD device is <filename>/dev/cdrom</filename>. If your setup
 differs, make a symlink or specify the correct device on the command line
 with the <option>-cdrom-device</option> option.
