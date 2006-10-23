@@ -41,6 +41,7 @@
 #include "fastmemcpy.h"
 #include "libswscale/swscale.h"
 #include "libmpcodecs/vf_scale.h"
+#include "libavutil/rational.h"
 
 static vo_info_t info = 
 {
@@ -82,6 +83,8 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
        uint32_t d_height, uint32_t flags, char *title, 
        uint32_t format)
 {
+	AVRational pixelaspect = av_div_q((AVRational){d_width, d_height},
+	                                  (AVRational){width, height});
 	if (image_width == width && image_height == height &&
 	     image_fps == vo_fps && vo_config_count)
 	  return 0;
@@ -153,14 +156,10 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	image_u = image_y + image_width * image_height;
 	image_v = image_u + image_width * image_height / 4;
 	
-	// This isn't right.  
-	// But it should work as long as the file isn't interlaced
-	// or otherwise unusual (the "Ip A0:0" part).
-
-	/* At least the interlacing is ok now */
-	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%ld:%ld I%c A0:0\n", 
+	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%ld:%ld I%c A%"PRId64":%"PRId64"\n", 
 			image_width, image_height, (long)(image_fps * 1000000.0), 
-			(long)1000000, config_interlace);
+			(long)1000000, config_interlace,
+			pixelaspect.num, pixelaspect.den);
 
 	fflush(yuv_out);
 	return 0;
