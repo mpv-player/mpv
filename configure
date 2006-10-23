@@ -7225,21 +7225,6 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
-echocheck "compiler support for -fno-PIC"
-if x86; then
-cat > $TMPC <<EOF
-int main(void) { return 0; }
-EOF
-if cc_check -fno-PIC ; then
-  CFLAGS="-fno-PIC $CFLAGS"
-  echores "yes"
-else
-  echores "no"
-fi
-else
-  echores "only used for x86"
-fi
-
 echocheck "compiler support for noexecstack"
 cat > $TMPC <<EOF
 int main(void) { return 0; }
