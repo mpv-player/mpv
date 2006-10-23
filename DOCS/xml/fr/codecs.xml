@@ -722,7 +722,7 @@ En utilisant <application>Microsoft GraphEdit</application> (rapide)
 </para>
 <step><para>
   Obtenez <application>GraphEdit</application> depuis le SDK DirectX ou sur
-  <ulink url="http://doom9.net">doom9</ulink>
+  <ulink url="http://doom9.net">doom9</ulink>.
   </para></step>
 <step><para>
   Exécutez <command>graphedit.exe</command>.
@@ -731,7 +731,7 @@ En utilisant <application>Microsoft GraphEdit</application> (rapide)
   Dans le menu sélectionnez Graph -> Insert Filters.
   </para></step>
 <step><para>
-  Dépliez l'élément <systemitem>DirectShow Filters</systemitem>
+  Dépliez l'élément <systemitem>DirectShow Filters</systemitem>.
   </para></step>
 <step><para>
   Sélectionnez le bon nom de codec et dépliez l'élément.
