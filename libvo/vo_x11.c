@@ -254,6 +254,47 @@ static void freeMyXImage(void)
     myximage = NULL;
 }
 
+#ifdef WORDS_BIGENDIAN
+#define BO_NATIVE    MSBFirst
+#define BO_NONNATIVE LSBFirst
+#else
+#define BO_NATIVE    LSBFirst
+#define BO_NONNATIVE MSBFirst
+#endif
+struct fmt2Xfmtentry_s {
+  uint32_t mpfmt;
+  int byte_order;
+  unsigned red_mask;
+  unsigned green_mask;
+  unsigned blue_mask;
+} fmt2Xfmt[] = {
+  {IMGFMT_RGB8,  BO_NATIVE,    0x00000007, 0x00000038, 0x000000C0},
+  {IMGFMT_RGB8,  BO_NONNATIVE, 0x00000007, 0x00000038, 0x000000C0},
+  {IMGFMT_BGR8,  BO_NATIVE,    0x000000E0, 0x0000001C, 0x00000003},
+  {IMGFMT_BGR8,  BO_NONNATIVE, 0x000000E0, 0x0000001C, 0x00000003},
+  {IMGFMT_RGB15, BO_NATIVE,    0x0000001F, 0x000003E0, 0x00007C00},
+  {IMGFMT_BGR15, BO_NATIVE,    0x00007C00, 0x000003E0, 0x0000001F},
+  {IMGFMT_RGB16, BO_NATIVE,    0x0000001F, 0x000007E0, 0x0000F800},
+  {IMGFMT_BGR16, BO_NATIVE,    0x0000F800, 0x000007E0, 0x0000001F},
+  {IMGFMT_RGB24, MSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
+  {IMGFMT_RGB24, LSBFirst,     0x000000FF, 0x0000FF00, 0x00FF0000},
+  {IMGFMT_BGR24, MSBFirst,     0x000000FF, 0x0000FF00, 0x00FF0000},
+  {IMGFMT_BGR24, LSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
+  {IMGFMT_RGB32, BO_NATIVE,    0x000000FF, 0x0000FF00, 0x00FF0000},
+  {IMGFMT_RGB32, BO_NONNATIVE, 0xFF000000, 0x00FF0000, 0x0000FF00},
+  {IMGFMT_BGR32, BO_NATIVE,    0x00FF0000, 0x0000FF00, 0x000000FF},
+  {IMGFMT_BGR32, BO_NONNATIVE, 0x0000FF00, 0x00FF0000, 0xFF000000},
+  {IMGFMT_ARGB,  MSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
+  {IMGFMT_ARGB,  LSBFirst,     0x0000FF00, 0x00FF0000, 0xFF000000},
+  {IMGFMT_ABGR,  MSBFirst,     0x000000FF, 0x0000FF00, 0x00FF0000},
+  {IMGFMT_ABGR,  LSBFirst,     0xFF000000, 0x00FF0000, 0x0000FF00},
+  {IMGFMT_RGBA,  MSBFirst,     0xFF000000, 0x00FF0000, 0x0000FF00},
+  {IMGFMT_RGBA,  LSBFirst,     0x000000FF, 0x0000FF00, 0x00FF0000},
+  {IMGFMT_BGRA,  MSBFirst,     0x0000FF00, 0x00FF0000, 0xFF000000},
+  {IMGFMT_BGRA,  LSBFirst,     0x00FF0000, 0x0000FF00, 0x000000FF},
+  {0, 0, 0, 0, 0}
+};
+
 static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format)
@@ -269,6 +310,7 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
     Colormap theCmap;
     XSetWindowAttributes xswa;
     unsigned long xswamask;
+    struct fmt2Xfmtentry_s *fmte = fmt2Xfmt;
 
 #ifdef HAVE_XF86VM
     unsigned int modeline_width, modeline_height;
@@ -470,31 +512,35 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
         vo_dheight = vo_screenheight;
     }
 
+    while (fmte->mpfmt) {
+      if (IMGFMT_RGB_DEPTH(fmte->mpfmt) == myximage->bits_per_pixel &&
+          fmte->byte_order == myximage->byte_order &&
+          fmte->red_mask   == myximage->red_mask   &&
+          fmte->green_mask == myximage->green_mask &&
+          fmte->blue_mask  == myximage->blue_mask)
+        break;
+      fmte++;
+    }
+    if (!fmte->mpfmt) {
+      mp_msg(MSGT_VO, MSGL_ERR,
+             "X server image format not supported, please contact the developers\n");
+      return -1;
+    }
+    out_format = fmte->mpfmt;
     switch ((bpp = myximage->bits_per_pixel))
     {
         case 24:
             draw_alpha_fnc = draw_alpha_24;
-            out_format = IMGFMT_BGR24;
             break;
         case 32:
             draw_alpha_fnc = draw_alpha_32;
-            out_format = IMGFMT_BGR32;
             break;
         case 15:
         case 16:
             if (depth == 15)
-            {
                 draw_alpha_fnc = draw_alpha_15;
-                out_format = IMGFMT_BGR15;
-            } else
-            {
+            else
                 draw_alpha_fnc = draw_alpha_16;
-                out_format = IMGFMT_BGR16;
-            }
-            break;
-        case 8:
-            draw_alpha_fnc = draw_alpha_null;
-            out_format = IMGFMT_BGR8;
             break;
         default:
             draw_alpha_fnc = draw_alpha_null;
@@ -509,35 +555,6 @@ static int config(uint32_t width, uint32_t height, uint32_t d_width,
 
     dst_width = width;
     //printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
-
-    // If we have blue in the lowest bit then obviously RGB
-    mode = ((myximage->blue_mask & 0x01) != 0) ? MODE_RGB : MODE_BGR;
-#ifdef WORDS_BIGENDIAN
-    if (myximage->byte_order != MSBFirst)
-#else
-    if (myximage->byte_order != LSBFirst)
-#endif
-    {
-        mode = ((myximage->blue_mask & 0x01) != 0) ? MODE_BGR : MODE_RGB;
-//   printf( "No support for non-native XImage byte order!\n" );
-//   return -1;
-    }
-#ifdef WORDS_BIGENDIAN
-    if (mode == MODE_BGR && bpp != 32)
-    {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "BGR%d not supported, please contact the developers\n",
-               bpp);
-        return -1;
-    }
-#else
-    if (mode == MODE_BGR)
-    {
-        mp_msg(MSGT_VO, MSGL_ERR,
-               "BGR not supported, please contact the developers\n");
-        return -1;
-    }
-#endif
 
     if (vo_ontop)
         vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
