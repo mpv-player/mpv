@@ -20,6 +20,7 @@ typedef struct {
   int              prelen;              /* length of prefill buffer */
   unsigned int     duration;            /* in milliseconds */
   int              mousex, mousey;
+  int              title;
 } dvdnav_priv_t;
 
 extern int dvd_nav_still;
