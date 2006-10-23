@@ -77,8 +77,7 @@ you want to compile it yourself, you should look at the
 and the
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 directory in the OpenZaurus distribution buildroot. These always have the latest
-Makefile and patches used for building a CVS <application>MPlayer</application> with
-<systemitem class="library">libavcodec</systemitem>.
+Makefile and patches used for building a SVN <application>MPlayer</application>.
 If you need a GUI frontend, you can use xmms-embedded.
 </para>
 </sect2>
@@ -761,7 +760,7 @@ and an official release should arrive soon.
 In order to build <application>MPlayerOSX</application> from source
 yourself, you need the <systemitem>mplayerosx</systemitem>, the
 <systemitem>main</systemitem> and a copy of the
-<systemitem>main</systemitem> CVS module named
+<systemitem>main</systemitem> SVN module named
 <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> is the GUI frontend,
 <systemitem>main</systemitem> is MPlayer and
