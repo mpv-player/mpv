@@ -109,7 +109,7 @@
     <title>DVD-Wiedergabe</title>
     <para>
       Für eine komplette Liste der verfügbaren Optionen lies bitte die Manpage.
-      Der Syntax für das Abspielen einer Standard-DVD lautet wie folgt:
+      Die Syntax für das Abspielen einer Standard-DVD lautet wie folgt:
       <screen>mplayer dvd://<replaceable>&lt;Track&gt;</replaceable> [-dvd-device <replaceable>&lt;Gerät&gt;</replaceable>]</screen>
     </para>
 
@@ -195,7 +195,7 @@
 
     <para>
       Wenn du <application>MPlayer</application> mit dvdnav-Unterstützung compiliert hast,
-      bleibt der Syntax derselbe, ausgenommen die Verwendung von dvdnav:// an Stelle von dvd://.
+      bleibt die Syntax derselbe, ausgenommen die Verwendung von dvdnav:// an Stelle von dvd://.
     </para>
 
     <formalpara>
@@ -313,7 +313,7 @@
     <title>VCD-Wiedergabe</title>
     <para>
       Für eine komplette Liste an verfügbaren Optionen lies bitte die
-      Manpage. Der Syntax für eine Standard Video CD (VCS) lautet wie folgt:
+      Manpage. Die Syntax für eine Standard Video CD (VCS) lautet wie folgt:
       <screen>mplayer vcd://<replaceable>&lt;Track&gt;</replaceable> [-cdrom-device <replaceable>&lt;Gerät&gt;</replaceable>]</screen>
       Beispiel:
       <screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>

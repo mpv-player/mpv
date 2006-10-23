@@ -242,7 +242,7 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 		<para>
 			<application>MPlayer</application> erlaubt dir durch eine einfache Konfigurationsdatei,
 			jede Taste an jeden beliebigen <application>MPlayer</application>-Befehl zu binden.
-			Der Syntax besteht aus einem Tastennamen gefolgt von einem Befehl. Die Standardkonfigurationsdatei
+			Die Syntax besteht aus einem Tastennamen gefolgt von einem Befehl. Die Standardkonfigurationsdatei
 			ist <filename>$HOME/.mplayer/input.conf</filename>, dies kann jedoch mit der Option<option>-input <replaceable>conf</replaceable></option> überschrieben werden
 			(relative Pfade sind relativ zu <filename>$HOME/.mplayer</filename>).
 		</para>
