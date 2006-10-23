@@ -85,8 +85,7 @@ et
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 du répertoire raçine de la distribution OpenZaurus.
 Ils ont toujours les derniers Makefile et patchs utilisés pour contruire
-la version SVN de <application>MPlayer</application> avec
-<systemitem class="library">libavcodec</systemitem>.
+la version SVN de <application>MPlayer</application>.
 Si vous avez besoin d'une GUI, vous pouvez utiliser xmms-embedded.
 </para>
 </sect2>
