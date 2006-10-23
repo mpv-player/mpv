@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r20183 -->
+<!-- in sync with r20399 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -153,18 +153,6 @@
         <para>
           <emphasis role="bold">ALSA</emphasis> - optional, für Unterstützung der
           Audioausgabe mit ALSA. Version 0.9.0rc4 ist mindestens erforderlich.
-        </para>
-      </listitem>
-      <listitem>
-        <para>
-          <emphasis role="bold">bio2jack</emphasis> - optional, für
-          Unterstützung der Audioausgabe mit JACK, wird nur zur Compilezeit benötigt.
-          Du kannst es von
-          <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink> beziehen.
-          Da es keine Installationsoptionen hat, musst du die Datei
-          <filename>libbio2jack.a</filename> manuell in deinen Bibliothekspfad
-          kopieren, oder benutze die Option <option>--with-bio2jack=DIR</option>, damit
-          <filename>./configure</filename> weiß, wo sich die Datei befindet.
         </para>
       </listitem>
     </itemizedlist>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20392 -->
+<!-- synced with r20401 -->
 <chapter id="cd-dvd">
   <title>CD/DVD Nutzung</title>
 
@@ -316,7 +316,7 @@
       Manpage. Die Syntax für eine Standard Video CD (VCS) lautet wie folgt:
       <screen>mplayer vcd://<replaceable>&lt;Track&gt;</replaceable> [-cdrom-device <replaceable>&lt;Gerät&gt;</replaceable>]</screen>
       Beispiel:
-      <screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+      <screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
       Das Standard-VCD-Gerät ist <filename>/dev/cdrom</filename>. Wenn deine
       Installation davon abweicht, erstelle einen Symlink oder gib das genaue Gerät auf
       der Kommandozeile an mit der Option <option>-cdrom-device</option>.

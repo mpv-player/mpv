@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with r20361 -->
+<!-- In sync with r20408 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -159,9 +159,9 @@
           <emphasis role="bold">Immer</emphasis> wenn ein Film für die
           Anzeige auf dem Fernseher vorbereitet wird (einschließlich
           DVD), wird er in ein Feld-basiertes Format konvertiert.
-          Die zahlreichen Methoden, mit denen dies bewerkstelligt werden
-          kann, werden insgesamt dem &quot;pulldown&quot; zugeordnet, von welchem
-          das verrufene NTSC &quot;3:2 telecine&quot; eine Abart darstellt.
+          Die verschiedenen Methoden, mit denen dies bewerkstelligt werden
+          kann, werden zusammengenommen als &quot;telecine&quot; bezeichnet, von welchen
+          das verrufene NTSC &quot;3:2 pulldown&quot; eine Abart darstellt.
           Sofern das Originalmaterial nicht Feld-basiert war (bei gleicher
           Feldrate), erhältst du einen Film in einem anderen Format als
           das Original.
