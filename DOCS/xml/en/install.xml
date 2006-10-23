@@ -450,13 +450,16 @@ If <application>MPlayer</application> was compiled with
 <systemitem class="library">fontconfig</systemitem> support, the above methods
 won't work, instead <option>-font</option> expects a
 <systemitem class="library">fontconfig</systemitem> font name
-and defaults to the sans-serif font. To get a list of fonts known to
-<systemitem class="library">fontconfig</systemitem>,
-use <command>fc-list</command>. Example:
+and defaults to the sans-serif font. Example:
 
 <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
+<para>
+To get a list of fonts known to
+<systemitem class="library">fontconfig</systemitem>,
+use <command>fc-list</command>.
+</para>
 </sect2>
 
 
@@ -486,9 +489,9 @@ Then rename or symlink one of the extracted directories to
 Fonts should have an appropriate <filename>font.desc</filename> file
 which maps unicode font positions to the actual code page of the
 subtitle text. Another solution is to have UTF-8-encoded subtitles
-and use the <option>-utf8</option> option or just name the subtitles
-file <filename>&lt;video_name&gt;.utf</filename> and have it in the
-same directory as the video file.
+and use the <option>-utf8</option> option or give the subtitles
+file the same name as your video file with a <filename>.utf</filename>
+extension and have it in the same directory as the video file.
 </para>
 
 </sect2>
