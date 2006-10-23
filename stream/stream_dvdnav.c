@@ -17,6 +17,8 @@
 #include "help_mp.h"
 
 extern char *dvd_device;
+extern int dvd_chapter;
+extern int dvd_last_chapter;
 extern char *audio_lang, *dvdsub_lang;
 
 static struct stream_priv_s {
@@ -223,6 +225,14 @@ static int fill_buffer(stream_t *s, char *but, int len)
                 }
                 break;
             }
+            case DVDNAV_CELL_CHANGE: {
+                if(dvdnav_priv->title > 0 && dvd_last_chapter > 0) {
+                  int tit=0, part=0;
+                  if(dvdnav_current_title_info(dvdnav_priv->dvdnav, &tit, &part) == DVDNAV_STATUS_OK && part > dvd_last_chapter)
+                      return 0;
+                  }
+            }
+            break;
         }
   }
   mp_msg(MSGT_STREAM,MSGL_DBG2,"DVDNAV fill_buffer len: %d\n",len);
@@ -293,11 +303,17 @@ static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 
   if(p->track > 0) {
+  if(dvd_chapter > 0 && dvd_last_chapter > 0 && dvd_chapter > dvd_last_chapter) {
+    mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, invalid chapter range: %d > %d\n", dvd_chapter, dvd_last_chapter);
+    return STREAM_UNSUPORTED;
+  }
   dvdnav_priv->title = p->track;
   if(dvdnav_title_play(dvdnav_priv->dvdnav, p->track) != DVDNAV_STATUS_OK) {
     mp_msg(MSGT_OPEN,MSGL_FATAL,"dvdnav_stream, couldn't select title %d, error '%s'\n", p->track, dvdnav_err_to_string(dvdnav_priv->dvdnav));
     return STREAM_UNSUPORTED;
   }
+  if(dvd_chapter > 0)
+    dvdnav_part_play(dvdnav_priv->dvdnav, p->track, dvd_chapter);
   } else if(p->track == -1)
       dvdnav_menu_call(dvdnav_priv->dvdnav, DVD_MENU_Root);
     else {
