@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20361 -->
+<!-- synced with r20408 -->
 <chapter id="encoding-guide">
 <title>L'encodage avec <application>MEncoder</application></title>
 
@@ -126,8 +126,8 @@
   est que certains utilisent des images entières alors que d'autres, des trames.
   Avant d'être visionnable sur un téléviseur, tout film (DVD inclus) doit être converti dans un 
   format basé sur des trames. Les diverses méthodes par lesquelles ceci peut être fait
-  peuvent être rassemblées sous le terme anglais "pulldown", parmi lesquels l'infâme
-  NTSC "3:2 telecine" en est une variété.
+  peuvent être rassemblées sous le terme anglais "telecine", parmi lesquels l'infâme
+  NTSC "3:2 pulldown" en est une variété.
   A moins que la vidéo source ne soit déjà basée sur des trames (au bon nombre par seconde),
   vous devez transformer le film dans un format autre que celui d'origine.
 </para>
