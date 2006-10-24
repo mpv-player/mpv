@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r19087 -->
+<!-- synced with r20412 -->
 <!-- Opiekun: brak (poprzednio Paszczi) -->
 <chapter id="install">
 <title>Instalacja</title>
@@ -24,7 +24,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 </para>
 
 <sect1 id="softreq">
-<title>Wymagania sprzętowe</title>
+<title>Wymagane oprogramowanie</title>
 
 <itemizedlist>
 <listitem><para>
@@ -35,6 +35,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - zalecanymi wersjami są 2.95 i 3.3+.
   Wiadomo, że 2.96 i 3.0.x generują wadliwy kod, 3.1 i 3.2 również miały problemy.
+  Na PowerPC używaj 4.x+.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">XFree86</emphasis> - sugerowaną wersją jest <emphasis role="bold">
@@ -53,8 +54,12 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   wypadków nie jest to jednak ważne.
   </para></listitem>
 <listitem><para>
+  <emphasis role="bold">FreeType</emphasis> 2.0.9 lub wyższa jest wymagana
+  jeśli chcesz mieć czcionkę do OSD i napisów.
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">SDL</emphasis> - nie jest konieczne, ale może pomóc w niektórych
-  wypadkach (złe karty dźwiękowe, graficzne, które mają dziwne opóźnienia ze sterownikiem Xv).
+  wypadkach (wadliwy dźwięk, karty graficzne, które mają dziwne opóźnienia ze sterownikiem Xv).
   Zawsze używaj najnowszego (zaczynając od 1.2.x).
   </para></listitem>
 <listitem><para>
@@ -86,7 +91,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   dźwięku OGG Vorbis.
   </para></listitem>
 <listitem><para>
-<emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE.COM Streaming Media</ulink></emphasis>
+  <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
   - opcjonalna, wymagana do odtwarzania strumieni RTSP/RTP.
   </para></listitem>
 <listitem><para>
@@ -96,10 +101,6 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">cdparanoia</emphasis> - opcjonalna, do obsługi CDDA.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">libfreetype</emphasis> - opcjonalna, do obsługi czcionek TTF.
-  Wymagana jest przynajmniej wersja 2.0.9.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">libxmms</emphasis> - opcjonalna, do obsługi wtyczek wejściowych
@@ -112,119 +113,6 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   <emphasis role="bold">ALSA</emphasis> - opcjonalna, do obsługi wyjścia dźwięku
   przez ALSA. Wymagana jest przynajmniej wersja 0.9.0rc4.
   </para></listitem>
-<listitem><para>
-  <emphasis role="bold">bio2jack</emphasis> - opcjonalna, do obsługi wyjścia
-  dźwięku poprzez JACK, potrzebna jedynie w czasie kompilacji. Do pobrania z
-  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Ponieważ
-  nie posiada ona opcji instalacji musisz samodzielnie umieścić plik
-  <filename>libbio2jack.a</filename> w swoim katalogu z bibliotekami
-  (np. <filename>/usr/local/lib/</filename>) lub użyć opcji
-  <option>--with-bio2jack=KATALOG</option> aby przekazać jego lokalizację do
-  skryptu <filename>./configure</filename>.
-  </para></listitem>
-</itemizedlist>
-</sect1>
-
-
-<sect1 id="installation_codecs">
-<title>Kodeki</title>
-
-<itemizedlist>
-<listitem><para>
-  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
-  Ten pakiet kodeków jest zdolny do dekodowania strumieni video zakodowanych
-  H.263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
-  i strumieni audio WMA (Windows Media Audio) v1/v2 na wielu platformach.
-  Jest również uważany za najszybszy. Przeczytaj rozdział
-  <link linkend="ffmpeg">FFmpeg</link>, a dowiesz się więcej. Cechy:
-  <itemizedlist>
-  <listitem><simpara>
-    umożliwia dekodowanie wyżej wymienionych strumieni video na maszynach innych niż x86
-    </simpara></listitem>
-  <listitem><simpara>
-    kodowanie większością wymienionych kodeków
-    </simpara></listitem>
-  <listitem><simpara>
-    ten kodek jest <emphasis role="bold">najszybszym dostępnym</emphasis> dla
-    DivX/3/4/5 i innych rodzajów MPEG-4. Zalecany!
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">Kodeki Win32</emphasis>: Jeśli zamierzasz używać
-  <application>MPlayera</application> na architekturze x86, będziesz ich prawdopodobnie
-  potrzebował. Ściągnij pakiet z naszej
-  <ulink url="http://www.mplayerhq.hu/design7/codecs.html">strony kodeków</ulink>
-  i umieść je w katalogu <filename class="directory">/usr/local/lib/codecs</filename>
-  <emphasis role="bold">PRZED</emphasis> kompilacją <application>MPlayera</application>,
-  w przeciwnym wypadku obsługa Win32 nie będzie wkompilowana!
-  <note><para>Projekt avifile ma podobny pakiet kodeków, ale różni się on od naszego,
-  więc jeżeli chcesz używać wszystkich, obsługiwanych kodeków, skorzystaj z
-  naszej paczki (nie przejmuj się, avifile działa z nią bez problemów).</para>
-  </note>
-  Cechy:
-  <itemizedlist>
-  <listitem><simpara>
-    potrzebujesz tego do odtwarzania i zakodowania, na przykład, filmów nagranych z użyciem
-    różnych kompresorów sprzętowych, jak tunery, kamery cyfrowe
-    (na przykład: DV, ATI VCR, MJPEG)
-    </simpara></listitem>
-  <listitem><simpara>
-    wymagane jeśli chcesz odtwarzać <emphasis role="bold">filmy WMV9/WMA9</emphasis>.
-   </simpara></listitem>
-  <listitem><simpara>
-    Nie są potrzebne do starych plików video ASF z MP41 lub MP42 (mimo, że dźwięk VoxWare
-    jest często używany w tych plikach - realizowane jest to przez kodek Win32), lub WMV7.
-    Nie są również potrzebne do WMA (Windows Media Audio),
-    <systemitem class="library">libavcodec</systemitem> ma potrzebne do niego dekodery ze
-    świata wolnego oprogramowania.
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">Kodeki QuickTime</emphasis>: na platformach x86 te kodeki
-  mogą być użyte do dekodowania RPZA, innych sekwencji video QuickTime i
-  strumieni audio QDesign. Instrukcję instalacji możesz znaleźć w rozdziale
-  <link linkend="sorenson">kodeki video Sorenson</link>.
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold">XviD</emphasis>: Alternatywa do kodowania dla DivX4Linux
-  z otwartym źródłem. Cechy:
-  <itemizedlist>
-  <listitem><simpara>
-    1 lub 2 przebiegowe kodowanie przy pomocy <link linkend="mencoder">
-    <application>MEncodera</application></link>
-    </simpara></listitem>
-  <listitem><simpara>
-    ma otwarte źródło, więc jest wieloplatformowa.
-    </simpara></listitem>
-  <listitem><simpara>
-    jest około 2 razy szybsza od DivX4 podczas zakodowywania, a osiąga mniej więcej tę samą jakość
-    </simpara></listitem>
-  </itemizedlist>
-  </para></listitem>
-<listitem><para>
-  <emphasis role="bold"><link linkend="xanim">Kodeki XAnim</link></emphasis>
-  są najlepsze (pełny ekran, sprzętowy zoom YUV) do dekodowania filmów
-  <emphasis role="bold">3ivx</emphasis>, Indeo 3/4/5 i kilku starych formatów.
-  Są wieloplatformowe, więc są jednym sposobem, żeby odtworzyć Indeo na platformach
-  innych niż x86 (no, może poza użyciem XAnim:). Ale na przykład filmy Cinepak
-  są najlepiej odtwarzane przy pomocy <application>MPlayerowego</application> dekodera Cinepak!
-  </para></listitem>
-<listitem><para>
-  Do dekodowania dźwięku <emphasis role="bold">Ogg Vorbis</emphasis>, będziesz musiał
-  poprawnie zainstalować <systemitem class="library">libvorbis</systemitem>.
-  Źródła i odpowiednie pakiety binarne możesz pobrać ze
-  <ulink url="http://www.vorbis.com/download.psp">strony ogg vorbis</ulink>.
-  </para></listitem>
-<listitem><para>
-  <application>MPlayer</application> może korzystać z bibliotek RealPlayer 8
-  lub RealONE, żeby odtworzyć pliki z obrazem w formacie
-  <emphasis role="bold">RealVideo 3.0 i 4.0</emphasis>
-  i dźwiękiem w Sipro/Cook. Zobacz rozdział
-  <link linkend="realmedia">format pliku RealMedia</link>,
-  znajdziesz tam instrukcje i kilka informacji.
-  </para></listitem>
 </itemizedlist>
 </sect1>
 
@@ -233,9 +121,9 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 <title>Karty graficzne</title>
 
 <para>
-Są właściwie dwa rodzaje kart graficznych. Te nowsze mają obsługę
+Są właściwie dwa rodzaje kart graficznych. Jeden (nowsze karty) ma obsługę
 <emphasis role="bold">sprzętowego skalowania i akceleracji YUV</emphasis>,
-te drugie nie.
+pozostałe karty nie.
 </para>
 
 
@@ -262,11 +150,11 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty 3Dfx Voodoo3/Banshee</emphasis>: przeczytaj rozdział
-  poświęcony <link linkend="tdfxfb">tdfxfb</link>, żeby dowiedzieć się, jak uzyskać znaczy
+  poświęcony <link linkend="tdfxfb">tdfxfb</link>, żeby dowiedzieć się, jak uzyskać znaczny
   wzrost prędkości. Ważne jest, abyś wykonał te kroki <emphasis role="bold">przed</emphasis>
   kompilacją <application>MPlayera</application>, w przeciwnym wypadku obsługa
-  3Dfx nie będzie wkompilowana. Przeczytaj również rozdział <link linkend="tvout-voodoo">
-  3dfx TV-out</link>. Jeżeli korzystasz z Xów, używaj przynajmniej wersji
+  3Dfx nie będzie wkompilowana.
+  Jeżeli korzystasz z Xów, używaj przynajmniej wersji
   <emphasis role="bold">4.2.0</emphasis>, ponieważ sterownik Xv dla 3dfx był uszkodzony
   w wersji 4.1.0 i wcześniejszych.
   </para></listitem>
@@ -282,8 +170,8 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   <emphasis role="bold">Karty S3</emphasis>: układy graficzne Savage i Virge/DX mają
   sprzętową akcelerację. Używaj jak najnowszej wersji XFree86, starsze sterowniki mają
   liczne błędy. Układy Savage mają problemy z obrazem YV12, więcej szczegółów
-  znajdziesz w rozdziale <link linkend="s3">S3 Xv</link>. Starsze karty Trio nie obsługują
-  w ogóle lub mają wolną akcelerację sprzętową.
+  znajdziesz w rozdziale <link linkend="s3">S3 Xv</link>.
+  Starsze karty Trio maja wolną akcelerację sprzętową lub nie mają jej wcale.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Karty nVidia</emphasis>: mogą lub nie mogą być dobrym
@@ -298,15 +186,16 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">3DLabs GLINT R3 and Permedia3</emphasis>: dostępny jest
-  sterownik VIDIX (pm3_vid). Dla uzyskanie bardziej szczegółowych informacji
-  przeczytaj rozdział <link linkend="vidix">VIDIX</link>.
+  sterownik VIDIX (pm3_vid).
+  Bardziej szczegółowe informacje znajdziesz w rozdziale
+  <link linkend="vidix">VIDIX</link>.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Inne karty</emphasis>: żadna z powyższych?
   <itemizedlist>
   <listitem><simpara>
     Sprawdź, czy sterownik XFree86 (i Twoja karta) obsługują sprzętową akcelerację.
-    Przeczytaj rozdział <link linkend="xv">Xv</link>, a znajdziesz więcej informacji.
+    Więcej informacji znajdziesz w rozdziale <link linkend="xv">Xv</link>.
     </simpara></listitem>
   <listitem><simpara>
     Jeżeli nie, oznacza to, że możliwości Twojej karty nie są obsługiwane
@@ -328,9 +217,10 @@ zoomie), dlatego też tryb pełnego ekranu jest miły i bardzo szybki.
 <title>Karty nieobsługujące YUV</title>
 
 <para>
-Odtwarzanie pełnoekranowe może być uzyskane przez <emphasis role="bold"> programowe
-skalowanie </emphasis> (użyj opcji  <option>-zoom</option> lub <option>-vf</option>,
-ale ostrzegam Cię: to jest wolne) lub przełączenie na niższą rozdzielczość,
+Odtwarzanie pełnoekranowe może być uzyskane przez
+<emphasis role="bold">skalowanie programowe</emphasis>
+(użyj opcji  <option>-zoom</option> lub <option>-vf</option>,
+ale ostrzegam Cię: jest to wolne) lub przełączenie na niższą rozdzielczość,
 na przykład 352x288. Jeżeli nie masz akceleracji YUV, ta druga metoda jest zalecana.
 Przełączanie między trybami video umożliwia opcja <option>-vm</option> i
 działa ona z następującymi sterownikami:
@@ -342,8 +232,8 @@ działa ona z następującymi sterownikami:
   DGA przez SDL, czasami jest to lepsze rozwiązanie.
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">nie używasz</emphasis> XFree86: spróbuj użyć któregoś
-  z niżej wymienionych sterowników w podanej kolejności:
+  <emphasis role="bold">nie używasz</emphasis> XFree86: wypróbuj te sterowniki
+  w podanej kolejności:
   <link linkend="vesa">vesa</link>,
   <link linkend="fbdev">fbdev</link>,
   <link linkend="svgalib">svgalib</link>,
@@ -380,7 +270,7 @@ działa ona z następującymi sterownikami:
     Nie możesz zastosować obejścia przez UniVBE.
   </simpara></listitem>
   <listitem><simpara>
-    SVGAlib: wykrywa starszy układ Cirrusa. Działa, chociaż jest wolny z
+    SVGAlib: wykrywa starszy układ Cirrusa. Działa, chociaż powoli, z
     <option>-bpp 8</option>.
   </simpara></listitem>
 </itemizedlist>
@@ -419,8 +309,8 @@ działa ona z następującymi sterownikami:
 
 <itemizedlist>
 <listitem><para>
-  Zdecyduj czy potrzebujesz GUI. Jeśli tak, przeczytaj rozdział <link linkend="gui">GUI
-  </link> przed kompilacją.
+  Zdecyduj czy potrzebujesz GUI. Jeśli tak, przeczytaj rozdział
+  <link linkend="gui">GUI</link> przed kompilacją.
   </para></listitem>
 <listitem><para>
   Jeżeli chcesz zainstalować <application>MEncodera</application> (naszego
@@ -431,6 +321,11 @@ działa ona z następującymi sterownikami:
   Jeżeli masz <emphasis role="bold">tuner TV</emphasis> kompatybilny z V4L i
   chcesz oglądać/przechwytywać i kodować filmy przy pomocy <application>MPlayera</application>,
   przeczytaj rozdział <link linkend="tv-input">wejście TV</link>.
+  </para></listitem>
+<listitem><para>
+  Jeżeli masz <emphasis role="bold">tuner radiowy</emphasis> kompatybilny z V4L i
+  chcesz słuchać i zapisywać dźwięk przy pomocy <application>MPlayera</application>,
+  przeczytaj rozdział <link linkend="radio">radio</link>.
   </para></listitem>
 <listitem><para>
   Dostępne jest miłe, gotowe do użycia <emphasis role="bold">Menu OSD</emphasis>.
@@ -466,7 +361,7 @@ Nie rób tak, chyba że chcesz pobawić się z ustawieniami wewnętrznymi
 <application>MPlayera</application>, ponieważ może to spowodować wiele
 problemów. Jeżeli chcesz zmienić kolejność szukania kodeków, skorzystaj
 z opcji <option>-vc</option>, <option>-ac</option>, <option>-vfm</option>
-lub <option>-afm</option> w linii poleceń, lub w Twoim pliku konfiguracyjnym
+lub <option>-afm</option> w wierszu poleceń, lub w Twoim pliku konfiguracyjnym
 (sprawdź stronę man).
 </para>
 
@@ -509,17 +404,18 @@ szczegółowych informacji.
 
 <para>
 GUI wymaga biblioteki GTK 1.2.x lub GTK 2.0 (nie jest w pełni w GTK, ale jego panele są).
-Skórki przechowywane są w formacie PNG, tak więc GTK, <systemitem class="library">libpng</systemitem>
+Skórki przechowywane są w formacie PNG, tak więc musi być zainstalowane GTK,
+<systemitem class="library">libpng</systemitem>
 (i ich pakiety rozwojowe, zazwyczaj nazwane <systemitem class="library">gtk-dev</systemitem>
-i <systemitem class="library">libpng-dev</systemitem>) muszą być zainstalowane.
+i <systemitem class="library">libpng-dev</systemitem>).
 Możesz go zbudować podając opcję <option>--enable-gui</option> skryptowi
-<filename>./configure</filename>. Aby skorzystać z trybu GUI, musisz wykonać
-komendę <command>gmplayer</command>.
+<filename>./configure</filename>. Aby skorzystać z trybu GUI, musisz wywołać
+polecenie <command>gmplayer</command>.
 </para>
 
 <para>
-Obecnie nie możesz skorzystać z opcji <option>-gui</option> w wierszu poleceń
-z przyczyn technicznych.
+Obecnie z przyczyn technicznych nie możesz skorzystać z opcji
+<option>-gui</option>.
 </para>
 
 <para>
@@ -540,307 +436,86 @@ program korzystał ze skórki w katalogu
 
 <!-- ********** -->
 
-<sect1 id="subosd">
-<title>Napisy i OSD</title>
+<sect1 id="fonts-osd">
+<title>Czcionki i OSD</title>
 
 <para>
-<application>MPlayer</application> może wyświetlać napisy podczas odtwarzania
-filmu. Obecnie obsługiwane są następujące formaty:
-<itemizedlist>
-<listitem><para>VOBsub</para></listitem>
-<listitem><para>OGM</para></listitem>
-<listitem><para>CC (closed caption)</para></listitem>
-<listitem><para>MicroDVD</para></listitem>
-<listitem><para>SubRip</para></listitem>
-<listitem><para>SubViewer</para></listitem>
-<listitem><para>Sami</para></listitem>
-<listitem><para>VPlayer</para></listitem>
-<listitem><para>RT</para></listitem>
-<listitem><para>SSA</para></listitem>
-<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
-<listitem><para>AQTitle</para></listitem>
-<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
-</itemizedlist>
-</para>
-
-<para>
-<application>MPlayer</application> może zrzucić wyżej wymienione formaty napisów
-(<emphasis role="bold">poza pierwszymi trzema</emphasis>) do następujących formatów,
-jeśli podasz odpowiednią opcję:
-<itemizedlist>
-<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
-<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
-<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
-<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
-<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
-</itemizedlist>
-</para>
-
-<para>
-<application>MEncoder</application> może zrzucić napisy DVD do formatu
-<link linkend="menc-feat-extractsub">VOBsub</link>.
-</para>
-
-<para>
-Opcje dla wiersza poleceń różnią się nieco dla poszczególnych formatów:
-</para>
-
-<formalpara>
-<title>Format VOBsub</title>
-<para>
-Napisy VOBsub składają się z dużego (kilkumegabajtowego) pliku <filename>.SUB</filename>
-i opcjonalnych plików <filename>.IDX</filename> i/lub <filename>.IFO</filename>.
-Jeżeli masz takie pliki, jak
-<filename><replaceable>przykład.sub</replaceable></filename>,
-<filename><replaceable>przykład.ifo</replaceable></filename> (opcjonalne),
-<filename><replaceable>przykład.idx</replaceable></filename> -
-musisz przekazać <application>MPlayerowi</application> opcje
-<option>-vobsub przykład [-vobsubid <replaceable>id</replaceable>]</option>
-(pełna ścieżka jest opcjonalna). Parametr <option>-vobsubid</option> jest, jak
-<option>-sid</option> dla DVD - przy jego pomocy możesz wybierać pomiędzy ścieżkami napisów
-(różne języki). Jeżeli opcja <option>-vobsubid</option> jest pominięta,
-<application>MPlayer</application> spróbuje użyć języka podanego przez parametr
-<option>-slang</option> i powróci do <systemitem>langidx</systemitem>
-zawartego w pliku<filename>.IDX</filename>, żeby ustawić język napisów. Jeżeli to
-zakończy się niepowodzeniem, napisy nie będą wyświetlane.
-</para>
-</formalpara>
-
-<formalpara>
-<title>Inne formaty napisów</title>
-<para>
-Inne formaty składają się z pojedynczego pliku tekstowego zawierającego przedział
-czasowy, rozmieszczenie i sam tekst. Sposób użycia: Jeżeli masz taki plik, jak
-<filename><replaceable>przykład.txt</replaceable></filename>,
-musisz przekazać opcję <option>-sub
-<replaceable>przykład.txt</replaceable></option> (pełna ścieżka jest opcjonalna).
-</para>
-</formalpara>
-
-<variablelist>
-<title>Dopasowywanie czasu wyświetlania i położenia napisów:</title>
-<varlistentry>
-  <term><option>-subdelay <replaceable>sek</replaceable></option></term>
-  <listitem><simpara>
-    Opóźnia wyświetlanie napisów o <option><replaceable>sek</replaceable></option> sekund.
-    Może być liczbą ujemną. Wartość jest dodawana do licznika czasu filmu.
-    </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-subfps <replaceable>ILOŚĆ</replaceable></option></term>
-  <listitem><simpara>
-    Określa ilość klatek na sekundę pliku z napisami (liczba rzeczywista).
-    </simpara></listitem>
-</varlistentry>
-<varlistentry>
-  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
-  <listitem><simpara>
-    Określa położenie napisów.
-    </simpara></listitem>
-</varlistentry>
-</variablelist>
-
-<para>
-Jeżeli podczas używania napisów w formacie MicroDVD zauważysz rosnące opóźnienie
-między nimi a filmem, to prawdopodobnie ilość klatek na sekundę filmu różni się
-od wartości, do której zostały przystosowane napisy.
-Zauważ, że format ten korzysta z bezwzględnych numerów klatek do wyświetlania
-napisów w odpowiednim momencie, ale nie zawiera w sobie informacji o wartości fps,
-dlatego powinieneś skorzystać z opcji <option>-subfps</option>.
-Jeżeli chciałbyś trwale rozwiązać ten problem, musisz ręcznie zmienić
-wartość framerate pliku z napisami.
-<application>MPlayer</application> może zrobić to za ciebie:
-
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_napisów</replaceable> -subfps <replaceable>fps_filmu</replaceable> -sub <replaceable>zbiór_z_napisami</replaceable> <replaceable>atrapa.avi</replaceable></screen>
-</para>
-
-<para>
-O napisach DVD przeczytasz w rozdziale <link linkend="dvd">DVD</link>.
+Musisz powiedzieć <application>MPlayerowi</application> której czcionki ma
+używać, by móc cieszyć się OSD i napisami. Działa dowolna czcionka TrueType
+lub specjalne czcionki bitmapowe. Jednakże zalecane są czcionki TrueType,
+ponieważ wyglądają o wiele lepiej, mogą być prawidłowo przeskalowane do
+wielkości filmu i lepiej sobie radzą z różnymi sposobami kodowania.
 </para>
 
 
-<sect2 id="mpsub">
-<title>MPsub - Własny format napisów <application>MPlayera</application></title>
+<sect2 id="truetype-fonts">
+<title>Czcionki TrueType</title>
 
 <para>
-<application>MPlayer</application> przedstawia nowy format napisów nazwany
-<emphasis role="bold">MPsub</emphasis>. Zaprojektowany on został przez Gabucino.
-Przede wszystkim jego główną cechą jest bycie <emphasis>dynamicznie</emphasis> opartym o
-czas (chociaż może być również oparty o ramki).  Przykład (z <ulink
-url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink> - na potrzeby tego dokumentu częściowo
-przetłumaczony):
-<programlisting>
-FORMAT=TIME
-# pierwsza liczba : czekaj tyle sekund po zniknięciu poprzednich napisów
-# druga liczba : wyświetlaj napisy przez tyle sekund
-
-15 3
-Dawno, dawno temu...
-
-0 3
-w odległej galaktyce...
-
-0 3
-planeta Naboo była atakowana.<!--
---></programlisting>
+Są dwa sposoby na skłonienie czcionek TrueType do działania. Pierwszy to
+podanie w wierszu poleceń pliku z czcionką TrueType przy pomocy opcji
+<option>-font</option>.
+Ta opcja jest też dobrym kandydatem do włożenie w plik konfiguracyjny
+(szczegóły na stronie man).
+Drugi to stworzenie dowiązania symbolicznego (symlink) o nazwie
+<filename>subfont.ttf</filename> wskazującego na wybraną czcionkę.
+Albo 
+<screen>ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+dla każdego użytkownika osobno, albo ogólnosystemowe:
+<screen>ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
 </para>
 
 <para>
-Widzisz więc, że głównym celem było <emphasis role="bold">umożliwienie łatwej
-edycji/synchronizacji/łączenia/obcinania napisów</emphasis>. Więc jeśli - powiedzmy -
-pobierzesz napisy SSA, które są źle rozmieszczone w czasie/opóźnione w stosunku do Twojej wersji
-filmu, wykonujesz wtedy
+Jeśli <application>MPlayer</application> był skompilowany z obsługą
+<systemitem class="library">fontconfig</systemitem>, te metody nie zadziałają,
+zamiast tego <option>-font</option> oczekuje nazwy czcionki według 
+<systemitem class="library">fontconfig</systemitem> i domyślnie bierze
+czcionkę sans-serif.
+Przykład:
 
-<screen>mplayer <replaceable>film.avi</replaceable> -sub źródło.ssa -dumpmpsub</screen>
-Zostanie utworzony plik <filename>dump.mpsub</filename> w obecnie używanym katalogu,
-który będzie zawierał źródłowe napisy, ale w formacie
-<emphasis role="bold">MPsub</emphasis>. Będziesz mógł wtedy dowolnie dodawać/odejmować
-sekundy do/z napisów.
+<screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
 </para>
 
 <para>
-Napisy wyświetlane są w technice <emphasis role="bold">'OSD',
-On Screen Display (Wyświetlanie Na Ekranie)</emphasis>. OSD używany jest
-do wyświetlania obecnego czasu odtwarzania, paska głośności, paska przeszukiwania
-filmu, itp.
+Żeby zobaczyć jakie czcionki zna
+<systemitem class="library">fontconfig</systemitem>, użyj
+<command>fc-list</command>.
 </para>
 </sect2>
 
 
-<sect2 id="mpsub-install">
-<title>Instalacja OSD i napisów</title>
+<sect2 id="bitmap-fonts">
+<title>Czcionki bitmapowe</title>
 
 <para>
-Będziesz potrzebował paczki zawierającej czcionkę dla <application>MPlayera</application>,
-żeby móc skorzystać z OSD/NAPISÓW. Jest wiele sposobów, aby ją uzyskać:
+Jeśli z jakiegoś powodu chcesz lub musisz użyć czcionek bitmapowych, ściągnij
+zestaw z naszej strony domowej. Możesz wybierać spośród rozmaitych
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">czcionek ISO</ulink>
+oraz zestawów czcionek
+<ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">stworzonych przez użytkowników</ulink>
+w rozmaitych kodowaniach.
 </para>
 
-<itemizedlist>
- <listitem><para>
- Skorzystaj z generatora czcionki w znajdującego się w katalogu <filename
- class="directory">TOOLS/subfont-c</filename>. Jest to kompletne narzędzie, które
- pomoże Ci przekonwertować czcionkę TTF/Type1/itp. do paczki z czcionką dla
- <application>MPlayera</application> (więcej szczegółów znajdziesz w
- <filename>TOOLS/subfont-c/README</filename>).
- </para></listitem>
- <listitem><para>
- Skorzystaj z wtyczki generator czcionki dla <application>GIMPa</application>,
- którą znajdziesz w katalogu <filename class="directory">TOOLS/subfont-GIMP</filename>
- (notka: musisz mieć również wtyczkę HSI RAW, sprawdź ten adres:
- <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts" />).
- </para></listitem>
- <listitem><para>
- używanie czcionki TrueType (TTF) przy pomocy biblioteki
- <systemitem class="library">freetype</systemitem>. Konieczna do tego jest wersja
- 2.0.9 lub wyższa! Tutaj możesz skorzystać z dwóch metod:
-  <itemizedlist>
-    <listitem><para>
-      użyj opcji <option>-font <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable>
-      </option>, aby określić plik z czcionką TrueType przy każdym uruchomieniu
-      </para></listitem>
-    <listitem><para>
-      stwórz symboliczne dowiązanie:
-      <screen>ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-  </itemizedlist>
-  Jeżeli <application>MPlayer</application> został skompilowany z obsługą
-  <systemitem class="library">fontconfig</systemitem>, powyższe metody nie będą
-  działały, ponieważ opcja <option>-font</option> będzie oczekiwała nazwy czcionki,
-  a domyślną jest sans-serif. Aby otrzymać listę czcionek znanych
-  <systemitem class="library">fontconfig</systemitem>,
-  użyj komendy <command>fc-list</command>. Przykład:
-  <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
-  </para></listitem>
-<listitem><para>
-  Pobierz gotowe do użycia pakiety z czcionkami ze strony
-  <application>MPlayera</application>. Informacja: dostępne obecnie czcionki
-  ograniczone są do obsługi kodowania ISO 8859-1/2, ale są też inne, przygotowane
-  przez użytkowników, (z obsługą koreańskiego, rosyjskiego, ISO 8859-8 itp) w katalogu
-  contrib/font serwera FTP.
-  </para><para>
-  <!-- FIXME: this para should be before the list -->
-  Czcionki powinny mieć odpowiedni plik <filename>font.desc</filename>, który
-  mapuje pozycję czcionek unicode do aktualnie używanej przez napisy strony kodowej
-  Innym wyjściem jest posiadanie napisów zakodowanych w UTF-8 i użycie opcji
-  <option>-utf8</option> albo po prostu zmienienie ich nazwy na
-  <filename>&lt;nazwa_filmu&gt;.utf</filename> i wgranie ich do tego samego
-  katalogu co plik z filmem. Konwersja z różnych stron kodowych do UTF-8
-  może być realizowana poprzez programy <command>konwert</command> lub
-  <command>iconv</command>.
-  </para><para>
-
-  <table>
-  <title>Kilka adresów URL</title>
-  <tgroup cols="2">
-  <thead>
-    <row><entry>URL</entry><entry>Komentarz</entry></row>
-  </thead>
-  <tbody>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
-    </entry><entry>
-    czcionki ISO
-    </entry></row>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
-    </entry><entry>
-    różne czcionki użytkowników
-    </entry></row>
-  <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts"></ulink>
-    </entry><entry>
-    czcionki koreańskie i wtyczka RAW
-    </entry></row>
-  </tbody>
-  </tgroup>
-  </table>
-
-  </para></listitem>
-</itemizedlist>
-
 <para>
-Jeżeli wybierzesz czcionki inne niż TTF, rozpakuj (UNZIP) plik, który ściągnąłeś do
-katalogu <filename class="directory">~/.mplayer</filename> lub <filename
-class="directory">$PREFIX/share/mplayer</filename>. Następnie zmień nazwę
-lub stwórz symboliczne dowiązanie tego katalogu do <filename>font</filename>,
-na przykład:
-
+Rozpakuj ściągnięty plik do katalogu
+<filename class="directory">~/.mplayer</filename> lub
+<filename class="directory">$PREFIX/share/mplayer</filename>.
+Potem przemianuj lub stwórz dowiązanie symboliczne jednego z rozpakowanych
+katalogów na nazwę
+<filename class="directory">font</filename>, na przykład:
 <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-
-Teraz na pewno zobaczysz licznik w lewym górnym rogu filmu (możesz go wyłączyć
-używając klawisza <keycap>o</keycap>).
+<screen>ln -s <replaceable>$PREFIX/share/mplayer/arial-24</replaceable> $PREFIX/share/mplayer/font</screen>
 </para>
 
 <para>
-(napisy są <emphasis>zawsze włączone</emphasis>, aby dowiedzieć się, je wyłączyć,
-przeczytaj stronę man)
+Czcionki powinny mieć odpowiedni plik <filename>font.desc</filename>, który
+przypisuje pozycje czcionek unicode na właściwą stronę kodową napisów.
+Innym rozwiązaniem jest mieć napisy zakodowane w UTF-8 i używać opcji
+<option>-utf8</option> albo nazwać plik z napisami tak samo jak film, ale z
+rozszerzeniem <filename>.utf</filename>
+i mieć go w tym samym katalogu co film.
 </para>
 
-<para>
-OSD ma 4 stany (przełączane przez klawisz <keycap>o</keycap>):
-
-<orderedlist>
-<listitem><simpara>
-  pasek głośności  + pasek przeszukiwania (domyślnie)
-  </simpara></listitem>
-<listitem><simpara>
-  pasek głośności  + pasek przeszukiwania + licznik czasu +
-  pozycja przeszukiwania w pliku (w procentach)
-  </simpara></listitem>
-<listitem><simpara>
-  pasek głośności  + pasek przeszukiwania + licznik czasu + całkowity czas trwania
-  </simpara></listitem>
-<listitem><simpara>
-  tylko napisy
-  </simpara></listitem>
-</orderedlist>
-
-Możesz zmienić domyślne zachowanie, ustawiając zmienną <varname>osdlevel</varname>
-w pliku konfiguracyjnym (config) lub korzystając z opcji <option>-osdlevel</option>
-w wierszu poleceń.
-
-</para>
 </sect2>
 
 
@@ -905,34 +580,29 @@ Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
   musi być jeszcze dokładniejsza.
   </simpara></listitem>
 <listitem><para>
-  Kod <emphasis role="bold">nowego zegara</emphasis> korzysta z RTC(Real Time Clock)
-  do tego zadania, ponieważ jest on dokładny co do 1ms. Jest automagicznie
-  uruchomiany, jeżeli jest to możliwe, ale wymaga uprawnień roota, ustawionego
-  <emphasis>bitu uid roota</emphasis> na pliku wykonywalnym
-  <application>MPlayera</application> lub odpowiednio skonfigurowanego jądra.
+  Kod <emphasis role="bold">nowego zegara</emphasis> korzysta do tego celu
+  z RTC (RealTime Clock), ponieważ jest on dokładny co do 1ms.
+  Włącza się go opcją
+  <option>-rtc</option>, ale wymaga odpowiednio skonfigurowanego jądra.
   Jeżeli korzystasz z jądra w wersji 2.4.19pre8 lub późniejszej, wystarczy, że
   ustawisz maksymalną częstotliwość RTC dla zwykłego użytkownika przez
   system plików <systemitem class="systemname">/proc</systemitem>.
-  Użyj następującej komendy, aby to zrobić:
+  Użyj jednego z następujących poleceń, aby pozwolić na korzystanie z RTC
+  zwykłym użytkownikom:
   <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
-  Jeżeli nie używasz tak nowego jądra, możesz zmienić jedną linię w
-  <filename>drivers/char/rtc.c</filename> i przekompilować je.
-  Znajdź fragment, który wygląda tak:
-  <programlisting>
-       * We don't really want Joe User enabling more
-       * than 64Hz of interrupts on a multi-user machine.
-       */
-      if ((rtc_freq &gt; 64) &amp;&amp; (!capable(CAP_SYS_RESOURCE)))
-   </programlisting>
-   i zmień 64 na 1024. Powinieneś jednak naprawdę wiedzieć co robisz.
-   Możesz zobaczyć wydajność nowego synchronizatora w linii statusu.
-   Zarządzanie energią w niektórych BIOSach notebooków z procesorami w technologii
+  <screen>sysctl dev/rtc/max-user-freq=1024</screen>
+  Możesz uczynić tę zmianę trwałą  dodając ten drugi wiersz do
+  <filename>/etc/sysctl.conf</filename>.
+  </para>
+  <para>
+   Możesz zobaczyć wydajność nowego synchronizatora w wierszu stanu.
+   Zarządzanie energią w BIOSach niektórych notebooków z procesorami w technologii
    speedstep nie współgra z RTC. Dźwięk i obraz mogą być niezsynchronizowane.
-   Podłączenie zewnętrznego źródła energii, przed włączeniem notebooka,
-   wydaje się pomagać. Zawsze możesz wyłączyć RTC opcją <option>-nortc</option>.
+   Podłączenie zewnętrznego źródła energii przed włączeniem notebooka
+   wydaje się pomagać.
    W niektórych zestawieniach sprzętowych (sprawdzone przy używaniu DVD bez
    obsługi DMA na płycie ALi1541) korzystanie z RTC wywołuje skokowe odtwarzanie.
-   Zaleca się skorzystanie z trzeciej metody w wyżej wymienionych wypadkach.
+   Zaleca się skorzystanie w tych przypadkach z trzeciej metody.
   </para></listitem>
 <listitem><simpara>
   <emphasis role="bold">Trzeci kod zegara</emphasis> włączany jest opcją
@@ -940,11 +610,6 @@ Istnieją trzy metody synchronizacji w <application>MPlayerze</application>.
   Wymaga jednak większej mocy obliczeniowej procesora.
   </simpara></listitem>
 </itemizedlist>
-<note><para><emphasis role="bold">NIGDY nie instaluj pliku wykonywalnego
-<application>MPlayera</application> z bitem uid roota na maszynie
-z wieloma użytkownikami!</emphasis>
-Istnieje możliwość przejęcia praw superużytkownika.
-</para></note>
 </para>
 </sect1>
 </chapter>
