@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20379 -->
+<!-- synced with r20401 -->
 <!-- Opiekun: Emdej -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
@@ -103,13 +103,13 @@ sysctl hw.ata.atapi_dma=1
 <title>Odtwarzanie DVD</title>
 <para>
 Aby poznać pełną listę dostępnych opcji, proszę przeczytać odpowiednie strony
-man. Składnia dla standardowego DVD (Digital Versatile Disc) jest następująca:
+man. Składnia do odtwarzania standardowego DVD jest następująca:
 <screen>mplayer dvd://<replaceable>&lt;ścieżka&gt;</replaceable> [-dvd-device <replaceable>&lt;urządzenie&gt;</replaceable>]</screen>
 </para>
 
 <para>
 Przykład:
-<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -126,7 +126,7 @@ urządzenie (device) w linii polecenia korzystając z opcji
 
 <para>
 <application>MPlayer</application> używa <systemitem>libdvdread</systemitem>
-oraz <systemitem>libdvdcss</systemitem> do dekodowania i odtwarzania DVD. Te
+oraz <systemitem>libdvdcss</systemitem> do odtwarzania i dekodowania DVD. Te
 dwie biblioteki są zawarte w podkatalogu <filename class="directory">libmpdvdkit2</filename>
 w głównym drzewie katalogów <application>MPlayera</application>, nie trzeba
 instalować ich osobno.
@@ -194,11 +194,10 @@ nazwy urządzeń są przydzielane automatycznie.
 </para>
 
 <formalpara>
-<title>Autoryzacja DVD</title>
+<title>Deszyfrowanie DVD</title>
 <para>
-Metoda autoryzacji i rozszyfrowywania używana gdy korzystamy z DVD przy użyciu
-nowego sposobu polega na korzystaniu ze zmodyfikowanej biblioteki
-<systemitem>libdvdcss</systemitem> (patrz wyżej). Ta metoda może być określona
+Do deszyfrowania DVD jest używana biblioteka
+<systemitem>libdvdcss</systemitem>. Metoda jej działania może być określona
 poprzez zmienna środowiskową <envar>DVDCSS_METHOD</envar>, która może być
 ustawiona na "key", "disk" albo "title".
 </para>
@@ -222,7 +221,7 @@ rozszyfrowania zaszyfrowanego klucza dysku (disk key).
 <listitem><para>
 <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
 wyszukuje już złamane klucze tytułów, które są przechowywane w katalogu
-<filename class="directory">~/.mplayer/DVDKeys</filename> (szybkie ;).
+<filename class="directory">~/.dvdcss</filename> (szybkie).
 </para></listitem>
 
 <listitem><para>
