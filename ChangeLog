@@ -73,7 +73,7 @@ MPlayer (1.0)
     * removed support for obsolete and non-free divx4 libraries
 
     Ports:
-    * partial Intel Mac support, --disable-loader --disable-mp3lib is needed
+    * partial Intel Mac support, --disable-win32 --disable-mp3lib is needed
     * OpenGL can now create windows > screen size under Windows
     * allow filenames starting with \\ for remote paths on Windows
 
