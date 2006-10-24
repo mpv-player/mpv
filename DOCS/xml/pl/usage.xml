@@ -105,6 +105,309 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 </para>
 </sect1>
 
+<sect1 id="subosd">
+<title>Napisy i OSD</title>
+ 
+<para>
+<application>MPlayer</application> mo¿e wy¶wietlaæ napisy podczas odtwarzania
+filmu. Obecnie obs³ugiwane s± nastêpuj±ce formaty:
+<itemizedlist>
+<listitem><para>VOBsub</para></listitem>
+<listitem><para>OGM</para></listitem>
+<listitem><para>CC (closed caption)</para></listitem>
+<listitem><para>MicroDVD</para></listitem>
+<listitem><para>SubRip</para></listitem>
+<listitem><para>SubViewer</para></listitem>
+<listitem><para>Sami</para></listitem>
+<listitem><para>VPlayer</para></listitem>
+<listitem><para>RT</para></listitem>
+<listitem><para>SSA</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
+<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
+<listitem><para>AQTitle</para></listitem>
+<listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
+</itemizedlist>
+</para>
+ 
+<para>
+<application>MPlayer</application> mo¿e zrzuciæ wy¿ej wymienione formaty napisów
+(<emphasis role="bold">poza pierwszymi trzema</emphasis>) do nastêpuj±cych formatów,
+je¶li podasz odpowiedni± opcjê:
+<itemizedlist>
+<listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
+<listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
+<listitem><para>MicroDVD: <option>-dumpmicrodvdsub</option></para></listitem>
+<listitem><para>JACOsub: <option>-dumpjacosub</option></para></listitem>
+<listitem><para>Sami: <option>-dumpsami</option></para></listitem>
+</itemizedlist>
+</para>
+ 
+<para>
+<application>MEncoder</application> mo¿e zrzuciæ napisy DVD do formatu
+<link linkend="menc-feat-extractsub">VOBsub</link>.
+</para>
+ 
+<para>
+Opcje dla wiersza poleceñ ró¿ni± siê nieco dla poszczególnych formatów:
+ </para>
+ 
+<formalpara>
+<title>Format VOBsub</title>
+<para>
+Napisy VOBsub sk³adaj± siê z du¿ego (kilkumegabajtowego) pliku <filename>.SUB</filename>
+i opcjonalnych plików <filename>.IDX</filename> i/lub <filename>.IFO</filename>.
+Je¿eli masz takie pliki, jak
+<filename><replaceable>przyk³ad.sub</replaceable></filename>,
+<filename><replaceable>przyk³ad.ifo</replaceable></filename> (opcjonalne),
+<filename><replaceable>przyk³ad.idx</replaceable></filename> -
+musisz przekazaæ <application>MPlayerowi</application> opcje
+<option>-vobsub przyk³ad [-vobsubid <replaceable>id</replaceable>]</option>
+(pe³na ¶cie¿ka jest opcjonalna). Parametr <option>-vobsubid</option> jest, jak
+<option>-sid</option> dla DVD - przy jego pomocy mo¿esz wybieraæ pomiêdzy ¶cie¿kami napisów
+(ró¿ne jêzyki). Je¿eli opcja <option>-vobsubid</option> jest pominiêta,
+<application>MPlayer</application> spróbuje u¿yæ jêzyka podanego przez parametr
+<option>-slang</option> i powróci do <systemitem>langidx</systemitem>
+zawartego w pliku<filename>.IDX</filename>, ¿eby ustawiæ jêzyk napisów. Je¿eli to
+zakoñczy siê niepowodzeniem, napisy nie bêd± wy¶wietlane.
+</para>
+</formalpara>
+ 
+<formalpara>
+<title>Inne formaty napisów</title>
+<para>
+Inne formaty sk³adaj± siê z pojedynczego pliku tekstowego zawieraj±cego przedzia³
+czasowy, rozmieszczenie i sam tekst. Sposób u¿ycia: Je¿eli masz taki plik, jak
+<filename><replaceable>przyk³ad.txt</replaceable></filename>,
+musisz przekazaæ opcjê <option>-sub
+<replaceable>przyk³ad.txt</replaceable></option> (pe³na ¶cie¿ka jest opcjonalna).
+</para>
+</formalpara>
+ 
+<variablelist>
+<title>Dopasowywanie czasu wy¶wietlania i po³o¿enia napisów:</title>
+<varlistentry>
+  <term><option>-subdelay <replaceable>sek</replaceable></option></term>
+  <listitem><simpara>
+    Opó¼nia wy¶wietlanie napisów o <option><replaceable>sek</replaceable></option> sekund.
+    Mo¿e byæ liczb± ujemn±. Warto¶æ jest dodawana do licznika czasu filmu.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subfps <replaceable>ILO¦Æ</replaceable></option></term>
+  <listitem><simpara>
+    Okre¶la ilo¶æ klatek na sekundê pliku z napisami (liczba rzeczywista).
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>-subpos <replaceable>0-100</replaceable></option></term>
+  <listitem><simpara>
+    Okre¶la po³o¿enie napisów.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Je¿eli podczas u¿ywania napisów w formacie MicroDVD zauwa¿ysz rosn±ce opó¼nienie
+miêdzy nimi a filmem, to prawdopodobnie ilo¶æ klatek na sekundê filmu ró¿ni siê
+od warto¶ci, do której zosta³y przystosowane napisy.
+Zauwa¿, ¿e format ten korzysta z bezwzglêdnych numerów klatek do wy¶wietlania
+napisów w odpowiednim momencie, ale nie zawiera w sobie informacji o warto¶ci fps,
+dlatego powiniene¶ skorzystaæ z opcji <option>-subfps</option>.
+Je¿eli chcia³by¶ trwale rozwi±zaæ ten problem, musisz rêcznie zmieniæ
+warto¶æ framerate pliku z napisami.
+<application>MPlayer</application> mo¿e zrobiæ to za ciebie:
+
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_napisów</replaceable> -subfps <replaceable>fps_filmu</replaceable> -sub <replaceable>zbiór_z_napisami</replaceable> <replaceable>atrapa.avi</replaceable></screen>
+</para>
+
+<para>
+O napisach DVD przeczytasz w rozdziale <link linkend="dvd">DVD</link>.
+</para>
+
+
+<sect2 id="mpsub">
+<title>MPsub - W³asny format napisów <application>MPlayera</application></title>
+
+<para>
+<application>MPlayer</application> przedstawia nowy format napisów nazwany
+<emphasis role="bold">MPsub</emphasis>. Zaprojektowany on zosta³ przez Gabucino.
+Przede wszystkim jego g³ówn± cech± jest bycie <emphasis>dynamicznie</emphasis> opartym o
+czas (chocia¿ mo¿e byæ równie¿ oparty o ramki).  Przyk³ad (z <ulink
+url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink> - na potrzeby tego dokumentu czê¶ciowo
+przet³umaczony):
+<programlisting>
+FORMAT=TIME
+# pierwsza liczba : czekaj tyle sekund po znikniêciu poprzednich napisów
+# druga liczba : wy¶wietlaj napisy przez tyle sekund
+
+15 3
+Dawno, dawno temu...
+
+0 3
+w odleg³ej galaktyce...
+
+0 3
+planeta Naboo by³a atakowana.<!--
+--></programlisting>
+</para>
+
+<para>
+Widzisz wiêc, ¿e g³ównym celem by³o <emphasis role="bold">umo¿liwienie ³atwej
+edycji/synchronizacji/³±czenia/obcinania napisów</emphasis>. Wiêc je¶li - powiedzmy -
+pobierzesz napisy SSA, które s± ¼le rozmieszczone w czasie/opó¼nione w stosunku do Twojej wersji
+filmu, wykonujesz wtedy
+
+<screen>mplayer <replaceable>film.avi</replaceable> -sub ¼ród³o.ssa -dumpmpsub</screen>
+Zostanie utworzony plik <filename>dump.mpsub</filename> w obecnie u¿ywanym katalogu,
+który bêdzie zawiera³ ¼ród³owe napisy, ale w formacie
+<emphasis role="bold">MPsub</emphasis>. Bêdziesz móg³ wtedy dowolnie dodawaæ/odejmowaæ
+sekundy do/z napisów.
+</para>
+
+<para>
+Napisy wy¶wietlane s± w technice <emphasis role="bold">'OSD',
+On Screen Display (Wy¶wietlanie Na Ekranie)</emphasis>. OSD u¿ywany jest
+do wy¶wietlania obecnego czasu odtwarzania, paska g³o¶no¶ci, paska przeszukiwania
+filmu, itp.
+</para>
+</sect2>
+ 
+ 
+<sect2 id="mpsub-install">
+<title>Instalacja OSD i napisów</title>
+ 
+ <para>
+Bêdziesz potrzebowa³ paczki zawieraj±cej czcionkê dla <application>MPlayera</application>,
+¿eby móc skorzystaæ z OSD/NAPISÓW. Jest wiele sposobów, aby j± uzyskaæ:
+</para>
+ 
+<itemizedlist>
+ <listitem><para>
+ Skorzystaj z generatora czcionki w znajduj±cego siê w katalogu <filename
+ class="directory">TOOLS/subfont-c</filename>. Jest to kompletne narzêdzie, które
+ pomo¿e Ci przekonwertowaæ czcionkê TTF/Type1/itp. do paczki z czcionk± dla
+ <application>MPlayera</application> (wiêcej szczegó³ów znajdziesz w
+ <filename>TOOLS/subfont-c/README</filename>).
+ </para></listitem>
+ <listitem><para>
+ Skorzystaj z wtyczki generator czcionki dla <application>GIMPa</application>,
+ któr± znajdziesz w katalogu <filename class="directory">TOOLS/subfont-GIMP</filename>
+ (notka: musisz mieæ równie¿ wtyczkê HSI RAW, sprawd¼ ten adres:
+ <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts" />).
+ </para></listitem>
+ <listitem><para>
+ u¿ywanie czcionki TrueType (TTF) przy pomocy biblioteki
+ <systemitem class="library">freetype</systemitem>. Konieczna do tego jest wersja
+ 2.0.9 lub wy¿sza! Tutaj mo¿esz skorzystaæ z dwóch metod:
+  <itemizedlist>
+    <listitem><para>
+      u¿yj opcji <option>-font <replaceable>/¶cie¿ka/do/przyk³adowej_czcionki.ttf</replaceable>
+      </option>, aby okre¶liæ plik z czcionk± TrueType przy ka¿dym uruchomieniu
+      </para></listitem>
+    <listitem><para>
+      stwórz symboliczne dowi±zanie:
+      <screen>ln -s <replaceable>/¶cie¿ka/do/przyk³adowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
+      </para></listitem>
+  </itemizedlist>
+  Je¿eli <application>MPlayer</application> zosta³ skompilowany z obs³ug±
+  <systemitem class="library">fontconfig</systemitem>, powy¿sze metody nie bêd±
+  dzia³a³y, poniewa¿ opcja <option>-font</option> bêdzie oczekiwa³a nazwy czcionki,
+  a domy¶ln± jest sans-serif. Aby otrzymaæ listê czcionek znanych
+  <systemitem class="library">fontconfig</systemitem>,
+  u¿yj komendy <command>fc-list</command>. Przyk³ad:
+  <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
+  </para></listitem>
+<listitem><para>
+  Pobierz gotowe do u¿ycia pakiety z czcionkami ze strony
+  <application>MPlayera</application>. Informacja: dostêpne obecnie czcionki
+  ograniczone s± do obs³ugi kodowania ISO 8859-1/2, ale s± te¿ inne, przygotowane
+  przez u¿ytkowników, (z obs³ug± koreañskiego, rosyjskiego, ISO 8859-8 itp) w katalogu
+  contrib/font serwera FTP.
+  </para><para>
+  <!-- FIXME: this para should be before the list -->
+  Czcionki powinny mieæ odpowiedni plik <filename>font.desc</filename>, który
+  mapuje pozycjê czcionek unicode do aktualnie u¿ywanej przez napisy strony kodowej
+  Innym wyj¶ciem jest posiadanie napisów zakodowanych w UTF-8 i u¿ycie opcji
+  <option>-utf8</option> albo po prostu zmienienie ich nazwy na
+  <filename>&lt;nazwa_filmu&gt;.utf</filename> i wgranie ich do tego samego
+  katalogu co plik z filmem. Konwersja z ró¿nych stron kodowych do UTF-8
+  mo¿e byæ realizowana poprzez programy <command>konwert</command> lub
+  <command>iconv</command>.
+  </para><para>
+
+  <table>
+  <title>Kilka adresów URL</title>
+  <tgroup cols="2">
+  <thead>
+    <row><entry>URL</entry><entry>Komentarz</entry></row>
+  </thead>
+  <tbody>
+  <row><entry>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
+    </entry><entry>
+    czcionki ISO
+    </entry></row>
+  <row><entry>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
+    </entry><entry>
+    ró¿ne czcionki u¿ytkowników
+    </entry></row>
+  <row><entry>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts"></ulink>
+    </entry><entry>
+    czcionki koreañskie i wtyczka RAW
+    </entry></row>
+  </tbody>
+  </tgroup>
+  </table>
+
+  </para></listitem>
+</itemizedlist>
+
+<para>
+Je¿eli wybierzesz czcionki inne ni¿ TTF, rozpakuj (UNZIP) plik, który ¶ci±gn±³e¶ do
+katalogu <filename class="directory">~/.mplayer</filename> lub <filename
+class="directory">$PREFIX/share/mplayer</filename>. Nastêpnie zmieñ nazwê
+lub stwórz symboliczne dowi±zanie tego katalogu do <filename>font</filename>,
+na przyk³ad:
+
+ <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
+
+Teraz na pewno zobaczysz licznik w lewym górnym rogu filmu (mo¿esz go wy³±czyæ
+u¿ywaj±c klawisza <keycap>o</keycap>).
+</para>
+ 
+<para>
+(napisy s± <emphasis>zawsze w³±czone</emphasis>, aby dowiedzieæ siê, je wy³±czyæ,
+przeczytaj stronê man)
+</para>
+ 
+<para>
+OSD ma 4 stany (prze³±czane przez klawisz <keycap>o</keycap>):
+
+<orderedlist>
+<listitem><simpara>
+  pasek g³o¶no¶ci  + pasek przeszukiwania (domy¶lnie)
+  </simpara></listitem>
+<listitem><simpara>
+  pasek g³o¶no¶ci  + pasek przeszukiwania + licznik czasu +
+  pozycja przeszukiwania w pliku (w procentach)
+  </simpara></listitem>
+<listitem><simpara>
+  pasek g³o¶no¶ci  + pasek przeszukiwania + licznik czasu + ca³kowity czas trwania
+  </simpara></listitem>
+<listitem><simpara>
+  tylko napisy
+  </simpara></listitem>
+</orderedlist>
+
+Mo¿esz zmieniæ domy¶lne zachowanie, ustawiaj±c zmienn± <varname>osdlevel</varname>
+w pliku konfiguracyjnym (config) lub korzystaj±c z opcji <option>-osdlevel</option>
+w wierszu poleceñ.
+
+</para>
+</sect2>
+</sect1>
 
 <sect1 id="control">
 <title>Sterowanie</title>

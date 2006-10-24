@@ -469,8 +469,8 @@ Mam problem z wyświetlaniem napisów. Pomocy!
 <answer><para>
 Upewnij się, że poprawnie zainstalowałeś czcionki. Wykonaj jeszcze raz
 krok po kroku instrukcje z części  
-<link linkend="mpsub-install">OSD i napisy</link> z sekcji traktującej o
-instalacji. Jeżeli używasz czcionek TrueType, upewnij się, że masz zainstalowaną
+<link linkend="fonts-osd">czcionki i OSD</link> z rozdziału o instalacji. Jeżeli
+używasz czcionek TrueType, upewnij się, że masz zainstalowaną
 bibliotekę <systemitem class="library">FreeType</systemitem>.
 Sprawdź także napisy w edytorze tekstu, bądź z innymi odtwarzaczami. Spróbuj
 tekże przekonwertować je na inny format.
