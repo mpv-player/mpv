@@ -17,6 +17,8 @@ ifo_print.h
 ifo_read.c
 ifo_read.h
 ifo_types.h
+md5.c
+md5.h
 nav_print.c
 nav_print.h
 nav_read.c
