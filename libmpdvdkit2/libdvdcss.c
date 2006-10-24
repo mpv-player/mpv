@@ -471,7 +471,7 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
         {
             if( psz_serial[i] < '0' || psz_serial[i] > '9' )
             {
-                unsigned char psz_tmp[16 + 1];
+                char psz_tmp[16 + 1];
                 sprintf( psz_tmp,
                          "%.2x%.2x%.2x%.2x%.2x%.2x%.2x%.2x",
                          psz_serial[0], psz_serial[1], psz_serial[2],
