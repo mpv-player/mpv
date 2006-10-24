@@ -159,7 +159,7 @@ char * dvdcss_interface_2 = VERSION;
  * and when possible, the disc key is retrieved.
  *
  * dvdcss_open() returns a handle to be used for all subsequent \e libdvdcss
- * calls. If an error occured, NULL is returned.
+ * calls. If an error occurred, NULL is returned.
  */
 extern dvdcss_t dvdcss_open ( char *psz_target )
 {
@@ -550,14 +550,14 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 }
 
 /**
- * \brief Return a string containing the latest error that occured in the
+ * \brief Return a string containing the latest error that occurred in the
  *        given \e libdvdcss instance.
  *
  * \param dvdcss a \e libdvdcss instance.
  * \return a null-terminated string containing the latest error message.
  *
  * This function returns a constant string containing the latest error that
- * occured in \e libdvdcss. It can be used to format error messages at your
+ * occurred in \e libdvdcss. It can be used to format error messages at your
  * convenience in your application.
  */
 extern char * dvdcss_error ( dvdcss_t dvdcss )
