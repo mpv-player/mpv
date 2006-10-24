@@ -318,8 +318,8 @@ typedef struct _SCSI_PASS_THROUGH_DIRECT
  * win32 aspi specific
  *****************************************************************************/
 
-typedef WINAPI DWORD (*GETASPI32SUPPORTINFO)(VOID);
-typedef WINAPI DWORD (*SENDASPI32COMMAND)(LPVOID);
+typedef DWORD (CALLBACK *GETASPI32SUPPORTINFO)(VOID);
+typedef DWORD (CALLBACK *SENDASPI32COMMAND)(LPVOID);
 
 #define WIN2K               ( GetVersion() < 0x80000000 )
 #define ASPI_HAID           0

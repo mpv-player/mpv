@@ -170,7 +170,7 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
 
         if( i_fd >= 0 )
         {
-            unsigned char psz_key[KEY_SIZE * 3];
+            char psz_key[KEY_SIZE * 3];
             unsigned int k0, k1, k2, k3, k4;
 
             psz_key[KEY_SIZE * 3 - 1] = '\0';
@@ -219,7 +219,7 @@ int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
         i_fd = open( dvdcss->psz_cachefile, O_RDWR|O_CREAT, 0644 );
         if( i_fd >= 0 )
         {
-            unsigned char psz_key[KEY_SIZE * 3 + 2];
+            char psz_key[KEY_SIZE * 3 + 2];
 
             sprintf( psz_key, "%02x:%02x:%02x:%02x:%02x\r\n",
                               p_title_key[0], p_title_key[1], p_title_key[2],
