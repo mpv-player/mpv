@@ -56,29 +56,37 @@ typedef struct dvdcss_s* dvdcss_t;
 #define DVDCSS_SEEK_KEY        (1 << 1)
 
 
+#if defined(LIBDVDCSS_EXPORTS)
+#define LIBDVDCSS_EXPORT __declspec(dllexport) extern
+#elif defined(LIBDVDCSS_IMPORTS)
+#define LIBDVDCSS_EXPORT __declspec(dllimport) extern
+#else
+#define LIBDVDCSS_EXPORT extern
+#endif
+
 /*
  * Our version number. The variable name contains the interface version.
  */
-extern char *        dvdcss_interface_2;
+LIBDVDCSS_EXPORT char *        dvdcss_interface_2;
 
 
 /*
  * Exported prototypes.
  */
-extern dvdcss_t dvdcss_open  ( char *psz_target );
-extern int      dvdcss_close ( dvdcss_t );
-extern int      dvdcss_seek  ( dvdcss_t,
+LIBDVDCSS_EXPORT dvdcss_t dvdcss_open  ( char *psz_target );
+LIBDVDCSS_EXPORT int      dvdcss_close ( dvdcss_t );
+LIBDVDCSS_EXPORT int      dvdcss_seek  ( dvdcss_t,
                                int i_blocks,
                                int i_flags );
-extern int      dvdcss_read  ( dvdcss_t,
+LIBDVDCSS_EXPORT int      dvdcss_read  ( dvdcss_t,
                                void *p_buffer,
                                int i_blocks,
                                int i_flags );
-extern int      dvdcss_readv ( dvdcss_t,
+LIBDVDCSS_EXPORT int      dvdcss_readv ( dvdcss_t,
                                void *p_iovec,
                                int i_blocks,
                                int i_flags );
-extern char *   dvdcss_error ( dvdcss_t );
+LIBDVDCSS_EXPORT char *   dvdcss_error ( dvdcss_t );
 
 
 /*
