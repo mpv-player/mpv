@@ -57,6 +57,20 @@ extern int    gui_main_pos_y;
 extern int    gui_sub_pos_x;
 extern int    gui_sub_pos_y;
 
+#ifdef USE_ASS
+typedef struct {
+    int enabled;
+    int use_margins;
+    int top_margin;
+    int bottom_margin;
+} gtkASS_t;
+extern gtkASS_t gtkASS;
+extern int ass_enabled;
+extern int ass_use_margins;
+extern int ass_top_margin;
+extern int ass_bottom_margin;
+#endif
+
 extern int cfg_read( void );
 extern int cfg_write( void );
 

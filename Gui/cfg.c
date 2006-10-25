@@ -73,6 +73,10 @@ int    gui_main_pos_x = -2;
 int    gui_main_pos_y = -2;
 int    gui_sub_pos_x = -1;
 int    gui_sub_pos_y = -1;
+
+#ifdef USE_ASS
+gtkASS_t gtkASS;
+#endif
 // ---
 
 extern char * get_path( const char * filename );
@@ -139,6 +143,12 @@ static m_option_t gui_opts[] =
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
  { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },
  { "sub_unicode",&sub_unicode,CONF_TYPE_FLAG,0,0,1,NULL },
+#ifdef USE_ASS
+ { "ass_enabled",&ass_enabled,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "ass_use_margins",&ass_use_margins,CONF_TYPE_FLAG,0,0,1,NULL },
+ { "ass_top_margin",&ass_top_margin,CONF_TYPE_INT,CONF_RANGE,0,512,NULL },
+ { "ass_bottom_margin",&ass_bottom_margin,CONF_TYPE_INT,CONF_RANGE,0,512,NULL },
+#endif
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
  { "sub_overlap",&suboverlap_enabled,CONF_TYPE_FLAG,0,0,0,NULL },
 #ifdef USE_ICONV

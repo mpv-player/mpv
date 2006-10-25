@@ -12,6 +12,7 @@ extern GtkWidget * AddVBox( GtkWidget * parent,int type );
 extern GtkWidget * AddHBox( GtkWidget * parent,int type );
 extern GtkWidget * AddCheckButton( const char * title, GtkWidget * parent );
 extern GtkWidget * AddRadioButton( const char * title,GSList ** group,GtkWidget * parent );
+extern GtkWidget * AddSpinButton( const char * title,GtkAdjustment * adj,GtkWidget * parent );
 extern GtkWidget * AddButton( const char * title,GtkWidget * parent );
 extern GtkWidget * AddHSeparator( GtkWidget * parent );
 extern GtkWidget * AddHButtonBox( GtkWidget * parent );

@@ -67,6 +67,10 @@ static GtkWidget * CBSubUnicode;
 static GtkWidget * CBSubOverlap;
 static GtkWidget * CBDumpMPSub;
 static GtkWidget * CBDumpSrt;
+static GtkWidget * CBUseASS;
+static GtkWidget * CBASSUseMargins;
+static GtkWidget * SBASSTopMargin;
+static GtkWidget * SBASSBottomMargin;
 static GtkWidget * CBPostprocess;
 static GtkWidget * CBCache;
 static GtkWidget * CBLoadFullscreen;
@@ -259,6 +263,20 @@ void ShowPreferences( void )
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ),gtkSubDumpMPSub );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDumpSrt ),gtkSubDumpSrt );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBSubUnicode ),sub_unicode );
+#ifdef USE_ASS
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBUseASS ),gtkASS.enabled );
+ gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBASSUseMargins ),gtkASS.use_margins );
+ gtk_spin_button_set_value( (GtkSpinButton *)SBASSTopMargin,(gdouble)gtkASS.top_margin );
+ gtk_spin_button_set_value( (GtkSpinButton *)SBASSBottomMargin,(gdouble)gtkASS.bottom_margin );
+
+ if ( !gtkASS.enabled )
+  {
+   gtk_widget_set_sensitive( CBASSUseMargins,FALSE );
+   gtk_widget_set_sensitive( SBASSTopMargin,FALSE );
+   gtk_widget_set_sensitive( SBASSBottomMargin,FALSE );
+  }
+#endif
+
  gtk_adjustment_set_value( HSSubDelayadj,sub_delay );
  gtk_adjustment_set_value( HSSubFPSadj,sub_fps );
  gtk_adjustment_set_value( HSSubPositionadj,sub_pos );
@@ -394,6 +412,13 @@ void ShowPreferences( void )
  gtk_widget_set_sensitive( HSSubFPS,FALSE );
 #endif
 
+#ifndef USE_ASS
+ gtk_widget_set_sensitive( CBUseASS,FALSE );
+ gtk_widget_set_sensitive( CBASSUseMargins,FALSE );
+ gtk_widget_set_sensitive( SBASSTopMargin,FALSE );
+ gtk_widget_set_sensitive( SBASSBottomMargin,FALSE );
+#endif
+
 #ifndef USE_OSD
  gtk_widget_set_sensitive( RBOSDNone,FALSE );
  gtk_widget_set_sensitive( RBOSDTandP,FALSE );
@@ -421,6 +446,9 @@ void ShowPreferences( void )
 #endif
  gtk_signal_connect( GTK_OBJECT( CBCache ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)8);
  gtk_signal_connect( GTK_OBJECT( CBAutoSync ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)9);
+#ifdef USE_ASS
+ gtk_signal_connect( GTK_OBJECT( CBUseASS ),"toggled",GTK_SIGNAL_FUNC( prToggled ),(void*)10);
+#endif
 
  gtk_signal_connect( GTK_OBJECT( HSExtraStereoMul ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( HSAudioDelay ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)1 );
@@ -539,6 +567,12 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkSubDumpMPSub=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpMPSub ) );
 	gtkSubDumpSrt=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDumpSrt ) );
 	sub_unicode=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBSubUnicode ) );
+#ifdef USE_ASS
+	gtkASS.enabled=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBUseASS ) );
+	gtkASS.use_margins=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBASSUseMargins ) );
+	gtkASS.top_margin=gtk_spin_button_get_value( GTK_SPIN_BUTTON( SBASSTopMargin ) );
+	gtkASS.bottom_margin=gtk_spin_button_get_value( GTK_SPIN_BUTTON( SBASSBottomMargin ) );
+#endif
 	sub_delay=HSSubDelayadj->value;
 	sub_fps=HSSubFPSadj->value;
 	sub_pos=(int)HSSubPositionadj->value;
@@ -721,6 +755,22 @@ static void prToggled( GtkToggleButton * togglebutton,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBAutoSync ) ) ) gtk_widget_set_sensitive( SBAutoSync,TRUE );
 	 else gtk_widget_set_sensitive( SBAutoSync,FALSE );
 	break;
+#ifdef USE_ASS
+   case 10:
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBUseASS ) ) )
+	 {
+	  gtk_widget_set_sensitive( CBASSUseMargins,TRUE );
+	  gtk_widget_set_sensitive( SBASSTopMargin,TRUE );
+	  gtk_widget_set_sensitive( SBASSBottomMargin,TRUE );
+	 }
+	else
+	 {
+	  gtk_widget_set_sensitive( CBASSUseMargins,FALSE );
+	  gtk_widget_set_sensitive( SBASSTopMargin,FALSE );
+	  gtk_widget_set_sensitive( SBASSBottomMargin,FALSE );
+	 }
+	break;
+#endif
   }
 }
 
@@ -789,6 +839,10 @@ GtkWidget * create_Preferences( void )
   GtkWidget * hbox5;
   GtkWidget * hbuttonbox1;
   GtkAccelGroup * accel_group;
+
+  GtkWidget * hbox9;
+  GtkWidget * hbox91;
+  GtkWidget * hbox92;
 
   accel_group=gtk_accel_group_new();
 
@@ -1027,6 +1081,25 @@ GtkWidget * create_Preferences( void )
   CBSubUnicode=AddCheckButton( MSGTR_PREFERENCES_SUB_Unicode,vbox9 );
   CBDumpMPSub=AddCheckButton( MSGTR_PREFERENCES_SUB_MPSUB,vbox9 );
   CBDumpSrt=AddCheckButton( MSGTR_PREFERENCES_SUB_SRT,vbox9 );
+
+  AddHSeparator( vbox9 );
+  CBUseASS=AddCheckButton( MSGTR_PREFERENCES_SUB_USE_ASS,vbox9 );
+  hbox9=AddHBox( vbox9,0 );
+  CBASSUseMargins=AddCheckButton( MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS,hbox9 );
+
+  hbox91=gtk_hbox_new( FALSE,0 );
+  gtk_widget_set_name( hbox91,"hbox91" );
+  gtk_box_pack_start( GTK_BOX( hbox9 ),hbox91,TRUE,FALSE,0 );
+  gtk_widget_show( hbox91 );
+  SBASSTopMargin=AddSpinButton( MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN,
+	(GtkAdjustment *)gtk_adjustment_new(0,0,512,1,8,0),hbox91 );
+
+  hbox92=gtk_hbox_new( FALSE,0 );
+  gtk_widget_set_name( hbox92,"hbox92" );
+  gtk_box_pack_start( GTK_BOX( hbox9 ),hbox92,TRUE,FALSE,0 );
+  gtk_widget_show( hbox92 );
+  SBASSBottomMargin=AddSpinButton( MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN,
+	(GtkAdjustment *)gtk_adjustment_new(0,0,512,1,8,0),hbox92 );
 
   label=AddLabel( MSGTR_PREFERENCES_SubtitleOSD,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );

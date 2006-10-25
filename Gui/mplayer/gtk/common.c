@@ -97,6 +97,21 @@ GtkWidget * AddRadioButton( const char * title,GSList ** group,GtkWidget * paren
  return RB;
 }
 
+GtkWidget * AddSpinButton( const char * title,GtkAdjustment * adj,GtkWidget * parent )
+{
+ GtkWidget * SB;
+ GtkWidget * label;
+ label=gtk_label_new( title );
+ gtk_misc_set_alignment( GTK_MISC( label ),0,0.5 );
+ gtk_box_pack_start( GTK_BOX( parent ),label,FALSE,FALSE,0 );
+ gtk_widget_show( label );
+ SB=gtk_spin_button_new( adj,0,0 );
+ gtk_widget_set_name( SB,"SB" );
+ gtk_box_pack_start( GTK_BOX( parent ),SB,FALSE,FALSE,0 );
+ gtk_widget_show( SB );
+ return SB;
+}
+
 GtkWidget * AddButton( const char * title,GtkWidget * parent )
 {
  GtkWidget * B;

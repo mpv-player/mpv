@@ -216,6 +216,13 @@ void guiInit( void )
  else if ( stream_cache_size == 0 ) gtkCacheOn = 0;
  if ( autosync && autosync != gtkAutoSync ) { gtkAutoSyncOn=1; gtkAutoSync=autosync; }
    
+#ifdef USE_ASS
+ gtkASS.enabled = ass_enabled;
+ gtkASS.use_margins = ass_use_margins;
+ gtkASS.top_margin = ass_top_margin;
+ gtkASS.bottom_margin = ass_bottom_margin;
+#endif
+
  gtkInit();
 // --- initialize X 
  wsXInit( (void *)mDisplay );
@@ -388,6 +395,13 @@ void guiDone( void )
    gui_main_pos_x=appMPlayer.mainWindow.X; gui_main_pos_y=appMPlayer.mainWindow.Y;
    gui_sub_pos_x=appMPlayer.subWindow.X; gui_sub_pos_y=appMPlayer.subWindow.Y;
   }
+ 
+#ifdef USE_ASS
+ ass_enabled = gtkASS.enabled;
+ ass_use_margins = gtkASS.use_margins;
+ ass_top_margin = gtkASS.top_margin;
+ ass_bottom_margin = gtkASS.bottom_margin;
+#endif
 
  cfg_write();
  wsXDone();
@@ -922,6 +936,13 @@ int guiGetEvent( int type,char * arg )
         guiIntfStruct.DiskChanged=0;
         guiIntfStruct.FilenameChanged=0;
         guiIntfStruct.NewPlay=0;
+
+#ifdef USE_ASS
+        ass_enabled = gtkASS.enabled;
+        ass_use_margins = gtkASS.use_margins;
+        ass_top_margin = gtkASS.top_margin;
+        ass_bottom_margin = gtkASS.bottom_margin;
+#endif
 
 	break;
   }
