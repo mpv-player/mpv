@@ -181,66 +181,9 @@ are dynamically allocated.
 <para>
 DVD decryption is done by <systemitem>libdvdcss</systemitem>. The method
 can be specified through the <envar>DVDCSS_METHOD</envar> environment
-variable, which can be set to key, disk or title.
+variable, see the manual page for details.
 </para>
 </formalpara>
-
-<para>
-If nothing is specified it tries the following methods (default: key,
-title request):
-</para>
-
-<orderedlist>
-<listitem><para>
-<emphasis role="bold">bus key</emphasis>: This key is negotiated during
-authentication (a long mix of ioctls and various key exchanges, crypto
-stuff) and is used to encrypt the title and disk keys before sending them
-over the unprotected bus (to prevent eavesdropping). The bus key is needed
-to get and predecrypt the crypted disk key.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-looks for already cracked title keys which are stored in the
-<filename class="directory">~/.dvdcss</filename> directory (fast).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">key</emphasis>: If no cached key is available,
-<application>MPlayer</application> tries to decrypt the disk key with a set
-of included player keys.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">disk</emphasis>: If the key method fails
-(e.g. no included player keys), <application>MPlayer</application>
-will crack the disk key using a brute force algorithm. This process
-is CPU intensive and requires 64 MB of memory (16M 32Bit entries hash
-table) to store temporary data. This method should always work (slow).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title request</emphasis>: With the disk key
-<application>MPlayer</application> requests the crypted title keys,
-which are inside <emphasis>hidden sectors</emphasis> using <systemitem>ioctl()</systemitem>.
-The region protection of RPC-2 drives is performed in this step and may fail on such drives.
-If it succeeds, the title keys will be decrypted with the bus and disk key.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title</emphasis>: This method is used if the title
-request failed and does not rely on any key exchange with the DVD drive.
-It uses a crypto attack to guess the title key directly (by finding a
-repeating pattern in the decrypted VOB content and guessing that the
-plain text corresponding to the first encrypted bytes is a continuation
-of that pattern). The method is also known as &quot;known plaintext attack&quot;
-or &quot;DeCSSPlus&quot;. In rare cases this may fail because there is not
-enough encrypted data on the disk to perform a statistical attack or because
-the key changes in the middle of a title. This method is the only way to
-decrypt a DVD stored on a hard disk or a DVD with the wrong region on an
-RPC2 drive (slow).
-</para></listitem>
-</orderedlist>
 
 <para>
 RPC-1 DVD drives only protect region settings through software. RPC-2 drives
