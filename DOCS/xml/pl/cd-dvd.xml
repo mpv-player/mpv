@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with r20401 -->
+<!-- synced with r20442 -->
 <!-- Opiekun: Emdej -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
@@ -198,73 +198,10 @@ nazwy urządzeń są przydzielane automatycznie.
 <para>
 Do deszyfrowania DVD jest używana biblioteka
 <systemitem>libdvdcss</systemitem>. Metoda jej działania może być określona
-poprzez zmienna środowiskową <envar>DVDCSS_METHOD</envar>, która może być
-ustawiona na "key", "disk" albo "title".
+poprzez zmienna środowiskową <envar>DVDCSS_METHOD</envar>,
+co jest dokładniej opisane na stronie man.
 </para>
 </formalpara>
-
-<para>
-Jeżeli żadna wartość nie jest ustawiona, próbowane są następujące metody
-(domyślnie: "key", "title request"):
-</para>
-
-<orderedlist>
-<listitem><para>
-<emphasis role="bold">bus key</emphasis>: Ten klucz jest ustalany podczas
-autoryzacji (długa mieszanina ioctl'i i rozmaite wymiany kluczy, bajery
-kryptograficzne) oraz jest używany do szyfrowania tytułu i kluczy dyskowych
-przed wysłaniem ich nieszyfrowaną magistralą (by zapobiec podsłuchiwaniu).
-Klucz magistrali (bus key) jest wymagany do pobrania i wstępnego
-rozszyfrowania zaszyfrowanego klucza dysku (disk key).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-wyszukuje już złamane klucze tytułów, które są przechowywane w katalogu
-<filename class="directory">~/.dvdcss</filename> (szybkie).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">key</emphasis>: Jeżeli żaden zbuforowany klucz nie jest
-dostępny, <application>MPlayer</application> próbuje rozszyfrować klucz dysku
-korzystając z garści kluczy zaszytych w odtwarzaczu.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">disk</emphasis>: Jeżeli metoda "key" zawodzi (np. brak
-kluczy zaszytych w odtwarzaczu), <application>MPlayer</application> złamie klucz
-dysku używając algorytmu ataku brutalnego. Proces ten jest bardzo
-procesorochłonny i wymaga 64 MB pamięci (16M 32-bitowych pól
-tabeli hash) do przechowywania tymczasowych danych. Ta metoda powinna zadziałać
-zawsze (powolne).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title request</emphasis>: Mając klucz dysku
-<application>MPlayer</application> pobiera zaszyfrowane klucze tytułów (title
-key), które są zawarte w <emphasis>ukrytych sektorach (hidden
-sectors)</emphasis> używając <systemitem>ioctl()</systemitem>. Ochrona
-regionalna w napędach RPC-2 jest realizowana w tym kroku i może się nie udać na
-tych napędach. Jeśli jednak się uda, klucze tytułowe zostają rozszyfrowane przy
-użyciu kluczy magistrali i dysku.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title</emphasis>: Ta metoda jest używana jeżeli zapytanie
-o tytuł zakończyło się niepowodzeniem i nie polega na żadnej wymianie
-kluczy z napędem DVD. Używa ona ataku kryptograficznego w celu odgadnięcia
-klucza tytułowego (title key) wprost (poprzez szukanie powtarzającego się ciągu
-znaków (wzoru) w rozszyfrowanej zawartości pliku VOB oraz poprzez zgadywanie, że
-czysty tekst odpowiadający pierwszym zaszyfrowanym bajtom jest kontynuacją
-wzoru). Metoda ta jest także znana jako &quot;znany czysto-tekstowy atak (known
-plaintext attack)&quot; bądź &quot;DeCSSPlus&quot;. Rzadko zdarza się, ale się
-zdarza, że metoda ta może zawieść ponieważ jest niewystarczająco dużo
-zaszyfrowanych danych na dysku aby spełnić założenia statystycznego ataku lub
-ponieważ klucz zmienia się w trakcie tytułu. Jest to jedyna metoda, aby
-zdeszyfrować DVD przechowywane na twardym dysku lub DVD ze złym regionem na
-napędzie RPC2 (powolne).
-</para></listitem>
-</orderedlist>
 
 <para>
 Napędy DVD RPC-1 zabezpieczają ustawienia regionu jedynie poprzez
