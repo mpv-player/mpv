@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18964 -->
+<!-- synced with r20449 -->
 <!-- Opiekun: emdej -->
 <chapter id="usage">
 <title>Sposób użycia</title>
@@ -51,10 +51,10 @@ Odtwarzanie większej ilości plików:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>opcje domyślne</replaceable>]<!--
---> [<replaceable>ścieżka</replaceable>/]<replaceable>nazwa_pliku1</replaceable><!--
---> [<replaceable>opcje dla nazwa_pliku1</replaceable>]<!--
---> <replaceable>nazwa_pliku2</replaceable><!--
---> [<replaceable>opcje dla nazwa_pliku2</replaceable>] ...
+--> [<replaceable>ścieżka</replaceable>/]<replaceable>plik1</replaceable><!--
+--> [<replaceable>opcje dla pliku1</replaceable>]<!--
+--> <replaceable>plik2</replaceable><!--
+--> [<replaceable>opcje dla pliku2</replaceable>] ...
 </synopsis>
 </para>
 
@@ -105,6 +105,8 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 </para>
 </sect1>
 
+
+
 <sect1 id="subosd">
 <title>Napisy i OSD</title>
  
@@ -123,7 +125,7 @@ filmu. Obecnie obsługiwane są następujące formaty:
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
 <listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
-<listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
+<listitem><para>MPsub</para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
 </itemizedlist>
@@ -148,7 +150,7 @@ jeśli podasz odpowiednią opcję:
 </para>
  
 <para>
-Opcje dla wiersza poleceń różnią się nieco dla poszczególnych formatów:
+Opcje wiersza poleceń różnią się nieco dla poszczególnych formatów:
  </para>
  
 <formalpara>
@@ -224,190 +226,9 @@ wartość framerate pliku z napisami.
 O napisach DVD przeczytasz w rozdziale <link linkend="dvd">DVD</link>.
 </para>
 
-
-<sect2 id="mpsub">
-<title>MPsub - Własny format napisów <application>MPlayera</application></title>
-
-<para>
-<application>MPlayer</application> przedstawia nowy format napisów nazwany
-<emphasis role="bold">MPsub</emphasis>. Zaprojektowany on został przez Gabucino.
-Przede wszystkim jego główną cechą jest bycie <emphasis>dynamicznie</emphasis> opartym o
-czas (chociaż może być również oparty o ramki).  Przykład (z <ulink
-url="../../tech/mpsub.sub">DOCS/tech/mpsub.sub</ulink> - na potrzeby tego dokumentu częściowo
-przetłumaczony):
-<programlisting>
-FORMAT=TIME
-# pierwsza liczba : czekaj tyle sekund po zniknięciu poprzednich napisów
-# druga liczba : wyświetlaj napisy przez tyle sekund
-
-15 3
-Dawno, dawno temu...
-
-0 3
-w odległej galaktyce...
-
-0 3
-planeta Naboo była atakowana.<!--
---></programlisting>
-</para>
-
-<para>
-Widzisz więc, że głównym celem było <emphasis role="bold">umożliwienie łatwej
-edycji/synchronizacji/łączenia/obcinania napisów</emphasis>. Więc jeśli - powiedzmy -
-pobierzesz napisy SSA, które są źle rozmieszczone w czasie/opóźnione w stosunku do Twojej wersji
-filmu, wykonujesz wtedy
-
-<screen>mplayer <replaceable>film.avi</replaceable> -sub źródło.ssa -dumpmpsub</screen>
-Zostanie utworzony plik <filename>dump.mpsub</filename> w obecnie używanym katalogu,
-który będzie zawierał źródłowe napisy, ale w formacie
-<emphasis role="bold">MPsub</emphasis>. Będziesz mógł wtedy dowolnie dodawać/odejmować
-sekundy do/z napisów.
-</para>
-
-<para>
-Napisy wyświetlane są w technice <emphasis role="bold">'OSD',
-On Screen Display (Wyświetlanie Na Ekranie)</emphasis>. OSD używany jest
-do wyświetlania obecnego czasu odtwarzania, paska głośności, paska przeszukiwania
-filmu, itp.
-</para>
-</sect2>
- 
- 
-<sect2 id="mpsub-install">
-<title>Instalacja OSD i napisów</title>
- 
- <para>
-Będziesz potrzebował paczki zawierającej czcionkę dla <application>MPlayera</application>,
-żeby móc skorzystać z OSD/NAPISÓW. Jest wiele sposobów, aby ją uzyskać:
-</para>
- 
-<itemizedlist>
- <listitem><para>
- Skorzystaj z generatora czcionki w znajdującego się w katalogu <filename
- class="directory">TOOLS/subfont-c</filename>. Jest to kompletne narzędzie, które
- pomoże Ci przekonwertować czcionkę TTF/Type1/itp. do paczki z czcionką dla
- <application>MPlayera</application> (więcej szczegółów znajdziesz w
- <filename>TOOLS/subfont-c/README</filename>).
- </para></listitem>
- <listitem><para>
- Skorzystaj z wtyczki generator czcionki dla <application>GIMPa</application>,
- którą znajdziesz w katalogu <filename class="directory">TOOLS/subfont-GIMP</filename>
- (notka: musisz mieć również wtyczkę HSI RAW, sprawdź ten adres:
- <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts" />).
- </para></listitem>
- <listitem><para>
- używanie czcionki TrueType (TTF) przy pomocy biblioteki
- <systemitem class="library">freetype</systemitem>. Konieczna do tego jest wersja
- 2.0.9 lub wyższa! Tutaj możesz skorzystać z dwóch metod:
-  <itemizedlist>
-    <listitem><para>
-      użyj opcji <option>-font <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable>
-      </option>, aby określić plik z czcionką TrueType przy każdym uruchomieniu
-      </para></listitem>
-    <listitem><para>
-      stwórz symboliczne dowiązanie:
-      <screen>ln -s <replaceable>/ścieżka/do/przykładowej_czcionki.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-      </para></listitem>
-  </itemizedlist>
-  Jeżeli <application>MPlayer</application> został skompilowany z obsługą
-  <systemitem class="library">fontconfig</systemitem>, powyższe metody nie będą
-  działały, ponieważ opcja <option>-font</option> będzie oczekiwała nazwy czcionki,
-  a domyślną jest sans-serif. Aby otrzymać listę czcionek znanych
-  <systemitem class="library">fontconfig</systemitem>,
-  użyj komendy <command>fc-list</command>. Przykład:
-  <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
-  </para></listitem>
-<listitem><para>
-  Pobierz gotowe do użycia pakiety z czcionkami ze strony
-  <application>MPlayera</application>. Informacja: dostępne obecnie czcionki
-  ograniczone są do obsługi kodowania ISO 8859-1/2, ale są też inne, przygotowane
-  przez użytkowników, (z obsługą koreańskiego, rosyjskiego, ISO 8859-8 itp) w katalogu
-  contrib/font serwera FTP.
-  </para><para>
-  <!-- FIXME: this para should be before the list -->
-  Czcionki powinny mieć odpowiedni plik <filename>font.desc</filename>, który
-  mapuje pozycję czcionek unicode do aktualnie używanej przez napisy strony kodowej
-  Innym wyjściem jest posiadanie napisów zakodowanych w UTF-8 i użycie opcji
-  <option>-utf8</option> albo po prostu zmienienie ich nazwy na
-  <filename>&lt;nazwa_filmu&gt;.utf</filename> i wgranie ich do tego samego
-  katalogu co plik z filmem. Konwersja z różnych stron kodowych do UTF-8
-  może być realizowana poprzez programy <command>konwert</command> lub
-  <command>iconv</command>.
-  </para><para>
-
-  <table>
-  <title>Kilka adresów URL</title>
-  <tgroup cols="2">
-  <thead>
-    <row><entry>URL</entry><entry>Komentarz</entry></row>
-  </thead>
-  <tbody>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
-    </entry><entry>
-    czcionki ISO
-    </entry></row>
-  <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/"></ulink>
-    </entry><entry>
-    różne czcionki użytkowników
-    </entry></row>
-  <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/index.php?pagename=MplayerKoreanFonts"></ulink>
-    </entry><entry>
-    czcionki koreańskie i wtyczka RAW
-    </entry></row>
-  </tbody>
-  </tgroup>
-  </table>
-
-  </para></listitem>
-</itemizedlist>
-
-<para>
-Jeżeli wybierzesz czcionki inne niż TTF, rozpakuj (UNZIP) plik, który ściągnąłeś do
-katalogu <filename class="directory">~/.mplayer</filename> lub <filename
-class="directory">$PREFIX/share/mplayer</filename>. Następnie zmień nazwę
-lub stwórz symboliczne dowiązanie tego katalogu do <filename>font</filename>,
-na przykład:
-
- <screen>ln -s <replaceable>~/.mplayer/arial-24</replaceable> ~/.mplayer/font</screen>
-
-Teraz na pewno zobaczysz licznik w lewym górnym rogu filmu (możesz go wyłączyć
-używając klawisza <keycap>o</keycap>).
-</para>
- 
-<para>
-(napisy są <emphasis>zawsze włączone</emphasis>, aby dowiedzieć się, je wyłączyć,
-przeczytaj stronę man)
-</para>
- 
-<para>
-OSD ma 4 stany (przełączane przez klawisz <keycap>o</keycap>):
-
-<orderedlist>
-<listitem><simpara>
-  pasek głośności  + pasek przeszukiwania (domyślnie)
-  </simpara></listitem>
-<listitem><simpara>
-  pasek głośności  + pasek przeszukiwania + licznik czasu +
-  pozycja przeszukiwania w pliku (w procentach)
-  </simpara></listitem>
-<listitem><simpara>
-  pasek głośności  + pasek przeszukiwania + licznik czasu + całkowity czas trwania
-  </simpara></listitem>
-<listitem><simpara>
-  tylko napisy
-  </simpara></listitem>
-</orderedlist>
-
-Możesz zmienić domyślne zachowanie, ustawiając zmienną <varname>osdlevel</varname>
-w pliku konfiguracyjnym (config) lub korzystając z opcji <option>-osdlevel</option>
-w wierszu poleceń.
-
-</para>
-</sect2>
 </sect1>
+
+
 
 <sect1 id="control">
 <title>Sterowanie</title>
@@ -435,8 +256,8 @@ można podać także inny za pomocą opcji
 </para>
 
 <para>
-Możesz uzyskać pełną listę uruchamiając
-<command>mplayer -input keylist</command>.
+Możesz uzyskać pełną listę obsługiwanych klawiszy uruchamiając
+<command>mplayer -input keylist</command>
 i pełną listę dostępnych komend za pomocą
 <command>mplayer -input cmdlist</command>.
 </para>
@@ -472,10 +293,10 @@ Więcej informacji na <ulink url="http://www.lirc.org">stronie domowej LIRC</ulin
 </para>
 
 <para>
-Jeśli zainstalowałeś LIRC, <filename>configure</filename> automatycznie go
+Jeśli zainstalowałeś pakiet LIRC, <filename>configure</filename> automatycznie go
 wykryje. Jeśli wszystko pójdzie dobrze, <application>MPlayer</application>
-wypisze &quot;<systemitem>Setting up LIRC support...</systemitem>&quot; przy
-starcie. Jeśli wystąpi błąd, powiadomi Cię o tym. Jeśli nic nie powie Ci na
+wypisze przy starcie &quot;<systemitem>Setting up LIRC support...</systemitem>&quot;.
+Jeśli wystąpi błąd, powiadomi Cię o tym. Jeśli nic nie powie Ci na
 temat LIRC, to znaczy, że jego obsługa nie została wkompilowana. Proste :-)
 </para>
 
@@ -532,12 +353,13 @@ Jeśli nie lubisz standardowej lokalizacji pliku lirc-config
 Tryb sługi pozwala Ci na utworzenie prostej nakładki na
 <application>MPlayera</application>. Po uruchomieniu z opcją
 <option>-slave</option> <application>MPlayer</application> będzie czytał
-komendy oddzielone znakami nowego wiersza (\n) ze standardowego wejścia.
+ze standardowego wejścia komendy oddzielone znakami nowego wiersza (\n).
 Komendy zostały udokumentowane w pliku
 <ulink url="../../tech/slave.txt">slave.txt</ulink>
 </para>
 </sect2>
 </sect1>
+
 
 
 <sect1 id="streaming">
@@ -553,8 +375,7 @@ Odtwarzanie następuje przez proste podanie URLa w wierszu poleceń.
 <application>MPlayer</application> zwraca również uwagę na zmienną środowiskową
 <envar>http_proxy</envar> i używa proxy jeśli jest to możliwe. Korzystanie
 z proxy może być również wymuszone za pomocą:
-<screen>mplayer
-<replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/strumien.asf</replaceable></screen>
+<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/strumien.asf</replaceable></screen>
 </para>
 
 <para>
@@ -588,6 +409,8 @@ z sieci:
 </para>
 </sect2>
 </sect1>
+
+
 
 <sect1 id="mpst" xreflabel="Remote streams">
 <title>Strumienie zdalne</title>
@@ -643,6 +466,8 @@ więc na liczne nadużycia, które są przez to możliwe. Zamiast tego wyślij jakąś
 
 </sect1>
 
+
+
 <sect1 id="edl" xreflabel="Edit Decision Lists (EDL)">
 <title>Decyzyjne Listy Edycji (Edit Decision Lists - EDL)</title>
 
@@ -660,9 +485,9 @@ zastosowania, jak automatyczne pomijanie reklam w oglądanych filmach.
 </para>
 
 <para>
-Format pliku EDL jest raczej "goły". Używana jest struktura z pojedynczą komendą w linii, w
-której określone jest co należy zrobić (skip/mute) oraz kiedy (używane opóźnienie w
-sekundach).
+Format pliku EDL jest raczej "goły". Używana jest struktura z pojedynczym
+poleceniem w wierszu, w którym określone jest co należy zrobić (skip/mute),
+oraz kiedy (używając opóźnienia w sekundach).
 </para>
 
 <sect2 id="edl_using">
@@ -699,13 +524,17 @@ osiągnie zadeklarowaną wartość.
 <para>
 Aby stworzyć plik EDL, będący punktem wyjścia do dalszej edycji, użyj flagi
 <option>-edlout &lt;nazwa pliku&gt;</option>.
-Następnie, podczas odtwarzania filmu, naciśnij <keycap>i</keycap>, aby oznaczyć początek i koniec
-bloku do pominięcia. Odpowiedni wpis zostanie automatycznie utworzony w pliku. Wtedy możesz wrócić do edycji i "dostrajania" wygenerowanego
-pliku EDL, w którym możesz także zmienić domyślną akcję (domyślnie jest to pomijanie).
+Następnie, podczas odtwarzania filmu, naciśnij <keycap>i</keycap>, aby oznaczyć
+początek i koniec bloku do pominięcia.
+Odpowiedni wpis zostanie automatycznie utworzony w pliku.
+Wtedy możesz wrócić do edycji i "dostrajania" wygenerowanego pliku EDL,
+w którym możesz także zmienić domyślne pomijanie bloku na wyciszanie.
 </para>
 </sect2>
 
 </sect1>
+
+
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
 <title>Zaawansowane audio</title>
@@ -716,7 +545,7 @@ pliku EDL, w którym możesz także zmienić domyślną akcję (domyślnie jest to pomij
 <sect3 id="advaudio-surround-DVD">
 <title>DVDs</title>
 <para>
-Większość płyt DVD, a także wiele innych plików zawiera dźwięk przestrzenny.
+Większość płyt DVD, a także wiele innych plików, zawiera dźwięk przestrzenny.
 <application>MPlayer</application> obsługuje dźwięk przestrzenny, ale opcja ta 
 nie jest domyślnie włączona, ponieważ sprzęt przeznaczony dla zwykłego stereo 
 jest znacznie bedziej popularny. Aby odtworzyć plik zawierający więcej niż dwa 
@@ -725,11 +554,11 @@ Na przykład, aby odtworzyć DVD z audio 5.1:
 
 <screen>mplayer dvd://1 -channels 6</screen>
 
-Zauważmy, że mimo nazwy "5.1", uzywanych jest 6 kanałów.
+Zauważmy, że mimo nazwy "5.1", używanych jest 6 kanałów.
 Jeżeli posiadasz sprzęt pozwalający na odtwarzanie dźwięku przestrzennego możesz 
 bezpiecznie wpisać <option>channels</option> do swojego pliku konfiguracyjnego 
 <application>MPlayera</application> (<filename>~/.mplayer/config</filename>). 
-Przykładowo, aby domyślnie włączyć efekt kwadrofonii, należy dodać linię:
+Przykładowo, aby domyślnie włączyć efekt kwadrofonii, należy dodać wiersz:
 
 <programlisting>channels=4</programlisting>
 
@@ -749,8 +578,8 @@ robi tego większość sterowników audio. Jeżeli chcesz zrobić to ręcznie:
 <screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
 
 Zobacz sekcję o 
-<link linkend="advaudio-channels-copying">kopiowaniu kanałów</link> aby uzyskać 
-wyjaśnienie.
+<link linkend="advaudio-channels-copying">kopiowaniu kanałów</link>,
+jest tam wyjaśnienie tego polecenia.
 </para>
 
 </sect3>
@@ -775,7 +604,7 @@ dla tego formatu, który jest obsługiwany przez Twój sprzęt.
 </para>
 
 <itemizedlist>
-<title>Aby włączyć przekazywanie z linii poleceń:</title>
+<title>Aby włączyć przekazywanie z wiersza poleceń:</title>
 <listitem><para>
 dla AC3 użyj <option>-ac hwac3</option>
 </para></listitem>
@@ -809,8 +638,8 @@ są normalnie używane podczas odtwarzania plików, które nie posiadają dźwięku
 AC3 ani DTS. 
 
 Opcja <option>afm=hwac3</option> nie wymaga przecinka, 
-<application>MPlayer</application> użyje odpowiedniego kodeka, gdy będzie 
-określony rodzaj dźwięku.
+samo podanie rodziny kodeków powoduje że <application>MPlayer</application>
+wypróbuje inne gdy będzie musiał.
 </para>
 
 </sect3>
@@ -820,7 +649,7 @@ określony rodzaj dźwięku.
 
 <para>
 Cyfrowe transmisje TV (takie jak DVB czy ATSC), także niektóre płyty DVDs
-zazwyczaj zawierają strumienie audio w formacie MPEG (konkretnie MP2).
+zazwyczaj zawierają strumienie audio w formacie MPEG (zazwyczaj MP2).
 Część sprzętowych dekoderów MPEG, takich jak pełnofunkcjonalne karty DVB, oraz
 adaptery DXR2, potrafi natywnie dekodować ten format.
 <application>MPlayer</application> może zostać tak skonfigurowany, aby przekazywać
@@ -878,9 +707,9 @@ ludzkiego manekina.
 </para>
 
 <para>
-Chociaż nie jest możliwe dokładne zasymulowanie systemu otaczającego dźwiękiem,
+Chociaż nie jest możliwe dokładne zasymulowanie systemu dźwięku przestrzennego,
 filtr HRTF zawarty w <application>MPlayerze</application> powoduje bardziej
-przestrzenne zanurzenie w dźwięku przy uzyciu 2-kanałowych słuchawek.
+przestrzenne zanurzenie w dźwięku przy użyciu 2-kanałowych słuchawek.
 Standardowy procedura po prostu łączy wszystkie kanały w dwa. <option>hrtf</option>,
 obok łączenia kanałów, generuje także subtelne echa, nieznacznie zwiększa
 separację kanałów stereo, a także zmienia głośność niektórych częstotliwości.
@@ -1002,7 +831,7 @@ Aby dowiedzieć się więcej, zobacz kolejne sekcje.
 
 
 <sect3 id="advaudio-channels-mono">
-<title>Odtwarzanie dźwięku mono używając dwóch głośników</title>
+<title>Odtwarzanie dźwięku mono przy użyciu dwóch głośników</title>
 
 <para>
 Dźwięk mono brzmi znacznie lepiej, gdy jest odtwarzany przy użyciu dwóch
@@ -1047,7 +876,7 @@ Zdecyduj ile wyjściowych kanałów audio potrzebujesz. Oto pierwsza podopcja.
 <listitem><para>
 Policz ile przesunięć kanałów zamierzasz wykonać. To jest druga podopcja. Każdy
 kanał może być przesunięty do kilku różnych kanałów w tym samym czasie, ale pamiętaj,
-że gdy przesuniesz kanał (również gdy do tylko jednego kanału docelowego), źródło zostanie
+że gdy przesuniesz kanał (również gdy tylko do jednego kanału docelowego), źródło zostanie
 opróżnione, chyba że inny kanał zostanie tam przesunięty. Aby skopiować kanał,
 pozostawiając źródło nietknięte, po prostu przesuń kanał zarówno do miejsca kopiowania,
 jak i do źródła. Na przykład:
@@ -1072,7 +901,7 @@ pogrupowane w pary typu:
 
 <para>
 Oto przykład innej metody odtwarzania jednego kanału w dwóch głośnikach.
-Załóżmy, że lewy kanał ma być odtwarzany, a lewy ma zostać pominięty.
+Załóżmy, że lewy kanał ma być odtwarzany, a prawy ma zostać pominięty.
 Zgodnie z krokami opisanymi powyżej:
 <orderedlist>
 <listitem><para>
@@ -1115,8 +944,8 @@ oba głośniki. Oczywiście zadziała to tylko, gdy pożądanym kanałem jest kanał lew
 
 <bridgehead>Przykład: kopiowanie kanałów przednich do kanałów tylnych</bridgehead>
 <para>
-Kolejną typową operacją jest kopiowanie kanałów przednich i odtwarzanie ich z
-tylnych głośników w ustawieniu kwadrofonicznym.
+Kolejną typową operacją jest kopiowanie kanałów przednich i odtwarzanie ich
+z tylnych głośników zestawu kwadrofonicznego.
 <orderedlist>
 <listitem><para>
 Potrzebujemy czterech kanałów wyjściowych, więc pierwsza podopcja to "4".
@@ -1155,7 +984,7 @@ użyć <option>-channels</option> i/lub <option>-af channels</option>. Późniejsze
 przykłady pokażą kiedy użyć którego.
 </para></listitem>
 <listitem><para>
-Zdecyduj ile kanałów ma zostać wprowadzonych do <option>pan</option> (później
+Zdecyduj ile kanałów ma zostać wprowadzonych do <option>pan</option> (dalsze
 dekodowane kanały zostaną porzucone). To jest pierwsza podopcja. Kontroluje ona
 także liczbę kanałów używanych jako wyjście.
 </para></listitem>
@@ -1172,7 +1001,7 @@ zmiksowana w kanale wyjściowym.
 0% do 51200% oryginalnej głośności. Bądź ostrożny używając wartości większych od
 1. Może to spowodować nie tylko bardzo duże zwiększenie głośności, ale także,
 jeżeli przekroczysz zakres swojej karty muzycznej, możesz usłyszeć okropne trzaski.
-Jeżeli chcesz, możesz stosować <option>pan</option> z opcją <option>,volume</option>,
+Jeżeli chcesz, możesz stosować po filtrze <option>pan</option> dopisać <option>,volume</option>,
 co włączy obcinanie głośności, jednak najlepiej używać na tyle małych wartości
 parametrów <option>pan</option>, aby przycinanie nie było potrzebne.
 </para></listitem>
@@ -1195,7 +1024,7 @@ Ponieważ używane są również dwa kanały wyjściowe, w każdej grupie będą po dwie
 podopcje. Lewy kanał z pliku powinien zostać skopiowany z pełną głośnością
 do nowych kanału: lewego i prawego. W związku z tym, pierwsza grupa podopcji
 to "1:1". Prawy kanał powinien zostać pominięty, zatem druga grupa to "0:0".
-Wszelkie zera na końcu listy podopcji mogą zostać pominiętę, ale dla przejrzystości
+Wszelkie zera na końcu listy podopcji mogą zostać pominięte, ale dla przejrzystości
 przykładu, pozostawimy je.
 </para></listitem>
 </orderedlist>
@@ -1234,7 +1063,7 @@ Liczba kanałów wyjściowych to 2, więc pierwsza podopcja to "2".
 Jako, że mamy 6 kanałów wejściowych, musimy użyć sześciu grup opcji.
 Na szczęście, ponieważ interesują nas tylko dwa pierwsze kanały, możemy
 użyć tylko dwóch grup opcji; pozostałe cztery grupy mogą zostać pominięte.
-Pamiętaj, że nie wszystki wielokanałowe pliki audio posiadają ten sam porządek
+Pamiętaj, że nie wszystkie wielokanałowe pliki audio mają tę samą kolejność
 kanałów. Poniższy przykład pokazuje zmniejszanie liczby kanałów w pliku, w którym
 kolejność kanałów jest taka, jak w AC3 5.1:
 <programlisting>
@@ -1357,7 +1186,7 @@ aby uzyskać większą precyzję.
 </para>
 
 <para>
-Opcja <option>-softvol</option> operuje poprzez kontrolę filtru
+Opcja <option>-softvol</option> działa poprzez kontrolę filtru
 <option>volume</option>. Jeżeli chcesz odtwarzać plik z określoną głośnością,
 możesz podać opcję dla <option>volume</option> ręcznie:
 
