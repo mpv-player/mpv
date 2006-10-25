@@ -1,322 +1,937 @@
-.\" synced with r9821
+.\" Partially synced with r20426 
+.\" up to line 933 (section "DEMUXER/STREAM OPTIONS")
+.\" Reminder of hard words/terms need final solution: 
+.\"   /capture; palytree in parent list; colorkey; 
+.\"   wrapper script ... shellescapes; keyframe;
 .\" 
-.\" MPlayer (C) 2000-2003 Arpad Gereoffy
-.\" 本man page由Gabucino, Diego Biurrun, Jonas Jermann制作
-.\"
+.\" MPlayer (C) 2000-2006 MPlayer 团队
+.\" 本手册页由 Gabucino, Diego Biurrun, Jonas Jermann 制作
 .
 .\" --------------------------------------------------------------------------
-.\" Macro definitions
+.\" 宏定义
 .\" --------------------------------------------------------------------------
 .
-.\" default indentation is 7, don't change!
-.nr IN 7
-.\" define indentation for suboptions
-.nr SS 20
-.\" add new suboption
+.\" 定义子选项缩进
+.nr SS 5
+.\" 添加新子选项
 .de IPs
 .IP "\\$1" \n(SS
 ..
-.\" begin of first level suboptions, end with .RE
+.\" 一级子选项开始, 结束用 .RE
 .de RSs
-.RS \n(IN+3
+.RS 10
 ..
-.\" begin of 2nd level suboptions
+.\" 二级子选项开始
 .de RSss
 .PD 0
 .RS \n(SS+3
 ..
-.\" end of 2nd level suboptions
+.\" 二级子选项结束
 .de REss
 .RE
 .PD 1
 ..
 .
 .\" --------------------------------------------------------------------------
-.\" Title
+.\" 名称
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2003-03-22"
+.TH MPlayer 1 "2006-10-15" "MPlayer 项目" "电影播放器"
 .
-.SH 名称
-mplayer  \- Linux下的电影播放器
+.SH NAME
+mplayer  \- 电影播放器
 .br
-mencoder \- Linux下的电影编码器
-
+mencoder \- 电影编解码器
+.
 .\" --------------------------------------------------------------------------
-.\" Synopsis
+.\" 总览
 .\" --------------------------------------------------------------------------
 .
-.SH 概要
+.SH "SYNOPSIS (总览)"
 .na
 .nh
 .B mplayer
-.RI [选项]\ [ \ 文件\  | \ URL\  | \ 播放列表\  | \ -\  ]
+[选项] [文件|URL|播放列表|\-]
+.
 .br
 .B mplayer
-'in +\n[.k]u
-[全局选项]
-.I 文件1
-[特定选项] [文件2] [特定选项]
+[选项] 文件1
+[指定选项] [文件2] [指定选项]
+.
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-[全局选项]
-.RI { "一组文件和选项" }
-[针对该组的特定选项]
-.br
-.in
-.B mplayer
-'in +\n[.k]u
-.RI [ dvd | vcd | cdda | cddb | tv ] ://title
 [选项]
+{文件和选项组}
+[组指定选项]
+.
 .br
-.in
 .B mplayer
-'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p ] ://
-[用户名:密码@]\fIURL\fP[:端口] [选项]
-.br
-.in
-.B mencoder
+[dvd|dvdnav]://[标题|[开头标题]\-末尾标题]
 [选项]
-.RI [ \ 文件\  | \ URL\  | \ -\  ]
-[\-o\ 输出文件]
+.
+.br
+.B mplayer
+vcd://轨迹[/设备]
+.
+.br
+.B mplayer
+tv://[频道]
+[选项]
+.
+.br
+.B mplayer
+radio://[频道|频率][/capture]
+[选项]
+.
+.br
+.B mplayer
+pvr://
+[选项]
+.
+.br
+.B mplayer
+dvb://[卡号@]频道
+[选项]
+.
+.br
+.B mplayer
+mf://文件掩码
+[\-mf 选项] [选项]
+.
+.br
+.B mplayer
+[cdda|cddb]://轨迹[-末轨迹][:速度][/设备]
+[选项]
+.
+.br
+.B mplayer
+cue://文件[:轨迹]
+[选项]
+.
+.br
+.B mplayer
+[file|mms[t]|http|http_proxy|rt[s]p|ftp|udp|unsv]://
+[用户名:密码@]URL[:端口] [选项]
+.
+.br
+.B mplayer
+sdp://文件
+[选项]
+.
+.br
+.B mplayer
+mpst://主机[:端口]/URL
+[选项]
+.
+.br
+.B mplayer
+tivo://主机/[list|llist|fsid]
+[选项]
+.
 .br
 .B gmplayer
 [选项]
-[\-skin\ skin]
+[\-skin\ 皮肤]
+.
+.br
+.B mencoder
+[选项] 文件
+[文件|URL|\-] [\-o 文件]
+.
+.br
+.B mencoder
+[选项] 文件1
+[指定选项] [文件2] [指定选项]
 .ad
 .hy
-
+.
 .\" --------------------------------------------------------------------------
-.\" Description
+.\" 描述
 .\" --------------------------------------------------------------------------
 .
-.SH 说明
+.SH "DESCRIPTION (描述)"
 .B mplayer
-是一个LINUX下的电影播放器, (也能运行在许多其它的Unices和非x86的CPU上,
-参看文档). 它能使用本地的, XAnim, Win32 DLL的编解码器播放绝大部分的MPEG/\:VOB,
-AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, VIVO, FLI, NuppelVideo,
-yuv4mpeg, FILM和RoQ文件. 你还能观看VideoCD,SVCD, DVD, 3ivx,
-DivX\ 3/\:4/\:5甚至WMV电影(不需要使用avifile库).
+是一个 LINUX 下的电影播放器 (也能运行在许多其它的平台和 CPU 架构, 请参阅文档)。
+通过许多原生的和可执行的编解码器的支持, 它能播放绝大部分的 MPEG/\:VOB, AVI, 
+ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, Ogg/\:OGM, MKV, VIVO, FLI, NuppelVideo, 
+yuv4mpeg, FILM 和 RoQ 文件。
+你还能观看 VCD, SVCD, DVD, 3ivx, DivX 3/4/5, 甚至 WMV 电影。
 .PP
-MPlayer的另一个优越的特性是对输出设备的广泛的支持. 它可以使用X11, XV, DGA, OpenGL,
-SVGAlib, fbdev, AAlib, DirectFB, 但你也可以使用GGI,
-SDL(由此可以使用他们的所有驱动), VESA(所有VESA兼容的显卡，甚至可以没有X11),
-某些低级的显卡相关的驱动(Matrox, 3Dfx和ATI)和一些硬件MPEG解码器卡, 比如Siemens DVB,
- DXR2和DXR3/\:Hollywood+. 它们中绝大多数支持软件或硬件缩放, 所以你可以享受全屏电影.
+MPlayer 广泛地支持音视频输出驱动。
+它不仅可以使用 X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, 
+DirectFB, Quartz, Mac OS X CoreVideo, 也能使用 GGI, SDL (及它们的所有驱动),
+所有 VESA 兼容显卡上的 VESA (甚至不需要 X11), 某些低级的
+显卡相关的驱动 (如 Matrox, 3dfx 及 ATI) 和一些硬件 MPEG 解码器卡, 
+比如 Siemens DVB, Hauppauge PVR (IVTV), DXR2 和 DXR3/\:Hollywood+。
+它们中绝大多数支持软件或硬件缩放, 所以你可以享受全屏电影。
 .PP
-MPlayer具有onscreen display(OSD)功能, 用来显示状态信息,
-清晰放大反锯齿带阴影的字幕和键盘控制的视觉反馈. 支持的字体包括欧洲语种/\:ISO 8859-1,2
-(匈牙利语, 英语, 捷克语等等), 西里尔语和韩语, 可以播放10种格式的字幕文件(MicroDVD,
-SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub和我们自己的:
-MPsub)和DVD字幕(SPU流, VobSub和隐藏字幕数据表(Closed Captions)).
+MPlayer 具有 OSD(屏上显示) 功能显示状态信息, 有
+抗锯齿带阴影的漂亮大字幕和键盘控制的可视反馈。
+支持的字体包括欧洲语种/\:ISO8859-1,2 (匈牙利语, 英语, 捷克语等等), 
+西里尔语和韩语, 可以播放 12 种格式的字幕文件 (MicroDVD, SubRip, OGM,
+SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS 
+及我们自己的: MPsub) 和 DVD 字幕 (SPU 流, VOBsub 及隐藏式 CC 字幕)。
 .PP
 .B mencoder
-(MPlayer的电影编码器)是一个简单的电影编码器,
-设计用来把MPlayer可以播放的电影(见上面)编码成另一些MPlayer可以播放的格式(见下面).
-它可以通过1, 2或者3 pass的方式编码DivX4, XviD,
-libavcodec的编解码器支持的视频格式和PCM/\:MP3/\:VBRMP3的音频.
-进一步的它还拥有流复制的能力, 一个强大的插件系统(crop, expand, flip, postprocess,
-rotate, scale, noise, rgb/\:yuv转换)和更多.
+(MPlayer 的电影编解码器) 是一个简单的电影编解码器, 其设计为将
+MPlayer 可播放的电影(见上所述)编码成其他的 MPlayer 可播放格式(见下面)。
+其编码成的 MPEG-4 (DivX/XviD), 是 libavcodec 编解码器的一种和
+使用 1, 2 或 3-passes 的 PCM/\:MP3/\:VBRMP3 音频。
+此外还具有流复制的能力, 拥有强大的(过滤器)插件系统(裁剪,
+扩展, 反转, 后处理, 旋转, 拉伸, 降噪声, RGB/\:YUV 转换)等。
 .PP
 .B gmplayer
-是使用图形用户界面的MPlayer. 它使用跟MPlayer相同的参数.
-
-
+是具有图形用户界面的 MPlayer。其选项与 MPlayer 相同。
+.PP
+本手册页最后有用法示例, 能让你迅速上手。
+.PP
+.B 也请参阅 HTML 文档!
+.
+.
 .\" --------------------------------------------------------------------------
-.\" Options
+.\" 交互控制
 .\" --------------------------------------------------------------------------
 .
-.SH "一般注记"
-.B 参见HTML文档!
-.PP
-每个'flag'选项都有一个对应的'noflag'选项, 比如\&\-fs选项的对应选项是\-nofs.
-.PP
-你可以把所有选项放在配置文件中, mplayer每次运行时都会读取它们.
-系统范围的配置文件'mplayer.conf'在你的配置目录中,
-(比如\&/etc/\:mplayer或者/usr/\:local/\:etc/\:mplayer),
-用户特定的配置文件是'~/\:.mplayer/\:config'.
-用户特定的选项优先于系统范围的选项, 而命令行选项优先于这两者.
-配置文件的语法是'选项=<参数>', '#'后面的都认为是注释.
-启用没有参数的选项可以把参数设为'yes'或者'1', 而如果要禁用就把它们设置为'no'或者'0'.
-甚至子选项也可以通过这种方式设定.
-
-.I 示例:
-.br
-# 默认使用Matrox驱动.
-.br
-vo=xmga
-.br
-# 我喜欢在看片子的时候练习倒立.
-.br
-flip=yes
-.br
-# 从多个png文件解码/\:编码, 以-mf启动
-.br
-mf= type=png:fps=25
-
-你也可以制作针对特定文件的配置文件. 如果你希望'movie.avi'这个文件有自己的配置文件,
-创建一个叫'movie.avi.conf'的文件, 写上针对该文件的选项,
-把它放在~/.mplayer中或者该文件同一目录下.
-
-.SH "播放选项(仅用于MPLAYER)"
+.SH "INTERACTIVE CONTROL (交互控制)"
+MPlayer 有个完全可配置的, 命令驱动的控制层, 
+让你通过键盘, 鼠标, 操纵杆或遥控器(需使用 LIRC)来控制 MPlayer。
+参见 \-input 选项定制控制层的方法。
+.
 .TP
-.B \-, \-use-stdin
-从标准输入读取数据. \-idx选项无法与这个选项同时工作.
-.TP
-.B \-autoq <质量> (与\-vf pp一起使用)
-根据可用的CPU空闲时间动态调整后期处理的级别. 你设定的数字是允许使用的最高级别.
-一般来说你可以使用一些比较大的数字. 你必须使用不带参数的\-vf pp才能使用它.
-.TP
-.B \-autosync <因子>
-基于音频延迟的检测逐步调整A/\:V同步. 设定\-autosync\ 0, 也就是默认值,
-将导致帧记时完全基于音频延迟的检测. 设定\-autosync\ 1也是一样,
-但将会微妙的改变所使用的A/\:V修正算法. 设置大于1的值对那些视频帧速率不均匀,
-但用\-nosound可以正常播放的电影一般会有帮助. 这个值越大, 记时方法越接近于\-nosound.
-对于没有好的音频延迟检测功能的声卡驱动试试用\-autosync\ 30来平滑这个问题.
-使用这个值时, 如果出现大的A/\:V同步偏移, 只需要1或2秒就可以摆平.
-对于任何声卡驱动, 打开这个选项的唯一缺点就是对于突然的A/\:V偏移的反应延迟时间.
-.TP
-.B \-benchmark
-在终端显示一些CPU使用率和丢帧数的统计信息.
-与\-nosound和\-vo null联合使用可以用来评测视频解码器.
-.TP
-.B \-edl <文件名>
-在播放时启用编辑决定列表(EDL)的动作. 根据所给文件的内容,
-可以跳过视频, 静音和取消静音. 具体内容和使用方法参见DOCS/documentation.html#edl.
-.TP
-.B \-edlout <文件名>
-建立一个新文件并写入编辑决定列表(EDL)的记录. 在播放时, 当用户按下'i',
-一个跳过下面两秒的记录将写入文件. 用户以后可以以此作为调整EDL记录的出发点.
-具体内容参见DOCS/documentation.html#edl.
-.TP
-.B \-enqueue (仅用于GUI)
-将命令行中的文件加入播放序列而不是立刻播放它们.
-.TP
-.B \-fixed-vo (BETA代码!)
-对多个文件使用一个固定的视频系统(对所有文件初始化/\:释放一次).
-所以对所有文件只使用一个窗口, 目前fixed-vo兼容的驱动有: x11, xv, xvidix, xmga,
-gl2, and svga.
-.TP
-.B \-framedrop (参见\-hardframedrop)
-跳过一些帧从而在慢的机器上实现A/\:V同步.视频滤镜不会应用到这些帧上.
-对于B帧解码也会完全跳过.
-.TP
-.B \-h, \-help, \-\-help
-显示简短的选项摘要.
-.TP
-.B \-hardframedrop
-丢掉更多的帧(破坏解码). 导致图像破损!
-.TP
-.B \-identify
-用容易分析的格式显示文件参数.
-调用的TOOLS/midentify脚本将滤除mplayer的其它输出而(但愿能)留下文件名.
-.TP
-.B \-input <命令>
-这个选项可以用来配置输入系统的特定部分. 路径相对于~/\:.mplayer/.
-
-.I 注意:
-.br
-自动重复功能目前只有游戏操纵杆支持.
-.br
-可用的命令有:
-
+.B 键盘控制
 .PD 0
-.RSs
-.IPs conf=<文件>
-读取另外的input.conf.
-如果没有给出路径名, 将假设是~/\:.mplayer.
-.IPs ar\-delay
-在开始自动重复一个键之前等待多少毫秒(0代表禁用).
-.IPs ar\-rate
-当自动重复是每秒重复多少次.
-.IPs keylist
-列出所有可以被绑定的键.
-.IPs cmdlist
-列出所有可以被绑定的命令.
-.IPs js\-dev
-指定可用的游戏操纵杆设备(默认为/dev/\:input/\:js0).
-.IPs file
-从指定文件读取命令, 用于命名管道很有效.
+.RS
+.IPs "<\- 和 \->"
+后退/\:快进 10 秒。
+.IPs "up 和 down"
+快进/\:后退 1 分。
+.IPs "pgup 和 pgdown"
+快进/\:后退 10 分。
+.IPs "[ 和 ]"
+减少/增加当前回放速度 10%。
+.IPs "{ 和 }"
+减半/加倍当前回放速度。
+.IPs "backspace"
+重置正常回放速度.
+.IPs "< 和 >"
+在播放列表中后退/\:快进。
+.IPs "ENTER"
+在播放列表中快进, 甚至越过末尾。
+.IPs "HOME 和 END"
+下一个/\:前一个父列表中的播放树项。
+.IPs "INS 和 DEL (仅用于 ASX 播放列表)"
+下一个/\:前一个供选择的源。
+.IPs "p / SPACE"
+暂停 (再按取消暂停)。
+.IPs ".\ \ \ \ "
+步进。
+按一下暂停回放, 每按一下就播放一帧(直到按其它键取消步进)。
+.IPs "q / ESC"
+停止播放和退出。
+.IPs "+ 和 -"
+调整音频延迟增加/减少 0.1 秒。
+.IPs "/ 和 *"
+降低/\:提高音量。
+.IPs "9 和 0"
+降低/\:提高音量。
+.IPs "m\ \ \ \ "
+静音。
+.IPs "# (仅用于 MPEG 和 Matroska)"
+循环可用的音轨。
+.IPs "f\ \ \ \ "
+切换全屏 (也请参见 \-fs)。
+.IPs "T\ \ \ \ "
+切换顶置 (也请参见 \-ontop)。
+.IPs "w 和 e"
+降低/\:提高摇移范围。
+.IPs "o\ \ \ \ "
+循环 OSD 状态: 无 / 搜索条 / 搜索条 + 定时 / 搜索条 + 定时 + 总时间。
+.IPs "d\ \ \ \ "
+循环丢帧状态: 无 / 跳过显示 / 跳过解码。
+(请参见 \-framedrop 和 \-hardframedrop)。
+.IPs "v\ \ \ \ "
+切换显示字幕。
+.IPs "b / j"
+循环可用的字幕。
+.IPs "y 和 g"
+在字幕列表中步进/步退。
+.IPs "F\ \ \ \ "
+切换显示"锁定的字幕"。
+.IPs "a\ \ \ \ "
+切换对齐字幕: 上 / 中 / 下。
+.IPs "x 和 z"
+调整字幕延迟增加/减少 0.1 秒。
+.IPs "r 和 t"
+上/下调整字幕位置。
+.IPs "i (仅用于 \-edlout 模式)"
+设置 EDL 的开头或末尾并写入指定的文件。
+.IPs "s (仅用于 \-vf 截屏)"
+截屏。
+.IPs "S (仅用于 \-vf 截屏)"
+开始/停止截屏。
+.IPs "I\ \ \ \ "
+用 OSD 显示文件名。
+.IPs "! 和 @"
+寻到前一章节/后一章节的开始处。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于硬件加速视频输出(xv, (x)vidix, (x)mga, 等), 
+软件均衡器(\-vf eq or \-vf eq2), 或者色调过滤器(\-vf hue)。)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "1 和 2"
+调整对比度。
+.IPs "3 和 4"
+调整亮度。
+.IPs "5 和 6"
+调整色调。
+.IPs "7 和 8"
+调整饱和度。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于 quartz or macosx 视频输出驱动。)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "command + 0"
+半尺寸。
+.IPs "command + 1"
+原始尺寸。
+.IPs "command + 2"
+双倍尺寸。
+.IPs "command + f"
+切换全屏 (也请参见 \-fs)。
+.IPs "command + [ 和 command + ]"
+设置窗口的 alpha。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于 sdl 视频输出驱动。)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "c\ \ \ \ "
+切换可用的全屏模式。
+.IPs "n\ \ \ \ "
+原始尺寸。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于多媒体键盘。)
+.RE
+.PP
+.PD 0
+.RS
+.IPs PAUSE
+暂停。
+.IPs "STOP\ "
+停止并退出。
+.IPs "PREVIOUS 和 NEXT"
+后退/\:快进 1 分。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于已编译支持 GUI 并优先于以前的定义。)
+.RE
+.PP
+.PD 0
+.RS
+.IPs ENTER
+开始播放。
+.IPs "ESC\ \ "
+停止播放。
+.IPs "l\ \ \ \ "
+加载文件。
+.IPs "t\ \ \ \ "
+加载字幕。
+.IPs "c\ \ \ \ "
+打开皮肤浏览器。
+.IPs "p\ \ \ \ "
+打开播放列表。
+.IPs "r\ \ \ \ "
+打开首选项。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于已编译支持 TV 或 DVB 的输入并优先于以前的定义。)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "h 和 k"
+选择上一个/\:下一个频道。
+.IPs "n\ \ \ \ "
+改变制式。
+.IPs "u\ \ \ \ "
+改变频道列表。
+.RE
+.PD 1
+.PP
+.RS
+(以下的按键仅适用于已编译支持 dvdnav: 用于导航菜单)
+.RE
+.PP
+.PD 0
+.RS
+.IPs "keypad 8"
+选择上。
+.IPs "keypad 2"
+选择下。
+.IPs "keypad 4"
+选择左。
+.IPs "keypad 6"
+选择右。
+.IPs "keypad 5"
+返回主菜单。
+.IPs "keypad 7"
+返回最近的菜单(先后次序是: 章节->标题->根)。
+.IPs "keypad ENTER"
+确定。
+.RE
+.PD 1
+.PP
+.RS
+.
+.TP
+.B 鼠标控制
+.PD 0
+.RS
+.IPs "button 3 和 button 4"
+后退/\:快进 1 分。
+.IPs "button 5 和 button 6"
+降低/\:提高音量。
 .RE
 .PD 1
 .
 .TP
-.B \-lircconf <文件>
-指定LIRC(Linux Infrared Remote Control, 参见http://www.lirc.org)的配置文件,
-如果你不喜欢默认的~/\:.lircrc的话.
+.B 操纵杆
+.PD 0
+.RS
+.IPs "left 和 right"
+后退/\:快进 10 秒。
+.IPs "up 和 down"
+快进/\:后退 1 分。
+.IPs "button 1"
+暂停。
+.IPs "button 2"
+循环 OSD 状态: 无 / 搜索条 / 搜索条 + 定时 / 搜索条 + 定时 + 总时间。
+.IPs "button 3 和 button 4"
+降低/\:提高音量。
+.RE
+.PD 1
+.
+.
+.\" --------------------------------------------------------------------------
+.\" 用法
+.\" --------------------------------------------------------------------------
+.
+.SH "USAGE (用法)"
+每个 'flag' 选项有个相反的 'noflag' 选项对应, 例如\& 选项\-fs 反的是 \-nofs。
+.PP
+如果某选项标为: (仅用于 XXX), 就仅适用于与选项 XXX 联合使用或者已编译进 XXX。
+.PP
+.I 注意:
+子选项解析器(例如用于 \-ao pcm 子选项)支持
+一种特殊的字符串转义(string-escaping)意欲和外部的 GUI 一起使用。
+.br
+其格式如下:
+.br
+%n%string_of_length_n
+.br
+.I 示例:
+.br
+mplayer \-ao pcm:file=%10%C:test.wav test.avi
+.br
+或在脚本中:
+.br
+mplayer \-ao pcm:file=%`expr length "$NAME"`%"$NAME" test.avi
+.PP
+.
+.\" --------------------------------------------------------------------------
+.\" 配置文件
+.\" --------------------------------------------------------------------------
+.
+.SH "CONFIGURATION FILES (配置文件)"
+你可以把所有选项放在配置文件中, 每次 MPlayer/MEncoder 运行时都会读取它们。
+系统范围的配置文件 'mplayer.conf' 位于你的配置目录
+(例如\& /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
+用户指定的配置文件是 '~/\:.mplayer/\:config'。
+MEncoder 的配置文件是 'mencoder.conf' 位于你的配置目录
+(例如\& /etc/\:mplayer 或者 /usr/\:local/\:etc/\:mplayer)中, 
+用户指定的配置文件是 '~/\:.mplayer/\:mencoder.conf'。
+用户指定的选项优先于系统范围的选项, 而命令行选项优先于以上两者。
+配置文件的语法是 'option=<value>', 任何 '#' 后面的都认为是注释。
+启用没有参数值的选项可以把参数设为 'yes' 或者 '1' 或者 'true', 
+而如果要停用就把它们设置为 'no' 或者'0' 或者 'false'。
+甚至子选项也可以如此设定选项。
+.PP
+你也可以为特定文件写配置文件。
+如果你希望一个特定文件 'movie.avi' 有个配置文件, 就新建文件, 
+名为 'movie.avi.conf', 写上该特定文件的选项并放在目录 ~/.mplayer/ 下。
+你也可以把配置文件放在与播放该特定文件时该特定文件相同的目录之下, 
+只要你(要么在命令行或者在全局配置文件中)给定 \-use-filedir-conf 选项。
+.PP
+.I MPLAYER 配置文件示例:
+.sp 1
+.nf
+# 默认使用 Matrox 驱动。
+vo=xmga
+# 我喜欢在看片子的时候练习倒立。
+flip=yes
+# 解码/编码多个 PNG 文件,
+# 开始于 mf://文件掩码
+mf=type=png:fps=25
+# 怪异的负片图像好酷。
+vf=eq2=1.0:-0.8
+.fi
+.PP
+.I "MENCODER 配置文件示例:"
+.sp 1
+.nf
+# 产生 MEncoder 输出到默认的文件名。
+o=encoded.avi
+# 下面四行使 mencoder tv:// 立刻开始捕获。
+oac=pcm=yes
+ovc=lavc=yes
+lavcopts=vcodec=mjpeg
+tv=driver=v4l2:input=1:width=768:height=576:device=/dev/video0:audiorate=48000
+# 较复杂的默认编码选项设置
+lavcopts=vcodec=mpeg4:autoaspect=1
+lameopts=aq=2:vbr=4
+ovc=lavc=1
+oac=lavc=1
+passlogfile=pass1stats.log
+noautoexpand=1
+subfont-autoscale=3
+subfont-osd-scale=6
+subfont-text-scale=4
+subalign=2
+subpos=96
+spuaa=20
+.fi
+.
+.\" --------------------------------------------------------------------------
+.\" 配置轮廓
+.\" --------------------------------------------------------------------------
+.
+.SH "PROFILES (配置轮廓)"
+为了方便操作不同的配置文件, 可以在配置文件中定义配置轮廓。
+配置轮廓以放在方括号中的名称开始, 如\& '[my-profile]'。
+所有跟随的选项成为配置轮廓的一部分。
+描述(通过 \-profile help 显示)定义于 profile-desc 选项。
+要结束该配置轮廓, 使用别的名称开始即可或使用配置轮廓名称 'default' 继续正常的选项。
+.fi
+.PP
+.I "MENCODER 配置轮廓示例:"
+.sp 1
+.nf
+
+[mpeg4]
+profile-desc="MPEG4 encoding"
+ovc=lacv=yes
+lavcopts=vcodec=mpeg4:vbitrate=1200
+
+[mpeg4-hq]
+profile-desc="HQ MPEG4 encoding"
+profile=mpeg4
+lavcopts=mbd=2:trell=yes:v4mv=yes
+.fi
+.
+.\" --------------------------------------------------------------------------
+.\" 选项
+.\" --------------------------------------------------------------------------
+.
+.SH "GENERAL OPTIONS (一般选项)"
+.
 .TP
-.B \-loop <数字>
-重复播放电影<数字>遍. 0表示不断重复.
+.B \-codecs-file <文件名> (也请参见 \-afm, \-ac, \-vfm, \-vc)
+过载标准的搜索路径并使用指定的文件代替内置的 codecs.conf。
+.
 .TP
-.B \-menu (BETA代码)
-打开OSD菜单支持.
+.B \-include <配置文件>
+指定配置文件在默认的配置文件后面解析。
+.
 .TP
-.B \-menu-root <参数> (BETA代码)
-指定主菜单.
+.B \-list-options
+打印所有可用的选项。
+.
 .TP
-.B \-menu-cfg <文件> (BETA代码)
-使用另外的menu.conf.
+.B \-msgcharset <字符集>
+转换控制台消息为指定的字符集(默认是自动侦测: autodetect)。
+文字的字符集编码用选项 \-\-charset 指定配置。
+设置为 "noconv" 以停用转换 (为了如\& iconv 问题)。
+.br
+.I 注意:
+选项在命令行解析完成后生效。
+环境变量 MPLAYER_CHARSET 能帮你去除开头几行混乱的输出。
+.
+.TP
+.B \-msglevel <all=<级别>:<模块>=<级别>:...>
+直接对各个模块控制冗赘度。
+此 'all' 模块改变所有模块(虽然没有在命令行中显式指定)的冗赘级别。
+查看所有模块的列表请参见于 '\-msglevel help'。
+.br
+.I 注意:
+消息是在命令行解析之前打印的, 仅受到能应用于所有模块的
+环境变量 MPLAYER_VERBOSE 的控制。
+.br
+可用级别:
+.PD 0
+.RSs
+.IPs "-1"
+完全沉默
+.IPs " 0"
+仅致命消息
+.IPs " 1"
+错误消息
+.IPs " 2"
+警告消息
+.IPs " 3"
+简短提示
+.IPs " 4"
+信息消息
+.IPs " 5"
+状态消息 (隐藏用 \-quiet)
+.IPs " 6"
+冗赘消息
+.IPs " 7"
+调试级别 2
+.IPs " 8"
+调试级别 3
+.IPs " 9"
+调试级别 4
+.RE
+.PD 1
+.
+.TP
+.B "\-quiet\ "
+使得控制台消息少输出; 特别地, 阻止状态行
+(如\& A:   0.7 V:   0.6 A-V:  0.068 ...)的显示。
+对慢机器或者不能正确处理回车符(如\& \\r)的旧机器特别有用。
+.
+.TP
+.B \-priority <优先> (仅适用于 Windows)
+根据 Windows 下可用的预定义优先级设置 MPlayer 的进程优先级。
+可能的 <优先> 值为:
+.RSs
+idle|belownormal|normal|abovenormal|high|realtime
+.RE
+.sp 1
+.RS
+.I 警告:
+使用 realtime(实时) 优先级会引起系统锁住。
+.RE
+.
+.TP
+.B \-profile <配置轮廓1,配置轮廓2,...>
+使用给定的配置轮廓, \-profile help 显示定义的配置轮廓列表。
+.
+.TP
+.B \-really-quiet (也请参见 \-quiet)
+显示比 \-quiet 更少的输出和状态信息。
+.
+.TP
+.B \-show-profile <配置轮廓>
+显示配置轮廓的描述和内容。
+.
+.TP
+.B \-use-filedir-conf
+在文件播放时的相同目录之下寻找该特定文件的配置文件。
+.br
+.I 警告:
+播放未经信任的媒体可能有危险。
+.
+.TP
+.B "\-v\ \ \ \ \ "
+提高冗赘级别, 对命令行中发现的各个 \-v 提高一级。
+.
+.
+.
+.SH "PLAYER OPTIONS 播放器选项 (仅适用于 MPLAYER)"
+.
+.TP
+.B \-autoq <质量> (和 \-vf [s]pp 一起使用)
+依据可用的 CPU 空闲时间动态改变后期处理的级别。
+你指定的数字可能是已使用中的最高级别。通常你可以使用有点高的级别数字。
+为此你必须使用不带参数的 \-vf [s]pp 选项。
+.
+.TP
+.B \-autosync <因子>
+基于音频延迟的检测逐步调整 A/V 同步。
+指定 \-autosync 0, 也就是默认值, 将导致帧计时完全基于音频延迟的检测。
+指定 \-autosync 1 也是一样, 但会微妙地改变所使用的 A/V 修正算法。
+对那些视频帧率不均匀, 但用 \-nosound 可以正常播放的电影, 
+设置大于 1 的整数值一般会有所帮助。
+这个值越大, 计时方法越接近于 \-nosound。
+对于某些音频延迟检测实现不完善的声卡驱动, 试试用 \-autosync\ 30 来平滑此问题。
+使用这个值时, 如果出现 A/V 同步大偏移, 只需要 1, 2 秒时间就可以搞定。
+对于所有的声卡驱动, 对突然的 A/V 偏移, 在反应时间上有延迟, 
+这应该是打开此选项的唯一副作用。
+.
+.TP
+.B \-benchmark
+在终端打印一些回放后的 CPU 使用率和丢帧数的统计信息。
+与 \-nosound 和 \-vo null 联合使用可用来仅仅评测视频编解码器.
+.br
+.I 注意:
+使用此参数仅仅回放视频时, MPlayer 也将忽略帧持续期(frame duration) 
+(你可以认为那是不定帧率)。
+.
+.TP
+.B \-colorkey <号码>
+改变 colorkey 为你所选的 RGB 值。
+0x000000 是黑色而 0xffffff 是白色。
+仅被视频输出驱动 cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix, 
+xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
+.
+.TP
+.B \-nocolorkey
+停用 colorkeying。
+仅被视频输出驱动 cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix, 
+xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
+.
+.TP
+.B \-crash-debug (调试代码)
+一旦崩溃或 SIGTRAP 自动联上 gdb 调试程序。
+此支持必须已编译进配置 \-\-enable-crash-debug。
+.
+.TP
+.B \-edlout <文件名>
+新建文件并写入 EDL(编辑决定列表) 记录。
+回放时, 用户击 'i' 键标记跳过块的开始结束处。
+这提供了用户一个以后能精调 EDL (记录)项的开始点。
+详情请参见 http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html。
+.
+.TP
+.B \-enqueue (仅用于 GUI)
+将命令行中给定的文件排入播放列表但不立刻播放。
+.
+.TP
+.B \-fixed-vo
+为多个文件锁定一个固定的视频系统 (对所有的文件(反)初始化仅一次)。
+这样, 对所有文件只打开一个窗口。
+目前 fixed-vo 兼容的驱动有: gl, gl2, mga, svga, x11, xmga, 
+xv, xvidix 和 dfbmga。
+.
+.TP
+.B \-framedrop (也请参见 \-hardframedrop)
+跳过显示一些帧从而在慢的机器上保持 A/V 同步。
+视频滤镜不会应用到这些帧上。对于 B-帧 甚至解码也完全跳过。
+.
+.TP
+.B \-(no)gui
+启用或停用 GUI 接口(默认取决于可执行文件名)。
+仅能作为命令行第一个参数。不能作为选项写入配置文件。
+.
+.TP
+.B \-h, \-help, \-\-help
+显示简短的选项概要。
+.
+.TP
+.B \-hardframedrop
+更高强度的丢帧(破坏解码)。导致图像失真!
+.
+.TP
+.B \-identify
+是 \-msglevel identify=4 的简式。使用易于分析的格式显示文件参数。
+也打印更详细的字幕信息和音轨语言和 ID。
+在某些情形下, 你使用 \-msglevel identify=6 能得到更多的信息。
+例如, 对于 DVD 能列出每个标题的时长和碟片 ID 号。
+wrapper(封套) 脚本 TOOLS/\:midentify 能抑制 MPlayer 的其它输出
+并(希望能) shellescapes(脚本转义) 文件名。
+.
+.TP
+.B \-idle (也请参见 \-slave)
+当没有文件播放时, 让 MPlayer 空闲等待而不是退出。
+一般在 slave 模式时有用, 能通过输入命令控制 MPlayer。
+.
+.TP
+.B \-input <命令>
+此选项可以用来配置输入系统的某些部分。路径相对于 ~/.mplayer/。
+.br
+.I 注意:
+自动重复功能目前只有游戏操纵杆支持。
+.sp 1
+可用的命令有:
+.sp 1
+.PD 0
+.RSs
+.IPs conf=<文件名>
+指定输入配置文件而不是默认的 ~/\:.mplayer/\:input.conf。
+如果没有给出完全路径名, 将假设是 ~/\:.mplayer/\:<文件名>。
+.IPs ar-delay
+在开始自动重复一个键之前等待多少毫秒 (0 代表停用)。
+.IPs ar-rate
+自动重复数是每秒重复多少次按键。
+.IPs keylist
+列出所有可以被绑定于命令的键。
+.IPs cmdlist
+列出所有可以被绑定于键的命令。
+.IPs js-dev
+指定使用的操纵杆设备(默认是: /dev/\:input/\:js0)。
+.IPs file=<文件名>
+从给定文件中读取命令。
+一般结合 FIFO 时有用。
+.br
+.I 注意:
+当给定文件是 FIFO 时 MPlayer 打开两个端头, 这样你就可以做
+几次 'echo "seek 10" > mp_pipe' 而管道仍保持有效。
+.RE
+.PD 1
+.
+.TP
+.B \-key-fifo-size <2\-65000>
+指定 FIFO 大小供缓冲按键事件(默认: 10)。
+n 大小的 FIFO 能容纳 (n-1) 缓冲事件。
+如果太小会丢失一些事件
+(导致 "stuck mouse buttons (鼠标键卡住)" 或类似效果)。
+如果太大, MPlayer 处理缓冲的事件时可能看上去挂住了。
+为得到同以前一样的行为效果而引入此选项,
+对 Linux 设置为 2 或对 Windows 为 1024。
+.
+.TP
+.B \-lircconf <文件名> (仅适用于 LIRC)
+为 LIRC 指定配置文件(默认是: ~/.lircrc)。
+.
+.TP
+.B \-list-properties
+打印可用的属性列表。
+.
+.TP
+.B \-loop <数>
+重复回放电影 <数> 遍。
+0 表示重复不断。
+.
+.TP
+.B \-menu (仅适用于 OSD 菜单)
+打开 OSD 菜单支持。.
+.
+.TP
+.B \-menu-cfg <文件名> (仅适用于 OSD 菜单)
+使用另外的 menu.conf。
+.
+.TP
+.B \-menu-root <参数值> (仅适用于 OSD 菜单)
+指定主菜单。
+.
+.TP
+.B \-menu-startup (仅适用于 OSD 菜单)
+在 MPlayer 启动时显示主菜单。
+.
+.TP
+.B \-mouse-movements
+允许 MPlayer 接受指针事件来自视频输出驱动(目前仅支持 X11 衍生型)。
+必须选择 DVD 菜单中的按钮。
+.
+.TP
+.B \-noconsolecontrols
+阻止 MPlayer 读取标准输入的键盘事件。
+读取标准输入的数据时有用。命令行中发现 \- 会自动启用。
+会遇到不得不手动设置的情形, 比如你
+打开 /dev/\:stdin (或者你系统中等价的设备), 在播放列表中使用 stdin 
+或者意欲以后通过 slave 命令的 loadfile 或 loadlist 从 stdin 读取。
+.
 .TP
 .B \-nojoystick
-关闭游戏操纵杆的支持. 默认是只要编译了就会打开.
+关闭支持操纵杆。
+.
 .TP
 .B \-nolirc
-关闭LIRC支持.
+关闭支持 LIRC。
+.
 .TP
-.B \-nortc
-关闭使用Linux的RTC(real-time clock \- /dev/\:rtc)作为计时器的功能.
+.B \-nomouseinput (仅适用于 X11)
+停用鼠标键 按/\:放 输入 (mozplayerxp 的上下文菜单依赖此选项)。
+.
 .TP
-.B \-playlist <文件>
-根据播放列表播放文件(每行一个文件或者Winamp或ASX格式).
+.B \-rtc (仅适用 RTC)
+打开使用 Linux 的 RTC (实时钟 \- /dev/\:rtc) 作为计时机制。
+唤醒过程每 1/1024 秒核查当前时间。
+除非现代 Linux 内核配置为桌面应用, 因为当使用正常的定时睡眠时, 
+已唤醒相似精度的过程。
+.
 .TP
-.B \-quiet
-显示较少的输出和状态信息.
+.B \-playing-msg <字符串>
+开始回放前打印出字符串。
+支持以下的扩展:
+.RSs
+.IPs ${NAME}
+扩展为属性 NAME 的值。
+.IPs $(NAME:TEXT)
+仅当属性 NAME 可用时扩展 TEXT(文字)。
+.RE
+.
 .TP
-.B \-really\-quiet
-显示更少的输出和状态信息.
+.B \-playlist <文件名>
+根据播放列表播放文件(ASX, Winamp, SMIL, 或者
+one-file-per-line(每行一个文件) 格式)。
+.br
+.I 注意:
+此选项作为条目仅应用于播放列表的元素以后, 会找到选项。
+.br
+FIXME: 需要彻底理清并建立文档。
+.
 .TP
-.B \-sdp
-指定输入文件为描述一个RTP会话的SDP('Session Description Protocol')文件,
-(参见http://www.live555.com/mplayer/).
+.B \-rtc-device <设备>
+为 RTC 计时使用指定的设备。
+.
 .TP
 .B \-shuffle
-以随机顺序播放文件.
+以随机顺序播放文件。
+.
 .TP
-.B \-skin <skin目录> (BETA代码)
-从指定目录中装载skin(没有路径名).
-
+.B \-skin <名> (仅用于 GUI)
+从默认皮肤目录 
+/usr/\:local/\:share/\:mplayer/\:skins/\: 或 ~/.mplayer/\:skins/ 
+下的, 作为参数的给定目录中装载皮肤。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-尝试skins/fittyfene.
-将会首先察看/usr/local/share/mplayer/,
-然后是~/.mplayer/.
+尝试 /usr/\:local/\:share/\:mplayer/\:skins/\:fittyfene
+然后是 ~/.mplayer/\:skins/\:fittyfene。
 .RE
 .PD 1
 .
 .TP
-.B \-slave
-这个选项打开slave模式.
-这用来将MPlayer作为其它程序的后端. MPlayer将从他的标准输入读取简单命令行,
-而不再截获键盘事件.
-.B SLAVE模式协议
-部分将解释其语法.
+.B \-slave (也请参见 \-input)
+切换到 slave 模式, MPlayer 为其他程序在后台运行。
+MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行, 
+而不再截获键盘事件。
+.br
+.I 注意:
+请参见 \-input cmdlist 的命令列表和 DOCS/tech/slave.txt 中的描述。
+.
 .TP
 .B \-softsleep
-使用高质量的软件计时器. 跟RTC同样精确且不需要特别权限. 代价是更高的CPU消耗.
+通过不断核查当前时间来测定帧的时间, 
+而不是请求内核在适当的时刻唤醒 MPlayer。
+对于内核计时器精度不高且不能使用 RTC 时有用, 代价是较高的 CPU 消耗。
+.
 .TP
-.B \-speed <0.01\-100>
-设置播放速率.
-.TP
-.B \-sstep <秒>
-设定各帧显示之间的时间间隔. 用于幻灯片播放.
-
-
-.SH "分路器/媒体流选项"
+.B \-sstep <数>
+每帧后跳过 <数> 秒。
+影片的正常帧率仍被保留, 所以回放加速了。
+既然 MPlayer 仅能搜寻到下一个 keyframe, 加速过程可能不精准。
+.
+.
+.
+.SH "DEMUXER/STREAM OPTIONS (分路器/媒体流选项)"
+.
+.\" The below is only synced with r9821
 .TP
 .B \-aid <标识> (参见 \-alang选项)
 选择音频频道 [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
