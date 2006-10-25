@@ -40,6 +40,7 @@
 
 #include "fastmemcpy.h"
 #include "libswscale/swscale.h"
+#include "libswscale/rgb2rgb.h"
 #include "libmpcodecs/vf_scale.h"
 #include "libavutil/rational.h"
 
