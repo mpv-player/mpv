@@ -165,7 +165,7 @@ files.  If you have files like
 (full path optional). The <option>-vobsubid</option> option is like
 <option>-sid</option> for DVDs, you can choose between subtitle tracks
 (languages) with it. In case that <option>-vobsubid</option> is omitted,
-<application>MPLayer</application> will try to use the languages given by the
+<application>MPlayer</application> will try to use the languages given by the
 <option>-slang</option> option and fall back to the <systemitem>langidx</systemitem>
 in the <filename>.IDX</filename> file to set the subtitle language. If it fails,
 there will be no subtitles.
