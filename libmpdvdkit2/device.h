@@ -45,6 +45,7 @@ struct iovec
  * Device reading prototypes
  *****************************************************************************/
 int  _dvdcss_use_ioctls ( dvdcss_t );
+void _dvdcss_check      ( dvdcss_t );
 int  _dvdcss_open       ( dvdcss_t );
 int  _dvdcss_close      ( dvdcss_t );
 

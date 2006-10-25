@@ -39,7 +39,7 @@ Directory:  liba52
 License:    GNU General Public License
 
 Name:       libdvdcss
-Version:    1.2.9 + patches
+Version:    Subversion r201 (post 1.2.9 release)
 Homepage:   http://developers.videolan.org/libdvdcss/
 Directory:  libmpdvdkit2
 License:    GNU General Public License

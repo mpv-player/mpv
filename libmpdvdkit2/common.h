@@ -3,9 +3,6 @@
  * Collection of useful common types and macros definitions
  *****************************************************************************
  * Copyright (C) 1998, 1999, 2000 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
  * $Id$
  *
  * Authors: Samuel Hocevar <sam@via.ecp.fr>
@@ -78,6 +75,10 @@ typedef __int64 off_t;
 #   ifndef snprintf
 #       define snprintf _snprintf  /* snprintf not defined in mingw32 (bug?) */
 #   endif
+
+#else
+
+#   define lseek64 lseek
 
 #endif
 

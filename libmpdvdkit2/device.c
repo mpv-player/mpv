@@ -1,14 +1,11 @@
 /*****************************************************************************
  * device.h: DVD device access
  *****************************************************************************
- * Copyright (C) 1998-2002 VideoLAN
- *
- * Modified for use with MPlayer, changes contained in libdvdcss_changes.diff.
- * detailed changelog at http://svn.mplayerhq.hu/mplayer/trunk/
+ * Copyright (C) 1998-2006 VideoLAN
  * $Id$
  *
  * Authors: Stéphane Borel <stef@via.ecp.fr>
- *          Samuel Hocevar <sam@zoy.org>
+ *          Sam Hocevar <sam@zoy.org>
  *          Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -56,6 +53,16 @@
 #   include <io.h>                                                 /* read() */
 #else
 #   include <sys/uio.h>                                      /* struct iovec */
+#endif
+
+#ifdef DARWIN_DVD_IOCTL
+#   include <paths.h>
+#   include <CoreFoundation/CoreFoundation.h>
+#   include <IOKit/IOKitLib.h>
+#   include <IOKit/IOBSD.h>
+#   include <IOKit/storage/IOMedia.h>
+#   include <IOKit/storage/IOCDMedia.h>
+#   include <IOKit/storage/IODVDMedia.h>
 #endif
 
 #include "dvdcss/dvdcss.h"
@@ -137,6 +144,148 @@ int _dvdcss_use_ioctls( dvdcss_t dvdcss )
         return 0;
     }
 #endif
+}
+
+void _dvdcss_check ( dvdcss_t dvdcss )
+{
+#if defined( WIN32 )
+    DWORD drives;
+    int i;
+#elif defined( DARWIN_DVD_IOCTL )
+    io_object_t next_media;
+    mach_port_t master_port;
+    kern_return_t kern_result;
+    io_iterator_t media_iterator;
+    CFMutableDictionaryRef classes_to_match;
+#else
+    char *ppsz_devices[] = { "/dev/dvd", "/dev/cdrom", "/dev/hdc", NULL };
+    int i, i_fd;
+#endif
+
+    /* If the device name is non-null, return */
+    if( dvdcss->psz_device[0] )
+    {
+        return;
+    }
+
+#if defined( WIN32 )
+    drives = GetLogicalDrives();
+
+    for( i = 0; drives; i++ )
+    {
+        char psz_device[5];
+        DWORD cur = 1 << i;
+        UINT i_ret;
+
+        if( (drives & cur) == 0 )
+        {
+            continue;
+        }
+        drives &= ~cur;
+
+        sprintf( psz_device, "%c:\\", 'A' + i );
+        i_ret = GetDriveType( psz_device );
+        if( i_ret != DRIVE_CDROM )
+        {
+            continue;
+        }
+
+        /* Remove trailing backslash */
+        psz_device[2] = '\0';
+
+        /* FIXME: we want to differenciate between CD and DVD drives
+         * using DeviceIoControl() */
+        print_debug( dvdcss, "defaulting to drive `%s'", psz_device );
+        free( dvdcss->psz_device );
+        dvdcss->psz_device = strdup( psz_device );
+        return;
+    }
+#elif defined( DARWIN_DVD_IOCTL )
+
+    kern_result = IOMasterPort( MACH_PORT_NULL, &master_port );
+    if( kern_result != KERN_SUCCESS )
+    {
+        return;
+    }
+
+    classes_to_match = IOServiceMatching( kIODVDMediaClass );
+    if( classes_to_match == NULL )
+    {
+        return;
+    }
+
+    CFDictionarySetValue( classes_to_match, CFSTR( kIOMediaEjectableKey ),
+                          kCFBooleanTrue );
+
+    kern_result = IOServiceGetMatchingServices( master_port, classes_to_match,
+                                                &media_iterator );
+    if( kern_result != KERN_SUCCESS )
+    {
+        return;
+    }
+
+    next_media = IOIteratorNext( media_iterator );
+    for( ; ; )
+    {
+        char psz_buf[0x32];
+        size_t i_pathlen;
+        CFTypeRef psz_path;
+
+        next_media = IOIteratorNext( media_iterator );
+        if( next_media == 0 )
+        {
+            break;
+        }
+
+        psz_path = IORegistryEntryCreateCFProperty( next_media,
+                                                    CFSTR( kIOBSDNameKey ),
+                                                    kCFAllocatorDefault,
+                                                    0 );
+        if( psz_path == NULL )
+        {
+            IOObjectRelease( next_media );
+            continue;
+        }
+
+        snprintf( psz_buf, sizeof(psz_buf), "%s%c", _PATH_DEV, 'r' );
+        i_pathlen = strlen( psz_buf );
+
+        if( CFStringGetCString( psz_path,
+                                (char*)&psz_buf + i_pathlen,
+                                sizeof(psz_buf) - i_pathlen,
+                                kCFStringEncodingASCII ) )
+        {
+            print_debug( dvdcss, "defaulting to drive `%s'", psz_buf );
+            CFRelease( psz_path );
+            IOObjectRelease( next_media );
+            IOObjectRelease( media_iterator );
+            free( dvdcss->psz_device );
+            dvdcss->psz_device = strdup( psz_buf );
+            return;
+        }
+
+        CFRelease( psz_path );
+
+        IOObjectRelease( next_media );
+    }
+
+    IOObjectRelease( media_iterator );
+#else
+    for( i = 0; ppsz_devices[i]; i++ )
+    {
+        i_fd = open( ppsz_devices[i], 0 );
+        if( i_fd != -1 )
+        {
+            print_debug( dvdcss, "defaulting to drive `%s'", ppsz_devices[i] );
+            close( i_fd );
+            free( dvdcss->psz_device );
+            dvdcss->psz_device = strdup( ppsz_devices[i] );
+            return;
+        }
+    }
+#endif
+
+    print_error( dvdcss, "could not find a suitable default drive" );
 }
 
 int _dvdcss_open ( dvdcss_t dvdcss )
@@ -443,7 +592,7 @@ static int libc_seek( dvdcss_t dvdcss, int i_blocks )
     }
 
     i_seek = (off_t)i_blocks * (off_t)DVDCSS_BLOCK_SIZE;
-    i_seek = lseek( dvdcss->i_read_fd, i_seek, SEEK_SET );
+    i_seek = lseek64( dvdcss->i_read_fd, i_seek, SEEK_SET );
 
     if( i_seek < 0 )
     {
