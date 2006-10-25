@@ -740,6 +740,12 @@ xover, xv (see \-vo xv:ck), xvmc (see \-vo xv:ck) and directx video output
 drivers.
 .
 .TP
+.B \-correct-pts (experimental)
+Switches mplayer to an experimental mode where the video filters decide
+the presentation timestamp of video frames instead of the video source.
+Not supported by most filters.
+.
+.TP
 .B \-crash-debug (DEBUG CODE)
 Automatically attaches gdb upon crash or SIGTRAP.
 Support must be compiled in by configuring with \-\-enable-crash-debug.
