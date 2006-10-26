@@ -2,7 +2,7 @@
 .\" Diese Man-Page wurde/wird von Moritz Bunkus, Sebastian Krämer,
 .\" Tobias Diedrich gepflegt.
 .\"
-.\" In sync with r20375
+.\" In sync with r20445
 .
 .\" --------------------------------------------------------------------------
 .\" Makrodefinitionen
@@ -772,6 +772,13 @@ svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
 (siehe \-vo xv:ck) und directx.
 .
 .TP
+.B \-correct-pts (experimentell)
+Lässt mplayer in einen experimentellen Modus wechseln, in dem anstelle des
+Quellvideos die Filter über den Präsentationszeitstempel von Videoframes
+entscheiden.
+Von den meisten Filtern nicht unterstützt.
+.
+.TP
 .B \-crash-debug (DEBUG-CODE)
 Führt bei einem Absturz oder SIGTRAP automatisch gdb aus.
 Unterstützung hierfür muß einkompiliert sein durch Ausführung von 'configure'
@@ -1210,7 +1217,7 @@ volles 5.1
 .PD 1
 .
 .TP
-.B \-chapter <Kapitel-ID>[\-<ID des letzten Kapitels>] (nur bei DVD)
+.B \-chapter <Kapitel-ID>[\-<ID des letzten Kapitels>](nur dvd:// und dvdnav://)
 Gibt das Kapitel an, ab dem abgespielt werden soll.
 Optional kann angegeben werden, nach welchem Kapitel mit dem Abspielen
 aufgehört werden soll (Standard: 1).
