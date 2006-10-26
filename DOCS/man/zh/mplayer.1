@@ -1041,27 +1041,35 @@ Full 5.1
 .TP
 .B \-cuefile <文件名> (参见\-vcd)
 从指定的文件中描述的, CDRwin的(bin/cue文件格式)光盘镜像中播放(S)VCD.
+.
 .TP
 .B \-demuxer <参数>
-指定分路器类型. 分路器的标识定义在demuxers.h中.
+指定分路器类型.
+分路器的标识定义在demuxers.h中.
 使用\-demuxer 17将指定.mp3检测.
+.
 .TP
 .B \-dumpaudio (仅用于MPLAYER)
-将原始的音频压缩流复制到./\:stream.dump(用于mpeg/\:ac3).
+将原始的音频压缩流复制到./stream.dump(用于MPEG/AC3).
+.
 .TP
 .B \-dumpfile <文件名> (仅用于MPLAYER)
 指定MPlayer复制的输出文件.
 应该与\-dumpaudio / \-dumpvideo / \-dumpstream一起使用.
+.
 .TP
 .B \-dumpstream (仅用于MPLAYER)
-将原始流复制到./\:stream.dump. 当从DVD或网络上rip时候有用.
+将原始流复制到./stream.dump.
+当从DVD或网络上rip时候有用.
+.
 .TP
 .B \-dumpvideo (仅用于MPLAYER)
-将原始的视频压缩流复制到./\:stream.dump(不是十分好用).
+将原始的视频压缩流复制到./stream.dump(不是十分好用).
+.
 .TP
-.B \dvd://<节目标识>
-告诉MPlayer播放哪个电影(通过节目标识指定). 比如有时'1'是一部预告片,
-而'2'才是真正的电影.
+.B \-dvd://<节目标识>
+告诉MPlayer播放哪个电影(通过节目标识指定).
+比如有时'1'是一部预告片, 而'2'才是真正的电影.
 
 .I 注意:
 .br
@@ -1192,7 +1200,7 @@ Full 5.1
 .
 .TP
 .B \-rtsp-stream-over-tcp
-与'rtsp://'URL一起用来指定最后结果输入的RTP和RTCP的包通过TCP流,
+与"rtsp://"URL一起用来指定最后结果输入的RTP和RTCP的包通过TCP流,
 (跟RTSP使用同一个TCP连接 ).
 这个选项可以用于当你的Internet连接不允许UDP包进入的情况.
 (参见http://www.live555.com/mplayer/).
@@ -1785,7 +1793,9 @@ Signed 32-bit (高位优先)
 来获得一份可用选项的解释的列表.
 .TP
 .B \-bpp <深度>
-使用与自动检测结果不同的颜色深度. 不是所有\-vo驱动都支持它(fbdev, dga2, svga, vesa).
+使用与自动检测结果不同的颜色深度.
+不是所有\-vo驱动都支持它(fbdev, dga2, svga, vesa).
+.
 .TP
 .B \-brightness <\-100\-100>
 调整视频输出的亮度(默认值为0). 它改变视频信号中RGB组份的亮度, 从黑到白.
@@ -1885,7 +1895,9 @@ color key参数
 .
 .TP
 .B \-fb <设备> (仅用于fbdev或者DirectFB)
-设置使用的帧缓冲设备. 默认为/dev/\:fb0.
+设置使用的帧缓冲设备.
+默认为/dev/\:fb0.
+.
 .TP
 .B \-fbmode <模式名> (仅用于fbdev)
 把视频模式设为/etc/\:fb.modes中标记为<模式名>的模式
@@ -2859,7 +2871,9 @@ clear: 传送前清楚帧缓冲.
 .TP
 .B \-y <y> (仅用于MPLAYER)
 把图像缩放到高度y(如果软件/\:硬件缩放可用).
-禁用长宽比计算..TP
+禁用长宽比计算
+.
+.TP
 .B \-zoom
 在可能的情况下使用软件缩放.
 可以用来指定\-vf scale进行缩放.
@@ -3634,7 +3648,8 @@ h263量化默认值: -64
 .
 .TP
 .B \-of <格式> (BETA代码!)
-编码到设置的格式. 可用格式的列表参见\-of help的输出.
+编码到设置的格式.
+可用格式的列表参见\-of help的输出.
 
 .I 示例:
 .PD 0
