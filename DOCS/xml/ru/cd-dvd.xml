@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r20176 -->
+<!-- synced with r20442 -->
 <chapter id="cd-dvd">
 <title>Использование CD/DVD</title>
 
@@ -85,14 +85,13 @@
 <title>Воспроизведение DVD</title>
 <para>
 Полный список возможных опций можно прочитать в man странице.
-Синтаксис для стандартных Цифровых Многоцелевых Дисков[Digital Versatile Disc]
-(DVD) таков:
+Синтаксис для воспроизведения стандартного DVD таков:
 <screen>mplayer dvd://<replaceable>&lt;ролик&gt;</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
 </para>
 
 <para>
 Пример:
-<screen>mplayer dvd://<replaceable>1</replaceable> -dvd-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer dvd://1 -dvd-device /dev/hdc</screen>
 </para>
 
 <para>
@@ -108,8 +107,8 @@
 
 <para>
 <application>MPlayer</application> использует библиотеки <systemitem>libdvdread
-</systemitem> и <systemitem>libdvdcss</systemitem> для DVD расшифровки и
-воспроизведения. Эти две библиотеки содержатся в подкаталоге
+</systemitem> и <systemitem>libdvdcss</systemitem> для воспроизведения и расшифровки DVD.
+Эти две библиотеки содержатся в подкаталоге
 <filename class="directory">libmpdvdkit2</filename> дерева исходного кода
 <application>MPlayer</application>'а, так что отдельно устанавливать их не нужно.
 Вы также можете использовать уже установленные в системе версии библиотек, но это
@@ -169,80 +168,15 @@ DVD также не обязан быть смонтированным, поскольку используется
 присваиваются динамически.
 </para>
 
-<!--FIXME duplicate paragraph -->
-<para>
-Устройство DVD по умолчанию &mdash; <filename>/dev/dvd</filename>. Если Ваши
-настройки отличаются, создайте символическую ссылку или укажите правильное
-название в командной строке после опции <filename>-dvd-device</filename>.
-</para>
-
 <formalpara>
-<title>DVD аутентификация</title>
+<title>Расшифровка DVD</title>
 <para>
-Аутентификация и дешифровка в новом методе поддержки DVD происходит при помощи
-пропатченной <systemitem>libdvdcss</systemitem> (см. выше). Метод может быть
-указан в переменной среды <envar>DVDCSS_METHOD</envar>, которая может быть
-установлена в key, disk или title.
+Расшифровка DVD осуществляется библиотекой <systemitem>libdvdcss</systemitem>.
+Метод может быть указан переменной окружения <envar>DVDCSS_METHOD</envar>,
+подробную информацию смотрите на странице руководства man.
 </para>
 </formalpara>
 
-<para>
-Если ничего не указано, она пробует следующие методы (по умолчанию: key,
-title request):
-</para>
-
-<orderedlist>
-<listitem><para>
-<emphasis role="bold">bus key</emphasis>: Этот ключ устанавливается во время
-аутентификации (длинная смесь ioctl'ов и различных обменов ключами,
-криптографические процедуры) и используется для зашифровки ключей диска и ролика
-при передаче по незащищённой шине (во избежания подслушивания). Он необходим для
-получения и предварительной расшифровки ключа диска.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-ищет уже взломанный ключ ролика, который сохраняется в каталоге
-<filename class="directory">~/.mplayer/DVDKeys</filename> (быстро ;).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">key</emphasis>: Если кэшированного ключа нет,
-<application>MPlayer</application> пытается расшифровать ключ диска с помощью
-включённых ключей плееров.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">disk</emphasis>: Если метод key проваливается
-(например, при отсутствии ключей плееров) <application>MPlayer</application>
-взломает ключ грубой силой. Этот метод интенсивно использует процессор и
-нуждается в 64 мегабайтах памяти (хэш-таблица из 16 миллионов 32-разрядных
-записей). Работает наверняка (но медленно).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title request</emphasis>: Используя ключ диска
-<application>MPlayer</application> запрашивает зашифрованные ключи роликов,
-которые находятся в <emphasis>скрытых секторах</emphasis>, используя 
-<systemitem>ioctl()</systemitem>. Региональная защита RPC-2 приводов
-осуществляется именно на этом этапе и может не сработать на подобных приводах.
-Если это удаётся, ключи роликов будут расшифрованы, используя ключи диска и шины.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">title</emphasis>:Данный метод используется если title
-request не срабатывает. Он не опирается на обмен ключами с приводом.
-Используется криптографическая атака, чтобы угадать ключ непосредственно
-(находится повторяющаяся последовательность в расшифрованном содержимом VOB'а
-и предполагается, что текст, соответствующий первому зашифрованному байту - это
-продолжение этой последовательности). Метод также известен под названиями &quot;
-атака с известным открытым текстом&quot; или &quot;DeCSSPlus&quot;. В редких
-случаях этот метод проваливается, по причине недостаточности зашифрованного
-содержания для статистической атаки или из-за изменения ключа в середине
-ролика. Это единственный метод расшифровать содержимое DVD на жёстком диске
-или на диске из неподходящего региона на проигрывателе RPC-2. (медленный метод).
-</para></listitem>
-</orderedlist>
 
 <para>
 С дисководами RPC-1, региональная защита осуществляется программно.
@@ -264,7 +198,7 @@ RPC-2 привод. Обновления прошивок могут быть найдены на
 Видео-CD (VCD):
 <screen>mplayer vcd://<replaceable>&lt;дорожка&gt;</replaceable> [-cdrom-device <replaceable>&lt;устройство&gt;</replaceable>]</screen>
 Пример:
-<screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
+<screen>mplayer vcd://2 -cdrom-device /dev/hdc</screen>
 Устройство VCD по умолчанию &mdash; <filename>/dev/cdrom</filename>. Если Ваши
 настройки отличаются, создайте символическую ссылку добавьте правильное название
 в командной строке после опции <option>-cdrom-device</option>.

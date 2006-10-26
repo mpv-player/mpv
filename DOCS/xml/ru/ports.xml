@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with r19820 -->
+<!-- synced with r20419 -->
 <chapter id="ports" xreflabel="Портинг">
 <title>Портинг</title>
 
@@ -79,7 +79,7 @@ MPlayer</application> &mdash; это скачать его с
 и
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 в корне сборки дистрибутива OpenZaurus. Там всегда найдутся
-свежий Makefile и патчи, используемые для сборки CVS <application>MPlayer</application>'а вместе с
+свежий Makefile и патчи, используемые для сборки SVN <application>MPlayer</application>'а вместе с
 <systemitem class="library">libavcodec</systemitem>.
 Если Вам нужен GUI, используйте встроенный в xmms
 </para>
@@ -731,16 +731,16 @@ $ ./configure --charset=noconv
 <para>
 Есть как минимум два на выбор:
 <ulink url="http://fink.sourceforge.net/">Fink</ulink> и
-<ulink url="http://www.macports.org/">DarwinPorts</ulink>.
+<ulink url="http://www.macports.org/">MacPorts</ulink>.
 Они оба предоставляют одинаковый сервис (т.е. огромное количество пакетов 
 для установки, разрешение зависимостей, возможность простой
 установки/обновления/удаления пакетов и т.д.).
 Fink предлагает как предкомпилированные бинарные пакеты, так и сборку
-всего из исходников, в то время как DarwinPorts предлагает только собирать из
+всего из исходников, в то время как MacPorts предлагает только собирать из
 исходных текстов.
-Автор данного руководства выбрал DarwinPorts исходя из того простого соображения, 
+Автор данного руководства выбрал MacPorts исходя из того простого соображения, 
 что его базовая установка легче.
-Последующие примеры будут основаны на DarwinPorts.
+Последующие примеры будут основаны на MacPorts.
 </para>
 
 <para>
@@ -756,7 +756,7 @@ Fink предлагает как предкомпилированные бинарные пакеты, так и сборку
 <systemitem>configure</systemitem> скрипт (задайте переменные окружения
 <systemitem>PKG_CONFIG_PATH</systemitem> и <systemitem>PATH</systemitem> так,
 чтобы <systemitem>configure</systemitem> мог найти библиотеки, установленные 
-при помощи DarwinPorts):
+при помощи MacPorts):
 <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
 </para>
 
@@ -782,7 +782,7 @@ Fink предлагает как предкомпилированные бинарные пакеты, так и сборку
 исходный текстов, вам потребуется
 <systemitem>mplayerosx</systemitem>, 
 <systemitem>main</systemitem> и копию 
-<systemitem>main</systemitem> CVS модуля, называющегося 
+<systemitem>main</systemitem> SVN модуля, называющегося 
 <systemitem>main_noaltivec</systemitem>.
 <systemitem>mplayerosx</systemitem> - это GUI frontend,
 <systemitem>main</systemitem> - это MPlayer, а
