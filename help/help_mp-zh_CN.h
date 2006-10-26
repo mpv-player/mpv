@@ -1,4 +1,11 @@
-// Synced with help_mp-en.h r20191
+// Synced with help_mp-en.h r20440
+// Reminder of hard terms which need better/final solution later:
+//   (file links to be updated later if available!);  
+//   NAV; pass 3; section/subsection;  XScreenSaver; keycolor;  
+//   _audio_ (why 2 underscores here [en r20191 ln 94]? emphasize?); 
+//   AGP move failed on Y plane;  
+//   profile?; demuxer?
+// 
 // Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2@yahoo.com>
 // (Translator before 2006-04-24)
 // Emfox Zhou <EmfoxZhou@gmail.com>
@@ -844,6 +851,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_MPSUB "转换所给字幕为 MPlayer 的字幕文件"
 #define MSGTR_PREFERENCES_SUB_SRT "转换所给字幕为基于时间的 SubViewer (SRT) 格式"
 #define MSGTR_PREFERENCES_SUB_Overlap "启/停用字幕重叠"
+#define MSGTR_PREFERENCES_SUB_USE_ASS "SSA/ASS 字幕提供中"
+#define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "使用边空白"
+#define MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN "上: "
+#define MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN "下: "
 #define MSGTR_PREFERENCES_Font "字体:"
 #define MSGTR_PREFERENCES_FontFactor "字体效果:"
 #define MSGTR_PREFERENCES_PostProcess "启用后期处理"
