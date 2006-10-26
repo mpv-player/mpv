@@ -5,5 +5,13 @@
 
   <xsl:param name="chunker.output.encoding" select="'iso-8859-2'"/>
   <xsl:output encoding="iso-8859-2"/>
+  <xsl:param name="local.l10n.xml" select="document('')"/>
+  <l:i18n xmlns:l="http://docbook.sourceforge.net/xmlns/l10n/1.0">
+    <l:l10n language="pl">
+	  <l:gentext key="NOTE" text="Informacja"/>
+	  <l:gentext key="Note" text="Informacja"/>
+	  <l:gentext key="note" text="Informacja"/>
+	</l:l10n>
+  </l:i18n>
 
 </xsl:stylesheet>
