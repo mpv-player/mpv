@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r18247 -->
+<!-- synced with r20341 -->
 <!-- Opiekun: Cobra -->
 <chapter id="formats">
 <title>Kontenery</title>
@@ -40,7 +40,7 @@ tworzyć takie pliki.
 <title>Pliki MPEG</title>
 
 <para>
-Pliki MPEG spotykamy w różnych kształtach:
+Pliki MPEG spotykamy w różnych odmianach:
 </para>
 
 <itemizedlist>
@@ -96,12 +96,13 @@ skalowane w trakcie kodowania lub odtwarzane z opcją <option>-aspect</option>
 <para>
 Zaprojektowane przez Microsoft <emphasis role="bold">pliki AVI
 (Audio Video Interleaved)</emphasis> to szeroko stosowany wielofunkcyjny format
-aktualnie używany głównie dla video MPEG-4 (DivX i DivX4). Posiada wiele wad i
+aktualnie używany głównie dla video MPEG-4 (DivX i DivX4). Ma on wiele wad i
 niedociągnięć (np. przy strumieniowaniu). Obsługuje jeden strumień video i od 0
 do 99 strumieni audio i może mieć co najwyżej 2 GB, lecz istnieje rozszerzenie,
-które pozwala na osiągnięcie większych plików, zwane
-<emphasis role="bold">OpenDML</emphasis>. Aktualnie Microsoft usilnie zniechęca
-do stosowania AVI i zaleca ASF/WMV. Nie żeby to kogoś obchodziło...
+zwane <emphasis role="bold">OpenDML</emphasis>, które pozwala na osiągnięcie
+większych plików.
+Aktualnie Microsoft usilnie zniechęca do stosowania AVI i zaleca ASF/WMV.
+Nie żeby to kogoś obchodziło...
 </para>
 
 <para>
@@ -109,9 +110,9 @@ Istnieje hack, który pozwala plikom AVI zawierać strumień audio Ogg Vorbis,
 ale powoduje to ich niekompatybilność ze zwykłymi AVI.
 <application>MPlayer</application> obsługuje odtwarzanie takich plików.
 Skoki są również zaimplementowane, lecz poważnie ograniczone poprzez
-źle zakodowane pliki z pomieszanymi nagłówkami tworzonymi przez zepsute
-programy. Niestety jedyny program, który potrafi tworzyć takie pliki -
-<application>NanDub</application> ma z tym problem.
+źle zakodowane pliki z pomieszanymi nagłówkami.
+Niestety jedyny program, który potrafi tworzyć takie pliki -
+<application>NanDub</application> - ma z tym problem.
 </para>
 
 <note>
@@ -186,7 +187,7 @@ tę regułę:
 <title>Pliki ASF/WMV</title>
 <para>
 ASF (Active Streaming Format - Aktywny Format Strumieniowania) pochodzi z
-Microsoftu. Rozwinęły się dwa warianty ASF: v1.0 i v2.0. v1.0 jest używana
+Microsoftu. Stworzyli oni dwa warianty ASF: v1.0 i v2.0. v1.0 jest używana
 przez ich narzędzia medialne (<application>Windows Media Player</application>
 oraz <application>Windows Media Encoder</application>) i jest bardzo tajna.
 v2.0 jest opublikowana i opatentowana :). Oczywiście różnią się one znacząco i
@@ -211,14 +212,6 @@ strumienie w tych plikach to w rzeczywistości pliki MPG i AAC. Możesz nawet je
 wyciągnąć za pomocą opcji <option>-dumpvideo</option> oraz
 <option>-dumpaudio</option>).
 </para>
-
-<note>
-<para>
-Większość nowych plików QuickTime używa kodeka video
-<emphasis role="bold">Sorenson</emphasis> i dźwięku QDesign Music. Zobacz naszą
-sekcję poświęconą kodekowi <link linkend="sorenson">Sorenson</link>.
-</para>
-</note>
 </sect2>
 
 
@@ -239,13 +232,6 @@ Kodek video plików VIVO/2.0 to zmodyfikowany, niestandardowy
 <emphasis role="bold">g.723 (standardowy)</emphasis> lub
 <emphasis role="bold">Vivo Siren</emphasis>.
 </para>
-
-<para>
-Zobacz sekcje
-<link linkend="vivo-video">Kodeka video VIVO</link> i
-<link linkend="vivo-audio">Kodeka audio VIVO</link>
-by uzyskać informacje na temat instalacji.
-</para>
 </sect2>
 
 
@@ -253,7 +239,8 @@ by uzyskać informacje na temat instalacji.
 <title>Pliki FLI</title>
 <para>
 <emphasis role="bold">FLI</emphasis> jest bardzo starym formatem używanym przez
-Autodesk Animator, lecz jest to powszechny w sieci format dla krótkich animacji.
+Autodesk Animator,
+lecz jest to powszechnie stosowany w sieci format do krótkich animacji.
 <application>MPlayer</application> demultipleksuje i dekoduje pliki FLI i
 potrafi nawet po nich skakać (użyteczne przy zapętlaniu za pomocą opcji
 <option>-loop</option>). Pliki FLI nie zawierają klatek kluczowych, więc obraz
@@ -268,8 +255,6 @@ będzie trochę zaśmiecony przez krótką chwilę po skoku.
 <para>
 Tak, <application>MPlayer</application> potrafi czytać (demultipleksować)
 pliki RealMedia (<filename>.rm</filename>).
-Tu znajdziesz listę obsługiwanych kodeków <link linkend="realvideo">RealVideo</link>
-i <link linkend="realaudio">RealAudio</link>.
 </para>
 </sect2>
 
@@ -291,7 +276,7 @@ Działają również skoki.
 
 
 <sect2 id="yuv4mpeg">
-<title>pliki yuv4mpeg</title>
+<title>Pliki yuv4mpeg</title>
 <para>
 <ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 to format plików stosowany przez
@@ -336,7 +321,7 @@ oraz <systemitem class="library">libvorbis</systemitem> zanim skompilujesz
 <title>Pliki SDP</title>
 <para>
 <ulink url="ftp://ftp.rfc-editor.org/in-notes/rfc2327.txt">SDP</ulink>
-to format opisu strumieni RTP audio lub wideo będący standardem IETF.
+to format opisu strumieni RTP audio lub video będący standardem IETF.
 (Wymagane jest &quot;<ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink>&quot;.)
 </para>
 </sect2>
@@ -381,7 +366,7 @@ Więcej informacji na
 
 
 <sect2 id="nut">
-<title>PLiki NUT</title>
+<title>Pliki NUT</title>
 <para>
 NUT jest formatem przechowywania opracowanym przez ludzi
 z <application>MPlayera</application> i <application>FFmpeg</application>. Oba
@@ -402,7 +387,7 @@ Główną różnicą jest to, że GIF89a pozwala na animację.
 formaty plików za pomocą biblioteki <systemitem class="library">libungif</systemitem>
 lub innej, kompatybilnej z libgif biblioteki. Nieanimowane GIFy są wyświetlane
 jako filmy o pojedynczej klatce. (Użyj opcji <option>-loop</option> oraz
-<option>-fixed-vo</option> by wyświetlić je dłużej)
+<option>-fixed-vo</option> by wyświetlić je dłużej.)
 </para>
 
 <para>
@@ -451,8 +436,8 @@ Powinieneś raczej użyć <ulink url="http://www.xmms.org">XMMSa</ulink>.
 Możesz mieć pewne problemy przy odtwarzaniu niektórych plików
 MP3, które <application>MPlayer</application> błędnie rozpozna jako
 MPEG i odtworzy je nieprawidłowo lub nie odtworzy ich wcale. Nie da się
-tego naprawić bez porzucenia wsparcia obsługi uszkodzonych plików
-MPEG i tak prawdopodobnie zostanie przez najbliższą przyszłość. Opcja
+tego naprawić bez porzucenia odtwarzania uszkodzonych plików
+MPEG i tak prawdopodobnie zostanie w najbliższej przyszłości. Opcja
 <option>-demuxer</option> opisana na stronie man może pomóc Ci w takich
 przypadkach.
 </para>
