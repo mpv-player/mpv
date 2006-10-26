@@ -2,7 +2,7 @@
 // Dmitry Baryshkov <mitya@school.ioffe.ru>
 // Reworked by: Andrew Savchenko aka Bircoph <Bircoph[at]list[dot]ru>
 
-// Synced with help_mp-en.h: r20191
+// Synced with help_mp-en.h: r20440
 
 // ========================= MPlayer help ===========================
 
@@ -853,6 +853,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_MPSUB "Конвертировать данные субтитры в MPlayer'овский формат субтитров"
 #define MSGTR_PREFERENCES_SUB_SRT "Конвертировать данные субтитры в основанный на времени SubViewer (SRT) формат"
 #define MSGTR_PREFERENCES_SUB_Overlap "Изменить перекрывание субтитров"
+#define MSGTR_PREFERENCES_SUB_USE_ASS "SSA/ASS рендеринг субтитров"
+#define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "Использ. края"
+#define MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN "Верх: "
+#define MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN "Низ: "
 #define MSGTR_PREFERENCES_Font "Шрифт:"
 #define MSGTR_PREFERENCES_FontFactor "Коэффициент шрифта:"
 #define MSGTR_PREFERENCES_PostProcess "Включить постобработку"
