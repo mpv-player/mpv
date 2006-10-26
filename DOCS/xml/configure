@@ -149,6 +149,9 @@ fi
 for lang in `grep 'SUBDIRS =' Makefile|cut -d= -f2`; do
   cat > $lang/main.xml << EOF
 <?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!-- **************************************************
+     This file is generated automatically. DO NOT EDIT.
+     ************************************************** -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
     "$_dtd"
 [ 
