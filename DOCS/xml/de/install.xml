@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r20399 -->
+<!-- in sync with r20412 -->
 
 <chapter id="install">
   <title>Installation</title>
@@ -552,10 +552,14 @@ make install</screen>
         <systemitem class="library">fontconfig</systemitem>-Unterstützung compiliert wurde,
         werden die oben genannten Methoden nicht funktionieren; statt dessen erwartet
         <option>-font</option> einen <systemitem class="library">fontconfig</systemitem>-Schriftnamen,
-        und der Standard ist die Schriftart Sans-serif. Um eine Liste der
-        <systemitem class="library">fontconfig</systemitem> bekannten Dateien zu erhalten,
-        benutze <command>fc-list</command>. Beispiel:
+        der Standard ist die Schriftart Sans-serif. Beispiel:
         <screen>mplayer -font <replaceable>'Bitstream Vera Sans'</replaceable> <replaceable>anime.mkv</replaceable></screen>
+      </para>
+
+      <para>
+        Um eine Liste der
+        <systemitem class="library">fontconfig</systemitem> bekannten Dateien zu erhalten,
+        benutze <command>fc-list</command>.
       </para>
 
     </sect2>
@@ -587,8 +591,8 @@ make install</screen>
         Schriftarten sollten eine entsprechende <filename>font.desc</filename>-Datei haben,
         die Positionen von Unicode-Schriften auf die aktuelle Codeseite des Untertiteltexts abbildet.
         Eine andere Möglichkeit besteht darin, in UTF-8 codierte Untertitel zu verwenden und die Option
-        <option>-utf8</option> zu verwenden. Noch eine Möglichkeit besteht darin, die Untertiteldatei
-        umzubenennen zu <filename>&lt;video_name&gt;.utf</filename> und sie im selben Verzeichnis wie
+        <option>-utf8</option> zu verwenden. Noch eine Möglichkeit besteht darin, der Untertiteldatei
+        den gleichen Namen zu geben wie die Videodatei mit der Dateiendung <filename>&lt;video_name&gt;.utf</filename> und sie im selben Verzeichnis wie
         die Videodatei abzulegen.
       </para>
 

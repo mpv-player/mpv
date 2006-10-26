@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r19820 -->
+<!-- in sync with r20419 -->
 
 <chapter id="ports" xreflabel="Ports">
   <title>Portierungen</title>
@@ -83,8 +83,8 @@
         und im
         <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>-Verzeichnis
         der OpenZaurus Distribution Buildroot nachsehen. Diese haben stets die neueste
-        Makefile und Patches, die zum Erstellen eines CVS-<application>MPlayer</application> mit
-        <systemitem class="library">libavcodec</systemitem> verwendet werden.
+        Makefile und Patches, die zum Erstellen eines SVN-<application>MPlayer</application>
+        verwendet werden.
         Brauchst du ein GUI-Frontend, kannst du xmms-embedded nutzen.
       </para>
     </sect2>
@@ -743,15 +743,15 @@ Segmentation fault</screen>
     <para>
       Es stehen mindestens zwei zur Wahl:
       <ulink url="http://fink.sourceforge.net/">Fink</ulink> und
-      <ulink url="http://www.macports.org/">DarwinPorts</ulink>.
+      <ulink url="http://www.macports.org/">MacPorts</ulink>.
       Beide bieten in etwa denselben Funktionsumfang (z.B. eine Menge Pakete, von denen
       gewählt werden kann, Auflösung von Abhängigkeiten, die Möglichkeit, einfach
       Pakete hinzuzufügen/zu aktualisieren/zu entfernen, etc...).
       Fink bietet sowohl vorcompilierte Binärpakete als auch das Erstellen aus den
-      Quelldateien, wohingegen DarwinPorts nur das Erstellen aus den Quellen anbietet.
-      Der Autor dieser Anleitung hat DarwinPorts gewählt aus dem Grund, dass das
+      Quelldateien, wohingegen MacPorts nur das Erstellen aus den Quellen anbietet.
+      Der Autor dieser Anleitung hat MacPorts gewählt aus dem Grund, dass das
       grundlegende Setup etwas leichtgewichtiger war.
-      Folgende Beispiele werden sich auf DarwinPorts beziehen.
+      Folgende Beispiele werden sich auf MacPorts beziehen.
     </para>
     
     <para>
@@ -766,7 +766,7 @@ Segmentation fault</screen>
       Dann kannst du fortfahren mit der Ausführung von <application>MPlayer</application>s
       <systemitem>configure</systemitem>-Skript (beachte die Umgebungsvariablen
       <systemitem>PKG_CONFIG_PATH</systemitem> und <systemitem>PATH</systemitem>,
-      so dass <systemitem>configure</systemitem> die mit DarwinPorts installierten
+      so dass <systemitem>configure</systemitem> die mit MacPorts installierten
       Bibliotheken findet):
       <screen>PKG_CONFIG_PATH=/opt/local/lib/pkgconfig/ PATH=$PATH:/opt/local/bin/ ./configure</screen>
     </para>
@@ -792,7 +792,7 @@ Segmentation fault</screen>
         Um <application>MPlayerOSX</application> selbst von den Quellen
         zu bauen, brauchst du <systemitem>mplayerosx</systemitem>, das
         <systemitem>main</systemitem> und eine Kopie des
-        <systemitem>main</systemitem> CVS-Moduls genannt
+        <systemitem>main</systemitem> SVN-Moduls genannt
         <systemitem>main_noaltivec</systemitem>.
         <systemitem>mplayerosx</systemitem> ist das GUI-Frontend,
         <systemitem>main</systemitem> ist MPlayer und

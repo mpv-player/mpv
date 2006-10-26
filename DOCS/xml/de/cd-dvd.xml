@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with r20401 -->
+<!-- synced with r20442 -->
 <chapter id="cd-dvd">
   <title>CD/DVD Nutzung</title>
 
@@ -203,91 +203,9 @@
       <para>
         DVD-Entschlüsselung geschieht durch <systemitem>libdvdcss</systemitem>. Die dafür
 	verwendete Methode kann durch Umgebungsvariable <envar>DVDCSS_METHOD</envar> festgelegt werden,
-	indem sie auf key, disk oder title gesetzt wird.
+	siehe Manpage für Details.
       </para>
     </formalpara>
-
-    <para>
-      Wenn nichts angegeben wird, werden zuerst folgende Methoden probiert
-      (Standard: key, title request):
-    </para>
-
-    <orderedlist>
-      <listitem>
-        <para>
-          <emphasis role="bold">bus key</emphasis>: Dieser Schlüssel
-          ist ausgehandelt zwichen der Authentifizierung (ein langer Mix aus ioctls und
-          verschiedenen Schlüsselaustauschen, Crypto-Zeug) und wird benutzt,
-          um den Titel-Schlüssel und den Datenträger-Schlüssel
-          vor dem Senden über den ungeschützten Bus
-          (um Abhören zu verhinden) zu entschlüsseln.
-          Der Busschlüssel wird benötigt, um den verschlüsselten
-          Datenträger-Schlüssel zu erhalten und vorzuentschlüsseln.
-        </para>
-      </listitem>
-
-      <listitem>
-        <para>
-          <emphasis role="bold">cached key</emphasis>: <application>MPlayer</application>
-          sucht nach bereits geknackten Titel-Schüsseln, welche im
-          <filename class="directory">~/.dvdcss</filename> Verzeichnis
-          gespeichert werden (schnell).
-        </para>
-      </listitem>
-
-      <listitem>
-        <para>
-          <emphasis role="bold">key</emphasis>: Wenn kein zwichengespeicherter
-          Schlüssel verfügbar ist, versucht <application>MPlayer</application>
-          den Datenträgerschlüssel mittels einer Reihe enthaltener
-          Player-Schlüssel zu entschlüsseln.
-        </para>
-      </listitem>
-
-      <listitem>
-        <para>
-          <emphasis role="bold">disk</emphasis>: Wenn die Schlüsselmethode fehlschlägt
-          (z.B. keine Player-Schlüssel enthalten sind), wird <application>MPlayer</application>
-          den Datenträgerschlüssel mittels eines Brute-Force-Algorithmus knacken.
-          Dieser Prozess ist sehr CPU-lastig und benötigt 64 MB
-          Arbeitsspeicher (16M 32Bit Hash-Tabelle), um die temporären
-          Daten zu speichern. Diese Methode sollte immer funktionieren (langsam).
-        </para>
-      </listitem>
-
-      <listitem>
-        <para>
-          <emphasis role="bold">title request</emphasis>: Mit dem
-          Datenträgerschlüssel fordert <application>MPlayer</application>
-          die verschlüsselten Titelschlüssel an, welche in
-          <emphasis>versteckten Sektoren</emphasis> mittels <systemitem>ioctl()</systemitem>
-          ausgelesen werden.
-          Der Regionschutz von RPC-2-Laufwerken erfolgt an dieser Stelle und kann auf solchen
-          Laufwerken fehlschlagen. Bei Erfolg werden die Titelschlüssel mit dem Bus- und
-          dem Datenträgerschlüssel entschlüsselt.
-        </para>
-      </listitem>
-
-      <listitem>
-        <para>
-          <emphasis role="bold">title</emphasis>: Diese Methode wird genutzt, wenn die
-          Titelanforderung fehlgeschlagen ist und keinen Schlüsselaustausch mit dem
-          DVD-Laufwerk nötig ist.
-          Die Methode nutzt Crypto-Attacken, um den Titelschlüssel direkt zu erraten
-          (durch das Finden von wiederholenden Mustern im entschlüsselten VOB-Inhalt
-          und dem Erraten, dass der zu den ersten entschlüsselten Bytes gehörende
-          Klartext eine Fortsetzung dieses Musters ist).
-          Die Methode ist bekannt als &quot;known plaintext attack&quot;
-          oder &quot;DeCSSPlus&quot;. In einigen wenigen Fällen kann dies
-          fehlschlagen, da sich nicht genug verschlüsselte Daten auf dem
-          Datenträger befinden, um eine statistische Attacke durchzufüren, oder
-          weil der Schlüssel sich mitten im Titel ändert. Diese Methode ist der
-          einzige Weg, eine DVD zu entschlüsseln, die auf einer Festplatte gespeichert
-          ist oder auf einer DVD mit einer falschen Region auf einem
-          RPC2-Laufwerk (langsam).
-        </para>
-      </listitem>
-    </orderedlist>
 
     <para>
       <!-- Idee: (am Regioncode) hinzufuegen? -->

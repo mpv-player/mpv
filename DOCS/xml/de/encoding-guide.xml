@@ -4368,7 +4368,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
                 <entry>avimszh.dll</entry>
                 <entry>AVImszh (MSZH)</entry>
                 <entry>253118fe1eedea04a95ed6e5f4c28878</entry>
-                <entry>needs <option>-vf format</option></entry>
+                <entry>benötigt <option>-vf format</option></entry>
               </row>
               <row>
                 <entry>avizlib.dll</entry>

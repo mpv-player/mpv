@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- in sync with r20041 -->
+<!-- in sync with r20449 -->
 <chapter id="usage">
 <title>Gebrauch</title>
 
@@ -164,7 +164,7 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
       Die Option <option>-vobsubid</option> verhält sich wie
       die Option <option>-sid</option> für DVDs, du kannst damit Tracks (Sprachen) wählen.
       Im Falle, dass <option>-vobsubid</option> nicht angegeben wird, wird
-      <application>MPLayer</application> versuchen, auf die Sprachen zurückzugreifen,
+      <application>MPlayer</application> versuchen, auf die Sprachen zurückzugreifen,
       die mit der Option <option>-slang</option> angegeben werden, und sonst auf
       <systemitem>langidx</systemitem> zurückzugreifen, um die Untertitelsprache zu wählen.
       Schlägt dies fehl, wird es keine Untertitel geben.
