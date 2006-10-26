@@ -39,5 +39,7 @@ ass_track_t* ass_default_track();
 int ass_process_subtitle(ass_track_t* track, subtitle* sub);
 ass_track_t* ass_read_subdata(sub_data* subdata, double fps);
 
+void ass_configure(ass_instance_t* priv, int w, int h);
+
 #endif
 

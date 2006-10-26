@@ -77,8 +77,6 @@ static int config(struct vf_instance_s* vf,
 	int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt)
 {
-	ass_settings_t settings;
-	
 	if (outfmt == IMGFMT_IF09) return 0;
 
 	vf->priv->outh = height + ass_top_margin + ass_bottom_margin;
@@ -94,17 +92,8 @@ static int config(struct vf_instance_s* vf,
 	vf->priv->dirty_rows = malloc(vf->priv->outh);
 	
 	if (vf->priv->ass_priv) {
-		memset(&settings, 0, sizeof(ass_settings_t));
-		settings.frame_width = vf->priv->outw;
-		settings.frame_height = vf->priv->outh;
-		settings.font_size_coeff = ass_font_scale;
-		settings.line_spacing = ass_line_spacing;
-		settings.top_margin = ass_top_margin;
-		settings.bottom_margin = ass_bottom_margin;
-		settings.use_margins = ass_use_margins;
-		settings.aspect = ((double)d_width) / d_height;
-		
-		ass_configure(vf->priv->ass_priv, &settings);
+		ass_configure(vf->priv->ass_priv, vf->priv->outw, vf->priv->outh);
+		ass_set_aspect_ratio(vf->priv->ass_priv, ((double)d_width) / d_height);
 	}
 
 	return vf_next_config(vf, vf->priv->outw, vf->priv->outh, d_width, d_height, flags, outfmt);

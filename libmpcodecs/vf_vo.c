@@ -30,7 +30,6 @@ struct vf_priv_s {
     vf_vo_data_t* vf_vo_data;
 #ifdef USE_ASS
     ass_instance_t* ass_priv;
-    ass_settings_t ass_settings;
 #endif
 };
 #define video_out (vf->priv->vf_vo_data->vo)
@@ -70,11 +69,8 @@ static int config(struct vf_instance_s* vf,
 	return 0;
 
 #ifdef USE_ASS
-    if (vf->priv->ass_priv) {
-        vf->priv->ass_settings.font_size_coeff = ass_font_scale;
-        vf->priv->ass_settings.line_spacing = ass_line_spacing;
-        vf->priv->ass_settings.use_margins = ass_use_margins;
-    }
+    if (vf->priv->ass_priv)
+	ass_configure(vf->priv->ass_priv, width, height);
 #endif
 
     ++vo_config_count;
@@ -112,7 +108,8 @@ static int control(struct vf_instance_s* vf, int request, void* data)
     case VFCTRL_INIT_EOSD:
     {
         vf->priv->ass_priv = ass_init();
-        return vf->priv->ass_priv ? CONTROL_TRUE : CONTROL_FALSE;
+        if (!vf->priv->ass_priv) return CONTROL_FALSE;
+        return CONTROL_TRUE;
     }
     case VFCTRL_DRAW_EOSD:
     {
@@ -121,18 +118,11 @@ static int control(struct vf_instance_s* vf, int request, void* data)
         if (!vo_config_count || !vf->priv->ass_priv) return CONTROL_FALSE;
         if (sub_visibility && vf->priv->ass_priv && ass_track && (pts != MP_NOPTS_VALUE)) {
             mp_eosd_res_t res;
-            ass_settings_t* const settings = &vf->priv->ass_settings;
             memset(&res, 0, sizeof(res));
             if (video_out->control(VOCTRL_GET_EOSD_RES, &res) == VO_TRUE) {
-                settings->frame_width = res.w;
-                settings->frame_height = res.h;
-                settings->top_margin = res.mt;
-                settings->bottom_margin = res.mb;
-                settings->left_margin = res.ml;
-                settings->right_margin = res.mr;
-                settings->aspect = ((double)res.w) / res.h;
+                ass_set_frame_size(vf->priv->ass_priv, res.w, res.h);
+                ass_set_margins(vf->priv->ass_priv, res.mt, res.mb, res.ml, res.mr);
             }
-            ass_configure(vf->priv->ass_priv, settings);
 
             images = ass_render_frame(vf->priv->ass_priv, ass_track, (pts+sub_delay) * 1000 + .5);
         }

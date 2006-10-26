@@ -42,16 +42,24 @@
 #define MAX_GLYPHS 1000
 #define MAX_LINES 100
 
-char *get_path(char *);
-
-extern char *font_name;
-#ifdef HAVE_FONTCONFIG
-extern int font_fontconfig;
-#else
-static int font_fontconfig = 0;
-#endif
-
 static int last_render_id = 0;
+
+typedef struct ass_settings_s {
+	int frame_width;
+	int frame_height;
+	double font_size_coeff; // font size multiplier
+	double line_spacing; // additional line spacing (in frame pixels)
+	int top_margin; // height of top margin. Everything except toptitles is shifted down by top_margin.
+	int bottom_margin; // height of bottom margin. (frame_height - top_margin - bottom_margin) is original video height.
+	int left_margin;
+	int right_margin;
+	int use_margins; // 0 - place all subtitles inside original frame
+	                 // 1 - use margins for placing toptitles and subtitles
+	double aspect; // frame aspect ratio, d_width / d_height.
+	char* fonts_dir;
+	char* default_font;
+	char* default_family;
+} ass_settings_t;
 
 struct ass_instance_s {
 	FT_Library library;
@@ -213,11 +221,7 @@ static void ass_lazy_track_init(void)
 
 ass_instance_t* ass_init(void)
 {
-	char* family = 0;
-	char* path = 0;
-	char* fonts_path = 0;
 	int error;
-	fc_instance_t* fc_priv;
 	FT_Library ft;
 	ass_instance_t* priv = 0;
 	
@@ -225,43 +229,21 @@ ass_instance_t* ass_init(void)
 	memset(&frame_context, 0, sizeof(frame_context));
 	memset(&text_info, 0, sizeof(text_info));
 
-	if (font_fontconfig && font_name)
-		family = strdup(font_name);
-	
-	if (!font_fontconfig && font_name)
-		path = strdup(font_name);
-	else
-		path = get_path("subfont.ttf");
-
-	fonts_path = get_path("fonts");
-	
-	fc_priv = fontconfig_init(fonts_path, family, path);
-
-	free(fonts_path);
-	if (path) free(path);
-	if (family) free(family);
-
-	if (!fc_priv)
-		goto ass_init_exit;
-	
 	error = FT_Init_FreeType( &ft );
 	if ( error ) { 
 		mp_msg(MSGT_GLOBAL, MSGL_FATAL, "FT_Init_FreeType failed\n");
-		fontconfig_done(fc_priv);
 		goto ass_init_exit;
 	}
 
 	priv = calloc(1, sizeof(ass_instance_t));
 	if (!priv) {
 		FT_Done_FreeType(ft);
-		fontconfig_done(fc_priv);
 		goto ass_init_exit;
 	}
 
 	priv->synth_priv = ass_synth_init();
 
 	priv->library = ft;
-	priv->fontconfig_priv = fc_priv;
 	// images_root and related stuff is zero-filled in calloc
 	
 	ass_face_cache_init();
@@ -1921,17 +1903,74 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	return 0;
 }
 
-void ass_configure(ass_instance_t* priv, const ass_settings_t* config)
+static void ass_reconfigure(ass_instance_t* priv)
 {
-	if (memcmp(&priv->settings, config, sizeof(ass_settings_t)) != 0) {
-		mp_msg(MSGT_GLOBAL, MSGL_V, "ass_configure: %d x %d; margins: l: %d, r: %d, t: %d, b: %d  \n",
-				config->frame_width, config->frame_height,
-				config->left_margin, config->right_margin, config->top_margin, config->bottom_margin);
+	priv->render_id = ++last_render_id;
+	ass_glyph_cache_reset();
+}
 
-		priv->render_id = ++last_render_id;
-		memcpy(&priv->settings, config, sizeof(ass_settings_t));
-		ass_glyph_cache_reset();
+void ass_set_frame_size(ass_instance_t* priv, int w, int h)
+{
+	if (priv->settings.frame_width != w || priv->settings.frame_height != h) {
+		priv->settings.frame_width = w;
+		priv->settings.frame_height = h;
+		if (priv->settings.aspect == 0.)
+			priv->settings.aspect = ((double)w) / h;
+		ass_reconfigure(priv);
 	}
+}
+
+void ass_set_margins(ass_instance_t* priv, int t, int b, int l, int r)
+{
+	if (priv->settings.left_margin != l ||
+	    priv->settings.right_margin != r ||
+	    priv->settings.top_margin != t ||
+	    priv->settings.bottom_margin != b) {
+		priv->settings.left_margin = l;
+		priv->settings.right_margin = r;
+		priv->settings.top_margin = t;
+		priv->settings.bottom_margin = b;
+		ass_reconfigure(priv);
+	}
+}
+
+void ass_set_use_margins(ass_instance_t* priv, int use)
+{
+	priv->settings.use_margins = use;
+}
+
+void ass_set_aspect_ratio(ass_instance_t* priv, double ar)
+{
+	if (priv->settings.aspect != ar) {
+		priv->settings.aspect = ar;
+		ass_reconfigure(priv);
+	}
+}
+
+void ass_set_font_scale(ass_instance_t* priv, double font_scale)
+{
+	if (priv->settings.font_size_coeff != font_scale) {
+		priv->settings.font_size_coeff = font_scale;
+		ass_reconfigure(priv);
+	}
+}
+
+int ass_set_fonts(ass_instance_t* priv, const char* fonts_dir, const char* default_font, const char* default_family)
+{
+	if (priv->settings.fonts_dir)
+		free(priv->settings.fonts_dir);
+	if (priv->settings.default_font)
+		free(priv->settings.default_font);
+	if (priv->settings.default_family)
+		free(priv->settings.default_family);
+
+	priv->settings.fonts_dir = fonts_dir ? strdup(fonts_dir) : 0;
+	priv->settings.default_font = default_font ? strdup(default_font) : 0;
+	priv->settings.default_family = default_family ? strdup(default_family) : 0;
+
+	priv->fontconfig_priv = fontconfig_init(fonts_dir, default_family, default_font);
+
+	return !!priv->fontconfig_priv;
 }
 
 /**

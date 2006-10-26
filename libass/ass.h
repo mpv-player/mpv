@@ -26,21 +26,6 @@
 /// Libass "library object". Contents are private.
 typedef struct ass_instance_s ass_instance_t;
 
-/// used in ass_configure
-typedef struct ass_settings_s {
-	int frame_width;
-	int frame_height;
-	double font_size_coeff; // font size multiplier
-	double line_spacing; // additional line spacing (in frame pixels)
-	int top_margin; // height of top margin. Everything except toptitles is shifted down by top_margin.
-	int bottom_margin; // height of bottom margin. (frame_height - top_margin - bottom_margin) is original video height.
-	int left_margin;
-	int right_margin;
-	int use_margins; // 0 - place all subtitles inside original frame
-	                 // 1 - use margins for placing toptitles and subtitles
-	double aspect; // frame aspect ratio, d_width / d_height.
-} ass_settings_t;
-
 /// a linked list of images produced by ass renderer
 typedef struct ass_image_s {
 	int w, h; // bitmap width/height
@@ -64,12 +49,12 @@ ass_instance_t* ass_init(void);
  */
 void ass_done(ass_instance_t* priv);
 
-/**
- * \brief configure the library
- * \param priv library handle
- * \param config struct with configuration parameters. Caller is free to reuse it after this function returns.
- */
-void ass_configure(ass_instance_t* priv, const ass_settings_t* config);
+void ass_set_frame_size(ass_instance_t* priv, int w, int h);
+void ass_set_margins(ass_instance_t* priv, int t, int b, int l, int r);
+void ass_set_use_margins(ass_instance_t* priv, int use);
+void ass_set_aspect_ratio(ass_instance_t* priv, double ar);
+void ass_set_font_scale(ass_instance_t* priv, double font_scale);
+int  ass_set_fonts(ass_instance_t* priv, const char* fonts_dir, const char* default_font, const char* default_family);
 
 /**
  * \brief render a frame, producing a list of ass_image_t
