@@ -154,7 +154,7 @@ Er spielt die meisten Dateien in den Formaten
 MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM, MKV
 VIVO, FLI, NuppelVideo, yuv4mpeg, FILM und RoQ ab, unterstützt von vielen
 eingebauten und binären Codecs.
-Es können VideoCDs, SuperVCDs, DVDs, 3ivx-, DivX 3/4/5- und sogar
+Es können Video-CDs, Super-VCDs, DVDs, 3ivx-, DivX 3/4/5- und sogar
 WMV-Filme angeschaut werden.
 .PP
 MPlayer unterstützt eine große Auswahl an Video- und Audioausgabetreibern.
@@ -229,7 +229,7 @@ Setzt die Abspielgeschwindigkeit zurück.
 .IPs "< und >"
 zurück/\:vor in der Playlist
 .IPs "Eingabetaste"
-nächster Eintrag der Playliste, auch über das Ende hinaus.
+nächster Eintrag der Playlist, auch über das Ende hinaus.
 .IPs "Pos1 und Ende"
 nächster/\:voriger Eintrag des Wiedergabebaums der aktuellen Liste
 .IPs "INS und DEL"
@@ -273,7 +273,7 @@ Wechselt durch die verfügbaren Untertitel.
 .IPs "F\ \ \ \ "
 Ändert die Anzeige der "erzwungenen Untertitel".
 .IPs "a\ \ \ \ "
-Ändert die Positionierung der Untertitel: oben / mitte / unten.
+Ändert die Positionierung der Untertitel: oben / mittig / unten.
 .IPs "x und z"
 Passt die Untertitel-Anzeige um +/- 0.1 Sekunde an.
 .IPs "r und t"
@@ -320,11 +320,11 @@ quartz und macosx.)
 .PD 0
 .RSs
 .IPs "Apfel + 0"
-Ändere die Größe des Abspielfensters auf die Hälfte der Originalgröße.
+Ändere die Größe des Wiedergabefensters auf die Hälfte der Originalgröße.
 .IPs "Apfel + 1"
-Ändere die Größe des Abspielfensters auf die Originalgröße.
+Ändere die Größe des Wiedergabefensters auf die Originalgröße.
 .IPs "Apfel + 2"
-Ändere die Größe des Abspielfensters auf das doppelte der Originalgröße.
+Ändere die Größe des Wiedergabefensters auf das doppelte der Originalgröße.
 .IPs "Apfel + f"
 Ändert Vollbild-Wiedergabe (ein/\:aus, siehe auch \-fs).
 .IPs "Apfel + [ und Apfel + ]"
@@ -356,7 +356,7 @@ Pause.
 .IPs "STOP\ "
 Wiedergabe anhalten und beenden.
 .IPs "ZURÜCK und VORWÄRTS"
-Im Minutenschritt zurück-/\:vorwärtsspulen.
+Im Minutenschritt zurück-/\:vorwärts spulen.
 .RE
 .PD 1
 .PP
@@ -476,7 +476,7 @@ ist.
 .br
 Das Format ist folgendermaßen:
 .br
-%n%zeichenkette_der_laenge_n
+%n%Zeichenkette_der_Länge_n
 .br
 .I BEISPIELE:
 .br
@@ -717,7 +717,7 @@ Kommandozeile.
 .
 .TP
 .B \-autoq <Qualität> (zusammen mit \-vf [s]pp)
-Ändert dynamisch das Qualitätslevel (der Nachbearbeitung (postprocessing)), je
+Ändert dynamisch das Qualitätslevel (der Nachbearbeitung (Postprocessing)), je
 nachdem, wieviel CPU-Zeit gerade frei ist.
 Das angegebene Level ist das maximal verwendete Level.
 Normalerweise kannst du eine große Zahl wählen.
@@ -781,7 +781,7 @@ Von den meisten Filtern nicht unterstützt.
 .TP
 .B \-crash-debug (DEBUG-CODE)
 Führt bei einem Absturz oder SIGTRAP automatisch gdb aus.
-Unterstützung hierfür muß einkompiliert sein durch Ausführung von 'configure'
+Unterstützung hierfür muss einkompiliert sein durch Ausführung von 'configure'
 mit \-\-enable-crash-debug.
 .
 .TP
@@ -847,7 +847,7 @@ und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
 .
 .TP
 .B \-idle (siehe auch \-slave)
-MPlayer wartet nichtstuend anstatt sich zu beenden, wenn keine Datei
+MPlayer wartet nichtstuend anstatt zu beenden, wenn keine Datei
 abzuspielen ist.
 Hauptsächlich für den Slave-Modus nützlich, in dem MPlayer
 durch Eingabekommandos gesteuert werden kann.
@@ -875,8 +875,8 @@ angenommen.
 Zeit in Millisekunden, bevor ein Tastendruck automatisch wiederholt
 wird (0 deaktiviert dies).
 .IPs ar-rate
-Anzahl der Tastendrücke pro Sekunde bei automatisch wiederholten
-Tastendrücken (0 deaktiviert dies).
+Anzahl der Tastendrücke pro Sekunde bei automatisch wiederholtem
+Drücken der Tasten (0 deaktiviert dies).
 .IPs keylist
 Zeigt alle Tastennamen an, die mit Kommandos belegt werden können.
 .IPs cmdlist
@@ -888,7 +888,7 @@ Liest Kommandos aus der angegeben Datei.
 Ist mit einem FIFO am sinnvollsten.
 .br
 .I ANMERKUNG:
-Falls die angegebene Datei ein FIFO ist, öffnet MPlayer beide Enden, so daß
+Falls die angegebene Datei ein FIFO ist, öffnet MPlayer beide Enden, so dass
 mehrere 'echo "seek 10" > mp_pipe' ausgeführt werden können und die Pipe in
 Ordnung bleibt.
 .RE
@@ -993,7 +993,7 @@ Spiele die in der Datei angegebenen Dateien ab (eine Datei pro Zeile,
 oder eine Datei im Winamp-, SMIL- oder ASX-Format).
 .br
 .I Anmerkung:
-Diese Option wird als ein Eintrag gesehen, so daß alle Optionen danach nur auf
+Diese Option wird als ein Eintrag gesehen, so dass alle Optionen danach nur auf
 die Elemente dieser Playlist angewendet werden.
 .br
 FIXME: Dies muss noch genauer angegeben und ordentlich dokumentiert werden.
@@ -1563,7 +1563,7 @@ FourCC als Hexadezimalwert
 .TP
 .B \-rawvideo <option1:option2:...>
 Mit dieser Option kannst du Dateien abspielen, die nur aus Videodaten bestehen.
-Du mußt außerdem \-demuxer rawvideo angeben.
+Du musst außerdem \-demuxer rawvideo angeben.
 .sp 1
 Verfügbare Optionen sind folgende:
 .sp 1
@@ -2418,7 +2418,7 @@ wie
 .br
 .I ANMERKUNG:
 Die Namen von ALSA-Mixerkanälen gefolgt von einer Nummer müssen im Format
-<Name,Nummer> angegeben werden, z.B.\& muß ein Kanal, der im alsamixer 'PCM 1'
+<Name,Nummer> angegeben werden, z.B.\& muss ein Kanal, der im alsamixer 'PCM 1'
 heißt, umbenannt werden in
 .BR PCM,1 .
 .
@@ -2480,7 +2480,7 @@ Setzt den noblock-Modus.
 Setzt den Gerätenamen.
 Ersetze jedes ',' mit '.' und jeden ':' mit '=' im ALSA-Gerätenamen.
 Benutze für hwac3-Ausgabe via S/PDIF ein "iec958"- oder "spdif"-Gerät, es sei
-denn, du weißt wirklich, wie sie gesetzt werden muß.
+denn, du weißt wirklich, wie sie gesetzt werden muss.
 .RE
 .PD 1
 .
@@ -2940,12 +2940,12 @@ Behalte beim Ändern der Fenstergröße das
 Höhen-/\:Breitenverhältnis nicht bei.
 Funktioniert nur mit den x11-, xv-, xmga-, xvidix- und
 directx-Videoausgabetreibern.
-Außerdem muß dein Windowmanager unter X11 Anweisungen zum
+Außerdem muss dein Windowmanager unter X11 Anweisungen zum
 Fenster-Seitenverhältnis verstehen.
 .
 .TP
 .B "\-ontop\ "
-Sorgt dafür, daß das Abspielfenster oberhalb von anderen Fenstern bleibt.
+Sorgt dafür, dass das Abspielfenster oberhalb von anderen Fenstern bleibt.
 Wird unterstützt von Videoausgabetreibern, die X11 benutzen, außer SDL,
 außerdem directx, macosx, quartz, ggi und gl2.
 .
@@ -3396,7 +3396,7 @@ Benutze svga mit VIDIX.
 .TP
 .B "gl\ \ \ \ \ "
 OpenGL-Videoausgabetreiber, einfache Version.
-Die Videogröße muß kleiner
+Die Videogröße muss kleiner
 sein als die maximale Texturgröße deiner OpenGL-Implementierung.
 Es ist beabsichtigt, auch mit den einfachsten OpenGL-Implementierungen zu
 funktionieren, benutzt aber auch neuere Erweiterungen, die mehr Farbräume
@@ -3626,7 +3626,7 @@ deaktiviert).
 Gültige Werte sind top = obere Felder zuerst, bottom = untere Felder zuerst.
 Diese Option hat keinerlei Effekt auf progressives Filmmaterial, wie es die
 meisten MPEG-Filme sind.
-Du mußt diese Option aktivieren, wenn es beim Schauen von
+Du musst diese Option aktivieren, wenn es beim Schauen von
 interlaced-Filmmaterial zu Abreißeffekten oder unscharfen Bewegungen kommt.
 .IPs layer=N
 Wird den Layer mit der ID N für die Wiedergabe erzwingen (Standard: -1 \-
@@ -5928,7 +5928,7 @@ Wähle den Skalierungs-Modus.
 .TP
 .B harddup
 Nur in Verbindung mit MEncoder nützlich.
-Wenn harddup bei der Encodierung verwendet wird, sorgt es dafür, daß doppelte
+Wenn harddup bei der Encodierung verwendet wird, sorgt es dafür, dass doppelte
 Frames auch im encodierten Output doppelt vorkommen.
 Dies verbraucht ein wenig mehr Platz, ist jedoch für die Ausgabe in
 MPEG-Dateien nötig oder dann, wenn der Videostream nach der Encodierung
@@ -5982,7 +5982,7 @@ verwirft den ersten einer Gruppe von interlaced Frames.
 .IPs <0.0\-1.0>
 relative Differenz zwischen benachbarten Pixeln (Standard: 0.1)
 .IPs <0.0\-1.0>
-Wie groß der als interlaced erkannte Teil eines Bildes sein muß, damit der
+Wie groß der als interlaced erkannte Teil eines Bildes sein muss, damit der
 Frame verworfen wird (Standard: 0.15).
 .RE
 .PD 1
@@ -6160,7 +6160,7 @@ Im Endeffekt ist es jedoch nicht so nachsichtig bei leicht gestörtem Input,
 wie bei Capturing von TV-Input.
 Der optionale Parameter (ivtc=1) entspricht der Option dr=1 des detc-Filters
 und sollte nur von MEncoder, nicht von MPlayer verwendet werden.
-Wie bei detc muß auch hier bei Benutzung von MEncoder die korrekte
+Wie bei detc muss auch hier bei Benutzung von MEncoder die korrekte
 Ausgabe-Framerate (\-ofps 24000/1001) angegeben werden.
 Die Entwicklung an itvc findet nicht weiter statt, da die Filter pullup und
 filmident genauer zu sein scheinen.
@@ -6783,7 +6783,7 @@ Finden der richtigen Parameter für x,y,w und h zu erleichtern.
 .B remove-logo=/pfad/zur/logo_bitmap_datei.pgm
 Unterdrückt das Senderlogo unter Benutzung des angegebenen PGM- oder PPM-Bildes
 um herauszufinden, welche Bildpunkte das Logo umfassen.
-Die Breite und Höhe des Bildes muß denen des zu bearbeitenden Videos
+Die Breite und Höhe des Bildes muss denen des zu bearbeitenden Videos
 entsprechen.
 Benutzt das Bild und einen runden Weichzeichnungsalgorithmus, um das Logo zu
 entfernen.
@@ -6874,7 +6874,7 @@ Beachte, dass diese Option das genaue Gegenstück zur Option \-delay ist.
 Zum Beispiel, wenn ein Video korrekt abgespielt wird mit \-delay 0.2, kannst
 Du das Video mit MEncoder reparieren, indem du \-audio-delay -0.2 verwendest.
 Momentan funktioniert diese Option nur mit dem Standardmuxer (\-of avi).
-Wenn du einen anderen Muxer benutzt, mußt du stattdessen \-delay verwenden.
+Wenn du einen anderen Muxer benutzt, musst du stattdessen \-delay verwenden.
 .
 .TP
 .B \-audio-density <1\-50>
@@ -7826,7 +7826,7 @@ wirksam sind, wenn vrc_strategy nicht auf 0 gesetzt ist.
 .IPs 0
 Benutze die interne lavc-Bitratenkontrolle (Standard).
 .IPs 1
-Benutze die XviD-Bitratenkontrolle (experimentell; MEncoder muß mit
+Benutze die XviD-Bitratenkontrolle (experimentell; MEncoder muss mit
 Unterstützung für XviD 1.1 oder höher kompiliert worden sein).
 .RE
 .PD 1
@@ -8854,7 +8854,7 @@ Quantisierungsparameter von 20.
 .IPs zones=0,w,0.1/10001,w,1.0/90000,q,20
 Encodiere alle Frames 0\-10000 mit 10% der Bitrate und alle Frames von 90000
 bis zum Ende mit einem konstanten Quantisierungsparameter von 20.
-Beachte, daß die zweite Zone benötigt wird, um die erste Zone zu beschränken,
+Beachte, dass die zweite Zone benötigt wird, um die erste Zone zu beschränken,
 da ohne diese alles bis zu Frame 89999 mit 10% der Bitrate encodiert würde.
 .RE
 .PD 1
@@ -9540,7 +9540,7 @@ IDR-Frame beziehen.
 .B scenecut=<-1\-100>
 Legt fest, wie aggressiv zusätzliche Intra-Frames eingefügt werden (Standard:
 40).
-Mit geringen Werten für scenecut muß der Codec oft einen Intra-Frame einfügen,
+Mit geringen Werten für scenecut muss der Codec oft einen Intra-Frame einfügen,
 wenn er den Wert für keyint übersteigen würde.
 Gute Werte für scenecut finden evtl.\& eine bessere Position für Intra-Frames.
 Hohe Werte setzen mehr Intra-Frames als nötig ein und verschwenden damit Bits.
@@ -9862,7 +9862,7 @@ Benötigt subq>=5.
 .B (no)mixed_refs
 Ermöglicht für jede 8x8- oder 16x8-Bewegungspartition die unabhängige Wahl
 eines Referenz-Frames.
-Ohne diese Option muß ein gesamter Makroblock dieselbe Referenz benutzen.
+Ohne diese Option muss ein gesamter Makroblock dieselbe Referenz benutzen.
 Benötigt frameref>1.
 .
 .TP
