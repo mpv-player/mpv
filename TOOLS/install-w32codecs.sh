@@ -1,140 +1,181 @@
 #!/bin/sh
+set -e
+
+# This script will download binary codecs for MPlayer unto a Debian system.
 
 # Author:  thuglife, mennucc1
 #
 
-set -e
+CODECDIR=/usr/lib/codecs
+PREFDIR=/var/lib/mplayer/prefs
+MYSITE='http://people.debian.org/~mennucc1/mplayer'
 
-arch=$(dpkg --print-installation-architecture)
+dpkgarch=$(dpkg --print-installation-architecture)
 
-codecsdir=/usr/lib/codecs
+[ -d $PREFDIR  ] || mkdir -v $PREFDIR
+[ -d $CODECDIR ] || mkdir -v $CODECDIR
+cd $CODECDIR
+[ -d mplayer_binary_codecs ] || mkdir -v mplayer_binary_codecs
 
-[ -d $codecsdir ] || mkdir -v $codecsdir
-cd $codecsdir
-[ -d mplayer_win32_codecs ] || mkdir -v mplayer_win32_codecs
-   
-INSTALL () { 
-    filename="$1"
-    site="$2"
-    url="$site/$filename"
 
-    cd $codecsdir/mplayer_win32_codecs
+choosemirror ()
+{
+  cd $PREFDIR
 
-    if [ -r $filename.list ] ; then
-      #if we stop the script, we don't want to redownload things
-      #fixme we should check timestamps
-      echo You have already downloaded and installed $filename.
+  #if [ ! -r mirrors ] || find  mirrors -mtime +20  ; then
+    echo Downloading mirrors list..
+    wget -nv -c -N $MYSITE/mirrors || true
+  #fi
+  if [ ! -r bestsites ] || [ mirrors -nt bestsites ] || \
+    find  bestsites -mtime +20 > /dev/null ; then
+    if which netselect > /dev/null  ; then
+      echo  Choosing best mirrors using netselect....
+      netselect  -s 5  $( cat mirrors ) | awk '{print $2}' > bestsites
+    elif which fping > /dev/null ; then
+      fping -C 1   $( sed   's#.*//##;s#/.*##' mirrors ) 2>&1 | \
+        egrep -v 'bytes.*loss' | sort -n -k3  | \
+        grep -v ': *-' |  awk '/:/{print $1}' | head -5 > bestsites
     else
-     wget $url || return 1
-     case "$filename" in 
-      *.tar.gz)
-            tar xvzf $filename > $filename.list
-            rm $filename
-          ;;
-      *.tgz)
-            tar xvzf $filename > $filename.list
-            rm $filename
-          ;;
-      *.tar.bz2)
-            tar  --bzip2 -xvf $filename > $filename.list
-            rm $filename
-          ;;
-     esac
-     cd ..
-     ln -sbf mplayer_win32_codecs/*/* . 
-     echo "Installed Succesfully!"
+      echo "(If you install 'netselect', it will select the best mirror for you"
+      echo "  you may wish to stop this script and rerun after installation)"
+      sleep 5
+      head -3 mirrors > bestsites
     fi
+  fi
 }
 
 
+
+INSTALL () {
+  filename="$3"
+  dir="$2"
+  url="$1"
+
+  cd $CODECDIR/mplayer_binary_codecs
+
+  if [ -r $filename ] ; then
+    cp $filename  $filename.bak
+  fi
+
+  if [  "$url" = @MAINSITE@ ] ; then
+    cat $PREFDIR/bestsites |   while read mainsite ; do
+      echo Downloading $filename from $mainsite ...
+      wget -v -c -N $mainsite/$dir/$filename || true
+      if [ -r "$filename" ] ; then
+        UNPACK "$filename"
+        [ -r $filename.bak ] && rm $filename.bak
+        return 0
+      fi
+    done
+  else
+    wget -v -c -N $url/$dir/$filename || true
+    if  [ -r "$filename" ] ; then
+      UNPACK "$filename"
+      [ -r $filename.bak ] && rm $filename.bak
+      return 0
+    fi
+  fi
+}
+
+
+
+
+UNPACK ()
+{
+  filename="$1"
+  if [ ! -r $filename.bak ] || ! cmp $filename.bak $filename ; then
+    echo Installing $filename  ...
+    if [ -r $filename.list  ] ; then
+      tr '\n' '\000' < $filename.list | xargs -r0 rm  || true
+      UNLINK $filename.list
+      rm $filename.list
+    fi
+
+    case "$filename" in
+      *.tar.gz)
+        tar xvzf $filename > $filename.list
+        #rm $filename
+        ;;
+      *.tgz)
+        tar xvzf $filename > $filename.list
+        #rm $filename
+        ;;
+      *.tar.bz2)
+        tar  --bzip2 -xvf $filename > $filename.list
+        #rm $filename
+        ;;
+    esac
+    LINK $filename.list
+    echo "Installed $filename Succesfully!"
+  fi
+}
+
+LINK () {
+  cd $CODECDIR/
+  cat $CODECDIR/mplayer_binary_codecs/$1 | while read f ; do
+  ln -sbf mplayer_binary_codecs/"$f" .
+  done
+}
+
+UNLINK () {
+### FIXME
+#  cd $CODECDIR
+#  cat $CODECDIR/mplayer_binary_codecs/$1 | while f do
+#  ln -sbf mplayer_binary_codecs/"$f"
+#  done
+  if which symlinks > /dev/null ; then
+    symlinks -d $CODECDIR
+  fi
+}
+
 if [ `whoami` != root ]; then
-    echo "You must be root to start this script. Login as root first!"
-    exit 1
-else
+  echo "You must be 'root' to use this script. Login as root first!"
+  exit 1
+fi
 
 case "$1" in
- install)
-  if [ "$arch" = "i386" ]; then
-     
-   mainurl=''
+  install)
+    choosemirror
+    cd $PREFDIR
+    #if [ ! -r codecs_list ] || find  codecs_list -mtime +20  ; then
+      echo 'Getting  codecs list ...'
+      wget -nv -c -N $MYSITE/codecs_list || true
+    #fi
 
-   pref=$codecsdir/mplayer_win32_codecs/bestsite
-
-   #distribute the load
-   if [ -r $pref ] ; then
-    mainurl=`cat $pref `
-   else
-    if [ -f /usr/bin/netselect ] ; then   
-     echo  Choosing best mirror using netselect....
-        /usr/bin/netselect \
-          http://www1.mplayerhq.hu/MPlayer/releases/codecs/ \
-          http://www2.mplayerhq.hu/MPlayer/releases/codecs/ \
-          http://ftp.lug.udel.edu/MPlayer/releases/codecs/ \
-           | awk '{print $2}' > $pref
-     mainurl=`cat $pref `
+    if  grep -q "^$dpkgarch" $PREFDIR/codecs_list   ] ; then
+      egrep -v "^[[:space:]]*(#|$)" $PREFDIR/codecs_list | \
+        while read arch url dir file info ; do
+          if [ "$dpkgarch" = "$arch" ]; then
+            echo Installing $file  $info...
+            INSTALL "$url"  "$dir"  "$file"
+            n=1
+          fi
+        done
     else
-     echo "(If you install 'netselect', it will select the best mirror for you."
-     echo "  You may wish to stop this script and rerun after installation.)"
-     sleep 2
-    fi
-   fi
-
-   #sanity check, in case netselect fails
-   mainhost=`echo $mainurl | sed 's|http://||;s|ftp://||;s|/.*||g'`
-   echo Test if $mainhost exists and is ping-able...
-   if [ "$mainurl" = '' ] || ! ping -c1 "$mainhost" > /dev/null ; then
-     domain=`hostname -f | sed 's/.*\.//g' `
-     mainurl=http://www1.mplayerhq.hu/MPlayer/releases/codecs/
-     if [ "$domain" = 'edu' -o "$domain" = 'com' ] ; then
-       mainurl=http://ftp.lug.udel.edu/MPlayer/releases/codecs/
-     fi
-     if [ "$domain" = 'de' -o "$domain" = 'it' ] ; then
-       mainurl=http://www2.mplayerhq.hu/MPlayer/releases/codecs/
-     fi
-   fi
-
-   #INSTALL win32.tar.gz http://ers.linuxforum.hu/             
-
-   INSTALL win32codecs-lite.tar.bz2 $mainurl
-   #INSTALL w32codec.tar.bz2 http://www.mplayerhq.hu/MPlayer/releases/      
-   INSTALL rp9codecs.tar.bz2 $mainurl
-   INSTALL qt6dlls.tar.bz2 $mainurl
-  elif [ "$arch" = "alpha" ]; then
-   INSTALL rp8codecs-alpha.tar.bz2 $mainurl
-  elif [ "$arch" = "powerpc" ]; then
-   INSTALL rp8codecs-ppc.tar.bz2 $mainurl
-   INSTALL xanimdlls-ppc.tar.bz2 $mainurl
-  else
-   echo "Sorry, no codecs for your arch. Sorry dude :("
+      echo "Sorry, no codecs for your arch '$dpkgarch'. Sorry dude :("
       exit 1
-	    
-  fi
-	
-	;;
-    
-    uninstall)
-	cd $codecsdir
-	rm -rf mplayer_win32_codecs      
-	#FIXME we need a better clean system
-	if [ -r /usr/bin/symlinks ] ; then
-         symlinks -d .
-	else
-	 echo "Please install the package 'symlinks' and run 'symlinks -d $codecsdir'."
-	fi
-	echo "Uninstalled Succesfully!"
-	
-	;;
-	
-    *)
-	echo "Usage: {install|uninstall}"
-	exit 1
+    fi
+    ;;
 
-	;;	    
+  uninstall)
+    cd $DIR/
+    rm -rf mplayer_binary_codecs
+    #FIXME we need a better clean system
+    if which symlinks > /dev/null ; then
+      symlinks -d .
+    else
+      echo "please install the package 'symlinks' and run 'symlinks -d $DIR' "
+    fi
+    echo "Uninstalled Succesfully!"
+    ;;
+
+  *)
+    echo "Usage: {install|uninstall}"
+    echo "This program will install binary codecs for mplayer"
+    exit 1
+    ;;
 
 esac
 
 
 exit 0
-
-fi
-
