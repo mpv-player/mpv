@@ -1,11 +1,12 @@
-.\" Partially synced with r20426 
-.\" up to line 933 (section "DEMUXER/STREAM OPTIONS")
-.\" Reminder of hard words/terms need final solution: 
+.\" Partial sync with en/mplayer.1 r20445
+.\" up to line 1678 (near section header "OSD/SUBTITLE OPTIONS")
+.\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; palytree in parent list; colorkey; 
 .\"   wrapper script ... shellescapes; keyframe;
+.\"   encoding audio rate; \&; 
 .\" 
 .\" MPlayer (C) 2000-2006 MPlayer 团队
-.\" 本手册页由 Gabucino, Diego Biurrun, Jonas Jermann 制作
+.\" 本(英文)手册页由 Gabucino, Diego Biurrun, Jonas Jermann 编写
 .
 .\" --------------------------------------------------------------------------
 .\" 宏定义
@@ -502,7 +503,7 @@ vf=eq2=1.0:-0.8
 .nf
 # 产生 MEncoder 输出到默认的文件名。
 o=encoded.avi
-# 下面四行使 mencoder tv:// 立刻开始捕获。
+# 下面四行使 mencoder tv:// 立刻开始捕捉。
 oac=pcm=yes
 ovc=lavc=yes
 lavcopts=vcodec=mjpeg
@@ -531,7 +532,8 @@ spuaa=20
 配置轮廓以放在方括号中的名称开始, 如\& '[my-profile]'。
 所有跟随的选项成为配置轮廓的一部分。
 描述(通过 \-profile help 显示)定义于 profile-desc 选项。
-要结束该配置轮廓, 使用别的名称开始即可或使用配置轮廓名称 'default' 继续正常的选项。
+要结束该配置轮廓, 使用别的名称开始即可
+或使用配置轮廓名称 'default' 继续正常的选项。
 .fi
 .PP
 .I "MENCODER 配置轮廓示例:"
@@ -701,6 +703,12 @@ xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
 停用 colorkeying。
 仅被视频输出驱动 cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix, 
 xover, xv (参见 \-vo xv:ck), xvmc (参见 \-vo xv:ck) 和 directx 支持。
+.
+.TP
+.B \-correct-pts (试验)
+切换 mplayer 到试验模式。
+视频过滤器决定视频帧的演示时戳而不是视频源。
+还不支持大多数过滤器。
 .
 .TP
 .B \-crash-debug (调试代码)
@@ -931,398 +939,702 @@ MPlayer 从标准输入读取以新行 (\\n) 分隔开的命令行,
 .
 .SH "DEMUXER/STREAM OPTIONS (分路器/媒体流选项)"
 .
-.\" The below is only synced with r9821
 .TP
-.B \-aid <标识> (参见 \-alang选项)
-选择音频频道 [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
-VOB(AC3): 128\-159 VOB(LPCM): 160\-191]
-MPlayer在冗长(-v)模式下会显示可用的标识.
+.B \-a52drc <级别>
+选择 AC3 音频流的动态范围压缩(DRC)级别。
+<级别> 是 0 到 1 的浮点数, 其中 0 表示无压缩, 
+(默认值) 1 表示全压缩 (使得响亮的通路更安静或相反)。
+此选项仅当 AC3 流包含所需范围的压缩信息时显示效果。
+.
 .TP
-.B \-alang <两个字母的国家代码> (参见\-aid选项)
-仅用于DVD播放. 它选择DVD的音频语言并总是尝试播放与所给代码符合的语言.
-加上\-v参数观察输出可以获得可用语言的列表.
-
+.B \-aid <标识> (也请参见 \-alang)
+选择音频频道 (MPEG: 0\-31, AVI/\:OGM: 1\-99, ASF/\:RM: 0\-127, 
+VOB(AC3): 128\-159, VOB(LPCM): 160\-191, MPEG-TS 17\-8190)。
+MPlayer 在 verbose (\-v) 模式下会打印可用的音频标识。
+当播放 MPEG-TS 流时, MPlayer/\:MEncoder 用第一个程序
+播放已选择的(如果有的话)音频流。
+.
+.TP
+.B \-alang <语言代码[,语言代码,...]> (也请参见 \-aid)
+指定使用音频语言的优先列表。
+不同的容器格式运用不同的语言代码。DVDs 使用 ISO 639-1 的
+两字符语言代码, Matroska 和 NUT 使用 ISO 639-2 的
+三字符语言代码, 而 OGM 使用自由格式标识符。
+MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-.IPs "\-alang hu,en"
-播放匈牙利语, 英语在没有匈牙利语时备用.
+.IPs "mplayer dvd://1 \-alang hu,en"
+选择 DVD 上的匈牙利语音轨播放而英语在没有匈牙利语时备用。
+.IPs "mplayer \-alang jpn example.mkv"
+播放日语 Matroska 文件。
 .RE
 .PD 1
 .
 .TP
-.B \-audio\-demuxer <数字> (仅用于\-audiofile)
-指定用于\-audiofile的分路器. 分路器的标识在demuxers.h中.
-使用\-audio\-demuxer 17将指定.mp3检测.
+.B \-audio-demuxer <[+]名称> (仅用于 \-audiofile)
+锁定用于 \-audiofile 的音频分路器类型。
+在名称前使用 '+' 锁定类型, 跳过某些核查!
+按照 \-audio-demuxer help 打印出来的指定分路器类型。
+为了向后兼容, 也接受定义在 libmpdemux/\:demuxer.h 的分路器标识。
+\-audio-demuxer audio 或 \-audio-demuxer 17 锁定 MP3。
+.
 .TP
 .B \-audiofile <文件名>
-在看电影时播放外部文件(WAV, MP3或Ogg Vorbis)的音频.
-.TP
-.B -audiofile-cache <kBytes>
-对-audiofile的文件流启用缓存, 使用指定大小的内存.
-.TP
-.B \-bandwidth <参数>
-设定网络流的最大带宽(用于服务器可以以不同带宽传送内容的情况).
-当你以慢速连接观看流媒体实况时有用.
-.TP
-.B \-cdrom\-device <设备路径>
-替代默认的CDROM设备名/dev/\:cdrom.
-.TP
-.B \-cache <kBytes>
-这个选项设定用多少内存(以kBytes为单位)作为播放文件/\:URL的预缓冲.
-对速度慢的媒体特别有用(默认为\-nocache).
-.TP
-.B \-cdda <选项1:选项2>
-这个选项用来调整MPlayer的CD音频读取特性.
-.br
-可用选项有:
+在看电影时播放外部音频文件(WAV, MP3 或 Ogg Vorbis)。
 .
+.TP
+.B \-audiofile-cache <千字节>
+对 \-audiofile 的文件流启用缓存, 使用指定大小的内存。
+.
+.TP
+.B \-bandwidth <参数值> (仅适用于网络)
+指定网络流的最大带宽(用于服务器可以以不同带宽传送内容的情况)。
+当你以慢速连接观看现场流媒体时有用。
+对于 Real RTSP 流, 也用来设置最大的传送带宽
+以容许较快的缓存填充和流转储。
+.
+.TP
+.B \-cache <千字节>
+此选项指定用多少内存(以 kBytes 为单位)作为播放文件或 URL 的预缓冲。
+对速度慢的媒体特别有用。
+.
+.TP
+.B \-nocache
+关闭缓冲。
+.
+.TP
+.B \-cache-min <百分数>
+当缓冲填充到总数的 <百分数> 时开始回放。
+.
+.TP
+.B \-cache-seek-min <百分数>
+如果查寻到的位置处于从当前位置算起的缓存大小的 <百分数> 之内, 
+MPlayer 等待填充缓存到此位置而不是执行流查寻(默认值是: 50)。
+.
+.TP
+.B \-cdda <选项1:选项2> (仅适用于 CDDA)
+此选项用来调整 MPlayer 的 CD 音频读取特性。
+.sp 1
+可用选项有:
 .RSs
-.IPs speed=<参数>
-设定CD转速
+.IPs speed=<参数值>
+设定 CD 转速。
 .IPs paranoia=<0\-2>
-设定谨慎级别
+设定谨慎级别。
+0 以外的值可能会打断除了第一个音轨的任何回放。
 .RSss
-0: 关闭检测
+0: 关闭检测 (默认)
 .br
-1: 只进行重叠检测(默认)
+1: 只进行重叠检测
 .br
 2: 完全数据修正和校检
 .REss
-.IPs generic-dev=<参数>
-使用指定的通用SCSI设备
-.IPs sector-size=<参数>
-单位读取量
-.IPs overlap=<参数>
-将校检时的最小重叠搜索设置为<参数>个扇区.
+.IPs generic-dev=<参数值>
+使用指定的通用 SCSI 设备。
+.IPs sector-size=<参数值>
+单位读取量。
+.IPs overlap=<参数值>
+锁定校检时的最小重叠搜索为 <参数值> 个扇区。
 .IPs toc-bias
-假定TOC中报告的第1音轨的起始偏移量将按照LBA\ 0定位.
-有些东芝光驱需要这个来获得正确的音轨边界.
-.IPs toc-offset=<参数>
-给定位音轨时在报告的扇区数上再加上<参数>个扇区. 可以是负数.
+假定 TOC 报告中第1音轨的起始偏移量为 LBA 0。
+有些东芝光驱需要这样来修正音轨边界。
+.IPs toc-offset=<参数值>
+报告音轨时在扇区数上再加上 <参数值> 个扇区。可能是负数。
 .IPs (no)skip
-(不)接受不完整的数据重建.
+(不)接受不完整的数据重建。
 .RE
 .
 .TP
-.B \-channels <数字>
-改变播放的声道数, 如果没有设定默认值为'2'. 如果输出声道数比输入声道数多时,
-将插入空声道(但在将单声道混合为立体声时, 会把单声道复制到两个输出声道).
-如果输出声道比输入声道少, 结果取决与所用的音频解码器(\-afm).
-MPlayer会要求解码器把音频解码到跟指定数量的声道. 由解码器来实现这个要求.
-如果解码器的输出比要求的多, 多余的声道会被去掉.
-这个选项通常只有在播放AC3音频(比如DVD)的视频时才显得重要.
-在那时默认使用liba52解码并把音频适当的混合到需要的输出声道.
-
+.B \-cdrom-device <设备路径>
+指定 CD-ROM 设备 (默认是: /dev/\:cdrom)。
+.
+.TP
+.B \-channels <数字> (也请参见 \-af channels)
+请求播放的声道数 (默认值是: 2)。
+MPlayer 要求解码器把音频解码到指定数量的声道。
+然后由解码器来实现这个要求。
+此选项通常只有在播放带 AC3 音频(比如 DVD)的视频时才显得重要。
+在那时默认使用 liba52 解码并把音频正确地混合到需要的声道数。
+为了直接控制输出声道数独立于解码声道数, 使用声道过滤器。
+.br
 .I 注意:
-.br
-这个选项可以被解码器(仅用于AC3)滤镜(surround)和音频输出驱动(至少OSS可以)接受.
-.br
+此选项可以被解码器(仅适用于 AC3), 过滤镜(环绕立体声), 和音频
+输出驱动(至少 OSS 可以)接受。
+.sp 1
 可用选项有:
-
+.sp 1
 .PD 0
 .RSs
 .IPs 2
-Stereo
+立体声
 .IPs 4
-Surround
+环绕立体声
 .IPs 6
-Full 5.1
+5.1 立体声
 .RE
 .PD 1
 .
 .TP
-.B \-chapter <场景标识>[-<结束的场景标识>]
-设定从哪个场景开始播放. 也可以设定在哪个场景结束播放(默认值: 1).
-示例可以在下面找到.
-.TP
-.B \-csslib <文件名>
-(老式DVD选项)这个选项用来替代libcss.so的默认位置.
-.TP
-.B \-cuefile <文件名> (参见\-vcd)
-从指定的文件中描述的, CDRwin的(bin/cue文件格式)光盘镜像中播放(S)VCD.
+.B \-chapter <场景标识>[\-<末尾场景标识>] (仅适用于 dvd:// 和 dvdnav://)
+指定从哪个场景开始播放。也可以指定在哪个场景结束播放 (默认值为: 1)。
 .
 .TP
-.B \-demuxer <参数>
-指定分路器类型.
-分路器的标识定义在demuxers.h中.
-使用\-demuxer 17将指定.mp3检测.
+.B \-cookies (仅适用于网络)
+HTTP 请求时发送 cookies。
 .
 .TP
-.B \-dumpaudio (仅用于MPLAYER)
-将原始的音频压缩流复制到./stream.dump(用于MPEG/AC3).
+.B \-cookies-file <文件名> (仅适用于网络)
+从 <文件名> 中读取 HTTP cookies (默认值是: ~/.mozilla/ 和 ~/.netscape/)
+而跳过从默认位置读取。
+假定文件是 Netscape 格式。
 .
 .TP
-.B \-dumpfile <文件名> (仅用于MPLAYER)
-指定MPlayer复制的输出文件.
-应该与\-dumpaudio / \-dumpvideo / \-dumpstream一起使用.
-.
-.TP
-.B \-dumpstream (仅用于MPLAYER)
-将原始流复制到./stream.dump.
-当从DVD或网络上rip时候有用.
-.
-.TP
-.B \-dumpvideo (仅用于MPLAYER)
-将原始的视频压缩流复制到./stream.dump(不是十分好用).
-.
-.TP
-.B \-dvd://<节目标识>
-告诉MPlayer播放哪个电影(通过节目标识指定).
-比如有时'1'是一部预告片, 而'2'才是真正的电影.
-
-.I 注意:
+.B \-delay <数>
+音频延迟数秒 (正或负的浮点数)
 .br
-有时DVD播放时需要进行交错/\:逐行扫描转换, 参见\-vf pp=0x20000选项.
+.I 注意:
+当和 MEncoder 一起用时, 并不保证能与 \-ovc copy 一起工作正常; 
+请使用 \-audio-delay。
+.
 .TP
-.B \-dvd\-device <设备路径>
-替代默认的DVD设备名/dev/\:dvd.
+.B \-ignore-start
+忽略 AVI 文件中指定的流开始时间。
+对于 MPlayer, 用 \-audio-delay 选项编码的文件废除了流延迟。
+在编码时期, 此选项防止 MEncoder 转送原流的开始时间到新的文件; 
+但是 \-audio-delay 选项并不受影响。
+注意 MEncoder 有时会自动调整流开始时间以补偿预期的解码延迟, 
+所以没有测试之前不要使用此选项进行编码。
+.
 .TP
-.B \-dvdangle <视角标识>
-有些DVD碟片中的场景可以从多个视角观看.
-通过这个选项你可以告诉MPlayer使用那个视角(默认值: 1).
-示例可以在下面找到.
+.B \-demuxer <[+]类型名>
+锁定分路器类型。
+在名称前使用 '+' 锁定类型, 跳过某些核查!
+按照 \-demuxer help 打印出来的指定分路器类型。
+为了向后兼容, 也接受定义在 libmpdemux/\:demuxer.h 的分路器标识。
+\-demuxer audio 或 \-demuxer 17 锁定 MP3。
+.
 .TP
-.B \-dvdauth <DVD设备>
-(老式DVD选项)打开指定设备的DVD认证.
+.B \-dumpaudio (仅用于 MPlayer)
+转储原始的音频压缩流到 ./stream.dump (用于 MPEG/\:AC3)。
+如果你在命令行中指定多于其中 \-dumpaudio, \-dumpvideo, \-dumpstream
+的一个, 只有最后一个生效。
+.
 .TP
-.B \-dvdkey <CSS密钥>
-(老式DVD选项)当解码一个由DVD上复制的未解密的VOB文件时,
-用这个选项提供解码VOB需要的CSS密钥(密钥在\-dvdauth通过DVD设备认证时会显示出来).
+.B \-dumpfile <文件名> (仅用于 MPlayer)
+指定 MPlayer 应该转储到的文件。
+应该与 \-dumpaudio / \-dumpvideo / \-dumpstream 一起使用。
+.
 .TP
-.B \-dvdnav (BETA代码!)
-强行使用libdvdnav.
+.B \-dumpstream (仅用于 MPlayer)
+转储原始流到 ./stream.dump。
+当从 DVD 或网络上抓取时候有用。
+如果你在命令行中指定多于其中 \-dumpaudio, \-dumpvideo, \-dumpstream
+的一个, 只有最后一个生效。
+.
+.TP
+.B \-dumpvideo (仅用于 MPlayer)
+转储原始流到 ./stream.dump (不是十分有用)。
+如果你在命令行中指定多于其中 \-dumpaudio, \-dumpvideo, \-dumpstream
+的一个, 只有最后一个生效。
+.
+.TP
+.B \-dvbin <选项> (仅用于 DVB)
+为了过载默认的值, 把下面的参数传递给 DVB 输入模块:
+.sp 1
+.PD 0
+.RSs
+.IPs card=<1\-4>
+指定使用卡号 1\-4 (默认是: 1).
+.IPs file=<文件名>
+指示 MPlayer 从频道中读取 <文件名>。
+默认是 ~/.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (基于卡的类型)
+或者最后于求助 ~/.mplayer/\:channels.conf。
+.IPs timeout=<1\-30>
+放弃试图调谐的最大等候秒数(默认值是: 30)。
+.RE
+.PD 1
+.
+.TP
+.B \-dvd\-device <设备路径> (仅用于 DVD)
+指定 DVD 设备(默认是: /dev/\:dvd)。
+你也可以指定目录, 其中包含以前直接从 DVD 拷贝(比如用 \& vobcopy)的文件。
+首先注意使用 \-dumpstream 通常是更好的拷贝 DVD 的方法(请参见示例)。
+.
+.TP
+.TP
+.B \-dvdangle <视角标识> (仅用于 DVD)
+有些 DVD 碟片中的场景可以从多个视角观看。
+这里你可以告诉 MPlayer 使用哪个视角(默认值是: 1)。
+.
+.B \-edl <文件名>
+回放时启用编辑决定列表(EDL)。
+根据给定文件的条目视频被跳过, 而音频或静音或不静音。
+如何使用详情请参见 http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:edl.html。
+.
+.TP
+.B \-endpos <[[hh:]mm:]ss[.ms]|size[b|kb|mb]> (也请参见 \-ss 和 \-sb)
+停止在给定的时间或字节位置。
+.br
+.I 注意:
+字节位置仅为了 MEncoder 而启用但不精确, 因为它只会停在帧的边缘。
+当与 \-ss 选项组合使用时, \-endpos 的时间会向前移动 \-ss 指定的秒数。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-endpos 56"
+56 秒后停止。
+.IPs "\-endpos 01:10:00"
+1 小时 10 分后停止。
+.IPs "\-ss 10 \-endpos 56"
+1 分 6 秒后停止。
+.IPs "\-endpos 100mb"
+只编码 100 MB。
+.RE
+.PD 1
+.
 .TP
 .B \-forceidx
-指定重新生成索引. 对索引损坏的文件(不同步等等)有用. 可以进行收缩.
-你能使用MEncoder永久性的修复索引(参见文档).
+强制索引重建。
+对索引损坏的文件(A/V 不同步等等)有用。
+这使得不可能搜索的文件启用搜索。
+你能使用 MEncoder 永久性地修复索引 (请参见文档)。
+.br
+.I 注意:
+此选项仅对原本支持搜索的媒体有效 (如: 没有标准输入, 管道, 等)。
+.
 .TP
-.B \-fps <参数>
-替代帧速率(如果文件头中没有该参数/\:参数是错误的)(浮点数).
+.B \-fps <浮点数>
+过载帧速率。
+如果原先的值是错误的或缺少的有用。
+.
 .TP
-.B \-frames <参数>
-只播放/\:转换前<参数>帧, 然后退出.
+.B \-frames <参数值>
+只播放/\:转换前<参数值>帧, 然后退出。
+.
 .TP
-.B \-hr\-mp3\-seek (仅用于MP3)
-高精度mp3搜索. 默认为: 在播放外部MP3文件时启用,
-因为我们需要搜索到非常精确的位置来保持A/\:V同步. 这种方法在后退搜索时特别慢
-\- 它需要绕回开头来找到准确的帧.
+.B \-hr-mp3-seek (仅用于 MP3)
+高精度 MP3 搜索。
+播放外部 MP3 文件时启用, 
+因为我们需要搜索到非常精确的位置来保持 A/V 同步。
+这种方法在后退搜索时尤其慢, 因为需要绕回到开头来寻找准确的帧位置。
+.
 .TP
-.B \-idx (参见\-forceidx)
-在没有找到索引的情况下重建AVI文件的索引, 从而允许搜索.
-对于损坏的/\:不完整的下载, 或制作低劣的AVI.
+.B \-idx (也请参见 \-forceidx)
+在没有找到索引的情况下重建文件的索引, 从而允许搜索。
+对于损坏的/\:不完整的下载, 或制作低劣的文件有用。
+.br
+.I 注意:
+此选项仅对原本支持搜索的媒体有效 (如 \& 没有标准输入, 管道, 等)。
+.
+.TP
+.B \-ipv4-only-proxy (仅适用于网络)
+对于 IPv6 地址跳过代理服务器。
+仍然用于 IPv4 连接。
+.
+.TP
+.B \-loadidx <索引文件>
+从 \-saveidx 保存的此文件中, 读取视频索引数据。
+索引用于搜索, 过载其它任何包含在 AVI 本身的索引。
+MPlayer 不阻止你装载产生于不同 AVI 的索引文件, 
+但是的确会导致不利的结果。
+.br
+.I 注意:
+既然 MPlayer 现在支持 OpenDML, 此选项已废弃。
+.
 .TP
 .B \-mc <每帧秒数>
-每帧的最大A-V同步修正(以秒为单位).
+每帧的最大 A-V 同步修正(以秒为单位)。
+.
 .TP
 .B \-mf <选项1:选项2:...>
-用来从多个PNG或JPEG文件解码.
-.br
+用来从多个 PNG 或 JPEG 文件中解码。
+.sp 1
 可用选项有:
-
+.sp 1
 .PD 0
 .RSs
-.IPs on
-打开多文件支持
-.IPs w=<参数>
-输出的宽度(自动检测)
-.IPs h=<参数>
-输出的高度(自动检测)
-.IPs fps=<参数>
-输出的帧速率(默认值: 25)
-.IPs type=<参数>
-输入文件的类型(可用类型: jpeg, png, tga, sgi)
+.IPs w=<参数值>
+输入文件的宽度 (默认值是: 自动检测)
+.IPs h=<参数值>
+输入文件的高度 (默认值是: 自动检测)
+.IPs fps=<参数值>
+输出的帧率 (默认值是: 25)
+.IPs type=<参数值>
+输入文件的类型 (可用类型是: jpeg, png, tga, sgi)
 .RE
 .PD 1
 .
 .TP
-.B \-ni (仅用于AVI)
-指定使用非交错的AVI分析器(用来处理某些质量差的AVI文件的播放).
+.B \-ni (仅用于 AVI)
+锁定使用非交错的 AVI 分析器(修复某些质量差的 AVI 文件的播放)。
+.
 .TP
-.B \-nobps (仅用于AVI)
-不使用平均比特率值来维持A\-V同步(AVI). 对某些文件头损坏的AVI文件有帮助.
+.B \-nobps (仅用于 AVI)
+不使用平均比特率值来维持 A-V 同步。
+对某些文件头损坏的 AVI 文件有帮助。
+.
 .TP
 .B \-noextbased
-禁用基于后缀名的分路器选择机制. 默认情况下, 当文件类型(分路器)无法可靠检测时,
-(文件没有头部或者不够可靠), 将使用后缀名来选择分路器.
-后备的基于内容的分路器总是可用的.
+停用基于后缀名的分路器选择机制。
+默认情况下, 当文件类型(分路器)无法可靠检测时
+(文件没有头部或者不够可靠), 使用文件后缀名来选择分路器。
+基于内容的分路器总是可作为备用的。
+.
 .TP
-.B \-passwd <密码> (参见\-user选项)
-设置http认证的密码.
+.B \-passwd <密码> (也请参见\-user 选项) (仅适用于网络)
+设置 http 认证密码.
+.
+.TP
+.B \-prefer-ipv4 (仅适用于网络)
+使用 IPv4 网络连接。
+IPv6 自动地作为备用。
+.
+.TP
+.B \-prefer-ipv6 (仅适用于 IPv6 网络)
+使用 IPv6 网络连接。
+IPv4 自动地作为备用。
+.
+.TP
+.B \-pvr <选项1:选项2:...> (仅适用于 PVR)
+此选项调谐 PVR 捕捉模块的各种编码属性。
+不得不与基于硬件 MPEG 编码器 V4L2 驱动支持的卡一起使用。
+Hauppauge WinTV PVR\-150/250/350/500 和所有基于 IVTV 的卡
+是众所周知的 PVR 捕捉卡。
+小心只有 Linux 2.6.18 及以上的内核能通过 V4L2 层处理 MPEG 流。
+对于 MPEG 流硬件捕捉卡并使用 MPlayer/MEncoder 来观看电影的, 
+使用 'pvr://' 作为 URL 地址。
+.sp 1
+可用选项有:
+.RSs
+.IPs aspect=<0\-3>
+指定宽高比:
+.RSss
+0: 1:1
+.br
+1: 4:3 (默认)
+.br
+2: 16:9
+.br
+3: 2.21:1
+.REss
+.IPs arate=<32000\-48000>
+指定编码音频率(encoding audio rate) (默认是: 48000 Hz, 可用的有: 32000, 
+44100 和 48000 Hz)。
+.IPs alayer=<1\-3>
+指定编码 MPEG 音频层 (默认是: 2)。
+.IPs abitrate=<32\-448>
+指定音频编码比特率(以 kbps 为单位) (默认是: 384)。
+.IPs amode=<参数值>
+指定音频编码模式。
+可用的预设值是 'stereo', 'joint_stereo', 'dual' 和 'mono' (默认是: stereo)。
+.IPs vbitrate=<参数值>
+指定平均编码视频比特率(以 Mbps 为单位) (默认是: 6)。
+.IPs vmode=<参数值>
+指定视频编码模式:
+.RSss
+vbr: Variable BitRate (可变比特率) (默认)
+.br
+cbr: Constant BitRate (常量比特率)
+.REss
+.IPs vpeak=<参数值>
+指定编码视频比特率峰值(以 Mbps 为单位) 
+(只对 VBR 编码有用, 默认是: 9.6)。
+.IPs fmt=<参数值>
+选择进行编码的 MPEG 格式:
+.RSss
+ps:    MPEG-2 Program Stream (MPEG-2 程序流) (默认)
+.br
+ts:    MPEG-2 Transport Stream (MPEG-2 传输流)
+.br
+mpeg1: MPEG-1 System Stream (MPEG-1 系统流)
+.br
+vcd:   Video CD compatible stream (VCD 可兼容流)
+.br
+svcd:  Super Video CD compatible stream (SVCD 可兼容流)
+.br
+dvd:   DVD compatible stream (DVD 可兼容流)
+.REss
+.RE
+.PD 1
+.
 .TP
 .B \-rawaudio <选项1:选项2:...>
-用这个选项你可以播放原始音频文件.
-也可以用来播放不是44KHz 16Bit立体声的音频CD.
-.br
+此选项可让你播放原始音频文件。
+你也不得不使用 \-demuxer rawaudio。
+也可以用来播放不是 44kHz 16-位 立体声的音频 CD。
+播放原始 AC3 流请使用 \-rawaudio format=0x2000 \-demuxer rawaudio。
+.sp 1
 可用选项有:
-
+.sp 1
 .PD 0
 .RSs
-.IPs on
-使用原始音频分路器
-.IPs channels=<参数>
+.IPs channels=<参数值>
 声道数
-.IPs rate=<参数>
+.IPs rate=<参数值>
 每秒采样率
-.IPs samplesize=<参数>
-以字节为单位的样本大小
-.IPs format=<参数>
-16进制的fourcc
+.IPs samplesize=<参数值>
+样本大小(以字节为单位)
+.IPs bitrate=<参数值>
+原始音频文件的比特率
+.IPs format=<参数值>
+16-进制的 fourcc
 .RE
 .PD 1
 .
 .TP
 .B \-rawvideo <选项1:选项2:...>
-用这个选项你可以播放原始视频文件.
-.br
+此选项可让你播放原始视频文件。
+你也不得不使用 \-demuxer rawvideo。
+.sp 1
 可用选项有:
-
+.sp 1
 .PD 0
 .RSs
-.IPs on
-使用原始视频分路器
-.IPs fps=<参数>
-每秒帧速率, 默认值为25.0
+.IPs fps=<参数值>
+每秒帧(速)率 (默认值是: 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
-设置默认的图像大小
-.IPs w=<参数>
-以像素为单位的图像宽
-.IPs h=<参数>
-以像素为单位的图像高
+设置标准的图像大小
+.IPs w=<参数值>
+图像宽(以像素为单位)
+.IPs h=<参数值>
+图像高(以像素为单位)
 .IPs i420|yv12|yuy2|y8
 设置色彩空间
-.IPs format=<参数>
-16进制的色彩空间(fourcc)
-.IPs size=<参数>
-以字节为单位的帧大小
+.IPs format=<参数值>
+16-进制的色彩空间(fourcc)
+.IPs size=<参数值>
+帧大小(以字节为单位)
+.REss
+.sp 1
+.RS
+.I 示例:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer foreman.qcif -demuxer rawvideo -rawvideo qcif"
+播放著名的 "foreman" 视频样本。
+.IPs "mplayer sample-720x576.yuv -demuxer rawvideo -rawvideo w=720:h=576"
+播放原始 YUV 样本。
 .RE
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp
-与"rtsp://"URL一起用来指定最后结果输入的RTP和RTCP的包通过TCP流,
-(跟RTSP使用同一个TCP连接 ).
-这个选项可以用于当你的Internet连接不允许UDP包进入的情况.
-(参见http://www.live555.com/mplayer/).
+.B \-rtsp-port
+与 'rtsp://' 的 URL 地址一起用来锁定客户端的端口号。
+如果你在路由器后面, 想把 RTSP 流从服务器转到指定客户端, 此选项可能有用。
+.
 .TP
-.B \-skipopening
-提过DVD打开(仅用于dvdnav).
+.B \-rtsp-destination
+与 'rtsp://' 的 URL 地址一起用来强制目标绑定 IP 地址。
+对某些 RTSP 服务器不能把 RTP 包送到正确的接口, 此选项可能有用。
+如果连接 RTSP 服务器失败, 使用 \-v 看看 MPlayer 试图绑定到
+哪个 IP 地址, 然后试试用它强制分配到你的计算机。
+.
 .TP
-.B \-sb <比特位置> (参见\-ss选项)
-搜索到比特位置.
-用于播放开始部分是垃圾的CDROM镜像/\:.VOB文件.
+.B \-rtsp-stream-over-tcp (仅适用于 LIVE555)
+与 "rtsp://" 的 URL 地址一起用来指定让 RTP 和 RTCP 进入包流过 TCP 
+(使用与 RTSP 相同的 TCP 连接)。
+如果你的破 internet 连接不传递 UDP 进入包, 此选项可能有用 
+(参见 http://www.live555.com/\:mplayer/)。
+.
+.TP
+.B \-saveidx <文件名>
+强制重建索引并转储到 <文件名>。
+目前只对 AVI 文件有效。
+.br
+.I 注意:
+既然 MPlayer 现在支持 OpenDML, 此选项已废弃。
+.
+.TP
+.B \-sb <比特位置> (也请参见 \-ss)
+搜索到比特位置。
+回放开始部分是垃圾的 CD-ROM 镜像或 VOB 文件时有用。
+.
+.TP
+.B \-speed <0.01\-100>
+根据给定的参数因子, 减慢或加快回放速度。
+并不保证能与 \-oac copy 一起工作正常。
+.
 .TP
 .B \-srate <Hz>
-指定音频播放速, 视频播放速度也会改变以保持a-v同步.
-MEncoder会把这个值传给lame用于重新采样.
+选择输出的取样率(当然声卡对此有限制)。
+如果选择的样本频率与当前的媒体有差异, 会在音频过滤层中插入
+音频过滤器 resample(重取样) 或 lavcresample 来补偿此差异。
+重取样的类型由 \-af-adv 选项控制。
+默认的是快速重取样, 可能会引起失真。
+.
 .TP
-.B \-ss <时间> (参见\-sb选项)
-搜索到指定的时间位置.
-
+.B \-ss <时间> (也请参见 \-sb)
+搜索到给定的时间位置。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
 .IPs "\-ss 56"
-搜索到56秒处
+搜索到 56 秒处。
 .IPs "\-ss 01:10:00"
-搜索到1小时10分钟处
+搜索到 1 小时 10 分钟处。
 .RE
 .PD 1
 .
 .TP
-.B \-tv <选项1:选项2:...>
-这个选项会启用MPlayer的电视截取功能.
-
-.I 注意:
-.br
-MPlayer不接受冒号所以在设备标识中用逗号代替. (例如.\&用hw.0,0代替hw:0,0).
-.br
-虽然使用ALSA是你可以选择任何采样率, 但LAME音频编码器只能对'标准'的采样率进行编码.
-如果你选择一个奇怪的采样率使用这个编码器得到的.avi文件会没有声音.
-.br
-可用选项有:
+.B \-tskeepbroken
+告诉 MPlayer 不要丢弃流中报告损坏的 TS 包。
+有时需要播放窜改了的 MPEG-TS 文件。
 .
+.TP
+.B \-tsprobe <字节位置>
+播放 MPEG-TS 流时, 此选项让你指定流中多少字节给 MPlayer 搜索
+你所要的音频和视频的标识。
+.
+.TP
+.B \-tsprog <1\-65534>
+播放 MPEG-TS 流时, 你可以用此选项指定你想运行的程序(如果知道的话)。
+能和 \-vid 及 \-aid 一起使用。
+.
+.TP
+.B \-radio <选项1:选项2:...> (仅用于广播)
+这些选项设置广播捕捉模块的各种属性。
+为了用 MPlayer 收听广播, (如果没有给定频道, )使用 "radio://<频率>"
+ 或者(如果给定频道, )使用 "radio://<频道号>" 作为 URL 地址。
+要启动抓取子系统, 使用 "radio://<频率或频道>/capture"。
+如果 capture 关键词没给, 你只可以用 line-in (线路输入) 电缆收听广播。
+由于同步问题, 不推荐用 capture 收听, 此过程不舒服。
+.sp 1
+可用选项有:
 .RSs
-.IPs on
-使用电视输入
+.IPs device=<参数值>
+使用的广播设备 (默认值是: /dev/radio0)。
+.IPs driver=<参数值>
+使用的广播驱动 (默认值是: v4l2 如果可用, 否则是 v4l)。
+目前, 支持 v4l 和 v4l2 驱动。
+.IPs volume=<0..100>
+广播设备的音量 (默认 100)
+.IPs channels=<频率>\-<名称>,<频率>\-<名称>,...
+设置频道列表。
+名称中使用 _ 代替空格(或使用引号 ;-))。
+OSD 会显示频道名称, slave 命令 radio_step_channel 和 radio_set_channel 
+会有用于遥控(参见 LIRC)。
+如果有列表, URL 中的号会当作频道列表的频道位置。
+.br
+.I 示例:
+radio://1, radio://104.4, radio_set_channel 1
+.IPs adevice=<参数值> (配合启用广播 capture)
+从中捕捉声音的设备名称。
+没有名称的话就会停用 capture, 哪怕 URL 中出现捕捉关键字。
+对于 ALSA 设备使用格式 hw=<卡>.<设备>。
+如果设备名称包含一个 '=', 此模块就会使用 ALSA 去捕捉, 否则使用 OSS。
+.IPs arate=<参数值> (配合启用广播 capture)
+每秒采样率 (默认值是: 44100)。
+.br
+.I 注意:
+使用音频捕捉时也请用相同的采样率设置 \-rawaudio rate=<参数值> 选项。
+如果声音速度有(太快)问题, 
+试试用不同的速度值(如 48000,44100,32000,...)。
+.IPs achannels=<参数值> (配合启用广播 capture)
+用于捕捉的音频声道数。
+.RE
+.
+.TP
+.B \-tv <选项1:选项2:...> (仅用于 TV/\:PVR)
+此选项会调谐 TV 捕捉模块的各种属性。
+为了用 MPlayer 收看 TV, 使用 "tv://" 或 "tv://<频道号>"
+甚至用 "tv://<频道名>" (参见下面的频道选项) 作为 URL 地址。
+.sp 1
+可用选项有:
+.RSs
 .IPs noaudio
 没有声音
-.IPs driver=<参数>
+.IPs driver=<参数值>
 可用参数: dummy, v4l, bsdbt848
-.IPs device=<参数>
-设定默认的/dev/\:video0之外的设备
-.IPs input=<参数>
-设定默认的0(电视)之外的输入(参见输出的列表)
-.IPs freq=<参数>
-设定电视调谐器的频率(例如\& 511.250).
+.IPs device=<参数值>
+指定 TV 设备 (默认值是: /dev/\:video0）。
+.IPs input=<参数值>
+指定输入 (默认值是: 0 (TV), 参见控制台输出的可用输入列表）。
+.IPs freq=<参数值>
+指定调谐器的频率(例如\& 511.250)。
 与频道参数不兼容.
-.IPs outfmt=<参数>
-电视调谐器的输出格式(yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
-i420)
-.IPs width=<参数>
+.IPs outfmt=<参数值>
+指定调谐器的输出格式, 用 V4L 驱动支持的预设置(yv12, rgb32, rgb24, 
+rgb16, rgb15, uyvy, yuy2, i420) 或者一个以 16-进制值给定的武断的格式。
+试试用 outfmt=help 察看可用的所有格式的列表。
+.IPs width=<参数值>
 输出窗口的宽度
-.IPs height=<参数>
+.IPs height=<参数值>
 输出窗口的高度
-.IPs fps=<参数>
+.IPs fps=<参数值>
 捕捉视频的帧速率(帧每秒)
-.IPs buffersize=<参数>
-设定以兆为单位的捕捉缓冲区的大小(默认值: 动态)
-.IPs norm=<参数>
-可用参数: PAL, SECAM, NTSC
-.IPs channel=<参数>
-把电视调谐器设定到<参数>频道.
-.IPs chanlist=<参数>
+.IPs buffersize=<参数值>
+捕捉缓冲区的最大尺寸(以兆为单位) (默认值: 动态)
+.IPs norm=<参数值>
+bsdbt848 和 v4l 可用的参数: PAL, SECAM, NTSC。对于 v4l2, 
+参见控制台输出的所有可用制式列表, 也请参看下面的 normid 选项。
+.IPs "normid=<参数值> (仅用于 v4l2)"
+设置 TV 制式 为给定的数字标识。
+TV 制式取决于捕捉卡。参见控制台输出的可用 TV 制式列表。
+.IPs channel=<参数值>
+设置调谐器到 <参数值> 频道.
+.IPs chanlist=<参数值>
 可用参数: europe-east, europe-west, us-bcast, us-cable, 等等
 .IPs channels=<频道>\-<名称>,<频道>\-<名称>,...
-设定频道的名称. 在名称中用_代替空格(或者玩引号游戏;-).
-频道名称会用OSD显示, tv_step_channel,
-tv_set_channel和tv_last_channel等命令将可以被遥控器(参见lirc)使用.
-与频率参数不兼容.
-警告: 频道编号将出现在'频道'列表上, 从1开始.
-示例: 使用tv://1, tv://2, tv_set_channel 1, tv_set_channel 2等等.
-.IPs [brightness|contrast|hue|saturation]=<\-100\-100>
-设置显卡的色彩均衡器.
-.IPs audiorate=<参数>
-设定音频捕捉比特率
+设置频道的名称。
+名称中使用 _ 代替空格(或使用引号 ;-))。
+OSD 会显示频道名称, slave 命令 tv_step_channel, tv_set_channel 及 
+tv_last_channel 会有用于遥控(参见 LIRC)。
+与频率参数不兼容。
+.br
+.I 注意:
+频道号就将是"频道"列表上从1开始计数的位置。
+.br
+.I 示例:
+tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
+.IPs [brightness|contrast|hue|saturation]=<-100\-100>
+设置显卡的色彩均衡器。
+.IPs audiorate=<参数值>
+设置音频捕捉比特率。
 .IPs forceaudio
-即使v4l报告没有音频源也捕捉音频
-.IPs alsa
-从ALSA捕捉
+即使 v4l 报告没有音频源也捕捉音频。
+.IPs "alsa\ "
+从 ALSA 捕捉。
 .IPs amode=<0\-3>
 选择音频模式:
 .RSss
-0: mono
+0: 单声道
 .br
-1: stereo
+1: 立体声
 .br
-2: language 1
+2: 语言 1
 .br
-3: language 2
+3: 语言 2
 .REss
 .IPs forcechan=<1\-2>
-默认情况下, 记录音频声道数由电视卡检察音频模式自动决定.
-这个选项允许指定立体声/\:单声道记录而不管amode选项和v4l返回的参数.
-在电视卡不能报告正确的音频模式的时候可以用这个选项解决麻烦.
-.IPs adevice=<参数>
-设置音频设备
-.RSss
-/dev/\:...\&用于OSS
-.br
-硬件标识用于ALSA
-.REss
-.IPs audioid=<参数>
-选择捕捉卡的音频输出, 如果它有不止一个的话
-.IPs "[volume|bass|treble|balance]=<0\-65535>"
-这些选项用来设定视频捕捉卡上的混音器参数.
-如果你的卡没有混音器, 它们将没有效果.
+默认情况下, 音频声道数计数由电视卡查询音频模式自动决定。
+此选项允许锁定立体声/\:单声道记录而不管 amode 选项和 v4l 返回的参数。
+在电视卡不能报告正确的当前音频模式的时候可以用此选项解决麻烦。
+.IPs adevice=<参数值>
+设置音频设备。
+<参数值> 必须是 /dev/\:xxx 用于 OSS 而硬件标识用于 ALSA。
+硬件标识用于 ALSA 时, 你务必要用 '.' 代替 ':'。
+.IPs audioid=<参数值>
+选择捕捉卡的音频输出, 如果它有不止一个的话。
+.IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
+.IPs "[volume|bass|treble|balance]=<0\-100> (v4l2)"
+这些选项用来设置视频捕捉卡上的混音器参数。
+如果你的卡没有混音器, 它们将没有效果。
+对于 v4l2 50 根据驱动器的报告影射到控制器上的默认值。
 .IPs immediatemode=<布尔值>
-参数值为0表示同时捕捉和缓冲音频和视频(mencoder的默认值).
-参数值为1(mplayer的默认值)表示只捕捉视频而让音频通过通过环路电缆由电视卡输入声卡.
+参数值为 0 表示同时捕捉和缓冲音频和视频 (MEncoder 的默认值)。
+参数值为 1 (MPlayer 的默认值)表示只捕捉视频
+而让音频通过环路电缆由电视卡输入声卡。
 .IPs mjpeg
-使用硬件mjpeg压缩(如果芯片支持的话). 当使用这个选项的时候,
-你不需要设置输出窗口的宽和高, mplayer会根据抽样参数(见下面)自动确定.
-.IPs decimation=<1,2,4>
-选择硬件mjpeg压缩的图像的尺寸:
+使用硬件 MJPEG 压缩(如果芯片支持的话)。
+使用此选项时, 你不需要指定输出窗口的宽和高, 
+因为 MPlayer 会根据 decimation 参数(见下面)自动确定。
+.IPs decimation=<1|2|4>
+选择硬件 MJPEG 压缩的图像尺寸:
 .RSss
 1: 全尺寸
     704x576    PAL
@@ -1336,30 +1648,35 @@ tv_set_channel和tv_last_channel等命令将可以被遥控器(参见lirc)使用
     176x144    PAL
     176x120    NTSC
 .REss
-.IPs quality=<0-100>
-选择jpeg压缩的质量
-.br
-(全尺寸推荐使用quality < 60)
+.IPs quality=<0\-100>
+选择 JPEG 压缩的质量(全尺寸推荐值 < 60)。
 .RE
 .
 .TP
-.B \-user <用户名> (参见\-passwd选项)
-设定http认证的用户名.
+.B \-user <用户名> (也请参见 \-passwd) (仅用于网络)
+指定 HTTP 认证的用户名。
+.
 .TP
-.B vcd://<音轨>
-从设备或镜像文件中播放video CD音轨(参见\-cuefile).
+.B \-user-agent <字符串>
+使用 <字符串> 作为 HTTP 流的用户代理。
+.
 .TP
 .B \-vid <标识>
-选择视频频道[MPG: 0\-15 ASF: 0\-255].
+选择视频频道 (MPG: 0\-15, ASF: 0\-255, MPEG-TS: 17\-8190)。
+当播放 MPEG-TS 流时, MPlayer/\:MEncoder 用第一个程序
+播放已选择的(如果有的话)视频流。
+.
 .TP
 .B \-vivo <子选项> (调试代码)
-指定.vivo分路器的音频参数(用于调试).
-
-
-.SH "OSD/字幕选项"
+锁定 VIVO 分路器的音频参数(用于调试)。
+.
+.
+.
+.SH "OSD/SUBTITLE OPTIONS (OSD/字幕选项)"
 .I 注意:
-.br
-参见\-vf expand.
+也请参见\-vf expand。
+.
+.\" The below is only synced with r9821
 .TP
 .B \-dumpmicrodvdsub (仅用于MPLAYER)
 把给定的字幕文件(由\-sub选项设置)转换为MicroDVD字幕格式.
@@ -4114,37 +4431,28 @@ cat *.vob | mencoder <选项> \-
 
 
 .\" --------------------------------------------------------------------------
-.\" Bugs, authors, standard disclaimer
+.\" 错误, 作者, 标准声明
 .\" --------------------------------------------------------------------------
 .
-.SH BUGS
-可能有.
-请, 多看几遍文档(特别是bugreports.html), FAQ和以前的邮件文档!
-.br
-把你的完整的bug报告发送到MPlayer-users邮件列表<mplayer-users@mplayerhq.hu>.
-我们喜欢完整的bug报告:)
-
-
-.SH 作者
-查看文档.
-.TP
-MPlayer is (C) 2000\-2003
-.B Arpad Gereoffy
-.TP
-这个man page由
-.B Gabucino
-.br
-.B Diego Biurrun
-.br
-.B Jonas Jermann
-.br
-编写并维护
+.SH "BUGS (错误)"
+不要惊慌。
+如果你发现错误, 报告我们, 但请首先确认你已阅读了所有的文档。
+也要小心那些表情符号 :)
+许多错误是不正确的设置和参数使用引起的。
+错误报告的文档一节
+(http://www.mplayerhq.hu/\:DOCS/\:HTML/\:en/\:bugreports.html)
+解释了如何创建有用的错误报告。
+.
+.
+.
+.SH "AUTHORS 作者"
+MPlayer 由 Arpad Gereoffy 起草。
+参见 AUTHORS (作者) 文件的其它许多贡献者的一些列表。
 .PP
-请把相关的邮件发送到MPlayer-users邮件列表.
-
-
-.SH "标准声明"
-你必须自己承担使用风险!
-可能会有错误和不精确的地方损坏你的系统或你的眼睛.
-小心使用, 尽管可能性很低, 作者对此不负任何责任!
+MPlayer 是 (C) 2000\-2006 The MPlayer Team (MPlayer 团队)所有
+.PP
+本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写。
+由 Diego Biurrun 维护。
+有关本文的联系请发送邮件到 MPlayer-DOCS 邮件列表。
+与翻译相关的邮件属于 MPlayer-translations 邮件列表.
 .\" end of file
