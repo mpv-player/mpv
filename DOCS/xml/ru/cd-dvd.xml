@@ -30,10 +30,10 @@
 
 <para>
 Вы можете уменьшить скорость вращения IDE CD-ROM приводов программами
-<command>hdparm</command> или <command>setcd</command>. Это работает так:
-<screen>hdparm -E <replaceable>[скорость]</replaceable> <replaceable>[cdrom устройство]</replaceable></screen>
-<screen>setcd -x <replaceable>[скорость]</replaceable> <replaceable>[cdrom устройство]</replaceable></screen>
-<screen>cdctl -bS <replaceable>[speed]</replaceable></screen>
+<command>hdparm</command>,<command>setcd</command> или <command>cdctl</command>. Это работает так:
+<screen>hdparm -E <replaceable>[скорость]</replaceable> <replaceable>[устройство cdrom]</replaceable></screen>
+<screen>setcd -x <replaceable>[скорость]</replaceable> <replaceable>[устройство cdrom]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[скорость]</replaceable></screen>
 </para>
 
 <para>
@@ -44,7 +44,7 @@
 <para>
 Если у Вас есть привилегии администратора, следующая команда
 тоже может оказаться полезной:
-<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[cdrom device]</replaceable>/settings</screen>
+<screen>echo file_readahead:2000000 &gt; /proc/ide/<replaceable>[устройство cdrom]</replaceable>/settings</screen>
 </para>
 
 <para>
@@ -52,7 +52,7 @@
 дисках с царапинами). Если поставить слишком большое значение, то постоянный
 запуск и остановка вращения диска ужасно снизят эффективность.
 Рекомендуется также подстроить привод, используя <command>hdparm</command>:
-<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom устройство</replaceable></screen>
+<screen>hdparm -d1 -a8 -u1 <replaceable>[устройство cdrom]</replaceable></screen>
 </para>
 
 <para>
@@ -62,7 +62,7 @@
 </para>
 
 <para>
-Обратитесь к &quot;<filename>/proc/ide/<replaceable>[cdrom device]</replaceable>/settings</filename>&quot;
+Обратитесь к &quot;<filename>/proc/ide/<replaceable>[устройство cdrom]</replaceable>/settings</filename>&quot;
 для подстройки Вашего CD-ROM привода.
 </para>
 
@@ -76,7 +76,7 @@
 <sect2 id="drives_freebsd">
 <title>FreeBSD</title>
 <para>Скорость: 
-<screen>cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>speed</replaceable></screen></para>
+<screen>cdcontrol [-f <replaceable>устройство</replaceable>] speed <replaceable>[скорость]</replaceable></screen></para>
 <para>DMA: <screen>sysctl hw.ata.atapi_dma=1</screen></para>
 </sect2>
 </sect1>
@@ -86,7 +86,7 @@
 <para>
 Полный список возможных опций можно прочитать в man странице.
 Синтаксис для воспроизведения стандартного DVD таков:
-<screen>mplayer dvd://<replaceable>&lt;ролик&gt;</replaceable> [-dvd-device <replaceable>привод</replaceable>]</screen>
+<screen>mplayer dvd://<replaceable>&lt;ролик&gt;</replaceable> [-dvd-device <replaceable>устройство</replaceable>]</screen>
 </para>
 
 <para>
