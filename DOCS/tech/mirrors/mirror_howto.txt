@@ -156,7 +156,12 @@ Here is an example stanza to paste into your Apache configuration:
         Alias /homepage /path/to/htdocs
         Alias /MPlayer  /path/to/MPlayer
         Alias /DOCS     /path/to/MPlayer/DOCS
+        AddDefaultCharset off
 </VirtualHost>
+
+The AddDefaultCharset directive is necessary because newer versions of Apache
+appear to default to defining a standard charset. This breaks our documentation
+translations, which are written in different encodings.
 
 
 Setting up an FTP server
