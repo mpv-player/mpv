@@ -1,4 +1,4 @@
-.\" Synced with r20375
+.\" Synced with r20445
 .\" MPlayer (C) 2000-2006 MPlayer Team
 .\" Ezt a man oldalt Gabucino, Diego Biurrun és Jonas Jermann készíti/készítette
 .\" Karbantartó: Gabrov
@@ -738,6 +738,12 @@ Csak a cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix, xover, xv
 meghajtók támogatják.
 .
 .TP
+.B \-correct-pts (kísérleti)
+Átváltja az MPlayert egy kísérleti módba, melyben a videó szûrõk állapítják
+meg a videó kockák prezentációs idõbélyegét a videó forrás helyett.
+A legtöbb szûrõ nem támogatja.
+.
+.TP
 .B \-crash-debug (DEBUG KÓD)
 Automatikusan kapcsolódik a gdb-hez összeomlásnál vagy SIGTRAP-nál.
 A támogatását be kell fordítani a configure \-\-enable-crash-debug kapcsolójával.
@@ -1148,7 +1154,7 @@ teljes 5.1
 .PD 1
 .
 .TP
-.B \-chapter <fejezet ID>[\-<utolsó fejezet ID-je>] (csak DVD)
+.B \-chapter <fejezet ID>[\-<utolsó fejezet ID-je>] (csak dvd:// és dvdnav://)
 Itt adható meg, hogy a lejátszás mely fejezetnél kezdõdjön. Opcionálisan az
 is megadható, hogy melyiknél végzõdjön (alapértelmezésként: 1).
 .
