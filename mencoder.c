@@ -718,7 +718,10 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 spudec_set_forced_subs_only(vo_spudec,forced_subs_only);
 
 // set up output file:
-muxer_f=fopen(out_filename,"wb");
+if(!strcmp(out_filename, "-"))
+    muxer_f=stdout;
+else
+    muxer_f=fopen(out_filename,"wb");
 if(!muxer_f) {
   mp_msg(MSGT_MENCODER, MSGL_FATAL, MSGTR_CannotOpenOutputFile, out_filename);
   mencoder_exit(1,NULL);
