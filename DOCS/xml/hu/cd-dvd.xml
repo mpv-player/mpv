@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20401 -->
+<!-- synced with r20442 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -180,68 +180,9 @@ vannak lefoglalva.
 <para>
 A DVD dekódolást a <systemitem>libdvdcss</systemitem> végzi. A módszer
 megadható a <envar>DVDCSS_METHOD</envar> környezeti változó segítségével,
-mely beállítható kulcsra, lemezre vagy címre.
+lásd a man oldalt.
 </para>
 </formalpara>
-
-<para>
-Ha semmi sincs megadva, akkor a következő módon próbálkozik (alapértelmezett:
-kulcs, sáv kérés):
-</para>
-
-<orderedlist>
-<listitem><para>
-<emphasis role="bold">busz kulcs</emphasis>: Ez a kulcs a hitelesítés során
-kerül megállapításra (ioctl-ek és egyéb kulcs cserék hosszú sora, titkosítási
-cucc) és a sáv és a lemez kulcsok titkosítására használják, mielőtt kiküldenék
-a védtelen buszra (hogy megelőzzés az eavesdropping-ot). A busz kulcs szükséges
-a titkosított lemez kulcs megszerzéséhez és visszakódolásához.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">cache-elt kulcs</emphasis>: Az <application>MPlayer</application>
-végignézi a már cache-elt sáv kulcsokat, amik a <filename class="directory">~/.dvdcss</filename>
-könyvtárban tárolódnak (gyors ;).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">kulcs</emphasis>: Ha nincs cache-lt kulcs, az
-<application>MPlayer</application> megpróbálja visszakódolni a lemez kulcsot
-a beépített lejátszó kulcsok gyűjteményének segítségével.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">lemez</emphasis>: Ha a kulcs metódus sikertelen
-(pl. nincs beépített lejátszó kulcs), az <application>MPlayer</application>
-feltöri a lemez kulcsot egy brute force algoritmussal. Ez az eljárás
-intenzív CPU használatot eredményez és 64 MB memóriát igényel (16M 32Bit-es
-bejegyzések a hash táblához) az ideiglenes adatok tárolásához. Ez a módszer
-mindig működik (lassú).
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">sáv kérés</emphasis>: a lemez kulccsal az
-<application>MPlayer</application> az <systemitem>ioctl()</systemitem> segítségével
-lekéri a titkosított sáv kulcsokat, amik <emphasis>rejtett szektorokban</emphasis> találhatók.
-Az RPC-2 meghajtók régió védelme is ebben a lépésben van megvalósítva, ezért
-ez hibázhat ilyen meghajtókon. Ha sikerül, a sáv kulcsokat dekódolja a busz és
-lemez kulccsal.
-</para></listitem>
-
-<listitem><para>
-<emphasis role="bold">sáv</emphasis>: Ezt a metódust akkor használjuk, ha
-a sáv kérés sikertelen és nem a DVD meghajtóval történő kulcs cserén alapul.
-Ez egy crypto támadást indít, hogy kitalálja közvetlenül a sáv kulcsot (egy,
-a visszakódolt VOB tartalomban ismétlődő minta megkeresésével, azt feltételezve,
-hogy az első titkosított bájtnak megfelelő sima szöveg ezen minta folytatása).
-Ezt a metódust úgy is ismerik, mint &quot;ismert tiszta szöveg támadás&quot;
-vagy &quot;DeCSSPlus&quot;. Ritka esetben sikertelen lehet, mert nincs elég
-titkosított adat a lemezen a statisztikai támadáshoz vagy mert a kulcs megváltozik
-a sáv közepén. Ez a módszer az egyetlen járható út a merevlemezen tárolt DVD-k
-visszakódolásához vagy a rossz régió kódú DVD-k RPC2 meghajtóban történő
-lejátszásához (lassú).
-</para></listitem>
-</orderedlist>
 
 <para>
 Az RPC-1 DVD meghajtók csak szoftveresen védik a régió kódot. Az RPC-2 meghajtókban

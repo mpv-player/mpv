@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with r20041 -->
+<!-- synced with r20449 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -165,7 +165,7 @@ fájlból állnak.  Ha olyan fájlaid vannak, hogy
 (teljes elérési út is megadható). A <option>-vobsubid</option> kapcsoló olyan,
 mint a <option>-sid</option> a DVD-knél, segítségével felirat sávok (nyelvek)
 közül választhatsz. Abban az esetben, ha elfelejted a <option>-vobsubid</option>
-kapcsolót, az <application>MPLayer</application> a <option>-slang</option> kapcsolóval
+kapcsolót, az <application>MPlayer</application> a <option>-slang</option> kapcsolóval
 megadott nyelveket próbálja használni, és a <systemitem>langidx</systemitem>-re ugrik
 az <filename>.IDX</filename> fájlban, hogy beállítsa a felirat nyelvét. Ha ez nem
 sikerül, nem lesz felirat.
