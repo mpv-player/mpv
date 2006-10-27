@@ -27,18 +27,12 @@
 #include "mp_msg.h"
 #include "cpudetect.h"
 
-#if 1
-double ff_eval(char *s, double *const_value, const char **const_name,
-               double (**func1)(void *, double), const char **func1_name,
-               double (**func2)(void *, double, double), char **func2_name,
-               void *opaque);
-#endif
-
 // Needed to bring in lrintf.
 #define HAVE_AV_CONFIG_H
 
 #include "libavcodec/avcodec.h"
 #include "libavcodec/dsputil.h"
+#include "libavcodec/eval.h"
 #include "libavutil/common.h"
 
 /* FIXME: common.h defines printf away when HAVE_AV_CONFIG
@@ -57,7 +51,7 @@ double ff_eval(char *s, double *const_value, const char **const_name,
 
 
 struct vf_priv_s {
-	char eq[3][2000];
+        AVEvalExpr * e[3];
         int framenum;
         mp_image_t *mpi;
 };
@@ -120,6 +114,76 @@ static double cr(struct vf_instance_s* vf, double x, double y){
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
 	mp_image_t *dmpi;
         int x,y, plane;
+
+	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
+		// no DR, so get a new image! hope we'll get DR buffer:
+		vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+		mpi->w,mpi->h);
+	}
+
+	dmpi= vf->dmpi;
+        vf->priv->mpi= mpi;
+
+        vf_clone_mpi_attributes(dmpi, mpi);
+
+        for(plane=0; plane<3; plane++){
+            int w= mpi->w >> (plane ? mpi->chroma_x_shift : 0);
+            int h= mpi->h >> (plane ? mpi->chroma_y_shift : 0);
+            uint8_t *dst  = dmpi->planes[plane];
+            int dst_stride= dmpi->stride[plane];
+            double const_values[]={
+                M_PI,
+                M_E,
+                0,
+                0,
+                w,
+                h,
+                vf->priv->framenum,
+                w/(double)mpi->w,
+                h/(double)mpi->h,
+                0
+            };
+            if (!vf->priv->e[plane]) continue;
+            for(y=0; y<h; y++){
+                const_values[3]=y;
+                for(x=0; x<w; x++){
+                    const_values[2]=x;
+                    dst[x+y* dst_stride]= ff_parse_eval(vf->priv->e[plane], const_values, vf);
+                }
+            }
+        }
+
+        vf->priv->framenum++;
+
+	return vf_next_put_image(vf,dmpi, pts);
+}
+
+static void uninit(struct vf_instance_s* vf){
+	if(!vf->priv) return;
+
+	av_free(vf->priv);
+	vf->priv=NULL;
+}
+
+//===========================================================================//
+static int open(vf_instance_t *vf, char* args){
+    char eq[3][2000] = { { 0 }, { 0 }, { 0 } };
+    int plane;
+
+    vf->config=config;
+    vf->put_image=put_image;
+//    vf->get_image=get_image;
+    vf->uninit=uninit;
+    vf->priv=av_malloc(sizeof(struct vf_priv_s));
+    memset(vf->priv, 0, sizeof(struct vf_priv_s));
+
+    if (args) sscanf(args, "%1999s:%1999s:%1999s", eq[0], eq[1], eq[2]);
+
+    if (!eq[1][0]) strncpy(eq[1], eq[0], sizeof(eq[0])-1);
+    if (!eq[2][0]) strncpy(eq[2], eq[1], sizeof(eq[0])-1);
+
+    for(plane=0; plane<3; plane++){
         static const char *const_names[]={
             "PI",
             "E",
@@ -139,77 +203,20 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
             "p",
             NULL
         };
+        double (*func2[])(void *, double, double)={
+            lum,
+            cb,
+            cr,
+            plane==0 ? lum : (plane==1 ? cb : cr),
+            NULL
+        };
+        char * a;
+        vf->priv->e[plane] = ff_parse(eq[plane], const_names, NULL, NULL, func2, func2_names, &a);
 
-	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-		// no DR, so get a new image! hope we'll get DR buffer:
-		vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-		mpi->w,mpi->h);
-	}
-
-	dmpi= vf->dmpi;
-        vf->priv->mpi= mpi;
-
-        vf_clone_mpi_attributes(dmpi, mpi);
-
-        for(plane=0; plane<3; plane++){
-            int w= mpi->w >> (plane ? mpi->chroma_x_shift : 0);
-            int h= mpi->h >> (plane ? mpi->chroma_y_shift : 0);
-            uint8_t *dst  = dmpi->planes[plane];
-            int dst_stride= dmpi->stride[plane];
-            double (*func2[])(void *, double, double)={
-                lum,
-                cb,
-                cr,
-                plane==0 ? lum : (plane==1 ? cb : cr),
-                NULL
-            };
-            double const_values[]={
-                M_PI,
-                M_E,
-                0,
-                0,
-                w,
-                h,
-                vf->priv->framenum,
-                w/(double)mpi->w,
-                h/(double)mpi->h,
-                0
-            };
-            for(y=0; y<h; y++){
-                const_values[3]=y;
-                for(x=0; x<w; x++){
-                    const_values[2]=x;
-                    dst[x+y* dst_stride]= ff_eval(vf->priv->eq[plane], const_values, const_names, NULL, NULL, func2, func2_names, vf);
-                }
-            }
+        if (!vf->priv->e[plane]) {
+            mp_msg(MSGT_VFILTER, MSGL_ERR, "geq: error loading equation `%s': %s\n", eq[plane], a);
         }
-
-        vf->priv->framenum++;
-
-	return vf_next_put_image(vf,dmpi, pts);
-}
-
-static void uninit(struct vf_instance_s* vf){
-	if(!vf->priv) return;
-
-	av_free(vf->priv);
-	vf->priv=NULL;
-}
-
-//===========================================================================//
-static int open(vf_instance_t *vf, char* args){
-    vf->config=config;
-    vf->put_image=put_image;
-//    vf->get_image=get_image;
-    vf->uninit=uninit;
-    vf->priv=av_malloc(sizeof(struct vf_priv_s));
-    memset(vf->priv, 0, sizeof(struct vf_priv_s));
-
-    if (args) sscanf(args, "%1999s:%1999s:%1999s", vf->priv->eq[0], vf->priv->eq[1], vf->priv->eq[2]);
-
-    if(!vf->priv->eq[1][0]) strncpy(vf->priv->eq[1], vf->priv->eq[0], sizeof(vf->priv->eq[0])-1);
-    if(!vf->priv->eq[2][0]) strncpy(vf->priv->eq[2], vf->priv->eq[1], sizeof(vf->priv->eq[0])-1);
+    }
 
     return 1;
 }
