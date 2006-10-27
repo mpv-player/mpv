@@ -471,6 +471,7 @@ _3dnowext=auto
 _mmxext=auto
 _sse=auto
 _sse2=auto
+_cmov=auto
 _armv5te=auto
 _iwmmxt=auto
 _mtrr=auto
@@ -1446,6 +1447,7 @@ esac # case "$host_arch" in
 
 if test "$_runtime_cpudetection" = yes ; then
   if x86; then
+    _cmov=no
     _mmx=yes
     _3dnow=yes
     _3dnowext=yes
@@ -1492,6 +1494,7 @@ EOF
   extcheck $_3dnowext "3dnowext" "pswapd %%mm0, %%mm0" || _3dnowext=no
   extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" || _sse=no _gcc3_ext="$_gcc3_ext -mno-sse"
   extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" || _sse2=no _gcc3_ext="$_gcc3_ext -mno-sse2"
+  extcheck $_cmov "cmov" "cmovb %%eax,%%ebx" || _cmov=no
   echocheck "mtrr support"
   echores "$_mtrr"
 
@@ -2125,6 +2128,8 @@ for ac_option do
   --disable-3dnow) _3dnow=no _3dnowext=no ;;
   --enable-3dnowext) _3dnow=yes _3dnowext=yes ;;
   --disable-3dnowext) _3dnowext=no ;;
+  --enable-cmov) _cmov=yes ;;
+  --disable-cmov) _cmov=no ;;
   --enable-altivec) _altivec=yes ;;
   --disable-altivec) _altivec=no ;;
   --enable-armv5te) _armv5te=yes ;;
@@ -2245,6 +2250,10 @@ if x86 ; then
   #  _pref_as_version='2.11'
   #  echo 'xorpd %xmm0, %xmm0' >> $TMPS
   #fi
+  if test "$_cmov" = yes ; then
+    _pref_as_version='2.10.1'
+    echo 'cmovb %eax, %ebx' >> $TMPS
+  fi
   $_as $TMPS -o $TMPO > /dev/null 2>&1 || as_verc_fail=yes
 
   if test "$as_verc_fail" != yes ; then
@@ -2405,6 +2414,8 @@ _def_sse='#undef HAVE_SSE'
 test "$_sse" = yes && _def_sse='#define HAVE_SSE 1'
 _def_sse2='#undef HAVE_SSE2'
 test "$_sse2" = yes && _def_sse2='#define HAVE_SSE2 1'
+_def_cmov='#undef HAVE_CMOV'
+test "$_cmov" = yes && _def_cmov='#define HAVE_CMOV 1'
 _def_armv5te='#undef HAVE_ARMV5TE'
 test "$_armv5te" = yes && _def_armv5te='#define HAVE_ARMV5TE 1'
 _def_iwmmxt='#undef HAVE_IWMMXT'
@@ -7635,6 +7646,7 @@ TARGET_MMX2 = $_mmxext
 TARGET_3DNOW = $_3dnow
 TARGET_3DNOWEX = $_3dnowext
 TARGET_SSE = $_sse
+TARGET_CMOV = $_cmov
 TARGET_ALTIVEC = $_altivec
 TARGET_ARMV5TE = $_armv5te
 TARGET_IWMMXT = $_iwmmxt
@@ -8300,6 +8312,7 @@ $_def_mmx	// only define if you have MMX (newer x86 chips, not P54C/PPro)
 $_def_mmxext	// only define if you have MMX2 (Athlon/PIII/4/CelII)
 $_def_sse	// only define if you have SSE (Intel Pentium III/4 or Celeron II)
 $_def_sse2	// only define if you have SSE2 (Intel Pentium 4)
+$_def_cmov	// only define if you have CMOV (i686+, without VIA C3)
 $_def_altivec	// only define if you have Altivec (G4)
 $_def_armv5te	// only define if you have Enhanced DSP Extensions (ARM)
 $_def_iwmmxt	// only define if you have XScale IWMMX (ARM)
