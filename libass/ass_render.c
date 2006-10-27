@@ -1968,6 +1968,8 @@ int ass_set_fonts(ass_instance_t* priv, const char* fonts_dir, const char* defau
 	priv->settings.default_font = default_font ? strdup(default_font) : 0;
 	priv->settings.default_family = default_family ? strdup(default_family) : 0;
 
+	if (priv->fontconfig_priv)
+		fontconfig_done(priv->fontconfig_priv);
 	priv->fontconfig_priv = fontconfig_init(fonts_dir, default_family, default_font);
 
 	return !!priv->fontconfig_priv;
