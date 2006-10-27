@@ -51,17 +51,17 @@
 
 
 struct vf_priv_s {
-        AVEvalExpr * e[3];
-        int framenum;
-        mp_image_t *mpi;
+    AVEvalExpr * e[3];
+    int framenum;
+    mp_image_t *mpi;
 };
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
+        unsigned int flags, unsigned int outfmt){
         int i;
 
-	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
+    return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
@@ -75,8 +75,8 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PLANAR){
         mpi->planes[1]=vf->dmpi->planes[1];
         mpi->planes[2]=vf->dmpi->planes[2];
-	mpi->stride[1]=vf->dmpi->stride[1];
-	mpi->stride[2]=vf->dmpi->stride[2];
+        mpi->stride[1]=vf->dmpi->stride[1];
+        mpi->stride[2]=vf->dmpi->stride[2];
     }
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
@@ -112,58 +112,58 @@ static double cr(struct vf_instance_s* vf, double x, double y){
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi, double pts){
-	mp_image_t *dmpi;
-        int x,y, plane;
+    mp_image_t *dmpi;
+    int x,y, plane;
 
-	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-		// no DR, so get a new image! hope we'll get DR buffer:
-		vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-		mpi->w,mpi->h);
-	}
+    if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
+        // no DR, so get a new image! hope we'll get DR buffer:
+        vf->dmpi=vf_get_image(vf->next,mpi->imgfmt, MP_IMGTYPE_TEMP,
+                              MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
+                              mpi->w,mpi->h);
+    }
 
-	dmpi= vf->dmpi;
-        vf->priv->mpi= mpi;
+    dmpi= vf->dmpi;
+    vf->priv->mpi= mpi;
 
-        vf_clone_mpi_attributes(dmpi, mpi);
+    vf_clone_mpi_attributes(dmpi, mpi);
 
-        for(plane=0; plane<3; plane++){
-            int w= mpi->w >> (plane ? mpi->chroma_x_shift : 0);
-            int h= mpi->h >> (plane ? mpi->chroma_y_shift : 0);
-            uint8_t *dst  = dmpi->planes[plane];
-            int dst_stride= dmpi->stride[plane];
-            double const_values[]={
-                M_PI,
-                M_E,
-                0,
-                0,
-                w,
-                h,
-                vf->priv->framenum,
-                w/(double)mpi->w,
-                h/(double)mpi->h,
-                0
-            };
-            if (!vf->priv->e[plane]) continue;
-            for(y=0; y<h; y++){
-                const_values[3]=y;
-                for(x=0; x<w; x++){
-                    const_values[2]=x;
-                    dst[x+y* dst_stride]= ff_parse_eval(vf->priv->e[plane], const_values, vf);
-                }
+    for(plane=0; plane<3; plane++){
+        int w= mpi->w >> (plane ? mpi->chroma_x_shift : 0);
+        int h= mpi->h >> (plane ? mpi->chroma_y_shift : 0);
+        uint8_t *dst  = dmpi->planes[plane];
+        int dst_stride= dmpi->stride[plane];
+        double const_values[]={
+            M_PI,
+            M_E,
+            0,
+            0,
+            w,
+            h,
+            vf->priv->framenum,
+            w/(double)mpi->w,
+            h/(double)mpi->h,
+            0
+        };
+        if (!vf->priv->e[plane]) continue;
+        for(y=0; y<h; y++){
+            const_values[3]=y;
+            for(x=0; x<w; x++){
+                const_values[2]=x;
+                dst[x+y* dst_stride]= ff_parse_eval(vf->priv->e[plane], const_values, vf);
             }
         }
+    }
 
-        vf->priv->framenum++;
+    vf->priv->framenum++;
 
-	return vf_next_put_image(vf,dmpi, pts);
+    return vf_next_put_image(vf,dmpi, pts);
 }
 
 static void uninit(struct vf_instance_s* vf){
-	if(!vf->priv) return;
+    if(!vf->priv) return;
 
-	av_free(vf->priv);
-	vf->priv=NULL;
+    av_free(vf->priv);
+    vf->priv=NULL;
 }
 
 //===========================================================================//
