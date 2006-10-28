@@ -549,6 +549,11 @@ flags[frame_code], frame_flags
     max_pts_distance (where pts represents this frame's pts and last_pts is
     defined as below).
 
+last_pts
+    the timestamp of the last frame with the same stream_id as the current
+    if there is no such frame between the last syncpoint and the current
+    frame then the syncpoint timestamp is used, see global_key_pts
+
 stream_id[frame_code]
     MUST be <250
 
@@ -560,6 +565,9 @@ data_size_lsb[frame_code]
 
 pts_delta[frame_code]
     MUST be <16384 and >-16384
+    if FLAG_CODED_PTS is set in the flags of the current frame then this
+    value MUST be ignored, if FLAG_CODED_PTS is not set then pts_delta is the
+    difference between the current pts and last_pts
 
 reserved_count[frame_code]
     MUST be <256
