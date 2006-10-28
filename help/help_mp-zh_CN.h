@@ -2,9 +2,8 @@
 // Reminder of hard terms which need better/final solution later:
 //   (file links to be updated later if available!);  
 //   NAV; pass 3; section/subsection;  XScreenSaver; keycolor;  
-//   _audio_ (why 2 underscores here [en r20191 ln 94]? emphasize?); 
 //   AGP move failed on Y plane;  
-//   profile?; demuxer?
+//   profile? demuxer? drain? flush? 
 // 
 // Translated by Lu Ran <hephooey@fastmail.fm>, Sheldon Jin <jinsh2@yahoo.com>
 // (Translator before 2006-04-24)
@@ -26,7 +25,7 @@ static char help_text[]=
 #endif
 #ifdef USE_DVDREAD
 " dvd://<titleno>  从设备而不是普通文件上播放 DVD 标题号\n"
-" -alang/-slang    选择DVD音轨/字幕的语言(使用两位字符的国家代码)\n"
+" -alang/-slang    选择 DVD 音轨/字幕的语言(使用两字符的国家代号)\n"
 #endif
 " -ss <position>   寻找到给定(多少秒或时分秒 hh:mm:ss 的)位置\n"
 " -nosound         不播放声音\n"
@@ -47,7 +46,7 @@ static char help_text[]=
 " p or SPACE       暂停播放(按任意键继续)\n"
 " q or ESC         停止播放并退出程序\n"
 " + or -           调整音频延迟增加/减少 0.1 秒\n"
-" o                循环 OSD 模式:  无/搜索条/搜索条加定时\n"
+" o                循环 OSD 模式:  无/搜索条/搜索条加计时器\n"
 " * or /           增加或减少 PCM 音量\n"
 " x or z           调整字幕延迟增加/减少 0.1 秒\n"
 " r or t           上/下调整字幕位置, 参见“-vf expand”\n"
@@ -94,7 +93,7 @@ static char help_text[]=
 "         ****      你的系统太“慢”了, 播放不了!     ****\n"\
 "         ************************************************\n"\
 " 可能的原因, 问题, 和解决办法：\n"\
-"- 最常见的原因：损坏的或有错误的 _audio_ 音频驱动\n"\
+"- 最常见的原因：损坏的或有错误的 _音频_ 驱动\n"\
 "  - 试试 -ao sdl 或使用 ALSA  的 OSS 模拟。\n"\
 "  - 试验不同的 -autosync 的值，不妨从 30 开始。\n"\
 "- 视频输出太慢\n"\
@@ -150,7 +149,7 @@ static char help_text[]=
 "  反汇编。具体细节看 DOCS/zh/bugreports.html#crash。\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer 崩溃了。这不应该发生。\n"\
-"  这可能是 MPlayer 代码中, 或者你的驱动中, 或者你的 gcc 版本中的一个\n"\
+"  这可能是 MPlayer 代码中 _或者_ 你的驱动中 _或者_ 你的 gcc 版本中的一个\n"\
 "  错误。如你觉得这是 MPlayer 的错误，请阅读 DOCS/zh/bugreports.html\n"\
 "  并遵循上面的步骤报告错误。除非你在报告一个可能的错误时候提供我们\n"\
 "  所需要的信息, 否则我们不能也不会帮助你。\n"
@@ -848,8 +847,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_POS "位置: "
 #define MSGTR_PREFERENCES_SUB_AutoLoad "停用字幕自动装载"
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode 字幕"
-#define MSGTR_PREFERENCES_SUB_MPSUB "转换所给字幕为 MPlayer 的字幕文件"
-#define MSGTR_PREFERENCES_SUB_SRT "转换所给字幕为基于时间的 SubViewer (SRT) 格式"
+#define MSGTR_PREFERENCES_SUB_MPSUB "转换给定的字幕成为 MPlayer 的字幕文件"
+#define MSGTR_PREFERENCES_SUB_SRT "转换给定的字幕成为基于时间的 SubViewer (SRT) 格式"
 #define MSGTR_PREFERENCES_SUB_Overlap "启/停用字幕重叠"
 #define MSGTR_PREFERENCES_SUB_USE_ASS "SSA/ASS 字幕提供中"
 #define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "使用边空白"
@@ -910,7 +909,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOSDScale "OSD 缩放:"
 #define MSGTR_PREFERENCES_Cache "打开/关闭缓存"
 #define MSGTR_PREFERENCES_CacheSize "缓存大小: "
-#define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式开始"
+#define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式启动"
 #define MSGTR_PREFERENCES_SaveWinPos "保存窗口位置"
 #define MSGTR_PREFERENCES_XSCREENSAVER "停用屏保(XScreenSaver)"
 #define MSGTR_PREFERENCES_PlayBar "使用播放条"
@@ -1777,7 +1776,7 @@ static char help_text[]=
 #define MSGTR_LIBVO_VESA_FoundVesaVbeBiosVersion "[VO_VESA] 找到 VESA VBE BIOS 版本 %x.%x 修订版本: %x。\n"
 #define MSGTR_LIBVO_VESA_VideoMemory "[VO_VESA] 显存: %u Kb。\n"
 #define MSGTR_LIBVO_VESA_Capabilites "[VO_VESA] VESA 兼容性: %s %s %s %s %s。\n"
-#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! 下面显示 OEM 信息. !!!\n"
+#define MSGTR_LIBVO_VESA_BelowWillBePrintedOemInfo "[VO_VESA] !!! 下面显示 OEM 信息 !!!\n"
 #define MSGTR_LIBVO_VESA_YouShouldSee5OemRelatedLines "[VO_VESA] 你应该看到 5 行 OEM 相关内容; 否则, 你的 vm86 有问题。\n"
 #define MSGTR_LIBVO_VESA_OemInfo "[VO_VESA] OEM 信息: %s。\n"
 #define MSGTR_LIBVO_VESA_OemRevision "[VO_VESA] OEM 版本: %x。\n"
@@ -1788,7 +1787,7 @@ static char help_text[]=
 "[VO_VESA] 因为 VESA BIOS 只在自举的时候初始化自己。\n"
 #define MSGTR_LIBVO_VESA_UsingVesaMode "[VO_VESA] 使用 VESA 模式 (%u) = %x [%ux%u@%u]\n"
 #define MSGTR_LIBVO_VESA_CantInitializeSwscaler "[VO_VESA] 不能初始化软件缩放。\n"
-#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] 不能使用 DGA。锁定区域切换模式. :(\n"
+#define MSGTR_LIBVO_VESA_CantUseDga "[VO_VESA] 不能使用 DGA。锁定区域切换模式。 :(\n"
 #define MSGTR_LIBVO_VESA_UsingDga "[VO_VESA] 使用 DGA (物理资源: %08lXh, %08lXh)"
 #define MSGTR_LIBVO_VESA_CantUseDoubleBuffering "[VO_VESA] 不能使用双缓冲: 显存不足。\n"
 #define MSGTR_LIBVO_VESA_CantFindNeitherDga "[VO_VESA] 未找到 DGA 也不能重新分配窗口的大小。\n"
