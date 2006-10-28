@@ -1532,7 +1532,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   splice.
   As long as <application>MEncoder</application> sees the audio when it is
   encoding the video, it can do this dropping/duping (which is usually OK
-  since it takes place at full black/scenechange, but if
+  since it takes place at full black/scenechange), but if
   <application>MEncoder</application> cannot see the audio, it will just
   process all frames as-is and they will not fit the final audio stream when
   you for example merge your audio and video track into a Matroska file.
