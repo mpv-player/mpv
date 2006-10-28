@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- In sync with r20408 -->
+<!-- In sync with r20477 -->
 
 <chapter id="encoding-guide">
   <title>Encodieren mit <application>MEncoder</application></title>
@@ -1652,8 +1652,8 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
         bleiben inkorrekt und der einzige Weg sie zu korrigieren ist, Videoframes
         an diesem Splice zu streichen bzw. zu duplizieren.
         Solange <application>MEncoder</application> Audio beim Encodieren des
-        Videos sieht, kann er dieses Streichen/Duplizieren erledigen, was
-        gewöhnlich OK ist, da es bei voller Schwärze/Szenenwechsel stattfindet,
+        Videos sieht, kann er dieses Streichen/Duplizieren erledigen (was
+        gewöhnlich OK ist, da es bei voller Schwärze/Szenenwechsel stattfindet),
         aber wenn <application>MEncoder</application> Audio nicht erkennen kann,
         wird er einfach alle Frames so wie sie ankommen verarbeiten und sie werden
         einfach nicht zum endgültigen Audiostream passen, wenn du beispielsweise
@@ -1661,7 +1661,7 @@ vcodec=mpeg2video:vbitrate=6000:ilme:ildct:acodec=mp2:abitrate=224</screen>
       </para>
 
       <para>
-        Zuallererst wirst du den DVD-Sound in eine WAV-datei konvertieren müssen, die
+        Zuallererst wirst du den DVD-Sound in eine WAV-Datei konvertieren müssen, die
         der Audiocodec als Input nutzen kann.
         Zum Beispiel:
         <screen>mplayer <replaceable>source_file.vob</replaceable> -ao pcm:file=<replaceable>destination_sound.wav</replaceable> -vc dummy -aid 1 -vo null</screen>
