@@ -2861,16 +2861,33 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		}
 
 
+		if(probe)
+		{
+			p = &packet[base];
+		}
+		else	//feeding
+		{
+			if(*dp_offset + buf_size > *buffer_size)
+			{
+				*buffer_size = *dp_offset + buf_size + TS_FEC_PACKET_SIZE;
+				resize_demux_packet(*dp, *buffer_size);
+			}
+			p = &((*dp)->buffer[*dp_offset]);
+		}
+
+		buf_size = stream_read(stream, p, buf_size);
+		if(buf_size==-1)
+		{
+			mp_msg(MSGT_DEMUX, MSGL_DBG2,  "\r\nts_parse() couldn't read data\r\n");
+			continue;
+		}
+		stream_skip(stream, junk);
 
 		if(is_start)
 		{
 			uint8_t *lang = NULL;
 
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "IS_START\n");
-
-			p = &packet[base];
-			stream_read(stream, p, buf_size);
-			stream_skip(stream, junk);
 
 			len = pes_parse2(p, buf_size, es, pid_type, pmt, pid);
 			if(! len)
@@ -2912,14 +2929,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 				demuxer->filepos = stream_tell(demuxer->stream) - es->size;
 
-				if(*dp_offset + es->size > *buffer_size)
-				{
-					*buffer_size = *dp_offset + es->size + TS_FEC_PACKET_SIZE;
-					resize_demux_packet(*dp, *buffer_size);
-					//we'll skip at least one RESIZE() in the next iteration of ts_parse()
-					mp_msg(MSGT_DEMUX, MSGL_DBG2, "RESIZE DP TO %d\n", *buffer_size);
-				}
-				memcpy(&((*dp)->buffer[*dp_offset]), es->start, es->size);
+				memmove(p, es->start, es->size);
 				*dp_offset += es->size;
 				(*dp)->flags = 0;
 				(*dp)->pos = stream_tell(demuxer->stream);
@@ -2962,7 +2972,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				else
 				{
-					stream_skip(stream, buf_size+junk);
 					continue;
 				}
 			}
@@ -2970,22 +2979,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			if(! probe)
 			{
-				if(*dp_offset + sz > *buffer_size)
-				{
-					*buffer_size = *dp_offset + sz + TS_FEC_PACKET_SIZE;
-					resize_demux_packet(*dp, *buffer_size);
-					//we'll skip at least one RESIZE() in the next iteration of ts_parse()
-					mp_msg(MSGT_DEMUX, MSGL_DBG2, "RESIZE DP TO %d\n", *buffer_size);
-				}
-
-				stream_read(stream, &((*dp)->buffer[*dp_offset]), sz);
 				*dp_offset += sz;
-
-				if(buf_size - sz > 0)
-				{
-					stream_skip(stream, buf_size - sz);
-				}
-				stream_skip(stream, junk);
 
 				if(*dp_offset >= MAX_PACK_BYTES)
 				{
@@ -2998,9 +2992,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			}
 			else
 			{
-				stream_read(stream, es->start, sz);
-				if(buf_size - sz) stream_skip(stream, buf_size-sz);
-				stream_skip(stream, junk);
+				memcpy(es->start, p, sz);
 
 				if(es->size)
 					return es->size;
