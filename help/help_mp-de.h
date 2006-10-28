@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@kraymer.de>
 
-// In sync with r20191
+// In sync with r20440
 
 // ========================= MPlayer help ===========================
 
@@ -871,6 +871,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_MPSUB "Konvertiere Untertitel in das MPlayer-Untertitelformat"
 #define MSGTR_PREFERENCES_SUB_SRT "Konvertiere Untertitel in das zeitbasierte SubViewer-Untertitelformat (SRT)"
 #define MSGTR_PREFERENCES_SUB_Overlap "Schalte Untertitelüberlappung ein/aus"
+#define MSGTR_PREFERENCES_SUB_USE_ASS "Rendering von SSA/ASS-Untertiteln"
+#define MSGTR_PREFERENCES_SUB_ASS_USE_MARGINS "Benutze Ränder"
+#define MSGTR_PREFERENCES_SUB_ASS_TOP_MARGIN "Oben: "
+#define MSGTR_PREFERENCES_SUB_ASS_BOTTOM_MARGIN "Unten: "
 #define MSGTR_PREFERENCES_Font "Schrift:"
 #define MSGTR_PREFERENCES_FontFactor "Schriftfaktor:"
 #define MSGTR_PREFERENCES_PostProcess "Postprocessing aktivieren:"
