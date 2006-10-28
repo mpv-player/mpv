@@ -285,36 +285,21 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
 
 static int nsv_check_file ( demuxer_t* demuxer )
 {
-    unsigned char hdr;
+    uint32_t hdr = 0;
     int i;
-
-    /* Store original position */
-//  off_t orig_pos = stream_tell(demuxer->stream);
 
     mp_msg ( MSGT_DEMUX, MSGL_V, "Checking for Nullsoft Streaming Video\n" );
    
     for (i = 0; i < HEADER_SEARCH_SIZE; i++) {
-        if (stream_read_char(demuxer->stream) != 'N')
-            continue;
-        if(stream_eof(demuxer->stream))
+        uint8_t c = stream_read_char(demuxer->stream);
+        if (stream_eof(demuxer->stream))
             return 0;
-
-        if (stream_read_char(demuxer->stream) != 'S')
-            continue;
-        if(stream_eof(demuxer->stream))
-            return 0;
-        if (stream_read_char(demuxer->stream) != 'V')
-            continue;
-        if(stream_eof(demuxer->stream))
-            return 0;
-
-        hdr = stream_read_char(demuxer->stream);
-        if(stream_eof(demuxer->stream)) 
-            return 0;
-        if((hdr == 'f') || (hdr == 's')) {
-            stream_seek(demuxer->stream,stream_tell(demuxer->stream)-4);
+        if (hdr == mmioFOURCC('s', 'V', 'S', 'N') ||
+            (hdr == mmioFOURCC('f', 'V', 'S', 'N') && !c)) {
+            stream_seek(demuxer->stream,stream_tell(demuxer->stream)-5);
             return DEMUXER_TYPE_NSV;
         }
+        hdr = (hdr << 8) | c;
     }
 
     return 0;
