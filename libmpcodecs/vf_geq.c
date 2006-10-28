@@ -176,7 +176,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv=av_malloc(sizeof(struct vf_priv_s));
     memset(vf->priv, 0, sizeof(struct vf_priv_s));
 
-    if (args) sscanf(args, "%1999s:%1999s:%1999s", eq[0], eq[1], eq[2]);
+    if (args) sscanf(args, "%1999[^:]:%1999[^:]:%1999[^:]", eq[0], eq[1], eq[2]);
 
     if (!eq[1][0]) strncpy(eq[1], eq[0], sizeof(eq[0])-1);
     if (!eq[2][0]) strncpy(eq[2], eq[1], sizeof(eq[0])-1);
