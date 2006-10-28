@@ -2881,22 +2881,12 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			
 			if(probe)
 			{
+				uint8_t *lang = NULL;
+
 				if(es->type == UNKNOWN)
 					return 0;
 				
 				tss->payload_size = es->payload_size;
-				if(len == 0)
-				{
-					if(tss->type != UNKNOWN)
-					{
-						es->size = buf_size;
-						es->start = p;
-						return 1;
-					}
-				}
-				else
-				{
-					uint8_t *lang = NULL;
 					tss->type = es->type;
 					tss->subtype = es->subtype;
 					
@@ -2910,22 +2900,9 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					else
 						es->lang[0] = 0;
 					return 1;
-				}
 			}
 			else
 			{
-				if(len == 0)
-				{
-					if(tss->type != UNKNOWN)
-					{
-						len = es->size = buf_size;		//push the whole packet to the fifo 
-											//(we already learned what it is during the probe phase)
-						es->start = p;
-					}
-					else
-						continue;
-				}
-					
 				if(es->pts == 0.0f)
 					es->pts = tss->pts = tss->last_pts;
 				else
