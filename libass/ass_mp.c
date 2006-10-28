@@ -41,7 +41,11 @@ char* ass_color = NULL;
 char* ass_border_color = NULL;
 char* ass_styles_file = NULL;
 
+#ifdef HAVE_FONTCONFIG
 extern int font_fontconfig;
+#else
+static int font_fontconfig = 0;
+#endif
 extern char* font_name;
 extern float text_font_scale_factor;
 extern int subtitle_autoscale;
@@ -200,11 +204,6 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 char *get_path(char *);
 
 extern char *font_name;
-#ifdef HAVE_FONTCONFIG
-extern int font_fontconfig;
-#else
-static int font_fontconfig = 0;
-#endif
 
 void ass_configure(ass_instance_t* priv, int w, int h) {
 	char *dir, *path, *family;
