@@ -1282,6 +1282,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		es->payload_size -= header_len + 3;
 
 
+	es->is_synced = 1;	//only for SL streams we have to make sure it's really true, see below
 	if (stream_id == 0xbd)
 	{
 		mp_msg(MSGT_DEMUX, MSGL_DBG3, "pes_parse2: audio buf = %02X %02X %02X %02X %02X %02X %02X %02X, 80: %d\n",
@@ -1388,6 +1389,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 	{
 		int l;
 		
+		es->is_synced = 0;
 		if(type_from_pmt != UNKNOWN)	//MP4 A/V or SL
 		{
 			es->start   = p;
@@ -1444,6 +1446,7 @@ static int pes_parse2(unsigned char *buf, uint16_t packet_len, ES_stream_t *es, 
 		mp_msg(MSGT_DEMUX, MSGL_DBG2, "pes_parse2: unknown packet, id: %x\n", stream_id);
 	}
 
+	es->is_synced = 0;
 	return 0;
 }
 
@@ -2619,8 +2622,10 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		}
 
 
+		if(is_start)
+			tss->is_synced = 1;
 
-		if(((pid > 1) && (pid < 16)) || (pid == 8191))		//invalid pid
+		if((!is_start && !tss->is_synced) || ((pid > 1) && (pid < 16)) || (pid == 8191))		//invalid pid
 		{
 			stream_skip(stream, buf_size-1+junk);
 			continue;
@@ -2882,17 +2887,14 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			stream_skip(stream, junk);
 
 			len = pes_parse2(p, buf_size, es, pid_type, pmt, pid);
+			if(! len)
+			{
+				tss->is_synced = 0;
+				continue;
+			}
 			es->pid = tss->pid;
 			tss->is_synced |= es->is_synced || rap_flag;
 			
-			if(es->type==SL_PES_STREAM && !tss->is_synced)
-			{
-				if(probe)
-					return 0;
-				else
-					continue;
-			}
-					
 			if(probe)
 			{
 				if(es->type == UNKNOWN)
@@ -2980,16 +2982,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		else
 		{
 			uint16_t sz;
-
-			if((tss->type == UNKNOWN) || (tss->type==SL_PES_STREAM && !tss->is_synced))
-			{
-				stream_skip(stream, buf_size+junk);
-				if(probe)
-					return (is_video || is_audio || is_sub);
-				else
-					continue;
-			}
-
 
 			es->pid = tss->pid;
 			es->type = tss->type;
