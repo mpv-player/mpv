@@ -374,7 +374,7 @@ file_id_string
     "nut/multimedia container\0"
 
 *_startcode
-        all startcodes start with 'N'
+    all startcodes start with 'N'
 
 main_startcode
     0x7A561F5F04ADULL + (((uint64_t)('N'<<8) + 'M')<<48)
