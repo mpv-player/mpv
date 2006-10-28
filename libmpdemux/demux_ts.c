@@ -1518,22 +1518,6 @@ static inline int32_t prog_id_in_pat(ts_priv_t *priv, uint16_t pid)
 	return -1;
 }
 
-/*
-DON'T REMOVE, I'LL NEED IT IN THE (NEAR) FUTURE)
-static int check_crc32(uint32_t val, uint8_t *ptr, uint16_t len, uint8_t *vbase)
-{
-	uint32_t tab_crc32, calc_crc32;
-
-	calc_crc32 = CalcCRC32(val, ptr, len);
-
-	tab_crc32 = (vbase[0] << 24) | (vbase[1] << 16) | (vbase[2] << 8) | vbase[3];
-
-	printf("CRC32, TAB: %x, CALC: %x, eq: %x\n", tab_crc32, calc_crc32, tab_crc32 == calc_crc32);
-	return (tab_crc32 == calc_crc32);
-
-}
-*/
-
 static int collect_section(ts_section_t *section, int is_start, unsigned char *buff, int size)
 {
 	uint8_t *ptr;
