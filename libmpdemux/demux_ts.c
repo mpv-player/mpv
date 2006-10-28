@@ -2864,6 +2864,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 		if(is_start)
 		{
+			uint8_t *lang = NULL;
+
 			mp_msg(MSGT_DEMUX, MSGL_DBG2, "IS_START\n");
 
 			p = &packet[base];
@@ -2878,27 +2880,26 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			}
 			es->pid = tss->pid;
 			tss->is_synced |= es->is_synced || rap_flag;
+			tss->payload_size = es->payload_size;
+
+			if(is_audio)
+				lang = pid_lang_from_pmt(priv, es->pid);
+			if(lang != NULL)
+			{
+				memcpy(es->lang, lang, 3);
+				es->lang[3] = 0;
+			}
+			else
+				es->lang[0] = 0;
 			
 			if(probe)
 			{
-				uint8_t *lang = NULL;
-
 				if(es->type == UNKNOWN)
 					return 0;
 				
-				tss->payload_size = es->payload_size;
 				tss->type = es->type;
 				tss->subtype = es->subtype;
 				
-				if(is_audio)
-					lang = pid_lang_from_pmt(priv, es->pid);
-				if(lang != NULL)
-				{
-					memcpy(es->lang, lang, 3);
-					es->lang[3] = 0;
-				}
-				else
-					es->lang[0] = 0;
 				return 1;
 			}
 			else
@@ -2910,8 +2911,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "ts_parse, NEW pid=%d, PSIZE: %u, type=%X, start=%p, len=%d\n",
 					es->pid, es->payload_size, es->type, es->start, es->size);
-
-				tss->payload_size = es->payload_size;
 
 				demuxer->filepos = stream_tell(demuxer->stream) - es->size;
 
