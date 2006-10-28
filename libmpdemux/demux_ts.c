@@ -2882,9 +2882,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			tss->is_synced |= es->is_synced || rap_flag;
 			tss->payload_size = es->payload_size;
 
-			if(is_audio)
-				lang = pid_lang_from_pmt(priv, es->pid);
-			if(lang != NULL)
+			if(is_audio && (lang = pid_lang_from_pmt(priv, es->pid)))
 			{
 				memcpy(es->lang, lang, 3);
 				es->lang[3] = 0;
