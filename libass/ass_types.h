@@ -79,6 +79,8 @@ typedef struct ass_event_s {
 
 typedef struct parser_priv_s parser_priv_t;
 
+typedef struct ass_library_s ass_library_t;
+
 /// ass track represent either an external script or a matroska subtitle stream (no real difference between them)
 /// it can be used in rendering after the headers are parsed (i.e. events format line read)
 typedef struct ass_track_s {
@@ -104,6 +106,7 @@ typedef struct ass_track_s {
 	int default_style; // index of default style
 	char* name; // file name in case of external subs, 0 for streams
 
+	ass_library_t* library;
 	parser_priv_t* parser_priv;
 } ass_track_t;
 

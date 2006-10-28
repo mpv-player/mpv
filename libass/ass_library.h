@@ -18,29 +18,14 @@
   Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 */
 
-#ifndef __ASS_OPTIONS_H__
-#define __ASS_OPTIONS_H__
+#ifndef __ASS_LIBRARY_H__
+#define __ASS_LIBRARY_H__
 
-#include "subreader.h"
-
-extern ass_library_t* ass_library;
-extern int ass_enabled;
-extern float ass_font_scale;
-extern float ass_line_spacing;
-extern int ass_top_margin;
-extern int ass_bottom_margin;
-extern int extract_embedded_fonts;
-extern char **ass_force_style_list;
-extern int ass_use_margins;
-extern char* ass_color;
-extern char* ass_border_color;
-extern char* ass_styles_file;
-
-ass_track_t* ass_default_track(ass_library_t* library);
-int ass_process_subtitle(ass_track_t* track, subtitle* sub);
-ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double fps);
-
-void ass_configure(ass_renderer_t* priv, int w, int h);
+struct ass_library_s {
+	char* fonts_dir;
+	int extract_fonts;
+	char** style_overrides;
+};
 
 #endif
 

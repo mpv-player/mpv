@@ -1624,7 +1624,7 @@ demux_mkv_read_attachments (demuxer_t *demuxer)
               if (extract_embedded_fonts && name && data && data_size &&
                   mime && (strcmp(mime, "application/x-truetype-font") == 0 ||
                   strcmp(mime, "application/x-font") == 0))
-                ass_process_font(name, data, data_size);
+                ass_process_font(ass_library, name, data, data_size);
 #endif
               break;
             }
@@ -2385,7 +2385,7 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
 
       if (track->subtitle_type == MATROSKA_SUBTYPE_SSA)
         {
-      track->sh_sub.ass_track = ass_new_track();
+      track->sh_sub.ass_track = ass_new_track(ass_library);
       size = track->private_size;
       m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
       if (buffer && m)
@@ -2398,7 +2398,7 @@ demux_mkv_parse_ass_data (demuxer_t *demuxer)
         }
       else
         {
-          track->sh_sub.ass_track = ass_default_track();
+          track->sh_sub.ass_track = ass_default_track(ass_library);
         }
     }
 }

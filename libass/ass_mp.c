@@ -27,8 +27,10 @@
 #include "ass.h"
 #include "ass_utils.h"
 #include "ass_mp.h"
+#include "ass_library.h"
 
 // libass-related command line options
+ass_library_t* ass_library;
 int ass_enabled = 0;
 float ass_font_scale = 1.;
 float ass_line_spacing = 0.;
@@ -50,11 +52,17 @@ extern char* font_name;
 extern float text_font_scale_factor;
 extern int subtitle_autoscale;
 
+#ifdef USE_ICONV
+extern char* sub_cp;
+#else
+static char* sub_cp = 0;
+#endif
+
 extern double ass_internal_font_size_coeff; 
 extern void process_force_style(ass_track_t* track);
 
-ass_track_t* ass_default_track() {
-	ass_track_t* track = ass_new_track();
+ass_track_t* ass_default_track(ass_library_t* library) {
+	ass_track_t* track = ass_new_track(library);
 
 	track->track_type = TRACK_TYPE_ASS;
 	track->Timer = 100.;
@@ -63,7 +71,7 @@ ass_track_t* ass_default_track() {
 	track->WrapStyle = 0;
 
 	if (ass_styles_file)
-		ass_read_styles(track, ass_styles_file);
+		ass_read_styles(track, ass_styles_file, sub_cp);
 
 	if (track->n_styles == 0) {
 		ass_style_t* style;
@@ -182,11 +190,11 @@ int ass_process_subtitle(ass_track_t* track, subtitle* sub)
  * \param fps video framerate
  * \return newly allocated ass_track, filled with subtitles from subdata
  */
-ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
+ass_track_t* ass_read_subdata(ass_library_t* library, sub_data* subdata, double fps) {
 	ass_track_t* track;
 	int i;
 
-	track = ass_default_track();
+	track = ass_default_track(library);
 	track->name = subdata->filename ? strdup(subdata->filename) : 0;
 
 	for (i = 0; i < subdata->sub_num; ++i) {
@@ -203,9 +211,7 @@ ass_track_t* ass_read_subdata(sub_data* subdata, double fps) {
 
 char *get_path(char *);
 
-extern char *font_name;
-
-void ass_configure(ass_instance_t* priv, int w, int h) {
+void ass_configure(ass_renderer_t* priv, int w, int h) {
 	char *dir, *path, *family;
 	ass_set_frame_size(priv, w, h);
 	ass_set_margins(priv, ass_top_margin, ass_bottom_margin, 0, 0);
@@ -218,7 +224,7 @@ void ass_configure(ass_instance_t* priv, int w, int h) {
 	if (font_fontconfig && font_name) family = strdup(font_name);
 	else family = 0;
 
-	ass_set_fonts(priv, dir, path, family);
+	ass_set_fonts(priv, path, family);
 
 	free(dir);
 	free(path);

@@ -29,7 +29,7 @@ typedef struct vf_vo_data_s {
 struct vf_priv_s {
     vf_vo_data_t* vf_vo_data;
 #ifdef USE_ASS
-    ass_instance_t* ass_priv;
+    ass_renderer_t* ass_priv;
 #endif
 };
 #define video_out (vf->priv->vf_vo_data->vo)
@@ -107,7 +107,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 #ifdef USE_ASS
     case VFCTRL_INIT_EOSD:
     {
-        vf->priv->ass_priv = ass_init();
+        vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
         if (!vf->priv->ass_priv) return CONTROL_FALSE;
         return CONTROL_TRUE;
     }
@@ -185,7 +185,7 @@ static void uninit(struct vf_instance_s* vf)
     if (vf->priv) {
 #ifdef USE_ASS
         if (vf->priv->ass_priv)
-            ass_done(vf->priv->ass_priv);
+            ass_renderer_done(vf->priv->ass_priv);
 #endif
         free(vf->priv);
     }

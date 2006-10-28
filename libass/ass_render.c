@@ -36,6 +36,7 @@
 #include "ass_cache.h"
 #include "ass_utils.h"
 #include "ass_fontconfig.h"
+#include "ass_library.h"
 
 #include "libvo/sub.h" // for utf8_get_char
 
@@ -56,13 +57,14 @@ typedef struct ass_settings_s {
 	int use_margins; // 0 - place all subtitles inside original frame
 	                 // 1 - use margins for placing toptitles and subtitles
 	double aspect; // frame aspect ratio, d_width / d_height.
-	char* fonts_dir;
+
 	char* default_font;
 	char* default_family;
 } ass_settings_t;
 
-struct ass_instance_s {
-	FT_Library library;
+struct ass_renderer_s {
+	ass_library_t* library;
+	FT_Library ftlibrary;
 	fc_instance_t* fontconfig_priv;
 	ass_settings_t settings;
 	int render_id;
@@ -166,7 +168,7 @@ typedef struct render_context_s {
 
 // frame-global data
 typedef struct frame_context_s {
-	ass_instance_t* ass_priv;
+	ass_renderer_t* ass_priv;
 	int width, height; // screen dimensions
 	int orig_height; // frame height ( = screen height - margins )
 	int orig_width; // frame width ( = screen width - margins )
@@ -177,7 +179,7 @@ typedef struct frame_context_s {
 	double border_scale;
 } frame_context_t;
 
-static ass_instance_t* ass_instance;
+static ass_renderer_t* ass_renderer;
 static ass_settings_t* global_settings;
 static text_info_t text_info;
 static render_context_t render_context;
@@ -219,11 +221,11 @@ static void ass_lazy_track_init(void)
 	}
 }
 
-ass_instance_t* ass_init(void)
+ass_renderer_t* ass_renderer_init(ass_library_t* library)
 {
 	int error;
 	FT_Library ft;
-	ass_instance_t* priv = 0;
+	ass_renderer_t* priv = 0;
 	
 	memset(&render_context, 0, sizeof(render_context));
 	memset(&frame_context, 0, sizeof(frame_context));
@@ -235,7 +237,7 @@ ass_instance_t* ass_init(void)
 		goto ass_init_exit;
 	}
 
-	priv = calloc(1, sizeof(ass_instance_t));
+	priv = calloc(1, sizeof(ass_renderer_t));
 	if (!priv) {
 		FT_Done_FreeType(ft);
 		goto ass_init_exit;
@@ -243,7 +245,8 @@ ass_instance_t* ass_init(void)
 
 	priv->synth_priv = ass_synth_init();
 
-	priv->library = ft;
+	priv->library = library;
+	priv->ftlibrary = ft;
 	// images_root and related stuff is zero-filled in calloc
 	
 	ass_face_cache_init();
@@ -258,7 +261,7 @@ ass_init_exit:
 	return priv;
 }
 
-void ass_done(ass_instance_t* priv)
+void ass_renderer_done(ass_renderer_t* priv)
 {
 	ass_face_cache_done();
 	ass_glyph_cache_done();
@@ -266,7 +269,7 @@ void ass_done(ass_instance_t* priv)
 		FT_Stroker_Done(render_context.stroker);
 		render_context.stroker = 0;
 	}
-	if (priv && priv->library) FT_Done_FreeType(priv->library);
+	if (priv && priv->ftlibrary) FT_Done_FreeType(priv->ftlibrary);
 	if (priv && priv->fontconfig_priv) fontconfig_done(priv->fontconfig_priv);
 	if (priv && priv->synth_priv) ass_synth_done(priv->synth_priv);
 	if (priv) free(priv);
@@ -388,7 +391,7 @@ static ass_image_t* render_text(text_info_t* text_info, int dst_x, int dst_y)
 		if (text_info->glyphs[i].glyph) {
 			if ((text_info->glyphs[i].symbol == '\n') || (text_info->glyphs[i].symbol == 0))
 				continue;
-			error = glyph_to_bitmap(ass_instance->synth_priv,
+			error = glyph_to_bitmap(ass_renderer->synth_priv,
 					text_info->glyphs[i].glyph, text_info->glyphs[i].outline_glyph,
 					&text_info->glyphs[i].bm, &text_info->glyphs[i].bm_o,
 					&text_info->glyphs[i].bm_s, text_info->glyphs[i].be);
@@ -566,7 +569,7 @@ static void update_font(void)
 {
 	int error;
 	unsigned val;
-	ass_instance_t* priv = frame_context.ass_priv;
+	ass_renderer_t* priv = frame_context.ass_priv;
 	face_desc_t desc;
 	desc.family = strdup(render_context.family);
 
@@ -581,7 +584,7 @@ static void update_font(void)
 	else if (val == 1) val = 110; //italic
 	desc.italic = val;
 
-	error = ass_new_face(priv->library, priv->fontconfig_priv, &desc, &(render_context.face));
+	error = ass_new_face(priv->ftlibrary, priv->fontconfig_priv, &desc, &(render_context.face));
 	if (error) {
 		render_context.face = 0;
 	}
@@ -615,7 +618,7 @@ static void change_border(double border)
 		if (!render_context.stroker) {
 			int error;
 #if (FREETYPE_MAJOR > 2) || ((FREETYPE_MAJOR == 2) && (FREETYPE_MINOR > 1))
-			error = FT_Stroker_New( ass_instance->library, &render_context.stroker );
+			error = FT_Stroker_New( ass_renderer->ftlibrary, &render_context.stroker );
 #else // < 2.2
 			error = FT_Stroker_New( render_context.face->memory, &render_context.stroker );
 #endif
@@ -1903,13 +1906,13 @@ static int ass_render_event(ass_event_t* event, event_images_t* event_images)
 	return 0;
 }
 
-static void ass_reconfigure(ass_instance_t* priv)
+static void ass_reconfigure(ass_renderer_t* priv)
 {
 	priv->render_id = ++last_render_id;
 	ass_glyph_cache_reset();
 }
 
-void ass_set_frame_size(ass_instance_t* priv, int w, int h)
+void ass_set_frame_size(ass_renderer_t* priv, int w, int h)
 {
 	if (priv->settings.frame_width != w || priv->settings.frame_height != h) {
 		priv->settings.frame_width = w;
@@ -1920,7 +1923,7 @@ void ass_set_frame_size(ass_instance_t* priv, int w, int h)
 	}
 }
 
-void ass_set_margins(ass_instance_t* priv, int t, int b, int l, int r)
+void ass_set_margins(ass_renderer_t* priv, int t, int b, int l, int r)
 {
 	if (priv->settings.left_margin != l ||
 	    priv->settings.right_margin != r ||
@@ -1934,12 +1937,12 @@ void ass_set_margins(ass_instance_t* priv, int t, int b, int l, int r)
 	}
 }
 
-void ass_set_use_margins(ass_instance_t* priv, int use)
+void ass_set_use_margins(ass_renderer_t* priv, int use)
 {
 	priv->settings.use_margins = use;
 }
 
-void ass_set_aspect_ratio(ass_instance_t* priv, double ar)
+void ass_set_aspect_ratio(ass_renderer_t* priv, double ar)
 {
 	if (priv->settings.aspect != ar) {
 		priv->settings.aspect = ar;
@@ -1947,7 +1950,7 @@ void ass_set_aspect_ratio(ass_instance_t* priv, double ar)
 	}
 }
 
-void ass_set_font_scale(ass_instance_t* priv, double font_scale)
+void ass_set_font_scale(ass_renderer_t* priv, double font_scale)
 {
 	if (priv->settings.font_size_coeff != font_scale) {
 		priv->settings.font_size_coeff = font_scale;
@@ -1955,22 +1958,19 @@ void ass_set_font_scale(ass_instance_t* priv, double font_scale)
 	}
 }
 
-int ass_set_fonts(ass_instance_t* priv, const char* fonts_dir, const char* default_font, const char* default_family)
+int ass_set_fonts(ass_renderer_t* priv, const char* default_font, const char* default_family)
 {
-	if (priv->settings.fonts_dir)
-		free(priv->settings.fonts_dir);
 	if (priv->settings.default_font)
 		free(priv->settings.default_font);
 	if (priv->settings.default_family)
 		free(priv->settings.default_family);
 
-	priv->settings.fonts_dir = fonts_dir ? strdup(fonts_dir) : 0;
 	priv->settings.default_font = default_font ? strdup(default_font) : 0;
 	priv->settings.default_family = default_family ? strdup(default_family) : 0;
 
 	if (priv->fontconfig_priv)
 		fontconfig_done(priv->fontconfig_priv);
-	priv->fontconfig_priv = fontconfig_init(fonts_dir, default_family, default_font);
+	priv->fontconfig_priv = fontconfig_init(priv->library->fonts_dir, default_family, default_font);
 
 	return !!priv->fontconfig_priv;
 }
@@ -1978,11 +1978,11 @@ int ass_set_fonts(ass_instance_t* priv, const char* fonts_dir, const char* defau
 /**
  * \brief Start a new frame
  */
-static int ass_start_frame(ass_instance_t *priv, ass_track_t* track, long long now)
+static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long now)
 {
 	ass_image_t* img;
 
-	ass_instance = priv;
+	ass_renderer = priv;
 	global_settings = &priv->settings;
 
 	if (!priv->settings.frame_width && !priv->settings.frame_height)
@@ -2044,9 +2044,9 @@ static render_priv_t* get_render_priv(ass_event_t* event)
 	if (!event->render_priv)
 		event->render_priv = calloc(1, sizeof(render_priv_t));
 	// FIXME: check render_id
-	if (ass_instance->render_id != event->render_priv->render_id) {
+	if (ass_renderer->render_id != event->render_priv->render_id) {
 		memset(event->render_priv, 0, sizeof(render_priv_t));
-		event->render_priv->render_id = ass_instance->render_id;
+		event->render_priv->render_id = ass_renderer->render_id;
 	}
 	return event->render_priv;
 }
@@ -2191,7 +2191,7 @@ static void fix_collisions(event_images_t* imgs, int cnt)
  * \param track track
  * \param now current video timestamp (ms)
  */
-ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long long now)
+ass_image_t* ass_render_frame(ass_renderer_t *priv, ass_track_t* track, long long now)
 {
 	int i, cnt, rc;
 	event_images_t eimg[MAX_EVENTS];
@@ -2232,7 +2232,7 @@ ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long lon
 		fix_collisions(last, eimg + cnt - last);
 
 	// concat lists
-	tail = &ass_instance->images_root;
+	tail = &ass_renderer->images_root;
 	for (i = 0; i < cnt; ++i) {
 		ass_image_t* cur = eimg[i].imgs;
 		while (cur) {
@@ -2242,6 +2242,6 @@ ass_image_t* ass_render_frame(ass_instance_t *priv, ass_track_t* track, long lon
 		}
 	}
 	
-	return ass_instance->images_root;
+	return ass_renderer->images_root;
 }
 

@@ -60,7 +60,7 @@ static struct vf_priv_s {
 	// 0 = insert always
 	int auto_insert;
 
-	ass_instance_t* ass_priv;
+	ass_renderer_t* ass_priv;
 
 	unsigned char* planes[3];
 	unsigned char* dirty_rows;
@@ -349,7 +349,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 {
 	switch (request) {
 	case VFCTRL_INIT_EOSD:
-		vf->priv->ass_priv = ass_init();
+		vf->priv->ass_priv = ass_renderer_init((ass_library_t*)data);
 		return vf->priv->ass_priv ? CONTROL_TRUE : CONTROL_FALSE;
 	case VFCTRL_DRAW_EOSD:
 		if (vf->priv->ass_priv) return CONTROL_TRUE;
@@ -361,7 +361,7 @@ static int control(vf_instance_t *vf, int request, void *data)
 static void uninit(struct vf_instance_s* vf)
 {
 	if (vf->priv->ass_priv)
-		ass_done(vf->priv->ass_priv);
+		ass_renderer_done(vf->priv->ass_priv);
 	if (vf->priv->planes[1])
 		free(vf->priv->planes[1]);
 	if (vf->priv->planes[2])

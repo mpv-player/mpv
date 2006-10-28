@@ -36,17 +36,13 @@
 
 #ifdef USE_ICONV
 #include <iconv.h>
-extern char *sub_cp;
 #endif
-extern int extract_embedded_fonts;
-extern char** ass_force_style_list;
 
 #include "mp_msg.h"
 #include "ass.h"
 #include "ass_utils.h"
+#include "ass_library.h"
 #include "libvo/sub.h" // for utf8_get_char
-
-char *get_path(char *);
 
 typedef enum {PST_UNKNOWN = 0, PST_INFO, PST_STYLES, PST_EVENTS, PST_FONTS} parser_state_t;
 
@@ -327,10 +323,11 @@ void process_force_style(ass_track_t* track) {
 	char **fs, *eq, *dt, *style, *tname, *token;
 	ass_style_t* target;
 	int sid;
+	char** list = track->library->style_overrides;
 	
-	if (!ass_force_style_list) return;
+	if (!list) return;
 	
-	for (fs = ass_force_style_list; *fs; ++fs) {
+	for (fs = list; *fs; ++fs) {
 		eq = strchr(*fs, '=');
 		if (!eq)
 			continue;
@@ -577,8 +574,8 @@ static int decode_font(ass_track_t* track)
 	dsize = q - buf;
 	assert(dsize <= size / 4 * 3 + 2);
 	
-	if (extract_embedded_fonts)
-		ass_process_font(track->parser_priv->fontname, (char*)buf, dsize);
+	if (track->library->extract_fonts)
+		ass_process_font(track->library, track->parser_priv->fontname, (char*)buf, dsize);
 
 error_decode_font:
 	if (buf) free(buf);
@@ -795,24 +792,24 @@ void ass_process_chunk(ass_track_t* track, char *data, int size, long long timec
 
 #ifdef USE_ICONV
 /** \brief recode buffer to utf-8
- * constraint: sub_cp != 0
+ * constraint: codepage != 0
  * \param data pointer to text buffer
  * \param size buffer size
  * \return a pointer to recoded buffer, caller is responsible for freeing it
 **/
-static char* sub_recode(char* data, size_t size)
+static char* sub_recode(char* data, size_t size, char* codepage)
 {
 	static iconv_t icdsc = (iconv_t)(-1);
 	char* tocp = "UTF-8";
 	char* outbuf;
-	assert(sub_cp);
+	assert(codepage);
 
 	{
-		char* cp_tmp = sub_cp;
+		char* cp_tmp = codepage;
 #ifdef HAVE_ENCA
 		char enca_lang[3], enca_fallback[100];
-		if (sscanf(sub_cp, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
-				|| sscanf(sub_cp, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
+		if (sscanf(codepage, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
+				|| sscanf(codepage, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
 			cp_tmp = guess_buffer_cp((unsigned char*)data, size, enca_lang, enca_fallback);
 		}
 #endif
@@ -868,7 +865,7 @@ static char* sub_recode(char* data, size_t size)
 /**
  * \brief read file contents into newly allocated buffer, recoding to utf-8
  */
-static char* read_file(char* fname)
+static char* read_file(char* fname, char* codepage)
 {
 	int res;
 	long sz;
@@ -915,8 +912,8 @@ static char* read_file(char* fname)
 	fclose(fp);
 	
 #ifdef USE_ICONV
-	if (sub_cp) {
-		char* tmpbuf = sub_recode(buf, sz);
+	if (codepage) {
+		char* tmpbuf = sub_recode(buf, sz, codepage);
 		free(buf);
 		buf = tmpbuf;
 	}
@@ -929,17 +926,17 @@ static char* read_file(char* fname)
  * \param fname file name
  * \return newly allocated track
 */ 
-ass_track_t* ass_read_file(char* fname)
+ass_track_t* ass_read_file(ass_library_t* library, char* fname, char* codepage)
 {
 	char* buf;
 	ass_track_t* track;
 	int i;
 	
-	buf = read_file(fname);
+	buf = read_file(fname, codepage);
 	if (!buf)
 		return 0;
 	
-	track = ass_new_track();
+	track = ass_new_track(library);
 	track->name = strdup(fname);
 	
 	// process header
@@ -971,12 +968,12 @@ ass_track_t* ass_read_file(char* fname)
 /**
  * \brief read styles from file into already initialized track
  */
-int ass_read_styles(ass_track_t* track, char* fname)
+int ass_read_styles(ass_track_t* track, char* fname, char* codepage)
 {
 	char* buf;
 	parser_state_t old_state;
 
-	buf = read_file(fname);
+	buf = read_file(fname, codepage);
 	if (!buf)
 		return 1;
 
@@ -1030,15 +1027,17 @@ static char* validate_fname(char* name)
  * \param data binary font data
  * \param data_size data size
 */ 
-void ass_process_font(const char* name, char* data, int data_size)
+void ass_process_font(ass_library_t* library, const char* name, char* data, int data_size)
 {
 	char buf[1000];
 	FILE* fp = 0;
 	int rc;
 	struct stat st;
 	char* fname;
+	const char* fonts_dir = library->fonts_dir;
 
-	char* fonts_dir = get_path("fonts");
+	if (!fonts_dir)
+		return;
 	rc = stat(fonts_dir, &st);
 	if (rc) {
 		int res;
@@ -1058,7 +1057,6 @@ void ass_process_font(const char* name, char* data, int data_size)
 
 	snprintf(buf, 1000, "%s/%s", fonts_dir, fname);
 	free(fname);
-	free(fonts_dir);
 
 	fp = fopen(buf, "wb");
 	if (!fp) return;
@@ -1086,8 +1084,9 @@ long long ass_step_sub(ass_track_t* track, long long now, int movement) {
 	return ((long long)track->events[i].Start) - now;
 }
 
-ass_track_t* ass_new_track(void) {
+ass_track_t* ass_new_track(ass_library_t* library) {
 	ass_track_t* track = calloc(1, sizeof(ass_track_t));
+	track->library = library;
 	track->parser_priv = calloc(1, sizeof(parser_priv_t));
 	return track;
 }

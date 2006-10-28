@@ -705,6 +705,12 @@ static void exit_player_with_rc(const char* how, int rc){
 #endif
   free_osd_list();
 
+#ifdef USE_ASS
+if(ass_enabled) {
+  ass_library_done(ass_library);
+}
+#endif
+
   current_module="exit_player";
 
 // free mplayer config
@@ -978,9 +984,13 @@ void add_subtitles(char *filename, float fps, int silent)
     subd = sub_read_file(filename, fps);
 #ifdef USE_ASS
     if (ass_enabled)
-        asst = ass_read_file(filename);
+#ifdef USE_ICONV
+        asst = ass_read_file(ass_library, filename, sub_cp);
+#else
+        asst = ass_read_file(ass_library, filename, 0);
+#endif
     if (ass_enabled && subd && !asst)
-        asst = ass_read_subdata(subd, fps);
+        asst = ass_read_subdata(ass_library, subd, fps);
 
     if (!asst && !subd && !silent)
 #else
@@ -3099,6 +3109,17 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif /* USE_OSD */
   vo_init_osd();
 
+#ifdef USE_ASS
+if(ass_enabled) {
+  char* path = get_path("fonts");
+  ass_library = ass_library_init();
+  ass_set_fonts_dir(ass_library, path);
+  ass_set_extract_fonts(ass_library, extract_embedded_fonts);
+  ass_set_style_overrides(ass_library, ass_force_style_list);
+  free(path);
+}
+#endif
+
 #ifdef HAVE_RTC
   if(!nortc)
   {
@@ -3882,7 +3903,7 @@ sh_video->vfilter=(void*)append_filters(sh_video->vfilter);
 
 #ifdef USE_ASS
 if (ass_enabled)
-  ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, 0);
+  ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_INIT_EOSD, ass_library);
 #endif
 
 current_module="init_video_codec";
