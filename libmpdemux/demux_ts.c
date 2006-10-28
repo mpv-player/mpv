@@ -2622,6 +2622,12 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		bad = ts_error; // || (! cc_ok);
     
 		afc = (packet[3] >> 4) & 3;
+		if(! (afc % 2))	//no payload in this TS packet
+		{
+			stream_skip(stream, buf_size-1+junk);
+			continue;
+		}
+		
 		if(afc > 1)
 		{
 			int c;
@@ -2635,12 +2641,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			buf_size -= c;
 			if(buf_size == 0)
 				continue;
-		}
-		
-		if(! (afc % 2))	//no payload in this TS packet
-		{
-			stream_skip(stream, buf_size-1+junk);
-			continue;
 		}
 		
 		if(bad)
