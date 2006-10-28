@@ -170,6 +170,8 @@ static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
                 
             // NSVs
             stream_read(demuxer->stream,hdr,17);        
+            if (stream_eof(demuxer->stream) || strncmp(hdr, "NSVs", 4))
+                return 0;
         }
 
         // dummy debug message
