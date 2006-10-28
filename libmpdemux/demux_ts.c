@@ -2792,16 +2792,16 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 						if(dvdsub_lang)
 						{
-						if(!strcmp(dvdsub_lang, ""))
-							asgn = 1;
-						else
-						{
-							lang = pid_lang_from_pmt(priv, pid);
-							if(lang != NULL)
-								asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
+							if(!strcmp(dvdsub_lang, ""))
+								asgn = 1;
 							else
-								asgn = 0;
-						}
+							{
+								lang = pid_lang_from_pmt(priv, pid);
+								if(lang != NULL)
+									asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
+								else
+									asgn = 0;
+							}
 						}
 
 						if(asgn)
@@ -2887,19 +2887,19 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					return 0;
 				
 				tss->payload_size = es->payload_size;
-					tss->type = es->type;
-					tss->subtype = es->subtype;
-					
-					if(is_audio)
-						lang = pid_lang_from_pmt(priv, es->pid);
-					if(lang != NULL)
-					{
-						memcpy(es->lang, lang, 3);
-						es->lang[3] = 0;
-					}
-					else
-						es->lang[0] = 0;
-					return 1;
+				tss->type = es->type;
+				tss->subtype = es->subtype;
+				
+				if(is_audio)
+					lang = pid_lang_from_pmt(priv, es->pid);
+				if(lang != NULL)
+				{
+					memcpy(es->lang, lang, 3);
+					es->lang[3] = 0;
+				}
+				else
+					es->lang[0] = 0;
+				return 1;
 			}
 			else
 			{
@@ -2915,18 +2915,18 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 				demuxer->filepos = stream_tell(demuxer->stream) - es->size;
 
-						if(*dp_offset + es->size > *buffer_size)
-						{
-							*buffer_size = *dp_offset + es->size + TS_FEC_PACKET_SIZE;
-							resize_demux_packet(*dp, *buffer_size);
-							//we'll skip at least one RESIZE() in the next iteration of ts_parse()
-							mp_msg(MSGT_DEMUX, MSGL_DBG2, "RESIZE DP TO %d\n", *buffer_size);
-						}
-						memcpy(&((*dp)->buffer[*dp_offset]), es->start, es->size);
-						*dp_offset += es->size;
-						(*dp)->flags = 0;
-						(*dp)->pos = stream_tell(demuxer->stream);
-						(*dp)->pts = es->pts;
+				if(*dp_offset + es->size > *buffer_size)
+				{
+					*buffer_size = *dp_offset + es->size + TS_FEC_PACKET_SIZE;
+					resize_demux_packet(*dp, *buffer_size);
+					//we'll skip at least one RESIZE() in the next iteration of ts_parse()
+					mp_msg(MSGT_DEMUX, MSGL_DBG2, "RESIZE DP TO %d\n", *buffer_size);
+				}
+				memcpy(&((*dp)->buffer[*dp_offset]), es->start, es->size);
+				*dp_offset += es->size;
+				(*dp)->flags = 0;
+				(*dp)->pos = stream_tell(demuxer->stream);
+				(*dp)->pts = es->pts;
 
 				if(*dp_offset >= MAX_PACK_BYTES)
 				{
