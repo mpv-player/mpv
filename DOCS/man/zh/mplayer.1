@@ -1,9 +1,9 @@
 .\" Partial sync with en/mplayer.1 r20445
-.\" up to line 1678 (near section header "OSD/SUBTITLE OPTIONS")
+.\" up to line 2123 (.SH "AUDIO OUTPUT OPTIONS")
 .\" Reminder of hard terms which need better/final solution later: 
 .\"   /capture; palytree in parent list; colorkey; 
 .\"   wrapper script ... shellescapes; keyframe;
-.\"   encoding audio rate; \&; 
+.\"   encoding audio rate; \&; alphamap; 
 .\" 
 .\" MPlayer (C) 2000-2006 MPlayer 团队
 .\" 本(英文)手册页由 Gabucino, Diego Biurrun, Jonas Jermann 编写
@@ -246,7 +246,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .IPs "w 和 e"
 降低/\:提高摇移范围。
 .IPs "o\ \ \ \ "
-循环 OSD 状态: 无 / 搜索条 / 搜索条 + 定时 / 搜索条 + 定时 + 总时间。
+循环 OSD 状态: 无 / 搜索条 / 搜索条 + 计时器 / 搜索条 + 计时器 + 总时间。
 .IPs "d\ \ \ \ "
 循环丢帧状态: 无 / 跳过显示 / 跳过解码。
 (请参见 \-framedrop 和 \-hardframedrop)。
@@ -427,7 +427,7 @@ MPlayer 有个完全可配置的, 命令驱动的控制层,
 .IPs "button 1"
 暂停。
 .IPs "button 2"
-循环 OSD 状态: 无 / 搜索条 / 搜索条 + 定时 / 搜索条 + 定时 + 总时间。
+循环 OSD 状态: 无 / 搜索条 / 搜索条 + 计时器 / 搜索条 + 计时器 + 总时间。
 .IPs "button 3 和 button 4"
 降低/\:提高音量。
 .RE
@@ -661,7 +661,7 @@ idle|belownormal|normal|abovenormal|high|realtime
 .
 .
 .
-.SH "PLAYER OPTIONS 播放器选项 (仅适用于 MPLAYER)"
+.SH "PLAYER OPTIONS (播放器选项) (仅适用于 MPLAYER)"
 .
 .TP
 .B \-autoq <质量> (和 \-vf [s]pp 一起使用)
@@ -955,11 +955,11 @@ MPlayer 在 verbose (\-v) 模式下会打印可用的音频标识。
 播放已选择的(如果有的话)音频流。
 .
 .TP
-.B \-alang <语言代码[,语言代码,...]> (也请参见 \-aid)
-指定使用音频语言的优先列表。
-不同的容器格式运用不同的语言代码。DVDs 使用 ISO 639-1 的
-两字符语言代码, Matroska 和 NUT 使用 ISO 639-2 的
-三字符语言代码, 而 OGM 使用自由格式标识符。
+.B \-alang <语言代号[,语言代号,...]> (也请参见 \-aid)
+指定音频语言的优先使用列表。
+不同的容器格式使用不同的语言代号。DVDs 使用 ISO 639-1 的
+两字符语言代号, Matroska 和 NUT 使用 ISO 639-2 的
+三字符语言代号, 而 OGM 使用自由格式标识符。
 MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
 .sp 1
 .I 示例:
@@ -1674,40 +1674,106 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .
 .SH "OSD/SUBTITLE OPTIONS (OSD/字幕选项)"
 .I 注意:
-也请参见\-vf expand。
+也请参见 \-vf expand。
 .
-.\" The below is only synced with r9821
 .TP
-.B \-dumpmicrodvdsub (仅用于MPLAYER)
-把给定的字幕文件(由\-sub选项设置)转换为MicroDVD字幕格式.
-在当前目录中创建一个dumpsub.sub文件.
+.B \-ass (仅适用于 FreeType)
+打开 SSA/ASS 字幕提供。
+通过此选项, libass 将用于 SSA/ASS 外部字幕和 Matroska 轨迹。
+你可能也想使用 \-embeddedfonts。
+.
 .TP
-.B \-dumpmpsub (仅用于MPLAYER)
-把给定的字幕文件(由\-sub选项设置)转换为MPlayer的字幕格式, MPsub.
-在当前目录中创建一个dump.mpsub文件.
+.B \-ass-border-color <参数值>
+为文字字幕设置边框 (轮廓) 颜色。
+颜色格式是 RRGGBBAA。
+.
 .TP
-.B \-dumpsrtsub (仅用于MPLAYER)
-把给定的字幕文件(由\-sub选项设置)转换为基于时间的SubViewer(SRT)字幕格式.
-在当前目录中创建一个dumpsub.srt文件.
+.B \-ass-bottom-margin <参数值>
+在帧底部添加黑带。
+SSA/ASS 提供器能在那里放置字幕 (与 \-ass-use-margins 组合用)。
+.
 .TP
-.B \-dumpjacosub (仅用于MPLAYER)
-把给定的字幕文件(由\-sub选项设置)转换为基于时间的JACOsub字幕格式.
-在当前目录中创建一个dumpsub.js文件.
+.B \-ass-color <参数值>
+为文字字幕设置颜色。
+颜色格式是 RRGGBBAA。
+.
 .TP
-.B \-dumpsami (仅用于MPLAYER)
-把给定的字幕文件(由\-sub选项设置)转换为基于时间的SAMI字幕格式.
-在当前目录中创建一个dumpsub.smi文件.
+.B \-ass-font-scale <参数值>
+为 SSA/ASS 提供器中的字体设置比例系数。
+.
 .TP
-.B \-dumpsub (仅用于MPLAYER) (BETA代码)
-从VOB流中复制子字幕流. 参见-dump*sub和-vobsubout*选项.
+.B \-ass-force-style <[Style.]Param=参数值[,...]>
+过载一些风格参数。
+.sp
+.I 示例:
+.PD 0
+.RSs
+\-ass-force-style FontName=Arial,Default.Bold=1
+.RE
+.PD 1
+.
 .TP
-.B \-ifo <vobsub的ifo文件>
-设置用于读取的包含VOBSUB字幕的调色板和帧尺寸的文件.
+.B \-ass-line-spacing <参数值>
+为 SSA/ASS 提供器设置行间隔。
+.
 .TP
-.B \-ffactor <数字>
-对字体的alpha映射图重新采样.
+.B \-ass-styles <文件名>
+装载指定文件中找到的所有 SSA/ASS 风格并在提供文字字幕时使用。
+文件的语法完全像是 SSA/ASS 中的一节 [V4 Styles] / [V4+ Styles]。
+.
+.TP
+.B \-ass-top-margin <参数值>
+在帧顶部添加黑带。
+SSA/ASS 提供器能在那里放置字幕 (与 \-ass-use-margins 组合用)。
+.
+.TP
+.B \-(no)ass-use-margins
+启用/停用放置字幕(如果有的话)在黑框中 (默认值是: no)。
+.
+.TP
+.B \-dumpjacosub (仅用于 MPlayer)
+转换给定的(由 \-sub 选项指定的)字幕成为基于时间的 JACOsub 字幕格式。
+在当前的目录中创建 dumpsub.js 文件。
+.
+.TP
+.B \-dumpmicrodvdsub (仅用于 MPlayer)
+转换给定的(由 \-sub 选项指定的)字幕成为 MicroDVD 字幕格式。
+在当前的目录中创建 dumpsub.sub 文件。
+.
+.TP
+.B \-dumpmpsub (仅用于 MPlayer)
+转换给定的(由 \-sub 选项指定的)字幕成为 MPlayer 的字幕格式, MPsub。
+在当前的目录中创建 dumpsub.mpsub 文件。
+.
+.TP
+.B \-dumpsami (仅用于 MPlayer)
+转换给定的(由 \-sub 选项指定的)字幕成为基于时间的 SAMI 字幕格式。
+在当前的目录中创建 dumpsub.smi 文件。
+.
+.TP
+.B \-dumpsrtsub (仅用于 MPlayer)
+转换给定的(由 \-sub 选项指定的)字幕成为基于时间的 SubViewer (SRT) 字幕格式。
+在当前的目录中创建 dumpsub.srt 文件。
+.br
+.I 注意:
+有些破硬件播放器对 Unix 行结尾的 SRT 字幕会哽住。
+如果你够彩碰到这样的盒子, 把你的字幕文件到 unix2dos 或类似的程序过一过, 
+替换 Unix 行结尾为 DOS/Windows 行结尾。
+.
+.TP
+.B \-dumpsub (仅用于 MPlayer) (BETA 代码)
+从 VOB 流中转储字幕子流。
+也请参见 \-dump*sub 和 \-vobsubout* 选项。
+.
+.TP
+.B \-embeddedfonts (仅用于 FreeType)
+启用抽取 Matroska 内嵌字体。
+这些字体能用于 SSA/ASS 字幕提供 (\-ass 选项)。
+.
+.TP
+.B \-ffactor <数字> (仅用于 OSD)
+对字体的 alphamap 重新采样。
 可设为:
-
 .PD 0
 .RSs
 .IPs 0
@@ -1722,190 +1788,108 @@ tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .PD 1
 .
 .TP
-.B \-font <font.desc文件的路径>
-在另外目录你寻找OSD/\:SUB字体(默认的普通字体为:
-~/\:.mplayer/\:font/\:font.desc, 默认的FreeType字体为:
-~/.mplayer/\:subfont.ttf).
-
+.B \-flip-hebrew (仅用于 FriBiDi)
+打开使用 FriBiDi 的翻转字幕。
+.
+.TP
+.B \-noflip-hebrew-commas
+改变 FriBiDi 中假定的字幕中的逗号位置。
+如果字幕中的逗号显示在句首而不是在句尾, 就使用它。
+.
+.TP
+.B \-font <文件 font.desc 的路径> (仅用于 OSD)
+在别的目录中寻找 OSD/\:SUB 字体(
+默认的普通字体为: ~/\:.mplayer/\:font/\:font.desc, 
+默认的 FreeType 字体为: ~/.mplayer/\:subfont.ttf)。
+.br
 .I 注意:
-.br
-对于FreeType, 这个选项指定文本字体文件的路径.
-.br
-\-subfont-*选项只有当编译了FreeType支持才可用.
-
+对于 FreeType, 此选项决定文本字体文件的路径。
+对于 fontconfig, 此选项决定 fontconfig 的字体名称。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-\-font ~/\:.mplayer/\:arial\-14/\:font.desc
+\-font ~/\:.mplayer/\:arial-14/\:font.desc
 .br
 \-font ~/\:.mplayer/\:arialuni.ttf
+.br
+\-font 'Bitstream Vera Sans'
 .RE
 .PD 1
 .
 .TP
+.B \-fontconfig (仅用于 fontconfig)
+启用使用 fontconfig 管理的字体。
+.
+.TP
+.B \-forcedsubsonly
+仅显示锁定的字幕, 例如由 \-slang 选择的 DVD 字幕流。
+.
+.TP
+.B \-fribidi-charset <字符集名称> (仅用于 FriBiDi)
+当编码非 UTF-8 字幕(默认是: ISO8859-8)时, 指定传递到 FriBiDi 的字符集。
+.
+.TP
+.B \-ifo <VOBsub 的 IFO 文件>
+指出用于装载 VOBsub 字幕的调色板和帧尺寸的文件。
+.
+.TP
 .B \-noautosub
-关闭字幕文件的自动载入功能.
+关闭自动载入字幕文件。
+.
 .TP
-.B \-overlapsub
-对所有字幕格式启用重叠字幕支持.
+.B \-osd-duration <时间>
+设置 OSD 信息的停留时间(以毫秒 ms 为单位) (默认值是: 1000)。
+.
 .TP
-.B \-nooverlapsub
-对所有字幕格式禁用重叠字幕支持(默认行为是只对特定格式启用支持).
-.TP
-.B \-osdlevel <0\-3> (仅用于MPLAYER)
-设定开始的OSD模式.
-
+.B \-osdlevel <0\-3> (仅用于 MPlayer)
+指定 OSD 的启始模式。
 .PD 0
 .RSs
 .IPs 0
 只有字幕
 .IPs 1
-音量 + 搜索(默认)
+音量 + 搜索条 (默认)
 .IPs 2
-音量 + 搜索 + 计时器 + 百分比
+音量 + 搜索条 + 计时器 + 百分比
 .IPs 3
-音量 + 搜索 + 计时器 + 百分比 + 总时间
+音量 + 搜索条 + 计时器 + 百分比 + 总时间
 .RE
 .PD 1
 .
 .TP
-.B \-sid <标识> (参见\-slang选项)
-打开DVD字幕显示. 同时, 你必须设置一个对应于一种DVD字幕语言的数字(0\-31).
-至于可用字幕的列表, 可以加上\-v选项并察看输出.
+.B \-overlapsub
+虽然当前有字幕显示, 允许同时显示下一行字幕(默认启用只支持特定格式)。
+.
 .TP
-.B \-slang <两个字母的国家代码> (参见\-sid选项)
-仅用于DVD播放. 打开/\:选择DVD字幕语言.
-至于可用字幕的列表, 可以加上\-v选项并察看输出.
-
+.B \-sid <标识> (也请参见 \-slang, \-vobsubid)
+显示由 <标识> (0\-31) 指定的字幕流。
+MPlayer 运行在 verbose (\-v) 模式时, 打印可用的字幕标识。
+如果你不能选择 DVD 中其中之一的字幕, 也请试试 \-vobsubid。
+.
+.TP
+.B \-slang <语言代号[,语言代号,...]> (也请参见 \-sid)
+指定字幕语言的优先使用列表。
+不同的容器格式使用不同的语言代号。DVDs 使用 ISO 639-1 的
+两字符语言代号, Matroska 使用 uses ISO 639-2 的
+三字符语言代号, 而 OGM 使用自由格式标识符。
+MPlayer 在 verbose (\-v) 模式下会打印可用的语言。
+.sp 1
 .I 示例:
 .PD 0
 .RSs
-.IPs "\-slang hu,en"
-选择匈牙利语, 英语在没有匈牙利语时备用.
+.IPs "mplayer dvd://1 \-slang hu,en"
+选择 DVD 上的匈牙利语字幕轨迹而英语在没有匈牙利语时备用。
+.IPs "mplayer \-slang jpn example.mkv"
+播放日语字幕的 Matroska 文件。
 .RE
 .PD 1
 .
 .TP
-.B \-sub <字幕文件>
-使用/\:显示指定的字幕文件.
-.TP
-.B \-sub-bg-alpha <0\-255>
-设置字幕和OSD背景的alpha通道值. 值越大代表越透明. 0是一个例外代表完全透明.
-.TP
-.B \-sub-bg-color <0\-255>
-设置字幕和OSD背景的颜色值. 目前字幕是灰度图像所以这个值相当于颜色的亮度.
-255代表白色0代表黑色.
-.TP
-.B \-subcc \
-显示DVD的隐藏字幕数据表(CC)字幕.
-它们不是VOB字幕, 它们是为听力障碍的人准备的特殊的ASCII字幕,
-编码在大多数区码为1的VOB的用户数据流中.
-CC字幕到目前为止还没有在别的区码的DVD中发现.
-.TP
-.B \-subcp <编码页>
-如果你的系统支持iconv(3), 你可以用这个选项来设置字幕文件的编码页.
-
-.I 示例:
-.PD 0
-.RSs
-\-subcp latin2
-.br
-\-subcp cp1250
-.RE
-.PD 1
-.
-.TP
-.B \-sub\-demuxer <数值> (BETA代码)
-指定\-subfile的字幕分路器的类型.
-.TP
-.B \-subdelay <参数>
-字幕延迟<参数>秒. 可以是负数.
-.TP
-.B \-subfont-autoscale <0\-3>
-设置自动缩放模式.
-
-.I 注意:
-.br
-0表示text-scale和osd-scale的参数为以点为尺寸的字体高度.
-.br
-可用模式有:
-
-.PD 0
-.RSs
-.IPs 0
-不自动缩放
-.IPs 1
-按电影高度缩放
-.IPs 2
-按电影宽度缩放
-.IPs 3
-按电影对角线缩放(默认值)
-.RE
-.PD 1
-.
-.TP
-.B \-subfont-blur <0\-8>
-设置字体模糊半径(默认值: 2).
-.TP
-.B \-subfont-encoding <参数>
-设置字幕编码. 当设为'unicode'时,
-字体文件中的所有字模都会被渲染并使用unicode编码(默认值: unicode).
-.TP
-.B \-subfont-osd-scale <0\-100>
-设置osd元素的自动缩放系数(默认值: 6).
-.TP
-.B \-subfont-outline <0\-8>
-设置字体边框的宽度(默认值: 2).
-.TP
-.B \-subfont-text-scale <0\-100>
-设置字幕文本的自动缩放系数(屏幕尺寸的百分比) (默认值: 5).
-.TP
-.B \-subfps <速率>
-设置字幕文件的帧/\:秒速率(浮点数), 默认值: 与电影同样的fps.
-
-.I 注意:
-.br
-仅用于基于帧的SUB文件, 比如不能用于MicroDVD格式.
-.TP
-.B \-subfile <文件名> (BETA代码)
-目前没有用.
-与\-audiofile一样, 但用于字幕流(OggDS?).
-.TP
-.B \-subpos <0\-100> (用于\-vf expand)
-设置字幕在屏幕上显示的位置. 参数表示字幕的垂直位置位于屏幕的百分之多少.
-.TP
-.B \-subalign <0\-2>
-设置字幕相对于subpos如何对齐.
-0表示顶部对齐(最初的/默认的行为), 1表示中央对齐,
-而2标识底部对齐.
-.TP
-.B \-subwidth <10\-100>
-设置字幕在屏幕上显示的最大宽度. 对于电视输出有用.
-参数表示字幕宽度占屏幕宽度的百分之多少.
-.TP
-.B \-unicode
-告诉MPlayer以UNICODE格式处理字幕.
-.TP
-.B \-utf8
-告诉MPlayer以UTF8格式处理字幕.
-.TP
-.B \-sub-no-text-pp
-禁用载入字幕后的任何形式的文字后期处理. 用于调试.
-.TP
-.B \-vobsub <无后缀名的vobsub文件名>
-设置用于字幕显示的VobSub文件. 这是无后缀名的完整路径名, 例如\&没有'.idx',
-\'.ifo'或者'.sub'.
-.TP
-.B \-vobsubid <0-31>
-设置VobSub字幕标识.
-.TP
-.B \-spualign <-1\-2>
-设置spu(DVD/VobSub)字幕如何对齐. 参数值与-subpos相同,
-特别的, -1表示在初始位置显示.
-.TP
-.B \-spuaa <模式>
-设置DVD/VobSub的反锯齿/\:缩放模式.
-加上16可以在原始和缩放帧尺寸完全相同时强制进行缩放, 比如使用高斯模糊来平滑字幕.
+.B \-spuaa <模式> (仅用于 OSD)
+设置 DVD/\:VOBsub 的反锯齿/\:缩放模式。
+甚至在原始的与缩放的帧尺寸已匹配时, 还可能在 <模式> 上增加 16 以强制进行缩放, 
+比如使用高斯模糊来平滑字幕。
 可用模式有:
 .PD 0
 .RSs
@@ -1923,11 +1907,222 @@ CC字幕到目前为止还没有在别的区码的DVD中发现.
 .PD 1
 .
 .TP
-.B \-spugauss <0.0\-3.0>
--spuaa 4使用的高斯模糊的可变参数. 越高表示越模糊. 默认值为1.0.
-
-
-.SH "音频输出选项(仅用于MPLAYER)"
+.B \-spualign <-1\-2> (仅用于 OSD)
+指定 SPU (DVD/\:VOBsub) 字幕该如何对齐。
+.PD 0
+.RSs
+.IPs "-1"
+原始位置。
+.IPs " 0"
+顶部对齐 (原始行为, 默认)。
+.IPs " 1"
+中央对齐。
+.IPs " 2"
+底部对齐。
+.RE
+.PD 1
+.
+.TP
+.B \-spugauss <0.0\-3.0> (仅用于 OSD)
+高斯模糊的可变参数用于 \-spuaa 4。
+越高表示越模糊 (默认值是: 1.0)。
+.
+.TP
+.B \-sub <字幕文件1,字幕文件2,...>
+使用/\:显示指定的字幕文件。
+同时只能显示一个文件。
+.
+.TP
+.B \-sub-bg-alpha <0\-255>
+指定字幕和 OSD 背景的 alpha 通道值。
+值越大代表越透明。但 0 表示完全透明。
+.
+.TP
+.B \-sub-bg-color <0\-255>
+指定字幕和 OSD 背景的颜色值。
+目前字幕是灰度图像所以这个值相当于颜色的亮度。
+255 代表白色 0 代表黑色。
+.
+.TP
+.B \-sub-demuxer <[+]名称> (仅用于 \-subfile) (BETA 代码)
+锁定 \-subfile 的字幕分路器类型。
+在名称前使用 '+' 锁定类型, 跳过某些核查!
+按照 \-demuxer help 打印出来的指定分路器类型。
+为了向后兼容, 也接受定义在 libmpdemux/\:demuxer.h 的分路器标识。
+.
+.TP
+.B \-sub-fuzziness <模式>
+搜寻字幕时调整匹配模糊度:
+.PD 0
+.RSs
+.IPs 0
+精确匹配
+.IPs 1
+装载所有包含电影名称的字幕。
+.IPs 2
+装载当前目录的所有字幕。
+.RE
+.PD 1
+.
+.TP
+.B \-sub-no-text-pp
+停用载入字幕后的任何形式的文字后期处理。
+用于调试目的。
+.
+.TP
+.B \-subalign <0\-2> (仅用于 OSD)
+根据 \-subpos 给定的高度, 指定该对齐哪个字幕边缘。
+.PD 0
+.RSs
+.IPs 0
+顶部对齐 (原始行为)。
+.IPs 1
+中央对齐。
+.IPs 2
+底部对齐 (默认)。
+.RE
+.PD 1
+.
+.TP
+.B "\-subcc \ "
+显示 DVD 的隐藏式(CC)字幕。
+它们
+.B 不
+是 VOB 字幕, 它们是为听力有障碍的人准备的特殊的 ASCII 字幕,
+编码在大多数 DVD 地区码为 1 的 VOB 用户数据流中。
+CC 字幕到目前为止还没有在其它地区码的 DVD 中发现。
+.
+.TP
+.B \-subcp <编码页> (仅用于 iconv)
+如果你的系统支持 iconv(3), 你可以用此选项来指定字幕的编码页。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+\-subcp latin2
+.br
+\-subcp cp1250
+.RE
+.PD 1
+.
+.TP
+.B \-subcp enca:<语言>:<备用编码页> (仅用于 ENCA)
+你可以使用两字符语言代号指定语言, 让 ENCA 自动检测编码页。
+如果不能确定, 随便输入点什么然后察看 mplayer 的 \-v output 中可用的语言。
+备用编码页指定自动检测失败时使用的编码页。
+.sp 1
+.I 示例:
+.PD 0
+.RSs
+.IPs "\-subcp enca:cs:latin2"
+猜测编码页, 假定字幕是捷克语, 如果自动检测失败 latin 2 作备用。
+.IPs "\-subcp enca:pl:cp1250"
+猜测波兰语的编码页, cp1250 作备用。
+.RE
+.PD 1
+.
+.TP
+.B \-subdelay <数>
+字幕延迟 <数> 秒。可以是负数。
+.
+.TP
+.B \-subfile <文件名> (BETA 代码)
+目前没有用。
+与 \-audiofile 一样, 但用于字幕流(OggDS?)。
+.
+.TP
+.B \-subfont-autoscale <0\-3> (仅用于 FreeType)
+设置自动缩放模式。
+.br
+.I 注意:
+0 表示文字和 OSD 的尺度为字体高度(以点 point 为单位的)。
+.sp 1
+可用模式有:
+.sp 1
+.PD 0
+.RSs
+.IPs 0
+不自动缩放
+.IPs 1
+高度成比例
+.IPs 2
+宽度成比例
+.IPs 3
+对角线成比例 (默认值)
+.RE
+.PD 1
+.
+.TP
+.B \-subfont-blur <0\-8> (仅用于 FreeType)
+设置字体模糊半径(默认值是: 2)。
+.
+.TP
+.B \-subfont-encoding <参数值> (仅用于 FreeType)
+设置字幕编码。
+当设为"unicode"时, 字体文件中的所有字模都会被渲染
+并使用 unicode 编码(默认值是: unicode)。
+.
+.TP
+.B \-subfont-osd-scale <0\-100> (仅用于 FreeType)
+设置 OSD 元素的自动缩放系数(默认值是: 6)。
+.
+.TP
+.B \-subfont-outline <0\-8> (仅用于 FreeType)
+设置字体边框的宽度(默认值是: 2)。
+.
+.TP
+.B \-subfont-text-scale <0\-100> (仅用于 FreeType)
+设置字幕文本的自动缩放系数(屏幕尺寸的百分比) (默认值是: 5)。
+.
+.TP
+.B \-subfps <速率>
+指定字幕文件的帧率(默认值是: 电影的帧率)。
+.br
+.I 注意:
+仅用于基于帧的字幕文件, 比如 MicroDVD 格式。
+.
+.TP
+.B \-subpos <0\-100> (用于 \-vf expand) (仅用于 OSD)
+指定字幕在屏幕上显示的位置。
+参数值是以屏幕高度的百分比为单位的字幕垂直位置。
+.
+.TP
+.B \-subwidth <10\-100> (仅用于 OSD)
+指定字幕在屏幕上显示的最大宽度。
+对于电视输出(TV-out)有用。
+参数值是以屏幕宽度的百分比为单位的字幕宽度。
+.
+.TP
+.B \-noterm-osd
+当没有可用的视频输出时, 停止在控制台上显示 OSD 信息。
+.
+.TP
+.B \-term-osd-esc <转义序列>
+指定, 在控制台上显示 OSD 信息之前, 使用的转义序列。
+转义序列应该把指针移到 OSD 的行首然后清理(默认值是: ^[[A\\r^[[K)。
+.
+.TP
+.B \-unicode
+告诉 MPlayer 把字幕文件作为 unicode 来处理。
+.
+.TP
+.B "\-utf8 \ \ "
+告诉 MPlayer 把字幕文件作为 UTF-8 来处理。
+.
+.TP
+.B \-vobsub <无后缀名的 VOBsub 文件名>
+指定用于字幕显示的 VOBsub 文件。
+不得不是无后缀名的完整路径名, 例如没有".idx", ".ifo" 及 ".sub"。
+.
+.TP
+.B \-vobsubid <0-31>
+指定 VOBsub 字幕标识。
+.
+.
+.
+.SH "AUDIO OUTPUT OPTIONS (音频输出选项) (仅适用于 MPLAYER)"
+.\" The below is only synced with r9821
+.
 .TP
 .B \-abs <参数> (已被放弃)
 替代音频驱动/\:声卡的缓冲区大小检测, 仅用于\-ao oss
@@ -4445,14 +4640,14 @@ cat *.vob | mencoder <选项> \-
 .
 .
 .
-.SH "AUTHORS 作者"
-MPlayer 由 Arpad Gereoffy 起草。
-参见 AUTHORS (作者) 文件的其它许多贡献者的一些列表。
+.SH "AUTHORS (作者)"
+MPlayer 由 Arpad Gereoffy 起稿。
+其它许多贡献者的部分清单, 请参见 AUTHORS(作者) 文件。
 .PP
 MPlayer 是 (C) 2000\-2006 The MPlayer Team (MPlayer 团队)所有
 .PP
-本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写。
+本(英文)手册页主要由 Gabucino, Jonas Jermann 和 Diego Biurrun 编写, 
 由 Diego Biurrun 维护。
 有关本文的联系请发送邮件到 MPlayer-DOCS 邮件列表。
-与翻译相关的邮件属于 MPlayer-translations 邮件列表.
+与翻译相关的邮件属于 MPlayer-translations 邮件列表。
 .\" end of file
