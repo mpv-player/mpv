@@ -2935,12 +2935,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				(*dp)->pos = stream_tell(demuxer->stream);
 				(*dp)->pts = es->pts;
 
-				if(*dp_offset >= MAX_PACK_BYTES)
-				{
-					retv = fill_packet(demuxer, ds, dp, dp_offset, si);
-					return 1;
-				}
-				
 				if(retv > 0)
 					return retv;
 				else
