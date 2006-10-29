@@ -2827,10 +2827,10 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			p = &((*dp)->buffer[*dp_offset]);
 		}
 
-		buf_size = stream_read(stream, p, buf_size);
-		if(buf_size==-1)
+		len = stream_read(stream, p, buf_size);
+		if(len < buf_size)
 		{
-			mp_msg(MSGT_DEMUX, MSGL_DBG2,  "\r\nts_parse() couldn't read data\r\n");
+			mp_msg(MSGT_DEMUX, MSGL_DBG2,  "\r\nts_parse() couldn't read enough data: %d < %d\r\n", len, buf_size);
 			continue;
 		}
 		stream_skip(stream, junk);
