@@ -3110,7 +3110,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   vo_init_osd();
 
 #ifdef USE_ASS
-if(ass_enabled) {
+if(1 || ass_enabled) {  // even if ass_enabled==0 now it can be used
   char* path = get_path("fonts");
   ass_library = ass_library_init();
   ass_set_fonts_dir(ass_library, path);
