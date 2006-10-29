@@ -2677,54 +2677,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		//TABLE PARSING
 
 		base = priv->ts.packet_size - buf_size;
-		if(pid  == 0)
-		{
-			stream_read(stream,&packet[base], buf_size);
-			stream_skip(stream, junk);
-			parse_pat(priv, is_start, &packet[base], buf_size);
-			continue;
-		}
-		else if((tss->type == SL_SECTION) && pmt)
-		{
-			int k, ok=0, mp4_es_id = -1;
-			ts_section_t *section;
-			for(k = 0; k < pmt->mp4es_cnt; k++)
-			{
-				if(pmt->mp4es[k].decoder.object_type == MP4_OD && pmt->mp4es[k].decoder.stream_type == MP4_OD)
-					mp4_es_id = pmt->mp4es[k].id;
-			}
-			mp_msg(MSGT_DEMUX, MSGL_DBG2, "MP4ESID: %d\n", mp4_es_id);
-			for(k = 0; k < pmt->es_cnt; k++)
-			{
-				if(pmt->es[k].mp4_es_id == mp4_es_id)
-					ok = 1;
-			}
-			stream_read(stream,&packet[base], buf_size);
-			stream_skip(stream, junk);
-			if(ok)
-			{
-				section = &(tss->section);
-				parse_sl_section(pmt, section, progid, pid, is_start, &packet[base], buf_size);
-			}
-			continue;
-		}
-		else
-		{
-			progid = prog_id_in_pat(priv, pid);
-			if(progid != -1)
-			{
-				if(pid != demuxer->video->id && pid != demuxer->audio->id && pid != demuxer->sub->id)
-				{
-					stream_read(stream,&packet[base], buf_size);
-					stream_skip(stream, junk);
-					parse_pmt(priv, progid, pid, is_start, &packet[base], buf_size);
-					continue;
-				}
-				else
-					mp_msg(MSGT_DEMUX, MSGL_ERR, "Argh! Data pid %d used in the PMT, Skipping PMT parsing!\n", pid);
-			}
-		}
-
 
 		priv->last_pid = pid;
 
@@ -2861,7 +2813,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		}
 
 
-		if(probe)
+		if(probe || !dp)	//dp is NULL for tables and sections
 		{
 			p = &packet[base];
 		}
@@ -2882,6 +2834,46 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			continue;
 		}
 		stream_skip(stream, junk);
+
+		if(pid  == 0)
+		{
+			parse_pat(priv, is_start, p, buf_size);
+			continue;
+		}
+		else if((tss->type == SL_SECTION) && pmt)
+		{
+			int k, mp4_es_id = -1;
+			ts_section_t *section;
+			for(k = 0; k < pmt->mp4es_cnt; k++)
+			{
+				if(pmt->mp4es[k].decoder.object_type == MP4_OD && pmt->mp4es[k].decoder.stream_type == MP4_OD)
+					mp4_es_id = pmt->mp4es[k].id;
+			}
+			mp_msg(MSGT_DEMUX, MSGL_DBG2, "MP4ESID: %d\n", mp4_es_id);
+			for(k = 0; k < pmt->es_cnt; k++)
+			{
+				if(pmt->es[k].mp4_es_id == mp4_es_id)
+				{
+					section = &(tss->section);
+					parse_sl_section(pmt, section, progid, pid, is_start, &packet[base], buf_size);
+				}
+			}
+			continue;
+		}
+		else
+		{
+			progid = prog_id_in_pat(priv, pid);
+			if(progid != -1)
+			{
+				if(pid != demuxer->video->id && pid != demuxer->audio->id && pid != demuxer->sub->id)
+				{
+					parse_pmt(priv, progid, pid, is_start, &packet[base], buf_size);
+					continue;
+				}
+				else
+					mp_msg(MSGT_DEMUX, MSGL_ERR, "Argh! Data pid %d used in the PMT, Skipping PMT parsing!\n", pid);
+			}
+		}
 
 		if(is_start)
 		{
