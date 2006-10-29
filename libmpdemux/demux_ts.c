@@ -2747,27 +2747,17 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 						if(dvdsub_lang)
 						{
-							if(!strcmp(dvdsub_lang, ""))
-								asgn = 1;
-							else
-							{
-								lang = pid_lang_from_pmt(priv, pid);
-								if(lang != NULL)
-									asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
-								else
-									asgn = 0;
-							}
+							if(lang = pid_lang_from_pmt(priv, pid))
+								asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
 						}
+						else		//no language specified with -slang
+							asgn = 1;
 
 						if(asgn)
 						{
 							demuxer->sub->id = tss->pid;
 							mp_msg(MSGT_DEMUX, MSGL_INFO, "CHOSEN SUBs pid 0x%x (%d) FROM PROG %d\n", tss->pid, tss->pid, priv->prog);
 						}
-					}
-					else
-					{
-						mp_msg(MSGT_DEMUX, MSGL_V, "DISCARDED SUBs pid 0x%x (%d) NOT CHOSEN OR NOT IN PROG %d\n", tss->pid, tss->pid, priv->prog);
 					}
 				}
 
