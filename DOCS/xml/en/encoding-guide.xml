@@ -1559,7 +1559,8 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   the encoding quality 1, which is roughly equivalent to 80Kb/s, and
   is the minimum quality at which you should encode if you care about
   quality.
-  Please note that MEncoder currently cannot mux Vorbis audio tracks
+  Please note that <application>MEncoder</application> currently cannot 
+  mux Vorbis audio tracks
   into the output file because it only supports AVI and MPEG
   containers as an output, each of which may lead to audio/video
   playback synchronization problems with some players when the AVI file
@@ -1589,7 +1590,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 </para>
 
 <para>
-  MEncoder features experimental support for
+  <application>MEncoder</application> features experimental support for
   <systemitem class="library">libavformat</systemitem>, which is a
   library from the FFmpeg project that supports muxing and demuxing
   a variety of containers.
@@ -4125,7 +4126,7 @@ An example with VP3 compression:
 
 
 <sect1 id="menc-feat-vcd-dvd">
-<title>Using MEncoder to create VCD/SVCD/DVD-compliant files.</title>
+<title>Using <application>MEncoder</application> to create VCD/SVCD/DVD-compliant files.</title>
 
 <sect2 id="menc-feat-vcd-dvd-constraints">
 <title>Format Constraints</title>
