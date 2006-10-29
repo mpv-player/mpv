@@ -229,3 +229,14 @@ void ass_configure(ass_renderer_t* priv, int w, int h) {
 	free(path);
 	free(family);
 }
+
+ass_library_t* ass_init() {
+  ass_library_t* priv;
+  char* path = get_path("fonts");
+  priv = ass_library_init();
+  ass_set_fonts_dir(priv, path);
+  ass_set_extract_fonts(priv, extract_embedded_fonts);
+  ass_set_style_overrides(priv, ass_force_style_list);
+  free(path);
+  return priv;
+}

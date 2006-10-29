@@ -3108,14 +3108,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
   vo_init_osd();
 
 #ifdef USE_ASS
-{
-  char* path = get_path("fonts");
-  ass_library = ass_library_init();
-  ass_set_fonts_dir(ass_library, path);
-  ass_set_extract_fonts(ass_library, extract_embedded_fonts);
-  ass_set_style_overrides(ass_library, ass_force_style_list);
-  free(path);
-}
+  ass_library = ass_init();
 #endif
 
 #ifdef HAVE_RTC
