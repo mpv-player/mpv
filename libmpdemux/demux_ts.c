@@ -2775,11 +2775,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					continue;
 				}
 			}
-			else
-			{
-				stream_skip(stream, buf_size+junk);
-				continue;
-			}
 
 			//IS IT TIME TO QUEUE DATA to the dp_packet?
 			if(is_start && (dp != NULL))
@@ -2788,7 +2783,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			}
 
 
-			if(*dp == NULL)
+			if(dp && *dp == NULL)
 			{
 				if(*buffer_size > MAX_PACK_BYTES)
 					*buffer_size = MAX_PACK_BYTES;
@@ -2801,8 +2796,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				}
 				mp_msg(MSGT_DEMUX, MSGL_DBG2, "CREATED DP(%d)\n", *buffer_size);
 			}
-
-			mp_msg(MSGT_DEMUX, MSGL_DBG2, "NOW PACKET_SIZE = %d, DP_OFFSET = %d\n", *buffer_size, *dp_offset);
 		}
 
 
@@ -2867,6 +2860,9 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 					mp_msg(MSGT_DEMUX, MSGL_ERR, "Argh! Data pid %d used in the PMT, Skipping PMT parsing!\n", pid);
 			}
 		}
+
+		if(!probe && !dp)
+			continue;
 
 		if(is_start)
 		{
