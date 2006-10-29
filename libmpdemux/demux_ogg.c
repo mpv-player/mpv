@@ -393,6 +393,8 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
 #endif /* HAVE_OGGTHEORA */
   } else if (os->flac) {
      /* we pass complete packets to flac, mustn't strip the header! */
+     if (os->flac == 2 && pack->packet[0] != 0xff)
+       return NULL;
   } else {
     if(*pack->packet & PACKET_TYPE_HEADER)
       os->hdr_packets++;
@@ -565,6 +567,8 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,int id,ogg_p
   if (ds == d->video && ((sh_audio_t*)ds->sh)->format == FOURCC_THEORA)
      context = ((sh_video_t *)ds->sh)->context;
   data = demux_ogg_read_packet(os,pack,context,&pts,&flags,samplesize);
+  if (!data)
+    return 0;
 
   /// Clear subtitles if necessary (for broken files)
   if ((clear_sub > 0) && (pts >= clear_sub)) {
@@ -1009,6 +1013,17 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	ogg_d->subs[ogg_d->num_sub].flac = 1;
 	sh_a->wf = NULL;
 	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (FLAC), -aid %d\n",ogg_d->num_sub,n_audio-1);
+    } else if (pack.bytes >= 51 && !strncmp(&pack.packet[1], "FLAC", 4)) {
+	sh_a = new_sh_audio_aid(demuxer,ogg_d->num_sub, n_audio);
+	sh_a->format =  mmioFOURCC('f', 'L', 'a', 'C');
+	ogg_d->subs[ogg_d->num_sub].id = n_audio;
+	n_audio++;
+	ogg_d->subs[ogg_d->num_sub].flac = 2;
+	sh_a->wf = calloc(1, sizeof(WAVEFORMATEX) + 34);
+	sh_a->wf->wFormatTag = sh_a->format;
+	sh_a->wf->cbSize = 34;
+	memcpy(&sh_a->wf[1], &pack.packet[17], 34);
+	mp_msg(MSGT_DEMUX,MSGL_INFO,"[Ogg] stream %d: audio (FLAC, try 2), -aid %d\n",ogg_d->num_sub,n_audio-1);
 
       /// Check for old header
     } else if(pack.bytes >= 142 && ! strncmp(&pack.packet[1],"Direct Show Samples embedded in Ogg",35) ) {
