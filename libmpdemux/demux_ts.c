@@ -2633,14 +2633,24 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			int c;
 			c = stream_read_char(stream);
 			buf_size--;
+			if(c < 0 || c > 183)	//broken from the stream layer or invalid
+			{
+				stream_skip(stream, buf_size-1+junk);
+				continue;
+			}
+			
+			//c==0 is allowed!
+			if(c > 0)
+			{
 			rap_flag = (stream_read_char(stream) & 0x40) >> 6;
 			buf_size--;
 
-			c = min(c-1, buf_size);
+			c--;
 			stream_skip(stream, c);
 			buf_size -= c;
 			if(buf_size == 0)
 				continue;
+			}
 		}
 		
 		if(bad)
