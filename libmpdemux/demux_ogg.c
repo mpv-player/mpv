@@ -231,6 +231,8 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   int ignoring = 0;
   char *packet = pack->packet;
 
+  if (pack->bytes < 4)
+    return;
   mp_msg(MSGT_DEMUX,MSGL_DBG2,"\ndemux_ogg_add_sub %02X %02X %02X '%s'\n",
       (unsigned char)packet[0],
       (unsigned char)packet[1],
@@ -244,6 +246,8 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
     int16_t hdrlen = (*packet & PACKET_LEN_BITS01)>>6, i;
     hdrlen |= (*packet & PACKET_LEN_BITS2) <<1;
     lcv = 1 + hdrlen;
+    if (pack->bytes < lcv)
+      return;
     for (i = hdrlen; i > 0; i--) {
       duration <<= 8;
       duration |= (unsigned char)packet[i];
@@ -257,7 +261,7 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
     }
     ogg_sub.text[0] = realloc(ogg_sub.text[0], OGG_SUB_MAX_LINE);
     while (1) {
-      int c = packet[lcv++];
+      int c = lcv < pack->bytes ? packet[lcv++] : 0;
       if(c=='\n' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
 	  ogg_sub.text[ogg_sub.lines][line_pos] = 0; // close sub
           if(line_pos) {
