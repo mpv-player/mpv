@@ -26,6 +26,7 @@
 #include FT_GLYPH_H
 
 #include "mp_msg.h"
+#include "libvo/font_load.h" // for blur()
 #include "ass_bitmap.h"
 
 struct ass_synth_priv_s {
@@ -87,122 +88,6 @@ static int generate_tables(ass_synth_priv_t* priv, double radius)
 	}
 
 	return 0;
-}
-
-static void blur(unsigned char *buffer, unsigned short *tmp2,
-	  int width, int height, int stride, int *m2, int r, int mwidth)
-{
-	int x, y;
-
-	unsigned char  *s = buffer;
-	unsigned short *t = tmp2+1;
-	for(y=0; y<height; y++) {
-		memset(t-1, 0, (width+1)*sizeof(short));
-
-		for(x=0; x<r; x++) {
-			const int src= s[x];
-			if(src) {
-				register unsigned short *dstp= t + x-r;
-				int mx;
-				unsigned *m3= m2 + src*mwidth;
-				for(mx=r-x; mx<mwidth; mx++) {
-					dstp[mx]+= m3[mx];
-				}
-			}
-		}
-
-		for(; x<width-r; x++) {
-			const int src= s[x];
-			if(src) {
-				register unsigned short *dstp= t + x-r;
-				int mx;
-				unsigned *m3= m2 + src*mwidth;
-				for(mx=0; mx<mwidth; mx++) {
-					dstp[mx]+= m3[mx];
-				}
-			}
-		}
-
-		for(; x<width; x++) {
-			const int src= s[x];
-			if(src) {
-				register unsigned short *dstp= t + x-r;
-				int mx;
-				const int x2= r+width -x;
-				unsigned *m3= m2 + src*mwidth;
-				for(mx=0; mx<x2; mx++) {
-					dstp[mx]+= m3[mx];
-				}
-			}
-		}
-
-		s+= stride;
-		t+= width + 1;
-	}
-
-	t = tmp2;
-	for(x=0; x<width; x++) {
-		for(y=0; y<r; y++) {
-			unsigned short *srcp= t + y*(width+1) + 1;
-			int src= *srcp;
-			if(src) {
-				register unsigned short *dstp= srcp - 1 + width+1;
-				const int src2= (src + 128)>>8;
-				unsigned *m3= m2 + src2*mwidth;
-
-				int mx;
-				*srcp= 128;
-				for(mx=r-1; mx<mwidth; mx++) {
-					*dstp += m3[mx];
-					dstp+= width+1;
-				}
-			}
-		}
-		for(; y<height-r; y++) {
-			unsigned short *srcp= t + y*(width+1) + 1;
-			int src= *srcp;
-			if(src) {
-				register unsigned short *dstp= srcp - 1 - r*(width+1);
-				const int src2= (src + 128)>>8;
-				unsigned *m3= m2 + src2*mwidth;
-
-				int mx;
-				*srcp= 128;
-				for(mx=0; mx<mwidth; mx++) {
-					*dstp += m3[mx];
-					dstp+= width+1;
-				}
-			}
-		}
-		for(; y<height; y++) {
-			unsigned short *srcp= t + y*(width+1) + 1;
-			int src= *srcp;
-			if(src) {
-				const int y2=r+height-y;
-				register unsigned short *dstp= srcp - 1 - r*(width+1);
-				const int src2= (src + 128)>>8;
-				unsigned *m3= m2 + src2*mwidth;
-
-				int mx;
-				*srcp= 128;
-				for(mx=0; mx<y2; mx++) {
-					*dstp += m3[mx];
-					dstp+= width+1;
-				}
-			}
-		}
-		t++;
-	}
-
-	t = tmp2;
-	s = buffer;
-	for(y=0; y<height; y++) {
-		for(x=0; x<width; x++) {
-			s[x]= t[x]>>8;
-		}
-		s+= stride;
-		t+= width + 1;
-	}
 }
 
 static void resize_tmp(ass_synth_priv_t* priv, int w, int h)

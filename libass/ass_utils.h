@@ -25,11 +25,5 @@ int mystrtoi(char** p, int base, int* res);
 int mystrtou32(char** p, int base, uint32_t* res);
 int mystrtod(char** p, double* res);
 int strtocolor(char** q, uint32_t* res);
-unsigned ass_utf8_get_char(char **str);
-
-#ifdef HAVE_ENCA
-void* ass_guess_buffer_cp(unsigned char* buffer, int buflen, char *preferred_language, char *fallback);
-#endif
-
 #endif
 

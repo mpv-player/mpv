@@ -38,6 +38,8 @@
 #include "ass_fontconfig.h"
 #include "ass_library.h"
 
+#include "libvo/sub.h" // for utf8_get_char
+
 #define MAX_GLYPHS 1000
 #define MAX_LINES 100
 
@@ -1077,7 +1079,7 @@ static unsigned get_next_char(char** str)
 			return ' ';
 		}
 	}
-	chr = ass_utf8_get_char(&p);
+	chr = utf8_get_char(&p);
 	*str = p;
 	return chr;
 }

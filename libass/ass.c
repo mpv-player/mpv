@@ -30,6 +30,10 @@
 #include <unistd.h>
 #include <inttypes.h>
 
+#ifdef HAVE_ENCA
+#include "subreader.h" // for guess_buffer_cp
+#endif
+
 #ifdef USE_ICONV
 #include <iconv.h>
 #endif
@@ -38,6 +42,7 @@
 #include "ass.h"
 #include "ass_utils.h"
 #include "ass_library.h"
+#include "libvo/sub.h" // for utf8_get_char
 
 typedef enum {PST_UNKNOWN = 0, PST_INFO, PST_STYLES, PST_EVENTS, PST_FONTS} parser_state_t;
 
@@ -805,7 +810,7 @@ static char* sub_recode(char* data, size_t size, char* codepage)
 		char enca_lang[3], enca_fallback[100];
 		if (sscanf(codepage, "enca:%2s:%99s", enca_lang, enca_fallback) == 2
 				|| sscanf(codepage, "ENCA:%2s:%99s", enca_lang, enca_fallback) == 2) {
-			cp_tmp = ass_guess_buffer_cp((unsigned char*)data, size, enca_lang, enca_fallback);
+			cp_tmp = guess_buffer_cp((unsigned char*)data, size, enca_lang, enca_fallback);
 		}
 #endif
 		if ((icdsc = iconv_open (tocp, cp_tmp)) != (iconv_t)(-1)){
@@ -991,7 +996,7 @@ static char* validate_fname(char* name)
 	q = fname = malloc(sz + 1);
 	p = name;
 	while (*p) {
-		code = ass_utf8_get_char(&p);
+		code = utf8_get_char(&p);
 		if (code == 0)
 			break;
 		if (	(code > 0x7F) ||
