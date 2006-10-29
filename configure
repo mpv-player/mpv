@@ -5286,13 +5286,8 @@ EOF
 fi
 if test "$_cdparanoia" = yes ; then
     _cdda='yes'
-    _def_cdparanoia='#define HAVE_CDDA'
-    _inputmodules="cdda $_inputmodules"
     _ld_cdparanoia="$_ld_cdparanoia -lcdda_interface -lcdda_paranoia"
     openbsd && _ld_cdparanoia="$_ld_cdparanoia -lutil"
-else
-    _def_cdparanoia='#undef HAVE_CDDA'
-    _noinputmodules="cdda $_noinputmodules"
 fi
 echores "$_cdparanoia"
 
@@ -5324,9 +5319,7 @@ fi
 if test "$_libcdio" = yes && test "$_cdparanoia" = no ; then
     _cdda='yes'
     _def_libcdio='#define HAVE_LIBCDIO'
-    _def_cdparanoia='#define HAVE_CDDA'
     _def_havelibcdio='yes'
-    _inputmodules="cdda $_inputmodules"
     _inc_extra="$_inc_extra `pkg-config --cflags libcdio`"
     _ld_libcdio=`pkg-config --libs libcdio_paranoia`
 else
@@ -5338,6 +5331,13 @@ else
 fi
 echores "$_libcdio"
 
+if test "$_cdda" = yes ; then
+    _def_cdparanoia='#define HAVE_CDDA'
+    _inputmodules="cdda $_inputmodules"
+else
+    _def_cdparanoia='#undef HAVE_CDDA'
+    _noinputmodules="cdda $_noinputmodules"
+fi
 
 echocheck "bitmap font support"
 if test "$_bitmap_font" = yes ; then
