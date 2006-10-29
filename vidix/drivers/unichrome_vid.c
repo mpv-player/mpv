@@ -78,8 +78,9 @@ uint8_t hwrev;
 #define UC_MAP_V1_FIFO_CONTROL(depth, pre_thr, thr) \
     (((depth)-1) | ((thr) << 8) | ((pre_thr) << 24))
 
-#define FRAMEBUFFER_START	0x600000
+#define VIDEOMEMORY_SIZE	(8 * 1024 * 1024)
 #define FRAMEBUFFER_SIZE	0x200000
+#define FRAMEBUFFER_START	(VIDEOMEMORY_SIZE - FRAMEBUFFER_SIZE)
 
 #ifdef DEBUG_LOGFILE
 FILE *logfile = 0;
@@ -529,7 +530,7 @@ int
 vixInit (void)
 {
   long tmp;
-  uc_mem = map_phys_mem (pci_info.base0, 0x800000);
+  uc_mem = map_phys_mem (pci_info.base0, VIDEOMEMORY_SIZE);
   enable_app_io ();
 
   outb (0x2f, 0x3c4);
@@ -590,7 +591,7 @@ vixDestroy (void)
   outb (mclk_save[2], 0x3c5);
 
   disable_app_io ();
-  unmap_phys_mem (uc_mem, 0x800000);
+  unmap_phys_mem (uc_mem, VIDEOMEMORY_SIZE);
   unmap_phys_mem (vio, 0x1000);
 }
 
