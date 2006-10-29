@@ -571,6 +571,10 @@ static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
     int x, sps, cfs, sph, spc, w;
     int audioreorder_getnextpk = 0;
 
+  // Don't demux video if video codec init failed
+  if (demuxer->video->id >= 0 && !demuxer->video->sh)
+    demuxer->video->id = -2;
+
   while(!stream_eof(demuxer->stream)){
 
     /* Handle audio/video demxing switch for multirate files (non-interleaved) */
