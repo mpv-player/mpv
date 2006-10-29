@@ -225,14 +225,6 @@ uint64_t get_uint64 (const void *buf)
   return (ret);
 }
 
-void demux_ogg_init_sub (void) {
-  int lcv;
-  if(!ogg_sub.text[0]) // not yet allocated
-  for (lcv = 0; lcv < SUB_MAX_TEXT; lcv++) {
-    ogg_sub.text[lcv] = malloc(OGG_SUB_MAX_LINE);
-  }
-}
-
 void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
   int lcv;
   int line_pos = 0;
@@ -263,11 +255,15 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
       pts = (float)pack->granulepos/(float)os->samplerate;
       clear_sub = 1.0 + pts + (float)duration/1000.0;
     }
+    ogg_sub.text[0] = realloc(ogg_sub.text[0], OGG_SUB_MAX_LINE);
     while (1) {
       int c = packet[lcv++];
       if(c=='\n' || c==0 || line_pos >= OGG_SUB_MAX_LINE-1){
 	  ogg_sub.text[ogg_sub.lines][line_pos] = 0; // close sub
-          if(line_pos) ogg_sub.lines++;
+          if(line_pos) {
+              ogg_sub.lines++;
+              ogg_sub.text[ogg_sub.lines] = realloc(ogg_sub.text[ogg_sub.lines], OGG_SUB_MAX_LINE);
+          }
 	  if(!c || ogg_sub.lines>=SUB_MAX_TEXT) break; // EOL or TooMany
           line_pos = 0;
       }
@@ -1155,7 +1151,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
           ogg_d->text_ids[ogg_d->n_text - 1] = ogg_d->num_sub;
           ogg_d->text_langs = (char **)realloc(ogg_d->text_langs, sizeof(char *) * ogg_d->n_text);
           ogg_d->text_langs[ogg_d->n_text - 1] = NULL;
-          demux_ogg_init_sub();
 	//// Unknown header type
       } else
 	mp_msg(MSGT_DEMUX,MSGL_ERR,"Ogg stream %d has a header marker but is of an unknown type\n",ogg_d->num_sub);
