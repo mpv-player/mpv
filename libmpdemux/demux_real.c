@@ -1841,6 +1841,8 @@ static void demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, float audio
     if (flags & 1)
 	/* seek absolute */
 	priv->current_apacket = priv->current_vpacket = 0;
+    if (flags & 2) // percent seek
+        rel_seek_secs *= priv->duration;
 
     if ((streams & 1) && priv->current_vpacket >= priv->index_table_size[vid])
 	priv->current_vpacket = priv->index_table_size[vid] - 1;
