@@ -294,7 +294,7 @@ static inline int get_height(int c,int h){
 }
 
 #ifdef HAVE_FREETYPE
-#define render_txt(t)  { char* p = t;  while(*p) render_one_glyph(vo_font,*p++); }
+#define render_txt(t)  { unsigned char* p = t;  while(*p) render_one_glyph(vo_font,*p++); }
 #else
 #define render_txt(t)
 #endif
