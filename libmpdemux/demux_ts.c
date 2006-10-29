@@ -2588,11 +2588,11 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 		len = stream_read(stream, &packet[1], 3);
 		if (len != 3)
 			return 0;
+		buf_size -= 4;
 
 		if((packet[1]  >> 7) & 0x01)	//transport error
 			ts_error = 1;
 
-		buf_size -= 4;
 
 		is_start = packet[1] & 0x40;
 		pid = ((packet[1] & 0x1f) << 8) | packet[2];
@@ -2605,6 +2605,21 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				continue;
 		}
 
+		cc = (packet[3] & 0xf);
+		cc_ok = (tss->last_cc < 0) || ((((tss->last_cc + 1) & 0x0f) == cc));
+		tss->last_cc = cc;
+		    
+		bad = ts_error; // || (! cc_ok);
+		if(bad)
+		{
+			if(priv->keep_broken == 0)
+			{
+				stream_skip(stream, buf_size-1+junk);
+				continue;
+			}
+			
+			is_start = 0;	//queued to the packet data
+		}
 
 		if(is_start)
 			tss->is_synced = 1;
@@ -2615,11 +2630,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			continue;
 		}
 
-		cc = (packet[3] & 0xf);
-		cc_ok = (tss->last_cc < 0) || ((((tss->last_cc + 1) & 0x0f) == cc));
-		tss->last_cc = cc;
-		    
-		bad = ts_error; // || (! cc_ok);
     
 		afc = (packet[3] >> 4) & 3;
 		if(! (afc % 2))	//no payload in this TS packet
@@ -2651,23 +2661,6 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 				if(buf_size == 0)
 					continue;
 			}
-		}
-		
-		if(bad)
-		{
-			// logically this packet should be dropped, but if I do it
-			// certain streams play corrupted. Maybe the decoders know
-			// how to deal with it, but at least I consider the packet
-			// as "not initial"
-			mp_msg(MSGT_DEMUX, MSGL_V, "ts_parse: PID=%d, Transport error: %d, CC_OK: %s\n\n", tss->pid, ts_error, (cc_ok ? "yes" : "no"));
-
-			if(priv->keep_broken == 0)
-			{
-				stream_skip(stream, buf_size-1+junk);
-				continue;
-			}
-			
-			is_start = 0;	//queued to the packet data
 		}
 
 		//find the program that the pid belongs to; if (it's the right one or -1) && pid_type==SL_SECTION
