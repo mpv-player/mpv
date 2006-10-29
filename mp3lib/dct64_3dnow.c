@@ -617,6 +617,8 @@ void dct64_MMX_3dnow(real *a,real *b,real *c)
 "	punpckldq %%mm1, %%mm0\n\t"
 "	movq  %%mm0, 116(%%edx)\n\t"
 
+// this code is broken, there is nothing modifying the z flag above.
+#if 0
 "	jnz .L01\n\t"
 
 /* Phase 7*/
@@ -738,6 +740,7 @@ void dct64_MMX_3dnow(real *a,real *b,real *c)
 
 "	jmp	.L_bye\n\t"
 ".L01:\n\t"
+#endif
 /* Phase 9*/
 
 "	movq	(%%ecx), %%mm0\n\t"
