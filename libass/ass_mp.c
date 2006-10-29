@@ -66,7 +66,6 @@ ass_track_t* ass_default_track(ass_library_t* library) {
 
 	track->track_type = TRACK_TYPE_ASS;
 	track->Timer = 100.;
-	track->PlayResX = 384;
 	track->PlayResY = 288;
 	track->WrapStyle = 0;
 
