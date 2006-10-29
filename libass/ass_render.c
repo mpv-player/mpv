@@ -2002,7 +2002,7 @@ static int ass_start_frame(ass_renderer_t *priv, ass_track_t* track, long long n
 	                           frame_context.orig_height / frame_context.track->PlayResY;
 	frame_context.border_scale = ((double)frame_context.orig_height) / frame_context.track->PlayResY;
 
-	if (frame_context.width * track->PlayResY == frame_context.height * track->PlayResX)
+	if (frame_context.orig_width * track->PlayResY == frame_context.orig_height * track->PlayResX)
 		frame_context.font_scale_x = 1.;
 	else
 		frame_context.font_scale_x = ((double)(frame_context.orig_width * track->PlayResY)) / (frame_context.orig_height * track->PlayResX);
