@@ -2642,14 +2642,14 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 			//c==0 is allowed!
 			if(c > 0)
 			{
-			rap_flag = (stream_read_char(stream) & 0x40) >> 6;
-			buf_size--;
-
-			c--;
-			stream_skip(stream, c);
-			buf_size -= c;
-			if(buf_size == 0)
-				continue;
+				rap_flag = (stream_read_char(stream) & 0x40) >> 6;
+				buf_size--;
+	
+				c--;
+				stream_skip(stream, c);
+				buf_size -= c;
+				if(buf_size == 0)
+					continue;
 			}
 		}
 		
