@@ -166,9 +166,9 @@ int ass_process_subtitle(ass_track_t* track, subtitle* sub)
 		p += snprintf(p, end - p, "{\\an%d}", sub->alignment);
 
 	for (j = 0; j < sub->lines; ++j)
-		p += snprintf(p, end - p, "%s ", sub->text[j]);
+		p += snprintf(p, end - p, "%s\\N", sub->text[j]);
 
-	p--; // remove last ' '
+	p-=2; // remove last ' '
 	*p = 0;
 
 	if (check_duplicate_plaintext_event(track)) {
