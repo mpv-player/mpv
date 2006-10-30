@@ -50,7 +50,7 @@ static char help_text[]=
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\nИзлегу�\n"
+#define MSGTR_Exiting "\nИзлегу...\n"
 #define MSGTR_ExitingHow "\nИзлегува... (%s)\n"
 #define MSGTR_Exit_quit "Откажи"
 #define MSGTR_Exit_eof "Крај на датотеката"
