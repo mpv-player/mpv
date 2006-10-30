@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r17322 -->
 <chapter id="tv">
   <title>TV</title>
@@ -7,8 +7,8 @@
     <title>TV-Input</title>
 
     <para>
-      Dieser Abschnitt behandelt das <emphasis role="bold">Anschauen/Grabben von einem V4L-kompatiblen TV-Empfänger</emphasis>.
-      Siehe Manpage für eine Beschreibung der TV-Optionen und Tastensteuerungen.
+      Dieser Abschnitt behandelt das <emphasis role="bold">Anschauen/Grabben von einem V4L-kompatiblen TV-EmpfÃ¤nger</emphasis>.
+      Siehe Manpage fÃ¼r eine Beschreibung der TV-Optionen und Tastensteuerungen.
     </para>
 
 
@@ -19,15 +19,15 @@
         <step>
           <para>
             Zuerst musst du neu compilieren. <filename>./configure</filename> wird die Kernelheader
-            vom v4l-Kram und die Existenz der <filename>/dev/video*</filename>-Einträge
-            automatisch erkennen und TV-Unterstützung wird eingebaut werden
+            vom v4l-Kram und die Existenz der <filename>/dev/video*</filename>-EintrÃ¤ge
+            automatisch erkennen und TV-UnterstÃ¼tzung wird eingebaut werden
             (siehe Ausgaben von <filename>./configure</filename>).
           </para>
         </step>
         <step>
           <para>
-            Stelle sicher, dass dein Empfänger mit anderer TV-Software wie zum Beispiel
-            <application>XawTV</application> unter Linux läuft.
+            Stelle sicher, dass dein EmpfÃ¤nger mit anderer TV-Software wie zum Beispiel
+            <application>XawTV</application> unter Linux lÃ¤uft.
           </para>
         </step>
       </procedure>
@@ -36,7 +36,7 @@
     <sect2 id="tv-tips">
       <title>Tipps zum Gebrauch</title>
       <para>
-        Die vollständige Liste der Optionen ist in der Manpage verfügbar.
+        Die vollstÃ¤ndige Liste der Optionen ist in der Manpage verfÃ¼gbar.
         Hier sind nur ein paar Tipps:
       </para>
       <itemizedlist>
@@ -44,29 +44,29 @@
           <para>
             Benutze die Option <option>channels</option>. Ein Beispiel:
             <screen>-tv channels=26-MTV1,23-TV2</screen>
-            Erklärung: Durch Verwendung dieser Option sind nur die Kanäle 26 und 23 in Gebrauch,
+            ErklÃ¤rung: Durch Verwendung dieser Option sind nur die KanÃ¤le 26 und 23 in Gebrauch,
             und es wird beim Kanalwechsel einen netten OSD-Text geben, der den Namen des Kanals
-            anzeigt. Leerzeichen im Kanalnamen müssen durch das Zeichen	&quot;_&quot; ersetzt werden.
+            anzeigt. Leerzeichen im Kanalnamen mÃ¼ssen durch das Zeichen	&quot;_&quot; ersetzt werden.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Wähle vernünftige Bildabmessungen. Die Abmessungen des resultierenden Bildes sollten durch
+            WÃ¤hle vernÃ¼nftige Bildabmessungen. Die Abmessungen des resultierenden Bildes sollten durch
             16 teilbar sein.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Wenn du das Video bei einer vertikalen Auflösung höher als halb der vollen
-            Auflösung einfängst (z.B. 288 für PAL oder 240 für NTSC), dann werden die
-            'Frames', die du erhältst, wirklich jeweils ausgelassene Paare von Feldern sein.
-            Je nach dem, was du mit dem Video anfängst, kannst du es in dieser Form belassen,
-            (zerstörend) deinterlacen oder die Paare zu einzelnen Feldern machen.
+            Wenn du das Video bei einer vertikalen AuflÃ¶sung hÃ¶her als halb der vollen
+            AuflÃ¶sung einfÃ¤ngst (z.B. 288 fÃ¼r PAL oder 240 fÃ¼r NTSC), dann werden die
+            'Frames', die du erhÃ¤ltst, wirklich jeweils ausgelassene Paare von Feldern sein.
+            Je nach dem, was du mit dem Video anfÃ¤ngst, kannst du es in dieser Form belassen,
+            (zerstÃ¶rend) deinterlacen oder die Paare zu einzelnen Feldern machen.
           </para>
           <para>
-            Ansonsten wirst du einen Film erhalten, der während schnellbewegten Szenen gestört ist,
+            Ansonsten wirst du einen Film erhalten, der wÃ¤hrend schnellbewegten Szenen gestÃ¶rt ist,
             und die Bitratenkontrolle wird vermutlich nicht in der Lage sein, die angegebene Bitrate
             einzuhalten, da die Interlacing-Artefakte hohe Details produzieren und daher eine Menge
             Bandbreite kosten. Du kannst Deinterlacing mit <option>-vf pp=DEINT_TYPE</option>
@@ -78,48 +78,48 @@
 
         <listitem>
           <para>
-            Schneide tote Bereiche ab. Wenn du Video aufnimmst, sind die Bereiche an den Rändern
-            normalerweise schwarz oder enthalten Rauschen. Diese wiederum verbrauchen unnötige
+            Schneide tote Bereiche ab. Wenn du Video aufnimmst, sind die Bereiche an den RÃ¤ndern
+            normalerweise schwarz oder enthalten Rauschen. Diese wiederum verbrauchen unnÃ¶tige
             Bandbreite. Genauer gesagt sind es nicht die schwarzen Bereiche selbst, sondern
-            die scharfen Übergänge zwischen dem schwarzen und dem helleren Videobild, die das tun.
-            Aber das ist für den Moment nicht so wichtig. Bevor du mit der Aufnahme beginnst,
-            passe alle Argumente der Option <option>crop</option> so an, dass der ganze Müll
-            an den Rändern abgeschnitten wird. Nochmal, vergiss nicht, die resultierenden
-            Abmessungen vernünftig zu halten.
+            die scharfen ÃœbergÃ¤nge zwischen dem schwarzen und dem helleren Videobild, die das tun.
+            Aber das ist fÃ¼r den Moment nicht so wichtig. Bevor du mit der Aufnahme beginnst,
+            passe alle Argumente der Option <option>crop</option> so an, dass der ganze MÃ¼ll
+            an den RÃ¤ndern abgeschnitten wird. Nochmal, vergiss nicht, die resultierenden
+            Abmessungen vernÃ¼nftig zu halten.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Achte auf CPU-Load. Es sollte die 90%-Grenze die meiste Zeit über nicht überschreiten.
-            Wenn du einen großen Aufnahmepuffer hast, kann <application>MEncoder</application>
-            eine Überlastung für ein paar Sekunden überstehen, aber nicht mehr.
-            Es ist besser, 3D-OpenGL-Bildschirmschoner und ähnlichen Kram abzustellen.
+            Achte auf CPU-Load. Es sollte die 90%-Grenze die meiste Zeit Ã¼ber nicht Ã¼berschreiten.
+            Wenn du einen groÃŸen Aufnahmepuffer hast, kann <application>MEncoder</application>
+            eine Ãœberlastung fÃ¼r ein paar Sekunden Ã¼berstehen, aber nicht mehr.
+            Es ist besser, 3D-OpenGL-Bildschirmschoner und Ã¤hnlichen Kram abzustellen.
           </para>
         </listitem>
 
         <listitem>
           <para>
             Spiele nicht mit der Systemuhr herum. <application>MEncoder</application> benutzt
-            sie für A/V-Synchronisation. Wenn du die Systemuhr anpasst (vor allem rückwärtig),
+            sie fÃ¼r A/V-Synchronisation. Wenn du die Systemuhr anpasst (vor allem rÃ¼ckwÃ¤rtig),
             verwirrt dies <application>MEncoder</application>, und du wirst Frames verlieren.
             Das ist ein wichtiger Sachverhalt, wenn du mit einem Netzwerk verbunden bist und
-            Zeitsynchronisationssoftware wie NTP verwendest. Du musst NTP während des Aufnahmeprozesses
-            ausschalten, wenn du zuverlässig aufnehmen möchtest.
+            Zeitsynchronisationssoftware wie NTP verwendest. Du musst NTP wÃ¤hrend des Aufnahmeprozesses
+            ausschalten, wenn du zuverlÃ¤ssig aufnehmen mÃ¶chtest.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Ändere das <option>outfmt</option> nicht, es sei denn, du weißt, was du tust, oder
-            deine Karte/Treiber den Standard (YV12-Farbraum) wirklich nicht unterstützt.
-            In älteren Versionen von <application>MPlayer</application>/<application>MEncoder</application>
+            Ã„ndere das <option>outfmt</option> nicht, es sei denn, du weiÃŸt, was du tust, oder
+            deine Karte/Treiber den Standard (YV12-Farbraum) wirklich nicht unterstÃ¼tzt.
+            In Ã¤lteren Versionen von <application>MPlayer</application>/<application>MEncoder</application>
             war es notwendig, das Ausgabeformat anzugeben. Diese Sache sollte in aktuellen Releases
-            behoben sein, und <option>outfmt</option> wird nicht weiter benötigt. Die Standardeinstellung
-            genügt den meisten Zwecken. Zum Beispiel, wenn du mit
+            behoben sein, und <option>outfmt</option> wird nicht weiter benÃ¶tigt. Die Standardeinstellung
+            genÃ¼gt den meisten Zwecken. Zum Beispiel, wenn du mit
             <systemitem class="library">libavcodec</systemitem> nach DivX aufnimmst und
-            <option>outfmt=RGB24</option> angibst, um die Qualität der aufgenommenen Bilder zu erhöhen,
-            so wird das aufgenommene Bild später tatsächlich zurück zu YV12 konvertiert.
+            <option>outfmt=RGB24</option> angibst, um die QualitÃ¤t der aufgenommenen Bilder zu erhÃ¶hen,
+            so wird das aufgenommene Bild spÃ¤ter tatsÃ¤chlich zurÃ¼ck zu YV12 konvertiert.
             Die einzige Sache, die du erreichst, ist eine massive Verschwendung von CPU-Power.
           </para>
         </listitem>
@@ -127,30 +127,30 @@
         <listitem>
           <para>
             Um den Farbraum I420 anzugeben (<option>outfmt=i420</option>), musst du die Option
-            <option>-vc rawi420</option> hinzufügen. Das liegt an einem Konflikt mit einem
+            <option>-vc rawi420</option> hinzufÃ¼gen. Das liegt an einem Konflikt mit einem
             Intel Indeo Videocodec.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Es gibt viele Möglichkeiten, Audio aufzunehmen. Du kannst den Ton grabben entweder
-            mit deiner Soundkarte über ein externes Kabel zwischen Videokarte und Line-In oder
+            Es gibt viele MÃ¶glichkeiten, Audio aufzunehmen. Du kannst den Ton grabben entweder
+            mit deiner Soundkarte Ã¼ber ein externes Kabel zwischen Videokarte und Line-In oder
             durch Benutzung des eingebauten ADC im bt878-Chip. In letzterem Falle musst den den
             Treiber <emphasis role="bold">btaudio</emphasis> laden. Lies die Datei
             <filename>linux/Documentation/sound/btaudio</filename> (im Kernel-Tree, nicht
-            in dem von <application>MPlayer</application>) für ein paar Anweisungen,
+            in dem von <application>MPlayer</application>) fÃ¼r ein paar Anweisungen,
             wie dieser Treiber verwendet wird.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            Wenn <application>MEncoder</application> das Audiogerät nicht öffnen kann,
-            stelle sicher, dass es wirklich verfügbar ist. Es kann Ärger geben mit Soundservern
+            Wenn <application>MEncoder</application> das AudiogerÃ¤t nicht Ã¶ffnen kann,
+            stelle sicher, dass es wirklich verfÃ¼gbar ist. Es kann Ã„rger geben mit Soundservern
             wie aRts (KDE) oder ESD (GNOME). Wenn du eine Vollduplex-Soundkarte hast
-            (fast jede vernünftige Karte unterstützt dies heutzutage) und du KDE laufen hast,
-            probiere die Option "Vollduplex" im Eigenschaftenmenü des Soundservers.
+            (fast jede vernÃ¼nftige Karte unterstÃ¼tzt dies heutzutage) und du KDE laufen hast,
+            probiere die Option "Vollduplex" im EigenschaftenmenÃ¼ des Soundservers.
           </para>
         </listitem>
       </itemizedlist>
@@ -176,10 +176,10 @@
 
       <informalexample>
         <para>
-          Ein gehobenes Beispiel. Dies sorgt dafür, dass <application>MEncoder</application>
-          das volle PAL-Bild einfängt, die Ränder abschneidet und einen Deinterlacer mit einem linearen
+          Ein gehobenes Beispiel. Dies sorgt dafÃ¼r, dass <application>MEncoder</application>
+          das volle PAL-Bild einfÃ¤ngt, die RÃ¤nder abschneidet und einen Deinterlacer mit einem linearen
           Blendalgorithmus auf das Bild anwendet. Der Ton wird mit dem LAME-Codec bei konstanter Bitrate
-          von 64kbps komprimiert. Diese Einstellungen eigenen sich für das Einfangen von Filmen.
+          von 64kbps komprimiert. Diese Einstellungen eigenen sich fÃ¼r das Einfangen von Filmen.
           <screen>
 mencoder -tv driver=v4l:width=768:height=576 \
 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=900 \
@@ -191,22 +191,22 @@ mencoder -tv driver=v4l:width=768:height=576 \
 
       <informalexample>
         <para>
-          Dies wird zusätzlich die Bildabmessungen auf 384x288 ändern und das Video mit
+          Dies wird zusÃ¤tzlich die Bildabmessungen auf 384x288 Ã¤ndern und das Video mit
           einer Bitrate von 250kbps im hochqualitativen Modus encodieren.
           Die Option vqmax lockert den Quantisierungsparameter und erlaubt dem Videokompressor, eine
-          sehr niedrige Bitrate zu erlangen, sogar auf Kosten der Qualität. Dies kann verwendet werden
-          für das Einfangen von langen TV-Serien, wo die Videoqualität nicht so wichtig ist.
+          sehr niedrige Bitrate zu erlangen, sogar auf Kosten der QualitÃ¤t. Dies kann verwendet werden
+          fÃ¼r das Einfangen von langen TV-Serien, wo die VideoqualitÃ¤t nicht so wichtig ist.
           <screen>
 mencoder -tv driver=v4l:width=768:height=576 \
 -ovc lavc -lavcopts vcodec=mpeg4:vbitrate=350:vhq:vqmax=31:keyint=300 \
 -oac mp3lame -lameopts cbr:br=48 \
 -vf crop=720:540:24:18,pp=lb,scale=384:288 -sws 1 -o <replaceable>output.avi</replaceable> tv://<!--
           --></screen>
-          Es ist außerdem möglich, in der Option <option>-tv</option> kleinere Bildabmessungen
+          Es ist auÃŸerdem mÃ¶glich, in der Option <option>-tv</option> kleinere Bildabmessungen
           anzugeben und die Softwareskalierung auszulassen, aber dieser Ansatz nutzt die maximal
-          verfügbaren Informationen und ist ein wenig resistenter gegen Störungen. Die bt8x8-Chips
-          können das Mitteln der Pixel auf Grund einer Hardwarebeschränkung nur in horizontaler
-          Richtung durchführen.
+          verfÃ¼gbaren Informationen und ist ein wenig resistenter gegen StÃ¶rungen. Die bt8x8-Chips
+          kÃ¶nnen das Mitteln der Pixel auf Grund einer HardwarebeschrÃ¤nkung nur in horizontaler
+          Richtung durchfÃ¼hren.
         </para>
       </informalexample>
     </sect2>

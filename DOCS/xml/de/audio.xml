@@ -1,19 +1,19 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r17322 -->
 
 <chapter id="audio">
-  <title>Audioausgabegeräte</title>
+  <title>AudioausgabegerÃ¤te</title>
   <sect1 id="sync">
     <title>Audio/Video-Synchronisation</title>
 
     <para>
-      Soundkartentreiber für Linux bereiten Kompatibilitätsprobleme. Dies liegt
+      Soundkartentreiber fÃ¼r Linux bereiten KompatibilitÃ¤tsprobleme. Dies liegt
       daran, dass sich <application>MPlayer</application> auf ein eingebautes
       Feature von <emphasis>ordentlich</emphasis> programmierten Soundkartentreibern
-      verlässt, das es ermöglicht, korrekte Audio/Video-Synchronisation beizubehalten.
+      verlÃ¤sst, das es ermÃ¶glicht, korrekte Audio/Video-Synchronisation beizubehalten.
       Leider ist es jedoch so, dass sich manche Schreiber der Treiber um dieses
-      Feature nicht kümmern, da es zum Abspielen von MP3s oder für Soundeffekte
-      nicht benötigt wird.
+      Feature nicht kÃ¼mmern, da es zum Abspielen von MP3s oder fÃ¼r Soundeffekte
+      nicht benÃ¶tigt wird.
     </para>
 
     <para>
@@ -27,32 +27,32 @@
     <para>
       Die Benutzung von <application>MPlayer</application> mit einem ordentlich
       geschriebenen Audiotreiber wird niemals zu mit Audio im Zusammenhang
-      stehender A/V-Desynchronisation führen, außer bei sehr schlecht erstellten
-      Dateien (siehe Manpage für Umgehungsmöglichkeiten).
+      stehender A/V-Desynchronisation fÃ¼hren, auÃŸer bei sehr schlecht erstellten
+      Dateien (siehe Manpage fÃ¼r UmgehungsmÃ¶glichkeiten).
     </para>
 
     <para>
       Sollte es der Fall sein, dass du einen schlechten Audiotreiber hast, probiere
-      die Option <option>-autosync</option>, diese sollte deine Probleme lösen.
-      Siehe Manpage für detaillierte Informationen.
+      die Option <option>-autosync</option>, diese sollte deine Probleme lÃ¶sen.
+      Siehe Manpage fÃ¼r detaillierte Informationen.
     </para>
   </sect1>
 
   <sect1 id="troubleshooting">
-    <title>Troubleshooting/Problemlösung</title>
+    <title>Troubleshooting/ProblemlÃ¶sung</title>
 
     <para>Ein paar Anmerkungen:</para>
 
     <para>
       Wenn du ALSA Version 0.5 in nutzt, musst du fast immer
-      <option>-ao alsa5</option> verwenden, da ALSA 0.5 fehlerhaften Code für die
-      OSS-Emulation enthält und <application>MPlayer</application>
+      <option>-ao alsa5</option> verwenden, da ALSA 0.5 fehlerhaften Code fÃ¼r die
+      OSS-Emulation enthÃ¤lt und <application>MPlayer</application>
       <emphasis role="bold"> zum Absturz bringen wird</emphasis>, mit einer
       Nachricht wie dieser:
       <screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
     </para>
     <para>
-      Wenn du bei der Wiedergabe von CD-ROM Klicken hörst, schalte IRQ-Unmasking
+      Wenn du bei der Wiedergabe von CD-ROM Klicken hÃ¶rst, schalte IRQ-Unmasking
       an wie im Abschnitt <link linkend="drives">CD-ROM</link> beschrieben.
     </para>
   </sect1>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r20449 -->
 <chapter id="usage">
 <title>Gebrauch</title>
@@ -20,7 +20,7 @@
 	
 	<para>
 		Du kannst Dateinamen/URLs mit <literal>{</literal> und <literal>}</literal> gruppieren.
-		Dies ist nützlich mit der Option <option>-loop</option>:
+		Dies ist nÃ¼tzlich mit der Option <option>-loop</option>:
 		
 		<screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
 		
@@ -37,7 +37,7 @@
 	</para>
 	
 	<para>
-		Eine andere Möglichkeit, eine Datei abzuspielen:
+		Eine andere MÃ¶glichkeit, eine Datei abzuspielen:
 		<synopsis><!--
 			--> <command>mplayer</command><!--
 			--> [<replaceable>Optionen</replaceable>]<!--
@@ -51,9 +51,9 @@
 			--> <command>mplayer</command><!--
 			--> [<replaceable>Standardoptionen</replaceable>]<!--
 			--> [<replaceable>Pfad</replaceable>/]<replaceable>dateiname1</replaceable><!--
-			--> [<replaceable>Optionen für dateiname1</replaceable>]<!--
+			--> [<replaceable>Optionen fÃ¼r dateiname1</replaceable>]<!--
 			--> <replaceable>dateiname2</replaceable><!--
-			--> [<replaceable>Optionen für dateiname2</replaceable>] ... <!--
+			--> [<replaceable>Optionen fÃ¼r dateiname2</replaceable>] ... <!--
 		--></synopsis>
 	</para>
 
@@ -80,7 +80,7 @@
 		<synopsis><!--
 			--><command>mplayer</command> [<replaceable>Optionen</replaceable>]<!--
 			--> http://<replaceable>site.com/datei.asf</replaceable><!--
-		--></synopsis> (es können auch Playlists benutzt werden)
+		--></synopsis> (es kÃ¶nnen auch Playlists benutzt werden)
 	</para>
 
 	<para>
@@ -109,7 +109,7 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
   
   <para>
     <application>MPlayer</application> kann Untertitel bei Filmen darstellen.
-    Momentan werden die folgenden Formate unterstützt:
+    Momentan werden die folgenden Formate unterstÃ¼tzt:
     <itemizedlist>
       <listitem><para>VOBsub</para></listitem>
       <listitem><para>OGM</para></listitem>
@@ -129,7 +129,7 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
   </para>
   
   <para>
-    <application>MPlayer</application> kann (<emphasis role="bold">außer den ersten drei</emphasis>)
+    <application>MPlayer</application> kann (<emphasis role="bold">auÃŸer den ersten drei</emphasis>)
     die oben gelisteten Zielformate ausgeben (speichern), und zwar mit folgenden Optionen:
     <itemizedlist>
       <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
@@ -152,7 +152,7 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
   <formalpara>
     <title>VOBsub-Untertitel</title>
     <para>
-      VOBsub-Untertitel bestehen aus einer (ein paar Megabyte) großen
+      VOBsub-Untertitel bestehen aus einer (ein paar Megabyte) groÃŸen
       <filename>.SUB</filename> Datei, und optional <filename>.IDX-</filename> und/oder
       <filename>.IFO</filename>-Dateien. Wenn du Dateien hast wie
       <filename><replaceable>beispiel.sub</replaceable></filename>,
@@ -160,14 +160,14 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
       oder <filename><replaceable>beispiel.idx</replaceable></filename>, musst du
       <application>MPlayer</application> die Optionen
       <option>-vobsub beispiel [-vobsubid <replaceable>id</replaceable>]</option>
-      übergeben (vollständige Pfadangabe optional).
-      Die Option <option>-vobsubid</option> verhält sich wie
-      die Option <option>-sid</option> für DVDs, du kannst damit Tracks (Sprachen) wählen.
+      Ã¼bergeben (vollstÃ¤ndige Pfadangabe optional).
+      Die Option <option>-vobsubid</option> verhÃ¤lt sich wie
+      die Option <option>-sid</option> fÃ¼r DVDs, du kannst damit Tracks (Sprachen) wÃ¤hlen.
       Im Falle, dass <option>-vobsubid</option> nicht angegeben wird, wird
-      <application>MPlayer</application> versuchen, auf die Sprachen zurückzugreifen,
+      <application>MPlayer</application> versuchen, auf die Sprachen zurÃ¼ckzugreifen,
       die mit der Option <option>-slang</option> angegeben werden, und sonst auf
-      <systemitem>langidx</systemitem> zurückzugreifen, um die Untertitelsprache zu wählen.
-      Schlägt dies fehl, wird es keine Untertitel geben.
+      <systemitem>langidx</systemitem> zurÃ¼ckzugreifen, um die Untertitelsprache zu wÃ¤hlen.
+      SchlÃ¤gt dies fehl, wird es keine Untertitel geben.
     </para>
   </formalpara>
   
@@ -175,11 +175,11 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
     <title>Andere Untertitel</title>
     <para>
       Die anderen Formate bestehen aus einer Textdatei, die Zeit-, Platzierungs- und
-      Textinformationen enthält. Gebrauch:
+      Textinformationen enthÃ¤lt. Gebrauch:
       Wenn du eine Datei wie
       <filename><replaceable>beispiel.txt</replaceable></filename> hast,
       musst du die Option <option>-sub <replaceable>beispiel.txt</replaceable></option>
-      (vollständiger Pfad optional) angeben.
+      (vollstÃ¤ndiger Pfad optional) angeben.
     </para>
   </formalpara>
   
@@ -188,15 +188,15 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
     <varlistentry>
       <term><option>-subdelay <replaceable>sek</replaceable></option></term>
       <listitem><simpara>
-          Verzögert Untertitel um <option><replaceable>sek</replaceable></option>
-          Sekunden. Kann negativ sein. Dieser Wert wird zum Zeitpositionszähler
+          VerzÃ¶gert Untertitel um <option><replaceable>sek</replaceable></option>
+          Sekunden. Kann negativ sein. Dieser Wert wird zum ZeitpositionszÃ¤hler
           hinzuaddiert.
         </simpara></listitem>
     </varlistentry>
     <varlistentry>
       <term><option>-subfps <replaceable>RATE</replaceable></option></term>
       <listitem><simpara>
-          Gibt die Frame/sek-Rate der Untertiteldatei (Fließkommazahl) an.
+          Gibt die Frame/sek-Rate der Untertiteldatei (FlieÃŸkommazahl) an.
         </simpara></listitem>
     </varlistentry>
     <varlistentry>
@@ -208,19 +208,19 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
   </variablelist>
   
   <para>
-    Wenn du bei Benutzung einer MicroDVD-Untertiteldatei eine zunehmende Verzögerung
+    Wenn du bei Benutzung einer MicroDVD-Untertiteldatei eine zunehmende VerzÃ¶gerung
     zwischen Film und Untertiteln feststellst, ist vermutlich die Framerate des
     Films und die der Untertiteldatei unterschiedlich. Beachte bitte, dass das MicroDVD-Untertitelformat
     absolute Framenummern nutzt. Daher sollte die Option <option>-subfps</option>
     bei diesem Format verwendet werden. Wenn du dieses Problem auf Dauer beheben willst,
     musst du die Framerate manuell konvertieren.
-    <application>MPlayer</application> kann diese Konvertierung für dich übernehmen:
+    <application>MPlayer</application> kann diese Konvertierung fÃ¼r dich Ã¼bernehmen:
     
     <screen>mplayer -dumpmicrodvdsub -fps <replaceable>untertitel_fps</replaceable> -subfps <replaceable>avi_fps</replaceable> -sub <replaceable>untertitel_dateiname</replaceable> <replaceable>dummy.avi</replaceable></screen>
   </para>
   
   <para>
-    Ausführungen über DVD-Untertitel findest du im Abschnitt <link linkend="dvd">DVD</link>.
+    AusfÃ¼hrungen Ã¼ber DVD-Untertitel findest du im Abschnitt <link linkend="dvd">DVD</link>.
   </para>
 </sect1>
 
@@ -229,10 +229,10 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 	<title>Steuerung/Kontrolle</title>
 	
 	<para>
-		<application>MPlayer</application> hat einen vollständig konfigurierbaren, befehlgesteuerten
-		Steuerungslayer, der dir ermöglicht, <application>MPlayer</application> mit der Tastatur,
+		<application>MPlayer</application> hat einen vollstÃ¤ndig konfigurierbaren, befehlgesteuerten
+		Steuerungslayer, der dir ermÃ¶glicht, <application>MPlayer</application> mit der Tastatur,
 		der Maus, einem Joystick oder einer Fernbedienung (durch Gebrauch von LIRC) zu kontrollieren.
-		Siehe Manpage für die komplette Liste der Tastatursteuerungen.
+		Siehe Manpage fÃ¼r die komplette Liste der Tastatursteuerungen.
 	</para>
 	
 	
@@ -243,14 +243,14 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 			<application>MPlayer</application> erlaubt dir durch eine einfache Konfigurationsdatei,
 			jede Taste an jeden beliebigen <application>MPlayer</application>-Befehl zu binden.
 			Die Syntax besteht aus einem Tastennamen gefolgt von einem Befehl. Die Standardkonfigurationsdatei
-			ist <filename>$HOME/.mplayer/input.conf</filename>, dies kann jedoch mit der Option<option>-input <replaceable>conf</replaceable></option> überschrieben werden
+			ist <filename>$HOME/.mplayer/input.conf</filename>, dies kann jedoch mit der Option<option>-input <replaceable>conf</replaceable></option> Ã¼berschrieben werden
 			(relative Pfade sind relativ zu <filename>$HOME/.mplayer</filename>).
 		</para>
 		
 		<para>
-			Du erhältst eine vollständige Liste der unterstützten Tastennamen, indem du den Befehl
-			<command>mplayer -input keylist</command> ausführst, eine vollständige Liste der
-			verfügbaren Befehle mit <command>mplayer -input cmdlist</command>.
+			Du erhÃ¤ltst eine vollstÃ¤ndige Liste der unterstÃ¼tzten Tastennamen, indem du den Befehl
+			<command>mplayer -input keylist</command> ausfÃ¼hrst, eine vollstÃ¤ndige Liste der
+			verfÃ¼gbaren Befehle mit <command>mplayer -input cmdlist</command>.
 		</para>
 		
 		<example id="input_control_file">
@@ -278,24 +278,24 @@ ENTER pt_step 1 1<!--
 		
 		<para>
 			Linux Infrared Remote Control - benutze einen einfach zu erstellenden, selbstgemachten
-			IR-Empfänger, eine (fast) veraltete Fernbedienung und steuere deine Linuxkiste damit!
-			Mehr darüber auf der <ulink url="http://www.lirc.org">LIRC Homepage</ulink>.
+			IR-EmpfÃ¤nger, eine (fast) veraltete Fernbedienung und steuere deine Linuxkiste damit!
+			Mehr darÃ¼ber auf der <ulink url="http://www.lirc.org">LIRC Homepage</ulink>.
 		</para>
 		
 		<para>
 			Wenn du das LIRC-Paket installiert hast, wird <filename>configure</filename>
 			dies automatisch erkennen. Wenn alles gut lief, wird <application>MPlayer</application>
-			beim Start &quot;<systemitem>Initialisiere LIRC-Unterstützung...</systemitem>&quot; ausgeben.
-			Wenn ein Fehler auftritt, wird er dir das sagen. Wenn keine Mitteilung über LIRC erscheint,
-			ist die entsprechende Unterstützung nicht eincompiliert. Das ist es schon :-)
+			beim Start &quot;<systemitem>Initialisiere LIRC-UnterstÃ¼tzung...</systemitem>&quot; ausgeben.
+			Wenn ein Fehler auftritt, wird er dir das sagen. Wenn keine Mitteilung Ã¼ber LIRC erscheint,
+			ist die entsprechende UnterstÃ¼tzung nicht eincompiliert. Das ist es schon :-)
 		</para>
 		
 		<para>
-			Der Anwendungsname für <application>MPlayer</application> ist - Überraschung -
+			Der Anwendungsname fÃ¼r <application>MPlayer</application> ist - Ãœberraschung -
 			<filename>mplayer</filename>. Du kannst jeden <application>MPlayer</application>-Befehl
-			verwenden und sogar mehrere Befehle übergeben, indem du sie mit <literal>\n</literal>
+			verwenden und sogar mehrere Befehle Ã¼bergeben, indem du sie mit <literal>\n</literal>
 			trennst. Vergiss nicht, das repeat-Flag in <filename>.lircrc</filename> zu setzen, wenn
-			es Sinn macht (spulen, Lautstärke, etc). Hier ist ein Auszug einer Beispieldatei
+			es Sinn macht (spulen, LautstÃ¤rke, etc). Hier ist ein Auszug einer Beispieldatei
 			<filename>.lircrc</filename>:
 		</para>
 		
@@ -328,7 +328,7 @@ end<!--
 		--></programlisting>
 		
 		<para>
-			Wenn du die Standardposition für die LIRC-Konfigurationsdatei
+			Wenn du die Standardposition fÃ¼r die LIRC-Konfigurationsdatei
 			(<filename>~/.lircrc</filename>) nicht magst, benutze die Option <option>-lircconf
 			<replaceable>Dateiname</replaceable></option>, um eine andere Datei anzugeben.
 		</para>
@@ -338,9 +338,9 @@ end<!--
 	<sect2 id="slave-mode">
 		<title>Slave-Modus</title>
 		<para>
-			Der Slave-Modus erlaubt dir, einfache Frontends für <application>MPlayer</application>
+			Der Slave-Modus erlaubt dir, einfache Frontends fÃ¼r <application>MPlayer</application>
 			zu erstellen. Wenn dieser mit der Option <option>-slave</option> gestartet wird,
-			wird <application>MPlayer</application> durch Zeilenumsprünge (\n) getrennte
+			wird <application>MPlayer</application> durch ZeilenumsprÃ¼nge (\n) getrennte
 			Befehle von der Standardeingabe lesen.
 			Die Befehle sind in der Datei <ulink url="../../tech/slave.txt">slave.txt</ulink> dokumentiert.
 		</para>
@@ -357,9 +357,9 @@ end<!--
 	</para>
 	
 	<para>
-		Die Wiedergabe funktioniert durch einfache Übergabe der URL auf der Kommandozeile.
-		<application>MPlayer</application> berücksichtigt die <envar>http_proxy</envar>-Umgebungsvariable
-		und benutzt einen Proxy, wenn verfügbar. Proxies können auch erzwungen werden:
+		Die Wiedergabe funktioniert durch einfache Ãœbergabe der URL auf der Kommandozeile.
+		<application>MPlayer</application> berÃ¼cksichtigt die <envar>http_proxy</envar>-Umgebungsvariable
+		und benutzt einen Proxy, wenn verfÃ¼gbar. Proxies kÃ¶nnen auch erzwungen werden:
 		<screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 	</para>
 	
@@ -387,7 +387,7 @@ end<!--
 			<screen>mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable> </screen>
 			den von <replaceable>http://217.71.208.37:8006</replaceable> gestreamten Inhalt nach
 			<replaceable>stream.asf</replaceable> speichern. Dies funktioniert mit allen Protokollen,
-			die von <application>MPlayer</application> unterstützt werden, wie MMS, RSTP und so weiter.
+			die von <application>MPlayer</application> unterstÃ¼tzt werden, wie MMS, RSTP und so weiter.
 		</para>
 	</sect2>
 	
@@ -398,12 +398,12 @@ end<!--
 	
 	<para>
 		Ferngesteuerte Streams erlauben dir, auf die meisten von <application>MPlayer</application>s
-		Streamtypen von einem entfernten Host zuzugreifen. Der hauptsächliche Zweck dieses Features
-		ist es, das CD- oder DVD-Laufwerk einen anderen Computers über das Netzwerk zu verwenden
-		(vorausgesetzt, du hast die nötige Bandbreite). Leider kann auf manche Streamtypen (zur Zeit
+		Streamtypen von einem entfernten Host zuzugreifen. Der hauptsÃ¤chliche Zweck dieses Features
+		ist es, das CD- oder DVD-Laufwerk einen anderen Computers Ã¼ber das Netzwerk zu verwenden
+		(vorausgesetzt, du hast die nÃ¶tige Bandbreite). Leider kann auf manche Streamtypen (zur Zeit
 		TV und MF) nicht ferngesteuert zugegriffen werden, da sie auf Demuxerlevel implementiert sind.
-		Das ist schade im Falle von MF, im Falle des TV-Streams wäre eh eine unglaublich hohe Bandbreite
-		nötig.
+		Das ist schade im Falle von MF, im Falle des TV-Streams wÃ¤re eh eine unglaublich hohe Bandbreite
+		nÃ¶tig.
 	</para>
 	
 	<sect2 id="compile_mpst_server">
@@ -412,7 +412,7 @@ end<!--
 			Gehe nach der Compilierung von <application>MPlayer</application> in das Verzeichnis
 			<filename>TOOLS/netstream</filename> und gib dort
 			<application>make</application> ein, um das Binary zu erstellen.
-			Du kannst dann die <application>netstream</application>-Binärdatei an den richtigen Ort
+			Du kannst dann die <application>netstream</application>-BinÃ¤rdatei an den richtigen Ort
 			auf deinem System (unter Linux normalerweise
 			<filename class="directory">/usr/local/bin</filename>) kopieren.
 		</para>
@@ -429,13 +429,13 @@ end<!--
 			Du kannst auch auf Dateien auf diesem Server zugreifen:
 			<screen>mplayer -cache 5000 <replaceable>mpst://servername//usr/local/movies/lol.avi</replaceable></screen>
 			Beachte, dass Pfade nicht mit einem / beginnen und relativ zu dem Pfad sind, in dem der
-			Server läuft. Die Option <option>-cache</option> wird nicht benötigt, wird aber empfohlen.
+			Server lÃ¤uft. Die Option <option>-cache</option> wird nicht benÃ¶tigt, wird aber empfohlen.
 		</para>
 		
 		<para>
-			Sei dir im klaren darüber, dass der Server momentan überhaupt nicht sicher ist.
-			Beschwere dich also nicht über die zahlreichen Exploits, die durch diesen momentan
-			möglich sind. Sende stattdessen einen (guten Patch) sein, um ihn zu verbessern, oder
+			Sei dir im klaren darÃ¼ber, dass der Server momentan Ã¼berhaupt nicht sicher ist.
+			Beschwere dich also nicht Ã¼ber die zahlreichen Exploits, die durch diesen momentan
+			mÃ¶glich sind. Sende stattdessen einen (guten Patch) sein, um ihn zu verbessern, oder
 			schreibe deinen eigenen Server.
 		</para>
 		
@@ -448,27 +448,27 @@ end<!--
 	
 	<para>
 		Das System der "edit decision list" (EDL) erlaubt dir, Abschnitte von Videos
-		während der Wiedergabe automatisch zu überspringen oder stummzuschalten,
+		wÃ¤hrend der Wiedergabe automatisch zu Ã¼berspringen oder stummzuschalten,
 		basierend auf einer filmspezifischen EDL-Konfigurationsdatei.
 	</para>
 	
 	<para>
-		Dies ist nützlich für diejenigen, die einen Film im "familienfreundlichen" Modus
-		anschauen möchten.  Du kannst jegliche Gewalt oder Obszönität nach persönlichen
+		Dies ist nÃ¼tzlich fÃ¼r diejenigen, die einen Film im "familienfreundlichen" Modus
+		anschauen mÃ¶chten.  Du kannst jegliche Gewalt oder ObszÃ¶nitÃ¤t nach persÃ¶nlichen
 		Vorgaben aus einem Film herausschneiden. Daneben gibt es noch weitere
-		Nutzungsmöglichkeiten wie dem automatischen Überspringen von Werbung in den
+		NutzungsmÃ¶glichkeiten wie dem automatischen Ãœberspringen von Werbung in den
 		Videos, die du dir anschaust.
 	</para>
 	
 	<para>
 		Das EDL-Dateiformat ist ziemlich simpel. Es gibt einen Befehl pro Zeile, der
-		angibt, was zu tun ist (überspringen/stumm schalten) und wann es zu tun ist (benutzt pts in Sekunden).
+		angibt, was zu tun ist (Ã¼berspringen/stumm schalten) und wann es zu tun ist (benutzt pts in Sekunden).
 	</para>
 	
 	<sect2 id="edl_using">
 		<title>Benutzung einer EDL-Datei</title>
 		<para>
-			Füge die Option <option>-edl &lt;dateiname&gt;</option> mit der EDL-Datei,
+			FÃ¼ge die Option <option>-edl &lt;dateiname&gt;</option> mit der EDL-Datei,
 			die auf das Video angewendet werden soll, hinzu, wenn du
 			<application>MPlayer</application> aufrufst.
 		</para>
@@ -479,29 +479,29 @@ end<!--
 		<para>
 			Das aktuelle EDL-Dateiformat ist das folgende:
 			<programlisting>[Anfangssekunde] [Endsekunde] [Aktion]</programlisting>
-			Wobei die Sekunden Fließkommazahlen sind und die Aktion entweder
-			<literal>0</literal> zum Überspringen oder <literal>1</literal> für
+			Wobei die Sekunden FlieÃŸkommazahlen sind und die Aktion entweder
+			<literal>0</literal> zum Ãœberspringen oder <literal>1</literal> fÃ¼r
 			Stummschaltung. Beispiel:
 			<programlisting>
 5.3   7.1    0
 15    16.7   1
 420   422    0<!--
 			--></programlisting>
-			Dies wird den Bereich von Sekunde 5.3 bis Sekunde 7.1 des Videos überspringen
+			Dies wird den Bereich von Sekunde 5.3 bis Sekunde 7.1 des Videos Ã¼berspringen
 			und dann bei 15 Sekunden stummschalten, bei 16.7 Sekunden den Ton wieder
-			anschalten. Der Bereich zwischen den Sekunden 420 bis 422 wird übersprungen.
-			Diese Aktionen werden ausgeführt, wenn der Wiedergabetimer die in der Datei
+			anschalten. Der Bereich zwischen den Sekunden 420 bis 422 wird Ã¼bersprungen.
+			Diese Aktionen werden ausgefÃ¼hrt, wenn der Wiedergabetimer die in der Datei
 			angegebenen Zeiten erreicht.
 		</para>
 		
 		<para>
 			Um eine EDL-Datei zu erstellen, die als Arbeitsvorlage benutzt werden kann,
 			benutze die Option <option>-edlout &lt;dateiname&gt;</option>.
-			Drücke dann während der Wiedergabe <keycap>i</keycap>, um den Anfang und as Ende
-			eines zu überspringenden Blocks zu markieren. Ein entsprechender Eintrag wird für
+			DrÃ¼cke dann wÃ¤hrend der Wiedergabe <keycap>i</keycap>, um den Anfang und as Ende
+			eines zu Ã¼berspringenden Blocks zu markieren. Ein entsprechender Eintrag wird fÃ¼r
 			diese Zeit in die Datei geschrieben. Danach kannst du Feineinstellungen an
-			der generierten EDL-Datei vornehmen und zusätzlich die Standardeinstellung ändern,
-			welche darin besteht, den Block, der in einer Zeile beschrieben ist, zu überspringen.
+			der generierten EDL-Datei vornehmen und zusÃ¤tzlich die Standardeinstellung Ã¤ndern,
+			welche darin besteht, den Block, der in einer Zeile beschrieben ist, zu Ã¼berspringen.
 		</para>
 	</sect2>
 	
@@ -509,7 +509,7 @@ end<!--
 
 
 <sect1 id="advaudio" xreflabel="Advanced Audio">
-	<title>Audio für Fortgeschrittene</title>
+	<title>Audio fÃ¼r Fortgeschrittene</title>
 	
 	<sect2 id="advaudio-surround">
 		<title>Surround/Multichannel-Wiedergabe</title>
@@ -518,24 +518,24 @@ end<!--
 			<title>DVDs</title>
 			<para>
 				Die meisten DVDs und viele andere Dateien enthalten Surround-Sound.
-				<application>MPlayer</application> unterstützt Surround-Wiedergabe, aktiviert diese
-				jedoch nicht in der Voreinstellung, da Stereo-Ausrüstung weit gebräuchlicher ist.
-				Um eine Datei abzuspielen, die mehr als zwei Audiokanäle hat, benutze
+				<application>MPlayer</application> unterstÃ¼tzt Surround-Wiedergabe, aktiviert diese
+				jedoch nicht in der Voreinstellung, da Stereo-AusrÃ¼stung weit gebrÃ¤uchlicher ist.
+				Um eine Datei abzuspielen, die mehr als zwei AudiokanÃ¤le hat, benutze
 				die Option <option>-channels</option>.
 				Um eine DVD mit 5.1-Ton abzuspielen, benutze beispielsweise:
 				
 				<screen>mplayer dvd://1 -channels 6</screen>
 
-				Beachte, dass es sich trotz des Namens "5.1" um sechs diskrete Kanäle handelt.
-				Wenn du eine entsprechende Ausrüstung für Surround-Sound hast, ist es sicher, die
+				Beachte, dass es sich trotz des Namens "5.1" um sechs diskrete KanÃ¤le handelt.
+				Wenn du eine entsprechende AusrÃ¼stung fÃ¼r Surround-Sound hast, ist es sicher, die
 				Option <option>channels</option> in die <application>MPlayer</application>-Konfigurationsdatei
 				<filename>~/.mplayer/config</filename> zu schreiben. Um zum Beispiel Quadrophonie-Wiedergabe
-				als Voreinstellung zu verwenden, füge folgende Zeile hinzu:
+				als Voreinstellung zu verwenden, fÃ¼ge folgende Zeile hinzu:
 				
 				<programlisting>channels=4</programlisting>
 				
-				<application>MPlayer</application> wird dann den Ton in vier Kanäle ausgeben, falls
-				alle vier Kanäle zur Verfügung stehen.
+				<application>MPlayer</application> wird dann den Ton in vier KanÃ¤le ausgeben, falls
+				alle vier KanÃ¤le zur VerfÃ¼gung stehen.
 			</para>
 		</sect3>
 		
@@ -544,13 +544,13 @@ end<!--
 			<title>Stereo-Dateien auf vier Lautsprechern wiedergeben</title>
 			
 			<para>
-				<application>MPlayer</application> dupliziert per Voreinstellung keine Kanäle, genausowenig
-				wie die meisten Audiotreiber. Wenn du dies manuell tun möchtest:
+				<application>MPlayer</application> dupliziert per Voreinstellung keine KanÃ¤le, genausowenig
+				wie die meisten Audiotreiber. Wenn du dies manuell tun mÃ¶chtest:
 				
 				<screen>mplayer <replaceable>dateiname</replaceable> -af channels=2:2:0:1:0:0</screen>
 				
-				Siehe den Abschnitt über das <link linkend="advaudio-channels-copying">Kopieren von Kanälen</link>
-				für eine Erklärung.
+				Siehe den Abschnitt Ã¼ber das <link linkend="advaudio-channels-copying">Kopieren von KanÃ¤len</link>
+				fÃ¼r eine ErklÃ¤rung.
 			</para>
 			
 		</sect3>
@@ -561,29 +561,29 @@ end<!--
 			
 			<para>
 				DVDs enthalten Surround-Ton normalerweise encodiert im Format AC3 (Dolby Digital)
-				oder DTS (Digital Theater System). Manche moderne Audioausrüstung ist dazu in
+				oder DTS (Digital Theater System). Manche moderne AudioausrÃ¼stung ist dazu in
 				der Lage, diese Formate intern zu decodieren.
 				<application>MPlayer</application> kann angewiesen werden, die Audiodaten weiterzuleiten,
 				ohne diese zu decodieren. Dies wird jedoch nur funktionieren, wenn du einen
-				S/PDIF- (Sony/Philips Digital Interface) Anschluß an deiner Soundkarte hast.
+				S/PDIF- (Sony/Philips Digital Interface) AnschluÃŸ an deiner Soundkarte hast.
 			</para>
 			
 			<para>
-				Wenn deine Audioausrüstung sowohl AC3 als auch DTS decodieren kann, ist es sicher, Passthrough
-				für beide Formate zu aktivieren. Sonst solltest du Passthrough nur für das Format aktivieren,
-				das deine Ausrüstung unterstützt.
+				Wenn deine AudioausrÃ¼stung sowohl AC3 als auch DTS decodieren kann, ist es sicher, Passthrough
+				fÃ¼r beide Formate zu aktivieren. Sonst solltest du Passthrough nur fÃ¼r das Format aktivieren,
+				das deine AusrÃ¼stung unterstÃ¼tzt.
 			</para>
 			
 			<itemizedlist>
 				<title>Passthrough auf der Kommandozeile aktivieren:</title>
 				<listitem><para>
-					Für nur AC3, benutze <option>-ac hwac3</option>
+					FÃ¼r nur AC3, benutze <option>-ac hwac3</option>
 				</para></listitem>
 				<listitem><para>
-					Für nur DTS, benutze <option>-ac hwdts</option>
+					FÃ¼r nur DTS, benutze <option>-ac hwdts</option>
 				</para></listitem>
 				<listitem><para>
-					Für AC3 und DTS, benutze <option>-afm hwac3</option>
+					FÃ¼r AC3 und DTS, benutze <option>-afm hwac3</option>
 				</para></listitem>
 			</itemizedlist>
 			
@@ -593,22 +593,22 @@ end<!--
 					aktivieren:
 				</title>
 				<listitem><para>
-						Für nur AC3, benutze <option>ac=hwac3,</option>
+						FÃ¼r nur AC3, benutze <option>ac=hwac3,</option>
 					</para></listitem>
 				<listitem><para>
-						Für nur DTS, benutze <option>ac=hwdts,</option>
+						FÃ¼r nur DTS, benutze <option>ac=hwdts,</option>
 					</para></listitem>
 				<listitem><para>
-						Für AC3 und DTS, benutze <option>afm=hwac3</option>
+						FÃ¼r AC3 und DTS, benutze <option>afm=hwac3</option>
 					</para></listitem>
 			</itemizedlist>
 			
 			<para>
 				Beachte, dass am Ende von <option>ac=hwac3,</option> und <option>ac=hwdts,</option> ein Komma (",")steht.
-				Dies wird dafür sorgen, dass <application>MPlayer</application> auf andere Codecs zurückgreift,
+				Dies wird dafÃ¼r sorgen, dass <application>MPlayer</application> auf andere Codecs zurÃ¼ckgreift,
 				die er normalerweise benutzt, wenn eine Datei keinen AC3- oder DTS-Ton besitzt.
-				<option>afm=hwac3</option> benötigt kein Komma; <application>MPlayer</application> wird sowieso
-				auf andere zurückgreigen, wenn eine Audiofamilie angegeben wurde.
+				<option>afm=hwac3</option> benÃ¶tigt kein Komma; <application>MPlayer</application> wird sowieso
+				auf andere zurÃ¼ckgreigen, wenn eine Audiofamilie angegeben wurde.
 			</para>
 			
 		</sect3>
@@ -617,10 +617,10 @@ end<!--
 			<title>MPEG-Audio-Passthrough</title>
 			
 			<para>
-				Digitale TV-Übertragungen (wie DVB und ATSC) und manche DVDs haben normalerweise
+				Digitale TV-Ãœbertragungen (wie DVB und ATSC) und manche DVDs haben normalerweise
 				MPEG-Audiostreams (vornehmlich MP2).
 				Manche MPEG-Hardwaredecoder wie vollausgestattete DVB-Karten und DXR2-Adapter
-				können dieses Format nativ decodieren.
+				kÃ¶nnen dieses Format nativ decodieren.
 				<application>MPlayer</application> kann angewiesen werden, die Audiodaten weiterzuleiten,
 				ohne sie zu decodieren.
 			</para>
@@ -638,9 +638,9 @@ end<!--
 				<emphasis>***TODO***</emphasis>
 			</para>
 			<para>
-				Dieser Abschnitt muss noch geschrieben werden und kann nicht vervollständigt werden,
+				Dieser Abschnitt muss noch geschrieben werden und kann nicht vervollstÃ¤ndigt werden,
 				bis uns jemand mit Beispieldateien zum Testen versorgt. Wenn du irgendwelche
-				Matrix-encodierten Audiodateien hast, weißt, wo man welche finden kann oder andere
+				Matrix-encodierten Audiodateien hast, weiÃŸt, wo man welche finden kann oder andere
 				hilfreiche Informationen hast, schicke bitte eine Nachricht auf die 
 				<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>-Mailing-Liste.
 				Benutzt "[matrix-encoded audio]" in der Betreffzeile.
@@ -669,7 +669,7 @@ end<!--
 		
 		
 		<sect3 id="advaudio-surround-hrtf">
-			<title>Surround-Emulation bei Kopfhörern</title>
+			<title>Surround-Emulation bei KopfhÃ¶rern</title>
 			
 			<para>
 				<application>MPlayer</application> besitzt einen HRTF- (Head Related Transfer
@@ -679,13 +679,13 @@ end<!--
 			</para>
 			
 			<para>
-				Obwohl es unmöglich ist, ein Surroundsystem exakt zu imitieren, liefert
-				<application>MPlayer</application>s HRTF-Filter in 2-Kanal-Kopfhörern einen
-				räumlich eindringlicheren Ton. Reguläres Heruntermixen kombiniert einfach alle
-				Kanäle zu zweien; neben der Kombinierung der Kanäle generiert <option>hrtf</option>
-				feine Echos, erhöht die Stereoseparation leicht und verändert die Lautstärke mancher
-				Frequenzen. Ob HRTF-Klänge besser klingen, kann vom Quellmaterial und persönlichem
-				Geschmack abhängen, den Filter auszuprobieren ist aber definitiv einen Versuch wert.
+				Obwohl es unmÃ¶glich ist, ein Surroundsystem exakt zu imitieren, liefert
+				<application>MPlayer</application>s HRTF-Filter in 2-Kanal-KopfhÃ¶rern einen
+				rÃ¤umlich eindringlicheren Ton. RegulÃ¤res Heruntermixen kombiniert einfach alle
+				KanÃ¤le zu zweien; neben der Kombinierung der KanÃ¤le generiert <option>hrtf</option>
+				feine Echos, erhÃ¶ht die Stereoseparation leicht und verÃ¤ndert die LautstÃ¤rke mancher
+				Frequenzen. Ob HRTF-KlÃ¤nge besser klingen, kann vom Quellmaterial und persÃ¶nlichem
+				Geschmack abhÃ¤ngen, den Filter auszuprobieren ist aber definitiv einen Versuch wert.
 			</para>
 			
 			<para>
@@ -696,7 +696,7 @@ end<!--
 			</para>
 			
 			<para>
-				<option>hrtf</option> funktioniert nur gut bei 5 oder 6 Kanälen und benötigt außerdem
+				<option>hrtf</option> funktioniert nur gut bei 5 oder 6 KanÃ¤len und benÃ¶tigt auÃŸerdem
 				48 kHz Ton. DVD-Ton ist schon 48 kHz, wenn du aber eine Datei mit einer anderen Samplerate
 				hast, die du mit <option>hrtf</option> abspielen willst, musst du sie resamplen:
 				
@@ -708,12 +708,12 @@ end<!--
 		
 		
 		<sect3 id="advaudio-surround-troubleshooting">
-			<title>Troubleshooting/Problemlösung</title>
+			<title>Troubleshooting/ProblemlÃ¶sung</title>
 			
 			<para>
-				Wenn du keinen Ton aus deinen Surround-Kanälen hören kannst, überprüfe deine
+				Wenn du keinen Ton aus deinen Surround-KanÃ¤len hÃ¶ren kannst, Ã¼berprÃ¼fe deine
 				Mixereinstellungen mit Mixerprogrammen wie <application>alsamixer</application>;
-				Audioausgaben sind oft stummgeschaltet und per Voreinstellung auf Lautstärke 0 gesetzt.
+				Audioausgaben sind oft stummgeschaltet und per Voreinstellung auf LautstÃ¤rke 0 gesetzt.
 			</para>
 			
 		</sect3>
@@ -728,9 +728,9 @@ end<!--
 			<title>Allgemeine Informationen</title>
 			
 			<para>
-				Leider gibt es keinen Standard, der vorgibt, wie Kanäle angeordnet sind. Die unten
+				Leider gibt es keinen Standard, der vorgibt, wie KanÃ¤le angeordnet sind. Die unten
 				gelisteten Reihenfolgen sind die von AC3 und halbwegs typisch; versuche diese und
-				schaue, ob sie zu deiner Quelle passen. Kanäle sind durchnummeriert, beginnend bei 0.
+				schaue, ob sie zu deiner Quelle passen. KanÃ¤le sind durchnummeriert, beginnend bei 0.
 				
 				<orderedlist spacing="compact">
 					<title>Mono</title>
@@ -782,17 +782,17 @@ end<!--
 			
 			<para>
 				Die Option <option>-channels</option> wird benutzt, um vom Audiodecoder eine Anzahl
-				Kanäle zu fordern. Manche Audiocodecs benutzen die angegebenen Kanäle, um zu entscheiden,
-				ob Heruntermixen der Quelle nötig ist. Beachte, dass dies nicht immer die Anzahl der
-				Ausgabekanäle beeinflusst. Zum Beispiel wird die Angabe der Option <option>-channels 4</option>
-				bei der Wiedergabe einer Stereo-MP3-Datei zur Ausgabe in 2 Kanälen führen, da der
-				MP3-Codec keine zusätzlichen Kanäle produziert.
+				KanÃ¤le zu fordern. Manche Audiocodecs benutzen die angegebenen KanÃ¤le, um zu entscheiden,
+				ob Heruntermixen der Quelle nÃ¶tig ist. Beachte, dass dies nicht immer die Anzahl der
+				AusgabekanÃ¤le beeinflusst. Zum Beispiel wird die Angabe der Option <option>-channels 4</option>
+				bei der Wiedergabe einer Stereo-MP3-Datei zur Ausgabe in 2 KanÃ¤len fÃ¼hren, da der
+				MP3-Codec keine zusÃ¤tzlichen KanÃ¤le produziert.
 			</para>
 			
 			<para>
-				Der Audiofilter <option>channels</option> kann genutzt werden, um Kanäle zu erstellen oder
-				zu entfernen. Er ist nützlich für die Kontrolle der Anzahl der Kanäle, die an die Soundkarte
-				geschickt werden. Siehe folgenden Abschnitt für weitergehende Informationen zur Kanalmanipulation.
+				Der Audiofilter <option>channels</option> kann genutzt werden, um KanÃ¤le zu erstellen oder
+				zu entfernen. Er ist nÃ¼tzlich fÃ¼r die Kontrolle der Anzahl der KanÃ¤le, die an die Soundkarte
+				geschickt werden. Siehe folgenden Abschnitt fÃ¼r weitergehende Informationen zur Kanalmanipulation.
 			</para>
 			
 		</sect3>
@@ -803,9 +803,9 @@ end<!--
 			
 			<para>
 				Mono klingt viel besser, wenn es von zwei Lautsprechern wiedergegeben wird -
-				besonders bei Kopfhörern. Audiodateien, die wirklich nur einen Kanal haben,
+				besonders bei KopfhÃ¶rern. Audiodateien, die wirklich nur einen Kanal haben,
 				werden automatisch von zwei Lautsprechern wiedergeben; leider sind jedoch die meisten
-				Dateien in mono tatsächlich als stereo encodiert, bei dem ein Kanal stumm ist.
+				Dateien in mono tatsÃ¤chlich als stereo encodiert, bei dem ein Kanal stumm ist.
 				Der einfachste und sicherste Weg, zwei Lautsprecher dasselbe ausgeben zu lassen ist
 				der Filter <option>extrastereo</option>:
 				
@@ -814,13 +814,13 @@ end<!--
 			</para>
 			
 			<para>
-				Dieser mittelt über beide Kanäle, was darin resultiert, dass beide Kanäle jeweils halb
-				so laut sind wie das Original. Die nächsten Abschnitte enthalten Beispiele für
-				andere Möglichkeiten, dies ohne Minderung der Lautstärke zu erreichen, sie sind
-				aber komplexer und erfordern verschiedene Optionen, je nach dem, welche Kanäle
-				beibehalten werden sollen. Wenn du wirklich die Lautstärke beibehalten musst,
-				ist es möglicherweise leichter, mit dem Filter <option>volume</option> zu experimentieren
-				und den dafür richtigen Wert zu finden. Zum Beispiel:
+				Dieser mittelt Ã¼ber beide KanÃ¤le, was darin resultiert, dass beide KanÃ¤le jeweils halb
+				so laut sind wie das Original. Die nÃ¤chsten Abschnitte enthalten Beispiele fÃ¼r
+				andere MÃ¶glichkeiten, dies ohne Minderung der LautstÃ¤rke zu erreichen, sie sind
+				aber komplexer und erfordern verschiedene Optionen, je nach dem, welche KanÃ¤le
+				beibehalten werden sollen. Wenn du wirklich die LautstÃ¤rke beibehalten musst,
+				ist es mÃ¶glicherweise leichter, mit dem Filter <option>volume</option> zu experimentieren
+				und den dafÃ¼r richtigen Wert zu finden. Zum Beispiel:
 				
 				<screen>mplayer <replaceable>dateiname</replaceable> -af extrastereo=0,volume=5</screen>
 				
@@ -830,24 +830,24 @@ end<!--
 		
 		
 		<sect3 id="advaudio-channels-copying">
-			<title>Kopieren/Verschieben von Kanälen</title>
+			<title>Kopieren/Verschieben von KanÃ¤len</title>
 			
 			<para>
-				Der Filter <option>channels</option> kann einen beliebigen oder alle Kanäle verschieben.
-				All die Suboptionen für den <option>channels</option>-Filter einzustellen kann
+				Der Filter <option>channels</option> kann einen beliebigen oder alle KanÃ¤le verschieben.
+				All die Suboptionen fÃ¼r den <option>channels</option>-Filter einzustellen kann
 				kompliziert sein und erfordert ein wenig Sorgfalt.
 				
 				<orderedlist spacing="compact">
 					<listitem>
 						<para>
-							Entscheide, wieviele Ausgabekanäle du benötigst. Dies ist die erste Suboption.
+							Entscheide, wieviele AusgabekanÃ¤le du benÃ¶tigst. Dies ist die erste Suboption.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							Zähle, wieviele Kanäle du umordnen möchtest. Dies ist die zweite Suboption.
-							Jeder Kanal kann gleichzeitig zu mehreren verschiedenen Kanälen verschoben werden.
-							Behalte jedoch im Gedächtnis, dass ein Kanal leer ist, wenn er (auch wenn er
+							ZÃ¤hle, wieviele KanÃ¤le du umordnen mÃ¶chtest. Dies ist die zweite Suboption.
+							Jeder Kanal kann gleichzeitig zu mehreren verschiedenen KanÃ¤len verschoben werden.
+							Behalte jedoch im GedÃ¤chtnis, dass ein Kanal leer ist, wenn er (auch wenn er
 							nur an ein Ziel) verschoben wird, es sei denn, ein anderer Kanal ersetzt ihn.
 							Um einen Kanal zu kopieren, wobei die Quelle gleich bleibt, verschiebe den Kanal
 							ins Ziel und in die Quelle, zum Beispiel:
@@ -872,13 +872,13 @@ channel 2 --> channel 2<!--
 			<bridgehead>Beispiel: ein Kanal auf zwei Lautsprecher</bridgehead>
 			
 			<para>
-				Hier ist ein Beispiel einer weiteren Möglichkeit, einen Kanal auf zwei Lautsprechern wiederzugeben.
-				Für dieses Beispiel sei angenommen, dass der linke Kanal abgespielt und der rechte verworfen
+				Hier ist ein Beispiel einer weiteren MÃ¶glichkeit, einen Kanal auf zwei Lautsprechern wiederzugeben.
+				FÃ¼r dieses Beispiel sei angenommen, dass der linke Kanal abgespielt und der rechte verworfen
 				werden soll. Befolge die oben angegebenen Schritte:
 				<orderedlist>
 					<listitem>
 						<para>
-							Um einen Ausgabekanal für jeden der beiden Lautsprecher bereitzustellen, muss
+							Um einen Ausgabekanal fÃ¼r jeden der beiden Lautsprecher bereitzustellen, muss
 							die erste Suboption "2" sein.
 						</para>
 					</listitem>
@@ -902,38 +902,38 @@ channel 2 --> channel 2<!--
 			</para>
 			
 			<para>
-				Der Vorteil, den diese Methode gegenüber <option>extrastereo</option> hat, ist, dass
-				die Lautstärke auf jedem Ausgabekanal die gleiche ist wie die des Eingabekanals.
-				Der Nachteil ist, dass die Suboptionen zu "2:2:1:0:1:1" geändert werden müssen, wenn
-				der gewünschte Ton im rechten Kanal ist. Außerdem ist es schwerer zu merken und einzutippen.
+				Der Vorteil, den diese Methode gegenÃ¼ber <option>extrastereo</option> hat, ist, dass
+				die LautstÃ¤rke auf jedem Ausgabekanal die gleiche ist wie die des Eingabekanals.
+				Der Nachteil ist, dass die Suboptionen zu "2:2:1:0:1:1" geÃ¤ndert werden mÃ¼ssen, wenn
+				der gewÃ¼nschte Ton im rechten Kanal ist. AuÃŸerdem ist es schwerer zu merken und einzutippen.
 			</para>
 			
-			<bridgehead>Beispiel: ein Kanal auf zwei Lautsprecher, Abkürzung</bridgehead>
+			<bridgehead>Beispiel: ein Kanal auf zwei Lautsprecher, AbkÃ¼rzung</bridgehead>
 			
 			<para>
-				Tatsächlich gibt es einen viel einfacheren Weg, um mit dem <option>channels</option>-Filter
+				TatsÃ¤chlich gibt es einen viel einfacheren Weg, um mit dem <option>channels</option>-Filter
 				den linken Kanal auf beiden Lautsprechern wiederzugeben:
 				
 				<screen>mplayer <replaceable>dateiname</replaceable> -af channels=1</screen>
 
-				Der zweite Kanal wird verworfen und ohne weitere Suboptionen bleibt der übrige Kanal
+				Der zweite Kanal wird verworfen und ohne weitere Suboptionen bleibt der Ã¼brige Kanal
 				allein. Soundkartentreiber spielen einkanaliges Audio automatisch auf beiden
-				Lautsprechern ab. Dies funktioniert nur, wenn der gewünschte Kanal der linke ist.
+				Lautsprechern ab. Dies funktioniert nur, wenn der gewÃ¼nschte Kanal der linke ist.
 			</para>
 			
-			<bridgehead>Beispiel: Dupliziere die vorderen Kanäle hinten</bridgehead>
+			<bridgehead>Beispiel: Dupliziere die vorderen KanÃ¤le hinten</bridgehead>
 			<para>
-				Eine weitere übliche Aktion ist die Duplizierung der vorderen Kanäle, um sie auf den hinteren
+				Eine weitere Ã¼bliche Aktion ist die Duplizierung der vorderen KanÃ¤le, um sie auf den hinteren
 				Lautsprechern einer quadraphonischen Installation abzuspielen.
 				<orderedlist>
 					<listitem>
 						<para>
-							Es sollte vier Ausgabekanäle geben. Die erste Suboption ist "4".
+							Es sollte vier AusgabekanÃ¤le geben. Die erste Suboption ist "4".
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							Jeder der zwei Frontkanäle muss zum entsprechenden hinteren Kanal und zu sich selbst
+							Jeder der zwei FrontkanÃ¤le muss zum entsprechenden hinteren Kanal und zu sich selbst
 							bewegt werden. Das sind vier Bewegungen, also ist die zweite Suboption "4".
 						</para>
 					</listitem>
@@ -945,7 +945,7 @@ channel 2 --> channel 2<!--
 							sich selbst: "1:1".
 						</para></listitem>
 				</orderedlist>
-				Setze alle Suboptionen zusammen und du erhältst:
+				Setze alle Suboptionen zusammen und du erhÃ¤ltst:
 				
 				<screen>mplayer <replaceable>dateiname</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1</screen>
 				
@@ -955,44 +955,44 @@ channel 2 --> channel 2<!--
 		
 		
 		<sect3 id="advaudio-channels-mixing">
-			<title>Kanäle mixen</title>
+			<title>KanÃ¤le mixen</title>
 			
 			<para>
-				Der Filter <option>pan</option> in Kanäle in vom Benutzer angegebenen Verhältnissen mixen.
-				Dies ermöglicht alles, was der <option>channels</option>-Filter kann, und mehr. Leider
+				Der Filter <option>pan</option> in KanÃ¤le in vom Benutzer angegebenen VerhÃ¤ltnissen mixen.
+				Dies ermÃ¶glicht alles, was der <option>channels</option>-Filter kann, und mehr. Leider
 				sind die Suboptionen auch viel schwieriger.
 				<orderedlist>
 					<listitem>
 						<para>
-							Entscheide, mit wievielen Kanälen du arbeiten möchtest. Dies musst du mit der Option
+							Entscheide, mit wievielen KanÃ¤len du arbeiten mÃ¶chtest. Dies musst du mit der Option
 							<option>-channels</option> und/oder <option>-af channels</option> angeben.
-							Spätere Beispiele werden dir zeigen, wann welcher zu benutzen ist.
+							SpÃ¤tere Beispiele werden dir zeigen, wann welcher zu benutzen ist.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							Entscheide, mit wievielen Kanälen du <option>pan</option> füttern möchtest (weitere
-							decodierte Kanäle werden verworfen).
-							Dies ist die erste Suboption, und diese kontrolliert auch, wieviele Kanäle für
+							Entscheide, mit wievielen KanÃ¤len du <option>pan</option> fÃ¼ttern mÃ¶chtest (weitere
+							decodierte KanÃ¤le werden verworfen).
+							Dies ist die erste Suboption, und diese kontrolliert auch, wieviele KanÃ¤le fÃ¼r
 							die Ausgabe	bereitgestellt werden.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							Die übrigen Suboptionen geben an, wieviel von jedem Kanal in jeden anderen Kanal gemixt
-							werden. Das ist der komplizierte Teil. Um die Arbeit übersichtlich zu machen,
-							zerlege die Suboptionen in mehrere Teile, einen Teil für jeden Ausgabekanal.
+							Die Ã¼brigen Suboptionen geben an, wieviel von jedem Kanal in jeden anderen Kanal gemixt
+							werden. Das ist der komplizierte Teil. Um die Arbeit Ã¼bersichtlich zu machen,
+							zerlege die Suboptionen in mehrere Teile, einen Teil fÃ¼r jeden Ausgabekanal.
 							Jede Suboption innerhalb eines Teils entspricht einem Eingabekanal. Die Anzahl, die du
 							angibst, ist die prozentuale Menge, die vom Eingabekanal in den Ausgabekanal gemixt wird.
 						</para>
 						<para>
 							<option>pan</option> akzeptiert Werte von 0 bis 512, was Werte von 0% bis 512000%
-							der ursprünglichen Lautstärke ergibt.. Sei vorsichtig bei Werten größer als 1. Dies
-							liefert nicht nur eine sehr hohe Lautstärke, sondern sprengt auch den Samplebereich deiner
-							Soundkarte, und du könntest schmerzvolle Pops und Klicken hören. Wenn du willst,
+							der ursprÃ¼nglichen LautstÃ¤rke ergibt.. Sei vorsichtig bei Werten grÃ¶ÃŸer als 1. Dies
+							liefert nicht nur eine sehr hohe LautstÃ¤rke, sondern sprengt auch den Samplebereich deiner
+							Soundkarte, und du kÃ¶nntest schmerzvolle Pops und Klicken hÃ¶ren. Wenn du willst,
 							kannst du auf <option>pan</option> <option>,volume</option> folgen lassen, um eine
-							Abschneidung zu ermöglichen, es ist aber das beste, die Werte von <option>pan</option>
-							niedrig genug zu halten, dass keine Abschneidung nötig ist.
+							Abschneidung zu ermÃ¶glichen, es ist aber das beste, die Werte von <option>pan</option>
+							niedrig genug zu halten, dass keine Abschneidung nÃ¶tig ist.
 						</para>
 					</listitem>
 				</orderedlist>
@@ -1001,22 +1001,22 @@ channel 2 --> channel 2<!--
 			<bridgehead>Beispiel: Ein Kanal auf zwei Lautsprechern</bridgehead>
 			
 			<para>
-				Hier ist also noch ein Beispiel für die Wiedergabe des linken Kanals auf zwei Lautsprechern.
+				Hier ist also noch ein Beispiel fÃ¼r die Wiedergabe des linken Kanals auf zwei Lautsprechern.
 				Befolge die Schritte oben:
 				<orderedlist>
 					<listitem>
 						<para>
-							<option>pan</option> sollte zwei Kanäle ausgeben, also ist die erste Suboption "2".
+							<option>pan</option> sollte zwei KanÃ¤le ausgeben, also ist die erste Suboption "2".
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							Da wir zwei Eingabekanäle haben, gibt es die Suboptionen in zwei Teilen.
-							Da es auch zwei Ausgabekanäle gibt, wird es pro Teil zwei Suboptionen geben.
-							Der linke Kanal der Datei sollte in voller Lautstärke auf den neuen linken Kanal
+							Da wir zwei EingabekanÃ¤le haben, gibt es die Suboptionen in zwei Teilen.
+							Da es auch zwei AusgabekanÃ¤le gibt, wird es pro Teil zwei Suboptionen geben.
+							Der linke Kanal der Datei sollte in voller LautstÃ¤rke auf den neuen linken Kanal
 							und den rechten gehen, daher ist der erste Teil der Suboptionen "1:1".
 							Der rechte Kanal sollte weggelassen werden, daher ist der zweite "0:0".
-							Alle 0-Werte am Ende können weggelassen werden, aber um das Verstehen leichter zu
+							Alle 0-Werte am Ende kÃ¶nnen weggelassen werden, aber um das Verstehen leichter zu
 							machen, behalten wir sie.
 						</para>
 					</listitem>
@@ -1025,15 +1025,15 @@ channel 2 --> channel 2<!--
 				
 				<screen>mplayer <replaceable>dateiname</replaceable> -af pan=2:1:1:0:0</screen>
 
-				Wenn der rechte Kanal anstelle des linken gewünscht ist, sind die Suboptionen für
+				Wenn der rechte Kanal anstelle des linken gewÃ¼nscht ist, sind die Suboptionen fÃ¼r
 				<option>pan</option> "2:0:0:1:1".
 			</para>
 			
 			
-			<bridgehead>Beispiel: Ein Kanal auf zwei Lautsprechern, Abkürzung</bridgehead>
+			<bridgehead>Beispiel: Ein Kanal auf zwei Lautsprechern, AbkÃ¼rzung</bridgehead>
 			
 			<para>
-				Wie bei der Option <option>channels</option> gibt es eine Abkürzung, die nur mit dem linken
+				Wie bei der Option <option>channels</option> gibt es eine AbkÃ¼rzung, die nur mit dem linken
 				Kanal funktioniert:
 				
 				<screen>mplayer <replaceable>dateiname</replaceable> -af pan=1:1</screen>
@@ -1044,20 +1044,20 @@ channel 2 --> channel 2<!--
 			
 			<bridgehead>Beispiel: 6-kanaliges PCM heruntermixen</bridgehead>
 			<para>
-				<application>MPlayer</application>s Decoder für 6-kanaliges PCM ist nicht in der Lage, herunterzumixen.
-				Hier ist eine Möglichkeit, PCM unter Verwendung von <option>pan</option> herunterzumixen:
+				<application>MPlayer</application>s Decoder fÃ¼r 6-kanaliges PCM ist nicht in der Lage, herunterzumixen.
+				Hier ist eine MÃ¶glichkeit, PCM unter Verwendung von <option>pan</option> herunterzumixen:
 				<orderedlist>
 					<listitem>
 						<para>
-							Die Anzahl der Ausgabekanäle ist zwei, daher ist die erste Suboption "2".
+							Die Anzahl der AusgabekanÃ¤le ist zwei, daher ist die erste Suboption "2".
 						</para>
 					</listitem>
 					<listitem><para>
-							Bei sechs Eingabekanälen gibt es sechs Teile Optionen. Glücklicherweise müssen wir nur zwei
-							Teile machen, da wir uns nur für die Ausgabe der ersten beiden Kanäle interessieren.
-							Die übrigen vier Teile können weggelassen werden. Sei dir im klaren darüber, dass nicht
-							alle Audiodateien mit mehreren Kanälen die gleiche Kanalabfolge haben! Dieses Beispiel
-							demonstriert das Heruntermixen einer Datei mit den gleichen Kanälen wie MAC3 5.1:
+							Bei sechs EingabekanÃ¤len gibt es sechs Teile Optionen. GlÃ¼cklicherweise mÃ¼ssen wir nur zwei
+							Teile machen, da wir uns nur fÃ¼r die Ausgabe der ersten beiden KanÃ¤le interessieren.
+							Die Ã¼brigen vier Teile kÃ¶nnen weggelassen werden. Sei dir im klaren darÃ¼ber, dass nicht
+							alle Audiodateien mit mehreren KanÃ¤len die gleiche Kanalabfolge haben! Dieses Beispiel
+							demonstriert das Heruntermixen einer Datei mit den gleichen KanÃ¤len wie MAC3 5.1:
 							<programlisting>
 0 - vorne links
 1 - vorne rechts
@@ -1066,12 +1066,12 @@ channel 2 --> channel 2<!--
 4 - mittig vorne
 5 - Subwoofer<!--
 							--></programlisting>
-							Der erste Teil der Suboptionen listet die Prozente der ursprünglichen Lautstärke, und zwar
+							Der erste Teil der Suboptionen listet die Prozente der ursprÃ¼nglichen LautstÃ¤rke, und zwar
 							in der Reihenfolge, die jeder Ausgabekanal vom vorderen linken Kanal erhalten soll: "1:0".
 							Der vordere rechte Kanal sollte zur rechten Ausgabe gehen: "0:1".
-							Das gleiche gilt für die hinteren Kanäle: "1:0" und "0:1".
-							Der mittlere Kanal geht mit jeweils halber Lautstärke in beide Ausgabekanäle:
-							"0.5:0.5", und der Subwoofer geht mit voller Lautstärke in beide: "1:1".
+							Das gleiche gilt fÃ¼r die hinteren KanÃ¤le: "1:0" und "0:1".
+							Der mittlere Kanal geht mit jeweils halber LautstÃ¤rke in beide AusgabekanÃ¤le:
+							"0.5:0.5", und der Subwoofer geht mit voller LautstÃ¤rke in beide: "1:1".
 						</para>
 					</listitem>
 				</orderedlist>
@@ -1079,33 +1079,33 @@ channel 2 --> channel 2<!--
 				
 				<screen>mplayer <replaceable>6-kanal.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
 
-				Die oben gelisteten Prozente sind nur ein einfaches Beispiel. Fühle dich nicht eingeschränkt,
+				Die oben gelisteten Prozente sind nur ein einfaches Beispiel. FÃ¼hle dich nicht eingeschrÃ¤nkt,
 				mit ihnen zu experimentieren.
 			</para>
-			<bridgehead>Beispiel: Wiedergabe von 5.1-Audio auf großen Lautsprechern ohne Subwoofer</bridgehead>
+			<bridgehead>Beispiel: Wiedergabe von 5.1-Audio auf groÃŸen Lautsprechern ohne Subwoofer</bridgehead>
 			
 			<para>
-				Wenn du ein riesiges Paar Front-Lautsprecher hast und kein Geld darauf verschwenden möchtest,
-				einen Subwoofer für ein komplettes 5.1-Soundsystem zu erhalten. Wenn du die Option
+				Wenn du ein riesiges Paar Front-Lautsprecher hast und kein Geld darauf verschwenden mÃ¶chtest,
+				einen Subwoofer fÃ¼r ein komplettes 5.1-Soundsystem zu erhalten. Wenn du die Option
 				<option>-channels 5</option> benutzt, damit liba52 5.1-Ton in 5.0 decodiert, wird der Subwoofer-Kanal
-				einfach weggelassen. Wenn du den Subwoofer-Kanal selbst verteilen möchtest, musst du
+				einfach weggelassen. Wenn du den Subwoofer-Kanal selbst verteilen mÃ¶chtest, musst du
 				manuell mit <option>pan</option> heruntermixen:
 				
 				<orderedlist>
 					<listitem>
 						<para>
-							Da <option>pan</option> alle sechs Kanäle untersuchen muss, gib 
+							Da <option>pan</option> alle sechs KanÃ¤le untersuchen muss, gib 
 							<option>-channels 6</option> an, so dass liba52 sie alle decodiert.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							<option>pan</option> gibt nur fünf Kanäle aus, die erste Suboption ist 5.
+							<option>pan</option> gibt nur fÃ¼nf KanÃ¤le aus, die erste Suboption ist 5.
 						</para>
 					</listitem>
 					<listitem>
 						<para>
-							Sechs Eingabekanäle und fünf Ausgabekanäle bedeuten sechs Teile von fünf Suboptionen.
+							Sechs EingabekanÃ¤le und fÃ¼nf AusgabekanÃ¤le bedeuten sechs Teile von fÃ¼nf Suboptionen.
 							<itemizedlist spacing="compact">
 								<listitem>
 									<simpara>
@@ -1114,17 +1114,17 @@ channel 2 --> channel 2<!--
 								</listitem>
 								<listitem>
 									<simpara>
-										Das gleiche gilt für den rechten vorderen Kanal: "0:1:0:0:0"
+										Das gleiche gilt fÃ¼r den rechten vorderen Kanal: "0:1:0:0:0"
 									</simpara>
 								</listitem>
 								<listitem>
 									<simpara>
-										Das gleiche gilt für den linken hinteren Kanal:	"0:0:1:0:0"
+										Das gleiche gilt fÃ¼r den linken hinteren Kanal:	"0:0:1:0:0"
 									</simpara>
 								</listitem>
 								<listitem>
 									<simpara>
-										Und das gleiche auch für den rechten hinteren Kanal: "0:0:0:1:0"
+										Und das gleiche auch fÃ¼r den rechten hinteren Kanal: "0:0:0:1:0"
 									</simpara>
 								</listitem>
 								<listitem>
@@ -1134,8 +1134,8 @@ channel 2 --> channel 2<!--
 								</listitem>
 								<listitem>
 									<simpara>
-										Jetzt müssen wir entscheiden, was mit dem Subwoofer geschieht, zum Beispiel
-										eine Hälfte jeweils nach vorne rechts und vorne links: "0.5:0.5:0:0:0"
+										Jetzt mÃ¼ssen wir entscheiden, was mit dem Subwoofer geschieht, zum Beispiel
+										eine HÃ¤lfte jeweils nach vorne rechts und vorne links: "0.5:0.5:0:0:0"
 									</simpara>
 								</listitem>
 							</itemizedlist>
@@ -1154,49 +1154,49 @@ channel 2 --> channel 2<!--
 	
 	
 	<sect2 id="advaudio-volume">
-		<title>Anpassung der softwaregesteuerten Lautstärke</title>
+		<title>Anpassung der softwaregesteuerten LautstÃ¤rke</title>
 		
 		<para>
-			Manche Audiotracks sind zu leise, um sie bequem ohne Anpassung zu hören.
-			Das kann zum Problem werden, wenn dein Audiosystem diese Anpassung nicht für dich
+			Manche Audiotracks sind zu leise, um sie bequem ohne Anpassung zu hÃ¶ren.
+			Das kann zum Problem werden, wenn dein Audiosystem diese Anpassung nicht fÃ¼r dich
 			vornehmen kann. Die Option <option>-softvol</option> weist <application>MPlayer</application>
-			an, einen internen Mixer zu verwenden. Du kannst die Tasten zur Anpassung der Lautstärke
+			an, einen internen Mixer zu verwenden. Du kannst die Tasten zur Anpassung der LautstÃ¤rke
 			(in der Voreinstellung <keycap>9</keycap> und <keycap>0</keycap>) verwenden, um
-			wesentlich höhere Lautstärkelevel zu erreichen. Beachte, dass dies nicht den Mixer deiner
-			Soundkarte umgeht; <application>MPlayer</application> wird das Signal nur verändern, bevor
+			wesentlich hÃ¶here LautstÃ¤rkelevel zu erreichen. Beachte, dass dies nicht den Mixer deiner
+			Soundkarte umgeht; <application>MPlayer</application> wird das Signal nur verÃ¤ndern, bevor
 			es an die Soundkarte gesendet wird.
 
 			Das folgende Beispiel ist ein guter Anfang:
 			
 			<screen>mplayer <replaceable>leise-datei</replaceable> -softvol -softvol-max 300</screen>
 			
-			Die Option <option>-softvol-max</option> gibt die maximal erlaubte Ausgabelautstärke als
-			prozentualen Wert hinsichtlich der Originallautstärke an.
-			Beispielsweise würde <option>-softvol-max 200</option> erlauben, die Lautstärke doppelt so
-			hoch wie das ursprüngliche Level zu setzen. Es ist sicher, einen größeren Wert mit 
-			<option>-softvol-max</option> zu setzen; die höhere Lautstärke wird nicht verwendet, solange
-			du nicht die entsprechenden Tasten drückst.
+			Die Option <option>-softvol-max</option> gibt die maximal erlaubte AusgabelautstÃ¤rke als
+			prozentualen Wert hinsichtlich der OriginallautstÃ¤rke an.
+			Beispielsweise wÃ¼rde <option>-softvol-max 200</option> erlauben, die LautstÃ¤rke doppelt so
+			hoch wie das ursprÃ¼ngliche Level zu setzen. Es ist sicher, einen grÃ¶ÃŸeren Wert mit 
+			<option>-softvol-max</option> zu setzen; die hÃ¶here LautstÃ¤rke wird nicht verwendet, solange
+			du nicht die entsprechenden Tasten drÃ¼ckst.
 			Der einzige Nachteil bei Verwendung von hohen Werten ist, dass du nicht ganz so genaue Kontrolle
-			bei der Verwendung der Tasten hast, da <application>MPlayer</application> die Lautstärke in
-			Prozenten der maximalen Lautstärke anpasst. Benutze einen niedrigeren Wert mit
+			bei der Verwendung der Tasten hast, da <application>MPlayer</application> die LautstÃ¤rke in
+			Prozenten der maximalen LautstÃ¤rke anpasst. Benutze einen niedrigeren Wert mit
 			<option>-softvol-max</option> und/oder gib <option>-volstep 1</option> an,
-			wenn du höhere Genauigkeit brauchst.
+			wenn du hÃ¶here Genauigkeit brauchst.
 		</para>
 		
 		<para>
 			Die Option <option>-softvol</option> funktioniert durch Kontrolle des Audiofilters
-			<option>volume</option>. Wenn du eine Datei von Anfang an mit einer gewissen Lautstärke
-			abspielen möchtest, kannst du die <option>volume</option> manuell angeben:
+			<option>volume</option>. Wenn du eine Datei von Anfang an mit einer gewissen LautstÃ¤rke
+			abspielen mÃ¶chtest, kannst du die <option>volume</option> manuell angeben:
 			
 			<screen>mplayer <replaceable>leise-datei</replaceable> -af volume=10</screen>
 
-			Dies wird die Datei mit einer Erhöhung um zehn Dezibel wiedergeben.
+			Dies wird die Datei mit einer ErhÃ¶hung um zehn Dezibel wiedergeben.
 			Sei vorsichtig bei der Verwendung des <option>volume</option>-Filters - du kannst deinen Ohren
 			leicht schaden, wenn du einen zu hohen Wert benutzt. Beginne niedrig und arbeite dich stufenweise
-			hoch, bis du ein Gefühl dafür bekommst, wieviel Anpassung notwendig ist. Außerdem kann es
-			passieren, wenn du einen übermäßig hohen Wert angibst, dass <option>volume</option> das Signal
-			kappen muss, um keine Daten an die Soundkarte zu schicken, die außerhalb des gültigen Bereichs liegen;
-			dies führt zu gestörtem Ton.
+			hoch, bis du ein GefÃ¼hl dafÃ¼r bekommst, wieviel Anpassung notwendig ist. AuÃŸerdem kann es
+			passieren, wenn du einen Ã¼bermÃ¤ÃŸig hohen Wert angibst, dass <option>volume</option> das Signal
+			kappen muss, um keine Daten an die Soundkarte zu schicken, die auÃŸerhalb des gÃ¼ltigen Bereichs liegen;
+			dies fÃ¼hrt zu gestÃ¶rtem Ton.
 		</para>
 		
 	</sect2>

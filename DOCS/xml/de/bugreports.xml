@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r19715 -->
 
 <appendix id="bugreports">
@@ -6,26 +6,26 @@
   <para>
     Gute Fehlerberichte sind ein sehr wertvoller Beitrag zur Entwicklung jedes
     Softwareprojekts. Aber genau wie das Schreiben guter Software erfordert das
-    Anfertigen von Problemberichten etwas Arbeit. Bitte sei dir darüber im
-    klaren, dass die meisten Entwickler sehr beschäftigt sind und eine unverschämt
-    hohe Anzahl Mails bekommen. Verstehe daher, dass wir dir, obwohl dein Feedback für die
-    Verbesserung von <application>MPlayer</application> sehr wichtig ist und geschätzt
+    Anfertigen von Problemberichten etwas Arbeit. Bitte sei dir darÃ¼ber im
+    klaren, dass die meisten Entwickler sehr beschÃ¤ftigt sind und eine unverschÃ¤mt
+    hohe Anzahl Mails bekommen. Verstehe daher, dass wir dir, obwohl dein Feedback fÃ¼r die
+    Verbesserung von <application>MPlayer</application> sehr wichtig ist und geschÃ¤tzt
     wird, <emphasis role="bold">alle</emphasis> Informationen, die wir fordern, zur
-    Verfügung stellen und dass du die Anweisungen dieses Dokuments strikt befolgen musst.
+    VerfÃ¼gung stellen und dass du die Anweisungen dieses Dokuments strikt befolgen musst.
   </para>
 
   <sect1 id="bugreports_security">
     <title>Berichte sicherheitsrelevante Fehler</title>
     <para>
-      Falls du einen Exploit-fähigen Fehler gefunden hast und gern das richtige tun
-      möchtest und uns diesen beseitigen lässt, bevor du ihn veröffentlichst, würden wir uns
+      Falls du einen Exploit-fÃ¤higen Fehler gefunden hast und gern das richtige tun
+      mÃ¶chtest und uns diesen beseitigen lÃ¤sst, bevor du ihn verÃ¶ffentlichst, wÃ¼rden wir uns
       freuen, deinen Rat zur Sicherheit unter
       <ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>
       zu erhalten.
-      Füge dem Betreff bitte [SECURITY] oder [ADVISORY] hinzu.
-      Stelle bitte sicher, dass dein Bericht eine vollständige und detaillierte Analyse des Fehlers enthält.
-      Die Einsendung einer Lösung nehmen wir sehr gerne dankend an.
-      Bitte zögere deinen Bericht nicht hinaus, um einen Proof-of-concept-Exploit zu schreiben, den
+      FÃ¼ge dem Betreff bitte [SECURITY] oder [ADVISORY] hinzu.
+      Stelle bitte sicher, dass dein Bericht eine vollstÃ¤ndige und detaillierte Analyse des Fehlers enthÃ¤lt.
+      Die Einsendung einer LÃ¶sung nehmen wir sehr gerne dankend an.
+      Bitte zÃ¶gere deinen Bericht nicht hinaus, um einen Proof-of-concept-Exploit zu schreiben, den
       kannst du in einer weiteren Mail schicken.
     </para>
   </sect1>
@@ -33,8 +33,8 @@
   <sect1 id="bugreports_fix">
     <title>Wie Fehler beseitigt werden</title>
     <para>
-      Wenn du das Gefühl hast, dass du die nötigen Kenntnisse hast, bist du dazu eingeladen,
-      dich selbst an der Lösung des Fehlers zu versuchen. Vielleicht hast du das schon?
+      Wenn du das GefÃ¼hl hast, dass du die nÃ¶tigen Kenntnisse hast, bist du dazu eingeladen,
+      dich selbst an der LÃ¶sung des Fehlers zu versuchen. Vielleicht hast du das schon?
       Bitte lies
       <ulink url="../../tech/patches.txt">dieses kurze Dokument</ulink>, um herauszufinden,
       wie dein Code Teil von <application>MPlayer</application> werden kann. Die Leute der
@@ -45,12 +45,12 @@
   </sect1>
 
   <sect1 id="bugreports_regression_test">
-    <title>Wie Regressionstests mit Subversion durchgeführt werden</title>
+    <title>Wie Regressionstests mit Subversion durchgefÃ¼hrt werden</title>
     <para>
       Ein Problem, das manchmal auftreten kann ist &quot;es hat vorher funktioniert, jetzt
       tut es das nicht mehr...&quot;.
-      Hier eine Schritt-für-Schritt-Verfahren, um herauszufinden, wann das Problem
-      aufgetreten ist. Dies ist <emphasis role="bold">nichts</emphasis> für Gelegenheitsanwender.
+      Hier eine Schritt-fÃ¼r-Schritt-Verfahren, um herauszufinden, wann das Problem
+      aufgetreten ist. Dies ist <emphasis role="bold">nichts</emphasis> fÃ¼r Gelegenheitsanwender.
     </para>
     <para>
       Zuerst musst du dir MPlayers Sourcenverzeichnis aus dem Subversion-Repository besorgen.
@@ -61,7 +61,7 @@
     <para>
       Du wirst dann im mplayer/-Verzeichnis ein Abbild des Subversion-Baums auf der Client-Seite
       haben.
-      Führe jetzt ein Update für dieses Abbild auf das von dir gewünschte Datum durch:
+      FÃ¼hre jetzt ein Update fÃ¼r dieses Abbild auf das von dir gewÃ¼nschte Datum durch:
 <screen>cd mplayer/
 svn update -r {"2004-08-23"}</screen>
       Das Datumsformat ist YYYY-MM-DD HH:MM:SS.
@@ -76,21 +76,21 @@ make</screen>
     </para>
     <para>
       Falls ein Nicht-Programmierer dies liest: Der schnellste Weg, zu dem Punkt zu
-      gelangen, bei dem das Problem auftrat ist eine Binärsuche - das bedeutet:
+      gelangen, bei dem das Problem auftrat ist eine BinÃ¤rsuche - das bedeutet:
       Suche das Datum der Bruchstelle, indem du das Suchintervall wiederholt halbierst.
       Zum Beispiel, wenn das Problem 2003 auftrat, starte in der Mitte des Jahres und
       frage "Ist das Problem schon da?".
-      Wenn ja, gehe zurück zum 1. April; wenn nicht, gehe zum 1. Oktober und so weiter.
+      Wenn ja, gehe zurÃ¼ck zum 1. April; wenn nicht, gehe zum 1. Oktober und so weiter.
     </para>
     <para>
-      Wenn du viel Festplattenspeicher frei hast (eine vollständige Compilierung
-      benötigt momentan 100 MB, und ungefähr 300-350 MB, wenn Debugging-Symbole mit
-      dabei sind), kopiere vor einem Update die älteste Version, von der bekannt ist,
-      dass sie funktioniert; das spart Zeit, wenn du zurückgehen musst.
-      (Es ist normalerweise nicht nötig, 'make distclean' vor einer erneuten Compilierung
-      einer früheren Version auszuführen. Wenn du also keine Backup-Kopie deines
-      Original-Sourcebaums machst, wirst du alles neu compilieren müssen, wenn du beim
-      gegenwärtigen wieder angekommen bist.)
+      Wenn du viel Festplattenspeicher frei hast (eine vollstÃ¤ndige Compilierung
+      benÃ¶tigt momentan 100 MB, und ungefÃ¤hr 300-350 MB, wenn Debugging-Symbole mit
+      dabei sind), kopiere vor einem Update die Ã¤lteste Version, von der bekannt ist,
+      dass sie funktioniert; das spart Zeit, wenn du zurÃ¼ckgehen musst.
+      (Es ist normalerweise nicht nÃ¶tig, 'make distclean' vor einer erneuten Compilierung
+      einer frÃ¼heren Version auszufÃ¼hren. Wenn du also keine Backup-Kopie deines
+      Original-Sourcebaums machst, wirst du alles neu compilieren mÃ¼ssen, wenn du beim
+      gegenwÃ¤rtigen wieder angekommen bist.)
     </para>
     <para>
       Wenn du den Tag gefunden hast, an dem das Problem auftrat, fahre mit der Suche mit
@@ -101,13 +101,13 @@ make</screen>
     </para>
     <para>
       Hast du den Patch gefunden, der Ursache des Problems ist, hast du fast gewonnen;
-      Berichte darüber im
+      Berichte darÃ¼ber im
       <ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>-System oder melde
       dich bei
       <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-Users</ulink>
       an und mach es dort bekannt.
-      Es besteht die Chance, dass der Autor einspringt und eine Lösung vorschlägt.
-      Du kannst auch solange einen genauen Blick auf den Patch werfen, bis er genötigt ist,
+      Es besteht die Chance, dass der Autor einspringt und eine LÃ¶sung vorschlÃ¤gt.
+      Du kannst auch solange einen genauen Blick auf den Patch werfen, bis er genÃ¶tigt ist,
       zu offenbaren, wo der Fehler steckt :-).
     </para>
   </sect1>
@@ -116,38 +116,38 @@ make</screen>
     <title>Wie Fehler berichtet werden</title>
     <para>
       Probiere vor allem zu allererst die letzte Subversion-Version von <application>MPlayer</application>,
-      da dein Problem dort möglicherweise schon behoben ist. Die Entwicklung geht extrem schnell
+      da dein Problem dort mÃ¶glicherweise schon behoben ist. Die Entwicklung geht extrem schnell
       voran, die meisten Probleme in offiziellen Versionen werden innerhalb von Tagen oder sogar
       Stunden den Entwicklern mitgeteilt. Benutze daher bitte <emphasis role="bold">nur
-        Subversion</emphasis> beim Berichten von Fehlern. Dies gilt auch für Binärpakete von
+        Subversion</emphasis> beim Berichten von Fehlern. Dies gilt auch fÃ¼r BinÃ¤rpakete von
       <application>MPlayer</application>. Subversion-Anweisungen findest du am unteren Ende
       <ulink url="http://www.mplayerhq.hu/dload.html">dieser Seite</ulink> oder in der README.
       Wenn dies nicht hilft, ziehe die Liste <link linkend="bugs">bekannter Fehler</link> und den
       Rest der Dokumentation zu Rate. Ist dein Problem nicht bekannt oder kann es durch unsere
-      Anweisungen nicht gelöst werden, dann teil uns den Fehler mit.
+      Anweisungen nicht gelÃ¶st werden, dann teil uns den Fehler mit.
     </para>
 
     <para>
       Sende bitte keine Fehlerberichte privat an einzelne Entwickler. MPlayer ist
       Gemeinschaftsarbeit, also wird es vielleicht mehrere interessierte Leute geben. Es
       kommt auch teilweise vor, dass derselbe Fehler von anderen Benutzern gefunden wurde,
-      die bereits eine Lösung zur Umgehung des Problems haben, auch wenn es sich um einen
+      die bereits eine LÃ¶sung zur Umgehung des Problems haben, auch wenn es sich um einen
       Fehler im <application>MPlayer</application>-Code handelt.
     </para>
 
     <para>
-      Bitte beschreibe dein Problem so detailliert wie möglich. Dazu gehört ein klein
-      wenig Detektivarbeit, um die Umstände einzuengen, unter denen das Problem auftritt.
-      Tritt der Fehler nur in bestimmten Situationen auf? Ist er abhängig von Dateien oder
-      Dateitypen? Tritt er nur bei einem Codec auf oder ist er davon unabhängig? Kannst
+      Bitte beschreibe dein Problem so detailliert wie mÃ¶glich. Dazu gehÃ¶rt ein klein
+      wenig Detektivarbeit, um die UmstÃ¤nde einzuengen, unter denen das Problem auftritt.
+      Tritt der Fehler nur in bestimmten Situationen auf? Ist er abhÃ¤ngig von Dateien oder
+      Dateitypen? Tritt er nur bei einem Codec auf oder ist er davon unabhÃ¤ngig? Kannst
       du den Fehler mit allen Ausgabetreibern reproduzieren? Je mehr Informationen du zur
-      Verfügung stellst, desto besser sind die Chancen, dass das Problem gelöst wird.
+      VerfÃ¼gung stellst, desto besser sind die Chancen, dass das Problem gelÃ¶st wird.
       Bitte vergiss nicht, auch die unten angeforderten wertvollen Informationen miteinzubeziehen.
       Ansonsten sind wir vermutlich nicht in der Lage, das Problem genau zu untersuchen.
     </para>
 
     <para>
-      Eine exzellente und gut geschriebene Anleitung dazu, wie Fragen in öffentlichen Foren
+      Eine exzellente und gut geschriebene Anleitung dazu, wie Fragen in Ã¶ffentlichen Foren
       gestellt werden sollen, ist
       <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">How To Ask Questions
         The Smart Way</ulink> von <ulink url="http://www.catb.org/~esr/">Eric S. Raymond</ulink>.
@@ -155,10 +155,10 @@ make</screen>
       <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</ulink>
       von
       <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</ulink>.
-      Befolgst du diese Richtlinien, solltest du Hilfe bekommen können. Bitte hab aber Verständnis,
+      Befolgst du diese Richtlinien, solltest du Hilfe bekommen kÃ¶nnen. Bitte hab aber VerstÃ¤ndnis,
       dass wir alle den Mailinglisten freiwillig in unserer Freizeit folgen. Wir sind sehr
-      beschäftigt und können nicht garantieren, dass du eine Lösung oder auch nur eine Antwort zu
-      deinem Problem erhältst.
+      beschÃ¤ftigt und kÃ¶nnen nicht garantieren, dass du eine LÃ¶sung oder auch nur eine Antwort zu
+      deinem Problem erhÃ¤ltst.
     </para>
   </sect1>
 
@@ -180,8 +180,8 @@ make</screen>
       <ulink url="http://www.ietf.org/rfc/rfc1855.txt">Netiquette-Richtlinien</ulink>
       und <emphasis role="bold">sende keine HTML-Mails</emphasis> an eine unserer
       Mailinglisten. Du wirst ignoriert oder ausgeschlossen werden. Wenn du nicht
-      weißt, was eine HTML-Mail ist oder warum sie böse ist, lies dieses
-      <ulink url="http://expita.com/nomime.html">feine Dokument</ulink>. Es erklärt
+      weiÃŸt, was eine HTML-Mail ist oder warum sie bÃ¶se ist, lies dieses
+      <ulink url="http://expita.com/nomime.html">feine Dokument</ulink>. Es erklÃ¤rt
       alle Details und beinhaltet Instruktionen, wie man HTML abschalten kann. Beachte
       auch, dass wir keine Kopien (CC, carbon-copy) verschicken. Es ist daher eine
       gute Sache, sich anzumelden, um auch wirklich eine Antwort zu erhalten.
@@ -192,12 +192,12 @@ make</screen>
     <title>Was berichtet werden soll</title>
     <para>
       Du wirst wahrscheinlich Logdateien, Konfigurationsinformationen und Beispieldateien
-      in deinen Fehlerbericht aufnehmen müssen. Werden einige von ihnen ziemlich groß,
+      in deinen Fehlerbericht aufnehmen mÃ¼ssen. Werden einige von ihnen ziemlich groÃŸ,
       ist es besser, wenn du sie auf unseren
       <ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">FTP-Server</ulink>
-      hochlädst, und zwar in komprimierter Form (gzip und bzip2 bevorzugt). Gib dann in deinem
+      hochlÃ¤dst, und zwar in komprimierter Form (gzip und bzip2 bevorzugt). Gib dann in deinem
       Fehlerbericht nur den Pfad- und den Dateinamen an. Unsere Mailinglisten haben ein
-      Nachrichten-Größenlimit von 80k, wenn du etwas größeres hast, musst du es
+      Nachrichten-GrÃ¶ÃŸenlimit von 80k, wenn du etwas grÃ¶ÃŸeres hast, musst du es
       komprimieren und hochladen.
     </para>
 
@@ -322,7 +322,7 @@ ld -v</screen>
           </listitem>
           <listitem>
             <para>
-              Füge bei Linuxsystemen im Zweifel die Ausgabe von <command>lspci -vv</command> bei.
+              FÃ¼ge bei Linuxsystemen im Zweifel die Ausgabe von <command>lspci -vv</command> bei.
             </para>
           </listitem>
         </itemizedlist>
@@ -333,8 +333,8 @@ ld -v</screen>
       <title>Configure-Probleme</title>
       <para>
         Wenn du Fehlermeldungen beim Aufruf von <command>./configure</command> bekommst oder
-        die automatische Erkennung von etwas fehlschlägt, so lies <filename>configure.log</filename>.
-        Du könntest dort die Antwort finden, zum Beispiel mehrere Versionen derselben Bibliothek,
+        die automatische Erkennung von etwas fehlschlÃ¤gt, so lies <filename>configure.log</filename>.
+        Du kÃ¶nntest dort die Antwort finden, zum Beispiel mehrere Versionen derselben Bibliothek,
         die gemischt auf deinem System vorliegen, oder du hast vergessen, das Entwicklerpaket
         (die mit dem Suffix -dev) zu installieren. Wenn du denkst, dass es sich um einen
         Fehler handelt, binde <filename>configure.log</filename> in deinen Fehlerbericht ein.
@@ -344,7 +344,7 @@ ld -v</screen>
     <sect2 id="bugreports_compilation">
       <title>Compilierungsprobleme</title>
       <para>
-        Bitte füge diese Dateien an:
+        Bitte fÃ¼ge diese Dateien an:
         <itemizedlist>
           <listitem><para>config.h</para></listitem>
           <listitem><para>config.mak</para></listitem>
@@ -355,10 +355,10 @@ ld -v</screen>
     <sect2 id="bugreports_playback">
       <title>Wiedergabeprobleme</title>
       <para>
-        Bitte füge die Ausgabe von <application>MPlayer</application> im ausführlichen Modus
-        bei Level 1 an, denke aber daran, <emphasis role="bold">die Ausgabe nicht zu kürzen</emphasis>,
-        wenn du sie in deine Mail einfügst. Die Entwickler benötigen alle Ausgaben, um das Problem
-        angemessen zu untersuchen. Du kannst die Ausgabe folgendermaßen in eine Datei ausgeben:
+        Bitte fÃ¼ge die Ausgabe von <application>MPlayer</application> im ausfÃ¼hrlichen Modus
+        bei Level 1 an, denke aber daran, <emphasis role="bold">die Ausgabe nicht zu kÃ¼rzen</emphasis>,
+        wenn du sie in deine Mail einfÃ¼gst. Die Entwickler benÃ¶tigen alle Ausgaben, um das Problem
+        angemessen zu untersuchen. Du kannst die Ausgabe folgendermaÃŸen in eine Datei ausgeben:
         <screen>mplayer -v <replaceable>Optionen</replaceable> <replaceable>Dateiname</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
       </para>
 
@@ -371,32 +371,32 @@ ld -v</screen>
         Lade bitte auch eine kleine Textdatei hoch, die denselben Basisnamen wie deine Datei
         hat, mit der Erweiterung .txt. Beschreibe dort das Problem, das du mit dieser speziellen
         Datei hast und gib sowohl deine Emailadresse als auch die Ausgabe von
-        <application>MPlayer</application> im ausführlichen Modus bei Level 1 an. Normalerweise
+        <application>MPlayer</application> im ausfÃ¼hrlichen Modus bei Level 1 an. Normalerweise
         reichen die ersten 1-5 MB einer Datei aus, um das Problem zu reproduzieren. Um ganz sicher
         zu gehen, bitten wir dich, folgendes zu tun:
         <screen>dd if=<replaceable>deine-datei</replaceable> of=<replaceable>kleine-datei</replaceable> bs=1024k count=5</screen>
-        Dies wird die ersten fünf Megabyte von '<emphasis role="bold">deine-datei</emphasis>' nehmen
+        Dies wird die ersten fÃ¼nf Megabyte von '<emphasis role="bold">deine-datei</emphasis>' nehmen
         und nach '<emphasis role="bold">kleine-datei</emphasis>' schreiben. Probiere es dann erneut
-        mit dieser kleinen Datei, und wenn der Fehler noch immer auftritt, ist dieses Beispiel für uns
+        mit dieser kleinen Datei, und wenn der Fehler noch immer auftritt, ist dieses Beispiel fÃ¼r uns
         ausreichend.
         Bitte sende <emphasis role="bold">niemals</emphasis> solche Dateien via Mail!
         Lade sie hoch und schicke nur den Pfad/Dateinamen der Datei auf dem FTP-Server. Ist
-        die Datei im Netz verfügbar, reicht es, die <emphasis role="bold">exakte</emphasis>
+        die Datei im Netz verfÃ¼gbar, reicht es, die <emphasis role="bold">exakte</emphasis>
         URL zu schicken.
       </para>
     </sect2>
 
     <sect2 id="bugreports_crash">
-      <title>Abstürze</title>
+      <title>AbstÃ¼rze</title>
       <para>
         Du musst <application>MPlayer</application> in <command>gdb</command> aufrufen und
         uns die komplette Ausgabe schicken, oder du kannst, wenn du ein <filename>core</filename>-Dump
-        des Absturzes hast, nützliche Informationen aus der Core-Datei extrahieren,
-        und zwar folgendermaßen:
+        des Absturzes hast, nÃ¼tzliche Informationen aus der Core-Datei extrahieren,
+        und zwar folgendermaÃŸen:
       </para>
 
       <sect3 id="bugreports_debug">
-        <title>Wie man Informationen eines reproduzierbaren Absturzes erhält</title>
+        <title>Wie man Informationen eines reproduzierbaren Absturzes erhÃ¤lt</title>
         <para>
           Compiliere <application>MPlayer</application> neu mit Debugging-Code aktiviert:
 <screen>./configure --enable-debug=3
@@ -406,7 +406,7 @@ make</screen>
           Du befindest dich nun innerhalb gdb. Gib ein
           <screen>run -v <replaceable>Optionen-an-mplayer</replaceable> <replaceable>Dateiname</replaceable></screen>
           und reproduziere den Absturz. Sobald du das getan hast, wird gdb zur Eingabeaufforderung
-          zurückkehren, wo du folgendes eingeben musst:
+          zurÃ¼ckkehren, wo du folgendes eingeben musst:
 <screen>bt
 disass $pc-32 $pc+32
 info all-registers</screen>
@@ -414,13 +414,13 @@ info all-registers</screen>
       </sect3>
 
       <sect3 id="bugreports_core">
-        <title>Wie man aussagekräftige Informationen aus einem Core-Dump extrahiert</title>
+        <title>Wie man aussagekrÃ¤ftige Informationen aus einem Core-Dump extrahiert</title>
         <para>
           Erzeuge die folgende Befehlsdatei:
 <screen>bt
 disass $pc-32 $pc+32
 info all-registers</screen>
-          Führe dann einfach folgenden Befehl aus:
+          FÃ¼hre dann einfach folgenden Befehl aus:
           <screen>gdb mplayer --core=core -batch --command=<replaceable>Kommando_Datei</replaceable> &gt; mplayer.bug</screen>
         </para>
       </sect3>
@@ -428,22 +428,22 @@ info all-registers</screen>
   </sect1>
 
   <sect1 id="bugreports_advusers">
-    <title>Ich weiß, was ich tue...</title>
+    <title>Ich weiÃŸ, was ich tue...</title>
     <para>
       Wenn du einen Fehlerbericht wie oben beschrieben geschrieben hast und du dir sicher
       bist, dass es ein Bug in <application>MPlayer</application> und nicht ein Problem mit dem
-      Compiler oder eine defekte Datei ist, du die Dokumentation gelesen hast und keine Lösungen
+      Compiler oder eine defekte Datei ist, du die Dokumentation gelesen hast und keine LÃ¶sungen
       finden konntest und deine Soundtreiber OK sind, dann kannst du auch der
       mplayer-advusers-Mailingliste beitreten und dort deine Fehlerberichte einsenden. Du wirst dort
       schnellere und bessere Antworten erhalten.
     </para>
 
     <para>
-      Aber sei gewarnt: Wenn du Anfängerfragen stellst oder Fragen, die in dieser Anleitung
+      Aber sei gewarnt: Wenn du AnfÃ¤ngerfragen stellst oder Fragen, die in dieser Anleitung
       bereits beantwortet werden, wirst du ignoriert oder angemeckert, anstatt eine Antwort
-      zu erhalten. Also ärgere uns nicht und trete der -advusers-Liste nur bei, wenn du weißt,
-      was du tust und du dich für einen erfahrenen MPlayer-Nutzer oder -Entwickler hältst.
-      Erfüllst du diese Kriterien, sollte es kein Problem für dich sein, dich anzumelden...
+      zu erhalten. Also Ã¤rgere uns nicht und trete der -advusers-Liste nur bei, wenn du weiÃŸt,
+      was du tust und du dich fÃ¼r einen erfahrenen MPlayer-Nutzer oder -Entwickler hÃ¤ltst.
+      ErfÃ¼llst du diese Kriterien, sollte es kein Problem fÃ¼r dich sein, dich anzumelden...
     </para>
   </sect1>
 

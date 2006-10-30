@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r20043 -->
 <chapter id="mencoder">
 <title>Allgemeiner Gebrauch von <application>MEncoder</application></title>
@@ -13,7 +13,7 @@ die aus verschiedenen Mailing-Listen-Threads von MPlayer-Nutzern
 zusammengestellt wurden.
 Durchsuche die
 <ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-users/">Archive</ulink>
-nach einer Fülle von Diskussionen über alle Aspekte und Probleme mit
+nach einer FÃ¼lle von Diskussionen Ã¼ber alle Aspekte und Probleme mit
 der Encodierung mittels <application>MEncoder</application>.
 </para>
 
@@ -21,13 +21,13 @@ der Encodierung mittels <application>MEncoder</application>.
 <title>Auswahl der Codecs und Containerformate</title>
 
 <para>
-  Audio- und Videocodecs für die Encodierung werden mit den Optionen
-  <option>-oac</option> und <option>-ovc</option> respektive gewählt.
+  Audio- und Videocodecs fÃ¼r die Encodierung werden mit den Optionen
+  <option>-oac</option> und <option>-ovc</option> respektive gewÃ¤hlt.
   Gib zum Beispiel folgendes ein:
   <screen>mencoder -ovc help</screen>
   um alle von der <application>MEncoder</application>-Version auf deinem Rechner
-  unterstützten Video-Codecs aufzulisten.
-  Die folgenden Wahlmöglichkeiten stehen zur Verfügung:
+  unterstÃ¼tzten Video-Codecs aufzulisten.
+  Die folgenden WahlmÃ¶glichkeiten stehen zur VerfÃ¼gung:
 </para>
 <para>
 Audiocodecs:
@@ -109,19 +109,19 @@ Video-Codecs:
   </row>
   <row>
     <entry>frameno</entry>
-    <entry>Verwendet für 3-pass-Encodierung (nicht empfohlen)</entry>
+    <entry>Verwendet fÃ¼r 3-pass-Encodierung (nicht empfohlen)</entry>
   </row>
 </tbody>
 </tgroup>
 </informaltable>
 </para>
 <para>
-  Ausgabe-Containerformate werden mittels der Option <option>-of</option> gewählt.
+  Ausgabe-Containerformate werden mittels der Option <option>-of</option> gewÃ¤hlt.
   Gib folgendes ein
   <screen>mencoder -of help</screen>
   um alle von der <application>MEncoder</application>-Version auf deinem Rechner
-  unterstützten Videocodecs aufzulisten.
-  Die folgenden Wahlmöglichkeiten stehen zur Verfügung:
+  unterstÃ¼tzten Videocodecs aufzulisten.
+  Die folgenden WahlmÃ¶glichkeiten stehen zur VerfÃ¼gung:
 </para>
 <para>
 Containerformate:
@@ -135,7 +135,7 @@ Containerformate:
     <entry>lavf</entry>
     <entry>Einer der von
     <systemitem class="library">libavformat</systemitem>
-    unterstützten Container</entry>
+    unterstÃ¼tzten Container</entry>
   </row>
   <row>
     <entry>avi</entry>
@@ -156,11 +156,11 @@ Containerformate:
 </tbody>
 </tgroup>
 </informaltable>
-  Der AVI-Container ist das ursprüngliche Containerformat für
+  Der AVI-Container ist das ursprÃ¼ngliche Containerformat fÃ¼r
   <application>MEncoder</application>, was bedeutet, dass es der am besten
-  gehandhabte ist und derjenige, für welchen <application>MEncoder</application>
+  gehandhabte ist und derjenige, fÃ¼r welchen <application>MEncoder</application>
   entworfen wurde.
-  Wie oben angemerkt können weitere Containerformate verwendet werden, jedoch
+  Wie oben angemerkt kÃ¶nnen weitere Containerformate verwendet werden, jedoch
   kann es bei deren Gebrauch zu Problemen kommen.
 </para>
 
@@ -168,7 +168,7 @@ Containerformate:
 <systemitem class="library">libavformat</systemitem>-Container:
 </para>
 <para>
-  Wenn du für das Muxen der Ausgabedatei
+  Wenn du fÃ¼r das Muxen der Ausgabedatei
   <systemitem class="library">libavformat</systemitem> verwendest
   (mittels <option>-of lavf</option>),
   wird das passende Containerformat entsprechend der Erweiterung der Ausgabedatei
@@ -238,10 +238,10 @@ Containerformate:
   <application>MEncoder</application>, in eine beachtliche Vielfalt an Containern
   zu muxen.
   Leider solltest du wirklich Paranoia angesichts der resultierenden Datei schieben,
-  da <application>MEncoder</application> nicht von Anfang an für die Unterstützung
+  da <application>MEncoder</application> nicht von Anfang an fÃ¼r die UnterstÃ¼tzung
   anderer Containerformate als AVI entworfen wurde.
 
-  Überprüfe bitte sicherheitshalber, ob die Audio-/Video-Synchronisierung in Ordnung ist
+  ÃœberprÃ¼fe bitte sicherheitshalber, ob die Audio-/Video-Synchronisierung in Ordnung ist
   und ob die Datei von anderen Playern als <application>MPlayer</application>
   wiedergegeben werden kann.
 </para>
@@ -263,47 +263,47 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 
 
 <sect1 id="menc-feat-selecting-input">
-<title>Auswahl von Eingabedatei oder -gerät</title>
+<title>Auswahl von Eingabedatei oder -gerÃ¤t</title>
 
 <para>
   <application>MEncoder</application> kann aus Dateien oder direkt von
   einer DVD- oder VCD-Disk encodieren.
-  Schließe einfach den Dateinamen in der Befehlszeile mit ein, um
+  SchlieÃŸe einfach den Dateinamen in der Befehlszeile mit ein, um
   von einer Datei zu ecodieren, oder
   <option>dvd://</option><replaceable>Titelnummer</replaceable>
   bzw. <option>vcd://</option><replaceable>Tracknummer</replaceable> zum
   Ecodieren von einem DVD-Titel oder VCD-Track.
   Wenn du bereits einmal eine DVD auf deine Festplatte kopiert hast
   (du kannst ein Tool wie etwa <application>dvdbackup</application>
-  verwenden, auf den meisten Systemen verfügbar)
+  verwenden, auf den meisten Systemen verfÃ¼gbar)
   und von der Kopie encodieren willst, solltest du nach wie vor die Syntax
   <option>dvd://</option> benutzen, zusammen mit <option>-dvd-device</option>
   gefolgt vom Pfad zur kopierten DVD-Root.
 
   Die Optionen <option>-dvd-device</option> und <option>-cdrom-device</option>
-  können auch dazu genutzt werden, die Pfade zu den Geräte-Nodes zu überschreiben,
+  kÃ¶nnen auch dazu genutzt werden, die Pfade zu den GerÃ¤te-Nodes zu Ã¼berschreiben,
   um direkt von der Disk zu lesen, falls die Standardoptionen
   <filename>/dev/dvd</filename> und <filename>/dev/cdrom</filename> auf
   deinem System nicht funktionieren.
 </para>
 <para>
-  Wenn du von einer DVD encodierst, ist es oft wünschenswert, ein zu
-  encodierendes Kapitel oder einen Bereich von Kapiteln auszuwählen.
+  Wenn du von einer DVD encodierst, ist es oft wÃ¼nschenswert, ein zu
+  encodierendes Kapitel oder einen Bereich von Kapiteln auszuwÃ¤hlen.
   Du kannst zu diesem Zweck die Option <option>-chapter</option> nutzen.
   Zum Beispiel wird <option>-chapter</option> <replaceable>1-4</replaceable>
   nur die Kapitel 1 bis 4 der DVD encodieren.
-  Dies ist besonders nützlich, wenn du eine für zwei CDs bestimmte
-  Encodierung mit 1400 MB durchführen willst, da du sicherstellen kannst,
+  Dies ist besonders nÃ¼tzlich, wenn du eine fÃ¼r zwei CDs bestimmte
+  Encodierung mit 1400 MB durchfÃ¼hren willst, da du sicherstellen kannst,
   dass die Unterbrechung exakt an den Kapitelgrenzen stattfindet, anstatt mitten
   in einer Szene.
 </para>
 <para>
-  Besitzt du eine unterstützte TV-Capture-Karte, kannst du auch von einem
-  TV-In-Gerät encodieren.
+  Besitzt du eine unterstÃ¼tzte TV-Capture-Karte, kannst du auch von einem
+  TV-In-GerÃ¤t encodieren.
   Verwende <option>tv://</option><replaceable>Kanalnummer</replaceable> als
   Dateinamen und <option>-tv</option> zur Konfiguration der zahlreichen
   Aufnahmeeinstellungen.
-  Der DVB-Input funktioniert ähnlich.
+  Der DVB-Input funktioniert Ã¤hnlich.
 </para>
 </sect1>
 
@@ -311,32 +311,32 @@ mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.flv</replac
 <title>Encodieren ins Sony PSP Video Format</title>
 
 <para>
-  <application>MEncoder</application> unterstützt das Encodieren in das
-  Sony PSP Video Format, allerdings gibt es, abhängig von der Version der PSP
-  Software, unterschiedliche Beschränkungen.
-  Wer sicher gehen möchte, sollte folgende Beschränkungen beachten:
+  <application>MEncoder</application> unterstÃ¼tzt das Encodieren in das
+  Sony PSP Video Format, allerdings gibt es, abhÃ¤ngig von der Version der PSP
+  Software, unterschiedliche BeschrÃ¤nkungen.
+  Wer sicher gehen mÃ¶chte, sollte folgende BeschrÃ¤nkungen beachten:
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Bitrate</emphasis>: sollte 1500kbps
-  nicht überschreiten, frühere Versionen unterstützten allerdings fast jede
+  nicht Ã¼berschreiten, frÃ¼here Versionen unterstÃ¼tzten allerdings fast jede
   beliebige Bitrate, so lange der Header sagte, sie sei nicht zu hoch.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Dimensionen</emphasis>: die Breite und Höhe des
+  <emphasis role="bold">Dimensionen</emphasis>: die Breite und HÃ¶he des
   PSP videos sollte ein Vielfaches von 16 sein, und das Produkt Breite
-  * Höhe muss &lt;= 64000 sein.
-  Unter gewissen Umständen kann es der PSP möglich sein, höhere
-  Auflösungen abzuspielen.
+  * HÃ¶he muss &lt;= 64000 sein.
+  Unter gewissen UmstÃ¤nden kann es der PSP mÃ¶glich sein, hÃ¶here
+  AuflÃ¶sungen abzuspielen.
 </para></listitem>
 <listitem><para>
-<emphasis role="bold">Audio</emphasis>: die Samplerate sollte für
-MPEG-4 Videos 24kHz, und für H.264 48kHz betragen.
+<emphasis role="bold">Audio</emphasis>: die Samplerate sollte fÃ¼r
+MPEG-4 Videos 24kHz, und fÃ¼r H.264 48kHz betragen.
 </para></listitem>
 </itemizedlist>
 </para>
 
 <example id="encode_for_psp">
-<title>Encodierung für PSP</title>
+<title>Encodierung fÃ¼r PSP</title>
 <para>
 <screen>
 mencoder -oac lavc -ovc lavc -of lavf -lavcopts
@@ -345,7 +345,7 @@ aglobal=1:vglobal=1:vcodec=mpeg4:acodec=aac \
 format=psp:i_certify_that_my_video_stream_does_not_use_b_frames \
 -ofps 30000/1001 input.video -o output.psp
 </screen>
-Der Titel des Videos kann folgendermaßen angepasst werden:
+Der Titel des Videos kann folgendermaÃŸen angepasst werden:
 <option>-info name=<replaceable>MovieTitle</replaceable></option>.
 </para>
 </example>
@@ -358,15 +358,15 @@ Der Titel des Videos kann folgendermaßen angepasst werden:
 <para>
 Der Name kommt daher, dass diese Methode die Datei <emphasis>zweimal</emphasis>
 encodiert.
-Die erste Encodierung (synchronisierter Durchgang) erzeugt einige temporäre
-Dateien (<filename>*.log</filename>) mit einer Größe von ein paar Megabyte,
-lösche diese noch nicht (du kannst dabei die AVI löschen oder vielmehr einfach
+Die erste Encodierung (synchronisierter Durchgang) erzeugt einige temporÃ¤re
+Dateien (<filename>*.log</filename>) mit einer GrÃ¶ÃŸe von ein paar Megabyte,
+lÃ¶sche diese noch nicht (du kannst dabei die AVI lÃ¶schen oder vielmehr einfach
 kein Video erstellen, indem du sie nach <filename>/dev/null</filename>
 umadressierst).
 Im zweiten Durchgang wird die 2-pass-Ausgabedatei erzeugt, indem die
-Bitraten-Daten der temporären Dateien genutzt werden. Die sich daraus
-ergebende Datei wird eine viel bessere Bildqualität besitzen. Wenn du das
-erste Mal davon gehört hast, solltest du einige im Netz verfügbare Handbücher
+Bitraten-Daten der temporÃ¤ren Dateien genutzt werden. Die sich daraus
+ergebende Datei wird eine viel bessere BildqualitÃ¤t besitzen. Wenn du das
+erste Mal davon gehÃ¶rt hast, solltest du einige im Netz verfÃ¼gbare HandbÃ¼cher
 zu Rate ziehen.
 </para>
 
@@ -374,7 +374,7 @@ zu Rate ziehen.
 <title>Kopieren eines Audio-Tracks</title>
 <para>
 2-pass-Encodierung des zweiten Tracks einer DVD zu einer MPEG4 (&quot;DivX&quot;)
-AVI-Datei während des gleichzeitigen Kopierens des Audio-Tracks.
+AVI-Datei wÃ¤hrend des gleichzeitigen Kopierens des Audio-Tracks.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o /dev/null
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy -o <replaceable>output.avi</replaceable>
@@ -386,9 +386,9 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac copy 
 <title>Encodieren eines Audio-Tracks</title>
 <para>
 2-pass-Encodierung einer DVD nach einer MPEG4 (&quot;DivX&quot;) AVI-Datei
-während des gleichzeitigen Encodierens des Audio-Tracks nach MP3.
-Sei bei der Anwendung dieser Methode vorsichtig, da sie in einigen Fällen
-zur Audio-/Video-Desynchronisierung führen kann.
+wÃ¤hrend des gleichzeitigen Encodierens des Audio-Tracks nach MP3.
+Sei bei der Anwendung dieser Methode vorsichtig, da sie in einigen FÃ¤llen
+zur Audio-/Video-Desynchronisierung fÃ¼hren kann.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o /dev/null
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>output.avi</replaceable>
@@ -402,7 +402,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 -oac mp3la
 <para>
 <application>MEncoder</application> kann Ausgabedateien im Format
 MPEG (MPEG-PS) erzeugen.
-Gewöhnlich, wenn du MPEG1- oder MPEG2-Videos benutzt, tust du dies, weil
+GewÃ¶hnlich, wenn du MPEG1- oder MPEG2-Videos benutzt, tust du dies, weil
 du in ein erzwungenes Format wie SVCD, VCD oder DVD encodierst.
 Die spezifischen Anforderungen an diese Formate werden im Abschnitt
 <link linkend="menc-feat-vcd-dvd">Verwenden von MEncoder zum Erzeugen
@@ -412,7 +412,7 @@ beschrieben.
 
 <para>
 Verwende die Option <option>-of mpeg</option>, um das Format der
-Ausgabedatei von <application>MEncoder</application> zu ändern.
+Ausgabedatei von <application>MEncoder</application> zu Ã¤ndern.
 </para>
 
 <informalexample>
@@ -421,7 +421,7 @@ Beispiel:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>other_options</replaceable> -o <replaceable>output.mpg</replaceable>
 </screen>
-Erzeugen einer für das Abspielen auf Systemen mit minimalem Multimedia-Support
+Erzeugen einer fÃ¼r das Abspielen auf Systemen mit minimalem Multimedia-Support
 geeigneten MPEG1-Datei, wie etwa auf Standard-Windows-Installationen:
 <screen>
 mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:tsaf:muxrate=2000 -o <replaceable>output.mpg</replaceable> -oac lavc -ovc lavc \
@@ -432,14 +432,14 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
 
 <note><title>Hinweis:</title>
 <para>
-  Wenn dich die Video-Qualität des zweiten Durchgangs aus irgendeinem
+  Wenn dich die Video-QualitÃ¤t des zweiten Durchgangs aus irgendeinem
   Grund nicht zufrieden gestellt hat, kannst du deine Encodierung
   mit einer anderen Zielbitrate erneut durchlaufen lassen, vorausgesetzt,
   du hast die Statistikdateien des vorherigen Durchgangs gesichert.
-  Dies ist möglich, weil das Primärziel der Statistikdateien die Aufzeichnung
-  der Komplexität jedes Frames ist, was nicht allzusehr von der Bitrate
-  abhängt. Du solltest daher beachten, dass du die besten Ergebnisse bekommst,
-  wenn alle Durchgänge mit nicht zu sehr voneinander abweichenden
+  Dies ist mÃ¶glich, weil das PrimÃ¤rziel der Statistikdateien die Aufzeichnung
+  der KomplexitÃ¤t jedes Frames ist, was nicht allzusehr von der Bitrate
+  abhÃ¤ngt. Du solltest daher beachten, dass du die besten Ergebnisse bekommst,
+  wenn alle DurchgÃ¤nge mit nicht zu sehr voneinander abweichenden
   Ziel-Bitraten durchlaufen werden.
 </para>
 </note>
@@ -450,17 +450,17 @@ mencoder <replaceable>input.avi</replaceable> -of mpeg -mpegopts format=mpeg1:ts
 <title>Reskalierung von Filmen</title>
 
 <para>
-Oft taucht die Notwendigkeit auf, die Größe der Bilder eines Films zu
-ändern. Das kann viele Gründe haben: das Anwachsen der Dateigröße,
+Oft taucht die Notwendigkeit auf, die GrÃ¶ÃŸe der Bilder eines Films zu
+Ã¤ndern. Das kann viele GrÃ¼nde haben: das Anwachsen der DateigrÃ¶ÃŸe,
 Netzwerkbandbreite etc. Die meisten Leute reskalieren gerade beim
 Konvertieren von DVDs oder SVCDs nach DivX AVI. Wenn du reskalieren willst,
-lies den Abschnitt <link linkend="aspect">Beibehalten des Seitenverhältnisses</link>.
+lies den Abschnitt <link linkend="aspect">Beibehalten des SeitenverhÃ¤ltnisses</link>.
 </para>
 
 <para>
 Der Skalierungsprozess wird vom <literal>scale</literal>-Video-Filter verarbeitet:
 <option>-vf scale=<replaceable>Breite</replaceable>:<replaceable>Hoehe</replaceable></option>.
-Seine Qualität kann mit der Option <option>-sws</option> gesetzt werden.
+Seine QualitÃ¤t kann mit der Option <option>-sws</option> gesetzt werden.
 Ist sie nicht angegeben, wird <application>MEncoder</application> 2: bikubisch
 verwenden.
 </para>
@@ -489,14 +489,14 @@ sie. Dieser Abschnitt behandelt das <emphasis role="bold">Kopieren</emphasis>.
   Damit kann man nette Sachen machen :) Wie etwa FLI oder VIVO oder
   MPEG1-Video in eine AVI-Datei legen (nicht konvertieren!)! Sicherlich kann
   nur <application>MPlayer</application> solche Dateien abspielen :)
-  Und es hat tatsächlich keine wirkliche Daseinsberechtigung.
+  Und es hat tatsÃ¤chlich keine wirkliche Daseinsberechtigung.
   Rational: Das Kopieren eines Video-Stream kann zum Beispiel dann
-  nützlich sein, wenn nur der Audio-Stream encodiert werden muß (wie
+  nÃ¼tzlich sein, wenn nur der Audio-Stream encodiert werden muÃŸ (wie
   unkomprimiertes PCM nach MP3).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Audiostream</emphasis> (Option <option>-oac copy</option>):
-  unkompliziert. Es ist möglich, eine externe Audio-Datei (MP3,
+  unkompliziert. Es ist mÃ¶glich, eine externe Audio-Datei (MP3,
   WAV) herzunehmen und sie in einen Ausgabestream zu muxen. Nimm dazu die
   Option <option>-audiofile <replaceable>Dateinamename</replaceable></option>.
   </para></listitem>
@@ -508,8 +508,8 @@ sie. Dieser Abschnitt behandelt das <emphasis role="bold">Kopieren</emphasis>.
   <option>-fafmttag</option> erfordern, um das Audio-Format-Tag der Originaldatei
   beizubehalten.
   Wenn du zum Beispiel eine NSV-Datei mit AAC-Audio in einen AVI-Container
-  konvertierst, wird der Audio-Format-Tag fehlerhaft sein und muss geändert
-  werden. <filename>codecs.conf</filename> enthält eine Liste von
+  konvertierst, wird der Audio-Format-Tag fehlerhaft sein und muss geÃ¤ndert
+  werden. <filename>codecs.conf</filename> enthÃ¤lt eine Liste von
   Audio-Format-Tags.
 </para>
 
@@ -534,22 +534,22 @@ mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc la
 </para>
 
 <orderedlist>
-<title>Erläuterung des Prozesses:</title>
+<title>ErlÃ¤uterung des Prozesses:</title>
 <listitem><para>
   <application>MEncoder</application> <emphasis>decodiert</emphasis> das/die
   Input-Bild(er) mittels <systemitem class="library">libjpeg</systemitem>
   (beim Decodieren von PNGs nimmt er <systemitem class="library">libpng</systemitem>).
   </para></listitem>
 <listitem><para>
-  <application>MEncoder</application> führt dann das decodierte Bild dem
-  gewählten Video-Kompressor zu (DivX4, XviD, FFmpeg msmpeg4, etc).
+  <application>MEncoder</application> fÃ¼hrt dann das decodierte Bild dem
+  gewÃ¤hlten Video-Kompressor zu (DivX4, XviD, FFmpeg msmpeg4, etc).
   </para></listitem>
 </orderedlist>
 
 <formalpara>
 <title>Beispiele</title>
 <para>
-Die Erklärung der Option <option>-mf</option> steht in der Manpage.
+Die ErklÃ¤rung der Option <option>-mf</option> steht in der Manpage.
 
 <informalexample>
 <para>
@@ -574,7 +574,7 @@ mencoder mf://<replaceable>frame001.jpg,frame002.jpg</replaceable> -mf w=800:h=6
 <informalexample>
 <para>
   Erzeugen einer MPEG4-Datei aus einer eindeutigen Liste von JPEG-Dateien (list.txt im
-  aktuellem Verzeichnis enthält die Liste von Dateien, die als Quelle genutzt werden
+  aktuellem Verzeichnis enthÃ¤lt die Liste von Dateien, die als Quelle genutzt werden
   sollen, eine pro Zeile):
 <screen>
 mencoder mf://<replaceable>@list.txt</replaceable> -mf w=800:h=600:fps=25:type=jpg \
@@ -603,7 +603,7 @@ mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <repla
 </informalexample>
 
 <note><para>
-  Die Breite muß ein Vielfaches von 4 sein, dies ist eine Einschränkung des
+  Die Breite muÃŸ ein Vielfaches von 4 sein, dies ist eine EinschrÃ¤nkung des
   RAW RGB AVI Formats.
 </para></note>
 
@@ -637,7 +637,7 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
   <application>MEncoder</application> kann Untertitel aus einer DVD
   in VOBsub-formatierte Dateien extrahieren. Diese bestehen aus einem
   Paar von Dateien mit den Endungen <filename>.idx</filename> und
-  <filename>.sub</filename> und sind für gewöhnlich in ein einzelnes
+  <filename>.sub</filename> und sind fÃ¼r gewÃ¶hnlich in ein einzelnes
   <filename>.rar</filename>-Archiv gepackt.
   <application>MPlayer</application> kann diese mit den Optionen
   <option>-vobsub</option> und <option>-vobsubid</option> abspielen.
@@ -646,14 +646,14 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
 <para>
   Du legst den Basisnamen der Ausgabedateien (z.B ohne die Erweiterung
   <filename>.idx</filename> oder <filename>.sub</filename>)
-  mittels <option>-vobsubout</option> fest und den Index für diesen
+  mittels <option>-vobsubout</option> fest und den Index fÃ¼r diesen
   Untertitel der resultierenden Dateien mit <option>-vobsuboutindex</option>.
 </para>
 
 <para>
   Stammt der Input nicht von einer DVD, solltest du <option>-ifo</option>
   verwenden, um die zur Konstruktion der resultierenden
-  <filename>.idx</filename>-Datei benötigten <filename>.ifo</filename>-Datei
+  <filename>.idx</filename>-Datei benÃ¶tigten <filename>.ifo</filename>-Datei
   anzugeben.
 </para>
 
@@ -661,17 +661,17 @@ mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <repl
   Stammt der Input nicht von einer DVD und besitzt du die
   <filename>.ifo</filename>-Datei nicht, musst du die Option
   <option>-vobsubid</option> anwenden, um ihn wissen zu lassen, welche
-  Sprach-ID in die <filename>.idx</filename>-Datei eingefügt werden soll.
+  Sprach-ID in die <filename>.idx</filename>-Datei eingefÃ¼gt werden soll.
 </para>
 
 <para>
-  Jeder Start wird den laufenden Untertitel anhängen, falls die
+  Jeder Start wird den laufenden Untertitel anhÃ¤ngen, falls die
   <filename>.idx</filename>- und <filename>.sub</filename>-Dateien bereits
   existieren. Also solltest du beide vor dem Start entfernen.
 </para>
 
 <example id="copying_two_subtitles_from_a_dvd_while_doing_two_pass_encoding">
-<title>Kopieren zweier Untertitel aus einer DVD während einer 2-pass-Encodierung</title>
+<title>Kopieren zweier Untertitel aus einer DVD wÃ¤hrend einer 2-pass-Encodierung</title>
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
@@ -680,7 +680,7 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell:vpass=2 
 </example>
 
 <example id="copying_a_french_subtitle_from_an_mpeg_file">
-<title>Kopieren eines französichen Untertitels aus einer MPEG-Datei</title>
+<title>Kopieren eines franzÃ¶sichen Untertitels aus einer MPEG-Datei</title>
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
@@ -690,14 +690,14 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 </sect1>
 
 <sect1 id="aspect">
-<title>Beibehalten des Seitenverhältnisses</title>
+<title>Beibehalten des SeitenverhÃ¤ltnisses</title>
 <para>
-  Dateien von DVDs und SVCDs (z.B. MPEG1/2) enthalten einen Wert für das
-  Seitenverhältnis, welcher beschreibt, wie der Player den Videostream
-  skalieren soll, damit Menschen keine Eierköpfe kriegen
+  Dateien von DVDs und SVCDs (z.B. MPEG1/2) enthalten einen Wert fÃ¼r das
+  SeitenverhÃ¤ltnis, welcher beschreibt, wie der Player den Videostream
+  skalieren soll, damit Menschen keine EierkÃ¶pfe kriegen
   (Beispiel: 480x480 + 4:3 = 640x480). Beim Encodieren zu AVI-(DivX)-Dateien
   musst du dir bewusst sein, dass AVI-Header diesen Wert nicht abspeichern.
-  Das Reskalieren des Films ist ätzend und zeitaufwändig, da muss es doch
+  Das Reskalieren des Films ist Ã¤tzend und zeitaufwÃ¤ndig, da muss es doch
   einen besseren Weg geben!
 </para>
 
@@ -705,22 +705,22 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 
 <para>
   MPEG4 besitzt ein einzigartiges Feature: Der Video-Stream kann sein
-  benötigtes Seitenverhältnis enthalten. Ja, genau wie MPEG1/2 (DVD, SVCD)
+  benÃ¶tigtes SeitenverhÃ¤ltnis enthalten. Ja, genau wie MPEG1/2 (DVD, SVCD)
   und H.263 Dateien. Bedauerlicherweise gibt es abgesehen von
   <application>MPlayer</application> wenige Video-Player, die dieses
-  MPEG4-Attribut unterstützen.
+  MPEG4-Attribut unterstÃ¼tzen.
 </para>
 
 <para>
   Dieses Feature kann nur mit dem <systemitem>mpeg4</systemitem>-Codec von
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   verwendet werden. Vergiss nicht: Obwohl <application>MPlayer</application>
-  die erzeugte Datei korrekt abspielen wird, könnten andere Player das verkehrte
-  Seitenverhältnis benutzen.
+  die erzeugte Datei korrekt abspielen wird, kÃ¶nnten andere Player das verkehrte
+  SeitenverhÃ¤ltnis benutzen.
 </para>
 
 <para>
-  Du solltest auf jeden Fall die schwarzen Bänder oberhalb und unterhalb des
+  Du solltest auf jeden Fall die schwarzen BÃ¤nder oberhalb und unterhalb des
   Filmbildes abschneiden.
   In der Manpage steht mehr zur Verwendung der Filter <systemitem>cropdetect</systemitem>
   und <systemitem>crop</systemitem>.

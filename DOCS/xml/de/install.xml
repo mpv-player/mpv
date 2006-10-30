@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r20412 -->
 
 <chapter id="install">
   <title>Installation</title>
 
   <para>
-    Eine Anleitung für eine schnelle Installation steht in der Datei
-    <filename>README</filename>. Bitte lies diese zuerst und komm erst dann für
-    den Rest der mörderischen Details zurück.
+    Eine Anleitung fÃ¼r eine schnelle Installation steht in der Datei
+    <filename>README</filename>. Bitte lies diese zuerst und komm erst dann fÃ¼r
+    den Rest der mÃ¶rderischen Details zurÃ¼ck.
   </para>
 
   <para>
     In diesem Abschnitt werde ich versuchen, dich durch den Vorgang des
     Compilierens und Konfigurierens von <application>MPlayer</application> zu
     leiten. Es ist nicht leicht, muss aber nicht unbedingt schwierig sein. Wenn du
-    andere Erfahrungen machst als das, was ich erkläre, durchsuche bitte die
+    andere Erfahrungen machst als das, was ich erklÃ¤re, durchsuche bitte die
     Dokumentation, und du wirst deine Antworten finden. Wenn du Links siehst, folge
-    ihnen und lies ihren Inhalt sorgfältig. Das wird etwas Zeit in Anspruch
+    ihnen und lies ihren Inhalt sorgfÃ¤ltig. Das wird etwas Zeit in Anspruch
     nehmen, aber das IST es wert.
   </para>
 
@@ -32,7 +32,7 @@
       <listitem>
         <para>
           <emphasis role="bold">binutils</emphasis> - Empfohlene Version ist <emphasis role="bold">2.11.x</emphasis>.
-          Dieses Programm ist verantwortlich für die Generierung von Instruktionen für
+          Dieses Programm ist verantwortlich fÃ¼r die Generierung von Instruktionen fÃ¼r
           MMX/3DNow!/usw. und daher sehr wichtig.
         </para>
       </listitem>
@@ -47,13 +47,13 @@
         <para>
           <emphasis role="bold">XFree86</emphasis> - Empfohlene Version ist
           <emphasis role="bold">immer die neueste</emphasis> (4.3). Normalerweise
-          möchte das jeder. Mit XFree86 4.0.2 beginnend enthält es die
+          mÃ¶chte das jeder. Mit XFree86 4.0.2 beginnend enthÃ¤lt es die
           <link linkend="xv">XVideo</link>-Erweiterung (irgendwo als
-          <emphasis role="bold">Xv</emphasis> bezeichnet), die bei Karten, die dies unterstützen,
-          für die YUV-Hardwarebeschleunigung (schnelle Bilddarstellung) benötigt wird.
+          <emphasis role="bold">Xv</emphasis> bezeichnet), die bei Karten, die dies unterstÃ¼tzen,
+          fÃ¼r die YUV-Hardwarebeschleunigung (schnelle Bilddarstellung) benÃ¶tigt wird.
           Stelle auch sicher, dass das <emphasis role="bold">Entwicklerpaket</emphasis>
           installiert ist, sonst wird es nicht funktionieren.
-          Bei manchen Grafikkarten benötigst du kein XFree86. Siehe Liste unten.
+          Bei manchen Grafikkarten benÃ¶tigst du kein XFree86. Siehe Liste unten.
         </para>
       </listitem>
       <listitem>
@@ -66,13 +66,13 @@
       <listitem>
         <para>
           <emphasis role="bold">FreeType</emphasis> in der Version 2.0.9 oder neuer wird
-          benötigt, um Schriften für OSD und Untertitel zu erhalten.
+          benÃ¶tigt, um Schriften fÃ¼r OSD und Untertitel zu erhalten.
         </para>
       </listitem>
       <listitem>
         <para>
           <emphasis role="bold">SDL</emphasis> - ist nicht zwingend notwendig, kann
-          in manchen Fällen aber helfen (schlechter Klang, Grafikkarten, die zusammen
+          in manchen FÃ¤llen aber helfen (schlechter Klang, Grafikkarten, die zusammen
           mit dem xv-Treiber komischerweise hinterherhingen).
           Benutze immer die neueste Version (beginnend bei 1.2.x).
         </para>
@@ -80,8 +80,8 @@
       <listitem>
         <para>
           <emphasis role="bold">libjpeg</emphasis> - optionaler JPEG-Decoder, der
-          von der Option <option>-mf</option> und für mache QT MOV-Dateien verwendet
-          wird. Nützlich sowohl für <application>MPlayer</application> als auch
+          von der Option <option>-mf</option> und fÃ¼r mache QT MOV-Dateien verwendet
+          wird. NÃ¼tzlich sowohl fÃ¼r <application>MPlayer</application> als auch
           <application>MEncoder</application>, wenn du vorhast, mit JPEG-Dateien zu
           arbeiten.
         </para>
@@ -89,14 +89,14 @@
       <listitem>
         <para>
           <emphasis role="bold">libpng</emphasis> - empfohlen und
-          Standard-(M)PNG-Decoder. Wird für die GUI benötigt.
-          Nützlich sowohl für <application>MPlayer</application> als auch
+          Standard-(M)PNG-Decoder. Wird fÃ¼r die GUI benÃ¶tigt.
+          NÃ¼tzlich sowohl fÃ¼r <application>MPlayer</application> als auch
           <application>MEncoder</application>.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">lame</emphasis> - empfohlen, erforderlich für
+          <emphasis role="bold">lame</emphasis> - empfohlen, erforderlich fÃ¼r
           Audioencodierung in das MP3-Format mit <application>MEncoder</application>,
           empfohlene Version ist <emphasis>immer die neueste</emphasis> (mindestens
           3.90).
@@ -104,26 +104,26 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">zlib</emphasis> - empfohlen, benötigt für die
-          Unterstützung komprimierter MOV-Headern und PNG.
+          <emphasis role="bold">zlib</emphasis> - empfohlen, benÃ¶tigt fÃ¼r die
+          UnterstÃ¼tzung komprimierter MOV-Headern und PNG.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libogg</emphasis> - optional, erforderlich für die
+          <emphasis role="bold">libogg</emphasis> - optional, erforderlich fÃ¼r die
           Wiedergabe von Dateien im OGG-Format.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libvorbis</emphasis> - optional, benötigt für die
+          <emphasis role="bold">libvorbis</emphasis> - optional, benÃ¶tigt fÃ¼r die
           Audiowiedergabe von OGG Vorbis.
         </para>
       </listitem>
       <listitem>
         <para>
           <emphasis role="bold"><ulink url="http://www.live555.com/mplayer/">LIVE555 Streaming Media</ulink></emphasis>
-          - optional, benötigt für die Wiedergabe von RTSP/RTP-Streams.
+          - optional, benÃ¶tigt fÃ¼r die Wiedergabe von RTSP/RTP-Streams.
         </para>
       </listitem>
       <listitem>
@@ -135,23 +135,23 @@
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">cdparanoia</emphasis> - optional, für CDDA-Unterstützung
+          <emphasis role="bold">cdparanoia</emphasis> - optional, fÃ¼r CDDA-UnterstÃ¼tzung
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libxmms</emphasis> - optional, für Unterstützung des
+          <emphasis role="bold">libxmms</emphasis> - optional, fÃ¼r UnterstÃ¼tzung des
           XMMS-Input-Plugins. Version 1.2.7 ist mindestens erforderlich.
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">libsmb</emphasis> - optional, für Samba-Unterstützung
+          <emphasis role="bold">libsmb</emphasis> - optional, fÃ¼r Samba-UnterstÃ¼tzung
         </para>
       </listitem>
       <listitem>
         <para>
-          <emphasis role="bold">ALSA</emphasis> - optional, für Unterstützung der
+          <emphasis role="bold">ALSA</emphasis> - optional, fÃ¼r UnterstÃ¼tzung der
           Audioausgabe mit ALSA. Version 0.9.0rc4 ist mindestens erforderlich.
         </para>
       </listitem>
@@ -164,7 +164,7 @@
 
     <para>
       Es gibt allgemein zwei Arten Grafikkarten. Die eine (die neueren Karten)
-      unterstützen <emphasis role="bold">Hardware-Skalierung und YUV-Beschleunigung</emphasis>,
+      unterstÃ¼tzen <emphasis role="bold">Hardware-Skalierung und YUV-Beschleunigung</emphasis>,
       die anderen nicht.
     </para>
 
@@ -173,7 +173,7 @@
       <title>YUV-Karten</title>
 
       <para>
-        Diese können das Bild in jeder Größe darstellen und auf jede Größe
+        Diese kÃ¶nnen das Bild in jeder GrÃ¶ÃŸe darstellen und auf jede GrÃ¶ÃŸe
         skalieren (zoomen), die in ihren Speicher passt, und das mit
         <emphasis role="bold">geringer CPU-Last</emphasis> (sogar beim Zoom), daher ist
         die Vollbildwiedergabe nett und sehr schnell.
@@ -182,24 +182,24 @@
           <listitem>
             <para>
               <emphasis role="bold">Matrox G200/G400/G450/G550-Karten</emphasis>: Obwohl ein
-              <link linkend="vidix">Vidix-Treiber</link> zur Verfügung steht, wird empfohlen,
+              <link linkend="vidix">Vidix-Treiber</link> zur VerfÃ¼gung steht, wird empfohlen,
               statt dessen das mga_vid-Modul zu verwenden, da es wesentlich besser funktioniert.
-              Siehe bitte den Abschnitt <link linkend="mga_vid">mga_vid</link> für dessen Installation
+              Siehe bitte den Abschnitt <link linkend="mga_vid">mga_vid</link> fÃ¼r dessen Installation
               und den Umgang damit. Es ist wichtig, diese Schritte <emphasis>vor</emphasis> der Compilierung
-              von <application>MPlayer</application> durchzuführen, da sonst keine Unterstützung
-              für mga_vid eingebaut wird. Schaue dir auch den Abschnitt
+              von <application>MPlayer</application> durchzufÃ¼hren, da sonst keine UnterstÃ¼tzung
+              fÃ¼r mga_vid eingebaut wird. Schaue dir auch den Abschnitt
               <link linkend="tvout-mga-g400">Matrox TV-out</link> an.
               <emphasis role="bold"> Wenn du nicht Linux benutzt</emphasis>, ist deine einzige
-              Möglichkeit der VIDIX-Treiber: Lies den Abschnitt <link linkend="vidix">VIDIX</link>.
+              MÃ¶glichkeit der VIDIX-Treiber: Lies den Abschnitt <link linkend="vidix">VIDIX</link>.
             </para>
           </listitem>
           <listitem>
             <para>
               <emphasis role="bold">3Dfx Voodoo3/Banshee-Karten</emphasis>: Bitte siehe den Abschnitt
-              <link linkend="tdfxfb">tdfxfb</link>, um große Geschwindigkeitsvorteile zu nutzen.
+              <link linkend="tdfxfb">tdfxfb</link>, um groÃŸe Geschwindigkeitsvorteile zu nutzen.
               Es ist wichtig, diese Schritte <emphasis>vor</emphasis> der Compilierung
-              von <application>MPlayer</application> durchzuführen, da sonst keine Unterstützung
-              für 3Dfx eingebaut wird.
+              von <application>MPlayer</application> durchzufÃ¼hren, da sonst keine UnterstÃ¼tzung
+              fÃ¼r 3Dfx eingebaut wird.
               Wenn du X benutzt, verwende mindestens <emphasis role="bold">4.2.0</emphasis>, da der
               3dfx Xv-Treiber in der Version 4.1.0 und davor nicht funktioniert.
             </para>
@@ -207,38 +207,38 @@
           <listitem>
             <para>
               <emphasis role="bold">ATI-Karten</emphasis>: Der <link linkend="vidix">VIDIX</link>-Treiber
-              wird für folgende Karten bereitgestellt:
+              wird fÃ¼r folgende Karten bereitgestellt:
               <emphasis role="bold">Radeon, Rage128, Mach64</emphasis> (Rage XL/Mobility, Xpert98).
               Siehe auch die Dokumentation des TV-out im Abschnitt <link linkend="tvout-ati">ATI-Karten</link>,
-              damit du weißt, ob das TV-out deiner Karte unter Linux mit
-              <application>MPlayer</application> unterstützt wird.
+              damit du weiÃŸt, ob das TV-out deiner Karte unter Linux mit
+              <application>MPlayer</application> unterstÃ¼tzt wird.
             </para>
           </listitem>
           <listitem>
             <para>
-              <emphasis role="bold">S3-Karten</emphasis>: Die Savage- und Virge/DX-Chips verfügen
-              über Hardwarebeschleunigung. Benutze eine XFree86-Version, die so neu wir möglich ist,
-              ältere Treiber sind buggy. Savage-Chips haben Probleme mit YV12-Darstellung, siehe
-              Abschnitt <link linkend="s3">S3 Xv</link> für Details. Ältere Trio-Karten haben keine
-              oder nur langsame Hardwareunterstützung.
+              <emphasis role="bold">S3-Karten</emphasis>: Die Savage- und Virge/DX-Chips verfÃ¼gen
+              Ã¼ber Hardwarebeschleunigung. Benutze eine XFree86-Version, die so neu wir mÃ¶glich ist,
+              Ã¤ltere Treiber sind buggy. Savage-Chips haben Probleme mit YV12-Darstellung, siehe
+              Abschnitt <link linkend="s3">S3 Xv</link> fÃ¼r Details. Ã„ltere Trio-Karten haben keine
+              oder nur langsame HardwareunterstÃ¼tzung.
             </para>
           </listitem>
           <listitem>
             <para>
-              <emphasis role="bold">nVidia-Karten</emphasis>: Können oder können keine gute Wahl sein
-              für die Videowiedergabe. Wenn du eine GeForce2-Karte hast (oder neuer), ist es nicht
+              <emphasis role="bold">nVidia-Karten</emphasis>: KÃ¶nnen oder kÃ¶nnen keine gute Wahl sein
+              fÃ¼r die Videowiedergabe. Wenn du eine GeForce2-Karte hast (oder neuer), ist es nicht
               wahrscheinlich, dass sie ohne Fehler funktioniert.
-              <emphasis role="bold">Der in XFree86 eingebaute nVidia-Treiber unterstützt nicht auf
+              <emphasis role="bold">Der in XFree86 eingebaute nVidia-Treiber unterstÃ¼tzt nicht auf
                 allen Karten YUV-Hardwarebeschleunigung.</emphasis> Du musst die Closed-Source-Treiber von
               <ulink url="http://nvidia.com">nVidia.com</ulink> herunterladen. Siehe Abschnitt
-              <link linkend="nvidia">nVidia Xv-Treiber</link> für Details. Bitte siehe auch Abschnitt
-              <link linkend="tvout-nvidia">nVidia TV-out</link>, wenn du einen Fernseher verwenden möchtest.
+              <link linkend="nvidia">nVidia Xv-Treiber</link> fÃ¼r Details. Bitte siehe auch Abschnitt
+              <link linkend="tvout-nvidia">nVidia TV-out</link>, wenn du einen Fernseher verwenden mÃ¶chtest.
             </para>
           </listitem>
           <listitem>
             <para>
               <emphasis role="bold">3DLabs GLINT R3 und Permedia3</emphasis>: Ein VIDIX-Treiber wird
-              bereitgestellt (pm3_vid). Bitte siehe Abschnitt <link linkend="vidix">VIDIX</link> für Details.
+              bereitgestellt (pm3_vid). Bitte siehe Abschnitt <link linkend="vidix">VIDIX</link> fÃ¼r Details.
             </para>
           </listitem>
           <listitem>
@@ -247,17 +247,17 @@
               <itemizedlist>
                 <listitem>
                   <simpara>
-                    Probiere, ob der XFree86-Treiber (und deine Karte) Hardwarebeschleunigung unterstützen.
-                    Siehe Abschnitt <link linkend="xv">Xv</link> für Details.
+                    Probiere, ob der XFree86-Treiber (und deine Karte) Hardwarebeschleunigung unterstÃ¼tzen.
+                    Siehe Abschnitt <link linkend="xv">Xv</link> fÃ¼r Details.
                   </simpara>
                 </listitem>
                 <listitem>
                   <simpara>
                     Sollten sie dies nicht tun, werden die Features unter deinem Betriebssystem nicht
-                    unterstützt :( Wenn Hardwarebeschleunigung unter Windows funktioniert, bedeutet
+                    unterstÃ¼tzt :( Wenn Hardwarebeschleunigung unter Windows funktioniert, bedeutet
                     dies nicht, dass sie unter Linux oder anderen Betriebssystemen funktioniert, das
-                    hängt von den Treibern ab. Die meisten Hersteller stellen weder Linuxtreiber her,
-                    noch veröffentlichen sie die Spezifikationen ihrer Chips - daher hast du Pech,
+                    hÃ¤ngt von den Treibern ab. Die meisten Hersteller stellen weder Linuxtreiber her,
+                    noch verÃ¶ffentlichen sie die Spezifikationen ihrer Chips - daher hast du Pech,
                     wenn du ihre Karten benutzt.
                     Siehe <xref linkend="non-yuv-cards"/>.
                   </simpara>
@@ -303,17 +303,17 @@
       </para>
     </sect2>
 
-    <!-- FIXME: finde eine logisch sinnvollere Ordnung für diesen Abschnitt -->
+    <!-- FIXME: finde eine logisch sinnvollere Ordnung fÃ¼r diesen Abschnitt -->
     <sect2 id="cirrus-logic-cards" xreflabel="Cirrus-Logic-Karten">
       <title>Cirrus-Logic-Karten</title>
       <itemizedlist>
         <listitem>
           <para>
-            GD 7548: verfügbar on-board und getestet in der Compaq Armada 41xx Notebook-Serie.
+            GD 7548: verfÃ¼gbar on-board und getestet in der Compaq Armada 41xx Notebook-Serie.
             <itemizedlist>
               <listitem>
                 <simpara>
-                  XFree86 3: Funktioniert in 8/16bpp-Modi. Trotzdem, der Treiber ist übel langsam in
+                  XFree86 3: Funktioniert in 8/16bpp-Modi. Trotzdem, der Treiber ist Ã¼bel langsam in
                   800x600@16bpp. <emphasis role="bold">Empfohlen: 640x480@16bpp</emphasis>
                 </simpara>
               </listitem>
@@ -334,13 +334,13 @@
               </listitem>
               <listitem>
                 <simpara>
-                  VESA: Die Karte ist nur VBE 1.2-fähig, daher kann VESA-Ausgabe nicht benutzt
+                  VESA: Die Karte ist nur VBE 1.2-fÃ¤hig, daher kann VESA-Ausgabe nicht benutzt
                   werden. Kann mit UniVBE nicht umgangen werden.
                 </simpara>
               </listitem>
               <listitem>
                 <simpara>
-                  SVGAlib: erkennt einen älteren Cirrus-Chip. Langsam, aber nutzbar mit der Option
+                  SVGAlib: erkennt einen Ã¤lteren Cirrus-Chip. Langsam, aber nutzbar mit der Option
                   <option>-bpp 8</option>.
                 </simpara>
               </listitem>
@@ -359,23 +359,23 @@
       <listitem>
         <simpara>
           <emphasis role="bold">Soundblaster Live!</emphasis>: Mit dieser Karte kannst du
-          AC3-Decodierung mit 4 oder 6 (<emphasis role="bold">5.1</emphasis>) anstatt 2 Kanälen
+          AC3-Decodierung mit 4 oder 6 (<emphasis role="bold">5.1</emphasis>) anstatt 2 KanÃ¤len
           verwenden. Lies den Abschnitt <link linkend="swac3">Software-AC3-Decodierung</link>.
-          Für Hardware-AC3-Passthrough <emphasis role="bold">musst</emphasis> du ALSA 0.9 mit
+          FÃ¼r Hardware-AC3-Passthrough <emphasis role="bold">musst</emphasis> du ALSA 0.9 mit
           OSS-Emulation verwenden!
         </simpara>
       </listitem>
       <listitem>
         <simpara>
           <emphasis role="bold">C-Media mit S/PDIF out</emphasis>: Hardware-AC3-Passthrough
-          ist mit diesen Karten möglich, siehe Abschnitt
+          ist mit diesen Karten mÃ¶glich, siehe Abschnitt
           <link linkend="hwac3">Hardware-AC3-Decodierung</link>.
         </simpara>
       </listitem>
       <listitem>
         <simpara>
           Features <emphasis role="bold">anderer Karten</emphasis> werden von
-          <application>MPlayer</application> nicht unterstützt.
+          <application>MPlayer</application> nicht unterstÃ¼tzt.
           <emphasis role="bold">Es wird dringend empfohlen, die Sektion <link linkend="audio">Soundkarte</link> zu lesen!</emphasis>
         </simpara>
       </listitem>
@@ -389,14 +389,14 @@
     <itemizedlist>
       <listitem>
         <para>
-          Entscheide, ob du eine GUI benötigst. Ist dies der Fall, schau in Abschnitt
+          Entscheide, ob du eine GUI benÃ¶tigst. Ist dies der Fall, schau in Abschnitt
           <link linkend="gui">GUI</link>, bevor du compilierst.
         </para>
       </listitem>
       <listitem>
         <para>
           Wenn Du <application>MEncoder</application> (unseren super Allzweck-Encoder)
-          installieren möchtest, siehe Abschnitt
+          installieren mÃ¶chtest, siehe Abschnitt
           <link linkend="mencoder"><application>MEncoder</application></link>.
         </para>
       </listitem>
@@ -404,20 +404,20 @@
         <para>
           Wenn du eine V4L-kompatible <emphasis role="bold">TV-Tuner</emphasis>-Karte hast
           und Filme mit <application>MPlayer</application> anschauen/grabben und encodieren
-          möchtest, lies den Abschnitt <link linkend="tv-input">TV-Input</link>.
+          mÃ¶chtest, lies den Abschnitt <link linkend="tv-input">TV-Input</link>.
         </para>
       </listitem>
       <listitem>
         <para>
-          Wenn du eine V4L-kompatible <emphasis role="bold">Radioempfänger</emphasis>karte hast
-          und mit <application>MPlayer</application> Radio hören oder aufnehmen möchtest,
+          Wenn du eine V4L-kompatible <emphasis role="bold">RadioempfÃ¤nger</emphasis>karte hast
+          und mit <application>MPlayer</application> Radio hÃ¶ren oder aufnehmen mÃ¶chtest,
           lies den Abschnitt <link linkend="radio">radio</link>.
         </para>
       </listitem>
       <listitem>
         <para>
-          Es gibt Unterstützung für ein schickes <emphasis role="bold">OSD-Menü</emphasis>,
-          das benutzt werden kann. Siehe Abschnitt <link linkend="subosd">OSD-Menü</link>.
+          Es gibt UnterstÃ¼tzung fÃ¼r ein schickes <emphasis role="bold">OSD-MenÃ¼</emphasis>,
+          das benutzt werden kann. Siehe Abschnitt <link linkend="subosd">OSD-MenÃ¼</link>.
         </para>
       </listitem>
     </itemizedlist>
@@ -431,12 +431,12 @@ make install</screen>
 
     <para>
       Zu diesem Zeitpunkt ist <application>MPlayer</application> benutzbar. Das Verzeichnis
-      <filename class="directory">$PREFIX/share/mplayer</filename> enthält die Datei
+      <filename class="directory">$PREFIX/share/mplayer</filename> enthÃ¤lt die Datei
       <filename>codecs.conf</filename>, die dem Programm mitteilt, welche
-      Codecs verfügbar sind und was diese können. Du brauchst die Datei nur, wenn du
-      Eigenschaften ändern möchtest, da die ausführbare Datei intern eine eigene
-      Kopie enthält. Überprüfe, ob du eine Kopie von <filename>codecs.conf</filename> einer
-      älteren <application>MPlayer</application>-Version in deinem
+      Codecs verfÃ¼gbar sind und was diese kÃ¶nnen. Du brauchst die Datei nur, wenn du
+      Eigenschaften Ã¤ndern mÃ¶chtest, da die ausfÃ¼hrbare Datei intern eine eigene
+      Kopie enthÃ¤lt. ÃœberprÃ¼fe, ob du eine Kopie von <filename>codecs.conf</filename> einer
+      Ã¤lteren <application>MPlayer</application>-Version in deinem
       Home-Verzeichnis (<filename>~/.mplayer/codecs.conf</filename>) hast, und entferne diese.
     </para>
 
@@ -445,38 +445,38 @@ make install</screen>
       ignoriert wird, wenn du eine <filename>codecs.conf</filename> im Verzeichnis
       <filename>~/.mplayer/</filename>, hast.
       Benutze diese nicht, wenn du nicht an den Interna von <application>MPlayer</application>
-      herumbasteln möchtest, da dies viele Probleme hervorrufen kann. Wenn du die Reihenfolge
-      der Suche nach Codecs ändern möchtest, benutze die Optionen <option>-vc</option>,
+      herumbasteln mÃ¶chtest, da dies viele Probleme hervorrufen kann. Wenn du die Reihenfolge
+      der Suche nach Codecs Ã¤ndern mÃ¶chtest, benutze die Optionen <option>-vc</option>,
       <option>-ac</option>, <option>-vfm</option>, oder <option>-afm</option> auf der
       Kommandozeile oder in deiner Konfigurationsdatei (siehe Manpage).
     </para>
 
     <para>
-      Debian-Nutzer können ihr eigenes .deb-Paket bauen, das ist sehr leicht.
-      Führe nur <screen>fakeroot debian/rules binary</screen>
+      Debian-Nutzer kÃ¶nnen ihr eigenes .deb-Paket bauen, das ist sehr leicht.
+      FÃ¼hre nur <screen>fakeroot debian/rules binary</screen>
       in <application>MPlayer</application>s Wurzelverzeichnis aus. Siehe
-      <link linkend="debian">Debian-Packaging</link> für detaillierte Informationen.
+      <link linkend="debian">Debian-Packaging</link> fÃ¼r detaillierte Informationen.
     </para>
 
     <para>
-      <emphasis role="bold">Überprüfe immer die Ausgabe von </emphasis>
+      <emphasis role="bold">ÃœberprÃ¼fe immer die Ausgabe von </emphasis>
       <filename>./configure</filename> und die Datei <filename>configure.log</filename>,
-      sie enthalten Informationen darüber, was eingebaut wird und was nicht.
-      Du möchtest dir vielleicht auch die Dateien
+      sie enthalten Informationen darÃ¼ber, was eingebaut wird und was nicht.
+      Du mÃ¶chtest dir vielleicht auch die Dateien
       <filename>config.h</filename> und <filename>config.mak</filename> anschauen.
       Wenn du manche Bibliotheken installiert hast, die von
-      <filename>./configure</filename> aber nicht erkannt werden, überprüfe auch
+      <filename>./configure</filename> aber nicht erkannt werden, Ã¼berprÃ¼fe auch
       die entsprechenden Header-Dateien (normalerweise die -dev-Pakete) und ob deren
       Versionen passen. Die Datei <filename>configure.log</filename> gibt
-      normalerweise Auskunft darüber, was fehlt.
+      normalerweise Auskunft darÃ¼ber, was fehlt.
     </para>
 
     <para>
       Obwohl sie nicht notwendig sind, sollten die Fonts installiert werden, um die
-      Funktionalität von OSD- und Untertiteldarstellung nutzen zu können. Die
+      FunktionalitÃ¤t von OSD- und Untertiteldarstellung nutzen zu kÃ¶nnen. Die
       empfohlene Methode dazu ist, eine TTF-Fontdatei zu installieren und
       <application>MPlayer</application> anzuweisen, diese zu benutzen.
-      Siehe Abschnitt <link linkend="subosd">Untertitel und OSD</link> für Details.
+      Siehe Abschnitt <link linkend="subosd">Untertitel und OSD</link> fÃ¼r Details.
     </para>
 
   </sect1>
@@ -487,23 +487,23 @@ make install</screen>
     <title>Was ist mit der GUI?</title>
 
     <para>
-      Die GUI benötigt GTK 1.2.x oder GTK 2.0 (sie ist nicht vollständig GTK, aber
-      die Panels). Die Skins werden im PNG-Format gespeichert, daher müssen GTK,
+      Die GUI benÃ¶tigt GTK 1.2.x oder GTK 2.0 (sie ist nicht vollstÃ¤ndig GTK, aber
+      die Panels). Die Skins werden im PNG-Format gespeichert, daher mÃ¼ssen GTK,
       <systemitem class="library">libpng</systemitem> (und deren Entwicklungskram,
       normalerweise <systemitem class="library">gtk-dev</systemitem> genannt),
       installiert sein. Du kannst die GUI durch Angabe von <option>--enable-gui</option>
-      während <filename>./configure</filename> aktivieren. Dann musst du, um den
-      GUI-Modus zu aktivieren, die Binärdatei <command>gmplayer</command> starten.
+      wÃ¤hrend <filename>./configure</filename> aktivieren. Dann musst du, um den
+      GUI-Modus zu aktivieren, die BinÃ¤rdatei <command>gmplayer</command> starten.
     </para>
 
     <para>
-      Aus technischen Gründen kannst du die Option <option>-gui</option> nicht auf
+      Aus technischen GrÃ¼nden kannst du die Option <option>-gui</option> nicht auf
       der Kommandozeile verwenden.
     </para>
 
     <para>
-      Da <application>MPlayer</application> kein Skin enthält, musst du eins
-      herunterladen, um die GUI benutzen zu können. Siehe
+      Da <application>MPlayer</application> kein Skin enthÃ¤lt, musst du eins
+      herunterladen, um die GUI benutzen zu kÃ¶nnen. Siehe
       <ulink url="http://www.mplayerhq.hu/dload.html">Download-Seite</ulink>.
       Sie sollten in das normale systemweite Verzeichnis
       (<filename class="directory">$PREFIX/share/mplayer/skins</filename>) oder nach
@@ -524,10 +524,10 @@ make install</screen>
 
     <para>
       Du musst <application>MPlayer</application> mitteilen, welche Schriftart verwendet
-      werden soll, um in den Genuß von OSD und Untertiteln zu kommen.
+      werden soll, um in den GenuÃŸ von OSD und Untertiteln zu kommen.
       Jede TrueType-Schriftart oder spezielle Bitmap-Schriftarten werden funktionieren.
       TrueType-Schriftarten werden jedoch empfohlen, da sie weit besser aussehen,
-      entsprechend der Filmgröße skaliert werden können und mit verschiedenen Zeichensätzen
+      entsprechend der FilmgrÃ¶ÃŸe skaliert werden kÃ¶nnen und mit verschiedenen ZeichensÃ¤tzen
       besser umgehen.
     </para>
 
@@ -536,20 +536,20 @@ make install</screen>
       <title>TrueType-Schriften</title>
 
       <para>
-        Es gibt zwei Möglichkeiten, TrueType-Schriften ans Laufen zu bekommen.
+        Es gibt zwei MÃ¶glichkeiten, TrueType-Schriften ans Laufen zu bekommen.
         Die erste besteht darin, die Option <option>-font</option> auf der Kommandozeile
-        anzugeben. Diese Option ist vermutlich ein guter Kandidat für die Aufnahme
-        in deine Konfigurationsdatei (siehe Manpage für Details).
+        anzugeben. Diese Option ist vermutlich ein guter Kandidat fÃ¼r die Aufnahme
+        in deine Konfigurationsdatei (siehe Manpage fÃ¼r Details).
         Die zweite besteht darin, einen <filename>subfont.ttf</filename> genannten Symlink
-        zu der Schriftart deiner Wahl zu erstellen. Führe entweder
+        zu der Schriftart deiner Wahl zu erstellen. FÃ¼hre entweder
         <screen>ln -s <replaceable>/Pfad/zur/Schrift.ttf</replaceable> ~/.mplayer/subfont.ttf</screen>
-        für jeden User durch, oder erstelle einen systemweiten Symlink:
+        fÃ¼r jeden User durch, oder erstelle einen systemweiten Symlink:
         <screen>ln -s <replaceable>/Pfad/zur/Schrift.ttf</replaceable> $PREFIX/share/mplayer/subfont.ttf</screen>
       </para>
 
       <para>
         Wenn <application>MPlayer</application> mit
-        <systemitem class="library">fontconfig</systemitem>-Unterstützung compiliert wurde,
+        <systemitem class="library">fontconfig</systemitem>-UnterstÃ¼tzung compiliert wurde,
         werden die oben genannten Methoden nicht funktionieren; statt dessen erwartet
         <option>-font</option> einen <systemitem class="library">fontconfig</systemitem>-Schriftnamen,
         der Standard ist die Schriftart Sans-serif. Beispiel:
@@ -569,12 +569,12 @@ make install</screen>
       <title>Bitmap-Schriften</title>
 
       <para>
-        Wenn du aus einem bestimmten Grund Bitmap-Schriftwarten verwenden möchtest, lade dir einen Satz
+        Wenn du aus einem bestimmten Grund Bitmap-Schriftwarten verwenden mÃ¶chtest, lade dir einen Satz
         von unserer Homepage herunter. Du kannst zwischen verschiedenen
         <ulink url="http://www.mplayerhq.hu/MPlayer/releases/fonts/">ISO-Schriftarten</ulink>
-        und ein paar Sätzen von Schriftarten, die
+        und ein paar SÃ¤tzen von Schriftarten, die
         <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/fonts/">von Benutzern beigetragen</ulink> wurden,
-        in verschiedenen Zeichensätzen wählen.
+        in verschiedenen ZeichensÃ¤tzen wÃ¤hlen.
       </para>
 
       <para>
@@ -590,8 +590,8 @@ make install</screen>
       <para>
         Schriftarten sollten eine entsprechende <filename>font.desc</filename>-Datei haben,
         die Positionen von Unicode-Schriften auf die aktuelle Codeseite des Untertiteltexts abbildet.
-        Eine andere Möglichkeit besteht darin, in UTF-8 codierte Untertitel zu verwenden und die Option
-        <option>-utf8</option> zu verwenden. Noch eine Möglichkeit besteht darin, der Untertiteldatei
+        Eine andere MÃ¶glichkeit besteht darin, in UTF-8 codierte Untertitel zu verwenden und die Option
+        <option>-utf8</option> zu verwenden. Noch eine MÃ¶glichkeit besteht darin, der Untertiteldatei
         den gleichen Namen zu geben wie die Videodatei mit der Dateiendung <filename>&lt;video_name&gt;.utf</filename> und sie im selben Verzeichnis wie
         die Videodatei abzulegen.
       </para>
@@ -600,15 +600,15 @@ make install</screen>
 
 
     <sect2 id="osdmenu">
-      <title>OSD-Menü</title>
+      <title>OSD-MenÃ¼</title>
 
       <para>
-        <application>MPlayer</application> hat eine komplett benutzerdefinierbare OSD-Menü-Schnittstelle.
+        <application>MPlayer</application> hat eine komplett benutzerdefinierbare OSD-MenÃ¼-Schnittstelle.
       </para>
 
       <note>
         <simpara>
-          Das Menü Einstellungen ist momentan NICHT IMPLEMENTIERT!
+          Das MenÃ¼ Einstellungen ist momentan NICHT IMPLEMENTIERT!
         </simpara>
       </note>
 
@@ -616,7 +616,7 @@ make install</screen>
         <title>Installation</title>
         <listitem>
           <simpara>
-            compiliere <application>MPlayer</application> mit Übergabe von <option>--enable-menu</option>
+            compiliere <application>MPlayer</application> mit Ãœbergabe von <option>--enable-menu</option>
             an <filename>./configure</filename>
           </simpara>
         </listitem>
@@ -641,7 +641,7 @@ make install</screen>
         </listitem>
         <listitem>
           <simpara>
-            überprüfe und editiere <filename>input.conf</filename>, um Menüsteuerungstasten
+            Ã¼berprÃ¼fe und editiere <filename>input.conf</filename>, um MenÃ¼steuerungstasten
             zu aktivieren (das ist dort beschrieben).
           </simpara>
         </listitem>
@@ -653,7 +653,7 @@ make install</screen>
         </listitem>
         <listitem>
           <simpara>
-            drücke irgendeine von dir definierte Menütaste
+            drÃ¼cke irgendeine von dir definierte MenÃ¼taste
           </simpara>
         </listitem>
       </orderedlist>
@@ -680,35 +680,35 @@ make install</screen>
         <listitem>
           <para>
             <emphasis role="bold">Der neue Zeitgeber</emphasis>-Code benutzt RTC (RealTime Clock, Echtzeituhr)
-            für diese Aufgabe, da dieser präzise 1ms-Timer besitzt.
-            Die Option <option>-rtc</option> aktivert diesen, es ist jedoch ein hierfür speziell konfigurierter
+            fÃ¼r diese Aufgabe, da dieser prÃ¤zise 1ms-Timer besitzt.
+            Die Option <option>-rtc</option> aktivert diesen, es ist jedoch ein hierfÃ¼r speziell konfigurierter
             Kernel erforderlich.
             Wenn du Kernel 2.4.19pre8 oder neuer laufen hast, kannst du die maximale RTC-Frequenz
-            für normale Benutzer durch das <systemitem class="systemname">/proc</systemitem>-Dateisystem
+            fÃ¼r normale Benutzer durch das <systemitem class="systemname">/proc</systemitem>-Dateisystem
             festlegen.
-            Benutze einen der folgenden Befehle, um RTC für normale Benutzer zu aktivieren:
+            Benutze einen der folgenden Befehle, um RTC fÃ¼r normale Benutzer zu aktivieren:
             <screen>echo 1024 &gt; /proc/sys/dev/rtc/max-user-freq</screen>
             <screen>sysctl dev/rtc/max-user-freq=1024</screen>
             Die kannst diese Einstellung permanent machen, indem du letzteren Befehl der Datei
-            <filename>/etc/sysctl.conf</filename> hinzufügst.
+            <filename>/etc/sysctl.conf</filename> hinzufÃ¼gst.
           </para>
           <para>
             Du kannst die Effizienz des neuen Zeitgebers in der Statuszeile sehen.
             Die Power Management-Funktionen der BIOSse mancher Notebooks mit speedstep-CPUs
-            vertragen sich nicht gut mit RTC. Audio und Video könnten Synchronisation verlieren.
-            Die externe Stromversorgung anzuschließen, bevor du dein Notebook einschaltest,
+            vertragen sich nicht gut mit RTC. Audio und Video kÃ¶nnten Synchronisation verlieren.
+            Die externe Stromversorgung anzuschlieÃŸen, bevor du dein Notebook einschaltest,
             scheint zu helfen.
-            Bei manchen Hardwarekombinationen (bestätigt
-            während des Gebrauchs eines Nicht-DMA-DVD-Laufwerks auf einem ALi1541-Board)
-            führt der Gebrauch des RTC-Zeitgebers zu sprunghafter Wiedergabe. Es wird empfohlen,
-            in solchen Fällen die dritte Methode zu verwenden.
+            Bei manchen Hardwarekombinationen (bestÃ¤tigt
+            wÃ¤hrend des Gebrauchs eines Nicht-DMA-DVD-Laufwerks auf einem ALi1541-Board)
+            fÃ¼hrt der Gebrauch des RTC-Zeitgebers zu sprunghafter Wiedergabe. Es wird empfohlen,
+            in solchen FÃ¤llen die dritte Methode zu verwenden.
           </para>
         </listitem>
         <listitem>
           <simpara>
             <emphasis role="bold">Der Code des dritten Zeitgebers</emphasis> wird mit der Option
             <option>-softsleep</option> aktiviert. Der hat die Effizienz von RTC, benutzt RTC aber nicht.
-            Auf der anderen Seite benötigt er mehr CPU.
+            Auf der anderen Seite benÃ¶tigt er mehr CPU.
           </simpara>
         </listitem>
       </itemizedlist>

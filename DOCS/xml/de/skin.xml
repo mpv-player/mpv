@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r19081 -->
 <appendix id="skin">
   <title><application>MPlayer</application>s Skinformat</title>
 
   <sect1 id="skin-overview">
-    <title>Überblick</title>
+    <title>Ãœberblick</title>
     <para>
       Es hat nicht wirklich etwas mit dem Skinformat zu tun, aber du solltest
       wissen, dass <application>MPlayer</application> <emphasis role="bold">kein</emphasis>
@@ -44,7 +44,7 @@
 
       <para>
         Jedes Skin wird in sein eigenes Verzeichnis unterhalb einem der oben
-        aufgeführten Verzeichnisse installiert, zum Beispiel:
+        aufgefÃ¼hrten Verzeichnisse installiert, zum Beispiel:
         <screen>$(PREFIX)/share/mplayer/skins/default/</screen>
       </para>
     </sect2>
@@ -52,12 +52,12 @@
     <sect2 id="skin-overview-formats">
       <title>Bildformate</title>
       <para>
-        Die Bilder müssen Truecolor-PNGs sein (24 oder 32 bpp).
+        Die Bilder mÃ¼ssen Truecolor-PNGs sein (24 oder 32 bpp).
       </para>
 
       <para>
         Im Hauptfenster und in der Abspielleiste (siehe unten) kannst du Bilder
-        mit 'Transparenz' verwenden: Mit der Farbe #FF00FF (Magenta) gefüllte Bereiche
+        mit 'Transparenz' verwenden: Mit der Farbe #FF00FF (Magenta) gefÃ¼llte Bereiche
         sind beim Betrachten mit <application>MPlayer</application> voll transparent.
         Dies bedeutet, dass du sogar Formfenster haben kannst, wenn dein X-Server die
         XShape-Extension besitzt.
@@ -77,7 +77,7 @@
         <link linkend="skin-file-main">Hauptfenster</link>, das
         <link linkend="skin-file-subwindow">Unterfenster</link>, die
         <link linkend="skin-file-main">Abspielleitse</link> und das
-        <link linkend="skin-file-menu">Skin-Menü</link> (das durch einen
+        <link linkend="skin-file-menu">Skin-MenÃ¼</link> (das durch einen
         Rechtsklick aktiviert werden kann).
 
         <itemizedlist>
@@ -87,45 +87,45 @@
               <emphasis role="bold">Abspielleiste</emphasis> befindet sich dort, wo du
               <application>MPlayer</application> kontrollieren kannst. Der Hintergrund
               des Fensters ist eine Grafik.
-              Ins Fenster können (und müssen) diverse Elemente platziert werden:
+              Ins Fenster kÃ¶nnen (und mÃ¼ssen) diverse Elemente platziert werden:
               <emphasis>Buttons</emphasis>, <emphasis>Potentiometer</emphasis> (Schieberegler)
               und <emphasis>Labels</emphasis>.
-              Für jedes Element musst du dessen Position und Größe angeben.
+              FÃ¼r jedes Element musst du dessen Position und GrÃ¶ÃŸe angeben.
             </para>
             <para>
-              Ein <emphasis role="bold">Button</emphasis> besitzt drei Zustände (gedrückt,
+              Ein <emphasis role="bold">Button</emphasis> besitzt drei ZustÃ¤nde (gedrÃ¼ckt,
               losgelassen, deaktiviert), deshalb muss seine Grafik vertikal in drei Teile
               getrennt werden. Siehe Eintrag <link linkend="skin-button">Button</link>
-              für mehr Details.
+              fÃ¼r mehr Details.
             </para>
             <para>
-              Ein <emphasis role="bold">Potentiometer</emphasis> (hauptsächlich für
-              die Suchleiste und die Lautstärke-/Balance-Regler) kann durch die Aufteilung
+              Ein <emphasis role="bold">Potentiometer</emphasis> (hauptsÃ¤chlich fÃ¼r
+              die Suchleiste und die LautstÃ¤rke-/Balance-Regler) kann durch die Aufteilung
               der Grafik in verschiedene untereinander liegende Teile
               eine beliebige Anzahl von Phasen haben. Siehe
               <link linkend="skin-hpotmeter">hpotmeter</link> und
-              <link linkend="skin-potmeter">potmeter</link> für Details.
+              <link linkend="skin-potmeter">potmeter</link> fÃ¼r Details.
             </para>
             <para>
               <emphasis role="bold">Labels</emphasis> sind ein wenig speziell: Die Zeichen,
-              die man zu ihrer Darstellung benötigt, werden von einer Grafikdatei und
+              die man zu ihrer Darstellung benÃ¶tigt, werden von einer Grafikdatei und
               die Zeichen in der Grafik durch eine
               <link linkend="skin-fonts">Schrift-Beschreibungsdatei</link> festgelegt.
-              Letztere ist eine Volltextdatei, welche die x-,y-Position und Größe jedes
+              Letztere ist eine Volltextdatei, welche die x-,y-Position und GrÃ¶ÃŸe jedes
               Zeichens in der Grafik beschreibt (die Grafikdatei und ihre
               Schrift-Beschreibungsdatei bilden <emphasis>zusammen</emphasis> eine Schrift).
               Siehe
               <link linkend="skin-dlabel">dlabel</link>
               und
-              <link linkend="skin-slabel">slabel</link> für Details.
+              <link linkend="skin-slabel">slabel</link> fÃ¼r Details.
             </para>
             <note>
               <para>
-                Alle Grafiken können wie im Abschnitt über die
-                <link linkend="skin-overview-formats">Grafikformate</link> erklärt
+                Alle Grafiken kÃ¶nnen wie im Abschnitt Ã¼ber die
+                <link linkend="skin-overview-formats">Grafikformate</link> erklÃ¤rt
                 volle Transparenz besitzen. Wenn der X-Server keine XShape-Extension
-                unterstützt, werden die als transparent markierten Teile schwarz.
-                Wenn du dieses Feature gerne nutzen möchtest, muss die Breite der
+                unterstÃ¼tzt, werden die als transparent markierten Teile schwarz.
+                Wenn du dieses Feature gerne nutzen mÃ¶chtest, muss die Breite der
                 Hintergrundgrafik des Hauptfensters durch 8 teilbar sein.
               </para>
             </note>
@@ -143,31 +143,31 @@
 
           <listitem>
             <para>
-              Das <emphasis role="bold">Skin-Menü</emphasis> ist ganz einfach ein
-              Weg, <application>MPlayer</application> mittels der Menüeinträge zu
-              kontrollieren. Zwei Grafiken sind für das Menü erforderlich:
-              eine davon ist die Basisgrafik, die den Normalzustand des Menüs darstellt,
-              die andere wird zur Anzeige der gewählten Einträge verwendet.
-              Wenn du das Menü aufklappst, wird die erste Grafik angezeigt. Bewegst du
-              die Maus über die Menüeinträge, wird der aktuell gewählte Eintrag aus der
-              zweiten Grafik über den Menüeintrag unterhalb des Mauszeigers kopiert
+              Das <emphasis role="bold">Skin-MenÃ¼</emphasis> ist ganz einfach ein
+              Weg, <application>MPlayer</application> mittels der MenÃ¼eintrÃ¤ge zu
+              kontrollieren. Zwei Grafiken sind fÃ¼r das MenÃ¼ erforderlich:
+              eine davon ist die Basisgrafik, die den Normalzustand des MenÃ¼s darstellt,
+              die andere wird zur Anzeige der gewÃ¤hlten EintrÃ¤ge verwendet.
+              Wenn du das MenÃ¼ aufklappst, wird die erste Grafik angezeigt. Bewegst du
+              die Maus Ã¼ber die MenÃ¼eintrÃ¤ge, wird der aktuell gewÃ¤hlte Eintrag aus der
+              zweiten Grafik Ã¼ber den MenÃ¼eintrag unterhalb des Mauszeigers kopiert
               (die zweite Grafik wird nie als ganzes angezeigt).
             </para>
             <para>
-              Ein Menüeintrag wird definiert durch seine Position und Größe innerhalb
-              der Grafik (sieh nach mehr Details im Abschnitt über das
-              <link linkend="skin-file-menu">Skin-Menü</link>).
+              Ein MenÃ¼eintrag wird definiert durch seine Position und GrÃ¶ÃŸe innerhalb
+              der Grafik (sieh nach mehr Details im Abschnitt Ã¼ber das
+              <link linkend="skin-file-menu">Skin-MenÃ¼</link>).
             </para>
           </listitem>
         </itemizedlist>
       </para>
 
       <para>
-        Eine wichtige Sache wurde noch nicht aufgeführt: Damit Buttons, Potentiometer und
-        Menüeinträge funktionieren, muss <application>MPlayer</application> wissen, was
+        Eine wichtige Sache wurde noch nicht aufgefÃ¼hrt: Damit Buttons, Potentiometer und
+        MenÃ¼eintrÃ¤ge funktionieren, muss <application>MPlayer</application> wissen, was
         er machen soll, wenn sie angeklickt werden.
         Dies geschieht mittels <link linkend="skin-gui">Meldungen</link> (Ereignisse).
-        Für diese Elemente musst du die beim Klick auf sie zu generierenden Meldungen
+        FÃ¼r diese Elemente musst du die beim Klick auf sie zu generierenden Meldungen
         definieren.
       </para>
     </sect2>
@@ -175,24 +175,24 @@
     <sect2 id="skin-files">
       <title>Dateien</title>
       <para>
-        Du benötigst folgende Dateien, um ein Skin zu bauen:
+        Du benÃ¶tigst folgende Dateien, um ein Skin zu bauen:
         <itemizedlist>
           <listitem>
             <para>
-              Die Konfigurationsdatei genannt <link linkend="skin-file">skin</link> erzählt
+              Die Konfigurationsdatei genannt <link linkend="skin-file">skin</link> erzÃ¤hlt
               <application>MPlayer</application>, wie unterschiedliche Teile des Skins
-              zusammengefügt werden und was er tun soll, wenn du irgendwo innerhalb des Fenster
+              zusammengefÃ¼gt werden und was er tun soll, wenn du irgendwo innerhalb des Fenster
               hinklickst.
             </para>
           </listitem>
           <listitem>
             <para>
-              Die Hintergrundgrafik fürs Hauptfenster.
+              Die Hintergrundgrafik fÃ¼rs Hauptfenster.
             </para>
           </listitem>
           <listitem>
             <para>
-              Grafiken für die Elemente im Hauptfenster (einschließlich einer oder mehrerer
+              Grafiken fÃ¼r die Elemente im Hauptfenster (einschlieÃŸlich einer oder mehrerer
               Schrift-Beschreibungsdateien zum Zeichnen der Labels).
             </para></listitem>
           <listitem>
@@ -202,14 +202,14 @@
           </listitem>
           <listitem>
             <para>
-              Zwei Grafiken für das Skin-Menü (sie werden nur gebraucht, wenn du
-              ein Menü erzeugen möchtest).
+              Zwei Grafiken fÃ¼r das Skin-MenÃ¼ (sie werden nur gebraucht, wenn du
+              ein MenÃ¼ erzeugen mÃ¶chtest).
             </para>
           </listitem>
         </itemizedlist>
         Mit Ausnahme der skin-Konfigurationsdatei kannst du die anderen Dateien
         benennen, wie es dir beliebt (beachte aber, dass Schrift-Beschreibungsdateien
-        eine <filename>.fnt</filename>-Erweiterung besitzen müssen).
+        eine <filename>.fnt</filename>-Erweiterung besitzen mÃ¼ssen).
       </para>
     </sect2>
   </sect1>
@@ -217,7 +217,7 @@
   <sect1 id="skin-file">
     <title>Die skin-Datei</title>
     <para>
-      Wie oben erwähnt, ist dies die skin-Konfigurationsdatei. Sie ist
+      Wie oben erwÃ¤hnt, ist dies die skin-Konfigurationsdatei. Sie ist
       Zeilen-orientiert;
       Kommentarzeilen beginnen mit einem '<literal>;</literal>' Semikolon
       am Zeilenanfang (es sind nur Leer- und Tabulator-Zeichen vor dem
@@ -226,7 +226,7 @@
 
     <para>
       Die Datei ist in Abschnitte unterteilt. Jeder Abschnitt beschreibt den Skin
-      für eine Anwendung und besitzt folgende Form:
+      fÃ¼r eine Anwendung und besitzt folgende Form:
 <programlisting><!--
 -->section = <replaceable>Abschnittsname</replaceable>
 .
@@ -256,20 +256,20 @@ end
     <para>
       wobei <replaceable>Fenstername</replaceable> einer dieser Zeichenketten sein kann:
       <itemizedlist>
-        <listitem><para><emphasis role="bold">main</emphasis> - für das Hauptfenster</para></listitem>
-        <listitem><para><emphasis role="bold">sub</emphasis> - für das Unterfenster</para></listitem>
-        <listitem><para><emphasis role="bold">menu</emphasis> - für das Skin-Menü</para></listitem>
+        <listitem><para><emphasis role="bold">main</emphasis> - fÃ¼r das Hauptfenster</para></listitem>
+        <listitem><para><emphasis role="bold">sub</emphasis> - fÃ¼r das Unterfenster</para></listitem>
+        <listitem><para><emphasis role="bold">menu</emphasis> - fÃ¼r das Skin-MenÃ¼</para></listitem>
         <listitem><para><emphasis role="bold">playbar</emphasis> - Abspielleiste</para></listitem>
       </itemizedlist>
     </para>
 
     <para>
-      (Die sub- und menu-Blöcke sind optional - du musst kein Menü erzeugen oder
+      (Die sub- und menu-BlÃ¶cke sind optional - du musst kein MenÃ¼ erzeugen oder
       das Unterfenster dekorieren.)
     </para>
 
     <para>
-      Innerhalb des Fensterblocks kannst du jedes Element für das Fenster durch eine
+      Innerhalb des Fensterblocks kannst du jedes Element fÃ¼r das Fenster durch eine
       Zeile dieser Form definieren:
       <programlisting>Element = Parameter</programlisting>
       Wobei <literal>Element</literal> eine Zeichenkette ist, die den Typ des GUI-Elements
@@ -278,30 +278,30 @@ end
     </para>
 
     <para>
-      Fügt man nun das oben genannte zusammen, sieht die komplette Datei etwa so aus:
+      FÃ¼gt man nun das oben genannte zusammen, sieht die komplette Datei etwa so aus:
 <programlisting><!--
 -->section = movieplayer
 window = main
-; ... Elemente für das Hauptfenster ...
+; ... Elemente fÃ¼r das Hauptfenster ...
 end
 
 window = sub
-; ... Elemente für das Unterfenster ...
+; ... Elemente fÃ¼r das Unterfenster ...
 end
 
 window = menu
-; ... Elemente für das Menü ...
+; ... Elemente fÃ¼r das MenÃ¼ ...
 end
 
 window = playbar
-; ... Elemente für die Abspielleiste ...
+; ... Elemente fÃ¼r die Abspielleiste ...
 end
 end
 </programlisting>
     </para>
 
     <para>
-      Der Name einer Grafikdatei muss ohne führende Pfadangaben angegeben werden -
+      Der Name einer Grafikdatei muss ohne fÃ¼hrende Pfadangaben angegeben werden -
       Grafiken werden im Verzeichnis <filename class="directory">skins</filename>
       gesucht.
       Du kannst (musst aber nicht) die Erweiterung der Datei spezifizieren.
@@ -314,8 +314,8 @@ end
 
     <para>
       Zum Schluss einige Worte zur Positionierung.
-      Hauptfenster und Unterfenster können in verschiedenen Ecken des Bilschirms
-      über die <literal>X</literal>- und <literal>Y</literal>-Koordinaten
+      Hauptfenster und Unterfenster kÃ¶nnen in verschiedenen Ecken des Bilschirms
+      Ã¼ber die <literal>X</literal>- und <literal>Y</literal>-Koordinaten
       platziert werden. <literal>0</literal> ist oben oder links,
       <literal>-1</literal> bedeutet zentriert und <literal>-2</literal> ist
       rechts oder unten, wie in dieser Illustration gezeigt:
@@ -334,7 +334,7 @@ end
 
     <para>
       Hier ein Beispiel, um es zu verdeutlichen. Angenommen, du hast eine Grafik
-      mit Namen <filename>main.png</filename>, die du für das Hauptfenster nutzt:
+      mit Namen <filename>main.png</filename>, die du fÃ¼r das Hauptfenster nutzt:
       <programlisting>base = main, -1, -1</programlisting>
       <application>MPlayer</application> versucht, die Dateien
       <filename>main</filename>,
@@ -347,10 +347,10 @@ end
     <sect2 id="skin-file-main">
       <title>Hauptfenster und Abspielleiste</title>
       <para>
-        Unten steht eine Liste von Einträgen, die in den Blöcken
+        Unten steht eine Liste von EintrÃ¤gen, die in den BlÃ¶cken
         '<literal>window = main</literal>' ... '<literal>end</literal>',
         und '<literal>window = playbar</literal>' ... '<literal>end</literal>'
-        genutzt werden können.
+        genutzt werden kÃ¶nnen.
       </para>
 
       <variablelist>
@@ -362,9 +362,9 @@ end
           </term>
           <listitem>
             <para>
-              Lässt dich die Hintergrundgrafik fürs Hauptfenster spezifizieren.
+              LÃ¤sst dich die Hintergrundgrafik fÃ¼rs Hauptfenster spezifizieren.
               Das Fenster wird an der angegebenen Position <literal>X,Y</literal> auf
-              dem Bildschirm erscheinen. Es wird die Größe der Grafik besitzen.
+              dem Bildschirm erscheinen. Es wird die GrÃ¶ÃŸe der Grafik besitzen.
             </para>
             <note>
               <para>
@@ -389,16 +389,16 @@ end
           </term>
           <listitem>
             <para>
-              Platziere einen Button mit der Größe <literal>width</literal> * <literal>height</literal>
+              Platziere einen Button mit der GrÃ¶ÃŸe <literal>width</literal> * <literal>height</literal>
               an Position <literal>X,Y</literal>. Die angegebene <literal>message</literal> wird
               erzeugt, wenn der Button angeklickt wird. Die mittels <literal>image</literal>
               festgelegte Grafik muss drei untereinander liegende Teile aufweisen (entsprechend
-              der möglichen Zustände des Buttons), etwa so:
+              der mÃ¶glichen ZustÃ¤nde des Buttons), etwa so:
             </para>
             <informalfigure>
               <screen>
 +---------------+
-|    gedrückt   |
+|    gedrÃ¼ckt   |
 +---------------+
 |  losgelassen  |
 +---------------+
@@ -448,30 +448,30 @@ end
           <listitem>
             <para>
               Platziere einen horizontal (hpotmeter) oder vertikal (vpotmeter) Potentiometer mit
-              der Größe <literal>width</literal> * <literal>height</literal> an Position
-              <literal>X,Y</literal>. Die Grafik kann in unterschiedliche Teile für die
+              der GrÃ¶ÃŸe <literal>width</literal> * <literal>height</literal> an Position
+              <literal>X,Y</literal>. Die Grafik kann in unterschiedliche Teile fÃ¼r die
               verschiedenen Phasen des Potentiometers aufgeteilt werden (du kannst zum Beispiel
-              eines für die Lautstärkeregelung haben, das von rot nach grün wechselt, während sich
-              sein Wert vom Minimum zum Maximum ändert.).
+              eines fÃ¼r die LautstÃ¤rkeregelung haben, das von rot nach grÃ¼n wechselt, wÃ¤hrend sich
+              sein Wert vom Minimum zum Maximum Ã¤ndert.).
               <literal>hpotmeter</literal> kann einen Button besitzen, der horizontal gezogen
               werden kann. Die Parameter sind:
             </para>
             <itemizedlist>
               <listitem>
                 <para>
-                  <literal>button</literal> - die für den Button zu verwendende
+                  <literal>button</literal> - die fÃ¼r den Button zu verwendende
                   Grafik (muss drei untereinander liegende Teile aufweisen, wie im Fall des
                   <link linkend="skin-button">Buttons</link>)
                 </para>
               </listitem>
               <listitem>
                 <para>
-                  <literal>bwidth</literal>, <literal>bheight</literal> - Größe des Buttons
+                  <literal>bwidth</literal>, <literal>bheight</literal> - GrÃ¶ÃŸe des Buttons
                 </para>
               </listitem>
               <listitem>
                 <para>
-                  <literal>phases</literal> - die für die verschiedenen Phasen
+                  <literal>phases</literal> - die fÃ¼r die verschiedenen Phasen
                   zu verwendende Grafik des hpotmeter. Ein spezieller Wert von <literal>NULL</literal>
                   kann benutzt werden, wenn du keine solche Grafik anwenden willst. Die Grafik muss
                   vertikal in <literal>numphases</literal> Teile wie folgt aufgeteilt werden:
@@ -498,25 +498,25 @@ end
               </listitem>
               <listitem>
                 <para>
-                  <literal>default</literal> - Standardwert für hpotmeter
+                  <literal>default</literal> - Standardwert fÃ¼r hpotmeter
                   (im Bereich <literal>0</literal> bis <literal>100</literal>)
                 </para>
               </listitem>
               <listitem>
                 <para>
-                  <literal>X</literal>, <literal>Y</literal> - Position fürs hpotmeter
+                  <literal>X</literal>, <literal>Y</literal> - Position fÃ¼rs hpotmeter
                 </para>
               </listitem>
               <listitem>
                 <para>
-                  <literal>width</literal>, <literal>height</literal> - Breite und Höhe
+                  <literal>width</literal>, <literal>height</literal> - Breite und HÃ¶he
                   des <literal>hpotmeter</literal>
                 </para>
               </listitem>
               <listitem>
                 <para>
                   <literal>message</literal> - die Meldung, die erzeugt werden soll,
-                  wenn der Wert des <literal>hpotmeter</literal> geändert wird
+                  wenn der Wert des <literal>hpotmeter</literal> geÃ¤ndert wird
                 </para>
               </listitem>
             </itemizedlist>
@@ -532,11 +532,11 @@ end
           </term>
           <listitem>
             <para>
-              Ein <literal>hpotmeter</literal> ohne einen Button. (ich schätze, es ist dazu
+              Ein <literal>hpotmeter</literal> ohne einen Button. (ich schÃ¤tze, es ist dazu
               bestimmt, herumgedreht zu werden, reagiert aber nur auf horizontales Ziehen.)
               Eine Beschreibung der Parameter findest du unter
               <link linkend="skin-hpotmeter">hpotmeter</link>.
-              <literal>phases</literal> können <literal>NULL</literal> sein, dies ist aber ziemlich
+              <literal>phases</literal> kÃ¶nnen <literal>NULL</literal> sein, dies ist aber ziemlich
               sinnlos, da du nicht sehen kannst, wo das <literal>Potentiometer</literal> hingesetzt
               wurde.
             </para>
@@ -556,7 +556,7 @@ end
               (gieb hier keine Erweiterung an).
               <literal>fontid</literal> wird verwendet, um auf die Schrift zu verweisen
               (siehe <link linkend="skin-dlabel">dlabel</link>
-              und <link linkend="skin-slabel">slabel</link>). Bis zu 25 Schriften können
+              und <link linkend="skin-slabel">slabel</link>). Bis zu 25 Schriften kÃ¶nnen
               definiert werden.
             </para>
           </listitem>
@@ -574,9 +574,9 @@ end
               <literal>text</literal> wird mittels der identifizierten
               <literal>fontid</literal> angezeigt. Der Text ist einfach ein
               eine Ausgangszeichenkette (<literal>$x</literal>-Variablen funktionieren nicht),
-              eingeschlossen von doppelten Anführungszeichen (das &quot;-Zeichen kann jedoch
+              eingeschlossen von doppelten AnfÃ¼hrungszeichen (das &quot;-Zeichen kann jedoch
               nicht Teil des Textes sein).
-              Das Label wird mittels der über die <literal>fontid</literal> identifizierten
+              Das Label wird mittels der Ã¼ber die <literal>fontid</literal> identifizierten
               Schrift angezeigt.
             </para>
           </listitem>
@@ -592,21 +592,21 @@ end
             <para>
               Platziere ein dynamisches Label an Position <literal>X,Y</literal>.
               Das Label wird als dynamisch bezeichnet, weil sein Text periodisch
-              aktualisiert wird. Die Maximallänge des Labels wird mit dem
-              Wert <literal>length</literal> vorgegeben (seine Höhe ist die der
+              aktualisiert wird. Die MaximallÃ¤nge des Labels wird mit dem
+              Wert <literal>length</literal> vorgegeben (seine HÃ¶he ist die der
               Zeichen).
               Wird der anzuzeigende Text breiter als dieser Wert, wird er gescrollt,
               andernfalls wird er innerhalb des Mittels des Wertes des vom
               <literal>align</literal>-Parameter festgelegten Zwischenraums ausgerichtet:
-              <literal>0</literal> steht für rechts,
-              <literal>1</literal> steht für zentriert,
-              <literal>2</literal> steht für links.
+              <literal>0</literal> steht fÃ¼r rechts,
+              <literal>1</literal> steht fÃ¼r zentriert,
+              <literal>2</literal> steht fÃ¼r links.
             </para>
             <para>
               Der anzuzeigende Text wird mit <literal>text</literal> festgelegt:
-              Er muss zwischen doppelten Anführungszeichen stehen (das &quot;-Zeichen kann jedoch
+              Er muss zwischen doppelten AnfÃ¼hrungszeichen stehen (das &quot;-Zeichen kann jedoch
               nicht Teil des Textes sein).
-              Das Label wird mittels der über die <literal>fontid</literal> identifizierten
+              Das Label wird mittels der Ã¼ber die <literal>fontid</literal> identifizierten
               Schrift angezeigt.
               Du kannst folgende Variablen im Text verwenden:
             </para>
@@ -639,11 +639,11 @@ end
                   </row>
                   <row>
                     <entry>$6</entry>
-                    <entry>Filmlänge im <emphasis>hh:mm:ss</emphasis>-Format</entry>
+                    <entry>FilmlÃ¤nge im <emphasis>hh:mm:ss</emphasis>-Format</entry>
                   </row>
                   <row>
                     <entry>$7</entry>
-                    <entry>Filmlänge im <emphasis>mmmm:ss</emphasis>-Format</entry>
+                    <entry>FilmlÃ¤nge im <emphasis>mmmm:ss</emphasis>-Format</entry>
                   </row>
                   <row>
                     <entry>$8</entry>
@@ -651,11 +651,11 @@ end
                   </row>
                   <row>
                     <entry>$v</entry>
-                    <entry>Lautstärke im <emphasis>xxx.xx</emphasis>%-Format</entry>
+                    <entry>LautstÃ¤rke im <emphasis>xxx.xx</emphasis>%-Format</entry>
                   </row>
                   <row>
                     <entry>$V</entry>
-                    <entry>Lautstärke im <emphasis>xxx.xx</emphasis>-Format</entry>
+                    <entry>LautstÃ¤rke im <emphasis>xxx.xx</emphasis>-Format</entry>
                   </row>
                   <row>
                     <entry>$b</entry>
@@ -703,21 +703,21 @@ end
                     <entry>$p</entry>
                     <entry>
                       Das <keycap>p</keycap>-Zeichen (wenn ein Film abgespielt wird und die Schrift
-                      das Zeichen <keycap>p</keycap> enthält)
+                      das Zeichen <keycap>p</keycap> enthÃ¤lt)
                     </entry>
                   </row>
                   <row>
                     <entry>$s</entry>
                     <entry>
                       Das <keycap>s</keycap>-Zeichen (wenn ein Film angehalten wird und die Schrift
-                      das Zeichen <keycap>s</keycap> enthält)
+                      das Zeichen <keycap>s</keycap> enthÃ¤lt)
                     </entry>
                   </row>
                   <row>
                     <entry>$e</entry>
                     <entry>
                       Das <keycap>e</keycap>-Zeichen (wenn ein Film pausiert wird und die Schrift
-                      das Zeichen <keycap>e</keycap> enthält)
+                      das Zeichen <keycap>e</keycap> enthÃ¤lt)
                     </entry>
                   </row>
                   <row>
@@ -726,7 +726,7 @@ end
                   </row>
                   <row>
                     <entry>$y</entry>
-                    <entry>Filmhöhe</entry>
+                    <entry>FilmhÃ¶he</entry>
                   </row>
                   <row>
                     <entry>$C</entry>
@@ -744,13 +744,13 @@ end
       <note>
         <para>
           Die Variablen <literal>$a, $T, $p, $s</literal> und <literal>$e</literal>
-          geben alle Zeichen zurück, die als spezielle Symbole angezeigt werden sollen
-          (zum Beispiel steht <keycap>e</keycap> für das Pause-Symbol, welches gewöhnlich
+          geben alle Zeichen zurÃ¼ck, die als spezielle Symbole angezeigt werden sollen
+          (zum Beispiel steht <keycap>e</keycap> fÃ¼r das Pause-Symbol, welches gewÃ¶hnlich
           etwa so || aussieht).
-          Du solltest eine Schrift für normale Zeichen und eine weitere Schrift für
-          Symbole haben. Schau in den Abschnitt über
+          Du solltest eine Schrift fÃ¼r normale Zeichen und eine weitere Schrift fÃ¼r
+          Symbole haben. Schau in den Abschnitt Ã¼ber
           <link linkend="skin-fonts-symbols">Symbole</link>
-          für mehr Informationen.
+          fÃ¼r mehr Informationen.
         </para>
       </note>
     </sect2>
@@ -758,7 +758,7 @@ end
     <sect2 id="skin-file-subwindow">
       <title>Unterfenster</title>
       <para>
-        Die folgenden Einträge können in diesem Block verwendet werden
+        Die folgenden EintrÃ¤ge kÃ¶nnen in diesem Block verwendet werden
         '<literal>window = sub</literal>' . . . '<literal>end</literal>'.
       </para>
 
@@ -772,12 +772,12 @@ end
               Die im Fenster anzuzeigende Grafik. Das Fenster wird an der angegebenen
               Position <literal>X,Y</literal> auf dem Bildschirm erscheinen
               (<literal>0,0</literal> ist die obere linke Ecke).
-              Du kannst <literal>-1</literal> für zentriert und <literal>-2</literal>
-              für rechts (<literal>X</literal>) und unten (<literal>Y</literal>) festlegen.
-              Das Fenster wird so groß sein wie die Grafik.
-              <literal>Breite</literal> und <literal>Höhe</literal>
-              kennzeichnen die Größe des Fensters; sie sind optional (wenn sie fehlen, hat
-              das Fenster dieselbe Größe wie die Grafik).
+              Du kannst <literal>-1</literal> fÃ¼r zentriert und <literal>-2</literal>
+              fÃ¼r rechts (<literal>X</literal>) und unten (<literal>Y</literal>) festlegen.
+              Das Fenster wird so groÃŸ sein wie die Grafik.
+              <literal>Breite</literal> und <literal>HÃ¶he</literal>
+              kennzeichnen die GrÃ¶ÃŸe des Fensters; sie sind optional (wenn sie fehlen, hat
+              das Fenster dieselbe GrÃ¶ÃŸe wie die Grafik).
             </para>
           </listitem>
         </varlistentry>
@@ -788,10 +788,10 @@ end
           </term>
           <listitem>
             <para>
-              Lässt dich die Hintergrundfarbe setzen. Dies ist von Nutzen, wenn die Grafik
+              LÃ¤sst dich die Hintergrundfarbe setzen. Dies ist von Nutzen, wenn die Grafik
               kleiner ist als das Fenster.
               <literal>R</literal>, <literal>G</literal> und <literal>B</literal>
-              spezifizieren die Rot-, Grün- und Blau-Komponenten der Farbe (jede davon ist
+              spezifizieren die Rot-, GrÃ¼n- und Blau-Komponenten der Farbe (jede davon ist
               eine Dezimalzahl von 0 bis 255).
             </para>
           </listitem>
@@ -800,18 +800,18 @@ end
     </sect2>
 
     <sect2 id="skin-file-menu">
-      <title>Skin-Menü</title>
+      <title>Skin-MenÃ¼</title>
       <para>
-        Wie bereits zuvor erwähnt, wird das Menü mittels zweier Grafiken dargestellt.
-        Normale Menüeinträge werden aus der Grafik entnommen, die durch das Element
-        <literal>base</literal> festgelegt sind, während der aktuell gewählte Eintrag
+        Wie bereits zuvor erwÃ¤hnt, wird das MenÃ¼ mittels zweier Grafiken dargestellt.
+        Normale MenÃ¼eintrÃ¤ge werden aus der Grafik entnommen, die durch das Element
+        <literal>base</literal> festgelegt sind, wÃ¤hrend der aktuell gewÃ¤hlte Eintrag
         aus der Grafik entnommen wird, die durch das Element <literal>selected</literal>
-        spezifiziert wurde. Du musst Position und Größe jedes Menüeintrags mittels des
+        spezifiziert wurde. Du musst Position und GrÃ¶ÃŸe jedes MenÃ¼eintrags mittels des
         Elements <literal>menu</literal> definieren.
       </para>
 
       <para>
-        Die folgenden Einträge können im Block
+        Die folgenden EintrÃ¤ge kÃ¶nnen im Block
         '<literal>window = menu</literal>'. . .'<literal>end</literal>' genutzt werden.
       </para>
 
@@ -822,7 +822,7 @@ end
           </term>
           <listitem>
             <para>
-              Die Grafik für normale Menüeinträge.
+              Die Grafik fÃ¼r normale MenÃ¼eintrÃ¤ge.
             </para>
           </listitem>
         </varlistentry>
@@ -835,7 +835,7 @@ end
           </term>
           <listitem>
             <para>
-              Die Grafik, die das Menü mit allen gewählten Einträgen anzeigt.
+              Die Grafik, die das MenÃ¼ mit allen gewÃ¤hlten EintrÃ¤gen anzeigt.
             </para>
           </listitem>
         </varlistentry>
@@ -843,14 +843,14 @@ end
         <varlistentry>
           <term>
             <literal>
-              <anchor id="skin-menu"/>menu = X, Y, Breite, Höhe, Nachricht
+              <anchor id="skin-menu"/>menu = X, Y, Breite, HÃ¶he, Nachricht
             </literal>
           </term>
           <listitem>
             <para>
-              Definiert die Position <literal>X,Y</literal> und die Größe eines Menüeintrags
+              Definiert die Position <literal>X,Y</literal> und die GrÃ¶ÃŸe eines MenÃ¼eintrags
               innerhalb der Grafik. <literal>Nachricht</literal> ist die Meldung, die erzeugt
-              werden soll, wenn die Maustaste über dem Eintrag losgelassen wird.
+              werden soll, wenn die Maustaste Ã¼ber dem Eintrag losgelassen wird.
             </para>
           </listitem>
         </varlistentry>
@@ -861,9 +861,9 @@ end
   <sect1 id="skin-fonts">
     <title>Schriften</title>
     <para>
-      Wie im Abschnitt über die Skin-Teile beschrieben, wird eine Schrift durch eine
+      Wie im Abschnitt Ã¼ber die Skin-Teile beschrieben, wird eine Schrift durch eine
       Grafik und eine Beschreibungsdatei definiert. Du kannst die Zeichen irgendwo
-      innerhalb der Grafik platzieren, aber stell sicher, dass Position und Größe
+      innerhalb der Grafik platzieren, aber stell sicher, dass Position und GrÃ¶ÃŸe
       der Zeichen in der Beschreibungsdatei exakt angegeben sind.
     </para>
 
@@ -873,14 +873,14 @@ end
       Die Datei muss eine Zeile in der Form enthalten
       <anchor id="skin-font-image"/>
       <programlisting>image = <replaceable>image</replaceable></programlisting>
-      Wobei <literal><replaceable>image</replaceable></literal> der Name der für
+      Wobei <literal><replaceable>image</replaceable></literal> der Name der fÃ¼r
       die Schrift anzuwendenden Grafikdatei ist (du musst keine Erweiterung angeben).
       <anchor id="skin-font-char"/>
       <programlisting>&quot;char&quot; = X, Y, width, hight</programlisting>
       Hier legen <literal>X</literal> und <literal>Y</literal> die Position des
       <literal>char</literal>-Zeichens innerhalb der Grafik fest
-      (<literal>0,0</literal> steht für die obere linke Ecke).
-      <literal>width</literal> und <literal>height</literal> sind die Maße der
+      (<literal>0,0</literal> steht fÃ¼r die obere linke Ecke).
+      <literal>width</literal> und <literal>height</literal> sind die MaÃŸe der
       Zeichen in Pixel.
     </para>
 
@@ -902,14 +902,14 @@ image = font.png
       <title>Symbole</title>
       <para>
         Einige Zeichen haben spezielle Bedeutungen, wenn sie von bestimmten
-        Variablen in <link linkend="skin-dlabel">dlabel</link> zurückgegeben
+        Variablen in <link linkend="skin-dlabel">dlabel</link> zurÃ¼ckgegeben
         werden. Diese Zeichen sind dazu gedacht, als Symbole angezeigt zu werden,
-        so dass Dinge wie ein hübsches DVD-Logo an Stelle des Zeichens
-        '<literal>d</literal>' für einen DVD-Stream angezeigt werden können.
+        so dass Dinge wie ein hÃ¼bsches DVD-Logo an Stelle des Zeichens
+        '<literal>d</literal>' fÃ¼r einen DVD-Stream angezeigt werden kÃ¶nnen.
       </para>
       <para>
         Die folgende Tabelle listet alle Zeichen auf, die zum Anzeigen von
-        Symbolen genutzt werden können (und daher eine andere Schrift benötigen).
+        Symbolen genutzt werden kÃ¶nnen (und daher eine andere Schrift benÃ¶tigen).
       </para>
 
       <informaltable>
@@ -938,7 +938,7 @@ image = font.png
     <title>GUI-Meldungen</title>
     <para>
       Dies sind die Meldungen, die von Buttons, Potentiometern und
-      Menüeinträgen generiert werden können.
+      MenÃ¼eintrÃ¤gen generiert werden kÃ¶nnen.
     </para>
 
     <variablelist>
@@ -946,7 +946,7 @@ image = font.png
       <varlistentry>
         <term><emphasis role="bold">evNext</emphasis></term>
         <listitem>
-          <para>Springe zum nächsten Track in der Playliste.</para>
+          <para>Springe zum nÃ¤chsten Track in der Playliste.</para>
         </listitem>
       </varlistentry>
 
@@ -954,12 +954,12 @@ image = font.png
         <term><emphasis role="bold">evPause</emphasis></term>
         <listitem><para>
             Formt einen Schalter zusammen mit <literal>evPlaySwitchToPause</literal>.
-            Sie können dazu benutzt werden, einen gebräuchlichen Play/Pause-Button
+            Sie kÃ¶nnen dazu benutzt werden, einen gebrÃ¤uchlichen Play/Pause-Button
             zu bekommen. Beide Meldungen sollten den Buttons zugewiesen werden, die
             an genau derselben Position innerhalb des Fensters dargestellt werden.
-            Diese Meldung pausiert das Abspielen und die Grafik für den
+            Diese Meldung pausiert das Abspielen und die Grafik fÃ¼r den
             <literal>evPlaySwitchToPause</literal>-Button wird gezeigt
-            (um anzudeuten, dass der Button zum Fortsetzen des Abspielens gedrückt
+            (um anzudeuten, dass der Button zum Fortsetzen des Abspielens gedrÃ¼ckt
             werden kann).
           </para></listitem>
       </varlistentry>
@@ -980,9 +980,9 @@ image = font.png
         <listitem>
           <para>
             Das Gegenteil von <literal>evPauseSwitchToPlay</literal>. Diese Meldung
-            startet das Abspielen und die Grafik für den
+            startet das Abspielen und die Grafik fÃ¼r den
             <literal>evPauseSwitchToPlay</literal>-Button wird angezeigt
-            (um anzudeuten, dass der Button zum Pausieren des Abspielvorgangs gedrückt
+            (um anzudeuten, dass der Button zum Pausieren des Abspielvorgangs gedrÃ¼ckt
             werden kann).
           </para>
         </listitem>
@@ -1011,7 +1011,7 @@ image = font.png
         <term><emphasis role="bold">evBackward10sec</emphasis></term>
         <listitem>
           <para>
-            Springe 10 Sekunden rückwärts.
+            Springe 10 Sekunden rÃ¼ckwÃ¤rts.
           </para>
         </listitem>
       </varlistentry>
@@ -1020,7 +1020,7 @@ image = font.png
         <term><emphasis role="bold">evBackward1min</emphasis></term>
         <listitem>
           <para>
-            Springe 1 Minute rückwärts.
+            Springe 1 Minute rÃ¼ckwÃ¤rts.
           </para>
         </listitem>
       </varlistentry>
@@ -1028,7 +1028,7 @@ image = font.png
       <varlistentry>
         <term><emphasis role="bold">evBackward10min</emphasis></term>
         <listitem><para>
-            Springe 10 Minuten rückwärts.
+            Springe 10 Minuten rÃ¼ckwÃ¤rts.
           </para></listitem>
       </varlistentry>
 
@@ -1036,7 +1036,7 @@ image = font.png
         <term><emphasis role="bold">evForward10sec</emphasis></term>
         <listitem>
           <para>
-            Springe 10 Sekunden vorwärts.
+            Springe 10 Sekunden vorwÃ¤rts.
           </para>
         </listitem>
       </varlistentry>
@@ -1045,7 +1045,7 @@ image = font.png
         <term><emphasis role="bold">evForward1min</emphasis></term>
         <listitem>
           <para>
-            Springe 1 Minute vorwärts.
+            Springe 1 Minute vorwÃ¤rts.
           </para>
         </listitem>
       </varlistentry>
@@ -1054,7 +1054,7 @@ image = font.png
         <term><emphasis role="bold">evForward10min</emphasis></term>
         <listitem>
           <para>
-            Springe 10 Minuten vorwärts.
+            Springe 10 Minuten vorwÃ¤rts.
           </para>
         </listitem>
       </varlistentry>
@@ -1076,7 +1076,7 @@ image = font.png
         <term><emphasis role="bold">evHalfSize</emphasis></term>
         <listitem>
           <para>
-            Setze das Filmfenster auf halbe Größe.
+            Setze das Filmfenster auf halbe GrÃ¶ÃŸe.
           </para>
         </listitem>
       </varlistentry>
@@ -1084,7 +1084,7 @@ image = font.png
         <term><emphasis role="bold">evDoubleSize</emphasis></term>
         <listitem>
           <para>
-            Setze das Filmfenster auf doppelte Größe.
+            Setze das Filmfenster auf doppelte GrÃ¶ÃŸe.
           </para>
         </listitem>
       </varlistentry>
@@ -1100,7 +1100,7 @@ image = font.png
         <term><emphasis role="bold">evNormalSize</emphasis></term>
         <listitem>
           <para>
-            Setze das Filmfenster auf normale Größe.
+            Setze das Filmfenster auf normale GrÃ¶ÃŸe.
           </para>
         </listitem>
       </varlistentry>
@@ -1112,7 +1112,7 @@ image = font.png
         <term><emphasis role="bold">evDecAudioBufDelay</emphasis></term>
         <listitem>
           <para>
-            Verringere die Verzögerung des Audiopuffers.
+            Verringere die VerzÃ¶gerung des Audiopuffers.
           </para>
         </listitem>
       </varlistentry>
@@ -1129,7 +1129,7 @@ image = font.png
       <varlistentry>
         <term><emphasis role="bold">evDecVolume</emphasis></term>
         <listitem><para>
-            Verringere die Lautstärke.
+            Verringere die LautstÃ¤rke.
           </para></listitem>
       </varlistentry>
 
@@ -1137,7 +1137,7 @@ image = font.png
         <term><emphasis role="bold">evIncAudioBufDelay</emphasis></term>
         <listitem>
           <para>
-            Erhöhe die Verzögerung des Audiopuffers.
+            ErhÃ¶he die VerzÃ¶gerung des Audiopuffers.
           </para>
         </listitem>
       </varlistentry>
@@ -1146,7 +1146,7 @@ image = font.png
         <term><emphasis role="bold">evIncBalance</emphasis></term>
         <listitem>
           <para>
-            Erhöhe die Balance.
+            ErhÃ¶he die Balance.
           </para>
         </listitem>
       </varlistentry>
@@ -1155,7 +1155,7 @@ image = font.png
         <term><emphasis role="bold">evIncVolume</emphasis></term>
         <listitem>
           <para>
-            Erhöhe die Lautstärke.
+            ErhÃ¶he die LautstÃ¤rke.
           </para>
         </listitem>
       </varlistentry>
@@ -1183,7 +1183,7 @@ image = font.png
         <term><emphasis role="bold">evSetVolume</emphasis></term>
         <listitem>
           <para>
-            Setze die Lautstärke(kann von einem Potentiometer genutzt werden;
+            Setze die LautstÃ¤rke(kann von einem Potentiometer genutzt werden;
             mit dem relativen Wert (0-100%) des Potentiometers).
           </para>
         </listitem>
@@ -1196,7 +1196,7 @@ image = font.png
         <term><emphasis role="bold">evAbout</emphasis></term>
         <listitem>
           <para>
-            Öffne das About-Fenster.
+            Ã–ffne das About-Fenster.
           </para>
         </listitem>
       </varlistentry>
@@ -1223,7 +1223,7 @@ image = font.png
         <term><emphasis role="bold">evExit</emphasis></term>
         <listitem>
           <para>
-            Schließe das Programm.
+            SchlieÃŸe das Programm.
           </para>
         </listitem>
       </varlistentry>
@@ -1241,8 +1241,8 @@ image = font.png
         <term><emphasis role="bold">evLoad</emphasis></term>
         <listitem>
           <para>
-            Lade eine Datei (durch Öffnen des Datei-Browser-Fensters,
-            in dem du die Datei wählen kannst).
+            Lade eine Datei (durch Ã–ffnen des Datei-Browser-Fensters,
+            in dem du die Datei wÃ¤hlen kannst).
           </para>
         </listitem>
       </varlistentry>
@@ -1261,7 +1261,7 @@ image = font.png
         <term><emphasis role="bold">evLoadSubtitle</emphasis></term>
         <listitem>
           <para>
-            Lädt eine Untertiteldatei (mit dem Dateiwähler)
+            LÃ¤dt eine Untertiteldatei (mit dem DateiwÃ¤hler)
           </para>
         </listitem>
       </varlistentry>
@@ -1270,7 +1270,7 @@ image = font.png
         <term><emphasis role="bold">evLoadAudioFile</emphasis></term>
         <listitem>
           <para>
-            Lädt eine Audio-Datei (mit dem Dateiwähler)
+            LÃ¤dt eine Audio-Datei (mit dem DateiwÃ¤hler)
           </para>
         </listitem>
       </varlistentry>
@@ -1279,7 +1279,7 @@ image = font.png
         <term><emphasis role="bold">evNone</emphasis></term>
         <listitem>
           <para>
-            Leere Meldung, besitzt keinen Effekt (außer vielleicht in Subversion-Versionen :-)).
+            Leere Meldung, besitzt keinen Effekt (auÃŸer vielleicht in Subversion-Versionen :-)).
           </para>
         </listitem>
       </varlistentry>
@@ -1288,7 +1288,7 @@ image = font.png
         <term><emphasis role="bold">evPlaylist</emphasis></term>
         <listitem>
           <para>
-            Öffne/schließe das Playlisten-Fenster.
+            Ã–ffne/schlieÃŸe das Playlisten-Fenster.
           </para>
         </listitem>
       </varlistentry>
@@ -1297,7 +1297,7 @@ image = font.png
         <term><emphasis role="bold">evPlayDVD</emphasis></term>
         <listitem>
           <para>
-            Versucht die DVD im angegebenen DVD-ROM-Laufwerk zu öffnen.
+            Versucht die DVD im angegebenen DVD-ROM-Laufwerk zu Ã¶ffnen.
           </para>
         </listitem>
       </varlistentry>
@@ -1306,7 +1306,7 @@ image = font.png
         <term><emphasis role="bold">evPlayVCD</emphasis></term>
         <listitem>
           <para>
-            Versucht die VCD im angegebenen CD-ROM-Laufwerk zu öffnen.
+            Versucht die VCD im angegebenen CD-ROM-Laufwerk zu Ã¶ffnen.
           </para>
         </listitem>
       </varlistentry>
@@ -1315,7 +1315,7 @@ image = font.png
         <term><emphasis role="bold">evPreferences</emphasis></term>
         <listitem>
           <para>
-            Öffne das Einstellungsfenster.
+            Ã–ffne das Einstellungsfenster.
           </para>
         </listitem>
       </varlistentry>
@@ -1324,7 +1324,7 @@ image = font.png
         <term><emphasis role="bold">evSetAspect</emphasis></term>
         <listitem>
           <para>
-            Setzt das angezeigte Grafikseitenverhältnis.
+            Setzt das angezeigte GrafikseitenverhÃ¤ltnis.
           </para>
         </listitem>
       </varlistentry>
@@ -1342,7 +1342,7 @@ image = font.png
         <term><emphasis role="bold">evSkinBrowser</emphasis></term>
         <listitem>
           <para>
-            Öffne das Skin-Browser-Fenster.
+            Ã–ffne das Skin-Browser-Fenster.
           </para>
         </listitem>
       </varlistentry>
@@ -1354,33 +1354,33 @@ image = font.png
     <title>Erstellen von qualitativen Skins</title>
 
     <para>
-      Jetzt hast du dich über das Herstellen eines Skins für das
+      Jetzt hast du dich Ã¼ber das Herstellen eines Skins fÃ¼r das
       <application>MPlayer</application>-GUI informiert, in
       <application>Gimp</application> dein bestes gegeben und willst
       deinen Skin an uns schicken?
-      Lies weiter, dann findest du einige Vorgaben dafür, wie häufige Irrtümer
-      vermieden und hochqualitative Skins erstellt werden können.
+      Lies weiter, dann findest du einige Vorgaben dafÃ¼r, wie hÃ¤ufige IrrtÃ¼mer
+      vermieden und hochqualitative Skins erstellt werden kÃ¶nnen.
     </para>
 
     <para>
-      Wir wollen, dass Skins, die wir in unser Repository einfügen,
-      bestimmten Qualitätsstandards entsprechen. Du kannst auch vieles
+      Wir wollen, dass Skins, die wir in unser Repository einfÃ¼gen,
+      bestimmten QualitÃ¤tsstandards entsprechen. Du kannst auch vieles
       dazutun, uns das Leben leichter zu machen.
     </para>
 
     <para>
       Als ein Beispiel kannst du dir den <systemitem>Blue</systemitem>-Skin
-      ansehen. Er genügt seit Version 1.5 allen unten aufgelisteten Kriterien.
+      ansehen. Er genÃ¼gt seit Version 1.5 allen unten aufgelisteten Kriterien.
     </para>
 
     <itemizedlist>
       <listitem>
         <para>
           Jeder Skin sollte mit einer
-          <filename>README</filename>-Datei kommen, die Informationen über
+          <filename>README</filename>-Datei kommen, die Informationen Ã¼ber
           dich, den Autor, Copyright- und Lizenzanmerkungen und alles, was du
-          sonst noch anfügen willst, enthält.
-          Willst du ein Changelog, ist diese Datei ein geeigneter Ort dafür.
+          sonst noch anfÃ¼gen willst, enthÃ¤lt.
+          Willst du ein Changelog, ist diese Datei ein geeigneter Ort dafÃ¼r.
         </para>
       </listitem>
 
@@ -1394,19 +1394,19 @@ image = font.png
 
       <listitem>
         <para>
-          Horizontale und vertikale Regler (wie die für Lautstärke
+          Horizontale und vertikale Regler (wie die fÃ¼r LautstÃ¤rke
           oder Position) sollten die Mitte des Knaufs sauber in der Mitte
-          des Reglers zentriert haben. Es sollte möglich sein, den Knauf
-          an beide Enden des Reglers zu bewegen, jedoch nicht darüber hinaus.
+          des Reglers zentriert haben. Es sollte mÃ¶glich sein, den Knauf
+          an beide Enden des Reglers zu bewegen, jedoch nicht darÃ¼ber hinaus.
         </para>
       </listitem>
 
       <listitem>
         <para>
-          Für Skin-Elemente sollten die richtigen Größen in der skin-Datei
-          deklariert sein. Ist dies nicht der Fall, kannst du außerhalb
+          FÃ¼r Skin-Elemente sollten die richtigen GrÃ¶ÃŸen in der skin-Datei
+          deklariert sein. Ist dies nicht der Fall, kannst du auÃŸerhalb
           z.B. eines Buttons klicken und trotzdem einen Klick innerhalb
-          seiner Fläche auslösen und diesen dennoch nicht auslösen.
+          seiner FlÃ¤che auslÃ¶sen und diesen dennoch nicht auslÃ¶sen.
         </para>
       </listitem>
 

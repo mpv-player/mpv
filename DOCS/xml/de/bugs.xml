@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20083 -->
 <appendix id="bugs">
   <title>Bekannte Fehler</title>
@@ -9,8 +9,8 @@
     <itemizedlist>
       <listitem>
         <para>SIGILL (Signal 4) auf P3 bei 2.2.x-Kernels:</para>
-        <para>Problem: Kernel 2.2.x hat keine angemessene (funktionierende) SSE-Unterstützung</para>
-        <para>Lösung: Upgrade auf Kernel 2.4.x</para>
+        <para>Problem: Kernel 2.2.x hat keine angemessene (funktionierende) SSE-UnterstÃ¼tzung</para>
+        <para>LÃ¶sung: Upgrade auf Kernel 2.4.x</para>
         <para>Workaround: <command>./configure --disable-sse</command></para>
       </listitem>
 
@@ -23,21 +23,21 @@
           compiliert und gestartet (zum Beispiel compiliert auf P3 und gestartet auf Celeron)
         </para>
         <para>
-          Lösung: compiliere <application>MPlayer</application> auf dem Rechner, auf dem du ihn
+          LÃ¶sung: compiliere <application>MPlayer</application> auf dem Rechner, auf dem du ihn
           benutzen wirst!
         </para>
         <para>
           Workaround: Du kannst das alles vergessen, indem du configure mit der Option
-          <option>--enable-runtime-cpudetection</option> ausführst oder bestimmte CPU-Instruktionssets mit
+          <option>--enable-runtime-cpudetection</option> ausfÃ¼hrst oder bestimmte CPU-Instruktionssets mit
           spezielleren Optionen(wie <option>--disable-mmx</option>, <option>--disable-3dnow</option>, usw)
           deaktivierst.
         </para>
       </listitem>
 
       <listitem>
-        <para>Abstürze bei Ausgabe (Dump) von Streams:</para>
+        <para>AbstÃ¼rze bei Ausgabe (Dump) von Streams:</para>
         <para>Problem: Core Dump</para>
-        <para>Lösung: Keine Panik. Stelle sicher, dass du weißt, wo dein Handtuch liegt.</para>
+        <para>LÃ¶sung: Keine Panik. Stelle sicher, dass du weiÃŸt, wo dein Handtuch liegt.</para>
       </listitem>
     </itemizedlist>
   </sect1>
@@ -47,7 +47,7 @@
     <title>Verschiedene A-V-Sync und andere Audioprobleme</title>
 
     <sect2 id="bugs-delay-all">
-      <title>Allgemeine Audioverzögerung oder mieser Ton (existiert bei allen oder vielen Videodateien)</title>
+      <title>Allgemeine AudioverzÃ¶gerung oder mieser Ton (existiert bei allen oder vielen Videodateien)</title>
       <itemizedlist>
         <listitem>
           <para>
@@ -59,13 +59,13 @@
         </listitem>
 
         <listitem>
-          <para>Audiopuffer-Probleme (Puffergröße schlecht erkannt)</para>
+          <para>Audiopuffer-Probleme (PuffergrÃ¶ÃŸe schlecht erkannt)</para>
           <para>Workaround: <application>MPlayer</application>s Option <option>-abs</option></para>
         </listitem>
 
         <listitem>
           <para>
-            Probleme mit der Samplerate - vielleicht unterstützt deine Karte nicht die Samplerate
+            Probleme mit der Samplerate - vielleicht unterstÃ¼tzt deine Karte nicht die Samplerate
             deiner Dateien - probiere den Resample-Filter (<option>-af resample=...</option>)
           </para>
         </listitem>
@@ -76,14 +76,14 @@
             VGA-Karte/Treiber</para>
           <para>Workaround: kaufe eine schnellere Karte oder lies die Dokumentationsteil, der
             Geschwindigkeitsoptimierung behandelt</para>
-          <para>Probiere außerdem <option>-framedrop</option></para>
+          <para>Probiere auÃŸerdem <option>-framedrop</option></para>
         </listitem>
       </itemizedlist>
     </sect2>
 
 
     <sect2 id="bugs-delay-specific">
-      <title>Audioverzögerung/-desynchronisation speziell bei einer oder wenigen Dateien</title>
+      <title>AudioverzÃ¶gerung/-desynchronisation speziell bei einer oder wenigen Dateien</title>
       <itemizedlist>
         <listitem>
           <para>schlechte Datei</para>
@@ -92,7 +92,7 @@
             <itemizedlist>
               <listitem>
                 <para>
-                  Option <option>-ni</option> oder <option>-nobps</option> (für
+                  Option <option>-ni</option> oder <option>-nobps</option> (fÃ¼r
                   nicht-interleaved- oder schlechte Dateien)
                 </para>
                 <para>
@@ -101,7 +101,7 @@
               </listitem>
               <listitem>
                 <para>
-                  <option>-mc 0</option> (erforderlich für Dateien mit schlecht interleavedem VBR-Audio)
+                  <option>-mc 0</option> (erforderlich fÃ¼r Dateien mit schlecht interleavedem VBR-Audio)
                 </para>
                 <para>
                   und/oder
@@ -110,17 +110,17 @@
               <listitem>
                 <para>
                   <option>-delay</option> oder <keycap>+</keycap>/<keycap>-</keycap>
-                  Tasten zur Laufzeit, um die Verzögerung anzupassen
+                  Tasten zur Laufzeit, um die VerzÃ¶gerung anzupassen
                 </para>
               </listitem>
             </itemizedlist>
-            Wenn nichts davon hilft, lade die Datei bitte hoch, wir überprüfen (und fixen) das.
+            Wenn nichts davon hilft, lade die Datei bitte hoch, wir Ã¼berprÃ¼fen (und fixen) das.
           </para>
         </listitem>
 
         <listitem>
           <para>
-            deine Soundkarte unterstützt keine Wiedergabe bei 48kHz
+            deine Soundkarte unterstÃ¼tzt keine Wiedergabe bei 48kHz
           </para>
           <para>
             Workaround: Kaufe eine bessere Soundkarte... oder versuche, fps um 10% zu senken
@@ -141,14 +141,14 @@
 
 
     <sect2 id="bugs-nosound">
-      <title>Überhaupt kein Ton</title>
+      <title>Ãœberhaupt kein Ton</title>
       <itemizedlist>
         <listitem>
           <para>
-            deine Datei enthält einen nicht-unterstützten Audiocodec
+            deine Datei enthÃ¤lt einen nicht-unterstÃ¼tzten Audiocodec
           </para>
           <para>
-            Lösung: lies die Dokumentation und hilf uns, Unterstützung dafür hinzuzufügen
+            LÃ¶sung: lies die Dokumentation und hilf uns, UnterstÃ¼tzung dafÃ¼r hinzuzufÃ¼gen
           </para>
         </listitem>
       </itemizedlist>
@@ -156,20 +156,20 @@
 
 
     <sect2 id="bugs-nopicture">
-      <title>Überhaupt kein Bild (nur graues/grünes Fenster)</title>
+      <title>Ãœberhaupt kein Bild (nur graues/grÃ¼nes Fenster)</title>
       <itemizedlist>
         <listitem>
           <para>
-            deine Datei enthält einen nicht-unterstützten Videocodec
+            deine Datei enthÃ¤lt einen nicht-unterstÃ¼tzten Videocodec
           </para>
           <para>
-            Lösung: lies die Dokumentation und hilf uns, Unterstützung dafür hinzuzufügen
+            LÃ¶sung: lies die Dokumentation und hilf uns, UnterstÃ¼tzung dafÃ¼r hinzuzufÃ¼gen
           </para>
         </listitem>
         <listitem>
           <para>
-            automatisch ausgewählter Codec kann die Datei nicht decodieren - probier, mit
-            den Optionen <option>-vc</option> oder <option>-vfm</option> einen anderen auszuwählen
+            automatisch ausgewÃ¤hlter Codec kann die Datei nicht decodieren - probier, mit
+            den Optionen <option>-vc</option> oder <option>-vfm</option> einen anderen auszuwÃ¤hlen
           </para>
         </listitem>
       </itemizedlist>
@@ -180,8 +180,8 @@
       <title>Video-out-Probleme</title>
       <para>
         Beachte zuerst, dass die Optionen <option>-fs</option>, <option>-vm</option> und
-        <option>-zoom</option> nicht von allen Treibern unterstützt werden.
-        Außerdem unterstützen nicht alle Treiber Skalierung/Zoomen in Hardware.
+        <option>-zoom</option> nicht von allen Treibern unterstÃ¼tzt werden.
+        AuÃŸerdem unterstÃ¼tzen nicht alle Treiber Skalierung/Zoomen in Hardware.
       </para>
 
       <formalpara>
@@ -203,12 +203,12 @@
       </formalpara>
 
       <formalpara>
-        <title>Grünes Bild bei mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
+        <title>GrÃ¼nes Bild bei mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
         <para>
           <itemizedlist>
             <listitem>
               <para>
-                mga_vid hat die Größe deines RAMs falsch erkannt, lade es neu mit der Option
+                mga_vid hat die GrÃ¶ÃŸe deines RAMs falsch erkannt, lade es neu mit der Option
                 <option>mga_ram_size</option>
               </para>
             </listitem>

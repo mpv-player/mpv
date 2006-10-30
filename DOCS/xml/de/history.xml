@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- in sync with r20085 -->
 <appendix id="history">
   <title>Geschichte</title>
@@ -12,8 +12,8 @@
       <application>xanim</application>, <application>avifile</application>,
       <application>xmmp</application>) aber sie haben alle irgendwelche Probleme,
       meist mit speziellen Dateien oder mit der Audio-/Video-Synchronisation.
-      Die meisten von ihnen sind nicht fähig, beides, MPEG-1, MPEG-2 und AVI-(DivX)-Dateien,
-      abzuspielen. Viele Player haben auch Probleme mit der Bildqualität oder mit der
+      Die meisten von ihnen sind nicht fÃ¤hig, beides, MPEG-1, MPEG-2 und AVI-(DivX)-Dateien,
+      abzuspielen. Viele Player haben auch Probleme mit der BildqualitÃ¤t oder mit der
       Geschwindigkeit. Also beschloss ich, einen zu schreiben bzw. zu modifizieren...
     </para>
   </blockquote>
@@ -28,7 +28,7 @@
         <para>
           Der erste Versuch, zusammengehackt in einer halben Stunde!  Ich hatte
           libmpeg3 von <ulink url="http://www.heroinewarrior.com"/> bis zur Version 0.3
-          verwendet, aber es gab Probleme mit Bildqualität und Geschwindigkeit.
+          verwendet, aber es gab Probleme mit BildqualitÃ¤t und Geschwindigkeit.
         </para>
       </listitem>
       <listitem>
@@ -36,7 +36,7 @@
           <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 28. Sep. - 20 Okt. 2000
         </para>
         <para>
-          MPEG-Codec ersetzt durch DVDview von Dirk Farin, es war großartiger
+          MPEG-Codec ersetzt durch DVDview von Dirk Farin, es war groÃŸartiger
           Stoff, aber er war langsam und in C++ geschrieben (A'rpi hasst C++!!!)
         </para>
       </listitem>
@@ -47,7 +47,7 @@
         <para>
           MPEG-Codec war libmpeg2 (mpeg2dec) von Aaron Holtzman und
           Michel Lespinasse. Er ist super, optimierter, sehr schneller C-Code mit perfekter
-          Bildqualität und 100% MPEG-Standard-Konformität.
+          BildqualitÃ¤t und 100% MPEG-Standard-KonformitÃ¤t.
         </para>
       </listitem>
       <listitem>
@@ -74,7 +74,7 @@
         </para>
         <para>
           Einige neue Entwickler kamen dazu, und seit 0.11 ist das <application>MPlayer</application>-Projekt
-          eine Gemeischaftsarbeit! Unterstützung für ASF-Dateien hinzugefügt sowie OpenDivX-En-/Decodierung
+          eine Gemeischaftsarbeit! UnterstÃ¼tzung fÃ¼r ASF-Dateien hinzugefÃ¼gt sowie OpenDivX-En-/Decodierung
           (siehe <ulink url="http://www.projectmayo.com"/>).
         </para>
       </listitem>
@@ -84,8 +84,8 @@
         </para>
         <para>
           Die Release-Version der 0.11pre nach 4 Monaten harter Entwicklungsarbeit!
-          Probiere sie aus und sei verblüfft! Tausende neuer Features hinzugefügt...
-          Und natürlich wurde alter Code auch verbessert, Fehler entfernt usw.
+          Probiere sie aus und sei verblÃ¼fft! Tausende neuer Features hinzugefÃ¼gt...
+          Und natÃ¼rlich wurde alter Code auch verbessert, Fehler entfernt usw.
         </para>
       </listitem>
       <listitem>
@@ -93,9 +93,9 @@
           <emphasis role="bold"><application>MPlayer</application> 0.18 "The BugCounter"</emphasis> 9. Jul. 2001
         </para>
         <para>
-          2 Monate seit 0.17, und hier ist ein neues Release.. ASF-Unterstützung
-          vervollständigt, mehr Untertitelformate, libao (ähnlich wie libvo aber für Audio)
-          eingeführt, stabiler als je zuvor, und so weiter. Es ist ein MUSS!
+          2 Monate seit 0.17, und hier ist ein neues Release.. ASF-UnterstÃ¼tzung
+          vervollstÃ¤ndigt, mehr Untertitelformate, libao (Ã¤hnlich wie libvo aber fÃ¼r Audio)
+          eingefÃ¼hrt, stabiler als je zuvor, und so weiter. Es ist ein MUSS!
         </para>
       </listitem>
       <listitem>
@@ -104,7 +104,7 @@
         </para>
         <para>
           Hmm. Wieder ein Release. Tonnen neuer Features, Beta-GUI-Version,
-          Bugs gefixt, neue vo- und ao-Treiber, auf viele Systeme portiert, einschließlich
+          Bugs gefixt, neue vo- und ao-Treiber, auf viele Systeme portiert, einschlieÃŸlich
           Opensource-DivX-Codecs und vieles mehr. Probiers aus!
         </para>
       </listitem>
@@ -113,10 +113,10 @@
           <emphasis role="bold"><application>MPlayer</application> 0.60 "The RTFMCounter"</emphasis> 3. Jan. 2002
         </para>
         <para>
-          MOV/VIVO/RM/FLI/NUV-Dateiformat werden unterstützt, native CRAM-, Cinepak-,
-          ADPCM-Codecs und Unterstützung für XAnim's Binary-Codecs; Support für DVD-Untertitel,
+          MOV/VIVO/RM/FLI/NUV-Dateiformat werden unterstÃ¼tzt, native CRAM-, Cinepak-,
+          ADPCM-Codecs und UnterstÃ¼tzung fÃ¼r XAnim's Binary-Codecs; Support fÃ¼r DVD-Untertitel,
           erstes Release von <application>MEncoder</application>, TV-Grabbing, Cache,
-          liba52, unzählige Fixes.
+          liba52, unzÃ¤hlige Fixes.
         </para>
       </listitem>
       <listitem>
@@ -124,7 +124,7 @@
           <emphasis role="bold"><application>MPlayer</application> 0.90pre10 "The BirthdayCounter"</emphasis> 11. Nov. 2002
         </para>
         <para>
-          Obwohl dies kein Release ist, erwähne ich es, denn es kam
+          Obwohl dies kein Release ist, erwÃ¤hne ich es, denn es kam
           2 Jahre nach <application>MPlayer</application> v0.01 heraus.
           Happy birthday, <application>MPlayer</application>!
         </para>
@@ -134,9 +134,9 @@
           <emphasis role="bold"><application>MPlayer</application> 0.90rc1 "The CodecCounter"</emphasis> 7. Dez. 2002
         </para>
         <para>
-          Wieder kein Release, aber nachdem Unterstützung für Sorenson 3 (QuickTime)
-          und Windows Media 9 hinzugefügt wurde, ist <application>MPlayer</application> weltweit
-          der erste Movie-Player mit Support für alle bekannten Video-Formate!
+          Wieder kein Release, aber nachdem UnterstÃ¼tzung fÃ¼r Sorenson 3 (QuickTime)
+          und Windows Media 9 hinzugefÃ¼gt wurde, ist <application>MPlayer</application> weltweit
+          der erste Movie-Player mit Support fÃ¼r alle bekannten Video-Formate!
         </para>
       </listitem>
       <listitem>
@@ -144,9 +144,9 @@
           <emphasis role="bold"><application>MPlayer</application> 0.90 "The CounterCounter"</emphasis> 6. Apr. 2003
         </para>
         <para>
-          Nach mehr als einem Jahr kamen wir letztendlich zu dem Entschluß, dass
-          der Code tatsächlich wieder stabil und bereit zur Veröffentlichung als
-          Release ist. Leider vergaßen wir, die Versionsnummer zu erhöhen, und weitere
+          Nach mehr als einem Jahr kamen wir letztendlich zu dem EntschluÃŸ, dass
+          der Code tatsÃ¤chlich wieder stabil und bereit zur VerÃ¶ffentlichung als
+          Release ist. Leider vergaÃŸen wir, die Versionsnummer zu erhÃ¶hen, und weitere
           widerliche Bugs flossen ein, also sei darauf vorbebereitet...
         </para>
       </listitem>
@@ -155,7 +155,7 @@
           <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 13. Aug. 2003
         </para>
         <para>
-          Die oben erwähnten und viele weitere Bugs wurden gefixt.
+          Die oben erwÃ¤hnten und viele weitere Bugs wurden gefixt.
           Dies ist die aktuelltste stabile Version.
         </para>
       </listitem>
@@ -164,11 +164,11 @@
           <emphasis role="bold"><application>MPlayer</application> 1.0pre1 "Development on the beach"</emphasis> 1. Sep. 2003
         </para>
         <para>
-          Obwohl dies kein stabiles Release ist, werde ich es aufführen, weil
+          Obwohl dies kein stabiles Release ist, werde ich es auffÃ¼hren, weil
           es die erste Vorabversion der 1.0-Serie des <application>MPlayer</application>
-          und dazu ausersehen ist, die <emphasis>großen Fehlerjagdparty</emphasis>
-          zu unterstützen.
-          Dies ist ein großer Schritt vorwärts!
+          und dazu ausersehen ist, die <emphasis>groÃŸen Fehlerjagdparty</emphasis>
+          zu unterstÃ¼tzen.
+          Dies ist ein groÃŸer Schritt vorwÃ¤rts!
         </para>
       </listitem>
       <listitem>
