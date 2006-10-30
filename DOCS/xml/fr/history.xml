@@ -1,18 +1,18 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20085 -->
 <appendix id="history">
 <title>Histoire</title>
 
 <blockquote><para>
-Cela a commencé un an auparavant...
-J'ai essayé de nombreux lecteurs de vidéos sous GNU/Linux (<application>mtv</application>, <application>xmps</application>,
+Cela a commencÃ© un an auparavant...
+J'ai essayÃ© de nombreux lecteurs de vidÃ©os sous GNU/Linux (<application>mtv</application>, <application>xmps</application>,
 <application>dvdview</application>, <application>livid/oms</application>,
 <application>videolan</application>, <application>xine</application>,
 <application>xanim</application>, <application>avifile</application>,
-<application>xmmp</application>) mais ils présentaient tous des défauts, particulièrement sur
-certains fichiers ou avec la synchronisation audio/vidéo. La plupart étaient incapables de lire à
-la fois les fichiers MPEG-1, MPEG-2 et AVI (DivX). De plus ils avaient des problèmes de vitesse/qualité
-d'images. J'ai donc décidé d'en écrire/modifier un...
+<application>xmmp</application>) mais ils prÃ©sentaient tous des dÃ©fauts, particuliÃ¨rement sur
+certains fichiers ou avec la synchronisation audio/vidÃ©o. La plupart Ã©taient incapables de lire Ã 
+la fois les fichiers MPEG-1, MPEG-2 et AVI (DivX). De plus ils avaient des problÃ¨mes de vitesse/qualitÃ©
+d'images. J'ai donc dÃ©cidÃ© d'en Ã©crire/modifier un...
 </para></blockquote><para>A'rpi, 2001</para>
 
 <para>
@@ -20,92 +20,92 @@ d'images. J'ai donc décidé d'en écrire/modifier un...
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3</emphasis>: 22-25 Sep 2000
   </para>
-  <para>Le premier essai, réalisé en une demi-heure !
-  J'ai utilisé libmpeg3 de <ulink url="http://www.heroinewarrior.com"/>
-  dans sa version 0.3, mais il présentait des problèmes graves;mes de
-  vitesse/qualité d'images.
+  <para>Le premier essai, rÃ©alisÃ© en une demi-heure !
+  J'ai utilisÃ© libmpeg3 de <ulink url="http://www.heroinewarrior.com"/>
+  dans sa version 0.3, mais il prÃ©sentait des problÃ¨mes graves;mes de
+  vitesse/qualitÃ© d'images.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 28 Sep-20 Oct 2000
-  </para><para>Le codec MPEG a été remplacé par DVDview de Dirk Farin, du bon boulot,
-    mais c'était lent et écrit en C++ (A'rpi déteste le C++!!!)
+  </para><para>Le codec MPEG a Ã©tÃ© remplacÃ© par DVDview de Dirk Farin, du bon boulot,
+    mais c'Ã©tait lent et Ã©crit en C++ (A'rpi dÃ©teste le C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 21 Oct-2 Nov 2000
-  </para><para>Le codec MPEG était libmpeg2 (mpeg2dec) par Aaron Holtzman et Michel Lespinasse.
-    Il est excellent, un code C rapide et bien optimisé; avec une qualité d'image parfaite
+  </para><para>Le codec MPEG Ã©tait libmpeg2 (mpeg2dec) par Aaron Holtzman et Michel Lespinasse.
+    Il est excellent, un code C rapide et bien optimisÃ©; avec une qualitÃ© d'image parfaite
     et 100% compatible avec les standards MPEG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9</emphasis>: 18 Nov-4 Dec 2000
-  </para><para>Un condensé de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
-    basé sur le chargeur de DLL Win32 de avifile.
+  </para><para>Un condensÃ© de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
+    basÃ© sur le chargeur de DLL Win32 de avifile.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>: 1er Jan 2001
   </para><para>Les lecteurs MPEG et AVI dans un seul binaire !
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">série <application>MPlayer</application> v0.11pre</emphasis>:
-  </para><para>De nouveaux développeurs ont joint le projet et depuis la version 0.11 le projet
-    MPlayer est un travail d'équipe ! Ajout du support des fichiers .ASF, et
-    de l'encodage/décodage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
+  <emphasis role="bold">sÃ©rie <application>MPlayer</application> v0.11pre</emphasis>:
+  </para><para>De nouveaux dÃ©veloppeurs ont joint le projet et depuis la version 0.11 le projet
+    MPlayer est un travail d'Ã©quipe ! Ajout du support des fichiers .ASF, et
+    de l'encodage/dÃ©codage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.17a &quot;The IdegCounter&quot;</emphasis> 27 Avr 2001
-  </para><para>La finalisation de la version 0.11pre après 4 mois de développement intensif !
-    Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalités ont été apportées, le code existant amélioré et sécurisé, et de nombreux bogues ont été corrigés..
+  </para><para>La finalisation de la version 0.11pre aprÃ¨s 4 mois de dÃ©veloppement intensif !
+    Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalitÃ©s ont Ã©tÃ© apportÃ©es, le code existant amÃ©liorÃ© et sÃ©curisÃ©, et de nombreux bogues ont Ã©tÃ© corrigÃ©s..
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.18 &quot;The BugCounter&quot;</emphasis> 9 Juillet 2001
-  </para><para>Deux mois après la 0.17, une nouvelle parution.. Compléter le support ASF,
+  </para><para>Deux mois aprÃ¨s la 0.17, une nouvelle parution.. ComplÃ©ter le support ASF,
     plus de formats pour les sous-titres, introduction de libao (similaire et libvo pour l'audio),
     encore plus stable et performant.... C'est un MUST !
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.50 &quot;The Faszom(C)ounter&quot;</emphasis> 8 Oct 2001
-  </para><para>Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalités, une GUI en version
-    beta, des bogues fixés, de nouveaux drivers vo et ao, portage
-    sur de nombreux systèmes, incluant les codecs DivX Open-Source, et bien plus
+  </para><para>Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalitÃ©s, une GUI en version
+    beta, des bogues fixÃ©s, de nouveaux drivers vo et ao, portage
+    sur de nombreux systÃ¨mes, incluant les codecs DivX Open-Source, et bien plus
     encore... Essayez le !
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.60 &quot;The RTFMCounter&quot;</emphasis> 3 Jan 2002
   </para><para>Support des formats de fichier MOV/VIVO/RM/FLI/NUV, CRAM natif, Cinepak,
     codecs ADPCM, et support des codecs XAnim binaires; support des sous-titres DVD,
-    première sortie de <application>MEncoder</application>, capture TV, cache, liba52, réparations innombrables.
+    premiÃ¨re sortie de <application>MEncoder</application>, capture TV, cache, liba52, rÃ©parations innombrables.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90pre10 &quot;The BirthdayCounter&quot;</emphasis> 11 Nov 2002
   </para><para>MPlayer 0.90pre10 "The BirthdayCounter" 11 Nov 2002
     Bien que ce ne soit pas une version officielle, je la mentionne parce qu'elle est sortie 2 ans
-    après MPlayer v0.01. Joyeux anniversaire, MPlayer !
+    aprÃ¨s MPlayer v0.01. Joyeux anniversaire, MPlayer !
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90rc1 &quot;The CodecCounter&quot;</emphasis> 7 Dec 2002
-  </para><para>Là encore, pas une version officielle, mais après l'ajout du support Sorenson 3 (QuickTime)
+  </para><para>LÃ  encore, pas une version officielle, mais aprÃ¨s l'ajout du support Sorenson 3 (QuickTime)
     et Windows Media 9, MPlayer est le premier lecteur de film au monde qui supporte
-    tous les formats vidéos connus!
+    tous les formats vidÃ©os connus!
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.90 &quot;The CounterCounter&quot;</emphasis> 6 Avr 2003
   </para><para>
-  </para><para>Après plus d'un an, nous avons finalement conclu que le code était
-  de nouveau suffisamment stable, et prêt à sortir en temps que version officielle.
-  Malheureusement nous avons oublié d'incrémenter le numéro de version, et d'autres
-  bogues ennuyeux sont apparus, donc préparez-vous pour...
+  </para><para>AprÃ¨s plus d'un an, nous avons finalement conclu que le code Ã©tait
+  de nouveau suffisamment stable, et prÃªt Ã  sortir en temps que version officielle.
+  Malheureusement nous avons oubliÃ© d'incrÃ©menter le numÃ©ro de version, et d'autres
+  bogues ennuyeux sont apparus, donc prÃ©parez-vous pour...
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 13 Août 2003
-  </para><para>Des corrections ont été apportées à ce qui est dit ci-dessus,
-    ainsi qu'à d'autres bogues. Ceci est la dernière version stable.
+  <emphasis role="bold"><application>MPlayer</application> 0.91</emphasis> 13 AoÃ»t 2003
+  </para><para>Des corrections ont Ã©tÃ© apportÃ©es Ã  ce qui est dit ci-dessus,
+    ainsi qu'Ã  d'autres bogues. Ceci est la derniÃ¨re version stable.
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold"><application>MPlayer</application> 1.0pre1 &quot;Développement sur la plage&quot;</emphasis> 1er Sep 2003
+  <emphasis role="bold"><application>MPlayer</application> 1.0pre1 &quot;DÃ©veloppement sur la plage&quot;</emphasis> 1er Sep 2003
   </para><para>Bien que ce ne soit pas une version stable, je la mentionne car
-   c'est la première pré-version de la série 1.0 de MPlayer et qu'elle est destinée
-   à aider la <emphasis>grande chasse aux bogues</emphasis>. C'est un pas en avant
-   énorme !
+   c'est la premiÃ¨re prÃ©-version de la sÃ©rie 1.0 de MPlayer et qu'elle est destinÃ©e
+   Ã  aider la <emphasis>grande chasse aux bogues</emphasis>. C'est un pas en avant
+   Ã©norme !
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 1.0</emphasis> date encore inconnue

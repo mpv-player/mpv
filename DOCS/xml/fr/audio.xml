@@ -1,46 +1,46 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r17322 -->
 <chapter id="audio">
-<title>Périphériques de sortie audio</title>
+<title>PÃ©riphÃ©riques de sortie audio</title>
 <sect1 id="sync">
-<title>Synchronisation audio/vidéo</title>
+<title>Synchronisation audio/vidÃ©o</title>
 
 <para>
-Les pilotes Linux des cartes son ont des problèmes d'incompatibilité. C'est parce que
-<application>MPlayer</application> se base sur une fonction des pilotes écrits
-<emphasis>correctement</emphasis> pour maintenir une synchro audio/vidéo correcte.
+Les pilotes Linux des cartes son ont des problÃ¨mes d'incompatibilitÃ©. C'est parce que
+<application>MPlayer</application> se base sur une fonction des pilotes Ã©crits
+<emphasis>correctement</emphasis> pour maintenir une synchro audio/vidÃ©o correcte.
 Malheureusement, certains auteurs de pilotes n'ont que faire de cette fonction: elle
 n'est pas requise pour jouer des MP3 ou des effets sonores.
 </para>
 
 <para>
-D'autres lecteurs multimédia comme <ulink url="http://avifile.sf.net">aviplay</ulink>
+D'autres lecteurs multimÃ©dia comme <ulink url="http://avifile.sf.net">aviplay</ulink>
 ou <ulink url="http://xinehq.de">xine</ulink> fonctionnent probablement
-autrement avec ces pilotes parce qu'ils utilisent des méthodes "simples" pour leur
-synchro interne. Des mesures ont montré que leurs méthodes n'étaient pas aussi
+autrement avec ces pilotes parce qu'ils utilisent des mÃ©thodes "simples" pour leur
+synchro interne. Des mesures ont montrÃ© que leurs mÃ©thodes n'Ã©taient pas aussi
 efficaces que celles de <application>MPlayer</application>.
 </para>
 
 <para>
-Utiliser <application>MPlayer</application> avec un pilote correctement écrit
-ne provoquera pas de désynchro A/V relatives à l'audio, à part avec les fichiers
-très mal créés (voir la page de man pour les solutions).
+Utiliser <application>MPlayer</application> avec un pilote correctement Ã©crit
+ne provoquera pas de dÃ©synchro A/V relatives Ã  l'audio, Ã  part avec les fichiers
+trÃ¨s mal crÃ©Ã©s (voir la page de man pour les solutions).
 </para>
 
 <para>
 Si vous avez un mauvais pilote audio, essayez l'option <option>-autosync</option>, il
-devrait régler vos problèmes. Voir la page de man pour les informations détaillées.
+devrait rÃ©gler vos problÃ¨mes. Voir la page de man pour les informations dÃ©taillÃ©es.
 </para>
 </sect1>
 
 <sect1 id="troubleshooting">
-<title>Dépannage</title>
+<title>DÃ©pannage</title>
 
 <para>Quelques notes:</para>
 
 <para>
   Si vous avez ALSA version 0.5, vous devrez presque toujours utiliser l'option
-  <option>-ao alsa5</option>, la version 0.5 émulant mal l'OSS, qui
+  <option>-ao alsa5</option>, la version 0.5 Ã©mulant mal l'OSS, qui
   <emphasis role="bold">plante <application>MPlayer</application></emphasis>
   avec un message du type:
   <screen>
@@ -49,8 +49,8 @@ DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
 </para>
 
 <para>
-  Si le son comporte des cliquètements lors d'une lecture depuis le CD-ROM, activez l'IRQ
-  unmasking comme décrit plus en détail dans la section <link linkend="drives">CD-ROM</link>.
+  Si le son comporte des cliquÃ¨tements lors d'une lecture depuis le CD-ROM, activez l'IRQ
+  unmasking comme dÃ©crit plus en dÃ©tail dans la section <link linkend="drives">CD-ROM</link>.
 
 </para>
 </sect1>

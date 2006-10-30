@@ -1,14 +1,14 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20051 -->
 <chapter id="radio">
 <title>Radio</title>
 
 <sect1 id="radio-input">
-<title>Entrée Radio</title>
+<title>EntrÃ©e Radio</title>
 
 <para>
-Cette section a pour but de vous expliquer comment écouter la radio
-depuis un tuner compatible V4L (Video For Linux). Reportez-vous à la 
+Cette section a pour but de vous expliquer comment Ã©couter la radio
+depuis un tuner compatible V4L (Video For Linux). Reportez-vous Ã  la 
 page de manuel pour la description des options controlant la radio ainsi
 que pour la liste des raccourcis clavier.
 </para>
@@ -19,13 +19,13 @@ que pour la liste des raccourcis clavier.
 
 <procedure>
 <step><para>
-  Le support de la radio n'est pas activée par défaut, vous devez donc commencer
+  Le support de la radio n'est pas activÃ©e par dÃ©faut, vous devez donc commencer
   par recompiler MPlayer. Invoquez <filename>./configure</filename> avec l'option
-  <option>--enable-radio</option> et si vous désirez pouvoir enregister la radio,
+  <option>--enable-radio</option> et si vous dÃ©sirez pouvoir enregister la radio,
   ajoutez  <option>--enable-radio-capture</option>.
 </para></step>
 <step><para>
-  Vérifiez que votre tuner fonctionne avec un autre logiciel d'écoute radio
+  VÃ©rifiez que votre tuner fonctionne avec un autre logiciel d'Ã©coute radio
   comme <application>XawTV</application> par exemple.
 </para></step>
 </procedure>
@@ -34,26 +34,26 @@ que pour la liste des raccourcis clavier.
 <sect2 id="radio-tips">
 <title>Astuces d'utilisation</title>
 <para>
-La liste complète des options est disponible dans la page de manuel.
-En voici une sélection des plus pratiques:
+La liste complÃ¨te des options est disponible dans la page de manuel.
+En voici une sÃ©lection des plus pratiques:
 </para>
 <itemizedlist>
 <listitem>
 <para>
 L'option <option>channels</option>. Un exemple:
 <screen>-radio channels=104.4-Sibir,103.9-Maximum</screen>
-Avec cette option, seules les fréquences 104.4 et 103.9
-pourront être écoutées. Lors d'un changement de station, le nom de la radio
-apparaitra à l'écran (OSD). Les caractères espace &quot; &quot; dans le nom de la station
-doivent être remplacés par le caractère underscore &quot;_&quot;.
+Avec cette option, seules les frÃ©quences 104.4 et 103.9
+pourront Ãªtre Ã©coutÃ©es. Lors d'un changement de station, le nom de la radio
+apparaitra Ã  l'Ã©cran (OSD). Les caractÃ¨res espace &quot; &quot; dans le nom de la station
+doivent Ãªtre remplacÃ©s par le caractÃ¨re underscore &quot;_&quot;.
 </para>
 </listitem>
 
 <listitem>
 <para>
-Il y a plusieurs façons d'enregistrer la radio. Vous pouvez soit utiliser votre
-carte son via un cable externe reliant votre carte vidéo et le line-in de la carte son
-ou utiliser l'ADC integré à la puce saa7134. Dans le second cas, vous devez charger le
+Il y a plusieurs faÃ§ons d'enregistrer la radio. Vous pouvez soit utiliser votre
+carte son via un cable externe reliant votre carte vidÃ©o et le line-in de la carte son
+ou utiliser l'ADC integrÃ© Ã  la puce saa7134. Dans le second cas, vous devez charger le
 pilote <systemitem>saa7134-alsa</systemitem> ou <systemitem>saa7134-oss</systemitem> selon 
 votre configuration.
 </para>
@@ -61,11 +61,11 @@ votre configuration.
 
 <listitem>
 <para>
-<application>MEncoder</application> ne peut pas être utilisé pour enregistrer la radio car
-il doit necessairement travailler sur un flux vidéo. Vous pouvez soit utiliser le logiciel
+<application>MEncoder</application> ne peut pas Ãªtre utilisÃ© pour enregistrer la radio car
+il doit necessairement travailler sur un flux vidÃ©o. Vous pouvez soit utiliser le logiciel
 <application>arecord</application> du projet ALSA ou utiliser l'option 
 <option>-ao pcm:file=fichier.wav</option>. Dans ce cas, vous n'entenderez rien,
-sauf si vous utilisez un cable branché au line-in et que le volume du line-in n'est pas nul).
+sauf si vous utilisez un cable branchÃ© au line-in et que le volume du line-in n'est pas nul).
 </para>
 </listitem>
 </itemizedlist>
@@ -78,8 +78,8 @@ sauf si vous utilisez un cable branché au line-in et que le volume du line-in n'
 
 <informalexample>
 <para>
-Ecoute depuis un périphérique V4L standard (cable relié au line-in,
-enregistrement désactivé):
+Ecoute depuis un pÃ©riphÃ©rique V4L standard (cable reliÃ© au line-in,
+enregistrement dÃ©sactivÃ©):
 <screen>
 mplayer radio://104.4
 </screen>
@@ -88,8 +88,8 @@ mplayer radio://104.4
 
 <informalexample>
 <para>
-Ecoute depuis un périphérique V4L standard (cable relié au line-in,
-enregistrement désactivé, interface V4Lv1):
+Ecoute depuis un pÃ©riphÃ©rique V4L standard (cable reliÃ© au line-in,
+enregistrement dÃ©sactivÃ©, interface V4Lv1):
 <screen>
 mplayer -radio driver=v4l radio://104.4
 </screen>
@@ -98,7 +98,7 @@ mplayer -radio driver=v4l radio://104.4
 
 <informalexample>
 <para>
-Ecoute de la seconde fréquence dans la liste.
+Ecoute de la seconde frÃ©quence dans la liste.
 <screen>
 mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
 </screen>
@@ -108,14 +108,14 @@ mplayer -radio channels=104.4=Sibir,103.9=Maximm radio://2
 <informalexample>
 <para>
 Transfert du son par le bus PCI depuis l'ADC interne de la carte son.
-Dans cet exemple, le tuner radio est utilisé comme une seconde carte son
-(périphérique ALSA hw:1,0). Pour les cartes son basées sur la puce
-saa7134, le module saa7134-alsa ou saa7134-oss doit être chargé.
+Dans cet exemple, le tuner radio est utilisÃ© comme une seconde carte son
+(pÃ©riphÃ©rique ALSA hw:1,0). Pour les cartes son basÃ©es sur la puce
+saa7134, le module saa7134-alsa ou saa7134-oss doit Ãªtre chargÃ©.
 <screen>
 mplayer -rawaudio rate=32000 -radio adevice=hw=1.0:arate=32000:channels=104.4=Sibir,103.9=Maximm radio://2/capture
 </screen>
-<note><para>Dans les noms de périphérique ALSA, les point-virgules &quot;;&quot; doivent être remplacés
-par des signes égal &quot;=&quot; et les virgules &quot;,&quot; par des points &quot;.&quot;.
+<note><para>Dans les noms de pÃ©riphÃ©rique ALSA, les point-virgules &quot;;&quot; doivent Ãªtre remplacÃ©s
+par des signes Ã©gal &quot;=&quot; et les virgules &quot;,&quot; par des points &quot;.&quot;.
 </para></note>
 </para>
 </informalexample>

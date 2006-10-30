@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20085 -->
 
 <bookinfo id="toc">
-<title><application>MPlayer</application> - Le Lecteur Vidéo</title>
+<title><application>MPlayer</application> - Le Lecteur VidÃ©o</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
 <date>30 Novembre 2004</date>
 <copyright>
@@ -40,16 +40,16 @@
 <title>Comment lire cette documentation</title>
 
 <para>
-Si c'est votre première installation, assurez-vous de tout lire d'ici
-jusqu'à la fin de la section Installation, et de suivre tous les liens que vous
-pourrez trouver. Si vous avez d'autres questions, retournez à la
-<link linkend="toc">table des matières</link>, lisez la <xref linkend="faq"/>
+Si c'est votre premiÃ¨re installation, assurez-vous de tout lire d'ici
+jusqu'Ã  la fin de la section Installation, et de suivre tous les liens que vous
+pourrez trouver. Si vous avez d'autres questions, retournez Ã  la
+<link linkend="toc">table des matiÃ¨res</link>, lisez la <xref linkend="faq"/>
 ou faites une recherche dans ces fichiers.
-La plupart des questions devraient trouver leur réponse ici et le
-reste a probablement déjà été demandé sur nos
+La plupart des questions devraient trouver leur rÃ©ponse ici et le
+reste a probablement dÃ©jÃ  Ã©tÃ© demandÃ© sur nos
 <ulink url="http://www.mplayerhq.hu/design7/info.html#mailing_lists">listes de diffusion</ulink>.
 Regardez leurs <ulink url="http://lists.mplayerhq.hu/cgi-bin/s-arch.cgi">archives</ulink>,
-il y a beaucoup d'informations intéressantes à y trouver.
+il y a beaucoup d'informations intÃ©ressantes Ã  y trouver.
 </para>
 
 </preface>
@@ -59,75 +59,75 @@ il y a beaucoup d'informations intéressantes à y trouver.
 <title>Introduction</title>
 
 <para>
-<application>MPlayer</application> est un lecteur de vidéos pour GNU/Linux
+<application>MPlayer</application> est un lecteur de vidÃ©os pour GNU/Linux
 (fonctionne sur de nombreux autres Un*x, et processeurs
 <emphasis role="bold">non-x86</emphasis>, voir la section <xref linkend="ports"/>).
-Il lit la majorité des fichiers MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
-QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska supportés
+Il lit la majoritÃ© des fichiers MPEG, VOB, AVI, OGG/OGM, VIVO, ASF/WMA/WMV,
+QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA, Matroska supportÃ©s
 par de nombreux codecs natifs, XAnim, RealPlayer et les DLLs Win32.
 Vous pouvez regarder les <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx,
-RealMedia, Sorenson, Theora</emphasis>, ainsi que les vidéos au format
+RealMedia, Sorenson, Theora</emphasis>, ainsi que les vidÃ©os au format
 <emphasis role="bold">MPEG-4 (DivX)</emphasis>.
 L'autre point fort de <application>MPlayer</application> est la grande
-variété de pilotes de sortie supportée.
+variÃ©tÃ© de pilotes de sortie supportÃ©e.
 Il fonctionne avec X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, mais vous pouvez utiliser GGI et SDL (et ainsi tous leurs pilotes)
-et également certains pilotes de bas niveau spécifiques à certaines cartes
+et Ã©galement certains pilotes de bas niveau spÃ©cifiques Ã  certaines cartes
 (pour Matrox, 3Dfx et Radeon, Mach64, Permedia3) !
 La plupart d'entre eux supportent le redimmensionnement logiciel ou
-matériel, vous pouvez donc apprécier les films en plein écran.
-<application>MPlayer</application> supporte la décompression matérielle
+matÃ©riel, vous pouvez donc apprÃ©cier les films en plein Ã©cran.
+<application>MPlayer</application> supporte la dÃ©compression matÃ©rielle
 fournie par certaines cartes MPEG, telles que la <link linkend="dvb">DVB</link>
 et la <link linkend="dxr3">DXR3/Hollywood+</link>.
-Et que dire de ces superbes sous-titres lissés (<emphasis role="bold">14
-types supportés</emphasis>) avec des polices européennes/ISO 8859-1,2
-(Hongrois, Anglais, tchèque, etc.), Cyrilliques, Coréennes, ainsi que de
+Et que dire de ces superbes sous-titres lissÃ©s (<emphasis role="bold">14
+types supportÃ©s</emphasis>) avec des polices europÃ©ennes/ISO 8859-1,2
+(Hongrois, Anglais, tchÃ¨que, etc.), Cyrilliques, CorÃ©ennes, ainsi que de
 l'OnScreenDisplay (OSD) ?
 </para>
 
 <para>
-Ce lecteur peut lire les fichiers MPEG endommagés (utile pour certains VCDs),
-ainsi que les mauvais fichiers AVI qui ne sont pas lisibles par le célèbre
+Ce lecteur peut lire les fichiers MPEG endommagÃ©s (utile pour certains VCDs),
+ainsi que les mauvais fichiers AVI qui ne sont pas lisibles par le cÃ©lÃ¨bre
 Windows Media Player.
-Même les fichiers AVI sans index sont lisibles, et vous pouvez reconstruire
+MÃªme les fichiers AVI sans index sont lisibles, et vous pouvez reconstruire
 ses indexs soit temporairement avec l'option <option>-idx</option>,
-soit de manière définitive avec <application>MEncoder</application>, autorisant
+soit de maniÃ¨re dÃ©finitive avec <application>MEncoder</application>, autorisant
 ainsi l'avance/retour rapide !
-Comme vous pouvez le constater, la stabilité et la qualité sont les choses
-les plus importantes, mais la vitesse est également formidable.
-Il y a également un puissant système de filtres pour faire de la manipulation
-vidéo et audio.
+Comme vous pouvez le constater, la stabilitÃ© et la qualitÃ© sont les choses
+les plus importantes, mais la vitesse est Ã©galement formidable.
+Il y a Ã©galement un puissant systÃ¨me de filtres pour faire de la manipulation
+vidÃ©o et audio.
 </para>
 
 <para>
 <application>MEncoder</application> (Le Movie Encoder de
-<application>MPlayer</application>) est un simple encodeur de vidéos, conçu
-pour encoder des vidéos jouables par <application>MPlayer</application>
+<application>MPlayer</application>) est un simple encodeur de vidÃ©os, conÃ§u
+pour encoder des vidÃ©os jouables par <application>MPlayer</application>
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 dans d'autres formats jouables par <application>MPlayer</application>
 (voir plus bas).
-Il peut encoder avec des codecs variés comme <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
+Il peut encoder avec des codecs variÃ©s comme <emphasis role="bold">MPEG-4 (DivX4)</emphasis>
 (1 ou 2 passes),<systemitem class="library">libavcodec</systemitem>,
 audio <emphasis role="bold">PCM/MP3/MP3 VBR</emphasis>.
 </para>
 
 
 <itemizedlist>
-<title>Fonctionnalités de <application>MEncoder</application></title>
-<listitem><simpara>Encodage à partir de la grande variété de formats de fichiers
-et de décodeurs de <application>MPlayer</application></simpara></listitem>
+<title>FonctionnalitÃ©s de <application>MEncoder</application></title>
+<listitem><simpara>Encodage Ã  partir de la grande variÃ©tÃ© de formats de fichiers
+et de dÃ©codeurs de <application>MPlayer</application></simpara></listitem>
 <listitem><simpara>
   Encodage dans tous les codecs
   <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de ffmpeg
 </simpara></listitem>
 <listitem><simpara>
-  Encodage vidéo depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>
+  Encodage vidÃ©o depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>
 </simpara></listitem>
 <listitem><simpara>
-  Encodage/multiplexage vers fichiers AVI entrelacés avec index propre
+  Encodage/multiplexage vers fichiers AVI entrelacÃ©s avec index propre
 </simpara></listitem>
 <listitem><simpara>
-  Création de fichiers à partir de flux audio externes
+  CrÃ©ation de fichiers Ã  partir de flux audio externes
 </simpara></listitem>
 <listitem><simpara>
   Encodage 1, 2 ou 3 passes
@@ -135,7 +135,7 @@ et de décodeurs de <application>MPlayer</application></simpara></listitem>
 <listitem><para>
   MP3 audio <emphasis role="bold">VBR</emphasis>
   <important><simpara>
-  L'audio MP3 VBR peut ne pas être bien lu sur les lecteurs Windows!
+  L'audio MP3 VBR peut ne pas Ãªtre bien lu sur les lecteurs Windows!
   </simpara></important>
 </para></listitem>
 <listitem><simpara>
@@ -145,7 +145,7 @@ et de décodeurs de <application>MPlayer</application></simpara></listitem>
   Copie de flux (stream)
 </simpara></listitem>
 <listitem><simpara>
-  Synchronisation A/V de la source (basé sur PTS, peut être désactivé avec l'option
+  Synchronisation A/V de la source (basÃ© sur PTS, peut Ãªtre dÃ©sactivÃ© avec l'option
   <option>-mc 0</option>)
 </simpara></listitem>
 <listitem><simpara>
@@ -153,7 +153,7 @@ et de décodeurs de <application>MPlayer</application></simpara></listitem>
   pour l'encodage d'un VOB 29.97fps en AVI 24fps)
 </simpara></listitem>
 <listitem><simpara>
-  Utilise notre très puissant système de plugins (crop, expand,
+  Utilise notre trÃ¨s puissant systÃ¨me de plugins (crop, expand,
   flip, postprocess, rotate, scale, conversion rgb/yuv)
 </simpara></listitem>
 <listitem><simpara>
@@ -166,17 +166,17 @@ et de décodeurs de <application>MPlayer</application></simpara></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Fonctionnalités prévues</title>
+<title>FonctionnalitÃ©s prÃ©vues</title>
 <listitem><simpara>
   Toujours plus de formats/codecs disponibles
-  (création de fichiers VOB avec des flux DivX4/Indeo5/VIVO :)
+  (crÃ©ation de fichiers VOB avec des flux DivX4/Indeo5/VIVO :)
 </simpara></listitem>
 </itemizedlist>
 
 <!-- FIXME: the license should be in bookinfo -->
 <para>
 <application>MPlayer</application> et <application>MEncoder</application>
-peuvent être distribués selon les termes de la GNU General Public License Version 2.
+peuvent Ãªtre distribuÃ©s selon les termes de la GNU General Public License Version 2.
 </para>
 
 </chapter>

@@ -1,49 +1,49 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20083 -->
 <appendix id="bugs">
 
 <title>Bogues connus</title>
 <sect1 id="bugs-special">
-<title>Bogues/Problèmes spécifiques à certains systèmes ou à certains CPU</title>
+<title>Bogues/ProblÃ¨mes spÃ©cifiques Ã  certains systÃ¨mes ou Ã  certains CPU</title>
 <itemizedlist>
 <listitem>
 <para>SIGILL (signal 4) sur P3 en utilisant les noyaux 2.2.x:</para>
-<para>Problème: le noyau 2.2.x n'a pas un support natif (fonctionnel) du SSE</para>
-<para>Solution: mettez à jour le noyau en 2.4.x</para>
+<para>ProblÃ¨me: le noyau 2.2.x n'a pas un support natif (fonctionnel) du SSE</para>
+<para>Solution: mettez Ã  jour le noyau en 2.4.x</para>
 <para>Contournement: <command>./configure --disable-sse</command></para>
 </listitem>
 
 <listitem>
-<para>SIGILL (signal 4) Général:</para>
-<para>Problème: vous avez compilé et utilisé <application>MPlayer</application> sur des machines différentes
-(par exemple compilé sur P3 et tournant sur Celeron)</para>
+<para>SIGILL (signal 4) GÃ©nÃ©ral:</para>
+<para>ProblÃ¨me: vous avez compilÃ© et utilisÃ© <application>MPlayer</application> sur des machines diffÃ©rentes
+(par exemple compilÃ© sur P3 et tournant sur Celeron)</para>
 <para>Solution: compilez <application>MPlayer</application> sur la machine sur laquelle vous l'utiliserez !</para>
 <para>Contournement: Vous pouvez oublier tout ceci en passant l'option <option>--enable-runtime-cpudetection</option>
-ou en désactivant les instructions spécifiques au CPU (comme <option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc)
-lors de l'étape de configuration.</para>
+ou en dÃ©sactivant les instructions spÃ©cifiques au CPU (comme <option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc)
+lors de l'Ã©tape de configuration.</para>
 </listitem>
 </itemizedlist>
 </sect1>
 
 
 <sect1 id="bugs-audio">
-<title>Problèmes de synchro A-V et autres problèmes audio</title>
+<title>ProblÃ¨mes de synchro A-V et autres problÃ¨mes audio</title>
 
 <sect2 id="bugs-delay-all">
-<title>Décalage audio général ou son saccadé (existe avec tous ou de nombreux fichiers)</title>
+<title>DÃ©calage audio gÃ©nÃ©ral ou son saccadÃ© (existe avec tous ou de nombreux fichiers)</title>
 <itemizedlist>
-<listitem><para>Le plus courant: pilote audio bogué ! - Essayez d'utiliser d'autres pilotes, essayez
-l'émulation OSS ALSA avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
-des fois ça aide. Si votre fichier est lu correctement avec <option>-nosound</option>,
-alors vous pouvez être certain qu'il s'agit d'un problème de carte son (pilote).
+<listitem><para>Le plus courant: pilote audio boguÃ© ! - Essayez d'utiliser d'autres pilotes, essayez
+l'Ã©mulation OSS ALSA avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
+des fois Ã§a aide. Si votre fichier est lu correctement avec <option>-nosound</option>,
+alors vous pouvez Ãªtre certain qu'il s'agit d'un problÃ¨me de carte son (pilote).
 </para></listitem>
 <listitem>
-<para>Problèmes de buffer audio (taille de buffer mal détectée)</para>
+<para>ProblÃ¨mes de buffer audio (taille de buffer mal dÃ©tectÃ©e)</para>
 <para>Contournement: option <option>-abs</option> de <application>MPlayer</application></para>
 </listitem>
 <listitem><para>
-Problèmes de taux d'échantillonnage - peut-être que votre carte ne supporte pas le taux
-d'échantillonnage utilisé dans vos fichiers - essayez le filtre de réechantillonnage (<option>-af resample=...</option>)
+ProblÃ¨mes de taux d'Ã©chantillonnage - peut-Ãªtre que votre carte ne supporte pas le taux
+d'Ã©chantillonnage utilisÃ© dans vos fichiers - essayez le filtre de rÃ©echantillonnage (<option>-af resample=...</option>)
 </para></listitem>
 <listitem>
 <para>Machine lente (CPU ou VGA)</para>
@@ -58,7 +58,7 @@ augmenter la vitesse.</para>
 
 
 <sect2 id="bugs-delay-specific">
-<title>Décalage audio/désynchro spécifique à un ou quelques fichiers</title>
+<title>DÃ©calage audio/dÃ©synchro spÃ©cifique Ã  un ou quelques fichiers</title>
 <itemizedlist>
 <listitem>
 <para>Mauvais fichier</para>
@@ -67,32 +67,32 @@ Contournement:
   <itemizedlist>
   <listitem>
     <para>options <option>-ni</option> ou <option>-nobps</option> (pour les fichiers
-    non-entrelacés ou mauvais)</para>
+    non-entrelacÃ©s ou mauvais)</para>
     <para>et/ou</para>
   </listitem>
   <listitem>
-    <para><option>-mc 0</option>(requis pour les fichiers avec de l'audio VBR mal entrelacé)</para>
+    <para><option>-mc 0</option>(requis pour les fichiers avec de l'audio VBR mal entrelacÃ©)</para>
     <para>et/ou</para>
   </listitem>
   <listitem>
     <para><option>-delay</option> ou les touches <keycap>+</keycap>/<keycap>-</keycap>
-    pendant l'exécution pour régler le décalage</para>
+    pendant l'exÃ©cution pour rÃ©gler le dÃ©calage</para>
   </listitem>
   </itemizedlist>
-Si rien de tout ça n'aide, uploadez le fichier SVP, nous le contrôlerons (et réparerons).
+Si rien de tout Ã§a n'aide, uploadez le fichier SVP, nous le contrÃ´lerons (et rÃ©parerons).
 </para>
 </listitem>
 
 <listitem>
-<para>Votre carte son ne supporte pas la lecture à 48kHz</para>
-<para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter le
-nombre de trames par seconde (fps) de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
-filtre de réechantillonnage (resample)</para>
+<para>Votre carte son ne supporte pas la lecture Ã  48kHz</para>
+<para>Contournement: achetez une meilleur carte son... ou essayez de dÃ©crÃ©menter le
+nombre de trames par seconde (fps) de 10% (utilisez <option>-fps 27</option> pour un film Ã  30fps) ou utilisez le
+filtre de rÃ©echantillonnage (resample)</para>
 </listitem>
 
 <listitem>
 <para>Machine lente (si A-V n'est pas proche de 0, et que le dernier nombre de la ligne
-d'état augmente)</para>
+d'Ã©tat augmente)</para>
 <para>Contournement: <option>-framedrop</option></para>
 </listitem>
 </itemizedlist>
@@ -103,8 +103,8 @@ d'état augmente)</para>
 <title>Pas de son du tout</title>
 <itemizedlist>
 <listitem>
-<para>Votre fichier utilise un codec audio non-supporté</para>
-<para>Solution: lisez la documentation et aidez-nous à en ajouter
+<para>Votre fichier utilise un codec audio non-supportÃ©</para>
+<para>Solution: lisez la documentation et aidez-nous Ã  en ajouter
 le support</para>
 </listitem>
 </itemizedlist>
@@ -112,15 +112,15 @@ le support</para>
 
 
 <sect2 id="bugs-nopicture">
-<title>Pas d'image du tout (juste une fenêtre complètement grise/verte)</title>
+<title>Pas d'image du tout (juste une fenÃªtre complÃ¨tement grise/verte)</title>
 <itemizedlist>
 <listitem>
-<para>votre fichier utilise un codec vidéo non-supporté</para>
-<para>Solution: lisez la documentation et aidez-nous à en ajouter le support</para>
+<para>votre fichier utilise un codec vidÃ©o non-supportÃ©</para>
+<para>Solution: lisez la documentation et aidez-nous Ã  en ajouter le support</para>
 </listitem>
 <listitem>
 <para>
-le codec auto-sélectionné ne peut décoder le fichier, essayez avec un autre en
+le codec auto-sÃ©lectionnÃ© ne peut dÃ©coder le fichier, essayez avec un autre en
 utilisant les options <option>-vc</option> ou <option>-vfm</option>
 </para>
 </listitem>
@@ -129,19 +129,19 @@ utilisant les options <option>-vc</option> ou <option>-vfm</option>
 
 
 <sect2 id="bugs-video">
-<title>Problèmes de sortie vidéo</title>
+<title>ProblÃ¨mes de sortie vidÃ©o</title>
 <para>
-Premièrement notez que les options <option>-fs -vm</option> et
-<option>-zoom</option> ne sont pas non supportées par tous les pilotes.
+PremiÃ¨rement notez que les options <option>-fs -vm</option> et
+<option>-zoom</option> ne sont pas non supportÃ©es par tous les pilotes.
 De plus, seuls quelques pilotes supportent le redimensionnement/zoom
-matériel.
+matÃ©riel.
 </para>
 
 <formalpara>
 <title>OSD/sub papillotant</title>
 <para>
 <itemizedlist>
-<listitem><para>pilote x11: désolé, cela ne peut être réparé maintenant</para></listitem>
+<listitem><para>pilote x11: dÃ©solÃ©, cela ne peut Ãªtre rÃ©parÃ© maintenant</para></listitem>
 <listitem><para>pilote xv: utilisez l'option <option>-double</option></para></listitem>
 </itemizedlist>
 </para>
@@ -151,7 +151,7 @@ matériel.
 <title>Image verte en utilisant mga_vid (<option>-vo mga</option> / <option>-vo xmga</option>)</title>
 <para>
 <itemizedlist>
-<listitem><para>mga_vid a mal détecté la quantité de RAM de votre carte, rechargez-le
+<listitem><para>mga_vid a mal dÃ©tectÃ© la quantitÃ© de RAM de votre carte, rechargez-le
 en utilisant l'option <option>mga_ram_size</option>
 </para></listitem>
 </itemizedlist>
