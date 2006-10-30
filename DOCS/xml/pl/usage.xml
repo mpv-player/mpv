@@ -1,31 +1,31 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20449 -->
 <!-- Opiekun: emdej -->
 <chapter id="usage">
-<title>Sposób użycia</title>
+<title>SposĂłb uĹźycia</title>
 
 <sect1 id="commandline">
-<title>Wiersz poleceń</title>
+<title>Wiersz poleceĹ</title>
 
 <para>
-<application>MPlayer</application> używa skomplikowanego drzewa odtwarzania.
-Składa się ono z opcji globalnych podanych na początku, na przykład:
+<application>MPlayer</application> uĹźywa skomplikowanego drzewa odtwarzania.
+SkĹada siÄ ono z opcji globalnych podanych na poczÄtku, na przykĹad:
 
 <screen>mplayer -vfm 5</screen>
 
-i opcji podanych po nazwach plików, które stosują się jedynie do podanego
-pliku/URLa/czegokolwiek, na przykład:
+i opcji podanych po nazwach plikĂłw, ktĂłre stosujÄ siÄ jedynie do podanego
+pliku/URLa/czegokolwiek, na przykĹad:
 
 <screen>mplayer -vfm 5 <replaceable>film1.avi</replaceable> <replaceable>film2.avi</replaceable> -vfm 4</screen>
 </para>
 
 <para>
-Możesz pogrupować nazwy plików/URLe za pomocą <literal>{</literal> oraz
-<literal>}</literal>. Przydaje się to przy opcji <option>-loop</option>:
+MoĹźesz pogrupowaÄ nazwy plikĂłw/URLe za pomocÄ <literal>{</literal> oraz
+<literal>}</literal>. Przydaje siÄ to przy opcji <option>-loop</option>:
 
 <screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
 
-Powyższe polecenie odtworzy pliki w kolejności: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+PowyĹźsze polecenie odtworzy pliki w kolejnoĹci: 1, 1, 2, 1, 1, 2, 1, 1, 2.
 </para>
 
 <para>
@@ -33,25 +33,25 @@ Odtwarzanie pliku:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>opcje</replaceable>]<!--
---> [<replaceable>ścieżka</replaceable>/]<replaceable>nazwa_pliku</replaceable>
+--> [<replaceable>ĹcieĹźka</replaceable>/]<replaceable>nazwa_pliku</replaceable>
 </synopsis>
 </para>
 
 <para>
-Kolejny sposób na odtworzenie pliku:
+Kolejny sposĂłb na odtworzenie pliku:
 <synopsis>
 <command>mplayer</command><!--
 --> [<replaceable>opcje</replaceable>]<!--
---> <replaceable>file:///zakodowana-ścieżka-uri</replaceable>
+--> <replaceable>file:///zakodowana-ĹcieĹźka-uri</replaceable>
 </synopsis>
 </para>
 
 <para>
-Odtwarzanie większej ilości plików:
+Odtwarzanie wiÄkszej iloĹci plikĂłw:
 <synopsis>
 <command>mplayer</command><!--
---> [<replaceable>opcje domyślne</replaceable>]<!--
---> [<replaceable>ścieżka</replaceable>/]<replaceable>plik1</replaceable><!--
+--> [<replaceable>opcje domyĹlne</replaceable>]<!--
+--> [<replaceable>ĹcieĹźka</replaceable>/]<replaceable>plik1</replaceable><!--
 --> [<replaceable>opcje dla pliku1</replaceable>]<!--
 --> <replaceable>plik2</replaceable><!--
 --> [<replaceable>opcje dla pliku2</replaceable>] ...
@@ -62,7 +62,7 @@ Odtwarzanie większej ilości plików:
 Odtwarzanie VCD:
 <synopsis>
 <command>mplayer</command> [<replaceable>opcje</replaceable>]<!--
---> vcd://<replaceable>numer_ścieżki</replaceable><!--
+--> vcd://<replaceable>numer_ĹcieĹźki</replaceable><!--
 --> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
 </synopsis>
 </para>
@@ -71,7 +71,7 @@ Odtwarzanie VCD:
 Odtwarzanie DVD:
 <synopsis>
 <command>mplayer</command> [<replaceable>opcje</replaceable>]<!--
---> dvd://<replaceable>numer_tytułu</replaceable><!--
+--> dvd://<replaceable>numer_tytuĹu</replaceable><!--
 --> [-dvd-device <replaceable>/dev/dvd</replaceable>]
 </synopsis>
 </para>
@@ -82,7 +82,7 @@ Odtwarzanie z WWW:
 <command>mplayer</command> [<replaceable>opcje</replaceable>]<!--
 --> http://<replaceable>strona.com/plik.asf</replaceable>
 </synopsis>
-(można użyć również playlist)
+(moĹźna uĹźyÄ rĂłwnieĹź playlist)
 </para>
 
 <para>
@@ -94,7 +94,7 @@ Odtwarzanie z RTSP:
 </para>
 
 <para>
-Przykłady:
+PrzykĹady:
 <screen>
 mplayer -vo x11 <replaceable>/mnt/Films/Contact/contact2.mpg</replaceable>
 mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable>
@@ -111,8 +111,8 @@ mplayer -abs 65536 -delay -0.4 -nobps <replaceable>~/movies/test.avi</replaceabl
 <title>Napisy i OSD</title>
  
 <para>
-<application>MPlayer</application> może wyświetlać napisy podczas odtwarzania
-filmu. Obecnie obsługiwane są następujące formaty:
+<application>MPlayer</application> moĹźe wyĹwietlaÄ napisy podczas odtwarzania
+filmu. Obecnie obsĹugiwane sÄ nastÄpujÄce formaty:
 <itemizedlist>
 <listitem><para>VOBsub</para></listitem>
 <listitem><para>OGM</para></listitem>
@@ -132,9 +132,9 @@ filmu. Obecnie obsługiwane są następujące formaty:
 </para>
  
 <para>
-<application>MPlayer</application> może zrzucić wyżej wymienione formaty napisów
-(<emphasis role="bold">poza pierwszymi trzema</emphasis>) do następujących formatów,
-jeśli podasz odpowiednią opcję:
+<application>MPlayer</application> moĹźe zrzuciÄ wyĹźej wymienione formaty napisĂłw
+(<emphasis role="bold">poza pierwszymi trzema</emphasis>) do nastÄpujÄcych formatĂłw,
+jeĹli podasz odpowiedniÄ opcjÄ:
 <itemizedlist>
 <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
 <listitem><para>SubRip: <option>-dumpsrtsub</option></para></listitem>
@@ -145,81 +145,81 @@ jeśli podasz odpowiednią opcję:
 </para>
  
 <para>
-<application>MEncoder</application> może zrzucić napisy DVD do formatu
+<application>MEncoder</application> moĹźe zrzuciÄ napisy DVD do formatu
 <link linkend="menc-feat-extractsub">VOBsub</link>.
 </para>
  
 <para>
-Opcje wiersza poleceń różnią się nieco dla poszczególnych formatów:
+Opcje wiersza poleceĹ rĂłĹźniÄ siÄ nieco dla poszczegĂłlnych formatĂłw:
  </para>
  
 <formalpara>
 <title>Format VOBsub</title>
 <para>
-Napisy VOBsub składają się z dużego (kilkumegabajtowego) pliku <filename>.SUB</filename>
-i opcjonalnych plików <filename>.IDX</filename> i/lub <filename>.IFO</filename>.
-Jeżeli masz takie pliki, jak
-<filename><replaceable>przykład.sub</replaceable></filename>,
-<filename><replaceable>przykład.ifo</replaceable></filename> (opcjonalne),
-<filename><replaceable>przykład.idx</replaceable></filename> -
-musisz przekazać <application>MPlayerowi</application> opcje
-<option>-vobsub przykład [-vobsubid <replaceable>id</replaceable>]</option>
-(pełna ścieżka jest opcjonalna). Parametr <option>-vobsubid</option> jest, jak
-<option>-sid</option> dla DVD - przy jego pomocy możesz wybierać pomiędzy ścieżkami napisów
-(różne języki). Jeżeli opcja <option>-vobsubid</option> jest pominięta,
-<application>MPlayer</application> spróbuje użyć języka podanego przez parametr
-<option>-slang</option> i powróci do <systemitem>langidx</systemitem>
-zawartego w pliku<filename>.IDX</filename>, żeby ustawić język napisów. Jeżeli to
-zakończy się niepowodzeniem, napisy nie będą wyświetlane.
+Napisy VOBsub skĹadajÄ siÄ z duĹźego (kilkumegabajtowego) pliku <filename>.SUB</filename>
+i opcjonalnych plikĂłw <filename>.IDX</filename> i/lub <filename>.IFO</filename>.
+JeĹźeli masz takie pliki, jak
+<filename><replaceable>przykĹad.sub</replaceable></filename>,
+<filename><replaceable>przykĹad.ifo</replaceable></filename> (opcjonalne),
+<filename><replaceable>przykĹad.idx</replaceable></filename> -
+musisz przekazaÄ <application>MPlayerowi</application> opcje
+<option>-vobsub przykĹad [-vobsubid <replaceable>id</replaceable>]</option>
+(peĹna ĹcieĹźka jest opcjonalna). Parametr <option>-vobsubid</option> jest, jak
+<option>-sid</option> dla DVD - przy jego pomocy moĹźesz wybieraÄ pomiÄdzy ĹcieĹźkami napisĂłw
+(rĂłĹźne jÄzyki). JeĹźeli opcja <option>-vobsubid</option> jest pominiÄta,
+<application>MPlayer</application> sprĂłbuje uĹźyÄ jÄzyka podanego przez parametr
+<option>-slang</option> i powrĂłci do <systemitem>langidx</systemitem>
+zawartego w pliku<filename>.IDX</filename>, Ĺźeby ustawiÄ jÄzyk napisĂłw. JeĹźeli to
+zakoĹczy siÄ niepowodzeniem, napisy nie bÄdÄ wyĹwietlane.
 </para>
 </formalpara>
  
 <formalpara>
-<title>Inne formaty napisów</title>
+<title>Inne formaty napisĂłw</title>
 <para>
-Inne formaty składają się z pojedynczego pliku tekstowego zawierającego przedział
-czasowy, rozmieszczenie i sam tekst. Sposób użycia: Jeżeli masz taki plik, jak
-<filename><replaceable>przykład.txt</replaceable></filename>,
-musisz przekazać opcję <option>-sub
-<replaceable>przykład.txt</replaceable></option> (pełna ścieżka jest opcjonalna).
+Inne formaty skĹadajÄ siÄ z pojedynczego pliku tekstowego zawierajÄcego przedziaĹ
+czasowy, rozmieszczenie i sam tekst. SposĂłb uĹźycia: JeĹźeli masz taki plik, jak
+<filename><replaceable>przykĹad.txt</replaceable></filename>,
+musisz przekazaÄ opcjÄ <option>-sub
+<replaceable>przykĹad.txt</replaceable></option> (peĹna ĹcieĹźka jest opcjonalna).
 </para>
 </formalpara>
  
 <variablelist>
-<title>Dopasowywanie czasu wyświetlania i położenia napisów:</title>
+<title>Dopasowywanie czasu wyĹwietlania i poĹoĹźenia napisĂłw:</title>
 <varlistentry>
   <term><option>-subdelay <replaceable>sek</replaceable></option></term>
   <listitem><simpara>
-    Opóźnia wyświetlanie napisów o <option><replaceable>sek</replaceable></option> sekund.
-    Może być liczbą ujemną. Wartość jest dodawana do licznika czasu filmu.
+    OpĂłĹşnia wyĹwietlanie napisĂłw o <option><replaceable>sek</replaceable></option> sekund.
+    MoĹźe byÄ liczbÄ ujemnÄ. WartoĹÄ jest dodawana do licznika czasu filmu.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
-  <term><option>-subfps <replaceable>ILOŚĆ</replaceable></option></term>
+  <term><option>-subfps <replaceable>ILOĹÄ</replaceable></option></term>
   <listitem><simpara>
-    Określa ilość klatek na sekundę pliku z napisami (liczba rzeczywista).
+    OkreĹla iloĹÄ klatek na sekundÄ pliku z napisami (liczba rzeczywista).
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-subpos <replaceable>0-100</replaceable></option></term>
   <listitem><simpara>
-    Określa położenie napisów.
+    OkreĹla poĹoĹźenie napisĂłw.
     </simpara></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-Jeżeli podczas używania napisów w formacie MicroDVD zauważysz rosnące opóźnienie
-między nimi a filmem, to prawdopodobnie ilość klatek na sekundę filmu różni się
-od wartości, do której zostały przystosowane napisy.
-Zauważ, że format ten korzysta z bezwzględnych numerów klatek do wyświetlania
-napisów w odpowiednim momencie, ale nie zawiera w sobie informacji o wartości fps,
-dlatego powinieneś skorzystać z opcji <option>-subfps</option>.
-Jeżeli chciałbyś trwale rozwiązać ten problem, musisz ręcznie zmienić
-wartość framerate pliku z napisami.
-<application>MPlayer</application> może zrobić to za ciebie:
+JeĹźeli podczas uĹźywania napisĂłw w formacie MicroDVD zauwaĹźysz rosnÄce opĂłĹşnienie
+miÄdzy nimi a filmem, to prawdopodobnie iloĹÄ klatek na sekundÄ filmu rĂłĹźni siÄ
+od wartoĹci, do ktĂłrej zostaĹy przystosowane napisy.
+ZauwaĹź, Ĺźe format ten korzysta z bezwzglÄdnych numerĂłw klatek do wyĹwietlania
+napisĂłw w odpowiednim momencie, ale nie zawiera w sobie informacji o wartoĹci fps,
+dlatego powinieneĹ skorzystaÄ z opcji <option>-subfps</option>.
+JeĹźeli chciaĹbyĹ trwale rozwiÄzaÄ ten problem, musisz rÄcznie zmieniÄ
+wartoĹÄ framerate pliku z napisami.
+<application>MPlayer</application> moĹźe zrobiÄ to za ciebie:
 
-<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_napisów</replaceable> -subfps <replaceable>fps_filmu</replaceable> -sub <replaceable>zbiór_z_napisami</replaceable> <replaceable>atrapa.avi</replaceable></screen>
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_napisĂłw</replaceable> -subfps <replaceable>fps_filmu</replaceable> -sub <replaceable>zbiĂłr_z_napisami</replaceable> <replaceable>atrapa.avi</replaceable></screen>
 </para>
 
 <para>
@@ -234,11 +234,11 @@ O napisach DVD przeczytasz w rozdziale <link linkend="dvd">DVD</link>.
 <title>Sterowanie</title>
 
 <para>
-<application>MPlayer</application> posiada w pełni konfigurowalną, opartą na
-komendach warstwę sterowania, która pozwala na sterowanie
-<application>MPlayerem</application> za pomocą klawiatury, myszki, joysticka lub
-zdalnego sterowania (za pomocą LIRC). Zajrzyj na stronę man w celu przejrzenia
-pełnej listy skrótów klawiszowych.
+<application>MPlayer</application> posiada w peĹni konfigurowalnÄ, opartÄ na
+komendach warstwÄ sterowania, ktĂłra pozwala na sterowanie
+<application>MPlayerem</application> za pomocÄ klawiatury, myszki, joysticka lub
+zdalnego sterowania (za pomocÄ LIRC). Zajrzyj na stronÄ man w celu przejrzenia
+peĹnej listy skrĂłtĂłw klawiszowych.
 </para>
 
 
@@ -246,24 +246,24 @@ pełnej listy skrótów klawiszowych.
 <title>Konfiguracja sterowania</title>
 
 <para>
-<application>MPlayer</application> pozwala Ci przypisać dowolny klawisz/przycisk
-do dowolnego polecenia za pomocą prostego pliku konfiguracyjnego. Składnia tego
-pliku to nazwa klawisza, po której znajduje się komenda. Domyślny plik
-konfiguracyjny znajduje się w <filename>$HOME/.mplayer/input.conf</filename>, ale
-można podać także inny za pomocą opcji
+<application>MPlayer</application> pozwala Ci przypisaÄ dowolny klawisz/przycisk
+do dowolnego polecenia za pomocÄ prostego pliku konfiguracyjnego. SkĹadnia tego
+pliku to nazwa klawisza, po ktĂłrej znajduje siÄ komenda. DomyĹlny plik
+konfiguracyjny znajduje siÄ w <filename>$HOME/.mplayer/input.conf</filename>, ale
+moĹźna podaÄ takĹźe inny za pomocÄ opcji
 <option>-input <replaceable>plik</replaceable></option>
-(ścieżki względne są względem <filename>$HOME/.mplayer</filename>).
+(ĹcieĹźki wzglÄdne sÄ wzglÄdem <filename>$HOME/.mplayer</filename>).
 </para>
 
 <para>
-Możesz uzyskać pełną listę obsługiwanych klawiszy uruchamiając
+MoĹźesz uzyskaÄ peĹnÄ listÄ obsĹugiwanych klawiszy uruchamiajÄc
 <command>mplayer -input keylist</command>
-i pełną listę dostępnych komend za pomocą
+i peĹnÄ listÄ dostÄpnych komend za pomocÄ
 <command>mplayer -input cmdlist</command>.
 </para>
 
 <example>
-<title>Przykładowy plik konfiguracji sterowania</title>
+<title>PrzykĹadowy plik konfiguracji sterowania</title>
 <programlisting>
 ##
 ## Plik konfiguracji sterowania MPlayera
@@ -286,28 +286,28 @@ ENTER pt_step 1 1<!--
 <title>Sterowanie poprzez LIRC</title>
 
 <para>
-Linux Infrared Remote Control - użyj łatwego do własnoręcznego zbudowania
+Linux Infrared Remote Control - uĹźyj Ĺatwego do wĹasnorÄcznego zbudowania
 odbiornika podczerwieni i (prawie) dowolnego pilota zdalnego sterowania i
 steruj nim swoim Linuksem!
-Więcej informacji na <ulink url="http://www.lirc.org">stronie domowej LIRC</ulink>.
+WiÄcej informacji na <ulink url="http://www.lirc.org">stronie domowej LIRC</ulink>.
 </para>
 
 <para>
-Jeśli zainstalowałeś pakiet LIRC, <filename>configure</filename> automatycznie go
-wykryje. Jeśli wszystko pójdzie dobrze, <application>MPlayer</application>
+JeĹli zainstalowaĹeĹ pakiet LIRC, <filename>configure</filename> automatycznie go
+wykryje. JeĹli wszystko pĂłjdzie dobrze, <application>MPlayer</application>
 wypisze przy starcie &quot;<systemitem>Setting up LIRC support...</systemitem>&quot;.
-Jeśli wystąpi błąd, powiadomi Cię o tym. Jeśli nic nie powie Ci na
-temat LIRC, to znaczy, że jego obsługa nie została wkompilowana. Proste :-)
+JeĹli wystÄpi bĹÄd, powiadomi CiÄ o tym. JeĹli nic nie powie Ci na
+temat LIRC, to znaczy, Ĺźe jego obsĹuga nie zostaĹa wkompilowana. Proste :-)
 </para>
 
 <para>
 Nazwa aplikacji dla <application>MPlayer</application> to - niespodzianka -
-<filename>mplayer</filename>. Możesz używać dowolnych komend
-<application>MPlayera</application>, a nawet podać więcej niż jedną
-komendę na raz oddzielając je za pomocą <literal>\n</literal>.
+<filename>mplayer</filename>. MoĹźesz uĹźywaÄ dowolnych komend
+<application>MPlayera</application>, a nawet podaÄ wiÄcej niĹź jednÄ
+komendÄ na raz oddzielajÄc je za pomocÄ <literal>\n</literal>.
 
-Nie zapomnij o włączeniu flagi repeat w <filename>.lircrc</filename> jeśli
-ma to sens (skoki, głośność itp). To jest fragment przykładowego
+Nie zapomnij o wĹÄczeniu flagi repeat w <filename>.lircrc</filename> jeĹli
+ma to sens (skoki, gĹoĹnoĹÄ itp). To jest fragment przykĹadowego
 <filename>.lircrc</filename>:
 </para>
 
@@ -340,21 +340,21 @@ end<!--
 --></programlisting>
 
 <para>
-Jeśli nie lubisz standardowej lokalizacji pliku lirc-config
-(<filename>~/.lircrc</filename>), użyj opcji <option>-lircconf
-<replaceable>nazwa_pliku</replaceable></option> by podać inny plik.
+JeĹli nie lubisz standardowej lokalizacji pliku lirc-config
+(<filename>~/.lircrc</filename>), uĹźyj opcji <option>-lircconf
+<replaceable>nazwa_pliku</replaceable></option> by podaÄ inny plik.
 </para>
 </sect2>
 
 
 <sect2 id="slave-mode">
-<title>Tryb sługi</title>
+<title>Tryb sĹugi</title>
 <para>
-Tryb sługi pozwala Ci na utworzenie prostej nakładki na
-<application>MPlayera</application>. Po uruchomieniu z opcją
-<option>-slave</option> <application>MPlayer</application> będzie czytał
-ze standardowego wejścia komendy oddzielone znakami nowego wiersza (\n).
-Komendy zostały udokumentowane w pliku
+Tryb sĹugi pozwala Ci na utworzenie prostej nakĹadki na
+<application>MPlayera</application>. Po uruchomieniu z opcjÄ
+<option>-slave</option> <application>MPlayer</application> bÄdzie czytaĹ
+ze standardowego wejĹcia komendy oddzielone znakami nowego wiersza (\n).
+Komendy zostaĹy udokumentowane w pliku
 <ulink url="../../tech/slave.txt">slave.txt</ulink>
 </para>
 </sect2>
@@ -363,48 +363,48 @@ Komendy zostały udokumentowane w pliku
 
 
 <sect1 id="streaming">
-<title>Strumieniowanie z sieci i potoków</title>
+<title>Strumieniowanie z sieci i potokĂłw</title>
 
 <para>
-<application>MPlayer</application> potrafi odtwarzać pliki z sieci, używając
-protokołów HTTP, FTP, MMS lub RTSP/RTP.
+<application>MPlayer</application> potrafi odtwarzaÄ pliki z sieci, uĹźywajÄc
+protokoĹĂłw HTTP, FTP, MMS lub RTSP/RTP.
 </para>
 
 <para>
-Odtwarzanie następuje przez proste podanie URLa w wierszu poleceń.
-<application>MPlayer</application> zwraca również uwagę na zmienną środowiskową
-<envar>http_proxy</envar> i używa proxy jeśli jest to możliwe. Korzystanie
-z proxy może być również wymuszone za pomocą:
+Odtwarzanie nastÄpuje przez proste podanie URLa w wierszu poleceĹ.
+<application>MPlayer</application> zwraca rĂłwnieĹź uwagÄ na zmiennÄ ĹrodowiskowÄ
+<envar>http_proxy</envar> i uĹźywa proxy jeĹli jest to moĹźliwe. Korzystanie
+z proxy moĹźe byÄ rĂłwnieĹź wymuszone za pomocÄ:
 <screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/strumien.asf</replaceable></screen>
 </para>
 
 <para>
-<application>MPlayer</application> potrafi również czytać ze standardowego wejścia
-(<emphasis>nie</emphasis> z nazwanych potoków). Może to być wykorzystane np. do
+<application>MPlayer</application> potrafi rĂłwnieĹź czytaÄ ze standardowego wejĹcia
+(<emphasis>nie</emphasis> z nazwanych potokĂłw). MoĹźe to byÄ wykorzystane np. do
 odtwarzania poprzez FTP:
 <screen>wget <replaceable>ftp://micorsops.com/cokolwiek.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
-Zalecane jest również włączenie <option>-cache</option> przy odtwarzaniu
+Zalecane jest rĂłwnieĹź wĹÄczenie <option>-cache</option> przy odtwarzaniu
 z sieci:
 <screen>wget <replaceable>ftp://micorsops.com/cokolwiek.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
 
 <sect2 id="streaming-save">
-<title>Zapisywanie strumieniowanej zawartości</title>
+<title>Zapisywanie strumieniowanej zawartoĹci</title>
 <para>
-  Jak już uda Ci się zmusić <application>MPlayera</application> do odtwarzania
-  Twojego ulubionego strumienia internetowego, możesz użyć opcji
-  <option>-dumpstream</option> aby zapisać strumień do pliku.
-  Na przykład:
+  Jak juĹź uda Ci siÄ zmusiÄ <application>MPlayera</application> do odtwarzania
+  Twojego ulubionego strumienia internetowego, moĹźesz uĹźyÄ opcji
+  <option>-dumpstream</option> aby zapisaÄ strumieĹ do pliku.
+  Na przykĹad:
 <screen>
   mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>strumien.asf</replaceable>
 </screen>
-  zapisze zawartość strumieniowaną z
+  zapisze zawartoĹÄ strumieniowanÄ z
   <replaceable>http://217.71.208.37:8006</replaceable> do pliku
   <replaceable>stream.asf</replaceable>.
-  Działa to ze wszystkimi protokołami obsługiwanymi przez
+  DziaĹa to ze wszystkimi protokoĹami obsĹugiwanymi przez
   <application>MPlayera</application>, jak MMS, RSTP itd.
 </para>
 </sect2>
@@ -416,50 +416,50 @@ z sieci:
 <title>Strumienie zdalne</title>
 
 <para>
-Strumienie zdalne pozwalają na dostęp do większości strumieni obsługiwanych
-przez <application>MPlayera</application> ze zdalnego hosta. Głównym celem tej
-funkcji jest umożliwienie bezpośredniego korzystania z napędu CD lub DVD innego
-komputera w sieci (pod warunkiem posiadania odpowiedniej przepustowości).
-Niestety niektóre typy strumieni (aktualnie TV oraz MF) nie są dostępne zdalnie,
-gdyż są zaimplementowane na poziomie demultipleksera. Jest to przykre w
-przypadku MF, gdyż TV i tak by wymagało szalonej przepustowości.
+Strumienie zdalne pozwalajÄ na dostÄp do wiÄkszoĹci strumieni obsĹugiwanych
+przez <application>MPlayera</application> ze zdalnego hosta. GĹĂłwnym celem tej
+funkcji jest umoĹźliwienie bezpoĹredniego korzystania z napÄdu CD lub DVD innego
+komputera w sieci (pod warunkiem posiadania odpowiedniej przepustowoĹci).
+Niestety niektĂłre typy strumieni (aktualnie TV oraz MF) nie sÄ dostÄpne zdalnie,
+gdyĹź sÄ zaimplementowane na poziomie demultipleksera. Jest to przykre w
+przypadku MF, gdyĹź TV i tak by wymagaĹo szalonej przepustowoĹci.
 </para>
 
 <sect2 id="compile_mpst_server">
 <title>Kompilacja serwera</title>
 <para>
-Po kompilacji <application>MPlayera</application> wejdź do katalogu
+Po kompilacji <application>MPlayera</application> wejdĹş do katalogu
 <filename>TOOLS/netstream</filename> i wpisz <application>make</application>
-by zbudować program serwera. Możesz wtedy skopiować program
+by zbudowaÄ program serwera. MoĹźesz wtedy skopiowaÄ program
 <application>nestream</application> do odpowiedniego miejsca w Twoim
-systemie (przeważnie <filename class="directory">/usr/local/bin</filename>
+systemie (przewaĹźnie <filename class="directory">/usr/local/bin</filename>
 pod Linuksem).
 </para>
 </sect2>
 
 <sect2 id="use_mpst">
-<title>Używanie strumieni zdalnych</title>
+<title>UĹźywanie strumieni zdalnych</title>
 <para>
-Najpierw musisz uruchomić serwer na komputerze, do którego masz zamiar mieć
-dostęp zdalny. Aktualnie serwer jest bardzo podstawowy i nie ma żadnych
-argumentów wiersza poleceń, więc po prostu wpisz <filename>netstream</filename>.
-Teraz możesz np. odtworzyć drugą ścieżkę VCD na serwerze za pomocą:
+Najpierw musisz uruchomiÄ serwer na komputerze, do ktĂłrego masz zamiar mieÄ
+dostÄp zdalny. Aktualnie serwer jest bardzo podstawowy i nie ma Ĺźadnych
+argumentĂłw wiersza poleceĹ, wiÄc po prostu wpisz <filename>netstream</filename>.
+Teraz moĹźesz np. odtworzyÄ drugÄ ĹcieĹźkÄ VCD na serwerze za pomocÄ:
 <screen>
 mplayer -cache 5000 <replaceable>mpst://nazwa_serwera/vcd://2</replaceable>
 </screen>
-Masz również dostęp do plików na tym serwerze:
+Masz rĂłwnieĹź dostÄp do plikĂłw na tym serwerze:
 <screen>
 mplayer -cache 5000 <replaceable>mpst://nazwa_serwera//usr/local/movies/lol.avi</replaceable>
 </screen>
-Zauważ, że ścieżki, które nie zaczynają się na "/" będą względne do katalogu,
-w którym uruchomiono serwer. Opcja <option>-cache</option> nie jest wymagana,
+ZauwaĹź, Ĺźe ĹcieĹźki, ktĂłre nie zaczynajÄ siÄ na "/" bÄdÄ wzglÄdne do katalogu,
+w ktĂłrym uruchomiono serwer. Opcja <option>-cache</option> nie jest wymagana,
 lecz bardzo zalecana.
 </para>
 
 <para>
-Miej na uwadze to, że aktualnie serwer nie ma żadnych zabezpieczeń. Nie narzekaj
-więc na liczne nadużycia, które są przez to możliwe. Zamiast tego wyślij jakąś
-(dobrą) łatkę, by stał się lepszy lub napisz swój własny serwer.
+Miej na uwadze to, Ĺźe aktualnie serwer nie ma Ĺźadnych zabezpieczeĹ. Nie narzekaj
+wiÄc na liczne naduĹźycia, ktĂłre sÄ przez to moĹźliwe. Zamiast tego wyĹlij jakÄĹ
+(dobrÄ) ĹatkÄ, by staĹ siÄ lepszy lub napisz swĂłj wĹasny serwer.
 </para>
 
 </sect2>
@@ -472,29 +472,29 @@ więc na liczne nadużycia, które są przez to możliwe. Zamiast tego wyślij jakąś
 <title>Decyzyjne Listy Edycji (Edit Decision Lists - EDL)</title>
 
 <para>
-Decyzyjna lista edycji (EDL) pozwala na automatyczne omijanie, bądź wyciszanie
-fragmentów filmów podczas ich odtwarzania, na podstawie pliku konfiguracji EDL
+Decyzyjna lista edycji (EDL) pozwala na automatyczne omijanie, bÄdĹş wyciszanie
+fragmentĂłw filmĂłw podczas ich odtwarzania, na podstawie pliku konfiguracji EDL
 dla danego filmu.
 </para>
 
 <para>
-Funkcja ta jest użyteczna dla osób, które zechcą obejrzeć film w "przyjaznym
-dla rodziny" trybie. Możesz usunąć z filmu przemoc, przekleństwa, Jar-Jar
-Binksa, zgodnie z własnymi preferencjami. Ponadto istnieją także inne
-zastosowania, jak automatyczne pomijanie reklam w oglądanych filmach.
+Funkcja ta jest uĹźyteczna dla osĂłb, ktĂłre zechcÄ obejrzeÄ film w "przyjaznym
+dla rodziny" trybie. MoĹźesz usunÄÄ z filmu przemoc, przekleĹstwa, Jar-Jar
+Binksa, zgodnie z wĹasnymi preferencjami. Ponadto istniejÄ takĹźe inne
+zastosowania, jak automatyczne pomijanie reklam w oglÄdanych filmach.
 </para>
 
 <para>
-Format pliku EDL jest raczej "goły". Używana jest struktura z pojedynczym
-poleceniem w wierszu, w którym określone jest co należy zrobić (skip/mute),
-oraz kiedy (używając opóźnienia w sekundach).
+Format pliku EDL jest raczej "goĹy". UĹźywana jest struktura z pojedynczym
+poleceniem w wierszu, w ktĂłrym okreĹlone jest co naleĹźy zrobiÄ (skip/mute),
+oraz kiedy (uĹźywajÄc opĂłĹşnienia w sekundach).
 </para>
 
 <sect2 id="edl_using">
-<title>Używanie pliku EDL</title>
+<title>UĹźywanie pliku EDL</title>
 <para>
-Użyj podczas uruchamiania <application>MPlayera</application> flagi
-<option>-edl &lt;nazwa pliku&gt;</option> z nazwą pliku EDL, który ma być
+UĹźyj podczas uruchamiania <application>MPlayera</application> flagi
+<option>-edl &lt;nazwa pliku&gt;</option> z nazwÄ pliku EDL, ktĂłry ma byÄ
 zastosowany do filmu.
 </para>
 </sect2>
@@ -502,33 +502,33 @@ zastosowany do filmu.
 <sect2 id="edl_making">
 <title>Tworzenie pliku EDL</title>
 <para>
-Aktualny format pliku EDL jest następujący:
+Aktualny format pliku EDL jest nastÄpujÄcy:
 <programlisting>
-[sekunda początkowa] [sekunda końcowa] [akcja]
+[sekunda poczÄtkowa] [sekunda koĹcowa] [akcja]
 </programlisting>
-gdzie liczby odpowiadające sekundom nie muszą być całkowite, zaś akcja może
-przyjmować wartość <literal>0</literal> dla pominięcia bądź
+gdzie liczby odpowiadajÄce sekundom nie muszÄ byÄ caĹkowite, zaĹ akcja moĹźe
+przyjmowaÄ wartoĹÄ <literal>0</literal> dla pominiÄcia bÄdĹş
 <literal>1</literal> dla wyciszenia.
-Na przykład: 
+Na przykĹad: 
 <programlisting>
 5.3   7.1    0
 15    16.7   1
 420   422    0
 </programlisting>
-Oznacza to pominięcie filmu między 5,3 sekundą, a 7,1 sekundą filmu, następnie
-wyciszenie od 15-tej sekundy do 16,7 sekundy i wreszcie pominięcie filmu
-pomiędzy 420 a 422 sekundą Akcje te są wykonywane, gdy licznik czasu filmu
-osiągnie zadeklarowaną wartość.
+Oznacza to pominiÄcie filmu miÄdzy 5,3 sekundÄ, a 7,1 sekundÄ filmu, nastÄpnie
+wyciszenie od 15-tej sekundy do 16,7 sekundy i wreszcie pominiÄcie filmu
+pomiÄdzy 420 a 422 sekundÄ Akcje te sÄ wykonywane, gdy licznik czasu filmu
+osiÄgnie zadeklarowanÄ wartoĹÄ.
 </para>
 
 <para>
-Aby stworzyć plik EDL, będący punktem wyjścia do dalszej edycji, użyj flagi
+Aby stworzyÄ plik EDL, bÄdÄcy punktem wyjĹcia do dalszej edycji, uĹźyj flagi
 <option>-edlout &lt;nazwa pliku&gt;</option>.
-Następnie, podczas odtwarzania filmu, naciśnij <keycap>i</keycap>, aby oznaczyć
-początek i koniec bloku do pominięcia.
+NastÄpnie, podczas odtwarzania filmu, naciĹnij <keycap>i</keycap>, aby oznaczyÄ
+poczÄtek i koniec bloku do pominiÄcia.
 Odpowiedni wpis zostanie automatycznie utworzony w pliku.
-Wtedy możesz wrócić do edycji i "dostrajania" wygenerowanego pliku EDL,
-w którym możesz także zmienić domyślne pomijanie bloku na wyciszanie.
+Wtedy moĹźesz wrĂłciÄ do edycji i "dostrajania" wygenerowanego pliku EDL,
+w ktĂłrym moĹźesz takĹźe zmieniÄ domyĹlne pomijanie bloku na wyciszanie.
 </para>
 </sect2>
 
@@ -540,46 +540,46 @@ w którym możesz także zmienić domyślne pomijanie bloku na wyciszanie.
 <title>Zaawansowane audio</title>
 
 <sect2 id="advaudio-surround">
-<title>Dźwięk przestrzenny/wielokanałowy</title>
+<title>DĹşwiÄk przestrzenny/wielokanaĹowy</title>
 
 <sect3 id="advaudio-surround-DVD">
 <title>DVDs</title>
 <para>
-Większość płyt DVD, a także wiele innych plików, zawiera dźwięk przestrzenny.
-<application>MPlayer</application> obsługuje dźwięk przestrzenny, ale opcja ta 
-nie jest domyślnie włączona, ponieważ sprzęt przeznaczony dla zwykłego stereo 
-jest znacznie bedziej popularny. Aby odtworzyć plik zawierający więcej niż dwa 
-kanały audio, użyj opcji <option>-channels</option>.
-Na przykład, aby odtworzyć DVD z audio 5.1:
+WiÄkszoĹÄ pĹyt DVD, a takĹźe wiele innych plikĂłw, zawiera dĹşwiÄk przestrzenny.
+<application>MPlayer</application> obsĹuguje dĹşwiÄk przestrzenny, ale opcja ta 
+nie jest domyĹlnie wĹÄczona, poniewaĹź sprzÄt przeznaczony dla zwykĹego stereo 
+jest znacznie bedziej popularny. Aby odtworzyÄ plik zawierajÄcy wiÄcej niĹź dwa 
+kanaĹy audio, uĹźyj opcji <option>-channels</option>.
+Na przykĹad, aby odtworzyÄ DVD z audio 5.1:
 
 <screen>mplayer dvd://1 -channels 6</screen>
 
-Zauważmy, że mimo nazwy "5.1", używanych jest 6 kanałów.
-Jeżeli posiadasz sprzęt pozwalający na odtwarzanie dźwięku przestrzennego możesz 
-bezpiecznie wpisać <option>channels</option> do swojego pliku konfiguracyjnego 
+ZauwaĹźmy, Ĺźe mimo nazwy "5.1", uĹźywanych jest 6 kanaĹĂłw.
+JeĹźeli posiadasz sprzÄt pozwalajÄcy na odtwarzanie dĹşwiÄku przestrzennego moĹźesz 
+bezpiecznie wpisaÄ <option>channels</option> do swojego pliku konfiguracyjnego 
 <application>MPlayera</application> (<filename>~/.mplayer/config</filename>). 
-Przykładowo, aby domyślnie włączyć efekt kwadrofonii, należy dodać wiersz:
+PrzykĹadowo, aby domyĹlnie wĹÄczyÄ efekt kwadrofonii, naleĹźy dodaÄ wiersz:
 
 <programlisting>channels=4</programlisting>
 
-Od tego momentu, <application>MPlayer</application> będzie odtwarzał cztery 
-kanały audio, zawsze gdy będą one dostępne.
+Od tego momentu, <application>MPlayer</application> bÄdzie odtwarzaĹ cztery 
+kanaĹy audio, zawsze gdy bÄdÄ one dostÄpne.
 </para>
 </sect3>
 
 
 <sect3 id="advaudio-surround-stereoinfour">
-<title>Odtwarzanie plików stereo przy użyciu czterech głośników</title>
+<title>Odtwarzanie plikĂłw stereo przy uĹźyciu czterech gĹoĹnikĂłw</title>
 
 <para>
-<application>MPlayer</application> standardowo nie duplikuje kanałów, ani nie 
-robi tego większość sterowników audio. Jeżeli chcesz zrobić to ręcznie:
+<application>MPlayer</application> standardowo nie duplikuje kanaĹĂłw, ani nie 
+robi tego wiÄkszoĹÄ sterownikĂłw audio. JeĹźeli chcesz zrobiÄ to rÄcznie:
 
 <screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
 
-Zobacz sekcję o 
-<link linkend="advaudio-channels-copying">kopiowaniu kanałów</link>,
-jest tam wyjaśnienie tego polecenia.
+Zobacz sekcjÄ o 
+<link linkend="advaudio-channels-copying">kopiowaniu kanaĹĂłw</link>,
+jest tam wyjaĹnienie tego polecenia.
 </para>
 
 </sect3>
@@ -589,96 +589,96 @@ jest tam wyjaśnienie tego polecenia.
 <title>Przekazywanie AC3/DTS</title>
 
 <para>
-Dźwięk przestrzenny na płytach DVD zazwyczaj kodowany jest w formacie AC3 
-(Dolby Digital) lub DTS (Digital Theater System). Część współczesnego sprzętu 
-audio jest w stanie dekodować te formaty.
-<application>MPlayer</application> może zostać skonfigurowany, aby przekazywał 
-dane audio bez ich dekodowania. Rozwiązanie takie będzie działało tylko, jeżeli 
-posiadasz w swojej karcie muzycznej złącze S/PDIF (Sony/Philips Digital Interface).
+DĹşwiÄk przestrzenny na pĹytach DVD zazwyczaj kodowany jest w formacie AC3 
+(Dolby Digital) lub DTS (Digital Theater System). CzÄĹÄ wspĂłĹczesnego sprzÄtu 
+audio jest w stanie dekodowaÄ te formaty.
+<application>MPlayer</application> moĹźe zostaÄ skonfigurowany, aby przekazywaĹ 
+dane audio bez ich dekodowania. RozwiÄzanie takie bÄdzie dziaĹaĹo tylko, jeĹźeli 
+posiadasz w swojej karcie muzycznej zĹÄcze S/PDIF (Sony/Philips Digital Interface).
 </para>
 
 <para>
-Jeżeli twój sprzęt audio potrafi dekodować zarówno AC3 jak i DTS, możesz 
-bezpiecznie włączyć przekazywanie dla obu formatów. W przeciwnym razie, tylko 
-dla tego formatu, który jest obsługiwany przez Twój sprzęt.
+JeĹźeli twĂłj sprzÄt audio potrafi dekodowaÄ zarĂłwno AC3 jak i DTS, moĹźesz 
+bezpiecznie wĹÄczyÄ przekazywanie dla obu formatĂłw. W przeciwnym razie, tylko 
+dla tego formatu, ktĂłry jest obsĹugiwany przez TwĂłj sprzÄt.
 </para>
 
 <itemizedlist>
-<title>Aby włączyć przekazywanie z wiersza poleceń:</title>
+<title>Aby wĹÄczyÄ przekazywanie z wiersza poleceĹ:</title>
 <listitem><para>
-dla AC3 użyj <option>-ac hwac3</option>
+dla AC3 uĹźyj <option>-ac hwac3</option>
 </para></listitem>
 <listitem><para>
-dla DTS użyj <option>-ac hwdts</option>
+dla DTS uĹźyj <option>-ac hwdts</option>
 </para></listitem>
 <listitem><para>
-dla AC3 i DTS użyj <option>-afm hwac3</option>
+dla AC3 i DTS uĹźyj <option>-afm hwac3</option>
 </para></listitem>
 </itemizedlist>
 
 <itemizedlist>
-<title>Aby włączyć przekazywanie w pliku konfiguracyjnym 
+<title>Aby wĹÄczyÄ przekazywanie w pliku konfiguracyjnym 
 <application>MPlayera</application>: </title>
 <listitem><para>
-dla AC3 użyj <option>ac=hwac3,</option>
+dla AC3 uĹźyj <option>ac=hwac3,</option>
 </para></listitem>
 <listitem><para>
-dla DTS użyj <option>ac=hwdts,</option>
+dla DTS uĹźyj <option>ac=hwdts,</option>
 </para></listitem>
 <listitem><para>
-dla AC3 i DTS użyj <option>afm=hwac3</option>
+dla AC3 i DTS uĹźyj <option>afm=hwac3</option>
 </para></listitem>
 </itemizedlist>
 
 <para>
-Zauważ, że na końcu opcji <option>ac=hwac3,</option> oraz 
-<option>ac=hwdts,</option> są przecinki. Powodują one, że 
-<application>MPlayer</application> będzie używał standardowych kodeków, które 
-są normalnie używane podczas odtwarzania plików, które nie posiadają dźwięku 
+ZauwaĹź, Ĺźe na koĹcu opcji <option>ac=hwac3,</option> oraz 
+<option>ac=hwdts,</option> sÄ przecinki. PowodujÄ one, Ĺźe 
+<application>MPlayer</application> bÄdzie uĹźywaĹ standardowych kodekĂłw, ktĂłre 
+sÄ normalnie uĹźywane podczas odtwarzania plikĂłw, ktĂłre nie posiadajÄ dĹşwiÄku 
 AC3 ani DTS. 
 
 Opcja <option>afm=hwac3</option> nie wymaga przecinka, 
-samo podanie rodziny kodeków powoduje że <application>MPlayer</application>
-wypróbuje inne gdy będzie musiał.
+samo podanie rodziny kodekĂłw powoduje Ĺźe <application>MPlayer</application>
+wyprĂłbuje inne gdy bÄdzie musiaĹ.
 </para>
 
 </sect3>
 
 <sect3 id="hwmpa-surround-passthrough">
-<title>Przekazywanie dźwięku MPEG</title>
+<title>Przekazywanie dĹşwiÄku MPEG</title>
 
 <para>
-Cyfrowe transmisje TV (takie jak DVB czy ATSC), także niektóre płyty DVDs
-zazwyczaj zawierają strumienie audio w formacie MPEG (zazwyczaj MP2).
-Część sprzętowych dekoderów MPEG, takich jak pełnofunkcjonalne karty DVB, oraz
-adaptery DXR2, potrafi natywnie dekodować ten format.
-<application>MPlayer</application> może zostać tak skonfigurowany, aby przekazywać
+Cyfrowe transmisje TV (takie jak DVB czy ATSC), takĹźe niektĂłre pĹyty DVDs
+zazwyczaj zawierajÄ strumienie audio w formacie MPEG (zazwyczaj MP2).
+CzÄĹÄ sprzÄtowych dekoderĂłw MPEG, takich jak peĹnofunkcjonalne karty DVB, oraz
+adaptery DXR2, potrafi natywnie dekodowaÄ ten format.
+<application>MPlayer</application> moĹźe zostaÄ tak skonfigurowany, aby przekazywaÄ
 dane audio bez ich dekodowania.
 </para>
 
 <para>
-Aby użyć tego sposobu dekodowania:
+Aby uĹźyÄ tego sposobu dekodowania:
 <screen> mplayer -ac hwmpa </screen>
 </para>
 </sect3>
 
 <sect3 id="advaudio-surround-matrix">
-<title>Dźwięk zakodowany macierzowo</title>
+<title>DĹşwiÄk zakodowany macierzowo</title>
 
 <para>
 <emphasis>***TODO***</emphasis>
 </para>
 <para>
-Ta sekcja musi dopiero zostać napisana i nie może zostać ukończona zanim
-ktoś nie dostarczy przykładowych plików do testów. Jeżeli posiadasz jakieś
+Ta sekcja musi dopiero zostaÄ napisana i nie moĹźe zostaÄ ukoĹczona zanim
+ktoĹ nie dostarczy przykĹadowych plikĂłw do testĂłw. JeĹźeli posiadasz jakieĹ
 pliki audio zakodowane macierzowo (matrix-encoded), wiesz kto je posiada lub
-wiesz cokolwiek co mogłoby być pomocne, wyślij proszę informację na listę
-mailingową 
+wiesz cokolwiek co mogĹoby byÄ pomocne, wyĹlij proszÄ informacjÄ na listÄ
+mailingowÄ 
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-DOCS</ulink>
 W temacie podaj "[matrix-encoded audio]".
 </para>
 <para>
-Jeżeli nie nadejdą żadne wiadomości, ta sekcja zostanie usunięta.
+JeĹźeli nie nadejdÄ Ĺźadne wiadomoĹci, ta sekcja zostanie usuniÄta.
 </para>
 
 <para>
@@ -697,24 +697,24 @@ Przydatne linki:
 
 
 <sect3 id="advaudio-surround-hrtf">
-<title>Emulacja przestrzeni w słuchawkach</title>
+<title>Emulacja przestrzeni w sĹuchawkach</title>
 
 <para>
 <application>MPlayer</application> posiada filtr HRTF (Head Related Transfer
-Function) bazujący na <ulink url="http://sound.media.mit.edu/KEMAR.html">projekcie MIT</ulink>,
-w ramach którego wykonane zostały pomiary z mikrofonów zamontowanych na głowie
+Function) bazujÄcy na <ulink url="http://sound.media.mit.edu/KEMAR.html">projekcie MIT</ulink>,
+w ramach ktĂłrego wykonane zostaĹy pomiary z mikrofonĂłw zamontowanych na gĹowie
 ludzkiego manekina.
 </para>
 
 <para>
-Chociaż nie jest możliwe dokładne zasymulowanie systemu dźwięku przestrzennego,
+ChociaĹź nie jest moĹźliwe dokĹadne zasymulowanie systemu dĹşwiÄku przestrzennego,
 filtr HRTF zawarty w <application>MPlayerze</application> powoduje bardziej
-przestrzenne zanurzenie w dźwięku przy użyciu 2-kanałowych słuchawek.
-Standardowy procedura po prostu łączy wszystkie kanały w dwa. <option>hrtf</option>,
-obok łączenia kanałów, generuje także subtelne echa, nieznacznie zwiększa
-separację kanałów stereo, a także zmienia głośność niektórych częstotliwości.
-To, czy dźwięk HRTF brzmi lepiej, może zależeć od źródła dźwięku oraz gustu
-słuchacza, ale z pewnością jest on warty wypróbowania.
+przestrzenne zanurzenie w dĹşwiÄku przy uĹźyciu 2-kanaĹowych sĹuchawek.
+Standardowy procedura po prostu ĹÄczy wszystkie kanaĹy w dwa. <option>hrtf</option>,
+obok ĹÄczenia kanaĹĂłw, generuje takĹźe subtelne echa, nieznacznie zwiÄksza
+separacjÄ kanaĹĂłw stereo, a takĹźe zmienia gĹoĹnoĹÄ niektĂłrych czÄstotliwoĹci.
+To, czy dĹşwiÄk HRTF brzmi lepiej, moĹźe zaleĹźeÄ od ĹşrĂłdĹa dĹşwiÄku oraz gustu
+sĹuchacza, ale z pewnoĹciÄ jest on warty wyprĂłbowania.
 </para>
 
 <para>
@@ -725,10 +725,10 @@ Odtwarzanie DVD z HRTF:
 </para>
 
 <para>
-<option>hrtf</option> działa poprawnie tylko przy 5 i 6 kanałach. Opcja ta wymaga
-także audio próbkowanego z częstotliwością 48kHz. Audio na płytach DVD jest już
-próbkowane 48kHz, lecz jeżeli chcesz odtworzyć plik z innym próbkowaniem i opcją
-<option>hrtf</option>, musisz dokonać jego przepróbkowania tego pliku:
+<option>hrtf</option> dziaĹa poprawnie tylko przy 5 i 6 kanaĹach. Opcja ta wymaga
+takĹźe audio prĂłbkowanego z czÄstotliwoĹciÄ 48kHz. Audio na pĹytach DVD jest juĹź
+prĂłbkowane 48kHz, lecz jeĹźeli chcesz odtworzyÄ plik z innym prĂłbkowaniem i opcjÄ
+<option>hrtf</option>, musisz dokonaÄ jego przeprĂłbkowania tego pliku:
 
 <screen>mplayer <replaceable>filename</replaceable> -channels 6 -af resample=48000,hrtf</screen>
 
@@ -738,12 +738,12 @@ próbkowane 48kHz, lecz jeżeli chcesz odtworzyć plik z innym próbkowaniem i opcją
 
 
 <sect3 id="advaudio-surround-troubleshooting">
-<title>Rozwiązywanie problemów</title>
+<title>RozwiÄzywanie problemĂłw</title>
 
 <para>
-Jeżeli nie słyszysz żadnych dźwięków, sprawdź ustawienia miksera przy pomocy
+JeĹźeli nie sĹyszysz Ĺźadnych dĹşwiÄkĂłw, sprawdĹş ustawienia miksera przy pomocy
 stosownego programu, takiego jak <application>alsamixer</application>;
-niejednokrotnie wyjścia audio są domyślnie wyciszone lub ich głośność jest ustawiona
+niejednokrotnie wyjĹcia audio sÄ domyĹlnie wyciszone lub ich gĹoĹnoĹÄ jest ustawiona
 na zero.
 </para>
 
@@ -753,19 +753,19 @@ na zero.
 
 
 <sect2 id="advaudio-channels">
-<title>Manipulowanie kanałami</title>
+<title>Manipulowanie kanaĹami</title>
 
 <sect3 id="advaudio-channels-general">
-<title>Ogólne informacje</title>
+<title>OgĂłlne informacje</title>
 
 <para>
-Niestety nie ma żadnego standardu opisującego w jaki sposób kanały są uporządkowane.
-Poniższe porządki przedstawiają te używane przez AC3, które są dość typowe. Spróbuj
-ich i sprawdź czy odpowiednie źródła dźwięku się zgadzają. Kanały są numerowane od 0.
+Niestety nie ma Ĺźadnego standardu opisujÄcego w jaki sposĂłb kanaĹy sÄ uporzÄdkowane.
+PoniĹźsze porzÄdki przedstawiajÄ te uĹźywane przez AC3, ktĂłre sÄ doĹÄ typowe. SprĂłbuj
+ich i sprawdĹş czy odpowiednie ĹşrĂłdĹa dĹşwiÄku siÄ zgadzajÄ. KanaĹy sÄ numerowane od 0.
 
 <orderedlist spacing="compact">
 <title>mono</title>
-<listitem override="0"><simpara>środkowy</simpara></listitem>
+<listitem override="0"><simpara>Ĺrodkowy</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
@@ -786,8 +786,8 @@ ich i sprawdź czy odpowiednie źródła dźwięku się zgadzają. Kanały są numerowane 
 <title>surround 4.0</title>
 <listitem override="0"><simpara>lewy przedni</simpara></listitem>
 <listitem><simpara>prawy przedni</simpara></listitem>
-<listitem><simpara>środkowy tylny</simpara></listitem>
-<listitem><simpara>środkowy przedni</simpara></listitem>
+<listitem><simpara>Ĺrodkowy tylny</simpara></listitem>
+<listitem><simpara>Ĺrodkowy przedni</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
@@ -796,7 +796,7 @@ ich i sprawdź czy odpowiednie źródła dźwięku się zgadzają. Kanały są numerowane 
 <listitem><simpara>prawy przedni</simpara></listitem>
 <listitem><simpara>lewy tylny</simpara></listitem>
 <listitem><simpara>prawy tylny</simpara></listitem>
-<listitem><simpara>środkowy przedni</simpara></listitem>
+<listitem><simpara>Ĺrodkowy przedni</simpara></listitem>
 </orderedlist>
 
 <orderedlist spacing="compact">
@@ -805,41 +805,41 @@ ich i sprawdź czy odpowiednie źródła dźwięku się zgadzają. Kanały są numerowane 
 <listitem><simpara>prawy przedni</simpara></listitem>
 <listitem><simpara>lewy tylny</simpara></listitem>
 <listitem><simpara>prawy tylny</simpara></listitem>
-<listitem><simpara>środkowy przedni</simpara></listitem>
-<listitem><simpara>subwoofer (głośnik niskotonowy)</simpara></listitem>
+<listitem><simpara>Ĺrodkowy przedni</simpara></listitem>
+<listitem><simpara>subwoofer (gĹoĹnik niskotonowy)</simpara></listitem>
 </orderedlist>
 
 </para>
 
 <para>
-Opcja <option>-channels</option> jest używana w celu określenia liczby kanałów
-dekodowanego audio. Niektóre kodeki audio wykorzystują tę liczbę aby zdecydować
-czy konieczne jest zmniejszenie liczby kanałów poprzez miksowanie. 
-Zauważ, że ustawienie tej opcji nie jest równoważne z ustawieniem liczby
-wyjściowych kanałów. Przykładowo, używając opcji <option>-channels 4</option>
-aby odtworzyć plik stereo MP3, otrzymamy 2 kanały wyjściowe, bowiem kodek MP3
-nie potrafi spreparować dodatkowych kanałów.
+Opcja <option>-channels</option> jest uĹźywana w celu okreĹlenia liczby kanaĹĂłw
+dekodowanego audio. NiektĂłre kodeki audio wykorzystujÄ tÄ liczbÄ aby zdecydowaÄ
+czy konieczne jest zmniejszenie liczby kanaĹĂłw poprzez miksowanie. 
+ZauwaĹź, Ĺźe ustawienie tej opcji nie jest rĂłwnowaĹźne z ustawieniem liczby
+wyjĹciowych kanaĹĂłw. PrzykĹadowo, uĹźywajÄc opcji <option>-channels 4</option>
+aby odtworzyÄ plik stereo MP3, otrzymamy 2 kanaĹy wyjĹciowe, bowiem kodek MP3
+nie potrafi spreparowaÄ dodatkowych kanaĹĂłw.
 </para>
 
 <para>
-Filtr audio <option>channels</option> może być użyty aby stworzyć lub usunąć kanały,
-co może być przydatne przy określaniu liczy kanałów przesyłanych do karty muzycznej.
-Aby dowiedzieć się więcej, zobacz kolejne sekcje.
+Filtr audio <option>channels</option> moĹźe byÄ uĹźyty aby stworzyÄ lub usunÄÄ kanaĹy,
+co moĹźe byÄ przydatne przy okreĹlaniu liczy kanaĹĂłw przesyĹanych do karty muzycznej.
+Aby dowiedzieÄ siÄ wiÄcej, zobacz kolejne sekcje.
 </para>
 
 </sect3>
 
 
 <sect3 id="advaudio-channels-mono">
-<title>Odtwarzanie dźwięku mono przy użyciu dwóch głośników</title>
+<title>Odtwarzanie dĹşwiÄku mono przy uĹźyciu dwĂłch gĹoĹnikĂłw</title>
 
 <para>
-Dźwięk mono brzmi znacznie lepiej, gdy jest odtwarzany przy użyciu dwóch
-głośników - szczególnie gdy używamy słuchawek. Pliki audio, które posiadają
-tylko jeden kanał audio są automatycznie odtwarzane przy użyciu obu głośników;
-niestety większość plików mono jest zakodowana jako dźwięk stereo, gdzie jeden
-kanał jest wyciszony. Najłatwiejszą i najbardziej niezawodną metodą pozwalającą
-na odtworzenie dźwięku przy użyciu obu głośników jest użycie filtru
+DĹşwiÄk mono brzmi znacznie lepiej, gdy jest odtwarzany przy uĹźyciu dwĂłch
+gĹoĹnikĂłw - szczegĂłlnie gdy uĹźywamy sĹuchawek. Pliki audio, ktĂłre posiadajÄ
+tylko jeden kanaĹ audio sÄ automatycznie odtwarzane przy uĹźyciu obu gĹoĹnikĂłw;
+niestety wiÄkszoĹÄ plikĂłw mono jest zakodowana jako dĹşwiÄk stereo, gdzie jeden
+kanaĹ jest wyciszony. NajĹatwiejszÄ i najbardziej niezawodnÄ metodÄ pozwalajÄcÄ
+na odtworzenie dĹşwiÄku przy uĹźyciu obu gĹoĹnikĂłw jest uĹźycie filtru
 <option>extrastereo</option>:
 
 <screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0</screen>
@@ -847,12 +847,12 @@ na odtworzenie dźwięku przy użyciu obu głośników jest użycie filtru
 </para>
 
 <para>
-Metoda ta uśrednia oba kanały, co skutkuje zmniejszeniu głośności każdego z kanałów
-o połowę względem oryginału. W następnej sekcji zawarto przykłady innych metod rozwiązania
-tego problemu bez zmniejszania głośności; niestety są one bardziej skomplikowanego
-i wymagają różnych opcji w zależności od kanału, który zawiera dane.
-Jeżeli na prawdę potrzebujesz utrzymać głośność, możliwe że łatwiej będzie odpowiednio
-dopasować głośność przy użyciu filtru <option>volume</option>. Na przykład:
+Metoda ta uĹrednia oba kanaĹy, co skutkuje zmniejszeniu gĹoĹnoĹci kaĹźdego z kanaĹĂłw
+o poĹowÄ wzglÄdem oryginaĹu. W nastÄpnej sekcji zawarto przykĹady innych metod rozwiÄzania
+tego problemu bez zmniejszania gĹoĹnoĹci; niestety sÄ one bardziej skomplikowanego
+i wymagajÄ rĂłĹźnych opcji w zaleĹźnoĹci od kanaĹu, ktĂłry zawiera dane.
+JeĹźeli na prawdÄ potrzebujesz utrzymaÄ gĹoĹnoĹÄ, moĹźliwe Ĺźe Ĺatwiej bÄdzie odpowiednio
+dopasowaÄ gĹoĹnoĹÄ przy uĹźyciu filtru <option>volume</option>. Na przykĹad:
 
 <screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5</screen>
 
@@ -862,105 +862,105 @@ dopasować głośność przy użyciu filtru <option>volume</option>. Na przykład:
 
 
 <sect3 id="advaudio-channels-copying">
-<title>Kopiowanie i przesuwanie kanałów</title>
+<title>Kopiowanie i przesuwanie kanaĹĂłw</title>
 
 <para>
-Filtr <option>channels</option> potrafi przesunąć dowolny jeden lub wszystkie kanały.
-Ustawienie wszystkich podopcji filtru <option>channels</option> może być
+Filtr <option>channels</option> potrafi przesunÄÄ dowolny jeden lub wszystkie kanaĹy.
+Ustawienie wszystkich podopcji filtru <option>channels</option> moĹźe byÄ
 skomplikowane i wymaga nieco uwagi.
 
 <orderedlist spacing="compact">
 <listitem><para>
-Zdecyduj ile wyjściowych kanałów audio potrzebujesz. Oto pierwsza podopcja.
+Zdecyduj ile wyjĹciowych kanaĹĂłw audio potrzebujesz. Oto pierwsza podopcja.
 </para></listitem>
 <listitem><para>
-Policz ile przesunięć kanałów zamierzasz wykonać. To jest druga podopcja. Każdy
-kanał może być przesunięty do kilku różnych kanałów w tym samym czasie, ale pamiętaj,
-że gdy przesuniesz kanał (również gdy tylko do jednego kanału docelowego), źródło zostanie
-opróżnione, chyba że inny kanał zostanie tam przesunięty. Aby skopiować kanał,
-pozostawiając źródło nietknięte, po prostu przesuń kanał zarówno do miejsca kopiowania,
-jak i do źródła. Na przykład:
+Policz ile przesuniÄÄ kanaĹĂłw zamierzasz wykonaÄ. To jest druga podopcja. KaĹźdy
+kanaĹ moĹźe byÄ przesuniÄty do kilku rĂłĹźnych kanaĹĂłw w tym samym czasie, ale pamiÄtaj,
+Ĺźe gdy przesuniesz kanaĹ (rĂłwnieĹź gdy tylko do jednego kanaĹu docelowego), ĹşrĂłdĹo zostanie
+oprĂłĹźnione, chyba Ĺźe inny kanaĹ zostanie tam przesuniÄty. Aby skopiowaÄ kanaĹ,
+pozostawiajÄc ĹşrĂłdĹo nietkniÄte, po prostu przesuĹ kanaĹ zarĂłwno do miejsca kopiowania,
+jak i do ĹşrĂłdĹa. Na przykĹad:
 
 <programlisting>
-kanał 2 --> kanał 3
-kanał 2 --> kanał 2
+kanaĹ 2 --> kanaĹ 3
+kanaĹ 2 --> kanaĹ 2
 </programlisting>
 </para></listitem>
 <listitem><para>
-Wypisz kopie kanałów jako pary subopcji. Pamiętaj, że pierwszy kanał ma numer 0,
-drugi 1 itd. Kolejność subopcji nie jest istotna tak długo, ale muszą one być
+Wypisz kopie kanaĹĂłw jako pary subopcji. PamiÄtaj, Ĺźe pierwszy kanaĹ ma numer 0,
+drugi 1 itd. KolejnoĹÄ subopcji nie jest istotna tak dĹugo, ale muszÄ one byÄ
 pogrupowane w pary typu:
-<replaceable>źródło:cel</replaceable>.
+<replaceable>ĹşrĂłdĹo:cel</replaceable>.
 </para></listitem>
 </orderedlist>
 
 </para>
 
 
-<bridgehead>Przykład: jeden kanał w dwóch głośnikach</bridgehead>
+<bridgehead>PrzykĹad: jeden kanaĹ w dwĂłch gĹoĹnikach</bridgehead>
 
 <para>
-Oto przykład innej metody odtwarzania jednego kanału w dwóch głośnikach.
-Załóżmy, że lewy kanał ma być odtwarzany, a prawy ma zostać pominięty.
-Zgodnie z krokami opisanymi powyżej:
+Oto przykĹad innej metody odtwarzania jednego kanaĹu w dwĂłch gĹoĹnikach.
+ZaĹĂłĹźmy, Ĺźe lewy kanaĹ ma byÄ odtwarzany, a prawy ma zostaÄ pominiÄty.
+Zgodnie z krokami opisanymi powyĹźej:
 <orderedlist>
 <listitem><para>
-Aby dostarczyć dźwięk do każdego z dwóch głośników, pierwsza opcja musi mieć
-wartość "2".
+Aby dostarczyÄ dĹşwiÄk do kaĹźdego z dwĂłch gĹoĹnikĂłw, pierwsza opcja musi mieÄ
+wartoĹÄ "2".
 </para></listitem>
 <listitem><para>
-Lewy kanał musi zostać przesunięty do prawego kanału oraz lewego, aby nie został
-on pusty. Sumaryczna liczba przesunięć to dwa, zatem druga opcja to również "2".
+Lewy kanaĹ musi zostaÄ przesuniÄty do prawego kanaĹu oraz lewego, aby nie zostaĹ
+on pusty. Sumaryczna liczba przesuniÄÄ to dwa, zatem druga opcja to rĂłwnieĹź "2".
 </para></listitem>
 <listitem><para>
-Aby przesunąć lewy kanał (kanał 0) do kanału prawego (kanał 1), para subopcji
-musi byc "0:1", "0:0" przesunie lewy kanał do siebie.
+Aby przesunÄÄ lewy kanaĹ (kanaĹ 0) do kanaĹu prawego (kanaĹ 1), para subopcji
+musi byc "0:1", "0:0" przesunie lewy kanaĹ do siebie.
 </para></listitem>
 </orderedlist>
-Po połączeniu wszystkiego razem otrzymamy:
+Po poĹÄczeniu wszystkiego razem otrzymamy:
 
 <screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
 </para>
 
 <para>
-Przewaga tego przykładu nad opcją <option>extrastereo</option> jest taka, że
-głośność każdego z kanałów wyjściowych pozostanie taka sama jak kanału źródłowego.
-Wadą jest, że podopcje muszą zostać zmienione na "2:2:1:0:1:1", gdy dźwięk zawiera
-kanał prawy. Ponadto trudniej to zapamiętać i wpisać.
+Przewaga tego przykĹadu nad opcjÄ <option>extrastereo</option> jest taka, Ĺźe
+gĹoĹnoĹÄ kaĹźdego z kanaĹĂłw wyjĹciowych pozostanie taka sama jak kanaĹu ĹşrĂłdĹowego.
+WadÄ jest, Ĺźe podopcje muszÄ zostaÄ zmienione na "2:2:1:0:1:1", gdy dĹşwiÄk zawiera
+kanaĹ prawy. Ponadto trudniej to zapamiÄtaÄ i wpisaÄ.
 </para>
 
-<bridgehead>Przykład: lewy kanał w obu głośnikach (skrót)</bridgehead>
+<bridgehead>PrzykĹad: lewy kanaĹ w obu gĹoĹnikach (skrĂłt)</bridgehead>
 
 <para>
-Istnieje znacznie łatwiejsza metoda na użycie filtru <option>channels</option> w
-celu odtworzenia lewego kanału w dwóch głośnikach:
+Istnieje znacznie Ĺatwiejsza metoda na uĹźycie filtru <option>channels</option> w
+celu odtworzenia lewego kanaĹu w dwĂłch gĹoĹnikach:
 
 <screen>mplayer <replaceable>filename</replaceable> -af channels=1</screen>
 
-Drugi kanał jest pomijany, a pierwszy jest pozostawiany, bez dodatkowych podopcji.
-Sterowniki kart muzycznych automatycznie odtwarzają jednokanałowy dźwięk wykorzystując
-oba głośniki. Oczywiście zadziała to tylko, gdy pożądanym kanałem jest kanał lewy.
+Drugi kanaĹ jest pomijany, a pierwszy jest pozostawiany, bez dodatkowych podopcji.
+Sterowniki kart muzycznych automatycznie odtwarzajÄ jednokanaĹowy dĹşwiÄk wykorzystujÄc
+oba gĹoĹniki. OczywiĹcie zadziaĹa to tylko, gdy poĹźÄdanym kanaĹem jest kanaĹ lewy.
 </para>
 
-<bridgehead>Przykład: kopiowanie kanałów przednich do kanałów tylnych</bridgehead>
+<bridgehead>PrzykĹad: kopiowanie kanaĹĂłw przednich do kanaĹĂłw tylnych</bridgehead>
 <para>
-Kolejną typową operacją jest kopiowanie kanałów przednich i odtwarzanie ich
-z tylnych głośników zestawu kwadrofonicznego.
+KolejnÄ typowÄ operacjÄ jest kopiowanie kanaĹĂłw przednich i odtwarzanie ich
+z tylnych gĹoĹnikĂłw zestawu kwadrofonicznego.
 <orderedlist>
 <listitem><para>
-Potrzebujemy czterech kanałów wyjściowych, więc pierwsza podopcja to "4".
+Potrzebujemy czterech kanaĹĂłw wyjĹciowych, wiÄc pierwsza podopcja to "4".
 </para></listitem>
 <listitem><para>
-Każdy z przednich kanałów musi zostać przesunięty do odpowiedniego kanału tylnego
-oraz do siebie. W sumie użyte będą cztery przesunięcia, więc druga opcja to "4".
+KaĹźdy z przednich kanaĹĂłw musi zostaÄ przesuniÄty do odpowiedniego kanaĹu tylnego
+oraz do siebie. W sumie uĹźyte bÄdÄ cztery przesuniÄcia, wiÄc druga opcja to "4".
 </para></listitem>
 <listitem><para>
-Lewy przedni kanał (kanał 0) musi zostać przesunięty do lewego tylnego (kanał 2): "0:2".
-Lewy przedni musi być także przesunięty do siebie: "0:0". Prawy przedni (kanał 1)
-musi zostać przesunięty do prawego tylnego (kanał 3): "1:3" oraz do siebie: "1:1".
+Lewy przedni kanaĹ (kanaĹ 0) musi zostaÄ przesuniÄty do lewego tylnego (kanaĹ 2): "0:2".
+Lewy przedni musi byÄ takĹźe przesuniÄty do siebie: "0:0". Prawy przedni (kanaĹ 1)
+musi zostaÄ przesuniÄty do prawego tylnego (kanaĹ 3): "1:3" oraz do siebie: "1:1".
 </para></listitem>
 </orderedlist>
-Po połączeniu wszystkich podopcji otrzymujemy:
+Po poĹÄczeniu wszystkich podopcji otrzymujemy:
 
 <screen>mplayer <replaceable>filename</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1</screen>
 
@@ -970,157 +970,157 @@ Po połączeniu wszystkich podopcji otrzymujemy:
 
 
 <sect3 id="advaudio-channels-mixing">
-<title>Miksowanie kanałów</title>
+<title>Miksowanie kanaĹĂłw</title>
 
 <para>
-Filtr <option>pan</option> potrafi zmiksować kanały w określonych przez
-użytkownika proporcjach. Pozwala to na wykonanie wszystkiego tego co potrafi
-filtr <option>channels</option> i wiele więcej. Niestety podopcje są tutaj
+Filtr <option>pan</option> potrafi zmiksowaÄ kanaĹy w okreĹlonych przez
+uĹźytkownika proporcjach. Pozwala to na wykonanie wszystkiego tego co potrafi
+filtr <option>channels</option> i wiele wiÄcej. Niestety podopcje sÄ tutaj
 znacznie bardziej skomplikowane.
 <orderedlist>
 <listitem><para>
-Zdecyduj z iloma kanałami chcesz pracować. Aby to określić możesz potrzebować
-użyć <option>-channels</option> i/lub <option>-af channels</option>. Późniejsze
-przykłady pokażą kiedy użyć którego.
+Zdecyduj z iloma kanaĹami chcesz pracowaÄ. Aby to okreĹliÄ moĹźesz potrzebowaÄ
+uĹźyÄ <option>-channels</option> i/lub <option>-af channels</option>. PĂłĹşniejsze
+przykĹady pokaĹźÄ kiedy uĹźyÄ ktĂłrego.
 </para></listitem>
 <listitem><para>
-Zdecyduj ile kanałów ma zostać wprowadzonych do <option>pan</option> (dalsze
-dekodowane kanały zostaną porzucone). To jest pierwsza podopcja. Kontroluje ona
-także liczbę kanałów używanych jako wyjście.
+Zdecyduj ile kanaĹĂłw ma zostaÄ wprowadzonych do <option>pan</option> (dalsze
+dekodowane kanaĹy zostanÄ porzucone). To jest pierwsza podopcja. Kontroluje ona
+takĹźe liczbÄ kanaĹĂłw uĹźywanych jako wyjĹcie.
 </para></listitem>
 <listitem><para>
-Pozostałe podopcje określają jak dużą część danego kanału zmiksować do kanału
-docelowego. To jest najbardziej skomplikowana część. Aby sprostać temu zadaniu,
-podzielmy podopcje na kilka grup, po jednej dla każdego kanału wyjściowego.
-Każda podopcja w zbiorze odpowiada pojedynczemu kanałowi wejściowemu. Liczba,
-którą podasz odpowiada części kanału wejściowego, która zostanie
-zmiksowana w kanale wyjściowym.
+PozostaĹe podopcje okreĹlajÄ jak duĹźÄ czÄĹÄ danego kanaĹu zmiksowaÄ do kanaĹu
+docelowego. To jest najbardziej skomplikowana czÄĹÄ. Aby sprostaÄ temu zadaniu,
+podzielmy podopcje na kilka grup, po jednej dla kaĹźdego kanaĹu wyjĹciowego.
+KaĹźda podopcja w zbiorze odpowiada pojedynczemu kanaĹowi wejĹciowemu. Liczba,
+ktĂłrÄ podasz odpowiada czÄĹci kanaĹu wejĹciowego, ktĂłra zostanie
+zmiksowana w kanale wyjĹciowym.
 </para>
 <para>
-<option>pan</option> akceptuje wartości od 0 do 512, co odpowiada wartościom od
-0% do 51200% oryginalnej głośności. Bądź ostrożny używając wartości większych od
-1. Może to spowodować nie tylko bardzo duże zwiększenie głośności, ale także,
-jeżeli przekroczysz zakres swojej karty muzycznej, możesz usłyszeć okropne trzaski.
-Jeżeli chcesz, możesz stosować po filtrze <option>pan</option> dopisać <option>,volume</option>,
-co włączy obcinanie głośności, jednak najlepiej używać na tyle małych wartości
-parametrów <option>pan</option>, aby przycinanie nie było potrzebne.
+<option>pan</option> akceptuje wartoĹci od 0 do 512, co odpowiada wartoĹciom od
+0% do 51200% oryginalnej gĹoĹnoĹci. BÄdĹş ostroĹźny uĹźywajÄc wartoĹci wiÄkszych od
+1. MoĹźe to spowodowaÄ nie tylko bardzo duĹźe zwiÄkszenie gĹoĹnoĹci, ale takĹźe,
+jeĹźeli przekroczysz zakres swojej karty muzycznej, moĹźesz usĹyszeÄ okropne trzaski.
+JeĹźeli chcesz, moĹźesz stosowaÄ po filtrze <option>pan</option> dopisaÄ <option>,volume</option>,
+co wĹÄczy obcinanie gĹoĹnoĹci, jednak najlepiej uĹźywaÄ na tyle maĹych wartoĹci
+parametrĂłw <option>pan</option>, aby przycinanie nie byĹo potrzebne.
 </para></listitem>
 </orderedlist>
 </para>
 
-<bridgehead>Przykład: jeden kanał w dwóch głośnikach</bridgehead>
+<bridgehead>PrzykĹad: jeden kanaĹ w dwĂłch gĹoĹnikach</bridgehead>
 
 <para>
-Oto jeszcze jeden przykład, jak odtworzyć lewy kanał w dwóch głośnikach.
-Postępując zgodnie z krokami opisanymi powyżej:
+Oto jeszcze jeden przykĹad, jak odtworzyÄ lewy kanaĹ w dwĂłch gĹoĹnikach.
+PostÄpujÄc zgodnie z krokami opisanymi powyĹźej:
 <orderedlist>
 <listitem><para>
-<option>pan</option> powinien używać dwóch kanałów wyjściowych, więc pierwsza
+<option>pan</option> powinien uĹźywaÄ dwĂłch kanaĹĂłw wyjĹciowych, wiÄc pierwsza
 podopcja to "2".
 </para></listitem>
 <listitem><para>
-Ponieważ mamy dwa kanały wejściowe, będziemy mieli dwie grupy podopcji.
-Ponieważ używane są również dwa kanały wyjściowe, w każdej grupie będą po dwie
-podopcje. Lewy kanał z pliku powinien zostać skopiowany z pełną głośnością
-do nowych kanału: lewego i prawego. W związku z tym, pierwsza grupa podopcji
-to "1:1". Prawy kanał powinien zostać pominięty, zatem druga grupa to "0:0".
-Wszelkie zera na końcu listy podopcji mogą zostać pominięte, ale dla przejrzystości
-przykładu, pozostawimy je.
+PoniewaĹź mamy dwa kanaĹy wejĹciowe, bÄdziemy mieli dwie grupy podopcji.
+PoniewaĹź uĹźywane sÄ rĂłwnieĹź dwa kanaĹy wyjĹciowe, w kaĹźdej grupie bÄdÄ po dwie
+podopcje. Lewy kanaĹ z pliku powinien zostaÄ skopiowany z peĹnÄ gĹoĹnoĹciÄ
+do nowych kanaĹu: lewego i prawego. W zwiÄzku z tym, pierwsza grupa podopcji
+to "1:1". Prawy kanaĹ powinien zostaÄ pominiÄty, zatem druga grupa to "0:0".
+Wszelkie zera na koĹcu listy podopcji mogÄ zostaÄ pominiÄte, ale dla przejrzystoĹci
+przykĹadu, pozostawimy je.
 </para></listitem>
 </orderedlist>
-Po złączeniu wszystkich podopcji otrzymamy:
+Po zĹÄczeniu wszystkich podopcji otrzymamy:
 
 <screen>mplayer <replaceable>filename</replaceable> -af pan=2:1:1:0:0</screen>
 
-Jeżeli pożądanym kanałem jest prawy, a nie lewy, podopcje zmienią się na
+JeĹźeli poĹźÄdanym kanaĹem jest prawy, a nie lewy, podopcje zmieniÄ siÄ na
 "2:0:0:1:1".
 </para>
 
 
-<bridgehead>Przykład: lewy kanał w dwóch głośnikach (skrót)</bridgehead>
+<bridgehead>PrzykĹad: lewy kanaĹ w dwĂłch gĹoĹnikach (skrĂłt)</bridgehead>
 
 <para>
-Podobnie jak przy użyciu <option>channels</option>, istnieje skrót działający
-tylko z lewym kanałem:
+Podobnie jak przy uĹźyciu <option>channels</option>, istnieje skrĂłt dziaĹajÄcy
+tylko z lewym kanaĹem:
 
 <screen>mplayer <replaceable>filename</replaceable> -af pan=1:1</screen>
 
-Jeżeli <option>pan</option> posiada tylko jeden kanał wejściowy (pozostałe kanały
-są pomijane), potrzebna jest tylko jedna grupa podopcji z jedną podopcją, która
-oznacza, że jedyny kanał będzie zawierał 100% siebie.
+JeĹźeli <option>pan</option> posiada tylko jeden kanaĹ wejĹciowy (pozostaĹe kanaĹy
+sÄ pomijane), potrzebna jest tylko jedna grupa podopcji z jednÄ podopcjÄ, ktĂłra
+oznacza, Ĺźe jedyny kanaĹ bÄdzie zawieraĹ 100% siebie.
 </para>
 
-<bridgehead>Przykład: zmniejszanie liczy kanałów w 6-kanałowym PCM</bridgehead>
+<bridgehead>PrzykĹad: zmniejszanie liczy kanaĹĂłw w 6-kanaĹowym PCM</bridgehead>
 <para>
-Dekoder 6-kanałowego PCM zawarty w <application>MPlayerze</application> nie potrafi
-zmniejszać liczby kanałów przez miksowanie. Oto metoda dokonania tego przy użyciu
+Dekoder 6-kanaĹowego PCM zawarty w <application>MPlayerze</application> nie potrafi
+zmniejszaÄ liczby kanaĹĂłw przez miksowanie. Oto metoda dokonania tego przy uĹźyciu
 opcji <option>pan</option>:
 <orderedlist>
 <listitem><para>
-Liczba kanałów wyjściowych to 2, więc pierwsza podopcja to "2".
+Liczba kanaĹĂłw wyjĹciowych to 2, wiÄc pierwsza podopcja to "2".
 </para></listitem>
 <listitem><para>
-Jako, że mamy 6 kanałów wejściowych, musimy użyć sześciu grup opcji.
-Na szczęście, ponieważ interesują nas tylko dwa pierwsze kanały, możemy
-użyć tylko dwóch grup opcji; pozostałe cztery grupy mogą zostać pominięte.
-Pamiętaj, że nie wszystkie wielokanałowe pliki audio mają tę samą kolejność
-kanałów. Poniższy przykład pokazuje zmniejszanie liczby kanałów w pliku, w którym
-kolejność kanałów jest taka, jak w AC3 5.1:
+Jako, Ĺźe mamy 6 kanaĹĂłw wejĹciowych, musimy uĹźyÄ szeĹciu grup opcji.
+Na szczÄĹcie, poniewaĹź interesujÄ nas tylko dwa pierwsze kanaĹy, moĹźemy
+uĹźyÄ tylko dwĂłch grup opcji; pozostaĹe cztery grupy mogÄ zostaÄ pominiÄte.
+PamiÄtaj, Ĺźe nie wszystkie wielokanaĹowe pliki audio majÄ tÄ samÄ kolejnoĹÄ
+kanaĹĂłw. PoniĹźszy przykĹad pokazuje zmniejszanie liczby kanaĹĂłw w pliku, w ktĂłrym
+kolejnoĹÄ kanaĹĂłw jest taka, jak w AC3 5.1:
 <programlisting>
 0 - lewy przedni
 1 - prawy przedni
 2 - lewy tylny
 3 - prawy tylny
-4 - środkowy przedni
-5 - subwoofer (głośnik niskotonowy)
+4 - Ĺrodkowy przedni
+5 - subwoofer (gĹoĹnik niskotonowy)
 </programlisting>
-Pierwsza grupa podopcji zawiera kolejne wartości oryginalnej głośności lewego
-przedniego kanału, które powinny być dostarczone do odpowiednich kanałów
-wyjściowych: "1:0". Prawy przedni kanał powinien zostać przeniesiony do
-prawego wyjściowego: "0:1". Analogicznie dla kanałów tylnych: "1:0" i "0:1".
-Kanał środkowy powinien zostać przeniesiony do obu kanałów wyjściowych z połową
-głośności: "0.5:0.5", zaś kanał głośnika niskotonowego powinien być słyszalny
-w obu kanałach wyjściowych z pełną głośnością: "1:1".
+Pierwsza grupa podopcji zawiera kolejne wartoĹci oryginalnej gĹoĹnoĹci lewego
+przedniego kanaĹu, ktĂłre powinny byÄ dostarczone do odpowiednich kanaĹĂłw
+wyjĹciowych: "1:0". Prawy przedni kanaĹ powinien zostaÄ przeniesiony do
+prawego wyjĹciowego: "0:1". Analogicznie dla kanaĹĂłw tylnych: "1:0" i "0:1".
+KanaĹ Ĺrodkowy powinien zostaÄ przeniesiony do obu kanaĹĂłw wyjĹciowych z poĹowÄ
+gĹoĹnoĹci: "0.5:0.5", zaĹ kanaĹ gĹoĹnika niskotonowego powinien byÄ sĹyszalny
+w obu kanaĹach wyjĹciowych z peĹnÄ gĹoĹnoĹciÄ: "1:1".
 
 </para></listitem>
 </orderedlist>
-Połącz wszystko razem, a otrzymasz:
+PoĹÄcz wszystko razem, a otrzymasz:
 
 <screen>mplayer <replaceable>6-channel.wav</replaceable> -af pan=2:1:0:0:1:1:0:0:1:0.5:0.5:1:1</screen>
 
-Przedstawione powyżej głośności są tylko przybliżonym przykładem. Nie czuj się
-nimi skrępowany i zmieniaj je zgodnie ze swoim uznaniem.
+Przedstawione powyĹźej gĹoĹnoĹci sÄ tylko przybliĹźonym przykĹadem. Nie czuj siÄ
+nimi skrÄpowany i zmieniaj je zgodnie ze swoim uznaniem.
 </para>
 
-<bridgehead>Przykład: Odtwarzanie audio 5.1 przy pomocy dużych głośników, bez subwoofera</bridgehead>
+<bridgehead>PrzykĹad: Odtwarzanie audio 5.1 przy pomocy duĹźych gĹoĹnikĂłw, bez subwoofera</bridgehead>
 
 <para>
-Jeżeli posiadasz parę dużych przednich głośników, możesz nie mieć ochoty
-tracić pieniędzy na dodatkowy głośnik niskotonowy, tylko po to, aby mieć
-kompletny system 5.1. Jeżeli użyjesz opcji <option>-channels 5</option>,
-przekażesz do lib52 informację, że ma dekodować audio 5.1 dla systemu 5.0.
-Tym sposobem kanał głośnika niskotonowego zostanie po prostu pominięty.
-Jeżeli chcesz rozdzielić kanał subwoofera samodzielnie, musisz dokonać ręcznego
-zmiksowania przy użyciu <option>pan</option>:
+JeĹźeli posiadasz parÄ duĹźych przednich gĹoĹnikĂłw, moĹźesz nie mieÄ ochoty
+traciÄ pieniÄdzy na dodatkowy gĹoĹnik niskotonowy, tylko po to, aby mieÄ
+kompletny system 5.1. JeĹźeli uĹźyjesz opcji <option>-channels 5</option>,
+przekaĹźesz do lib52 informacjÄ, Ĺźe ma dekodowaÄ audio 5.1 dla systemu 5.0.
+Tym sposobem kanaĹ gĹoĹnika niskotonowego zostanie po prostu pominiÄty.
+JeĹźeli chcesz rozdzieliÄ kanaĹ subwoofera samodzielnie, musisz dokonaÄ rÄcznego
+zmiksowania przy uĹźyciu <option>pan</option>:
 
 <orderedlist>
 <listitem><para>
-Jako, że <option>pan</option> musi analizować wszystkie 6 kanałów,
-podaj opcję <option>-channels 6</option>, aby liba52 zdekodował je wszystkie.
+Jako, Ĺźe <option>pan</option> musi analizowaÄ wszystkie 6 kanaĹĂłw,
+podaj opcjÄ <option>-channels 6</option>, aby liba52 zdekodowaĹ je wszystkie.
 </para></listitem>
 <listitem><para>
-Ponieważ <option>pan</option> będzie używał pięciu kanałów wyjściowych, pierwsza
+PoniewaĹź <option>pan</option> bÄdzie uĹźywaĹ piÄciu kanaĹĂłw wyjĹciowych, pierwsza
 podopcja to "5".
 </para></listitem>
 <listitem><para>
-Sześć kanałów wejściowych i pięć wyjściowych oznacza 6 grup po 5 podopcji.
+SzeĹÄ kanaĹĂłw wejĹciowych i piÄÄ wyjĹciowych oznacza 6 grup po 5 podopcji.
   <itemizedlist spacing="compact">
   <listitem><simpara>
-  Lewy przedni kanał replikuje samego siebie:
+  Lewy przedni kanaĹ replikuje samego siebie:
   "1:0:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
-  Identycznie dla prawego przedniego kanału:
+  Identycznie dla prawego przedniego kanaĹu:
   "0:1:0:0:0"
   </simpara></listitem>
   <listitem><simpara>
@@ -1132,18 +1132,18 @@ Sześć kanałów wejściowych i pięć wyjściowych oznacza 6 grup po 5 podopcji.
   "0:0:0:1:0"
   </simpara></listitem>
   <listitem><simpara>
-  Środkowy też:
+  Ĺrodkowy teĹź:
   "0:0:0:0:1"
   </simpara></listitem>
   <listitem><simpara>
-  Teraz musimy zdecydować, co zrobić z subwooferem. Na przykład możemy podzielić
-  go po połowie na lewy przedni i prawy przedni:
+  Teraz musimy zdecydowaÄ, co zrobiÄ z subwooferem. Na przykĹad moĹźemy podzieliÄ
+  go po poĹowie na lewy przedni i prawy przedni:
   "0.5:0.5:0:0:0"
   </simpara></listitem>
   </itemizedlist>
 </para></listitem>
 </orderedlist>
-Po połączeniu wszystkich opcji otrzymasz:
+Po poĹÄczeniu wszystkich opcji otrzymasz:
 
 <screen>mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=5:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0:0:0:0:0:1:0.5:0.5:0:0:0</screen>
 
@@ -1155,50 +1155,50 @@ Po połączeniu wszystkich opcji otrzymasz:
 
 
 <sect2 id="advaudio-volume">
-<title>Programowa regulacja głośności</title>
+<title>Programowa regulacja gĹoĹnoĹci</title>
 
 <para>
-Niekóre ścieżki audio są zbyt ciche aby można ich komfortowo słuchać bez
-wzmocnienia. Staje się to problemem, gdy Twój sprzęt audio nie potrafi wzmacniać
-sygnału. Opcja <option>-softvol</option> instruuje <application>MPlayera</application>,
-aby ten używał wewnętrznego miksera. Możesz wtedy używać klawiszy strojenia
-głośności (domyślnie <keycap>9</keycap> i <keycap>0</keycap>), aby uzyskać
-większe poziomy głośności. Pamiętaj, że nie omija to miksera Twojej karty
-muzycznej; <application>MPlayer</application> zwiększa tylko głośność sygnału
-przed przesłaniem go do Twojej karty.
+NiekĂłre ĹcieĹźki audio sÄ zbyt ciche aby moĹźna ich komfortowo sĹuchaÄ bez
+wzmocnienia. Staje siÄ to problemem, gdy TwĂłj sprzÄt audio nie potrafi wzmacniaÄ
+sygnaĹu. Opcja <option>-softvol</option> instruuje <application>MPlayera</application>,
+aby ten uĹźywaĹ wewnÄtrznego miksera. MoĹźesz wtedy uĹźywaÄ klawiszy strojenia
+gĹoĹnoĹci (domyĹlnie <keycap>9</keycap> i <keycap>0</keycap>), aby uzyskaÄ
+wiÄksze poziomy gĹoĹnoĹci. PamiÄtaj, Ĺźe nie omija to miksera Twojej karty
+muzycznej; <application>MPlayer</application> zwiÄksza tylko gĹoĹnoĹÄ sygnaĹu
+przed przesĹaniem go do Twojej karty.
 
-Poniższy przykład może być dobrym początkiem:
+PoniĹźszy przykĹad moĹźe byÄ dobrym poczÄtkiem:
 
 <screen>mplayer <replaceable>cichy-plik</replaceable> -softvol -softvol-max 300</screen>
 
-Opcja <option>-softvol-max</option> określa maksymalny dozwolony poziom głośności,
-jako procent głośności oryginalnej. Przykładowo, <option>-softvol-max 200</option>
-pozwoli na maksymalne zwiększenie głośności do 200% głośności oryginalnej.
+Opcja <option>-softvol-max</option> okreĹla maksymalny dozwolony poziom gĹoĹnoĹci,
+jako procent gĹoĹnoĹci oryginalnej. PrzykĹadowo, <option>-softvol-max 200</option>
+pozwoli na maksymalne zwiÄkszenie gĹoĹnoĹci do 200% gĹoĹnoĹci oryginalnej.
 
-Można bezpiecznie używać dużych parametrów <option>-softvol-max</option>;
-większa głośność nie zostanie użyta, jeżeli nie zwiększysz jej przy pomocy
-klawiszy regulacji głośności. Jedyną wadą stosowania większych wartości jest to,
-że, ponieważ <application>MPlayer</application> ustala głośność jako procent
-głośności maksymalnej, nie będziesz w stanie precyzyjnie kontrolować głośności
-przy pomocy klawiszy regulacji głośności. Użyj mniejszych wartości parametrów
-<option>-softvol-max</option> i/lub dodaj opcję <option>-volstep 1</option>
-aby uzyskać większą precyzję.
+MoĹźna bezpiecznie uĹźywaÄ duĹźych parametrĂłw <option>-softvol-max</option>;
+wiÄksza gĹoĹnoĹÄ nie zostanie uĹźyta, jeĹźeli nie zwiÄkszysz jej przy pomocy
+klawiszy regulacji gĹoĹnoĹci. JedynÄ wadÄ stosowania wiÄkszych wartoĹci jest to,
+Ĺźe, poniewaĹź <application>MPlayer</application> ustala gĹoĹnoĹÄ jako procent
+gĹoĹnoĹci maksymalnej, nie bÄdziesz w stanie precyzyjnie kontrolowaÄ gĹoĹnoĹci
+przy pomocy klawiszy regulacji gĹoĹnoĹci. UĹźyj mniejszych wartoĹci parametrĂłw
+<option>-softvol-max</option> i/lub dodaj opcjÄ <option>-volstep 1</option>
+aby uzyskaÄ wiÄkszÄ precyzjÄ.
 </para>
 
 <para>
-Opcja <option>-softvol</option> działa poprzez kontrolę filtru
-<option>volume</option>. Jeżeli chcesz odtwarzać plik z określoną głośnością,
-możesz podać opcję dla <option>volume</option> ręcznie:
+Opcja <option>-softvol</option> dziaĹa poprzez kontrolÄ filtru
+<option>volume</option>. JeĹźeli chcesz odtwarzaÄ plik z okreĹlonÄ gĹoĹnoĹciÄ,
+moĹźesz podaÄ opcjÄ dla <option>volume</option> rÄcznie:
 
 <screen>mplayer <replaceable>cichy-plik</replaceable> -af volume=10</screen>
 
-Pozwoli to na odtworzenie pliku z 10-decybelowym wzmocnieniem. Bądź ostrożny
-używając filtru <option>volume</option> - ustawiając zbyt dużą głośność możesz
-łatwo uszkodzić swój słuch. Zaczynaj od małych wartości i stopniowo zwiększaj je
-aż do uzyskania pożądanej głośności. Ponadto, jeżeli podasz zbyt dużą wartość,
-filtr <option>volume</option> może musieć przyciąć głośność, aby nie przesłać
-do karty muzycznej danych spoza akceptowalnego przez nią zakresu; będzie to
-powodować zniekształcenia dźwięku.
+Pozwoli to na odtworzenie pliku z 10-decybelowym wzmocnieniem. BÄdĹş ostroĹźny
+uĹźywajÄc filtru <option>volume</option> - ustawiajÄc zbyt duĹźÄ gĹoĹnoĹÄ moĹźesz
+Ĺatwo uszkodziÄ swĂłj sĹuch. Zaczynaj od maĹych wartoĹci i stopniowo zwiÄkszaj je
+aĹź do uzyskania poĹźÄdanej gĹoĹnoĹci. Ponadto, jeĹźeli podasz zbyt duĹźÄ wartoĹÄ,
+filtr <option>volume</option> moĹźe musieÄ przyciÄÄ gĹoĹnoĹÄ, aby nie przesĹaÄ
+do karty muzycznej danych spoza akceptowalnego przez niÄ zakresu; bÄdzie to
+powodowaÄ znieksztaĹcenia dĹşwiÄku.
 </para>
 
 </sect2>

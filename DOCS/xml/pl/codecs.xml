@@ -1,22 +1,22 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r19087 -->
 <!-- Opiekun: Boski -->
 <chapter id="codecs">
-<title>Obsługiwane kodeki</title>
+<title>ObsĹugiwane kodeki</title>
 
 <sect1 id="video-codecs">
 <title>Kodeki Video</title>
 
 <para>
 Zajrzyj do
-<ulink url="../../codecs-status.html">tabeli stanu kodeków</ulink>, żeby
-zobaczyć kompletną, codziennie generowaną listę. Niektóre
-kodeki są dostępne do pobrania z naszej strony domowej. Ściągniesz je ze
+<ulink url="../../codecs-status.html">tabeli stanu kodekĂłw</ulink>, Ĺźeby
+zobaczyÄ kompletnÄ, codziennie generowanÄ listÄ. NiektĂłre
+kodeki sÄ dostÄpne do pobrania z naszej strony domowej. ĹciÄgniesz je ze
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">strony z kodekami</ulink>.
 </para>
 
 <para>
-Najważniejsze ze wszystkich:
+NajwaĹźniejsze ze wszystkich:
 </para>
 
 <itemizedlist>
@@ -26,13 +26,13 @@ Najważniejsze ze wszystkich:
   </simpara></listitem>
 <listitem><simpara>
   natywne dekodery dla <emphasis role="bold">DivX ;-), OpenDivX (DivX4),
-  DivX 5.01 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 i dla innych rodzajów MPEG4
+  DivX 5.01 (Pro), 3ivX, M$ MPEG-4</emphasis> v1, v2 i dla innych rodzajĂłw MPEG4
   </simpara></listitem>
 <listitem><simpara>
   natywne dekodery dla <emphasis role="bold">Windows Media Video 7/8</emphasis>
      (<emphasis role="bold">WMV1/WMV2</emphasis>) i dekodery Win32 DLL
   dla <emphasis role="bold">Windows Media Video 9</emphasis>
-  (<emphasis role="bold">WMV3</emphasis>). Oba używane w plikach <filename>.wmv</filename>
+  (<emphasis role="bold">WMV3</emphasis>). Oba uĹźywane w plikach <filename>.wmv</filename>
   </simpara></listitem>
 <listitem><simpara>
   natywny dekoder <emphasis role="bold">Sorenson 1 (SVQ1)</emphasis>
@@ -47,7 +47,7 @@ Najważniejsze ze wszystkich:
   Kodeki Cinepak i <emphasis role="bold">Intel Indeo</emphasis> (3.1,3.2,4.1,5.0)
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 i inne formaty sprzętowe
+  <emphasis role="bold">MJPEG</emphasis>, AVID, VCR2, ASV2 i inne formaty sprzÄtowe
   </simpara></listitem>
 <listitem><simpara>
   VIVO 1.0, 2.0, I263 i inne warianty <emphasis role="bold">H.263(+)</emphasis>
@@ -56,23 +56,23 @@ Najważniejsze ze wszystkich:
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> z użyciem
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> z uĹźyciem
   <systemitem class="library">libavcodec</systemitem> i kodeki
-  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> używające bibliotek
+  <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> uĹźywajÄce bibliotek
   RealPlayer
   </simpara></listitem>
 <listitem><simpara>
   natywny dekoder HuffYUV
   </simpara></listitem>
 <listitem><simpara>
-  Różne stare proste formaty podobne do RLE
+  RĂłĹźne stare proste formaty podobne do RLE
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Jeżeli posiadasz niewymienione tutaj kodeki Win32, które nie są jeszcze
-obsługiwane, zajrzyj do działu <link linkend="codec-importing">importowanie kodeków
-Win32-HOWTO</link> i pomóż nam dodać ich obsługę.
+JeĹźeli posiadasz niewymienione tutaj kodeki Win32, ktĂłre nie sÄ jeszcze
+obsĹugiwane, zajrzyj do dziaĹu <link linkend="codec-importing">importowanie kodekĂłw
+Win32-HOWTO</link> i pomĂłĹź nam dodaÄ ich obsĹugÄ.
 </para>
 
 <sect2 id="ffmpeg" xreflabel="FFmpeg/libavcodec">
@@ -80,44 +80,44 @@ Win32-HOWTO</link> i pomóż nam dodać ich obsługę.
 
 <para>
 <ulink url="http://ffmpeg.org">FFmpeg</ulink> zawiera pakiet
-kodeków <emphasis role="bold">o otwartych źródłach</emphasis>, które potrafią
-dekodować strumienie różnymi kodekami audio i video. Oferują one także
-imponujące funkcję kodowania i szybszą bibliotekę DivX4/5 niż w przypadku
-kodeków Win32, albo tych z DivX.com!
+kodekĂłw <emphasis role="bold">o otwartych ĹşrĂłdĹach</emphasis>, ktĂłre potrafiÄ
+dekodowaÄ strumienie rĂłĹźnymi kodekami audio i video. OferujÄ one takĹźe
+imponujÄce funkcjÄ kodowania i szybszÄ bibliotekÄ DivX4/5 niĹź w przypadku
+kodekĂłw Win32, albo tych z DivX.com!
 </para>
 
 <para>
-W skład pakietu wchodzi wiele dobrych kodeków, szczególnie tych związanych
+W skĹad pakietu wchodzi wiele dobrych kodekĂłw, szczegĂłlnie tych zwiÄzanych
 z MPEG-4: DivX3, DivX4, DivX5, Windows Media Video 7/8 (WMV1/WMV2). Zawiera
-również warty uwagi dekoder WMA.
+rĂłwnieĹź warty uwagi dekoder WMA.
 </para>
 
 <para>
-Jednym z najnowszych kodeków, który warto wymienić jest
+Jednym z najnowszych kodekĂłw, ktĂłry warto wymieniÄ jest
 kodek <emphasis role="bold">Sorenson 3</emphasis> (SVQ3). Jest to pierwsza,
-całkowicie otwarta implementacja tego kodeka. Jest on nawet szybszy od
-oryginału. Zaleca się wybór tej wersji zamiast kodeków binarnych!
+caĹkowicie otwarta implementacja tego kodeka. Jest on nawet szybszy od
+oryginaĹu. Zaleca siÄ wybĂłr tej wersji zamiast kodekĂłw binarnych!
 </para>
 
 <para>
-Pełną listę obsługiwanych kodeków
+PeĹnÄ listÄ obsĹugiwanych kodekĂłw
 (<ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC19">video</ulink>
 i <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>)
 znajdziesz na stronie FFmpeg.
 </para>
 
 <para>
-	Zarówno wydania <application>MPlayera</application>, jak i
+	ZarĂłwno wydania <application>MPlayera</application>, jak i
 	wersje <application>MPlayera</application> z Subversion,
-	zawierają <systemitem class="library">libavcodec</systemitem>,
-	więc nie musisz się martwić o osobne sprawdzanie
+	zawierajÄ <systemitem class="library">libavcodec</systemitem>,
+	wiÄc nie musisz siÄ martwiÄ o osobne sprawdzanie
 	<systemitem class="library">libavcodec</systemitem>.
 	Po prostu uruchom <filename>configure</filename> i kompiluj.
 </para>
 
 <para>
-Wykorzystując FFmpega i mojego Matroksa G400, mogę oglądać na moim
-K6-2 500 filmy DivX najwyższej rozdzielczości bez gubienia klatek.
+WykorzystujÄc FFmpega i mojego Matroksa G400, mogÄ oglÄdaÄ na moim
+K6-2 500 filmy DivX najwyĹźszej rozdzielczoĹci bez gubienia klatek.
 </para>
 </sect2>
 
@@ -127,57 +127,57 @@ K6-2 500 filmy DivX najwyższej rozdzielczości bez gubienia klatek.
 
 <note>
 <para>
-Wiedz, że binarne kodeki Xanim wydane są na licencji, która, oprócz innych
-ograniczeń, zabrania użytkownikowi korzystać z nich w zestawieniu z innym
-programem niż <application>XAnim</application>. Jednakże do tej pory
-autor nie podejmował jeszcze żadnych kroków prawnych w sprawie
-związanej z kodekami.
+Wiedz, Ĺźe binarne kodeki Xanim wydane sÄ na licencji, ktĂłra, oprĂłcz innych
+ograniczeĹ, zabrania uĹźytkownikowi korzystaÄ z nich w zestawieniu z innym
+programem niĹź <application>XAnim</application>. JednakĹźe do tej pory
+autor nie podejmowaĹ jeszcze Ĺźadnych krokĂłw prawnych w sprawie
+zwiÄzanej z kodekami.
 </para>
 </note>
 
 <formalpara>
-<title>INSTALACJA I UŻYTKOWANIE</title>
+<title>INSTALACJA I UĹťYTKOWANIE</title>
 <para>
 
-<application>MPlayer</application> potrafi zaprzęgnąć do dekodowania
-kodeki Xanim. Aby je uaktywnić, postępuj zgodnie z instrukcją:
+<application>MPlayer</application> potrafi zaprzÄgnÄÄ do dekodowania
+kodeki Xanim. Aby je uaktywniÄ, postÄpuj zgodnie z instrukcjÄ:
 </para>
 </formalpara>
 
 <procedure>
 <step><para>
-  Ściągnij kodeki, których chcesz użyć ze
+  ĹciÄgnij kodeki, ktĂłrych chcesz uĹźyÄ ze
   <ulink url="http://xanim.va.pubnix.com">strony XAnim</ulink>.
-  Nie ma tam kodeka <emphasis role="bold">3ivX</emphasis>, ale można go
-  znaleźć na <ulink url="http://www.3ivx.com">stronie 3ivX</ulink>.
+  Nie ma tam kodeka <emphasis role="bold">3ivX</emphasis>, ale moĹźna go
+  znaleĹşÄ na <ulink url="http://www.3ivx.com">stronie 3ivX</ulink>.
   </para></step>
 <step><para>
-  <emphasis role="bold">ALBO</emphasis> ściągnij zestaw kodeków z naszej
+  <emphasis role="bold">ALBO</emphasis> ĹciÄgnij zestaw kodekĂłw z naszej
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">strony z kodekami</ulink>
   </para></step>
 <step><para>
-  Użyj opcji <option>--with-xanimlibdir</option> żeby wskazać skryptowi
-  <filename>configure</filename> gdzie ma szukać kodeków Xanim.
-  Domyślnie szuka ich w katalogach
+  UĹźyj opcji <option>--with-xanimlibdir</option> Ĺźeby wskazaÄ skryptowi
+  <filename>configure</filename> gdzie ma szukaÄ kodekĂłw Xanim.
+  DomyĹlnie szuka ich w katalogach
   <filename class="directory">/usr/local/lib/codecs</filename>,
   <filename class="directory">/usr/local/lib/xanim/mods</filename>,
   <filename class="directory">/usr/lib/xanim/mods</filename> i
   <filename class="directory">/usr/lib/xanim</filename>.
-  Drugą możliwością jest ustawienie zmiennej środowiskowej
+  DrugÄ moĹźliwoĹciÄ jest ustawienie zmiennej Ĺrodowiskowej
   <envar>XANIM_MOD_DIR</envar> na katalog z kodekami XAnim.
   </para></step>
 <step><para>
-  Zmień nazwę/utwórz dowiązanie symboliczne (symlink) plików,
-  usuwając z nazwy rzeczy związane z architekturą komputera, tak żeby
-  miały nazwy tego typu: <filename>vid_cvid.xa</filename>,
+  ZmieĹ nazwÄ/utwĂłrz dowiÄzanie symboliczne (symlink) plikĂłw,
+  usuwajÄc z nazwy rzeczy zwiÄzane z architekturÄ komputera, tak Ĺźeby
+  miaĹy nazwy tego typu: <filename>vid_cvid.xa</filename>,
   <filename>vid_h263.xa</filename>, <filename>vid_iv50.xa</filename>
   </para></step>
 </procedure>
 
 <para>
-XAnim to cała rodzina kodeków <systemitem>xanim</systemitem>, możesz więc użyć
-opcji <option>-vfm xanim</option> żeby kazać
-<application>MPlayerowi</application> używać ich, gdy jest to możliwe.
+XAnim to caĹa rodzina kodekĂłw <systemitem>xanim</systemitem>, moĹźesz wiÄc uĹźyÄ
+opcji <option>-vfm xanim</option> Ĺźeby kazaÄ
+<application>MPlayerowi</application> uĹźywaÄ ich, gdy jest to moĹźliwe.
 </para>
 
 <para>
@@ -190,11 +190,11 @@ H.263.</emphasis>
 <sect2 id="vivo-video">
 <title>VIVO video</title>
 <para>
-<application>MPlayer</application> potrafi odtwarzać pliki video zakodowane
-przy pomocy Vivo (1.0 i 2.0). Najodpowiedniejszym kodekiem dla plików w wersji
-1.0 jest dekoder H.263 FFmpega, którego możesz użyć za pomocą opcji
-<option>-vc ffh263</option>. Dla plików w wersji 2.0, użyj Win32 DLL
-korzystając z opcji <option>-vc vivo</option>. Jeżeli nie wybierzesz żadnej
+<application>MPlayer</application> potrafi odtwarzaÄ pliki video zakodowane
+przy pomocy Vivo (1.0 i 2.0). Najodpowiedniejszym kodekiem dla plikĂłw w wersji
+1.0 jest dekoder H.263 FFmpega, ktĂłrego moĹźesz uĹźyÄ za pomocÄ opcji
+<option>-vc ffh263</option>. Dla plikĂłw w wersji 2.0, uĹźyj Win32 DLL
+korzystajÄc z opcji <option>-vc vivo</option>. JeĹźeli nie wybierzesz Ĺźadnej
 opcji, <application>MPlayer</application> automatycznie wybierze najlepszy
 kodek.
 </para>
@@ -204,13 +204,13 @@ kodek.
 <sect2 id="mpeg12">
 <title>MPEG-1/2 video</title>
 <para>
-MPEG-1 i MPEG-2 są dekodowane przez natywną, wieloplatformową bibliotekę
-<systemitem class="library">libmpeg2</systemitem>, której kod źródłowy
-wchodzi w skład <application>MPlayera</application>. Z uszkodzonymi plikami
-MPEG-1/2 radzimy sobie przechwytując <systemitem>Signal 11</systemitem>
-(<systemitem>segmentation fault -błąd segmentacji -przyp tłumacz</systemitem>)
-i szybko reinicjując kodek, kontynuując odtwarzanie dokładnie w miejscu gdzie
-wystąpił błąd. Ta technika nie ma widocznego wpływu na szybkość działania.
+MPEG-1 i MPEG-2 sÄ dekodowane przez natywnÄ, wieloplatformowÄ bibliotekÄ
+<systemitem class="library">libmpeg2</systemitem>, ktĂłrej kod ĹşrĂłdĹowy
+wchodzi w skĹad <application>MPlayera</application>. Z uszkodzonymi plikami
+MPEG-1/2 radzimy sobie przechwytujÄc <systemitem>Signal 11</systemitem>
+(<systemitem>segmentation fault -bĹÄd segmentacji -przyp tĹumacz</systemitem>)
+i szybko reinicjujÄc kodek, kontynuujÄc odtwarzanie dokĹadnie w miejscu gdzie
+wystÄpiĹ bĹÄd. Ta technika nie ma widocznego wpĹywu na szybkoĹÄ dziaĹania.
 </para>
 </sect2>
 
@@ -218,11 +218,11 @@ wystąpił błąd. Ta technika nie ma widocznego wpływu na szybkość działania.
 <sect2 id="avicodecs">
 <title>MS Video1, Cinepak CVID i inne stare kodeki</title>
 <para>
-<application>MPlayer</application> potrafi odtwarzać większość plików
-AVI i MOV w których użyto starszych kodeków.
-W przeszłości były one dekodowane przy pomocy binarnych kodeków Win32, ale
-dzisiaj dysponujemy już <emphasis role="bold">natywnymi kodekami</emphasis>.
-W przypadku większości z nich używany jest
+<application>MPlayer</application> potrafi odtwarzaÄ wiÄkszoĹÄ plikĂłw
+AVI i MOV w ktĂłrych uĹźyto starszych kodekĂłw.
+W przeszĹoĹci byĹy one dekodowane przy pomocy binarnych kodekĂłw Win32, ale
+dzisiaj dysponujemy juĹź <emphasis role="bold">natywnymi kodekami</emphasis>.
+W przypadku wiÄkszoĹci z nich uĹźywany jest
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para>
 </sect2>
@@ -232,7 +232,7 @@ W przypadku większości z nich używany jest
 <title>RealVideo</title>
 
 <para>
-<application>MPlayer</application> obsługuje dekodowanie wszystkich wersji
+<application>MPlayer</application> obsĹuguje dekodowanie wszystkich wersji
 RealVideo:
 
 <itemizedlist>
@@ -241,25 +241,25 @@ RealVideo:
   przez <systemitem class="library">libavcodec</systemitem>
   </simpara></listitem>
 <listitem><simpara>
-  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - dekodowanie za pomocą
+  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - dekodowanie za pomocÄ
   <emphasis role="bold">bibliotek RealPlayer</emphasis>
   </simpara></listitem>
 </itemizedlist>
 </para>
 
 <para>
-Ściągnij kodeki Real z
+ĹciÄgnij kodeki Real z
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
 i rozpakuj je do katalogu
 <filename class="directory">/usr/local/lib/codecs</filename>.
-Jeżeli wolisz je trzymać w innym miejscu, użyj opcji
+JeĹźeli wolisz je trzymaÄ w innym miejscu, uĹźyj opcji
 <option>--with-reallibdir</option> dla <command>configure</command>.
 </para>
 
 <note><para>
 Aktualnie biblioteki <application>RealPlayer</application>
-<emphasis role="bold">działają tylko pod Linuksem, FreeBSD, NetBSD, Cygwinem na
-platformach x86, Alpha i PowerPC (Sprawdzone zostały Linux/Alpha
+<emphasis role="bold">dziaĹajÄ tylko pod Linuksem, FreeBSD, NetBSD, Cygwinem na
+platformach x86, Alpha i PowerPC (Sprawdzone zostaĹy Linux/Alpha
 i Linux/PowerPC) i pod Mac OS X</emphasis>.
 </para></note>
 </sect2>
@@ -270,30 +270,30 @@ i Linux/PowerPC) i pod Mac OS X</emphasis>.
 
 <para>
 <ulink url="http://www.xvid.org">XviD</ulink> jest wolnym, kompatybilnym
-z MPEG-4 ASP kodekiem video z możliwościami kodowania dwuprzebiegowego
-i pełną obsługą MPEG-4 ASP, dlatego jest dużo bardziej efektywny niż dobrze
+z MPEG-4 ASP kodekiem video z moĹźliwoĹciami kodowania dwuprzebiegowego
+i peĹnÄ obsĹugÄ MPEG-4 ASP, dlatego jest duĹźo bardziej efektywny niĹź dobrze
 znany kodek DivX.
-Łączy bardzo dobrą jakość video i dobre osiągi dzięki optymalizacjami kodu dla
-większości nowoczesnych procesorów.
+ĹÄczy bardzo dobrÄ jakoĹÄ video i dobre osiÄgi dziÄki optymalizacjami kodu dla
+wiÄkszoĹci nowoczesnych procesorĂłw.
 </para>
 <para>
-Zaczął się jako odłam kodeka OpenDivX.
-Stało się to gdy ProjectMajo zmienił OpenDivX na zamknięte DivX4
-(a teraz DivX5). W rezultacie tej decyzji, rozeźleni ludzie spoza ProjectMayo,
-którzy pracowali nad OpenDivX, rozpoczęli projekt XviD. Tak więc oba projekty
-mają to samo pochodzenie.
+ZaczÄĹ siÄ jako odĹam kodeka OpenDivX.
+StaĹo siÄ to gdy ProjectMajo zmieniĹ OpenDivX na zamkniÄte DivX4
+(a teraz DivX5). W rezultacie tej decyzji, rozeĹşleni ludzie spoza ProjectMayo,
+ktĂłrzy pracowali nad OpenDivX, rozpoczÄli projekt XviD. Tak wiÄc oba projekty
+majÄ to samo pochodzenie.
 </para>
 
 <procedure>
 <title>Instalacja <systemitem class="library">XviD</systemitem></title>
 <para>
-  Jak większość otwartego oporgramowania dostępny jest w dwóch wersjach:
-  <ulink url="http://www.xvid.org/downloads.html">oficjalnych wydań</ulink>
+  Jak wiÄkszoĹÄ otwartego oporgramowania dostÄpny jest w dwĂłch wersjach:
+  <ulink url="http://www.xvid.org/downloads.html">oficjalnych wydaĹ</ulink>
   i wersji CVS.
-  Wersja CVS jest zazwyczaj wystarczająco stablina by jej używać, jako że
-  zazwyczaj ma poprawki do błędów występujących w wydaniach.
-  Tak należy nakłonić <systemitem class="library">XviD</systemitem> CVS do
-  pracy z <application>MEncoderem</application> (będziesz potrzebował
+  Wersja CVS jest zazwyczaj wystarczajÄco stablina by jej uĹźywaÄ, jako Ĺźe
+  zazwyczaj ma poprawki do bĹÄdĂłw wystÄpujÄcych w wydaniach.
+  Tak naleĹźy nakĹoniÄ <systemitem class="library">XviD</systemitem> CVS do
+  pracy z <application>MEncoderem</application> (bÄdziesz potrzebowaĹ
   przenajmniej <application>autoconf</application> 2.50,
   <application>automake</application> i <application>libtool</application>):
 </para>
@@ -311,22 +311,22 @@ mają to samo pochodzenie.
   </para></step>
 <step><para>
   <screen>./configure</screen>
-  Możesz potrzebować dodać jakieś opcje (przejrzyj wyjście
-  poniższej komendy).
+  MoĹźesz potrzebowaÄ dodaÄ jakieĹ opcje (przejrzyj wyjĹcie
+  poniĹźszej komendy).
   <command>./configure --help</command>
   </para></step>
 <step><para>
   <screen>make &amp;&amp; make install</screen>
   </para></step>
 <step><para>
-  Jeżeli użyłeś opcji <option>--enable-divxcompat</option>,
+  JeĹźeli uĹźyĹeĹ opcji <option>--enable-divxcompat</option>,
   skopiuj <filename>../../src/divx4.h</filename> do
   <filename class="directory">/usr/local/include/</filename>.
   </para></step>
 <step><para>
   Przekompiluj <application>MPlayera</application> z opcjami
-  <option>--with-xvidcore=<replaceable>/ścieżka/do/</replaceable>libxvidcore.a</option>
-  <option>--with-xvidincdir=<replaceable>/ścieżka/do/</replaceable>xvid.h</option>.
+  <option>--with-xvidcore=<replaceable>/ĹcieĹźka/do/</replaceable>libxvidcore.a</option>
+  <option>--with-xvidincdir=<replaceable>/ĹcieĹźka/do/</replaceable>xvid.h</option>.
   </para></step>
 </procedure>
 </sect2>
@@ -337,20 +337,20 @@ mają to samo pochodzenie.
 
 <para>
 Sorenson jest kodekiem video rozwijanym przez Sorenson Media i licencjonowanym
-dla Apple, która rozprowadza go wraz ze swoim <application>Odtwarzaczem
+dla Apple, ktĂłra rozprowadza go wraz ze swoim <application>Odtwarzaczem
 QuickTime</application>.
-Aktualnie <application>MPlayer</application> jest w stanie odtwarzać wszystkie
-wersje plików video Sorensona z użyciem następujących dekoderów:
+Aktualnie <application>MPlayer</application> jest w stanie odtwarzaÄ wszystkie
+wersje plikĂłw video Sorensona z uĹźyciem nastÄpujÄcych dekoderĂłw:
 </para>
 
 <itemizedlist>
 <listitem><simpara>
-  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - dekodowanie za pomocą
+  Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - dekodowanie za pomocÄ
   <emphasis role="bold">natywnego kodeka video</emphasis>
   (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
-  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - dekodowanie za pomocą
+  Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - dekodowanie za pomocÄ
   <emphasis role="bold">natywnego kodeka video</emphasis>
   (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
@@ -358,13 +358,13 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 
 <procedure>
 <title>KOMPILOWANIE MPLAYERA ZE WSPARCIEM DLA BIBLIOTEK QUICKTIME</title>
-<note><para>Aktualnie obsługiwane są tylko 32-bitowe platformy Intela.</para></note>
-<step><para>ściągnij <application>MPlayera</application> z SVN</para></step>
+<note><para>Aktualnie obsĹugiwane sÄ tylko 32-bitowe platformy Intela.</para></note>
+<step><para>ĹciÄgnij <application>MPlayera</application> z SVN</para></step>
 <step><para>pobierz pakiet QuickTime DLL z
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>rozpakuj pakiet QuickTime DLL do twojego katalogu z kodekami Win32
-(domyślnie: <filename class="directory">/usr/local/lib/codecs/</filename>)
+(domyĹlnie: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
 <step><para>skompiluj <application>MPlayera</application></para></step>
 </procedure>
@@ -377,36 +377,36 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 <sect3 id="codec-x264-whatis">
 <title>Co to jest x264</title>
 <para>
-  <systemitem class="library">x264</systemitem> jest biblioteką słurzącą do
+  <systemitem class="library">x264</systemitem> jest bibliotekÄ sĹurzÄcÄ do
   tworzenia strumieni video H.264.
-  Nie jest w 100% ukończona, ale ma przynajmniej pewną obsługę większości
-  mających wpływ na jakość możliwości H.264.
-  Jest też wiele zaawansowanych możliwości w specyfikacji H.264, które nie mają
-  nic wspólnego z jakością jako taką; wiele z nich jeszcze nie ma
+  Nie jest w 100% ukoĹczona, ale ma przynajmniej pewnÄ obsĹugÄ wiÄkszoĹci
+  majÄcych wpĹyw na jakoĹÄ moĹźliwoĹci H.264.
+  Jest teĹź wiele zaawansowanych moĹźliwoĹci w specyfikacji H.264, ktĂłre nie majÄ
+  nic wspĂłlnego z jakoĹciÄ jako takÄ; wiele z nich jeszcze nie ma
   implementacji w <systemitem class="library">x264</systemitem>.
 </para>
 
 <itemizedlist>
-<title>Możliwości kodera</title>
+<title>MoĹźliwoĹci kodera</title>
   <listitem><para>CAVLC/CABAC</para></listitem>
   <listitem><para>Wielokrotne referencje</para></listitem>
-  <listitem><para>Intra: wszystkie typy makrobloków 
+  <listitem><para>Intra: wszystkie typy makroblokĂłw 
      (16x16, 8x8 i 4x4 z wszystkimi predykcjami)</para></listitem>
-  <listitem><para>Inter P: wszystkie podziały
-     (od 16x16 aż do 4x4)</para></listitem>
-  <listitem><para>Inter B: podziały od 16x16 do 8x8
-    (włączając SKIP/DIRECT)</para></listitem>
-  <listitem><para>Kontrola tempa: stały kwantyzator, stały bitrate,
+  <listitem><para>Inter P: wszystkie podziaĹy
+     (od 16x16 aĹź do 4x4)</para></listitem>
+  <listitem><para>Inter B: podziaĹy od 16x16 do 8x8
+    (wĹÄczajÄc SKIP/DIRECT)</para></listitem>
+  <listitem><para>Kontrola tempa: staĹy kwantyzator, staĹy bitrate,
 	pojedyncze albo wieloprzebiegowe ABR</para></listitem>
   <listitem><para>Wykrywanie zmian scen</para></listitem>
   <listitem><para>Adaptatywne umieszczanie klatek B</para></listitem>
-  <listitem><para>Referencyjne ramki / dowolna kolejność
+  <listitem><para>Referencyjne ramki / dowolna kolejnoĹÄ
 	ramek</para></listitem>
   <listitem><para>adaptywna transformacja przestrzenna
 	8x8 i 4x4</para></listitem>
   <listitem><para>tryb bezstratny</para></listitem>
-  <listitem><para>Własne matryce kwantyzacji</para></listitem>
-  <listitem><para>Równoległe kodowanie wielu fragmentów</para></listitem>
+  <listitem><para>WĹasne matryce kwantyzacji</para></listitem>
+  <listitem><para>RĂłwnolegĹe kodowanie wielu fragmentĂłw</para></listitem>
 </itemizedlist>
 
 </sect3>
@@ -414,90 +414,90 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 <sect3 id="codec-h264-whatis">
 <title>Co to jest H.264</title>
 <para>
-  H.264 jedną z nazw nowego kodeka video opracowanego wspólnie przez ITU
+  H.264 jednÄ z nazw nowego kodeka video opracowanego wspĂłlnie przez ITU
   i MPEG.
-  Może też być prawidłowo nazywany okropnymi nazwami "ISO/IEC 14496-10" lub
-  "MPEG-4 Part 10". Częściej jest nazywany "MPEG-4 AVC" albo po prostu "AVC".
+  MoĹźe teĹź byÄ prawidĹowo nazywany okropnymi nazwami "ISO/IEC 14496-10" lub
+  "MPEG-4 Part 10". CzÄĹciej jest nazywany "MPEG-4 AVC" albo po prostu "AVC".
 </para>
 <para>
-  Jakkolwiek go nie nazywać, H.264 może być wart wypróbowania ponieważ
-  zazwyczaj może dorównać jakością MPEG-4 ASP z mniejszą o 5%-30% objętością.
-  Dokładne wyniki zależą od materiału źródłowego i kodera.
-  Zyski z używania H.264 nie są za darmo: Dekodowanie strumieni H.264 mają
-  duże wymagania obliczeniowe i pamięciowe.
-  Na przykład, na Athlonie 1733 MHz, film H.264 w rozdzielczości DVD 1500kbps
-  wymaga do zdekodowania około 35% CPU.
-  Dla porównania, dekodowanie strumienia MPEG-4 ASP w rozdzielczości DVD
-  1500kbps wymaga około 10% CPU.
-  Oznacza to że dekodowanie wysokiej jakości strumieni jest prawie nie do
-  pomyślenia dla zwykłych użytkowników.
-  Oznacza to również że dobry DVD rip może się czasami zacinać na procesorach
-  wolniejszych niż około 2.0 GHz.
+  Jakkolwiek go nie nazywaÄ, H.264 moĹźe byÄ wart wyprĂłbowania poniewaĹź
+  zazwyczaj moĹźe dorĂłwnaÄ jakoĹciÄ MPEG-4 ASP z mniejszÄ o 5%-30% objÄtoĹciÄ.
+  DokĹadne wyniki zaleĹźÄ od materiaĹu ĹşrĂłdĹowego i kodera.
+  Zyski z uĹźywania H.264 nie sÄ za darmo: Dekodowanie strumieni H.264 majÄ
+  duĹźe wymagania obliczeniowe i pamiÄciowe.
+  Na przykĹad, na Athlonie 1733 MHz, film H.264 w rozdzielczoĹci DVD 1500kbps
+  wymaga do zdekodowania okoĹo 35% CPU.
+  Dla porĂłwnania, dekodowanie strumienia MPEG-4 ASP w rozdzielczoĹci DVD
+  1500kbps wymaga okoĹo 10% CPU.
+  Oznacza to Ĺźe dekodowanie wysokiej jakoĹci strumieni jest prawie nie do
+  pomyĹlenia dla zwykĹych uĹźytkownikĂłw.
+  Oznacza to rĂłwnieĹź Ĺźe dobry DVD rip moĹźe siÄ czasami zacinaÄ na procesorach
+  wolniejszych niĹź okoĹo 2.0 GHz.
 </para>
 <para>
-  Przynajmniej przy używaniu <systemitem class="library">x264</systemitem>
-  wymagania kodowania nie są o wiele większe niż te, do których przywykliśmy
+  Przynajmniej przy uĹźywaniu <systemitem class="library">x264</systemitem>
+  wymagania kodowania nie sÄ o wiele wiÄksze niĹź te, do ktĂłrych przywykliĹmy
   przy MPEG-4 ASP.
-  Na przykład, na Athlonie 1733 MHz typowe kodowanie DVD będzie działać
+  Na przykĹad, na Athlonie 1733 MHz typowe kodowanie DVD bÄdzie dziaĹaÄ
   z 5-15fps.
 </para>
 <para>
-  Ten dokument nie ma wyjaśniać szczegółów H.264, ale jeśli jesteś
-  zainteresowany niewielkim wstępem możesz chcieć przeczytać
+  Ten dokument nie ma wyjaĹniaÄ szczegĂłĹĂłw H.264, ale jeĹli jesteĹ
+  zainteresowany niewielkim wstÄpem moĹźesz chcieÄ przeczytaÄ
   <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
 </para>
 </sect3>
 
 <sect3 id="codec-x264-playback">
-<title>Jak mogę odtwarzać filmy H.264 używając <application>MPlayera</application></title>
+<title>Jak mogÄ odtwarzaÄ filmy H.264 uĹźywajÄc <application>MPlayera</application></title>
 <para>
-  <application>MPlayer</application> używa dekodera H.264 z
+  <application>MPlayer</application> uĹźywa dekodera H.264 z
   <systemitem class="library">libavcodec</systemitem>.
-  <systemitem class="library">libavcodec</systemitem> miało choć trochę zdatny
-  do użytku dekoder H.264 od około czerwca 2004, ale od tego czasu wprowadzono
-  wiele zmian i poprawek, zarówno pod względem obsługiwanej funkcjonalności
-  jak i zużycia CPU.
-  Na wszelki wypadek lepiej jest używać najnowszej wersji z Subversion.
+  <systemitem class="library">libavcodec</systemitem> miaĹo choÄ trochÄ zdatny
+  do uĹźytku dekoder H.264 od okoĹo czerwca 2004, ale od tego czasu wprowadzono
+  wiele zmian i poprawek, zarĂłwno pod wzglÄdem obsĹugiwanej funkcjonalnoĹci
+  jak i zuĹźycia CPU.
+  Na wszelki wypadek lepiej jest uĹźywaÄ najnowszej wersji z Subversion.
 </para>
 <para>
-  Jeśli chcesz szybki i łatwy sposób na sprawdzenie czy były ostatnio zmiany
-  w obsłudze H.264 w <systemitem class="library">libavcodec</systemitem>,
-  możesz patrzeć na
+  JeĹli chcesz szybki i Ĺatwy sposĂłb na sprawdzenie czy byĹy ostatnio zmiany
+  w obsĹudze H.264 w <systemitem class="library">libavcodec</systemitem>,
+  moĹźesz patrzeÄ na
   <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">interfejs sieciowy repozytorium SVN FFmpega</ulink>
 </para>
 </sect3>
 
 <sect3 id="codec-x264-encode">
-<title>Jak mogę kodować filmy używając <application>MEncodera</application> i <systemitem class="library">x264</systemitem>?</title>
+<title>Jak mogÄ kodowaÄ filmy uĹźywajÄc <application>MEncodera</application> i <systemitem class="library">x264</systemitem>?</title>
 <para>
-  Jeśli masz zainstalowanego klienta subversion, możesz uzyskać najnowsze
-  źródła x264 tym poleceniem:
+  JeĹli masz zainstalowanego klienta subversion, moĹźesz uzyskaÄ najnowsze
+  ĹşrĂłdĹa x264 tym poleceniem:
   <screen>
     svn co svn://svn.videolan.org/x264/trunk x264<!--
   --></screen>
-  Źródła <application>MPlayera</application> są aktualizowane, gdy tylko
-  zmieni się API <systemitem class="library">x264</systemitem>, więc zalecane
-  jest także używanie <application>MPlayera</application> z Subversion.
-  Być może sytuacja się zmieni jeśli i gdy nastąpi "wydanie"
+  ĹšrĂłdĹa <application>MPlayera</application> sÄ aktualizowane, gdy tylko
+  zmieni siÄ API <systemitem class="library">x264</systemitem>, wiÄc zalecane
+  jest takĹźe uĹźywanie <application>MPlayera</application> z Subversion.
+  ByÄ moĹźe sytuacja siÄ zmieni jeĹli i gdy nastÄpi "wydanie"
   <systemitem class="library">x264</systemitem>.
-  W międzyczasie <systemitem class="library">x264</systemitem> powinna być
-  uważana za niestabilną, w tym sensie że jej interface programistyczny może
-  się zmienić.
+  W miÄdzyczasie <systemitem class="library">x264</systemitem> powinna byÄ
+  uwaĹźana za niestabilnÄ, w tym sensie Ĺźe jej interface programistyczny moĹźe
+  siÄ zmieniÄ.
 </para>
 <para>
-  <systemitem class="library">x264</systemitem> buduje się i instaluje
-  w sposób standardowy:
+  <systemitem class="library">x264</systemitem> buduje siÄ i instaluje
+  w sposĂłb standardowy:
   <screen>
     ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
   --></screen>
   To zainstaluje libx264.a w /usr/local/lib oraz x264.h w /usr/local/include.
 
-  Gdy biblioteka i nagłówki <systemitem class="library">x264</systemitem> są
-  już w standardowych miejscach, budowanie <application>MPlayera</application>
-  z obsługą <systemitem class="library">x264</systemitem> jest proste.
+  Gdy biblioteka i nagĹĂłwki <systemitem class="library">x264</systemitem> sÄ
+  juĹź w standardowych miejscach, budowanie <application>MPlayera</application>
+  z obsĹugÄ <systemitem class="library">x264</systemitem> jest proste.
   Uruchom standardowe:
   <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
-  Skrypt konfiguracyjny wykryje że spełniłeś wymagania do obsługi
+  Skrypt konfiguracyjny wykryje Ĺźe speĹniĹeĹ wymagania do obsĹugi
   <systemitem class="library">x264</systemitem>.
 </para>
 </sect3>
@@ -510,10 +510,10 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 <title>Kodeki audio</title>
 
 <itemizedlist>
-<title>Najważniejsze ze wszystkich kodeków audio:</title>
+<title>NajwaĹźniejsze ze wszystkich kodekĂłw audio:</title>
 <listitem><simpara>
   MPEG layer 1/2/3 (MP1/2/3) audio (<emphasis role="bold">natywny</emphasis>
-  kod, z optymalizacją dla MMX/SSE/3DNow!)
+  kod, z optymalizacjÄ dla MMX/SSE/3DNow!)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 7 i 8 (AKA WMAv1 i WMAv2) (<emphasis role="bold">natywny</emphasis> kod, z
@@ -524,10 +524,10 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   </simpara></listitem>
 <listitem><simpara>
   AC3 Dolby audio (<emphasis role="bold">natywny</emphasis> kod, z
-  optymalizacją MMX/SSE/3DNow!)
+  optymalizacjÄ MMX/SSE/3DNow!)
   </simpara></listitem>
 <listitem><simpara>
- przetwarzanie AC3 przez kartę dźwiękową
+ przetwarzanie AC3 przez kartÄ dĹşwiÄkowÄ
   </simpara></listitem>
 <listitem><simpara>
   AAC
@@ -548,7 +548,7 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
   Voxware audio (poprzez DirectShow DLL)
   </simpara></listitem>
 <listitem><simpara>
-  formaty alaw i ulaw, różne gsm, adpcm i pcm i inne stare, proste kodeki
+  formaty alaw i ulaw, rĂłĹźne gsm, adpcm i pcm i inne stare, proste kodeki
   audio
   </simpara></listitem>
  <listitem><simpara>
@@ -561,93 +561,93 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 <title>Programowe dekodowanie AC3</title>
 
 <para>
-To jest domyślny dekoder używany przez pliki z dźwiękiem AC3.
+To jest domyĹlny dekoder uĹźywany przez pliki z dĹşwiÄkiem AC3.
 </para>
 
 <para>
-Dekoder AC3 może wytworzyć wyjście audio zmiksowane dla 2, 4 lub 6 głośników.
-Kiedy skonfigurowany jest dla 6 głośników, dekoder dostarcza do sterownika
-karty dźwiękowej osobne wyjście dla każdego kanału AC3, pozwalając doświadczyć
-pełnego "dźwięku przestrzennego" bez potrzeby użycia zewnętrznego dekodera AC3
+Dekoder AC3 moĹźe wytworzyÄ wyjĹcie audio zmiksowane dla 2, 4 lub 6 gĹoĹnikĂłw.
+Kiedy skonfigurowany jest dla 6 gĹoĹnikĂłw, dekoder dostarcza do sterownika
+karty dĹşwiÄkowej osobne wyjĹcie dla kaĹźdego kanaĹu AC3, pozwalajÄc doĹwiadczyÄ
+peĹnego "dĹşwiÄku przestrzennego" bez potrzeby uĹźycia zewnÄtrznego dekodera AC3
 wymaganego przez kodek hwac3.
 </para>
 
 <para>
-Użyj opcji <option>-channels</option> aby wybrać liczbę wyjściowych kanałów.
-Użyj <option>-channels 2</option> do uzyskania dźwięku stereo. Dla
-czterokanałowego dźwięku (wyjścia Lewe Przednie, Prawe Przednie, Lewe Surround
-i Prawe Surround), użyj <option>-channels 4</option>. W tym przypadku,
-wszystkie centralne kanały zostaną zmiksowane do odpowiadających im przednich
-kanałów. Natomiast <option>-channels 6</option> wyprodukuje wszystkie kanały
-AC3 tak jak zostały zakodowane - w kolejności Lewy, Prawy, Lewy Surround, Prawy
+UĹźyj opcji <option>-channels</option> aby wybraÄ liczbÄ wyjĹciowych kanaĹĂłw.
+UĹźyj <option>-channels 2</option> do uzyskania dĹşwiÄku stereo. Dla
+czterokanaĹowego dĹşwiÄku (wyjĹcia Lewe Przednie, Prawe Przednie, Lewe Surround
+i Prawe Surround), uĹźyj <option>-channels 4</option>. W tym przypadku,
+wszystkie centralne kanaĹy zostanÄ zmiksowane do odpowiadajÄcych im przednich
+kanaĹĂłw. Natomiast <option>-channels 6</option> wyprodukuje wszystkie kanaĹy
+AC3 tak jak zostaĹy zakodowane - w kolejnoĹci Lewy, Prawy, Lewy Surround, Prawy
 Surround, Centralny i LFE.
 </para>
 
 <para>
-Domyślną liczbą kanałów wyjściowych jest 2.
+DomyĹlnÄ liczbÄ kanaĹĂłw wyjĹciowych jest 2.
 </para>
 
 <para>
-Aby użyć więcej niż dwóch wyjściowych kanałów, będziesz potrzebował
-OSS i kartę dźwiękową ze wsparciem dla odpowiedniej liczby wyjściowych
-kanałów poprzez SNDCTL_DSP_CHANNELS ioctl. Przykładem odpowiedniego sterownika
-jest emu10k1 (używany przez karty Soundblaster Live!) z sierpnia 2001 roku,
-albo nowszy (przypuszczalnie działa także ALSA CVS).
+Aby uĹźyÄ wiÄcej niĹź dwĂłch wyjĹciowych kanaĹĂłw, bÄdziesz potrzebowaĹ
+OSS i kartÄ dĹşwiÄkowÄ ze wsparciem dla odpowiedniej liczby wyjĹciowych
+kanaĹĂłw poprzez SNDCTL_DSP_CHANNELS ioctl. PrzykĹadem odpowiedniego sterownika
+jest emu10k1 (uĹźywany przez karty Soundblaster Live!) z sierpnia 2001 roku,
+albo nowszy (przypuszczalnie dziaĹa takĹźe ALSA CVS).
 </para>
 </sect2>
 
 
 <sect2 id="hwac3">
-<title>Sprzętowe dekodowanie AC3</title>
+<title>SprzÄtowe dekodowanie AC3</title>
 <para>
-Potrzebna jest karta obsługująca AC3, z cyfrowym wyjściem (S/PDIF). Sterownik
-musi prawidłowo obsługiwać format AFMT_AC3 (robi to C-Media). Podłącz swój
-dekoder AC3 do wyjścia S/PDIF i użyj opcji <option>-ac hwac3</option>.
-Rozwiązanie to jest ciągle w fazie testów, ale wiadomo, że działa z kartami
+Potrzebna jest karta obsĹugujÄca AC3, z cyfrowym wyjĹciem (S/PDIF). Sterownik
+musi prawidĹowo obsĹugiwaÄ format AFMT_AC3 (robi to C-Media). PodĹÄcz swĂłj
+dekoder AC3 do wyjĹcia S/PDIF i uĹźyj opcji <option>-ac hwac3</option>.
+RozwiÄzanie to jest ciÄgle w fazie testĂłw, ale wiadomo, Ĺźe dziaĹa z kartami
 C-Media i Soundblaster Live! + sterowniki ALSA (ale nie z OSS) i kartami
-dekodującymi DXR3/Hollywood+ MPEG.
+dekodujÄcymi DXR3/Hollywood+ MPEG.
 </para>
 </sect2>
 
 
 <sect2 id="libmad">
-<title>obsługa libmad</title>
+<title>obsĹuga libmad</title>
 
 <para>
-<ulink url="http://www.underbit.com/products/mad/">libmad</ulink> jest wieloplatformową,
-stałoprzecinkową (wewnętrznie 24-bitowe PCM) biblioteką dekodującą dźwięk
-MPEG. Nie odtwarza zbyt dobrze uszkodzonych plików i czasami ma problemy
-z przewijaniem, ale może mieć lepszą wydajność niż mp3lib na platformach ze
-słabszymi FPU (jednostka do wykonywania obliczeń
-zmiennoprzecinkowych-przyp. tłumacza) (jak np. <link linkend="arm">ARM</link>).
+<ulink url="http://www.underbit.com/products/mad/">libmad</ulink> jest wieloplatformowÄ,
+staĹoprzecinkowÄ (wewnÄtrznie 24-bitowe PCM) bibliotekÄ dekodujÄcÄ dĹşwiÄk
+MPEG. Nie odtwarza zbyt dobrze uszkodzonych plikĂłw i czasami ma problemy
+z przewijaniem, ale moĹźe mieÄ lepszÄ wydajnoĹÄ niĹź mp3lib na platformach ze
+sĹabszymi FPU (jednostka do wykonywania obliczeĹ
+zmiennoprzecinkowych-przyp. tĹumacza) (jak np. <link linkend="arm">ARM</link>).
 </para>
 
 <para>
-Aby włączyć obsługę biblioteki, podczas kompilacji użyj opcji
-<option>--enable-mad</option> przy wywoływaniu configure.
+Aby wĹÄczyÄ obsĹugÄ biblioteki, podczas kompilacji uĹźyj opcji
+<option>--enable-mad</option> przy wywoĹywaniu configure.
 </para>
 </sect2>
 
 <sect2 id="hwmpa">
-	<title>sprzętowy kodek MPEG audio</title>
+	<title>sprzÄtowy kodek MPEG audio</title>
 	
 	<para>
 		Ten kodek (wybierany poprzez -ac hwmpa) przepuszcza pakiety
-		MPEG audio do sprzętowego dekodera takiego, jak ten, który można
-		znaleźć w pełni wyposażonych kartach DVB i adapterach DXR2.
-		Nie używaj ich w połączeniu z żadnymi innymi wyjściowymi
-		urządzeniami audo (np. OSS i ALSA), bo nie będzie to działało
-		(będziesz słyszeć tylko szum).
+		MPEG audio do sprzÄtowego dekodera takiego, jak ten, ktĂłry moĹźna
+		znaleĹşÄ w peĹni wyposaĹźonych kartach DVB i adapterach DXR2.
+		Nie uĹźywaj ich w poĹÄczeniu z Ĺźadnymi innymi wyjĹciowymi
+		urzÄdzeniami audo (np. OSS i ALSA), bo nie bÄdzie to dziaĹaĹo
+		(bÄdziesz sĹyszeÄ tylko szum).
 	</para>
 </sect2>
 
 <sect2 id="vivo-audio">
 <title>VIVO audio</title>
 <para>
-Rodzaj kodeka audio używanego w plikach VIVO zależy od tego, czy jest to plik
-VIVO/1.0, czy VIVO/2.0. Pliki VIVO/1.0 mają dźwięk w formacie
+Rodzaj kodeka audio uĹźywanego w plikach VIVO zaleĹźy od tego, czy jest to plik
+VIVO/1.0, czy VIVO/2.0. Pliki VIVO/1.0 majÄ dĹşwiÄk w formacie
 <emphasis role="bold">g.723</emphasis>, a pliki VIVO/2.0 w formacie
-<emphasis role="bold">Vivo Siren</emphasis>. Obsługiwane są oba typy.
+<emphasis role="bold">Vivo Siren</emphasis>. ObsĹugiwane sÄ oba typy.
 </para>
 </sect2>
 
@@ -656,7 +656,7 @@ VIVO/1.0, czy VIVO/2.0. Pliki VIVO/1.0 mają dźwięk w formacie
 <title>RealAudio</title>
 
 <para>
-<application>MPlayer</application> potrafi dekodować prawie wszystkie wersje RealAudio:
+<application>MPlayer</application> potrafi dekodowaÄ prawie wszystkie wersje RealAudio:
 </para>
 
 <itemizedlist>
@@ -665,23 +665,23 @@ VIVO/1.0, czy VIVO/2.0. Pliki VIVO/1.0 mają dźwięk w formacie
   <systemitem class="library">liba52</systemitem>
   </simpara></listitem>
 <listitem><simpara>
-  RealAudio Cook/Sipro/ATRAC3 - dekodowanie z użyciem
+  RealAudio Cook/Sipro/ATRAC3 - dekodowanie z uĹźyciem
   <emphasis role="bold">bibliotek RealPlayer</emphasis>
   </simpara></listitem>
 </itemizedlist>
 
 <para>
-Instrukcje dotyczące sposobu instalacji bibliotek RealPlayer
-znajdują się w dziale <link linkend="realvideo">RealVideo</link>.
+Instrukcje dotyczÄce sposobu instalacji bibliotek RealPlayer
+znajdujÄ siÄ w dziale <link linkend="realvideo">RealVideo</link>.
 </para>
 </sect2>
 
 <sect2 id="qdesign">
 <title>kodeki QDesign</title>
 <para>
-Format dźwięku QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) wykorzystywany
-jest w plikach MOV/QT. Obie wersje tych kodeków mogą być odtwarzane za pomocą
-bibliotek QuickTime. Instrukcje instalacji znajdują się w dziale
+Format dĹşwiÄku QDesign (fourcc:<emphasis>QDMC, QDM2</emphasis>) wykorzystywany
+jest w plikach MOV/QT. Obie wersje tych kodekĂłw mogÄ byÄ odtwarzane za pomocÄ
+bibliotek QuickTime. Instrukcje instalacji znajdujÄ siÄ w dziale
 <link linkend="sorenson">kodek Sorenson video</link>.
 </para>
 </sect2>
@@ -689,9 +689,9 @@ bibliotek QuickTime. Instrukcje instalacji znajdują się w dziale
 <sect2 id="qualcomm">
 <title>kodeki Qualcomm</title>
 <para>
-Dźwięk w formacie Qualcomm (fourcc:<emphasis>Qclp</emphasis>) używany jest
-w plikach MOV/QT. Może być dekodowany z użyciem bibliotek QuickTime.
-Instrukcje instalacji znajdują się w dziale
+DĹşwiÄk w formacie Qualcomm (fourcc:<emphasis>Qclp</emphasis>) uĹźywany jest
+w plikach MOV/QT. MoĹźe byÄ dekodowany z uĹźyciem bibliotek QuickTime.
+Instrukcje instalacji znajdujÄ siÄ w dziale
 <link linkend="sorenson">kodeka video Sorenson</link>.
 </para>
 </sect2>
@@ -700,21 +700,21 @@ Instrukcje instalacji znajdują się w dziale
 <title>AAC codec</title>
 <para>
 AAC (Advanced Audio Coding) jest kodekiem audio spotykanym czasami w plikach
-MOV i MP4. Otwarty dekoder nazywany FAAD dostępny jest na stronie
+MOV i MP4. Otwarty dekoder nazywany FAAD dostÄpny jest na stronie
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> zawiera migawkę CVS z
-libfaad 2.1beta, więc nie musisz ściągać go oddzielnie.
+<application>MPlayer</application> zawiera migawkÄ CVS z
+libfaad 2.1beta, wiÄc nie musisz ĹciÄgaÄ go oddzielnie.
 </para>
 
 <para>
-Jeżeli używasz gcc 3.2, który ma kłopoty z kompilacją wbudowanej wersji
-FAAD lub chcesz z jakichś powodów użyć zewnętrznej biblioteki,
-ściągnij ją z
+JeĹźeli uĹźywasz gcc 3.2, ktĂłry ma kĹopoty z kompilacjÄ wbudowanej wersji
+FAAD lub chcesz z jakichĹ powodĂłw uĹźyÄ zewnÄtrznej biblioteki,
+ĹciÄgnij jÄ z
 <ulink url="http://www.audiocoding.com/modules/mydownloads/">tej strony</ulink>
-i dodaj opcję <option>--enable-external-faad</option> do
-<filename>configure</filename>. Nie potrzebujesz całego faad2 do dekodowanie
-plików AAC. Wystarczy użyć samej biblioteki libfaad. Zbudujesz ją w następujący
-sposób
+i dodaj opcjÄ <option>--enable-external-faad</option> do
+<filename>configure</filename>. Nie potrzebujesz caĹego faad2 do dekodowanie
+plikĂłw AAC. Wystarczy uĹźyÄ samej biblioteki libfaad. Zbudujesz jÄ w nastÄpujÄcy
+sposĂłb
 <screen>
 cd faad2/
 sh bootstrap
@@ -723,8 +723,8 @@ cd libfaad
 make
 make install
 </screen>
-Wersje binarne nie są dostępne na stronie audiocoding.com, ale możesz
-ściągnąć (apt-getem) Debianowe paczki z
+Wersje binarne nie sÄ dostÄpne na stronie audiocoding.com, ale moĹźesz
+ĹciÄgnÄÄ (apt-getem) Debianowe paczki z
 <ulink url="http://www.debian-multimedia.org/">domowej strony
 	Christiana Marillata</ulink>,
 RPM-y dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>.
@@ -736,20 +736,20 @@ a RedHatowe RPM-y z
 <sect2 id="amr">
 	<title>kodeki AMR</title>
 	<para>
-		kodeki mowy Adaptive Multi-Rate są używane w telefonii komórkowej
+		kodeki mowy Adaptive Multi-Rate sÄ uĹźywane w telefonii komĂłrkowej
 		trzeciej generacji (3G).
-		Opis implementacji udostępniany jest przez
+		Opis implementacji udostÄpniany jest przez
 		<ulink url="http://www.3gpp.org">The 3rd Generation Partnership Project</ulink>
-		(za darmo dla osób prywatnych).
+		(za darmo dla osĂłb prywatnych).
 		</para>
 	<para>
-		Żeby uaktywnić obsługę kodeków, pobierz źródła kodeków
+		Ĺťeby uaktywniÄ obsĹugÄ kodekĂłw, pobierz ĹşrĂłdĹa kodekĂłw
 		<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26104-610.zip">
 			AMR-NB</ulink> i
 		<ulink url="http://www.3gpp.org/ftp/Specs/latest/Rel-6/26_series/26204-600.zip">
 			AMR-WB</ulink>,
-		umieść je w katalogu do którego rozpakowałeś źródła
-		<application>MPlayera</application> i wpisz następujące komendy:
+		umieĹÄ je w katalogu do ktĂłrego rozpakowaĹeĹ ĹşrĂłdĹa
+		<application>MPlayera</application> i wpisz nastÄpujÄce komendy:
 		<screen>
 			unzip 26104-610.zip
 			unzip 26104-610_ANSI_C_source_code.zip
@@ -758,7 +758,7 @@ a RedHatowe RPM-y z
 			unzip 26204-600_ANSI-C_source_code.zip
 			mv c-code libavcodec/amrwb_float
 			</screen>
-			Gdy już to zrobisz, kontynuuj <link linkend="features">budowanie</link>
+			Gdy juĹź to zrobisz, kontynuuj <link linkend="features">budowanie</link>
 			<application>MPlayera</application> tak, jak zwykle.
 		</para>
 </sect2>
@@ -768,7 +768,7 @@ a RedHatowe RPM-y z
 <!-- ********** -->
 
 <sect1 id="codec-importing">
-<title>importowanie kodeków Win32-HOWTO</title>
+<title>importowanie kodekĂłw Win32-HOWTO</title>
 
 <!-- TODO: a short paragraph of text would be nice here... -->
 <!-- Taa, a ja to potem pewnie bede mial tlumaczyc:-) -->
@@ -777,43 +777,43 @@ a RedHatowe RPM-y z
 <title>kodeki VFW</title>
 
 <para>
-VFW (Video for Windows) jest starym API Video pod Windows. Jego kodeki mają
+VFW (Video for Windows) jest starym API Video pod Windows. Jego kodeki majÄ
 rozszerzenie <filename>.DLL</filename> albo (rzadziej)
-<filename>.DRV</filename>. Jeżeli <application>MPlayer</application> odmawia
-odtwarzania plików AVI z komunikatem tego typu:
+<filename>.DRV</filename>. JeĹźeli <application>MPlayer</application> odmawia
+odtwarzania plikĂłw AVI z komunikatem tego typu:
 <screen>UNKNOWN video codec: HFYU (0x55594648)</screen>
 </para>
 
 <para>
-oznacza to, że twój plik AVI jest zakodowany z użyciem kodeka, który korzysta
+oznacza to, Ĺźe twĂłj plik AVI jest zakodowany z uĹźyciem kodeka, ktĂłry korzysta
 z fourcc HFYU (HFYU = kodek HuffYUV, DIV3 = DivX Low Motion, itd.;
-fourcc-unikalny, czteroliterowy identyfikator kodeka znajdujący się najczęściej
-w nagłówkach plików AVI-przyp. tłumacz). Kiedy już to wiesz, musisz odzukać
-DLL'a, który jest ładowany przez Windows w celu odtworzenia tego pliku.
-W naszym przypadku plik <filename>system.ini</filename> zawiera tę informację
-w następującej linii:
+fourcc-unikalny, czteroliterowy identyfikator kodeka znajdujÄcy siÄ najczÄĹciej
+w nagĹĂłwkach plikĂłw AVI-przyp. tĹumacz). Kiedy juĹź to wiesz, musisz odzukaÄ
+DLL'a, ktĂłry jest Ĺadowany przez Windows w celu odtworzenia tego pliku.
+W naszym przypadku plik <filename>system.ini</filename> zawiera tÄ informacjÄ
+w nastÄpujÄcej linii:
 <programlisting>VIDC.HFYU=huffyuv.dll</programlisting>
 </para>
 
 <para>
-Zatem potrzebujesz pliku <filename>huffyuv.dll</filename>. Zauważ, że kodeki
-audio są oznaczane za pomocą prefiksu MSACM:
+Zatem potrzebujesz pliku <filename>huffyuv.dll</filename>. ZauwaĹź, Ĺźe kodeki
+audio sÄ oznaczane za pomocÄ prefiksu MSACM:
 <programlisting>msacm.l3acm=L3codeca.acm</programlisting>
 </para>
 
 <para>
-Jest to kodek MP3. Teraz powinieneś mieć wszystkie niezbędne informacje
-(fourcc, plik z kodekiem, przykładowy plik AVI). Umieść swoją prośbę o wsparcie
-dla kodeka za pomocą poczty elektronicznej i wyślij ww. pliki na poniższy
+Jest to kodek MP3. Teraz powinieneĹ mieÄ wszystkie niezbÄdne informacje
+(fourcc, plik z kodekiem, przykĹadowy plik AVI). UmieĹÄ swojÄ proĹbÄ o wsparcie
+dla kodeka za pomocÄ poczty elektronicznej i wyĹlij ww. pliki na poniĹźszy
 serwer FTP:
 <systemitem role="url">
 ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
-<note><para> W systemach Windows NT/2000/XP szukaj powyższych informacji
-w rejestrze, np. szukaj wyrażenia &quot;VIDC.HFYU&quot;. Aby dowiedzieć się jak
-to zrobić, spójrz niżej na starą metodę DirectShow.
+<note><para> W systemach Windows NT/2000/XP szukaj powyĹźszych informacji
+w rejestrze, np. szukaj wyraĹźenia &quot;VIDC.HFYU&quot;. Aby dowiedzieÄ siÄ jak
+to zrobiÄ, spĂłjrz niĹźej na starÄ metodÄ DirectShow.
 </para></note>
 </sect2>
 
@@ -822,12 +822,12 @@ to zrobić, spójrz niżej na starą metodę DirectShow.
 <title>Kodeki DirectShow</title>
 
 <para>
-DirectShow jest nowszym API Video, które jest nawet gorsze od swojego
-poprzednika. Sprawa ma się gorzej z DirectShow, ponieważ:
+DirectShow jest nowszym API Video, ktĂłre jest nawet gorsze od swojego
+poprzednika. Sprawa ma siÄ gorzej z DirectShow, poniewaĹź:
 <itemizedlist>
 <listitem><simpara>
   <filename>system.ini</filename> nie zawiera wymaganych informacji,
-  zamiast tego są one przechowywane w rejestrze.
+  zamiast tego sÄ one przechowywane w rejestrze.
   </simpara></listitem>
 <listitem><simpara>
   Z tego powodu wymagane jest GUID kodeka.
@@ -838,7 +838,7 @@ poprzednika. Sprawa ma się gorzej z DirectShow, ponieważ:
 <procedure>
 <title>Nowa metoda:</title>
 <para>
-Używając <application>Microsoft GraphEdit</application> (szybki sposób)
+UĹźywajÄc <application>Microsoft GraphEdit</application> (szybki sposĂłb)
 </para>
 <step><para>
   Pobierz <application>GraphEdit</application> z dowolnego DirectX SDK, albo z
@@ -851,26 +851,26 @@ Używając <application>Microsoft GraphEdit</application> (szybki sposób)
   Z menu wybierz Graph -> Insert Filters.
   </para></step>
 <step><para>
-  Rozwiń listę <systemitem>DirectShow Filters</systemitem>
+  RozwiĹ listÄ <systemitem>DirectShow Filters</systemitem>
   </para></step>
 <step><para>
-  Wybierz właściwy kodek i rozwiń go.
+  Wybierz wĹaĹciwy kodek i rozwiĹ go.
   </para></step>
 <step><para>
-  We wpisie <systemitem>DisplayName</systemitem> spójrz na tekst w
-  nawiasach klamrowych po znaku "backslash" i zapisz go (pięć bloków
+  We wpisie <systemitem>DisplayName</systemitem> spĂłjrz na tekst w
+  nawiasach klamrowych po znaku "backslash" i zapisz go (piÄÄ blokĂłw
   oddzielonych kreskami, GUID).
   </para></step>
 <step><para>
-  Binariami kodeka jest plik określony w polu <systemitem>Filename</systemitem>.
+  Binariami kodeka jest plik okreĹlony w polu <systemitem>Filename</systemitem>.
   </para></step>
 </procedure>
 
 <note>
 <para>
 
-Jeżeli nie ma pola <systemitem>Filename</systemitem>, a
-<systemitem>DisplayName</systemitem> zawiera coś w stylu
+JeĹźeli nie ma pola <systemitem>Filename</systemitem>, a
+<systemitem>DisplayName</systemitem> zawiera coĹ w stylu
 <systemitem>device:dmo</systemitem>, to jest to DMO-kodek.
 </para>
 </note>
@@ -878,57 +878,57 @@ Jeżeli nie ma pola <systemitem>Filename</systemitem>, a
 <procedure>
 <title>Stara Metoda:</title>
 <para>
-Weź głęboki oddech i zacznij przeszukiwanie rejestru...
+WeĹş gĹÄboki oddech i zacznij przeszukiwanie rejestru...
 </para>
 <step><para>
   Uruchom <command>regedit</command>.
   </para></step>
 <step><para>
-  Naciśnij <keycap>Ctrl</keycap>+<keycap>F</keycap>, odznacz dwa pierwsze
+  NaciĹnij <keycap>Ctrl</keycap>+<keycap>F</keycap>, odznacz dwa pierwsze
   pola (checkboxes) i zaznacz trzecie. Wpisz fourcc kodeka (np.
   <userinput>TM20</userinput>).
   </para></step>
 <step><para>
-  Powinieneś zobaczyć pole zwierające ścieżkę i nazwę pliku (np.
+  PowinieneĹ zobaczyÄ pole zwierajÄce ĹcieĹźkÄ i nazwÄ pliku (np.
   <filename>C:\WINDOWS\SYSTEM\TM20DEC.AX</filename>).
   </para></step>
 <step><para>
-  Gdy odnalazłeś już plik, potrzebny będzie GUID. Spróbuj ponownego
-  wyszukiwania, ale tym razem wpisz nazwę kodeka, a nie jego fourcc. Jego nazwę
-  można sprawdzić, kiedy Media Player odtwarza plik, odszukując ją w
+  Gdy odnalazĹeĹ juĹź plik, potrzebny bÄdzie GUID. SprĂłbuj ponownego
+  wyszukiwania, ale tym razem wpisz nazwÄ kodeka, a nie jego fourcc. Jego nazwÄ
+  moĹźna sprawdziÄ, kiedy Media Player odtwarza plik, odszukujÄc jÄ w
   <guimenu>Plik</guimenu> -&gt; <guisubmenu>Opcje</guisubmenu> -&gt;
   <guimenuitem>Zaawansowane</guimenuitem>.
-  Jeżeli jej tam nie będzie, to masz pecha. Spróbuj odgadnąć nazwę (np. spróbuj
-  wyszukać "TrueMotion").
+  JeĹźeli jej tam nie bÄdzie, to masz pecha. SprĂłbuj odgadnÄÄ nazwÄ (np. sprĂłbuj
+  wyszukaÄ "TrueMotion").
   </para></step>
 <step><para>
-Jeżeli GUID został odnaleziony, powinieneś ujrzeć pola <guilabel>FriendlyName</guilabel>
-  i <guilabel>CLSID</guilabel>. Zapisz szesnastobajtowy CLSID będący GUIDem,
-  którego potrzebujemy.
+JeĹźeli GUID zostaĹ odnaleziony, powinieneĹ ujrzeÄ pola <guilabel>FriendlyName</guilabel>
+  i <guilabel>CLSID</guilabel>. Zapisz szesnastobajtowy CLSID bÄdÄcy GUIDem,
+  ktĂłrego potrzebujemy.
   </para></step>
 </procedure>
 
 <note>
 <para>
-Jeżeli wyszukiwanie się nie powiedzie, spróbuj zaznaczyć wszystkie pola
-(checkboxes). Prawdopodobnie dostaniesz niepasujące wyniki, ale być może
-będziesz miał szczęście...
+JeĹźeli wyszukiwanie siÄ nie powiedzie, sprĂłbuj zaznaczyÄ wszystkie pola
+(checkboxes). Prawdopodobnie dostaniesz niepasujÄce wyniki, ale byÄ moĹźe
+bÄdziesz miaĹ szczÄĹcie...
 </para>
 </note>
 
 <para>
 
-Teraz, kiedy masz już wszystkie niezbędne informacje (fourcc, GUID, plik
-z kodekiem, przykładowy plik AVI), umieść swoją prośbę o wsparcie dla kodeka
-za pomocą poczty elektronicznej i wyślij ww. pliki na poniższy serwer FTP:
+Teraz, kiedy masz juĹź wszystkie niezbÄdne informacje (fourcc, GUID, plik
+z kodekiem, przykĹadowy plik AVI), umieĹÄ swojÄ proĹbÄ o wsparcie dla kodeka
+za pomocÄ poczty elektronicznej i wyĹlij ww. pliki na poniĹźszy serwer FTP:
 <systemitem role="url">ftp://upload.mplayerhq.hu/MPlayer/incoming/[codecname]/
 </systemitem>
 </para>
 
 <para>
-Jeżeli chcesz samodzielnie dodać obsługę kodeka, przeczytaj
+JeĹźeli chcesz samodzielnie dodaÄ obsĹugÄ kodeka, przeczytaj
 <ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">
-DOCS/tech/codecs.conf.txt</ulink> (tylko po angielsku - przyp. tłum.).
+DOCS/tech/codecs.conf.txt</ulink> (tylko po angielsku - przyp. tĹum.).
 </para>
 
 </sect2>

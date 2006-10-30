@@ -2,66 +2,66 @@
 <!-- synced with r18930 -->
 <!-- Opiekun: Frogu -->
 <chapter id="faq" xreflabel="FAQ">
-<title>FAQ - Często Zadawane Pytania</title>
+<title>FAQ - CzÄsto Zadawane Pytania</title>
 
 <qandaset defaultlabel="qanda">
 
 <qandadiv id="faq-development">
-<title>Rozwój</title>
+<title>RozwĂłj</title>
 
 <qandaentry>
 <question><para>
-Jak mam stworzyć poprawną łatkę do <application>MPlayera</application>?
+Jak mam stworzyÄ poprawnÄ ĹatkÄ do <application>MPlayera</application>?
 </para></question>
 <answer><para>
-Przygotowaliśmy <ulink url="../../tech/patches.txt">krótki dokument</ulink>
-opisujący wszystkie potrzebne szczegóły. Kieruj się zawartymi w nim wskazówkami.
+PrzygotowaliĹmy <ulink url="../../tech/patches.txt">krĂłtki dokument</ulink>
+opisujÄcy wszystkie potrzebne szczegĂłĹy. Kieruj siÄ zawartymi w nim wskazĂłwkami.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę przetłumaczyć <application>MPlayera</application> na nowy język?
+Jak mogÄ przetĹumaczyÄ <application>MPlayera</application> na nowy jÄzyk?
 </para></question>
 <answer><para>
-Przeczytaj <ulink url="../../tech/translations.txt">HOWTO tłumaczenia</ulink>,
-powinno wszystko wyjaśnić. Dalszą pomoc uzyskasz na liście dyskusyjnej 
+Przeczytaj <ulink url="../../tech/translations.txt">HOWTO tĹumaczenia</ulink>,
+powinno wszystko wyjaĹniÄ. DalszÄ pomoc uzyskasz na liĹcie dyskusyjnej 
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę wesprzeć rozwój <application>MPlayera</application>?
+Jak mogÄ wesprzeÄ rozwĂłj <application>MPlayera</application>?
 </para></question>
 <answer><para>
-Jesteśmy bardziej niż szczęśliwi, gdy ofiarowujecie nam sprzęt i oprogramowanie w formie
+JesteĹmy bardziej niĹź szczÄĹliwi, gdy ofiarowujecie nam sprzÄt i oprogramowanie w formie
 <ulink url="http://www.mplayerhq.hu/donations.html">darowizn</ulink>.
-Pomagają one nam ciągle ulepszać <application>MPlayera</application>.
+PomagajÄ one nam ciÄgle ulepszaÄ <application>MPlayera</application>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę zostać deweloperem <application>MPlayera</application>?
+Jak mogÄ zostaÄ deweloperem <application>MPlayera</application>?
 </para></question>
 <answer><para>
-Programiści i dokumentatorzy zawsze są mile widziani. Na początek przeczytaj
-<ulink url="../../tech/">dokumentację techniczną</ulink> dla ogólnego zarysu.
-Następnie powinieneś zapisać się na listę dyskusyjną 
+ProgramiĹci i dokumentatorzy zawsze sÄ mile widziani. Na poczÄtek przeczytaj
+<ulink url="../../tech/">dokumentacjÄ technicznÄ</ulink> dla ogĂłlnego zarysu.
+NastÄpnie powinieneĹ zapisaÄ siÄ na listÄ dyskusyjnÄ 
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-i zacząć pisać. Jeżeli chcesz pomóc przy dokumentacji, zapisz się na listę dyskusyjną
+i zaczÄÄ pisaÄ. JeĹźeli chcesz pomĂłc przy dokumentacji, zapisz siÄ na listÄ dyskusyjnÄ
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Czemu nie używacie autoconf/automake?
+Czemu nie uĹźywacie autoconf/automake?
 </para></question>
 <answer><para>
-Mamy modularny, ręcznie napisany system budowania. Sprawuje się on całkiem nieźle,
-więc po co zmieniać? Poza tym nie lubimy narzędzi auto*
+Mamy modularny, rÄcznie napisany system budowania. Sprawuje siÄ on caĹkiem nieĹşle,
+wiÄc po co zmieniaÄ? Poza tym nie lubimy narzÄdzi auto*
 tak jak i 
 <ulink url="http://freshmeat.net/articles/view/889/">inni ludzie</ulink>.
 </para></answer>
@@ -72,39 +72,39 @@ tak jak i
 <title>Kompilacja i instalacja</title>
 <qandaentry>
 <question><para>
-Kompilacja nie udaje się z powodu błędu i <application>gcc</application>
-wyskakuje z tajemniczą wiadomością zawierającą zwrot
+Kompilacja nie udaje siÄ z powodu bĹÄdu i <application>gcc</application>
+wyskakuje z tajemniczÄ wiadomoĹciÄ zawierajÄcÄ zwrot
 <systemitem>internal compiler error</systemitem> lub
 <systemitem>unable to find a register to spill</systemitem>.
 </para></question>
 <answer><para>
-Natknąłeś się na błąd w <application>gcc</application>. Proszę
-<ulink url="http://gcc.gnu.org/bugs.html">zgłoś go zespołowi gcc</ulink>
-ale nie nam. Z jakichś przyczyn <application>MPlayer</application> często
-wywołuje błędy kompilatora. Jednak nie możemy ich naprawić i nie dodajemy do
-naszych źródeł obejść błędów kompilatora. Żeby uniknąć problemu albo trzymaj
-się wersji kompilatora o której wiadomo że jest stabilna i pewna, albo często
+NatknÄĹeĹ siÄ na bĹÄd w <application>gcc</application>. ProszÄ
+<ulink url="http://gcc.gnu.org/bugs.html">zgĹoĹ go zespoĹowi gcc</ulink>
+ale nie nam. Z jakichĹ przyczyn <application>MPlayer</application> czÄsto
+wywoĹuje bĹÄdy kompilatora. Jednak nie moĹźemy ich naprawiÄ i nie dodajemy do
+naszych ĹşrĂłdeĹ obejĹÄ bĹÄdĂłw kompilatora. Ĺťeby uniknÄÄ problemu albo trzymaj
+siÄ wersji kompilatora o ktĂłrej wiadomo Ĺźe jest stabilna i pewna, albo czÄsto
 aktualizuj.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Czy istnieją binarne (RPM/Debian) paczki z <application>MPlayerem</application>?
+Czy istniejÄ binarne (RPM/Debian) paczki z <application>MPlayerem</application>?
 </para></question>
 <answer><para>
-Więcej informacji na ten temat znajdziesz w sekcjach 
+WiÄcej informacji na ten temat znajdziesz w sekcjach 
 <link linkend="debian">Debian</link> oraz <link linkend="rpm">RPM</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę zbudować 32 bitowego <application>MPlayera</application> na 64
+Jak mogÄ zbudowaÄ 32 bitowego <application>MPlayera</application> na 64
 bitowym Athlonie?
 </para></question>
 <answer><para>
-Zastosuj następujące opcje konfiguracyjne.
+Zastosuj nastÄpujÄce opcje konfiguracyjne.
 <screen>
 ./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
 </screen>
@@ -113,160 +113,160 @@ Zastosuj następujące opcje konfiguracyjne.
 
 <qandaentry>
 <question><para>
-Konfiguracja kończy się takim komunikatem i <application>MPlayer</application> nie chce się skompilować!
+Konfiguracja koĹczy siÄ takim komunikatem i <application>MPlayer</application> nie chce siÄ skompilowaÄ!
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
-(Twój gcc nie obsługuje nawet i386 dla '-march' oraz '-mcpu')
+(TwĂłj gcc nie obsĹuguje nawet i386 dla '-march' oraz '-mcpu')
 </para></question>
 <answer><para>
-Twój gcc nie jest poprawnie zainstalowany. Sprawdź <filename>configure.log</filename>
-aby uzyskać szczegóły.
+TwĂłj gcc nie jest poprawnie zainstalowany. SprawdĹş <filename>configure.log</filename>
+aby uzyskaÄ szczegĂłĹy.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-    Mam Matroksa G200/G400/G450/G550, jak skompilować/używać sterownika
+    Mam Matroksa G200/G400/G450/G550, jak skompilowaÄ/uĹźywaÄ sterownika
     <systemitem>mga_vid</systemitem>?
 </para></question>
 <answer><para>
-Przeczytaj sekcję <link linkend="mga_vid">mga_vid</link>.
+Przeczytaj sekcjÄ <link linkend="mga_vid">mga_vid</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
   <question><para>
-Podczas 'make', <application>MPlayer</application> narzeka na brakujące biblioteki X11. 
+Podczas 'make', <application>MPlayer</application> narzeka na brakujÄce biblioteki X11. 
 Nie rozumiem, <emphasis>mam</emphasis> zainstalowane X11!?
 </para></question>
 <answer><para>
-...ale nie masz zainstalowanej paczki X11 development lub jest ona źle
-zainstalowana. Nazywa się ona <filename>XFree86-devel*</filename> w Red Hacie i
+...ale nie masz zainstalowanej paczki X11 development lub jest ona Ĺşle
+zainstalowana. Nazywa siÄ ona <filename>XFree86-devel*</filename> w Red Hacie i
 <filename>xlibs-dev</filename> w Debianie Woody,
-<filename>libx11-dev</filename> w Debianie Sarge. Sprawdź także czy istnieją 
-dowiązania symboliczne do
+<filename>libx11-dev</filename> w Debianie Sarge. SprawdĹş takĹźe czy istniejÄ 
+dowiÄzania symboliczne do
 <filename class="directory">/usr/X11</filename> oraz
 <filename class="directory">/usr/include/X11</filename>
-(problem może wystąpić w systemach Mandrake).
+(problem moĹźe wystÄpiÄ w systemach Mandrake).
 </para></answer>
 </qandaentry>
 
 
 <qandaentry>
 	<question><para>
-		Kompilowanie pod Mac OS 10.3 prowadzi do kilku błędów linkowania</para></question>
+		Kompilowanie pod Mac OS 10.3 prowadzi do kilku bĹÄdĂłw linkowania</para></question>
 	<answer><para>
-			Błąd linkowania, który się pojawia, wygląda najprawdopodobniej tak:
+			BĹÄd linkowania, ktĂłry siÄ pojawia, wyglÄda najprawdopodobniej tak:
 			<screen>
 				ld: Undefined symbols:
 				_LLCStyleInfoCheckForOpenTypeTables referenced from QuartzCore expected to be defined in ApplicationServices
 				_LLCStyleInfoGetUserRunFeatures referenced from QuartzCore expected to be defined in ApplicationServices
 				</screen>
-			Problem ten wynika z faktu, że deweloperzy Apple używają MacOS 10.4 do
-			kompilowania swojego oprogramowania i dostarczają binaria
-			użytkownikom 10.3 poprzez Uaktualnienia Oprogramowania.
-			Niezdefiniowane symbole obecne są pod Mac OS 10.4,
+			Problem ten wynika z faktu, Ĺźe deweloperzy Apple uĹźywajÄ MacOS 10.4 do
+			kompilowania swojego oprogramowania i dostarczajÄ binaria
+			uĹźytkownikom 10.3 poprzez Uaktualnienia Oprogramowania.
+			Niezdefiniowane symbole obecne sÄ pod Mac OS 10.4,
 			ale nie pod 10.3.
-			Jednym z rozwiązań jest powrót do QuickTime w wersji 7.0.1.
-			Oto lepsze rozwiązanie.
+			Jednym z rozwiÄzaĹ jest powrĂłt do QuickTime w wersji 7.0.1.
+			Oto lepsze rozwiÄzanie.
 			</para><para>
-			Zdobądź <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">
-				starszą wersję szkieletów</ulink> (frameworks; jest lepsze tłumaczenie? - przyp. tłumacz).
-			Otrzymasz skompresowany plik zawierający QuickTime 7.0.1 Framework
+			ZdobÄdĹş <ulink url="http://rapidshare.de/files/20281171/CompatFrameworks.tgz.html">
+				starszÄ wersjÄ szkieletĂłw</ulink> (frameworks; jest lepsze tĹumaczenie? - przyp. tĹumacz).
+			Otrzymasz skompresowany plik zawierajÄcy QuickTime 7.0.1 Framework
 			i 10.3.9 QuartzCore Framework.
 			</para><para>
-				Rozpakuj pliki gdzieś poza swoim katalogiem systemowym.
-				(nie instaluj szkieletów do swojego
+				Rozpakuj pliki gdzieĹ poza swoim katalogiem systemowym.
+				(nie instaluj szkieletĂłw do swojego
 			<filename class="directory">/System/Library/Frameworks</filename>!
-			Używanie tej starszej kopii doprowadzi do otrzymywania błędów dowiązań!)
+			UĹźywanie tej starszej kopii doprowadzi do otrzymywania bĹÄdĂłw dowiÄzaĹ!)
 			<screen>
 				gunzip &lt; CompatFrameworks.tgz | tar xvf -
 				</screen>
 			W pliku config.mak, dodaj
-			<systemitem>-F/ścieżka/do/rozpakowanego/archiwum</systemitem>
+			<systemitem>-F/ĹcieĹźka/do/rozpakowanego/archiwum</systemitem>
 			do zmiennej <systemitem>OPTFLAGS</systemitem>.
-			Jeżeli używasz <application>X-Code</application>, możesz po prostu
-			zaznaczyć te szkieletey, zamiast systemowych.
+			JeĹźeli uĹźywasz <application>X-Code</application>, moĹźesz po prostu
+			zaznaczyÄ te szkieletey, zamiast systemowych.
 			</para><para>
-			W rezultacie binarka <application>MPlayer</application> będzie
-			w rzeczywistości używać zainstalowanego w twoim systemie szkieletu poprzez
-			dynamiczne dowiązania, rozwiązywane przy uruchamianiu.
-			(Możesz to sprawdzić używając <systemitem>otool -l</systemitem>).
+			W rezultacie binarka <application>MPlayer</application> bÄdzie
+			w rzeczywistoĹci uĹźywaÄ zainstalowanego w twoim systemie szkieletu poprzez
+			dynamiczne dowiÄzania, rozwiÄzywane przy uruchamianiu.
+			(MoĹźesz to sprawdziÄ uĹźywajÄc <systemitem>otool -l</systemitem>).
 			</para></answer>
 	</qandaentry>
 
 </qandadiv>
 
 <qandadiv id="faq-general">
-<title>Pytania ogólne</title>
+<title>Pytania ogĂłlne</title>
 
 <qandaentry>
 <question><para>
-Czy są jakieś listy dyskusyjne o <application>MPlayerze</application>?
+Czy sÄ jakieĹ listy dyskusyjne o <application>MPlayerze</application>?
 </para></question>
 <answer><para>
-Tak. Spójrz na sekcję 
+Tak. SpĂłjrz na sekcjÄ 
 <ulink url="http://www.mplayerhq.hu/design7/mailing_lists.html">listy dyskusyjne</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Znalazłem paskudny błąd przy próbie odtworzenia mojego ulubionego filmu! Kogo
-powinienem poinformować?
+ZnalazĹem paskudny bĹÄd przy prĂłbie odtworzenia mojego ulubionego filmu! Kogo
+powinienem poinformowaÄ?
 </para></question>
 <answer><para>
-Przeczytaj proszę 
-<link linkend="bugreports">wskazówki do zgłoszeń błędów</link>
-i kieruj się zawartymi tam instrukcjami.
+Przeczytaj proszÄ 
+<link linkend="bugreports">wskazĂłwki do zgĹoszeĹ bĹÄdĂłw</link>
+i kieruj siÄ zawartymi tam instrukcjami.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Mam problemy z odtwarzaniem plików przy użyciu kodeka ... Czy mogę ich używać?
+Mam problemy z odtwarzaniem plikĂłw przy uĹźyciu kodeka ... Czy mogÄ ich uĹźywaÄ?
 </para></question>
 <answer><para>
-    Sprawdź <ulink url="../../codecs-status.html">status kodeków</ulink>,
-jeżeli nie zawiera on Twojego kodeka przeczytaj 
-<link linkend="codecs">dokumentację kodeków</link>,
-a w szczególności <link linkend="codec-importing">HOWTO importowania kodeków</link> i skontaktuj się z nami.
+    SprawdĹş <ulink url="../../codecs-status.html">status kodekĂłw</ulink>,
+jeĹźeli nie zawiera on Twojego kodeka przeczytaj 
+<link linkend="codecs">dokumentacjÄ kodekĂłw</link>,
+a w szczegĂłlnoĹci <link linkend="codec-importing">HOWTO importowania kodekĂłw</link> i skontaktuj siÄ z nami.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Gdy zaczynam odtwarzanie wyświetla się następujący komunikat lecz wszystko wydaje się być wporządku.
+Gdy zaczynam odtwarzanie wyĹwietla siÄ nastÄpujÄcy komunikat lecz wszystko wydaje siÄ byÄ wporzÄdku.
 <screen>Linux RTC init: ioctl (rtc_pie_on): Permission denied</screen>
 </para></question>
 <answer><para>
-Potrzebujesz uprawnień roota lub specjalnie ustawionego jądra, aby używać
+Potrzebujesz uprawnieĹ roota lub specjalnie ustawionego jÄdra, aby uĹźywaÄ
 nowego kodu synchronizacji czasu.
-Aby uzyskać szczegóły, spójrz do sekcji <link linkend="rtc">RTC</link> w dokumentacji.
+Aby uzyskaÄ szczegĂłĹy, spĂłjrz do sekcji <link linkend="rtc">RTC</link> w dokumentacji.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę zrobić zrzut ekranu?
+Jak mogÄ zrobiÄ zrzut ekranu?
 </para></question>
 <answer><para>
-Musisz skorzystać ze sterownika wyjścia video, który nie używa nakładki video. Pod X11 
-wystarczy użyć <option>-vo x11</option>, pod Windows działa <option>-vo directx:noaccel</option>
+Musisz skorzystaÄ ze sterownika wyjĹcia video, ktĂłry nie uĹźywa nakĹadki video. Pod X11 
+wystarczy uĹźyÄ <option>-vo x11</option>, pod Windows dziaĹa <option>-vo directx:noaccel</option>
 </para>
 <para>
-  Możesz też uruchomić <application>MPlayera</application> z filtrem video
+  MoĹźesz teĹź uruchomiÄ <application>MPlayera</application> z filtrem video
   <systemitem>screenshot</systemitem> (<option>-vf screenshot</option>).
-  Wtedy wciśnięcie klaiwsza <keycap>s</keycap> spowoduje pobranie zrzutu
+  Wtedy wciĹniÄcie klaiwsza <keycap>s</keycap> spowoduje pobranie zrzutu
   ekranu.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Co oznaczają te liczby w wierszu stanu?
+Co oznaczajÄ te liczby w wierszu stanu?
 </para></question>
 <answer><para>
-Przykład:
+PrzykĹad:
 <screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
 <variablelist>
   <varlistentry><term><systemitem>A: 2.1</systemitem></term>
@@ -276,98 +276,98 @@ Przykład:
     <listitem><para>pozycja video w sekundach</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
-    <listitem><para>różnica audio-video w sekundach (opóźnienie)</para></listitem>
+    <listitem><para>rĂłĹźnica audio-video w sekundach (opĂłĹşnienie)</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>ct: 0.042</systemitem></term>
-    <listitem><para>całkowita dokonana korekcja synchronizacji A-V</para></listitem>
+    <listitem><para>caĹkowita dokonana korekcja synchronizacji A-V</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>57/57</systemitem></term>
-    <listitem><para>ramki odtworzone/zdekodowane (licząc od ostatniego przewijania)</para></listitem>
+    <listitem><para>ramki odtworzone/zdekodowane (liczÄc od ostatniego przewijania)</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>41%</systemitem></term>
-    <listitem><para>użycie procesora w procentach przez kodek video (dla porcji/pakietów i
-DR zawiera także video_out)</para></listitem>
+    <listitem><para>uĹźycie procesora w procentach przez kodek video (dla porcji/pakietĂłw i
+DR zawiera takĹźe video_out)</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>0%</systemitem></term>
-<listitem><para>użycie procesora przez video_out</para></listitem>
+<listitem><para>uĹźycie procesora przez video_out</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>2.6%</systemitem></term>
-<listitem><para>użycie procesora w procentach przez kodek audio</para></listitem>
+<listitem><para>uĹźycie procesora w procentach przez kodek audio</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>0</systemitem></term>
-<listitem><para>ramki opuszczone, aby zachować synchronizację A-V</para></listitem>
+<listitem><para>ramki opuszczone, aby zachowaÄ synchronizacjÄ A-V</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>4</systemitem></term>
-<listitem><para>obecny poziom postprocessingu obrazu (gdy używasz 
+<listitem><para>obecny poziom postprocessingu obrazu (gdy uĹźywasz 
 <option>-autoq</option>)</para></listitem>
   </varlistentry>
   <varlistentry><term><systemitem>49%</systemitem></term>
-    <listitem><para>obecne wykożystanie pamięci cache (około 50% to norma)
+    <listitem><para>obecne wykoĹźystanie pamiÄci cache (okoĹo 50% to norma)
     </para></listitem>
 </varlistentry>
   <varlistentry><term><systemitem>1.00x</systemitem></term>
-<listitem><para>szybkość odtwarzania będąca mnożnikiem oryginalnej
-szybkości</para></listitem>
+<listitem><para>szybkoĹÄ odtwarzania bÄdÄca mnoĹźnikiem oryginalnej
+szybkoĹci</para></listitem>
   </varlistentry>
 </variablelist>
-Większość z nich obecna jest w celu debuggingu, aby się ich pozbyć użyj opcji
-<option>-quiet</option>. Możesz zauważyć, że dla niektóych plików użycie
-procesora przez video_out wynosi zero (0%). Spowodowane to jest tym, że jest
-ono wywoływane bezpośrednio przez kodek i nie może być zmierzone osobno.
-Jeżeli chcesz znać szybkość video_out, to porównaj różnicę przy odtwarzaniu
-z <option>-vo null</option> i normalnie przez Ciebie używanym sterownikiem
-wyjścia video.
+WiÄkszoĹÄ z nich obecna jest w celu debuggingu, aby siÄ ich pozbyÄ uĹźyj opcji
+<option>-quiet</option>. MoĹźesz zauwaĹźyÄ, Ĺźe dla niektĂłych plikĂłw uĹźycie
+procesora przez video_out wynosi zero (0%). Spowodowane to jest tym, Ĺźe jest
+ono wywoĹywane bezpoĹrednio przez kodek i nie moĹźe byÄ zmierzone osobno.
+JeĹźeli chcesz znaÄ szybkoĹÄ video_out, to porĂłwnaj rĂłĹźnicÄ przy odtwarzaniu
+z <option>-vo null</option> i normalnie przez Ciebie uĹźywanym sterownikiem
+wyjĹcia video.
 
 </para></answer>
 
 <answer><para>
-Używasz Bezpośredniego Renderowania, gdzie kodek renderuje wprost do 
-pamięci video. W tym przypadku procent dekodowania zawiera także procent 
-wyświetlania.
+UĹźywasz BezpoĹredniego Renderowania, gdzie kodek renderuje wprost do 
+pamiÄci video. W tym przypadku procent dekodowania zawiera takĹźe procent 
+wyĹwietlania.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Dostaję komunikaty błędów o nie znalezionym pliku <filename>/usr/local/lib/codecs/</filename> ...
+DostajÄ komunikaty bĹÄdĂłw o nie znalezionym pliku <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Ściągnij i zainstaluj binarne kodeki z naszej 
-<ulink url="http://www.mplayerhq.hu/design7/codecs.html">strony kodeków</ulink>
+ĹciÄgnij i zainstaluj binarne kodeki z naszej 
+<ulink url="http://www.mplayerhq.hu/design7/codecs.html">strony kodekĂłw</ulink>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-    Jak zmusić <application>MPlayera</application> do zapamiętania opcji
-    użytych dla określonego pliku, np <filename>film.avi</filename>?
+    Jak zmusiÄ <application>MPlayera</application> do zapamiÄtania opcji
+    uĹźytych dla okreĹlonego pliku, np <filename>film.avi</filename>?
 </para></question>
 <answer><para>
-    Stwórz plik w katalogu <filename class="directory">~/.mplayer</filename>, lub w katalogu z filmem,
-    o nazwie <filename>film.avi.conf</filename> i umieść w nim porządane opcje.
+    StwĂłrz plik w katalogu <filename class="directory">~/.mplayer</filename>, lub w katalogu z filmem,
+    o nazwie <filename>film.avi.conf</filename> i umieĹÄ w nim porzÄdane opcje.
 
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Napisy są bardzo ładne, najpiękniejsze jakie widziałem, ale spowalniają 
-odtwarzanie! Wiem, że to jest niezwykłe...
+Napisy sÄ bardzo Ĺadne, najpiÄkniejsze jakie widziaĹem, ale spowalniajÄ 
+odtwarzanie! Wiem, Ĺźe to jest niezwykĹe...
 </para></question>
 <answer><para>
 Po odpaleniu <filename>./configure</filename>, wyedytuj <filename>config.h</filename>
-i zamień <systemitem>#undef FAST_OSD</systemitem> na
+i zamieĹ <systemitem>#undef FAST_OSD</systemitem> na
 <systemitem>#define FAST_OSD</systemitem>. Po czym skompiluj ponownie.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Nie mogę się dostać do menu GUI. Klikam prawym przyciskiem myszy lecz 
-nie mogę dostać się do żadnych elementów menu!
+Nie mogÄ siÄ dostaÄ do menu GUI. Klikam prawym przyciskiem myszy lecz 
+nie mogÄ dostaÄ siÄ do Ĺźadnych elementĂłw menu!
 </para></question>
 <answer><para>
-Czy używasz FVWM? Spróbuj tego:
+Czy uĹźywasz FVWM? SprĂłbuj tego:
 <orderedlist>
 <listitem><para>Start -> Settings -> Configuration -> Base Configuration</para></listitem>
 <listitem><para>Ustaw <systemitem>Use Applications position hints</systemitem>
@@ -378,10 +378,10 @@ na <systemitem>Yes</systemitem></para></listitem>
 
 <qandaentry>
 <question><para>
-Jak uruchomić <application>MPlayera</application> w tle?
+Jak uruchomiÄ <application>MPlayera</application> w tle?
 </para></question>
 <answer><para>
-Użyj:
+UĹźyj:
 <screen>mplayer <replaceable>opcje</replaceable> <replaceable>nazwa_pliku</replaceable> &lt; /dev/null &amp;</screen>
 </para></answer>
 </qandaentry>
@@ -392,31 +392,31 @@ Użyj:
 
 <qandaentry>
 <question><para>
-Nie mogę zidentyfikować powodu dziwnego problemu z odtwarzaniem.
+Nie mogÄ zidentyfikowaÄ powodu dziwnego problemu z odtwarzaniem.
 </para></question>
 <answer><para>
-Czy masz jakiś zawieruszony plik <filename>codecs.conf</filename> w 
+Czy masz jakiĹ zawieruszony plik <filename>codecs.conf</filename> w 
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
-<filename>/usr/local/etc/</filename> lub podobnym miejscu? Usuń go,
-stary plik <filename>codecs.conf</filename> może powodować tajemnicze 
-problemy i jest przeznaczony tylko dla deweloperów pracujących nad obsługą
-kodeków. Przesłania on wbudowane ustawienia <application>MPlayera</application>
-dotyczące kodeków, co spowoduje chaos jeśli w nowszych wersjach zostaną
-wprowadzone niekompatybilne zmiany. Jeśli nie jest używany przez ekspertów
-jest to przepis na katastrofę w postaci pozornie losowych i trudnych
-do zlokalizowania awarii i problemów z odtwarzaniem. Jeśli nadal masz go
-gdzieś w swoim systemie powinieneś go teraz usunąć.
+<filename>/usr/local/etc/</filename> lub podobnym miejscu? UsuĹ go,
+stary plik <filename>codecs.conf</filename> moĹźe powodowaÄ tajemnicze 
+problemy i jest przeznaczony tylko dla deweloperĂłw pracujÄcych nad obsĹugÄ
+kodekĂłw. PrzesĹania on wbudowane ustawienia <application>MPlayera</application>
+dotyczÄce kodekĂłw, co spowoduje chaos jeĹli w nowszych wersjach zostanÄ
+wprowadzone niekompatybilne zmiany. JeĹli nie jest uĹźywany przez ekspertĂłw
+jest to przepis na katastrofÄ w postaci pozornie losowych i trudnych
+do zlokalizowania awarii i problemĂłw z odtwarzaniem. JeĹli nadal masz go
+gdzieĹ w swoim systemie powinieneĹ go teraz usunÄÄ.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-    W jaki sposób sprawić by napisy pojawiały się na czarnym pasku pod filmem?
+    W jaki sposĂłb sprawiÄ by napisy pojawiaĹy siÄ na czarnym pasku pod filmem?
 </para></question>
 <answer><para>
-    Użyj filtru video <systemitem>expand</systemitem> do zwiększenia pionowego
-    obszaru renderowania filmu i umieść film przy jego górnej granicy. Na
-    przykład:
+    UĹźyj filtru video <systemitem>expand</systemitem> do zwiÄkszenia pionowego
+    obszaru renderowania filmu i umieĹÄ film przy jego gĂłrnej granicy. Na
+    przykĹad:
     <screen>
       mplayer -vf expand=0:-100:0:0 -slang de dvd://1
     </screen>
@@ -424,17 +424,17 @@ gdzieś w swoim systemie powinieneś go teraz usunąć.
 </qandaentry>
 <qandaentry>
   <question><para>
-Jak mogę określić ścieżkę audio/napisów z pliku OGM, Matroska, NUT lub DVD?
+Jak mogÄ okreĹliÄ ĹcieĹźkÄ audio/napisĂłw z pliku OGM, Matroska, NUT lub DVD?
 </para></question>
 <answer><para>
-Musisz użyć <option>-aid</option> (ID audio) lub <option>-alang</option>
-(język audio), <option>-sid</option> (ID napisów) lub <option>-slang</option>
-(język napisów), na przykład:
+Musisz uĹźyÄ <option>-aid</option> (ID audio) lub <option>-alang</option>
+(jÄzyk audio), <option>-sid</option> (ID napisĂłw) lub <option>-slang</option>
+(jÄzyk napisĂłw), na przykĹad:
 <screen>
-  mplayer -alang eng -slang eng <replaceable>przykład.mkv</replaceable>
-  mplayer -aid 1 -sid 1 <replaceable>przykład.mkv</replaceable>
+  mplayer -alang eng -slang eng <replaceable>przykĹad.mkv</replaceable>
+  mplayer -aid 1 -sid 1 <replaceable>przykĹad.mkv</replaceable>
 </screen>
-Aby zobaczyć jakie są dostępne:
+Aby zobaczyÄ jakie sÄ dostÄpne:
 <screen>
 mplayer -vo null -ao null -frames 0 -v <replaceable>nazwa_pliku</replaceable> | grep sid
 mplayer -vo null -ao null -frames 0 -v <replaceable>nazwa_pliku</replaceable> | grep aid
@@ -444,70 +444,70 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>nazwa_pliku</replaceable> | 
 
 <qandaentry>
 <question><para>
-Próbuję odtworzyć jakiś strumień z internetu, ale nie udaje mi się.
+PrĂłbujÄ odtworzyÄ jakiĹ strumieĹ z internetu, ale nie udaje mi siÄ.
 </para></question>
 <answer><para>
-Spróbuj otworzyć strumień korzystając z opcji <option>-playlist</option>.
+SprĂłbuj otworzyÄ strumieĹ korzystajÄc z opcji <option>-playlist</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Ściągnąłem film z sieci P2P i nie chce się odtworzyć! 
+ĹciÄgnÄĹem film z sieci P2P i nie chce siÄ odtworzyÄ! 
 </para></question>
 <answer><para>
-Prawdopodobnie plik jest uszkodzony lub jest to fałszywka.
-Jeżeli dostałeś go od znajomego i on mówi, że u niego działa, to spróbuj
-porównać skróty <application>md5sum</application> (md5sum hashes).
+Prawdopodobnie plik jest uszkodzony lub jest to faĹszywka.
+JeĹźeli dostaĹeĹ go od znajomego i on mĂłwi, Ĺźe u niego dziaĹa, to sprĂłbuj
+porĂłwnaÄ skrĂłty <application>md5sum</application> (md5sum hashes).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Mam problem z wyświetlaniem napisów. Pomocy!
+Mam problem z wyĹwietlaniem napisĂłw. Pomocy!
 </para></question>
 <answer><para>
-Upewnij się, że poprawnie zainstalowałeś czcionki. Wykonaj jeszcze raz
-krok po kroku instrukcje z części  
-<link linkend="fonts-osd">czcionki i OSD</link> z rozdziału o instalacji. Jeżeli
-używasz czcionek TrueType, upewnij się, że masz zainstalowaną
-bibliotekę <systemitem class="library">FreeType</systemitem>.
-Sprawdź także napisy w edytorze tekstu, bądź z innymi odtwarzaczami. Spróbuj
-tekże przekonwertować je na inny format.
+Upewnij siÄ, Ĺźe poprawnie zainstalowaĹeĹ czcionki. Wykonaj jeszcze raz
+krok po kroku instrukcje z czÄĹci  
+<link linkend="fonts-osd">czcionki i OSD</link> z rozdziaĹu o instalacji. JeĹźeli
+uĹźywasz czcionek TrueType, upewnij siÄ, Ĺźe masz zainstalowanÄ
+bibliotekÄ <systemitem class="library">FreeType</systemitem>.
+SprawdĹş takĹźe napisy w edytorze tekstu, bÄdĹş z innymi odtwarzaczami. SprĂłbuj
+tekĹźe przekonwertowaÄ je na inny format.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Dlaczego <application>MPlayer</application> nie działa w Fedora Core?
+Dlaczego <application>MPlayer</application> nie dziaĹa w Fedora Core?
 </para></question>
 <answer><para>
-Prelink, exec-shield i aplikacje używająca windowsowych DLLi
+Prelink, exec-shield i aplikacje uĹźywajÄca windowsowych DLLi
 (takie jak <application>MPlayer</application>) nie
-współdziałają ze sobą dobrze w Fedorze.
+wspĂłĹdziaĹajÄ ze sobÄ dobrze w Fedorze.
 </para>
 <para>
-Problem powoduje exec-shield, który ustawia losowy adres, pod który będą
-ładowane biblioteki systemowe. Dzieje się to podczas prelinkowania (raz
+Problem powoduje exec-shield, ktĂłry ustawia losowy adres, pod ktĂłry bÄdÄ
+Ĺadowane biblioteki systemowe. Dzieje siÄ to podczas prelinkowania (raz
 na dwa tygodnie)	
 </para>
 <para>
-<application>MPlayer</application> próbuje załadować windowsowy DLL pod
-określony adres (0x400000). Jeżeli znajduje się tam już ważna biblioteka
-systemowa, <application>MPlayer</application> się wykrzaczy. (Typowym objawem
-jest błąd naruszenia ochrony pamięci (segfault) przy próbie odtwarzania plików
+<application>MPlayer</application> prĂłbuje zaĹadowaÄ windowsowy DLL pod
+okreĹlony adres (0x400000). JeĹźeli znajduje siÄ tam juĹź waĹźna biblioteka
+systemowa, <application>MPlayer</application> siÄ wykrzaczy. (Typowym objawem
+jest bĹÄd naruszenia ochrony pamiÄci (segfault) przy prĂłbie odtwarzania plikĂłw
 Windows Media 9.)
 </para>
 <para>
-Jeżeli napotkasz taki problem, masz dwa wyjścia:
+JeĹźeli napotkasz taki problem, masz dwa wyjĹcia:
 <itemizedlist>
-<listitem><para>Poczekać dwa tygodnie... Być może znów zacznie działać.</para></listitem>
-<listitem><para>Zlinkować wszystkie biblioteki systemowe z innymi opcjami
+<listitem><para>PoczekaÄ dwa tygodnie... ByÄ moĹźe znĂłw zacznie dziaĹaÄ.</para></listitem>
+<listitem><para>ZlinkowaÄ wszystkie biblioteki systemowe z innymi opcjami
 prelink. Oto instrukcje krok po korku:
 </para>
 <para>
 <orderedlist>
-<listitem><para>Otwórz <filename>/etc/syconfig/prelink</filename> i zmień</para>
+<listitem><para>OtwĂłrz <filename>/etc/syconfig/prelink</filename> i zmieĹ</para>
 <para>
 <programlisting>
 PRELINK_OPTS=-mR
@@ -525,8 +525,8 @@ PRELINK_OPTS="-mR --no-exec-shield"
 (To ponownie linkuje wszystkie aplikacje i zajmuje sporo czasu.)
 </para></listitem>
 <listitem>
-<para><command>execstack -s <replaceable>/ścieżka/do/</replaceable>mplayer</command>
-(To wyłącza exec-shield dla binarki <application>MPlayera</application>.)
+<para><command>execstack -s <replaceable>/ĹcieĹźka/do/</replaceable>mplayer</command>
+(To wyĹÄcza exec-shield dla binarki <application>MPlayera</application>.)
 </para>
 </listitem>
 </orderedlist>
@@ -538,83 +538,83 @@ PRELINK_OPTS="-mR --no-exec-shield"
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> przerywa działanie z komunikatem <screen>MPlayer interrupted by
-signal 4 in module: decode_video</screen> (MPlayer przerwany przez sygnał 4 w
+<application>MPlayer</application> przerywa dziaĹanie z komunikatem <screen>MPlayer interrupted by
+signal 4 in module: decode_video</screen> (MPlayer przerwany przez sygnaĹ 4 w
 module: decode_video).
 </para></question>
 <answer><para>
-Nie używaj <application>MPlayera</application> na CPU innym niż ten, 
-na któym był skompilowany lub przekompiluj go z detekcją CPU podczas
+Nie uĹźywaj <application>MPlayera</application> na CPU innym niĹź ten, 
+na ktĂłym byĹ skompilowany lub przekompiluj go z detekcjÄ CPU podczas
 uruchamiania (<command>./configure --enable-runtime-cpudetection</command>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Gdy uruchamiam <application>MPlayera</application> pod KDE, pojawia się 
-czarny ekran i nic się nie dzieje. Po około minucie zaczyna się odtwarzanie
+Gdy uruchamiam <application>MPlayera</application> pod KDE, pojawia siÄ 
+czarny ekran i nic siÄ nie dzieje. Po okoĹo minucie zaczyna siÄ odtwarzanie
 filmu.
 </para></question>
 <answer><para>
-Arts - demon dźwięku KDE - blokuje urządzenie dźwiękowe. Albo czekaj aż
-rozpocznie się odtwarzanie lub wyłącz demona arts w centrum sterowania. Jeżeli
-chcesz używać dźwięku arts, określ wyjście audio przez nasz natywny sterownik
-dźwięku arts (<option>-ao arts</option>). Jeżeli próba się nie powiedzie lub
-sterownik nie jest wkompilowany, spróbuj użyć SDL (<option>-ao sdl</option>) 
-i upewnij się, że twoje SDL poradzi sobie z dźwiękiem arts. Inną możliwością
+Arts - demon dĹşwiÄku KDE - blokuje urzÄdzenie dĹşwiÄkowe. Albo czekaj aĹź
+rozpocznie siÄ odtwarzanie lub wyĹÄcz demona arts w centrum sterowania. JeĹźeli
+chcesz uĹźywaÄ dĹşwiÄku arts, okreĹl wyjĹcie audio przez nasz natywny sterownik
+dĹşwiÄku arts (<option>-ao arts</option>). JeĹźeli prĂłba siÄ nie powiedzie lub
+sterownik nie jest wkompilowany, sprĂłbuj uĹźyÄ SDL (<option>-ao sdl</option>) 
+i upewnij siÄ, Ĺźe twoje SDL poradzi sobie z dĹşwiÄkiem arts. InnÄ moĹźliwoĹciÄ
 jest uruchomienie <application>MPlayera</application> z artsdsp.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Gry próbuję przechwycić obraz z mojego tunera kolory są dziwne. Działa OK
+Gry prĂłbujÄ przechwyciÄ obraz z mojego tunera kolory sÄ dziwne. DziaĹa OK
 pod innymi aplikacjami.
 </para></question>
 <answer><para>
-Twoja karta prawdopodobni zgłasza obsługę penych przestrzeni kolorów,
-w rzeczywistości ich nie obsługując. Spróbuj z YUV2 zamiast domyślnego YV12
-(spójrz do sekcji <link linkend="tv-input">TV</link>).
+Twoja karta prawdopodobni zgĹasza obsĹugÄ penych przestrzeni kolorĂłw,
+w rzeczywistoĹci ich nie obsĹugujÄc. SprĂłbuj z YUV2 zamiast domyĹlnego YV12
+(spĂłjrz do sekcji <link linkend="tv-input">TV</link>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Otrzymuję bardzo dziwne wartości procentowe (dużo za duże) podczas odtwarzania
-plików na moim notebooku.
+OtrzymujÄ bardzo dziwne wartoĹci procentowe (duĹźo za duĹźe) podczas odtwarzania
+plikĂłw na moim notebooku.
 </para></question>
 <answer><para>
-    Jest to efekt działania systemu zarządzania / oszczędzania energii w Twoim
-    notebooku (BIOS, a nie kernel). Podłącz wtyczkę od zasilacza 
-    <emphasis role="bold">przed</emphasis> włączeniem notebooka. Możesz także
-    zobaczyć czy <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
-    (interfejs SpeedStep dla Linuksa) pomoże.
+    Jest to efekt dziaĹania systemu zarzÄdzania / oszczÄdzania energii w Twoim
+    notebooku (BIOS, a nie kernel). PodĹÄcz wtyczkÄ od zasilacza 
+    <emphasis role="bold">przed</emphasis> wĹÄczeniem notebooka. MoĹźesz takĹźe
+    zobaczyÄ czy <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
+    (interfejs SpeedStep dla Linuksa) pomoĹźe.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-    Audio/video całowicie wychodzi z synchronizacji gdy uruchamiam
-    <application>MPlayera</application> jako root na moim notebooku. Działa OK
-    gdy robię to jako zwykły użytkownik.
+    Audio/video caĹowicie wychodzi z synchronizacji gdy uruchamiam
+    <application>MPlayera</application> jako root na moim notebooku. DziaĹa OK
+    gdy robiÄ to jako zwykĹy uĹźytkownik.
 </para></question>
 <answer><para>
-    to także jest efekt zarządzania energią (patrz wyżej). Podłącz wtyczkę od
-    zasilacza <emphasis role="bold">przed</emphasis> włączeniem notebooka lub
-    użyj opcji <option>nortc</option>.
+    to takĹźe jest efekt zarzÄdzania energiÄ (patrz wyĹźej). PodĹÄcz wtyczkÄ od
+    zasilacza <emphasis role="bold">przed</emphasis> wĹÄczeniem notebooka lub
+    uĹźyj opcji <option>nortc</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Podczas odtwarzania filmu nagle się tnie i wyświetlany jest następujący
+Podczas odtwarzania filmu nagle siÄ tnie i wyĹwietlany jest nastÄpujÄcy
 komunikat:
 <screen>Badly interleaved AVI file detected - switching to -ni mode...</screen>
-(Plik AVI ze złym przeplotem - przełączam się w trym -in)
+(Plik AVI ze zĹym przeplotem - przeĹÄczam siÄ w trym -in)
 </para></question>
 <answer><para>
-    Pliki ze złym przeplotem i <option>-cache</option> nie współdziałają
-    dobrze. Spróbuj <option>-nocache</option>
+    Pliki ze zĹym przeplotem i <option>-cache</option> nie wspĂłĹdziaĹajÄ
+    dobrze. SprĂłbuj <option>-nocache</option>
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -624,39 +624,39 @@ komunikat:
   
 <qandaentry>
 <question><para>
-    Gdy przechodzę w tryb pełnoekranowy wyświetlana jest czarna ramka
-    okalająca obraz. Obraz nie jest w ogóle skalowany.
+    Gdy przechodzÄ w tryb peĹnoekranowy wyĹwietlana jest czarna ramka
+    okalajÄca obraz. Obraz nie jest w ogĂłle skalowany.
 </para></question>
 <answer><para>
-    Twój sterownik wyjścia video nie obsługuje sprzętowego skalowania,
-    a ponieważ programowe skalowanie może być niewiarygodnie powolne,
-    <application>MPlayer</application> nie włącza go automatycznie.
-    Prawdopodobnie używasz sterownika wyjśca <systemitem>x11</systemitem>
-    zamiast <systemitem>xv</systemitem>. Spróbuj dodać do wywołania programu
-    <option>-vo xv</option> lub przeczytaj <link linkend="video">sekcję
-      video</link>, w której znajdziesz więcej informacji dotyczących
-    alternatywnych sterowników wyjścia video. Opcja <option>-zoom</option>
+    TwĂłj sterownik wyjĹcia video nie obsĹuguje sprzÄtowego skalowania,
+    a poniewaĹź programowe skalowanie moĹźe byÄ niewiarygodnie powolne,
+    <application>MPlayer</application> nie wĹÄcza go automatycznie.
+    Prawdopodobnie uĹźywasz sterownika wyjĹca <systemitem>x11</systemitem>
+    zamiast <systemitem>xv</systemitem>. SprĂłbuj dodaÄ do wywoĹania programu
+    <option>-vo xv</option> lub przeczytaj <link linkend="video">sekcjÄ
+      video</link>, w ktĂłrej znajdziesz wiÄcej informacji dotyczÄcych
+    alternatywnych sterownikĂłw wyjĹcia video. Opcja <option>-zoom</option>
     jawnie wymusza skalowanie programowe.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Właśnie zainstalowałem <application>MPlayera</application>. W momencie gdy chcę
-otworzyć plik video wyskakuje błąd:
+WĹaĹnie zainstalowaĹem <application>MPlayera</application>. W momencie gdy chcÄ
+otworzyÄ plik video wyskakuje bĹÄd:
 <screen>
 Error opening/initializing the selected video_out (-vo) device.
-(Błąd przy otwarciu.inicjalizacji wybranego urządzenia video_out (-vo).)
+(BĹÄd przy otwarciu.inicjalizacji wybranego urzÄdzenia video_out (-vo).)
 </screen>
-Jak mogę rozwiązać mój problem?
+Jak mogÄ rozwiÄzaÄ mĂłj problem?
 </para></question>
 <answer><para>
-Po prostu zmień urządzenie wyjścia video. Aby uzyskać listę dostępnych
-sterowników wyjścia video wydaj następujące polecenie:
+Po prostu zmieĹ urzÄdzenie wyjĹcia video. Aby uzyskaÄ listÄ dostÄpnych
+sterownikĂłw wyjĹcia video wydaj nastÄpujÄce polecenie:
 <screen>
 mplayer -vo help
 </screen>
-Gdy juz wybierzesz odpowiedni sterownik wyjścia video, dodaj go do swojego pliku
+Gdy juz wybierzesz odpowiedni sterownik wyjĹcia video, dodaj go do swojego pliku
 konfiguracyjnego.
 Dodaj
 <programlisting>
@@ -673,55 +673,55 @@ do <filename>~/.mplayer/gui.conf</filename>.
 
 <qandaentry>
 <question><para>
-Mam problemy z [Twój manager okien] i pełnoekranowymi trybami xv/xmga/sdl/x11...
+Mam problemy z [TwĂłj manager okien] i peĹnoekranowymi trybami xv/xmga/sdl/x11...
 </para></question>
 <answer><para>
-Przeczytaj <link linkend="bugreports">wskazówki do zgłaszania błędów</link> i
-wyślij nam poprawne zgłoszenie błędu.
-Popróbuj też poeksperymentować z opcją <option>-fstype</option>.
+Przeczytaj <link linkend="bugreports">wskazĂłwki do zgĹaszania bĹÄdĂłw</link> i
+wyĹlij nam poprawne zgĹoszenie bĹÄdu.
+PoprĂłbuj teĹź poeksperymentowaÄ z opcjÄ <option>-fstype</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Dźwięk gubi synchronizację przy odtwarzaniu pliku AVI.
+DĹşwiÄk gubi synchronizacjÄ przy odtwarzaniu pliku AVI.
 </para></question>
 <answer><para>
-Wypróbuj opcje <option>-bps</option> oraz <option>-nobps</option>. Jeżeli
-nic się nie poprawiło, przeczytaj
-<link linkend="bugreports">wskazówki do zgłaszania błędów</link>
+WyprĂłbuj opcje <option>-bps</option> oraz <option>-nobps</option>. JeĹźeli
+nic siÄ nie poprawiĹo, przeczytaj
+<link linkend="bugreports">wskazĂłwki do zgĹaszania bĹÄdĂłw</link>
 i wgraj plik na FTP.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Mój komputer odtwarza zbyt wolno pliki AVI MS DivX w rozdzielczości ~ 640x300 i
-z dźwiękiem mp3 stereo. Gdy użyję opcji <option>-nosound</option>, wszystko jest
-OK (lecz bez dźwięku).
+MĂłj komputer odtwarza zbyt wolno pliki AVI MS DivX w rozdzielczoĹci ~ 640x300 i
+z dĹşwiÄkiem mp3 stereo. Gdy uĹźyjÄ opcji <option>-nosound</option>, wszystko jest
+OK (lecz bez dĹşwiÄku).
 </para></question>
 <answer><para>
-Twój komputer jest zbyt wolny lub sterownik karty dźwiękowej jest
-zepsuty. Skonsultuj się z dokumentacją, aby zobaczyć, czy możesz poprawić
-wydajność
+TwĂłj komputer jest zbyt wolny lub sterownik karty dĹşwiÄkowej jest
+zepsuty. Skonsultuj siÄ z dokumentacjÄ, aby zobaczyÄ, czy moĹźesz poprawiÄ
+wydajnoĹÄ
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak użyć <application>dmix</application> z
+Jak uĹźyÄ <application>dmix</application> z
 <application>MPlayerem</application>?
 </para></question>
 <answer><para>
 Po ustawieniu 
 <ulink url="http://alsa.opensrc.org/index.php?page=DmixPlugin">asoundrc</ulink>
-użyj <option>-ao alsa:device=dmix</option>.
+uĹźyj <option>-ao alsa:device=dmix</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Podczas odtwarzania filmu nie ma dźwięku i dostaję komunikat podobny do tego:
+Podczas odtwarzania filmu nie ma dĹşwiÄku i dostajÄ komunikat podobny do tego:
 <screen>
     AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
     audio_setup: Can't open audio device /dev/dsp: Device or resource busy
@@ -731,67 +731,67 @@ Podczas odtwarzania filmu nie ma dźwięku i dostaję komunikat podobny do tego:
 </screen>
 </para></question>
 <answer><para>
-Czy masz uruchomione KDE lub GNOME z demonem dźwięku aRts lub ESD? Spróbuj
-wyłączyć demona dźwięku lub użyj opcji 
+Czy masz uruchomione KDE lub GNOME z demonem dĹşwiÄku aRts lub ESD? SprĂłbuj
+wyĹÄczyÄ demona dĹşwiÄku lub uĹźyj opcji 
 <option>-ao arts</option> lub <option>-ao esd</option>,
-aby <application>MPlayer</application> używał aRts lub ESD.
-Możliwe jest też że masz uruchomione ALSA bez emulacji OSD, spróbuj załadować
-moduły jądra ALSA OSS lub dodaj <option>-ao alsa</option> do wiersza poleceń
-żeby bezpośrednio używać sterownika wyjścia dźwięku ALSA.
+aby <application>MPlayer</application> uĹźywaĹ aRts lub ESD.
+MoĹźliwe jest teĹź Ĺźe masz uruchomione ALSA bez emulacji OSD, sprĂłbuj zaĹadowaÄ
+moduĹy jÄdra ALSA OSS lub dodaj <option>-ao alsa</option> do wiersza poleceĹ
+Ĺźeby bezpoĹrednio uĹźywaÄ sterownika wyjĹcia dĹşwiÄku ALSA.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Gdy uruchamiam <application>MPlayera</application> pod KDE, pojawia się
-czarny ekran i nic się nie dzieje. Po około minucie zaczyna się odtwarzanie 
+Gdy uruchamiam <application>MPlayera</application> pod KDE, pojawia siÄ
+czarny ekran i nic siÄ nie dzieje. Po okoĹo minucie zaczyna siÄ odtwarzanie 
 filmu.
 </para></question>
 <answer><para> 
-aRts - demon dźwięku KDE - blokuje urządzenie dźwiękowe. Albo czekaj aż
-rozpocznie się odtwarzanie lub wyłącz demona arts w centrum sterowania. Jeżeli
-chcesz używać dźwięku aRts, określ wyjście audio przez nasz natywny sterownik
-dźwięku aRts (<option>-ao arts</option>). Jeżeli próba się nie powiedzie lub
-sterownik nie jest wkompilowany, spróbuj użyć SDL (<option>-ao sdl</option>)
-i upewnij się, że twoje SDL poradzi sobie z dźwiękiem aRts. Inną możliwością
+aRts - demon dĹşwiÄku KDE - blokuje urzÄdzenie dĹşwiÄkowe. Albo czekaj aĹź
+rozpocznie siÄ odtwarzanie lub wyĹÄcz demona arts w centrum sterowania. JeĹźeli
+chcesz uĹźywaÄ dĹşwiÄku aRts, okreĹl wyjĹcie audio przez nasz natywny sterownik
+dĹşwiÄku aRts (<option>-ao arts</option>). JeĹźeli prĂłba siÄ nie powiedzie lub
+sterownik nie jest wkompilowany, sprĂłbuj uĹźyÄ SDL (<option>-ao sdl</option>)
+i upewnij siÄ, Ĺźe twoje SDL poradzi sobie z dĹşwiÄkiem aRts. InnÄ moĹźliwoĹciÄ
 jest uruchomienie <application>MPlayera</application> z artsdsp.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Mam problemy z synchronizacją A/V. Niektóre moje AVI są odtwarzane dobrze, a
-niektóre z podwójną szybkością.
+Mam problemy z synchronizacjÄ A/V. NiektĂłre moje AVI sÄ odtwarzane dobrze, a
+niektĂłre z podwĂłjnÄ szybkoĹciÄ.
 </para></question>
 <answer><para>
-Masz wadliwą kartę/sterownik dźwięku. Najwyraźniej jest ustawiona na stałe na
-44100Hz i próbujesz odtwarzać plik z dźwiękiem 22050Hz. Wypróbuj filtr zmiany
-częstotliwości próbkowania audio (audio <systemitem>resample</systemitem> filter).  
+Masz wadliwÄ kartÄ/sterownik dĹşwiÄku. NajwyraĹşniej jest ustawiona na staĹe na
+44100Hz i prĂłbujesz odtwarzaÄ plik z dĹşwiÄkiem 22050Hz. WyprĂłbuj filtr zmiany
+czÄstotliwoĹci prĂłbkowania audio (audio <systemitem>resample</systemitem> filter).  
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Podczas odtwarzania filmu pojawia się brak synchronizacji video-audio i/lub
-<application>MPlayer</application> wywala się z następującym komunikatem:
+Podczas odtwarzania filmu pojawia siÄ brak synchronizacji video-audio i/lub
+<application>MPlayer</application> wywala siÄ z nastÄpujÄcym komunikatem:
 <screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
 </para></question>
 <answer><para>
-Może istnieć kilka powodów.
+MoĹźe istnieÄ kilka powodĂłw.
 <itemizedlist>
 <listitem><para>
-Twój CPU <emphasis role="bold">i/lub</emphasis> karta graficzna
+TwĂłj CPU <emphasis role="bold">i/lub</emphasis> karta graficzna
 <emphasis role="bold">i/lub</emphasis> magistrala jest zbyt wolna.
-<application>MPlayer</application> w tym wypadku wyświetli komunikat
-(i licznik porzuconych ramek szybko będzie wzrastał).
+<application>MPlayer</application> w tym wypadku wyĹwietli komunikat
+(i licznik porzuconych ramek szybko bÄdzie wzrastaĹ).
 </para></listitem>
 <listitem><para>
-Jeżeli to plik AVI, to może ma zły przeplot. Wypróbuj opcję
+JeĹźeli to plik AVI, to moĹźe ma zĹy przeplot. WyprĂłbuj opcjÄ
 <option>-ni</option>.
 </para></listitem>
 <listitem><para>
-Twój sterownik dźwięku jest wadliwy.
-Spójrz do <link linkend="audio">sekcji kart dźwiękowych</link>.
+TwĂłj sterownik dĹşwiÄku jest wadliwy.
+SpĂłjrz do <link linkend="audio">sekcji kart dĹşwiÄkowych</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -799,10 +799,10 @@ Spójrz do <link linkend="audio">sekcji kart dźwiękowych</link>.
 
 <qandaentry>
 <question><para>
-Jak pozbyć się braku synchronizacji przy przewijaniu strumieni RealMedia?
+Jak pozbyÄ siÄ braku synchronizacji przy przewijaniu strumieni RealMedia?
 </para></question>
 <answer><para>
-Może pomóc <option>-mc 0.1</option>
+MoĹźe pomĂłc <option>-mc 0.1</option>
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -811,67 +811,67 @@ Może pomóc <option>-mc 0.1</option>
 <title>Odtwarzanie DVD</title>
 <qandaentry>
 <question><para>
-Co z nawigacją/menu DVD?
+Co z nawigacjÄ/menu DVD?
 </para></question>
 <answer><para>
-<application>MPlayer</application> nie obsługuje menu DVD ze względu na poważne 
-ograniczenia konstrukcyjne, które uniemożliwiają poprawną obsługę stałych obrazów
-i treści interaktywnej. Jeżeli chcesz mieć fajne menu, będziesz musiał użyć innego
+<application>MPlayer</application> nie obsĹuguje menu DVD ze wzglÄdu na powaĹźne 
+ograniczenia konstrukcyjne, ktĂłre uniemoĹźliwiajÄ poprawnÄ obsĹugÄ staĹych obrazĂłw
+i treĹci interaktywnej. JeĹźeli chcesz mieÄ fajne menu, bÄdziesz musiaĹ uĹźyÄ innego
 odtwarzacza, takiego jak <application>xine</application>, 
 <application>vlc</application> lub <application>Ogle</application>.
-Jeżeli chcesz nawigacji DVD w <application>MPlayerze</application>, to będziesz musiał 
-sam ją zaimplementować. Bierz jednak pod uwagę, że jest to poważne przedsięwzięcie.
+JeĹźeli chcesz nawigacji DVD w <application>MPlayerze</application>, to bÄdziesz musiaĹ 
+sam jÄ zaimplementowaÄ. Bierz jednak pod uwagÄ, Ĺźe jest to powaĹźne przedsiÄwziÄcie.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Co z napisami? Czy <application>MPlayer</application> może je wyświetlać?
+Co z napisami? Czy <application>MPlayer</application> moĹźe je wyĹwietlaÄ?
 </para></question>
 <answer><para>
-Tak. Spójrz do rozdziału <link linkend="dvd">DVD</link>.
+Tak. SpĂłjrz do rozdziaĹu <link linkend="dvd">DVD</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę ustawić kod regionu w moim napędzie DVD? Nie mam Windowsów!
+Jak mogÄ ustawiÄ kod regionu w moim napÄdzie DVD? Nie mam WindowsĂłw!
 </para></question>
 <answer><para>
-Użyj <ulink
-url="http://linvdr.org/projects/regionset/">narzędzia regionset</ulink>.
+UĹźyj <ulink
+url="http://linvdr.org/projects/regionset/">narzÄdzia regionset</ulink>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-    Nie mogę odtworzyć DVD, <application>MPlayer</application> 
-    się zawiesza bądź wyrzuca błędy "Encrypted VOB file!"
+    Nie mogÄ odtworzyÄ DVD, <application>MPlayer</application> 
+    siÄ zawiesza bÄdĹş wyrzuca bĹÄdy "Encrypted VOB file!"
     (Zaszyfrowany plik VOB!).
 </para></question>
 <answer><para>
-    Kod deszyfrowania CSS nie działa z niektórymi odtwarzaczami DVD
-    dopóki nie ustawisz odpowiednio kodu regionu. Spójrz na odpowiedź na
+    Kod deszyfrowania CSS nie dziaĹa z niektĂłrymi odtwarzaczami DVD
+    dopĂłki nie ustawisz odpowiednio kodu regionu. SpĂłjrz na odpowiedĹş na
     poprzednie pytanie.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
   <question><para>
-Czy muszę mieć uprawnienia użytkownika (setuid) root, aby móc odtwarzać DVD?
+Czy muszÄ mieÄ uprawnienia uĹźytkownika (setuid) root, aby mĂłc odtwarzaÄ DVD?
 </para></question>
 <answer><para>
-Nie. Jednakże musisz mieć poprawne prawa ustawione dla wpisu urządzenia DVD 
+Nie. JednakĹźe musisz mieÄ poprawne prawa ustawione dla wpisu urzÄdzenia DVD 
 (w <filename class="directory">/dev/</filename>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Czy jest możliwe odtwarzanie/kodowanie tylko wybranych rozdziałów?
+Czy jest moĹźliwe odtwarzanie/kodowanie tylko wybranych rozdziaĹĂłw?
 </para></question>
 <answer><para>
-Tak, spróbuj użyć opcji <option>-chapter</option>.
+Tak, sprĂłbuj uĹźyÄ opcji <option>-chapter</option>.
 </para></answer>
 </qandaentry>
 
@@ -880,22 +880,22 @@ Tak, spróbuj użyć opcji <option>-chapter</option>.
 Odtwarzanie DVD jest bardzo wolne!
 </para></question>
 <answer><para>
-Użyj opcji <option>-cache</option> (opisana na stronie man) i spróbuj włączyć DMA
-dla napędu DVD, używając narzędzia <command>hdparm</command> (opisane w rozdziale
+UĹźyj opcji <option>-cache</option> (opisana na stronie man) i sprĂłbuj wĹÄczyÄ DMA
+dla napÄdu DVD, uĹźywajÄc narzÄdzia <command>hdparm</command> (opisane w rozdziale
 <link linkend="drives">CD</link>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Skopiowałem DVD używając vobcopy. Jak mogę je odtworzyć/zakodować z dysku 
+SkopiowaĹem DVD uĹźywajÄc vobcopy. Jak mogÄ je odtworzyÄ/zakodowaÄ z dysku 
 twardego?
 </para></question>
 <answer><para>
-Użyj opcji <option>-dvd-device</option> aby odwołać się do katalogu zawierającego
+UĹźyj opcji <option>-dvd-device</option> aby odwoĹaÄ siÄ do katalogu zawierajÄcego
 pliki:
 <screen>
-mplayer dvd://1 -dvd-device <replaceable>/ścieżka/do/katalogu</replaceable>
+mplayer dvd://1 -dvd-device <replaceable>/ĹcieĹźka/do/katalogu</replaceable>
 </screen>
 </para></answer>
 </qandaentry>
@@ -903,28 +903,28 @@ mplayer dvd://1 -dvd-device <replaceable>/ścieżka/do/katalogu</replaceable>
 </qandadiv>
 
 <qandadiv id="faq-features">
-<title>Prośby o wprowadzenie nowych możliwości</title>
+<title>ProĹby o wprowadzenie nowych moĹźliwoĹci</title>
 <qandaentry>
 <question><para>
-Jeżeli <application>MPlayer</application> jest zatrzymany i próbuję przewijać lub 
-nacisnę jakikolwiek klawisz, <application>MPlayer</application> z powrotem wraca 
-do odtwarzania. Chciałbym móc przwijać zatrzymany film.
+JeĹźeli <application>MPlayer</application> jest zatrzymany i prĂłbujÄ przewijaÄ lub 
+nacisnÄ jakikolwiek klawisz, <application>MPlayer</application> z powrotem wraca 
+do odtwarzania. ChciaĹbym mĂłc przwijaÄ zatrzymany film.
 </para></question>
 <answer><para>
 Zaimplementowanie tego bez utraty synchronizacji A/V jest bardzo podchwytliwe.
-Wszelkie próby do tej pory zakończyły się porażką. Łatki mile widziane.
+Wszelkie prĂłby do tej pory zakoĹczyĹy siÄ poraĹźkÄ. Ĺatki mile widziane.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Chciałbym przewijać o +/- 1 ramkę zamiast 10 sekund.
+ChciaĹbym przewijaÄ o +/- 1 ramkÄ zamiast 10 sekund.
 </para></question>
 <answer><para>
-Możesz przejść w przód o jedną klatkę przez naciśnięcie
-<keycap>.</keycap>. Film zostanie zatrzymany (po szczegóły zajrzyj do
-strony man). Wątpliwe jest, żeby przechodzenie w tył zostało
-zaimplementowane w najbliższym czasie.
+MoĹźesz przejĹÄ w przĂłd o jednÄ klatkÄ przez naciĹniÄcie
+<keycap>.</keycap>. Film zostanie zatrzymany (po szczegĂłĹy zajrzyj do
+strony man). WÄtpliwe jest, Ĺźeby przechodzenie w tyĹ zostaĹo
+zaimplementowane w najbliĹźszym czasie.
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -933,128 +933,128 @@ zaimplementowane w najbliższym czasie.
 <title>Kodowanie</title>
 <qandaentry>
 <question><para>
-Jak mogę kodować?
+Jak mogÄ kodowaÄ?
 </para></question>
 <answer><para>
-Przeczytaj sekcję <link linkend="mencoder"><application>MEncoder</application></link>
+Przeczytaj sekcjÄ <link linkend="mencoder"><application>MEncoder</application></link>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak zrzucić całą pozycję DVD do pliku?
+Jak zrzuciÄ caĹÄ pozycjÄ DVD do pliku?
 </para></question>
 <answer><para>
-Gdy już wybierzesz pozycję i upewnisz się, że jest poprawnie odtwarzana 
-przez <application>MPlayera</application>, użyj opcji <option>-dumpstream</option>.
-Na przykład:
+Gdy juĹź wybierzesz pozycjÄ i upewnisz siÄ, Ĺźe jest poprawnie odtwarzana 
+przez <application>MPlayera</application>, uĹźyj opcji <option>-dumpstream</option>.
+Na przykĹad:
 <screen>
 mplayer dvd://5 -dumpstream -dumpfile <replaceable>zrzut_dvd.vob</replaceable>
 </screen>
-zrzuci piątą pozycję DVD do pliku <replaceable>zrzut_dvd.vob</replaceable>.
+zrzuci piÄtÄ pozycjÄ DVD do pliku <replaceable>zrzut_dvd.vob</replaceable>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę tworzyć automatycznie (S)VCD?
+Jak mogÄ tworzyÄ automatycznie (S)VCD?
 </para></question>
 <answer><para>
-Wypróbuj skrypt <filename>mencvcd</filename> z podkatalogu <filename
-class="directory">TOOLS</filename>. Korzystając z niego, możesz kodować DVD lub
-inne filmy do formatu VCD lub SVCD, a nawet wypalać bezpośrednio na CD.
+WyprĂłbuj skrypt <filename>mencvcd</filename> z podkatalogu <filename
+class="directory">TOOLS</filename>. KorzystajÄc z niego, moĹźesz kodowaÄ DVD lub
+inne filmy do formatu VCD lub SVCD, a nawet wypalaÄ bezpoĹrednio na CD.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę stworzyć (S)VCD?
+Jak mogÄ stworzyÄ (S)VCD?
 </para></question>
 <answer><para>
-Nowsze wersje <application>MEncodera</application> potrafią bezpośrednio generować pliki
-MPEG-2, które mogą być użyte jako podstawa do stworzenia VCD lub SVCD i prawdopodobnie
-są od ręki odtwarzalne na wszelkich platformach (na przykład aby podzielić się nagraniem 
-z kamery cyfrowej z Twoimi nieobytymi z komputerem przyjaciółmi)
-Aby zdobyć więcej informacji rpzeczytaj sekcję
-<link linkend="menc-feat-vcd-dvd">Używanie MEncodera do tworzenia plików 
+Nowsze wersje <application>MEncodera</application> potrafiÄ bezpoĹrednio generowaÄ pliki
+MPEG-2, ktĂłre mogÄ byÄ uĹźyte jako podstawa do stworzenia VCD lub SVCD i prawdopodobnie
+sÄ od rÄki odtwarzalne na wszelkich platformach (na przykĹad aby podzieliÄ siÄ nagraniem 
+z kamery cyfrowej z Twoimi nieobytymi z komputerem przyjaciĂłĹmi)
+Aby zdobyÄ wiÄcej informacji rpzeczytaj sekcjÄ
+<link linkend="menc-feat-vcd-dvd">UĹźywanie MEncodera do tworzenia plikĂłw 
 zgodnych z VCD/SVCD/DVD</link>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę połączyć dwa pliki video?
+Jak mogÄ poĹÄczyÄ dwa pliki video?
 </para></question>
 <answer><para>
-Przy odrobinie szczęścia zbiory MPEG można połączyć (zkonkatenować).
-Do zbiorów AVI możesz używać obsługi wielu zbiorów
-<application>MEncodera</application> w następujący sposób:
+Przy odrobinie szczÄĹcia zbiory MPEG moĹźna poĹÄczyÄ (zkonkatenowaÄ).
+Do zbiorĂłw AVI moĹźesz uĹźywaÄ obsĹugi wielu zbiorĂłw
+<application>MEncodera</application> w nastÄpujÄcy sposĂłb:
 <screen>
-mencoder -ovc copy -oac copy -o <replaceable>wyjście.avi</replaceable> <replaceable>plik1.avi</replaceable> <replaceable>plik2.avi</replaceable>
+mencoder -ovc copy -oac copy -o <replaceable>wyjĹcie.avi</replaceable> <replaceable>plik1.avi</replaceable> <replaceable>plik2.avi</replaceable>
 </screen>
-Zadziała to tylko jeśli zbiory mają tę samą rozdzielczość i używają tego samego kodeka.
-Możesz też spróbować
+ZadziaĹa to tylko jeĹli zbiory majÄ tÄ samÄ rozdzielczoĹÄ i uĹźywajÄ tego samego kodeka.
+MoĹźesz teĹź sprĂłbowaÄ
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> i
-<application>avimerge</application> (część zestawu narzędzi
+<application>avimerge</application> (czÄĹÄ zestawu narzÄdzi
 <ulink url="http://www.transcoding.org/">transcode</ulink>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę naprawić pliki AVI z popsutym indeksem lub złym przeplotem?
+Jak mogÄ naprawiÄ pliki AVI z popsutym indeksem lub zĹym przeplotem?
 </para></question>
 <answer><para>
-Aby unknąć używania <option>-idx</option> aby móc przewijać w plikach AVI z zepsutym indeksem 
-lub <option>-ni</option> do odtwarzania plików AVI ze złym przeplotem, użyj polecenia
+Aby unknÄÄ uĹźywania <option>-idx</option> aby mĂłc przewijaÄ w plikach AVI z zepsutym indeksem 
+lub <option>-ni</option> do odtwarzania plikĂłw AVI ze zĹym przeplotem, uĹźyj polecenia
 <screen>
-mencoder -idx <replaceable>wejście.avi</replaceable> -ovc copy -oac copy -o <replaceable>wyjście.avi</replaceable>
+mencoder -idx <replaceable>wejĹcie.avi</replaceable> -ovc copy -oac copy -o <replaceable>wyjĹcie.avi</replaceable>
 </screen>
-aby skopiować strumienie audio i video do nowego pliku, równocześnie odtwarzając indeks
-i poprawnie przeplatając dane.
-Oczywiście to nie może naprawić ewentualnych błędów w strumieniach audio i/lub
+aby skopiowaÄ strumienie audio i video do nowego pliku, rĂłwnoczeĹnie odtwarzajÄc indeks
+i poprawnie przeplatajÄc dane.
+OczywiĹcie to nie moĹźe naprawiÄ ewentualnych bĹÄdĂłw w strumieniach audio i/lub
 video. 
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę naprawić proporcje pliku AVI?
+Jak mogÄ naprawiÄ proporcje pliku AVI?
 </para></question>
 <answer><para>
-Możesz to zrobić dzięki opcji <application>MEncodera</application> 
-<option>-force-avi-aspect</option>, która nadpisuje proporcje zachowane w opcji nagłówka 
-AVI vprp OpenDML. Na przykład:
+MoĹźesz to zrobiÄ dziÄki opcji <application>MEncodera</application> 
+<option>-force-avi-aspect</option>, ktĂłra nadpisuje proporcje zachowane w opcji nagĹĂłwka 
+AVI vprp OpenDML. Na przykĹad:
 <screen>
-mencoder <replaceable>wejście.avi</replaceable> -ovc copy -oac copy -o<replaceable>wyjście</replaceable> -force-avi-acpect 4/3
+mencoder <replaceable>wejĹcie.avi</replaceable> -ovc copy -oac copy -o<replaceable>wyjĹcie</replaceable> -force-avi-acpect 4/3
 </screen>
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Nie mogę zakodować napisów z DVD do AVI!
+Nie mogÄ zakodowaÄ napisĂłw z DVD do AVI!
 </para></question>
 <answer><para>
-Musisz poprawnie określić opcję <option>-sid</option>.
+Musisz poprawnie okreĹliÄ opcjÄ <option>-sid</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę zakodować tylko wybrane rozdziały z DVD?
+Jak mogÄ zakodowaÄ tylko wybrane rozdziaĹy z DVD?
 </para></question>
 <answer><para>
-Użyj poprawnie opcji <option>-chapter</option>, na przykład: <option>-chapter 5-7</option>.
+UĹźyj poprawnie opcji <option>-chapter</option>, na przykĹad: <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Próbuję pracować z plikami 2GB+ na systemie plików VFAT. Czy to działa?
+PrĂłbujÄ pracowaÄ z plikami 2GB+ na systemie plikĂłw VFAT. Czy to dziaĹa?
 </para></question>
 <answer><para>
-Nie, VFAT nie obsługuje plików 2GB+.
+Nie, VFAT nie obsĹuguje plikĂłw 2GB+.
 </para></answer>
 </qandaentry>
 
@@ -1064,40 +1064,40 @@ Dlaczego zalecany bitrate wypisywany przez <application>MEncodera</application>
 jest ujemny?
 </para></question>
 <answer><para>
-Ponieważ bitrate (ilość bitów na sekundę) z którym zakodowałeś audio jest za duże, aby film się zmieścił
-na jakimkolwiek CD. Sprawdź czy libmp3lame jest zainstalowana poprawnie.
+PoniewaĹź bitrate (iloĹÄ bitĂłw na sekundÄ) z ktĂłrym zakodowaĹeĹ audio jest za duĹźe, aby film siÄ zmieĹciĹ
+na jakimkolwiek CD. SprawdĹş czy libmp3lame jest zainstalowana poprawnie.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Nie mogę zakodować pliku ASF do AVI/DivX, ponieważ ma on 1000 fps?
+Nie mogÄ zakodowaÄ pliku ASF do AVI/DivX, poniewaĹź ma on 1000 fps?
 </para></question>
 <answer><para>
-Ponieważ ASF używa zmiennego framerate (ilość ramek na sekundę), a AVI używa
-ustalonej wartości, musisz ustawić ją ręcznie używając opcji <option>-ofps</option>.
+PoniewaĹź ASF uĹźywa zmiennego framerate (iloĹÄ ramek na sekundÄ), a AVI uĹźywa
+ustalonej wartoĹci, musisz ustawiÄ jÄ rÄcznie uĹźywajÄc opcji <option>-ofps</option>.
 </para></answer>
 </qandaentry>
 
 
 <qandaentry>
 <question><para>
-Jak mogę wstawić napisy do pliku wynikowego?
+Jak mogÄ wstawiÄ napisy do pliku wynikowego?
 </para></question>
 <answer><para>
-Po prostu przekaż opcję <option>-sub &lt;nazwa_pliku&gt;</option> 
+Po prostu przekaĹź opcjÄ <option>-sub &lt;nazwa_pliku&gt;</option> 
 (lub odpowiednio <option>-sid</option>) do <application>MEncodera</application>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak zakodować wyłącznie dźwięk z teledysku?
+Jak zakodowaÄ wyĹÄcznie dĹşwiÄk z teledysku?
 </para></question>
 <answer><para>
-Nie jest to możliwe bezpośrednio lecz możesz sprówować następującego
-sposobu (zwróć uwagę na znak 
-<emphasis role="bold">&amp;</emphasis> na końcu polecenia
+Nie jest to moĹźliwe bezpoĹrednio lecz moĹźesz sprĂłwowaÄ nastÄpujÄcego
+sposobu (zwrĂłÄ uwagÄ na znak 
+<emphasis role="bold">&amp;</emphasis> na koĹcu polecenia
 <command>mplayer</command>):
 <screen>
     mkfifo encode
@@ -1105,69 +1105,69 @@ sposobu (zwróć uwagę na znak
     lame <replaceable>Twoje_opcje</replaceable> encode music.mp3
     rm encode
 </screen>
-Ten sposób pozwala na użycie dowolnego kodera, nie tylko
+Ten sposĂłb pozwala na uĹźycie dowolnego kodera, nie tylko
 <application>LAME</application>.
-Po prostu zamień <command>lame</command> w powyższym poleceniu 
-na swój ulubiony koder audio.
+Po prostu zamieĹ <command>lame</command> w powyĹźszym poleceniu 
+na swĂłj ulubiony koder audio.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Dlaczego zewnętrzne odtwarzacze nieodtwarzają filmów MPEG-4 zakodowanych 
-<application>MEncoderem</application> w wersji nowszej niż 1.0pre7?
+Dlaczego zewnÄtrzne odtwarzacze nieodtwarzajÄ filmĂłw MPEG-4 zakodowanych 
+<application>MEncoderem</application> w wersji nowszej niĹź 1.0pre7?
 </para></question>
 
 <answer><para>
     <systemitem class="library">libavcodec</systemitem>, natywna biblioteka
     kodowania MPEG-4 zwykle dostarczana z <application>Encoderem</application>
-    ustawiała FourCC na 'DIVX' podczas kodowania video MPEG-4 (FourCC to
-    etykieta AVI identyfikująca oprogramowanie użyte do kodowania
+    ustawiaĹa FourCC na 'DIVX' podczas kodowania video MPEG-4 (FourCC to
+    etykieta AVI identyfikujÄca oprogramowanie uĹźyte do kodowania
     i przewidziane do dekodowania video). 
-    To powodowało przekonanie u wielu ludzi, że <systemitem
-      class="library">libavcodec</systemitem> jest biblioteką kodowania DivX,
-    gdy w rzeczywistości jest zupełnie inną biblioteką kodowania MPEG-4, która
-    dużo lepiej niż DivX implementuje standard MPEG-4.
-    Dlatego też nowym domyślnym kodem FourCC używanym przez <systemitem
-      class="library">libavcodec</systemitem> jest 'FMP4', lecz możesz obejść
-    to zachowanie używając opcji <application>MEncodera</application>
+    To powodowaĹo przekonanie u wielu ludzi, Ĺźe <systemitem
+      class="library">libavcodec</systemitem> jest bibliotekÄ kodowania DivX,
+    gdy w rzeczywistoĹci jest zupeĹnie innÄ bibliotekÄ kodowania MPEG-4, ktĂłra
+    duĹźo lepiej niĹź DivX implementuje standard MPEG-4.
+    Dlatego teĹź nowym domyĹlnym kodem FourCC uĹźywanym przez <systemitem
+      class="library">libavcodec</systemitem> jest 'FMP4', lecz moĹźesz obejĹÄ
+    to zachowanie uĹźywajÄc opcji <application>MEncodera</application>
     <option>-ffourcc</option>.
-    Tak samo możesz zmienić FourCC istniejącego pliku:
+    Tak samo moĹźesz zmieniÄ FourCC istniejÄcego pliku:
     <screen>
-      mencoder <replaceable>wejście.avi</replaceable> -o <replaceable>wyjście.avi</replaceable> -ffourcc XVID
+      mencoder <replaceable>wejĹcie.avi</replaceable> -o <replaceable>wyjĹcie.avi</replaceable> -ffourcc XVID
     </screen>
-    Zauważ, że to ustawi FourCC na XVID, a nie na DIVX. Jest to zalecane, ze
-    względu na to, że kod FourCC DIVX oznacza DivX4, który jest bardzo prostym
-    kodekiem MPEG-4, a DX50 i XVID oba oznaczają pełne MPEG-4 (ASP). Dlatego
-    gdy ustawisz FourCC na DIVX, pewne programy lub sprzętowe odtwarzacze mogą
-    się dławić na niektórych zaawansowanych funkcjach, które obsługuje
+    ZauwaĹź, Ĺźe to ustawi FourCC na XVID, a nie na DIVX. Jest to zalecane, ze
+    wzglÄdu na to, Ĺźe kod FourCC DIVX oznacza DivX4, ktĂłry jest bardzo prostym
+    kodekiem MPEG-4, a DX50 i XVID oba oznaczajÄ peĹne MPEG-4 (ASP). Dlatego
+    gdy ustawisz FourCC na DIVX, pewne programy lub sprzÄtowe odtwarzacze mogÄ
+    siÄ dĹawiÄ na niektĂłrych zaawansowanych funkcjach, ktĂłre obsĹuguje
     <systemitem class="library">libavcodec</systemitem>, a DivX nie; z drugiej
-    strony <systemitem class="library">XviD</systemitem> jest bliższy
-    funkjonalnością <systemitem class="library">libavacodec</systemitem>,
-    a jest obsługiwany przez wszystkie sensowne odtwarzacze.
+    strony <systemitem class="library">XviD</systemitem> jest bliĹźszy
+    funkjonalnoĹciÄ <systemitem class="library">libavacodec</systemitem>,
+    a jest obsĹugiwany przez wszystkie sensowne odtwarzacze.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
   <question><para>
-      Jak mogę kodować plik zawierający tylko dźwięk?
+      Jak mogÄ kodowaÄ plik zawierajÄcy tylko dĹşwiÄk?
   </para></question>
   <answer><para>
-      Użyj <filename>aconvert</filename> z podkatalogu <filename
-        class="directory">TOOLS</filename> w drzewie źródeł
+      UĹźyj <filename>aconvert</filename> z podkatalogu <filename
+        class="directory">TOOLS</filename> w drzewie ĹşrĂłdeĹ
       <application>MPlayera</application>.
   </para></answer>
 </qandaentry>
 
 <qandaentry>
   <question><para>
-      Jak mogę odtwarzać napisy wbudowane w AVI?
+      Jak mogÄ odtwarzaÄ napisy wbudowane w AVI?
   </para></question>
   <answer><para>
-      Użyj <filename>avisubdump.c</filename> z podkatalogu <filename
+      UĹźyj <filename>avisubdump.c</filename> z podkatalogu <filename
         class="directory">TOOLS</filename> lub przeczytaj
       <ulink url="http://xlife.zuavra.net/curse/0012/">ten dokument
-        o wydobywaniu/demultipleksowaniu napisów wbudowanych w pliki AVI
+        o wydobywaniu/demultipleksowaniu napisĂłw wbudowanych w pliki AVI
         OpenDML</ulink>
   </para></answer>
 </qandaentry>
@@ -1177,9 +1177,9 @@ Dlaczego zewnętrzne odtwarzacze nieodtwarzają filmów MPEG-4 zakodowanych
       <application>MPlayer</application> nie...
   </para></question>
   <answer><para>
-      Przeglądnij podkatalog <filename class="directory">TOOLS</filename>.
-      Znajduje się tam kolekcja losowych skryptów i hacków.
-      Dokumentację znajdziesz w <filename>TOOLS/README</filename>.
+      PrzeglÄdnij podkatalog <filename class="directory">TOOLS</filename>.
+      Znajduje siÄ tam kolekcja losowych skryptĂłw i hackĂłw.
+      DokumentacjÄ znajdziesz w <filename>TOOLS/README</filename>.
   </para></answer>
 </qandaentry>
 

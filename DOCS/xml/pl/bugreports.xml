@@ -1,221 +1,221 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r20024 -->
 <!-- Opiekun: Boski -->
 <appendix id="bugreports">
-<title>Jak zgłaszać błędy</title>
+<title>Jak zgĹaszaÄ bĹÄdy</title>
 <para>
-Dobre raporty błędów stanowią bardzo istotny wkład w rozwój każdego
-projektu. Jednak tak jak pisanie dobrych programów wymaga sporo pracy, tak
-dobre zgłoszenia problemów wymagają trochę wysiłku. Prosimy wziąć pod uwagę to,
-że większość deweloperów jest bardzo zajęta i odbiera nieprzyzwoitą wręcz
-ilość listów. Wsparcie ze strony użytkownika jest naprawdę ważne w procesie
-rozwoju <application>MPlayera</application>. Należy jednak pamiętać, że
-trzeba dostarczyć <emphasis role="bold">wszystkie</emphasis> informacje o które
-poprosimy i postępować dokładnie według instrukcji zawartej w tym dokumencie.
+Dobre raporty bĹÄdĂłw stanowiÄ bardzo istotny wkĹad w rozwĂłj kaĹźdego
+projektu. Jednak tak jak pisanie dobrych programĂłw wymaga sporo pracy, tak
+dobre zgĹoszenia problemĂłw wymagajÄ trochÄ wysiĹku. Prosimy wziÄÄ pod uwagÄ to,
+Ĺźe wiÄkszoĹÄ deweloperĂłw jest bardzo zajÄta i odbiera nieprzyzwoitÄ wrÄcz
+iloĹÄ listĂłw. Wsparcie ze strony uĹźytkownika jest naprawdÄ waĹźne w procesie
+rozwoju <application>MPlayera</application>. NaleĹźy jednak pamiÄtaÄ, Ĺźe
+trzeba dostarczyÄ <emphasis role="bold">wszystkie</emphasis> informacje o ktĂłre
+poprosimy i postÄpowaÄ dokĹadnie wedĹug instrukcji zawartej w tym dokumencie.
 </para>
 <sect1 id="bugreports_security">
-<title>Zgłaszanie błędów związanych z bezpieczeństwem</title>
+<title>ZgĹaszanie bĹÄdĂłw zwiÄzanych z bezpieczeĹstwem</title>
 <para>
-Jeśli znalazłeś lukę, którą można wykorzystać, i chcesz zrobić dobry uczynek
-i pozwolić nam ją naprawić zanim ją ujawnisz, chętnie przyjmiemy zgłoszenie
-bezpieczeństwa pod adresem
+JeĹli znalazĹeĹ lukÄ, ktĂłrÄ moĹźna wykorzystaÄ, i chcesz zrobiÄ dobry uczynek
+i pozwoliÄ nam jÄ naprawiÄ zanim jÄ ujawnisz, chÄtnie przyjmiemy zgĹoszenie
+bezpieczeĹstwa pod adresem
 <ulink url="mailto:&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;">&#115;&#101;&#99;&#117;&#114;&#105;&#116;&#121;&#64;&#109;&#112;&#108;&#97;&#121;&#101;&#114;&#104;&#113;&#46;&#104;&#117;</ulink>.
-Proszę pisać w języku angielskim i dodać [SECURITY] albo [ADVISORY] w temacie.
-Upewnij się że Twoje zgłoszenie zawiera całkowity i dokładny opis błędu.
-Jeśli wyślesz też poprawkę będziemy bardzo szczęśliwi.
-Proszę, nie opóźniaj zgłoszenia żeby stworzyć exploit wykorzystujący lukę,
-możesz go wysłać w następnym liście.
+ProszÄ pisaÄ w jÄzyku angielskim i dodaÄ [SECURITY] albo [ADVISORY] w temacie.
+Upewnij siÄ Ĺźe Twoje zgĹoszenie zawiera caĹkowity i dokĹadny opis bĹÄdu.
+JeĹli wyĹlesz teĹź poprawkÄ bÄdziemy bardzo szczÄĹliwi.
+ProszÄ, nie opĂłĹşniaj zgĹoszenia Ĺźeby stworzyÄ exploit wykorzystujÄcy lukÄ,
+moĹźesz go wysĹaÄ w nastÄpnym liĹcie.
 </para>
 </sect1>
 <sect1 id="bugreports_fix">
-<title>Jak poprawiać błędy</title>
+<title>Jak poprawiaÄ bĹÄdy</title>
 <para>
-Jeżeli uważasz, że posiadasz wystarczające umiejętności, namawiamy Cię do
-samodzielnego poprawiania błędów. A może już to zrobiłeś? Przeczytaj
-<ulink url="../../tech/patches.txt">ten krótki dokument</ulink>, żeby dowiedzieć
-się w jaki sposób dodać swoją łatę do źródeł
-<application>MPlayera</application>. Jeżeli będziesz miał jakieś pytania, pomogą
+JeĹźeli uwaĹźasz, Ĺźe posiadasz wystarczajÄce umiejÄtnoĹci, namawiamy CiÄ do
+samodzielnego poprawiania bĹÄdĂłw. A moĹźe juĹź to zrobiĹeĹ? Przeczytaj
+<ulink url="../../tech/patches.txt">ten krĂłtki dokument</ulink>, Ĺźeby dowiedzieÄ
+siÄ w jaki sposĂłb dodaÄ swojÄ ĹatÄ do ĹşrĂłdeĹ
+<application>MPlayera</application>. JeĹźeli bÄdziesz miaĹ jakieĹ pytania, pomogÄ
 Ci ludzie z listy
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
-(tylko w języku angielskim -przyp. tłumacza).
+(tylko w jÄzyku angielskim -przyp. tĹumacza).
 </para>
 </sect1>
 
 
 <sect1 id="bugreports_regression_test">
-	<title>Jak wykonać test regresji za pomocą Subversion</title>
+	<title>Jak wykonaÄ test regresji za pomocÄ Subversion</title>
 	<para>
-		Czasami zdarza się problem typu "wcześniej działało, a teraz przestało...".
-		Tutaj znajduje się, opisana krok po kroku, procedura, której celem jest próba
-		znalezienia źródła problemu.
+		Czasami zdarza siÄ problem typu "wczeĹniej dziaĹaĹo, a teraz przestaĹo...".
+		Tutaj znajduje siÄ, opisana krok po kroku, procedura, ktĂłrej celem jest prĂłba
+		znalezienia ĹşrĂłdĹa problemu.
 		<emphasis role="bold">Nie jest</emphasis> ona przeznaczona
-		dla przeciętnego użytkownika.
+		dla przeciÄtnego uĹźytkownika.
 	</para>
 	<para>
-		Najpierw należy pobrać źródła MPlayera z SVN.
-		Więcej szczegółów na ten temat znajduje się na 
+		Najpierw naleĹźy pobraÄ ĹşrĂłdĹa MPlayera z SVN.
+		WiÄcej szczegĂłĹĂłw na ten temat znajduje siÄ na 
 		<ulink url="http://www.mplayerhq.hu/dload.html">tej stronie</ulink>.
 	</para>
 	<para>
-		W rezultacie w katalogu mplayer/ znajdzie się obraz drzewa Subversion, po stronie klienta.
-		Teraz zaktualizuj ten obraz do daty, która Cię interesuje:
+		W rezultacie w katalogu mplayer/ znajdzie siÄ obraz drzewa Subversion, po stronie klienta.
+		Teraz zaktualizuj ten obraz do daty, ktĂłra CiÄ interesuje:
 		<screen>
 			cd mplayer/
 			svn update -r {"2004-08-23"}
 		</screen>
 		Format daty to RRRR-MM-DD GG:MM:SS.
-		Używając takiego formatu daty masz pewność, że będziesz w stanie wyciągać łatki
-		zgodnie z datą, gdy zostały dodane, dokładnie tak jak w przypadku
-		<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum logów CVS MPlayera</ulink>.
+		UĹźywajÄc takiego formatu daty masz pewnoĹÄ, Ĺźe bÄdziesz w stanie wyciÄgaÄ Ĺatki
+		zgodnie z datÄ, gdy zostaĹy dodane, dokĹadnie tak jak w przypadku
+		<ulink url="http://lists.mplayerhq.hu/pipermail/mplayer-cvslog/">archiwum logĂłw CVS MPlayera</ulink>.
 	</para>
 	<para>
-		Następnie postępuj tak jak w przypadku normalnej aktualizacji:
+		NastÄpnie postÄpuj tak jak w przypadku normalnej aktualizacji:
 		<screen>
 			./configure
 			make
 		</screen>
 	</para>
 	<para>
-		Jeżeli czytasz ten dokument, a nie jesteś programistą, najszybszym
-		sposobem na dotarcie do miejsca w którym pojawi się problem jest
-		użycie binarnego wyszukiwania &mdash; tzn. szukania daty
-		pojawienia się problemu poprzez dzielenie interwału czasowego na pół
-		przy każdym kolejnym wyszukiwaniu.
-		Przykładowo, jeżeli problem wystąpił w 2003, spróbuj najpierw szukać
-		problemu w wydaniu z połowy roku. Jeżeli będzie obecny, cofnij się
-		do pierwszego kwietnia; jeżeli nie, przejdź do pierwszego października itd.
+		JeĹźeli czytasz ten dokument, a nie jesteĹ programistÄ, najszybszym
+		sposobem na dotarcie do miejsca w ktĂłrym pojawi siÄ problem jest
+		uĹźycie binarnego wyszukiwania &mdash; tzn. szukania daty
+		pojawienia siÄ problemu poprzez dzielenie interwaĹu czasowego na pĂłĹ
+		przy kaĹźdym kolejnym wyszukiwaniu.
+		PrzykĹadowo, jeĹźeli problem wystÄpiĹ w 2003, sprĂłbuj najpierw szukaÄ
+		problemu w wydaniu z poĹowy roku. JeĹźeli bÄdzie obecny, cofnij siÄ
+		do pierwszego kwietnia; jeĹźeli nie, przejdĹş do pierwszego paĹşdziernika itd.
 	</para>
 	<para>
-		Jeżeli masz dużo wolnego miejsca na twardym dysku (pełna kompilacja
-		zajmuje aktualnie 100 MB albo około 300-350 MB jeżeli uaktywnione
-		jest debuggowanie), skopiuj najstarszą działającą wersję zanim dokonasz
-		aktualizacji; oszczędzi to sporo czasu, jeżeli zajdzie potrzeba powrotu
+		JeĹźeli masz duĹźo wolnego miejsca na twardym dysku (peĹna kompilacja
+		zajmuje aktualnie 100 MB albo okoĹo 300-350 MB jeĹźeli uaktywnione
+		jest debuggowanie), skopiuj najstarszÄ dziaĹajÄcÄ wersjÄ zanim dokonasz
+		aktualizacji; oszczÄdzi to sporo czasu, jeĹźeli zajdzie potrzeba powrotu
 		do starszej wersji.
 		(Zazwyczaj konieczne jest uruchomienie 'make distclean' przed
-		rekompilacją wcześniejszej wersji, więc jeżeli nie zrobisz kopii zapasowej
-		oryginalnego drzewa, będziesz musiał wszystko rekompilować, jeśli
-		będziesz chciał wrócić do aktualnej wersji.)
+		rekompilacjÄ wczeĹniejszej wersji, wiÄc jeĹźeli nie zrobisz kopii zapasowej
+		oryginalnego drzewa, bÄdziesz musiaĹ wszystko rekompilowaÄ, jeĹli
+		bÄdziesz chciaĹ wrĂłciÄ do aktualnej wersji.)
 	</para>
 	<para>
-		Kiedy znajdziesz dzień w którym pojawił się problem, kontynuuj szukanie
-		używając archiwum mplayer-cvslog (uporządkowane wg daty) i bardziej
-		precyzyjnych aktualizacji svn obejmujących godziny, minuty i sekundy:
+		Kiedy znajdziesz dzieĹ w ktĂłrym pojawiĹ siÄ problem, kontynuuj szukanie
+		uĹźywajÄc archiwum mplayer-cvslog (uporzÄdkowane wg daty) i bardziej
+		precyzyjnych aktualizacji svn obejmujÄcych godziny, minuty i sekundy:
 		<screen>
 			svn update -r {"2004-08-23 15:17:25"}
 		</screen>
-		To pomoże ci łatwo znaleźć łatkę, która jest winowajcą.
+		To pomoĹźe ci Ĺatwo znaleĹşÄ ĹatkÄ, ktĂłra jest winowajcÄ.
 	</para>
 	<para>
-		Jeżeli znajdziesz łatkę, która jest źródłem problemu, to znaczy, że już
-		prawie osiągnąłeś sukces; wyślij informację o niej na
+		JeĹźeli znajdziesz ĹatkÄ, ktĂłra jest ĹşrĂłdĹem problemu, to znaczy, Ĺźe juĹź
+		prawie osiÄgnÄĹeĹ sukces; wyĹlij informacjÄ o niej na
 		<ulink url="http://bugzilla.mplayerhq.hu/">MPlayer Bugzilla</ulink>
-		lub zapisz się na listę 
+		lub zapisz siÄ na listÄ 
 		<ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users">MPlayer-users</ulink>
-		i tam wyślij raport.
-		Istnieje szansa, że autor łatki zasugeruje w jaki sposób rozwiązać problem.
-		Możesz też wpatrywać się w łatkę tak długo, aż nie będzie mogła wytrzymać
-		i wyjawi ci lokalizację błędu:-).
+		i tam wyĹlij raport.
+		Istnieje szansa, Ĺźe autor Ĺatki zasugeruje w jaki sposĂłb rozwiÄzaÄ problem.
+		MoĹźesz teĹź wpatrywaÄ siÄ w ĹatkÄ tak dĹugo, aĹź nie bÄdzie mogĹa wytrzymaÄ
+		i wyjawi ci lokalizacjÄ bĹÄdu:-).
 	</para>
 </sect1>
 
 
 <sect1 id="bugreports_report">
-<title>Jak zgłaszać błędy</title>
+<title>Jak zgĹaszaÄ bĹÄdy</title>
 <para>
-Po pierwsze sprawdź najnowszą wersję SVN <application>MPlayera</application>,
-ponieważ dany błąd może być już w niej naprawiony. Rozwój
-<application>MPlayera</application> przebiega naprawdę szybko, większość
-problemów występujących w oficjalnych wydaniach jest zgłaszana w ciągu kilku dni
-albo nawet godzin. Dlatego też prosimy używać <emphasis role="bold">tylko wersji
-z Subversion</emphasis> do zgłaszania błędów. Dotyczy to głównie pakietów binarnych
-<application>MPlayera</application>. Instrukcje dotyczące Subversion znajdują się
+Po pierwsze sprawdĹş najnowszÄ wersjÄ SVN <application>MPlayera</application>,
+poniewaĹź dany bĹÄd moĹźe byÄ juĹź w niej naprawiony. RozwĂłj
+<application>MPlayera</application> przebiega naprawdÄ szybko, wiÄkszoĹÄ
+problemĂłw wystÄpujÄcych w oficjalnych wydaniach jest zgĹaszana w ciÄgu kilku dni
+albo nawet godzin. Dlatego teĹź prosimy uĹźywaÄ <emphasis role="bold">tylko wersji
+z Subversion</emphasis> do zgĹaszania bĹÄdĂłw. Dotyczy to gĹĂłwnie pakietĂłw binarnych
+<application>MPlayera</application>. Instrukcje dotyczÄce Subversion znajdujÄ siÄ
 na dole <ulink url="http://www.mplayerhq.hu/dload.html">tej strony</ulink>
-lub w pliku README. Jeżeli problem dalej występuje prosimy sprawdzić listę
-<link linkend="bugs">znanych błędów</link> i resztę dokumentacji. Jeżeli problem
-nie jest znany lub rozwiązany przez naszą dokumentację prosimy zgłosić błąd.
+lub w pliku README. JeĹźeli problem dalej wystÄpuje prosimy sprawdziÄ listÄ
+<link linkend="bugs">znanych bĹÄdĂłw</link> i resztÄ dokumentacji. JeĹźeli problem
+nie jest znany lub rozwiÄzany przez naszÄ dokumentacjÄ prosimy zgĹosiÄ bĹÄd.
 </para>
 
 <para>
-Nie należy wysyłać zgłoszeń do deweloperów. <application>MPlayer</application>
-jest dziełem dużej grupy, więc więcej osób może być zainteresowanych tym
-problemem. Czasami inni użytkownicy spotkali się już z danym problemem i wiedzą,
-jak go rozwiązać, nawet jeżeli jest to błąd w kodzie
+Nie naleĹźy wysyĹaÄ zgĹoszeĹ do deweloperĂłw. <application>MPlayer</application>
+jest dzieĹem duĹźej grupy, wiÄc wiÄcej osĂłb moĹźe byÄ zainteresowanych tym
+problemem. Czasami inni uĹźytkownicy spotkali siÄ juĹź z danym problemem i wiedzÄ,
+jak go rozwiÄzaÄ, nawet jeĹźeli jest to bĹÄd w kodzie
 <application>MPlayera</application>.
 </para>
 
 <para>
-Prosimy opisywać problem tak dokładnie, jak to tylko możliwe. Należy sprawdzić w
-jakich dokładnie okolicznościach pojawia się błąd. Czy występuje on tylko w
-określonych sytuacjach? Czy ma związek z konkretnym plikiem lub typem plików?
-Czy dotyczy tylko danego kodeka, czy też jest niezależny od kodeków? Czy możesz
-go powtórzyć z każdym wyjściem wideo? Im więcej informacji dostarczysz, tym
-większe są szanse na rozwiązanie zgłoszonego problemu. Nie należy również
-zapominać o dołączeniu wartościowych informacji wymienionych poniżej. W
-przeciwnym wypadku nie będziemy w stanie prawidłowo zdiagnozować zgłoszonego
+Prosimy opisywaÄ problem tak dokĹadnie, jak to tylko moĹźliwe. NaleĹźy sprawdziÄ w
+jakich dokĹadnie okolicznoĹciach pojawia siÄ bĹÄd. Czy wystÄpuje on tylko w
+okreĹlonych sytuacjach? Czy ma zwiÄzek z konkretnym plikiem lub typem plikĂłw?
+Czy dotyczy tylko danego kodeka, czy teĹź jest niezaleĹźny od kodekĂłw? Czy moĹźesz
+go powtĂłrzyÄ z kaĹźdym wyjĹciem wideo? Im wiÄcej informacji dostarczysz, tym
+wiÄksze sÄ szanse na rozwiÄzanie zgĹoszonego problemu. Nie naleĹźy rĂłwnieĹź
+zapominaÄ o doĹÄczeniu wartoĹciowych informacji wymienionych poniĹźej. W
+przeciwnym wypadku nie bÄdziemy w stanie prawidĹowo zdiagnozowaÄ zgĹoszonego
 problemu.
 </para>
 
 <para>
-Doskonałym i dobrze napisanym przewodnikiem dotyczącym zadawania pytań jest
+DoskonaĹym i dobrze napisanym przewodnikiem dotyczÄcym zadawania pytaĹ jest
 dokument <ulink url="http://www.catb.org/~esr/faqs/smart-questions.html">"Jak
-mądrze zadawać pytania"</ulink> napisany przez
+mÄdrze zadawaÄ pytania"</ulink> napisany przez
 <ulink url="http://www.catb.org/~esr/">Erica S. Raymonda</ulink>
-(Polskie tłumaczenie tego dokumentu można znaleźć
-+<ulink url="http://rtfm.killfile.pl/">tutaj</ulink> -przyp. tłum.). Istnieje
-także inny dokumentem tego typu zatytułowany
-<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Jak efektywnie zgłaszać błędy</ulink>
+(Polskie tĹumaczenie tego dokumentu moĹźna znaleĹşÄ
++<ulink url="http://rtfm.killfile.pl/">tutaj</ulink> -przyp. tĹum.). Istnieje
+takĹźe inny dokumentem tego typu zatytuĹowany
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Jak efektywnie zgĹaszaÄ bĹÄdy</ulink>
 stworzony przez <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/">Simona Tathama</ulink>
-(Polskie tłumaczenie tego dokumentu można znaleźć
+(Polskie tĹumaczenie tego dokumentu moĹźna znaleĹşÄ
 <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/bugs-pl.html">tutaj</ulink>
--przyp. tłum.). Jeśli będziesz postępował zgodnie z tymi przewodnikami,
-powinieneś uzyskać pomoc. Prosimy jednak pamiętać, że śledzimy listę jako
-ochotnicy, poświęcając nasz wolny czas. Jesteśmy bardzo zajęci i nie potrafimy
-zagwarantować, że pomożemy rozwiązać zgłoszony problem, ani nawet tego, że
-odpowiemy na Twoje zgłoszenie.
+-przyp. tĹum.). JeĹli bÄdziesz postÄpowaĹ zgodnie z tymi przewodnikami,
+powinieneĹ uzyskaÄ pomoc. Prosimy jednak pamiÄtaÄ, Ĺźe Ĺledzimy listÄ jako
+ochotnicy, poĹwiÄcajÄc nasz wolny czas. JesteĹmy bardzo zajÄci i nie potrafimy
+zagwarantowaÄ, Ĺźe pomoĹźemy rozwiÄzaÄ zgĹoszony problem, ani nawet tego, Ĺźe
+odpowiemy na Twoje zgĹoszenie.
 </para>
 
 </sect1>
 
 <sect1 id="bugreports_where">
-<title>Gdzie zgłaszać błędy</title>
+<title>Gdzie zgĹaszaÄ bĹÄdy</title>
 <para>
-Zapisz się na listę MPlayer-users:
+Zapisz siÄ na listÄ MPlayer-users:
 <ulink url="http://lists.mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-i wyślij swoje zgłoszenie błędu na
-<ulink url="mailto:mplayer-users@mplayerhq.hu"/>, gdzie będzie można je omówić.
+i wyĹlij swoje zgĹoszenie bĹÄdu na
+<ulink url="mailto:mplayer-users@mplayerhq.hu"/>, gdzie bÄdzie moĹźna je omĂłwiÄ.
 </para>
 <para>
-Jeżeli wolisz, możesz zamiast tego skorzystać z naszej nowej
-<ulink url="http://bugzilla.mplayerhq.hu/">Bugzilli</ulink> (systemu zgłaszania błędów - przyp. tłum.)
+JeĹźeli wolisz, moĹźesz zamiast tego skorzystaÄ z naszej nowej
+<ulink url="http://bugzilla.mplayerhq.hu/">Bugzilli</ulink> (systemu zgĹaszania bĹÄdĂłw - przyp. tĹum.)
 </para>
 <para>
-Językiem obowiązującym na tej liście jest
-<emphasis role="bold">angielski</emphasis>. Prosimy trzymać się zasad standardowej
+JÄzykiem obowiÄzujÄcym na tej liĹcie jest
+<emphasis role="bold">angielski</emphasis>. Prosimy trzymaÄ siÄ zasad standardowej
 <ulink url="http://www.ietf.org/rfc/rfc1855.txt">netykiety</ulink>
-(Polską wersję netykiety można przeczytać np.
-<ulink url="http://www.pg.gda.pl/~agatek/netq.html">tutaj</ulink> - przyp. tłum.)
-i <emphasis role="bold">nie wysyłać listów w HTML-u</emphasis> na żadną z naszych
-list. W przeciwnym wypadku zostaniesz zignorowany lub wyrzucony z listy. Jeżeli
-nie wiesz czym jest list w HTML-u albo dlaczego jest on zły, przeczytaj ten
-<ulink url="http://expita.com/nomime.html">świetny dokument</ulink> (znów tylko
-po angielsku - przyp. tłum.). Wyjaśnia on wszystkie szczegóły i zawiera
-instrukcje wyłączania HTML-u. Zauważ również, że nie wysyłamy kopii listów do
-użytkowników, więc dobrym pomysłem jest zapisanie się na listę w celu uzyskania
+(PolskÄ wersjÄ netykiety moĹźna przeczytaÄ np.
+<ulink url="http://www.pg.gda.pl/~agatek/netq.html">tutaj</ulink> - przyp. tĹum.)
+i <emphasis role="bold">nie wysyĹaÄ listĂłw w HTML-u</emphasis> na ĹźadnÄ z naszych
+list. W przeciwnym wypadku zostaniesz zignorowany lub wyrzucony z listy. JeĹźeli
+nie wiesz czym jest list w HTML-u albo dlaczego jest on zĹy, przeczytaj ten
+<ulink url="http://expita.com/nomime.html">Ĺwietny dokument</ulink> (znĂłw tylko
+po angielsku - przyp. tĹum.). WyjaĹnia on wszystkie szczegĂłĹy i zawiera
+instrukcje wyĹÄczania HTML-u. ZauwaĹź rĂłwnieĹź, Ĺźe nie wysyĹamy kopii listĂłw do
+uĹźytkownikĂłw, wiÄc dobrym pomysĹem jest zapisanie siÄ na listÄ w celu uzyskania
 odpowiedzi.
 </para>
 </sect1>
 
 <sect1 id="bugreports_what">
-<title>Co zgłaszać</title>
+<title>Co zgĹaszaÄ</title>
 <para>
-Może zajść potrzeba dołączenia logu, konfiguracji lub przykładowego
+MoĹźe zajĹÄ potrzeba doĹÄczenia logu, konfiguracji lub przykĹadowego
 pliku w Twoim
-zgłoszeniu błędu. Jeżeli któryś z nich ma duży rozmiar, lepiej załadować go na
+zgĹoszeniu bĹÄdu. JeĹźeli ktĂłryĹ z nich ma duĹźy rozmiar, lepiej zaĹadowaÄ go na
 nasz <ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/">serwer FTP</ulink>
-w skompresowanej postaci (gzip i bzip2 są preferowanymi formatami) i załączyć
-tylko ścieżkę i nazwę pliku do zgłoszenia błędu. Nasza lista ma ustawiony limit
-rozmiaru każdej wiadomości na 80k. Jeżeli potrzebujesz wysłać coś większego,
-musisz to skompresować albo załadować na serwer.
+w skompresowanej postaci (gzip i bzip2 sÄ preferowanymi formatami) i zaĹÄczyÄ
+tylko ĹcieĹźkÄ i nazwÄ pliku do zgĹoszenia bĹÄdu. Nasza lista ma ustawiony limit
+rozmiaru kaĹźdej wiadomoĹci na 80k. JeĹźeli potrzebujesz wysĹaÄ coĹ wiÄkszego,
+musisz to skompresowaÄ albo zaĹadowaÄ na serwer.
 </para>
 
 <sect2 id="bugreports_system">
@@ -230,7 +230,7 @@ Nazwa Twojej dystrybucji Linuksa albo system operacyjny. Np.:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-wersja jądra (kernela):
+wersja jÄdra (kernela):
 <screen>uname -a</screen>
 </para></listitem>
 <listitem><para>
@@ -251,26 +251,26 @@ as --version
 </screen>
 </para></listitem>
 <listitem><para>
-Jeżeli masz problem z trybem pełnoekranowym:
+JeĹźeli masz problem z trybem peĹnoekranowym:
   <itemizedlist>
-    <listitem><para>Menadżer okien i wersja</para></listitem>
+    <listitem><para>MenadĹźer okien i wersja</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Jeżeli masz problem z XVIDIXem:
+JeĹźeli masz problem z XVIDIXem:
   <itemizedlist>
-    <listitem><para>głębia barw Xów (colour depth):
+    <listitem><para>gĹÄbia barw XĂłw (colour depth):
 <screen>xdpyinfo | grep &quot;depth of root&quot;</screen>
     </para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Jeżeli tylko GUI zawiera błędy:
+JeĹźeli tylko GUI zawiera bĹÄdy:
   <itemizedlist>
     <listitem><para>wersja GTK</para></listitem>
     <listitem><para>wersja GLIB</para></listitem>
     <listitem><para>wersja libpng</para></listitem>
-    <listitem><para>Sytuacja w której pojawia się błąd GUI</para></listitem>
+    <listitem><para>Sytuacja w ktĂłrej pojawia siÄ bĹÄd GUI</para></listitem>
   </itemizedlist>
 </para></listitem>
 </itemizedlist>
@@ -278,11 +278,11 @@ Jeżeli tylko GUI zawiera błędy:
 </sect2>
 
 <sect2 id="bugreports_hardware">
-<title>Sprzęt i sterowniki</title>
+<title>SprzÄt i sterowniki</title>
 <para>
 <itemizedlist>
 <listitem><para>
-informacje o procesorze (CPU) (to działa tylko pod Linuksem):
+informacje o procesorze (CPU) (to dziaĹa tylko pod Linuksem):
 <screen>cat /proc/cpuinfo</screen>
 </para></listitem>
 <listitem><para>
@@ -302,15 +302,15 @@ Typ sterownika wideo i wersja, np:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Typ karty dźwiękowej i sterownik, np:
+Typ karty dĹşwiÄkowej i sterownik, np:
   <itemizedlist>
     <listitem><para>Creative SBLive! Gold ze sterownikiem OSS z oss.creative.com</para></listitem>
     <listitem><para>Creative SB16 ze sterownikiem OSS z kernela</para></listitem>
-    <listitem><para>GUS PnP z emulacją ALSA OSS</para></listitem>
+    <listitem><para>GUS PnP z emulacjÄ ALSA OSS</para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Jeżeli masz wątpliwości, załącz wyjście linuksowego polecenia
+JeĹźeli masz wÄtpliwoĹci, zaĹÄcz wyjĹcie linuksowego polecenia
 <command>lspci -vv</command>.
 </para></listitem>
 </itemizedlist>
@@ -318,22 +318,22 @@ Jeżeli masz wątpliwości, załącz wyjście linuksowego polecenia
 </sect2>
 
 <sect2 id="bugreports_configure">
-<title>Problemy z konfiguracją</title>
+<title>Problemy z konfiguracjÄ</title>
 <para>
-Jeżeli <command>./configure</command> zwraca błąd albo
-automatyczne wykrywanie czegoś zawiedzie, przeczytaj
-<filename>configure.log</filename>. Możliwe, że znajdziesz tam odpowiedź, na
-przykład kilka połączonych wersji tej samej biblioteki w Twoim systemie albo że
-zapomniałeś zainstalować pakietów rozwojowych (tych z przyrostkiem -dev albo
--devel). Jeżeli wydaje Ci się, że istnieje jednak błąd, załącz
+JeĹźeli <command>./configure</command> zwraca bĹÄd albo
+automatyczne wykrywanie czegoĹ zawiedzie, przeczytaj
+<filename>configure.log</filename>. MoĹźliwe, Ĺźe znajdziesz tam odpowiedĹş, na
+przykĹad kilka poĹÄczonych wersji tej samej biblioteki w Twoim systemie albo Ĺźe
+zapomniaĹeĹ zainstalowaÄ pakietĂłw rozwojowych (tych z przyrostkiem -dev albo
+-devel). JeĹźeli wydaje Ci siÄ, Ĺźe istnieje jednak bĹÄd, zaĹÄcz
 <filename>configure.log</filename> w twoim raporcie.
 </para>
 </sect2>
 
 <sect2 id="bugreports_compilation">
-<title>Problemy z kompilacją</title>
+<title>Problemy z kompilacjÄ</title>
 <para>
-Prosimy załączyć następujące pliki:
+Prosimy zaĹÄczyÄ nastÄpujÄce pliki:
 <itemizedlist>
 <listitem><para>config.h</para></listitem>
 <listitem><para>config.mak</para></listitem>
@@ -344,63 +344,63 @@ Prosimy załączyć następujące pliki:
 <sect2 id="bugreports_playback">
 <title>Problemy z odtwarzaniem</title>
 <para>
-Prosimy załączyć wyjście <application>MPlayera</application> w trybie gadatliwym
-na poziomie pierwszym (opcja -v - przyp. tłum.), ale pamiętając o
+Prosimy zaĹÄczyÄ wyjĹcie <application>MPlayera</application> w trybie gadatliwym
+na poziomie pierwszym (opcja -v - przyp. tĹum.), ale pamiÄtajÄc o
 <emphasis role="bold">nie skracaniu wyniku polecenia</emphasis> podczas
-kopiowania go do Twojego listu. Deweloperzy potrzebują wszystkich informacji do
-prawidłowego zdiagnozowania problemu. Możesz przekierować wyjście bezpośrednio
-do pliku w ten sposób:
+kopiowania go do Twojego listu. Deweloperzy potrzebujÄ wszystkich informacji do
+prawidĹowego zdiagnozowania problemu. MoĹźesz przekierowaÄ wyjĹcie bezpoĹrednio
+do pliku w ten sposĂłb:
 <screen>mplayer -v <replaceable>opcje</replaceable> <replaceable>nazwa_pliku</replaceable> &gt; mplayer.log 2&gt;&amp;1</screen>
 </para>
 
 <para>
-Jeżeli Twój problem jest specyficzny dla jednego albo wielu plików, załaduj
-winowajcę(ów) na:
+JeĹźeli TwĂłj problem jest specyficzny dla jednego albo wielu plikĂłw, zaĹaduj
+winowajcÄ(Ăłw) na:
 <ulink url="ftp://upload.mplayerhq.hu/MPlayer/incoming/"/>
 </para>
 
 <para>
-Załaduj także mały plik tekstowy nazwany tak samo jak Twój plik, ale z
-rozszerzeniem .txt. Opisz w nim problem, który masz z zawartym plikiem i załącz
-swój adres email oraz wyjście <application>MPlayera</application> w trybie
+ZaĹaduj takĹźe maĹy plik tekstowy nazwany tak samo jak TwĂłj plik, ale z
+rozszerzeniem .txt. Opisz w nim problem, ktĂłry masz z zawartym plikiem i zaĹÄcz
+swĂłj adres email oraz wyjĹcie <application>MPlayera</application> w trybie
 gadatliwym na poziomie pierwszym. Zazwyczaj pierwsze 1-5 MB pliku jest
-wystarczające do odtworzenia problemu, ale żeby być pewnym prosimy wykonać:
-<screen>dd if=<replaceable>twój_plik</replaceable> of=<replaceable>mały_plik</replaceable> bs=1024k count=5</screen>
-To polecenie weźmie pierwsze pięć megabajtów
+wystarczajÄce do odtworzenia problemu, ale Ĺźeby byÄ pewnym prosimy wykonaÄ:
+<screen>dd if=<replaceable>twĂłj_plik</replaceable> of=<replaceable>maĹy_plik</replaceable> bs=1024k count=5</screen>
+To polecenie weĹşmie pierwsze piÄÄ megabajtĂłw
 '<emphasis role="bold">twojego_pliku</emphasis>' i zapisze je do
-'<emphasis role="bold">małego_pliku</emphasis>'. Następnie spróbuj odtworzyć
-mały plik i jeśli błąd wciąż się pojawia plik ten jest dla nas wystarczający.
-Prosimy <emphasis role="bold">w żadnym wypadku</emphasis> nie wysyłać plików
-poprzez pocztę elektroniczną! Załaduj je na serwer FTP i wyślij tylko
-ścieżkę/nazwę pliku. Jeżeli plik jest dostępny w sieci, wyślij
-<emphasis role="bold">dokładny</emphasis> adres pod którym jest on dostępny.
+'<emphasis role="bold">maĹego_pliku</emphasis>'. NastÄpnie sprĂłbuj odtworzyÄ
+maĹy plik i jeĹli bĹÄd wciÄĹź siÄ pojawia plik ten jest dla nas wystarczajÄcy.
+Prosimy <emphasis role="bold">w Ĺźadnym wypadku</emphasis> nie wysyĹaÄ plikĂłw
+poprzez pocztÄ elektronicznÄ! ZaĹaduj je na serwer FTP i wyĹlij tylko
+ĹcieĹźkÄ/nazwÄ pliku. JeĹźeli plik jest dostÄpny w sieci, wyĹlij
+<emphasis role="bold">dokĹadny</emphasis> adres pod ktĂłrym jest on dostÄpny.
 </para>
 </sect2>
 
 <sect2 id="bugreports_crash">
 <title>Awarie programu (ang. Crashes)</title>
 <para>
-Musisz uruchomić <application>MPlayera</application> wewnątrz
-<command>gdb</command> i wysłać nam kompletne wyjście, albo jeżeli posiadasz
+Musisz uruchomiÄ <application>MPlayera</application> wewnÄtrz
+<command>gdb</command> i wysĹaÄ nam kompletne wyjĹcie, albo jeĹźeli posiadasz
 zrzut <filename>core</filename> (ang. core dump) utworzony w wyniku awarii,
-wyciągnąć z niego użyteczne informacje. Oto jak to zrobić:
+wyciÄgnÄÄ z niego uĹźyteczne informacje. Oto jak to zrobiÄ:
 </para>
 
 <sect3 id="bugreports_debug">
-<title>Jak otrzymać informację o awarii</title>
+<title>Jak otrzymaÄ informacjÄ o awarii</title>
 <para>
-Przekompiluj <application>MPlayera</application> z opcją debugowania kodu:
+Przekompiluj <application>MPlayera</application> z opcjÄ debugowania kodu:
 <screen>
 ./configure --enable-debug=3
 make
 </screen>
-i uruchom <application>MPlayera</application> używając gdb:
+i uruchom <application>MPlayera</application> uĹźywajÄc gdb:
 <screen>gdb ./mplayer</screen>
-Jesteś teraz wewnątrz gdb. Wpisz:
+JesteĹ teraz wewnÄtrz gdb. Wpisz:
 <screen>run -v <replaceable>opcje-mplayera</replaceable>
-<replaceable>nazwa_pliku</replaceable></screen> i odtwórz swoją awarię. Gdy
-tylko to zrobisz, gdb przeniesie cię z powrotem do linii poleceń, gdzie należy
-wpisać
+<replaceable>nazwa_pliku</replaceable></screen> i odtwĂłrz swojÄ awariÄ. Gdy
+tylko to zrobisz, gdb przeniesie ciÄ z powrotem do linii poleceĹ, gdzie naleĹźy
+wpisaÄ
 <screen>
 bt
 disass $pc-32 $pc+32
@@ -410,15 +410,15 @@ info all-registers
 </sect3>
 
 <sect3 id="bugreports_core">
-<title>Jak wyciągnąć sensowne informacje ze zrzutu core (ang. core dump)</title>
+<title>Jak wyciÄgnÄÄ sensowne informacje ze zrzutu core (ang. core dump)</title>
 <para>
-Utwórz plik z nastepującymi poleceniami:
+UtwĂłrz plik z nastepujÄcymi poleceniami:
 <screen>
 bt
 disass $pc-32 $pc+32
 info all-registers
 </screen>
-A następnie uruchomić następujące polecenie:
+A nastÄpnie uruchomiÄ nastÄpujÄce polecenie:
 <screen>gdb mplayer --core=core -batch 	--command=<replaceable>plik_z_poleceniami</replaceable> &gt; mplayer.bug</screen>
 </para>
 </sect3>
@@ -426,25 +426,25 @@ A następnie uruchomić następujące polecenie:
 </sect1>
 
 <sect1 id="bugreports_advusers">
-<title>Wiem co robię...</title>
+<title>Wiem co robiÄ...</title>
 <para>
-Jeżeli utworzyłeś właściwy raport błędu kierując się powyższymi wskazówkami i
-jesteś pewien że to błąd <application>MPlayera</application>, nie kompilatora
-albo uszkodzonego pliku, przeczytałeś dokumentację i nie możesz znaleźć
-rozwiązania, Twoje sterowniki dźwięku są w porządku, możesz chcieć zapisać się
-na listę MPlayer-advusers (tylko po angielsku - przyp. tłum.) i wysłać tam swoje
-zgłoszenie błędu, aby uzyskać lepszą i szybszą odpowiedź.
+JeĹźeli utworzyĹeĹ wĹaĹciwy raport bĹÄdu kierujÄc siÄ powyĹźszymi wskazĂłwkami i
+jesteĹ pewien Ĺźe to bĹÄd <application>MPlayera</application>, nie kompilatora
+albo uszkodzonego pliku, przeczytaĹeĹ dokumentacjÄ i nie moĹźesz znaleĹşÄ
+rozwiÄzania, Twoje sterowniki dĹşwiÄku sÄ w porzÄdku, moĹźesz chcieÄ zapisaÄ siÄ
+na listÄ MPlayer-advusers (tylko po angielsku - przyp. tĹum.) i wysĹaÄ tam swoje
+zgĹoszenie bĹÄdu, aby uzyskaÄ lepszÄ i szybszÄ odpowiedĹş.
 </para>
 
 <para>
-Wiedz, że jeśli zadasz trywialne pytanie albo odpowiedź na nie znajduje się na
-stronie man, zamiast dostać odpowiedź zostaniesz zignorowany
+Wiedz, Ĺźe jeĹli zadasz trywialne pytanie albo odpowiedĹş na nie znajduje siÄ na
+stronie man, zamiast dostaÄ odpowiedĹş zostaniesz zignorowany
 albo obrzucony wyzwiskami.
-Dlatego też nie obrażaj nas i zapisz się na listę -advusers tylko jeżeli
-naprawdę wiesz co robisz i czujesz się zaawansowanym użytkownikiem lub
-deweloperem. Jeżeli spełniasz te kryteria, nie powinno Ci sprawić problemu
-znalezienie sposobu zapisania się na listę (pamiętaj, że musisz biegle znać j.
-angielski - przyp. tłum.)
+Dlatego teĹź nie obraĹźaj nas i zapisz siÄ na listÄ -advusers tylko jeĹźeli
+naprawdÄ wiesz co robisz i czujesz siÄ zaawansowanym uĹźytkownikiem lub
+deweloperem. JeĹźeli speĹniasz te kryteria, nie powinno Ci sprawiÄ problemu
+znalezienie sposobu zapisania siÄ na listÄ (pamiÄtaj, Ĺźe musisz biegle znaÄ j.
+angielski - przyp. tĹum.)
 </para>
 
 </sect1>

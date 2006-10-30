@@ -1,59 +1,59 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with r17322 -->
 <!-- Opiekun: chwilowo nikt (poprzednio Paszczi)-->
 <chapter id="audio">
-<title>Urządzenia wyjściowe audio</title>
+<title>UrzÄdzenia wyjĹciowe audio</title>
 <sect1 id="sync">
 <title>Synchronizacja Audio/Video</title>
 
 <para>
-Sterowniki kart dźwiękowych przeznaczone dla Linuksa mają problemy
-związane z kompatybilnością. Dzieje się tak, ponieważ <application>MPlayer</application>
-korzysta z wbudowanych właściwości <emphasis>poprawnie</emphasis> napisanych
-sterowników dźwięku, które prawidłowo obsługują synchronizację audio/video.
-Niestety, niektórzy autorzy sterowników nie uwzględniają tej cechy, ponieważ
-nie jest ona potrzebna do odtwarzania efektów dźwiękowych i plików MP3.
+Sterowniki kart dĹşwiÄkowych przeznaczone dla Linuksa majÄ problemy
+zwiÄzane z kompatybilnoĹciÄ. Dzieje siÄ tak, poniewaĹź <application>MPlayer</application>
+korzysta z wbudowanych wĹaĹciwoĹci <emphasis>poprawnie</emphasis> napisanych
+sterownikĂłw dĹşwiÄku, ktĂłre prawidĹowo obsĹugujÄ synchronizacjÄ audio/video.
+Niestety, niektĂłrzy autorzy sterownikĂłw nie uwzglÄdniajÄ tej cechy, poniewaĹź
+nie jest ona potrzebna do odtwarzania efektĂłw dĹşwiÄkowych i plikĂłw MP3.
 </para>
 
 <para>
 Inne odtwarzacze takie jak: <ulink url="http://avifile.sf.net">aviplay</ulink>
-czy <ulink url="http://xinehq.de">xine</ulink> prawdopodobnie działają
-od razu z tymi sterownikami, ponieważ używają "prostych" metod synchronizacji
-korzystających z wewnętrznego zegara. Testy pokazały, że ich metody nie są tak
+czy <ulink url="http://xinehq.de">xine</ulink> prawdopodobnie dziaĹajÄ
+od razu z tymi sterownikami, poniewaĹź uĹźywajÄ "prostych" metod synchronizacji
+korzystajÄcych z wewnÄtrznego zegara. Testy pokazaĹy, Ĺźe ich metody nie sÄ tak
 wydajne jak <application>MPlayera</application>.
 </para>
 
 <para>
-Używanie <application>MPlayera</application> z poprawnie napisanym sterownikiem
-dźwięku, nigdy nie zaowocuje desynchronizacją A/V z powodu dźwięku, chyba że
-odtwarzany plik został utworzony w niewłaściwy sposób lub jest popsuty
-(na stronie man znajdziesz możliwe rozwiązania tego problemu).
+UĹźywanie <application>MPlayera</application> z poprawnie napisanym sterownikiem
+dĹşwiÄku, nigdy nie zaowocuje desynchronizacjÄ A/V z powodu dĹşwiÄku, chyba Ĺźe
+odtwarzany plik zostaĹ utworzony w niewĹaĹciwy sposĂłb lub jest popsuty
+(na stronie man znajdziesz moĹźliwe rozwiÄzania tego problemu).
 </para>
 
 <para>
-Jeśli masz kiepski sterownik dźwięku, spróbuj użyć opcji <option>-autosync</option>.
-Powinna ona rozwiązać Twój problem. Dokładniejsze informacje znajdziesz na stronie
+JeĹli masz kiepski sterownik dĹşwiÄku, sprĂłbuj uĹźyÄ opcji <option>-autosync</option>.
+Powinna ona rozwiÄzaÄ TwĂłj problem. DokĹadniejsze informacje znajdziesz na stronie
 man.
 </para>
 </sect1>
 
 <sect1 id="troubleshooting">
-<title>Rozwiązywanie problemów</title>
+<title>RozwiÄzywanie problemĂłw</title>
 
 <para>Kilka uwag:</para>
 <para>
-  Jeżeli posiadasz sterowniki ALSA w wersji 0.5, prawie zawsze konieczne będzie
-  użycie <option>-ao alsa5</option>, ponieważ ich kod emulacji OSS jest wadliwy i
-  spowoduje <emphasis role="bold">błąd <application>MPlayera</application></emphasis>
-  wyświetlając komunikat o treści podobnej do tej:
+  JeĹźeli posiadasz sterowniki ALSA w wersji 0.5, prawie zawsze konieczne bÄdzie
+  uĹźycie <option>-ao alsa5</option>, poniewaĹź ich kod emulacji OSS jest wadliwy i
+  spowoduje <emphasis role="bold">bĹÄd <application>MPlayera</application></emphasis>
+  wyĹwietlajÄc komunikat o treĹci podobnej do tej:
   <screen>
-    DEMUXER: Za dużo (945 w 8390980 bajtach) pakietów video w buforze!
+    DEMUXER: Za duĹźo (945 w 8390980 bajtach) pakietĂłw video w buforze!
     (DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!)<!--
 --></screen>
 </para>
 <para>
-  Jeśli dźwięk przerywany jest krótkimi trzaskami podczas odtwarzania z CD-ROMu,
-  włącz odmaskowywanie przerwań, tak jak opisano to w rozdziale dotyczącym
+  JeĹli dĹşwiÄk przerywany jest krĂłtkimi trzaskami podczas odtwarzania z CD-ROMu,
+  wĹÄcz odmaskowywanie przerwaĹ, tak jak opisano to w rozdziale dotyczÄcym
   <link linkend="drives">CD-ROMu</link>.
 </para>
 </sect1>

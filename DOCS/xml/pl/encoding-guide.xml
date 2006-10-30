@@ -1,232 +1,232 @@
-<?xml version="1.0" encoding="iso-8859-2"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- synced with 1.32 -->
 <!-- Opiekun: Torinthiel -->
 <!-- INCOMPLETE!!!! -->
 <chapter id="encoding-guide">
-<title>Kodowanie przy użyciu <application>MEncodera</application></title>
+<title>Kodowanie przy uĹźyciu <application>MEncodera</application></title>
 
 <sect1 id="menc-feat-dvd-mpeg4">
-<title>Rippowanie DVD do wysokiej jakości pliku MPEG-4 ("DivX")</title>
+<title>Rippowanie DVD do wysokiej jakoĹci pliku MPEG-4 ("DivX")</title>
 
 <para>
-  Jednym z często zadawanych pytań jest "Jak zrobić rip najlepszej jakości
-  przy danej objętości?". Innym pytaniem jest "Jak zrobić najlepszy możliwy
-  rip? Nie ważne jaka będzie objętość, chcę najlepszej jakości."
+  Jednym z czÄsto zadawanych pytaĹ jest "Jak zrobiÄ rip najlepszej jakoĹci
+  przy danej objÄtoĹci?". Innym pytaniem jest "Jak zrobiÄ najlepszy moĹźliwy
+  rip? Nie waĹźne jaka bÄdzie objÄtoĹÄ, chcÄ najlepszej jakoĹci."
 </para>
 
 <para>
-  To drugie pytanie jest przynajmniej źle postawione. W końcu, jeśli nie
-  przejmujesz się wielkością pliku, mógłbyć po prostu skopiować strumień
-  MPEG-2 z DVD. Pewnie, dostaniesz AVI wielkości około 5GB, ale jeśli chcesz
-  najlepszej jakości i nie przejmujesz się wielkością to jest to najlepsze
-  wyjście.
+  To drugie pytanie jest przynajmniej Ĺşle postawione. W koĹcu, jeĹli nie
+  przejmujesz siÄ wielkoĹciÄ pliku, mĂłgĹbyÄ po prostu skopiowaÄ strumieĹ
+  MPEG-2 z DVD. Pewnie, dostaniesz AVI wielkoĹci okoĹo 5GB, ale jeĹli chcesz
+  najlepszej jakoĹci i nie przejmujesz siÄ wielkoĹciÄ to jest to najlepsze
+  wyjĹcie.
 </para>
 
 <para>
-  Tak na prawdę, powodem dla którego chcesz przekodować DVD na MPEG-4 jest to,
-  że <emphasis role="bold">przejmujesz</emphasis> się wielkością pliku.
+  Tak na prawdÄ, powodem dla ktĂłrego chcesz przekodowaÄ DVD na MPEG-4 jest to,
+  Ĺźe <emphasis role="bold">przejmujesz</emphasis> siÄ wielkoĹciÄ pliku.
 </para>
 
 <para>
-  Ciężko jest pokazać książkowy przepis na tworzenie ripu DVD bardzo wysokiej
-  jakości. Trzeba wziąć pod uwagę kilka czynników, i powinieneś rozumieć
-  szczegóły albo masz dużą szansę że nie będziesz zadowolony z wyników.
-  Poniżej zbadamy niektóre problemy i pokażemy przykład. Zakładamy że używasz
+  CiÄĹźko jest pokazaÄ ksiÄĹźkowy przepis na tworzenie ripu DVD bardzo wysokiej
+  jakoĹci. Trzeba wziÄÄ pod uwagÄ kilka czynnikĂłw, i powinieneĹ rozumieÄ
+  szczegĂłĹy albo masz duĹźÄ szansÄ Ĺźe nie bÄdziesz zadowolony z wynikĂłw.
+  PoniĹźej zbadamy niektĂłre problemy i pokaĹźemy przykĹad. ZakĹadamy Ĺźe uĹźywasz
   <systemitem class="library">libavcodec</systemitem> do kodowania obrazu,
-  chociaż ta sama teoria działą też przy innych kodekach.
+  chociaĹź ta sama teoria dziaĹÄ teĹź przy innych kodekach.
 </para>
 
 <para>
-  Jeśli to wydaje Ci się za dużo, to pewnie powinieneś użyć jednej z wielu
-  nakładek dostępnych w
+  JeĹli to wydaje Ci siÄ za duĹźo, to pewnie powinieneĹ uĹźyÄ jednej z wielu
+  nakĹadek dostÄpnych w
   <ulink url="http://mplayerhq.hu/homepage/design7/projects.html#mencoder_frontends">sekcji MEncodera</ulink>
-  naszej strony z powiązanymi projektami.
-  W ten sposób, powinno się udać otrzymać ripy wysokiej jakości bez zbyt
-  myślenia za dużo, ponieważ te narzędzia są projektowane by podejmować za
-  Ciebie mądre decyzje.
+  naszej strony z powiÄzanymi projektami.
+  W ten sposĂłb, powinno siÄ udaÄ otrzymaÄ ripy wysokiej jakoĹci bez zbyt
+  myĹlenia za duĹźo, poniewaĹź te narzÄdzia sÄ projektowane by podejmowaÄ za
+  Ciebie mÄdre decyzje.
 </para>
 
 <sect2 id="menc-feat-dvd-mpeg4-preparing-encode">
-<title>Przygotowanie do kodowania: Identyfikowanie materiału źródłowego
+<title>Przygotowanie do kodowania: Identyfikowanie materiaĹu ĹşrĂłdĹowego
 i framerate</title>
 <para>
-  Zanim w ogóle zaczniesz myśleć o kodowaniu filmu, musisz podjąć kilka
-  początkowych kroków.
+  Zanim w ogĂłle zaczniesz myĹleÄ o kodowaniu filmu, musisz podjÄÄ kilka
+  poczÄtkowych krokĂłw.
 </para>
 
 <para>
-  Pierwszym i najważniejszym krokiem przed kodowaniem powinno być
-  ustalenie jakim typem filmu się zajmujesz.
-  Jeśli Twój film jest z DVD albo telewizji (zwykłej, kablowej czy
-  satelitarnej), będzie w jednym z dwóch formatów: NTSC w Ameryce Północnej
+  Pierwszym i najwaĹźniejszym krokiem przed kodowaniem powinno byÄ
+  ustalenie jakim typem filmu siÄ zajmujesz.
+  JeĹli TwĂłj film jest z DVD albo telewizji (zwykĹej, kablowej czy
+  satelitarnej), bÄdzie w jednym z dwĂłch formatĂłw: NTSC w Ameryce PĂłĹnocnej
   i Japonii, PAL w Europie itp.
-  Trzeba sobie jednak zdawać sprawę z tego, że jest to tylko format do
-  prezentacji w telewizji, i często <emphasis role="bold">ne</emphasis> jest
+  Trzeba sobie jednak zdawaÄ sprawÄ z tego, Ĺźe jest to tylko format do
+  prezentacji w telewizji, i czÄsto <emphasis role="bold">ne</emphasis> jest
   oryginalnym formatem filmu.
-  Doświadczenie pokazuje że filmy NTSC są trudniejsze do kodowania, ponieważ
-  jest więcej elementów do zidentyfikowania w źródle.
-  Żeby zrobić odpowienie kodowanie musisz znać oryginalny format filmu.
-  Nieuwzględnienie tego skutkuje wieloma wadami wynikowego pliku, na przykład
-  brzydkie artefakty przeplotu i powtórzone albo zagubione klatki.
-  Poza tym że są pbrzydkie, artefakty są też szkodliwe dla kodowania:
-  Dostaniesz gorszą jakość na jednostkę bitrate.
+  DoĹwiadczenie pokazuje Ĺźe filmy NTSC sÄ trudniejsze do kodowania, poniewaĹź
+  jest wiÄcej elementĂłw do zidentyfikowania w ĹşrĂłdle.
+  Ĺťeby zrobiÄ odpowienie kodowanie musisz znaÄ oryginalny format filmu.
+  NieuwzglÄdnienie tego skutkuje wieloma wadami wynikowego pliku, na przykĹad
+  brzydkie artefakty przeplotu i powtĂłrzone albo zagubione klatki.
+  Poza tym Ĺźe sÄ pbrzydkie, artefakty sÄ teĹź szkodliwe dla kodowania:
+  Dostaniesz gorszÄ jakoĹÄ na jednostkÄ bitrate.
 </para>
 
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
-<title>Ustalanie źródłowego framerate</title>
+<title>Ustalanie ĹşrĂłdĹowego framerate</title>
 <para>
-  Poniżej jest lista popularnych typów materiału źródłowego, gdzie można je
-  najczęściej znaleźć i ich własności:
+  PoniĹźej jest lista popularnych typĂłw materiaĹu ĹşrĂłdĹowego, gdzie moĹźna je
+  najczÄĹciej znaleĹşÄ i ich wĹasnoĹci:
 </para>
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">Typowy film</emphasis>: Tworzony do wyświetlania przy
+  <emphasis role="bold">Typowy film</emphasis>: Tworzony do wyĹwietlania przy
   24fps.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Film PAL</emphasis>: Nagrywany kamerą video PAL
-  z prędkością 50 pól na sekundę.
-  Pole składa się tylko z parzystych albo nieparzystych linii klatki.
-  Telewizja była projektowana by odświerzać je naprzemiennie, jako tania forma
+  <emphasis role="bold">Film PAL</emphasis>: Nagrywany kamerÄ video PAL
+  z prÄdkoĹciÄ 50 pĂłl na sekundÄ.
+  Pole skĹada siÄ tylko z parzystych albo nieparzystych linii klatki.
+  Telewizja byĹa projektowana by odĹwierzaÄ je naprzemiennie, jako tania forma
   analogowej kompresji.
-  Ludzkie oko podobno kompensuje ten efekt, ale jeśli zrozumiesz przeplot
-  nauczysz się go widzieć też w telewizji i nigdy już nie będziesz z niej
+  Ludzkie oko podobno kompensuje ten efekt, ale jeĹli zrozumiesz przeplot
+  nauczysz siÄ go widzieÄ teĹź w telewizji i nigdy juĹź nie bÄdziesz z niej
   zadowolony.
-  Dwa pola <emphasis role="bold">nie</emphasis> dają pełnej klatki, ponieważ
-  są uchwycone co 1/50 sekundy, więc nie pasują do siebie, chyba że nie ma
+  Dwa pola <emphasis role="bold">nie</emphasis> dajÄ peĹnej klatki, poniewaĹź
+  sÄ uchwycone co 1/50 sekundy, wiÄc nie pasujÄ do siebie, chyba Ĺźe nie ma
   ruchu.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Film NTSC</emphasis>: Nagrany kamerą NTSC z prędkością
-  6000/1001 pól na sekundę, albo 60 pól na sekundę w erze przedkolorowej.
+  <emphasis role="bold">Film NTSC</emphasis>: Nagrany kamerÄ NTSC z prÄdkoĹciÄ
+  6000/1001 pĂłl na sekundÄ, albo 60 pĂłl na sekundÄ w erze przedkolorowej.
   Poza tym podobny do PAL.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Animacja</emphasis>: Zazwyczaj rysowana przy 24fps,
-  ale zdarzają się też z mieszanym framerate.
+  ale zdarzajÄ siÄ teĹź z mieszanym framerate.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Grafika komputerowa (CG)</emphasis>: Może być dowolny
-  framerate, ale niektóre są częstsze niż inne; wartości 24 i 30 klatek na
-  sekundę są typowe dla NTSC, a 25fps jest typowe dla PAL. 
+  <emphasis role="bold">Grafika komputerowa (CG)</emphasis>: MoĹźe byÄ dowolny
+  framerate, ale niektĂłre sÄ czÄstsze niĹź inne; wartoĹci 24 i 30 klatek na
+  sekundÄ sÄ typowe dla NTSC, a 25fps jest typowe dla PAL. 
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">Stary film</emphasis>: Rozmaite niższe framerate.
+  <emphasis role="bold">Stary film</emphasis>: Rozmaite niĹźsze framerate.
 </para></listitem>
 </itemizedlist>
 </sect3>
 
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-material">
-<title>Identyfikowanie materiału źródłowego</title>
+<title>Identyfikowanie materiaĹu ĹşrĂłdĹowego</title>
 <para>
-  Filmy składające się z klatek nazywa się progresywnymi,
-  podczas gdy te składające się z niezależnych pól nazywa się
-  z przeplotem, albo filmem - chociaż ten drugi termin jest niejasny.
+  Filmy skĹadajÄce siÄ z klatek nazywa siÄ progresywnymi,
+  podczas gdy te skĹadajÄce siÄ z niezaleĹźnych pĂłl nazywa siÄ
+  z przeplotem, albo filmem - chociaĹź ten drugi termin jest niejasny.
 </para>
 <para>
-  Żeby nie było za łatwo, niektóre filmy są kombinacją kilku powyższych typów.
+  Ĺťeby nie byĹo za Ĺatwo, niektĂłre filmy sÄ kombinacjÄ kilku powyĹźszych typĂłw.
 </para>
 <para>
-  Najważniejszą różnicą między tymi formatami, jest to że niektóre są oparte
+  NajwaĹźniejszÄ rĂłĹźnicÄ miÄdzy tymi formatami, jest to Ĺźe niektĂłre sÄ oparte
   na klatkach a inne na polach.
   <emphasis role="bold">Zawsze</emphasis> gdy film jest przygotowywany do
-  wyświetlania w telewizji jest przekształcany na format oparty na polach.
-  Rozliczne metody którymi się tego dokonuje są wspólnie nazywane "pulldown",
-  a niesławne "3:2 telecine" z NTSC jest jednym z jego rodzajów.
-  Jeżeli oryginał nie był też oparty na polach (z tą samą prędkością),
-  dostajesz film w innym formacie niż oryginał.
+  wyĹwietlania w telewizji jest przeksztaĹcany na format oparty na polach.
+  Rozliczne metody ktĂłrymi siÄ tego dokonuje sÄ wspĂłlnie nazywane "pulldown",
+  a niesĹawne "3:2 telecine" z NTSC jest jednym z jego rodzajĂłw.
+  JeĹźeli oryginaĹ nie byĹ teĹź oparty na polach (z tÄ samÄ prÄdkoĹciÄ),
+  dostajesz film w innym formacie niĹź oryginaĹ.
 </para>
 
 <itemizedlist>
-<title>Jest kilka popularnych typów pulldown:</title>
+<title>Jest kilka popularnych typĂłw pulldown:</title>
 <listitem><para>
   <emphasis role="bold">pulldown PAL 2:2</emphasis>: Najprzyjemniejszy z nich
   wszystkich.
-  Każda klatka jest pokazywana przez czas dwóch pól, poprzez wydobycie
+  KaĹźda klatka jest pokazywana przez czas dwĂłch pĂłl, poprzez wydobycie
   parzystych i nieparzystych linii i pokazywanie ich na przemian.
-  Jeśli oryginalny materiał miał 24fps, ten proces przyspiesza film o 4%.
+  JeĹli oryginalny materiaĹ miaĹ 24fps, ten proces przyspiesza film o 4%.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">pulldown PAL 2:2:2:2:2:2:2:2:2:2:2:3</emphasis>:
-  Każda 12ta klatka jest pokazywana przez czas trzech pól zamiast tylko dwóch.
-  Dzięki temu nie ma przyspieszenia o 4%, ale proces jest o wiele trudniejszy
+  KaĹźda 12ta klatka jest pokazywana przez czas trzech pĂłl zamiast tylko dwĂłch.
+  DziÄki temu nie ma przyspieszenia o 4%, ale proces jest o wiele trudniejszy
   do odtworzenia.
-  Zazwyczaj występuje w produkcjach muzycznych, gdzie zmiana prędkości o 4%
-  poważnie by uszkodziła muzykę.
+  Zazwyczaj wystÄpuje w produkcjach muzycznych, gdzie zmiana prÄdkoĹci o 4%
+  powaĹźnie by uszkodziĹa muzykÄ.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">NTSC 3:2 telecine</emphasis>: Klatki są pokazywane na
-  przemian przez czas 3ch albo 2ch pól.
-  To daje częstotliwość pól 2.5 raza większą niż oryginalna częstotliwość
-  klatek. Rezultat jest też lekko zwolniony z 60 pól na sekundę do 60000/1001
-  pól na sekundę by utrzymać częstotliwość pól w NTSC.
+  <emphasis role="bold">NTSC 3:2 telecine</emphasis>: Klatki sÄ pokazywane na
+  przemian przez czas 3ch albo 2ch pĂłl.
+  To daje czÄstotliwoĹÄ pĂłl 2.5 raza wiÄkszÄ niĹź oryginalna czÄstotliwoĹÄ
+  klatek. Rezultat jest teĹź lekko zwolniony z 60 pĂłl na sekundÄ do 60000/1001
+  pĂłl na sekundÄ by utrzymaÄ czÄstotliwoĹÄ pĂłl w NTSC.
 </para></listitem>
 <listitem><para>
-  <emphasis role="bold">NTSC 2:2 pulldown</emphasis>: Używane do pokazywania
-  materiałów 30fps na NTSC.
-  Przyjemne, dokładnie jak pulldown 2:2 PAL.
+  <emphasis role="bold">NTSC 2:2 pulldown</emphasis>: UĹźywane do pokazywania
+  materiaĹĂłw 30fps na NTSC.
+  Przyjemne, dokĹadnie jak pulldown 2:2 PAL.
 </para></listitem>
 </itemizedlist>
 
 <para>
-  Są też metody konwersji między filmami PAL i NTSC, ale ten temat
-  wykracza poza zakres tego podręcznika.
-  Jeśli natkniesz się na taki film, i chcesz go zakodować, to największe
-  szanse masz odnajdując kopię w oryginalnym formacie.
-  Konwersja między tymi dwoma formatami jest wysoce destrukcyjna i nie może
-  zostać czysto odwrócona, więc kodowanie będzie o wiele gorszej jakości jeśli
-  jest robione z przekonwertowanego źródła.
+  SÄ teĹź metody konwersji miÄdzy filmami PAL i NTSC, ale ten temat
+  wykracza poza zakres tego podrÄcznika.
+  JeĹli natkniesz siÄ na taki film, i chcesz go zakodowaÄ, to najwiÄksze
+  szanse masz odnajdujÄc kopiÄ w oryginalnym formacie.
+  Konwersja miÄdzy tymi dwoma formatami jest wysoce destrukcyjna i nie moĹźe
+  zostaÄ czysto odwrĂłcona, wiÄc kodowanie bÄdzie o wiele gorszej jakoĹci jeĹli
+  jest robione z przekonwertowanego ĹşrĂłdĹa.
 </para>
 <para>
-  Gdy film jest zapisywany na DVD, kolejne pary pól są zapisywane jako klatka,
-  pomimo tego że nie są przezaczone do wyświetlania razem.
-  Standard MPEG-2 używany na DVD i w cyfrowej TV pozwala na zakodowanie
-  oryginalnej progresywnej klatki i na przechowanie w nagłówku klatki ilości
-  pól przez które ta klatka powinna być pokazana.
-  Filmy zrobione przy użyciu tej metody są często określane mianem "miękkiego
-  telecine" (soft-telecine), ponieważ proces ten tylko informuje odtwarzacz że
-  ma on zastosować pulldown, a nie stosuje go samemu.
-  Tak jest o wiele lepiej, ponieważ może to zostać łatwo odwrócone (a tak na
-  prawdę zignorowane) przez koder i ponieważ zachowuje możliwie najwyższą
-  jakość.
-  Niestety, wielu producentów DVD i stacji nadawczych nie stosuje prawidłowych
-  technik kodowania ale w zamian produkuje filmy przy użyciu "twardego
-  telecine" (hard-telecine), gdzie pola są faktycznie powtórzone
+  Gdy film jest zapisywany na DVD, kolejne pary pĂłl sÄ zapisywane jako klatka,
+  pomimo tego Ĺźe nie sÄ przezaczone do wyĹwietlania razem.
+  Standard MPEG-2 uĹźywany na DVD i w cyfrowej TV pozwala na zakodowanie
+  oryginalnej progresywnej klatki i na przechowanie w nagĹĂłwku klatki iloĹci
+  pĂłl przez ktĂłre ta klatka powinna byÄ pokazana.
+  Filmy zrobione przy uĹźyciu tej metody sÄ czÄsto okreĹlane mianem "miÄkkiego
+  telecine" (soft-telecine), poniewaĹź proces ten tylko informuje odtwarzacz Ĺźe
+  ma on zastosowaÄ pulldown, a nie stosuje go samemu.
+  Tak jest o wiele lepiej, poniewaĹź moĹźe to zostaÄ Ĺatwo odwrĂłcone (a tak na
+  prawdÄ zignorowane) przez koder i poniewaĹź zachowuje moĹźliwie najwyĹźszÄ
+  jakoĹÄ.
+  Niestety, wielu producentĂłw DVD i stacji nadawczych nie stosuje prawidĹowych
+  technik kodowania ale w zamian produkuje filmy przy uĹźyciu "twardego
+  telecine" (hard-telecine), gdzie pola sÄ faktycznie powtĂłrzone
   w zakodowanym MPEG-2.
 </para>
 <para>
-  Procedury radzenia sobie z takimi przypadkami będą omówione
-  <link linkend="menc-feat-telecine">w dalszej części przewodnika</link>.
-  Teraz podamy tylko kilka wskazówek jak identyfikować z jakim typem materiału
+  Procedury radzenia sobie z takimi przypadkami bÄdÄ omĂłwione
+  <link linkend="menc-feat-telecine">w dalszej czÄĹci przewodnika</link>.
+  Teraz podamy tylko kilka wskazĂłwek jak identyfikowaÄ z jakim typem materiaĹu
   mamy do czynienia.
 </para>
 
 <itemizedlist>
 <title>Regiony NTSC:</title>
 <listitem><para>
-  Jeśli <application>MPlayer</application> wyświetla w trakcie oglądania filmu
-  że framerate zostało zmienione na 24000/1001, i nigdy nie powraca, to jest
-  to prawie na pewno progresywny materiał na którym zastosowano "miękkie
+  JeĹli <application>MPlayer</application> wyĹwietla w trakcie oglÄdania filmu
+  Ĺźe framerate zostaĹo zmienione na 24000/1001, i nigdy nie powraca, to jest
+  to prawie na pewno progresywny materiaĹ na ktĂłrym zastosowano "miÄkkie
   telecine".
 </para></listitem>
 <listitem><para>
-  Jeśli <application>MPlayer</application> pokazuje że framerate zmienia się
-  między 24000/1001 i 30000/1001 i czasami widzisz "grzebienie" to jest kilka
-  możliwości.
-  <!-- Torinthiel: grzebienie mi najlepiej pasują, ale może jest oficjalne tłumaczenie -->
-  Kawałki 24000/1001fps są prawie na pewno progresywne, poddane "miękkiemu
-  telecine", ale fragmenty  30000/1001 fps mogą albo być 24000/1001 poddanym
-  "twardemu telecine" albo filmem NTCS o 60000/1001 polach na sekundę.
-  Używaj tych samych metod co w następnych dwóch przypadkach żeby je odróżnić.
+  JeĹli <application>MPlayer</application> pokazuje Ĺźe framerate zmienia siÄ
+  miÄdzy 24000/1001 i 30000/1001 i czasami widzisz "grzebienie" to jest kilka
+  moĹźliwoĹci.
+  <!-- Torinthiel: grzebienie mi najlepiej pasujÄ, ale moĹźe jest oficjalne tĹumaczenie -->
+  KawaĹki 24000/1001fps sÄ prawie na pewno progresywne, poddane "miÄkkiemu
+  telecine", ale fragmenty  30000/1001 fps mogÄ albo byÄ 24000/1001 poddanym
+  "twardemu telecine" albo filmem NTCS o 60000/1001 polach na sekundÄ.
+  UĹźywaj tych samych metod co w nastÄpnych dwĂłch przypadkach Ĺźeby je odrĂłĹźniÄ.
 </para></listitem>
 <listitem><para>
-  Jeśli <application>MPlayer</application> nigdy nie pokazuje informacji
-  o zmianie framerate i każda klatka z ruchem wygląda jak grzebień, to masz
-  film NTSC z 60000/1001 polami na sekundę.
+  JeĹli <application>MPlayer</application> nigdy nie pokazuje informacji
+  o zmianie framerate i kaĹźda klatka z ruchem wyglÄda jak grzebieĹ, to masz
+  film NTSC z 60000/1001 polami na sekundÄ.
 </para></listitem>
 <listitem><para>
-  Jeśli <application>MPlayer</application> nigdy nie pokazuje informacji
-  o zmianie framerate i dwie klatki z każdych pięciu mają grzebienie, to film
+  JeĹli <application>MPlayer</application> nigdy nie pokazuje informacji
+  o zmianie framerate i dwie klatki z kaĹźdych piÄciu majÄ grzebienie, to film
   jest 24000/1001 fps poddanym "twardemu telecine".
 </para></listitem>
 </itemizedlist>
@@ -234,167 +234,167 @@ i framerate</title>
 <itemizedlist>
 <title>Regiony PAL:</title>
 <listitem><para>
-  Jeśli nie widzisz grzebieni, to jest to 2:2 pulldown.
+  JeĹli nie widzisz grzebieni, to jest to 2:2 pulldown.
 </para></listitem>
 <listitem><para>
-  Jeśli na przemian przez pół sekundy widzisz grzebienie a potem nie, to masz
+  JeĹli na przemian przez pĂłĹ sekundy widzisz grzebienie a potem nie, to masz
   2:2:2:2:2:2:2:2:2:2:2:3 pulldown.
 </para></listitem>
 <listitem><para>
-  Jeśli zawsze widzisz grzebienie w trakcie ruchu, to film jest filmem PAL
-  wyświetlanym z 50 polami na sekundę.
-  <!-- Torinthiel: wyświetlanym czy nagranym? -->
+  JeĹli zawsze widzisz grzebienie w trakcie ruchu, to film jest filmem PAL
+  wyĹwietlanym z 50 polami na sekundÄ.
+  <!-- Torinthiel: wyĹwietlanym czy nagranym? -->
 </para></listitem>
 </itemizedlist>
 
-<note><title>Podpowiedź:</title>
+<note><title>PodpowiedĹş:</title>
 <para>
-  <application>MPlayer</application> może zwolnić odtwarzanie filmu opcją
-  -speed albo odtwarzać klatka po klatce.
-  Spróbuj użyć opcji <option>-speed</option> 0.2 żeby oglądać film bardzo
-  wolno, albo naciskaj wielokrotnie klawisz "<keycap>.</keycap>" żeby
-  wyświetlać jedną klatkę na raz. Może to pomóc zidentyfikować wzorzec jeśli
-  nie możesz go dostrzec przy pełnej prędkości.
+  <application>MPlayer</application> moĹźe zwolniÄ odtwarzanie filmu opcjÄ
+  -speed albo odtwarzaÄ klatka po klatce.
+  SprĂłbuj uĹźyÄ opcji <option>-speed</option> 0.2 Ĺźeby oglÄdaÄ film bardzo
+  wolno, albo naciskaj wielokrotnie klawisz "<keycap>.</keycap>" Ĺźeby
+  wyĹwietlaÄ jednÄ klatkÄ na raz. MoĹźe to pomĂłc zidentyfikowaÄ wzorzec jeĹli
+  nie moĹźesz go dostrzec przy peĹnej prÄdkoĹci.
 </para>
 </note>
 </sect3>
 </sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Stały kwantyzator a tryb wieloprzebiegowy</title>
+<title>StaĹy kwantyzator a tryb wieloprzebiegowy</title>
 
 <para>
-  Jest możliwe zakodowanie filmu z szeroką gamą jakości.
-  Z nowoczesnymi koderami i odrobiną kompresji przed kodekiem (zmniejszenie
-  rozdzielczości i usuwanie szumu), możliwe jest osiągnięcie bardzo dobrej
-  jakości przy 700 MB, dla 90-110 minutowego filmu kinowego.
-  Dodatkowo tylko najdłuższe filmy nie dają się zakodować na 1400 MB z prawie
-  doskonałą jakością.
+  Jest moĹźliwe zakodowanie filmu z szerokÄ gamÄ jakoĹci.
+  Z nowoczesnymi koderami i odrobinÄ kompresji przed kodekiem (zmniejszenie
+  rozdzielczoĹci i usuwanie szumu), moĹźliwe jest osiÄgniÄcie bardzo dobrej
+  jakoĹci przy 700 MB, dla 90-110 minutowego filmu kinowego.
+  Dodatkowo tylko najdĹuĹźsze filmy nie dajÄ siÄ zakodowaÄ na 1400 MB z prawie
+  doskonaĹÄ jakoĹciÄ.
 </para>
 
 <para>
-  Są trzy podejścia do kodowania video: stały bitrate (CBR),
-  stały kwantyzator i tryb wieloprzebiegowy (ABR, uśrednione bitrate).
+  SÄ trzy podejĹcia do kodowania video: staĹy bitrate (CBR),
+  staĹy kwantyzator i tryb wieloprzebiegowy (ABR, uĹrednione bitrate).
 </para>
 
 <para>
-  Złożoność klatek filmu, a zatem i ilość bitów potrzebna na ich zakodowanie,
-  może się bardzo mocno zmieniać w zależności od sceny.
-  Nowoczesne kodery potrafią się dostosowywać do tych zmian i zmieniać
+  ZĹoĹźonoĹÄ klatek filmu, a zatem i iloĹÄ bitĂłw potrzebna na ich zakodowanie,
+  moĹźe siÄ bardzo mocno zmieniaÄ w zaleĹźnoĹci od sceny.
+  Nowoczesne kodery potrafiÄ siÄ dostosowywaÄ do tych zmian i zmieniaÄ
   bitrate.
-  Jednak w prostych trybach, takich jak CBR, kodery nie znają zapotrzebowania
-  na bitrate w przyszłych scenach, więc nie mogą na długo przekraczać
+  Jednak w prostych trybach, takich jak CBR, kodery nie znajÄ zapotrzebowania
+  na bitrate w przyszĹych scenach, wiÄc nie mogÄ na dĹugo przekraczaÄ
   wymaganego bitrate.
-  Bardziej zaawansowane tryby, takie jak kodowanie wieloprzebiegowe, potrafią
-  wziąć pod uwagę statystyki z poprzednich przebiegów; to naprawia wyżej
+  Bardziej zaawansowane tryby, takie jak kodowanie wieloprzebiegowe, potrafiÄ
+  wziÄÄ pod uwagÄ statystyki z poprzednich przebiegĂłw; to naprawia wyĹźej
   wymieniony problem.
 </para>
 
 <note><title>Uwaga:</title>
 <para>
-  Większość kodeków obsługujących kodowanie ABR obsługuje tylko kodowanie
-  dwuprzebiegowe, podczas gdy niektóre inne, na przykład
+  WiÄkszoĹÄ kodekĂłw obsĹugujÄcych kodowanie ABR obsĹuguje tylko kodowanie
+  dwuprzebiegowe, podczas gdy niektĂłre inne, na przykĹad
   <systemitem class="library">x264</systemitem> albo
-  <systemitem class="library">XviD</systemitem> potrafią wykonywać wiele
-  przebiegów, z lekką poprawą jakości po każdym przebiegu. Jednak ta poprawa
-  nie jest zauważalna ani mierzalna po około 4tym przebiegu.
-  Dlatego też, w tej części, tryb dwuprzebiegowy i wieloprzebiegowy będą
-  używane zamiennie.
+  <systemitem class="library">XviD</systemitem> potrafiÄ wykonywaÄ wiele
+  przebiegĂłw, z lekkÄ poprawÄ jakoĹci po kaĹźdym przebiegu. Jednak ta poprawa
+  nie jest zauwaĹźalna ani mierzalna po okoĹo 4tym przebiegu.
+  Dlatego teĹź, w tej czÄĹci, tryb dwuprzebiegowy i wieloprzebiegowy bÄdÄ
+  uĹźywane zamiennie.
 </para>
 </note>
 
 <para>
-  W każdym z tych trybów, kodek video (na przykład
+  W kaĹźdym z tych trybĂłw, kodek video (na przykĹad
   <systemitem class="library">libavcodec</systemitem>)
-  dzieli klatkę obrazu na makrobloki 16x16 pikseli i stosuje do każdego z nich
-  kwantyzator. Im niższy kwantyzator, tym lepsza jakość i tym wyższe bitrate.
-  Metody jakiej koder używa do ustalenia kwantyzatora są różne i można nimi
-  sterować. (Jest to straszliwe uproszczenie, ale wystarcza do zrozumienia
+  dzieli klatkÄ obrazu na makrobloki 16x16 pikseli i stosuje do kaĹźdego z nich
+  kwantyzator. Im niĹźszy kwantyzator, tym lepsza jakoĹÄ i tym wyĹźsze bitrate.
+  Metody jakiej koder uĹźywa do ustalenia kwantyzatora sÄ rĂłĹźne i moĹźna nimi
+  sterowaÄ. (Jest to straszliwe uproszczenie, ale wystarcza do zrozumienia
   podstaw.)
 </para>
 
 <para>
-  Kiedy podajesz stałe bitrate, kodek koduje usuwając tyle szczegółów ile musi
-  i tak mało jak to tylko możliwe żeby pozostać poniżej podanego bitrate.
-  Jeśli na prawdę nie obchodzi cię wielkość pliku, możesz użyć CBR i podać
-  nieskończone bitrate (W praktyce oznacza to bitrate na tyle wysokie że nie
-  stanowi bariery, na przykład 10000Kbit.) Bez żadnego ograniczenia na bitrate
-  kodek użyje najniższego możliwego kwantyzatora do każdej klatki (ustalonego
-  dla <systemitem class="library">libavcodec</systemitem> opcją
-  <option>vqmin</option>, domyślnie 2).
-  Gdy tylko podasz bitrate na tyle niskie że kodek musi używać wyższego
+  Kiedy podajesz staĹe bitrate, kodek koduje usuwajÄc tyle szczegĂłĹĂłw ile musi
+  i tak maĹo jak to tylko moĹźliwe Ĺźeby pozostaÄ poniĹźej podanego bitrate.
+  JeĹli na prawdÄ nie obchodzi ciÄ wielkoĹÄ pliku, moĹźesz uĹźyÄ CBR i podaÄ
+  nieskoĹczone bitrate (W praktyce oznacza to bitrate na tyle wysokie Ĺźe nie
+  stanowi bariery, na przykĹad 10000Kbit.) Bez Ĺźadnego ograniczenia na bitrate
+  kodek uĹźyje najniĹźszego moĹźliwego kwantyzatora do kaĹźdej klatki (ustalonego
+  dla <systemitem class="library">libavcodec</systemitem> opcjÄ
+  <option>vqmin</option>, domyĹlnie 2).
+  Gdy tylko podasz bitrate na tyle niskie Ĺźe kodek musi uĹźywaÄ wyĹźszego
   kwantyzatora, to prawie na pewno niszczysz film.
-  Żeby tego uniknąć, powinieneś pewnie zmniejszyć rozdzielczość filmu, metodą
-  opisaną dalej.
-  Ogólnie, jeśli troszczysz się o jakość, powinieneś unikać CBR.
+  Ĺťeby tego uniknÄÄ, powinieneĹ pewnie zmniejszyÄ rozdzielczoĹÄ filmu, metodÄ
+  opisanÄ dalej.
+  OgĂłlnie, jeĹli troszczysz siÄ o jakoĹÄ, powinieneĹ unikaÄ CBR.
 </para>
 
 <para>
-  Przy stałym kwantyzatorze, kodek używa na każdym makrobloku tego samego
-  kwantyzatora, podanego opcją <option>vqscale</option>
+  Przy staĹym kwantyzatorze, kodek uĹźywa na kaĹźdym makrobloku tego samego
+  kwantyzatora, podanego opcjÄ <option>vqscale</option>
   (w przypadku <systemitem class="library">libavcodec</systemitem>).
-  Jeśli chcesz możliwie najlepszy efekt, znów ignorując bitrate, możesz użyć
+  JeĹli chcesz moĹźliwie najlepszy efekt, znĂłw ignorujÄc bitrate, moĹźesz uĹźyÄ
   <option>vqscale=2</option>. Da to ten sam bitrate i PSNR (peak
-  signal-to-noise ratio, szczytowa proporcja sygnału do szumu) co CBR
-  z <option>vbitrate</option>=nieskończoność i domyślnym
+  signal-to-noise ratio, szczytowa proporcja sygnaĹu do szumu) co CBR
+  z <option>vbitrate</option>=nieskoĹczonoĹÄ i domyĹlnym
   <option>vqmin</option>.
 </para>
 
 <para>
-  Problemem przy stałym kwantyzatorze jest to, że używa podanego kwantyzatora
-  niezależnie od tego czy makroblok tego wymaga czy nie. To znaczy że można by
-  było zastosować do makrobloku wyższy kwantyzator bez utraty postrzegalnej
-  jakości. Dlaczego marnować bity na niepotrzebnie niski kwantyzator?
-  Mikroprocesor ma tyle cykli ile jest czasu, ale jest tylko pewna ilość bitów
+  Problemem przy staĹym kwantyzatorze jest to, Ĺźe uĹźywa podanego kwantyzatora
+  niezaleĹźnie od tego czy makroblok tego wymaga czy nie. To znaczy Ĺźe moĹźna by
+  byĹo zastosowaÄ do makrobloku wyĹźszy kwantyzator bez utraty postrzegalnej
+  jakoĹci. Dlaczego marnowaÄ bity na niepotrzebnie niski kwantyzator?
+  Mikroprocesor ma tyle cykli ile jest czasu, ale jest tylko pewna iloĹÄ bitĂłw
   na twardym dysku.
 </para>
 
 <para>
   Przy kodowaniu dwuprzebiegowym, pierwszy przebieg potraktuje film jak przu
-  ustawieniu CBR, ale zachowa informacje o własnościach każdej klatki. Te dane
-  są później używane przy drugim przebiegu do podejmowania słusznych decyzji
-  o używanym kwantyzatorze. Przy szybkich scenach albo niewielu szczegółach
-  pewnie użyje większego kwantyzatora, podczas gdy dla powolnych,
-  szczegółowych scen będzie niższy kwantyzator.
+  ustawieniu CBR, ale zachowa informacje o wĹasnoĹciach kaĹźdej klatki. Te dane
+  sÄ pĂłĹşniej uĹźywane przy drugim przebiegu do podejmowania sĹusznych decyzji
+  o uĹźywanym kwantyzatorze. Przy szybkich scenach albo niewielu szczegĂłĹach
+  pewnie uĹźyje wiÄkszego kwantyzatora, podczas gdy dla powolnych,
+  szczegĂłĹowych scen bÄdzie niĹźszy kwantyzator.
 </para>
 
 <para>
-  Jeśli używasz <option>vqscale=2</option> to marnujesz bity. Jeśli używasz
-  <option>vqscale=3</option> to nie dostajesz najlepszej możliwej jakości.
-  Załóżmy że zakodowałeś swoje DVD przy <option>vqscale=3</option>
-  i dostałeś bitrate 1800Kbit. Jeśli zrobisz dwa przebiegi
-  z <option>vbitrate=1800</option> ostateczny wynik będzie miał
-  <emphasis role="bold">wyższą jakość</emphasis> przy
+  JeĹli uĹźywasz <option>vqscale=2</option> to marnujesz bity. JeĹli uĹźywasz
+  <option>vqscale=3</option> to nie dostajesz najlepszej moĹźliwej jakoĹci.
+  ZaĹĂłĹźmy Ĺźe zakodowaĹeĹ swoje DVD przy <option>vqscale=3</option>
+  i dostaĹeĹ bitrate 1800Kbit. JeĹli zrobisz dwa przebiegi
+  z <option>vbitrate=1800</option> ostateczny wynik bÄdzie miaĹ
+  <emphasis role="bold">wyĹźszÄ jakoĹÄ</emphasis> przy
   <emphasis role="bold">tym samym bitrate</emphasis>.
 </para>
 
 <para>
-  Ponieważ jesteś już przekonany że prawidłowym wyborem są dwa przebiegi,
-  prawdziwym pytaniem jest jakiego bitrate użyć. Nie ma jednej odpowiedzi.
-  Idealnie chcesz wybrać bitrate będący najbliżej równowagi między jakością
-  a wielkością pliku. To się zmienia w zależności od filmu.
+  PoniewaĹź jesteĹ juĹź przekonany Ĺźe prawidĹowym wyborem sÄ dwa przebiegi,
+  prawdziwym pytaniem jest jakiego bitrate uĹźyÄ. Nie ma jednej odpowiedzi.
+  Idealnie chcesz wybraÄ bitrate bÄdÄcy najbliĹźej rĂłwnowagi miÄdzy jakoĹciÄ
+  a wielkoĹciÄ pliku. To siÄ zmienia w zaleĹźnoĹci od filmu.
 </para>
 
 <para>
-  Jeśli wielkość nie ma znaczenia, dobrym punktem wyjściowym do bardzo
-  wysokiej jakości jest około 2000Kbit plus minus 200Kbit.
-  Jeśli jest dużo akcji albo szczegółów, albo po prostu masz bardzo wrażliwe
-  oko, możesz się zdecydować na 2400 albo 2600.
-  Przy niektórych DVD możesz nie zauważyć różnicy przy 1400Kbit. Dobrym
-  pomysłem jest poeksperymentowanie z kilkoma scenami i różnymi wartościami
-  bitrate żeby nabrać wyczucia.
+  JeĹli wielkoĹÄ nie ma znaczenia, dobrym punktem wyjĹciowym do bardzo
+  wysokiej jakoĹci jest okoĹo 2000Kbit plus minus 200Kbit.
+  JeĹli jest duĹźo akcji albo szczegĂłĹĂłw, albo po prostu masz bardzo wraĹźliwe
+  oko, moĹźesz siÄ zdecydowaÄ na 2400 albo 2600.
+  Przy niektĂłrych DVD moĹźesz nie zauwaĹźyÄ rĂłĹźnicy przy 1400Kbit. Dobrym
+  pomysĹem jest poeksperymentowanie z kilkoma scenami i rĂłĹźnymi wartoĹciami
+  bitrate Ĺźeby nabraÄ wyczucia.
 </para>
 
 <para>
-  Jeśli chcesz konkretnej wielkości, musisz jakoś obliczyć bitrare.
-  Ale zanim to zrobisz, musisz wiedzieć ile miejsca potrzebujesz na dźwięk,
-  więc powinieneś <link linkend="menc-feat-dvd-mpeg4-audio">ściągnąć go</link>
+  JeĹli chcesz konkretnej wielkoĹci, musisz jakoĹ obliczyÄ bitrare.
+  Ale zanim to zrobisz, musisz wiedzieÄ ile miejsca potrzebujesz na dĹşwiÄk,
+  wiÄc powinieneĹ <link linkend="menc-feat-dvd-mpeg4-audio">ĹciÄgnÄÄ go</link>
   najpierw.
-  Możesz wyliczyć bitrate z następującego równania:
-  <systemitem>bitrate = (wielkość_docelowa_w_MBajtach - wielkość_dźwięku_w_MB)
-  * 1024 * 1024 / długość_w_sekundach * 8 / 1000</systemitem>
-  Na przykład by wcisność dwugodzinny film na płytkę 702MB, z 60MB ścieżki
-  dźwiękowej, bitrate video musi być:
+  MoĹźesz wyliczyÄ bitrate z nastÄpujÄcego rĂłwnania:
+  <systemitem>bitrate = (wielkoĹÄ_docelowa_w_MBajtach - wielkoĹÄ_dĹşwiÄku_w_MB)
+  * 1024 * 1024 / dĹugoĹÄ_w_sekundach * 8 / 1000</systemitem>
+  Na przykĹad by wcisnoĹÄ dwugodzinny film na pĹytkÄ 702MB, z 60MB ĹcieĹźki
+  dĹşwiÄkowej, bitrate video musi byÄ:
   <systemitem>(702 - 60) * 1024 * 1024 / (120*60) * 8 / 1000
   = 740kbps</systemitem>
 </para>
